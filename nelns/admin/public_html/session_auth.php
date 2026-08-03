@@ -19,16 +19,27 @@
 	function auth(&$error)
 	{
 		global	$command, $sessionAuth, $admcookielogin, $admcookiepassword, $sessionAuth;
-		global	$admlogin, $admpassword, $uid, $gid, $useCookie, $group, $HTTP_POST_VARS;
+		global	$admlogin, $admpassword, $uid, $gid, $useCookie, $group, $HTTP_POST_VARS, $HTTP_GET_VARS;
 		unset($error);
 
-		switch($HTTP_POST_VARS["command"])
+		// Prefer POST for mutations; the logout link is still a GET, so accept
+		// command from either after the request-to-global import in foo.php.
+		$cmd = '';
+		if (isset($HTTP_POST_VARS["command"]))
+			$cmd = $HTTP_POST_VARS["command"];
+		else if (isset($command))
+			$cmd = $command;
+		else if (isset($HTTP_GET_VARS["command"]))
+			$cmd = $HTTP_GET_VARS["command"];
+
+		switch($cmd)
 		{
 		case "logout":
 			addToLog("Logout!");
 
-			$uid = $sessionAuth["uid"];
-			logUser($uid, "LOGOUT");
+			$uid = isset($sessionAuth["uid"]) ? $sessionAuth["uid"] : 0;
+			if ($uid)
+				logUser($uid, "LOGOUT");
 
 			//session_unregister("sessionAuth"); 
 			unset($_SESSION["sessionAuth"]);
@@ -59,26 +70,57 @@
 			addToLog("Change pass!");
 			global	$chOldPass, $chNewPass, $chConfirmNewPass;
 
-			if (!($uid = validateId($admlogin, $admpassword, $useCookie, $gid, $group)))
+			// Identity is the existing session only. Do not take login or
+			// stored hash from the form (that used to put the hash in HTML).
+			if (!isset($sessionAuth) || empty($sessionAuth["admlogin"]) || empty($sessionAuth["admpassword"]))
 			{
-				$error = "Invalid login '$admlogin'";
+				$error = "Not logged in";
 				eraseCookies();
 				return 0;
 			}
 
-			if (verifyPassword($chOldPass, $admpassword) && $chNewPass == $chConfirmNewPass)
+			$admlogin = $sessionAuth["admlogin"];
+			$admpassword = $sessionAuth["admpassword"];
+			$uid = isset($sessionAuth["uid"]) ? $sessionAuth["uid"] : 0;
+
+			if (!($uid = validateId($admlogin, $admpassword, $useCookie, $gid, $group)))
 			{
-				sqlquery("UPDATE user SET password='".sqlescape(hashPassword($chNewPass))."' WHERE uid='".intval($uid)."'");
-				$admpassword = $chNewPass;
-
-				// never write the password, in clear or hashed, to the admin
-				// log: htmlEpilog() prints that log back into the page
-				addToLog("Password changed");
-
-				//session_unregister("sessionAuth");
-				unset($_SESSION["sessionAuth"]);
-				session_destroy();
+				$error = "Invalid session";
+				eraseCookies();
+				return 0;
 			}
+
+			if (!verifyPassword($chOldPass, $admpassword)
+				|| (string)$chNewPass === ''
+				|| (string)$chNewPass !== (string)$chConfirmNewPass)
+			{
+				// Stay logged in; do not fall through into login with a
+				// half-updated password state.
+				$error = "Password change failed";
+				$sessionAuth = array("admlogin" => $admlogin, "admpassword" => $admpassword, "uid" => $uid);
+				$_SESSION["sessionAuth"] = $sessionAuth;
+				return 1;
+			}
+
+			$newHash = hashPassword($chNewPass);
+			sqlquery("UPDATE user SET password='".sqlescape($newHash)."' WHERE uid='".intval($uid)."'");
+
+			// never write the password, in clear or hashed, to the admin
+			// log: htmlEpilog() prints that log back into the page
+			addToLog("Password changed");
+
+			if (function_exists('session_regenerate_id'))
+				session_regenerate_id(true);
+
+			$admpassword = $newHash;
+			$sessionAuth = array("admlogin" => $admlogin, "admpassword" => $admpassword, "uid" => $uid);
+			$_SESSION["sessionAuth"] = $sessionAuth;
+
+			if ($useCookie)
+				setupCookies($admlogin, $admpassword);
+
+			logUser($uid, "CHPASSWORD");
+			return 1;
 
 		case "login":
 			// turn the submitted password into the stored form; everything

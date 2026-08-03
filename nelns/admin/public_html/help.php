@@ -26,6 +26,16 @@
 	$help_body = getVar('help_body');
 	$update = getVar('update');
 
+	// The body is still HTML by design for root authors, so only root (and
+	// the nevrax group when allowNevrax is on) may edit or update. Any
+	// authenticated user may still read.
+	$canEditHelp = ($admlogin === 'root' || (!empty($allowNevrax) && !empty($IsNevrax)));
+	if (!$canEditHelp)
+	{
+		$edit = false;
+		$update = false;
+	}
+
 	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Help for '".htmlspecialchars($file, ENT_QUOTES)."/".htmlspecialchars($topic, ENT_QUOTES)."'", false);
 
 	$file = mysql_real_escape_string($file);
@@ -75,11 +85,12 @@
 		if ($result && ($body=mysql_fetch_array($result)))
 		{
 			echo "<b>Help for '$file_html/$topic_html':</b><br>\n";
-			echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?edit=1&file=$file_url&topic=$topic_url'>Edit Help</a><br><hr>\n";
+			if ($canEditHelp)
+				echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?edit=1&file=$file_url&topic=$topic_url'>Edit Help</a><br><hr>\n";
 			// Curly-bracket links are rewritten into anchors; the topic part
 			// of the match is put into both the href and the link text, so
 			// encode it for each place. The rest of the body is still HTML
-			// by design (the edit form documents that).
+			// by design (root-only edit).
 			$help_html = nl2br($body["help_body"]);
 			$help_html = preg_replace_callback(
 				"/\x7b([^\x7d]+)\x7d/",
@@ -96,7 +107,8 @@
 		else
 		{
 			echo "<b>No help found for '$file_html/$topic_html'.</b><br>\n";
-			echo "If you want to create an <b>Help note</b> for this topic, <a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?edit=1&file=$file_url&topic=$topic_url'>click here</a>.\n";
+			if ($canEditHelp)
+				echo "If you want to create an <b>Help note</b> for this topic, <a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?edit=1&file=$file_url&topic=$topic_url'>click here</a>.\n";
 		}
 	}
 

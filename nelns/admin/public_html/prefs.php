@@ -40,11 +40,14 @@
 	echo "</td></tr><tr><td><hr></td></tr><tr><td>\n";
 
 	echo "<table><tr><td colspan=2>Change password</td></tr>\n";
-	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'><input type=hidden name='command' value='chPassword'><input type=hidden name='admlogin' value='$admlogin'><input type=hidden name='admpassword' value='$admpassword'>\n";
-	echo "<tr><td>Enter previous password</td><td><input type=password name='chOldPass' size=16 maxlength=16></td></tr>\n";
-	echo "<tr><td>Enter new password</td><td><input type=password name='chNewPass' size=16 maxlength=16></td></tr>\n";
-	echo "<tr><td>Reenter new password</td><td><input type=password name='chConfirmNewPass' size=16 maxlength=16></td></tr>\n";
-	echo "<tr><td colspan=2 align=center><input type=submit type=password name='chPassword' value='Change password'></td></tr>\n";
+	// Identity comes from the session, not from hidden fields. Putting the
+	// stored password hash into the page handed the session secret to anyone
+	// who could view source (or any later XSS).
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'><input type=hidden name='command' value='chPassword'>\n";
+	echo "<tr><td>Enter previous password</td><td><input type=password name='chOldPass' size=16 maxlength=64 autocomplete='current-password'></td></tr>\n";
+	echo "<tr><td>Enter new password</td><td><input type=password name='chNewPass' size=16 maxlength=64 autocomplete='new-password'></td></tr>\n";
+	echo "<tr><td>Reenter new password</td><td><input type=password name='chConfirmNewPass' size=16 maxlength=64 autocomplete='new-password'></td></tr>\n";
+	echo "<tr><td colspan=2 align=center><input type=submit name='chPassword' value='Change password'></td></tr>\n";
 	echo "</form></table><br>\n";
 
 	echo "</td></tr></table>\n";

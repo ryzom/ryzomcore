@@ -22,7 +22,9 @@
 		$GLOBALS["dblogin"] = "";
 		$GLOBALS["dbpassword"] = "";
 
-		$GLOBALS["allowrootdebug"] = true;
+		// Off by default: when true, root pages dump SQL and raw request
+		// values into the HTML response.
+		$GLOBALS["allowrootdebug"] = false;
 
 		$GLOBALS["userlogpath"] = "/var/log/nelns";				// without final /
 

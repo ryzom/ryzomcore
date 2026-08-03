@@ -41,10 +41,14 @@
 	
 	if (isset($active_player) && $active_player != "")
 	{
+		// uid and slot only: spaces or extra tokens would reframe the AS
+		// command. Anything that is not two plain integers is dropped.
 		$arr = explode(',', $active_player);
 		foreach($arr as $player)
 		{
-			$pl = explode(' ', $player);
+			$pl = preg_split('/\s+/', trim($player));
+			if (count($pl) < 2 || !ctype_digit((string)$pl[0]) || !ctype_digit((string)$pl[1]))
+				continue;
 			nel_query("*.*.EGS.loadPlayer ".$pl[0], $dummyResult);
 			nel_query("*.*.EGS.activePlayer ".$pl[0]." ".$pl[1], $dummyResult);
 		}
@@ -505,17 +509,31 @@
 	}
 	else if (isset($executeQuery))
 	{
-		$bef = microtime();
-		$qstate = nel_query($executeQuery, $updateResult);
-		$aft = microtime();
+		// The free-form "Execute Raw NeL query" field is only rendered for
+		// root, but the handler used to run for any logged-in account that
+		// posted executeQuery. Keep it root-only; the form-built UPDATE path
+		// above is separate and still goes through lock checks.
+		if ($admlogin !== 'root')
+		{
+			$queryResult = "Raw NeL queries are restricted to root.<br>\n";
+			unset($executeQuery);
+			unset($updateResult);
+		}
+		else
+		{
+			$bef = microtime();
+			logUser($uid, "RAW=".$executeQuery);
+			$qstate = nel_query($executeQuery, $updateResult);
+			$aft = microtime();
 
-		list($usec, $sec) = explode(" ", $bef);
-		$bef = ((float)$sec + (float)$usec);
-		list($usec, $sec) = explode(" ", $aft);
-		$aft = ((float)$sec + (float)$usec);
-		$tm = (int)(($aft-$bef)*1000.0);
+			list($usec, $sec) = explode(" ", $bef);
+			$bef = ((float)$sec + (float)$usec);
+			list($usec, $sec) = explode(" ", $aft);
+			$aft = ((float)$sec + (float)$usec);
+			$tm = (int)(($aft-$bef)*1000.0);
 
-		$queryResult = "Executed ".htmlspecialchars($executeQuery, ENT_QUOTES)."<br>$tm milliseconds computation time<br>\n";
+			$queryResult = "Executed ".htmlspecialchars($executeQuery, ENT_QUOTES)."<br>$tm milliseconds computation time<br>\n";
+		}
 	}
 
 	if ($updateResult)

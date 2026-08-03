@@ -29,6 +29,23 @@
  *
  * Names that are decided here, not sent here, are refused.
  */
+
+// PHP long ago stopped populating $HTTP_*_VARS and bare $REMOTE_ADDR.
+// The rest of this tree still reads those names for parameters, IP allowlists
+// and shard locks; fill them from the real request before anything else runs.
+if (!isset($HTTP_POST_VARS) || !is_array($HTTP_POST_VARS))
+	$HTTP_POST_VARS = $_POST;
+if (!isset($HTTP_GET_VARS) || !is_array($HTTP_GET_VARS))
+	$HTTP_GET_VARS = $_GET;
+if (!isset($HTTP_COOKIE_VARS) || !is_array($HTTP_COOKIE_VARS))
+	$HTTP_COOKIE_VARS = $_COOKIE;
+if (!isset($REMOTE_ADDR) || $REMOTE_ADDR === '')
+	$REMOTE_ADDR = isset($_SERVER['REMOTE_ADDR']) ? (string)$_SERVER['REMOTE_ADDR'] : '';
+if (!isset($HTTP_USER_AGENT))
+	$HTTP_USER_AGENT = isset($_SERVER['HTTP_USER_AGENT']) ? (string)$_SERVER['HTTP_USER_AGENT'] : '';
+if (!isset($HTTP_HOST))
+	$HTTP_HOST = isset($_SERVER['HTTP_HOST']) ? (string)$_SERVER['HTTP_HOST'] : '';
+
 $nelnsReservedGlobals = array(
 	// what config.php sets, and the flag that tells it it already ran
 	'NEL_TOOL_CONFIG_PHP', 'dbhost', 'dbname', 'dblogin', 'dbpassword',
