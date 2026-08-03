@@ -54,7 +54,7 @@ public:
 	// default ctor
 	CStreamableIG();
 	// dtor
-	~CStreamableIG();
+	~CStreamableIG() NL_OVERRIDE;
 	/** Init this streamable ig
 	  * \param owningScene the scene in which that ig should be inserted
 	  * \param pos center of the testing volume
@@ -82,7 +82,7 @@ public:
 	  */
 	void						setLoadedIGMap(TString2IG *igMap);
 	//
-	virtual void				forceUnload();
+	virtual void				forceUnload() NL_OVERRIDE;
 	/** enum all currently instanciated IGs
 	  * \return false if the enumeration has been stopped
 	  */
@@ -104,7 +104,7 @@ private:
 	{
 	public:
 		CStreamableIG *Owner;
-		virtual void InstanceGroupCreated(NL3D::UInstanceGroup *newVal)
+		virtual void InstanceGroupCreated(NL3D::UInstanceGroup *newVal) NL_OVERRIDE
 		{
 			Owner->notifyIGLoaded(newVal);
 		}
@@ -138,9 +138,9 @@ private:
 
 	//\name From CStreamableEntity
 	//@{
-		virtual void			loadAsync();
-		virtual void			load(NLMISC::IProgressCallback &progress);
-		virtual void			unload();
+		virtual void			loadAsync() NL_OVERRIDE;
+		virtual void			load(NLMISC::IProgressCallback &progress) NL_OVERRIDE;
+		virtual void			unload() NL_OVERRIDE;
 	//@}
 		void					linkInstances();
 		void					addLoadedIGToMap();

@@ -114,28 +114,28 @@ public:
 	// @{
 
 	/// Create a CMeshInstance, which contains materials.
-	virtual	CTransformShape		*createInstance(CScene &scene);
+	virtual	CTransformShape		*createInstance(CScene &scene) NL_OVERRIDE;
 
 	/// clip this mesh in a driver.
-	virtual bool	clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) ;
+	virtual bool	clip(const std::vector<CPlane>	&pyramid, const CMatrix &worldMatrix) NL_OVERRIDE ;
 
 	/// render() this mesh in a driver.
-	virtual void	render(IDriver *drv, CTransformShape *trans, bool passOpaque);
+	virtual void	render(IDriver *drv, CTransformShape *trans, bool passOpaque) NL_OVERRIDE;
 
 	/// Get bbox.
-	virtual void	getAABBox(NLMISC::CAABBox &bbox) const;
+	virtual void	getAABBox(NLMISC::CAABBox &bbox) const NL_OVERRIDE;
 
 	/// serial this mesh.
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// Declare name of the shape
 	NLMISC_DECLARE_CLASS(CMeshMultiLod);
 
 	/// profiling
-	virtual void	profileSceneRender(CRenderTrav *rdrTrav, CTransformShape *trans, bool opaquePass);
+	virtual void	profileSceneRender(CRenderTrav *rdrTrav, CTransformShape *trans, bool opaquePass) NL_OVERRIDE;
 
 	/// System Mem Geometry Copy, built at load time
-	virtual void	buildSystemGeometry();
+	virtual void	buildSystemGeometry() NL_OVERRIDE;
 
 	// @}
 
@@ -175,11 +175,11 @@ public:
 
 	/// \name Mesh Block Render Interface
 	// @{
-	virtual IMeshGeom	*supportMeshBlockRendering (CTransformShape *trans, float &polygonCount ) const;
+	virtual IMeshGeom	*supportMeshBlockRendering (CTransformShape *trans, float &polygonCount ) const NL_OVERRIDE;
 	// @}
 
 	/// should not be called direclty as the intance of this shape will use 'getNumTrianglesWithCoarsestDist' themselves to get the correct distance.
-	virtual float	getNumTriangles (float distance)
+	virtual float	getNumTriangles (float distance) NL_OVERRIDE
 	{
 		return getNumTrianglesWithCoarsestDist(distance, -1);
 	}

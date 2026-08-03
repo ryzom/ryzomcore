@@ -3,6 +3,7 @@
  * \brief See spline_shape.h.
  * \author Jan Boon (Kaetemi)
  * \author Grok 4.5
+ * \author Claude Fable 5
  */
 
 /*
@@ -26,11 +27,9 @@
 
 #include "spline_shape.h"
 
-#include <cstring>
-
 #include <nel/misc/common.h>
 
-#include "../pipeline_max/storage_object.h"
+#include "../pipeline_max/builtin/shape_object.h"
 
 using namespace PIPELINE::MAX;
 using namespace NLMISC;
@@ -41,171 +40,46 @@ const CClassId CLASSID_SPLINESHAPE(0x0000000a, 0x00000000);
 const CClassId CLASSID_LINE(0x00001040, 0x00000000);
 const CClassId CLASSID_RECTANGLE(0x00001065, 0x00000000);
 
-// Compact on-disk knot size (corpus-verified: every trail remanence Line/SplineShape uses 52).
-static const uint KNOT_BYTES = 52;
-
 bool isShapeObject(CSceneClass *obj)
 {
-	if (!obj || !obj->classDesc()) return false;
-	return obj->classDesc()->superClassId() == SCLASS_SHAPE;
+	// Every superclass-0x40 object instantiates through the CShapeObject registration.
+	return dynamic_cast<BUILTIN::CShapeObject *>(obj) != NULL;
 }
 
-bool decodeKnotsRaw(const uint8 *data, uint size, uint32 numKnots, std::vector<SKnot> &out)
-{
-	out.clear();
-	if (!data || numKnots == 0) return false;
-	if ((uint64)numKnots * KNOT_BYTES > size) return false;
-	out.reserve(numKnots);
-	for (uint32 i = 0; i < numKnots; ++i)
-	{
-		const uint8 *p = data + (size_t)i * KNOT_BYTES;
-		SKnot k;
-		sint32 ktype = 0, ltype = 0;
-		float du = 0.f;
-		float px, py, pz, ix, iy, iz, ox, oy, oz;
-		uint32 flags = 0;
-		memcpy(&ktype, p + 0, 4);
-		memcpy(&ltype, p + 4, 4);
-		memcpy(&du, p + 8, 4);
-		// First Point3 = knot point (matches remanence InterpPiece3D endpoints after objectToLocal).
-		// Second / third = handle vectors (in/out; order matches SDK SplineKnotAssy after the
-		// knot-first on-disk packing observed in the corpus — see Part N).
-		memcpy(&px, p + 12, 4); memcpy(&py, p + 16, 4); memcpy(&pz, p + 20, 4);
-		memcpy(&ix, p + 24, 4); memcpy(&iy, p + 28, 4); memcpy(&iz, p + 32, 4);
-		memcpy(&ox, p + 36, 4); memcpy(&oy, p + 40, 4); memcpy(&oz, p + 44, 4);
-		memcpy(&flags, p + 48, 4);
-		k.KType = ktype;
-		k.LType = ltype;
-		k.Du = du;
-		k.Knot = CVector(px, py, pz);
-		k.InVec = CVector(ix, iy, iz);
-		k.OutVec = CVector(ox, oy, oz);
-		k.Flags = flags;
-		out.push_back(k);
-	}
-	return true;
-}
-
-// Walk a container's children; when a container holds both 0x2900 and 0x290a, decode one spline.
-static void collectSplines(CStorageContainer *cont, SShape &out)
-{
-	if (!cont) return;
-
-	const CStorageContainer::TStorageObjectContainer &ch = cont->chunks();
-	CStorageRaw *rawKnots = nullptr;
-	uint32 numKnots = 0;
-	uint32 closed = 0;
-	bool haveNum = false;
-
-	for (CStorageContainer::TStorageObjectConstIt it = ch.begin(); it != ch.end(); ++it)
-	{
-		if (it->first == 0x2900)
-		{
-			CStorageRaw *r = dynamic_cast<CStorageRaw *>(it->second);
-			if (r && r->Value.size() >= 4)
-			{
-				memcpy(&numKnots, nlVectorData(r->Value), 4);
-				haveNum = true;
-			}
-		}
-		else if (it->first == 0x290d)
-		{
-			// The CLOSED flag is the TRAILING word 0x290d, not 0x2904: every open corpus trail
-			// (remanence Lines, du = 1/(knots-1)) stores 0 here, every closed face-outline
-			// SplineShape (du = 1/knots — the closed parametrization) stores 1, while 0x2904
-			// reads 0 on both. (Part N's original table had these two roles swapped; nothing
-			// consumed Closed until the spline-mesh cap path.)
-			CStorageRaw *r = dynamic_cast<CStorageRaw *>(it->second);
-			if (r && r->Value.size() >= 4)
-				memcpy(&closed, nlVectorData(r->Value), 4);
-		}
-		else if (it->first == 0x290a)
-		{
-			rawKnots = dynamic_cast<CStorageRaw *>(it->second);
-		}
-		else if (it->first == 0x1050)
-		{
-			// Interpolation steps of the owning BezierShape (sibling of the per-spline
-			// containers): 6 on default rigs (trail Lines), 0 on the corpus face outlines —
-			// which is why their caps have exactly one vertex per knot.
-			CStorageRaw *r = dynamic_cast<CStorageRaw *>(it->second);
-			if (r && r->Value.size() >= 4)
-			{
-				sint32 st = 0;
-				memcpy(&st, nlVectorData(r->Value), 4);
-				out.Steps = st;
-				out.HaveSteps = true;
-			}
-		}
-	}
-
-	if (haveNum && rawKnots && numKnots > 0)
-	{
-		SSpline sp;
-		sp.Closed = (closed != 0);
-		if (decodeKnotsRaw(nlVectorData(rawKnots->Value), (uint)rawKnots->Value.size(), numKnots, sp.Knots))
-			out.Curves.push_back(sp);
-	}
-
-	// Recurse into nested containers (BezierShape → spline list → spline).
-	for (CStorageContainer::TStorageObjectConstIt it = ch.begin(); it != ch.end(); ++it)
-	{
-		CStorageContainer *child = dynamic_cast<CStorageContainer *>(it->second);
-		if (child)
-			collectSplines(child, out);
-	}
-}
-
-// Also walk orphaned chunks on a scene class (typed classes leave geometry there).
-static void collectFromSceneClass(CSceneClass *sc, SShape &out)
-{
-	if (!sc) return;
-
-	// Prefer orphaned (post-parse) then chunks (pre-clean or raw-unknown).
-	const CStorageContainer::TStorageObjectContainer *lists[2] = {
-		&sc->orphanedChunks(),
-		&sc->chunks()
-	};
-	for (int li = 0; li < 2; ++li)
-	{
-		for (CStorageContainer::TStorageObjectConstIt it = lists[li]->begin();
-		     it != lists[li]->end(); ++it)
-		{
-			CStorageContainer *child = dynamic_cast<CStorageContainer *>(it->second);
-			if (child)
-				collectSplines(child, out);
-		}
-	}
-}
-
+// Thin copy from the typed model: CShapeObject decoded the BezierShape/Spline3D chunk tree at
+// parse (raw chunks stay authoritative in the scene class; see shape_object.h for the format).
 bool decodeShapeObject(CSceneClass *shapeObj, SShape &out)
 {
 	out.Curves.clear();
-	if (!shapeObj) return false;
-	collectFromSceneClass(shapeObj, out);
-	// Deduplicate if the same spline was found via both orphaned and chunks (rare).
-	// Prefer the first complete curve list; if we got multiples of the same knot count
-	// from double-walk, keep unique by knot-point signature of the first knot.
-	if (out.Curves.size() > 1)
+	BUILTIN::CShapeObject *so = dynamic_cast<BUILTIN::CShapeObject *>(shapeObj);
+	if (!so) return false;
+	const std::vector<BUILTIN::CShapeObject::SSpline> &splines = so->splines();
+	for (uint s = 0; s < splines.size(); ++s)
 	{
-		std::vector<SSpline> uniq;
-		for (uint i = 0; i < out.Curves.size(); ++i)
+		const BUILTIN::CShapeObject::SSpline &spline = splines[s];
+		if (spline.Knots.empty()) continue;
+		SSpline sp;
+		sp.Closed = spline.closed();
+		sp.Knots.reserve(spline.Knots.size());
+		for (uint k = 0; k < spline.Knots.size(); ++k)
 		{
-			bool dup = false;
-			for (uint j = 0; j < uniq.size(); ++j)
-			{
-				if (uniq[j].Knots.size() != out.Curves[i].Knots.size()) continue;
-				if (uniq[j].Knots.empty()) { dup = true; break; }
-				if (uniq[j].Knots[0].Knot == out.Curves[i].Knots[0].Knot
-				    && uniq[j].Knots.back().Knot == out.Curves[i].Knots.back().Knot)
-				{
-					dup = true;
-					break;
-				}
-			}
-			if (!dup) uniq.push_back(out.Curves[i]);
+			const BUILTIN::CShapeObject::SKnot &tk = spline.Knots[k];
+			SKnot knot;
+			knot.KType = tk.KType;
+			knot.LType = tk.LType;
+			knot.Du = tk.Du;
+			knot.Knot = tk.Knot;
+			knot.InVec = tk.InVec;
+			knot.OutVec = tk.OutVec;
+			knot.Flags = tk.Flags;
+			sp.Knots.push_back(knot);
 		}
-		out.Curves.swap(uniq);
+		out.Curves.push_back(sp);
+	}
+	if (so->hasSteps())
+	{
+		out.Steps = so->steps();
+		out.HaveSteps = true;
 	}
 	return !out.Curves.empty();
 }

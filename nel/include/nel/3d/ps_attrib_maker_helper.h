@@ -49,10 +49,10 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 		F _F;
 
 		/// compute one value of the attribute for the given index
-		virtual T get(CPSLocated *loc, uint32 index);
-		virtual T get(const CPSEmitterInfo &info);
+		virtual T get(CPSLocated *loc, uint32 index) NL_OVERRIDE;
+		virtual T get(const CPSEmitterInfo &info) NL_OVERRIDE;
 
-		virtual T get(float input)
+		virtual T get(float input) NL_OVERRIDE
 		{
 			NLMISC::OptFastFloorBegin();
 			nlassert(input >= 0.f && input <= 1.f);
@@ -97,7 +97,7 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 
 
 		/// serialization of the object
-		virtual void serial(NLMISC::IStream &f)
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 		{
 			sint ver = f.serialVersion(2);
 			CPSAttribMaker<T>::serial(f);
@@ -125,41 +125,41 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 		{}
 
 		/// dtor
-		  virtual ~CPSAttribMakerT() {}
+		  virtual ~CPSAttribMakerT() NL_OVERRIDE {}
 
 
 		/** tells whether one may choose one attribute from a CPSLocated to use as an input. If false, the input(s) is fixed
 		 *  For this class, it is supported
 		 */
-		virtual bool hasCustomInput(void) { return true; }
+		virtual bool hasCustomInput(void) NL_OVERRIDE { return true; }
 
 
 		/** set a new input type
 		 */
-		virtual void setInput(const CPSInputType &input) { _InputType = input; }
+		virtual void setInput(const CPSInputType &input) NL_OVERRIDE { _InputType = input; }
 
 
 		/** get the type of input (if supported). The default return attrDate
 		 *  \see hasCustomInput()
 		 */
-		virtual CPSInputType getInput(void) const { return _InputType; }
+		virtual CPSInputType getInput(void) const NL_OVERRIDE { return _InputType; }
 
 
 		/** tells whether clamping is supported for the input (value can't go above MaxInputValue)
 		 */
-		bool isClampingSupported(void) const { return true; }
+		bool isClampingSupported(void) const NL_OVERRIDE { return true; }
 
 
 		/** Enable, disable the clamping of input values.
 		 *  \see isClampingSupported()
 		 */
-		virtual void setClamping(bool enable = true) { _Clamp = enable; };
+		virtual void setClamping(bool enable = true) NL_OVERRIDE { _Clamp = enable; };
 
 
 		/** Test if the clamping is enabled.
 		 *  \see isClampingSupported()
 		 */
-		virtual bool getClamping(void) const  { return _Clamp; };
+		virtual bool getClamping(void) const NL_OVERRIDE  { return _Clamp; };
 
 
 		/// the type of the attribute to be produced
@@ -596,7 +596,7 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 											  bool /* allowNoCopy */ /* = false */,
 											  uint32 srcStep /*= (1 << 16)*/,
 											  bool	forceClampEntry /*= false*/
-											 ) const
+											 ) const NL_OVERRIDE
 			{
 
 				NLMISC::OptFastFloorBegin();
@@ -791,7 +791,7 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 											   uint32 stride,
 											   uint32 numAttrib,
 											   uint32 srcStep /*= (1 << 16)*/
-											  ) const
+											  ) const NL_OVERRIDE
 			{
 				NLMISC::OptFastFloorBegin();
 				nlassert(loc);
@@ -982,7 +982,7 @@ template <typename T, class F> class CPSAttribMakerT : public CPSAttribMaker<T>
 										uint32 numAttrib,
 										uint32 nbReplicate,
 										uint32 srcStep /* = (1 << 16)*/
-									) const
+									) const NL_OVERRIDE
 			{
 				NLMISC::OptFastFloorBegin();
 				nlassert(loc);
@@ -1476,7 +1476,7 @@ public:
 		this->_Scheme = s.release();
 	}
 	/// dtor
-	~CPSAttribMakerMemoryBase()
+	~CPSAttribMakerMemoryBase() NL_OVERRIDE
 	{
 		if (_Scheme)
 		{
@@ -1485,12 +1485,12 @@ public:
 	}
 
 	/// inherited from CPSAttribMaker
-	virtual T get(CPSLocated * /* loc */, uint32 index)
+	virtual T get(CPSLocated * /* loc */, uint32 index) NL_OVERRIDE
 	{
 		if (index < _T.getSize()) return _T[index];
 		else return _DefaultValue;
 	}
-	virtual T get(const CPSEmitterInfo &/* infos */) { 	return _DefaultValue; }
+	virtual T get(const CPSEmitterInfo &/* infos */) NL_OVERRIDE { 	return _DefaultValue; }
 
 	/// inherited from CPSAttribMaker
 	virtual void *make(CPSLocated * /* loc */,
@@ -1501,7 +1501,7 @@ public:
 					   bool allowNoCopy = false,
 					   uint32 srcStep = (1 << 16),
 					   bool /* forceClampEntry */ = false
-					  ) const
+					  ) const NL_OVERRIDE
 	{
 		if (!numAttrib) return output;
 		void *tab = output;
@@ -1546,7 +1546,7 @@ public:
 					   uint32 stride,
 					   uint32 numAttrib,
 					   uint32 srcStep = (1 << 16)
-					   ) const
+					   ) const NL_OVERRIDE
 	{
 		// we just copy what we have memorized
 		if (srcStep == (1 << 16))
@@ -1592,7 +1592,7 @@ public:
 					   uint32 numAttrib,
 					   uint32 nbReplicate,
 					   uint32 srcStep = (1 << 16)
-					  ) const
+					  ) const NL_OVERRIDE
 	{
 		// we just copy what we have memorized
 		uint k;
@@ -1631,7 +1631,7 @@ public:
 	}
 
 	/// serialisation of the object. Derivers MUST call this, (if they use the attribute of this class at least)
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 
 		f.serialVersion(1);
@@ -1646,7 +1646,7 @@ public:
 	}
 
 	/// inherited from CPSAttribMaker
-	virtual void deleteElement(uint32 index)
+	virtual void deleteElement(uint32 index) NL_OVERRIDE
 	{
 		nlassert(_Scheme); // you should have called setScheme !
 		_T.remove(index);
@@ -1656,7 +1656,7 @@ public:
 		}
 	}
 	/// inherited from CPSAttribMaker
-	virtual void newElement(const CPSEmitterInfo &info)
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE
 	{
 		nlassert(_Scheme); // you should have called setScheme !
 
@@ -1679,7 +1679,7 @@ public:
 			_T.insert(_DefaultValue);
 		}
 	}
-	virtual void resize(uint32 capacity, uint32 nbPresentElements)
+	virtual void resize(uint32 capacity, uint32 nbPresentElements) NL_OVERRIDE
 	{
 		nlassert(capacity < (1 << 16));
 		_T.resize(capacity);
@@ -1705,7 +1705,7 @@ public:
 		}
 
 	}
-	virtual bool hasCustomInput() { return false; }
+	virtual bool hasCustomInput() NL_OVERRIDE { return false; }
 
 protected:
 	// the attribute we memorize
@@ -1751,10 +1751,10 @@ public:
 		_MaxValue = other._MaxValue;
 	}
 	// serial. Should update min / max when reading
-	virtual void serial(NLMISC::IStream &f);
-	virtual uint32 getMinValue(void) const { return _MinValue; }
-	virtual uint32 getMaxValue(void) const { return _MaxValue; }
-	virtual void newElement(const CPSEmitterInfo &info);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual uint32 getMinValue(void) const NL_OVERRIDE { return _MinValue; }
+	virtual uint32 getMaxValue(void) const NL_OVERRIDE { return _MaxValue; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 private:
 	uint32 _MinValue;
 	uint32 _MaxValue;
@@ -1774,10 +1774,10 @@ public:
 		_MaxValue = other._MaxValue;
 	}
 	// serial. Should update min / max when reading
-	virtual void serial(NLMISC::IStream &f);
-	virtual sint32 getMinValue(void) const { return _MinValue; }
-	virtual sint32 getMaxValue(void) const { return _MaxValue; }
-	virtual void newElement(const CPSEmitterInfo &info);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual sint32 getMinValue(void) const NL_OVERRIDE { return _MinValue; }
+	virtual sint32 getMaxValue(void) const NL_OVERRIDE { return _MaxValue; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 private:
 	sint32 _MinValue;
 	sint32 _MaxValue;
@@ -1797,10 +1797,10 @@ public:
 		_MaxValue = other._MaxValue;
 	}
 	// serial. Should update min / max when reading
-	virtual void serial(NLMISC::IStream &f);
-	virtual float getMinValue(void) const { return _MinValue; }
-	virtual float getMaxValue(void) const { return _MaxValue; }
-	virtual void newElement(const CPSEmitterInfo &info);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual float getMinValue(void) const NL_OVERRIDE { return _MinValue; }
+	virtual float getMaxValue(void) const NL_OVERRIDE { return _MaxValue; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 private:
 	float _MinValue;
 	float _MaxValue;

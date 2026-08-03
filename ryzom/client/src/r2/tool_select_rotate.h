@@ -33,17 +33,17 @@ public:
 
 	CToolSelectRotate();
 	// from CTool
-	virtual const char *getToolUIName() const { return "selectRotate"; }
-	virtual bool  isCreationTool() const { return false; }
-	virtual bool  isActionPossibleOn(const CInstance &instance) const;
+	virtual const char *getToolUIName() const NL_OVERRIDE { return "selectRotate"; }
+	virtual bool  isCreationTool() const NL_OVERRIDE { return false; }
+	virtual bool  isActionPossibleOn(const CInstance &instance) const NL_OVERRIDE;
 protected:
 	// from CToolMaintainedAction
-	virtual bool onMouseLeftButtonDown();
-	virtual void beginAction(CInstance &instance);
-	virtual void cancelAction(CInstance &instance);
-	virtual void commitAction(CInstance &instance);
-	virtual void updateAction(CInstance &instance);
-	virtual const char *getCursorForPossibleAction() const { return "r2ed_tool_can_rotate.tga"; }
+	virtual bool onMouseLeftButtonDown() NL_OVERRIDE;
+	virtual void beginAction(CInstance &instance) NL_OVERRIDE;
+	virtual void cancelAction(CInstance &instance) NL_OVERRIDE;
+	virtual void commitAction(CInstance &instance) NL_OVERRIDE;
+	virtual void updateAction(CInstance &instance) NL_OVERRIDE;
+	virtual const char *getCursorForPossibleAction() const NL_OVERRIDE { return "r2ed_tool_can_rotate.tga"; }
 private:
 	float   _StartAngle;
 	sint32  _MouseStartX;

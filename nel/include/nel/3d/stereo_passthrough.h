@@ -35,39 +35,39 @@ class CStereoPassthrough : public IStereoDisplay
 {
 public:
 	CStereoPassthrough();
-	virtual ~CStereoPassthrough();
+	virtual ~CStereoPassthrough() NL_OVERRIDE;
 
-	virtual void setDriver(NL3D::UDriver *driver);
+	virtual void setDriver(NL3D::UDriver *driver) NL_OVERRIDE;
 
-	virtual bool attachToDisplay();
-	virtual void detachFromDisplay();
+	virtual bool attachToDisplay() NL_OVERRIDE;
+	virtual void detachFromDisplay() NL_OVERRIDE;
 
-	virtual bool getScreenResolution(uint &width, uint &height);
-	virtual void updateCamera(uint cid, const NL3D::UCamera *camera);
-	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const;
-	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const;
+	virtual bool getScreenResolution(uint &width, uint &height) NL_OVERRIDE;
+	virtual void updateCamera(uint cid, const NL3D::UCamera *camera) NL_OVERRIDE;
+	virtual void getClippingFrustum(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
+	virtual void getOriginalFrustum(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
 
-	virtual bool nextPass();
-	virtual const NL3D::CViewport &getCurrentViewport() const;
-	virtual const NL3D::CFrustum &getCurrentFrustum(uint cid) const;
-	virtual void getCurrentFrustum(uint cid, NL3D::UCamera *camera) const;
-	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const;
+	virtual bool nextPass() NL_OVERRIDE;
+	virtual const NL3D::CViewport &getCurrentViewport() const NL_OVERRIDE;
+	virtual const NL3D::CFrustum &getCurrentFrustum(uint cid) const NL_OVERRIDE;
+	virtual void getCurrentFrustum(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
+	virtual void getCurrentMatrix(uint cid, NL3D::UCamera *camera) const NL_OVERRIDE;
 
-	virtual bool wantClear();
-	virtual bool wantSceneReflections();
-	virtual bool wantScene();
-	virtual bool wantSceneEffects();
-	virtual bool wantInterface3D();
-	virtual bool wantInterface2D();
+	virtual bool wantClear() NL_OVERRIDE;
+	virtual bool wantSceneReflections() NL_OVERRIDE;
+	virtual bool wantScene() NL_OVERRIDE;
+	virtual bool wantSceneEffects() NL_OVERRIDE;
+	virtual bool wantInterface3D() NL_OVERRIDE;
+	virtual bool wantInterface2D() NL_OVERRIDE;
 
-	virtual bool isSceneFirst();
-	virtual bool isSceneLast();
+	virtual bool isSceneFirst() NL_OVERRIDE;
+	virtual bool isSceneLast() NL_OVERRIDE;
 
-	virtual uint getSceneReflectionPass() const;
-	virtual uint getFlareContext();
+	virtual uint getSceneReflectionPass() const NL_OVERRIDE;
+	virtual uint getFlareContext() NL_OVERRIDE;
 
-	virtual bool beginRenderTarget();
-	virtual bool endRenderTarget();
+	virtual bool beginRenderTarget() NL_OVERRIDE;
+	virtual bool endRenderTarget() NL_OVERRIDE;
 
 private:
 	UDriver *m_Driver;

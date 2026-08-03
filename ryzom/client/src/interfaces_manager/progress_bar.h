@@ -138,7 +138,7 @@ public:
 	void setProgressBarColor(NLMISC::CRGBA &color) { _ProgressBarColor = color; }
 
 	/// display the control
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/**
 	 * set the smooth mode of the control

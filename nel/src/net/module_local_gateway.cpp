@@ -53,7 +53,7 @@ namespace NLNET
 
 		}
 
-		~CLocalGateway()
+		~CLocalGateway() NL_OVERRIDE
 		{
 			// we need to unplug any plugged module
 			while (!_PluggedModules.getAToBMap().empty())
@@ -69,11 +69,11 @@ namespace NLNET
 		/***********************************************************
 		 ** Gateway methods
 		 ***********************************************************/
-		virtual const std::string &getGatewayName() const
+		virtual const std::string &getGatewayName() const NL_OVERRIDE
 		{
 			return getModuleName();
 		}
-		virtual const std::string &getFullyQualifiedGatewayName() const
+		virtual const std::string &getFullyQualifiedGatewayName() const NL_OVERRIDE
 		{
 			return getModuleFullyQualifiedName();
 		}
@@ -85,74 +85,74 @@ namespace NLNET
 //		}
 
 		/// Create and bind to this gateway a new transport
-		virtual void createTransport(const std::string &/* transportClass */, const std::string &/* instanceName */)
+		virtual void createTransport(const std::string &/* transportClass */, const std::string &/* instanceName */) NL_OVERRIDE
 		{
 		}
 		/// Delete a transport (this will close any open route)
-		virtual void deleteTransport(const std::string &/* instanceName */)
+		virtual void deleteTransport(const std::string &/* instanceName */) NL_OVERRIDE
 		{
 		}
 
 		/// Activate/stop peer invisible mode on a transport
-		virtual void	setTransportPeerInvisible(const std::string &/* transportInstanceName */, bool /* peerInvisible */)
+		virtual void	setTransportPeerInvisible(const std::string &/* transportInstanceName */, bool /* peerInvisible */) NL_OVERRIDE
 		{
 			// unsupported
 			nlstop;
 		}
 
 		/// Activate/stop firewalling mode on a transport
-		virtual void	setTransportFirewallMode(const std::string &/* transportInstanceName */, bool /* firewalled */)
+		virtual void	setTransportFirewallMode(const std::string &/* transportInstanceName */, bool /* firewalled */) NL_OVERRIDE
 		{
 			// unsupported
 			nlstop;
 		}
 
 		/// Send a command to a transport
-		virtual void transportCommand(const TParsedCommandLine &/* commandLine */)
+		virtual void transportCommand(const TParsedCommandLine &/* commandLine */) NL_OVERRIDE
 		{
 		}
-		virtual IGatewayTransport *getGatewayTransport(const std::string &/* transportName */) const
+		virtual IGatewayTransport *getGatewayTransport(const std::string &/* transportName */) const NL_OVERRIDE
 		{
 			// there are no transport here
 			return nullptr;
 		}
 
-		virtual uint32	getTransportCount() const
+		virtual uint32	getTransportCount() const NL_OVERRIDE
 		{
 			return 0;
 		}
 
-		virtual uint32	getRouteCount() const
+		virtual uint32	getRouteCount() const NL_OVERRIDE
 		{
 			return 0;
 		}
 
-		virtual uint32 getReceivedPingCount() const
+		virtual uint32 getReceivedPingCount() const NL_OVERRIDE
 		{
 			return 0;
 		}
 
-		virtual void onRouteAdded(CGatewayRoute * /* route */)
+		virtual void onRouteAdded(CGatewayRoute * /* route */) NL_OVERRIDE
 		{
 		}
 
 		/// A route is removed by a transport
-		virtual void onRouteRemoved(CGatewayRoute * /* route */)
+		virtual void onRouteRemoved(CGatewayRoute * /* route */) NL_OVERRIDE
 		{
 		}
 
 		/// A transport have received a message
-		virtual void onReceiveMessage(CGatewayRoute * /* from */, const CMessage &/* msgin */)
+		virtual void onReceiveMessage(CGatewayRoute * /* from */, const CMessage &/* msgin */) NL_OVERRIDE
 		{
 		}
 
-		virtual void createSecurityPlugin(const std::string &/* className */)
+		virtual void createSecurityPlugin(const std::string &/* className */) NL_OVERRIDE
 		{
 		}
-		virtual void sendSecurityCommand(const TParsedCommandLine &/* command */)
+		virtual void sendSecurityCommand(const TParsedCommandLine &/* command */) NL_OVERRIDE
 		{
 		}
-		virtual void removeSecurityPlugin()
+		virtual void removeSecurityPlugin() NL_OVERRIDE
 		{
 		}
 
@@ -221,15 +221,15 @@ namespace NLNET
 //		{
 //			nlstop;
 //		}
-		virtual void onAddModuleProxy(IModuleProxy *addedModule)
+		virtual void onAddModuleProxy(IModuleProxy *addedModule) NL_OVERRIDE
 		{
 			// always disclose module to local modules
 			discloseModule(addedModule);
 		}
-		virtual void onRemoveModuleProxy(IModuleProxy * /* removedModule */)
+		virtual void onRemoveModuleProxy(IModuleProxy * /* removedModule */) NL_OVERRIDE
 		{
 		}
-		virtual void discloseModule(IModuleProxy *moduleProxy)
+		virtual void discloseModule(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			// check that the module is plugged here
 			nlassert(_ModuleProxies.getB(moduleProxy) != NULL);
@@ -249,18 +249,18 @@ namespace NLNET
 				}
 			}
 		}
-		virtual IModuleProxy *getPluggedModuleProxy(IModule * /* pluggedModule */)
+		virtual IModuleProxy *getPluggedModuleProxy(IModule * /* pluggedModule */) NL_OVERRIDE
 		{
 			return nullptr;
 		}
 
-		virtual uint32	getProxyCount() const
+		virtual uint32	getProxyCount() const NL_OVERRIDE
 		{
 			return (uint32)_ModuleProxies.getAToBMap().size();
 		}
 
 		/// Fill a vector with the list of proxies managed here. The module are filled in ascending proxy id order.
-		virtual void	getModuleProxyList(std::vector<IModuleProxy*> &resultList) const
+		virtual void	getModuleProxyList(std::vector<IModuleProxy*> &resultList) const NL_OVERRIDE
 		{
 			map<TModuleId, IModuleProxy*> index;
 			{
@@ -283,10 +283,10 @@ namespace NLNET
 //		virtual void onReceiveModuleMessage(TModuleGatewayProxyPtr &senderGateway, TModuleMessagePtr &message)
 //		{
 //		}
-		virtual void sendModuleProxyMessage(IModuleProxy * /* senderProxy */, IModuleProxy * /* addresseeProxy */, const CMessage &/* message */)
+		virtual void sendModuleProxyMessage(IModuleProxy * /* senderProxy */, IModuleProxy * /* addresseeProxy */, const CMessage &/* message */) NL_OVERRIDE
 		{
 		}
-		virtual void dispatchModuleMessage(IModuleProxy * /* senderProxy */, IModuleProxy * /* addresseeProxy */, const CMessage &/* message */)
+		virtual void dispatchModuleMessage(IModuleProxy * /* senderProxy */, IModuleProxy * /* addresseeProxy */, const CMessage &/* message */) NL_OVERRIDE
 		{
 			nlstop;
 //			TModuleId sourceId = message->getSenderModuleProxyId();
@@ -305,7 +305,7 @@ namespace NLNET
 		/***********************************************************
 		 ** Module methods
 		 ***********************************************************/
-		bool	initModule(const TParsedCommandLine &initInfo)
+		bool	initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE
 		{
 			bool ret = CModuleBase::initModule(initInfo);
 
@@ -317,37 +317,37 @@ namespace NLNET
 			return ret;
 		}
 
-		std::string			buildModuleManifest() const
+		std::string			buildModuleManifest() const NL_OVERRIDE
 		{
 			return string();
 		}
 
-		void				onServiceUp(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */)
+		void				onServiceUp(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */) NL_OVERRIDE
 		{
 		}
-		void				onServiceDown(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */)
+		void				onServiceDown(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */) NL_OVERRIDE
 		{
 		}
-		void				onModuleUpdate()
+		void				onModuleUpdate() NL_OVERRIDE
 		{
 		}
-		void				onApplicationExit()
+		void				onApplicationExit() NL_OVERRIDE
 		{
 		}
-		void				onModuleUp(IModuleProxy * /* moduleProxy */)
+		void				onModuleUp(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{
 		}
-		void				onModuleDown(IModuleProxy * /* moduleProxy */)
+		void				onModuleDown(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{
 		}
-		bool				onProcessModuleMessage(IModuleProxy * /* senderModuleProxy */, const CMessage &/* message */)
+		bool				onProcessModuleMessage(IModuleProxy * /* senderModuleProxy */, const CMessage &/* message */) NL_OVERRIDE
 		{
 			return false;
 		}
-		void				onModuleSecurityChange(IModuleProxy * /* moduleProxy */)
+		void				onModuleSecurityChange(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{
 		}
-		void				onModuleSocketEvent(IModuleSocket * /* moduleSocket */, TModuleSocketEvent /* eventType */)
+		void				onModuleSocketEvent(IModuleSocket * /* moduleSocket */, TModuleSocketEvent /* eventType */) NL_OVERRIDE
 		{
 		}
 
@@ -355,24 +355,24 @@ namespace NLNET
 		 ** Socket methods
 		 ***********************************************************/
 
-		const std::string &getSocketName()
+		const std::string &getSocketName() NL_OVERRIDE
 		{
 			return getModuleName();
 		}
 
-		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
+		void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message) NL_OVERRIDE
 		{
 			TModuleProxies::TAToBMap::const_iterator first(_ModuleProxies.getAToBMap().begin()), last(_ModuleProxies.getAToBMap().end());
 			for (; first != last && first->first->getModuleProxyId() != destModuleProxyId; ++first) {}
 			if (first != last) {  first->first->sendModuleMessage(senderModule, message); return;}
 			throw EModuleNotReachable();
 		}
-		virtual void _broadcastModuleMessage(IModule * /* senderModule */, const NLNET::CMessage &/* message */)
+		virtual void _broadcastModuleMessage(IModule * /* senderModule */, const NLNET::CMessage &/* message */) NL_OVERRIDE
 		{
 			nlstop;
 		}
 
-		void onModulePlugged(IModule *pluggedModule)
+		void onModulePlugged(IModule *pluggedModule) NL_OVERRIDE
 		{
 			// A module has just been plugged here, we need to disclose it to the
 			// other module, and disclose other module to it.
@@ -408,7 +408,7 @@ namespace NLNET
 
 		}
 		/// Called just after a module as been effectively unplugged from a socket
-		void				onModuleUnplugged(IModule *unpluggedModule)
+		void				onModuleUnplugged(IModule *unpluggedModule) NL_OVERRIDE
 		{
 			// remove the proxy info
 			TModuleProxies::TBToAMap::const_iterator it(_ModuleProxies.getBToAMap().find(CStringMapper::map(getGatewayName()+"/"+unpluggedModule->getModuleFullyQualifiedName())));
@@ -445,7 +445,7 @@ namespace NLNET
 
 		}
 
-		void getModuleList(std::vector<IModuleProxy*> &resultList)
+		void getModuleList(std::vector<IModuleProxy*> &resultList) NL_OVERRIDE
 		{
 			TModuleProxies::TAToBMap::const_iterator first(_ModuleProxies.getAToBMap().begin()), last(_ModuleProxies.getAToBMap().end());
 			for (; first != last; ++first)

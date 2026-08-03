@@ -30,11 +30,11 @@ public:
 
 	//@{
 	//@name Overloads from inventory base
-	virtual uint32 getMaxBulk() const;
-	virtual uint32 getMaxSlot() const;
+	virtual uint32 getMaxBulk() const NL_OVERRIDE;
+	virtual uint32 getMaxSlot() const NL_OVERRIDE;
 
-	virtual TInventoryOpResult insertItem(CGameItemPtr &item, uint32 slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, bool autoStack = false);
-	virtual CGameItemPtr removeItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL);
+	virtual TInventoryOpResult insertItem(CGameItemPtr &item, uint32 slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, bool autoStack = false) NL_OVERRIDE;
+	virtual CGameItemPtr removeItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL) NL_OVERRIDE;
 	//@}
 
 	/// return true if the given character can use inventory
@@ -50,7 +50,7 @@ class CPlayerRoomInvView : public CCharacterInvView
 {
 public:
 	/// The inventory information has changed (like total bulk or weight)
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE;
 };
 
 #endif

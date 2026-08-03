@@ -39,7 +39,7 @@ class CType : public UType
 public:
 
 	CType ();
-	virtual ~CType ();
+	virtual ~CType () NL_OVERRIDE;
 
 	// ** UI
 	enum TUI
@@ -104,15 +104,15 @@ public:
 	static const char *getUIName (TUI type);
 
 	// From UType
-	virtual TType				getType () const;
-	virtual const std::string	&getDefault () const;
-	virtual const std::string	&getMin () const;
-	virtual const std::string	&getMax () const;
-	virtual const std::string	&getIncrement () const;
-	virtual uint				getNumDefinition () const;
-	virtual bool				getDefinition (uint index, std::string &label, std::string &value) const;
-	virtual const std::string	&getComment () const;
-	virtual	void				getDependencies (std::set<std::string> &dependencies) const;
+	virtual TType				getType () const NL_OVERRIDE;
+	virtual const std::string	&getDefault () const NL_OVERRIDE;
+	virtual const std::string	&getMin () const NL_OVERRIDE;
+	virtual const std::string	&getMax () const NL_OVERRIDE;
+	virtual const std::string	&getIncrement () const NL_OVERRIDE;
+	virtual uint				getNumDefinition () const NL_OVERRIDE;
+	virtual bool				getDefinition (uint index, std::string &label, std::string &value) const NL_OVERRIDE;
+	virtual const std::string	&getComment () const NL_OVERRIDE;
+	virtual	void				getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
 
 private:
 

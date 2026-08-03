@@ -46,6 +46,8 @@
 
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
+#include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 namespace PIPELINE {
 namespace MAX {
@@ -68,10 +70,9 @@ using PIPELINE::MAX::BUILTIN::INode;
 using PIPELINE::MAX::BUILTIN::CReferenceMaker;
 
 // Well-known scene class identities
-using MAXSCENE::CLASSID_PRS_CTRL;
-using MAXSCENE::CLASSID_LOOKAT_CTRL;
-extern const NLMISC::CClassId CLASSID_OSM_DERIVED;
-extern const NLMISC::CClassId CLASSID_WSM_DERIVED;
+// (The OSM/WSM Derived wrapper identities live on the typed classes now:
+// PIPELINE::MAX::BUILTIN::CDerivedObject / CWSMDerivedObject — dynamic_cast to CDerivedObject
+// catches both wrapper kinds.)
 extern const NLMISC::CClassId CLASSID_RPO;
 extern const NLMISC::CClassId CLASSID_TARGET;
 extern const NLMISC::CClassId CLASSID_EDITABLE_MESH;
@@ -100,27 +101,13 @@ const TSClassId SCLASS_PBLOCK = 0x00000008;
 const TSClassId SCLASS_PBLOCK2 = 0x00000082;
 
 // ---------------------------------------------------------------------------------------------
-// Scene loading
+// Scene loading — the shared loader from pipeline_max_export_common/max_load.h (full registry,
+// one parse per file); re-exported here for the many SCENELIB call sites.
 
-struct SLoadedMax
-{
-	CDllDirectory *Dll;
-	CClassDirectory3 *Cd;
-	CScene *Scene;
-	SLoadedMax() : Dll(nullptr)
-	    , Cd(nullptr)
-	    , Scene(nullptr) { }
-};
-
-// One-time registry construction (builtin + update1 + epoly + biped + nelpatch classes).
-CSceneClassRegistry *sceneRegistry();
-
-// Load and parse a .max file's DllDirectory/ClassDirectory3/Scene streams. Returns false and
-// leaves lm empty on failure. Caller owns the pointers (or use loadMaxFileCached).
-bool loadMaxFile(const std::string &path, SLoadedMax &lm);
-
-// Cached load, keyed by resolved path (also caches failure). Used for XRef and interface files.
-SLoadedMax *loadMaxFileCached(const std::string &path);
+using PMAXLOAD::SLoadedMax;
+using PMAXLOAD::sceneRegistry;
+using PMAXLOAD::loadMaxFile;
+using PMAXLOAD::loadMaxFileCached;
 
 // Database root used for XRef / interface-file resolution (the ryzomcore_graphics checkout).
 void setDatabaseRoot(const std::string &root);
@@ -131,12 +118,34 @@ const std::string &databaseRoot();
 bool resolveDbPath(const std::string &authoredPath, std::string &out);
 
 // ---------------------------------------------------------------------------------------------
-// Script AppData (MAXSCRIPT_UTILITY_CLASS_ID / 4128 / subId string entries)
+// Script AppData (MAXSCRIPT_UTILITY_CLASS_ID / 4128 / subId string entries) — the shared
+// readers from pipeline_max_export_common; re-exported here for the many SCENELIB call sites.
 
-bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out);
-std::string getScriptAppDataStr(CSceneClass *sc, uint32 subId, const std::string &def);
-int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def);
-float getScriptAppDataFloat(CSceneClass *sc, uint32 subId, float def);
+using APPDATA::getScriptAppData;
+using APPDATA::getScriptAppDataStr;
+using APPDATA::getScriptAppDataInt;
+using APPDATA::getScriptAppDataFloat;
+
+// ---------------------------------------------------------------------------------------------
+// Node classification helpers (shared by the shape exporter's selection gate and the glTF
+// writer's replication of it)
+
+// Is this node's evaluated object in the geometry/shapes MaxScript categories?
+bool isGeometryOrShape(CSceneClass *base);
+
+// Topmost scene-node ancestor (for the "Bip"-rooted skeleton-part check).
+INode *rootOf(INode *node);
+
+// "Bip" name prefix — the biped skeleton-part naming convention.
+bool startsWithBip(const std::string &s);
+
+// The shape process's standalone-node selection gate (shape_export.ms replication, applied
+// after isGeometryOrShape): excludes Bip-rooted skeleton parts, RklPatch / nel_ps / nel_pacs /
+// Target objects, accelerators (accel appdata other than 0/32), and DONOTEXPORT / COLLISION /
+// COLLISION_EXTERIOR-flagged nodes. `cid` = the base object's class id. LOD slaves bypass this
+// gate entirely on both routes (they are resolved by name from their parent). Shared by the
+// direct shape exporter and the glTF writer — the selection must never drift between routes.
+bool shapeProcessSelectsNode(INode &node, const NLMISC::CClassId &cid);
 
 // ---------------------------------------------------------------------------------------------
 // Old-style ParamBlock (superclass 0x8) params
@@ -236,7 +245,8 @@ bool resolveNelBoolAt0(const std::vector<SPB2Block> &blocks, uint block, uint16 
 
 // ---------------------------------------------------------------------------------------------
 // Controller values at t=0 (PRS sub-controllers; typed keyframer key tables bracketed at t=0,
-// else the default-value chunks 0x2503/0x2504/0x2505)
+// else the keyframer's claimed default-value chunk 0x2503/0x2504/0x2505 — non-keyframer
+// controllers yield the identity/zero default, see max_scene.h §10j-dix note)
 
 using MAXSCENE::posValueAt0;
 using MAXSCENE::rotValueAt0;
@@ -253,9 +263,9 @@ typedef MAXSCENE::SNodeTMCache SNodeTMCache;
 // GetNodeTM(0) replication with memoization.
 using MAXSCENE::getNodeTM;
 
-// Node state flags chunk 0x0963 bit 0x40 = hidden; rendering-control chunk 0x099c bits
-// 0x0200 = cast-shadows, 0x0400 = receive-shadows.
-uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found);
+// Node state flags (0x0963 bit 0x40 = hidden) and rendering-control flags (0x099c bits
+// 0x0200 = cast-shadows, 0x0400 = receive-shadows) are typed CNodeImpl overlay accessors now
+// (nodeFlags/isHidden/renderFlags).
 
 // The node's object-offset TRS (chunks 0x096a pos, 0x096b rot, 0x096c ScaleValue).
 using MAXSCENE::readObjectOffset;
@@ -269,10 +279,10 @@ CSceneClass *objectRefOf(INode &node);
 // Unwrap derived-object wrappers and XRefs down to the base object. When mods is non-NULL,
 // collects the modifier scene objects (outermost wrapper first, reference order within each
 // wrapper) and their per-node mod-app 0x2500 containers (parallel array, NULL when absent).
-CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods = nullptr,
-                          std::vector<CStorageContainer *> *modApps = nullptr);
-CSceneClass *baseObjectOf(INode &node, std::vector<CSceneClass *> *mods = nullptr,
-                          std::vector<CStorageContainer *> *modApps = nullptr);
+CSceneClass *baseObjectOf(CSceneClass *obj, std::vector<CSceneClass *> *mods = NULL,
+                          std::vector<CStorageContainer *> *modApps = NULL);
+CSceneClass *baseObjectOf(INode &node, std::vector<CSceneClass *> *mods = NULL,
+                          std::vector<CStorageContainer *> *modApps = NULL);
 
 // The material reference of a node (reference 3), NULL if none.
 CSceneClass *materialOf(INode &node);

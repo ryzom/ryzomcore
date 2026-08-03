@@ -56,7 +56,7 @@ void CBotChatPageCreateGuild::end()
 // ***************************************************************************
 class CHandlerGuildCreate : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string guildNameWin = getParam(Params, "guild");

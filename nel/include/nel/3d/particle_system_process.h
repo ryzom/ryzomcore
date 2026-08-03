@@ -97,13 +97,13 @@ class CParticleSystemProcess : public NLMISC::IStreamable
 	        , _MatrixMode(PSFXWorldMatrix), _Index(0) {}
 
 			/// dtor
-			virtual ~CParticleSystemProcess()  {}
+			virtual ~CParticleSystemProcess() NL_OVERRIDE  {}
 
 			/** Serialize this object.
 			* Everything is saved, except for the fontManager and the fontGenerator.
 			* They must be set again if the PSToolRender pass is used.
 			*/
-			virtual void			serial(NLMISC::IStream &f);
+			virtual void			serial(NLMISC::IStream &f) NL_OVERRIDE;
 		/// @}
 
 

@@ -99,10 +99,10 @@ public:
 	};
 
 	CDisplayerVisual();
-	virtual ~CDisplayerVisual();
+	virtual ~CDisplayerVisual() NL_OVERRIDE;
 
 	// Init parameters from script
-	virtual bool init(const CLuaObject &parameters);
+	virtual bool init(const CLuaObject &parameters) NL_OVERRIDE;
 
 
 	////////////
@@ -114,28 +114,28 @@ public:
 	  * If not visible then "setActive(false)" will be called to remove the displayed object from the view.
 	  * Modification messages (if any ...) should then be ignored by derivers until onCreate is called again
 	  */
-	virtual void onPreActChanged();
-	virtual void onActChanged();
-	virtual void onContinentChanged();
+	virtual void onPreActChanged() NL_OVERRIDE;
+	virtual void onActChanged() NL_OVERRIDE;
+	virtual void onContinentChanged() NL_OVERRIDE;
 	virtual void onPreRender() {}
 	virtual void onPostRender();
 	/** NB : derivers should not usually react to the 'onPostCreate' or 'onErase' methods
 	  * because default behavior of these is to call 'setActive' as necessary when the user select
 	  * an act in which the displayed instance is visible in the scenario.
 	  */
-	virtual void onPostCreate();
+	virtual void onPostCreate() NL_OVERRIDE;
 	// for derivers : see 'onPostCreate' remarks
-	virtual void onErase();
-	virtual void onFocus(bool focused);
-	virtual void onSelect(bool selected);
+	virtual void onErase() NL_OVERRIDE;
+	virtual void onFocus(bool focused) NL_OVERRIDE;
+	virtual void onSelect(bool selected) NL_OVERRIDE;
 	/** Derivers note : 'onAttrModifier' takes care of updating position of the displayer,
       * hence derivers should call their parent version before updating real position in the 3D scene
 	  */
-	virtual void onAttrModified(const std::string &attrName, sint32 attrIndex);
+	virtual void onAttrModified(const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
 	/** Default behavior of 'onPostHrcMove' is to force to recompute the world pos
 	  * Because object may have been made son of an new object with another world pos
       */
-	virtual void onPostHrcMove();
+	virtual void onPostHrcMove() NL_OVERRIDE;
 
 	//////////
 	// MISC //
@@ -166,7 +166,7 @@ public:
 	// Eval exit point (for objects such as roads), default resume to evalEnterPoint
 	virtual NLMISC::CVector evalExitPoint();
 	// From ISelectableObject
-	virtual CInstance		*getInstanceInEditor() const { return getDisplayedInstance(); }
+	virtual CInstance		*getInstanceInEditor() const NL_OVERRIDE { return getDisplayedInstance(); }
 	// Snap the displayed object to the ground (if supported)
 	virtual void snapToGround() {}
 	// Make this displayer blink
@@ -190,7 +190,7 @@ public:
 	virtual	bool isGroup() const { return false; }
 
 	// from ISelectableObject
-	virtual bool			isSelectable() const;
+	virtual bool			isSelectable() const NL_OVERRIDE;
 
 	NLMISC::CRGBA getDisplayModeColorInScene() const;
 	NLMISC::CRGBA getDisplayModeColorInMap() const;

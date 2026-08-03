@@ -168,12 +168,12 @@ public:
 
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("STUN"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("STUN"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the stunned creature id
@@ -194,12 +194,12 @@ public:
 
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("STUN_END"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("STUN_END"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the waked creature id
@@ -222,12 +222,12 @@ public:
 
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("AGGRO"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("AGGRO"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the creature Id
@@ -254,12 +254,12 @@ class CAISurvivalInstinctEvent: public IAIEvent
 public:
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("SURVIE"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("SURVIE"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the affected creature id
@@ -286,12 +286,12 @@ class CAIFearEvent: public IAIEvent
 public:
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("FEAR"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("FEAR"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the creature id
@@ -312,12 +312,12 @@ class CAIFearEndEvent: public IAIEvent
 public:
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("FEAR_END"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("FEAR_END"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the creature id
@@ -337,12 +337,12 @@ class CAIHungerEvent: public IAIEvent
 public:
 	// this is the name of the class
 	// for now it is limited to 8 letters - will be extended at a later date if need be
-	virtual const CAIEventType &type() const { static CAIEventType type("HUNGER"); return type; }
+	virtual const CAIEventType &type() const NL_OVERRIDE { static CAIEventType type("HUNGER"); return type; }
 
 	// serial()
 	// note serial should serialise: <Type> <uint16 sizeof(EventClass)> <event_parameters>
 	// the 'read' version of the serial should test the <sizeof> to ensure version robustness
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 public:
 	/// the affected creature id

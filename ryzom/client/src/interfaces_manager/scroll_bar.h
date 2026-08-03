@@ -44,13 +44,13 @@ public:
 	CScrollBar(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, bool vertical = true,CScrollableControl *ctrl = NULL);
 
 	/// destructor
-	virtual ~CScrollBar() {}
+	virtual ~CScrollBar() NL_OVERRIDE {}
 
 	/// Display the control
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/// Manage the click of the mouse for control
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// set the number of unit
 	void setNbUnit(uint32 nbUnits) { _NbUnits = nbUnits; }

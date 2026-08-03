@@ -36,19 +36,19 @@ class CObjectRefIdClient : public CObjectRefId, public CEditor::IInstanceObserve
 {
 public:
 	CObjectRefIdClient(const std::string &value);
-	~CObjectRefIdClient();
+	~CObjectRefIdClient() NL_OVERRIDE;
 	// from CObjectString
-	virtual bool set(const std::string& key, const std::string & value);
-	TSmartPtr clone() const;
+	virtual bool set(const std::string& key, const std::string & value) NL_OVERRIDE;
+	TSmartPtr clone() const NL_OVERRIDE;
 	void	 enable(bool enabled);
 protected:
 	// from CEditor::IInstanceObserver
-	virtual void onInstanceCreated(CInstance &instance);
-	virtual void onInstanceErased(CInstance &instance);
-	virtual void onPreHrcMove(CInstance &instance);
-	virtual void onPostHrcMove(CInstance &instance);
-	virtual void onInstanceEraseRequest(CInstance &instance);
-	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex);
+	virtual void onInstanceCreated(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstanceErased(CInstance &instance) NL_OVERRIDE;
+	virtual void onPreHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onPostHrcMove(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstanceEraseRequest(CInstance &instance) NL_OVERRIDE;
+	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
 private:
 	// cache for the 'name' of this property in the parent
 	CEditor::TInstanceObserverHandle	_ObserverHandle;
@@ -70,7 +70,7 @@ class CObjectTableClient : public CObjectTable
 public:
 	CObjectTableClient();
 	void pushOnLuaStack(CLuaState &state, CLuaObject &metatable) const;
-	TSmartPtr clone() const;
+	TSmartPtr clone() const NL_OVERRIDE;
 private:
 	mutable CLuaObject _Ref;
 };
@@ -81,7 +81,7 @@ class CObjectFactoryClient : public CObjectFactory
 public:
 	CObjectFactoryClient(const std::string &prefix);
 	// from CObjectFactory
-	virtual CObject* newBasic(const std::string & type);
+	virtual CObject* newBasic(const std::string & type) NL_OVERRIDE;
 };
 
 

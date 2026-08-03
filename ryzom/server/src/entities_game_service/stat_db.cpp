@@ -618,7 +618,7 @@ public:
 	}
 
 private:
-	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path)
+	void visitTableLeaf(CStatDBTableLeaf * tableLeaf, const std::string & path) NL_OVERRIDE
 	{
 		string sFilePath = toString("sdb/table_leaf_%s_pdr.%s", path.c_str(), (XMLSave?"xml":"bin"));
 		Bsi.deleteFile(sFilePath, _KeepBackupOfFiles);
@@ -713,7 +713,7 @@ uint32 nTotalLoaded = 0;
 
 struct TValueLeaveFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		CStatDB::getInstance()->valueLeaveFileCallback(fileDescription, dataStream);
 	}
@@ -759,7 +759,7 @@ vector<string>	fileNames;
 
 struct TFileClassCallback : public IBackupFileClassReceiveCallback
 {
-	virtual void callback(const CFileDescriptionContainer& fileList)
+	virtual void callback(const CFileDescriptionContainer& fileList) NL_OVERRIDE
 	{
 		for (uint i=0; i<fileList.size(); ++i)
 		{
@@ -771,7 +771,7 @@ struct TFileClassCallback : public IBackupFileClassReceiveCallback
 
 struct TTableLeaveFileCallback : public IBackupFileReceiveCallback
 {
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		CStatDB::getInstance()->tableLeaveFileCallback(fileDescription, dataStream);
 	}

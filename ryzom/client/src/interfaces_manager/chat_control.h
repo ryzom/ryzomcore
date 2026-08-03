@@ -62,7 +62,7 @@ private:
 	* add a line of text (private because this function, herited from CMultiList should be avoided for chat box,
 	* use add( const NLMISC::CEntityId sid, const ucstring &name, const ucstring &text) or add(const ucstring &text) for player msg and system msg
 	*/
-	virtual void add(const std::list<ucstring> &str);
+	virtual void add(const std::list<ucstring> &str) NL_OVERRIDE;
 
 public:
 
@@ -81,7 +81,7 @@ public:
 	void add( const ucstring &text);
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/**
 	* clear the control, erasing all stored sentences
@@ -90,13 +90,13 @@ public:
 
 
 	/// Manage the left click of the mouse for the list
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// Manage the right click of the mouse for the list
-	virtual void clickRight(float x, float y, bool &taken);
+	virtual void clickRight(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// called when the mouse move, indicate new mouse coordinates
-	virtual void mouseMove( float x, float y);
+	virtual void mouseMove( float x, float y) NL_OVERRIDE;
 
 	/**
 	* unmute all the players
@@ -170,7 +170,7 @@ public:
 	CRGBA getNewColor() const;
 
 	/// scroll verticaly by 'scroll' units in either direction
-	void scrollV(sint32 scroll);
+	void scrollV(sint32 scroll) NL_OVERRIDE;
 
 private:
 	/// Initialize the control (1 function called for all constructors -> easier).

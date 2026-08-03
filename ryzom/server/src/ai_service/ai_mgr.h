@@ -39,25 +39,25 @@ class CManager
 {
 public:
 	CManager(IManagerParent* parent, uint32 alias, std::string const& name, std::string const& filename);
-	virtual ~CManager();
+	virtual ~CManager() NL_OVERRIDE;
 	
 	/// @name CChild implementation
 	//@{
 	virtual std::string getIndexString() const;
-	virtual std::string	getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	virtual std::string getFullName() const;
 //	virtual std::string getName() const;
 	//@}
 	
 	/// @name CServiceEvent::CHandler implementation
 	//@{
-	virtual void serviceEvent(CServiceEvent const& info);
+	virtual void serviceEvent(CServiceEvent const& info) NL_OVERRIDE;
 	//@}
 	
 	/// @name CAIEntity public implementation
 	//@{
-	virtual CAIInstance* getAIInstance() const;
+	virtual CAIInstance* getAIInstance() const NL_OVERRIDE;
 	//@}
 	
 public:

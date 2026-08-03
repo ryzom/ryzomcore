@@ -50,18 +50,18 @@ namespace NLGUI
 		/// Constructor
 		CGroupEditBox(const TCtorParam &param);
 		/// Dtor
-		~CGroupEditBox();
+		~CGroupEditBox() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
-		virtual void draw();
+		virtual void draw() NL_OVERRIDE;
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc) NL_OVERRIDE;
 
 		/// Accessors
 		std::string getInputString() const;
@@ -93,11 +93,11 @@ namespace NLGUI
 		/// force the selection of all the text
 		void		setSelectionAll();
 
-		virtual void checkCoords();
-		virtual void updateCoords();
-		virtual void clearViews ();
+		virtual void checkCoords() NL_OVERRIDE;
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void clearViews () NL_OVERRIDE;
 
-		virtual void setActive (bool state);
+		virtual void setActive (bool state) NL_OVERRIDE;
 
 		static CGroupEditBox *getMenuFather() { return _MenuFather; }
 
@@ -135,8 +135,8 @@ namespace NLGUI
 		void	cutSelection();
 
 		/// From CInterfaceElement
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
 
 		// Copy the selection into buffer
 		void		copy();
@@ -157,21 +157,21 @@ namespace NLGUI
 		// True if the editBox loose the focus on enter
 		bool		getLooseFocusOnEnter() const {return _LooseFocusOnEnter;}
 		//
-		virtual void    clearAllEditBox();
+		virtual void    clearAllEditBox() NL_OVERRIDE;
 		// From CInterfaceElement
-		virtual bool wantSerialConfig() const;
+		virtual bool wantSerialConfig() const NL_OVERRIDE;
 		// From CInterfaceElement
-		virtual void serialConfig(NLMISC::IStream &f);
+		virtual void serialConfig(NLMISC::IStream &f) NL_OVERRIDE;
 		// From CInterfaceElement
-		virtual void onQuit();
+		virtual void onQuit() NL_OVERRIDE;
 		// From CInterfaceElement
-		virtual void onLoadConfig();
+		virtual void onLoadConfig() NL_OVERRIDE;
 
 		// from CCtrlBase
-		virtual	void elementCaptured(CCtrlBase *capturedElement);
+		virtual	void elementCaptured(CCtrlBase *capturedElement) NL_OVERRIDE;
 
 		// from CCtrlBase
-		virtual void onKeyboardCaptureLost();
+		virtual void onKeyboardCaptureLost() NL_OVERRIDE;
 
 		// set the input string as "default". will be reseted at first click (used for user information)
 		void	setDefaultInputString(const std::string &str);
@@ -303,6 +303,7 @@ namespace NLGUI
 		void makeTopWindow();
 		void handleEventChar(const NLGUI::CEventDescriptorKey &event);
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
+		bool handleEventKeyDown(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
 		void appendStringFromClipboard(const std::string &str);

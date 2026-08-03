@@ -34,7 +34,7 @@ public:
 template <class VarClass>
 class CVarFactory : public IVarFactory
 {
-	IVar *createVar(CMissionData &md, IPrimitive *prim)
+	IVar *createVar(CMissionData &md, IPrimitive *prim) NL_OVERRIDE
 	{
 		return new VarClass(md, prim);
 	}
@@ -77,7 +77,7 @@ public:
 		return _NpcLabel+_NpcFunction;
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		if (subPart == "fullname")
 			return getNpcFullName();
@@ -89,12 +89,12 @@ public:
 		throw EParseException(nullptr, toString("var_npc don't have a subpart '%s'", subPart.c_str()).c_str());
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::bot;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return "decl : bot : "+evalVar("")+NL;
 	}
@@ -138,7 +138,7 @@ public:
 		return _NpcLabel+_NpcFunction;
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		if (subPart.empty())
 			return string("\"")+_NpcLabel+"\"";
@@ -146,12 +146,12 @@ public:
 		throw EParseException(nullptr, toString("var_npc_name don't have a subpart '%s'", subPart.c_str()).c_str());
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::bot_name;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return string();
 	}
@@ -172,7 +172,7 @@ public:
 		_GroupName = getPrimProperty(prim, "group_name");
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		if (subPart.empty())
 			return _GroupName;
@@ -183,12 +183,12 @@ public:
 		return "";
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::bot_name;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 //		return "decl : bot : "+evalVar("no_quote")+NL;
 		return "decl : bot : "+evalVar("")+NL;
@@ -216,18 +216,18 @@ public:
 		return _ItemSheet;
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _ItemSheet;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::item;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return "decl : item : "+evalVar("")+NL;
 	}
@@ -249,18 +249,18 @@ public:
 		_Race = getPrimProperty(prim, "race");
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _Race;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::race;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return "decl : race : "+evalVar("")+NL;
 	}
@@ -280,18 +280,18 @@ public:
 		_SPhrase = getPrimProperty(prim, "sphrase_sheet");
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _SPhrase;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::sphrase;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return "decl : sphrase : "+evalVar("")+NL;
 	}
@@ -311,18 +311,18 @@ public:
 		_SBrick = getPrimProperty(prim, "sbrick_sheet");
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _SBrick;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::sbrick;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return "decl : sbrick : "+evalVar("")+NL;
 	}
@@ -425,18 +425,18 @@ public:
 //		return _ItemSheet;
 //	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _VarName;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::item;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		string ret = string("decl_item : ")+_VarName+" : "+_ItemSheet+" : "+_ReqSkill;
 		if (!_Properties.empty() ||!_Action.empty())
@@ -462,7 +462,7 @@ public:
 		return ret;
 	}
 
-	std::string genPhrase()
+	std::string genPhrase() NL_OVERRIDE
 	{
 		return _ItemPhrase.genPhrase();
 	}
@@ -504,18 +504,18 @@ public:
 		return _PlaceLabel;
 	}
 */	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _PlaceLabel;
 	}
 	
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::place;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		return "decl : place : "+evalVar("")+NL;
 	}
@@ -551,18 +551,18 @@ public:
 		return _Value;
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _Value;;
 	}
 	
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::integer;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		// nothing to declare for this pseudo var
 		return string();
@@ -595,7 +595,7 @@ public:
 		return _TextValue;;
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		string t;
@@ -603,13 +603,13 @@ public:
 		return t;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		nlassert(false);
 		return STRING_MANAGER::NB_PARAM_TYPES;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		// nothing to declare for this one
 		return string();
@@ -630,19 +630,19 @@ public:
 		_CreatureSheet = getPrimProperty(prim, "creature_sheet");
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _CreatureSheet;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 //		return STRING_MANAGER::creature;
 		return STRING_MANAGER::creature_model;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		// declare a creature sheet
 //		return "decl : creature : "+_CreatureSheet+NL;
@@ -664,18 +664,18 @@ public:
 		_FactionName = getPrimProperty(prim, "faction_name");
 	}
 	
-	string evalVar(const string &subPart)
+	string evalVar(const string &subPart) NL_OVERRIDE
 	{
 		nlassert(subPart.empty());
 		return _FactionName;
 	}
 
-	STRING_MANAGER::TParamType getStringManagerType()
+	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::faction;
 	}
 
-	string genDecl(CMissionData &md)
+	string genDecl(CMissionData &md) NL_OVERRIDE
 	{
 		// declare a creature sheet
 		return "decl : faction : "+_FactionName+NL;

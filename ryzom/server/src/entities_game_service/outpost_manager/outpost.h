@@ -202,15 +202,15 @@ public:
 	
 	/// PVP zone management (IPVPZone implementation)
 	//@{
-	virtual bool leavePVP(CCharacter * user, IPVP::TEndType type);
-	virtual void addPlayer(CCharacter * user);
-	virtual bool isCharacterInConflict(CCharacter *user) const;
-	virtual PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const;
+	virtual bool leavePVP(CCharacter * user, IPVP::TEndType type) NL_OVERRIDE;
+	virtual void addPlayer(CCharacter * user) NL_OVERRIDE;
+	virtual bool isCharacterInConflict(CCharacter *user) const NL_OVERRIDE;
+	virtual PVP_RELATION::TPVPRelation getPVPRelation( CCharacter * user, CEntityBase * target ) const NL_OVERRIDE;
 	//@}
 	
 	/// get PVP mode to send to the client (IPVP implementation)
 	//@{
-	virtual PVP_MODE::TPVPMode getPVPMode() const { return PVP_MODE::PvpZoneOutpost; }
+	virtual PVP_MODE::TPVPMode getPVPMode() const NL_OVERRIDE { return PVP_MODE::PvpZoneOutpost; }
 	//@}
 	
 	/// Init

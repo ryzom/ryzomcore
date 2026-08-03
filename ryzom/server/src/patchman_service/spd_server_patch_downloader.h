@@ -46,20 +46,20 @@ namespace PATCHMAN
 	{
 	public:
 		// CModuleBase specialisation implementation
-		bool initModule(const NLNET::TParsedCommandLine &initInfo);
-		void onModuleUp(NLNET::IModuleProxy *module);
-		void onModuleDown(NLNET::IModuleProxy *module);
+		bool initModule(const NLNET::TParsedCommandLine &initInfo) NL_OVERRIDE;
+		void onModuleUp(NLNET::IModuleProxy *module) NL_OVERRIDE;
+		void onModuleDown(NLNET::IModuleProxy *module) NL_OVERRIDE;
 //		void onProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &msg);
-		void onModuleUpdate();
-		std::string buildModuleManifest() const;
+		void onModuleUpdate() NL_OVERRIDE;
+		std::string buildModuleManifest() const NL_OVERRIDE;
 
 		// prevent modules from misbehaving when they run on the same service together
-		bool isImmediateDispatchingSupported() const { return false; }
+		bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 		// specialisations of overloadable callback methods
-		void cbValidateRequestMatches(TFileRequestMatches& requestMatches);
-		void cbFileDownloadSuccess(const NLMISC::CSString& fileName,const NLMISC::CMemStream& data);
-		void cbRetryAfterFileDownloadFailure(const NLMISC::CSString& fileName);
+		void cbValidateRequestMatches(TFileRequestMatches& requestMatches) NL_OVERRIDE;
+		void cbFileDownloadSuccess(const NLMISC::CSString& fileName,const NLMISC::CMemStream& data) NL_OVERRIDE;
+		void cbRetryAfterFileDownloadFailure(const NLMISC::CSString& fileName) NL_OVERRIDE;
 
 	public:
 		// remaining public interface

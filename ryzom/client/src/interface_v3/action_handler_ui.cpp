@@ -90,7 +90,7 @@ static bool isContainerAuthorized(CGroupContainer *pGC)
 // ***************************************************************************
 class CAHUIOpen : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -112,7 +112,7 @@ REGISTER_ACTION_HANDLER( CAHUIOpen, "open" );
 // ***************************************************************************
 class CAHUIClose : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -133,7 +133,7 @@ REGISTER_ACTION_HANDLER( CAHUIClose, "close" );
 // ***************************************************************************
 class CAHUIOpenClose : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -155,7 +155,7 @@ REGISTER_ACTION_HANDLER( CAHUIOpenClose, "open_close" );
 // ***************************************************************************
 class CAHUIPopup : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -186,7 +186,7 @@ REGISTER_ACTION_HANDLER( CAHUIPopup, "popup" );
 // ***************************************************************************
 class CAHUIPopin : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -221,7 +221,7 @@ REGISTER_ACTION_HANDLER( CAHUIPopin, "popin" );
 // ***************************************************************************
 class CAHUIPopupPopin : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -257,7 +257,7 @@ public:
 		_FirstTime = true;
 	}
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -308,7 +308,7 @@ public:
 	{
 	}
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -339,7 +339,7 @@ public:
 	{
 	}
 
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -373,7 +373,7 @@ string urlencode(const string &param)
 // ***************************************************************************
 class CAHUIShowHide : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface", Params));
@@ -476,7 +476,7 @@ REGISTER_ACTION_HANDLER( CAHSetSheath, "set_sheath" );
 // ***************************************************************************
 class CAHTalkUntalk : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 /*		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM == NULL) return;
@@ -537,7 +537,7 @@ REGISTER_ACTION_HANDLER( CAHTalkUntalk, "talk_untalk" );
 // ***************************************************************************
 class CAHMountUnmount : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM == nullptr) return;
@@ -582,7 +582,7 @@ REGISTER_ACTION_HANDLER( CAHMountUnmount, "mount_unmount" );
 // ***************************************************************************
 class CAHExchange : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if(pIM == nullptr) return;
@@ -610,7 +610,7 @@ REGISTER_ACTION_HANDLER( CAHExchange, "exchange" );
 // ***************************************************************************
 class CAHUISetTopWindow : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sWin = getParam(Params,"win");
@@ -627,7 +627,7 @@ REGISTER_ACTION_HANDLER( CAHUISetTopWindow, "set_top_window" );
 
 class CAHUIDockUndocChat : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// change the DB (if exist)

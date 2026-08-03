@@ -38,10 +38,10 @@ public:
 	enum	{NumPreset= 4, CustomPreset=NumPreset};
 
 public:
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 
 	CInterfaceDDX();
-	virtual ~CInterfaceDDX();
+	virtual ~CInterfaceDDX() NL_OVERRIDE;
 
 	// DB -> Parameters
 	void init();
@@ -135,7 +135,7 @@ private:
 	class CPresetObs : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public:
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 		CInterfaceDDX		*Owner;
 
 		CPresetObs() : Owner(nullptr) {}

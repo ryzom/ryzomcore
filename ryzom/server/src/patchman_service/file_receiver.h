@@ -116,10 +116,10 @@ namespace PATCHMAN
 
 	protected:
 		// protected methods - for treating incoming messages ---------------------
-		void setupSubscriptions(NLNET::IModuleProxy *sender);
-		void cbFileInfo(NLNET::IModuleProxy *sender, const TFileInfoVector &files);
-		void cbFileData(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 startOffset, const NLNET::TBinBuffer &data);
-		void cbFileDataFailure(NLNET::IModuleProxy *sender, const std::string &fileName);
+		void setupSubscriptions(NLNET::IModuleProxy *sender) NL_OVERRIDE;
+		void cbFileInfo(NLNET::IModuleProxy *sender, const TFileInfoVector &files) NL_OVERRIDE;
+		void cbFileData(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 startOffset, const NLNET::TBinBuffer &data) NL_OVERRIDE;
+		void cbFileDataFailure(NLNET::IModuleProxy *sender, const std::string &fileName) NL_OVERRIDE;
 
 	private:
 		// private data -----------------------------------------------------------

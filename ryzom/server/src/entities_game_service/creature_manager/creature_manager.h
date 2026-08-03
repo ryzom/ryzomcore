@@ -50,7 +50,7 @@ public:
 class CFaunaBotDescriptionImp : public CFaunaBotDescription
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -59,7 +59,7 @@ public:
 class CAIGainAggroMsgImp : public CAIGainAggroMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -68,7 +68,7 @@ public:
 class CCreatureCompleteHealImp : public CCreatureCompleteHealMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -77,7 +77,7 @@ public:
 class CChangeCreatureMaxHPImp : public CChangeCreatureMaxHPMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 /**
@@ -86,7 +86,7 @@ public:
 class CChangeCreatureHPImp : public CChangeCreatureHPMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -96,7 +96,7 @@ public:
 class CCreatureSetUrlImp : public CCreatureSetUrlMsg
 {
 public:
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

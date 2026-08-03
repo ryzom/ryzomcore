@@ -999,7 +999,7 @@ void	CDBGroupListSheet::forceValidity(uint element, bool forceValid)
 class CListSheetAddRow : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 	{
 		CDBGroupListSheet *pLS = dynamic_cast<CDBGroupListSheet*>(pCaller->getParent());
 		if (pLS == nullptr) return;
@@ -1012,7 +1012,7 @@ REGISTER_ACTION_HANDLER (CListSheetAddRow, "list_sheet_add_row");
 class CListSheetSubRow : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 	{
 		CDBGroupListSheet *pLS = dynamic_cast<CDBGroupListSheet*>(pCaller->getParent());
 		if (pLS == nullptr) return;

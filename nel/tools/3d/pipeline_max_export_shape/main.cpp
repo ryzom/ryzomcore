@@ -90,8 +90,11 @@
 #include "flare_build.h"
 #include "remanence_build.h"
 #include "../pipeline_max_export_common/physique_skin.h"
+#include "../pipeline_max_export_common/export_ids.h"
 #include "interface_build.h"
 #include "lm_scene_build.h"
+#include "../nel_gltf/shape_export_bytes.h"
+#include "../nel_gltf/mesh_shape_build.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -105,36 +108,18 @@ using namespace MESHEVAL;
 using namespace MATBUILD;
 using namespace MESHBUILD;
 
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_LOD_NAME_COUNT 1423062537
-#define NEL3D_APPDATA_LOD_NAME 1423062538
-#define NEL3D_APPDATA_LOD_BLEND_IN 1423062548
-#define NEL3D_APPDATA_LOD_BLEND_OUT 1423062549
-#define NEL3D_APPDATA_LOD_COARSE_MESH 1423062550
-#define NEL3D_APPDATA_LOD_DYNAMIC_MESH 1423062551
-#define NEL3D_APPDATA_LOD_DIST_MAX 1423062552
-#define NEL3D_APPDATA_LOD_BLEND_LENGTH 1423062553
-#define NEL3D_APPDATA_LOD_MRM 1423062554
-#define NEL3D_APPDATA_ACCEL 1423062561
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_COLLISION 1423062613
-#define NEL3D_APPDATA_COLLISION_EXTERIOR 1423062614
-#define NEL3D_APPDATA_USE_REMANENCE 1423062631
-#define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
-#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
-#define NEL3D_APPDATA_INTERFACE_FILE 1423062700
-
-// Scene class part-A ids of the special objects
-#define CLASSID_PARTA_NEL_PS 0x58ce2893
-#define CLASSID_PARTA_NEL_FLARE 0x4e913532
-#define CLASSID_PARTA_NEL_WAVE_MAKER 0x77e24828
-#define CLASSID_PARTA_XREF 0x92aab38c
-static const NLMISC::CClassId CLASSID_PACS_BOX(0x7f374277, 0x5d3971df);
-static const NLMISC::CClassId CLASSID_PACS_CYL(0x62a56810, 0x4b3d601c);
+// NeL export AppData sub-ids + special-object class ids: pipeline_max_export_common/export_ids.h
+using PMAX_EXPORT_IDS::CLASSID_PACS_BOX;
+using PMAX_EXPORT_IDS::CLASSID_PACS_CYL;
 
 static bool g_verbose = false;
 
 // ---------------------------------------------------------------------------------------------
+
+// Anonymous namespace: the glTF writer (PMB_SHAPE_NO_MAIN) compiles this file into a binary
+// whose own main.cpp defines a DIFFERENT file-scope SExportStats — internal linkage keeps the
+// two types (and their implicitly-inline members) from ODR-colliding across the TUs.
+namespace {
 
 struct SExportStats
 {
@@ -150,33 +135,10 @@ struct SExportStats
 	}
 };
 
-// Is this node's evaluated object in the geometry/shapes MaxScript categories?
-static bool isGeometryOrShape(CSceneClass *base)
-{
-	if (!base) return false;
-	TSClassId scid = base->classDesc()->superClassId();
-	return scid == SCLASS_GEOMOBJECT || scid == SCLASS_SHAPE;
-}
+} // anonymous namespace
 
-// Root node name check ("Bip" prefixed root => skeleton part)
-static INode *rootOf(INode *node)
-{
-	INode *cur = node;
-	int guard = 64;
-	while (cur && guard-- > 0)
-	{
-		if (!dynamic_cast<CNodeImpl *>(cur)) break;
-		INode *p = cur->parent();
-		if (!p || !dynamic_cast<CNodeImpl *>(p)) break;
-		cur = p;
-	}
-	return cur;
-}
-
-static bool startsWithBip(const std::string &s)
-{
-	return s.size() >= 3 && s.compare(0, 3, "Bip") == 0;
-}
+// isGeometryOrShape / rootOf / startsWithBip (the selection-gate node classification) live in
+// scene_lib — shared with the glTF writer's replication of this gate.
 
 // ---------------------------------------------------------------------------------------------
 // PMB_SKIN_DUMP diagnostic — recursive dump of a Physique/Skin mod-app payload.
@@ -273,28 +235,6 @@ static bool tryApplyPhysique(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	return true;
 }
 
-// Interface-weld world matrix per the reference call sites (export_mesh.cpp:1111): Identity
-// for skinned meshes (their VBs are already world space), else worldObjectTM * FromExportSpace
-// (maps the build's local/offset-space verts back to world).
-static NLMISC::CMatrix interfaceToWorldMat(INode &node, SNodeTMCache &tmCache, bool skinned)
-{
-	if (skinned)
-		return NLMISC::CMatrix::Identity;
-	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
-	Matrix3M nodeTM = getNodeTM(&node, tmCache);
-	Point3M opos;
-	QuatM orot;
-	ScaleValueM oscale;
-	readObjectOffset(n, opos, orot, oscale);
-	Matrix3M objectTM = composePRS(opos, orot, oscale) * nodeTM;
-	Matrix3M objectToLocal = objectTM * inverseM3(nodeTM);
-	NLMISC::CMatrix toWorld, fromExportSpace;
-	MAXSCENE::convertMatrix(toWorld, objectTM);
-	MAXSCENE::convertMatrix(fromExportSpace, objectToLocal);
-	fromExportSpace.invert();
-	return toWorld * fromExportSpace;
-}
-
 // Apply the interface weld when the node carries the appdata (post skinning, like the
 // reference; morph targets would skip — none are built yet).
 static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
@@ -303,98 +243,25 @@ static void tryApplyInterface(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
 	if (!IFACEBUILD::useInterfaceMesh(node))
 		return;
 	IFACEBUILD::applyInterfaceToMeshBuild(node, buildMesh,
-	                                      interfaceToWorldMat(node, tmCache, skinned), tmCache);
+	                                      IFACEBUILD::interfaceToWorldMat(node, tmCache, skinned), tmCache);
 }
 
-// Morpher blend-shape targets — the reference's getBSMeshBuild (export_mesh.cpp:1192): for each
-// non-NULL Morpher ref 101+i, evaluate the TARGET node through the non-skinned mesh path with
-// finalSpace = the SOURCE node's NodeTM when the source is skinned (else Identity) — landing the
-// target's verts in the same space as the source's build — then copy the source's (welded)
-// corner normals onto every corner whose vertex is an interface vertex (the reference computes
-// them off a fresh base MeshBuild in the objectToLocal·finalSpace frame, which equals the
-// skinned world frame; our export buildMesh IS that frame with the weld applied, so it serves
-// as the base directly). Targets that fail to evaluate or whose vertex count diverges from the
-// base are skipped with a warning — NL3D's CMRMBuilder::buildBlendShapes dereferences and
-// asserts equal counts (the reference could rely on live Max never failing there).
-static void buildBSList(INode &node, SNodeTMCache &tmCache,
-                        const std::vector<CSceneClass *> &mods,
-                        const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
-                        bool exportLighting,
-                        std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
-{
-	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
-	CReferenceMaker *morph = nullptr;
-	for (uint i = 0; i < mods.size() && !morph; ++i)
-		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
-			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
-	if (!morph)
-		return;
-
-	NLMISC::CMatrix finalSpace = NLMISC::CMatrix::Identity;
-	if (skinned)
-		MAXSCENE::convertMatrix(finalSpace, getNodeTM(&node, tmCache));
-
-	for (uint i = 0; i < 100; ++i)
-	{
-		if (101 + i >= morph->nbReferences())
-			break;
-		INode *target = dynamic_cast<INode *>(morph->getReference(101 + i));
-		if (!target)
-			continue;
-		SEvalMesh tmesh;
-		if (!MESHEVAL::evalNodeMesh(*target, tmesh, nullptr))
-		{
-			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
-			        nodeName(*target).c_str(), nodeName(node).c_str());
-			continue;
-		}
-		SMaxMeshBaseBuild tMax;
-		NL3D::CMeshBase::CMeshBaseBuild tBase;
-		buildBaseMeshInterface(tBase, tMax, *target, tmCache, getLocalMatrix(*target, tmCache),
-		                       exportLighting);
-		NL3D::CMesh::CMeshBuild *mb = new NL3D::CMesh::CMeshBuild;
-		buildMeshInterface(tmesh, *mb, tBase, tMax, *target, tmCache, false, &finalSpace);
-		if (mb->Vertices.size() != exportMesh.Vertices.size())
-		{
-			fprintf(stderr, "WARNING: morph target '%s' of '%s' has %u verts vs base %u; channel dropped\n",
-			        nodeName(*target).c_str(), nodeName(node).c_str(),
-			        (uint)mb->Vertices.size(), (uint)exportMesh.Vertices.size());
-			delete mb;
-			continue;
-		}
-		// Interface-vert corner normals come from the (welded) base.
-		if (exportMesh.InterfaceVertexFlag.size() != 0)
-		{
-			for (uint k = 0; k < mb->Faces.size() && k < exportMesh.Faces.size(); ++k)
-				for (uint l = 0; l < 3; ++l)
-				{
-					uint vert = mb->Faces[k].Corner[l].Vertex;
-					if (vert < exportMesh.InterfaceVertexFlag.size() && exportMesh.InterfaceVertexFlag.get(vert))
-						mb->Faces[k].Corner[l].Normal = exportMesh.Faces[k].Corner[l].Normal;
-				}
-		}
-		bsList.push_back(mb);
-	}
-}
+// buildBSList (Morpher blend-shape target list) lives in mesh_build — shared with the glTF
+// writer's morph-target encoding.
 
 // Construct an IMeshGeom (CMeshGeom or CMeshMRMGeom) from a built CMeshBuild — used per LOD slot
-// in the multi-lod path. Caller owns the returned pointer until CMeshMultiLod::build takes it.
+// in the multi-lod path (the slot node's own LOD_MRM appdata decides; the geom build itself is
+// the shared NLGLTF::buildMeshGeom both routes call). Caller owns the returned pointer until
+// CMeshMultiLod::build takes it.
 static NL3D::IMeshGeom *buildMeshGeomFor(INode &node, NL3D::CMesh::CMeshBuild &buildMesh,
                                           uint numMaxMaterial)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
-	if (getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0))
-	{
-		NL3D::CMRMParameters parameters;
+	NL3D::CMRMParameters parameters;
+	bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
+	if (wantMrm)
 		buildMRMParameters(n, parameters);
-		std::vector<NL3D::CMesh::CMeshBuild *> bsList; // morph targets: not implemented
-		NL3D::CMeshMRMGeom *g = new NL3D::CMeshMRMGeom;
-		g->build(buildMesh, bsList, numMaxMaterial, parameters);
-		return g;
-	}
-	NL3D::CMeshGeom *g = new NL3D::CMeshGeom;
-	g->build(buildMesh, numMaxMaterial);
-	return g;
+	return NLGLTF::buildMeshGeom(buildMesh, numMaxMaterial, wantMrm, parameters);
 }
 
 // LOD slot flags from a slave's appdata.
@@ -417,7 +284,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
                                        const TNodesByName &nodesByName,
                                        bool exportLighting, SExportStats &stats,
                                        CSceneClassContainer *ssc,
-                                       LMSCENE::SCollector *lmc)
+                                       LMSCENE::SCollector *lmc, bool lmOnly)
 {
 	CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 	std::string name = nodeName(node);
@@ -425,7 +292,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	std::vector<CSceneClass *> mods;
 	std::vector<CStorageContainer *> modApps;
 	CSceneClass *base = baseObjectOf(node, &mods, &modApps);
-	if (!base) return nullptr;
+	if (!base) return NULL;
 	NLMISC::CClassId cid = base->classDesc()->classId();
 
 	// FX/special shape classes (not yet implemented; each reports for the harness)
@@ -433,30 +300,33 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	{
 		stats.skip("wavemaker");
 		fprintf(stderr, "SKIP shape '%s': wave maker not implemented\n", name.c_str());
-		return nullptr;
+		return NULL;
 	}
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
 	{
+		if (lmOnly) return NULL; // specials never collect as lightmap receivers
 		NL3D::IShape *rs = REMANENCEBUILD::buildRemanenceShape(node, tmCache, exportLighting);
 		if (!rs)
 		{
 			stats.skip("remanence");
-			return nullptr;
+			return NULL;
 		}
 		return rs;
 	}
 	if (cid.a() == CLASSID_PARTA_NEL_FLARE)
 	{
+		if (lmOnly) return NULL;
 		NL3D::IShape *fs = FLAREBUILD::buildFlareShape(node, tmCache);
 		if (!fs)
 		{
 			stats.skip("flare");
-			return nullptr;
+			return NULL;
 		}
 		return fs;
 	}
 	if (hasWaterMaterial(node))
 	{
+		if (lmOnly) return NULL;
 		NL3D::IShape *ws = WATERBUILD::buildWaterShape(node, tmCache);
 		if (!ws)
 		{
@@ -464,7 +334,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			// specific (the reference exporter returns NULL in the same cases without further
 			// output — missing required maps, empty geometry).
 			stats.skip("water");
-			return nullptr;
+			return NULL;
 		}
 		return ws;
 	}
@@ -485,7 +355,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		{
 			if (getenv("PMB_SKIN_DUMP"))
 			{
-				CStorageContainer *app = (i < modApps.size()) ? modApps[i] : nullptr;
+				CStorageContainer *app = (i < modApps.size()) ? modApps[i] : NULL;
 				fprintf(stderr, "PMB_SKIN_DUMP node='%s' modifier=%s cid=(0x%x,0x%x) sup=0x%x\n",
 				        name.c_str(), isPhysique ? "Physique" : "Skin",
 				        mcid.a(), mcid.b(), (uint32)mscid);
@@ -515,7 +385,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				fprintf(stderr, "SKIP shape '%s': Skin modifier not implemented (Max 4+ ISkin path;"
 				                " corpus era is Physique-only — see design §10z-quat)\n",
 				        name.c_str());
-				return nullptr;
+				return NULL;
 			}
 			hasPhysique = true;
 			// Physique: continue into the mesh path; skinning is applied after mesh eval.
@@ -584,6 +454,12 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		                " lightmap receiver\n", name.c_str());
 		lmCollect = false;
 	}
+	// Lightmap-scene-only mode (the nel_lmscene blob flow): nodes that don't collect as
+	// receivers contribute nothing — skip the expensive mesh eval/build for them. Receiver
+	// nodes still take the FULL build path below so the collected pre-build data (and any
+	// build-failure bail-out) is bit-for-bit the direct --lm-scene run's.
+	if (lmOnly && !lmCollect)
+		return NULL;
 	NL3D::CLightmapReceiver lmRecv;
 	if (lmCollect)
 	{
@@ -611,7 +487,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		lmRecv.CoarseOutput = lmc->CurrentCoarse;
 	}
 
-	NL3D::CMeshBase *meshBase = nullptr;
+	NL3D::CMeshBase *meshBase = NULL;
 	std::vector<sint> materialRemap;
 
 	if (lodCount > 0)
@@ -633,7 +509,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			                     hasPhysique))
 			{
 				if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
-					return nullptr;
+					return NULL;
 				tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 				NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 				slot.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -734,7 +610,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		{
 			// No LOD came through — bail rather than serialize an empty multi-lod.
 			stats.skip("mesh-eval");
-			return nullptr;
+			return NULL;
 		}
 
 		NL3D::CMeshMultiLod *ml = new NL3D::CMeshMultiLod;
@@ -753,9 +629,9 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		NL3D::CMesh::CMeshBuild buildMesh;
 		if (!evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
 		                      hasPhysique))
-			return nullptr;
+			return NULL;
 		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
-			return nullptr;
+			return NULL;
 		tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 
 		if (lmCollect)
@@ -776,59 +652,35 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		// on their post-MRM VB (both are big ship meshes without LOD_MRM authored).
 		const bool wantMrm = getScriptAppDataInt(n, NEL3D_APPDATA_LOD_MRM, 0) != 0;
 
+		NL3D::CMRMParameters parameters;
+		std::vector<NL3D::CMesh::CMeshBuild *> bsList;
 		if (wantMrm)
 		{
-			NL3D::CMRMParameters parameters;
 			buildMRMParameters(n, parameters);
-
 			// Morpher blend-shape targets — a non-empty bsList forces the CMeshMRM branch (the
-			// reference's isCompatible gate below), which is how the visage files ship as
+			// shared build's isCompatible gate), which is how the visage files ship as
 			// CMeshMRM-with-SkinWeights instead of CMeshMRMSkinned.
-			std::vector<NL3D::CMesh::CMeshBuild *> bsList;
 			buildBSList(node, tmCache, mods, buildMesh, hasPhysique, exportLighting, bsList);
-
-			if (NL3D::CMeshMRMSkinned::isCompatible(buildMesh) && bsList.empty())
-			{
-				NL3D::CMeshMRMSkinned *meshMRMSkinned = new NL3D::CMeshMRMSkinned;
-				meshMRMSkinned->build(buildBaseMesh, buildMesh, parameters);
-				// CMeshMRMSkinned::isCompatible gates the INPUT vertex count, but MRM
-				// construction can grow the vertex count at smoothing-group/material/bone
-				// boundaries past NL3D_MESH_SKIN_MANAGER_MAXVERTICES=5000 (the skin-manager's
-				// fixed shared VB size). CMeshMRMSkinnedGeom::compileRunTime logs the failure
-				// and clears _RuntimeCompiled when that happens; skip the node with an artist-
-				// facing message so the authoring gets fixed (LOD_MRM=0 or split the mesh).
-				if (!meshMRMSkinned->isRuntimeCompiled())
-				{
-					fprintf(stderr, "SKIP shape '%s': CMeshMRMSkinned post-MRM vertex count "
-					                "exceeds NL3D_MESH_SKIN_MANAGER_MAXVERTICES. Author "
-					                "LOD_MRM=0 to export as plain CMesh with SkinWeights, or "
-					                "split the geometry so each part's post-MRM VB fits in "
-					                "the skin-manager buffer.\n",
-					        name.c_str());
-					delete meshMRMSkinned;
-					stats.skip("skinned-maxverts");
-					return nullptr;
-				}
-				meshMRMSkinned->optimizeMaterialUsage(materialRemap);
-				meshBase = meshMRMSkinned;
-			}
-			else
-			{
-				NL3D::CMeshMRM *meshMRM = new NL3D::CMeshMRM;
-				meshMRM->build(buildBaseMesh, buildMesh, bsList, parameters);
-				meshMRM->optimizeMaterialUsage(materialRemap);
-				meshBase = meshMRM;
-			}
-			for (uint i = 0; i < bsList.size(); ++i)
-				delete bsList[i];
 		}
-		else
+		// The shared mesh-path shape build (NLGLTF::buildMeshShape — same call on the glTF
+		// import route).
+		std::string skipReason;
+		meshBase = NLGLTF::buildMeshShape(buildBaseMesh, buildMesh, bsList, wantMrm, parameters,
+		                                  materialRemap, &skipReason);
+		for (uint i = 0; i < bsList.size(); ++i)
+			delete bsList[i];
+		if (!meshBase)
 		{
-			NL3D::CMesh *m = new NL3D::CMesh;
-			m->build(buildBaseMesh, buildMesh);
-			// buildMeshMorph: morph targets not implemented (Morpher modifier reports unhandled)
-			m->optimizeMaterialUsage(materialRemap);
-			meshBase = m;
+			// skinned-maxverts: artist-facing message so the authoring gets fixed
+			if (skipReason == "skinned-maxverts")
+				fprintf(stderr, "SKIP shape '%s': CMeshMRMSkinned post-MRM vertex count "
+				                "exceeds NL3D_MESH_SKIN_MANAGER_MAXVERTICES. Author "
+				                "LOD_MRM=0 to export as plain CMesh with SkinWeights, or "
+				                "split the geometry so each part's post-MRM VB fits in "
+				                "the skin-manager buffer.\n",
+				        name.c_str());
+			stats.skip(skipReason.empty() ? "build" : skipReason);
+			return NULL;
 		}
 	}
 
@@ -865,18 +717,27 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 
 static int exportFile(const std::string &maxPath, const std::string &outDir, const std::string &outDirCoarse,
                       const std::string &animDir, const std::string &lmSceneDir,
-                      bool exportLighting, SExportStats &stats)
+                      bool exportLighting, SExportStats &stats,
+                      std::vector<uint8> *lmSceneBytesOut = NULL,
+                      SLoadedMax *preloaded = NULL)
 {
-	SLoadedMax lm;
-	if (!loadMaxFile(maxPath, lm))
+	// preloaded = the caller's already-parsed scene (the glTF writer parses each .max once and
+	// feeds every process flow the same instance); standalone runs load their own.
+	SLoadedMax lmLocal;
+	if (!preloaded && !loadMaxFile(maxPath, lmLocal))
 		return 1;
+	SLoadedMax &lm = preloaded ? *preloaded : lmLocal;
 
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
-	tmCache.SceneRoot = nullptr;
+	tmCache.SceneRoot = NULL;
 
+	// lmSceneBytesOut = lightmap-scene-only mode (nel_lmscene blob): collect the scene graph
+	// exactly like --lm-scene but serialize to memory, skip every file output, and skip the
+	// build of nodes that can't be receivers.
+	const bool lmOnly = lmSceneBytesOut != NULL;
 	LMSCENE::SCollector lmCollector;
-	LMSCENE::SCollector *lmc = lmSceneDir.empty() ? nullptr : &lmCollector;
+	LMSCENE::SCollector *lmc = (lmSceneDir.empty() && !lmOnly) ? NULL : &lmCollector;
 
 	// Collect the LOD slave set (case-insensitive) and coarse-mesh info
 	std::set<std::string> lodNames;
@@ -921,38 +782,13 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 		std::string name = nodeName(node);
 
-		CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
+		CSceneClass *base = baseObjectOf(node, NULL, NULL);
 		if (!isGeometryOrShape(base))
 			continue;
 
-		// Skeleton parts
-		if (startsWithBip(name) || startsWithBip(nodeName(*rootOf(&node))))
-			continue;
-
-		NLMISC::CClassId cid = base->classDesc()->classId();
-		if (cid == CLASSID_RPO)
-			continue;
-		if (cid.a() == CLASSID_PARTA_NEL_PS)
-			continue;
-		if (cid == CLASSID_PACS_BOX || cid == CLASSID_PACS_CYL)
-			continue;
-		// Target objects ((0x1020,0), light/camera look-at anchors) never yield reference
-		// shapes (0 of 3518 references) — the reference exporter produces nothing for them.
-		if (cid == CLASSID_TARGET)
-			continue;
-
-		// Accelerator?
-		{
-			std::string accel = getScriptAppDataStr(n, NEL3D_APPDATA_ACCEL, "");
-			if (!accel.empty() && accel != "0" && accel != "32")
-				continue;
-		}
-
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_DONOTEXPORT, "") == "1")
-			continue;
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION, "") == "1")
-			continue;
-		if (getScriptAppDataStr(n, NEL3D_APPDATA_COLLISION_EXTERIOR, "") == "1")
+		// The shared standalone-node selection gate (scene_lib) — Bip parts, special classes,
+		// accelerators, DONOTEXPORT/COLLISION flags.
+		if (!shapeProcessSelectsNode(node, base->classDesc()->classId()))
 			continue;
 
 		// LOD slave?
@@ -980,9 +816,15 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		if (lmc)
 			lmc->CurrentCoarse = haveCoarse;
 
-		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc, lmc);
+		NL3D::IShape *shape = buildShapeForNode(node, tmCache, nodesByName, exportLighting, stats, ssc, lmc, lmOnly);
 		if (!shape)
 			continue;
+		if (lmOnly)
+		{
+			// Collection happened inside the build; no shape file output in this mode.
+			delete shape;
+			continue;
+		}
 
 		// setDistMax was previously called uniformly here; the reference exporter's
 		// CExportNel::buildShape gates it on the mesh path only (`!multiLodObject && buildLods`
@@ -992,97 +834,21 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		// LOD_DIST_MAX on zo_flare (300 vs ref 1000) even though every other field matched
 		// byte-for-byte. Now applied inside the mesh/multi-lod branch of buildShapeForNode.
 
-		try
+		// The one shared .shape serializer (nel_gltf/shape_export_bytes.cpp): temp-COFile route
+		// for CMeshMRMGeom's seek-back-then-forward save, CMeshBase v10->v9 and CWaterShape
+		// v7->v4 version patches — see there for the full rationale on each.
 		{
-			// Serialize via a PID+node temp file, then patch the serialMeshBase version byte 10 -> 9:
-			// current NL3D writes CMeshBase version 10 ("Ryzom Core release check", 2024) which adds
-			// no fields over the export-era version 9 — same pure-version-byte class as the zone
-			// v4/v5 byte (see pipeline_max_design.md §10h). Stream layout for the CMeshBase shapes:
-			// "SHAP" + u64 0x1 + u32 nameLen + name + classVersion byte + meshBase version byte.
-			//
-			// COFile-not-CMemStream: CMeshMRMGeom::save uses a seek-back-then-forward pattern to
-			// patch its per-lod offsets after writing each lod (mesh_mrm.cpp:1942-1972). CMemStream
-			// rejects the forward seek because its `length()` (checked in `seek(begin)`) returns the
-			// current write position, not the max ever written — so the writer silently overwrites
-			// its own lod-offset placeholders and the resulting file cannot be loaded (see
-			// pipeline_max_design.md §9 T2 note for the same limitation on the corpus tester). Route
-			// the initial serialize through a real file to sidestep the CMemStream constraint,
-			// exactly the way pipeline_max_corpus_test T2 does.
-			char tmpPath[256];
-			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.tmp", (int)PMB_GETPID());
+			std::string serr;
+			if (NLGLTF::writeShapeExportFile(shape, outPath, &serr))
 			{
-				NLMISC::COFile ofile;
-				if (!ofile.open(tmpPath))
-				{
-					fprintf(stderr, "ERROR: cannot open %s for writing\n", tmpPath);
-					delete shape;
-					continue;
-				}
-				NL3D::CShapeStream shapeStream(shape);
-				shapeStream.serial(ofile);
-				ofile.close();
-			}
-			std::vector<uint8> memBuf;
-			{
-				NLMISC::CIFile ifile;
-				if (!ifile.open(tmpPath))
-				{
-					fprintf(stderr, "ERROR: cannot open %s for reading\n", tmpPath);
-					delete shape;
-					continue;
-				}
-				memBuf.resize(ifile.getFileSize());
-				if (!memBuf.empty())
-					ifile.serialBuffer(&memBuf[0], (uint)memBuf.size());
-				ifile.close();
-			}
-			uint8 *buf = memBuf.empty() ? nullptr : &memBuf[0];
-			uint32 len = (uint32)memBuf.size();
-			{
-				std::string className = shape->getClassName();
-				// CMeshBase-derived shapes: CMesh/CMeshMRM/CMeshMRMSkinned write their OWN
-				// version byte first, THEN CMeshBase's version byte — the "+1" skips over the
-				// outer class version to reach CMeshBase's (see the two-level serial in
-				// CMesh::serial calling CMeshBase::serial). For a plain-IShape-derived shape
-				// like CWaterShape there's no inner class, so the version byte sits right at
-				// the end of the class name (no +1 offset).
-				uint32 meshBaseVerOff = 4 + 8 + 4 + (uint32)className.size() + 1;
-				if ((className == "CMesh" || className == "CMeshMRM" || className == "CMeshMRMSkinned")
-					&& meshBaseVerOff < len && buf[meshBaseVerOff] == 10)
-					buf[meshBaseVerOff] = 9;
-				// CWaterShape: reference-era exports are stream version 4 (2004 plugin build).
-				// Our v7 adds RealtimeReflection (1 byte) + fresnel bias/scale/power (12 bytes)
-				// + EnvMapCalcReflectivity (1 byte) at the END of the serial, in that order. To
-				// emit a v4 stream from a v7 in-memory shape: patch the version byte + truncate
-				// the trailing 14 bytes. Safe because those 4 fields sit right at the end and
-				// aren't referenced by any later field (the CMeshBase v10→v9 pattern is a pure
-				// version bump with no data change — this one has data to peel off too, but the
-				// same structural principle applies).
-				uint32 waterVerOff = 4 + 8 + 4 + (uint32)className.size();
-				if (className == "CWaterShape" && waterVerOff < len && buf[waterVerOff] == 7
-					&& len > 14)
-				{
-					buf[waterVerOff] = 4;
-					len -= 14;
-				}
-			}
-			NLMISC::COFile file;
-			if (file.open(outPath))
-			{
-				file.serialBuffer(buf, len);
-				file.close();
 				++stats.Exported;
 				if (g_verbose)
 					printf("OK %s\n", outPath.c_str());
 			}
 			else
 			{
-				fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
+				fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), serr.c_str());
 			}
-		}
-		catch (const NLMISC::Exception &e)
-		{
-			fprintf(stderr, "ERROR: shape serialization failed for %s: %s\n", outPath.c_str(), e.what());
 		}
 		delete shape;
 	}
@@ -1119,7 +885,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			}
 			std::vector<INode *> stack;
 			INode *sceneRoot = ssc->scene()->rootNode();
-			INode *seeds[2] = { sceneRoot, nullptr };
+			INode *seeds[2] = { sceneRoot, NULL };
 			for (int s = 0; s < 2; ++s)
 			{
 				if (s == 1 && seeds[0] == seeds[1]) continue;
@@ -1152,7 +918,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			// Root-level only (the maxscript's `node.parent == undefined` selection)
 			if (dynamic_cast<CNodeImpl *>(n->parent())) continue;
 			std::string name = nodeName(node);
-			CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
+			CSceneClass *base = baseObjectOf(node, NULL, NULL);
 			if (!base || base->classDesc()->superClassId() != SCLASS_GEOMOBJECT) continue;
 			NLMISC::CClassId cid = base->classDesc()->classId();
 			if (cid == CLASSID_RPO) continue; // zones never occlude (RPO::isZone in addNode)
@@ -1184,18 +950,48 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		// Project name = the source scene's file stem (prefixes the lightmap texture names)
 		lmc->Scene.ProjectName = NLMISC::CFile::getFilenameWithoutExtension(maxPath);
 
-		std::string scenePath = lmSceneDir + "/"
-			+ NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)) + ".lmscene";
-		try
+		if (lmSceneBytesOut)
 		{
-			lmc->Scene.save(scenePath);
-			printf("LMSCENE %s (%u receivers, %u occluders, %u lights)\n", scenePath.c_str(),
-			       (uint)lmc->Scene.Receivers.size(), (uint)lmc->Scene.Occluders.size(),
-			       (uint)lmc->Scene.Lights.size());
+			// Memory output for the nel_lmscene blob. Serialize through a real file exactly like
+			// save() so the bytes cannot diverge from the direct --lm-scene write (the shape
+			// serializer above takes the same detour for CMemStream's seek limitation).
+			char tmpPath[256];
+			sprintf(tmpPath, "/tmp/pipeline_max_export_shape.%d.lmscene.tmp", (int)PMB_GETPID());
+			try
+			{
+				lmc->Scene.save(tmpPath);
+				NLMISC::CIFile ifile;
+				if (ifile.open(tmpPath))
+				{
+					lmSceneBytesOut->resize(ifile.getFileSize());
+					if (!lmSceneBytesOut->empty())
+						ifile.serialBuffer(&(*lmSceneBytesOut)[0], (uint)lmSceneBytesOut->size());
+					ifile.close();
+				}
+				NLMISC::CFile::deleteFile(tmpPath);
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				lmSceneBytesOut->clear();
+				fprintf(stderr, "ERROR: lmscene serialization failed for %s: %s\n",
+				        maxPath.c_str(), e.what());
+			}
 		}
-		catch (const NLMISC::Exception &e)
+		else
 		{
-			fprintf(stderr, "ERROR: cannot write %s: %s\n", scenePath.c_str(), e.what());
+			std::string scenePath = lmSceneDir + "/"
+				+ NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath)) + ".lmscene";
+			try
+			{
+				lmc->Scene.save(scenePath);
+				printf("LMSCENE %s (%u receivers, %u occluders, %u lights)\n", scenePath.c_str(),
+				       (uint)lmc->Scene.Receivers.size(), (uint)lmc->Scene.Occluders.size(),
+				       (uint)lmc->Scene.Lights.size());
+			}
+			catch (const NLMISC::Exception &e)
+			{
+				fprintf(stderr, "ERROR: cannot write %s: %s\n", scenePath.c_str(), e.what());
+			}
 		}
 	}
 
@@ -1244,7 +1040,7 @@ static NL3D::IShape *loadShape(const std::string &path)
 	try
 	{
 		NLMISC::CIFile f;
-		if (!f.open(path)) return nullptr;
+		if (!f.open(path)) return NULL;
 		NL3D::CShapeStream ss;
 		ss.serial(f);
 		return ss.getShapePointer();
@@ -1252,7 +1048,7 @@ static NL3D::IShape *loadShape(const std::string &path)
 	catch (const NLMISC::Exception &e)
 	{
 		fprintf(stderr, "load %s: %s\n", path.c_str(), e.what());
-		return nullptr;
+		return NULL;
 	}
 }
 
@@ -1283,7 +1079,7 @@ static const std::vector<NL3D::CMesh::CSkinWeight> *dumpSkinWeightsOf(NL3D::ISha
 		bonesNames = g.getBonesName();
 		return &sw;
 	}
-	return nullptr;
+	return NULL;
 }
 
 static int dumpSkin(const std::string &path)
@@ -1303,7 +1099,7 @@ static int dumpSkin(const std::string &path)
 	// position-matched weight comparison against a reference shape (PMB_SKIN_DUMP_ALL for the
 	// full listing; default keeps the original 16-vert preview).
 	NL3D::CVertexBuffer vbStore;
-	const NL3D::CVertexBuffer *vbp = nullptr;
+	const NL3D::CVertexBuffer *vbp = NULL;
 	if (NL3D::CMeshMRM *mrm = dynamic_cast<NL3D::CMeshMRM *>(shape))
 		vbp = &mrm->getMeshGeom().getVertexBuffer();
 	else if (NL3D::CMeshMRMSkinned *mrms = dynamic_cast<NL3D::CMeshMRMSkinned *>(shape))
@@ -1313,7 +1109,7 @@ static int dumpSkin(const std::string &path)
 	}
 	uint nShow = getenv("PMB_SKIN_DUMP_ALL") ? (uint)sw->size() : std::min((uint)sw->size(), (uint)16u);
 	NL3D::CVertexBufferRead vbr;
-	const uint8 *posPtr = nullptr;
+	const uint8 *posPtr = NULL;
 	uint stride = 0;
 	if (vbp && vbp->getNumVertices() >= sw->size())
 	{
@@ -1674,7 +1470,7 @@ static void compareMeshBase(NL3D::CMeshBase *ma, NL3D::CMeshBase *mb)
 			// dedup — but the presence + class is what the base material carries).
 			NL3D::ITexture *ta = const_cast<NL3D::CMaterial &>(m_a).getTexture(0);
 			NL3D::ITexture *tb = const_cast<NL3D::CMaterial &>(m_b).getTexture(0);
-			if ((ta != nullptr) != (tb != nullptr))
+			if ((ta != NULL) != (tb != NULL))
 			{
 				printf("  material %u lightmap-masked: slot-0 texture presence differs\n", i);
 				raiseVerdict(2);
@@ -2003,7 +1799,7 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 			std::vector<std::string> bonesA, bonesB;
 			const std::vector<NL3D::CMesh::CSkinWeight> *swa = dumpSkinWeightsOf(sa, bonesA);
 			std::vector<NL3D::CMesh::CSkinWeight> swbStore;
-			const std::vector<NL3D::CMesh::CSkinWeight> *swb = nullptr;
+			const std::vector<NL3D::CMesh::CSkinWeight> *swb = NULL;
 			if (mrmb) { bonesB = mrmb->getMeshGeom().getBonesName(); swbStore = mrmb->getMeshGeom().getSkinWeights(); swb = &swbStore; }
 			else { msb->getMeshGeom().getSkinWeights(swbStore); bonesB = msb->getMeshGeom().getBonesName(); swb = &swbStore; }
 			if (bonesA != bonesB)
@@ -2224,6 +2020,30 @@ static int compareShapes(const std::string &a, const std::string &b)
 
 // ---------------------------------------------------------------------------------------------
 
+/** Shared flow for the glTF writer (compiled in with PMB_SHAPE_NO_MAIN): run the shape
+ *	exporter's whole per-file flow in lightmap-scene-only mode over the caller's already-parsed
+ *	scene and return the .lmscene bytes — byte-identical to a direct
+ *	`pipeline_max_export_shape --lm-scene` run on the same file. The caller owns process-wide
+ *	setup (registerSerial3d, SerialOldPreferredMemory, database root). Returns 1 with bytes,
+ *	3 when the scene has no lightmap receivers, -1 on error.
+ */
+int pmbExportLmSceneForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                            bool exportLighting,
+                            std::string &nameOut, std::vector<uint8> &out)
+{
+	out.clear();
+	SExportStats stats;
+	int ret = exportFile(maxPath, std::string(), std::string(), std::string(), std::string(),
+	                     exportLighting, stats, &out, &lm);
+	if (ret != 0)
+		return -1;
+	if (out.empty())
+		return 3;
+	nameOut = NLMISC::toLowerAscii(NLMISC::CFile::getFilenameWithoutExtension(maxPath));
+	return 1;
+}
+
+#ifndef PMB_SHAPE_NO_MAIN
 int main(int argc, char **argv)
 {
 	NLMISC::CApplicationContext appContext;
@@ -2336,5 +2156,6 @@ int main(int argc, char **argv)
 		printf("SKIPCLASS %s %u\n", it->first.c_str(), it->second);
 	return ret;
 }
+#endif /* !PMB_SHAPE_NO_MAIN */
 
 /* end of file */

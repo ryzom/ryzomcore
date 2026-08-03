@@ -33,7 +33,7 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CGroupContainerBase )
 
 		CGroupContainerBase( const TCtorParam &param );
-		virtual ~CGroupContainerBase();
+		virtual ~CGroupContainerBase() NL_OVERRIDE;
 
 		virtual void removeAllContainers();
 		virtual void setLocked( bool locked );

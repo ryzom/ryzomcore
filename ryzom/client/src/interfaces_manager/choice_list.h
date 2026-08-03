@@ -42,16 +42,16 @@ public:
 	CChoiceList(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint32 fontSize, CRGBA color, bool shadow);
 
 	/// Display the Bitmap.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/**
 	 * called when the mouse has moved
 	 * \param the x coordinate of the mouse
 	 * \param the y coordinate of the mouse
 	 */
-	virtual void mouseMove( float x, float y);
+	virtual void mouseMove( float x, float y) NL_OVERRIDE;
 };
 
 

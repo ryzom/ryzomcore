@@ -30,25 +30,25 @@ class CCloudScapeUser : public UCloudScape
 public:
 
 	CCloudScapeUser(CScene *scene);
-	virtual	~CCloudScapeUser();
+	virtual	~CCloudScapeUser() NL_OVERRIDE;
 
-	virtual void init (SCloudScapeSetup *pCSS = nullptr);
+	virtual void init (SCloudScapeSetup *pCSS = nullptr) NL_OVERRIDE;
 
-	virtual void set (SCloudScapeSetup &css);
+	virtual void set (SCloudScapeSetup &css) NL_OVERRIDE;
 
-	virtual void anim (double dt);
+	virtual void anim (double dt) NL_OVERRIDE;
 
-	virtual void render ();
+	virtual void render () NL_OVERRIDE;
 
-	virtual uint32 getMemSize();
+	virtual uint32 getMemSize() NL_OVERRIDE;
 
-	virtual void setQuality (float threshold);
+	virtual void setQuality (float threshold) NL_OVERRIDE;
 
-	virtual void setNbCloudToUpdateIn80ms (uint32 n);
+	virtual void setNbCloudToUpdateIn80ms (uint32 n) NL_OVERRIDE;
 
-	virtual bool isDebugQuadEnabled ();
+	virtual bool isDebugQuadEnabled () NL_OVERRIDE;
 
-	virtual void setDebugQuad (bool b);
+	virtual void setDebugQuad (bool b) NL_OVERRIDE;
 
 	CCloudScape *_CS;
 	CScene *_Scene;

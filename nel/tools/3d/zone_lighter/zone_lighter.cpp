@@ -77,7 +77,7 @@ const char *progressbar[BAR_LENGTH]=
 class CMyZoneLighter : public CZoneLighter
 {
 	// Progress bar
-	virtual void progress (const char *message, float progress)
+	virtual void progress (const char *message, float progress) NL_OVERRIDE
 	{
 		// Progress bar
 		char msg[512];
@@ -459,6 +459,11 @@ int main(int argc, char* argv[])
 				// A landscape allocated with new: it is not delete because destruction take 3 secondes more!
 				CLandscape *landscape=new CLandscape;
 				landscape->init();
+
+				// Debug/archaeology: disable procedural tessellation noise so lumel
+				// normals come from the smooth surface only (era-reproduction probes).
+				if (getenv ("NL_ZONE_LIGHTER_NO_NOISE"))
+					landscape->setNoiseMode (false);
 
 				// A zone lighter
 				CMyZoneLighter lighter;

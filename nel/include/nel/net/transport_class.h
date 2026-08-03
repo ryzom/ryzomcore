@@ -312,18 +312,18 @@ protected:
 
 		T DefaultValue, *Value;
 
-		virtual void serialDefaultValue (NLMISC::IStream &f)
+		virtual void serialDefaultValue (NLMISC::IStream &f) NL_OVERRIDE
 		{
 			f.serial (DefaultValue);
 		}
 
-		virtual void serialValue (NLMISC::IStream &f)
+		virtual void serialValue (NLMISC::IStream &f) NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			f.serial (*Value);
 		}
 
-		virtual void setDefaultValue ()
+		virtual void setDefaultValue () NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			*Value = DefaultValue;
@@ -339,18 +339,18 @@ protected:
 
 		T *Value;
 
-		virtual void serialDefaultValue (NLMISC::IStream &/* f */)
+		virtual void serialDefaultValue (NLMISC::IStream &/* f */) NL_OVERRIDE
 		{
 			// nothing
 		}
 
-		virtual void serialValue (NLMISC::IStream &f)
+		virtual void serialValue (NLMISC::IStream &f) NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			f.serialCont (*Value);
 		}
 
-		virtual void setDefaultValue ()
+		virtual void setDefaultValue () NL_OVERRIDE
 		{
 			nlassert (Value != NULL);
 			Value->clear ();

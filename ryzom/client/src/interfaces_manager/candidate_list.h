@@ -45,7 +45,7 @@ public:
 	CCandidateList(uint id, float x, float y, float x_pixel, float y_pixel, float w, float h, float w_pixel, float h_pixel, uint32 fontSize, CRGBA color, bool shadow);
 
 	///destructor
-	~CCandidateList();
+	~CCandidateList() NL_OVERRIDE;
 
 
 	/**
@@ -68,14 +68,14 @@ public:
 	void setSelectedColor( const CRGBA &color) { _SelectedColor = color; }
 
 	/// Display the control.
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 
 	/// Manage the left click of the mouse for the list
-	virtual void click(float x, float y, bool &taken);
+	virtual void click(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/// Manage the right click of the mouse for the list
-	virtual void clickRight(float x, float y, bool &taken);
+	virtual void clickRight(float x, float y, bool &taken) NL_OVERRIDE;
 
 	/**
 	 * get the name of the selected candidate

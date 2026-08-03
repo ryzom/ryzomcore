@@ -91,7 +91,7 @@ protected:
 
 protected:
 	/// add brick
-	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams )
+	virtual bool addBrick( const CStaticBrick & brick, CMagicPhrase * phrase, bool &effectEnd, CBuildParameters &buildParams ) NL_OVERRIDE
 	{
 		for ( uint i=0 ; i<brick.Params.size() ; ++i)
 		{
@@ -119,7 +119,7 @@ protected:
 		///\todo nico: check if everything is set
 		return true;
 	}
-	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode)
+	virtual bool validate(CMagicPhrase * phrase, std::string &errorCode) NL_OVERRIDE
 	{
 		if ( !PHRASE_UTILITIES::validateSpellTarget(phrase->getActor(),phrase->getTargets()[0].getId(),ACTNATURE::CURATIVE_MAGIC, errorCode, true) )
 		{
@@ -131,7 +131,7 @@ protected:
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
 						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
-						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
+						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport ) NL_OVERRIDE
 	{
 		///\todo nico:
 		//		- behaviour + messages de chat
@@ -208,7 +208,7 @@ protected:
 	virtual void apply( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
 						const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
 						const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport,
-						sint32 vamp, float vampRatio, bool reportXp )
+						sint32 vamp, float vampRatio, bool reportXp ) NL_OVERRIDE
 	{
 		CEntityBase * actor = CEntityBaseManager::getEntityBasePtr( phrase->getActor() );
 		if (!actor)

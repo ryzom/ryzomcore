@@ -111,34 +111,34 @@ namespace NLMISC
 	{
 	public:
 		CApplicationContext();
-		virtual ~CApplicationContext();
+		virtual ~CApplicationContext() NL_OVERRIDE;
 
-		virtual void *getSingletonPointer(const std::string &singletonName);
-		virtual void setSingletonPointer(const std::string &singletonName, void *ptr);
-		virtual void releaseSingletonPointer(const std::string &singletonName, void *ptr);
+		virtual void *getSingletonPointer(const std::string &singletonName) NL_OVERRIDE;
+		virtual void setSingletonPointer(const std::string &singletonName, void *ptr) NL_OVERRIDE;
+		virtual void releaseSingletonPointer(const std::string &singletonName, void *ptr) NL_OVERRIDE;
 
-		virtual CLog *getErrorLog();
-		virtual void setErrorLog(CLog *errorLog);
-		virtual CLog *getWarningLog();
-		virtual void setWarningLog(CLog *warningLog);
-		virtual CLog *getInfoLog();
-		virtual void setInfoLog(CLog *infoLog);
-		virtual CLog *getDebugLog();
-		virtual void setDebugLog(CLog *debugLog);
-		virtual CLog *getAssertLog();
-		virtual void setAssertLog(CLog *assertLog);
-		virtual CMemDisplayer *getDefaultMemDisplayer();
-		virtual void setDefaultMemDisplayer(CMemDisplayer *memDisplayer);
-		virtual CMsgBoxDisplayer *getDefaultMsgBoxDisplayer();
-		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer);
-		virtual bool getDebugNeedAssert();
-		virtual void setDebugNeedAssert(bool needAssert);
-		virtual bool getNoAssert();
-		virtual void setNoAssert(bool noAssert);
-		virtual bool getAlreadyCreateSharedAmongThreads();
-		virtual void setAlreadyCreateSharedAmongThreads(bool b);
-		virtual bool isWindowedApplication();
-		virtual void setWindowedApplication(bool b);
+		virtual CLog *getErrorLog() NL_OVERRIDE;
+		virtual void setErrorLog(CLog *errorLog) NL_OVERRIDE;
+		virtual CLog *getWarningLog() NL_OVERRIDE;
+		virtual void setWarningLog(CLog *warningLog) NL_OVERRIDE;
+		virtual CLog *getInfoLog() NL_OVERRIDE;
+		virtual void setInfoLog(CLog *infoLog) NL_OVERRIDE;
+		virtual CLog *getDebugLog() NL_OVERRIDE;
+		virtual void setDebugLog(CLog *debugLog) NL_OVERRIDE;
+		virtual CLog *getAssertLog() NL_OVERRIDE;
+		virtual void setAssertLog(CLog *assertLog) NL_OVERRIDE;
+		virtual CMemDisplayer *getDefaultMemDisplayer() NL_OVERRIDE;
+		virtual void setDefaultMemDisplayer(CMemDisplayer *memDisplayer) NL_OVERRIDE;
+		virtual CMsgBoxDisplayer *getDefaultMsgBoxDisplayer() NL_OVERRIDE;
+		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer) NL_OVERRIDE;
+		virtual bool getDebugNeedAssert() NL_OVERRIDE;
+		virtual void setDebugNeedAssert(bool needAssert) NL_OVERRIDE;
+		virtual bool getNoAssert() NL_OVERRIDE;
+		virtual void setNoAssert(bool noAssert) NL_OVERRIDE;
+		virtual bool getAlreadyCreateSharedAmongThreads() NL_OVERRIDE;
+		virtual void setAlreadyCreateSharedAmongThreads(bool b) NL_OVERRIDE;
+		virtual bool isWindowedApplication() NL_OVERRIDE;
+		virtual void setWindowedApplication(bool b) NL_OVERRIDE;
 
 	private:
 		/// Singleton registry
@@ -168,32 +168,32 @@ namespace NLMISC
 	public:
 		CLibraryContext (INelContext &applicationContext);
 
-		virtual void *getSingletonPointer(const std::string &singletonName);
-		virtual void setSingletonPointer(const std::string &singletonName, void *ptr);
-		virtual void releaseSingletonPointer(const std::string &singletonName, void *ptr);
+		virtual void *getSingletonPointer(const std::string &singletonName) NL_OVERRIDE;
+		virtual void setSingletonPointer(const std::string &singletonName, void *ptr) NL_OVERRIDE;
+		virtual void releaseSingletonPointer(const std::string &singletonName, void *ptr) NL_OVERRIDE;
 
-		virtual CLog *getErrorLog();
-		virtual void setErrorLog(CLog *errorLog);
-		virtual CLog *getWarningLog();
-		virtual void setWarningLog(CLog *warningLog);
-		virtual CLog *getInfoLog();
-		virtual void setInfoLog(CLog *infoLog);
-		virtual CLog *getDebugLog();
-		virtual void setDebugLog(CLog *debugLog);
-		virtual CLog *getAssertLog();
-		virtual void setAssertLog(CLog *assertLog);
-		virtual CMemDisplayer *getDefaultMemDisplayer();
-		virtual void setDefaultMemDisplayer(CMemDisplayer *memDisplayer);
-		virtual CMsgBoxDisplayer *getDefaultMsgBoxDisplayer();
-		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer);
-		virtual bool getDebugNeedAssert();
-		virtual void setDebugNeedAssert(bool needAssert);
-		virtual bool getNoAssert();
-		virtual void setNoAssert(bool noAssert);
-		virtual bool getAlreadyCreateSharedAmongThreads();
-		virtual void setAlreadyCreateSharedAmongThreads(bool b);
-		virtual bool isWindowedApplication();
-		virtual void setWindowedApplication(bool b);
+		virtual CLog *getErrorLog() NL_OVERRIDE;
+		virtual void setErrorLog(CLog *errorLog) NL_OVERRIDE;
+		virtual CLog *getWarningLog() NL_OVERRIDE;
+		virtual void setWarningLog(CLog *warningLog) NL_OVERRIDE;
+		virtual CLog *getInfoLog() NL_OVERRIDE;
+		virtual void setInfoLog(CLog *infoLog) NL_OVERRIDE;
+		virtual CLog *getDebugLog() NL_OVERRIDE;
+		virtual void setDebugLog(CLog *debugLog) NL_OVERRIDE;
+		virtual CLog *getAssertLog() NL_OVERRIDE;
+		virtual void setAssertLog(CLog *assertLog) NL_OVERRIDE;
+		virtual CMemDisplayer *getDefaultMemDisplayer() NL_OVERRIDE;
+		virtual void setDefaultMemDisplayer(CMemDisplayer *memDisplayer) NL_OVERRIDE;
+		virtual CMsgBoxDisplayer *getDefaultMsgBoxDisplayer() NL_OVERRIDE;
+		virtual void setDefaultMsgBoxDisplayer(CMsgBoxDisplayer *msgBoxDisplayer) NL_OVERRIDE;
+		virtual bool getDebugNeedAssert() NL_OVERRIDE;
+		virtual void setDebugNeedAssert(bool needAssert) NL_OVERRIDE;
+		virtual bool getNoAssert() NL_OVERRIDE;
+		virtual void setNoAssert(bool noAssert) NL_OVERRIDE;
+		virtual bool getAlreadyCreateSharedAmongThreads() NL_OVERRIDE;
+		virtual void setAlreadyCreateSharedAmongThreads(bool b) NL_OVERRIDE;
+		virtual bool isWindowedApplication() NL_OVERRIDE;
+		virtual void setWindowedApplication(bool b) NL_OVERRIDE;
 
 	private:
 		/// Pointer to the application context.

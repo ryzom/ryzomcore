@@ -32,6 +32,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/quat.h>
 #include <nel/misc/algo.h>
@@ -72,12 +73,17 @@
 #include "../pipeline_max/builtin/i_node.h"
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 
 #include "../pipeline_max_export_common/biped_rig.h"
+#include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 #include "../pipeline_max/biped/biped_driven.h"
 #include "biped_anim.h"
+#include "bip_file.h"
 #include "biped_author.h"
 
 using namespace PIPELINE::MAX;
@@ -91,21 +97,14 @@ static const sint32 TIME_NEG_INFINITY = (sint32)0x80000000;
 static const sint32 TIME_POS_INFINITY = 0x7fffffff;
 
 // NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_INSTANCE_NAME 1423062562
-#define NEL3D_APPDATA_EXPORT_NOTE_TRACK 1423062566
-#define NEL3D_APPDATA_EXPORT_NODE_ANIMATION 1423062800
-#define NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME 1423062801
-#define NEL3D_APPDATA_EXPORT_SSS_TRACK 1423062802
+// NeL export AppData sub-ids: pipeline_max_export_common/export_ids.h
 
-static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
+// (PRS/LookAt TM controllers are the typed CControlPRS/CControlLookAt since §10j-dix)
 static const NLMISC::CClassId CLASSID_BIPED_VHT_CTRL(0x00009156, 0x00000000);
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
 // Scripted-plugin class ids carry a per-script-edit PartB; match PartA only, like the
 // reference exporter (export_nel.h NEL_PARTICLE_SYSTEM_CLASS_ID / BOOL_CONTROL_CLASS_ID).
-static const uint32 CLASSID_PARTA_NEL_PS = 0x58ce2893;
 static const uint32 CLASSID_PARTA_ONOFF_CTRL = 0x984b8d27;
 // Camera superclass (isCamera in the reference)
 static const TSClassId SCLASS_CAMERA = 0x00000020;
@@ -249,9 +248,9 @@ enum TNelValueType
 static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 {
 	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (!kf) return nullptr;
+	if (!kf) return NULL;
 	uint numKeys = kf->keyCount();
-	if (!numKeys) return nullptr;
+	if (!numKeys) return NULL;
 
 	sint32 rangeStart = 0, rangeEnd = 0;
 	bool hasRange = kf->range(rangeStart, rangeEnd);
@@ -261,7 +260,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Position -> LinearVector (pos or scale request, like the reference)
 	if (CControlPosLinear *c = dynamic_cast<CControlPosLinear *>(kf))
 	{
-		if (type != typePos && type != typeScale) return nullptr;
+		if (type != typePos && type != typeScale) return NULL;
 		NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 		const CStorageLinPoint3Key *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -280,7 +279,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Rotation -> LinearQuat (w negated)
 	if (CControlRotLinear *c = dynamic_cast<CControlRotLinear *>(kf))
 	{
-		if (type != typeRotation) return nullptr;
+		if (type != typeRotation) return NULL;
 		NL3D::CTrackKeyFramerLinearQuat *track = new NL3D::CTrackKeyFramerLinearQuat();
 		const CStorageLinRotKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -299,7 +298,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Scale -> LinearVector via the scale-matrix diagonal
 	if (CControlScaleLinear *c = dynamic_cast<CControlScaleLinear *>(kf))
 	{
-		if (type != typePos && type != typeScale) return nullptr;
+		if (type != typePos && type != typeScale) return NULL;
 		NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 		const CStorageLinScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -318,7 +317,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Bezier Position -> BezierVector (tangents scaled to per-second)
 	if (CControlPosBezier *c = dynamic_cast<CControlPosBezier *>(kf))
 	{
-		if (type != typePos && type != typeScale) return nullptr;
+		if (type != typePos && type != typeScale) return NULL;
 		NL3D::CTrackKeyFramerBezierVector *track = new NL3D::CTrackKeyFramerBezierVector();
 		const CStorageBezPoint3Key *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -341,7 +340,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// reference IBezScaleKey conversion keeps them as-is)
 	if (CControlScaleBezier *c = dynamic_cast<CControlScaleBezier *>(kf))
 	{
-		if (type != typePos && type != typeScale) return nullptr;
+		if (type != typePos && type != typeScale) return NULL;
 		NL3D::CTrackKeyFramerBezierVector *track = new NL3D::CTrackKeyFramerBezierVector();
 		const CStorageBezScaleKey *keys = c->keys();
 		if (getenv("PMB_ANIM_DUMP_BEZSCALE"))
@@ -373,7 +372,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Bezier Float -> BezierFloat (tangents unscaled, like the reference IBezFloatKey conversion)
 	if (CControlFloatBezier *c = dynamic_cast<CControlFloatBezier *>(kf))
 	{
-		if (type != typeFloat) return nullptr;
+		if (type != typeFloat) return NULL;
 		NL3D::CTrackKeyFramerBezierFloat *track = new NL3D::CTrackKeyFramerBezierFloat();
 		const CStorageBezFloatKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -395,7 +394,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Position -> TCBVector
 	if (CControlPosTCB *c = dynamic_cast<CControlPosTCB *>(kf))
 	{
-		if (type != typePos && type != typeScale) return nullptr;
+		if (type != typePos && type != typeScale) return NULL;
 		NL3D::CTrackKeyFramerTCBVector *track = new NL3D::CTrackKeyFramerTCBVector();
 		const CStorageTCBPoint3Key *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -419,7 +418,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Rotation -> TCBQuat (relative angle-axis, angle negated)
 	if (CControlRotTCB *c = dynamic_cast<CControlRotTCB *>(kf))
 	{
-		if (type != typeRotation) return nullptr;
+		if (type != typeRotation) return NULL;
 		NL3D::CTrackKeyFramerTCBQuat *track = new NL3D::CTrackKeyFramerTCBQuat();
 		const CStorageTCBRotKey *keys = c->keys();
 		if (getenv("PMB_ANIM_DUMP_TCBROT"))
@@ -496,7 +495,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Scale -> TCBVector via the scale-matrix diagonal
 	if (CControlScaleTCB *c = dynamic_cast<CControlScaleTCB *>(kf))
 	{
-		if (type != typePos && type != typeScale) return nullptr;
+		if (type != typePos && type != typeScale) return NULL;
 		NL3D::CTrackKeyFramerTCBVector *track = new NL3D::CTrackKeyFramerTCBVector();
 		const CStorageTCBScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -521,7 +520,7 @@ static NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// 2026-07-06: the nine typed keyframer classes cover every PRS/LookAt/morph-factor
 	// controller in the anim corpus — no Linear/TCB Float, Bezier Rotation/Point3 or list
 	// controllers appear in exportable roles.)
-	return nullptr;
+	return NULL;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -736,7 +735,7 @@ void CSSSBuild::compile(NL3D::CAnimation &dest, const std::string &baseName)
 	else
 	{
 		delete finalTrack;
-		finalTrack = nullptr;
+		finalTrack = NULL;
 	}
 
 	if (finalTrack)
@@ -833,38 +832,37 @@ static void addNodeTracks(NL3D::CAnimation &animation, INode &node, const std::s
                           CSSSBuild *ssBuilder)
 {
 	CReferenceMaker *transform = node.getReference(0);
-	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : nullptr;
-	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
-	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
+	CControlPRS *prs = dynamic_cast<CControlPRS *>(transform);
+	CControlLookAt *lookAt = dynamic_cast<CControlLookAt *>(transform);
 
-	if (isPrs || isLookAt)
+	if (prs || lookAt)
 	{
-		// Export order matches the reference: scale, rotation, position, then camera extras.
-		NL3D::ITrack *track = buildATrack(transform->getReference(isPrs ? 2 : 3), typeScale);
+		// Export order matches the reference: scale, rotation, position, then camera extras
+		// (typed sub-controller slots on CControlPRS/CControlLookAt — §10j-dix).
+		NL3D::ITrack *track = buildATrack(prs ? prs->scaleController() : lookAt->scaleController(), typeScale);
 		addTrackChecked(animation, parentName + NL3D::ITransformable::getScaleValueName(), track);
 
-		if (isPrs)
+		if (prs)
 		{
-			track = buildATrack(transform->getReference(1), typeRotation);
+			track = buildATrack(prs->rotationController(), typeRotation);
 			addTrackChecked(animation, parentName + NL3D::ITransformable::getRotQuatValueName(), track);
 		}
 
-		track = buildATrack(transform->getReference(isPrs ? 0 : 1), typePos);
+		track = buildATrack(prs ? prs->positionController() : lookAt->positionController(), typePos);
 		addTrackChecked(animation, parentName + NL3D::ITransformable::getPosValueName(), track);
 
 		// Camera roll + target position (reference: only when isCamera(node)).
-		if (isLookAt && nodeIsCamera(node))
+		if (lookAt && nodeIsCamera(node))
 		{
-			track = buildATrack(transform->getReference(2), typeFloat);
+			track = buildATrack(lookAt->rollController(), typeFloat);
 			addTrackChecked(animation, parentName + NL3D::CCamera::getRollValueName(), track);
 
-			CNodeImpl *target = dynamic_cast<CNodeImpl *>(transform->getReference(0));
+			CNodeImpl *target = dynamic_cast<CNodeImpl *>(lookAt->targetNode());
 			if (target)
 			{
-				CReferenceMaker *ttm = target->getReference(0);
-				if (ttm && dynamic_cast<CSceneClass *>(ttm) && ttm->classDesc()->classId() == CLASSID_PRS_CTRL)
+				if (CControlPRS *tprs = dynamic_cast<CControlPRS *>(target->getReference(0)))
 				{
-					track = buildATrack(ttm->getReference(0), typePos);
+					track = buildATrack(tprs->positionController(), typePos);
 					addTrackChecked(animation, parentName + NL3D::CCamera::getTargetValueName(), track);
 				}
 			}
@@ -886,14 +884,14 @@ static void addNodeTracks(NL3D::CAnimation &animation, INode &node, const std::s
 // "MorphFactor", replicating CExportNel::addMorphTracks.
 static void addMorphTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName)
 {
-	CReferenceMaker *obj = objectOfNode(node);
-	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return;
-	CReferenceMaker *morpher = nullptr;
-	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
+	CDerivedObject *obj = dynamic_cast<CDerivedObject *>(objectOfNode(node));
+	if (!obj) return;
+	CReferenceMaker *morpher = NULL;
+	for (uint i = 0; i < obj->modifierCount() && !morpher; ++i)
 	{
-		CReferenceMaker *mod = obj->getReference(i);
+		CSceneClass *mod = obj->modifier(i);
 		if (mod && mod->classDesc()->classId() == CLASSID_MORPHER)
-			morpher = mod;
+			morpher = dynamic_cast<CReferenceMaker *>(mod);
 	}
 	if (!morpher) return;
 
@@ -963,7 +961,7 @@ static void addParticleSystemTracks(NL3D::CAnimation &animation, INode &node, co
 	if (obj->classDesc()->classId().a() != CLASSID_PARTA_NEL_PS) return;
 
 	// Find the object's ParamBlock2 and parse its param records.
-	CReferenceMaker *pb2 = nullptr;
+	CReferenceMaker *pb2 = NULL;
 	for (uint i = 0; i < obj->nbReferences() && !pb2; ++i)
 	{
 		CReferenceMaker *r = obj->getReference(i);
@@ -1082,13 +1080,16 @@ struct SBipedSampled
 };
 
 // Sample the whole biped subtree once per frame. Returns false when no biped keys exist.
-static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSampled &out)
+// \a overrideKeys — when non-NULL (e.g. keys loaded from a Character Studio .bip), replaces
+// the figure file's (usually empty) keytracks on every rig.
+static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSampled &out,
+                               const BIPANIM::SBipAnimKeys *overrideKeys = NULL)
 {
 	using namespace PMAX_RIG;
 
 	// figure-time walk (fills g_bipedRigs and per-bone figure world transforms)
 	g_bipedRigs.clear();
-	g_rig = nullptr;
+	g_rig = NULL;
 	g_msBones.clear();
 	std::vector<Bone> bones;
 	std::set<std::string> nameSet;
@@ -1107,7 +1108,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 	for (std::map<CSceneClass *, SBipedRig>::iterator it = g_bipedRigs.begin(); it != g_bipedRigs.end(); ++it)
 	{
 		g_rig = &it->second;
-		BIPANIM::CBipedAnimEval *ev = new BIPANIM::CBipedAnimEval(it->first, it->second, bones, boneOf);
+		BIPANIM::CBipedAnimEval *ev = new BIPANIM::CBipedAnimEval(it->first, it->second, bones, boneOf, overrideKeys);
 		evals.push_back(ev);
 		if (ev->keys().HasRange)
 		{
@@ -1164,7 +1165,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 				std::map<INode *, size_t>::const_iterator bi = boneOf.find(node), pi = boneOf.find(parent);
 				if (bi != boneOf.end() && pi != boneOf.end())
 				{
-					const PMAX_RIG::SBipedRig *rig = nullptr;
+					const PMAX_RIG::SBipedRig *rig = NULL;
 					CSceneClass *sys = PMAX_RIG::bipedSystemOfCtrl(dynamic_cast<CReferenceMaker *>(node->getReference(0)));
 					if (sys)
 					{
@@ -1227,7 +1228,7 @@ static bool sampleBipedSubtree(INode &root, CSceneClassContainer *ssc, SBipedSam
 static NL3D::ITrack *buildSampledQuatTrack(const std::vector<sint32> &times, const std::vector<NLMISC::CQuat> &vals,
                                            sint32 rangeStart, sint32 rangeEnd)
 {
-	if (vals.empty()) return nullptr;
+	if (vals.empty()) return NULL;
 	NL3D::CTrackKeyFramerLinearQuat *track = new NL3D::CTrackKeyFramerLinearQuat();
 	NLMISC::CQuat prev;
 	for (size_t i = 0; i < times.size() && i < vals.size(); ++i)
@@ -1248,7 +1249,7 @@ static NL3D::ITrack *buildSampledQuatTrack(const std::vector<sint32> &times, con
 static NL3D::ITrack *buildSampledPosTrack(const std::vector<sint32> &times, const std::vector<NLMISC::CVector> &vals,
                                           sint32 rangeStart, sint32 rangeEnd)
 {
-	if (vals.empty()) return nullptr;
+	if (vals.empty()) return NULL;
 	NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 	for (size_t i = 0; i < times.size() && i < vals.size(); ++i)
 	{
@@ -1261,8 +1262,18 @@ static NL3D::ITrack *buildSampledPosTrack(const std::vector<sint32> &times, cons
 	return track;
 }
 
+// --com-node-prefix: give a COM exported with an empty base name its node-name prefix
+// ("Bip01.pos"). The Snowballs 2003 refs have this shape (COM prefixed, bones bare — the
+// era result when the selected COM was not a direct child of the scene root, so root was
+// false with an empty parent prefix). The Ryzom per-node refs are bare "pos"/"rotquat",
+// so this must never be default.
+static bool g_comNodePrefix = false;
+
 // Replicates CExportNel::addBipedNodeTracks: biped nodes emit their sampled tracks under
-// parentName + name + "." (bare for the root), non-biped children go through addBoneTracks.
+// parentName + name + "." ; the COM root uses parentName VERBATIM — bare "pos"/"rotquat"
+// when the caller passed no prefix (the Ryzom per-node exports; all 2004 refs). The
+// Snowballs 2003 shape (COM "Bip01.pos", bones bare) is opt-in via --com-node-prefix.
+// Non-biped children go through addBoneTracks.
 static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const std::string &parentName,
                                bool root, CSceneClassContainer *ssc, const SBipedSampled &sampled,
                                CSSSBuild &ssBuilder)
@@ -1273,6 +1284,8 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 	if (isBiped)
 	{
 		std::string name = root ? parentName : (parentName + ucstring(node.userName()).toUtf8() + ".");
+		if (root && name.empty() && g_comNodePrefix)
+			name = ucstring(node.userName()).toUtf8() + ".";
 		// scale: biped nodes have none. rotation:
 		std::map<INode *, std::vector<NLMISC::CQuat> >::const_iterator rit = sampled.Rot.find(&node);
 		if (rit != sampled.Rot.end())
@@ -1304,6 +1317,9 @@ static void addBipedNodeTracks(NL3D::CAnimation &animation, INode &node, const s
 	}
 }
 
+// Optional BIP override keys for the current export (set from main via --bip).
+static const BIPANIM::SBipAnimKeys *g_bipOverrideKeys = NULL;
+
 static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::string &baseName, bool root, CSceneClassContainer *ssc)
 {
 	// One SkeletonSpawnScript builder per exported selection node, like the reference.
@@ -1314,7 +1330,7 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 	// controller class, so a nested biped COM anywhere in the subtree (the mektoub_selle rider
 	// under the saddle nodes) samples and exports through the same shared context and range.
 	SBipedSampled sampled;
-	bool hasBiped = sampleBipedSubtree(node, ssc, sampled);
+	bool hasBiped = sampleBipedSubtree(node, ssc, sampled, g_bipOverrideKeys);
 
 	// Biped COM root: the oversampling path (CExportNel::addBipedNodeTracks).
 	CSceneClass *tmsc = dynamic_cast<CSceneClass *>(node.getReference(0));
@@ -1330,7 +1346,7 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 			addNodeTracks(animation, node, baseName, &ssBuilder);
 			std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
 			for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-				{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, nullptr); }
+				{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, NULL); }
 		}
 	}
 	else
@@ -1343,7 +1359,7 @@ static void addAnimation(NL3D::CAnimation &animation, INode &node, const std::st
 		addMorphTracks(animation, node, baseName);
 		std::vector<INode *> kids = orderedChildrenOf(&node, ssc);
 		for (std::vector<INode *>::iterator ci = kids.begin(); ci != kids.end(); ++ci)
-			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, hasBiped ? &sampled : nullptr); }
+			{ INode *child = *ci; addBoneTracks(animation, *child, baseName, ssc, ssBuilder, hasBiped ? &sampled : NULL); }
 	}
 
 	// NoteTrack export (a string track used to create events)
@@ -1364,7 +1380,7 @@ static int dumpBipedSamples(INode &root, CSceneClassContainer *ssc, const char *
 {
 	using namespace PMAX_RIG;
 	g_bipedRigs.clear();
-	g_rig = nullptr;
+	g_rig = NULL;
 	g_msBones.clear();
 	std::vector<Bone> bones;
 	std::set<std::string> nameSet;
@@ -1534,7 +1550,7 @@ static int runDumpRig(const char *path, const char *outPath)
 			if (v.size() >= 4 && (v.size() % 4) == 0)
 			{
 				// PMB_DUMP_RIG_FULL: no float/int cap (keytrack record inspection)
-				static const bool s_full = getenv("PMB_DUMP_RIG_FULL") != nullptr;
+				static const bool s_full = getenv("PMB_DUMP_RIG_FULL") != NULL;
 				size_t nf = v.size() / 4;
 				size_t fCap = s_full ? nf : 32, iCap = s_full ? nf : 8;
 				const float *f = reinterpret_cast<const float *>(nlVectorData(v));
@@ -1576,34 +1592,133 @@ static int runDiffRig(const char *pathA, const char *pathB, const char *outPath)
 	return 0;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Entry point for the max2gltf writer (pipeline_max_export_gltf compiles this file with
+// PMB_ANIM_NO_MAIN): run exactly the standalone flow — $Bip01-first + EXPORT_NODE_ANIMATION
+// selection in scene order, addAnimation per node — and hand back the serialized CAnimation.
+// The bytes ride the glTF as the lossless nel_anim blob (dual representation per the plan:
+// sampled interop channels are a later additive tier; the blob is the byte-exact carrier).
+// Loads the .max through this tool's own loader/registry, independent of the caller's state.
+// Returns 1 with animOut filled, 3 when nothing to export, -1 on load/serial failure.
+int pmbExportAnimForGltf(const std::string &maxPath, PMAXLOAD::SLoadedMax &lm,
+                         std::vector<uint8> &animOut,
+                         std::vector<std::string> *bareNodesOut)
+{
+	NL3D::registerSerial3d(); // internally guarded
+
+	CSceneClassContainer *ssc = lm.Scene->container();
+
+	// Selection: $Bip01 first (case-insensitive), then every EXPORT_NODE_ANIMATION == "1" node
+	// in scene order — identical to main below.
+	std::vector<INode *> selection;
+	std::set<INode *> selected;
+	INode *rootNode = ssc->scene()->rootNode();
+	INode *bip01 = rootNode ? rootNode->find(ucstring("Bip01")) : NULL;
+	if (!bip01)
+	{
+		for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end() && !bip01; ++it)
+		{
+			CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
+			if (n && NLMISC::toLower(ucstring(n->userName()).toUtf8()) == "bip01") bip01 = n;
+		}
+	}
+	if (bip01 && selected.insert(bip01).second) selection.push_back(bip01);
+	for (PIPELINE::MAX::CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
+		if (!n) continue;
+		if (getNodeScriptAppDataString(n, NEL3D_APPDATA_EXPORT_NODE_ANIMATION) == "1")
+			if (selected.insert(n).second) selection.push_back(n);
+	}
+	if (selection.empty())
+		return 3;
+
+	NL3D::CAnimation animFile;
+	for (std::vector<INode *>::iterator si = selection.begin(); si != selection.end(); ++si)
+	{
+		INode *node = *si;
+		std::string nodeName;
+		std::string prefixe = getNodeScriptAppDataString(node, NEL3D_APPDATA_EXPORT_ANIMATION_PREFIXE_NAME);
+		if (!prefixe.empty() && atoi(prefixe.c_str()) != 0)
+		{
+			nodeName = getNodeScriptAppDataString(node, NEL3D_APPDATA_INSTANCE_NAME);
+			if (nodeName.empty())
+				nodeName = ucstring(node->userName()).toUtf8();
+			nodeName += ".";
+		}
+		bool root = node->parent() == rootNode;
+		// Selection nodes exported with an EMPTY prefix own the bare "pos"/"rotquat"/"scale"
+		// and "<target>MorphFactor" track names (the Ryzom per-node convention) — the glTF
+		// sampled-channel tier needs to know which nodes those are.
+		if (bareNodesOut && nodeName.empty())
+			bareNodesOut->push_back(ucstring(node->userName()).toUtf8());
+		addAnimation(animFile, *node, nodeName, root, ssc);
+	}
+
+	try
+	{
+		NLMISC::CMemStream ms;
+		animFile.serial(ms);
+		animOut.assign(ms.buffer(), ms.buffer() + ms.length());
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		fprintf(stderr, "ERROR: anim serial failed for %s: %s\n", maxPath.c_str(), e.what());
+		return -1;
+	}
+	return 1;
+}
+
+#ifndef PMB_ANIM_NO_MAIN
 int main(int argc, char **argv)
 {
 	if (argc >= 5 && std::string(argv[1]) == "--diff-rig")
 		return runDiffRig(argv[2], argv[3], argv[4]);
 	if (argc >= 3 && std::string(argv[1]) == "--dump-rig")
-		return runDumpRig(argv[2], argc >= 4 ? argv[3] : nullptr);
+		return runDumpRig(argv[2], argc >= 4 ? argv[3] : NULL);
 	if (argc >= 5 && std::string(argv[1]) == "--author-jump")
 		return BIPAUTHOR::runAuthorJump(argv[2], argv[3], argv[4]);
 
-	const char *dumpSamples = nullptr;
+	const char *dumpSamples = NULL;
 	double dumpMaxFrame = 60.0;
+	const char *bipFile = NULL;
 	int argi = 1;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
 		if (std::string(argv[argi]) == "--dump-samples" && argi + 1 < argc) { dumpSamples = argv[argi + 1]; argi += 2; }
 		else if (std::string(argv[argi]) == "--dump-max-frame" && argi + 1 < argc) { dumpMaxFrame = atof(argv[argi + 1]); argi += 2; }
+		else if (std::string(argv[argi]) == "--bip" && argi + 1 < argc) { bipFile = argv[argi + 1]; argi += 2; }
+		else if (std::string(argv[argi]) == "--com-node-prefix") { g_comNodePrefix = true; ++argi; }
 		else break;
 	}
 	if (argc - argi < 2)
 	{
-		std::cerr << "usage: pipeline_max_export_anim [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
+		std::cerr << "usage: pipeline_max_export_anim [--bip <take.bip>] [--com-node-prefix] [--dump-samples <out.txt> [--dump-max-frame <f>]] <input.max> <output.anim>\n";
 		std::cerr << "       pipeline_max_export_anim --diff-rig <A.max> <B.max> <out.txt>\n";
 		std::cerr << "       pipeline_max_export_anim --author-jump <skel.max> <idle_source.max> <out.max>\n";
+		std::cerr << "  --bip loads Character Studio motion keys from a .bip take (Snowballs workflow:\n";
+		std::cerr << "        figure .max + bip/*.bip) and overrides the figure file's keytracks.\n";
+		std::cerr << "  --com-node-prefix names a bare-based COM's tracks '<nodeName>.pos/.rotquat'\n";
+		std::cerr << "        (Snowballs 2003 anim shape; Ryzom per-node refs are bare 'pos'/'rotquat').\n";
 		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export\n";
 		return 1;
 	}
 	const char *maxFile = argv[argi];
 	const char *animOut = argv[argi + 1];
+
+	BIPANIM::SBipAnimKeys bipKeys;
+	if (bipFile)
+	{
+		std::string err;
+		if (!BIPANIM::loadBipFile(bipFile, bipKeys, err))
+		{
+			std::cerr << "ERROR: --bip " << bipFile << ": " << err << "\n";
+			return 1;
+		}
+		g_bipOverrideKeys = &bipKeys;
+		std::cerr << "BIP " << bipFile << ": range [" << bipKeys.RangeMin << ".." << bipKeys.RangeMax
+		          << "] ticks\n";
+	}
 
 	NL3D::registerSerial3d();
 
@@ -1634,7 +1749,7 @@ int main(int argc, char **argv)
 	std::vector<INode *> selection;
 	std::set<INode *> selected;
 	INode *rootNode = ssc->scene()->rootNode();
-	INode *bip01 = rootNode ? rootNode->find(ucstring("Bip01")) : nullptr;
+	INode *bip01 = rootNode ? rootNode->find(ucstring("Bip01")) : NULL;
 	// MaxScript $Bip01 finds the node anywhere in the scene, not only top-level — search the
 	// whole container if the root-level find missed.
 	if (!bip01)
@@ -1681,6 +1796,11 @@ int main(int argc, char **argv)
 		}
 		// root flag: the selected node's parent is the scene root (see addAnimation)
 		bool root = node->parent() == rootNode;
+		if (getenv("PMB_ANIM_DUMP_SELECTION"))
+			fprintf(stderr, "PMB_ANIM_DUMP_SELECTION: node '%s' parent '%s' root=%d prefixe='%s'\n",
+			        ucstring(node->userName()).toUtf8().c_str(),
+			        node->parent() ? ucstring(node->parent()->userName()).toUtf8().c_str() : "(null)",
+			        (int)root, prefixe.c_str());
 		addAnimation(animFile, *node, nodeName, root, ssc);
 	}
 
@@ -1704,5 +1824,6 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+#endif /* PMB_ANIM_NO_MAIN */
 
 /* end of file */

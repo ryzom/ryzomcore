@@ -53,8 +53,8 @@ public:
 	// public instance methods
 
 	// specialisations of methods from IInterShardExchangeValidator
-	virtual bool isExchangeAllowed(const CGameItemPtr& theItem, TShardId shardId0, TShardId shardId1) const;
-	virtual bool isMoneyExchangeAllowed(TShardId shardId0, TShardId shardId1) const;
+	virtual bool isExchangeAllowed(const CGameItemPtr& theItem, TShardId shardId0, TShardId shardId1) const NL_OVERRIDE;
+	virtual bool isMoneyExchangeAllowed(TShardId shardId0, TShardId shardId1) const NL_OVERRIDE;
 
 	// accessors for the default level cap value
 	void setDefaultLevelCap(TLevelCap defaultLevelCap);

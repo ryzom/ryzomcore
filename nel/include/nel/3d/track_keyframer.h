@@ -62,11 +62,17 @@ public:
 		_Dirty= false;
 		_RangeLock= true;
 		_LoopMode= false;
+		// Compile-time caches ("valid only when track cleaned"), but serial() writes them
+		// unconditionally — a track serialized before any compile() would otherwise leak
+		// uninitialized heap bytes into the stream (seen on the exporters' spawn-script
+		// ConstString tracks; export-era reference files carry zeros here).
+		_RangeBegin= 0;
+		_RangeEnd= 0;
 	}
 
 
 	/// Destructor
-	~ITrackKeyFramer ()
+	~ITrackKeyFramer () NL_OVERRIDE
 	{
 	}
 
@@ -124,11 +130,11 @@ public:
 	void	setLoopMode(bool loop) {_LoopMode= loop; _Dirty= true;}
 
 	/// get LoopMode. From ITrack
-	virtual bool getLoopMode() const {return _LoopMode;}
+	virtual bool getLoopMode() const NL_OVERRIDE {return _LoopMode;}
 
 
 	/// From ITrack.
-	virtual const IAnimatedValue &eval (const TAnimationTime& inDate, CAnimatedValueBlock &avBlock)
+	virtual const IAnimatedValue &eval (const TAnimationTime& inDate, CAnimatedValueBlock &avBlock) NL_OVERRIDE
 	{
 		float	date= inDate;
 		const CKeyT *previous = nullptr;
@@ -220,14 +226,14 @@ public:
 	}
 
 
-	virtual TAnimationTime getBeginTime () const
+	virtual TAnimationTime getBeginTime () const NL_OVERRIDE
 	{
 		// must precalc ??
 		testAndClean();
 
 		return _RangeBegin;
 	}
-	virtual TAnimationTime getEndTime () const
+	virtual TAnimationTime getEndTime () const NL_OVERRIDE
 	{
 		// must precalc ??
 		testAndClean();
@@ -237,7 +243,7 @@ public:
 
 
 	/// Serial the template
-	virtual void serial (NLMISC::IStream& f)
+	virtual void serial (NLMISC::IStream& f) NL_OVERRIDE
 	{
 		// Serial version
 		(void)f.serialVersion (0);
@@ -253,7 +259,7 @@ public:
 	/** From UTrackKeyframer, retrieve the keys that are in the given range [t1, t2] of the track
 	  * \param result a vector that will be cleared, and filled with the date ofthe keys
 	  */
-	void getKeysInRange(TAnimationTime t1, TAnimationTime t2, std::vector<TAnimationTime> &result);
+	void getKeysInRange(TAnimationTime t1, TAnimationTime t2, std::vector<TAnimationTime> &result) NL_OVERRIDE;
 
 
 private:
@@ -442,7 +448,7 @@ public:
 	/// From ITrackKeyFramer
 	virtual void evalKey   (const CKeyT* previous, const CKeyT* next,
 							TAnimationTime /* datePrevious */, TAnimationTime /* dateNext */,
-							TAnimationTime /* date */, IAnimatedValue &result)
+							TAnimationTime /* date */, IAnimatedValue &result) NL_OVERRIDE
 	{
 		// Const key.
 		if (previous)
@@ -470,7 +476,7 @@ public:
 	/// From ITrackKeyFramer
 	virtual void evalKey (	const CKeyT* previous, const CKeyT* next,
 							TAnimationTime /* datePrevious */, TAnimationTime /* dateNext */,
-							TAnimationTime /* date */, IAnimatedValue &result )
+							TAnimationTime /* date */, IAnimatedValue &result ) NL_OVERRIDE
 	{
 		// Const key.
 		if (previous)
@@ -506,7 +512,7 @@ public:
 	/// From ITrackKeyFramer
 	virtual void evalKey (	const CKeyT* previous, const CKeyT* next,
 							TAnimationTime datePrevious, TAnimationTime /* dateNext */,
-							TAnimationTime date, IAnimatedValue &result )
+							TAnimationTime date, IAnimatedValue &result ) NL_OVERRIDE
 	{
 		CAnimatedValueBlendable<T>	&resultVal= static_cast<CAnimatedValueBlendable<T>&>(result);
 
@@ -549,7 +555,7 @@ public:
 	/// From ITrackKeyFramer
 	virtual void evalKey (	const CKeyQuat* previous, const CKeyQuat* next,
 							TAnimationTime datePrevious, TAnimationTime /* dateNext */,
-							TAnimationTime date, IAnimatedValue &result )
+							TAnimationTime date, IAnimatedValue &result ) NL_OVERRIDE
 	{
 		CAnimatedValueBlendable<CQuat>	&resultVal= static_cast<CAnimatedValueBlendable<CQuat>&>(result);
 
@@ -588,7 +594,7 @@ public:
 	/// From ITrackKeyFramer
 	virtual void evalKey (	const CKeyRGBA* previous, const CKeyRGBA* next,
 							TAnimationTime datePrevious, TAnimationTime /* dateNext */,
-							TAnimationTime date, IAnimatedValue &result )
+							TAnimationTime date, IAnimatedValue &result ) NL_OVERRIDE
 	{
 		CAnimatedValueBlendable<NLMISC::CRGBA>	&resultVal= static_cast<CAnimatedValueBlendable<NLMISC::CRGBA>&>(result);
 
@@ -635,7 +641,7 @@ public:
 // ***************************************************************************
 
 #define	NL3D_TRACKKEYF_CHOOSE(_Val_)	\
-virtual IAnimatedValue &chooseAnimatedValue(CAnimatedValueBlock &avBlock)	\
+virtual IAnimatedValue &chooseAnimatedValue(CAnimatedValueBlock &avBlock) NL_OVERRIDE	\
 {																			\
 	return avBlock._Val_;													\
 }
@@ -694,7 +700,7 @@ public:
 	NLMISC_DECLARE_CLASS (CTrackKeyFramerLinearFloat);
 	NL3D_TRACKKEYF_CHOOSE(ValFloat)
 
-	virtual	bool	addLinearFloatKey(const UKeyLinearFloat &key)
+	virtual	bool	addLinearFloatKey(const UKeyLinearFloat &key) NL_OVERRIDE
 	{
 		CKeyFloat	k;
 		k.OODeltaTime= 0.f;
@@ -736,7 +742,7 @@ public:
 	NLMISC_DECLARE_CLASS (CTrackKeyFramerTCBFloat);
 	NL3D_TRACKKEYF_CHOOSE(ValFloat)
 
-	virtual	bool	addTCBFloatKey(const UKeyTCBFloat &key)
+	virtual	bool	addTCBFloatKey(const UKeyTCBFloat &key) NL_OVERRIDE
 	{
 		CKeyTCBFloat	k;
 		k.Value= key.Value;
@@ -783,7 +789,7 @@ public:
 	NLMISC_DECLARE_CLASS (CTrackKeyFramerBezierFloat);
 	NL3D_TRACKKEYF_CHOOSE(ValFloat)
 
-	virtual	bool	addBezierFloatKey(const UKeyBezierFloat &key)
+	virtual	bool	addBezierFloatKey(const UKeyBezierFloat &key) NL_OVERRIDE
 	{
 		CKeyBezierFloat	k;
 		k.Value= key.Value;

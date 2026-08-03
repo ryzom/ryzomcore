@@ -24,11 +24,11 @@
 class CSessionBrowserServer : public NLNET::IService
 {
 	
-	void init();
+	void init() NL_OVERRIDE;
 	
-	bool update();
+	bool update() NL_OVERRIDE;
 	
-	void release();
+	void release() NL_OVERRIDE;
 	
 };
 

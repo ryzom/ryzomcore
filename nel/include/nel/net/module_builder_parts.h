@@ -28,13 +28,13 @@ namespace NLNET
 	class CEmptyModuleServiceBehav : public T
 	{
 	public:
-		virtual void				onServiceUp(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */)
+		virtual void				onServiceUp(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */) NL_OVERRIDE
 		{}
-		virtual void				onServiceDown(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */)
+		virtual void				onServiceDown(const std::string &/* serviceName */, NLNET::TServiceId /* serviceId */) NL_OVERRIDE
 		{}
-		virtual void				onModuleUpdate()
+		virtual void				onModuleUpdate() NL_OVERRIDE
 		{}
-		virtual void				onApplicationExit()
+		virtual void				onApplicationExit() NL_OVERRIDE
 		{}
 	};
 
@@ -42,17 +42,17 @@ namespace NLNET
 	class CEmptyModuleCommBehav : public T
 	{
 	public:
-		std::string					buildModuleManifest() const
+		std::string					buildModuleManifest() const NL_OVERRIDE
 		{
 			return "";
 		}
-		virtual void				onModuleUp(IModuleProxy * /* moduleProxy */)
+		virtual void				onModuleUp(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{}
-		virtual void				onModuleDown(IModuleProxy * /* moduleProxy */)
+		virtual void				onModuleDown(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{}
-		virtual void				onModuleSecurityChange(IModuleProxy * /* moduleProxy */)
+		virtual void				onModuleSecurityChange(IModuleProxy * /* moduleProxy */) NL_OVERRIDE
 		{}
-		virtual bool				onProcessModuleMessage(IModuleProxy * /* senderModuleProxy */, const CMessage &/* message */)
+		virtual bool				onProcessModuleMessage(IModuleProxy * /* senderModuleProxy */, const CMessage &/* message */) NL_OVERRIDE
 		{	return false; }
 	};
 
@@ -60,7 +60,7 @@ namespace NLNET
 	class CEmptySocketBehav : public T
 	{
 	public:
-		virtual void	onModuleSocketEvent(IModuleSocket * /* moduleSocket */, IModule::TModuleSocketEvent /* eventType */)
+		virtual void	onModuleSocketEvent(IModuleSocket * /* moduleSocket */, IModule::TModuleSocketEvent /* eventType */) NL_OVERRIDE
 		{
 		}
 	};
@@ -99,23 +99,23 @@ namespace NLNET
 			return _Parent;
 		}
 
-		virtual std::string			buildModuleManifest() const
+		virtual std::string			buildModuleManifest() const NL_OVERRIDE
 		{
 			return _Parent->fwdBuildModuleManifest();
 		}
-		virtual void				onModuleUp(IModuleProxy *moduleProxy)
+		virtual void				onModuleUp(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			_Parent->fwdOnModuleUp(moduleProxy);
 		}
-		virtual void				onModuleDown(IModuleProxy *moduleProxy)
+		virtual void				onModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			_Parent->fwdOnModuleDown(moduleProxy);
 		}
-		virtual bool				onProcessModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message)
+		virtual bool				onProcessModuleMessage(IModuleProxy *senderModuleProxy, const CMessage &message) NL_OVERRIDE
 		{
 			return _Parent->fwdOnProcessModuleMessage(senderModuleProxy, message);
 		}
-		virtual void				onModuleSecurityChange(IModuleProxy *moduleProxy)
+		virtual void				onModuleSecurityChange(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			_Parent->fwdOnModuleSecurityChange(moduleProxy);
 		}

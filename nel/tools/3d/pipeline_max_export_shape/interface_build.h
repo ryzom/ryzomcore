@@ -61,6 +61,12 @@ namespace IFACEBUILD {
 /// Whether the node carries a (non-empty) interface file appdata.
 bool useInterfaceMesh(PIPELINE::MAX::BUILTIN::INode &node);
 
+/// Interface-weld world matrix per the reference call sites (export_mesh.cpp:1111): Identity
+/// for skinned meshes (their VBs are already world space), else worldObjectTM * FromExportSpace
+/// (maps the build's local/offset-space verts back to world).
+NLMISC::CMatrix interfaceToWorldMat(PIPELINE::MAX::BUILTIN::INode &node,
+                                    SCENELIB::SNodeTMCache &tmCache, bool skinned);
+
 /// Apply the interface weld to a built CMeshBuild. `toWorldMat` maps the buildMesh's vertex
 /// space to world (Identity for skinned meshes — their VBs are already world — else
 /// worldObjectTM * Inverse(toExportSpace), same as the reference call sites). Reads the

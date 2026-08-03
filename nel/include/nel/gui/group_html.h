@@ -105,18 +105,18 @@ namespace NLGUI
 
 		// Constructor
 		CGroupHTML(const TCtorParam &param);
-		~CGroupHTML();
+		~CGroupHTML() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// CInterfaceGroup Interface
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
-		virtual void draw ();
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
+		virtual void draw () NL_OVERRIDE;
 
 		// Events
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc) NL_OVERRIDE;
 
 		// Browse
 		virtual void browse (const char *url);
@@ -142,7 +142,7 @@ namespace NLGUI
 		bool isBrowsing();
 
 		// Update coords
-		void updateCoords();
+		void updateCoords() NL_OVERRIDE;
 
 		// New paragraph
 		void newParagraph(uint beginSpace);
@@ -854,7 +854,7 @@ namespace NLGUI
 		        , fp(nullptr)
 		        , dest(d), redirects(0), ConnectionTimeout(60)
 			{}
-			virtual ~CDataDownload();
+			virtual ~CDataDownload() NL_OVERRIDE;
 
 		public:
 			CCurlWWWData *data;
@@ -1094,8 +1094,8 @@ namespace NLGUI
 
 		sint32 Offset;
 		CGroupHTMLInputOffset(const TCtorParam &param);
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parentGroup) NL_OVERRIDE;
 	};
 }
 

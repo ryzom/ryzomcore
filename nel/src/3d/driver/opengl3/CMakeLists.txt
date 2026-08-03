@@ -60,7 +60,9 @@ SOURCE_GROUP(window FILES
 		driver_opengl3_window.cpp
 		driver_opengl3_inputs.cpp
 		unix_event_emitter.cpp
-		unix_event_emitter.h)
+		unix_event_emitter.h
+		emscripten_event_emitter.cpp
+		emscripten_event_emitter.h)
 
 IF(APPLE)
   FILE(GLOB MAC_SRC mac/*.h mac/*.m mac/*.mm mac/*.cpp)

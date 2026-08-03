@@ -82,13 +82,13 @@ namespace NLGUI
 		{
 		public:
 			CInterfaceLinkUpdater();
-			~CInterfaceLinkUpdater();
-			void onObserverCallFlush();
+			~CInterfaceLinkUpdater() NL_OVERRIDE;
+			void onObserverCallFlush() NL_OVERRIDE;
 		};
 
 	public:
 		CInterfaceLink();
-		~CInterfaceLink(); // this object should only be destroyed by a CInterfaceElement
+		~CInterfaceLink() NL_OVERRIDE; // this object should only be destroyed by a CInterfaceElement
 		/** Make a link between the given interface element properties and a value that depends on database entries.
 		  * The link is automatically added in the link list of the targets element (it calls CInterfaceElement::addLink), so when all target elements are removed, the link is.
 		  * If there are no target element, the link is permanent (removed at exit)
@@ -186,7 +186,7 @@ namespace NLGUI
 		  * This doesn't update the node directly, but mark it as 'triggered'
 		  * The node is really updated during the call to 'updateTrigeredLinks()'
 		  */
-		virtual void update(NLMISC::ICDBNode *node);
+		virtual void update(NLMISC::ICDBNode *node) NL_OVERRIDE;
 		void    createObservers(const TNodeVect &nodes);
 		void    removeObservers(const TNodeVect &nodes);
 		// debug : check that there are as many targets as reference to a link

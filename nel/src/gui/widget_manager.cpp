@@ -1991,7 +1991,7 @@ namespace NLGUI
 			this->reset = reset;
 		}
 
-		void visitGroup( CInterfaceGroup *group )
+		void visitGroup( CInterfaceGroup *group ) NL_OVERRIDE
 		{
 			const std::vector< CViewBase* > &vs = group->getViews();
 			for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )

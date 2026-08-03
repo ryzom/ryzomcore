@@ -51,20 +51,22 @@ namespace BUILTIN {
  *
  * The Max ParamBlock2 (superclass 0x82). A ParamBlock2 scene object stores a single parameter
  * block: a header chunk 0x0009 = { u32 scriptVersion, u16 blockId, u16 (owner class marker),
- * u16 0x2328, u16 paramCount, u32 ownerSceneIndex }, followed by one 0x000e chunk per
- * parameter = { u16 paramId, u16 type, 10 opaque bytes, u8 flagByte, payload }. flagByte bit
- * 0x40 = an inline constant value follows (except reference-kind types, whose value is a
- * reference slot on the PB2 object). Reference-kind params (MTL/TEXMAP/NODE/REFTARG) and
- * controller-backed params own the PB2's reference slots in record order. Tab (array) params
- * (type bit 0x800) carry a u32 count then per-element flag+value.
+ * u16 magic (0x2328 modern / 0x0c1c Max 3), u16 paramCount, u32 ownerSceneIndex }, followed by
+ * one parameter record per param. Modern Max 4+ uses chunk **0x000e** = { u16 paramId, u16 type,
+ * 10 opaque bytes, u8 flagByte, payload }; Max 3 uses chunk **0x000a** with the same fields but
+ * only 6 opaque bytes (11-byte header before payload). flagByte bit 0x40 (and Max 3's 0xc0) =
+ * an inline constant value follows. Reference-kind params (MTL/TEXMAP/NODE/REFTARG) and
+ * controller-backed params own the PB2's reference slots in record order (Max 3 may also store
+ * TEXMAP as an inline storage index under 0x40). Tab (array) params (type bit 0x800) carry a
+ * u32 count then per-element flag+value.
  *
  * This class keeps the raw chunks authoritative (roundtrip is byte-exact by construction, the
- * design-doc §5/§12.2 discipline shared with CControlKeyFramerBase / CRklPatchObject): parse
- * decodes a typed model over the orphaned chunks WITHOUT moving them, build re-emits them
- * verbatim. On top of that it exposes typed read access to every parameter and an in-place
- * modify API (setFloat/setInt/setBool/setColor rewrite the owning record's payload bytes) —
- * the read+modify+save foundation for programmatic .max editing and the standalone NeL
- * material editor. See max_geometry_formats.md Part I and pipeline_max_design.md §10i/§12.5.
+ * overlay-codec discipline shared with CControlKeyFramerBase / CRklPatchObject): parse decodes
+ * a typed model over the orphaned chunks WITHOUT moving them, build re-emits them verbatim.
+ * On top of that it exposes typed read access to every parameter and an in-place modify API
+ * (setFloat/setInt/setBool/setColor rewrite the owning record's payload bytes), the
+ * read+modify+save foundation for programmatic .max editing and the standalone NeL material
+ * editor.
  */
 class CParamBlock2 : public CReferenceTarget
 {
@@ -129,7 +131,7 @@ public:
 	};
 
 	CParamBlock2(CScene *scene);
-	virtual ~CParamBlock2();
+	virtual ~CParamBlock2() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -139,14 +141,14 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	//! \name Typed read access (valid between parse and clean/disown)
 	//@{
@@ -202,7 +204,7 @@ public:
 
 protected:
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	void decodeModel();

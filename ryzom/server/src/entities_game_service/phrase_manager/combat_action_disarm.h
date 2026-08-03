@@ -34,14 +34,14 @@ public:
 	virtual bool initFromAiAction( const CStaticAiAction *aiAction, CCombatPhrase *phrase );
 
 	// validate
-	virtual bool validate(CCombatPhrase * phrase, std::string &errorCode) 
+	virtual bool validate(CCombatPhrase * phrase, std::string &errorCode) NL_OVERRIDE 
 	{ return true; }
 
 	// apply
-	virtual void apply(CCombatPhrase *phrase);
+	virtual void apply(CCombatPhrase *phrase) NL_OVERRIDE;
 
 	/// apply on entity
-	virtual void applyOnEntity( CEntityBase *entity, float successFactor );
+	virtual void applyOnEntity( CEntityBase *entity, float successFactor ) NL_OVERRIDE;
 protected:	
 	/// apply combat action effects on target
 	void applyOnTarget( uint8 targetIndex, CCombatPhrase *phrase);

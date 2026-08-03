@@ -1200,9 +1200,9 @@ private:
 	CBotDespawnNotification();
 
 	/// callback of the observer
-	void notifyBotDespawn(CBot* bot);
-	void notifyBotDeath(CBot* bot);
-	void notifyStopNpcControl(CBot* bot);
+	void notifyBotDespawn(CBot* bot) NL_OVERRIDE;
+	void notifyBotDeath(CBot* bot) NL_OVERRIDE;
+	void notifyStopNpcControl(CBot* bot) NL_OVERRIDE;
 
 	/// the singleton instance
 	static CBotDespawnNotification*	_Instance;

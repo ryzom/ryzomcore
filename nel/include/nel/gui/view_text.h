@@ -54,31 +54,31 @@ namespace NLGUI
 		CViewText (const std::string& id, const std::string Text="", sint FontSize=12,
 					NLMISC::CRGBA Color=NLMISC::CRGBA(255,255,255), bool Shadow=false, bool ShadowOutline=false);
 
-		virtual ~CViewText();
+		virtual ~CViewText() NL_OVERRIDE;
 
 		CViewText &operator=(const CViewText &vt);
 
-		std::string getProperty( const std::string &name ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
 		std::string getTextProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
 		bool setTextProperty( const std::string &name, const std::string &value );
 		bool serializeTextOptions( xmlNodePtr node ) const;
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 		void parseTextOptions (xmlNodePtr cur);
-		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		/// Updating
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 		void updateTextContext ();
-		virtual void checkCoords();
-		virtual void updateCoords();
-		virtual	void onAddToGroup();
-		virtual void onInterfaceScaleChanged();
+		virtual void checkCoords() NL_OVERRIDE;
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual	void onAddToGroup() NL_OVERRIDE;
+		virtual void onInterfaceScaleChanged() NL_OVERRIDE;
 
 		/// From CInterfaceElement
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
 
 		/// Accessors
 
@@ -203,8 +203,8 @@ namespace NLGUI
 		NLMISC::CRGBA getColorRGBA() const;
 		void        setColorRGBA(NLMISC::CRGBA col);
 
-		virtual sint32 getAlpha() const { return _Color.A; }
-		virtual void setAlpha (sint32 a) { _ShadowColor.A = _Color.A = (uint8)a; }
+		virtual sint32 getAlpha() const NL_OVERRIDE { return _Color.A; }
+		virtual void setAlpha (sint32 a) NL_OVERRIDE { _ShadowColor.A = _Color.A = (uint8)a; }
 
 		/** Setup a Text with Format Tags. Text is store without color/format tags, and special array is allocated for Format association
 		 */
@@ -261,7 +261,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("setLineMaxW", luaSetLineMaxW);
 		REFLECT_EXPORT_END
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		// Sets the parent element
 		// See the comment at the field
@@ -477,7 +477,7 @@ namespace NLGUI
 	//	void pushString(const ucstring &str, bool deleteSpaceAtStart = false); // OLD
 
 		/// \from CInterfaceElement
-		void onInvalidateContent();
+		void onInvalidateContent() NL_OVERRIDE;
 
 		// may append a new line, and append a word to the last line (no spaces)
 		void flushWordInLine(std::string &ucCurrentWord, bool &linePushed, const CFormatInfo &wordFormat);

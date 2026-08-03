@@ -822,7 +822,7 @@ public:
 		}
 	}
 	
-	void	doOnFamily(CFamilyBehavior	*fb)	const
+	void	doOnFamily(CFamilyBehavior	*fb)	const NL_OVERRIDE
 	{
 		if	(_value==-1)	//	not for affectation.
 		{
@@ -838,7 +838,7 @@ public:
 		fb->setModifier	(_value, (uint32)_index);
 	}
 	
-	virtual	void	doOnCellZone(CCellZone	*cz)	const
+	virtual	void	doOnCellZone(CCellZone	*cz)	const NL_OVERRIDE
 	{
 		if	(_value==-1)
 			_stringWriter.append("");

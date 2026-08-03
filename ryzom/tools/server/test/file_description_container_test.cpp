@@ -14,7 +14,7 @@ using namespace NLMISC;
 class CFileDescriptionTest: public IServiceSingleton
 {
 public:
-	void init()
+	void init() NL_OVERRIDE
 	{
 		CFileDescriptionContainer fdc;
 		nlassert(fdc.empty());

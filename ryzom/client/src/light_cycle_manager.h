@@ -114,9 +114,9 @@ public:
 	bool		isInTransition() const;
 
 	/// From IIGObserver
-	virtual void instanceGroupLoaded(NL3D::UInstanceGroup * /* ig */) { }
-	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig);
-	virtual void instanceGroupRemoved(NL3D::UInstanceGroup * /* ig */) { }
+	virtual void instanceGroupLoaded(NL3D::UInstanceGroup * /* ig */) NL_OVERRIDE { }
+	virtual void instanceGroupAdded(NL3D::UInstanceGroup *ig) NL_OVERRIDE;
+	virtual void instanceGroupRemoved(NL3D::UInstanceGroup * /* ig */) NL_OVERRIDE { }
 
 	/// get the light level at the given hour
 	float			getLightLevel(float hour) const;

@@ -41,16 +41,16 @@ public:
 	/// Constructor
 	CMusicSource	(class CMusicSound *sound = nullptr, bool spawn=false, TSpawnEndCallback cb=nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
 	/// Destructor
-	~CMusicSource	();
+	~CMusicSource	() NL_OVERRIDE;
 
 	/// Return the sound binded to the source (or NULL if there is no sound)
-	virtual TSoundId				getSound();
+	virtual TSoundId				getSound() NL_OVERRIDE;
 
-	virtual void					play();
+	virtual void					play() NL_OVERRIDE;
 	/// Stop playing
-	virtual void					stop();
+	virtual void					stop() NL_OVERRIDE;
 
-	TSOURCE_TYPE					getType() const								{return SOURCE_MUSIC;}
+	TSOURCE_TYPE					getType() const NL_OVERRIDE								{return SOURCE_MUSIC;}
 
 private:
 

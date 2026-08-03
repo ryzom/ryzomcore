@@ -98,7 +98,7 @@ public:
 	// the sheet for which help must be updated
 	CDBCtrlSheet *Sheet;
 public:
-	virtual void	infoReceived()
+	virtual void	infoReceived() NL_OVERRIDE
 	{
 		CSheetHelpSetup helpSetup;
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -517,7 +517,7 @@ void CBotChatPageTrade::notifyDownloadComplete(bool completed)
 	{
 	public:
 		bool DownloadComplete;
-		virtual void visitGroup(CInterfaceGroup *group)
+		virtual void visitGroup(CInterfaceGroup *group) NL_OVERRIDE
 		{
 			CDBGroupListSheetText *dbGroup = dynamic_cast<CDBGroupListSheetText *>(group);
 			if (dbGroup)
@@ -2212,7 +2212,7 @@ void		CBotChatPageTrade::confirmDestroyItemDialog()
 // the player has clicked on an item to buy it
 class CAHBuyItem : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		BotChatPageAll->Trade->startBuyDialog(sheet, pCaller);
@@ -2224,7 +2224,7 @@ REGISTER_ACTION_HANDLER(CAHBuyItem, "buy_item");
 // the player has clicked on an item to sell it
 class CAHSellItem : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		BotChatPageAll->Trade->startSellDialog(sheet, pCaller);
@@ -2237,7 +2237,7 @@ REGISTER_ACTION_HANDLER(CAHSellItem, "sell_item");
 // confirm sell or buy item
 class CAHConfirmTrade : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -2289,7 +2289,7 @@ REGISTER_ACTION_HANDLER(CAHConfirmTrade, "confirm_trade");
 // Trade has been canceled
 class CAHCancelTrade : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->cancelTrade();
 	}
@@ -2301,7 +2301,7 @@ REGISTER_ACTION_HANDLER(CAHCancelTrade, "cancel_trade");
 // Request to Change the Min/Max of Price or quantity
 class CAHEnterChangeBotChatBuyFilter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		string dbext= getParam(params, "dbext");
 		string title= getParam(params, "title");
@@ -2317,7 +2317,7 @@ REGISTER_ACTION_HANDLER(CAHEnterChangeBotChatBuyFilter, "enter_change_botchat_bu
 // Validate Change the Min/Max of Price or quantity
 class CAHConfirmChangeBotChatBuyFilter : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->confirmChangeBuyFilterDialog();
 	}
@@ -2329,7 +2329,7 @@ REGISTER_ACTION_HANDLER(CAHConfirmChangeBotChatBuyFilter ,"confirm_change_botcha
 // Reset the Min/Max of Price or quantity
 class CAHResetBotChatBuyFilter : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->resetBuyFilterDialog();
 	}
@@ -2341,7 +2341,7 @@ REGISTER_ACTION_HANDLER(CAHResetBotChatBuyFilter, "reset_botchat_buy_filter");
 // Min EditBox validated, give focus to max EditBox.
 class CAHChangeBotChatBuyFilterGiveFocusToMax : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->giveFocusToMaxEBChangeBuyFilterDialog();
 	}
@@ -2354,7 +2354,7 @@ REGISTER_ACTION_HANDLER(CAHChangeBotChatBuyFilterGiveFocusToMax ,"change_botchat
 // Request to Change the Min/Max of Price or quantity
 class CAHEnterChangeBotChatBuyFilterMP : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->startChangeBuyFilterMPDialog();
 	}
@@ -2366,7 +2366,7 @@ REGISTER_ACTION_HANDLER(CAHEnterChangeBotChatBuyFilterMP, "enter_change_botchat_
 // Validate Change the Min/Max of Price or quantity
 class CAHConfirmChangeBotChatBuyFilterMP : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->confirmChangeBuyFilterMPDialog(RM_FABER_TYPE::toFaberType(params));
 	}
@@ -2378,7 +2378,7 @@ REGISTER_ACTION_HANDLER(CAHConfirmChangeBotChatBuyFilterMP, "confirm_change_botc
 // Ask for Refresh of the User list
 class CAHBotChatRefreshResale : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->refreshResale();
 	}
@@ -2390,7 +2390,7 @@ REGISTER_ACTION_HANDLER(CAHBotChatRefreshResale, "botchat_refresh_resale");
 // client requires change of Item Class bounds
 class CAHEnterChangeBotChatBuyFilterClass : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->startChangeBuyFilterClassDialog();
 	}
@@ -2402,7 +2402,7 @@ REGISTER_ACTION_HANDLER(CAHEnterChangeBotChatBuyFilterClass, "enter_change_botch
 // client confirms change of Item Class bounds
 class CAHConfirmChangeBotChatBuyFilterClass : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->confirmChangeBuyFilterClassDialog();
 	}
@@ -2414,7 +2414,7 @@ REGISTER_ACTION_HANDLER(CAHConfirmChangeBotChatBuyFilterClass, "confirm_change_b
 // client confirms change of Item Class bounds
 class CAHResetBotChatBuyFilterClass : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->resetBuyFilterClassDialog();
 	}
@@ -2426,7 +2426,7 @@ REGISTER_ACTION_HANDLER(CAHResetBotChatBuyFilterClass, "reset_botchat_buy_filter
 class CHandlerBotChatTTItemType : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// \todo yoyo: for now disable tooltip
 		CWidgetManager::getInstance()->setContextHelpText(std::string());
@@ -2438,7 +2438,7 @@ REGISTER_ACTION_HANDLER(CHandlerBotChatTTItemType, "botchat_tt_item_type");
 // ***************************************************************************
 class CAHEnterChangeBotchatBuyFilterItemType : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->startChangeBuyFilterItemTypeDialog();
 	}
@@ -2449,7 +2449,7 @@ REGISTER_ACTION_HANDLER(CAHEnterChangeBotchatBuyFilterItemType, "enter_change_bo
 // ***************************************************************************
 class CAHConfirmChangeBotchatBuyFilterItemType : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		ITEM_TYPE::TItemType	itemType= ITEM_TYPE::UNDEFINED;
 
@@ -2475,7 +2475,7 @@ REGISTER_ACTION_HANDLER(CAHConfirmChangeBotchatBuyFilterItemType, "confirm_chang
 // ***************************************************************************
 class CAHBotChatRefilItemTypeChoiceList : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -2528,7 +2528,7 @@ REGISTER_ACTION_HANDLER(CAHBotChatRefilItemTypeChoiceList, "botchat_refill_item_
 // ***************************************************************************
 class CAHBotChatEnterDestroy : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->startDestroyItemDialog();
 	}
@@ -2538,7 +2538,7 @@ REGISTER_ACTION_HANDLER(CAHBotChatEnterDestroy, "botchat_enter_destroy");
 // ***************************************************************************
 class CAHBotChatConfirmDestroy : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		BotChatPageAll->Trade->confirmDestroyItemDialog();
 	}
@@ -2548,7 +2548,7 @@ REGISTER_ACTION_HANDLER(CAHBotChatConfirmDestroy, "botchat_confirm_destroy");
 // ***************************************************************************
 class CAHBotChatChangeResaleMargin : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_SELL_BUY_ITEM));

@@ -17,6 +17,8 @@
 #ifndef NL_VALUE_H_
 #define NL_VALUE_H_
 
+#include "nel/misc/types_nl.h"
+
 #include <string>
 
 class IValue {
@@ -38,14 +40,14 @@ template<class T> class CValue : public IValue {
 		CValue();
 		CValue(T);
 		CValue(const CValue<T> &);
-		virtual void getValue(IValue &);
-		virtual void setValue(IValue &);
+		virtual void getValue(IValue &) NL_OVERRIDE;
+		virtual void setValue(IValue &) NL_OVERRIDE;
 
 //		virtual CValue<T> &operator=(T);
 
-		virtual bool operator==(IValue *) const;
-		bool operator<(IValue &);
-		bool operator>(IValue &);
+		virtual bool operator==(IValue *) const NL_OVERRIDE;
+		bool operator<(IValue &) NL_OVERRIDE;
+		bool operator>(IValue &) NL_OVERRIDE;
 
 		virtual T getValue();
 		virtual void setValue(T);

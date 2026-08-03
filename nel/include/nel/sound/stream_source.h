@@ -45,28 +45,28 @@ class CStreamSource : public CSourceCommon
 {
 public:
 	CStreamSource(CStreamSound *streamSound = nullptr, bool spawn = false, TSpawnEndCallback cb = nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
-	virtual ~CStreamSource();
+	virtual ~CStreamSource() NL_OVERRIDE;
 	
 	/// Return the sound binded to the source (or NULL if there is no sound)
-	virtual TSoundId				getSound()									{ return m_StreamSound; }
+	virtual TSoundId				getSound() NL_OVERRIDE									{ return m_StreamSound; }
 	/// Return the sound binded to the source (or NULL if there is no sound)
 	virtual CStreamSound			*getStreamSound()							{ return m_StreamSound; }
 	
 	/// \name Playback control
 	//@{
 	/// Set looping on/off for future playbacks (default: off)
-	virtual void					setLooping(bool l);
+	virtual void					setLooping(bool l) NL_OVERRIDE;
 	/// Play
-	virtual void					play();
+	virtual void					play() NL_OVERRIDE;
 protected:
 	void							stopInt();
 public:
 	/// Stop playing
-	virtual void					stop();
+	virtual void					stop() NL_OVERRIDE;
 	/// Get playing state. Return false even if the source has stopped on its own.
-	virtual bool					isPlaying();
+	virtual bool					isPlaying() NL_OVERRIDE;
 	/// Returns the number of milliseconds the source has been playing
-	virtual uint32					getTime();
+	virtual uint32					getTime() NL_OVERRIDE;
 	//@}
 		
 	/// \name Source properties
@@ -75,7 +75,7 @@ public:
 	 * 3D mode -> 3D position
 	 * st mode -> x is the pan value (from left (-1) to right (1)), set y and z to 0
 	 */
-	virtual void					setPos(const NLMISC::CVector& pos);
+	virtual void					setPos(const NLMISC::CVector& pos) NL_OVERRIDE;
 	/// Get the position vector (3D mode only)
 	
 	/** Get the virtual source position.
@@ -83,34 +83,34 @@ public:
 	 */
 	NLMISC::CVector					getVirtualPos() const;
 
-	virtual void					setVelocity(const NLMISC::CVector& vel);
+	virtual void					setVelocity(const NLMISC::CVector& vel) NL_OVERRIDE;
 	/// Set the direction vector (3D mode only, ignored in stereo mode) (default: (0,0,0) as non-directional)
-	virtual void					setDirection(const NLMISC::CVector& dir);
-	virtual void					updateFinalGain();
+	virtual void					setDirection(const NLMISC::CVector& dir) NL_OVERRIDE;
+	virtual void					updateFinalGain() NL_OVERRIDE;
 	/** Shift the frequency. 1.0f equals identity, each reduction of 50% equals a pitch shift
 	 * of one octave. 0 is not a legal value.
 	 */
-	virtual void					setPitch(float pitch);
+	virtual void					setPitch(float pitch) NL_OVERRIDE;
 	/// Set the source relative mode. If true, positions are interpreted relative to the listener position (default: false)
-	virtual void					setSourceRelativeMode(bool mode);
+	virtual void					setSourceRelativeMode(bool mode) NL_OVERRIDE;
 	//@}
 	
 	/// \name Streaming source controls
 	//@{
 	/// Set the sample format. (channels = 1, 2, ...; bitsPerSample = 8, 16; frequency = samples per second, 44100, ...)
-	virtual void					setFormat(uint8 channels, uint8 bitsPerSample, uint32 frequency);	
+	virtual void					setFormat(uint8 channels, uint8 bitsPerSample, uint32 frequency) NL_OVERRIDE;
 	/// Return the sample format information.
-	virtual void					getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const;	
+	virtual void					getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const NL_OVERRIDE;
 	/// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
-	virtual uint8					*lock(uint capacity);	
+	virtual uint8					*lock(uint capacity) NL_OVERRIDE;
 	/// Notify that you are done writing to the locked buffer, so it can be copied over to hardware if needed. Set size to the number of bytes actually written to the buffer. Returns true if ok.
-	virtual bool					unlock(uint size);
+	virtual bool					unlock(uint size) NL_OVERRIDE;
 	/// Get the recommended buffer size to use with lock()/unlock()
-	virtual void					getRecommendedBufferSize(uint &samples, uint &bytes) const;
+	virtual void					getRecommendedBufferSize(uint &samples, uint &bytes) const NL_OVERRIDE;
 	/// Get the recommended sleep time based on the size of the last submitted buffer and the available buffer space
-	virtual uint32					getRecommendedSleepTime() const;
+	virtual uint32					getRecommendedSleepTime() const NL_OVERRIDE;
 	/// Return if there are still buffers available for playback.
-	virtual bool					hasFilledBuffersAvailable() const;
+	virtual bool					hasFilledBuffersAvailable() const NL_OVERRIDE;
 	//@}
 	
 	/// Prepare the buffers in this stream for the given maximum capacity. (TODO: Move this into UStreamSource)
@@ -125,7 +125,7 @@ private:
 	
 protected:
 	/// Return the source type
-	TSOURCE_TYPE					getType() const								{ return SOURCE_STREAM; }
+	TSOURCE_TYPE					getType() const NL_OVERRIDE								{ return SOURCE_STREAM; }
 
 	/// Returns if this logical source has a physical source attached to it.
 	inline bool						hasPhysicalSource() const					{ return m_Track != nullptr; }

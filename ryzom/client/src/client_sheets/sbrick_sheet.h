@@ -342,9 +342,9 @@ public:
 	SKILLS::ESkills		getSkill() const {return UsedSkills[0];}
 
 	// Georges Std build implementation
-	virtual void build (const NLGEORGES::UFormElm &root);
+	virtual void build (const NLGEORGES::UFormElm &root) NL_OVERRIDE;
 
-	virtual void serial (NLMISC::IStream &s)
+	virtual void serial (NLMISC::IStream &s) NL_OVERRIDE
 	{
 		std::string sTmp;
 		s.serialCont(UsedSkills);

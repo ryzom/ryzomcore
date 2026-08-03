@@ -55,7 +55,7 @@ public:
 		_Scene= scene;
 		_Landscape= (CLandscapeModel*)_Scene->createModel(LandscapeModelId);
 	}
-	virtual	~CLandscapeUser();
+	virtual	~CLandscapeUser() NL_OVERRIDE;
 	// @}
 
 
@@ -63,27 +63,27 @@ public:
 	/// All those load methods use CPath to search files.
 	// @{
 	/// Set the zonePath from where zones are loaded.
-	virtual	void	setZonePath(const std::string &zonePath);
+	virtual	void	setZonePath(const std::string &zonePath) NL_OVERRIDE;
 	/// Load the tile banks:  the ".bank" and the  ".farbank".
-	virtual	void	loadBankFiles(const std::string &tileBankFile, const std::string &farBankFile);
+	virtual	void	loadBankFiles(const std::string &tileBankFile, const std::string &farBankFile) NL_OVERRIDE;
 	/// Flush the tiles
-	virtual void	flushTiles (NLMISC::IProgressCallback &progress);
+	virtual void	flushTiles (NLMISC::IProgressCallback &progress) NL_OVERRIDE;
 	/// Postfix tile filename
-	virtual void	postfixTileFilename (const char *postfix);
+	virtual void	postfixTileFilename (const char *postfix) NL_OVERRIDE;
 	/// Postfix vegetable filename
-	virtual void	postfixTileVegetableDesc (const char *postfix);
+	virtual void	postfixTileVegetableDesc (const char *postfix) NL_OVERRIDE;
 	/// Load all Zones around a position. Call at init only!! (no zone must exist before). This is a blocking call.
-	virtual	void	loadAllZonesAround(const CVector &pos, float radius);
-	virtual	void	loadAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded);
+	virtual	void	loadAllZonesAround(const CVector &pos, float radius) NL_OVERRIDE;
+	virtual	void	loadAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded) NL_OVERRIDE;
 	/// Delete old zones, or load new zones, around a position. new Zones are loaded async.
-	virtual	void	refreshZonesAround(const CVector &pos, float radius);
-	virtual	void	refreshZonesAround(const CVector &pos, float radius, std::string &zoneAdded, std::string &zoneRemoved, const std::vector<uint16> *validZoneIds = nullptr);
+	virtual	void	refreshZonesAround(const CVector &pos, float radius) NL_OVERRIDE;
+	virtual	void	refreshZonesAround(const CVector &pos, float radius, std::string &zoneAdded, std::string &zoneRemoved, const std::vector<uint16> *validZoneIds = nullptr) NL_OVERRIDE;
 	/// Delete old zones, or load new zones, around a position, until it is finished. This is a blocking call.
 	virtual	void	refreshAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded, std::vector<std::string> &zonesRemoved,
-		NLMISC::IProgressCallback &progress, const std::vector<uint16> *validZoneIds = nullptr);
-	virtual	void	getAllZoneLoaded(std::vector<std::string>	&zoneLoaded) const;
-	virtual void    invalidateAllTiles();
-	virtual void	removeAllZones();
+		NLMISC::IProgressCallback &progress, const std::vector<uint16> *validZoneIds = nullptr) NL_OVERRIDE;
+	virtual	void	getAllZoneLoaded(std::vector<std::string>	&zoneLoaded) const NL_OVERRIDE;
+	virtual void    invalidateAllTiles() NL_OVERRIDE;
+	virtual void	removeAllZones() NL_OVERRIDE;
 	// @}
 
 
@@ -97,15 +97,15 @@ public:
 	  *  \param ambiant is the color of the ambiante componante of the lighting.
 	  *  \param multiply is the multiply factor. Final color is (diffuse*multiply*shading+ambiant*(1.0-shading))
 	  */
-	virtual	void	setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant, float multiply);
+	virtual	void	setupStaticLight (const CRGBA &diffuse, const CRGBA &ambiant, float multiply) NL_OVERRIDE;
 
-	virtual	void	setPointLightDiffuseMaterial(CRGBA diffuse);
-	virtual	CRGBA	getPointLightDiffuseMaterial () const;
+	virtual	void	setPointLightDiffuseMaterial(CRGBA diffuse) NL_OVERRIDE;
+	virtual	CRGBA	getPointLightDiffuseMaterial () const NL_OVERRIDE;
 
 
-	virtual	void	setUpdateLightingFrequency(float freq);
+	virtual	void	setUpdateLightingFrequency(float freq) NL_OVERRIDE;
 
-	virtual	void	updateLightingAll();
+	virtual	void	updateLightingAll() NL_OVERRIDE;
 
 	// @}
 
@@ -113,96 +113,96 @@ public:
 	/// \name Parameters
 	// @{
 	/// Set threshold for subdivsion quality. The lower is threshold, the more the landscape is subdivided. Default: 0.001.
-	virtual	void	setThreshold (float thre);
+	virtual	void	setThreshold (float thre) NL_OVERRIDE;
 	/// Get threshold.
-	virtual	float	getThreshold () const;
+	virtual	float	getThreshold () const NL_OVERRIDE;
 	/// Set tile near distance. Default 50.f. maximized to length of Far alpha transition).
-	virtual	void	setTileNear (float tileNear);
+	virtual	void	setTileNear (float tileNear) NL_OVERRIDE;
 	/// Get tile near distance.
-	virtual	float	getTileNear () const;
+	virtual	float	getTileNear () const NL_OVERRIDE;
 	/// Set Maximum Tile subdivision. Valid values must be in [0..4]  (assert). Default is 0 (for now :) ).
-	virtual	void	setTileMaxSubdivision (uint tileDiv);
+	virtual	void	setTileMaxSubdivision (uint tileDiv) NL_OVERRIDE;
 	/// Get Maximum Tile subdivision.
-	virtual	uint 	getTileMaxSubdivision ();
+	virtual	uint 	getTileMaxSubdivision () NL_OVERRIDE;
 	/// Set all zones monochromatic or colored
-	virtual	void 	setTileColor (bool monochrome, float factor) { _ZoneManager.setZoneTileColor(monochrome, factor); }
+	virtual	void 	setTileColor (bool monochrome, float factor) NL_OVERRIDE { _ZoneManager.setZoneTileColor(monochrome, factor); }
 	// @}
 
 
 	/// \name Misc
 	// @{
 	/// Return the name of the zone around a particular position (in NL3D basis!).
-	virtual	std::string	getZoneName(const CVector &pos);
+	virtual	std::string	getZoneName(const CVector &pos) NL_OVERRIDE;
 
-	virtual	void		show()
+	virtual	void		show() NL_OVERRIDE
 	{
 		_Landscape->show();
 	}
-	virtual	void		hide()
+	virtual	void		hide() NL_OVERRIDE
 	{
 		_Landscape->hide();
 	}
 
-	virtual	void		enableAdditive (bool enable);
-	virtual	bool		isAdditiveEnabled () const;
+	virtual	void		enableAdditive (bool enable) NL_OVERRIDE;
+	virtual	bool		isAdditiveEnabled () const NL_OVERRIDE;
 
-	virtual	void			setRefineCenterAuto(bool mode);
-	virtual bool			getRefineCenterAuto() const;
-	virtual void			setRefineCenterUser(const CVector &refineCenter);
-	virtual const CVector	&getRefineCenterUser() const;
+	virtual	void			setRefineCenterAuto(bool mode) NL_OVERRIDE;
+	virtual bool			getRefineCenterAuto() const NL_OVERRIDE;
+	virtual void			setRefineCenterUser(const CVector &refineCenter) NL_OVERRIDE;
+	virtual const CVector	&getRefineCenterUser() const NL_OVERRIDE;
 
 	// @}
 
 
 	/// \name HeightField DeltaZ.
 	// @{
-	virtual	CVector		getHeightFieldDeltaZ(float x, float y) const;
-	virtual	void		setHeightField(const CHeightMap &hf);
+	virtual	CVector		getHeightFieldDeltaZ(float x, float y) const NL_OVERRIDE;
+	virtual	void		setHeightField(const CHeightMap &hf) NL_OVERRIDE;
 	// @}
 
 	/// Micro-Vegetation.
 	// @{
-	virtual	void		enableVegetable(bool enable);
-	virtual	void		loadVegetableTexture(const std::string &textureFileName);
-	virtual	void		setupVegetableLighting(const CRGBA &ambient, const CRGBA &diffuse, const CVector &directionalLight);
-	virtual	void		setVegetableWind(const CVector &windDir, float windFreq, float windPower, float windBendMin);
-	virtual	void		setVegetableUpdateLightingFrequency(float freq);
-	virtual	void		setVegetableDensity(float density);
-	virtual	float		getVegetableDensity() const;
+	virtual	void		enableVegetable(bool enable) NL_OVERRIDE;
+	virtual	void		loadVegetableTexture(const std::string &textureFileName) NL_OVERRIDE;
+	virtual	void		setupVegetableLighting(const CRGBA &ambient, const CRGBA &diffuse, const CVector &directionalLight) NL_OVERRIDE;
+	virtual	void		setVegetableWind(const CVector &windDir, float windFreq, float windPower, float windBendMin) NL_OVERRIDE;
+	virtual	void		setVegetableUpdateLightingFrequency(float freq) NL_OVERRIDE;
+	virtual	void		setVegetableDensity(float density) NL_OVERRIDE;
+	virtual	float		getVegetableDensity() const NL_OVERRIDE;
 	// @}
 
 
 	/// \name Dynamic Lighting management
 	// @{
-	virtual	void		setDLMGlobalVegetableColor(CRGBA gvc);
-	virtual	CRGBA		getDLMGlobalVegetableColor() const;
+	virtual	void		setDLMGlobalVegetableColor(CRGBA gvc) NL_OVERRIDE;
+	virtual	CRGBA		getDLMGlobalVegetableColor() const NL_OVERRIDE;
 	// @}
 
 	/// \name ShadowMapping
 	// @{
-	virtual void			enableReceiveShadowMap(bool state);
-	virtual bool			canReceiveShadowMap() const;
+	virtual void			enableReceiveShadowMap(bool state) NL_OVERRIDE;
+	virtual bool			canReceiveShadowMap() const NL_OVERRIDE;
 	// @}
 
 	/// \name TileCallback
 	// @{
-	virtual	void					addTileCallback(ULandscapeTileCallback *cb);
-	virtual	void					removeTileCallback(ULandscapeTileCallback *cb);
-	virtual	bool					isTileCallback(ULandscapeTileCallback *cb);
+	virtual	void					addTileCallback(ULandscapeTileCallback *cb) NL_OVERRIDE;
+	virtual	void					removeTileCallback(ULandscapeTileCallback *cb) NL_OVERRIDE;
+	virtual	bool					isTileCallback(ULandscapeTileCallback *cb) NL_OVERRIDE;
 	// @}
 
 	// modify ZBuffer test of landscape material
-	virtual	void					setZFunc(UMaterial::ZFunc val);
+	virtual	void					setZFunc(UMaterial::ZFunc val) NL_OVERRIDE;
 
 	/// \name getZone
 	// @{
 	// Get a zone pointer.
-	virtual const CZone*	getZone (sint zoneId) const;
+	virtual const CZone*	getZone (sint zoneId) const NL_OVERRIDE;
 	// @}
 
 	/// \name raytrace
 	// @{
-	virtual float			getRayCollision(const NLMISC::CVector &start, const NLMISC::CVector &end);
+	virtual float			getRayCollision(const NLMISC::CVector &start, const NLMISC::CVector &end) NL_OVERRIDE;
 	// @}
 
 public:

@@ -151,10 +151,10 @@ public:
 class CBracketToken : public CBasicToken
 {
 public:
-	CBasicToken *createNew() const;
-	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex);
-	CTokenTestResult buildNode(const std::string &code, size_t &index) const;
-	void dump(size_t indent) const;
+	CBasicToken *createNew() const NL_OVERRIDE;
+	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex) NL_OVERRIDE;
+	CTokenTestResult buildNode(const std::string &code, size_t &index) const NL_OVERRIDE;
+	void dump(size_t indent) const NL_OVERRIDE;
 	
 private:
 	string _Body;
@@ -168,10 +168,10 @@ private:
 class CCharToken : public CBasicToken
 {
 public:
-	CBasicToken *createNew() const;
-	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex);
-	CTokenTestResult buildNode(const std::string &code, size_t &index) const;
-	void dump(size_t indent) const;
+	CBasicToken *createNew() const NL_OVERRIDE;
+	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex) NL_OVERRIDE;
+	CTokenTestResult buildNode(const std::string &code, size_t &index) const NL_OVERRIDE;
+	void dump(size_t indent) const NL_OVERRIDE;
 	
 private:
 	char _c;
@@ -185,10 +185,10 @@ private:
 class CTokenToken : public CBasicToken
 {
 public:
-	CBasicToken *createNew() const;
-	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex);
-	CTokenTestResult buildNode(const std::string &code, size_t &index) const;
-	void dump(size_t indent) const;
+	CBasicToken *createNew() const NL_OVERRIDE;
+	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex) NL_OVERRIDE;
+	CTokenTestResult buildNode(const std::string &code, size_t &index) const NL_OVERRIDE;
+	void dump(size_t indent) const NL_OVERRIDE;
 	
 private:
 	string _tokenName;
@@ -202,10 +202,10 @@ private:
 class CParenthesisToken : public CBasicToken
 {
 public:
-	CBasicToken *createNew() const;
-	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex);
-	CTokenTestResult buildNode(const std::string &code, size_t &index) const;
-	void dump(size_t indent) const;
+	CBasicToken *createNew() const NL_OVERRIDE;
+	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex) NL_OVERRIDE;
+	CTokenTestResult buildNode(const std::string &code, size_t &index) const NL_OVERRIDE;
+	void dump(size_t indent) const NL_OVERRIDE;
 	
 private:
 	TTokenList _tokenList;
@@ -219,10 +219,10 @@ private:
 class COrToken : public CBasicToken
 {
 public:
-	CBasicToken *createNew() const;
-	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex);
-	CTokenTestResult buildNode(const std::string &code, size_t &index) const;
-	void dump(size_t indent) const;
+	CBasicToken *createNew() const NL_OVERRIDE;
+	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex) NL_OVERRIDE;
+	CTokenTestResult buildNode(const std::string &code, size_t &index) const NL_OVERRIDE;
+	void dump(size_t indent) const NL_OVERRIDE;
 	
 private:
 	CSmartPtr<CBasicToken> firstToken;
@@ -244,10 +244,10 @@ public:
 		CARD_ONE_MANY,
 	};
 	
-	CBasicToken *createNew() const;
-	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex);
-	CTokenTestResult buildNode(const std::string &code, size_t &index) const;
-	void dump(size_t indent) const;
+	CBasicToken *createNew() const NL_OVERRIDE;
+	size_t init(TTokenList &tokenList, const string &str, size_t firstIndex, size_t lastIndex) NL_OVERRIDE;
+	CTokenTestResult buildNode(const std::string &code, size_t &index) const NL_OVERRIDE;
+	void dump(size_t indent) const NL_OVERRIDE;
 	
 private:
 	CSmartPtr<CBasicToken> _childToken;

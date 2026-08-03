@@ -1050,7 +1050,7 @@ void CSkillManager::setPlayerTitle(const std::string &name)
 class CHandlerTitleInit: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("title_combobox_button", nullptr);
@@ -1076,7 +1076,7 @@ REGISTER_ACTION_HANDLER( CHandlerTitleInit, "title_init_combobox");
 class CHandlerTitleButton: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CSkillManager *pSM = CSkillManager::getInstance();
 		// Try to unblock titles without showing the new title message
@@ -1112,7 +1112,7 @@ REGISTER_ACTION_HANDLER( CHandlerTitleButton, "title_combobox_button");
 class CHandlerTitleChanged: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CSkillManager *pSM = CSkillManager::getInstance();
 		uint8 nNewTitle = 0;

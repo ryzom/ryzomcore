@@ -50,10 +50,10 @@ public:
 	 * Spawn the toxic cloud as an entity in mirror. Return false in case of failure.
 	 * \param sheet sheet id of the effect (for visual FX)
 	 */
-	virtual bool		spawn( const NLMISC::CSheetId &sheet );
+	virtual bool		spawn( const NLMISC::CSheetId &sheet ) NL_OVERRIDE;
 
 	/// Tick update. Return false if the source's life is ended.
-	virtual bool		update();
+	virtual bool		update() NL_OVERRIDE;
 
 	static NLMISC::TGameCycle	ToxicCloudDefaultLifetime;
 

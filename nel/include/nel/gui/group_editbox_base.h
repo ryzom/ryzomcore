@@ -32,7 +32,7 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CGroupEditBoxBase )
 
 		CGroupEditBoxBase( const TCtorParam &param );
-		~CGroupEditBoxBase();
+		~CGroupEditBoxBase() NL_OVERRIDE;
 
 		// True if the editBox can recover the focus on enter. if not, it does not erase OldCapturedKeyboard when loose focus
 		bool getRecoverFocusOnEnter() const{ return _RecoverFocusOnEnter; }
@@ -48,7 +48,7 @@ namespace NLGUI
 		static CGroupEditBoxBase *getCurrSelection(){ return _CurrSelection; }
 		static void setCurrSelection( CGroupEditBoxBase *selection ){ _CurrSelection = selection; }
 
-		void draw(){}
+		void draw() NL_OVERRIDE{}
 
 		REFLECT_EXPORT_START( CGroupEditBoxBase, CInterfaceGroup )
 			REFLECT_BOOL( "enter_recover_focus", getRecoverFocusOnEnter, setRecoverFocusOnEnter );

@@ -46,36 +46,36 @@ public:
 	/// Init
 	void			init( ISoundDriver *sd )					{  nlassert( sd ); _DrvListener = sd->createListener(); }
 	/// Destructor
-	virtual			~CListenerUser()							{ if ( _DrvListener != nullptr) delete _DrvListener; }
+	virtual			~CListenerUser() NL_OVERRIDE							{ if ( _DrvListener != nullptr) delete _DrvListener; }
 
 
 	/// \name Listener properties
 	//@{
 	/// Set the position vector (default: (0,0,0)) (3D mode only)
-	virtual void	setPos( const NLMISC::CVector& pos );
+	virtual void	setPos( const NLMISC::CVector& pos ) NL_OVERRIDE;
 	/** Get the position vector.
 	 * See setPos() for details.
 	 */
-	virtual const NLMISC::CVector &getPos() const		{ return _DrvListener->getPos(); }
+	virtual const NLMISC::CVector &getPos() const NL_OVERRIDE		{ return _DrvListener->getPos(); }
 	/// Set the velocity vector (3D mode only, ignored in stereo mode) (default: (0,0,0))
-	virtual void	setVelocity( const NLMISC::CVector& vel )	{ _DrvListener->setVelocity( vel ); }
+	virtual void	setVelocity( const NLMISC::CVector& vel ) NL_OVERRIDE	{ _DrvListener->setVelocity( vel ); }
 	/// Get the velocity vector
-	virtual void	getVelocity( NLMISC::CVector& vel ) const	{ _DrvListener->getVelocity( vel ); }
+	virtual void	getVelocity( NLMISC::CVector& vel ) const NL_OVERRIDE	{ _DrvListener->getVelocity( vel ); }
 	/// Set the orientation vectors (3D mode only, ignored in stereo mode) (default: (0,1,0), (0,0,1) )
 	virtual void	setOrientation( const NLMISC::CVector& front,
-									const NLMISC::CVector& up )	{ _DrvListener->setOrientation( front, up ); }
+									const NLMISC::CVector& up ) NL_OVERRIDE	{ _DrvListener->setOrientation( front, up ); }
 	/// Get the orientation vectors
 	virtual void	getOrientation( NLMISC::CVector& front,
-									NLMISC::CVector& up ) const	{ _DrvListener->getOrientation( front, up ); }
+									NLMISC::CVector& up ) const NL_OVERRIDE	{ _DrvListener->getOrientation( front, up ); }
 	/** Set the gain (volume value inside [0 , 1]). (default: 1)
 	 * 0.0 -> silence
 	 * 0.5 -> -6dB
 	 * 1.0 -> no attenuation
 	 * values > 1 (amplification) not supported by most drivers
 	 */
-	virtual void	setGain( float gain )						{ _DrvListener->setGain( gain ); }
+	virtual void	setGain( float gain ) NL_OVERRIDE						{ _DrvListener->setGain( gain ); }
 	/// Get the gain
-	virtual float	getGain() const								{ return _DrvListener->getGain(); }
+	virtual float	getGain() const NL_OVERRIDE								{ return _DrvListener->getGain(); }
 	//@}
 
 

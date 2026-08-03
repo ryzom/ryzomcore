@@ -158,30 +158,30 @@ public:
 		_Character = PlayerManager.getChar(_RowId);
 	}
 
-	virtual ~CCombatDefenderPlayer()
+	virtual ~CCombatDefenderPlayer() NL_OVERRIDE
 	{}
 
-	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople attackerRace) const
+	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople attackerRace) const NL_OVERRIDE
 	{
 		if (!_Character || skill >= SKILLS::NUM_SKILLS || skill<0) return 0;
 		// add skill mod according to target race
 		return _Character->getSkillValue(skill) + _Character->getSkillModifierForRace(attackerRace);
 	}
 
-	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const
+	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const NL_OVERRIDE
 	{
 		if (!_Character || skill >= SKILLS::NUM_SKILLS || skill<0) return 0;
 		return _Character->getSkillBaseValue(skill);
 	}
 
-	virtual bool getArmor( SLOT_EQUIPMENT::TSlotEquipment slot, CCombatArmor &armor ) const ;
+	virtual bool getArmor( SLOT_EQUIPMENT::TSlotEquipment slot, CCombatArmor &armor ) const NL_OVERRIDE ;
 	
-	virtual bool getShield(CCombatShield &shield) const;
+	virtual bool getShield(CCombatShield &shield) const NL_OVERRIDE;
 
-	virtual sint32 getDefenseValue(EGSPD::CPeople::TPeople attackerRace) const;
-	virtual sint32 getBaseDefenseValue() const;
+	virtual sint32 getDefenseValue(EGSPD::CPeople::TPeople attackerRace) const NL_OVERRIDE;
+	virtual sint32 getBaseDefenseValue() const NL_OVERRIDE;
 
-	virtual void damageOnShield(uint32 dmg)
+	virtual void damageOnShield(uint32 dmg) NL_OVERRIDE
 	{
 		if ( !_Character) return;
 
@@ -192,7 +192,7 @@ public:
 		shieldPtr->removeHp(dmg);
 	}
 
-	virtual void damageOnArmor(SLOT_EQUIPMENT::TSlotEquipment slot, uint32 dmg)
+	virtual void damageOnArmor(SLOT_EQUIPMENT::TSlotEquipment slot, uint32 dmg) NL_OVERRIDE
 	{
 		if ( !_Character) return;
 
@@ -203,9 +203,9 @@ public:
 		armorPtr->removeHp(dmg);
 	}
 
-	virtual SLOT_EQUIPMENT::TSlotEquipment getLeastProtectedSlot(DMGTYPE::EDamageType dmgType) const;
-	virtual SLOT_EQUIPMENT::TSlotEquipment getMostProtectedSlot(DMGTYPE::EDamageType dmgType) const;
-	virtual SLOT_EQUIPMENT::TSlotEquipment getAveragestProtectedSlot(DMGTYPE::EDamageType dmgType) const;
+	virtual SLOT_EQUIPMENT::TSlotEquipment getLeastProtectedSlot(DMGTYPE::EDamageType dmgType) const NL_OVERRIDE;
+	virtual SLOT_EQUIPMENT::TSlotEquipment getMostProtectedSlot(DMGTYPE::EDamageType dmgType) const NL_OVERRIDE;
+	virtual SLOT_EQUIPMENT::TSlotEquipment getAveragestProtectedSlot(DMGTYPE::EDamageType dmgType) const NL_OVERRIDE;
 
 /*	inline sint32 dodgeModifier() const
 	{
@@ -241,29 +241,29 @@ class CCombatDefenderAI : public CCombatDefender
 public:
 	explicit CCombatDefenderAI(const TDataSetRow &rowId);
 
-	virtual ~CCombatDefenderAI()
+	virtual ~CCombatDefenderAI() NL_OVERRIDE
 	{}
 
-	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople ) const { return _DefenseValue; }
-	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const { return _DefenseValue; }
+	inline sint32 getSkillValue( SKILLS::ESkills skill, EGSPD::CPeople::TPeople ) const NL_OVERRIDE { return _DefenseValue; }
+	inline sint32 getSkillBaseValue( SKILLS::ESkills skill) const NL_OVERRIDE { return _DefenseValue; }
 	
-	virtual sint32 getDefenseValue(EGSPD::CPeople::TPeople) const;
-	virtual sint32 getBaseDefenseValue() const { return _DefenseValue; }
+	virtual sint32 getDefenseValue(EGSPD::CPeople::TPeople) const NL_OVERRIDE;
+	virtual sint32 getBaseDefenseValue() const NL_OVERRIDE { return _DefenseValue; }
 
-	virtual bool getArmor( SLOT_EQUIPMENT::TSlotEquipment slot, CCombatArmor &armor ) const;
+	virtual bool getArmor( SLOT_EQUIPMENT::TSlotEquipment slot, CCombatArmor &armor ) const NL_OVERRIDE;
 
-	virtual bool getShield(CCombatShield &shield) const;
+	virtual bool getShield(CCombatShield &shield) const NL_OVERRIDE;
 
-	inline void damageOnShield(uint32 dmg) {}
-	inline void damageOnArmor(SLOT_EQUIPMENT::TSlotEquipment slot, uint32 dmg) {}
+	inline void damageOnShield(uint32 dmg) NL_OVERRIDE {}
+	inline void damageOnArmor(SLOT_EQUIPMENT::TSlotEquipment slot, uint32 dmg) NL_OVERRIDE {}
 
-	virtual SLOT_EQUIPMENT::TSlotEquipment getLeastProtectedSlot(DMGTYPE::EDamageType dmgType) const
+	virtual SLOT_EQUIPMENT::TSlotEquipment getLeastProtectedSlot(DMGTYPE::EDamageType dmgType) const NL_OVERRIDE
 	{ return SLOT_EQUIPMENT::HEAD; }
 	
-	virtual SLOT_EQUIPMENT::TSlotEquipment getMostProtectedSlot(DMGTYPE::EDamageType dmgType) const
+	virtual SLOT_EQUIPMENT::TSlotEquipment getMostProtectedSlot(DMGTYPE::EDamageType dmgType) const NL_OVERRIDE
 	{ return SLOT_EQUIPMENT::CHEST;	}
 
-	virtual SLOT_EQUIPMENT::TSlotEquipment getAveragestProtectedSlot(DMGTYPE::EDamageType dmgType) const
+	virtual SLOT_EQUIPMENT::TSlotEquipment getAveragestProtectedSlot(DMGTYPE::EDamageType dmgType) const NL_OVERRIDE
 	{ return SLOT_EQUIPMENT::CHEST;	}
 
 protected:

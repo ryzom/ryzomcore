@@ -30,6 +30,7 @@
 #ifdef __EMSCRIPTEN__
 #	include <emscripten.h>
 #	include <emscripten/html5.h>
+#	include "emscripten_event_emitter.h"
 #elif defined(NL_OS_MAC)
 #	import "mac/cocoa_window_delegate.h"
 #	import "mac/cocoa_application_delegate.h"
@@ -605,12 +606,8 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 
 #if defined(__EMSCRIPTEN__)
 
-	// Emscripten / WebGL 2.0 context creation
-	// Uses the default canvas element "#canvas" as per Emscripten convention.
-	// Define NL_EMSCRIPTEN_CANVAS to override (e.g. "#myCanvas").
-#ifndef NL_EMSCRIPTEN_CANVAS
-#define NL_EMSCRIPTEN_CANVAS "#canvas"
-#endif
+	// Emscripten / WebGL 2.0 context creation on NL_EMSCRIPTEN_CANVAS (driver_opengl3.h,
+	// "#canvas" by the Emscripten convention).
 	{
 		EmscriptenWebGLContextAttributes attrs;
 		emscripten_webgl_init_context_attributes(&attrs);
@@ -642,6 +639,15 @@ bool CDriverGL3::setDisplay(nlWindow wnd, const GfxMode &mode, bool show, bool r
 		// Mark window as valid so isActive() returns true
 		_win = 1;
 		_WindowVisible = true;
+
+		// Release old emitters and hook mouse/keyboard/touch input on the canvas
+		while (_EventEmitter.getNumEmitters() != 0)
+		{
+			_EventEmitter.removeEmitter(_EventEmitter.getEmitter(_EventEmitter.getNumEmitters() - 1));
+		}
+		NLMISC::CEmscriptenEventEmitter *ee = new NLMISC::CEmscriptenEventEmitter();
+		ee->init(NL_EMSCRIPTEN_CANVAS);
+		_EventEmitter.addEmitter(ee, true /*must delete*/);
 	}
 
 #elif defined(NL_OS_WINDOWS)
@@ -2595,6 +2601,19 @@ void CDriverGL3::getWindowSize(uint32 &width, uint32 &height)
 			width = _backBufferWidth;
 			height = _backBufferHeight;
 			return;
+		}
+#endif
+#ifdef __EMSCRIPTEN__
+		// The canvas backing store is the authoritative size; the resize
+		// callback in CEmscriptenEventEmitter keeps it in sync with the
+		// browser viewport (CSS × devicePixelRatio). Sync _CurrentMode so
+		// other code paths that read it stay coherent.
+		int cw = 0, ch = 0;
+		emscripten_get_canvas_element_size(NL_EMSCRIPTEN_CANVAS, &cw, &ch);
+		if (cw > 0 && ch > 0)
+		{
+			_CurrentMode.Width = (uint16)cw;
+			_CurrentMode.Height = (uint16)ch;
 		}
 #endif
 		width = _CurrentMode.Width;

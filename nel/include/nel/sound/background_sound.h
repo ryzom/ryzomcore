@@ -45,25 +45,25 @@ public:
 	/// Constructor
 	CBackgroundSound();
 	/// Destructor
-	~CBackgroundSound();
+	~CBackgroundSound() NL_OVERRIDE;
 
-	TSOUND_TYPE getSoundType()							{ return SOUND_BACKGROUND;}
+	TSOUND_TYPE getSoundType() NL_OVERRIDE							{ return SOUND_BACKGROUND;}
 
 	/// Load the sound parameters from georges' form
-	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot);
+	virtual void		importForm(const std::string& filename, NLGEORGES::UFormElm& formRoot) NL_OVERRIDE;
 
 	/// Return true if cone is meaningful
 	bool				isDetailed() const				{ return false;}
 	/// Return the length of the sound in ms
-	virtual uint32		getDuration();
+	virtual uint32		getDuration() NL_OVERRIDE;
 	/// Return the name (must be unique)
 
 	/// Used by the george sound plugin to check sound recursion (ie sound 'toto' use sound 'titi' witch also use sound 'toto' ...).
-	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const;
+	virtual void		getSubSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE;
 
-	virtual float		getMaxDistance() const;
+	virtual float		getMaxDistance() const NL_OVERRIDE;
 
-	void				serial(NLMISC::IStream &s);
+	void				serial(NLMISC::IStream &s) NL_OVERRIDE;
 
 	/// Associtation clas for storage of sound / filter.
 	struct TSoundInfo

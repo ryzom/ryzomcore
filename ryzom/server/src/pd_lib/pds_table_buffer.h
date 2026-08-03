@@ -382,7 +382,7 @@ public:
 
 protected:
 
-	virtual std::string	getLoggerIdentifier() const						{ return "buffer"; }
+	virtual std::string	getLoggerIdentifier() const NL_OVERRIDE						{ return "buffer"; }
 
 private:
 

@@ -71,26 +71,26 @@ private:
 
 public:
 	// IModule methods
-	bool initialiseModule(const NLMISC::CSString& rawArgs);
+	bool initialiseModule(const NLMISC::CSString& rawArgs) NL_OVERRIDE;
 
-	void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule);
-	void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule);
-	void receiveModuleMessage(GUSNET::CModuleMessage& msg);
+	void moduleUp(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
+	void moduleDown(GUSNET::CRemoteModuleViaConnection* remoteModule) NL_OVERRIDE;
+	void receiveModuleMessage(GUSNET::CModuleMessage& msg) NL_OVERRIDE;
 	
-	NLMISC::CSString getState() const;
-	NLMISC::CSString getName() const;
-	NLMISC::CSString getParameters() const;
-	void displayModule() const;
+	NLMISC::CSString getState() const NL_OVERRIDE;
+	NLMISC::CSString getName() const NL_OVERRIDE;
+	NLMISC::CSString getParameters() const NL_OVERRIDE;
+	void displayModule() const NL_OVERRIDE;
 
 public:
 	// CEventManager methods
-	void login(const NLMISC::CSString& shardName,const NLMISC::CSString& userId,const NLMISC::CSString& password);
-	void upload(const NLMISC::CSString& shardName,const NLMISC::CSString& eventName,const CFileDescriptionContainer& fdc,const NLMISC::CVectorSString& fileBodies);
-	void startEvent(const NLMISC::CSString& shardName);
-	void stopEvent(const NLMISC::CSString& shardName);
-	void updateTools();
-	void peekInstalledEvent(const NLMISC::CSString& shardName) const;
-	void getShards(NLMISC::CVectorSString& shardNames) const;
+	void login(const NLMISC::CSString& shardName,const NLMISC::CSString& userId,const NLMISC::CSString& password) NL_OVERRIDE;
+	void upload(const NLMISC::CSString& shardName,const NLMISC::CSString& eventName,const CFileDescriptionContainer& fdc,const NLMISC::CVectorSString& fileBodies) NL_OVERRIDE;
+	void startEvent(const NLMISC::CSString& shardName) NL_OVERRIDE;
+	void stopEvent(const NLMISC::CSString& shardName) NL_OVERRIDE;
+	void updateTools() NL_OVERRIDE;
+	void peekInstalledEvent(const NLMISC::CSString& shardName) const NL_OVERRIDE;
+	void getShards(NLMISC::CVectorSString& shardNames) const NL_OVERRIDE;
 
 private:
 	// the shard id type used as map key

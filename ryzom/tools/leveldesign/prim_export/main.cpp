@@ -112,7 +112,7 @@ const char *progressbar[BAR_LENGTH]=
 class CMyCallback : public IProgressCallback
 {
 public:
-	void progress (float progress)
+	void progress (float progress) NL_OVERRIDE
 	{
 		// Delta time, update max all the 300 ms
 		static sint64 time = CTime::getLocalTime ();

@@ -68,7 +68,7 @@ public:
 	//
 	void init();
 	/// From CWeatherManager : Loads all the weather setups
-	virtual void         init(const std::vector<const CWeatherSetupSheetBase *> &sheets, const std::vector<std::string> &sheetNames);
+	virtual void         init(const std::vector<const CWeatherSetupSheetBase *> &sheets, const std::vector<std::string> &sheetNames) NL_OVERRIDE;
 	/// From CWeatherManager : Release all datas (fx models..). Should be called before deleting the scene
 	virtual void		 release();
 	/// Set the global direction of the wind. Only XY direction is kept
@@ -108,9 +108,9 @@ public:
 /////////////////////////////////////////////////////////////////
 protected:
 	// from CWeatherManager
-	virtual CWeatherSetup *newWeatherSetup() const;
+	virtual CWeatherSetup *newWeatherSetup() const NL_OVERRIDE;
 	// from CWeatherManager
-	virtual void setupLoaded(CWeatherSetup *setup);
+	virtual void setupLoaded(CWeatherSetup *setup) NL_OVERRIDE;
 private:
 	void                 manualUpdateImpl(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season);
 	void                 manualUpdateImpl(uint64 day, float hour, const CWeatherContext &wc, float weatherValue, EGSPD::CSeason::TSeason season, const NLMISC::CMatrix &camMat, const class CContinent &continent);

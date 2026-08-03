@@ -481,7 +481,7 @@ NLMISC_CATEGORISED_COMMAND(EventManager,emWinEventStop,"stop the event that is c
 
 class CEMCommandDummy: public IServiceSingleton
 {
-	void init()				
+	void init() NL_OVERRIDE				
 	{
 		readVariablesFromFile();
 	}

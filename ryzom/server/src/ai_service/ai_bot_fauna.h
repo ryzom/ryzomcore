@@ -71,13 +71,13 @@ class CSpawnBotFauna
 {
 public:
 	CSpawnBotFauna(TDataSetRow const& row, CBot& owner, NLMISC::CEntityId const& id, float radius, uint32 level, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
-	virtual	~CSpawnBotFauna();
+	virtual	~CSpawnBotFauna() NL_OVERRIDE;
 	
 	CSpawnGroupFauna& spawnGrp();
 	
 	void update(AITYPES::TProfiles	activity, uint32 ticksSinceLastUpdate);
 	
-	bool canMove() const;
+	bool canMove() const NL_OVERRIDE;
 	
 	//////////////////////////////////////////////////////////////////////////
 	//	Specific
@@ -92,7 +92,7 @@ public:
 	
 	void getBestTarget();
 	
-	void processEvent(CCombatInterface::CEvent const& event);
+	void processEvent(CCombatInterface::CEvent const& event) NL_OVERRIDE;
 	void eventEngaged(TDataSetRow const& originId);
 	
 	/// @name Profiles transition
@@ -104,13 +104,13 @@ public:
 	
 	float aggroRadius();
 	
-	float getCollisionDist(float angTo)	const;
+	float getCollisionDist(float angTo)	const NL_OVERRIDE;
 	
 	void setHungry() { _Hungry = 1.f; }
 	float& hungry() { return _Hungry; }
 	
 	// fauna are always attackable by other bots
-	virtual	bool isBotAttackable() const  { return true; }
+	virtual	bool isBotAttackable() const NL_OVERRIDE  { return true; }
 	
 	//////////////////////////////////////////////////////////////////////////
 	//	Specific ( Comportement )
@@ -120,12 +120,12 @@ public:
 	// Dispatching message to EGS to describe chat possibilities
 	//----------------------------------------------------------------------------------------------
 	
-	void sendInfoToEGS() const;
+	void sendInfoToEGS() const NL_OVERRIDE;
 	
 	CBotFauna& getPersistent() const;
 	
 	// replace by	'getRYZOMType'
-	virtual RYZOMID::TTypeId getRyzomType() const { return RYZOMID::creature; }
+	virtual RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::creature; }
 	
 	//////////////////////////////////////////////////////////////////////////
 	//	Specific ( Comportement )
@@ -137,7 +137,7 @@ public:
 	
 	CAITimer& VisualTargetTimer() { return _VisualTargetTimer; }
 
-	float getReturnDistCheck() const;
+	float getReturnDistCheck() const NL_OVERRIDE;
 	
 private:
 	float	_Hungry;
@@ -203,8 +203,8 @@ class CReturnMovementMagnet
 {
 public:
 	CReturnMovementMagnet(RYAI_MAP_CRUNCH::CWorldPosition const& forcedDest, CSpawnBotFauna& botFauna, RYAI_MAP_CRUNCH::TAStarFlag flag);
-	virtual void getNewDestination(RYAI_MAP_CRUNCH::CWorldPosition const& alternativePos, RYAI_MAP_CRUNCH::TAStarFlag denyFlag);
-	virtual void update(uint32 waitTime, uint32 ticksSinceLastUpdate) { CMovementMagnet::update(waitTime, ticksSinceLastUpdate, true); }
+	virtual void getNewDestination(RYAI_MAP_CRUNCH::CWorldPosition const& alternativePos, RYAI_MAP_CRUNCH::TAStarFlag denyFlag) NL_OVERRIDE;
+	virtual void update(uint32 waitTime, uint32 ticksSinceLastUpdate) NL_OVERRIDE { CMovementMagnet::update(waitTime, ticksSinceLastUpdate, true); }
 	
 private:
 	RYAI_MAP_CRUNCH::CWorldPosition	_ForcedDest;
@@ -237,7 +237,7 @@ public:
 		reset();
 	}
 	
-	virtual void setSheet(AISHEETS::ICreatureCPtr const& sheet)
+	virtual void setSheet(AISHEETS::ICreatureCPtr const& sheet) NL_OVERRIDE
 	{
 		CCreatureProxy::setSheet(sheet);
 		reset();
@@ -245,9 +245,9 @@ public:
 	
 	///@name ICreature overloads
 	//@{
-	virtual float AggroRadiusNotHungry() const { return _AggroRadiusNotHungry; }
-	virtual float AggroRadiusHungry() const { return _AggroRadiusHungry; }
-	virtual float AggroRadiusHunting() const { return _AggroRadiusHunting; }
+	virtual float AggroRadiusNotHungry() const NL_OVERRIDE { return _AggroRadiusNotHungry; }
+	virtual float AggroRadiusHungry() const NL_OVERRIDE { return _AggroRadiusHungry; }
+	virtual float AggroRadiusHunting() const NL_OVERRIDE { return _AggroRadiusHunting; }
 	//@}
 	
 	///@name Setters
@@ -286,37 +286,37 @@ class CBotFauna
 public:
 	CBotFauna(AITYPES::TFaunaType type, CGroup* owner, CAIAliasDescriptionNode* alias = NULL);
 	
-	virtual ~CBotFauna();
+	virtual ~CBotFauna() NL_OVERRIDE;
 	
 	AITYPES::TFaunaType faunaType()	const { return _Type; }
 	
-	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius);
+	CSpawnBot* getSpawnBot(TDataSetRow const& row, NLMISC::CEntityId const& id, float radius) NL_OVERRIDE;
 	
-	CAIS::CCounter& getSpawnCounter();
+	CAIS::CCounter& getSpawnCounter() NL_OVERRIDE;
 	
-	virtual bool spawn();
-	void despawnBot();
-	bool reSpawn(bool sendMessage = true);
+	virtual bool spawn() NL_OVERRIDE;
+	void despawnBot() NL_OVERRIDE;
+	bool reSpawn(bool sendMessage = true) NL_OVERRIDE;
 		
 	CSpawnBotFauna*	getSpawn() { return static_cast<CSpawnBotFauna*>(getSpawnObj()); }
 	
-	RYZOMID::TTypeId getRyzomType() const { return RYZOMID::creature; }
+	RYZOMID::TTypeId getRyzomType() const NL_OVERRIDE { return RYZOMID::creature; }
 		
 	CGrpFauna& grp() const;
 	CMgrFauna& mgr() const;
 	
 	//	(assuming targetPlace is always valid ..)
-	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& pos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta);
+	void getSpawnPos(CAIVector& triedPos, RYAI_MAP_CRUNCH::CWorldPosition& pos, RYAI_MAP_CRUNCH::CWorldMap const& worldMap, CAngle& spawnTheta) NL_OVERRIDE;
 	
-	virtual std::string	getOneLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
 	
-	virtual AISHEETS::ICreatureCPtr getSheet() const { return _Sheet.getPtr(); }
-	virtual void setSheet(AISHEETS::ICreatureCPtr const& sheet)
+	virtual AISHEETS::ICreatureCPtr getSheet() const NL_OVERRIDE { return _Sheet.getPtr(); }
+	virtual void setSheet(AISHEETS::ICreatureCPtr const& sheet) NL_OVERRIDE
 	{
 		_Sheet->setSheet(sheet);
 		sheetChanged();
 	}
-	virtual bool isSheetValid() const
+	virtual bool isSheetValid() const NL_OVERRIDE
 	{
 		return _Sheet!=NULL && _Sheet->isValid();
 	}
@@ -326,10 +326,10 @@ public:
 	void setAggroRadiusHunting(float val) { _Sheet->setAggroRadiusHunting(val); }
 	void resetAggroRadius() { _Sheet->reset(); }
 	
-	void triggerSetSheet(AISHEETS::ICreatureCPtr const& sheet);
+	void triggerSetSheet(AISHEETS::ICreatureCPtr const& sheet) NL_OVERRIDE;
 	
 protected:
-	virtual void sheetChanged();
+	virtual void sheetChanged() NL_OVERRIDE;
 	bool finalizeSpawnFauna();
 	
 private:

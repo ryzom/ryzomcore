@@ -106,26 +106,26 @@ public:
 		text = preparePhraseFile(phrases, true);
 	}
 
-	void onEquivalent(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onEquivalent(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Reference[refIndex]);
 	}
-	void onAdd(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onAdd(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		LOGPARSE("Using newly added phrase '%s'", context.Diff.back().Identifier.c_str());
 	}
-	void onRemove(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onRemove(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		// nothing to do because we don't insert bad value
 		LOGPARSE("Removing phrase '%s'", context.Reference[refIndex].Identifier.c_str());
 	}
-	void onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context)
+	void onChanged(uint addIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		LOGPARSE("Using changed phrase '%s'", context.Diff.back().Identifier.c_str());
 	}
-	void onSwap(uint newIndex, uint refIndex, TPhraseDiffContext &context)
+	void onSwap(uint newIndex, uint refIndex, TPhraseDiffContext &context) NL_OVERRIDE
 	{
 		// don't swap.
 	}
@@ -185,28 +185,28 @@ public:
 //		nldebug("%s", debug.c_str());
 	}
 
-	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Reference[refIndex]);
 	}
-	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		context.Diff.back().Text = ucstring("<NEW>")+context.Diff.back().Text;
 		LOGPARSE("Adding new clause '%s'", context.Diff.back().Identifier.c_str());	
 	}
-	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		// nothing to do because we don't insert bad value
 		LOGPARSE("removing clause '%s'", context.Reference[refIndex].Identifier.c_str());	
 	}
-	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context)
+	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		context.Diff.back().Text = ucstring("<CHG>")+context.Diff.back().Text;
 		LOGPARSE("Changing clause '%s'", context.Diff.back().Identifier.c_str());	
 	}
-	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context)
+	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE
 	{
 		// don't swap.
 	}
@@ -333,25 +333,25 @@ public:
 		text = prepareExcelSheet(diff);
 	}
 
-	void onEquivalent(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onEquivalent(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Reference[refIndex]);
 	}
-	void onAdd(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onAdd(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		LOGPARSE("Using newly sheet row %s", context.Diff.getData(context.Diff.size()-1, 1).toString().c_str());
 	}
-	void onRemove(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onRemove(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		// nothing to do because we don't insert bad value
 	}
-	void onChanged(uint addIndex, uint refIndex, TWordsDiffContext &context)
+	void onChanged(uint addIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		context.Diff.push_back(context.Addition[addIndex]);
 		LOGPARSE("Using changed sheet row %s", context.Diff.getData(context.Diff.size()-1, 1).toString().c_str());
 	}
-	void onSwap(uint newIndex, uint refIndex, TWordsDiffContext &context)
+	void onSwap(uint newIndex, uint refIndex, TWordsDiffContext &context) NL_OVERRIDE
 	{
 		// don't swap.
 	}

@@ -155,11 +155,11 @@ class CZoneLoadingTask : public NLMISC::IRunnablePos
 public:
 	/// Constructor
 	CZoneLoadingTask (const std::string &sZoneName, TVolatileZonePtr *ppZone, CVector &pos, bool monochrome, float factor);
-	~CZoneLoadingTask();
+	~CZoneLoadingTask() NL_OVERRIDE;
 
 	/// Runnable Task
-	void run (void);
-	void getName (std::string &result) const;
+	void run (void) NL_OVERRIDE;
+	void getName (std::string &result) const NL_OVERRIDE;
 
 private:
 

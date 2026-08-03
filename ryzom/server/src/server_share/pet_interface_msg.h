@@ -50,7 +50,7 @@ public:
 	ucstring			CustomName;
 #endif
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CPetSpawnMsg");
 		property ("AIInstanceId", PropUInt32, std::numeric_limits<uint32>::max(), AIInstanceId);
@@ -67,7 +67,7 @@ public:
 #endif
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 		
@@ -93,7 +93,7 @@ public:
 	TDataSetRow	PetMirrorRow; //If spawned
 	uint16 PetIdx;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{		
 		className ("CPetSpawnConfirmationMsg");
 		property ("SpawnError", PropUInt16, (uint16)NO_ERROR_SPAWN, SpawnError);
@@ -101,7 +101,7 @@ public:
 		property ("PetMirrorRow",		PropDataSetRow,	TDataSetRow(), PetMirrorRow);
 		property ("PetIndex", PropUInt16, (uint16)0, PetIdx);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 
@@ -119,7 +119,7 @@ public:
 	sint32	Coordinate_X, Coordinate_Y, Coordinate_H; //For GOTO_POINT, GOTO_POINT_DESPAWN and SPAWN_POINT commands
 	float Heading; // For GOTO_POINT_DESPAWN commands (via stable)
 	
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CPetCommandMsg");
 		property ("Command", PropUInt16, (uint16)STAND, Command);
@@ -131,7 +131,7 @@ public:
 		property ("Heading", PropFloat, 0.0f, Heading);
 	}
 
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------
@@ -154,12 +154,12 @@ public:
 	,PetMirrorRow(msg.PetMirrorRow)
 	{}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{		
 		className ("CPetCommandConfirmationMsg");
 		property ("CommandError", PropUInt16, (uint16)NO_ERROR_COMMAND, CommandError);
 	}
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 //----------------------------------------------------------------
@@ -172,14 +172,14 @@ public:
 	TDataSetRow	OwnerMirrorRow;
 	TDataSetRow PetMirrorRow;
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CPetSetOwner");
 		property ("OwnerMirrorRow", PropDataSetRow, TDataSetRow(), OwnerMirrorRow);
 		property ("PetMirrorRow", PropDataSetRow, TDataSetRow(), PetMirrorRow);
 	}
 	
-	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}
+	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) NL_OVERRIDE {}
 };
 
 #endif //RY_PET_INTERFACE_MESSAGES_H

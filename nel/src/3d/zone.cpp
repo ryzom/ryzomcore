@@ -1320,6 +1320,47 @@ void			CZone::changePatchTextureAndColor (sint numPatch, const std::vector<CTile
 
 
 // ***************************************************************************
+bool			CZone::setPatchGeometry(sint patch, const CBezierPatch &bezier)
+{
+	nlassert(patch>=0 && patch<(sint)Patchs.size());
+
+	// Range check first, over every control point, so a partial write is impossible.
+	//
+	// The bound is what pack() can REPRESENT (sint16), not the 32760 computeBBScaleBias
+	// divides by. Those are different numbers and the difference is load-bearing: the bbox is
+	// sized from the patch VERTICES plus a noise margin, while tangents and interiors may lie
+	// outside that hull, so untouched corpus geometry legitimately sits between 32760 and
+	// 32767. Rejecting at 32760 refuses zones nobody has edited.
+	const CVector	&bias= PatchBias;
+	const float		scale= PatchScale;
+	if(scale<=0.f)
+		return false;
+	const CVector	*all[3]= { bezier.Vertices, bezier.Tangents, bezier.Interiors };
+	const uint		counts[3]= { 4, 8, 4 };
+	for(uint g=0; g<3; g++)
+	{
+		for(uint i=0; i<counts[g]; i++)
+		{
+			const CVector	&v= all[g][i];
+			const float	x= (v.x-bias.x)/scale, y= (v.y-bias.y)/scale, z= (v.z-bias.z)/scale;
+			if(x<-32768.f || x>32767.f || y<-32768.f || y>32767.f || z<-32768.f || z>32767.f)
+				return false;
+		}
+	}
+
+	CPatch	&p= Patchs[patch];
+	uint	i;
+	for(i=0;i<4;i++)
+		p.Vertices[i].pack(bezier.Vertices[i], bias, scale);
+	for(i=0;i<8;i++)
+		p.Tangents[i].pack(bezier.Tangents[i], bias, scale);
+	for(i=0;i<4;i++)
+		p.Interiors[i].pack(bezier.Interiors[i], bias, scale);
+	return true;
+}
+
+
+// ***************************************************************************
 void			CZone::refreshTesselationGeometry(sint numPatch)
 {
 	nlassert(numPatch>=0);

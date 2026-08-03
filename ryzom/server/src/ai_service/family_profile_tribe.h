@@ -135,7 +135,7 @@ public:
 
 	CFamilyProfileTribe	(const	CtorParam	&ctorParam);
 	
-	virtual	~CFamilyProfileTribe	()
+	virtual	~CFamilyProfileTribe	() NL_OVERRIDE
 	{
 	}
 
@@ -154,14 +154,14 @@ public:
 		_CampZone=campZone;
 	}
 
-	void	spawnBoss(NLMISC::TStringId outpostName);
+	void	spawnBoss(NLMISC::TStringId outpostName) NL_OVERRIDE;
 
-	void	setDefaultProfile(const	CNpcZone	*const	zone, CGroupNpc	*grp);
+	void	setDefaultProfile(const	CNpcZone	*const	zone, CGroupNpc	*grp) NL_OVERRIDE;
 
 	typedef std::map<NLMISC::TStringId, NLMISC::CSmartPtr<COutpostInfo> >	TOutpostContainer;
 	TOutpostContainer	_OutpostInfos;
 
-	void	fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames)
+	void	fillOutpostNames(std::vector<NLMISC::TStringId> outpostNames) NL_OVERRIDE
 	{
 		outpostNames.clear();
 		for (TOutpostContainer::const_iterator first(_OutpostInfos.begin()), last(_OutpostInfos.end()); first != last; ++first)
@@ -169,10 +169,10 @@ public:
 	}
 
 
-	void	outpostAdd(NLMISC::TStringId outpostName);
-	void	outpostRemove(NLMISC::TStringId outpostName);
+	void	outpostAdd(NLMISC::TStringId outpostName) NL_OVERRIDE;
+	void	outpostRemove(NLMISC::TStringId outpostName) NL_OVERRIDE;
 
-	void	outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState	state)
+	void	outpostEvent(NLMISC::TStringId outpostName, ZCSTATE::TZcState	state) NL_OVERRIDE
 	{
 		TOutpostContainer::iterator it(_OutpostInfos.find(outpostName));
 		if	(it==_OutpostInfos.end())
@@ -182,10 +182,10 @@ public:
 		it->second->outpostEvent(state);
 	};
 			
-	void	spawnGroup();
+	void	spawnGroup() NL_OVERRIDE;
 
 	/// The main update for the profile. Called aprox every 10 s (100 ticks)
-	void	update();
+	void	update() NL_OVERRIDE;
 
 };
 extern	IAiFactory<IFamilyProfile>	*_ProfileTribe;
@@ -212,7 +212,7 @@ public:
 		_Grp->getPersistent().setDiscardable(!isTheContactGroup);
 	}
 
-	virtual ~CGrpProfileDynContact()
+	virtual ~CGrpProfileDynContact() NL_OVERRIDE
 	{
 	}
 			
@@ -224,17 +224,17 @@ public:
 	// routine called when a bot starts to use a given profile
 	// note that bots have a data member called 'void *aiProfileData' reserved for the use of the profile code
 	// this data member should be setup here if it is to be used by the profile
-	virtual void beginProfile();
+	virtual void beginProfile() NL_OVERRIDE;
 	
 	// routine called just before bot starts to use a new profile or when a bot dies
-	virtual void endProfile();
+	virtual void endProfile() NL_OVERRIDE;
 	// routine called every time the bot is updated (frequency depends on player proximity, etc)
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 
 	// routine used to build a debug string for detailed information on a bot's status (with respect to their aiProfile)
 	virtual std::string buildDebugString() const;
 	
-	virtual	AITYPES::TProfiles getAIProfileType () const
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE
 	{
 		return	AITYPES::ACTIVITY_CONTACT;
 	}
@@ -269,7 +269,7 @@ public:
 		_CurrentZone=currentZone;
 	}
 
-	virtual ~CGrpProfileDynHarvest()
+	virtual ~CGrpProfileDynHarvest() NL_OVERRIDE
 	{
 	}
 			
@@ -281,19 +281,19 @@ public:
 	// routine called when a bot starts to use a given profile
 	// note that bots have a data member called 'void *aiProfileData' reserved for the use of the profile code
 	// this data member should be setup here if it is to be used by the profile
-	virtual void beginProfile();
+	virtual void beginProfile() NL_OVERRIDE;
 	
 	// routine called just before bot starts to use a new profile or when a bot dies
-	virtual void endProfile();
+	virtual void endProfile() NL_OVERRIDE;
 	// routine called every time the bot is updated (frequency depends on player proximity, etc)
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 
 	void	checkTargetsAround	();
 		
 	// routine used to build a debug string for detailed information on a bot's status (with respect to their aiProfile)
 	virtual std::string buildDebugString() const;
 	
-	virtual	AITYPES::TProfiles getAIProfileType () const
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE
 	{
 		return	AITYPES::ACTIVITY_HARVEST;
 	}
@@ -329,7 +329,7 @@ public:
 	{
 	}
 
-	virtual ~CGrpProfileDynFight()
+	virtual ~CGrpProfileDynFight() NL_OVERRIDE
 	{
 	}
 			
@@ -341,17 +341,17 @@ public:
 	// routine called when a bot starts to use a given profile
 	// note that bots have a data member called 'void *aiProfileData' reserved for the use of the profile code
 	// this data member should be setup here if it is to be used by the profile
-	virtual void beginProfile();
+	virtual void beginProfile() NL_OVERRIDE;
 	
 	// routine called just before bot starts to use a new profile or when a bot dies
-	virtual void endProfile();
+	virtual void endProfile() NL_OVERRIDE;
 	// routine called every time the bot is updated (frequency depends on player proximity, etc)
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 
 	// routine used to build a debug string for detailed information on a bot's status (with respect to their aiProfile)
 	virtual std::string buildDebugString() const;
 	
-	virtual	AITYPES::TProfiles getAIProfileType () const
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE
 	{
 		return	AITYPES::ACTIVITY_FIGHT;
 	}

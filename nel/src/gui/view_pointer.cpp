@@ -25,6 +25,8 @@
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/group_paragraph.h"
 #include "nel/gui/group_container.h"
+#include "nel/gui/ctrl_col_pick.h"
+#include "nel/gui/group_html.h"
 #include "nel/misc/xml_auto_ptr.h"
 #include "nel/misc/algo.h"
 
@@ -392,6 +394,89 @@ namespace NLGUI
 			// Draw the default cursor
 			drawCursor(_TxIdDefault, col, 0);
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	// --------------------------------------------------------------------------------------------------------------------
+	// Generic cursor shapes. Everything here keys off a widget NLGUI defines itself, so it
+	// belongs in the base rather than in each embedder's subclass. The Ryzom client
+	// registers its own pointer class ("pointer") and overrides all of these, so it is
+	// unaffected; embedders using the stock "generic_pointer" gain them.
+
+	bool CViewPointer::drawResizer(CCtrlBase *pCB, CRGBA col)
+	{
+		CCtrlResizer *pCR = dynamic_cast<CCtrlResizer *>(pCB);
+		if (!pCR)
+			return false;
+		// A locked container cannot be resized, so it must not advertise that it can.
+		CGroupContainer *parent = dynamic_cast<CGroupContainer *>(pCR->getParent());
+		if (parent && parent->isLocked())
+			return false;
+		sint32 texId = -1;
+		switch (pCR->getRealResizerPos())
+		{
+		case Hotspot_BR:
+		case Hotspot_TL:
+			texId = _TxIdResizeBRTL;
+			break;
+		case Hotspot_BL:
+		case Hotspot_TR:
+			texId = _TxIdResizeBLTR;
+			break;
+		case Hotspot_MR:
+		case Hotspot_ML:
+			texId = _TxIdResizeLR;
+			break;
+		case Hotspot_TM:
+		case Hotspot_BM:
+			texId = _TxIdResizeTB;
+			break;
+		default:
+			return false;
+		}
+		// An embedder that did not declare the resize textures gets no id; fall through to
+		// the default cursor rather than drawing garbage.
+		if (texId < 0)
+			return false;
+		drawCursor(texId, col, 0);
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	bool CViewPointer::drawColorPicker(CCtrlBase *pCB, CRGBA col)
+	{
+		if (!dynamic_cast<CCtrlColPick *>(pCB))
+			return false;
+		if (_TxIdColPick < 0)
+			return false;
+		drawCursor(_TxIdColPick, col, 0);
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	bool CViewPointer::drawLink(CCtrlBase *pCB, CRGBA col)
+	{
+		if (!dynamic_cast<CCtrlLink *>(pCB))
+			return false;
+		if (_TxIdColPick < 0)
+			return false;
+		drawCursor(_TxIdColPick, col, 0);
+		return true;
+	}
+
+	// --------------------------------------------------------------------------------------------------------------------
+	bool CViewPointer::drawBrowse(CCtrlBase *pCB, CRGBA col)
+	{
+		CGroupHTML *pCGH = dynamic_cast<CGroupHTML *>(pCB);
+		if (!pCGH || !pCGH->isBrowsing())
+			return false;
+		if (_TxIdRotate < 0)
+			return false;
+		// Spinning "busy" cursor while a page loads (the rotation is the animation).
+		static uint8 rot = 0;
+		drawCursor(_TxIdRotate, col, rot >> 3);
+		rot = (rot + 1) & 0x1f;
+		return true;
 	}
 
 	// --------------------------------------------------------------------------------------------------------------------

@@ -64,9 +64,9 @@ class CCtrlPolygonSelectable : public CCtrlPolygon, public IDisplayerUIHandle
 public:
 	CCtrlPolygonSelectable( CViewBase::TCtorParam &param, CInstance &instance) : CCtrlPolygon(param), Instance(instance) {}
 	// from IDisplayerUIHandle
-	virtual CInstance &getDisplayedInstance() { return Instance; }
+	virtual CInstance &getDisplayedInstance() NL_OVERRIDE { return Instance; }
 	// from IDisplayerUIHandle
-	virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const
+	virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const NL_OVERRIDE
 	{
 		if (!_Parent) return false;
 
@@ -74,7 +74,7 @@ public:
 		return CCtrlPolygon::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
 	}
 	// tooltip
-	virtual void		getContextHelp(std::string &help) const
+	virtual void		getContextHelp(std::string &help) const NL_OVERRIDE
 	{
 		help = Instance.getDisplayName().toUtf8();
 		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
@@ -83,7 +83,7 @@ public:
 	bool				emptyContextHelp() const { return true; }
 	bool				wantInstantContextHelp() const { return true; }
 	// from CCtrlBase
-	virtual bool		preciseHitTest(sint32 x, sint32 y) const
+	virtual bool		preciseHitTest(sint32 x, sint32 y) const NL_OVERRIDE
 	{
 		if (!_Parent) return false;
 		sint32 winX, winY;
@@ -95,7 +95,7 @@ public:
 protected:
 	// TMP TMP until matrix precision is solved
 	// from CCtrlPolygon
-	void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src)
+	void computeScaledVertex(NLMISC::CVector2f &dest, const NLMISC::CVector2f &src) NL_OVERRIDE
 	{
 		CGroupMap *gm = CTool::getWorldMap();
 		if (!gm) dest = CVector::Null;
@@ -109,13 +109,13 @@ class CCtrlQuadSelectable : public CCtrlQuad, public IDisplayerUIHandle
 public:
 	CCtrlQuadSelectable( CViewBase::TCtorParam &param, CInstance &instance, uint edgeIndex) : CCtrlQuad(param), Instance(instance), EdgeIndex(edgeIndex) {}
 	// from IDisplayerUIHandle
-	virtual CInstance &getDisplayedInstance() { return Instance; }
+	virtual CInstance &getDisplayedInstance() NL_OVERRIDE { return Instance; }
 	// from IDisplayerUIHandle
-	virtual bool isEdge() const { return true; }
+	virtual bool isEdge() const NL_OVERRIDE { return true; }
 	// from IDisplayerUIHandle
-	virtual uint getEdgeIndex() const { return EdgeIndex; }
+	virtual uint getEdgeIndex() const NL_OVERRIDE { return EdgeIndex; }
 	// from IDisplayerUIHandle
-	virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const
+	virtual bool contains(sint32 mouseXInWindow, sint32 mouseYInWindow) const NL_OVERRIDE
 	{
 		if (!_Parent) return false;
 
@@ -123,7 +123,7 @@ public:
 		return CCtrlQuad::contains(CVector2f(mouseXInWindow + 0.5f, mouseYInWindow + 0.5f));
 	}
 	// tooltip
-	virtual void		getContextHelp(std::string &help) const
+	virtual void		getContextHelp(std::string &help) const NL_OVERRIDE
 	{
 		help = Instance.getDisplayName().toUtf8();
 		if (help == NLMISC::CI18N::get("uiR2EDNoName"))
@@ -132,14 +132,14 @@ public:
 	bool				emptyContextHelp() const { return true; }
 	bool				wantInstantContextHelp() const { return true; }
 	// from CCtrlBase
-	virtual bool		preciseHitTest(sint32 x, sint32 y) const
+	virtual bool		preciseHitTest(sint32 x, sint32 y) const NL_OVERRIDE
 	{
 		if (!_Parent) return false;
 		sint32 winX, winY;
 		_Parent->getCorner(winX, winY, _ParentPosRef);
 		return contains(x - winX, y - winY);
 	}
-	virtual bool		handleEvent (const NLGUI::CEventDescriptor &/* event */)
+	virtual bool		handleEvent (const NLGUI::CEventDescriptor &/* event */) NL_OVERRIDE
 	{
 		return false;
 	}

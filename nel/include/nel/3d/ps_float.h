@@ -41,7 +41,7 @@ public:
 	{
 		_F.setValues(startFloat, endFloat);
 	}
-	CPSAttribMakerBase *clone() const { return new CPSFloatBlender(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSFloatBlender(*this); }
 	// F is serialized by base classes...
 
 };
@@ -65,7 +65,7 @@ public:
 	CPSFloatGradient(const float *floatTab, uint32 nbValues, uint32 nbStages, float nbCycles = 1.0f);
 
 
-	CPSAttribMakerBase *clone() const { return new CPSFloatGradient(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSFloatGradient(*this); }
 	// F is serialized by base classes...
 };
 
@@ -78,7 +78,7 @@ class CPSFloatMemory : public CPSAttribMakerMemory<float>
 public:
 	CPSFloatMemory() { setDefaultValue(0.f); }
 	NLMISC_DECLARE_CLASS(CPSFloatMemory);
-	CPSAttribMakerBase *clone() const { return new CPSFloatMemory(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSFloatMemory(*this); }
 
 };
 
@@ -89,7 +89,7 @@ class CPSFloatBinOp : public CPSAttribMakerBinOp<float>
 {
 public:
 	NLMISC_DECLARE_CLASS(CPSFloatBinOp);
-	CPSAttribMakerBase *clone() const { return new CPSFloatBinOp(*this); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSFloatBinOp(*this); }
 };
 
 /** this functor produce float based on a hermite curve
@@ -198,9 +198,9 @@ class CPSFloatCurve : public CPSAttribMakerT<float, CPSFloatCurveFunctor>
 public:
 	CPSFloatCurve() : CPSAttribMakerT<float, CPSFloatCurveFunctor>(1) {}
 	NLMISC_DECLARE_CLASS(CPSFloatCurve);
-	CPSAttribMakerBase *clone() const { return new CPSFloatCurve(*this); }
-	virtual float getMinValue(void) const { return _F.getMinValue(); }
-	virtual float getMaxValue(void) const { return _F.getMaxValue(); }
+	CPSAttribMakerBase *clone() const NL_OVERRIDE { return new CPSFloatCurve(*this); }
+	virtual float getMinValue(void) const NL_OVERRIDE { return _F.getMinValue(); }
+	virtual float getMaxValue(void) const NL_OVERRIDE { return _F.getMaxValue(); }
 };
 
 

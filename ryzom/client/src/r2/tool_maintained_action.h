@@ -41,14 +41,14 @@ public:
 	public:
 	enum TState { Idle, Action, ActionNotPossible, Canceling };
 	CToolMaintainedAction();
-	virtual ~CToolMaintainedAction();
+	virtual ~CToolMaintainedAction() NL_OVERRIDE;
 
 	// when another tool finishes with a (double) click, it may switch to the default select move tool
 	// so the last click may be interpreted as a click "in scene", which does an unselect.
 	// Call this after switching to prevent this behavior
 	void markPreviousToolClickEnd() { _PreviousToolClickEnd = true; }
 
-	virtual bool getPreviousToolClickEndFlag(bool clear = true);
+	virtual bool getPreviousToolClickEndFlag(bool clear = true) NL_OVERRIDE;
 
 protected:
 	TState _State;
@@ -70,16 +70,16 @@ protected:
 	// from CTool //
 	////////////////
 
-	virtual void onFocusGained();
-	virtual bool onMouseMove();
-	virtual bool onMouseLeftButtonDown();
-	virtual bool onMouseRightButtonDown();
-	virtual bool onMouseLeftButtonUp();
-	virtual bool onMouseRightButtonUp();
-	virtual bool onMouseLeftButtonClicked();
-	virtual void updateBeforeRender();
-	virtual void updateAfterRender();
-	virtual void cancel();
+	virtual void onFocusGained() NL_OVERRIDE;
+	virtual bool onMouseMove() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonDown() NL_OVERRIDE;
+	virtual bool onMouseRightButtonDown() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonUp() NL_OVERRIDE;
+	virtual bool onMouseRightButtonUp() NL_OVERRIDE;
+	virtual bool onMouseLeftButtonClicked() NL_OVERRIDE;
+	virtual void updateBeforeRender() NL_OVERRIDE;
+	virtual void updateAfterRender() NL_OVERRIDE;
+	virtual void cancel() NL_OVERRIDE;
 
 
 

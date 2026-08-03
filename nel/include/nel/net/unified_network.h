@@ -266,7 +266,7 @@ class CUnifiedNetwork : public NLMISC::ICommandsHandler
 
 public:
 
-	virtual const std::string &getCommandHandlerName() const
+	virtual const std::string &getCommandHandlerName() const NL_OVERRIDE
 	{
 		static const std::string name("unifiedNetwork");
 
@@ -758,7 +758,7 @@ private:
 	{
 	}
 
-	~CUnifiedNetwork() {}
+	~CUnifiedNetwork() NL_OVERRIDE {}
 
 	//
 	void	autoCheck();

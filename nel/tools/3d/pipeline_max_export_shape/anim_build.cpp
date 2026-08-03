@@ -44,11 +44,16 @@
 #include "scene_lib.h"
 #include "../pipeline_max_export_common/track_build.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
 #include "../pipeline_max/builtin/mtl_base.h"
 #include "../pipeline_max/builtin/multi_mtl.h"
 #include "../pipeline_max/builtin/node_impl.h"
+#include "../pipeline_max/builtin/param_block.h"
 #include "../pipeline_max/builtin/reference_maker.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/storage_object.h"
+
+#include "../pipeline_max_export_common/export_ids.h"
 
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
@@ -59,14 +64,7 @@ using namespace TRACKBUILD;
 namespace SHAPEANIM {
 
 // NeL AppData sub-ids
-#define NEL3D_APPDATA_AUTOMATIC_ANIMATION 1423062617
-#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS 1423062587
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_COLLISION 1423062613
-#define NEL3D_APPDATA_COLLISION_EXTERIOR 1423062614
 // Lightmap animated light (calc_lm.h): NEL3D_APPDATA_LM = 41654684
-#define NEL3D_APPDATA_LM_ANIMATED_LIGHT 41654685
-#define NEL3D_APPDATA_LM_ANIMATED 41654686
 
 // NeL material v14 param ids (subset)
 #define NLB_MAIN 1
@@ -76,10 +74,7 @@ namespace SHAPEANIM {
 #define NLP_TTEXTURE_1 0x10
 #define MAX_TEX_STAGE 8
 
-// Class ids
-static const NLMISC::CClassId CLASSID_PRS_CTRL(0x00002005, 0x00000000);
-static const NLMISC::CClassId CLASSID_LOOKAT_CTRL(0x00002006, 0x00000000);
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
+// Class ids (PRS/LookAt are the typed CControlPRS/CControlLookAt since §10j-dix)
 static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
 // Light superclasses / Omni class for light detection
 static const TSClassId SCLASS_LIGHT = 0x00000030;
@@ -124,22 +119,22 @@ static uint addNodeTracks(NL3D::CAnimation &animation, INode &node)
 {
 	uint n = 0;
 	CReferenceMaker *transform = node.getReference(0);
-	CSceneClass *tmsc = transform ? dynamic_cast<CSceneClass *>(transform) : nullptr;
-	bool isPrs = tmsc && tmsc->classDesc()->classId() == CLASSID_PRS_CTRL;
-	bool isLookAt = tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL;
-	if (!isPrs && !isLookAt) return 0;
+	CControlPRS *prs = dynamic_cast<CControlPRS *>(transform);
+	CControlLookAt *lookAt = dynamic_cast<CControlLookAt *>(transform);
+	if (!prs && !lookAt) return 0;
 
-	// Export order matches the reference: scale, rotation, position.
-	NL3D::ITrack *track = buildATrack(transform->getReference(isPrs ? 2 : 3), typeScale);
+	// Export order matches the reference: scale, rotation, position (typed sub-controller slots
+	// on CControlPRS/CControlLookAt — §10j-dix).
+	NL3D::ITrack *track = buildATrack(prs ? prs->scaleController() : lookAt->scaleController(), typeScale);
 	if (track) { addTrackChecked(animation, NL3D::ITransformable::getScaleValueName(), track); ++n; }
 
-	if (isPrs)
+	if (prs)
 	{
-		track = buildATrack(transform->getReference(1), typeRotation);
+		track = buildATrack(prs->rotationController(), typeRotation);
 		if (track) { addTrackChecked(animation, NL3D::ITransformable::getRotQuatValueName(), track); ++n; }
 	}
 
-	track = buildATrack(transform->getReference(isPrs ? 0 : 1), typePos);
+	track = buildATrack(prs ? prs->positionController() : lookAt->positionController(), typePos);
 	if (track) { addTrackChecked(animation, NL3D::ITransformable::getPosValueName(), track); ++n; }
 
 	return n;
@@ -163,51 +158,27 @@ static const SUVCoord s_uvCoords[] = {
 
 static CSceneClass *findUVGen(CSceneClass *obj, int depth)
 {
-	if (!obj) return nullptr;
+	if (!obj) return NULL;
 	if (obj->classDesc()->superClassId() == 0x00000c20) return obj;
-	if (depth <= 0) return nullptr;
+	if (depth <= 0) return NULL;
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
 	for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		if (CSceneClass *r = findUVGen(dynamic_cast<CSceneClass *>(rm->getReference(i)), depth - 1))
 			return r;
-	return nullptr;
+	return NULL;
 }
 
 static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 {
+	// The StdUVGen coord params live on the UVGen's reference 0 = an old ParamBlock; an ANIMATED
+	// param's controller occupies the block's compact reference slots in entry order — the typed
+	// CParamBlock decodes that mapping (§10k; formerly an inline 0x0002 chunk walk here).
 	CSceneClass *uvgen = findUVGen(texmap, 3);
 	CReferenceMaker *urm = dynamic_cast<CReferenceMaker *>(uvgen);
-	if (!urm || urm->nbReferences() == 0) return nullptr;
-	CSceneClass *pblock = dynamic_cast<CSceneClass *>(urm->getReference(0));
-	CStorageContainer *pc = dynamic_cast<CStorageContainer *>(pblock);
-	CReferenceMaker *prm = dynamic_cast<CReferenceMaker *>(pblock);
-	if (!pc || !prm) return nullptr;
-
-	int refSlot = 0;
-	for (CStorageContainer::TStorageObjectConstIt it = pc->chunks().begin(); it != pc->chunks().end(); ++it)
-	{
-		if (it->first != 0x0002) continue;
-		CStorageContainer *e = dynamic_cast<CStorageContainer *>(it->second);
-		if (!e) continue;
-		sint32 idx = -1;
-		bool animated = false;
-		for (CStorageContainer::TStorageObjectConstIt st = e->chunks().begin(); st != e->chunks().end(); ++st)
-		{
-			if (st->first == 0x0003)
-			{
-				CStorageRaw *rw = dynamic_cast<CStorageRaw *>(st->second);
-				if (rw && rw->Value.size() == 4) memcpy(&idx, nlVectorData(rw->Value), 4);
-			}
-			else if (st->first == 0x0200)
-				animated = true;
-		}
-		if (animated)
-		{
-			if (idx == coord) return dynamic_cast<CControlKeyFramerBase *>(prm->getReference(refSlot));
-			++refSlot;
-		}
-	}
-	return nullptr;
+	if (!urm || urm->nbReferences() == 0) return NULL;
+	CParamBlock *pblock = dynamic_cast<CParamBlock *>(urm->getReference(0));
+	if (!pblock) return NULL;
+	return dynamic_cast<CControlKeyFramerBase *>(pblock->controllerForParam(coord));
 }
 
 static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint stage, const std::string &mtlName)
@@ -229,12 +200,12 @@ static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint 
 
 static CSceneClass *firstNelMaterial(CSceneClass *mtl)
 {
-	if (!mtl) return nullptr;
+	if (!mtl) return NULL;
 	if (mtl->classDesc()->classId() == CLASSID_NEL_MTL) return mtl;
 	if (CMultiMtl *mm = dynamic_cast<CMultiMtl *>(mtl))
 		for (uint s = 0; s < mm->numSubMaterials(); ++s)
 			if (CSceneClass *r = firstNelMaterial(mm->subMaterial(s))) return r;
-	return nullptr;
+	return NULL;
 }
 
 static uint addMtlTracks(NL3D::CAnimation &animation, CSceneClass *mtl, const std::string &parentName)
@@ -288,8 +259,8 @@ static bool nodeIsLight(INode &node)
 // whole node first).
 static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std::set<CReferenceMaker *> &seen)
 {
-	if (!obj || depth < 0) return nullptr;
-	if (!seen.insert(obj).second) return nullptr;
+	if (!obj || depth < 0) return NULL;
+	if (!seen.insert(obj).second) return NULL;
 
 	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(obj))
 	{
@@ -308,7 +279,7 @@ static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std
 		if (CReferenceMaker *found = findColorController(r, depth - 1, seen))
 			return found;
 	}
-	return nullptr;
+	return NULL;
 }
 
 static std::string getAnimatedLightName(INode &node)
@@ -349,14 +320,14 @@ static uint addLightTracks(NL3D::CAnimation &animation, INode &node)
 
 static uint addMorphTracks(NL3D::CAnimation &animation, INode &node)
 {
-	CReferenceMaker *obj = dynamic_cast<CReferenceMaker *>(node.getReference(1));
-	if (!obj || obj->classDesc()->classId() != CLASSID_OSM_DERIVED) return 0;
-	CReferenceMaker *morpher = nullptr;
-	for (uint i = 0; i < obj->nbReferences() && !morpher; ++i)
+	CDerivedObject *obj = dynamic_cast<CDerivedObject *>(node.getReference(1));
+	if (!obj) return 0;
+	CReferenceMaker *morpher = NULL;
+	for (uint i = 0; i < obj->modifierCount() && !morpher; ++i)
 	{
-		CReferenceMaker *mod = obj->getReference(i);
+		CSceneClass *mod = obj->modifier(i);
 		if (mod && mod->classDesc()->classId() == CLASSID_MORPHER)
-			morpher = mod;
+			morpher = dynamic_cast<CReferenceMaker *>(mod);
 	}
 	if (!morpher) return 0;
 

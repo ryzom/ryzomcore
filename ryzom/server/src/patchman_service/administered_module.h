@@ -51,21 +51,21 @@ public:
 
 	//---------------------------------------------------------------------------------------------
 	// hooks for methods that this interface implements and that must be called from the parent class
-	void onModuleUp(NLNET::IModuleProxy *module);
-	void onModuleDown(NLNET::IModuleProxy *module);
-	void onModuleUpdate();
+	void onModuleUp(NLNET::IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(NLNET::IModuleProxy *module) NL_OVERRIDE;
+	void onModuleUpdate() NL_OVERRIDE;
 //	bool onDispatchMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 
 	// dissable immediate message dispatching to allow modules on same service to send eachother messages on module up
-	bool isImmediateDispatchingSupported() const { return false; }
+	bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 
 	//---------------------------------------------------------------------------------------------
 	// callbacks on receipt of module messages
 
-	void installVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version) {}
-	void launchVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version) {}
-	void executeCommand(NLNET::IModuleProxy *sender, const NLMISC::CSString &cmdline, const NLMISC::CSString &originator);
+	void installVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version) NL_OVERRIDE {}
+	void launchVersion(NLNET::IModuleProxy *sender, const NLMISC::CSString& domainName, uint32 version) NL_OVERRIDE {}
+	void executeCommand(NLNET::IModuleProxy *sender, const NLMISC::CSString &cmdline, const NLMISC::CSString &originator) NL_OVERRIDE;
 
 	
 	//---------------------------------------------------------------------------------------------

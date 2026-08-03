@@ -72,22 +72,22 @@ public:
 	CPatchmanAdminModule();
 
 	// IModule specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
-	void onModuleUpdate();
-	std::string buildModuleManifest() const;
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleUpdate() NL_OVERRIDE;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 
 	// dissable immediate message dispatching to allow modules on same service to send eachother messages on module up
-	bool isImmediateDispatchingSupported() const { return false; }
+	bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 	// CDeploymentConfigurationSynchroniser specialisation implementation
-	void cbDeploymentConfigurationSynchronised(NLNET::IModuleProxy* sender);
+	void cbDeploymentConfigurationSynchronised(NLNET::IModuleProxy* sender) NL_OVERRIDE;
 
 	// CFileReceiver specialisation implementation
-	void cbValidateRequestMatches(TFileRequestMatches& requestMatches);
-	void cbFileDownloadSuccess(const CSString& fileName,const NLMISC::CMemStream& data);
-	void cbFileInfoChange(const NLMISC::CSString& fileName);
+	void cbValidateRequestMatches(TFileRequestMatches& requestMatches) NL_OVERRIDE;
+	void cbFileDownloadSuccess(const CSString& fileName,const NLMISC::CMemStream& data) NL_OVERRIDE;
+	void cbFileInfoChange(const NLMISC::CSString& fileName) NL_OVERRIDE;
 
 private:
 	// private data

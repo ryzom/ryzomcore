@@ -136,7 +136,7 @@ namespace NLGUI
 		}
 
 		// dtor
-		virtual ~CInterfaceElement();
+		virtual ~CInterfaceElement() NL_OVERRIDE;
 
 		/** Cloning
 		  * Cloning is actually performed using a serial / unserial in a memory stream
@@ -426,7 +426,7 @@ namespace NLGUI
 
 		/* Element UI scale change event callback
 		 */
-		virtual void	onInterfaceScaleChanged() {}
+		virtual void	onInterfaceScaleChanged() NL_OVERRIDE {}
 
 		// called by interfaceManager for master window only
 		void			resetInvalidCoords();
@@ -504,7 +504,7 @@ namespace NLGUI
 		bool	avoidResizeParent() const {return _AvoidResizeParent;}
 		void	setAvoidResizeParent(bool state) {_AvoidResizeParent= state;}
 
-		virtual std::string	getClassName()
+		virtual std::string	getClassName() NL_OVERRIDE
 		{
 			nlassert(0); // forgot to implement serial & to register the class ?
 			return "";
@@ -623,7 +623,7 @@ namespace NLGUI
 		bool		_AvoidResizeParent;
 
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		void parseSizeRef(const char *sizeRef);
 		void parseSizeRef(const char *sizeRefStr, sint32 &sizeref, sint32 &sizeDivW, sint32 &sizeDivH);

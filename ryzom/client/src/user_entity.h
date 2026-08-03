@@ -107,10 +107,10 @@ public:
 	/// Constructor
 	CUserEntity();
 	/// Destructor
-	virtual ~CUserEntity();
+	virtual ~CUserEntity() NL_OVERRIDE;
 
 	/// Build the entity from a sheet.
-	virtual bool build(const CEntitySheet *sheet);
+	virtual bool build(const CEntitySheet *sheet) NL_OVERRIDE;
 
 	/**
 	 * Apply the motion to the entity.
@@ -125,32 +125,32 @@ public:
 	/**
 	 * Update precollision
 	 */
-	virtual void updatePreCollision(const NLMISC::TTime &time, CEntityCL *target);
+	virtual void updatePreCollision(const NLMISC::TTime &time, CEntityCL *target) NL_OVERRIDE;
 
 	/**
 	 * Update the position of the entity after the motion.
 	 * \param target : pointer on the current target.
 	 */
-	virtual void updatePosCombatFloatChanged(CEntityCL *target);
+	virtual void updatePosCombatFloatChanged(CEntityCL *target) NL_OVERRIDE;
 	/**
 	 * Update the position of the entity after the motion.
 	 * \param time : Time for the position of the entity after the motion.
 	 * \param target : pointer on the current target.
 	 */
-	virtual void updatePos(const NLMISC::TTime &time, CEntityCL *target);
+	virtual void updatePos(const NLMISC::TTime &time, CEntityCL *target) NL_OVERRIDE;
 
 	/**	Update the PACS position after the evalCollision. The entity position is set too. This is fast.
 	 *	If the entity position is too far from its PACS position, setGlobalPosition is called.
 	 *	After this call, the position.z is valid.
 	 */
-	virtual void pacsFinalizeMove();
+	virtual void pacsFinalizeMove() NL_OVERRIDE;
 
 	/**
 	 * Update the sound management to play user steps
 	 */
 	void	updateSound(const NLMISC::TTime &time);
 
-	virtual void snapToGround();
+	virtual void snapToGround() NL_OVERRIDE;
 
 	/**
 	 * 'true' if the user is dead too much and have to be disconnected.
@@ -159,9 +159,9 @@ public:
 
 
 	/// Method called to change the mode (Combat/Mount/etc.).
-	virtual bool mode(MBEHAV::EMode m);
+	virtual bool mode(MBEHAV::EMode m) NL_OVERRIDE;
 	/// Set the mode for the entity
-	virtual MBEHAV::EMode mode() const {return _Mode;}
+	virtual MBEHAV::EMode mode() const NL_OVERRIDE {return _Mode;}
 
 	/// Return the mount entity if the user is riding, otherwise NULL
 	CEntityCL* getMountEntity();
@@ -173,7 +173,7 @@ public:
 	 * This will remove the entity from the target.
 	 * \param slot : Slot of the entity that will be removed.
 	 */
-	virtual void slotRemoved(const CLFECOMMON::TCLEntityId &slot);
+	virtual void slotRemoved(const CLFECOMMON::TCLEntityId &slot) NL_OVERRIDE;
 
 	/** Change the entity selected.
 	 * \param slot : slot now selected (CLFECOMMON::INVALID_SLOT for an empty selection).
@@ -328,9 +328,9 @@ public:
 	const NLPACS::UMovePrimitive	*getMovePrimitive() const { return _Primitive; }
 
 	/// Remove the primitive
-	virtual void removePrimitive();
+	virtual void removePrimitive() NL_OVERRIDE;
 	/// Create a primitive for the entity.
-	virtual void computePrimitive();
+	virtual void computePrimitive() NL_OVERRIDE;
 
 	/// Remove the check primitive
 	void removeCheckPrimitive();
@@ -351,7 +351,7 @@ public:
 	 */
 	//@{
 	/// Display Debug Information.
-	virtual void displayDebug(float x, float &y, float lineStep);
+	virtual void displayDebug(float x, float &y, float lineStep) NL_OVERRIDE;
 	//@}
 
 	void updateVisualDisplay();
@@ -363,7 +363,7 @@ public:
 	void light();
 
 	/// Display dmg/heal numbers above the head.
-	virtual void displayModifiers();
+	virtual void displayModifiers() NL_OVERRIDE;
 
 	/** \name VIEW
 	 * Methods about the view (First/Third Person View).
@@ -380,9 +380,9 @@ public:
 	//@}
 
 	/// Return the entity scale. (return 1.0 if there is any problem).
-	virtual float getScale() const;
+	virtual float getScale() const NL_OVERRIDE;
 	/// Return 'true' is the entity is displayed.
-	virtual bool isVisible() const;
+	virtual bool isVisible() const NL_OVERRIDE;
 
 	/// Return true if the user is indoor and the CFG want to force the FPV Indoor.
 	bool forceIndoorFPV();
@@ -441,14 +441,14 @@ public:
 	void stopColTimer();
 
 	/// Make the character transparent if the mouse is under it (params is if we must make it transparent or opaque)
-	virtual void makeTransparent(bool t);
-	virtual void setDiffuse(bool onOff, NLMISC::CRGBA diffuse);
+	virtual void makeTransparent(bool t) NL_OVERRIDE;
+	virtual void setDiffuse(bool onOff, NLMISC::CRGBA diffuse) NL_OVERRIDE;
 
 	/// false if in first person mode
-	virtual bool	canCastShadowMap() const;
+	virtual bool	canCastShadowMap() const NL_OVERRIDE;
 
 	/// Return the Entity Current Speed.
-	virtual double speed() const;
+	virtual double speed() const NL_OVERRIDE;
 
 	/// assert(target). NB: this engage (moveToCombatPhrase) if in melee and to far, or directly launch the action
 	void	executeCombatWithPhrase(CEntityCL	*target, uint32 memoryLine, uint32 memoryIndex, bool cyclic);
@@ -460,7 +460,7 @@ public:
 	void	rememberWeaponsInHand();
 
 	/// overriden beginCast method
-	virtual void beginCast(const MBEHAV::CBehaviour &behaviour);
+	virtual void beginCast(const MBEHAV::CBehaviour &behaviour) NL_OVERRIDE;
 
 	/// Return the walk speed applicable when riding
 	float	getMountWalkVelocity() const { return _MountSpeeds.getWalkSpeed(); }
@@ -516,7 +516,7 @@ protected:
 		virtual void serial(NLMISC::IStream &f) {f.serial(_Value);}
 	protected:
 		/// Method called when the ping message is back.
-		virtual void update(NLMISC::ICDBNode* leaf);
+		virtual void update(NLMISC::ICDBNode* leaf) NL_OVERRIDE;
 	private:
 		float _Value;
 		float _ServerFactor;
@@ -547,7 +547,7 @@ protected:
 		float getRunSpeed() const { return _RunSpeed; }
 	protected:
 		/// Method called when the value is changed
-		virtual void update(NLMISC::ICDBNode* leaf);
+		virtual void update(NLMISC::ICDBNode* leaf) NL_OVERRIDE;
 	private:
 		float _WalkSpeed;
 		float _RunSpeed;
@@ -616,14 +616,14 @@ protected:
 		uint	SpType;
 
 		/// From ICDBNode::IPropertyObserver
-		virtual void update(NLMISC::ICDBNode* node );
+		virtual void update(NLMISC::ICDBNode* node ) NL_OVERRIDE;
 	};
 	CSkillPointsObserver		_SkillPointObs[EGSPD::CSPType::EndSPType];
 
 	class CInvisibleObserver : public NLMISC::ICDBNode::IPropertyObserver
 	{
 	public :
-		virtual void update(NLMISC::ICDBNode* node);
+		virtual void update(NLMISC::ICDBNode* node) NL_OVERRIDE;
 	};
 	CInvisibleObserver			_InvisibleObs;
 
@@ -634,52 +634,52 @@ protected:
 		uint32	FactionIndex;
 
 		/// From ICDBNode::IPropertyObserver
-		virtual void update(NLMISC::ICDBNode* node );
+		virtual void update(NLMISC::ICDBNode* node ) NL_OVERRIDE;
 	};
 	std::vector<CFameObserver *>		_FamesObs;
 
 protected:
 	/// Initialize properties of the entity (according to the class).
-	virtual void initProperties();
+	virtual void initProperties() NL_OVERRIDE;
 
 	/// Update Entity Position.
-	virtual void updateVisualPropertyPos           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI);
+	virtual void updateVisualPropertyPos           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI) NL_OVERRIDE;
 	/// Update Entity Orientation.
-	virtual void updateVisualPropertyOrient        (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyOrient        (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Behaviour.
-	virtual void updateVisualPropertyBehaviour     (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyBehaviour     (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Name.
-	virtual void updateVisualPropertyName          (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyName          (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Target.
-	virtual void updateVisualPropertyTarget        (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyTarget        (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Mode.
-	virtual void updateVisualPropertyMode          (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyMode          (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Visual Property A
-	virtual void updateVisualPropertyVpa           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVpa           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Visual Property B
-	virtual void updateVisualPropertyVpb           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVpb           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Visual Property C
-	virtual void updateVisualPropertyVpc           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVpc           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Mount
-	virtual void updateVisualPropertyEntityMounted (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyEntityMounted (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Update Entity Rider
-	virtual void updateVisualPropertyRiderEntity   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyRiderEntity   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Target lists
-	virtual void updateVisualPropertyTargetList	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop, uint listIndex);
+	virtual void updateVisualPropertyTargetList	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop, uint listIndex) NL_OVERRIDE;
 	/// visual fx
-	virtual void updateVisualPropertyVisualFX	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyVisualFX	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// PVP Mode
-	virtual void updateVisualPropertyPvpMode	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyPvpMode	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Pvp Outpost
-	virtual void updateVisualPropertyOutpostInfos  (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyOutpostInfos  (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 	/// Pvp Clan
-	virtual void updateVisualPropertyPvpClan	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+	virtual void updateVisualPropertyPvpClan	   (const NLMISC::TGameCycle &gameCycle, const sint64 &prop) NL_OVERRIDE;
 
 
 	/// Apply the behaviour for the user.
-	virtual void applyBehaviour(const CBehaviourContext &behaviour);
+	virtual void applyBehaviour(const CBehaviourContext &behaviour) NL_OVERRIDE;
 	/// Method to Flag the character as dead and do everything needed.
-	virtual void setDead();
+	virtual void setDead() NL_OVERRIDE;
 
 	/// Mount the mount in _Mount
 	void	setOnMount();
@@ -689,12 +689,12 @@ protected:
 	 * It's also return a value according to the landscape (water)
 	 * Also managed mounts
 	 */
-	virtual double getMaxSpeed() const;
+	virtual double getMaxSpeed() const NL_OVERRIDE;
 
 	/// Read/Write Variables from/to the stream.
-	virtual void readWrite(NLMISC::IStream &f);
+	virtual void readWrite(NLMISC::IStream &f) NL_OVERRIDE;
 	/// To call after a read from a stream to re-initialize the entity.
-	virtual void load();
+	virtual void load() NL_OVERRIDE;
 
 
 	/// Extract RM from a select forage source

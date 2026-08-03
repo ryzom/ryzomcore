@@ -77,18 +77,18 @@ namespace GUSNET
 		bool init(TConnectionModulePtr connection,CMsgRegisterModule& msg);
 
 		// display the module id and description
-		const NLMISC::CSString getInfoString() const;
+		const NLMISC::CSString getInfoString() const NL_OVERRIDE;
 
 		// read accessors
 		const TConnectionModulePtr getConnection() const;
-		NLNET::TSockId getSockId() const;
-		uint32 getRemoteId() const;
-		uint32 getUniqueId() const;
-		const NLMISC::CSString& getName() const;
-		const NLMISC::CSString& getParameters() const;
+		NLNET::TSockId getSockId() const NL_OVERRIDE;
+		uint32 getRemoteId() const NL_OVERRIDE;
+		uint32 getUniqueId() const NL_OVERRIDE;
+		const NLMISC::CSString& getName() const NL_OVERRIDE;
+		const NLMISC::CSString& getParameters() const NL_OVERRIDE;
 
 		// message send routines
-		void sendMessage(const NLMISC::CSString& msgName, TRawMsgBodyPtr msgBody, TRemoteModuleId senderModuleId=InvalidRemoteModuleId);
+		void sendMessage(const NLMISC::CSString& msgName, TRawMsgBodyPtr msgBody, TRemoteModuleId senderModuleId=InvalidRemoteModuleId) NL_OVERRIDE;
 
 	private:
 		TConnectionModulePtr _Connection;
@@ -115,18 +115,18 @@ namespace GUSNET
 		void buildDescriptionMsg(CMsgRegisterModule& msg);
 
 		// display the module id and description
-		const NLMISC::CSString getInfoString() const;
+		const NLMISC::CSString getInfoString() const NL_OVERRIDE;
 
 		// read accessors
 		const THubModulePtr getHub() const;
-		NLNET::TSockId getSockId() const;
-		uint32 getRemoteId() const;
-		uint32 getUniqueId() const;
-		const NLMISC::CSString& getName() const;
-		const NLMISC::CSString& getParameters() const;
+		NLNET::TSockId getSockId() const NL_OVERRIDE;
+		uint32 getRemoteId() const NL_OVERRIDE;
+		uint32 getUniqueId() const NL_OVERRIDE;
+		const NLMISC::CSString& getName() const NL_OVERRIDE;
+		const NLMISC::CSString& getParameters() const NL_OVERRIDE;
 
 		// message send routines
-		void sendMessage(const NLMISC::CSString& msgName, TRawMsgBodyPtr msgBody, TRemoteModuleId senderModuleId=InvalidRemoteModuleId);
+		void sendMessage(const NLMISC::CSString& msgName, TRawMsgBodyPtr msgBody, TRemoteModuleId senderModuleId=InvalidRemoteModuleId) NL_OVERRIDE;
 
 	private:
 		THubModulePtr _Hub;

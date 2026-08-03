@@ -66,11 +66,11 @@ namespace NLGUI
 		}
 
 		/// Destructor
-		virtual ~CViewBitmap();
+		virtual ~CViewBitmap() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		/**
 		 * parse an xml node and initialize the base view mambers. Must call CViewBase::parse
@@ -79,13 +79,13 @@ namespace NLGUI
 		 * \partam id : a refence to the string that will receive the view ID
 		 * \return true if success
 		 */
-		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup);
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		bool parse(xmlNodePtr cur,CInterfaceGroup * parentGroup) NL_OVERRIDE;
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
-		virtual void updateCoords ();
+		virtual void updateCoords () NL_OVERRIDE;
 
 		/// Draw the view
-		virtual void draw ();
+		virtual void draw () NL_OVERRIDE;
 
 		bool  getScale() const { return _Scale; }
 		void setScale (bool s) { _Scale = s; }
@@ -114,8 +114,8 @@ namespace NLGUI
 		void			setColorRGBA(NLMISC::CRGBA col);
 		NLMISC::CRGBA	getColorRGBA() const;
 
-		virtual sint32 getAlpha() const { return _Color.A; }
-		virtual void setAlpha (sint32 a) { _Color.A = (uint8)a; }
+		virtual sint32 getAlpha() const NL_OVERRIDE { return _Color.A; }
+		virtual void setAlpha (sint32 a) NL_OVERRIDE { _Color.A = (uint8)a; }
 
 		REFLECT_EXPORT_START(CViewBitmap, CViewBase)
 			REFLECT_STRING ("color", getColorAsString, setColorAsString);
@@ -127,10 +127,10 @@ namespace NLGUI
 		REFLECT_EXPORT_END
 
 		/// \from CInterfaceElement
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
 
-		virtual void serial(NLMISC::IStream &f);
+		virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	protected:
 		CViewRenderer::CTextureId	_TextureId;	/// Accelerator

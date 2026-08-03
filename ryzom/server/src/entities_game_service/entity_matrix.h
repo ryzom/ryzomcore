@@ -505,7 +505,7 @@ class CAIEntityMatrix<T>::CEntityIteratorRandom
 
 	protected:
 
-		inline bool testValidity( CEntityBase* entity )
+		inline bool testValidity( CEntityBase* entity ) NL_OVERRIDE
 		{
 			if( entity == 0 )
 			{
@@ -553,7 +553,7 @@ class CAIEntityMatrix<T>::CEntityIteratorRandom
 		}		
 	private:
 		
-		inline bool testValidity( CEntityBase* entity )
+		inline bool testValidity( CEntityBase* entity ) NL_OVERRIDE
 		{
 			if( entity == 0 )
 			{
@@ -595,7 +595,7 @@ class CAIEntityMatrix<T>::CEntityIteratorRandom
 		
 	private:
 		
-		inline bool testValidity( CEntityBase* entity )
+		inline bool testValidity( CEntityBase* entity ) NL_OVERRIDE
 		{
 			if( entity == 0 )
 			{
@@ -669,7 +669,7 @@ class CAIEntityMatrix<T>::CEntityIteratorRandom
 		
 	private:
 		
-		inline bool testValidity( CEntityBase* entity )
+		inline bool testValidity( CEntityBase* entity ) NL_OVERRIDE
 		{
 			if( entity == 0 )
 			{

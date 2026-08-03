@@ -75,7 +75,7 @@ public:
 	/// Constructor
 	CGuild();
 	/// Destructor
-	~CGuild();
+	~CGuild() NL_OVERRIDE;
 
 	///\name Accessors to the guild data
 	//@{
@@ -140,7 +140,7 @@ public:
 	/// add a new member to the guild
 	CGuildMember* newMember( const EGSPD::TCharacterId & id, NLMISC::TGameCycle enterTime = 0);
 	/// Remove a member of the guild, taking appropriate action if the player is on or off line
-	void removeMember(const EGSPD::TCharacterId &id);
+	void removeMember(const EGSPD::TCharacterId &id) NL_OVERRIDE;
 	/// delete a member from the guild
 	void deleteMember( CGuildMember* member );
 	/// get a member of the guild from its index in the guild

@@ -94,7 +94,7 @@ public:
 	};
 
 	CHugeListObs(ListType category = ListTypeCount);
-	~CHugeListObs();
+	~CHugeListObs() NL_OVERRIDE;
 
 	// Init the category. This must be called (no more that once) before any other method (or the ctor must provide the category)
 	void setListType(ListType listType);
@@ -214,7 +214,7 @@ private:
 		{}
 	};
 	//
-	virtual void update(NLMISC::ICDBNode *node);
+	virtual void update(NLMISC::ICDBNode *node) NL_OVERRIDE;
 
 	void updateUIItemPage(uint index);
 

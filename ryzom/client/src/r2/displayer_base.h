@@ -46,7 +46,7 @@ class CDisplayerBase : public NLMISC::IClassable, public NLGUI::CReflectableRefP
 public:
 	typedef NLMISC::CSmartPtr<CDisplayerBase> TSmartPtr;
 	CDisplayerBase();
-	virtual ~CDisplayerBase();
+	virtual ~CDisplayerBase() NL_OVERRIDE;
 	// Init parameters from script
 	virtual bool init(const CLuaObject &/* parameters */) { return true; }
 	// Get the instance being displayed

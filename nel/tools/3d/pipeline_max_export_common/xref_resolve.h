@@ -49,11 +49,6 @@ namespace XREFRESOLVE {
 /// the corpus consistently matches on part A only.
 const uint32 CLASSID_XREF_OBJECT_A = 0x92aab38c;
 
-/// Derived-object wrapper superclasses (OSM / WSM), used to unwrap modifier stacks down to the
-/// base object of a node.
-const NLMISC::CClassId CLASSID_OSM_DERIVED = NLMISC::CClassId(0x29263a68, 0x405f22f5);
-const NLMISC::CClassId CLASSID_WSM_DERIVED = NLMISC::CClassId(0x4ec13906, 0x5578130e);
-
 /// True iff \a obj is an XRefObject (matched on ClassId part A only, per corpus practice).
 inline bool isXRefObject(PIPELINE::MAX::CSceneClass *obj)
 {
@@ -73,11 +68,11 @@ void configure(PIPELINE::MAX::CSceneClassRegistry *registry);
 /// replaces. \a depth is the recursion guard for nested XRefs; callers pass 0.
 PIPELINE::MAX::CSceneClass *resolveXRefObject(PIPELINE::MAX::CSceneClass *xrefObj, int depth);
 
-/// Walk \a obj through OSM/WSM Derived wrappers (unwrapping to the last non-modifier reference at
-/// each step) and through XRefObject resolutions (recursively), returning the concrete base
-/// object at the end. Returns \a obj itself when it's already a base object; returns the XRef
-/// wrapper when its source can't be resolved (caller can then classify the node as "unresolved
-/// XRef" via isXRefObject on the return value).
+/// Walk \a obj through OSM/WSM Derived wrappers (the typed CDerivedObject::baseObject at each
+/// step) and through XRefObject resolutions (recursively), returning the concrete base object
+/// at the end. Returns \a obj itself when it's already a base object; returns the XRef wrapper
+/// when its source can't be resolved (caller can then classify the node as "unresolved XRef"
+/// via isXRefObject on the return value).
 PIPELINE::MAX::CSceneClass *baseObjectOfObj(PIPELINE::MAX::CSceneClass *obj, int depth = 0);
 
 /// Convenience: the node's `getReference(1)` walked through baseObjectOfObj.

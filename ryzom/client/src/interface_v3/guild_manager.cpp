@@ -784,7 +784,7 @@ void CGuildManager::CDBObsMembers::update(ICDBNode* /* node */)
 // ***************************************************************************
 class CAHGuildSheetOpen : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGuildManager *pGM = CGuildManager::getInstance();
@@ -925,7 +925,7 @@ static void setRights(bool lead, bool hioff, bool offi, bool recr, bool bear, bo
 // ***************************************************************************
 class CAHGuildSheetMenuOpen : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGuildManager *pGM = CGuildManager::getInstance();
@@ -1037,7 +1037,7 @@ static void sendMsgSetGrade(EGSPD::CGuildGrade::TGuildGrade Grade)
 class CAHGuildSheetSortGuildList : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager* pIM= CInterfaceManager::getInstance();
 		CGuildManager::TSortOrder order = (CGuildManager::TSortOrder)(NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:GUILD_LIST:SORT_ORDER")->getValue32());
@@ -1060,7 +1060,7 @@ REGISTER_ACTION_HANDLER(CAHGuildSheetSortGuildList, "sort_guild_list");
 class CAHGuildSheetTellMember : public IActionHandler
 {
 public:
-	void execute (CCtrlBase * pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase * pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGuildManager *pGM = CGuildManager::getInstance();
@@ -1099,7 +1099,7 @@ string		CAHGuildSheetTellMember::MemberNameSelected;
 // ***************************************************************************
 class CAHGuildSheetSetLeader : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -1112,7 +1112,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeader, "guild_member_chg_to_leader");
 // ***************************************************************************
 class CAHGuildSheetSetLeaderConfirm : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		// Leadership change confirmed
 		sendMsgSetGrade(EGSPD::CGuildGrade::Leader);
@@ -1125,7 +1125,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetLeaderConfirm, "guild_member_do_change_
 // ***************************************************************************
 class CAHGuildSheetSetHighOfficer : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgSetGrade(EGSPD::CGuildGrade::HighOfficer);
 	}
@@ -1135,7 +1135,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetHighOfficer, "guild_member_chg_to_high_
 // ***************************************************************************
 class CAHGuildSheetSetOfficer : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgSetGrade(EGSPD::CGuildGrade::Officer);
 	}
@@ -1145,7 +1145,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetOfficer, "guild_member_chg_to_officer")
 // ***************************************************************************
 class CAHGuildSheetSetRecruiter : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//sendMsgSetGrade(EGSPD::CGuildGrade::Recruiter);
 	}
@@ -1155,7 +1155,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetRecruiter, "guild_member_chg_to_recruit
 // ***************************************************************************
 class CAHGuildSheetSetBearer : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		//sendMsgSetGrade(EGSPD::CGuildGrade::Bearer);
 	}
@@ -1165,7 +1165,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetBearer, "guild_member_chg_to_bearer");
 // ***************************************************************************
 class CAHGuildSheetSetMember : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMsgSetGrade(EGSPD::CGuildGrade::Member);
 	}
@@ -1175,7 +1175,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetSetMember, "guild_member_chg_to_member");
 // ***************************************************************************
 class CAHGuildSheetKick : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		const string &message = "GUILD:KICK_MEMBER";
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1211,7 +1211,7 @@ REGISTER_ACTION_HANDLER (CAHGuildSheetKick, "guild_member_kick");
 // ***************************************************************************
 class CHandlerAscensorTeleport : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *ctrlSheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		if (!ctrlSheet) return;
@@ -1366,7 +1366,7 @@ static void sendMoneyServerMessage(const string &sMsg)
 // ***************************************************************************
 class CHandlerGuildInvGetMoney : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMoneyServerMessage("GUILD:TAKE_MONEY");
 		CWidgetManager::getInstance()->popModalWindow();
@@ -1378,7 +1378,7 @@ REGISTER_ACTION_HANDLER (CHandlerGuildInvGetMoney, "guild_inv_get_money");
 // ***************************************************************************
 class CHandlerGuildInvPutMoney : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		sendMoneyServerMessage("GUILD:PUT_MONEY");
 		CWidgetManager::getInstance()->popModalWindow();

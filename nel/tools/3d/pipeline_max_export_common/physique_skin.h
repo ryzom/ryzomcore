@@ -81,7 +81,7 @@ struct SBoneWeight
 bool decodePhysiqueWeights(PIPELINE::MAX::CSceneClass *mod,
                            PIPELINE::MAX::CStorageContainer *modApp,
                            std::vector<std::vector<SBoneWeight> > &outVertWeights,
-                           std::string *err = nullptr);
+                           std::string *err = NULL);
 
 /// Walk the skeleton tree rooted at `root` (scene-order children) into a bone-id map + name list,
 /// matching the reference's buildSkeletonShape mapId convention (duplicate names get "_Second").
@@ -98,13 +98,16 @@ PIPELINE::MAX::BUILTIN::INode *skeletonRootOf(PIPELINE::MAX::BUILTIN::INode *bon
 /// orderedChildrenOf during the skeleton walk. On success, `buildMesh.SkinWeights` has one entry
 /// per vertex (same count as buildMesh.Vertices) and `BonesNames` is the full skeleton bone list
 /// (mesh build later remaps to the used subset). Returns false with a reason in `err` when the
-/// decode cannot produce usable weights (caller should skip the node).
+/// decode cannot produce usable weights (caller should skip the node). `boneNodesOut`
+/// (optional) receives the scene nodes behind BonesNames by bone id — exact duplicate-name-safe
+/// resolution for consumers that need the joints as nodes (glTF skins).
 bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
                            PIPELINE::MAX::BUILTIN::INode &node,
                            const std::vector<PIPELINE::MAX::CSceneClass *> &mods,
                            const std::vector<PIPELINE::MAX::CStorageContainer *> &modApps,
                            PIPELINE::MAX::CSceneClassContainer *ssc,
-                           std::string *err = nullptr);
+                           std::string *err = NULL,
+                           std::vector<PIPELINE::MAX::BUILTIN::INode *> *boneNodesOut = NULL);
 
 } /* namespace PHYSIQUESKIN */
 

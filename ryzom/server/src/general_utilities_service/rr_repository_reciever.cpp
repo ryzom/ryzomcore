@@ -63,13 +63,13 @@ class CRepositoryReceiver:
 {
 public:
 	// IModule specialisation implementation
-	bool initModule(const TParsedCommandLine &initInfo);
-	void onModuleUp(IModuleProxy *module);
-	void onModuleDown(IModuleProxy *module);
+	bool initModule(const TParsedCommandLine &initInfo) NL_OVERRIDE;
+	void onModuleUp(IModuleProxy *module) NL_OVERRIDE;
+	void onModuleDown(IModuleProxy *module) NL_OVERRIDE;
 //	void onProcessModuleMessage(IModuleProxy *sender, const CMessage &msg);
 	NLMISC::CSString getState() const;
 	NLMISC::CSString getName() const;
-	std::string buildModuleManifest() const;
+	std::string buildModuleManifest() const NL_OVERRIDE;
 	void displayModule() const;
 
 	static const std::string &getHelperString()
@@ -78,7 +78,7 @@ public:
 		return help;
 	}
 
-	virtual bool isImmediateDispatchingSupported() const { return false; }
+	virtual bool isImmediateDispatchingSupported() const NL_OVERRIDE { return false; }
 
 public:
 	// remaining public interface
@@ -87,13 +87,13 @@ public:
 private:
 	// private methods
 	// 
-	virtual void fileList(NLNET::IModuleProxy *sender, const std::vector < TFileRecord > &files);
+	virtual void fileList(NLNET::IModuleProxy *sender, const std::vector < TFileRecord > &files) NL_OVERRIDE;
 	// 
-	virtual void beginFile(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 fileSize);
+	virtual void beginFile(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 fileSize) NL_OVERRIDE;
 	// 
-	virtual void fileData(NLNET::IModuleProxy *sender, const std::string &fileName, const std::string &data);
+	virtual void fileData(NLNET::IModuleProxy *sender, const std::string &fileName, const std::string &data) NL_OVERRIDE;
 	// 
-	virtual void fileEnd(NLNET::IModuleProxy *sender, const std::string &fileName);
+	virtual void fileEnd(NLNET::IModuleProxy *sender, const std::string &fileName) NL_OVERRIDE;
 
 private:
 	// private data

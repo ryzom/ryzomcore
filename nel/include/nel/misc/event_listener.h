@@ -83,7 +83,7 @@ public:
 
 	/// Constructor
 	CEventListenerAsync();
-	virtual ~CEventListenerAsync() {}
+	virtual ~CEventListenerAsync() NL_OVERRIDE {}
 
 	/**
 	  * Register the listener to the server.
@@ -128,7 +128,7 @@ protected:
 	 * Call back of the listener.
 	 * \param event is the event send to the listener
 	 */
-	virtual void operator ()(const CEvent& event);
+	virtual void operator ()(const CEvent& event) NL_OVERRIDE;
 	CBitSet _KeyArray;
 	// Must have 2 arrays because of key repetition...
 	CBitSet _KeyDownArray, _KeyReleaseArray;

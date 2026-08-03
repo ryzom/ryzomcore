@@ -25,7 +25,7 @@ private:
 	class	CItemEditionWindow : public IItemInfoWaiter
 	{
 		public:
-			~CItemEditionWindow() {	_CurrItemSheet = nullptr;	}
+			~CItemEditionWindow() NL_OVERRIDE {	_CurrItemSheet = nullptr;	}
 			// start that page (display and setup ui)
 			void begin();
 			// end that page (hide and deactivate ui)
@@ -33,7 +33,7 @@ private:
 			// update function : it is called at each frame.
 			void update();
 			void	validate();
-			void infoReceived();
+			void infoReceived() NL_OVERRIDE;
 		public:
 			CItemEditionWindow() : _CurrItemSheet(nullptr) {}
 			// If the window is in Edition or Display mode

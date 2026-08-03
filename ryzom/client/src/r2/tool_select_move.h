@@ -36,23 +36,23 @@ public:
 	NLMISC_DECLARE_CLASS(R2::CToolSelectMove);
 
 	CToolSelectMove();
-	virtual ~CToolSelectMove() {}
+	virtual ~CToolSelectMove() NL_OVERRIDE {}
 	// fram CTool
-	virtual void updateBeforeRender();
+	virtual void updateBeforeRender() NL_OVERRIDE;
 protected:
 	// from CTool
-	virtual void onActivate();
-	virtual const char *getToolUIName() const { return "selectMove"; }
-	virtual bool  isCreationTool() const { return false; }
-	virtual bool isActionPossibleOn(const CInstance &instance) const;
+	virtual void onActivate() NL_OVERRIDE;
+	virtual const char *getToolUIName() const NL_OVERRIDE { return "selectMove"; }
+	virtual bool  isCreationTool() const NL_OVERRIDE { return false; }
+	virtual bool isActionPossibleOn(const CInstance &instance) const NL_OVERRIDE;
 	// from CToolMaintainedAction
-	virtual void beginAction(CInstance &instance);
-	virtual void cancelAction(CInstance &instance);
-	virtual void commitAction(CInstance &instance);
-	virtual void updateAction(CInstance &instance);
-	virtual const char *getCursorForPossibleAction() const;
-	virtual const char *getDefaultCursor() const;
-	virtual const char *getPickCursor() const;
+	virtual void beginAction(CInstance &instance) NL_OVERRIDE;
+	virtual void cancelAction(CInstance &instance) NL_OVERRIDE;
+	virtual void commitAction(CInstance &instance) NL_OVERRIDE;
+	virtual void updateAction(CInstance &instance) NL_OVERRIDE;
+	virtual const char *getCursorForPossibleAction() const NL_OVERRIDE;
+	virtual const char *getDefaultCursor() const NL_OVERRIDE;
+	virtual const char *getPickCursor() const NL_OVERRIDE;
 private:
 	//
 	sint32 _MouseX;

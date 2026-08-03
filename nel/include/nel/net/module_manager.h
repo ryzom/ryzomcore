@@ -192,8 +192,8 @@ namespace NLNET
 			return TLocalModuleFactoryRegistry::instance();
 		}
 
-		virtual void onLibraryLoaded(bool /* firstTime */) {}
-		virtual void onLibraryUnloaded(bool /* lastTime */) {}
+		virtual void onLibraryLoaded(bool /* firstTime */) NL_OVERRIDE {}
+		virtual void onLibraryUnloaded(bool /* lastTime */) NL_OVERRIDE {}
 	};
 
 } // namespace NLNET

@@ -54,21 +54,21 @@ public:
 	float getRadiusCut(void) const { return _RadiusCut; }
 
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSShockWave);
 
 	/// complete the bbox depending on the size of particles
-	virtual bool completeBBox(NLMISC::CAABBox &box) const  ;
+	virtual bool completeBBox(NLMISC::CAABBox &box) const NL_OVERRIDE  ;
 
 	/// return true if there are transparent faces in the object
-	virtual bool hasTransparentFaces(void);
+	virtual bool hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool hasOpaqueFaces(void);
+	virtual bool hasOpaqueFaces(void) NL_OVERRIDE;
 
 	/// return the max number of faces needed for display. This is needed for LOD balancing
-	virtual uint32 getNumWantedTris() const;
+	virtual uint32 getNumWantedTris() const NL_OVERRIDE;
 
 	/// set the U factor for textures
 	void			setUFactor(float value);
@@ -77,17 +77,17 @@ public:
 	float			getUFactor(void) const { return _UFactor; }
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool hasLightableFaces() { 	return false; }
+	virtual bool hasLightableFaces() NL_OVERRIDE { 	return false; }
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return true; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return true; }
 
 	// from CPSLocatedBindable
-	virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv);
+	virtual void enumTexs(std::vector<NLMISC::CSmartPtr<ITexture> > &dest, IDriver &drv) NL_OVERRIDE;
 
 	// from CPSParticle
-	virtual void setZBias(float value) { CPSMaterial::setZBias(value); }
-	virtual float getZBias() const { return CPSMaterial::getZBias(); }
+	virtual void setZBias(float value) NL_OVERRIDE { CPSMaterial::setZBias(value); }
+	virtual float getZBias() const NL_OVERRIDE { return CPSMaterial::getZBias(); }
 
 protected:
 
@@ -97,31 +97,31 @@ protected:
 	void			updateVbColNUVForRender(uint32 startIndex, uint32 size, uint32 srcStep, CVertexBuffer &vb, IDriver &drv);
 
 	/// update the material and the vb so that they match the color scheme. Inherited from CPSColoredParticle
-	virtual void	updateMatAndVbForColor(void);
+	virtual void	updateMatAndVbForColor(void) NL_OVERRIDE;
 
 	/// update the material and the vb so that they match the texture scheme.
-	virtual void	updateMatAndVbForTexture(void);
+	virtual void	updateMatAndVbForTexture(void) NL_OVERRIDE;
 
 	/**	Generate a new element for this bindable. They are generated according to the properties of the class
 	 */
-	virtual void	newElement(const CPSEmitterInfo &info);
+	virtual void	newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
 	/** Delete an element given its index
 	 *  Attributes of the located that hold this bindable are still accessible for the index given
 	 *  index out of range -> nl_assert
 	 */
-	virtual void	deleteElement(uint32 index) ;
+	virtual void	deleteElement(uint32 index) NL_OVERRIDE ;
 
 	/** Resize the bindable attributes containers. Size is the max number of element to be contained. DERIVERS MUST CALL THEIR PARENT VERSION
 	 * should not be called directly. Call CPSLocated::resize instead
 	 */
-	virtual void	resize(uint32 size);
+	virtual void	resize(uint32 size) NL_OVERRIDE;
 
-	virtual CPSLocated *getColorOwner(void) { return _Owner; }
-	virtual CPSLocated *getSizeOwner(void) { return _Owner; }
-	virtual CPSLocated *getAngle2DOwner(void) { return _Owner; }
-	virtual CPSLocated *getPlaneBasisOwner(void) { return _Owner; }
-	virtual CPSLocated *getTextureIndexOwner(void) { return _Owner; }
+	virtual CPSLocated *getColorOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getSizeOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getAngle2DOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getPlaneBasisOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getTextureIndexOwner(void) NL_OVERRIDE { return _Owner; }
 
 private:
 	typedef CHashMap<uint, CVertexBuffer> TVBMap;
@@ -146,7 +146,7 @@ private:
 	uint getNumShockWavesInVB() const;
 	//
 	void setupUFactor();
-	virtual void draw(bool opaque);
+	virtual void draw(bool opaque) NL_OVERRIDE;
 	/// initialisations
 	virtual void	init(void);
 

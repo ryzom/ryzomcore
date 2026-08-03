@@ -33,7 +33,7 @@ class CCharacterTickUpdateTimerEvent : public CTimerEvent
 public:
 
 	CCharacterTickUpdateTimerEvent(CCharacter *parent);
-	void timerCallback(CTimer *owner);
+	void timerCallback(CTimer *owner) NL_OVERRIDE;
 private:
 	CCharacter *_Parent;
 };
@@ -45,7 +45,7 @@ class CCharacterDbUpdateTimerEvent:public CTimerEvent
 	NL_INSTANCE_COUNTER_DECL(CCharacterDbUpdateTimerEvent);
 public:
 	CCharacterDbUpdateTimerEvent(CCharacter *parent);
-	void timerCallback(CTimer *owner);
+	void timerCallback(CTimer *owner) NL_OVERRIDE;
 private:
 	CCharacter *_Parent;
 };
@@ -57,7 +57,7 @@ class CCharacterBarUpdateTimerEvent : public CTimerEvent
 	NL_INSTANCE_COUNTER_DECL(CCharacterBarUpdateTimerEvent);
 public:
 	CCharacterBarUpdateTimerEvent(CCharacter *parent);
-	void timerCallback(CTimer *owner);
+	void timerCallback(CTimer *owner) NL_OVERRIDE;
 private:
 	CCharacter *_Parent;
 };

@@ -265,7 +265,7 @@ CContinent::CContinent()
 
 class CChangeTaskPriority : public CTaskManager::IChangeTaskPriority
 {
-	virtual float getTaskPriority(const IRunnable &runnable)
+	virtual float getTaskPriority(const IRunnable &runnable) NL_OVERRIDE
 	{
 		const NLMISC::IRunnablePos *_3dRunnable = dynamic_cast<const NLMISC::IRunnablePos*>(&runnable);
 		if (_3dRunnable)
@@ -376,7 +376,7 @@ void CContinent::setup()
 //-----------------------------------------------
 class CPCBank : public IProgressCallback
 {
-	virtual void progress (float /* progressValue */) {}
+	virtual void progress (float /* progressValue */) NL_OVERRIDE {}
 };
 CPCBank PCBank;
 

@@ -234,7 +234,7 @@ public:
 	CDeposit() : _AutoSpawnSourcePt(NULL), _QuantityConstraintsPt(NULL), _Ecotype(ECOSYSTEM::common_ecosystem), _FilterPhase(0), _KamiAnger(0.0f), _MinQuality(-1), _MaxQuality(-1), _SourceFXIndex(0), _CanProspect(false), _Enabled(false), _CurrentNbAutoSpawnedSources(0), _AllowDepletionRisk(true), _Alias(0) {}
 
 	/// Destructor
-	~CDeposit();
+	~CDeposit() NL_OVERRIDE;
 
 	/// Add an ecotype information
 	static void		addEcotype( CEcotypeZone *ecotypeZone ) { _EcotypeZones.push_back( ecotypeZone ); }

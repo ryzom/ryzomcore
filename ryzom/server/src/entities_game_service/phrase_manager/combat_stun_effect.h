@@ -51,7 +51,7 @@ public:
 	virtual bool update( uint32 & updateFlag );
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// set stunned entity
 	inline void stunnedEntity(CEntityBase *entity) { _StunnedEntity = entity; }

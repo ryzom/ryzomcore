@@ -13,8 +13,14 @@
  * range. This closes the "one face-index remap" §10x listed as an open item, and generalises to
  * the face diffs on the other Edit-Mesh direct-tier files. One decode + one apply, both consumers
  * on it, so the two copies don't drift again.
+ *
+ * The chunk-level decode has since graduated into the pipeline_max library
+ * (BUILTIN::STORAGE::CMeshDelta, bit-exact rows corpus-selftested — design-doc §10j-sept);
+ * readModApp is a thin copy from that typed model into SEdits. The evaluation semantics
+ * (applyEdits and the SEdits shape) stay here — they are exporter policy, not file format.
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.7 (1M context)
+ * \author Claude Fable 5
  */
 
 /*

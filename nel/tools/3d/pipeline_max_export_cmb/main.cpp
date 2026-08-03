@@ -66,6 +66,7 @@
 
 #include <nel/misc/types_nl.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/matrix.h>
 #include <nel/misc/aabbox.h>
@@ -87,6 +88,8 @@
 #include "../pipeline_max/builtin/node_impl.h"
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/geom_object.h"
+#include "../pipeline_max/builtin/derived_object.h"
+#include "../pipeline_max/builtin/control_transform.h"
 #include "../pipeline_max/builtin/storage/geom_buffers.h"
 
 #include "../pipeline_max_export_common/max_scene.h"
@@ -96,6 +99,7 @@
 #include "../pipeline_max_export_common/xref_resolve.h"
 #include "../pipeline_max_export_common/parametric_mesh.h"
 #include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 
 #include <algorithm>
@@ -115,14 +119,10 @@ const uint32 NEL3D_APPDATA_COLLISION = 1423062613;
 const uint32 NEL3D_APPDATA_COLLISION_EXTERIOR = 1423062614;
 const uint32 NEL3D_APPDATA_IGNAME = 1423062564;
 
-// Derived-object wrapper classes and modifier superclasses — the pair the object walk uses to
-// unwrap the modifier stack down to the base object; shared with pipeline_max_export_ig.
-using XREFRESOLVE::CLASSID_OSM_DERIVED;
-using XREFRESOLVE::CLASSID_WSM_DERIVED;
+// XRef resolution (shared with pipeline_max_export_ig). Derived-object wrappers are the typed
+// CDerivedObject/CWSMDerivedObject — the object walk unwraps modifier stacks through them.
 using XREFRESOLVE::isXRefObject;
 using XREFRESOLVE::resolveXRefObject;
-const TSClassId SCLASS_OSMODIFIER = 0x00000810;
-const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 
 const float WELD_THRESHOLD = 0.005f;
 const sint GRID_SIZE = 64;
@@ -282,30 +282,12 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 			obj = resolved;
 			continue;
 		}
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = nullptr;
-		std::vector<CSceneClass *> mods;
-		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		for (uint m = 0; m < derived->modifierCount(); ++m)
 		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER) { mods.push_back(r); continue; }
-			base = r;
-		}
-		std::vector<CStorageContainer *> modApps;
-		{
-			const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
-			for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-				if (it->first == 0x2500)
-					modApps.push_back(dynamic_cast<CStorageContainer *>(it->second));
-		}
-		for (uint m = 0; m < mods.size(); ++m)
-		{
-			NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
-			CStorageContainer *app = m < modApps.size() ? modApps[m] : nullptr;
+			NLMISC::CClassId mcid = derived->modifier(m)->classDesc()->classId();
+			CStorageContainer *app = derived->modApp(m);
 			if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 			{
 				SModOp op;
@@ -322,7 +304,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 				op.MirrorAxis = 0;
 				op.MirrorOffset = 0.0f;
 				op.MirrorCopy = false;
-				CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[m]);
+				CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(derived->modifier(m));
 				for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
 				{
 					CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
@@ -335,26 +317,15 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 						op.MirrorCopy = OLDPBLOCK::paramInt(params, 1) != 0;
 						op.MirrorOffset = OLDPBLOCK::paramFloat(params, 2);
 					}
-					else if (ref->classDesc()->classId() == NLMISC::CClassId(0x00002005, 0x00000000))
+					else if (CControlPRS *prm = dynamic_cast<CControlPRS *>(ref))
 					{
-						CReferenceMaker *prm = dynamic_cast<CReferenceMaker *>(ref);
-						CSceneClass *pc = dynamic_cast<CSceneClass *>(prm->getReference(0));
-						MAXMATH::Point3M gp = MAXSCENE::posValueAt0(pc);
-						MAXMATH::QuatM gr = MAXSCENE::rotValueAt0(dynamic_cast<CSceneClass *>(prm->getReference(1)));
-						MAXMATH::ScaleValueM gs = MAXSCENE::scaleValueAt0(dynamic_cast<CSceneClass *>(prm->getReference(2)));
+						MAXMATH::Point3M gp = MAXSCENE::posValueAt0(dynamic_cast<CSceneClass *>(prm->positionController()));
+						MAXMATH::QuatM gr = MAXSCENE::rotValueAt0(dynamic_cast<CSceneClass *>(prm->rotationController()));
+						MAXMATH::ScaleValueM gs = MAXSCENE::scaleValueAt0(dynamic_cast<CSceneClass *>(prm->scaleController()));
 						op.GizmoTM = MAXMATH::composePRS(gp, gr, gs);
 					}
 				}
-				if (app)
-				{
-					for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin(); it != app->chunks().end(); ++it)
-					{
-						if (it->first != 0x2510) continue;
-						CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-						if (raw && raw->Value.size() >= 48)
-							memcpy(op.CtxTM.m, nlVectorData(raw->Value), 48);
-					}
-				}
+				CDerivedObject::modAppContextTM(app, &op.CtxTM.m[0][0]);
 				opStack.push_back(op);
 			}
 			else if (mcid != NLMISC::CClassId(0x000f72b1, 0x00000000)) // UVW Map: geometry-neutral
@@ -363,6 +334,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 					ucstring(node.userName()).toUtf8().c_str(), mcid.toString().c_str());
 			}
 		}
+		CSceneClass *base = derived->baseObject();
 		if (!base) break;
 		obj = base;
 	}
@@ -434,7 +406,7 @@ bool extractObjectMesh(INode &node, CSceneClass *rawObj, std::vector<NLMISC::CVe
 		// nodes are frequently plain Boxes with an Edit Mesh modifier stack on top (§10g), so
 		// the modifier evaluation pass below still gets to run.
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *pblock = nullptr;
+		CSceneClass *pblock = NULL;
 		for (uint r = 0; rm && r < rm->nbReferences(); ++r)
 		{
 			CSceneClass *ref = dynamic_cast<CSceneClass *>(rm->getReference(r));
@@ -695,51 +667,19 @@ bool buildCollisionMesh(const std::vector<SCandidate *> &group, MAXSCENE::SNodeT
 
 } /* anonymous namespace */
 
-int main(int argc, char **argv)
+// Whole-file flow shared by the standalone tool and the max2gltf writer (PMB_CMB_NO_MAIN +
+// nel_cmbs blob list): one code path, the blob and the tool's files cannot drift. Returns 0
+// with (igname, .cmb bytes) pairs, 3 when the scene has no collision geometry, 1 on error
+// (partial output kept when some groups succeeded, matching the tool's behavior).
+int pmbExportCmbsForGltf(const std::string &inputPath, PMAXLOAD::SLoadedMax &lm, bool ligoMode,
+                         std::vector<std::pair<std::string, std::vector<uint8> > > &filesOut)
 {
-	bool ligoMode = false;
-	std::vector<std::string> args;
-	for (int i = 1; i < argc; ++i)
-	{
-		std::string a = argv[i];
-		if (a == "--ligo") ligoMode = true;
-		else if (a == "--db" && i + 1 < argc) { DBPATH::setDefaultRoot(argv[++i]); }
-		else if (a == "--path-alias" && i + 1 < argc)
-		{
-			// --path-alias <windows-prefix>=<root>, same shape as pipeline_max_export_ig — for
-			// corpus content authored under a different drive/root than R:\graphics\...
-			std::string kv = argv[++i];
-			std::string::size_type eq = kv.find('=');
-			if (eq == std::string::npos)
-				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
-			else
-				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
-		}
-		else args.push_back(a);
-	}
-	if (args.size() < 2)
-	{
-		std::cerr << "usage: pipeline_max_export_cmb [--ligo] [--db <root>] [--path-alias <prefix>=<root>] <input.max> <output_dir>\n";
-		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
-		return 1;
-	}
-	std::string inputPath = args[0];
-	std::string outputDir = args[1];
-	while (!outputDir.empty() && (outputDir[outputDir.size() - 1] == '/' || outputDir[outputDir.size() - 1] == '\\'))
-		outputDir.resize(outputDir.size() - 1);
-
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-	NELPATCH::CNelPatch::registerClasses(&reg);
-
 	// XRef resolution: shared with pipeline_max_export_ig. --ligo mode's collision nodes are
 	// routinely XRefs into other .max files (§10v open); the registry drives every scene we
-	// pull in as an XRef source. Deduce the DB root from the input path when --db was not
-	// passed — same convention as pipeline_max_export_ig.
-	XREFRESOLVE::configure(&reg);
+	// pull in as an XRef source — the shared one the caller's scene was parsed with. Deduce
+	// the DB root from the input path when --db was not passed — same convention as
+	// pipeline_max_export_ig.
+	XREFRESOLVE::configure(PMAXLOAD::sceneRegistry());
 	if (DBPATH::defaultRoot().empty())
 	{
 		// Strip "/stuff/..." or "/landscape/..." tail to find the DB root the input lives under.
@@ -761,19 +701,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-	CStorageOleIn in;
-	if (!in.open(inputPath)) { std::cerr << "ERROR: not an OLE compound file: " << inputPath << "\n"; return 1; }
-
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
 	// Select candidates: `geometry`-category nodes flagged COLLISION or COLLISION_EXTERIOR,
 	// in scene-container order (the maxscript's `for m in geometry` enumeration, same precedent
 	// as every other tool in this family). --ligo mode additionally accepts XRefObject nodes,
@@ -781,7 +708,7 @@ int main(int argc, char **argv)
 	// exactly as the reference plugin's EvalWorldState resolves them live; this closes design-
 	// doc §10v's "6 of 1201 brick files export nothing" gap.
 	std::vector<SCandidate> candidates;
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -830,7 +757,6 @@ int main(int argc, char **argv)
 	}
 
 	MAXSCENE::SNodeTMCache tmCache;
-	int written = 0;
 	bool hadError = false;
 	for (size_t g = 0; g < groupOrder.size(); ++g)
 	{
@@ -843,16 +769,84 @@ int main(int argc, char **argv)
 			hadError = true;
 			continue;
 		}
-		std::string outPath = outputDir + "/" + igname + ".cmb";
-		NLMISC::COFile file;
-		if (!file.open(outPath)) { std::cerr << "ERROR: cannot open output " << outPath << "\n"; hadError = true; continue; }
-		cmb.serial(file);
-		file.close();
-		++written;
+		try
+		{
+			NLMISC::CMemStream ms;
+			cmb.serial(ms);
+			filesOut.push_back(std::make_pair(igname,
+				std::vector<uint8>(ms.buffer(), ms.buffer() + ms.length())));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			std::cerr << "ERROR: group \"" << igname << "\" serial failed: " << e.what() << "\n";
+			hadError = true;
+		}
 	}
 
+	if (hadError && filesOut.empty()) return 1;
+	return 0;
+}
+
+#ifndef PMB_CMB_NO_MAIN
+int main(int argc, char **argv)
+{
+	bool ligoMode = false;
+	std::vector<std::string> args;
+	for (int i = 1; i < argc; ++i)
+	{
+		std::string a = argv[i];
+		if (a == "--ligo") ligoMode = true;
+		else if (a == "--db" && i + 1 < argc) { DBPATH::setDefaultRoot(argv[++i]); }
+		else if (a == "--path-alias" && i + 1 < argc)
+		{
+			std::string kv = argv[++i];
+			std::string::size_type eq = kv.find('=');
+			if (eq == std::string::npos)
+				fprintf(stderr, "WARNING: --path-alias expects <prefix>=<root>, got '%s'\n", kv.c_str());
+			else
+				DBPATH::addAlias(kv.substr(0, eq), kv.substr(eq + 1));
+		}
+		else args.push_back(a);
+	}
+	if (args.size() < 2)
+	{
+		std::cerr << "usage: pipeline_max_export_cmb [--ligo] [--db <root>] [--path-alias <prefix>=<root>] <input.max> <output_dir>\n";
+		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
+		return 1;
+	}
+	std::string inputPath = args[0];
+	std::string outputDir = args[1];
+	while (!outputDir.empty() && (outputDir[outputDir.size() - 1] == '/' || outputDir[outputDir.size() - 1] == '\\'))
+		outputDir.resize(outputDir.size() - 1);
+
+	std::vector<std::pair<std::string, std::vector<uint8> > > files;
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(inputPath, lm))
+		return 1;
+	int rc = pmbExportCmbsForGltf(inputPath, lm, ligoMode, files);
+	if (rc != 0) return rc;
+	bool hadError = false;
+	int written = 0;
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		std::string outPath = outputDir + "/" + files[i].first + ".cmb";
+		NLMISC::COFile file;
+		if (!file.open(outPath)) { std::cerr << "ERROR: cannot open output " << outPath << "\n"; hadError = true; continue; }
+		try
+		{
+			file.serialBuffer(&files[i].second[0], (uint)files[i].second.size());
+			file.close();
+			++written;
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			std::cerr << "ERROR: write failed for " << outPath << ": " << e.what() << "\n";
+			hadError = true;
+		}
+	}
 	if (hadError && written == 0) return 1;
 	return 0;
 }
+#endif /* PMB_CMB_NO_MAIN */
 
 /* end of file */

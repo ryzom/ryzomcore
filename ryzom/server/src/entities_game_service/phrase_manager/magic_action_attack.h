@@ -53,7 +53,7 @@ public:
 protected:
 	/// @name IMagicAction interface
 	//@{
-	virtual bool validate(CMagicPhrase* phrase, std::string& errorCode);
+	virtual bool validate(CMagicPhrase* phrase, std::string& errorCode) NL_OVERRIDE;
 	
 	virtual void launch(
 		CMagicPhrase*				phrase,
@@ -67,7 +67,7 @@ protected:
 		NLMISC::CBitSet const&		invulnerabilityAll,
 		bool						isMad,
 		NLMISC::CBitSet&			resists,
-		TReportAction const&		actionReport);
+		TReportAction const&		actionReport) NL_OVERRIDE;
 	
 	virtual void apply(
 		CMagicPhrase*				phrase,
@@ -84,9 +84,9 @@ protected:
 		TReportAction const&		actionReport,
 		sint32						vamp,
 		float						vampRatio,
-		bool						reportXp);
+		bool						reportXp) NL_OVERRIDE;
 	
-	virtual bool addBrick(CStaticBrick const& brick, CMagicPhrase* phrase, bool& effectEnd, CBuildParameters& buildParams);
+	virtual bool addBrick(CStaticBrick const& brick, CMagicPhrase* phrase, bool& effectEnd, CBuildParameters& buildParams) NL_OVERRIDE;
 	//@}
 	
 private:

@@ -292,7 +292,7 @@ namespace ADMIN
 
 		}
 
-		bool initModule(const TParsedCommandLine &pcl)
+		bool initModule(const TParsedCommandLine &pcl) NL_OVERRIDE
 		{
 			CModuleBase::initModule(pcl);
 
@@ -337,7 +337,7 @@ namespace ADMIN
 			return true;
 		}
 
-		void onModuleUp(IModuleProxy *proxy)
+		void onModuleUp(IModuleProxy *proxy) NL_OVERRIDE
 		{
 			if (proxy->getModuleClassName() == "AdminService")
 			{
@@ -418,7 +418,7 @@ namespace ADMIN
 			}
 		}
 
-		void onModuleDown(IModuleProxy *proxy)
+		void onModuleDown(IModuleProxy *proxy) NL_OVERRIDE
 		{
 			if (proxy == _AdminService)
 			{
@@ -428,7 +428,7 @@ namespace ADMIN
 			}
 		}
 
-		void onModuleUpdate()
+		void onModuleUpdate() NL_OVERRIDE
 		{
 			H_AUTO(CAdminExecutorService_onModuleUpdate);
 
@@ -1022,7 +1022,7 @@ namespace ADMIN
 		//// Virtuals from IModuleTrackerCb
 		///////////////////////////////////////////////////////////////////////
 
-		virtual void onTrackedModuleUp(IModuleProxy *moduleProxy)
+		virtual void onTrackedModuleUp(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			nldebug("Service module '%s' UP", moduleProxy->getModuleName().c_str());
 
@@ -1102,7 +1102,7 @@ namespace ADMIN
 
 			sendUpServiceUpdate();			
 		}
-		virtual void onTrackedModuleDown(IModuleProxy *moduleProxy)
+		virtual void onTrackedModuleDown(IModuleProxy *moduleProxy) NL_OVERRIDE
 		{
 			nldebug("Service module '%s' DOWN", moduleProxy->getModuleName().c_str());
 
@@ -1177,7 +1177,7 @@ retry_pending_command_loop:
 		///////////////////////////////////////////////////////////////////////
 
 		// AS send orders for a shard
-		virtual void setShardOrders(NLNET::IModuleProxy *sender, const std::string &shardName, const TShardOrders &shardOrders)
+		virtual void setShardOrders(NLNET::IModuleProxy *sender, const std::string &shardName, const TShardOrders &shardOrders) NL_OVERRIDE
 		{
 			nlinfo("AS setShardOrders for shard '%s' to '%s'", shardName.c_str(), shardOrders.toString().c_str());
 
@@ -1195,7 +1195,7 @@ retry_pending_command_loop:
 		}
 
 		// AS send a command to shutdown a shard with a delay
-		virtual void shutdownShard(NLNET::IModuleProxy *sender, const std::string &shardName, uint32 delay)
+		virtual void shutdownShard(NLNET::IModuleProxy *sender, const std::string &shardName, uint32 delay) NL_OVERRIDE
 		{
 			TStopingShardInfo ssi;
 			ssi.ShardName = shardName;
@@ -1212,13 +1212,13 @@ retry_pending_command_loop:
 		}
 
 		// AS send a control command to this AES
-		virtual void controlCmd(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceAlias, const std::string &command)
+		virtual void controlCmd(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceAlias, const std::string &command) NL_OVERRIDE
 		{
 			// create a displayer to gather the output of the command
 			class CStringDisplayer: public IDisplayer
 			{
 			public:
-				virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message)
+				virtual void doDisplay( const CLog::TDisplayInfo& args, const char *message) NL_OVERRIDE
 				{
 					_Data += message;
 				}
@@ -1262,7 +1262,7 @@ retry_pending_command_loop:
 		}
 
 		//The return is sent back by another message
-		virtual void serviceCmd(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceAlias, const std::string &command)
+		virtual void serviceCmd(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceAlias, const std::string &command) NL_OVERRIDE
 		{
 			// look in the list of service for a matching one
 			IModuleProxy *proxy = findOnlineService(serviceAlias);
@@ -1286,7 +1286,7 @@ retry_pending_command_loop:
 		}
 
 		// AES client send back the result of execution of a command
-		virtual void commandResult(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceAlias, const std::string &result)
+		virtual void commandResult(NLNET::IModuleProxy *sender, uint32 commandId, const std::string &serviceAlias, const std::string &result) NL_OVERRIDE
 		{
 			// check for waiting commands
 			TPendingWebCommands::iterator it(_PendingWebCommands.find(commandId));
@@ -1313,7 +1313,7 @@ retry_pending_command_loop:
 
 
 		// An AES send graph data update
-		virtual void graphUpdate(NLNET::IModuleProxy *sender, const TGraphDatas &graphDatas)
+		virtual void graphUpdate(NLNET::IModuleProxy *sender, const TGraphDatas &graphDatas) NL_OVERRIDE
 		{
 			if (_AdminService != NULL)
 			{ 
@@ -1323,7 +1323,7 @@ retry_pending_command_loop:
 		}
 
 		// A service high rez graph data update
-		virtual void highRezGraphUpdate(NLNET::IModuleProxy *sender, const THighRezDatas &graphDatas)
+		virtual void highRezGraphUpdate(NLNET::IModuleProxy *sender, const THighRezDatas &graphDatas) NL_OVERRIDE
 		{
 			if (_AdminService != NULL)
 			{
@@ -1333,7 +1333,7 @@ retry_pending_command_loop:
 		}
 
 		// A service send an update of of it's status string
-		virtual void serviceStatusUpdate(NLNET::IModuleProxy *sender, const std::string &status)
+		virtual void serviceStatusUpdate(NLNET::IModuleProxy *sender, const std::string &status) NL_OVERRIDE
 		{
 			TConnectedServiceIndex::iterator it(_ConnectedServiceIndex.find(sender));
 			if (it == _ConnectedServiceIndex.end())

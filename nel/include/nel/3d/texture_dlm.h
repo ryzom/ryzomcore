@@ -73,7 +73,7 @@ public:
 	CTextureDLM(uint width, uint height);
 
 	/// Since texture is always in memory...
-	void			doGenerate(bool /* async */ = false)
+	void			doGenerate(bool /* async */ = false) NL_OVERRIDE
 	{
 		// Do nothing. texture still in memory... :o)
 	}
@@ -81,7 +81,7 @@ public:
 	/// TextureDLM are system. Do not need to serialize them...
 	// default ctor is required for compilation with NLMISC_DECLARE_CLASS, but never called...
 	CTextureDLM() {nlstop;}
-	virtual void	serial(NLMISC::IStream &/* f */) {nlstop;}
+	virtual void	serial(NLMISC::IStream &/* f */) NL_OVERRIDE {nlstop;}
 	NLMISC_DECLARE_CLASS(CTextureDLM);
 
 

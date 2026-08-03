@@ -76,6 +76,10 @@ struct CMeshUtilsContext
 	const NL_SCENE_INTERNAL_TYPE *InternalScene;
 	CSceneMeta SceneMeta;
 
+	// Materials sidecar entries (name -> reconstructed CMaterial), from --materials files.
+	// Named scene materials resolve here first; see material_sidecar.h.
+	TMaterialMap SidecarMaterials;
+
 	TNodeContextMap Nodes; // Impl note: Should never end up containing the scene root node.
 	// std::map<const aiMesh *, NLMISC::CSString> MeshNames; // Maps meshes to a node name ********************* todo ***************
 };

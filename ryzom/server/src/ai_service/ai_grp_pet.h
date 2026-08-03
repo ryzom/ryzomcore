@@ -44,10 +44,10 @@ public:
 	
 	CGrpPet& getPersistent() const;
 	
-	void spawnBots() { }
-	void despawnBots (bool immediately) { }
+	void spawnBots() NL_OVERRIDE { }
+	void despawnBots (bool immediately) NL_OVERRIDE { }
 	
-	void update();
+	void update() NL_OVERRIDE;
 		
 	CPathCont& getPathCont() { return _PathCont; }
 	
@@ -69,11 +69,11 @@ class CGrpPet
 public:
 	CGrpPet(CMgrPet* mgr, NLMISC::CEntityId const& owner, CAIAliasDescriptionNode* aliasTree = NULL);
 	
-	CDynGrpBase* getGrpDynBase() { return NULL; }
+	CDynGrpBase* getGrpDynBase() NL_OVERRIDE { return NULL; }
 	
-	RYZOMID::TTypeId getRyzomType() { return RYZOMID::pack_animal; }
+	RYZOMID::TTypeId getRyzomType() NL_OVERRIDE { return RYZOMID::pack_animal; }
 	
-	CAIS::CCounter& getSpawnCounter();
+	CAIS::CCounter& getSpawnCounter() NL_OVERRIDE;
 	
 	/// @name Service events
 	//@{
@@ -85,11 +85,11 @@ public:
 	
 	void release() { }
 	
-	void setEvent(uint eventId);
+	void setEvent(uint eventId) NL_OVERRIDE;
 	
-	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup();
+	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup() NL_OVERRIDE;
 	
-	CPersistentStateInstance* getPersistentStateInstance();
+	CPersistentStateInstance* getPersistentStateInstance() NL_OVERRIDE;
 	
 	NLMISC::CEntityId const& getPetOwner() const { return _PetOwner; }
 	
@@ -97,7 +97,7 @@ public:
 	
 	CCont<CBot>& bots() { return _Bots; }
 	
-	virtual std::string	getOneLineInfoString() const { return std::string("Pet group '") + getName() + "'"; }
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE { return std::string("Pet group '") + getName() + "'"; }
 	
 private:
 	NLMISC::CEntityId const _PetOwner;

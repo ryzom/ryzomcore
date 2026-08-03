@@ -52,8 +52,8 @@ namespace SAVES
 	{
 	public:
 		CSavesUnitFileList(const CSString& parentPath,const CSString& directoryName,const CSString& fileSpec);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
 	protected:
 		CSString _Path;
@@ -72,8 +72,8 @@ namespace SAVES
 	{
 	public:
 		CShardRootDirectory(const CSString& path);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
 	private:
 		CSString _Path;
@@ -119,13 +119,13 @@ namespace SAVES
 	{
 	public:
 		CShardGuildDirectory(const CSString& parentPath,const CSString& directoryName);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
-		void addNew(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size);
-		void addChange(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size);
-		void addDeleted(const NLMISC::CSString& fileName);
-		void addElement(ISavesUnitElement* newChild);
+		void addNew(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size) NL_OVERRIDE;
+		void addChange(const NLMISC::CSString& fileName,uint32 timeStamp,uint32 size) NL_OVERRIDE;
+		void addDeleted(const NLMISC::CSString& fileName) NL_OVERRIDE;
+		void addElement(ISavesUnitElement* newChild) NL_OVERRIDE;
 
 	private:
 		ISavesCallbackHandler* _Parent;
@@ -140,8 +140,8 @@ namespace SAVES
 	{
 	public:
 		CShardGuildFile(const CSString& path);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
 	private:
 		CSString _Path;
@@ -159,8 +159,8 @@ namespace SAVES
 	{
 	public:
 		CBakRootDirectory(const CSString& path);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
 	private:
 		CSString _Path;
@@ -177,8 +177,8 @@ namespace SAVES
 	{
 	public:
 		CWwwRootDirectory(const CSString& path);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
 	private:
 		CSString _Path;
@@ -195,8 +195,8 @@ namespace SAVES
 	{
 	public:
 		CWwwGroupDirectory(const CSString& parentPath,const CSString& directoryName);
-		bool update(ISavesCallbackHandler* parent);
-		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const;
+		bool update(ISavesCallbackHandler* parent) NL_OVERRIDE;
+		void appendFileListToFdc(const NLMISC::CSString& path,CFileDescriptionContainer &fdc) const NL_OVERRIDE;
 
 	private:
 		CSString _Path;

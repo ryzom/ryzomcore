@@ -80,16 +80,16 @@ class CQuadLeaf : public IQuadNode
 {
 public:
 	CQuadLeaf(uint8 level = 0) : IQuadNode(level) {}
-	bool					isLeaf() const { return true; }
-	const IQuadNode			*getChild(uint child) const { nlerror("Can't access child %d on the leaf!", child); return nullptr; }
-	bool			check() const
+	bool					isLeaf() const NL_OVERRIDE { return true; }
+	const IQuadNode			*getChild(uint child) const NL_OVERRIDE { nlerror("Can't access child %d on the leaf!", child); return nullptr; }
+	bool			check() const NL_OVERRIDE
 	{
 		if (!IQuadNode::check())
 			return false;
 		return (_Level == 1 || _MaxHeight-_MinHeight <= _MaxThickness);
 	}
 
-	void					serial(NLMISC::IStream &f)	{ IQuadNode::serial(f); }
+	void					serial(NLMISC::IStream &f) NL_OVERRIDE	{ IQuadNode::serial(f); }
 };
 
 //
@@ -114,10 +114,10 @@ protected:
 public:
 	CQuadBranch(const CQuadBranch &branch);
 	CQuadBranch(uint8 level = 0) : IQuadNode(level) { uint i; for (i=0; i<4; ++i) _Children[i] = nullptr; }
-	~CQuadBranch() { uint i; for (i=0; i<4; ++i) delete _Children[i]; }
+	~CQuadBranch() NL_OVERRIDE { uint i; for (i=0; i<4; ++i) delete _Children[i]; }
 	CQuadBranch				&operator = (const CQuadBranch &branch);
-	bool					isLeaf() const { return false; }
-	const IQuadNode			*getChild(uint child) const
+	bool					isLeaf() const NL_OVERRIDE { return false; }
+	const IQuadNode			*getChild(uint child) const NL_OVERRIDE
 	{
 		if (child > 3)	nlerror("Can't access child %d on the branch", child);
 		return _Children[child];
@@ -127,10 +127,10 @@ public:
 		if (child > 3)	nlerror("Can't set child %d on the branch", child);
 		_Children[child] = node;
 	}
-	void					addVertex(const NLMISC::CVector &v);
-	bool					check() const;
+	void					addVertex(const NLMISC::CVector &v) NL_OVERRIDE;
+	bool					check() const NL_OVERRIDE;
 
-	void					translate(const NLMISC::CVector &translation)
+	void					translate(const NLMISC::CVector &translation) NL_OVERRIDE
 	{
 		IQuadNode::translate(translation);
 		uint	i;
@@ -139,7 +139,7 @@ public:
 				_Children[i]->translate(translation);
 	}
 
-	void					serial(NLMISC::IStream &f);
+	void					serial(NLMISC::IStream &f) NL_OVERRIDE;
 };
 
 class CSurfaceQuadTree

@@ -33,7 +33,7 @@ namespace NLGUI
 		DECLARE_UI_CLASS( CCtrlScrollBase )
 
 		CCtrlScrollBase( const TCtorParam &param );
-		virtual ~CCtrlScrollBase();
+		virtual ~CCtrlScrollBase() NL_OVERRIDE;
 		
 		virtual void setTarget( CInterfaceGroup *pIG );
 		CInterfaceGroup* getTarget(){ return _Target; }
@@ -48,7 +48,7 @@ namespace NLGUI
 
 
 		// Necessary because of reflection, no other purpose
-		void draw(){}
+		void draw() NL_OVERRIDE{}
 
 	protected:
 		CInterfaceGroup *_Target; // If NULL the scroller is a value scroller

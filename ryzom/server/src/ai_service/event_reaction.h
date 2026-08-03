@@ -71,7 +71,7 @@ public:
 	}
 
 	// NOTE if the event mgr is set then we need to remove self from event mgr befor deletion
-	virtual ~CAIEventReaction()
+	virtual ~CAIEventReaction() NL_OVERRIDE
 	{
 	}
 

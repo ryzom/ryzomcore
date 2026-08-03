@@ -46,6 +46,7 @@
 #include <nel/misc/app_context.h>
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/path.h>
 #include <nel/misc/quat.h>
 #include <nel/misc/vector.h>
@@ -89,11 +90,17 @@
 #include "../pipeline_max/builtin/reference_maker.h"
 #include "../pipeline_max/builtin/storage/app_data.h"
 #include "../pipeline_max/builtin/geom_object.h"
+#include "../pipeline_max/builtin/derived_object.h"
 #include "../pipeline_max/builtin/control_keyframer.h"
+#include "../pipeline_max/builtin/control_transform.h"
+#include "../pipeline_max/builtin/param_block.h"
 
 #include "../pipeline_max_export_common/max_math.h"
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/db_path.h"
+#include "../pipeline_max_export_common/appdata_util.h"
+#include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 #include "../pipeline_max_export_common/edit_mesh_mod.h"
 
 using namespace PIPELINE::MAX;
@@ -101,8 +108,6 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace MAXMATH;
 
 // Shared Max scene-graph transform helpers (formerly file-local copies here); see max_scene.h.
-using MAXSCENE::CLASSID_PRS_CTRL;
-using MAXSCENE::CLASSID_LOOKAT_CTRL;
 using MAXSCENE::posValueAt0;
 using MAXSCENE::rotValueAt0;
 using MAXSCENE::scaleValueAt0;
@@ -110,36 +115,11 @@ using MAXSCENE::readObjectOffset;
 using MAXSCENE::getNodeTM;
 using MAXSCENE::SNodeTMCache;
 
-// NeL export AppData sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_IGNAME 1423062564
-#define NEL3D_APPDATA_ACCEL 1423062561
-#define NEL3D_APPDATA_ACCEL_DEFAULT 32
-#define NEL3D_APPDATA_INSTANCE_NAME 1423062562
-#define NEL3D_APPDATA_DONT_ADD_TO_SCENE 1423062563
-#define NEL3D_APPDATA_INSTANCE_SHAPE 1970
-#define NEL3D_APPDATA_COLLISION 1423062613
-#define NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION 1423062671
-#define NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_INTERIOR 1423062636
-#define NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_EXTERIOR 1423062637
-#define NEL3D_APPDATA_EXPORT_REALTIME_LIGHT 1423062588
-#define NEL3D_APPDATA_EXPORT_AS_SUN_LIGHT 1423062591
-#define NEL3D_APPDATA_REALTIME_AMBIENT_ADD_SUN 1423062672
-#define NEL3D_APPDATA_OCC_MODEL 84682540
-#define NEL3D_APPDATA_OPEN_OCC_MODEL 84682541
-#define NEL3D_APPDATA_SOUND_GROUP 84682542
-#define NEL3D_APPDATA_ENV_FX 84682543
-
-// AppData script-entry key (the MaxScript utility panel writes these)
-static const NLMISC::CClassId APPDATA_SCRIPT_CLASS_ID(0x04d64858, 0x16d1751d);
-static const uint32 APPDATA_SCRIPT_SUPER_CLASS_ID = 4128;
-
-// Scene class ids (CLASSID_PRS_CTRL / CLASSID_LOOKAT_CTRL come from MAXSCENE, imported above)
-static const NLMISC::CClassId CLASSID_OSM_DERIVED(0x29263a68, 0x405f22f5);
-static const NLMISC::CClassId CLASSID_WSM_DERIVED(0x4ec13906, 0x5578130e);
+// Scene class ids (the PRS/LookAt TM controllers are the typed CControlPRS/CControlLookAt;
+// OSM/WSM Derived wrappers are the typed CDerivedObject/CWSMDerivedObject now)
 static const NLMISC::CClassId CLASSID_RPO(0x368c679f, 0x711c22ee);
 static const NLMISC::CClassId CLASSID_TARGET(0x00001020, 0x00000000);
 static const uint32 CLASSID_PARTA_DUMMY = 0x876234;
-static const uint32 CLASSID_PARTA_NEL_PS = 0x58ce2893;
 static const NLMISC::CClassId CLASSID_PARAM_BLOCK_2(0x00000082, 0x00000000);
 
 // Superclass ids
@@ -148,8 +128,6 @@ static const TSClassId SCLASS_SHAPE = 0x00000040;
 static const TSClassId SCLASS_LIGHT = 0x00000030;
 static const TSClassId SCLASS_CAMERA = 0x00000020;
 static const TSClassId SCLASS_HELPER = 0x00000050;
-static const TSClassId SCLASS_OSMODIFIER = 0x00000810;
-static const TSClassId SCLASS_WSMODIFIER = 0x00000820;
 
 static bool g_verbose = false;
 // Search directories for .ps shapes (the clusterize link test needs the FX AABBox, like the
@@ -159,44 +137,17 @@ static std::vector<std::string> g_psSearchPaths;
 // (shared with pipeline_max_export_shape) — deduced from the input path or passed via --db;
 // --path-alias registers additional DBPATH::addAlias() roots for corpus content that doesn't
 // follow the "R:\graphics\..." / "R:\database\..." convention.
-static CSceneClassRegistry *g_registry = nullptr;
+static CSceneClassRegistry *g_registry = NULL;
 
 // ---------------------------------------------------------------------------------------------
 // AppData access. Script entries are keyed (MAXSCRIPT_UTILITY_CLASS_ID, 4128, subId) and hold
 // null-terminated strings.
 
-static bool getScriptAppData(CSceneClass *sc, uint32 subId, std::string &out)
-{
-	CAnimatable *anim = dynamic_cast<CAnimatable *>(sc);
-	if (!anim) return false;
-	STORAGE::CAppData *ad = anim->appData();
-	if (!ad) return false;
-	STORAGE::CAppData::TMap::const_iterator it = ad->entries().find(
-		STORAGE::CAppData::TKey(APPDATA_SCRIPT_CLASS_ID, APPDATA_SCRIPT_SUPER_CLASS_ID, subId));
-	if (it == ad->entries().end()) return false;
-	CStorageRaw *raw = it->second->value<CStorageRaw>();
-	if (!raw) return false;
-	// getScriptAppData (string variant) requires the last byte to be the null terminator.
-	if (raw->Value.empty() || raw->Value[raw->Value.size() - 1] != '\0') return false;
-	out = std::string(raw->Value.begin(), raw->Value.end() - 1);
-	return true;
-}
-
-static std::string getScriptAppDataStr(CSceneClass *sc, uint32 subId, const std::string &def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	return s;
-}
-
-static int getScriptAppDataInt(CSceneClass *sc, uint32 subId, int def)
-{
-	std::string s;
-	if (!getScriptAppData(sc, subId, s)) return def;
-	int value = 0;
-	if (NLMISC::fromString(s, value)) return value;
-	return def;
-}
+// Shared script AppData readers (pipeline_max_export_common/appdata_util) — formerly
+// file-local copies here.
+using APPDATA::getScriptAppData;
+using APPDATA::getScriptAppDataStr;
+using APPDATA::getScriptAppDataInt;
 
 // ---------------------------------------------------------------------------------------------
 // Object resolution.
@@ -210,8 +161,7 @@ static CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 	int guard = 16;
 	while (obj && guard-- > 0)
 	{
-		NLMISC::CClassId cid = obj->classDesc()->classId();
-		if (cid.a() == 0x92aab38c)
+		if (obj->classDesc()->classId().a() == 0x92aab38c)
 		{
 			// XRefObject: resolve to the referenced file's object.
 			CSceneClass *resolved = resolveXRefObject(obj, depth);
@@ -219,19 +169,10 @@ static CSceneClass *baseObjectOfObj(CSceneClass *obj, int depth)
 			obj = resolved;
 			continue;
 		}
-		if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-		// Derived object: modifiers (superclass 0x810/0x820) + the base object. Take the last
-		// reference that is not a modifier.
-		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-		CSceneClass *base = nullptr;
-		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
-		{
-			CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-			if (!r) continue;
-			TSClassId scid = r->classDesc()->superClassId();
-			if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER) continue;
-			base = r;
-		}
+		// Derived object (typed): unwrap to the base object (the last non-modifier reference).
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+		if (!derived) break;
+		CSceneClass *base = derived->baseObject();
 		if (!base) break;
 		obj = base;
 	}
@@ -253,9 +194,7 @@ struct SLoadedMax
 	CDllDirectory *Dll;
 	CClassDirectory3 *Cd;
 	CScene *Scene;
-	SLoadedMax() : Dll(nullptr)
-	    , Cd(nullptr)
-	    , Scene(nullptr) { }
+	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL) { }
 };
 
 static std::map<std::string, SLoadedMax> g_xrefScenes;
@@ -263,10 +202,10 @@ static std::map<std::string, SLoadedMax> g_xrefScenes;
 static SLoadedMax *loadMaxFileCached(const std::string &path)
 {
 	std::map<std::string, SLoadedMax>::iterator it = g_xrefScenes.find(path);
-	if (it != g_xrefScenes.end()) return it->second.Scene ? &it->second : nullptr;
+	if (it != g_xrefScenes.end()) return it->second.Scene ? &it->second : NULL;
 	SLoadedMax &lm = g_xrefScenes[path]; // inserted empty: failure is cached too
 	CStorageOleIn in;
-	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return nullptr; }
+	if (!in.open(path)) { fprintf(stderr, "WARNING: xref: not an OLE compound file: %s\n", path.c_str()); return NULL; }
 	CDllDirectory *dll = new CDllDirectory();
 	CClassDirectory3 *cd = new CClassDirectory3(dll);
 	CScene *scene = new CScene(g_registry, dll, cd);
@@ -278,7 +217,7 @@ static SLoadedMax *loadMaxFileCached(const std::string &path)
 	{
 		fprintf(stderr, "WARNING: xref: missing streams in %s\n", path.c_str());
 		delete scene; delete cd; delete dll;
-		return nullptr;
+		return NULL;
 	}
 	lm.Dll = dll;
 	lm.Cd = cd;
@@ -308,10 +247,10 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (depth > 8)
 	{
 		fprintf(stderr, "WARNING: xref: recursion depth exceeded\n");
-		return nullptr;
+		return NULL;
 	}
 	// Find the 0x0170 record among the orphaned chunks.
-	CStorageContainer *rec = nullptr;
+	CStorageContainer *rec = NULL;
 	const CStorageContainer::TStorageObjectContainer &orphans = xrefObj->orphanedChunks();
 	for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
 	{
@@ -322,13 +261,13 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	if (!rec)
 	{
 		fprintf(stderr, "WARNING: xref: no 0x0170 record on XRefObject\n");
-		return nullptr;
+		return NULL;
 	}
 	std::string file, objName;
 	if (!xrefChildString(rec, 0x0100, file) || !xrefChildString(rec, 0x0110, objName))
 	{
 		fprintf(stderr, "WARNING: xref: incomplete 0x0170 record\n");
-		return nullptr;
+		return NULL;
 	}
 
 	// Authored path (R:\graphics\... or an explicit --path-alias prefix) -> on-disk path.
@@ -337,11 +276,11 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 	{
 		fprintf(stderr, "WARNING: xref: cannot resolve '%s' under db root '%s'\n",
 		        file.c_str(), DBPATH::defaultRoot().c_str());
-		return nullptr;
+		return NULL;
 	}
 
 	SLoadedMax *lm = loadMaxFileCached(resolved);
-	if (!lm) return nullptr;
+	if (!lm) return NULL;
 
 	// Find the named node in the referenced scene.
 	CSceneClassContainer *ssc = lm->Scene->container();
@@ -354,7 +293,7 @@ static CSceneClass *resolveXRefObject(CSceneClass *xrefObj, int depth)
 		return baseObjectOfObj(dynamic_cast<CSceneClass *>(node->getReference(1)), depth + 1);
 	}
 	fprintf(stderr, "WARNING: xref: node '%s' not found in %s\n", objName.c_str(), resolved.c_str());
-	return nullptr;
+	return NULL;
 }
 
 // The category superclass the maxscript selection passes see (geometry/lights/helpers object
@@ -409,7 +348,7 @@ static bool getPB2StringParam(CSceneClass *obj, uint16 paramId, std::string &out
 {
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
 	if (!rm) return false;
-	CReferenceMaker *pb2 = nullptr;
+	CReferenceMaker *pb2 = NULL;
 	for (uint i = 0; i < rm->nbReferences() && !pb2; ++i)
 	{
 		CReferenceMaker *r = dynamic_cast<CReferenceMaker *>(rm->getReference(i));
@@ -479,36 +418,9 @@ static std::string getNelObjectName(INode &node)
 //     Observed 0x4b00f0xx / 0x4b00f6xx / 0x4b00d6xx; bits 0x0200/0x0400 clear exactly on the
 //     nodes whose reference ig instances carry DontCastShadow=true (cast+receive shadow pair;
 //     0x0200 = cast-shadows, 0x0400 = receive-shadows — discriminated by the canope class: 0x4b00d4xx receives but does not cast, matching DontCastShadow=true in its reference).
-#define NODE_FLAGS_CHUNK_ID 0x0963
+// The 0x0963/0x099c reads themselves are the typed CNodeImpl overlay now (nodeFlags/renderFlags).
 #define NODE_FLAG_HIDDEN 0x00000040
-#define NODE_RENDERFLAGS_CHUNK_ID 0x099c
 #define NODE_RENDERFLAG_CASTSHADOW 0x00000200
-
-static uint32 readNodeDword(CNodeImpl *node, uint16 chunkId, bool &found)
-{
-	found = false;
-	uint32 fl = 0;
-	CStorageRaw *flags = dynamic_cast<CStorageRaw *>(node->findStorageObject(chunkId));
-	if (flags && flags->Value.size() >= 4)
-	{
-		memcpy(&fl, nlVectorData(flags->Value), 4);
-		found = true;
-		return fl;
-	}
-	const CStorageContainer::TStorageObjectContainer &orphans = node->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt oit = orphans.begin(); oit != orphans.end(); ++oit)
-	{
-		if (oit->first != chunkId) continue;
-		CStorageRaw *raw = dynamic_cast<CStorageRaw *>(oit->second);
-		if (raw && raw->Value.size() >= 4)
-		{
-			memcpy(&fl, nlVectorData(raw->Value), 4);
-			found = true;
-		}
-		break;
-	}
-	return fl;
-}
 
 // ---------------------------------------------------------------------------------------------
 // Ligo brick ig export (build_gamedata processes/ligo, nel_ligo_export.ms): the same
@@ -698,37 +610,22 @@ struct SPBlockParam
 
 static void readPBlockParams(CSceneClass *pblock, std::map<sint32, SPBlockParam> &out)
 {
-	const CStorageContainer::TStorageObjectContainer &po = pblock->orphanedChunks();
-	for (CStorageContainer::TStorageObjectConstIt it = po.begin(); it != po.end(); ++it)
+	// Delegates to the library's typed BUILTIN::CParamBlock (every superclass-0x8 object parses
+	// through it — one decode path); thin copy onto the legacy per-index map shape.
+	CParamBlock *pb = dynamic_cast<CParamBlock *>(pblock);
+	if (!pb) return;
+	const std::vector<CParamBlock::SParam> &params = pb->params();
+	for (std::vector<CParamBlock::SParam>::const_iterator it = params.begin(); it != params.end(); ++it)
 	{
-		if (it->first != 0x0002) continue;
-		CStorageContainer *pc = dynamic_cast<CStorageContainer *>(it->second);
-		if (!pc) continue;
-		sint32 idx = -1;
-		for (CStorageContainer::TStorageObjectConstIt cit = pc->chunks().begin(); cit != pc->chunks().end(); ++cit)
-		{
-			CStorageRaw *cr = dynamic_cast<CStorageRaw *>(cit->second);
-			if (!cr) continue;
-			if (cit->first == 0x0003 && cr->Value.size() == 4)
-				memcpy(&idx, nlVectorData(cr->Value), 4);
-			else if (cit->first == 0x0102 && cr->Value.size() == 12 && idx >= 0)
-			{
-				SPBlockParam p;
-				p.IsPoint3 = true;
-				memcpy(p.V, nlVectorData(cr->Value), 12);
-				out[idx] = p;
-			}
-			else if (cit->first != 0x0004 && cr->Value.size() == 4 && idx >= 0)
-			{
-				SPBlockParam p;
-				p.IsPoint3 = false;
-				p.IsInt = (cit->first == 0x0101);
-				p.V[1] = p.V[2] = 0.0f;
-				memcpy(p.V, nlVectorData(cr->Value), 4);
-				memcpy(&p.I, nlVectorData(cr->Value), 4);
-				out[idx] = p;
-			}
-		}
+		if (it->Index < 0 || !it->HasConstant) continue;
+		SPBlockParam p;
+		p.IsPoint3 = it->Kind == CParamBlock::KindPoint3;
+		p.IsInt = it->Kind == CParamBlock::KindInt;
+		p.I = p.IsPoint3 ? 0 : it->I;
+		p.V[0] = it->F[0];
+		p.V[1] = it->Kind == CParamBlock::KindPoint3 ? it->F[1] : 0.0f;
+		p.V[2] = it->Kind == CParamBlock::KindPoint3 ? it->F[2] : 0.0f;
+		out[it->Index] = p;
 	}
 }
 
@@ -855,11 +752,9 @@ static bool convertMaxLight(NL3D::CPointLightNamed &plNamed, INode &node, SNodeT
 	NLMISC::CVector direction(0, 0, -1);
 	if (kind == maxLightTargetSpot)
 	{
-		CReferenceMaker *tm = dynamic_cast<CReferenceMaker *>(node.getReference(0));
-		CSceneClass *tmsc = dynamic_cast<CSceneClass *>(tm);
-		INode *target = nullptr;
-		if (tmsc && tmsc->classDesc()->classId() == CLASSID_LOOKAT_CTRL)
-			target = dynamic_cast<INode *>(tm->getReference(0));
+		INode *target = NULL;
+		if (CControlLookAt *la = dynamic_cast<CControlLookAt *>(node.getReference(0)))
+			target = dynamic_cast<INode *>(la->targetNode());
 		if (target)
 		{
 			Matrix3M targetTM = getNodeTM(target, tmCache);
@@ -1158,7 +1053,7 @@ static bool extractObjectMesh(CSceneClass *obj, std::vector<NLMISC::CVector> &ve
 	if (cid == NLMISC::CClassId(0xe44f10b3, 0x00000000))
 	{
 		CGeomObject *geom = dynamic_cast<CGeomObject *>(obj);
-		STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : nullptr;
+		STORAGE::CGeomBuffers *gb = geom ? geom->geomBuffers() : NULL;
 		if (!gb)
 		{
 			fprintf(stderr, "WARNING: accelerator mesh '%s' without geom buffers\n", nodeName.c_str());
@@ -1252,7 +1147,7 @@ static bool psShapeBBoxVerts(INode &node, CSceneClass *obj, SNodeTMCache &tmCach
 	}
 	if (found.empty()) return false;
 
-	NL3D::CParticleSystemShape *pss = nullptr;
+	NL3D::CParticleSystemShape *pss = NULL;
 	try
 	{
 		NLMISC::CIFile f;
@@ -1429,35 +1324,12 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 				obj = resolved;
 				continue;
 			}
-			if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
-			CSceneClass *base = nullptr;
-			std::vector<CSceneClass *> mods;
-			for (uint i = 0; rm && i < rm->nbReferences(); ++i)
+			CDerivedObject *derived = dynamic_cast<CDerivedObject *>(obj);
+			if (!derived) break;
+			for (uint m = 0; m < derived->modifierCount(); ++m)
 			{
-				CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-				if (!r) continue;
-				TSClassId scid = r->classDesc()->superClassId();
-				if (scid == SCLASS_OSMODIFIER || scid == SCLASS_WSMODIFIER)
-				{
-					mods.push_back(r);
-					continue;
-				}
-				base = r;
-			}
-			// mod-app local data: the wrapper's orphaned 0x2500 containers, one per modifier
-			// slot in reference order
-			std::vector<CStorageContainer *> modApps;
-			{
-				const CStorageContainer::TStorageObjectContainer &orphans = obj->orphanedChunks();
-				for (CStorageContainer::TStorageObjectConstIt it = orphans.begin(); it != orphans.end(); ++it)
-					if (it->first == 0x2500)
-						modApps.push_back(dynamic_cast<CStorageContainer *>(it->second));
-			}
-			for (uint m = 0; m < mods.size(); ++m)
-			{
-				NLMISC::CClassId mcid = mods[m]->classDesc()->classId();
-				CStorageContainer *app = m < modApps.size() ? modApps[m] : nullptr;
+				NLMISC::CClassId mcid = derived->modifier(m)->classDesc()->classId();
+				CStorageContainer *app = derived->modApp(m);
 				if (mcid == NLMISC::CClassId(0x00000050, 0x00000000)) // Edit Mesh
 				{
 					SModOp op;
@@ -1474,7 +1346,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 					op.MirrorAxis = 0;
 					op.MirrorOffset = 0.0f;
 					op.MirrorCopy = false;
-					CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mods[m]);
+					CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(derived->modifier(m));
 					for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
 					{
 						CSceneClass *ref = dynamic_cast<CSceneClass *>(mrm->getReference(r));
@@ -1487,25 +1359,15 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 							if (params.find(1) != params.end()) op.MirrorCopy = (params[1].IsInt ? params[1].I : (sint)params[1].V[0]) != 0;
 							if (params.find(2) != params.end() && !params[2].IsInt) op.MirrorOffset = params[2].V[0];
 						}
-						else if (ref->classDesc()->classId() == NLMISC::CClassId(0x00002005, 0x00000000))
+						else if (CControlPRS *prm = dynamic_cast<CControlPRS *>(ref))
 						{
-							CSceneClass *pc = dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(0));
-							Point3M gp = posValueAt0(pc);
-							QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(1)));
-							ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(dynamic_cast<CReferenceMaker *>(ref)->getReference(2)));
+							Point3M gp = posValueAt0(dynamic_cast<CSceneClass *>(prm->positionController()));
+							QuatM gr = rotValueAt0(dynamic_cast<CSceneClass *>(prm->rotationController()));
+							ScaleValueM gs = scaleValueAt0(dynamic_cast<CSceneClass *>(prm->scaleController()));
 							op.GizmoTM = composePRS(gp, gr, gs);
 						}
 					}
-					if (app)
-					{
-						for (CStorageContainer::TStorageObjectConstIt it = app->chunks().begin(); it != app->chunks().end(); ++it)
-						{
-							if (it->first != 0x2510) continue;
-							CStorageRaw *raw = dynamic_cast<CStorageRaw *>(it->second);
-							if (raw && raw->Value.size() >= 48)
-								memcpy(op.CtxTM.m, nlVectorData(raw->Value), 48);
-						}
-					}
+					CDerivedObject::modAppContextTM(app, &op.CtxTM.m[0][0]);
 					opStack.push_back(op);
 				}
 				else if (mcid != NLMISC::CClassId(0x000f72b1, 0x00000000)) // UVW Map: geometry-neutral
@@ -1514,6 +1376,7 @@ static bool nodeWorldMesh(INode &node, SNodeTMCache &tmCache, SMeshData &out)
 					        ucstring(n->userName()).toUtf8().c_str(), mcid.toString().c_str());
 				}
 			}
+			CSceneClass *base = derived->baseObject();
 			if (!base) break;
 			obj = base;
 		}
@@ -1652,9 +1515,9 @@ static NL3D::CInstanceGroup *buildInstanceGroup(const std::vector<INode *> &vect
 			sint appDataCameraCol = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_CAMERA_COLLISION_MESH_GENERATION, 0);
 			aIGArray[nNumIG].Visible = appDataCameraCol != 3;
 
-			// DontCastShadow from the node's CastShadows rendering-control flag.
-			bool flagsFound = false;
-			uint32 rendFlags = readNodeDword(pNodeImpl, NODE_RENDERFLAGS_CHUNK_ID, flagsFound);
+			// DontCastShadow from the node's CastShadows rendering-control flag (typed overlay).
+			uint32 rendFlags = 0;
+			bool flagsFound = pNodeImpl->renderFlags(rendFlags);
 			aIGArray[nNumIG].DontCastShadow = flagsFound && (rendFlags & NODE_RENDERFLAG_CASTSHADOW) == 0;
 
 			aIGArray[nNumIG].DontCastShadowForInterior = getScriptAppDataInt(pNodeImpl, NEL3D_APPDATA_LIGHT_DONT_CAST_SHADOW_INTERIOR, 0) ? true : false;
@@ -1993,7 +1856,7 @@ static void buildTreeOrder(CSceneClassContainer *ssc, INode *root, std::map<INod
 	// DFS pre-order. Seed with root's children (and any NULL-parent orphans, defensive) in
 	// storage order — push in reverse so the top of the stack is the first child.
 	std::vector<INode *> stack;
-	INode *seeds[2] = { root, nullptr };
+	INode *seeds[2] = { root, NULL };
 	for (int s = 0; s < 2; ++s)
 	{
 		std::map<INode *, std::vector<INode *> >::iterator it = kids.find(seeds[s]);
@@ -2089,14 +1952,14 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 			// so we call it and then peel back one step: what we want is the OBJECT REFERENCE of
 			// the resolved source node, not its fully-unwrapped base — inline the same loader
 			// path resolveXRefObject uses and stop at `node->getReference(1)`.
-			CSceneClass *source = nullptr;
+			CSceneClass *source = NULL;
 			{
-				CStorageContainer *rec170 = nullptr;
+				CStorageContainer *rec170 = NULL;
 				const CStorageContainer::TStorageObjectContainer &orphans = directObj->orphanedChunks();
 				for (CStorageContainer::TStorageObjectConstIt oi = orphans.begin(); oi != orphans.end(); ++oi)
 					if (oi->first == 0x0170) { rec170 = dynamic_cast<CStorageContainer *>(oi->second); break; }
 				std::string srcFile, srcObj, srcOnDisk;
-				SLoadedMax *lm = nullptr;
+				SLoadedMax *lm = NULL;
 				if (rec170 &&
 				    xrefChildString(rec170, 0x0100, srcFile) &&
 				    xrefChildString(rec170, 0x0110, srcObj) &&
@@ -2126,18 +1989,9 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 			CSceneClass *unwrapped = source;
 			for (int guard = 0; unwrapped && guard < 8; ++guard)
 			{
-				NLMISC::CClassId cid = unwrapped->classDesc()->classId();
-				if (cid != CLASSID_OSM_DERIVED && cid != CLASSID_WSM_DERIVED) break;
-				CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(unwrapped);
-				CSceneClass *base = nullptr;
-				for (uint i = 0; rm && i < rm->nbReferences(); ++i)
-				{
-					CSceneClass *r = dynamic_cast<CSceneClass *>(rm->getReference(i));
-					if (!r) continue;
-					TSClassId scid_i = r->classDesc()->superClassId();
-					if (scid_i == SCLASS_OSMODIFIER || scid_i == SCLASS_WSMODIFIER) continue;
-					base = r;
-				}
+				CDerivedObject *derived = dynamic_cast<CDerivedObject *>(unwrapped);
+				if (!derived) break;
+				CSceneClass *base = derived->baseObject();
 				if (!base) break;
 				unwrapped = base;
 			}
@@ -2185,7 +2039,7 @@ static NL3D::CInstanceGroup *exportIgForName(CSceneClassContainer *ssc, SNodeTMC
 		}
 	}
 
-	if (vectNode.empty()) return nullptr;
+	if (vectNode.empty()) return NULL;
 
 	if (transitionZone >= 0)
 	{
@@ -2302,8 +2156,8 @@ static int exportLigoIg(CSceneClassContainer *ssc, SNodeTMCache &tmCache, const 
 // ---------------------------------------------------------------------------------------------
 // Debug dump of the per-node classification.
 
-static const char *g_dumpObjName = nullptr;
-static const char *g_dumpLightName = nullptr;
+static const char *g_dumpObjName = NULL;
+static const char *g_dumpLightName = NULL;
 static void dumpLightNode(CNodeImpl *node);
 
 static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
@@ -2365,8 +2219,8 @@ static void dumpNodes(CSceneClassContainer *ssc, SNodeTMCache &tmCache)
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
 		if (!node) continue;
 		CSceneClass *obj = baseObjectOf(*node);
-		bool flagsFound = false;
-		uint32 flags = readNodeDword(node, NODE_FLAGS_CHUNK_ID, flagsFound);
+		uint32 flags = 0;
+		bool flagsFound = node->nodeFlags(flags);
 		std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
 		Matrix3M tm = getNodeTM(node, tmCache);
 		INode *parent = node->parent();
@@ -2734,6 +2588,71 @@ static int infoIg(const char *path)
 
 // ---------------------------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------------------------
+// Entry point for the max2gltf writer (pipeline_max_export_gltf compiles this file with
+// PMB_IG_NO_MAIN): run exactly the standalone-mode flow — distinct-ig-name scan in scene order,
+// tree-walk-ordered selection, buildInstanceGroup — and hand back each built CInstanceGroup's
+// serialized bytes. The bytes ride the glTF as the lossless nel_igs blob (same dual-
+// representation rule as animation tracks: structural node tags for artists, the blob for the
+// byte-exact roundtrip). Loads the .max through this tool's own loader/registry — independent
+// of the caller's scene state. Returns the number of igs built, or -1 on load failure.
+// Companion setter for the entry below: the .ps shape search paths (the standalone tool's
+// --ps-path flag) — the FX-instance clusterize test resolves .ps shapes through these.
+void pmbIgAddPsSearchPath(const std::string &path)
+{
+	g_psSearchPaths.push_back(path);
+}
+
+int pmbExportIgsForGltf(PMAXLOAD::SLoadedMax &lm,
+                        std::vector<std::pair<std::string, std::vector<uint8> > > &igsOut)
+{
+	// The XRef machinery below resolves referenced scenes against g_registry — point it at the
+	// shared registry the caller's scene was parsed with.
+	CSceneClassRegistry *prevReg = g_registry;
+	g_registry = PMAXLOAD::sceneRegistry();
+
+	CSceneClassContainer *ssc = lm.Scene->container();
+	SNodeTMCache tmCache;
+	tmCache.SceneRoot = ssc->scene()->rootNode();
+
+	std::vector<std::string> igNames;
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
+		if (!node) continue;
+		std::string ig = getScriptAppDataStr(node, NEL3D_APPDATA_IGNAME, "");
+		if (ig.empty()) continue;
+		if (std::find(igNames.begin(), igNames.end(), ig) == igNames.end())
+			igNames.push_back(ig);
+	}
+
+	for (uint igIdx = 0; igIdx < igNames.size(); ++igIdx)
+	{
+		SIgBuildStats stats;
+		NL3D::CInstanceGroup *ig = exportIgForName(ssc, tmCache, igNames[igIdx],
+		                                            /*lowercaseCompare*/ false, /*transitionZone*/ -1,
+		                                            /*cellSize*/ 160.0f, stats,
+		                                            /*includeXRefFirst*/ false);
+		if (!ig) continue;
+		try
+		{
+			NLMISC::CMemStream ms;
+			ig->serial(ms);
+			std::vector<uint8> bytes(ms.buffer(), ms.buffer() + ms.length());
+			igsOut.push_back(std::make_pair(igNames[igIdx], bytes));
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			fprintf(stderr, "ERROR: ig serial failed for %s: %s\n", igNames[igIdx].c_str(), e.what());
+		}
+		delete ig;
+	}
+
+	g_registry = prevReg;
+	return (int)igsOut.size();
+}
+
+#ifndef PMB_IG_NO_MAIN
 int main(int argc, char **argv)
 {
 	if (!NLMISC::INelContext::isContextInitialised())
@@ -2833,7 +2752,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	const char *maxFile = argv[argi];
-	const char *outDir = ligoMode ? ligoOutDir.c_str() : ((argc - argi >= 2) ? argv[argi + 1] : nullptr);
+	const char *outDir = ligoMode ? ligoOutDir.c_str() : ((argc - argi >= 2) ? argv[argi + 1] : NULL);
 
 	NL3D::registerSerial3d();
 
@@ -2951,5 +2870,6 @@ int main(int argc, char **argv)
 
 	return ret;
 }
+#endif /* PMB_IG_NO_MAIN */
 
 /* end of file */

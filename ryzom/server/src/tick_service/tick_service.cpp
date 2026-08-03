@@ -767,7 +767,7 @@ struct TTickFileCallback : public IBackupFileReceiveCallback
 	{
 	}
 
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		TickService->tickFileCallback(fileDescription, dataStream);
 	}
@@ -1221,7 +1221,7 @@ class CFileClassReceiveCb: public IBackupFileClassReceiveCallback
 {
 public:
 	
-	virtual void callback(const CFileDescriptionContainer& list)
+	virtual void callback(const CFileDescriptionContainer& list) NL_OVERRIDE
 	{
 		nlinfo("received fileclass");
 		uint	i;

@@ -59,8 +59,8 @@ public:
 
 	///\name Texture sharing
 	// @{
-	virtual bool			supportSharing() const;
-	virtual std::string		getShareName() const;
+	virtual bool			supportSharing() const NL_OVERRIDE;
+	virtual std::string		getShareName() const NL_OVERRIDE;
 	/// enable / disable sharing support
 	void					enableSharing(bool enabled = false);
 	/// test whether texture sharing is enabled
@@ -68,13 +68,13 @@ public:
 	// @}
 
 	/// Generate this texture data's.
-	virtual void doGenerate(bool async);
+	virtual void doGenerate(bool async) NL_OVERRIDE;
 
 	/// release this texture datas
-	virtual void release();
+	virtual void release() NL_OVERRIDE;
 
 	// serial this texture datas
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 private:
 	uint16						_BlendFactor;

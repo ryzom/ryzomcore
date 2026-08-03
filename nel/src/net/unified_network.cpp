@@ -430,8 +430,8 @@ class CAliveCheck : public NLMISC::IRunnable
 public:
 	CAliveCheck() : ExitRequired(false)	{ }
 
-	virtual void	run();
-	virtual			~CAliveCheck()	{ }
+	virtual void	run() NL_OVERRIDE;
+	virtual			~CAliveCheck() NL_OVERRIDE	{ }
 
 	NLMISC::CAtomicBool ExitRequired;
 

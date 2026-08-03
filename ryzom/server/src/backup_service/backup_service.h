@@ -47,17 +47,17 @@ public :
 	/** 
 	 * init the service
 	 */
-	void init();
+	void init() NL_OVERRIDE;
 
 	/**
 	 * main loop
 	 */
-	bool update();
+	bool update() NL_OVERRIDE;
 	
 	/**
 	 * release
 	 */
-	void release();
+	void release() NL_OVERRIDE;
 
 	// stall shard
 	void stallShard(const std::string& fileName);

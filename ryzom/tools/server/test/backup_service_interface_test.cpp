@@ -14,14 +14,14 @@ using namespace NLMISC;
 class CBackupFileReceiveCallbackTest: public IBackupFileReceiveCallback
 {
 public:
-	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	virtual void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		std::string s;
 		dataStream.serial(s);
 		nlinfo("Received file: %s (timestamp:%d, size:%d)  containing string: %s",fileDescription.FileName.c_str(),fileDescription.FileTimeStamp,fileDescription.FileSize,s.c_str());
 	}
 
-	~CBackupFileReceiveCallbackTest()
+	~CBackupFileReceiveCallbackTest() NL_OVERRIDE
 	{
 		nlinfo("~CBackupFileReceiveCallbackTest()");
 	}
@@ -47,7 +47,7 @@ extern NLMISC::CVariable<bool> UseBS;
 class CBackupServiceInterfaceTest: public IServiceSingleton
 {
 public:
-	void init()
+	void init() NL_OVERRIDE
 	{
 
 		// *** TODO !!!! ***

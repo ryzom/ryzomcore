@@ -218,6 +218,7 @@ int main(int argc, char **argv)
 	args.addAdditionalArg("output_filename", "PNG or TGA file to generate", true);
 	args.addAdditionalArg("input_path", "Path that containts interfaces elements", false);
 	args.addArg("", "no-border", "", "Disable border duplication. Enabled by default");
+	args.addArg("k", "keep-going", "", "Skip input files that cannot be loaded as bitmaps (with a warning) instead of aborting");
 
 	if (!args.parse(argc, argv)) return 1;
 
@@ -240,6 +241,9 @@ int main(int argc, char **argv)
 
 	// extract all interface elements
 	bool extractElements = args.haveArg("x");
+
+	// skip unloadable input files instead of aborting
+	bool keepGoing = args.haveArg("k");
 
 	// output format
 	std::string outputFormat;
@@ -445,9 +449,29 @@ int main(int argc, char **argv)
 		{
 			if (pBtmp) delete pBtmp;
 
+			if (keepGoing)
+			{
+				outString(toString("WARNING : skipping %s : %s", AllMapNames[i].c_str(), e.what()));
+				AllMaps[i] = NULL;
+				continue;
+			}
+
 			outString(toString("ERROR : %s", e.what()));
 			return -1;
 		}
+	}
+
+	// Drop entries skipped by --keep-going
+	for (sint i = 0; i < mapSize; )
+	{
+		if (AllMaps[i] == NULL)
+		{
+			AllMaps.erase(AllMaps.begin() + i);
+			AllMapNames.erase(AllMapNames.begin() + i);
+			--mapSize;
+		}
+		else
+			++i;
 	}
 
 	// Sort all maps by decreasing size

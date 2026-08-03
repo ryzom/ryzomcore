@@ -57,7 +57,7 @@ namespace BUILTIN {
  * reached through the reference wiring (see CParamBlock2, max_geometry_formats Part I).
  *
  * This class keeps the raw chunks authoritative (parse decodes the name over the orphaned
- * chunks WITHOUT moving them, build re-emits verbatim — byte-exact roundtrip, the §5/§12.2
+ * chunks WITHOUT moving them, build re-emits verbatim; byte-exact roundtrip, the overlay-codec
  * discipline). It gives a consumer (the exporter, a live material editor) a typed handle on
  * every material/texmap with its name, on top of the reference walk (sub-materials, textures)
  * and the typed CParamBlock2 parameters.
@@ -66,7 +66,7 @@ class CMtlBase : public CReferenceTarget
 {
 public:
 	CMtlBase(CScene *scene);
-	virtual ~CMtlBase();
+	virtual ~CMtlBase() NL_OVERRIDE;
 
 	// class desc
 	static const ucstring DisplayName;
@@ -76,14 +76,14 @@ public:
 	static const TSClassId SuperClassId;
 
 	// inherited
-	virtual void parse(uint16 version, uint filter = 0);
-	virtual void clean();
-	virtual void build(uint16 version, uint filter = 0);
-	virtual void disown();
-	virtual void init();
-	virtual bool inherits(const NLMISC::CClassId classId) const;
-	virtual const ISceneClassDesc *classDesc() const;
-	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const;
+	virtual void parse(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void clean() NL_OVERRIDE;
+	virtual void build(uint16 version, uint filter = 0) NL_OVERRIDE;
+	virtual void disown() NL_OVERRIDE;
+	virtual void init() NL_OVERRIDE;
+	virtual bool inherits(const NLMISC::CClassId classId) const NL_OVERRIDE;
+	virtual const ISceneClassDesc *classDesc() const NL_OVERRIDE;
+	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	/// True when a name chunk (0x4001, bare or under 0x4000) was found.
 	inline bool hasName() const { return m_NameChunk != nullptr; }
@@ -92,7 +92,7 @@ public:
 
 protected:
 	// inherited
-	virtual IStorageObject *createChunkById(uint16 id, bool container);
+	virtual IStorageObject *createChunkById(uint16 id, bool container) NL_OVERRIDE;
 
 private:
 	void decodeName();

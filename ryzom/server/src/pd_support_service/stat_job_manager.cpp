@@ -35,12 +35,12 @@ NLMISC::CVariable<std::string>	ScanJobState("Stats", "ScanJobState", "The state 
 class CFinishedJob: public CJobManager::IJob
 {
 public:
-	void start()									{ }
-	bool finished()									{ return true; }
-	std::string getShortStatus()					{ return _ShortStatus; }
-	std::string getStatus()							{ return _Status; }
-	void display(NLMISC::CLog* log=NLMISC::InfoLog) { log->displayNL("%s",_Status.c_str()); }
-	void update()									{}
+	void start() NL_OVERRIDE									{ }
+	bool finished() NL_OVERRIDE									{ return true; }
+	std::string getShortStatus() NL_OVERRIDE					{ return _ShortStatus; }
+	std::string getStatus() NL_OVERRIDE							{ return _Status; }
+	void display(NLMISC::CLog* log=NLMISC::InfoLog) NL_OVERRIDE { log->displayNL("%s",_Status.c_str()); }
+	void update() NL_OVERRIDE									{}
 
 	CFinishedJob(CJobManager::IJob* theFinishedJob)
 	{

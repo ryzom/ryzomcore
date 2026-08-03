@@ -57,17 +57,17 @@ public:
 	~CItemShopType() { releaseShopType(); }
 
 	// return type of shop
-	TShopType getShopType() { return _ShopType; }
+	TShopType getShopType() NL_OVERRIDE { return _ShopType; }
 
 	// get shop unit
-	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
+	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) NL_OVERRIDE;
 	
 	// create a shop unit, or just return it if already exist
-	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
+	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) NL_OVERRIDE;
 	
 private:
 	//release shop content
-	void releaseShopType();
+	void releaseShopType() NL_OVERRIDE;
 
 	IShopUnit *				_ShopItemBaseContent[ ITEM_ORIGIN::NUM_ITEM_ORIGIN ] [ NumQuality ] [ NumLevel ] [ IShopUnit::NumShopUnitType ];
 	IShopType::TShopType	_ShopType;
@@ -83,17 +83,17 @@ public:
 	~CRMShopType() { releaseShopType(); }
 
 	// return type of shop
-	TShopType getShopType() { return _ShopType; }
+	TShopType getShopType() NL_OVERRIDE { return _ShopType; }
 	
 	// get shop unit
-	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
+	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) NL_OVERRIDE;
 	
 	// create a shop unit, or just return it if already exist
-	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
+	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) NL_OVERRIDE;
 	
 private:
 	//release shop content
-	void releaseShopType();
+	void releaseShopType() NL_OVERRIDE;
 	
 	IShopUnit *				_ShopRMBaseContent[ ECOSYSTEM::NUM_ECOSYSTEM ] [ NumQuality ] [ NumLevel ] [ IShopUnit::NumShopUnitType ];
 	IShopType::TShopType	_ShopType;
@@ -109,17 +109,17 @@ public:
 	~CTPShopType() { releaseShopType(); }
 	
 	// return type of shop
-	TShopType getShopType() { return _ShopType; }
+	TShopType getShopType() NL_OVERRIDE { return _ShopType; }
 	
 	// get shop unit
-	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
+	IShopUnit * getShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) NL_OVERRIDE;
 	
 	// create a shop unit, or just return it if already exist
-	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType );
+	IShopUnit * createShopUnit( uint32 selector1, uint32 selector2, uint32 selector3, IShopUnit::TShopUnitType shopUnitType ) NL_OVERRIDE;
 	
 private:
 	//release shop content
-	void releaseShopType();
+	void releaseShopType() NL_OVERRIDE;
 	
 	IShopUnit *				_ShopTPBaseContent[ ECOSYSTEM::NUM_ECOSYSTEM ] [ NumTpType ];
 	IShopType::TShopType	_ShopType;

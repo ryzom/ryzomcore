@@ -82,7 +82,7 @@ public:
 	
 	//*****************************************************
 	// Destructor : remove all substeps
-	virtual ~IMissionStepTarget()
+	virtual ~IMissionStepTarget() NL_OVERRIDE
 	{
 		for (uint32 i = 0; i < _SubSteps.size(); ++i)
 			delete _SubSteps[i];
@@ -90,7 +90,7 @@ public:
 
 	//*****************************************************
 	// Constructs all substep from the script and if there is a place needed, get it
-	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -142,7 +142,7 @@ public:
 
 	//*****************************************************
 	// Process the step events with place check if needed
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex, const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex, const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		uint32 ret = 0;
 		if ( event.Type == CMissionEvent::Target )
@@ -186,7 +186,7 @@ public:
 	}
 	
 	//*****************************************************
-	virtual void getInitState( std::vector<uint32>& ret )
+	virtual void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -197,7 +197,7 @@ public:
 	}
 
 	//*****************************************************
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = getStepDefaultText();
 		textPtr = &stepText;
@@ -222,7 +222,7 @@ class CMissionStepTargetFauna : public IMissionStepTarget
 	{
 		CSheetId	Sheet;
 
-		virtual bool assign(const std::string &str)
+		virtual bool assign(const std::string &str) NL_OVERRIDE
 		{
 			Sheet = CSheetId(str + ".creature" );
 			if ( Sheet == CSheetId::Unknown )
@@ -230,7 +230,7 @@ class CMissionStepTargetFauna : public IMissionStepTarget
 			return true;
 		}
 
-		virtual bool check(const CMissionEventTarget &event, const TDataSetRow & giverRow)
+		virtual bool check(const CMissionEventTarget &event, const TDataSetRow & giverRow) NL_OVERRIDE
 		{
 			CCreature * c = CreatureManager.getCreature( event.TargetEntity );
 			if ( c && Sheet == c->getType() && !c->isDead() )
@@ -238,33 +238,33 @@ class CMissionStepTargetFauna : public IMissionStepTarget
 			return false;
 		}
 
-		virtual void fillParam(STRING_MANAGER::TParam &outParam)
+		virtual void fillParam(STRING_MANAGER::TParam &outParam) NL_OVERRIDE
 		{
 			outParam.SheetId = Sheet;
 		}
 	};
 
-	virtual IMissionStepTarget::ISubStep *createNewSubStep()
+	virtual IMissionStepTarget::ISubStep *createNewSubStep() NL_OVERRIDE
 	{
 		return new CSubStepFauna;
 	}
 	
-	virtual void logSyntaxError(uint32 line, const vector<string> &script)
+	virtual void logSyntaxError(uint32 line, const vector<string> &script) NL_OVERRIDE
 	{
 		MISLOGSYNTAXERROR("<sheet> *[; <sheet>] [: <place>]");
 	}
 
-	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex)
+	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex) NL_OVERRIDE
 	{
 		LOGMISSIONSTEPSUCCESS("target_fauna");
 	}
 
-	virtual STRING_MANAGER::TParamType getStringManagerType()
+	virtual STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::creature_model;
 	}
 
-	virtual string getStepDefaultText()
+	virtual string getStepDefaultText() NL_OVERRIDE
 	{
 		return "MIS_TARGET_FAUNA_";
 	}
@@ -280,7 +280,7 @@ class CMissionStepTargetRace : public IMissionStepTarget
 	{
 		EGSPD::CPeople::TPeople	Race;
 		
-		virtual bool assign(const std::string &str)
+		virtual bool assign(const std::string &str) NL_OVERRIDE
 		{
 			Race = EGSPD::CPeople::fromString(str);
 			if ( Race == EGSPD::CPeople::EndPeople )
@@ -288,7 +288,7 @@ class CMissionStepTargetRace : public IMissionStepTarget
 			return true;
 		}
 		
-		virtual bool check(const CMissionEventTarget &event, const TDataSetRow & giverRow)
+		virtual bool check(const CMissionEventTarget &event, const TDataSetRow & giverRow) NL_OVERRIDE
 		{
 			CCreature * c = CreatureManager.getCreature( event.TargetEntity );
 			if ( c && Race == c->getRace() && !c->isDead() )
@@ -296,33 +296,33 @@ class CMissionStepTargetRace : public IMissionStepTarget
 			return false;
 		}
 		
-		virtual void fillParam(STRING_MANAGER::TParam &outParam)
+		virtual void fillParam(STRING_MANAGER::TParam &outParam) NL_OVERRIDE
 		{
 			outParam.Enum = Race;
 		}
 	};
 	
-	virtual IMissionStepTarget::ISubStep *createNewSubStep()
+	virtual IMissionStepTarget::ISubStep *createNewSubStep() NL_OVERRIDE
 	{
 		return new CSubStepRace;
 	}
 	
-	virtual void logSyntaxError(uint32 line, const vector<string> &script)
+	virtual void logSyntaxError(uint32 line, const vector<string> &script) NL_OVERRIDE
 	{
 		MISLOGSYNTAXERROR("<race> *[; <race>] [: <place>]");
 	}
 	
-	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex)
+	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex) NL_OVERRIDE
 	{
 		LOGMISSIONSTEPSUCCESS("target_race");
 	}
 	
-	virtual STRING_MANAGER::TParamType getStringManagerType()
+	virtual STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::race;
 	}
 	
-	virtual string getStepDefaultText()
+	virtual string getStepDefaultText() NL_OVERRIDE
 	{
 		return "MIS_TARGET_SPECIES_";
 	}
@@ -338,7 +338,7 @@ class CMissionStepTargetNpc : public IMissionStepTarget
 	{
 		TAIAlias	Alias;
 
-		virtual bool assign(const std::string &str)
+		virtual bool assign(const std::string &str) NL_OVERRIDE
 		{
 			Alias = CAIAliasTranslator::Invalid;
 			string name = CMissionParser::getNoBlankString( str );
@@ -355,7 +355,7 @@ class CMissionStepTargetNpc : public IMissionStepTarget
 			return true;
 		}
 		
-		virtual bool check(const CMissionEventTarget &event, const TDataSetRow & giverRow)
+		virtual bool check(const CMissionEventTarget &event, const TDataSetRow & giverRow) NL_OVERRIDE
 		{
 			CCreature * c = CreatureManager.getCreature( event.TargetEntity );
 			if ( c && !c->isDead() )
@@ -373,7 +373,7 @@ class CMissionStepTargetNpc : public IMissionStepTarget
 			return false;
 		}
 		
-		virtual void fillParam(STRING_MANAGER::TParam &outParam)
+		virtual void fillParam(STRING_MANAGER::TParam &outParam) NL_OVERRIDE
 		{
 			if ( Alias != CAIAliasTranslator::Invalid )
 				outParam.Int = Alias ;
@@ -382,32 +382,32 @@ class CMissionStepTargetNpc : public IMissionStepTarget
 		}
 	};
 
-	virtual IMissionStepTarget::ISubStep *createNewSubStep()
+	virtual IMissionStepTarget::ISubStep *createNewSubStep() NL_OVERRIDE
 	{
 		return new CSubStepNpc;
 	}
 	
-	virtual void logSyntaxError(uint32 line, const vector<string> &script)
+	virtual void logSyntaxError(uint32 line, const vector<string> &script) NL_OVERRIDE
 	{
 		MISLOGSYNTAXERROR("<npc_name> *[; <npc_name>] [: <place>]");
 	}
 	
-	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex)
+	virtual void logSuccessString(const TDataSetRow & userRow, uint subStepIndex) NL_OVERRIDE
 	{
 		LOGMISSIONSTEPSUCCESS("target_npc");
 	}
 	
-	virtual STRING_MANAGER::TParamType getStringManagerType()
+	virtual STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
 	{
 		return STRING_MANAGER::bot;
 	}
 	
-	virtual string getStepDefaultText()
+	virtual string getStepDefaultText() NL_OVERRIDE
 	{
 		return "MIS_TARGET_NPC_";
 	}
 
-	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const
+	virtual TAIAlias getInvolvedBot(bool& invalidIsGiver) const NL_OVERRIDE
 	{
 		if (_SubSteps.empty())
 		{
@@ -730,7 +730,7 @@ class CMissionStepSkill : public IMissionStepTemplate
 		SKILLS::ESkills	Skill;
 		uint			Level;
 	};
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		bool ret = true;
@@ -772,7 +772,7 @@ class CMissionStepSkill : public IMissionStepTemplate
 			return ret;
 		}
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::SkillProgress )
 		{
@@ -786,7 +786,7 @@ class CMissionStepSkill : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _SubSteps.size() );
@@ -796,7 +796,7 @@ class CMissionStepSkill : public IMissionStepTemplate
 		}
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "MIS_SKILL_";
 		textPtr = &stepText;
@@ -817,7 +817,7 @@ class CMissionStepSkill : public IMissionStepTemplate
 		}
 	}
 
-	void onActivation(CMission* instance,uint32 stepIndex,std::list< CMissionEvent * > & eventList)
+	void onActivation(CMission* instance,uint32 stepIndex,std::list< CMissionEvent * > & eventList) NL_OVERRIDE
 	{		
 
 		IMissionStepTemplate::onActivation( instance, stepIndex, eventList );
@@ -1028,7 +1028,7 @@ class CMissionStepCast : public IMissionStepTemplate
 	vector<CSheetId>	_Actions;
 	uint16				_PlaceId;
 	
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{
 		_SourceLine = line;
 		_PlaceId = InvalidPlaceId; // it is optional (but cool) to require a location
@@ -1067,7 +1067,7 @@ class CMissionStepCast : public IMissionStepTemplate
 		return ret;
 
 	}
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::Cast )
 		{
@@ -1098,13 +1098,13 @@ class CMissionStepCast : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.clear();
 		ret.resize( _Actions.size(), 1 );
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "MIS_CAST_";
 		static const std::string stepTextPlace = "MIS_CAST_LOC_";
@@ -1149,7 +1149,7 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 
 	std::vector< MissionNb > _Missions;
 	
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{	
 		_SourceLine = line;
 		bool ret = true;
@@ -1185,7 +1185,7 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		return true;
 	}
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::MissionDone )
 		{
@@ -1200,7 +1200,7 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.resize( _Missions.size(), 1 );
 		uint32 i = 0;
@@ -1211,7 +1211,7 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		}
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		/*static const std::string stepText = "ERROR_UNSPECIFIED_MISSION_TEXT";
 		textPtr = &stepText;*/
@@ -1235,7 +1235,7 @@ class CMissionStepDoMissions : public IMissionStepTemplate
 		}
 		textPtr = &stepText;
 	}
-	bool checkTextConsistency()
+	bool checkTextConsistency() NL_OVERRIDE
 	{
 		if ( !_IsInOverridenOOO && isDisplayed() && _OverridenText.empty() )
 		{
@@ -1254,7 +1254,7 @@ class CMissionStepRingScenario : public IMissionStepTemplate
 {
 	std::string _ScenarioTag;
 	
-	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData )
+	virtual bool	buildStep( uint32 line, const std::vector< std::string > & script, CMissionGlobalParsingData & globalData, CMissionSpecificParsingData & missionData ) NL_OVERRIDE
 	{	
 		_SourceLine = line;
 		bool ret = true;
@@ -1268,7 +1268,7 @@ class CMissionStepRingScenario : public IMissionStepTemplate
 		return true;
 	}
 	
-	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow )
+	uint processEvent( const TDataSetRow & userRow, const CMissionEvent & event,uint subStepIndex,const TDataSetRow & giverRow ) NL_OVERRIDE
 	{
 		if ( event.Type == CMissionEvent::TaggedRingScenario )
 		{
@@ -1282,17 +1282,17 @@ class CMissionStepRingScenario : public IMissionStepTemplate
 		return 0;
 	}
 	
-	void getInitState( std::vector<uint32>& ret )
+	void getInitState( std::vector<uint32>& ret ) NL_OVERRIDE
 	{
 		ret.resize( 1, 1 );
 	}
 	
-	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
+	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates) NL_OVERRIDE
 	{
 		static const std::string stepText = "ERROR_UNSPECIFIED_RING_SCENARIO_TEXT";
 		textPtr = &stepText;
 	}
-	bool checkTextConsistency()
+	bool checkTextConsistency() NL_OVERRIDE
 	{
 		if ( !_IsInOverridenOOO && isDisplayed() && _OverridenText.empty() )
 		{

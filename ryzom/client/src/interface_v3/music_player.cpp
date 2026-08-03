@@ -68,7 +68,7 @@ public:
 	{
 	}
 
-	~CMusicPlayerWorker()
+	~CMusicPlayerWorker() NL_OVERRIDE
 	{
 		_Running = false;
 		if (_Thread)
@@ -81,7 +81,7 @@ public:
 
 	bool isRunning() const { return _Running; }
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		_Running = true;
 
@@ -684,7 +684,7 @@ void CMusicPlayer::createPlaylistFromMusic()
 class CMusicPlayerPlaySongs: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
 	{
 		if(!SoundMngr)
 		{

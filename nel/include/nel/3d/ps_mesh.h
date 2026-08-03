@@ -76,54 +76,54 @@ public:
 	}
 
 	/// set a new shape for that kind of particles
-	void setShape(const std::string &shape);
+	void setShape(const std::string &shape) NL_OVERRIDE;
 
 	/// get the shape used for those particles
-	std::string getShape(void) const { return _Shape; }
+	std::string getShape(void) const NL_OVERRIDE { return _Shape; }
 
 		/// serialisation. Derivers must override this, and call their parent version
-	virtual void serial(NLMISC::IStream &f);
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
-	virtual ~CPSMesh();
+	virtual ~CPSMesh() NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSMesh);
 
 
 	/// return true if there are transparent faces in the object
-	virtual bool hasTransparentFaces(void);
+	virtual bool hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool hasOpaqueFaces(void);
+	virtual bool hasOpaqueFaces(void) NL_OVERRIDE;
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool		hasLightableFaces();
+	virtual bool		hasLightableFaces() NL_OVERRIDE;
 
 	/// return the max number of faces needed for display. This is needed for LOD balancing
-	virtual uint32 getNumWantedTris() const;
+	virtual uint32 getNumWantedTris() const NL_OVERRIDE;
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return false; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return false; }
 
 	// from CPSParticle. No-op for meshs	virtual float getZBias() { return 0.f; }
 
-	virtual void setZBias(float value) {}
-	virtual float getZBias() const { return 0.f; }
+	virtual void setZBias(float value) NL_OVERRIDE {}
+	virtual float getZBias() const NL_OVERRIDE { return 0.f; }
 
 	// from CPSLocatedBindable
-	virtual void onShow(bool shown);
+	virtual void onShow(bool shown) NL_OVERRIDE;
 
 protected:
 	/**	Generate a new element for this bindable. They are generated according to the properties of the class
 	 */
-	virtual void newElement(const CPSEmitterInfo &info);
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
 	/** Delete an element given its index
 	 *  Attributes of the located that hold this bindable are still accessible for the index given
 	 *  index out of range -> nl_assert
 	 */
-	virtual void deleteElement(uint32 index);
+	virtual void deleteElement(uint32 index) NL_OVERRIDE;
 
-	virtual void step(TPSProcessPass pass);
+	virtual void step(TPSProcessPass pass) NL_OVERRIDE;
 
 	/// in fact we don't draw the meshs, we just update their pos...
 	virtual void updatePos();
@@ -131,7 +131,7 @@ protected:
 	/** Resize the bindable attributes containers. Size is the max number of element to be contained. DERIVERS MUST CALL THEIR PARENT VERSION
 	 * should not be called directly. Call CPSLocated::resize instead
 	 */
-	virtual void resize(uint32 size);
+	virtual void resize(uint32 size) NL_OVERRIDE;
 
 	//CSmartPtr<IShape> _Shape;
 
@@ -144,11 +144,11 @@ protected:
 
 
 
-	virtual CPSLocated *getSizeOwner(void) { return _Owner; }
-	virtual CPSLocated *getAngle2DOwner(void) { return _Owner; }
-	virtual CPSLocated *getPlaneBasisOwner(void) { return _Owner; }
+	virtual CPSLocated *getSizeOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getAngle2DOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getPlaneBasisOwner(void) NL_OVERRIDE { return _Owner; }
 
-	void releaseAllRef();
+	void releaseAllRef() NL_OVERRIDE;
 
 	// create an instance of the current shape, or a dummy mesh if not found
 	// NB : the object is hidden at start
@@ -176,15 +176,15 @@ public:
 	/// ctor
 	CPSConstraintMesh();
 
-	virtual ~CPSConstraintMesh();
+	virtual ~CPSConstraintMesh() NL_OVERRIDE;
 
 	/** Construct the mesh by using the given mesh shape file.
 	  * No morphing is applied. The mesh is used 'as it'.
 	  */
-	void				setShape(const std::string &meshFileName);
+	void				setShape(const std::string &meshFileName) NL_OVERRIDE;
 
 	/// Get the shape used for those particles. (must use no morphing or an assertion is raised)
-	std::string			getShape(void) const;
+	std::string			getShape(void) const NL_OVERRIDE;
 
 
 
@@ -246,13 +246,13 @@ public:
 	void				hintRotateTheSame(uint32 nbConfiguration,
 										  float minAngularVelocity = NLMISC::Pi,
 										  float maxAngularVelocity = NLMISC::Pi
-										 );
+										 ) NL_OVERRIDE;
 
 	/** disable the hint 'hintRotateTheSame'
 	 *  The previous set scheme for roation is used
 	 *  \see hintRotateTheSame(), CPSRotated3dPlaneParticle
 	 */
-	void				disableHintRotateTheSame(void)
+	void				disableHintRotateTheSame(void) NL_OVERRIDE
 	{
 		hintRotateTheSame(0);
 	}
@@ -262,7 +262,7 @@ public:
 	 *  \see hintRotateTheSame(), CPSRotated3dPlaneParticle
 	 */
 
-	uint32				checkHintRotateTheSame(float &min, float &max) const
+	uint32				checkHintRotateTheSame(float &min, float &max) const NL_OVERRIDE
 	{
 		min = _MinAngularVelocity;
 		max = _MaxAngularVelocity;
@@ -271,22 +271,22 @@ public:
 
 
 	/// serialisation. Derivers must override this, and call their parent version
-	virtual void		serial(NLMISC::IStream &f);
+	virtual void		serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	NLMISC_DECLARE_CLASS(CPSConstraintMesh);
 
 	/// return true if there are transparent faces in the object
-	virtual bool		hasTransparentFaces(void);
+	virtual bool		hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool		hasOpaqueFaces(void);
+	virtual bool		hasOpaqueFaces(void) NL_OVERRIDE;
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool		hasLightableFaces();
+	virtual bool		hasLightableFaces() NL_OVERRIDE;
 
 	/// return the max number of faces needed for display. This is needed for LOD balancing
-	virtual uint32		getNumWantedTris() const;
+	virtual uint32		getNumWantedTris() const NL_OVERRIDE;
 
 
 	/** Force the n-th stage of all material to be modulated by the mesh color. This allow to put colors on meshs
@@ -362,33 +362,33 @@ public:
 	void getShapeNumVerts(std::vector<sint> &numVerts);
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return false; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return false; }
 
 	// from CPSParticle. No-op for meshs
-	virtual void setZBias(float value) {}
-	virtual float getZBias() const { return 0.f; }
+	virtual void setZBias(float value) NL_OVERRIDE {}
+	virtual float getZBias() const NL_OVERRIDE { return 0.f; }
 
 protected:
 	friend class CPSConstraintMeshHelper;
 	// inherited from CPSColoredParticle
-	virtual CPSLocated *getColorOwner(void) { return _Owner; }
+	virtual CPSLocated *getColorOwner(void) NL_OVERRIDE { return _Owner; }
 
 	// inherited from CPSColoredParticle
-	virtual void updateMatAndVbForColor(void);
+	virtual void updateMatAndVbForColor(void) NL_OVERRIDE;
 
 	/**	Generate a new element.
 	 */
-	virtual void		newElement(const CPSEmitterInfo &info);
+	virtual void		newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
 	/** Delete an element by its index
 	 */
-	virtual void		deleteElement(uint32 index);
+	virtual void		deleteElement(uint32 index) NL_OVERRIDE;
 
-	virtual void step(TPSProcessPass pass);
+	virtual void step(TPSProcessPass pass) NL_OVERRIDE;
 	/** called by the system when particles must be drawn
 	  * \param opaque true if we are dealing with the opaque pass, false for transparent faces
 	  */
-	void		draw(bool opaque);
+	void		draw(bool opaque) NL_OVERRIDE;
 
 	/// draw for pre-rotated meshs
 	void				drawPreRotatedMeshs(bool opaque);
@@ -407,7 +407,7 @@ protected:
 	/** Resize the bindable attributes containers. Size is the max number of element to be contained. DERIVERS MUST CALL THEIR PARENT VERSION
 	 * should not be called directly. Call CPSLocated::resize instead
 	 */
-	virtual void		resize(uint32 size);
+	virtual void		resize(uint32 size) NL_OVERRIDE;
 
 	/** Build the mesh data, if the 'touch' flag is set.
 	  * \param  numVerts, if not NULL, the dest vector will be filled with the number of vertices of each mesh (or a TError enumerated value if loading failed)
@@ -556,8 +556,8 @@ protected:
 	// release the model shape (dtor, or before loading)
 	void clean(void);
 
-	virtual CPSLocated *getSizeOwner(void) { return _Owner; }
-	virtual CPSLocated *getPlaneBasisOwner(void) { return _Owner; }
+	virtual CPSLocated *getSizeOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual CPSLocated *getPlaneBasisOwner(void) NL_OVERRIDE { return _Owner; }
 
 	/** Setup material so that global or per mesh color is taken in account. Useful if material hasn't been setup correctly in the export
 	  */

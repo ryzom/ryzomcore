@@ -73,18 +73,18 @@ public:
 
 	/// \name CTransform traverse specialisation
 	// @{
-	virtual	bool	clip()
+	virtual	bool	clip() NL_OVERRIDE
 	{
 		return true;
 	}
-	virtual void	traverseRender();
+	virtual void	traverseRender() NL_OVERRIDE;
 	// @}
 
 protected:
 	/// Constructor
 	CVegetableBlendLayerModel();
 	/// Destructor
-	virtual ~CVegetableBlendLayerModel() {}
+	virtual ~CVegetableBlendLayerModel() NL_OVERRIDE {}
 
 
 private:

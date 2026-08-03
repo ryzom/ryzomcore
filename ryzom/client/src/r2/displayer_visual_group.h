@@ -59,41 +59,41 @@ public:
 	  * The 'Shape' field is a string that give the shape (same values than the TShape enum).
 	  * The 'Array' field is a string that give the name of the sub-instance array containing the primitive vertices
 	  */
-	virtual bool init(const CLuaObject &parameters);
+	virtual bool init(const CLuaObject &parameters) NL_OVERRIDE;
 	// dtor
-	~CDisplayerVisualGroup();
+	~CDisplayerVisualGroup() NL_OVERRIDE;
 	// events
-	virtual void onPreRender();
-	virtual void onPostRender();
-	virtual void onFocus(bool focused);
-	virtual void onSelect(bool selected);
-	virtual void onAttrModified(const std::string &attrName, sint32 attrIndex);
+	virtual void onPreRender() NL_OVERRIDE;
+	virtual void onPostRender() NL_OVERRIDE;
+	virtual void onFocus(bool focused) NL_OVERRIDE;
+	virtual void onSelect(bool selected) NL_OVERRIDE;
+	virtual void onAttrModified(const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
 	//
-	virtual void onParentDisplayModeChanged();
+	virtual void onParentDisplayModeChanged() NL_OVERRIDE;
 	//virtual void onTableModified(const std::string &tableName, const std::string &keyInTable, sint32 indexInTable);
 	// eval of link point returns first vetrex
-	virtual NLMISC::CVector evalLinkPoint(bool leader);
-	virtual bool evalEnterPoint(const NLMISC::CVector &startPoint,  NLMISC::CVector &result);
-	virtual NLMISC::CVector evalExitPoint();
+	virtual NLMISC::CVector evalLinkPoint(bool leader) NL_OVERRIDE;
+	virtual bool evalEnterPoint(const NLMISC::CVector &startPoint,  NLMISC::CVector &result) NL_OVERRIDE;
+	virtual NLMISC::CVector evalExitPoint() NL_OVERRIDE;
 	// from ISelectableObject
-	virtual TSelectionType	getSelectionType() const { return GroundProjected; }
-	virtual	bool			isInProjection(const NLMISC::CVector2f &pos) const;
-	virtual	bool			isInProjectionBorder(const NLMISC::CVector2f &pos) const;
+	virtual TSelectionType	getSelectionType() const NL_OVERRIDE { return GroundProjected; }
+	virtual	bool			isInProjection(const NLMISC::CVector2f &pos) const NL_OVERRIDE;
+	virtual	bool			isInProjectionBorder(const NLMISC::CVector2f &pos) const NL_OVERRIDE;
 	// see if a position if over an edge, return the edge index in this case, or -1 if not found
 	virtual	sint			isOnEdge(const NLMISC::CVector2f &pos) const;
-	const NLMISC::CMatrix	&getInvertedMatrix() const;
+	const NLMISC::CMatrix	&getInvertedMatrix() const NL_OVERRIDE;
 	uint					getFadeTimeInMS() const;
-	virtual void					getSons(std::vector<CDisplayerVisual *> &sons) const;
+	virtual void					getSons(std::vector<CDisplayerVisual *> &sons) const NL_OVERRIDE;
 	// from CDisplayerVisual
-	virtual bool isInvalidPacsPosAcceptable() const { return false; }
-	virtual void getSonsWorldPos2f(std::vector<NLMISC::CVector2f> &result);
-	virtual uint	  getNumSons() const;
-	virtual CDisplayerVisual *getSon(uint index) const;
-	virtual bool isAccessible();
-	virtual	bool isGroup() const { return true; }
-	virtual bool isValidShape() const { return _CurrPrimValid; }
-	virtual bool isCompound() const { return true; }
-	virtual void setDisplayMode(sint32 mode);
+	virtual bool isInvalidPacsPosAcceptable() const NL_OVERRIDE { return false; }
+	virtual void getSonsWorldPos2f(std::vector<NLMISC::CVector2f> &result) NL_OVERRIDE;
+	virtual uint	  getNumSons() const NL_OVERRIDE;
+	virtual CDisplayerVisual *getSon(uint index) const NL_OVERRIDE;
+	virtual bool isAccessible() NL_OVERRIDE;
+	virtual	bool isGroup() const NL_OVERRIDE { return true; }
+	virtual bool isValidShape() const NL_OVERRIDE { return _CurrPrimValid; }
+	virtual bool isCompound() const NL_OVERRIDE { return true; }
+	virtual void setDisplayMode(sint32 mode) NL_OVERRIDE;
 
 	/** Active contextual visibility. This is road / region specific
 	  * In this mode, the road or the region is only displayed if some entity is attached to it
@@ -108,7 +108,7 @@ public:
 	//
 
 	// from CVisualDisplayer
-	virtual TDisplayMode getActualDisplayMode() const;
+	virtual TDisplayMode getActualDisplayMode() const NL_OVERRIDE;
 
 	REFLECT_EXPORT_START(R2::CDisplayerVisualGroup, R2::CDisplayerBase)
 			REFLECT_BOOL("ContextualVisibilityActive", getContextualVisibilityActive, setContextualVisibilityActive);
@@ -125,9 +125,9 @@ private:
 	public:
 		CSelectablePrimRender() : DisplayedInstance(nullptr) {}
 		// from CPrimRender
-		virtual CCtrlPolygon *newCtrlPolygon() const;
+		virtual CCtrlPolygon *newCtrlPolygon() const NL_OVERRIDE;
 		// from CPrimRender
-		virtual CCtrlQuad *newCtrlQuad(uint edgeIndex) const;
+		virtual CCtrlQuad *newCtrlQuad(uint edgeIndex) const NL_OVERRIDE;
 		CInstance *DisplayedInstance;
 	};
 	CSelectablePrimRender			_Prim;				// rendering of edges in the worldmap
@@ -161,11 +161,11 @@ private:
 	void touch();
 protected:
 	// from CDisplayerVisual
-	virtual void setActive(bool active);
-	virtual bool getActive() const;
-	virtual void updateWorldPos();
+	virtual void setActive(bool active) NL_OVERRIDE;
+	virtual bool getActive() const NL_OVERRIDE;
+	virtual void updateWorldPos() NL_OVERRIDE;
 	// from CDisplayerBase
-	virtual void   setDisplayedInstance(CInstance *instance);
+	virtual void   setDisplayedInstance(CInstance *instance) NL_OVERRIDE;
 public:
 	virtual void setActiveRecurse(bool active);
 	void setContextualVisibilityDate(sint64 date) { _ContextualVisibilityDate = date; }

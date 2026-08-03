@@ -46,49 +46,49 @@ public:
 	NLMISC_DECLARE_CLASS(CPSDot);
 
 	///serialisation
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	/// return true if there are transparent faces in the object
-	virtual bool hasTransparentFaces(void);
+	virtual bool hasTransparentFaces(void) NL_OVERRIDE;
 
 	/// return true if there are Opaque faces in the object
-	virtual bool hasOpaqueFaces(void);
+	virtual bool hasOpaqueFaces(void) NL_OVERRIDE;
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool hasLightableFaces() { 	return false; }
+	virtual bool hasLightableFaces() NL_OVERRIDE { 	return false; }
 
 	/// return the max number of faces needed for display. This is needed for LOD balancing
-	virtual uint32 getNumWantedTris() const;
+	virtual uint32 getNumWantedTris() const NL_OVERRIDE;
 
 	/// init the vertex buffers
 	static void initVertexBuffers();
 
 	// from CPSParticle
-	virtual bool supportGlobalColorLighting() const { return true; }
+	virtual bool supportGlobalColorLighting() const NL_OVERRIDE { return true; }
 
 	// from CPSParticle
-	virtual void setZBias(float value) { CPSMaterial::setZBias(value); }
-	virtual float getZBias() const { return CPSMaterial::getZBias(); }
+	virtual void setZBias(float value) NL_OVERRIDE { CPSMaterial::setZBias(value); }
+	virtual float getZBias() const NL_OVERRIDE { return CPSMaterial::getZBias(); }
 
 protected:
-	virtual void draw(bool opaque);
-	virtual CPSLocated *getColorOwner(void) { return _Owner; }
+	virtual void draw(bool opaque) NL_OVERRIDE;
+	virtual CPSLocated *getColorOwner(void) NL_OVERRIDE { return _Owner; }
 	void	init(void);
 	static CVertexBuffer _DotVb; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static CVertexBuffer _DotVbColor; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	/// update the material and the vb so that they match the color scheme
-	virtual void updateMatAndVbForColor(void);
+	virtual void updateMatAndVbForColor(void) NL_OVERRIDE;
 
 	/** Set the max number of dot
 	*/
-	void resize(uint32 size);
+	void resize(uint32 size) NL_OVERRIDE;
 
 	/// we don't save datas so it does nothing for now
-	void newElement(const CPSEmitterInfo &info);
+	void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
 	/// we don't save datas so it does nothing for now
-	void deleteElement(uint32);
+	void deleteElement(uint32) NL_OVERRIDE;
 
 
 };

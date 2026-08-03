@@ -42,16 +42,16 @@ namespace NLGUI
         DECLARE_UI_CLASS( CViewPolygon )
 
         CViewPolygon( const TCtorParam &param );
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
-		virtual void updateCoords();
-		virtual void draw();
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual void updateCoords() NL_OVERRIDE;
+		virtual void draw() NL_OVERRIDE;
 		void	setVertices(const std::vector<NLMISC::CVector> &vertices);
 		// color
 		void			setColorRGBA(NLMISC::CRGBA col) { _Color = col; }
 		NLMISC::CRGBA	getColorRGBA() const { return _Color; }
 		// from CViewBase
-		virtual sint32 getAlpha() const { return (sint32) _Color.A; }
-		virtual void setAlpha (sint32 a);
+		virtual sint32 getAlpha() const NL_OVERRIDE { return (sint32) _Color.A; }
+		virtual void setAlpha (sint32 a) NL_OVERRIDE;
 	private:
 		NLMISC::CPolygon _Poly;
 		bool _Touched;

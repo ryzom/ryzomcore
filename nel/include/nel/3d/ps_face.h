@@ -69,7 +69,7 @@ public:
 	 */
 	CPSFace(CSmartPtr<ITexture> tex = nullptr);
 
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSFace);
 	/** Tells that all faces are turning in the same manner, and only have a rotationnal bias
@@ -84,13 +84,13 @@ public:
 	void hintRotateTheSame(uint32 nbConfiguration
 							, float minAngularVelocity = NLMISC::Pi
 							, float maxAngularVelocity = NLMISC::Pi
-						  );
+						  ) NL_OVERRIDE;
 
 	/** disable the hint 'hintRotateTheSame'
 	 *  The previous set scheme for roation is used
 	 *  \see hintRotateTheSame(), CPSRotated3dPlaneParticle
 	 */
-	void disableHintRotateTheSame(void)
+	void disableHintRotateTheSame(void) NL_OVERRIDE
 	{
 		hintRotateTheSame(0);
 	}
@@ -100,7 +100,7 @@ public:
 	 *  \see hintRotateTheSame(), CPSRotated3dPlaneParticle
 	 */
 
-	uint32 checkHintRotateTheSame(float &min, float &max) const
+	uint32 checkHintRotateTheSame(float &min, float &max) const NL_OVERRIDE
 	{
 		min = _MinAngularVelocity;
 		max = _MaxAngularVelocity;
@@ -108,20 +108,20 @@ public:
 	}
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool hasLightableFaces() { 	return false; }
+	virtual bool hasLightableFaces() NL_OVERRIDE { 	return false; }
 
 
 protected:
 
 	friend class CPSFaceHelper; /// for private use only
 
-	virtual void	step(TPSProcessPass pass);
-	virtual void	newElement(const CPSEmitterInfo &info);
-	virtual void	deleteElement(uint32 index);
-	virtual void	resize(uint32 size);
+	virtual void	step(TPSProcessPass pass) NL_OVERRIDE;
+	virtual void	newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void	deleteElement(uint32 index) NL_OVERRIDE;
+	virtual void	resize(uint32 size) NL_OVERRIDE;
 	/// fill _IndexInPrecompBasis with index in the range [0.. nb configurations[
 	void fillIndexesInPrecompBasis(void);
-	virtual CPSLocated *getPlaneBasisOwner(void) { return _Owner; }
+	virtual CPSLocated *getPlaneBasisOwner(void) NL_OVERRIDE { return _Owner; }
 
 	// we must store them for serialization
 	float			_MinAngularVelocity;

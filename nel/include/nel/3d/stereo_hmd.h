@@ -48,7 +48,7 @@ class IStereoHMD : public IStereoDisplay
 {
 public:
 	IStereoHMD();
-	virtual ~IStereoHMD();
+	virtual ~IStereoHMD() NL_OVERRIDE;
 	
 	/// Get the HMD orientation
 	virtual NLMISC::CQuat getOrientation() const = 0;

@@ -125,7 +125,7 @@ public:
 	 * otherwise it is the number of bytes that have been written.
 	 * Overloaded because uses a specific version of lengthR().
 	 */
-	virtual uint32	length() const
+	virtual uint32	length() const NL_OVERRIDE
 	{
 		if ( isReading() )
 		{
@@ -137,7 +137,7 @@ public:
 		}
 	}
 
-	virtual uint32			lengthS() const
+	virtual uint32			lengthS() const NL_OVERRIDE
 	{
 		if (!hasLockedSubMessage())
 //			return _BufPos - _Buffer.getPtr();
@@ -154,7 +154,7 @@ public:
 		return _LengthR;
 	}
 
-	virtual sint32	getPos() const
+	virtual sint32	getPos() const NL_OVERRIDE
 	{
 //		return (_BufPos - _Buffer.getPtr()) - _SubMessagePosR;
 		return _Buffer.Pos - _SubMessagePosR;
@@ -227,7 +227,7 @@ public:
 
 	/** If a sub message is locked, return the sub message part
 	*/
-	virtual const uint8		*buffer() const
+	virtual const uint8		*buffer() const NL_OVERRIDE
 	{
 		if (hasLockedSubMessage())
 		{
@@ -257,7 +257,7 @@ public:
 	/**
 	 * Transforms the message from input to output or from output to input
 	 */
-	void invert()
+	void invert() NL_OVERRIDE
 	{
 		nlassertex( (!isReading()) || (!hasLockedSubMessage()), ("Inverting %s", LockedSubMessageError) );
 
@@ -275,7 +275,7 @@ public:
 	}
 
 	// Clear the message. With this function, you can reuse a message to create another message
-	void clear ();
+	void clear () NL_OVERRIDE;
 
 	/** Returns the type name in string if available. Be sure that the message have the name of the message type
 	 * In a callback driven by message name, getName() does not necessarily return the right name.

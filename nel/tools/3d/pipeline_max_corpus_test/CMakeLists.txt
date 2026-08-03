@@ -166,6 +166,59 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_shape_corpus PROPERTIES SKIP_RETURN_CODE 77)
 
+	# max2gltf differential gate (drafts/max2gltf_plan.md): direct .shape vs
+	# .max -> .gltf -> mesh_export .shape over the whole shape corpus. Every co-produced shape
+	# must be BYTE-IDENTICAL (same extraction + same NL3D build calls on the same host — the
+	# glTF hop is lossless by design; any float-eq is an encoding leak and fails). Direct-only
+	# shapes are the staged-coverage classes (skinned/multilod/...), tracked in the summary.
+	# The sweep unions the shape+ig corpora with the 4524-file anim corpus (nel_anim blob) and
+	# the ligo zone corpus (nel_zones blob; per-ecosystem smallbank), ~7370 files total. The
+	# floors pin coverage (2026-07-15 skel sweep: 30244 byte-identical shapes + 626 igs +
+	# 5329 anims + 2640 zone files + 6266 process files (skel/swt/pacs_prim/veget/clod/cmb), 0 direct-only,
+	# 0 via-only — TOTAL co-production; the only skips, mesh-eval=253 and skinned-maxverts=1,
+	# are identical on both routes).
+	ADD_TEST(NAME pipeline_max_gltf_corpus
+		COMMAND ${Python3_EXECUTABLE} gltf_corpus.py --gate --min-identical 29880 --min-anims 5040 --min-zones 2630 --min-singles 6300
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_corpus PROPERTIES SKIP_RETURN_CODE 77)
+
+	# materials_sidecar_test.py: behavior test for the assimp route's --materials sidecar
+	# loader (materials-only .gltf, name-bound nel_* materials — plan decision 2026-07-14).
+	# One-fixture test: bind-all / fallback / partial / tamper-fails / stacking / exact-ignores.
+	ADD_TEST(NAME pipeline_max_materials_sidecar
+		COMMAND ${Python3_EXECUTABLE} materials_sidecar_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_materials_sidecar PROPERTIES SKIP_RETURN_CODE 77)
+
+	# gltf_skins_test.py: behavior test for the glTF-skins interop view (JOINTS_0/WEIGHTS_0 +
+	# skin objects + IBMs, biped figure-mode rest pose on the rig nodes). One skinned fixture:
+	# coverage / exact extras match / rest-pose skinning identity / non-degenerate rig.
+	ADD_TEST(NAME pipeline_max_gltf_skins
+		COMMAND ${Python3_EXECUTABLE} gltf_skins_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_skins PROPERTIES SKIP_RETURN_CODE 77)
+
+	# gltf_anim_channels_test.py: behavior test for the sampled glTF animation channels (TRS
+	# tracks from the nel_anim blob, 30 fps LINEAR, blob authoritative). One-clip fixture:
+	# presence / channel shape / well-formedness / unit hemisphere-aligned quaternions.
+	ADD_TEST(NAME pipeline_max_gltf_anim_channels
+		COMMAND ${Python3_EXECUTABLE} gltf_anim_channels_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_anim_channels PROPERTIES SKIP_RETURN_CODE 77)
+
+	# gltf_morph_targets_test.py: behavior test for standard glTF morph targets (POSITION/NORMAL
+	# deltas + weights + targetNames from the nel_bs_* data; exact-tier streams authoritative).
+	# Visage fixture: counts / names / weights / float-exact POSITION deltas.
+	ADD_TEST(NAME pipeline_max_gltf_morph_targets
+		COMMAND ${Python3_EXECUTABLE} gltf_morph_targets_test.py
+			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_gltf_morph_targets PROPERTIES SKIP_RETURN_CODE 77)
+
 	# Same shape corpus through the VS2008/Wine x87 reference-codegen build, same rationale as
 	# the other *_vs2008 gates: T1/T2 byte-identity is codegen-independent, and the T3 FLOATEQ
 	# tier (2e-6/32-ULP, normals 1e-4) must hold under the Max-2010-matching compiler/float
@@ -251,6 +304,30 @@ IF (Python3_Interpreter_FOUND)
 			--bin $<TARGET_FILE_DIR:pipeline_max_export_shape>
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_lightmap_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 10800)
+
+	# rpo_paint_corpus.py: the zone painter's RPatchMesh write path (design doc §14-paint) —
+	# corpus-wide decode->encode byte-identity on every 0x08FD / 0x4001 blob (--rpo-selftest)
+	# plus the whole-file NULL-EDIT save proof on every blob-carrying file
+	# (--rpo-modify-save-test: every blob pushed through the write path in place, whole .max
+	# rewritten, every stream must stay byte-identical). Floors pin the 2026-07-18 landing
+	# coverage (7190 rpo + 1660 snapshots over 8743 files).
+	ADD_TEST(NAME pipeline_max_rpo_paint_corpus
+		COMMAND ${Python3_EXECUTABLE} rpo_paint_corpus.py --gate
+			--bin $<TARGET_FILE_DIR:pipeline_max_corpus_test>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_rpo_paint_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 3600)
+
+	# pm_encode_corpus.py: the PatchMesh chunk-stream encoder (Tier B) — the whole-file
+	# NULL-EDIT proof on every file (--pm-modify-save-test: every base stream and every
+	# modifier 0x1140 decoded and written back through encodePatchMesh in place, whole .max
+	# rewritten, every stream must stay byte-identical). Decode->encode is the identity
+	# BEFORE any topological op exists. Floors pin the Tier B survey coverage (6943 base +
+	# 1539 modifier copies over the ligo corpus).
+	ADD_TEST(NAME pipeline_max_pm_encode_corpus
+		COMMAND ${Python3_EXECUTABLE} pm_encode_corpus.py --gate
+			--bin $<TARGET_FILE_DIR:pipeline_max_corpus_test>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_pm_encode_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 3600)
 
 	IF (TARGET unit_test)
 		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod shape_lightmapper)

@@ -44,21 +44,21 @@ public:
 
 	/// Constructor
 	CCallbackClient( TRecordingState rec=Off, const std::string& recfilename="", bool recordall=true, bool initPipeForDataAvailable=true );
-	~CCallbackClient();
+	~CCallbackClient() NL_OVERRIDE;
 
 	/// Sends a message to the remote host (the second parameter isn't used)
-	void	send (const CMessage &buffer, TSockId hostid = InvalidSockId, bool log = true);
+	void	send (const CMessage &buffer, TSockId hostid = InvalidSockId, bool log = true) NL_OVERRIDE;
 
 	/// Force to send all data pending in the send queue. hostid must be InvalidSockId here. See comment in CCallbackNetBase.
-	bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining = nullptr);
+	bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining = nullptr) NL_OVERRIDE;
 
 	/** Updates the network (call this method evenly).
 	 * More info about timeout and mintime in the code of CCallbackNetBase::baseUpdate().
 	 */
-	void	update2 (sint32 timeout=-1, sint32 mintime=0);
+	void	update2 (sint32 timeout=-1, sint32 mintime=0) NL_OVERRIDE;
 
 	/// Updates the network (call this method evenly) (legacy)
-	void	update (sint32 timeout=0);
+	void	update (sint32 timeout=0) NL_OVERRIDE;
 
 	/// Connects to the specified host
 	void	connect(const CInetHost &addrs);
@@ -67,29 +67,29 @@ public:
 	 * event has reached the front of the receive queue, just before calling the disconnection callback
 	 * if there is one)
 	 */
-	virtual bool	connected () const { return CBufClient::connected (); }
+	virtual bool	connected () const NL_OVERRIDE { return CBufClient::connected (); }
 
-	virtual const CInetAddress&	hostAddress( TSockId /* hostid */ ) { return remoteAddress(); }
+	virtual const CInetAddress&	hostAddress( TSockId /* hostid */ ) NL_OVERRIDE { return remoteAddress(); }
 
 	/** Disconnect a connection
 	 * Unlike in CCallbackClient, you can call disconnect() on a socket that is already disconnected
 	 * (it will do nothing)
 	 */
-	void	disconnect (TSockId hostid = InvalidSockId);
+	void	disconnect (TSockId hostid = InvalidSockId) NL_OVERRIDE;
 
 	/// Sets callback for disconnections (or NULL to disable callback)
 	void	setDisconnectionCallback (TNetCallback cb, void *arg) { CCallbackNetBase::setDisconnectionCallback (cb, arg); }
 
 	/// Returns the sockid
-	virtual TSockId	getSockId (TSockId hostid = InvalidSockId);
+	virtual TSockId	getSockId (TSockId hostid = InvalidSockId) NL_OVERRIDE;
 
-	uint64	getReceiveQueueSize () { return CBufClient::getReceiveQueueSize(); }
-	uint64	getSendQueueSize () { return CBufClient::getSendQueueSize(); }
+	uint64	getReceiveQueueSize () NL_OVERRIDE { return CBufClient::getReceiveQueueSize(); }
+	uint64	getSendQueueSize () NL_OVERRIDE { return CBufClient::getSendQueueSize(); }
 
-	void displayReceiveQueueStat (NLMISC::CLog *log = NLMISC::InfoLog) { CBufClient::displayReceiveQueueStat(log); }
-	void displaySendQueueStat (NLMISC::CLog *log = NLMISC::InfoLog, TSockId /* destid */ = InvalidSockId) { CBufClient::displaySendQueueStat(log); }
+	void displayReceiveQueueStat (NLMISC::CLog *log = NLMISC::InfoLog) NL_OVERRIDE { CBufClient::displayReceiveQueueStat(log); }
+	void displaySendQueueStat (NLMISC::CLog *log = NLMISC::InfoLog, TSockId /* destid */ = InvalidSockId) NL_OVERRIDE { CBufClient::displaySendQueueStat(log); }
 
-	void displayThreadStat (NLMISC::CLog *log = NLMISC::InfoLog) { CBufClient::displayThreadStat(log); }
+	void displayThreadStat (NLMISC::CLog *log = NLMISC::InfoLog) NL_OVERRIDE { CBufClient::displayThreadStat(log); }
 
 private:
 
@@ -97,10 +97,10 @@ private:
 	void	send (const NLMISC::CMemStream &/* buffer */) { nlstop; }
 
 	/// Returns true if there are messages to read
-	bool	dataAvailable ();
-	virtual bool getDataAvailableFlagV() const { return dataAvailableFlag(); }
+	bool	dataAvailable () NL_OVERRIDE;
+	virtual bool getDataAvailableFlagV() const NL_OVERRIDE { return dataAvailableFlag(); }
 
-	void	receive (CMessage &buffer, TSockId *hostid = nullptr);
+	void	receive (CMessage &buffer, TSockId *hostid = nullptr) NL_OVERRIDE;
 
 	// ---------------------------------------
 #ifdef USE_MESSAGE_RECORDER

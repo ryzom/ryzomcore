@@ -323,7 +323,7 @@ namespace NLGUI
 			if (open)	Opened = convertBool(open);
 
 			CXMLAutoPtr show((const char*) xmlGetProp (cur,   (xmlChar*)"show"));
-			if (open)	Show = convertBool(show);
+			if (show)	Show = convertBool(show);
 
 			CXMLAutoPtr ah((const char*) xmlGetProp (cur,   (xmlChar*)"handler"));
 			if (ah)		AHName = (const char*)ah;
@@ -1622,7 +1622,7 @@ namespace NLGUI
 	class CHandlerTreeReset : public IActionHandler
 	{
 	public:
-		void execute (CCtrlBase * /* pCaller */,  const std::string &sParams)
+		void execute (CCtrlBase * /* pCaller */,  const std::string &sParams) NL_OVERRIDE
 		{
 			CGroupTree *pTree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(sParams));
 			if (pTree != nullptr)

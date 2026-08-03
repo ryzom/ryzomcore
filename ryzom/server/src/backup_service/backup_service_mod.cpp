@@ -55,7 +55,7 @@ namespace BS
 //
 //		}
 
-		void onModuleDown(IModuleProxy *proxy)
+		void onModuleDown(IModuleProxy *proxy) NL_OVERRIDE
 		{
 			// we must check that this module is not in the listener list
 			CBackupService::getInstance()->onModuleDown(proxy);
@@ -77,7 +77,7 @@ namespace BS
 		/////////////////////////////////////////////////////////////
 
 		// A module ask to save a file in the backup repository
-		void saveFile(NLNET::IModuleProxy *sender, const std::string &fileName, const NLNET::TBinBuffer &data)
+		void saveFile(NLNET::IModuleProxy *sender, const std::string &fileName, const NLNET::TBinBuffer &data) NL_OVERRIDE
 		{
 			CWriteFile*	access = new CWriteFile(fileName, TRequester(sender), 0, data.getBuffer(), data.getBufferSize());
 
@@ -90,7 +90,7 @@ namespace BS
 		}
 
 		// A module ask to load a file
-		void loadFile(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 requestId)
+		void loadFile(NLNET::IModuleProxy *sender, const std::string &fileName, uint32 requestId) NL_OVERRIDE
 		{
 			CLoadFile* access = new CLoadFile(fileName, TRequester(sender), requestId);
 

@@ -102,32 +102,32 @@ public:
 	/// @name Constructors, destructor
 	//@{
 	CBotProfileFight(CProfileOwner* owner, CAIEntityPhysical* ennemy);
-	virtual ~CBotProfileFight();
+	virtual ~CBotProfileFight() NL_OVERRIDE;
 	//@}
 	
 	/// @name Event handlers
 	//@{
 	virtual void eventBeginFight() = 0;
-	virtual void eventTargetKilled() = 0;
+	virtual void eventTargetKilled() NL_OVERRIDE = 0;
 	//@}
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual	void resumeProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual	void resumeProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
-	virtual void noMoreTarget() = 0;
+	virtual void noMoreTarget() NL_OVERRIDE = 0;
 	
 public:
 	/// @name Accessors
 	//@{
 	bool isHitting() const { return _Bot->isHitting(); }
 	bool atAttackDist() const { return _AtAttackDist; }
-	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FIGHT; }
+	virtual AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::BOT_FIGHT; }
 	//@}
 
 protected:
@@ -161,32 +161,32 @@ public:
 	/// @name Constructors, destructor
 	//@{
 	CBotProfileHeal(TDataSetRow const& row, CProfileOwner* owner);
-	virtual ~CBotProfileHeal();
+	virtual ~CBotProfileHeal() NL_OVERRIDE;
 	//@}
 	
 	/// @name Event handlers
 	//@{
 //	virtual void eventBeginFight() = 0;
-	virtual void eventTargetKilled() { nlwarning("eventTargetKilled called on a heal profile"); }
+	virtual void eventTargetKilled() NL_OVERRIDE { nlwarning("eventTargetKilled called on a heal profile"); }
 	//@}
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual	void resumeProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual	void resumeProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
-	virtual void noMoreTarget() = 0;
+	virtual void noMoreTarget() NL_OVERRIDE = 0;
 	
 public:
 	/// @name Accessors
 	//@{
 	bool isHitting() const { return (_Bot->getActionFlags()&RYZOMACTIONFLAGS::Attacks)!=0; }
 	bool atAttackDist() const { return _AtAttackDist; }
-	virtual AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_HEAL; }
+	virtual AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::BOT_HEAL; }
 	//@}
 	
 protected:
@@ -219,16 +219,16 @@ public:
 	/// @name Constructor and destructor
 	//@{
 	CBotProfileFlee(CProfileOwner *owner);
-	virtual ~CBotProfileFlee();
+	virtual ~CBotProfileFlee() NL_OVERRIDE;
 	//@}
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile() { }
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::BOT_FLEE; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE { }
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::BOT_FLEE; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 private:
@@ -263,17 +263,17 @@ public:
 	/// @name Constructor and destructor
 	//@{
 	CBotProfileReturnAfterFight(CProfileOwner *owner);
-	virtual ~CBotProfileReturnAfterFight();
+	virtual ~CBotProfileReturnAfterFight() NL_OVERRIDE;
 	//@}
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::BOT_RETURN_AFTER_FIGHT; }
-	virtual std::string getOneLineInfoString() const;
-	virtual void stateChangeProfile();
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::BOT_RETURN_AFTER_FIGHT; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
+	virtual void stateChangeProfile() NL_OVERRIDE;
 	//@}
 	
 private:
@@ -351,7 +351,7 @@ class CBotProfileFightFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 		nlassert(false);
 		return NULL;
@@ -367,7 +367,7 @@ class CBotProfileFleeFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 		nlassert(false);
 		return NULL;

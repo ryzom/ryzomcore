@@ -43,7 +43,7 @@
 class CCommandExecutorServiceSingleton: public IServiceSingleton
 {
 public:
-	void serviceUpdate()
+	void serviceUpdate() NL_OVERRIDE
 	{
 		static NLMISC::TTime lastUpdateTime= NLMISC::CTime::getLocalTime();
 		NLMISC::TTime localTime= NLMISC::CTime::getLocalTime();

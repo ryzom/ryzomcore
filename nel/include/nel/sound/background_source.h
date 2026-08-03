@@ -42,23 +42,23 @@ public:
 	/// Constructor
 	CBackgroundSource	(CBackgroundSound *backgroundSound = nullptr, bool spawn=false, TSpawnEndCallback cb=nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
 	/// Destructor
-	~CBackgroundSource	();
+	~CBackgroundSource	() NL_OVERRIDE;
 
 	/// Return the sound binded to the source (or NULL if there is no sound)
-	virtual TSoundId				getSound();
+	virtual TSoundId				getSound() NL_OVERRIDE;
 
-	virtual void					play();
+	virtual void					play() NL_OVERRIDE;
 	/// Stop playing
-	virtual void					stop();
+	virtual void					stop() NL_OVERRIDE;
 
-	TSOURCE_TYPE					getType() const								{return SOURCE_BACKGROUND;}
+	TSOURCE_TYPE					getType() const NL_OVERRIDE								{return SOURCE_BACKGROUND;}
 
-	void							setGain( float gain );
-	void							setRelativeGain( float gain );
+	void							setGain( float gain ) NL_OVERRIDE;
+	void							setRelativeGain( float gain ) NL_OVERRIDE;
 
-	void							setPos( const NLMISC::CVector& pos );
-	void							setVelocity( const NLMISC::CVector& vel );
-	void							setDirection( const NLMISC::CVector& dir );
+	void							setPos( const NLMISC::CVector& pos ) NL_OVERRIDE;
+	void							setVelocity( const NLMISC::CVector& vel ) NL_OVERRIDE;
+	void							setDirection( const NLMISC::CVector& dir ) NL_OVERRIDE;
 
 	void							updateFilterValues(const float *filterValues);
 
@@ -66,7 +66,7 @@ public:
 private:
 
 	/// Mixer update
-	void onUpdate();
+	void onUpdate() NL_OVERRIDE;
 
 	/// Sub source possible status.
 	enum TSubSourceStatus

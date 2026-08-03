@@ -419,13 +419,13 @@ public:
  */
 class CLoadProxy : public NLMISC::CI18N::ILoadProxy, public TStringDiff::IDiffCallback
 {
-	void loadStringFile(const std::string &filename, ucstring &text); // TODO: UTF-8 (serial)
+	void loadStringFile(const std::string &filename, ucstring &text) NL_OVERRIDE; // TODO: UTF-8 (serial)
 
-	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context);
-	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context);
+	void onEquivalent(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onAdd(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onRemove(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onChanged(uint addIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
+	void onSwap(uint newIndex, uint refIndex, TStringDiffContext &context) NL_OVERRIDE;
 
 };
 

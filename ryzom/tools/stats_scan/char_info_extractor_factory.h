@@ -118,18 +118,18 @@ class CInfoExtractor_##name: public ICharInfoExtractor\
 {\
 public:\
 	CInfoExtractor_##name(const std::string& rawArgs) {_RawArgs=rawArgs;}\
-	virtual std::string toString() const {return std::string(#name)+" "+_RawArgs;}\
-	virtual void execute(CCharacterScanJob* job,const CStatsScanCharacter* c);\
+	virtual std::string toString() const NL_OVERRIDE {return std::string(#name)+" "+_RawArgs;}\
+	virtual void execute(CCharacterScanJob* job,const CStatsScanCharacter* c) NL_OVERRIDE;\
 private:\
 	NLMISC::CSString _RawArgs;\
 };\
 class CInfoExtractorBuilder_##name: public ICharInfoExtractorBuilder\
 {\
 public:\
-	virtual const char* getName()			{return #name;}\
-	virtual const char* getDescription()	{return description;}\
-	virtual const char* getFields()			{return fields;}\
-	virtual ICharInfoExtractor* build(const std::string& rawArgs)	{return new CInfoExtractor_##name(rawArgs);}\
+	virtual const char* getName() NL_OVERRIDE			{return #name;}\
+	virtual const char* getDescription() NL_OVERRIDE	{return description;}\
+	virtual const char* getFields() NL_OVERRIDE			{return fields;}\
+	virtual ICharInfoExtractor* build(const std::string& rawArgs) NL_OVERRIDE	{return new CInfoExtractor_##name(rawArgs);}\
 };\
 CInfoExtractorRegisterer<CInfoExtractorBuilder_##name> __Registerer_CInfoExtractor_##name;\
 void CInfoExtractor_##name::execute(CCharacterScanJob* job,const CStatsScanCharacter* c)

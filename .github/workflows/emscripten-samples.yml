@@ -48,20 +48,87 @@ jobs:
           version: ${{ env.EM_VERSION }}
           no-cache: true
 
-      - name: Checkout graphics assets (sparse)
+      - name: Cache graphics assets dump
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/../ryzomcore_graphics_cache
+          key: ryzomcore_graphics-rev5
+
+      - name: Fetch graphics assets dump
+        # A `git clone` of ryzom/ryzomcore_graphics smudges LFS on checkout,
+        # which burns the org's LFS bandwidth on every CI run and hard-fails
+        # the moment the budget is exhausted. Instead pull the mirrored
+        # snapshot from cdn.ryzom.dev (no LFS involved) and unpack it to the
+        # path CMake resolves as NL_GRAPHICS_DIR. The cache above skips the
+        # ~2 GB download on repeat runs.
         run: |
-          git clone --filter=blob:none --sparse --depth=1 \
-            https://github.com/ryzom/ryzomcore_graphics.git ${{ github.workspace }}/../ryzomcore_graphics
-          cd ${{ github.workspace }}/../ryzomcore_graphics
-          git sparse-checkout set landscape/water
+          sudo apt-get install -y p7zip-full
+          ASSETS_URL="https://cdn.ryzom.dev/pub/assets/ryzomcore_graphics-rev5.7z"
+          DEST="${{ github.workspace }}/../ryzomcore_graphics"
+          CACHE_DIR="${{ github.workspace }}/../ryzomcore_graphics_cache"
+          mkdir -p "$CACHE_DIR"
+          if [ ! -f "$CACHE_DIR/ryzomcore_graphics-rev5.7z" ]; then
+            curl -L --fail --retry 3 -o "$CACHE_DIR/ryzomcore_graphics-rev5.7z" "$ASSETS_URL"
+          fi
+          mkdir -p "$DEST"
+          7z x -y -o"$DEST" "$CACHE_DIR/ryzomcore_graphics-rev5.7z" > /dev/null
+          # The archive root may or may not include a leading ryzomcore_graphics/;
+          # flatten if it does so NL_GRAPHICS_DIR points at the asset tree itself.
+          if [ -d "$DEST/ryzomcore_graphics" ] && [ ! -d "$DEST/interfaces" ]; then
+            mv "$DEST/ryzomcore_graphics"/* "$DEST/ryzomcore_graphics"/.[!.]* "$DEST/" 2>/dev/null || true
+            rmdir "$DEST/ryzomcore_graphics" 2>/dev/null || true
+          fi
 
       - name: Verify Emscripten
         run: emcc --version
+
+      - name: Cache nelgui_deps (wasm prefix)
+        id: nelgui-deps-cache
+        uses: actions/cache@v6
+        with:
+          path: ${{ github.workspace }}/../nelgui_deps
+          key: nelgui_deps-em${{ env.EM_VERSION }}-${{ hashFiles('.github/scripts/build-nelgui-deps.sh') }}
+
+      - name: Build nelgui_deps (wasm prefix)
+        if: steps.nelgui-deps-cache.outputs.cache-hit != 'true'
+        # Builds lua5.1 + libxml2 + ryzom/luabind cross-compiled to wasm plus
+        # boost/openssl/curl headers + nel_wasm_stubs archived as libcurl.a/
+        # libssl.a/libcrypto.a. Cached above so this only runs when the
+        # script or emsdk version changes.
+        run: |
+          bash .github/scripts/build-nelgui-deps.sh \
+            ${{ github.workspace }}/../nelgui_deps/wasm \
+            ${{ github.workspace }}
+
+      - name: Build host build_interface
+        # nl_sample_gui packs its interface atlas at build time via
+        # build_interface, a native tool that can't run under emscripten.
+        # Configure a separate host CMake tree and build just that target;
+        # the emscripten configure below points NL_BUILD_INTERFACE_TOOL at
+        # the resulting binary. Only build_interface itself is compiled,
+        # not the rest of nel/tools. libpng/libjpeg are top-level find_package
+        # requirements for nelmisc's CBitmap paths.
+        run: |
+          sudo apt-get install -y libpng-dev libjpeg-dev libxml2-dev libcurl4-openssl-dev libgif-dev
+          mkdir -p build-host
+          cd build-host
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DWITH_NEL_TOOLS=ON \
+            -DWITH_NEL_SAMPLES=OFF -DWITH_NEL_TESTS=OFF \
+            -DWITH_3D=OFF -DWITH_GUI=OFF -DWITH_SOUND=OFF \
+            -DWITH_LOGIC=OFF -DWITH_PACS=OFF -DWITH_GEORGES=OFF \
+            -DWITH_LIGO=OFF -DWITH_NET=OFF -DWITH_WEB=OFF \
+            -DWITH_RYZOM=OFF -DWITH_RYZOM_CLIENT=OFF \
+            -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_TOOLS=OFF \
+            -DWITH_NELNS=OFF -DWITH_SNOWBALLS=OFF
+          make -j$(nproc) build_interface
 
       - name: Configure CMake
         env:
           EM_FROZEN_CACHE: ""
         run: |
+          DEPS="${{ github.workspace }}/../nelgui_deps"
           mkdir -p build
           cd build
           emcmake cmake .. \
@@ -70,6 +137,7 @@ jobs:
             -DWITH_PCH=OFF \
             -DWITH_STATIC=ON \
             -DWITH_STATIC_DRIVERS=ON \
+            -DWITH_STATIC_LIBXML2=ON \
             -DWITH_DRIVER_OPENGL=OFF \
             -DWITH_DRIVER_OPENGLES=OFF \
             -DWITH_DRIVER_OPENGL3=OFF \
@@ -83,7 +151,8 @@ jobs:
             -DWITH_RYZOM_TOOLS=OFF \
             -DWITH_NELNS=OFF \
             -DWITH_SNOWBALLS=OFF \
-            -DWITH_GUI=OFF \
+            -DWITH_GUI=ON \
+            -DWITH_LUA51=ON \
             -DWITH_SOUND=OFF \
             -DWITH_LOGIC=OFF \
             -DWITH_PACS=OFF \
@@ -91,6 +160,18 @@ jobs:
             -DWITH_LIGO=OFF \
             -DWITH_NET=OFF \
             -DWITH_WEB=OFF \
+            -DNL_BUILD_INTERFACE_TOOL=${{ github.workspace }}/build-host/bin/build_interface \
+            -DLUA_INCLUDE_DIR=$DEPS/wasm/include \
+            -DLUA_LIBRARIES=$DEPS/wasm/lib/liblua.a \
+            -DLUABIND_INCLUDE_DIR=$DEPS/wasm/include \
+            -DLUABIND_LIBRARY_RELEASE=$DEPS/wasm/lib/libluabind09.a \
+            -DLibXml2_DIR=$DEPS/wasm/lib/cmake/libxml2-2.12.10 \
+            -DBoost_INCLUDE_DIR=$DEPS/boost-headers \
+            -DCURL_INCLUDE_DIR=$DEPS/wasm/include \
+            -DCURL_LIBRARY=$DEPS/wasm/lib/libcurl.a \
+            -DOPENSSL_INCLUDE_DIR=$DEPS/openssl-headers \
+            -DOPENSSL_SSL_LIBRARY=$DEPS/wasm/lib/libssl.a \
+            -DOPENSSL_CRYPTO_LIBRARY=$DEPS/wasm/lib/libcrypto.a \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
 
       - name: Build samples
@@ -104,7 +185,9 @@ jobs:
             nl_sample_planar_reflection \
             nl_sample_ppl \
             nl_sample_water \
-            nl_sample_font
+            nl_sample_font \
+            nl_sample_gui \
+            nl_sample_navigation
 
       - name: ccache stats
         if: always()
@@ -114,7 +197,7 @@ jobs:
         run: |
           mkdir -p pages
           # Copy built sample files
-          for sample in clip_plane nelvp planar_reflection ppl water font; do
+          for sample in clip_plane nelvp planar_reflection ppl water font gui navigation; do
             cp build/bin/nl_sample_${sample}.js pages/
             cp build/bin/nl_sample_${sample}.wasm pages/
             # Copy any embedded data files
@@ -123,7 +206,7 @@ jobs:
             fi
           done
           # Generate per-sample HTML host pages
-          for sample in clip_plane nelvp planar_reflection ppl water font; do
+          for sample in clip_plane nelvp planar_reflection ppl water font gui navigation; do
             title=$(echo "$sample" | sed 's/_/ /g; s/\b\(.\)/\u\1/g')
             cat > pages/nl_sample_${sample}.html << 'SAMPLEEOF'
           <!DOCTYPE html>
@@ -280,6 +363,29 @@ jobs:
           SAMPLEEOF
             # Append the title and sample-specific script tag (needs shell variable expansion)
             sed -i "s|<title>NeL Sample (WebGL 2.0)</title>|<title>NeL Sample - ${title} (WebGL 2.0)</title>|" pages/nl_sample_${sample}.html
+            # Samples that run fullscreen at native devicePixelRatio: swap the fixed-size
+            # centered layout for a viewport-filling canvas. The driver's emscripten event
+            # emitter already tracks CSS size x DPR into the canvas backing store and
+            # re-syncs on resize, so the page only has to let the canvas fill.
+            #
+            # The viewport meta is what makes "fill" mean the real screen on a phone -
+            # without it 100vw resolves against a ~980px virtual viewport and the page is
+            # scaled down. It stays off the fixed-size samples on purpose: width=device-width
+            # would leave their 800px canvas overflowing a narrow screen sideways.
+            #
+            # overscroll-behavior stops pull-to-refresh and rubber-banding from stealing a
+            # drag that starts near an edge, which on a phone is most of them.
+            case "$sample" in
+              gui|navigation)
+                sed -i \
+                  -e 's|<meta charset="utf-8">|<meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">|' \
+                  -e 's|body {|html, body { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none;|' \
+                  -e 's|display: flex; justify-content: center; align-items: center;||' \
+                  -e 's|width: 800px; height: 600px;|width: 100vw; height: 100vh;|' \
+                  -e 's|<canvas id="canvas" width="800" height="600"|<canvas id="canvas"|' \
+                  pages/nl_sample_${sample}.html
+                ;;
+            esac
             echo "  <script src=\"nl_sample_${sample}.js\"></script>" >> pages/nl_sample_${sample}.html
             echo "  </body>" >> pages/nl_sample_${sample}.html
             echo "  </html>" >> pages/nl_sample_${sample}.html

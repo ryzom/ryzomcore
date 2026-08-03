@@ -293,7 +293,7 @@ namespace NLGUI
 	class CSTUp : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
@@ -315,7 +315,7 @@ namespace NLGUI
 	class CSTDown : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 

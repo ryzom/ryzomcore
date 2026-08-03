@@ -338,7 +338,7 @@ inline std::string capitalizeFirst(const std::string &s)
 	class __CCallStackEntry##__LINE__: public ICallStackEntry\
 	{\
 	public:\
-		virtual void displayEntry(NLMISC::CLog& log) const\
+		virtual void displayEntry(NLMISC::CLog& log) const NL_OVERRIDE\
 		{\
 			log.displayNL(">>" __FILE__ ":%d", __LINE__);\
 		}\
@@ -349,7 +349,7 @@ inline std::string capitalizeFirst(const std::string &s)
 	class __CCallStackEntry##__LINE__: public ICallStackEntry\
 	{\
 	public:\
-		virtual void displayEntry(NLMISC::CLog& log) const\
+		virtual void displayEntry(NLMISC::CLog& log) const NL_OVERRIDE\
 		{\
 			log.displayNL(">>" __FILE__ ":%d: %s", __LINE__,msg);\
 		}\
@@ -363,7 +363,7 @@ inline std::string capitalizeFirst(const std::string &s)
 		__TraceVal_##var(const type& var): _Val(var) \
 		{\
 		}\
-		virtual void displayEntry(NLMISC::CLog& log) const\
+		virtual void displayEntry(NLMISC::CLog& log) const NL_OVERRIDE\
 		{\
 			log.displayNL(">>" __FILE__ ":%d: %s=[%s]", __LINE__, #var, NLMISC::toString(_Val).c_str());\
 		}\
@@ -378,7 +378,7 @@ inline std::string capitalizeFirst(const std::string &s)
 		__TraceVar_##var(const type& var): _Var(var) \
 		{\
 		}\
-		virtual void displayEntry(NLMISC::CLog& log) const\
+		virtual void displayEntry(NLMISC::CLog& log) const NL_OVERRIDE\
 		{\
 			log.displayNL(">>" __FILE__ ":%d: %s=>[%s]", __LINE__, #var, NLMISC::toString(_Var).c_str());\
 		}\

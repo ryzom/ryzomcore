@@ -48,11 +48,11 @@ public:
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::BOT_MOVE_TO; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::BOT_MOVE_TO; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	bool destinationReach()	const;
@@ -82,11 +82,11 @@ public:
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::BOT_FOLLOW_POS; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	void setMaxSpeeds(float walkSpeed, float runSpeed);
@@ -139,11 +139,11 @@ public:
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_STAND_AT_POS; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::BOT_STAND_AT_POS; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 protected:
@@ -160,15 +160,15 @@ class CBotProfileForage
 {
 public:
 	CBotProfileForage(CProfileOwner* owner);
-	virtual ~CBotProfileForage();
+	virtual ~CBotProfileForage() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::BOT_FORAGE; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::BOT_FORAGE; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	void setOldSheet();
@@ -202,11 +202,11 @@ public:
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::ACTIVITY_NORMAL; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::ACTIVITY_NORMAL; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	bool isGroupFighting() const;
@@ -231,8 +231,8 @@ public:
 
 	/// @name IAIProfile partial implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 	//@}
 
 	virtual	void addBot(CBot* bot) = 0;
@@ -286,7 +286,7 @@ public:
 	/// @name Constructors, destructor
 	//@{
 	CGrpProfileGoToPoint(CProfileOwner* owner, RYAI_MAP_CRUNCH::CWorldPosition const& startPos, RYAI_MAP_CRUNCH::CWorldPosition const& endPos, bool dontSendEvent = false);
-	virtual ~CGrpProfileGoToPoint();
+	virtual ~CGrpProfileGoToPoint() NL_OVERRIDE;
 	//@}
 
 	enum TShapeType
@@ -308,24 +308,24 @@ public:
 
 	/// @name CMoveProfile implementation
 	//@{
-	virtual CPathCont* getPathCont(CBot const* bot);
+	virtual CPathCont* getPathCont(CBot const* bot) NL_OVERRIDE;
 	//@}
 
 	/// @name CSlaveProfile implementation
 	//@{
-	virtual void addBot(CBot* bot);
-	virtual void removeBot(CBot* bot);
+	virtual void addBot(CBot* bot) NL_OVERRIDE;
+	virtual void removeBot(CBot* bot) NL_OVERRIDE;
 	//@}
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_GOTO_POINT; }
-	virtual std::string getOneLineInfoString() const;
-	virtual void stateChangeProfile();
-	virtual void resumeProfile();
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_GOTO_POINT; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
+	virtual void stateChangeProfile() NL_OVERRIDE;
+	virtual void resumeProfile() NL_OVERRIDE;
 	//@}
 
 	bool profileTerminated() const;
@@ -387,7 +387,7 @@ public:
 	CGrpProfileFollowRoute(CProfileOwner* owner, std::vector<CShape::TPosition> const& geometry, AITYPES::TVerticalPos const& verticalPos, bool dontSendEvent = false);
 	CGrpProfileFollowRoute(CProfileOwner* owner);
 
-	virtual ~CGrpProfileFollowRoute();
+	virtual ~CGrpProfileFollowRoute() NL_OVERRIDE;
 
 	enum TShapeType
 	{
@@ -410,20 +410,20 @@ public:
 	void setDirection(bool forward);
 	bool getDirection();
 
-	void resumeProfile();
+	void resumeProfile() NL_OVERRIDE;
 
-	CPathCont* getPathCont(CBot const* bot);
+	CPathCont* getPathCont(CBot const* bot) NL_OVERRIDE;
 
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot* bot) NL_OVERRIDE;
+	void removeBot(CBot* bot) NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_FOLLOW_ROUTE; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_FOLLOW_ROUTE; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	bool profileTerminated() const;
@@ -432,7 +432,7 @@ public:
 
 	void calcRatios();
 
-	virtual void stateChangeProfile();
+	virtual void stateChangeProfile() NL_OVERRIDE;
 
 	void stopNpc(bool stop);
 
@@ -495,24 +495,24 @@ public:
 	};
 
 	CGrpProfileStandOnVertices(CProfileOwner* owner);
-	~CGrpProfileStandOnVertices();
+	~CGrpProfileStandOnVertices() NL_OVERRIDE;
 
-	CPathCont	*getPathCont	(const	CBot *bot);
+	CPathCont	*getPathCont	(const	CBot *bot) NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_STAND_ON_VERTICES; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_STAND_ON_VERTICES; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
-	void resumeProfile();
+	void resumeProfile() NL_OVERRIDE;
 
 	void setCurrentValidPos	(CAIStatePositional *grpState);
 
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot* bot) NL_OVERRIDE;
+	void removeBot(CBot* bot) NL_OVERRIDE;
 
 private:
 	typedef		std::map<const CBot*,NLMISC::CSmartPtr<CBotPositionner> >	TNpcBotPositionnerMap;
@@ -531,24 +531,24 @@ class CGrpProfileWander
 public:
 	CGrpProfileWander(CProfileOwner* owner);
 	CGrpProfileWander(CProfileOwner* owner, CNpcZone const* const npcZone);
-	virtual ~CGrpProfileWander();
+	virtual ~CGrpProfileWander() NL_OVERRIDE;
 
 	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_WANDER; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_WANDER; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
-	void		addBot			(CBot*	bot);
-	void		removeBot		(CBot*	bot);
-	CPathCont*	getPathCont		(CBot const*	bot);
+	void		addBot			(CBot*	bot) NL_OVERRIDE;
+	void		removeBot		(CBot*	bot) NL_OVERRIDE;
+	CPathCont*	getPathCont		(CBot const*	bot) NL_OVERRIDE;
 
-	void	stateChangeProfile();
+	void	stateChangeProfile() NL_OVERRIDE;
 
 	void	affectZoneFromStateMachine();
 	void	resetDestinationReachedData();
@@ -587,24 +587,24 @@ class CGrpProfileWanderNoPrim
 public:
 //	CGrpProfileWanderNoPrim(CProfileOwner* owner);
 	CGrpProfileWanderNoPrim(CProfileOwner* owner, NLMISC::CSmartPtr<CNpcZonePlaceNoPrim> const& npcZone);
-	virtual ~CGrpProfileWanderNoPrim();
+	virtual ~CGrpProfileWanderNoPrim() NL_OVERRIDE;
 
 	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_WANDER; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_WANDER; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
-	void		addBot			(CBot*	bot);
-	void		removeBot		(CBot*	bot);
-	CPathCont*	getPathCont		(CBot const*	bot);
+	void		addBot			(CBot*	bot) NL_OVERRIDE;
+	void		removeBot		(CBot*	bot) NL_OVERRIDE;
+	CPathCont*	getPathCont		(CBot const*	bot) NL_OVERRIDE;
 
-	void	stateChangeProfile();
+	void	stateChangeProfile() NL_OVERRIDE;
 
 //	void	affectZoneFromStateMachine();
 
@@ -633,25 +633,25 @@ public CMoveProfile
 {
 public:
 	CGrpProfileFollowPlayer(CProfileOwner* owner, TDataSetRow const& playerRow, uint32 dispersionRadius);
-	virtual ~CGrpProfileFollowPlayer() {}
+	virtual ~CGrpProfileFollowPlayer() NL_OVERRIDE {}
 
 	void setBotStandProfile(AITYPES::TProfiles	botStandProfileType, IAIProfileFactory* botStandProfileFactory);
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile() {}
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::BOT_FOLLOW_POS; }
-	virtual std::string getOneLineInfoString() const { return std::string("follow_player group profile"); }
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE {}
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::BOT_FOLLOW_POS; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return std::string("follow_player group profile"); }
 	//@}
 
-	void	stateChangeProfile() {}
+	void	stateChangeProfile() NL_OVERRIDE {}
 	bool	destinationReach() const;
 
-	void		addBot			(CBot*	bot) {}
-	void		removeBot		(CBot*	bot) {}
-	CPathCont*	getPathCont		(CBot const*	bot) { return NULL; };
+	void		addBot			(CBot*	bot) NL_OVERRIDE {}
+	void		removeBot		(CBot*	bot) NL_OVERRIDE {}
+	CPathCont*	getPathCont		(CBot const*	bot) NL_OVERRIDE { return NULL; };
 
 
 protected:
@@ -680,7 +680,7 @@ class CGrpProfileIdle
 {
 public:
 	CGrpProfileIdle(CProfileOwner* owner);
-	virtual ~CGrpProfileIdle();
+	virtual ~CGrpProfileIdle() NL_OVERRIDE;
 
 	class CBotPositionner
 	{
@@ -689,17 +689,17 @@ public:
 		virtual ~CBotPositionner();
 	};
 
-	CPathCont* getPathCont(CBot const* bot);
-	virtual void beginProfile();
-	void resumeProfile();
-	virtual void endProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
+	CPathCont* getPathCont(CBot const* bot) NL_OVERRIDE;
+	virtual void beginProfile() NL_OVERRIDE;
+	void resumeProfile() NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 
-	void addBot(CBot* bot);
-	void removeBot(CBot* bot);
+	void addBot(CBot* bot) NL_OVERRIDE;
+	void removeBot(CBot* bot) NL_OVERRIDE;
 
-	virtual std::string getOneLineInfoString() const;
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::MOVE_IDLE; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::MOVE_IDLE; }
 
 private:
 	typedef	std::map<CBot*,CBotPositionner>	TNpcBotPositionnerMap;
@@ -715,15 +715,15 @@ class CGrpProfileBandit
 {
 public:
 	CGrpProfileBandit(CProfileOwner* owner);
-	virtual ~CGrpProfileBandit();
+	virtual ~CGrpProfileBandit() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::ACTIVITY_BANDIT; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::ACTIVITY_BANDIT; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 private:
@@ -739,18 +739,18 @@ class CGrpProfileEscorted
 {
 public:
 	CGrpProfileEscorted(CProfileOwner* owner);
-	virtual ~CGrpProfileEscorted();
+	virtual ~CGrpProfileEscorted() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType () const { return AITYPES::ACTIVITY_ESCORTED; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType () const NL_OVERRIDE { return AITYPES::ACTIVITY_ESCORTED; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
-	void stateChangeProfile();
+	void stateChangeProfile() NL_OVERRIDE;
 
 protected:
 	bool _EscortTeamInRange;
@@ -765,15 +765,15 @@ class CGrpProfileGuard
 {
 public:
 	CGrpProfileGuard(CProfileOwner* owner);
-	virtual ~CGrpProfileGuard();
+	virtual ~CGrpProfileGuard() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GUARD; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_GUARD; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 private:
@@ -790,18 +790,18 @@ class CGrpProfileGuardEscorted
 {
 public:
 	CGrpProfileGuardEscorted(CProfileOwner* owner);
-	virtual ~CGrpProfileGuardEscorted();
+	virtual ~CGrpProfileGuardEscorted() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GUARD_ESCORTED; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_GUARD_ESCORTED; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
-	void stateChangeProfile();
+	void stateChangeProfile() NL_OVERRIDE;
 
 protected:
 	NLMISC::CSmartPtr<CGrpProfileGuard>    _GuardProfile;
@@ -817,15 +817,15 @@ class CGrpProfileFaction
 {
 public:
 	CGrpProfileFaction(CProfileOwner* owner);
-	virtual ~CGrpProfileFaction();
+	virtual ~CGrpProfileFaction() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_FACTION; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_FACTION; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	virtual void aggroEntity(CAIEntityPhysical const* entity);
@@ -859,16 +859,16 @@ class CGrpProfileSquad
 {
 public:
 	CGrpProfileSquad(CProfileOwner* owner);
-	virtual ~CGrpProfileSquad();
+	virtual ~CGrpProfileSquad() NL_OVERRIDE;
 
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_SQUAD; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_SQUAD; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
-	virtual void aggroEntity(CAIEntityPhysical const* entity);
+	virtual void aggroEntity(CAIEntityPhysical const* entity) NL_OVERRIDE;
 
 	NLMISC::CSmartPtr<CAIPlace const> buildFirstHitPlace(TDataSetRow const& aggroBot);
 
@@ -895,33 +895,33 @@ class CGrpProfileFight
 	};
 public:
 	CGrpProfileFight(CProfileOwner *owner);
-	virtual ~CGrpProfileFight();
+	virtual ~CGrpProfileFight() NL_OVERRIDE;
 
-	virtual void beginProfile();
-	void	endProfile();
+	virtual void beginProfile() NL_OVERRIDE;
+	void	endProfile() NL_OVERRIDE;
 
-	void	addBot	(CBot *bot);
-	void	removeBot	(CBot *bot);
+	void	addBot	(CBot *bot) NL_OVERRIDE;
+	void	removeBot	(CBot *bot) NL_OVERRIDE;
 
 	//////////////////////////////////////////////////////////////////////////
 	/// @name CFightOrganizer
 	//@{
-	virtual void setFight(CSpawnBot* bot, CAIEntityPhysical* ennemy);
-	virtual void setHeal(CSpawnBot* bot, CAIEntityPhysical* target);
-	virtual void setNoFight(CSpawnBot* bot);
-	virtual void setFlee(CSpawnBot* bot, CAIVector& fleeVect);
-	virtual void setReturnAfterFight(CSpawnBot* bot);
+	virtual void setFight(CSpawnBot* bot, CAIEntityPhysical* ennemy) NL_OVERRIDE;
+	virtual void setHeal(CSpawnBot* bot, CAIEntityPhysical* target) NL_OVERRIDE;
+	virtual void setNoFight(CSpawnBot* bot) NL_OVERRIDE;
+	virtual void setFlee(CSpawnBot* bot, CAIVector& fleeVect) NL_OVERRIDE;
+	virtual void setReturnAfterFight(CSpawnBot* bot) NL_OVERRIDE;
 	//@}
 
-	bool stillHaveEnnemy	() const;
+	bool stillHaveEnnemy	() const NL_OVERRIDE;
 
-	virtual	void	updateProfile(uint ticksSinceLastUpdate);
+	virtual	void	updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
 
-	virtual	std::string	getOneLineInfoString() const;
+	virtual	std::string	getOneLineInfoString() const NL_OVERRIDE;
 
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::FIGHT_NORMAL; }
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::FIGHT_NORMAL; }
 
-	std::vector<CBot*>	&npcList();
+	std::vector<CBot*>	&npcList() NL_OVERRIDE;
 
 private:
 	std::vector<CBot*> _NpcList;
@@ -978,7 +978,7 @@ class CGrpProfileNoChangeFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 		return NULL;
 	}
@@ -993,7 +993,7 @@ class CGrpProfileBanditFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner);
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE;
 	static float getDefaultBanditAggroRange();
 private:
 	static float _DefaultAggroRange;

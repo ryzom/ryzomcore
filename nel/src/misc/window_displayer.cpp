@@ -50,7 +50,7 @@ public:
 	{
 	}
 
-	void run()
+	void run() NL_OVERRIDE
 	{
 		Disp->open (WindowNameEx, Iconified, X, Y, W, H, HS, FS, FN, WW, Log);
 		Disp->display_main ();

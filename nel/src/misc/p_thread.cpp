@@ -45,6 +45,12 @@ struct CPMainThread : public CPThread
 {
 	CPMainThread() : CPThread(nullptr, 0)
 	{
+		// Main thread is not started via CPThread::start(), so _ThreadHandle was left
+		// uninitialized. zone_lighter (and any getCPUMask on the main thread) then called
+		// pthread_getaffinity_np on garbage and SIGSEGV'd at affinity offset ~0x2d0.
+		_ThreadHandle = pthread_self();
+		_State = ThreadStateRunning;
+
 		if(pthread_key_create(&threadSpecificKey, nullptr) != 0)
 			throw EThread("cannot create thread specific storage key.");
 
@@ -52,8 +58,10 @@ struct CPMainThread : public CPThread
 			throw EThread("cannot set main thread ptr in thread specific storage.");
 	}
 
-	~CPMainThread()
+	~CPMainThread() NL_OVERRIDE
 	{
+		// Don't pthread_detach the main thread handle — it was never pthread_create'd.
+		_State = ThreadStateNone;
 		if (pthread_key_delete(threadSpecificKey) != 0)
 		{
 			nlwarning("cannot delete thread specific storage key.");
@@ -122,6 +130,7 @@ static void *ProxyFunc( void *arg )
 CPThread::CPThread(IRunnable *runnable, uint32 stackSize)
 	:	Runnable(runnable),
 		_State(ThreadStateNone),
+		_ThreadHandle(),
 		_StackSize(stackSize)
 {}
 
@@ -234,17 +243,22 @@ void CPThread::wait ()
 bool CPThread::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
-
-	nlwarning("This code does not work. May cause a segmentation fault...");
-
-	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(uint64), (const cpu_set_t*)&cpuMask);
-
+	// Real cpu_set_t — same fix as getCPUMask / CPProcess::setCPUMask. Passing sizeof(uint64)
+	// into pthread_setaffinity_np is undefined (cpu_set_t is 128+ bytes on modern glibc) and
+	// can segfault multi-threaded tools (zone_lighter).
+	if (_State == ThreadStateNone)
+		return false;
+	cpu_set_t set;
+	CPU_ZERO(&set);
+	for (int i = 0; i < 64; ++i)
+		if (cpuMask & ((uint64)1 << i))
+			CPU_SET(i, &set);
+	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(set), &set);
 	if (res)
 	{
 		nlwarning("pthread_setaffinity_np() returned %d", res);
 		return false;
 	}
-
 	return true;
 
 #else // __USE_GNU
@@ -260,24 +274,28 @@ bool CPThread::setCPUMask(uint64 cpuMask)
 uint64 CPThread::getCPUMask()
 {
 #ifdef __USE_GNU
-
-	nlwarning("This code does not work. May cause a segmentation fault...");
-
-	uint64 cpuMask = 0;
-
-	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(uint64), (cpu_set_t*)&cpuMask);
-
-	if (res)
+	// Must pass a real cpu_set_t — sizeof(uint64) is wrong on modern glibc (cpu_set_t is
+	// 128+ bytes) and was known to segfault (see historical warning). Fall back to the
+	// process mask when the pthread call fails or is unavailable.
+	if (_State == ThreadStateNone)
+		return IProcess::getCurrentProcess()->getCPUMask();
+	cpu_set_t set;
+	CPU_ZERO(&set);
+	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(set), &set);
+	if (res != 0)
 	{
-		nlwarning("pthread_getaffinity_np() returned %d", res);
-		return 0;
+		// Not always fatal — inherit process affinity.
+		return IProcess::getCurrentProcess()->getCPUMask();
 	}
-
-	return cpuMask;
+	uint64 cpuMask = 0;
+	for (int i = 0; i < 64; ++i)
+		if (CPU_ISSET(i, &set))
+			cpuMask |= (uint64)1 << i;
+	return cpuMask ? cpuMask : 1;
 
 #else // __USE_GNU
 
-	return 0;
+	return 1;
 
 #endif // __USE_GNU
 }
@@ -346,21 +364,25 @@ IProcess *IProcess::getCurrentProcess ()
 uint64 CPProcess::getCPUMask()
 {
 #ifdef __USE_GNU
-
-	uint64 cpuMask = 0;
-	sint res = sched_getaffinity(getpid(), sizeof(uint64), (cpu_set_t*)&cpuMask);
-
-	if (res)
+	// Real cpu_set_t — do NOT cast a uint64 (crashes zone_lighter / multi-thread tools on
+	// Linux with modern glibc). Fold the first 64 CPUs into a uint64 for callers that still
+	// walk a 64-bit mask (CZoneLighter, setCPUMask helpers).
+	cpu_set_t set;
+	CPU_ZERO(&set);
+	if (sched_getaffinity(getpid(), sizeof(set), &set) != 0)
 	{
-		nlwarning("sched_getaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
-		return 0;
+		nlwarning("sched_getaffinity() returned errno = %d: %s", errno, strerror(errno));
+		return 1; // at least one logical CPU so NumCPU auto-detect never sees 0
 	}
-
-	return cpuMask;
+	uint64 cpuMask = 0;
+	for (int i = 0; i < 64; ++i)
+		if (CPU_ISSET(i, &set))
+			cpuMask |= (uint64)1 << i;
+	return cpuMask ? cpuMask : 1;
 
 #else // __USE_GNU
 
-	return 0;
+	return 1;
 
 #endif // __USE_GNU
 }
@@ -369,15 +391,16 @@ uint64 CPProcess::getCPUMask()
 bool CPProcess::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
-
-	sint res = sched_setaffinity(getpid(), sizeof(uint64), (const cpu_set_t*)&cpuMask);
-
-	if (res)
+	cpu_set_t set;
+	CPU_ZERO(&set);
+	for (int i = 0; i < 64; ++i)
+		if (cpuMask & ((uint64)1 << i))
+			CPU_SET(i, &set);
+	if (sched_setaffinity(getpid(), sizeof(set), &set) != 0)
 	{
-		nlwarning("sched_setaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
+		nlwarning("sched_setaffinity() returned errno = %d: %s", errno, strerror(errno));
 		return false;
 	}
-
 	return true;
 
 #else // __USE_GNU

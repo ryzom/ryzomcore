@@ -89,7 +89,7 @@ namespace NLGUI
 			CGroupTree			*ParentTree;
 			// ----------------------------
 			SNode();
-			~SNode();
+			~SNode() NL_OVERRIDE;
 			void updateLastVisibleSon();
 			void detachChild(SNode *pNode);
 			void deleteChild(SNode *pNode);
@@ -219,21 +219,21 @@ namespace NLGUI
 		CGroupTree(const TCtorParam &param);
 
 		// dtor
-		virtual ~CGroupTree();
+		virtual ~CGroupTree() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-		virtual void checkCoords();
+		virtual void checkCoords() NL_OVERRIDE;
 
-		virtual void updateCoords();
+		virtual void updateCoords() NL_OVERRIDE;
 
-		virtual void draw();
+		virtual void draw() NL_OVERRIDE;
 
-		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc);
+		virtual bool handleEvent (const NLGUI::CEventDescriptor& eventDesc) NL_OVERRIDE;
 
 		void reset();
 

@@ -65,7 +65,7 @@ public:
 	/** 
 	 * init the service
 	 */
-	void init()
+	void init() NL_OVERRIDE
 	{
 		LastCheckMail = 0;
 		MailFile = NULL;
@@ -75,7 +75,7 @@ public:
 	/**
 	 * main loop
 	 */
-	bool update()
+	bool update() NL_OVERRIDE
 	{
 		checkMail();
 		CHoFGenerator::getInstance()->serviceUpdate();
@@ -86,7 +86,7 @@ public:
 	/**
 	 * release
 	 */
-	void release()
+	void release() NL_OVERRIDE
 	{
 	}
 

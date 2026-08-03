@@ -23,6 +23,7 @@
 #endif
 #include <nel/misc/common.h>
 #include <nel/misc/file.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/quat.h>
 #include <nel/misc/matrix.h>
@@ -76,6 +77,7 @@ using namespace PIPELINE::MAX::BUILTIN;
 using namespace PIPELINE::MAX::BIPED;
 
 #include "../pipeline_max_export_common/biped_rig.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 using namespace PMAX_RIG;
 
@@ -299,7 +301,7 @@ static void writeRigDump(FILE *fp)
 }
 
 // Serialize a CSkeletonShape file (SHAP magic + CShapeStream + CSkeletonShape v1 + CBoneBase v2 + CLod v0).
-static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
+static void writeSkelStream(NLMISC::IStream &of, const std::vector<Bone> &bonesIn)
 {
 	// CSkeletonShape::build semantics, reproduced exactly (nel/src/3d/skeleton_shape.cpp):
 	// 1. A bone must be LOD-disabled no later than its father: inherit/clamp LodDisableDistance.
@@ -321,7 +323,6 @@ static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
 		if (bones[i].LodDisableDistance > 0.0f)
 			distSet.insert(bones[i].LodDisableDistance);
 
-	NLMISC::COFile of(path);
 	// SHAP magic — serialCheck writes NELID("PAHS") which is "SHAP" big-endian
 	of.serialCheck(NELID("PAHS"));
 
@@ -544,6 +545,60 @@ static void writeGltf(const std::string &path, const std::vector<Bone> &bones)
 	fclose(fp);
 }
 
+static void writeSkel(const std::string &path, const std::vector<Bone> &bonesIn)
+{
+	NLMISC::COFile of(path);
+	writeSkelStream(of, bonesIn);
+}
+
+// Whole-file flow shared with the max2gltf writer (PMB_SKEL_NO_MAIN + nel_skel blob): the
+// Bip01-rooted skeleton walk serialized to bytes. Returns 1 with the .skel bytes, 3 when the
+// scene has no Bip01, -1 on error.
+int pmbExportSkelForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out)
+{
+	bool isBiped = looksLikeBipedFile(*lm.Cd);
+
+	INode *root = lm.Scene->container()->scene()->rootNode();
+	INode *bip01 = root->find(ucstring("Bip01"));
+	if (!bip01) return 3;
+
+	// Clear the per-run rig caches and rebuild from this scene — a deterministic fresh
+	// reconstruction, so it is byte-neutral whether the caller shares one parsed scene across
+	// flows (the writer, since the single-parse refactor) or loads its own (the standalone
+	// main, which does the same reset).
+	g_bipedRigs.clear();
+	g_rig = NULL;
+	g_msBones.clear();
+
+	std::vector<Bone> bones;
+	std::set<std::string> nameSet;
+	if (!isBiped)
+	{
+		walkNodeMax(bip01, -1, lm.Scene->container(), bones, nameSet);
+	}
+	else
+	{
+		NLMISC::CMatrix rootMat; rootMat.identity();
+		walkNode(bip01, -1, rootMat, lm.Scene->container(), bones, nameSet);
+		patchFootstepsGround(bones);
+	}
+	if (bones.empty()) return 3;
+
+	try
+	{
+		NLMISC::CMemStream ms;
+		writeSkelStream(ms, bones);
+		out.assign(ms.buffer(), ms.buffer() + ms.length());
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		std::cerr << "ERROR: skel serial failed: " << e.what() << "\n";
+		return -1;
+	}
+	return 1;
+}
+
+#ifndef PMB_SKEL_NO_MAIN
 int main(int argc, char **argv)
 {
 	// Args: [--double] [--gltf <path>] [--allow-biped-degraded] <input.max> <output.skel>
@@ -685,3 +740,4 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+#endif /* PMB_SKEL_NO_MAIN */

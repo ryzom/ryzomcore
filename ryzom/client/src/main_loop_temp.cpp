@@ -47,7 +47,7 @@ void tempDumpValidPolys()
 {
 	struct CPolyDisp : public CInterfaceElementVisitor
 	{
-		virtual void visitCtrl(CCtrlBase *ctrl)
+		virtual void visitCtrl(CCtrlBase *ctrl) NL_OVERRIDE
 		{
 			CCtrlPolygon *cp = dynamic_cast<CCtrlPolygon *>(ctrl);
 			if (cp)

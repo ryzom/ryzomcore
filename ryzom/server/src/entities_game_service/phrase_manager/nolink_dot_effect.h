@@ -63,10 +63,10 @@ public:
 	/**
 	 * apply the effects of the... effect
 	 */
-	virtual bool update(CTimerEvent * event, bool applyEffect);
+	virtual bool update(CTimerEvent * event, bool applyEffect) NL_OVERRIDE;
 
 	/// callback called when the effect is actually removed
-	virtual void removed();
+	virtual void removed() NL_OVERRIDE;
 
 	/// if true effect ends at caster death 
 	inline void endsAtCasterDeath(bool flag) { _EndsAtCasterDeath = flag; }

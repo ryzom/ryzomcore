@@ -39,6 +39,8 @@
 #include "material_build.h"
 #include "scene_lib.h"
 
+#include "../pipeline_max_export_common/export_ids.h"
+
 using namespace PIPELINE::MAX;
 using namespace PIPELINE::MAX::BUILTIN;
 using namespace NLMISC;
@@ -51,11 +53,6 @@ using MAXSCENE::decompMatrix;
 namespace REMANENCEBUILD {
 
 // AppData sub-ids (export_appdata.h)
-#define NEL3D_APPDATA_REMANENCE_SLICE_NUMBER     1423062632
-#define NEL3D_APPDATA_REMANENCE_SAMPLING_PERIOD  1423062633
-#define NEL3D_APPDATA_REMANENCE_SHIFTING_TEXTURE 1423062634
-#define NEL3D_APPDATA_REMANENCE_ROLLUP_RATIO     1423062635
-#define NEL3D_APPDATA_EXPORT_ANIMATED_MATERIALS  1423062587
 
 IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLighting)
 {

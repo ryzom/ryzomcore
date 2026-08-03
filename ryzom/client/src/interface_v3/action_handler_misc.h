@@ -43,7 +43,7 @@ namespace NLGUI
 class CActionHandlerShowOne : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 
@@ -57,7 +57,7 @@ public:
 class CActionHandlerHideClose : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 
@@ -71,7 +71,7 @@ public:
 class CActionHandlerEnterModal : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 
@@ -85,7 +85,7 @@ public:
 class CActionHandlerPushModal : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 
@@ -100,7 +100,7 @@ public:
 class CActionHandlerLeaveModal : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -113,7 +113,7 @@ public:
 class CActionHandlerActive : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 
@@ -127,7 +127,7 @@ public:
 class CActionHandlerSetOpen : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -140,7 +140,7 @@ public:
 class CActionHandlerEvalExpr : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const std::string &params);
+	virtual void execute (CCtrlBase *pCaller, const std::string &params) NL_OVERRIDE;
 };
 
 
@@ -158,7 +158,7 @@ class CStringPostProcessRemoveName : public CInterfaceManager::IStringProcess
 public:
 	CStringPostProcessRemoveName():Woman(false) {}
 	bool Woman;
-	bool cbIDStringReceived(std::string &inOut);
+	bool cbIDStringReceived(std::string &inOut) NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -166,7 +166,7 @@ public:
 class CStringPostProcessRemoveTitle : public CInterfaceManager::IStringProcess
 {
 public:
-	bool cbIDStringReceived(std::string &inOut);
+	bool cbIDStringReceived(std::string &inOut) NL_OVERRIDE;
 };
 
 // ***************************************************************************
@@ -174,7 +174,7 @@ public:
 class CStringPostProcessNPCRemoveTitle : public CInterfaceManager::IStringProcess
 {
 public:
-	bool cbIDStringReceived(std::string &inOut);
+	bool cbIDStringReceived(std::string &inOut) NL_OVERRIDE;
 };
 
 

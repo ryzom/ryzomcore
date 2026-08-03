@@ -303,7 +303,7 @@ namespace NLGUI
 				CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
 			}
 		}
-		virtual uint		getDeltaDepth() const { return 100; }
+		virtual uint		getDeltaDepth() const NL_OVERRIDE { return 100; }
 		CInterfaceGroup *getTargetGroup()
 		{
 			if (_RightSide) return _Parent;
@@ -311,7 +311,7 @@ namespace NLGUI
 			if (getParent()->getParent() == _Parent->getParentPos()) return nullptr; // leftmost header
 			return dynamic_cast<CInterfaceGroup *>(getParent()->getParentPos());
 		}
-		bool handleEvent (const NLGUI::CEventDescriptor &event)
+		bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE
 		{
 			if (_Parent)
 			{
@@ -403,11 +403,11 @@ namespace NLGUI
 			}
 			return CCtrlBase::handleEvent(event);
 		}
-		virtual void draw ()
+		virtual void draw () NL_OVERRIDE
 		{
 			// no-op
 		}
-		virtual bool getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col)
+		virtual bool getMouseOverShape(std::string &texName, uint8 &rot, NLMISC::CRGBA &col) NL_OVERRIDE
 		{
 
 			if (!getTargetGroup()) return false;

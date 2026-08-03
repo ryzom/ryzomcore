@@ -43,6 +43,14 @@ using namespace std;
 
 #define PMB_PB2_HEADER_CHUNK_ID 0x0009
 #define PMB_PB2_PARAM_CHUNK_ID 0x000e
+// Max 3 / early Max 4 ParamBlock2 parameter records use chunk id 0x000a with an 11-byte
+// header (vs modern 0x000e's 15-byte header): { u16 id, u16 type, 6 opaque, u8 flagByte,
+// payload }. Same flag 0x40/0xc0 = constant, tab layout (count + per-element flag+value),
+// and type enum. Snowballs Max 3 (Scene 0x2004) is entirely 0x000a; the Ryzom Max 9+ corpus
+// is 0x000e. Both must round-trip (raw authoritative) and decode for export.
+#define PMB_PB2_PARAM_CHUNK_ID_MAX3 0x000a
+#define PMB_PB2_PARAM_HDR_MODERN 15
+#define PMB_PB2_PARAM_HDR_MAX3 11
 
 namespace PIPELINE {
 namespace MAX {
@@ -124,6 +132,133 @@ const ISceneClassDesc *CParamBlock2::classDesc() const
 	return &ParamBlock2ClassDesc;
 }
 
+// Shared body for modern 0x000e (hdr=15) and Max 3 0x000a (hdr=11) parameter records.
+// Layout after the type word: (hdr-5) opaque bytes, then flagByte at [hdr-1], payload at [hdr].
+static void decodeParamRecord(CParamBlock2::SParam &p, CStorageRaw *raw, size_t hdr,
+	sint &refSlot, std::vector<CParamBlock2::SParam> &out)
+{
+	typedef CParamBlock2::SParam SParam; // C++03 (VS2008 x87 reference build)
+	if (!raw || raw->Value.size() < hdr) return;
+	memcpy(&p.Id, nlVectorData(raw->Value), 2);
+	memcpy(&p.Type, nlVectorData(raw->Value) + 2, 2);
+	p.Chunk = raw;
+	p.IsTab = (p.Type & CParamBlock2::TYPE_TAB_FLAG) != 0;
+	const uint8 flagByte = raw->Value[hdr - 1];
+	const bool refKind = SParam::typeIsRefKind(p.baseType());
+	// 0x40 = constant (modern); Max 3 also uses 0xc0 for the same (animatable-but-constant).
+	const bool isConstant = (flagByte & 0x40) != 0;
+	const uint8 *payload = nlVectorData(raw->Value) + hdr;
+	const size_t payloadSize = raw->Value.size() - hdr;
+
+	if (p.IsTab)
+	{
+		// Tab: after the record flag byte, u32 count then per-element (u8 flag + value).
+		// Max 3 tabs often have record flag 0x00 (not 0x40); count still follows at payload[0].
+		const uint8 *q = payload;
+		const uint8 *end = nlVectorData(raw->Value) + raw->Value.size();
+		// Modern puts the record flag at [hdr-1] and count at payload start. Max 3 tabs put
+		// count at payload start too (flag at [hdr-1] is 0x00). Same walk for both.
+		if (q + 4 <= end)
+		{
+			uint32 count;
+			memcpy(&count, q, 4);
+			q += 4;
+			const uint16 base = p.baseType();
+			const uint elemSize = (base == CParamBlock2::TYPE_RGBA
+				|| base == CParamBlock2::TYPE_POINT3
+				|| base == CParamBlock2::TYPE_HSV) ? 12u : 4u;
+			for (uint32 e = 0; e < count && q + 1 + elemSize <= end; ++e)
+			{
+				++q; // element flag
+				if (elemSize == 4)
+				{
+					sint32 iv; float fv;
+					memcpy(&iv, q, 4);
+					memcpy(&fv, q, 4);
+					p.TabI.push_back(iv);
+					p.TabF.push_back(fv);
+				}
+				else
+				{
+					float fv[3];
+					memcpy(fv, q, 12);
+					p.TabF.push_back(fv[0]);
+					p.TabF.push_back(fv[1]);
+					p.TabF.push_back(fv[2]);
+					p.TabI.push_back(0);
+				}
+				q += elemSize;
+			}
+			p.HasConstant = true;
+		}
+		out.push_back(p);
+		return;
+	}
+
+	if (refKind || !isConstant)
+	{
+		// reftarget-kind params and controller-backed value params own the PB2's
+		// reference slots in record order
+		p.RefBacked = true;
+		p.RefSlot = refSlot++;
+	}
+	// Max 3 stores TYPE_TEXMAP / TYPE_MTL etc. as inline storage indices under flag 0x40
+	// (e.g. 0xffffffff = none) rather than as PB2 reference slots — treat that as a constant
+	// int for the consumer (std_maps TEXMAP_TAB already uses TabI storage indices).
+	if (isConstant && payloadSize > 0)
+	{
+		p.HasConstant = true;
+		p.PayloadOff = (uint32)hdr;
+		switch (p.baseType())
+		{
+		case CParamBlock2::TYPE_FLOAT:
+		case CParamBlock2::TYPE_ANGLE:
+		case CParamBlock2::TYPE_PCNT_FRAC:
+		case CParamBlock2::TYPE_WORLD:
+		case CParamBlock2::TYPE_COLOR_CHANNEL:
+			if (payloadSize >= 4) memcpy(&p.F[0], payload, 4);
+			else p.HasConstant = false;
+			break;
+		case CParamBlock2::TYPE_INT:
+		case CParamBlock2::TYPE_BOOL:
+		case CParamBlock2::TYPE_TIMEVALUE:
+		case CParamBlock2::TYPE_RADIOBTN_INDEX:
+		case CParamBlock2::TYPE_TEXMAP:
+		case CParamBlock2::TYPE_MTL:
+		case CParamBlock2::TYPE_NODE:
+		case CParamBlock2::TYPE_REFTARG:
+		case CParamBlock2::TYPE_BITMAP:
+			if (payloadSize >= 4) { memcpy(&p.I, payload, 4); p.F[0] = (float)p.I; }
+			else p.HasConstant = false;
+			// Inline reftarget constants don't own a PB2 reference slot.
+			if (refKind) { p.RefBacked = false; p.RefSlot = -1; --refSlot; }
+			break;
+		case CParamBlock2::TYPE_RGBA:
+		case CParamBlock2::TYPE_POINT3:
+		case CParamBlock2::TYPE_HSV:
+			if (payloadSize >= 12) memcpy(p.F, payload, 12);
+			else p.HasConstant = false;
+			break;
+		case CParamBlock2::TYPE_STRING:
+		case CParamBlock2::TYPE_FILENAME:
+			if (payloadSize >= 4)
+			{
+				uint32 len;
+				memcpy(&len, payload, 4);
+				if (len > payloadSize - 4) len = (uint32)(payloadSize - 4);
+				std::string s((const char *)payload + 4, len);
+				while (!s.empty() && s[s.size() - 1] == '\0') s.resize(s.size() - 1);
+				p.S = s;
+			}
+			break;
+		default:
+			p.HasConstant = false;
+			break;
+		}
+	}
+	out.push_back(p);
+}
+
 // Decode the header + parameter records from the orphaned chunks WITHOUT moving them (the raw
 // chunks remain the serialization authority). Reference-slot counting mirrors the record order
 // exactly so refValue resolves the same reference the original param block would.
@@ -143,120 +278,22 @@ void CParamBlock2::decodeModel()
 		if (!raw) continue;
 		if (it->first == PMB_PB2_HEADER_CHUNK_ID && raw->Value.size() >= 16)
 		{
+			// Header layout is the same across eras; only the magic word (0x2328 modern /
+			// 0x0c1c Max 3) differs — we don't gate on it.
 			memcpy(&m_ScriptVersion, nlVectorData(raw->Value), 4);
 			memcpy(&m_BlockId, nlVectorData(raw->Value) + 4, 2);
 			memcpy(&m_ParamCount, nlVectorData(raw->Value) + 10, 2);
 			m_HasHeader = true;
 		}
-		else if (it->first == PMB_PB2_PARAM_CHUNK_ID && raw->Value.size() >= 15)
+		else if (it->first == PMB_PB2_PARAM_CHUNK_ID && raw->Value.size() >= PMB_PB2_PARAM_HDR_MODERN)
 		{
 			SParam p;
-			memcpy(&p.Id, nlVectorData(raw->Value), 2);
-			memcpy(&p.Type, nlVectorData(raw->Value) + 2, 2);
-			p.Chunk = raw;
-			p.IsTab = (p.Type & TYPE_TAB_FLAG) != 0;
-			uint8 flagByte = raw->Value[14];
-			bool refKind = SParam::typeIsRefKind(p.baseType());
-			bool isConstant = (flagByte & 0x40) != 0;
-			const uint8 *payload = nlVectorData(raw->Value) + 15;
-			size_t payloadSize = raw->Value.size() - 15;
-
-			if (p.IsTab)
-			{
-				// Tab record: flag byte at [14] (0x00), then u32 count, then per element a u8
-				// flag (0x40 = inline) + value by base type. Reference-kind element values are
-				// scene storage indices (resolved through the scene container by the consumer),
-				// not PB2 reference slots — a tab record does NOT own a PB2 reference slot.
-				const uint8 *q = nlVectorData(raw->Value) + 14 + 1;
-				const uint8 *end = nlVectorData(raw->Value) + raw->Value.size();
-				if (q + 4 <= end)
-				{
-					uint32 count;
-					memcpy(&count, q, 4);
-					q += 4;
-					uint16 base = p.baseType();
-					uint elemSize = (base == TYPE_RGBA || base == TYPE_POINT3 || base == TYPE_HSV) ? 12 : 4;
-					for (uint32 e = 0; e < count && q + 1 + elemSize <= end; ++e)
-					{
-						++q; // element flag byte
-						if (elemSize == 4)
-						{
-							sint32 iv; float fv;
-							memcpy(&iv, q, 4);
-							memcpy(&fv, q, 4);
-							p.TabI.push_back(iv);
-							p.TabF.push_back(fv);
-						}
-						else
-						{
-							float fv[3];
-							memcpy(fv, q, 12);
-							p.TabF.push_back(fv[0]);
-							p.TabF.push_back(fv[1]);
-							p.TabF.push_back(fv[2]);
-							p.TabI.push_back(0);
-						}
-						q += elemSize;
-					}
-					p.HasConstant = true;
-				}
-				m_Params.push_back(p);
-				continue;
-			}
-
-			if (refKind || !isConstant)
-			{
-				// reftarget-kind params and controller-backed value params own the PB2's
-				// reference slots in record order
-				p.RefBacked = true;
-				p.RefSlot = refSlot++;
-			}
-			if (isConstant && !refKind && payloadSize > 0)
-			{
-				p.HasConstant = true;
-				p.PayloadOff = 15;
-				switch (p.baseType())
-				{
-				case TYPE_FLOAT:
-				case TYPE_ANGLE:
-				case TYPE_PCNT_FRAC:
-				case TYPE_WORLD:
-				case TYPE_COLOR_CHANNEL:
-					if (payloadSize >= 4) memcpy(&p.F[0], payload, 4);
-					else p.HasConstant = false;
-					break;
-				case TYPE_INT:
-				case TYPE_BOOL:
-				case TYPE_TIMEVALUE:
-				case TYPE_RADIOBTN_INDEX:
-					if (payloadSize >= 4) { memcpy(&p.I, payload, 4); p.F[0] = (float)p.I; }
-					else p.HasConstant = false;
-					break;
-				case TYPE_RGBA:
-				case TYPE_POINT3:
-				case TYPE_HSV:
-					if (payloadSize >= 12) memcpy(p.F, payload, 12);
-					else p.HasConstant = false;
-					break;
-				case TYPE_STRING:
-				case TYPE_FILENAME:
-					if (payloadSize >= 4)
-					{
-						uint32 len;
-						memcpy(&len, payload, 4);
-						if (len > payloadSize - 4) len = (uint32)(payloadSize - 4);
-						std::string s((const char *)payload + 4, len);
-						while (!s.empty() && s[s.size() - 1] == '\0') s.resize(s.size() - 1);
-						p.S = s;
-					}
-					break;
-				default:
-					// unknown scalar types: keep the record id/type, no decoded value
-					p.HasConstant = false;
-					break;
-				}
-			}
-			m_Params.push_back(p);
+			decodeParamRecord(p, raw, PMB_PB2_PARAM_HDR_MODERN, refSlot, m_Params);
+		}
+		else if (it->first == PMB_PB2_PARAM_CHUNK_ID_MAX3 && raw->Value.size() >= PMB_PB2_PARAM_HDR_MAX3)
+		{
+			SParam p;
+			decodeParamRecord(p, raw, PMB_PB2_PARAM_HDR_MAX3, refSlot, m_Params);
 		}
 	}
 }

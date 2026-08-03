@@ -59,21 +59,21 @@ namespace GUS
 	public:
 		CChatChannelImplementation(const NLMISC::CSString &channelName);
 
-		void openChannel(const NLMISC::CSString& channelTitle, uint32 historySize, bool noBroadcast, bool forwardInput, bool autoInsertPlayer);
-		void closeChannel();
+		void openChannel(const NLMISC::CSString& channelTitle, uint32 historySize, bool noBroadcast, bool forwardInput, bool autoInsertPlayer) NL_OVERRIDE;
+		void closeChannel() NL_OVERRIDE;
 		
-		void addClient(GUS::TClientId clientId);
-		void removeClient(GUS::TClientId clientId);
+		void addClient(GUS::TClientId clientId) NL_OVERRIDE;
+		void removeClient(GUS::TClientId clientId) NL_OVERRIDE;
 
-		void broadcastMessage(const ucstring& speakerName, const ucstring& txt);
-		void broadcastMessage(const std::string& speakerNameUtf8, const std::string& txtUtf8);
-		void sendMessage(GUS::TClientId clientId, const ucstring& speakerName,const ucstring& txt);
-		void sendMessage(GUS::TClientId clientId, const std::string& speakerNameUtf8, const std::string& txtUtf8);
+		void broadcastMessage(const ucstring& speakerName, const ucstring& txt) NL_OVERRIDE;
+		void broadcastMessage(const std::string& speakerNameUtf8, const std::string& txtUtf8) NL_OVERRIDE;
+		void sendMessage(GUS::TClientId clientId, const ucstring& speakerName,const ucstring& txt) NL_OVERRIDE;
+		void sendMessage(GUS::TClientId clientId, const std::string& speakerNameUtf8, const std::string& txtUtf8) NL_OVERRIDE;
 
-		void setChatCallback(IChatCallback *callback);
-		const NLMISC::CSString& getChannelName() const;
-		const NLMISC::CSString& getChannelTitle() const;
-		void setChannelTitle(const NLMISC::CSString& title);
+		void setChatCallback(IChatCallback *callback) NL_OVERRIDE;
+		const NLMISC::CSString& getChannelName() const NL_OVERRIDE;
+		const NLMISC::CSString& getChannelTitle() const NL_OVERRIDE;
+		void setChannelTitle(const NLMISC::CSString& title) NL_OVERRIDE;
 
 	private:
 
@@ -118,36 +118,36 @@ namespace GUS
 		//-----------------------------------------------------------------------------
 		// specialisation of CGusMirror::IMirrorModuleCallback
 
-		void mirrorIsReady(CGusMirror *mirrorModule) {};
-		void serviceMirrorUp(CGusMirror *mirrorModule, const std::string &serviceName, NLNET::TServiceId serviceId);
-		void serviceMirrorDown(CGusMirror *mirrorModule, const std::string &serviceName, NLNET::TServiceId serviceId) {};
-		void mirrorTickUpdate(CGusMirror *mirrorModule);
-		void entityAdded(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex) {};
-		void entityRemoved(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, const NLMISC::CEntityId *entityId) {};
-		void propertyChanged(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, TPropertyIndex propIndex) {};
+		void mirrorIsReady(CGusMirror *mirrorModule) NL_OVERRIDE {};
+		void serviceMirrorUp(CGusMirror *mirrorModule, const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE;
+		void serviceMirrorDown(CGusMirror *mirrorModule, const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE {};
+		void mirrorTickUpdate(CGusMirror *mirrorModule) NL_OVERRIDE;
+		void entityAdded(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex) NL_OVERRIDE {};
+		void entityRemoved(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, const NLMISC::CEntityId *entityId) NL_OVERRIDE {};
+		void propertyChanged(CGusMirror *mirrorModule, CMirroredDataSet *dataSet, const TDataSetRow &entityIndex, TPropertyIndex propIndex) NL_OVERRIDE {};
 
 
 		//-----------------------------------------------------------------------------
 		// specialisation of CClientManager::IConnectionHandler
 
-		void connect(TClientId);
-		void disconnect(TClientId);
+		void connect(TClientId) NL_OVERRIDE;
+		void disconnect(TClientId) NL_OVERRIDE;
 
 
 		//-----------------------------------------------------------------------------
 		// specialisation of IServiceSingleton
 
-		void init();
+		void init() NL_OVERRIDE;
 
 
 	public:
 		//-----------------------------------------------------------------------------
 		// specialisation of CChatManager
 
-		TChatChannelPtr	createChatChannel(const NLMISC::CSString &channelName);
-		void removeChannel(CChatChannel *channel);
-		TChatChannelPtr getChatChannel(const NLMISC::CSString& channelName);
-		bool setChatChannelTitle(CChatChannel *channel,const NLMISC::CSString& channelTitle);
+		TChatChannelPtr	createChatChannel(const NLMISC::CSString &channelName) NL_OVERRIDE;
+		void removeChannel(CChatChannel *channel) NL_OVERRIDE;
+		TChatChannelPtr getChatChannel(const NLMISC::CSString& channelName) NL_OVERRIDE;
+		bool setChatChannelTitle(CChatChannel *channel,const NLMISC::CSString& channelTitle) NL_OVERRIDE;
 
 
 		//-----------------------------------------------------------------------------

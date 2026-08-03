@@ -41,24 +41,24 @@ public:
 	 * \param buffer pointer to the buffer where the data are
 	 * \size size of the buffer
 	 */
-	virtual void unpack (NLMISC::CBitMemStream &message) { message.serial(Sync); message.serial(BKEntityId); }
+	virtual void unpack (NLMISC::CBitMemStream &message) NL_OVERRIDE { message.serial(Sync); message.serial(BKEntityId); }
 
 	/// This functions is used when you want to transform an action into an IStream.
-	virtual void serial (NLMISC::IStream &f) { f.serial(Sync); f.serial(BKEntityId); }
+	virtual void serial (NLMISC::IStream &f) NL_OVERRIDE { f.serial(Sync); f.serial(BKEntityId); }
 
 	/** Returns the size of this action when it will be send to the UDP connection:
 	 * the size is IN BITS, not in bytes (the actual size is this one plus the header size)
 	 */
-	virtual uint32 size () { return 8*sizeof(Sync)+64; }
+	virtual uint32 size () NL_OVERRIDE { return 8*sizeof(Sync)+64; }
 
 	/// Sets the value of the action
-	virtual void	setValue(const TValue &value) { Sync = (NLMISC::TGameCycle)value; }
+	virtual void	setValue(const TValue &value) NL_OVERRIDE { Sync = (NLMISC::TGameCycle)value; }
 
 	/// Sets the value of the action
-	virtual TValue	getValue() const { return CAction::TValue((sint64)Sync); }
+	virtual TValue	getValue() const NL_OVERRIDE { return CAction::TValue((sint64)Sync); }
 
 	/// Returns true if the property is continuous
-	virtual bool	isContinuous() const { return false; }
+	virtual bool	isContinuous() const NL_OVERRIDE { return false; }
 
 	static CAction *create () { return new CActionSync; }
 
@@ -75,9 +75,9 @@ protected:
 	 * \param buffer pointer to the buffer where the data will be written
 	 * \size size of the buffer
 	 */
-	virtual void pack (NLMISC::CBitMemStream &message) { message.serial(Sync); message.serial(BKEntityId); }
+	virtual void pack (NLMISC::CBitMemStream &message) NL_OVERRIDE { message.serial(Sync); message.serial(BKEntityId); }
 
-	virtual void	reset() { Sync = 0; }
+	virtual void	reset() NL_OVERRIDE { Sync = 0; }
 
 	friend class CActionFactory;
 };

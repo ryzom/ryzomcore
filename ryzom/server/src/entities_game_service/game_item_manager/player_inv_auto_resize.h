@@ -28,10 +28,10 @@ public:
 	//@{
 	//@name Overloads from inventory base
 	/// Insert an item in the inventory, auto resize inventory if needed
-	virtual TInventoryOpResult insertItem(CGameItemPtr &item, uint32 slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, bool autoStack = false);
+	virtual TInventoryOpResult insertItem(CGameItemPtr &item, uint32 slot = INVENTORIES::INSERT_IN_FIRST_FREE_SLOT, bool autoStack = false) NL_OVERRIDE;
 	/// NEVER use this method. ONLY used when loading inventory from save files.
 	/// It does ignore bulk and weight limitations.
-	virtual void forceLoadItem(CGameItemPtr &item, uint32 slot);
+	virtual void forceLoadItem(CGameItemPtr &item, uint32 slot) NL_OVERRIDE;
 	//@}
 };
 

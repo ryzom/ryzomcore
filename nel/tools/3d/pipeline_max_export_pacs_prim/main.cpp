@@ -58,6 +58,7 @@
 #include <nel/misc/types_nl.h>
 #include <nel/misc/file.h>
 #include <nel/misc/o_xml.h>
+#include <nel/misc/mem_stream.h>
 #include <nel/misc/vector.h>
 #include <nel/misc/matrix.h>
 #include <nel/pacs/primitive_block.h>
@@ -81,6 +82,8 @@
 
 #include "../pipeline_max_export_common/max_scene.h"
 #include "../pipeline_max_export_common/old_param_block.h"
+#include "../pipeline_max_export_common/export_ids.h"
+#include "../pipeline_max_export_common/max_load.h"
 
 #include <cmath>
 #include <cstdio>
@@ -93,8 +96,8 @@ using namespace PIPELINE::MAX::BUILTIN;
 
 namespace {
 
-const NLMISC::CClassId CLASSID_PACS_BOX(0x7f374277, 0x5d3971df);
-const NLMISC::CClassId CLASSID_PACS_CYL(0x62a56810, 0x4b3d601c);
+using PMAX_EXPORT_IDS::CLASSID_PACS_BOX;
+using PMAX_EXPORT_IDS::CLASSID_PACS_CYL;
 const TSClassId SCLASS_GEOMOBJECT = 0x00000010;
 const TSClassId SCLASS_PARAMBLOCK2 = 0x00000082;
 
@@ -218,39 +221,15 @@ bool decodePrimitive(INode &node, MAXSCENE::SNodeTMCache &tmCache, NLPACS::CPrim
 
 } /* anonymous namespace */
 
-int main(int argc, char **argv)
+// Whole-file flow shared by the standalone tool and the max2gltf writer (PMB_PACS_PRIM_NO_MAIN
+// + nel_pacs_prim blob): returns 1 with the serialized XML bytes, 3 when the scene has no PACS
+// primitives, -1 on error. One code path — the tool's file and the blob cannot drift.
+int pmbExportPacsPrimForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out)
 {
-	if (argc < 3)
-	{
-		std::cerr << "usage: pipeline_max_export_pacs_prim <input.max> <output.pacs_prim>\n";
-		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
-		return 1;
-	}
-
-	CSceneClassRegistry reg;
-	CBuiltin::registerClasses(&reg);
-	UPDATE1::CUpdate1::registerClasses(&reg);
-	EPOLY::CEPoly::registerClasses(&reg);
-	BIPED::CBiped::registerClasses(&reg);
-	NELPATCH::CNelPatch::registerClasses(&reg);
-
-	CStorageOleIn in;
-	if (!in.open(argv[1])) { std::cerr << "ERROR: not an OLE compound file: " << argv[1] << "\n"; return 1; }
-
-	CDllDirectory dll;
-	{ std::vector<uint8> b; if (!in.readStream("DllDirectory", b)) { std::cerr << "ERROR: no DllDirectory stream\n"; return 1; } CStorageStream st(b); dll.serial(st); }
-	dll.parse(VersionUnknown);
-	CClassDirectory3 cd(&dll);
-	{ std::vector<uint8> b; if (!in.readStream("ClassDirectory3", b)) { std::cerr << "ERROR: no ClassDirectory3 stream\n"; return 1; } CStorageStream st(b); cd.serial(st); }
-	cd.parse(VersionUnknown);
-	CScene scene(&reg, &dll, &cd);
-	{ std::vector<uint8> b; if (!in.readStream("Scene", b)) { std::cerr << "ERROR: no Scene stream\n"; return 1; } CStorageStream st(b); scene.serial(st); }
-	scene.parse(VersionUnknown);
-
 	// Walk nodes in scene-container order (the `geometry` MaxScript category enumeration,
 	// same precedent as pipeline_max_export_ig/_swt), collecting PACS-primitive nodes.
 	std::vector<INode *> candidates;
-	CSceneClassContainer *ssc = scene.container();
+	CSceneClassContainer *ssc = lm.Scene->container();
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
 	{
 		CNodeImpl *node = dynamic_cast<CNodeImpl *>(it->second);
@@ -264,7 +243,7 @@ int main(int argc, char **argv)
 
 	if (candidates.empty())
 	{
-		std::cerr << "WARNING: no PACS primitives in " << argv[1] << "\n";
+		std::cerr << "WARNING: no PACS primitives in scene\n";
 		return 3;
 	}
 
@@ -277,19 +256,58 @@ int main(int argc, char **argv)
 		if (!decodePrimitive(*candidates[i], tmCache, primitiveBlock.Primitives[i], err))
 		{
 			std::cerr << "ERROR: \"" << ucstring(candidates[i]->userName()).toUtf8() << "\": " << err << "\n";
-			return 1;
+			return -1;
 		}
 	}
 
+	try
+	{
+		NLMISC::CMemStream ms;
+		NLMISC::COXml output;
+		if (!output.init(&ms, "1.0")) { std::cerr << "ERROR: cannot init XML stream\n"; return -1; }
+		primitiveBlock.serial(output);
+		output.flush();
+		out.assign(ms.buffer(), ms.buffer() + ms.length());
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		std::cerr << "ERROR: serial failed: " << e.what() << "\n";
+		return -1;
+	}
+
+	return 1;
+}
+
+#ifndef PMB_PACS_PRIM_NO_MAIN
+int main(int argc, char **argv)
+{
+	if (argc < 3)
+	{
+		std::cerr << "usage: pipeline_max_export_pacs_prim <input.max> <output.pacs_prim>\n";
+		std::cerr << "exit codes: 0 ok, 1 error, 3 nothing to export (no output written)\n";
+		return 1;
+	}
+	std::vector<uint8> bytes;
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(argv[1], lm))
+		return 1;
+	int rc = pmbExportPacsPrimForGltf(lm, bytes);
+	if (rc == 3) return 3;
+	if (rc != 1) return 1;
 	NLMISC::COFile file;
 	if (!file.open(argv[2])) { std::cerr << "ERROR: cannot open output " << argv[2] << "\n"; return 1; }
-	NLMISC::COXml output;
-	if (!output.init(&file, "1.0")) { std::cerr << "ERROR: cannot init XML stream\n"; return 1; }
-	primitiveBlock.serial(output);
-	output.flush();
-	file.close();
-
+	try
+	{
+		file.serialBuffer(&bytes[0], (uint)bytes.size());
+		file.close();
+	}
+	catch (const NLMISC::Exception &e)
+	{
+		std::cerr << "ERROR: write failed: " << e.what() << "\n";
+		return 1;
+	}
 	return 0;
 }
+#endif /* PMB_PACS_PRIM_NO_MAIN */
 
 /* end of file */

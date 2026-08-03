@@ -32,23 +32,23 @@ protected:
 
 public:
 	CItemEltAtom( CLoader* const _pl );
-	virtual ~CItemEltAtom();
+	virtual ~CItemEltAtom() NL_OVERRIDE;
 	
 	void BuildItem( CMoldElt* const _pme );
 
-	virtual CStringEx GetFormula() const;
-	virtual void SetParentValue( const CStringEx _sxparentvalue );
-	virtual void SetCurrentValue( const CStringEx _sxcurrentvalue );
-	virtual void FillParent( const CFormBodyElt* const _pfbe );
-	virtual void FillCurrent(const  CFormBodyElt* const _pfbe );
-	virtual CItemElt* Clone();
-	virtual CFormBodyElt* BuildForm();
-	virtual unsigned int GetNbElt() const;
+	virtual CStringEx GetFormula() const NL_OVERRIDE;
+	virtual void SetParentValue( const CStringEx _sxparentvalue ) NL_OVERRIDE;
+	virtual void SetCurrentValue( const CStringEx _sxcurrentvalue ) NL_OVERRIDE;
+	virtual void FillParent( const CFormBodyElt* const _pfbe ) NL_OVERRIDE;
+	virtual void FillCurrent(const  CFormBodyElt* const _pfbe ) NL_OVERRIDE;
+	virtual CItemElt* Clone() NL_OVERRIDE;
+	virtual CFormBodyElt* BuildForm() NL_OVERRIDE;
+	virtual unsigned int GetNbElt() const NL_OVERRIDE;
 	
 	CMoldEltType* GetMoldType() const;
 
-	virtual unsigned int GetNbChild ();
-	virtual CItemElt* GetChild (unsigned int _index);
+	virtual unsigned int GetNbChild () NL_OVERRIDE;
+	virtual CItemElt* GetChild (unsigned int _index) NL_OVERRIDE;
 };
 
 } // NLGEORGES

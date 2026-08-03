@@ -176,7 +176,7 @@ void CPlayerTrade::restoreAllItems()
 
 class CPlayerTradeStartHandler : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:BEGUN")->getValue8() != 0)
@@ -193,7 +193,7 @@ REGISTER_ACTION_HANDLER(CPlayerTradeStartHandler, "player_trade_start");
 
 class CPlayerTradeLeftClickOnSlotHandler : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		if (!sheet) return;

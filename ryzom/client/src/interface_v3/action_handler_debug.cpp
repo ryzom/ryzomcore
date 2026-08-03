@@ -73,7 +73,7 @@ void	endMovieShooting();
 // ***************************************************************************
 class CAHDisplayInfos : public IActionHandler
 {
-	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		// can only be used by devs and CSR or in local mode
 #if FINAL_VERSION

@@ -39,15 +39,15 @@ class CDisplayerVisualActivitySequence : public CDisplayerVisual, public CEditor
 public:
 	NLMISC_DECLARE_CLASS(R2::CDisplayerVisualActivitySequence);
 	CDisplayerVisualActivitySequence();
-	~CDisplayerVisualActivitySequence();
+	~CDisplayerVisualActivitySequence() NL_OVERRIDE;
 	// from CDisplayerVisual
-	virtual bool isSelectable() const { return false; }
-	virtual void onAttrModified(const std::string &attrName, sint32 attrIndex);
-	virtual void onPostRender();
-	virtual void onPreRender();
-	virtual void updateWorldPos();
-	virtual void setActive(bool active);
-	virtual bool getActive() const;
+	virtual bool isSelectable() const NL_OVERRIDE { return false; }
+	virtual void onAttrModified(const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
+	virtual void onPostRender() NL_OVERRIDE;
+	virtual void onPreRender() NL_OVERRIDE;
+	virtual void updateWorldPos() NL_OVERRIDE;
+	virtual void setActive(bool active) NL_OVERRIDE;
+	virtual bool getActive() const NL_OVERRIDE;
 private:
 	bool _AddedToWorldMap;
 	bool _Touched;
@@ -84,15 +84,15 @@ protected:
 	void setWorldMapNumEdges(uint count);
 	CDisplayerVisual *getParentDV() const;
 	// from CEditor::IInstanceObserver
-	virtual void onInstanceCreated(CInstance &instance);
-	virtual void onInstanceErased(CInstance &instance);
-	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex);
+	virtual void onInstanceCreated(CInstance &instance) NL_OVERRIDE;
+	virtual void onInstanceErased(CInstance &instance) NL_OVERRIDE;
+	virtual void onAttrModified(CInstance &instance, const std::string &attrName, sint32 attrIndex) NL_OVERRIDE;
 protected:
 	// from CGroupMap::IDeco
-	virtual void onAdd(CGroupMap &owner);
-	virtual void onRemove(CGroupMap &owner);
-	virtual void onPreRender(CGroupMap &owner);
-	virtual void onUpdate(CGroupMap &owner);
+	virtual void onAdd(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onRemove(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onPreRender(CGroupMap &owner) NL_OVERRIDE;
+	virtual void onUpdate(CGroupMap &owner) NL_OVERRIDE;
 	// return true if visible
 	// if entiyDV == groupDV, then an ungrouped entity, else the group an its entity
 	bool isVisible(CDisplayerVisual *groupDV, CDisplayerVisual *entityDV);

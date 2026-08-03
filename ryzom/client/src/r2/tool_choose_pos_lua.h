@@ -52,11 +52,11 @@ public:
 					  const CPrimLook &polyValidLook = CPrimLook(),
 					  const CPrimLook &polyInvalidLook = CPrimLook()
 					 );
-	virtual const char *getToolUIName() const { return _ToolName.c_str(); }
+	virtual const char *getToolUIName() const NL_OVERRIDE { return _ToolName.c_str(); }
 protected:
 	// from CToolChoosePos
-	virtual void commit(const NLMISC::CVector &createPosition, float createAngle);
-	virtual void cancel();
+	virtual void commit(const NLMISC::CVector &createPosition, float createAngle) NL_OVERRIDE;
+	virtual void cancel() NL_OVERRIDE;
 private:
 	CLuaObject			_ValidFunc;
 	CLuaObject			_CancelFunc;

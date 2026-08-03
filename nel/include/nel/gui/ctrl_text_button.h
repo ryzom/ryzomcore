@@ -46,33 +46,33 @@ namespace NLGUI
 
 		/// Constructor
 		CCtrlTextButton(const TCtorParam &param);
-		~CCtrlTextButton();
+		~CCtrlTextButton() NL_OVERRIDE;
 
-		std::string getProperty( const std::string &name ) const;
-		void setProperty( const std::string &name, const std::string &value );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const;
+		std::string getProperty( const std::string &name ) const NL_OVERRIDE;
+		void setProperty( const std::string &name, const std::string &value ) NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const char *type ) const NL_OVERRIDE;
 
 		// Init part
-		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup);
+		virtual bool parse (xmlNodePtr cur, CInterfaceGroup * parentGroup) NL_OVERRIDE;
 
-		virtual void checkCoords();
-		virtual void updateCoords();
+		virtual void checkCoords() NL_OVERRIDE;
+		virtual void updateCoords() NL_OVERRIDE;
 
-		virtual uint32 getMemory() { return (uint32)(sizeof(*this)+_Id.size()); }
+		virtual uint32 getMemory() NL_OVERRIDE { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		// Display part
-		virtual void draw();
+		virtual void draw() NL_OVERRIDE;
 
 		// Hide/Show the text also.
-		virtual	void setActive(bool state);
+		virtual	void setActive(bool state) NL_OVERRIDE;
 
 		// Add also our ViewText
-		virtual	void onAddToGroup();
+		virtual	void onAddToGroup() NL_OVERRIDE;
 
 
 		/// \from CInterfaceElement
-		sint32	getMaxUsedW() const;
-		sint32	getMinUsedW() const;
+		sint32	getMaxUsedW() const NL_OVERRIDE;
+		sint32	getMinUsedW() const NL_OVERRIDE;
 
 		// Special Text Colors accessors
 		// Colors
@@ -150,9 +150,9 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("getViewText", luaGetViewText)
 		REFLECT_EXPORT_END
 
-		void onRemoved();
-		void onWidgetDeleted( CInterfaceElement *e );
-		void moveBy( sint32 x, sint32 y );
+		void onRemoved() NL_OVERRIDE;
+		void onWidgetDeleted( CInterfaceElement *e ) NL_OVERRIDE;
+		void moveBy( sint32 x, sint32 y ) NL_OVERRIDE;
 
 	protected:
 

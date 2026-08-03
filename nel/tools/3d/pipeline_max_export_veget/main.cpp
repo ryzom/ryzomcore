@@ -8,7 +8,7 @@
 //
 // The veget maxscript (processes/veget/maxscript/veget_export.ms::isToBeExported) iterates
 // $geometry, keeps only scene-root nodes (parent == undefined) that aren't "Bip01", filters out
-// nel_ps and DONOTEXPORT/CHARACTER_LOD flagged nodes, and emits one .veget per node whose
+// nel_ps and DONOTEXPORT flagged nodes, and emits one .veget per node whose
 // NEL3D_APPDATA_VEGETABLE appdata == "1". Per node: NelExportVegetable
 // (nel_export/nel_export_export.cpp) -> CExportNel::buildVegetableShape
 // (nel_mesh_lib/export_vegetable.cpp): convert to TriObject, build the CMeshBase / CMesh via the
@@ -49,6 +49,7 @@
 #include <nel/3d/mesh.h>
 #include <nel/3d/register_3d.h>
 #include <nel/3d/vegetable_shape.h>
+#include <nel/misc/mem_stream.h>
 
 #include <cstdio>
 #include <cstring>
@@ -61,6 +62,7 @@
 #include "../pipeline_max_export_shape/mesh_build.h"
 #include "../pipeline_max_export_common/db_path.h"
 #include "../pipeline_max_export_common/max_scene.h"
+#include "../pipeline_max_export_common/export_ids.h"
 
 #include "../pipeline_max/builtin/scene_impl.h"
 #include "../pipeline_max/builtin/i_node.h"
@@ -74,19 +76,10 @@ using namespace MESHEVAL;
 using namespace MATBUILD;
 using namespace MESHBUILD;
 
-// NeL vegetable appdata sub-ids (plugin_max/nel_mesh_lib/export_appdata.h)
-#define NEL3D_APPDATA_VEGETABLE 1423062580
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND 1423062581
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_ON_LIGHTED 1423062582
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_LIGHTED 1423062583
-#define NEL3D_APPDATA_VEGETABLE_ALPHA_BLEND_OFF_DOUBLE_SIDED 1423062584
-#define NEL3D_APPDATA_BEND_CENTER 1423062585
-#define NEL3D_APPDATA_BEND_FACTOR 1423062586
-#define NEL3D_APPDATA_VEGETABLE_FORCE_BEST_SIDED_LIGHTING 1423062616
-#define NEL3D_APPDATA_DONOTEXPORT 1423062565
-#define NEL3D_APPDATA_CHARACTER_LOD 1423062634
-
-#define NEL3D_APPDATA_BEND_FACTOR_DEFAULT 1.0f
+// NeL vegetable appdata sub-ids: pipeline_max_export_common/export_ids.h. (A former local
+// NEL3D_APPDATA_CHARACTER_LOD define here carried a wrong id — 1423062634 is
+// REMANENCE_SHIFTING_TEXTURE — but was never used; the veget maxscript's isToBeExported
+// filters on nel_ps / DONOTEXPORT / VEGETABLE only.)
 
 // Windows tri-state checkbox constants (BST_UNCHECKED=0, BST_CHECKED=1) — the reference impl
 // mixes 0/1/2 semantics via getScriptAppData integer comparisons; reproduce the same values.
@@ -94,7 +87,6 @@ using namespace MESHBUILD;
 #define VEG_BST_CHECKED 1
 
 // PS class part-A id (skip nel_ps nodes)
-#define CLASSID_PARTA_NEL_PS 0x58ce2893
 
 static bool g_verbose = false;
 
@@ -226,15 +218,15 @@ static bool buildVegetableShape(INode &node, SNodeTMCache &tmCache, NL3D::CVeget
 }
 
 // ---------------------------------------------------------------------------------------------
-// Per-file export
+// Per-file export — the whole-file flow shared by the standalone tool and the max2gltf writer
+// (PMB_VEGET_NO_MAIN + nel_vegets blob list): one code path, the blob and the tool's files
+// cannot drift. Serialization uses the export-era stream flags (saved/restored — the writer
+// process doesn't set them globally like this tool's main does).
 
-static int exportFile(const std::string &maxPath, const std::string &outDir, bool exportLighting,
-                      uint &exported, uint &skipped)
+int pmbExportVegetsForGltf(PMAXLOAD::SLoadedMax &lm, bool exportLighting,
+                           std::vector<std::pair<std::string, std::vector<uint8> > > &out,
+                           uint &skipped)
 {
-	SLoadedMax lm;
-	if (!loadMaxFile(maxPath, lm))
-		return 1;
-
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
 	tmCache.SceneRoot = nullptr;
@@ -247,6 +239,11 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 		allNodes.push_back(node);
 	}
 
+	bool oldVB = NL3D::CVertexBuffer::SerialOldPreferredMemory;
+	bool oldIB = NL3D::CIndexBuffer::SerialOldPreferredMemory;
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = true;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = true;
+
 	for (uint i = 0; i < allNodes.size(); ++i)
 	{
 		INode &node = *allNodes[i];
@@ -254,7 +251,6 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 			continue;
 
 		std::string name = nodeName(node);
-		std::string outPath = outDir + "/" + name + ".veget";
 
 		try
 		{
@@ -265,31 +261,28 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, boo
 				continue;
 			}
 
-			NLMISC::COFile file;
-			if (!file.open(outPath))
-			{
-				fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
-				++skipped;
-				continue;
-			}
-			shape.serial(file);
-			file.close();
-			++exported;
+			NLMISC::CMemStream ms;
+			shape.serial(ms);
+			out.push_back(std::make_pair(name,
+				std::vector<uint8>(ms.buffer(), ms.buffer() + ms.length())));
 			if (g_verbose)
-				printf("OK %s\n", outPath.c_str());
+				printf("OK %s.veget\n", name.c_str());
 		}
 		catch (const NLMISC::Exception &e)
 		{
-			fprintf(stderr, "ERROR: veget serialization failed for %s: %s\n", outPath.c_str(), e.what());
+			fprintf(stderr, "ERROR: veget serialization failed for %s: %s\n", name.c_str(), e.what());
 			++skipped;
 		}
 	}
 
+	NL3D::CVertexBuffer::SerialOldPreferredMemory = oldVB;
+	NL3D::CIndexBuffer::SerialOldPreferredMemory = oldIB;
 	return 0;
 }
 
 // ---------------------------------------------------------------------------------------------
 
+#ifndef PMB_VEGET_NO_MAIN
 int main(int argc, char **argv)
 {
 	NLMISC::CApplicationContext appContext;
@@ -348,10 +341,36 @@ int main(int argc, char **argv)
 	}
 	setDatabaseRoot(dbRoot);
 
-	uint exported = 0, skipped = 0;
-	int ret = exportFile(input, outDir, exportLighting, exported, skipped);
-	printf("EXPORTED %u vegets, %u skipped\n", exported, skipped);
+	uint skipped = 0;
+	std::vector<std::pair<std::string, std::vector<uint8> > > files;
+	PMAXLOAD::SLoadedMax lm;
+	if (!PMAXLOAD::loadMaxFile(input, lm))
+		return 1;
+	int ret = pmbExportVegetsForGltf(lm, exportLighting, files, skipped);
+	for (size_t i = 0; i < files.size(); ++i)
+	{
+		std::string outPath = outDir + "/" + files[i].first + ".veget";
+		NLMISC::COFile file;
+		if (!file.open(outPath))
+		{
+			fprintf(stderr, "ERROR: cannot open %s for writing\n", outPath.c_str());
+			++skipped;
+			continue;
+		}
+		try
+		{
+			file.serialBuffer(&files[i].second[0], (uint)files[i].second.size());
+			file.close();
+		}
+		catch (const NLMISC::Exception &e)
+		{
+			fprintf(stderr, "ERROR: write failed for %s: %s\n", outPath.c_str(), e.what());
+			++skipped;
+		}
+	}
+	printf("EXPORTED %u vegets, %u skipped\n", (uint)files.size(), skipped);
 	return ret;
 }
+#endif /* PMB_VEGET_NO_MAIN */
 
 /* end of file */

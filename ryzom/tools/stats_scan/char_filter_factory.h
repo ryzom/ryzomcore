@@ -115,17 +115,17 @@ class CFilter_##name: public ICharFilter\
 {\
 public:\
 	CFilter_##name(const std::string& rawArgs) {_RawArgs=rawArgs;}\
-	virtual std::string toString() const {return std::string(#name)+" "+_RawArgs;}\
-	virtual bool evaluate(const CStatsScanCharacter* c);\
+	virtual std::string toString() const NL_OVERRIDE {return std::string(#name)+" "+_RawArgs;}\
+	virtual bool evaluate(const CStatsScanCharacter* c) NL_OVERRIDE;\
 private:\
 	NLMISC::CSString _RawArgs;\
 };\
 class CFilterBuilder_##name: public ICharFilterBuilder\
 {\
 public:\
-	virtual const char* getName()			{return #name;}\
-	virtual const char* getDescription()	{return description;}\
-	virtual ICharFilter* build(const std::string& rawArgs)	{return new CFilter_##name(rawArgs);}\
+	virtual const char* getName() NL_OVERRIDE			{return #name;}\
+	virtual const char* getDescription() NL_OVERRIDE	{return description;}\
+	virtual ICharFilter* build(const std::string& rawArgs) NL_OVERRIDE	{return new CFilter_##name(rawArgs);}\
 };\
 CFilterRegisterer<CFilterBuilder_##name> __Registerer_CFilter_##name;\
 bool CFilter_##name::evaluate(const CStatsScanCharacter* c)

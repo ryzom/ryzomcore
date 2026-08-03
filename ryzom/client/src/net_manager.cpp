@@ -608,9 +608,9 @@ void impulsePermanentUnban(NLMISC::CBitMemStream &impulse)
 class CInterfaceChatDisplayer : public CClientChatManager::IChatDisplayer
 {
 public:
-	virtual void displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0);
-	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName);
-	virtual void clearChannel(CChatGroup::TGroupType mode, uint32 dynChatDbIndex);
+	virtual void displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0) NL_OVERRIDE;
+	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName) NL_OVERRIDE;
+	virtual void clearChannel(CChatGroup::TGroupType mode, uint32 dynChatDbIndex) NL_OVERRIDE;
 
 private:
 	// Add colorization tag for sender name
@@ -1436,7 +1436,7 @@ void impulseCorrectPos(NLMISC::CBitMemStream &impulse)
 
 class CDummyProgress : public IProgressCallback
 {
-	void progress (float /* value */) {}
+	void progress (float /* value */) NL_OVERRIDE {}
 };
 
 //-----------------------------------------------
@@ -3328,7 +3328,7 @@ private:
 
 public:
 	// called when the string is available
-	virtual void onDynStringAvailable(uint stringId, const std::string &value)
+	virtual void onDynStringAvailable(uint stringId, const std::string &value) NL_OVERRIDE
 	{
 		// don't care if already displayed
 		if(_AlreadyDisplayed)

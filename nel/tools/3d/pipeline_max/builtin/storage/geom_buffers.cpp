@@ -4,6 +4,7 @@
  * \date 2012-08-25 07:55GMT
  * \author Jan Boon (Kaetemi)
  * \author Claude Opus 4.8
+ * \author Claude Fable 5
  * CGeomBuffers
  */
 
@@ -37,6 +38,7 @@
 
 // Project includes
 #include "../../storage_array.h"
+#include "../../storage_value.h"
 
 // using namespace std;
 // using namespace NLMISC;
@@ -70,6 +72,13 @@ namespace STORAGE {
 #define PBMS_GEOM_BUFFERS_POLY_A_VERTEX_CHUNK_ID 0x0100
 #define PBMS_GEOM_BUFFERS_POLY_A_EDGE_CHUNK_ID 0x010a
 #define PBMS_GEOM_BUFFERS_POLY_A_FACE_CHUNK_ID 0x011a
+// Map-channel chunk family, repeated per stored channel in file order (corpus-established:
+// 0x0959 always 4 bytes, 0x2398 always 4 bytes value 1, 0x2394/0x2396 always exactly
+// count-prefixed at stride 12; EditableMesh only, stable from Max 3 through Max 2010).
+#define PMBS_GEOM_BUFFERS_MAP_CHANNEL_CHUNK_ID 0x0959
+#define PMBS_GEOM_BUFFERS_MAP_SUPPORT_CHUNK_ID 0x2398
+#define PMBS_GEOM_BUFFERS_MAP_VERTEX_CHUNK_ID 0x2394
+#define PMBS_GEOM_BUFFERS_MAP_FACE_CHUNK_ID 0x2396
 
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -313,6 +322,52 @@ const std::vector<CGeomPolyFaceInfo> *CGeomBuffers::polyFaces() const
 	return a ? &a->Value : nullptr;
 }
 
+void CGeomBuffers::mapChannels(std::vector<CMapChannelView> &out) const
+{
+	// Walk the chunk list in file order; 0x0959 opens a new group, the family leaves that follow
+	// attach to it. A family leaf before any 0x0959 opens an announce-less group (Channel -1, one
+	// Max 3 corpus witness) — the consumer decides what to do with it, matching the historical
+	// raw read that skipped such channels.
+	out.clear();
+	bool haveGroup = false;
+	for (TStorageObjectConstIt it = m_Chunks.begin(), end = m_Chunks.end(); it != end; ++it)
+	{
+		switch (it->first)
+		{
+		case PMBS_GEOM_BUFFERS_MAP_CHANNEL_CHUNK_ID:
+			if (const CStorageValue<uint32> *v = dynamic_cast<const CStorageValue<uint32> *>(it->second))
+			{
+				out.resize(out.size() + 1);
+				out.back().Channel = (sint32)v->Value;
+				haveGroup = true;
+			}
+			break;
+		case PMBS_GEOM_BUFFERS_MAP_SUPPORT_CHUNK_ID:
+			if (const CStorageValue<uint32> *v = dynamic_cast<const CStorageValue<uint32> *>(it->second))
+			{
+				if (!haveGroup) { out.resize(out.size() + 1); haveGroup = true; }
+				out.back().SupportFlag = v->Value;
+				out.back().HasSupportFlag = true;
+			}
+			break;
+		case PMBS_GEOM_BUFFERS_MAP_VERTEX_CHUNK_ID:
+			if (const CStorageArraySizePre<NLMISC::CVector> *a = dynamic_cast<const CStorageArraySizePre<NLMISC::CVector> *>(it->second))
+			{
+				if (!haveGroup) { out.resize(out.size() + 1); haveGroup = true; }
+				out.back().Verts = &a->Value;
+			}
+			break;
+		case PMBS_GEOM_BUFFERS_MAP_FACE_CHUNK_ID:
+			if (const CStorageArraySizePre<CGeomTriIndex> *a = dynamic_cast<const CStorageArraySizePre<CGeomTriIndex> *>(it->second))
+			{
+				if (!haveGroup) { out.resize(out.size() + 1); haveGroup = true; }
+				out.back().Faces = &a->Value;
+			}
+			break;
+		}
+	}
+}
+
 IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 {
 #if PMBS_GEOM_BUFFERS_PARSE
@@ -342,8 +397,16 @@ IStorageObject *CGeomBuffers::createChunkById(uint16 id, bool container)
 	case PMBS_GEOM_BUFFERS_TRI_A_VERTEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_B_VERTEX_CHUNK_ID:
 	case PMBS_GEOM_BUFFERS_TRI_C_VERTEX_CHUNK_ID:
+	case PMBS_GEOM_BUFFERS_MAP_VERTEX_CHUNK_ID:
 		nlassert(!container);
 		return new CStorageArraySizePre<NLMISC::CVector>();
+	case PMBS_GEOM_BUFFERS_MAP_FACE_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageArraySizePre<CGeomTriIndex>();
+	case PMBS_GEOM_BUFFERS_MAP_CHANNEL_CHUNK_ID:
+	case PMBS_GEOM_BUFFERS_MAP_SUPPORT_CHUNK_ID:
+		nlassert(!container);
+		return new CStorageValue<uint32>();
 	}
 #endif
 	return CStorageContainer::createChunkById(id, container);

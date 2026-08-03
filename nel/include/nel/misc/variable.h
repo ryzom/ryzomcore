@@ -96,7 +96,7 @@ class __name##Class : public NLMISC::IVariable \
 public: \
 	__name##Class () : IVariable(#__category, #__name, __help) { } \
 	 \
-	virtual bool fromString(const std::string &val, bool human=false) \
+	virtual bool fromString(const std::string &val, bool human=false) NL_OVERRIDE \
 	{ \
 		/*std::stringstream ss (val);*/ \
 		__type p; \
@@ -106,7 +106,7 @@ public: \
 		return ret; \
 	} \
 	 \
-	virtual std::string toString(bool human) const \
+	virtual std::string toString(bool human) const NL_OVERRIDE \
 	{ \
 		__type p; \
 		ptr (&p, true, human); \
@@ -148,7 +148,7 @@ public:
 
 	virtual std::string toString(bool human=false) const = 0;
 
-	virtual bool execute(const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
+	virtual bool execute(const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE
 	{
 		if (args.size() > 1)
 			return false;
@@ -197,7 +197,7 @@ public:
 	{
 	}
 
-	virtual bool fromString (const std::string &val, bool /* human */=false)
+	virtual bool fromString (const std::string &val, bool /* human */=false) NL_OVERRIDE
 	{
 		//std::stringstream ss (val);
 		//ss >> *_ValuePtr;
@@ -206,7 +206,7 @@ public:
 		return ret;
 	}
 
-	virtual std::string toString (bool /* human */) const
+	virtual std::string toString (bool /* human */) const NL_OVERRIDE
 	{
 		//std::stringstream ss;
 		//ss << *_ValuePtr;
@@ -238,7 +238,7 @@ public:
 		set (defaultValue, executeCallbackForDefaultValue);
 	}
 
-	virtual bool fromString (const std::string &val, bool /* human */=false)
+	virtual bool fromString (const std::string &val, bool /* human */=false) NL_OVERRIDE
 	{
 		T v;
 		bool ret = NLMISC::fromString(val, v);
@@ -246,7 +246,7 @@ public:
 		return ret;
 	}
 
-	virtual std::string toString (bool /* human */) const
+	virtual std::string toString (bool /* human */) const NL_OVERRIDE
 	{
 		return NLMISC::toString(_Value);
 	}
@@ -327,7 +327,7 @@ public:
 		return str;
 	}
 
-	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
+	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE
 	{
 		if (args.size() > 1)
 			return false;
@@ -407,13 +407,13 @@ public:
 		set (defaultValue, executeCallbackForDefaultValue);
 	}
 
-	virtual bool fromString (const std::string &val, bool /* human */=false)
+	virtual bool fromString (const std::string &val, bool /* human */=false) NL_OVERRIDE
 	{
 		set (val);
 		return true;
 	}
 
-	virtual std::string toString (bool /* human */=false) const
+	virtual std::string toString (bool /* human */=false) const NL_OVERRIDE
 	{
 		return _Value;
 	}
@@ -456,7 +456,7 @@ public:
 		return _Value;
 	}
 
-	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human)
+	virtual bool execute (const std::string &/* rawCommandString */, const std::vector<std::string> &args, NLMISC::CLog &log, bool quiet, bool human) NL_OVERRIDE
 	{
 		if (args.size () > 1)
 			return false;

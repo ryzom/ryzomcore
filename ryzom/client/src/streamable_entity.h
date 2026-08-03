@@ -57,7 +57,7 @@ public:
 		// ctor
 		CStreamableEntity();
 		// dtor
-		virtual ~CStreamableEntity() {}
+		virtual ~CStreamableEntity() NL_OVERRIDE {}
 	//@}
 
 	//\name Attributes
@@ -78,17 +78,17 @@ public:
 		  * It it returns false, it means that the entity is too far or that asynchronous loading suffice.
 		  * It it returns true, the next call to update will return only when the loading is completed.
 		  */
-		virtual bool needCompleteLoading(const NLMISC::CVector &pos) const
+		virtual bool needCompleteLoading(const NLMISC::CVector &pos) const NL_OVERRIDE
 		{
 			nlassert(_UnloadRadius >= _LoadRadius && _LoadRadius >= _ForceLoadRadius);
 			return (pos - _Pos).norm() < _ForceLoadRadius;
 		}
 		/** Test that entity against the player position, and load / unload it (using synchronous or asynchronous loading)
 		  */
-		virtual void		 update(const NLMISC::CVector &pos);
+		virtual void		 update(const NLMISC::CVector &pos) NL_OVERRIDE;
 		/** The same as 'update', but force synchronous update all the time
 		  */
-		virtual void		 forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress);
+		virtual void		 forceUpdate(const NLMISC::CVector &pos, NLMISC::IProgressCallback &progress) NL_OVERRIDE;
 	//@}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

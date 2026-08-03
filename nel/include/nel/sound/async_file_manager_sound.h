@@ -68,7 +68,7 @@ private:
 		std::string	_Filename;
 
 		CLoadWavFile (IBuffer *pdestBuffer, const std::string &filename);
-		void run (void);
+		void run (void) NL_OVERRIDE;
 	};
 
 };

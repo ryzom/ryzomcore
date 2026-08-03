@@ -55,7 +55,7 @@ namespace R2
 		  *        If the lua state is provided externally, then it won't be deleted by this object
 		  */
 		CDynamicMapClient(const std::string &eid, NLNET::IModuleSocket * clientGateway, lua_State *luaState);
-		~CDynamicMapClient();
+		~CDynamicMapClient() NL_OVERRIDE;
 
 		virtual void init( uint id, lua_State *luaState );
 		virtual void release();

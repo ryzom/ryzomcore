@@ -137,11 +137,11 @@ public:
 	sint32	Array[16][16];
 
 	CFull16x16Layer()						{ memset(Array, 0, sizeof(Array)); }
-	sint	get(uint i, uint j) const		{ nlassert(i<16 && j<16); return Array[i][j]; }
-	void	set(uint i, uint j, sint value)	{ nlassert(i<16 && j<16); Array[i][j] = value; }
+	sint	get(uint i, uint j) const NL_OVERRIDE		{ nlassert(i<16 && j<16); return Array[i][j]; }
+	void	set(uint i, uint j, sint value) NL_OVERRIDE	{ nlassert(i<16 && j<16); Array[i][j] = value; }
 
 protected:
-	void	serial(NLMISC::IStream &f)	{
+	void	serial(NLMISC::IStream &f) NL_OVERRIDE	{
 		for (uint i=0; i<16; ++i)
 			for (uint j=0; j<16; ++j)
 				f.serial(Array[i][j]);
@@ -163,11 +163,11 @@ public:
 	uint8	Array[16][16];
 
 	C8Bits16x16Layer(sint32 mean=0) : Mean(mean)	{ memset(Array, 0, sizeof(Array)); }
-	sint	get(uint i, uint j) const				{ nlassert(i<16 && j<16); return Mean + Array[i][j]; }
-	void	set(uint i, uint j, sint value)			{ nlassert(i<16 && j<16); Array[i][j] = (uint8)(value-Mean); }
+	sint	get(uint i, uint j) const NL_OVERRIDE				{ nlassert(i<16 && j<16); return Mean + Array[i][j]; }
+	void	set(uint i, uint j, sint value) NL_OVERRIDE			{ nlassert(i<16 && j<16); Array[i][j] = (uint8)(value-Mean); }
 
 protected:
-	void	serial(NLMISC::IStream &f)
+	void	serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Mean);
 		for (uint i=0; i<16; ++i)
@@ -191,11 +191,11 @@ public:
 	T4BitField	Array[16][2];
 
 	C4Bits16x16Layer(sint32 mean=0) : Mean(mean)	{ memset(Array, 0, sizeof(Array)); }
-	sint	get(uint i, uint j) const				{ nlassert(i<16 && j<16); return Mean + Array[i][j>>3].get(j); }
-	void	set(uint i, uint j, sint value)			{ nlassert(i<16 && j<16); Array[i][j>>3].set(j, (value-Mean)&0xf); }
+	sint	get(uint i, uint j) const NL_OVERRIDE				{ nlassert(i<16 && j<16); return Mean + Array[i][j>>3].get(j); }
+	void	set(uint i, uint j, sint value) NL_OVERRIDE			{ nlassert(i<16 && j<16); Array[i][j>>3].set(j, (value-Mean)&0xf); }
 
 protected:
-	void	serial(NLMISC::IStream &f)
+	void	serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Mean);
 		for (uint i=0; i<16; ++i)
@@ -220,11 +220,11 @@ public:
 	T2BitField	Array[16];
 
 	C2Bits16x16Layer(sint32 v0=0, sint32 v1=1, sint32 v2=2, sint32 v3=3)	{ Values[0] = v0; Values[1] = v1; Values[2] = v2; Values[3] = v3; memset(Array, 0, sizeof(Array)); }
-	sint	get(uint i, uint j) const		{ nlassert(i<16 && j<16); return Values[Array[i].get(j)]; }
-	void	set(uint i, uint j, sint value)	{ nlassert(i<16 && j<16); Array[i].set(j, getIndex(value)); }
+	sint	get(uint i, uint j) const NL_OVERRIDE		{ nlassert(i<16 && j<16); return Values[Array[i].get(j)]; }
+	void	set(uint i, uint j, sint value) NL_OVERRIDE	{ nlassert(i<16 && j<16); Array[i].set(j, getIndex(value)); }
 
 protected:
-	void	serial(NLMISC::IStream &f)
+	void	serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Values[0], Values[1], Values[2], Values[3]);
 		for (uint i=0; i<16; ++i)
@@ -255,11 +255,11 @@ public:
 	T1BitField	Array[16];
 
 	C1Bit16x16Layer(sint32 v0=0, sint32 v1=1)	{ Values[0] = v0; Values[1] = v1; memset(Array, 0, sizeof(Array)); }
-	sint	get(uint i, uint j) const			{ nlassert(i<16 && j<16); return Values[Array[i].get(j)]; }
-	void	set(uint i, uint j, sint value)		{ nlassert(i<16 && j<16); Array[i].set(j, getIndex(value)); }
+	sint	get(uint i, uint j) const NL_OVERRIDE			{ nlassert(i<16 && j<16); return Values[Array[i].get(j)]; }
+	void	set(uint i, uint j, sint value) NL_OVERRIDE		{ nlassert(i<16 && j<16); Array[i].set(j, getIndex(value)); }
 
 protected:
-	void	serial(NLMISC::IStream &f)
+	void	serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serial(Values[0], Values[1]);
 		for (uint i=0; i<16; ++i)
@@ -283,11 +283,11 @@ public:
 	sint32	Value;
 
 	CWhite16x16Layer(sint32 value=0) : Value(value)	{ }
-	sint	get(uint i, uint j) const		{ return Value; }
-	void	set(uint i, uint j, sint value)	{ Value = value; }
+	sint	get(uint i, uint j) const NL_OVERRIDE		{ return Value; }
+	void	set(uint i, uint j, sint value) NL_OVERRIDE	{ Value = value; }
 
 protected:
-	void	serial(NLMISC::IStream &f)		{ f.serial(Value); }
+	void	serial(NLMISC::IStream &f) NL_OVERRIDE		{ f.serial(Value); }
 };
 
 

@@ -37,8 +37,8 @@ class CDeploymentConfigurationSynchroniser: public PATCHMAN::CDeploymentConfigur
 {
 public:
 	// specialisation of CDeploymentConfigurationSynchroniserSkel
-	void requestSync(NLNET::IModuleProxy *sender);
-	void sync(NLNET::IModuleProxy *sender, const NLNET::TBinBuffer &dataBlob);
+	void requestSync(NLNET::IModuleProxy *sender) NL_OVERRIDE;
+	void sync(NLNET::IModuleProxy *sender, const NLNET::TBinBuffer &dataBlob) NL_OVERRIDE;
 
 	// our own virtual callback method for derived clases to implement (optionally)
 	virtual void cbDeploymentConfigurationSynchronised(NLNET::IModuleProxy* sender) {}

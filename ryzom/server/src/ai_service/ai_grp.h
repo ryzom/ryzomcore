@@ -54,7 +54,7 @@ class CSpawnGroup
 public:
 	CSpawnGroup(CPersistent<CSpawnGroup>& owner);
 	
-	virtual	~CSpawnGroup();
+	virtual	~CSpawnGroup() NL_OVERRIDE;
 	
 	virtual void spawnBotOfGroup();
 	
@@ -191,9 +191,9 @@ public:
 	
 	CGroup(CManager* owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlag, CAIAliasDescriptionNode* aliasTree = NULL);
 	CGroup(CManager* owner, RYAI_MAP_CRUNCH::TAStarFlag denyFlag, uint32 alias, std::string const& name);
-	virtual ~CGroup();
+	virtual ~CGroup() NL_OVERRIDE;
 	
-	void serviceEvent(CServiceEvent const& info);
+	void serviceEvent(CServiceEvent const& info) NL_OVERRIDE;
 	
 	CBot* getLeader();
 	CBot* getSquadLeader(bool checkAliveStatus = true);
@@ -210,8 +210,8 @@ public:
 	/// @name CChild implementation
 	//@{
 	virtual std::string getIndexString() const;
-	virtual std::string getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	virtual std::string getFullName() const;
 	//@}
 	
@@ -257,7 +257,7 @@ public:
 	virtual void setAutoSpawn(bool autoSpawn) { _AutoSpawn = autoSpawn; }
 	bool isAutoSpawn() const { return _AutoSpawn; }
 	
-	CAIInstance* getAIInstance() const { return getOwner()->getAIInstance(); }
+	CAIInstance* getAIInstance() const NL_OVERRIDE { return getOwner()->getAIInstance(); }
 	
 	void setEventParams(const std::vector<std::string> &a) { _EventParams = a; }
 	std::string getEventParamString(uint32 i) { if (i >= _EventParams.size()) return ""; return _EventParams[i]; }

@@ -37,7 +37,7 @@ public:
 	/// ctor
 	CTextureBump();
 	/// dtor
-	~CTextureBump();
+	~CTextureBump() NL_OVERRIDE;
 
 	/// set the height map used to generate this bump map
 	void				setHeightMap(ITexture *heightMap);
@@ -47,11 +47,11 @@ public:
 	const ITexture		*getHeightMap() const { return _HeightMap; };
 
 	// serial this texture datas
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 
-	virtual bool			supportSharing() const;
+	virtual bool			supportSharing() const NL_OVERRIDE;
 
-	virtual std::string		getShareName() const;
+	virtual std::string		getShareName() const NL_OVERRIDE;
 
 	void					enableSharing(bool enabled = true) { _DisableSharing = !enabled; }
 
@@ -72,21 +72,21 @@ public:
 	virtual float					getNormalizationFactor();
 
 	// inherited from ITexture. release this texture, and its datas
-	virtual void release();
+	virtual void release() NL_OVERRIDE;
 
 	// this is a bump texture
-	virtual bool isBumpMap() const { return true; }
+	virtual bool isBumpMap() const NL_OVERRIDE { return true; }
 
 protected:
 	// inherited from ITexture. Generate this bumpmap pixels
-	virtual void doGenerate(bool async = false);
+	virtual void doGenerate(bool async = false) NL_OVERRIDE;
 	NLMISC::CSmartPtr<ITexture>  _HeightMap;
 	float						 *_NormalizationFactor;
 	bool						 _DisableSharing;
 	bool						 _ForceNormalize;
 private:
 	/// we don't allow for mipmap for bump so we redefine this to prevent the user from doing this on the base class Itexture
-	virtual         void setFilterMode(TMagFilter magf, TMinFilter minf);
+	virtual         void setFilterMode(TMagFilter magf, TMinFilter minf) NL_OVERRIDE;
 };
 
 

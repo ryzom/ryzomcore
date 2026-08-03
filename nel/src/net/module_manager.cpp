@@ -134,7 +134,7 @@ namespace NLNET
 			return _Instance != nullptr;
 		}
 
-		const std::string &getCommandHandlerName() const
+		const std::string &getCommandHandlerName() const NL_OVERRIDE
 		{
 			static string moduleManagerName("moduleManager");
 			return moduleManagerName;
@@ -153,7 +153,7 @@ namespace NLNET
 			addModuleFactoryRegistry(lmfr);
 		}
 
-		~CModuleManager()
+		~CModuleManager() NL_OVERRIDE
 		{
 			// unload any loaded module library
 			while (!_ModuleLibraryRegistry.empty())
@@ -174,7 +174,7 @@ namespace NLNET
 			_Instance = nullptr;
 		}
 
-		virtual void applicationExit()
+		virtual void applicationExit() NL_OVERRIDE
 		{
 			TModuleInstances::TAToBMap::const_iterator first(_ModuleInstances.getAToBMap().begin()), last(_ModuleInstances.getAToBMap().end());
 			for (; first != last; ++first)
@@ -185,12 +185,12 @@ namespace NLNET
 			}
 		}
 
-		virtual void setUniqueNameRoot(const std::string &uniqueNameRoot)
+		virtual void setUniqueNameRoot(const std::string &uniqueNameRoot) NL_OVERRIDE
 		{
 			_UniqueNameRoot = uniqueNameRoot;
 		}
 
-		virtual const std::string &getUniqueNameRoot()
+		virtual const std::string &getUniqueNameRoot() NL_OVERRIDE
 		{
 			if (_UniqueNameRoot.empty())
 			{
@@ -234,7 +234,7 @@ namespace NLNET
 			}
 		}
 
-		virtual bool loadModuleLibrary(const std::string &libraryName)
+		virtual bool loadModuleLibrary(const std::string &libraryName) NL_OVERRIDE
 		{
 			// build the short name
 			string path = CFile::getPath(libraryName);
@@ -298,7 +298,7 @@ namespace NLNET
 			return true;
 		}
 
-		virtual bool unloadModuleLibrary(const std::string &libraryName)
+		virtual bool unloadModuleLibrary(const std::string &libraryName) NL_OVERRIDE
 		{
 			string shorName = CLibrary::cleanLibName(libraryName);
 			TModuleLibraryInfos::iterator it(_ModuleLibraryRegistry.find(shorName));
@@ -325,7 +325,7 @@ namespace NLNET
 //		}
 		/** Unregister a module factory
 		*/
-		virtual void unregisterModuleFactory(class IModuleFactory *moduleFactory)
+		virtual void unregisterModuleFactory(class IModuleFactory *moduleFactory) NL_OVERRIDE
 		{
 			// we need to remove the factory from the registry
 			TModuleFactoryRegistry::iterator it(_ModuleFactoryRegistry.find(moduleFactory->getModuleClassName()));
@@ -353,7 +353,7 @@ namespace NLNET
 		/** Fill the vector with the list of available module.
 		 *	Note that the vector is not cleared before being filled.
 		 */
-		virtual void getAvailableModuleClassList(std::vector<std::string> &moduleClassList)
+		virtual void getAvailableModuleClassList(std::vector<std::string> &moduleClassList) NL_OVERRIDE
 		{
 			TModuleFactoryRegistry::iterator first(_ModuleFactoryRegistry.begin()), last(_ModuleFactoryRegistry.end());
 			for (; first != last; ++first)
@@ -370,7 +370,7 @@ namespace NLNET
 		 *	If the name is empty, the method generate a name using
 		 *	the module class and a number.
 		 */
-		virtual IModule *createModule(const std::string &className, const std::string &localName, const std::string &paramString)
+		virtual IModule *createModule(const std::string &className, const std::string &localName, const std::string &paramString) NL_OVERRIDE
 		{
 			TModuleFactoryRegistry::iterator it(_ModuleFactoryRegistry.find(className));
 			if (it == _ModuleFactoryRegistry.end())
@@ -447,7 +447,7 @@ namespace NLNET
 			}
 		}
 
-		void deleteModule(IModule *module)
+		void deleteModule(IModule *module) NL_OVERRIDE
 		{
 			nlassert(module != NULL);
 
@@ -475,7 +475,7 @@ namespace NLNET
 		/** Lookup in the created module for a module having the
 		 *	specified local name.
 		 */
-		virtual IModule *getLocalModule(const std::string &moduleName)
+		virtual IModule *getLocalModule(const std::string &moduleName) NL_OVERRIDE
 		{
 			TModuleInstances::TAToBMap::const_iterator it(_ModuleInstances.getAToBMap().find(moduleName));
 
@@ -485,7 +485,7 @@ namespace NLNET
 				return it->second;
 		}
 
-		virtual void updateModules()
+		virtual void updateModules() NL_OVERRIDE
 		{
 			H_AUTO(CModuleManager_updateModules);
 			// module are updated in creation order (i.e in module ID order)
@@ -529,7 +529,7 @@ namespace NLNET
 		/** Lookup in the created socket for a socket having the
 		 *	specified local name.
 		 */
-		virtual IModuleSocket *getModuleSocket(const std::string &socketName)
+		virtual IModuleSocket *getModuleSocket(const std::string &socketName) NL_OVERRIDE
 		{
 			TModuleSockets::iterator it(_ModuleSocketsRegistry.find(socketName));
 			if (it == _ModuleSocketsRegistry.end())
@@ -539,7 +539,7 @@ namespace NLNET
 		}
 		/** Register a socket in the manager.
 		 */
-		virtual void registerModuleSocket(IModuleSocket *moduleSocket)
+		virtual void registerModuleSocket(IModuleSocket *moduleSocket) NL_OVERRIDE
 		{
 			nlassert(moduleSocket != NULL);
 			TModuleSockets::iterator it(_ModuleSocketsRegistry.find(moduleSocket->getSocketName()));
@@ -550,7 +550,7 @@ namespace NLNET
 		}
 		/** Unregister a socket in the manager.
 		 */
-		virtual void unregisterModuleSocket(IModuleSocket *moduleSocket)
+		virtual void unregisterModuleSocket(IModuleSocket *moduleSocket) NL_OVERRIDE
 		{
 			nlassert(moduleSocket != NULL);
 			TModuleSockets::iterator it(_ModuleSocketsRegistry.find(moduleSocket->getSocketName()));
@@ -564,7 +564,7 @@ namespace NLNET
 		/** Lookup in the created gateway for a gateway having the
 		 *	specified local name.
 		 */
-		virtual IModuleGateway *getModuleGateway(const std::string &gatewayName)
+		virtual IModuleGateway *getModuleGateway(const std::string &gatewayName) NL_OVERRIDE
 		{
 			TModuleGateways::iterator it(_ModuleGatewaysRegistry.find(gatewayName));
 			if (it == _ModuleGatewaysRegistry.end())
@@ -574,7 +574,7 @@ namespace NLNET
 		}
 		/** Register a gateway in the manager.
 		 */
-		virtual void registerModuleGateway(IModuleGateway *moduleGateway)
+		virtual void registerModuleGateway(IModuleGateway *moduleGateway) NL_OVERRIDE
 		{
 			nlassert(moduleGateway != NULL);
 			TModuleGateways::iterator it(_ModuleGatewaysRegistry.find(moduleGateway->getGatewayName()));
@@ -585,7 +585,7 @@ namespace NLNET
 		}
 		/** Unregister a socket in the manager.
 		 */
-		virtual void unregisterModuleGateway(IModuleGateway *moduleGateway)
+		virtual void unregisterModuleGateway(IModuleGateway *moduleGateway) NL_OVERRIDE
 		{
 			nlassert(moduleGateway != NULL);
 			TModuleGateways::iterator it(_ModuleGatewaysRegistry.find(moduleGateway->getGatewayName()));
@@ -597,7 +597,7 @@ namespace NLNET
 		}
 
 		/** Get a module proxy with the module ID */
-		virtual TModuleProxyPtr getModuleProxy(TModuleId moduleProxyId)
+		virtual TModuleProxyPtr getModuleProxy(TModuleId moduleProxyId) NL_OVERRIDE
 		{
 			const TModuleProxyPtr *pproxy = _ModuleProxyIds.getB(moduleProxyId);
 
@@ -624,7 +624,7 @@ namespace NLNET
 			const std::string &moduleClassName,
 			const std::string &moduleFullyQualifiedName,
 			const std::string &moduleManifest,
-			TModuleId foreignModuleId)
+			TModuleId foreignModuleId) NL_OVERRIDE
 		{
 			CUniquePtr<CModuleProxy> modProx(new CModuleProxy(localModule, ++_LastGeneratedId, moduleClassName, moduleFullyQualifiedName, moduleManifest));
 			modProx->_Gateway = gateway;
@@ -645,7 +645,7 @@ namespace NLNET
 			return modProx.release();
 		}
 
-		virtual void releaseModuleProxy(TModuleId moduleProxyId)
+		virtual void releaseModuleProxy(TModuleId moduleProxyId) NL_OVERRIDE
 		{
 			TModuleProxyIds::TAToBMap::const_iterator it(_ModuleProxyIds.getAToBMap().find(moduleProxyId));
 			nlassert(it != _ModuleProxyIds.getAToBMap().end());
@@ -662,12 +662,12 @@ namespace NLNET
 			nlassertex(sanityCheck == NULL, ("Someone has kept a smart pointer on the proxy '%s' of class '%s'", sanityCheck->getModuleName().c_str(), sanityCheck->getModuleClassName().c_str()));
 		}
 
-		virtual uint32 getNbModule()
+		virtual uint32 getNbModule() NL_OVERRIDE
 		{
 			return (uint32)_ModuleInstances.getAToBMap().size();
 		}
 
-		virtual uint32 getNbModuleProxy()
+		virtual uint32 getNbModuleProxy() NL_OVERRIDE
 		{
 			return (uint32)_ModuleProxyIds.getAToBMap().size();
 		}

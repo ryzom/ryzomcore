@@ -106,25 +106,25 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = nullptr);
+	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = nullptr) NL_OVERRIDE;
 
 	/**
 	 * Get a node
 	 * \param idx is the node index
 	 */
-	ICDBNode * getNode( uint16 idx );
+	ICDBNode * getNode( uint16 idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node . Create it if it does not exist yet
 	 * \param id : the CTextId identifying the node
 	 */
-	ICDBNode * getNode (const CTextId& id, bool bCreate);
+	ICDBNode * getNode (const CTextId& id, bool bCreate) NL_OVERRIDE;
 
 	/**
 	 * Get a node index
 	 * \param node is a pointer to the node
 	 */
-	virtual bool getNodeIndex( ICDBNode* /* node */, uint& /* index */)
+	virtual bool getNodeIndex( ICDBNode* /* node */, uint& /* index */) NL_OVERRIDE
 	{
 		return false;
 	}
@@ -134,13 +134,13 @@ public:
 	 * \param id is the text id of the property/grp
 	 * \param f is the stream
 	 */
-	void write( CTextId& id, FILE * f);
+	void write( CTextId& id, FILE * f) NL_OVERRIDE;
 
 	/**
 	 * Update the database from a stream coming from the FE
 	 * \param f : the stream.
 	 */
-	void readDelta(TGameCycle gc, CBitMemStream & f );
+	void readDelta(TGameCycle gc, CBitMemStream & f ) NL_OVERRIDE;
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -148,7 +148,7 @@ public:
 	 * \param name is the name of the property
 	 * \return the structure of the property
 	 */
-	sint64 getProp( CTextId& id );
+	sint64 getProp( CTextId& id ) NL_OVERRIDE;
 
 	/**
 	 * Set the value of a property (the update flag is set to true)
@@ -157,7 +157,7 @@ public:
 	 * \param value is the value of the property
 	 * \return bool : 'false' if id is too long.
 	 */
-	bool setProp( CTextId& id, sint64 value );
+	bool setProp( CTextId& id, sint64 value ) NL_OVERRIDE;
 
 	/**
 	 * Set the value of a property, only if gc>=_LastChangeGC
@@ -165,31 +165,31 @@ public:
 	bool setPropCheckGC(TGameCycle gc, sint64 value);
 
 	/// Reset all leaf data from this point
-	void resetData(TGameCycle gc, bool forceReset=false);
+	void resetData(TGameCycle gc, bool forceReset=false) NL_OVERRIDE;
 
 	/**
 	 * Clear the node and his children
 	 */
-	void clear();
+	void clear() NL_OVERRIDE;
 
 
 	// the parent node for a branch (NULL by default)
-	virtual void setParent(CCDBNodeBranch* parent) { _Parent=parent; }
+	virtual void setParent(CCDBNodeBranch* parent) NL_OVERRIDE { _Parent=parent; }
 
 	//get the node parent
-	virtual CCDBNodeBranch	*getParent()
+	virtual CCDBNodeBranch	*getParent() NL_OVERRIDE
 	{
 		return _Parent;
 	}
 
 	/// Count the leaves
-	virtual uint			countLeaves() const
+	virtual uint			countLeaves() const NL_OVERRIDE
 	{
 		return 1;
 	}
 
 	/// Find the leaf which count is specified (if found, the returned value is non-null and count is 0)
-	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count )
+	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count ) NL_OVERRIDE
 	{
 		if ( count == 0 )
 			return this;
@@ -201,10 +201,10 @@ public:
 	}
 
 	/// Debug purpose
-	virtual void display(const std::string &prefix);
+	virtual void display(const std::string &prefix) NL_OVERRIDE;
 
 
-	virtual bool isLeaf() const { return true; }
+	virtual bool isLeaf() const NL_OVERRIDE { return true; }
 
 	/**
 	* add an observer to a property
@@ -212,14 +212,14 @@ public:
 	* \param id text id identifying the property
 	* \return false if the node doen t exist
 	*/
-	virtual bool addObserver(IPropertyObserver* observer, CTextId& id);
+	virtual bool addObserver(IPropertyObserver* observer, CTextId& id) NL_OVERRIDE;
 
 	/** remove an obsever
 	 * \param observer : pointer to an observer
 	 * \param id text id identifying the property
 	 * \return false if the node or observer doesn t exist
 	 */
-	virtual bool removeObserver(IPropertyObserver* observer, CTextId& id);
+	virtual bool removeObserver(IPropertyObserver* observer, CTextId& id) NL_OVERRIDE;
 
 
 	/// get the last change GameCycle (server tick) for this value

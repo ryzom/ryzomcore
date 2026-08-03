@@ -45,19 +45,19 @@ public:
 	enum { HeldElementCount = 4 };
 
 	// From UForm
-	UFormElm&		getRootNode ();
-	const UFormElm& getRootNode () const;
-	const std::string &getComment () const;
-	void			write (class NLMISC::IStream &stream);
-	void			getDependencies (std::set<std::string> &dependencies) const;
-	uint			getNumParent () const;
-	UForm			*getParentForm (uint parent) const;
+	UFormElm&		getRootNode () NL_OVERRIDE;
+	const UFormElm& getRootNode () const NL_OVERRIDE;
+	const std::string &getComment () const NL_OVERRIDE;
+	void			write (class NLMISC::IStream &stream) NL_OVERRIDE;
+	void			getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
+	uint			getNumParent () const NL_OVERRIDE;
+	UForm			*getParentForm (uint parent) const NL_OVERRIDE;
 
 #ifdef NL_OS_WINDOWS
 #  pragma warning (disable : 4355)
 #endif
 	CForm ();
-	~CForm ();
+	~CForm () NL_OVERRIDE;
 
 	// Clean the form. Erase parents.
 	void				clean ();
@@ -98,7 +98,7 @@ public:
 	void				clearParents ();
 
 	// Get the form filename with extension
-	const std::string	&getFilename () const;
+	const std::string	&getFilename () const NL_OVERRIDE;
 
 	// Error handling
 	void				warning (bool exception, const std::string &function, const char *format, ... ) const;

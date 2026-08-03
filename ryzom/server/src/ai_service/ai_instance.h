@@ -67,7 +67,7 @@ class CAIInstance
 {
 public:
 	CAIInstance(CAIS* owner);
-	virtual ~CAIInstance();
+	virtual ~CAIInstance() NL_OVERRIDE;
 	
 	typedef	CHashMap<NLMISC::TStringId, NLMISC::CDbgPtr<CNpcZone>, NLMISC::CStringIdHashMapTraits> TZoneList;
 	TZoneList zoneList;
@@ -78,17 +78,17 @@ public:
 	void updateZoneTrigger(CBotPlayer* player);
 	
  	// overloads for IManagerParent virtuals
-	CAIInstance* getAIInstance() const { return const_cast<CAIInstance*>(this); }
-	CCellZone* getCellZone() { return NULL; }
-	virtual std::string getIndexString() const;
-	virtual std::string getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	CAIInstance* getAIInstance() const NL_OVERRIDE { return const_cast<CAIInstance*>(this); }
+	CCellZone* getCellZone() NL_OVERRIDE { return NULL; }
+	virtual std::string getIndexString() const NL_OVERRIDE;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	
-	std::string getManagerIndexString(CManager const* manager) const;
+	std::string getManagerIndexString(CManager const* manager) const NL_OVERRIDE;
 	
-	void groupDead(CGroup* grp) { }
+	void groupDead(CGroup* grp) NL_OVERRIDE { }
 	
-	void serviceEvent(CServiceEvent const& info);
+	void serviceEvent(CServiceEvent const& info) NL_OVERRIDE;
 	
 	//-------------------------------------------------------------------
 	// classic init(), update() and release()

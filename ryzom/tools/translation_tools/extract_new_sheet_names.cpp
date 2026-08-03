@@ -59,7 +59,7 @@ struct CSheetWordListBuilder : public IWordListBuilder
 	string		SheetExt;
 	string		SheetPath;
 
-	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName)
+	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName) NL_OVERRIDE
 	{
 		SheetExt= toLowerAscii(SheetExt);
 
@@ -107,7 +107,7 @@ struct CRegionPrimWordListBuilder : public IWordListBuilder
 	string			PrimPath;
 	vector<string>	PrimFilter;
 
-	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName)
+	virtual bool	buildWordList(std::vector<string> &allWords, string workSheetFileName) NL_OVERRIDE
 	{
 		// verify the directory is correct
 		if(!CFile::isDirectory(PrimPath))

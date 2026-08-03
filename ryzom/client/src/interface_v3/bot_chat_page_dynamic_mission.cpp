@@ -288,7 +288,7 @@ void CBotChatPageDynamicMission::regen()
 // the player has clicked on an item to buy it
 class CAHChangeDMOption : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &params)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &params) NL_OVERRIDE
 	{
 		//get id of choice
 		sint id;
@@ -307,7 +307,7 @@ REGISTER_ACTION_HANDLER(CAHChangeDMOption, "change_dm_option");
 // regenerate current mission
 class CAHRegenDM : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		BotChatPageAll->DynamicMission->regen();
 	}
@@ -319,7 +319,7 @@ REGISTER_ACTION_HANDLER(CAHRegenDM, "regen_dm");
 // the player accepted the mission
 class CAHAcceptDM : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* params */) NL_OVERRIDE
 	{
 		NLMISC::CBitMemStream out;
 		static const char *msgName = "BOTCHAT:DM_ACCEPT";

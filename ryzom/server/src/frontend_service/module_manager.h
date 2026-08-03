@@ -133,7 +133,7 @@ public:
 	CModuleManager(const char *name = NULL, bool independent = false);
 
 	/// Destructor
-	~CModuleManager();
+	~CModuleManager() NL_OVERRIDE;
 
 
 	/// Adds a new module to this manager (id must be unique.)
@@ -157,7 +157,7 @@ public:
 
 
 	/// The run() method from the runnable interface. Not to be called it.
-	virtual void	run();
+	virtual void	run() NL_OVERRIDE;
 
 private:
 

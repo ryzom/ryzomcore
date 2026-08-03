@@ -148,51 +148,51 @@ public:
 class CAiWrapperServer: public IAiWrapper
 {
 public:
-	void init(NLLIGO::CLigoConfig *             ligoConfig);
+	void init(NLLIGO::CLigoConfig *             ligoConfig) NL_OVERRIDE;
 
-	virtual void streamToPdr(NLMISC::IStream& stream, const std::string& primName, CPersistentDataRecord& pdr);
+	virtual void streamToPdr(NLMISC::IStream& stream, const std::string& primName, CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void primsToPdr(NLLIGO::CPrimitives *prims, const std::string& primName, CPersistentDataRecord& pdr);
+	virtual void primsToPdr(NLLIGO::CPrimitives *prims, const std::string& primName, CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void pdrToFile(CPersistentDataRecord& pdr, const std::string& pdrName);
+	virtual void pdrToFile(CPersistentDataRecord& pdr, const std::string& pdrName) NL_OVERRIDE;
 
-	virtual void fileToPdr(const std::string& pdrName, CPersistentDataRecord& pdr);
+	virtual void fileToPdr(const std::string& pdrName, CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void displayPdr( CPersistentDataRecord& pdr);
+	virtual void displayPdr( CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void clearPdr( CPersistentDataRecord& pdr);
+	virtual void clearPdr( CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void primitiveFileToPdr(const std::string& primitiveName, CPersistentDataRecord& pdr);
+	virtual void primitiveFileToPdr(const std::string& primitiveName, CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void stopTest(TSessionId sessionId, uint32 aiInstance);
+	virtual void stopTest(TSessionId sessionId, uint32 aiInstance) NL_OVERRIDE;
 
-	virtual void startTest(TSessionId sessionId, uint32 aiInstance, CPersistentDataRecord& pdr);
+	virtual void startTest(TSessionId sessionId, uint32 aiInstance, CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void stopAct(TSessionId sessionId, uint32 aiInstance);
+	virtual void stopAct(TSessionId sessionId, uint32 aiInstance) NL_OVERRIDE;
 
-	virtual void startAct(TSessionId sessionId, uint32 aiInstance, CPersistentDataRecord& pdr);
+	virtual void startAct(TSessionId sessionId, uint32 aiInstance, CPersistentDataRecord& pdr) NL_OVERRIDE;
 
-	virtual void despawnEntity(NLMISC::CEntityId entityId, TAIAlias alias);
+	virtual void despawnEntity(NLMISC::CEntityId entityId, TAIAlias alias) NL_OVERRIDE;
 
-	virtual void setAggroRange(NLMISC::CEntityId entityId, float range);
+	virtual void setAggroRange(NLMISC::CEntityId entityId, float range) NL_OVERRIDE;
 
-	virtual void setHPLevel(NLMISC::CEntityId entityId, uint32 alias, float value);
-	virtual void setGrpHPLevel(NLMISC::CEntityId entityId, uint32 alias, float value);
+	virtual void setHPLevel(NLMISC::CEntityId entityId, uint32 alias, float value) NL_OVERRIDE;
+	virtual void setGrpHPLevel(NLMISC::CEntityId entityId, uint32 alias, float value) NL_OVERRIDE;
 
 
-	virtual void triggerGrpEvent(NLMISC::CEntityId entityId, float eventId);
+	virtual void triggerGrpEvent(NLMISC::CEntityId entityId, float eventId) NL_OVERRIDE;
 
-	virtual void startInstance(TSessionId sessionId, uint32 aiInstance);
+	virtual void startInstance(TSessionId sessionId, uint32 aiInstance) NL_OVERRIDE;
 
-	virtual void setPioneerRight(NLMISC::CEntityId clientId, const R2::TPioneerRight& right);
+	virtual void setPioneerRight(NLMISC::CEntityId clientId, const R2::TPioneerRight& right) NL_OVERRIDE;
 
-	virtual void controlNpc(NLMISC::CEntityId clientId, NLMISC::CEntityId npc);
+	virtual void controlNpc(NLMISC::CEntityId clientId, NLMISC::CEntityId npc) NL_OVERRIDE;
 
-	virtual void stopControlNpc(NLMISC::CEntityId clientId, NLMISC::CEntityId npc);
+	virtual void stopControlNpc(NLMISC::CEntityId clientId, NLMISC::CEntityId npc) NL_OVERRIDE;
 
-	virtual void triggerUserTrigger(const std::string& groupName, uint32 triggerId);
+	virtual void triggerUserTrigger(const std::string& groupName, uint32 triggerId) NL_OVERRIDE;
 
-	virtual void askBotDespawnNotification(NLMISC::CEntityId creatureId, TAIAlias alias);
+	virtual void askBotDespawnNotification(NLMISC::CEntityId creatureId, TAIAlias alias) NL_OVERRIDE;
 
 
 };

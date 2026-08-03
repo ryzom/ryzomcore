@@ -29,18 +29,18 @@ public:
 	//@{
 	//@name Overloads from inventory base
 	/// Return the max bulk according to player capacity
-	uint32 getMaxBulk() const;
+	uint32 getMaxBulk() const NL_OVERRIDE;
 
-	uint32 getMaxSlot() const;
+	uint32 getMaxSlot() const NL_OVERRIDE;
 };
 
 /** View for the bag inventory */
 class CBagInvView : public CCharacterInvView
 {
 public:
-	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);
+	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags) NL_OVERRIDE;
 	/// The inventory information has changed (like total bulk or weight)
-	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags);
+	virtual void onInventoryChanged(INVENTORIES::TInventoryChangeFlags changeFlags) NL_OVERRIDE;
 };
 
 #endif

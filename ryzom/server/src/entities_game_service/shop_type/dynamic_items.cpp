@@ -185,7 +185,7 @@ void CDynamicItems::makeFileName(uint subIndex, std::string &fileName)
 
 struct CItemsFileCb : public IBackupFileReceiveCallback
 {
-	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream)
+	void callback(const CFileDescription& fileDescription, NLMISC::IStream& dataStream) NL_OVERRIDE
 	{
 		CDynamicItems::getInstance()->fileAvailable(fileDescription, dataStream);
 	}

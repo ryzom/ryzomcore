@@ -68,6 +68,23 @@ void buildMeshInterface(const MESHEVAL::SEvalMesh &mesh, NL3D::CMesh::CMeshBuild
 // buildMRMParameters replication (appdata-driven).
 void buildMRMParameters(CSceneClass *node, NL3D::CMRMParameters &params);
 
+// Morpher blend-shape targets — the reference's getBSMeshBuild (export_mesh.cpp:1192): for each
+// non-NULL Morpher ref 101+i, evaluate the TARGET node through the non-skinned mesh path with
+// finalSpace = the SOURCE node's NodeTM when the source is skinned (else Identity) — landing the
+// target's verts in the same space as the source's build — then copy the source's (welded)
+// corner normals onto every corner whose vertex is an interface vertex (the reference computes
+// them off a fresh base MeshBuild in the objectToLocal·finalSpace frame, which equals the
+// skinned world frame; our export buildMesh IS that frame with the weld applied, so it serves
+// as the base directly). Targets that fail to evaluate or whose vertex count diverges from the
+// base are skipped with a warning — NL3D's CMRMBuilder::buildBlendShapes dereferences and
+// asserts equal counts (the reference could rely on live Max never failing there). Caller owns
+// (and deletes) the returned builds.
+void buildBSList(INode &node, SNodeTMCache &tmCache,
+                 const std::vector<CSceneClass *> &mods,
+                 const NL3D::CMesh::CMeshBuild &exportMesh, bool skinned,
+                 bool exportLighting,
+                 std::vector<NL3D::CMesh::CMeshBuild *> &bsList);
+
 // getLocalMatrix: nodeTM * Inverse(parentTM) in Max float math.
 using MAXSCENE::getLocalMatrix;
 

@@ -541,7 +541,7 @@ void CChatTextManager::reset ()
 class	CHandlerCopyChatPopup: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &params )
+	virtual void execute(CCtrlBase *pCaller, const string &params ) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 
@@ -560,7 +560,7 @@ REGISTER_ACTION_HANDLER( CHandlerCopyChatPopup, "copy_chat_popup");
 class	CHandlerCopyChat: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &params )
+	virtual void execute(CCtrlBase *pCaller, const string &params ) NL_OVERRIDE
 	{
 		if (pCaller == nullptr) return;
 

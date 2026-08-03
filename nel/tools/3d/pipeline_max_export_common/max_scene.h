@@ -48,17 +48,20 @@
 
 namespace MAXSCENE {
 
-// The two transform-controller classes whose value we can evaluate at t=0.
-extern const NLMISC::CClassId CLASSID_PRS_CTRL;    // Position/Rotation/Scale (0x2005)
-extern const NLMISC::CClassId CLASSID_LOOKAT_CTRL; // LookAt (0x2006)
+// The two transform-controller classes whose value we can evaluate at t=0 are the typed
+// CControlPRS (0x2005) / CControlLookAt (0x2006) — see pipeline_max/builtin/control_transform.h;
+// identity lives on the typed classes (dynamic_cast), not on exported ClassId constants.
 
 // ---------------------------------------------------------------------------------------------
 // Controller value at t=0.
 //
 // A transform sub-controller's value at tick 0 — the key table bracketed at tick 0 for the typed
 // keyframers (CControlKeyFramerBase::{pos,rot,scale,float}ValueAt0), else the default-value chunk
-// (0x2503 pos / 0x2504 rot / 0x2505 scale / 0x2501 float), with a raw-chunk fallback for a
-// controller that is not a typed keyframer. The rotation is returned in the Max STORED convention
+// (0x2503 pos / 0x2504 rot / 0x2505 scale / 0x2501 float, claimed by the keyframer). A controller
+// that is not a typed keyframer yields the identity/zero default: the corpus-wide 0x9008
+// inventory (design doc §10j-dix) established that no non-keyframer sub-controller carries a
+// default-value chunk anywhere, so the historical raw-chunk fallback never fired and is gone.
+// The rotation is returned in the Max STORED convention
 // (the inverse of the node-TM rotation); feed it straight to MAXMATH::composePRS, whose
 // quatToMatrix3 (= Max Quat::MakeMatrix) already bakes in the transpose.
 

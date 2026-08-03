@@ -51,19 +51,19 @@ class CStreamFileSource : public CStreamSource, private NLMISC::IRunnable
 {
 public:
 	CStreamFileSource(CStreamFileSound *streamFileSound = nullptr, bool spawn = false, TSpawnEndCallback cb = nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
-	virtual ~CStreamFileSource();
+	virtual ~CStreamFileSource() NL_OVERRIDE;
 
 	/// Return the source type
-	TSOURCE_TYPE					getType() const								{ return SOURCE_STREAM_FILE; }
+	TSOURCE_TYPE					getType() const NL_OVERRIDE								{ return SOURCE_STREAM_FILE; }
 
 	/// \name Playback control
 	//@{
 	/// Play
-	virtual void					play();
+	virtual void					play() NL_OVERRIDE;
 	/// Stop playing
-	virtual void					stop();
+	virtual void					stop() NL_OVERRIDE;
 	/// Get playing state. Return false even if the source has stopped on its own.
-	virtual bool					isPlaying();
+	virtual bool					isPlaying() NL_OVERRIDE;
 	/// Pause (following legacy music channel implementation)
 	void pause();
 	/// Resume (following legacy music channel implementation)
@@ -78,8 +78,8 @@ public:
 
 	/// \name Decoding thread
 	//@{
-	virtual void getName (std::string &result) const { result = "CStreamFileSource"; }
-	virtual void run();
+	virtual void getName (std::string &result) const NL_OVERRIDE { result = "CStreamFileSource"; }
+	virtual void run() NL_OVERRIDE;
 	//@}
 
 	// TODO: getTime

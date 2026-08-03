@@ -234,31 +234,31 @@ class CObjectString : public CObject
 public:
 	explicit CObjectString(const std::string & value);
 
-	virtual const char *getTypeAsString() const;
+	virtual const char *getTypeAsString() const NL_OVERRIDE;
 
-	virtual TSmartPtr clone() const;
+	virtual TSmartPtr clone() const NL_OVERRIDE;
 
-	virtual bool set(const std::string& key, const std::string & value);
+	virtual bool set(const std::string& key, const std::string & value) NL_OVERRIDE;
 
-	virtual bool setObject(const std::string& key, CObject* value);
+	virtual bool setObject(const std::string& key, CObject* value) NL_OVERRIDE;
 
 	const std::string &getValue() const { return _Value; }
 
-	virtual void dump(const std::string prefix = "", uint depth = 0) const;
+	virtual void dump(const std::string prefix = "", uint depth = 0) const NL_OVERRIDE;
 
-	virtual bool equal(const CObject* other) const;
+	virtual bool equal(const CObject* other) const NL_OVERRIDE;
 
 protected:
-	virtual void visitInternal(IObjectVisitor &visitor);
+	virtual void visitInternal(IObjectVisitor &visitor) NL_OVERRIDE;
 
-	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
+	virtual void doSerialize(std::string& out, CSerializeContext& context) const NL_OVERRIDE;
 
-	virtual std::string doToString() const;
+	virtual std::string doToString() const NL_OVERRIDE;
 
-	virtual bool doIsString() const;
+	virtual bool doIsString() const NL_OVERRIDE;
 
-	virtual void inPlaceCopyTo(CObject &dest) const;
-	virtual void inPlaceCopy(const CObjectString &src);
+	virtual void inPlaceCopyTo(CObject &dest) const NL_OVERRIDE;
+	virtual void inPlaceCopy(const CObjectString &src) NL_OVERRIDE;
 
 private:
 	std::string _Value;
@@ -273,14 +273,14 @@ class CObjectRefId : public CObjectString
 {
 public:
 	explicit CObjectRefId(const std::string & value);
-	~CObjectRefId();
-	virtual const char *getTypeAsString() const;
-	virtual TSmartPtr clone() const;
-	virtual bool equal(const CObject* other) const;
+	~CObjectRefId() NL_OVERRIDE;
+	virtual const char *getTypeAsString() const NL_OVERRIDE;
+	virtual TSmartPtr clone() const NL_OVERRIDE;
+	virtual bool equal(const CObject* other) const NL_OVERRIDE;
 protected:
-	virtual void visitInternal(IObjectVisitor &visitor);
-	virtual bool doIsRefId() const;
-	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
+	virtual void visitInternal(IObjectVisitor &visitor) NL_OVERRIDE;
+	virtual bool doIsRefId() const NL_OVERRIDE;
+	virtual void doSerialize(std::string& out, CSerializeContext& context) const NL_OVERRIDE;
 };
 
 
@@ -345,64 +345,64 @@ public:
 
 	explicit CObjectTable();
 
-	virtual ~CObjectTable();
+	virtual ~CObjectTable() NL_OVERRIDE;
 
-	virtual const char *getTypeAsString() const;
+	virtual const char *getTypeAsString() const NL_OVERRIDE;
 
-	virtual bool insert(const std::string & key, const CObject::TSmartPtr &value, sint32 pos);
+	virtual bool insert(const std::string & key, const CObject::TSmartPtr &value, sint32 pos) NL_OVERRIDE;
 
-	virtual TSmartPtr clone() const;
+	virtual TSmartPtr clone() const NL_OVERRIDE;
 
-	virtual void doSerialize(std::string& out, CSerializeContext& context) const;
+	virtual void doSerialize(std::string& out, CSerializeContext& context) const NL_OVERRIDE;
 
-	virtual const TSmartPtr& getAttr(const std::string & name) const;
+	virtual const TSmartPtr& getAttr(const std::string & name) const NL_OVERRIDE;
 
 
-	virtual std::string getKey(uint32 pos) const;
+	virtual std::string getKey(uint32 pos) const NL_OVERRIDE;
 
-	virtual const TSmartPtr& getValueAtPos(uint32 pos) const;
+	virtual const TSmartPtr& getValueAtPos(uint32 pos) const NL_OVERRIDE;
 
-	virtual sint32 findIndex(const CObject* child) const;
+	virtual sint32 findIndex(const CObject* child) const NL_OVERRIDE;
 
 	// find index from a key, or -1 if not found
-	virtual sint32 findIndex(const std::string &key) const;
+	virtual sint32 findIndex(const std::string &key) const NL_OVERRIDE;
 
-	virtual uint32 getSize() const;
+	virtual uint32 getSize() const NL_OVERRIDE;
 
-	virtual bool set(const std::string& key, const std::string & value);
+	virtual bool set(const std::string& key, const std::string & value) NL_OVERRIDE;
 
-	virtual bool set(const std::string& key, double value);
+	virtual bool set(const std::string& key, double value) NL_OVERRIDE;
 
-	virtual bool setObject(const std::string& key, CObject* value);
+	virtual bool setObject(const std::string& key, CObject* value) NL_OVERRIDE;
 
-	virtual CObject::TSmartPtr take(sint32 pos);
+	virtual CObject::TSmartPtr take(sint32 pos) NL_OVERRIDE;
 
-	virtual bool canTake(sint32 pos) const;
+	virtual bool canTake(sint32 pos) const NL_OVERRIDE;
 
 	void clear();
 
 	void sort();
 
-	virtual void dump(const std::string prefix = "", uint depth = 0) const;
+	virtual void dump(const std::string prefix = "", uint depth = 0) const NL_OVERRIDE;
 
-	virtual bool equal(const CObject* other) const;
+	virtual bool equal(const CObject* other) const NL_OVERRIDE;
 
-	virtual void  setGhost(bool ghost);
+	virtual void  setGhost(bool ghost) NL_OVERRIDE;
 
-	virtual void checkIntegrity() const;
+	virtual void checkIntegrity() const NL_OVERRIDE;
 
 protected:
-	virtual void visitInternal(IObjectVisitor &visitor);
+	virtual void visitInternal(IObjectVisitor &visitor) NL_OVERRIDE;
 
-	virtual bool doIsTable() const;
+	virtual bool doIsTable() const NL_OVERRIDE;
 
-	virtual CObjectTable* doToTable() const;
+	virtual CObjectTable* doToTable() const NL_OVERRIDE;
 
-	virtual void inPlaceCopyTo(CObject &dest) const;
-	virtual void inPlaceCopy(const CObjectTable &src);
+	virtual void inPlaceCopyTo(CObject &dest) const NL_OVERRIDE;
+	virtual void inPlaceCopy(const CObjectTable &src) NL_OVERRIDE;
 
 
-	virtual void previsit(std::vector<CObject::TRefPtr> &sons);
+	virtual void previsit(std::vector<CObject::TRefPtr> &sons) NL_OVERRIDE;
 
 	/** Compute absolute position, return true if index is valid
 	  * A negative index indicate an offset from the end of the table (-1 for the last element)

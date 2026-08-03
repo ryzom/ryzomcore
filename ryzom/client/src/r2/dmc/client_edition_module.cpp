@@ -135,7 +135,7 @@ namespace R2 {
 			:_Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onScenarioUploaded(server, _Value.getPtr());
 		}
@@ -150,7 +150,7 @@ namespace R2 {
 			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeSet(server, _InstanceId, _AttrName, _Value.getPtr());
 		}
@@ -167,7 +167,7 @@ namespace R2 {
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone() : nullptr)
 	    {}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeInserted(server, _InstanceId, _AttrName, _Position, _Key, _Value.getPtr());
 		}
@@ -185,7 +185,7 @@ namespace R2 {
 		CServerAnswerMsgErased(const std::string &instanceId, const std::string &attrName, sint32 position)
 			:_InstanceId(instanceId), _AttrName(attrName), _Position(position){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeErased(server, _InstanceId, _AttrName, _Position);
 		}
@@ -203,7 +203,7 @@ namespace R2 {
 			:_InstanceId1(instanceId1), _AttrName1(attrName1), _Position1(position1),
 			_InstanceId2(instanceId2), _AttrName2(attrName2), _Position2(position2){}
 
-		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server)
+		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
 			client->onNodeMoved(server, _InstanceId1, _AttrName1, _Position1, _InstanceId2, _AttrName2, _Position2);
 		}
@@ -2627,7 +2627,7 @@ class CModuleMessageSender : public R2::IMessageSender
 public:
 	CModuleMessageSender(const NLNET::TModuleProxyPtr& proxy, NLNET::IModule* senderModule):_Proxy(proxy), _Sender(senderModule){}
 
-	void operator()(const NLNET::CMessage & msg)
+	void operator()(const NLNET::CMessage & msg) NL_OVERRIDE
 	{
 		if (!_Proxy)
 		{

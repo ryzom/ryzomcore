@@ -101,26 +101,26 @@ private:
 
 public:
 	// GUS::IModule methods
-	bool initialiseModule(const CSString& rawArgs);
-	void release();
-	CSString getState() const;
-	NLMISC::CSString getName() const;
-	NLMISC::CSString getParameters() const;
-	void displayModule() const;
+	bool initialiseModule(const CSString& rawArgs) NL_OVERRIDE;
+	void release() NL_OVERRIDE;
+	CSString getState() const NL_OVERRIDE;
+	NLMISC::CSString getName() const NL_OVERRIDE;
+	NLMISC::CSString getParameters() const NL_OVERRIDE;
+	void displayModule() const NL_OVERRIDE;
 
 	// public interface exposed via CRyzomFileRetriever class
-	void useShard(const CSString& shardName);
-	void stopUsingShard(const CSString& shardName);
-	CVectorSString getUsedShardList();
-	CShardSavesInterface* getShardSavesInterface(const CSString& shardName);
-	CMailSavesInterface* getWwwSavesInterface(const CSString& shardName);
-	CIncrementalBackupSavesInterface* getBakSavesInterface(const CSString& shardName);
-	CVectorSString getSavesModules();
-	bool uploadFile(const CSString& shardName,const CSString& localFileName,const CSString& remoteFileName);
-	bool downloadFile(const CSString& shardName,const CSString& remoteFileName,const CSString& localFileName);
-	bool downloadBackupFiles(const CSString& shardName,const CSString& fileName,const CSString& localDirectory);
-	bool getCharIdFromName(const CSString& shardName,const CSString& name,uint32& account,uint32& slot);
-	bool getAccountIdFromName(const CSString& name,uint32& account);
+	void useShard(const CSString& shardName) NL_OVERRIDE;
+	void stopUsingShard(const CSString& shardName) NL_OVERRIDE;
+	CVectorSString getUsedShardList() NL_OVERRIDE;
+	CShardSavesInterface* getShardSavesInterface(const CSString& shardName) NL_OVERRIDE;
+	CMailSavesInterface* getWwwSavesInterface(const CSString& shardName) NL_OVERRIDE;
+	CIncrementalBackupSavesInterface* getBakSavesInterface(const CSString& shardName) NL_OVERRIDE;
+	CVectorSString getSavesModules() NL_OVERRIDE;
+	bool uploadFile(const CSString& shardName,const CSString& localFileName,const CSString& remoteFileName) NL_OVERRIDE;
+	bool downloadFile(const CSString& shardName,const CSString& remoteFileName,const CSString& localFileName) NL_OVERRIDE;
+	bool downloadBackupFiles(const CSString& shardName,const CSString& fileName,const CSString& localDirectory) NL_OVERRIDE;
+	bool getCharIdFromName(const CSString& shardName,const CSString& name,uint32& account,uint32& slot) NL_OVERRIDE;
+	bool getAccountIdFromName(const CSString& name,uint32& account) NL_OVERRIDE;
 
 	// public interface extensions
 	void addAccountIdNameMapping(const CSString& name,uint32& account);
@@ -151,8 +151,8 @@ public:
 	CRFRDownloadCallback(uint32 requestId,const CSString& destFileName);
 
 	// specialisation of methods from class ISavesFileReceiveCallback
-	void cbFileReceived(uint32 requestId,const CSString& fileName,const CSString& fileBody);
-	void cbGenericReply(uint32 requestId,bool successFlag,const CSString& explanation);
+	void cbFileReceived(uint32 requestId,const CSString& fileName,const CSString& fileBody) NL_OVERRIDE;
+	void cbGenericReply(uint32 requestId,bool successFlag,const CSString& explanation) NL_OVERRIDE;
 
 private:
 	uint32				_RequestId;
@@ -174,8 +174,8 @@ public:
 	CRFRUploadCallback(uint32 requestId,const CSString& srcFileName);
 
 	// specialisation of methods from class ISavesFileReceiveCallback
-	void cbFileReceived(uint32 requestId,const CSString& fileName,const CSString& fileBody);
-	void cbGenericReply(uint32 requestId,bool successFlag,const CSString& explanation);
+	void cbFileReceived(uint32 requestId,const CSString& fileName,const CSString& fileBody) NL_OVERRIDE;
+	void cbGenericReply(uint32 requestId,bool successFlag,const CSString& explanation) NL_OVERRIDE;
 
 private:
 	uint32		_RequestId;
@@ -197,14 +197,14 @@ public:
 	CRFRFileListCallback(CRFRShardInterface* shardFileInterface);
 
 	// specialisation of methods from class ISavesFileListCallback
-	void cbInit(const CFileDescriptionContainer& fdc);
+	void cbInit(const CFileDescriptionContainer& fdc) NL_OVERRIDE;
 	void cbFileListChanged(	const CFileDescriptionContainer& newFiles,
 							const CFileDescriptionContainer& modifiedFiles,
 							const NLMISC::CVectorSString&	 deletedFile,
 							const CFileDescriptionContainer& oldFileList,
-							const CFileDescriptionContainer& newFileList);
-	void cbFileReceived(uint32 requestId,const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody);
-	void cbGenericReply(uint32 requestId,bool successFlag,const NLMISC::CSString& explanation);
+							const CFileDescriptionContainer& newFileList) NL_OVERRIDE;
+	void cbFileReceived(uint32 requestId,const NLMISC::CSString& fileName,const NLMISC::CSString& fileBody) NL_OVERRIDE;
+	void cbGenericReply(uint32 requestId,bool successFlag,const NLMISC::CSString& explanation) NL_OVERRIDE;
 
 private:
 	NLMISC::CRefPtr<CRFRShardInterface> _ShardFileInterface;

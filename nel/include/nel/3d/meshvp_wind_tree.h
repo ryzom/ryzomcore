@@ -71,34 +71,34 @@ public:
 
 	/// Constructor
 	CMeshVPWindTree();
-	virtual ~CMeshVPWindTree();
+	virtual ~CMeshVPWindTree() NL_OVERRIDE;
 
 
 	/// \name IMeshVertexProgram implementation
 	// @{
 
 	/// Setup a rand phase for wind in mbi
-	virtual	void	initInstance(CMeshBaseInstance *mbi);
+	virtual	void	initInstance(CMeshBaseInstance *mbi) NL_OVERRIDE;
 	/// Setup Wind constants, Light constants, and activate the VP.
 	virtual	bool	begin(IDriver *drv,
 						  CScene *scene,
 						  CMeshBaseInstance *mbi,
 						  const NLMISC::CMatrix &invertedModelMat,
-						  const NLMISC::CVector & /*viewerPos*/);
+						  const NLMISC::CVector & /*viewerPos*/) NL_OVERRIDE;
 	/// disable the VertexProgram.
-	virtual	void	end(IDriver *drv);
+	virtual	void	end(IDriver *drv) NL_OVERRIDE;
 
 	// Setup this shader for the given material.
 	virtual void	setupForMaterial(const CMaterial &mat,
 									 IDriver *drv,
 									 CScene *scene,
-									 CVertexBuffer *vb);
+									 CVertexBuffer *vb) NL_OVERRIDE;
 
 	// Max VP Distance movement
-	virtual float	getMaxVertexMove();
+	virtual float	getMaxVertexMove() NL_OVERRIDE;
 
 	// Serial.
-	virtual void	serial(NLMISC::IStream &f);
+	virtual void	serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CMeshVPWindTree);
 
 	// @}
@@ -106,11 +106,11 @@ public:
 	/** \name MBR support For WindTree
 	*/
 	// @{
-	virtual	bool	supportMeshBlockRendering() const;
-	virtual	bool	isMBRVpOk(IDriver *drv) const;
-	virtual	void	beginMBRMesh(IDriver *drv, CScene *scene);
-	virtual	void	beginMBRInstance(IDriver *drv, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat);
-	virtual	void	endMBRMesh(IDriver *drv);
+	virtual	bool	supportMeshBlockRendering() const NL_OVERRIDE;
+	virtual	bool	isMBRVpOk(IDriver *drv) const NL_OVERRIDE;
+	virtual	void	beginMBRMesh(IDriver *drv, CScene *scene) NL_OVERRIDE;
+	virtual	void	beginMBRInstance(IDriver *drv, CScene *scene, CMeshBaseInstance *mbi, const NLMISC::CMatrix &invertedModelMat) NL_OVERRIDE;
+	virtual	void	endMBRMesh(IDriver *drv) NL_OVERRIDE;
 	// @}
 
 private:

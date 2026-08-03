@@ -40,7 +40,7 @@ public:
 	 */
 	CPSFaceLookAt(CSmartPtr<ITexture> tex = nullptr);
 
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSFaceLookAt);
 
@@ -96,7 +96,7 @@ public:
 	}
 
 	/// from CPSParticle : return true if there are lightable faces in the object
-	virtual bool			hasLightableFaces() { 	return false; }
+	virtual bool			hasLightableFaces() NL_OVERRIDE { 	return false; }
 
 	// Force faces to be aligned on motion. This bypass motion blur / align on z axis
 	void					setAlignOnMotion(bool align) { _AlignOnMotion = align; }
@@ -112,16 +112,16 @@ protected:
 	struct					CSecondSize : public CPSSizedParticle
 	{
 		CPSFaceLookAt *Owner;
-		virtual CPSLocated *getSizeOwner(void) { return Owner->getOwner(); }
+		virtual CPSLocated *getSizeOwner(void) NL_OVERRIDE { return Owner->getOwner(); }
 	} _SecondSize;
 	bool					_IndependantSizes;
 	bool                    _AlignOnMotion;
 	bool					_AlignOnZAxis;
-	virtual void			draw(bool opaque);
-	void					newElement(const CPSEmitterInfo &info);
-	void					deleteElement(uint32);
-	void					resize(uint32);
-	virtual CPSLocated		*getAngle2DOwner(void) { return _Owner; }
+	virtual void			draw(bool opaque) NL_OVERRIDE;
+	void					newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	void					deleteElement(uint32) NL_OVERRIDE;
+	void					resize(uint32) NL_OVERRIDE;
+	virtual CPSLocated		*getAngle2DOwner(void) NL_OVERRIDE { return _Owner; }
 
 };
 

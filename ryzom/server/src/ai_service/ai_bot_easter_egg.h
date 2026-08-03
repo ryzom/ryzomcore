@@ -27,12 +27,12 @@ class CBotEasterEgg : public CBotNpc
 {
 public:
 	CBotEasterEgg(CGroup* owner, uint32 alias, std::string const& name, uint32 easterEggId);
-	virtual ~CBotEasterEgg();
+	virtual ~CBotEasterEgg() NL_OVERRIDE;
 
 	/// get the easter egg ID
 	uint32	getEasterEggId() const { return _EasterEggId; }
 
-	virtual std::string	getOneLineInfoString() const;
+	virtual std::string	getOneLineInfoString() const NL_OVERRIDE;
 
 private:
 	uint32	_EasterEggId;

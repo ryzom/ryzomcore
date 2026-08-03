@@ -109,7 +109,7 @@ private:
 
 /// Useful Macros.
 #define	NLMISC_DECLARE_CLASS(_class_)					\
-	virtual std::string	getClassName() {return #_class_;}		\
+	virtual std::string	getClassName() NL_OVERRIDE {return #_class_;}	\
 	static	NLMISC::IClassable	*creator() {return new _class_;}
 #define	NLMISC_REGISTER_CLASS(_class_) NLMISC::CClassRegistry::registerClass(#_class_, _class_::creator, typeid(_class_).name());
 

@@ -46,9 +46,9 @@ public:
 	const ITexture		*getHeightMap() const { return _HeightMap; };
 
 	// serial this texture datas
-	virtual void			serial(NLMISC::IStream &f);
-	virtual bool			supportSharing() const;
-	virtual std::string		getShareName() const;
+	virtual void			serial(NLMISC::IStream &f) NL_OVERRIDE;
+	virtual bool			supportSharing() const NL_OVERRIDE;
+	virtual std::string		getShareName() const NL_OVERRIDE;
 	//
 	void					enableSharing(bool enabled = true) { _DisableSharing = !enabled; }
 	bool					isSharingEnabled() const { return !_DisableSharing; }
@@ -68,12 +68,12 @@ public:
 
 
 	// inherited from ITexture. release this texture, and its datas
-	virtual void release();
+	virtual void release() NL_OVERRIDE;
 
 
 protected:
 	// inherited from ITexture. Generate this bumpmap pixels
-	virtual void doGenerate(bool async = false);
+	virtual void doGenerate(bool async = false) NL_OVERRIDE;
 	NLMISC::CSmartPtr<ITexture> _HeightMap;
 	NLMISC::CRGBA				_Ambient;
 	NLMISC::CRGBA				_Diffuse;

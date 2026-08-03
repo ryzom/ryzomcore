@@ -842,7 +842,11 @@ sint CDriverGL3::beginLightMapMultiPass()
 // ***************************************************************************
 void CDriverGL3::setupLightMapPass(uint pass)
 {
-	nlassert(getProgram(PixelProgram));
+	// Under the linked-mega path there is no CPixelProgram object — the mega pixel program
+	// implements the LightMap shader directly (texCoord1 lightmap stages) and this function
+	// stages its state through the material UBO slots / _LightMapUBOOverride below. The
+	// program-object precondition only holds for the SSO/user-program paths.
+	nlassert(getProgram(PixelProgram) || (m_LinkedMegaShaders && m_UseMegaShaders));
 	nlassert(!m_UserPixelProgram);
 
 	H_AUTO_OGL(CDriverGL3_setupLightMapPass)

@@ -676,7 +676,7 @@ class CSetSheetTimerEvent
 	uint32 _Step;
 public:
 	CSetSheetTimerEvent(CBot* bot, uint32 step) : _Bot(bot), _Step(step) { }
-	virtual void timerCallback(CTimer* owner)
+	virtual void timerCallback(CTimer* owner) NL_OVERRIDE
 	{
 		if (!_Bot.isNull())
 			_Bot->setSheetDelayed(_Step);

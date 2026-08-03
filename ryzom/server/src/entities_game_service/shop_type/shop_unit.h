@@ -56,23 +56,23 @@ public:
 	CShopUnitStatic() { _ShopUnitType = IShopUnit::StaticShop; }
 
 	// release content of shop unit
-	void releaseShopUnit();
+	void releaseShopUnit() NL_OVERRIDE;
 
 	// get shop unit type
-	IShopUnit::TShopUnitType getShopUnitType() const { return _ShopUnitType; }
+	IShopUnit::TShopUnitType getShopUnitType() const NL_OVERRIDE { return _ShopUnitType; }
 	
 	// add content
-	void addContent( const TItemTradePtr& item ); 
+	void addContent( const TItemTradePtr& item ) NL_OVERRIDE; 
 	
 	// remove content not valid for static shop
-	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) { return false; }
-	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) const { return false; }
+	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) NL_OVERRIDE { return false; }
+	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) const NL_OVERRIDE { return false; }
 	
 	// return trade list reference corresponding to item shop content
-	const TTradeList& getShopContent( CONTINENT::TContinent ) const { return _ShopContent; }
+	const TTradeList& getShopContent( CONTINENT::TContinent ) const NL_OVERRIDE { return _ShopContent; }
 
 	// get cycle of last content change
-	NLMISC::TGameCycle getGameCycleContentChange() const { return 0; }
+	NLMISC::TGameCycle getGameCycleContentChange() const NL_OVERRIDE { return 0; }
 
 private:
 	IShopUnit::TShopUnitType	_ShopUnitType;
@@ -89,23 +89,23 @@ typedef std::vector< TTradeList > TShopContentPerContinent;
 	CShopUnitDynamic() { _ShopUnitType = IShopUnit::DynamicShop; _ShopContent.resize( CONTINENT::NB_CONTINENTS );  _CycleContentChange = 0; }
 	
 	// release content of shop unit
-	void releaseShopUnit();
+	void releaseShopUnit() NL_OVERRIDE;
 	
 	// get shop unit type
-	IShopUnit::TShopUnitType getShopUnitType() const { return _ShopUnitType; }	
+	IShopUnit::TShopUnitType getShopUnitType() const NL_OVERRIDE { return _ShopUnitType; }	
 
 	//addContent
-	void addContent( const TItemTradePtr& item );
+	void addContent( const TItemTradePtr& item ) NL_OVERRIDE;
 
 	// remove content
-	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true );
-	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) const { return (const_cast<CShopUnitDynamic*>(this))->removeContent( item, updateQuantity ); }
+	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) NL_OVERRIDE;
+	bool removeContent( const TItemTradePtr& item, bool updateQuantity = true ) const NL_OVERRIDE { return (const_cast<CShopUnitDynamic*>(this))->removeContent( item, updateQuantity ); }
 	
 	// return trade list reference corresponding to item shop content
-	const TTradeList& getShopContent( CONTINENT::TContinent continent ) const { nlassert( ((uint32) continent) < _ShopContent.size() ); return _ShopContent[ continent ]; }
+	const TTradeList& getShopContent( CONTINENT::TContinent continent ) const NL_OVERRIDE { nlassert( ((uint32) continent) < _ShopContent.size() ); return _ShopContent[ continent ]; }
 	
 	// get cycle of last content change
-	NLMISC::TGameCycle getGameCycleContentChange() const { return _CycleContentChange; }
+	NLMISC::TGameCycle getGameCycleContentChange() const NL_OVERRIDE { return _CycleContentChange; }
 
 private:
 	IShopUnit::TShopUnitType	_ShopUnitType;

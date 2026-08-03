@@ -61,10 +61,10 @@ namespace GUS
 		CModuleBuilder(const NLMISC::CSString& name,const NLMISC::CSString& args,const NLMISC::CSString& description);
 
 		// accessor for 
-		const NLMISC::CSString& getName() const;
-		const NLMISC::CSString& getArgs() const;
-		const NLMISC::CSString& getDescription() const;
-		NLMISC::CSmartPtr<IModule> buildNewModule(const NLMISC::CSString& rawArgs) const;
+		const NLMISC::CSString& getName() const NL_OVERRIDE;
+		const NLMISC::CSString& getArgs() const NL_OVERRIDE;
+		const NLMISC::CSString& getDescription() const NL_OVERRIDE;
+		NLMISC::CSmartPtr<IModule> buildNewModule(const NLMISC::CSString& rawArgs) const NL_OVERRIDE;
 
 	private:
 		NLMISC::CSString _Name;
@@ -85,10 +85,10 @@ namespace GUS
 		CSingletonModuleBuilder(const NLMISC::CSString& name,const NLMISC::CSString& args,const NLMISC::CSString& description);
 
 		// accessor for 
-		const NLMISC::CSString& getName() const;
-		const NLMISC::CSString& getArgs() const;
-		const NLMISC::CSString& getDescription() const;
-		NLMISC::CSmartPtr<IModule> buildNewModule(const NLMISC::CSString& rawArgs) const;
+		const NLMISC::CSString& getName() const NL_OVERRIDE;
+		const NLMISC::CSString& getArgs() const NL_OVERRIDE;
+		const NLMISC::CSString& getDescription() const NL_OVERRIDE;
+		NLMISC::CSmartPtr<IModule> buildNewModule(const NLMISC::CSString& rawArgs) const NL_OVERRIDE;
 
 	private:
 		NLMISC::CSString _Name;

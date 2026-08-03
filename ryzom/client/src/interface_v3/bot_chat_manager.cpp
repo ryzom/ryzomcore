@@ -268,7 +268,7 @@ void CBotChatManager::debugLocalReceiveMissionInfo()
 class CHandlerCloseBotChatProgram : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* params */) NL_OVERRIDE
 	{
 		CBotChatManager::getInstance()->endDialog();
 	}

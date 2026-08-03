@@ -33,7 +33,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, class NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false );
+	void init( xmlNodePtr node, class NLMISC::IProgressCallback &progressCallBack, bool mapBanks=false ) NL_OVERRIDE;
 
 	/**
 	 * Add a new sub node
@@ -47,25 +47,25 @@ public:
 	 * \param ids is the list of property index
 	 * \param idx is the property index of the current node(updated by the method,should be 0 at first call)
 	 */
-	ICDBNode * getNode( std::vector<uint16>& ids, uint idx );
+	ICDBNode * getNode( std::vector<uint16>& ids, uint idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node . Create it if it does not exist yet
 	 * \param id : the CTextId identifying the node
 	 */
-	ICDBNode * getNode (const CTextId& id, bool bCreate=true);
+	ICDBNode * getNode (const CTextId& id, bool bCreate=true) NL_OVERRIDE;
 
 	/**
 	 * Get a node. Return NULL if out of bounds (no warning)
 	 * \param idx is the node index
 	 */
-	ICDBNode * getNode( uint16 idx );
+	ICDBNode * getNode( uint16 idx ) NL_OVERRIDE;
 
 	/**
 	 * Get a node index
 	 * \param node is a pointer to the node
 	 */
-	virtual bool getNodeIndex( ICDBNode* node , uint& index)
+	virtual bool getNodeIndex( ICDBNode* node , uint& index) NL_OVERRIDE
 	{
 		index=0;
 		for ( std::vector<ICDBNode*>::const_iterator it = _Nodes.begin(); it != _Nodes.end(); it++)
@@ -88,7 +88,7 @@ public:
 	void readAndMapDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream& s, TCDBBank bank );
 
 	/// Update the database from a stream coming from the FE
-	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f );
+	void readDelta( NLMISC::TGameCycle gc, NLMISC::CBitMemStream & f ) NL_OVERRIDE;
 
 	/**
 	 * Return the value of a property (the update flag is set to false)
@@ -96,7 +96,7 @@ public:
 	 * \param name is the name of the property
 	 * \return the value of the property
 	 */
-	sint64 getProp( CTextId& id ); 
+	sint64 getProp( CTextId& id ) NL_OVERRIDE; 
 	
 	/**
 	 * Set the value of a property (the update flag is set to true)
@@ -105,10 +105,10 @@ public:
 	 * \param value is the value of the property
 	 * \return bool : 'true' if property found.
 	 */
-	bool setProp( CTextId& id, sint64 value ); 	
+	bool setProp( CTextId& id, sint64 value ) NL_OVERRIDE; 	
 
 	/// Clear the node and his children
-	void clear(); 
+	void clear() NL_OVERRIDE; 
 
 	/// Reset the data corresponding to the bank (works only on top level node)
 	void resetBank( NLMISC::TGameCycle gc, TCDBBank bank)
@@ -122,7 +122,7 @@ public:
 	}
 
 	/// Reset all leaf data from this point
-	void resetData(NLMISC::TGameCycle gc)
+	void resetData(NLMISC::TGameCycle gc) NL_OVERRIDE
 	{
 		for ( uint i=0; i!=_Nodes.size(); ++i )
 		{
@@ -133,12 +133,12 @@ public:
 	/**
 	 *	Destructor
 	 */
-	virtual ~CCDBNodeBranch() { clear(); }
+	virtual ~CCDBNodeBranch() NL_OVERRIDE { clear(); }
 
 	// the parent node for a branch (NULL by default)
-	virtual void setParent(CCDBNodeBranch *parent) { _Parent=parent; }
+	virtual void setParent(CCDBNodeBranch *parent) NL_OVERRIDE { _Parent=parent; }
 
-	virtual CCDBNodeBranch*  getParent()
+	virtual CCDBNodeBranch*  getParent() NL_OVERRIDE
 	{
 		return _Parent;
 	}
@@ -150,12 +150,12 @@ public:
 	}
 
 	/// Count the leaves
-	virtual uint	countLeaves() const;
+	virtual uint	countLeaves() const NL_OVERRIDE;
 
 	/// Find the leaf which count is specified (if found, the returned value is non-null and count is 0)
-	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count );
+	virtual CCDBNodeLeaf	*findLeafAtCount( uint& count ) NL_OVERRIDE;
 
-	virtual void display (const std::string &prefix);
+	virtual void display (const std::string &prefix) NL_OVERRIDE;
 
 	void removeNode (CTextId& id);
 
@@ -181,7 +181,7 @@ public:
 	// Remove observer from all sub-leaves
 	//virtual bool removeBranchObserver(IPropertyObserver* observer);
 
-	virtual bool isLeaf() const { return false; }
+	virtual bool isLeaf() const NL_OVERRIDE { return false; }
 
 	/** Update all observers of branchs that have been modified
 	  */

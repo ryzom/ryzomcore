@@ -47,13 +47,13 @@ public:
 		Data=data;
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAIUploadActions");
 		property ("data", PropString, std::string(), Data);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -74,13 +74,13 @@ public:
 		MgrId.push_back(mgrId);
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAISpawnMgrs");
 		propertyCont ("mgrId", PropUInt16, MgrId);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -101,13 +101,13 @@ public:
 		MgrId.push_back(mgrId);
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAIDespawnMgrs");
 		propertyCont ("mgrId", PropUInt16, MgrId);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -128,13 +128,13 @@ public:
 		MgrId.push_back(mgrId);
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAIBackupMgrs");
 		propertyCont ("mgrId", PropUInt16, MgrId);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 
@@ -155,13 +155,13 @@ public:
 		MgrId.push_back(mgrId);
 	}
 
-	virtual void description ()
+	virtual void description () NL_OVERRIDE
 	{
 		className ("CMsgAICloseMgrs");
 		propertyCont ("mgrId", PropUInt16, MgrId);
 	}
 
-	virtual void callback (const std::string &name, NLNET::TServiceId id);
+	virtual void callback (const std::string &name, NLNET::TServiceId id) NL_OVERRIDE;
 };
 
 

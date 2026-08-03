@@ -83,8 +83,8 @@ class CAIAction
 {
 public:
 	CAIAction();
-	virtual NLMISC::CSheetId SheetId() const { return _SheetId; }
-	virtual bool SelfAction() const { return _SelfAction; }
+	virtual NLMISC::CSheetId SheetId() const NL_OVERRIDE { return _SheetId; }
+	virtual bool SelfAction() const NL_OVERRIDE { return _SelfAction; }
 	
 public:
 	void readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const& form, NLMISC::CSheetId const& sheetId);
@@ -157,10 +157,10 @@ class CDefaultGroupProperties
 : public CGroupProperties
 {
 public:
-	virtual ~CDefaultGroupProperties() { }
+	virtual ~CDefaultGroupProperties() NL_OVERRIDE { }
 	// avoid modification.
-	virtual void setAssist(bool	assist) { }	
-	virtual void setAttack(bool	attack) { }
+	virtual void setAssist(bool	assist) NL_OVERRIDE { }	
+	virtual void setAttack(bool	attack) NL_OVERRIDE { }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -300,100 +300,100 @@ public:
 	virtual bool isValid() const { return _Sheet!=NULL; }
 	
 public:
-	virtual NLMISC::CSheetId const& SheetId() const { if (_Sheet) return _Sheet->SheetId(); else return NLMISC::CSheetId::Unknown; }
-	virtual uint32 Level() const { return _Sheet->Level(); }
+	virtual NLMISC::CSheetId const& SheetId() const NL_OVERRIDE { if (_Sheet) return _Sheet->SheetId(); else return NLMISC::CSheetId::Unknown; }
+	virtual uint32 Level() const NL_OVERRIDE { return _Sheet->Level(); }
 	
-	virtual uint8 ColorHead() const { return _Sheet->ColorHead(); }
-	virtual uint8 ColorArms() const { return _Sheet->ColorArms(); }
-	virtual uint8 ColorHands() const { return _Sheet->ColorHands(); }
-	virtual uint8 ColorBody() const { return _Sheet->ColorBody(); }
-	virtual uint8 ColorLegs() const { return _Sheet->ColorLegs(); }
-	virtual uint8 ColorFeets() const { return _Sheet->ColorFeets(); }
+	virtual uint8 ColorHead() const NL_OVERRIDE { return _Sheet->ColorHead(); }
+	virtual uint8 ColorArms() const NL_OVERRIDE { return _Sheet->ColorArms(); }
+	virtual uint8 ColorHands() const NL_OVERRIDE { return _Sheet->ColorHands(); }
+	virtual uint8 ColorBody() const NL_OVERRIDE { return _Sheet->ColorBody(); }
+	virtual uint8 ColorLegs() const NL_OVERRIDE { return _Sheet->ColorLegs(); }
+	virtual uint8 ColorFeets() const NL_OVERRIDE { return _Sheet->ColorFeets(); }
 	
-	virtual float Radius() const { return _Sheet->Radius(); }
-	virtual float Height() const { return _Sheet->Height(); }
-	virtual float Width() const { return _Sheet->Width(); }
-	virtual float Length() const { return _Sheet->Length(); }
-	virtual float BoundingRadius() const { return _Sheet->BoundingRadius(); }
+	virtual float Radius() const NL_OVERRIDE { return _Sheet->Radius(); }
+	virtual float Height() const NL_OVERRIDE { return _Sheet->Height(); }
+	virtual float Width() const NL_OVERRIDE { return _Sheet->Width(); }
+	virtual float Length() const NL_OVERRIDE { return _Sheet->Length(); }
+	virtual float BoundingRadius() const NL_OVERRIDE { return _Sheet->BoundingRadius(); }
 	
-	virtual bool NotTraversable() const { return _Sheet->NotTraversable(); }
+	virtual bool NotTraversable() const NL_OVERRIDE { return _Sheet->NotTraversable(); }
 	
-	virtual bool ForceDisplayCreatureName() const { return _Sheet->ForceDisplayCreatureName(); }
+	virtual bool ForceDisplayCreatureName() const NL_OVERRIDE { return _Sheet->ForceDisplayCreatureName(); }
 	
-	virtual float BonusAggroHungry() const { return _Sheet->BonusAggroHungry(); }
-	virtual float BonusAggroVeryHungry() const { return _Sheet->BonusAggroVeryHungry(); }
+	virtual float BonusAggroHungry() const NL_OVERRIDE { return _Sheet->BonusAggroHungry(); }
+	virtual float BonusAggroVeryHungry() const NL_OVERRIDE { return _Sheet->BonusAggroVeryHungry(); }
 	
-	virtual float AssistDist() const { return _Sheet->AssistDist(); }
+	virtual float AssistDist() const NL_OVERRIDE { return _Sheet->AssistDist(); }
 	
-	virtual float AggroRadiusNotHungry() const { return _Sheet->AggroRadiusNotHungry(); }
-	virtual float AggroRadiusHungry() const { return _Sheet->AggroRadiusHungry(); }
-	virtual float AggroRadiusHunting() const { return _Sheet->AggroRadiusHunting(); }
+	virtual float AggroRadiusNotHungry() const NL_OVERRIDE { return _Sheet->AggroRadiusNotHungry(); }
+	virtual float AggroRadiusHungry() const NL_OVERRIDE { return _Sheet->AggroRadiusHungry(); }
+	virtual float AggroRadiusHunting() const NL_OVERRIDE { return _Sheet->AggroRadiusHunting(); }
 	
-	virtual float AggroReturnDistCheck() const { return _Sheet->AggroReturnDistCheck(); }
-	virtual float AggroRadiusD1() const { return _Sheet->AggroRadiusD1(); }
-	virtual float AggroRadiusD2() const { return _Sheet->AggroRadiusD2(); }
-	virtual float AggroPrimaryGroupDist() const { return _Sheet->AggroPrimaryGroupDist(); }
-	virtual float AggroPrimaryGroupCoef() const { return _Sheet->AggroPrimaryGroupCoef(); }
-	virtual float AggroSecondaryGroupDist() const { return _Sheet->AggroSecondaryGroupDist(); }
-	virtual float AggroSecondaryGroupCoef() const { return _Sheet->AggroSecondaryGroupCoef(); }
-	virtual float AggroPropagationRadius() const { return _Sheet->AggroPropagationRadius(); }
+	virtual float AggroReturnDistCheck() const NL_OVERRIDE { return _Sheet->AggroReturnDistCheck(); }
+	virtual float AggroRadiusD1() const NL_OVERRIDE { return _Sheet->AggroRadiusD1(); }
+	virtual float AggroRadiusD2() const NL_OVERRIDE { return _Sheet->AggroRadiusD2(); }
+	virtual float AggroPrimaryGroupDist() const NL_OVERRIDE { return _Sheet->AggroPrimaryGroupDist(); }
+	virtual float AggroPrimaryGroupCoef() const NL_OVERRIDE { return _Sheet->AggroPrimaryGroupCoef(); }
+	virtual float AggroSecondaryGroupDist() const NL_OVERRIDE { return _Sheet->AggroSecondaryGroupDist(); }
+	virtual float AggroSecondaryGroupCoef() const NL_OVERRIDE { return _Sheet->AggroSecondaryGroupCoef(); }
+	virtual float AggroPropagationRadius() const NL_OVERRIDE { return _Sheet->AggroPropagationRadius(); }
 	
-	virtual AITYPES::TFaunaType FaunaType() const { return _Sheet->FaunaType(); }
+	virtual AITYPES::TFaunaType FaunaType() const NL_OVERRIDE { return _Sheet->FaunaType(); }
 	
-	virtual float Scale() const { return _Sheet->Scale(); }
+	virtual float Scale() const NL_OVERRIDE { return _Sheet->Scale(); }
 	
-	virtual float DistToFront() const { return _Sheet->DistToFront(); }
-	virtual float DistToBack() const { return _Sheet->DistToBack(); }
-	virtual float DistToSide() const { return _Sheet->DistToSide(); }
+	virtual float DistToFront() const NL_OVERRIDE { return _Sheet->DistToFront(); }
+	virtual float DistToBack() const NL_OVERRIDE { return _Sheet->DistToBack(); }
+	virtual float DistToSide() const NL_OVERRIDE { return _Sheet->DistToSide(); }
 	
-	virtual float DistModulator() const { return _Sheet->DistModulator(); }
-	virtual float TargetModulator() const { return _Sheet->TargetModulator(); }
-	virtual float ScoreModulator() const { return _Sheet->ScoreModulator(); }
-	virtual float FearModulator() const { return _Sheet->FearModulator(); }
-	virtual float LifeLevelModulator() const { return _Sheet->LifeLevelModulator(); }
-	virtual float CourageModulator() const { return _Sheet->CourageModulator(); }
-	virtual float GroupCohesionModulator() const { return _Sheet->GroupCohesionModulator(); }
+	virtual float DistModulator() const NL_OVERRIDE { return _Sheet->DistModulator(); }
+	virtual float TargetModulator() const NL_OVERRIDE { return _Sheet->TargetModulator(); }
+	virtual float ScoreModulator() const NL_OVERRIDE { return _Sheet->ScoreModulator(); }
+	virtual float FearModulator() const NL_OVERRIDE { return _Sheet->FearModulator(); }
+	virtual float LifeLevelModulator() const NL_OVERRIDE { return _Sheet->LifeLevelModulator(); }
+	virtual float CourageModulator() const NL_OVERRIDE { return _Sheet->CourageModulator(); }
+	virtual float GroupCohesionModulator() const NL_OVERRIDE { return _Sheet->GroupCohesionModulator(); }
 	
-	virtual float GroupDispersion() const { return _Sheet->GroupDispersion(); }
+	virtual float GroupDispersion() const NL_OVERRIDE { return _Sheet->GroupDispersion(); }
 	
-	virtual uint32 XPLevel() const { return _Sheet->XPLevel(); }
-	virtual uint32 NbPlayers() const { return _Sheet->NbPlayers(); }
+	virtual uint32 XPLevel() const NL_OVERRIDE { return _Sheet->XPLevel(); }
+	virtual uint32 NbPlayers() const NL_OVERRIDE { return _Sheet->NbPlayers(); }
 	
-	virtual uint32 EnergyValue() const { return _Sheet->EnergyValue(); }
+	virtual uint32 EnergyValue() const NL_OVERRIDE { return _Sheet->EnergyValue(); }
 	
-	virtual bool CanTurn() const { return _Sheet->CanTurn(); }
+	virtual bool CanTurn() const NL_OVERRIDE { return _Sheet->CanTurn(); }
 	
-	virtual NLMISC::CDbgPtr<CActionList> const& FightConfig(TFightCfg fightCfg) const { return _Sheet->FightConfig(fightCfg); }
+	virtual NLMISC::CDbgPtr<CActionList> const& FightConfig(TFightCfg fightCfg) const NL_OVERRIDE { return _Sheet->FightConfig(fightCfg); }
 	
-	virtual NLMISC::CSheetId const& LeftItem() const { return _Sheet->LeftItem(); }
-	virtual NLMISC::CSheetId const& RightItem() const { return _Sheet->RightItem(); }
+	virtual NLMISC::CSheetId const& LeftItem() const NL_OVERRIDE { return _Sheet->LeftItem(); }
+	virtual NLMISC::CSheetId const& RightItem() const NL_OVERRIDE { return _Sheet->RightItem(); }
 	
-	virtual uint32 MinFightDist() const { return _Sheet->MinFightDist(); }
+	virtual uint32 MinFightDist() const NL_OVERRIDE { return _Sheet->MinFightDist(); }
 	
-	virtual uint32 FactionIndex() const { return _Sheet->FactionIndex(); }
-	virtual sint32 FameForGuardAttack() const { return _Sheet->FameForGuardAttack(); }
+	virtual uint32 FactionIndex() const NL_OVERRIDE { return _Sheet->FactionIndex(); }
+	virtual sint32 FameForGuardAttack() const NL_OVERRIDE { return _Sheet->FameForGuardAttack(); }
 	
-	virtual std::string const& AssistGroupIndexStr() const { return _Sheet->AssistGroupIndexStr(); }
-	virtual std::string const& AttackGroupIndexStr() const { return _Sheet->AttackGroupIndexStr(); }
-	virtual std::string const& GroupIndexStr() const { return _Sheet->GroupIndexStr(); }
+	virtual std::string const& AssistGroupIndexStr() const NL_OVERRIDE { return _Sheet->AssistGroupIndexStr(); }
+	virtual std::string const& AttackGroupIndexStr() const NL_OVERRIDE { return _Sheet->AttackGroupIndexStr(); }
+	virtual std::string const& GroupIndexStr() const NL_OVERRIDE { return _Sheet->GroupIndexStr(); }
 	
-	virtual uint32 GroupPropertiesIndex() const { return _Sheet->GroupPropertiesIndex(); }
+	virtual uint32 GroupPropertiesIndex() const NL_OVERRIDE { return _Sheet->GroupPropertiesIndex(); }
 	
-	virtual uint32 DynamicGroupCountMultiplier() const { return _Sheet->DynamicGroupCountMultiplier(); }
+	virtual uint32 DynamicGroupCountMultiplier() const NL_OVERRIDE { return _Sheet->DynamicGroupCountMultiplier(); }
 	
-	virtual std::string const& BotName() const { return _Sheet->BotName(); }
+	virtual std::string const& BotName() const NL_OVERRIDE { return _Sheet->BotName(); }
 	
-	virtual TScriptCompList const& ScriptCompList() const { return _Sheet->ScriptCompList(); }
+	virtual TScriptCompList const& ScriptCompList() const NL_OVERRIDE { return _Sheet->ScriptCompList(); }
 	
-	virtual TScriptCompList const& UpdateScriptList() const { return _Sheet->UpdateScriptList(); }
-	virtual TScriptCompList const& DeathScriptList() const { return _Sheet->DeathScriptList(); }
-	virtual TScriptCompList const& BirthScriptList() const { return _Sheet->BirthScriptList(); }
+	virtual TScriptCompList const& UpdateScriptList() const NL_OVERRIDE { return _Sheet->UpdateScriptList(); }
+	virtual TScriptCompList const& DeathScriptList() const NL_OVERRIDE { return _Sheet->DeathScriptList(); }
+	virtual TScriptCompList const& BirthScriptList() const NL_OVERRIDE { return _Sheet->BirthScriptList(); }
 	
-	virtual EGSPD::CPeople::TPeople Race() const { return _Sheet->Race(); }
+	virtual EGSPD::CPeople::TPeople Race() const NL_OVERRIDE { return _Sheet->Race(); }
 	
-	virtual CGroupProperties const& getPropertiesCst(uint32 groupIndex) const { return _Sheet->getPropertiesCst(groupIndex); }
+	virtual CGroupProperties const& getPropertiesCst(uint32 groupIndex) const NL_OVERRIDE { return _Sheet->getPropertiesCst(groupIndex); }
 	
-	virtual std::vector<std::string> getMultiLineInfoString() const { return _Sheet->getMultiLineInfoString(); }
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE { return _Sheet->getMultiLineInfoString(); }
 };
 
 //////////////////////////////////////////////////////////////////////////////
@@ -506,104 +506,104 @@ private:
 public:
 	///@name ICreature implementation
 	//@{
-	virtual NLMISC::CSheetId const& SheetId() const { return _SheetId; }
-	virtual uint32 Level() const { return _Level; }
+	virtual NLMISC::CSheetId const& SheetId() const NL_OVERRIDE { return _SheetId; }
+	virtual uint32 Level() const NL_OVERRIDE { return _Level; }
 	
 	// colors from sheet
-	virtual uint8 ColorHead() const { return _ColorHead; }
-	virtual uint8 ColorArms() const { return _ColorArms; }
-	virtual uint8 ColorHands() const { return _ColorHands; }
-	virtual uint8 ColorBody() const { return _ColorBody; }
-	virtual uint8 ColorLegs() const { return _ColorLegs; }
-	virtual uint8 ColorFeets() const { return _ColorFeets; }
+	virtual uint8 ColorHead() const NL_OVERRIDE { return _ColorHead; }
+	virtual uint8 ColorArms() const NL_OVERRIDE { return _ColorArms; }
+	virtual uint8 ColorHands() const NL_OVERRIDE { return _ColorHands; }
+	virtual uint8 ColorBody() const NL_OVERRIDE { return _ColorBody; }
+	virtual uint8 ColorLegs() const NL_OVERRIDE { return _ColorLegs; }
+	virtual uint8 ColorFeets() const NL_OVERRIDE { return _ColorFeets; }
 	
-	virtual float Radius() const { return _Radius; }
-	virtual float Height() const { return _Height; }
-	virtual float Width() const { return _Width; }
-	virtual float Length() const { return _Length; }
-	virtual float BoundingRadius() const { return _BoundingRadius; }
+	virtual float Radius() const NL_OVERRIDE { return _Radius; }
+	virtual float Height() const NL_OVERRIDE { return _Height; }
+	virtual float Width() const NL_OVERRIDE { return _Width; }
+	virtual float Length() const NL_OVERRIDE { return _Length; }
+	virtual float BoundingRadius() const NL_OVERRIDE { return _BoundingRadius; }
 	
 	// the entity is a bot object and cannot be traversed.
-	virtual bool NotTraversable() const { return _NotTraversable; }
+	virtual bool NotTraversable() const NL_OVERRIDE { return _NotTraversable; }
 	
 	// the entity is a fauna, even is used as npc, it keep it's fauna name
-	virtual bool ForceDisplayCreatureName() const { return _ForceDisplayCreatureName; }
+	virtual bool ForceDisplayCreatureName() const NL_OVERRIDE { return _ForceDisplayCreatureName; }
 	
-	virtual float BonusAggroHungry() const { return _BonusAggroHungry; }
-	virtual float BonusAggroVeryHungry() const { return _BonusAggroVeryHungry; }
+	virtual float BonusAggroHungry() const NL_OVERRIDE { return _BonusAggroHungry; }
+	virtual float BonusAggroVeryHungry() const NL_OVERRIDE { return _BonusAggroVeryHungry; }
 	
-	virtual float AssistDist() const { return _AssistDist; }
+	virtual float AssistDist() const NL_OVERRIDE { return _AssistDist; }
 	
-	virtual float AggroRadiusNotHungry() const { return _AggroRadiusNotHungry; }
-	virtual float AggroRadiusHungry() const { return _AggroRadiusHungry; }
-	virtual float AggroRadiusHunting() const { return _AggroRadiusHunting; }
+	virtual float AggroRadiusNotHungry() const NL_OVERRIDE { return _AggroRadiusNotHungry; }
+	virtual float AggroRadiusHungry() const NL_OVERRIDE { return _AggroRadiusHungry; }
+	virtual float AggroRadiusHunting() const NL_OVERRIDE { return _AggroRadiusHunting; }
 	
-	virtual float AggroReturnDistCheck() const { return _AggroReturnDistCheck; }
-	virtual float AggroRadiusD1() const { return _AggroRadiusD1; }
-	virtual float AggroRadiusD2() const { return _AggroRadiusD2; }
-	virtual float AggroPrimaryGroupDist() const { return _AggroPrimaryGroupDist; }
-	virtual float AggroPrimaryGroupCoef() const { return _AggroPrimaryGroupCoef; }
-	virtual float AggroSecondaryGroupDist() const { return _AggroSecondaryGroupDist; }
-	virtual float AggroSecondaryGroupCoef() const { return _AggroSecondaryGroupCoef; }
-	virtual float AggroPropagationRadius() const { return _AggroPropagationRadius; }
+	virtual float AggroReturnDistCheck() const NL_OVERRIDE { return _AggroReturnDistCheck; }
+	virtual float AggroRadiusD1() const NL_OVERRIDE { return _AggroRadiusD1; }
+	virtual float AggroRadiusD2() const NL_OVERRIDE { return _AggroRadiusD2; }
+	virtual float AggroPrimaryGroupDist() const NL_OVERRIDE { return _AggroPrimaryGroupDist; }
+	virtual float AggroPrimaryGroupCoef() const NL_OVERRIDE { return _AggroPrimaryGroupCoef; }
+	virtual float AggroSecondaryGroupDist() const NL_OVERRIDE { return _AggroSecondaryGroupDist; }
+	virtual float AggroSecondaryGroupCoef() const NL_OVERRIDE { return _AggroSecondaryGroupCoef; }
+	virtual float AggroPropagationRadius() const NL_OVERRIDE { return _AggroPropagationRadius; }
 	
-	virtual AITYPES::TFaunaType FaunaType() const { return _FaunaType; }
+	virtual AITYPES::TFaunaType FaunaType() const NL_OVERRIDE { return _FaunaType; }
 	
-	virtual float Scale() const { return _Scale; }
+	virtual float Scale() const NL_OVERRIDE { return _Scale; }
 	
-	virtual float DistToFront() const { return _DistToFront; }
-	virtual float DistToBack() const { return _DistToBack; }
-	virtual float DistToSide() const { return _DistToSide; }
+	virtual float DistToFront() const NL_OVERRIDE { return _DistToFront; }
+	virtual float DistToBack() const NL_OVERRIDE { return _DistToBack; }
+	virtual float DistToSide() const NL_OVERRIDE { return _DistToSide; }
 	
-	virtual float DistModulator() const { return _DistModulator; }
-	virtual float TargetModulator() const { return _TargetModulator; }
-	virtual float ScoreModulator() const { return _ScoreModulator; }
-	virtual float FearModulator() const { return _FearModulator; }
-	virtual float LifeLevelModulator() const { return _LifeLevelModulator; }
-	virtual float CourageModulator() const { return _CourageModulator; }
-	virtual float GroupCohesionModulator() const { return _GroupCohesionModulator; }
+	virtual float DistModulator() const NL_OVERRIDE { return _DistModulator; }
+	virtual float TargetModulator() const NL_OVERRIDE { return _TargetModulator; }
+	virtual float ScoreModulator() const NL_OVERRIDE { return _ScoreModulator; }
+	virtual float FearModulator() const NL_OVERRIDE { return _FearModulator; }
+	virtual float LifeLevelModulator() const NL_OVERRIDE { return _LifeLevelModulator; }
+	virtual float CourageModulator() const NL_OVERRIDE { return _CourageModulator; }
+	virtual float GroupCohesionModulator() const NL_OVERRIDE { return _GroupCohesionModulator; }
 	
-	virtual float GroupDispersion() const { return _GroupDispersion; }
+	virtual float GroupDispersion() const NL_OVERRIDE { return _GroupDispersion; }
 	
-	virtual uint32 XPLevel() const { return _XPLevel; }
-	virtual uint32 NbPlayers() const { return _NbPlayers; }
+	virtual uint32 XPLevel() const NL_OVERRIDE { return _XPLevel; }
+	virtual uint32 NbPlayers() const NL_OVERRIDE { return _NbPlayers; }
 	
-	virtual uint32 EnergyValue() const { return _EnergyValue; }
+	virtual uint32 EnergyValue() const NL_OVERRIDE { return _EnergyValue; }
 	
-	virtual bool CanTurn() const { return _CanTurn; }
+	virtual bool CanTurn() const NL_OVERRIDE { return _CanTurn; }
 	
-	virtual NLMISC::CDbgPtr<CActionList> const& FightConfig(TFightCfg fightCfg) const { return _FightConfig[fightCfg]; }
+	virtual NLMISC::CDbgPtr<CActionList> const& FightConfig(TFightCfg fightCfg) const NL_OVERRIDE { return _FightConfig[fightCfg]; }
 	
-	virtual NLMISC::CSheetId const& LeftItem() const { return _LeftItem; }
-	virtual NLMISC::CSheetId const& RightItem() const { return _RightItem; }
+	virtual NLMISC::CSheetId const& LeftItem() const NL_OVERRIDE { return _LeftItem; }
+	virtual NLMISC::CSheetId const& RightItem() const NL_OVERRIDE { return _RightItem; }
 	
-	virtual uint32 MinFightDist() const { return _MinFightDist; }
+	virtual uint32 MinFightDist() const NL_OVERRIDE { return _MinFightDist; }
 	
-	virtual uint32 FactionIndex() const { return _FactionIndex; }
-	virtual sint32 FameForGuardAttack() const { return _FameForGuardAttack; }
+	virtual uint32 FactionIndex() const NL_OVERRIDE { return _FactionIndex; }
+	virtual sint32 FameForGuardAttack() const NL_OVERRIDE { return _FameForGuardAttack; }
 	
-	virtual std::string const& AssistGroupIndexStr() const { return _AssistGroupIndexStr; }
-	virtual std::string const& AttackGroupIndexStr() const { return _AttackGroupIndexStr; }
-	virtual std::string const& GroupIndexStr() const { return _GroupIndexStr; }
+	virtual std::string const& AssistGroupIndexStr() const NL_OVERRIDE { return _AssistGroupIndexStr; }
+	virtual std::string const& AttackGroupIndexStr() const NL_OVERRIDE { return _AttackGroupIndexStr; }
+	virtual std::string const& GroupIndexStr() const NL_OVERRIDE { return _GroupIndexStr; }
 	
-	virtual uint32 GroupPropertiesIndex() const { return _GroupPropertiesIndex; }
+	virtual uint32 GroupPropertiesIndex() const NL_OVERRIDE { return _GroupPropertiesIndex; }
 	
 	/// the creature sheet can specify a multiplier that modulate the dynmaic groupe size
-	virtual uint32 DynamicGroupCountMultiplier() const { return _DynamicGroupCountMultiplier; }
+	virtual uint32 DynamicGroupCountMultiplier() const NL_OVERRIDE { return _DynamicGroupCountMultiplier; }
 	
-	virtual std::string const& BotName() const { return _BotName; }
+	virtual std::string const& BotName() const NL_OVERRIDE { return _BotName; }
 	
-	virtual TScriptCompList const& ScriptCompList() const { return _ScriptCompList; }
+	virtual TScriptCompList const& ScriptCompList() const NL_OVERRIDE { return _ScriptCompList; }
 	
-	virtual TScriptCompList const& UpdateScriptList() const { return _UpdateScriptList; }
-	virtual TScriptCompList const& DeathScriptList() const { return _DeathScriptList; }
-	virtual TScriptCompList const& BirthScriptList() const { return _BirthScriptList; }
+	virtual TScriptCompList const& UpdateScriptList() const NL_OVERRIDE { return _UpdateScriptList; }
+	virtual TScriptCompList const& DeathScriptList() const NL_OVERRIDE { return _DeathScriptList; }
+	virtual TScriptCompList const& BirthScriptList() const NL_OVERRIDE { return _BirthScriptList; }
 	
-	virtual EGSPD::CPeople::TPeople Race() const { return _Race; }
+	virtual EGSPD::CPeople::TPeople Race() const NL_OVERRIDE { return _Race; }
 	
-	virtual CGroupProperties const& getPropertiesCst(uint32 groupIndex) const;
+	virtual CGroupProperties const& getPropertiesCst(uint32 groupIndex) const NL_OVERRIDE;
 
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 public:
@@ -658,8 +658,8 @@ class CRaceStats
 : public IRaceStats
 {
 public:
-	virtual NLMISC::CSheetId SheetId() const { return _SheetId; }
-	virtual std::string Race() const { return _Race; }
+	virtual NLMISC::CSheetId SheetId() const NL_OVERRIDE { return _SheetId; }
+	virtual std::string Race() const NL_OVERRIDE { return _Race; }
 	
 public:
 	void readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const& form, NLMISC::CSheetId const& sheetId);

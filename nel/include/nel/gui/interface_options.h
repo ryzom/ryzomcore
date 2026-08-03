@@ -117,9 +117,9 @@ namespace NLGUI
 
 	public:
 		COptionsLayer( const TCtorParam &/* param */ );
-		~COptionsLayer();
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		~COptionsLayer() NL_OVERRIDE;
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		// Container optimizer
 
@@ -127,6 +127,12 @@ namespace NLGUI
 		sint32 Tile_M_Header, Tile_M_Scrollbar;
 		sint32 Tile_T, Tile_B, Tile_L, Tile_R;
 		sint32 Tile_B_Open, Tile_EM_Open, Tile_M_Open;
+
+		// When false, the frame of an opened container stops below the
+		// header and content; the child list hangs in the open section
+		// (original layout: side rail and ending strip framing it).
+		// Default true: the frame stretches over the open child list.
+		bool FrameCoversOpenList;
 
 		sint32 Scrollbar_Offset_X;
 		sint32 Scrollbar_W;
@@ -175,8 +181,8 @@ namespace NLGUI
 	{
 	public:
 		COptionsContainerInsertion( const TCtorParam &/* param */ );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		sint32 TxId_R_Arrow;
 		sint32 TxId_L_Arrow;
@@ -190,8 +196,8 @@ namespace NLGUI
 	{
 	public:
 		COptionsContainerMove( const TCtorParam &/* param */ );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		sint32 TrackW;
 		sint32 TrackH;
@@ -211,8 +217,8 @@ namespace NLGUI
 	{
 	public:
 		COptionsList( const TCtorParam &/* param */ );
-		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const;
-		virtual bool parse (xmlNodePtr cur);
+		xmlNodePtr serialize( xmlNodePtr parentNode, const std::string &name ) const NL_OVERRIDE;
+		virtual bool parse (xmlNodePtr cur) NL_OVERRIDE;
 
 		uint	getNumParams() const {return _NumParams;}
 

@@ -57,7 +57,7 @@ public:
 	inline void stop() { _Running = false; }
 
 	/// display the control
-	virtual void display();
+	virtual void display() NL_OVERRIDE;
 
 	/// set the auto hide mode (hide the control when the pos == 0
 	inline void autoHide( bool autoHide ) { _AutoHide = autoHide; }

@@ -1,0 +1,64 @@
+<interface_config>
+
+<!-- ******************************************************* -->
+<!-- * Minesweeper                                         * -->
+<!-- * A complete game in interface data: the cells are    * -->
+<!-- * ordinary button/text/bitmap widgets stamped out by  * -->
+<!-- * <vector>, and minesweeper.lua drives them through   * -->
+<!-- * the reflection system. No game code in the sample   * -->
+<!-- * binary.                                             * -->
+<!-- ******************************************************* -->
+
+<!-- One 26x26 board cell: flat floor + number underneath, a w_slot_brick
+     cover button on top, flag marker above the cover. Revealing a cell is
+     just cover.active=false. -->
+<template name="ms_cell" keep="true" id="" i="0" x="0" y="0" posparent="parent" posref="TL TL">
+	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="26" h="26">
+		<view type="bitmap" id="bg" posref="MM MM" scale="true" sizeref="wh" w="-2" h="-2" texture="w_box_blank.tga" global_color="false" />
+		<view type="text" id="t" posref="MM MM" x="0" y="1" fontsize="15" shadow="true" global_color="false" color="255 255 255 255" hardtext="" />
+		<view type="bitmap" id="mine" posref="MM MM" x="0" y="0" texture="w_death.tga" global_color="false" active="false" />
+		<ctrl type="button" id="cover" button_type="push_button" posref="MM MM" x="0" y="0"
+			tx_normal="w_slot_brick.tga" tx_pushed="w_slot_brick.tga" tx_over="w_slot_brick_selected.tga"
+			global_color_normal="false" global_color_pushed="false" global_color_over="false"
+			onclick_l="lua" params_l="ms.reveal(#i)" onclick_r="lua" params_r="ms.flag(#i)" />
+		<view type="bitmap" id="flag" posref="MM MM" x="0" y="0" texture="w_warning.tga" global_color="false" active="false" />
+	</group>
+</template>
+
+<group type="container" id="minesweeper" w="252" pop_min_w="252" pop_max_w="252" h="322" pop_min_h="322" pop_max_h="322"
+	title="Minesweeper" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
+	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
+	opened="true" movable="true" active="true" x="514" y="520">
+	<group id="header_closed" x="0" y="0" h="12" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL"></group>
+	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
+		<!-- mines left | NEW + flag-mode toggle | elapsed seconds -->
+		<view type="text" id="mines" posref="TL TL" x="12" y="-8" fontsize="16" shadow="true" global_color="false" color="255 110 110 255" hardtext="010" />
+		<ctrl style="text_button_16" id="bt_new" posref="TM TM" x="-12" y="-8" onclick_l="lua" params_l="ms.new()" hardtext="New" />
+		<!-- toggle: taps place flags instead of revealing (right-click substitute) -->
+		<ctrl type="button" id="bt_flagmode" button_type="toggle_button" posparent="bt_new" posref="MR ML" x="8" y="0"
+			tx_normal="w_warning.tga" tx_pushed="w_warning.tga" tx_over="w_button_18_over.tga"
+			global_color_normal="false" global_color_pushed="false"
+			col_normal="255 255 255 90" col_pushed="255 255 255 255"
+			tooltip="Flag mode: click plants a flag"
+			onclick_l="lua" params_l="ms.toggleFlagMode()" />
+		<view type="text" id="timer" posref="TR TR" x="-12" y="-8" fontsize="16" shadow="true" global_color="false" color="150 255 150 255" hardtext="000" />
+		<group id="grid" posref="TM TM" x="0" y="-34" w="234" h="234">
+			<vector template="ms_cell" _size="9" _firstindex="0"  _firstpos="TL TL" _xfirst="0" _yfirst="0"    _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="9"  _firstpos="TL TL" _xfirst="0" _yfirst="-26"  _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="18" _firstpos="TL TL" _xfirst="0" _yfirst="-52"  _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="27" _firstpos="TL TL" _xfirst="0" _yfirst="-78"  _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="36" _firstpos="TL TL" _xfirst="0" _yfirst="-104" _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="45" _firstpos="TL TL" _xfirst="0" _yfirst="-130" _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="54" _firstpos="TL TL" _xfirst="0" _yfirst="-156" _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="63" _firstpos="TL TL" _xfirst="0" _yfirst="-182" _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+			<vector template="ms_cell" _size="9" _firstindex="72" _firstpos="TL TL" _xfirst="0" _yfirst="-208" _nextpos="TR TL" id="c$i" i="$i" x="0" y="0" />
+		</group>
+		<view type="text" id="status" posref="BM BM" x="0" y="8" fontsize="14" shadow="true" global_color="false" color="255 255 255 200" hardtext="Click a tile. Right-click flags." />
+	</group>
+</group>
+<tree node="minesweeper"></tree>
+
+<lua file="minesweeper.lua" />
+
+</interface_config>

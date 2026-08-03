@@ -35,7 +35,7 @@ public:
 	// ctor & dtor ------------------------------------------------------
 	CAIStateChat(CAIState*	state,	CAIAliasDescriptionNode *aliasDescription): CAliasChild<CAIState>(state,aliasDescription)
 	{}
-	virtual ~CAIStateChat()
+	virtual ~CAIStateChat() NL_OVERRIDE
 	{}
 
 	virtual	std::string	getIndexString	()	const;

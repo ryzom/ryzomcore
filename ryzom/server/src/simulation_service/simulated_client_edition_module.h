@@ -38,7 +38,7 @@ namespace R2
 	{
 	public:
 		CSimClientEditionModule();
-		~CSimClientEditionModule();
+		~CSimClientEditionModule() NL_OVERRIDE;
 
 		void init( uint id, NLNET::IModuleSocket *clientGW, CDynamicMapClient* client);
 		void release();
@@ -46,17 +46,17 @@ namespace R2
 		void updateScenario(CObject* scenario);
 
 		// message handlers
-		void onModuleUp(NLNET::IModuleProxy *moduleProxy);
-		void onModuleDown(NLNET::IModuleProxy *moduleProxy);
-		void onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message);
-		void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy);
+		void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		void onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
+		void onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE;
+		void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE;
 		void onAdventureConnected(uint32 userSlotId, uint32 scenarioId, uint32 connectedAs, CObject* scenario );
 		// stubbed
 		void onServiceUp(const std::string &serviceName, uint16 serviceId) {}
 		void onServiceDown(const std::string &serviceName, uint16 serviceId) {}
-		void onModuleUpdate() {}
-		void onApplicationExit() {}
-		void onModuleSocketEvent(NLNET::IModuleSocket *moduleSocket, TModuleSocketEvent eventType) {}
+		void onModuleUpdate() NL_OVERRIDE {}
+		void onApplicationExit() NL_OVERRIDE {}
+		void onModuleSocketEvent(NLNET::IModuleSocket *moduleSocket, TModuleSocketEvent eventType) NL_OVERRIDE {}
 
 		void requestCreatePrimitives();
 		// request handlers

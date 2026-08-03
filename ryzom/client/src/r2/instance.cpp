@@ -144,7 +144,7 @@ void CInstance::visit(IInstanceVisitor &visitor)
 	struct CInstanceVisitor : public IObjectVisitor
 	{
 		IInstanceVisitor *Visitor;
-		virtual void visit(CObjectTable &obj)
+		virtual void visit(CObjectTable &obj) NL_OVERRIDE
 		{
 			CInstance *inst = getEditor().getInstanceFromObject(&obj);
 			if (inst)
@@ -828,7 +828,7 @@ std::string CInstance::getPosInstanceId() const
 // Select an instance from its id
 class CAHSelectInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// retrieve instance from its Id
 		CInstance *instance = getEditor().getInstanceFromId(sParams);
@@ -845,7 +845,7 @@ REGISTER_ACTION_HANDLER(CAHSelectInstance, "r2ed_select_instance");
 // Delete selected instance
 class CAHDeleteSelectedInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInstance *selectedInstance = getEditor().getSelectedInstance();
 		if (selectedInstance)
@@ -861,7 +861,7 @@ REGISTER_ACTION_HANDLER(CAHDeleteSelectedInstance, "r2ed_delete_selected_instanc
 class CAHPickerLua : public IActionHandler
 {
 	//	 TODO nico : replace this action handler by a CTool (in the same way that CToolChoosePosLua derives from CToolChoosePos)
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		// TODO : put this class in a separate file
 		class CToolPickLua : public CToolPick
@@ -882,7 +882,7 @@ class CAHPickerLua : public IActionHandler
 			{}
 
 			NLMISC_DECLARE_CLASS(CToolPickLua);
-			void pick(CInstance &instance)
+			void pick(CInstance &instance) NL_OVERRIDE
 			{
 				CTool::TSmartPtr holdThis(this); // prevent 'setCurrentTool' from deleting 'this'
 				getEditor().setCurrentTool(nullptr);
@@ -891,7 +891,7 @@ class CAHPickerLua : public IActionHandler
 					getEditor().getLua().executeScriptNoThrow(LuaPickFunc + "('" + instance.getId() + "')");
 				}
 			}
-			void pick(const CVector &pos)
+			void pick(const CVector &pos) NL_OVERRIDE
 			{
 				CTool::TSmartPtr holdThis(this); // prevent 'setCurrentTool' from deleting 'this'
 				getEditor().setCurrentTool(nullptr);
@@ -900,7 +900,7 @@ class CAHPickerLua : public IActionHandler
 					getEditor().getLua().executeScriptNoThrow(NLMISC::toString("%s(%f, %f, %f)", LuaPickPosFunc.c_str(), pos.x, pos.y, pos.z));
 				}
 			}
-			bool canPick(const CInstance &instance) const
+			bool canPick(const CInstance &instance) const NL_OVERRIDE
 			{
 				if (LuaPickFunc.empty()) return true;
 				CLuaState &lua = getEditor().getLua();
@@ -946,7 +946,7 @@ REGISTER_ACTION_HANDLER(CAHPickerLua, "r2ed_picker_lua");
 // rotate
 class CAHRotateInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().setCurrentTool(new CToolSelectRotate);
 	}
@@ -957,7 +957,7 @@ REGISTER_ACTION_HANDLER(CAHRotateInstance, "r2ed_rotate");
 // move
 class CAHMoveInstance : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		getEditor().setCurrentTool(new CToolSelectMove);
 	}
@@ -970,7 +970,7 @@ REGISTER_ACTION_HANDLER(CAHMoveInstance, "r2ed_move");
 // Debug : dump the lua table for current instance
 class CAHDumpLuaTable : public IActionHandler
 {
-	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		if (!getEditor().getSelectedInstance()) return;
 		std::string maxDepthStr = getParam(sParams, "depth");

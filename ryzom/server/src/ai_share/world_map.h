@@ -2097,17 +2097,17 @@ class CComputeCell
 public:
 	CComputeCell(CWorldMap const& worldMapPtr);
 	
-	CCellLinkage getCellLink(CWorldPosition const& wpos) const;
+	CCellLinkage getCellLink(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	uint32 nbUsedSlots(CMapPosition const& pos) const;
+	uint32 nbUsedSlots(CMapPosition const& pos) const NL_OVERRIDE;
 	
-	sint32 maxUsedSlot(CMapPosition const& pos) const;
+	sint32 maxUsedSlot(CMapPosition const& pos) const NL_OVERRIDE;
 	
-	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const;
+	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const NL_OVERRIDE;
 	
-	uint getTopology(CWorldPosition const& wpos) const;
+	uint getTopology(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	sint getHeight(CWorldPosition const& wpos) const;
+	sint getHeight(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
 	TCellUnit const& getCellUnitCst(CMapPosition const& pos) const;
 	
@@ -2117,9 +2117,9 @@ public:
 	
 	CUnitSlot& getUnitSlot(CWorldPosition const& wpos);
 	
-	void serial(NLMISC::IStream& f);
+	void serial(NLMISC::IStream& f) NL_OVERRIDE;
 
-	void clearHeightMap() { }
+	void clearHeightMap() NL_OVERRIDE { }
 	
 private:
 	TCellUnit const& getCellUnitCst(CWorldPosition const& wpos) const;
@@ -2231,21 +2231,21 @@ class CWhiteCell
 public:
 	CWhiteCell(CWorldMap const& worldMapPtr);
 	
-	CCellLinkage getCellLink(CWorldPosition const& wpos) const;
+	CCellLinkage getCellLink(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	uint32 nbUsedSlots(CMapPosition const& pos) const;
+	uint32 nbUsedSlots(CMapPosition const& pos) const NL_OVERRIDE;
 	
-	sint32 maxUsedSlot(CMapPosition const& pos) const;
+	sint32 maxUsedSlot(CMapPosition const& pos) const NL_OVERRIDE;
 	
-	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const;
+	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const NL_OVERRIDE;
 	
-	uint getTopology(CWorldPosition const& wpos) const;
+	uint getTopology(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	sint getHeight(CWorldPosition const& wpos) const;
+	sint getHeight(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	void serial(NLMISC::IStream& f);
+	void serial(NLMISC::IStream& f) NL_OVERRIDE;
 	
-	void clearHeightMap();
+	void clearHeightMap() NL_OVERRIDE;
 	
 	void setHeightMap(I16x16Layer* heightMap);
 	
@@ -2337,17 +2337,17 @@ protected:
 public:
 	CSingleLayerCell(CWorldMap const& worldMapPtr);
 	
-	CCellLinkage getCellLink(CWorldPosition const& wpos) const;
+	CCellLinkage getCellLink(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	uint32 nbUsedSlots(CMapPosition const& pos) const;
+	uint32 nbUsedSlots(CMapPosition const& pos) const NL_OVERRIDE;
 	
-	sint32 maxUsedSlot(CMapPosition const& pos) const;
+	sint32 maxUsedSlot(CMapPosition const& pos) const NL_OVERRIDE;
 	
-	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const;
+	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const NL_OVERRIDE;
 	
-	uint getTopology(CWorldPosition const& wpos) const;
+	uint getTopology(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	sint getHeight(CWorldPosition const& wpos) const;
+	sint getHeight(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
 	bool testPos(CMapPosition const& pos) const;
 	
@@ -2362,9 +2362,9 @@ public:
 	
 	void setHeightMap(I16x16Layer* heightMap);
 	
-	virtual void serial(NLMISC::IStream& f);
+	virtual void serial(NLMISC::IStream& f) NL_OVERRIDE;
 	
-	void clearHeightMap();
+	void clearHeightMap() NL_OVERRIDE;
 	
 private:
 	/// The map of accessible positions
@@ -2518,21 +2518,21 @@ protected:
 	
 public:
 	CMultiLayerCell(CWorldMap const& worldMapPtr);
-	virtual ~CMultiLayerCell();
+	virtual ~CMultiLayerCell() NL_OVERRIDE;
 	
-	CCellLinkage getCellLink(CWorldPosition const& wpos) const;
-	uint32 nbUsedSlots(CMapPosition const& pos) const;
-	sint32 maxUsedSlot(CMapPosition const& pos) const;
-	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const;
-	uint getTopology(CWorldPosition const& wpos) const;
-	sint getHeight(CWorldPosition const& wpos) const;
+	CCellLinkage getCellLink(CWorldPosition const& wpos) const NL_OVERRIDE;
+	uint32 nbUsedSlots(CMapPosition const& pos) const NL_OVERRIDE;
+	sint32 maxUsedSlot(CMapPosition const& pos) const NL_OVERRIDE;
+	bool isSlotUsed(CMapPosition const& pos, CSlot const& slot) const NL_OVERRIDE;
+	uint getTopology(CWorldPosition const& wpos) const NL_OVERRIDE;
+	sint getHeight(CWorldPosition const& wpos) const NL_OVERRIDE;
 	
-	virtual void serial(NLMISC::IStream& f);
+	virtual void serial(NLMISC::IStream& f) NL_OVERRIDE;
 	
 	void setLinks(CWorldPosition const& wpos, CCellLinkage links);
 	void setTopology(CWorldPosition const& wpos, uint topology);
 	void setHeightMap(CSlot const& slot, I16x16Layer* heightMap);
-	void clearHeightMap();
+	void clearHeightMap() NL_OVERRIDE;
 	
 private:
 	// each layer is allocated in memory

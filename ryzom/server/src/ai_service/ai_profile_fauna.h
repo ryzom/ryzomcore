@@ -88,11 +88,11 @@ public:
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_PLANTIDLE; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_PLANTIDLE; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 protected:
@@ -110,7 +110,7 @@ class CAIFaunaActivityBaseSpawnProfile
 public:
 	CAIFaunaActivityBaseSpawnProfile(CProfileOwner* owner);
 	
-	virtual NLMISC::CSmartPtr<CMovementMagnet> const& getMovementMagnet() const;
+	virtual NLMISC::CSmartPtr<CMovementMagnet> const& getMovementMagnet() const NL_OVERRIDE;
 	
 protected:
 	NLMISC::CSmartPtr<CMovementMagnet> _MovementMagnet;
@@ -130,11 +130,11 @@ public:
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_WANDERING; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_WANDERING; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 protected:
@@ -156,11 +156,11 @@ public:
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_GRAZING; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_GRAZING; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 protected:
@@ -186,11 +186,11 @@ public:
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_RESTING; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_RESTING; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 protected:
@@ -216,11 +216,11 @@ public:
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_EAT_CORPSE; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_EAT_CORPSE; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 	
 	TDataSetRow		_eated;
@@ -245,11 +245,11 @@ public:
 	
 	/// @name IAIProfile implementation
 	//@{
-	virtual void beginProfile();
-	virtual void updateProfile(uint ticksSinceLastUpdate);
-	virtual void endProfile();
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_CURIOSITY; }
-	virtual std::string getOneLineInfoString() const;
+	virtual void beginProfile() NL_OVERRIDE;
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE;
+	virtual void endProfile() NL_OVERRIDE;
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_CURIOSITY; }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
 	//@}
 
 	TDataSetRow		_player;
@@ -275,15 +275,15 @@ class CCorpseFaunaProfile
 public:
 	CCorpseFaunaProfile(CProfileOwner* owner);
 	
-	virtual void beginProfile();
+	virtual void beginProfile() NL_OVERRIDE;
 	
-	virtual void endProfile() { }
+	virtual void endProfile() NL_OVERRIDE { }
 	
-	virtual void updateProfile(uint ticksSinceLastUpdate) { }
+	virtual void updateProfile(uint ticksSinceLastUpdate) NL_OVERRIDE { }
 	
-	virtual std::string getOneLineInfoString() const { return NLMISC::toString("corpse fauna profile"); }
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE { return NLMISC::toString("corpse fauna profile"); }
 	
-	virtual	AITYPES::TProfiles getAIProfileType() const { return AITYPES::ACTIVITY_CORPSE; }
+	virtual	AITYPES::TProfiles getAIProfileType() const NL_OVERRIDE { return AITYPES::ACTIVITY_CORPSE; }
 	
 	bool eated() const { return _Eated; }
 	void setEated(bool eated) { _Eated = eated; }
@@ -327,7 +327,7 @@ class CFightFaunaProfileFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 		return NULL;
 	}
@@ -338,7 +338,7 @@ class CEatCorpseFaunaProfileFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 	#ifdef NL_DEBUG
 		nlassert(false);
@@ -352,7 +352,7 @@ class CCuriosityFaunaProfileFactory
 : public IAIProfileFactory
 {
 public:
-	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner)
+	NLMISC::CSmartPtr<IAIProfile> createAIProfile(CProfileOwner* owner) NL_OVERRIDE
 	{
 #ifdef NL_DEBUG
 		nlassert(false);

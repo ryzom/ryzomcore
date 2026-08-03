@@ -89,12 +89,12 @@ public:
 	CLoadMeshCancel (const std::string &meshName)
 		: _MeshName(meshName)
 	{}
-	virtual ~CLoadMeshCancel() { }
+	virtual ~CLoadMeshCancel() NL_OVERRIDE { }
 
 private:
 	std::string	_MeshName;
 
-	bool callback(const NLMISC::IRunnable *prunnable) const
+	bool callback(const NLMISC::IRunnable *prunnable) const NL_OVERRIDE
 	{
 		const CAsyncFileManager3D::CMeshLoad *pML = dynamic_cast<const CAsyncFileManager3D::CMeshLoad*>(prunnable);
 		if (pML != nullptr)
@@ -147,12 +147,12 @@ public:
 		: _TextureFile(ptextureFile)
 	{}
 
-	virtual ~CLoadTextureCancel() {}
+	virtual ~CLoadTextureCancel() NL_OVERRIDE {}
 
 private:
 	CTextureFile	*_TextureFile;
 
-	bool callback(const NLMISC::IRunnable *prunnable) const
+	bool callback(const NLMISC::IRunnable *prunnable) const NL_OVERRIDE
 	{
 		const CAsyncFileManager3D::CTextureLoad *pTL = dynamic_cast<const CAsyncFileManager3D::CTextureLoad*>(prunnable);
 		if (pTL != nullptr)

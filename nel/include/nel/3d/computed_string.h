@@ -54,7 +54,7 @@ public:
 
 public:
 	CRenderStringBuffer();
-	virtual ~CRenderStringBuffer();
+	virtual ~CRenderStringBuffer() NL_OVERRIDE;
 
 	/// render and make empty the render string buffer. see CComputedString::render2DClip()
 	void	flush(IDriver& driver, CMaterial *fontMat);
@@ -91,7 +91,7 @@ public:
 	};
 
 	CLetterColors() {}
-	virtual ~CLetterColors() {}
+	virtual ~CLetterColors() NL_OVERRIDE {}
 
 	void clear()
 	{
@@ -133,7 +133,7 @@ public:
 		return defaultLetterColor;
 	}
 
-	bool isSameLetterColors(ULetterColors * letterColors)
+	bool isSameLetterColors(ULetterColors * letterColors) NL_OVERRIDE
 	{
 		CLetterColors * letterCol = static_cast<CLetterColors*>(letterColors);
 		bool	sameLetterColors = false;
@@ -153,7 +153,7 @@ public:
 		return sameLetterColors;
 	}
 
-	void pushLetterColor(uint index, const NLMISC::CRGBA & color)
+	void pushLetterColor(uint index, const NLMISC::CRGBA & color) NL_OVERRIDE
 	{
 		_indexedColors.push_back(SLetterColor(index, color));
 	}

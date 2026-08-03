@@ -50,7 +50,7 @@ public:
 	///\name object
 	//@{
 		CSegRemanence();
-		~CSegRemanence();
+		~CSegRemanence() NL_OVERRIDE;
 		CSegRemanence(CSegRemanence &other);
 		CSegRemanence &operator = (CSegRemanence &other);
 	//@}
@@ -69,15 +69,15 @@ public:
 
 	///\name From CTransformShape
 	//@{
-		virtual bool				canStartStop() { return true; }
+		virtual bool				canStartStop() NL_OVERRIDE { return true; }
 		// start the fx (by default it is off).
-		virtual void				start();
+		virtual void				start() NL_OVERRIDE;
 		/// Stop the fx and let it unroll
-		virtual void				stop();
+		virtual void				stop() NL_OVERRIDE;
 		/// Stop the fx with no unrolling
 		virtual void				stopNoUnroll();
 		// Test whether the fx is started
-		virtual bool				isStarted() const { return _Started; }
+		virtual bool				isStarted() const NL_OVERRIDE { return _Started; }
 		// Test if the fx is stopping (unrollinh)
 		bool						isStopping() const { return _Stopping; }
 		// Equivalent to a call to start, then stop
@@ -92,7 +92,7 @@ public:
 	CAnimatedMaterial		*getAnimatedMaterial() const { return _AniMat; }
 
 	// Register to a channel mixer.
-	void					registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	void					registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 
 	enum	TAnimValues
 	{
@@ -102,13 +102,13 @@ public:
 	};
 
 
-	virtual ITrack *getDefaultTrack (uint valueId);
+	virtual ITrack *getDefaultTrack (uint valueId) NL_OVERRIDE;
 
 
 	/// \name CTransform traverse specialisation
 	// @{
 	//virtual void	traverseHrc();
-	virtual void	traverseAnimDetail();
+	virtual void	traverseAnimDetail() NL_OVERRIDE;
 	// @}
 
 	/** \name slice time. Gives the time between 2 sampled position of the trail

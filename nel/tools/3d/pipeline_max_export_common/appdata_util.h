@@ -50,6 +50,9 @@ std::string getScriptAppDataStr(PIPELINE::MAX::CSceneClass *sc, uint32 subId, co
 /// "1"/"0" for checkboxes). Returns def when absent or unparseable.
 int getScriptAppDataInt(PIPELINE::MAX::CSceneClass *sc, uint32 subId, int def);
 
+/// Same, parsed as a float. Returns def when absent or unparseable.
+float getScriptAppDataFloat(PIPELINE::MAX::CSceneClass *sc, uint32 subId, float def);
+
 } /* namespace APPDATA */
 
 #endif /* PIPELINE_MAX_EXPORT_COMMON_APPDATA_UTIL_H */

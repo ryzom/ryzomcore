@@ -66,7 +66,7 @@ public:
 	/** 
 	 * init the service
 	 */
-	void init(void);
+	void init(void) NL_OVERRIDE;
 
 	/// Init after the mirror init
 	void initMirror();
@@ -74,7 +74,7 @@ public:
 	/**
 	 * main loop
 	 */
-	bool update(void);
+	bool update(void) NL_OVERRIDE;
 
 	/**
 	 * update, called at each tick
@@ -94,7 +94,7 @@ public:
 	/**
 	 * release
 	 */
-	void release(void);
+	void release(void) NL_OVERRIDE;
 
 	/**
 	 * private method used to manage creation of instances in the ring vision universe

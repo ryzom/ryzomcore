@@ -81,7 +81,7 @@ private:
 	std::vector<CChatWindow *> _ListeningWindows;
 	std::vector<CPeopleList *> _ListeningPeopleList;
 	// from CChatWindow::IObserver
-	virtual void chatWindowRemoved(CChatWindow *cw);
+	virtual void chatWindowRemoved(CChatWindow *cw) NL_OVERRIDE;
 	//
 	// copy not supported
 	CChatInputFilter(const CChatInputFilter &/* other */):NLMISC::CRefCount() { nlassert(0); }
@@ -157,8 +157,8 @@ private:
 	// @}
 private:
 	// from IChatWindowListener
-	void chatWindowRemoved(CChatWindow *cw);
-	void msgEntered(const std::string &msg, CChatWindow *chatWindow);
+	void chatWindowRemoved(CChatWindow *cw) NL_OVERRIDE;
+	void msgEntered(const std::string &msg, CChatWindow *chatWindow) NL_OVERRIDE;
 	// copy not supported
 	CChatTargetFilter(const CChatTargetFilter &/* other */):NLMISC::CRefCount() { nlassert(0); }
 	CChatTargetFilter& operator=(const CChatTargetFilter &/* other */) { nlassert(0); return *this; }

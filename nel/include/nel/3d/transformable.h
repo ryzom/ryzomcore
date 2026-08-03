@@ -60,7 +60,7 @@ public:
 
 	/// Constructor. By default, RotQuat mode.
 	ITransformable();
-	virtual ~ITransformable() {}
+	virtual ~ITransformable() NL_OVERRIDE {}
 
 
 	/// Get the matrix, compute her if necessary (work in all modes).
@@ -280,16 +280,16 @@ public:
 	};
 
 	/// From IAnimatable
-	virtual IAnimatedValue* getValue (uint valueId);
+	virtual IAnimatedValue* getValue (uint valueId) NL_OVERRIDE;
 
 	/// From IAnimatable
-	virtual const char *getValueName (uint valueId) const;
+	virtual const char *getValueName (uint valueId) const NL_OVERRIDE;
 
 	/// From IAnimatable. Deriver must implement this.
-	virtual ITrack* getDefaultTrack (uint valueId) =0;
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE =0;
 
 	/// From IAnimatable. Deriver must implement this (channels may be detail-ed or not).
-	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) =0;
+	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE =0;
 
 	// @}
 

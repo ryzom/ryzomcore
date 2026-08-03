@@ -728,7 +728,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 class CHandlerSwapItem: public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string src = getParam(Params, "src");
@@ -813,7 +813,7 @@ REGISTER_ACTION_HANDLER( CHandlerSwapItem, "swap_item");
 class CHandlerStackOk: public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		// get the value to drop
@@ -832,7 +832,7 @@ REGISTER_ACTION_HANDLER( CHandlerStackOk, "stack_item");
 class CPlayerTradePutBagItemToExchange : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CDBCtrlSheet *src = dynamic_cast<CDBCtrlSheet *>(pCaller);
@@ -854,7 +854,7 @@ REGISTER_ACTION_HANDLER(CPlayerTradePutBagItemToExchange, "put_bag_item_to_excha
 class CPlayerTradePutExchangeItemtoBag : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *src = dynamic_cast<CDBCtrlSheet *>(pCaller);
 		if (src) putExchangedItemToInventory(src);
@@ -870,7 +870,7 @@ REGISTER_ACTION_HANDLER(CPlayerTradePutExchangeItemtoBag, "put_exchange_item_to_
 class CIsItem : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string src = getParam(Params, "src");
@@ -891,7 +891,7 @@ REGISTER_ACTION_HANDLER (CIsItem, "isitem");
 class CItemToEmptySlotTest : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string src = getParam(Params, "src");
@@ -915,7 +915,7 @@ REGISTER_ACTION_HANDLER (CItemToEmptySlotTest, "itemtoemptyslottest");
 class CIsPlayerItem : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *cs = dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() );
 		if (cs)
@@ -935,7 +935,7 @@ REGISTER_ACTION_HANDLER (CIsPlayerItem, "isplayeritem");
 class CIsItemSlot : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string	src = getParam(Params, "src");
@@ -1028,7 +1028,7 @@ bool checkCanExchangeItem(CDBCtrlSheet *pCSSrc)
 // **********************************************************************************************************
 class CCanDropToExchange : public IActionHandler
 {
-	virtual void execute (CCtrlBase *pCaller, const string &Params)
+	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string	src = getParam(Params, "src");
@@ -1058,7 +1058,7 @@ REGISTER_ACTION_HANDLER (CCanDropToExchange, "can_drop_to_exchange");
   */
 class CClearSelectedSheet : public IActionHandler
 {
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet::setCurrSelection(nullptr);
 	}
@@ -1070,7 +1070,7 @@ REGISTER_ACTION_HANDLER (CClearSelectedSheet, "clear_selected_sheet");
 class CHandlerAcceptExchange: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		sint64 counter;
 		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "counter"), counter))
@@ -1098,7 +1098,7 @@ REGISTER_ACTION_HANDLER( CHandlerAcceptExchange, "accept_exchange");
 class CHandlerInvalidateExchange: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		sint64 counter;
 		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "counter"), counter))
@@ -1124,7 +1124,7 @@ REGISTER_ACTION_HANDLER( CHandlerInvalidateExchange, "invalidate_exchange");
 class CHandlerEndExchange: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		PlayerTrade.restoreAllItems();
 		CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -1155,7 +1155,7 @@ REGISTER_ACTION_HANDLER( CHandlerEndExchange, "end_exchange");
 class CHandlerValidateSeedSel: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		sint64 quantity;
 		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "quantity"), quantity))
@@ -1191,7 +1191,7 @@ REGISTER_ACTION_HANDLER( CHandlerValidateSeedSel, "validate_seed_sel");
 class CHandlerAcceptExchangeInvite: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream("EXCHANGE:ACCEPT_INVITATION", out))
@@ -1209,7 +1209,7 @@ REGISTER_ACTION_HANDLER( CHandlerAcceptExchangeInvite, "accept_exchange_invitati
 class CHandlerDeclineExchangeInvite: public IActionHandler
 {
 public:
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CBitMemStream out;
 		if(GenericMsgHeaderMngr.pushNameToStream("EXCHANGE:DECLINE_INVITATION", out))
@@ -1234,7 +1234,7 @@ static void dropOrDestroyItem(CDBCtrlSheet *item, CBitMemStream &out, uint16 qua
 // destroy an item
 class CHandlerDestroyItem : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		sint64 quantity;
 		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "quantity"), quantity))
@@ -1287,7 +1287,7 @@ REGISTER_ACTION_HANDLER( CHandlerDestroyItem, "destroy_item");
 // drop an item
 class CHandlerDropItem : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		sint64 quantity = 1;
 		string sQuantity = getParam(sParams, "quantity");
@@ -1374,7 +1374,7 @@ REGISTER_ACTION_HANDLER( CHandlerReceiveActiveSheath, "receive_active_sheath" );
 // **********************************************************************************************************
 class CHandlerEndHarvest : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		CBitMemStream out;
 		if( sParams == string("loot") )
@@ -1401,7 +1401,7 @@ REGISTER_ACTION_HANDLER( CHandlerEndHarvest, "end_harvest" );
 // **********************************************************************************************************
 class CHandlerHarvestItem : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CBitMemStream out;
 
@@ -1459,7 +1459,7 @@ void getCtrlSheets(CInterfaceGroup *pIG, vector<CDBCtrlSheet*> &res)
 // **********************************************************************************************************
 class CHandlerMoveItem : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		// get the calling item
 		CDBCtrlSheet *item = CDBCtrlSheet::getCurrSelSheet();
@@ -1628,7 +1628,7 @@ REGISTER_ACTION_HANDLER( CHandlerMoveItem, "move_item" );
 // **********************************************************************************************************
 class CHandlerDragNDrop : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		string sSrc = getParam(sParams,"src");
 		string sDst = getParam(sParams,"dst");
@@ -1662,7 +1662,7 @@ static void sendToServerEnchantMessage(uint8 invent, uint16 slot)
 // **********************************************************************************************************
 class CHandlerItemCristalEnchant : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &sParams)
+	void execute (CCtrlBase *pCaller, const std::string &sParams) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("item_cristal_reload", pCaller, sParams);
@@ -1673,7 +1673,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemCristalEnchant, "item_cristal_enchant" );
 // **********************************************************************************************************
 class CHandlerItemCristalReload : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
@@ -1693,7 +1693,7 @@ public:
 	CDBCtrlSheet* CtrlSheet;
 public:
 	void infoValidated(CDBCtrlSheet* CtrlSheet);
-	virtual void infoReceived();
+	virtual void infoReceived() NL_OVERRIDE;
 };
 static CItemMenuInBagInfoWaiter ItemMenuInBagUpdater;
 
@@ -1737,7 +1737,7 @@ void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 
 class CHandlerItemMenuCheck : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		uint i;
@@ -2102,7 +2102,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemMenuCheck, "item_menu_check" );
 
 class CHandlerItemMenuDeactivate : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// The waiter may exist here only if at window init item info was
 		// incorrect, and it hasn't been updated since then, but that's only
@@ -2117,7 +2117,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemMenuDeactivate, "item_menu_deactivate" );
 
 class CHandlerItemMenuBaseCheck : public IActionHandler
 {
-	void execute (CCtrlBase *pCaller, const std::string &/* sParams */)
+	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -2191,7 +2191,7 @@ static void sendMsgStopUseXpCat( bool isRingCatalyser )
 // ***************************************************************************
 class CHandlerTeleportUse : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
@@ -2223,7 +2223,7 @@ REGISTER_ACTION_HANDLER( CHandlerTeleportUse, "teleport_use" );
 // ***************************************************************************
 class CHandlerItemConsume : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
@@ -2239,7 +2239,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemConsume, "item_consume" );
 // ***************************************************************************
 class CHandlerValidateItemTextEdition : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string & /* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string & /* sParams */) NL_OVERRIDE
 	{
 		CInterfaceItemEdition::getInstance()->validate();
 	}
@@ -2250,7 +2250,7 @@ REGISTER_ACTION_HANDLER( CHandlerValidateItemTextEdition, "validate_edit_custom"
 // ***************************************************************************
 class CHandlerItemTextDisplay : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2267,7 +2267,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemTextDisplay, "item_text_display" );
 
 class CHandlerItemTextEdition : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams) NL_OVERRIDE
 	{
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -2283,7 +2283,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemTextEdition, "item_text_edition" );
 // ***************************************************************************
 class CHandlerItemTextEditionClose : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string & /* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string & /* sParams */) NL_OVERRIDE
 	{
 		CInterfaceItemEdition::getInstance()->setCurrWindow(nullptr);
 	}
@@ -2293,7 +2293,7 @@ REGISTER_ACTION_HANDLER( CHandlerItemTextEditionClose, "on_close_edit_custom" );
 // ***************************************************************************
 class CHandlerXpCatalyserUse : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
@@ -2309,7 +2309,7 @@ REGISTER_ACTION_HANDLER( CHandlerXpCatalyserUse, "xp_catalyser_use" );
 // ***************************************************************************
 class CHandlerXpCatalyserStopUse : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// stop use the item
 		sendMsgStopUseXpCat(false);
@@ -2320,7 +2320,7 @@ REGISTER_ACTION_HANDLER( CHandlerXpCatalyserStopUse, "xp_catalyser_stop_use" );
 // ***************************************************************************
 class CHandlerRingXpCatalyserStopUse : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		// stop use the item
 		sendMsgStopUseXpCat(true);

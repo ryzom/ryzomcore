@@ -114,7 +114,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		// make sure something was found
 		if (_weightSum==0)
@@ -194,7 +194,7 @@ public:
 	}
 
 //	CPersistentStateInstance
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 
 		if (_states.empty())
@@ -239,7 +239,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if	(	_groups.empty()
 			&&	!_groupsName.empty())
@@ -308,7 +308,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex();
+	virtual uint32 getIndex() NL_OVERRIDE;
 };
 
 uint32 CAILogicActionUserEvent0::getIndex()
@@ -326,7 +326,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 1; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 1; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -339,7 +339,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 2; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 2; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -352,7 +352,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 3; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 3; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 4; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 4; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -378,7 +378,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 5; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 5; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -391,7 +391,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 6; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 6; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -404,7 +404,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 7; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 7; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -417,7 +417,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 8; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 8; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -430,7 +430,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionUserEvent(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 9; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 9; }
 };
 
 
@@ -458,7 +458,7 @@ public:
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
 //	virtual bool executeAction(CAIEntity *entity,const IAIEvent *event)
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_subActions.empty())
 		{
@@ -516,7 +516,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_states.empty())
 		{
@@ -558,7 +558,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (entity->getDebugHistory()->isRecording())
 		{
@@ -596,7 +596,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_subActions.empty())
 		{
@@ -647,7 +647,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		uint t=_min;
 		if (_min != _max)
@@ -697,7 +697,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity, const IAIEvent *event) NL_OVERRIDE
 	{
 		uint t = _min;
 		if (_min != _max)
@@ -864,7 +864,7 @@ public:
 	// this is the executeAction 'callback' for the action type.
 	// NOTE: This code should be fast and compact as it may be called very large numbers of times
 	// depending on the whim of the level designers
-	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event)
+	virtual bool executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		// precompute the timer ticks
 		float currentTime = CTimeInterface::getRyzomTime().getRyzomTime();
@@ -949,7 +949,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionSetTimer(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 0; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 0; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -962,7 +962,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionSetTimer(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 1; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 1; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -975,7 +975,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionSetTimer(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 2; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 2; }
 };
 
 //-------------------------------------------------------------------------------------------
@@ -988,7 +988,7 @@ public:
 								const CAIAliasDescriptionNode *eventNode, CStateMachine *container):
 								IAILogicActionSetTimer(args,subActions,eventNode,container){}
 protected:
-	virtual uint32 getIndex()	{ return 3; }
+	virtual uint32 getIndex() NL_OVERRIDE	{ return 3; }
 };
 
 
@@ -1000,7 +1000,7 @@ public:
 								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		CGroup *grp = entity->getGroup();
 		if (grp)
@@ -1035,7 +1035,7 @@ public:
 		_immediately = (args[0] == "immediately");
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		CGroup *const	grp = entity->getGroup();
 		
@@ -1073,7 +1073,7 @@ public:
 		_content.swap(temp);
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_destService.empty())
 			return false;
@@ -1152,7 +1152,7 @@ public:
 		_phraseId = tail;
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if	(_phraseId.empty())
 			return false;
@@ -1542,7 +1542,7 @@ public:
 		_Code = AICOMP::CCompiler::getInstance().compileCode(wrappedArgs, eventNode->fullName() + std::string(":dynamic if"));
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_Code.isNull()) { return false; }
 		if (_SubActions.empty()){ return false;}
@@ -1611,7 +1611,7 @@ public:
 
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
@@ -1644,7 +1644,7 @@ public:
 
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (evalCondition(entity, _Var1, _Op, _Var2))
 		{
@@ -1717,7 +1717,7 @@ public:
 
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_Op == invalid_operator)
 			return false;
@@ -1848,7 +1848,7 @@ public:
 
 	}
 
-	bool executeAction(CStateInstance* entity, IAIEvent const* event)
+	bool executeAction(CStateInstance* entity, IAIEvent const* event) NL_OVERRIDE
 	{
 		CGroup	*group = entity->getGroup();
 		if (_EmotNumber==MBEHAV::NUMBER_OF_BEHAVIOURS)
@@ -2041,7 +2041,7 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		CGroup	*const	group = entity->getGroup();
 		 CAILogicActionSitDownHelper::sitDown(group);
@@ -2067,7 +2067,7 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		CGroup	*const	group = entity->getGroup();
 		CAILogicActionSitDownHelper::standUp(group);
@@ -2102,7 +2102,7 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_Activity == fa_invalid)
 			return false;
@@ -2268,7 +2268,7 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if (_SubActions.empty()) { return true; }
 			
@@ -2360,7 +2360,7 @@ public:
 		}
 		parseCell	(true);
 	}
-	virtual		~CZoneMarker()
+	virtual		~CZoneMarker() NL_OVERRIDE
 	{
 		//	remove activities flags.
 		parseCell	(false);
@@ -2500,7 +2500,7 @@ public:
 
 	}
 	
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if	(!entity)
 			return	true;
@@ -2547,7 +2547,7 @@ public:
 		return	true;
 	}
 
-	void addPropertyZone	(CTmpPropertyZone::TSmartPtr	zone)
+	void addPropertyZone	(CTmpPropertyZone::TSmartPtr	zone) NL_OVERRIDE
 	{
 		CPropertyZone::TSmartPtr	newZone=new CPropertyZone();
 		if (!newZone->_Shape.setPatat(zone->verticalPos, zone->points))
@@ -2560,7 +2560,7 @@ public:
 	}
 
 	
-	virtual void addGroupFamily(CGroupFamily *grpFam) { _GroupFamilies.addChild(grpFam); }
+	virtual void addGroupFamily(CGroupFamily *grpFam) NL_OVERRIDE { _GroupFamilies.addChild(grpFam); }
 	
 private:
 	std::vector<CPropertyZone::TSmartPtr>	_Zones;
@@ -2605,7 +2605,7 @@ public:
 		return	string();
 	}
 	
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		nlwarning("executeActionSpawnDynGroup");
 		if	(!entity)
@@ -2735,7 +2735,7 @@ public:
 		const std::vector<IAILogicAction::TSmartPtr> &subActions, 
 		const CAIAliasDescriptionNode *eventNode,
 		CStateMachine *container);	
-	bool executeAction(CStateInstance *entity, const IAIEvent *event);
+	bool executeAction(CStateInstance *entity, const IAIEvent *event) NL_OVERRIDE;
 	NLMISC::CSmartPtr<const AIVM::CByteCode> _byteCode;
 };
 
@@ -2770,7 +2770,7 @@ public:
 		std::vector<IAILogicAction::TSmartPtr> const& subActions,
 		CAIAliasDescriptionNode const* eventNode,
 		CStateMachine* container);	
-	bool executeAction(CStateInstance* entity, IAIEvent const* event);
+	bool executeAction(CStateInstance* entity, IAIEvent const* event) NL_OVERRIDE;
 };
 
 
@@ -2821,7 +2821,7 @@ public:
 		std::vector<IAILogicAction::TSmartPtr> const& subActions,
 		CAIAliasDescriptionNode const* eventNode,
 		CStateMachine* container);	
-	bool executeAction(CStateInstance* entity, IAIEvent const* event);
+	bool executeAction(CStateInstance* entity, IAIEvent const* event) NL_OVERRIDE;
 };
 
 
@@ -2873,7 +2873,7 @@ public:
 		std::vector<IAILogicAction::TSmartPtr> const& subActions,
 		CAIAliasDescriptionNode const* eventNode,
 		CStateMachine* container);	
-	bool executeAction(CStateInstance* entity, IAIEvent const* event);
+	bool executeAction(CStateInstance* entity, IAIEvent const* event) NL_OVERRIDE;
 };
 
 
@@ -3013,7 +3013,7 @@ public:
 		}
 	}
 
-	bool	executeAction(CStateInstance *entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance *entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		if(_Sentence == "")
 		{
@@ -3110,7 +3110,7 @@ class CAILogicActionNull : public IAILogicAction
 	CAILogicActionNull(const std::vector<std::string> &args, const std::vector<IAILogicAction::TSmartPtr> 
 								&subActions, const CAIAliasDescriptionNode *eventNode, CStateMachine *container)
 	{}
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{return true;}
 	
 };
@@ -3174,7 +3174,7 @@ public:
 	}
 	
 
-	bool	executeAction(CStateInstance	*entity,const IAIEvent *event)
+	bool	executeAction(CStateInstance	*entity,const IAIEvent *event) NL_OVERRIDE
 	{
 		CGroup	*defaultGrp = entity->getGroup();
 		

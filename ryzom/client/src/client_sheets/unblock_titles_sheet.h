@@ -183,12 +183,12 @@ public:
 		Type = UNBLOCK_TITLES;
 	}
 	/// destructor
-	virtual ~CUnblockTitlesSheet() {}
+	virtual ~CUnblockTitlesSheet() NL_OVERRIDE {}
 
-	virtual void build(const NLGEORGES::UFormElm &item);
+	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 
 	/// serialize
-	virtual void serial(NLMISC::IStream &f)
+	virtual void serial(NLMISC::IStream &f) NL_OVERRIDE
 	{
 		f.serialCont(TitlesUnblock);
 	}

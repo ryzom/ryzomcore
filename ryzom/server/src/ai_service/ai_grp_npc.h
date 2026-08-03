@@ -40,14 +40,14 @@ class CSpawnGroupNpc
 public:
 	CSpawnGroupNpc(CPersistent<CSpawnGroup>& owner);
 	
-	virtual ~CSpawnGroupNpc() { }
+	virtual ~CSpawnGroupNpc() NL_OVERRIDE { }
 	
 	CGroupNpc& getPersistent() const;
 	
-	virtual void spawnBots();
-	virtual void despawnBots(bool immediately);
+	virtual void spawnBots() NL_OVERRIDE;
+	virtual void despawnBots(bool immediately) NL_OVERRIDE;
 	
-	void update();
+	void update() NL_OVERRIDE;
 	
 	void sendInfoToEGS() const;
 	
@@ -98,48 +98,48 @@ public:
 	CGroupNpc(CMgrNpc* mgr, CAIAliasDescriptionNode* aliasTree, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
 	CGroupNpc(CMgrNpc* mgr, uint32 alias, std::string const& name, RYAI_MAP_CRUNCH::TAStarFlag denyFlags);
 	
-	virtual ~CGroupNpc();
+	virtual ~CGroupNpc() NL_OVERRIDE;
 	
 	/// @name CChild implementation
 	//@{
 //	virtual std::string getIndexString() const;
-	virtual std::string getOneLineInfoString() const;
-	virtual std::vector<std::string> getMultiLineInfoString() const;
+	virtual std::string getOneLineInfoString() const NL_OVERRIDE;
+	virtual std::vector<std::string> getMultiLineInfoString() const NL_OVERRIDE;
 //	virtual std::string getFullName() const;
 	//@}
 	
-	CDynGrpBase* getGrpDynBase() { return this; }
+	CDynGrpBase* getGrpDynBase() NL_OVERRIDE { return this; }
 	
 	//////////////////////////////////////////////////////////////////////////	
 	//	PersistentStateInstance
 	
-	CAliasTreeOwner* aliasTreeOwner() { return this; }
+	CAliasTreeOwner* aliasTreeOwner() NL_OVERRIDE { return this; }
 	
-	void stateChange(CAIState const* oldState, CAIState const* newState);
+	void stateChange(CAIState const* oldState, CAIState const* newState) NL_OVERRIDE;
 	
-	CGroup* getGroup() { return this; }
+	CGroup* getGroup() NL_OVERRIDE { return this; }
 	
 	//////////////////////////////////////////////////////////////////////////
 	
-	virtual void lastBotDespawned();
-	virtual void firstBotSpawned();
+	virtual void lastBotDespawned() NL_OVERRIDE;
+	virtual void firstBotSpawned() NL_OVERRIDE;
 	
 	// debugging stuff
-	CDebugHistory* getDebugHistory() { return this; }
+	CDebugHistory* getDebugHistory() NL_OVERRIDE { return this; }
 	
-	CAIS::CCounter& getSpawnCounter();
+	CAIS::CCounter& getSpawnCounter() NL_OVERRIDE;
 	
-	RYZOMID::TTypeId getRyzomType() { return RYZOMID::npc; }
+	RYZOMID::TTypeId getRyzomType() NL_OVERRIDE { return RYZOMID::npc; }
 	
-	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup();
+	NLMISC::CSmartPtr<CSpawnGroup> createSpawnGroup() NL_OVERRIDE;
 	
 	CSpawnGroupNpc*	getSpawnObj() const { return NLMISC::type_cast<CSpawnGroupNpc*>(CGroup::getSpawnObj()); }
 	
-	CPersistentStateInstance* getPersistentStateInstance() { return this; }
+	CPersistentStateInstance* getPersistentStateInstance() NL_OVERRIDE { return this; }
 	
-	void setEvent(uint eventId);
+	void setEvent(uint eventId) NL_OVERRIDE;
 
-	virtual void serviceEvent (const CServiceEvent &info);
+	virtual void serviceEvent (const CServiceEvent &info) NL_OVERRIDE;
 	
 	void init() { }
 	
@@ -147,15 +147,15 @@ public:
 
 	
 	// inheritted virtual interface ------------------------------------
-	virtual bool spawn();
-	virtual void despawnGrp();
+	virtual bool spawn() NL_OVERRIDE;
+	virtual void despawnGrp() NL_OVERRIDE;
 	
 	virtual std::string buildDebugString(uint idx) const;
 	virtual void display(CStringWriter& stringWriter) const;
 	
-	void updateDependencies(CAIAliasDescriptionNode const& aliasTree, CAliasTreeOwner* aliasTreeOwner);
-	IAliasCont* getAliasCont(AITYPES::TAIType type);
-	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree);			
+	void updateDependencies(CAIAliasDescriptionNode const& aliasTree, CAliasTreeOwner* aliasTreeOwner) NL_OVERRIDE;
+	IAliasCont* getAliasCont(AITYPES::TAIType type) NL_OVERRIDE;
+	CAliasTreeOwner* createChild(IAliasCont* cont, CAIAliasDescriptionNode* aliasTree) NL_OVERRIDE;			
 	
 	// basic utilities -------------------------------------------------
 	CMgrNpc& mgr() const;

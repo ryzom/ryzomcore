@@ -53,7 +53,7 @@ public:
 		Round = 0xffffffff;
 	}
 
-	virtual ~CFormDfn () { }
+	virtual ~CFormDfn () NL_OVERRIDE { }
 
 	// A form definition entry
 	class CEntry
@@ -197,7 +197,7 @@ public:
 	const std::string				&getParentFilename (uint parent) const;
 
 	// Get num entry
-	uint							getNumEntry () const;
+	uint							getNumEntry () const NL_OVERRIDE;
 
 	// Set num entry
 	void							setNumEntry (uint size);
@@ -209,23 +209,23 @@ public:
 	CEntry							&getEntry (uint entry);
 
 	// Form UFormDfn
-	bool							getEntryType (uint entry, TEntryType &type, bool &array) const;
-	bool							getEntryName (uint entry, std::string &name) const;
-	bool							getEntryIndexByName (uint &entry, const	std::string &name) const;
-	bool							getEntryDfn (uint entry, UFormDfn **dfn);
+	bool							getEntryType (uint entry, TEntryType &type, bool &array) const NL_OVERRIDE;
+	bool							getEntryName (uint entry, std::string &name) const NL_OVERRIDE;
+	bool							getEntryIndexByName (uint &entry, const	std::string &name) const NL_OVERRIDE;
+	bool							getEntryDfn (uint entry, UFormDfn **dfn) NL_OVERRIDE;
 
 	bool							getEntryByName			(const std::string &name, CFormDfn::CEntry **entry);
-	bool							getEntryDfnByName		(const std::string &name, UFormDfn **dfn);
-	bool							isAnArrayEntryByName	(const std::string &name)	const;
+	bool							getEntryDfnByName		(const std::string &name, UFormDfn **dfn) NL_OVERRIDE;
+	bool							isAnArrayEntryByName	(const std::string &name)	const NL_OVERRIDE;
 
-	bool							getEntryType (uint entry, UType **type);
-	uint							getNumParents () const;
-	bool							getParent (uint parent, UFormDfn **parentRet);
-	const std::string				&getComment () const;
-	bool							getEntryFilename (uint entry, std::string& filename) const;
-	bool							getEntryFilenameExt (uint entry, std::string& filename) const;
-	bool							getParentFilename (uint parent, std::string &filename) const;
-	void							getDependencies (std::set<std::string> &dependencies) const;
+	bool							getEntryType (uint entry, UType **type) NL_OVERRIDE;
+	uint							getNumParents () const NL_OVERRIDE;
+	bool							getParent (uint parent, UFormDfn **parentRet) NL_OVERRIDE;
+	const std::string				&getComment () const NL_OVERRIDE;
+	bool							getEntryFilename (uint entry, std::string& filename) const NL_OVERRIDE;
+	bool							getEntryFilenameExt (uint entry, std::string& filename) const NL_OVERRIDE;
+	bool							getParentFilename (uint parent, std::string &filename) const NL_OVERRIDE;
+	void							getDependencies (std::set<std::string> &dependencies) const NL_OVERRIDE;
 
 	// Get the sub dfn of a dfn
 	CFormDfn						*getSubDfn (uint index, uint &dfnIndex);

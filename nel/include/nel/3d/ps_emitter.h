@@ -47,21 +47,21 @@ public:
 		CPSEmitter();
 
 		// dtor
-		virtual ~CPSEmitter();
+		virtual ~CPSEmitter() NL_OVERRIDE;
 	//@}
 
 	/// Return this bindable type
-	uint32							getType() const { return PSEmitter; }
+	uint32							getType() const NL_OVERRIDE { return PSEmitter; }
 
 
 	/// Return priority for emitters
-	virtual uint32					getPriority() const { return 500; }
+	virtual uint32					getPriority() const NL_OVERRIDE { return 500; }
 
 	/// Return true if this located bindable derived class holds alive emitters
-	virtual bool					hasEmitters() const { nlassert(_Owner); return _Owner->getSize() != 0; }
+	virtual bool					hasEmitters() const NL_OVERRIDE { nlassert(_Owner); return _Owner->getSize() != 0; }
 
 
-	virtual void					step(TPSProcessPass pass);
+	virtual void					step(TPSProcessPass pass) NL_OVERRIDE;
 
 	/**
 	* Process the emissions.
@@ -87,7 +87,7 @@ public:
 	/** Inherited from CPSLocatedBindable
 	 *  We register to the emitted type (when setEmittedType is called), so, this, this will be called when it is destroyed
 	 */
-	virtual void					notifyTargetRemoved(CPSLocated *ptr);
+	virtual void					notifyTargetRemoved(CPSLocated *ptr) NL_OVERRIDE;
 
 	/// Get emitted type.
 	CPSLocated						*getEmittedType() { return _EmittedType; }
@@ -171,7 +171,7 @@ public:
 	const CPSAttribMaker<uint32>	*getGenNbScheme(void) const  { return _GenNbScheme; }
 
 	/// Serialization
-	void serial(NLMISC::IStream &f);
+	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	///\name Speed vector options
 	//@{
@@ -238,12 +238,12 @@ public:
 	/** Release any reference this obj may have on the given process.
 	  * For example, this is used when detaching a located bindable from a system.
 	  */
-	virtual	void			 releaseRefTo(const CParticleSystemProcess *other);
+	virtual	void			 releaseRefTo(const CParticleSystemProcess *other) NL_OVERRIDE;
 
 	/** Release any reference this obj may have to other process of the system
 	  * For example, this is used when detaching a located bindable from a system.
 	  */
-	virtual void			 releaseAllRef();
+	virtual void			 releaseAllRef() NL_OVERRIDE;
 
 	// bypass the auto-LOD : no auto-LOD will be applied to that emitter
 	void					 setBypassAutoLOD(bool bypass) { _BypassAutoLOD = bypass; }
@@ -266,10 +266,10 @@ public:
 	bool					testEmitForever() const;
 
 	// from CPSLocated
-	virtual void setOwner(CPSLocated *psl);
+	virtual void setOwner(CPSLocated *psl) NL_OVERRIDE;
 
 	// from from CPSLocated
-	virtual bool			getUserMatrixUsageCount() const;
+	virtual bool			getUserMatrixUsageCount() const NL_OVERRIDE;
 
 	// Set the emit trigger. At the next sim step, all particles will emit at the start of the step.
 	void					setEmitTrigger() { _EmitTrigger = true; }
@@ -322,21 +322,21 @@ protected:
 
 	/**	Generate a new element for this bindable. They are generated according to the propertie of the class
 	 */
-	virtual void					newElement(const CPSEmitterInfo &info);
+	virtual void					newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
 	/** Delete an element given its index
 	 *  Attributes of the located that hold this bindable are still accessible for of the index given
 	 *  index out of range -> nl_assert
 	 */
-	virtual void					deleteElement(uint32 index);
+	virtual void					deleteElement(uint32 index) NL_OVERRIDE;
 	// version of delete element that is called by the sim loop
-	virtual void					deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep);
+	virtual void					deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep) NL_OVERRIDE;
 
 	/** Resize the bindable attributes containers. DERIVERS SHOULD CALL THEIR PARENT VERSION
 	 * should not be called directly. Call CPSLocated::resize instead
 	 */
-	virtual void					resize(uint32 size);
-	virtual void					bounceOccurred(uint32 index, TAnimationTime timeToNextSimStep);
+	virtual void					resize(uint32 size) NL_OVERRIDE;
+	virtual void					bounceOccurred(uint32 index, TAnimationTime timeToNextSimStep) NL_OVERRIDE;
 	void							updateMaxCountVect();
 
 
@@ -470,28 +470,28 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f);
+ 	virtual	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 
 	NLMISC_DECLARE_CLASS(CPSEmitterDirectionnal);
 
-	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
+	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed) NL_OVERRIDE;
 
-	void setDir(const NLMISC::CVector &v) { _Dir = v; }
+	void setDir(const NLMISC::CVector &v) NL_OVERRIDE { _Dir = v; }
 
-	NLMISC::CVector getDir(void) const { return _Dir; }
+	NLMISC::CVector getDir(void) const NL_OVERRIDE { return _Dir; }
 
 
 protected:
 
 	NLMISC::CVector _Dir;
 
-	virtual CPSLocated *getModulatedEmitterOwner(void) { return _Owner; }
-	virtual void newElement(const CPSEmitterInfo &info);
-	virtual void deleteElement(uint32 index);
+	virtual CPSLocated *getModulatedEmitterOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void deleteElement(uint32 index) NL_OVERRIDE;
 	void deleteElementBase(uint32 index);
-	virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep);
-	virtual void resize(uint32 capacity);
+	virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep) NL_OVERRIDE;
+	virtual void resize(uint32 capacity) NL_OVERRIDE;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -506,9 +506,9 @@ class CPSRadialEmitter : public CPSEmitterDirectionnal
 		if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("RadialEmitter");
 	}
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f);
+ 	virtual	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 	NLMISC_DECLARE_CLASS(CPSRadialEmitter);
-	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
+	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed) NL_OVERRIDE;
 };
 
 
@@ -527,20 +527,20 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f);
+ 	virtual	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSEmitterOmni);
 
 
 	/// Emission of located
-	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
+	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed) NL_OVERRIDE;
 protected:
-	virtual CPSLocated *getModulatedEmitterOwner(void) { return _Owner; }
-	virtual void newElement(const CPSEmitterInfo &info);
-	virtual void deleteElement(uint32 index);
+	virtual CPSLocated *getModulatedEmitterOwner(void) NL_OVERRIDE { return _Owner; }
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void deleteElement(uint32 index) NL_OVERRIDE;
 	void deleteElementBase(uint32 index);
-	virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep);
-	virtual void resize(uint32 capacity);
+	virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep) NL_OVERRIDE;
+	virtual void resize(uint32 capacity) NL_OVERRIDE;
 
 
 };
@@ -561,36 +561,36 @@ class CPSEmitterRectangle : public CPSEmitter, public CPSModulatedEmitter, publi
 		}
 
 		/// Serialisation
- 		virtual	void serial(NLMISC::IStream &f);
+ 		virtual	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 		NLMISC_DECLARE_CLASS(CPSEmitterRectangle);
 
 
 		/// Emission of located
 
-		virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
+		virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed) NL_OVERRIDE;
 
-		virtual void setDir(const NLMISC::CVector &v) { _Dir = v; }
+		virtual void setDir(const NLMISC::CVector &v) NL_OVERRIDE { _Dir = v; }
 
-		NLMISC::CVector getDir(void) const { return _Dir; }
+		NLMISC::CVector getDir(void) const NL_OVERRIDE { return _Dir; }
 
 
-		void showTool(void);
+		void showTool(void) NL_OVERRIDE;
 
 
 
 		// Inherited from IPSMover
-		virtual bool supportUniformScaling(void) const { return true; }
-		virtual bool supportNonUniformScaling(void) const { return true; }
-		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-		virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-		virtual void setScale(uint32 index, float scale);
-		virtual void setScale(uint32 index, const NLMISC::CVector &s);
-		NLMISC::CVector getScale(uint32 index) const;
+		virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual bool supportNonUniformScaling(void) const NL_OVERRIDE { return true; }
+		virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+		virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+		virtual void setScale(uint32 index, float scale) NL_OVERRIDE;
+		virtual void setScale(uint32 index, const NLMISC::CVector &s) NL_OVERRIDE;
+		NLMISC::CVector getScale(uint32 index) const NL_OVERRIDE;
 
 	protected:
 
-		virtual CPSLocated *getModulatedEmitterOwner(void) { return _Owner; }
+		virtual CPSLocated *getModulatedEmitterOwner(void) NL_OVERRIDE { return _Owner; }
 
 		CPSAttrib<CPlaneBasis> _Basis;
 
@@ -605,20 +605,20 @@ class CPSEmitterRectangle : public CPSEmitter, public CPSModulatedEmitter, publi
 
 		/**	Generate a new element for this bindable. They are generated according to the propertie of the class
 		 */
-		virtual void newElement(const CPSEmitterInfo &info);
+		virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
 
 		/** Delete an element given its index
 		 *  Attributes of the located that hold this bindable are still accessible for of the index given
 		 *  index out of range -> nl_assert
 		 */
-		virtual void deleteElement(uint32 index);
+		virtual void deleteElement(uint32 index) NL_OVERRIDE;
 		void deleteElementBase(uint32 index);
-		virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep);
+		virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep) NL_OVERRIDE;
 
 		/** Resize the bindable attributes containers. DERIVERS SHOULD CALL THEIR PARENT VERSION
 		 * should not be called directly. Call CPSLocated::resize instead
 		 */
-		virtual void resize(uint32 size);
+		virtual void resize(uint32 size) NL_OVERRIDE;
 };
 
 
@@ -636,13 +636,13 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f);
+ 	virtual	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSEmitterConic);
 
 
 	/// Emission of located
-	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
+	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed) NL_OVERRIDE;
 
 	/// Set a new radius for emission
 	void setRadius(float r) { _Radius = r; }
@@ -651,7 +651,7 @@ public:
 	float getRadius(void) const { return _Radius; }
 
 	/// Set the direction for emission
-	virtual void setDir(const NLMISC::CVector &v);
+	virtual void setDir(const NLMISC::CVector &v) NL_OVERRIDE;
 
 protected:
 
@@ -675,37 +675,37 @@ public:
 	}
 
 	/// Serialisation
- 	virtual	void serial(NLMISC::IStream &f);
+ 	virtual	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	NLMISC_DECLARE_CLASS(CPSSphericalEmitter);
 
 
 	/// Emission of located
 
-	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed);
+	virtual void emit(const NLMISC::CVector &srcPos, uint32 index, NLMISC::CVector &pos, NLMISC::CVector &speed) NL_OVERRIDE;
 
 
 
-	void showTool(void);
+	void showTool(void) NL_OVERRIDE;
 
 
 
 	// Inherited from IPSMover
-	virtual bool supportUniformScaling(void) const { return true; }
-	virtual bool supportNonUniformScaling(void) const { return false; }
-	virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m);
-	virtual NLMISC::CMatrix getMatrix(uint32 index) const;
-	virtual void setScale(uint32 index, float scale) { _Radius[index] = scale; }
-	NLMISC::CVector getScale(uint32 index) const { return NLMISC::CVector(_Radius[index], _Radius[index], _Radius[index]); }
+	virtual bool supportUniformScaling(void) const NL_OVERRIDE { return true; }
+	virtual bool supportNonUniformScaling(void) const NL_OVERRIDE { return false; }
+	virtual void setMatrix(uint32 index, const NLMISC::CMatrix &m) NL_OVERRIDE;
+	virtual NLMISC::CMatrix getMatrix(uint32 index) const NL_OVERRIDE;
+	virtual void setScale(uint32 index, float scale) NL_OVERRIDE { _Radius[index] = scale; }
+	NLMISC::CVector getScale(uint32 index) const NL_OVERRIDE { return NLMISC::CVector(_Radius[index], _Radius[index], _Radius[index]); }
 
 protected:
-	virtual CPSLocated *getModulatedEmitterOwner(void) { return _Owner; }
+	virtual CPSLocated *getModulatedEmitterOwner(void) NL_OVERRIDE { return _Owner; }
 	TPSAttribFloat _Radius;
-	virtual void newElement(const CPSEmitterInfo &info);
-	virtual void deleteElement(uint32 index);
+	virtual void newElement(const CPSEmitterInfo &info) NL_OVERRIDE;
+	virtual void deleteElement(uint32 index) NL_OVERRIDE;
 	void deleteElementBase(uint32 index);
-	virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep);
-	virtual void resize(uint32 size);
+	virtual void deleteElement(uint32 index, TAnimationTime timeUntilNextSimStep) NL_OVERRIDE;
+	virtual void resize(uint32 size) NL_OVERRIDE;
 };
 
 

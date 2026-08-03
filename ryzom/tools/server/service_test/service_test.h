@@ -32,16 +32,16 @@ class CServiceTest : public NLNET::IService
 {
 public:
 	// Initialisation of service
-	void init (void);
+	void init (void) NL_OVERRIDE;
 
 	// Update net processing 
-	bool update (void);
+	bool update (void) NL_OVERRIDE;
 
 	// Update service processing
 	void serviceUpdate(void);
 
 	// Release the service
-	void release (void);
+	void release (void) NL_OVERRIDE;
 };
 
 #endif // GD_SERVICE_TEST_H

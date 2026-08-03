@@ -103,13 +103,13 @@ public:
 	};
 
 	/// From IAnimatable
-	virtual IAnimatedValue* getValue (uint valueId);
+	virtual IAnimatedValue* getValue (uint valueId) NL_OVERRIDE;
 	/// From IAnimatable
-	virtual const char *getValueName (uint valueId) const;
+	virtual const char *getValueName (uint valueId) const NL_OVERRIDE;
 	/// Default Track Values for SpawnScriptValue is empty string
-	virtual ITrack* getDefaultTrack (uint valueId);
+	virtual ITrack* getDefaultTrack (uint valueId) NL_OVERRIDE;
 	/// Register bones into chanMixer.
-	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix);
+	virtual	void	registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix) NL_OVERRIDE;
 
 	/// Return the name of the spwan script track
 	static const char *getSpawnScriptValueName() {return "spawn_script";}
@@ -265,7 +265,7 @@ public:
 	CSkeletonSpawnScript	&getSSSScript() {return _SpawnScriptEvaluator;}
 
 	/// see CTransform::fastIntersect()
-	virtual bool	fastIntersect(const NLMISC::CVector &p0, const NLMISC::CVector &dir, float &dist2D, float &distZ, bool computeDist2D);
+	virtual bool	fastIntersect(const NLMISC::CVector &p0, const NLMISC::CVector &dir, float &dist2D, float &distZ, bool computeDist2D) NL_OVERRIDE;
 
 	/** Internal. Tool method used by Skins, to remap their bones id to skeleton ones
 	 *	\param bonesName input list of bones name
@@ -340,7 +340,7 @@ public:
 	// @{
 
 	/// Special version for skins
-	virtual float	getNumTriangles (float distance);
+	virtual float	getNumTriangles (float distance) NL_OVERRIDE;
 
 	/** Special version for skins. NB: skins never follow their original MRM distance setup, but follow
 	 *	this skeleton MRM setup. Default is to follow the MAX of all skins binded (ie the finer).
@@ -364,14 +364,14 @@ public:
 	 *  - call CTransformShape::traverseAnimDetail()
 	 *  - update animated bones.
 	 */
-	virtual void	traverseAnimDetail();
+	virtual void	traverseAnimDetail() NL_OVERRIDE;
 	/**	If displayed as a CLod, render it, else render the skins binded to this skeleton
 	 */
-	virtual	void	traverseRender();
+	virtual	void	traverseRender() NL_OVERRIDE;
 	// @}
 
 	// Lighting: get the Root world position!
-	virtual	void		getLightHotSpotInWorld(CVector &modelPos, float &modelRadius) const;
+	virtual	void		getLightHotSpotInWorld(CVector &modelPos, float &modelRadius) const NL_OVERRIDE;
 
 	/// \name AnimCtrl (IK...)
 	// @{
@@ -386,10 +386,10 @@ public:
 
 	/// \name ShadowMap CTransform Implementation
 	// @{
-	virtual	void		generateShadowMap(const CVector &lightDir);
-	virtual	CShadowMap	*getShadowMap();
-	virtual bool		computeWorldBBoxForShadow(NLMISC::CAABBox &worldBB);
-	virtual void		renderIntoSkeletonShadowMap(CSkeletonModel *rootSkeleton, CMaterial	&castMat);
+	virtual	void		generateShadowMap(const CVector &lightDir) NL_OVERRIDE;
+	virtual	CShadowMap	*getShadowMap() NL_OVERRIDE;
+	virtual bool		computeWorldBBoxForShadow(NLMISC::CAABBox &worldBB) NL_OVERRIDE;
+	virtual void		renderIntoSkeletonShadowMap(CSkeletonModel *rootSkeleton, CMaterial	&castMat) NL_OVERRIDE;
 	// @}
 
 	// TMP nico debug function : retrieve all max bone spheres in world coordinates
@@ -400,10 +400,10 @@ protected:
 	/// Constructor
 	CSkeletonModel();
 	/// Destructor
-	virtual ~CSkeletonModel();
+	virtual ~CSkeletonModel() NL_OVERRIDE;
 
 	/// Build link to traversals.
-	virtual	void	initModel();
+	virtual	void	initModel() NL_OVERRIDE;
 
 private:
 	static CTransform	*creator() {return new CSkeletonModel;}
@@ -592,8 +592,8 @@ private:
 	// @}
 
 protected:
-	virtual void			createShadowMap();
-	virtual void			deleteShadowMap();
+	virtual void			createShadowMap() NL_OVERRIDE;
+	virtual void			deleteShadowMap() NL_OVERRIDE;
 
 };
 
