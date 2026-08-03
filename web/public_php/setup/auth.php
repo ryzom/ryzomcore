@@ -21,6 +21,8 @@ require_once('config.php');
 
 <?php
 
+// drop any session id the caller may have planted before auth
+session_regenerate_id(true);
 $_SESSION['nelSetupAuthenticated'] = 1;
 
 printalert("success", "You are now authenticated");

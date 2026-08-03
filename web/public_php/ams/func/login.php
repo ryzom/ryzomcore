@@ -18,6 +18,8 @@ function login(){
 
 		if( $result != "fail"){
 			//handle successful login
+			// drop any session id the caller may have planted before auth
+			session_regenerate_id(true);
 			$_SESSION['user'] = $result['Login'];
 			$_SESSION['id'] = $result['UId'];
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));

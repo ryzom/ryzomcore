@@ -84,6 +84,8 @@
 			$nel_user = nt_auth_check_login($NELTOOL['POST_VARS']['nel_login'], $NELTOOL['POST_VARS']['nel_passwd']);
 			if ($nel_user)
 			{
+				// drop any session id the caller may have planted before auth
+				session_regenerate_id(true);
 				nt_auth_set_session_var('nelid',$nel_user['user_id']);
 				nt_auth_set_logging_count($nel_user['user_id']);
 				$nel_user['new_login'] = true;

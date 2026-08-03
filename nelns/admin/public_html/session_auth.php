@@ -95,6 +95,10 @@
 				return 0;
 			}
 
+			// drop any session id the caller may have planted before auth
+			if (function_exists('session_regenerate_id'))
+				session_regenerate_id(true);
+
 			$sessionAuth = array ("admlogin" => $admlogin, "admpassword" => $admpassword, "uid" => $uid);
 			//session_register("sessionAuth");
 			$_SESSION["sessionAuth"] = $sessionAuth;
