@@ -12,14 +12,17 @@ function add_sgroup(){
 
         //check if admin
         if( Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))){
-            $name = filter_var($_POST['Name'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $inner_tag = filter_var($_POST['Tag'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            // Stored as entered: the pages that show these escape on the way
+            // out, and running the imap password through the html filter
+            // silently turned every &, quote and angle bracket in it into an
+            // entity, so the stored credential was not the one that was typed.
+            $name = $_POST['Name'];
+            $inner_tag = $_POST['Tag'];
             $tag = "[" . $inner_tag . "]";
-            $inner_tag = filter_var($_POST['Tag'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $groupemail = filter_var($_POST['GroupEmail'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $imap_mailserver = filter_var($_POST['IMAP_MailServer'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $imap_username = filter_var($_POST['IMAP_Username'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $imap_password = filter_var($_POST['IMAP_Password'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            $groupemail = filter_var($_POST['GroupEmail'], FILTER_SANITIZE_EMAIL);
+            $imap_mailserver = $_POST['IMAP_MailServer'];
+            $imap_username = $_POST['IMAP_Username'];
+            $imap_password = $_POST['IMAP_Password'];
 
             //create a new support group
             $result['RESULT_OF_ADDING'] = Support_Group::createSupportGroup($name, $tag, $groupemail, $imap_mailserver, $imap_username, $imap_password);

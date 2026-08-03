@@ -8,7 +8,7 @@
 			</div>
 			<div class="panel-body">
 				<center>
-				<p>{$ip_support}</p>
+				<p>{$ip_support nofilter}</p>
 				<div class="alert alert-error">
 				<form enctype="multipart/form-data" method="post" action="index.php?page=plugin&action=install_plugin" id="upload_plugin"  >
 				<label for="file">Filename:</label>&nbsp;&nbsp;

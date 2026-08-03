@@ -31,6 +31,12 @@ class Helpers {
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
 
          $smarty = new Smarty;
+         // Escape every {$var} the templates print. None of them escaped
+         // anything themselves, so user names, mail addresses, ticket titles,
+         // ticket text, support group names and plugin names all reached the
+         // page as markup. The few places that are meant to emit html say so
+         // with 'nofilter'.
+        $smarty -> escape_html = true;
          $smarty -> setCompileDir( $SITEBASE . '/templates_c/' );
          $smarty -> setCacheDir( $AMS_CACHEDIR );
          $smarty -> setConfigDir( $SITEBASE . '/configs/' );

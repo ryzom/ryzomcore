@@ -28,7 +28,7 @@
 								  <th>{$plugin_version}</th>
 								  <th width="350">{$plugin_description}</th>
 								  <th width="80">{$plugin_type}</th>
-								  <th>{$plugin_permission}</th>
+								  <th>{$plugin_permission nofilter}</th>
 								  <th>{$plugin_actions}</th>
 							  </tr>
 						  </thead>

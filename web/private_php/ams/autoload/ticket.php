@@ -112,9 +112,9 @@ class Ticket{
     public static function create_Ticket( $title, $content, $category, $author, $real_author, $for_support_group = 0, $extra_info = 0) {
 
         //create the new ticket!
-        // the title is shown back without further escaping, and the mail
-        // handler hands us a subject line straight off an incoming email
-        $title = filter_var($title, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        // The title is stored as it was typed. The pages that show it escape
+        // on the way out (smarty escape_html), and the notification mails are
+        // plain text, so escaping it here only put entities in both.
         $ticket = new Ticket();
         $values = array("Title" => $title, "Timestamp"=>0,  "Status"=> 1, "Queue"=> 0, "Ticket_Category" => $category, "Author" => $author, "Priority" => 0);
         $ticket->set($values);
