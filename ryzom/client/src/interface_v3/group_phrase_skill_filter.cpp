@@ -259,13 +259,13 @@ void	CGroupPhraseSkillFilter::rebuild()
 		sint	skillValue;
 		fromString(pRoot->Children[i]->Id, skillValue);
 		// Special sort:
-		if(skillValue==SKILLS::SF)
+		if(skillValue==(sint)SKILLS::SF)
 			skillValue= -4;
-		if(skillValue==SKILLS::SM)
+		if(skillValue==(sint)SKILLS::SM)
 			skillValue= -3;
-		if(skillValue==SKILLS::SC)
+		if(skillValue==(sint)SKILLS::SC)
 			skillValue= -2;
-		if(skillValue==SKILLS::SH)
+		if(skillValue==(sint)SKILLS::SH)
 			skillValue= -1;
 		// prepare tri
 		sortNodes[i].Value= skillValue;
