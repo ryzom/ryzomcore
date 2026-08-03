@@ -3121,7 +3121,7 @@ string checkLogin(const string &login, const string &password, const string &cli
 					}*/
 				}
 
-				if (res.size() < 7 && res.size() > 8)
+				if (res.size() < 7 || res.size() > 8)
 				{
 					nlwarning("bad | numbers %u != %d", (uint)res.size(), 8);
 					nlwarning("'%s'", lines[i].c_str());
@@ -3170,7 +3170,7 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	std::string url = ClientCfg.ConfigFile.getVar("StartupHost").asString() + ClientCfg.ConfigFile.getVar("StartupPage").asString();
 
 	if(!HttpClient.sendGet(url + "?cmd=login&shardid=" + toString(shardId) + "&login=" + LoginLogin + "&password=" + cryptedPassword + "&clientApplication=" + ClientApp + "&cp=2"))
-		return "Can't send (error code 11)";
+		return std::string("Can't send (error code 11) ") + HttpClient.lastError();
 
 	string res;
 
@@ -3204,6 +3204,11 @@ string selectShard(uint32 shardId, string &cookie, string &addr)
 	}
 
 	nldebug("res2: %s", res.c_str());
+
+	// a headers-only reply would otherwise fall through the parse below
+	// and come back as success with an empty cookie
+	if (res.empty())
+		return "Empty answer body from server (error code 67)";
 
 	if (res[0] == 'H')
 	{
