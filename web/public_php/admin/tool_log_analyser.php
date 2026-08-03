@@ -282,10 +282,14 @@
 									$service_text = trim(stripslashes(html_entity_decode($NELTOOL['POST_VARS']['service_text'], ENT_QUOTES)));
 									$tpl->assign('tool_form_service_text', $service_text); // the template escapes it
 
+									// text rides inside a quoted AES argument;
+									// addslashes is not enough against a quote
+									// that leaves the string and a second command
+									$service_text = tool_main_frame_quoted_arg($service_text, 256);
 									if ($service_text != '')
 									{
 										$service_command = 'executeToFile '. $AS_LAS_LocalPath . $service_search_file_name ;
-										$service_command .= ' searchString '. $service_search_database .' "'. addslashes($service_text) .'" ';
+										$service_command .= ' searchString '. $service_search_database .' "'. $service_text .'" ';
 										$service_command .= $service_search_start_date;
 										if ($service_search_end_date != '')	$service_command .= ' '. $service_search_end_date;
 

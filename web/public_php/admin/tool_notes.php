@@ -30,7 +30,13 @@
 				$note_title 		= $NELTOOL['POST_VARS']['tool_form_note_title'];
 				$note_data 			= $NELTOOL['POST_VARS']['tool_form_note_data'];
 				$note_active		= $NELTOOL['POST_VARS']['tool_form_note_active'];
-				$note_global		= (isset($NELTOOL['POST_VARS']['tool_form_note_global']) ? $NELTOOL['POST_VARS']['tool_form_note_global'] : 0);
+				// UI hides the checkbox, but the POST field is still forgeable
+				$note_global		= 0;
+				if (tool_admin_applications_check('tool_notes_global')
+					&& !empty($NELTOOL['POST_VARS']['tool_form_note_global']))
+				{
+					$note_global = 1;
+				}
 
 				$note_mode			= $NELTOOL['POST_VARS']['tool_form_note_mode'];
 				$note_uri			= $NELTOOL['POST_VARS']['tool_form_note_popup_uri'];
@@ -50,7 +56,12 @@
 				$note_title 		= $NELTOOL['POST_VARS']['tool_form_note_title'];
 				$note_data 			= $NELTOOL['POST_VARS']['tool_form_note_data'];
 				$note_active		= $NELTOOL['POST_VARS']['tool_form_note_active'];
-				$note_global		= (isset($NELTOOL['POST_VARS']['tool_form_note_global']) ? $NELTOOL['POST_VARS']['tool_form_note_global'] : 0);
+				$note_global		= 0;
+				if (tool_admin_applications_check('tool_notes_global')
+					&& !empty($NELTOOL['POST_VARS']['tool_form_note_global']))
+				{
+					$note_global = 1;
+				}
 
 				$note_mode			= $NELTOOL['POST_VARS']['tool_form_note_mode'];
 				$note_uri			= $NELTOOL['POST_VARS']['tool_form_note_popup_uri'];

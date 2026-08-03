@@ -55,11 +55,7 @@
 
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
-		$tmp_data = nt_unpack_request_data($NELTOOL['GET_VARS']['refdata']);
-		if (is_array($tmp_data))
-		{
-			$NELTOOL['POST_VARS'] = $tmp_data;
-		}
+		tool_main_apply_refdata_from_get($NELTOOL['GET_VARS']['refdata']);
 	}
 
 	$tpl->assign('tool_domain_list',		$nel_user['access']['domains']);
@@ -125,23 +121,38 @@
 								$service_command = '';
 								$_commands = array();
 
-								if ($entity_data['entity_state']	!= $entity_data['source_entity_state'])		$_commands[] = 'NamedEntityState='. $entity_data['entity_state'];
-								if ($entity_data['entity_param1']	!= $entity_data['source_entity_param1'])	$_commands[] = 'NamedEntityParam1='. $entity_data['entity_param1'];
-								if ($entity_data['entity_param2']	!= $entity_data['source_entity_param2'])	$_commands[] = 'NamedEntityParam2='. $entity_data['entity_param2'];
+								// Values and the entity path land as bare words
+								// in getView; only allow framed pieces through.
+								$source_entity = isset($entity_data['source_entity']) ? $entity_data['source_entity'] : '';
+								$source_service = isset($entity_data['source_service']) ? strtolower($entity_data['source_service']) : '';
+								if (!tool_main_valid_entity_view_path($source_entity)
+									|| !tool_main_valid_service_alias($source_service))
+								{
+									nt_common_add_debug('update entities refused: invalid entity or service');
+									continue;
+								}
+
+								// getView values are unquoted bare words
+								if ($entity_data['entity_state']	!= $entity_data['source_entity_state'])
+									$_commands[] = 'NamedEntityState='. preg_replace('/[^A-Za-z0-9_.:-]/', '', (string)$entity_data['entity_state']);
+								if ($entity_data['entity_param1']	!= $entity_data['source_entity_param1'])
+									$_commands[] = 'NamedEntityParam1='. preg_replace('/[^A-Za-z0-9_.:-]/', '', (string)$entity_data['entity_param1']);
+								if ($entity_data['entity_param2']	!= $entity_data['source_entity_param2'])
+									$_commands[] = 'NamedEntityParam2='. preg_replace('/[^A-Za-z0-9_.:-]/', '', (string)$entity_data['entity_param2']);
 
 								if (sizeof($_commands) > 0)
 								{
-									nt_common_add_debug("something has been updated in entity : ". $entity_data['source_entity']);
+									nt_common_add_debug("something has been updated in entity : ". $source_entity);
 									if (sizeof($_commands) == 1)
 									{
-										$service_command = 'getView '. $entity_data['source_entity'] .'.'. $_commands[0];
+										$service_command = 'getView '. $source_entity .'.'. $_commands[0];
 									}
 									else
 									{
-										$service_command = 'getView '. $entity_data['source_entity'] .'.['. implode(',', $_commands) .']';
+										$service_command = 'getView '. $source_entity .'.['. implode(',', $_commands) .']';
 									}
 
-									$service = strtolower($entity_data['source_service']);
+									$service = $source_service;
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
 

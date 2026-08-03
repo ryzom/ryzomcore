@@ -472,15 +472,132 @@
 		return false;
 	}
 
+	/*
+	 * Auto-refresh is written into a meta tag with |smarty:nodefaults.
+	 * Only accept a rate that is on the menu; anything else becomes "never".
+	 */
+	function tool_main_refresh_rate_validate($value)
+	{
+		global $refresh_rates;
+
+		$secs = (int)$value;
+		if (is_array($refresh_rates))
+		{
+			foreach ($refresh_rates as $rate)
+			{
+				if ((int)$rate['secs'] === $secs)
+					return $secs;
+			}
+		}
+		return 0;
+	}
+
+	/*
+	 * Service aliases go into AES serviceCmd as the target module name.
+	 * Same charset as the welcome-service su check.
+	 */
+	function tool_main_valid_service_alias($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9._:-]{1,64}$/', $value);
+	}
+
+	/*
+	 * Entity ids on the wire are usually (0x…:aa:bb:cc); some dumps omit the
+	 * parentheses. Either way they must be a single command word — no space,
+	 * quote or newline that would frame a second argument.
+	 */
+	function tool_main_valid_entity_id($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9():._-]{1,64}\z/', $value);
+	}
+
+	/*
+	 * Player / character names for playerInfo and similar: letters, digits,
+	 * underscore and a few name separators — no spaces, quotes or newlines.
+	 */
+	function tool_main_valid_player_name($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9_\'-]{1,64}\z/', $value);
+	}
+
+	/*
+	 * Shard / host names that land as bare words in AES global commands.
+	 */
+	function tool_main_valid_shard_token($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9._:-]{1,64}\z/', $value);
+	}
+
+	/*
+	 * Named entity path segments for getView (no dots that would walk up
+	 * the view tree further than intended, no commas that open multi-sets).
+	 */
+	function tool_main_valid_entity_view_path($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9_():-]{1,128}\z/', $value);
+	}
+
+	/*
+	 * Free text that is still quoted inside an AES command (searchString).
+	 * Drop anything that would leave the quoted argument.
+	 */
+	function tool_main_frame_quoted_arg($value, $max_len = 256)
+	{
+		$value = str_replace(array("\r", "\n", "\0", '"', '\\'), ' ', (string)$value);
+		$value = trim($value);
+		if (strlen($value) > $max_len)
+			$value = substr($value, 0, $max_len);
+		return $value;
+	}
+
+	/*
+	 * GET refdata used to unpack a full prior POST, including the action
+	 * button names. That turns a link into a one-click mutation (and a CSRF
+	 * vector under SameSite=Lax). Keep form state keys, drop the triggers.
+	 */
+	function tool_main_apply_refdata_from_get($packed)
+	{
+		global $NELTOOL;
+
+		$tmp_data = nt_unpack_request_data($packed);
+		if (!is_array($tmp_data))
+			return;
+
+		static $action_keys = array(
+			'services_pl' => true,
+			'services_gl' => true,
+			'services_ee' => true,
+			'services_update' => true,
+			'services_las' => true,
+			'subservices_gl' => true,
+			'shards_update' => true,
+			'ws_update' => true,
+			'toolaction' => true,
+		);
+
+		foreach ($tmp_data as $key => $val)
+		{
+			if (isset($action_keys[$key]))
+				continue;
+			// service_xxx checkboxes and locate fields stay; action names go
+			$NELTOOL['POST_VARS'][$key] = $val;
+		}
+	}
+
 	function tool_main_get_checked_services()
 	{
 		global $NELTOOL;
 
 		$services = array();
 
+		if (!is_array($NELTOOL['POST_VARS']))
+			return $services;
+
 		reset($NELTOOL['POST_VARS']);
 		foreach($NELTOOL['POST_VARS'] as $post_key => $post_val)
 		{
+			if (!is_string($post_val) || !tool_main_valid_service_alias($post_val))
+				continue;
 			$val = 'service_'. $post_val;
 			if ($post_key == $val)
 			{

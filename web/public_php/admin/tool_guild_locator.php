@@ -41,31 +41,25 @@
 
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
-		$tmp_data = nt_unpack_request_data($NELTOOL['GET_VARS']['refdata']);
-		if (is_array($tmp_data))
-		{
-			$NELTOOL['POST_VARS'] = $tmp_data;
-		}
+		tool_main_apply_refdata_from_get($NELTOOL['GET_VARS']['refdata']);
 	}
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
 
 	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $_POST['services_refresh'])
+		$new_refresh = tool_main_refresh_rate_validate($_POST['services_refresh']);
+		if ($current_refresh_rate != $new_refresh)
 		{
-			$current_refresh_rate = $_POST['services_refresh'];
+			$current_refresh_rate = $new_refresh;
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
 
-	if ($current_refresh_rate == null)
+	$current_refresh_rate = tool_main_refresh_rate_validate($current_refresh_rate);
+	if ($current_refresh_rate > 0)
 	{
-		$current_refresh_rate = 0;
-	}
-	elseif ($current_refresh_rate > 0)
-	{
-		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. $current_refresh_rate .'">');
+		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. (int)$current_refresh_rate .'">');
 	}
 
 	$tpl->assign('tool_refresh_list',		$refresh_rates);
@@ -239,32 +233,40 @@
 
 						case 'setleader':
 
+							// Grade changes are still GET links (templates build
+							// them that way); frame every id before it reaches AES.
 							if (($tool_services_gl == 'setleader') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
-								$service		= $NELTOOL['GET_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['GET_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['GET_VARS']['guildid'];
-								$member_eid		= $NELTOOL['GET_VARS']['eid'];
+								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
+								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
 
-								// guildSetLeader <guildName|<shardId>:<guildId> <member eid>
-
-								$service_command = 'guildSetLeader '. $guild_shard_id .':'. $guild_id .' '. $member_eid;
-
-								nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
-
-								$tpl->assign('tool_execute_result', '');
-								$command_return_data = array();
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (tool_main_valid_service_alias($service)
+									&& $guild_shard_id > 0 && $guild_id > 0
+									&& tool_main_valid_entity_id($member_eid))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									// guildSetLeader <guildName|<shardId>:<guildId> <member eid>
+									$service_command = 'guildSetLeader '. $guild_shard_id .':'. $guild_id .' '. $member_eid;
+
+									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
+
+									$tpl->assign('tool_execute_result', '');
+									$command_return_data = array();
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+									else
+									{
+										$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									}
 								}
 								else
 								{
-									// the locator displays a nice output, no need for the raw one
-									//$tpl->assign('tool_execute_command', 	$service_command);
-									$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									nt_common_add_debug('setleader refused: invalid service, guild or eid');
 								}
 
 							}
@@ -274,35 +276,41 @@
 
 							if (($tool_services_gl == 'promote') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
-								$service		= $NELTOOL['GET_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['GET_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['GET_VARS']['guildid'];
-								$member_eid		= $NELTOOL['GET_VARS']['eid'];
-								$member_grade	= $NELTOOL['GET_VARS']['grade'];
+								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
+								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
+								$member_grade	= isset($NELTOOL['GET_VARS']['grade']) ? $NELTOOL['GET_VARS']['grade'] : '';
 
 								$new_grade		= 'Member';
 								if		($member_grade == 'Officer')		$new_grade = 'Officer';
 								elseif	($member_grade == 'HighOfficer')	$new_grade = 'HighOfficer';
 
-								// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade = Member/Officer/HighOfficer/Leader>
-
-								$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
-
-								nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
-
-								$tpl->assign('tool_execute_result', '');
-								$command_return_data = array();
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (tool_main_valid_service_alias($service)
+									&& $guild_shard_id > 0 && $guild_id > 0
+									&& tool_main_valid_entity_id($member_eid))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade>
+									$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
+
+									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
+
+									$tpl->assign('tool_execute_result', '');
+									$command_return_data = array();
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+									else
+									{
+										$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									}
 								}
 								else
 								{
-									// the locator displays a nice output, no need for the raw one
-									//$tpl->assign('tool_execute_command', 	$service_command);
-									$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									nt_common_add_debug('promote refused: invalid service, guild or eid');
 								}
 
 
@@ -312,46 +320,52 @@
 
 							if (($tool_services_gl == 'demote') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
-								$service		= $NELTOOL['GET_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['GET_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['GET_VARS']['guildid'];
-								$member_eid		= $NELTOOL['GET_VARS']['eid'];
-								$member_grade	= $NELTOOL['GET_VARS']['grade'];
+								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
+								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
+								$member_grade	= isset($NELTOOL['GET_VARS']['grade']) ? $NELTOOL['GET_VARS']['grade'] : '';
 
 								$new_grade		= 'Member';
 								if 		($member_grade == 'Officer')	$new_grade = 'Officer';
 								elseif	($member_grade == 'Member')		$new_grade = 'Member';
 
-								// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade = Member/Officer/HighOfficer/Leader>
-
-								$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
-
-								nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
-
-								$tpl->assign('tool_execute_result', '');
-								$command_return_data = array();
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (tool_main_valid_service_alias($service)
+									&& $guild_shard_id > 0 && $guild_id > 0
+									&& tool_main_valid_entity_id($member_eid))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade>
+									$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
+
+									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
+
+									$tpl->assign('tool_execute_result', '');
+									$command_return_data = array();
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+									else
+									{
+										$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									}
 								}
 								else
 								{
-									// the locator displays a nice output, no need for the raw one
-									//$tpl->assign('tool_execute_command', 	$service_command);
-									$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									nt_common_add_debug('demote refused: invalid service, guild or eid');
 								}
 
 							}
 
 						case 'dumpguild':
 
-							$service		= $NELTOOL['GET_VARS']['servicealias'];
-							$guild_shard_id	= $NELTOOL['GET_VARS']['guildshardid'];
-							$guild_id		= $NELTOOL['GET_VARS']['guildid'];
+							$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+							$guild_shard_id	= isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+							$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
 
-							if (($guild_shard_id > 0) && ($guild_id > 0) && ($service != ''))
+							if (($guild_shard_id > 0) && ($guild_id > 0) && tool_main_valid_service_alias($service))
 							{
 								$service_command = 'dumpGuild '. $guild_shard_id .':'. $guild_id;
 

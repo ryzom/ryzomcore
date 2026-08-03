@@ -46,20 +46,18 @@
 
 	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $_POST['services_refresh'])
+		$new_refresh = tool_main_refresh_rate_validate($_POST['services_refresh']);
+		if ($current_refresh_rate != $new_refresh)
 		{
-			$current_refresh_rate = $_POST['services_refresh'];
+			$current_refresh_rate = $new_refresh;
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
 
-	if ($current_refresh_rate == null)
+	$current_refresh_rate = tool_main_refresh_rate_validate($current_refresh_rate);
+	if ($current_refresh_rate > 0)
 	{
-		$current_refresh_rate = 0;
-	}
-	elseif ($current_refresh_rate > 0)
-	{
-		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. $current_refresh_rate .'">');
+		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. (int)$current_refresh_rate .'">');
 	}
 
 	$tpl->assign('tool_refresh_list',		$refresh_rates);
@@ -640,9 +638,14 @@
 				elseif (isset($_POST['shards_update']) && tool_admin_applications_check('tool_main_shard_autostart'))
 				{
 					$shard_update_mode	= $_POST['shards_update'];
-					$shard_update_name	= $_POST['shards_update_name'];
+					$shard_update_name	= isset($_POST['shards_update_name']) ? $_POST['shards_update_name'] : '';
 
-					switch ($shard_update_mode)
+					// shard name is a bare word in setShardStartMode
+					if (!tool_main_valid_shard_token($shard_update_name))
+					{
+						nt_common_add_debug('shards_update refused: invalid shard name');
+					}
+					else switch ($shard_update_mode)
 					{
 						case 'auto restart on':
 
