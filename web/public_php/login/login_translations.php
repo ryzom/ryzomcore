@@ -17,43 +17,43 @@ $ErrMsgs[1000]['de'] = 'Error';
 
 // Common public error messages
 $msgMisconfiguredClient['en'] = 'Your client might be misconfigured, please contact support';
-$msgMisconfiguredClient['fr'] = 'Il se peut que votre client soit mal configuré, merci de contacter le service client';
-$msgMisconfiguredClient['de'] = 'Dein Client ist möglicherweise falsch konfiguriert, bitte kontaktiere den Support';
+$msgMisconfiguredClient['fr'] = 'Il se peut que votre client soit mal configurÃ©, merci de contacter le service client';
+$msgMisconfiguredClient['de'] = 'Dein Client ist mÃ¶glicherweise falsch konfiguriert, bitte kontaktiere den Support';
 $msgOutOfDateClient['en'] = 'This client software is out of date, please visit www.ryzom.com to download a new client';
-$msgOutOfDateClient['fr'] = 'Ce logiciel client est trop ancien, merci de télécharger un nouveau client sur www.ryzom.com';
+$msgOutOfDateClient['fr'] = 'Ce logiciel client est trop ancien, merci de tÃ©lÃ©charger un nouveau client sur www.ryzom.com';
 $msgOutOfDateClient['de'] = 'Die Software ist nicht mehr aktuell bitte geh auf www.ryzom.com und lade dir den neuen Client herunter';
 $msgLSInMaintenance['en'] = 'The log-in server is in maintenance, please try later';
-$msgLSInMaintenance['fr'] = 'Le serveur de connexion est en maintenance, merci de réessayer plus tard';
-$msgLSInMaintenance['de'] = 'Der Login-Server ist wegen Wartungsarbeiten offline, bitte versuch es später nochmal';
+$msgLSInMaintenance['fr'] = 'Le serveur de connexion est en maintenance, merci de rÃ©essayer plus tard';
+$msgLSInMaintenance['de'] = 'Der Login-Server ist wegen Wartungsarbeiten offline, bitte versuch es spÃ¤ter nochmal';
 $msgDBInMaintenance['en'] = 'The database server is in maintenance, please try later';
-$msgDBInMaintenance['fr'] = 'Le serveur de base de données est en maintenance, merci de réessayer plus tard';
-$msgDBInMaintenance['de'] = 'Der Datenbank-Server ist wegen Wartungsarbeiten offline, bitte versuch es später nochmal';
+$msgDBInMaintenance['fr'] = 'Le serveur de base de donnÃ©es est en maintenance, merci de rÃ©essayer plus tard';
+$msgDBInMaintenance['de'] = 'Der Datenbank-Server ist wegen Wartungsarbeiten offline, bitte versuch es spÃ¤ter nochmal';
 $msgGameServersClosed['en'] = 'Game servers are currently closed or restricted, please retry later';
-$msgGameServersClosed['fr'] = 'Les serveurs de jeu sont actuellement fermés ou à accès restreint, merci de réessayer plus tard';
-$msgGameServersClosed['de'] = 'Die Spiel-Server sind momentan geschlossen oder gesperrt, bitte versuch es später nochmal';
+$msgGameServersClosed['fr'] = 'Les serveurs de jeu sont actuellement fermÃ©s ou Ã  accÃ¨s restreint, merci de rÃ©essayer plus tard';
+$msgGameServersClosed['de'] = 'Die Spiel-Server sind momentan geschlossen oder gesperrt, bitte versuch es spÃ¤ter nochmal';
 
 /*
  * Main account error messages:
  */
 $ErrMsgs[2001]['dbg'] = '(in %2)';
 $ErrMsgs[2001]['en'] = 'Invalid account: %1'; // ex 52 and 64
-$ErrMsgs[2001]['fr'] = 'Compte erroné : %1';
-$ErrMsgs[2001]['de'] = 'Ungültiger Account: %1';
+$ErrMsgs[2001]['fr'] = 'Compte erronÃ© : %1';
+$ErrMsgs[2001]['de'] = 'UngÃ¼ltiger Account: %1';
 $ErrMsgs[2001]['log'] = false;
 
 $ErrMsgs[2002]['en'] = "Your account must be activated first. Please read the email sent to %1.";
-$ErrMsgs[2002]['fr'] = "Votre compte doit d'abord être activé. Merci de lire l'e-mail envoyé à %1.";
+$ErrMsgs[2002]['fr'] = "Votre compte doit d'abord Ãªtre activÃ©. Merci de lire l'e-mail envoyÃ© Ã  %1.";
 $ErrMsgs[2002]['de'] = "Dein Account muss noch aktiviert werden. Bitte befolge die Anweisungen, die wir per Mail an %1 geschickt haben.";
 $ErrMsgs[2002]['log'] = false;
 
 $ErrMsgs[2003]['en'] = "Your account must be activated first. Please read the email that has been sent to you.";
-$ErrMsgs[2003]['fr'] = "Votre compte doit d'abord être activé. Merci de lire l'e-mail que nous vous avons envoyé.";
+$ErrMsgs[2003]['fr'] = "Votre compte doit d'abord Ãªtre activÃ©. Merci de lire l'e-mail que nous vous avons envoyÃ©.";
 $ErrMsgs[2003]['de'] = "Dein Account muss noch aktiviert werden. Bitte befolge die Anweisungen, die wir per Mail an Dich geschickt haben.";
 $ErrMsgs[2003]['log'] = false;
 
 $ErrMsgs[2004]['dbg'] = '(in %2)'; // user => ex 56; signup_data => ex 56B
 $ErrMsgs[2004]['en'] = "Invalid password";
-$ErrMsgs[2004]['fr'] = "Mot de passe erroné";
+$ErrMsgs[2004]['fr'] = "Mot de passe erronÃ©";
 $ErrMsgs[2004]['de'] = "Falsches Passwort";
 $ErrMsgs[2004]['log'] = false;
 
@@ -62,12 +62,12 @@ define('BASE_TRANSLATED_LS_ERROR_NUM', 2100);
 
 $ErrMsgs[2101]['dbg'] = '(LS error %1: %2 for userId %3)';
 $ErrMsgs[2101]['en'] = 'Invalid account'; // ex 1?: 'invalid user'
-$ErrMsgs[2101]['fr'] = 'Compte erroné';
-$ErrMsgs[2101]['de'] = 'Ungültiger Account';
+$ErrMsgs[2101]['fr'] = 'Compte erronÃ©';
+$ErrMsgs[2101]['de'] = 'UngÃ¼ltiger Account';
 
 $ErrMsgs[2102]['dbg'] = '(LS error %1: %2 for userId %3)';
 $ErrMsgs[2102]['en'] = 'Your account is already in online state, please retry in a few seconds'; // ex 2: 'User already online, please relog'
-$ErrMsgs[2102]['fr'] = "Votre compte est encore dans l'état en ligne, merci de réessayer dans quelques secondes";
+$ErrMsgs[2102]['fr'] = "Votre compte est encore dans l'Ã©tat en ligne, merci de rÃ©essayer dans quelques secondes";
 $ErrMsgs[2102]['de'] = 'Dein Account ist schon als online gekennzeichnet, bitte versuche es in ein paar Sekunden nochmals';
 $ErrMsgs[2102]['log'] = false;
 
@@ -134,8 +134,8 @@ $ErrMsgs[3012]['dbg'] = "No access privilege found for %1, but I need to accept 
 
 $ErrMsgs[3013]['dbg'] = "(client application: %1 domain: %2 reqPriv: %3)";
 $ErrMsgs[3013]['en'] = "You don't have sufficient privilege to connect now, please try later";
-$ErrMsgs[3013]['fr'] = "Vous n'avez pas les privilèges nécessaires pour vous connecter maintenant, veuillez essayer plus tard";
-$ErrMsgs[3013]['de'] = 'Du hast nicht die nötigen Rechte um dich jetzt zu verbinden, bitte versuch es später nochmal';
+$ErrMsgs[3013]['fr'] = "Vous n'avez pas les privilÃ¨ges nÃ©cessaires pour vous connecter maintenant, veuillez essayer plus tard";
+$ErrMsgs[3013]['de'] = 'Du hast nicht die nÃ¶tigen Rechte um dich jetzt zu verbinden, bitte versuch es spÃ¤ter nochmal';
 $ErrMsgs[3013]['log'] = false;
 
 // Translated Ring Session Manager (joinSession) error messages
