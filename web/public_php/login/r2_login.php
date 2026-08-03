@@ -163,9 +163,11 @@
 	// Callback called on end of output buffering
 	function ob_callback_r2login($buffer)
 	{
-		// Log only in case of error or malformed result string
+		// Log only in case of error or malformed result string.
+		// Success is '1:' for cmd=ask and '1#' for cmd=login; the login
+		// answer carries the session cookie, which must stay out of the log.
 		$blockHd = substr($buffer, 0, 2);
-		if ($blockHd != '1:')
+		if ($blockHd != '1:' && $blockHd != '1#')
 		{
 			$logFile = new CWwwLog();
 			$logFile->logStr(str_replace("\n",'\n',$buffer));
