@@ -16,7 +16,9 @@ function forgot_password(){
         $webUser = new WebUsers($target_id);
         $target_username = $webUser->getUsername();
         $target_hashedPass = $webUser->getHashedPass();
-        $hashed_key = hash('sha512',$target_hashedPass);
+        // time-limited HMAC; the previous form was a permanent sha512 of the
+        // password hash and never expired on its own
+        $hashed_key = WebUsers::createPasswordResetToken($target_id, $target_hashedPass);
 
         if ( isset( $_COOKIE['Language'] ) ) {
             $lang = $_COOKIE['Language'];
@@ -34,7 +36,9 @@ function forgot_password(){
 
         //create the reset url
         global $WEBPATH;
-        $resetURL = $WEBPATH . "?page=reset_password&user=". $target_username . "&email=" . $email . "&key=" . $hashed_key;
+        $resetURL = $WEBPATH . "?page=reset_password&user=" . rawurlencode($target_username)
+              . "&email=" . rawurlencode($email)
+              . "&key=" . rawurlencode($hashed_key);
         //set email stuff
         $recipient = $email;
         $subject = $mailText['email_subject_forgot_password'];

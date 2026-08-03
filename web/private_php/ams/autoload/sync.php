@@ -91,7 +91,7 @@ class Sync{
                 catch (PDOException $e) {
                     if ($display == true) {
                         print('Something went wrong! The shard is probably still offline!');
-                        print_r($e);
+                        error_log($e->getMessage());
                     }
                 }
                 unlink($pidfile);

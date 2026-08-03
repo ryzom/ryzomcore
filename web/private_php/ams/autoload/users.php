@@ -322,7 +322,7 @@ class Users{
                     "query" => json_encode(array($values["Login"], $values["Password"], $values["Email"])), "db" => "shard"));
                     return "shardoffline";
                } catch (PDOException $e) {
-                    print_r($e);
+                    error_log($e->getMessage());
                     return "liboffline";
                }
           }

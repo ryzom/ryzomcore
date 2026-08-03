@@ -54,7 +54,7 @@ function change_receivemail(){
 
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
-         print_r($e);
+         error_log($e->getMessage());
          throw new SystemExit();
     }
 

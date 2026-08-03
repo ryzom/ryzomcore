@@ -11,9 +11,11 @@
  * @author Daan Janssens, mentored by Matthew Lagoe
  */
 
-// load required pages and turn error reporting on/off
+// Log errors server-side; never print them into the response (stack traces
+// and PDO messages carry connection details).
 error_reporting( E_ALL );
-ini_set( 'display_errors', 'on' );
+ini_set( 'display_errors', '0' );
+ini_set( 'log_errors', '1' );
 
 class SystemExit extends Exception {}
 try {

@@ -71,7 +71,7 @@ function create_ticket(){
                    
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
-                    print_r($e);
+                    error_log($e->getMessage());
                     throw new SystemExit();
                     header("Cache-Control: max-age=1");
                     header("Location: index.php");

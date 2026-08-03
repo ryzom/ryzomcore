@@ -99,6 +99,57 @@ class WebUsers extends Users{
                 return "fail";
           }	
        }
+
+       /**
+       * Build a time-limited password reset token.
+       * The old form was sha512(password_hash) with no expiry, so a leaked
+       * link (or a known hash) stayed valid until the password changed.
+       * The token carries an expiry and an HMAC over the user id, the
+       * expiry and the current password hash, so it dies with the clock
+       * and with a successful reset.
+       *
+       * @param $userId the ams_user UId
+       * @param $passwordHash the current stored password hash
+       * @param $lifetimeSeconds how long the token stays valid (default 1h)
+       * @return string token of the form "<expiry>.<hmac>"
+       */
+       public static function createPasswordResetToken($userId, $passwordHash, $lifetimeSeconds = 3600){
+              global $cfg;
+              $secret = (isset($cfg['crypt']['key']) && $cfg['crypt']['key'] !== '')
+                     ? $cfg['crypt']['key'] : 'ams-password-reset';
+              $expiry = time() + (int)$lifetimeSeconds;
+              $payload = (string)(int)$userId . '|' . $expiry . '|' . (string)$passwordHash;
+              $sig = hash_hmac('sha256', $payload, $secret);
+              return $expiry . '.' . $sig;
+       }
+
+       /**
+       * Validate a password reset token from createPasswordResetToken().
+       * Rejects anything that is not the current form, anything past its
+       * expiry, and anything whose signature does not match.
+       */
+       public static function verifyPasswordResetToken($userId, $passwordHash, $token){
+              global $cfg;
+              if (!is_string($token) || $token === ''){
+                     return false;
+              }
+              $parts = explode('.', $token, 2);
+              if (count($parts) !== 2){
+                     return false;
+              }
+              list($expiry, $sig) = $parts;
+              if (!ctype_digit((string)$expiry) || (int)$expiry < time()){
+                     return false;
+              }
+              if (!preg_match('/^[0-9a-f]{64}$/i', $sig)){
+                     return false;
+              }
+              $secret = (isset($cfg['crypt']['key']) && $cfg['crypt']['key'] !== '')
+                     ? $cfg['crypt']['key'] : 'ams-password-reset';
+              $payload = (string)(int)$userId . '|' . $expiry . '|' . (string)$passwordHash;
+              $expected = hash_hmac('sha256', $payload, $secret);
+              return hash_equals($expected, $sig);
+       }
        
 	   
        /**
@@ -110,6 +161,9 @@ class WebUsers extends Users{
          $dbw = new DBLayer("web");  
          $statement = $dbw->select("ams_user", array('username' => $username), "Login=:username");
          $row = $statement->fetch();
+         if (!$row || !isset($row['UId'])){
+                return 0;
+         }
          return $row['UId'];
        }
     

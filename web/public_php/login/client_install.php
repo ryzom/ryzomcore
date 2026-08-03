@@ -1,11 +1,5 @@
 <?php 
 
-	// LOG database
-	$StatsDBHost = "192.168.1.169";
-	$StatsDBUserName = "root";
-	$StatsDBPassword = "";
-	$StatsDBName = "stats";
-
 	include_once('config.php');
 
 	error_reporting(E_ERROR | E_PARSE);

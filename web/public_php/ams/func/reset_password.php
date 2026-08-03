@@ -1,17 +1,26 @@
 <?php
 
 function reset_password(){
-    //filter all data
+    // filter all data; passwords must not go through FULL_SPECIAL_CHARS —
+    // that rewrites &, <, etc. and makes real passwords fail to match
     $email = filter_var($_GET["email"], FILTER_SANITIZE_EMAIL);
-    $user = filter_var($_GET["user"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $key = filter_var($_GET["key"], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $user = isset($_GET["user"]) && is_string($_GET["user"]) ? $_GET["user"] : '';
+    $key = isset($_GET["key"]) && is_string($_GET["key"]) ? $_GET["key"] : '';
 
-    $password = filter_var($_POST['NewPass'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $confirmpass = filter_var($_POST['ConfirmNewPass'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+    $password = isset($_POST['NewPass']) ? (string)$_POST['NewPass'] : '';
+    $confirmpass = isset($_POST['ConfirmNewPass']) ? (string)$_POST['ConfirmNewPass'] : '';
 
     $target_id = WebUsers::getId($user);
+    if (!$target_id){
+        global $WEBPATH;
+        $_SESSION['error_code'] = "403";
+        header("Cache-Control: max-age=1");
+        header("Location: ".$WEBPATH."?page=error");
+        throw new SystemExit();
+    }
     $webUser = new WebUsers($target_id);
-    if( (WebUsers::getIdFromEmail($email) == $target_id) && (hash('sha512',$webUser->getHashedPass()) == $key) ){
+    $email_id = WebUsers::getIdFromEmail($email);
+    if( ($email_id == $target_id) && WebUsers::verifyPasswordResetToken($target_id, $webUser->getHashedPass(), $key) ){
         $params = Array( 'user' => $user, 'CurrentPass' => "dummy", 'NewPass' => $password, 'ConfirmNewPass' => $confirmpass, 'adminChangesOther' => true);
         $result = $webUser->check_change_password($params);
         if ($result == "success"){
@@ -26,19 +35,21 @@ function reset_password(){
             helpers :: loadtemplate( 'reset_success', $result);
             throw new SystemExit();
         }
-        $GETString = "";
-        foreach($_GET as $key => $value){
-                $GETString = $GETString . $key . '=' . $value . "&";
-        }
-        if($GETString != ""){
-                $GETString = '?'.$GETString;
-        }
+        // only the params the form needs, encoded for the action url
+        $GETString = '?user=' . rawurlencode($user)
+            . '&email=' . rawurlencode($email)
+            . '&key=' . rawurlencode($key);
         $result['getstring'] = $GETString;
-        $result['prevNewPass'] = $password;
-        $result['prevConfirmNewPass'] = $confirmpass;
+        $result['prevNewPass'] = '';
+        $result['prevConfirmNewPass'] = '';
         $result['no_visible_elements'] = 'TRUE';
         helpers :: loadtemplate( 'reset_password', $result);
         throw new SystemExit();
 
     }
+    global $WEBPATH;
+    $_SESSION['error_code'] = "403";
+    header("Cache-Control: max-age=1");
+    header("Location: ".$WEBPATH."?page=error");
+    throw new SystemExit();
 }
