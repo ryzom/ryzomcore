@@ -513,8 +513,47 @@ class CStaticCreatures
 {
 public:
 	/// constructor
+	// readGeorges() only sets the fields relevant to the sheet's actual
+	// content (e.g. non-combat/decorative ".creature" sheets never touch
+	// combat-only fields like _Skills/_Characteristics), yet serial() always
+	// writes every field unconditionally: without an explicit default here,
+	// packed_sheets ends up storing whatever raw memory was left behind by
+	// the previous object built at this address.
 	CStaticCreatures()
-	: _Protections(DMGTYPE::NBTYPES)
+	: _Race(EGSPD::CPeople::Unknown)
+	, _Gender(0)
+	, _Size(0)
+	, _Level(0)
+	, _PlayerHpLevel(0)
+	, _NbHitToKillPlayer(0.f)
+	, _AttackLevel(0)
+	, _DefenseLevel(0)
+	, _XPLevel(0)
+	, _XPGainOnCreature(0.f)
+	, _TauntLevel(0)
+	, _NbPlayers(0)
+	, _Characteristics()
+	, _Scores()
+	, _Regen()
+	, _Skills()
+	, _MeleeReachValue(0)
+	, _DodgeAsDefense(false)
+	, _WalkSpeed(0.f)
+	, _RunSpeed(0.f)
+	, _Ecosystem(ECOSYSTEM::unknown)
+	, _CreatureDamagePerHit(0)
+	, _CreatureDamagePerHitWithoutAverageDodge(0)
+	, _AttackLatency(0)
+	, _Protections(DMGTYPE::NBTYPES)
+	, _Faction(0)
+	, _FameByKillValid(false)
+	, _FameByKill(0)
+	, _ColRadius(0.f)
+	, _Scale(1.f)
+	, _ColLength(0.f)
+	, _ColWidth(0.f)
+	, _DamageShieldDamage(0)
+	, _DamageShieldHpDrain(0)
 	{
 	}
 	/// destructor
