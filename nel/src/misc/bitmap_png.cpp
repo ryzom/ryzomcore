@@ -81,9 +81,9 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	if(!f.isReading()) return false;
 
 	// initialize the info header
-	png_struct *png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, setPNGError, setPNGWarning);
+	png_struct *png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, setPNGError, setPNGWarning);
 
-	if (png_ptr == NULL)
+	if (png_ptr == nullptr)
 	{
 		nlwarning("failed to create the png read struct");
 		return 0;
@@ -92,9 +92,9 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	// allocate/initialize the memory for image information.
 	png_info *info_ptr = png_create_info_struct(png_ptr);
 
-	if (info_ptr == NULL)
+	if (info_ptr == nullptr)
 	{
-		png_destroy_read_struct(&png_ptr, NULL, NULL);
+		png_destroy_read_struct(&png_ptr, nullptr, nullptr);
 		nlwarning("failed to create the png info struct");
 		return 0;
 	}
@@ -102,7 +102,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	if (setjmp(png_jmpbuf(png_ptr)))
 	{
 		// free all of the memory associated with the png_ptr and info_ptr
-		png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+		png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 		// if we get here, we had a problem reading the file
 		nlwarning("Error while reading PNG");
 		return 0;
@@ -120,7 +120,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	// get header infos
 	png_uint_32 width, height;
 	int iBitDepth, iColorType;
-	png_get_IHDR(png_ptr, info_ptr, &width, &height, &iBitDepth, &iColorType, NULL, NULL, NULL);
+	png_get_IHDR(png_ptr, info_ptr, &width, &height, &iBitDepth, &iColorType, nullptr, nullptr, nullptr);
 
 	// expand images of all color-type and bit-depth to 3x8 bit RGB images
 	// let the library process things like alpha, transparency, background
@@ -147,7 +147,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	png_read_update_info(png_ptr, info_ptr);
 
 	// get again width, height and the new bit-depth and color-type
-	png_get_IHDR(png_ptr, info_ptr, &width, &height, &iBitDepth, &iColorType, NULL, NULL, NULL);
+	png_get_IHDR(png_ptr, info_ptr, &width, &height, &iBitDepth, &iColorType, nullptr, nullptr, nullptr);
 
 	uint8 imageDepth;
 
@@ -248,7 +248,7 @@ uint8 CBitmap::readPNG( NLMISC::IStream &f )
 	png_free(png_ptr, row_pointers);
 
 	// clean up after the read, and free any memory allocated
-	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);
 
 	//return the size of a pixel, either 8,24,32 bit
 	return imageDepth;
@@ -260,7 +260,7 @@ static bool writePNGSetJmp(png_struct *png_ptr)
 	if (setjmp(png_jmpbuf(png_ptr)))
 	{
 		// free all of the memory associated with the png_ptr
-		png_destroy_write_struct(&png_ptr, (png_info**)NULL);
+		png_destroy_write_struct(&png_ptr, (png_info**)nullptr);
 		// if we get here, we had a problem writing the file
 		nlwarning("Error while writing PNG");
 		return false;
@@ -284,7 +284,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 	if (d!=32 && d!=24 && d!=16 && d!=8) return false;
 
 	// create image write structure
-	png_struct *png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, setPNGError, setPNGWarning);
+	png_struct *png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, setPNGError, setPNGWarning);
 
 	if (!png_ptr)
 	{
@@ -295,9 +295,9 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 	// create info structure
 	png_info *info_ptr = png_create_info_struct(png_ptr);
 
-	if (info_ptr == NULL)
+	if (info_ptr == nullptr)
 	{
-		png_destroy_write_struct( &png_ptr, (png_info**)NULL );
+		png_destroy_write_struct( &png_ptr, (png_info**)nullptr);
 		nlwarning("couldn't save PNG image.");
 		return false;
 	}
@@ -305,7 +305,7 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 	if (!writePNGSetJmp(png_ptr)) return false;
 
 	// set the write function
-	png_set_write_fn(png_ptr, (void*)&f, writePNGData, NULL);
+	png_set_write_fn(png_ptr, (void*)&f, writePNGData, nullptr);
 
 	int iColorType;
 	

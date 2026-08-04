@@ -259,7 +259,7 @@ class CContextSoundContainer : public IContextSoundContainer
 		if (it != _ContextSounds.end())
 			return it->second;
 		else
-			return 0;
+			return nullptr;
 	}
 
 	void getSoundList(std::vector<std::pair<std::string, CSound*> > &subsounds) const NL_OVERRIDE

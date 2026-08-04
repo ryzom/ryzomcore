@@ -223,7 +223,7 @@ const CStorageRaw *CRklPatchObject::rpoChunk() const
 {
 	for (TStorageObjectContainer::const_iterator it = m_Claimed.begin(), end = m_Claimed.end(); it != end; ++it)
 		if (it->first == 0x08fd) return dynamic_cast<const CStorageRaw *>(it->second);
-	return NULL;
+	return nullptr;
 }
 
 bool CRklPatchObject::decodeRPatch(SRPatchMesh &out, std::string &err) const

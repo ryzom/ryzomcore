@@ -45,10 +45,10 @@ namespace NLGUI
 	CDBGroupSelectNumber::CDBGroupSelectNumber(const TCtorParam &param) :
 	CInterfaceGroup(param)
 	{
-		_SlotNumber= NULL;
-		_TextNumber= NULL;
-		_ButtonUp= NULL;
-		_ButtonDown= NULL;
+		_SlotNumber = nullptr;
+		_TextNumber = nullptr;
+		_ButtonUp = nullptr;
+		_ButtonDown = nullptr;
 		_LoopMode= true;
 		_MinValue= 0;
 		_MaxValue= 9;
@@ -64,7 +64,7 @@ namespace NLGUI
 	{
 		if( name == "value" )
 		{
-			if( _Number.getNodePtr() != NULL )
+			if( _Number.getNodePtr() != nullptr)
 				return _Number.getNodePtr()->getFullName();
 			else
 				return "";
@@ -139,12 +139,12 @@ namespace NLGUI
 	xmlNodePtr CDBGroupSelectNumber::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "select_number" );
 		
-		if( _Number.getNodePtr() != NULL )
+		if( _Number.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
@@ -196,7 +196,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CDBGroupSelectNumber::setup()
 	{
-		if (_SlotNumber != NULL)
+		if (_SlotNumber != nullptr)
 			return;
 
 		// bind to the controls.
@@ -206,15 +206,15 @@ namespace NLGUI
 		_ButtonDown= dynamic_cast<CCtrlBaseButton*>(CInterfaceGroup::getCtrl("arrow_down"));
 
 		// checks
-		if(_SlotNumber==NULL)
+		if(_SlotNumber == nullptr)
 			nlwarning("Interface: SelectNumberGroup: bitmap 'slot_number' missing or bad type");
-		if(_TextNumber==NULL)
+		if(_TextNumber == nullptr)
 			nlwarning("Interface: SelectNumberGroup: text view 'number' missing or bad type");
-		if(_ButtonUp==NULL)
+		if(_ButtonUp == nullptr)
 			nlwarning("Interface: SelectNumberGroup: button 'arrow_up' missing or bad type");
-		if(_ButtonDown==NULL)
+		if(_ButtonDown == nullptr)
 			nlwarning("Interface: SelectNumberGroup: button 'arrow_down' missing or bad type");
-		if(_SlotNumber==NULL || _TextNumber==NULL || _ButtonUp==NULL || _ButtonDown==NULL)
+		if(_SlotNumber == nullptr || _TextNumber == nullptr || _ButtonUp == nullptr || _ButtonDown == nullptr)
 			return;
 
 		// actions
@@ -319,7 +319,7 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CDBGroupSelectNumber *pSN = dynamic_cast<CDBGroupSelectNumber*>(pCaller->getParent());
-			if (pSN == NULL) return;
+			if (pSN == nullptr) return;
 			pSN->changeValue(+1);
 		}
 	};
@@ -332,7 +332,7 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CDBGroupSelectNumber *pSN = dynamic_cast<CDBGroupSelectNumber*>(pCaller->getParent());
-			if (pSN == NULL) return;
+			if (pSN == nullptr) return;
 			pSN->changeValue(-1);
 		}
 	};

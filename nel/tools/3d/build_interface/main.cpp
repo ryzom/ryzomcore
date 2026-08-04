@@ -403,7 +403,7 @@ int main(int argc, char **argv)
 	AllMaps.resize( mapSize );
 	for(sint i = 0; i < mapSize; ++i )
 	{
-		NLMISC::CBitmap *pBtmp = NULL;
+		NLMISC::CBitmap *pBtmp = nullptr;
 
 		try
 		{
@@ -452,7 +452,7 @@ int main(int argc, char **argv)
 			if (keepGoing)
 			{
 				outString(toString("WARNING : skipping %s : %s", AllMapNames[i].c_str(), e.what()));
-				AllMaps[i] = NULL;
+				AllMaps[i] = nullptr;
 				continue;
 			}
 
@@ -464,7 +464,7 @@ int main(int argc, char **argv)
 	// Drop entries skipped by --keep-going
 	for (sint i = 0; i < mapSize; )
 	{
-		if (AllMaps[i] == NULL)
+		if (AllMaps[i] == nullptr)
 		{
 			AllMaps.erase(AllMaps.begin() + i);
 			AllMapNames.erase(AllMapNames.begin() + i);
@@ -557,7 +557,7 @@ int main(int argc, char **argv)
 		fmtName = fmtName.substr(0, fmtName.rfind('.'));
 		fmtName += ".txt";
 		FILE *f = nlfopen(fmtName, "wb");
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			for (sint i = 0; i < mapSize; ++i)
 			{
@@ -592,7 +592,7 @@ int main(int argc, char **argv)
 		fmtName += ".txt";
 		FILE *f = nlfopen(fmtName, "wb");
 
-		if (f == NULL)
+		if (f == nullptr)
 		{
 			outString(toString("ERROR: Unable to write UV file %s", fmtName.c_str()));
 			return -1;

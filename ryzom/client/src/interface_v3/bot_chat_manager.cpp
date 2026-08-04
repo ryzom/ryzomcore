@@ -34,13 +34,13 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
 
-CBotChatManager *CBotChatManager::_Instance = NULL;
+CBotChatManager *CBotChatManager::_Instance = nullptr;
 
 
 // ********************************************************************************************
 CBotChatManager::CBotChatManager()
 {
-	_CurrPage = NULL;
+	_CurrPage = nullptr;
 	_SessionID = 0;
 	//_ChosenMissionFlags = 0;
 }
@@ -65,7 +65,7 @@ void CBotChatManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -110,7 +110,7 @@ void CBotChatManager::endDialog()
 	}
 	else
 		nlwarning("impulseCallBack : unknown message name : 'BOTCHAT:END'.");
-	setCurrPage(NULL);
+	setCurrPage(nullptr);
 }
 
 // ***************************************************************************

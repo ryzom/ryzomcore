@@ -70,7 +70,7 @@ public:
 	virtual CObject *find(const std::string& /* instanceId */, const std::string& /* attrName */ = "", sint32 /* position */ = -1, const std::string &/* key */ ="") NL_OVERRIDE
 	{
 		nlassert(0);
-		return NULL;
+		return nullptr;
 	}
 private:
 	CDynamicMapClient &_DMC;
@@ -185,7 +185,7 @@ void CFrameActionsRecorder::flush()
 	_FrameActions.setDMC(&feedback);
 	_FrameActions.endAction();
 	_FrameActions.clear();
-	_FrameActions.setDMC(NULL);
+	_FrameActions.setDMC(nullptr);
 	_FrameActions.newSingleAction(ucstring());
 	_Flushing = false;
 }
@@ -194,7 +194,7 @@ void CFrameActionsRecorder::flush()
 CDynamicMapClient::CDynamicMapClient(const std::string &/* eid */, NLNET::IModuleSocket * clientGateway, lua_State *luaState)
 {
 
-	_ComLua = 0;
+	_ComLua = nullptr;
 		//new CComLuaModule(this, luaState);
 
 	_ActionHistoric.setDMC(this);
@@ -227,7 +227,7 @@ void CDynamicMapClient::release()
 {
 	//H_AUTO(R2_CDynamicMapClient_release)
 	delete _ComLua;
-	_ComLua = 0;
+	_ComLua = nullptr;
 	_EditionModule->release();
 	CRingAccess::releaseInstance();
 		//new CComLuaModule(this, luaState);
@@ -236,7 +236,7 @@ void CDynamicMapClient::release()
 void CDynamicMapClient::init(lua_State *luaState)
 {
 	//H_AUTO(R2_CDynamicMapClient_init)
-	nlassert(luaState != 0);
+	nlassert(luaState != nullptr);
 	_ComLua = new CComLuaModule(this, luaState);
 	_EditionModule->init();
 	CRingAccess::getInstance().init();
@@ -671,7 +671,7 @@ CObject *CDynamicMapClient::find(const std::string& instanceId, const std::strin
 CObject *CDynamicMapClient::getHighLevel() const
 {
 	//H_AUTO(R2_CDynamicMapClient_getHighLevel)
-	if (!getCurrentScenario()) { return 0;}
+	if (!getCurrentScenario()) { return nullptr;}
 	return getCurrentScenario()->getHighLevel();
 }
 

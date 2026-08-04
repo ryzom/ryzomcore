@@ -89,7 +89,7 @@ void			IShape::getAABBox(CAABBox &bbox) const
 // ***************************************************************************
 CShapeStream::CShapeStream ()
 {
-	_Shape=NULL;
+	_Shape = nullptr;
 }
 
 

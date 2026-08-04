@@ -202,7 +202,7 @@ CStage *CStageSet::addStage(NLMISC::TGameCycle gameCycle, uint property, sint64 
 				if(itFind == _StageSet.end())
 				{
 					nlwarning("CStageSet::addStage: Cannot insert a stage for the gamecycle '%d' but cannot find too.", gameCycle);
-					return 0;
+					return nullptr;
 				}
 
 				// Set the iterator.
@@ -225,7 +225,7 @@ CStage *CStageSet::addStage(NLMISC::TGameCycle gameCycle, uint property, sint64 
 		if(!result.second)
 		{
 			nlwarning("CStageSet::addStage : Strange, map is empty but cannot insert a new element in the map.");
-			return 0;
+			return nullptr;
 		}
 
 		// Set the iterator (can be a new one or an existing one.
@@ -262,7 +262,7 @@ CStage *CStageSet::addStage(NLMISC::TGameCycle gameCycle, uint property, sint64 
 		return stage;
 	}
 	else
-		return 0;
+		return nullptr;
 }// addStage //
 
 

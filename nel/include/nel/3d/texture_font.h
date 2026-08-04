@@ -46,7 +46,7 @@ public:
 		bool Oblique;
 		CFontGenerator *FontGenerator;
 
-		SLetterKey() : Char(0), Size(0), Embolden(false), Oblique(false), FontGenerator(NULL)
+		SLetterKey() : Char(0), Size(0), Embolden(false), Oblique(false), FontGenerator(nullptr)
 		{
 		}
 
@@ -107,7 +107,7 @@ public:
 
 		SLetterInfo()
 			: GlyphIndex(0), CharWidth(0), CharHeight(0), Top(0), Left(0), AdvX(0),
-			  glyph(NULL)
+			  glyph(nullptr)
 		{
 		}
 	};

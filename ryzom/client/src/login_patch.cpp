@@ -110,7 +110,7 @@ struct EPatchDownloadException : public Exception
 };
 
 
-CPatchManager *CPatchManager::_Instance = NULL;
+CPatchManager *CPatchManager::_Instance = nullptr;
 
 static std::string ClientRootPath;
 
@@ -144,12 +144,12 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 
 	VerboseLog = true;
 
-	PatchThread = NULL;
-	CheckThread = NULL;
-	InstallThread = NULL;
-	ScanDataThread = NULL;
-	DownloadThread = NULL;
-	Thread = NULL;
+	PatchThread = nullptr;
+	CheckThread = nullptr;
+	InstallThread = nullptr;
+	ScanDataThread = nullptr;
+	DownloadThread = nullptr;
+	Thread = nullptr;
 
 	LogSeparator = "\n";
 	ValidDescFile = false;
@@ -157,8 +157,8 @@ CPatchManager::CPatchManager() : State("t_state"), DataScanState("t_data_scan_st
 	MustLaunchBatFile = false;
 
 	DownloadInProgress = false;
-	_AsyncDownloader = NULL;
-	_StateListener = NULL;
+	_AsyncDownloader = nullptr;
+	_StateListener = nullptr;
 	_StartRyzomAtEnd = true;
 }
 
@@ -263,7 +263,7 @@ void CPatchManager::init(const std::vector<std::string>& patchURIs, const std::s
 #ifdef NL_DEBUG
 		CConfigFile::CVar *forceVersion = cf->getVarPtr("ForceVersion");
 
-		if (forceVersion != NULL)
+		if (forceVersion != nullptr)
 		{
 			line = forceVersion->asString();
 		}
@@ -367,12 +367,12 @@ void CPatchManager::readClientVersionAndDescFile()
 // ****************************************************************************
 void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 {
-	if (CheckThread != NULL)
+	if (CheckThread != nullptr)
 	{
 		nlwarning ("check thread is already running");
 		return;
 	}
-	if (Thread != NULL)
+	if (Thread != nullptr)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -391,7 +391,7 @@ void CPatchManager::startCheckThread(bool includeBackgroundPatch)
 // ****************************************************************************
 bool CPatchManager::isCheckThreadEnded(bool &ok)
 {
-	if (CheckThread == NULL)
+	if (CheckThread == nullptr)
 	{
 		ok = false;
 		return true;
@@ -414,9 +414,9 @@ void CPatchManager::stopCheckThread()
 	{
 		Thread->wait();
 		delete Thread;
-		Thread = NULL;
+		Thread = nullptr;
 		delete CheckThread;
-		CheckThread = NULL;
+		CheckThread = nullptr;
 	}
 }
 
@@ -543,12 +543,12 @@ void stopSoundMngr();
 // TODO : use selected categories to patch a list of files
 void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, bool applyPatch)
 {
-	if (PatchThread != NULL)
+	if (PatchThread != nullptr)
 	{
 		nlwarning ("check thread is already running");
 		return;
 	}
-	if (Thread != NULL)
+	if (Thread != nullptr)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -581,7 +581,7 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 		for (i = 0; i < CatsSelected.size(); ++i)
 		{
 			const CBNPCategory *pCat = rAllCats.getCategory(CatsSelected[i]);
-			if (pCat == NULL) continue;
+			if (pCat == nullptr) continue;
 			if (pCat->getCatRequired().empty()) continue;
 			// Check if the category required is already present
 			for (j = 0; j < CatsSelected.size(); ++j)
@@ -605,14 +605,14 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 	{
 		// Find the category from the name
 		const CBNPCategory *pCat = rAllCats.getCategory(CatsSelected[i]);
-		if (pCat != NULL)
+		if (pCat != nullptr)
 		{
 			for (j = 0; j < pCat->fileCount(); ++j)
 			{
 				const string &rFilename = pCat->getFile(j);
 				const CBNPFileSet &rFileSet = DescFile.getFiles();
 				const CBNPFile *pFile = rFileSet.getFileByName(rFilename);
-				if (pFile != NULL)
+				if (pFile != nullptr)
 				{
 					// Look if it's a file to patch
 					for (k = 0; k < FilesToPatch.size(); ++k)
@@ -650,7 +650,7 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 // ****************************************************************************
 bool CPatchManager::isPatchThreadEnded (bool &ok)
 {
-	if (PatchThread == NULL)
+	if (PatchThread == nullptr)
 	{
 		ok = false;
 		return true;
@@ -670,7 +670,7 @@ bool CPatchManager::isPatchThreadEnded (bool &ok)
 // Called in main thread
 bool CPatchManager::getThreadState (std::string &stateOut, vector<string> &stateLogOut)
 {
-	if ((PatchThread == NULL) && (CheckThread == NULL) && (ScanDataThread==NULL))
+	if ((PatchThread == nullptr) && (CheckThread == nullptr) && (ScanDataThread == nullptr))
 		return false;
 
 	// clear output
@@ -709,9 +709,9 @@ void CPatchManager::stopPatchThread()
 	{
 		Thread->wait();
 		delete Thread;
-		Thread = NULL;
+		Thread = nullptr;
 		delete PatchThread;
-		PatchThread = NULL;
+		PatchThread = nullptr;
 	}
 }
 
@@ -843,7 +843,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		std::string patchContent;
 
 		vector<string> vFileList;
-		CPath::getPathContent (patchDirectory, false, false, true, vFileList, NULL, false);
+		CPath::getPathContent (patchDirectory, false, false, true, vFileList, nullptr, false);
 
 		for(uint32 i = 0; i < vFileList.size(); ++i)
 		{
@@ -895,7 +895,7 @@ void CPatchManager::createBatchFile(CProductDescriptionForClient &descFile, bool
 		// write windows .bat format else write sh format
 		FILE *fp = nlfopen (batchFilename, "wt");
 
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", batchFilename.c_str(), errno, strerror(errno));
 			throw Exception (err);
@@ -1087,13 +1087,13 @@ void CPatchManager::reboot()
 // ****************************************************************************
 int CPatchManager::getTotalFilesToGet()
 {
-	if (CheckThread != NULL)
+	if (CheckThread != nullptr)
 		return CheckThread->TotalFileToCheck;
 
-	if (PatchThread != NULL)
+	if (PatchThread != nullptr)
 		return PatchThread->getNbFileToPatch();
 
-	if (ScanDataThread != NULL)
+	if (ScanDataThread != nullptr)
 		return ScanDataThread->TotalFileToScan;
 
 	return 1;
@@ -1102,13 +1102,13 @@ int CPatchManager::getTotalFilesToGet()
 // ****************************************************************************
 int CPatchManager::getCurrentFilesToGet()
 {
-	if (CheckThread != NULL)
+	if (CheckThread != nullptr)
 		return CheckThread->CurrentFileChecked;
 
-	if (PatchThread != NULL)
+	if (PatchThread != nullptr)
 		return PatchThread->getCurrentFilePatched();
 
-	if (ScanDataThread != NULL)
+	if (ScanDataThread != nullptr)
 		return ScanDataThread->CurrentFileScanned;
 
 	return 1;
@@ -1117,7 +1117,7 @@ int CPatchManager::getCurrentFilesToGet()
 // ****************************************************************************
 int CPatchManager::getPatchingSize()
 {
-	if (PatchThread != NULL)
+	if (PatchThread != nullptr)
 		return PatchThread->getPatchingSize();
 	return 0;
 }
@@ -1125,7 +1125,7 @@ int CPatchManager::getPatchingSize()
 // ****************************************************************************
 float CPatchManager::getCurrentFileProgress() const
 {
-	if (PatchThread != NULL)
+	if (PatchThread != nullptr)
 		return PatchThread->getCurrentFileProgress();
 	return 0.f;
 }
@@ -1436,7 +1436,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 
 		curl_global_init(CURL_GLOBAL_ALL);
 		curl = curl_easy_init();
-		if(curl == NULL)
+		if(curl == nullptr)
 		{
 			// file not found, delete local file
 			throw Exception ("curl init failed");
@@ -1463,7 +1463,7 @@ void CPatchManager::downloadFileWithCurl (const string &source, const string &de
 
 		FILE *fp = nlfopen (dest, "wb");
 
-		if (fp == NULL)
+		if (fp == nullptr)
 		{
 			curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
 			throw Exception ("Can't open file '%s' for writing: code=%d %s (error code 37)", dest.c_str (), errno, strerror(errno));
@@ -1584,7 +1584,7 @@ void CPatchManager::decompressFile (const string &filename)
 
 	//if(isVerboseLog()) nlinfo("Calling gzopen('%s','rb')", filename.c_str());
 	gzFile gz = gzopen (filename.c_str (), "rb");
-	if (gz == NULL)
+	if (gz == nullptr)
 	{
 		string err = toString("Can't open compressed file '%s' : ", filename.c_str());
 		if(errno == 0)
@@ -1607,7 +1607,7 @@ void CPatchManager::decompressFile (const string &filename)
 	setRWAccess(dest, false);
 	//if(isVerboseLog()) nlinfo("Calling nlfopen('%s','wb')", dest.c_str());
 	FILE *fp = nlfopen (dest, "wb");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		string err = toString("Can't open file '%s' : code=%d %s, (error code 32)", dest.c_str(), errno, strerror(errno));
 
@@ -1973,12 +1973,12 @@ void CPatchManager::MyPatchingCB::progress(float f)
 // ***************************************************************************
 void CPatchManager::startScanDataThread()
 {
-	if (ScanDataThread != NULL)
+	if (ScanDataThread != nullptr)
 	{
 		nlwarning ("scan data thread is already running");
 		return;
 	}
-	if (Thread != NULL)
+	if (Thread != nullptr)
 	{
 		nlwarning ("a thread is already running");
 		return;
@@ -2004,7 +2004,7 @@ void CPatchManager::startScanDataThread()
 // ****************************************************************************
 bool CPatchManager::isScanDataThreadEnded(bool &ok)
 {
-	if (ScanDataThread == NULL)
+	if (ScanDataThread == nullptr)
 	{
 		ok = false;
 		return true;
@@ -2027,9 +2027,9 @@ void CPatchManager::stopScanDataThread()
 	{
 		Thread->wait();
 		delete Thread;
-		Thread = NULL;
+		Thread = nullptr;
 		delete ScanDataThread;
-		ScanDataThread = NULL;
+		ScanDataThread = nullptr;
 	}
 }
 
@@ -2354,7 +2354,7 @@ void CCheckThread::run ()
 					{
 						// read the file inside the bnp and calculate the sha1
 						FILE *bnp = nlfopen (sBNPFilename, "rb");
-						if (bnp != NULL)
+						if (bnp != nullptr)
 						{
 							for (uint32 k = 0; k < bnpFile.SFiles.size(); ++k)
 							{
@@ -2588,7 +2588,8 @@ public:
 	float Scale;
 	float Bias;
 	uint CurrentFilePatched;
-	CPatchThreadDownloadProgress() : PatchThread(NULL),
+	CPatchThreadDownloadProgress() : PatchThread(nullptr)
+	    ,
 									 Scale(1.f),
 									 Bias(0.f),
 									 CurrentFilePatched(0)
@@ -3229,7 +3230,7 @@ bool CPatchManager::extract(const std::string& patchPath,
 
 	FILE *fp = nlfopen (updateBatchFilename, "wt");
 
-	if (fp == 0)
+	if (fp == nullptr)
 	{
 		string err = toString("Can't open file '%s' for writing: code=%d %s (error code 29)", updateBatchFilename.c_str(), errno, strerror(errno));
 		throw Exception (err);

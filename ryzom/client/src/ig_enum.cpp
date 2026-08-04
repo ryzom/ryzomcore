@@ -38,7 +38,7 @@ bool enumAllIGs(IIGEnum *callback)
 			return false;
 	}
 
-	if ((ContinentMngr.cur() == 0) || !ContinentMngr.cur()->enumIGs(callback))
+	if ((ContinentMngr.cur() == nullptr) || !ContinentMngr.cur()->enumIGs(callback))
 		return false;
 	return true;
 }

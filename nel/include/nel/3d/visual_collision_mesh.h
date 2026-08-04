@@ -62,8 +62,8 @@ public:
 		CShadowContext(CMaterial &mat, CIndexBuffer &ib, CShadowMapProjector &smp) :
 		  ShadowMapProjector(smp), ShadowMaterial(mat), IndexBuffer(ib)
 		{
-			Driver= NULL;
-			ShadowMap= NULL;
+			Driver = nullptr;
+			ShadowMap = nullptr;
 		}
 	};
 

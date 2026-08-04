@@ -116,7 +116,7 @@ extern void beastOrder (const std::string &orderStr, const std::string &beastInd
 // Out game received position
 NLMISC::CVectorD	UserEntityInitPos;
 NLMISC::CVector		UserEntityInitFront;
-CUserEntity			*UserEntity = NULL;
+CUserEntity			*UserEntity = nullptr;
 
 uint32				CharFirstConnectedTime = 0;
 uint32				CharPlayedTime = 0;
@@ -175,7 +175,7 @@ CUserEntity::CUserEntity()
 	_PermanentDeath = false;
 	_FollowMode = false;
 
-	_CheckPrimitive = 0;
+	_CheckPrimitive = nullptr;
 	// The user is not in collision with someone else.
 	_ColOn = false;
 	// Collisions are not removed.
@@ -279,7 +279,7 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 
 	// Cast the sheet in the right type.
 	_PlayerSheet = dynamic_cast<const CRaceStatsSheet *>(sheet);
-	if(_PlayerSheet == 0)
+	if(_PlayerSheet == nullptr)
 	{
 		pushDebugStr("User Sheet is not a valid '.race_stats'.");
 		return false;
@@ -293,7 +293,7 @@ bool CUserEntity::build(const CEntitySheet *sheet)	// virtual
 		if(nodeRoot)
 		{
 			_DBEntry = dynamic_cast<CCDBNodeBranch *>(nodeRoot->getNode(_Slot));
-			if(_DBEntry == 0)
+			if(_DBEntry == nullptr)
 				pushDebugStr("Cannot get a pointer on the DB entry.");
 		}
 	}
@@ -1025,7 +1025,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	// Remove Positions in stages
 	_Stages.removePosWithNoMode();
 	// Remove Positions in stages for the mount.
-	CCharacterCL *mount = 0;
+	CCharacterCL *mount = nullptr;
 	if(parent() != CLFECOMMON::INVALID_SLOT)
 	{
 		mount = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(parent()));
@@ -1033,7 +1033,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 			mount->_Stages.removePosWithNoMode();
 	}
 	// NO PRIMITIVE -> NO MOVE
-	if(_Primitive == 0)
+	if(_Primitive == nullptr)
 		return;
 	// BAD CONNECTION -> NO MOVE
 	if(NetMngr.getConnectionQuality() == false)
@@ -1046,7 +1046,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	if(_MoveToSlot != CLFECOMMON::INVALID_SLOT)
 	{
 		// Check the Target.
-		if(target == 0 || target == this)
+		if(target == nullptr || target == this)
 			return;
 		// Compute the vector between the user and the target.
 		CVectorD dir2targ = target->pos() - pos();
@@ -1117,7 +1117,7 @@ void CUserEntity::applyMotion(CEntityCL *target)
 	else if(follow())
 	{
 		// Check the Target.
-		if(target == 0 || target == this)
+		if(target == nullptr || target == this)
 			return;
 		// If the target is moving, orientate the user to the target.
 //		if(target->hasMoved())
@@ -1583,12 +1583,12 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 	// Quartering
 	case CUserEntity::Quarter:
 		if((ent->properties()).harvestable())
-			CAHManager::getInstance()->runActionHandler("context_quartering", 0);
+			CAHManager::getInstance()->runActionHandler("context_quartering", nullptr);
 		break;
 	// Loot
 	case CUserEntity::Loot:
 		if((ent->properties()).lootable())
-			CAHManager::getInstance()->runActionHandler("context_loot", 0);
+			CAHManager::getInstance()->runActionHandler("context_loot", nullptr);
 		break;
 	// Pick Up
 	case CUserEntity::PickUp:
@@ -1599,57 +1599,57 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		break;
 	// Trade Item
 	case CUserEntity::TradeItem:
-		CAHManager::getInstance()->runActionHandler("context_trade_item", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_item", nullptr);
 		break;
 	// Trade Phrase
 	case CUserEntity::TradePhrase:
-		CAHManager::getInstance()->runActionHandler("context_trade_phrase", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_phrase", nullptr);
 		break;
 	// Trade Pact
 	case CUserEntity::TradePact:
-		CAHManager::getInstance()->runActionHandler("context_trade_pact", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_pact", nullptr);
 		break;
 	// Mission
 	case CUserEntity::Mission:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			CAHManager::getInstance()->runActionHandler("mission_option", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_option", nullptr, param);
 		}
 		break;
 	// Dynamic Mission
 	case CUserEntity::DynamicMission:
-		CAHManager::getInstance()->runActionHandler("context_dynamic_mission", 0);
+		CAHManager::getInstance()->runActionHandler("context_dynamic_mission", nullptr);
 		break;
 	// Static Mission
 	case CUserEntity::StaticMission:
-		CAHManager::getInstance()->runActionHandler("context_choose_mission", 0);
+		CAHManager::getInstance()->runActionHandler("context_choose_mission", nullptr);
 		break;
 	// Mission
 	case CUserEntity::MissionRing:
 		{
 			string param = toString("id=%d", _MoveToMissionId);
-			CAHManager::getInstance()->runActionHandler("mission_ring", 0, param);
+			CAHManager::getInstance()->runActionHandler("mission_ring", nullptr, param);
 		}
 		break;
 	// Create Guild
 	case CUserEntity::CreateGuild:
-		CAHManager::getInstance()->runActionHandler("context_create_guild", 0);
+		CAHManager::getInstance()->runActionHandler("context_create_guild", nullptr);
 		break;
 	// News
 	case CUserEntity::News:
-		CAHManager::getInstance()->runActionHandler("context_talk", 0);
+		CAHManager::getInstance()->runActionHandler("context_talk", nullptr);
 		break;
 	// Trade Teleport
 	case CUserEntity::TradeTeleport:
-		CAHManager::getInstance()->runActionHandler("context_trade_teleport", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_teleport", nullptr);
 		break;
 	// Trade Faction items
 	case CUserEntity::TradeFaction:
-		CAHManager::getInstance()->runActionHandler("context_trade_faction", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_faction", nullptr);
 		break;
 	// Trade Cosmetic
 	case CUserEntity::TradeCosmetic:
-		CAHManager::getInstance()->runActionHandler("context_trade_cosmetic", 0);
+		CAHManager::getInstance()->runActionHandler("context_trade_cosmetic", nullptr);
 		break;
 	// Talk
 	case CUserEntity::Talk:
@@ -1670,7 +1670,7 @@ void CUserEntity::moveToAction(CEntityCL *ent)
 		}
 	// WebPage
 	case CUserEntity::WebPage:
-		CAHManager::getInstance()->runActionHandler("context_web_page", 0);
+		CAHManager::getInstance()->runActionHandler("context_web_page", nullptr);
 		break;
 	// Outpost
 	case CUserEntity::Outpost:
@@ -1839,7 +1839,7 @@ void CUserEntity::checkPos()
 		}
 
 		// Create the Primitive used to check if the move will be accepted by the server
-		if(_CheckPrimitive == 0)
+		if(_CheckPrimitive == nullptr)
 		{
 			_Primitive->getGlobalPosition(_LastGPosSent, dynamicWI);
 			_Primitive->getGlobalPosition(_LastGPosValidated, dynamicWI);
@@ -2094,7 +2094,7 @@ void CUserEntity::updatePos(const TTime &t, CEntityCL *target)
 //-----------------------------------------------
 void CUserEntity::pacsFinalizeMove()	// virtual
 {
-	if(_Primitive == 0)
+	if(_Primitive == nullptr)
 		return;
 
 	// Get the global position
@@ -2239,7 +2239,7 @@ void CUserEntity::setDead()	// virtual
 	if (pIM && kamiFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
 		CCDBNodeLeaf *pLeafKamiFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", kamiFameIndex - 1), false);
-		if (pLeafKamiFame != NULL)
+		if (pLeafKamiFame != nullptr)
 			kamiFame = pLeafKamiFame->getValue8();
 	}
 
@@ -2249,7 +2249,7 @@ void CUserEntity::setDead()	// virtual
 	if (pIM && karavanFameIndex != CStaticFames::INVALID_FACTION_INDEX)
 	{
 		CCDBNodeLeaf *pLeafKaravanFame = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:FAME:PLAYER%d:VALUE", karavanFameIndex - 1), false);
-		if (pLeafKaravanFame != NULL)
+		if (pLeafKaravanFame != nullptr)
 			karavanFame = pLeafKaravanFame->getValue8();
 	}
 
@@ -2266,7 +2266,7 @@ void CUserEntity::setDead()	// virtual
 	//CInterfaceManager * pIM = CInterfaceManager::getInstance();
 	if( pIM )
 	{
-		CAHManager::getInstance()->runActionHandler("set",NULL,"dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=1");
+		CAHManager::getInstance()->runActionHandler("set", nullptr, "dblink=UI:VARIABLES:DEATH_WARNING_WANTED|value=1");
 	}
 }// setDead //
 
@@ -2399,7 +2399,7 @@ void CUserEntity::updateSound(const TTime &time)
 	H_AUTO_USE ( RZ_Client_Update_Sound );
 
 	// no sound manager, no need to update sound
-	if (SoundMngr == NULL)
+	if (SoundMngr == nullptr)
 		return;
 
 	if (!(StereoHMD && true)) // TODO: ClientCfg.Headphone
@@ -2420,8 +2420,8 @@ void CUserEntity::updateSound(const TTime &time)
 	static TTime	previousTime = 0;
 	static TTime	stepTime = 0;
 	static bool		leftRight = false;
-	static NLSOUND::CSoundAnimMarker	*leftStep = 0;
-	static NLSOUND::CSoundAnimMarker	*rightStep = 0;
+	static NLSOUND::CSoundAnimMarker	*leftStep = nullptr;
+	static NLSOUND::CSoundAnimMarker	*rightStep = nullptr;
 
 	// TODO : Remove when bug corrected:
 	if (_Gender == GSGENDER::unknown)
@@ -2434,7 +2434,7 @@ void CUserEntity::updateSound(const TTime &time)
 	computeAnim = computeAnim || (lastMode != _Run);
 
 	// Check the sound animation to find the time between to step
-	if(computeAnim && SoundMngr && _CurrentAnimSet[MOVE] != 0) // && _SoundId[MOVE] != NLSOUND::CSoundAnimationNoId)
+	if(computeAnim && SoundMngr && _CurrentAnimSet[MOVE] != nullptr) // && _SoundId[MOVE] != NLSOUND::CSoundAnimationNoId)
 	{
 		lastMode = _Run;
 		TAnimStateId mode = _Run ? CAnimationStateSheet::Run : CAnimationStateSheet::Walk;
@@ -2503,13 +2503,13 @@ void CUserEntity::updateSound(const TTime &time)
 				{
 					if (leftStep)
 						// TODO : find the correct cluster
-						leftStep->play(SoundMngr->getMixer(), NULL, _SoundContext);
+						leftStep->play(SoundMngr->getMixer(), nullptr, _SoundContext);
 				}
 				else
 				{
 					if (rightStep)
 						// TODO : find the correct cluster
-						rightStep->play(SoundMngr->getMixer(), NULL, _SoundContext);
+						rightStep->play(SoundMngr->getMixer(), nullptr, _SoundContext);
 
 					// recompute a new sound anim
 					computeAnim = true;
@@ -2610,7 +2610,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 
 	// Change the current selection so un color the current selection.
 	CEntityCL *sel = EntitiesMngr.entity(_Selection);
-	if(sel != NULL)
+	if(sel != nullptr)
 		sel->visualSelectionStop(); // Blink off == restore to normal
 
 	// Set the entity selected
@@ -2620,7 +2620,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 	if ( sel && sel->isForageSource() )
 		sel->buildInSceneInterface(); // remove focus on previous selected source
 	sel = EntitiesMngr.entity(_Selection);
-	if(sel != NULL)
+	if(sel != nullptr)
 	{
 		sel->visualSelectionStart();
 		if ( sel->isForageSource() )
@@ -2636,7 +2636,7 @@ void CUserEntity::selection(const CLFECOMMON::TCLEntityId &slot)	// virtual
 	// Get the new target UID, and set in Database
 	uint	tgtSlot= _Selection;
 	uint32	tgtEntityId= CLFECOMMON::INVALID_CLIENT_DATASET_INDEX;
-	CEntityCL *entity = NULL;
+	CEntityCL *entity = nullptr;
 	if (tgtSlot!=CLFECOMMON::INVALID_SLOT)
 	{
 		entity = EntitiesMngr.entity(tgtSlot);
@@ -2873,7 +2873,7 @@ void CUserEntity::assist(uint slot)
 		return;
 	// Check the target
 	CEntityCL *target = EntitiesMngr.entity(slot);
-	if(target == 0)
+	if(target == nullptr)
 		return;
 	// Check the new slot.
 	CLFECOMMON::TCLEntityId newSlot = target->targetSlot();
@@ -3088,7 +3088,7 @@ void CUserEntity::rollDice(sint16 min, sint16 max, bool local)
 	if (local)
 	{
 		// no need to broadcast over network here
-		static NLMISC::CRandom* dice = (NLMISC::CRandom*)NULL;
+		static NLMISC::CRandom* dice = (NLMISC::CRandom*)nullptr;
 		if (!dice)
 		{
 			dice = new NLMISC::CRandom;
@@ -3281,7 +3281,7 @@ void CUserEntity::removeCheckPrimitive()
 {
 	if(PACS && _CheckPrimitive)
 		PACS->removePrimitive(_CheckPrimitive);
-	_CheckPrimitive = 0;
+	_CheckPrimitive = nullptr;
 }
 
 //---------------------------------------------------
@@ -3363,7 +3363,7 @@ bool CUserEntity::isBusy() const
 
 	// Check Bot chat.
 	CBotChatPage * currPage = CBotChatManager::getInstance()->getCurrPage();
-	if( currPage!= NULL )
+	if( currPage != nullptr)
 	{
 		return true;
 	}
@@ -3682,7 +3682,7 @@ CEntityCL* CUserEntity::getMountEntity()
 	{
 		return EntitiesMngr.entities()[_Mount];
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -3702,7 +3702,7 @@ CCDBNodeBranch *CUserEntity::getBeastDBEntry( CLFECOMMON::TClientDataSetIndex ui
 		if ( pNodeLeaf && (pNodeLeaf->getValue32() == (sint32)uid) )
 			return (CCDBNodeBranch*)beastNode;
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -3816,7 +3816,7 @@ void CUserEntity::CSkillPointsObserver::update(ICDBNode* node )
 			const string &spTitle = CI18N::get(toString("uiSkillPointsBold%d",SpType));
 
 			// run the popup
-			CAHManager::getInstance()->runActionHandler("message_popup", NULL, "text1="+deltaStr+"|text0="+spTitle);
+			CAHManager::getInstance()->runActionHandler("message_popup", nullptr, "text1="+deltaStr+"|text0="+spTitle);
 
 			// Context help
 			contextHelp ("skill_point");
@@ -4332,7 +4332,7 @@ void	CUserEntity::setR2CharMode(R2::TCharMode mode)
 		runVelocity(ClientCfg.DmRun);
 		View.setCameraDistanceMaxForDm();
 		CEntityCL *user = EntitiesMngr.entity(0);
-		NLPACS::UMovePrimitive* prim = user?user->getPrimitive():0;
+		NLPACS::UMovePrimitive* prim = user?user->getPrimitive():nullptr;
 		if (prim)
 		{
 			prim->setObstacle(false);
@@ -4346,7 +4346,7 @@ void	CUserEntity::setR2CharMode(R2::TCharMode mode)
 		runVelocity(ClientCfg.Run);
 		View.setCameraDistanceMaxForPlayer();
 		CEntityCL *user = EntitiesMngr.entity(0);
-		NLPACS::UMovePrimitive* prim = user?user->getPrimitive():0;
+		NLPACS::UMovePrimitive* prim = user?user->getPrimitive():nullptr;
 		if (prim)
 		{
 			prim->setObstacle(true);

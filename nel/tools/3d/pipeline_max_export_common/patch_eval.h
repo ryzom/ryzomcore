@@ -284,7 +284,7 @@ static CStorageContainer *containerChild(const CStorageContainer *c, uint16 id, 
 		if (skip) { --skip; continue; }
 		return dynamic_cast<CStorageContainer *>(it->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 static CStorageRaw *rawChildOf(const CStorageContainer *c, uint16 id)
@@ -294,7 +294,7 @@ static CStorageRaw *rawChildOf(const CStorageContainer *c, uint16 id)
 		if (it->first != id) continue;
 		return dynamic_cast<CStorageRaw *>(it->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // The modifier per-node local data of derived-object modifier slot modIndex: the typed slot's
@@ -302,7 +302,7 @@ static CStorageRaw *rawChildOf(const CStorageContainer *c, uint16 id)
 static CStorageContainer *editPatchLocalData(CDerivedObject *derived, uint modIndex)
 {
 	CStorageContainer *data = dynamic_cast<CStorageContainer *>(derived->localModData(modIndex));
-	if (!data) return NULL;
+	if (!data) return nullptr;
 	return containerChild(data, 0x1000);
 }
 
@@ -432,7 +432,7 @@ static inline PtF ptAvg(const PtF &a, const PtF &b)
 
 // InterpCenter (nel_patch_mesh.cpp): bezier edge split at 0.5.
 static PtF interpCenter(const PtF &e1, const PtF &i1, const PtF &i2, const PtF &e2,
-                        PtF *v1 = NULL, PtF *v2 = NULL, PtF *v3 = NULL, PtF *v4 = NULL)
+                        PtF *v1 = nullptr, PtF *v2 = nullptr, PtF *v3 = nullptr, PtF *v4 = nullptr)
 {
 	PtF e1i1 = ptAvg(e1, i1);
 	PtF i1i2 = ptAvg(i1, i2);
@@ -733,7 +733,7 @@ static int getCommonEdge(const SPatchMesh &pm, sint32 edge, const SPmPatch &patc
 	return -1;
 }
 
-static int getCommonVertex(const SPatchMesh &pm, int ipatch1, int ipatch2, int *pordervtx = NULL)
+static int getCommonVertex(const SPatchMesh &pm, int ipatch1, int ipatch2, int *pordervtx = nullptr)
 {
 	const SPmPatch &patch1 = pm.Patches[ipatch1];
 	const SPmPatch &patch2 = pm.Patches[ipatch2];

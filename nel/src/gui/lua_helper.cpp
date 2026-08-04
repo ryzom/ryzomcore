@@ -157,7 +157,7 @@ namespace NLGUI
 	// ***************************************************************************
 	CLuaState::CLuaState( bool debugger )
 	{
-		_State = NULL;
+		_State = nullptr;
 
 		#ifdef LUA_NEVRAX_VERSION
 			_GCThreshold = MinGCThreshold;
@@ -380,7 +380,7 @@ namespace NLGUI
 		if (!lua_islightuserdata(state,   -1))
 		{
 			lua_pop(state,   1);
-			return NULL;
+			return nullptr;
 		}
 		CLuaState *ls = (CLuaState *) lua_touserdata(state,   -1);
 		lua_pop(state,   1);
@@ -416,7 +416,7 @@ namespace NLGUI
 				else
 				{
 					*sz = 0;
-					return NULL;
+					return nullptr;
 				}
 			}
 		};
@@ -426,7 +426,8 @@ namespace NLGUI
 
 		int result = lua_load(_State,   CHelper::luaChunkReaderFromString,   (void *) &rd,   dbgSrc.c_str()
 #if LUA_VERSION_NUM >= 502
-			, NULL
+			,
+	        nullptr
 #endif
 			);
 		if (result !=0)

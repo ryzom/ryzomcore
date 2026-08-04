@@ -863,7 +863,7 @@ static void computeIGBBoxFromContinent(NLMISC::CConfigFile &parameter,
 		}		
 		NLGEORGES::UForm *villageForm;
 		villageForm = loader->loadForm(pathName.c_str());
-		if(villageForm != NULL)
+		if(villageForm != nullptr)
 		{
 			NLGEORGES::UFormElm &rootItem = villageForm->getRootNode();
 			// try to get the village list

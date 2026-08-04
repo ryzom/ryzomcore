@@ -90,7 +90,8 @@ namespace NLMISC
 
 
 		TCoTaskData(CCoTask *task)
-			:	_TaskThread(NULL),
+			:	_TaskThread(nullptr)
+	        ,
 				_CoTask(task),
 				_ResumeTask(false),
 				_TaskHasYield(false)
@@ -100,7 +101,7 @@ namespace NLMISC
 		virtual ~TCoTaskData() NL_OVERRIDE
 		{
 			NL_CT_DEBUG("CoTaskData : ~TCoTaskData %p : deleting cotask data", this);
-			if (_TaskThread != NULL)
+			if (_TaskThread != nullptr)
 			{
 				NL_CT_DEBUG("CoTask : ~TCoTaskData (%p) waiting for thread termination", this);
 
@@ -108,7 +109,7 @@ namespace NLMISC
 				_TaskThread->wait();
 
 				delete _TaskThread;
-				_TaskThread = NULL;
+				_TaskThread = nullptr;
 			}
 		}
 
@@ -228,7 +229,7 @@ namespace NLMISC
 			{
 				NLMISC::INelContext::getInstance().releaseSingletonPointer("CCurrentCoTask", _Instance);
 				delete _Instance;
-				_Instance = NULL;
+				_Instance = nullptr;
 			}
 		}
 	};

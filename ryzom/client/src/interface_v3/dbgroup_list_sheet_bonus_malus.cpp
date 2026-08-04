@@ -48,7 +48,9 @@ CDBGroupListSheetBonusMalus::CDBGroupListSheetBonusMalus(const TCtorParam &param
 
 // ***************************************************************************
 CDBGroupListSheetBonusMalus::CSheetChildTimer::CSheetChildTimer()
-:	TimerDB(NULL), DisabledDB(NULL), TimerCache(0),
+:	TimerDB(nullptr)
+    , DisabledDB(nullptr)
+    , TimerCache(0),
 	_RegenTextColor(NLMISC::CRGBA::White),
 	_RegenTextDisabledColor(NLMISC::CRGBA(127,127,127))
 {

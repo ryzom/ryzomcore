@@ -45,7 +45,7 @@ CTemplatizer			Templatizer;
 CHashKey				HashKey;
 
 string					CurrentEnum;
-CEnumNode				*CurrentEnumNode = NULL;
+CEnumNode				*CurrentEnumNode = nullptr;
 
 string					DbDescriptionVersion("0.0");
 
@@ -131,7 +131,7 @@ CParseNode	*parse(const string &file)
 
 	if (Tokenizer.tokenize())
 		return parseMain(Tokenizer);
-	return NULL;
+	return nullptr;
 }
 
 
@@ -572,7 +572,7 @@ void	CDbNode::pass2()
 		if (!child->Inherited.empty() && child->MappedFlag && !child->HasParent)
 			child->error("class cannot inherit another class and be mapped. Try to map base class instead.");
 
-		if (child->MappedFlag && child->getClassKey() == NULL)
+		if (child->MappedFlag && child->getClassKey() == nullptr)
 			child->error("class is mapped and has no key defined");
 
 		child->ForceReference = (child->HasInheritance || child->MappedFlag || child->DerivatedFlag || (child->HasParent && !child->ParentIsHidden));
@@ -585,13 +585,13 @@ void	CDbNode::pass2()
 		if (!child->Inherited.empty())
 		{
 			CClassNode	*icln = child;
-			CClassNode	*lastMapped = (child->MappedFlag ? child : NULL);
+			CClassNode	*lastMapped = (child->MappedFlag ? child : nullptr);
 			while (!icln->Inherited.empty())
 			{
 				icln = getClassNode(icln->Inherited);
 				if (icln->MappedFlag)
 				{
-					if (lastMapped != NULL)
+					if (lastMapped != nullptr)
 						lastMapped->error("class cannot be remapped since parent "+icln->Name+" is already mapped");
 					lastMapped = icln;
 				}
@@ -1024,7 +1024,7 @@ bool	CTypeNode::generateContent()
 	hOutput() << "typedef " << getCppType() << " " << Name << ";\n\n";
 
 
-	if (ToCppType != NULL)
+	if (ToCppType != nullptr)
 	{
 		CCppCodeNode	*tocpp = static_cast<CCppCodeNode*>(ToCppType);
 
@@ -1040,7 +1040,7 @@ bool	CTypeNode::generateContent()
 		toCppFunc.add("return __res;");
 		toCppFunc.flush(hOutput(), cppOutput(), inlineOutput());
 	}
-	if (ToStorageType != NULL)
+	if (ToStorageType != nullptr)
 	{
 		CCppCodeNode	*tostorage = static_cast<CCppCodeNode*>(ToStorageType);
 
@@ -1174,14 +1174,14 @@ bool	CEnumNode::epilog()
 			MaxValue = Values[i].second;
 	}
 
-	CurrentEnumNode = NULL;
+	CurrentEnumNode = nullptr;
 	return true;
 }
 
 bool	CEnumSimpleValueNode::prolog()
 {
 	CEnumNode	*parent = dynamic_cast<CEnumNode*>(Parent);
-	if (parent != NULL)
+	if (parent != nullptr)
 	{
 		CurrentValue = parent->CurrentValue;
 	}
@@ -1194,7 +1194,7 @@ bool	CEnumSimpleValueNode::prolog()
 	{
 		CurrentEnumNode->Values.push_back(std::pair<string, uint32>(Names[i], CurrentValue));
 	}
-	if (parent != NULL)
+	if (parent != nullptr)
 		++(parent->CurrentValue);
 
 	return true;
@@ -1208,7 +1208,7 @@ bool	CEnumSimpleValueNode::epilog()
 bool	CEnumRangeNode::prolog()
 {
 	CEnumNode	*parent = dynamic_cast<CEnumNode*>(Parent);
-	if (parent != NULL)
+	if (parent != nullptr)
 	{
 		CurrentValue = parent->CurrentValue;
 	}
@@ -1225,7 +1225,7 @@ bool	CEnumRangeNode::prolog()
 bool	CEnumRangeNode::epilog()
 {
 	CEnumNode	*parent = dynamic_cast<CEnumNode*>(Parent);
-	if (parent != NULL)
+	if (parent != nullptr)
 	{
 		parent->CurrentValue = CurrentValue;
 	}
@@ -1396,7 +1396,7 @@ void	CClassNode::checkClassReferences()
 	}
 
 	CClassNode*	inherit = this;
-	while (inherit != NULL)
+	while (inherit != nullptr)
 	{
 		if (MappedFlag)
 			inherit->PDSMapped = true;
@@ -1424,7 +1424,7 @@ void	CClassNode::checkClassReferences()
 			//	decl->error("class '"+Name+"' can't have a parent and be mapped at the same time");
 
 			CClassNode*	inherit = this;
-			while (inherit != NULL)
+			while (inherit != nullptr)
 			{
 				inherit->PDSMapped = false;
 				inherit = getClassNode(inherit->Inherited, false);
@@ -1458,7 +1458,7 @@ void	CClassNode::fillAttributes()
 
 		uint	j;
 		for (j=0; j<Nodes.size(); ++j)
-			if (j != i && dynamic_cast<CDeclarationNode*>(Nodes[j]) != NULL && Nodes[j]->Name == decl->Name)
+			if (j != i && dynamic_cast<CDeclarationNode*>(Nodes[j]) != nullptr && Nodes[j]->Name == decl->Name)
 				decl->error("attribute '"+decl->Name+"' already defined");
 
 		if (decl->ParentFlag)
@@ -1467,8 +1467,8 @@ void	CClassNode::fillAttributes()
 		}
 		else if (decl->ArrayFlag)
 		{
-			CClassNode	*classNd = NULL;
-			CTypeNode	*typeNd = NULL;
+			CClassNode	*classNd = nullptr;
+			CTypeNode	*typeNd = nullptr;
 
 			if ( (classNd = decl->getClassNode(decl->Type, false)) )
 			{
@@ -1512,8 +1512,8 @@ void	CClassNode::fillAttributes()
 		}
 		else
 		{
-			CClassNode	*classNd = NULL;
-			CTypeNode	*typeNd = NULL;
+			CClassNode	*classNd = nullptr;
+			CTypeNode	*typeNd = nullptr;
 
 			if ( (classNd = decl->getClassNode(decl->Type, false)) )
 			{
@@ -1552,7 +1552,7 @@ void	CClassNode::fillAttributes()
 	}
 
 	CDeclarationNode	*declNd = getClassKey();
-	if (declNd != NULL)
+	if (declNd != nullptr)
 	{
 		if (!declNd->IsType)
 			error("attribute '"+declNd->Name+"' can't be a key, only simple type allowed");
@@ -1601,7 +1601,7 @@ void	CClassNode::fillRefs()
 				if (dln->ParentClass != Name || dln->ParentField != decl->Name)
 					decl->error("set '"+decl->Type+":"+decl->ForwardRefAttribute+"<> "+decl->Name+"' is not correctly backref'd in class '"+decl->Type+"'");
 
-				if (cln->getClassKey() == NULL)
+				if (cln->getClassKey() == nullptr)
 					decl->error("class '"+decl->Type+"' has no key defined, whereas it is used in a set");
 
 				cln->Friends.insert(Name);
@@ -1626,7 +1626,7 @@ void	CClassNode::fillRefs()
 				if (dln->ParentClass != Name || dln->ParentField != decl->Name)
 					decl->error("array '"+decl->Type+":"+decl->ForwardRefAttribute+"["+decl->ArrayIndex+"] "+decl->Name+"' is not correctly backref'd in class '"+decl->Type+"'");
 
-				if (cln->getClassKey() == NULL)
+				if (cln->getClassKey() == nullptr)
 					decl->error("class '"+decl->Type+"' has no key defined, whereas it is used in an array of ref");
 				CDeclarationNode	*kdn = dynamic_cast<CDeclarationNode*>(cln->getClassKey());
 				if (!kdn)	decl->error("attribute '"+cln->ClassKey+"' not found in class '"+cln->Name+"'");
@@ -1813,7 +1813,7 @@ void	CClassNode::computeAttributesColumns()
 	for (i=0; i<Nodes.size(); ++i)
 	{
 		CDeclarationNode	*decl = dynamic_cast<CDeclarationNode*>(Nodes[i]);
-		if (decl == NULL)
+		if (decl == nullptr)
 			continue;
 
 		Attributes.push_back(decl);
@@ -2072,7 +2072,7 @@ bool	CClassNode::generateContent()
 	for (j=0; j<Nodes.size(); ++j)
 	{
 		CCppCodeNode*	cpp = dynamic_cast<CCppCodeNode*>(Nodes[j]);
-		if (cpp == NULL || !cpp->Name.empty())
+		if (cpp == nullptr || !cpp->Name.empty())
 			continue;
 
 		Gen.addOther(cpp->RawCode, "user");
@@ -2254,7 +2254,7 @@ bool	CClassNode::generateContent()
 		xmlnode += " inherit='"+toString(inh->Id)+"'";
 	}
 	CDeclarationNode	*dln = getClassKey();
-	if (dln != NULL)
+	if (dln != nullptr)
 	{
 		xmlnode += " key='"+toString(dln->Id)+"'";
 	}
@@ -2292,7 +2292,7 @@ bool	CClassNode::generateContent()
 		RegisterId.add("__BaseRow = _IndexAllocator.allocate();");
 		if (GenerateDebugMessages)
 		{
-			if (MapClass != NULL)
+			if (MapClass != nullptr)
 			{
 				CDeclarationNode*	key = MapClass->getKey();
 				RegisterId.add("if (RY_PDS::PDVerbose)\tnldebug(\""+Name+": register %u:%u, key="+key->displayPrintfPrefix()+"\", "+getId()+", __BaseRow, "+key->displayCppCode()+");");
@@ -2342,7 +2342,7 @@ bool	CClassNode::generateContent()
 
 		if (GenerateDebugMessages)
 		{
-			if (MapClass != NULL)
+			if (MapClass != nullptr)
 			{
 				CDeclarationNode*	key = MapClass->getKey();
 				UnregisterId.add("if (RY_PDS::PDVerbose)\tnldebug(\""+Name+": unregister %u:%u, key="+key->displayPrintfPrefix()+"\", "+getId()+", __BaseRow, "+key->displayCppCode()+");");
@@ -2480,7 +2480,7 @@ bool	CClassNode::generateContent()
 
 		if (MappedFlag)
 		{
-			CDeclarationNode	*dln = (MapClass != NULL ? MapClass->getKey() : NULL);
+			CDeclarationNode	*dln = (MapClass != nullptr ? MapClass->getKey() : nullptr);
 			CTypeNode			*keyType = getTypeNode(dln->Type);
 
 			// only authorize remove/load/unload for mapped objects that are roots
@@ -2577,7 +2577,7 @@ bool	CClassNode::generateContent()
 	{
 		if (MappedFlag)
 		{
-			CDeclarationNode	*dln = (MappedFlag ? getKey() : NULL);
+			CDeclarationNode	*dln = (MappedFlag ? getKey() : nullptr);
 			CTypeNode			*keyType = getTypeNode(dln->Type);
 			Gen.addAttribute("std::map<" + keyType->getName() + "," + Name + "*>", "_Map", "inherit map", true);
 		}
@@ -2717,7 +2717,7 @@ void	CDeclarationNode::generateContent(CCallContext *context)
 
 	XmlNode = "name='"+Name+"' id='"+toString(Id)+"' columnid='"+toString(Column)+"' columns='"+toString(Columns)+"'";
 
-	if (context == NULL)
+	if (context == nullptr)
 	{
 		CCppOutput&	DbSummary = getDbNode()->DbSummary;
 		DbSummary << "Attribute " << Name << ":\n";
@@ -2762,7 +2762,7 @@ void	CDeclarationNode::generateContent(CCallContext *context)
 		break;
 	}
 
-	if (context == NULL)
+	if (context == nullptr)
 	{
 		ClassNode->Gen.separator("methods");
 	}
@@ -2794,7 +2794,7 @@ void	CDeclarationNode::generateTypeContent(CCallContext *context)
 	CClassGenerator::SMethodId	&SetUnnotifiedParentId = ClassNode->SetUnnotifiedParentId;
 
 	string			UCodeContext;
-	if (context != NULL)
+	if (context != nullptr)
 		UCodeContext = context->getUserCodeContext();
 
 	string			onGetUser = getUserCode("onGet", UCodeContext);
@@ -2811,7 +2811,7 @@ void	CDeclarationNode::generateTypeContent(CCallContext *context)
 	setEnv("checkcode", tnd->checkCode(Name));
 
 	CCallContext	ctx(this);
-	if (context != NULL)
+	if (context != nullptr)
 		ctx = context->getSubContext(this);
 	CClassGenerator	&gen = ctx.getRootCaller()->Gen;
 
@@ -3087,7 +3087,7 @@ void	CDeclarationNode::generateClassContent(CCallContext *context)
 	// export class accessors into root caller
 	//
 	CCallContext	ctx;
-	if (context != NULL)
+	if (context != nullptr)
 		ctx = *context;
 	ctx.Context.push_back(this);
 	cnd->generateContentInCall(&ctx);
@@ -3143,9 +3143,9 @@ void	CDeclarationNode::generateBackRefContent()
 
 	CClassNode			*cnd = getClassNode(ParentClass);
 	CDeclarationNode	*dnd = cnd->getDeclarationNode(ParentField);
-	CDeclarationNode	*knd = (ClassNode->ClassKey.empty() ? NULL : ClassNode->getKey());
+	CDeclarationNode	*knd = (ClassNode->ClassKey.empty() ? nullptr : ClassNode->getKey());
 	XmlNode += " type='backref' classid='"+toString(cnd->Id)+"' backreferentid='"+toString(dnd->Id)+"'";
-	if (knd != NULL)
+	if (knd != nullptr)
 		XmlNode += " key='"+toString(knd->Id)+"'";
 
 	setEnv("type", ParentClass);
@@ -3204,7 +3204,7 @@ void	CDeclarationNode::generateBackRefContent()
 		if (parentUseId)
 			SetParentId.add("prevId = "+cppName()+"->"+getFunctionPrefix+cnd->getKey()->Name+"();");
 
-		if (ClassNode->getClassKey() == NULL)
+		if (ClassNode->getClassKey() == nullptr)
 		{
 			SetParentId.add(cppName()+"->"+dnd->unlinkFunc()+"();");
 		}
@@ -3307,9 +3307,9 @@ void	CDeclarationNode::generateForwardRefContent()
 
 	CClassNode			*cnd = getClassNode(Type);
 	CDeclarationNode	*dnd = cnd->getDeclarationNode(ForwardRefAttribute);
-	CDeclarationNode	*knd = (cnd->ClassKey.empty() ? NULL : cnd->getKey());
+	CDeclarationNode	*knd = (cnd->ClassKey.empty() ? nullptr : cnd->getKey());
 	XmlNode += " type='forwardref' classid='"+toString(cnd->Id)+"' forwardreferedid='"+toString(dnd->Id)+"'";
-	if (knd != NULL)
+	if (knd != nullptr)
 		XmlNode += " key='"+toString(knd->Id)+"'";
 
 	setEnv("type", Type);
@@ -3433,7 +3433,7 @@ void	CDeclarationNode::generateForwardRefContent()
 	// generate unlink code
 	//
 	string	unlinkProto;
-	if (cnd->getClassKey() != NULL)
+	if (cnd->getClassKey() != nullptr)
 	{
 		CDeclarationNode*	kd = cnd->getClassKey();
 		CTypeNode*			keyType = getTypeNode(kd->Type);
@@ -3531,7 +3531,7 @@ void	CDeclarationNode::generateArrayTypeContent(CCallContext *context)
 	CClassGenerator::SMethodId	&SetUnnotifiedParentId = ClassNode->SetUnnotifiedParentId;
 
 	string			UCodeContext;
-	if (context != NULL)
+	if (context != nullptr)
 		UCodeContext = context->getUserCodeContext();
 
 	string			onGetUser = getUserCode("onGet", UCodeContext);
@@ -3543,7 +3543,7 @@ void	CDeclarationNode::generateArrayTypeContent(CCallContext *context)
 	XmlNode += " type='arraytype' typeid='"+toString(tnd->Id)+"' indexid='"+toString(ind->Id)+"'";
 
 	CCallContext	ctx(this);
-	if (context != NULL)
+	if (context != nullptr)
 		ctx = context->getSubContext(this);
 	CClassGenerator	&gen = ctx.getRootCaller()->Gen;
 
@@ -3812,7 +3812,7 @@ void	CDeclarationNode::generateArrayClassContent(CCallContext *context)
 	//
 
 	CCallContext	ctx;
-	if (context != NULL)
+	if (context != nullptr)
 		ctx = *context;
 	ctx.Context.push_back(this);
 
@@ -3900,7 +3900,7 @@ void	CDeclarationNode::generateArrayRefContent(CCallContext *context)
 	define(useReference, "useref");
 
 	string			UCodeContext;
-	if (context != NULL)
+	if (context != nullptr)
 		UCodeContext = context->getUserCodeContext();
 
 	string			onChangeUser = getUserCode("onChange", UCodeContext);
@@ -3980,7 +3980,7 @@ void	CDeclarationNode::generateArrayRefContent(CCallContext *context)
 		Gen.add("if (__prev != NULL)");
 		Gen.add("{");
 		Gen.add("__prev->"+setParentFunction+"(NULL);");
-		if (cnd->MapClass == NULL)
+		if (cnd->MapClass == nullptr)
 		{
 			Gen.add("__prev->"+unregisterFunction+"();");
 			Gen.add("__prev->"+destroyFunction+"();");
@@ -3991,7 +3991,7 @@ void	CDeclarationNode::generateArrayRefContent(CCallContext *context)
 		Gen.add(cppName()+"["+keyVariable+"] = "+valueVariable+";");
 	}
 
-	if (cnd->MapClass == NULL && useReference && !cnd->HasInheritance && !cnd->DerivatedFlag)
+	if (cnd->MapClass == nullptr && useReference && !cnd->HasInheritance && !cnd->DerivatedFlag)
 	{
 		Gen.startMethod(Type+"*", newFunc(), ind->getName()+" "+indexVariable, "methods", false, inlineAccessors);
 		DbSummary << "\t" << newFunc() << "\n";
@@ -4002,7 +4002,7 @@ void	CDeclarationNode::generateArrayRefContent(CCallContext *context)
 		Gen.add(setFunc()+"("+objectVariable+");");
 	}
 
-	if (cnd->MapClass == NULL && useReference)
+	if (cnd->MapClass == nullptr && useReference)
 	{
 		Gen.startMethod("void", deleteFunc(), ind->getName()+" "+indexVariable, "methods", false, inlineAccessors);
 		DbSummary << "\t" << deleteFunc() << "\n";
@@ -4269,7 +4269,7 @@ void	CDeclarationNode::generateSetContent(CCallContext *context)
 	bool	useReference = sub->ForceReference;
 	string	access = (useReference ? "->" : ".");
 
-	string	onChangeUser = getUserCode("onChange", context != NULL ? context->getUserCodeContext() : "");
+	string	onChangeUser = getUserCode("onChange", context != nullptr ? context->getUserCodeContext() : "");
 
 
 	string	setType = "std::map<"+keyType->getName()+", " + Type + (useReference ? "*" : "") + ">";
@@ -4400,7 +4400,7 @@ void	CDeclarationNode::generateSetContent(CCallContext *context)
 		}
 	}
 
-	if (sub->MapClass == NULL && !sub->HasInheritance && !sub->DerivatedFlag)
+	if (sub->MapClass == nullptr && !sub->HasInheritance && !sub->DerivatedFlag)
 	{
 		Gen.startMethod(Type+"*", newFunc(), "const "+keyType->getName()+" &"+keyVariable, "methods", false, inlineAccessors);
 		DbSummary << "\t" << newFunc() << "\n";
@@ -4822,20 +4822,20 @@ void	CLogMsgNode::generateContent()
 				if (it == params.end())
 					error("'"+param+"' ot found in prototype, at line \""+Logs[j]+"\"");
 
-				CTypeNode	*tnd = NULL;
-				CExtLogTypeNode*	extnd = NULL;
+				CTypeNode	*tnd = nullptr;
+				CExtLogTypeNode*	extnd = nullptr;
 
 				if (var.empty())
 				{
 					// is simple type
 					tnd = dynamic_cast<CTypeNode*>((*it).second);
 					extnd = dynamic_cast<CExtLogTypeNode*>((*it).second);
-					if (tnd != NULL)
+					if (tnd != nullptr)
 					{
 						logfunc.add(pdslibFunc("logPush")+"("+tnd->castToPDS(param)+");");
 						startlogid.add(pdslibFunc("logPush")+"("+tnd->castToPDS(param)+");");
 					}
-					else if (extnd != NULL && extnd->ExtLogType == "string")
+					else if (extnd != nullptr && extnd->ExtLogType == "string")
 					{
 						logfunc.add(pdslibFunc("logPush")+"("+param+");");
 						startlogid.add(pdslibFunc("logPush")+"("+param+");");
@@ -4863,7 +4863,7 @@ void	CLogMsgNode::generateContent()
 					startlogid.add(pdslibFunc("logPush")+"("+tnd->castToPDS(param+"."+dnd->getFunc()+"()")+");");
 				}
 
-				if (tnd != NULL)
+				if (tnd != nullptr)
 				{
 					getDbNode()->xmlDescription.push_back("<param id='"+toString(paramNum)+"' typeid='"+toString(tnd->Id)+"'/>");
 					initDb.add(pdslibFunc("initLogParam")+"("+toString(logId)+", "+toString(paramNum)+", "+toString(tnd->Size)+");");

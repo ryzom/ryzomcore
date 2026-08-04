@@ -93,7 +93,7 @@ void CWaterMap::release()
 	_CellSize = 0.f;
 	_Width = 0;
 	_Height = 0;
-	Scene->setWaterCallback(NULL);
+	Scene->setWaterCallback(nullptr);
 }
 
 // *********************************************************************************************************

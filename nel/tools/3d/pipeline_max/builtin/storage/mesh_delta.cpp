@@ -135,7 +135,7 @@ bool CMeshDelta::decodeRows(uint16 id, IStorageObject *obj, uint stride, uint ki
 	seg.Raw = raw;
 	seg.Rows = n;
 	seg.Value = 0;
-	seg.Bits = NULL;
+	seg.Bits = nullptr;
 	switch (kind)
 	{
 	case 0:
@@ -183,7 +183,7 @@ bool CMeshDelta::decodeCountLeaf(uint16 id, IStorageObject *obj, uint32 &value, 
 	seg.Row0 = 0;
 	seg.Rows = 0;
 	seg.Value = value;
-	seg.Bits = NULL;
+	seg.Bits = nullptr;
 	m_Segments.push_back(seg);
 	return true;
 }
@@ -194,7 +194,7 @@ bool CMeshDelta::decodeBitArray(uint16 id, IStorageObject *obj, SBitArray &out)
 {
 	const CStorageContainer *cont = dynamic_cast<const CStorageContainer *>(obj);
 	if (!cont) return false;
-	const CStorageRaw *bitsRaw = NULL;
+	const CStorageRaw *bitsRaw = nullptr;
 	for (CStorageContainer::TStorageObjectConstIt it = cont->chunks().begin(); it != cont->chunks().end(); ++it)
 	{
 		if (it->first != PMB_MD_BIT_ARRAY_CHUNK_ID) return false;
@@ -227,7 +227,7 @@ bool CMeshDelta::decode(IStorageObject *localModData)
 	CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(localModData);
 	if (!c2512) return false;
 
-	CStorageContainer *c4000 = NULL;
+	CStorageContainer *c4000 = nullptr;
 	for (CStorageContainer::TStorageObjectConstIt it = c2512->chunks().begin(); it != c2512->chunks().end(); ++it)
 	{
 		noteChunk(m_LocalDataChildren, it->first, it->second);
@@ -316,14 +316,14 @@ bool CMeshDelta::selfTestReencode(std::string &err) const
 		if (seg.kind <= 4)
 		{
 			uint stride = 0;
-			const uint8 *rows = NULL;
+			const uint8 *rows = nullptr;
 			switch (seg.kind)
 			{
-			case 0: stride = 16; rows = seg.Rows ? (const uint8 *)&m_Moves[seg.Row0] : NULL; break;
-			case 1: stride = 16; rows = seg.Rows ? (const uint8 *)&m_CreatedVerts[seg.Row0] : NULL; break;
-			case 2: stride = 24; rows = seg.Rows ? (const uint8 *)&m_CreatedFaces[seg.Row0] : NULL; break;
-			case 3: stride = 20; rows = seg.Rows ? (const uint8 *)&m_FaceRemap[seg.Row0] : NULL; break;
-			case 4: stride = 12; rows = seg.Rows ? (const uint8 *)&m_FaceAttribs[seg.Row0] : NULL; break;
+			case 0: stride = 16; rows = seg.Rows ? (const uint8 *)&m_Moves[seg.Row0] : nullptr; break;
+			case 1: stride = 16; rows = seg.Rows ? (const uint8 *)&m_CreatedVerts[seg.Row0] : nullptr; break;
+			case 2: stride = 24; rows = seg.Rows ? (const uint8 *)&m_CreatedFaces[seg.Row0] : nullptr; break;
+			case 3: stride = 20; rows = seg.Rows ? (const uint8 *)&m_FaceRemap[seg.Row0] : nullptr; break;
+			case 4: stride = 12; rows = seg.Rows ? (const uint8 *)&m_FaceAttribs[seg.Row0] : nullptr; break;
 			}
 			enc.resize(4 + seg.Rows * stride);
 			uint32 n = (uint32)seg.Rows;

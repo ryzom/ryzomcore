@@ -38,9 +38,9 @@ namespace NL3D
 // ***************************************************************************
 CMeshBlockManager::CMeshBlockManager()
 {
-	_RenderCtx.Driver= NULL;
-	_RenderCtx.Scene= NULL;
-	_RenderCtx.RenderTrav= NULL;
+	_RenderCtx.Driver = nullptr;
+	_RenderCtx.Scene = nullptr;
+	_RenderCtx.RenderTrav = nullptr;
 
 	// Allocate at least the 0th heap
 	_VBHeapBlocks.resize(1);
@@ -64,7 +64,7 @@ CMeshBlockManager::~CMeshBlockManager()
 void			CMeshBlockManager::addInstance(IMeshGeom *meshGeom, CMeshBaseInstance *inst, float polygonCount)
 {
 	// If the meshGeom has never been added to the manager, may do some precalc
-	if(meshGeom->_MeshBlockManager==NULL)
+	if(meshGeom->_MeshBlockManager == nullptr)
 	{
 		// Fill
 		meshGeom->_MeshBlockManager= this;
@@ -202,7 +202,7 @@ void			CMeshBlockManager::render(CVBHeapBlock	*vbHeapBlock, IMeshGeom *meshGeom,
 				CInstanceInfo		&instInfo= rdrInstances[instId];
 
 				// activate this instance
-				meshGeom->activeInstance(_RenderCtx, instInfo.MBI, instInfo.PolygonCount, NULL);
+				meshGeom->activeInstance(_RenderCtx, instInfo.MBI, instInfo.PolygonCount, nullptr);
 
 				// render the pass.
 				meshGeom->renderPass(_RenderCtx, instInfo.MBI, instInfo.PolygonCount, rdrPass);
@@ -223,7 +223,7 @@ void			CMeshBlockManager::render(CVBHeapBlock	*vbHeapBlock, IMeshGeom *meshGeom,
 
 			// If the meshGeom need to change Some VB (geomorphs...)
 			bool	needVBHeapLock= _RenderCtx.RenderThroughVBHeap && meshGeom->isActiveInstanceNeedVBFill();
-			void	*vbDst= NULL;
+			void	*vbDst = nullptr;
 			if(needVBHeapLock)
 			{
 				// Lock the VBHeap
@@ -355,7 +355,7 @@ void			CMeshBlockManager::freeMeshVBHeap(IMeshGeom *mesh)
 
 	// free this space
 	nlassert(meshId<vbHeapBlock->AllocatedMeshGeoms.size());
-	vbHeapBlock->AllocatedMeshGeoms[meshId]= NULL;
+	vbHeapBlock->AllocatedMeshGeoms[meshId] = nullptr;
 	vbHeapBlock->FreeIds.push_back(meshId);
 
 	// reset mesh info.

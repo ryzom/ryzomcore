@@ -132,7 +132,7 @@ void INode::toStringLocal(std::ostream &ostream, const std::string &pad, uint fi
 INode *INode::parent()
 {
 	nlerror("Unkown node class, cannot get parent node");
-	return NULL;
+	return nullptr;
 }
 
 void INode::setParent(INode *node)
@@ -166,7 +166,7 @@ INode *INode::find(const ucstring &userName) const
 		if (NLMISC::toLower(node->userName()) == unl)
 			return node;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void INode::dumpNodes(std::ostream &ostream, const std::string &pad) const

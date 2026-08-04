@@ -48,7 +48,7 @@ const ucstring				CI18N::_NotTranslatedValue16("<Not Translated>");
 const std::string			CI18N::_NotTranslatedValue("<Not Translated>");
 bool					CI18N::_LanguagesNamesLoaded = false;
 string					CI18N::_SelectedLanguageCode;
-CI18N::ILoadProxy		*CI18N::_LoadProxy = 0;
+CI18N::ILoadProxy		*CI18N::_LoadProxy = nullptr;
 vector<string>			CI18N::_LanguageCodes;
 vector<std::string>		CI18N::_LanguageNames;
 std::string				CI18N::_SystemLanguageCode;
@@ -708,7 +708,7 @@ bool CI18N::parseMarkedString(ucchar openMark, ucchar closeMark, ucstring::const
 			}
 			else
 			{
-				if (*it == '\n' && lineCounter != NULL)
+				if (*it == '\n' && lineCounter != nullptr)
 					// update line counter
 					++(*lineCounter);
 
@@ -755,7 +755,7 @@ void CI18N::readTextFile(const string &filename,
 bool CI18N::matchToken(const char* token, ucstring::const_iterator &it, ucstring::const_iterator end)
 {
 	ucstring::const_iterator rewind = it;
-	skipWhiteSpace(it, end, NULL, false);
+	skipWhiteSpace(it, end, nullptr, false);
 	while (it != end && *token != 0 && *it == *token)
 	{
 		++it;
@@ -844,21 +844,21 @@ void CI18N::_readTextFile(const string &filename,
 			ucstring::const_iterator beginOfLine = it;
 
 			// advance in the line, looking for a preprocessor command
-			skipWhiteSpace(it, end, NULL, false);
+			skipWhiteSpace(it, end, nullptr, false);
 
 			if (it != end && *it == '#')
 			{
 				// skip the '#' symbol
 				++it;
 				// we found a preprocessor command !
-				skipWhiteSpace(it, end, NULL, false);
+				skipWhiteSpace(it, end, nullptr, false);
 
 				if (matchToken("include", it, end))
 				{
 					if (readContext.IfStack.empty() || readContext.IfStack.back())
 					{
 						// we have an include command
-						skipWhiteSpace(it, end, NULL, false);
+						skipWhiteSpace(it, end, nullptr, false);
 
 						// read the file name between quote
 						ucstring str;
@@ -911,7 +911,7 @@ void CI18N::_readTextFile(const string &filename,
 					if (readContext.IfStack.empty() || readContext.IfStack.back())
 					{
 						// we have an optional include command
-						skipWhiteSpace(it, end, NULL, false);
+						skipWhiteSpace(it, end, nullptr, false);
 
 						// read the file name between quote
 						ucstring str;
@@ -964,7 +964,7 @@ void CI18N::_readTextFile(const string &filename,
 				{
 					if (readContext.IfStack.empty() || readContext.IfStack.back())
 					{
-						skipWhiteSpace(it, end, NULL, false);
+						skipWhiteSpace(it, end, nullptr, false);
 
 						string label;
 						if (parseLabel(it, end, label))
@@ -995,7 +995,7 @@ void CI18N::_readTextFile(const string &filename,
 				{
 					if (readContext.IfStack.empty() || readContext.IfStack.back())
 					{
-						skipWhiteSpace(it, end, NULL, false);
+						skipWhiteSpace(it, end, nullptr, false);
 						string label;
 						if (parseLabel(it, end, label))
 						{
@@ -1032,7 +1032,7 @@ void CI18N::_readTextFile(const string &filename,
 				{
 					if (readContext.IfStack.empty() || readContext.IfStack.back())
 					{
-						skipWhiteSpace(it, end, NULL, false);
+						skipWhiteSpace(it, end, nullptr, false);
 						string label;
 						if (parseLabel(it, end, label))
 						{

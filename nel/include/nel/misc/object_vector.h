@@ -347,7 +347,7 @@ private:
 		T	*newPtr= (T*)realloc(_Ptr, s*sizeof(T));
 #else // NL_OV_USE_NEW_ALLOCATOR
 		uint allocSize= s*sizeof(T);
-		T	*newPtr= NULL;
+		T	*newPtr = nullptr;
 		if (!_Ptr || (allocSize > _Size*sizeof(T)))
 		{
 			// Reallocate
@@ -374,7 +374,7 @@ private:
 		}
 #endif // NL_OV_USE_NEW_ALLOCATOR
 		// if realloc failure
-		if(newPtr==NULL)
+		if(newPtr == nullptr)
 		{
 			// leave the array unchanged.
 			// exception.

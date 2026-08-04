@@ -229,14 +229,14 @@ GenderExtractor::GenderExtractor(const std::string & literal, const std::string&
 		std::string goodMarkup = isMale ? std::string("") +"<" + h + "></" + h + ">" : std::string("")+"<"+f+"></"+f+">";
 		std::string badMarkup  = isFemale ? std::string("") +"<" + h + "></" + h + ">" : std::string("")+"<"+f+"></"+f+">";
 		std::string exceptionText = std::string("Expression ") + identifier + " that contains a tag " + goodMarkup + " needs also tags " + badMarkup + " even empty.";		
-		throw EParseException(0, exceptionText.c_str());
+		throw EParseException(nullptr, exceptionText.c_str());
 	}
 
 	if (!isMale && !isFemale)
 	{
 		_Text = literal;
-		_Female = 0;
-		_Male = 0;
+		_Female = nullptr;
+		_Male = nullptr;
 
 	}
 	else
@@ -498,7 +498,7 @@ bool CMissionCompiler::compileMission(NLLIGO::IPrimitive *rootPrim, const std::s
 		temp->addPropertyByName("var_name", new CPropertyString("giver"));
 
 		IVar *var = IVar::createVar(md, temp);
-		md.addVariable(NULL, var);
+		md.addVariable(nullptr, var);
 
 		delete temp;
 	}
@@ -512,7 +512,7 @@ bool CMissionCompiler::compileMission(NLLIGO::IPrimitive *rootPrim, const std::s
 		temp->addPropertyByName("var_name", new CPropertyString("player"));
 
 		IVar *var = IVar::createVar(md, temp);
-		md.addVariable(NULL, var);
+		md.addVariable(nullptr, var);
 
 		delete temp;
 	}
@@ -526,7 +526,7 @@ bool CMissionCompiler::compileMission(NLLIGO::IPrimitive *rootPrim, const std::s
 		temp->addPropertyByName("var_name", new CPropertyString("guild_name"));
 
 		IVar *var = IVar::createVar(md, temp);
-		md.addVariable(NULL, var);
+		md.addVariable(nullptr, var);
 
 		delete temp;
 	}
@@ -662,7 +662,7 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				string fullFileName = CPath::lookup(fileName, false);
 				if (fullFileName.empty())
 				{
-					throw EParseException(NULL, toString("Can't find primitive file '%s' in path", fileName.c_str()).c_str());
+					throw EParseException(nullptr, toString("Can't find primitive file '%s' in path", fileName.c_str()).c_str());
 				}
 				// we need to load this primitive file.
 				CPrimitives *primDoc = new CPrimitives;
@@ -671,12 +671,12 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				{
 					// the primitive file is loaded correctly
 					loadedPrimitives.insert(make_pair(toLowerAscii(fileName), TLoadedPrimitive(primDoc, fullFileName)));
-					CPrimitiveContext::instance().CurrentPrimitive = NULL;
+					CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 				}
 				else
 				{
-					CPrimitiveContext::instance().CurrentPrimitive = NULL;
-					throw EParseException(NULL, toString("Can't read primitive file '%s'", fullFileName.c_str()).c_str());
+					CPrimitiveContext::instance().CurrentPrimitive = nullptr;
+					throw EParseException(nullptr, toString("Can't read primitive file '%s'", fullFileName.c_str()).c_str());
 				}
 			}
 			TLoadedPrimitive &loadedPrim = loadedPrimitives[toLowerAscii(fileName)];
@@ -758,14 +758,14 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				string err = toString("Can't find bot '%s' in primitive '%s' !", 
 					mission.getGiverName().c_str(),
 					fileName.c_str());
-				throw EParseException(NULL, err.c_str());
+				throw EParseException(nullptr, err.c_str());
 			}
 			else if (bots.size() > 1)
 			{
 				string err = toString("Found more than one bot named '%s' in primitive '%s' !", 
 					mission.getGiverName().c_str(),
 					fileName.c_str());
-				throw EParseException(NULL, err.c_str());
+				throw EParseException(nullptr, err.c_str());
 			}
 
 			// ok, all is good, we can add the mission node to the giver
@@ -803,7 +803,7 @@ bool CMissionCompiler::installCompiledMission(NLLIGO::CLigoConfig &ligoConfig, c
 				script->insertChild(pa, 0);
 			}
 
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 		}
 
 		// Save the modified primitive files
@@ -882,7 +882,7 @@ bool CMissionCompiler::publishFiles(const std::string &serverPathPrim, const std
 bool CMissionCompiler::includeText(const std::string &filename, const std::string &text)
 {
 	FILE *f = nlfopen(filename, "r+");
-	if (f == NULL)
+	if (f == nullptr)
 	{
 		nlwarning("Unable to open %s", filename.c_str());
 		return false;
@@ -928,12 +928,12 @@ bool CMissionCompiler::parsePreRequisite(CMissionData &md, IPrimitive *preReq)
 bool CMissionCompiler::parseOneStep(CMissionData &md, IPrimitive *stepToParse, IStep *parent, bool bEndOfBranch)
 {
 	IStep *step = IStep::createStep(md, stepToParse);
-	if (step != NULL)
+	if (step != nullptr)
 	{
 
 		if (!step->isAJump() && !step->getStepName().empty())
 		{
-			if (md.getStepByName(step->getStepName()) != NULL)
+			if (md.getStepByName(step->getStepName()) != nullptr)
 			{
 				string err = toString("Step '%s' already defined !", step->getStepName().c_str());
 				throw EParseException(step->getPrimitive(), err.c_str());
@@ -949,7 +949,7 @@ bool CMissionCompiler::parseOneStep(CMissionData &md, IPrimitive *stepToParse, I
 		TPrimitiveSet subBranchs = step->getSubBranchs();
 		
 		// Add the step (if no parent add to the mission data)
-		if (parent == NULL)
+		if (parent == nullptr)
 		{
 			if (!md.addStep(step))
 			{
@@ -964,10 +964,10 @@ bool CMissionCompiler::parseOneStep(CMissionData &md, IPrimitive *stepToParse, I
 		CStepIf *pSI = dynamic_cast<CStepIf *>(step);
 		// If this is a IF step : parse with 'step' as a parent 
 
-		IStep *pParentStep = NULL;
+		IStep *pParentStep = nullptr;
 		
-		if ((dynamic_cast<CStepIf*>(step) != NULL) ||
-			(dynamic_cast<CStepPlayerReconnect*>(step) != NULL))
+		if ((dynamic_cast<CStepIf*>(step) != nullptr) ||
+			(dynamic_cast<CStepPlayerReconnect*>(step) != nullptr))
 			pParentStep = step;
 
 		if (!subBranchs.empty())
@@ -1007,7 +1007,7 @@ bool CMissionCompiler::parseSteps(CMissionData &md, IPrimitive *steps, IStep *pa
 		{
 			IPrimitive *child = childs[i];
 
-			parseOneStep(md, childs[i], NULL, i == (childs.size()-1));
+			parseOneStep(md, childs[i], nullptr, i == (childs.size()-1));
 
 		}
 	}
@@ -1375,7 +1375,7 @@ retry:
 		if (varName != "self")
 		{
 			IVar *var = md.getVariable(varName);
-			if (var == NULL)
+			if (var == nullptr)
 			{
 				string err = toString("Can't find variable '%s' referenced from a phrase", 
 					name.c_str());
@@ -1399,10 +1399,10 @@ std::string CPhrase::genScript(CMissionData &md)
 	for (uint i=0; i<_AdditionalParams.size(); ++i)
 	{
 		IVar *var = md.getVariable(_AdditionalParams[i].ParamName);
-		if (var == NULL)
+		if (var == nullptr)
 		{
 			string err = toString("Can't find variable named '%s' to generate phrase param", _AdditionalParams[i].ParamName.c_str());
-			throw EParseException(NULL, err.c_str());
+			throw EParseException(nullptr, err.c_str());
 		}
 		ret += "; " + var->evalVar(_AdditionalParams[i].CompilerParam);
 	}
@@ -1466,7 +1466,7 @@ IVar *CMissionData::getVariable(const string &varName)
 	map<string, IVar*>::iterator it(_Variables.find(varName));
 	if (it != _Variables.end())
 		return it->second;
-	return NULL;
+	return nullptr;
 }
 
 IStep *CMissionData::getNextStep(IStep *current)
@@ -1476,7 +1476,7 @@ IStep *CMissionData::getNextStep(IStep *current)
 		if (_Steps[i] == current && i < _Steps.size()-1)
 			return _Steps[i+1];
 	}
-	return NULL;
+	return nullptr;
 }
 
 IStep *CMissionData::getStepByName(const std::string &stepName)
@@ -1486,7 +1486,7 @@ IStep *CMissionData::getStepByName(const std::string &stepName)
 		return _StepsByNames[stepName];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -2110,7 +2110,7 @@ std::string CMissionData::replaceVar(NLLIGO::IPrimitive *prim, const std::string
 			if (pos >= str.size())
 			{
 				string err = toString("Error while parsing variable in '%s', missing closing '$'", str.c_str());
-				throw EParseException (NULL, err.c_str());
+				throw EParseException (nullptr, err.c_str());
 			}
 
 			// skip the final '$'

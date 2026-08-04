@@ -264,7 +264,7 @@ const CStorageRaw *rawSub(const CStorageContainer *c, uint16 id)
 {
 	for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<const CStorageRaw *>(it->second);
-	return NULL;
+	return nullptr;
 }
 
 bool readRawInts(const CStorageRaw *raw, sint32 *dst, size_t n, const char *what, std::string &err)
@@ -428,9 +428,9 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			if (!readRawFloats(rawSub(c, 0x03e8), vt.Pos, 3, "vertex pos", err)) return false;
 			if (!readRawInts(rawSub(c, 0x03fc), &vt.Flags, 1, "vertex flags", err)) return false;
 			// Max 3 omits 0x0406/0x0410/0x041a adjacency tables entirely.
-			vt.HasVectors = rawSub(c, 0x0406) != NULL;
-			vt.HasPatches = rawSub(c, 0x0410) != NULL;
-			vt.HasEdges = rawSub(c, 0x041a) != NULL;
+			vt.HasVectors = rawSub(c, 0x0406) != nullptr;
+			vt.HasPatches = rawSub(c, 0x0410) != nullptr;
+			vt.HasEdges = rawSub(c, 0x041a) != nullptr;
 			if (!readOptionalCountedInts(rawSub(c, 0x0406), vt.Vectors, "vertex vectors", err)) return false;
 			if (!readOptionalCountedInts(rawSub(c, 0x0410), vt.Patches, "vertex patches", err)) return false;
 			if (!readOptionalCountedInts(rawSub(c, 0x041a), vt.Edges, "vertex edges", err)) return false;
@@ -445,8 +445,8 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			if (!readRawFloats(rawSub(c, 0x03e8), vc.Pos, 3, "vector pos", err)) return false;
 			if (!readRawInts(rawSub(c, 0x03fc), &vc.Flags, 1, "vector flags", err)) return false;
 			// Max 3: no owner vert (0x0410) / patch list (0x0406).
-			vc.HasVert = rawSub(c, 0x0410) != NULL;
-			vc.HasPatches = rawSub(c, 0x0406) != NULL;
+			vc.HasVert = rawSub(c, 0x0410) != nullptr;
+			vc.HasPatches = rawSub(c, 0x0406) != nullptr;
 			if (!readOptionalInt(rawSub(c, 0x0410), vc.Vert, -1)) { err = "bad vector vert"; return false; }
 			if (!readOptionalCountedInts(rawSub(c, 0x0406), vc.Patches, "vector patches", err)) return false;
 			break;
@@ -461,7 +461,7 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			sint32 quad[4];
 			if (!readRawInts(rawSub(c, 0x03e8), quad, 4, "edge record", err)) return false;
 			e.V1 = quad[0]; e.Vec12 = quad[1]; e.Vec21 = quad[2]; e.V2 = quad[3];
-			e.HasPatches = rawSub(c, 0x03f2) != NULL;
+			e.HasPatches = rawSub(c, 0x03f2) != nullptr;
 			if (!readOptionalCountedInts(rawSub(c, 0x03f2), e.Patches, "edge patches", err)) return false;
 			break;
 		}
@@ -472,7 +472,7 @@ bool decodePatchMesh(const CStorageContainer::TStorageObjectContainer &chunks, S
 			out.Patches.resize(out.Patches.size() + 1);
 			SPmPatch &p = out.Patches.back();
 			// Max 3: Type (0x0424) absent — NumVerts (0x03e8) carries 3/4; Type defaults to it.
-			p.HasType = rawSub(c, 0x0424) != NULL;
+			p.HasType = rawSub(c, 0x0424) != nullptr;
 			if (!readOptionalInt(rawSub(c, 0x0424), p.Type, 0)) { err = "bad patch type"; return false; }
 			if (!readRawInts(rawSub(c, 0x03e8), &p.NumVerts, 1, "patch numverts", err)) return false;
 			if (p.Type == 0) p.Type = p.NumVerts;
@@ -602,7 +602,7 @@ CStorageRaw *rawSubMut(CStorageContainer *c, uint16 id)
 {
 	for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<CStorageRaw *>(it->second);
-	return NULL;
+	return nullptr;
 }
 
 /// Stamp the header width of every unknown-width chunk under `obj` (recursively). New

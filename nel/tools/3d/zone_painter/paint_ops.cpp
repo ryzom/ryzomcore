@@ -93,7 +93,7 @@ bool CPaintCore::clearATile(SPaintTile *tile, bool _256, bool force128)
 			CTileDescP descOrig;
 			getTileIdx((uint)neighbor[n]->Zone, neighbor[n]->TileId, descOrig);
 			desc.setDisplace(descOrig.getDisplace());
-			setTile((uint)neighbor[n]->Zone, neighbor[n]->TileId, desc, NULL, true);
+			setTile((uint)neighbor[n]->Zone, neighbor[n]->TileId, desc, nullptr, true);
 		}
 	}
 	else
@@ -104,7 +104,7 @@ bool CPaintCore::clearATile(SPaintTile *tile, bool _256, bool force128)
 		CTileDescP descOrig;
 		getTileIdx((uint)tile->Zone, tile->TileId, descOrig);
 		desc.setDisplace(descOrig.getDisplace());
-		setTile((uint)tile->Zone, tile->TileId, desc, NULL, true);
+		setTile((uint)tile->Zone, tile->TileId, desc, nullptr, true);
 	}
 	return true;
 }
@@ -416,7 +416,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			case 3: desc.setTile(3, 0, desc.getDisplace(), finalIndex[0], finalIndex[1], finalIndex[2]); break;
 			default: return false;
 			}
-			setTile((uint)pTile->Zone, pTile->TileId, desc, NULL, true);
+			setTile((uint)pTile->Zone, pTile->TileId, desc, nullptr, true);
 			// Residual gate: transition-at-pick must also leave legal seams
 			if (!tileSeamsLegal(pTile))
 			{
@@ -639,7 +639,7 @@ void CPaintCore::abortStrokeTo(size_t mark)
 	{
 		if (m_CurStroke[i].Kind != 0)
 			continue;
-		setTile(m_CurStroke[i].Zone, m_CurStroke[i].TileId, m_CurStroke[i].Old, NULL, false, true);
+		setTile(m_CurStroke[i].Zone, m_CurStroke[i].TileId, m_CurStroke[i].Old, nullptr, false, true);
 		if (m_CurStroke[i].HaveRaw)
 			restoreRawTile(m_CurStroke[i], true);
 	}
@@ -697,7 +697,7 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].OldColor, false);
 			else
 			{
-				setTile(list[i].Zone, list[i].TileId, list[i].Old, NULL, false, true);
+				setTile(list[i].Zone, list[i].TileId, list[i].Old, nullptr, false, true);
 				if (list[i].HaveRaw)
 					restoreRawTile(list[i], true);
 			}
@@ -731,7 +731,7 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].NewColor, false);
 			else
 			{
-				setTile(list[i].Zone, list[i].TileId, list[i].New, NULL, false, true);
+				setTile(list[i].Zone, list[i].TileId, list[i].New, nullptr, false, true);
 				if (list[i].HaveRaw)
 					restoreRawTile(list[i], false);
 			}
@@ -1305,8 +1305,8 @@ bool CPaintCore::colorVertexBorderLocked(uint zoneIdx, uint patch, sint32 s, sin
 	                                              + tv * ZP_MAX_TILE_IN_PATCH + tu];
 	if (tile.TileId < 0)
 		return true; // dead meta cell: refuse (no side information)
-	const bool aLocked = (tile.Voisins[sideA] == NULL) || tile.Voisins[sideA]->Frozen;
-	const bool bLocked = (tile.Voisins[sideB] == NULL) || tile.Voisins[sideB]->Frozen;
+	const bool aLocked = (tile.Voisins[sideA] == nullptr) || tile.Voisins[sideA]->Frozen;
+	const bool bLocked = (tile.Voisins[sideB] == nullptr) || tile.Voisins[sideB]->Frozen;
 	return aLocked || bLocked;
 }
 
@@ -1712,7 +1712,7 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 				CTileDescP descOrig;
 				getTileIdx(zi, t->TileId, descOrig);
 				descFill.setDisplace(descOrig.getDisplace());
-				setTile(zi, t->TileId, descFill, NULL, true);
+				setTile(zi, t->TileId, descFill, nullptr, true);
 			}
 		}
 		else
@@ -1852,7 +1852,7 @@ void CPaintCore::displaceOne(SPaintTile *tile, uint displace)
 	int t0 = (int)desc.getLayer(0).Tile;
 	if (desc.isEmpty() || t0 < 0 || t0 >= m_Bank->getTileCount()) return; // plugin: valid layer 0 only
 	desc.setDisplace((uint8)(displace & 0xf));
-	setTile((uint)tile->Zone, tile->TileId, desc, NULL, true, true);
+	setTile((uint)tile->Zone, tile->TileId, desc, nullptr, true, true);
 }
 
 // RecursTile displace-mode port (the plugin's PutDisplace path): one PutADisplacetile per tile
@@ -1917,7 +1917,7 @@ bool CPaintCore::opRawTile(uint zone, uint patch, uint u, uint v, int tile, int 
 	noteEditTile(zi, t->TileId);
 	CTileDescP desc;
 	desc.setTile(1, 0, 0, CTileIdx(tile, rot & 3), CTileIdx(), CTileIdx());
-	setTile(zi, t->TileId, desc, NULL, true);
+	setTile(zi, t->TileId, desc, nullptr, true);
 	applyChanges();
 	endStroke();
 	return true;

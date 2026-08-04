@@ -66,7 +66,7 @@ bool	computeOneShape(const char *lodFile, const char *shapeIn, const char *shape
 		CMesh		*mesh= dynamic_cast<CMesh*>((IShape*)theShape);
 		CMeshMRM	*meshMRM= dynamic_cast<CMeshMRM*>((IShape*)theShape);
 		CMeshMRMSkinned	*meshMRMSkinned= dynamic_cast<CMeshMRMSkinned*>((IShape*)theShape);
-		CMeshBase	*base = NULL;
+		CMeshBase	*base = nullptr;
 		if(mesh)
 		{
 			base = mesh;

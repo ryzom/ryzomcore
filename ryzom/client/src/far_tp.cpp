@@ -574,7 +574,7 @@ void CLoginStateMachine::run()
 			// Far TP part 1.1: From the ingame main loop, the admin html box gives us an event ev_connect for the destination shard.
 			//   Note: the admin html box is run by CInputHandlerManager::getInstance()->pumpEvents() in the main loop.
 			//   Tip: to see where a co-task is resumed from, just add a breakpoint on the end of CCoTask::resume().
-			CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL, "");
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr, "");
 
 			if (!FarTP.isIngame()) // assumes there is no Far TP starting between char selection and main loop, see below
 			{
@@ -739,7 +739,7 @@ bool CFarTP::requestFarTPToSession(TSessionId sessionId, uint8 charSlot, CFarTP:
 	_SessionIdToJoinFast = 0;
 
 	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
-	sb.init(NULL);
+	sb.init(nullptr);
 //	sb.setAuthInfo(NetMngr.getLoginCookie());
 //	sb.connectItf(CInetHost("borisb", 80));
 
@@ -984,8 +984,8 @@ retryJoinEdit:
 		else if ( letReturnToCharSelect )
 		{
 			// Show all buttons except 'New character' so that the character can retry entering game or choose another character.
-			CAHManager::getInstance()->runActionHandler( "proc", NULL, "charsel_enable_buttons" );
-			CAHManager::getInstance()->runActionHandler( "set", NULL, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
+			CAHManager::getInstance()->runActionHandler( "proc", nullptr, "charsel_enable_buttons" );
+			CAHManager::getInstance()->runActionHandler( "set", nullptr, "target_property=ui:outgame:charsel:create_new_but:active|value=0" );
 
 			CInterfaceGroup* charselGroup = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:outgame:charsel"));
 			if(charselGroup)
@@ -1394,7 +1394,7 @@ void CFarTP::onFailure()
 	{
 		reason += ": " + (*_Reason);
 		delete _Reason;
-		_Reason = NULL;
+		_Reason = nullptr;
 	}
 	else if (noUserChar)
 	{

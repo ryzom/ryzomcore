@@ -136,13 +136,13 @@ void CPSColoredParticle::setColor(NLMISC::CRGBA col)
 {
 	NL_PS_FUNC(CPSColoredParticle_setColor)
 	delete _ColorScheme;
-	_ColorScheme = NULL;
+	_ColorScheme = nullptr;
 	_Color = col;
 	updateMatAndVbForColor();
 }
 
 //=======================================
-CPSColoredParticle::CPSColoredParticle() : _Color(CRGBA(255, 255, 255)), _ColorScheme(NULL)
+CPSColoredParticle::CPSColoredParticle() : _Color(CRGBA(255, 255, 255)), _ColorScheme(nullptr)
 {
 	NL_PS_FUNC(CPSColoredParticle_CPSColoredParticle)
 }
@@ -164,10 +164,10 @@ void CPSColoredParticle::serialColorScheme(NLMISC::IStream &f)
 		if (_ColorScheme)
 		{
 			delete _ColorScheme;
-			_ColorScheme = NULL;
+			_ColorScheme = nullptr;
 		}
 	}
-	bool useColorScheme = _ColorScheme != NULL;
+	bool useColorScheme = _ColorScheme != nullptr;
 	f.serial(useColorScheme);
 	if (useColorScheme)
 	{
@@ -198,12 +198,12 @@ void CPSSizedParticle::setSize(float size)
 {
 	NL_PS_FUNC(CPSSizedParticle_setSize)
 	delete _SizeScheme;
-	_SizeScheme = NULL;
+	_SizeScheme = nullptr;
 	_ParticleSize = size;
 }
 
 //=======================================
-CPSSizedParticle::CPSSizedParticle() : _ParticleSize(0.3f), _SizeScheme(NULL)
+CPSSizedParticle::CPSSizedParticle() : _ParticleSize(0.3f), _SizeScheme(nullptr)
 {
 	NL_PS_FUNC(CPSSizedParticle_CPSSizedParticle)
 }
@@ -225,10 +225,10 @@ void CPSSizedParticle::serialSizeScheme(NLMISC::IStream &f)
 		if (_SizeScheme)
 		{
 			delete _SizeScheme;
-			_SizeScheme = NULL;
+			_SizeScheme = nullptr;
 		}
 	}
-	bool useSizeScheme = _SizeScheme != NULL;
+	bool useSizeScheme = _SizeScheme != nullptr;
 	f.serial(useSizeScheme);
 	if (useSizeScheme)
 	{
@@ -262,12 +262,12 @@ void CPSRotated2DParticle::setAngle2D(float angle2DScheme)
 {
 	NL_PS_FUNC(CPSRotated2DParticle_setAngle2D)
 	delete _Angle2DScheme;
-	_Angle2DScheme = NULL;
+	_Angle2DScheme = nullptr;
 	_Angle2D = angle2DScheme;
 }
 
 ///===================================================================================
-CPSRotated2DParticle::CPSRotated2DParticle() : _Angle2D(0), _Angle2DScheme(NULL)
+CPSRotated2DParticle::CPSRotated2DParticle() : _Angle2D(0), _Angle2DScheme(nullptr)
 {
 	NL_PS_FUNC(CPSRotated2DParticle_CPSRotated2DParticle)
 }
@@ -289,10 +289,10 @@ void CPSRotated2DParticle::serialAngle2DScheme(NLMISC::IStream &f)
 		if (_Angle2DScheme)
 		{
 			delete _Angle2DScheme;
-			_Angle2DScheme = NULL;
+			_Angle2DScheme = nullptr;
 		}
 	}
-	bool useAngle2DScheme = _Angle2DScheme != NULL;
+	bool useAngle2DScheme = _Angle2DScheme != nullptr;
 	f.serial(useAngle2DScheme);
 	if (useAngle2DScheme)
 	{
@@ -346,7 +346,7 @@ void CPSTexturedParticle::setTextureIndex(sint32 index)
 {
 	NL_PS_FUNC(CPSTexturedParticle_setTextureIndex)
 	delete _TextureIndexScheme;
-	_TextureIndexScheme = NULL;
+	_TextureIndexScheme = nullptr;
 	_TextureIndex = index;
 }
 
@@ -357,7 +357,7 @@ void CPSTexturedParticle::setTextureGroup(NLMISC::CSmartPtr<CTextureGrouped> tex
 	nlassert(texGroup);
 	if (_Tex)
 	{
-		_Tex = NULL;
+		_Tex = nullptr;
 	}
 	_TexGroup = texGroup;
 	updateMatAndVbForTexture();
@@ -368,15 +368,17 @@ void CPSTexturedParticle::setTexture(CSmartPtr<ITexture> tex)
 {
 	NL_PS_FUNC(CPSTexturedParticle_setTexture)
 	delete _TextureIndexScheme;
-	_TextureIndexScheme = NULL;
+	_TextureIndexScheme = nullptr;
 	_Tex = tex;
-	_TexGroup = NULL; // release any grouped texture if one was set before
+	_TexGroup = nullptr; // release any grouped texture if one was set before
 	updateMatAndVbForTexture();
 }
 
 ///===================================================================================
-CPSTexturedParticle::CPSTexturedParticle() : _TexGroup(NULL),
-											 _TextureIndexScheme(NULL),
+CPSTexturedParticle::CPSTexturedParticle() : _TexGroup(nullptr)
+    ,
+											 _TextureIndexScheme(nullptr)
+    ,
 											 _TextureIndex(0)
 {
 	NL_PS_FUNC(CPSTexturedParticle_CPSTexturedParticle)
@@ -399,23 +401,23 @@ void CPSTexturedParticle::serialTextureScheme(NLMISC::IStream &f)
 		if (_TextureIndexScheme)
 		{
 			delete _TextureIndexScheme;
-			_TextureIndexScheme = NULL;
-			_Tex = NULL;
-			_TexGroup = NULL;
+			_TextureIndexScheme = nullptr;
+			_Tex = nullptr;
+			_TexGroup = nullptr;
 		}
 	}
 
 	bool useAnimatedTexture;
 	if (!f.isReading())
 	{
-		useAnimatedTexture = (_TexGroup != NULL);
+		useAnimatedTexture = (_TexGroup != nullptr);
 	}
 	f.serial(useAnimatedTexture);
 	if (useAnimatedTexture)
 	{
 		if (f.isReading())
 		{
-			CTextureGrouped *ptTex = NULL;
+			CTextureGrouped *ptTex = nullptr;
 			f.serialPolyPtr(ptTex);
 			_TexGroup = ptTex;
 		}
@@ -425,7 +427,7 @@ void CPSTexturedParticle::serialTextureScheme(NLMISC::IStream &f)
 			f.serialPolyPtr(ptTex);
 		}
 
-		bool useTextureIndexScheme = _TextureIndexScheme != NULL;
+		bool useTextureIndexScheme = _TextureIndexScheme != nullptr;
 		f.serial(useTextureIndexScheme);
 		if (useTextureIndexScheme)
 		{
@@ -441,7 +443,7 @@ void CPSTexturedParticle::serialTextureScheme(NLMISC::IStream &f)
 	{
 		if (f.isReading())
 		{
-			ITexture *ptTex = NULL;
+			ITexture *ptTex = nullptr;
 			f.serialPolyPtr(ptTex);
 			_Tex = ptTex;
 		}
@@ -472,12 +474,12 @@ void CPSRotated3DPlaneParticle::setPlaneBasis(const CPlaneBasis &basis)
 {
 	NL_PS_FUNC(CPSRotated3DPlaneParticle_setPlaneBasis)
 	delete _PlaneBasisScheme;
-	_PlaneBasisScheme = NULL;
+	_PlaneBasisScheme = nullptr;
 	_PlaneBasis = basis;
 }
 
 ///===================================================================================
-CPSRotated3DPlaneParticle::CPSRotated3DPlaneParticle() : _PlaneBasisScheme(NULL)
+CPSRotated3DPlaneParticle::CPSRotated3DPlaneParticle() : _PlaneBasisScheme(nullptr)
 {
 	NL_PS_FUNC(CPSRotated3DPlaneParticle_CPSRotated3DPlaneParticle)
 	_PlaneBasis.X = CVector::I;
@@ -497,7 +499,7 @@ void CPSRotated3DPlaneParticle::serialPlaneBasisScheme(NLMISC::IStream &f)
 	NL_PS_FUNC(CPSRotated3DPlaneParticle_serialPlaneBasisScheme)
 	f.serialVersion(1);
 	f.serialPolyPtr(_PlaneBasisScheme);
-	bool usePlaneBasisScheme = _PlaneBasisScheme != NULL;
+	bool usePlaneBasisScheme = _PlaneBasisScheme != nullptr;
 	if (!usePlaneBasisScheme)
 	{
 		f.serial(_PlaneBasis);
@@ -637,9 +639,9 @@ void CPSMaterial::forceModulateConstantColor(bool force, const NLMISC::CRGBA &co
 	}
 	else
 	{
-		if (_Mat.getTexture(1) != NULL)
+		if (_Mat.getTexture(1) != nullptr)
 		{
-			_Mat.setTexture(1, NULL);
+			_Mat.setTexture(1, nullptr);
 		}
 	}
 }
@@ -649,11 +651,11 @@ void CPSMaterial::forceModulateConstantColor(bool force, const NLMISC::CRGBA &co
 void CPSMaterial::forceTexturedMaterialStages(uint numStages)
 {
 	NL_PS_FUNC(CPSMaterial_forceTexturedMaterialStages)
-	ITexture *blankTex = NULL;
+	ITexture *blankTex = nullptr;
 	uint k;
 	for (k = 0; k < numStages; ++k)
 	{
-		if (_Mat.getTexture(k) == NULL)
+		if (_Mat.getTexture(k) == nullptr)
 		{
 			if (!blankTex)
 			{
@@ -664,9 +666,9 @@ void CPSMaterial::forceTexturedMaterialStages(uint numStages)
 	}
 	for (; k < IDRV_MAT_MAXTEXTURES; ++k)
 	{
-		if (_Mat.getTexture(k) != NULL)
+		if (_Mat.getTexture(k) != nullptr)
 		{
-			_Mat.setTexture(k, NULL);
+			_Mat.setTexture(k, nullptr);
 		}
 	}
 }
@@ -692,8 +694,8 @@ void	CPSMultiTexturedParticle::enableMultiTexture(bool enabled /*= true*/)
 	if (isMultiTextureEnabled() == enabled) return;
 	if (!enabled)
 	{
-		_Texture2		   = NULL;
-		_AlternateTexture2 = NULL;
+		_Texture2		   = nullptr;
+		_AlternateTexture2 = nullptr;
 		_MultiTexState = 0;
 	}
 	else
@@ -722,7 +724,7 @@ void	CPSMultiTexturedParticle::enableAlternateTex(bool enabled /*= true*/)
 	}
 	else
 	{
-		_Texture2 = NULL;
+		_Texture2 = nullptr;
 		_MultiTexState &= ~(uint8) AlternateTextureEnabled;
 	}
 	touch();
@@ -742,7 +744,7 @@ void	CPSMultiTexturedParticle::serialMultiTex(NLMISC::IStream &f)
 		{
 			f.serial(_BumpFactor);
 		}
-		ITexture *tex = NULL;
+		ITexture *tex = nullptr;
 		if (f.isReading())
 		{
 			f.serialPolyPtr(tex);
@@ -772,15 +774,15 @@ void	CPSMultiTexturedParticle::serialMultiTex(NLMISC::IStream &f)
 		}
 		else
 		{
-			_AlternateTexture2 = NULL;
+			_AlternateTexture2 = nullptr;
 		}
 	}
 	else
 	{
 		if (f.isReading())
 		{
-			_Texture2		   = NULL;
-			_AlternateTexture2 = NULL;
+			_Texture2		   = nullptr;
+			_AlternateTexture2 = nullptr;
 		}
 	}
 }
@@ -795,7 +797,7 @@ void CPSMultiTexturedParticle::setupMaterial(ITexture *primary, IDriver *driver,
 		if (driver->supportTextureAddrMode(CMaterial::OffsetTexture))
 		{
 			CTextureBump *tb = dynamic_cast<CTextureBump *>((ITexture *) _Texture2);
-			if (tb != NULL)
+			if (tb != nullptr)
 			{
 				float normFactor = tb->getNormalizationFactor();
 				if (normFactor == 0.f) // have we computed the normalization factor ?
@@ -830,7 +832,7 @@ void CPSMultiTexturedParticle::setupMaterial(ITexture *primary, IDriver *driver,
 				}
 			}
 			CTextureBump *tb = dynamic_cast<CTextureBump *>((ITexture *) _Texture2);
-			if (tb != NULL)
+			if (tb != nullptr)
 			{
 				float normFactor = tb->getNormalizationFactor();
 				if (normFactor == 0.f) // have we computed the normalization factor ?
@@ -852,7 +854,7 @@ void CPSMultiTexturedParticle::setupMaterial(ITexture *primary, IDriver *driver,
 	{
 		mat.setTexture(0, primary);
 		mat.texEnvOpRGB(0, CMaterial::Modulate);
-		mat.setTexture(1, NULL);
+		mat.setTexture(1, nullptr);
 	}
 	else
 	{
@@ -867,7 +869,7 @@ void CPSMultiTexturedParticle::setupMaterial(ITexture *primary, IDriver *driver,
 			if (!_ForceBasicCaps && (driver->supportTextureAddrMode(CMaterial::OffsetTexture) || driver->supportEMBM())) // envbumpmap supported ?
 			{
 				CTextureBump *tb = dynamic_cast<CTextureBump *>((ITexture *) _Texture2);
-				if (tb != NULL)
+				if (tb != nullptr)
 				{
 					float normFactor = tb->getNormalizationFactor();
 					if (normFactor == 0.f) // have we computed the normalization factor ?
@@ -979,7 +981,7 @@ void	CPSMultiTexturedParticle::setupMultiTexEnv(TOperator op, ITexture *tex1, IT
 		case Decal:
 			mat.setTexture(0, tex1);
 			mat.texEnvOpRGB(0, CMaterial::Replace);
-			mat.setTexture(1, NULL);
+			mat.setTexture(1, nullptr);
 			mat.enableTexAddrMode(false);
 			break;
 		default: break;

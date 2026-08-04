@@ -120,7 +120,7 @@ public:
 	const CTileFar*			getTile (sint tile) const
 	{
 		if (tile>=(sint)_TileVector.size())
-			return NULL;
+			return nullptr;
 
 		return &_TileVector[tile];
 	}
@@ -129,7 +129,7 @@ public:
 	CTileFar*				getTile (sint tile)
 	{
 		if (tile>=(sint)_TileVector.size())
-			return NULL;
+			return nullptr;
 
 		return &_TileVector[tile];
 	}

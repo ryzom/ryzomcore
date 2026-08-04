@@ -68,7 +68,7 @@ using namespace NLMISC;
 
 namespace NL3D {
 
-FT_Library	CFontGenerator::_Library = NULL;
+FT_Library	CFontGenerator::_Library = nullptr;
 uint		CFontGenerator::_LibraryInit = 0;
 uint32		CFontGenerator::_FontGeneratorCounterUID = 1;
 
@@ -76,7 +76,7 @@ const char *CFontGenerator::getFT2Error(FT_Error fte)
 {
 	static char ukn[1024];
 
-	for (uint32 i = 0; ft_errors[i].err_code != 0 || ft_errors[i].err_msg != 0; i++)
+	for (uint32 i = 0; ft_errors[i].err_code != 0 || ft_errors[i].err_msg != nullptr; i++)
 	{
 		if (ft_errors[i].err_code == fte)
 			return ft_errors[i].err_msg;
@@ -142,7 +142,7 @@ static void nlFreetypeStreamClose(FT_Stream stream)
 		file->close();
 		delete file;
 
-		stream->descriptor.pointer = NULL;
+		stream->descriptor.pointer = nullptr;
 	}
 
 	// free Freetype stream structure
@@ -163,7 +163,7 @@ static bool createFreetypeStream(const std::string &filename, FT_Open_Args &args
 	args.flags = FT_OPEN_STREAM;
 	args.stream = (FT_Stream)malloc(sizeof(*args.stream));
 
-	if (args.stream == NULL)
+	if (args.stream == nullptr)
 	{
 		nlwarning("Unable to allocate FT_Stream for %s", filename.c_str());
 
@@ -171,11 +171,11 @@ static bool createFreetypeStream(const std::string &filename, FT_Open_Args &args
 		return false;
 	}
 
-	args.stream->base = NULL; // only used for memory streams
+	args.stream->base = nullptr; // only used for memory streams
 	args.stream->size = file->getFileSize();
 	args.stream->pos = 0;
 	args.stream->descriptor.pointer = file;
-	args.stream->pathname.pointer = NULL; // filename is already managed by CIFile
+	args.stream->pathname.pointer = nullptr; // filename is already managed by CIFile
 	args.stream->read = nlFreetypeStreamIo;
 	args.stream->close = nlFreetypeStreamClose;
 
@@ -284,7 +284,7 @@ CFontGenerator::~CFontGenerator ()
 	if (!_LibraryInit)
 	{
 		FT_Done_FreeType(_Library);
-		_Library = NULL;
+		_Library = nullptr;
 	}
 }
 
@@ -346,7 +346,7 @@ uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool ob
 	if (!_Faces.size())
 	{
 		nlerror("No faces loaded");
-		return NULL;
+		return nullptr;
 	}
 
 	for (std::vector<FT_Face>::iterator it(_Faces.begin()), end(_Faces.end()); it != end; ++it)
@@ -390,7 +390,7 @@ uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool ob
 		top = 0;
 		advx = 0;
 		glyphIndex = glyph_index;
-		return NULL;
+		return nullptr;
 	}
 
 	if (embolden)

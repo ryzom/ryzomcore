@@ -611,7 +611,7 @@ CZoneBankElement *CZoneBank::getElementByZoneName (const std::string &ZoneName)
 	{
 		return &(it->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -670,13 +670,13 @@ void CZoneBank::addAndSwitch (const std::string &CategoryType, const std::string
 		}
 		if (!bFound)
 		{
-			_Selection[i] = NULL; // Mark this item to be removed
+			_Selection[i] = nullptr; // Mark this item to be removed
 		}
 	}
 	// Remove all unused items
 	for (i = 0, j = 0; i < _Selection.size(); ++i)
 	{
-		if (_Selection[i] != NULL)
+		if (_Selection[i] != nullptr)
 		{
 			_Selection[j] = _Selection[i];
 			++j;

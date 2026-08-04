@@ -35,11 +35,13 @@ namespace NL3D
 
 // ***************************************************************************************************************
 CPSLight::CPSLight() : _Color(CRGBA::White),
-					   _ColorScheme(NULL),
+					   _ColorScheme(nullptr)
+    ,
 					   _AttenStart(0.1f),
-					   _AttenStartScheme(NULL),
+					   _AttenStartScheme(nullptr)
+    ,
 					   _AttenEnd(1.f),
-					   _AttenEndScheme(NULL)
+					   _AttenEndScheme(nullptr)
 {
 	NL_PS_FUNC(CPSLight_CPSLight)
 }
@@ -80,7 +82,7 @@ void CPSLight::serial(NLMISC::IStream &f)
 	// version 0 : color, start attenuation radius, end attenuation radius.
 	sint ver = f.serialVersion(1);
 	// color
-	bool hasColorScheme = _ColorScheme != NULL;
+	bool hasColorScheme = _ColorScheme != nullptr;
 	f.serial(hasColorScheme);
 	if (hasColorScheme)
 	{
@@ -91,7 +93,7 @@ void CPSLight::serial(NLMISC::IStream &f)
 		f.serial(_Color);
 	}
 	// Atten start
-	bool hasAttenStartScheme = _AttenStartScheme != NULL;
+	bool hasAttenStartScheme = _AttenStartScheme != nullptr;
 	f.serial(hasAttenStartScheme);
 	if (hasAttenStartScheme)
 	{
@@ -102,7 +104,7 @@ void CPSLight::serial(NLMISC::IStream &f)
 		f.serial(_AttenStart);
 	}
 	// Atten end
-	bool hasAttenEndScheme = _AttenEndScheme != NULL;
+	bool hasAttenEndScheme = _AttenEndScheme != nullptr;
 	f.serial(hasAttenEndScheme);
 	if (hasAttenEndScheme)
 	{
@@ -296,7 +298,7 @@ void CPSLight::setColor(NLMISC::CRGBA color)
 {
 	NL_PS_FUNC(CPSLight_setColor)
 	delete _ColorScheme;
-	_ColorScheme = NULL;
+	_ColorScheme = nullptr;
 	_Color = color;
 }
 
@@ -318,7 +320,7 @@ void CPSLight::setAttenStart(float radius)
 	NL_PS_FUNC(CPSLight_setAttenStart)
 	nlassert(radius > 0.f);
 	delete _AttenStartScheme;
-	_AttenStartScheme =	NULL;
+	_AttenStartScheme = nullptr;
 	_AttenStart = radius;
 }
 
@@ -339,7 +341,7 @@ void CPSLight::setAttenEnd(float radius)
 {
 	NL_PS_FUNC(CPSLight_setAttenEnd)
 	delete _AttenEndScheme;
-	_AttenEndScheme = NULL;
+	_AttenEndScheme = nullptr;
 	_AttenEnd = radius;
 }
 
@@ -362,7 +364,7 @@ void CPSLight::newElement(const CPSEmitterInfo &info)
 	if (_ColorScheme && _ColorScheme->hasMemory()) _ColorScheme->newElement(info);
 	if (_AttenStartScheme && _AttenStartScheme->hasMemory()) _AttenStartScheme->newElement(info);
 	if (_AttenEndScheme && _AttenEndScheme->hasMemory()) _AttenEndScheme->newElement(info);
-	_Lights.insert(NULL); // instance is created during step()
+	_Lights.insert(nullptr); // instance is created during step()
 }
 
 // ***************************************************************************************************************
@@ -403,7 +405,7 @@ void CPSLight::releaseAllRef()
 		{
 			nlassert(_Owner && _Owner->getScene()); // if there's an instance there must be a scene from which it was created.
 			_Owner->getScene()->deleteModel(_Lights[k]);
-			_Lights[k] = NULL;
+			_Lights[k] = nullptr;
 		}
 	}
 }
@@ -433,8 +435,8 @@ void CPSLight::show()
 		float radiusStart = _AttenStartScheme ? _AttenStartScheme->get(_Owner, k) : _AttenStart;
 		float radiusEnd = _AttenEndScheme ? _AttenEndScheme->get(_Owner, k) : _AttenEnd;
 		NLMISC::clamp(radiusStart, 0.f, radiusEnd);
-		const NLMISC::CRGBA colStart = (((lb == NULL || this == lb) && loc == _Owner && index == k)  ? CRGBA::Blue : CRGBA(0, 0, 127));
-		const NLMISC::CRGBA colEnd = (((lb == NULL || this == lb) && loc == _Owner && index == k)  ? CRGBA::Red : CRGBA(127, 0, 0));
+		const NLMISC::CRGBA colStart = (((lb == nullptr || this == lb) && loc == _Owner && index == k)  ? CRGBA::Blue : CRGBA(0, 0, 127));
+		const NLMISC::CRGBA colEnd = (((lb == nullptr || this == lb) && loc == _Owner && index == k)  ? CRGBA::Red : CRGBA(127, 0, 0));
 		//
 		CPSUtil::displayDisc(*getDriver(), radiusStart, getLocalToWorldMatrix() * _Owner->getPos()[k], xzMat, numSubdiv, colStart);
 		CPSUtil::displayDisc(*getDriver(), radiusStart, getLocalToWorldMatrix() * _Owner->getPos()[k], xyMat, numSubdiv, colStart);

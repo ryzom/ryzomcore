@@ -299,12 +299,12 @@ namespace NLGUI
 		// ** try to get the Env Table (interface group only)
 		if(propName==lstr_isNil)
 		{
-			ls.push(pRPT==NULL);
+			ls.push(pRPT == nullptr);
 			return 1;
 		}
 
 		// Check the object is not NULL or freed
-		if(pRPT==NULL)
+		if(pRPT == nullptr)
 		{
 			return 0;
 		}
@@ -314,7 +314,7 @@ namespace NLGUI
 		{
 			// Env can be bound to a CInterfaceGroup only
 			CInterfaceGroup		*group= dynamic_cast<CInterfaceGroup*>(pRPT);
-			if(group==NULL)
+			if(group == nullptr)
 			{
 				ls.pushNil();
 				return 1;
@@ -360,7 +360,7 @@ namespace NLGUI
 		nlassert(pRefElm);
 		CReflectableRefPtrTarget	*pRPT= (CReflectableRefPtrTarget*)(pRefElm->Ptr);
 		// Check the UI is not NULL or freed
-		if(pRPT == NULL)
+		if(pRPT == nullptr)
 		{
 			return 0;
 		}
@@ -630,7 +630,7 @@ namespace NLGUI
 	bool CLuaIHM::isUIOnStack(CLuaState &ls,    sint index)
 	{
 		//H_AUTO(Lua_CLuaIHM_isUIOnStack)
-		return getUIOnStack(ls,    index) != NULL;
+		return getUIOnStack(ls,    index) != nullptr;
 	}
 
 	// ***************************************************************************
@@ -660,7 +660,7 @@ namespace NLGUI
 	CInterfaceElement *CLuaIHM::getUIRelative(CInterfaceElement *pIE,    const std::string &propName)
 	{
 		//H_AUTO(Lua_CLuaIHM_getUIRelative)
-		if (pIE == NULL) return NULL;
+		if (pIE == nullptr) return nullptr;
 		// If the prop is "parent",    then return the parent of the ui
 		if(propName=="parent")
 		{
@@ -676,7 +676,7 @@ namespace NLGUI
 			}
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -978,7 +978,7 @@ namespace NLGUI
 
 		// run AH
 		// The element must be ctrl (or NULL)
-		CCtrlBase	*ctrl= NULL;
+		CCtrlBase	*ctrl = nullptr;
 		if(pIE)
 		{
 			ctrl= dynamic_cast<CCtrlBase*>(pIE);
@@ -1145,7 +1145,7 @@ namespace NLGUI
 		//H_AUTO(Lua_CLuaIHM_runExprAndPushResult)
 		// Execute expression
 		CInterfaceExprValue value;
-		if (CInterfaceExpr::eval(expr,    value,    NULL))
+		if (CInterfaceExpr::eval(expr,    value, nullptr))
 		{
 			switch(value.getType())
 			{
@@ -1847,7 +1847,7 @@ namespace NLGUI
 	{
 		//H_AUTO(Lua_CLuaIHM_getReflectableOnStack)
 		if(!isReflectableOnStack(ls,    index))
-			return NULL;
+			return nullptr;
 
 		CReflectableLuaRef	*p= (CReflectableLuaRef *) ls.toUserData(index);
 		nlassert(p->Ptr);

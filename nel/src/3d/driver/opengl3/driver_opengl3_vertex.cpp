@@ -59,7 +59,7 @@ CVBDrvInfosGL3::CVBDrvInfosGL3(CDriverGL3 *drv, ItVBDrvInfoPtrList it, CVertexBu
 {
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGL)
 	_DriverGL = drv;
-	_VBHard = NULL;
+	_VBHard = nullptr;
 }
 
 // ***************************************************************************
@@ -71,7 +71,7 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 	if (VertexBufferPtr)
 	{
 		VertexBufferPtr->setLocation(CVertexBuffer::NotResident);
-		VertexBufferPtr = NULL;
+		VertexBufferPtr = nullptr;
 	}
 
 	if (_VBHard)
@@ -80,7 +80,7 @@ CVBDrvInfosGL3::~CVBDrvInfosGL3()
 		_DriverGL->_VertexBufferGLSet.erase(_VBHard);
 	}
 
-	_VBHard = NULL;
+	_VBHard = nullptr;
 }
 
 // ***************************************************************************
@@ -104,12 +104,12 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 	// 2. If necessary, do modifications.
 	//==================================
 	const bool touched = (VB.getTouchFlags() & (CVertexBuffer::TouchedReserve|CVertexBuffer::TouchedVertexFormat)) != 0;
-	if (touched || (VB.DrvInfos == NULL))
+	if (touched || (VB.DrvInfos == nullptr))
 	{
 		// delete first
 		if (VB.DrvInfos)
 			delete VB.DrvInfos;
-		VB.DrvInfos = NULL;
+		VB.DrvInfos = nullptr;
 
 		// create only if some vertices
 		if (VB.getNumVertices())
@@ -117,7 +117,7 @@ bool CDriverGL3::setupVertexBuffer(CVertexBuffer& VB)
 			// 1. Retrieve/Create driver shader.
 			//==================================
 			// insert into driver list. (so it is deleted when driver is deleted).
-			ItVBDrvInfoPtrList	it= _VBDrvInfos.insert(_VBDrvInfos.end(), (NL3D::IVBDrvInfos*)NULL);
+			ItVBDrvInfoPtrList	it= _VBDrvInfos.insert(_VBDrvInfos.end(), (NL3D::IVBDrvInfos*)nullptr);
 			// create and set iterator, for future deletion.
 			CVBDrvInfosGL3 *info = new CVBDrvInfosGL3(this, it, &VB);
 			*it= VB.DrvInfos = info;
@@ -200,7 +200,7 @@ bool		CDriverGL3::activeVertexBuffer(CVertexBuffer& VB)
 	if (!info->_VBHard ||  (info->_VBHard && !info->_VBHard->isInvalid()))
 		_LastVB.setupVertexBuffer(VB);
 
-	if (info->_VBHard == NULL)
+	if (info->_VBHard == nullptr)
 	{
 		// Disable the current vertexBufferHard if setuped.
 		if (_CurrentVertexBufferGL)
@@ -559,7 +559,7 @@ bool			CDriverGL3::initVertexBufferHard(uint agpMem, uint vramMem)
 CIndexBufferInfo::CIndexBufferInfo()
 {
 	H_AUTO_OGL(CIndexBufferInfo_CIndexBufferInfo)
-	_Values = NULL;
+	_Values = nullptr;
 }
 
 // ***************************************************************************

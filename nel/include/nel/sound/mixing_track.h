@@ -38,21 +38,22 @@ class CTrack
 {
 public:
 	/// Constructor
-	CTrack() : m_LogicalSource(NULL), m_PhysicalSource(NULL) { }
+	CTrack() : m_LogicalSource(nullptr)
+	    , m_PhysicalSource(nullptr) { }
 	/// Init
 	inline void init(ISoundDriver *soundDriver) { m_PhysicalSource = soundDriver->createSource(); }
 	/// Destructor
-	virtual ~CTrack() { /* nlassert(m_LogicalSource != NULL); [TODO KAETEMI: Try this.] */ if (m_PhysicalSource != NULL) delete m_PhysicalSource; m_PhysicalSource = NULL; }
+	virtual ~CTrack() { /* nlassert(m_LogicalSource != NULL); [TODO KAETEMI: Try this.] */ if (m_PhysicalSource != nullptr) delete m_PhysicalSource; m_PhysicalSource = nullptr; }
 	
 	/// Return if the track succeeded to create a physical source.
-	inline bool						hasPhysicalSource() const { return m_PhysicalSource != NULL; }
+	inline bool						hasPhysicalSource() const { return m_PhysicalSource != nullptr; }
 	/// Return the physical source. Asserts when NULL.
 	inline ISource *getPhysicalSource() { nlassert(m_PhysicalSource != NULL); return m_PhysicalSource; }
 	
 	/// Return availability for playback
 	/// FIXME: SWAPTEST [TODO: KAETEMI: Figure out what FIXME: SWAPTEST means.]
 	// bool isAvailable() const { return (_SimpleSource==NULL); }
-	bool isAvailable() const { nlassert(m_PhysicalSource != NULL); return (m_LogicalSource == NULL) && m_PhysicalSource->isStopped(); }
+	bool isAvailable() const { nlassert(m_PhysicalSource != NULL); return (m_LogicalSource == nullptr) && m_PhysicalSource->isStopped(); }
 	/// Returns true if the track is physically playing (different from getUserSource()->isPlaying())
 	bool isPlaying() const { nlassert(m_PhysicalSource != NULL); return m_PhysicalSource->isPlaying(); }
 

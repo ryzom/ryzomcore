@@ -102,7 +102,7 @@ public:
 		if ((uint)stateId<_AnimationStates.size ())
 			return &(_AnimationStates[stateId]);
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	// get number of animation states

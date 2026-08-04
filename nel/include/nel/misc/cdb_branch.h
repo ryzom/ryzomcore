@@ -57,7 +57,7 @@ public:
 	// default constructor
 	CCDBNodeBranch(const std::string &name) : ICDBNode(name)
 	{
-		_Parent = NULL;
+		_Parent = nullptr;
 		_IdBits = 0;
 		_Sorted = false;
 	}
@@ -66,7 +66,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL ) NL_OVERRIDE;
+	void init( xmlNodePtr node, class IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = nullptr) NL_OVERRIDE;
 
 	/**
 	 * Add a new sub node
@@ -217,7 +217,7 @@ public:
 	 * "" -> this node
 	 * "FOO:BAR" ->  sub-branch "BAR" of "FOO" which is a sub-branch of this node
 	 */
-	void addBranchObserver( ICDBDBBranchObserverHandle *handle, const char *dbPathFromThisNode, const char **positiveLeafNameFilter=NULL, uint positiveLeafNameFilterSize=0);
+	void addBranchObserver( ICDBDBBranchObserverHandle *handle, const char *dbPathFromThisNode, const char **positiveLeafNameFilter = nullptr, uint positiveLeafNameFilterSize=0);
 
 	// Remove observer from all sub-leaves
 	bool removeBranchObserver(IPropertyObserver* observer);

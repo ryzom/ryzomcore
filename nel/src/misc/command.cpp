@@ -32,7 +32,7 @@ using namespace NLMISC;
 namespace NLMISC {
 
 //ICommand::TCategorySet* ICommand::_Categories;
-ICommand::TCommand *ICommand::LocalCommands = NULL;
+ICommand::TCommand *ICommand::LocalCommands = nullptr;
 bool ICommand::LocalCommandsInit = false;
 //set<std::string>		ICommand::_CommandsDisablingControlChar;
 
@@ -91,7 +91,7 @@ ICommand::~ICommand()
 			if (!LocalCommands->size())
 			{
 				delete LocalCommands;
-				LocalCommands = NULL;
+				LocalCommands = nullptr;
 				LocalCommandsInit = false;
 			}
 
@@ -138,7 +138,7 @@ void CCommandRegistry::unregisterCommand(ICommand *command)
 void CCommandRegistry::registerNamedCommandHandler(ICommandsHandler *handler, const std::string &className)
 {
 	const std::string &name = handler->getCommandHandlerName();
-	if (_CommandsHandlers.getB(name) != NULL)
+	if (_CommandsHandlers.getB(name) != nullptr)
 	{
 		nlwarning("CCommandRegistry : a commands handler with the name '%s' already exist, ignoring new candidat", name.c_str());
 		return;
@@ -169,7 +169,7 @@ void CCommandRegistry::registerNamedCommandHandler(ICommandsHandler *handler, co
 
 void CCommandRegistry::unregisterNamedCommandHandler(ICommandsHandler *handler, const std::string &className)
 {
-	if (_CommandsHandlers.getA(handler) == NULL)
+	if (_CommandsHandlers.getA(handler) == nullptr)
 		return;
 
 	_CommandsHandlers.removeWithB(handler);
@@ -381,7 +381,7 @@ end:
 			string objectName = cp.CommandName.substr(0, pos);
 			string commandName = cp.CommandName.substr(pos+1);
 			ICommandsHandler *const *ppch = _CommandsHandlers.getB(objectName);
-			if (ppch != NULL)
+			if (ppch != nullptr)
 			{
 				// ok, we found the object
 				ret = ret && (*ppch)->execute(commands[u].RawCommandString, commandName, commands[u].CommandArgs, log, quiet, human);
@@ -497,7 +497,7 @@ void CCommandRegistry::expand (std::string &commandName, NLMISC::CLog &log)
 		else
 		{
 			ICommandsHandler *const *pch = _CommandsHandlers.getB(objectName);
-			if (pch != NULL)
+			if (pch != nullptr)
 			{
 				// ok, an object of this name exist, lookup the class
 				TCommandsHandlersClass::iterator it = _CommandsHandlersClass.find((*pch)->getCommandHandlerClassName());
@@ -623,7 +623,7 @@ bool CCommandRegistry::exists (std::string const &commandName)
 
 bool CCommandRegistry::isNamedCommandHandler(const std::string &handlerName)
 {
-	return _CommandsHandlers.getB(handlerName) != NULL;
+	return _CommandsHandlers.getB(handlerName) != nullptr;
 }
 
 bool ICommand::isCommand (const std::string &str)
@@ -649,7 +649,7 @@ ICommand *CCommandRegistry::getCommand(const std::string &commandName)
 	TCommand::iterator it(_Commands.find(commandName));
 
 	if (it == _Commands.end())
-		return NULL;
+		return nullptr;
 	else
 		return it->second;
 }
@@ -796,7 +796,7 @@ NLMISC_CATEGORISED_COMMAND(nel,help,"display help on a specific variable/command
 	{
 		string objName = args[0].substr(0, args[0].find("."));
 
-		if (cr._CommandsHandlers.getB(objName) != NULL)
+		if (cr._CommandsHandlers.getB(objName) != nullptr)
 		{
 			const string &className = (*(cr._CommandsHandlers.getB(objName)))->getCommandHandlerClassName();
 			if (cr._CommandsHandlersClass.find(className) != cr._CommandsHandlersClass.end())
@@ -975,13 +975,13 @@ bool	CCommandRegistry::isControlCharForCommandEnabled(const std::string &command
 }
 
 ICommandsHandler::ICommandsHandler()
-: _ClassName(NULL)
+: _ClassName(nullptr)
 {
 }
 
 void ICommandsHandler::registerCommandsHandler()
 {
-	if (_ClassName == NULL)
+	if (_ClassName == nullptr)
 	{
 		// store the class name for unregistering during destruction
 		_ClassName = &getCommandHandlerClassName();
@@ -991,10 +991,10 @@ void ICommandsHandler::registerCommandsHandler()
 
 void ICommandsHandler::unregisterCommandsHandler()
 {
-	if (_ClassName != NULL)
+	if (_ClassName != nullptr)
 	{
 		CCommandRegistry::getInstance().unregisterNamedCommandHandler(this, *_ClassName);
-		_ClassName = NULL;
+		_ClassName = nullptr;
 	}
 }
 

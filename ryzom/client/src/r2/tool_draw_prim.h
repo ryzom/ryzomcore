@@ -46,7 +46,7 @@ public:
 	enum TPrimType { Road = 0, Region, PrimTypeCount };
 	NLMISC_DECLARE_CLASS(R2::CToolDrawPrim);
 	// ctor
-	CToolDrawPrim(TPrimType primType = Road, CInstance *extending = NULL);
+	CToolDrawPrim(TPrimType primType = Road, CInstance *extending = nullptr);
 	virtual bool init(const CLuaObject &parameters) NL_OVERRIDE;
 	virtual const char *getToolUIName() const NL_OVERRIDE;
 	virtual bool  isCreationTool() const NL_OVERRIDE { return true; }

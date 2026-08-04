@@ -134,10 +134,10 @@ CWaterModel::CWaterModel()
 	setOrderingLayer(1);
 	// RenderFilter: We are a SegRemanece
 	_RenderFilterType= UScene::FilterWater;
-	_Prev = NULL;
-	_Next = NULL;
+	_Prev = nullptr;
+	_Next = nullptr;
 	_MatrixUpdateDate = 0;
-	_PlanarReflection = NULL;
+	_PlanarReflection = nullptr;
 }
 
 //=======================================================================
@@ -967,7 +967,7 @@ void CWaterModel::setupMaterialNVertexShader(IDriver *drv, CWaterShape *shape, c
 	// reflection manager never renders reflections for planes the camera
 	// is under anyway — the 'above' gate on planar only covers the same
 	// frame's camera diving below a plane selected while above it.
-	const bool planar = _PlanarReflection != NULL && above;
+	const bool planar = _PlanarReflection != nullptr && above;
 	// Calculated reflectivity over the artist envmap (fallback continuity /
 	// explicit shape option), when the per-vertex base channel is present
 	const bool envCalc = !planar && above
@@ -1157,7 +1157,7 @@ void CWaterModel::setupSimpleRender(CWaterShape *shape, const NLMISC::CVector &o
 		}
 	}
 	//
-	if (shape->_ColorMap == NULL)
+	if (shape->_ColorMap == nullptr)
 	{
 		// version with no color map
 		if (!_EmbossTexture)
@@ -1292,8 +1292,8 @@ void CWaterModel::unlink()
 		_Next->_Prev = _Prev;
 	}
 	*_Prev = _Next;
-	_Next = NULL;
-	_Prev = NULL;
+	_Next = nullptr;
+	_Prev = nullptr;
 }
 
 // ***********************************************************************************************************
@@ -1323,7 +1323,7 @@ uint CWaterModel::getNumWantedVertices()
 	CScene						*scene = getOwnerScene();
 	CRenderTrav					&renderTrav		= scene->getRenderTrav();
 
-	_PlanarReflection = NULL;
+	_PlanarReflection = nullptr;
 
 	if (!renderTrav.Perspective || forceWaterSimpleRender) return 0;
 
@@ -1929,14 +1929,14 @@ void	CWaterModel::traverseRender()
 			nlassert(vb.getNumVertices() > 0);
 			drv->activeVertexBuffer(vb);
 			drv->renderRawTriangles(CWaterModel::_WaterMat, _StartTri, _NumTris);
-			drv->activeVertexProgram(NULL);
-			drv->bindUniformBuffer(UBBindingVertexProgram, NULL);
+			drv->activeVertexProgram(nullptr);
+			drv->bindUniformBuffer(UBBindingVertexProgram, nullptr);
 		}
 		else
 		{
 			setupSimpleRender(shape, obsPos, isAbove);
 			drv->activeVertexBuffer(vb);
-			drv->activeVertexProgram(NULL);
+			drv->activeVertexProgram(nullptr);
 			drv->renderRawTriangles(CWaterModel::_SimpleWaterMat, _StartTri, _NumTris);
 		}
 	}

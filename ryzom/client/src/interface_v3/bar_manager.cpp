@@ -63,7 +63,7 @@ static const char *entryTypeToStr(CBarManager::TEntryType et)
 
 
 // ***************************************************************************
-CBarManager		*CBarManager::_Instance= NULL;
+CBarManager		*CBarManager::_Instance = nullptr;
 
 
 // ***************************************************************************
@@ -89,12 +89,12 @@ void	CBarManager::CBarDataEntry::clear()
 // ***************************************************************************
 void	CBarManager::CBarDataEntry::resetDB()
 {
-	UIDIn= NULL;
-	PresentIn= NULL;
+	UIDIn = nullptr;
+	PresentIn = nullptr;
 	for(uint sc=0;sc<SCORES::NUM_SCORES;sc++)
 	{
-		ScoreIn[sc]= NULL;
-		ScoreOut[sc]= NULL;
+		ScoreIn[sc] = nullptr;
+		ScoreOut[sc] = nullptr;
 	}
 }
 
@@ -187,7 +187,7 @@ void CBarManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -493,7 +493,7 @@ void		CBarManager::updateEntryFromDB(TEntryType type, uint entryId)
 	CBarDataEntry	&bde= entryArray[entryId];
 
 	// if the UID db was not found, can't do nothing... => abort
-	if(bde.UIDIn==NULL)
+	if(bde.UIDIn == nullptr)
 		return;
 
 	// get the new UID from the SERVER DB
@@ -543,7 +543,7 @@ void		CBarManager::updateTargetFromDB()
 	CBarDataEntry	&bde= _EntryBars[TargetType][0];
 
 	// if the UID db was not found, can't do nothing... => abort
-	if(bde.UIDIn==NULL)
+	if(bde.UIDIn == nullptr)
 		return;
 
 	// get the new UID from the SERVER DB

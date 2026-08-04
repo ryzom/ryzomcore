@@ -42,13 +42,13 @@ public:
 	/// Update sorted lists for an element
 	void linkFirstX (CMoveElement *element)
 	{
-		linkX (NULL, element, _FirstX);
+		linkX (nullptr, element, _FirstX);
 	}
 
 	/// Update sorted lists for an element
 	void linkLastX (CMoveElement *element)
 	{
-		linkX (_LastX, element, NULL);
+		linkX (_LastX, element, nullptr);
 	}
 
 	/*/// Update sorted lists for an element

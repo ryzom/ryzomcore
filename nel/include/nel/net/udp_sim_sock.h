@@ -78,8 +78,8 @@ private:
 	static uint8	_OutPacketDisordering;
 
 	void updateBufferizedPackets ();
-	void sendUDP (const uint8 *buffer, uint32& len, const CInetAddress *addr = NULL);
-	void sendUDPNow (const uint8 *buffer, uint32 len, const CInetAddress *addr = NULL);
+	void sendUDP (const uint8 *buffer, uint32& len, const CInetAddress *addr = nullptr);
+	void sendUDPNow (const uint8 *buffer, uint32 len, const CInetAddress *addr = nullptr);
 
 	friend void cbSimVar (NLMISC::CConfigFile::CVar &var);
 };

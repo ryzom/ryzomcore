@@ -163,7 +163,7 @@ public:
 	/// \param needComputeVS : if 'true' this will compute the visual slot file too.
 	void load        (NLMISC::IProgressCallback &callBack, bool updatePackedSheet, bool needComputeVS = false, bool dumpVSIndex = false);
 	/// Load all sheet or a subset of them (if 'extensions' is not NULL, them the extensions list is taken from that vector)
-	void loadAllSheet(NLMISC::IProgressCallback &callBack, bool updatePackedSheet, bool needComputeVS, bool dumpVSIndex, bool forceRecompute = false, const std::vector<std::string> *extensions = NULL);
+	void loadAllSheet(NLMISC::IProgressCallback &callBack, bool updatePackedSheet, bool needComputeVS, bool dumpVSIndex, bool forceRecompute = false, const std::vector<std::string> *extensions = nullptr);
 	/// Load all sheet, without packed sheet, and with a wildcard (for reload feature)
 	void loadAllSheetNoPackedSheet(NLMISC::IProgressCallback &callBack, const std::vector<std::string> &extensions, const std::string &wildcardFilter);
 

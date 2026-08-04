@@ -308,7 +308,7 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 					// anywhere else the press falls through to the normal paths, so arming
 					// only changes what a vertex press means.
 					NL3D::IDriver *drv = g_PaintCtx.UDriver
-						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
+						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : nullptr;
 					if (g_WeldTargetArmed && SubObj == SubVertex
 					    && zpWeldDragBegin(Camera, drv, MouseX, MouseY))
 						return;
@@ -457,7 +457,7 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			if (zpWeldDragActive() && (mouse->Button & NLMISC::leftButton))
 			{
 				NL3D::IDriver *drv = g_PaintCtx.UDriver
-					? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : NULL;
+					? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : nullptr;
 				zpWeldDragFinish(Camera, drv, mouse->X, mouse->Y);
 				return;
 			}
@@ -655,15 +655,15 @@ static void zpFrameTarget(NL3D::CNavMouseListener &nav, const CPaintMouseListene
  */
 static void zpDropViewerFrameState()
 {
-	ZPUI::setSessionBoardBridge(NULL);
+	ZPUI::setSessionBoardBridge(nullptr);
 	ZPUI::setSessionBoardVisible(false);
-	ZPUI::setPaintUIBridge(NULL);
-	g_SessionBank = NULL;
+	ZPUI::setPaintUIBridge(nullptr);
+	g_SessionBank = nullptr;
 	g_PaintCtx = SPaintCtx();
 	g_SessionOpsAvailable = false;
 	g_PumpCtx = SScriptPumpCtx();
-	g_ScriptHost.bridge = NULL; // pointed at the frame's paintBridge
-	g_ViewerAsync = NULL;
+	g_ScriptHost.bridge = nullptr; // pointed at the frame's paintBridge
+	g_ViewerAsync = nullptr;
 }
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
@@ -702,11 +702,11 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 	NLMISC::CVector center = bbox.getCenter();
 
 	NL3D::UDriver *udriver = externalDriver;
-	const bool ownsDriver = (externalDriver == NULL);
-	NL3D::UScene *uscene = NULL;
+	const bool ownsDriver = (externalDriver == nullptr);
+	NL3D::UScene *uscene = nullptr;
 	ZPUI::CEditorUI localEditorUI;
 	ZPUI::CEditorUI *editorUI = externalEditorUI ? externalEditorUI : &localEditorUI;
-	const bool ownsEditorUI = (externalEditorUI == NULL);
+	const bool ownsEditorUI = (externalEditorUI == nullptr);
 	try
 	{
 		// UDriver/UScene port of the previous CNELU init (needed for NLGUI's CViewRenderer,
@@ -715,7 +715,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		NL3D::CViewport viewport;
 		if (ownsDriver)
 		{
-			udriver = NL3D::UDriver::createDriver(0, false, 0);
+			udriver = NL3D::UDriver::createDriver(0, false, nullptr);
 			if (!udriver)
 			{
 				fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
@@ -847,7 +847,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		CPaintMouseListener paintListener;
 		// Shared paint actions (keys + NLGUI); bridge lives for the viewer session.
 		ZPUI::SPaintUIBridge paintBridge;
-		g_PaintCtx.Active = (core != NULL);
+		g_PaintCtx.Active = (core != nullptr);
 		g_PaintCtx.Core = core;
 		g_PaintCtx.Paint = &paintListener;
 		g_PaintCtx.InputPath = g_InputPath;
@@ -1008,12 +1008,12 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				sessionBridge.isEditable = sessionIsEditable;
 				sessionBridge.FootprintCellsW = scratchFw();
 				sessionBridge.FootprintCellsH = scratchFh();
-				sessionBridge.FootprintMask = g_FootprintMask.empty() ? NULL : &g_FootprintMask;
+				sessionBridge.FootprintMask = g_FootprintMask.empty() ? nullptr : &g_FootprintMask;
 			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
 		else
-			ZPUI::setSessionBoardBridge(NULL);
+			ZPUI::setSessionBoardBridge(nullptr);
 		// Session rebuild params
 		g_SessionBank = &bank;
 		// cellSize/snap/lockBorders captured later via globals set before runViewer
@@ -1480,7 +1480,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					NLGUI::CInterfaceElement *btn = NLGUI::CWidgetManager::getInstance()->getElementFromId(
 						"ui:zp:toolbar:header_closed:btn_season");
 					NLGUI::CCtrlBase *caller = dynamic_cast<NLGUI::CCtrlBase *>(btn);
-					zpSeasonMenuFill(NULL);
+					zpSeasonMenuFill(nullptr);
 					NLGUI::CWidgetManager::getInstance()->enableModalWindow(caller, "ui:zp:season_menu");
 				}
 			}
@@ -1602,7 +1602,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 			{
 				NLMISC::CBitmap thumb;
 				if (captureTopDownThumbnail(thumb,
-				        g_EditableFiles.empty() ? NULL : &g_EditableFiles[0].ZoneIds))
+				        g_EditableFiles.empty() ? nullptr : &g_EditableFiles[0].ZoneIds))
 				{
 					g_CapturedThumb.swap(thumb);
 					g_HaveCapturedThumb = true;
@@ -1995,7 +1995,7 @@ textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u undo %u %s",
 		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
 		if (core)
 		{
-			core->attachLandscape(NULL);
+			core->attachLandscape(nullptr);
 			udriver->EventServer.removeListener(NLMISC::EventMouseDownId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventMouseUpId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
@@ -2004,13 +2004,13 @@ textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u undo %u %s",
 		if (uscene)
 		{
 			udriver->deleteScene(uscene);
-			uscene = NULL;
+			uscene = nullptr;
 		}
 		if (ownsDriver)
 		{
 			udriver->release();
 			delete udriver;
-			udriver = NULL;
+			udriver = nullptr;
 		}
 	}
 	catch (const NL3D::EDru &e)

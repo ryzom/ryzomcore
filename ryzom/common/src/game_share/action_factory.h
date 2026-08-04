@@ -50,14 +50,14 @@ public:
 	/// Singleton access
 	static CActionFactory *getInstance ()
 	{
-		if (Instance == NULL)
+		if (Instance == nullptr)
 			Instance = new CActionFactory;
 		return Instance;
 	}
 
 	static bool isInstanceAllocated()
 	{
-		return Instance != NULL;
+		return Instance != nullptr;
 	}
 
 	/// Singleton release
@@ -67,7 +67,7 @@ public:
 		{
 			Instance->releaseVolatileProperties();
 			delete Instance;
-			Instance = NULL;
+			Instance = nullptr;
 		}
 	}
 

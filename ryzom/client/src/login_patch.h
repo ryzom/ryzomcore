@@ -140,7 +140,7 @@ public:
 	/// Singleton method : Get the unique patch manager instance
 	static CPatchManager* getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CPatchManager();
 		return _Instance;
 	}
@@ -315,9 +315,9 @@ private:
 	CPatchThread *getPatchThread() { return PatchThread; }
 
 	// Get a file from the server and decompress it if zipped
-	void getServerFile (const std::string &name, bool bZipped = false, const std::string& destName="", NLMISC::IProgressCallback *progress = NULL);
-	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
-	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = NULL);
+	void getServerFile (const std::string &name, bool bZipped = false, const std::string& destName="", NLMISC::IProgressCallback *progress = nullptr);
+	void downloadFileWithCurl (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = nullptr);
+	void downloadFile (const std::string &source, const std::string &dest, NLMISC::IProgressCallback *progress = nullptr);
 	// Decompress zipped file override destination file
 	void decompressFile (const std::string &filename);
 	void applyDate (const std::string &sFilename, uint32 nDate);

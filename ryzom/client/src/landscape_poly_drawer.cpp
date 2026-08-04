@@ -486,7 +486,7 @@ void CLandscapePolyDrawer::drawShadowVolume(uint poly, bool firstPass)
 
 		uint i;
 		CVector2f vertex;
-		CVector * vertexVB = NULL;
+		CVector * vertexVB = nullptr;
 		const CVector cameraPos = Scene->getCam().getPos();
 
 		float height = 2000.0;

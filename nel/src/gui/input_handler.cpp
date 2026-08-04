@@ -28,12 +28,12 @@ namespace NLGUI
 {
 	CInputHandler::CInputHandler()
 	{
-		listener = NULL;
+		listener = nullptr;
 	}
 
 	CInputHandler::~CInputHandler()
 	{
-		listener = NULL;
+		listener = nullptr;
 	}
 
 

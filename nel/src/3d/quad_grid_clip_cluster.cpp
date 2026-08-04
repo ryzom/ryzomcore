@@ -104,12 +104,12 @@ void		CQuadGridClipClusterListDist::resetSons(CClipTrav *clipTrav)
 // ***************************************************************************
 CQuadGridClipClusterQTreeNode::CQuadGridClipClusterQTreeNode()
 {
-	Sons[0]=NULL;
-	Sons[1]=NULL;
-	Sons[2]=NULL;
-	Sons[3]=NULL;
+	Sons[0] = nullptr;
+	Sons[1] = nullptr;
+	Sons[2] = nullptr;
+	Sons[3] = nullptr;
 	Empty= true;
-	Owner= NULL;
+	Owner = nullptr;
 	RootNode= false;
 	LeafNode= false;
 }
@@ -173,7 +173,7 @@ CQuadGridClipClusterQTreeNode::~CQuadGridClipClusterQTreeNode()
 	{
 		if(Sons[i])
 			delete Sons[i];
-		Sons[i]= NULL;
+		Sons[i] = nullptr;
 	}
 
 	// check my list

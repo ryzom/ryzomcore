@@ -60,7 +60,7 @@ void primitiveToLM(CContLandMark &lm, IPrimitive *p)
 	p->getPropertyByName("name", primName);
 	lm.TitleTextID = primName;
 	CPrimVector *pvVect = p->getPrimVector();
-	if (pvVect != NULL)
+	if (pvVect != nullptr)
 		for (uint32 j = 0; j < p->getNumVector(); ++j)
 			lm.Zone.VPoints.push_back(CPrimVector(CVector2f(pvVect[j].x,pvVect[j].y)));
 
@@ -149,11 +149,11 @@ bool buildLMConts(const std::string &worldSheet, const std::string &primitivesPa
 			if (!loadXmlPrimitiveFile(PrimDoc, vRegionFiles[nRegion], LigoConfig))
 			{
 				nlwarning("cannot open %s file", vRegionFiles[nRegion].c_str());
-				CPrimitiveContext::instance().CurrentPrimitive = NULL;
+				CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 				continue;
 			}
 
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 			// Select all nodes continent
 			TPrimitiveClassPredicate predCont("continent");
@@ -287,7 +287,7 @@ bool buildLMConts(const std::string &worldSheet, const std::string &primitivesPa
 						nlwarning("region %s do not contain any point", lm.TitleTextID.c_str());
 				}
 			}
-			CPrimitiveContext::instance().CurrentPrimitive = NULL;
+			CPrimitiveContext::instance().CurrentPrimitive = nullptr;
 
 		}
 		// Ok save the file

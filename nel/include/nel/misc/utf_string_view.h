@@ -35,7 +35,8 @@ class IStream;
 class CUtfStringView
 {
 public:
-	inline CUtfStringView() : m_Str(NULL), m_Size(0), m_Iterator(utf32Iterator) {}
+	inline CUtfStringView() : m_Str(nullptr)
+	    , m_Size(0), m_Iterator(utf32Iterator) {}
 
 	inline CUtfStringView(const std::string &utf8Str) : m_Str(utf8Str.c_str()), m_Size(utf8Str.size()), m_Iterator(utf8Iterator) {}
 	inline CUtfStringView(const char *utf8Str) : m_Str(utf8Str), m_Size(strlen(utf8Str)), m_Iterator(utf8Iterator) {}
@@ -95,7 +96,9 @@ public:
 		inline bool operator!=(const const_iterator &o) const { return m_Addr != o.m_Addr; }
 		inline bool operator==(const const_iterator &o) const { return m_Addr == o.m_Addr; }
 		inline const u32char &operator*() const { return m_Char; }
-		const_iterator() : m_View(*(CUtfStringView *)NULL), m_Addr(NULL), m_Char(0) { }
+		const_iterator() : m_View(*(CUtfStringView *)nullptr)
+		    , m_Addr(nullptr)
+		    , m_Char(0) { }
 
 		const_iterator &operator=(const const_iterator &other)
 		{

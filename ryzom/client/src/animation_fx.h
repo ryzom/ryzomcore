@@ -57,14 +57,14 @@ public:
 public:
 
 	// ctor
-	CAnimationFX(const std::string &psName = "", const float *userParams = NULL);
+	CAnimationFX(const std::string &psName = "", const float *userParams = nullptr);
 
 	void init(const CAnimationFXSheet *sheet, NL3D::UAnimationSet *as);
 
 	/** helper : create instance matching that sheet. NB : the instance is not sticked neither positionned.
 	  * 4 user params may be supplied to replace the default ones
 	  */
-	NL3D::UParticleSystemInstance createMatchingInstance(const float *customUserParams = NULL) const;
+	NL3D::UParticleSystemInstance createMatchingInstance(const float *customUserParams = nullptr) const;
 
 private:
 	// build track for that fx, using the given animation set
@@ -82,7 +82,7 @@ public:
 	std::vector<CAnimationFX> FX;	// matching track for each fx
 	const CAnimationFXSetSheet      *Sheet;
 public:
-	CAnimationFXSet() : Sheet(NULL) {}
+	CAnimationFXSet() : Sheet(nullptr) {}
 	void init(const CAnimationFXSetSheet *sheet, NL3D::UAnimationSet *as);
 };
 

@@ -222,7 +222,7 @@ public:		// Basic Usage.
 
 	bool	isOpen	()	const
 	{
-		return	_F!=NULL;
+		return	_F != nullptr;
 	}
 
 public:		// Advanced Usage.

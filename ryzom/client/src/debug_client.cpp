@@ -525,7 +525,7 @@ string getDebugInformation()
 	str += toString("ViewPosition: %.2f %.2f %.2f\n", View.viewPos().x, View.viewPos().y, View.viewPos().z);
 	uint64 timeInGame = ingameTime1 ();
 	str += toString("Time in game: %dh %dmin %dsec\n", (uint)(timeInGame/(60*60*1000)), (uint)(timeInGame/(60*1000))%60, (uint)(timeInGame/1000)%60);
-	str += toString("LocalTime: %s\n", NLMISC::IDisplayer::dateToHumanString(time(NULL)));
+	str += toString("LocalTime: %s\n", NLMISC::IDisplayer::dateToHumanString(time(nullptr)));
 	str += toString("ServerTick: %u\n", NetMngr.getCurrentServerTick());
 	str += toString("ConnectState: %s\n", NetMngr.getConnectionStateCStr());
 	str += toString("LocalAddress: %s\n", NetMngr.getAddress().asString().c_str());

@@ -384,7 +384,7 @@ void CGroupQuickHelp::activateCurrentStep ()
 
 			// A link to follow ?
 			if (!step.URL.empty())
-				CAHManager::getInstance()->runActionHandler("browse", NULL, "url="+step.URL);
+				CAHManager::getInstance()->runActionHandler("browse", nullptr, "url="+step.URL);
 
 			// Test a skip condition
 			if (!step.Condition.empty() && evalExpression (step.Condition))

@@ -123,7 +123,7 @@ bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
                                           std::vector<uint8> &outStream,
                                           uint maxDim = 128,
                                           bool gateRoundtrip = true,
-                                          std::string *err = NULL);
+                                          std::string *err = nullptr);
 
 /**
  * Build a CF_DIB (clipboard format 8) CLIPDATA property value (VT_CF) from a DIB.

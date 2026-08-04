@@ -195,9 +195,9 @@ void setLoginFinished( bool f );
 // Edit actions
 CActionsManager EditActions;
 
-CInterfaceManager * CInterfaceManager::_Instance = NULL;
+CInterfaceManager * CInterfaceManager::_Instance = nullptr;
 
-CChatDisplayer * ChatDisplayer = NULL;
+CChatDisplayer * ChatDisplayer = nullptr;
 
 
 void initActions();
@@ -288,7 +288,7 @@ public:
 		if ( CWidgetManager::getInstance()->getPointer()->show())
 		{
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>( CWidgetManager::getInstance()->getCapturePointerLeft() );
-			if ((pCS != NULL) && (pCS->isDragged()))
+			if ((pCS != nullptr) && (pCS->isDragged()))
 			{
 				sint	x= CWidgetManager::getInstance()->getPointer()->getX() - pCS->getDeltaDragX();
 				sint	y= CWidgetManager::getInstance()->getPointer()->getY() - pCS->getDeltaDragY();
@@ -382,7 +382,7 @@ public:
 						if (trader != CLFECOMMON::INVALID_SLOT)
 						{
 							CEntityCL *entity = EntitiesMngr.entity(trader);
-							if (entity != NULL)
+							if (entity != nullptr)
 							{
 								uint32 nDBid = entity->getNameId();
 								if (nDBid != 0)
@@ -395,7 +395,7 @@ public:
 									botName = entity->getDisplayName();
 								}
 								CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
-								if (pChar != NULL)
+								if (pChar != nullptr)
 									womanTitle = pChar->getGender() == GSGENDER::female;
 							}
 						}
@@ -454,7 +454,7 @@ namespace
 
 CInterfaceManager* CInterfaceManager::getInstance()
 {
-	if( _Instance == NULL )
+	if( _Instance == nullptr)
 		_Instance = new CInterfaceManager();
 	return _Instance;
 }
@@ -515,16 +515,16 @@ CInterfaceManager::CInterfaceManager()
 	_InterfaceScaleChanged = false;
 	_InterfaceScale = 1.0f;
 	_InterfaceScaleAuto = false;
-	_DescTextTarget = NULL;
+	_DescTextTarget = nullptr;
 	_ConfigLoaded = false;
 	_LogState = false;
 	_KeysLoaded = false;
 	CWidgetManager::getInstance()->resetColorProps();
 	CWidgetManager::getInstance()->resetAlphaRolloverSpeedProps();
 	CWidgetManager::getInstance()->resetGlobalAlphasProps();
-	_NeutralColor = NULL;
-	_WarningColor = NULL;
-	_ErrorColor = NULL;
+	_NeutralColor = nullptr;
+	_WarningColor = nullptr;
+	_ErrorColor = nullptr;
 	_EmotesInitialized = false;
 
 
@@ -554,21 +554,21 @@ CInterfaceManager::CInterfaceManager()
 		_CurrentPlayerCharac[i]= 0;
 	}
 
-	_CheckMailNode = NULL;
-	_CheckForumNode = NULL;
+	_CheckMailNode = nullptr;
+	_CheckForumNode = nullptr;
 	_UpdateWeatherTime = 0;
 
-	_DBB_UI_DUMMY = NULL;
-	_DB_UI_DUMMY_QUANTITY = NULL;
-	_DB_UI_DUMMY_QUALITY = NULL;
-	_DB_UI_DUMMY_SHEET = NULL;
-	_DB_UI_DUMMY_NAMEID = NULL;
-	_DB_UI_DUMMY_ENCHANT = NULL;
-	_DB_UI_DUMMY_SLOT_TYPE = NULL;
-	_DB_UI_DUMMY_PHRASE = NULL;
-	_DB_UI_DUMMY_WORNED = NULL;
-	_DB_UI_DUMMY_PREREQUISIT_VALID = NULL;
-	_DB_UI_DUMMY_FACTION_TYPE = NULL;
+	_DBB_UI_DUMMY = nullptr;
+	_DB_UI_DUMMY_QUANTITY = nullptr;
+	_DB_UI_DUMMY_QUALITY = nullptr;
+	_DB_UI_DUMMY_SHEET = nullptr;
+	_DB_UI_DUMMY_NAMEID = nullptr;
+	_DB_UI_DUMMY_ENCHANT = nullptr;
+	_DB_UI_DUMMY_SLOT_TYPE = nullptr;
+	_DB_UI_DUMMY_PHRASE = nullptr;
+	_DB_UI_DUMMY_WORNED = nullptr;
+	_DB_UI_DUMMY_PREREQUISIT_VALID = nullptr;
+	_DB_UI_DUMMY_FACTION_TYPE = nullptr;
 
 #ifdef AJM_DEBUG_TRACK_INTERFACE_GROUPS
 	_DebugTrackGroupSet.clear();
@@ -582,8 +582,8 @@ CInterfaceManager::CInterfaceManager()
 // ------------------------------------------------------------------------------------------------
 CInterfaceManager::~CInterfaceManager()
 {
-	CViewTextID::setTextProvider( NULL );
-	CViewTextFormated::setFormatter( NULL );
+	CViewTextID::setTextProvider(nullptr);
+	CViewTextFormated::setFormatter(nullptr);
 	reset(); // to flush IDStringWaiters
 
 	// release the database observers
@@ -594,7 +594,7 @@ CInterfaceManager::~CInterfaceManager()
 	delete interfaceLinkUpdater;
 	interfaceLinkUpdater = NULL;
 	*/
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -608,9 +608,9 @@ void CInterfaceManager::reset()
 	_IDStringWaiters.clear();
 	CGroupFrame::resetDisplayTypes();
 
-	_NeutralColor			= NULL;
-	_WarningColor			= NULL;
-	_ErrorColor				= NULL;
+	_NeutralColor			= nullptr;
+	_WarningColor			= nullptr;
+	_ErrorColor				= nullptr;
 
 }
 
@@ -636,13 +636,13 @@ void CInterfaceManager::resetShardSpecificData()
 	_LocalSyncActionCounter= 0;
 	CGroupSkills::InhibitSkillUpFX = true;
 	CBarManager::getInstance()->resetShardSpecificData();
-	CBotChatManager::getInstance()->setCurrPage(NULL);
+	CBotChatManager::getInstance()->setCurrPage(nullptr);
 
 	CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 	pPM->setEquipInvalidation(0, 0);
 
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-	if (pGC != NULL)
+	if (pGC != nullptr)
 		pGC->setActive(false);
 }
 
@@ -652,7 +652,7 @@ void CInterfaceManager::resetShardSpecificData()
 void CInterfaceManager::destroy ()
 {
 	delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 void CInterfaceManager::initLUA()
@@ -725,7 +725,7 @@ void CInterfaceManager::uninitLogin()
 	parser->removeAll();
 	reset();
 
-	CWidgetManager::getInstance()->setPointer( NULL );
+	CWidgetManager::getInstance()->setPointer(nullptr);
 
 	CInterfaceLink::removeAllLinks();
 
@@ -758,7 +758,7 @@ void CInterfaceManager::initOutGame()
 		return;
 
 	{
-		if (SoundMngr != NULL)
+		if (SoundMngr != nullptr)
 		{
 			NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
 			pMixer->loadSampleBank(false, "ui_outgame");
@@ -834,13 +834,13 @@ void CInterfaceManager::uninitOutGame()
 	CWidgetManager::getInstance()->disableModalWindow();
 
 	//_Database->display("");
-	CBotChatManager::getInstance()->setCurrPage(NULL);
+	CBotChatManager::getInstance()->setCurrPage(nullptr);
 
-	CInterfaceItemEdition::getInstance()->setCurrWindow(NULL);
+	CInterfaceItemEdition::getInstance()->setCurrWindow(nullptr);
 
 //	NLMISC::TTime initStart;
 //	initStart = ryzomGetLocalTime ();
-	if (SoundMngr != NULL)
+	if (SoundMngr != nullptr)
 	{
 		NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
 		pMixer->unloadSampleBank("ui_outgame");
@@ -859,7 +859,7 @@ void CInterfaceManager::uninitOutGame()
 	reset();
 	//nlinfo ("%d seconds for reset", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
 	// reset the mouse pointer to avoid invalid pointer access
-	CWidgetManager::getInstance()->setPointer( NULL );
+	CWidgetManager::getInstance()->setPointer(nullptr);
 //	initStart = ryzomGetLocalTime ();
 	CInterfaceLink::removeAllLinks();
 	//nlinfo ("%d seconds for removeAllLinks", (uint32)(ryzomGetLocalTime ()-initStart)/1000);
@@ -923,7 +923,7 @@ void CInterfaceManager::initInGame()
 	ActionsContext.addActionsManager(&EditActions, RZ_CATEGORY_EDIT);
 
 
-	if (SoundMngr != NULL)
+	if (SoundMngr != nullptr)
 	{
 		NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
 		pMixer->loadSampleBank(false, "ui_ingame");
@@ -1076,8 +1076,8 @@ void CInterfaceManager::initInGame()
 	}
 
 	// rebuild mp3 player playlist if user reselected a char (songs are already scanned)
-	CAHManager::getInstance()->runActionHandler("music_player", NULL, "update_playlist");
-	CAHManager::getInstance()->runActionHandler("music_player", NULL, "stop");
+	CAHManager::getInstance()->runActionHandler("music_player", nullptr, "update_playlist");
+	CAHManager::getInstance()->runActionHandler("music_player", nullptr, "stop");
 	
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHATLOG_STATE", false);
 	if (node)
@@ -1374,7 +1374,7 @@ void CInterfaceManager::uninitInGame1 ()
 		AssertLog->removeDisplayer (ChatDisplayer);
 		g_log.removeDisplayer(ChatDisplayer);
 		delete ChatDisplayer;
-		ChatDisplayer = NULL;
+		ChatDisplayer = nullptr;
 	}
 
 	// Release inventory manager
@@ -1385,13 +1385,13 @@ void CInterfaceManager::uninitInGame1 ()
 	CGuildManager::release();
 
 	// release bot chat and manager
-	CBotChatManager::getInstance()->setCurrPage(NULL);
+	CBotChatManager::getInstance()->setCurrPage(nullptr);
 	delete BotChatPageAll;
-	BotChatPageAll = NULL;
+	BotChatPageAll = nullptr;
 	CBotChatManager::releaseInstance();
 
 	//release CInterfaceItemEdition
-	CInterfaceItemEdition::getInstance()->setCurrWindow(NULL);
+	CInterfaceItemEdition::getInstance()->setCurrWindow(nullptr);
 	CInterfaceItemEdition::releaseInstance();
 
 	// release task bar manager
@@ -1400,7 +1400,7 @@ void CInterfaceManager::uninitInGame1 ()
 	// People inetrraction release
 	PeopleInterraction.release();
 
-	if (SoundMngr != NULL)
+	if (SoundMngr != nullptr)
 	{
 		NLSOUND::UAudioMixer *pMixer = SoundMngr->getMixer();
 		pMixer->unloadSampleBank("ui_ingame");
@@ -1418,7 +1418,7 @@ void CInterfaceManager::uninitInGame1 ()
 	reset();
 	CInterfaceLink::removeAllLinks();
 
-	CWidgetManager::getInstance()->setPointer( NULL );
+	CWidgetManager::getInstance()->setPointer(nullptr);
 
 	// Release DDX manager, before DB remove
 	CDDXManager::getInstance()->release();
@@ -1462,9 +1462,9 @@ void CInterfaceManager::uninitInGame1 ()
 	parser->uninitLUA();
 
 	setInGame( false );
-	_NeutralColor = NULL;
-	_WarningColor = NULL;
-	_ErrorColor = NULL;
+	_NeutralColor = nullptr;
+	_WarningColor = nullptr;
+	_ErrorColor = nullptr;
 	CWidgetManager::getInstance()->resetColorProps();
 	CWidgetManager::getInstance()->resetAlphaRolloverSpeedProps();
 	CWidgetManager::getInstance()->resetGlobalAlphasProps();
@@ -1481,7 +1481,7 @@ void CInterfaceManager::uninitInGame1 ()
 // ------------------------------------------------------------------------------------------------
 void CInterfaceManager::flushDebugWindow()
 {
-	if (ChatDisplayer != NULL)
+	if (ChatDisplayer != nullptr)
 		ChatDisplayer->update();
 }
 
@@ -1556,11 +1556,11 @@ void CInterfaceManager::updateFrameEvents()
 
 
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather"));
-			if (pVT != NULL)
+			if (pVT != nullptr)
 				pVT->setText(str);
 
 			CCtrlBase *pTooltip= dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:weather_tt"));
-			if (pTooltip != NULL)
+			if (pTooltip != nullptr)
 			{
 				string tt =	toString("%02d", WeatherManager.getNextWeatherHour()) + CI18N::get("uiMissionTimerHour") +
 								" - " + CI18N::get("uiHumidity") + " " +
@@ -1590,13 +1590,13 @@ void CInterfaceManager::updateFrameEvents()
 			str += toString("%04d", RT.getRyzomYear());
 
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:time"));
-			if (pVT != NULL)
+			if (pVT != nullptr)
 				pVT->setText(str);
 
 			str.clear();
 			// Update the clock in the compass if enabled.
 			pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:compass:clock:time"));
-			if (pVT != NULL)
+			if (pVT != nullptr)
 			{
 				if (pVT->getActive())
 				{
@@ -1660,12 +1660,12 @@ void CInterfaceManager::setupOptions()
 	// Try to change font if any
 	string sFont = wm->getSystemOption( CWidgetManager::OptionFont ).getValStr();
 
-	if ((!sFont.empty()) && (Driver != NULL))
+	if ((!sFont.empty()) && (Driver != nullptr))
 		resetTextContext(sFont.c_str(), true);
 	// Continue to parse the rest of the interface
 
 	sFont = wm->getSystemOption (CWidgetManager::OptionMonospaceFont).getValStr();
-	if ((!sFont.empty()) && (Driver != NULL))
+	if ((!sFont.empty()) && (Driver != nullptr))
 		CViewRenderer::registerFont("monospace", sFont);
 }
 
@@ -1712,11 +1712,11 @@ bool CInterfaceManager::loadConfig (const string &filename)
 	vector<string> v;
 	if (ClientCfg.R2EDEnabled)
 	{
-		CWidgetManager::getInstance()->runProcedure ("proc_reset_r2ed_interface", NULL, v);
+		CWidgetManager::getInstance()->runProcedure ("proc_reset_r2ed_interface", nullptr, v);
 	}
 	else
 	{
-		CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
+		CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", nullptr, v);
 	}
 
 	// By default, consider the reset interface has been set with the current resolution
@@ -1878,7 +1878,7 @@ bool CInterfaceManager::loadConfig (const string &filename)
 		vector<string> v;
 		if (!ClientCfg.R2EDEnabled)
 		{
-			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", nullptr, v);
 		}
 		return false;
 	}
@@ -2031,7 +2031,7 @@ bool CInterfaceManager::saveLandmarks(const std::string &filename) const
 			xmlStream.init (&f);
 
 			xmlDocPtr doc = xmlStream.getDocument ();
-			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"interface_config", NULL);
+			xmlNodePtr node = xmlNewDocNode(doc, nullptr, (const xmlChar*)"interface_config", nullptr);
 			xmlDocSetRootElement (doc, node);
 
 			ContinentMngr.writeTo(node);
@@ -2227,7 +2227,7 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 		if (!_CurrentPlayerCharacLeaf[i])
 			_CurrentPlayerCharacLeaf[i] = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:CHARACTERISTICS%d:VALUE", i), false);
 
-		NLMISC::CCDBNodeLeaf *node = NULL;
+		NLMISC::CCDBNodeLeaf *node = nullptr;
 
 		if (_CurrentPlayerCharacLeaf[i])
 			node = &*_CurrentPlayerCharacLeaf[i];
@@ -2269,7 +2269,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			// prevent 'click in scene' as mouse was previously captured
 			// (more a patch that anything, but 'UserControls' test for 'mouse up'
 			// directly later in the main loop (not through message queue), so it has no way of knowing that the event was handled...
-			if( CWidgetManager::getInstance()->getCapturePointerRight() == NULL )
+			if( CWidgetManager::getInstance()->getCapturePointerRight() == nullptr)
 				EventsListener.addUIHandledButtonMask(rightButton);
 		}else
 		if( ( eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup ) && handled )
@@ -2277,7 +2277,7 @@ bool CInterfaceManager::handleEvent (const NLGUI::CEventDescriptor& event)
 			// prevent 'click in scene' as mouse was previously captured
 			// (more a patch that anything, but 'UserControls' test for 'mouse up'
 			// directly later in the main loop (not through message queue), so it has no way of knowing that the event was handled...
-			if( CWidgetManager::getInstance()->getCapturePointerLeft() == NULL )
+			if( CWidgetManager::getInstance()->getCapturePointerLeft() == nullptr)
 				EventsListener.addUIHandledButtonMask(leftButton);
 		}
 
@@ -2321,7 +2321,7 @@ public:
 		for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
 		{
 			CViewText *vt = dynamic_cast< CViewText* >( *itr );
-			if( vt != NULL )
+			if( vt != nullptr)
 			{
 				if( reset )
 					vt->resetTextIndex();
@@ -2397,7 +2397,7 @@ void CInterfaceManager::processServerIDString()
 			CInterfaceExprValue val;
 			bool bValid = true;
 
-			if (pISW->Cb != NULL)
+			if (pISW->Cb != nullptr)
 			{
 				bValid = pISW->Cb->cbIDStringReceived(ucstrToAffect);
 				delete pISW->Cb;
@@ -2427,7 +2427,7 @@ void CInterfaceManager::messageBoxInternal(const string &msgBoxGroup, const stri
 	{
 		viewText->setCaseMode(caseMode);
 		viewText->setText(text);
-		CWidgetManager::getInstance()->enableModalWindow(NULL, group);
+		CWidgetManager::getInstance()->enableModalWindow(nullptr, group);
 		// don't understand why but need to update coords here
 		group->updateCoords();
 		group->updateCoords();
@@ -2495,7 +2495,7 @@ void	CInterfaceManager::validMessageBox(TValidMessageIcon icon, const std::strin
 		}
 
 		// Go
-		CWidgetManager::getInstance()->enableModalWindow(NULL, group);
+		CWidgetManager::getInstance()->enableModalWindow(nullptr, group);
 		// don't understand why but need to update coords here
 		group->updateCoords();
 		group->updateCoords();
@@ -2535,7 +2535,7 @@ void CInterfaceManager::displayDebugInfo(const string &str, TSystemInfoMode mode
 // ***************************************************************************
 NLMISC::CRGBA CInterfaceManager::getDebugInfoColor(TSystemInfoMode mode)
 {
-	if (_NeutralColor == NULL) // not initialised ?
+	if (_NeutralColor == nullptr) // not initialised ?
 	{
 		#define SYSTEM_INFO_COLOR_DB_PATH "UI:VARIABLES:SYSTEM_INFOS:COLORS"
 		_NeutralColor = NLGUI::CDBManager::getInstance()->getDbProp(SYSTEM_INFO_COLOR_DB_PATH ":NEUTRAL");
@@ -2607,7 +2607,7 @@ CRGBA CInterfaceManager::getSystemInfoColor(const std::string &cat)
 void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 {
 	// Launch the context menu in-game: can't appear while dragging an item
-	if (CCtrlDraggable::getDraggedSheet() == NULL)
+	if (CCtrlDraggable::getDraggedSheet() == nullptr)
 	{
 		if ( !CWidgetManager::getInstance()->hasModal() )
 		{
@@ -2622,13 +2622,13 @@ void	CInterfaceManager::launchContextMenuInGame (const std::string &nameOfCM)
 			{
 				pMG = CWidgetManager::getInstance()->getMasterGroupFromId("ui:outgame");
 			}
-			if ((pMG != NULL) && (pMG->getActive()))
+			if ((pMG != nullptr) && (pMG->getActive()))
 			{
 				CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(nameOfCM);
 				CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
-				if (pIG != NULL)
+				if (pIG != nullptr)
 				{
-					CWidgetManager::getInstance()->enableModalWindow (NULL, pIG);
+					CWidgetManager::getInstance()->enableModalWindow (nullptr, pIG);
 				}
 			}
 		}
@@ -2692,7 +2692,7 @@ void	CInterfaceManager::setMode(uint8 newMode)
 				for (itw = rList.begin(); itw!= rList.end(); itw++)
 				{
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(*itw);
-					if ((pGC != NULL)&&(pGC->getActive()))
+					if ((pGC != nullptr) &&(pGC->getActive()))
 					{
 						// if this GC is a Full modal window, or if it is a modal son of another GC,
 						if (pGC->isModal() || pGC->isModalSon())
@@ -2715,11 +2715,11 @@ void	CInterfaceManager::setMode(uint8 newMode)
 	}
 
 	// check if there's a special behaviour with current captured ctrl that prevent from changing desktop
-	if ( CWidgetManager::getInstance()->getCapturePointerLeft() != NULL)
+	if ( CWidgetManager::getInstance()->getCapturePointerLeft() != nullptr)
 	{
 		if (!CWidgetManager::getInstance()->getCapturePointerLeft()->canChangeVirtualDesktop()) return;
 	}
-	if ( CWidgetManager::getInstance()->getCapturePointerRight() != NULL)
+	if ( CWidgetManager::getInstance()->getCapturePointerRight() != nullptr)
 	{
 		if (!CWidgetManager::getInstance()->getCapturePointerRight()->canChangeVirtualDesktop()) return;
 	}
@@ -2892,7 +2892,7 @@ void writeComboActionMap (const CActionsManager &actions, xmlNodePtr node, const
 	while (ite != combos.end ())
 	{
 		// Key node
-		xmlNodePtr keyNode = xmlNewChild ( node, NULL, (const xmlChar*)"key", NULL );
+		xmlNodePtr keyNode = xmlNewChild ( node, nullptr, (const xmlChar*)"key", nullptr);
 
 		// Props
 		xmlSetProp (keyNode, (const xmlChar*)"name", (const xmlChar*)CEventKey::getStringFromKey(ite->first.Key).c_str());
@@ -2961,7 +2961,7 @@ bool	CInterfaceManager::saveKeys(const std::string &filename)
 			xmlStream.init (&file);
 
 			xmlDocPtr doc = xmlStream.getDocument ();
-			xmlNodePtr node = xmlNewDocNode(doc, NULL, (const xmlChar*)"interface_config", NULL);
+			xmlNodePtr node = xmlNewDocNode(doc, nullptr, (const xmlChar*)"interface_config", nullptr);
 			xmlDocSetRootElement (doc, node);
 
 			writeComboActionMap (Actions, node, "");
@@ -3014,7 +3014,7 @@ void CInterfaceManager::log(const std::string &str, const std::string &cat)
 		// Open file with the name of the player
 		const string fileName= "save/log_" + PlayerSelectedFileName + ".txt";
 		FILE *f = nlfopen(fileName, "at");
-		if (f != NULL)
+		if (f != nullptr)
 		{
 			const string finalString = string(NLMISC::IDisplayer::dateToHumanString()) + " (" + NLMISC::toUpperAscii(cat) + ") * " + str;
 			fprintf(f, "%s\n", finalString.c_str());
@@ -3037,7 +3037,7 @@ void CInterfaceManager::clearAllEditBox()
 			for(it = rList.begin(); it != rList.end(); ++it)
 			{
 				CInterfaceGroup *pIG = *it;
-				if (pIG != NULL)
+				if (pIG != nullptr)
 					pIG->clearAllEditBox();
 			}
 		}
@@ -3126,10 +3126,10 @@ NLMISC_COMMAND(loadui, "Load an interface file", "<loadui [all]/interface.xml>")
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 
 	// reset captures
-	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-	CWidgetManager::getInstance()->setCapturePointerRight(NULL);
-	CWidgetManager::getInstance()->setOldCaptureKeyboard(NULL);
-	CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+	CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
+	CWidgetManager::getInstance()->setOldCaptureKeyboard(nullptr);
+	CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
 
 	return result;
 }
@@ -3138,14 +3138,14 @@ NLMISC_COMMAND(loadui, "Load an interface file", "<loadui [all]/interface.xml>")
 void CInterfaceManager::displayWebWindow(const string & name, const string & url)
 {
 	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(name));
-	if (pIG != NULL)
+	if (pIG != nullptr)
 	{
 		pIG->setActive(true);
 		pIG->updateCoords();
 		pIG->center();
 	}
 
-	CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+name+":content:html|url="+url);
+	CAHManager::getInstance()->runActionHandler("browse", nullptr, "name="+name+":content:html|url="+url);
 }
 
 // ***************************************************************************
@@ -3255,7 +3255,7 @@ void CInterfaceManager::initEmotes()
 {
 	_EmotesInitialized = true;
 	CTextEmotListSheet *pTELS = dynamic_cast<CTextEmotListSheet*>(SheetMngr.get(CSheetId("list.text_emotes")));
-	if (pTELS == NULL)
+	if (pTELS == nullptr)
 		return;
 
 	static list<CEmoteEntry> entries;
@@ -3286,7 +3286,7 @@ void CInterfaceManager::initEmotes()
 
 	betaTester = pSM->isTitleUnblocked(CHARACTER_TITLE::FBT);
 	string	previousMind;
-	CGroupSubMenu *pFirstMenu = 0;
+	CGroupSubMenu *pFirstMenu = nullptr;
 
 	for (list<CEmoteEntry>::const_iterator it = entries.begin(); it != entries.end(); it++)
 	{
@@ -3366,7 +3366,7 @@ void CInterfaceManager::initEmotes()
 					CGroupSubMenu *pNewSubMenu = new CGroupSubMenu(CViewBase::TCtorParam());
 					pMenu->setSubMenu(j, pNewSubMenu);
 
-					if (pFirstMenu == 0)
+					if (pFirstMenu == nullptr)
 						pFirstMenu = pNewSubMenu;
 				}
 				else
@@ -3465,7 +3465,7 @@ void CInterfaceManager::uninitEmotes()
 
 	// reset the emotes menu
 	CTextEmotListSheet *pTELS = dynamic_cast<CTextEmotListSheet*>(SheetMngr.get(CSheetId("list.text_emotes")));
-	if (pTELS != NULL && !pTELS->TextEmotList.empty())
+	if (pTELS != nullptr && !pTELS->TextEmotList.empty())
 	{
 		// get the emotes menu id
 		string sPath = pTELS->TextEmotList[0].Path;
@@ -3516,7 +3516,7 @@ bool CInterfaceManager::CEmoteCmd::execute(const std::string &/* rawCommandStrin
 		customPhrase += " ";
 		customPhrase += args[i];
 	}
-	CAHManager::getInstance()->runActionHandler("emote", NULL, "nb="+toString(EmoteNb)+"|behav="+toString(Behaviour)+"|custom_phrase="+customPhrase);
+	CAHManager::getInstance()->runActionHandler("emote", nullptr, "nb="+toString(EmoteNb)+"|behav="+toString(Behaviour)+"|custom_phrase="+customPhrase);
 	return true;
 }
 
@@ -3532,13 +3532,13 @@ bool	CInterfaceManager::testDragCopyKey()
 // ***************************************************************************
 void	CInterfaceManager::notifyMailAvailable()
 {
-	if (_CheckMailNode != NULL)
+	if (_CheckMailNode != nullptr)
 		_CheckMailNode->setValue32(1);
 }
 
 void	CInterfaceManager::notifyForumUpdated()
 {
-	if (_CheckForumNode != NULL)
+	if (_CheckForumNode != nullptr)
 		_CheckForumNode->setValue32(1);
 }
 
@@ -3818,7 +3818,7 @@ void CInterfaceManager::createLocalBranch(const std::string &fileName, NLMISC::I
 #endif
 CInterfaceManager::CServerToLocalAutoCopy::CServerToLocalAutoCopy() : _LocalObserver(*this), _ServerObserver(*this)
 {
-	_ServerCounter= NULL;
+	_ServerCounter = nullptr;
 	_UpdateList.reserve(300);
 	_LocalUpdating= false;
 }
@@ -3831,7 +3831,7 @@ CInterfaceManager::CServerToLocalAutoCopy::CServerToLocalAutoCopy() : _LocalObse
 void CInterfaceManager::CServerToLocalAutoCopy::release()
 {
 	_Nodes.clear();
-	_ServerCounter = NULL;
+	_ServerCounter = nullptr;
 	_ServerNodeMap.clear();
 	_LocalNodeMap.clear();
 	_UpdateList.clear();
@@ -4173,7 +4173,7 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 			}
 		}
 
-		CEntityCL *pTokenSubjectEntity = NULL;
+		CEntityCL *pTokenSubjectEntity = nullptr;
 
 		if (token_subject == "me")
 		{
@@ -4240,7 +4240,7 @@ bool CInterfaceManager::parseTokens(string& ucstr)
 			continue;
 		}
 
-		if (pTokenSubjectEntity != NULL)
+		if (pTokenSubjectEntity != nullptr)
 		{
 			// Parse the parameter
 			if (token_param == "name")

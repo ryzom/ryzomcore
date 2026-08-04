@@ -47,10 +47,10 @@ CDBGroupListSheetText::CDBGroupListSheetText(const TCtorParam &param)
 	_WSlot= 24;
 	_HSlot= 24;
 	_HSpace = 0;
-	_ScrollBar = NULL;
-	_List= NULL;
+	_ScrollBar = nullptr;
+	_List = nullptr;
 	_Setuped = false;
-	_DbBranch = NULL;
+	_DbBranch = nullptr;
 	_Array = true;
 	_StartDbIdx = 0;
 	_XItem = _YItem = 0;
@@ -70,7 +70,7 @@ CDBGroupListSheetText::CDBGroupListSheetText(const TCtorParam &param)
 	_CheckCoordAccelerated = true;
 	_GrayTextWithCtrlState= false;
 
-	_AnimalStatus= NULL;
+	_AnimalStatus = nullptr;
 	_CacheAnimalStatus= -1;
 	_CanDrop= false;
 	_Draggable= false;
@@ -629,7 +629,7 @@ void CDBGroupListSheetText::draw ()
 	}
 
 	_CanDrop = false;
-	if (_CtrlInfo._AHOnCanDrop != NULL)
+	if (_CtrlInfo._AHOnCanDrop != nullptr)
 	if (CWidgetManager::getInstance()->getCapturePointerLeft())
 	{
 		CGroupContainer *pGC = getContainer();
@@ -641,7 +641,7 @@ void CDBGroupListSheetText::draw ()
 				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
 				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-				if ((pCSSrc != NULL) && pCSSrc->isDragged())
+				if ((pCSSrc != nullptr) && pCSSrc->isDragged())
 				{
 					string params = string("src=") + pCSSrc->getId();
 					if (!_CtrlInfo._AHCanDropParams.empty())
@@ -655,7 +655,7 @@ void CDBGroupListSheetText::draw ()
 		}
 
 		// Set the container highlighted
-		if (pGC != NULL) pGC->setHighLighted(_CanDrop);
+		if (pGC != nullptr) pGC->setHighLighted(_CanDrop);
 	}
 
 	CInterfaceGroup::draw();
@@ -683,11 +683,11 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			// Drag'n'drop from a ctrl sheet that belongs to this list
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
-			if ((CWidgetManager::getInstance()->getCapturePointerLeft() != NULL) && (CWidgetManager::getInstance()->getCapturePointerLeft()->getParent() == _List))
+			if ((CWidgetManager::getInstance()->getCapturePointerLeft() != nullptr) && (CWidgetManager::getInstance()->getCapturePointerLeft()->getParent() == _List))
 			{
-				CDBCtrlSheet *pDraggedSheet = NULL;
+				CDBCtrlSheet *pDraggedSheet = nullptr;
 				CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-				if (pCB != NULL)
+				if (pCB != nullptr)
 				{
 					// A button has been captured -> Transform the capture to the corresponding ctrlsheet
 					sint pos = getIndexOf(pCB);
@@ -719,7 +719,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 				// If we were dragging a sheet from this list so we want to drop it somewhere
 				if(swapable())
 				{
-					if (pDraggedSheet != NULL)
+					if (pDraggedSheet != nullptr)
 					if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 					{
 						sint posdst = -1,possrc = -1;
@@ -727,7 +727,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 						for (uint i = 0; i < rV.size(); ++i)
 						{
 							CCtrlButton *pCB = dynamic_cast<CCtrlButton*>(rV[i]);
-							if (pCB != NULL)
+							if (pCB != nullptr)
 							{
 								posdst = getIndexOf(pCB);
 								if (posdst >= 0)
@@ -745,7 +745,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
 				// If scroll ok, and if scroll possible
-				if (_ScrollBar != NULL && _List != NULL && _List->getH()>_List->getMaxH())
+				if (_ScrollBar != nullptr && _List != nullptr && _List->getH()>_List->getMaxH())
 				{
 					// The listSheetTrade can be very big. So to get better precision, scroll only 1 item for 1 mouseWheel
 					// In this case, also ensure that we get no Items clipped by the group.
@@ -767,7 +767,7 @@ bool CDBGroupListSheetText::handleEvent (const NLGUI::CEventDescriptor &event)
 		if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 		{
 			if (_Scrolling != 0)
-				if (_ScrollBar != NULL && _List != NULL)
+				if (_ScrollBar != nullptr && _List != nullptr)
 				{
 					if ((T1 - _LastTimeScrolled) > 250)
 					{
@@ -959,7 +959,7 @@ sint CDBGroupListSheetText::getIndexOf(const CCtrlButton *button) const
 // ***************************************************************************
 CDBCtrlSheet *CDBGroupListSheetText::getSheet(uint index) const
 {
-	if (index >= _SheetChildren.size()) return NULL;
+	if (index >= _SheetChildren.size()) return nullptr;
 	return _SheetChildren[index]->Ctrl;
 }
 
@@ -1193,7 +1193,7 @@ class	CHandlerListSheetTextRightClick : public IActionHandler
 		// Run Menu (if item is not being dragged)
 		if (!listSheetTrade->_CtrlInfo._ListMenuRight.empty())
 		{
-			if ( CDBCtrlSheet::getDraggedSheet() == NULL)
+			if ( CDBCtrlSheet::getDraggedSheet() == nullptr)
 			{
 				CWidgetManager::getInstance()->enableModalWindow (ctrlSheet, listSheetTrade->_CtrlInfo._ListMenuRight);
 			}
@@ -1213,7 +1213,7 @@ class	CHandlerListSheetTextResetSelection : public IActionHandler
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
 		CDBGroupListSheetText *listSheetTrade = dynamic_cast<CDBGroupListSheetText*>(CWidgetManager::getInstance()->getElementFromId(Params));
-		if (listSheetTrade == NULL)
+		if (listSheetTrade == nullptr)
 			return;
 
 		listSheetTrade->unselect();

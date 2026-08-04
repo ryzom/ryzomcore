@@ -304,7 +304,7 @@ REGISTER_INTERFACE_USER_FCT("lua",    lua)
 CCtrlBase* CHandlerLUA::getUICaller()
 {
 	if (_UICallerStack.empty())
-		return NULL;
+		return nullptr;
 	else
 		return _UICallerStack.back();
 }
@@ -625,11 +625,11 @@ static CEntityCL *getTargetEntity()
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(dbPath, false);
 
-	if (!node) return NULL;
+	if (!node) return nullptr;
 
 	if ((uint8) node->getValue32() == (uint8) CLFECOMMON::INVALID_SLOT)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	return EntitiesMngr.entity((uint) node->getValue32());
@@ -961,7 +961,7 @@ int CLuaIHMRyzom::initEmotesMenu(CLuaState &ls)
 	uint maxVisibleLine = 10;
 
 	CTextEmotListSheet *pTELS = dynamic_cast<CTextEmotListSheet*>(SheetMngr.get(CSheetId("list.text_emotes")));
-	if (pTELS == NULL)
+	if (pTELS == nullptr)
 		return 0;
 
 	std::list<CEmoteStruct> entries;
@@ -1496,7 +1496,7 @@ int CLuaIHMRyzom::addSearchPathUser(CLuaState &ls)
 		CPath::memoryUncompress();
 	}
 
-	CPath::addSearchPath("user/", true, false, NULL);
+	CPath::addSearchPath("user/", true, false, nullptr);
 
 	if (memoryCompressed)
 	{
@@ -3377,7 +3377,7 @@ void	CLuaIHMRyzom::browseNpcWebPage(const std::string &htmlId, const std::string
 		// Set top of the page
 		CCtrlScroll *pScroll = groupHtml->getScrollBar();
 
-		if (pScroll != NULL)
+		if (pScroll != nullptr)
 			pScroll->moveTrackY(10000);
 	}
 }
@@ -3444,7 +3444,7 @@ std::string CLuaIHMRyzom::getSheetType(const std::string &sheet)
 std::string CLuaIHMRyzom::getSheetFamily(const std::string &sheet)
 {
 	CEntitySheet *pES = SheetMngr.get ( CSheetId(sheet) );
-	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	if ((pES != nullptr) && (pES->type() == CEntitySheet::ITEM))
 	{
 		CItemSheet *pIS = (CItemSheet*)pES;
 
@@ -3738,7 +3738,7 @@ void CLuaIHMRyzom::tell(const std::string &player, const std::string &msg)
 #endif
 				CGroupEditBox *eb = w->getEditBox();
 
-				if (eb != NULL)
+				if (eb != nullptr)
 				{
 					eb->bypassNextKey();
 				}

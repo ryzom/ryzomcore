@@ -284,7 +284,7 @@ inline void initDatasetQuickArray()
 {
 	for ( uint i=0; i!=MAX_NB_DATASETS; ++i )
 	{
-		DataSetQuickArray[0] = NULL;
+		DataSetQuickArray[0] = nullptr;
 	}
 }
 

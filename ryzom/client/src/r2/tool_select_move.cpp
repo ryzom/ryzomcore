@@ -142,7 +142,7 @@ CInstance *CToolSelectMove::createGhost(CInstance &instance)
 			}
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************
@@ -259,13 +259,13 @@ void CToolSelectMove::beginAction(CInstance &instance)
 		if (!checkAdditionnalRoomLeftFor(instance))
 		{
 			_State = Idle;
-			getEditor().setCurrentTool(NULL);
+			getEditor().setCurrentTool(nullptr);
 			return;
 		}
 		_Duplicating = true;
 		_ValidPos = true; // valid pos for first frame
 		_FinalPos = _StartPos;
-		_GhostInstance = NULL;
+		_GhostInstance = nullptr;
 	}
 	_LastValidPos = _StartPos;
 	dv->setMoveInProgress(true);
@@ -497,7 +497,7 @@ void CToolSelectMove::updateAction(CInstance &instance)
 			if (!_GhostInstance)
 			{
 				_State = Idle;
-				getEditor().setCurrentTool(NULL);
+				getEditor().setCurrentTool(nullptr);
 				return;
 			}
 			vd = _GhostInstance->getDisplayerVisual();
@@ -700,7 +700,7 @@ void CToolSelectMove::updateBeforeRender()
 	if (_Duplicating && _GhostInstance)
 	{
 		_AutoGroup.update(_FinalPos, _GhostInstance->getPaletteId(), _ValidPos && !isCtrlDown());
-		_GhostInstance->getDisplayerVisual()->setDisplayFlag(CDisplayerVisual::FlagHideActivities, _AutoGroup.getGroupingCandidate() != NULL);
+		_GhostInstance->getDisplayerVisual()->setDisplayFlag(CDisplayerVisual::FlagHideActivities, _AutoGroup.getGroupingCandidate() != nullptr);
 	}
 	else
 	{

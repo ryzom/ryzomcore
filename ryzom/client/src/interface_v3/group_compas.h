@@ -50,7 +50,7 @@ public:
 	std::string					Name;
 	CCompassTarget();
 	TType					 getType() const { return _Type; }
-	void                     setType(TType type) { if (type == _Type) return; setPositionState(NULL); _Type = type; }
+	void                     setType(TType type) { if (type == _Type) return; setPositionState(nullptr); _Type = type; }
 	// returns position tracker (if type is 'PosTracker')
 	CPositionState			*getPositionState() { return _PositionState; }
 	void					 setPositionState(CPositionState	*ps) {if (ps != _PositionState) _PositionState = ps; if (ps) _Type = PosTracker; }
@@ -164,7 +164,7 @@ public:
 	~CGroupCompasMenu() NL_OVERRIDE;
 
 	// parse
-	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent=NULL) NL_OVERRIDE;
+	virtual bool parse (xmlNodePtr cur, CInterfaceGroup *parent = nullptr) NL_OVERRIDE;
 
 	// From CInterfaceElement
 	virtual void setActive (bool state) NL_OVERRIDE;
@@ -197,7 +197,7 @@ public:
 	};
 	static CCompassDialogsManager & getInstance()
 	{
-		if ( _Instance == NULL )
+		if ( _Instance == nullptr)
 			_Instance = new CCompassDialogsManager;
 		return *_Instance;
 	}

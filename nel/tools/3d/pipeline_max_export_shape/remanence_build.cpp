@@ -75,7 +75,7 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': expected a single material, got %u\n",
 		        name.c_str(), (uint)materials.size());
-		return NULL;
+		return nullptr;
 	}
 
 	// Base shape object
@@ -86,7 +86,7 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': base object is not a Shape (can't get curves)\n",
 		        name.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	SPLINESHAPE::SShape shape;
@@ -94,13 +94,13 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': no spline data decoded on shape object\n",
 		        name.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if (shape.Curves.size() != 1)
 	{
 		fprintf(stderr, "SKIP remanence '%s': expected 1 curve, got %u\n",
 		        name.c_str(), (uint)shape.Curves.size());
-		return NULL;
+		return nullptr;
 	}
 
 	std::vector<CVector> ends;
@@ -108,7 +108,7 @@ IShape *buildRemanenceShape(INode &node, SNodeTMCache &tmCache, bool exportLight
 	{
 		fprintf(stderr, "SKIP remanence '%s': curve needs at least one segment (2 knots)\n",
 		        name.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	// objectToLocal = objectTM * inverse(nodeTM), same as water/mesh paths and the reference

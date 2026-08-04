@@ -106,7 +106,7 @@ public:
 		BboxActive = bbox_active;
 		Deleted = false;
 		LastDeleted = -1;
-		Primitive = NULL;
+		Primitive = nullptr;
 		PrimSize = CVector(1.f, 1.f, 1.f);
 		PrimHeight = 1.f;
 		PrimRelativePos = CVector(0.f, 0.f, 0.f);

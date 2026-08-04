@@ -47,8 +47,8 @@ H_AUTO_DECL( NL3D_UI_Animation )
 CAnimation::CAnimation() : _BeginTimeTouched(true), _EndTimeTouched(true), _AnimLoopTouched(true)
 {
 	_MinEndTime = -FLT_MAX;
-	_TrackSamplePack= NULL;
-	_AnimationSetOwner= NULL;
+	_TrackSamplePack = nullptr;
+	_AnimationSetOwner = nullptr;
 }
 
 // ***************************************************************************
@@ -63,7 +63,7 @@ CAnimation::~CAnimation ()
 	// if created, release the _TrackSamplePack
 	if(_TrackSamplePack)
 		delete _TrackSamplePack;
-	_TrackSamplePack= NULL;
+	_TrackSamplePack = nullptr;
 }
 
 // ***************************************************************************
@@ -289,7 +289,7 @@ UTrack* CAnimation::getTrackByName (const char* name)
 	// Not found ?
 	if (id==CAnimation::NotFound)
 		// Error, return NULL
-		return NULL;
+		return nullptr;
 	else
 		// No error, return the track
 		return getTrack (id);
@@ -334,7 +334,7 @@ UAnimation* UAnimation::createAnimation (const char* sPath)
 		return ret;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************

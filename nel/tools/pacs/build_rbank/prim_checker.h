@@ -105,7 +105,7 @@ private:
 		void	set(uint x, uint y, uint8 bits)
 		{
 			CGridCell	*cell = _Grid[((x&0xff00)>>8) + (y&0xff00)];
-			if (cell == NULL)
+			if (cell == nullptr)
 			{
 				cell = new CGridCell();
 				_Grid[((x&0xff00)>>8) + (y&0xff00)] = cell;
@@ -117,14 +117,14 @@ private:
 		uint8	get(uint x, uint y) const
 		{
 			CGridCell	*cell = _Grid[((x&0xff00)>>8) + (y&0xff00)];
-			return cell != NULL ? cell->get(x, y) : (uint8)0;
+			return cell != nullptr ? cell->get(x, y) : (uint8)0;
 		}
 
 		/// Set bits in grid
 		void	index(uint x, uint y, uint16 idx)
 		{
 			CGridCell	*cell = _Grid[((x&0xff00)>>8) + (y&0xff00)];
-			if (cell == NULL)
+			if (cell == nullptr)
 			{
 				cell = new CGridCell();
 				_Grid[((x&0xff00)>>8) + (y&0xff00)] = cell;
@@ -136,7 +136,7 @@ private:
 		uint16	index(uint x, uint y) const
 		{
 			CGridCell	*cell = _Grid[((x&0xff00)>>8) + (y&0xff00)];
-			return cell != NULL ? cell->index(x, y) : (uint16)0;
+			return cell != nullptr ? cell->index(x, y) : (uint16)0;
 		}
 
 
@@ -144,10 +144,10 @@ private:
 		void	clear()
 		{
 			for (uint i=0; i<256*256; ++i)
-				if (_Grid != NULL)
+				if (_Grid != nullptr)
 				{
 					delete _Grid[i];
-					_Grid[i] = NULL;
+					_Grid[i] = nullptr;
 				}
 		}
 
@@ -162,12 +162,12 @@ private:
 
 			for (uint i=0; i<256*256; ++i)
 			{
-				bool	present = (_Grid[i] != NULL);
+				bool	present = (_Grid[i] != nullptr);
 				f.serial(present);
 
 				if (present)
 				{
-					if (_Grid[i] == NULL)
+					if (_Grid[i] == nullptr)
 						_Grid[i] = new CGridCell();
 					_Grid[i]->serial(f);
 				}

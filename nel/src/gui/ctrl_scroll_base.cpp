@@ -31,7 +31,7 @@ namespace NLGUI
 	CCtrlScrollBase::CCtrlScrollBase( const TCtorParam &param ) :
 	CCtrlBase( param )
 	{
-		_Target = NULL;
+		_Target = nullptr;
 	}
 
 	CCtrlScrollBase::~CCtrlScrollBase()

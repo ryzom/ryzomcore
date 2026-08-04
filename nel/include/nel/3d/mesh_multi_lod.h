@@ -62,7 +62,8 @@ public:
 		class CBuildSlot
 		{
 		public:
-			CBuildSlot() : MeshGeom(NULL), DistMax(0.0f), BlendLength(0.0f), Flags(0) { }
+			CBuildSlot() : MeshGeom(nullptr)
+			    , DistMax(0.0f), BlendLength(0.0f), Flags(0) { }
 			/**
 			  * Flags for the build of a slot
 			  *

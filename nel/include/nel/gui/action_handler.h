@@ -70,7 +70,7 @@ namespace NLGUI
 
 		static CAHManager* getInstance()
 		{
-			if (_GlobalInstance == NULL && !s_Deleted)
+			if (_GlobalInstance == nullptr && !s_Deleted)
 				_GlobalInstance = new CAHManager;
 			return _GlobalInstance;
 		}
@@ -81,13 +81,13 @@ namespace NLGUI
 		IActionHandler *getActionHandler(const std::string &name) const
 		{
 			if( name.empty() )
-				return NULL;
+				return nullptr;
 
 			TFactoryMap::const_iterator it = FactoryMap.find(name);
 			if( it == FactoryMap.end() )
 			{
 				nlwarning( "Couldn't find action handler %s", name.c_str() );
-				return NULL;
+				return nullptr;
 			}
 			else
 				return it->second;
@@ -141,7 +141,7 @@ namespace NLGUI
 			~CDeleter()
 			{
 				delete _GlobalInstance;
-				_GlobalInstance = NULL;
+				_GlobalInstance = nullptr;
 				s_Deleted = true;
 			}
 		};

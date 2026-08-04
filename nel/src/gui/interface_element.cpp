@@ -59,7 +59,7 @@ namespace NLGUI
 		if( editorMode )
 		{
 			notifyDeletionWatchers();
-			if( _Parent != NULL )
+			if( _Parent != nullptr)
 				_Parent->onWidgetDeleted( this );
 		}
 	}
@@ -293,9 +293,9 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceElement::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST type );
-		if( node == NULL )
-			return NULL;
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST type );
+		if( node == nullptr)
+			return nullptr;
 
 		xmlAddChild( parentNode, node );
 
@@ -364,13 +364,13 @@ namespace NLGUI
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"w" );
 		_W = 0;
-		if (parentGroup != NULL)
+		if (parentGroup != nullptr)
 			_W = parentGroup->getW();
 		if (ptr) fromString((const char*)ptr, _W);
 
 		ptr = (char*) xmlGetProp( cur, (xmlChar*)"h" );
 		_H = 0;
-		if (parentGroup != NULL)
+		if (parentGroup != nullptr)
 			_H = parentGroup->getH();
 		if (ptr) fromString((const char*)ptr, _H);
 
@@ -532,16 +532,16 @@ namespace NLGUI
 		_WReal = getW();
 		_HReal = getH();
 
-		CInterfaceElement *el = NULL;
+		CInterfaceElement *el = nullptr;
 
 		// Modif Pos
 
-		if (_ParentPos != NULL)
+		if (_ParentPos != nullptr)
 			el = _ParentPos;
 		else
 			el = _Parent;
 
-		if (el == NULL)
+		if (el == nullptr)
 			return;
 
 		_XReal += el->_XReal;
@@ -559,19 +559,19 @@ namespace NLGUI
 
 		// Modif Size
 
-		if (_ParentSize != NULL)
+		if (_ParentSize != nullptr)
 		{
 			el = _ParentSize;
 		}
 		else
 		{
-			if (_ParentPos != NULL)
+			if (_ParentPos != nullptr)
 				el = _ParentPos;
 			else
 				el = _Parent;
 		}
 
-		if (el == NULL)
+		if (el == nullptr)
 			return;
 
 		if (_SizeRef&1)
@@ -705,9 +705,9 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceGroup* CInterfaceElement::getRootWindow ()
 	{
-		if (_Parent == NULL)
-			return NULL;
-		if (_Parent->getParent() == NULL)
+		if (_Parent == nullptr)
+			return nullptr;
+		if (_Parent->getParent() == nullptr)
 			return dynamic_cast<CInterfaceGroup*>(this);
 		return _Parent->getRootWindow();
 	}
@@ -717,7 +717,7 @@ namespace NLGUI
 	{
 		uint	depth= 0;
 		CInterfaceGroup *parent= _Parent;
-		while(parent!=NULL)
+		while(parent != nullptr)
 		{
 			parent= parent->getParent();
 			depth++;
@@ -730,10 +730,10 @@ namespace NLGUI
 	{
 		if(!getActive())
 			return false;
-		if(_Parent == NULL)
+		if(_Parent == nullptr)
 			return false;
 		// is it the root window?
-		if (_Parent->getParent() == NULL)
+		if (_Parent->getParent() == nullptr)
 			// yes and getActive() is true => the element is visible!
 			return true;
 		else
@@ -744,7 +744,7 @@ namespace NLGUI
 	void CInterfaceElement::relativeSInt64Read (CInterfaceProperty &rIP, const string &prop, const char *val,
 														   const string &defVal)
 	{
-		if (val == NULL)
+		if (val == nullptr)
 		{
 			rIP.readSInt64 (defVal.c_str(), _Id+":"+prop);
 		}
@@ -759,7 +759,7 @@ namespace NLGUI
 			sint32 decal = 0;
 			if (val[0] == ':')
 				decal = 1;
-			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
+			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != nullptr)
 			{
 				rIP.readSInt64 (val+decal, _Id+":"+prop);
 				return;
@@ -769,10 +769,10 @@ namespace NLGUI
 				string sTmp;
 				CInterfaceElement *pIEL = this;
 
-				while (pIEL != NULL)
+				while (pIEL != nullptr)
 				{
 					sTmp = pIEL->getId()+":"+string(val+decal);
-					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != nullptr)
 					{
 						rIP.readSInt64 (sTmp.c_str(), _Id+":"+prop);
 						return;
@@ -790,7 +790,7 @@ namespace NLGUI
 	void CInterfaceElement::relativeSInt32Read (CInterfaceProperty &rIP, const string &prop, const char *val,
 														   const string &defVal)
 	{
-		if (val == NULL)
+		if (val == nullptr)
 		{
 			rIP.readSInt32 (defVal.c_str(), _Id+":"+prop);
 		}
@@ -805,7 +805,7 @@ namespace NLGUI
 			sint32 decal = 0;
 			if (val[0] == ':')
 				decal = 1;
-			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
+			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != nullptr)
 			{
 				rIP.readSInt32 (val+decal, _Id+":"+prop);
 				return;
@@ -815,10 +815,10 @@ namespace NLGUI
 				string sTmp;
 				CInterfaceElement *pIEL = this;
 
-				while (pIEL != NULL)
+				while (pIEL != nullptr)
 				{
 					sTmp = pIEL->getId()+":"+string(val+decal);
-					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != nullptr)
 					{
 						rIP.readSInt32 (sTmp.c_str(), _Id+":"+prop);
 						return;
@@ -836,7 +836,7 @@ namespace NLGUI
 	void CInterfaceElement::relativeBoolRead (CInterfaceProperty &rIP, const string &prop, const char *val,
 														   const string &defVal)
 	{
-		if (val == NULL)
+		if (val == nullptr)
 		{
 			rIP.readBool (defVal.c_str(), _Id+":"+prop);
 		}
@@ -845,7 +845,7 @@ namespace NLGUI
 			sint32 decal = 0;
 			if (val[0] == ':')
 				decal = 1;
-			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
+			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != nullptr)
 			{
 				rIP.readBool (val+decal, _Id+":"+prop);
 				return;
@@ -855,10 +855,10 @@ namespace NLGUI
 				string sTmp;
 				CInterfaceElement *pIEL = this;
 
-				while (pIEL != NULL)
+				while (pIEL != nullptr)
 				{
 					sTmp = pIEL->getId()+":"+string(val+decal);
-					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != nullptr)
 					{
 						rIP.readBool (sTmp.c_str(), _Id+":"+prop);
 						return;
@@ -875,7 +875,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceElement::relativeRGBARead(CInterfaceProperty &rIP,const std::string &prop,const char *val,const std::string &defVal)
 	{
-		if (val == NULL)
+		if (val == nullptr)
 		{
 			rIP.readRGBA (defVal.c_str(), _Id+":"+prop);
 		}
@@ -890,7 +890,7 @@ namespace NLGUI
 			sint32 decal = 0;
 			if (val[0] == ':')
 				decal = 1;
-			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != NULL)
+			if (NLGUI::CDBManager::getInstance()->getDbProp(val+decal, false) != nullptr)
 			{
 				rIP.readRGBA (val+decal, _Id+":"+prop);
 				return;
@@ -900,10 +900,10 @@ namespace NLGUI
 				string sTmp;
 				CInterfaceElement *pIEL = this;
 
-				while (pIEL != NULL)
+				while (pIEL != nullptr)
 				{
 					sTmp = pIEL->getId()+":"+string(val+decal);
-					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp, false) != nullptr)
 					{
 						rIP.readRGBA (sTmp.c_str(), _Id+":"+prop);
 						return;
@@ -1112,7 +1112,7 @@ namespace NLGUI
 		if (_Links->empty())
 		{
 			delete _Links;
-			_Links = NULL;
+			_Links = nullptr;
 		}
 	}
 
@@ -1120,7 +1120,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement* CInterfaceElement::getMasterGroup() const
 	{
-		if(getParent()==NULL)
+		if(getParent() == nullptr)
 			return const_cast<CInterfaceElement*>(this);
 		else
 			return getParent()->getMasterGroup();
@@ -1133,12 +1133,12 @@ namespace NLGUI
 		while (parent)
 		{
 			CInterfaceGroup *gc = dynamic_cast< CInterfaceGroup* >( parent );
-			if( ( gc != NULL ) && gc->isGroupContainer() )
+			if( ( gc != nullptr) && gc->isGroupContainer() )
 				return gc;
 
 			parent = parent->getParent();
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1182,17 +1182,17 @@ namespace NLGUI
 		// Get the "Root Group" ie the 1st son of the master group of us (eg "ui:interface:rootgroup" )
 		CInterfaceGroup		*parent= getParent();
 		// if our parent is NULL, then we are the master group (error!)
-		if(parent==NULL)
+		if(parent == nullptr)
 			return;
 		// if our grandfather is NULL, then our father is the Master Group => we are the "Root group"
-		if(parent->getParent()==NULL)
+		if(parent->getParent() == nullptr)
 		{
 			parent= dynamic_cast<CInterfaceGroup*>(this);
 		}
 		else
 		{
 			// parent is the root group when is grandFather is NULL
-			while( parent->getParent()->getParent()!=NULL )
+			while( parent->getParent()->getParent() != nullptr)
 			{
 				parent= parent->getParent();
 			}
@@ -1283,9 +1283,9 @@ namespace NLGUI
 		CCtrlBase *ctrlBase = dynamic_cast<CCtrlBase*>(this);
 		CInterfaceGroup *groupBase = dynamic_cast<CInterfaceGroup*>(this);
 		if (
-			((type == RenderView) && (ctrlBase==NULL) && (groupBase==NULL)) ||
-			((type == RenderCtrl) && (ctrlBase!=NULL) && (groupBase==NULL)) ||
-			((type == RenderGroup) && (ctrlBase!=NULL) && (groupBase!=NULL)))
+			((type == RenderView) && (ctrlBase == nullptr) && (groupBase == nullptr)) ||
+			((type == RenderCtrl) && (ctrlBase != nullptr) && (groupBase == nullptr)) ||
+			((type == RenderGroup) && (ctrlBase != nullptr) && (groupBase != nullptr)))
 		{
 			if (!_Active) return;
 			// if there is an uiFilter, the end of _Id must match it
@@ -1464,12 +1464,12 @@ namespace NLGUI
 		NLMISC::CMemStream dupStream;
 		nlassert(!dupStream.isReading());
 		CInterfaceGroup *oldParent = _Parent;
-		_Parent = NULL;
+		_Parent = nullptr;
 		CInterfaceElement *oldParentPos = _ParentPos;
 		CInterfaceElement *oldParentSize = _ParentSize;
-		if (_ParentPos == oldParent) _ParentPos = NULL;
-		if (_ParentSize == oldParent) _ParentSize = NULL;
-		CInterfaceElement *begunThisCloneWarHas = NULL;
+		if (_ParentPos == oldParent) _ParentPos = nullptr;
+		if (_ParentSize == oldParent) _ParentSize = nullptr;
+		CInterfaceElement *begunThisCloneWarHas = nullptr;
 		try
 		{
 			if (dupStream.isReading())
@@ -1539,7 +1539,7 @@ namespace NLGUI
 	bool CInterfaceElement::isInGroup( CInterfaceGroup *group )
 	{
 		CInterfaceGroup *parent = getParent();
-		while( parent != NULL )
+		while( parent != nullptr)
 		{
 			if( parent == group )
 				return true;
@@ -1561,7 +1561,7 @@ namespace NLGUI
 
 		std::string ppId;
 
-		if( p != NULL )
+		if( p != nullptr)
 			ppId = p->getId() + ":" + id;
 		else
 			ppId = std::string( "ui:" ) + id;
@@ -1578,7 +1578,7 @@ namespace NLGUI
 			return;
 		}
 
-		CInterfaceElement *pp = NULL;
+		CInterfaceElement *pp = nullptr;
 
 		// Check if it's a short Id
 		std::string::size_type idx = id.find( "ui:" );
@@ -1586,7 +1586,7 @@ namespace NLGUI
 		{
 			// If it is, find the widget in the parent group and set as posparent
 			CInterfaceGroup *p = getParent();
-			if( p != NULL )
+			if( p != nullptr)
 			{
 				pp = p->findFromShortId( id );
 			}
@@ -1598,7 +1598,7 @@ namespace NLGUI
 			pp = CWidgetManager::getInstance()->getElementFromId( id );
 		}
 
-		if( pp != NULL )
+		if( pp != nullptr)
 			setParentPos( pp );
 
 	}
@@ -1607,7 +1607,7 @@ namespace NLGUI
 	{
 
 		// If there's no pos parent set, then the parent group is the pos parent
-		if( getParentPos() == NULL )
+		if( getParentPos() == nullptr)
 		{
 			id = "parent";
 			return;
@@ -1645,7 +1645,7 @@ namespace NLGUI
 
 		std::string spId;
 
-		if( p != NULL )
+		if( p != nullptr)
 			spId = p->getId() + ":" + id;
 		else
 			spId = std::string( "ui:" ) + id;
@@ -1662,7 +1662,7 @@ namespace NLGUI
 			return;
 		}
 
-		CInterfaceElement *pp = NULL;
+		CInterfaceElement *pp = nullptr;
 
 		// Check if it's a short Id
 		std::string::size_type idx = id.find( "ui:" );
@@ -1670,7 +1670,7 @@ namespace NLGUI
 		{
 			// If it is, find the widget in the parent group and set as posparent
 			CInterfaceGroup *p = getParent();
-			if( p != NULL )
+			if( p != nullptr)
 			{
 				pp = p->findFromShortId( id );
 			}
@@ -1682,7 +1682,7 @@ namespace NLGUI
 			pp = CWidgetManager::getInstance()->getElementFromId( id );
 		}
 
-		if( pp != NULL )
+		if( pp != nullptr)
 			setParentSize( pp );
 	}
 
@@ -1691,7 +1691,7 @@ namespace NLGUI
 		CInterfaceElement *p = getParentSize();
 
 		// If there's no parent set then the size parent is the parent
-		if( p == NULL )
+		if( p == nullptr)
 		{
 			id = "parent";
 			return;
@@ -1839,17 +1839,17 @@ namespace NLGUI
 	void CInterfaceElement::onWidgetDeleted( CInterfaceElement *e )
 	{
 		if( e == getParentPos() )
-			setParentPos( NULL );
+			setParentPos(nullptr);
 		if( e == getParentSize() )
-			setParentSize( NULL );
+			setParentSize(nullptr);
 	}
 
-	CStringMapper* CStringShared::_UIStringMapper = NULL;
+	CStringMapper* CStringShared::_UIStringMapper = nullptr;
 
 
 	void CStringShared::createStringMapper()
 	{
-		if( _UIStringMapper == NULL )
+		if( _UIStringMapper == nullptr)
 			_UIStringMapper = CStringMapper::createLocalMapper();
 	}
 

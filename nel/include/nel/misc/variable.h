@@ -138,7 +138,7 @@ class IVariable : public ICommand
 	friend class CCommandRegistry;
 public:
 
-	IVariable(const char *categoryName, const char *commandName, const char *commandHelp, const char *commandArgs = "[<value>]", bool useConfigFile = false, void (*cc)(IVariable &var)=NULL) :
+	IVariable(const char *categoryName, const char *commandName, const char *commandHelp, const char *commandArgs = "[<value>]", bool useConfigFile = false, void (*cc)(IVariable &var) = nullptr) :
 		ICommand(categoryName,commandName, commandHelp, commandArgs), _UseConfigFile(useConfigFile), ChangeCallback(cc)
 	{
 		Type = Variable;
@@ -192,7 +192,7 @@ class CVariablePtr : public IVariable
 {
 public:
 
-	CVariablePtr (const char *categoryName, const char *commandName, const char *commandHelp, T *valueptr, bool useConfigFile = false, void (*cc)(IVariable &var)=NULL) :
+	CVariablePtr (const char *categoryName, const char *commandName, const char *commandHelp, T *valueptr, bool useConfigFile = false, void (*cc)(IVariable &var) = nullptr) :
 		IVariable (categoryName, commandName, commandHelp, "[<value>]", useConfigFile, cc), _ValuePtr(valueptr)
 	{
 	}
@@ -231,7 +231,7 @@ public:
 				const T &defaultValue,
 				uint nbMeanValue = 0,
 				bool useConfigFile = false,
-				void (*cc)(IVariable &var)=NULL,
+				void (*cc)(IVariable &var) = nullptr,
 				bool executeCallbackForDefaultValue=false ) :
 		IVariable (categoryName, commandName, commandHelp, "[<value>|stat|mean|min|max]", useConfigFile, cc), _Mean(nbMeanValue), _First(true)
 	{
@@ -401,7 +401,7 @@ template<> class CVariable<std::string> : public IVariable
 {
 public:
 
-	CVariable (const char *categoryName, const char *commandName, const char *commandHelp, const std::string &defaultValue, uint /* nbMeanValue */ = 0, bool useConfigFile = false, void (*cc)(IVariable &/* var */)=NULL, bool executeCallbackForDefaultValue=false) :
+	CVariable (const char *categoryName, const char *commandName, const char *commandHelp, const std::string &defaultValue, uint /* nbMeanValue */ = 0, bool useConfigFile = false, void (*cc)(IVariable &/* var */) = nullptr, bool executeCallbackForDefaultValue=false) :
 		IVariable (categoryName, commandName, commandHelp, "[<value>]", useConfigFile, cc)
 	{
 		set (defaultValue, executeCallbackForDefaultValue);

@@ -47,7 +47,8 @@ public:
 	/**
 	 * Default constructor
 	 */
-	CTextureMem() : _Data(NULL),
+	CTextureMem() : _Data(nullptr)
+	    ,
 					_Delete(false),
 					_AllowDegradation(false),
 					_TexType(CBitmap::RGBA)
@@ -80,7 +81,7 @@ public:
 	CTextureMem(uint8 *data, uint32 length, bool _delete, bool isFile = true, uint width = 0, uint height = 0, CBitmap::TType texType = CBitmap::RGBA)
 	{
 		_AllowDegradation=false;
-		_Data=NULL;
+		_Data = nullptr;
 		_Delete=false;
 		setPointer(data, length, _delete, isFile, width, height, texType);
 	}

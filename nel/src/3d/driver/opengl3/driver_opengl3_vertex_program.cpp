@@ -653,7 +653,7 @@ void CDriverGL3::generateBuiltinVertexProgram()
 		nlwarning("GL3: Builtin VP compilation failed (fmt=0x%x, lit=%d, fog=%d, vcl=%d)",
 			m_VPBuiltinCurrent.VertexFormat, (int)m_VPBuiltinCurrent.Lighting,
 			(int)m_VPBuiltinCurrent.Fog, (int)m_VPBuiltinCurrent.VertexColorLighted);
-		delete vertexProgram; vertexProgram = NULL;
+		delete vertexProgram; vertexProgram = nullptr;
 	}
 
 	m_VPBuiltinCurrent.VertexProgram = vertexProgram;

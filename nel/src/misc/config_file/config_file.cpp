@@ -299,7 +299,7 @@ uint CConfigFile::CVar::size () const
 
 CConfigFile::~CConfigFile ()
 {
-	if (_ConfigFiles == NULL || (*_ConfigFiles).empty ()) return;
+	if (_ConfigFiles == nullptr || (*_ConfigFiles).empty ()) return;
 
 	vector<CConfigFile *>::iterator it = find ((*_ConfigFiles).begin (), (*_ConfigFiles).end (), this);
 	if (it != (*_ConfigFiles).end ())
@@ -310,13 +310,13 @@ CConfigFile::~CConfigFile ()
 	if ((*_ConfigFiles).empty())
 	{
 		delete _ConfigFiles;
-		_ConfigFiles = NULL;
+		_ConfigFiles = nullptr;
 	}
 }
 
 void CConfigFile::load (const string &fileName, bool lookupPaths )
 {
-	char *locale = setlocale(LC_NUMERIC, NULL);
+	char *locale = setlocale(LC_NUMERIC, nullptr);
 
 	if (!locale || strcmp(locale, "C"))
 	{
@@ -332,7 +332,7 @@ void CConfigFile::load (const string &fileName, bool lookupPaths )
 	FileNames.clear ();
 	FileNames.push_back (fileName);
 
-	if (_ConfigFiles == NULL)
+	if (_ConfigFiles == nullptr)
 	{
 		_ConfigFiles = new std::vector<CConfigFile *>;
 	}
@@ -423,9 +423,9 @@ void CConfigFile::reparse (bool lookupPaths)
 				cf_ifile.invert();
 			}
 
-			cfrestart (NULL);
+			cfrestart (nullptr);
 			cf_CurrentLine = 0;
-			cf_CurrentFile = NULL;
+			cf_CurrentFile = nullptr;
 			cf_Ignore = false;
 			cf_OverwriteExistingVariable = (FileNames.size()==1);
 			LoadRoot = (FileNames.size()>1);
@@ -446,7 +446,7 @@ void CConfigFile::reparse (bool lookupPaths)
 				throw EParseError (fn, cf_CurrentLine);
 			}
 
-			if (cf_CurrentFile != NULL)
+			if (cf_CurrentFile != nullptr)
 				free(cf_CurrentFile);
 
 			// reset all 'FromLocalFile' flag on created vars before reading next root cfg
@@ -490,7 +490,7 @@ void CConfigFile::reparse (bool lookupPaths)
 			fn.clear ();
 	}
 
-	if (_Callback != NULL)
+	if (_Callback != nullptr)
 		_Callback();
 
 /*	if (filename == NULL)
@@ -562,7 +562,7 @@ void CConfigFile::reparse (bool lookupPaths)
 CConfigFile::CVar &CConfigFile::getVar (const std::string &varName)
 {
 	CVar *var =  getVarPtr (varName);
-	if (var == 0)
+	if (var == nullptr)
 		throw EUnknownVar (getFilename(), varName);
 	else
 		return *var;
@@ -586,7 +586,7 @@ CConfigFile::CVar *CConfigFile::getVarPtr (const std::string &varName)
 	if (i == UnknownVariables.size())
 		UnknownVariables.push_back(varName);
 
-	return NULL;
+	return nullptr;
 }
 
 bool CConfigFile::exists (const std::string &varName)
@@ -604,7 +604,7 @@ bool CConfigFile::exists (const std::string &varName)
 
 void CConfigFile::save () const
 {
-	char *locale = setlocale(LC_NUMERIC, NULL);
+	char *locale = setlocale(LC_NUMERIC, nullptr);
 
 	if (!locale || strcmp(locale, "C"))
 	{
@@ -612,7 +612,7 @@ void CConfigFile::save () const
 	}
 
 	FILE *fp = nlfopen (getFilename(), "w");
-	if (fp == NULL)
+	if (fp == nullptr)
 	{
 		nlwarning ("CF: Couldn't create %s file", getFilename().c_str ());
 		return;
@@ -715,7 +715,7 @@ void CConfigFile::display (CLog *log) const
 	log->displayRawNL ("------------------------------------------------------");
 	for(int i = 0; i < (int)_Vars.size(); i++)
 	{
-		log->displayRaw ((_Vars[i].Callback==NULL)?"   ":"CB ");
+		log->displayRaw ((_Vars[i].Callback == nullptr) ?"   ":"CB ");
 		log->displayRaw ((_Vars[i].Root)?"Root ":"     ");
 		if (_Vars[i].Comp)
 		{
@@ -820,18 +820,18 @@ void CConfigFile::setCallback (const string &VarName, void (*cb)(CConfigFile::CV
 // ***************************************************************************
 
 
-vector<CConfigFile *> *CConfigFile::_ConfigFiles = NULL;
+vector<CConfigFile *> *CConfigFile::_ConfigFiles = nullptr;
 
 uint32	CConfigFile::_Timeout = 1000;
 
 void CConfigFile::checkConfigFiles ()
 {
-	if (_ConfigFiles == NULL) return;
+	if (_ConfigFiles == nullptr) return;
 
-	static time_t LastCheckTime = time (NULL);
-	if (_Timeout > 0 && (float)(time (NULL) - LastCheckTime)*1000.0f < (float)_Timeout) return;
+	static time_t LastCheckTime = time (nullptr);
+	if (_Timeout > 0 && (float)(time (nullptr) - LastCheckTime)*1000.0f < (float)_Timeout) return;
 
-	LastCheckTime = time (NULL);
+	LastCheckTime = time (nullptr);
 
 	bool needReparse;
 	for (vector<CConfigFile *>::iterator it = (*_ConfigFiles).begin (); it != (*_ConfigFiles).end (); it++)

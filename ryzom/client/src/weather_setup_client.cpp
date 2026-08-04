@@ -54,7 +54,7 @@ void CWeatherStateClient::setup(const CWeatherState &ws, std::map<std::string, C
 		}
 		else
 		{
-			FXs[k].Precipitation = NULL;
+			FXs[k].Precipitation = nullptr;
 			FXs[k].Ratio = 0.f;
 		}
 	}

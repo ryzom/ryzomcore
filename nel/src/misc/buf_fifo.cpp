@@ -40,7 +40,10 @@ CBufFIFO::TAllBuffers		CBufFIFO::_AllBuffers;
 #endif
 
 
-CBufFIFO::CBufFIFO() : _Buffer(NULL), _BufferSize(0), _Empty(true), _Head(NULL), _Tail(NULL), _Rewinder(NULL)
+CBufFIFO::CBufFIFO() : _Buffer(nullptr)
+    , _BufferSize(0), _Empty(true), _Head(nullptr)
+    , _Tail(nullptr)
+    , _Rewinder(nullptr)
 {
 #ifdef BUFFIFO_TRACK_ALL_BUFFERS
 	_AllBuffers.insert(this);
@@ -65,7 +68,7 @@ CBufFIFO::~CBufFIFO()
 	_AllBuffers.erase(this);
 #endif
 
-	if (_Buffer != NULL)
+	if (_Buffer != nullptr)
 	{
 		delete []_Buffer;
 #if DEBUG_FIFO
@@ -187,7 +190,7 @@ void CBufFIFO::pop ()
 		return;
 	}
 
-	if (_Rewinder != NULL && _Tail == _Rewinder)
+	if (_Rewinder != nullptr && _Tail == _Rewinder)
 	{
 #if DEBUG_FIFO
 		nldebug("%p pop rewind!", this);
@@ -195,7 +198,7 @@ void CBufFIFO::pop ()
 
 		// need to rewind
 		_Tail = _Buffer;
-		_Rewinder = NULL;
+		_Rewinder = nullptr;
 	}
 
 	TFifoSize s = *(TFifoSize *)_Tail;
@@ -228,7 +231,7 @@ uint8 CBufFIFO::frontLast ()
 		return 0;
 	}
 
-	if (_Rewinder != NULL && tail == _Rewinder)
+	if (_Rewinder != nullptr && tail == _Rewinder)
 	{
 #if DEBUG_FIFO
 		nldebug("%p front rewind!", this);
@@ -381,7 +384,7 @@ void CBufFIFO::front (uint8 *&buffer, uint32 &s)
 
 	_Fronted++;
 
-	if (_Rewinder != NULL && tail == _Rewinder)
+	if (_Rewinder != nullptr && tail == _Rewinder)
 	{
 #if DEBUG_FIFO
 		nldebug("%p front rewind!", this);
@@ -417,7 +420,7 @@ void CBufFIFO::front (uint8 *&buffer, uint32 &s)
 void CBufFIFO::clear ()
 {
 	_Tail = _Head = _Buffer;
-	_Rewinder = NULL;
+	_Rewinder = nullptr;
 	_Empty = true;
 }
 
@@ -430,7 +433,7 @@ uint32 CBufFIFO::size ()
 	else if (_Head == _Tail)
 	{
 		// buffer is full
-		if (_Rewinder == NULL)
+		if (_Rewinder == nullptr)
 			return _BufferSize;
 		else
 			return (uint32)(_Rewinder - _Buffer);
@@ -476,7 +479,7 @@ void CBufFIFO::resize (uint32 s)
 	}
 
 	uint8 *NewBuffer = new uint8[s];
-	if (NewBuffer == NULL)
+	if (NewBuffer == nullptr)
 	{
 		nlerror("Not enough memory to resize the FIFO to %u bytes", s);
 	}
@@ -514,10 +517,10 @@ void CBufFIFO::resize (uint32 s)
 	// Warning: don't invert these 2 lines position or it ll not work
 	_Tail = NewBuffer;
 	_Head = NewBuffer + UsedSize;
-	_Rewinder = NULL;
+	_Rewinder = nullptr;
 
 	// delete old buffer if needed
-	if (_Buffer != NULL)
+	if (_Buffer != nullptr)
 	{
 		delete []_Buffer;
 #if DEBUG_FIFO
@@ -568,7 +571,7 @@ void CBufFIFO::display ()
 		{
 			if (_Head >= pos && _Head < pos + gran)
 			{
-				if (_Rewinder != NULL && _Rewinder >= pos && _Rewinder < pos + gran)
+				if (_Rewinder != nullptr && _Rewinder >= pos && _Rewinder < pos + gran)
 				{
 					strncat (str, "*", 1);
 				}
@@ -586,7 +589,7 @@ void CBufFIFO::display ()
 		{
 			strncat (str, "H", 1);
 		}
-		else if (_Rewinder != NULL && _Rewinder >= pos && _Rewinder < pos + gran)
+		else if (_Rewinder != nullptr && _Rewinder >= pos && _Rewinder < pos + gran)
 		{
 			strncat (str, "R", 1);
 		}

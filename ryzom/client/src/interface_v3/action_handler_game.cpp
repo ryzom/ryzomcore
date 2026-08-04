@@ -144,7 +144,7 @@ static	bool	playerKnowSkill( SKILLS::ESkills e)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	string sPath = "SERVER:CHARACTER_INFO:SKILLS:" + toStringEnum( e ) + ":SKILL";
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath,false);
-	if ((pNL != NULL) && (pNL->getValue64() > 0))
+	if ((pNL != nullptr) && (pNL->getValue64() > 0))
 		return true;
 	else
 		return false;
@@ -162,7 +162,7 @@ public:
 	{
 		// Invalidate all lines
 		CGroupMenu *pGM = dynamic_cast<CGroupMenu*>(pCaller);
-		if (pGM == NULL) return;
+		if (pGM == nullptr) return;
 
 		// Id names of the lines in the game_context_menu.xml ...
 		static const char *sIdNames[] = { "talk", "use", "lift", "look", "attack", "invit", "exchange",
@@ -176,7 +176,7 @@ public:
 		for (i = 0; i < numOptions; ++i)
 		{
 			pVTM = dynamic_cast<CViewTextMenu*>(pGM->getElement(sMenuPath+":"+sIdNames[i]));
-			if (pVTM != NULL) pVTM->setGrayed(true);
+			if (pVTM != nullptr) pVTM->setGrayed(true);
 		}
 	}
 };
@@ -256,7 +256,7 @@ class CHandlerContextRingSessions : public IActionHandler
 				UserEntity->moveTo(UserEntity->selection(), 3.0, CUserEntity::WebPage);
 				if (pIE->getActive())
 				{
-					CBotChatManager::getInstance()->setCurrPage(NULL);
+					CBotChatManager::getInstance()->setCurrPage(nullptr);
 				}
 			}
 			else
@@ -269,7 +269,7 @@ class CHandlerContextRingSessions : public IActionHandler
 		}
 		else
 		{
-			if (pIE != NULL) pIE->setActive(false);
+			if (pIE != nullptr) pIE->setActive(false);
 		}
 	}
 };
@@ -934,7 +934,7 @@ public:
 		if (UserEntity->selection())
 		{
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
-			if (pSel != NULL)
+			if (pSel != nullptr)
 				if (pSel->isForageSource())
 					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
@@ -1024,7 +1024,7 @@ public:
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CEntityCL *sel = EntitiesMngr.entity(UserEntity->selection());
-		if (sel == NULL) return;
+		if (sel == nullptr) return;
 
 		// Game Specific Code
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1034,11 +1034,11 @@ public:
 		{
 			CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
 			CCDBNodeLeaf *typeProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:TYPE", i), false);
-			if ((uidProp != NULL) && (uidProp->getValue32() == (sint32)sel->dataSetId()) &&
-				(typeProp != NULL) && (typeProp->getValue32() == ANIMAL_TYPE::Mount))
+			if ((uidProp != nullptr) && (uidProp->getValue32() == (sint32)sel->dataSetId()) &&
+				(typeProp != nullptr) && (typeProp->getValue32() == ANIMAL_TYPE::Mount))
 			{
 				beastOrder("mount", toString(i+1)); // why +1 ? : dixit sendAnimalCommand in EGS : index 0 = all animals, 1 = animal 0 etc
-				CAHManager::getInstance()->runActionHandler("animal_target", NULL, toString(i+1));
+				CAHManager::getInstance()->runActionHandler("animal_target", nullptr, toString(i+1));
 				UserEntity->moveTo(UserEntity->selection(),2.0,CUserEntity::None);
 			}
 		}
@@ -1193,7 +1193,7 @@ public:
 		if(!FreeTrial)
 		{
 			 CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			 CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
+			 CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr);
 		}
 	}
 };
@@ -1244,7 +1244,7 @@ public:
 		{
 			// send a message to server, thru cancel cast
 			CInterfaceManager	*pIM= CInterfaceManager::getInstance();
-			CAHManager::getInstance()->runActionHandler("phrase_cancel_cast", NULL);
+			CAHManager::getInstance()->runActionHandler("phrase_cancel_cast", nullptr);
 		}
 		paying_account_request = false;
 		paying_account_already_request = false;
@@ -1272,10 +1272,10 @@ public:
 		else
 		{
 			paying_account_already_request = true;
-			CAHManager::getInstance()->runActionHandler("quit_ryzom", NULL);
+			CAHManager::getInstance()->runActionHandler("quit_ryzom", nullptr);
 		}
 
-		CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
+		CAHManager::getInstance()->runActionHandler("leave_modal", nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CAHCloseFreeTrialQuitting, "close_free_trial_game_quitting");
@@ -1328,7 +1328,7 @@ class CSelectItemSheet : public IActionHandler
 			}
 			else
 			{
-				CDBCtrlSheet::setCurrSelection(NULL);
+				CDBCtrlSheet::setCurrSelection(nullptr);
 			}
 		}
 		bool canUse = true;
@@ -1521,7 +1521,7 @@ public:
 			string beastIndex;
 			if( CInterfaceExpr::evalAsString(getParam(Params,"beast_index"), beastIndex) )
 			{
-				CAHManager::getInstance()->runActionHandler("animal_target", NULL, beastIndex);
+				CAHManager::getInstance()->runActionHandler("animal_target", nullptr, beastIndex);
 			}
 			// move to the beast
 			UserEntity->moveTo(UserEntity->selection(),3.0,CUserEntity::Mount);
@@ -1579,7 +1579,7 @@ public:
 			for(uint i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
 				// Get the entity if it is in vision
-				CEntityCL* selectedAnimalInVision = NULL;
+				CEntityCL* selectedAnimalInVision = nullptr;
 				CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", i), false);
 				if ( uidProp )
 				{
@@ -1595,7 +1595,7 @@ public:
 		else if(selected>=1 && selected<=MAX_INVENTORY_ANIMAL)
 		{
 			// Get the entity if it is in vision
-			CEntityCL* selectedAnimalInVision = NULL;
+			CEntityCL* selectedAnimalInVision = nullptr;
 			CCDBNodeLeaf *uidProp = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:PACK_ANIMAL:BEAST%d:UID", selected-1), false);
 			if ( uidProp )
 			{
@@ -1702,7 +1702,7 @@ static void closeGroup(const string &groupName)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(groupName));
-	if (pIG == NULL) return;
+	if (pIG == nullptr) return;
 	pIG->setActive(false);
 }
 
@@ -1870,7 +1870,7 @@ public:
 		if (ClientCfg.Light)
 		{
 			vector<string> v;
-			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", NULL, v);
+			CWidgetManager::getInstance()->runProcedure ("proc_reset_interface", nullptr, v);
 
 			//CInterfaceManager::getInstance()->launchContextMenuInGame("ui:interface:game_context_menu");
 		}
@@ -1902,7 +1902,7 @@ public:
 			pIG->setActive(true);
 
 		// browse the url
-		CAHManager::getInstance()->runActionHandler("browse", NULL, "name="+helpContainer+":content:html|url="+url);
+		CAHManager::getInstance()->runActionHandler("browse", nullptr, "name="+helpContainer+":content:html|url="+url);
     }
 };
 REGISTER_ACTION_HANDLER( CAHLaunchHelp, "launch_help");
@@ -1912,7 +1912,7 @@ static bool findInterfacePath(string &sPath, CCtrlBase *pCaller)
 {
 	if (sPath.rfind(':') == string::npos)
 	{
-		if (pCaller == NULL) return false;
+		if (pCaller == nullptr) return false;
 		sPath = pCaller->getId() + ":" + sPath;
 	}
 	else
@@ -1920,11 +1920,11 @@ static bool findInterfacePath(string &sPath, CCtrlBase *pCaller)
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string elt = sPath.substr(0,sPath.rfind(':'));
 		CInterfaceElement *pIE;
-		if (pCaller != NULL)
+		if (pCaller != nullptr)
 			pIE = CWidgetManager::getInstance()->getElementFromId(pCaller->getId(), elt);
 		else
 			pIE = CWidgetManager::getInstance()->getElementFromId(elt);
-		if (pIE == NULL) return false;
+		if (pIE == nullptr) return false;
 		sPath = pIE->getId() + ":" + sPath.substr(sPath.rfind(':')+1,sPath.size());
 	}
 	return true;
@@ -1946,7 +1946,7 @@ public:
 
 	bool cbIDStringReceived(string &inout) NL_OVERRIDE
 	{
-		if (UserEntity != NULL)
+		if (UserEntity != nullptr)
 		{
 			if (UserEntity->selection() == Slot)
 			{
@@ -1957,7 +1957,7 @@ public:
 					CEntityCL *entity = EntitiesMngr.entity(Slot);
 					CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
 					bool womanTitle = false;
-					if (pChar != NULL)
+					if (pChar != nullptr)
 						womanTitle = pChar->getGender() == GSGENDER::female;
 					
 					copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
@@ -1990,16 +1990,16 @@ public:
 
 	bool cbIDStringReceived(string &inout) NL_OVERRIDE
 	{
-		if (UserEntity != NULL)
+		if (UserEntity != nullptr)
 		{
 			if (UserEntity->selection() == Slot)
 			{
 				CEntityCL *entity = EntitiesMngr.entity(Slot);
 				CCharacterCL *pChar = dynamic_cast<CCharacterCL*>(entity);
-				if (pChar != NULL)
+				if (pChar != nullptr)
 				{
 					const CCharacterSheet *pSheet = pChar->getSheet();
-					if (pSheet != NULL)
+					if (pSheet != nullptr)
 					{
 						string sFame = pSheet->getFame();
 						if (strnicmp(sFame.c_str(),"tribe_",6)==0)
@@ -2035,7 +2035,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 		findInterfacePath(sTitleTarget, pCaller);
 
 		CInterfaceExprValue evValue;
-		if (CInterfaceExpr::eval(sSlot, evValue, NULL))
+		if (CInterfaceExpr::eval(sSlot, evValue, nullptr))
 		{
 			sint32 nSlot = (sint32)evValue.getInteger();
 
@@ -2048,7 +2048,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 //				uint32 nDBid = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:Entities:E"+toString(nSlot)+":P6")->getValue32();
 				uint32 nDBid = 0;
-				if (nSlot < sint32(EntitiesMngr.entities().size()) && EntitiesMngr.entities()[nSlot] != NULL)
+				if (nSlot < sint32(EntitiesMngr.entities().size()) && EntitiesMngr.entities()[nSlot] != nullptr)
 				{
 					nDBid = EntitiesMngr.entities()[nSlot]->getNameId();
 				}
@@ -2065,7 +2065,7 @@ class CActionHandlerSetTargetName : public IActionHandler
 				else
 				{
 					CEntityCL *pE = EntitiesMngr.entity(nSlot);
-					if (pE != NULL)
+					if (pE != nullptr)
 					{
 						TargetName = pE->getDisplayName();
 						TargetTitle = pE->getTitle();
@@ -2096,20 +2096,20 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		if (sSlot.empty()) return;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewBitmap *pVBR = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId(sTargetRegion));
-		if (pVBR == NULL)
+		if (pVBR == nullptr)
 			return;
 		CViewBitmap *pVBL = dynamic_cast<CViewBitmap*>(CWidgetManager::getInstance()->getElementFromId(sTargetLevel));
-		if (pVBL == NULL)
+		if (pVBL == nullptr)
 			return;
 		CInterfaceExprValue evValue;
-		if (!CInterfaceExpr::eval(sSlot, evValue, NULL))
+		if (!CInterfaceExpr::eval(sSlot, evValue, nullptr))
 			return;
 		sint32 nSlot = (sint32)evValue.getInteger();
 		CCtrlBase *pTooltip = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:target:header_opened:force"));
 
 		// Access target entity
-		CEntityCL *pE = NULL;
-		if ( (nSlot == -1) || ((pE = EntitiesMngr.entity(nSlot)) == NULL) )
+		CEntityCL *pE = nullptr;
+		if ( (nSlot == -1) || ((pE = EntitiesMngr.entity(nSlot)) == nullptr) )
 		{
 			// If untargetted, clear
 			pVBL->setTexture(string());
@@ -2163,7 +2163,7 @@ class CActionHandlerSetTargetForceRegionLevel: public IActionHandler
 		{
 			// Creature => RegionForce & ForceLevel are in its sheet
 			CCharacterSheet *pCS = dynamic_cast<CCharacterSheet*>(SheetMngr.get(pE->sheetId()));
-			if (pCS == NULL || pCS->RegionForce==-1)
+			if (pCS == nullptr || pCS->RegionForce==-1)
 			{
 				pVBL->setTexture(string());
 				pVBR->setColor(CRGBA(0,0,0,0));
@@ -2242,10 +2242,10 @@ class CAHUpdateCurrentMode : public IActionHandler
 		string sDBLink = getParam(Params,"dblink");
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sDBLink, false);
-		if (pNL == NULL) return;
+		if (pNL == nullptr) return;
 
 		CInterfaceExprValue eVal;
-		if (!CInterfaceExpr::eval(sValue, eVal, NULL)) return;
+		if (!CInterfaceExpr::eval(sValue, eVal, nullptr)) return;
 
 		sint32 nNewMode = (sint32)eVal.getInteger();
 
@@ -2292,7 +2292,7 @@ class CAHUpdateCurrentMode : public IActionHandler
 			while (!bFound)
 			{
 				CCDBNodeLeaf *pIntFlags = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:INTERFACES:FLAGS", false);
-				if (pIntFlags == NULL) return;
+				if (pIntFlags == nullptr) return;
 				sint64 nIntFlags = pIntFlags->getValue64();
 
 				sint32 tmpMode;
@@ -2452,25 +2452,25 @@ class CAHTarget : public IActionHandler
 		// late check because only possible if doing 'starts-with' search
 		bool preferCompleteMatch = (completeMatch != "0");
 
-		CEntityCL *entity = NULL;
+		CEntityCL *entity = nullptr;
 		if (preferCompleteMatch)
 		{
 			// Try to get the entity with complete match first
 			entity = EntitiesMngr.getEntityByName (entityName, false, true);
 		}
 
-		if (entity == NULL && !keywords.empty())
+		if (entity == nullptr && !keywords.empty())
 		{
 			entity = EntitiesMngr.getEntityByKeywords(keywords, true);
 		}
 
-		if (entity == NULL)
+		if (entity == nullptr)
 		{
 			// Get the entity with a partial match using 'starts with' search
 			entity = EntitiesMngr.getEntityByName(entityName, false, false);
 		}
 
-		if (entity == NULL)
+		if (entity == nullptr)
 		{
 			//Get the entity with a sheetName
 			entity = EntitiesMngr.getEntityBySheetName(entityName);
@@ -2822,13 +2822,13 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
-		if (pGC == NULL)
+		if (pGC == nullptr)
 		{
 			nlwarning("gestion_windows not found as a container");
 			return;
 		}
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows:close");
-		if (pIE != NULL) pIE->setActive(false);
+		if (pIE != nullptr) pIE->setActive(false);
 
 		bool switchDesktop = false;
 
@@ -2860,7 +2860,7 @@ public:
 			vector<string> vecStr;
 			vecStr.push_back("tb_setdesktop");
 			vecStr.push_back(Params);
-			CWidgetManager::getInstance()->runProcedure("tb_setdesktop", NULL, vecStr);
+			CWidgetManager::getInstance()->runProcedure("tb_setdesktop", nullptr, vecStr);
 		}
 	}
 private:
@@ -3123,7 +3123,7 @@ public:
 
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
-		if (Driver == NULL) return;
+		if (Driver == nullptr) return;
 
 		VideoModes.clear();
 		vector<string> stringModeList, stringFreqList;
@@ -3164,7 +3164,7 @@ public:
 		{
 			pBut->setPushed(!ClientCfg.Windowed);
 		}
-		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen",NULL);
+		CAHManager::getInstance()->runActionHandler("game_config_change_vid_fullscreen", nullptr);
 
 		updateSoundDriverComboUI();
 
@@ -3309,7 +3309,7 @@ class CHandlerGameConfigMode : public IActionHandler
 		if (nVideModeNb == -1 || oldVideoMode == -1) return;
 
 		CDBGroupComboBox *pCB= dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
-		if( pCB == NULL ) return;
+		if( pCB == nullptr) return;
 
 		// Get W, H
 		sint w,h;
@@ -3581,7 +3581,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				string name;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_MODES_COMBO ));
-					if( pCB != NULL )
+					if( pCB != nullptr)
 					{
 						string vidModeStr = pCB->getText(nVideModeNb);
 						string tmp = vidModeStr.substr(0,vidModeStr.find('x')-1);
@@ -3600,7 +3600,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				sint freq = 60;
 				{
 					CDBGroupComboBox *pCB = dynamic_cast<CDBGroupComboBox*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FREQS_COMBO ));
-					if( pCB != NULL )
+					if( pCB != nullptr)
 					{
 						string vidFreqStr = pCB->getText(nVideoFreqNb);
 						fromString(vidFreqStr, freq);
@@ -3611,7 +3611,7 @@ class CHandlerGameConfigApply : public IActionHandler
 				bool bFullscreen = false;
 				{
 					CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( GAME_CONFIG_VIDEO_FULLSCREEN_BUTTON ));
-					if (pBut != NULL)
+					if (pBut != nullptr)
 						bFullscreen = pBut->getPushed();
 				}
 
@@ -3957,7 +3957,7 @@ class CHandlerGameMissionAbandon : public IActionHandler
 		fromString(Params, nMissionNb);
 
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-		if (pNL != NULL) pNL->setValue64(0);
+		if (pNL != nullptr) pNL->setValue64(0);
 
 		sendMsgToServer("JOURNAL:MISSION_ABANDON", nMissionNb);
 	}
@@ -3974,7 +3974,7 @@ class CHandlerGameGroupMissionAbandon : public IActionHandler
 		fromString(Params, nMissionNb);
 
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-		if (pNL != NULL) pNL->setValue64(0);
+		if (pNL != nullptr) pNL->setValue64(0);
 
 		sendMsgToServer("JOURNAL:GROUP_MISSION_ABANDON", nMissionNb);
 	}
@@ -4495,7 +4495,7 @@ public:
 		fromString(sParams, nMissionNb);
 
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_WAKE_BUTTON",false);
-		if (pNL != NULL) pNL->setValue64(0);
+		if (pNL != nullptr) pNL->setValue64(0);
 
 		sendMsgToServer("MISSION:WAKE", nMissionNb);
 	}
@@ -4513,7 +4513,7 @@ public:
 		fromString(sParams, nMissionNb);
 
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_WAKE_BUTTON",false);
-		if (pNL != NULL) pNL->setValue64(0);
+		if (pNL != nullptr) pNL->setValue64(0);
 
 		sendMsgToServer("MISSION:GROUP_WAKE", nMissionNb);
 	}
@@ -4537,7 +4537,7 @@ public:
 		if (UserEntity->selection())
 		{
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
-			if (pSel != NULL)
+			if (pSel != nullptr)
 				UserEntity->moveToTotemBuildingPhrase( UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
@@ -4609,7 +4609,7 @@ REGISTER_ACTION_HANDLER(CHandlerConfigureQuitDialogBox, "configure_quit_dialog_b
 // ----------------------------------------------------------------------------
 static bool isSwimming()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->mode() == MBEHAV::SWIM || UserEntity->mode() == MBEHAV::MOUNT_SWIM);
 	else
 		return false;
@@ -4617,7 +4617,7 @@ static bool isSwimming()
 
 static bool isStunned()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->behaviour() == MBEHAV::STUNNED);
 	else
 		return false;
@@ -4625,7 +4625,7 @@ static bool isStunned()
 
 static bool isDead()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->mode() == MBEHAV::DEATH);
 	else
 		return false;

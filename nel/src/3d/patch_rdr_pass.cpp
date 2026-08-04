@@ -30,9 +30,9 @@ namespace NL3D
 // ***************************************************************************
 CRdrTileId::CRdrTileId()
 {
-	PatchRdrPass= NULL;
-	TileMaterial= NULL;
-	_Next= NULL;
+	PatchRdrPass = nullptr;
+	TileMaterial = nullptr;
+	_Next = nullptr;
 }
 
 
@@ -49,11 +49,11 @@ CPatchRdrPass::CPatchRdrPass()
 void	CPatchRdrPass::clearAllRenderList()
 {
 	_MaxRenderedFaces= 0;
-	_Far0ListRoot= NULL;
-	_Far1ListRoot= NULL;
+	_Far0ListRoot = nullptr;
+	_Far1ListRoot = nullptr;
 	for(uint i=0;i<NL3D_MAX_TILE_PASS; i++)
 	{
-		_TileListRoot[i]= NULL;
+		_TileListRoot[i] = nullptr;
 	}
 }
 

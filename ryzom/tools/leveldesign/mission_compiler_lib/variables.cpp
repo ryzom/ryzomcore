@@ -86,7 +86,7 @@ public:
 		else if (subPart.empty())
 			return _NpcLabel;
 
-		throw EParseException(NULL, toString("var_npc don't have a subpart '%s'", subPart.c_str()).c_str());
+		throw EParseException(nullptr, toString("var_npc don't have a subpart '%s'", subPart.c_str()).c_str());
 	}
 
 	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
@@ -143,7 +143,7 @@ public:
 		if (subPart.empty())
 			return string("\"")+_NpcLabel+"\"";
 
-		throw EParseException(NULL, toString("var_npc_name don't have a subpart '%s'", subPart.c_str()).c_str());
+		throw EParseException(nullptr, toString("var_npc_name don't have a subpart '%s'", subPart.c_str()).c_str());
 	}
 
 	STRING_MANAGER::TParamType getStringManagerType() NL_OVERRIDE
@@ -695,7 +695,7 @@ IVar *IVar::createVar(CMissionData &md, IPrimitive *prim)
 
 	return CFactoryIndirect<IVarFactory, string>::instance().getFactory(*c)->createVar(md, prim);
 
-	return NULL;
+	return nullptr;
 };
 //IVar *IVar::createVar(CMissionData &md, IPrimitive *prim)
 //{

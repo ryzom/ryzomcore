@@ -43,7 +43,7 @@ public:
 	void			setParam (uint32 maxStrings = 50);
 
 	/// Write N last line into a displayer (InfoLog by default)
-	void			write (CLog *log = NULL, bool quiet=true);
+	void			write (CLog *log = nullptr, bool quiet=true);
 	void			write (std::string &str, bool crLf=false);
 
 	const std::deque<std::string>	&lockStrings () { _CanUseStrings = false; return _Strings; }

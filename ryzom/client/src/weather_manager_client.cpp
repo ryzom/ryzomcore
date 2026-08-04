@@ -186,7 +186,7 @@ void CWeatherManagerClient::manualUpdateImpl(uint64 day, float hour, const CWeat
 	updateThunder(day, hour, wc, true, scaledWeatherValue, season);
 
 	// Sound stuff
-	if (SoundMngr != 0)
+	if (SoundMngr != nullptr)
 	{
 
 		const CWeatherSetup *floorSetup, *ceilSetup;
@@ -721,11 +721,11 @@ float CWeatherManagerClient::getThunderThreshold(uint64 thunderCycle, const CWea
 CWeatherContext::CWeatherContext ()
 {
 	H_AUTO_USE(RZ_WeatherManagerClient)
-	if (WeatherFunctionParams == NULL) WeatherFunctionParams = new CWeatherFunctionParamsSheet;
+	if (WeatherFunctionParams == nullptr) WeatherFunctionParams = new CWeatherFunctionParamsSheet;
 	WFP = WeatherFunctionParams;
 	LC = &WorldLightCycle;
-	WF = NULL;
-	GR = NULL;
+	WF = nullptr;
+	GR = nullptr;
 }
 
 // ***************************************************************************

@@ -314,7 +314,7 @@ inline void CTimer::set(NLMISC::TGameCycle time,uint32 variation)
 
 inline void CTimer::set(NLMISC::TGameCycle time,CTimerEvent* eventObject)
 {
-	if (_Event!=NULL)
+	if (_Event != nullptr)
 		_Event->clear();
 	_Event= eventObject;
 	eventObject->set(this,time);
@@ -322,7 +322,7 @@ inline void CTimer::set(NLMISC::TGameCycle time,CTimerEvent* eventObject)
 
 inline void CTimer::set(NLMISC::TGameCycle time,CTimerEvent* eventObject,uint32 variation)
 {
-	if (_Event!=NULL)
+	if (_Event != nullptr)
 		_Event->clear();
 	_Event= eventObject;
 	eventObject->set(this,time,variation);
@@ -350,15 +350,15 @@ inline void CTimer::setRemaining(NLMISC::TGameCycle time,CTimerEvent* eventObjec
 
 inline void CTimer::reset()
 {
-	if (_Event==NULL)
+	if (_Event == nullptr)
 		return;
 	_Event->clear();
-	_Event=NULL;
+	_Event = nullptr;
 }
 
 inline bool CTimer::isActive() const
 {
-	return (_Event!=NULL) && _Event->isActive();
+	return (_Event != nullptr) && _Event->isActive();
 }
 
 inline NLMISC::TGameCycle CTimer::getTime() const
@@ -386,7 +386,7 @@ inline CTimerEvent* CTimer::getEvent()
 
 inline CTimerEvent::CTimerEvent()
 {
-	_Owner	= NULL;
+	_Owner	= nullptr;
 	_Time	= 0;
 }
 
@@ -413,7 +413,7 @@ inline void CTimerEvent::set(CTimer* owner,NLMISC::TGameCycle time,uint32 variat
 	_Owner	= owner;
 
 	CTimerManager* mgr=CTimerManager::getInstance();
-	CTimerManager::TEventVector *best=NULL;
+	CTimerManager::TEventVector *best = nullptr;
 	uint32 bestLength=~0u;
 
 	for (uint32 i=0;i<variation;++i)
@@ -443,12 +443,12 @@ inline CTimer* CTimerEvent::getOwner() const
 
 inline bool CTimerEvent::isActive() const
 {
-	return _Owner!=NULL;
+	return _Owner != nullptr;
 }
 
 inline void CTimerEvent::clear()
 {
-	_Owner=NULL;
+	_Owner = nullptr;
 }
 
 
@@ -477,8 +477,8 @@ inline CTimerManager::CTimerManager()
 
 inline CTimerManager* CTimerManager::getInstance()
 {
-	static CTimerManager* instance= NULL;
-	if (instance==NULL)
+	static CTimerManager* instance = nullptr;
+	if (instance == nullptr)
 	{
 		instance=new CTimerManager;
 	}

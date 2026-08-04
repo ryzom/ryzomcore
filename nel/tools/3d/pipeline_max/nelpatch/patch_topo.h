@@ -158,7 +158,7 @@ bool topoTurnPatches(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
                           const std::set<uint> &patches, std::string &err,
-                          SPmVertMapper *mapper = NULL, const SPatchMesh *evalPm = NULL);
+                          SPmVertMapper *mapper = nullptr, const SPatchMesh *evalPm = nullptr);
 
 /**
  * Edge-driven subdivide (plan mA4): split the listed edges (indices into pm.Edges) at
@@ -214,7 +214,7 @@ bool topoSubdivideEdges(SPatchMesh &pm, SRPatchMesh &rp,
 bool topoWeldVerts(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                    const std::set<uint> &verts, float threshold,
                    STopoRemap &remap, std::string &err,
-                   const SPatchMesh *evalPm = NULL);
+                   const SPatchMesh *evalPm = nullptr);
 
 /**
  * Directed (target) weld: `srcVert` merges into `dstVert`, which keeps its position and
@@ -244,7 +244,7 @@ bool topoWeldVertInto(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
  */
 bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
                   const std::set<uint> &edges, std::string &err,
-                  const SPatchMesh *evalPm = NULL);
+                  const SPatchMesh *evalPm = nullptr);
 
 /**
  * Detach the listed patches as their own ISLAND inside the same mesh
@@ -264,8 +264,8 @@ bool topoAddQuads(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
                         const std::set<uint> &sel, std::string &err,
-                        const SPatchMesh *evalPm = NULL,
-                        STopoDetachBoundary *boundaryOut = NULL);
+                        const SPatchMesh *evalPm = nullptr,
+                        STopoDetachBoundary *boundaryOut = nullptr);
 
 /**
  * Detach WITH COPY (plan mA7): clone the selection's patches and every element they
@@ -312,7 +312,7 @@ bool topoCopyElements(SPatchMesh &pm, SRPatchMesh &rp,
  */
 bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                         const std::set<uint> &sel, float dx, float dy, float dz,
-                        std::string &err, const SPatchMesh *evalPm = NULL,
+                        std::string &err, const SPatchMesh *evalPm = nullptr,
                         float outline = 0.f);
 
 /**

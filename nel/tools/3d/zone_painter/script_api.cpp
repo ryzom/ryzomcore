@@ -147,7 +147,7 @@ using namespace NLGUI;
 
 namespace ZPSCRIPT {
 
-static SScriptHost *s_Host = NULL;
+static SScriptHost *s_Host = nullptr;
 static bool s_Registered = false;
 static bool s_Executing = false;
 static bool s_Recording = false;
@@ -204,7 +204,7 @@ void setRecording(bool on)
 	}
 	if (s_Host && s_Host->refreshBridge)
 		s_Host->refreshBridge();
-	ZPUI::SPaintUIBridge *b = s_Host ? s_Host->bridge : NULL;
+	ZPUI::SPaintUIBridge *b = s_Host ? s_Host->bridge : nullptr;
 	if (b && b->HaveCore)
 	{
 		std::string pre;
@@ -840,7 +840,7 @@ static int lPumpUI(CLuaState &ls) // painter.pumpUI() -> true, or false when can
 // ---------------------------------------------------------------------------------------------
 // Viewer state (bridge-backed; graceful headless)
 
-static ZPUI::SPaintUIBridge *bridge() { return s_Host ? s_Host->bridge : NULL; }
+static ZPUI::SPaintUIBridge *bridge() { return s_Host ? s_Host->bridge : nullptr; }
 
 static int lSetMode(CLuaState &ls) // painter.setMode(0..4) tile/color/displace/prop/patch
 {

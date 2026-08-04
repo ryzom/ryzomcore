@@ -44,8 +44,8 @@ void CSoundAnimMarker::play(UAudioMixer* mixer, NL3D::CCluster *cluster, CSoundC
 
 	for (; first != last; ++first)
 	{
-		USource* source = mixer->createSource((*first), true, NULL, NULL, cluster, &context);
-		if (source != NULL)
+		USource* source = mixer->createSource((*first), true, nullptr, nullptr, cluster, &context);
+		if (source != nullptr)
 		{
 			source->setRelativeGain(context.RelativeGain);
 			source->setPos(context.Position);

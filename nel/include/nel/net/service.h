@@ -228,7 +228,7 @@ public:
 	static IService					*getInstance ();
 
 	/// Returns true if the service singleton has been initialized
-	static bool						isServiceInitialized() { return _Instance != NULL; }
+	static bool						isServiceInitialized() { return _Instance != nullptr; }
 
 	/// Returns the current service short name (ie: TS)
 	const std::string				&getServiceShortName () const { return _ShortName; }
@@ -580,7 +580,7 @@ public:
 
 inline IService *IService::getInstance()
 {
-	if (_Instance == NULL)
+	if (_Instance == nullptr)
 	{
 		/* the nel context MUST be initialised */
 		nlassertex(NLMISC::INelContext::isContextInitialised(), ("You are trying to access a safe singleton without having initialized a NeL context. The simplest correction is to add 'NLMISC::CApplicationContext myApplicationContext;' at the very beginning of your application."));

@@ -43,7 +43,7 @@ CBackgroundSource::~CBackgroundSource()
 
 TSoundId CBackgroundSource::getSound()
 {
-	return NULL;
+	return nullptr;
 }
 
 void CBackgroundSource::setGain( float gain )
@@ -53,7 +53,7 @@ void CBackgroundSource::setGain( float gain )
 	std::vector<TSubSource>::iterator first(_Sources.begin()), last(_Sources.end());
 	for (; first != last; ++first)
 	{
-		if (first->Source != 0)
+		if (first->Source != nullptr)
 		{
 			first->Source->setGain(first->Source->getSound()->getGain() * gain);
 			first->Source->setRelativeGain(_Gain);
@@ -67,7 +67,7 @@ void CBackgroundSource::setRelativeGain( float gain )
 	std::vector<TSubSource>::iterator first(_Sources.begin()), last(_Sources.end());
 	for (; first != last; ++first)
 	{
-		if (first->Source != 0)
+		if (first->Source != nullptr)
 			first->Source->setRelativeGain(_Gain);
 	}
 }
@@ -79,7 +79,7 @@ void CBackgroundSource::setPos( const NLMISC::CVector& pos )
 	std::vector<TSubSource>::iterator first(_Sources.begin()), last(_Sources.end());
 	for (; first != last; ++first)
 	{
-		if (first->Source != 0)
+		if (first->Source != nullptr)
 			first->Source->setPos(pos);
 	}
 }
@@ -91,7 +91,7 @@ void CBackgroundSource::setVelocity( const NLMISC::CVector& vel )
 	std::vector<TSubSource>::iterator first(_Sources.begin()), last(_Sources.end());
 	for (; first != last; ++first)
 	{
-		if (first->Source != 0)
+		if (first->Source != nullptr)
 			first->Source->setVelocity(vel);
 	}
 }
@@ -102,7 +102,7 @@ void CBackgroundSource::setDirection( const NLMISC::CVector& dir )
 	std::vector<TSubSource>::iterator first(_Sources.begin()), last(_Sources.end());
 	for (; first != last; ++first)
 	{
-		if (first->Source != 0)
+		if (first->Source != nullptr)
 			first->Source->setDirection(dir);
 	}
 }
@@ -122,8 +122,8 @@ void CBackgroundSource::play()
 	for (; first != last; ++first)
 	{
 		TSubSource subSource;
-		subSource.Source = mixer->createSource(first->SoundName, false, 0, 0, _Cluster, NULL, _GroupController);
-		if (subSource.Source != NULL)
+		subSource.Source = mixer->createSource(first->SoundName, false, nullptr, nullptr, _Cluster, nullptr, _GroupController);
+		if (subSource.Source != nullptr)
 			subSource.Source->setPriority(_Priority);
 		subSource.Filter = first->Filter;
 		subSource.Status = SUB_STATUS_STOP;
@@ -142,7 +142,7 @@ void CBackgroundSource::stop()
 		while (!_Sources.empty())
 		{
 			TSubSource &subSource = _Sources.back();
-			if (subSource.Source != NULL)
+			if (subSource.Source != nullptr)
 			{
 				delete subSource.Source;
 			}
@@ -162,7 +162,7 @@ void CBackgroundSource::updateFilterValues(const float *filterValues)
 	for (; first != last; ++first)
 	{
 		TSubSource &ss = *first;
-		if (ss.Source != 0)
+		if (ss.Source != nullptr)
 		{
 			float gain = 1.0f;
 			for (uint i=0; i<UAudioMixer::TBackgroundFlags::NB_BACKGROUND_FLAGS; ++i)

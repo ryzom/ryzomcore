@@ -82,7 +82,7 @@ protected:
 	/** Constructor
 	 * \param sock To provide an external socket. Set it to NULL to create it internally.
 	 */
-	CBufSock( CTcpSock *sock=NULL );
+	CBufSock( CTcpSock *sock = nullptr);
 
 	///@name Sending data
 	//@{
@@ -107,7 +107,7 @@ protected:
 	 * \returns False if an error has occurred (e.g. the remote host is disconnected).
 	 * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
 	 */
-	bool	flush( uint *nbBytesRemaining=NULL );
+	bool	flush( uint *nbBytesRemaining = nullptr);
 
 	//@}
 
@@ -281,7 +281,7 @@ protected:
      * \param sock To provide an external socket. Set it to NULL to create it internally.
      * \maxExpectedBlockSize Default value: receiving limited to 10 M per block)
      */
-	CNonBlockingBufSock( CTcpSock *sock=NULL, uint32 maxExpectedBlockSize=10485760 );
+	CNonBlockingBufSock( CTcpSock *sock = nullptr, uint32 maxExpectedBlockSize=10485760 );
 
 	/** Call this method after connecting (for a client connection) to set the non-blocking mode.
 	 * For a server connection, call it as soon as the object is constructed

@@ -302,7 +302,7 @@ void buildBaseMeshInterface(CMeshBase::CMeshBaseBuild &buildMesh, SMaxMeshBaseBu
 	// buildBaseMeshInterface pushes factor 0.0 + the target node's name per channel).
 	{
 		std::vector<CSceneClass *> mods;
-		baseObjectOf(node, &mods, NULL);
+		baseObjectOf(node, &mods, nullptr);
 		for (uint mi = 0; mi < mods.size(); ++mi)
 		{
 			if (mods[mi]->classDesc()->classId() != CLASSID_MORPHER) continue;
@@ -559,7 +559,7 @@ void buildMeshInterface(const SEvalMesh &mesh, CMesh::CMeshBuild &buildMesh,
 	buildMesh.InterfaceLinks.clear();
 
 	// Vertex program
-	buildMesh.MeshVertexProgram = NULL;
+	buildMesh.MeshVertexProgram = nullptr;
 	// TODO: CMeshVPWindTree from the VPWT appdata; per-pixel-lighting VP from material shaders.
 }
 
@@ -591,7 +591,7 @@ void buildBSList(INode &node, SNodeTMCache &tmCache,
                  std::vector<NL3D::CMesh::CMeshBuild *> &bsList)
 {
 	static const NLMISC::CClassId CLASSID_MORPHER(0x17bb6854, 0xa5cba2a3);
-	CReferenceMaker *morph = NULL;
+	CReferenceMaker *morph = nullptr;
 	for (uint i = 0; i < mods.size() && !morph; ++i)
 		if (mods[i]->classDesc()->classId() == CLASSID_MORPHER)
 			morph = dynamic_cast<CReferenceMaker *>(mods[i]);
@@ -610,7 +610,7 @@ void buildBSList(INode &node, SNodeTMCache &tmCache,
 		if (!target)
 			continue;
 		SEvalMesh tmesh;
-		if (!MESHEVAL::evalNodeMesh(*target, tmesh, NULL))
+		if (!MESHEVAL::evalNodeMesh(*target, tmesh, nullptr))
 		{
 			fprintf(stderr, "WARNING: morph target '%s' of '%s' failed mesh eval; channel dropped\n",
 			        nodeName(*target).c_str(), nodeName(node).c_str());

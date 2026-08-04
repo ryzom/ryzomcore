@@ -302,14 +302,14 @@ const CParamBlock2::SParam *CParamBlock2::findParam(uint16 id) const
 {
 	for (std::vector<SParam>::const_iterator it = m_Params.begin(); it != m_Params.end(); ++it)
 		if (it->Id == id) return &(*it);
-	return NULL;
+	return nullptr;
 }
 
 CParamBlock2::SParam *CParamBlock2::findParamMutable(uint16 id)
 {
 	for (std::vector<SParam>::iterator it = m_Params.begin(); it != m_Params.end(); ++it)
 		if (it->Id == id) return &(*it);
-	return NULL;
+	return nullptr;
 }
 
 bool CParamBlock2::getFloat(uint16 id, float &out) const
@@ -356,7 +356,7 @@ bool CParamBlock2::getString(uint16 id, std::string &out) const
 
 CReferenceMaker *CParamBlock2::refValue(const SParam &param) const
 {
-	if (!param.RefBacked || param.RefSlot < 0) return NULL;
+	if (!param.RefBacked || param.RefSlot < 0) return nullptr;
 	return getReference((uint)param.RefSlot);
 }
 
@@ -386,7 +386,7 @@ bool CParamBlock2::getColorAt0(uint16 id, float out[3]) const
 CReferenceMaker *CParamBlock2::refValue(uint16 id) const
 {
 	const SParam *p = findParam(id);
-	if (!p) return NULL;
+	if (!p) return nullptr;
 	return refValue(*p);
 }
 

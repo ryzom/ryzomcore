@@ -93,7 +93,8 @@ class CParticleSystemProcess : public NLMISC::IStreamable
 		/// \name Object
 		/// @{
 			/// ctor
-			CParticleSystemProcess() : _Owner(NULL), _MatrixMode(PSFXWorldMatrix), _Index(0) {}
+			CParticleSystemProcess() : _Owner(nullptr)
+	        , _MatrixMode(PSFXWorldMatrix), _Index(0) {}
 
 			/// dtor
 			virtual ~CParticleSystemProcess() NL_OVERRIDE  {}

@@ -65,11 +65,14 @@ CBufServer::CBufServer( TThreadStategy strategy,
 	_ThreadStrategy( strategy ),
 	_MaxThreads( max_threads ),
 	_MaxSocketsPerThread( max_sockets_per_thread ),
-	_ListenTask( NULL ),
-	_ListenThread( NULL ),
+	_ListenTask(nullptr)
+    ,
+	_ListenThread(nullptr)
+    ,
 	_ThreadPool("CBufServer::_ThreadPool"),
 	_ConnectionCallback(),
-	_ConnectionCbArg( NULL ),
+	_ConnectionCbArg(nullptr)
+    ,
 	_BytesPushedOut( 0 ),
 	_BytesPoppedIn( 0 ),
 	_PrevBytesPoppedIn( 0 ),
@@ -415,7 +418,7 @@ bool CBufServer::dataAvailable()
 					sockid->setConnectedState( false );
 
 					// Call callback if needed
-					if ( disconnectionCallback() != NULL )
+					if ( disconnectionCallback() != nullptr)
 					{
 						disconnectionCallback()( sockid, argOfDisconnectionCallback() );
 					}
@@ -441,7 +444,7 @@ bool CBufServer::dataAvailable()
 					sockid->setConnectedState( true );
 
 					// Call callback if needed
-					if ( connectionCallback() != NULL )
+					if ( connectionCallback() != nullptr)
 					{
 						connectionCallback()( sockid, argOfConnectionCallback() );
 					}
@@ -491,7 +494,7 @@ void	CBufServer::sleepUntilDataAvailable( uint usecMax )
 		FD_SET( _DataAvailablePipeHandle[PipeRead], &readers );
 		tv.tv_sec = 0;
 		tv.tv_usec = usecMax;
-		int res = ::select( _DataAvailablePipeHandle[PipeRead]+1, &readers, NULL, NULL, &tv );
+		int res = ::select( _DataAvailablePipeHandle[PipeRead]+1, &readers, nullptr, nullptr, &tv );
 		if ( res == -1 )
 			nlerror( "LNETL1: Select failed in sleepUntilDataAvailable (code %u)", CSock::getLastError() );
 	}
@@ -769,7 +772,7 @@ void CListenTask::run()
 			FD_ZERO( &readers );
 			FD_SET( _ListenSock.descriptor(), &readers );
 			FD_SET( _WakeUpPipeHandle[PipeRead], &readers );
-			int res = ::select( descmax+1, &readers, NULL, NULL, NULL ); /// Wait indefinitely
+			int res = ::select( descmax+1, &readers, nullptr, nullptr, nullptr); /// Wait indefinitely
 
 			switch ( res )
 			{
@@ -807,7 +810,7 @@ void CListenTask::run()
 #endif
 			LNETL1_DEBUG( "LNETL1: Accepting an incoming connection..." );
 			CTcpSock *newSock = _ListenSock.accept();
-			if (newSock != NULL)
+			if (newSock != nullptr)
 			{
 				CServerBufSock *bufsock = new CServerBufSock( newSock );
 				LNETL1_DEBUG( "LNETL1: New connection : %s", bufsock->asString().c_str() );
@@ -1066,7 +1069,7 @@ void CServerReceiveTask::run()
 #elif defined NL_OS_UNIX
 
 		// Call select
-		int res = ::select( descmax+1, &readers, NULL, NULL, NULL );
+		int res = ::select( descmax+1, &readers, nullptr, nullptr, nullptr);
 
 #endif // NL_OS_WINDOWS
 

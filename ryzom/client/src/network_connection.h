@@ -317,7 +317,7 @@ public:
 	/**
 	 * Sets the callback called when	a generic impulse comes
 	 */
-	void			setImpulseCallback(TImpulseCallback callback, void *argument = NULL);
+	void			setImpulseCallback(TImpulseCallback callback, void *argument = nullptr);
 
 	//@}
 

@@ -118,7 +118,7 @@ void	CTextureBlend::serial(NLMISC::IStream &f)
 	ITexture::serial(f);
 	for (uint k = 0; k < 2; ++k)
 	{
-		ITexture *tex = NULL;
+		ITexture *tex = nullptr;
 		if (f.isReading())
 		{
 			f.serialPolyPtr(tex);

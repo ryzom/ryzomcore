@@ -72,10 +72,10 @@ extern URetrieverBank	*RB;
 extern class CIGCallback		*IGCallbacks;
 extern NLLIGO::CLigoConfig LigoConfig;
 
-UMoveContainer			*PACSHibernated = NULL;
-UGlobalRetriever		*GRHibernated = NULL;
-URetrieverBank			*RBHibernated = NULL;
-CIGCallback				*IGCallbacksHibernated = NULL;
+UMoveContainer			*PACSHibernated = nullptr;
+UGlobalRetriever		*GRHibernated = nullptr;
+URetrieverBank			*RBHibernated = nullptr;
+CIGCallback				*IGCallbacksHibernated = nullptr;
 
 ////////////
 // GLOBAL //
@@ -93,8 +93,8 @@ H_AUTO_DECL ( RZ_Client_Continent_Mngr_Update_Streamable )
 //-----------------------------------------------
 CContinentManager::CContinentManager()
 {
-	_Current = 0;
-	_Hibernated = NULL;
+	_Current = nullptr;
+	_Hibernated = nullptr;
 }// CContinentManager //
 
 
@@ -110,7 +110,7 @@ void CContinentManager::reset()
 		_Current->unselect();
 
 	// Shared data must be NULL now
-	_Current = NULL;
+	_Current = nullptr;
 	nlassert (GR == NULL);
 	nlassert (RB == NULL);
 	nlassert (PACS == NULL);
@@ -138,8 +138,8 @@ void CContinentManager::reset()
 		delete it->second;
 	}
 	_Continents.clear();
-	_Current = NULL;
-	_Hibernated = NULL;
+	_Current = nullptr;
+	_Hibernated = nullptr;
 }
 
 
@@ -302,7 +302,7 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 				_Current->unselect();
 
 				// Shared data must be NULL now
-				_Current = NULL;
+				_Current = nullptr;
 				nlassert (GR == NULL);
 				nlassert (RB == NULL);
 				nlassert (PACS == NULL);
@@ -373,10 +373,10 @@ void CContinentManager::select(const string &name, const CVectorD &pos, NLMISC::
 		{
 			CInterfaceManager *pIM = CInterfaceManager::getInstance();
 			CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-			if (pMap != NULL)
+			if (pMap != nullptr)
 				pMap->setMap(pWS->Maps[i].Name);
 			pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
-			if (pMap != NULL)
+			if (pMap != nullptr)
 				pMap->setMap(pWS->Maps[i].Name);
 			break;
 		}
@@ -444,7 +444,7 @@ void CContinentManager::select(const CVectorD &pos, NLMISC::IProgressCallback &p
 
 bool CContinentManager::isLoadingforced(const NLMISC::CVector &playerPos) const
 {
-	if(_Current == 0)
+	if(_Current == nullptr)
 		return false;
 
 	return _Current->isLoadingforced(playerPos);
@@ -489,7 +489,7 @@ CContinent *CContinentManager::get(const std::string &contName)
 	TContinents::iterator it = _Continents.find(contName);
 	if (it != _Continents.end())
 		return it->second;
-	return NULL;
+	return nullptr;
 }
 
 void CContinentManager::writeTo(xmlNodePtr node) const
@@ -502,7 +502,7 @@ void CContinentManager::writeTo(xmlNodePtr node) const
 	for(TContinents::const_iterator it = _Continents.begin(); it != _Continents.end(); ++it)
 	{
 		std::string name = it->first;
-		xmlNodePtr contNode = xmlNewChild(node, NULL, (const xmlChar*)"landmarks", NULL);
+		xmlNodePtr contNode = xmlNewChild(node, nullptr, (const xmlChar*)"landmarks", nullptr);
 		xmlSetProp(contNode, (const xmlChar*)"continent", (const xmlChar*)name.c_str());
 		xmlSetProp(contNode, (const xmlChar*)"type", (const xmlChar*)"user");
 
@@ -512,7 +512,7 @@ void CContinentManager::writeTo(xmlNodePtr node) const
 			{
 				const CUserLandMark& lm = it->second->UserLandMarks[i];
 
-				xmlNodePtr lmNode = xmlNewChild(contNode, NULL, (const xmlChar*)"landmark", NULL);
+				xmlNodePtr lmNode = xmlNewChild(contNode, nullptr, (const xmlChar*)"landmark", nullptr);
 				xmlSetProp(lmNode, (const xmlChar*)"type", (const xmlChar*)toString("%d", (uint32)lm.Type).c_str());
 				xmlSetProp(lmNode, (const xmlChar*)"x", (const xmlChar*)toString("%.2f", lm.Pos.x).c_str());
 				xmlSetProp(lmNode, (const xmlChar*)"y", (const xmlChar*)toString("%.2f", lm.Pos.y).c_str());

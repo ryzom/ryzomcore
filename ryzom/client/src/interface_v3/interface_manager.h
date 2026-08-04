@@ -252,8 +252,8 @@ public:
 		virtual bool cbIDStringReceived(std::string &inOut) = 0; // called when string or id is received (return true if valid the change)
 	};
 
-	void addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
-	void addServerID (const std::string &sTarget, uint32 id, IStringProcess *cb = NULL);
+	void addServerString (const std::string &sTarget, uint32 id, IStringProcess *cb = nullptr);
+	void addServerID (const std::string &sTarget, uint32 id, IStringProcess *cb = nullptr);
 	void processServerIDString();
 
 	/// Control specific
@@ -494,8 +494,8 @@ private:
 			bool			InsertedInUpdateList;
 			CNode()
 			{
-				ServerNode= NULL;
-				LocalNode= NULL;
+				ServerNode = nullptr;
+				LocalNode = nullptr;
 				InsertedInUpdateList= false;
 			}
 		};

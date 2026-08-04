@@ -186,10 +186,10 @@ public:
 
 protected:
 	/// Constructor with IPv4 address, port=0
-	CInetAddress(const in_addr *ip, const char *hostname = 0);
+	CInetAddress(const in_addr *ip, const char *hostname = nullptr);
 
 	/// Constructor with IPv6 address, port=0
-	CInetAddress(const in6_addr *ip, const char *hostname = 0);
+	CInetAddress(const in6_addr *ip, const char *hostname = nullptr);
 
 private:
 	// Called in all constructors. Calls CBaseSocket::init().

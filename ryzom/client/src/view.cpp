@@ -76,7 +76,7 @@ CView::CView()
 	_MaxCameraHeight = 2.2f;
 	_MinCameraHeight = 1.0f;
 	_CollisionCameraDist = FLT_MAX;
-	_ThirPersonClusterSystem= NULL;
+	_ThirPersonClusterSystem = nullptr;
 	_ForceFirstPersonView= false;
 	// For 3rd person camera collision
 	_CameraCollisionDecal= 0.1f;
@@ -410,7 +410,7 @@ void CView::updateCameraCollision()
 		NL3D::UInstanceGroup *pPlayerClusterSystem = getCluster(gPos);
 
 		// For "matis serre bug", suppose the player is "inside" if walk on a cluster system
-		CollisionManager->setPlayerInside(pPlayerClusterSystem!=NULL);
+		CollisionManager->setPlayerInside(pPlayerClusterSystem != nullptr);
 
 		// **** Compute the camera collision ray
 		// get the camera path

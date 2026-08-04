@@ -43,7 +43,7 @@ NLPACS::URetrieverBank *NLPACS::URetrieverBank::createRetrieverBank (const char 
 		return static_cast<URetrieverBank *>(bank);
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 

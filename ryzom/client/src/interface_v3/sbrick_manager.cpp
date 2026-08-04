@@ -33,7 +33,7 @@ using namespace NLMISC;
 using namespace NLGEORGES;
 
 
-CSBrickManager* CSBrickManager::_Instance = NULL;
+CSBrickManager* CSBrickManager::_Instance = nullptr;
 
 // ***************************************************************************
 void CSBrickManager::releaseInstance()
@@ -41,7 +41,7 @@ void CSBrickManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -88,7 +88,7 @@ void CSBrickManager::init()
 		if (brickSheet->BrickFamily >= (sint32)_NbFamily)
 		{
 			_SheetsByFamilies.resize(brickSheet->BrickFamily + 1);
-			_FamiliesBits.resize(brickSheet->BrickFamily + 1, 0);
+			_FamiliesBits.resize(brickSheet->BrickFamily + 1, nullptr);
 			_NbBricksPerFamily.resize(brickSheet->BrickFamily + 1, 0);
 
 			_NbFamily = brickSheet->BrickFamily + 1;
@@ -161,7 +161,7 @@ void CSBrickManager::uninitInGame()
 	// remove shortcuts to the node
 	for(uint i=0;i<_FamiliesBits.size();i++)
 	{
-		_FamiliesBits[i] = NULL;
+		_FamiliesBits[i] = nullptr;
 	}
 
 	// remove branch observer on brick family
@@ -200,7 +200,7 @@ CCDBNodeLeaf*	CSBrickManager::getKnownBrickBitFieldDB(uint family) const
 {
 	if (family < _NbFamily && _FamiliesBits[family])
 		return _FamiliesBits[family];
-	return NULL;
+	return nullptr;
 }
 
 

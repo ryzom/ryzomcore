@@ -227,17 +227,47 @@ struct SSessionBoardBridge
 	const std::vector<bool> *FootprintMask;
 
 	SSessionBoardBridge()
-		: World(NULL), getCellState(NULL), openZone(NULL), closeZone(NULL),
-		  saveZone(NULL), toggleEditable(NULL), isDirty(NULL), isOpen(NULL), isEditable(NULL),
-		  scratchPlace(NULL), scratchRotate(NULL), scratchMirror(NULL), scratchRemove(NULL),
-		  scratchGetInstance(NULL), scratchGetInstanceOrigin(NULL),
-		  scratchPlaceContext(NULL), scratchRemoveContext(NULL), scratchGetContext(NULL),
-		  scratchOpenEditable(NULL), scratchGetEditableAt(NULL), scratchContextToEditable(NULL),
-		  scratchPlaceInstanceOf(NULL), scratchOpenFileCount(NULL), scratchGetInstanceSource(NULL),
-		  scratchGetHintAt(NULL), scratchHintNames(NULL),
-		  scratchRotateContext(NULL), scratchMirrorContext(NULL), scratchGetContextTransform(NULL),
-		  scratchDragDrop(NULL),
-		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(NULL)
+		: World(nullptr)
+	    , getCellState(nullptr)
+	    , openZone(nullptr)
+	    , closeZone(nullptr)
+	    ,
+		  saveZone(nullptr)
+	    , toggleEditable(nullptr)
+	    , isDirty(nullptr)
+	    , isOpen(nullptr)
+	    , isEditable(nullptr)
+	    ,
+		  scratchPlace(nullptr)
+	    , scratchRotate(nullptr)
+	    , scratchMirror(nullptr)
+	    , scratchRemove(nullptr)
+	    ,
+		  scratchGetInstance(nullptr)
+	    , scratchGetInstanceOrigin(nullptr)
+	    ,
+		  scratchPlaceContext(nullptr)
+	    , scratchRemoveContext(nullptr)
+	    , scratchGetContext(nullptr)
+	    ,
+		  scratchOpenEditable(nullptr)
+	    , scratchGetEditableAt(nullptr)
+	    , scratchContextToEditable(nullptr)
+	    ,
+		  scratchPlaceInstanceOf(nullptr)
+	    , scratchOpenFileCount(nullptr)
+	    , scratchGetInstanceSource(nullptr)
+	    ,
+		  scratchGetHintAt(nullptr)
+	    , scratchHintNames(nullptr)
+	    ,
+		  scratchRotateContext(nullptr)
+	    , scratchMirrorContext(nullptr)
+	    , scratchGetContextTransform(nullptr)
+	    ,
+		  scratchDragDrop(nullptr)
+	    ,
+		  FootprintCellsW(1), FootprintCellsH(1), FootprintMask(nullptr)
 	{
 	}
 };

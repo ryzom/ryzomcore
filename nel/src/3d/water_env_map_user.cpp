@@ -68,7 +68,7 @@ void CWaterEnvMapRenderHelper::render(TFace face, TGlobalAnimationTime time, UDr
 // ***********************************************************************************
 CWaterEnvMapRenderFromUScene::CWaterEnvMapRenderFromUScene()
 {
-	_Scene = NULL;
+	_Scene = nullptr;
 	_ZNear = 0.1f;
 	_ZFar = 1000.f;
 	_RenderPart = UScene::RenderAll;

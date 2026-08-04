@@ -49,7 +49,7 @@ IStep::IStep(CMissionData &md, NLLIGO::IPrimitive *prim)
 	EndOfBranch(false),
 	JumpPoint(false)
 {
-	if (prim == NULL)
+	if (prim == nullptr)
 		return;
 
 	prim->getPropertyByName("class", _StepType);
@@ -140,7 +140,7 @@ void IStep::fillStepJump(CMissionData &md, std::set<TJumpInfo> &jumpPoints)
 	fillJump(md, jumpPoints);
 
 	for (i = 0; i < _SubSteps.size(); ++i)
-		if (_SubSteps[i] != NULL)
+		if (_SubSteps[i] != nullptr)
 			_SubSteps[i]->fillStepJump(md, jumpPoints);
 }
 
@@ -710,14 +710,14 @@ REGISTER_STEP_INDIRECT(CStepPlayerReconnect, "step_player_reconnect");
 static std::string *getJumpTarget(IPrimitive *child)
 {
 	if(!child)
-		return NULL;
+		return nullptr;
 
 	// default: jump to the node
-	string *s= NULL;
+	string *s = nullptr;
 	child->getPropertyByName("name", s);
 
 	// if the node is a jump itself
-	string *className= NULL;
+	string *className = nullptr;
 	child->getPropertyByName("class", className);
 	if (className && *className == "jump_to")
 	{
@@ -743,7 +743,7 @@ public:
 		temp = md.getPropertyArray(prim, "talk_to_menu", false, false);
 //		_TalkToMenu.initPhrase(md, prim, temp);
 
-		_TalkToObjective = NULL;
+		_TalkToObjective = nullptr;
 		CUniquePtr<CStepDynChatTalkTo> talkToObjective; // next calls could throw exceptions, so take care...
 		if (!temp.empty())
 		{
@@ -823,7 +823,7 @@ public:
 
 		// if there's a talk_to menu, add it
 //		if (!_TalkToMenu.isEmpty())
-		if (_TalkToObjective != NULL)
+		if (_TalkToObjective != nullptr)
 		{			
 			ret += _TalkToObjective->genCode(md);
 //			ret += "talk_to : "+_BotName;	
@@ -855,7 +855,7 @@ public:
 		string ret; /* = CStepObjective::genPhrase();*/
 
 //		if (!_TalkToMenu.isEmpty())
-		if (_TalkToObjective != NULL)
+		if (_TalkToObjective != nullptr)
 		{			
 			ret += _TalkToObjective->genPhrase();
 //			ret += _TalkToMenu.genPhrase();
@@ -992,9 +992,9 @@ CStepIf::CStepIf(CMissionData &md, IPrimitive *prim) : IStep(md, prim)
 	IPrimitive *ok = const_cast<IPrimitive *>(prim->getPrimitive("result_yes"));
 	//prim->getChild(ok, 1);
 	
-	if (notOk == NULL)
+	if (notOk == nullptr)
 		throw EParseException(prim, "Can't find 'not ok' step branch");
-	if (ok == NULL)
+	if (ok == nullptr)
 		throw EParseException(prim, "Can't find 'ok' step branch");
 
 	string name;

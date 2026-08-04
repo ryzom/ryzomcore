@@ -62,11 +62,11 @@ CAsyncFileManager3D::CAsyncFileManager3D()
 
 void CAsyncFileManager3D::terminate ()
 {
-	if (_Instance != NULL)
+	if (_Instance != nullptr)
 	{
 		CAsyncFileManager3D *afm = _Instance;
 		INelContext::getInstance().releaseSingletonPointer("CAsyncFileManager3D", _Instance);
-		_Instance = NULL;
+		_Instance = nullptr;
 		delete afm;
 	}
 }
@@ -97,7 +97,7 @@ private:
 	bool callback(const NLMISC::IRunnable *prunnable) const NL_OVERRIDE
 	{
 		const CAsyncFileManager3D::CMeshLoad *pML = dynamic_cast<const CAsyncFileManager3D::CMeshLoad*>(prunnable);
-		if (pML != NULL)
+		if (pML != nullptr)
 		{
 			if (pML->MeshName == _MeshName)
 			{
@@ -155,7 +155,7 @@ private:
 	bool callback(const NLMISC::IRunnable *prunnable) const NL_OVERRIDE
 	{
 		const CAsyncFileManager3D::CTextureLoad *pTL = dynamic_cast<const CAsyncFileManager3D::CTextureLoad*>(prunnable);
-		if (pTL != NULL)
+		if (pTL != nullptr)
 		{
 			if (pTL->TextureFile == _TextureFile)
 			{
@@ -247,7 +247,7 @@ void CAsyncFileManager3D::CMeshLoad::run()
 		meshfile.close ();
 
 		// Is the pointer is invalid return -1
-		if (mesh.getShapePointer() == NULL)
+		if (mesh.getShapePointer() == nullptr)
 		{
 			nlwarning ("Couldn't load '%s'", MeshName.c_str());
 			*_ppShp = (IShape*)-1;
@@ -260,9 +260,9 @@ void CAsyncFileManager3D::CMeshLoad::run()
 		// If the shape is a mesh but the driver is not given or if the shape is not a mesh
 		// then do not try to load the textures
 
-		if ((pMesh == NULL) || ((pMesh != NULL) && (_pDriver == NULL)))
+		if ((pMesh == nullptr) || ((pMesh != nullptr) && (_pDriver == nullptr)))
 		{
-			if (_pDriver == NULL || mesh.getShapePointer() == NULL)
+			if (_pDriver == nullptr || mesh.getShapePointer() == nullptr)
 			{
 				nlwarning ("mesh or driver is NULL for file '%s'", MeshName.c_str());
 			}
@@ -288,7 +288,7 @@ void CAsyncFileManager3D::CMeshLoad::run()
 				pText = rMat.getTexture (uint8(j));
 
 				// Does this texture is a texture file ?
-				if ((pText != NULL) && (pText->supportSharing()))
+				if ((pText != nullptr) && (pText->supportSharing()))
 				{
 					// Set texture slot
 					pText->selectTexture(_SelectedTexture);
@@ -315,10 +315,10 @@ void CAsyncFileManager3D::CMeshLoad::run()
 			if (rMat.getShader() == CMaterial::LightMap)
 			{
 				j = 0; pText = rMat.getLightMap (j);
-				while (pText != NULL)
+				while (pText != nullptr)
 				{
 					// Does this texture is a texture file ?
-					if ((pText != NULL) && (pText->supportSharing()))
+					if ((pText != nullptr) && (pText->supportSharing()))
 					{
 						// Yes -> Does the texture is already present in the driver ?
 						if (!_pDriver->isTextureExist(*pText))

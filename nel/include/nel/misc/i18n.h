@@ -192,11 +192,11 @@ public:
 	 *	This is useful if you want to keep the comments.
 	 *	NB : comments are appended to the comments string.
 	 */
-	static void		skipWhiteSpace		(ucstring::const_iterator &it, ucstring::const_iterator &last, ucstring *storeComments = NULL, bool newLineAsWhiteSpace = true);
+	static void		skipWhiteSpace		(ucstring::const_iterator &it, ucstring::const_iterator &last, ucstring *storeComments = nullptr, bool newLineAsWhiteSpace = true);
 	/// Parse a label
 	static bool		parseLabel			(ucstring::const_iterator &it, ucstring::const_iterator &last, std::string &label);
 	/// Parse a marked string. NB : usually, we use [ and ] as string delimiters in translation files.
-	static bool		parseMarkedString	(ucchar openMark, ucchar closeMark, ucstring::const_iterator &it, ucstring::const_iterator &last, ucstring &result, uint32 *lineCounter = NULL, bool allowNewline = true);
+	static bool		parseMarkedString	(ucchar openMark, ucchar closeMark, ucstring::const_iterator &it, ucstring::const_iterator &last, ucstring &result, uint32 *lineCounter = nullptr, bool allowNewline = true);
 	/** Try to read a given token at current position.
 	 *	The function will first skip any white space then try to read the token
 	 *	If found, the function return true and 'it' is advanced after the matched token,

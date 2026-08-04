@@ -90,7 +90,7 @@ public:
 
 	void *lock();
 	void unlock();
-	inline const void *data() const { return m_HostMemory.empty() ? NULL : &m_HostMemory[0]; }
+	inline const void *data() const { return m_HostMemory.empty() ? nullptr : &m_HostMemory[0]; }
 
 	inline void set(sint offset, float f) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); reinterpret_cast<float &>(m_HostMemory[offset]) = f; }
 	inline void set(sint offset, float f0, float f1) { NL3D_UNIFORM_BUFFER_ASSERT_LOCKED(this); float *f = reinterpret_cast<float *>(&m_HostMemory[offset]); f[0] = f0; f[1] = f1; }

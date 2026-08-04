@@ -222,7 +222,7 @@ void impulseDatabaseUpdateBank(NLMISC::CBitMemStream &impulse)
 		// read guild inventory update
 		if ( bank == CDBGuild )
 		{
-			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)NULL, false );
+			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)nullptr, false );
 		}
 	}
 	catch (const Exception &e)
@@ -252,7 +252,7 @@ void impulseDatabaseInitBank(NLMISC::CBitMemStream &impulse)
 		// read guild inventory update
 		if ( bank == CDBGuild )
 		{
-			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)NULL, false );
+			updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForGuild*)nullptr, false );
 		}
 	}
 	catch (const Exception &e)
@@ -950,7 +950,7 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const s
 
 	// Open the free teller window
 	CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
-	if (pCGW != NULL)
+	if (pCGW != nullptr)
 		pCGW->setActiveFreeTeller(goodSenderName);
 
 	if (windowVisible && !goodSenderName.empty())
@@ -1707,13 +1707,13 @@ void impulseTPCommon2(NLMISC::CBitMemStream &impulse, bool hasSeason)
 		switch(tpContext)
 		{
 			case R2::TPContext_Mainland:
-				CAHManager::getInstance()->runActionHandler("return_to_mainland", NULL);
+				CAHManager::getInstance()->runActionHandler("return_to_mainland", nullptr);
 			break;
 			case R2::TPContext_Edit:
-				CAHManager::getInstance()->runActionHandler("r2ed_stop_test", NULL);
+				CAHManager::getInstance()->runActionHandler("r2ed_stop_test", nullptr);
 			break;
 			case R2::TPContext_IslandOwner:
-				CAHManager::getInstance()->runActionHandler("r2_stop_live", NULL);
+				CAHManager::getInstance()->runActionHandler("r2_stop_live", nullptr);
 			break;
 			default:
 			break;
@@ -1777,7 +1777,7 @@ void impulseTeamShareInvalid(NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
-	if (pTB != NULL)
+	if (pTB != nullptr)
 		pTB->setActive(true);
 }// impulseTeamShareInvalid //
 
@@ -1791,10 +1791,10 @@ void impulseTeamShareClose(NLMISC::CBitMemStream &impulse)
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer
 	*pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share"));
-	if (pGC != NULL)
+	if (pGC != nullptr)
 		pGC->setActive(false);
 	CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
-	if (pTB != NULL)
+	if (pTB != nullptr)
 		pTB->setActive(true);
 }// impulseTeamShareClose //
 
@@ -2336,7 +2336,7 @@ void impulseReloadCache(NLMISC::CBitMemStream &impulse)
 void impulseBotChatForceEnd(NLMISC::CBitMemStream &impulse)
 {
 	if (PermanentlyBanned) return;
-	CBotChatManager::getInstance()->setCurrPage(NULL);
+	CBotChatManager::getInstance()->setCurrPage(nullptr);
 }
 
 
@@ -2451,7 +2451,7 @@ void impulseJournalCantAbandon (NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	/// reactivate abandon button
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:MISSION_ABANDON_BUTTON",false);
-	if (pNL != NULL)
+	if (pNL != nullptr)
 		pNL->setValue64(1);
 }
 
@@ -2577,7 +2577,7 @@ void impulseGuildAbortCreation (NLMISC::CBitMemStream &impulse)
 	CBotChatPage *pPage = CBotChatManager::getInstance()->getCurrPage();
 	CBotChatPageCreateGuild *pPageCG = dynamic_cast<CBotChatPageCreateGuild*>(pPage);
 	if (pPageCG == BotChatPageAll->CreateGuild)
-		CBotChatManager::getInstance()->setCurrPage(NULL);
+		CBotChatManager::getInstance()->setCurrPage(nullptr);
 }
 
 void impulseGuildOpenGuildWindow(NLMISC::CBitMemStream &impulse)
@@ -2881,7 +2881,7 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 //-----------------------------------------------
 void impulseUpdateInventory (NLMISC::CBitMemStream &impulse)
 {
-	updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForCharacter*)NULL, true );
+	updateInventoryFromStream( impulse, (INVENTORIES::CInventoryCategoryForCharacter*)nullptr, true );
 };
 
 //-----------------------------------------------
@@ -2942,7 +2942,7 @@ void impulseDeathRespawnPoint (NLMISC::CBitMemStream &impulse)
 	if (PermanentlyBanned) return;
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:respawn_map:content:map_content:actual_map"));
-	if (pMap == NULL)
+	if (pMap == nullptr)
 	{
 		nlwarning("problem cannot find ui:interface:respawn_map:content:map_content:actual_map");
 		return;
@@ -2951,7 +2951,7 @@ void impulseDeathRespawnPoint (NLMISC::CBitMemStream &impulse)
 
 
 	pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:map:content:map_content:actual_map"));
-	if (pMap == NULL)
+	if (pMap == nullptr)
 	{
 		nlwarning("problem cannot find ui:interface:map:content:map_content:actual_map");
 		return;
@@ -2981,9 +2981,9 @@ void impulseDuelInvitation(NLMISC::CBitMemStream &impulse)
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_duel_proposal"));
-	if (pGC == NULL) return;
+	if (pGC == nullptr) return;
 	CViewTextID *pVTID = dynamic_cast<CViewTextID *>(pGC->getView("invitor_name"));
-	if (pVTID == NULL) return;
+	if (pVTID == nullptr) return;
 	pVTID->setTextId(textID);
 	pGC->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(pGC);
@@ -3004,7 +3004,7 @@ void impulseDuelCancelInvitation(NLMISC::CBitMemStream &impulse)
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_duel_proposal"));
-	if (pGC == NULL) return;
+	if (pGC == nullptr) return;
 	pGC->setActive(false);
 
 }// impulseDuelCancelInvitation //
@@ -3024,9 +3024,9 @@ void impulsePVPChallengeInvitation(NLMISC::CBitMemStream &impulse)
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_challenge_proposal"));
-	if (pGC == NULL) return;
+	if (pGC == nullptr) return;
 	CViewTextID *pVTID = dynamic_cast<CViewTextID *>(pGC->getView("invitor_name"));
-	if (pVTID == NULL) return;
+	if (pVTID == nullptr) return;
 	pVTID->setTextId(textID);
 	pGC->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(pGC);
@@ -3046,7 +3046,7 @@ void impulsePVPChallengeCancelInvitation(NLMISC::CBitMemStream &impulse)
 	//activate the pop up window
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:join_pvp_challenge_proposal"));
-	if (pGC == NULL) return;
+	if (pGC == nullptr) return;
 	pGC->setActive(false);
 
 }// impulsePVPChallengeCancelInvitation //
@@ -3180,7 +3180,7 @@ void impulseItemCloseRoomInventory(NLMISC::CBitMemStream &impulse)
 
 	// deactivate the pop up window
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:inv_room"));
-	if (pGC == NULL) return;
+	if (pGC == nullptr) return;
 	pGC->setActive(false);
 }
 
@@ -3787,7 +3787,7 @@ bool CNetManager::update()
 				// Remove the old entity.
 				EntitiesMngr.remove(change.ShortId, false);
 				// Create the new entity.
-				if(EntitiesMngr.create(change.ShortId, get(change.ShortId), change.NewEntityInfo) == 0)
+				if(EntitiesMngr.create(change.ShortId, get(change.ShortId), change.NewEntityInfo) == nullptr)
 					nlwarning("CNetManager::update : entity in the slot '%u' has not been created.", change.ShortId);
 			}
 			else
@@ -3837,7 +3837,7 @@ bool CNetManager::update()
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		if (im)
 		{
-			CCDBNodeLeaf *node = NULL;
+			CCDBNodeLeaf *node = nullptr;
 
 			if (!m_PingLeaf)
 				m_PingLeaf = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:PING", false);

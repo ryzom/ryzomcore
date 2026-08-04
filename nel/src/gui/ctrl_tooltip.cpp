@@ -53,8 +53,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlToolTip::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "tooltip" );
 

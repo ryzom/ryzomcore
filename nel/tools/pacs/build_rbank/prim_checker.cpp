@@ -135,7 +135,7 @@ bool	CPrimChecker::build(const string &primitivesPath, const string &igLandPath,
 						shape.serial(f);
 
 						CWaterShape	*wshape = dynamic_cast<CWaterShape*>(shape.getShapePointer());
-						if (wshape == NULL)
+						if (wshape == nullptr)
 						{
 							noWaterShapes.insert(shapeName);
 							continue;
@@ -268,7 +268,7 @@ void	CPrimChecker::readPrimitive(IPrimitive *primitive)
 	string	className;
 
 	// check good class and check primitive has a class name
-	if (dynamic_cast<CPrimZone*>(primitive) != NULL && primitive->getPropertyByName("class", className))
+	if (dynamic_cast<CPrimZone*>(primitive) != nullptr && primitive->getPropertyByName("class", className))
 	{
 		if (className == "pacs_include")
 			render(static_cast<CPrimZone*>(primitive), Include);

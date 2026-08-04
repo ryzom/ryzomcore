@@ -46,7 +46,7 @@ static uint8 GIF_DISPOSE_LEAVE = 1;
 static uint8 GIF_DISPOSE_BACKGROUND = 2;
 static uint8 GIF_DISPOSE_RESTORE = 3;
 
-static NLMISC::IStream *GIFStream = NULL;
+static NLMISC::IStream *GIFStream = nullptr;
 
 #if GIFLIB_MAJOR < 5
 static uint8 INTERLACED_OFFSET[] = { 0, 4, 2, 1 };
@@ -105,7 +105,7 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 #if GIFLIB_MAJOR >= 5
 	sint32 errorCode;
 	GifFileType *gif = DGifOpen(&f, readGIFData, &errorCode);
-	if (gif == NULL)
+	if (gif == nullptr)
 	{
 		nlwarning("failed to open gif, error=%d", errorCode);
 		return 0;
@@ -186,7 +186,7 @@ uint8 CBitmap::readGIF( NLMISC::IStream &f )
 		else
 		{
 			nlwarning("GIF has no global or local color map");
-			ColorMap = NULL;
+			ColorMap = nullptr;
 		}
 
 		// copy frame to canvas

@@ -838,7 +838,7 @@ bool registerGlXExtensions(CGlExtensions &ext, Display *dpy, sint screen)
 
 	// Get extension string
 	const char *glext = glXQueryExtensionsString(dpy, screen);
-	if (glext == NULL)
+	if (glext == nullptr)
 	{
 		nlwarning ("glXQueryExtensionsString failed");
 		return false;

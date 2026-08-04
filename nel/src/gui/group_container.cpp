@@ -332,7 +332,7 @@ namespace NLGUI
 
 					//
 					// call resize handler of parent container if any
-					if (gc && gc->getAHOnResizePtr() != NULL)
+					if (gc && gc->getAHOnResizePtr() != nullptr)
 					{
 						CAHManager::getInstance()->runActionHandler(gc->getAHOnResize(), gc, gc->getAHOnResizeParams());
 					}
@@ -386,9 +386,9 @@ namespace NLGUI
 	sint32 CCtrlResizer::resizeH (sint32 dy)
 	{
 		// if the owner is a container, special resize applied
-		CGroupContainer *gc = NULL;
+		CGroupContainer *gc = nullptr;
 		gc = dynamic_cast<CGroupContainer *>(_Parent);
-		if (gc == NULL)
+		if (gc == nullptr)
 			return 0;
 
 		// resize popupmaxh or h, according to IsMaxH.
@@ -643,8 +643,8 @@ namespace NLGUI
 						}
 						gc->invalidateCoords(2);
 						//
-						CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-						CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+						CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+						CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 					}
 					return true;
 				}
@@ -1087,7 +1087,7 @@ namespace NLGUI
 		cm->_MoveDeltaYReal= gc->getYReal() - gc->getY();
 		cm->_Moving= true;
 		CWidgetManager::getInstance()->setCapturePointerLeft(cm);
-		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 	}
 
 	// ***************************************************************************
@@ -1131,7 +1131,7 @@ namespace NLGUI
 		_MoveDeltaYReal= gc->getYReal() - gc->getY();
 
 		CWidgetManager::getInstance()->setCapturePointerLeft(this);
-		CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+		CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 		_Moving = false;
 		_MovingInParentList = true;
 
@@ -1167,7 +1167,7 @@ namespace NLGUI
 	{
 		_ParentScrollingUp = false;
 		_ParentScrollingDown = false;
-		CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+		CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
 		_HasMoved = false;
 		if (_Moving)
 		{
@@ -1206,19 +1206,19 @@ namespace NLGUI
 
 		_LayerSetup = -1;
 		_Localize = true;
-		_Content = NULL;
-		_HeaderOpened = NULL;
-		_HeaderClosed = NULL;
-		_TitleOpened = NULL;
-		_TitleClosed = NULL;
+		_Content = nullptr;
+		_HeaderOpened = nullptr;
+		_HeaderClosed = nullptr;
+		_TitleOpened = nullptr;
+		_TitleClosed = nullptr;
 		_TitleDeltaMaxW = 0;
-		_ViewOpenState = NULL;
-		_RightButton = NULL;
-		_HelpButton = NULL;
-		_List = NULL;
-		_ScrollBar = NULL;
-		_Mover= NULL;
-		_OldFatherContainer = NULL;
+		_ViewOpenState = nullptr;
+		_RightButton = nullptr;
+		_HelpButton = nullptr;
+		_List = nullptr;
+		_ScrollBar = nullptr;
+		_Mover = nullptr;
+		_OldFatherContainer = nullptr;
 		_InsertionOrder = 0;
 		_MinW = 222;
 		_MaxW = 320;
@@ -1230,7 +1230,7 @@ namespace NLGUI
 		_PopupMaxH = 500;
 
 		_BlinkDT = 0;
-		_ChildrenObs = NULL;
+		_ChildrenObs = nullptr;
 		_NumBlinks = 0;
 
 		_PopupX = -1;
@@ -1271,16 +1271,16 @@ namespace NLGUI
 
 
 		// action handler
-		_AHOnOpen = NULL;
-		_AHOnClose = NULL;
-		_AHOnCloseButton = NULL;
-		_AHOnMove = NULL;
-		_AHOnDeactiveCheck = NULL;
-		_AHOnResize = NULL;
-		_AHOnAlphaSettingsChanged = NULL;
-		_AHOnBeginMove = NULL;
+		_AHOnOpen = nullptr;
+		_AHOnClose = nullptr;
+		_AHOnCloseButton = nullptr;
+		_AHOnMove = nullptr;
+		_AHOnDeactiveCheck = nullptr;
+		_AHOnResize = nullptr;
+		_AHOnAlphaSettingsChanged = nullptr;
+		_AHOnBeginMove = nullptr;
 
-		std::fill(_Resizer, _Resizer + NumResizers, (CCtrlResizer *) 0);
+		std::fill(_Resizer, _Resizer + NumResizers, (CCtrlResizer *) nullptr);
 
 		_ContentYOffset = 0;
 	}
@@ -1360,7 +1360,7 @@ namespace NLGUI
 		else
 		if( name == "header_color" )
 		{
-			if( _HeaderColor.getNodePtr() != NULL )
+			if( _HeaderColor.getNodePtr() != nullptr)
 				return _HeaderColor.getNodePtr()->getFullName();
 			else
 				return "";
@@ -1967,8 +1967,8 @@ namespace NLGUI
 	xmlNodePtr CGroupContainer::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "container" );
 		xmlSetProp( node, BAD_CAST "localize", BAD_CAST toString( _Localize ).c_str() );
@@ -2005,7 +2005,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "title_closed", BAD_CAST _TitleTextClosed.c_str() );
 		xmlSetProp( node, BAD_CAST "header_active", BAD_CAST toString( _HeaderActive ).c_str() );
 
-		if( _HeaderColor.getNodePtr() != NULL )
+		if( _HeaderColor.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "header_color", BAD_CAST _HeaderColor.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "header_color", BAD_CAST "" );
@@ -2093,21 +2093,21 @@ namespace NLGUI
 	xmlNodePtr CGroupContainer::serializeTreeData( xmlNodePtr parentNode ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serializeTreeData( parentNode );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
-		if( _List == NULL )
-			return NULL;
+		if( _List == nullptr)
+			return nullptr;
 
-		CInterfaceGroup *g = NULL;
+		CInterfaceGroup *g = nullptr;
 		for( sint32 i = 0; i < _List->getChildrenNb(); i++ )
 		{
 			g = dynamic_cast< CInterfaceGroup* >( _List->getChild( i ) );
-			if( g == NULL )
+			if( g == nullptr)
 				continue;
 			
-			if( g->serializeTreeData( node ) == NULL )
-				return NULL;
+			if( g->serializeTreeData( node ) == nullptr)
+				return nullptr;
 		}
 
 		return node;
@@ -2393,7 +2393,7 @@ namespace NLGUI
 
 		if (_Opened)
 		{
-			if (_HeaderOpened != NULL)
+			if (_HeaderOpened != nullptr)
 			{
 				if (_HeaderOpened->getPosRef()&Hotspot_xR)
 					_HeaderOpened->setX (-pLayer->W_R);
@@ -2412,7 +2412,7 @@ namespace NLGUI
 			newH -= (sint32) _ContentYOffset;
 
 			// Calculate content size part
-			if (_Content != NULL)
+			if (_Content != nullptr)
 			{
 				if (_Content->getPosRef()&Hotspot_xR)
 					_Content->setX (-pLayer->W_R);
@@ -2456,20 +2456,20 @@ namespace NLGUI
 				// zeH is the height to substract to total height of the container to obtain height of the list
 				sint32 zeH = (pLayer->H_T - pLayer->InsetT) + pLayer->H_B_Open + pLayer->H_EM_Open;
 
-				if (_HeaderOpened != NULL)
+				if (_HeaderOpened != nullptr)
 					zeH += max (_HeaderOpened->getHReal(), pLayer->HeaderH);
 				else
 					zeH += pLayer->HeaderH;
 
-				if (_Content != NULL)
+				if (_Content != nullptr)
 					zeH += _Content->getHReal();
 
-				if (_List != NULL)
+				if (_List != nullptr)
 					_List->setMaxH (max((sint32)0, _MaxH-zeH));
 			}
 			else
 			{
-				if (_List != NULL)
+				if (_List != nullptr)
 					_List->setMaxH (std::numeric_limits<sint32>::max());
 			}
 
@@ -2510,7 +2510,7 @@ namespace NLGUI
 		}
 		else // Closed
 		{
-			if (_HeaderClosed != NULL)
+			if (_HeaderClosed != nullptr)
 			{
 				if (_HeaderClosed->getPosRef()&Hotspot_xR)
 					_HeaderClosed->setX (-pLayer->W_R);
@@ -2534,7 +2534,7 @@ namespace NLGUI
 		}
 
 
-		if (_Mover != NULL)
+		if (_Mover != nullptr)
 		{
 			_Mover->setW (_W+_MoverDeltaW);
 			_Mover->updateCoords();
@@ -2546,13 +2546,13 @@ namespace NLGUI
 
 		_TitleOpened->updateCoords();
 		_TitleClosed->updateCoords();
-		if (_ViewOpenState != NULL)	_ViewOpenState->updateCoords();
-		if (_RightButton != NULL)	_RightButton->updateCoords();
-		if (_HelpButton != NULL)	_HelpButton->updateCoords();
-		if (_ScrollBar != NULL)		_ScrollBar->updateCoords();
-		if (_Content != NULL)		_Content->updateCoords();
-		if (_HeaderClosed != NULL)	_HeaderClosed->updateCoords();
-		if (_HeaderOpened != NULL)	_HeaderOpened->updateCoords();
+		if (_ViewOpenState != nullptr)	_ViewOpenState->updateCoords();
+		if (_RightButton != nullptr)	_RightButton->updateCoords();
+		if (_HelpButton != nullptr)	_HelpButton->updateCoords();
+		if (_ScrollBar != nullptr)		_ScrollBar->updateCoords();
+		if (_Content != nullptr)		_Content->updateCoords();
+		if (_HeaderClosed != nullptr)	_HeaderClosed->updateCoords();
+		if (_HeaderOpened != nullptr)	_HeaderOpened->updateCoords();
 
 		CInterfaceElement::updateCoords();
 
@@ -2671,7 +2671,7 @@ namespace NLGUI
 			_BlinkDT += std::min((uint) times.frameDiffMs, blinkDuration);
 		}
 
-		CGroupContainer *parentGC = NULL;
+		CGroupContainer *parentGC = nullptr;
 		if (getParent() && getParent()->getParent())
 		{
 			if (getParent()->getParent()->isGroupContainer())
@@ -2742,17 +2742,17 @@ namespace NLGUI
 
 		if (_Opened)
 		{
-			if (_HeaderOpened != NULL)
+			if (_HeaderOpened != nullptr)
 				h += max (_HeaderOpened->getHReal(), pLayer->HeaderH);
 			else
 				h += pLayer->HeaderH;
 
-			if (_Content != NULL)
+			if (_Content != nullptr)
 				h += _Content->getHReal();
 
 			// original layout: with an open child list, the frame stops
 			// here and the list hangs in the open section below
-			if (_List != NULL && (pLayer->FrameCoversOpenList || !bHasChild))
+			if (_List != nullptr && (pLayer->FrameCoversOpenList || !bHasChild))
 				h += _List->getHReal();
 
 			h -= _ContentYOffset;
@@ -2928,7 +2928,7 @@ namespace NLGUI
 			// Display the header in white if we are the last clicked window
 			if (CWidgetManager::getInstance()->getTopWindow(CWidgetManager::getInstance()->getLastTopWindowPriority()) != this)
 			{
-				if (_HeaderColor.getNodePtr() != NULL)
+				if (_HeaderColor.getNodePtr() != nullptr)
 					c = _HeaderColor.getRGBA();
 				if (bGrayed)
 				{
@@ -2938,16 +2938,16 @@ namespace NLGUI
 				}
 				c.A = 255;
 			}
-			if (_TitleClosed != NULL) _TitleClosed->setColor(c);
-			if (_TitleOpened != NULL) _TitleOpened->setColor(c);
-			if (_ViewOpenState != NULL) _ViewOpenState->setColor(c);
-			if (_RightButton != NULL)
+			if (_TitleClosed != nullptr) _TitleClosed->setColor(c);
+			if (_TitleOpened != nullptr) _TitleOpened->setColor(c);
+			if (_ViewOpenState != nullptr) _ViewOpenState->setColor(c);
+			if (_RightButton != nullptr)
 			{
 				_RightButton->setColor(c);
 				_RightButton->setColorPushed(c);
 				_RightButton->setColorOver(c);
 			}
-			if (_HelpButton != NULL)
+			if (_HelpButton != nullptr)
 			{
 				_HelpButton->setColor(c);
 				_HelpButton->setColorPushed(c);
@@ -2981,7 +2981,7 @@ namespace NLGUI
 			if (_HeaderActive)
 			{
 				CRGBA c(255,255,255,255);
-				if (_HeaderColor.getNodePtr() != NULL)
+				if (_HeaderColor.getNodePtr() != nullptr)
 					c = _HeaderColor.getRGBA();
 				if (bGrayed)
 				{
@@ -3038,7 +3038,7 @@ namespace NLGUI
 			bool dontFade = false;
 	//		bool alphaUp = false;
 			// should not applied if the container is being resized
-			if (CWidgetManager::getInstance()->getCapturePointerLeft() != NULL)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() != nullptr)
 			{
 				CInterfaceGroup *ig = CWidgetManager::getInstance()->getCapturePointerLeft()->getParent();
 				while (ig)
@@ -3056,7 +3056,7 @@ namespace NLGUI
 
 			bool isOver = false;
 
-			if (CWidgetManager::getInstance()->getCapturePointerLeft() == NULL)
+			if (CWidgetManager::getInstance()->getCapturePointerLeft() == nullptr)
 			if (isIn(mousePointer->getX(), mousePointer->getY()))
 			{
 				CInterfaceGroup *ig = CWidgetManager::getInstance()->getCurrentWindowUnder();
@@ -3128,7 +3128,7 @@ namespace NLGUI
 				{
 					if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 					{
-						if (_ScrollBar != NULL)
+						if (_ScrollBar != nullptr)
 							_ScrollBar->moveTrackY (eventDesc.getWheel()*12);
 						return true;
 					}
@@ -3146,26 +3146,26 @@ namespace NLGUI
 		disableBlink();
 		_Opened = true;
 		_OpenAtStart = true;
-		if (_TitleOpened != NULL) _TitleOpened->setActive(true);
-		if (_TitleClosed != NULL) _TitleClosed->setActive(false);
+		if (_TitleOpened != nullptr) _TitleOpened->setActive(true);
+		if (_TitleClosed != nullptr) _TitleClosed->setActive(false);
 
 		if ((_Openable) && (_LayerSetup >= 0))
 		{
 			COptionsLayer *pLayer = getContainerOptions();
-			if (_ViewOpenState != NULL) _ViewOpenState->setTexture(pLayer->getValStr ("open_state_tx_opened"));
+			if (_ViewOpenState != nullptr) _ViewOpenState->setTexture(pLayer->getValStr ("open_state_tx_opened"));
 		}
 
-		if (_List != NULL) _List->setActive(true);
+		if (_List != nullptr) _List->setActive(true);
 
-		if (_ScrollBar != NULL)		_ScrollBar->setActive(true);
-		if (_Content != NULL)		_Content->setActive(true);
-		if (_HeaderClosed != NULL)	_HeaderClosed->setActive(false);
-		if (_HeaderOpened != NULL)	_HeaderOpened->setActive(true);
+		if (_ScrollBar != nullptr)		_ScrollBar->setActive(true);
+		if (_Content != nullptr)		_Content->setActive(true);
+		if (_HeaderClosed != nullptr)	_HeaderClosed->setActive(false);
+		if (_HeaderOpened != nullptr)	_HeaderOpened->setActive(true);
 
 		invalidateCoords();
 
 		// call action handler if any
-		if (_AHOnOpen != NULL)
+		if (_AHOnOpen != nullptr)
 		{
 			CAHManager::getInstance()->runActionHandler(_AHOnOpen, this, _AHOnOpenParams);
 		}
@@ -3176,23 +3176,23 @@ namespace NLGUI
 	void CGroupContainer::close()
 	{
 		_Opened = false;
-		if (_TitleOpened != NULL) _TitleOpened->setActive(false);
-		if (_TitleClosed != NULL) _TitleClosed->setActive(true);
+		if (_TitleOpened != nullptr) _TitleOpened->setActive(false);
+		if (_TitleClosed != nullptr) _TitleClosed->setActive(true);
 		if ((_Openable) && (_LayerSetup >= 0))
 		{
 			COptionsLayer *pLayer = getContainerOptions();
-			if (_ViewOpenState != NULL) _ViewOpenState->setTexture(pLayer->getValStr ("open_state_tx_closed"));
+			if (_ViewOpenState != nullptr) _ViewOpenState->setTexture(pLayer->getValStr ("open_state_tx_closed"));
 		}
-		if (_List != NULL) _List->setActive(false);
+		if (_List != nullptr) _List->setActive(false);
 
-		if (_ScrollBar != NULL)		_ScrollBar->setActive(false);
-		if (_Content != NULL)		_Content->setActive(false);
-		if (_HeaderClosed != NULL)	_HeaderClosed->setActive(true);
-		if (_HeaderOpened != NULL)	_HeaderOpened->setActive(false);
+		if (_ScrollBar != nullptr)		_ScrollBar->setActive(false);
+		if (_Content != nullptr)		_Content->setActive(false);
+		if (_HeaderClosed != nullptr)	_HeaderClosed->setActive(true);
+		if (_HeaderOpened != nullptr)	_HeaderOpened->setActive(false);
 		invalidateCoords();
 
 		// call action handler if any
-		if (_AHOnClose != NULL)
+		if (_AHOnClose != nullptr)
 		{
 			CAHManager::getInstance()->runActionHandler(_AHOnClose, this, _AHOnCloseParams);
 		}
@@ -3201,7 +3201,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::attachContainer (CGroupContainer *pIC, sint insertionOrder /* = -1 */)
 	{
-		if (_List == NULL)
+		if (_List == nullptr)
 		{
 			_List = new CGroupList(CViewBase::TCtorParam());
 			_List->setId (_Id+":list");
@@ -3233,7 +3233,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CGroupContainer::attachContainerAtIndex(CGroupContainer *pIC, uint index)
 	{
-		if (_List == NULL)
+		if (_List == nullptr)
 		{
 			_List = new CGroupList(CViewBase::TCtorParam());
 			_List->setId (_Id+":list");
@@ -3365,7 +3365,7 @@ namespace NLGUI
 
 		// if the window is popable,
 
-		if (_List == NULL)
+		if (_List == nullptr)
 			_List = new CGroupList(CViewBase::TCtorParam());
 		_List->setId(_Id+":list");
 		_List->setParent (this);
@@ -3393,7 +3393,7 @@ namespace NLGUI
 		}
 		else
 		{
-			_ScrollBar = NULL;
+			_ScrollBar = nullptr;
 		}
 
 
@@ -3404,7 +3404,7 @@ namespace NLGUI
 			if (_Resizer[k])
 			{
 				delCtrl (toString("rz%d", (int) k));
-				_Resizer[k] = NULL;
+				_Resizer[k] = nullptr;
 			}
 		}
 
@@ -3447,12 +3447,12 @@ namespace NLGUI
 		}
 
 		addGroup (_List);
-		if (_ScrollBar != NULL)		addCtrl (_ScrollBar);
+		if (_ScrollBar != nullptr)		addCtrl (_ScrollBar);
 
 		// Link with script
 
 		_Content = getGroup ("content");
-		if (_Content != NULL)
+		if (_Content != nullptr)
 		{
 			// Content must be (TL TL), (TR TR) or (TM TM)
 			_Content->setPosRef( (THotSpot)((_Content->getPosRef() & (Hotspot_xL|Hotspot_xM|Hotspot_xR)) | Hotspot_Tx) );
@@ -3461,7 +3461,7 @@ namespace NLGUI
 		}
 
 		_HeaderOpened = getGroup ("header_opened");
-		if (_HeaderOpened != NULL)
+		if (_HeaderOpened != nullptr)
 		{
 			// Header opened must be (TL TL), (TR TR) or (TM TM)
 			_HeaderOpened->setPosRef( (THotSpot)((_HeaderOpened->getPosRef() & (Hotspot_xL|Hotspot_xM|Hotspot_xR)) | Hotspot_Tx) );
@@ -3470,7 +3470,7 @@ namespace NLGUI
 		}
 
 		_HeaderClosed = getGroup ("header_closed");
-		if (_HeaderClosed != NULL)
+		if (_HeaderClosed != nullptr)
 		{
 			// Header closed must be (TL TL), (TR TR) or (TM TM)
 			_HeaderClosed->setPosRef( (THotSpot)((_HeaderClosed->getPosRef() & (Hotspot_xL|Hotspot_xM|Hotspot_xR)) | Hotspot_Tx) );
@@ -3479,8 +3479,8 @@ namespace NLGUI
 		}
 
 		_List->setActive(_Opened);
-		if (_ScrollBar != NULL)	_ScrollBar->setActive(_Opened);
-		if (_Content != NULL)	_Content->setActive(_Opened);
+		if (_ScrollBar != nullptr)	_ScrollBar->setActive(_Opened);
+		if (_Content != nullptr)	_Content->setActive(_Opened);
 
 		if (!_ModalParentNames.empty())
 		{
@@ -3501,7 +3501,7 @@ namespace NLGUI
 			COptionsLayer *pLayer = getContainerOptions();
 
 			// Create right button
-			if (_RightButton == NULL)
+			if (_RightButton == nullptr)
 			{
 				_RightButton = new CCtrlButton(CViewBase::TCtorParam());
 				_RightButton->setId(_Id+":rightbut");
@@ -3530,7 +3530,7 @@ namespace NLGUI
 				else
 				{
 					// If the container is normally a layer>0 and is poped ? popin button
-					if (_OldFatherContainer != NULL)
+					if (_OldFatherContainer != nullptr)
 					{
 						_RightButton->setTexture (pLayer->getValStr ("right_button_tx_popin"));
 						_RightButton->setTexturePushed (pLayer->getValStr ("right_button_tx_popin"));
@@ -3566,7 +3566,7 @@ namespace NLGUI
 		{
 			// Delete right button
 			delCtrl ("rightbut");
-			_RightButton = NULL;
+			_RightButton = nullptr;
 		}
 	}
 
@@ -3580,7 +3580,7 @@ namespace NLGUI
 			COptionsLayer *pLayer = getContainerOptions();
 
 			// Create Help button
-			if (_HelpButton == NULL)
+			if (_HelpButton == nullptr)
 			{
 				_HelpButton = new CCtrlButton(CViewBase::TCtorParam());
 				_HelpButton->setId(_Id+":helpbut");
@@ -3623,7 +3623,7 @@ namespace NLGUI
 		{
 			// Delete help button
 			delCtrl ("helpbut");
-			_HelpButton = NULL;
+			_HelpButton = nullptr;
 		}
 	}
 
@@ -3649,10 +3649,10 @@ namespace NLGUI
 		}
 		else
 		{
-			_Mover = NULL;
+			_Mover = nullptr;
 		}
 		delCtrl ("mover");
-		if (_Mover != NULL)
+		if (_Mover != nullptr)
 			addCtrl (_Mover, 0);
 		invalidateCoords();
 	}
@@ -3663,7 +3663,7 @@ namespace NLGUI
 		if (_Openable)
 		{
 			COptionsLayer *pLayer = getContainerOptions();
-			if (_ViewOpenState == NULL)
+			if (_ViewOpenState == nullptr)
 			{
 				_ViewOpenState = new CViewBitmap(CViewBase::TCtorParam());
 				_ViewOpenState->setId(_Id+":open_state");
@@ -3685,7 +3685,7 @@ namespace NLGUI
 		}
 		else
 		{
-			_ViewOpenState = NULL;
+			_ViewOpenState = nullptr;
 			delView ("open_state");
 		}
 	}
@@ -3694,7 +3694,7 @@ namespace NLGUI
 	void CGroupContainer::updateTitle()
 	{
 		COptionsLayer *pLayer = getContainerOptions();
-		if (_TitleOpened == NULL)
+		if (_TitleOpened == nullptr)
 		{
 			switch(_TitleClass)
 			{
@@ -3746,7 +3746,7 @@ namespace NLGUI
 		_TitleOpened->setActive (_Opened);
 
 		// Title when the container is closed
-		if (_TitleClosed == NULL)
+		if (_TitleClosed == nullptr)
 		{
 			switch(_TitleClass)
 			{
@@ -3840,7 +3840,7 @@ namespace NLGUI
 	void CGroupContainer::createResizerMaxH()
 	{
 		if (_LayerSetup != 0) return;
-		if (_List == NULL) return;
+		if (_List == nullptr) return;
 		if (_List->getNumChildren() == 0) return;
 
 		COptionsContainerMove *options = getMoveOptions();
@@ -3848,18 +3848,18 @@ namespace NLGUI
 		// Create corner resizer if we asked for all resizer
 		if (_EnabledResizer)
 		{
-			if (_Resizer[1] == NULL) createResizer(1, Hotspot_TR, Hotspot_TR, 0, 0, true);
-			if (_Resizer[3] == NULL) createResizer(3, Hotspot_BR, Hotspot_BR, 0, 0, true);
-			if (_Resizer[5] == NULL) createResizer(5, Hotspot_BL, Hotspot_BL, 0, 0, true);
-			if (_Resizer[7] == NULL) createResizer(7, Hotspot_TL, Hotspot_TL, 0, 0, true);
+			if (_Resizer[1] == nullptr) createResizer(1, Hotspot_TR, Hotspot_TR, 0, 0, true);
+			if (_Resizer[3] == nullptr) createResizer(3, Hotspot_BR, Hotspot_BR, 0, 0, true);
+			if (_Resizer[5] == nullptr) createResizer(5, Hotspot_BL, Hotspot_BL, 0, 0, true);
+			if (_Resizer[7] == nullptr) createResizer(7, Hotspot_TL, Hotspot_TL, 0, 0, true);
 			_Resizer[1]->IsMaxH = true;
 			_Resizer[3]->IsMaxH = true;
 			_Resizer[5]->IsMaxH = true;
 			_Resizer[7]->IsMaxH = true;
 		}
 
-		if (_Resizer[0] == NULL) createResizer(0, Hotspot_TL, Hotspot_TM, options->ResizerSize, 0, true);
-		if (_Resizer[4] == NULL) createResizer(4, Hotspot_BR, Hotspot_BM, -options->ResizerSize, 0, true);
+		if (_Resizer[0] == nullptr) createResizer(0, Hotspot_TL, Hotspot_TM, options->ResizerSize, 0, true);
+		if (_Resizer[4] == nullptr) createResizer(4, Hotspot_BR, Hotspot_BM, -options->ResizerSize, 0, true);
 		_Resizer[0]->IsMaxH = true;
 		_Resizer[4]->IsMaxH = true;
 	}
@@ -3868,15 +3868,15 @@ namespace NLGUI
 	void CGroupContainer::removeResizerMaxH()
 	{
 		if (_LayerSetup != 0) return;
-		if (_List == NULL) return;
+		if (_List == nullptr) return;
 		if (_List->getNumChildren() != 0) return;
 
 		for (uint i = 0; i < NumResizers; ++i)
 			if ((i != 6) && (i != 2)) // 6 == right and 2 == left
-				if (_Resizer[i] != NULL)
+				if (_Resizer[i] != nullptr)
 				{
 					delCtrl ( toString(":rz%d", (int) i) );
-					_Resizer[i] = NULL;
+					_Resizer[i] = nullptr;
 				}
 	}
 
@@ -3893,10 +3893,10 @@ namespace NLGUI
 			// Count Nb of Parent
 			CInterfaceGroup *pIG = this;
 			sint32 nNbParent = 0;
-			while (pIG != NULL)
+			while (pIG != nullptr)
 			{
 				pIG = pIG->getParent();
-				if (pIG != NULL)
+				if (pIG != nullptr)
 					nNbParent++;
 			}
 			return (nNbParent-1)/2;
@@ -3930,7 +3930,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void	CGroupContainer::setContent (CInterfaceGroup *pC)
 	{
-		if (_Content != NULL)
+		if (_Content != nullptr)
 			delGroup (_Content);
 		_Content = pC;
 		if (_Content)
@@ -4003,7 +4003,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::setTitledOpenedViewText()
 	{
-		if (_TitleOpened != NULL)
+		if (_TitleOpened != nullptr)
 		{
 			_TitleOpened->setTextLocalized(_TitleTextOpened, _Localize);
 		}
@@ -4012,7 +4012,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::setTitledClosedViewText()
 	{
-		if (_TitleClosed != NULL)
+		if (_TitleClosed != nullptr)
 		{
 			_TitleClosed->setTextLocalized(_TitleTextClosed, _Localize);
 		}
@@ -4214,8 +4214,8 @@ namespace NLGUI
 		CWidgetManager::getInstance()->unMakeWindow(this);
 		CWidgetManager::getInstance()->clearViewUnders();
 		CWidgetManager::getInstance()->clearCtrlsUnders();
-		_Parent = NULL;
-		_ParentPos = NULL;
+		_Parent = nullptr;
+		_ParentPos = nullptr;
 		std::vector<CGroupContainer *>::iterator it = std::find(_PopedCont.begin(), _PopedCont.end(), this);
 		if (it != _PopedCont.end())
 		{
@@ -4240,7 +4240,7 @@ namespace NLGUI
 				}
 			}
 			setActive(active);
-			_OldFatherContainer = NULL;
+			_OldFatherContainer = nullptr;
 			if (_OpenWhenPopup)
 			{
 				setOpen(false);
@@ -4253,7 +4253,7 @@ namespace NLGUI
 
 		invalidateCoords();
 
-		_OldFatherContainer = NULL;
+		_OldFatherContainer = nullptr;
 		setup();
 	}
 
@@ -4325,9 +4325,9 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pIG);
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 			pIC->open();
 		}
 	};
@@ -4340,9 +4340,9 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pIG);
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 			pIC->close();
 		}
 	};
@@ -4355,9 +4355,9 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pIG);
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 			if (pIC->isLocked()) return;
 
 			// check if the window can be really closed
@@ -4388,16 +4388,16 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pIG);
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 			if (pIC->isLocked()) return;
 			//
 			pIC->popup();
 			//
 
-			CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-			CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+			CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+			CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 		}
 	};
 	REGISTER_ACTION_HANDLER (CICPopup, "ic_popup");
@@ -4409,9 +4409,9 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pIG);
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 			if (pIC->isLocked()) return;
 			// memorize popup position
 			pIC->setPopupX(pIC->getX());
@@ -4421,8 +4421,8 @@ namespace NLGUI
 			//
 			pIC->popin();
 
-			CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
-			CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+			CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
+			CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 		}
 	};
 	REGISTER_ACTION_HANDLER (CICPopin, "ic_popin");
@@ -4433,9 +4433,9 @@ namespace NLGUI
 		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 		{
 			CInterfaceGroup *pIG = pCaller->getParent();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pIG);
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 			pIC->setLocked(!pIC->isLocked());
 		}
 	};
@@ -4450,7 +4450,7 @@ namespace NLGUI
 			if(!pCaller)
 				return;
 			CGroupContainer *pIC = dynamic_cast<CGroupContainer*>(pCaller->getRootWindow());
-			if (pIC == NULL) return;
+			if (pIC == nullptr) return;
 
 			// if found the help page
 			const std::string	&helpPage= pIC->getHelpPage();
@@ -4458,7 +4458,7 @@ namespace NLGUI
 			{
 
 				// open the web browser, and point to the page
-				CAHManager::getInstance()->runActionHandler("launch_help", NULL, "url=" + helpPage);
+				CAHManager::getInstance()->runActionHandler("launch_help", nullptr, "url=" + helpPage);
 			}
 		}
 	};
@@ -4471,7 +4471,7 @@ namespace NLGUI
 		{
 			return dynamic_cast<CGroupContainer *>(_Parent->getParent());
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -4528,7 +4528,7 @@ namespace NLGUI
 	bool CGroupContainer::hasKeyboardFocus() const
 	{
 
-		if (CWidgetManager::getInstance()->getCaptureKeyboard() != NULL)
+		if (CWidgetManager::getInstance()->getCaptureKeyboard() != nullptr)
 		{
 			const CGroupEditBox *geb = dynamic_cast<const CGroupEditBox *>(CWidgetManager::getInstance()->getCaptureKeyboard());
 			if (geb)
@@ -4568,8 +4568,8 @@ namespace NLGUI
 		{
 			updateRightButton();
 			updateHelpButton();
-			if (_ViewOpenState != NULL)	_ViewOpenState->setActive(!_Locked);
-			if (_Mover != NULL)	_Mover->setActive(!_Locked);
+			if (_ViewOpenState != nullptr)	_ViewOpenState->setActive(!_Locked);
+			if (_Mover != nullptr)	_Mover->setActive(!_Locked);
 		}
 	}
 
@@ -4605,9 +4605,9 @@ namespace NLGUI
 		for(uint i=0;i<modalParents.size();i++)
 		{
 			CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(modalParents[i]));
-			if (pGC == NULL)
+			if (pGC == nullptr)
 				pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:"+modalParents[i]));
-			if (pGC == NULL)
+			if (pGC == nullptr)
 				nlwarning("<setModalParentList> not found %s",modalParents[i].c_str());
 			else
 				addModalParent (pGC);
@@ -4617,7 +4617,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::addModalParent (CGroupContainer *pParent)
 	{
-		if(pParent==NULL) return;
+		if(pParent == nullptr) return;
 		// Look if parent not already added
 		for(uint i=0;i<_ModalParents.size();++i)
 			if(_ModalParents[i] == pParent)
@@ -4630,7 +4630,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CGroupContainer::addModalSon (CGroupContainer *pSon)
 	{
-		if (pSon == NULL) return;
+		if (pSon == nullptr) return;
 		// Look if the son not already added
 		for (uint i = 0; i < _ModalSons.size(); ++i)
 			if (_ModalSons[i] == pSon)
@@ -4819,7 +4819,7 @@ namespace NLGUI
 		// Display the header in white if we are the last clicked window
 		if (CWidgetManager::getInstance()->getTopWindow(CWidgetManager::getInstance()->getLastTopWindowPriority()) != static_cast<const CInterfaceGroup*>(this))
 		{
-			if (_HeaderColor.getNodePtr() != NULL)
+			if (_HeaderColor.getNodePtr() != nullptr)
 				c = _HeaderColor.getRGBA();
 			if (isGrayed())
 			{

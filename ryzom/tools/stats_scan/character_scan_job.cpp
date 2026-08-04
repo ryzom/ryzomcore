@@ -43,7 +43,7 @@ extern NLMISC::CVariable<std::string> OutputDirectory;
 CCharacterScanJob::CCharacterScanJob()
 {
 	// start by initialising simple properties
-	_CharTblFile=NULL;
+	_CharTblFile = nullptr;
 	_NextFile=0;
 	_State=INIT;
 
@@ -54,7 +54,7 @@ CCharacterScanJob::CCharacterScanJob()
 	// open the output file for the character table
 	std::string filename= "char_tbl.csv";
 	_CharTblFile = NLMISC::nlfopen(filename, "wb");
-	if (_CharTblFile==NULL)
+	if (_CharTblFile == nullptr)
 	{
 		nlwarning("Failed to open output file: %s",filename.c_str());
 		_State=ERROR;
@@ -66,7 +66,7 @@ CCharacterScanJob::~CCharacterScanJob()
 	if (_State!=ERROR)
 		_State=CLOSED;
 
-	if (_CharTblFile!=NULL)
+	if (_CharTblFile != nullptr)
 		fclose(_CharTblFile);
 
 	// flush the stats maps to their respective output files
@@ -75,7 +75,7 @@ CCharacterScanJob::~CCharacterScanJob()
 		// create the output file name and open the file for writing
 		std::string filename="char_stats_"+(*it).first+".csv";
 		FILE* f = NLMISC::nlfopen(filename, "wb");
-		if (f==NULL)
+		if (f == nullptr)
 		{
 			nlwarning("Failed to open output file: %s",filename.c_str());
 			continue;

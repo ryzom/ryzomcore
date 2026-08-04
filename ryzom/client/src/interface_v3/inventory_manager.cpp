@@ -66,8 +66,8 @@ extern NLMISC::CLog g_log;
 // Context help
 extern void contextHelp (const std::string &help);
 
-CTempInvManager		*CTempInvManager::_Instance = NULL;
-CInventoryManager	*CInventoryManager::_Instance = NULL;
+CTempInvManager		*CTempInvManager::_Instance = nullptr;
+CInventoryManager	*CInventoryManager::_Instance = nullptr;
 
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupListSheetBag, std::string, "list_sheet_bag");
 NLMISC_REGISTER_OBJECT(CViewBase, CDBGroupIconListBag, std::string, "list_icon_bag");
@@ -122,15 +122,15 @@ const	uint	CInventoryManager::NumInventories= sizeof(CInventoryManager::Inventor
 // *************************************************************************************************
 CItemImage::CItemImage()
 {
-	Sheet = NULL;
-	Quality = NULL;
-	Quantity = NULL;
-	UserColor = NULL;
-	CharacBuffs = NULL;
-	Price = NULL;
-	Weight= NULL;
-	NameId= NULL;
-	InfoVersion= NULL;
+	Sheet = nullptr;
+	Quality = nullptr;
+	Quantity = nullptr;
+	UserColor = nullptr;
+	CharacBuffs = nullptr;
+	Price = nullptr;
+	Weight = nullptr;
+	NameId = nullptr;
+	InfoVersion = nullptr;
 }
 
 // *************************************************************************************************
@@ -296,20 +296,20 @@ void CItemInfoCache::debugItemInfoCache() const
 // *************************************************************************************************
 CInventoryManager::CInventoryManager()
 {
-	Money = NULL;
-	ServerMoney = NULL;
+	Money = nullptr;
+	ServerMoney = nullptr;
 	uint i;
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
 		Hands[i] = ServerHands[i] = 0;
-		UIHands[i] = NULL;
+		UIHands[i] = nullptr;
 	}
 
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
 		Equip[i] = ServerEquip[i] = 0;
-		UIEquip[i] = NULL;
-		UIEquip2[i] = NULL;
+		UIEquip[i] = nullptr;
+		UIEquip2[i] = nullptr;
 	}
 
 	for (i = 0; i < MAX_BAGINV_ENTRIES; i++)
@@ -348,7 +348,7 @@ void CInventoryManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // *************************************************************************************************
@@ -372,7 +372,7 @@ CItemImage *CInventoryManager::getHandItem(uint index)
 	if (Hands[index] != 0)
 		return &Bag[Hands[index]-1];
 	else
-		return NULL;
+		return nullptr;
 }
 
 // *************************************************************************************************
@@ -382,7 +382,7 @@ CItemImage *CInventoryManager::getEquipItem(uint index)
 	if (Equip[index] != 0)
 		return &Bag[Equip[index]];
 	else
-		return NULL;
+		return nullptr;
 }
 
 // *************************************************************************************************
@@ -429,7 +429,7 @@ CItemImage *CInventoryManager::getServerHandItem(uint index)
 	if (ServerHands[index] != 0)
 		return &ServerBag[ServerHands[index]];
 	else
-		return NULL;
+		return nullptr;
 }
 
 // *************************************************************************************************
@@ -439,7 +439,7 @@ CItemImage *CInventoryManager::getServerEquipItem(uint index)
 	if (ServerEquip[index] != 0)
 		return &ServerBag[ServerEquip[index]];
 	else
-		return NULL;
+		return nullptr;
 }
 
 // *************************************************************************************************
@@ -498,7 +498,7 @@ void CInventoryManager::init()
 		initItemArray(toString(SERVER_INVENTORY ":PACK_ANIMAL%d", i), ServerPAInv[i], MAX_ANIMALINV_ENTRIES);
 
 	// Drag'n'Drop
-	DNDCurrentItem = NULL;
+	DNDCurrentItem = nullptr;
 	DNDFrom = Nowhere;
 	// Initialize interface part
 	UIHands[0] = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_RIGHT));
@@ -620,7 +620,7 @@ void CInventoryManager::initIndirection(const std::string &dbbranch, sint32 *ind
 			ICDBNode::CTextId textId;
 			pNL->addObserver(&_DBEquipObs, textId);
 		}
-		if (pNL != NULL)
+		if (pNL != nullptr)
 			indices[i] = pNL->getValue32();
 	}
 }
@@ -637,7 +637,7 @@ void CInventoryManager::beginDrag(CDBCtrlSheet *pCS, TFrom From)
 // ***************************************************************************
 void CInventoryManager::endDrag()
 {
-	DNDCurrentItem = NULL;
+	DNDCurrentItem = nullptr;
 	DNDFrom = Nowhere;
 }
 
@@ -776,7 +776,7 @@ uint32 CInventoryManager::getHandItemSheet( bool rightHand ) const
 bool CInventoryManager::isLeftHandItemCompatibleWithRightHandItem(uint32 leftHandSheet, uint32 rightHandSheet, uint32 lastRightHandSheet)
 {
 	CEntitySheet *pLastRight = SheetMngr.get (CSheetId(lastRightHandSheet));
-	if (pLastRight != NULL)
+	if (pLastRight != nullptr)
 	{
 		if (pLastRight->type() != CEntitySheet::ITEM) return false;
 		CItemSheet *pIsLastRight = (CItemSheet *)pLastRight;
@@ -789,7 +789,7 @@ bool CInventoryManager::isLeftHandItemCompatibleWithRightHandItem(uint32 leftHan
 	if (leftHandSheet == 0) return true;
 
 	CEntitySheet *pLeft = SheetMngr.get (CSheetId(leftHandSheet));
-	if (pLeft == NULL) return false;
+	if (pLeft == nullptr) return false;
 	if (pLeft->type() != CEntitySheet::ITEM) return false;
 	CItemSheet *pIsLeft = (CItemSheet *)pLeft;
 
@@ -800,7 +800,7 @@ bool CInventoryManager::isLeftHandItemCompatibleWithRightHandItem(uint32 leftHan
 		return false;
 
 	CEntitySheet *pRight = SheetMngr.get (CSheetId(rightHandSheet));
-	if (pRight == NULL) return true;
+	if (pRight == nullptr) return true;
 	if (pRight->type() != CEntitySheet::ITEM) return true;
 	CItemSheet *pIsRight = (CItemSheet *)pRight;
 
@@ -834,7 +834,7 @@ static void grayItem (const std::string &listname, sint32 bagEntryIndex, bool gr
 
 	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(listname));
 
-	if (pList != NULL)
+	if (pList != nullptr)
 	{
 		pList->invalidateCoords();
 
@@ -889,7 +889,7 @@ bool CInventoryManager::isBagItemWeared(sint32 bagEntryIndex)
 // ----------------------------------------------------------------------------
 static bool isSwimming()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->mode() == MBEHAV::SWIM || UserEntity->mode() == MBEHAV::MOUNT_SWIM);
 	else
 		return false;
@@ -905,7 +905,7 @@ static bool isRiding()
 
 static bool isStunned()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->behaviour() == MBEHAV::STUNNED);
 	else
 		return false;
@@ -913,7 +913,7 @@ static bool isStunned()
 
 static bool isDead()
 {
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		return (UserEntity->mode() == MBEHAV::DEATH);
 	else
 		return false;
@@ -958,7 +958,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 	if (inventory == INVENTORIES::handling && invSlot == 0)
 	{
 		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
-		if (pCSLeftHand == NULL)
+		if (pCSLeftHand == nullptr)
 		{
 			return;
 		}
@@ -966,14 +966,14 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 		// get sheet of left item
 		uint32 leftSheet = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
-		if (pNL == NULL)
+		if (pNL == nullptr)
 		{
 			return;
 		}
 		if (pNL->getValue32() > 0)
 		{
 			CCDBNodeLeaf *pNL2 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL->getValue32()-1) + ":SHEET", false);
-			if (pNL2 == NULL)
+			if (pNL2 == nullptr)
 			{
 				return;
 			}
@@ -985,7 +985,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 		if (oldRightIndexInBag > 0)
 		{
 			pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(oldRightIndexInBag-1) + ":SHEET", false);
-			if (pNL == NULL)
+			if (pNL == nullptr)
 			{
 				return;
 			}
@@ -997,7 +997,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 		if (indexInBag+1 > 0)
 		{
 			pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(indexInBag) + ":SHEET", false);
-			if (pNL == NULL)
+			if (pNL == nullptr)
 			{
 				return;
 			}
@@ -1026,7 +1026,7 @@ void CInventoryManager::equip(const std::string &bagPath, const std::string &inv
 	}
 
 	// Update trade window if any
-	if ((BotChatPageAll != NULL) && (BotChatPageAll->Trade != NULL))
+	if ((BotChatPageAll != nullptr) && (BotChatPageAll->Trade != nullptr))
 		BotChatPageAll->Trade->invalidateCoords();
 
 	// Send message to the server
@@ -1090,7 +1090,7 @@ void CInventoryManager::unequip(const std::string &invPath)
 	if (inventory == INVENTORIES::handling && invSlot == 0)
 	{
 		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
-		if (pCSLeftHand == NULL)
+		if (pCSLeftHand == nullptr)
 		{
 			return;
 		}
@@ -1098,14 +1098,14 @@ void CInventoryManager::unequip(const std::string &invPath)
 		// get sheet of left item
 		uint32 leftSheet = 0;
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
-		if (pNL == NULL)
+		if (pNL == nullptr)
 		{
 			return;
 		}
 		if (pNL->getValue32() > 0)
 		{
 			CCDBNodeLeaf *pNL2 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL->getValue32()-1) + ":SHEET", false);
-			if (pNL2 == NULL)
+			if (pNL2 == nullptr)
 			{
 				return;
 			}
@@ -1117,7 +1117,7 @@ void CInventoryManager::unequip(const std::string &invPath)
 		if (oldIndexInBag > 0)
 		{
 			pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(oldIndexInBag-1) + ":SHEET", false);
-			if (pNL == NULL)
+			if (pNL == nullptr)
 			{
 				return;
 			}
@@ -1137,7 +1137,7 @@ void CInventoryManager::unequip(const std::string &invPath)
 	NLGUI::CDBManager::getInstance()->getDbProp(invPath + ":INDEX_IN_BAG")->setValue16(0);
 
 	// Update trade window if any
-	if ((BotChatPageAll != NULL) && (BotChatPageAll->Trade != NULL))
+	if ((BotChatPageAll != nullptr) && (BotChatPageAll->Trade != nullptr))
 		BotChatPageAll->Trade->invalidateCoords();
 
 	// Send message to the server
@@ -1173,7 +1173,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 	string sTmp = node->getFullName();
 	string sIE, sIE2; // Interface Element
 	CCDBNodeLeaf *pNL = dynamic_cast<CCDBNodeLeaf*>(node);
-	if (pNL == NULL) return;
+	if (pNL == nullptr) return;
 	if (strnicmp(sTmp.c_str(),"LOCAL:INVENTORY:HAND",20) == 0)
 	{
 		// Coming from hand
@@ -1261,14 +1261,14 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		// in some case left sheet is same than right sheet so don't clear it now (ex: 2 hands item, right hand exclusive)
 		if (sIE != CTRL_HAND_LEFT)
 		{
-			if (pCS  != NULL) pCS->setSheet("");
-			if (pCS2 != NULL) pCS2->setSheet("");
+			if (pCS  != nullptr) pCS->setSheet("");
+			if (pCS2 != nullptr) pCS2->setSheet("");
 		}
 	}
 	else
 	{
-		if (pCS  != NULL) pCS->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
-		if (pCS2 != NULL) pCS2->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
+		if (pCS  != nullptr) pCS->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
+		if (pCS2 != nullptr) pCS2->setSheet(LOCAL_INVENTORY ":BAG:"+ toString(newVal-1));
 	}
 
 	// Hands management
@@ -1276,7 +1276,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 	{
 		// if nothing in left hand -> return
 		CDBCtrlSheet *pCSLeftHand = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_HAND_LEFT));
-		if (pCSLeftHand == NULL)
+		if (pCSLeftHand == nullptr)
 		{
 			return;
 		}
@@ -1292,11 +1292,11 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		{
 			uint32 leftSheet = 0;
 			CCDBNodeLeaf *pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":HAND:1:INDEX_IN_BAG", false);
-			if (pNL3 == NULL) return;
+			if (pNL3 == nullptr) return;
 			if (pNL3->getValue32() > 0)
 			{
 				CCDBNodeLeaf *pNL4 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(pNL3->getValue32()-1) + ":SHEET", false);
-				if (pNL4 == NULL) return;
+				if (pNL4 == nullptr) return;
 				leftSheet = pNL4->getValue32();
 			}
 
@@ -1304,7 +1304,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 			if (newVal > 0)
 			{
 				pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(newVal-1) + ":SHEET", false);
-				if (pNL3 == NULL) return;
+				if (pNL3 == nullptr) return;
 				rightSheet = pNL3->getValue32();
 			}
 
@@ -1312,7 +1312,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 			if (oldVal > 0)
 			{
 				pNL3 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(oldVal-1) + ":SHEET", false);
-				if (pNL3 == NULL) return;
+				if (pNL3 == nullptr) return;
 				lastRightSheet = pNL3->getValue32();
 			}
 
@@ -1332,7 +1332,7 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 		if (newVal > 0)
 		{
 			CCDBNodeLeaf *pNL2 = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":BAG:" + toString(newVal-1) + ":SHEET", false);
-			if (pNL2 == NULL) return;
+			if (pNL2 == nullptr) return;
 
 			if (getInventory().is2HandItem(pNL2->getValue32()))
 			{
@@ -1398,8 +1398,8 @@ void CInventoryManager::CDBEquipObs::update(ICDBNode* node)
 				}
 				if(clearLeftHandDisplay)
 				{
-					if (pCS  != NULL) pCS->setSheet("");
-					if (pCS2 != NULL) pCS2->setSheet("");
+					if (pCS  != nullptr) pCS->setSheet("");
+					if (pCS2 != nullptr) pCS2->setSheet("");
 				}
 			}
 		}
@@ -1443,9 +1443,9 @@ bool CInventoryManager::autoEquip(sint bagEntryIndex, bool allowReplace)
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	IListSheetBase *pList = dynamic_cast<IListSheetBase*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
-	CDBCtrlSheet *pCSSrc = NULL;
+	CDBCtrlSheet *pCSSrc = nullptr;
 
-	if (pList == NULL) return false;
+	if (pList == nullptr) return false;
 
 	for (i = 0; i < MAX_BAGINV_ENTRIES; ++i)
 	{
@@ -1459,12 +1459,12 @@ bool CInventoryManager::autoEquip(sint bagEntryIndex, bool allowReplace)
 	}
 
 	if (i == MAX_BAGINV_ENTRIES) return false;
-	if (pCSSrc == NULL) return false;
+	if (pCSSrc == nullptr) return false;
 
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
 		CDBCtrlSheet *pCSDst = getInventory().getHandSheet(i);
-		if (pCSDst == NULL) continue;
+		if (pCSDst == nullptr) continue;
 		string dstPath = getInventory().getDBIndexPath(pCSDst);
 
 		sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
@@ -1491,7 +1491,7 @@ bool CInventoryManager::autoEquip(sint bagEntryIndex, bool allowReplace)
 	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 	{
 		CDBCtrlSheet *pCSDst = getInventory().getEquipSheet(i);
-		if (pCSDst == NULL) continue;
+		if (pCSDst == nullptr) continue;
 		string dstPath = getInventory().getDBIndexPath(pCSDst);
 		sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
 
@@ -1534,14 +1534,14 @@ static void checkEquipmentIntegrity(const string &equipVal)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(equipVal+":INDEX_IN_BAG",false);
-	if (pNL != NULL)
+	if (pNL != nullptr)
 	{
 		uint32 indexInBag = pNL->getValue16();
 		if (indexInBag != 0)
 		{
 			string sTmp = string(LOCAL_INVENTORY) + ":BAG:" + toString(indexInBag-1) + ":SHEET";
 			CCDBNodeLeaf *pNLBag = NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false);
-			if (pNLBag != NULL)
+			if (pNLBag != nullptr)
 			{
 				if (pNLBag->getValue32() == 0) // If no more item in this slot bag
 				{
@@ -1557,7 +1557,7 @@ static void checkEquipmentIntegrity(const string &equipVal)
 						for (uint32 i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
 						{
 							CDBCtrlSheet *pCSDst = getInventory().getEquipSheet(i);
-							if (pCSDst == NULL) continue;
+							if (pCSDst == nullptr) continue;
 							string dstPath = getInventory().getDBIndexPath(pCSDst);
 							sint32 indexDstPath = NLGUI::CDBManager::getInstance()->getDbProp(dstPath+":INDEX_IN_BAG")->getValue16();
 
@@ -1708,7 +1708,7 @@ double CInventoryManager::getMaxBagBulk(uint32 inventoryIndex)
 {
 	nlctassert(MAX_INVENTORY_ANIMAL==4);
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	CCDBNodeLeaf *pNL=NULL;
+	CCDBNodeLeaf *pNL = nullptr;
 	if (inventoryIndex == 0)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:STATIC_DATA:BAG_BULK_MAX");
 	else if (inventoryIndex == 1)
@@ -1719,7 +1719,7 @@ double CInventoryManager::getMaxBagBulk(uint32 inventoryIndex)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST2:BULK_MAX");
 	else if (inventoryIndex == 4)
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:PACK_ANIMAL:BEAST3:BULK_MAX");
-	if (pNL != NULL)
+	if (pNL != nullptr)
 		return pNL->getValue32();
 	return 0;
 }
@@ -1733,8 +1733,8 @@ bool CInventoryManager::isSpaceInAllBagsForItem(CDBCtrlSheet *item)
 	string sTmp = pCSDst->getSheet();
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":SHEET",false);
 	CCDBNodeLeaf *pNLquantity = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":QUANTITY",false);
-	if (pNL == NULL) return false;
-	if (pNLquantity == NULL) return false;
+	if (pNL == nullptr) return false;
+	if (pNLquantity == nullptr) return false;
 
 	// Check if we can find empty space for this item (or stack of item)
 	// in all of the bags that the player owe.
@@ -1760,7 +1760,7 @@ bool CInventoryManager::isSpaceInBagForItem(CDBCtrlSheet *item, uint32 quantity,
 	if (!pCSDst->isSheetValid()) return false;
 	string sTmp = pCSDst->getSheet();
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp+":SHEET",false);
-	if (pNL == NULL) return false;
+	if (pNL == nullptr) return false;
 
 	// Check if we can find empty space for this item (or stack of item)
 	// in a given bag that the player owe.
@@ -1806,7 +1806,7 @@ CTempInvManager::CTempInvManager()
 	for (uint i = 0; i < MAX_TEMPINV_ENTRIES; ++i)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath+":"+toString(i)+":SHEET", false);
-		if (pNL != NULL)
+		if (pNL != nullptr)
 		{
 			ICDBNode::CTextId textId;
 			pNL->addObserver(&_DBObs, textId);
@@ -1822,21 +1822,21 @@ CTempInvManager::CTempInvManager()
 
 	// Forage
 	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath+":ENABLE_TAKE");
-	if (pNL != NULL)
+	if (pNL != nullptr)
 	{
 		ICDBNode::CTextId textId;
 		pNL->addObserver(&_DBObs, textId);
 	}
 	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath+":0:QUANTITY");
 	_DBForageQQObs[0].WhichOne = 0;
-	if (pNL != NULL)
+	if (pNL != nullptr)
 	{
 		ICDBNode::CTextId textId;
 		pNL->addObserver(&_DBForageQQObs[0], textId);
 	}
 	pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath+":0:QUALITY");
 	_DBForageQQObs[1].WhichOne = 1;
-	if (pNL != NULL)
+	if (pNL != nullptr)
 	{
 		ICDBNode::CTextId textId;
 		pNL->addObserver(&_DBForageQQObs[1], textId);
@@ -1853,7 +1853,7 @@ void CTempInvManager::releaseInstance()
 {
 	if( _Instance )
 		delete _Instance;
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ***************************************************************************
@@ -1876,16 +1876,16 @@ void CTempInvManager::update()
 	_Mode = (TEMP_INV_MODE::TInventoryMode)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:INVENTORY:TEMP:TYPE")->getValue8();
 
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-	if (pGC == NULL)
+	if (pGC == nullptr)
 		return;
 
 	// show/hide weight info depending on temp inventory mode
 	bool displayWeight = (_Mode == TEMP_INV_MODE::Craft);
 	CViewBase *weightText = dynamic_cast<CViewBase*>(pGC->getView("weight_txt"));
-	if (weightText != NULL)
+	if (weightText != nullptr)
 		weightText->setActive(displayWeight);
 	CViewBase *weightImg = dynamic_cast<CViewBase*>(pGC->getView("weight"));
-	if (weightImg != NULL)
+	if (weightImg != nullptr)
 		weightImg->setActive(displayWeight);
 
 	if (_Mode == TEMP_INV_MODE::Forage)
@@ -1916,12 +1916,12 @@ void CTempInvManager::update()
 	{
 		// If all slots are empty, close the interface
 		pGC->setActive(false);
-		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", nullptr);
 	}
 	else
 	{
 		pGC->setActive(true);
-		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", nullptr);
 		// Something arrived, change text
 		switch(_Mode)
 		{
@@ -2037,7 +2037,7 @@ void CTempInvManager::open(TEMP_INV_MODE::TInventoryMode m)
 	IngameDbMngr.flushObserverCalls();
 	NLGUI::CDBManager::getInstance()->flushObserverCalls();
 
-	if (pGC != NULL)
+	if (pGC != nullptr)
 	{
 		switch(_Mode)
 		{
@@ -2054,7 +2054,7 @@ void CTempInvManager::open(TEMP_INV_MODE::TInventoryMode m)
 		};
 
 		pGC->setActive(true);
-		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", nullptr);
 	}
 }
 
@@ -2073,10 +2073,10 @@ void CTempInvManager::close()
 	}
 
 	CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-	if (pIG != NULL)
+	if (pIG != nullptr)
 	{
 		pIG->setActive(false);
-		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", NULL);
+		CAHManager::getInstance()->runActionHandler("phrase_update_all_memory_ctrl_regen_tick_range", nullptr);
 	}
 }
 
@@ -2085,7 +2085,7 @@ bool CTempInvManager::isOpened()
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_TEMPINV));
-	if (pGC != NULL)
+	if (pGC != nullptr)
 		return pGC->getActive();
 	return false;
 }
@@ -2106,7 +2106,7 @@ void initStructForItemSort(vector<SSortStruct>&vTemp, sint32 sheetId, sint32 qua
 	if (sheetId != 0)
 	{
 		CEntitySheet *pItem = SheetMngr.get(CSheetId(sheetId));
-		if ((pItem != NULL) && (pItem->Type == CEntitySheet::ITEM))
+		if ((pItem != nullptr) && (pItem->Type == CEntitySheet::ITEM))
 		{
 			CItemSheet *pIS = safe_cast<CItemSheet*>(pItem);
 			vTemp[indexInList].Pos = toString("%02d", pIS->Family);
@@ -2224,49 +2224,49 @@ bool SBagOptions::isSomethingChanged()
 {
 	bool bRet = false;
 
-	if (DbFilterArmor != NULL)
+	if (DbFilterArmor != nullptr)
 		if ((DbFilterArmor->getValue8() != 0) != LastDbFilterArmor)
 		{
 			bRet = true;
 			LastDbFilterArmor = (DbFilterArmor->getValue8() != 0);
 		}
 
-	if (DbFilterWeapon != NULL)
+	if (DbFilterWeapon != nullptr)
 		if ((DbFilterWeapon->getValue8() != 0) != LastDbFilterWeapon)
 		{
 			bRet = true;
 			LastDbFilterWeapon = (DbFilterWeapon->getValue8() != 0);
 		}
 
-	if (DbFilterTool != NULL)
+	if (DbFilterTool != nullptr)
 		if ((DbFilterTool->getValue8() != 0) != LastDbFilterTool)
 		{
 			bRet = true;
 			LastDbFilterTool = (DbFilterTool->getValue8() != 0);
 		}
 
-	if (DbFilterPet != NULL)
+	if (DbFilterPet != nullptr)
 		if ((DbFilterPet->getValue8() != 0) != LastDbFilterPet)
 		{
 			bRet = true;
 			LastDbFilterPet = (DbFilterPet->getValue8() != 0);
 		}
 
-	if (DbFilterMP != NULL)
+	if (DbFilterMP != nullptr)
 		if ((DbFilterMP->getValue8() != 0) != LastDbFilterMP)
 		{
 			bRet = true;
 			LastDbFilterMP = (DbFilterMP->getValue8() != 0);
 		}
 
-	if (DbFilterMissMP != NULL)
+	if (DbFilterMissMP != nullptr)
 		if ((DbFilterMissMP->getValue8() != 0) != LastDbFilterMissMP)
 		{
 			bRet = true;
 			LastDbFilterMissMP = (DbFilterMissMP->getValue8() != 0);
 		}
 
-	if (DbFilterTP != NULL)
+	if (DbFilterTP != nullptr)
 		if ((DbFilterTP->getValue8() != 0) != LastDbFilterTP)
 		{
 			bRet = true;
@@ -2296,7 +2296,7 @@ bool SBagOptions::canDisplay(CDBCtrlSheet *pCS) const
 	bool bFilterTP = getFilterTP();
 
 	const CItemSheet *pIS = pCS->asItemSheet();
-	if (pIS != NULL)
+	if (pIS != nullptr)
 	{
 		if (SearchFilter.size() > 0)
 		{
@@ -2663,7 +2663,7 @@ class CHandlerInvCanDrag : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSSrc == NULL) return;
+		if (pCSSrc == nullptr) return;
 
 		// Cannot drag an item if it is completely locked
 		if (pCSSrc->getNonLockedQuantity() == 0)
@@ -2692,7 +2692,7 @@ class CHandlerInvDrag : public IActionHandler
 	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
 	{
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCS == NULL) return;
+		if (pCS == nullptr) return;
 		if (Params == "from_text_list")
 			getInventory().beginDrag(pCS, CInventoryManager::TextList);
 		else if (Params == "from_slot")
@@ -2742,10 +2742,10 @@ class CHandlerInvSearchButton : public IActionHandler
 		}
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_list"));
-		if (pList != NULL) pList->setSearchFilter(filter);
+		if (pList != nullptr) pList->setSearchFilter(filter);
 
 		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(btn->getParent()->getId() + ":bag_icons"));
-		if (pIcons != NULL) pIcons->setSearchFilter(filter);
+		if (pIcons != nullptr) pIcons->setSearchFilter(filter);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvSearchButton, "inv_search_button" );
@@ -2788,10 +2788,10 @@ class CHandlerInvSetSearch : public IActionHandler
 		std::string id = pCaller->getParent()->getParent()->getId();
 
 		CDBGroupListSheetBag *pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_list"));
-		if (pList != NULL) pList->setSearchFilter(eb->getInputString());
+		if (pList != nullptr) pList->setSearchFilter(eb->getInputString());
 
 		CDBGroupIconListBag *pIcons = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(id + ":bag_icons"));
-		if (pIcons != NULL) pIcons->setSearchFilter(eb->getInputString());
+		if (pIcons != nullptr) pIcons->setSearchFilter(eb->getInputString());
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerInvSetSearch, "inv_set_search" );
@@ -2812,16 +2812,16 @@ class CHandlerInvCanDropTo : public IActionHandler
 		string	src = getParam(Params, "src");
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
-		if (pCSSrc == NULL) return; // Cannot do anything if the incoming sheet is not a sheet
+		if (pCSSrc == nullptr) return; // Cannot do anything if the incoming sheet is not a sheet
 
 		// Special case if we want to DND an animal representation
 		// -------------------------------------------------------
 		{
 			const CItemSheet *pIS = pCSSrc->asItemSheet();
-			if ((pIS != NULL) && (pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET))
+			if ((pIS != nullptr) && (pIS->Family == ITEMFAMILY::PET_ANIMAL_TICKET))
 			{
 				CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-				if (pCSDst != NULL)
+				if (pCSDst != nullptr)
 				{
 					// The destination must be exchange or gift
 					if (strnicmp(pCSDst->getSheet().c_str(),"LOCAL:EXCHANGE:GIVE", 19) == 0)
@@ -2842,7 +2842,7 @@ class CHandlerInvCanDropTo : public IActionHandler
 		// The destination is a slot or something like that ?
 		// --------------------------------------------------
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSDst != NULL)
+		if (pCSDst != nullptr)
 		{
 			// If we want to drop something on a reference slot (hand or equip)
 			if (!pInv->getDBIndexPath(pCSDst).empty())
@@ -2883,30 +2883,30 @@ class CHandlerInvCanDropTo : public IActionHandler
 		// ------------------------------------
 		CDBGroupListSheetBag *pListDstText = dynamic_cast<CDBGroupListSheetBag*>(pCaller);
 		CDBGroupIconListBag  *pListDstIcon = dynamic_cast<CDBGroupIconListBag*>(pCaller);
-		if ((pListDstText != NULL) || (pListDstIcon != NULL))
+		if ((pListDstText != nullptr) || (pListDstIcon != nullptr))
 		{
 			bool bCanDrop = true;
 			// WE CANT DND if we want to dnd from other bag than BAG to guild bag
-			if (pListDstIcon != NULL)
+			if (pListDstIcon != nullptr)
 			{
 				if (pListDstIcon->getInvType() == CInventoryManager::InvGuild)
 					if (strnicmp(pCSSrc->getSheet().c_str(),"LOCAL:INVENTORY:BAG", 19) != 0)
 						bCanDrop = false;
 			}
-			if (pListDstText != NULL)
+			if (pListDstText != nullptr)
 			{
 				if (pListDstText->getInvType() == CInventoryManager::InvGuild)
 					if (strnicmp(pCSSrc->getSheet().c_str(),"LOCAL:INVENTORY:BAG", 19) != 0)
 						bCanDrop = false;
 			}
 			// WE CANT DND if we want to dnd from guild bag to other bag than BAG
-			if (pListDstIcon != NULL)
+			if (pListDstIcon != nullptr)
 			{
 				if (pListDstIcon->getInvType() != CInventoryManager::InvBag)
 					if (strnicmp(pCSSrc->getSheet().c_str(),"SERVER:GUILD:INVENTORY", 19) == 0)
 						bCanDrop = false;
 			}
-			if (pListDstText != NULL)
+			if (pListDstText != nullptr)
 			{
 				if (pListDstText->getInvType() != CInventoryManager::InvBag)
 					if (strnicmp(pCSSrc->getSheet().c_str(),"SERVER:GUILD:INVENTORY", 19) == 0)
@@ -2914,7 +2914,7 @@ class CHandlerInvCanDropTo : public IActionHandler
 			}
 
 			// WE CANT DND when packer/mount is too far
-			if (pListDstIcon != NULL)
+			if (pListDstIcon != nullptr)
 			{
 				if ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
 					(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
@@ -2926,7 +2926,7 @@ class CHandlerInvCanDropTo : public IActionHandler
 						bCanDrop = false;
 				}
 			}
-			if (pListDstText != NULL)
+			if (pListDstText != nullptr)
 			{
 				if ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 					(pListDstText->getInvType() == CInventoryManager::InvPA1) ||
@@ -2941,8 +2941,8 @@ class CHandlerInvCanDropTo : public IActionHandler
 
 			// If the source is the equipment
 
-			if (pListDstText != NULL) pListDstText->setCanDrop(bCanDrop);
-			if (pListDstIcon != NULL) pListDstIcon->setCanDrop(bCanDrop);
+			if (pListDstText != nullptr) pListDstText->setCanDrop(bCanDrop);
+			if (pListDstIcon != nullptr) pListDstIcon->setCanDrop(bCanDrop);
 		}
 
 	}
@@ -2962,9 +2962,9 @@ class CHandlerInvDropTo : public IActionHandler
 		if (!getInventory().isDragging())
 		{
 			CInterfaceGroup *pIG = CWidgetManager::getInstance()->getModalWindow();
-			if (pIG == NULL) return;
+			if (pIG == nullptr) return;
 			if (pIG->getId() != "ui:interface:bag_choose") return;
-			getInventory().beginDrag(NULL, CInventoryManager::TextList);
+			getInventory().beginDrag(nullptr, CInventoryManager::TextList);
 
 			// Special case for choose in bag dialog
 			string	src = getParam(Params, "src");
@@ -2988,13 +2988,13 @@ class CHandlerInvDropTo : public IActionHandler
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
-		if (pCSSrc == NULL) return;
+		if (pCSSrc == nullptr) return;
 
 		// Is the dragged sheet comes from an inventory list
 		if (getInventory().isDraggingFromTextList() || getInventory().isDraggingFromIconList())
 		{
 			// If the destination is an equipment slot ?
-			if (pCSDst != NULL)
+			if (pCSDst != nullptr)
 			{
 				string invPath = getInventory().getDBIndexPath(pCSDst); // Get the index in the equipment
 				if (!invPath.empty())
@@ -3028,10 +3028,10 @@ class CHandlerInvDropTo : public IActionHandler
 
 			// If the destination is a list sheet
 			IListSheetBase *pListDst = dynamic_cast<IListSheetBase*>(pCaller);
-			if ((pListDst == NULL) && (pCSDst != NULL))
+			if ((pListDst == nullptr) && (pCSDst != nullptr))
 				pListDst = IListSheetBase::getListContaining(pCSDst);
 			IListSheetBase *pListSrc = IListSheetBase::getListContaining(pCSSrc);
-			if ((pListDst != NULL) && (pListSrc != NULL))
+			if ((pListDst != nullptr) && (pListSrc != nullptr))
 			{
 				// If the source list and destination list are the same
 				if (pListDst == pListSrc)
@@ -3046,35 +3046,35 @@ class CHandlerInvDropTo : public IActionHandler
 					CDBGroupListSheetBag *pListDstText = dynamic_cast<CDBGroupListSheetBag*>(pListDst);
 					CDBGroupIconListBag *pListDstIcon = dynamic_cast<CDBGroupIconListBag*>(pListDst);
 
-					if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvBag)) ||
-						((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvBag)))
+					if (((pListDstText != nullptr) && (pListDstText->getInvType() == CInventoryManager::InvBag)) ||
+						((pListDstIcon != nullptr) && (pListDstIcon->getInvType() == CInventoryManager::InvBag)))
 					{
 						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_bag");
 					}
-					else if (((pListDstText != NULL) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
+					else if (((pListDstText != nullptr) && ((pListDstText->getInvType() == CInventoryManager::InvPA0) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA1) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA2) ||
 														 (pListDstText->getInvType() == CInventoryManager::InvPA3)
 														)) ||
-							((pListDstIcon != NULL) && ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
+							((pListDstIcon != nullptr) && ((pListDstIcon->getInvType() == CInventoryManager::InvPA0) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA1) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA2) ||
 														(pListDstIcon->getInvType() == CInventoryManager::InvPA3)
 														)))
 					{
 						string sTmp;
-						if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
-						if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
+						if (pListDstText != nullptr) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
+						if (pListDstIcon != nullptr) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
 						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
 					}
-					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
-							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
+					else if (((pListDstText != nullptr) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
+							 ((pListDstIcon != nullptr) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
 					{
 						if (strnicmp(pCSSrc->getSheet().c_str(), "LOCAL:INVENTORY:BAG", 19) == 0)
 							CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild");
 					}
-					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||
-							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvRoom)))
+					else if (((pListDstText != nullptr) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||
+							 ((pListDstIcon != nullptr) && (pListDstIcon->getInvType() == CInventoryManager::InvRoom)))
 					{
 						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_room");
 					}
@@ -3083,7 +3083,7 @@ class CHandlerInvDropTo : public IActionHandler
 		}
 
 		// Is the dragged sheet comes from another slot
-		if (pCSDst != NULL)
+		if (pCSDst != nullptr)
 		if (getInventory().isDraggingFromSlot())
 		{
 			// Yes swap the 2 indices
@@ -3272,7 +3272,7 @@ class CHandlerInvTempAll : public IActionHandler
 		{
 			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":TEMP:" + toString(itemNb) + ":SHEET");
 			CCDBNodeLeaf *pNLquantity = NLGUI::CDBManager::getInstance()->getDbProp(LOCAL_INVENTORY ":TEMP:" + toString(itemNb) + ":QUANTITY");
-			if (pNL == NULL || pNLquantity == NULL) continue;
+			if (pNL == nullptr || pNLquantity == nullptr) continue;
 			if (pNL->getValue32() == 0 || pNLquantity->getValue32() == 0) continue;
 			double itemBulk = pNLquantity->getValue32() * pInv->getItemBulk(pNL->getValue32());
 
@@ -3703,39 +3703,39 @@ void CInventoryManager::sortBag()
 	CDBGroupListSheetBag *pList;
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_BAG_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_ROOM_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_ROOM_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA1_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA1_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA2_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA2_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_ICONS));
-	if (pIconList != NULL) pIconList->needToSort();
+	if (pIconList != nullptr) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA3_TEXT));
-	if (pList != NULL) pList->needToSort();
+	if (pList != nullptr) pList->needToSort();
 }
 
 // ***************************************************************************
@@ -3827,7 +3827,7 @@ bool CInventoryManager::isInventoryEmpty(INVENTORIES::TInventory invId)
 	{
 		CCDBNodeLeaf *pNL;
 		pNL = NLGUI::CDBManager::getInstance()->getDbProp(sPath+toString(":%d:SHEET", i), false);
-		if (pNL == NULL) return true;
+		if (pNL == nullptr) return true;
 		if (pNL->getValue32() != 0)
 			return false;
 	}
@@ -3915,7 +3915,7 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 				return &image;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 	else if (inv == INVENTORIES::player_room)
 	{
@@ -3930,7 +3930,7 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 				return &image;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 	else if (inv == INVENTORIES::trading)
 	{
@@ -3968,7 +3968,7 @@ const CItemImage *CInventoryManager::getServerItem(uint slotId) const
 	}
 
 	// invalid inventory
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************

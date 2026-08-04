@@ -49,7 +49,7 @@ public:
 		bool				FromIG; // true if the fx comes from an ig, or false if it was generated dynamically
 	#endif
 public:
-	CTimedFX() : SpawnPosition(0.f, 0.f, 0.f), FXSheet(NULL)
+	CTimedFX() : SpawnPosition(0.f, 0.f, 0.f), FXSheet(nullptr)
 	{
 #if !FINAL_VERSION
 			FromIG = true;
@@ -80,7 +80,7 @@ private:
 			else return Date < rhs.Date;
 		} // we want to deal with early dates sooner
 		bool operator == (const CTimeStampedFX &rhs) const { return Date == rhs.Date && FX == rhs.FX; }
-		CTimeStampedFX() : FX(NULL) {}
+		CTimeStampedFX() : FX(nullptr) {}
 	};
 	typedef std::set<CTimeStampedFX> TTimeStampedFXPtrSet;
 	struct CManagedFXGroup;
@@ -114,17 +114,17 @@ private:
 			// ctor
 			CManagedFX()
 			{
-				Instance = NULL;
+				Instance = nullptr;
 				State = Unknown;
 				#ifdef NL_DEBUG
-					OwnerGroup = NULL;
+					OwnerGroup = nullptr;
 					Magic = 0xbaadcafe;
 				#endif
-				_PrevCandidateFX = NULL;
-				_NextCandidateFX = NULL;
+				_PrevCandidateFX = nullptr;
+				_NextCandidateFX = nullptr;
 				//
-				_PrevInstanciatedFX = NULL;
-				_NextInstanciatedFX = NULL;
+				_PrevInstanciatedFX = nullptr;
+				_NextInstanciatedFX = nullptr;
 			}
 			// compute start hour of that fx for the given day
 			void computeStartHour(sint32 cycle, CClientDate &resultDate, float cycleLength, float dayLength, const NLMISC::CNoiseValue &nv) const;

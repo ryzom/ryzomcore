@@ -599,11 +599,11 @@ class CPrimAlias : public IPrimitive
 	};
 	virtual const CPrimVector	*getPrimVector () const NL_OVERRIDE
 	{
-		return NULL;
+		return nullptr;
 	}
 	virtual CPrimVector			*getPrimVector () NL_OVERRIDE
 	{
-		return NULL;
+		return nullptr;
 	}
 
 

@@ -323,7 +323,7 @@ private:
 			getOwnerScene()->getLoadBalancingTrav().addVisibleModel(this);
 
 			// Add only if no ancestor skeleton model
-			if( _AncestorSkeletonModel==NULL )
+			if( _AncestorSkeletonModel == nullptr)
 			{
 				// need to test isLightable(), because most of PS are not lightable
 				// NB: don't insert if has an _AncestorSkeletonModel, because in this case,

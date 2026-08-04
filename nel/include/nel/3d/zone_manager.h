@@ -75,7 +75,7 @@ public:
 
 	/// checkZonesAround : Add/Remove all zomes around a certain point
 	/// If a work is currently completed remove it and began another one
-	void checkZonesAround (uint x, uint y, uint area, const std::vector<uint16> *validZoneIds = NULL);
+	void checkZonesAround (uint x, uint y, uint area, const std::vector<uint16> *validZoneIds = nullptr);
 
 	/// Is a work has been completed ?
 	bool isWorkComplete (SZoneManagerWork &rWork);

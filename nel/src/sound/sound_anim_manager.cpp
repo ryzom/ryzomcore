@@ -30,13 +30,13 @@ using namespace NLMISC;
 
 namespace NLSOUND {
 
-CSoundAnimManager*	CSoundAnimManager::_Instance = 0;
+CSoundAnimManager*	CSoundAnimManager::_Instance = nullptr;
 
 // ********************************************************
 
 CSoundAnimManager::CSoundAnimManager(NLSOUND::UAudioMixer* mixer) : _Mixer(mixer)
 {
-	if (_Instance != 0)
+	if (_Instance != nullptr)
 	{
 		throw Exception("Duplicate instanciation of CSoundAnimManager singleton");
 	}
@@ -49,7 +49,7 @@ CSoundAnimManager::CSoundAnimManager(NLSOUND::UAudioMixer* mixer) : _Mixer(mixer
 
 CSoundAnimManager::~CSoundAnimManager()
 {
-	if (_Instance == NULL)
+	if (_Instance == nullptr)
 		return;
 	/*
 	set<CSoundAnimPlayer*>::iterator iter;
@@ -63,7 +63,7 @@ CSoundAnimManager::~CSoundAnimManager()
 	_Players.clear();
 	*/
 
-	_Instance = NULL;
+	_Instance = nullptr;
 }
 
 // ********************************************************
@@ -99,7 +99,7 @@ TSoundAnimId CSoundAnimManager::loadAnimation(std::string& name)
 
 	CSoundAnimation* anim = _Animations[id];
 
-	if (anim == NULL)
+	if (anim == nullptr)
 		return CSoundAnimationNoId;
 
 	anim->setFilename(filename);
@@ -137,7 +137,7 @@ TSoundAnimId CSoundAnimManager::createAnimation(std::string& name)
 CSoundAnimation* CSoundAnimManager::findAnimation(std::string& name)
 {
 	TSoundAnimMap::iterator iter = _IdMap.find(name.c_str());
-	return (iter == _IdMap.end())? 0 : _Animations[(*iter).second];
+	return (iter == _IdMap.end())? nullptr : _Animations[(*iter).second];
 }
 
 // ********************************************************

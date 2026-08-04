@@ -45,13 +45,13 @@ namespace STRING_MANAGER
 	map<string, string> CStringManagerClient::_DynStrings;
 	vector<string> CStringManagerClient::_TitleWords;
 	bool CStringManagerClient::_SpecItem_MemoryCompressed = false;
-	char *CStringManagerClient::_SpecItem_Labels = NULL;
-	char *CStringManagerClient::_SpecItem_NameDesc = NULL;
+	char *CStringManagerClient::_SpecItem_Labels = nullptr;
+	char *CStringManagerClient::_SpecItem_NameDesc = nullptr;
 	vector<CStringManagerClient::CItemLight> CStringManagerClient::_SpecItems;
 	bool MustReleaseStaticArrays = true;
 
 
-	CStringManagerClient *CStringManagerClient::_Instance= NULL;
+	CStringManagerClient *CStringManagerClient::_Instance = nullptr;
 	string CStringManagerClient::_WaitString("???");
 
 
@@ -72,9 +72,9 @@ namespace STRING_MANAGER
 			if (_SpecItem_MemoryCompressed)
 			{
 				delete [] _SpecItem_Labels;
-				_SpecItem_Labels = NULL;
+				_SpecItem_Labels = nullptr;
 				delete [] _SpecItem_NameDesc;
-				_SpecItem_NameDesc = NULL;
+				_SpecItem_NameDesc = nullptr;
 				_SpecItems.clear();
 				_SpecItem_MemoryCompressed = false;
 			}
@@ -84,7 +84,7 @@ namespace STRING_MANAGER
 
 	CStringManagerClient *CStringManagerClient::instance()
 	{
-		if (_Instance == 0)
+		if (_Instance == nullptr)
 			_Instance = new CStringManagerClient();
 
 		return _Instance;
@@ -92,13 +92,13 @@ namespace STRING_MANAGER
 
 	void CStringManagerClient::release(bool mustReleaseStaticArrays)
 	{
-		if (_Instance != 0)
+		if (_Instance != nullptr)
 		{
 			bool prev = MustReleaseStaticArrays;
 			MustReleaseStaticArrays = mustReleaseStaticArrays;
 			delete _Instance;
 			MustReleaseStaticArrays = prev;
-			_Instance  =0;
+			_Instance  =nullptr;
 		}
 	}
 
@@ -238,7 +238,7 @@ namespace STRING_MANAGER
 	{
 		H_AUTO( CStringManagerClient_waitString2 )
 
-		nlassert(pcallback != 0);
+		nlassert(pcallback != nullptr);
 		string value;
 		if (getString(stringId, value))
 		{
@@ -274,7 +274,7 @@ namespace STRING_MANAGER
 	{
 		H_AUTO( CStringManagerClient_waitDynString2 )
 
-		nlassert(pcallback != 0);
+		nlassert(pcallback != nullptr);
 		string value;
 		if (getDynString(stringId, value))
 		{

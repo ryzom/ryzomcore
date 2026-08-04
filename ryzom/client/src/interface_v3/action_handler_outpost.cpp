@@ -49,7 +49,7 @@ uint8 getOutpostSelection()
 {
 	uint8 nOutpost = 0;
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SELECTION",false);
-	if (pNL != NULL)
+	if (pNL != nullptr)
 		nOutpost = (uint8)pNL->getValue32();
 	return nOutpost;
 }
@@ -59,7 +59,7 @@ uint32 getOutpostSheet()
 	uint32	sheet= 0;
 	uint8	outpostSel= getOutpostSelection();
 	CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GUILD:OUTPOST:O%d:SHEET", outpostSel),false);
-	if (pNL != NULL)
+	if (pNL != nullptr)
 		sheet = pNL->getValue32();
 	return sheet;
 }
@@ -93,7 +93,7 @@ public:
 		uint8	outpostSel;
 		fromString(sParams, outpostSel);
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:GUILD:OUTPOST:O%d:SHEET", outpostSel),false);
-		if (pNL == NULL)
+		if (pNL == nullptr)
 			return;
 		sheet = pNL->getValue32();
 
@@ -212,7 +212,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
-		if (pMap == NULL)
+		if (pMap == nullptr)
 			return;
 
 		// Get the spawn index (from selected squad)
@@ -248,7 +248,7 @@ public:
 
 		// *** Find the finest map that contains the 2 points xMin,yMin and xMax,yMax
 		CWorldSheet *pWorldSheet = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
-		if (pWorldSheet == NULL)
+		if (pWorldSheet == nullptr)
 			return;
 
 		sint32 nMapFound = -1;
@@ -318,7 +318,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupMap *pMap = dynamic_cast<CGroupMap*>(CWidgetManager::getInstance()->getElementFromId(sParams));
-		if (pMap == NULL)
+		if (pMap == nullptr)
 			return;
 
 		// Get the spawn index (from selected squad)

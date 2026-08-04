@@ -130,32 +130,32 @@ NLMISC::CRGBA	CUserLandMark::getColor () const
 //===================================================================================
 CFogOfWar::~CFogOfWar()
 {
-	if (Tx != NULL)
+	if (Tx != nullptr)
 		Driver->deleteTextureMem(Tx);
 }
 
 //===================================================================================
 uint8 *CFogOfWar::getData()
 {
-	return (Tx != NULL) ? Tx->getPointer() : NULL;
+	return (Tx != nullptr) ? Tx->getPointer() : nullptr;
 }
 
 //===================================================================================
 sint16 CFogOfWar::getRealWidth()
 {
-	return (Tx != NULL) ? (sint16)Tx->getImageWidth() : 0;
+	return (Tx != nullptr) ? (sint16)Tx->getImageWidth() : 0;
 }
 
 //===================================================================================
 sint16 CFogOfWar::getRealHeight()
 {
-	return (Tx != NULL) ? (sint16)Tx->getImageHeight() : 0;
+	return (Tx != nullptr) ? (sint16)Tx->getImageHeight() : 0;
 }
 
 //===================================================================================
 bool CFogOfWar::createData(sint16 w, sint16 h)
 {
-	if (Tx != NULL)
+	if (Tx != nullptr)
 		Driver->deleteTextureMem(Tx);
 
 	MapWidth = w;
@@ -164,7 +164,7 @@ bool CFogOfWar::createData(sint16 w, sint16 h)
 	uint32 HReal = NLMISC::raiseToNextPowerOf2(MapHeight);
 
 	Tx = Driver->createTextureMem(WReal, HReal, CBitmap::Alpha);
-	if (Tx == NULL)
+	if (Tx == nullptr)
 		return false;
 
 	Tx->setWrapS(NL3D::UTexture::Clamp);
@@ -184,7 +184,7 @@ bool CFogOfWar::createData(sint16 w, sint16 h)
 void CFogOfWar::explored(sint16 /* mapPosX */, sint16 /* mapPosY */)
 {
 	// TODO trap : do something better than upload the whole texture
-	if (Tx != NULL)
+	if (Tx != nullptr)
 		Tx->touch();
 }
 
@@ -289,11 +289,11 @@ void CContinent::setup()
 	}
 
 	CEntitySheet *pES = SheetMngr.get(CSheetId (SheetName));
-	CContinentSheet *pCS = NULL;
+	CContinentSheet *pCS = nullptr;
 	if (pES->type() == CEntitySheet::CONTINENT)
 		pCS = (CContinentSheet*)pES;
 
-	if (pCS == NULL)
+	if (pCS == nullptr)
 	{
 		nlwarning("Bad type for continent form %s.", SheetName.c_str());
 		return;
@@ -348,7 +348,7 @@ void CContinent::setup()
 		bool	mustAddRuins= pCS->Continent.ZCList[k].EnableRuins;
 
 		// add a village for ruins display?
-		CVillage	*village= NULL;
+		CVillage	*village = nullptr;
 		if(mustAddRuins)
 		{
 			village = new CVillage;
@@ -357,7 +357,7 @@ void CContinent::setup()
 			else
 			{
 				delete village;
-				village= NULL;
+				village = nullptr;
 			}
 		}
 
@@ -382,7 +382,7 @@ CPCBank PCBank;
 
 static uint getNumZones()
 {
-	if (Landscape == NULL) return 0;
+	if (Landscape == nullptr) return 0;
 	std::vector<std::string> zoneLoaded;
 	Landscape->getAllZoneLoaded(zoneLoaded);
 	return (uint)zoneLoaded.size();
@@ -498,7 +498,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 			if(!pacsRBankPath.empty() && !pacsGRPath.empty())
 				initPACS(pacsRBankPath.c_str(), pacsGRPath.c_str(), progress);
 			else
-				initPACS(0, 0, progress);
+				initPACS(nullptr, nullptr, progress);
 			// Set the move container
 			if (IGCallbacks) IGCallbacks->setMoveContainer(PACS);
 		}
@@ -696,7 +696,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 		initWaterMap();
 	}
 
-	const R2::CScenarioEntryPoints::CCompleteIsland *completeIsland = NULL;
+	const R2::CScenarioEntryPoints::CCompleteIsland *completeIsland = nullptr;
 	{
 		progress.pushCropedValues (0, 3.f/4.f);
 
@@ -721,7 +721,7 @@ void CContinent::select(const CVectorD &pos, NLMISC::IProgressCallback &progress
 					vector<string>		zonesAdded;
 					vector<string>		zonesRemoved;
 					completeIsland = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
-					Landscape->refreshAllZonesAround(pos, ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, progress, completeIsland ? &(completeIsland->ZoneIDs) : NULL);
+					Landscape->refreshAllZonesAround(pos, ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, progress, completeIsland ? &(completeIsland->ZoneIDs) : nullptr);
 					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
 					LandscapeIGManager.loadArrayZoneIG(zonesAdded, &igAdded);
 				}
@@ -925,7 +925,7 @@ void CContinent::unselect()
 			nlassert(SceneRoot);
 			BackgroundIG->removeFromScene (*SceneRoot);
 			SceneRoot->deleteInstanceGroup (BackgroundIG);
-			BackgroundIG = NULL;
+			BackgroundIG = nullptr;
 		}
 	}
 
@@ -933,7 +933,7 @@ void CContinent::unselect()
 	removeOutpost();
 
 	// Unregister callback on streaming
-	CAsyncFileManager::getInstance().registerTaskPriorityCallback(NULL);
+	CAsyncFileManager::getInstance().registerTaskPriorityCallback(nullptr);
 
 	// Remove the primitive for all entitites (new PACS coming soon and need new primitives).
 	EntitiesMngr.removeCollision();
@@ -984,7 +984,7 @@ void CContinent::unselect()
 	// Release water envmap
 	#ifdef USE_WATER_ENV_MAP
 	Driver->deleteWaterEnvMap(WaterEnvMap);
-	WaterEnvMap = NULL;
+	WaterEnvMap = nullptr;
 	#endif
 }
 
@@ -1002,7 +1002,7 @@ static void overrideFog(CFogState &dest, TFogType fogType, float dayNight, float
 	// override the fog by the fog indicated in the WeatherManager
 	NLMISC::CRGBA fogColor;
 	// if there's a new style sky with a fog bitmap *(giving fog depending on hour & weather, use it)
-	if (ContinentMngr.cur() && ContinentMngr.cur()->CurrentSky.getScene() != NULL && ContinentMngr.cur()->CurrentSky.hasFogColor())
+	if (ContinentMngr.cur() && ContinentMngr.cur()->CurrentSky.getScene() != nullptr && ContinentMngr.cur()->CurrentSky.hasFogColor())
 	{
 		fogColor = ContinentMngr.cur()->CurrentSky.computeFogColor(CClientDate(RT.getRyzomDay(), (float) DayNightCycleHour), WeatherManager.getWeatherValue());
 	}
@@ -1166,7 +1166,7 @@ COutpost	*CContinent::getOutpost (uint outpostId)
 		if(_Outposts[i].getOutpostId()==(sint)outpostId)
 			return &_Outposts[i];
 	}
-	return NULL;
+	return nullptr;
 }
 
 //=========================================================================
@@ -1384,9 +1384,9 @@ void CContinent::releaseSky()
 		SkyScene->deleteInstance (Sky);
 		SkyScene->deleteInstance (Sky2ndPass);
 		SkyScene->deleteInstance(SkyFogPart);
-		Sky = NULL;
-		Sky2ndPass = NULL;
-		SkyFogPart = NULL;
+		Sky = nullptr;
+		Sky2ndPass = nullptr;
+		SkyFogPart = nullptr;
 	}
 	deleteSkyScene();
 

@@ -82,10 +82,10 @@ void CScenario::serial( NLMISC::IStream &f)
 CScenario::CScenario(CObject* object, TScenarioSessionType sessionType)
 {
 	_HighLevel = object;
-	_BasicBricks = 0;
+	_BasicBricks = nullptr;
 	_InstanceMap = new CInstanceMap("InstanceId");
 	if (object){_InstanceMap->add(object);}
-	_Palette = 0;
+	_Palette = nullptr;
 
 	_Mode = 1;
 	_SessionType = sessionType;
@@ -110,7 +110,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 	if (!src)
 	{
 		nlwarning("Can't find object with id '%s' (looking for attribute '%s[%d]' or '...[%s]')", instanceId.c_str(), attrName.c_str(), (int)position, key.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if (!attrName.empty())
 	{
@@ -118,7 +118,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 		if (!subObj)
 		{
 			nlwarning("Can't find attribute %s inside object with InstanceId =  %s", attrName.c_str(), instanceId.c_str());
-			return NULL;
+			return nullptr;
 		}
 		src = subObj;
 	}
@@ -128,7 +128,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 		if (!subObj)
 		{
 			nlwarning("Can't find attribute %s[%d] inside object with InstanceId =  %s", attrName.c_str(), (int) position, instanceId.c_str());
-			return NULL;
+			return nullptr;
 		}
 		src = subObj;
 	}
@@ -138,7 +138,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 		if (!subObj)
 		{
 			nlwarning("Can't find attribute %s['%s'] inside object with InstanceId =  %s", attrName.c_str(), key.c_str(), instanceId.c_str());
-			return NULL;
+			return nullptr;
 		}
 		src = subObj;
 	}
@@ -432,7 +432,7 @@ CObject* CInstanceMap::find (const std::string& instanceId)
 	std::map< std::string , CObject::TRefPtr>::const_iterator found = _Map.find(instanceId);
 	if (found != _Map.end()) { return found->second; }
 
-	return 0;
+	return nullptr;
 }
 
 sint32 CInstanceMap::getMaxId(const std::string& eid)
@@ -478,9 +478,9 @@ bool CScenario::isWaiting() const
 
 CUserComponent::CUserComponent()
 {
-	UncompressedData = 0;
+	UncompressedData = nullptr;
 	UncompressedDataLength = 0;
-	CompressedData = 0;
+	CompressedData = nullptr;
 	CompressedDataLength = 0;
 }
 

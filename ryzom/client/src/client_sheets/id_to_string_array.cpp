@@ -31,7 +31,7 @@ CIDToStringArraySheet::CIDToStringArraySheet()
 // *******************************************************************************************
 void CIDToStringArraySheet::build(const NLGEORGES::UFormElm &item)
 {
-	const UFormElm *stringArray = NULL;
+	const UFormElm *stringArray = nullptr;
 	if (item.getNodeByName(&stringArray, "Array") && stringArray)
 	{
 		std::string str;
@@ -40,7 +40,7 @@ void CIDToStringArraySheet::build(const NLGEORGES::UFormElm &item)
 		Array.reserve(numStr);
 		for(uint k = 0; k < numStr; ++k)
 		{
-			const UFormElm *strNode = NULL;
+			const UFormElm *strNode = nullptr;
 			if (stringArray->getArrayNode(&strNode, k) && strNode)
 			{
 				Array.push_back(CIDToString());

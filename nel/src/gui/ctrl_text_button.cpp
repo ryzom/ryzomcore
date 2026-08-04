@@ -54,7 +54,7 @@ namespace NLGUI
 		_TextX= 0;
 		_TextY= 0;
 		_Setuped= false;
-		_ViewText= NULL;
+		_ViewText = nullptr;
 		_IsViewTextId= false;
 		_TextColorNormal= CRGBA(255, 255, 255, 255);
 		_TextColorPushed= CRGBA(255, 255, 255, 255);
@@ -73,17 +73,17 @@ namespace NLGUI
 
 	CCtrlTextButton::~CCtrlTextButton()
 	{
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 		{
 			delete _ViewText;
-			_ViewText = NULL;
+			_ViewText = nullptr;
 		}
 	}
 
 	std::string CCtrlTextButton::getProperty( const std::string &name ) const
 	{
 		std::string prop;
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 			prop = _ViewText->getTextProperty( name );
 
 		if( !prop.empty() )
@@ -136,7 +136,7 @@ namespace NLGUI
 		else
 		if( name == "hardtext" )
 		{
-			if( _ViewText != NULL )
+			if( _ViewText != nullptr)
 				return _ViewText->getHardText();
 			else
 				return std::string( "" );
@@ -154,7 +154,7 @@ namespace NLGUI
 		else
 		if( name == "text_underlined" )
 		{
-			if( _ViewText != NULL )
+			if( _ViewText != nullptr)
 				return toString( _ViewText->getUnderlined() );
 			else
 				return std::string( "" );
@@ -234,7 +234,7 @@ namespace NLGUI
 
 	void CCtrlTextButton::setProperty( const std::string &name, const std::string &value )
 	{
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 		{
 			if( _ViewText->setTextProperty( name, value ) )
 			{
@@ -316,7 +316,7 @@ namespace NLGUI
 		else
 		if( name == "hardtext" )
 		{
-			if( _ViewText != NULL )
+			if( _ViewText != nullptr)
 				_ViewText->setHardText( value );
 			return;
 		}
@@ -340,7 +340,7 @@ namespace NLGUI
 		if( name == "text_underlined" )
 		{
 			bool b;
-			if( _ViewText != NULL )
+			if( _ViewText != nullptr)
 				if( fromString( value, b ) )
 					_ViewText->setUnderlined( b );
 
@@ -454,8 +454,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlTextButton::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBaseButton::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_button" );
 		
@@ -516,7 +516,7 @@ namespace NLGUI
 		xmlNewProp( node, BAD_CAST "force_text_over", BAD_CAST toString( _ForceTextOver ).c_str() );
 		xmlNewProp( node, BAD_CAST "text_header_color", BAD_CAST toString( _TextHeaderColor ).c_str() );
 
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 			_ViewText->serializeTextOptions( node );
 
 		return node;
@@ -655,7 +655,7 @@ namespace NLGUI
 		{
 			char *seekPtr = prop.getDatas();
 			seekPtr = strtok(seekPtr," \t");
-			if (seekPtr == NULL)
+			if (seekPtr == nullptr)
 			{
 				// mean that there s a bad formated posref (missing space or tab)
 				nlwarning("bad 'text_pos_ref' formatting");
@@ -769,7 +769,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CCtrlTextButton::draw ()
 	{
-		CViewRenderer::CTextureId *pTxId = NULL;
+		CViewRenderer::CTextureId *pTxId = nullptr;
 		CRGBA  color;
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
@@ -866,7 +866,7 @@ namespace NLGUI
 		if( ( !editorMode && _Over && (_OverWhenPushed || !(_Pushed ||  capturePointerLeft == this ) ) ) 
 		)
 		{
-			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL) )
+			if( !editorMode && (lastOver == false) && (_AHOnOver != nullptr) )
 				CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);
 
 			// the pointer is over the button.
@@ -899,7 +899,7 @@ namespace NLGUI
 			}
 		}
 		// Setup ViewText color
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 		{
 			if ( pTxId==_TextureIdNormal || editorMode )
 			{
@@ -935,7 +935,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CCtrlTextButton::checkCoords()
 	{
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 			_ViewText->checkCoords();
 
 		CCtrlBaseButton::checkCoords();
@@ -980,7 +980,7 @@ namespace NLGUI
 	{
 		_Setuped= true;
 
-		if( _ViewText == NULL )
+		if( _ViewText == nullptr)
 		{
 			CViewBase *v = CInterfaceFactory::createClass( "text" );
 			nlassert( v != NULL );
@@ -1126,7 +1126,7 @@ namespace NLGUI
 	{
 		CInterfaceElement::moveBy( x, y );
 
-		if( _ViewText != NULL )
+		if( _ViewText != nullptr)
 			_ViewText->updateCoords();
 	}
 }

@@ -43,7 +43,7 @@ public:
 	/** create the quad by giving a texture. This can't be a CTextureGrouped (for animation)
 	* animation must be set later by using setTextureScheme
 	*/
-	CPSQuad(CSmartPtr<ITexture> tex = NULL);
+	CPSQuad(CSmartPtr<ITexture> tex = nullptr);
 
 
 	/// return true if there are transparent faces in the object

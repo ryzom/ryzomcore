@@ -61,11 +61,11 @@ namespace NLGUI
 					// the mouse capture should be lost when the ctrl is hidden
 					if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 					{
-						CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+						CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
 					}
 					if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
 					{
-						CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+						CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 					}
 					// NB : don't call return here because derived class may be interested
 					// in handling event more speciffically
@@ -380,8 +380,8 @@ namespace NLGUI
 		xmlNodePtr node =
 			CInterfaceElement::serialize( parentNode, type );
 
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlNewProp( node, BAD_CAST "tooltip", BAD_CAST _ContextHelp.c_str() );
 		xmlNewProp( node, BAD_CAST "tooltip_i18n", BAD_CAST _ContextHelp.c_str() );
@@ -534,7 +534,7 @@ namespace NLGUI
 		uint32 depth = 1;
 		CInterfaceGroup *parent = getParent();
 
-		while( parent != NULL )
+		while( parent != nullptr)
 		{
 			if ( parent == group )
 				break;

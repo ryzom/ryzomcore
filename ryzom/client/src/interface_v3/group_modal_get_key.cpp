@@ -59,14 +59,14 @@ void CGroupModalGetKey::setActive (bool state)
 	if (state == true)
 		CWidgetManager::getInstance()->setCaptureKeyboard (this);
 	else
-		CWidgetManager::getInstance()->setCaptureKeyboard (NULL);
+		CWidgetManager::getInstance()->setCaptureKeyboard (nullptr);
 
 	CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
-	if (pVT != NULL) pVT->setText(string(""));
+	if (pVT != nullptr) pVT->setText(string(""));
 	pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_INUSE ));
-	if (pVT != NULL) pVT->setText(string(""));
+	if (pVT != nullptr) pVT->setText(string(""));
 	CCtrlBaseButton *pCB= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( CTRL_BUTTON_OK ));
-	if (pCB != NULL) pCB->setFrozen(true);
+	if (pCB != nullptr) pCB->setFrozen(true);
 
 	CGroupModal::setActive(state);
 }
@@ -90,10 +90,10 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 				// Setup the text !
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				CViewText *pVT= dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId( VIEW_TEXT_KEY ));
-				if (pVT != NULL) pVT->setText(Combo.toString());
+				if (pVT != nullptr) pVT->setText(Combo.toString());
 
 				// Check if in use
-				CActionsManager *pCurAM = NULL;
+				CActionsManager *pCurAM = nullptr;
 				CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 				if ((Caller == "newkey") || (Caller == "editkey"))
@@ -101,7 +101,7 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 				if (Caller == "editcmd")
 					pCurAM = pMCM->EditCmd->CurAM;
 
-				if (pCurAM != NULL)
+				if (pCurAM != nullptr)
 				{
 					const CActionsManager::TComboActionMap &keyShortcut = pCurAM->getComboActionMap();
 					CActionsManager::TComboActionMap::const_iterator it = keyShortcut.find(Combo);
@@ -112,18 +112,18 @@ bool CGroupModalGetKey::handleEvent (const NLGUI::CEventDescriptor &event)
 						if (baseAction && pCurAM->isActionPresentInContext(it->second))
 						{
 							string shortcutName = baseAction->getActionLocalizedText(it->second);
-							if (pVT != NULL) pVT->setText(shortcutName);
+							if (pVT != nullptr) pVT->setText(shortcutName);
 						}
 					}
 					else
 					{
-						if (pVT != NULL) pVT->setText(string());
+						if (pVT != nullptr) pVT->setText(string());
 					}
 				}
 
 				// Show the ok button
 				CCtrlBaseButton *pCB= dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId( CTRL_BUTTON_OK ));
-				if (pCB != NULL) pCB->setFrozen(false);
+				if (pCB != nullptr) pCB->setFrozen(false);
 			}
 //		}
 

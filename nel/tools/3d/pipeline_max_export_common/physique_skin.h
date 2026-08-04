@@ -81,7 +81,7 @@ struct SBoneWeight
 bool decodePhysiqueWeights(PIPELINE::MAX::CSceneClass *mod,
                            PIPELINE::MAX::CStorageContainer *modApp,
                            std::vector<std::vector<SBoneWeight> > &outVertWeights,
-                           std::string *err = NULL);
+                           std::string *err = nullptr);
 
 /// Walk the skeleton tree rooted at `root` (scene-order children) into a bone-id map + name list,
 /// matching the reference's buildSkeletonShape mapId convention (duplicate names get "_Second").
@@ -106,8 +106,8 @@ bool applyPhysiqueSkinning(NL3D::CMesh::CMeshBuild &buildMesh,
                            const std::vector<PIPELINE::MAX::CSceneClass *> &mods,
                            const std::vector<PIPELINE::MAX::CStorageContainer *> &modApps,
                            PIPELINE::MAX::CSceneClassContainer *ssc,
-                           std::string *err = NULL,
-                           std::vector<PIPELINE::MAX::BUILTIN::INode *> *boneNodesOut = NULL);
+                           std::string *err = nullptr,
+                           std::vector<PIPELINE::MAX::BUILTIN::INode *> *boneNodesOut = nullptr);
 
 } /* namespace PHYSIQUESKIN */
 

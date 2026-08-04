@@ -141,7 +141,7 @@ extern CEntityManager				EntitiesMngr;
 // Variables //
 ///////////////
 
-NLLIGO::CPrimitives *LDPrim = 0;
+NLLIGO::CPrimitives *LDPrim = nullptr;
 static std::vector<UInstance> ShapeAddedByCommand; // list of shapes added with the 'shape' command
 
 
@@ -156,7 +156,7 @@ void releaseCommands()
 	if(LDPrim)
 	{
 		delete LDPrim;
-		LDPrim = 0;
+		LDPrim = nullptr;
 	}
 }
 
@@ -397,7 +397,7 @@ NLMISC_COMMAND(afk, "Set the player as 'away from keyboard'","[<custom text>]")
 		customText += args[i];
 	}
 
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		UserEntity->setAFK(true,customText);
 /*
 	CBitMemStream out;
@@ -508,7 +508,7 @@ NLMISC_COMMAND(random, "Roll a dice and say the result around","[<min>] <max> [h
 	if (min>max)
 		std::swap(min, max);
 
-	if (UserEntity != NULL)
+	if (UserEntity != nullptr)
 		UserEntity->rollDice(min, max, hide);
 
 	return true;
@@ -874,7 +874,7 @@ NLMISC_COMMAND(bugReport, "Call the bug report tool with dump", "<AddScreenshot>
 		sys += "ShardName OFFLINE ";
 
 	FILE *fp = nlfopen (getLogDirectory() + "bug_report.txt", "wb");
-	if (fp != NULL)
+	if (fp != nullptr)
 	{
 		string res = addSlashR(getDebugInformation());
 
@@ -5372,7 +5372,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
 	// Find the good keyword table
-	CMode *mode = NULL;
+	CMode *mode = nullptr;
 	if (FixedArgModes.find ((uint)args.size()) != FixedArgModes.end())
 		mode = &(FixedArgModes[(uint)args.size()]);
 	else
@@ -5901,7 +5901,7 @@ NLMISC_COMMAND(em, "emote command", "<emote phrase>")
 			emotePhrase += " ";
 			emotePhrase += args[i];
 		}
-		CAHManager::getInstance()->runActionHandler("emote", NULL, "nb=0|behav=255|custom_phrase="+emotePhrase);
+		CAHManager::getInstance()->runActionHandler("emote", nullptr, "nb=0|behav=255|custom_phrase="+emotePhrase);
 		return true;
 	}
 	return false;

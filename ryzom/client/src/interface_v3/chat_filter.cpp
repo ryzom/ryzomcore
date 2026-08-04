@@ -150,7 +150,7 @@ CChatWindow *CChatInputFilter::getListeningWindow(uint index)
 	if (index > _ListeningWindows.size())
 	{
 		nlwarning("bad index");
-		return NULL;
+		return nullptr;
 	}
 	return _ListeningWindows[index];
 }
@@ -182,7 +182,7 @@ void CChatInputFilter::displayMessage(const string &msg, NLMISC::CRGBA col, uint
 	// If at least one window is visible, no need to make the window blink.
 	for(it = _ListeningWindows.begin(); it != _ListeningWindows.end(); ++it)
 	{
-		(*it)->displayMessage(msg, col, FilterType, DynamicChatDbIndex, windowVisibleTmp ? 0  : numBlinks, NULL);
+		(*it)->displayMessage(msg, col, FilterType, DynamicChatDbIndex, windowVisibleTmp ? 0  : numBlinks, nullptr);
 	}
 	if (windowVisible) *windowVisible = windowVisibleTmp;
 }
@@ -198,7 +198,7 @@ void CChatInputFilter::displayTellMessage(/*TDataSetIndex &receiverIndex, */cons
 	for(peopleListIt = _ListeningPeopleList.begin(); peopleListIt != _ListeningPeopleList.end(); ++peopleListIt)
 	{
 		CPeopleList *pPList = *peopleListIt;
-		if (pPList != NULL)
+		if (pPList != nullptr)
 		{
 			sint peopleIndex = pPList->getIndexFromName(senderLwr);
 			if (peopleIndex != -1)
@@ -243,7 +243,8 @@ void CChatInputFilter::clearMessages()
 
 
 //=============================================================================================================
-CChatTargetFilter::CChatTargetFilter() : _Chat(NULL), _TargetPartyChat(NULL)
+CChatTargetFilter::CChatTargetFilter() : _Chat(nullptr)
+    , _TargetPartyChat(nullptr)
 {
 	_TargetGroup= CChatGroup::say;
 	_TargetDynamicChannelDbIndex= 0;
@@ -260,13 +261,13 @@ void CChatTargetFilter::chatWindowRemoved(CChatWindow *cw)
 {
 	if (cw == _TargetPartyChat)
 	{
-		_TargetPartyChat = NULL;
+		_TargetPartyChat = nullptr;
 		setTargetGroup(CChatGroup::say);
 		return;
 	}
 	if (cw == _Chat)
 	{
-		_Chat = NULL;
+		_Chat = nullptr;
 	}
 }
 
@@ -277,7 +278,7 @@ void CChatTargetFilter::setChat(CChatWindow *w)
 	{
 		if (_Chat->getListener() == this)
 		{
-			_Chat->setListener(NULL);
+			_Chat->setListener(nullptr);
 		}
 		_Chat->removeObserver(this);
 	}
@@ -340,7 +341,7 @@ void CChatTargetFilter::setTargetPlayer(const string &targetPlayer)
 	if (_TargetPartyChat)
 	{
 		_TargetPartyChat->removeObserver(this);
-		_TargetPartyChat = NULL;
+		_TargetPartyChat = nullptr;
 	}
 	// set the prompt
 	if (_Chat)
@@ -356,7 +357,7 @@ void CChatTargetFilter::setTargetGroup(CChatGroup::TGroupType groupType, uint32 
 	if (_TargetPartyChat)
 	{
 		_TargetPartyChat->removeObserver(this);
-		_TargetPartyChat = NULL;
+		_TargetPartyChat = nullptr;
 	}
 	_TargetGroup = groupType;
 	_TargetDynamicChannelDbIndex = dynamicChannelDbIndex;
@@ -407,16 +408,16 @@ void CChatTargetFilter::reset()
 	if (_TargetPartyChat)
 	{
 		_TargetPartyChat->removeObserver(this);
-		_TargetPartyChat = NULL;
+		_TargetPartyChat = nullptr;
 	}
 	if (_Chat)
 	{
 		_Chat->removeObserver(this);
 		if (_Chat->getListener() == this)
 		{
-			_Chat->setListener(NULL);
+			_Chat->setListener(nullptr);
 		}
-		_Chat = NULL;
+		_Chat = nullptr;
 	}
 }
 

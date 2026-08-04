@@ -143,7 +143,7 @@ public:
 	 *	NB: this list is valid until model->isNeedUpdateLighting() is true.
 	 */
 	void		computeModelLightContributions(NLMISC::CRGBA sunAmbient, CTransform *model, CLightContribution &lightContrib,
-		ILogicInfo *logicInfo= NULL);
+		ILogicInfo *logicInfo = nullptr);
 
 
 // ***********

@@ -65,21 +65,21 @@ const float *xEffVert(const SPatchMesh &pm, const SPatchMesh *evalPm, sint32 i)
 SPmMapVert *xVertRec(SPmVertMapper *mapper, sint32 idx)
 {
 	if (!mapper)
-		return NULL;
+		return nullptr;
 	for (size_t i = 0; i < mapper->VertMap.size(); ++i)
 		if (mapper->VertMap[i].Vert == idx)
 			return &mapper->VertMap[i];
-	return NULL;
+	return nullptr;
 }
 
 SPmMapVert *xVecRec(SPmVertMapper *mapper, sint32 idx)
 {
 	if (!mapper)
-		return NULL;
+		return nullptr;
 	for (size_t i = 0; i < mapper->VecMap.size(); ++i)
 		if (mapper->VecMap[i].Vert == idx)
 			return &mapper->VecMap[i];
-	return NULL;
+	return nullptr;
 }
 
 /// Translate one element by (dx, dy, dz), the Tier A rule: a MAPPED output moves through

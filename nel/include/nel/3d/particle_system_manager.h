@@ -95,7 +95,7 @@ private:
 		CAlwaysAnimatedPS()
 		{
 			NL_PS_FUNC(CAlwaysAnimatedPS_CAlwaysAnimatedPS)
-			Model = NULL;
+			Model = nullptr;
 			IsRelMatrix = false;
 			HasAncestorSkeleton = false;
 		}

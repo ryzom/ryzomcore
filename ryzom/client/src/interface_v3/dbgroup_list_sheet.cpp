@@ -62,12 +62,12 @@ CDBGroupListSheet::CDBGroupListSheet(const TCtorParam &param)
 	_WSlot= 24;
 	_WSpace= 0;
 	_HSpace= 0;
-	_ButtonAddRow= NULL;
-	_ButtonSubRow= NULL;
-	_ScrollBar= NULL;
-	_DummyGroup= NULL;
+	_ButtonAddRow = nullptr;
+	_ButtonSubRow = nullptr;
+	_ScrollBar = nullptr;
+	_DummyGroup = nullptr;
 	_Setuped= false;
-	_DbBranch= NULL;
+	_DbBranch = nullptr;
 	_Array= true;
 	_LeftMargin= 0;
 	_RightMargin= 0;
@@ -84,7 +84,7 @@ CDBGroupListSheet::CDBGroupListSheet(const TCtorParam &param)
 	_DbBranchObs.Owner= this;
 	_BranchModified= true;
 
-	_AnimalStatus= NULL;
+	_AnimalStatus = nullptr;
 	_CacheAnimalStatus= -1;
 
 	_ListLeaveSpace= false;
@@ -281,10 +281,10 @@ void CDBGroupListSheet::updateCoords ()
 
 	setup();
 	if (!_Active) return;
-	if (_Parent != NULL)
+	if (_Parent != nullptr)
 	{
 		if (!_Parent->getActive()) return;
-		if ((_Parent->getParent() != NULL) && (!_Parent->getParent()->getActive())) return;
+		if ((_Parent->getParent() != nullptr) && (!_Parent->getParent()->getActive())) return;
 	}
 
 	// NB: yStart<=0 because top down list.
@@ -337,7 +337,7 @@ void CDBGroupListSheet::updateCoords ()
 		{
 			// increment num sheet if the empty slot is to be displayed
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-			if (pCS != NULL && pCS->isSheetValid()) ++numValidSheets;
+			if (pCS != nullptr && pCS->isSheetValid()) ++numValidSheets;
 		}
 		_ColumnMax = (uint) (ceil(sqrtf((float) numValidSheets)));
 		wMax = _ColumnMax * _WSlot - _WSpace + xStart;
@@ -399,7 +399,7 @@ void CDBGroupListSheet::updateCoords ()
 		{
 			_SheetChildren[i]->Valid= true;
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-			if (pCS != NULL)
+			if (pCS != nullptr)
 			{
 				ctrl->setTextureNoItem (pCS->getTextureNoItem());
 				_SheetChildren[i]->Valid = pCS->isSheetValid();
@@ -716,11 +716,11 @@ void CDBGroupListSheet::draw ()
 	if (_CanDrop)
 	{
 		CGroupContainer *pGC = getContainer();
-		if (pGC != NULL) pGC->setHighLighted(false);
+		if (pGC != nullptr) pGC->setHighLighted(false);
 	}
 
 	_CanDrop = false;
-	if (_CtrlInfo._AHOnCanDrop != NULL)
+	if (_CtrlInfo._AHOnCanDrop != nullptr)
 	if (CWidgetManager::getInstance()->getCapturePointerLeft())
 	{
 		CGroupContainer *pGC = getContainer();
@@ -732,7 +732,7 @@ void CDBGroupListSheet::draw ()
 				(CWidgetManager::getInstance()->getPointer()->getY() <= (_YReal+ _HReal)))
 			{
 				CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-				if ((pCSSrc != NULL) && pCSSrc->isDragged())
+				if ((pCSSrc != nullptr) && pCSSrc->isDragged())
 				{
 					string params = string("src=") + pCSSrc->getId();
 					if (!_CtrlInfo._AHCanDropParams.empty())
@@ -746,7 +746,7 @@ void CDBGroupListSheet::draw ()
 		}
 
 		// Set the container highlighted
-		if (pGC != NULL) pGC->setHighLighted(_CanDrop);
+		if (pGC != nullptr) pGC->setHighLighted(_CanDrop);
 	}
 
 	CInterfaceGroup::draw();
@@ -768,7 +768,7 @@ bool CDBGroupListSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 		{
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
-				if (_ScrollBar != NULL)
+				if (_ScrollBar != nullptr)
 				{
 					// and scroll for 1+ item.
 					_ScrollBar->moveTargetY (-eventDesc.getWheel() * _HSlot);
@@ -778,7 +778,7 @@ bool CDBGroupListSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftup)
 			{
 				CGroupContainer *pGC = getContainer();
-				if (pGC != NULL) pGC->setHighLighted(false);
+				if (pGC != nullptr) pGC->setHighLighted(false);
 			}
 		}
 	}
@@ -846,7 +846,7 @@ void CDBGroupListSheet::setup()
 
 	// Create all ctrl childs
 	nbNodes += (_DisplayEmptySlot?1:0);
-	_SheetChildren.resize(nbNodes, NULL);
+	_SheetChildren.resize(nbNodes, nullptr);
 
 	// determine the inventory slot from the database branch id
 	int slotNum = CDBCtrlSheet::getInventorySlot( _DbBranchName );
@@ -933,7 +933,7 @@ sint CDBGroupListSheet::getIndexOf(const CDBCtrlSheet	*sheet) const
 // ***************************************************************************
 CDBCtrlSheet *CDBGroupListSheet::getSheet(uint index) const
 {
-	if (index >= _SheetChildren.size()) return NULL;
+	if (index >= _SheetChildren.size()) return nullptr;
 	return _SheetChildren[index]->Ctrl;
 }
 
@@ -954,7 +954,7 @@ sint32 CDBGroupListSheet::getNbElt () const
 		if ( (_DisplayEmptySlot) && (i == 0) )
 		{
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-			if (pCS != NULL)
+			if (pCS != nullptr)
 			{
 				ctrl->setTextureNoItem (pCS->getTextureNoItem());
 				bValid = pCS->isSheetValid();
@@ -1002,7 +1002,7 @@ public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 	{
 		CDBGroupListSheet *pLS = dynamic_cast<CDBGroupListSheet*>(pCaller->getParent());
-		if (pLS== NULL) return;
+		if (pLS == nullptr) return;
 		pLS->changeNbRow(+1);
 	}
 };
@@ -1015,7 +1015,7 @@ public:
 	virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
 	{
 		CDBGroupListSheet *pLS = dynamic_cast<CDBGroupListSheet*>(pCaller->getParent());
-		if (pLS== NULL) return;
+		if (pLS == nullptr) return;
 		pLS->changeNbRow(-1);
 	}
 };

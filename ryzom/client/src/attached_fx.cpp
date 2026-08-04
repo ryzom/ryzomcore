@@ -68,8 +68,8 @@ void CAttachedFX::clear()
 			Scene->deleteInstance(FX);
 		}
 	}
-	FX = NULL;
-	AniFX = NULL;
+	FX = nullptr;
+	AniFX = nullptr;
 	TimeOutDate = FX_MANAGER_DEFAULT_TIMEOUT;
 	StickMode = CFXStickMode::Follow;
 	MaxAnimCount = 0;
@@ -201,7 +201,7 @@ void CAttachedFX::create(CCharacterCL					 &parent,
 			}
 			SpawnPos = buildInfo.StickOffset;
 			TargeterUserBoneID =0xff;
-			if (targeterInfo.StickMode.UserBoneName != 0)
+			if (targeterInfo.StickMode.UserBoneName != nullptr)
 			{
 				CEntityCL *targeter =  EntitiesMngr.entity(TargeterInfo.Slot);
 				if (parent.skeleton() && targeter && targeter->skeleton())

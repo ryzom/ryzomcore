@@ -29,11 +29,11 @@ CLightContribution::CLightContribution()
 {
 	FrozenStaticLightSetup= false;
 	// empty the list.
-	PointLight[0]= NULL;
+	PointLight[0] = nullptr;
 	// default is to take fully light from the sun.
 	SunContribution= 255;
 
-	FrozenAmbientLight= NULL;
+	FrozenAmbientLight = nullptr;
 
 	UseMergedPointLight= false;
 }

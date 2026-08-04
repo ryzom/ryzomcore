@@ -104,7 +104,7 @@ static DECLARE_INTERFACE_USER_FCT(getMissionSmallIcon)
 
 	string sTexture = "Small_Task_Generic.tga";
 	CEntitySheet *pSheet= SheetMngr.get(CSheetId((sint32)args[0].getInteger()));
-	if (pSheet != NULL)
+	if (pSheet != nullptr)
 	{
 		if (pSheet->Type == CEntitySheet::MISSION_ICON)
 		{
@@ -1240,7 +1240,7 @@ static DECLARE_INTERFACE_USER_FCT(getSquadCost)
 
 	// Yoyo: avoid warning(bad type) if the sheet is Bad.
 	COutpostSquadSheet *pOSS = dynamic_cast<COutpostSquadSheet*>(SheetMngr.get(CSheetId(nSheet)));
-	if (pOSS == NULL)
+	if (pOSS == nullptr)
 		result.setInteger(0);
 	else
 		result.setInteger(pOSS->BuyPrice);

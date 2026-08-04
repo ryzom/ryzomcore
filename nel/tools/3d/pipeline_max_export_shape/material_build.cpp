@@ -250,7 +250,7 @@ struct SNelMtlParams
 	CSceneClass *getRef(uint block, uint16 id) const
 	{
 		const SPB2Param *p = findPB2Param(Blocks, block, id);
-		if (!p) return NULL;
+		if (!p) return nullptr;
 		return pb2RefValue(Blocks[block], *p);
 	}
 };
@@ -477,10 +477,10 @@ static std::string convertTexFileName(const std::string &path)
 // buildATexture: returns the texture and fills the channel description.
 static ITexture *buildATexture(CSceneClass *texmap, SMaterialDesc &remap, bool forceCubic, const std::string &mtlName)
 {
-	if (!texmap) return NULL;
+	if (!texmap) return nullptr;
 	NLMISC::CClassId cid = texmap->classDesc()->classId();
-	ITexture *pTexture = NULL;
-	CSceneClass *bmtexDelegate = NULL;
+	ITexture *pTexture = nullptr;
+	CSceneClass *bmtexDelegate = nullptr;
 
 	if (cid == CLASSID_NEL_BMTEX || cid == CLASSID_BMTEX)
 	{
@@ -583,13 +583,13 @@ static ITexture *buildATexture(CSceneClass *texmap, SMaterialDesc &remap, bool f
 	{
 		fprintf(stderr, "WARNING: material '%s': texmap class %s not supported\n",
 		        mtlName.c_str(), cid.toString().c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	// UV channel + matrix from the UVGen (delegate's reference 0)
 	SUVGen uvgen;
 	{
-		CSceneClass *uvgenObj = NULL;
+		CSceneClass *uvgenObj = nullptr;
 		CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(bmtexDelegate);
 		for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		{
@@ -1040,7 +1040,7 @@ static const SPB2Block *blockById(const std::vector<SPB2Block> &blocks, uint16 b
 {
 	for (uint i = 0; i < blocks.size(); ++i)
 		if (blocks[i].BlockId == blockId) return &blocks[i];
-	return NULL;
+	return nullptr;
 }
 
 static void buildAStdMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSceneClass *mtl, bool exportLighting)
@@ -1074,15 +1074,15 @@ static void buildAStdMaterial(CMaterial &material, SMaterialInfo &materialInfo, 
 	const SPB2Block *mapsBlk = blockById(blocks, STD2_BLOCK_MAPS);
 	const SPB2Block *extBlk = blockById(blocks, STD2_BLOCK_EXTENDED);
 	const SPB2Block *shBlk = blockById(blocks, STD2_BLOCK_SHADER);
-	const SPB2Block *shaderBlk = shaderBlocks.empty() ? NULL : &shaderBlocks[0];
+	const SPB2Block *shaderBlk = shaderBlocks.empty() ? nullptr : &shaderBlocks[0];
 
 	material.initLighted();
 
 	// Enabled texmaps in the diffuse/opacity/specular slots
-	CSceneClass *pDifTexmap = NULL, *pOpaTexmap = NULL, *pSpeTexmap = NULL;
+	CSceneClass *pDifTexmap = nullptr, *pOpaTexmap = nullptr, *pSpeTexmap = nullptr;
 	if (mapsBlk)
 	{
-		const SPB2Param *en = NULL, *maps = NULL;
+		const SPB2Param *en = nullptr, *maps = nullptr;
 		{
 			std::map<uint16, SPB2Param>::const_iterator it = mapsBlk->Params.find(STD2_MAPS_ENABLES);
 			if (it != mapsBlk->Params.end()) en = &it->second;
@@ -1282,7 +1282,7 @@ static void buildAMaterial(CMaterial &material, SMaterialInfo &materialInfo, CSc
 		if (version > 0 && version < 14)
 		{
 			CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(mtl);
-			CSceneClass *delegate = NULL;
+			CSceneClass *delegate = nullptr;
 			if (rm && rm->nbReferences() > 0)
 				delegate = dynamic_cast<CSceneClass *>(rm->getReference(0));
 			if (delegate && (delegate->classDesc()->classId() == CLASSID_STDMAT

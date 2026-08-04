@@ -615,7 +615,7 @@ namespace NLGUI
 		inline CInterfaceGroup *getDiv() const
 		{
 			if (_Divs.empty())
-				return NULL;
+				return nullptr;
 			return _Divs.back();
 		}
 
@@ -624,7 +624,7 @@ namespace NLGUI
 		inline CGroupTable *getTable() const
 		{
 			if (_Tables.empty())
-				return NULL;
+				return nullptr;
 			return _Tables.back();
 		}
 
@@ -650,11 +650,11 @@ namespace NLGUI
 			public:
 				CEntry ()
 				{
-					TextArea = NULL;
-					Checkbox = NULL;
-					ComboBox = NULL;
-					SelectBox = NULL;
-					sbRBRef = NULL;
+					TextArea = nullptr;
+					Checkbox = nullptr;
+					ComboBox = nullptr;
+					SelectBox = nullptr;
+					sbRBRef = nullptr;
 					sbMultiple = false;
 					sbOptionDisabled = -1;
 					InitialSelection = 0;
@@ -850,7 +850,9 @@ namespace NLGUI
 		{
 		public:
 			CDataDownload(const std::string &u, const std::string &d)
-				: ICurlDownloadCB(u), data(NULL), fp(NULL), dest(d), redirects(0), ConnectionTimeout(60)
+				: ICurlDownloadCB(u), data(nullptr)
+		        , fp(nullptr)
+		        , dest(d), redirects(0), ConnectionTimeout(60)
 			{}
 			virtual ~CDataDownload() NL_OVERRIDE;
 

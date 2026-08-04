@@ -60,15 +60,15 @@ namespace NLGUI
 		_LeftLongClickHandled = true;
 		_LeftDblClickHandled = false;
 		_ClickWhenPushed = false;
-		_RBRefBut = NULL;
-		_RBRef = NULL;
+		_RBRefBut = nullptr;
+		_RBRef = nullptr;
 
-		_AHOnOver = NULL;
-		_AHOnLeftClick = NULL;
-		_AHOnRightClick = NULL;
-		_AHOnClockTick = NULL;
-		_AHOnLeftLongClick = NULL;
-		_AHOnLeftDblClick = NULL;
+		_AHOnOver = nullptr;
+		_AHOnLeftClick = nullptr;
+		_AHOnRightClick = nullptr;
+		_AHOnClockTick = nullptr;
+		_AHOnLeftLongClick = nullptr;
+		_AHOnLeftDblClick = nullptr;
 	}
 
 	std::string CCtrlBaseButton::getProperty( const std::string &name ) const
@@ -414,8 +414,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlBaseButton::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "button" );
 		xmlNewProp( node, BAD_CAST "button_type", BAD_CAST getTypeString().c_str() );
@@ -661,18 +661,18 @@ namespace NLGUI
 					{
 						CAHManager::getInstance()->runActionHandler (_AHOnLeftDblClick, this, _AHLeftDblClickParams);
 						_LeftDblClickHandled = true;
-						_LastLeftClickButton = NULL;
+						_LastLeftClickButton = nullptr;
 						return true;
 					}
 				}
 
-				if (_AHOnLeftLongClick != NULL)
+				if (_AHOnLeftLongClick != nullptr)
 				{
 					_LeftLongClickHandled = false;
 					_LeftLongClickDate = T1;
 				}
 				_LeftDblClickHandled = false;
-				_LastLeftClickButton = NULL;
+				_LastLeftClickButton = nullptr;
 				return true;
 			}
 
@@ -719,13 +719,13 @@ namespace NLGUI
 				_EventY = (_YReal + _HReal) - eventDesc.getY();
 
 				runLeftClickAction();
-				if (CWidgetManager::getInstance()->getCapturePointerLeft() == NULL) return true; // event handler may release cpature from this object (if it is removed for example)
+				if (CWidgetManager::getInstance()->getCapturePointerLeft() == nullptr) return true; // event handler may release cpature from this object (if it is removed for example)
 
 				// Run Menu
 				if (!_ListMenuLeft.empty())
 					CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuLeft);
 
-				if (_AHOnLeftDblClick != NULL)
+				if (_AHOnLeftDblClick != nullptr)
 				{
 					_LastLeftClickDate   = T1;
 					_LastLeftClickButton = this;
@@ -736,23 +736,23 @@ namespace NLGUI
 			}
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightdown)
 			{
-				_LastLeftClickButton = NULL;
+				_LastLeftClickButton = nullptr;
 				return true;
 			}
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
-				_LastLeftClickButton = NULL;
+				_LastLeftClickButton = nullptr;
 				bool	handled= false;
 				if (CWidgetManager::getInstance()->getCapturePointerRight() != this)
 					return false;
 
 				// RunAction
-				if(_AHOnRightClick != NULL)
+				if(_AHOnRightClick != nullptr)
 				{
 					handled= true;
 					CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
 				}
-				if (CWidgetManager::getInstance()->getCapturePointerRight() == NULL) return true; // if this become NULL, this ctrl has been deleted
+				if (CWidgetManager::getInstance()->getCapturePointerRight() == nullptr) return true; // if this become NULL, this ctrl has been deleted
 				// Run Menu
 				if (!_ListMenuRight .empty())
 				{
@@ -770,7 +770,7 @@ namespace NLGUI
 			const NLGUI::CEventDescriptorSystem &systemEvent = (const NLGUI::CEventDescriptorSystem &) event;
 			if (systemEvent.getEventTypeExtended() == NLGUI::CEventDescriptorSystem::clocktick)
 			{
-				if (_AHOnClockTick != NULL)
+				if (_AHOnClockTick != nullptr)
 				{
 					CAHManager::getInstance()->runActionHandler(_AHOnClockTick, this, _AHClockTickParams);
 				}
@@ -781,7 +781,7 @@ namespace NLGUI
 					{
 						uint nVal = 50;
 						CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:KEY_REPEAT_SPEED");
-						if (pNL != NULL)
+						if (pNL != nullptr)
 							nVal = pNL->getValue32();
 						uint repeatDelay = (uint)(KEY_REPEAT_MIN + (KEY_REPEAT_MAX-KEY_REPEAT_MIN) * (float)nVal / 100.0f);
 						if ((T1 - _LeftLongClickDate) > repeatDelay)
@@ -853,7 +853,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CCtrlBaseButton::initRBRef()
 	{
-		if (_RBRef != NULL) return;
+		if (_RBRef != nullptr) return;
 		nlassert(_Parent);
 		const vector<CCtrlBase*> &vCB = _Parent->getControls();
 		uint i = 0;
@@ -877,7 +877,7 @@ namespace NLGUI
 		if(pBut && pBut->_Type == RadioButton)
 		{
 			_RBRef = &(pBut->_RBRefBut);
-			_RBRefBut=NULL;
+			_RBRefBut = nullptr;
 		}
 	}
 
@@ -896,7 +896,7 @@ namespace NLGUI
 			else
 			{
 				if (*_RBRef == this)	// I have to be pushed to unpush me
-					*_RBRef = NULL;		// After that : All radio buttons are NOT pushed
+					*_RBRef = nullptr;		// After that : All radio buttons are NOT pushed
 			}
 		}
 	}
@@ -923,7 +923,7 @@ namespace NLGUI
 	{
 		if (_Type == RadioButton)
 		{
-			if (_RBRef) *_RBRef = NULL;
+			if (_RBRef) *_RBRef = nullptr;
 		}
 	}
 
@@ -937,7 +937,7 @@ namespace NLGUI
 			return;
 		}
 
-		if (CWidgetManager::getInstance()->getCapturePointerLeft() != NULL)
+		if (CWidgetManager::getInstance()->getCapturePointerLeft() != nullptr)
 		{
 			if (CWidgetManager::getInstance()->getCapturePointerLeft() != this)
 			{
@@ -953,7 +953,7 @@ namespace NLGUI
 			uint32 i;
 			lastOver = _Over;
 			// show over if it is the last control that has the same father
-			CCtrlBase *candidate = NULL;
+			CCtrlBase *candidate = nullptr;
 			for (i = 0; i < rVB.size(); ++i)
 			{
 				if (rVB[i]->getParent() == this->getParent())
@@ -983,7 +983,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CCtrlBaseButton::runLeftClickAction()
 	{
-		if(_AHOnLeftClick != NULL)
+		if(_AHOnLeftClick != nullptr)
 		{
 
 			//nlinfo("clicked on %s", _Id.c_str());
@@ -1007,7 +1007,7 @@ namespace NLGUI
 		// ***************************************************************************
 	void CCtrlBaseButton::runRightClickAction()
 	{
-		if(_AHOnRightClick != NULL)
+		if(_AHOnRightClick != nullptr)
 		{
 
 			CAHManager::getInstance()->submitEvent( "button_click:" + getId() );

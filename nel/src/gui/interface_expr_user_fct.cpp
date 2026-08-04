@@ -521,7 +521,7 @@ namespace NLGUI
 
 		string sTmp = args[0].getString();
 		std::vector<CInterfaceLink::CTargetInfo> targetsVector;
-		CInterfaceLink::splitLinkTargets(sTmp, NULL, targetsVector);
+		CInterfaceLink::splitLinkTargets(sTmp, nullptr, targetsVector);
 
 		if (targetsVector.empty())
 		{
@@ -729,14 +729,14 @@ namespace NLGUI
 			sTmp = sFirstPart + NLMISC::toString(i) + sSecondPart;
 			CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false);
 			CCDBNodeBranch *pNB = NLGUI::CDBManager::getInstance()->getDbBranch(sTmp);
-			if (pNL != NULL)
+			if (pNL != nullptr)
 			{
 				if (pNL->getValue64() == 0)
 					bExit = true;
 				else
 					++i;
 			}
-			else if (pNB != NULL)
+			else if (pNB != nullptr)
 			{
 				++i;
 			}

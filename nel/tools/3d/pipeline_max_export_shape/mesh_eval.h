@@ -78,7 +78,7 @@ struct SEvalMesh
 
 // Evaluate a node's object into a Mesh (modifier stack applied, object space).
 // Unsupported modifiers warn to stderr and append their class id to warnings.
-bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warnings = NULL);
+bool evalNodeMesh(INode &node, SEvalMesh &out, std::vector<std::string> *warnings = nullptr);
 
 } /* namespace MESHEVAL */
 

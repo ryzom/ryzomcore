@@ -495,7 +495,7 @@ public:
 
 	virtual	bool			isLost() const NL_OVERRIDE { return false; } // there's no notion of 'lost device" in OpenGL
 
-	virtual bool			init(uintptr_t windowIcon = 0, emptyProc exitFunc = 0) NL_OVERRIDE;
+	virtual bool			init(uintptr_t windowIcon = 0, emptyProc exitFunc = nullptr) NL_OVERRIDE;
 
 	virtual void			disableHardwareVertexProgram() NL_OVERRIDE {}
 	virtual void			disableHardwarePixelProgram() NL_OVERRIDE {}

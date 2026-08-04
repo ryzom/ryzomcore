@@ -86,7 +86,7 @@ struct SNodeTMCache
 {
 	PIPELINE::MAX::BUILTIN::INode *SceneRoot;
 	std::map<PIPELINE::MAX::BUILTIN::INode *, MAXMATH::Matrix3M> TM;
-	SNodeTMCache() : SceneRoot(NULL) { }
+	SNodeTMCache() : SceneRoot(nullptr) { }
 };
 
 // The node's world TM at t=0 — Max's GetNodeTM(time) reproduced by composing the node's PRS

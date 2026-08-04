@@ -527,7 +527,7 @@ public:
 	virtual	void		generateShadowMap(const CVector &/* lightDir */) { }
 	/** get The shadow Map result for receveing. If NULL, nothing is displayed.
 	 */
-	virtual	CShadowMap	*getShadowMap() {return NULL;}
+	virtual	CShadowMap	*getShadowMap() { return nullptr; }
 
 	/** For receivers. get the World Instance bbox that includes the receiver.
 	 */
@@ -639,13 +639,13 @@ protected:
 	 *	NB: if an index is -1, it means that the skin bone has not been found in the skeleton (skip it)
 	 *	default is to return NULL.
 	 */
-	virtual const std::vector<sint32>			*getSkinBoneUsage() const {return NULL;}
+	virtual const std::vector<sint32>			*getSkinBoneUsage() const { return nullptr; }
 	/** Deriver must change this method if isSkinnable(). It return a list of sphere relative to each bone
 	 *	of the father skeleton. Use with getSkinBoneUsage() to know to which bone this sphere apply
 	 *	NB: if a sphere radius is -1, it means that the bone is not used (for any reason...)
 	 *	default is to return NULL.
 	 */
-	virtual const std::vector<NLMISC::CBSphere>	*getSkinBoneSphere() const {return NULL;}
+	virtual const std::vector<NLMISC::CBSphere>	*getSkinBoneSphere() const { return nullptr; }
 	/** Deriver must change this method if isSkinnable(). It renders the skin with current ctx of the skeletonModel
 	 *	SkeletonModel has already setuped the Light and the modelMatrix in the driver.
 	 *	If the skin is a MRM, it is the skeleton which drives the MRM level with alphaMRM: [0,1]
@@ -682,7 +682,7 @@ protected:
 	 */
 	virtual	void			renderGPUSkin(float /* alphaMRM */, CSkeletonModel * /* skeleton */) { }
 	/// if supportGPUSkinning(), return the insert VP to use for this skin type.
-	virtual	CVertexProgram	*getGPUSkinVP() const { return NULL; }
+	virtual	CVertexProgram	*getGPUSkinVP() const { return nullptr; }
 
 	/// Special Skinning For ShadowMapping
 	virtual	bool			supportShadowSkinGrouping() const {return false;}

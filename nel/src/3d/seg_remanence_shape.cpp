@@ -39,7 +39,7 @@ CSegRemanenceShape::CSegRemanenceShape() : _GeomTouched(true),
 										   _NumSlices(8),
 										   _SliceTime(0.05f),
 										   _RollUpRatio(1.f),
-										   _AnimatedMat(NULL)
+										   _AnimatedMat(nullptr)
 {
 	_BBox.setCenter(NLMISC::CVector::Null);
 	_BBox.setHalfSize(NLMISC::CVector(3, 3, 3));
@@ -145,7 +145,7 @@ CTransformShape *CSegRemanenceShape::createInstance(CScene &scene)
 {
 	CSegRemanence *sr = NLMISC::safe_cast<CSegRemanence *>(scene.createModel(NL3D::SegRemanenceShapeId) );
 	sr->Shape = this;
-	CAnimatedMaterial *aniMat = NULL;
+	CAnimatedMaterial *aniMat = nullptr;
 	if (_AnimatedMat)
 	{
 		aniMat = new CAnimatedMaterial(_AnimatedMat);
@@ -227,7 +227,7 @@ void CSegRemanenceShape::setAnimatedMaterial(const std::string &name)
 
 
 //===========================================================
-CSegRemanenceShape::CSegRemanenceShape(const CSegRemanenceShape &other) : IShape(other), _AnimatedMat(NULL)
+CSegRemanenceShape::CSegRemanenceShape(const CSegRemanenceShape &other) : IShape(other), _AnimatedMat(nullptr)
 {
 	copyFromOther(other);
 }
@@ -253,8 +253,8 @@ CSegRemanenceShape::~CSegRemanenceShape()
 void CSegRemanenceShape::copyFromOther(const CSegRemanenceShape &other)
 {
 	if (&other == this) return;
-	CMaterialBase *otherAnimatedMat = other._AnimatedMat != NULL ? new CMaterialBase(*other._AnimatedMat)
-																 : NULL;
+	CMaterialBase *otherAnimatedMat = other._AnimatedMat != nullptr ? new CMaterialBase(*other._AnimatedMat)
+																 : nullptr;
 	delete _AnimatedMat;
 	_AnimatedMat = otherAnimatedMat;
 

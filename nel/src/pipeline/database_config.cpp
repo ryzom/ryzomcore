@@ -32,7 +32,7 @@ using namespace NLMISC;
 namespace NLPIPELINE {
 
 TPathString CDatabaseConfig::s_RootPath;
-NLMISC::CConfigFile *CDatabaseConfig::s_ConfigFile = NULL;
+NLMISC::CConfigFile *CDatabaseConfig::s_ConfigFile = nullptr;
 CDatabaseConfig CDatabaseConfig::s_Instance;
 uint32 CDatabaseConfig::s_ConfigFileModification;
 
@@ -41,7 +41,7 @@ static std::set<TPathString> s_SearchPaths;
 void CDatabaseConfig::cleanup()
 {
 	delete CDatabaseConfig::s_ConfigFile;
-	CDatabaseConfig::s_ConfigFile = NULL;
+	CDatabaseConfig::s_ConfigFile = nullptr;
 }
 
 CDatabaseConfig::~CDatabaseConfig()

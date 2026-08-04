@@ -522,7 +522,7 @@ void checkDriverVersion()
 		static const char *driversNTest[]=
 		{
 			NVIDIA_RECOMMANDED_DRIVERS_STRING_NTEST,
-			NULL
+			nullptr
 		};
 		static const char *driversURL[]=
 		{
@@ -539,7 +539,7 @@ void checkDriverVersion()
 		for (i=0; i< sizeofarray(driversVersion); i++)
 		{
 			string lwr = toLowerAscii(deviceName);
-			if ((lwr.find (driversTest[i])!=string::npos) && (driversNTest[i]==NULL || lwr.find (driversNTest[i])==string::npos))
+			if ((lwr.find (driversTest[i])!=string::npos) && (driversNTest[i] == nullptr || lwr.find (driversNTest[i])==string::npos))
 			{
 				if (driverVersion < driversVersion[i])
 				{
@@ -622,7 +622,7 @@ void initStereoDisplayDevice()
 		nldebug("VR [C]: Enabled");
 		std::vector<NL3D::CStereoDeviceInfo> devices;
 		listStereoDisplayDevices(devices);
-		CStereoDeviceInfo *deviceInfo = NULL;
+		CStereoDeviceInfo *deviceInfo = nullptr;
 		if (ClientCfg.VRDisplayDevice == std::string("Auto"))
 		{
 			for (std::vector<NL3D::CStereoDeviceInfo>::iterator it(devices.begin()), end(devices.end()); it != end; ++it)
@@ -1016,7 +1016,7 @@ void prelogInit()
 			STRING_MANAGER::CLoadProxy loadProxy;
 			CI18N::setLoadProxy(&loadProxy);
 			CI18N::load(ClientCfg.LanguageCode);
-			CI18N::setLoadProxy(NULL);
+			CI18N::setLoadProxy(nullptr);
 			FPU_CHECKER_ONCE
 
 			// Yoyo: Append the skills and Bricks to the I18N
@@ -1077,7 +1077,7 @@ void prelogInit()
 
 		Driver = UDriver::createDriver(icon, driver);
 
-		if(Driver == NULL)
+		if(Driver == nullptr)
 		{
 			ExitClientError (CI18N::get ("Can_t_load_the_display_driver").c_str ());
 			// ExitClientError() call exit() so the code after is never called
@@ -1423,7 +1423,7 @@ void prelogInit()
 				{
 					nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 					delete SoundMngr;
-					SoundMngr = NULL;
+					SoundMngr = nullptr;
 				}
 
 				// Play Music just after the SoundMngr is inited
@@ -1456,7 +1456,7 @@ void stopSoundMngr()
 	if (SoundMngr)
 	{
 		delete SoundMngr;
-		SoundMngr = NULL;
+		SoundMngr = nullptr;
 	}
 }
 
@@ -1611,7 +1611,7 @@ void postlogInit()
 					{
 						nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 						delete SoundMngr;
-						SoundMngr = NULL;
+						SoundMngr = nullptr;
 					}
 
 					if (SoundMngr)
@@ -1739,7 +1739,7 @@ void postlogInit()
 
 			// Call the user commands from the config file if any
 			CConfigFile::CVar *var;
-			if ((var = ClientCfg.ConfigFile.getVarPtr ("StartCommands")) != NULL)
+			if ((var = ClientCfg.ConfigFile.getVarPtr ("StartCommands")) != nullptr)
 			{
 				for (uint i = 0; i < var->size(); i++)
 				{

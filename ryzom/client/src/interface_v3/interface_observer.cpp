@@ -19,4 +19,4 @@
 #include "stdpch.h"
 #include "interface_observer.h"
 
-CInterfaceObserverFactoryManager *CInterfaceObserverFactoryManager::_GlobalInstance = NULL;
+CInterfaceObserverFactoryManager *CInterfaceObserverFactoryManager::_GlobalInstance = nullptr;

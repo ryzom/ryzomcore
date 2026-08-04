@@ -160,7 +160,7 @@ public:
 	void updateFX();
 
 	/// Get the entity position and set all visual stuff with it.
-	virtual void updateDisplay(CEntityCL *parent = 0) NL_OVERRIDE;
+	virtual void updateDisplay(CEntityCL *parent = nullptr) NL_OVERRIDE;
 
 	/// Display the entity name.
 	virtual void displayName() NL_OVERRIDE;
@@ -483,12 +483,12 @@ protected:
 	public:
 		CWornItem()
 		{
-			Sheet = NULL;
+			Sheet = nullptr;
 		}
 		// release (but not remove the mesh, it is managed by _Instances)
 		void release()
 		{
-			Sheet = NULL;
+			Sheet = nullptr;
 			releaseFXs();
 		}
 		// init item fxs
@@ -1036,8 +1036,7 @@ private:
 				  const NLMISC::CVector &stickOffset = NLMISC::CVector::Null,
 				  uint maxNumAnimCount = 0,
 				  uint8 targeterSlot = CLFECOMMON::INVALID_SLOT,
-				  const NLMISC::CMatrix *staticMatrix = NULL
-				 );
+				  const NLMISC::CMatrix *staticMatrix = nullptr);
 
 
 	// apply visual fx from packed property (include auras and links)

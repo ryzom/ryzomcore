@@ -81,7 +81,7 @@ class CQuadLeaf : public IQuadNode
 public:
 	CQuadLeaf(uint8 level = 0) : IQuadNode(level) {}
 	bool					isLeaf() const NL_OVERRIDE { return true; }
-	const IQuadNode			*getChild(uint child) const NL_OVERRIDE { nlerror("Can't access child %d on the leaf!", child); return NULL; }
+	const IQuadNode			*getChild(uint child) const NL_OVERRIDE { nlerror("Can't access child %d on the leaf!", child); return nullptr; }
 	bool			check() const NL_OVERRIDE
 	{
 		if (!IQuadNode::check())
@@ -113,7 +113,7 @@ protected:
 
 public:
 	CQuadBranch(const CQuadBranch &branch);
-	CQuadBranch(uint8 level = 0) : IQuadNode(level) { uint i; for (i=0; i<4; ++i) _Children[i] = NULL; }
+	CQuadBranch(uint8 level = 0) : IQuadNode(level) { uint i; for (i=0; i<4; ++i) _Children[i] = nullptr; }
 	~CQuadBranch() NL_OVERRIDE { uint i; for (i=0; i<4; ++i) delete _Children[i]; }
 	CQuadBranch				&operator = (const CQuadBranch &branch);
 	bool					isLeaf() const NL_OVERRIDE { return false; }
@@ -135,7 +135,7 @@ public:
 		IQuadNode::translate(translation);
 		uint	i;
 		for (i=0; i<4; ++i)
-			if (_Children[i] != NULL)
+			if (_Children[i] != nullptr)
 				_Children[i]->translate(translation);
 	}
 
@@ -175,7 +175,7 @@ public:
 	void						translate(const NLMISC::CVector &translation)
 	{
 		_BBox.setCenter(_BBox.getCenter()+translation);
-		if (_Root != NULL)
+		if (_Root != nullptr)
 			_Root->translate(translation);
 	}
 

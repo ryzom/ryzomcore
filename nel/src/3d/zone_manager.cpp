@@ -144,7 +144,7 @@ void CZoneManager::checkZonesAround (uint x, uint y, uint area, const std::vecto
 				CLoadingZone &newZone = _LoadingZones.back();
 				newZone.ZoneToAddName = getZoneNameFromId(nZone);
 				newZone.ZoneToAddId = nZone;
-				newZone.Zone = NULL;
+				newZone.Zone = nullptr;
 
 				// We have to load this zone. add a load task
 				CAsyncFileManager &rAFM = CAsyncFileManager::getInstance();
@@ -204,7 +204,7 @@ bool CZoneManager::isWorkComplete (CZoneManager::SZoneManagerWork &rWork)
 				_LoadedZones[j] = _LoadedZones[j+1];
 			_LoadedZones.resize(_LoadedZones.size()-1);
 		}
-		rWork.Zone = NULL;
+		rWork.Zone = nullptr;
 		return true;
 	}
 
@@ -227,7 +227,7 @@ void CZoneManager::clear()
 // ------------------------------------------------------------------------------------------------
 CZoneLoadingTask::CZoneLoadingTask(const std::string &sZoneName, TVolatileZonePtr *ppZone, CVector &pos, bool monochrome, float factor)
 {
-	*ppZone = NULL;
+	*ppZone = nullptr;
 	_Zone = ppZone;
 	_ZoneName = sZoneName;
 	Position = pos;

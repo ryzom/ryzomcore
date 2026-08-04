@@ -59,7 +59,7 @@ public:
 public:
 
 	// Constructor
-	CFXStickMode() : Mode(Follow), UserBoneName(0) {}
+	CFXStickMode() : Mode(Follow), UserBoneName(nullptr) {}
 
 	/// Build the stick mode from an external script.
 	bool build(const NLGEORGES::UFormElm &item, const std::string &prefix = "");

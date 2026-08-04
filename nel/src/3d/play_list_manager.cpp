@@ -55,7 +55,7 @@ void	CPlayListManager::animate(TGlobalAnimationTime time)
 	{
 		CNode	*node= &(it->second);
 		// Test refPtrs.
-		if( node->PlayList==NULL || node->ChannelMixer==NULL)
+		if( node->PlayList == nullptr || node->ChannelMixer == nullptr)
 		{
 			// erase it from map.
 			TPlayListList::iterator		itDel= it++;
@@ -81,7 +81,7 @@ void	CPlayListManager::setup(TGlobalAnimationTime time)
 	{
 		CNode	*node= &(it->second);
 		// Test refPtrs.
-		if( node->PlayList==NULL || node->ChannelMixer==NULL)
+		if( node->PlayList == nullptr || node->ChannelMixer == nullptr)
 		{
 			// erase it from map.
 			TPlayListList::iterator		itDel= it++;

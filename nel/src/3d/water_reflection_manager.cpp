@@ -87,7 +87,7 @@ static uint snapUp(uint v, uint snap)
 
 // ***************************************************************************
 CWaterReflectionManager::CWaterReflectionManager()
-	: _Scene(NULL)
+	: _Scene(nullptr)
 	, _MaxReflections(-1)
 	, _MaxTextures(-1)
 	, _ForceReflections(false)
@@ -99,8 +99,8 @@ CWaterReflectionManager::CWaterReflectionManager()
 	, _HadReflections(false)
 	, _CurrentPassPlaneZ(0.f)
 	, _CurrentView(0)
-	, _ReflCamera(NULL)
-	, _SaveCam(NULL)
+	, _ReflCamera(nullptr)
+	, _SaveCam(nullptr)
 {
 }
 
@@ -118,8 +118,8 @@ void CWaterReflectionManager::release()
 	_Collected.clear();
 	_PrevAdmitted.clear();
 	_Passes.clear();
-	_SaveRenderTarget = NULL;
-	_SaveCam = NULL;
+	_SaveRenderTarget = nullptr;
+	_SaveCam = nullptr;
 	_CollectionArmed = false;
 	_HadReflections = false;
 	_CurrentView = 0;
@@ -127,7 +127,7 @@ void CWaterReflectionManager::release()
 	{
 		if (_Scene)
 			_Scene->deleteModel(_ReflCamera);
-		_ReflCamera = NULL;
+		_ReflCamera = nullptr;
 	}
 }
 
@@ -177,9 +177,9 @@ void CWaterReflectionManager::reportVisibleSurface(float planeZ, float screenAre
 const CWaterReflectionManager::CActiveReflection *CWaterReflectionManager::getActiveReflection(float planeZ) const
 {
 	const CView *view = currentView();
-	if (!view) return NULL;
+	if (!view) return nullptr;
 	std::map<sint32, CActiveReflection>::const_iterator it = view->Active.find(planeKey(planeZ));
-	if (it == view->Active.end()) return NULL;
+	if (it == view->Active.end()) return nullptr;
 	return &it->second;
 }
 
@@ -187,7 +187,7 @@ const CWaterReflectionManager::CActiveReflection *CWaterReflectionManager::getAc
 const CWaterReflectionManager::CActiveReflection *CWaterReflectionManager::getActiveReflectionByIndex(uint index) const
 {
 	const CView *view = currentView();
-	if (!view || index >= view->Active.size()) return NULL;
+	if (!view || index >= view->Active.size()) return nullptr;
 	std::map<sint32, CActiveReflection>::const_iterator it = view->Active.begin();
 	std::advance(it, index);
 	return &it->second;
@@ -650,8 +650,8 @@ void CWaterReflectionManager::endPass(uint pass)
 	drv->setupScissor(fullScissor);
 	_Scene->setCam(_SaveCam);
 	_Scene->setViewport(_SaveSceneViewport);
-	_SaveRenderTarget = NULL;
-	_SaveCam = NULL;
+	_SaveRenderTarget = nullptr;
+	_SaveCam = nullptr;
 }
 
 // ***************************************************************************

@@ -87,8 +87,8 @@ CGltfBuilder::CGltfBuilder()
 	m_Images = m_Root.setArray("images");
 	m_Accessors = m_Root.setArray("accessors");
 	m_BufferViews = m_Root.setArray("bufferViews");
-	m_Skins = NULL;
-	m_Animations = NULL;
+	m_Skins = nullptr;
+	m_Animations = nullptr;
 	m_Root.setArray("buffers"); // filled at save
 }
 
@@ -175,25 +175,25 @@ sint CGltfBuilder::addAccessorFloat(const float *data, size_t count, int nComp, 
 		}
 	}
 	return addAccessor(bv, COMP_FLOAT, typeForComp(nComp), count, false,
-	                   withMinMax && count ? minv : NULL, withMinMax && count ? maxv : NULL, nComp);
+	                   withMinMax && count ? minv : nullptr, withMinMax && count ? maxv : nullptr, nComp);
 }
 
 sint CGltfBuilder::addAccessorU32(const uint32 *data, size_t count, int target)
 {
 	sint bv = addBufferView(data, count * 4, target);
-	return addAccessor(bv, COMP_UINT, "SCALAR", count, false, NULL, NULL, 0);
+	return addAccessor(bv, COMP_UINT, "SCALAR", count, false, nullptr, nullptr, 0);
 }
 
 sint CGltfBuilder::addAccessorU8Vec4Norm(const uint8 *data, size_t count4)
 {
 	sint bv = addBufferView(data, count4 * 4, TARGET_ARRAY);
-	return addAccessor(bv, COMP_UBYTE, "VEC4", count4, true, NULL, NULL, 0);
+	return addAccessor(bv, COMP_UBYTE, "VEC4", count4, true, nullptr, nullptr, 0);
 }
 
 sint CGltfBuilder::addAccessorU16Vec4(const uint16 *data, size_t count4)
 {
 	sint bv = addBufferView(data, count4 * 8, TARGET_ARRAY);
-	return addAccessor(bv, COMP_USHORT, "VEC4", count4, false, NULL, NULL, 0);
+	return addAccessor(bv, COMP_USHORT, "VEC4", count4, false, nullptr, nullptr, 0);
 }
 
 sint CGltfBuilder::addSkin(const std::vector<sint> &joints, const float *ibms)
@@ -203,7 +203,7 @@ sint CGltfBuilder::addSkin(const std::vector<sint> &joints, const float *ibms)
 	CJsonValue *sk = m_Skins->push();
 	// IBM accessor: no bufferView target (not vertex data — validators flag ARRAY_BUFFER here)
 	sint bv = addBufferView(ibms, joints.size() * 16 * 4, 0);
-	sk->setInt("inverseBindMatrices", addAccessor(bv, COMP_FLOAT, "MAT4", joints.size(), false, NULL, NULL, 0));
+	sk->setInt("inverseBindMatrices", addAccessor(bv, COMP_FLOAT, "MAT4", joints.size(), false, nullptr, nullptr, 0));
 	CJsonValue *js = sk->setArray("joints");
 	for (size_t i = 0; i < joints.size(); ++i)
 		js->pushInt(joints[i]);
@@ -243,7 +243,7 @@ void CGltfBuilder::addAnimChannel(const std::string &animName, sint node, const 
 {
 	if (!m_Animations)
 		m_Animations = m_Root.setArray("animations");
-	CJsonValue *anim = NULL;
+	CJsonValue *anim = nullptr;
 	if (m_Animations->size())
 		anim = const_cast<CJsonValue *>(m_Animations->at(m_Animations->size() - 1));
 	if (!anim || anim->getString("name", "") != animName)
@@ -260,7 +260,7 @@ void CGltfBuilder::addAnimChannel(const std::string &animName, sint node, const 
 	sint vbv = addBufferView(&values[0], values.size() * 4, 0);
 	sint vacc = addAccessor(vbv, COMP_FLOAT,
 	                        nComp == 4 ? "VEC4" : (nComp == 3 ? "VEC3" : "SCALAR"),
-	                        values.size() / nComp, false, NULL, NULL, 0);
+	                        values.size() / nComp, false, nullptr, nullptr, 0);
 	CJsonValue *samplers = anim->getMutable("samplers");
 	CJsonValue *sampler = samplers->push();
 	sampler->setInt("input", tacc);
@@ -339,7 +339,7 @@ void CGltfBuilder::attachMesh(sint node, sint mesh)
 NLGLTF::CJsonValue *CGltfBuilder::nodeExtras(sint node)
 {
 	if (node < 0 || node >= (sint)m_NodeVals.size())
-		return NULL;
+		return nullptr;
 	return m_NodeVals[(size_t)node]->ensureObject("extras");
 }
 

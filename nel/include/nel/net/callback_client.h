@@ -50,7 +50,7 @@ public:
 	void	send (const CMessage &buffer, TSockId hostid = InvalidSockId, bool log = true) NL_OVERRIDE;
 
 	/// Force to send all data pending in the send queue. hostid must be InvalidSockId here. See comment in CCallbackNetBase.
-	bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining=NULL) NL_OVERRIDE;
+	bool	flush (TSockId hostid = InvalidSockId, uint *nbBytesRemaining = nullptr) NL_OVERRIDE;
 
 	/** Updates the network (call this method evenly).
 	 * More info about timeout and mintime in the code of CCallbackNetBase::baseUpdate().
@@ -100,7 +100,7 @@ private:
 	bool	dataAvailable () NL_OVERRIDE;
 	virtual bool getDataAvailableFlagV() const NL_OVERRIDE { return dataAvailableFlag(); }
 
-	void	receive (CMessage &buffer, TSockId *hostid = NULL) NL_OVERRIDE;
+	void	receive (CMessage &buffer, TSockId *hostid = nullptr) NL_OVERRIDE;
 
 	// ---------------------------------------
 #ifdef USE_MESSAGE_RECORDER

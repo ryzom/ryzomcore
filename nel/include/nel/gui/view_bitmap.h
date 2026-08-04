@@ -62,7 +62,7 @@ namespace NLGUI
 			_TxtHeight = -1;
 
 			// Support for https://.. textures
-			_HtmlDownload = NULL;
+			_HtmlDownload = nullptr;
 		}
 
 		/// Destructor

@@ -71,8 +71,8 @@ void			CHLSTextureBank::addTextureInstance(const std::string &name, uint32 color
 	textInst._ColorTextureId= colorTextureId;
 	textInst._DataIndex= (uint32)_TextureInstanceData.size();
 	// leave ptrs undefined
-	textInst._DataPtr= NULL;
-	textInst._ColorTexturePtr= NULL;
+	textInst._DataPtr = nullptr;
+	textInst._ColorTexturePtr = nullptr;
 
 	// allocate/fill data
 	uint32	nameSize= (uint32)(nameLwr.size()+1);

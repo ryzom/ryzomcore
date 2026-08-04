@@ -57,7 +57,7 @@ using namespace NLGEORGES;
 /////////////
 // Sheet manager.
 CSheetManager	SheetMngr;
-UFormLoader		*CSheetManager::FormLoader = NULL;
+UFormLoader		*CSheetManager::FormLoader = nullptr;
 //COFile			fItemAssoc;
 //bool			ItemAssocFileOpen = false;
 
@@ -76,7 +76,7 @@ public:
 		if (CSheetManager::FormLoader)
 		{
 			UFormLoader::releaseLoader (CSheetManager::FormLoader);
-			CSheetManager::FormLoader = NULL;
+			CSheetManager::FormLoader = nullptr;
 		}
 	}
 };
@@ -150,7 +150,7 @@ static uint Version = 2;
 ////////////////////////
 
 // ***************************************************************************
-CSheetManagerEntry::CSheetManagerEntry () :	EntitySheet(NULL)
+CSheetManagerEntry::CSheetManagerEntry () :	EntitySheet(nullptr)
 {
 }
 
@@ -160,10 +160,10 @@ CSheetManagerEntry::CSheetManagerEntry () :	EntitySheet(NULL)
 CSheetManagerEntry::~CSheetManagerEntry ()
 {
 	// Release the sheet.
-	if(EntitySheet != 0)
+	if(EntitySheet != nullptr)
 	{
 		delete EntitySheet;
-		EntitySheet = 0;
+		EntitySheet = nullptr;
 	}
 }// ~CSheetManagerEntry //
 
@@ -177,7 +177,7 @@ void CSheetManagerEntry::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> 
 //		if (EntitySheet != NULL)
 //			delete EntitySheet;
 
-		CEntitySheet *sheet = NULL;
+		CEntitySheet *sheet = nullptr;
 
 		std::string extension = NLMISC::CSheetId::fileExtensionFromType(sheetId.getSheetType());
 
@@ -269,14 +269,14 @@ void CSheetManagerEntry::readGeorges (const NLMISC::CSmartPtr<NLGEORGES::UForm> 
 	else
 	{
 //		nlwarning("CSheetManager::loadSheet: Cannot load the form '%s'.", filename.c_str());
-		EntitySheet = 0;
+		EntitySheet = nullptr;
 	}
 }
 
 // ***************************************************************************
 void CSheetManagerEntry::initSheet(CEntitySheet *pES, NLMISC::IStream &s, CEntitySheet::TType type)
 {
-	if (pES != NULL)
+	if (pES != nullptr)
 	{
 		pES->Id.serial(s);
 		pES->serial(s);
@@ -511,13 +511,13 @@ void CSheetManagerEntry::serial (NLMISC::IStream &s)
 			break;
 			default:
 				nlwarning("CSheetManager::load: Unknown type '%d' in the packed file. Rebuild=true and Ignore this sheet.", type);
-				EntitySheet = NULL;
+				EntitySheet = nullptr;
 			break;
 		}
 	}
 	else
 	{
-		if (EntitySheet != NULL)
+		if (EntitySheet != nullptr)
 		{
 			s.serialEnum(EntitySheet->Type);
 			EntitySheet->Id.serial(s);
@@ -536,10 +536,10 @@ void CSheetManagerEntry::serial (NLMISC::IStream &s)
 void CSheetManagerEntry::removed()
 {
 	// any action that is needed if the sheet no more exist.
-	if (EntitySheet != 0)
+	if (EntitySheet != nullptr)
 	{
 		delete EntitySheet;
-		EntitySheet = 0;
+		EntitySheet = nullptr;
 	}
 }
 
@@ -572,7 +572,7 @@ CSheetManager::CSheetManager()
 	for(uint i=0; i<SLOTTYPE::NB_SLOT; ++i)
 	{
 		TItemVector slotList;
-		slotList.push_back(0);
+		slotList.push_back(nullptr);
 		_VisualSlots.push_back(slotList);
 	}
 }
@@ -686,7 +686,7 @@ void CSheetManager::loadAllSheet(NLMISC::IProgressCallback &callBack, bool updat
 				while(it  != entitySheetContainer.end())
 				{
 					_EntitySheetContainer[(*it).first] = (*it).second;
-					(*it).second.EntitySheet = 0;
+					(*it).second.EntitySheet = nullptr;
 					// Next
 					++it;
 				}
@@ -702,7 +702,7 @@ void CSheetManager::loadAllSheet(NLMISC::IProgressCallback &callBack, bool updat
 	// Compute Visual Slots
 	{
 		for(uint i=0; i<SLOTTYPE::NB_SLOT; ++i)
-			_VisualSlots[i].resize(CVisualSlotManager::getInstance()->getNbIndex((SLOTTYPE::EVisualSlot)i)+1, 0);	// Nb Index +1 because index 0 is reserve for empty.
+			_VisualSlots[i].resize(CVisualSlotManager::getInstance()->getNbIndex((SLOTTYPE::EVisualSlot)i)+1, nullptr);	// Nb Index +1 because index 0 is reserve for empty.
 
 		//
 		TEntitySheetMap::iterator it = _EntitySheetContainer.begin();
@@ -846,7 +846,7 @@ const CSheetManager::TVisualSlotItemArray *CSheetManager::getVSItems(CItemSheet 
 {
 	TItemSheet2SlotItemArray::const_iterator it = _SheetToVS.find(sheet);
 	if (it == _SheetToVS.end())
-		return NULL;
+		return nullptr;
 	return &(it->second);
 }
 
@@ -866,7 +866,7 @@ sint CSheetManager::getVSIndex(const std::string &itemName, SLOTTYPE::EVisualSlo
 		nlwarning("<CSheetManager::getVSIndex> : cannot find %s for the slot %d.", itemName.c_str(), slot);
 		return -1;
 	}
-	if (it->second.EntitySheet == 0 || it->second.EntitySheet->type() != CEntitySheet::ITEM)
+	if (it->second.EntitySheet == nullptr || it->second.EntitySheet->type() != CEntitySheet::ITEM)
 	{
 		nlwarning("<CSheetManager::getVSIndex> : %s is not an item for the slot %d.", itemName.c_str(), slot);
 		return -1;
@@ -875,7 +875,7 @@ sint CSheetManager::getVSIndex(const std::string &itemName, SLOTTYPE::EVisualSlo
 	CItemSheet *is = static_cast<CItemSheet *>(it->second.EntitySheet);
 
 	const TVisualSlotItemArray *ia = getVSItems(is);
-	if (ia == NULL)
+	if (ia == nullptr)
 	{
 		nlwarning("<CSheetManager::getVSIndex> : no items for the slot %d. while looking for %s", slot, itemName.c_str());
 		return -1;
@@ -906,7 +906,7 @@ CEntitySheet *CSheetManager::get(CSheetId num)
 	if(it != _EntitySheetContainer.end())
 		return it->second.EntitySheet;
 	else
-		return NULL;
+		return nullptr;
 }// get //
 
 
@@ -939,7 +939,7 @@ CItemSheet *CSheetManager::getItem(SLOTTYPE::EVisualSlot slot, uint index)
 {
 	// The slot is not a visible one.
 	if(slot == SLOTTYPE::HIDDEN_SLOT)
-		return 0;
+		return nullptr;
 
 	// Convert into an uint to remove warnings.
 	uint s = (uint)slot;
@@ -955,20 +955,20 @@ CItemSheet *CSheetManager::getItem(SLOTTYPE::EVisualSlot slot, uint index)
 				return _VisualSlots[s][index];
 			// Default Item.
 			else
-				return NULL;
+				return nullptr;
 		}
 		// Bad index.
 		else
 		{
 			//nlwarning("CSheetManager::getItem : invalid index %d for the slot %d.", index, slot);
-			return NULL;
+			return nullptr;
 		}
 	}
 	// Bad slot.
 	else
 	{
 		nlwarning("CSheetManager::getItem : invalid slot %d.", slot);
-		return NULL;
+		return nullptr;
 	}
 }// getItem //
 
@@ -1035,7 +1035,7 @@ void CSheetManager::dumpVisualSlotsIndex()
 			for (uint j = 0; j < rVTmp.size(); ++j)
 			{
 				CItemSheet *pIS = rVTmp[j];
-				if (pIS != NULL)
+				if (pIS != nullptr)
 				{
 					fprintf(vsIndexFile,"%d : %s\n", j, pIS->Id.toString().c_str());
 				}

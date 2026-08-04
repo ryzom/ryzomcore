@@ -265,7 +265,7 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			NLMISC::fromString(tok[2], patch);
 			NLMISC::fromString(tok[3], s);
 			NLMISC::fromString(tok[4], t);
-			uint32 rgb = (uint32)strtoul(tok[5].c_str(), NULL, 16);
+			uint32 rgb = (uint32)strtoul(tok[5].c_str(), nullptr, 16);
 			if (tok.size() >= 7) NLMISC::fromString(tok[6], blend);
 			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
 			ok = core.opColorVertex(zone, patch, s, t, col, blend, err);
@@ -282,7 +282,7 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			NLMISC::fromString(tok[2], x);
 			NLMISC::fromString(tok[3], y);
 			NLMISC::fromString(tok[4], radius);
-			uint32 rgb = (uint32)strtoul(tok[5].c_str(), NULL, 16);
+			uint32 rgb = (uint32)strtoul(tok[5].c_str(), nullptr, 16);
 			NLMISC::fromString(tok[6], hardness);
 			NLMISC::fromString(tok[7], opacity);
 			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
@@ -327,7 +327,7 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			uint blend = 256;
 			NLMISC::fromString(tok[1], zone);
 			NLMISC::fromString(tok[2], patch);
-			uint32 rgb = (uint32)strtoul(tok[3].c_str(), NULL, 16);
+			uint32 rgb = (uint32)strtoul(tok[3].c_str(), nullptr, 16);
 			if (tok.size() >= 5) NLMISC::fromString(tok[4], blend);
 			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
 			ok = core.opFillColor(zone, patch, col, blend, err);
@@ -639,7 +639,7 @@ void zpSetShowArrows(bool on)
 			{
 				NL3D::CZone *lz = land.getZone((sint)zones[z].ZoneId);
 				for (uint p = 0; lz && p < (uint)lz->getNumPatchs(); ++p)
-					lz->changePatchTextureAndColor((sint)p, NULL, NULL);
+					lz->changePatchTextureAndColor((sint)p, nullptr, nullptr);
 			}
 		}
 	}
@@ -1139,21 +1139,21 @@ void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 const SPaintZone *zpFindPaintZone(uint zoneId)
 {
 	if (!g_PaintCtx.Zones)
-		return NULL;
+		return nullptr;
 	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
 			return &(*g_PaintCtx.Zones)[i];
-	return NULL;
+	return nullptr;
 }
 
 SPaintZone *zpFindPaintZoneMut(uint zoneId)
 {
 	if (!g_PaintCtx.Zones)
-		return NULL;
+		return nullptr;
 	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
 			return &(*g_PaintCtx.Zones)[i];
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2035,7 +2035,7 @@ void zpRebuildTilesetPalette()
 		ts = g_PaintCtx.Paint->CurTileSet;
 	if (!g_PaintCtx.Bank)
 	{
-		ZPUI::rebuildTilesetPalette(NULL, std::string(), zpSeasonCacheKey(), ts);
+		ZPUI::rebuildTilesetPalette(nullptr, std::string(), zpSeasonCacheKey(), ts);
 		return;
 	}
 	ZPUI::rebuildTilesetPalette(g_PaintCtx.Bank, g_PaintCtx.BankPath, zpSeasonCacheKey(), ts);
@@ -2166,7 +2166,7 @@ static void zpPropFootprintCached(const SPaintZone &pz, bool useBB, bool symmetr
 	// s_HaveKey: the cached key is populated (suppresses the retry-every-frame the derive
 	// was doing). s_Ok: that derive produced a usable result.
 	static bool s_HaveKey = false;
-	static const PIPELINE::MAX::BUILTIN::CNodeImpl *s_Node = NULL;
+	static const PIPELINE::MAX::BUILTIN::CNodeImpl *s_Node = nullptr;
 	static bool s_UseBB = false, s_Symmetry = false;
 	static float s_CellSize = 0.f, s_Snap = 0.f;
 	static bool s_Ok = false;

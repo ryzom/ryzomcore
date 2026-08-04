@@ -149,7 +149,7 @@ void updateFromClientCfg()
 					std::vector<string>		zonesAdded;
 					std::vector<string>		zonesRemoved;
 					const R2::CScenarioEntryPoints::CCompleteIsland *ci = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
-					Landscape->refreshAllZonesAround(View.refinePos(), ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, ProgressBar, ci ? &(ci->ZoneIDs) : NULL);
+					Landscape->refreshAllZonesAround(View.refinePos(), ClientCfg.Vision + ExtraZoneLoadingVision, zonesAdded, zonesRemoved, ProgressBar, ci ? &(ci->ZoneIDs) : nullptr);
 					LandscapeIGManager.unloadArrayZoneIG(zonesRemoved);
 					LandscapeIGManager.loadArrayZoneIG(zonesAdded);
 				}
@@ -221,23 +221,23 @@ void updateFromClientCfg()
 		}
 		else
 		{
-			if (CloudScape != NULL)
+			if (CloudScape != nullptr)
 				Scene->deleteCloudScape(CloudScape);
-			CloudScape = NULL;
+			CloudScape = nullptr;
 		}
 	}
 
 	//---------------------------------------------------
 	if (ClientCfg.CloudQuality != LastClientCfg.CloudQuality)
 	{
-		if (CloudScape != NULL)
+		if (CloudScape != nullptr)
 			CloudScape->setQuality(ClientCfg.CloudQuality);
 	}
 
 	//---------------------------------------------------
 	if (ClientCfg.CloudUpdate != LastClientCfg.CloudUpdate)
 	{
-		if (CloudScape != NULL)
+		if (CloudScape != nullptr)
 			CloudScape->setNbCloudToUpdateIn80ms(ClientCfg.CloudUpdate);
 	}
 
@@ -276,7 +276,7 @@ void updateFromClientCfg()
 		{
 			nlassert(FXAA);
 			delete FXAA;
-			FXAA = NULL;
+			FXAA = nullptr;
 		}
 	}
 
@@ -347,7 +347,7 @@ void updateFromClientCfg()
 			{
 				nlwarning("Changing sound driver...");
 				delete SoundMngr;
-				SoundMngr = NULL;
+				SoundMngr = nullptr;
 			}
 		}
 
@@ -355,21 +355,21 @@ void updateFromClientCfg()
 		{
 			nlwarning("Deleting sound manager...");
 			delete SoundMngr;
-			SoundMngr = NULL;
+			SoundMngr = nullptr;
 		}
-		else if (SoundMngr == NULL && ClientCfg.SoundOn)
+		else if (SoundMngr == nullptr && ClientCfg.SoundOn)
 		{
 			nlwarning("Creating sound manager...");
 			SoundMngr = new CSoundManager();
 			try
 			{
-				SoundMngr->init(NULL);
+				SoundMngr->init(nullptr);
 			}
 			catch(const Exception &e)
 			{
 				nlwarning("init : Error when creating 'SoundMngr' : %s", e.what());
 				delete SoundMngr;
-				SoundMngr = NULL;
+				SoundMngr = nullptr;
 			}
 
 			// re-init with good SFX/Music Volume

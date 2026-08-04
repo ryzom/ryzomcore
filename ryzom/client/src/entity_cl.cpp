@@ -263,7 +263,7 @@ void CEntityCL::SInstanceCL::setScale(const CVector &scale)
 NL3D::UInstance CEntityCL::SInstanceCL::createLoadingFromCurrent()
 {
 	if (!Loading.empty()) return Loading;
-	if (Current.empty()) return NULL;
+	if (Current.empty()) return nullptr;
 
 	createLoading(CurrentName, StickPoint, TextureSet);
 	if (ApplyColor)
@@ -359,7 +359,7 @@ void CEntityCL::SInstanceCL::updateCurrentFromLoading(NL3D::USkeleton Skeleton)
 	// Assign loading to current
 	Current = Loading;
 	CurrentName = LoadingName;
-	Loading = NULL;
+	Loading = nullptr;
 	LoadingName.clear();
 
 
@@ -537,9 +537,9 @@ CEntityCL::CEntityCL()
 	// Initialize the object.
 	init();
 	Type = Entity;
-	_SelectionFX = NULL;
-	_MouseOverFX = NULL;
-	_StateFX = NULL;
+	_SelectionFX = nullptr;
+	_MouseOverFX = nullptr;
+	_StateFX = nullptr;
 	_GMTitle = _InvalidGMTitleCode;
 	_LastLocalSelectBoxComputeTime = 0;
 	_InSceneInterfaceEnabled = true;
@@ -555,7 +555,7 @@ CEntityCL::~CEntityCL()
 	if(CollisionManager && _CollisionEntity)
 	{
 		CollisionManager->deleteEntity(_CollisionEntity);
-		_CollisionEntity = 0;
+		_CollisionEntity = nullptr;
 	}
 
 	// If there still is a scene -> delete pointers.
@@ -565,13 +565,13 @@ CEntityCL::~CEntityCL()
 		if(!_Skeleton.empty())
 		{
 			Scene->deleteSkeleton(_Skeleton);
-			_Skeleton = 0;
+			_Skeleton = nullptr;
 		}
 		// Remove Instance.
 		if(!_Instance.empty())
 		{
 			Scene->deleteInstance(_Instance);
-			_Instance = 0;
+			_Instance = nullptr;
 		}
 
 		// Delete Instances.
@@ -590,8 +590,8 @@ CEntityCL::~CEntityCL()
 	// No more scene -> reset pointers.
 	else
 	{
-		_Skeleton = 0;
-		_Instance = 0;
+		_Skeleton = nullptr;
+		_Instance = nullptr;
 	}
 
 	// Remove the collision entity.
@@ -603,7 +603,7 @@ CEntityCL::~CEntityCL()
 	if(_PlayList)
 	{
 		EAM->deletePlayList(_PlayList);
-		_PlayList = 0;
+		_PlayList = nullptr;
 	}
 
 	if (!_StateFX.empty() && Scene)
@@ -644,7 +644,7 @@ void CEntityCL::init()
 	// No parent.
 	_Parent = CLFECOMMON::INVALID_SLOT;
 	// No entry for the moment.
-	_DBEntry = 0;
+	_DBEntry = nullptr;
 
 //	_Name = NULL;
 
@@ -678,16 +678,16 @@ void CEntityCL::init()
 	_CurrentBehaviour = MBEHAV::IDLE;
 
 	// No skeleton at the beginning.
-	_Skeleton = 0;
+	_Skeleton = nullptr;
 	// No Instance at the beginning.
-	_Instance = 0;
+	_Instance = nullptr;
 	// No primitive at the beginning.
-	_Primitive = 0;
+	_Primitive = nullptr;
 	// No collision Entity at the beginning.
-	_CollisionEntity = 0;
+	_CollisionEntity = nullptr;
 	// No PlayList at the beginning.
-	_PlayList		= 0;
-	_FacePlayList	= 0;
+	_PlayList		= nullptr;
+	_FacePlayList	= nullptr;
 
 	// AABBox
 	CAABBox aabbox;
@@ -756,10 +756,10 @@ void CEntityCL::init()
 	_GroundTypeCachePos= CVectorD::Null;
 	_GroundTypeCache= 0;
 
-	_StateFX = NULL;
+	_StateFX = nullptr;
 	_StateFXName.clear();
-	_SelectionFX = NULL;
-	_MouseOverFX = NULL;
+	_SelectionFX = nullptr;
+	_MouseOverFX = nullptr;
 
 	_SomeInstanceCastShadowMap= false;
 	_ShadowMapZDirClamp= ClientCfg.ShadowZDirClampLandscape;
@@ -800,7 +800,7 @@ bool CEntityCL::initPrimitive(float radius, float height, float length, float wi
 	if(_Primitive)
 	{
 		nlwarning("ENT:initPrimitive:%d: There is already a primitive -> _Primitive = 0.", _Slot);
-		_Primitive = 0;
+		_Primitive = nullptr;
 	}
 
 	// **** Create the primitive
@@ -940,7 +940,7 @@ void CEntityCL::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, const 
 		}
 
 		CCDBNodeBranch *nodGrp = dynamic_cast<CCDBNodeBranch*>(nodeRoot->getNode(_Slot));
-		if(nodGrp == 0)
+		if(nodGrp == nullptr)
 		{
 			nlwarning("CEntityCL::updateVisualProperty : Cannot find the entity '%d' in the database.", _Slot);
 			return;
@@ -948,7 +948,7 @@ void CEntityCL::updateVisualProperty(const NLMISC::TGameCycle &gameCycle, const 
 
 		// Get The property ptr.
 		CCDBNodeLeaf	*nodeProp	= dynamic_cast<CCDBNodeLeaf*>(nodGrp->getNode(prop));
-		if(nodeProp == 0)
+		if(nodeProp == nullptr)
 		{
 			nlwarning("CEntityCL::updateVisualProperty : Cannot find the property '%d' for the slot %d.", prop, _Slot);
 			return;
@@ -1086,7 +1086,7 @@ USkeleton *CEntityCL::skeleton(const string &filename)
 	if(!Scene)
 	{
 		pushDebugStr("No scene allocated -> Cannot create the skeleton.");
-		_Skeleton = 0;
+		_Skeleton = nullptr;
 		return skeleton();
 	}
 
@@ -1509,7 +1509,7 @@ void CEntityCL::pacsMove(const CVectorD &vect)
 //-----------------------------------------------
 void CEntityCL::pacsFinalizeMove()	// virtual
 {
-	if(_Primitive == 0)
+	if(_Primitive == nullptr)
 	{
 		return;
 	}
@@ -1599,7 +1599,7 @@ NL3D::UInstanceGroup *CEntityCL::getClusterSystem()
 {
 	if (!_Skeleton.empty()) return _Skeleton.getClusterSystem();
 	if (!_Instance.empty()) return _Instance.getClusterSystem();
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------
@@ -1743,7 +1743,7 @@ void		CEntityLogicInfo3D::getStaticLightSetup(NLMISC::CRGBA sunAmbient, std::vec
 		uint8 &sunContribution, NLMISC::CRGBA &localAmbient)
 {
 	// Is the instance in a InstanceGroup???
-	UInstanceGroup			*igUnderInstance= NULL;
+	UInstanceGroup			*igUnderInstance = nullptr;
 	const UMovePrimitive	*movePrim= Self->getPrimitive();
 	if(Self->skeleton() && movePrim)
 		igUnderInstance= Self->skeleton()->getClusterSystem();
@@ -1801,7 +1801,7 @@ void CEntityCL::removePrimitive()
 		if(PACS)
 			PACS->removePrimitive(_Primitive);
 		// Primitive removed
-		_Primitive = 0;
+		_Primitive = nullptr;
 	}
 }// removePrimitive //
 
@@ -1816,7 +1816,7 @@ void CEntityCL::computeCollisionEntity()
 	if(_CollisionEntity)
 	{
 		nlwarning("CEntityCL::computeCollisionEntity: There is already a collision entity in the slot %d.", _Slot);
-		_CollisionEntity = 0;
+		_CollisionEntity = nullptr;
 	}
 
 	// Is there a collision manager.
@@ -1824,7 +1824,7 @@ void CEntityCL::computeCollisionEntity()
 	{
 		// Create the collision entity.
 		_CollisionEntity = CollisionManager->createEntity();
-		if(_CollisionEntity == 0)
+		if(_CollisionEntity == nullptr)
 			nlwarning("CEntityCL::computeCollisionEntity : Cannot create the _CollisionEntity for the slot %d.", _Slot);
 		else
 			_CollisionEntity->setSnapToRenderedTesselation(false);
@@ -1844,7 +1844,7 @@ void CEntityCL::removeCollisionEntity()
 		if(CollisionManager)
 			CollisionManager->deleteEntity(_CollisionEntity);
 		// Collision Entity Removed.
-		_CollisionEntity = 0;
+		_CollisionEntity = nullptr;
 	}
 }// removeCollisionEntity //
 
@@ -1982,7 +1982,7 @@ void	CEntityCL::updateLodTexture()
 //-----------------------------------------------
 void CEntityCL::addChild(CEntityCL *c)
 {
-	if(c == 0)
+	if(c == nullptr)
 	{
 		nlwarning("ENT:addChild:%d: Try to add a child with a Null Pointer.", _Slot);
 		return;
@@ -2012,7 +2012,7 @@ void CEntityCL::addChild(CEntityCL *c)
 //-----------------------------------------------
 void CEntityCL::delChild(CEntityCL *c)
 {
-	if(c == 0)
+	if(c == nullptr)
 	{
 		nlwarning("ENT:delChild:%d: Try to remove a child with a Null Pointer.", _Slot);
 		return;
@@ -2348,10 +2348,10 @@ void CEntityCL::onStringAvailable(uint /* stringId */, const std::string &value)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player:header_opened:player_title"));
-		if (pVT != NULL) pVT->setText(_Title);
+		if (pVT != nullptr) pVT->setText(_Title);
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:player"));
-		if (pGC != NULL) pGC->setTitle(_EntityName);
+		if (pGC != nullptr) pGC->setTitle(_EntityName);
 
 		CSkillManager *pSM = CSkillManager::getInstance();
 		pSM->setPlayerTitle(_TitleRaw);
@@ -2817,7 +2817,7 @@ const char *CEntityCL::getBoneNameFromBodyPart(BODY::TBodyPart part, BODY::TSide
 		case BODY::HFeet:  return side == BODY::Left ? "Bip01 L Foot" : "Bip01 R Foot";
 		default: break;
 	}
-	return NULL;
+	return nullptr;
 }
 
 //-----------------------------------------------
@@ -2829,7 +2829,7 @@ CEntityCL::SInstanceCL *CEntityCL::idx2Inst(uint idx)
 	if(idx < _Instances.size()) // CEntityCL::BadIndex is the max so idx < ... mean idx != CEntityCL::BadIndex too
 		return &_Instances[idx];
 
-	return NULL;
+	return nullptr;
 }// idx2Inst //
 
 
@@ -3025,12 +3025,12 @@ void	CEntityCL::updateClipped(const NLMISC::TTime &/* currentTimeInMs */, CEntit
 		if (!_SelectionFX.empty() && Scene)
 		{
 			Scene->deleteInstance(_SelectionFX);
-			_SelectionFX = NULL;
+			_SelectionFX = nullptr;
 		}
 		if (!_MouseOverFX.empty() && Scene)
 		{
 			Scene->deleteInstance(_MouseOverFX);
-			_MouseOverFX = NULL;
+			_MouseOverFX = nullptr;
 		}
 	}
 }

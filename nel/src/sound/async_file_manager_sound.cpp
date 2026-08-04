@@ -46,11 +46,11 @@ NLMISC_SAFE_SINGLETON_IMPL(CAsyncFileManagerSound);
 
 void	CAsyncFileManagerSound::terminate()
 {
-	if (_Instance != NULL)
+	if (_Instance != nullptr)
 	{
 		INelContext::getInstance().releaseSingletonPointer("CAsyncFileManagerSound", _Instance);
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -68,7 +68,7 @@ class CCancelLoadWavFile : public CAsyncFileManager::ICancelCallback
 	{
 		const CAsyncFileManagerSound::CLoadWavFile *pLWF = dynamic_cast<const CAsyncFileManagerSound::CLoadWavFile*>(prunnable);
 
-		if (pLWF != NULL)
+		if (pLWF != nullptr)
 		{
 			if (pLWF->_Filename == _Filename)
 				return true;
@@ -108,7 +108,7 @@ void CAsyncFileManagerSound::loadFiles (const std::vector<std::string> &vFileNam
 
 void CAsyncFileManagerSound::signal (bool *pSgn)
 {
-	if (pSgn == 0)
+	if (pSgn == nullptr)
 	{
 		nlwarning("CAsyncFileManagerSound::signal : trying to signal with a null pointer !");
 		return;
@@ -118,7 +118,7 @@ void CAsyncFileManagerSound::signal (bool *pSgn)
 
 void CAsyncFileManagerSound::cancelSignal (bool *pSgn)
 {
-	if (pSgn == 0)
+	if (pSgn == nullptr)
 	{
 		nlwarning("CAsyncFileManagerSound::cancelSignal : trying to remove a signal with a null pointer !");
 		return;
@@ -135,7 +135,7 @@ CAsyncFileManagerSound::CLoadWavFile::CLoadWavFile (IBuffer *pdestBuffer, const 
 	{
 		nlwarning("CAsyncFileManagerSound::CLoadWavFile::CLoadWavFile : file name is empty !");
 	}
-	if (_pDestbuffer == 0)
+	if (_pDestbuffer == nullptr)
 	{
 		nlwarning("CAsyncFileManagerSound::CLoadWavFile::CLoadWavFile : dest buffer ptr is null!");
 	}
@@ -146,20 +146,20 @@ void CAsyncFileManagerSound::CLoadWavFile::run (void)
 	nldebug("Loading sample %s...", _Filename.c_str());
 //	nlSleep(500);
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
-	if (mixer == 0)
+	if (mixer == nullptr)
 	{
 		nlwarning("CAsyncFileManagerSound::CLoadWavFile::run : mixer is not avalable !");
 		return;
 	}
 
 	ISoundDriver *sndDrv = mixer->getSoundDriver();
-	if (sndDrv == 0)
+	if (sndDrv == nullptr)
 	{
 		nlwarning("CAsyncFileManagerSound::CLoadWavFile::run : sound driver is null !");
 		return;
 	}
 
-	if (_pDestbuffer == 0)
+	if (_pDestbuffer == nullptr)
 	{
 		nlwarning("CAsyncFileManagerSound::CLoadWavFile::run : dest buffer is null !");
 		return;

@@ -29,8 +29,8 @@ namespace NL3D
 // ***************************************************************************
 CVegetableInstanceGroup::CVegetableInstanceGroup()
 {
-	_ClipOwner= NULL;
-	_SortOwner= NULL;
+	_ClipOwner = nullptr;
+	_SortOwner = nullptr;
 	_HasZSortPassInstances= false;
 	_TriangleQuadrantOrderNumTriangles= 0;
 	_ULPrec= this;

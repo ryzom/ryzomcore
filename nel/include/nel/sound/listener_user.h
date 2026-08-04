@@ -42,11 +42,11 @@ class CListenerUser : public UListener
 public:
 
 	/// Constructor
-	CListenerUser()	: _DrvListener (NULL) {}
+	CListenerUser()	: _DrvListener (nullptr) {}
 	/// Init
 	void			init( ISoundDriver *sd )					{  nlassert( sd ); _DrvListener = sd->createListener(); }
 	/// Destructor
-	virtual			~CListenerUser() NL_OVERRIDE							{ if ( _DrvListener!=NULL ) delete _DrvListener; }
+	virtual			~CListenerUser() NL_OVERRIDE							{ if ( _DrvListener != nullptr) delete _DrvListener; }
 
 
 	/// \name Listener properties

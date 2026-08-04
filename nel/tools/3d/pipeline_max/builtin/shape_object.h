@@ -115,7 +115,7 @@ public:
 		CStorageRaw *KnotsChunk;
 
 		SSpline() : NumKnots(0), Word2904(0), ClosedWord(0), BezierShape(0),
-			Canonical(false), KnotsChunk(NULL) { }
+			Canonical(false), KnotsChunk(nullptr) { }
 
 		inline bool closed() const { return ClosedWord != 0; }
 	};

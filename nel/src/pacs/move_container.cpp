@@ -101,10 +101,10 @@ void CMoveContainer::init (double xmin, double ymin, double xmax, double ymax, u
 	// Create world images
 	_ChangedRoot.resize (numWorldImage);
 	for (uint i=0; i<numWorldImage; i++)
-		_ChangedRoot[i]=NULL;
+		_ChangedRoot[i] = nullptr;
 
 	// Not in test mode
-	_Retriever=NULL;
+	_Retriever = nullptr;
 
 	// Element size
 	_PrimitiveMaxSize=primitiveMaxSize;
@@ -192,7 +192,7 @@ void  CMoveContainer::evalCollision (double deltaTime, uint8 worldImage)
 
 	// Get first collision
 	_PreviousCollisionNode = &_TimeOT[0];
-	if(_PreviousCollisionNode == NULL)
+	if(_PreviousCollisionNode == nullptr)
 		return;
 
 	// Eval all collisions
@@ -271,7 +271,7 @@ void  CMoveContainer::evalCollision (double deltaTime, uint8 worldImage)
 	freeAllOTInfo ();
 
 	// Some init
-	_PreviousCollisionNode=NULL;
+	_PreviousCollisionNode = nullptr;
 }
 
 // ***************************************************************************
@@ -331,7 +331,7 @@ bool CMoveContainer::testMove (UMovePrimitive* primitive, const CVectorD& speed,
 	bool testMoveValid;
 
 	// Eval first each static world images
-	result=evalOneTerrainCollision (0, prim, primitiveWorldImage, true, testMoveValid, NULL, contactNormal);
+	result=evalOneTerrainCollision (0, prim, primitiveWorldImage, true, testMoveValid, nullptr, contactNormal);
 
 	// Eval first each static world images
 	if (!result)
@@ -341,7 +341,7 @@ bool CMoveContainer::testMove (UMovePrimitive* primitive, const CVectorD& speed,
 		{
 
 			// Eval in this world image
-			result=evalOnePrimitiveCollision (0, prim, *ite, primitiveWorldImage, true, true, testMoveValid, NULL, contactNormal);
+			result=evalOnePrimitiveCollision (0, prim, *ite, primitiveWorldImage, true, true, testMoveValid, nullptr, contactNormal);
 
 			// If found, abort
 			if (result)
@@ -354,7 +354,7 @@ bool CMoveContainer::testMove (UMovePrimitive* primitive, const CVectorD& speed,
 
 	// Eval collisions if not found and not tested
 	if ((!result) && (_StaticWorldImage.find (worldImage)==_StaticWorldImage.end()))
-		result=evalOnePrimitiveCollision (0, prim, worldImage, primitiveWorldImage, true, false, testMoveValid, NULL, contactNormal);
+		result=evalOnePrimitiveCollision (0, prim, worldImage, primitiveWorldImage, true, false, testMoveValid, nullptr, contactNormal);
 
 	// Backup speed only if the primitive is inserted in the world image
 	if (prim->isInserted (primitiveWorldImage))
@@ -369,7 +369,7 @@ bool CMoveContainer::testMove (UMovePrimitive* primitive, const CVectorD& speed,
 	freeAllOTInfo ();
 
 	// Some init
-	_PreviousCollisionNode=NULL;
+	_PreviousCollisionNode = nullptr;
 
 	// Return result
 	return !result;
@@ -586,13 +586,13 @@ void CMoveContainer::getCells (CMovePrimitive *primitive, uint8 worldImage, uint
 		{
 			// In the left
 			elementArray[i]->NextX=_VectorCell[worldImage][x+y*_CellCountWidth].getFirstX ();
-			elementArray[i]->PreviousX=NULL;
+			elementArray[i]->PreviousX = nullptr;
 		}
 		else
 		{
 			// In the right
 			elementArray[i]->PreviousX=_VectorCell[worldImage][x+y*_CellCountWidth].getLastX ();
-			elementArray[i]->NextX=NULL;
+			elementArray[i]->NextX = nullptr;
 		}
 
 		// Next cell
@@ -602,7 +602,7 @@ void CMoveContainer::getCells (CMovePrimitive *primitive, uint8 worldImage, uint
 	// Erase last array element
 	for (; i<4; i++)
 	{
-		elementArray[i]=NULL;
+		elementArray[i] = nullptr;
 	}
 }
 
@@ -631,7 +631,7 @@ void CMoveContainer::clearModifiedList (uint8 worldImage)
 	}
 
 	// Empty list
-	_ChangedRoot[worldImage]=NULL;
+	_ChangedRoot[worldImage] = nullptr;
 }
 
 // ***************************************************************************
@@ -999,7 +999,7 @@ void CMoveContainer::evalAllCollisions (double beginTime, uint8 worldImage)
 		bool testMoveValid=false;
 
 		// Eval collision on the terrain
-		found|=evalOneTerrainCollision (beginTime, primitive, primitiveWorldImage, false, testMoveValid, NULL, NULL);
+		found|=evalOneTerrainCollision (beginTime, primitive, primitiveWorldImage, false, testMoveValid, nullptr, nullptr);
 
 		// If the primitive can collid other primitive..
 		if (primitive->getCollisionMask())
@@ -1009,7 +1009,7 @@ void CMoveContainer::evalAllCollisions (double beginTime, uint8 worldImage)
 			while (ite!=_StaticWorldImage.end())
 			{
 				// Eval in this world image
-				found|=evalOnePrimitiveCollision (beginTime, primitive, *ite, primitiveWorldImage, false, true, testMoveValid, NULL, NULL);
+				found|=evalOnePrimitiveCollision (beginTime, primitive, *ite, primitiveWorldImage, false, true, testMoveValid, nullptr, nullptr);
 
 				// Next world image
 				ite++;
@@ -1023,7 +1023,7 @@ void CMoveContainer::evalAllCollisions (double beginTime, uint8 worldImage)
 		{
 			// Eval collision in the world image if not already tested
 			if (_StaticWorldImage.find (worldImage)==_StaticWorldImage.end())
-				found|=evalOnePrimitiveCollision (beginTime, primitive, worldImage, primitiveWorldImage, false, false, testMoveValid, NULL, NULL);
+				found|=evalOnePrimitiveCollision (beginTime, primitive, worldImage, primitiveWorldImage, false, false, testMoveValid, nullptr, nullptr);
 		}
 
 		CVectorD d2=wI->getDeltaPosition();
@@ -1392,7 +1392,7 @@ UMovePrimitive *CMoveContainer::addCollisionablePrimitive (uint8 firstWorldImage
 	_PrimitiveSet.insert (primitive);
 
 	// if copy from primitive is not null, copy attributes
-	if (copyFrom != NULL)
+	if (copyFrom != nullptr)
 	{
 		primitive->setPrimitiveType(copyFrom->getPrimitiveType());
 		primitive->setReactionType(copyFrom->getReactionType());
@@ -1433,7 +1433,7 @@ UMovePrimitive *CMoveContainer::addNonCollisionablePrimitive (const UMovePrimiti
 	_PrimitiveSet.insert (primitive);
 
 	// if copy from primitive is not null, copy attributes
-	if (copyFrom != NULL)
+	if (copyFrom != nullptr)
 	{
 		primitive->setPrimitiveType(copyFrom->getPrimitiveType());
 		primitive->setReactionType(copyFrom->getReactionType());
@@ -1511,7 +1511,7 @@ void CMoveContainer::removeNCFromModifiedList (CMovePrimitive* primitive, uint8 
 	{
 		// For each changed primitives
 		CMovePrimitive *changed=_ChangedRoot[i];
-		CPrimitiveWorldImage *previous=NULL;
+		CPrimitiveWorldImage *previous = nullptr;
 		CPrimitiveWorldImage *wI=primitive->getWorldImage (worldImage);
 
 		while (changed)
@@ -1529,7 +1529,7 @@ void CMoveContainer::removeNCFromModifiedList (CMovePrimitive* primitive, uint8 
 					_ChangedRoot[i]=wI->getNextModified ();
 
 				// Unlink
-				wI->linkInModifiedList (NULL);
+				wI->linkInModifiedList (nullptr);
 				wI->setInModifiedListFlag (false);
 				break;
 			}
@@ -1551,7 +1551,7 @@ void CMoveContainer::removeFromModifiedList (CMovePrimitive* primitive, uint8 wo
 {
 	// For each changed primitives
 	CMovePrimitive *changed=_ChangedRoot[worldImage];
-	CPrimitiveWorldImage *previous=NULL;
+	CPrimitiveWorldImage *previous = nullptr;
 	CPrimitiveWorldImage *wI=primitive->getWorldImage (worldImage);
 
 	while (changed)
@@ -1569,7 +1569,7 @@ void CMoveContainer::removeFromModifiedList (CMovePrimitive* primitive, uint8 wo
 				_ChangedRoot[worldImage]=wI->getNextModified ();
 
 			// Unlink
-			wI->linkInModifiedList (NULL);
+			wI->linkInModifiedList (nullptr);
 			wI->setInModifiedListFlag (false);
 			break;
 		}
@@ -1720,7 +1720,7 @@ void CMoveContainer::duplicateWorldImage (uint8 source, uint8 dest)
 			CPrimitiveWorldImage *wIDest=elm->Primitive->getWorldImage (dest);
 
 			// First time the primitive is visited ?
-			if (wIDest->getMoveElement (0)==NULL)
+			if (wIDest->getMoveElement (0) == nullptr)
 			{
 				wIDest->copy (*wISource);
 			}
@@ -1955,7 +1955,7 @@ bool CMoveContainer::evalNCPrimitiveCollision (double deltaTime, UMovePrimitive 
 		// Get the world image
 		CPrimitiveWorldImage *wI = ((CMovePrimitive*)primitive)->getWorldImage (0);
 
-		CCollisionOTInfo *firstCollision = NULL;
+		CCollisionOTInfo *firstCollision = nullptr;
 		do
 		{
 			//nlassert (beginTime < 1.0);
@@ -1976,10 +1976,10 @@ bool CMoveContainer::evalNCPrimitiveCollision (double deltaTime, UMovePrimitive 
 			CCollisionOTDynamicInfo dynamicColInfoWI0;
 			CCollisionOTDynamicInfo dynamicColInfoWI;
 
-			firstCollision = NULL;
+			firstCollision = nullptr;
 
 			// If collision found, note it is on the landscape
-			if (evalOneTerrainCollision (beginTime, (CMovePrimitive*)primitive, worldImage, false, testMoveValid, &staticColInfo, NULL))
+			if (evalOneTerrainCollision (beginTime, (CMovePrimitive*)primitive, worldImage, false, testMoveValid, &staticColInfo, nullptr))
 			{
 				firstCollision = &staticColInfo;
 			}
@@ -1989,7 +1989,7 @@ bool CMoveContainer::evalNCPrimitiveCollision (double deltaTime, UMovePrimitive 
 			while (ite!=_StaticWorldImage.end())
 			{
 				// Eval in this world image
-				if (evalOnePrimitiveCollision (beginTime, (CMovePrimitive*)primitive, *ite, worldImage, false, true, testMoveValid, &dynamicColInfoWI0, NULL))
+				if (evalOnePrimitiveCollision (beginTime, (CMovePrimitive*)primitive, *ite, worldImage, false, true, testMoveValid, &dynamicColInfoWI0, nullptr))
 				{
 					// First collision..
 					if (!firstCollision || (firstCollision->getCollisionTime () > dynamicColInfoWI0.getCollisionTime ()))
@@ -2008,7 +2008,7 @@ bool CMoveContainer::evalNCPrimitiveCollision (double deltaTime, UMovePrimitive 
 			// Eval collision again the world image
 			if (_StaticWorldImage.find (worldImage)==_StaticWorldImage.end())
 			{
-				if (evalOnePrimitiveCollision (beginTime, (CMovePrimitive*)primitive, worldImage, worldImage, false, false, testMoveValid, &dynamicColInfoWI, NULL))
+				if (evalOnePrimitiveCollision (beginTime, (CMovePrimitive*)primitive, worldImage, worldImage, false, false, testMoveValid, &dynamicColInfoWI, nullptr))
 				{
 					// First collision..
 					if (!firstCollision || (firstCollision->getCollisionTime () > dynamicColInfoWI.getCollisionTime ()))

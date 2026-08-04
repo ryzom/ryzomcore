@@ -27,7 +27,7 @@ namespace NLMISC
 
 // Use a Raw structure, to be sure it is initialized before any constructor calls...
 //CPtrInfo() {Ptr=NULL; RefCount=0x7FFFFFFF; IsNullPtrInfo=true;}
-CRefCount::CPtrInfoBase		CRefCount::NullPtrInfo= {NULL, 0x7FFFFFFF, true};
+CRefCount::CPtrInfoBase		CRefCount::NullPtrInfo= { nullptr, 0x7FFFFFFF, true};
 
 }
 

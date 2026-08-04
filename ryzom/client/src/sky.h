@@ -44,7 +44,7 @@ public:
 	/** init from a sky sheet and a scene
 	  * \param unsupportedObjects If not NULL, will be filled with the names of the shapes that the driver cannot render
 	  */
-	void init(NL3D::UDriver *drv, const CSkySheet &sheet, bool forceFallbaclVersion = false, float numHourInDay = 24.f, std::vector<std::string> *unsupportedObjects = NULL);
+	void init(NL3D::UDriver *drv, const CSkySheet &sheet, bool forceFallbaclVersion = false, float numHourInDay = 24.f, std::vector<std::string> *unsupportedObjects = nullptr);
 	// release all datas, including the sky scene
 	void release();
 	/** Setup the sky
@@ -58,7 +58,7 @@ public:
 	uint			 getNumObjects() const { return uint(_Objects.size()); }
 	const CSkyObject &getObject(uint index) const { return _Objects[index]; }
 	// test if the sky has a fog color
-	bool			  hasFogColor() const { return _FogColor != NULL; }
+	bool			  hasFogColor() const { return _FogColor != nullptr; }
 	// compute fog color
 	NLMISC::CRGBA	 computeFogColor(const CClientDate &date, float weatherLevel) const;
 	float			 getWaterEnvMapCameraHeight() const { return _WaterEnvMapCameraHeight; }

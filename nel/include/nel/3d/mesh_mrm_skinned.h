@@ -474,7 +474,7 @@ public:
 		const CPackedVertex	*getPackedVertices() const
 		{
 			if (_PackedBuffer.empty())
-				return NULL;
+				return nullptr;
 			else
 				return &(_PackedBuffer[0]);
 		}
@@ -483,7 +483,7 @@ public:
 		CPackedVertex	*getPackedVertices()
 		{
 			if (_PackedBuffer.empty())
-				return NULL;
+				return nullptr;
 			else
 				return &(_PackedBuffer[0]);
 		}

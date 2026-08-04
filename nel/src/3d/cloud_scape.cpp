@@ -50,9 +50,9 @@ static const double MAX_FRAME_PERCENT_FOR_CLOUD_RENDERING = 20 / 100; // at most
 // ------------------------------------------------------------------------------------------------
 SCloudTexture3D::SCloudTexture3D ()
 {
-	Mem = NULL;
-	Mem2 = NULL;
-	MemBuffer = NULL;
+	Mem = nullptr;
+	Mem2 = nullptr;
+	MemBuffer = nullptr;
 	ToLightRGB.initUnlit();
 	ToLightRGB.setShader (CMaterial::Normal);
 	ToLightRGB.setZFunc (CMaterial::always);
@@ -111,7 +111,7 @@ SCloudTexture3D::SCloudTexture3D ()
 // ------------------------------------------------------------------------------------------------
 void SCloudTexture3D::init (uint32 nWidth, uint32 nHeight, uint32 nDepth)
 {
-	if (Mem != NULL)
+	if (Mem != nullptr)
 		return;
 
 	Width = raiseToNextPowerOf2 (nWidth);
@@ -164,7 +164,7 @@ void SCloudTexture3D::init (uint32 nWidth, uint32 nHeight, uint32 nDepth)
 // ------------------------------------------------------------------------------------------------
 SCloudTextureClamp::SCloudTextureClamp ()
 {
-	Mem = NULL;
+	Mem = nullptr;
 	ToClamp.initUnlit();
 	ToClamp.setShader (CMaterial::Normal);
 	ToClamp.texEnvOpAlpha (0, CMaterial::Add);
@@ -181,7 +181,7 @@ SCloudTextureClamp::SCloudTextureClamp ()
 // ------------------------------------------------------------------------------------------------
 void SCloudTextureClamp::init (uint32 nWidth, uint32 nHeight, uint32 nDepth, const std::string &filename)
 {
-	if (Mem != NULL)
+	if (Mem != nullptr)
 		return;
 
 	Width = raiseToNextPowerOf2 (nWidth);
@@ -297,7 +297,7 @@ CCloudScape::CCloudScape (NL3D::IDriver *pDriver) : _Noise3D (pDriver)
 	_IsIncomingCSS = false;
 	_DebugQuad = false;
 	_NbHalfCloudToUpdate = 1;
-	_CurrentCloudInProcess = NULL;
+	_CurrentCloudInProcess = nullptr;
 
 	_LastAnimRenderTime = 0;
 	_MaxDeltaTime = 0.1; // 100 ms
@@ -324,7 +324,7 @@ void CCloudScape::init (SCloudScapeSetup *pCSS, NL3D::CCamera *pCamera)
 	Tex3DTemp.init (64, 32, 32);
 	TexClamp.init (64, 32, 32,"");
 
-	if (pCSS != NULL)
+	if (pCSS != nullptr)
 	{
 		_CurrentCSS = *pCSS;
 		_NewCSS = *pCSS;
@@ -804,7 +804,7 @@ void CCloudScape::makeHalfCloud ()
 		// Is the cloud to calc is a real cloud
 		if (CSEToCalc.CloudIndex == -1)
 		{
-			_CurrentCloudInProcess = NULL;
+			_CurrentCloudInProcess = nullptr;
 		}
 		else
 		{
@@ -838,7 +838,7 @@ void CCloudScape::makeHalfCloud ()
 	}
 	else
 	{
-		if (_CurrentCloudInProcess != NULL)
+		if (_CurrentCloudInProcess != nullptr)
 		{
 			CCloud &c = *_CurrentCloudInProcess;
 

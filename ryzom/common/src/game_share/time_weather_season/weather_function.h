@@ -74,7 +74,7 @@ public:
 	  * \param pressure 0 for low pressure and 1 for high pressure
 	  */
 	uint                getNumWeatherSetups() const { return (uint)_WeatherSetups.size(); }
-	const CWeatherSetup *getWeatherSetup(uint index) const { return _WeatherSetups.empty() ? NULL : _WeatherSetups[index].WS; }
+	const CWeatherSetup *getWeatherSetup(uint index) const { return _WeatherSetups.empty() ? nullptr : _WeatherSetups[index].WS; }
 	uint32              getWeatherSetupWeight(uint index) const { return _WeatherSetups[index].Weight; }
 	uint32				getWeatherSetupsTotalWeight() const { return _TotalWeight; }
 
@@ -87,7 +87,8 @@ private:
 		const CWeatherSetup *WS;
 		uint32				 Weight; // the more high the weight, the more frequent this weather setup happens
 	public:
-		CWSInfo() : WS(NULL), Weight(1) {}
+		CWSInfo() : WS(nullptr)
+		    , Weight(1) {}
 	};
 	std::vector<CWSInfo> _WeatherSetups;
 	uint32 _TotalWeight;

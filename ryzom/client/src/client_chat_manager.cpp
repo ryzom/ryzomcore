@@ -234,8 +234,8 @@ CClientChatManager::CClientChatManager()
 	// default to NULL
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
-		_DynamicChannelNameLeaf[i]= NULL;
-		_DynamicChannelIdLeaf[i]= NULL;
+		_DynamicChannelNameLeaf[i] = nullptr;
+		_DynamicChannelIdLeaf[i] = nullptr;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 	}
 }
@@ -243,7 +243,7 @@ CClientChatManager::CClientChatManager()
 //-------------------------------------------------------
 const string *CClientChatManager::cycleLastTell()
 {
-	if (_TellPeople.empty()) return NULL;
+	if (_TellPeople.empty()) return nullptr;
 	_TellPeople.push_front(_TellPeople.back());
 	_TellPeople.pop_back();
 	return &(_TellPeople.front());
@@ -312,7 +312,7 @@ void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 		nlwarning("<CClientChatManager::chat> unknown message name : %s", msgType);
 	}
 
-	if (UserEntity != NULL) UserEntity->setAFK(false);
+	if (UserEntity != nullptr) UserEntity->setAFK(false);
 
 } // chat //
 
@@ -372,7 +372,7 @@ void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 	}
 
 	// tell => the user is no more AFK.
-	if (UserEntity != NULL) UserEntity->setAFK(false);
+	if (UserEntity != nullptr) UserEntity->setAFK(false);
 
 } // tell //
 
@@ -397,7 +397,7 @@ void CClientChatManager::filter( uint8 filter )
 		nlwarning("<CClientChatManager::filter> unknown message name : STRING:FILTER");
 	}
 
-	if (UserEntity != NULL) UserEntity->setAFK(false);
+	if (UserEntity != nullptr) UserEntity->setAFK(false);
 
 } // filter //
 
@@ -435,7 +435,7 @@ void CClientChatManager::setChatMode(CChatGroup::TGroupType group, TChanID dynam
 	_ChatMode = mode;
 	_ChatDynamicChannelId = dynamicChannelId;
 
-	if (UserEntity != NULL) UserEntity->setAFK(false);
+	if (UserEntity != nullptr) UserEntity->setAFK(false);
 
 } // filter //
 
@@ -1076,8 +1076,8 @@ void	CClientChatManager::initInGame()
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
 		// default
-		_DynamicChannelNameLeaf[i]= NULL;
-		_DynamicChannelIdLeaf[i]= NULL;
+		_DynamicChannelNameLeaf[i] = nullptr;
+		_DynamicChannelIdLeaf[i] = nullptr;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 		// get
 		CCDBNodeLeaf	*name= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:DYN_CHAT:CHANNEL%d:NAME", i), false);
@@ -1095,8 +1095,8 @@ void	CClientChatManager::releaseInGame()
 {
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
-		_DynamicChannelNameLeaf[i]= NULL;
-		_DynamicChannelIdLeaf[i]= NULL;
+		_DynamicChannelNameLeaf[i] = nullptr;
+		_DynamicChannelIdLeaf[i] = nullptr;
 		_DynamicChannelIdCache[i]= DynamicChannelEmptyId;
 	}
 }
@@ -1104,7 +1104,7 @@ void	CClientChatManager::releaseInGame()
 // ***************************************************************************
 TChanID	CClientChatManager::getDynamicChannelIdFromDbIndex(uint32 dbIndex)
 {
-	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelIdLeaf[dbIndex]==NULL)
+	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelIdLeaf[dbIndex] == nullptr)
 		return CEntityId::Unknown;
 	else
 		return TChanID(uint64(_DynamicChannelIdLeaf[dbIndex]->getValue64()));
@@ -1115,7 +1115,7 @@ sint32	CClientChatManager::getDynamicChannelDbIndexFromId(TChanID channelId)
 {
 	for(uint i=0;i<CChatGroup::MaxDynChanPerPlayer;i++)
 	{
-		if(_DynamicChannelIdLeaf[i]!= NULL)
+		if(_DynamicChannelIdLeaf[i] != nullptr)
 		{
 			if(uint64(_DynamicChannelIdLeaf[i]->getValue64()) == channelId.getRawId())
 				return i;
@@ -1135,7 +1135,7 @@ bool	CClientChatManager::isDynamicChannelExist(TChanID channelId)
 // ***************************************************************************
 uint32	CClientChatManager::getDynamicChannelNameFromDbIndex(uint32 dbIndex)
 {
-	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelNameLeaf[dbIndex]==NULL)
+	if(dbIndex>=CChatGroup::MaxDynChanPerPlayer || _DynamicChannelNameLeaf[dbIndex] == nullptr)
 		return 0;
 	else
 		return _DynamicChannelNameLeaf[dbIndex]->getValue32();
@@ -1182,8 +1182,8 @@ class CHandlerTell : public IActionHandler
 			return;
 
 		// Get the chat window (if any)
-		CChatWindow *cw = NULL;
-		CGroupEditBox *eb = pCaller?dynamic_cast<CGroupEditBox *>(pCaller):NULL;
+		CChatWindow *cw = nullptr;
+		CGroupEditBox *eb = pCaller?dynamic_cast<CGroupEditBox *>(pCaller) : nullptr;
 		if (eb)
 			cw = getChatWndMgr().getChatWindowFromCaller(eb);
 
@@ -1225,10 +1225,10 @@ class CHandlerEnterTell : public IActionHandler
 			return;
 
 		CChatGroupWindow *pCGW = PeopleInterraction.getChatGroupWindow();
-		if (pCGW != NULL)
+		if (pCGW != nullptr)
 		{
 			CGroupContainer *pGC = pCGW->createFreeTeller(receiver);
-			if (pGC != NULL)
+			if (pGC != nullptr)
 			{
 				pGC->setActive(true);
 				CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(pGC->getGroup("eb"));
@@ -1468,7 +1468,7 @@ class CHandlerSwapChatMode : public IActionHandler
 				node->setValue32(0);
 				// also leave Chat Focus (important if comes from command)
 				if (updateCapture)
-					CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+					CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
 			}
 			else
 			{

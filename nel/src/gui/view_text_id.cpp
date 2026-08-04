@@ -37,13 +37,13 @@ NLMISC_REGISTER_OBJECT(CViewBase, CViewTextID, std::string, "text_id");
 namespace NLGUI
 {
 
-	CViewTextID::IViewTextProvider* CViewTextID::textProvider = NULL;
+	CViewTextID::IViewTextProvider* CViewTextID::textProvider = nullptr;
 
 	// ***************************************************************************
 	CViewTextID::CViewTextID(const std::string& id,const std::string &/* idDBPath */, sint FontSize /*=12*/,NLMISC::CRGBA Color /*=NLMISC::CRGBA(255,255,255)*/,bool Shadow /*=false*/)
 				: CViewText (id, std::string(""), FontSize, Color, Shadow)
 	{
-		_StringModifier= NULL;
+		_StringModifier = nullptr;
 		_IsDBLink = true;
 		_DBTextId.link(id.c_str());
 		_Initialized = false;
@@ -60,7 +60,7 @@ namespace NLGUI
 	{
 		if( name == "textid" )
 		{
-			if( _DBTextId.getNodePtr() != NULL )
+			if( _DBTextId.getNodePtr() != nullptr)
 				return _DBTextId.getNodePtr()->getFullName();
 			else
 				return NLMISC::toString( _TextId );
@@ -120,12 +120,12 @@ namespace NLGUI
 	xmlNodePtr CViewTextID::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewText::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_id" );
 
-		if( _DBTextId.getNodePtr() != NULL )
+		if( _DBTextId.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "textid", BAD_CAST _DBTextId.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "textid", BAD_CAST "" );
@@ -207,7 +207,7 @@ namespace NLGUI
 			// String result
 			string result;
 
-			if( textProvider != NULL )
+			if( textProvider != nullptr)
 			{
 				// Get the string
 				if( _DynamicString )
@@ -300,7 +300,7 @@ namespace NLGUI
 	string CViewTextID::getTextIdDbLink() const
 	{
 		if (!_IsDBLink) return "";
-		if (_DBTextId.getNodePtr() == NULL) return "";
+		if (_DBTextId.getNodePtr() == nullptr) return "";
 		return _DBTextId.getNodePtr()->getFullName();
 	}
 
@@ -308,7 +308,7 @@ namespace NLGUI
 	void CViewTextID::setTextIdDbLink(const string &link)
 	{
 		CCDBNodeLeaf *pNL = NLGUI::CDBManager::getInstance()->getDbProp(link,false);
-		if (pNL == NULL)
+		if (pNL == nullptr)
 		{
 			nlwarning("cant set textidlink for %s",link.c_str());
 			return;

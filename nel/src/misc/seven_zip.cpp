@@ -157,7 +157,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	}
 
 	UInt32 blockIndex = 0xFFFFFFFF; /* it can have any value before first call (if outBuffer = 0) */
-	Byte *outBuffer = 0; /* it must be 0 before first call for each new archive. */
+	Byte *outBuffer = nullptr; /* it must be 0 before first call for each new archive. */
 	size_t outBufferSize = 0; /* it can have any value before first call (if outBuffer = 0) */
 
 	size_t offset;
@@ -167,7 +167,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	res = SzArEx_Extract(&db, &lookStream.vt, 0, &blockIndex, &outBuffer, &outBufferSize, &offset, &outSizeProcessed, &allocImp, &allocTempImp);
 
 	// get the length of first file
-	size_t nameLen = SzArEx_GetFileNameUtf16(&db, 0, NULL);
+	size_t nameLen = SzArEx_GetFileNameUtf16(&db, 0, nullptr);
 
 	ucstring filename;
 	filename.resize(nameLen);
@@ -178,7 +178,7 @@ bool unpack7Zip(const std::string &sevenZipFile, const std::string &destFileName
 	// write the extracted file
 	FILE *outputHandle = nlfopen(destFileName, "wb+");
 
-	if (outputHandle == 0)
+	if (outputHandle == nullptr)
 	{
 		nlerror("Can not open output file '%s'", destFileName.c_str());
 		return false;

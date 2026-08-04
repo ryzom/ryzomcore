@@ -152,7 +152,7 @@ static bool bmtexFileName(CSceneClass *bmtex, std::string &out)
 // per the reference exporter's own gating (isClassIdCompatible + BMTEX_CLASS_ID checks).
 static ITexture *waterTextureFromTexmap(CSceneClass *texmap, const std::string &nodeName, const char *tag)
 {
-	if (!texmap) return NULL;
+	if (!texmap) return nullptr;
 	NLMISC::CClassId cid = texmap->classDesc()->classId();
 	CSceneClass *bmtex = texmap;
 	if (cid == CLASSID_NEL_BMTEX)
@@ -182,7 +182,7 @@ static ITexture *waterTextureFromTexmap(CSceneClass *texmap, const std::string &
 		{
 			fprintf(stderr, "WARNING: water '%s': %s NeL multi-bitmap has no slot filenames\n",
 			        nodeName.c_str(), tag);
-			return NULL;
+			return nullptr;
 		}
 		CTextureMultiFile *multi = new CTextureMultiFile(numUsed);
 		for (uint k = 0; k < numUsed; ++k)
@@ -197,7 +197,7 @@ static ITexture *waterTextureFromTexmap(CSceneClass *texmap, const std::string &
 		{
 			fprintf(stderr, "WARNING: water '%s': %s BitmapTex has no file name\n",
 			        nodeName.c_str(), tag);
-			return NULL;
+			return nullptr;
 		}
 		CTextureFile *tf = new CTextureFile;
 		tf->setFileName(NLMISC::CFile::getFilename(path));
@@ -205,7 +205,7 @@ static ITexture *waterTextureFromTexmap(CSceneClass *texmap, const std::string &
 	}
 	fprintf(stderr, "WARNING: water '%s': %s texmap class %s not a BitmapTex-compatible source\n",
 	        nodeName.c_str(), tag, cid.toString().c_str());
-	return NULL;
+	return nullptr;
 }
 
 NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
@@ -218,7 +218,7 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	if (!mtl || mtl->classDesc()->classId() != CLASSID_NEL_MTL)
 	{
 		fprintf(stderr, "WARNING: water '%s': not a NeL material\n", nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 	std::vector<SPB2Block> mtlBlocks;
 	readObjectPB2Blocks(mtl, mtlBlocks);
@@ -262,7 +262,7 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	// 3=env-below (optional), 4=env-below-alt (optional), 5=bump (required), 6=displace
 	// (required), 7=diffuse/color (optional).
 	int enable[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	CSceneClass *texmap[8] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+	CSceneClass *texmap[8] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 	for (uint s = 0; s < 7; ++s)
 	{
 		pb2Int(mtlBlocks, NLB_TEXTURES, (uint16)(NLP_BENABLESLOT_1 + s), enable[s]);
@@ -275,26 +275,26 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	{
 		fprintf(stderr, "SKIP water '%s': missing required slot enables (env+bump+displace)\n",
 		        nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if (!texmap[0] || !texmap[4] || !texmap[5])
 	{
 		fprintf(stderr, "SKIP water '%s': missing required texmaps (env/bump/displace)\n",
 		        nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	// Evaluate the mesh (respects the modifier stack — XForm etc.).
 	SEvalMesh mesh;
-	if (!evalNodeMesh(node, mesh, NULL))
+	if (!evalNodeMesh(node, mesh, nullptr))
 	{
 		fprintf(stderr, "WARNING: water '%s': mesh evaluation failed\n", nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if (mesh.Verts.empty())
 	{
 		fprintf(stderr, "WARNING: water '%s': mesh has no vertices\n", nodeName.c_str());
-		return NULL;
+		return nullptr;
 	}
 
 	// objectTM = offsetTM * nodeTM; objectToLocal = objectTM * inverse(nodeTM). Same construction
@@ -342,7 +342,7 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	{
 		fprintf(stderr, "WARNING: water '%s': convex hull too small (%u verts)\n",
 		        nodeName.c_str(), (uint)convexPoly.Vertices.size());
-		return NULL;
+		return nullptr;
 	}
 
 	// Build the shape
@@ -354,7 +354,7 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	// The blend gate is TEXMAP presence (not the enable-slot flag) — the corpus's above-water
 	// envmap on tr_water_00 is `CTextureBlend(waterenvmap.png, water_night_envmap.png)`, i.e.
 	// the day/night blend that CWaterPoolManager::setBlend drives at runtime.
-	NLMISC::CSmartPtr<ITexture> envMap = NULL;
+	NLMISC::CSmartPtr<ITexture> envMap = nullptr;
 	{
 		ITexture *t0 = waterTextureFromTexmap(texmap[0], nodeName, "env");
 		if (t0)
@@ -376,7 +376,7 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 				envMap = t0;
 		}
 	}
-	NLMISC::CSmartPtr<ITexture> envMapUnder = NULL;
+	NLMISC::CSmartPtr<ITexture> envMapUnder = nullptr;
 	if (texmap[2])
 	{
 		ITexture *t0 = waterTextureFromTexmap(texmap[2], nodeName, "env-under");
@@ -401,18 +401,18 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	}
 	NLMISC::CSmartPtr<ITexture> bumpMap = waterTextureFromTexmap(texmap[4], nodeName, "bump");
 	NLMISC::CSmartPtr<ITexture> displaceMap = waterTextureFromTexmap(texmap[5], nodeName, "displace");
-	NLMISC::CSmartPtr<ITexture> colorMap = NULL;
+	NLMISC::CSmartPtr<ITexture> colorMap = nullptr;
 	if (enable[6] && texmap[6])
 		colorMap = waterTextureFromTexmap(texmap[6], nodeName, "diffuse");
 
 	if (!envMap || !bumpMap || !displaceMap)
 	{
 		delete ws;
-		return NULL;
+		return nullptr;
 	}
 
 	ws->setEnvMap(0, (ITexture *)envMap);
-	if (envMapUnder != NULL)
+	if (envMapUnder != nullptr)
 		ws->setEnvMap(1, (ITexture *)envMapUnder);
 	ws->setHeightMap(0, (ITexture *)displaceMap);
 	ws->setHeightMap(1, (ITexture *)bumpMap);
@@ -448,7 +448,7 @@ NL3D::IShape *buildWaterShape(INode &node, SNodeTMCache &tmCache)
 	// projection is a 2x3 affine from a chosen mesh triangle's world XY to its UVs+crop, and
 	// requires walking the mesh's map channels + the diffuse map's UVGen. Water shapes without
 	// a color map are unaffected; ones with one will diff on ColorMapMat until this lands.
-	if (colorMap != NULL)
+	if (colorMap != nullptr)
 		ws->setColorMap((ITexture *)colorMap);
 
 	ws->setShape(convexPoly);

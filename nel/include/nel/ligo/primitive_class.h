@@ -198,8 +198,8 @@ public:
 		bool	translateAutoname (std::string &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass) const;
 
 		// Get a default value
-		bool	getDefaultValue (std::string &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass, std::string *fromWhere = NULL) const;
-		bool	getDefaultValue (std::vector<std::string> &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass, std::string *fromWhere = NULL) const;
+		bool	getDefaultValue (std::string &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass, std::string *fromWhere = nullptr) const;
+		bool	getDefaultValue (std::vector<std::string> &result, const IPrimitive &primitive, const CPrimitiveClass &primitiveClass, std::string *fromWhere = nullptr) const;
 	};
 
 	/// Parameters

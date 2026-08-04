@@ -123,7 +123,7 @@ private:
 	class CSelectablePrimRender : public CPrimRender
 	{
 	public:
-		CSelectablePrimRender() : DisplayedInstance(NULL) {}
+		CSelectablePrimRender() : DisplayedInstance(nullptr) {}
 		// from CPrimRender
 		virtual CCtrlPolygon *newCtrlPolygon() const NL_OVERRIDE;
 		// from CPrimRender

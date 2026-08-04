@@ -114,14 +114,14 @@ public:
 	/// Proxy interface
 
 	/// Constructors
-	UPointLight() { _Object = NULL; }
+	UPointLight() { _Object = nullptr; }
 	UPointLight(class CPointLightModel *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CPointLightModel *object) { _Object = (ITransformable*)object; }
 	/// Detach the object
-	void			detach() { _Object = NULL; }
+	void			detach() { _Object = nullptr; }
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const {return _Object == nullptr; }
 	/// For advanced usage, get the internal object ptr
 	class CPointLightModel	*getObjectPtr() const {return (CPointLightModel*)_Object;}
 };

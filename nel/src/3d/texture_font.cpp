@@ -114,7 +114,7 @@ void CTextureFont::clearAtlas()
 	// clear glyph cache
 	for(std::map<SLetterKey, SLetterInfo>::iterator it = _Letters.begin(); it != _Letters.end(); ++it)
 	{
-		it->second.glyph = NULL;
+		it->second.glyph = nullptr;
 	}
 	_GlyphCache.clear();
 
@@ -399,7 +399,7 @@ CTextureFont::SGlyphInfo* CTextureFont::renderLetterGlyph(SLetterInfo *letter, u
 	if (!reserveAtlas(rectW, rectH, atlasX, atlasY))
 	{
 		// no room
-		return NULL;
+		return nullptr;
 	}
 	copyGlyphBitmap(bitmap, charWidth, charHeight, atlasX, atlasY);
 
@@ -456,7 +456,7 @@ CTextureFont::SGlyphInfo* CTextureFont::findLetterGlyph(SLetterInfo *letter, boo
 		return renderLetterGlyph(letter, bitmapFontSize);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -488,7 +488,7 @@ CTextureFont::SLetterInfo* CTextureFont::findLetter(SLetterKey &k, bool insert)
 		return letter;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------
@@ -506,13 +506,13 @@ CTextureFont::SLetterInfo* CTextureFont::getLetterInfo (SLetterKey& k, bool rend
 	{
 		// render glyph
 		letter->glyph = findLetterGlyph(letter, true);
-		if (letter->glyph == NULL)
+		if (letter->glyph == nullptr)
 		{
 			// resize/repack and try again
 			if (!resizeAtlas()) repackAtlas();
 
 			letter->glyph = findLetterGlyph(letter, true);
-			if (letter->glyph == NULL)
+			if (letter->glyph == nullptr)
 			{
 				// make room by clearing all glyphs and reduce max size for glyphs
 				clearAtlas();

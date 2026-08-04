@@ -168,8 +168,8 @@ public:
 	void				init( std::vector<std::string>& dataSetsToLoad,
 							  TMirrorReadyCallback cbLevel1,
 							  TNotificationCallback tickUpdateFunc,
-							  TNotificationCallback tickSyncFunc = NULL,
-							  TNotificationCallback tickReleaseFunc = NULL,
+							  TNotificationCallback tickSyncFunc = nullptr,
+							  TNotificationCallback tickReleaseFunc = nullptr,
 							  TMTRTag tag=AllTag );
 
 	/**
@@ -198,7 +198,7 @@ public:
 	 * moment to allow you to spawn or despawn entities (see isRunningSynchronizedCode()), instead
 	 * of calling it as soon as received.
 	 */
-	void				setServiceMirrorUpCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=0, bool back=true, bool synchronizedCallback=true );
+	void				setServiceMirrorUpCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=nullptr, bool back=true, bool synchronizedCallback=true );
 
 	/**
 	 * This is the counterpart of setServiceMirrorUpCallback().
@@ -212,21 +212,21 @@ public:
 	 * For callbacks provided to CUnifiedNetwork::setServiceDownCallback(),
 	 * the behaviour with a false synchronizedCallback flag are applied.
 	 */
-	void				setServiceMirrorDownCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=0, bool back=true, bool synchronizedCallback=true );
+	void				setServiceMirrorDownCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=nullptr, bool back=true, bool synchronizedCallback=true );
 
 	/**
 	 * This is similar to CUnifiedNetwork::setServiceUpCallback() but it allows you to spawn or despawn
 	 * entities in the callback if you set synchronizedCallback to true (see isRunningSynchronizedCode())
 	 * \seealso setServiceMirrorUpCallback()
 	 */
-	void				setServiceUpCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=0, bool back=true, bool synchronizedCallback=true );
+	void				setServiceUpCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=nullptr, bool back=true, bool synchronizedCallback=true );
 
 	/**
 	 * This is similar to CUnifiedNetwork::setServiceUpCallback() but it allows you to spawn or despawn
 	 * entities in the callback if you set synchronizedCallback to true (see isRunningSynchronizedCode())
 	 * \seealso setServiceMirrorDownCallback()
 	 */
-	void				setServiceDownCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=0, bool back=true, bool synchronizedCallback=true );
+	void				setServiceDownCallback( const std::string &serviceName, NLNET::TUnifiedNetCallback cb, void *arg=nullptr, bool back=true, bool synchronizedCallback=true );
 
 	/**
 	 * Call this method every cycle (in your update routine) if you use mirror watches
@@ -426,7 +426,7 @@ protected:
 	bool				mirrorIsUp() const { return mirrorServiceIsUp() && (_PendingEntityTypesRanges == 0); }
 
 	/// Return true if the specified property is ready
-	bool				propIsAllocated( const std::string& propName ) const { return _PropAllocator.getPropertySegment( propName ) != NULL; }
+	bool				propIsAllocated( const std::string& propName ) const { return _PropAllocator.getPropertySegment( propName ) != nullptr; }
 
 	/// Receiving green light for level1
 	void				initAfterMirrorUp();

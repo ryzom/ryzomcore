@@ -83,8 +83,8 @@ public:
 
 		CSlot()
 		{
-			Brick= NULL;
-			Back= NULL;
+			Brick = nullptr;
+			Back = nullptr;
 			Valid= false;
 		}
 	};
@@ -120,9 +120,9 @@ public:
 		{
 			NumTotalParams= 0;
 			ParamError= false;
-			CostView= NULL;
-			CreditView= NULL;
-			InfoView= NULL;
+			CostView = nullptr;
+			CreditView = nullptr;
+			InfoView = nullptr;
 		}
 	};
 

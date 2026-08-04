@@ -58,13 +58,13 @@ static const int s_OutputHWSlot[] = {
 
 // GLSL varying names for output registers (indexed by EOutputRegister enum)
 static const char *s_OutputVaryingName[] = {
-	NULL,              // OHPosition -> gl_Position (builtin, not a varying)
+	nullptr,              // OHPosition -> gl_Position (builtin, not a varying)
 	"diffuseColor",    // OPrimaryColor
 	"specularColor",   // OSecondaryColor
-	NULL,              // OBackFacePrimaryColor (unsupported)
-	NULL,              // OBackFaceSecondaryColor (unsupported)
+	nullptr,              // OBackFacePrimaryColor (unsupported)
+	nullptr,              // OBackFaceSecondaryColor (unsupported)
 	"fog",             // OFogCoord
-	NULL,              // OPointSize -> gl_PointSize (builtin)
+	nullptr,              // OPointSize -> gl_PointSize (builtin)
 	"texCoord0",       // OTex0
 	"texCoord1",       // OTex1
 	"texCoord2",       // OTex2
@@ -303,7 +303,7 @@ static void writeBroadcastAssign(std::stringstream &ss, const CVPOperand &dest,
 bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked, bool clip)
 {
 	// Find the nelvp source
-	IProgram::CSource *nelvpSrc = NULL;
+	IProgram::CSource *nelvpSrc = nullptr;
 	for (int i = 0; i < program->getSourceNb(); i++)
 	{
 		IProgram::CSource *s = program->getSource(i);
@@ -457,7 +457,7 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked, bool c
 		for (int i = 0; i < CVPOperand::OutputRegisterCount; i++)
 		{
 			if (!outputUsed[i]) continue;
-			if (s_OutputVaryingName[i] == NULL) continue;
+			if (s_OutputVaryingName[i] == nullptr) continue;
 			int loc = s_OutputVaryingLocation[i];
 			if (loc < 0) continue;
 
@@ -644,7 +644,7 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked, bool c
 				}
 				else
 				{
-					static const char *vecCast[] = { NULL, NULL, "vec2", "vec3", "vec4" };
+					static const char *vecCast[] = { nullptr, nullptr, "vec2", "vec3", "vec4" };
 					ss << " = " << vecCast[mc] << "(lessThan(";
 					writeSrcOperand(ss, instr.Src1, registerCount, mc);
 					ss << ", ";
@@ -668,7 +668,7 @@ bool CDriverGL3::convertNelvpToGLSL(CVertexProgram *program, bool linked, bool c
 				}
 				else
 				{
-					static const char *vecCast[] = { NULL, NULL, "vec2", "vec3", "vec4" };
+					static const char *vecCast[] = { nullptr, nullptr, "vec2", "vec3", "vec4" };
 					ss << " = " << vecCast[mc] << "(greaterThanEqual(";
 					writeSrcOperand(ss, instr.Src1, registerCount, mc);
 					ss << ", ";

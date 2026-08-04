@@ -158,10 +158,10 @@ public:
 
 		CSheetChild()
 		{
-			Owner= NULL;
-			Ctrl= NULL;
-			Text= NULL;
-			Button= NULL;
+			Owner = nullptr;
+			Ctrl = nullptr;
+			Text = nullptr;
+			Button = nullptr;
 			SheetId= 0;
 			NameId= 0;
 			NeedUpdateText= true;

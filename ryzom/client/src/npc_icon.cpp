@@ -27,7 +27,7 @@
 using namespace std;
 using namespace NLMISC;
 
-CNPCIconCache* CNPCIconCache::_Instance = NULL;
+CNPCIconCache* CNPCIconCache::_Instance = nullptr;
 
 // Time after which the state of a NPC is considered obsolete and must be refreshed (because it's in gamecycle, actual time increases if server slows down, to avoid server congestion)
 NLMISC::TGameCycle CNPCIconCache::_CacheRefreshTimerDelay = NPC_ICON::DefaultClientNPCIconRefreshTimerDelayGC;
@@ -62,7 +62,7 @@ void CNPCIconCache::release()
 	if (_Instance)
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 

@@ -168,7 +168,7 @@ public:		// Methods.
 	NLMISC::CVector		unpack3f(float hintz=0.0f) const	{ return NLMISC::CVector(unpack(x), unpack(y), hintz); }
 
 	/// Test if 2 segments intersects
-	static bool			intersect(const CVector2s& a0, const CVector2s& a1, const CVector2s& b0, const CVector2s& b1, double* pa = NULL, double* pb = NULL);
+	static bool			intersect(const CVector2s& a0, const CVector2s& a1, const CVector2s& b0, const CVector2s& b1, double* pa = nullptr, double* pb = nullptr);
 };
 
 } // NLPACS

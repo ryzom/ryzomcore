@@ -144,10 +144,10 @@ void CDriverUser::endDefaultRenderTarget(UScene *scene)
 		setMatrixMode3D(pCam);
 	}
 
-	_MatRenderTarget.getObjectPtr()->setTexture(0, NULL);
+	_MatRenderTarget.getObjectPtr()->setTexture(0, nullptr);
 
 	getRenderTargetManager().recycleRenderTarget(_EffectRenderTarget);
-	_EffectRenderTarget = NULL;
+	_EffectRenderTarget = nullptr;
 }
 
 // ***************************************************************************

@@ -44,7 +44,7 @@ namespace NLGUI
 	CInterfaceTrack::CInterfaceTrack()
 	{
 		_Type = Track_Linear;
-		_TrackKeyFramer = NULL;
+		_TrackKeyFramer = nullptr;
 		_Dynamic = false;
 	}
 
@@ -281,7 +281,7 @@ namespace NLGUI
 	{
 		float currentValue;
 		UTrack *pTrack = dynamic_cast<UTrack*>(_TrackKeyFramer);
-		if (pTrack == NULL) return;
+		if (pTrack == nullptr) return;
 		pTrack->interpolate((TAnimationTime)currentTime, currentValue);
 
 		// Update the targets
@@ -296,7 +296,7 @@ namespace NLGUI
 	{
 		if (!_Dynamic) return;
 
-		if (_TrackKeyFramer != NULL)
+		if (_TrackKeyFramer != nullptr)
 			delete _TrackKeyFramer;
 
 		switch(_Type)
@@ -523,7 +523,7 @@ namespace NLGUI
 		_Duration = 0;
 		_DisableButtons = true;
 		_AnimHasToBeStopped = false;
-		_Parent = NULL;
+		_Parent = nullptr;
 	}
 
 	// ----------------------------------------------------------------------------

@@ -105,7 +105,7 @@ bool	CAnimationState::isOldRaceAnimationForced(EGSPD::CPeople::TPeople race, GSG
 //-----------------------------------------------
 CAnimationState::CAnimationState()
 {
-	_Sheet = NULL;
+	_Sheet = nullptr;
 }// CAnimationState //
 
 
@@ -307,6 +307,6 @@ CAnimation::TAnimId CAnimationState::chooseAnim(uint32 jobSpecialisation, EGSPD:
 //-----------------------------------------------
 CAnimation *CAnimationState::getAnimationByIndex(uint index)
 {
-	if (index >= _Animations.size()) return NULL;
+	if (index >= _Animations.size()) return nullptr;
 	return &_Animations[index];
 }// getAnimationByIndex

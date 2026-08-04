@@ -47,7 +47,7 @@ namespace NLMISC
 
 #ifdef USE_JPEG
 
-static NLMISC::IStream *JPGStream = NULL;
+static NLMISC::IStream *JPGStream = nullptr;
 static const uint32 JPGBufferSize = 4096;
 static uint32 JPGStreamSize = 0;
 static char JPGBuffer[JPGBufferSize];
@@ -122,7 +122,7 @@ static void jpgDecompressTerm(j_decompress_ptr /* cinfo */)
 {
 }
 
-static jpeg_source_mgr jpgSourceManager = { NULL, 0,
+static jpeg_source_mgr jpgSourceManager = { nullptr, 0,
 	jpgDecompressInit, jpgDecompressFill, jpgDecompressSkip, jpeg_resync_to_restart, jpgDecompressTerm };
 
 /*-------------------------------------------------------------------*\
@@ -216,7 +216,7 @@ uint8 CBitmap::readJPG( NLMISC::IStream &f )
 
 	jpeg_destroy_decompress(&cinfo);
 
-	JPGStream = NULL;
+	JPGStream = nullptr;
 
 	return uint8(srcChannels * 8);
 }
@@ -241,7 +241,7 @@ static void jpgCompressTerm(j_compress_ptr cinfo)
 		JPGStream->serialBuffer((uint8*) JPGBuffer, (uint)(JPGBufferSize - cinfo->dest->free_in_buffer));
 }
 
-static jpeg_destination_mgr jpgDestinationManager = { 0, 0,
+static jpeg_destination_mgr jpgDestinationManager = { nullptr, 0,
 	jpgCompressInit, jpgCompressEmpty, jpgCompressTerm };
 
 /*-------------------------------------------------------------------*\
@@ -331,8 +331,8 @@ bool CBitmap::writeJPG( NLMISC::IStream &f, uint8 quality)
 	jpeg_destroy_compress(&cinfo);
 
 	delete row_pointer[0];
-	row_pointer[0] = NULL;
-	JPGStream = NULL;
+	row_pointer[0] = nullptr;
+	JPGStream = nullptr;
 
 	return true;
 }

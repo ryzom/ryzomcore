@@ -803,7 +803,7 @@ void CWaterShape::serial(NLMISC::IStream &f)
 	// serial heightMap identifier
 	f.serial(_WaterPoolID);
 	//serial maps
-	ITexture *map = NULL;
+	ITexture *map = nullptr;
 	if (f.isReading())
 	{
 		f.serialPolyPtr(map); _EnvMap[0] = map;
@@ -997,7 +997,7 @@ void  CWaterShape::updateHeightMapNormalizationFactors()
 	{
 		if (_HeightMapTouch[k])
 		{
-			if (_BumpMap[k] != NULL)
+			if (_BumpMap[k] != nullptr)
 			{
 				_BumpMap[k]->generate();
 				_HeightMapNormalizationFactor[k] = NLMISC::safe_cast<CTextureBump *>((ITexture *)_BumpMap[k])->getNormalizationFactor();

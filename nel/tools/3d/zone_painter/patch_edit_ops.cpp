@@ -307,12 +307,12 @@ NLMISC::CVector zpDragOffsetAt(const NLMISC::CVector &p)
 const void *zpZoneNode(uint zoneId)
 {
 	if (!g_PaintCtx.Zones)
-		return NULL;
+		return nullptr;
 	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
 	for (uint z = 0; z < zones.size(); ++z)
 		if (zones[z].ZoneId == zoneId)
 			return (const void *)zones[z].Node;
-	return NULL;
+	return nullptr;
 }
 
 /** Linear part only: the image of a delta, with the matrix's translation dropped. */
@@ -459,7 +459,7 @@ bool zpTransformPivot(NLMISC::CVector &out)
 		return true;
 	case ZPPIV_AllObjects:
 		if (!s_AllObjValid)
-			s_AllObjValid = zpNodeCentre(NULL, s_AllObjCentre);
+			s_AllObjValid = zpNodeCentre(nullptr, s_AllObjCentre);
 		if (!s_AllObjValid)
 			return false;
 		out = s_AllObjCentre;

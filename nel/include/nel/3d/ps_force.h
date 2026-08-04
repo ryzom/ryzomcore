@@ -87,7 +87,7 @@ public:
 	  * 'accumulate' set to false.
 	  * NB : works only with integrable forces
 	  */
-	 virtual void integrate(float /* date */, CPSLocated * /* src */, uint32 /* startIndex */, uint32 /* numObjects */, NLMISC::CVector * /* destPos */ = NULL, NLMISC::CVector * /* destSpeed */ = NULL,
+	 virtual void integrate(float /* date */, CPSLocated * /* src */, uint32 /* startIndex */, uint32 /* numObjects */, NLMISC::CVector * /* destPos */ = nullptr, NLMISC::CVector * /* destSpeed */ = nullptr,
 							bool /* accumulate */ = false,
 							uint /* posStride */ = sizeof(NLMISC::CVector), uint /* speedStride */ = sizeof(NLMISC::CVector)
 							) const
@@ -153,7 +153,7 @@ class CPSForceIntensity
 public:
 
 	// ctor
-	CPSForceIntensity() : _IntensityScheme(NULL)
+	CPSForceIntensity() : _IntensityScheme(nullptr)
 	{
 	}
 
@@ -405,7 +405,7 @@ public:
 	virtual bool		 isIntegrable(void) const NL_OVERRIDE;
 
 	/// inherited from CPSForce
-	virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = NULL, NLMISC::CVector *destSpeed = NULL,
+	virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = nullptr, NLMISC::CVector *destSpeed = nullptr,
 							bool accumulate = false,
 							uint posStride = sizeof(NLMISC::CVector), uint speedStride = sizeof(NLMISC::CVector)
 							) const NL_OVERRIDE;
@@ -576,7 +576,7 @@ public:
 	/// We provide a kind of integration on a predefined sequence
 	virtual bool		 isIntegrable(void) const NL_OVERRIDE;
 
-	virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = NULL, NLMISC::CVector *destSpeed = NULL,
+	virtual void integrate(float date, CPSLocated *src, uint32 startIndex, uint32 numObjects, NLMISC::CVector *destPos = nullptr, NLMISC::CVector *destSpeed = nullptr,
 							bool accumulate = false,
 							uint posStride = sizeof(NLMISC::CVector), uint speedStride = sizeof(NLMISC::CVector)
 							) const NL_OVERRIDE;

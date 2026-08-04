@@ -35,7 +35,7 @@ namespace NLLOGIC
 //-------------------------------------------------
 void CLogicComparisonBlock::setLogicStateMachine( CLogicStateMachine * logicStateMachine )
 {
-	if( logicStateMachine == 0 )
+	if( logicStateMachine == nullptr )
 	{
 		nlwarning("(LOGIC)<CLogicComparisonBlock::setLogicStateMachine> The state machine is null");
 	}
@@ -91,7 +91,7 @@ bool CLogicComparisonBlock::testLogic()
 
 void CLogicComparisonBlock::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"COMPARISON_BLOCK", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"COMPARISON_BLOCK", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"VariableName", (const xmlChar*)VariableName.c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"Operator", (const xmlChar*)Operator.c_str());
 	xmlSetProp (elmPtr, (const xmlChar*)"Comparand", (const xmlChar*)toString(Comparand).c_str());
@@ -118,7 +118,7 @@ void CLogicComparisonBlock::read (xmlNodePtr node)
 //-------------------------------------------------
 void CLogicConditionLogicBlock::setLogicStateMachine( CLogicStateMachine * logicStateMachine )
 {
-	if( logicStateMachine == 0 )
+	if( logicStateMachine == nullptr )
 	{
 		nlwarning("(LOGIC)<CCLogicConditionLogicBlock::setLogicStateMachine> The state machine is null");
 	}
@@ -235,7 +235,7 @@ void CLogicConditionLogicBlock::fillVarSet( set<string>& condVars )
 
 void CLogicConditionLogicBlock::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"CONDITION_LOGIC_NODE", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"CONDITION_LOGIC_NODE", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Type", (const xmlChar*)toString((uint32)Type).c_str());
 	switch( Type )
 	{
@@ -289,7 +289,7 @@ void CLogicConditionLogicBlock::read (xmlNodePtr node)
 //-------------------------------------------------
 void CLogicConditionNode::setLogicStateMachine( CLogicStateMachine * logicStateMachine )
 {
-	if( logicStateMachine == 0 )
+	if( logicStateMachine == nullptr )
 	{
 		nlwarning("(LOGIC)<CLogicConditionNode::setLogicStateMachine> The state machine is null");
 	}
@@ -442,7 +442,7 @@ void CLogicConditionNode::fillVarSet( set<string>& condVars )
 
 void CLogicConditionNode::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"CONDITION_NODE", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"CONDITION_NODE", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Type", (const xmlChar*)toString((uint32)Type).c_str());
 
 	switch( Type )
@@ -521,7 +521,7 @@ CLogicConditionNode::~CLogicConditionNode()
 //-------------------------------------------------
 void CLogicCondition::setLogicStateMachine( CLogicStateMachine * logicStateMachine )
 {
-	if( logicStateMachine == 0 )
+	if( logicStateMachine == nullptr )
 	{
 		nlwarning("(LOGIC)<CLogicCondition::setLogicStateMachine> The state machine is null");
 	}
@@ -592,7 +592,7 @@ void CLogicCondition::fillVarSet( set<string>& condVars )
 
 void CLogicCondition::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"CONDITION", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"CONDITION", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Name", (const xmlChar*)_ConditionName.c_str());
 
 	uint i;

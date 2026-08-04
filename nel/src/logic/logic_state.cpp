@@ -34,7 +34,7 @@ namespace NLLOGIC
 CLogicState::CLogicState()
 {
 	_StateName = "no_state";
-	_LogicStateMachine = 0;
+	_LogicStateMachine = nullptr;
 
 } // CLogicState //
 
@@ -45,7 +45,7 @@ CLogicState::CLogicState()
 //---------------------------------------------------
 void CLogicState::setLogicStateMachine( CLogicStateMachine * logicStateMachine )
 {
-	if( logicStateMachine == 0 )
+	if( logicStateMachine == nullptr )
 	{
 		nlwarning("(LOGIC)<CLogicCondition::setLogicStateMachine> The state machine is null");
 	}
@@ -350,7 +350,7 @@ void CLogicState::fillVarMap( multimap<CEntityId,string >& stateMachineVariables
 
 void CLogicState::write (xmlNodePtr node) const
 {
-	xmlNodePtr elmPtr = xmlNewChild ( node, NULL, (const xmlChar*)"STATE", NULL);
+	xmlNodePtr elmPtr = xmlNewChild ( node, nullptr, (const xmlChar*)"STATE", nullptr);
 	xmlSetProp (elmPtr, (const xmlChar*)"Name", (const xmlChar*)_StateName.c_str());
 
 	uint i;

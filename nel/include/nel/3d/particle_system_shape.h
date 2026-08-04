@@ -147,7 +147,7 @@ public:
 	  * An contiguous block allocator may be provided for fast alloc, init will be called on such allocator with 0
 	  * if num bytes is unknown of with the size needed otherwise.
 	  */
-	CParticleSystem *instanciatePS(CScene &scene, NLMISC::CContiguousBlockAllocator *blockAllocator = NULL);
+	CParticleSystem *instanciatePS(CScene &scene, NLMISC::CContiguousBlockAllocator *blockAllocator = nullptr);
 public:
 	/// inherited from ishape
 	virtual void				flushTextures (IDriver &driver, uint selectedTexture) NL_OVERRIDE;

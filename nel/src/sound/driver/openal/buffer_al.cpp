@@ -31,8 +31,11 @@ namespace NLSOUND
 {
 
 CBufferAL::CBufferAL(ALuint buffername) :
-	IBuffer(), _BufferName(buffername), _Name(NULL), _SampleFormat(AL_INVALID), _Frequency(0),
-	_DataAligned(NULL), _DataPtr(NULL), _Capacity(0), _Size(0), _StorageMode(IBuffer::StorageAuto), _IsLoaded(false)
+	IBuffer(), _BufferName(buffername), _Name(nullptr)
+    , _SampleFormat(AL_INVALID), _Frequency(0),
+	_DataAligned(nullptr)
+    , _DataPtr(nullptr)
+    , _Capacity(0), _Size(0), _StorageMode(IBuffer::StorageAuto), _IsLoaded(false)
 {
 	
 }
@@ -40,11 +43,11 @@ CBufferAL::CBufferAL(ALuint buffername) :
 CBufferAL::~CBufferAL()
 {
 	// delete local copy
-	if (_DataPtr != NULL)
+	if (_DataPtr != nullptr)
 	{
 		delete[] _DataPtr;
-		_DataAligned = NULL;
-		_DataPtr = NULL;
+		_DataAligned = nullptr;
+		_DataPtr = nullptr;
 	}
 
 	// delete OpenAL copy
@@ -91,8 +94,8 @@ uint8 *CBufferAL::lock(uint capacity)
 		if (capacity > _Capacity) 
 		{
 			delete[] _DataPtr;
-			_DataAligned = NULL;
-			_DataPtr = NULL;
+			_DataAligned = nullptr;
+			_DataPtr = nullptr;
 		}
 	}
 	
@@ -120,8 +123,8 @@ bool CBufferAL::unlock(uint size)
 	if (_StorageMode != IBuffer::StorageSoftware && !CSoundDriverAL::getInstance()->getOption(ISoundDriver::OptionLocalBufferCopy))
 	{
 		delete[] _DataPtr;
-		_DataAligned = NULL;
-		_DataPtr = NULL;
+		_DataAligned = nullptr;
+		_DataPtr = nullptr;
 		_Capacity = 0;
 	}
 
@@ -144,8 +147,8 @@ bool CBufferAL::fill(const uint8 *src, uint size)
 		if ((!localBufferCopy) || (size > _Capacity)) 
 		{
 			delete[] _DataPtr;
-			_DataAligned = NULL;
-			_DataPtr = NULL;
+			_DataAligned = nullptr;
+			_DataPtr = nullptr;
 			_Capacity = 0;
 		}
 	}

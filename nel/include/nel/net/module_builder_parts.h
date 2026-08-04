@@ -82,7 +82,7 @@ namespace NLNET
 		ParentClass		*_Parent;
 	public:
 		CInterceptorForwarder()
-			:	_Parent(NULL)
+			:	_Parent(nullptr)
 		{}
 
 		void init(ParentClass *parent, IModule *module)
@@ -163,13 +163,13 @@ namespace NLNET
 	public:
 		CModuleTracker(const ModulePredicate &pred)
 			:	_ModulePred(pred),
-				_TrackerCallback(NULL)
+				_TrackerCallback(nullptr)
 		{
 		}
 		/** Init : set the owner module (to register the interceptor) and the
 		 *	optional callback interface.
 		 */
-		void init(NLNET::IModule *module, IModuleTrackerCb *trackerCallback = NULL)
+		void init(NLNET::IModule *module, IModuleTrackerCb *trackerCallback = nullptr)
 		{
 			_Interceptor.init(this, module);
 			_TrackerCallback = trackerCallback;
@@ -196,7 +196,7 @@ namespace NLNET
 		{
 			if (_ModulePred(moduleProxy))
 			{
-				if (_TrackedModules.insert(moduleProxy).second && _TrackerCallback != NULL)
+				if (_TrackedModules.insert(moduleProxy).second && _TrackerCallback != nullptr)
 					// warn the callback
 					_TrackerCallback->onTrackedModuleUp(moduleProxy);
 			}
@@ -208,7 +208,7 @@ namespace NLNET
 			if (_TrackedModules.find(moduleProxy) != _TrackedModules.end())
 			{
 				_TrackedModules.erase(moduleProxy);
-				if (_TrackerCallback != NULL)
+				if (_TrackerCallback != nullptr)
 					_TrackerCallback->onTrackedModuleDown(moduleProxy);
 			}
 		};

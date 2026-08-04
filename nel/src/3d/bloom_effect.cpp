@@ -230,14 +230,14 @@ CBloomEffect::CBloomEffect()
 		}
 	}
 
-	_Driver = NULL;
-	_Scene = NULL;
+	_Driver = nullptr;
+	_Scene = nullptr;
 	_SquareBloom = true;
 	_DensityBloom = 128;
 	_Init = false;
 
-	_BlurFinalTex = NULL;
-	_BlurHorizontalTex = NULL;
+	_BlurFinalTex = nullptr;
+	_BlurHorizontalTex = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -444,22 +444,22 @@ void CBloomEffect::applyBloom()
 	applyBlur();
 
 	// cleanup material texture references
-	_DisplayBlurMat.getObjectPtr()->setTexture(0, NULL);
-	_DisplaySquareBlurMat.getObjectPtr()->setTexture(0, NULL);
-	_DisplaySquareBlurMat.getObjectPtr()->setTexture(1, NULL);
-	_BlurMat.getObjectPtr()->setTexture(0, NULL);
-	_BlurMat.getObjectPtr()->setTexture(1, NULL);
-	_BlurMat.getObjectPtr()->setTexture(2, NULL);
-	_BlurMat.getObjectPtr()->setTexture(3, NULL);
+	_DisplayBlurMat.getObjectPtr()->setTexture(0, nullptr);
+	_DisplaySquareBlurMat.getObjectPtr()->setTexture(0, nullptr);
+	_DisplaySquareBlurMat.getObjectPtr()->setTexture(1, nullptr);
+	_BlurMat.getObjectPtr()->setTexture(0, nullptr);
+	_BlurMat.getObjectPtr()->setTexture(1, nullptr);
+	_BlurMat.getObjectPtr()->setTexture(2, nullptr);
+	_BlurMat.getObjectPtr()->setTexture(3, nullptr);
 
 	// restore
 	_Driver->enableFog(fogEnabled);
 
 	// recycle render targets
 	_Driver->getRenderTargetManager().recycleRenderTarget(_BlurFinalTex);
-	_BlurFinalTex = NULL;
+	_BlurFinalTex = nullptr;
 	_Driver->getRenderTargetManager().recycleRenderTarget(_BlurHorizontalTex);
-	_BlurHorizontalTex = NULL;
+	_BlurHorizontalTex = nullptr;
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -509,8 +509,8 @@ void CBloomEffect::applyBlur()
 	_Driver->drawQuad(_BlurQuad, displayBlurMat);
 
 	// disable vertex program
-	drvInternal->activeVertexProgram(NULL);
-	if (vpUBO) drvInternal->bindUniformBuffer(UBBindingVertexProgram, NULL);
+	drvInternal->activeVertexProgram(nullptr);
+	if (vpUBO) drvInternal->bindUniformBuffer(UBBindingVertexProgram, nullptr);
 }
 
 //-----------------------------------------------------------------------------------------------------------
@@ -611,8 +611,8 @@ void CBloomEffect::doBlur(bool horizontalBlur)
 	_Driver->drawQuad(_BlurQuad, _BlurMat);
 
 	// disable render target and vertex program
-	drvInternal->activeVertexProgram(NULL);
-	if (vpUBO) drvInternal->bindUniformBuffer(UBBindingVertexProgram, NULL);
+	drvInternal->activeVertexProgram(nullptr);
+	if (vpUBO) drvInternal->bindUniformBuffer(UBBindingVertexProgram, nullptr);
 	CTextureUser cu;
 	((CDriverUser *)_Driver)->setRenderTarget(cu, 0, 0, 0, 0);
 }

@@ -128,7 +128,7 @@ void CViewBitmapFaberMp::draw ()
 	CSheetId sheetId(sheet);
 	CEntitySheet *pES = SheetMngr.get (sheetId);
 
-	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+	if ((pES != nullptr) && (pES->type() == CEntitySheet::ITEM))
 	{
 		CItemSheet *pIS = (CItemSheet*)pES;
 

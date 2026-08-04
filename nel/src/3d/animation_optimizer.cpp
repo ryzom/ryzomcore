@@ -144,7 +144,7 @@ ITrack		*CAnimationOptimizer::cloneTrack(const ITrack	*trackIn)
 
 	// read from the stream.
 	memStream.invert();
-	ITrack	*ret= NULL;
+	ITrack	*ret = nullptr;
 	memStream.serialPolyPtr(ret);
 
 	return ret;

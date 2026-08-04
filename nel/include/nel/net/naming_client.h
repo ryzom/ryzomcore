@@ -71,7 +71,7 @@ public:
 	static void			connect( const CInetHost& addr, CCallbackNetBase::TRecordingState rec, const std::vector<CInetAddress> &addresses );
 
 	/// Return true if the connection to the Naming Service was done.
-	static bool			connected () { return _Connection != NULL && _Connection->connected (); }
+	static bool			connected () { return _Connection != nullptr && _Connection->connected (); }
 
 	/// Close the connection to the naming service.
 	static void			disconnect ();

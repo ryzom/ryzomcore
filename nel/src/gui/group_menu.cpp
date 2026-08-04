@@ -74,7 +74,7 @@ namespace NLGUI
 		if (!c)
 		{
 			_Checkable = false;
-			_CheckBox = NULL;
+			_CheckBox = nullptr;
 		}
 		else
 		{
@@ -126,13 +126,13 @@ namespace NLGUI
 	CGroupSubMenu::CGroupSubMenu(const TCtorParam &param)
 	: CGroupSubMenuBase(param)
 	{
-		_SelectionView = NULL;
-		_GroupList = NULL;
-		_GroupMenu = NULL;
+		_SelectionView = nullptr;
+		_GroupList = nullptr;
+		_GroupMenu = nullptr;
 		_MouseOver = -1;
 		_Selected = -1;
 		_MaxVisibleLine = -1;
-		_ScrollBar = NULL;
+		_ScrollBar = nullptr;
 		_ScrollToView = false;
 	}
 
@@ -161,7 +161,7 @@ namespace NLGUI
 		if (index >= _SubMenus.size())
 		{
 			nlassert("bad index");
-			return NULL;
+			return nullptr;
 		}
 		return _SubMenus[index];
 	}
@@ -173,12 +173,12 @@ namespace NLGUI
 		nlassert(index < _SubMenus.size());
 		sub->setSerializable( false );
 
-		if (_SubMenus[index] != NULL)
+		if (_SubMenus[index] != nullptr)
 		{
 			// must delete from the group menu (if not found, just delete)
 			if( !_GroupMenu || !_GroupMenu->delGroup(_SubMenus[index]) )
 				delete _SubMenus[index];
-			_SubMenus[index] = NULL;
+			_SubMenus[index] = nullptr;
 			delView(_Lines[index].RightArrow);
 		}
 
@@ -200,7 +200,7 @@ namespace NLGUI
 		// Initialization
 		// me
 		_Parent = _GroupMenu;
-		if (parent == NULL)
+		if (parent == nullptr)
 		{
 			setParentPos (_GroupMenu);
 			setParentPosRef (Hotspot_TL);
@@ -219,7 +219,7 @@ namespace NLGUI
 		_ResizeFromChildWMargin = 8;
 		_ModulateGlobalColor = _GroupMenu->_ModulateGlobalColor;
 		// the selection
-		if (_SelectionView == NULL)
+		if (_SelectionView == nullptr)
 		{
 			_SelectionView = new CViewBitmap(CViewBase::TCtorParam());
 	//		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -236,7 +236,7 @@ namespace NLGUI
 			addView (_SelectionView, 0);
 		}
 		// the group list
-		if (_GroupList == NULL)
+		if (_GroupList == nullptr)
 		{
 			_GroupList = new CGroupList(CViewBase::TCtorParam());
 			_GroupList->setId( getId() + ":list" );
@@ -258,7 +258,7 @@ namespace NLGUI
 		// the children
 		while (cur)
 		{
-			CViewTextMenu *pV = NULL;
+			CViewTextMenu *pV = nullptr;
 
 			CXMLAutoPtr id((const char*) xmlGetProp (cur,  (xmlChar*)"id"));
 
@@ -323,7 +323,7 @@ namespace NLGUI
 
 				// Is this line has a sub menu ?
 				xmlNodePtr child = cur->children;
-				if (child != NULL)
+				if (child != nullptr)
 				{
 					if (_Lines.back().CheckBox)
 					{
@@ -556,7 +556,7 @@ namespace NLGUI
 		bool activeLineSeen = false;
 		for (i = 0; i < _Lines.size(); ++i)
 		{
-			if (_Lines[i].Separator != NULL)
+			if (_Lines[i].Separator != nullptr)
 			{
 				if (i == _Lines.size() - 1)
 				{
@@ -589,7 +589,7 @@ namespace NLGUI
 				if (_Lines[k].RightArrow)	widgetMaxH = std::max(widgetMaxH, _Lines[k].RightArrow->getHReal());
 				widgetMaxH = std::max(widgetMaxH, _Lines[k].ViewText->getHReal());
 				_GroupList->setMaxH(widgetMaxH*_MaxVisibleLine+_GroupList->getSpace()*(_MaxVisibleLine-1));
-				if (_ScrollBar == NULL)
+				if (_ScrollBar == nullptr)
 				{
 					_ScrollToView = true;
 					_ScrollBar = new CCtrlScroll(CViewBase::TCtorParam());
@@ -669,14 +669,14 @@ namespace NLGUI
 		for (i = 1; i < _Views.size(); ++i)
 		{
 			CViewBitmap *pVB = dynamic_cast<CViewBitmap *>(_Views[i]);
-			if (pVB == NULL) continue;
+			if (pVB == nullptr) continue;
 			if (pVB->getId() == ID_MENU_SUBMENU)
 			{
 				// Look for the next line of the menu that contains a sub menu
 				for(;;)
 				{
 					nlassert (RALineNb < (sint32)_SubMenus.size());
-					if (_SubMenus[RALineNb] != NULL) // has a check box or an arrow to indicate submenu ?
+					if (_SubMenus[RALineNb] != nullptr) // has a check box or an arrow to indicate submenu ?
 					{
 						break;
 					}
@@ -760,7 +760,7 @@ namespace NLGUI
 				for(;;)
 				{
 					nlassert (CBLineNb < (sint32)_SubMenus.size());
-					if (_Lines[CBLineNb].CheckBox != NULL) // has a check box or an arrow to indicate submenu ?
+					if (_Lines[CBLineNb].CheckBox != nullptr) // has a check box or an arrow to indicate submenu ?
 					{
 						break;
 					}
@@ -857,7 +857,7 @@ namespace NLGUI
 		for (i = 0; i < _ChildrenGroups.size(); ++i)
 		{
 			CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup *>(_ChildrenGroups[i]);
-			if (pIG == NULL) continue;
+			if (pIG == nullptr) continue;
 			if (pIG->getId() != ID_MENU_SEPARATOR) continue; // is it a separator ?
 
 			// set good width
@@ -866,14 +866,14 @@ namespace NLGUI
 			pIG->setW(sw);*/
 
 			// Look for the next line of the menu that contains a separator
-			CInterfaceGroup *sep = NULL;
+			CInterfaceGroup *sep = nullptr;
 			do
 			{
 				nlassert (SepLineNb < (sint32)_Lines.size());
 				sep = _Lines[SepLineNb].Separator;
 				++SepLineNb;
 			}
-			while (sep == NULL);
+			while (sep == nullptr);
 
 			// Setup the arrow at the right pos
 			pIG->setY (sep->getYReal() - getYReal());
@@ -886,7 +886,7 @@ namespace NLGUI
 		_SelectionView->setY (4);
 
 		sint highlight = _MouseOver != -1 ? _MouseOver : _Selected;
-		if (highlight != -1 && _Lines[highlight].ViewText != NULL)
+		if (highlight != -1 && _Lines[highlight].ViewText != nullptr)
 		{
 			CRGBA col= _GroupMenu->_HighLightOver;
 
@@ -904,7 +904,7 @@ namespace NLGUI
 		if (_ScrollBar && _ScrollToView)
 		{
 			_ScrollToView = false;
-			if (_Selected != -1 && _Lines[_Selected].ViewText != NULL)
+			if (_Selected != -1 && _Lines[_Selected].ViewText != nullptr)
 				_ScrollBar->ensureVisible(_Lines[_Selected].ViewText, Hotspot_Tx, Hotspot_Mx);
 			else
 				_ScrollBar->setTrackPos(_GroupList->getHReal());
@@ -915,7 +915,7 @@ namespace NLGUI
 	void CGroupSubMenu::checkCoords()
 	{
 		if (!_Active) return;
-		if (_GroupMenu == NULL) return;
+		if (_GroupMenu == nullptr) return;
 
 		// if the mouse goes out the window,  unselect all (because handleEvent may not be called)
 		sint	xMouse= CWidgetManager::getInstance()->getPointer()->getX();
@@ -980,7 +980,7 @@ namespace NLGUI
 	void CGroupSubMenu::draw()
 	{
 		if (!_Active) return;
-		if (_GroupMenu == NULL) return;
+		if (_GroupMenu == nullptr) return;
 		CGroupFrame::draw();
 	}
 
@@ -1041,7 +1041,7 @@ namespace NLGUI
 											CWidgetManager::getInstance()->getCtrlLaunchingModal(),
 											_Lines[_MouseOver].AHParams );
 
-					if (_SubMenus[_MouseOver] != NULL)
+					if (_SubMenus[_MouseOver] != nullptr)
 					{
 						openSubMenu (_MouseOver);
 					}
@@ -1114,7 +1114,7 @@ namespace NLGUI
 	CInterfaceElement* CGroupSubMenu::getElement (const std::string &id)
 	{
 		string sTmp = id.substr(0,  _GroupMenu->getId().size());
-		if (sTmp != _GroupMenu->getId()) return NULL;
+		if (sTmp != _GroupMenu->getId()) return nullptr;
 
 		string sRest = id.substr(_GroupMenu->getId().size()+1,  id.size());
 
@@ -1140,10 +1140,10 @@ namespace NLGUI
 					if (sTok == pCurGSM->_Lines[i].Id)
 						break;
 				if (i == pCurGSM->_Lines.size())
-					return NULL;
+					return nullptr;
 
 				// No sub-menus
-				if (pCurGSM->_SubMenus[i] == NULL)
+				if (pCurGSM->_SubMenus[i] == nullptr)
 				{
 					// Get next token
 					sRest = sRest.substr (posid+1);
@@ -1174,7 +1174,7 @@ namespace NLGUI
 						}
 					}
 
-					return NULL;
+					return nullptr;
 				}
 				else
 				{
@@ -1184,7 +1184,7 @@ namespace NLGUI
 			sRest = sRest.substr (posid+1);
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1203,7 +1203,7 @@ namespace NLGUI
 		}
 
 			// create the real separator. It may be larger than the group list, this is why we create a separate group
-		CInterfaceGroup *separator = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator", "", NULL, 0);
+		CInterfaceGroup *separator = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator", "", nullptr, 0);
 		if (!separator) return;
 		separator->setSerializable( false );
 		separator->setId(ID_MENU_SEPARATOR);
@@ -1211,7 +1211,7 @@ namespace NLGUI
 		addGroup(separator);
 		separator->setParent(this);
 		// create place holder group
-		CInterfaceGroup *ph = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator_empty", "", NULL, 0);
+		CInterfaceGroup *ph = CWidgetManager::getInstance()->getParser()->createGroupInstance("menu_separator_empty", "", nullptr, 0);
 		if (!ph)
 		{
 			delGroup(separator);
@@ -1221,11 +1221,11 @@ namespace NLGUI
 		SSubMenuEntry tmp;
 		tmp.Id = id;
 		tmp.Separator = ph;
-		tmp.ViewText = NULL;
-		tmp.CheckBox = NULL;
-		tmp.RightArrow = NULL;
+		tmp.ViewText = nullptr;
+		tmp.CheckBox = nullptr;
+		tmp.RightArrow = nullptr;
 		_Lines.insert(_Lines.begin() + index, tmp);
-		_SubMenus.insert(_SubMenus.begin() + index, (CGroupSubMenu*)NULL);
+		_SubMenus.insert(_SubMenus.begin() + index, (CGroupSubMenu*)nullptr);
 		_GroupMenu->invalidateCoords();
 	}
 
@@ -1270,7 +1270,7 @@ namespace NLGUI
 
 		_GroupList->addChild (pV);
 
-		CViewBitmap *checkBox = NULL;
+		CViewBitmap *checkBox = nullptr;
 
 		if (checkable)
 		{
@@ -1279,7 +1279,7 @@ namespace NLGUI
 			pV->setCheckBox(checkBox);
 		}
 
-		CViewBitmap *icon = NULL;
+		CViewBitmap *icon = nullptr;
 		if (!texture.empty())
 		{	
 			if (_GroupList->getNumChildren() == 1)
@@ -1289,7 +1289,7 @@ namespace NLGUI
 		
 
 		tmp.ViewText = pV;
-		tmp.Separator = NULL;
+		tmp.Separator = nullptr;
 		tmp.AHName = ah;
 		tmp.AHParams = params;
 		tmp.Cond = cond;
@@ -1305,7 +1305,7 @@ namespace NLGUI
 		_Lines.push_back (tmp);
 
 		// Add an empty sub menu by default
-		_SubMenus.push_back (NULL);
+		_SubMenus.push_back (nullptr);
 
 		_GroupMenu->invalidateCoords();
 
@@ -1321,7 +1321,7 @@ namespace NLGUI
 		if (index > _Lines.size())
 		{
 			nlwarning("Bad index");
-			return NULL;
+			return nullptr;
 		}
 		SSubMenuEntry tmp;
 		CViewTextMenu *pV = new CViewTextMenu(CViewBase::TCtorParam());
@@ -1359,7 +1359,7 @@ namespace NLGUI
 
 		_GroupList->addChildAtIndex(pV,  index);
 
-		CViewBitmap *checkBox = NULL;
+		CViewBitmap *checkBox = nullptr;
 		if (checkable)
 		{
 			checkBox = createCheckBox(checked);
@@ -1368,12 +1368,12 @@ namespace NLGUI
 		}
 
 		tmp.ViewText = pV;
-		tmp.Separator = NULL;
+		tmp.Separator = nullptr;
 		tmp.AHName = ah;
 		tmp.AHParams = params;
 		tmp.Cond = cond;
 		tmp.CheckBox = checkBox;
-		tmp.RightArrow = NULL;
+		tmp.RightArrow = nullptr;
 
 		if (id.empty())
 			tmp.Id = NLMISC::toString (_Lines.size());
@@ -1385,7 +1385,7 @@ namespace NLGUI
 		_Lines.insert(_Lines.begin() + index,  tmp);
 
 		// Add an empty sub menu by default
-		_SubMenus.insert(_SubMenus.begin() + index,  (CGroupSubMenu*)NULL);
+		_SubMenus.insert(_SubMenus.begin() + index,  (CGroupSubMenu*)nullptr);
 
 		_GroupMenu->invalidateCoords();
 
@@ -1401,8 +1401,8 @@ namespace NLGUI
 			nlwarning("Bad index");
 			return;
 		}
-		setUserGroupRight(index, NULL, false); // remove user group
-		setUserGroupLeft(index, NULL, false); // remove user group
+		setUserGroupRight(index, nullptr, false); // remove user group
+		setUserGroupLeft(index, nullptr, false); // remove user group
 		// remove view (right arrow & checkbox)
 		if (_Lines[index].RightArrow) delView(_Lines[index].RightArrow);
 		if (_Lines[index].CheckBox) delView(_Lines[index].CheckBox);
@@ -1455,7 +1455,7 @@ namespace NLGUI
 	void CGroupSubMenu::hideSubMenus ()
 	{
 		for (uint32 i = 0; i < _SubMenus.size(); ++i)
-			if (_SubMenus[i] != NULL)
+			if (_SubMenus[i] != nullptr)
 			{
 				_SubMenus[i]->setActive (false);
 				_SubMenus[i]->hideSubMenus ();
@@ -1479,8 +1479,8 @@ namespace NLGUI
 	{
 		for(uint k = 0; k < _Lines.size(); ++k)
 		{
-			setUserGroupRight(k, NULL, false);
-			setUserGroupLeft(k, NULL, false);
+			setUserGroupRight(k, nullptr, false);
+			setUserGroupLeft(k, nullptr, false);
 		}
 	}
 
@@ -1490,7 +1490,7 @@ namespace NLGUI
 		if (line >= _Lines.size())
 		{
 			nlwarning("bad index");
-			return NULL;
+			return nullptr;
 		}
 		return _Lines[line].UserGroupRight;
 	}
@@ -1501,7 +1501,7 @@ namespace NLGUI
 		if (line >= _Lines.size())
 		{
 			nlwarning("bad index");
-			return NULL;
+			return nullptr;
 		}
 		return _Lines[line].UserGroupLeft;
 	}
@@ -1625,7 +1625,7 @@ namespace NLGUI
 				{
 					texture = _Lines[k].ViewText->getCheckBox()->getTexture();
 				}
-				CViewTextMenu *pV = NULL;
+				CViewTextMenu *pV = nullptr;
 				pV = copyMenu->addLine (_Lines[k].ViewText->getText(),  _Lines[k].AHName,  _Lines[k].AHParams,  _Lines[k].Id,  _Lines[k].Cond,
 						 texture, _Lines[k].ViewText->getCheckable(),  _Lines[k].ViewText->getChecked(), _Lines[k].ViewText->getFormatted ());
 				copyMenu->_Lines[k].Selectable = _Lines[k].Selectable;
@@ -1633,7 +1633,7 @@ namespace NLGUI
 			}
 
 			// sub menu copy if there's one
-			if (_SubMenus[k] != NULL)
+			if (_SubMenus[k] != nullptr)
 			{
 
 				if (copyMenu->_Lines.back().CheckBox)
@@ -1647,7 +1647,7 @@ namespace NLGUI
 
 
 				// and create the sub menu
-				copyMenu->_SubMenus[k + startSize] = _SubMenus[k]->cloneMenu(NULL,  newFather,  copyMenu);
+				copyMenu->_SubMenus[k + startSize] = _SubMenus[k]->cloneMenu(nullptr,  newFather,  copyMenu);
 			}
 		}
 		if (!appendToMenu)
@@ -1688,7 +1688,7 @@ namespace NLGUI
 		if (lineIndex > _Lines.size())
 		{
 			nlwarning("Bad index");
-			return 0;
+			return nullptr;
 		}
 		return _Lines[lineIndex].AHName;
 	}
@@ -1699,7 +1699,7 @@ namespace NLGUI
 		if (lineIndex > _Lines.size())
 		{
 			nlwarning("Bad index");
-			return 0;
+			return nullptr;
 		}
 		return _Lines[lineIndex].AHParams;
 	}
@@ -2087,7 +2087,7 @@ namespace NLGUI
 		_ShadowOutline = false;
 		_ResizeFromChildH = _ResizeFromChildW = true;
 		_DisplayFrame = false;
-		_RootMenu = NULL;
+		_RootMenu = nullptr;
 		_Space = 3;
 		_CaseMode = CaseUpper;
 		_Formatted = false;
@@ -2173,7 +2173,7 @@ namespace NLGUI
 		else
 		if( name == "max_visible_line" )
 		{
-			if( _RootMenu == NULL )
+			if( _RootMenu == nullptr)
 				return "0";
 			else
 				return toString( _RootMenu->getMaxVisibleLine() );
@@ -2296,7 +2296,7 @@ namespace NLGUI
 		else
 		if( name == "max_visible_line" )
 		{
-			if( _RootMenu != NULL )
+			if( _RootMenu != nullptr)
 			{
 				sint32 i;
 				if( fromString( value, i ) )
@@ -2312,8 +2312,8 @@ namespace NLGUI
 	xmlNodePtr CGroupMenu::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CGroupModal::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "menu" );
 		xmlSetProp( node, BAD_CAST "extends", BAD_CAST _Extends.c_str() );
@@ -2331,13 +2331,13 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "shadow_outline", BAD_CAST toString( _ShadowOutline ).c_str() );
 		xmlSetProp( node, BAD_CAST "formatted", BAD_CAST toString( _Formatted ).c_str() );
 		
-		if( _RootMenu == NULL )
+		if( _RootMenu == nullptr)
 			xmlSetProp( node, BAD_CAST "max_visible_line", BAD_CAST "0" );
 		else
 			xmlSetProp( node, BAD_CAST "max_visible_line",
 				BAD_CAST toString( _RootMenu->getMaxVisibleLine() ).c_str() );
 
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2354,7 +2354,7 @@ namespace NLGUI
 
 		// see if this menu extends another menu
 		prop= (char*) xmlGetProp( in,  (xmlChar*)"extends" );
-		CGroupSubMenu *gmExtended = NULL;
+		CGroupSubMenu *gmExtended = nullptr;
 		if (prop)
 		{
 			if( editorMode )
@@ -2456,7 +2456,7 @@ namespace NLGUI
 		// Read sons
 		xmlNodePtr cur;
 		cur = in->children;
-		if (_RootMenu != NULL) delete _RootMenu;
+		if (_RootMenu != nullptr) delete _RootMenu;
 		_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
 		_RootMenu->setId( getId() + ":header" );
 		_RootMenu->setSerializable( false );
@@ -2488,7 +2488,7 @@ namespace NLGUI
 		for (uint32 i = 0; i < pSubMenu->getNumLines(); i++)
 		{
 			CGroupSubMenu *pGSM = pSubMenu->getSubMenu(i);
-			if (pGSM != NULL)
+			if (pGSM != nullptr)
 			{
 				recurseDraw(pGSM);
 				CViewRenderer::getInstance()->flush();
@@ -2526,7 +2526,7 @@ namespace NLGUI
 	{
 		if (id == getId()) return this;
 		CInterfaceElement *pIE = _RootMenu->getElement(id);
-		if (pIE != NULL)
+		if (pIE != nullptr)
 			return pIE;
 		return CGroupModal::getElement(id);
 	}
@@ -2575,7 +2575,7 @@ namespace NLGUI
 			nlassert("bad index");
 			return false;
 		}
-		return _Lines[i].Separator != NULL;
+		return _Lines[i].Separator != nullptr;
 	}
 	// ------------------------------------------------------------------------------------------------
 	bool CGroupMenu::isWindowUnder (sint32 x,  sint32 y)
@@ -2595,7 +2595,7 @@ namespace NLGUI
 							 bool checkable /*= false*/,  bool checked /*= false*/
 							)
 	{
-		if (_RootMenu == NULL)
+		if (_RootMenu == nullptr)
 		{
 			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
 			_RootMenu->_GroupMenu = this;
@@ -2610,7 +2610,7 @@ namespace NLGUI
 									const std::string &cond /*=std::string()*/, const std::string &texture,
 									bool checkable /*=false*/, bool checked /*=false*/)
 	{
-		if (_RootMenu == NULL)
+		if (_RootMenu == nullptr)
 		{
 			_RootMenu = new CGroupSubMenu(CViewText::TCtorParam());
 			_RootMenu->_GroupMenu = this;

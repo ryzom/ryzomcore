@@ -215,7 +215,7 @@ void readStringArray(const std::string &filename, NLGEORGES::UFormLoader *formLo
 			// Get the root.
 			const UFormElm& rootElmt = form->getRootNode();
 			// Get animations.
-			const UFormElm *elmt = 0;
+			const UFormElm *elmt = nullptr;
 			if(rootElmt.getNodeByName(&elmt, "array") == false)
 				nlwarning("readStringArray: the node 'array' is not referenced.");
 			// If the array is not empty (in fact exist).
@@ -335,7 +335,7 @@ bool computeAnimSet(const CAnimationSet *&animSet, MBEHAV::EMode mode, const str
 {
 	static std::set<std::string> UnknownAnimSet;
 
-	if(EAM == 0)
+	if(EAM == nullptr)
 	{
 		if(!ClientCfg.Light)
 		{
@@ -562,7 +562,7 @@ CItemSheet *getItem(const CGenderInfo &genderInfo, SLOTTYPE::EVisualSlot slot)
 sint getColorIndex(const CGenderInfo &genderInfo, SLOTTYPE::EVisualSlot slot)
 {
 	CItemSheet *is = getItem(genderInfo, slot);
-	if(is == 0)
+	if(is == nullptr)
 		return 0;
 	return is->Color;
 }// getColorIndex //
@@ -1151,7 +1151,7 @@ NL3D::UScene *getSkyScene()
 			return SkyScene; // old sky rendering
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 // *************************************************************************************************
@@ -1268,7 +1268,7 @@ void makeInstanceTransparent(UInstance	&inst, uint8 opacity, bool disableZWrite)
 				{
 					CMaterial *srcInternalMat = matShape.getObjectPtr();
 					uint numTex = 0;
-					for (;numTex < 4 && srcInternalMat->getTexture(numTex) != NULL; ++numTex) {}
+					for (;numTex < 4 && srcInternalMat->getTexture(numTex) != nullptr; ++numTex) {}
 					if (numTex > 0)
 					{
 						if (srcInternalMat->getTexEnvMode(numTex - 1) != destInternalMat->getTexEnvMode(numTex - 1))
@@ -1308,7 +1308,7 @@ void makeInstanceTransparent(UInstance	&inst, uint8 opacity, bool disableZWrite)
 				if (internalMat->getShader() == CMaterial::Normal)
 				{
 					uint numTex = 0;
-					for (;numTex < 4 && internalMat->getTexture(numTex) != NULL; ++numTex) {}
+					for (;numTex < 4 && internalMat->getTexture(numTex) != nullptr; ++numTex) {}
 					if (numTex > 0)
 					{
 						internalMat->texEnvOpAlpha(numTex - 1, CMaterial::Replace);

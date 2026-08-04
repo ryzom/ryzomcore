@@ -606,13 +606,13 @@ void	CMeshVPPerPixelLight::enable(bool enabled, IDriver *drv)
 			}
 			else
 			{
-				_ActiveVertexProgram = NULL;
+				_ActiveVertexProgram = nullptr;
 			}
 		}
 		else
 		{
-			drv->activeVertexProgram(NULL);
-			_ActiveVertexProgram = NULL;
+			drv->activeVertexProgram(nullptr);
+			_ActiveVertexProgram = nullptr;
 		}
 		_Enabled = enabled;
 	}

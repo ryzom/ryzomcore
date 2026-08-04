@@ -293,7 +293,7 @@ bool CDriverGL3::setupMaterial(CMaterial &mat)
 	if (!mat._MatDrvInfo)
 	{
 		// insert into driver list. (so it is deleted when driver is deleted).
-		ItMatDrvInfoPtrList it = _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos *)NULL);
+		ItMatDrvInfoPtrList it = _MatDrvInfos.insert(_MatDrvInfos.end(), (NL3D::IMaterialDrvInfos *)nullptr);
 		// create and set iterator, for future deletion.
 		*it = mat._MatDrvInfo = new CMaterialDrvInfosGL3(this, it);
 
@@ -436,7 +436,7 @@ bool CDriverGL3::setupMaterial(CMaterial &mat)
 		for (uint stage = 0; stage < IDRV_MAT_MAXTEXTURES; ++stage)
 		{
 			ITexture *text = mat.getTexture(uint8(stage));
-			if (text != NULL && !setupTexture(*text))
+			if (text != nullptr && !setupTexture(*text))
 				textureFailed = true;
 		}
 	}
@@ -446,7 +446,7 @@ bool CDriverGL3::setupMaterial(CMaterial &mat)
 		for (uint stage = 0; stage < mat._LightMaps.size(); stage++)
 		{
 			ITexture *text = mat._LightMaps[stage].Texture;
-			if (text != NULL && !setupTexture(*text))
+			if (text != nullptr && !setupTexture(*text))
 				textureFailed = true;
 		}
 	}
@@ -879,7 +879,7 @@ void CDriverGL3::setupLightMapPass(uint pass)
 		for (uint stage = 1; stage < IDRV_MAT_MAXTEXTURES; stage++)
 		{
 			// disable texturing.
-			activateTexture(stage, NULL);
+			activateTexture(stage, nullptr);
 		}
 
 		// Stage per-material UBO slot for this pass (slot 1, no-lightmap case)
@@ -1032,7 +1032,7 @@ void CDriverGL3::setupLightMapPass(uint pass)
 		else
 		{
 			// else all other stages are disabled.
-			activateTexture(stage, NULL);
+			activateTexture(stage, nullptr);
 		}
 	}
 
@@ -1224,12 +1224,12 @@ void CDriverGL3::setupWaterPass(uint /* pass */)
 	}
 	for (k = 4; k < IDRV_PROGRAM_MAXSAMPLERS; ++k)
 	{
-		activateTexture(k, NULL);
+		activateTexture(k, nullptr);
 	}
 
 	// Select water FP variant: bit 0 = fog, bit 1 = diffuse,
 	// bit 2 = calculated reflectivity
-	uint fpIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != NULL ? 2 : 0)
+	uint fpIdx = (_FogEnabled ? 1 : 0) | (mat.getTexture(3) != nullptr ? 2 : 0)
 	    | (mat.isWaterCalcReflectivity() ? 4 : 0);
 
 	// Lazy creation of water FP programs
@@ -1322,10 +1322,10 @@ void CDriverGL3::endWaterMultiPass()
 
 	// Unbind water UBO if bound
 	if (_BoundUserUB[UBBindingPixelProgram] == _WaterUB)
-		bindUniformBuffer(UBBindingPixelProgram, NULL);
+		bindUniformBuffer(UBBindingPixelProgram, nullptr);
 
 	// Clear material pixel program — next setupPass() will restore builtin/mega PP
-	m_MaterialPixelProgram = NULL;
+	m_MaterialPixelProgram = nullptr;
 }
 
 } // NLDRIVERGL3

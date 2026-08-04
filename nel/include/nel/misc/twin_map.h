@@ -103,7 +103,7 @@ template <class TypeA, class TypeB>
 inline const TypeA *CTwinMap<TypeA, TypeB>::getA(const TypeB &valueB) const
 {
 	typename TBToAMap::const_iterator it = _BToA.find(valueB);
-	if (it == _BToA.end()) return NULL;
+	if (it == _BToA.end()) return nullptr;
 	else return &(it->second);
 }
 
@@ -112,7 +112,7 @@ template <class TypeA, class TypeB>
 inline const TypeB *CTwinMap<TypeA, TypeB>::getB(const TypeA &valueA) const
 {
 	typename TAToBMap::const_iterator it = _AToB.find(valueA);
-	if (it == _AToB.end()) return NULL;
+	if (it == _AToB.end()) return nullptr;
 	else return &(it->second);
 }
 

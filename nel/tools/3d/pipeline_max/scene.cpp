@@ -123,7 +123,7 @@ IStorageObject *CScene::createChunkById(uint16 id, bool container)
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
-CSceneClassContainer::CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_Scene(scene), m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3), m_BuiltinScene(NULL)
+CSceneClassContainer::CSceneClassContainer(CScene *scene, const CSceneClassRegistry *sceneClassRegistry, CDllDirectory *dllDirectory, CClassDirectory3 *classDirectory3) : m_Scene(scene), m_SceneClassRegistry(sceneClassRegistry), m_DllDirectory(dllDirectory), m_ClassDirectory3(classDirectory3), m_BuiltinScene(nullptr)
 {
 
 }
@@ -185,7 +185,7 @@ void CSceneClassContainer::disown()
 CSceneClass *CSceneClassContainer::getByStorageIndex(uint32 index) const
 {
 	// Temporary 'readonly' implementation, not modifying m_Chunks!
-	if (index >= m_StorageObjectByIndex.size()) { nlerror("Index %i is outside size %i", index, m_StorageObjectByIndex.size()); return NULL; }
+	if (index >= m_StorageObjectByIndex.size()) { nlerror("Index %i is outside size %i", index, m_StorageObjectByIndex.size()); return nullptr; }
 	return m_StorageObjectByIndex[index];
 }
 
@@ -198,7 +198,7 @@ uint32 CSceneClassContainer::getOrCreateStorageIndex(CSceneClass *storageObject)
 IStorageObject *CSceneClassContainer::createChunkById(uint16 id, bool container)
 {
 	// nldebug("Scene class id %x (%i)", (uint32)id, (uint32)id);
-	CSceneClass *sceneClass = NULL;
+	CSceneClass *sceneClass = nullptr;
 	switch (id)
 	{
 		// Special identifiers NOT resolved through ClassDirectory3 — the derived-object wrappers

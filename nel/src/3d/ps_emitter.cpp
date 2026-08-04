@@ -57,13 +57,16 @@ static void replaceNullPeriodsByThreshold(float *tab, uint numElem)
 ///////////////////////////////
 // CPSEmitter implementation //
 ///////////////////////////////
-CPSEmitter::CPSEmitter() : _EmittedType(NULL),
+CPSEmitter::CPSEmitter() : _EmittedType(nullptr)
+    ,
 						   _SpeedInheritanceFactor(0.f),
 						   _EmissionType(regular),
 						   _Period(0.02f),
-						   _PeriodScheme(NULL),
+						   _PeriodScheme(nullptr)
+    ,
 						   _GenNb(1),
-						   _GenNbScheme(NULL),
+						   _GenNbScheme(nullptr)
+    ,
 						   _EmitDelay(0),
 						   _MaxEmissionCount(0),
 						   _SpeedBasisEmission(false),
@@ -96,14 +99,14 @@ void CPSEmitter::releaseRefTo(const CParticleSystemProcess *other)
 	NL_PS_FUNC(CPSEmitter_releaseRefTo)
 	if (_EmittedType == other)
 	{
-		setEmittedType(NULL);
+		setEmittedType(nullptr);
 	}
 }
 
 void CPSEmitter::releaseAllRef()
 {
 	NL_PS_FUNC(CPSEmitter_releaseAllRef)
-	setEmittedType(NULL);
+	setEmittedType(nullptr);
 }
 
 
@@ -388,7 +391,7 @@ void CPSEmitter::notifyTargetRemoved(CPSLocated *ptr)
 {
 	NL_PS_FUNC(CPSEmitter_notifyTargetRemoved)
 	nlassert(ptr == _EmittedType && _EmittedType);
-	setEmittedType(NULL);
+	setEmittedType(nullptr);
 }
 
 ///==========================================================================
@@ -398,7 +401,7 @@ void CPSEmitter::setPeriod(float period)
 	if (_PeriodScheme)
 	{
 		delete _PeriodScheme;
-		_PeriodScheme = NULL;
+		_PeriodScheme = nullptr;
 	}
 	_Period = period;
 	if (_Owner && _Owner->getOwner())
@@ -427,7 +430,7 @@ void CPSEmitter::setGenNb(uint32 genNb)
 	if (_GenNbScheme)
 	{
 		delete _GenNbScheme;
-		_GenNbScheme = NULL;
+		_GenNbScheme = nullptr;
 	}
 	_GenNb = genNb;
 }
@@ -478,7 +481,7 @@ void CPSEmitter::showTool(void)
 		CPSLocatedBindable *lb;
 		_Owner->getOwner()->getCurrentEditedElement(loc, index, lb);
 
-		mat.setColor((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		mat.setColor((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 
 
 		CDRU::drawLinesUnlit(lines, mat, *getDriver() );
@@ -2487,7 +2490,7 @@ void CPSEmitterRectangle::showTool(void)
 		CPSUtil::displayBasis(getDriver() ,getLocalToWorldMatrix(), mat, 1.f, *getFontGenerator(), *getFontManager());
 		setupDriverModelMatrix();
 
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 
 
 
@@ -2583,7 +2586,7 @@ void CPSSphericalEmitter::showTool(void)
 	setupDriverModelMatrix();
 	for (uint k = 0; posIt != endPosIt; ++posIt, ++radiusIt, ++k)
 	{
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 		CPSUtil::displaySphere(*getDriver(), *radiusIt, *posIt, 5, col);
 	}
 }

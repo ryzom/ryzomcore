@@ -156,7 +156,7 @@ protected:
 	virtual void initProperties() NL_OVERRIDE;
 
 	/// Set the equipmenent worn.
-	void equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item = 0);
+	void equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, const CItemSheet *item = nullptr);
 	/// Compute the equipmenent worn.
 	void equip(SLOTTYPE::EVisualSlot slot, uint index, uint color);
 

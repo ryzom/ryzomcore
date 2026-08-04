@@ -38,7 +38,7 @@ public:
 	/** Parse File in rootPath, take only one that match posFilterList, and that don't match negFilterList
 	 *	eg: addSearchFiles("uiaddon", "*.xml;*.lua;*.tga", "login_*.xml;out_v2_*.xml");
 	 */
-	void	addSearchFiles(const std::string &path, const std::string &posFilterList, const std::string &negFilterList, NLMISC::IProgressCallback *progressCallBack= NULL);
+	void	addSearchFiles(const std::string &path, const std::string &posFilterList, const std::string &negFilterList, NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 	/** Get All files added in addSearchFiles, that match one filter in filterList
 	 *	eg: getFiles("*.xml;*.tga", vec);

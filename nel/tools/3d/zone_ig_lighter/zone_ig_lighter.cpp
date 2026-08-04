@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 				bool zoneIgLoaded;
 
 				// Try to open the file
-				CInstanceGroup *centerInstanceGroup= NULL;
+				CInstanceGroup *centerInstanceGroup = nullptr;
 				if (inputFile.open (igName))
 				{
 					// load the center ig

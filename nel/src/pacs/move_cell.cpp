@@ -27,8 +27,8 @@ namespace NLPACS
 
 CMoveCell::CMoveCell()
 {
-	_FirstX=NULL;
-	_LastX=NULL;
+	_FirstX = nullptr;
+	_LastX = nullptr;
 	/*_FirstY=NULL;
 	_LastY=NULL;*/
 }
@@ -83,9 +83,9 @@ void CMoveCell::linkX (CMoveElement *previous, CMoveElement *element, CMoveEleme
 		next->PreviousX=element;
 
 	// Check first / last
-	if (previous==NULL)
+	if (previous == nullptr)
 		_FirstX=element;
-	if (next==NULL)
+	if (next == nullptr)
 		_LastX=element;
 }
 

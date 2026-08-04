@@ -92,7 +92,7 @@ CDisplayerVisual *CDisplayerVisualActivitySequence::getParentDV() const
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_getParentDV)
 	CInstance *currParent = getDisplayedInstance()->getParent();
-	CDisplayerVisual *prevDV = NULL;
+	CDisplayerVisual *prevDV = nullptr;
 	while (currParent)
 	{
 		prevDV = currParent->getDisplayerVisual();
@@ -117,7 +117,7 @@ void CDisplayerVisualActivitySequence::update()
 	}
 	// get first world object parent to get start position
 	nlassert(getDisplayedInstance());
-	CInstance *prevZone = NULL;
+	CInstance *prevZone = nullptr;
 	CDisplayerVisual *prevDV = getParentDV();
 	if (!prevDV)
 	{
@@ -135,7 +135,7 @@ void CDisplayerVisualActivitySequence::update()
 		std::string activityStr = getString(activity, "Activity");
 		if (activityStr == "Stand Still" || activityStr == "Inactive") continue;
 		//
-		CInstance *nextZone = NULL;
+		CInstance *nextZone = nullptr;
 		std::string zoneId = getString(activity, "ActivityZoneId");
 		//
 		if (!zoneId.empty())
@@ -290,7 +290,7 @@ static void updateState(TSequenceState &state, CDisplayerVisual *dv)
 CDisplayerVisual *CDisplayerVisualActivitySequence::getPossibleGroupDV(CDisplayerVisual *entityDV)
 {
 	//H_AUTO(R2_CDisplayerVisualActivitySequence_getPossibleGroupDV)
-	if (!entityDV) return NULL;
+	if (!entityDV) return nullptr;
 	CInstance *parentGroup = entityDV->getDisplayedInstance()->getParent();
 	while (parentGroup)
 	{

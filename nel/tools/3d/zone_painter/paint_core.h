@@ -211,14 +211,14 @@ struct SPaintTile
 
 	SPaintTile() : Patch(-1), TileId(-1), Zone(-1), U(0), V(0), Frozen(false), Locked(0), Radius(0.f)
 	{
-		Voisins[0] = Voisins[1] = Voisins[2] = Voisins[3] = NULL;
+		Voisins[0] = Voisins[1] = Voisins[2] = Voisins[3] = nullptr;
 		Rotate[0] = Rotate[1] = Rotate[2] = Rotate[3] = 0;
 	}
 
 	SPaintTile *get2Voisin(int i)
 	{
 		if (Voisins[i]) return Voisins[i]->Voisins[(i + Rotate[i]) & 3];
-		return NULL;
+		return nullptr;
 	}
 	int get2VoisinRotate(int i)
 	{
@@ -232,14 +232,14 @@ struct SPaintTile
 		int rightRot;
 		SPaintTile *right = getRight256(rot, rightRot);
 		if (right) return right->getBottom256((rot - rightRot) & 3, rotate);
-		return NULL;
+		return nullptr;
 	}
 	SPaintTile *getBottomRight256(int rot, int &rotate)
 	{
 		int bottomRot;
 		SPaintTile *bottom = getBottom256(rot, bottomRot);
 		if (bottom) return bottom->getRight256((rot - bottomRot) & 3, rotate);
-		return NULL;
+		return nullptr;
 	}
 	bool validFor256(int rot)
 	{
@@ -269,7 +269,11 @@ struct SPaintZoneInput
 	// so getTile/setTile assemble transformDesc.
 	uint Rotate; // 0..3, 90° CCW steps
 	bool Symmetry; // mirror (Flip)
-	SPaintZoneInput() : Node(NULL), Frozen(false), ZoneId(0), Patches(NULL), Pm(NULL), EvalRp(NULL),
+	SPaintZoneInput() : Node(nullptr)
+	    , Frozen(false), ZoneId(0), Patches(nullptr)
+	    , Pm(nullptr)
+	    , EvalRp(nullptr)
+	    ,
 	                    Rotate(0), Symmetry(false) { }
 };
 
@@ -318,7 +322,8 @@ struct SGeomWriteTarget
 	/// Container form (0x03E8 position chunk of an element container), when the target is a
 	/// PatchMesh vertex or vec rather than a mapper record.
 	PIPELINE::MAX::CStorageContainer *VertChunk;
-	SGeomWriteTarget() : Kind(None), Raw(NULL), Offset(0), VertChunk(NULL) { }
+	SGeomWriteTarget() : Kind(None), Raw(nullptr)
+	    , Offset(0), VertChunk(nullptr) { }
 };
 
 /**
@@ -731,7 +736,10 @@ private:
 		std::vector<uint8> OriginalBytes; // raw blob bytes as loaded (0x4001 payload or 0x08FD payload)
 		std::vector<uint> Zones; // paint zones sharing this carrier
 		bool AnyUnfrozen;
-		SCarrier() : Rpo(NULL), SnapLeaf(NULL), Pristine(NULL), AnyUnfrozen(false) { }
+		SCarrier() : Rpo(nullptr)
+		    , SnapLeaf(nullptr)
+		    , Pristine(nullptr)
+		    , AnyUnfrozen(false) { }
 	};
 
 	// Snapshot of the four Max-export props (script AppData, string payloads).

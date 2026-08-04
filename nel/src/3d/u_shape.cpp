@@ -41,7 +41,7 @@ bool		UShape::getMeshTriangles(std::vector<NLMISC::CVector> &vertices, std::vect
 	// **** try to get a CMeshGeom
 	CMesh				*mesh= dynamic_cast<CMesh*>(_Object);
 	CMeshMultiLod		*meshMulti= dynamic_cast<CMeshMultiLod*>(_Object);
-	const CMeshGeom		*meshGeom= NULL;
+	const CMeshGeom		*meshGeom = nullptr;
 	if(mesh)
 	{
 		meshGeom= &mesh->getMeshGeom();
@@ -74,7 +74,7 @@ bool		UShape::getMeshTriangles(std::vector<NLMISC::CVector> &vertices, std::vect
 // ***************************************************************************
 void		UShape::getVisualCollisionMesh(UVisualCollisionMesh	&colMesh) const
 {
-	colMesh.attach(NULL);
+	colMesh.attach(nullptr);
 
 	CMeshBase			*mesh= dynamic_cast<CMeshBase*>(_Object);
 	if(mesh)

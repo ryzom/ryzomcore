@@ -255,7 +255,7 @@ CInstanceGroup::CInstance		&CInstanceGroup::getInstance(uint instanceNb)
 CTransformShape				*CInstanceGroup::getTransformShape(uint instanceNb) const
 {
 	if(instanceNb>_Instances.size())
-		return NULL;
+		return nullptr;
 	return _Instances[instanceNb];
 }
 
@@ -269,15 +269,15 @@ CInstanceGroup::CInstanceGroup()
 
 	_IGSurfaceLight.setOwner(this);
 	_GlobalPos = CVector(0,0,0);
-	_Root = NULL;
-	_ClusterSystemForInstances = NULL;
-	_ParentClusterSystem = NULL;
+	_Root = nullptr;
+	_ClusterSystemForInstances = nullptr;
+	_ParentClusterSystem = nullptr;
 	_RealTimeSunContribution= true;
 	_AddToSceneState = StateNotAdded;
-	_TransformName = NULL;
-	_AddRemoveInstance = NULL;
-	_IGAddBeginCallback = NULL;
-	_UserIg= NULL;
+	_TransformName = nullptr;
+	_AddRemoveInstance = nullptr;
+	_IGAddBeginCallback = nullptr;
+	_UserIg = nullptr;
 }
 
 // ***************************************************************************
@@ -543,13 +543,13 @@ bool CInstanceGroup::addToScene (CScene& scene, IDriver *driver, uint selectedTe
 	for (i = 0; i < _Portals.size(); ++i)
 	for (j = 0; j < 2; ++j)
 	{
-		if (_Portals[i]._Clusters[j] == NULL)
+		if (_Portals[i]._Clusters[j] == nullptr)
 		{
 			nlwarning("Portal %d (name:%s) is not linked to 2 clusters. Instance Group Not Added To Scene.", i, _Portals[i].getName().c_str());
 		}
 	}
 
-	_Instances.resize (_InstancesInfos.size(), NULL);
+	_Instances.resize (_InstancesInfos.size(), nullptr);
 
 	if (_IGAddBeginCallback)
 		_IGAddBeginCallback->startAddingIG((uint)_InstancesInfos.size());
@@ -561,7 +561,7 @@ bool CInstanceGroup::addToScene (CScene& scene, IDriver *driver, uint selectedTe
 	// Water surface may have a callback when they are created, and this callback need their position
 	// Their position isn't set right now however, so must call that callback later
 	IWaterSurfaceAddedCallback *oldCallback = scene.getWaterCallback();
-	scene.setWaterCallback(NULL);
+	scene.setWaterCallback(nullptr);
 	for (i = 0; i < _InstancesInfos.size(); ++i, ++it)
 	{
 		// Get the shape name
@@ -575,13 +575,13 @@ bool CInstanceGroup::addToScene (CScene& scene, IDriver *driver, uint selectedTe
 				if (nlstricmp(NLMISC::CFile::getExtension(shapeName), "pacs_prim") == 0)
 				{
 					nlwarning("Can't read %s (not a shape)", shapeName.c_str());
-					_Instances[i] = NULL;
+					_Instances[i] = nullptr;
 				}
 				else
 				{
 					_Instances[i] = scene.createInstance (shapeName);
 
-					if (_Instances[i] == NULL)
+					if (_Instances[i] == nullptr)
 					{
 						nlwarning("Not found '%s' file", shapeName.c_str());
 					}
@@ -602,7 +602,7 @@ void CInstanceGroup::getShapeName (uint instanceIndex, std::string &shapeName) c
 
 	// If there is a callback added to this instance group then transform
 	// the name of the shape to load.
-	if (_TransformName != NULL && !rInstanceInfo.InstanceName.empty())
+	if (_TransformName != nullptr && !rInstanceInfo.InstanceName.empty())
 	{
 		shapeName = _TransformName->transformName (instanceIndex, rInstanceInfo.InstanceName, rInstanceInfo.Name);
 	}
@@ -670,7 +670,7 @@ bool CInstanceGroup::addToSceneWhenAllShapesLoaded (CScene& scene, IDriver *driv
 					CPointLight *frozenAmbientlight;
 					if(rInstanceInfo.LocalAmbientId == 0xFF)
 						// must take the sun one.
-						frozenAmbientlight= NULL;
+						frozenAmbientlight = nullptr;
 					else
 						// ok, take the local ambient one.
 						frozenAmbientlight= (CPointLight*)(&_PointLightArray.getPointLights()[rInstanceInfo.LocalAmbientId]);
@@ -689,19 +689,19 @@ bool CInstanceGroup::addToSceneWhenAllShapesLoaded (CScene& scene, IDriver *driv
 		}
 		else
 		{
-			_Instances[i] = NULL;
+			_Instances[i] = nullptr;
 		}
 	}
 
 	// Setup the hierarchy
 	// We just have to set the traversal HRC (Hierarchy)
-	if (_Root == NULL)
+	if (_Root == nullptr)
 	{
 		createRoot (scene);
 	}
 	it = _InstancesInfos.begin();
 	for (i = 0; i < _InstancesInfos.size(); ++i, ++it)
-	if (!_InstancesInfos[i].DontAddToScene && _Instances[i] != NULL)
+	if (!_InstancesInfos[i].DontAddToScene && _Instances[i] != nullptr)
 	{
 		CInstance &rInstanceInfo = *it;
 		if( rInstanceInfo.nParent != -1 ) // Is the instance get a parent
@@ -754,7 +754,7 @@ bool CInstanceGroup::addToSceneWhenAllShapesLoaded (CScene& scene, IDriver *driv
 
 	// Link shapes to clusters
 	for (i = 0; i < _Instances.size(); ++i)
-	if (_Instances[i] != NULL && !_InstancesInfos[i].DontAddToScene)
+	if (_Instances[i] != nullptr && !_InstancesInfos[i].DontAddToScene)
 	{
 		if (!_InstancesInfos[i].Clusters.empty())
 		{
@@ -838,7 +838,7 @@ bool CInstanceGroup::addToSceneAsync (CScene& scene, IDriver *driver, uint selec
 	_AddToSceneTempDriver = driver;
 	_AddToSceneTempSelectTexture = selectedTexture;
 
-	_Instances.resize (_InstancesInfos.size(), NULL);
+	_Instances.resize (_InstancesInfos.size(), nullptr);
 
 	if (_IGAddBeginCallback)
 		_IGAddBeginCallback->startAddingIG((uint)_InstancesInfos.size());
@@ -855,7 +855,7 @@ bool CInstanceGroup::addToSceneAsync (CScene& scene, IDriver *driver, uint selec
 		if (!rInstanceInfo.DontAddToScene)
 		{
 			string shapeName = rInstanceInfo.Name;
-			if (_TransformName != NULL && !rInstanceInfo.InstanceName.empty())
+			if (_TransformName != nullptr && !rInstanceInfo.InstanceName.empty())
 			{
 				shapeName = _TransformName->transformName (i, rInstanceInfo.InstanceName, rInstanceInfo.Name);
 			}
@@ -904,7 +904,7 @@ void CInstanceGroup::stopAddToSceneAsync ()
 
 			bool getShapeName = true;
 
-			if (_TransformName != NULL && !rInstanceInfo.InstanceName.empty())
+			if (_TransformName != nullptr && !rInstanceInfo.InstanceName.empty())
 			{
 				shapeName = _TransformName->transformName (i, rInstanceInfo.InstanceName, rInstanceInfo.Name);
 				if (shapeName != rInstanceInfo.Name)
@@ -1009,7 +1009,7 @@ bool CInstanceGroup::removeFromScene (CScene& scene)
 			pTShape->unfreezeStaticLightSetup();
 			// delete the instance
 			scene.deleteInstance (pTShape);
-			_Instances[i] = NULL;
+			_Instances[i] = nullptr;
 		}
 	}
 
@@ -1037,7 +1037,7 @@ bool CInstanceGroup::removeFromScene (CScene& scene)
 	}
 
 	scene.deleteModel (_Root);
-	_Root = NULL;
+	_Root = nullptr;
 
 
 	// UnRegister the instanceGroup for light animation
@@ -1059,7 +1059,7 @@ void CInstanceGroup::getLights( set<string> &LightNames )
 	for( uint32 i = 0; i < _Instances.size(); ++i )
 	{
 		CMeshInstance *pMI = dynamic_cast<CMeshInstance*>(_Instances[i]);
-		if( pMI != NULL )
+		if( pMI != nullptr)
 		{
 			uint32 nNbLM = pMI->getNbLightMap();
 			for( uint32 j = 0; j < nNbLM; ++j )
@@ -1081,7 +1081,7 @@ void CInstanceGroup::getBlendShapes( set<string> &BlendShapeNames )
 	for( uint32 i = 0; i < _Instances.size(); ++i )
 	{
 		CMeshBaseInstance *pMBI = dynamic_cast<CMeshBaseInstance*>(_Instances[i]);
-		if (pMBI != NULL)
+		if (pMBI != nullptr)
 		{
 			uint32 nNbBS = pMBI->getNbBlendShape();
 			for( uint32 j = 0; j < nNbBS; ++j )
@@ -1102,7 +1102,7 @@ void CInstanceGroup::setBlendShapeFactor( const string &BlendShapeName, float rF
 	for( uint32 i = 0; i < _Instances.size(); ++i )
 	{
 		CMeshBaseInstance *pMI = dynamic_cast<CMeshBaseInstance*>(_Instances[i]);
-		if( pMI != NULL )
+		if( pMI != nullptr)
 		{
 			pMI->setBlendShapeFactor( BlendShapeName, rFactor );
 		}
@@ -1152,7 +1152,7 @@ bool CInstanceGroup::getDynamicPortal (std::string& name)
 // ***************************************************************************
 void CInstanceGroup::setPos (const CVector &pos)
 {
-	if (_Root != NULL)
+	if (_Root != nullptr)
 		/// \todo Make this work (precision): _Root->setPos (_GlobalPos+pos);
 		_Root->setPos (pos);
 }
@@ -1160,14 +1160,14 @@ void CInstanceGroup::setPos (const CVector &pos)
 // ***************************************************************************
 void CInstanceGroup::setRotQuat (const CQuat &quat)
 {
-	if (_Root != NULL)
+	if (_Root != nullptr)
 		_Root->setRotQuat (quat);
 }
 
 // ***************************************************************************
 CVector CInstanceGroup::getPos ()
 {
-	if (_Root != NULL)
+	if (_Root != nullptr)
 		return _Root->getPos ();
 	else
 		return CVector(0.0f, 0.0f, 0.0f);
@@ -1176,7 +1176,7 @@ CVector CInstanceGroup::getPos ()
 // ***************************************************************************
 CQuat CInstanceGroup::getRotQuat ()
 {
-	if (_Root != NULL)
+	if (_Root != nullptr)
 		return _Root->getRotQuat ();
 	else
 		return CQuat();

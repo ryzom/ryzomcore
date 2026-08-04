@@ -72,7 +72,7 @@ struct SMapChannel
 /// plugin object (\a mod) beyond class-id identification — all functional data is in the cache.
 /// Optional \a err receives a short reason on failure.
 bool readMapExtenderCache(PIPELINE::MAX::CStorageContainer *modApp, SMapChannel &out,
-                          std::string *err = 0);
+                          std::string *err = nullptr);
 
 /// Apply the cache onto a mesh's map channel. \a currentFaceCount is the evaluated mesh's face
 /// count after lower modifiers; if it does not match the cache face count the apply is refused
@@ -83,7 +83,7 @@ bool applyMapExtender(PIPELINE::MAX::CSceneClass *mod, PIPELINE::MAX::CStorageCo
                       int &outChannel,
                       std::vector<NLMISC::CVector> &outUVs,
                       std::vector<uint32> &outFaceUVs,
-                      std::string *err = 0);
+                      std::string *err = nullptr);
 
 } /* namespace MAPEXT */
 

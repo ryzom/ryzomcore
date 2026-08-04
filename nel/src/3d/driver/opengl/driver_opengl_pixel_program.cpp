@@ -108,7 +108,7 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 {
 #ifndef USE_OPENGLES
 	// Program setuped ?
-	if (program->m_DrvInfo == NULL)
+	if (program->m_DrvInfo == nullptr)
 	{
 		if (program->m_CompileFailed)
 			return false;
@@ -117,7 +117,7 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 		_PixelProgramEnabled = false;
 
 		// Insert into driver list. (so it is deleted when driver is deleted).
-		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
+		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)nullptr);
 
 		// Create a driver info
 		CPixelProgamDrvInfosGL *drvInfo;
@@ -128,7 +128,7 @@ bool CDriverGL::compilePixelProgram(NL3D::CPixelProgram *program)
 		if (!setupPixelProgram(program, drvInfo->ID))
 		{
 			delete drvInfo;
-			program->m_DrvInfo = NULL;
+			program->m_DrvInfo = nullptr;
 			//_GPUPrgDrvInfos.erase(it); // not needed as ~IProgramDrvInfos() already does it
 			program->m_CompileFailed = true;
 			return false;
@@ -185,7 +185,7 @@ bool CDriverGL::setupPixelProgram(CPixelProgram *program, GLuint id/*, bool &spe
 	CPixelProgamDrvInfosGL *drvInfo = static_cast<CPixelProgamDrvInfosGL *>((IProgramDrvInfos *)program->m_DrvInfo);
 
 	// Find a supported pixel program profile
-	IProgram::CSource *source = NULL;
+	IProgram::CSource *source = nullptr;
 	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
 		if (supportPixelProgram(program->getSource(i)->Profile))

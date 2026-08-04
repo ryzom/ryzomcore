@@ -67,7 +67,7 @@ public:
 	/** Create the face
 	 *  you can give a non-animated texture here
 	 */
-	CPSFace(CSmartPtr<ITexture> tex = NULL);
+	CPSFace(CSmartPtr<ITexture> tex = nullptr);
 
 	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 

@@ -142,7 +142,7 @@ CReferenceMaker *CSceneImpl::getReference(uint index) const
 	default:
 		if (index > 0)
 			nlerror("Invalid index %i", index);
-		return NULL;
+		return nullptr;
 	}
 }
 

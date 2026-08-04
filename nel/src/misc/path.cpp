@@ -91,7 +91,7 @@ CFileContainer::~CFileContainer()
 	if( _AllFileNames )
 	{
 		delete[] _AllFileNames;
-		_AllFileNames = NULL;
+		_AllFileNames = nullptr;
 	}
 }
 
@@ -101,7 +101,7 @@ void CPath::releaseInstance()
 	{
 		NLMISC::INelContext::getInstance().releaseSingletonPointer("CPath", _Instance);
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -205,7 +205,7 @@ void CFileContainer::getFileListByName(const std::string &extension, const std::
 			for (; first != last; ++ first)
 			{
 				string ext = SSMext.get(first->idExt);
-				if (strstr(first->Name, name.c_str()) != NULL && (ext == extension || extension.empty()))
+				if (strstr(first->Name, name.c_str()) != nullptr && (ext == extension || extension.empty()))
 				{
 					filenames.push_back(first->Name);
 				}
@@ -266,7 +266,7 @@ void CFileContainer::getFileListByPath(const std::string &extension, const std::
 				string ext = SSMext.get(first->idExt);
 				string p = SSMpath.get(first->idPath);
 
-				if (strstr(p.c_str(), path.c_str()) != NULL && (ext == extension || extension.empty()))
+				if (strstr(p.c_str(), path.c_str()) != nullptr && (ext == extension || extension.empty()))
 				{
 					filenames.push_back(first->Name);
 				}
@@ -310,7 +310,7 @@ CFileContainer::CMCFileEntry *CFileContainer::MCfind (const std::string &filenam
 		if (FileComp.specialCompare(*it, filename.c_str()) == 0)
 			return &(*it);
 	}
-	return NULL;
+	return nullptr;
 }
 
 sint CFileContainer::findExtension (const string &ext1, const string &ext2)
@@ -513,7 +513,7 @@ string CFileContainer::lookup (const string &filename, bool throwException, bool
 	{
 		CMCFileEntry *pMCFE = MCfind(str);
 		// If found in the map, returns it
-		if (pMCFE != NULL)
+		if (pMCFE != nullptr)
 		{
 			string fname, path = SSMpath.get(pMCFE->idPath);
 			if (pMCFE->Remapped)
@@ -611,7 +611,7 @@ bool CFileContainer::exists (const std::string &filename)
 	{
 		CMCFileEntry *pMCFE = MCfind(str);
 		// If found in the vector, returns it
-		if (pMCFE != NULL)
+		if (pMCFE != nullptr)
 			return true;
 	}
 	else
@@ -877,7 +877,7 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 
 	DIR *dir = opendir (path.c_str());
 
-	if (dir == NULL)
+	if (dir == nullptr)
 	{
 		NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): could not open the directory", path.c_str(), recurse, wantDir, wantFile);
 		return;
@@ -889,7 +889,7 @@ void CFileContainer::getPathContent (const string &path, bool recurse, bool want
 	for(;;)
 	{
 		dirent *de = readdir(dir);
-		if (de == NULL)
+		if (de == nullptr)
 		{
 			NL_DISPLAY_PATH("PATH: CPath::getPathContent(%s, %d, %d, %d): end of directory", path.c_str(), recurse, wantDir, wantFile);
 			break;
@@ -1285,7 +1285,7 @@ void CFileContainer::addSearchBigFile (const string &sBigFilename, bool recurse,
 	nlassert(!_MemoryCompressed);
 
 	FILE *Handle = nlfopen (sBigFilename, "rb");
-	if (Handle == NULL)
+	if (Handle == nullptr)
 	{
 		nlwarning ("PATH: CPath::addSearchBigFile(%s, %d, %d): can't open file, skip it", sBigFilename.c_str(), recurse, alternative);
 		return;
@@ -1498,7 +1498,7 @@ void CFileContainer::addSearchXmlpackFile (const string &sXmlpackFilename, bool 
 	// Open and read the xmlpack file header
 
 	FILE *Handle = nlfopen (sXmlpackFilename, "rb");
-	if (Handle == NULL)
+	if (Handle == nullptr)
 	{
 		nlwarning ("PATH: CPath::addSearchXmlpackFile(%s, %d, %d): can't open file, skip it", sXmlpackFilename.c_str(), recurse, alternative);
 		return;
@@ -1790,7 +1790,7 @@ void CFileContainer::memoryCompress()
 			// This is a file included in a bigfile (so the name is in the bigfile manager)
 			sTmp = sTmp.substr(0, sTmp.size()-1);
 			_MCFiles[nNb].Name = CBigFile::getInstance().getFileNamePtr(rFE.Name, sTmp);
-			if (_MCFiles[nNb].Name == NULL)
+			if (_MCFiles[nNb].Name == nullptr)
 			{
 				nlerror("memoryCompress: failed to find named file in big file: %s",SSMpath.get(rFE.idPath));
 			}
@@ -2373,7 +2373,7 @@ void CFile::checkFileChange (TTime frequency)
 			if(CFile::getFileModificationDate(FileToCheck[i].FileName) != FileToCheck[i].LastModified)
 			{
 				// need to reload it
-				if(FileToCheck[i].Callback != NULL)
+				if(FileToCheck[i].Callback != nullptr)
 					FileToCheck[i].Callback(FileToCheck[i].FileName);
 
 				FileToCheck[i].LastModified = CFile::getFileModificationDate(FileToCheck[i].FileName);
@@ -2384,7 +2384,7 @@ void CFile::checkFileChange (TTime frequency)
 	}
 }
 
-static bool CopyMoveFile(const std::string &dest, const std::string &src, bool copyFile, bool failIfExists = false, IProgressCallback *progress = NULL)
+static bool CopyMoveFile(const std::string &dest, const std::string &src, bool copyFile, bool failIfExists = false, IProgressCallback *progress = nullptr)
 {
 	if (dest.empty() || src.empty()) return false;
 	std::string sdest = CPath::standardizePath(dest,false);
@@ -2400,13 +2400,13 @@ static bool CopyMoveFile(const std::string &dest, const std::string &src, bool c
 			totalSize = CFile::getFileSize(ssrc);
 		}
 		FILE *fp1 = nlfopen(ssrc, "rb");
-		if (fp1 == NULL)
+		if (fp1 == nullptr)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read mode '%s'", ssrc.c_str());
 			return false;
 		}
 		FILE *fp2 = nlfopen(sdest, "wb");
-		if (fp2 == NULL)
+		if (fp2 == nullptr)
 		{
 			nlwarning ("PATH: CopyMoveFile error: can't fopen in read write mode '%s'", sdest.c_str());
 			return false;

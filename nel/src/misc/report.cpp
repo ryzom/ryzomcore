@@ -74,7 +74,7 @@ inline const char *getReportPostURL()
 	return buf;
 #else
 	char *res = getenv(NL_REPORT_POST_URL_ENVVAR);
-	if (res == NULL || res[0] == '\0') return NULL;
+	if (res == nullptr || res[0] == '\0') return nullptr;
 	return res;
 #endif
 }
@@ -84,7 +84,7 @@ TReportResult report(const std::string &title, const std::string &subject, const
 	std::string reportPath;
 	if (!body.empty())
 	{
-		std::string reportFile = getLogDirectory() + NLMISC::toString("nel_report_%u.log", (uint)time(NULL));
+		std::string reportFile = getLogDirectory() + NLMISC::toString("nel_report_%u.log", (uint)time(nullptr));
 		reportPath = CFile::findNewFile(reportFile);
 
 		FILE *f = nlfopen(reportPath, "wb"); // write as binary so \n are preserved

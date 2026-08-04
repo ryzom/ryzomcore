@@ -46,7 +46,7 @@ void CEffectAL::release()
 {
 	if (_AlAuxEffectSlot != AL_EFFECTSLOT_NULL) { alDeleteAuxiliaryEffectSlots(1, &_AlAuxEffectSlot); _AlAuxEffectSlot = AL_EFFECTSLOT_NULL; }
 	if (_AlEffect != AL_EFFECT_NULL) { alDeleteEffects(1, &_AlEffect); _AlEffect = AL_EFFECT_NULL; }
-	_SoundDriver = NULL;
+	_SoundDriver = nullptr;
 }
 
 // ******************************************************************

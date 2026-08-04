@@ -389,7 +389,7 @@ public:
 	 * \param alpha return the uniform value if return is true
 	 * \return uniform or not
 	 */
-	bool	isAlphaUniform(uint8 *alpha = NULL) const;
+	bool	isAlphaUniform(uint8 *alpha = nullptr) const;
 
 
 	/**

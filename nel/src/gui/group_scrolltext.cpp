@@ -40,10 +40,14 @@ namespace NLGUI
 	//========================================================================
 	CGroupScrollText::CGroupScrollText(const TCtorParam &param) :
 											CInterfaceGroup(param),
-											_List(NULL),
-											_ScrollBar(NULL),
-											_ButtonAdd(NULL),
-											_ButtonSub(NULL),
+											_List(nullptr)
+    ,
+											_ScrollBar(nullptr)
+    ,
+											_ButtonAdd(nullptr)
+    ,
+											_ButtonSub(nullptr)
+    ,
 											_Settuped(false),
 											_InvertScrollBar(true),
 											_ListHeight(0),
@@ -86,8 +90,8 @@ namespace NLGUI
 	xmlNodePtr CGroupScrollText::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "scroll_text" );
 		xmlSetProp( node, BAD_CAST "invert_scroll_bar", BAD_CAST NLMISC::toString( _InvertScrollBar ).c_str() );
@@ -242,7 +246,7 @@ namespace NLGUI
 		_ButtonSub = dynamic_cast<CCtrlBaseButton *>(CInterfaceGroup::getCtrl("button_sub"));
 		_List	   = dynamic_cast<CGroupList *>(CInterfaceGroup::getGroup("text_list"));
 
-		if(_ScrollBar == NULL)
+		if(_ScrollBar == nullptr)
 			nlwarning("<setup> scroll bar 'scroll_bar' missing or bad type.(%s)",this->_Id.c_str());
 		// Add and sub button are not required
 		/*
@@ -251,7 +255,7 @@ namespace NLGUI
 		if(buttonSub == NULL)
 			nlwarning("Interface: CGroupScrollText: button 'button_sub' missing or bad type");
 		*/
-		if(_List == NULL)
+		if(_List == nullptr)
 			nlwarning("<setup> group list 'text_list' missing or bad type");
 
 		// actions
@@ -294,8 +298,8 @@ namespace NLGUI
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
 			CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
-			if (pST == NULL) return;
-			if (pST->getList() == NULL) return;
+			if (pST == nullptr) return;
+			if (pST->getList() == nullptr) return;
 			// get the font height from the text template of the list
 			const CViewText *vt = pST->getList()->getTextTemplatePtr();
 			if (!vt) return;
@@ -316,8 +320,8 @@ namespace NLGUI
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
 			CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
-			if (pST == NULL) return;
-			if (pST->getList() == NULL) return;
+			if (pST == nullptr) return;
+			if (pST->getList() == nullptr) return;
 			// get the font height from the text template of the list
 			const CViewText *vt = pST->getList()->getTextTemplatePtr();
 			if (!vt) return;

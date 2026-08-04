@@ -415,7 +415,7 @@ void CAnimationStateSheet::build(const NLGEORGES::UFormElm &item)
 		return;
 
 	// Get animations.
-	const UFormElm *elmt = 0;
+	const UFormElm *elmt = nullptr;
 	if(!item.getNodeByName(&elmt, "animations"))
 		nlwarning("CAnimationState:build: the node 'animations' is not referenced.");
 	// If the array is not empty (in fact exist).
@@ -540,7 +540,7 @@ void CAnimationSetSheet::build(const NLGEORGES::UFormElm &rootElmt)
 			if (VerboseAnimParsing)
 					nlinfo("%2d state '%s' :", i, stateName.c_str());
 
-			const UFormElm *elmt = 0;
+			const UFormElm *elmt = nullptr;
 			if(rootElmt.getNodeByName(&elmt, stateName))
 			{
 				bool animPresent = false;
@@ -635,7 +635,7 @@ void CAnimationSetListSheet::build(const NLGEORGES::UFormElm &item)
 	NLGEORGES::UFormLoader *formLoader = UFormLoader::createLoader();
 
 	// Get the root.
-	const UFormElm *pAnimsetList = 0;
+	const UFormElm *pAnimsetList = nullptr;
 	if(item.getNodeByName(&pAnimsetList, "list"))
 	{
 		if(pAnimsetList)
@@ -668,7 +668,7 @@ void CAnimationSetListSheet::build(const NLGEORGES::UFormElm &item)
 				}
 				// Check if the filename is valid.
 				CSmartPtr<UForm> fileForm = formLoader->loadForm(filename.c_str());
-				if(fileForm == 0)
+				if(fileForm == nullptr)
 				{
 					nlwarning("Invalid Form : %s", filename.c_str());
 					continue;
@@ -699,7 +699,7 @@ void CAnimationSetListSheet::build(const NLGEORGES::UFormElm &item)
 							CAnimationSetSheet animationSet;
 							AnimSetList[nTotalSize+nSize].Name = animset + ".animation_set";
 							CSmartPtr<UForm> fileFormAS = formLoader->loadForm(AnimSetList[nTotalSize+nSize].Name.c_str());
-							if (fileFormAS != NULL)
+							if (fileFormAS != nullptr)
 							{
 								AnimSetList[nTotalSize+nSize].build(fileFormAS->getRootNode());
 								nSize++;

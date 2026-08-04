@@ -61,21 +61,21 @@ static uint32 filterAvailablePrograms(uint32 src)
 // ***************************************************************************
 CGameContextMenu::CGameContextMenu()
 {
-	_GroupMenu = NULL;
+	_GroupMenu = nullptr;
 
-	_MilkoAttackDisengage = NULL;
-	_ContextVal = NULL;
-	_AvailablePrograms = NULL;
-	_ServerTeamPresent = NULL;
+	_MilkoAttackDisengage = nullptr;
+	_ContextVal = nullptr;
+	_AvailablePrograms = nullptr;
+	_ServerTeamPresent = nullptr;
 	for(uint i=0;i<NUM_MISSION_OPTIONS;i++)
-		_MissionOption[i]= NULL;
-	_ServerInDuel = NULL;
-	_ServerInPvpChallenge = NULL;
-	_WebPageTitle = NULL;
-	_OutpostSheet= NULL;
-	_OutpostRightToBannish= NULL;
+		_MissionOption[i] = nullptr;
+	_ServerInDuel = nullptr;
+	_ServerInPvpChallenge = nullptr;
+	_WebPageTitle = nullptr;
+	_OutpostSheet = nullptr;
+	_OutpostRightToBannish = nullptr;
 	for(uint i=0;i<BOTCHATTYPE::MaxR2MissionEntryDatabase;i++)
-		_MissionRing[i]= NULL;
+		_MissionRing[i] = nullptr;
 }
 
 
@@ -88,14 +88,14 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 	_GroupMenu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getWindowFromId ("ui:interface:" + menuId + ""));
 	_ContextVal = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:TARGET:CONTEXT_VAL", false);
 
-	if(_GroupMenu == NULL)
+	if(_GroupMenu == nullptr)
 	{
 		nlwarning(("gamecontextmenu:init: 'ui:interface:" + menuId + "' window does not exist.").c_str());
 		return;
 	}
 
 	_GroupMilkoPad = "ui:interface:milko_pad";
-	if(_GroupMilkoPad != NULL)
+	if(_GroupMilkoPad != nullptr)
 	{
 		_MilkoAttackDisengage = NLGUI::CDBManager::getInstance()->getDbProp("UI:VARIABLES:MK_ATTACK", false);
 		_MilkoAttDisBut1 = "ui:interface:milko_pad:content:mode1:mode1_content:milko_actions:action5";
@@ -106,7 +106,7 @@ void		CGameContextMenu::init(const std::string &srcMenuId)
 		nlwarning("gamecontextmenu:init: 'ui:interface:milko_pad' window does not exist.");
 	}
 
-	if(_ContextVal == NULL)
+	if(_ContextVal == nullptr)
 	{
 		nlwarning("gamecontextmenu:init: 'SERVER:TARGET:CONTEXT_VAL' node does not exist.");
 		return;
@@ -224,7 +224,7 @@ void		CGameContextMenu::update()
 	CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
 
 	// Milko Pad
-	if ((_GroupMilkoPad != NULL) && (_GroupMilkoPad->getActive()))
+	if ((_GroupMilkoPad != nullptr) && (_GroupMilkoPad->getActive()))
 	{
 		if (canDisengage())
 		{
@@ -552,7 +552,7 @@ void		CGameContextMenu::update()
 			animalIndex = -1;
 
 		// Disable 'Mount' if server says so
-		CViewTextMenu *pTextMount = NULL;
+		CViewTextMenu *pTextMount = nullptr;
 		if ( propValidation.mountable() )
 			pTextMount = _TextMount;
 		else if (_TextMount)
@@ -560,8 +560,8 @@ void		CGameContextMenu::update()
 
 		// Enable/disable various menu items
 		bool ok = testMenuOptionForPackAnimal( selection, animalIndex, true, _TextPAFollow, _TextPAStop, _TextPAFree,
-			_TextPAEnterStable, NULL /*no 'leave stable' in context menu*/, pTextMount,
-			NULL /*unmount always active in context menu when the character is riding*/);
+			_TextPAEnterStable, nullptr /*no 'leave stable' in context menu*/, pTextMount,
+		    nullptr /*unmount always active in context menu when the character is riding*/);
 
 		// Follow & assist special case
 		if ( _TextFollow )
@@ -641,7 +641,7 @@ bool CGameContextMenu::canDuel()
 		return false;
 
 	CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-	if (selection == NULL)
+	if (selection == nullptr)
 		return false;
 
 	if (selection->isPlayer())
@@ -662,7 +662,7 @@ bool CGameContextMenu::canPvpChallenge()
 		return false;
 
 	CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-	if (selection == NULL)
+	if (selection == nullptr)
 		return false;
 
 	if (selection->isPlayer())
@@ -685,7 +685,7 @@ bool CGameContextMenu::canDisengage()
 bool CGameContextMenu::canTeamKick()
 {
 	CEntityCL *selection = EntitiesMngr.entity(UserEntity->selection());
-	if (selection != NULL)
+	if (selection != nullptr)
 	{
 		sint n = PeopleInterraction.TeamList.getIndexFromName(selection->getEntityName());
 		if (n >= 0)
