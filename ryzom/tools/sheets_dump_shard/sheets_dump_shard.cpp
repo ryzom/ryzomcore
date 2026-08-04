@@ -33,7 +33,9 @@
 #include <gpm_service/sheets.h>
 #include <server_share/continent_container.h>
 #include <entities_game_service/egs_sheets/egs_sheets.h>
+#include <entities_game_service/egs_sheets/egs_static_encyclo.h>
 #include <game_share/time_weather_season/time_date_season_manager.h>
+#include <game_share/time_weather_season/static_light_cycle.h>
 #include <ai_service/stdpch.h>
 #include <ai_service/sheets.h>
 
@@ -364,9 +366,21 @@ bool dumpMapPtr(const std::string &fileType, const std::string &inputFile, const
 	return true;
 }
 
+// One entry per file sheets_packer_shard writes; auto-detected from the
+// input filename, which is also the type name. Keep in sync with the
+// dispatch in main().
 const char *KnownTypes[] = {
-	"datasets", "ais", "egs_items", "egs_creatures",
-	"egs_outpost_building", "egs_weather_setup"
+	"datasets", "ios_sheets", "gpms", "continents", "light_cycles",
+	"ais", "ais_action", "ais_fight_config", "ais_race_stats",
+	"egs_action_xp_factor", "egs_aiactions", "egs_continents",
+	"egs_creatures", "egs_death_impact", "egs_emot",
+	"egs_encyclo_album", "egs_encyclo_thema", "egs_items",
+	"egs_loot_set", "egs_loot_table", "egs_outpost_building",
+	"egs_outpost_squads", "egs_outposts", "egs_race_stats",
+	"egs_sbricks", "egs_skill_tree", "egs_sphrases",
+	"egs_starting_role", "egs_success_chance_tables", "egs_text_emotes",
+	"egs_weather_function_params", "egs_weather_setup", "egs_world",
+	"egs_xptables"
 };
 const uint NbKnownTypes = sizeof(KnownTypes) / sizeof(KnownTypes[0]);
 
@@ -382,15 +396,14 @@ bool isKnownType(const std::string &s)
 
 void usage()
 {
-	nlinfo("USAGE : sheets_dump <input.packed_sheets> <output.txt> [type] [extra sheet_id.bin search dir]...");
+	nlinfo("USAGE : sheets_dump_shard <input.packed_sheets> <output.txt> [type] [extra sheet_id.bin search dir]...");
 	nlinfo("  <type> is optional, auto-detected from the input filename when omitted.");
-	nlinfo("  Supported types (and the file name they are auto-detected from) :");
-	nlinfo("    datasets              (datasets.packed_sheets)");
-	nlinfo("    ais                   (ais.packed_sheets)");
-	nlinfo("    egs_items             (egs_items.packed_sheets)");
-	nlinfo("    egs_creatures         (egs_creatures.packed_sheets)");
-	nlinfo("    egs_outpost_building  (egs_outpost_building.packed_sheets)");
-	nlinfo("    egs_weather_setup     (egs_weather_setup.packed_sheets)");
+	nlinfo("  Every file sheets_packer_shard produces is supported; the type name is the");
+	nlinfo("  packed file name without extension :");
+	std::string types;
+	for (uint i = 0; i < NbKnownTypes; ++i)
+		types += std::string(i ? ", " : "    ") + KnownTypes[i];
+	nlinfo("%s", types.c_str());
 	nlinfo("  The directory containing <input.packed_sheets> is always searched (recursively)");
 	nlinfo("  for sheet_id.bin. Pass one or more extra directories (searched recursively) if");
 	nlinfo("  it lives elsewhere, e.g. your live shard's leveldesign data directory.");
@@ -437,19 +450,62 @@ int main(int nNbArg, char **ppArgs)
 	bool ok = false;
 	try
 	{
+		// The sheet type filters below only matter when a packed sheet is
+		// being rebuilt from source sheets; for pure reading they are
+		// documentation, mirroring what the writer passed.
 		if (type == "datasets")
 		{
 			ok = dumpMap<TDataSetSheet>("dataset", input, output);
+		}
+		else if (type == "ios_sheets")
+		{
+			std::vector<std::string> fileTypes;
+			fileTypes.push_back("creature");
+			fileTypes.push_back("race_stats");
+			ok = dumpMapMulti<CStringManager::TSheetInfo>(fileTypes, input, output);
+		}
+		else if (type == "gpms")
+		{
+			std::vector<std::string> fileTypes;
+			fileTypes.push_back("creature");
+			fileTypes.push_back("player");
+			ok = dumpMapMulti<CGpmSheets::CSheet>(fileTypes, input, output);
+		}
+		else if (type == "continents")
+		{
+			ok = dumpMap<CContinentContainer::CSheet>("continent", input, output);
+		}
+		else if (type == "light_cycles")
+		{
+			ok = dumpMap<CStaticLightCycle>("light_cycle", input, output);
 		}
 		else if (type == "ais")
 		{
 			ok = dumpMapPtr<AISHEETS::CCreature>("creature", input, output);
 		}
-		else if (type == "egs_items")
+		else if (type == "ais_action")
 		{
-			std::vector<std::string> fileTypes;
-			fileTypes.push_back("sitem");
-			ok = dumpMapMulti<CStaticItem>(fileTypes, input, output);
+			ok = dumpMapPtr<AISHEETS::CAIAction>("aiaction", input, output);
+		}
+		else if (type == "ais_fight_config")
+		{
+			ok = dumpMap<AISHEETS::CActionList>("actionlist", input, output);
+		}
+		else if (type == "ais_race_stats")
+		{
+			ok = dumpMapPtr<AISHEETS::CRaceStats>("race_stats", input, output);
+		}
+		else if (type == "egs_action_xp_factor")
+		{
+			ok = dumpMap<CStaticXpFactorTable>("action_xp_factor", input, output);
+		}
+		else if (type == "egs_aiactions")
+		{
+			ok = dumpMap<CStaticAiAction>("aiaction", input, output);
+		}
+		else if (type == "egs_continents")
+		{
+			ok = dumpMap<CStaticContinent>("continent", input, output);
 		}
 		else if (type == "egs_creatures")
 		{
@@ -457,13 +513,98 @@ int main(int nNbArg, char **ppArgs)
 			fileTypes.push_back("creature");
 			ok = dumpMapMulti<CStaticCreatures>(fileTypes, input, output);
 		}
+		else if (type == "egs_death_impact")
+		{
+			ok = dumpMap<CStaticPacts>("death_impact", input, output);
+		}
+		else if (type == "egs_emot")
+		{
+			ok = dumpMap<CStaticEmot>("emot", input, output);
+		}
+		else if (type == "egs_encyclo_album")
+		{
+			ok = dumpMap<CStaticEncycloAlbum>("encyclo_album", input, output);
+		}
+		else if (type == "egs_encyclo_thema")
+		{
+			ok = dumpMap<CStaticEncycloThema>("encyclo_thema", input, output);
+		}
+		else if (type == "egs_items")
+		{
+			std::vector<std::string> fileTypes;
+			fileTypes.push_back("sitem");
+			ok = dumpMapMulti<CStaticItem>(fileTypes, input, output);
+		}
+		else if (type == "egs_loot_set")
+		{
+			ok = dumpMap<CStaticLootSet>("loot_set", input, output);
+		}
+		else if (type == "egs_loot_table")
+		{
+			ok = dumpMap<CStaticLootTable>("loot_table", input, output);
+		}
 		else if (type == "egs_outpost_building")
 		{
 			ok = dumpMap<CStaticOutpostBuilding>("outpost_building", input, output);
 		}
+		else if (type == "egs_outpost_squads")
+		{
+			ok = dumpMap<CStaticOutpostSquad>("outpost_squad", input, output);
+		}
+		else if (type == "egs_outposts")
+		{
+			ok = dumpMap<CStaticOutpost>("outpost", input, output);
+		}
+		else if (type == "egs_race_stats")
+		{
+			ok = dumpMap<CStaticRaceStats>("race_stats", input, output);
+		}
+		else if (type == "egs_sbricks")
+		{
+			std::vector<std::string> fileTypes;
+			fileTypes.push_back("sbrick");
+			fileTypes.push_back("saibrick");
+			ok = dumpMapMulti<CStaticBrick>(fileTypes, input, output);
+		}
+		else if (type == "egs_skill_tree")
+		{
+			ok = dumpMap<CStaticSkillsTree>("skill_tree", input, output);
+		}
+		else if (type == "egs_sphrases")
+		{
+			std::vector<std::string> fileTypes;
+			fileTypes.push_back("sphrase");
+			fileTypes.push_back("saiphrase");
+			ok = dumpMapMulti<CStaticRolemasterPhrase>(fileTypes, input, output);
+		}
+		else if (type == "egs_starting_role")
+		{
+			ok = dumpMap<CStaticRole>("starting_role", input, output);
+		}
+		else if (type == "egs_success_chance_tables")
+		{
+			// (sic) the filter string really is "succes_chances_table" in the EGS
+			ok = dumpMap<CStaticSuccessTable>("succes_chances_table", input, output);
+		}
+		else if (type == "egs_text_emotes")
+		{
+			ok = dumpMap<CStaticTextEmotes>("text_emotes", input, output);
+		}
+		else if (type == "egs_weather_function_params")
+		{
+			ok = dumpMap<CWeatherFunctionParamsSheetBase>("weather_function_params", input, output);
+		}
 		else if (type == "egs_weather_setup")
 		{
 			ok = dumpMap<CWeatherSetupSheetBase>("weather_setup", input, output);
+		}
+		else if (type == "egs_world")
+		{
+			ok = dumpMap<CStaticWorld>("world", input, output);
+		}
+		else if (type == "egs_xptables")
+		{
+			ok = dumpMap<CStaticXpStagesTable>("xp_table", input, output);
 		}
 		else
 		{

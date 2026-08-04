@@ -2,12 +2,12 @@ FILE(GLOB SRC *.cpp *.h)
 
 SOURCE_GROUP("" FILES ${SRC})
 
-ADD_EXECUTABLE(sheets_dump ${SRC})
+ADD_EXECUTABLE(sheets_dump_shard ${SRC})
 
 # Reads .packed_sheets through the same once-compiled sheet libraries the
 # services and sheets_packer_shard use, so the dump can never drift from the
 # real serialization code.
-TARGET_LINK_LIBRARIES(sheets_dump
+TARGET_LINK_LIBRARIES(sheets_dump_shard
 		PRIVATE
 		Ryzom::egssheets
 		Ryzom::aissheets
@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(sheets_dump
 		NeL::ligo
 )
 
-NL_DEFAULT_PROPS(sheets_dump "Ryzom, Tools: Sheets Dump")
-NL_ADD_RUNTIME_FLAGS(sheets_dump)
+NL_DEFAULT_PROPS(sheets_dump_shard "Ryzom, Tools: Sheets Dump Shard")
+NL_ADD_RUNTIME_FLAGS(sheets_dump_shard)
 
-INSTALL(TARGETS sheets_dump RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)
+INSTALL(TARGETS sheets_dump_shard RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT tools)

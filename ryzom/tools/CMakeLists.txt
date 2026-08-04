@@ -25,7 +25,7 @@ IF(WITH_RYZOM_TOOLS)
     # level only adds when MySQL is found (the gate on the server tree).
     IF(MYSQL_FOUND)
       ADD_SUBDIRECTORY(sheets_packer_shard)
-      ADD_SUBDIRECTORY(sheets_dump)
+      ADD_SUBDIRECTORY(sheets_dump_shard)
     ENDIF()
   ENDIF()
 
