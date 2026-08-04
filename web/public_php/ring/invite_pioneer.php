@@ -113,6 +113,11 @@
 			echo "<input type='submit' name='button' value='Invite'>";
 			echo "<input type='hidden' name='sessionId' value='".htmlspecialchars($formSessionId, ENT_QUOTES)."'>";
 			echo "<input type='hidden' name='mode' value='".htmlspecialchars($formMode, ENT_QUOTES)."'>";
+			// the inviter's slot arrives on the query string with the link from
+			// web_start; without carrying it through the post, getCharSlot()
+			// falls back to slot 0 and the session manager refuses the invite
+			// for an owner playing from any other character slot
+			echo "<input type='hidden' name='charSlot' value='".getCharSlot()."'>";
 			echo "<input type='hidden' name='execute'>";
 			echo "</form> ";
 		}

@@ -32,6 +32,9 @@
 	Session title : <input type="text" name="title" value="enter a title"><br>
 	Session description : <input type="text" name="description" value="enter a description"><br>
 	<input type='hidden' name='session_type' value='st_edit'>
+	<?php /* keep the character slot across the post: without it the session
+	   is scheduled for slot 0, not the character that opened this page */ ?>
+	<input type='hidden' name='charSlot' value='<?php echo getCharSlot(); ?>'>
 	<input type="submit" name="button" value="Schedule edition">
 </form>
 <br>
@@ -40,6 +43,7 @@
 	Session title : <input type="text" name="title" value="enter a title"><br>
 	Session description : <input type="text" name="description" value="enter a description"><br>
 	<input type='hidden' name='session_type' value='st_anim'>
+	<input type='hidden' name='charSlot' value='<?php echo getCharSlot(); ?>'>
 	<input type="submit" name="button" value="Schedule animation">
 </form>
 <br>	

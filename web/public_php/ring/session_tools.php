@@ -84,8 +84,10 @@ function planEditSession($charId, $domainId, $sessionType, $title, $desc)
 		1			// auto invite, gives the session public access
 		);
 
-	$rsm->waitCallback();
-	// the rest of the work is done in the callback
+	// the result rendering is done in the callback; a timeout leaves
+	// $SessionToolsResult false and would otherwise print nothing at all
+	if (!$rsm->waitCallback())
+		echo "No response from the session manager, session not scheduled<br>";
 }
 
 $SessionId = 0;
