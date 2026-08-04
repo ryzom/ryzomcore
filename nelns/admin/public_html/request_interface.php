@@ -174,7 +174,9 @@
 		$fp = fsockopen ($asHost, $asPort, $errno, $errstr, 30);
 		if (!$fp)
 		{
-			$res = "Can't connect to the admin service '$ASHost:$ASPort' ($errno: $errstr)";
+			// $ASHost/$ASPort were the globals, never imported here: the
+			// message printed an empty address (and warns on php 8)
+			$res = "Can't connect to the admin service '$asHost:$asPort' ($errno: $errstr)";
 		}
 		else
 		{
@@ -317,10 +319,12 @@
 
 		sendMessage ($fp, $msgout);
 
-		waitMessage ($fp, $msgin);
+		// a peer that accepts and then closes without answering leaves $msgin
+		// unset; calling into it was a fatal. An empty result already means
+		// "failed" to every caller, so report the same way.
+		if (!waitMessage ($fp, $msgin) || !$msgin->serialstring($result))
+			$result = '';
 
-		$msgin->serialstring($result);
-			
 		if(strlen($result) == 0)
 		{
 			// it failed
