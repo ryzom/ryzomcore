@@ -387,6 +387,7 @@ IF(WITH_NEL)
     ENDIF()
 
     HUNTER_ADD_PACKAGE(CURL)
+    FIND_PACKAGE(CURL CONFIG REQUIRED)
   ELSE()
     IF(EMSCRIPTEN)
       # CURL only when a cross-built (or stub) curl is provided via
