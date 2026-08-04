@@ -4,6 +4,8 @@
 // Reuses the shared config from the setup directory
 
 require_once(dirname(dirname(__FILE__)) . '/config.php');
+// the shared account name rule, enforced wherever an account is created
+require_once(dirname(dirname(__FILE__)) . '/tools/account_name.php');
 
 // NEL shard database (contains `user`, `domain`, `shard`, `permission` tables)
 $nel_db_host = $cfg['db']['shard']['host'];

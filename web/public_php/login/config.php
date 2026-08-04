@@ -3,6 +3,8 @@
 // This file contains all variables needed by other php scripts
 
 require_once dirname(__DIR__).'/config.php';
+// the shared account name rule, enforced wherever an account is created
+require_once dirname(__DIR__).'/tools/account_name.php';
 
 // php 8.1 turned exception reporting on by default for mysqli: every
 // `... or die(errorMsg...)` error path in this stack became unreachable,

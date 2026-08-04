@@ -43,6 +43,23 @@
 		return (int)$row[0];
 	}
 
+	/*
+	 * Same account name rule the ring login and the account tool enforce
+	 * (web/public_php/tools/account_name.php is the canonical copy; this
+	 * tree is standalone and shares nothing with it). The client sends the
+	 * login unencoded in its request, so a name outside this set would
+	 * create an account that can never be logged into afterwards.
+	 */
+	function isValidAccountName($login)
+	{
+		if (!is_string($login))
+			return false;
+		$len = strlen($login);
+		if ($len < 3 || $len > 64)
+			return false;
+		return (bool)preg_match('/^[a-zA-Z0-9_]+$/', $login);
+	}
+
 	// $reason contains the reason why the check failed or success
 	// return true if the check is ok
 	function checkUserValidity ($login, $password, $clientApplication, $cp, &$id, &$reason, &$priv, &$extended)
@@ -50,13 +67,20 @@
 		global $AcceptUnknownUser;
 
 		$link = connectDb("");
+		// keep the unescaped login for the account name rule below
+		$rawLogin = $login;
 		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
 		$result = mysqli_query ($link, $query) or die ("Database error");
 
 		if (mysqli_num_rows ($result) == 0)
 		{
-			if ($AcceptUnknownUser)
+			if ($AcceptUnknownUser && !isValidAccountName($rawLogin))
+			{
+				$reason = "Invalid account name (error code 67)";
+				$res = false;
+			}
+			else if ($AcceptUnknownUser)
 			{
 				if (!$cp)
 				{

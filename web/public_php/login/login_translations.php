@@ -152,6 +152,14 @@ $ErrMsgs[3013]['fr'] = "Vous n'avez pas les privilèges nécessaires pour vous c
 $ErrMsgs[3013]['de'] = 'Du hast nicht die nötigen Rechte um dich jetzt zu verbinden, bitte versuch es später nochmal';
 $ErrMsgs[3013]['log'] = false;
 
+// Auto-created accounts follow the same name rule as registration: the
+// client sends the login unencoded in the request, so a name outside that
+// set would create an account nobody could log into afterwards.
+$ErrMsgs[3014]['dbg'] = "Refused to auto-create login '%1': not a valid account name";
+$ErrMsgs[3014]['en'] = "This account name cannot be used: letters, numbers and underscores only";
+$ErrMsgs[3014]['fr'] = "Ce nom de compte ne peut pas être utilisé : uniquement des lettres, des chiffres et des tirets bas";
+$ErrMsgs[3014]['de'] = "Dieser Accountname kann nicht verwendet werden: nur Buchstaben, Zahlen und Unterstriche";
+
 // Translated Ring Session Manager (joinSession) error messages
 define('BASE_TRANSLATED_RSM_ERROR_NUM', 4000);
 

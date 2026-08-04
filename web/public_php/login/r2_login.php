@@ -370,13 +370,24 @@
 		$accessPriv = strtoupper(substr($domainInfo['status'], 3));
 
 		// now, retrieve the user infos
+		// keep the unescaped login: the account name rule below is about the
+		// characters the client sent, not about the escaped query fragment
+		$rawLogin = $login;
 		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
 		$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 		if (mysqli_num_rows ($result) == 0)
 		{
-			if ($AcceptUnknownUser)
+			if ($AcceptUnknownUser && !nel_is_valid_account_name($rawLogin))
+			{
+				// Never hand out an account whose name an existing client
+				// cannot send back: the login rides the login request query
+				// string unencoded. Registration has always refused these.
+				$reason = errorMsg(3014, $rawLogin);
+				$res = false;
+			}
+			else if ($AcceptUnknownUser)
 			{
 				// login doesn't exist, create it
 				// FIXME: nel.user.Email is `UNIQUE NOT NULL DEFAULT ''`, so this

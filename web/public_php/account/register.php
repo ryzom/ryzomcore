@@ -26,9 +26,10 @@ if (!$registrationOpen) {
 	// Validate inputs
 	if ($login === '' || $email === '' || $password === '' || $confirm === '') {
 		$error = 'All fields are required.';
-	} elseif (strlen($login) < 3 || strlen($login) > 64) {
-		$error = 'Username must be between 3 and 64 characters.';
-	} elseif (!preg_match('/^[a-zA-Z0-9_]+$/', $login)) {
+	} elseif (!nel_account_name_length_ok($login)) {
+		$error = 'Username must be between ' . nel_account_name_min_length()
+			. ' and ' . nel_account_name_max_length() . ' characters.';
+	} elseif (!nel_is_valid_account_name($login)) {
 		$error = 'Username may only contain letters, numbers, and underscores.';
 	} elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 255) {
 		$error = 'Please enter a valid email address.';
