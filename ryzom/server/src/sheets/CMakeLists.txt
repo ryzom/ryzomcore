@@ -74,3 +74,57 @@ NL_DEFAULT_PROPS(ryzom_aissheets "Ryzom, Library: AIS Sheets")
 IF(WITH_PCH AND NOT MINGW)
 	target_precompile_headers(ryzom_aissheets PRIVATE ${AIS_DIR}/stdpch.h)
 ENDIF()
+
+SET(GPM_DIR ${RZ_SERVER_SRC_DIR}/gpm_service)
+
+SET(GPM_SHEETS_SRC
+	${GPM_DIR}/sheets.cpp
+	${GPM_DIR}/sheets.h)
+
+ADD_LIBRARY(ryzom_gpmsheets STATIC ${GPM_SHEETS_SRC})
+add_library(Ryzom::gpmsheets ALIAS ryzom_gpmsheets)
+
+SOURCE_GROUP("gpm" FILES ${GPM_SHEETS_SRC})
+
+TARGET_INCLUDE_DIRECTORIES(ryzom_gpmsheets PUBLIC ${RZ_SERVER_SRC_DIR})
+
+TARGET_LINK_LIBRARIES(ryzom_gpmsheets
+		PUBLIC
+		Ryzom::gameshare
+		NeL::misc
+		NeL::net
+		NeL::georges
+)
+
+NL_DEFAULT_PROPS(ryzom_gpmsheets "Ryzom, Library: GPMS Sheets")
+
+IF(WITH_PCH AND NOT MINGW)
+	target_precompile_headers(ryzom_gpmsheets PRIVATE ${GPM_DIR}/stdpch.h)
+ENDIF()
+
+SET(IOS_DIR ${RZ_SERVER_SRC_DIR}/input_output_service)
+
+SET(IOS_SHEETS_SRC
+	${IOS_DIR}/string_manager_sheet.cpp
+	${IOS_DIR}/string_manager.h)
+
+ADD_LIBRARY(ryzom_iossheets STATIC ${IOS_SHEETS_SRC})
+add_library(Ryzom::iossheets ALIAS ryzom_iossheets)
+
+SOURCE_GROUP("ios" FILES ${IOS_SHEETS_SRC})
+
+TARGET_INCLUDE_DIRECTORIES(ryzom_iossheets PUBLIC ${RZ_SERVER_SRC_DIR})
+
+TARGET_LINK_LIBRARIES(ryzom_iossheets
+		PUBLIC
+		Ryzom::gameshare
+		NeL::misc
+		NeL::net
+		NeL::georges
+)
+
+NL_DEFAULT_PROPS(ryzom_iossheets "Ryzom, Library: IOS Sheets")
+
+IF(WITH_PCH AND NOT MINGW)
+	target_precompile_headers(ryzom_iossheets PRIVATE ${IOS_DIR}/stdpch.h)
+ENDIF()
