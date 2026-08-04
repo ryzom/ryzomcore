@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-08-04 — 🔧 Modernize sheets_packer_shard's compile definitions to TARGET_COMPILE_DEFINITIONS
+
+`ryzom/server/tools/sheets_packer_shard/CMakeLists.txt` used
+`ADD_DEFINITIONS(-DNO_EGS_VARS)` / `ADD_DEFINITIONS(-DNO_AI_COMP)`
+(directory-scoped, legacy). On `main/yubo-dev`, this target had already been
+migrated to `TARGET_COMPILE_DEFINITIONS(sheets_packer_shard PRIVATE
+NO_EGS_VARS DNO_AI_COMP)` — target-scoped, but with a typo
+(`DNO_AI_COMP` instead of `NO_AI_COMP`) that silently broke the
+`#ifndef NO_AI_COMP` guards in `ai_service/sheets.cpp`, causing
+`sheets_packer_shard` to try linking against `CFightScriptCompReader`/
+`CFightSelectFilter` (only defined in `ai_script_comp.cpp`, not part of this
+target's sources) — `undefined reference` at link time. Applied the same
+`TARGET_COMPILE_DEFINITIONS` modernization here on `fixes`, correctly
+spelled, so this commit can be merged into `main/yubo-dev` to fix the typo
+there via the merge rather than editing that branch directly.
+
 ## 2026-08-03 — 🐛 Fix MSVC operator< ambiguity for unqualified NUM_SKILLS in skill_manager.cpp
 
 `skill_manager.cpp` has `using namespace SKILLS;` at file scope, so its two
