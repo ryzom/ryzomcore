@@ -255,9 +255,13 @@ function convert_forum_name($str)
 // -------------------------------------
 // clean string
 // -------------------------------------
+// The (string) casts below: the optional request params arrive as null
+// when absent (importParam unsets them, `global` re-creates them null),
+// and php 8.1 deprecation-warns on null hitting an internal string
+// function -- with display_errors that text lands in the in-game browser.
 function clean_string($str)
 {
-	return strtr($str, array("\n" => '', '%' => '\%'));
+	return strtr((string)$str, array("\n" => '', '%' => '\%'));
 }
 
 // -------------------------------------
@@ -265,7 +269,7 @@ function clean_string($str)
 // -------------------------------------
 function clean_content($str)
 {
-	return strtr($str, array("\n" => '\n', '%' => '\%'));
+	return strtr((string)$str, array("\n" => '\n', '%' => '\%'));
 }
 
 // -------------------------------------
@@ -273,7 +277,7 @@ function clean_content($str)
 // -------------------------------------
 function displayable_string($str)
 {
-	return nl2br(htmlspecialchars(stripslashes($str), ENT_QUOTES));
+	return nl2br(htmlspecialchars(stripslashes((string)$str), ENT_QUOTES));
 }
 
 // -------------------------------------
@@ -281,7 +285,7 @@ function displayable_string($str)
 // -------------------------------------
 function displayable_content($str)
 {
-	return htmlspecialchars(stripcslashes($str), ENT_QUOTES);
+	return htmlspecialchars(stripcslashes((string)$str), ENT_QUOTES);
 }
 
 // -------------------------------------

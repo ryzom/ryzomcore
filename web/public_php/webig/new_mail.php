@@ -37,9 +37,10 @@
 	read_template('new_mail.html', $new_mail);
 
 	// the sender and the recipient arrive with the request too, so they need
-	// the same escaping the subject and the content already get
-	$e_login = htmlspecialchars($user_login, ENT_QUOTES);
-	$e_to    = htmlspecialchars($mail_to, ENT_QUOTES);
+	// the same escaping the subject and the content already get; every field
+	// but the login is optional (a fresh compose form sends none of them)
+	$e_login = htmlspecialchars((string)$user_login, ENT_QUOTES);
+	$e_to    = htmlspecialchars((string)$mail_to, ENT_QUOTES);
 
 	$instance = str_replace(array('%%FROM%%', '%%UCFROM%%',      '%%TO%%', '%%UCTO%%',     '%%SUBJECT%%',                              '%%CONTENT%%'),
 							array($e_login,   ucfirst($e_login), $e_to,    ucfirst($e_to), ucfirst(displayable_string($mail_subject)), displayable_content($mail_content)),
