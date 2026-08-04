@@ -3,6 +3,13 @@
 	error_reporting(E_ERROR | E_PARSE);
 	set_error_handler('err_callback');
 
+	// The answers here are the "1:..." / "0:..." lines the client parses, but
+	// several of them quote the login back ("Invalid account: %1"), and with
+	// the default html content type a browser renders that. Say what this is
+	// and stop the browser from guessing otherwise.
+	header('Content-Type: text/plain; charset=utf-8');
+	header('X-Content-Type-Options: nosniff');
+
 	// For error handling, buffer all output
 	ob_start('ob_callback_r2login');
 
@@ -16,6 +23,16 @@
 
     function get_salt($password)
     {
+        // Rows with no password reach this too (the column is nullable).
+        // Indexing an empty string is an error on php 8, and handing the
+        // client an empty salt tells it which accounts have no password;
+        // answer with a fixed one instead, exactly as an unknown login is
+        // answered, and let the comparison refuse the login.
+        $password = (string)$password;
+        if (strlen($password) < 2)
+        {
+            return 'AA';
+        }
         if ($password[0] == '$')
         {
             $salt = substr($password, 0, 19);
@@ -48,6 +65,7 @@
 				global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName, $AutoInsertInRing;
 
 				$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+				nel_mysqli_set_charset($link);
 				mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 				$domainId = intval($domainId);
 			$query = "SELECT * FROM domain WHERE domain_id=$domainId";
@@ -59,8 +77,22 @@
 				}
 				$row = mysqli_fetch_array($result);
 
-				// set the cookie
-				setcookie ( "ryzomId" , $cookie, 0, "/");
+				// Session token for ring/webig. Same flags as the admin
+				// session cookie: httponly so page script cannot lift it,
+				// samesite=Lax so it does not ride on cross-site posts.
+				// Secure only when this request itself arrived over tls.
+				$cookie_opts = array(
+					'expires' => 0,
+					'path' => '/',
+					'httponly' => true,
+					'samesite' => 'Lax',
+				);
+				if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off')
+					|| (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443))
+				{
+					$cookie_opts['secure'] = true;
+				}
+				setcookie('ryzomId', $cookie, $cookie_opts);
 				$_COOKIE["ryzomId"] = $cookie; // make it available immediately
 
 				// Auto-join an available mainland shard
@@ -81,7 +113,13 @@
 				else
 				{
 					global $JoinSessionResultCode, $JoinSessionResultMsg;
-					echo errorMsgBlock(BASE_TRANSLATED_RSM_ERROR_NUM + $JoinSessionResultCode, $JoinSessionResultCode, $JoinSessionResultMsg, $userId);
+					// the result globals are only set when the session manager
+					// answered; a timeout inside joinMainland leaves them unset
+					// and 4000+null used to render as a bare generic error
+					if (!isset($JoinSessionResultCode))
+						echo errorMsgBlock(3003);
+					else
+						echo errorMsgBlock(BASE_TRANSLATED_RSM_ERROR_NUM + $JoinSessionResultCode, $JoinSessionResultCode, $JoinSessionResultMsg, $userId);
 				}
 			}
 			else
@@ -110,7 +148,7 @@
 			$logPath = $pathInfo['dirname'].'/'.$LogRelativePath;
 			if (!is_dir($logPath))
 			{
-				$res = mkdir($LogPath, 0700);
+				$res = mkdir($logPath, 0700);
 				return $res ? $logPath : false;
 			}
 			return $logPath;
@@ -121,8 +159,13 @@
 			$logPath = $this->getSafeLogDir();
 			if ($logPath !== false)
 			{
+				// The client still sends the password on the query string
+				// (cmd=login). Never write that URI into the log — scrub the
+				// password field and only record cmd/login for context.
+				$uri = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+				$uri = preg_replace('/([?&]password=)[^&]*/i', '$1***', $uri);
 				$fp = fopen($logPath.'/r2_login_'.date('Y-m-d').'.log', 'a');
-				fwrite($fp, date('Y-m-d H:i:s').' ('.$_SERVER['REMOTE_ADDR'].':'.$_SERVER['REQUEST_URI']."): $str\n");
+				fwrite($fp, date('Y-m-d H:i:s').' ('.$_SERVER['REMOTE_ADDR'].':'.$uri."): $str\n");
 				fclose($fp);
 			}
 		}
@@ -131,9 +174,11 @@
 	// Callback called on end of output buffering
 	function ob_callback_r2login($buffer)
 	{
-		// Log only in case of error or malformed result string
+		// Log only in case of error or malformed result string.
+		// Success is '1:' for cmd=ask and '1#' for cmd=login; the login
+		// answer carries the session cookie, which must stay out of the log.
 		$blockHd = substr($buffer, 0, 2);
-		if ($blockHd != '1:')
+		if ($blockHd != '1:' && $blockHd != '1#')
 		{
 			$logFile = new CWwwLog();
 			$logFile->logStr(str_replace("\n",'\n',$buffer));
@@ -141,12 +186,18 @@
 		return $buffer; // sent to output
 	}
 
-	// Callback called on error
-	function err_callback($errno, $errmsg, $filename, $linenum, $vars)
+	// Callback called on error. $vars must stay optional: php 8 calls the
+	// handler with four arguments, and a handler that demands five turns
+	// every warning (a refused login-service socket, say) into a fatal.
+	function err_callback($errno, $errmsg, $filename, $linenum, $vars = null)
 	{
 		$logFile = new CWwwLog();
 		$logFile->logStr("PHP ERROR/$errno $errmsg ($filename:$linenum)");
-		$logFile->logStr("PHP CALLSTACK/" . print_r(debug_backtrace(), TRUE));
+		// IGNORE_ARGS, or the frame for checkUserValidity() writes the
+		// submitted password into the log -- the very thing logStr() scrubs
+		// out of the request uri. Any php notice raised during a login was
+		// enough to spill it.
+		$logFile->logStr("PHP CALLSTACK/" . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), TRUE));
 		// Never die after an error
 	}
 
@@ -166,19 +217,35 @@
 	}
 
 	$submittedLang = isset($_GET['lg']) ? $_GET['lg'] : 'unknown';
-	if (isset($_GET['dbg']) && ($_GET['dbg'] == 1))
-		$DisplayDbg = true;
+	// The debug variant of the messages carries the database host, the
+	// database user, the failing query and the mysql error text. This
+	// endpoint is reachable by anyone, so the client does not get to ask
+	// for it: $LoginAllowDbg has to be turned on in the site config.
+	// Exception: once the password check passes for an account whose
+	// privilege contains :DEV:, checkUserValidity turns $DisplayDbg on
+	// for the rest of the request (permission, LS and join errors).
+	global $LoginAllowDbg;
+	$DisplayDbg = (isset($LoginAllowDbg) && $LoginAllowDbg)
+		&& isset($_GET['dbg']) && ($_GET['dbg'] == 1);
+
+	// The three login fields are only ever read from here. A request that
+	// leaves one out used to reach mysqli_real_escape_string() and crypt()
+	// as null -- a deprecation on php 8.1 for every one of them, and one
+	// line per warning in the login log through err_callback().
+	$reqLogin		= isset($_GET['login']) && is_string($_GET['login']) ? $_GET['login'] : '';
+	$reqPassword	= isset($_GET['password']) && is_string($_GET['password']) ? $_GET['password'] : '';
+	$reqClientApp	= isset($_GET['clientApplication']) && is_string($_GET['clientApplication']) ? $_GET['clientApplication'] : '';
 
 	switch($_GET['cmd'])
 	{
 	case 'ask':
 		// client ask for a login salt
-		askSalt($_GET['login'], $submittedLang);
+		askSalt($reqLogin, $submittedLang);
 		die();
 	case 'login':
 		$domainId = -1;
 		// client sent is login info
-		if (!checkUserValidity($_GET['login'], $_GET['password'], $_GET['clientApplication'], $cp, $id, $reason, $priv, $extended, $domainId, $submittedLang))
+		if (!checkUserValidity($reqLogin, $reqPassword, $reqClientApp, $cp, $id, $reason, $priv, $extended, $domainId, $submittedLang))
 		{
 			echo '0:'.$reason;
 		}
@@ -193,6 +260,7 @@
 			{
 				// check if the ring user exist, and create it if not
 				$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die(errorMsgBlock(3004, 'Ring', $DBHost, $RingDBUserName));
+				nel_mysqli_set_charset($ringDb);
 				mysqli_select_db ($ringDb, $domainInfo['ring_db_name']) or die(errorMsgBlock(3005, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName));
 				$query = "SELECT user_id FROM ring_users where user_id = '".$id."'";
 				$result = mysqli_query ($ringDb, $query) or die(errorMsgBlock(3006, $query, 'Ring', $domainInfo['ring_db_name'], $DBHost, $RingDBUserName, mysqli_error($ringDb)));
@@ -274,6 +342,7 @@
 		setMsgLanguage($lang);
 
 		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
 		// we map the client application to the domain name
@@ -301,15 +370,34 @@
 		$accessPriv = strtoupper(substr($domainInfo['status'], 3));
 
 		// now, retrieve the user infos
+		// keep the unescaped login: the account name rule below is about the
+		// characters the client sent, not about the escaped query fragment
+		$rawLogin = $login;
 		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
 		$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 		if (mysqli_num_rows ($result) == 0)
 		{
-			if ($AcceptUnknownUser)
+			if ($AcceptUnknownUser && !nel_is_valid_account_name($rawLogin))
+			{
+				// Never hand out an account whose name an existing client
+				// cannot send back: the login rides the login request query
+				// string unencoded. Registration has always refused these.
+				$reason = errorMsg(3014, $rawLogin);
+				$res = false;
+			}
+			else if ($AcceptUnknownUser)
 			{
 				// login doesn't exist, create it
+				// FIXME: nel.user.Email is `UNIQUE NOT NULL DEFAULT ''`, so this
+				// insert succeeds exactly once per database: the second account
+				// created this way collides on the empty email. AMS always wrote
+				// a real address, which is why this never showed. Either give the
+				// row a unique placeholder here, or drop/relax EmailIndex, before
+				// relying on $AcceptUnknownUser for anything but a single dev
+				// account. The account tool (public_php/account) asks for a real
+				// email and is unaffected.
 				$password = mysqli_real_escape_string($link, $password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
 				$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
@@ -346,11 +434,36 @@
 		else
 		{
 			$row = mysqli_fetch_assoc ($result);
-			$salt = get_salt($row["Password"]);
-			if (($cp && $row["Password"] == $password) || (!$cp && $row["Password"] == crypt($password, $salt)))
+			$stored = (string)$row["Password"];
+			$password = (string)$password;
+			// An account row with no password must never authenticate. The
+			// client sends the already crypted password (cp is set on every
+			// build), so the check on that path is a plain comparison, and
+			// an empty column is matched by an empty password field. Rows
+			// like that exist: nel.user.Password is `varchar DEFAULT NULL`,
+			// so anything that inserts a user without one -- by hand, by an
+			// import, by a half finished registration -- leaves an account
+			// anyone can walk into by name alone. Two characters is also the
+			// minimum crypt() needs for its salt to mean anything.
+			if (strlen($stored) < 2 || $password === '')
+			{
+				$reason = errorMsg(2004, 'user');
+				$res = false;
+			}
+			// compare without leaking where the two values stop matching
+			elseif (($cp && hash_equals($stored, $password)) || (!$cp && hash_equals($stored, (string)crypt($password, get_salt($stored)))))
 			{
 				// Store the real login (with correct case)
 				$_GET['login'] = $row['Login'];
+
+				// The password is verified, so the privilege can be
+				// trusted now: a dev account asking for debug output
+				// gets it without the site-wide $LoginAllowDbg switch.
+				// Errors before this point stay gated by the switch.
+				global $DisplayDbg;
+				if (!$DisplayDbg && isset($_GET['dbg']) && $_GET['dbg'] == 1
+					&& strstr((string)$row['Privilege'], ':DEV:'))
+					$DisplayDbg = true;
 				// check if the user can use this application
 
 				$clientApplication = mysqli_real_escape_string($link, $clientApplication);
@@ -360,8 +473,10 @@
 				{
 					if ($AcceptUnknownUser)
 					{
-						// add default permission
-						$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$domainId', -1, '$domainStatus')";
+						// add default permission ($accessPriv is the domain
+						// status privilege computed above; $domainStatus was
+						// never set and would have written an empty privilege)
+						$query = "INSERT INTO permission (UId, DomainId, ShardId, AccessPrivilege) VALUES ('".$row["UId"]."', '$domainId', -1, '$accessPriv')";
 						$result = mysqli_query ($link, $query) or die (errorMsgBlock(3006, $query, 'main', $DBName, $DBHost, $DBUserName, mysqli_error($link)));
 
 						$reason = errorMsg(3010);
@@ -452,6 +567,7 @@
 		setMsgLanguage($lang);
 
 		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die (errorMsgBlock(3004, 'main', $DBHost, $DBUserName));
+		nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $DBName) or die (errorMsgBlock(3005, 'main', $DBName, $DBHost, $DBUserName));
 
 		$login = mysqli_real_escape_string($link, $login);

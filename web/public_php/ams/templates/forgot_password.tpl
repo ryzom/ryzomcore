@@ -44,7 +44,7 @@
 	
 		</form>
 		<div class="alert alert-info">
-			{$register_message} <a href="?page=register">{$here}</a>.<br/> {$login_message} <a href="?page=login">{$here}</a>
+			{$register_message nofilter} <a href="?page=register">{$here}</a>.<br/> {$login_message} <a href="?page=login">{$here}</a>
 		</div>
 
 	</div><!--/span-->

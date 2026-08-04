@@ -31,6 +31,12 @@ class Helpers {
         require_once $AMS_LIB . '/smarty/libs/Smarty.class.php';
 
          $smarty = new Smarty;
+         // Escape every {$var} the templates print. None of them escaped
+         // anything themselves, so user names, mail addresses, ticket titles,
+         // ticket text, support group names and plugin names all reached the
+         // page as markup. The few places that are meant to emit html say so
+         // with 'nofilter'.
+        $smarty -> escape_html = true;
          $smarty -> setCompileDir( $SITEBASE . '/templates_c/' );
          $smarty -> setCacheDir( $AMS_CACHEDIR );
          $smarty -> setConfigDir( $SITEBASE . '/configs/' );
@@ -190,6 +196,11 @@ class Helpers {
              default:
                  $lang = $_GET['Language'];
                  }
+            // the language code becomes part of the .ini path below, so only
+            // let a bare language code through
+            if ( !is_string( $lang ) || !preg_match( '/^[A-Za-z_-]{2,10}$/', $lang ) ) {
+                $lang = $DEFAULT_LANGUAGE;
+                 }
             // if the file exists en the setLang = true
             if ( file_exists( $AMS_TRANS . '/' . $lang . '.ini' ) && $_GET['setLang'] == "true" ) {
             // set a cookie & session var and incase logged in write it to the db!
@@ -204,8 +215,10 @@ class Helpers {
     } else {
     // if the session var is not set yet
     if ( !isset( $_SESSION['Language'] ) ) {
-        // check if a cookie already exists for it
-        if ( isset( $_COOKIE['Language'] ) ) {
+        // check if a cookie already exists for it -- the cookie is client
+        // supplied and ends up in the .ini path, so validate it as well
+        if ( isset( $_COOKIE['Language'] ) && is_string( $_COOKIE['Language'] )
+             && preg_match( '/^[A-Za-z_-]{2,10}$/', $_COOKIE['Language'] ) ) {
             $_SESSION['Language'] = $_COOKIE['Language'];
              // else use the default language
         } else {

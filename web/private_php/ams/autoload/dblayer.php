@@ -85,7 +85,7 @@ class DBLayer {
 			}
 			$PDOCache[$this->host]['pdo'] = $this->PDO;
 			$PDOCache[$this->host]['use'] = $this->dbname;
-			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
+			$this->useDbName($this->dbname);
 		}
 	}
 
@@ -93,11 +93,22 @@ class DBLayer {
 		$this->PDO = NULL;
 	}
 
+	/**
+	 * Switch to a database. The name comes from config, not the request, but
+	 * still refuse anything that is not a plain identifier before it hits USE.
+	 */
+	private function useDbName($dbname) {
+		if (!is_string($dbname) || !preg_match('/^[A-Za-z0-9_]+$/', $dbname)) {
+			throw new PDOException("Invalid database name");
+		}
+		$this->PDO->query('USE `' . $dbname . '`;');
+	}
+
 	function useDb() {
 		global $PDOCache;
 		if ($PDOCache[$this->host]['use'] != $this->dbname) {
 			$PDOCache[$this->host]['use'] = $this->dbname;
-			$this->PDO->query('USE ' . $this->dbname . ';'); // FIXME safety
+			$this->useDbName($this->dbname);
 		}
 	}
 
@@ -203,14 +214,21 @@ class DBLayer {
 	*
 	* @param string $tb_name name of the table on which operation to be performed.
 	* @param array $data array of data in format('fieldname' => $value,...).Here, only those fields must be stored which needs to be updated.
-	* @param string $where where part in format ('fieldname'= $value AND ...). 'fieldname' must be a field in that table.
+	* @param string $where where part, preferably with named placeholders (e.g. "Login = :Login").
+	* @param array $where_params optional bind values for the WHERE placeholders.
 	* @throws Exception error in updating.
 	*/
-	public function update($tb_name, $data, $where) {
+	public function update($tb_name, $data, $where, $where_params = array()) {
 		$this->useDb();
+		if (!is_string($tb_name) || !preg_match('/^[A-Za-z0-9_]+$/', $tb_name)) {
+			throw new Exception('Invalid table name');
+		}
 		$field_option_values = null;
 		foreach ( $data as $key => $value ) {
-			$field_option_values .= ",$key" . '=:' . $key;
+			if (!preg_match('/^[A-Za-z0-9_]+$/', $key)) {
+				throw new Exception('Invalid column name');
+			}
+			$field_option_values .= ",`$key`" . '=:' . $key;
 		}
 		$field_option_values = ltrim($field_option_values, ',');
 		try {
@@ -218,6 +236,13 @@ class DBLayer {
 
 			foreach ($data as $key => $value) {
 				$sth->bindValue(":$key", $value);
+			}
+			// WHERE values used to be concatenated into $where by callers;
+			// accept a fourth argument so they can be bound instead.
+			if (is_array($where_params)) {
+				foreach ($where_params as $key => $value) {
+					$sth->bindValue(is_int($key) ? $key + 1 : ":$key", $value);
+				}
 			}
 			$sth->execute();
 		}

@@ -74,6 +74,8 @@ class Ticket_Reply{
     * @param $ticket_creator the ticket's starter his id.
     */
     public static function createReply($content, $author, $ticket_id , $hidden, $ticket_creator){
+        // The reply is stored as it was typed; the pages that show it escape
+        // on the way out (smarty escape_html) and it is shown inside a <pre>.
         $ticket_content = new Ticket_Content();
         $ticket_content->setContent($content);
         $ticket_content->create();
@@ -148,7 +150,7 @@ class Ticket_Reply{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ticket", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Timestamp' => $this->timestamp, 'Hidden' => $this->hidden), "TReplyId=$this->tReplyId, ");
+        $dbl->update("ticket_reply", Array('Ticket' => $this->ticket, 'Content' => $this->content, 'Author' => $this->author, 'Timestamp' => $this->timestamp, 'Hidden' => $this->hidden), "TReplyId = :TReplyId", array('TReplyId' => (int)$this->tReplyId));
     }
 
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

@@ -47,11 +47,16 @@ class Mail_Handler{
             }
             
             global $AMS_TRANS;
+            global $DEFAULT_LANGUAGE;
             if(is_numeric($receiver)){
                 $webUser = new WebUsers($receiver);
                 $lang = $webUser->getLanguage();
             }else{
-                global $DEFAULT_LANGUAGE;
+                $lang = $DEFAULT_LANGUAGE;
+            }
+            // the code becomes part of the .ini path, and the column it comes
+            // from predates the check on the way in
+            if(!is_string($lang) || !preg_match('/^[A-Za-z_-]{2,10}$/', $lang)){
                 $lang = $DEFAULT_LANGUAGE;
             }
             $variables = parse_ini_file( $AMS_TRANS . '/' .  $lang . '.ini', true );
@@ -192,8 +197,12 @@ class Mail_Handler{
                         $from = $group->getName()." <".$group->getGroupEmail().">";
                     }
                    
+                    // the group name and address are typed in the support
+                    // group form, so keep a newline in either of them from
+                    // starting a header of its own
+                    $from = str_replace(array("\r", "\n"), ' ', $from);
                     $headers = "From: $from\r\n" . "Message-ID: " . $message_id ;
-                   
+
                     if(mail($email['Recipient'], $email['Subject'], $email['Body'], $headers)) {       
                         $status = "DELIVERED";        
                         error_log("Emailed {$email['Recipient']}\n", 3, $MAIL_LOG_PATH);

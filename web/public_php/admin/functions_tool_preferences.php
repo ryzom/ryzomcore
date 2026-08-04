@@ -7,10 +7,7 @@
 	{
 		if (!is_array($userinfo) && !isset($userinfo['user_id'])) return false;
 
-		$encoded_password = md5($password);
-		if ($encoded_password == $userinfo['user_password']) return true;
-
-		return false;
+		return nt_auth_verify_password($password, $userinfo['user_password']);
 	}
 
 	/*
@@ -23,9 +20,9 @@
 		if (!is_array($userinfo) && !isset($userinfo['user_id'])) 	return false;
 		if ($password == '')										return false;
 
-		$encoded_password = md5(trim($password));
+		$encoded_password = nt_auth_hash_password($password);
 
-		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_password='". $encoded_password ."' WHERE user_id=". intval($userinfo['user_id']);
+		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_password='". $db->sql_escape_string($encoded_password) ."' WHERE user_id=". intval($userinfo['user_id']);
 		$db->sql_query($sql);
 
 		return true;

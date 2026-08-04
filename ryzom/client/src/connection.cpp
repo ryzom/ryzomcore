@@ -688,7 +688,10 @@ TInterfaceState autoLogin (const string &cookie, const string &fsaddr, bool firs
 
 			if (!result.empty())
 			{
-				nlerror ("connection : %s.", result.c_str());
+				// nlerror exits through the crash handler without showing
+				// the reason (e.g. the frontend address failed to resolve)
+				nlwarning ("connection : %s.", result.c_str());
+				Driver->systemMessageBox(("Unable to connect to the shard: " + result).c_str(), "Connection error", UDriver::okType, UDriver::exclamationIcon);
 				return QUIT_THE_GAME;
 			}
 

@@ -29,7 +29,6 @@
 	// $post_content	content of the first post (optional)
 	//
 
-	importParam('post_from');
 	importParam('post_to');
 	importParam('post_subject');
 	importParam('post_content');
@@ -39,6 +38,11 @@
 	global $post_content;
 
 	check_character_belongs_to_guild($user_login, $post_to);
+
+	// The author is whoever the session cookie authenticated, not whatever
+	// name came in with the request -- post_from used to be read from the
+	// query string, so a player could open a thread under any character name.
+	$post_from = $user_login;
 
 	// check mail is valid
 	//if (!isset($post_from) || !isset($post_to) || !isset($post_subject))
@@ -70,9 +74,18 @@
 		// create thread file
 		create_thread($post_from, $post_to, $post_subject, $index);
 	
-		// add main post to thread
+		// a thread opened without content skips add_post, which is what sets
+		// $last_date; update_forum_index would then blank the date column the
+		// forum index row was just written with
+		$last_date = displayable_date();
+
+		// add main post to thread -- through clean_content() like post.php,
+		// or a newline in the opening post splits its row in the index
 		if ($post_content != "")
+		{
+			$post_content = clean_content($post_content);
 			add_post($post_from, $post_to, $post_content, $index, $last_date);
+		}
 	
 		// rebuild thread page
 		build_thread_page($post_to, $index, $num_posts);

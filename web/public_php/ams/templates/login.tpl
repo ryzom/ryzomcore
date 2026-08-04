@@ -46,7 +46,7 @@
 		
 		
 		<div class="alert alert-info">
-		{if $userRegistration == '0'|| $userRegistration == '2'}<a href="?page=register">{$login_register_message}</a>.<br>{/if}<a href="?page=forgot_password">{$login_forgot_password_message}</a>
+		{if $userRegistration == '0'|| $userRegistration == '2'}<a href="?page=register">{$login_register_message nofilter}</a>.<br>{/if}<a href="?page=forgot_password">{$login_forgot_password_message}</a>
 		</div>
 		
 		

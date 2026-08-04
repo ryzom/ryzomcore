@@ -1,10 +1,18 @@
 SetHandler none
 SetHandler default-handler
 Options -ExecCGI
+# Deny script execution under every php module name this tree might meet.
+# php5 only left the door open for php7/php8 handlers.
 <IfModule mod_php5.c>
 	php_flag engine off
 </IfModule>
-RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
+<IfModule mod_php7.c>
+	php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+	php_flag engine off
+</IfModule>
+RemoveHandler .cgi .php .php3 .php4 .php5 .php7 .php8 .phtml .pl .py .pyc .pyo
 Options -Indexes
 DirectoryIndex disabled
 <Files *>
@@ -14,7 +22,13 @@ DirectoryIndex disabled
 	<IfModule mod_php5.c>
 		php_flag engine off
 	</IfModule>
-	RemoveHandler .cgi .php .php3 .php4 .php5 .phtml .pl .py .pyc .pyo
+	<IfModule mod_php7.c>
+		php_flag engine off
+	</IfModule>
+	<IfModule mod_php.c>
+		php_flag engine off
+	</IfModule>
+	RemoveHandler .cgi .php .php3 .php4 .php5 .php7 .php8 .phtml .pl .py .pyc .pyo
 	ForceType application/octet-stream
 	Header set Content-Disposition attachment
 </Files>

@@ -28,7 +28,7 @@
 		
 		if ($presel_service)
 		{
-			$aliases = split('[/-]', $presel_service);
+			$aliases = preg_split('#[/-]#', $presel_service);
 			if (count($aliases) == 3)
 				$presel_service = $aliases[0];
 		}
@@ -42,7 +42,7 @@
 		$filter_entity = "";
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Commands");
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Commands");
 	
 	// input variables :
 	// - $preselServ : preselected service address
@@ -51,13 +51,13 @@
 
 	echo "Services commands<br>\n";
 
-	echo "<table border=1><form method=post action='".$_SERVER['PHP_SELF']."'>\n";
+	echo "<table border=1><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."'>\n";
 	echo "<tr><th rowspan=2>&nbsp;Filters&nbsp;</th><th>shard</th><th>server</th><th>service</th><th>entity</th><td rowspan=2>&nbsp;<input type=submit name='display_view' value='Update\nfilters'>&nbsp;</td><td rowspan=2>&nbsp;<input type=submit name='reset_filters' value='Reset\nfilters'>&nbsp;</td></tr>\n";
 	echo "<tr>\n";
-	echo "<td><input type=text name=filter_shard value='$filter_shard' size=12 maxlength=256></td>\n";
-	echo "<td><input type=text name=filter_server value='$filter_server' size=12 maxlength=256></td>\n";
-	echo "<td><input type=text name=filter_service value='$filter_service' size=12 maxlength=256></td>\n";
-	echo "<td><input type=text name=filter_entity value='$filter_entity' size=28 maxlength=1024></td>\n";
+	echo "<td><input type=text name=filter_shard value='".htmlspecialchars($filter_shard, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+	echo "<td><input type=text name=filter_server value='".htmlspecialchars($filter_server, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+	echo "<td><input type=text name=filter_service value='".htmlspecialchars($filter_service, ENT_QUOTES)."' size=12 maxlength=256></td>\n";
+	echo "<td><input type=text name=filter_entity value='".htmlspecialchars($filter_entity, ENT_QUOTES)."' size=28 maxlength=1024></td>\n";
 	echo "</tr>\n";
 	echo "</form></table><br>\n";
 
@@ -70,10 +70,12 @@
 
 	$query = "SELECT shard, server, name FROM service";
 
+	// Always define $where so an empty filter set does not trip PHP 8.
+	$where = array();
 	if ($filter_shard != "")	$where[] = "shard like '%".sqlescape($filter_shard)."%'";
 	if ($filter_server != "")	$where[] = "server like '%".sqlescape($filter_server)."%'";
 	if ($filter_service != "")	$where[] = "name like '%".sqlescape($filter_service)."%'";
-	
+
 	if (count($where)>=1)
 		$query .= " WHERE ".join(" AND ", $where);
 
@@ -102,13 +104,13 @@
 
 		if ($presel_shard == $shard && $presel_service != "" && strstr($service, $presel_service) != FALSE)
 		{
-			$dispServ = "<b><a href='".$_SERVER['PHP_SELF']."?preselServ=$addr'>$service</a></b>";
+			$dispServ = "<b><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=".htmlspecialchars(rawurlencode($addr), ENT_QUOTES)."'>".htmlspecialchars($service, ENT_QUOTES)."</a></b>";
 			$dcolor = "bgcolor=#FF88AA";
 		}
 		else
-			$dispServ = "<a href='".$_SERVER['PHP_SELF']."?preselServ=$addr'>$service</a>";
+			$dispServ = "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?preselServ=".htmlspecialchars(rawurlencode($addr), ENT_QUOTES)."'>".htmlspecialchars($service, ENT_QUOTES)."</a>";
 
-		echo "<tr><td $dcolor>$dshard</td><td $dcolor>$dserver</td><td $dcolor>$dispServ</td></tr></a>\n";
+		echo "<tr><td $dcolor>".htmlspecialchars($dshard, ENT_QUOTES)."</td><td $dcolor>".htmlspecialchars($dserver, ENT_QUOTES)."</td><td $dcolor>$dispServ</td></tr></a>\n";
 		$pshard = $shard;
 		$pserver = $server;
 	}
@@ -119,10 +121,10 @@
 	echo "<td width=30>&nbsp;</td>\n";
 	
 	echo "<td>\n";
-	echo "<table border=0><form method=post action='".$_SERVER['PHP_SELF']."' name='cmdform'>\n";
+	echo "<table border=0><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='cmdform'>\n";
 	echo "<tr><th align=left>Service Path</th><th align=left>Command (exact service syntax)</th></tr>\n";
-	echo "<tr><td><input name=preselServ value='$preselServ' size=32 maxlength=256></td>\n";
-	echo "<td><input name=execCommand value='".stripslashes($execCommand)."' size=50 maxlength=20480></td>\n";
+	echo "<tr><td><input name=preselServ value='".htmlspecialchars($preselServ, ENT_QUOTES)."' size=32 maxlength=256></td>\n";
+	echo "<td><input name=execCommand value='".htmlspecialchars(stripslashes($execCommand), ENT_QUOTES)."' size=50 maxlength=20480></td>\n";
 	echo "<td><input type=submit value=Execute></td></tr>\n";
 	echo "</form></table>\n";
 
@@ -135,7 +137,9 @@
 
 	if ($commandResult)
 	{
-		echo "<textarea rows=60 cols=300 readOnly style='font-family: Terminal, Courier; font-size: 10pt;'>".stripslashes($commandResult)."</textarea>\n";
+		// the service answer carries whatever the shard had to say, player
+		// names included, and a "</textarea>" in it would close the box
+		echo "<textarea rows=60 cols=300 readOnly style='font-family: Terminal, Courier; font-size: 10pt;'>".htmlspecialchars(stripslashes($commandResult), ENT_QUOTES)."</textarea>\n";
 	}
 	
 	echo "</td>\n";

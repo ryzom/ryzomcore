@@ -1,7 +1,8 @@
 <?php
 
 error_reporting(E_ALL);
-ini_set('display_errors', 'on');
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 
 class SystemExit extends Exception {}
 try {
@@ -24,10 +25,6 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 <?php } else if ($_POST) { ?>
 
-			<div class="alert alert-info" role="alert">
-				<?php var_dump($_POST); ?>
-			</div>
-
 <?php
 
 	$roleService = isset($_POST["roleService"]) && $_POST["roleService"] == "on";
@@ -40,6 +37,23 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 	if (!$roleService && !$roleSupport && !$roleDomain) {
 		printalert("danger", "No server roles selected");
 		$continue = false;
+	}
+
+	// Every password field on this form used to arrive pre-filled with
+	// "admin", so clicking through the wizard shipped an install whose setup
+	// page -- the gate on the installer and on every later upgrade -- and
+	// whose shard admin account both had a password everybody knows. The
+	// fields are empty now; refuse the old value and the empty one here too,
+	// since the browser is not the thing to trust with that.
+	$passwordFields = array('nelSetupPassword' => 'Setup Password');
+	if ($roleService)	$passwordFields['toolsAdminPassword'] = 'Admin Password (shard tools)';
+	if ($roleSupport)	$passwordFields['amsAdminPassword'] = 'Admin Password (AMS)';
+	foreach ($passwordFields as $field => $label) {
+		$value = isset($_POST[$field]) ? (string)$_POST[$field] : '';
+		if ($value === '' || strtolower($value) === 'admin' || strlen($value) < 8) {
+			printalert("danger", htmlentities($label) . " must be set, at least 8 characters, and not <em>admin</em>");
+			$continue = false;
+		}
 	}
     
 	if ($continue) {
@@ -56,13 +70,35 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
         }
 	}    
 
-	// Validate basics
+	// Validate basics. privatePhpDirectory is later opened as a path; keep
+	// it under the public php root or its immediate parent (the usual
+	// public_php / private_php sibling layout) and refuse anything else.
 	if ($continue) {
-		if (file_exists($_POST["privatePhpDirectory"])) {
-			printalert("success", "Private PHP Directory found");
-		} else {
+		$privDirIn = isset($_POST["privatePhpDirectory"]) ? (string)$_POST["privatePhpDirectory"] : '';
+		$privDirResolved = ($privDirIn !== '') ? realpath($privDirIn) : false;
+		$publicRoot = realpath('.');
+		$parentRoot = ($publicRoot !== false) ? realpath($publicRoot . '/..') : false;
+		$privPrefixOk = false;
+		if ($privDirResolved !== false && $publicRoot !== false) {
+			$privWithSep = $privDirResolved . DIRECTORY_SEPARATOR;
+			$publicPrefix = rtrim($publicRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+			$parentPrefix = ($parentRoot !== false)
+				? (rtrim($parentRoot, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR)
+				: null;
+			$privPrefixOk = (strpos($privWithSep, $publicPrefix) === 0)
+				|| ($parentPrefix !== null && strpos($privWithSep, $parentPrefix) === 0);
+		}
+		if ($privDirResolved === false || $publicRoot === false
+			|| !is_dir($privDirResolved)
+			|| !$privPrefixOk
+			|| !is_file($privDirResolved . '/setup/config/config.php')) {
 			printalert("danger", "Private PHP Directory not found (NOTE: This directory is relative to the root of the public PHP directory)");
 			$continue = false;
+		} else {
+			// store the cleaned path so later file_get_contents cannot be
+			// pointed at a different tree than the one we just checked
+			$_POST["privatePhpDirectory"] = $privDirResolved;
+			printalert("success", "Private PHP Directory found");
 		}
 	}
 	if ($continue) {
@@ -121,32 +157,35 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 
 	// Write config.php
 	if ($continue) {
-		$config = file_get_contents($_POST["privatePhpDirectory"] . "/setup/config/config.php");
+		require_once('config_generation.php');
+		$cwd = getcwd();
+		$config = generate_install_config(
+			$_POST["privatePhpDirectory"] . "/setup/config/config.php",
+			array(
+				// already resolved to an absolute path by the check above;
+				// joining it onto the cwd again resolved to nothing and wrote
+				// an empty private php path into the generated config
+				'privatePhpDirectory' => $_POST["privatePhpDirectory"],
+				'publicPhpDirectory'  => realpath($cwd),
+				'nelSqlHostname'      => $_POST["nelSqlHostname"],
+				'nelSqlPort'          => $_POST["nelSqlPort"],
+				'nelSqlUsername'      => $_POST["nelSqlUsername"],
+				'nelSqlPassword'      => $_POST["nelSqlPassword"],
+				'nelDatabase'         => $_POST["nelDatabase"],
+				'toolDatabase'        => $_POST["toolDatabase"],
+				'amsDatabase'         => $_POST["amsDatabase"],
+				'amsLibDatabase'      => $_POST["amsLibDatabase"],
+				'nelSetupPassword'    => $_POST["nelSetupPassword"],
+				'domainDatabase'      => $_POST["domainDatabase"],
+				'domainUsersDir'      => $_POST["domainUsersDir"],
+				'nelDomainName'       => $_POST["nelDomainName"],
+				'nelSetupVersion'     => $NEL_SETUP_VERSION,
+			)
+		);
 		if (!$config) {
 			printalert("danger", "Cannot read <em>config.php</em>");
 			$continue = false;
 		} else {
-			$cwd = getcwd();
-			$config = str_replace("%privatePhpDirectory%", addslashes(realpath($cwd . "/" . $_POST["privatePhpDirectory"])), $config);
-			$config = str_replace("%publicPhpDirectory%", addslashes(realpath($cwd)), $config);
-			$config = str_replace("%nelSqlHostname%", addslashes($_POST["nelSqlHostname"]), $config);
-			$config = str_replace("%nelSqlPort%", addslashes($_POST["nelSqlPort"]), $config);
-			$config = str_replace("%nelSqlUsername%", addslashes($_POST["nelSqlUsername"]), $config);
-			$config = str_replace("%nelSqlPassword%", addslashes($_POST["nelSqlPassword"]), $config);
-			$config = str_replace("%nelDatabase%", addslashes($_POST["nelDatabase"]), $config);
-			$config = str_replace("%toolDatabase%", addslashes($_POST["toolDatabase"]), $config);
-			$config = str_replace("%amsDatabase%", addslashes($_POST["amsDatabase"]), $config);
-			$config = str_replace("%amsLibDatabase%", addslashes($_POST["amsLibDatabase"]), $config);
-			$config = str_replace("%nelSetupPassword%", addslashes($_POST["nelSetupPassword"]), $config);
-			$config = str_replace("%domainDatabase%", addslashes($_POST["domainDatabase"]), $config);
-			$config = str_replace("%domainUsersDir%", addslashes($_POST["domainUsersDir"]), $config);
-			$config = str_replace("%nelDomainName%", addslashes($_POST["nelDomainName"]), $config);
-			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
-			$cryptKeyLength = 16;
-			$cryptKey = substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength); 
-			$cryptKeyIMAP = substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes($cryptKeyLength * 2))), 0, $cryptKeyLength); 
-			$config = str_replace("%cryptKey%", addslashes($cryptKey), $config);
-			$config = str_replace("%cryptKeyIMAP%", addslashes($cryptKeyIMAP), $config);
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
 			} else {
@@ -383,7 +422,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="nelSetupPassword" class="col-sm-3 control-label">Setup Password</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="nelSetupPassword" name="nelSetupPassword" value="admin">
+								<input type="password" class="form-control" id="nelSetupPassword" name="nelSetupPassword" value="" required autocomplete="new-password" placeholder="Required">
 							</div>
 						</div>
 					</div>
@@ -452,7 +491,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="toolsAdminPassword" class="col-sm-3 control-label">Admin Password</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="toolsAdminPassword" name="toolsAdminPassword" value="admin">
+								<input type="password" class="form-control" id="toolsAdminPassword" name="toolsAdminPassword" value="" required autocomplete="new-password" placeholder="Required">
 							</div>
 						</div>
 					</div>
@@ -483,7 +522,7 @@ $shardWin = (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
 						<div class="form-group">
 							<label for="amsAdminPassword" class="col-sm-3 control-label">Admin Password</label>
 							<div class="col-sm-6">
-								<input type="password" class="form-control" id="amsAdminPassword" name="amsAdminPassword" value="admin">
+								<input type="password" class="form-control" id="amsAdminPassword" name="amsAdminPassword" value="" required autocomplete="new-password" placeholder="Required">
 							</div>
 						</div>
 					</div>

@@ -12,14 +12,16 @@
 		die();
 	}
 	
-	echo "edit_session : user id = '$userId', char = '$charId', domain = '$domainId'<br>";
+	echo "edit_session : user id = '".htmlspecialchars($userId, ENT_QUOTES)."', char = '".htmlspecialchars($charId, ENT_QUOTES)."', domain = '".htmlspecialchars($domainId, ENT_QUOTES)."'<br>";
 	
 	$domainInfo = getDomainInfo($domainId);
 	
 	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
-	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
-	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db dbname:" . $domainInfo['ring_db_name']);
+	$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
+	if (function_exists('nel_mysqli_set_charset'))
+		nel_mysqli_set_charset($link);
+	mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the db");
 
 	// Find out if the character has an open editing session
 	$query = "SELECT session_id, state ";
@@ -27,7 +29,7 @@
 	$query .= " WHERE (owner = '".intval($charId)."')";
 	$query .= " AND (session_type = 'st_edit')";
 	$query .= " AND (NOT (state IN ('ss_closed', 'ss_locked')))";
-	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+	$result = mysqli_query($link, $query) or die ("Can't execute the query");
 	$num = mysqli_num_rows($result);
 	if ($num > 1)
 	{
@@ -40,7 +42,7 @@
 	{
 		// Not found => first, create an editing session for this character, start the session and invite himself
 		$query = "SELECT char_name FROM characters WHERE char_id = ".intval($charId);
-		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+		$result = mysqli_query($link, $query) or die ("Can't execute the query");
 		$num = mysqli_num_rows($result);
 		$characterName = "";
 		if ($num > 0)
@@ -62,7 +64,7 @@
 		$row = mysqli_fetch_assoc($result);
 		$sessionId = $row['session_id'];
 		$state = $row['state'];
-		echo "Found your session: $sessionId ($state)<br>";
+		echo "Found your session: ".htmlspecialchars($sessionId, ENT_QUOTES)." (".htmlspecialchars($state, ENT_QUOTES).")<br>";
 		if ($state == "ss_planned")
 		{
 			// First, start the session
@@ -78,10 +80,10 @@
 	
 	// check that we character have a participation in the session and invite him if needed
 	$query = "SELECT count(*) FROM session_participant WHERE session_id = ".intval($sessionId)." AND char_id = ".intval($charId);
-	$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+	$result = mysqli_query($link, $query) or die ("Can't execute the query");
 	$num = mysqli_num_rows($result);
 	if ($num != 1)
-		die ("Invalid result whil checking participation for char $charId in session $sessionId<br>");
+		die ("Invalid result while checking participation");
 	$value = mysqli_fetch_row($result);
 	if ($value[0] == 0)
 	{

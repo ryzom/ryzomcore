@@ -1,6 +1,17 @@
 <?php
 
 // Add overrides for config.php into this file
+//
+// To lock the /setup/ web UI after install, create an empty file next to
+// the generated public config: public_php/setup.disabled
+// (see web/public_php/setup/header.php).
+//
+// Installer stats viewer (stats_query.php):
+//   $cfg['stats_query']['private_network'] = '/^10\\.0\\.0\\./'; // REMOTE_ADDR regex
+//   $cfg['stats_query']['secret'] = 'long-random-token';       // ?token= or X-Stats-Token
+
+// Redirect legacy AMS to lightweight account management
+//$AMS_REDIRECT_TO_ACCOUNT = true;
 
 // IMAP connection string as explained above
 //$cfg['mail']['default_mailserver']= '{imap.gmail.com:993/imap/ssl}INBOX';

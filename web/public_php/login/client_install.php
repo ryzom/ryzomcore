@@ -1,11 +1,5 @@
 <?php 
 
-	// LOG database
-	$StatsDBHost = "192.168.1.169";
-	$StatsDBUserName = "root";
-	$StatsDBPassword = "";
-	$StatsDBName = "stats";
-
 	include_once('config.php');
 
 	error_reporting(E_ERROR | E_PARSE);
@@ -15,27 +9,20 @@
 	$dev_ip="192.168.1.169"; //ip where sql error are displayed
 	$private_network = "/192\.168\.1\./i"; //ip where the cmd=log&msg=dump function works
 
-	//get the ip of the viewer
+	// Peer address only. HTTP_CLIENT_IP / X-Forwarded-For are set by the
+	// caller, so trusting them would let anyone claim a private address and
+	// open the detailed error path.
 	function getIp()
 	{
-		if (getenv("HTTP_CLIENT_IP"))
-		{
-			$ip = getenv("HTTP_CLIENT_IP");
-		}
-		elseif(getenv("HTTP_X_FORWARDED_FOR"))
-		{
-			$ip = getenv("HTTP_X_FORWARDED_FOR");
-		}
-		else
-		{
-			$ip = getenv("REMOTE_ADDR");
-		}
-		return $ip;
+		if (!empty($_SERVER['REMOTE_ADDR']))
+			return $_SERVER['REMOTE_ADDR'];
+		$ip = getenv("REMOTE_ADDR");
+		return ($ip !== false && $ip !== '') ? $ip : '';
 	}
 
 	
 	// if the player ip is the dev ip then the sql error is explain
-	function die2($debug_str)
+	function die2($debug_str = '') // some callers pass nothing: keep the param optional
 	{
 		global $private_network;
 		if ( preg_match($private_network, getIp()) )
@@ -83,9 +70,10 @@
 			
 		if (mysqli_num_rows($result) != 1)
 		{
-			// unrecoverable error, we must giveup
-			$reason = "Can't find domain '".$domainName."' (error code x)";
-			$res = false;
+			// unrecoverable error, we must giveup (falling through here
+			// dereferenced the missing row and answered an empty url list)
+			echo "0:unknown domain";
+			die2("Can't find domain '".$domainName."' (error code x)");
 		}
 
 		$req = mysqli_fetch_array($result);
@@ -95,10 +83,11 @@
 		
 		$args = $patch_urls;
 		$urls = explode(";", $args);	
-		// first display backup url
+		// first display backup url; values come from the domain table and
+		// land inside an attribute / element, so escape them
 		echo "<version ";
 
-		echo 'serverPath="'.$backup_patch_url.'"';
+		echo 'serverPath="'.htmlspecialchars($backup_patch_url, ENT_QUOTES).'"';
 		echo ">\n";
 
 		// then display default uris
@@ -111,7 +100,7 @@
 			}
 			else
 			{
-				echo "\t<patchURI>$urls[$first]</patchURI>\n";
+				echo "\t<patchURI>".htmlspecialchars($urls[$first], ENT_QUOTES)."</patchURI>\n";
 			}
 		}
 		echo "</version>\n";

@@ -41,7 +41,11 @@
 	 */
     function nt_common_redirect($url)
     {
-        $url = trim($url);
+        $url = trim(str_replace(array("\r", "\n", "\0"), '', (string)$url));
+        // Only same-site relative targets: scheme URIs and protocol-relative
+        // ones would turn the post-login redirect into an open redirect.
+        if ($url === '' || preg_match('#^[a-z][a-z0-9+.-]*:#i', $url) || strpos($url, '//') === 0)
+            $url = 'index.php';
         if (substr($url,0,1) == '/')    $url = substr($url,1);
 
         $redirect = NELTOOL_SITEBASE . $url;
@@ -193,9 +197,11 @@
 		global $db;
 		global $nel_user;
 
-		$log_user_name	= $nel_user['user_name'];
+		// addslashes is not charset-aware; user_name was not escaped at all.
+		// Same escape path as nt_common_add_log().
+		$log_user_name	= $db->sql_escape_string($nel_user['user_name']);
 		$log_date		= time();
-		$log_data		= addslashes(trim($data));
+		$log_data		= $db->sql_escape_string(trim($data));
 
 		$sql = "INSERT INTO ". NELDB_LOG_TABLE ." (`logs_user_name`,`logs_date`,`logs_data`) VALUES ('". $log_user_name ."','". $log_date ."','". $log_data ."')";
 		$db->sql_query($sql);
@@ -225,6 +231,31 @@
 			$headers = "From: vl@ryzom.com\r\nReply-To: vl@ryzom.com\r\nX-Mailer: Shard Admin Tool\r\n";
 			mail($emails, $subject, $message, $headers);
 		}
+	}
+
+	/*
+	 * Pack an array so it can ride in a query string (refdata, hidden
+	 * fields). Uses JSON rather than serialize(): unserialize() of
+	 * request-supplied data is an object-injection RCE vector.
+	 */
+	function nt_pack_request_data($data)
+	{
+		return base64_encode(json_encode($data));
+	}
+
+	/*
+	 * Inverse of nt_pack_request_data(). Returns an array on success,
+	 * null when the payload is missing, malformed, or not an array.
+	 */
+	function nt_unpack_request_data($packed)
+	{
+		if (!is_string($packed) || $packed === '')
+			return null;
+		$json = base64_decode($packed, true);
+		if ($json === false || $json === '')
+			return null;
+		$data = json_decode($json, true);
+		return is_array($data) ? $data : null;
 	}
 
 ?>

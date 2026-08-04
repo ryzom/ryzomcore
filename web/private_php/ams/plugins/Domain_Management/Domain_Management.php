@@ -24,6 +24,16 @@ $domain_management_return_set = array();
 $var_set = array();
 
 /**
+ * True when the current request comes from a logged in admin. The hooks in
+ * this file are called for every request, so anything that writes has to ask.
+ */
+function domain_management_caller_is_admin()
+ {
+    if ( !isset( $_SESSION['ticket_user'] ) ) return false;
+     return Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) );
+     }
+
+/**
  * Display hook for Domain_Management plugin
  */
 function domain_management_hook_display()
@@ -67,11 +77,28 @@ function domain_management_hook_get_db()
  {
     global $domain_management_return_set;
 
-     if ( isset( $_GET['ModifyDomain'] ) && $_GET['ModifyDomain'] = '1' && isset($_POST['domain_name'])) {
+     // This hook runs on every page load, including for visitors who are not
+    // logged in, and it rewrites the domain row -- patch urls and login
+    // address included. Only an admin may do that. Note the comparisons
+    // below were assignments, so the flag was always considered set.
+    if ( domain_management_caller_is_admin()
+         && isset( $_GET['ModifyDomain'] ) && $_GET['ModifyDomain'] == '1' && isset($_POST['domain_name'])) {
         try {
 
             $dbs = new DBLayer( 'shard' );
-            $dbs->update("domain", Array( 'domain_name' => $_POST['domain_name'], 'status' => $_POST['status'], 'patch_version' => $_POST['patch_version'],'backup_patch_url' => $_POST['backup_patch_url'],'patch_urls' => $_POST['patch_urls'],'login_address' => $_POST['login_address'],'session_manager_address' => $_POST['session_manager_address'],'ring_db_name' => $_POST['ring_db_name'],'web_host' => $_POST['web_host'],'web_host_php' => $_POST['web_host_php'],'description' => $_POST['description'],),'`domain_id` = '.intval($_GET['edit_domain']));
+            $dbs->update("domain", Array(
+                'domain_name' => $_POST['domain_name'],
+                'status' => $_POST['status'],
+                'patch_version' => $_POST['patch_version'],
+                'backup_patch_url' => $_POST['backup_patch_url'],
+                'patch_urls' => $_POST['patch_urls'],
+                'login_address' => $_POST['login_address'],
+                'session_manager_address' => $_POST['session_manager_address'],
+                'ring_db_name' => $_POST['ring_db_name'],
+                'web_host' => $_POST['web_host'],
+                'web_host_php' => $_POST['web_host_php'],
+                'description' => $_POST['description'],
+            ), 'domain_id = :domain_id', array('domain_id' => (int)$_GET['edit_domain']));
 
             }
         catch ( Exception $e ) {
@@ -79,7 +106,8 @@ function domain_management_hook_get_db()
              }
         }     
         
-        if ( isset( $_GET['ModifyPermission'] ) && $_GET['ModifyPermission'] = '1' && isset($_POST['user'])) {
+        if ( domain_management_caller_is_admin()
+             && isset( $_GET['ModifyPermission'] ) && $_GET['ModifyPermission'] == '1' && isset($_POST['user'])) {
         try {
         
             $dbl = new DBLayer("lib");
@@ -88,13 +116,14 @@ function domain_management_hook_get_db()
             $json = $statement->fetch();
             $json = json_decode($json['Value'],true);
             
-            $json[$_GET['edit_domain']]['1'] = $_POST['user'];
-            $json[$_GET['edit_domain']]['2'] = $_POST['moderator'];
-            $json[$_GET['edit_domain']]['3'] = $_POST['admin'];   
+            $domainKey = (int)$_GET['edit_domain'];
+            $json[$domainKey]['1'] = $_POST['user'];
+            $json[$domainKey]['2'] = $_POST['moderator'];
+            $json[$domainKey]['3'] = $_POST['admin'];   
             
             $update = json_encode($json);
 
-            $dbl->update("settings", Array( 'Value' => $update),"`Setting` = 'Domain_Auto_Add'");
+            $dbl->update("settings", Array( 'Value' => $update), "Setting = :Setting", array('Setting' => 'Domain_Auto_Add'));
 
             }
         catch ( Exception $e ) {

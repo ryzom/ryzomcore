@@ -42,6 +42,7 @@ using namespace NLNET;
 //
 
 static string DatabaseName, DatabaseHost, DatabaseLogin, DatabasePassword;
+static uint DatabasePort = 0;
 
 MYSQL *DatabaseConnection = NULL;
 
@@ -128,6 +129,9 @@ static void cbDatabaseVar(CConfigFile::CVar &var)
 	DatabaseHost = IService::getInstance()->ConfigFile.getVar("DatabaseHost").asString ();
 	DatabaseLogin = IService::getInstance()->ConfigFile.getVar("DatabaseLogin").asString ();
 	DatabasePassword = IService::getInstance()->ConfigFile.getVar("DatabasePassword").asString ();
+	DatabasePort = 0; // 0 lets the client library pick the default port
+	if (IService::getInstance()->ConfigFile.exists("DatabasePort"))
+		DatabasePort = IService::getInstance()->ConfigFile.getVar("DatabasePort").asInt ();
 
 	if(DatabaseConnection)
 	{
@@ -155,7 +159,7 @@ static void cbDatabaseVar(CConfigFile::CVar &var)
 	}
 
 
-	DatabaseConnection = mysql_real_connect(db, DatabaseHost.c_str(), DatabaseLogin.c_str(), DatabasePassword.c_str(), DatabaseName.c_str(),0,0,0);
+	DatabaseConnection = mysql_real_connect(db, DatabaseHost.c_str(), DatabaseLogin.c_str(), DatabasePassword.c_str(), DatabaseName.c_str(),DatabasePort,0,0);
 	if (DatabaseConnection == 0 || DatabaseConnection != db)
 	{
 		mysql_close(db);

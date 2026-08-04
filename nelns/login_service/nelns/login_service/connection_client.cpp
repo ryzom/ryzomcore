@@ -40,6 +40,8 @@
 #include <nel/net/service.h>
 #include <nel/net/login_cookie.h>
 
+#include <nel/misc/wang_hash.h>
+
 #include <nelns/login_service/login_service.h>
 #include <nelns/login_service/functions.h>
 #include <nelns/login_service/variables.h>
@@ -60,6 +62,46 @@ using namespace NLNET;
 void ConnectionClient::sendToClient(CMessage &msgout, TSockId sockId)
 {
 	ClientsServer.send(msgout, sockId);
+}
+
+uint32 ConnectionClient::allocateConnectionId(TSockId from)
+{
+	// one id per connection, reuse it if this socket already has one
+	uint32 id = connectionId(from);
+	if (id != 0)
+		return id;
+	// hash the counter so consecutive connections don't hand out
+	// consecutive ids: keys spread over the whole 32 bit range (kinder to
+	// map implementations and nothing to guess from), and lowbias32 is a
+	// bijection so a colliding live id means a full 2^32 wrap
+	do
+	{
+		id = NLMISC::lowbias32(++m_ConnectionIdCounter);
+	} while (id == 0 || m_IdToSock.find(id) != m_IdToSock.end());
+	m_IdToSock[id] = from;
+	m_SockToId[from] = id;
+	return id;
+}
+
+uint32 ConnectionClient::connectionId(TSockId from) const
+{
+	auto it = m_SockToId.find(from);
+	return it != m_SockToId.end() ? it->second : 0;
+}
+
+TSockId ConnectionClient::connectionById(uint32 id) const
+{
+	auto it = m_IdToSock.find(id);
+	return it != m_IdToSock.end() ? it->second : InvalidSockId;
+}
+
+void ConnectionClient::releaseConnectionId(TSockId from)
+{
+	auto it = m_SockToId.find(from);
+	if (it == m_SockToId.end())
+		return;
+	m_IdToSock.erase(it->second);
+	m_SockToId.erase(it);
 }
 
 void string_escape(string &str)
@@ -120,11 +162,9 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 			break;
 		}
 
-		if (user.state != string("Offline"))
+		if (user.state == string("Online"))
 		{
 			// 2 players are trying to play with the same id, disconnect all
-			// reason = sqlQuery(string("update user set state='Offline', ShardId=-1 where UId=")+uid);
-			// if(!reason.empty()) break;
 
 			// send a message to the already connected player to disconnect
 			CMessage msgout("DC");
@@ -134,9 +174,20 @@ void ConnectionClient::cbClientVerifyLoginPassword(CMessage &msgin, TSockId from
 			reason = "You are already connected.";
 			break;
 		}
+		else if (user.state != string("Offline"))
+		{
+			// 'Authorized' or 'Waiting' is a login that never finished: the
+			// client vanished before it reached the shard, and nothing in
+			// this chain times the row out. A user actually playing is
+			// 'Online', so reclaim the row and let this login proceed (the
+			// same rule the ryzom shard unifier applies to its stale states)
+			nlinfo("user %d was stuck in state '%s', reclaiming the row for a new login", uid, user.state.c_str());
+			reason = persistence.logoutUserById(NLMISC::toString(uid));
+			if (!reason.empty()) break;
+		}
 
 		CLoginCookie c;
-		c.set((uint32)(uintptr_t)from, rand(), uid);
+		c.set(allocateConnectionId(from), rand(), uid);
 
 		reason = persistence.authorizeUser(uid, c);
 		if (!reason.empty()) break;
@@ -198,9 +249,10 @@ void ConnectionClient::cbClientChooseShard(CMessage &msgin, TSockId from, CCallb
 		string uid;
 		string priv;
 		string expriv;
+		uint32 fromId = connectionId(from);
 		for (auto user : users.first)
 		{
-			if (user.cookie.getUserAddr() == (uint32)(uintptr_t)from)
+			if (fromId != 0 && user.cookie.getUserAddr() == fromId)
 			{
 				ok = true;
 				uid = user.uid;
@@ -284,6 +336,11 @@ void ConnectionClient::cbClientDisconnection(TSockId from)
 
 	nldebug("new client disconnection: %s", ia.asString().c_str());
 
+	uint32 fromId = connectionId(from);
+	releaseConnectionId(from);
+	if (fromId == 0)
+		return;
+
 	auto users = persistence.findNotOfflineUsers();
 	string reason = users.second;
 	if (!reason.empty()) {
@@ -299,7 +356,7 @@ void ConnectionClient::cbClientDisconnection(TSockId from)
 	{
 		if (user.cookie.isValid())
 		{
-			if (user.cookie.getUserAddr() == (uint32)(uintptr_t)from)
+			if (user.cookie.getUserAddr() == fromId)
 			{
 				// got it, if he is not in waiting state, it s not normal, remove all
 				if (user.state == string("Authorized"))
@@ -361,11 +418,23 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 		string addr;
 		msgin.serial(addr);
 		msgout.serial(addr);
-		ClientsServer.send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
+		TSockId to = connectionById(cookie.getUserAddr());
+		if (to == InvalidSockId)
+		{
+			// the client dropped the connection while the WS was answering:
+			// nobody will ever present this cookie to the shard, put the row
+			// back offline instead of leaving it in 'Waiting'
+			nlinfo("SCS from WS for cookie %s but the client is gone, logging the user out", cookie.toString().c_str());
+			persistence.logoutUserByCookie(cookie);
+			return;
+		}
+		ClientsServer.send(msgout, to);
 		return;
 	}
 	msgout.serial(reason);
-	ClientsServer.send(msgout, (TSockId)cookie.getUserAddr()); // FIXME: 64-bit
+	TSockId to = connectionById(cookie.getUserAddr());
+	if (to != InvalidSockId)
+		ClientsServer.send(msgout, to);
 }
 
 //

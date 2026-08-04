@@ -91,7 +91,7 @@ class Sync{
                 catch (PDOException $e) {
                     if ($display == true) {
                         print('Something went wrong! The shard is probably still offline!');
-                        print_r($e);
+                        error_log($e->getMessage());
                     }
                 }
                 unlink($pidfile);
@@ -113,7 +113,9 @@ class Sync{
                       continue;
                  $matches = false;
                  preg_match( "/(.*?)\s+(\d+).*$/", $value, $matches );
-                 if (isset($matches[ 2 ]) && $pid = $matches[ 2 ]) {
+                 // was assignment ($pid = ...), which always succeeded once
+                 // the capture existed and never compared the two pids
+                 if (isset($matches[ 2 ]) && (string)$pid === (string)$matches[ 2 ]) {
                     return true;
                  }
             }

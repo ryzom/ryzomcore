@@ -65,7 +65,7 @@ class Ticket_Content{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ticket_content", Array('Content' => $this->content), "TContentId = $this->tContentId");
+        $dbl->update("ticket_content", Array('Content' => $this->content), "TContentId = :TContentId", array('TContentId' => (int)$this->tContentId));
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

@@ -10,9 +10,9 @@ function userRegistration()
 {
     
     try {
-        //if logged in
-        if (WebUsers::isLoggedIn()) {
-            
+        // this flips a site wide setting, so being logged in is not enough
+        if (WebUsers::isLoggedIn() && Ticket_User::isAdmin(unserialize($_SESSION['ticket_user']))) {
+
             $dbl = new DBLayer("lib");
             $dbl->update("settings", Array('Value' => $_POST['userRegistration']), "`Setting` = 'userRegistration'");
                         
@@ -35,7 +35,7 @@ function userRegistration()
     }
     catch (PDOException $e) {
         //go to error page or something, because can't access website db
-        print_r($e);
+        error_log($e->getMessage());
         throw new SystemExit();
     }
     

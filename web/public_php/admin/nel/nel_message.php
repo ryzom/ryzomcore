@@ -222,7 +222,7 @@
 				debug('Connection timed out!');
 				return false;
 			}
-			$size = ord($val) << 16;
+			$size += ord($val) << 16; // += : an assignment here dropped the high byte
 			$val = fread ($this->ConSock, 1);
 			$info = stream_get_meta_data($this->ConSock);
 			if ($info['timed_out']) 
@@ -254,9 +254,17 @@
 			{
 				$Buffer .= fread ($this->ConSock, $size - strlen($Buffer));
 				$info = stream_get_meta_data($this->ConSock);
-				if ($info['timed_out']) 
+				if ($info['timed_out'])
 				{
 					debug('Connection timed out!');
+					return false;
+				}
+				// a closed peer makes fread() return '' without setting the
+				// timeout flag, and the loop would then spin until the script
+				// itself is killed
+				if (strlen($Buffer) < $size && feof($this->ConSock))
+				{
+					debug('Connection closed while reading!');
 					return false;
 				}
 			}

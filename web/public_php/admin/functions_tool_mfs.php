@@ -2,42 +2,13 @@
 
 	function tool_mfs_HTTPOpen($url)
 	{
-		$ch = curl_init();
-
-		$url = "http://su1:50000/admin.php";
-
-		$uri_params  = 'user_login=support';
-		$uri_params .= '&shard=103';
-		$uri_params .= '&forum=Atrium Keepers';
-
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_POST, 1);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $uri_params);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // 0 = debug , 1 = normal
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); // 0 = debug , 1 = normal
-		curl_setopt($ch, CURLOPT_NOPROGRESS, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
-		curl_setopt($ch, CURLOPT_HEADER, 1); // has to be 1 due to using redirections
-		curl_setopt($ch, CURLOPT_TIMEOUT, 120);
-
-		ob_start();
-		$curlOutput	= curl_exec ($ch);
-		ob_end_clean();
-
-		$curlError	= curl_errno($ch);
-		if ($curlError != 0)
-		{
-			$outp		= "CURL Error [ $curlError ] : ". curl_error($ch);
-		}
-		else
-		{
-			$curlData 	= tool_mfs_HTTPParseResponse($curlOutput);
-			$outp		= $curlData[2];
-		}
-
-		curl_close ($ch);
-
-		return $outp;
+		// This tool was never finished: it ignored $url and always POSTed a
+		// hard-coded support login to a fixed internal host. Any operator with
+		// tool_mfs access would then trigger a credentialed server-side probe.
+		// Refuse until it is wired through domain_mfs_web with proper auth.
+		unset($url);
+		return "Mails &amp; Forums tool is not configured. "
+			."(Previously it contacted a hard-coded internal host as user_login=support.)";
 	}
 
 

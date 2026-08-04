@@ -28,8 +28,11 @@
 	$mails = array();
 
 	foreach ($_POST as $var => $value)
-		if (matchParam($var, "select_mail_", $mail))
+	{
+		// same rule as confirm_remove_mail: the id becomes a path component
+		if (matchParam($var, "select_mail_", $mail) && safe_index_param($mail))
 			$mails[] = $mail;
+	}
 
 	if (count($mails) > 0)
 		remove_mail($user_login, $mails);

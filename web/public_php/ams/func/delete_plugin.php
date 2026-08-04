@@ -9,13 +9,14 @@
  */
 function delete_plugin() {
 
-    // if logged in
-    if ( WebUsers :: isLoggedIn() ) {
+    // Deleting a plugin removes php from the server; admin only (same bar as
+    // install). Moderators can still list plugins from the page itself.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {
             // id of plugin to delete after filtering
-            $id = filter_var( $_GET['id'], FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+            $id = intval( $_GET['id'] );
 
              $db = new DBLayer( 'lib' );
              $sth = $db -> selectWithParameter( "FileName", "plugins", array( 'id' => $id ), "Id=:id" );

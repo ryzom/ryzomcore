@@ -15,11 +15,16 @@
 	}
 	else
 	{
-		echo "Welcome user $userId<BR>";
-		
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['sessionId']))
+		{
+			echo "Missing sessionId";
+			die();
+		}
+		echo "Welcome user ".htmlspecialchars($userId, ENT_QUOTES)."<BR>";
+
 		startSession($charId, $domainId, $_POST["sessionId"]);
 //		inviteOwnerInSession($charId, $domainId, $_POST["sessionId"]);
-					
+
 		die();
 	}
 ?>

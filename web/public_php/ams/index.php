@@ -11,9 +11,11 @@
  * @author Daan Janssens, mentored by Matthew Lagoe
  */
 
-// load required pages and turn error reporting on/off
+// Log errors server-side; never print them into the response (stack traces
+// and PDO messages carry connection details).
 error_reporting( E_ALL );
-ini_set( 'display_errors', 'on' );
+ini_set( 'display_errors', '0' );
+ini_set( 'log_errors', '1' );
 
 class SystemExit extends Exception {}
 try {
@@ -25,6 +27,12 @@ if (!file_exists('../role_support')) {
 }
 
 require( '../config.php' );
+
+if (!empty($AMS_REDIRECT_TO_ACCOUNT)) {
+	header("Cache-Control: max-age=1");
+	header('Location: ../account/', true, 302);
+	throw new SystemExit();
+}
 
 if ($NEL_SETUP_VERSION_CONFIGURED < $NEL_SETUP_VERSION) {
 	header("Cache-Control: max-age=1");
@@ -42,15 +50,32 @@ header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-// Running Cron
-if ( isset( $_GET["cron"] ) ) {
-    if ( $_GET["cron"] == "true" ) {
-        Sync :: syncdata( false );
-         }
-    }
-
-// Always try to sync on page load, ie "lazy" cron
+// Always try to sync on page load, ie "lazy" cron. A ?cron=true shortcut used
+// to force a full sync for any anonymous caller; the dedicated cron scripts
+// under cron/ are the place for an on-demand run, and they check admin.
 Sync :: syncdata( false );
+
+/**
+ * Resolve a request-supplied handler name to a script inside one of our own
+ * directories. Anything that is not a plain identifier, or that does not
+ * resolve to an existing file directly inside $dir, is rejected: without this
+ * the name is concatenated straight into require() and any file on disk (for
+ * instance an uploaded ticket attachment) can be executed.
+ *
+ * @param $name the untrusted handler/page name
+ * @param $dir the directory the script must live in, relative to this file
+ * @return the path to require, or false when the name is not acceptable
+ */
+function ams_resolve_script( $name, $dir ) {
+    if ( !is_string( $name ) || !preg_match( '/^[A-Za-z0-9_]+$/', $name ) ) {
+        return false;
+    }
+    $filename = $dir . '/' . $name . '.php';
+    if ( !is_file( $filename ) ) {
+        return false;
+    }
+    return $filename;
+}
 
 // Decide what page to load
 if ( ! isset( $_GET["page"] ) ) {
@@ -68,7 +93,9 @@ if ( ! isset( $_GET["page"] ) ) {
     } else {
 	// if the session exists load page with $_GET requests
     if ( isset( $_SESSION['user'] ) ) {
-        $page = $_GET["page"];
+        // $page ends up in the smarty template name, so only accept a plain
+        // identifier here -- otherwise it can be pointed at any file on disk
+        $page = is_string( $_GET["page"] ) && preg_match( '/^[A-Za-z0-9_]+$/', $_GET["page"] ) ? $_GET["page"] : 'error';
          } else {
         switch ( $_GET["page"] ) {
         case 'register':
@@ -100,15 +127,29 @@ if ( Helpers :: check_if_game_client() && ( $page == "register" ) ) {
 // perform an action in case one is specified
 // else check if a php page is included in the inc folder, else just set page to the get param
 if ( isset( $_POST["function"] ) ) {
-    require( "func/" . $_POST["function"] . ".php" );
+    $filename = ams_resolve_script( $_POST["function"], 'func' );
+     if ( $filename === false ) {
+        $_SESSION['error_code'] = "404";
+         header("Cache-Control: max-age=1");
+         header( "Location: index.php?page=error" );
+         throw new SystemExit();
+         }
+    require( $filename );
      $return = $_POST["function"]();
     } else if ( isset( $_GET["action"] ) ) {
-    require( "func/" . $_GET["action"] . ".php" );
+    $filename = ams_resolve_script( $_GET["action"], 'func' );
+     if ( $filename === false ) {
+        $_SESSION['error_code'] = "404";
+         header("Cache-Control: max-age=1");
+         header( "Location: index.php?page=error" );
+         throw new SystemExit();
+         }
+    require( $filename );
      $return = $_GET["action"]();
     } else {
-    $filename = 'inc/' . $page . '.php';
+    $filename = ams_resolve_script( $page, 'inc' );
      //check if this  is a file
-     if ( is_file( $filename ) ) {
+     if ( $filename !== false ) {
         require_once( $filename );
          $return = $page();
          }

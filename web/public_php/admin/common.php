@@ -32,7 +32,7 @@
 	$tpl = new Smarty;
 	if (!is_object($tpl)) die("error on smarty init");
 
-	$iPhone = (strstr($_SERVER['HTTP_USER_AGENT'], "iPhone") !== FALSE);
+	$iPhone = isset($_SERVER['HTTP_USER_AGENT']) && (strstr($_SERVER['HTTP_USER_AGENT'], "iPhone") !== FALSE);
 	$tpl->assign('iPhone', $iPhone);
 
 	$tpl->template_dir	= NELTOOL_SYSTEMBASE .'/templates/default/';
@@ -43,6 +43,17 @@
 	$tpl->caching = false;
 	$tpl->clear_all_cache();
 	if (NELTOOL_DEBUG) $tpl->debugging = false;
+
+	// Escape every {$var} the templates print. None of them escaped anything
+	// themselves, so character names, guild names, service names and the text
+	// the shard sends back all landed in these pages as markup -- and these
+	// are the pages that restart services and move characters. The handful of
+	// values that are markup on purpose ask out with |smarty:nodefaults.
+	$tpl->default_modifiers = array('escape:"html"');
+	// A compiled template is only rebuilt when its source is newer than the
+	// compiled copy, and the setting above is not part of that comparison.
+	// Naming the compiled files after it gets everything rebuilt once.
+	$tpl->compile_id = 'esc';
 
 	if (defined('NELTOOL_NO_USER_NEEDED'))
 	{
@@ -84,6 +95,8 @@
 			$nel_user = nt_auth_check_login($NELTOOL['POST_VARS']['nel_login'], $NELTOOL['POST_VARS']['nel_passwd']);
 			if ($nel_user)
 			{
+				// drop any session id the caller may have planted before auth
+				session_regenerate_id(true);
 				nt_auth_set_session_var('nelid',$nel_user['user_id']);
 				nt_auth_set_logging_count($nel_user['user_id']);
 				$nel_user['new_login'] = true;

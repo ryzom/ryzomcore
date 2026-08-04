@@ -407,6 +407,14 @@
 					$vars[$sline_parts[0]] = $sline_parts[1];
 				}
 
+				// AliasName is interpolated into onclick handlers in several
+				// templates; html-escape does not neutralize JS string breaks.
+				// Drop rows whose alias would not pass the service-alias validator.
+				if (!isset($vars['AliasName']) || !tool_main_valid_service_alias($vars['AliasName']))
+				{
+					continue;
+				}
+
 				// check is service is chain crashing
 				if (in_array('rt_chain_crashing', array_keys($vars['_flags_'])))
 				{
@@ -472,15 +480,154 @@
 		return false;
 	}
 
+	/*
+	 * Auto-refresh is written into a meta tag with |smarty:nodefaults.
+	 * Only accept a rate that is on the menu; anything else becomes "never".
+	 */
+	function tool_main_refresh_rate_validate($value)
+	{
+		global $refresh_rates;
+
+		$secs = (int)$value;
+		if (is_array($refresh_rates))
+		{
+			foreach ($refresh_rates as $rate)
+			{
+				if ((int)$rate['secs'] === $secs)
+					return $secs;
+			}
+		}
+		return 0;
+	}
+
+	/*
+	 * Service aliases go into AES serviceCmd as the target module name.
+	 * Same charset as the welcome-service su check.
+	 */
+	function tool_main_valid_service_alias($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9._:-]{1,64}$/', $value);
+	}
+
+	/*
+	 * Comma-separated service aliases for restart start/stop lists. Each
+	 * token must be a valid alias; empty input is allowed (returns empty
+	 * array). Invalid input returns null so the caller can refuse the action.
+	 */
+	function tool_main_valid_service_list($csv)
+	{
+		$csv = trim((string)$csv);
+		if ($csv === '')
+			return array();
+
+		$out = array();
+		foreach (explode(',', $csv) as $s)
+		{
+			$s = trim($s);
+			if ($s === '' || !tool_main_valid_service_alias($s))
+				return null;
+			$out[] = $s;
+		}
+		return $out;
+	}
+
+	/*
+	 * Entity ids on the wire are usually (0x…:aa:bb:cc); some dumps omit the
+	 * parentheses. Either way they must be a single command word — no space,
+	 * quote or newline that would frame a second argument.
+	 */
+	function tool_main_valid_entity_id($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9():._-]{1,64}\z/', $value);
+	}
+
+	/*
+	 * Player / character names for playerInfo and similar: letters, digits,
+	 * underscore and a few name separators — no spaces, quotes or newlines.
+	 */
+	function tool_main_valid_player_name($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9_\'-]{1,64}\z/', $value);
+	}
+
+	/*
+	 * Shard / host names that land as bare words in AES global commands.
+	 */
+	function tool_main_valid_shard_token($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9._:-]{1,64}\z/', $value);
+	}
+
+	/*
+	 * Named entity path segments for getView (no dots that would walk up
+	 * the view tree further than intended, no commas that open multi-sets).
+	 */
+	function tool_main_valid_entity_view_path($value)
+	{
+		return is_string($value) && preg_match('/^[A-Za-z0-9_():-]{1,128}\z/', $value);
+	}
+
+	/*
+	 * Free text that is still quoted inside an AES command (searchString).
+	 * Drop anything that would leave the quoted argument.
+	 */
+	function tool_main_frame_quoted_arg($value, $max_len = 256)
+	{
+		$value = str_replace(array("\r", "\n", "\0", '"', '\\'), ' ', (string)$value);
+		$value = trim($value);
+		if (strlen($value) > $max_len)
+			$value = substr($value, 0, $max_len);
+		return $value;
+	}
+
+	/*
+	 * GET refdata used to unpack a full prior POST, including the action
+	 * button names. That turns a link into a one-click mutation (and a CSRF
+	 * vector under SameSite=Lax). Keep form state keys, drop the triggers.
+	 */
+	function tool_main_apply_refdata_from_get($packed)
+	{
+		global $NELTOOL;
+
+		$tmp_data = nt_unpack_request_data($packed);
+		if (!is_array($tmp_data))
+			return;
+
+		static $action_keys = array(
+			'services_pl' => true,
+			'services_gl' => true,
+			'services_ee' => true,
+			'services_update' => true,
+			'services_las' => true,
+			'subservices_gl' => true,
+			'shards_update' => true,
+			'ws_update' => true,
+			'toolaction' => true,
+		);
+
+		foreach ($tmp_data as $key => $val)
+		{
+			if (isset($action_keys[$key]))
+				continue;
+			// service_xxx checkboxes and locate fields stay; action names go
+			$NELTOOL['POST_VARS'][$key] = $val;
+		}
+	}
+
 	function tool_main_get_checked_services()
 	{
 		global $NELTOOL;
 
 		$services = array();
 
+		if (!is_array($NELTOOL['POST_VARS']))
+			return $services;
+
 		reset($NELTOOL['POST_VARS']);
 		foreach($NELTOOL['POST_VARS'] as $post_key => $post_val)
 		{
+			if (!is_string($post_val) || !tool_main_valid_service_alias($post_val))
+				continue;
 			$val = 'service_'. $post_val;
 			if ($post_key == $val)
 			{
@@ -901,6 +1048,16 @@
 
 		if (is_array($data) && ($data['lock_shard_id'] > 0))
 		{
+			// Keepalive or re-lock only when we already own it, or the
+			// previous hold has timed out. Otherwise any operator with the
+			// lock application could steal the lock and run start/stop/kill.
+			$holder = isset($data['lock_user_name']) ? $data['lock_user_name'] : '';
+			$expired = (LOCK_TIMEOUT > 0) && (intval($data['lock_update']) + LOCK_TIMEOUT < $now);
+			if ($holder !== '' && $holder !== $nel_user['user_name'] && !$expired)
+			{
+				if ($log) nt_common_add_debug("Shard lock refused: held by '". $holder ."'");
+				return;
+			}
 			if ($log) nt_log("Shard Lock (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."'");
 			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',lock_update=". intval($now) ." WHERE lock_id=". intval($data['lock_id']);
 			$db->sql_query($sql);
@@ -949,6 +1106,13 @@
 
 		if (is_array($lock_data))
 		{
+			$holder = isset($lock_data['lock_user_name']) ? $lock_data['lock_user_name'] : '';
+			$expired = (LOCK_TIMEOUT > 0) && (intval($lock_data['lock_update']) + LOCK_TIMEOUT < $now);
+			if ($holder !== '' && $holder !== $nel_user['user_name'] && !$expired)
+			{
+				if ($log) nt_common_add_debug("Domain lock refused: held by '". $holder ."'");
+				return;
+			}
 			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',lock_update=". intval($now) ." WHERE lock_id=". intval($lock_data['lock_id']);
 			$db->sql_query($sql);
 		}
@@ -973,7 +1137,8 @@
 		global $nel_user;
 		global $AS_Name, $AS_ShardName;
 
-		$annotation = htmlentities(trim($annotation), ENT_QUOTES);
+		// stored as typed; the template escapes it on the way out
+		$annotation = trim($annotation);
 
 		$data = tool_main_get_lock($domain_id, $shard_id);
 

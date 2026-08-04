@@ -46,20 +46,18 @@
 
 	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $_POST['services_refresh'])
+		$new_refresh = tool_main_refresh_rate_validate($_POST['services_refresh']);
+		if ($current_refresh_rate != $new_refresh)
 		{
-			$current_refresh_rate = $_POST['services_refresh'];
+			$current_refresh_rate = $new_refresh;
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
 
-	if ($current_refresh_rate == null)
+	$current_refresh_rate = tool_main_refresh_rate_validate($current_refresh_rate);
+	if ($current_refresh_rate > 0)
 	{
-		$current_refresh_rate = 0;
-	}
-	elseif ($current_refresh_rate > 0)
-	{
-		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. $current_refresh_rate .'">');
+		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. (int)$current_refresh_rate .'">');
 	}
 
 	$tpl->assign('tool_refresh_list',		$refresh_rates);
@@ -315,19 +313,31 @@
 				// we don't want more than 1 client executing the restart commands if they think they still have the lock
 				if (isset($tool_restart_info) && ($tool_restart_info['restart_sequence_user_name'] == $nel_user['user_name']) && tool_admin_applications_check('tool_main_easy_restart'))
 				{
-					$tool_seq_id			= $NELTOOL['POST_VARS']['restart_sequence_id'];
-					$tool_seq_step			= $NELTOOL['POST_VARS']['restart_sequence_step'];
+					// Service aliases and shard id ride into AES controlCmd /
+					// serviceCmd. The restart form posts them as hidden fields,
+					// so re-validate the same way the normal start/stop UI does.
+					$tool_seq_id			= isset($NELTOOL['POST_VARS']['restart_sequence_id']) ? (int)$NELTOOL['POST_VARS']['restart_sequence_id'] : 0;
+					$tool_seq_step			= isset($NELTOOL['POST_VARS']['restart_sequence_step']) ? (int)$NELTOOL['POST_VARS']['restart_sequence_step'] : 0;
 
-					$restart_shard_id 		= $NELTOOL['POST_VARS']['restart_shard_id'];
-					$service_su				= $NELTOOL['POST_VARS']['restart_su'];
-					$service_egs			= $NELTOOL['POST_VARS']['restart_egs'];
+					$restart_shard_id 		= isset($NELTOOL['POST_VARS']['restart_shard_id']) ? (int)$NELTOOL['POST_VARS']['restart_shard_id'] : 0;
+					$service_su				= isset($NELTOOL['POST_VARS']['restart_su']) ? $NELTOOL['POST_VARS']['restart_su'] : '';
+					$service_egs			= isset($NELTOOL['POST_VARS']['restart_egs']) ? $NELTOOL['POST_VARS']['restart_egs'] : '';
 
-					$restart_stop_services	= $NELTOOL['POST_VARS']['restart_stop_services'];
+					$restart_stop_services	= isset($NELTOOL['POST_VARS']['restart_stop_services']) ? $NELTOOL['POST_VARS']['restart_stop_services'] : '';
+					$restart_ws_state		= isset($NELTOOL['POST_VARS']['restart_ws_state']) ? $NELTOOL['POST_VARS']['restart_ws_state'] : '';
+					$restart_stop_list_ok	= tool_main_valid_service_list($restart_stop_services);
+					$restart_targets_ok		= tool_main_valid_service_alias($service_su)
+						&& tool_main_valid_service_alias($service_egs)
+						&& ($restart_shard_id > 0);
 
-					if (isset($NELTOOL['POST_VARS']['restart_check_ws']))
+					if (!$restart_targets_ok)
+					{
+						nt_common_add_debug('restart sequence refused: invalid su/egs alias or shard id');
+					}
+
+					if (isset($NELTOOL['POST_VARS']['restart_check_ws']) && $restart_targets_ok)
 					{
 						// we are starting the restart sequence
-						$restart_ws_state		= $NELTOOL['POST_VARS']['restart_ws_state'];
 
 						if ($restart_ws_state == 'open')
 						{
@@ -341,7 +351,11 @@
 
 							if ($restart_reboot_message != '')
 							{
-								$service_command = "broadcast repeat=10 every=60 ". $restart_reboot_message;
+								// frame_quoted_arg strips quotes/newlines; still
+								// emit one quoted word so spaces cannot reframe
+								// the repeat/every AES arguments.
+								$restart_reboot_message = tool_main_frame_quoted_arg($restart_reboot_message, 512);
+								$service_command = "broadcast repeat=10 every=60 \"". $restart_reboot_message ."\"";
 
 								nt_log("Domain '$AS_Name' : '$service_command' on ". $service_egs);
 								nt_common_add_debug("about to run command '$service_command' on '$service_egs' ...");
@@ -396,7 +410,7 @@
 
 						// - resend the services to stop for the next step
 
-						$tpl->assign('tool_restart_stop_actions', $restart_stop_services);
+						$tpl->assign('tool_restart_stop_actions', is_array($restart_stop_list_ok) ? implode(',', $restart_stop_list_ok) : '');
 
 						// - move on to the next step
 
@@ -428,7 +442,7 @@
 							$tpl->assign('tool_restart_info', $tool_restart_info);
 						}
 					}
-					elseif (isset($NELTOOL['POST_VARS']['restart_giveup']))
+					elseif (isset($NELTOOL['POST_VARS']['restart_giveup']) && $restart_targets_ok)
 					{
 						// update klients events to giveup mode
 
@@ -440,7 +454,7 @@
 						nt_common_redirect('index.php');
 						exit();
 					}
-					elseif (isset($NELTOOL['POST_VARS']['restart_cancel']))
+					elseif (isset($NELTOOL['POST_VARS']['restart_cancel']) && $restart_targets_ok)
 					{
 						if ($restart_ws_state != 'open')
 						{
@@ -454,7 +468,8 @@
 
 								if ($restart_reboot_message != '')
 								{
-									$service_command = "broadcast ". $restart_reboot_message;
+									$restart_reboot_message = tool_main_frame_quoted_arg($restart_reboot_message, 512);
+									$service_command = "broadcast \"". $restart_reboot_message ."\"";
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service_egs);
 									nt_common_add_debug("about to run command '$service_command' on '$service_egs' ...");
@@ -499,9 +514,9 @@
 					{
 						// step 1, waited for the timer, lets shutdown the shard
 
-						$service_list = explode(',', $restart_stop_services);
+						$service_list = $restart_stop_list_ok;
 
-						if (sizeof($service_list))
+						if (is_array($service_list) && sizeof($service_list))
 						{
 							// comment out to prevent stopping services for testing purposes
 							nt_log("Domain '$AS_Name' : 'stopService' on ". implode(', ',array_values($service_list)));
@@ -516,6 +531,10 @@
 								}
 							}
 							nt_sleep(VIEW_DELAY);
+						}
+						else if ($restart_stop_list_ok === null)
+						{
+							nt_common_add_debug('restart wait_timer refused: invalid stop service list');
 						}
 
 						// - prepare next step (timer countdown to a few seconds)
@@ -539,17 +558,20 @@
 					elseif (isset($NELTOOL['POST_VARS']['restart_start_group']))
 					{
 						// step 4, start a group of services
-						$tool_seq_start_id 		= $NELTOOL['POST_VARS']['restart_start_group_id'];
-						$tool_seq_start_list	= $NELTOOL['POST_VARS']['restart_start_group_list'];
+						$tool_seq_start_id 		= isset($NELTOOL['POST_VARS']['restart_start_group_id']) ? (int)$NELTOOL['POST_VARS']['restart_start_group_id'] : 0;
+						$tool_seq_start_list	= isset($NELTOOL['POST_VARS']['restart_start_group_list']) ? $NELTOOL['POST_VARS']['restart_start_group_list'] : '';
+						$service_list = tool_main_valid_service_list($tool_seq_start_list);
 
-						if (isset($tool_restart_start_list))
+						if ($service_list === null)
+						{
+							nt_common_add_debug('restart start_group refused: invalid service list');
+						}
+						else if (isset($tool_restart_start_list))
 						{
 							foreach($tool_restart_start_list as $restart_start_group)
 							{
 								if ($restart_start_group['restart_group_id'] == $tool_seq_start_id)
 								{
-									$service_list = explode(',', $tool_seq_start_list);
-
 									if (sizeof($service_list))
 									{
 										nt_log("Domain '$AS_Name' : 'startService' on ". implode(', ',array_values($service_list)));
@@ -575,31 +597,31 @@
 					elseif (isset($NELTOOL['POST_VARS']['restart_stop_group']))
 					{
 						// step 3, stop a group of services
-						$tool_seq_stop_id 	= $NELTOOL['POST_VARS']['restart_stop_group_id'];
-						$tool_seq_stop_list	= $NELTOOL['POST_VARS']['restart_stop_group_list'];
+						$tool_seq_stop_id 	= isset($NELTOOL['POST_VARS']['restart_stop_group_id']) ? (int)$NELTOOL['POST_VARS']['restart_stop_group_id'] : 0;
+						$tool_seq_stop_list	= isset($NELTOOL['POST_VARS']['restart_stop_group_list']) ? $NELTOOL['POST_VARS']['restart_stop_group_list'] : '';
+						$service_list = tool_main_valid_service_list($tool_seq_stop_list);
 
-						if (isset($tool_restart_stop_list))
+						if ($service_list === null)
 						{
-							$service_list = explode(',', $tool_seq_stop_list);
-
-							if (sizeof($service_list))
+							nt_common_add_debug('restart stop_group refused: invalid service list');
+						}
+						else if (isset($tool_restart_stop_list) && sizeof($service_list))
+						{
+							nt_log("Domain '$AS_Name' : 'stopService' on ". implode(', ',array_values($service_list)));
+							reset($service_list);
+							foreach($service_list as $service)
 							{
-								nt_log("Domain '$AS_Name' : 'stopService' on ". implode(', ',array_values($service_list)));
-								reset($service_list);
-								foreach($service_list as $service)
+								nt_common_add_debug("about to run 'stopService' on '$service' ...");
+								$adminService->controlCmd($service, 'stopService');
+								if (!$adminService->waitCallback())
 								{
-									nt_common_add_debug("about to run 'stopService' on '$service' ...");
-									$adminService->controlCmd($service, 'stopService');
-									if (!$adminService->waitCallback())
-									{
-										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for stopService');
-									}
+									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for stopService');
 								}
-								nt_sleep(VIEW_DELAY);
 							}
+							nt_sleep(VIEW_DELAY);
 						}
 					}
-					elseif (isset($NELTOOL['POST_VARS']['restart_over']))
+					elseif (isset($NELTOOL['POST_VARS']['restart_over']) && $restart_targets_ok)
 					{
 						// this makes you go to the next step
 						if ($tool_seq_id == $tool_restart_info['restart_sequence_id'])
@@ -640,9 +662,14 @@
 				elseif (isset($_POST['shards_update']) && tool_admin_applications_check('tool_main_shard_autostart'))
 				{
 					$shard_update_mode	= $_POST['shards_update'];
-					$shard_update_name	= $_POST['shards_update_name'];
+					$shard_update_name	= isset($_POST['shards_update_name']) ? $_POST['shards_update_name'] : '';
 
-					switch ($shard_update_mode)
+					// shard name is a bare word in setShardStartMode
+					if (!tool_main_valid_shard_token($shard_update_name))
+					{
+						nt_common_add_debug('shards_update refused: invalid shard name');
+					}
+					else switch ($shard_update_mode)
 					{
 						case 'auto restart on':
 
@@ -682,28 +709,46 @@
 				{
 					$shard_ws_su			= $_POST['ws_su'];
 					$shard_ws_shard_name	= $_POST['ws_shard_name'];
-					$shard_ws_shard_id		= $_POST['ws_shard_id'];
+					$shard_ws_shard_id		= (int)$_POST['ws_shard_id'];
 
-					$shard_ws_state			= $_POST['ws_state_'. $shard_ws_shard_name];
-					$shard_ws_motd			= $_POST['ws_motd_'. $shard_ws_shard_name];
+					$shard_ws_state			= isset($_POST['ws_state_'. $shard_ws_shard_name]) ? $_POST['ws_state_'. $shard_ws_shard_name] : '';
+					$shard_ws_motd			= isset($_POST['ws_motd_'. $shard_ws_shard_name]) ? $_POST['ws_motd_'. $shard_ws_shard_name] : '';
 
-					// coders don't know how to write it seems
-					// ace: now they know if ($shard_ws_state == 'close') $shard_ws_state = 'closed';
-
-					//nt_common_add_debug("request for ". $shard_ws_su ."/". $shard_ws_shard_name ." to set STATE:". $shard_ws_state ." (". $shard_ws_motd .")");
-
-					$service = $shard_ws_su;
-					$service_command = 'rsm.setWSState '. $shard_ws_shard_id .' '. strtoupper($shard_ws_state) .' "'. $shard_ws_motd .'"';
-					nt_common_add_debug("about to run command '$service_command' on '$service' ...");
-
-					$adminService->serviceCmd($service, $service_command);
-					if (!$adminService->waitCallback())
+					// These three pieces go straight into a service command.
+					// A quote or space in the MOTD, or a free-form state,
+					// would break out of the quoted argument list.
+					$allowed_ws_states = array('close', 'closed', 'dev', 'restricted', 'open');
+					if (!in_array($shard_ws_state, $allowed_ws_states, true))
 					{
-						nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+						nt_common_add_debug('ws_update refused: invalid state');
 					}
+					else if (!is_string($shard_ws_su) || !preg_match('/^[A-Za-z0-9._:-]{1,64}$/', $shard_ws_su))
+					{
+						nt_common_add_debug('ws_update refused: invalid service name');
+					}
+					else
+					{
+						// coders don't know how to write it seems
+						// ace: now they know if ($shard_ws_state == 'close') $shard_ws_state = 'closed';
 
-					$tpl->clear_assign('tool_execute_result');
-					nt_sleep(VIEW_DELAY);
+						// strip anything that would leave the quoted MOTD argument
+						$shard_ws_motd = str_replace(array("\r", "\n", "\0", '"', '\\'), ' ', (string)$shard_ws_motd);
+						if (strlen($shard_ws_motd) > 512)
+							$shard_ws_motd = substr($shard_ws_motd, 0, 512);
+
+						$service = $shard_ws_su;
+						$service_command = 'rsm.setWSState '. $shard_ws_shard_id .' '. strtoupper($shard_ws_state) .' "'. $shard_ws_motd .'"';
+						nt_common_add_debug("about to run command '$service_command' on '$service' ...");
+
+						$adminService->serviceCmd($service, $service_command);
+						if (!$adminService->waitCallback())
+						{
+							nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+						}
+
+						$tpl->clear_assign('tool_execute_result');
+						nt_sleep(VIEW_DELAY);
+					}
 				}
 				elseif (isset($_POST['services_update']))
 				{
@@ -1018,7 +1063,7 @@
 											}
 											else
 											{
-												$tpl->assign('tool_execute_command', 	htmlentities($service_command, ENT_QUOTES));
+												$tpl->assign('tool_execute_command', 	$service_command); // the template escapes it
 											}
 										}
 									}

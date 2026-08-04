@@ -596,6 +596,28 @@ extern std::set<SPatchEdgeId> g_PatchEdgeSel;
 typedef std::pair<uint, uint> TPatchFaceId;
 extern std::set<TPatchFaceId> g_PatchFaceSel;
 
+/**
+ * Session-only HIDE set, patch-keyed (the legacy Hide / Unhide All, plan mA3). A hidden
+ * patch drops from the cage, the pick paths and the overlay arrows; its elements refuse
+ * selection. The LANDSCAPE keeps rendering it - hiding is a cage/editing concept, not a
+ * rendering hole (deliberate divergence from the host, right for terrain). Session-only
+ * by the corpus probe's verdict: PATCH_HIDDEN (bit 1) appears on 4 patches corpus-wide,
+ * so the on-disk bit is preserved verbatim and never interpreted - no byte churn.
+ * Cleared by every working-set rebuild (topology ops, open/close: indices shift).
+ */
+extern std::set<TPatchFaceId> g_PatchHidden;
+bool zpPatchIsHidden(uint zoneId, uint patchIdx);
+/** A vertex is hidden iff it is used by at least one patch and ALL of them are hidden
+ *  (a rim vertex shared with a visible patch stays workable). */
+bool zpVertIsHidden(const SPaintZone &pz, uint16 vertIdx);
+/** Hide the patches the current level's selection touches (vertex/edge/patch levels);
+ *  the selection clears - hidden elements cannot stay selected. NOT undoable (display
+ *  state, like the weld view and the arrows). */
+uint zpHideSelection();
+uint zpUnhideAll();
+void zpPatchHideClicked();
+void zpPatchUnhideAllClicked();
+
 /** Selection ops (recorded). Op: 0 replace, 1 add, 2 remove. */
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op);
 void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op);
@@ -808,6 +830,12 @@ void zpPatchTurnCcwClicked();
 void zpPatchTurnCwClicked();
 /** Subdivide selected quads 4-way; paint quadrants inherit; T-junction binds. Undoable. */
 uint zpSubdividePatchSelection();
+/** Edge-level subdivide (mA4): 1->2 across each selected edge; Propagate walks the
+ *  strip. The Subdiv button serves both levels. Undoable. */
+uint zpSubdivideEdgeSelection();
+void zpSetSubdividePropagate(bool on);
+bool zpSubdividePropagate();
+void zpSubdivPropToggleClicked();
 void zpPatchSubdivideClicked();
 /** Weld selected vertices (target-weld; coincident open edges fuse). Undoable. */
 uint zpWeldPatchSelection(float threshold);
@@ -819,14 +847,38 @@ void zpPatchWeldThresholdClicked(float distance);
 uint zpWeldVertexInto(uint zoneId, uint srcVert, uint dstVert);
 /** Surface Properties (patch level): smoothing groups and per-patch tessellation. */
 uint zpExtrudePatchSelection(float dz);
+/** Full extrude (mA5/mA6): height along Z or the selection's area-weighted eval normal
+ *  (Group semantics), plus the bevel outline (in/out along the boundary ring's outward
+ *  XY direction). Undoable. */
+uint zpExtrudePatchSelectionEx(float h, float outline, bool localNormal);
 float zpLastExtrudeHeight();
+float zpLastExtrudeOutline();
+bool zpLastExtrudeLocal();
 void zpPatchExtrudeClicked(float dz);
+void zpPatchExtrudeExClicked(float h, float outline, bool local);
 /** Begin a SHIFT-drag extrude at patch level: a Z-constrained gizmo drag whose release
  *  commits an extrude of the drag's height instead of a move. */
 bool zpPatchGizmoBeginExtrudeDrag(NL3D::CCamera *camera, const NL3D::CViewport &vp,
                                   float mouseX, float mouseY);
 uint zpSetSmoothGroup(uint bit, bool on);
 uint zpClearSmoothGroups();
+/** Vertex continuity type (PVERT_COPLANAR, vertex Flags bit 0 - corpus-pinned): value op
+ *  through the runner; the constraint applies at handle-move time. Undoable (Kind 6). */
+uint zpSetVertexCoplanar(bool on);
+/** Tri-state over the vertex selection: 0 = all corner, 1 = all coplanar, 2 = mixed/empty. */
+int zpVertCoplanarTriState();
+void zpPatchCoplanarClicked(int on);
+bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out);
+/** Auto/Manual interior (PATCH_AUTO, patch Flags bit 0; mA2): auto -> manual BAKES the
+ *  derived interiors (they become authored, editable points); manual -> auto abandons
+ *  them. Undoable (Kind 6). */
+uint zpSetPatchAuto(bool on);
+int zpPatchAutoTriState();
+void zpPatchAutoClicked(int on);
+bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out);
+bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out);
+/** Is this vec index an INTERIOR of an AUTO patch (derived - refuses selection)? */
+bool zpVecIsAutoInterior(const SPaintZone &pz, uint16 vecIdx);
 uint zpSetPatchTess(int u, int v);
 uint zpBalanceTessSelection();
 bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);
@@ -853,12 +905,19 @@ bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
 void zpPatchAddQuadClicked();
 /** Detach the selection as its own ISLAND inside the same zone (detach-to-element:
- *  boundary splits, nothing moves, still one exported node). Undoable. */
-uint zpDetachPatchSelection();
+ *  boundary splits, nothing moves, still one exported node). Undoable. copy=true (mA7)
+ *  CLONES the selection as a coincident island instead - the original stays untouched,
+ *  paint copies verbatim. */
+uint zpDetachPatchSelection(bool copy = false);
 void zpPatchDetachClicked();
 /** SHELVED off the panel: detach the selection into a new brick file (script-only until
- *  fresh-zone-file creation is designed; empty name = auto-bumped "<source>-det"). */
-uint zpDetachToFile(const std::string &nameIn);
+ *  fresh-zone-file creation is designed; empty name = auto-bumped "<source>-det").
+ *  copy=true writes the brick and leaves the session untouched (not undoable by
+ *  design - nothing mutates). */
+uint zpDetachToFile(const std::string &nameIn, bool copy = false);
+void zpSetDetachCopy(bool on);
+bool zpDetachCopy();
+void zpDetachCopyToggleClicked();
 /** Expand the face selection to whole elements (shared-vertex connected components). */
 uint zpExpandSelectionToElement();
 void zpPatchElementClicked();
@@ -1104,6 +1163,10 @@ std::string luaQuote(const std::string &s);
 void recordBoardOp(const std::string &line);
 void zpSelectMode(int mode);
 void zpFill(int rot);
+/** Reset one zone's paint wholesale (mA8): default tiles, white colors, displace 0, ONE
+ *  undo stroke. Scripts bare; the panel confirms through the reset modal. */
+void zpResetZonePaint(uint zoneId);
+bool zpResetPaintTarget(uint &zoneOut, std::string &labelOut);
 void zpUndo();
 void zpRedo();
 void zpSelectTileSetDelta(int d);

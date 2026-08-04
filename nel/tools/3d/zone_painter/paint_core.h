@@ -514,6 +514,10 @@ public:
 	bool opFillTile(uint zone, uint patch, int tileSet, int rot, bool _256, std::string &err);
 	bool opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint blend, std::string &err);
 	bool opFillDisplace(uint zone, uint patch, uint displace, std::string &err);
+	// Reset one zone's paint wholesale (the painter's ResetPatch, plan mA8): every patch
+	// fillTile(-1) + fillColor white + fillDisplace 0, as ONE undo stroke (the per-op
+	// endStroke is suspended for the sweep). Danger-guarded at the UI; scripts call bare.
+	bool opResetZone(uint zone, std::string &err);
 	// Displace paint (PutADisplacetile port; explicit index 0-15, Noise kept in sync). The
 	// brush size applies exactly like the plugin's displace path (PutDisplace -> RecursTile in
 	// displace mode: recursion depths {0,4,8}, 128 grid, one PutADisplacetile per reached
@@ -785,6 +789,9 @@ private:
 	std::vector<std::vector<std::vector<uint> > > m_GroupTile256;
 
 	// undo
+	// opResetZone sweeps every patch through the fill ops, whose own endStroke must not
+	// split the sweep into per-patch strokes - one reset, one undo.
+	bool m_SuspendStroke;
 	std::vector<SUndoTile> m_CurStroke;
 	std::deque<std::vector<SUndoTile> > m_UndoStack;
 	std::deque<std::vector<SUndoTile> > m_RedoStack;

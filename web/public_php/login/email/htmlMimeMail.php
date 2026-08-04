@@ -629,7 +629,11 @@ class htmlMimeMail
 	{
 		preg_match_all('/(\w*[\x80-\xFF]+\w*)/', $input, $matches);
 		foreach ($matches[1] as $value) {
-			$replacement = preg_replace('/([\x80-\xFF])/e', '"=" . strtoupper(dechex(ord("\1")))', $value);
+			// the /e modifier ran the replacement through the interpreter and
+			// php removed it in 7.0; a callback does the same quoting
+			$replacement = preg_replace_callback('/([\x80-\xFF])/', function ($m) {
+				return '=' . strtoupper(dechex(ord($m[1])));
+			}, $value);
 			$input = str_replace($value, '=?' . $charset . '?Q?' . $replacement . '?=', $input);
 		}
 

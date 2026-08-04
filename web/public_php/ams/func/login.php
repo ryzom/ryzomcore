@@ -9,23 +9,28 @@ function login(){
 	global $INGAME_WEBPATH;
 	global $WEBPATH;
 	try{
-		$login_value = filter_var($_POST['LoginValue'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-		$password = filter_var($_POST['Password'],FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+		$login_value = isset($_POST['LoginValue']) ? trim((string)$_POST['LoginValue']) : '';
+		// never run a password through a sanitizer that rewrites &, <, quotes
+		$password = isset($_POST['Password']) ? (string)$_POST['Password'] : '';
 
 		//check if the filtered sent POST data returns a match with the DB
 		$result = WebUsers::checkLoginMatch($login_value, $password);
 
 		if( $result != "fail"){
 			//handle successful login
+			// drop any session id the caller may have planted before auth
+			session_regenerate_id(true);
 			$_SESSION['user'] = $result['Login'];
 			$_SESSION['id'] = $result['UId'];
 			$_SESSION['ticket_user'] = serialize(Ticket_User::constr_ExternId($_SESSION['id']));
 			$user = new WebUsers($_SESSION['id']);
 			$_SESSION['Language'] = $user->getLanguage();
 
+			// this is pasted onto the redirect target, so encode it
 			$GETString = "";
 			foreach($_GET as $key => $value){
-				$GETString = $GETString . $key . '=' . $value . "&";
+				if (!is_scalar($value)) continue;
+				$GETString = $GETString . rawurlencode($key) . '=' . rawurlencode($value) . "&";
 			}
 			if($GETString != ""){
 				$GETString = '?'.$GETString;
@@ -52,7 +57,7 @@ function login(){
 
 	}catch (PDOException $e) {
 	     //go to error page or something, because can't access website db
-	     print_r($e);
+	     error_log($e->getMessage());
 	     throw new SystemExit();
 	}
 

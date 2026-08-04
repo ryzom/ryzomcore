@@ -3,7 +3,6 @@ FILE(GLOB SRC_BACKWARD_COMPATIBILITY	backward_compatibility/*.h backward_compati
 FILE(GLOB SRC_BUILDING_MANAGER			building_manager/*.h building_manager/*.cpp)
 FILE(GLOB SRC_CHARACTER_STRUCTURE		character_structure/*.h character_structure/*.cpp)
 FILE(GLOB SRC_CREATURE_MANAGER			creature_manager/*.h creature_manager/*.cpp)
-FILE(GLOB SRC_EGS_SHEETS				egs_sheets/*.h egs_sheets/*.cpp)
 FILE(GLOB SRC_ENTITY_MANAGER			entity_manager/*.h entity_manager/*.cpp)
 FILE(GLOB SRC_ENTITY_STRUCTURE			entity_structure/*.h entity_structure/*.cpp)
 FILE(GLOB SRC_GAME_ITEM_MANAGER			game_item_manager/*.h game_item_manager/*.cpp)
@@ -27,6 +26,10 @@ LIST(REMOVE_ITEM SRC
 			${CMAKE_CURRENT_SOURCE_DIR}/egs_static_continent.h
 			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/shutdown_handler.h)
+# resists.cpp is part of the egs sheets library (Ryzom::egssheets).
+LIST(REMOVE_ITEM SRC_ENTITY_STRUCTURE
+			${CMAKE_CURRENT_SOURCE_DIR}/entity_structure/resists.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/entity_structure/resists.h)
 LIST(REMOVE_ITEM SRC_BUILDING_MANAGER
 			${CMAKE_CURRENT_SOURCE_DIR}/building_manager/room.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/building_manager/room.h)
@@ -49,7 +52,6 @@ SOURCE_GROUP("Backward Compatibility" FILES ${SRC_BACKWARD_COMPATIBILITY})
 SOURCE_GROUP("Building Manager" FILES ${SRC_BUILDING_MANAGER})
 SOURCE_GROUP("Character Structure" FILES ${SRC_CHARACTER_STRUCTURE})
 SOURCE_GROUP("Creature Manager" FILES ${SRC_CREATURE_MANAGER})
-SOURCE_GROUP("EGS Sheets" FILES ${SRC_EGS_SHEETS})
 SOURCE_GROUP("Entity Manager" FILES ${SRC_ENTITY_MANAGER})
 SOURCE_GROUP("Entity Structure" FILES ${SRC_ENTITY_STRUCTURE})
 SOURCE_GROUP("Game Item Manager" FILES ${SRC_GAME_ITEM_MANAGER})
@@ -72,7 +74,6 @@ ADD_EXECUTABLE(ryzom_entities_game_service WIN32
 	${SRC_BUILDING_MANAGER}
 	${SRC_CHARACTER_STRUCTURE}
 	${SRC_CREATURE_MANAGER}
-	${SRC_EGS_SHEETS}
 	${SRC_ENTITY_MANAGER}
 	${SRC_ENTITY_STRUCTURE}
 	${SRC_GAME_ITEM_MANAGER}
@@ -94,6 +95,7 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_S
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 		                PRIVATE
 						Ryzom::adminmodules
+						Ryzom::egssheets
 						Ryzom::gameshare
 						Ryzom::servershare
 						Ryzom::aishare

@@ -182,6 +182,37 @@ class Plugincache {
          }
 
     /**
+     * Check that none of the entries of an opened archive would be written
+     * outside of the destination directory ("zip slip"), and that none of them
+     * is a file the web server might execute. The archives handled here are
+     * uploaded, so their entry names cannot be trusted.
+     *
+     * @param  $zip an opened ZipArchive
+     * @return boolean true when every entry is safe to extract
+     */
+    public static function zipEntriesAreSafe( $zip )
+     {
+        for ( $i = 0; $i < $zip -> numFiles; $i++ )
+         {
+            $name = $zip -> getNameIndex( $i );
+             if ( $name === false ) {
+                return false;
+                 }
+            $name = str_replace( "\\", "/", $name );
+
+             // absolute paths and any ".." step escape the destination
+            if ( $name === '' || $name[0] === '/' || preg_match( '#(^|/)\.\.(/|$)#', $name ) ) {
+                return false;
+                 }
+            // a windows drive letter would escape it as well
+            if ( preg_match( '#^[A-Za-z]:#', $name ) ) {
+                return false;
+                 }
+            }
+        return true;
+         }
+
+    /**
      * function to unzip the zipped files
      *
      * @param  $target_path path to the target zipped file
@@ -193,6 +224,11 @@ class Plugincache {
         $zip = new ZipArchive();
          $x = $zip -> open( $target_path );
          if ( $x === true ) {
+            if ( !Plugincache :: zipEntriesAreSafe( $zip ) )
+                 {
+                $zip -> close();
+                 return false;
+                 }
             if ( $zip -> extractTo( $destination ) )
                  {
                 $zip -> close();
@@ -204,6 +240,7 @@ class Plugincache {
                  return false;
                  }
             }
+        return false;
         }
 
     /**

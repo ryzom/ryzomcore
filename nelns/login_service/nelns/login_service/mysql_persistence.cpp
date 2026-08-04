@@ -74,7 +74,9 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 	MYSQL_ROW row;
 	sint32 nbrow;
 	std::vector<OnlineShardProjection> shards;
-	string reason = sqlQuery("select shardid, name, nbplayers from shard where Online>0 and ClientApplication='" + sqlEscape(application) + "'", nbrow, row, result);
+	// the client application maps to a domain since the shard table lost its
+	// ClientApplication column: shards hang off the domain the web login uses
+	string reason = sqlQuery("select s.ShardId, s.Name, s.NbPlayers from shard s, domain d where s.domain_id = d.domain_id and s.Online > 0 and d.domain_name = '" + sqlEscape(application) + "'", nbrow, row, result);
 	if (!reason.empty())
 	{
 		return std::make_pair(shards, reason);

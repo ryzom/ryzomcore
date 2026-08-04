@@ -9,13 +9,15 @@
  */
 function activate_plugin() {
 
-    // if logged in
-    if ( WebUsers :: isLoggedIn() ) {
+    // only the staff that can reach the plugin page may act on plugins
+    // Enabling a plugin runs its hooks on every request; admin only.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         if ( isset( $_GET['id'] ) )
              {
-            // id of plugin to activate
-            $id = filter_var( $_GET['id'], FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+            // id of plugin to activate -- this goes into the WHERE clause
+            // unquoted, so it has to be a number and nothing else
+            $id = intval( $_GET['id'] );
              $db = new DBLayer( 'lib' );
              $result = $db -> update( "plugins", array( 'Status' => '1' ), "Id = $id" );
              if ( $result )

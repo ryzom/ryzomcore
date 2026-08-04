@@ -161,6 +161,36 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
                           SPmVertMapper *mapper = nullptr, const SPatchMesh *evalPm = nullptr);
 
 /**
+ * Edge-driven subdivide (plan mA4): split the listed edges (indices into pm.Edges) at
+ * 0.5 - each patch adjacent to a listed edge splits ONCE, along the parameter that
+ * crosses that edge (a 1 -> 2 split, single-axis de Casteljau: rows only, never
+ * rows-then-columns). The cut necessarily splits the patch's OPPOSITE edge too; if that
+ * edge's other neighbor is not itself splitting it takes the canonical T-junction bind,
+ * exactly as the 4-way op gives unselected neighbors. A patch with listed edges on BOTH
+ * axes (two adjacent edges) degenerates to the proven 1 -> 4 split; a patch with two
+ * OPPOSITE listed edges still splits once, both halves getting split edges.
+ *
+ * `propagate` walks the strip before splitting: each affected patch's opposite edge
+ * joins the set, transitively, until the walk closes into a loop or exits an open
+ * border - the whole strip splits coherently with no T-junctions along the walk (the
+ * directional loop split's engine).
+ *
+ * Children keep the parent ring orientation (ring starts at the sub-domain origin), so
+ * paint copies by plain half translation: the split axis halves its tile order per
+ * child (the other axis is untouched), tiles and colors copy verbatim from their half
+ * (the color midline duplicates), outer edge flags follow their parent edge and the
+ * fresh internal edge starts clear.
+ *
+ * Refuses everything the 4-way refuses (Max 3, hooks, map channels, bound corners,
+ * bind-target patches, order-1 on the SPLIT axis), plus the incoherent configuration
+ * where a crossed edge's neighbor splits along the PARALLEL axis - the bind would
+ * target a patch this same op is replacing.
+ */
+bool topoSubdivideEdges(SPatchMesh &pm, SRPatchMesh &rp,
+                        const std::set<uint> &edges, bool propagate, std::string &err,
+                        SPmVertMapper *mapper = NULL, const SPatchMesh *evalPm = NULL);
+
+/**
  * Weld the listed vertices: clusters within `threshold` (transitive, measured on the
  * EFFECTIVE object-space positions - `evalPm` when given, stored otherwise) merge onto
  * their lowest-index member, which KEEPS ITS OWN position - the target-weld shape. No
@@ -238,6 +268,19 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
                         STopoDetachBoundary *boundaryOut = nullptr);
 
 /**
+ * Detach WITH COPY (plan mA7): clone the selection's patches and every element they
+ * reference as a COINCIDENT island appended to the same mesh - the original stays
+ * byte-untouched (nothing rewires, nothing renumbers). Positions copy from EVAL (the
+ * clones are unmapped; a stored mapper cache would shift the copy by the delta). The
+ * per-patch paint records copy verbatim. Binds INTERNAL to the selection re-establish
+ * on the clone with remapped targets and caches; binds crossing the boundary drop on
+ * the copy (a second record onto the same outside edge would double-bind it).
+ */
+bool topoCopyElements(SPatchMesh &pm, SRPatchMesh &rp,
+                      const std::set<uint> &sel, std::string &err,
+                      const SPatchMesh *evalPm = NULL);
+
+/**
  * Extrude the listed patches (patch_topo_extrude.cpp): the legacy Extrude, recomposed
  * from the tool's own pieces. The selection's boundary splits exactly as
  * topoDetachElements does it (duplicated ring, originals stay with the complement),
@@ -257,10 +300,20 @@ bool topoDetachElements(SPatchMesh &pm, SRPatchMesh &rp,
  *
  * Refuses: everything topoDetachElements refuses, map-channel meshes (walls would need
  * TVPatch rows), and a near-zero extrude vector.
+ *
+ * `outline` (the legacy Bevel's second stage, plan mA5): after the raise, the island's
+ * boundary ring moves in the XY plane along each vertex's OUTWARD direction (average of
+ * its adjacent boundary edges' XY normals, oriented away from the island) by `outline`
+ * metres - positive flares the top outward, negative tapers the classic cliff. Riding
+ * island tangents follow; interior island verts stay; the vertical wall tangents sit at
+ * the thirds of the OUTLINED vector so the wall sides lean smoothly. Wall-less open
+ * border edges are not outlined (they are not boundary walls), so a border-touching
+ * ring only outlines its walled portion.
  */
 bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                         const std::set<uint> &sel, float dx, float dy, float dz,
-                        std::string &err, const SPatchMesh *evalPm = nullptr);
+                        std::string &err, const SPatchMesh *evalPm = nullptr,
+                        float outline = 0.f);
 
 /**
  * Append `src`/`srcRp` onto `pm`/`rp` (patch_topo_attach.cpp) - the attach merge. Every

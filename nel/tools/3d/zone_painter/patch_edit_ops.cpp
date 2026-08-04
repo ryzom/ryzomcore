@@ -1084,6 +1084,186 @@ void zpGeomVertChanged(uint zoneId, uint16 elemIdx, int elem, const float *objDe
 	}
 }
 
+// ---------------------------------------------------------------------------------------------
+// Coplanar continuity (PVERT_COPLANAR, bit 0 of the vertex Flags word - pinned by the
+// corpus probe). When a handle of a COPLANAR vertex moves, the vertex's unmoving handles
+// re-aim so all handles and the corner stay in one plane: the new plane contains the moved
+// handle's direction and tilts minimally from the current plane, and each re-aimed handle
+// keeps its own length. One math function serves the commit (zpApplyPatchXform) and the
+// drag preview (zpTanOffset), the zpTanSelectedEffective parity discipline.
+
+/** All tangent vec indices attached to `vert`, derived from the patch table (the stored
+ *  Vectors lists are absent on Max 3; interiors never attach to a vertex). */
+void zpVertexTangents(const SPaintZone &pz, uint16 vert, std::vector<uint16> &out)
+{
+	out.clear();
+	for (size_t p = 0; p < pz.Ep.Pm.Patches.size() && p < pz.Patches.size(); ++p)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+		for (uint j = 0; j < 8; ++j)
+		{
+			if (pp.Vec[j] < 0)
+				continue;
+			const uint corner = (j & 1) ? (((j >> 1) + 1) & 3) : (j >> 1);
+			if (pz.Patches[p].BaseVertices[corner] != vert)
+				continue;
+			const uint16 v = (uint16)pp.Vec[j];
+			bool dup = false;
+			for (size_t k = 0; k < out.size() && !dup; ++k)
+				dup = out[k] == v;
+			if (!dup)
+				out.push_back(v);
+		}
+	}
+}
+
+/**
+ * The re-aim itself, pure math in doubles. `allOld` are ALL attached handle positions
+ * before the move (they define the current plane), `movedNew` the moved handles' new
+ * positions. The new plane's normal: the cross product of two moved directions when two
+ * or more move apart, else the current normal projected perpendicular to the one moved
+ * direction (the minimal tilt that admits it). False when any of it is degenerate -
+ * parallel handles, a zero-length handle, a handle perpendicular to the new plane - in
+ * which case the sibling stays put rather than jumping somewhere arbitrary.
+ */
+static bool zpReaimOntoPlane(const NLMISC::CVector &corner,
+                             const std::vector<NLMISC::CVector> &allOld,
+                             const std::vector<NLMISC::CVector> &movedNew,
+                             const NLMISC::CVector &sibOld, NLMISC::CVector &sibNew)
+{
+	// Unit directions corner -> handle, doubles for the plane fits.
+	std::vector<double> ox, oy, oz;
+	for (size_t i = 0; i < allOld.size(); ++i)
+	{
+		const double d0 = (double)allOld[i].x - corner.x;
+		const double d1 = (double)allOld[i].y - corner.y;
+		const double d2 = (double)allOld[i].z - corner.z;
+		const double len = sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+		if (len < 1e-9) continue;
+		ox.push_back(d0 / len); oy.push_back(d1 / len); oz.push_back(d2 / len);
+	}
+	double n0x = 0, n0y = 0, n0z = 0, n0mag = -1.0;
+	for (size_t a = 0; a < ox.size(); ++a)
+		for (size_t b = a + 1; b < ox.size(); ++b)
+		{
+			const double cx = oy[a] * oz[b] - oz[a] * oy[b];
+			const double cy = oz[a] * ox[b] - ox[a] * oz[b];
+			const double cz = ox[a] * oy[b] - oy[a] * ox[b];
+			const double mag = sqrt(cx * cx + cy * cy + cz * cz);
+			if (mag > n0mag) { n0mag = mag; n0x = cx; n0y = cy; n0z = cz; }
+		}
+	const bool haveOldPlane = n0mag > 1e-6;
+	if (haveOldPlane) { n0x /= n0mag; n0y /= n0mag; n0z /= n0mag; }
+
+	std::vector<double> mx, my, mz;
+	for (size_t i = 0; i < movedNew.size(); ++i)
+	{
+		const double d0 = (double)movedNew[i].x - corner.x;
+		const double d1 = (double)movedNew[i].y - corner.y;
+		const double d2 = (double)movedNew[i].z - corner.z;
+		const double len = sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+		if (len < 1e-9) continue;
+		mx.push_back(d0 / len); my.push_back(d1 / len); mz.push_back(d2 / len);
+	}
+	if (mx.empty())
+		return false;
+	double nx = 0, ny = 0, nz = 0, nmag = -1.0;
+	for (size_t a = 0; a < mx.size(); ++a)
+		for (size_t b = a + 1; b < mx.size(); ++b)
+		{
+			const double cx = my[a] * mz[b] - mz[a] * my[b];
+			const double cy = mz[a] * mx[b] - mx[a] * mz[b];
+			const double cz = mx[a] * my[b] - my[a] * mx[b];
+			const double mag = sqrt(cx * cx + cy * cy + cz * cz);
+			if (mag > nmag) { nmag = mag; nx = cx; ny = cy; nz = cz; }
+		}
+	if (nmag > 1e-6)
+	{
+		// Two or more moved directions span the plane outright.
+		nx /= nmag; ny /= nmag; nz /= nmag;
+		if (haveOldPlane && nx * n0x + ny * n0y + nz * n0z < 0) { nx = -nx; ny = -ny; nz = -nz; }
+	}
+	else
+	{
+		// One direction: tilt the current plane minimally to contain it.
+		if (!haveOldPlane)
+			return false;
+		const double dot = n0x * mx[0] + n0y * my[0] + n0z * mz[0];
+		nx = n0x - dot * mx[0]; ny = n0y - dot * my[0]; nz = n0z - dot * mz[0];
+		const double mag = sqrt(nx * nx + ny * ny + nz * nz);
+		if (mag < 1e-6)
+			return false;
+		nx /= mag; ny /= mag; nz /= mag;
+	}
+
+	const double vx = (double)sibOld.x - corner.x;
+	const double vy = (double)sibOld.y - corner.y;
+	const double vz = (double)sibOld.z - corner.z;
+	const double len = sqrt(vx * vx + vy * vy + vz * vz);
+	if (len < 1e-9)
+		return false;
+	const double dot = vx * nx + vy * ny + vz * nz;
+	double ux = vx - dot * nx, uy = vy - dot * ny, uz = vz - dot * nz;
+	const double umag = sqrt(ux * ux + uy * uy + uz * uz);
+	if (umag < 1e-9)
+		return false;
+	const double s = len / umag;
+	sibNew.x = (float)(corner.x + ux * s);
+	sibNew.y = (float)(corner.y + uy * s);
+	sibNew.z = (float)(corner.z + uz * s);
+	return true;
+}
+
+/**
+ * World offset for an UNMOVING handle `sibVec` of coplanar vertex `owner`, given the
+ * moving handles and their world offsets (all in `pz`'s displayed space). False when the
+ * re-aim is degenerate or negligible - the sibling then simply stays.
+ */
+bool zpCoplanarSiblingReaim(const SPaintZone &pz, uint16 sibVec, uint16 owner,
+                            const std::vector<uint16> &movedVecs,
+                            const std::vector<NLMISC::CVector> &movedOffsets,
+                            NLMISC::CVector &offsetOut)
+{
+	float cw[3];
+	if (!zpPatchVertWorld(pz.ZoneId, owner, cw))
+		return false;
+	const NLMISC::CVector corner(cw[0], cw[1], cw[2]);
+	std::vector<uint16> att;
+	zpVertexTangents(pz, owner, att);
+	std::vector<NLMISC::CVector> allOld;
+	for (size_t i = 0; i < att.size(); ++i)
+	{
+		float w[3];
+		if (zpPatchTangentWorld(pz.ZoneId, att[i], w))
+			allOld.push_back(NLMISC::CVector(w[0], w[1], w[2]));
+	}
+	std::vector<NLMISC::CVector> movedNew;
+	for (size_t i = 0; i < movedVecs.size() && i < movedOffsets.size(); ++i)
+	{
+		float w[3];
+		if (zpPatchTangentWorld(pz.ZoneId, movedVecs[i], w))
+			movedNew.push_back(NLMISC::CVector(w[0], w[1], w[2]) + movedOffsets[i]);
+	}
+	float sw[3];
+	if (!zpPatchTangentWorld(pz.ZoneId, sibVec, sw))
+		return false;
+	const NLMISC::CVector sibOld(sw[0], sw[1], sw[2]);
+	NLMISC::CVector sibNew;
+	if (!zpReaimOntoPlane(corner, allOld, movedNew, sibOld, sibNew))
+		return false;
+	offsetOut = sibNew - sibOld;
+	return offsetOut.norm() > 1e-5f;
+}
+
+/** Is this vertex COPLANAR-flagged (and eligible: not bound - a bound corner's handles are
+ *  derived and refuse to move, so nothing can tilt its plane)? */
+bool zpVertCoplanarConstrained(const SPaintZone &pz, uint16 vert)
+{
+	if (vert < pz.Ep.Rp.Verts.size() && pz.Ep.Rp.Verts[vert].Binded)
+		return false;
+	return vert < pz.Ep.Pm.Verts.size() && (pz.Ep.Pm.Verts[vert].Flags & 1) != 0;
+}
+
 uint zpApplyPatchMove(const NLMISC::CVector &worldDelta, std::string &msg)
 {
 	SPatchXform xf;
@@ -1259,19 +1439,6 @@ uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDel
 		if (move.empty())
 			continue;
 
-		// Count the targets before the write, for the gate's log line - the core op does not
-		// report them and does not need to.
-		for (size_t i = 0; i < move.size(); ++i)
-		{
-			ZPPAINT::SGeomWriteTarget t;
-			std::string e;
-			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, move[i].Idx, move[i].Elem, t, e))
-				continue;
-			if (t.Kind == ZPPAINT::SGeomWriteTarget::BasePatchMesh) ++nBase;
-			else if (t.Kind == ZPPAINT::SGeomWriteTarget::ModifierPatchMesh) ++nModPm;
-			else ++nDelta;
-		}
-
 		// The core owns the write, the undo record and the dirty flag; the display follows
 		// through the geom-changed callback, so undo and redo update the cage for free.
 		std::string err;
@@ -1281,9 +1448,12 @@ uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDel
 			continue;
 		}
 		// One world delta per element. A move gives every element the same one; a rotate or a
-		// scale gives each its own, derived from where it sits relative to the pivot.
-		std::vector<NLMISC::CVector> deltas;
+		// scale gives each its own, derived from where it sits relative to the pivot. The
+		// world form is kept alongside the object form: the coplanar expansion below reasons
+		// in displayed-world space.
+		std::vector<NLMISC::CVector> deltas, worldDeltas;
 		deltas.reserve(move.size());
+		worldDeltas.reserve(move.size());
 		for (size_t i = 0; i < move.size(); ++i)
 		{
 			NLMISC::CVector wd = worldDelta;
@@ -1296,12 +1466,71 @@ uint zpApplyPatchXform(const SPatchXform &xform, const NLMISC::CVector &worldDel
 				if (!have)
 				{
 					deltas.push_back(NLMISC::CVector::Null);
+					worldDeltas.push_back(NLMISC::CVector::Null);
 					continue;
 				}
 				wd = zpTransformPoint(xform, NLMISC::CVector(wp[0], wp[1], wp[2]))
 				     - NLMISC::CVector(wp[0], wp[1], wp[2]);
 			}
 			deltas.push_back(zpXformDelta(wd, inv));
+			worldDeltas.push_back(wd);
+		}
+		// Coplanar continuity (PVERT_COPLANAR): a handle moving on a coplanar vertex re-aims
+		// the vertex's UNMOVING handles onto the tilted plane, in the same stroke. Handle
+		// mode only - when the corner itself moves, its handles ride rigidly and the plane
+		// rides with them. The preview draws exactly this through the same helper.
+		if (zpHandleMode())
+		{
+			std::map<uint16, std::vector<size_t> > byOwner;
+			for (size_t i = 0; i < move.size(); ++i)
+			{
+				if (move[i].Elem != ZPPAINT::GeomVec)
+					continue;
+				const uint16 owner = zpTangentOwner(pz, move[i].Idx);
+				if (owner == (uint16)0xffff || !zpVertCoplanarConstrained(pz, owner))
+					continue;
+				byOwner[owner].push_back(i);
+			}
+			const size_t nExplicit = move.size();
+			for (std::map<uint16, std::vector<size_t> >::const_iterator ot = byOwner.begin();
+			     ot != byOwner.end(); ++ot)
+			{
+				std::vector<uint16> movedVecs;
+				std::vector<NLMISC::CVector> movedOffs;
+				for (size_t k = 0; k < ot->second.size(); ++k)
+				{
+					movedVecs.push_back(move[ot->second[k]].Idx);
+					movedOffs.push_back(worldDeltas[ot->second[k]]);
+				}
+				std::vector<uint16> att;
+				zpVertexTangents(pz, ot->first, att);
+				for (size_t k = 0; k < att.size(); ++k)
+				{
+					bool isMoved = false;
+					for (size_t m = 0; m < nExplicit && !isMoved; ++m)
+						isMoved = move[m].Elem == ZPPAINT::GeomVec && move[m].Idx == att[k];
+					if (isMoved)
+						continue;
+					NLMISC::CVector off;
+					if (!zpCoplanarSiblingReaim(pz, att[k], ot->first, movedVecs, movedOffs, off))
+						continue;
+					move.push_back(ZPPAINT::SGeomElemRef(att[k], ZPPAINT::GeomVec));
+					deltas.push_back(zpXformDelta(off, inv));
+					worldDeltas.push_back(off);
+				}
+			}
+		}
+		// Count the targets before the write, for the gate's log line - the core op does not
+		// report them and does not need to.
+		for (size_t i = 0; i < move.size(); ++i)
+		{
+			ZPPAINT::SGeomWriteTarget t;
+			std::string e;
+			if (!ZPPAINT::resolveGeomWriteTarget(pz.Node, move[i].Idx, move[i].Elem, t, e))
+				continue;
+			if (t.Kind == ZPPAINT::SGeomWriteTarget::BasePatchMesh) ++nBase;
+			else if (t.Kind == ZPPAINT::SGeomWriteTarget::ModifierPatchMesh) ++nModPm;
+			else ++nDelta;
 		}
 		const uint n = g_PaintCtx.Core->opMovePatchElems(pz.ZoneId, move, deltas, err);
 		if (!n && firstErr.empty() && !err.empty())
@@ -1549,11 +1778,136 @@ uint16 zpTangentOwner(const SPaintZone &pz, uint16 vecIdx)
 	return (uint16)0xffff;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Hide / Unhide All (plan mA3): session-only display state, patch-keyed. See zp_state.h
+// for the model (landscape keeps rendering; the corpus probe settled session-only).
+
+bool zpPatchIsHidden(uint zoneId, uint patchIdx)
+{
+	return g_PatchHidden.count(TPatchFaceId(zoneId, patchIdx)) != 0;
+}
+
+bool zpVertIsHidden(const SPaintZone &pz, uint16 vertIdx)
+{
+	bool used = false;
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+		for (uint c = 0; c < 4; ++c)
+			if (pz.Patches[p].BaseVertices[c] == vertIdx)
+			{
+				used = true;
+				if (!zpPatchIsHidden(pz.ZoneId, p))
+					return false;
+			}
+	return used;
+}
+
+/** Every patch of `pz` drawing the corner pair (a, b) is hidden (and one exists). */
+static bool zpEdgeIsHidden(const SPaintZone &pz, uint16 a, uint16 b)
+{
+	bool used = false;
+	for (uint p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CPatchInfo &pi = pz.Patches[p];
+		for (uint e = 0; e < 4; ++e)
+		{
+			const uint16 va = pi.BaseVertices[e], vb = pi.BaseVertices[(e + 1) & 3];
+			if (!((va == a && vb == b) || (va == b && vb == a)))
+				continue;
+			used = true;
+			if (!zpPatchIsHidden(pz.ZoneId, p))
+				return false;
+		}
+	}
+	return used;
+}
+
+uint zpHideSelection()
+{
+	if (!g_PaintCtx.Zones || !g_PaintCtx.Paint)
+		return 0;
+	const int level = g_PaintCtx.Paint->SubObj;
+	std::set<TPatchFaceId> add;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &pz = zones[z];
+		if (!pz.Editable)
+			continue;
+		for (uint p = 0; p < pz.Patches.size(); ++p)
+		{
+			const NL3D::CPatchInfo &pi = pz.Patches[p];
+			bool want = false;
+			if (level == CPaintMouseListener::SubPatch)
+				want = g_PatchFaceSel.count(TPatchFaceId(pz.ZoneId, p)) != 0;
+			else if (level == CPaintMouseListener::SubEdge)
+			{
+				for (uint e = 0; e < 4 && !want; ++e)
+					want = g_PatchEdgeSel.count(SPatchEdgeId(pz.ZoneId, pi.BaseVertices[e],
+					                                         pi.BaseVertices[(e + 1) & 3])) != 0;
+			}
+			else if (level == CPaintMouseListener::SubVertex)
+			{
+				for (uint c = 0; c < 4 && !want; ++c)
+					want = g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[c])) != 0;
+			}
+			if (want)
+				add.insert(TPatchFaceId(pz.ZoneId, p));
+		}
+	}
+	if (add.empty())
+	{
+		g_PropStatusMsg = "hide: nothing selected at this level";
+		printf("%s\n", g_PropStatusMsg.c_str());
+		fflush(stdout);
+		return 0;
+	}
+	g_PatchHidden.insert(add.begin(), add.end());
+	// Hidden elements cannot stay selected - a selection you cannot see is a trap (the
+	// orphaned-tangent rule, applied wholesale).
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	ZPSCRIPT::record("painter.hideSelection()");
+	g_PropStatusMsg = NLMISC::toString("hide: %u patches (%u hidden total)",
+	                                   (uint)add.size(), (uint)g_PatchHidden.size());
+	printf("%s\n", g_PropStatusMsg.c_str());
+	fflush(stdout);
+	return (uint)add.size();
+}
+
+uint zpUnhideAll()
+{
+	const uint n = (uint)g_PatchHidden.size();
+	if (!n)
+	{
+		g_PropStatusMsg = "unhide: nothing hidden";
+		return 0;
+	}
+	g_PatchHidden.clear();
+	ZPSCRIPT::record("painter.unhideAll()");
+	g_PropStatusMsg = NLMISC::toString("unhide: %u patches restored", n);
+	printf("%s\n", g_PropStatusMsg.c_str());
+	fflush(stdout);
+	return n;
+}
+
+void zpPatchHideClicked() { zpHideSelection(); }
+void zpPatchUnhideAllClicked() { zpUnhideAll(); }
+
 void zpPatchVertSelect(uint zoneId, uint vertIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vertIdx);
 	if (op != 2) // a removal can never create an alias
 	{
+		// Hidden elements refuse selection (a hidden thing must not join a transform).
+		const SPaintZone *hpz = zpFindPaintZone(zoneId);
+		if (hpz && zpVertIsHidden(*hpz, (uint16)vertIdx))
+		{
+			g_PropStatusMsg = NLMISC::toString("vertex %u is hidden", vertIdx);
+			return;
+		}
 		uint other = 0;
 		if (zpVertAliased(zoneId, vertIdx, other))
 		{
@@ -1646,6 +2000,15 @@ void zpRebuildVertSelFromSubObject()
 void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op)
 {
 	const SPatchEdgeId id(zoneId, (uint16)vertA, (uint16)vertB);
+	if (op != 2)
+	{
+		const SPaintZone *hpz = zpFindPaintZone(zoneId);
+		if (hpz && zpEdgeIsHidden(*hpz, (uint16)vertA, (uint16)vertB))
+		{
+			g_PropStatusMsg = NLMISC::toString("edge %u-%u is hidden", vertA, vertB);
+			return;
+		}
+	}
 	if (op == 0)
 		g_PatchEdgeSel.clear();
 	if (op == 2)
@@ -1660,6 +2023,11 @@ void zpPatchEdgeSelect(uint zoneId, uint vertA, uint vertB, int op)
 void zpPatchFaceSelect(uint zoneId, uint patchIdx, int op)
 {
 	const TPatchFaceId id(zoneId, patchIdx);
+	if (op != 2 && zpPatchIsHidden(zoneId, patchIdx))
+	{
+		g_PropStatusMsg = NLMISC::toString("patch %u is hidden", patchIdx);
+		return;
+	}
 	if (op == 0)
 		g_PatchFaceSel.clear();
 	if (op == 2)
@@ -1719,6 +2087,7 @@ bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3])
 	if (!pz)
 		return false;
 	for (size_t p = 0; p < pz->Ep.Pm.Patches.size() && p < pz->Patches.size(); ++p)
+	{
 		for (uint j = 0; j < 8; ++j)
 		{
 			if (pz->Ep.Pm.Patches[p].Vec[j] < 0
@@ -1728,12 +2097,59 @@ bool zpPatchTangentWorld(uint zoneId, uint vecIdx, float outPos[3])
 			outPos[0] = v.x; outPos[1] = v.y; outPos[2] = v.z;
 			return true;
 		}
+		// INTERIOR vecs resolve too (the manual-interior editing path): same index space,
+		// displayed at the patch's Interiors corner.
+		for (uint j = 0; j < 4; ++j)
+		{
+			if (pz->Ep.Pm.Patches[p].Interior[j] < 0
+			    || (uint16)pz->Ep.Pm.Patches[p].Interior[j] != (uint16)vecIdx)
+				continue;
+			const NLMISC::CVector &v = pz->Patches[p].Patch.Interiors[j];
+			outPos[0] = v.x; outPos[1] = v.y; outPos[2] = v.z;
+			return true;
+		}
+	}
+	return false;
+}
+
+/** Is this vec an INTERIOR of an AUTO patch? Derived at eval, so it must never join a
+ *  transform - the pick paths skip it and the scripted select refuses. */
+bool zpVecIsAutoInterior(const SPaintZone &pz, uint16 vecIdx)
+{
+	for (size_t p = 0; p < pz.Ep.Pm.Patches.size(); ++p)
+	{
+		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
+		for (int j = 0; j < 4; ++j)
+			if (pp.Interior[j] >= 0 && (uint16)pp.Interior[j] == vecIdx)
+				return (pp.Flags & 1) != 0;
+	}
 	return false;
 }
 
 void zpPatchTangentSelect(uint zoneId, uint vecIdx, int op)
 {
 	const TPatchVertId id((uint)zoneId, (uint16)vecIdx);
+	if (op != 2)
+	{
+		// A handle of a fully-hidden owner refuses like the owner does.
+		const SPaintZone *hpz = zpFindPaintZone(zoneId);
+		if (hpz)
+		{
+			// An AUTO patch's interior is derived: not editable, not selectable.
+			if (zpVecIsAutoInterior(*hpz, (uint16)vecIdx))
+			{
+				g_PropStatusMsg = NLMISC::toString(
+					"vec %u is an auto interior (switch the patch to manual)", vecIdx);
+				return;
+			}
+			const uint16 owner = zpTangentOwner(*hpz, (uint16)vecIdx);
+			if (owner != (uint16)0xffff && zpVertIsHidden(*hpz, owner))
+			{
+				g_PropStatusMsg = NLMISC::toString("handle %u's vertex is hidden", vecIdx);
+				return;
+			}
+		}
+	}
 	if (op == 0)
 		g_PatchTanSel.clear();
 	if (op == 2)
@@ -2651,6 +3067,18 @@ bool zpVertexBindQuery(uint zoneId, uint vertIdx, int &bindedOut, int &typeOut,
 
 /** The corner pair of edge `edgeSlot` of `patchIdx` (lets a script name an edge the way the
  *  edge selection does, from a bind record's target fields). */
+/** Script/gate read access: corner `corner` (0..3) of a patch as the vertex id the
+ *  selection and the tangent-owner derivation use (BaseVertices - the ring order, which
+ *  the stored edge records' arbitrary V1/V2 orientation does NOT give). */
+bool zpPatchCornerVert(uint zoneId, uint patchIdx, uint corner, uint &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Patches.size() || corner >= 4)
+		return false;
+	out = pz->Patches[patchIdx].BaseVertices[corner];
+	return true;
+}
+
 bool zpPatchEdgeCornerPair(uint zoneId, uint patchIdx, uint edgeSlot, uint &aOut, uint &bOut)
 {
 	const SPaintZone *pz = zpFindPaintZone(zoneId);

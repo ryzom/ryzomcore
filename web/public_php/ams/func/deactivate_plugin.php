@@ -9,14 +9,16 @@
  */
 function deactivate_plugin() {
 
-    // if logged in
-    if ( WebUsers :: isLoggedIn() ) {
+    // only the staff that can reach the plugin page may act on plugins
+    // Disabling a plugin changes what code runs on every request; admin only.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
 
         if ( isset( $_GET['id'] ) )
              {
-            // id of plugin to deactivate
-            $id = filter_var( $_GET['id'], FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+            // id of plugin to deactivate -- this goes into the WHERE clause
+            // unquoted, so it has to be a number and nothing else
+            $id = intval( $_GET['id'] );
              $db = new DBLayer( 'lib' );
              $result = $db -> update( "plugins", array( 'Status' => '0' ), "Id = $id" );
              if ( $result )

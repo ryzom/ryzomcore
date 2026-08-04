@@ -212,20 +212,20 @@
 <!-- {$egs_counter} -->
 		<tr class="{$trclass}">
 			<td><input class="check" type="checkbox" name="service_{$tool_services_list[service].AliasName}" value="{$tool_services_list[service].AliasName}" {if $tool_service_select_list.$check_name || (!$tool_service_select_list && $tool_services_list[service]._flags_.rs_online)}checked{/if}></td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].AliasName}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{if $tool_services_list[service].ShardName != ""}{$tool_services_list[service].ShardName}{else}?{/if}{if $tool_services_list[service].ShardId != ""}/{$tool_services_list[service].ShardId}{/if}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].ShortName}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].Hostname}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].RunningState}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].RunningTags}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].State}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].NoReportSince}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].StartCounter}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].UserSpeedLoop}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].TickSpeedLoop}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].ProcessUsedMemory}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].NbPlayers}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].UpTime}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].AliasName}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{if $tool_services_list[service].ShardName != ""}{$tool_services_list[service].ShardName}{else}?{/if}{if $tool_services_list[service].ShardId != ""}/{$tool_services_list[service].ShardId}{/if}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].ShortName}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].Hostname}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].RunningState}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].RunningTags}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].State}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].NoReportSince}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].StartCounter}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].UserSpeedLoop}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].TickSpeedLoop}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].ProcessUsedMemory}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].NbPlayers}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].UpTime}</td>
 		</tr>
 {/if}
 {/section}
@@ -381,9 +381,9 @@
 			<td align="center">{$tool_guild_dump_data.HighOfficer[hofficer].entertime}</td>
 {if $restriction_tool_guild_locator_manage_members}
 			<td align="right">[&nbsp;Set&nbsp;:&nbsp;
-				<a href="tool_guild_locator.php?services_gl=setleader&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.HighOfficer[hofficer].eid}" onclick="if (confirm('Are you sure you want to promote guild High Officer &lt;{$tool_guild_dump_data.HighOfficer[hofficer].name}&gt; as Leader ?')) return true; else return false;">Leader</a>&nbsp;|&nbsp;
-				<a href="tool_guild_locator.php?services_gl=demote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.HighOfficer[hofficer].eid}&grade=Officer" onclick="if (confirm('Are you sure you want to demote guild High Officer &lt;{$tool_guild_dump_data.HighOfficer[hofficer].name}&gt; as Officer ?')) return true; else return false;">Officer</a>&nbsp;|&nbsp;
-				<a href="tool_guild_locator.php?services_gl=demote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.HighOfficer[hofficer].eid}&grade=Member" onclick="if (confirm('Are you sure you want to demote guild High Officer &lt;{$tool_guild_dump_data.HighOfficer[hofficer].name}&gt; as Member ?')) return true; else return false;">Member</a>&nbsp;]&nbsp;
+				<a href="tool_guild_locator.php?services_gl=setleader&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.HighOfficer[hofficer].eid}&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to promote guild High Officer &lt;{$tool_guild_dump_data.HighOfficer[hofficer].name}&gt; as Leader ?')) return true; else return false;">Leader</a>&nbsp;|&nbsp;
+				<a href="tool_guild_locator.php?services_gl=demote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.HighOfficer[hofficer].eid}&grade=Officer&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to demote guild High Officer &lt;{$tool_guild_dump_data.HighOfficer[hofficer].name}&gt; as Officer ?')) return true; else return false;">Officer</a>&nbsp;|&nbsp;
+				<a href="tool_guild_locator.php?services_gl=demote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.HighOfficer[hofficer].eid}&grade=Member&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to demote guild High Officer &lt;{$tool_guild_dump_data.HighOfficer[hofficer].name}&gt; as Member ?')) return true; else return false;">Member</a>&nbsp;]&nbsp;
 			</td>
 {/if}
 		</tr>
@@ -413,9 +413,9 @@
 			<td align="center">{$tool_guild_dump_data.Officer[officer].entertime}</td>
 {if $restriction_tool_guild_locator_manage_members}
 			<td align="right">[&nbsp;Set&nbsp;:&nbsp;
-				<a href="tool_guild_locator.php?services_gl=setleader&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Officer[officer].eid}" onclick="if (confirm('Are you sure you want to promote guild Officer &lt;{$tool_guild_dump_data.Officer[officer].name}&gt; as Leader ?')) return true; else return false;">Leader</a>&nbsp;|&nbsp;
-				<a href="tool_guild_locator.php?services_gl=promote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Officer[officer].eid}&grade=HighOfficer" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Officer[officer].name}&gt; as High Officer ?')) return true; else return false;">HighOfficer</a>&nbsp;|&nbsp;
-				<a href="tool_guild_locator.php?services_gl=demote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Officer[officer].eid}&grade=Member" onclick="if (confirm('Are you sure you want to demote guild Officer &lt;{$tool_guild_dump_data.Officer[officer].name}&gt; as Member ?')) return true; else return false;">Member</a>&nbsp;]&nbsp;
+				<a href="tool_guild_locator.php?services_gl=setleader&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Officer[officer].eid}&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to promote guild Officer &lt;{$tool_guild_dump_data.Officer[officer].name}&gt; as Leader ?')) return true; else return false;">Leader</a>&nbsp;|&nbsp;
+				<a href="tool_guild_locator.php?services_gl=promote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Officer[officer].eid}&grade=HighOfficer&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Officer[officer].name}&gt; as High Officer ?')) return true; else return false;">HighOfficer</a>&nbsp;|&nbsp;
+				<a href="tool_guild_locator.php?services_gl=demote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Officer[officer].eid}&grade=Member&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to demote guild Officer &lt;{$tool_guild_dump_data.Officer[officer].name}&gt; as Member ?')) return true; else return false;">Member</a>&nbsp;]&nbsp;
 			</td>
 {/if}
 		</tr>
@@ -445,9 +445,9 @@
 			<td align="center">{$tool_guild_dump_data.Member[member].entertime}</td>
 {if $restriction_tool_guild_locator_manage_members}
 			<td align="right">[&nbsp;Set&nbsp;:&nbsp;
-				<a href="tool_guild_locator.php?services_gl=setleader&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Member[member].eid}" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Member[member].name}&gt; as Leader ?')) return true; else return false;">Leader</a>&nbsp;|&nbsp;
-				<a href="tool_guild_locator.php?services_gl=promote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Member[member].eid}&grade=HighOfficer" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Member[member].name}&gt; as High Officer ?')) return true; else return false;">HighOfficer</a>&nbsp;|&nbsp;
-				<a href="tool_guild_locator.php?services_gl=promote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Member[member].eid}&grade=Officer" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Member[member].name}&gt; as Officer ?')) return true; else return false;">Officer</a>&nbsp;]&nbsp;
+				<a href="tool_guild_locator.php?services_gl=setleader&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Member[member].eid}&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Member[member].name}&gt; as Leader ?')) return true; else return false;">Leader</a>&nbsp;|&nbsp;
+				<a href="tool_guild_locator.php?services_gl=promote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Member[member].eid}&grade=HighOfficer&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Member[member].name}&gt; as High Officer ?')) return true; else return false;">HighOfficer</a>&nbsp;|&nbsp;
+				<a href="tool_guild_locator.php?services_gl=promote&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&eid={$tool_guild_dump_data.Member[member].eid}&grade=Officer&csrf={$nel_csrf}" onclick="if (confirm('Are you sure you want to promote guild Member &lt;{$tool_guild_dump_data.Member[member].name}&gt; as Officer ?')) return true; else return false;">Officer</a>&nbsp;]&nbsp;
 			</td>
 {/if}
 		</tr>
@@ -520,7 +520,7 @@
 
 			<td align="center"><a href="?services_gl=dumpguild&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&subservices_gl=viewthread&threadid={$tool_guild_forums[line].thread}&recoverable={$tool_guild_forums[line].recover}#threadview">{$tool_guild_forums[line].file}</a></td>
 			<td align="center">{$tool_guild_forums[line].thread}</td>
-			<td align="center">{if $tool_guild_forums[line].recover == 1}<a href="?services_gl=dumpguild&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&subservices_gl=recoverthread&threadid={$tool_guild_forums[line].thread}&recoverable={$tool_guild_forums[line].recover}#forumview" onclick="if (confirm('Are you sure you want to RECOVER this thread ?')) return true; return false;">Recover</a>{/if}</td>
+			<td align="center">{if $tool_guild_forums[line].recover == 1}<a href="?services_gl=dumpguild&servicealias={$tool_service}&guildshardid={$tool_guild_dump_data.shard_id}&guildid={$tool_guild_dump_data.guild_id}&subservices_gl=recoverthread&threadid={$tool_guild_forums[line].thread}&recoverable={$tool_guild_forums[line].recover}&csrf={$nel_csrf}#forumview" onclick="if (confirm('Are you sure you want to RECOVER this thread ?')) return true; return false;">Recover</a>{/if}</td>
 		</tr>
 {/section}
 {/if}

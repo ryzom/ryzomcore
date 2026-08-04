@@ -1,10 +1,11 @@
 /**
  * \file patch_topo_subdiv.cpp
- * \brief topoSubdividePatches: exact bicubic 4-way subdivision with paint inheritance
+ * \brief topoSubdividePatches / topoSubdivideEdges: exact bicubic subdivision with paint
+ *        inheritance - the 4-way patch split and the single-axis edge split (plan mA4)
  * \date 2026-07-29
  * \author Jan Boon (Kaetemi)
  * \author Claude Fable 5
- * See the contract in patch_topo.h. Derived from the on-disk stream semantics and textbook
+ * See the contracts in patch_topo.h. Derived from the on-disk stream semantics and textbook
  * Bezier subdivision (de Casteljau at 0.5); the bind construction reproduces the corpus
  * T-junction shape (BIND_SINGLE onto the unsplit neighbor edge).
  *
@@ -16,9 +17,11 @@
  *      P[1] = Vec7  I0    I1    Vec2
  *      P[2] = Vec6  I3    I2    Vec3
  *      P[3] = V3    Vec5  Vec4  V2
- *  - Children are named by sub-domain quadrant (qa, qb); every child's ring starts at its
- *    sub-domain origin ((a_lo,b_lo), (a_hi,b_lo), (a_hi,b_hi), (a_lo,b_hi)), which is what
- *    keeps every child's grid aligned with the parent's and the tile copy rotation-free.
+ *  - Children are named by sub-domain quadrant/half; every child's ring starts at its
+ *    sub-domain origin, which is what keeps every child's grid aligned with the parent's
+ *    and the tile copy rotation-free.
+ *  - Tile axes: v runs along a (edge 0), u along b - so the a-crossing cut (splitting
+ *    edges 0/2) halves NbTilesV and the b-crossing cut halves NbTilesU.
  */
 
 /*
@@ -184,11 +187,774 @@ void writeVecPos(SPatchMesh &pm, SPmVertMapper *mapper, const SPatchMesh *evalPm
 	ptTo(pm.Vecs[idx].Pos, pos);
 }
 
-} /* anonymous namespace */
+/// Convenience creators for fresh elements (presence/flags from per-file templates).
+struct SNew
+{
+	SPatchMesh *Pm;
+	SRPatchMesh *Rp;
+	SPmVert VertTpl;
+	SPmVec VecTpl;
+	SPmEdge EdgeTpl;
+	sint32 newVert(const PtL &pos)
+	{
+		SPmVert v;
+		v.Flags = VertTpl.Flags;
+		v.HasVectors = VertTpl.HasVectors;
+		v.HasPatches = VertTpl.HasPatches;
+		v.HasEdges = VertTpl.HasEdges;
+		ptTo(v.Pos, pos);
+		Pm->Verts.push_back(v);
+		SRpoVertexBind b;
+		memset(&b, 0, sizeof(b));
+		b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		Rp->Verts.push_back(b);
+		return (sint32)Pm->Verts.size() - 1;
+	}
+	sint32 newVec(const PtL &pos, sint32 owner)
+	{
+		SPmVec v;
+		v.Flags = VecTpl.Flags;
+		v.HasVert = VecTpl.HasVert;
+		v.HasPatches = VecTpl.HasPatches;
+		v.Vert = v.HasVert ? owner : -1;
+		ptTo(v.Pos, pos);
+		Pm->Vecs.push_back(v);
+		return (sint32)Pm->Vecs.size() - 1;
+	}
+	sint32 newInteriorVec(const PtL &pos)
+	{
+		// Authored interiors carry PVEC_INTERIOR (bit 0), no vertex attachment, and
+		// never appear in a vertex's Vectors list - the identity the detach ownership
+		// derivation and Max's own linkage machinery key on.
+		SPmVec v;
+		v.Flags = VecTpl.Flags | 1;
+		v.HasVert = VecTpl.HasVert;
+		v.HasPatches = VecTpl.HasPatches;
+		v.Vert = -1;
+		ptTo(v.Pos, pos);
+		Pm->Vecs.push_back(v);
+		return (sint32)Pm->Vecs.size() - 1;
+	}
+	sint32 newEdge(sint32 v1, sint32 vec12, sint32 vec21, sint32 v2)
+	{
+		SPmEdge e;
+		e.HasPatches = EdgeTpl.HasPatches;
+		e.V1 = v1; e.Vec12 = vec12; e.Vec21 = vec21; e.V2 = v2;
+		Pm->Edges.push_back(e);
+		return (sint32)Pm->Edges.size() - 1;
+	}
+};
 
-bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
-                          const std::set<uint> &patches, std::string &err,
-                          SPmVertMapper *mapper, const SPatchMesh *evalPm)
+/// Capture one patch's 4x4 control grid from the EVALUATED positions (phase 0: before any
+/// edge split halves the reused tangent records in place - the m50 lesson).
+void captureGrid(const SPatchMesh &pm, const SPatchMesh *evalPm, const SPmPatch &pp,
+                 SParentGrid &g)
+{
+	g.P[0][0] = effVert(pm, evalPm, pp.V[0]);
+	g.P[0][3] = effVert(pm, evalPm, pp.V[1]);
+	g.P[3][3] = effVert(pm, evalPm, pp.V[2]);
+	g.P[3][0] = effVert(pm, evalPm, pp.V[3]);
+	g.P[0][1] = effVec(pm, evalPm, pp.Vec[0]);
+	g.P[0][2] = effVec(pm, evalPm, pp.Vec[1]);
+	g.P[1][3] = effVec(pm, evalPm, pp.Vec[2]);
+	g.P[2][3] = effVec(pm, evalPm, pp.Vec[3]);
+	g.P[3][2] = effVec(pm, evalPm, pp.Vec[4]);
+	g.P[3][1] = effVec(pm, evalPm, pp.Vec[5]);
+	g.P[2][0] = effVec(pm, evalPm, pp.Vec[6]);
+	g.P[1][0] = effVec(pm, evalPm, pp.Vec[7]);
+	g.P[1][1] = effVec(pm, evalPm, pp.Interior[0]);
+	g.P[1][2] = effVec(pm, evalPm, pp.Interior[1]);
+	g.P[2][2] = effVec(pm, evalPm, pp.Interior[2]);
+	g.P[2][1] = effVec(pm, evalPm, pp.Interior[3]);
+}
+
+/**
+ * Phase 1 for ONE edge: split it at 0.5 on the evaluated curve. `boundNeighbor` >= 0
+ * means the T-junction shape: the neighbor keeps the whole original record, the children
+ * ride two new halves and the midpoint binds BIND_SINGLE onto the neighbor's slot;
+ * otherwise the plain shape reuses the record for the first half (vec owners keep).
+ * `forPatch` is only used to resolve the neighbor's slot for the bind.
+ */
+bool splitEdgeOnce(SPatchMesh &pm, SRPatchMesh &rp, SNew &mk, SPmVertMapper *mapper,
+                   const SPatchMesh *evalPm, sint32 ei, sint32 boundNeighbor,
+                   std::string &err, SEdgeSplit &out)
+{
+	// BY VALUE: every mk.new* below may reallocate the element vectors, so no
+	// reference into them survives an allocation.
+	const SPmEdge ed = pm.Edges[ei];
+	if (ed.V1 < 0 || ed.V2 < 0 || ed.Vec12 < 0 || ed.Vec21 < 0
+	    || (size_t)ed.Vec12 >= pm.Vecs.size() || (size_t)ed.Vec21 >= pm.Vecs.size())
+	{ err = "edge record incomplete"; return false; }
+
+	// Split the edge's own cubic (record direction V1 -> V2), on the EVALUATED
+	// curve - the stored positions of mapped outputs are stale caches.
+	PtL c[4], le[4], ri[4];
+	c[0] = effVert(pm, evalPm, ed.V1);
+	c[1] = effVec(pm, evalPm, ed.Vec12);
+	c[2] = effVec(pm, evalPm, ed.Vec21);
+	c[3] = effVert(pm, evalPm, ed.V2);
+	splitCubic(c, le, ri);
+
+	SEdgeSplit sp;
+	sp.OrigV1 = ed.V1;
+	sp.OrigV2 = ed.V2;
+	sp.Mid = mk.newVert(le[3]);
+	sp.Bound = boundNeighbor >= 0;
+
+	if (sp.Bound)
+	{
+		// T-junction: the neighbor keeps the WHOLE original edge (its curve and
+		// tangent records untouched); the children ride two new half edges and the
+		// midpoint binds onto the neighbor's edge slot. The midpoint IS the curve's
+		// 0.5 point, so the bind refresh derives exactly this position.
+		const sint32 l1 = mk.newVec(le[1], ed.V1);
+		const sint32 l2 = mk.newVec(le[2], sp.Mid);
+		const sint32 r1 = mk.newVec(ri[1], sp.Mid);
+		const sint32 r2 = mk.newVec(ri[2], ed.V2);
+		sp.Half[0] = mk.newEdge(ed.V1, l1, l2, sp.Mid);
+		sp.Half[1] = mk.newEdge(sp.Mid, r1, r2, ed.V2);
+		// Bind record: BIND_SINGLE onto (neighbor, its slot for this edge).
+		sint32 slot = -1;
+		for (int s = 0; s < 4; ++s)
+			if (pm.Patches[boundNeighbor].Edge[s] == ei) { slot = s; break; }
+		if (slot < 0) { err = "neighbor slot for shared edge not found"; return false; }
+		SRpoVertexBind &b = rp.Verts[sp.Mid];
+		b.Binded = 1;
+		b.Type = 3; // BIND_SINGLE
+		b.Type2 = 3;
+		b.Patch = (uint32)boundNeighbor;
+		b.Edge = (uint32)slot;
+		b.PrimVert = (uint32)sp.Mid;
+	}
+	else
+	{
+		// Plain split (open edge, or shared with another SPLITTING patch): reuse the
+		// record for the first half and its tangent slots for the outer controls,
+		// so both vec owners stay what they were. The reused slots may be MAPPED
+		// outputs, so the write goes through the delta-shifting form.
+		writeVecPos(pm, mapper, evalPm, ed.Vec12, le[1]);
+		const sint32 l2 = mk.newVec(le[2], sp.Mid);
+		const sint32 r1 = mk.newVec(ri[1], sp.Mid);
+		writeVecPos(pm, mapper, evalPm, ed.Vec21, ri[2]);
+		sp.Half[1] = mk.newEdge(sp.Mid, r1, ed.Vec21, ed.V2);
+		// Rewire the reused record (fresh reference, taken after all allocations).
+		SPmEdge &edm = pm.Edges[ei];
+		edm.Vec21 = l2;
+		edm.V2 = sp.Mid;
+		sp.Half[0] = ei;
+		// Adjacency: origV2 leaves the reused record for the new half.
+		if (pm.Verts[sp.OrigV2].HasEdges)
+		{
+			listRemove(pm.Verts[sp.OrigV2].Edges, ei);
+			listAdd(pm.Verts[sp.OrigV2].Edges, sp.Half[1]);
+		}
+	}
+	out = sp;
+	return true;
+}
+
+/// Child-vec slot assignment from the child's edge records: edge k runs ring[k] ->
+/// ring[(k+1)&3]; the record may store either direction; Vec[2k] leaves ring[k].
+void assignChildVecsFromEdges(SPatchMesh &pm, SPmPatch &ch)
+{
+	for (int k = 0; k < 4; ++k)
+	{
+		const SPmEdge &ce = pm.Edges[ch.Edge[k]];
+		if (ce.V1 == ch.V[k])
+		{
+			ch.Vec[2 * k] = ce.Vec12;
+			ch.Vec[2 * k + 1] = ce.Vec21;
+		}
+		else
+		{
+			ch.Vec[2 * k] = ce.Vec21;
+			ch.Vec[2 * k + 1] = ce.Vec12;
+		}
+	}
+}
+
+/// Shared tail of the child cross-reference maintenance: every vec a child references
+/// lists that child (and drops the parent entry it may have inherited).
+void relistChildVecs(SPatchMesh &pm, sint32 parent, sint32 childIdx)
+{
+	const SPmPatch &ch = pm.Patches[childIdx];
+	for (int k = 0; k < 8; ++k)
+		if (pm.Vecs[ch.Vec[k]].HasPatches)
+		{
+			listRemove(pm.Vecs[ch.Vec[k]].Patches, parent);
+			listAdd(pm.Vecs[ch.Vec[k]].Patches, childIdx);
+		}
+	for (int k = 0; k < 4; ++k)
+		if (pm.Vecs[ch.Interior[k]].HasPatches)
+		{
+			listRemove(pm.Vecs[ch.Interior[k]].Patches, parent);
+			listAdd(pm.Vecs[ch.Interior[k]].Patches, childIdx);
+		}
+}
+
+/**
+ * Phase 2/3 for one patch, the FOUR-WAY split (the m43 machinery, extracted verbatim):
+ * split the captured grid both directions, build the four children on the phase-1 edge
+ * splits, copy the painted quadrants, and maintain every cross-reference.
+ */
+bool buildChildren4(SPatchMesh &pm, SRPatchMesh &rp, SNew &mk, SPmVertMapper *mapper,
+                    const SPatchMesh *evalPm, uint p, const SParentGrid &grid,
+                    std::map<sint32, SEdgeSplit> &splits, std::string &err)
+{
+	const SPmPatch par = pm.Patches[p]; // by value: the slot is rewritten below
+	const SRpoPatch upar = rp.Patches[p];
+
+	// Control grid P[b][a], captured in phase 0 - the element tables no longer hold
+	// the parent's curves (phase 1 halved the reused tangent records in place).
+	const PtL(&P)[4][4] = grid.P;
+
+	// Split rows at a = 0.5, then columns at b = 0.5 -> G[qa][qb] 4x4 child grids,
+	// child-local layout identical to the parent's (G[qa][qb][b'][a']).
+	PtL rowL[4][4], rowR[4][4];
+	for (int b = 0; b < 4; ++b)
+		splitCubic(P[b], rowL[b], rowR[b]);
+	PtL G[2][2][4][4];
+	for (int a = 0; a < 4; ++a)
+	{
+		PtL colInL[4], colInR[4], lo[4], hi[4];
+		for (int b = 0; b < 4; ++b) { colInL[b] = rowL[b][a]; colInR[b] = rowR[b][a]; }
+		splitCubic(colInL, lo, hi);
+		for (int b = 0; b < 4; ++b) { G[0][0][b][a] = lo[b]; G[0][1][b][a] = hi[b]; }
+		splitCubic(colInR, lo, hi);
+		for (int b = 0; b < 4; ++b) { G[1][0][b][a] = lo[b]; G[1][1][b][a] = hi[b]; }
+	}
+
+	// The four boundary midpoints and their splits (already created in phase 1).
+	const SEdgeSplit &s0 = splits[par.Edge[0]];
+	const SEdgeSplit &s1 = splits[par.Edge[1]];
+	const SEdgeSplit &s2 = splits[par.Edge[2]];
+	const SEdgeSplit &s3 = splits[par.Edge[3]];
+	const sint32 M0 = s0.Mid, M1 = s1.Mid, M2 = s2.Mid, M3 = s3.Mid;
+
+	// Centre vertex and the four internal cross edges Mk -> C with fresh tangents.
+	// The a=0.5 column of the b-lo half is G[0][0][.][3] == G[1][0][.][0] (same values
+	// by construction); the internal tangents come off these shared columns/rows.
+	const sint32 C = mk.newVert(G[0][0][3][3]);
+	// M0 -> C: parent (a=.5, b: 0 -> .5): controls G[0][0][b][3], b = 0..3.
+	const sint32 e0c = mk.newEdge(M0, mk.newVec(G[0][0][1][3], M0), mk.newVec(G[0][0][2][3], C), C);
+	// M1 -> C: parent (a: 1 -> .5, b=.5): controls G[1][0][3][a], a = 3..0.
+	const sint32 e1c = mk.newEdge(M1, mk.newVec(G[1][0][3][2], M1), mk.newVec(G[1][0][3][1], C), C);
+	// M2 -> C: parent (a=.5, b: 1 -> .5): controls G[0][1][b][3], b = 3..0.
+	const sint32 e2c = mk.newEdge(M2, mk.newVec(G[0][1][2][3], M2), mk.newVec(G[0][1][1][3], C), C);
+	// M3 -> C: parent (a: 0 -> .5, b=.5): controls G[0][0][3][a], a = 0..3.
+	const sint32 e3c = mk.newEdge(M3, mk.newVec(G[0][0][3][1], M3), mk.newVec(G[0][0][3][2], C), C);
+
+	// Child rings and edge assignments (see the header block).
+	const sint32 ring[4][4] = {
+		{ par.V[0], M0, C, M3 },      // Q(0,0)
+		{ M0, par.V[1], M1, C },      // Q(1,0)
+		{ C, M1, par.V[2], M2 },      // Q(1,1)
+		{ M3, C, M2, par.V[3] },      // Q(0,1)
+	};
+	const sint32 qedge[4][4] = {
+		{ halfBetween(pm, s0, par.V[0], M0), e0c, e3c, halfBetween(pm, s3, M3, par.V[0]) },
+		{ halfBetween(pm, s0, M0, par.V[1]), halfBetween(pm, s1, par.V[1], M1), e1c, e0c },
+		{ e1c, halfBetween(pm, s1, M1, par.V[2]), halfBetween(pm, s2, par.V[2], M2), e2c },
+		{ e3c, e2c, halfBetween(pm, s2, M2, par.V[3]), halfBetween(pm, s3, par.V[3], M3) },
+	};
+	const int qa[4] = { 0, 1, 1, 0 };
+	const int qb[4] = { 0, 0, 1, 1 };
+	for (int q = 0; q < 4; ++q)
+		for (int e = 0; e < 4; ++e)
+			if (qedge[q][e] < 0) { err = "internal: child half edge unresolved"; return false; }
+
+	// Child patch slots: parent slot -> Q(0,0); three appended in q order 1..3.
+	sint32 childIdx[4];
+	childIdx[0] = (sint32)p;
+	for (int q = 1; q < 4; ++q)
+	{
+		pm.Patches.push_back(par); // placeholder, filled below
+		rp.Patches.push_back(SRpoPatch());
+		childIdx[q] = (sint32)pm.Patches.size() - 1;
+	}
+
+	for (int q = 0; q < 4; ++q)
+	{
+		SPmPatch &ch = pm.Patches[childIdx[q]];
+		ch = par; // Type/NumVerts/SmGroup/Flags/presence inherit
+		for (int k = 0; k < 4; ++k)
+		{
+			ch.V[k] = ring[q][k];
+			ch.Edge[k] = qedge[q][k];
+		}
+		// Tangents and interiors: boundary tangent SLOTS come from the child's edge
+		// records so the patch and edge tables stay consistent by construction; the
+		// interiors are fresh vecs from the child grid (parent interior slots are
+		// reused for Q(0,0)).
+		assignChildVecsFromEdges(pm, ch);
+		const PtL(&g)[4][4] = G[qa[q]][qb[q]];
+		if (q == 0)
+		{
+			// Reuse the parent's interior slots (owners follow the child corners).
+			ch.Interior[0] = par.Interior[0];
+			ch.Interior[1] = par.Interior[1];
+			ch.Interior[2] = par.Interior[2];
+			ch.Interior[3] = par.Interior[3];
+			// Positions only: authored interiors have Vert = -1, and the reused records
+			// already carry the right identity - rewriting Vert to a corner gave them a
+			// tangent-shaped attachment no authored mesh has. Reused slots may be
+			// mapped, so the writes shift their deltas.
+			writeVecPos(pm, mapper, evalPm, ch.Interior[0], g[1][1]);
+			writeVecPos(pm, mapper, evalPm, ch.Interior[1], g[1][2]);
+			writeVecPos(pm, mapper, evalPm, ch.Interior[2], g[2][2]);
+			writeVecPos(pm, mapper, evalPm, ch.Interior[3], g[2][1]);
+		}
+		else
+		{
+			ch.Interior[0] = mk.newInteriorVec(g[1][1]);
+			ch.Interior[1] = mk.newInteriorVec(g[1][2]);
+			ch.Interior[2] = mk.newInteriorVec(g[2][2]);
+			ch.Interior[3] = mk.newInteriorVec(g[2][1]);
+		}
+	}
+
+	// --- rp side: tile quadrants, colors, edge flags. Child grids align with the
+	// parent's, so the copy is a plain offset. The (u, v) <-> (a, b) axis pairing is
+	// validated by the m43 marker gate; here: v runs along a (edge 0), u along b.
+	{
+		const sint32 S = 1 << upar.NbTilesU;  // u count
+		const sint32 T = 1 << upar.NbTilesV;  // v count
+		for (int q = 0; q < 4; ++q)
+		{
+			SRpoPatch &cu = rp.Patches[childIdx[q]];
+			cu = SRpoPatch();
+			cu.NbTilesU = upar.NbTilesU - 1;
+			cu.NbTilesV = upar.NbTilesV - 1;
+			const sint32 cs = S / 2, ct = T / 2;
+			cu.Tiles.resize((size_t)cs * ct);
+			cu.Colors.resize((size_t)(cs + 1) * (ct + 1));
+			const sint32 du = qb[q] * cs;
+			const sint32 dv = qa[q] * ct;
+			for (sint32 v = 0; v < ct; ++v)
+				for (sint32 u = 0; u < cs; ++u)
+					cu.Tiles[u + v * cs] = upar.Tiles[(u + du) + (v + dv) * S];
+			for (sint32 v = 0; v < ct + 1; ++v)
+				for (sint32 u = 0; u < cs + 1; ++u)
+					cu.Colors[u + v * (cs + 1)] = upar.Colors[(u + du) + (v + dv) * (S + 1)];
+		}
+		// Outer edges inherit the parent flag, internal edges start clear.
+		rp.Patches[childIdx[0]].EdgeFlags[0] = upar.EdgeFlags[0];
+		rp.Patches[childIdx[0]].EdgeFlags[3] = upar.EdgeFlags[3];
+		rp.Patches[childIdx[1]].EdgeFlags[0] = upar.EdgeFlags[0];
+		rp.Patches[childIdx[1]].EdgeFlags[1] = upar.EdgeFlags[1];
+		rp.Patches[childIdx[2]].EdgeFlags[1] = upar.EdgeFlags[1];
+		rp.Patches[childIdx[2]].EdgeFlags[2] = upar.EdgeFlags[2];
+		rp.Patches[childIdx[3]].EdgeFlags[2] = upar.EdgeFlags[2];
+		rp.Patches[childIdx[3]].EdgeFlags[3] = upar.EdgeFlags[3];
+	}
+
+	// --- Cross-reference maintenance for this parent's neighborhood.
+	// Edge patch lists: children onto their edges; the parent leaves every edge it sat
+	// on (reused half records inherited the parent entry - replace it).
+	for (int q = 0; q < 4; ++q)
+		for (int e = 0; e < 4; ++e)
+		{
+			SPmEdge &ce = pm.Edges[pm.Patches[childIdx[q]].Edge[e]];
+			if (ce.HasPatches)
+			{
+				listRemove(ce.Patches, (sint32)p);
+				listAdd(ce.Patches, childIdx[q]);
+			}
+		}
+	// T-junction originals keep the neighbor only - the edge record and its two
+	// tangent vecs (no child references them; the dead parent index must not stay,
+	// it now names child Q(0,0)).
+	for (int e = 0; e < 4; ++e)
+	{
+		const SEdgeSplit &sp = splits[par.Edge[e]];
+		if (!sp.Bound)
+			continue;
+		const SPmEdge &oe = pm.Edges[par.Edge[e]];
+		if (oe.HasPatches)
+			listRemove(pm.Edges[par.Edge[e]].Patches, (sint32)p);
+		if (oe.Vec12 >= 0 && pm.Vecs[oe.Vec12].HasPatches)
+			listRemove(pm.Vecs[oe.Vec12].Patches, (sint32)p);
+		if (oe.Vec21 >= 0 && pm.Vecs[oe.Vec21].HasPatches)
+			listRemove(pm.Vecs[oe.Vec21].Patches, (sint32)p);
+	}
+	// Corner verts: parent patch -> the corner's child; ring vec/edge lists follow.
+	for (int c = 0; c < 4; ++c)
+	{
+		SPmVert &cv = pm.Verts[par.V[c]];
+		if (cv.HasPatches)
+			listReplace(cv.Patches, (sint32)p, childIdx[c]);
+		if (cv.HasEdges)
+		{
+			// The T-junction case keeps the original edge in the corner's list (it
+			// still ends there, on the neighbor's side) and adds the new half.
+			for (int e = 0; e < 4; ++e)
+			{
+				const SEdgeSplit &sp = splits[par.Edge[e]];
+				const sint32 h = halfBetween(pm, sp,
+					par.V[c],
+					(sp.OrigV1 == par.V[c]) ? sp.Mid : (sp.OrigV2 == par.V[c] ? sp.Mid : -2));
+				if (h >= 0)
+					listAdd(cv.Edges, h);
+			}
+		}
+		if (cv.HasVectors)
+		{
+			// New boundary tangents owned by this corner (T-junction halves).
+			const SPmPatch &ch = pm.Patches[childIdx[c]];
+			listAdd(cv.Vectors, ch.Vec[2 * c]);
+			listAdd(cv.Vectors, ch.Vec[((c + 3) & 3) * 2 + 1]);
+		}
+	}
+	// Midpoint and centre verts: full lists.
+	const sint32 mids[4] = { M0, M1, M2, M3 };
+	const sint32 crossEdges[4] = { e0c, e1c, e2c, e3c };
+	for (int e = 0; e < 4; ++e)
+	{
+		SPmVert &mv = pm.Verts[mids[e]];
+		const SEdgeSplit &sp = splits[par.Edge[e]];
+		if (mv.HasEdges)
+		{
+			listAdd(mv.Edges, sp.Half[0]);
+			listAdd(mv.Edges, sp.Half[1]);
+			listAdd(mv.Edges, crossEdges[e]);
+		}
+		if (mv.HasPatches)
+		{
+			// The two children sharing this midpoint on this parent.
+			for (int q = 0; q < 4; ++q)
+				for (int k = 0; k < 4; ++k)
+					if (ring[q][k] == mids[e])
+						listAdd(mv.Patches, childIdx[q]);
+		}
+		if (mv.HasVectors)
+		{
+			for (int h = 0; h < 2; ++h)
+			{
+				const SPmEdge &he = pm.Edges[sp.Half[h]];
+				if (he.V1 == mids[e]) listAdd(mv.Vectors, he.Vec12);
+				if (he.V2 == mids[e]) listAdd(mv.Vectors, he.Vec21);
+			}
+			listAdd(mv.Vectors, pm.Edges[crossEdges[e]].Vec12);
+		}
+	}
+	{
+		SPmVert &cvC = pm.Verts[C];
+		if (cvC.HasEdges)
+			for (int e = 0; e < 4; ++e)
+				listAdd(cvC.Edges, crossEdges[e]);
+		if (cvC.HasPatches)
+			for (int q = 0; q < 4; ++q)
+				listAdd(cvC.Patches, childIdx[q]);
+		if (cvC.HasVectors)
+			for (int e = 0; e < 4; ++e)
+				listAdd(cvC.Vectors, pm.Edges[crossEdges[e]].Vec21);
+	}
+	// Vec patch lists.
+	for (int q = 0; q < 4; ++q)
+		relistChildVecs(pm, (sint32)p, childIdx[q]);
+	return true;
+}
+
+/**
+ * Phase 2/3 for one patch, the SINGLE-AXIS split (plan mA4). `axisA` = the cut at
+ * a = 0.5 crossing edges 0 and 2 (halves the v tile axis); otherwise the cut at b = 0.5
+ * crossing edges 1 and 3 (halves u). Split rows only - never rows-then-columns - so the
+ * two children are the exact halves of the parent surface. The lo child (containing the
+ * parent ring origin) reuses the parent's patch slot and interior records; the hi child
+ * is appended. Paint copies by plain half translation with the split axis's order
+ * halved; outer edge flags follow their parent edge, the internal edge starts clear.
+ */
+bool buildChildren2(SPatchMesh &pm, SRPatchMesh &rp, SNew &mk, SPmVertMapper *mapper,
+                    const SPatchMesh *evalPm, uint p, const SParentGrid &grid, bool axisA,
+                    std::map<sint32, SEdgeSplit> &splits, std::string &err)
+{
+	const SPmPatch par = pm.Patches[p]; // by value: the slot is rewritten below
+	const SRpoPatch upar = rp.Patches[p];
+	const PtL(&P)[4][4] = grid.P;
+
+	// Child grids: the exact halves, child-local layout identical to the parent's.
+	PtL Lo[4][4], Hi[4][4];
+	if (axisA)
+	{
+		// Split every row (a-direction cubics) at a = 0.5.
+		for (int b = 0; b < 4; ++b)
+			splitCubic(P[b], Lo[b], Hi[b]);
+	}
+	else
+	{
+		// Split every column (b-direction cubics) at b = 0.5.
+		for (int a = 0; a < 4; ++a)
+		{
+			PtL col[4], lo[4], hi[4];
+			for (int b = 0; b < 4; ++b) col[b] = P[b][a];
+			splitCubic(col, lo, hi);
+			for (int b = 0; b < 4; ++b) { Lo[b][a] = lo[b]; Hi[b][a] = hi[b]; }
+		}
+	}
+
+	// The two crossed edges' splits (phase 1) and the fresh internal edge.
+	const int ce0 = axisA ? 0 : 1, ce1 = axisA ? 2 : 3;
+	const SEdgeSplit &sA = splits[par.Edge[ce0]];
+	const SEdgeSplit &sB = splits[par.Edge[ce1]];
+	const sint32 MA = sA.Mid, MB = sB.Mid;
+	sint32 eInt;
+	if (axisA)
+	{
+		// M0 -> M2: the a=0.5 column, controls Lo[b][3], b = 0..3.
+		eInt = mk.newEdge(MA, mk.newVec(Lo[1][3], MA), mk.newVec(Lo[2][3], MB), MB);
+	}
+	else
+	{
+		// M3 -> M1: the b=0.5 row, controls Lo[3][a], a = 0..3 (M3 is at a=0).
+		eInt = mk.newEdge(MB, mk.newVec(Lo[3][1], MB), mk.newVec(Lo[3][2], MA), MA);
+	}
+
+	// Child rings and edges, parent ring orientation kept (origin = sub-domain origin).
+	// Corner c of the parent lands in child chOf[c] at LOCAL SLOT c (the ring layouts
+	// below are chosen for exactly this property).
+	sint32 ring[2][4], redge[2][4];
+	int chOf[4];
+	if (axisA)
+	{
+		// lo: a in [0,.5] - { V0, M0, M2, V3 }; hi: { M0, V1, V2, M2 }.
+		ring[0][0] = par.V[0]; ring[0][1] = MA; ring[0][2] = MB; ring[0][3] = par.V[3];
+		ring[1][0] = MA; ring[1][1] = par.V[1]; ring[1][2] = par.V[2]; ring[1][3] = MB;
+		redge[0][0] = halfBetween(pm, sA, par.V[0], MA);
+		redge[0][1] = eInt;
+		redge[0][2] = halfBetween(pm, sB, MB, par.V[3]);
+		redge[0][3] = par.Edge[3];
+		redge[1][0] = halfBetween(pm, sA, MA, par.V[1]);
+		redge[1][1] = par.Edge[1];
+		redge[1][2] = halfBetween(pm, sB, par.V[2], MB);
+		redge[1][3] = eInt;
+		chOf[0] = 0; chOf[1] = 1; chOf[2] = 1; chOf[3] = 0;
+	}
+	else
+	{
+		// lo: b in [0,.5] - { V0, V1, M1, M3 }; hi: { M3, M1, V2, V3 }.
+		ring[0][0] = par.V[0]; ring[0][1] = par.V[1]; ring[0][2] = MA; ring[0][3] = MB;
+		ring[1][0] = MB; ring[1][1] = MA; ring[1][2] = par.V[2]; ring[1][3] = par.V[3];
+		redge[0][0] = par.Edge[0];
+		redge[0][1] = halfBetween(pm, sA, par.V[1], MA);
+		redge[0][2] = eInt;
+		redge[0][3] = halfBetween(pm, sB, MB, par.V[0]);
+		redge[1][0] = eInt;
+		redge[1][1] = halfBetween(pm, sA, MA, par.V[2]);
+		redge[1][2] = par.Edge[2];
+		redge[1][3] = halfBetween(pm, sB, par.V[3], MB);
+		chOf[0] = 0; chOf[1] = 0; chOf[2] = 1; chOf[3] = 1;
+	}
+	for (int h = 0; h < 2; ++h)
+		for (int e = 0; e < 4; ++e)
+			if (redge[h][e] < 0) { err = "internal: child half edge unresolved"; return false; }
+
+	// Child slots: lo reuses the parent's, hi is appended.
+	sint32 childIdx[2];
+	childIdx[0] = (sint32)p;
+	pm.Patches.push_back(par);
+	rp.Patches.push_back(SRpoPatch());
+	childIdx[1] = (sint32)pm.Patches.size() - 1;
+
+	for (int h = 0; h < 2; ++h)
+	{
+		SPmPatch &ch = pm.Patches[childIdx[h]];
+		ch = par;
+		for (int k = 0; k < 4; ++k)
+		{
+			ch.V[k] = ring[h][k];
+			ch.Edge[k] = redge[h][k];
+		}
+		assignChildVecsFromEdges(pm, ch);
+		const PtL(&g)[4][4] = h == 0 ? Lo : Hi;
+		if (h == 0)
+		{
+			ch.Interior[0] = par.Interior[0];
+			ch.Interior[1] = par.Interior[1];
+			ch.Interior[2] = par.Interior[2];
+			ch.Interior[3] = par.Interior[3];
+			writeVecPos(pm, mapper, evalPm, ch.Interior[0], g[1][1]);
+			writeVecPos(pm, mapper, evalPm, ch.Interior[1], g[1][2]);
+			writeVecPos(pm, mapper, evalPm, ch.Interior[2], g[2][2]);
+			writeVecPos(pm, mapper, evalPm, ch.Interior[3], g[2][1]);
+		}
+		else
+		{
+			ch.Interior[0] = mk.newInteriorVec(g[1][1]);
+			ch.Interior[1] = mk.newInteriorVec(g[1][2]);
+			ch.Interior[2] = mk.newInteriorVec(g[2][2]);
+			ch.Interior[3] = mk.newInteriorVec(g[2][1]);
+		}
+	}
+
+	// --- rp side: half tiles, colors (midline duplicated), edge flags.
+	{
+		const sint32 S = 1 << upar.NbTilesU;  // u count (along b)
+		const sint32 T = 1 << upar.NbTilesV;  // v count (along a)
+		for (int h = 0; h < 2; ++h)
+		{
+			SRpoPatch &cu = rp.Patches[childIdx[h]];
+			cu = SRpoPatch();
+			cu.NbTilesU = axisA ? upar.NbTilesU : upar.NbTilesU - 1;
+			cu.NbTilesV = axisA ? upar.NbTilesV - 1 : upar.NbTilesV;
+			const sint32 cs = 1 << cu.NbTilesU, ct = 1 << cu.NbTilesV;
+			cu.Tiles.resize((size_t)cs * ct);
+			cu.Colors.resize((size_t)(cs + 1) * (ct + 1));
+			const sint32 du = axisA ? 0 : h * cs;
+			const sint32 dv = axisA ? h * ct : 0;
+			for (sint32 v = 0; v < ct; ++v)
+				for (sint32 u = 0; u < cs; ++u)
+					cu.Tiles[u + v * cs] = upar.Tiles[(u + du) + (v + dv) * S];
+			for (sint32 v = 0; v < ct + 1; ++v)
+				for (sint32 u = 0; u < cs + 1; ++u)
+					cu.Colors[u + v * (cs + 1)] = upar.Colors[(u + du) + (v + dv) * (S + 1)];
+		}
+		SRpoPatch &lo = rp.Patches[childIdx[0]];
+		SRpoPatch &hi = rp.Patches[childIdx[1]];
+		if (axisA)
+		{
+			lo.EdgeFlags[0] = upar.EdgeFlags[0];
+			lo.EdgeFlags[2] = upar.EdgeFlags[2];
+			lo.EdgeFlags[3] = upar.EdgeFlags[3];
+			hi.EdgeFlags[0] = upar.EdgeFlags[0];
+			hi.EdgeFlags[1] = upar.EdgeFlags[1];
+			hi.EdgeFlags[2] = upar.EdgeFlags[2];
+		}
+		else
+		{
+			lo.EdgeFlags[0] = upar.EdgeFlags[0];
+			lo.EdgeFlags[1] = upar.EdgeFlags[1];
+			lo.EdgeFlags[3] = upar.EdgeFlags[3];
+			hi.EdgeFlags[1] = upar.EdgeFlags[1];
+			hi.EdgeFlags[2] = upar.EdgeFlags[2];
+			hi.EdgeFlags[3] = upar.EdgeFlags[3];
+		}
+	}
+
+	// --- Cross-reference maintenance.
+	// Edge patch lists: children onto their edges (reused whole/half records inherited
+	// the parent entry - replace it).
+	for (int h = 0; h < 2; ++h)
+		for (int e = 0; e < 4; ++e)
+		{
+			SPmEdge &ce = pm.Edges[pm.Patches[childIdx[h]].Edge[e]];
+			if (ce.HasPatches)
+			{
+				listRemove(ce.Patches, (sint32)p);
+				listAdd(ce.Patches, childIdx[h]);
+			}
+		}
+	// T-junction originals: the parent leaves the whole record and its tangent vecs.
+	const int crossedSlots[2] = { ce0, ce1 };
+	for (int k = 0; k < 2; ++k)
+	{
+		const SEdgeSplit &sp = splits[par.Edge[crossedSlots[k]]];
+		if (!sp.Bound)
+			continue;
+		const SPmEdge &oe = pm.Edges[par.Edge[crossedSlots[k]]];
+		if (oe.HasPatches)
+			listRemove(pm.Edges[par.Edge[crossedSlots[k]]].Patches, (sint32)p);
+		if (oe.Vec12 >= 0 && pm.Vecs[oe.Vec12].HasPatches)
+			listRemove(pm.Vecs[oe.Vec12].Patches, (sint32)p);
+		if (oe.Vec21 >= 0 && pm.Vecs[oe.Vec21].HasPatches)
+			listRemove(pm.Vecs[oe.Vec21].Patches, (sint32)p);
+	}
+	// Corner verts: parent patch -> the corner's child (local slot c by construction).
+	for (int c = 0; c < 4; ++c)
+	{
+		SPmVert &cv = pm.Verts[par.V[c]];
+		if (cv.HasPatches)
+			listReplace(cv.Patches, (sint32)p, childIdx[chOf[c]]);
+		if (cv.HasEdges)
+		{
+			for (int k = 0; k < 2; ++k)
+			{
+				const SEdgeSplit &sp = splits[par.Edge[crossedSlots[k]]];
+				const sint32 h = halfBetween(pm, sp,
+					par.V[c],
+					(sp.OrigV1 == par.V[c]) ? sp.Mid : (sp.OrigV2 == par.V[c] ? sp.Mid : -2));
+				if (h >= 0)
+					listAdd(cv.Edges, h);
+			}
+		}
+		if (cv.HasVectors)
+		{
+			const SPmPatch &ch = pm.Patches[childIdx[chOf[c]]];
+			listAdd(cv.Vectors, ch.Vec[2 * c]);
+			listAdd(cv.Vectors, ch.Vec[((c + 3) & 3) * 2 + 1]);
+		}
+	}
+	// Midpoint verts.
+	const sint32 mids[2] = { MA, MB };
+	for (int k = 0; k < 2; ++k)
+	{
+		SPmVert &mv = pm.Verts[mids[k]];
+		const SEdgeSplit &sp = splits[par.Edge[crossedSlots[k]]];
+		if (mv.HasEdges)
+		{
+			listAdd(mv.Edges, sp.Half[0]);
+			listAdd(mv.Edges, sp.Half[1]);
+			listAdd(mv.Edges, eInt);
+		}
+		if (mv.HasPatches)
+		{
+			for (int h = 0; h < 2; ++h)
+				for (int r = 0; r < 4; ++r)
+					if (ring[h][r] == mids[k])
+						listAdd(mv.Patches, childIdx[h]);
+		}
+		if (mv.HasVectors)
+		{
+			for (int h = 0; h < 2; ++h)
+			{
+				const SPmEdge &he = pm.Edges[sp.Half[h]];
+				if (he.V1 == mids[k]) listAdd(mv.Vectors, he.Vec12);
+				if (he.V2 == mids[k]) listAdd(mv.Vectors, he.Vec21);
+			}
+			const SPmEdge &ie = pm.Edges[eInt];
+			if (ie.V1 == mids[k]) listAdd(mv.Vectors, ie.Vec12);
+			if (ie.V2 == mids[k]) listAdd(mv.Vectors, ie.Vec21);
+		}
+	}
+	// Vec patch lists.
+	for (int h = 0; h < 2; ++h)
+		relistChildVecs(pm, (sint32)p, childIdx[h]);
+	return true;
+}
+
+/// Shared per-patch validation. `needU` / `needV` say which tile axes must be halvable.
+bool validateSubdivPatch(const SPatchMesh &pm, const SRPatchMesh &rp, uint p,
+                         bool needU, bool needV, std::string &err)
+{
+	if (p >= pm.Patches.size()) { err = "patch index out of range"; return false; }
+	const SPmPatch &pp = pm.Patches[p];
+	if (pp.Type != 4) { err = "only quad patches can be subdivided"; return false; }
+	const SRpoPatch &up = rp.Patches[p];
+	if ((needU && up.NbTilesU < 1) || (needV && up.NbTilesV < 1))
+	{ err = "tile order 1 cannot be halved (subdivide refused)"; return false; }
+	const size_t nt = ((size_t)1 << up.NbTilesU) * ((size_t)1 << up.NbTilesV);
+	const size_t nc = (((size_t)1 << up.NbTilesU) + 1) * (((size_t)1 << up.NbTilesV) + 1);
+	if (up.Tiles.size() != nt || up.Colors.size() != nc)
+	{ err = "tile/color table size mismatch"; return false; }
+	for (int c = 0; c < 4; ++c)
+	{
+		if (pp.V[c] < 0 || (size_t)pp.V[c] >= rp.Verts.size())
+		{ err = "patch corner out of range"; return false; }
+		if (rp.Verts[pp.V[c]].Binded)
+		{ err = "a corner of the selection is bound (unbind first)"; return false; }
+		if (pp.Edge[c] < 0 || (size_t)pp.Edge[c] >= pm.Edges.size())
+		{ err = "patch edge out of range"; return false; }
+	}
+	for (int k = 0; k < 8; ++k)
+		if (pp.Vec[k] < 0 || (size_t)pp.Vec[k] >= pm.Vecs.size())
+		{ err = "patch tangent slot out of range"; return false; }
+	for (int k = 0; k < 4; ++k)
+		if (pp.Interior[k] < 0 || (size_t)pp.Interior[k] >= pm.Vecs.size())
+		{ err = "patch interior slot out of range"; return false; }
+	return true;
+}
+
+/// Global stream refusals shared by both entries.
+bool subdivGlobalRefusals(const SPatchMesh &pm, const SRPatchMesh &rp, std::string &err)
 {
 	if (pm.EdgesReconstructed)
 	{ err = "reconstructed (Max 3) edge table: topology cannot be written back"; return false; }
@@ -198,113 +964,38 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 	{ err = "mesh carries hook records; hook remap is not implemented"; return false; }
 	if (pm.HasTvPatches)
 	{ err = "map-channel mesh: child TVPatch assignment is not implemented"; return false; }
-	if (patches.empty())
-	{ err = "nothing to subdivide"; return false; }
 	if (pm.Verts.empty() || pm.Vecs.empty() || pm.Edges.empty() || pm.Patches.empty())
 	{ err = "empty element table"; return false; }
+	return true;
+}
+
+} /* anonymous namespace */
+
+bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
+                          const std::set<uint> &patches, std::string &err,
+                          SPmVertMapper *mapper, const SPatchMesh *evalPm)
+{
+	if (!subdivGlobalRefusals(pm, rp, err))
+		return false;
+	if (patches.empty())
+	{ err = "nothing to subdivide"; return false; }
 
 	// --- Validation over the selection.
 	for (std::set<uint>::const_iterator it = patches.begin(); it != patches.end(); ++it)
-	{
-		if (*it >= pm.Patches.size()) { err = "patch index out of range"; return false; }
-		const SPmPatch &pp = pm.Patches[*it];
-		if (pp.Type != 4) { err = "only quad patches can be subdivided"; return false; }
-		const SRpoPatch &up = rp.Patches[*it];
-		if (up.NbTilesU < 1 || up.NbTilesV < 1)
-		{ err = "tile order 1 cannot be halved (subdivide refused)"; return false; }
-		const size_t nt = ((size_t)1 << up.NbTilesU) * ((size_t)1 << up.NbTilesV);
-		const size_t nc = (((size_t)1 << up.NbTilesU) + 1) * (((size_t)1 << up.NbTilesV) + 1);
-		if (up.Tiles.size() != nt || up.Colors.size() != nc)
-		{ err = "tile/color table size mismatch"; return false; }
-		for (int c = 0; c < 4; ++c)
-		{
-			if (pp.V[c] < 0 || (size_t)pp.V[c] >= rp.Verts.size())
-			{ err = "patch corner out of range"; return false; }
-			if (rp.Verts[pp.V[c]].Binded)
-			{ err = "a corner of the selection is bound (unbind first)"; return false; }
-			if (pp.Edge[c] < 0 || (size_t)pp.Edge[c] >= pm.Edges.size())
-			{ err = "patch edge out of range"; return false; }
-		}
-		for (int k = 0; k < 8; ++k)
-			if (pp.Vec[k] < 0 || (size_t)pp.Vec[k] >= pm.Vecs.size())
-			{ err = "patch tangent slot out of range"; return false; }
-		for (int k = 0; k < 4; ++k)
-			if (pp.Interior[k] < 0 || (size_t)pp.Interior[k] >= pm.Vecs.size())
-			{ err = "patch interior slot out of range"; return false; }
-	}
+		if (!validateSubdivPatch(pm, rp, *it, true, true, err))
+			return false;
 	// No bind record may target an edge slot of a selected patch: splitting a T-junction
 	// target would strand the bound vertices.
 	for (size_t v = 0; v < rp.Verts.size(); ++v)
 		if (rp.Verts[v].Binded && patches.count((uint)rp.Verts[v].Patch))
 		{ err = "an edge of the selection is a bind target (unbind first)"; return false; }
 
-	// Presence/flags templates for freshly created elements (uniform per file in practice).
-	const SPmVert vertTpl = pm.Verts[0];
-	const SPmVec vecTpl = pm.Vecs[0];
-	const SPmEdge edgeTpl = pm.Edges[0];
-
-	// Convenience creators.
-	struct SNew
-	{
-		SPatchMesh *Pm;
-		SRPatchMesh *Rp;
-		const SPmVert *VertTpl;
-		const SPmVec *VecTpl;
-		const SPmEdge *EdgeTpl;
-		sint32 newVert(const PtL &pos)
-		{
-			SPmVert v;
-			v.Flags = VertTpl->Flags;
-			v.HasVectors = VertTpl->HasVectors;
-			v.HasPatches = VertTpl->HasPatches;
-			v.HasEdges = VertTpl->HasEdges;
-			ptTo(v.Pos, pos);
-			Pm->Verts.push_back(v);
-			SRpoVertexBind b;
-			memset(&b, 0, sizeof(b));
-			b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
-			Rp->Verts.push_back(b);
-			return (sint32)Pm->Verts.size() - 1;
-		}
-		sint32 newVec(const PtL &pos, sint32 owner)
-		{
-			SPmVec v;
-			v.Flags = VecTpl->Flags;
-			v.HasVert = VecTpl->HasVert;
-			v.HasPatches = VecTpl->HasPatches;
-			v.Vert = v.HasVert ? owner : -1;
-			ptTo(v.Pos, pos);
-			Pm->Vecs.push_back(v);
-			return (sint32)Pm->Vecs.size() - 1;
-		}
-		sint32 newInteriorVec(const PtL &pos)
-		{
-			// Authored interiors carry PVEC_INTERIOR (bit 0), no vertex attachment, and
-			// never appear in a vertex's Vectors list - the identity the detach ownership
-			// derivation and Max's own linkage machinery key on.
-			SPmVec v;
-			v.Flags = VecTpl->Flags | 1;
-			v.HasVert = VecTpl->HasVert;
-			v.HasPatches = VecTpl->HasPatches;
-			v.Vert = -1;
-			ptTo(v.Pos, pos);
-			Pm->Vecs.push_back(v);
-			return (sint32)Pm->Vecs.size() - 1;
-		}
-		sint32 newEdge(sint32 v1, sint32 vec12, sint32 vec21, sint32 v2)
-		{
-			SPmEdge e;
-			e.HasPatches = EdgeTpl->HasPatches;
-			e.V1 = v1; e.Vec12 = vec12; e.Vec21 = vec21; e.V2 = v2;
-			Pm->Edges.push_back(e);
-			return (sint32)Pm->Edges.size() - 1;
-		}
-	} mk;
+	SNew mk;
 	mk.Pm = &pm;
 	mk.Rp = &rp;
-	mk.VertTpl = &vertTpl;
-	mk.VecTpl = &vecTpl;
-	mk.EdgeTpl = &edgeTpl;
+	mk.VertTpl = pm.Verts[0];
+	mk.VecTpl = pm.Vecs[0];
+	mk.EdgeTpl = pm.Edges[0];
 
 	// --- Phase 0: capture every selected patch's control grid BEFORE any edge splits.
 	// Phase 1's plain split reuses the edge record and overwrites its two tangent vecs
@@ -314,26 +1005,7 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 	// tangents and every child interior derived from it.
 	std::map<uint, SParentGrid> grids;
 	for (std::set<uint>::const_iterator it = patches.begin(); it != patches.end(); ++it)
-	{
-		const SPmPatch &pp = pm.Patches[*it];
-		SParentGrid &g = grids[*it];
-		g.P[0][0] = effVert(pm, evalPm, pp.V[0]);
-		g.P[0][3] = effVert(pm, evalPm, pp.V[1]);
-		g.P[3][3] = effVert(pm, evalPm, pp.V[2]);
-		g.P[3][0] = effVert(pm, evalPm, pp.V[3]);
-		g.P[0][1] = effVec(pm, evalPm, pp.Vec[0]);
-		g.P[0][2] = effVec(pm, evalPm, pp.Vec[1]);
-		g.P[1][3] = effVec(pm, evalPm, pp.Vec[2]);
-		g.P[2][3] = effVec(pm, evalPm, pp.Vec[3]);
-		g.P[3][2] = effVec(pm, evalPm, pp.Vec[4]);
-		g.P[3][1] = effVec(pm, evalPm, pp.Vec[5]);
-		g.P[2][0] = effVec(pm, evalPm, pp.Vec[6]);
-		g.P[1][0] = effVec(pm, evalPm, pp.Vec[7]);
-		g.P[1][1] = effVec(pm, evalPm, pp.Interior[0]);
-		g.P[1][2] = effVec(pm, evalPm, pp.Interior[1]);
-		g.P[2][2] = effVec(pm, evalPm, pp.Interior[2]);
-		g.P[2][1] = effVec(pm, evalPm, pp.Interior[3]);
-	}
+		captureGrid(pm, evalPm, pm.Patches[*it], grids[*it]);
 
 	// --- Phase 1: split every edge of the selection once, globally keyed by edge index.
 	std::map<sint32, SEdgeSplit> splits;
@@ -345,82 +1017,17 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 			const sint32 ei = pp.Edge[e];
 			if (splits.count(ei))
 				continue;
-			// BY VALUE: every mk.new* below may reallocate the element vectors, so no
-			// reference into them survives an allocation.
-			const SPmEdge ed = pm.Edges[ei];
-			if (ed.V1 < 0 || ed.V2 < 0 || ed.Vec12 < 0 || ed.Vec21 < 0
-			    || (size_t)ed.Vec12 >= pm.Vecs.size() || (size_t)ed.Vec21 >= pm.Vecs.size())
-			{ err = "edge record incomplete"; return false; }
-
-			// Split the edge's own cubic (record direction V1 -> V2), on the EVALUATED
-			// curve - the stored positions of mapped outputs are stale caches.
-			PtL c[4], le[4], ri[4];
-			c[0] = effVert(pm, evalPm, ed.V1);
-			c[1] = effVec(pm, evalPm, ed.Vec12);
-			c[2] = effVec(pm, evalPm, ed.Vec21);
-			c[3] = effVert(pm, evalPm, ed.V2);
-			splitCubic(c, le, ri);
-
-			SEdgeSplit sp;
-			sp.OrigV1 = ed.V1;
-			sp.OrigV2 = ed.V2;
-			sp.Mid = mk.newVert(le[3]);
-
 			// The other patch on this edge, if any, and whether it splits too.
 			sint32 other = -1;
+			const SPmEdge &ed = pm.Edges[ei];
 			for (size_t k = 0; k < ed.Patches.size(); ++k)
 				if (ed.Patches[k] != (sint32)*it)
 					other = ed.Patches[k];
-			sp.Bound = other >= 0 && !patches.count((uint)other);
-
-			if (sp.Bound)
-			{
-				// T-junction: the neighbor keeps the WHOLE original edge (its curve and
-				// tangent records untouched); the children ride two new half edges and the
-				// midpoint binds onto the neighbor's edge slot. The midpoint IS the curve's
-				// 0.5 point, so the bind refresh derives exactly this position.
-				const sint32 l1 = mk.newVec(le[1], ed.V1);
-				const sint32 l2 = mk.newVec(le[2], sp.Mid);
-				const sint32 r1 = mk.newVec(ri[1], sp.Mid);
-				const sint32 r2 = mk.newVec(ri[2], ed.V2);
-				sp.Half[0] = mk.newEdge(ed.V1, l1, l2, sp.Mid);
-				sp.Half[1] = mk.newEdge(sp.Mid, r1, r2, ed.V2);
-				// Bind record: BIND_SINGLE onto (other, its slot for this edge).
-				sint32 slot = -1;
-				for (int s = 0; s < 4; ++s)
-					if (pm.Patches[other].Edge[s] == ei) { slot = s; break; }
-				if (slot < 0) { err = "neighbor slot for shared edge not found"; return false; }
-				SRpoVertexBind &b = rp.Verts[sp.Mid];
-				b.Binded = 1;
-				b.Type = 3; // BIND_SINGLE
-				b.Type2 = 3;
-				b.Patch = (uint32)other;
-				b.Edge = (uint32)slot;
-				b.PrimVert = (uint32)sp.Mid;
-			}
-			else
-			{
-				// Plain split (open edge, or shared with another SELECTED patch): reuse the
-				// record for the first half and its tangent slots for the outer controls,
-				// so both vec owners stay what they were. The reused slots may be MAPPED
-				// outputs, so the write goes through the delta-shifting form.
-				writeVecPos(pm, mapper, evalPm, ed.Vec12, le[1]);
-				const sint32 l2 = mk.newVec(le[2], sp.Mid);
-				const sint32 r1 = mk.newVec(ri[1], sp.Mid);
-				writeVecPos(pm, mapper, evalPm, ed.Vec21, ri[2]);
-				sp.Half[1] = mk.newEdge(sp.Mid, r1, ed.Vec21, ed.V2);
-				// Rewire the reused record (fresh reference, taken after all allocations).
-				SPmEdge &edm = pm.Edges[ei];
-				edm.Vec21 = l2;
-				edm.V2 = sp.Mid;
-				sp.Half[0] = ei;
-				// Adjacency: origV2 leaves the reused record for the new half.
-				if (pm.Verts[sp.OrigV2].HasEdges)
-				{
-					listRemove(pm.Verts[sp.OrigV2].Edges, ei);
-					listAdd(pm.Verts[sp.OrigV2].Edges, sp.Half[1]);
-				}
-			}
+			const sint32 boundNeighbor =
+				(other >= 0 && !patches.count((uint)other)) ? other : -1;
+			SEdgeSplit sp;
+			if (!splitEdgeOnce(pm, rp, mk, mapper, evalPm, ei, boundNeighbor, err, sp))
+				return false;
 			splits[ei] = sp;
 		}
 	}
@@ -428,293 +1035,193 @@ bool topoSubdividePatches(SPatchMesh &pm, SRPatchMesh &rp,
 	// --- Phase 2/3: per selected patch, split the control grid and build the children.
 	std::vector<uint> parents(patches.begin(), patches.end());
 	for (size_t pi = 0; pi < parents.size(); ++pi)
+		if (!buildChildren4(pm, rp, mk, mapper, evalPm, parents[pi], grids[parents[pi]],
+		                    splits, err))
+			return false;
+
+	// --- Side tables sized to the new counts (new elements unselected).
+	growBits(pm.VertSel, (sint32)pm.Verts.size());
+	growBits(pm.PatchSel, (sint32)pm.Patches.size());
+	growBits(pm.EdgeSel, (sint32)pm.Edges.size());
+	return true;
+}
+
+bool topoSubdivideEdges(SPatchMesh &pm, SRPatchMesh &rp,
+                        const std::set<uint> &edges, bool propagate, std::string &err,
+                        SPmVertMapper *mapper, const SPatchMesh *evalPm)
+{
+	if (!subdivGlobalRefusals(pm, rp, err))
+		return false;
+	if (edges.empty())
+	{ err = "nothing to subdivide"; return false; }
+	for (std::set<uint>::const_iterator it = edges.begin(); it != edges.end(); ++it)
+		if (*it >= pm.Edges.size())
+		{ err = "edge index out of range"; return false; }
+
+	/// Local slot of edge `ei` in patch `p`, -1 when the patch does not carry it.
+	struct SSlot
 	{
-		const uint p = parents[pi];
-		const SPmPatch par = pm.Patches[p]; // by value: the slot is rewritten below
-		const SRpoPatch upar = rp.Patches[p];
-
-		// Control grid P[b][a], captured in phase 0 - the element tables no longer hold
-		// the parent's curves (phase 1 halved the reused tangent records in place).
-		const PtL(&P)[4][4] = grids[p].P;
-
-		// Split rows at a = 0.5, then columns at b = 0.5 -> G[qa][qb] 4x4 child grids,
-		// child-local layout identical to the parent's (G[qa][qb][b'][a']).
-		PtL rowL[4][4], rowR[4][4];
-		for (int b = 0; b < 4; ++b)
-			splitCubic(P[b], rowL[b], rowR[b]);
-		PtL G[2][2][4][4];
-		for (int a = 0; a < 4; ++a)
+		static int of(const SPatchMesh &pm, sint32 p, sint32 ei)
 		{
-			PtL colInL[4], colInR[4], lo[4], hi[4];
-			for (int b = 0; b < 4; ++b) { colInL[b] = rowL[b][a]; colInR[b] = rowR[b][a]; }
-			splitCubic(colInL, lo, hi);
-			for (int b = 0; b < 4; ++b) { G[0][0][b][a] = lo[b]; G[0][1][b][a] = hi[b]; }
-			splitCubic(colInR, lo, hi);
-			for (int b = 0; b < 4; ++b) { G[1][0][b][a] = lo[b]; G[1][1][b][a] = hi[b]; }
+			for (int s = 0; s < 4; ++s)
+				if (pm.Patches[p].Edge[s] == ei)
+					return s;
+			return -1;
 		}
+	};
 
-		// The four boundary midpoints and their splits (already created in phase 1).
-		const SEdgeSplit &s0 = splits[par.Edge[0]];
-		const SEdgeSplit &s1 = splits[par.Edge[1]];
-		const SEdgeSplit &s2 = splits[par.Edge[2]];
-		const SEdgeSplit &s3 = splits[par.Edge[3]];
-		const sint32 M0 = s0.Mid, M1 = s1.Mid, M2 = s2.Mid, M3 = s3.Mid;
-
-		// Centre vertex and the four internal cross edges Mk -> C with fresh tangents.
-		// The a=0.5 column of the b-lo half is G[0][0][.][3] == G[1][0][.][0] (same values
-		// by construction); the internal tangents come off these shared columns/rows.
-		const sint32 C = mk.newVert(G[0][0][3][3]);
-		// M0 -> C: parent (a=.5, b: 0 -> .5): controls G[0][0][b][3], b = 0..3.
-		const sint32 e0c = mk.newEdge(M0, mk.newVec(G[0][0][1][3], M0), mk.newVec(G[0][0][2][3], C), C);
-		// M1 -> C: parent (a: 1 -> .5, b=.5): controls G[1][0][3][a], a = 3..0.
-		const sint32 e1c = mk.newEdge(M1, mk.newVec(G[1][0][3][2], M1), mk.newVec(G[1][0][3][1], C), C);
-		// M2 -> C: parent (a=.5, b: 1 -> .5): controls G[0][1][b][3], b = 3..0.
-		const sint32 e2c = mk.newEdge(M2, mk.newVec(G[0][1][2][3], M2), mk.newVec(G[0][1][1][3], C), C);
-		// M3 -> C: parent (a: 0 -> .5, b=.5): controls G[0][0][3][a], a = 0..3.
-		const sint32 e3c = mk.newEdge(M3, mk.newVec(G[0][0][3][1], M3), mk.newVec(G[0][0][3][2], C), C);
-
-		// Child rings and edge assignments (see the header block).
-		// ring[q] = { v0, v1, v2, v3 }, edges[q] = { e0, e1, e2, e3 }, grid[q]
-		const sint32 ring[4][4] = {
-			{ par.V[0], M0, C, M3 },      // Q(0,0)
-			{ M0, par.V[1], M1, C },      // Q(1,0)
-			{ C, M1, par.V[2], M2 },      // Q(1,1)
-			{ M3, C, M2, par.V[3] },      // Q(0,1)
-		};
-		const sint32 qedge[4][4] = {
-			{ halfBetween(pm, s0, par.V[0], M0), e0c, e3c, halfBetween(pm, s3, M3, par.V[0]) },
-			{ halfBetween(pm, s0, M0, par.V[1]), halfBetween(pm, s1, par.V[1], M1), e1c, e0c },
-			{ e1c, halfBetween(pm, s1, M1, par.V[2]), halfBetween(pm, s2, par.V[2], M2), e2c },
-			{ e3c, e2c, halfBetween(pm, s2, M2, par.V[3]), halfBetween(pm, s3, par.V[3], M3) },
-		};
-		const int qa[4] = { 0, 1, 1, 0 };
-		const int qb[4] = { 0, 0, 1, 1 };
-		for (int q = 0; q < 4; ++q)
-			for (int e = 0; e < 4; ++e)
-				if (qedge[q][e] < 0) { err = "internal: child half edge unresolved"; return false; }
-
-		// Child patch slots: parent slot -> Q(0,0); three appended in q order 1..3.
-		sint32 childIdx[4];
-		childIdx[0] = (sint32)p;
-		for (int q = 1; q < 4; ++q)
+	// --- Propagate closure: every affected patch's OPPOSITE edge joins the set, until
+	// the walk closes into a loop or exits an open border.
+	std::set<uint> S(edges);
+	if (propagate)
+	{
+		bool grew = true;
+		while (grew)
 		{
-			pm.Patches.push_back(par); // placeholder, filled below
-			rp.Patches.push_back(SRpoPatch());
-			childIdx[q] = (sint32)pm.Patches.size() - 1;
-		}
-
-		for (int q = 0; q < 4; ++q)
-		{
-			SPmPatch &ch = pm.Patches[childIdx[q]];
-			ch = par; // Type/NumVerts/SmGroup/Flags/presence inherit
-			for (int k = 0; k < 4; ++k)
+			grew = false;
+			const std::set<uint> cur(S);
+			for (std::set<uint>::const_iterator it = cur.begin(); it != cur.end(); ++it)
 			{
-				ch.V[k] = ring[q][k];
-				ch.Edge[k] = qedge[q][k];
-			}
-			// Tangents and interiors: boundary tangent SLOTS come from the child's edge
-			// records so the patch and edge tables stay consistent by construction; the
-			// interiors are fresh vecs from the child grid (parent interior slots are
-			// reused for Q(0,0)).
-			for (int k = 0; k < 4; ++k)
-			{
-				const SPmEdge &ce = pm.Edges[ch.Edge[k]];
-				// ch edge k runs ring[k] -> ring[(k+1)&3]; the record may store either
-				// direction. Vec[2k] leaves ring[k]: pick the record tangent adjacent to it.
-				if (ce.V1 == ch.V[k])
+				const SPmEdge &ed = pm.Edges[*it];
+				for (size_t k = 0; k < ed.Patches.size(); ++k)
 				{
-					ch.Vec[2 * k] = ce.Vec12;
-					ch.Vec[2 * k + 1] = ce.Vec21;
-				}
-				else
-				{
-					ch.Vec[2 * k] = ce.Vec21;
-					ch.Vec[2 * k + 1] = ce.Vec12;
+					const sint32 p = ed.Patches[k];
+					if (p < 0 || (size_t)p >= pm.Patches.size())
+						continue;
+					const int slot = SSlot::of(pm, p, (sint32)*it);
+					if (slot < 0)
+						continue;
+					const sint32 opp = pm.Patches[p].Edge[(slot + 2) & 3];
+					if (opp >= 0 && S.insert((uint)opp).second)
+						grew = true;
 				}
 			}
-			const PtL(&g)[4][4] = G[qa[q]][qb[q]];
-			if (q == 0)
-			{
-				// Reuse the parent's interior slots (owners follow the child corners).
-				ch.Interior[0] = par.Interior[0];
-				ch.Interior[1] = par.Interior[1];
-				ch.Interior[2] = par.Interior[2];
-				ch.Interior[3] = par.Interior[3];
-				// Positions only: authored interiors have Vert = -1, and the reused records
-				// already carry the right identity - rewriting Vert to a corner gave them a
-				// tangent-shaped attachment no authored mesh has. Reused slots may be
-				// mapped, so the writes shift their deltas.
-				writeVecPos(pm, mapper, evalPm, ch.Interior[0], g[1][1]);
-				writeVecPos(pm, mapper, evalPm, ch.Interior[1], g[1][2]);
-				writeVecPos(pm, mapper, evalPm, ch.Interior[2], g[2][2]);
-				writeVecPos(pm, mapper, evalPm, ch.Interior[3], g[2][1]);
-			}
-			else
-			{
-				ch.Interior[0] = mk.newInteriorVec(g[1][1]);
-				ch.Interior[1] = mk.newInteriorVec(g[1][2]);
-				ch.Interior[2] = mk.newInteriorVec(g[2][2]);
-				ch.Interior[3] = mk.newInteriorVec(g[2][1]);
-			}
-		}
-
-		// --- rp side: tile quadrants, colors, edge flags. Child grids align with the
-		// parent's, so the copy is a plain offset. The (u, v) <-> (a, b) axis pairing is
-		// validated by the m43 marker gate; here: v runs along a (edge 0), u along b.
-		{
-			const sint32 S = 1 << upar.NbTilesU;  // u count
-			const sint32 T = 1 << upar.NbTilesV;  // v count
-			for (int q = 0; q < 4; ++q)
-			{
-				SRpoPatch &cu = rp.Patches[childIdx[q]];
-				cu = SRpoPatch();
-				cu.NbTilesU = upar.NbTilesU - 1;
-				cu.NbTilesV = upar.NbTilesV - 1;
-				const sint32 cs = S / 2, ct = T / 2;
-				cu.Tiles.resize((size_t)cs * ct);
-				cu.Colors.resize((size_t)(cs + 1) * (ct + 1));
-				const sint32 du = qb[q] * cs;
-				const sint32 dv = qa[q] * ct;
-				for (sint32 v = 0; v < ct; ++v)
-					for (sint32 u = 0; u < cs; ++u)
-						cu.Tiles[u + v * cs] = upar.Tiles[(u + du) + (v + dv) * S];
-				for (sint32 v = 0; v < ct + 1; ++v)
-					for (sint32 u = 0; u < cs + 1; ++u)
-						cu.Colors[u + v * (cs + 1)] = upar.Colors[(u + du) + (v + dv) * (S + 1)];
-			}
-			// Outer edges inherit the parent flag, internal edges start clear.
-			rp.Patches[childIdx[0]].EdgeFlags[0] = upar.EdgeFlags[0];
-			rp.Patches[childIdx[0]].EdgeFlags[3] = upar.EdgeFlags[3];
-			rp.Patches[childIdx[1]].EdgeFlags[0] = upar.EdgeFlags[0];
-			rp.Patches[childIdx[1]].EdgeFlags[1] = upar.EdgeFlags[1];
-			rp.Patches[childIdx[2]].EdgeFlags[1] = upar.EdgeFlags[1];
-			rp.Patches[childIdx[2]].EdgeFlags[2] = upar.EdgeFlags[2];
-			rp.Patches[childIdx[3]].EdgeFlags[2] = upar.EdgeFlags[2];
-			rp.Patches[childIdx[3]].EdgeFlags[3] = upar.EdgeFlags[3];
-		}
-
-		// --- Cross-reference maintenance for this parent's neighborhood.
-		// Edge patch lists: children onto their edges; the parent leaves every edge it sat
-		// on (reused half records inherited the parent entry - replace it).
-		for (int q = 0; q < 4; ++q)
-			for (int e = 0; e < 4; ++e)
-			{
-				SPmEdge &ce = pm.Edges[pm.Patches[childIdx[q]].Edge[e]];
-				if (ce.HasPatches)
-				{
-					listRemove(ce.Patches, (sint32)p);
-					listAdd(ce.Patches, childIdx[q]);
-				}
-			}
-		// T-junction originals keep the neighbor only - the edge record and its two
-		// tangent vecs (no child references them; the dead parent index must not stay,
-		// it now names child Q(0,0)).
-		for (int e = 0; e < 4; ++e)
-		{
-			const SEdgeSplit &sp = splits[par.Edge[e]];
-			if (!sp.Bound)
-				continue;
-			const SPmEdge &oe = pm.Edges[par.Edge[e]];
-			if (oe.HasPatches)
-				listRemove(pm.Edges[par.Edge[e]].Patches, (sint32)p);
-			if (oe.Vec12 >= 0 && pm.Vecs[oe.Vec12].HasPatches)
-				listRemove(pm.Vecs[oe.Vec12].Patches, (sint32)p);
-			if (oe.Vec21 >= 0 && pm.Vecs[oe.Vec21].HasPatches)
-				listRemove(pm.Vecs[oe.Vec21].Patches, (sint32)p);
-		}
-		// Corner verts: parent patch -> the corner's child; ring vec/edge lists follow.
-		for (int c = 0; c < 4; ++c)
-		{
-			SPmVert &cv = pm.Verts[par.V[c]];
-			if (cv.HasPatches)
-				listReplace(cv.Patches, (sint32)p, childIdx[c]);
-			if (cv.HasEdges)
-			{
-				// The T-junction case keeps the original edge in the corner's list (it
-				// still ends there, on the neighbor's side) and adds the new half.
-				for (int e = 0; e < 4; ++e)
-				{
-					const SEdgeSplit &sp = splits[par.Edge[e]];
-					const sint32 h = halfBetween(pm, sp,
-						par.V[c],
-						(sp.OrigV1 == par.V[c]) ? sp.Mid : (sp.OrigV2 == par.V[c] ? sp.Mid : -2));
-					if (h >= 0)
-						listAdd(cv.Edges, h);
-				}
-			}
-			if (cv.HasVectors)
-			{
-				// New boundary tangents owned by this corner (T-junction halves).
-				const SPmPatch &ch = pm.Patches[childIdx[c]];
-				listAdd(cv.Vectors, ch.Vec[2 * c]);
-				listAdd(cv.Vectors, ch.Vec[((c + 3) & 3) * 2 + 1]);
-			}
-		}
-		// Midpoint and centre verts: full lists.
-		const sint32 mids[4] = { M0, M1, M2, M3 };
-		const sint32 crossEdges[4] = { e0c, e1c, e2c, e3c };
-		for (int e = 0; e < 4; ++e)
-		{
-			SPmVert &mv = pm.Verts[mids[e]];
-			const SEdgeSplit &sp = splits[par.Edge[e]];
-			if (mv.HasEdges)
-			{
-				listAdd(mv.Edges, sp.Half[0]);
-				listAdd(mv.Edges, sp.Half[1]);
-				listAdd(mv.Edges, crossEdges[e]);
-			}
-			if (mv.HasPatches)
-			{
-				// The two children sharing this midpoint on this parent.
-				for (int q = 0; q < 4; ++q)
-					for (int k = 0; k < 4; ++k)
-						if (ring[q][k] == mids[e])
-							listAdd(mv.Patches, childIdx[q]);
-			}
-			if (mv.HasVectors)
-			{
-				for (int h = 0; h < 2; ++h)
-				{
-					const SPmEdge &he = pm.Edges[sp.Half[h]];
-					if (he.V1 == mids[e]) listAdd(mv.Vectors, he.Vec12);
-					if (he.V2 == mids[e]) listAdd(mv.Vectors, he.Vec21);
-				}
-				listAdd(mv.Vectors, pm.Edges[crossEdges[e]].Vec12);
-			}
-		}
-		{
-			SPmVert &cvC = pm.Verts[C];
-			if (cvC.HasEdges)
-				for (int e = 0; e < 4; ++e)
-					listAdd(cvC.Edges, crossEdges[e]);
-			if (cvC.HasPatches)
-				for (int q = 0; q < 4; ++q)
-					listAdd(cvC.Patches, childIdx[q]);
-			if (cvC.HasVectors)
-				for (int e = 0; e < 4; ++e)
-					listAdd(cvC.Vectors, pm.Edges[crossEdges[e]].Vec21);
-		}
-		// Vec patch lists: every vec a child references lists that child (and drops the
-		// parent entry it may have inherited).
-		for (int q = 0; q < 4; ++q)
-		{
-			const SPmPatch &ch = pm.Patches[childIdx[q]];
-			for (int k = 0; k < 8; ++k)
-				if (pm.Vecs[ch.Vec[k]].HasPatches)
-				{
-					listRemove(pm.Vecs[ch.Vec[k]].Patches, (sint32)p);
-					listAdd(pm.Vecs[ch.Vec[k]].Patches, childIdx[q]);
-				}
-			for (int k = 0; k < 4; ++k)
-				if (pm.Vecs[ch.Interior[k]].HasPatches)
-				{
-					listRemove(pm.Vecs[ch.Interior[k]].Patches, (sint32)p);
-					listAdd(pm.Vecs[ch.Interior[k]].Patches, childIdx[q]);
-				}
 		}
 	}
 
-	// --- Side tables sized to the new counts (new elements unselected).
+	// --- Axis masks per adjacent patch: bit 0 = the a-crossing cut (a listed edge on
+	// slot 0 or 2), bit 1 = the b-crossing cut (slot 1 or 3). Both bits = the 1 -> 4.
+	std::map<uint, int> mask;
+	for (std::set<uint>::const_iterator it = S.begin(); it != S.end(); ++it)
+	{
+		const SPmEdge &ed = pm.Edges[*it];
+		for (size_t k = 0; k < ed.Patches.size(); ++k)
+		{
+			const sint32 p = ed.Patches[k];
+			if (p < 0 || (size_t)p >= pm.Patches.size())
+				continue;
+			const int slot = SSlot::of(pm, p, (sint32)*it);
+			if (slot < 0)
+				continue;
+			mask[(uint)p] |= (slot == 0 || slot == 2) ? 1 : 2;
+		}
+	}
+	if (mask.empty())
+	{ err = "selected edges touch no patches"; return false; }
+
+	/// The slots a patch's cut(s) cross.
+	struct SCrossed
+	{
+		static void of(int m, int out[4], int &n)
+		{
+			n = 0;
+			if (m & 1) { out[n++] = 0; out[n++] = 2; }
+			if (m & 2) { out[n++] = 1; out[n++] = 3; }
+		}
+	};
+
+	// --- Validation: per-patch (axis-specific orders), bind targets, and coherence -
+	// a crossed edge's neighbor must either split ACROSS that same edge or not split at
+	// all (a parallel-splitting neighbor would leave the T-bind targeting a patch this
+	// op is replacing).
+	for (std::map<uint, int>::const_iterator it = mask.begin(); it != mask.end(); ++it)
+	{
+		const bool needV = (it->second & 1) != 0; // a-cut halves v
+		const bool needU = (it->second & 2) != 0; // b-cut halves u
+		if (!validateSubdivPatch(pm, rp, it->first, needU, needV, err))
+			return false;
+	}
+	for (size_t v = 0; v < rp.Verts.size(); ++v)
+		if (rp.Verts[v].Binded && mask.count((uint)rp.Verts[v].Patch))
+		{ err = "an edge of the selection is a bind target (unbind first)"; return false; }
+	for (std::map<uint, int>::const_iterator it = mask.begin(); it != mask.end(); ++it)
+	{
+		int slots[4], n = 0;
+		SCrossed::of(it->second, slots, n);
+		for (int k = 0; k < n; ++k)
+		{
+			const sint32 ei = pm.Patches[it->first].Edge[slots[k]];
+			const SPmEdge &ed = pm.Edges[ei];
+			for (size_t j = 0; j < ed.Patches.size(); ++j)
+			{
+				const sint32 other = ed.Patches[j];
+				if (other == (sint32)it->first || other < 0)
+					continue;
+				std::map<uint, int>::const_iterator om = mask.find((uint)other);
+				if (om == mask.end())
+					continue; // unsplit neighbor: the T-junction bind
+				const int oslot = SSlot::of(pm, other, ei);
+				const bool otherCrosses = oslot >= 0
+					&& (om->second & ((oslot == 0 || oslot == 2) ? 1 : 2)) != 0;
+				if (!otherCrosses)
+				{ err = "a split edge's neighbor splits along the other axis (select coherently)"; return false; }
+			}
+		}
+	}
+
+	SNew mk;
+	mk.Pm = &pm;
+	mk.Rp = &rp;
+	mk.VertTpl = pm.Verts[0];
+	mk.VecTpl = pm.Vecs[0];
+	mk.EdgeTpl = pm.Edges[0];
+
+	// --- Phase 0: grids for every splitting patch (before any edge mutates).
+	std::map<uint, SParentGrid> grids;
+	for (std::map<uint, int>::const_iterator it = mask.begin(); it != mask.end(); ++it)
+		captureGrid(pm, evalPm, pm.Patches[it->first], grids[it->first]);
+
+	// --- Phase 1: split every crossed edge once, globally keyed by edge index.
+	std::map<sint32, SEdgeSplit> splits;
+	for (std::map<uint, int>::const_iterator it = mask.begin(); it != mask.end(); ++it)
+	{
+		int slots[4], n = 0;
+		SCrossed::of(it->second, slots, n);
+		for (int k = 0; k < n; ++k)
+		{
+			const sint32 ei = pm.Patches[it->first].Edge[slots[k]];
+			if (splits.count(ei))
+				continue;
+			sint32 other = -1;
+			const SPmEdge &ed = pm.Edges[ei];
+			for (size_t j = 0; j < ed.Patches.size(); ++j)
+				if (ed.Patches[j] != (sint32)it->first)
+					other = ed.Patches[j];
+			// Coherence was validated above: a splitting neighbor crosses this edge, so
+			// the bind arises exactly for the unsplit neighbor.
+			const sint32 boundNeighbor =
+				(other >= 0 && !mask.count((uint)other)) ? other : -1;
+			SEdgeSplit sp;
+			if (!splitEdgeOnce(pm, rp, mk, mapper, evalPm, ei, boundNeighbor, err, sp))
+				return false;
+			splits[ei] = sp;
+		}
+	}
+
+	// --- Phase 2/3 per splitting patch by axis mask.
+	for (std::map<uint, int>::const_iterator it = mask.begin(); it != mask.end(); ++it)
+	{
+		bool ok;
+		if (it->second == 3)
+			ok = buildChildren4(pm, rp, mk, mapper, evalPm, it->first, grids[it->first],
+			                    splits, err);
+		else
+			ok = buildChildren2(pm, rp, mk, mapper, evalPm, it->first, grids[it->first],
+			                    it->second == 1, splits, err);
+		if (!ok)
+			return false;
+	}
+
 	growBits(pm.VertSel, (sint32)pm.Verts.size());
 	growBits(pm.PatchSel, (sint32)pm.Patches.size());
 	growBits(pm.EdgeSel, (sint32)pm.Edges.size());

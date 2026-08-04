@@ -39,33 +39,31 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	// same gate as index.php: only domains/shards on this user's list
+	if (!tool_main_check_user_domain($view_domain_id))	$view_domain_id = null;
+	if (!tool_main_check_user_shard($view_shard_id))	$view_shard_id	= null;
+
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
-		$tmp_data = unserialize(base64_decode($NELTOOL['GET_VARS']['refdata']));
-		if (is_array($tmp_data))
-		{
-			$NELTOOL['POST_VARS'] = $tmp_data;
-		}
+		tool_main_apply_refdata_from_get($NELTOOL['GET_VARS']['refdata']);
 	}
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
 
 	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $_POST['services_refresh'])
+		$new_refresh = tool_main_refresh_rate_validate($_POST['services_refresh']);
+		if ($current_refresh_rate != $new_refresh)
 		{
-			$current_refresh_rate = $_POST['services_refresh'];
+			$current_refresh_rate = $new_refresh;
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
 
-	if ($current_refresh_rate == null)
+	$current_refresh_rate = tool_main_refresh_rate_validate($current_refresh_rate);
+	if ($current_refresh_rate > 0)
 	{
-		$current_refresh_rate = 0;
-	}
-	elseif ($current_refresh_rate > 0)
-	{
-		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. $current_refresh_rate .'">');
+		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. (int)$current_refresh_rate .'">');
 	}
 
 	$tpl->assign('tool_refresh_list',		$refresh_rates);
@@ -113,7 +111,7 @@
 				if (isset($NELTOOL['POST_VARS']['services_pl']))
 				{
 					$tool_services_pl = $NELTOOL['POST_VARS']['services_pl'];
-					$tpl->assign('tool_post_data',	base64_encode(serialize($NELTOOL['POST_VARS'])));
+					$tpl->assign('tool_post_data',	nt_pack_request_data($NELTOOL['POST_VARS']));
 
 					switch ($tool_services_pl)
 					{
@@ -166,14 +164,18 @@
 
 							if (tool_admin_applications_check('tool_player_locator_csr_relocate'))
 							{
-								$relocate_su	= $NELTOOL['POST_VARS']['pl_su'];
-								$relocate_shardid	= $NELTOOL['POST_VARS']['relocate_shardid'];
-								$relocate_eid	= $NELTOOL['POST_VARS']['relocate_eid'];
+								$relocate_su	= isset($NELTOOL['POST_VARS']['pl_su']) ? $NELTOOL['POST_VARS']['pl_su'] : '';
+								$relocate_shardid	= isset($NELTOOL['POST_VARS']['relocate_shardid']) ? $NELTOOL['POST_VARS']['relocate_shardid'] : '';
+								$relocate_eid	= isset($NELTOOL['POST_VARS']['relocate_eid']) ? $NELTOOL['POST_VARS']['relocate_eid'] : '';
 
-								if ($relocate_eid != 'na' && $relocate_shardid != 'na')
+								// eid, shard id and su land as bare words in cs.relocChar
+								if ($relocate_eid != 'na' && $relocate_shardid != 'na'
+									&& tool_main_valid_entity_id($relocate_eid)
+									&& ctype_digit((string)$relocate_shardid)
+									&& tool_main_valid_service_alias($relocate_su))
 								{
 									$service			= $relocate_su;
-									$service_command	= 'cs.relocChar ' . $relocate_eid . ' ' . $relocate_shardid;
+									$service_command	= 'cs.relocChar ' . $relocate_eid . ' ' . (int)$relocate_shardid;
 
 									nt_common_add_debug("about to run command '$service_command' on '$service' ...");
 
@@ -197,6 +199,10 @@
 									}
 
 								}
+								else
+								{
+									nt_common_add_debug('relocate refused: invalid eid, shard or service');
+								}
 							}
 
 							//break;
@@ -205,11 +211,13 @@
 
 							if (tool_admin_applications_check('tool_player_locator_locate'))
 							{
-								$tool_locate_name	= trim($NELTOOL['POST_VARS']['services_pl_locate']);
+								$tool_locate_name	= isset($NELTOOL['POST_VARS']['services_pl_locate'])
+									? trim($NELTOOL['POST_VARS']['services_pl_locate']) : '';
 								$tpl->assign('tool_locate_value', $tool_locate_name);
 
 								$service_list = tool_main_get_checked_services();
-								if (sizeof($service_list) && ($tool_locate_name != ''))
+								if (sizeof($service_list) && ($tool_locate_name != '')
+									&& tool_main_valid_player_name($tool_locate_name))
 								{
 									$service_command = 'playerInfo '. $tool_locate_name;
 									nt_log("Domain '$AS_Name' : '$service_command' on ". implode(', ',array_values($service_list)));
@@ -249,18 +257,25 @@
 
 							if (tool_admin_applications_check('tool_player_locator_userid_check'))
 							{
-								$check_su = $NELTOOL['POST_VARS']['pl_su'];
+								$check_su = isset($NELTOOL['POST_VARS']['pl_su']) ? $NELTOOL['POST_VARS']['pl_su'] : '';
 
 								tool_pl_fix_character_check_list($AS_Application);
 
-								$service = $check_su;
-								$service_command = 'sqlObjectCache.clearCache';
-								nt_common_add_debug("about to run command '$service_command' on '$service' ...");
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (tool_main_valid_service_alias($check_su))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									$service = $check_su;
+									$service_command = 'sqlObjectCache.clearCache';
+									nt_common_add_debug("about to run command '$service_command' on '$service' ...");
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+								}
+								else
+								{
+									nt_common_add_debug('clearCache refused: invalid service name');
 								}
 							}
 

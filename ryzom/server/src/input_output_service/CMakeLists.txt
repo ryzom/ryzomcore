@@ -10,6 +10,11 @@ LIST(REMOVE_ITEM SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/ios_pd.h
         ${CMAKE_CURRENT_SOURCE_DIR}/ios_pd_inline.h)
 
+# Part of the ios sheets library (Ryzom::iossheets), compiled once and shared
+# with sheets_packer_shard.
+LIST(REMOVE_ITEM SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/string_manager_sheet.cpp)
+
 ADD_EXECUTABLE(ryzom_ios_service WIN32 ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_ios_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
@@ -17,6 +22,7 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_ios_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQ
 TARGET_LINK_LIBRARIES(ryzom_ios_service
         PRIVATE
         Ryzom::adminmodules
+        Ryzom::iossheets
         Ryzom::pd
         Ryzom::gameshare
         Ryzom::servershare

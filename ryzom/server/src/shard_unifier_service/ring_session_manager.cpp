@@ -2835,28 +2835,8 @@ endOfWelcomeUserResult:
 			// if the invited character is not the session owner
 			if (invitedCharId != ownerCharId)
 			{
-				// check that free trial account can't access non authorised scenarios
 				CNelUserPtr invitedNelUser = CNelUser::load(_NelDb, invitedCharId>>4, __FILE__, __LINE__);
 				BOMB_IF(invitedNelUser == NULL, "Failed to load nel user "<<(ownerCharId>>4), invokeResult(from, ownerCharId>>4, 8, "Can not load Nel user of invited character"); return);
-				CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
-				if (sessionLog == NULL)
-				{
-					// the scenario is not started, can't accept invitation now
-					invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
-					return;
-				}
-
-				CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
-				BOMB_IF(invitedNelUser == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
-
-				if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
-					&& !scenario->getAllowFreeTrial())
-				{
-					// free trial are not allowed in this scenario
-					invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
-					return;
-
-				}
 
 				// check that the character is not already participating
 				invitedCharacter->loadSessionParticipants(_RingDb, __FILE__, __LINE__);
@@ -2869,51 +2849,97 @@ endOfWelcomeUserResult:
 					}
 				}
 
-
 				if (session->getSessionType() == TSessionType::st_edit)
 				{
-					invokeResult(from, ownerCharId>>4, 7, "It is not allowed to invite someone else in edit session");
-					return;
-				}
-				else if (role != TSessionPartStatus::sps_play_invited)
-				{
-					invokeResult(from, ownerCharId>>4, 4, "Animator can't invite other animator (only session owner can)");
-					return;
-				}
-				else if (session->getOwnerId() != ownerCharId)
-				{
-					// the character that request the invitation is not the session owner,
-					// check that he is animator in the session/
-
-					BOMB_IF(!ownerChar->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "Failed to load participation for host character "<<ownerCharId, invokeResult(from, ownerCharId>>4, 8, "Failed to load participation for host character"); return);
-
-					uint i=0;
-					for (; i<ownerChar->getSessionParticipants().size(); ++i)
+					// Co-editing: the session owner hands out editor
+					// invitations through the ring web pages. This used to be
+					// refused outright, which left no way to bring a second
+					// editor into an edit session from the web route.
+					if (session->getOwnerId() != ownerCharId)
 					{
-						CSessionParticipantPtr sp = ownerChar->getSessionParticipantsByIndex(i);
-
-						if (sp->getSessionId() == sessionId.asInt())
-						{
-							// we found it
-							if (sp->getStatus() != TSessionPartStatus::sps_anim_invited
-								&& sp->getStatus() != TSessionPartStatus::sps_animating)
-							{
-								// the host char is not animator in the session !
-								invokeResult(from, ownerCharId>>4, 11, "Invitation requester char is not animator in the session");
-								return;
-							}
-
-							// ok, stop the loop
-							break;
-						}
-					}
-
-					if (i == ownerChar->getSessionParticipants().size())
-					{
-						// no participation found !
-						invokeResult(from, ownerCharId>>4, 11, "Requester character is not invited in session");
+						invokeResult(from, ownerCharId>>4, 11, "Only the session owner can invite an editor in an edit session");
 						return;
 					}
+					if (role != TSessionPartStatus::sps_edit_invited)
+					{
+						invokeResult(from, ownerCharId>>4, 7, "Only editor invitations are allowed in an edit session");
+						return;
+					}
+				}
+				else if (role == TSessionPartStatus::sps_anim_invited)
+				{
+					// Co-animating: owner only, and before or after the
+					// scenario starts (there is no session log to check
+					// against until the DSS launches the scenario).
+					if (session->getOwnerId() != ownerCharId)
+					{
+						invokeResult(from, ownerCharId>>4, 4, "Animator can't invite other animator (only session owner can)");
+						return;
+					}
+				}
+				else if (role == TSessionPartStatus::sps_play_invited)
+				{
+					// check that free trial account can't access non authorised scenarios
+					CSessionLogPtr sessionLog = CSessionLog::load(_RingDb, sessionId, __FILE__, __LINE__);
+					if (sessionLog == NULL)
+					{
+						// the scenario is not started, can't accept invitation now
+						invokeResult(from, ownerCharId>>4, 13, "scenario not started, can't validate invitation now");
+						return;
+					}
+
+					CScenarioPtr scenario = CScenario::load(_RingDb, sessionLog->getScenarioId(), __FILE__, __LINE__);
+					BOMB_IF(scenario == NULL, "Failed to load scenario for id "<<sessionLog->getScenarioId()<<" for session "<<sessionId.asInt(), invokeResult(from, ownerCharId>>4, 8, "Can not load scenario associated with session log"); return);
+
+					if (invitedNelUser->getExtendedPrivilege().find(":TRIAL:") != string::npos
+						&& !scenario->getAllowFreeTrial())
+					{
+						// free trial are not allowed in this scenario
+						invokeResult(from, ownerCharId>>4, 14, "free trial character are not allowed in user scenario");
+						return;
+
+					}
+
+					if (session->getOwnerId() != ownerCharId)
+					{
+						// the character that request the invitation is not the session owner,
+						// check that he is animator in the session/
+
+						BOMB_IF(!ownerChar->loadSessionParticipants(_RingDb, __FILE__, __LINE__), "Failed to load participation for host character "<<ownerCharId, invokeResult(from, ownerCharId>>4, 8, "Failed to load participation for host character"); return);
+
+						uint i=0;
+						for (; i<ownerChar->getSessionParticipants().size(); ++i)
+						{
+							CSessionParticipantPtr sp = ownerChar->getSessionParticipantsByIndex(i);
+
+							if (sp->getSessionId() == sessionId.asInt())
+							{
+								// we found it
+								if (sp->getStatus() != TSessionPartStatus::sps_anim_invited
+									&& sp->getStatus() != TSessionPartStatus::sps_animating)
+								{
+									// the host char is not animator in the session !
+									invokeResult(from, ownerCharId>>4, 11, "Invitation requester char is not animator in the session");
+									return;
+								}
+
+								// ok, stop the loop
+								break;
+							}
+						}
+
+						if (i == ownerChar->getSessionParticipants().size())
+						{
+							// no participation found !
+							invokeResult(from, ownerCharId>>4, 11, "Requester character is not invited in session");
+							return;
+						}
+					}
+				}
+				else
+				{
+					invokeResult(from, ownerCharId>>4, 7, "Invalid invitation role for this session");
+					return;
 				}
 			}
 
@@ -3322,10 +3348,16 @@ endOfWelcomeUserResult:
 				TWelcomeServiceInfo &wsi = it3->second;
 
 				// match the access priv with ws open state
-				if (!wsi.ShardInfo->getWSOnline() || (!_DontUsePerm && !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState())))
+				if (!wsi.ShardInfo->getWSOnline())
 				{
-					// can't find a welcome service for this shard
-					joinSessionResult(from, charId >>4, sessionId, 14, string("Welcome service closed : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+					// the shard reports itself as down
+					joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+					return;
+				}
+				if (!_DontUsePerm && !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+				{
+					// the shard is up but restricted to another access level
+					joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 					return;
 				}
 
@@ -3395,10 +3427,16 @@ endOfWelcomeUserResult:
 					if (wsi.FixedSessionId == sessionId) // found the mainland WS
 					{
 						// match the access priv with ws open state
-						if (!wsi.ShardInfo->getWSOnline() || !checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						if (!wsi.ShardInfo->getWSOnline())
 						{
-							// can't find a welcome service for this shard
-							joinSessionResult(from, charId >>4, sessionId, 14, string("Welcome service closed : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+							// the shard reports itself as down
+							joinSessionResult(from, charId >>4, sessionId, 14, string("Shard is down : ")+wsi.ShardInfo->getMOTD(), TSessionPartStatus::invalid_val);
+							return;
+						}
+						if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						{
+							// the shard is up but restricted to another access level
+							joinSessionResult(from, charId >>4, sessionId, 14, toString("Shard is restricted to %s access : %s", wsi.ShardInfo->getRequiredState().toString().c_str(), wsi.ShardInfo->getMOTD().c_str()), TSessionPartStatus::invalid_val);
 							return;
 						}
 
@@ -3482,6 +3520,10 @@ endOfWelcomeUserResult:
 			BOMB_IF (!loadUserAccessPrivileges(userId, userAccessPriv), "RSM:on_joinMainland : failed to load privileges for user "<<userId, joinSessionResult(from, userId, TSessionId(0), 12, "failed to request for access permission", TSessionPartStatus::invalid_val); return;);
 
 			multimap<uint32, TSessionId> mainlandShardsByAscLoad;
+			// remember why each candidate was rejected, so a failure can say
+			// whether the shard is down, closed or restricted instead of the
+			// ambiguous 'no shard available'
+			string rejectedDetail;
 			for ( TWelcomeServices::iterator itw=_WelcomeServices.begin(); itw!=_WelcomeServices.end(); ++itw )
 			{
 				TWelcomeServiceInfo &wsi = itw->second;
@@ -3494,7 +3536,19 @@ endOfWelcomeUserResult:
 						// this welcome is a candidate for connection
 
 						// check open state agains user access
-						if (wsi.ShardInfo->getWSOnline() && checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						if (!wsi.ShardInfo->getWSOnline())
+						{
+							if (!rejectedDetail.empty())
+								rejectedDetail += "; ";
+							rejectedDetail += toString("shard %u is down (%s)", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getMOTD().c_str());
+						}
+						else if (!checkAccessRight(userAccessPriv, wsi.ShardInfo->getRequiredState()))
+						{
+							if (!rejectedDetail.empty())
+								rejectedDetail += "; ";
+							rejectedDetail += toString("shard %u is restricted to %s access", wsi.FixedSessionId.asInt(), wsi.ShardInfo->getRequiredState().toString().c_str());
+						}
+						else
 						{
 							if ( ForceWelcomerShard.get() != 0 )
 							{
@@ -3514,12 +3568,23 @@ endOfWelcomeUserResult:
 					else
 					{
 						nlwarning( "Ignoring mainland session %u (not registered in db)", wsi.FixedSessionId.asInt() );
+						if (!rejectedDetail.empty())
+							rejectedDetail += "; ";
+						rejectedDetail += toString("shard %u is not registered as a mainland session in the database", wsi.FixedSessionId.asInt());
 					}
 				}
 			}
 			if (mainlandShardsByAscLoad.empty())
 			{
-				joinSessionResult(from, charId>>4, TSessionId(0), 10, "No mainland shard available", TSessionPartStatus::invalid_val);
+				// a welcome service that dies is erased from _WelcomeServices,
+				// so 'nothing connected' and 'nothing configured' both end up
+				// with an empty detail string
+				string reason = "No mainland shard available";
+				if (rejectedDetail.empty())
+					reason += " (no mainland welcome service is connected to the session manager)";
+				else
+					reason += " (" + rejectedDetail + ")";
+				joinSessionResult(from, charId>>4, TSessionId(0), 10, reason, TSessionPartStatus::invalid_val);
 				return;
 			}
 			_joinSessionCommon(from, charId, (*mainlandShardsByAscLoad.begin()).second, clientApplication, false);

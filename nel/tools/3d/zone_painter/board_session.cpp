@@ -654,6 +654,9 @@ bool rebuildWorkingSet(std::string &err, uint &outWelds, bool skipWriteBack, boo
 
 	// Prop selection is session-local to the zone id set - clear on working-set change.
 	zpClearPropSelection();
+	// The hide set keys on (zone, patch INDEX): a topology op shifts indices and an
+	// open/close re-bases zone ids, so stale entries would hide the wrong patches.
+	g_PatchHidden.clear();
 	// The held "centre of all objects" pivot describes geometry this rebuild may replace.
 	zpPivotNoteInteractionEnd();
 

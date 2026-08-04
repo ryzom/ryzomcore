@@ -31,7 +31,10 @@
 	define('NELTOOL_SITETITLE', 'Ryzom Core Admin');
 	define('NELTOOL_SESSIONID', 'sid');
 
-	define('NELTOOL_DEBUG', true);
+	// When true, group_level 10 users see the service/SQL debug dump in the
+	// page footer. Off by default so a production install does not ship that
+	// surface open; turn it on in a local config when you need it.
+	define('NELTOOL_DEBUG', false);
 
 	// SQL table names
 	define('NELDB_PREFIX', 'neltool_');
@@ -73,6 +76,14 @@
 	define('HARDWARE_REFRESH', 600);
     define('LOCK_TIMEOUT', 1800);
     define('BG_IMG', 'imgs/bg_live.png');
+
+	// Optional MFS forum proxy identity used by the guild locator. Leave the
+	// token empty to keep the legacy user_login=support path (host still
+	// comes from domain_mfs_web and must pass the hostname allowlist).
+	if (!defined('NELTOOL_MFS_USER_LOGIN'))
+		define('NELTOOL_MFS_USER_LOGIN', 'support');
+	if (!defined('NELTOOL_MFS_SERVICE_TOKEN'))
+		define('NELTOOL_MFS_SERVICE_TOKEN', '');
 
 	$nel_user_group_levels	= array(array(	'level_id'		=>	0,
 											'level_name'	=>	'Normal'),

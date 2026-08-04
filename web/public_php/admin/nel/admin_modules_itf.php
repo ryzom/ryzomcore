@@ -66,7 +66,9 @@
 			}
 
 			$retMsg = parent::waitMessage();
-			if ($ret == false)
+			// test the message that was just received, not the send result:
+			// a timeout returns false and reading MsgName off it is fatal
+			if ($retMsg == false)
 			{
 				// error during send
 				$this->invokeError("getShardOrders", "Error in 'waitMessage'");
@@ -113,7 +115,9 @@
 			}
 
 			$retMsg = parent::waitMessage();
-			if ($ret == false)
+			// test the message that was just received, not the send result:
+			// a timeout returns false and reading MsgName off it is fatal
+			if ($retMsg == false)
 			{
 				// error during send
 				$this->invokeError("getStates", "Error in 'waitMessage'");
@@ -164,7 +168,9 @@
 			}
 
 			$retMsg = parent::waitMessage();
-			if ($ret == false)
+			// test the message that was just received, not the send result:
+			// a timeout returns false and reading MsgName off it is fatal
+			if ($retMsg == false)
 			{
 				// error during send
 				$this->invokeError("getHighRezGraph", "Error in 'waitMessage'");

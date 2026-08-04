@@ -12,13 +12,13 @@
 			
 			if ($resultCode != 0)
 			{
-				echo "<h1>Error ".$resultCode." : '".$resultString."' will trying to close the session ".$_POST["sessionId"]."</h1>";
+				echo "<h1>Error ".htmlspecialchars($resultCode, ENT_QUOTES)." : '".htmlspecialchars($resultString, ENT_QUOTES)."' will trying to close the session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)."</h1>";
 				echo '<p><p><a href="web_start.php">Back to menu</a>';
 			}
 			else
 			{
 				// ok, the session is closed (or almost to close)
-				echo "<h1>Session ".$_POST["sessionId"]." is begin closed</h1>";
+				echo "<h1>Session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)." is begin closed</h1>";
 				echo '<p><a href="web_start.php">Return to main</a> </p>';
 			}
 		}
@@ -32,22 +32,27 @@
 	}
 	else
 	{
+		if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['sessionId']))
+		{
+			echo "Missing sessionId";
+			die();
+		}
 		$domainInfo = getDomainInfo($domainId);
-		$addr = split(":", $domainInfo["session_manager_address"]);
+		$addr = explode(":", $domainInfo["session_manager_address"]);
 		$RSMHost = $addr[0];
 		$RSMPort = $addr[1];
-		
+
 		// ask to start the session
 		$closeSession = new CloseSessionCb;
 		$res = "";
 		$closeSession->connect($RSMHost, $RSMPort, $res);
 //		$rsmProxy = new CRingSessionManagerWebProxy;
-		$closeSession->closeSession($charId, $_POST["sessionId"]);
-		
+		$closeSession->closeSession($charId, intval($_POST["sessionId"]));
+
 		// wait the the return message
 //		$rsmSkel = new CRingSessionManagerWebSkel;
 		$closeSession->waitCallback();
-			
+
 		die();
 	}
 	

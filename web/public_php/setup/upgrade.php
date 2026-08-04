@@ -1,7 +1,8 @@
 <?php
 
 error_reporting(E_ALL);
-ini_set('display_errors', 'on');
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
 
 class SystemExit extends Exception {}
 try {
@@ -42,37 +43,19 @@ if (!isset($NEL_SETUP_VERSION_CONFIGURED)) {
 
 	// Rewrite config.php
 	if ($continue) {
-		$config = file_get_contents($PRIVATE_PHP_PATH . "/setup/config/config.php");
+		require_once('config_generation.php');
+		$config = generate_upgrade_config(
+			$PRIVATE_PHP_PATH . "/setup/config/config.php",
+			$cfg, $PRIVATE_PHP_PATH, $PUBLIC_PHP_PATH,
+			$NEL_SETUP_PASSWORD, $NEL_DOMAIN_NAME, $NEL_SETUP_VERSION,
+			$cfg['crypt']['key'], $SUPPORT_GROUP_IMAP_CRYPTKEY,
+			$cfg['db']['ring']['name'], $USERS_DIR,
+			$NEL_SETUP_VERSION_CONFIGURED
+		);
 		if (!$config) {
 			printalert("danger", "Cannot read <em>config.php</em>");
 			$continue = false;
 		} else {
-			$cwd = getcwd();
-			$config = str_replace("%privatePhpDirectory%", addslashes($PRIVATE_PHP_PATH), $config);
-			$config = str_replace("%publicPhpDirectory%", addslashes($PUBLIC_PHP_PATH), $config);
-			$config = str_replace("%nelSqlHostname%", addslashes($cfg['db']['shard']['host']), $config);
-			$config = str_replace("%nelSqlPort%", addslashes($cfg['db']['shard']['port']), $config);
-			$config = str_replace("%nelSqlUsername%", addslashes($cfg['db']['shard']['user']), $config);
-			$config = str_replace("%nelSqlPassword%", addslashes($cfg['db']['shard']['pass']), $config);
-			$config = str_replace("%nelDatabase%", addslashes($cfg['db']['shard']['name']), $config);
-			$config = str_replace("%toolDatabase%", addslashes($cfg['db']['tool']['name']), $config);
-			$config = str_replace("%amsDatabase%", addslashes($cfg['db']['web']['name']), $config);
-			$config = str_replace("%amsLibDatabase%", addslashes($cfg['db']['lib']['name']), $config);
-			$config = str_replace("%nelSetupPassword%", addslashes($NEL_SETUP_PASSWORD), $config);
-			$config = str_replace("%nelDomainName%", addslashes($NEL_DOMAIN_NAME), $config);
-			$config = str_replace("%nelSetupVersion%", addslashes($NEL_SETUP_VERSION), $config);
-			$config = str_replace("%cryptKey%", addslashes($cfg['crypt']['key']), $config);
-			$config = str_replace("%cryptKeyIMAP%", addslashes($SUPPORT_GROUP_IMAP_CRYPTKEY), $config);
-			if ($NEL_SETUP_VERSION_CONFIGURED < 2) {
-				$config = str_replace("%domainDatabase%", addslashes($NEL_DOMAIN_NAME . "_ring"), $config);
-			} else {
-				$config = str_replace("%domainDatabase%", addslashes($cfg['db']['ring']['name']), $config);
-			}
-			if ($NEL_SETUP_VERSION_CONFIGURED < 9) {
-				$config = str_replace("%domainUsersDir%", addslashes("/home/nevrax/" . $NEL_DOMAIN_NAME . "/www"), $config);
-			} else {
-				$config = str_replace("%domainUsersDir%", addslashes($USERS_DIR), $config);
-			}
 			if (file_put_contents("config.php", $config)) {
 				printalert("success", "Generated <em>config.php</em>");
 			} else {

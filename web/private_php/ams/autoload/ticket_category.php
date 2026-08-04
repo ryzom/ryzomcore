@@ -79,7 +79,7 @@ class Ticket_Category{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ticket_category", Array('Name' => $this->name), "TCategoryId = $this->tCategoryId");
+        $dbl->update("ticket_category", Array('Name' => $this->name), "TCategoryId = :TCategoryId", array('TCategoryId' => (int)$this->tCategoryId));
     }
     
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

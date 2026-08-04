@@ -7,11 +7,13 @@
 		global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName;
 		
 		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $DBPort) or die("can't connect to nel db");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
 		mysqli_select_db ($link, $DBName) or die("can't select nel db");
 
 		$domainId = (int)$domainId;
 		$query = "SELECT * FROM domain WHERE domain_id = $domainId";
-		$result = mysqli_query($link, $query) or die("query ($query) failed");
+		$result = mysqli_query($link, $query) or die("query failed");
 		
 		if (mysqli_num_rows($result) == 0)
 		{

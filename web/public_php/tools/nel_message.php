@@ -50,6 +50,23 @@
 			}
 		}
 
+		function serialUInt16 (&$val)
+		{
+			if ($this->isReading())
+			{
+				$val = ord($this->Buffer[$this->Pos++]);
+				$val += ord($this->Buffer[$this->Pos++])*256;
+				debug(sprintf ("read uint16 '%d'<br>\n", $val));
+			}
+			else
+			{
+				$this->Buffer .= chr($val & 0xFF);
+				$this->Buffer .= chr(($val>>8) & 0xFF);
+				$this->Pos += 2;
+				debug(sprintf ("write uint16 '%d' %d<br>\n", $val, $this->Pos));
+			}
+		}
+
 		function serialUInt32 (&$val)
 		{
 			if ($this->isReading())
@@ -233,7 +250,7 @@
 				debug('Connection timed out!');
 				return false;
 			}
-			$size = ord($val) << 16;
+			$size += ord($val) << 16; // += : an assignment here dropped the high byte
 			$val = fread ($this->ConSock, 1);
 			$info = stream_get_meta_data($this->ConSock);
 			if ($info['timed_out']) 
@@ -265,9 +282,19 @@
 			{
 				$Buffer .= fread ($this->ConSock, $size - strlen($Buffer));
 				$info = stream_get_meta_data($this->ConSock);
-				if ($info['timed_out']) 
+				if ($info['timed_out'])
 				{
 					debug('Connection timed out!');
+					return false;
+				}
+				// a closed peer makes fread() return '' without setting the
+				// timeout flag, and the loop would then spin until the script
+				// itself is killed. Only bail while the body is incomplete: a
+				// read that consumes exactly to the end of a closed stream
+				// raises eof too, and that reply is whole.
+				if (strlen($Buffer) < $size && feof($this->ConSock))
+				{
+					debug('Connection closed while reading!');
 					return false;
 				}
 			}

@@ -29,7 +29,6 @@
 	// $mail_content		content of the mail
 	//
 
-	importParam('mail_from');
 	importParam('mail_to');
 	importParam('mail_subject');
 	importParam('mail_content');
@@ -37,6 +36,11 @@
 	global $mail_to;
 	global $mail_subject;
 	global $mail_content;
+
+	// The sender is whoever the session cookie authenticated, not whatever
+	// name came in with the request -- mail_from used to be read from the
+	// query string, so a player could send in game mail as any character.
+	$mail_from = $user_login;
 
 	// check mail is valid
 	//if (!isset($mail_from) || $mail_from == "" || !isset($mail_to) || $mail_to == "" || !isset($mail_subject) || $mail_subject == "" || !isset($mail_content) || $mail_content == "" )
@@ -48,17 +52,25 @@
 	{
 		if ($mail_to == '' || !is_dir($to_dir = get_user_dir($mail_to, $shard)))
 		{
-			$mail_subject = "<i>uiMFUndelivrableMail</i> '$mail_subject'";
-			$mail_cleansubject = $mail_subject;
-			$mail_content = "<i>uiMFUndelivrableMailTo</i> '$mail_to'.\n<i>uiMFUndelivrableMailCheck</i><br>\n<br>\n<i>uiMFMailContent</i><br>\n$mail_content";
-			$mail_cleancontent = "<i>uiMFUndelivrableMailTo</i> '$mail_to'.\n<i>uiMFUndelivrableMailCheck</i>\n\n<i>uiMFMailContent</i>\n$mail_content";
+			// the bounce message is built as html, so escape the parts that
+			// came in with the request before they are pasted into it
+			$safe_to = displayable_string($mail_to);
+			$safe_subject = displayable_string($mail_subject);
+			$safe_content = displayable_string($mail_content);
+			$mail_subject = "<i>uiMFUndelivrableMail</i> '$safe_subject'";
+			$mail_cleansubject = clean_string($mail_subject);
+			$mail_content = "<i>uiMFUndelivrableMailTo</i> '$safe_to'.\n<i>uiMFUndelivrableMailCheck</i><br>\n<br>\n<i>uiMFMailContent</i><br>\n$safe_content";
+			$mail_cleancontent = "<i>uiMFUndelivrableMailTo</i> '$safe_to'.\n<i>uiMFUndelivrableMailCheck</i>\n\n<i>uiMFMailContent</i>\n$safe_content";
 			$mail_to = $mail_from;
 			$mail_from = '<i>uiMFMailServer</i>';
 		}
 		else
 		{
-			$mail_cleansubject = $mail_subject;
-			$mail_subject = displayable_string(clean_string($mail_subject));
+			// the index file is %%-separated: the subject has to go through
+			// clean_string() like the thread index does, or a subject with %%
+			// in it shifts the mailbox columns
+			$mail_cleansubject = clean_string($mail_subject);
+			$mail_subject = displayable_string($mail_cleansubject);
 			$mail_cleancontent = displayable_content($mail_content);
 			$mail_content = displayable_string($mail_content);
 			$mail_from = displayable_string(clean_string($mail_from));

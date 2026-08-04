@@ -17,43 +17,43 @@ $ErrMsgs[1000]['de'] = 'Error';
 
 // Common public error messages
 $msgMisconfiguredClient['en'] = 'Your client might be misconfigured, please contact support';
-$msgMisconfiguredClient['fr'] = 'Il se peut que votre client soit mal configuré, merci de contacter le service client';
-$msgMisconfiguredClient['de'] = 'Dein Client ist möglicherweise falsch konfiguriert, bitte kontaktiere den Support';
+$msgMisconfiguredClient['fr'] = 'Il se peut que votre client soit mal configurÃ©, merci de contacter le service client';
+$msgMisconfiguredClient['de'] = 'Dein Client ist mÃ¶glicherweise falsch konfiguriert, bitte kontaktiere den Support';
 $msgOutOfDateClient['en'] = 'This client software is out of date, please visit www.ryzom.com to download a new client';
-$msgOutOfDateClient['fr'] = 'Ce logiciel client est trop ancien, merci de télécharger un nouveau client sur www.ryzom.com';
+$msgOutOfDateClient['fr'] = 'Ce logiciel client est trop ancien, merci de tÃ©lÃ©charger un nouveau client sur www.ryzom.com';
 $msgOutOfDateClient['de'] = 'Die Software ist nicht mehr aktuell bitte geh auf www.ryzom.com und lade dir den neuen Client herunter';
 $msgLSInMaintenance['en'] = 'The log-in server is in maintenance, please try later';
-$msgLSInMaintenance['fr'] = 'Le serveur de connexion est en maintenance, merci de réessayer plus tard';
-$msgLSInMaintenance['de'] = 'Der Login-Server ist wegen Wartungsarbeiten offline, bitte versuch es später nochmal';
+$msgLSInMaintenance['fr'] = 'Le serveur de connexion est en maintenance, merci de rÃ©essayer plus tard';
+$msgLSInMaintenance['de'] = 'Der Login-Server ist wegen Wartungsarbeiten offline, bitte versuch es spÃ¤ter nochmal';
 $msgDBInMaintenance['en'] = 'The database server is in maintenance, please try later';
-$msgDBInMaintenance['fr'] = 'Le serveur de base de données est en maintenance, merci de réessayer plus tard';
-$msgDBInMaintenance['de'] = 'Der Datenbank-Server ist wegen Wartungsarbeiten offline, bitte versuch es später nochmal';
+$msgDBInMaintenance['fr'] = 'Le serveur de base de donnÃ©es est en maintenance, merci de rÃ©essayer plus tard';
+$msgDBInMaintenance['de'] = 'Der Datenbank-Server ist wegen Wartungsarbeiten offline, bitte versuch es spÃ¤ter nochmal';
 $msgGameServersClosed['en'] = 'Game servers are currently closed or restricted, please retry later';
-$msgGameServersClosed['fr'] = 'Les serveurs de jeu sont actuellement fermés ou à accès restreint, merci de réessayer plus tard';
-$msgGameServersClosed['de'] = 'Die Spiel-Server sind momentan geschlossen oder gesperrt, bitte versuch es später nochmal';
+$msgGameServersClosed['fr'] = 'Les serveurs de jeu sont actuellement fermÃ©s ou Ã  accÃ¨s restreint, merci de rÃ©essayer plus tard';
+$msgGameServersClosed['de'] = 'Die Spiel-Server sind momentan geschlossen oder gesperrt, bitte versuch es spÃ¤ter nochmal';
 
 /*
  * Main account error messages:
  */
 $ErrMsgs[2001]['dbg'] = '(in %2)';
 $ErrMsgs[2001]['en'] = 'Invalid account: %1'; // ex 52 and 64
-$ErrMsgs[2001]['fr'] = 'Compte erroné : %1';
-$ErrMsgs[2001]['de'] = 'Ungültiger Account: %1';
+$ErrMsgs[2001]['fr'] = 'Compte erronÃ© : %1';
+$ErrMsgs[2001]['de'] = 'UngÃ¼ltiger Account: %1';
 $ErrMsgs[2001]['log'] = false;
 
 $ErrMsgs[2002]['en'] = "Your account must be activated first. Please read the email sent to %1.";
-$ErrMsgs[2002]['fr'] = "Votre compte doit d'abord être activé. Merci de lire l'e-mail envoyé à %1.";
+$ErrMsgs[2002]['fr'] = "Votre compte doit d'abord Ãªtre activÃ©. Merci de lire l'e-mail envoyÃ© Ã  %1.";
 $ErrMsgs[2002]['de'] = "Dein Account muss noch aktiviert werden. Bitte befolge die Anweisungen, die wir per Mail an %1 geschickt haben.";
 $ErrMsgs[2002]['log'] = false;
 
 $ErrMsgs[2003]['en'] = "Your account must be activated first. Please read the email that has been sent to you.";
-$ErrMsgs[2003]['fr'] = "Votre compte doit d'abord être activé. Merci de lire l'e-mail que nous vous avons envoyé.";
+$ErrMsgs[2003]['fr'] = "Votre compte doit d'abord Ãªtre activÃ©. Merci de lire l'e-mail que nous vous avons envoyÃ©.";
 $ErrMsgs[2003]['de'] = "Dein Account muss noch aktiviert werden. Bitte befolge die Anweisungen, die wir per Mail an Dich geschickt haben.";
 $ErrMsgs[2003]['log'] = false;
 
 $ErrMsgs[2004]['dbg'] = '(in %2)'; // user => ex 56; signup_data => ex 56B
 $ErrMsgs[2004]['en'] = "Invalid password";
-$ErrMsgs[2004]['fr'] = "Mot de passe erroné";
+$ErrMsgs[2004]['fr'] = "Mot de passe erronÃ©";
 $ErrMsgs[2004]['de'] = "Falsches Passwort";
 $ErrMsgs[2004]['log'] = false;
 
@@ -62,12 +62,12 @@ define('BASE_TRANSLATED_LS_ERROR_NUM', 2100);
 
 $ErrMsgs[2101]['dbg'] = '(LS error %1: %2 for userId %3)';
 $ErrMsgs[2101]['en'] = 'Invalid account'; // ex 1?: 'invalid user'
-$ErrMsgs[2101]['fr'] = 'Compte erroné';
-$ErrMsgs[2101]['de'] = 'Ungültiger Account';
+$ErrMsgs[2101]['fr'] = 'Compte erronÃ©';
+$ErrMsgs[2101]['de'] = 'UngÃ¼ltiger Account';
 
 $ErrMsgs[2102]['dbg'] = '(LS error %1: %2 for userId %3)';
 $ErrMsgs[2102]['en'] = 'Your account is already in online state, please retry in a few seconds'; // ex 2: 'User already online, please relog'
-$ErrMsgs[2102]['fr'] = "Votre compte est encore dans l'état en ligne, merci de réessayer dans quelques secondes";
+$ErrMsgs[2102]['fr'] = "Votre compte est encore dans l'Ã©tat en ligne, merci de rÃ©essayer dans quelques secondes";
 $ErrMsgs[2102]['de'] = 'Dein Account ist schon als online gekennzeichnet, bitte versuche es in ein paar Sekunden nochmals';
 $ErrMsgs[2102]['log'] = false;
 
@@ -97,9 +97,14 @@ $ErrMsgs[2106]['lnk'] = $msgDBInMaintenance;
  */
 define('BASE_TECHNICAL_ERROR_NUM', 3000);
 
+// Player-facing text is required for every public code. Codes that only
+// had 'dbg' used to ship the debug string to every client (errorMsg falls
+// through to dbg when en/fr/de/lnk are missing), independent of DisplayDbg.
 $ErrMsgs[3001]['dbg'] = 'Failed to find a ring domain record for domainId: %1';
+$ErrMsgs[3001]['lnk'] = $msgLSInMaintenance;
 
 $ErrMsgs[3002]['dbg'] = 'Missing cmd';
+$ErrMsgs[3002]['lnk'] = $msgMisconfiguredClient;
 
 $ErrMsgs[3003]['dbg'] = 'No response from Shard Unifier';
 $ErrMsgs[3003]['lnk'] = $msgLSInMaintenance;
@@ -115,61 +120,106 @@ $ErrMsgs[3006]['lnk'] = $msgDBInMaintenance;
 
 $ErrMsgs[3007]['dbg'] = "Can't find domain: %1"; // ex 'x'
 $ErrMsgs[3007]['lnk'] = $msgMisconfiguredClient;
-$ErrMsgs[3007]['add'] = 'dbg';
+// Only append dbg when LoginAllowDbg / DisplayDbg is on (see r2_login.php).
 
 $ErrMsgs[3008]['dbg'] = "Login '%1' was created because it was not found in database"; // ex 50
+$ErrMsgs[3008]['en'] = "Account created, please log in again";
+$ErrMsgs[3008]['fr'] = "Compte crÃ©Ã©, veuillez vous reconnecter";
+$ErrMsgs[3008]['de'] = "Account erstellt, bitte melde dich erneut an";
 
 $ErrMsgs[3009]['dbg'] = "Can't fetch login '%1' after insertion"; // ex 51
+$ErrMsgs[3009]['lnk'] = $msgDBInMaintenance;
 
 $ErrMsgs[3010]['dbg'] = "No permission found, but I need to accept Unknown user, so permission created, please RELOG";
+$ErrMsgs[3010]['en'] = "Account permissions updated, please log in again";
+$ErrMsgs[3010]['fr'] = "Permissions du compte mises Ã  jour, veuillez vous reconnecter";
+$ErrMsgs[3010]['de'] = "Account-Rechte aktualisiert, bitte melde dich erneut an";
 
 $ErrMsgs[3011]['dbg'] = "(client application: %1 domain: %2)"; // ex 53
 $ErrMsgs[3011]['en'] = "Your account needs a proper subscription to connect";
 $ErrMsgs[3011]['fr'] = "Votre compte doit avoir un abonnement actif pour se connecter";
 $ErrMsgs[3011]['de'] = 'Du kannst dich nicht ohne abgeschlossenes Abonemment in deinen Account einloggen';
-$ErrMsgs[3011]['add'] = 'dbg';
 $ErrMsgs[3011]['log'] = false;
 
 $ErrMsgs[3012]['dbg'] = "No access privilege found for %1, but I need to accept Unknown user, so permission created, RELOG";
+$ErrMsgs[3012]['en'] = "Account permissions updated, please log in again";
+$ErrMsgs[3012]['fr'] = "Permissions du compte mises Ã  jour, veuillez vous reconnecter";
+$ErrMsgs[3012]['de'] = "Account-Rechte aktualisiert, bitte melde dich erneut an";
 
 $ErrMsgs[3013]['dbg'] = "(client application: %1 domain: %2 reqPriv: %3)";
 $ErrMsgs[3013]['en'] = "You don't have sufficient privilege to connect now, please try later";
-$ErrMsgs[3013]['fr'] = "Vous n'avez pas les privilèges nécessaires pour vous connecter maintenant, veuillez essayer plus tard";
-$ErrMsgs[3013]['de'] = 'Du hast nicht die nötigen Rechte um dich jetzt zu verbinden, bitte versuch es später nochmal';
+$ErrMsgs[3013]['fr'] = "Vous n'avez pas les privilÃ¨ges nÃ©cessaires pour vous connecter maintenant, veuillez essayer plus tard";
+$ErrMsgs[3013]['de'] = 'Du hast nicht die nÃ¶tigen Rechte um dich jetzt zu verbinden, bitte versuch es spÃ¤ter nochmal';
 $ErrMsgs[3013]['log'] = false;
+
+// Auto-created accounts follow the same name rule as registration: the
+// client sends the login unencoded in the request, so a name outside that
+// set would create an account nobody could log into afterwards.
+$ErrMsgs[3014]['dbg'] = "Refused to auto-create login '%1': not a valid account name";
+$ErrMsgs[3014]['en'] = "This account name cannot be used: letters, numbers and underscores only";
+$ErrMsgs[3014]['fr'] = "Ce nom de compte ne peut pas Ãªtre utilisÃ© : uniquement des lettres, des chiffres et des tirets bas";
+$ErrMsgs[3014]['de'] = "Dieser Accountname kann nicht verwendet werden: nur Buchstaben, Zahlen und Unterstriche";
 
 // Translated Ring Session Manager (joinSession) error messages
 define('BASE_TRANSLATED_RSM_ERROR_NUM', 4000);
 
-$ErrMsgs[4001]['dbg'] = 'joinSession error %1: %2 for userId %3';
-$ErrMsgs[4002]['dbg'] = 'joinSession error %1: %2 for userId %3';
-$ErrMsgs[4003]['dbg'] = 'joinSession error %1: %2 for userId %3';
-$ErrMsgs[4004]['dbg'] = 'joinSession error %1: %2 for userId %3';
+// Generic join failure for codes that only used to ship the dbg line.
+$msgJoinSessionFailed['en'] = 'Unable to join the session, please try later';
+$msgJoinSessionFailed['fr'] = 'Impossible de rejoindre la session, merci de rÃ©essayer plus tard';
+$msgJoinSessionFailed['de'] = 'Beitritt zur Session fehlgeschlagen, bitte versuch es spÃ¤ter nochmal';
 
+$ErrMsgs[4001]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4001]['lnk'] = $msgJoinSessionFailed;
+$ErrMsgs[4002]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4002]['lnk'] = $msgJoinSessionFailed;
+$ErrMsgs[4003]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4003]['lnk'] = $msgJoinSessionFailed;
+$ErrMsgs[4004]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4004]['lnk'] = $msgJoinSessionFailed;
+
+// For 4005/4010/4014 the %2 argument carries the reason the session
+// manager gives (including the operator-set shard MOTD, e.g. the
+// maintenance announcement), so append the dbg line when DisplayDbg is on.
 $ErrMsgs[4005]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4005]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[4005]['add'] = 'dbg';
 
 $ErrMsgs[4006]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4006]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4007]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4007]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4008]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4008]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4009]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4009]['lnk'] = $msgJoinSessionFailed;
 
 $ErrMsgs[4010]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4010]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[4010]['add'] = 'dbg';
 
 $ErrMsgs[4011]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4011]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4012]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4012]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4013]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4013]['lnk'] = $msgJoinSessionFailed;
 
 $ErrMsgs[4014]['dbg'] = '(joinSession error %1: %2 for userId %3)';
 $ErrMsgs[4014]['lnk'] = $msgGameServersClosed;
+$ErrMsgs[4014]['add'] = 'dbg';
 
 $ErrMsgs[4015]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4015]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4016]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4016]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4017]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4017]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4018]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4018]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4019]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4019]['lnk'] = $msgJoinSessionFailed;
 $ErrMsgs[4020]['dbg'] = 'joinSession error %1: %2 for userId %3';
+$ErrMsgs[4020]['lnk'] = $msgJoinSessionFailed;
 
 
 $MsgLanguages = array('en');
@@ -289,16 +339,30 @@ function errorMsg($errNum=GENERIC_ERROR_NUM) // $mixedArgs
 		$logFile->logStr(/*$msg.*/$logExtMsg); // message is already logged by ob_callback_r2login() 
 	}
 	
-	// Send email if specified
+	// Send email if specified. The bundled htmlMimeMail library is php 4
+	// era (old-style constructors, smtp::connect / parseAddressList called
+	// statically) and throws Error on php 8: the alert mail is best effort,
+	// the error message to the player must survive it.
 	if (!empty($mailData) && (count($mailData) >= 3))
 	{
-		include_once('email/htmlMimeMail.php');
-		$mail = new htmlMimeMail();
-		$mail->setFrom('noreply@ryzom.com');
-		$mail->setSubject($mailData[1]);
-		$mail->setText('Application: '.$_GET['clientApplication'].' - Login: '.$_GET['login']."\n". // display as much info as possible
-			$mailData[2]);
-		$result = $mail->send(array($mailData[0]));
+		try
+		{
+			include_once('email/htmlMimeMail.php');
+			$mail = new htmlMimeMail();
+			$mail->setFrom('noreply@ryzom.com');
+			$mail->setSubject($mailData[1]);
+			$mail->setText('Application: '.$_GET['clientApplication'].' - Login: '.$_GET['login']."\n". // display as much info as possible
+				$mailData[2]);
+			$result = $mail->send(array($mailData[0]));
+		}
+		catch (Throwable $mailErr)
+		{
+			if (class_exists('CWwwLog'))
+			{
+				$logFile = new CWwwLog();
+				$logFile->logStr("MAIL FAILED/".$mailErr->getMessage());
+			}
+		}
 	}
 	
 	return $msg;
@@ -307,8 +371,12 @@ function errorMsg($errNum=GENERIC_ERROR_NUM) // $mixedArgs
 // Helper for errorMsg()
 function appendToMsg(&$msg, $errNum, $str, &$args)
 {
+	global $DisplayDbg;
 	$msg .= "$str ($errNum)";
-	if (($errNum == GENERIC_ERROR_NUM) && !empty($args))
+	// The arguments of an undescribed error carry whatever the call site
+	// passed -- database host, user, the query, the mysql error. Only show
+	// them when debug output is enabled server side.
+	if (($errNum == GENERIC_ERROR_NUM) && !empty($args) && isset($DisplayDbg) && $DisplayDbg)
 	{
 		foreach ($args as $arg)
 		{

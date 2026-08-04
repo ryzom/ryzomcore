@@ -216,7 +216,7 @@ class Ticket_User{
     */
     public function update(){
         $dbl = new DBLayer("lib");
-        $dbl->update("ticket_user" ,array('Permission' => $this->permission, 'ExternId' => $this->externId) ,"TUserId=$this->tUserId");
+        $dbl->update("ticket_user" ,array('Permission' => $this->permission, 'ExternId' => $this->externId) ,"TUserId = :TUserId", array('TUserId' => (int)$this->tUserId));
     }
 
     ////////////////////////////////////////////Getters////////////////////////////////////////////////////

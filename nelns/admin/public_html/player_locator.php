@@ -25,13 +25,31 @@
 		
 		if ($presel_service)
 		{
-			$aliases = split('[/-]', $presel_service);
+			$aliases = preg_split('#[/-]#', $presel_service);
 			if (count($aliases) == 3)
 				$presel_service = $aliases[0];
 		}
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "Player Locator");
+	// Everything below prints values the shard answered with -- user names,
+	// character names, entity ids -- and some of them go inside a <script>
+	// block, where html escaping does nothing and a closing tag ends the
+	// block. Escape for the place each value lands in.
+	function pl_js($value)
+	{
+		return strtr((string)$value, array('\\'=>'\\\\', "'"=>"\\'", '"'=>'\\"', "\r"=>'\\r', "\n"=>'\\n', '<'=>'\\x3C'));
+	}
+
+	// the name becomes one word of the "*.*.EGS.playerInfo <name>" service
+	// command, so whitespace in it appends arguments of the caller's
+	// choosing. Wildcards and the bracket syntax stay usable.
+	if (isset($char_name) && (!is_string($char_name) || strlen($char_name) > 64
+		|| preg_match('/[\\s\\x00-\\x1F\\x7F]/', $char_name)))
+	{
+		unset($char_name);
+	}
+
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Player Locator");
 
 	echo "<script><!--\n";
 	echo "//----------------------------------\n";
@@ -85,7 +103,7 @@
 	echo "<br><br>\n";
 
 	echo "<table border=0><tr valign=top>\n";
-	echo "<form method=post action='".$_SERVER['PHP_SELF']."' name='cmdform'>\n";	
+	echo "<form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='cmdform'>\n";	
 	echo "<td>\n";
 
 	$result = sqlquery("SELECT DISTINCT shard FROM service ORDER BY shard");
@@ -100,7 +118,7 @@
 		if ($selected)
 			$selected_shards[] = $arr["shard"];
 
-		echo "<option value='".$arr["shard"]."'".($selected ? " selected" : "").">".$arr["shard"];
+		echo "<option value='".htmlspecialchars($arr["shard"], ENT_QUOTES)."'".($selected ? " selected" : "").">".htmlspecialchars($arr["shard"], ENT_QUOTES);
 	}
 	echo "</select>\n";
 
@@ -111,7 +129,7 @@
 	echo "<td>\n";
 	echo "<table border=0>\n";
 	echo "<tr><th align=left>Player/Character name</th></tr>\n";
-	echo "<tr><td><input name=char_name value='".stripslashes($char_name)."' size=50 maxlength=20480></td>\n";
+	echo "<tr><td><input name=char_name value='".htmlspecialchars(stripslashes(isset($char_name) ? $char_name : ''), ENT_QUOTES)."' size=50 maxlength=20480></td>\n";
 	echo "<td><input type=submit value='Locate'></td></tr>\n";
 	echo "</form></table>\n";
 
@@ -159,7 +177,7 @@
 			$last_uid = "";
 			$icolor = 0;
 			
-			echo "<b>Result of search for '$char_name' on Shard '$res_shard' ($num_res entr".($num_res>1 ? "ies" : "y")." found)</b><br>\n";
+			echo "<b>Result of search for '".htmlspecialchars($char_name, ENT_QUOTES)."' on Shard '".htmlspecialchars($res_shard, ENT_QUOTES)."' (".intval($num_res)." entr".($num_res>1 ? "ies" : "y")." found)</b><br>\n";
 			echo "<font size=-2>Click on EntityId to get directly to DefaultPlayer view, <br>or click anywhere else to select a player and then click Select Players button.</font><br><br>\n";
 			
 			echo "<table border=1><tr><th>UId</th><th>UserName</th><th>EId</th><th>EntityName</th><th>EntitySlot</th><th>State</th><th>Ext commands</th></tr>\n";
@@ -187,25 +205,25 @@
 				$sel_bgcolor = ($icolor ? "#FFDDAA" : "#FFCC88");
 
 				echo "<script><!--\n";
-				echo "player_eid[$num_player]='".$parse["EId"]."';\n";
+				echo "player_eid[$num_player]='".pl_js($parse["EId"])."';\n";
 				echo "player_select[$num_player]=false;\n";
 				echo "player_bgcolor[$num_player]='$bgcolor';\n";
 				echo "player_sel_bgcolor[$num_player]='$sel_bgcolor';\n";
-				echo "player_uidslot[$num_player]='".$parse["UId"]." ".$parse["EntitySlot"]."';\n";
-				echo "player_state[$num_player]='".$parse["State"]."';\n";
+				echo "player_uidslot[$num_player]='".pl_js($parse["UId"]." ".$parse["EntitySlot"])."';\n";
+				echo "player_state[$num_player]='".pl_js($parse["State"])."';\n";
 				echo "//--></script>\n";
 				
 				echo "<tr id='player_$num_player' onClick='clickOnEntity($num_player); return true;' bgcolor=$bgcolor>";
-				echo "<td>".($chUser ? $parse["UId"] : "")."</td>";
-				echo "<td>".$parse["UserName"]."</td>";
-				echo "<td><a href='index.php?select_view=DefaultPlayer&filter_shard=$res_shard&filter_entity=".$parse["EId"]."'>".$parse["EId"]."</a></td>";
-				echo "<td>".$parse["EntityName"]."</td>";
-				echo "<td>".$parse["EntitySlot"]."</td>";
-				echo "<td>".$parse["State"]."</td>";
+				echo "<td>".($chUser ? htmlspecialchars($parse["UId"], ENT_QUOTES) : "")."</td>";
+				echo "<td>".htmlspecialchars($parse["UserName"], ENT_QUOTES)."</td>";
+				echo "<td><a href='index.php?select_view=DefaultPlayer&filter_shard=".htmlspecialchars(rawurlencode($res_shard), ENT_QUOTES)."&filter_entity=".htmlspecialchars(rawurlencode($parse["EId"]), ENT_QUOTES)."'>".htmlspecialchars($parse["EId"], ENT_QUOTES)."</a></td>";
+				echo "<td>".htmlspecialchars($parse["EntityName"], ENT_QUOTES)."</td>";
+				echo "<td>".htmlspecialchars($parse["EntitySlot"], ENT_QUOTES)."</td>";
+				echo "<td>".htmlspecialchars($parse["State"], ENT_QUOTES)."</td>";
 				echo "<td>";
 				if (isset($parse["SaveFile"]))
 				{
-					echo "<a href='backup_interface.php?charid=".$parse["EId"]."&file=".$parse["SaveFile"]."'>Load/Save sheet</a>";
+					echo "<a href='backup_interface.php?charid=".htmlspecialchars(rawurlencode($parse["EId"]), ENT_QUOTES)."&file=".htmlspecialchars(rawurlencode($parse["SaveFile"]), ENT_QUOTES)."'>Load/Save sheet</a>";
 				}
 				echo "</td>";
 				echo "</tr>\n";
@@ -217,7 +235,7 @@
 		}
 
 		echo "<script><!--\n";
-		echo "var num_player = $num_player;\n";
+		echo "var num_player = ".intval($num_player).";\n";
 		echo "//--></script>\n";
 
 		echo "<form name='select_player_form' method=post action='index.php?select_view=DefaultPlayer'>\n";

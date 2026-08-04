@@ -105,7 +105,7 @@ void xShift(float *stored, SPmMapVert *rec, float dx, float dy, float dz)
 
 bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                         const std::set<uint> &sel, float dx, float dy, float dz,
-                        std::string &err, const SPatchMesh *evalPm)
+                        std::string &err, const SPatchMesh *evalPm, float outline)
 {
 	if (pm.HasTvPatches)
 	{ err = "map-channel mesh: wall TVPatch assignment is not implemented"; return false; }
@@ -147,6 +147,71 @@ bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 	if (!topoDetachElements(pm, rp, sel, err, evalPm, &boundary))
 		return false;
 	std::map<sint32, sint32> dup(boundary.Verts.begin(), boundary.Verts.end());
+
+	// --- Outline (the legacy Bevel's second stage): per boundary vertex, the outward
+	// direction in the XY plane - the average of its adjacent boundary edges' XY normals,
+	// oriented AWAY from the island (checked against the island patch's centroid).
+	// Positive outline pushes the top ring outward, negative pulls it in (the classic
+	// tapered cliff). Computed on the pre-translate geometry (the copies are coincident),
+	// keyed by the ORIGINAL vertex - the vertical-edge thirds and the top-ring shift both
+	// read it. Wall-less open border edges contribute nothing (they are not in the
+	// boundary list), so a border-only ring cannot be outlined.
+	struct SXY
+	{
+		float X, Y;
+		SXY() : X(0.f), Y(0.f) { }
+	};
+	std::map<sint32, SXY> outDir;
+	if (outline != 0.f)
+	{
+		for (size_t b = 0; b < boundary.Edges.size(); ++b)
+		{
+			const SPmEdge &eo = pm.Edges[boundary.Edges[b].first];
+			const SPmEdge &ec = pm.Edges[boundary.Edges[b].second];
+			if (ec.Patches.size() != 1)
+				continue;
+			const sint32 ip = ec.Patches[0];
+			if (ip < 0 || (size_t)ip >= pm.Patches.size())
+				continue;
+			const float *P = xEffVert(pm, evalPm, eo.V1);
+			const float *Q = xEffVert(pm, evalPm, eo.V2);
+			float nx = -(Q[1] - P[1]);
+			float ny = Q[0] - P[0];
+			const float nl = std::sqrt(nx * nx + ny * ny);
+			if (nl < 1e-6f)
+				continue; // an edge vertical in XY has no in-plane normal
+			nx /= nl;
+			ny /= nl;
+			// Orient away from the island: against the island patch's XY centroid.
+			float cx = 0.f, cy = 0.f;
+			for (int k = 0; k < 4; ++k)
+			{
+				const float *v = xEffVert(pm, evalPm, pm.Patches[ip].V[k]);
+				cx += v[0] / 4.f;
+				cy += v[1] / 4.f;
+			}
+			const float mx = (P[0] + Q[0]) / 2.f, my = (P[1] + Q[1]) / 2.f;
+			if (nx * (cx - mx) + ny * (cy - my) > 0.f)
+			{
+				nx = -nx;
+				ny = -ny;
+			}
+			outDir[eo.V1].X += nx; outDir[eo.V1].Y += ny;
+			outDir[eo.V2].X += nx; outDir[eo.V2].Y += ny;
+		}
+		for (std::map<sint32, SXY>::iterator it = outDir.begin(); it != outDir.end(); ++it)
+		{
+			const float l = std::sqrt(it->second.X * it->second.X
+			                          + it->second.Y * it->second.Y);
+			if (l < 1e-6f)
+			{
+				it->second.X = it->second.Y = 0.f;
+				continue;
+			}
+			it->second.X = it->second.X / l * outline;
+			it->second.Y = it->second.Y / l * outline;
+		}
+	}
 
 	// Presence/flags templates (uniform per file in practice; the add-quad rule).
 	const SPmVec vecTpl = pm.Vecs[0];
@@ -199,12 +264,22 @@ bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 				continue;
 			}
 			const float *base = xEffVert(pm, evalPm, bases[s]);
+			// The full base -> top vector for THIS vertex: extrude plus its outline
+			// offset, so an outlined wall's side curve leans smoothly bottom to top.
+			float total[3] = { dx, dy, dz };
+			{
+				std::map<sint32, SXY>::const_iterator ot = outDir.find(bases[s]);
+				if (ot != outDir.end())
+				{
+					total[0] += ot->second.X;
+					total[1] += ot->second.Y;
+				}
+			}
 			float t1[3], t2[3];
 			for (int c = 0; c < 3; ++c)
 			{
-				const float d = c == 0 ? dx : (c == 1 ? dy : dz);
-				t1[c] = (float)((long double)base[c] + d / 3.f);
-				t2[c] = (float)((long double)base[c] + d * 2.f / 3.f);
+				t1[c] = (float)((long double)base[c] + total[c] / 3.f);
+				t2[c] = (float)((long double)base[c] + total[c] * 2.f / 3.f);
 			}
 			SPmVec v1 = vecTpl;
 			v1.Patches.clear();
@@ -346,6 +421,51 @@ bool topoExtrudePatches(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
 		}
 		for (std::set<sint32>::const_iterator it = vecs.begin(); it != vecs.end(); ++it)
 			xShift(pm.Vecs[*it].Pos, xVecRec(mapper, *it), dx, dy, dz);
+
+		// --- Outline the top ring: each island boundary vertex (the detach COPY) moves
+		// by its outward XY offset, its riding island tangents with it (the ride-in-file
+		// rule - slots 2c and 2*((c+3)&3)+1 of the corner). Interior island verts stay;
+		// the wall tops follow for free (they ARE these vertices), and the vertical
+		// tangents already sit at the thirds of the outlined vector.
+		if (outline != 0.f)
+		{
+			std::set<sint32> outVecs;
+			std::map<sint32, SXY> copyOut; // island copy vert -> its offset
+			for (std::map<sint32, SXY>::const_iterator it = outDir.begin();
+			     it != outDir.end(); ++it)
+			{
+				std::map<sint32, sint32>::const_iterator dit = dup.find(it->first);
+				if (dit == dup.end())
+					continue;
+				copyOut[dit->second] = it->second;
+			}
+			for (std::map<sint32, SXY>::const_iterator it = copyOut.begin();
+			     it != copyOut.end(); ++it)
+			{
+				if ((size_t)it->first < rp.Verts.size() && rp.Verts[it->first].Binded)
+					continue;
+				xShift(pm.Verts[it->first].Pos, xVertRec(mapper, it->first),
+				       it->second.X, it->second.Y, 0.f);
+			}
+			for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+			{
+				const SPmPatch &pp = pm.Patches[*it];
+				for (int c = 0; c < 4; ++c)
+				{
+					std::map<sint32, SXY>::const_iterator co = copyOut.find(pp.V[c]);
+					if (co == copyOut.end())
+						continue;
+					const sint32 slots[2] = { pp.Vec[2 * c], pp.Vec[2 * ((c + 3) & 3) + 1] };
+					for (int s = 0; s < 2; ++s)
+					{
+						if (slots[s] < 0 || !outVecs.insert(slots[s]).second)
+							continue;
+						xShift(pm.Vecs[slots[s]].Pos, xVecRec(mapper, slots[s]),
+						       co->second.X, co->second.Y, 0.f);
+					}
+				}
+			}
+		}
 	}
 
 	// --- Side tables sized to the new counts (walls unselected).

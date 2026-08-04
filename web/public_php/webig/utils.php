@@ -92,10 +92,13 @@ $UTILS_PHP = 1;
 // -------------------------------------
 function read_index($file, &$header, &$array)
 {
+	// always hand back an array: an index that exists but holds no rows
+	// (fresh mailbox, everything removed) left the caller's variable unset
+	$array = array();
+
 	if (!file_exists($file))
 	{
 		$header = '';
-		$array = array();
 		return;
 	}
 
@@ -230,6 +233,8 @@ function read_template($file, &$template)
 // -------------------------------------
 function redirect($url, $time=0)
 {
+	$url = htmlspecialchars($url, ENT_QUOTES);
+	$time = (int)$time;
 	echo "<html><head><title>Redirecting...</title>\n";
 	echo "<meta http-equiv='refresh' content='$time; URL=$url'>\n";
 	echo "</head>\n";
@@ -250,9 +255,13 @@ function convert_forum_name($str)
 // -------------------------------------
 // clean string
 // -------------------------------------
+// The (string) casts below: the optional request params arrive as null
+// when absent (importParam unsets them, `global` re-creates them null),
+// and php 8.1 deprecation-warns on null hitting an internal string
+// function -- with display_errors that text lands in the in-game browser.
 function clean_string($str)
 {
-	return strtr($str, array("\n" => '', '%' => '\%'));
+	return strtr((string)$str, array("\n" => '', '%' => '\%'));
 }
 
 // -------------------------------------
@@ -260,7 +269,7 @@ function clean_string($str)
 // -------------------------------------
 function clean_content($str)
 {
-	return strtr($str, array("\n" => '\n', '%' => '\%'));
+	return strtr((string)$str, array("\n" => '\n', '%' => '\%'));
 }
 
 // -------------------------------------
@@ -268,7 +277,7 @@ function clean_content($str)
 // -------------------------------------
 function displayable_string($str)
 {
-	return nl2br(htmlspecialchars(stripslashes($str), ENT_QUOTES));
+	return nl2br(htmlspecialchars(stripslashes((string)$str), ENT_QUOTES));
 }
 
 // -------------------------------------
@@ -276,7 +285,7 @@ function displayable_string($str)
 // -------------------------------------
 function displayable_content($str)
 {
-	return htmlspecialchars(stripcslashes($str), ENT_QUOTES);
+	return htmlspecialchars(stripcslashes((string)$str), ENT_QUOTES);
 }
 
 // -------------------------------------
@@ -310,12 +319,38 @@ function nameToFile($name)
 	{
 		if ($name[$i] == ' ')
 			$r .= '_';
-		else if ($name[$i] == '%' || $name[$i] <= chr(32) || $name[$i] >= chr(127))
+		// '/', '\' and '.' would give the name a meaning to the file system,
+		// so they are escaped along with '%' and the non printable range
+		else if ($name[$i] == '%' || $name[$i] == '/' || $name[$i] == '\\' || $name[$i] == '.'
+			|| $name[$i] <= chr(32) || $name[$i] >= chr(127))
 			$r .= sprintf("%%%02x", ord($name[$i]));
 		else
 			$r .= $name[$i];
 	}
 	return $r;
+}
+
+// -------------------------------------
+// check a value that is about to become one component of a path
+// -------------------------------------
+function safe_path_component($value)
+{
+	if (!is_string($value) || $value === '')
+		return false;
+	if (strpbrk($value, "/\\\0") !== false)
+		return false;
+	if ($value === '.' || $value === '..')
+		return false;
+	return true;
+}
+
+// -------------------------------------
+// check a value that is about to become part of a file name, and that the
+// callers all treat as an index number
+// -------------------------------------
+function safe_index_param($value)
+{
+	return is_string($value) && preg_match('/^[0-9]{1,10}$/', $value);
 }
 
 function nameToURL($name)
@@ -368,10 +403,15 @@ function get_user_dir($user, $shard)
 {
 	if ($user == "" || $shard == "")
 		die("INTERNAL ERROR CODE 1");
-		
+
 	global	$USERS_DIR;
-	
+
 	$user = nameToFile($user);
+
+	// both halves come from the request; refuse anything that would step out
+	// of $USERS_DIR instead of building the path from it
+	if (!safe_path_component($user) || !safe_path_component($shard))
+		die("INTERNAL ERROR CODE 1");
 
 	return $USERS_DIR.'/'.strtolower($shard).'/'.substr(strtolower($user), 0, 2).'/'.strtolower($user).'/';
 }
@@ -396,7 +436,9 @@ function build_user_dir($user, $shard)
 			$interm = substr($dir, 0, $p);
 			if (!is_dir($interm))
 			{
-				if (!mkdir($interm, 0777))
+				// 0777 made the mail/forum tree world-writable on multi-user
+				// hosts, so a neighbour process could plant a session file.
+				if (!mkdir($interm, 0750))
 					die("INTERNAL ERROR CODE 3");
 			}
 		}
@@ -412,8 +454,10 @@ include_once('../login/config.php');
 function connect_to_ring_db()
 {
 	global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword, $RingDBName;
-	$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db @'".$DBHost."' with user '".$RingDBUserName."'");
-	mysqli_select_db($ringDb, $RingDBName) or die("can't select ring db: '$RingDBName' Host=$DBHost User=$RingDBUserName (not enough privilege?)");
+	$ringDb = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die("can't connect to ring db");
+	if (function_exists('nel_mysqli_set_charset'))
+		nel_mysqli_set_charset($ringDb);
+	mysqli_select_db($ringDb, $RingDBName) or die("can't select ring db");
 	return $ringDb;
 }
 
@@ -425,23 +469,25 @@ function check_character_belongs_to_guild($charName, $guildName)
 {
 	$ringDb = connect_to_ring_db();
 	$charName = mysqli_real_escape_string($ringDb, $charName);
-	$guildName_escaped = mysqli_real_escape_string($ringDb, $guildName);
 	$res = mysqli_query($ringDb,
 	"SELECT guilds.guild_name FROM guilds
 	JOIN characters ON characters.guild_id=guilds.guild_id
 	WHERE char_name='$charName'")
-		or die("Can't query guild for $charName in DB");
+		or die("Can't query guild");
 	$row = mysqli_fetch_row($res);
 	if (!isset($row))
-		die("Guild not found for char $charName in DB");
-	if ($row[0] != $guildName)
-		die("ACCESS DENIED: $charName is not a member of $guildName");
+		die("Guild not found");
+	// byte comparison: '!=' compares two numeric-looking names as numbers
+	if ($row[0] !== (string)$guildName)
+		die("ACCESS DENIED");
 }
 
 $remote_addr = $_SERVER['REMOTE_ADDR'];
 
 // if ($remote_addr == "213.208.119.226" || $remote_addr == "38.117.236.132")
-if (true)
+// internal_check used to answer for any caller; leave it off
+// unless the site operator explicitly re-enables it below.
+if (false)
 {
 	importParam('internal_check');
 	global $internal_check;
@@ -478,16 +524,21 @@ else
 	$ufile = $udir.'session'; 
 	if (is_dir($udir) && file_exists($ufile)) 
 	{ 
-		$file = fopen($ufile, 'r'); 
-		if (!$file) 
-			die("ERROR: Not logged"); 
-		$server_cookie = trim(fgets($file, 1024)); 
-		if ($server_cookie != $session_cookie) 
-			die("ERROR: Authentication failed"); 
-	} 
+		$file = fopen($ufile, 'r');
+		if (!$file)
+			die("ERROR: Not logged");
+		$server_cookie = trim(fgets($file, 1024));
+		fclose($file);
+		// An empty session file used to authenticate a caller that sent no
+		// cookie at all, and '!=' compares two numeric looking strings as
+		// numbers; require both sides and compare them as strings.
+		if ($server_cookie === '' || !isset($session_cookie) || !is_string($session_cookie)
+			|| !hash_equals($server_cookie, $session_cookie))
+			die("ERROR: Authentication failed");
+	}
 	else 
 	{ 
-		die("ERROR: Directory not found: ".$udir); 
+		die("ERROR: Not logged"); 
 	} 
 } 
  

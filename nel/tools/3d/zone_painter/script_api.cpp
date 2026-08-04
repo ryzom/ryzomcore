@@ -111,18 +111,31 @@ bool zpExtrudeDragAt(float x0, float y0, float x1, float y1);
 bool zpPatchVertScreen(uint zoneId, uint vertIdx, float &sxOut, float &syOut);
 bool zpPatchTangentScreen(uint zoneId, uint vecIdx, float &sxOut, float &syOut);
 uint zpAddQuadPatchSelection();
-uint zpDetachPatchSelection();
-uint zpDetachToFile(const std::string &nameIn);
+uint zpDetachPatchSelection(bool copy = false);
+uint zpDetachToFile(const std::string &nameIn, bool copy = false);
 uint zpExpandSelectionToElement();
 uint zpAttachZone(uint targetZone, uint srcZone, std::string &msg);
 uint zpMovePatchSelectionToZone(uint dstZone, std::string &msg);
 uint zpExtrudePatchSelection(float dz);
+uint zpExtrudePatchSelectionEx(float h, float outline, bool localNormal);
 uint zpSetSmoothGroup(uint bit, bool on);
 uint zpClearSmoothGroups();
 uint zpSetPatchTess(int u, int v);
 uint zpBalanceTessSelection();
 bool zpPatchSmGroupsQuery(uint zoneId, uint patchIdx, uint32 &maskOut);
 bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut);
+uint zpSetVertexCoplanar(bool on);
+bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out);
+bool zpPatchCornerVert(uint zoneId, uint patchIdx, uint corner, uint &out);
+uint zpHideSelection();
+uint zpUnhideAll();
+bool zpPatchIsHidden(uint zoneId, uint patchIdx);
+uint zpSubdivideEdgeSelection();
+void zpSetSubdividePropagate(bool on);
+uint zpSetPatchAuto(bool on);
+void zpResetZonePaint(uint zoneId);
+bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out);
+bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out);
 bool zpMoveDirTarget(int dir, uint &dstZoneOut);
 bool zpZonePatchCount(uint zoneId, uint &countOut);
 bool zpZoneVertCount(uint zoneId, uint &countOut);
@@ -1003,6 +1016,118 @@ static int lBalanceTessSelection(CLuaState &ls) // () -> max order per axis over
 	return retOk(ls);
 }
 
+static int lSetVertexCoplanar(CLuaState &ls) // (on) over the vertex selection
+{
+	const uint n = zpSetVertexCoplanar(argBoolOpt(ls, 1, true));
+	printf("setVertexCoplanar: %u vertices\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchVertFlags(CLuaState &ls) // (zone, vertIdx) -> the stored Flags word
+{
+	double z, v;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, v))
+		return retErr(ls, "usage: patchVertFlags(zone, vertIndex)");
+	sint32 f = 0;
+	if (!zpPatchVertFlagsQuery((uint)z, (uint)v, f))
+		return retErr(ls, "patchVertFlags: no such vertex");
+	ls.push((double)f);
+	return 1;
+}
+
+static int lResetZonePaint(CLuaState &ls) // (zone): default tiles, white colors, displace 0
+{
+	double z;
+	if (!argNumber(ls, 1, z))
+		return retErr(ls, "usage: resetZonePaint(zone)");
+	zpResetZonePaint((uint)z);
+	return retOk(ls);
+}
+
+static int lSetPatchAuto(CLuaState &ls) // (on) over the face selection; false = bake manual
+{
+	const uint n = zpSetPatchAuto(argBoolOpt(ls, 1, true));
+	printf("setPatchAuto: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchFlags(CLuaState &ls) // (zone, patchIdx) -> the stored Flags word
+{
+	double z, p;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p))
+		return retErr(ls, "usage: patchFlags(zone, patchIndex)");
+	sint32 f = 0;
+	if (!zpPatchFlagsQuery((uint)z, (uint)p, f))
+		return retErr(ls, "patchFlags: no such patch");
+	ls.push((double)f);
+	return 1;
+}
+
+static int lPatchInteriorIndex(CLuaState &ls) // (zone, patchIdx, slot 0..3) -> vec index
+{
+	double z, p, s;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, s))
+		return retErr(ls, "usage: patchInteriorIndex(zone, patchIndex, slot)");
+	uint v = 0;
+	if (!zpPatchInteriorIndexQuery((uint)z, (uint)p, (uint)s, v))
+		return retErr(ls, "patchInteriorIndex: no such slot");
+	ls.push((double)v);
+	return 1;
+}
+
+static int lSubdivideEdgeSelection(CLuaState &ls)
+{
+	const uint n = zpSubdivideEdgeSelection();
+	printf("subdivideEdgeSelection: %u edges\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lSetSubdividePropagate(CLuaState &ls) // (on)
+{
+	zpSetSubdividePropagate(argBoolOpt(ls, 1, true));
+	return retOk(ls);
+}
+
+static int lHideSelection(CLuaState &ls) // hide the current level's selection
+{
+	const uint n = zpHideSelection();
+	printf("hideSelection: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lUnhideAll(CLuaState &ls)
+{
+	const uint n = zpUnhideAll();
+	printf("unhideAll: %u patches\n", n);
+	fflush(stdout);
+	return retOk(ls);
+}
+
+static int lPatchHidden(CLuaState &ls) // (zone, patchIdx) -> bool
+{
+	double z, p;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p))
+		return retErr(ls, "usage: patchHidden(zone, patchIndex)");
+	ls.push(zpPatchIsHidden((uint)z, (uint)p));
+	return 1;
+}
+
+static int lPatchCornerVert(CLuaState &ls) // (zone, patchIdx, corner 0..3) -> vertex id
+{
+	double z, p, c;
+	if (!argNumber(ls, 1, z) || !argNumber(ls, 2, p) || !argNumber(ls, 3, c))
+		return retErr(ls, "usage: patchCornerVert(zone, patchIndex, corner)");
+	uint v = 0;
+	if (!zpPatchCornerVert((uint)z, (uint)p, (uint)c, v))
+		return retErr(ls, "patchCornerVert: no such corner");
+	ls.push((double)v);
+	return 1;
+}
+
 static int lPatchSmGroups(CLuaState &ls) // (zone, patch) -> mask
 {
 	double z, p;
@@ -1250,32 +1375,35 @@ static int lAddQuadPatchSelection(CLuaState &ls)
 	return 1;
 }
 
-static int lDetachPatchSelection(CLuaState &ls) // () -> detached count (element split)
+static int lDetachPatchSelection(CLuaState &ls) // ([copy]) -> count (split, or clone island)
 {
-	const uint n = zpDetachPatchSelection();
+	const uint n = zpDetachPatchSelection(argBoolOpt(ls, 1, false));
 	printf("detachPatchSelection: %u detached\n", n);
 	fflush(stdout);
 	ls.push((double)n);
 	return 1;
 }
 
-static int lDetachToFile(CLuaState &ls) // ([name]) -> detached count (SHELVED, script-only)
+static int lDetachToFile(CLuaState &ls) // ([name [, copy]]) -> count (SHELVED, script-only)
 {
 	std::string name;
 	argString(ls, 1, name); // optional; empty = auto "<source>-det"
-	const uint n = zpDetachToFile(name);
+	const uint n = zpDetachToFile(name, argBoolOpt(ls, 2, false));
 	printf("detachToFile: %u detached\n", n);
 	fflush(stdout);
 	ls.push((double)n);
 	return 1;
 }
 
-static int lExtrudePatchSelection(CLuaState &ls) // (height) -> extruded count
+static int lExtrudePatchSelection(CLuaState &ls) // (height [, outline [, local]]) -> count
 {
 	double h;
 	if (!argNumber(ls, 1, h))
-		return retErr(ls, "usage: extrudePatchSelection(height)");
-	const uint n = zpExtrudePatchSelection((float)h);
+		return retErr(ls, "usage: extrudePatchSelection(height [, outline [, local]])");
+	double outline = 0.0;
+	argNumber(ls, 2, outline); // optional
+	const bool local = argBoolOpt(ls, 3, false);
+	const uint n = zpExtrudePatchSelectionEx((float)h, (float)outline, local);
 	printf("extrudePatchSelection: %u extruded\n", n);
 	fflush(stdout);
 	ls.push((double)n);
@@ -1680,6 +1808,15 @@ static const char *kBootstrap =
 	"  setSmoothGroup = __zp_setSmoothGroup, clearSmoothGroups = __zp_clearSmoothGroups,\n"
 	"  setPatchTess = __zp_setPatchTess, balanceTessSelection = __zp_balanceTessSelection,\n"
 	"  patchSmGroups = __zp_patchSmGroups, patchTess = __zp_patchTess,\n"
+	"  setVertexCoplanar = __zp_setVertexCoplanar, patchVertFlags = __zp_patchVertFlags,\n"
+	"  patchCornerVert = __zp_patchCornerVert,\n"
+	"  hideSelection = __zp_hideSelection, unhideAll = __zp_unhideAll,\n"
+	"  patchHidden = __zp_patchHidden,\n"
+	"  subdivideEdgeSelection = __zp_subdivideEdgeSelection,\n"
+	"  setSubdividePropagate = __zp_setSubdividePropagate,\n"
+	"  setPatchAuto = __zp_setPatchAuto, patchFlags = __zp_patchFlags,\n"
+	"  resetZonePaint = __zp_resetZonePaint,\n"
+	"  patchInteriorIndex = __zp_patchInteriorIndex,\n"
 	"  rotatePatchSelection = __zp_rotatePatchSelection,\n"
 	"  rotatePatchSelectionAxis = __zp_rotatePatchSelectionAxis,\n"
 	"  scalePatchSelection = __zp_scalePatchSelection,\n"
@@ -1795,6 +1932,18 @@ bool ensureLua()
 	ls->registerFunc("__zp_balanceTessSelection", lBalanceTessSelection);
 	ls->registerFunc("__zp_patchSmGroups", lPatchSmGroups);
 	ls->registerFunc("__zp_patchTess", lPatchTess);
+	ls->registerFunc("__zp_setVertexCoplanar", lSetVertexCoplanar);
+	ls->registerFunc("__zp_patchVertFlags", lPatchVertFlags);
+	ls->registerFunc("__zp_patchCornerVert", lPatchCornerVert);
+	ls->registerFunc("__zp_hideSelection", lHideSelection);
+	ls->registerFunc("__zp_unhideAll", lUnhideAll);
+	ls->registerFunc("__zp_patchHidden", lPatchHidden);
+	ls->registerFunc("__zp_subdivideEdgeSelection", lSubdivideEdgeSelection);
+	ls->registerFunc("__zp_setSubdividePropagate", lSetSubdividePropagate);
+	ls->registerFunc("__zp_setPatchAuto", lSetPatchAuto);
+	ls->registerFunc("__zp_resetZonePaint", lResetZonePaint);
+	ls->registerFunc("__zp_patchFlags", lPatchFlags);
+	ls->registerFunc("__zp_patchInteriorIndex", lPatchInteriorIndex);
 	ls->registerFunc("__zp_pivotPos", lPivotPos);
 	ls->registerFunc("__zp_rotatePatchSelection", lRotatePatchSelection);
 	ls->registerFunc("__zp_rotatePatchSelectionAxis", lRotatePatchSelectionAxis);

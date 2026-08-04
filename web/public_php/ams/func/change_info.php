@@ -29,9 +29,8 @@ function change_info(){
                     //use current info to check for changes
                     $current_info = $webUser->getInfo();
 
-		    $current_info['FirstName'] = filter_var($current_info['FirstName'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-		    $current_info['LastName'] = filter_var($current_info['LastName'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-		    $current_info['Country'] = filter_var($current_info['Country'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+		    // the names are stored and compared as they were typed; the
+		    // pages that show them escape on the way out
 		    $current_info['Gender'] = filter_var($current_info['Gender'], FILTER_SANITIZE_NUMBER_INT);
 
 
@@ -44,7 +43,7 @@ function change_info(){
                     if(($_POST['FirstName'] != "") && ($_POST['FirstName'] != $current_info['FirstName'])){
                         $query = $query . "FirstName = :fName ";
                         $updated = true;
-                        $values['fName'] = filter_var($_POST['FirstName'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $values['fName'] = $_POST['FirstName'];
                     }
                     if(($_POST['LastName'] != "") && ($_POST['LastName'] != $current_info['LastName'])){
 			if($updated){
@@ -53,7 +52,7 @@ function change_info(){
 			 $query = $query . "LastName = :lName ";
 			}
                         $updated = true;
-                        $values['lName'] = filter_var($_POST['LastName'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $values['lName'] = $_POST['LastName'];
                     }
 		    if(($_POST['Country'] != "AA") && ($_POST['Country'] != $current_info['Country'])){
 			if($updated){
@@ -62,7 +61,7 @@ function change_info(){
 			 $query = $query . "Country = :country ";
 			}
                         $updated = true;
-                        $values['country'] = filter_var($_POST['Country'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                        $values['country'] = $_POST['Country'];
 		    }
 		    if($_POST['Gender'] != $current_info['Gender']){
 			if($updated){
@@ -122,7 +121,7 @@ function change_info(){
 
     }catch (PDOException $e) {
          //go to error page or something, because can't access website db
-         print_r($e);
+         error_log($e->getMessage());
          throw new SystemExit();
     }
 }

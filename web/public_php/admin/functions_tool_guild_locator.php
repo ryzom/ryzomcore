@@ -166,33 +166,58 @@
 
 		if (trim($host) == "") return "No MFS Web Host Configured for this domain!";
 
+		// Host comes from domain config; still refuse characters that would
+		// leave the authority part of the URL. Parameters must be encoded
+		// so guild/shard/thread cannot inject extra form fields.
+		$host = trim((string)$host);
+		if (!preg_match('/^[A-Za-z0-9._:-]+$/', $host))
+			return "Invalid MFS Web Host for this domain!";
+
 		$url = "http://". $host ."/admin.php";
 
-		$uri_params  = 'user_login=support';
-		$uri_params .= '&shard='. $shard;
-		$uri_params .= '&forum='. $guild;
+		// The MFS web endpoint historically accepted a hard-coded support
+		// identity with no password. Prefer a service token from config when
+		// one is set; otherwise keep the legacy login name only (operators
+		// who still rely on that protocol) but never follow redirects off the
+		// configured host.
+		$mfs_login = (defined('NELTOOL_MFS_USER_LOGIN') && NELTOOL_MFS_USER_LOGIN !== '')
+			? NELTOOL_MFS_USER_LOGIN
+			: 'support';
+		$params = array(
+			'user_login' => (string)$mfs_login,
+			'shard' => (string)$shard,
+			'forum' => (string)$guild,
+		);
+		if (defined('NELTOOL_MFS_SERVICE_TOKEN') && NELTOOL_MFS_SERVICE_TOKEN !== '')
+			$params['service_token'] = NELTOOL_MFS_SERVICE_TOKEN;
 
 		if ($thread !== null && $recover === null)
 		{
-			$uri_params .= '&thread='. $thread;
+			$params['thread'] = (string)$thread;
 		}
 		elseif ($recover !== null && $thread !== null)
 		{
-			$uri_params .= '&recover_thread='. $guild;
-			$uri_params .= '&recover_threadthread='. $thread;
+			$params['recover_thread'] = (string)$guild;
+			$params['recover_threadthread'] = (string)$thread;
 		}
 
-		nt_common_add_debug("curling '$url' with '$uri_params'");
+		$uri_params = http_build_query($params, '', '&');
+
+		nt_common_add_debug("curling '$url' with forum proxy params");
 
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $uri_params);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // 0 = debug , 1 = normal
-		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1); // 0 = debug , 1 = normal
+		// Do not follow redirects: a compromised MFS host must not steer the
+		// admin tool's credentialed POST at a different origin.
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
 		curl_setopt($ch, CURLOPT_NOPROGRESS, 0);
 		curl_setopt($ch, CURLOPT_USERAGENT, "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)");
 		curl_setopt($ch, CURLOPT_HEADER, 1); // has to be 1 due to using redirections
 		curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+		curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+		curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, 0);
 
 		ob_start();
 		$curlOutput	= curl_exec ($ch);

@@ -101,6 +101,7 @@ CPaintCore::CPaintCore()
 	m_StrokeOldTile = -1;
 	m_StrokeOldZone = -1;
 	m_StrokeSets = 0;
+	m_SuspendStroke = false;
 	m_BrushSize = 0;
 	m_TileGroup = 0;
 	m_BrushMaskLoaded = false;

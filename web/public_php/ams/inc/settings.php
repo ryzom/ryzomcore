@@ -34,11 +34,9 @@ function settings(){
 
             }
             //Sanitize Data
+            // the template escapes what it prints, so the name fields are
+            // passed through as they are stored
             $result['current_mail'] = filter_var($result['current_mail'], FILTER_SANITIZE_EMAIL);
-            $result['target_username'] = filter_var($result['target_username'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $result['FirstName'] = filter_var($result['FirstName'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $result['LastName'] = filter_var($result['LastName'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-            $result['Country'] = filter_var($result['Country'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
             $result['Gender'] = filter_var($result['Gender'], FILTER_SANITIZE_NUMBER_INT);
             $result['ReceiveMail'] = filter_var($result['ReceiveMail'], FILTER_SANITIZE_NUMBER_INT);
             $result['country_array'] = getCountryArray();

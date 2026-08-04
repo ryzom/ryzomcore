@@ -17,6 +17,7 @@
 #ifndef NL_CONNECTION_CLIENT_H
 #define NL_CONNECTION_CLIENT_H
 
+#include <map>
 #include <memory>
 
 #include <nel/net/buf_net_base.h>
@@ -45,8 +46,21 @@ private:
 
 	void cbWSShardChooseShard(NLNET::CMessage &msgin, const std::string &serviceName, NLNET::TServiceId sid);
 
+	// The cookie's address field carries a per-connection id, and the reply
+	// routing looks the socket up again through these maps. Storing the
+	// TSockId pointer itself in the 32 bit field truncated it on 64 bit
+	// builds, and a stale value could match another client's connection.
+	uint32 allocateConnectionId(NLNET::TSockId from);
+	uint32 connectionId(NLNET::TSockId from) const;
+	NLNET::TSockId connectionById(uint32 id) const;
+	void releaseConnectionId(NLNET::TSockId from);
+
 	IPersistence& persistence;
 	NLNET::CCallbackServer ClientsServer;
+
+	uint32 m_ConnectionIdCounter = 0;
+	std::map<uint32, NLNET::TSockId> m_IdToSock;
+	std::map<NLNET::TSockId, uint32> m_SockToId;
 };
 
 #endif // NL_CONNECTION_CLIENT_H

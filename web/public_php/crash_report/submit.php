@@ -59,14 +59,16 @@ class BugReportGatherApp
 		$descr = "";
 		$email = "";
 
-		if( isset( $_POST[ 'report' ] ) )
-			$report = $_POST[ 'report' ];
+		// Cap sizes so an open endpoint cannot be used to fill the
+		// database with multi-megabyte posts.
+		if( isset( $_POST[ 'report' ] ) && is_string( $_POST[ 'report' ] ) )
+			$report = substr( $_POST[ 'report' ], 0, 512 * 1024 );
 
-		if( isset( $_POST[ 'descr' ] ) )
-			$descr = $_POST[ 'descr' ];
+		if( isset( $_POST[ 'descr' ] ) && is_string( $_POST[ 'descr' ] ) )
+			$descr = substr( $_POST[ 'descr' ], 0, 16 * 1024 );
 
-		if( isset( $_POST[ 'email' ] ) )
-			$email = $_POST[ 'email' ];
+		if( isset( $_POST[ 'email' ] ) && is_string( $_POST[ 'email' ] ) )
+			$email = substr( $_POST[ 'email' ], 0, 256 );
 
 		$report = $this->db->real_escape_string( $report );
 		$descr  = $this->db->real_escape_string( $descr );
@@ -85,11 +87,23 @@ class BugReportGatherApp
 	{
 		//$this->logPOSTVars();
 
+		// Ship config still has user/password "bugs". Refuse that combination
+		// so a forgotten default cannot be an open write path into MySQL.
+		if (BugReportConfig::$dbuser === 'bugs' && BugReportConfig::$dbpw === 'bugs')
+		{
+			$this->logger->log( "Refusing default crash report database credentials" );
+			return;
+		}
+
+		// php 8.1 defaults mysqli to exception reporting; this class checks
+		// mysqli_connect_error() itself, keep the classic mode
+		if (function_exists('mysqli_report'))
+			mysqli_report(MYSQLI_REPORT_OFF);
 		$this->db = new mysqli( BugReportConfig::$dbhost, BugReportConfig::$dbuser, BugReportConfig::$dbpw, BugReportConfig::$dbdb, BugReportConfig::$dbport );
 		if( mysqli_connect_error() )
 		{
 			$this->logger->log( "Connection error :(" );
-			$this->logger->log( mysqli_connect_error() );
+			// do not log the mysql error text; it often quotes the host/user
 			return;
 		}
 
@@ -98,8 +112,7 @@ class BugReportGatherApp
 		if( $result !== TRUE )
 		{
 			$this->logger->log( "Query failed :(" );
-			$this->logger->log( 'Query: ' . $q );
-			$this->logPOSTVars();
+			// do not log the full query (it holds the report body)
 		}		
 
 		$this->db->close();

@@ -22,6 +22,14 @@
 	}
 
 	$tool_menu_item = tool_graphs_menu_get_item_from_key($NELTOOL['GET_VARS']['toolmode']);
+
+	// the templates put this straight inside href="...", so only let through
+	// a mode that is actually one of ours
+	if ($tool_menu_item === null)
+	{
+		$NELTOOL['GET_VARS']['toolmode'] = 'ccu';
+		$tool_menu_item = tool_graphs_menu_get_item_from_key('ccu');
+	}
 	$tpl->assign('toolmode',	$NELTOOL['GET_VARS']['toolmode']);
 
 	$tpl->assign('tool_title',	'Graphs&nbsp;/&nbsp;'. $tool_menu_item['title']);
@@ -58,15 +66,20 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	if (!tool_main_check_user_domain($view_domain_id))	$view_domain_id = null;
+	if (!tool_main_check_user_shard($view_shard_id))	$view_shard_id	= null;
+
+	// the frames end up on an rrdtool command line further down, so only ever
+	// keep one of the values we offer
 	if (isset($NELTOOL['GET_VARS']['highframe']))
 	{
-		$view_time_highframe = $NELTOOL['GET_VARS']['highframe'];
+		$view_time_highframe = tool_graphs_time_frame_validate($NELTOOL['GET_VARS']['highframe'], $tool_hires_frames);
 		nt_auth_set_session_var('view_time_highframe', $view_time_highframe);
 	}
 
 	if (isset($NELTOOL['GET_VARS']['lowframe']))
 	{
-		$view_time_lowframe = $NELTOOL['GET_VARS']['lowframe'];
+		$view_time_lowframe = tool_graphs_time_frame_validate($NELTOOL['GET_VARS']['lowframe'], $tool_lowres_frames);
 		nt_auth_set_session_var('view_time_lowframe', $view_time_lowframe);
 	}
 
@@ -74,30 +87,37 @@
 	{
 		$view_time_highframe = tool_graphs_time_frame_get_default($tool_hires_frames);
 	}
+	else
+	{
+		// a session written before this check may still hold anything
+		$view_time_highframe = tool_graphs_time_frame_validate($view_time_highframe, $tool_hires_frames);
+	}
 
 	if ($view_time_lowframe == null)
 	{
 		$view_time_lowframe = tool_graphs_time_frame_get_default($tool_lowres_frames);
+	}
+	else
+	{
+		$view_time_lowframe = tool_graphs_time_frame_validate($view_time_lowframe, $tool_lowres_frames);
 	}
 
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
 	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $_POST['services_refresh'])
+		$new_refresh = tool_main_refresh_rate_validate($_POST['services_refresh']);
+		if ($current_refresh_rate != $new_refresh)
 		{
-			$current_refresh_rate = $_POST['services_refresh'];
+			$current_refresh_rate = $new_refresh;
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
 
-	if ($current_refresh_rate == null)
+	$current_refresh_rate = tool_main_refresh_rate_validate($current_refresh_rate);
+	if ($current_refresh_rate > 0)
 	{
-		$current_refresh_rate = 0;
-	}
-	elseif ($current_refresh_rate > 0)
-	{
-		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. $current_refresh_rate .'">');
+		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. (int)$current_refresh_rate .'">');
 	}
 
 	$tpl->assign('tool_refresh_list',		$refresh_rates);
@@ -158,18 +178,19 @@
 						reset($graph_list);
 						foreach($graph_list as $graph_item)
 						{
+							if (!tool_graphs_safe_rd_basename($graph_item['rd_file']))
+								continue;
+
 							$rrd_path	= $AS_RRDPath . $graph_item['rd_file'];
-							$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
-							$rrd_draw	= "LINE2:val#0000FF --no-legend";
 							$rrd_output	= NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
 							$rrd_web	= NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
-							$rrd_exec	= NELTOOL_RRDTOOL ." graph ". $rrd_output ." --width 916 --height 110 --start -". $view_time_lowframe ." ". $rrd_def ." ". $rrd_draw;
+							$rrd_exec	= tool_graphs_rrdtool_graph_cmd($rrd_path, $rrd_output, $view_time_lowframe, 916, 110, 'LINE2:val#0000FF', true);
 
 							nt_common_add_debug($rrd_exec);
 							exec($rrd_exec, $rrd_result, $rrd_code);
 
 							$file_description = str_replace(array('.rrd','.hrd','.'),
-															array('',    '',    '&nbsp;-&nbsp;'),
+															array('',    '',    ' - '),
 															$graph_item['rd_file']);
 
 							$time_string = '';
@@ -215,18 +236,19 @@
 						reset($graph_list);
 						foreach($graph_list as $graph_item)
 						{
+							if (!tool_graphs_safe_rd_basename($graph_item['rd_file']))
+								continue;
+
 							$rrd_path	= $AS_RRDPath . $graph_item['rd_file'];
-							$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
-							$rrd_draw	= "LINE2:val#0000FF --no-legend";
 							$rrd_output	= NELTOOL_RRDSYSBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
 							$rrd_web	= NELTOOL_RRDWEBBASE . $graph_item['rd_file'] ."-". $view_time_lowframe .".gif";
-							$rrd_exec	= NELTOOL_RRDTOOL ." graph ". $rrd_output ." --width 916 --height 110 --start -". $view_time_lowframe ." ". $rrd_def ." ". $rrd_draw;
+							$rrd_exec	= tool_graphs_rrdtool_graph_cmd($rrd_path, $rrd_output, $view_time_lowframe, 916, 110, 'LINE2:val#0000FF', true);
 
 							nt_common_add_debug($rrd_exec);
 							exec($rrd_exec, $rrd_result, $rrd_code);
 
 							$file_description = str_replace(array('.rrd','.hrd','.'),
-															array('',    '',    '&nbsp;-&nbsp;'),
+															array('',    '',    ' - '),
 															$graph_item['rd_file']);
 
 							$time_string = '';
@@ -324,7 +346,7 @@
 									}
 
 									$file_description = str_replace(array('.rrd','.hrd','.'),
-																	array('',    '',    '&nbsp;-&nbsp;'),
+																	array('',    '',    ' - '),
 																	$graph_item['rd_file']);
 
 									$time_string = '';
@@ -379,22 +401,23 @@
 							if ($tool_selected_variable_data['low_file'] != '')
 							{
 								$rrd_values	= array(1200, 10800, 86400, 604800, 2592000, 7776000); // 20mins, 3h, 24h, 7days, 30 days, 90 days (unit is 1 second)
-								$rrd_path	= $AS_RRDPath . $tool_selected_variable_data['low_file'];
-								$rrd_def	= "DEF:val=". str_replace(":", "\\:", $rrd_path) .":var:AVERAGE";
-								$rrd_draw	= "LINE2:val#0000FF";
-
 								$rrd_webs	= array();
 
-								reset($rrd_values);
-								foreach($rrd_values as $rrd_value)
+								if (tool_graphs_safe_rd_basename($tool_selected_variable_data['low_file']))
 								{
-									$rrd_output	= NELTOOL_RRDSYSBASE . $tool_selected_variable_data['low_file'] ."-". $rrd_value .".gif";
-									$rrd_web	= NELTOOL_RRDWEBBASE . $tool_selected_variable_data['low_file'] ."-". $rrd_value .".gif";
-									$rrd_exec	= NELTOOL_RRDTOOL ." graph ". $rrd_output ." --start -". $rrd_value ." ". $rrd_def ." ". $rrd_draw;
-									nt_common_add_debug($rrd_exec);
-									exec($rrd_exec, $rrd_result, $rrd_code);
-									$rrd_webs[] = array('desc'	=> $tool_selected_variable_data['low_file'] .' over '. $rrd_value .'s.',
-														'img'	=> $rrd_web);
+									$rrd_path	= $AS_RRDPath . $tool_selected_variable_data['low_file'];
+
+									reset($rrd_values);
+									foreach($rrd_values as $rrd_value)
+									{
+										$rrd_output	= NELTOOL_RRDSYSBASE . $tool_selected_variable_data['low_file'] ."-". $rrd_value .".gif";
+										$rrd_web	= NELTOOL_RRDWEBBASE . $tool_selected_variable_data['low_file'] ."-". $rrd_value .".gif";
+										$rrd_exec	= tool_graphs_rrdtool_graph_cmd($rrd_path, $rrd_output, $rrd_value);
+										nt_common_add_debug($rrd_exec);
+										exec($rrd_exec, $rrd_result, $rrd_code);
+										$rrd_webs[] = array('desc'	=> $tool_selected_variable_data['low_file'] .' over '. $rrd_value .'s.',
+															'img'	=> $rrd_web);
+									}
 								}
 
 								$tpl->assign('tool_rrd_output', $rrd_webs);

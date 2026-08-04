@@ -21,6 +21,10 @@
 	importParam('page');
 	global $page;
 
+	// $page becomes part of the file name below
+	if (isset($page) && $page != "" && !safe_index_param($page))
+		die("ERROR: Bad parameters");
+
 	unset($user);
 	$user = $user_login;
 

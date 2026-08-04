@@ -523,7 +523,20 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpWeldCancel, "zp_weld_cancel");
 
-/** Panel Extrude button: pop the height dialog, seeded with the last-used height. */
+/** The Normal radio pair state (dialog-local; seeded from the bridge on open). */
+static void zpSetExtrudeNormalRadio(bool local)
+{
+	if (CCtrlBaseButton *bz = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:extrude_dialog:content:norm_z")))
+		bz->setPushed(!local);
+	if (CCtrlBaseButton *bl = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:extrude_dialog:content:norm_local")))
+		bl->setPushed(local);
+}
+
+/** Panel Extrude button: pop the dialog, seeded with the last-used height/outline/mode. */
 class CAHZpPatchExtrude : public IActionHandler
 {
 public:
@@ -536,12 +549,28 @@ public:
 		        CWidgetManager::getInstance()->getElementFromId(
 		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
 			eb->setInputString(NLMISC::toString("%g", b->ExtrudeHeight));
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:outl_frame:outl")))
+			eb->setInputString(NLMISC::toString("%g", b->ExtrudeOutline));
+		zpSetExtrudeNormalRadio(b->ExtrudeLocal);
 		CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:extrude_dialog");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPatchExtrude, "zp_patch_extrude");
 
-/** Extrude dialog OK: parse the height and extrude the face selection by it. */
+/** The Normal radio pair: exactly one pushed. */
+class CAHZpExtrudeNormal : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		zpSetExtrudeNormalRadio(atoi(params.c_str()) != 0);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeNormal, "zp_extrude_normal");
+
+/** Extrude dialog OK: parse height + outline + mode and extrude the face selection. */
 class CAHZpExtrudeOk : public IActionHandler
 {
 public:
@@ -549,16 +578,25 @@ public:
 	{
 		if (ZPSCRIPT::isExecuting()) return;
 		SPaintUIBridge *b = getPaintUIBridge();
-		if (!b || !b->patchExtrude) return;
-		float h = 0.f;
+		if (!b || !b->patchExtrudeEx) return;
+		float h = 0.f, outline = 0.f;
 		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
 		        CWidgetManager::getInstance()->getElementFromId(
 		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
 			NLMISC::fromString(eb->getInputString(), h);
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:outl_frame:outl")))
+			NLMISC::fromString(eb->getInputString(), outline);
+		bool local = false;
+		if (CCtrlBaseButton *bl = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:norm_local")))
+			local = bl->getPushed();
 		if (h == 0.f)
 			return; // an unparsable or zero height extrudes nothing; the dialog stays up
 		CWidgetManager::getInstance()->disableModalWindow();
-		b->patchExtrude(h);
+		b->patchExtrudeEx(h, outline, local);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpExtrudeOk, "zp_extrude_ok");
@@ -977,6 +1015,133 @@ public:
 };
 REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
 
+
+/** Reset paint (mA8): resolve the target zone, show it in the confirm modal, execute on
+ *  OK. The modal is the danger guard - scripts call the op bare. */
+static uint s_ResetPaintZone = 0;
+class CAHZpResetPaint : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->resetPaintTarget || !b->resetPaint) return;
+		std::string label;
+		uint zone = 0;
+		if (!b->resetPaintTarget(zone, label))
+			return; // ambiguous or nothing editable; the status line explains
+		s_ResetPaintZone = zone;
+		if (CViewText *t = dynamic_cast<CViewText *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:reset_dialog:content:zone")))
+			t->setHardText(label);
+		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:reset_dialog");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetPaint, "zp_reset_paint");
+
+class CAHZpResetOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->resetPaint)
+			b->resetPaint(s_ResetPaintZone);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetOk, "zp_reset_ok");
+
+class CAHZpResetCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetCancel, "zp_reset_cancel");
+
+class CAHZpPatchDetachCopy : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDetachCopyToggle) b->patchDetachCopyToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDetachCopy, "zp_patch_detach_copy");
+
+class CAHZpPatchSubdivProp : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSubdivPropToggle) b->patchSubdivPropToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSubdivProp, "zp_patch_subdiv_prop");
+
+class CAHZpPatchHide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchHide) b->patchHide();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchHide, "zp_patch_hide");
+
+class CAHZpPatchUnhide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchUnhideAll) b->patchUnhideAll();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchUnhide, "zp_patch_unhide");
+
+/** Scene-menu vertex type pair: set the vertex selection Coplanar (1) or Corner (0). */
+class CAHZpVertexType : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchVertCoplanar)
+			b->patchVertCoplanar(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpVertexType, "zp_vertex_type");
+
+/** Scene-menu interior mode pair: set the face selection Auto (1) or Manual (0). */
+class CAHZpInteriorMode : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchInteriorMode)
+			b->patchInteriorMode(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInteriorMode, "zp_interior_mode");
 
 /** Pick a specific season code from the menu (params = sp|su|au|wi). */
 class CAHZpSeasonSelect : public IActionHandler
@@ -2103,11 +2268,8 @@ REGISTER_ACTION_HANDLER(CAHZpSaveCancel, "zp_save_cancel");
 // ---------------------------------------------------------------------------------------------
 
 CEditorUI::CEditorUI()
-	: _Ready(false), _Visible(true), _Driver(nullptr)
-    , _TextContext(nullptr)
-    ,
-	  _GuiListener(nullptr)
-    , _PointerButtons(nullptr)
+	: _Ready(false), _Visible(true), _Driver(nullptr), _TextContext(nullptr),
+	  _GuiListener(nullptr), _PointerButtons(nullptr)
 {
 }
 
@@ -2698,8 +2860,20 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_cw").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Subdiv serves both levels: the patch selection 1->4 and the edge selection 1->2.
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_subdivide").c_str()))
-			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+			btn->setFrozen(!((b->SubObj == 3 && b->PatchSelFaces)
+			                 || (b->SubObj == 2 && b->PatchSelEdges)));
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":subdiv_prop:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 2);
+			btn->setPushed(b->SubdivPropagate);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":detach_copy:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 3);
+			btn->setPushed(b->DetachCopy);
+		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
 			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
@@ -2708,6 +2882,17 @@ void CEditorUI::syncPanelFromBridge()
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_element").c_str()))
 			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Hide takes the current level's selection (vertex/edge/patch); Unhide All is live
+		// whenever anything is hidden, whatever the level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_hide").c_str()))
+		{
+			const bool haveSel = (b->SubObj == 1 && b->PatchSelVerts)
+				|| (b->SubObj == 2 && b->PatchSelEdges)
+				|| (b->SubObj == 3 && b->PatchSelFaces);
+			btn->setFrozen(!haveSel);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unhide").c_str()))
+			btn->setFrozen(!b->HiddenCount);
 		// Scene-menu compass: a direction is live when an editable board neighbor sits there
 		// (patch level with a face selection; the mask is empty otherwise).
 		{
@@ -2717,6 +2902,35 @@ void CEditorUI::syncPanelFromBridge()
 				if (CCtrlBaseButton *btn = findButton(
 						(std::string("ui:zp:scene_menu:content:") + kMvIds[d]).c_str()))
 					btn->setFrozen(!(b->MoveDirMask & (1u << d)));
+		}
+		// Scene-menu vertex type pair: checked = the WHOLE selection carries that type
+		// (mixed shows neither); live at vertex level with a vertex selection.
+		{
+			const bool vtOff = b->SubObj != 1 || !b->PatchSelVerts;
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:vt_coplanar"))
+			{
+				btn->setFrozen(vtOff);
+				btn->setPushed(!vtOff && b->VertCoplanar == 1);
+			}
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:vt_corner"))
+			{
+				btn->setFrozen(vtOff);
+				btn->setPushed(!vtOff && b->VertCoplanar == 0);
+			}
+		}
+		// Scene-menu interior mode pair: same shape, patch level.
+		{
+			const bool imOff = b->SubObj != 3 || !b->PatchSelFaces;
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:im_auto"))
+			{
+				btn->setFrozen(imOff);
+				btn->setPushed(!imOff && b->PatchAuto == 1);
+			}
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:im_manual"))
+			{
+				btn->setFrozen(imOff);
+				btn->setPushed(!imOff && b->PatchAuto == 0);
+			}
 		}
 		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
 		{

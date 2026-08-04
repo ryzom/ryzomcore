@@ -34,6 +34,12 @@
 	global $thread;
 	global $page;
 
+	// both become part of the file name below
+	if (!isset($thread) || !safe_index_param($thread))
+		die("ERROR: Bad parameters");
+	if (isset($page) && $page != "" && !safe_index_param($page))
+		die("ERROR: Bad parameters");
+
 	check_character_belongs_to_guild($user_login, $forum);
 
 	$user_dir = build_user_dir($forum, $shard);

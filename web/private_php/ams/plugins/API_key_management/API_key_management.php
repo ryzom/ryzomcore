@@ -123,6 +123,9 @@ function api_key_management_hook_store_db()
     global $var_set;
      global $API_key_management_return_set;
 
+     // this hook runs for every request, so check who is asking
+    if ( !isset( $_SESSION['user'] ) ) return;
+
      // if the form been submited move forward
     if ( @hook_validate( $_POST['gen_key'] ) ) {
 
@@ -192,11 +195,16 @@ function api_key_management_hook_update_db()
     global $var_set;
      global $API_key_management_return_set;
 
+     // this hook runs for every request, so check who is asking
+    if ( !isset( $_SESSION['user'] ) ) return;
+
      $db = new DBLayer( 'lib' );
      if ( isset( $_GET['delete_id'] ) )
          {
-        // removes the registered key using get variable which contains the id of the registered key
-        $db -> delete( 'ams_api_keys', array( 'SNo' => $_GET['delete_id'] ), 'SNo = :SNo' );
+        // removes the registered key using get variable which contains the id
+        // of the registered key -- restricted to the caller's own keys, the id
+        // alone says nothing about who owns it
+        $db -> delete( 'ams_api_keys', array( 'SNo' => intval( $_GET['delete_id'] ), 'user' => $_SESSION['user'] ), 'SNo = :SNo AND User = :user' );
 
          // redirecting to the API_key_management plugins template with success code
         // 2 refers to the succssfull delete condition

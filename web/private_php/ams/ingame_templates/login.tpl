@@ -33,7 +33,7 @@
 		</p>
 		{/if}
 		<p>
-		<font color="green">{$login_register_message} <a href="{$ingame_webpath}?page=register">{$login_register_message_here}</a></font>!
+		<font color="green">{$login_register_message nofilter} <a href="{$ingame_webpath}?page=register">{$login_register_message_here}</a></font>!
 		</p>
 		</td></tr>
 		</table>

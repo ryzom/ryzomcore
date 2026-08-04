@@ -32,8 +32,13 @@
 
 	read_template('new_thread.html', $new_thread);
 
-	$instance = str_replace(array('%%SENDER%%', '%%UCSENDER%%', '%%FORUM_POST%%', '%%FORUM%%', '%%UCFORUM%%'), 
-							array($user_login,  ucfirst($user_login), $forum, nameToURL($forum),      convert_forum_name($forum)),
+	// both arrive with the request and are placed in the page, so they have to
+	// be escaped
+	$e_login = htmlspecialchars($user_login, ENT_QUOTES);
+	$e_forum = htmlspecialchars($forum, ENT_QUOTES);
+
+	$instance = str_replace(array('%%SENDER%%', '%%UCSENDER%%', 	'%%FORUM_POST%%', 	'%%FORUM%%', 									'%%UCFORUM%%'),
+							array($e_login,  	ucfirst($e_login), 	$e_forum, 			htmlspecialchars(nameToURL($forum), ENT_QUOTES),	htmlspecialchars(convert_forum_name($forum), ENT_QUOTES)),
 							$new_thread);
 
 	echo $instance;

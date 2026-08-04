@@ -39,33 +39,30 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	if (!tool_main_check_user_domain($view_domain_id))	$view_domain_id = null;
+	if (!tool_main_check_user_shard($view_shard_id))	$view_shard_id	= null;
+
 	if (isset($NELTOOL['GET_VARS']['refdata']))
 	{
-		$tmp_data = unserialize(base64_decode($NELTOOL['GET_VARS']['refdata']));
-		if (is_array($tmp_data))
-		{
-			$NELTOOL['POST_VARS'] = $tmp_data;
-		}
+		tool_main_apply_refdata_from_get($NELTOOL['GET_VARS']['refdata']);
 	}
 
 	$current_refresh_rate = nt_auth_get_session_var('current_refresh_rate');
 
 	if (isset($_POST['services_refresh']))
 	{
-		if ($current_refresh_rate != $_POST['services_refresh'])
+		$new_refresh = tool_main_refresh_rate_validate($_POST['services_refresh']);
+		if ($current_refresh_rate != $new_refresh)
 		{
-			$current_refresh_rate = $_POST['services_refresh'];
+			$current_refresh_rate = $new_refresh;
 			nt_auth_set_session_var('current_refresh_rate',$current_refresh_rate);
 		}
 	}
 
-	if ($current_refresh_rate == null)
+	$current_refresh_rate = tool_main_refresh_rate_validate($current_refresh_rate);
+	if ($current_refresh_rate > 0)
 	{
-		$current_refresh_rate = 0;
-	}
-	elseif ($current_refresh_rate > 0)
-	{
-		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. $current_refresh_rate .'">');
+		$tpl->assign('nel_tool_refresh',	'<meta http-equiv=refresh content="'. (int)$current_refresh_rate .'">');
 	}
 
 	$tpl->assign('tool_refresh_list',		$refresh_rates);
@@ -83,6 +80,8 @@
 	if (tool_admin_applications_check('tool_guild_locator_manage_guild'))	$tpl->assign('restriction_tool_guild_locator_manage_guild',true);
 	if (tool_admin_applications_check('tool_guild_locator_manage_members'))	$tpl->assign('restriction_tool_guild_locator_manage_members',true);
 	if (tool_admin_applications_check('tool_guild_locator_manage_forums'))	$tpl->assign('restriction_tool_guild_locator_manage_forums',true);
+
+	$tpl->assign('nel_csrf', nt_csrf_token());
 
 	if ($view_domain_id)
 	{
@@ -114,7 +113,7 @@
 
 				if ($tool_services_gl)
 				{
-					$tpl->assign('tool_post_data',	base64_encode(serialize($NELTOOL['POST_VARS'])));
+					$tpl->assign('tool_post_data',	nt_pack_request_data($NELTOOL['POST_VARS']));
 
 					switch ($tool_services_gl)
 					{
@@ -161,15 +160,20 @@
 
 							if (($tool_services_gl == 'update name') && tool_admin_applications_check('tool_guild_locator_manage_guild'))
 							{
-								$service		= $NELTOOL['POST_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['POST_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['POST_VARS']['guildid'];
-								$new_guild_name = $NELTOOL['POST_VARS']['new_guild_name'];
+								$service		= isset($NELTOOL['POST_VARS']['servicealias']) ? $NELTOOL['POST_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['POST_VARS']['guildshardid']) ? (int)$NELTOOL['POST_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['POST_VARS']['guildid']) ? (int)$NELTOOL['POST_VARS']['guildid'] : 0;
+								$new_guild_name = isset($NELTOOL['POST_VARS']['new_guild_name']) ? $NELTOOL['POST_VARS']['new_guild_name'] : '';
 
 								$new_guild_name = trim($new_guild_name);
-								if (ereg("^[a-zA-Z0-9\ ]+$", $new_guild_name))
+								if (!tool_main_valid_service_alias($service) || $guild_shard_id <= 0 || $guild_id <= 0)
+								{
+									$tpl->assign('tool_guild_errors',	array('Invalid service or guild id.'));
+								}
+								else if (preg_match('/^[a-zA-Z0-9 ]+$/', $new_guild_name))
 								{
 									// this is a small hack that was done by daniel so i could use the renameGuild command without an EID
+									$new_guild_name = tool_main_frame_quoted_arg($new_guild_name, 64);
 									$service_command = 'renameGuild admin_tool '. $guild_shard_id .':'. $guild_id .' "'. $new_guild_name .'"';
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
@@ -201,14 +205,19 @@
 
 							if (($tool_services_gl == 'update description') && tool_admin_applications_check('tool_guild_locator_manage_guild'))
 							{
-								$service		= $NELTOOL['POST_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['POST_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['POST_VARS']['guildid'];
-								$new_guild_desc	= $NELTOOL['POST_VARS']['new_guild_description'];
+								$service		= isset($NELTOOL['POST_VARS']['servicealias']) ? $NELTOOL['POST_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['POST_VARS']['guildshardid']) ? (int)$NELTOOL['POST_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['POST_VARS']['guildid']) ? (int)$NELTOOL['POST_VARS']['guildid'] : 0;
+								$new_guild_desc	= isset($NELTOOL['POST_VARS']['new_guild_description']) ? $NELTOOL['POST_VARS']['new_guild_description'] : '';
 
 								$new_guild_desc = trim($new_guild_desc);
-								if (ereg("^[a-zA-Z0-9\ ]+$", $new_guild_desc))
+								if (!tool_main_valid_service_alias($service) || $guild_shard_id <= 0 || $guild_id <= 0)
 								{
+									$tpl->assign('tool_guild_errors',	array('Invalid service or guild id.'));
+								}
+								else if (preg_match('/^[a-zA-Z0-9 ]+$/', $new_guild_desc))
+								{
+									$new_guild_desc = tool_main_frame_quoted_arg($new_guild_desc, 128);
 									$service_command = 'setGuildDescription '. $guild_shard_id .':'. $guild_id .' "'. $new_guild_desc .'"';
 
 									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
@@ -239,32 +248,47 @@
 
 						case 'setleader':
 
+							// Grade changes are still GET links (templates build
+							// them that way); frame every id before it reaches AES,
+							// and require the session CSRF token so a forged link
+							// cannot promote someone when the operator is logged in.
 							if (($tool_services_gl == 'setleader') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
-								$service		= $NELTOOL['GET_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['GET_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['GET_VARS']['guildid'];
-								$member_eid		= $NELTOOL['GET_VARS']['eid'];
+								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
+								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
+								$csrf			= isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
 
-								// guildSetLeader <guildName|<shardId>:<guildId> <member eid>
-
-								$service_command = 'guildSetLeader '. $guild_shard_id .':'. $guild_id .' '. $member_eid;
-
-								nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
-
-								$tpl->assign('tool_execute_result', '');
-								$command_return_data = array();
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (!nt_csrf_check($csrf))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									nt_common_add_debug('setleader refused: bad csrf token');
+								}
+								else if (tool_main_valid_service_alias($service)
+									&& $guild_shard_id > 0 && $guild_id > 0
+									&& tool_main_valid_entity_id($member_eid))
+								{
+									// guildSetLeader <guildName|<shardId>:<guildId> <member eid>
+									$service_command = 'guildSetLeader '. $guild_shard_id .':'. $guild_id .' '. $member_eid;
+
+									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
+
+									$tpl->assign('tool_execute_result', '');
+									$command_return_data = array();
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+									else
+									{
+										$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									}
 								}
 								else
 								{
-									// the locator displays a nice output, no need for the raw one
-									//$tpl->assign('tool_execute_command', 	$service_command);
-									$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									nt_common_add_debug('setleader refused: invalid service, guild or eid');
 								}
 
 							}
@@ -274,35 +298,46 @@
 
 							if (($tool_services_gl == 'promote') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
-								$service		= $NELTOOL['GET_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['GET_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['GET_VARS']['guildid'];
-								$member_eid		= $NELTOOL['GET_VARS']['eid'];
-								$member_grade	= $NELTOOL['GET_VARS']['grade'];
+								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
+								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
+								$member_grade	= isset($NELTOOL['GET_VARS']['grade']) ? $NELTOOL['GET_VARS']['grade'] : '';
+								$csrf			= isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
 
 								$new_grade		= 'Member';
 								if		($member_grade == 'Officer')		$new_grade = 'Officer';
 								elseif	($member_grade == 'HighOfficer')	$new_grade = 'HighOfficer';
 
-								// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade = Member/Officer/HighOfficer/Leader>
-
-								$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
-
-								nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
-
-								$tpl->assign('tool_execute_result', '');
-								$command_return_data = array();
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (!nt_csrf_check($csrf))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									nt_common_add_debug('promote refused: bad csrf token');
+								}
+								else if (tool_main_valid_service_alias($service)
+									&& $guild_shard_id > 0 && $guild_id > 0
+									&& tool_main_valid_entity_id($member_eid))
+								{
+									// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade>
+									$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
+
+									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
+
+									$tpl->assign('tool_execute_result', '');
+									$command_return_data = array();
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+									else
+									{
+										$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									}
 								}
 								else
 								{
-									// the locator displays a nice output, no need for the raw one
-									//$tpl->assign('tool_execute_command', 	$service_command);
-									$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									nt_common_add_debug('promote refused: invalid service, guild or eid');
 								}
 
 
@@ -312,46 +347,57 @@
 
 							if (($tool_services_gl == 'demote') && tool_admin_applications_check('tool_guild_locator_manage_members'))
 							{
-								$service		= $NELTOOL['GET_VARS']['servicealias'];
-								$guild_shard_id = $NELTOOL['GET_VARS']['guildshardid'];
-								$guild_id		= $NELTOOL['GET_VARS']['guildid'];
-								$member_eid		= $NELTOOL['GET_VARS']['eid'];
-								$member_grade	= $NELTOOL['GET_VARS']['grade'];
+								$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+								$guild_shard_id = isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+								$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
+								$member_eid		= isset($NELTOOL['GET_VARS']['eid']) ? $NELTOOL['GET_VARS']['eid'] : '';
+								$member_grade	= isset($NELTOOL['GET_VARS']['grade']) ? $NELTOOL['GET_VARS']['grade'] : '';
+								$csrf			= isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
 
 								$new_grade		= 'Member';
 								if 		($member_grade == 'Officer')	$new_grade = 'Officer';
 								elseif	($member_grade == 'Member')		$new_grade = 'Member';
 
-								// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade = Member/Officer/HighOfficer/Leader>
-
-								$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
-
-								nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
-
-								$tpl->assign('tool_execute_result', '');
-								$command_return_data = array();
-
-								$adminService->serviceCmd($service, $service_command);
-								if (!$adminService->waitCallback())
+								if (!nt_csrf_check($csrf))
 								{
-									nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									nt_common_add_debug('demote refused: bad csrf token');
+								}
+								else if (tool_main_valid_service_alias($service)
+									&& $guild_shard_id > 0 && $guild_id > 0
+									&& tool_main_valid_entity_id($member_eid))
+								{
+									// guildSetGrade <guildName|<shardId>:<guildId> <member eid> <grade>
+									$service_command = 'guildSetGrade '. $guild_shard_id .':'. $guild_id .' '. $member_eid .' '. $new_grade;
+
+									nt_log("Domain '$AS_Name' : '$service_command' on ". $service);
+
+									$tpl->assign('tool_execute_result', '');
+									$command_return_data = array();
+
+									$adminService->serviceCmd($service, $service_command);
+									if (!$adminService->waitCallback())
+									{
+										nt_common_add_debug('Error while waiting for callback on service \''. $service .'\' for command : '. $service_command);
+									}
+									else
+									{
+										$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									}
 								}
 								else
 								{
-									// the locator displays a nice output, no need for the raw one
-									//$tpl->assign('tool_execute_command', 	$service_command);
-									$tpl->assign('tool_guild_errors', tool_gl_parse_grade_change($command_return_data));
+									nt_common_add_debug('demote refused: invalid service, guild or eid');
 								}
 
 							}
 
 						case 'dumpguild':
 
-							$service		= $NELTOOL['GET_VARS']['servicealias'];
-							$guild_shard_id	= $NELTOOL['GET_VARS']['guildshardid'];
-							$guild_id		= $NELTOOL['GET_VARS']['guildid'];
+							$service		= isset($NELTOOL['GET_VARS']['servicealias']) ? $NELTOOL['GET_VARS']['servicealias'] : '';
+							$guild_shard_id	= isset($NELTOOL['GET_VARS']['guildshardid']) ? (int)$NELTOOL['GET_VARS']['guildshardid'] : 0;
+							$guild_id		= isset($NELTOOL['GET_VARS']['guildid']) ? (int)$NELTOOL['GET_VARS']['guildid'] : 0;
 
-							if (($guild_shard_id > 0) && ($guild_id > 0) && ($service != ''))
+							if (($guild_shard_id > 0) && ($guild_id > 0) && tool_main_valid_service_alias($service))
 							{
 								$service_command = 'dumpGuild '. $guild_shard_id .':'. $guild_id;
 
@@ -390,23 +436,34 @@
 											{
 												case 'viewthread':
 
-													$view_forum_threadid		= $NELTOOL['GET_VARS']['threadid'];
-													$view_forum_recoverable		= $NELTOOL['GET_VARS']['recoverable'];
+													$view_forum_threadid		= isset($NELTOOL['GET_VARS']['threadid']) ? (int)$NELTOOL['GET_VARS']['threadid'] : 0;
+													$view_forum_recoverable		= isset($NELTOOL['GET_VARS']['recoverable']) ? (int)$NELTOOL['GET_VARS']['recoverable'] : 0;
 
-													$thread_name = ($view_forum_recoverable == 1 ? '_':'') .'thread_'. $view_forum_threadid .'.index';
+													if ($view_forum_threadid > 0)
+													{
+														$thread_name = ($view_forum_recoverable == 1 ? '_':'') .'thread_'. $view_forum_threadid .'.index';
 
-													$view_thread_data_raw 		= tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $thread_name);
-													$view_thread_data			= tool_gl_parse_thread_view($view_thread_data_raw);
-													$tpl->assign('tool_guild_thread',	$view_thread_data);
+														$view_thread_data_raw 		= tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $thread_name);
+														$view_thread_data			= tool_gl_parse_thread_view($view_thread_data_raw);
+														$tpl->assign('tool_guild_thread',	$view_thread_data);
+													}
 
 													break;
 
 												case 'recoverthread':
 
-													$recover_forum_threadid		= $NELTOOL['GET_VARS']['threadid'];
+													// State change over GET: same CSRF bar as the grade links.
+													$csrf = isset($NELTOOL['GET_VARS']['csrf']) ? $NELTOOL['GET_VARS']['csrf'] : '';
+													$recover_forum_threadid = isset($NELTOOL['GET_VARS']['threadid']) ? (int)$NELTOOL['GET_VARS']['threadid'] : 0;
 
-													$thread_name = '_thread_'. $recover_forum_threadid .'.index';
-													tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $recover_forum_threadid, true);
+													if (!nt_csrf_check($csrf))
+													{
+														nt_common_add_debug('recoverthread refused: bad csrf token');
+													}
+													else if ($recover_forum_threadid > 0)
+													{
+														tool_gl_view_forum($MFS_Web, $guild_shard_id, $guild_dump_data['guild_name'], $recover_forum_threadid, true);
+													}
 
 													break;
 											}

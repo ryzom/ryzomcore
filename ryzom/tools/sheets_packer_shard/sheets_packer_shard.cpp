@@ -57,6 +57,14 @@ std::string writeDirectory()
 	return s_WriteDirectory;
 }
 
+// AIS
+// The ai sheets library routes fight script components through this seam.
+// The AI service parses and registers them for combat; packing only carries
+// the serialized strings, so they are ignored here.
+void AISHEETS::readCreatureScriptComp(AISHEETS::CCreature &creature, const std::string &scriptCompStr)
+{
+}
+
 ////////////////////////////////////////////////////////////////////////
 // note: *.packed_sheets files are placed in <build_packed_sheets>    //
 //           and will need to be moved to the right location by       //

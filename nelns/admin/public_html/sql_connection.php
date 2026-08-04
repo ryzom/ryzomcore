@@ -17,16 +17,28 @@
 
 	include('../config.php');
 
+	// The whole tool used to talk to the database through ext/mysql, which
+	// php dropped in 7.0: nothing here could run on any supported php. Same
+	// wrappers, mysqli underneath, one connection handle in $sqlLink.
+	$sqlLink = null;
+
 	// connect to database
 	function connectToDatabase($dbhost, $dbname, $dblogin, $dbpasswd)
 	{
-		if (!mysql_connect($dbhost, $dblogin, $dbpasswd))
-			return "Unable to connect to MySQL server (host='$dbhost' login='$dblogin')";
-		if (!mysql_select_db ($dbname))
-			return "Unable to select MySQL database '$dbname'";
+		global	$sqlLink;
+		// php 8.1 defaults mysqli to exception reporting; the wrappers below
+		// check their results themselves, keep the classic mode
+		if (function_exists('mysqli_report'))
+			mysqli_report(MYSQLI_REPORT_OFF);
+		$sqlLink = @mysqli_connect($dbhost, $dblogin, $dbpasswd);
+		if (!$sqlLink)
+			return "Unable to connect to MySQL server";
+		if (!mysqli_select_db($sqlLink, $dbname))
+			return "Unable to select MySQL database";
+		@mysqli_set_charset($sqlLink, 'utf8mb4');
 		return FALSE;
 	}
-	
+
 	// default connection to database
 	function defaultConnectToDatabase()
 	{
@@ -34,35 +46,66 @@
 		return connectToDatabase($dbhost, $dbname, $dblogin, $dbpassword);
 	}
 
+	function sqllink()
+	{
+		global	$sqlLink;
+		return $sqlLink;
+	}
+
 	function sqlescape($value)
 	{
-		return mysql_real_escape_string($value);
+		global	$sqlLink;
+		if (!$sqlLink)
+			return addslashes((string)$value);
+		return mysqli_real_escape_string($sqlLink, (string)$value);
 	}
 
 	function sqlquery($query)
 	{
 		// here log queries
-		global	$sqlQueries;
-		$res = mysql_query($query);
-		$sqlQueries[] = $query.(($res)?"":" ***FAILED***: ".mysql_error());
+		global	$sqlQueries, $sqlLink;
+		if (!$sqlLink)
+			return false;
+		$res = @mysqli_query($sqlLink, $query);
+		$sqlQueries[] = $query.(($res)?"":" ***FAILED***: ".mysqli_error($sqlLink));
 		return $res;
 	}
 
+	// The callers pass whatever sqlquery() gave back, including the `false` of
+	// a failed query and the `true` of an insert; hand back false for anything
+	// that is not a result set instead of letting mysqli raise.
 	function sqlfetch(&$result)
 	{
-		return mysql_fetch_array($result);
+		if (!($result instanceof mysqli_result))
+			return false;
+		$row = mysqli_fetch_array($result);
+		return ($row === null) ? false : $row;
 	}
 
 	function sqlnumrows(&$result)
 	{
-		return mysql_num_rows($result);
+		if (!($result instanceof mysqli_result))
+			return 0;
+		return mysqli_num_rows($result);
 	}
 
 	function sqlchrows(&$result)
 	{
-		return mysql_affected_rows($result);
+		return sqlaffectedrows();
 	}
-	
+
+	function sqlaffectedrows()
+	{
+		global	$sqlLink;
+		return $sqlLink ? mysqli_affected_rows($sqlLink) : 0;
+	}
+
+	function sqlerror()
+	{
+		global	$sqlLink;
+		return $sqlLink ? mysqli_error($sqlLink) : '';
+	}
+
 	function displayQueries()
 	{
 		global	$sqlQueries;
@@ -70,7 +113,7 @@
 		{
 			echo "<br><br><hr><ul>";
 			foreach ($sqlQueries as $query)
-				echo "<li>$query</li>\n";
+				echo "<li>".htmlspecialchars($query, ENT_QUOTES)."</li>\n";
 			echo "</ul>";
 /*
 			echo "<br><br><p align=right><textarea rows=15 cols=100 readOnly>";
@@ -81,10 +124,14 @@
 		}
 	}
 	
-	if ($queries)
+	// sqlPopup() opens this script with ?queries=... so it can show the
+	// query text. Only accept it from the query string (not as a bare
+	// global — that path used to exist under register_globals), and escape
+	// it: the text is whatever the caller put in the url.
+	if (isset($_GET['queries']) && is_string($_GET['queries']))
 	{
 		echo "<textarea rows=15 cols=100 readOnly>";
-		echo "$queries";
+		echo htmlspecialchars($_GET['queries'], ENT_QUOTES);
 		echo "</textarea>\n";
 		die();
 	}

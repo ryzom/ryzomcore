@@ -14,11 +14,11 @@
 
 			if ($resultCode == 0)
 			{
-				echo "<h1>The character ".$_POST["charName"]." have been invited in session ".$_POST["sessionId"].".</h1>";
+				echo "<h1>The character ".htmlspecialchars($_POST["charName"], ENT_QUOTES)." have been invited in session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES).".</h1>";
 			}
 			else
 			{
-				echo "<h1>Failed to invite player ".$_POST["charName"]." in session ".$_POST["sessionId"]." : ".$resultString."</h1>";
+				echo "<h1>Failed to invite player ".htmlspecialchars($_POST["charName"], ENT_QUOTES)." in session ".htmlspecialchars($_POST["sessionId"], ENT_QUOTES)." : ".htmlspecialchars($resultString, ENT_QUOTES)."</h1>";
 			}	
 		}
 	}
@@ -32,10 +32,10 @@
 		die();
 	}
 
-	echo "Welcome user $userId<BR>";
+	echo "Welcome user ".htmlspecialchars($userId, ENT_QUOTES)."<BR>";
 	
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 	
@@ -44,17 +44,20 @@
 		// lookup in the database to convert character name into
 		global $DBHost, $DBPort, $RingDBUserName, $RingDBPassword;
 
-		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database host:$DBHost user:$RingDBUserName");
-		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table dbname:" . $domainInfo['ring_db_name']);
-		
+		$link = mysqli_connect($DBHost, $RingDBUserName, $RingDBPassword, NULL, $DBPort) or die ("Can't connect to database");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
+		mysqli_select_db($link, $domainInfo['ring_db_name']) or die ("Can't access to the table");
+
 		// extract the character that have the specified name
-		$charName = mysqli_real_escape_string($link, $_POST['charName']);
+		$postCharName = isset($_POST['charName']) ? $_POST['charName'] : '';
+		$charName = mysqli_real_escape_string($link, $postCharName);
 		$query = "select char_id, char_name from characters where char_name = '$charName'";
-		$result = mysqli_query($link, $query) or die ("Can't execute the query: ".$query);
+		$result = mysqli_query($link, $query) or die ("Can't execute the query");
 
 		if (mysqli_num_rows($result) == 0)
 		{
-			echo "<h1>Can't find the character ".$_POST["charName"]."<h1>";
+			echo "<h1>Can't find the character ".htmlspecialchars($postCharName, ENT_QUOTES)."<h1>";
 		}
 		else
 		{
@@ -69,7 +72,20 @@
 //			$rsmProxy = new CRingSessionManagerWebProxy;
 
 			// TODO: not sure it works with a char slot > 0
-			$invitePioneer->inviteCharacter(($userId*16) + getCharSlot(), $_POST["sessionId"], $row[0], $_POST["mode"]);
+			// the session id and the role both arrive with the request; the
+			// session manager is the one that checks the caller owns the
+			// session, so at least keep the values to the shapes it expects
+			$sessionId = intval($_POST["sessionId"]);
+			$modeStr = isset($_POST["mode"]) ? $_POST["mode"] : "";
+			if ($modeStr != "sps_edit_invited" && $modeStr != "sps_anim_invited"
+				&& $modeStr != "sps_play_invited")
+				$modeStr = "sps_edit_invited";
+			// the role is an enum on the wire, a bare string has no toInt()
+			$mode = new RSMGR_TSessionPartStatus;
+			$mode->fromString($modeStr);
+			// mysqli_fetch_assoc() has no numeric keys: $row[0] was null and
+			// the session manager received no character to invite
+			$invitePioneer->inviteCharacter((intval($userId)*16) + getCharSlot(), $sessionId, $row['char_id'], $mode);
 			
 			echo "wait result...";
 			// wait the the return message
@@ -83,15 +99,28 @@
 	else
 	{
 		// buid a form to gather info about the character to invite
-
-		echo "<h1>Invite a player in the session ".$_POST["sessionId"]."</h1>";
-		echo "<form action='invite_pioneer.php' method='post'>Type in character name:<br>";
-		echo "<input type='text' name='charName' value=''>";
-		echo "<input type='submit' name='button' value='Invite'>";
-		echo "<input type='hidden' name='sessionId' value='".$_POST["sessionId"]."'>";
-		echo "<input type='hidden' name='mode' value='".$_POST["mode"]."'>";
-		echo "<input type='hidden' name='execute'>";
-		echo "</form> ";
+		$formSessionId = isset($_POST["sessionId"]) ? $_POST["sessionId"] : (isset($_GET["sessionId"]) ? $_GET["sessionId"] : '');
+		$formMode = isset($_POST["mode"]) ? $_POST["mode"] : (isset($_GET["mode"]) ? $_GET["mode"] : '');
+		if ($formSessionId === '')
+		{
+			echo "<h1>Missing sessionId</h1>";
+		}
+		else
+		{
+			echo "<h1>Invite a player in the session ".htmlspecialchars($formSessionId, ENT_QUOTES)."</h1>";
+			echo "<form action='invite_pioneer.php' method='post'>Type in character name:<br>";
+			echo "<input type='text' name='charName' value=''>";
+			echo "<input type='submit' name='button' value='Invite'>";
+			echo "<input type='hidden' name='sessionId' value='".htmlspecialchars($formSessionId, ENT_QUOTES)."'>";
+			echo "<input type='hidden' name='mode' value='".htmlspecialchars($formMode, ENT_QUOTES)."'>";
+			// the inviter's slot arrives on the query string with the link from
+			// web_start; without carrying it through the post, getCharSlot()
+			// falls back to slot 0 and the session manager refuses the invite
+			// for an owner playing from any other character slot
+			echo "<input type='hidden' name='charSlot' value='".getCharSlot()."'>";
+			echo "<input type='hidden' name='execute'>";
+			echo "</form> ";
+		}
 	}
 
 	

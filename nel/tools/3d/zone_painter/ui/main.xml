@@ -523,16 +523,33 @@
 	</group>
 </group>
 
-<!-- Scene context menu (right click on empty space in patch mode). Kept to the one entry
-     that has nowhere else to live: the user pivot has no other way to be placed. -->
-<group type="modal" id="scene_menu" exit_click_out="true" w="170" h="132" options="skin_modal"
+<!-- Scene context menu (right click on empty space in patch mode). Kept to entries that
+     have nowhere else to live: the user pivot placement, and the checked pairs the legacy
+     kept in its own viewport right-click menu (vertex type). -->
+<group type="modal" id="scene_menu" exit_click_out="true" w="170" h="232" options="skin_modal"
 	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<ctrl style="text_button_16" id="s_pivot" posref="TM TM" x="0" y="-10" w="150"
 			onclick_l="zp_pivot_to_selection" params_l="" hardtext="Pivot to selection" />
+		<!-- Vertex type (vertex level): PVERT_COPLANAR bit; pushed = the whole selection
+		     carries that type; the constraint applies on the next handle move -->
+		<view type="text" id="vt_label" posparent="s_pivot" posref="BM TM" x="0" y="-8" fontsize="9"
+			shadow="true" global_color="false" color="255 220 140 255" hardtext="Vertex type" />
+		<ctrl style="text_button_toggle" id="vt_coplanar" posparent="vt_label" posref="BM TM" x="-37" y="-4" w="72"
+			onclick_l="zp_vertex_type" params_l="1" hardtext="Coplanar" />
+		<ctrl style="text_button_toggle" id="vt_corner" posparent="vt_coplanar" posref="MR ML" x="4" y="0" w="72"
+			onclick_l="zp_vertex_type" params_l="0" hardtext="Corner" />
+		<!-- Interior mode (patch level): PATCH_AUTO bit; Manual bakes the derived
+		     interiors into editable points -->
+		<view type="text" id="im_label" posparent="vt_coplanar" posref="BM TM" x="37" y="-6" fontsize="9"
+			shadow="true" global_color="false" color="255 220 140 255" hardtext="Interior" />
+		<ctrl style="text_button_toggle" id="im_auto" posparent="im_label" posref="BM TM" x="-37" y="-4" w="72"
+			onclick_l="zp_interior_mode" params_l="1" hardtext="Auto" />
+		<ctrl style="text_button_toggle" id="im_manual" posparent="im_auto" posref="MR ML" x="4" y="0" w="72"
+			onclick_l="zp_interior_mode" params_l="0" hardtext="Manual" />
 		<!-- Move to zone: compass of editable board neighbors (patch selection; no legacy
 		     equivalent - the session shows several brick files, the old plugin never did) -->
-		<view type="text" id="mv_label" posparent="s_pivot" posref="BM TM" x="0" y="-8" fontsize="9"
+		<view type="text" id="mv_label" posparent="im_auto" posref="BM TM" x="37" y="-8" fontsize="9"
 			shadow="true" global_color="false" color="255 220 140 255" hardtext="Move to zone" />
 		<ctrl style="text_button_16" id="mv_n" posparent="mv_label" posref="BM TM" x="0" y="-4" w="34"
 			onclick_l="zp_move_to_zone" params_l="0" hardtext="N" />
@@ -591,13 +608,16 @@
 	active="true" resizer="false" lockable="false">
 	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
-	<group id="content" x="0" y="0" h="52" posref="TL TL">
+	<group id="content" x="0" y="0" h="74" posref="TL TL">
 		<view type="text" id="instance_info" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />
 		<view type="text" id="files_info" posparent="instance_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="1 file" />
 		<view type="text" id="hint" posparent="files_info" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
 			global_color="false" color="255 255 255 140" hardtext="T/C/D/R O board Y season P tiles" />
+		<!-- Reset paint (mA8): whole-zone clear behind the confirm modal. -->
+		<ctrl style="text_button_16" id="btn_reset_paint" posparent="hint" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_reset_paint" params_l="" hardtext="Reset paint" />
 	</group>
 </group>
 
@@ -777,7 +797,7 @@
 	active="true" resizer="false" lockable="false">
 	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
-	<group id="content" x="0" y="0" h="330" posref="TL TL">
+	<group id="content" x="0" y="0" h="374" posref="TL TL">
 		<!-- Level toolbar (text faces until the icon pass; toggle-off returns to Object) -->
 		<view type="text" id="lbl_level" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="255 255 255 180" hardtext="Level" />
@@ -832,8 +852,23 @@
 			onclick_l="zp_patch_detach" params_l="" hardtext="Detach" />
 		<ctrl style="text_button_16" id="btn_extrude" posparent="btn_detach" posref="MR ML" x="4" y="0"
 			onclick_l="zp_patch_extrude" params_l="" hardtext="Extr" />
+		<!-- Hide / Unhide All (session display state: the cage and the picks skip hidden
+		     patches, the landscape keeps rendering them; cleared by topology rebuilds) -->
+		<ctrl style="text_button_16" id="btn_hide" posparent="btn_add_quad" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_patch_hide" params_l="" hardtext="Hide" />
+		<ctrl style="text_button_16" id="btn_unhide" posparent="btn_hide" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_unhide" params_l="" hardtext="Unhide All" />
+		<!-- Propagate: the edge-level subdivide's strip walk (the split follows the strip
+		     until it loops or exits an open border). On the Hide row for space - the
+		     Subdiv row is full (clipped controls render invisible; a screenshot showed it). -->
+		<instance template="zp_checkbox_row" id="subdiv_prop" posparent="btn_unhide" posref="MR ML" x="10" y="0"
+			w="60" labelw="36" label="Prop" onclick="zp_patch_subdiv_prop" params="" />
+		<!-- Detach's Copy checkbox (mA7): checked = Detach clones the selection as a
+		     coincident island, the original stays untouched. -->
+		<instance template="zp_checkbox_row" id="detach_copy" posparent="btn_hide" posref="BL TL" x="0" y="-4"
+			w="110" labelw="86" label="Detach Copy" onclick="zp_patch_detach_copy" params="" />
 		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
-		<instance template="zp_checkbox_row" id="no_smooth" posparent="btn_add_quad" posref="BL TL" x="0" y="-8"
+		<instance template="zp_checkbox_row" id="no_smooth" posparent="detach_copy" posref="BL TL" x="0" y="-8"
 			label="No smooth" onclick="zp_patch_nosmooth" params="" />
 		<view type="text" id="no_smooth_state" posparent="no_smooth" posref="MR ML" x="6" y="0" fontsize="9" shadow="true"
 			global_color="false" color="255 200 120 220" hardtext="" />
@@ -1089,8 +1124,11 @@
 	</group>
 </group>
 
-<!-- Extrude dialog: typed height; shift-drag at patch level is the gesture form. -->
-<group type="modal" id="extrude_dialog" exit_click_out="true" w="240" h="102" options="skin_modal"
+<!-- Extrude dialog: typed height + bevel outline + normal direction; shift-drag at patch
+     level is the gesture form (Z-constrained, no outline - the drag gesture is vertical
+     by design). The legacy Bevel smoothing radios are deliberately absent: walls are
+     fresh paintable surface, smoothing is the no-smooth flag's job. -->
+<group type="modal" id="extrude_dialog" exit_click_out="true" w="240" h="152" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
 		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="12"
@@ -1107,10 +1145,47 @@
 					fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
 			</group>
 		</group>
+		<view type="text" id="outl_lbl" posparent="dist_lbl" posref="BL TL" x="0" y="-14" color="180 200 220 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Outline:" />
+		<group type="frame" id="outl_frame" options="w_box_frame" posparent="outl_lbl" posref="MR ML" x="4" y="0"
+			w="120" h="22" color="255 255 255 255" global_color="false" display="true">
+			<group type="edit_box" id="outl" posref="TL TL" x="4" y="-5" w="112" h="13"
+				prompt="" max_num_chars="16" entry_type="float" menu_r="ui:zp:editbox_menu"
+				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+				want_return="false" clear_on_escape="false">
+				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
+					fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+			</group>
+		</group>
+		<!-- Normal: world Z, or the selection's own area-weighted eval normal (Local). -->
+		<view type="text" id="norm_lbl" posparent="outl_lbl" posref="BL TL" x="0" y="-14" color="180 200 220 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Normal:" />
+		<ctrl style="text_button_toggle" id="norm_z" posparent="norm_lbl" posref="MR ML" x="8" y="0" w="40"
+			onclick_l="zp_extrude_normal" params_l="0" hardtext="Z" />
+		<ctrl style="text_button_toggle" id="norm_local" posparent="norm_z" posref="MR ML" x="6" y="0" w="60"
+			onclick_l="zp_extrude_normal" params_l="1" hardtext="Local" />
 		<ctrl style="text_button_16" id="btn_ok" posref="BL BL" x="16" y="14"
 			onclick_l="zp_extrude_ok" params_l="" hardtext="Extrude" />
 		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_ok" posref="MR ML" x="8" y="0"
 			onclick_l="zp_extrude_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
+<!-- Reset paint confirm (mA8): one click clears a whole zone's paint - the modal is the
+     danger guard (scripts call painter.resetZonePaint bare). -->
+<group type="modal" id="reset_dialog" exit_click_out="true" w="260" h="110" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="12"
+			shadow="true" global_color="false" hardtext="Reset paint" />
+		<view type="text" id="zone" posparent="title" posref="BM TM" x="0" y="-8" color="180 220 255 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="" />
+		<view type="text" id="warn" posparent="zone" posref="BM TM" x="0" y="-4" color="255 200 120 255" fontsize="10"
+			shadow="true" global_color="false" hardtext="Clears every tile, color and displace." />
+		<ctrl style="text_button_16" id="btn_ok" posref="BL BL" x="16" y="14"
+			onclick_l="zp_reset_ok" params_l="" hardtext="Reset" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_ok" posref="MR ML" x="8" y="0"
+			onclick_l="zp_reset_cancel" params_l="" hardtext="Cancel" />
 	</group>
 </group>
 

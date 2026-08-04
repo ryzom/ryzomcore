@@ -30,6 +30,7 @@
 #include <nel/misc/config_file.h>
 #include <nel/misc/displayer.h>
 #include <nel/misc/log.h>
+#include <nel/misc/wang_hash.h>
 
 #include <nel/net/buf_server.h>
 #include <nel/net/login_cookie.h>
@@ -38,6 +39,7 @@
 #include <nelns/login_service/functions.h>
 #include <nelns/login_service/login_service.h>
 #include <nelns/login_service/variables.h>
+#include <nelns/login_service/mysql_helper.h>
 
 //
 // Namespaces
@@ -54,8 +56,58 @@ using namespace NLNET;
 
 CBufServer *WebServer = NULL;
 
-// uint32 is the hostid to the web connection
+// uint32 is the connection id of the web connection (see allocateWebConnectionId)
 map<uint32, CLoginCookie> TempCookies;
+
+// The cookie's address field carries a per-connection id, and the reply
+// routing looks the socket up again through these maps. Storing the TSockId
+// pointer itself in the 32 bit field truncated it on 64 bit builds, and a
+// stale value could match another connection.
+static uint32 WebConnectionIdCounter = 0;
+static map<uint32, TSockId> WebIdToSock;
+static map<TSockId, uint32> WebSockToId;
+
+static uint32 webConnectionId(TSockId from)
+{
+	map<TSockId, uint32>::iterator it = WebSockToId.find(from);
+	return it != WebSockToId.end() ? it->second : 0;
+}
+
+static TSockId webConnectionById(uint32 id)
+{
+	map<uint32, TSockId>::iterator it = WebIdToSock.find(id);
+	return it != WebIdToSock.end() ? it->second : InvalidSockId;
+}
+
+static uint32 allocateWebConnectionId(TSockId from)
+{
+	// one id per connection, reuse it if this socket already has one
+	uint32 id = webConnectionId(from);
+	if (id != 0)
+		return id;
+	// hash the counter so consecutive connections don't hand out consecutive
+	// ids: keys spread over the whole 32 bit range (kinder to map
+	// implementations and nothing to guess from), and lowbias32 is a
+	// bijection so a colliding live id means a full 2^32 wrap
+	do
+	{
+		id = NLMISC::lowbias32(++WebConnectionIdCounter);
+	} while (id == 0 || WebIdToSock.find(id) != WebIdToSock.end());
+	WebIdToSock[id] = from;
+	WebSockToId[from] = id;
+	return id;
+}
+
+static void cbWebDisconnection(TSockId from, void *arg)
+{
+	map<TSockId, uint32>::iterator it = WebSockToId.find(from);
+	if (it == WebSockToId.end())
+		return;
+	// forget any cookie still waiting for a WS answer on this connection
+	TempCookies.erase(it->second);
+	WebIdToSock.erase(it->second);
+	WebSockToId.erase(it);
+}
 
 
 //
@@ -77,7 +129,7 @@ static void cbWSShardChooseShard/* (CMessage &msgin, TSockId from, CCallbackNetB
 	string reason;
 	msgin.serial (reason);
 	msgout.serial (reason);
-	
+
 	CLoginCookie cookie;
 	msgin.serial (cookie);
 
@@ -91,7 +143,16 @@ static void cbWSShardChooseShard/* (CMessage &msgin, TSockId from, CCallbackNetB
 		return;
 	}
 
-	if (reason.empty())
+	// this cookie is answered, it is no longer waiting
+	TempCookies.erase (it);
+
+	if (!reason.empty())
+	{
+		// the WS refused the user: the row was set to 'Waiting' when the
+		// request went out, put it back offline
+		sqlQuery("update user set State='Offline', ShardId=-1, Cookie='' where Cookie='" + sqlEscape(cookie.setToString()) + "'");
+	}
+	else
 	{
 		string str = cookie.setToString ();
 		msgout.serial (str);
@@ -121,7 +182,16 @@ static void cbWSShardChooseShard/* (CMessage &msgin, TSockId from, CCallbackNetB
 		*/
 	}
 
-	WebServer->send (msgout, (TSockId)cookie.getUserAddr ());  // FIXME: 64-bit
+	TSockId to = webConnectionById (cookie.getUserAddr ());
+	if (to == InvalidSockId)
+	{
+		// the web request is gone (php timed out or closed): nobody will
+		// ever present this cookie to the shard, put the row back offline
+		nlinfo ("SCS from WS for cookie %s but the web connection is gone, logging the user out", cookie.toString ().c_str ());
+		sqlQuery("update user set State='Offline', ShardId=-1, Cookie='' where Cookie='" + sqlEscape(cookie.setToString()) + "'");
+		return;
+	}
+	WebServer->send (msgout, to);
 }
 
 static const TUnifiedCallbackItem WSCallbackArray[] =
@@ -158,13 +228,69 @@ void cbAskClientConnection (CMemStream &msgin, TSockId host)
 
 	nlinfo ("Web wants to add userid %d (name '%s' priv '%s' extended '%s') to the shardid %d, send request to the shard", userId, userName.c_str(), userPriv.c_str(), userExtended.c_str(), shardId);
 
+	// The web path has to drive the same state machine as the direct client
+	// path, or the WS 'CC' confirmation finds an 'Offline' row and refuses
+	// to mark the player online (no presence tracking, no double login
+	// protection). Same rules as the direct path: 'Online' refuses, a stale
+	// mid-login state is reclaimed, and the row goes to 'Waiting' with the
+	// cookie before the request reaches the welcome service.
+	{
+		CMysqlResult result;
+		MYSQL_ROW row;
+		sint32 nbrow;
+		string reason = sqlQuery("select State from user where UId="+toString(userId), nbrow, row, result);
+		if (!reason.empty() || nbrow == 0)
+		{
+			CMemStream msgout;
+			uint32 fake = 0;
+			msgout.serial(fake);
+			string answer = reason.empty() ? string("Unknown user") : string("Database error");
+			nlwarning("Web asked to connect userid %d but: %s", userId, answer.c_str());
+			msgout.serial (answer);
+			WebServer->send (msgout, host);
+			return;
+		}
+		string state = row[0] ? row[0] : "";
+		if (state == "Online")
+		{
+			CMemStream msgout;
+			uint32 fake = 0;
+			msgout.serial(fake);
+			string answer = "You are already connected.";
+			msgout.serial (answer);
+			WebServer->send (msgout, host);
+			return;
+		}
+		else if (state != "Offline")
+		{
+			// a login that never finished; a user actually playing is
+			// 'Online', so reclaim the row and let this login proceed
+			nlinfo("user %d was stuck in state '%s', reclaiming the row for a new login", userId, state.c_str());
+			sqlQuery("update user set State='Offline', ShardId=-1, Cookie='' where UId="+toString(userId));
+		}
+	}
+
 	uint32 i;
 	for (i = 0; i < Shards.size (); i++)
 	{
 		if (Shards[i].ShardId == shardId)
 		{
-			// generate a cookie
-			CLoginCookie Cookie ((uint32)(uintptr_t)host, userId);
+			// generate a cookie carrying this connection's id
+			CLoginCookie Cookie (allocateWebConnectionId(host), userId);
+
+			// enter the login state machine so the WS confirmation can move
+			// the row to 'Online' when the client reaches the shard
+			string reason = sqlQuery("update user set State='Waiting', ShardId="+toString(shardId)+", Cookie='"+sqlEscape(Cookie.setToString())+"' where UId="+toString(userId));
+			if (!reason.empty())
+			{
+				CMemStream msgout;
+				uint32 fake = 0;
+				msgout.serial(fake);
+				string answer = "Database error";
+				msgout.serial (answer);
+				WebServer->send (msgout, host);
+				return;
+			}
 
 			// send message to the welcome service to see if it s ok and know the front end ip
 			CMessage msgout ("CS");
@@ -251,6 +377,9 @@ void connectionWebInit ()
 
 	uint16 port = (uint16) IService::getInstance ()->ConfigFile.getVar ("WebPort").asInt();
 	WebServer->init (port);
+	// clean up the connection id and any cookie still waiting for a WS
+	// answer when a web request drops its connection
+	WebServer->setDisconnectionCallback (cbWebDisconnection, NULL);
 
 	// catch the messages from Welcome Service to know if the user can connect or not
 	CUnifiedNetwork::getInstance ()->addCallbackArray (WSCallbackArray, sizeof(WSCallbackArray)/sizeof(WSCallbackArray[0]));

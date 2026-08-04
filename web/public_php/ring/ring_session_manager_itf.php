@@ -6,33 +6,32 @@
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_play_subscribed";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_play_invited";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_edit_invited";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_anim_invited";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_playing";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_editing";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter++] = "sps_animating";
-	$RSMGR_TSessionPartStatus_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TSessionPartStatus_InvalidValue = $arrayCounter;
+	$RSMGR_TSessionPartStatus_EnumValues[1] = "sps_play_subscribed";
+	$RSMGR_TSessionPartStatus_EnumValues[2] = "sps_play_invited";
+	$RSMGR_TSessionPartStatus_EnumValues[3] = "sps_edit_invited";
+	$RSMGR_TSessionPartStatus_EnumValues[4] = "sps_anim_invited";
+	$RSMGR_TSessionPartStatus_EnumValues[5] = "sps_playing";
+	$RSMGR_TSessionPartStatus_EnumValues[6] = "sps_editing";
+	$RSMGR_TSessionPartStatus_EnumValues[7] = "sps_animating";
+	$RSMGR_TSessionPartStatus_EnumValues[9] = "invalid";
+	$RSMGR_TSessionPartStatus_InvalidValue = 9;
 
 	class RSMGR_TSessionPartStatus
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TSessionPartStatus_InvalidValue;
 			$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TSessionPartStatus_EnumValues;
 			return $RSMGR_TSessionPartStatus_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionPartStatus_EnumValues;
@@ -44,15 +43,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionPartStatus_InvalidValue;
@@ -62,37 +61,36 @@
 			else
 				$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TSessionType_EnumValues[$arrayCounter++] = "st_edit";
-	$RSMGR_TSessionType_EnumValues[$arrayCounter++] = "st_anim";
-	$RSMGR_TSessionType_EnumValues[$arrayCounter++] = "st_outland";
-	$RSMGR_TSessionType_EnumValues[$arrayCounter++] = "st_mainland";
-	$RSMGR_TSessionType_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TSessionType_InvalidValue = $arrayCounter;
+	$RSMGR_TSessionType_EnumValues[0] = "st_edit";
+	$RSMGR_TSessionType_EnumValues[1] = "st_anim";
+	$RSMGR_TSessionType_EnumValues[2] = "st_outland";
+	$RSMGR_TSessionType_EnumValues[3] = "st_mainland";
+	$RSMGR_TSessionType_EnumValues[5] = "invalid";
+	$RSMGR_TSessionType_InvalidValue = 5;
 
 	class RSMGR_TSessionType
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TSessionType_InvalidValue;
 			$this->Value = $RSMGR_TSessionType_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TSessionType_EnumValues;
 			return $RSMGR_TSessionType_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionType_EnumValues;
@@ -104,15 +102,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TSessionType_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionType_InvalidValue;
@@ -122,39 +120,38 @@
 			else
 				$this->Value = $RSMGR_TSessionType_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter++] = "so_newbie_training";
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter++] = "so_story_telling";
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter++] = "so_mistery";
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter++] = "so_hack_slash";
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter++] = "so_guild_training";
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter++] = "so_other";
-	$RSMGR_TSessionOrientation_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TSessionOrientation_InvalidValue = $arrayCounter;
+	$RSMGR_TSessionOrientation_EnumValues[1] = "so_newbie_training";
+	$RSMGR_TSessionOrientation_EnumValues[2] = "so_story_telling";
+	$RSMGR_TSessionOrientation_EnumValues[3] = "so_mistery";
+	$RSMGR_TSessionOrientation_EnumValues[4] = "so_hack_slash";
+	$RSMGR_TSessionOrientation_EnumValues[5] = "so_guild_training";
+	$RSMGR_TSessionOrientation_EnumValues[6] = "so_other";
+	$RSMGR_TSessionOrientation_EnumValues[8] = "invalid";
+	$RSMGR_TSessionOrientation_InvalidValue = 8;
 
 	class RSMGR_TSessionOrientation
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TSessionOrientation_InvalidValue;
 			$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TSessionOrientation_EnumValues;
 			return $RSMGR_TSessionOrientation_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionOrientation_EnumValues;
@@ -166,15 +163,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionOrientation_InvalidValue;
@@ -184,37 +181,36 @@
 			else
 				$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TSessionState_EnumValues[$arrayCounter++] = "ss_planned";
-	$RSMGR_TSessionState_EnumValues[$arrayCounter++] = "ss_open";
-	$RSMGR_TSessionState_EnumValues[$arrayCounter++] = "ss_locked";
-	$RSMGR_TSessionState_EnumValues[$arrayCounter++] = "ss_closed";
-	$RSMGR_TSessionState_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TSessionState_InvalidValue = $arrayCounter;
+	$RSMGR_TSessionState_EnumValues[1] = "ss_planned";
+	$RSMGR_TSessionState_EnumValues[2] = "ss_open";
+	$RSMGR_TSessionState_EnumValues[3] = "ss_locked";
+	$RSMGR_TSessionState_EnumValues[4] = "ss_closed";
+	$RSMGR_TSessionState_EnumValues[6] = "invalid";
+	$RSMGR_TSessionState_InvalidValue = 6;
 
 	class RSMGR_TSessionState
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TSessionState_InvalidValue;
 			$this->Value = $RSMGR_TSessionState_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TSessionState_EnumValues;
 			return $RSMGR_TSessionState_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionState_EnumValues;
@@ -226,15 +222,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TSessionState_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionState_InvalidValue;
@@ -244,35 +240,34 @@
 			else
 				$this->Value = $RSMGR_TSessionState_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TAnimMode_EnumValues[$arrayCounter++] = "am_dm";
-	$RSMGR_TAnimMode_EnumValues[$arrayCounter++] = "am_autonomous";
-	$RSMGR_TAnimMode_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TAnimMode_InvalidValue = $arrayCounter;
+	$RSMGR_TAnimMode_EnumValues[1] = "am_dm";
+	$RSMGR_TAnimMode_EnumValues[2] = "am_autonomous";
+	$RSMGR_TAnimMode_EnumValues[4] = "invalid";
+	$RSMGR_TAnimMode_InvalidValue = 4;
 
 	class RSMGR_TAnimMode
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TAnimMode_InvalidValue;
 			$this->Value = $RSMGR_TAnimMode_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TAnimMode_EnumValues;
 			return $RSMGR_TAnimMode_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TAnimMode_EnumValues;
@@ -284,15 +279,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TAnimMode_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TAnimMode_InvalidValue;
@@ -302,35 +297,34 @@
 			else
 				$this->Value = $RSMGR_TAnimMode_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TAccessType_EnumValues[$arrayCounter++] = "at_public";
-	$RSMGR_TAccessType_EnumValues[$arrayCounter++] = "at_private";
-	$RSMGR_TAccessType_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TAccessType_InvalidValue = $arrayCounter;
+	$RSMGR_TAccessType_EnumValues[1] = "at_public";
+	$RSMGR_TAccessType_EnumValues[2] = "at_private";
+	$RSMGR_TAccessType_EnumValues[4] = "invalid";
+	$RSMGR_TAccessType_InvalidValue = 4;
 
 	class RSMGR_TAccessType
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TAccessType_InvalidValue;
 			$this->Value = $RSMGR_TAccessType_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TAccessType_EnumValues;
 			return $RSMGR_TAccessType_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TAccessType_EnumValues;
@@ -342,15 +336,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TAccessType_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TAccessType_InvalidValue;
@@ -360,35 +354,34 @@
 			else
 				$this->Value = $RSMGR_TAccessType_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TRuleType_EnumValues[$arrayCounter++] = "rt_strict";
-	$RSMGR_TRuleType_EnumValues[$arrayCounter++] = "rt_liberal";
-	$RSMGR_TRuleType_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TRuleType_InvalidValue = $arrayCounter;
+	$RSMGR_TRuleType_EnumValues[1] = "rt_strict";
+	$RSMGR_TRuleType_EnumValues[2] = "rt_liberal";
+	$RSMGR_TRuleType_EnumValues[4] = "invalid";
+	$RSMGR_TRuleType_InvalidValue = 4;
 
 	class RSMGR_TRuleType
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TRuleType_InvalidValue;
 			$this->Value = $RSMGR_TRuleType_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TRuleType_EnumValues;
 			return $RSMGR_TRuleType_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TRuleType_EnumValues;
@@ -400,15 +393,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TRuleType_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TRuleType_InvalidValue;
@@ -418,39 +411,38 @@
 			else
 				$this->Value = $RSMGR_TRuleType_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter++] = "lf_a";
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter++] = "lf_b";
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter++] = "lf_c";
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter++] = "lf_d";
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter++] = "lf_e";
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter++] = "lf_f";
-	$RSMGR_TLevelFilter_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TLevelFilter_InvalidValue = $arrayCounter;
+	$RSMGR_TLevelFilter_EnumValues[1] = "lf_a";
+	$RSMGR_TLevelFilter_EnumValues[2] = "lf_b";
+	$RSMGR_TLevelFilter_EnumValues[4] = "lf_c";
+	$RSMGR_TLevelFilter_EnumValues[8] = "lf_d";
+	$RSMGR_TLevelFilter_EnumValues[16] = "lf_e";
+	$RSMGR_TLevelFilter_EnumValues[32] = "lf_f";
+	$RSMGR_TLevelFilter_EnumValues[34] = "invalid";
+	$RSMGR_TLevelFilter_InvalidValue = 34;
 
 	class RSMGR_TLevelFilter
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TLevelFilter_InvalidValue;
 			$this->Value = $RSMGR_TLevelFilter_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TLevelFilter_EnumValues;
 			return $RSMGR_TLevelFilter_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TLevelFilter_EnumValues;
@@ -462,15 +454,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TLevelFilter_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TLevelFilter_InvalidValue;
@@ -480,36 +472,35 @@
 			else
 				$this->Value = $RSMGR_TLevelFilter_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TEstimatedDuration_EnumValues[$arrayCounter++] = "et_short";
-	$RSMGR_TEstimatedDuration_EnumValues[$arrayCounter++] = "et_medium";
-	$RSMGR_TEstimatedDuration_EnumValues[$arrayCounter++] = "et_long";
-	$RSMGR_TEstimatedDuration_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TEstimatedDuration_InvalidValue = $arrayCounter;
+	$RSMGR_TEstimatedDuration_EnumValues[1] = "et_short";
+	$RSMGR_TEstimatedDuration_EnumValues[2] = "et_medium";
+	$RSMGR_TEstimatedDuration_EnumValues[3] = "et_long";
+	$RSMGR_TEstimatedDuration_EnumValues[5] = "invalid";
+	$RSMGR_TEstimatedDuration_InvalidValue = 5;
 
 	class RSMGR_TEstimatedDuration
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TEstimatedDuration_InvalidValue;
 			$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TEstimatedDuration_EnumValues;
 			return $RSMGR_TEstimatedDuration_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TEstimatedDuration_EnumValues;
@@ -521,15 +512,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TEstimatedDuration_InvalidValue;
@@ -539,37 +530,36 @@
 			else
 				$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TRaceFilter_EnumValues[$arrayCounter++] = "rf_fyros";
-	$RSMGR_TRaceFilter_EnumValues[$arrayCounter++] = "rf_matis";
-	$RSMGR_TRaceFilter_EnumValues[$arrayCounter++] = "rf_tryker";
-	$RSMGR_TRaceFilter_EnumValues[$arrayCounter++] = "rf_zorai";
-	$RSMGR_TRaceFilter_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TRaceFilter_InvalidValue = $arrayCounter;
+	$RSMGR_TRaceFilter_EnumValues[1] = "rf_fyros";
+	$RSMGR_TRaceFilter_EnumValues[2] = "rf_matis";
+	$RSMGR_TRaceFilter_EnumValues[4] = "rf_tryker";
+	$RSMGR_TRaceFilter_EnumValues[8] = "rf_zorai";
+	$RSMGR_TRaceFilter_EnumValues[10] = "invalid";
+	$RSMGR_TRaceFilter_InvalidValue = 10;
 
 	class RSMGR_TRaceFilter
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TRaceFilter_InvalidValue;
 			$this->Value = $RSMGR_TRaceFilter_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TRaceFilter_EnumValues;
 			return $RSMGR_TRaceFilter_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TRaceFilter_EnumValues;
@@ -581,15 +571,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TRaceFilter_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TRaceFilter_InvalidValue;
@@ -599,36 +589,35 @@
 			else
 				$this->Value = $RSMGR_TRaceFilter_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TReligionFilter_EnumValues[$arrayCounter++] = "rf_kami";
-	$RSMGR_TReligionFilter_EnumValues[$arrayCounter++] = "rf_karavan";
-	$RSMGR_TReligionFilter_EnumValues[$arrayCounter++] = "rf_neutral";
-	$RSMGR_TReligionFilter_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TReligionFilter_InvalidValue = $arrayCounter;
+	$RSMGR_TReligionFilter_EnumValues[1] = "rf_kami";
+	$RSMGR_TReligionFilter_EnumValues[2] = "rf_karavan";
+	$RSMGR_TReligionFilter_EnumValues[4] = "rf_neutral";
+	$RSMGR_TReligionFilter_EnumValues[6] = "invalid";
+	$RSMGR_TReligionFilter_InvalidValue = 6;
 
 	class RSMGR_TReligionFilter
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TReligionFilter_InvalidValue;
 			$this->Value = $RSMGR_TReligionFilter_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TReligionFilter_EnumValues;
 			return $RSMGR_TReligionFilter_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TReligionFilter_EnumValues;
@@ -640,15 +629,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TReligionFilter_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TReligionFilter_InvalidValue;
@@ -658,35 +647,34 @@
 			else
 				$this->Value = $RSMGR_TReligionFilter_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TGuildFilter_EnumValues[$arrayCounter++] = "gf_only_my_guild";
-	$RSMGR_TGuildFilter_EnumValues[$arrayCounter++] = "gf_any_player";
-	$RSMGR_TGuildFilter_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TGuildFilter_InvalidValue = $arrayCounter;
+	$RSMGR_TGuildFilter_EnumValues[0] = "gf_only_my_guild";
+	$RSMGR_TGuildFilter_EnumValues[1] = "gf_any_player";
+	$RSMGR_TGuildFilter_EnumValues[3] = "invalid";
+	$RSMGR_TGuildFilter_InvalidValue = 3;
 
 	class RSMGR_TGuildFilter
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TGuildFilter_InvalidValue;
 			$this->Value = $RSMGR_TGuildFilter_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TGuildFilter_EnumValues;
 			return $RSMGR_TGuildFilter_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TGuildFilter_EnumValues;
@@ -698,15 +686,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TGuildFilter_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TGuildFilter_InvalidValue;
@@ -716,65 +704,64 @@
 			else
 				$this->Value = $RSMGR_TGuildFilter_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard00";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard01";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard02";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard03";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard04";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard05";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard06";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard07";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard08";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard09";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard10";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard11";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard12";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard13";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard14";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard15";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard16";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard17";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard18";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard19";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard20";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard21";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard22";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard23";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard24";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard25";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard26";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard27";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard28";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard29";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard30";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter++] = "sf_shard31";
-	$RSMGR_TShardFilter_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TShardFilter_InvalidValue = $arrayCounter;
+	$RSMGR_TShardFilter_EnumValues[1<<0] = "sf_shard00";
+	$RSMGR_TShardFilter_EnumValues[1<<1] = "sf_shard01";
+	$RSMGR_TShardFilter_EnumValues[1<<2] = "sf_shard02";
+	$RSMGR_TShardFilter_EnumValues[1<<3] = "sf_shard03";
+	$RSMGR_TShardFilter_EnumValues[1<<4] = "sf_shard04";
+	$RSMGR_TShardFilter_EnumValues[1<<5] = "sf_shard05";
+	$RSMGR_TShardFilter_EnumValues[1<<6] = "sf_shard06";
+	$RSMGR_TShardFilter_EnumValues[1<<7] = "sf_shard07";
+	$RSMGR_TShardFilter_EnumValues[1<<8] = "sf_shard08";
+	$RSMGR_TShardFilter_EnumValues[1<<9] = "sf_shard09";
+	$RSMGR_TShardFilter_EnumValues[1<<10] = "sf_shard10";
+	$RSMGR_TShardFilter_EnumValues[1<<11] = "sf_shard11";
+	$RSMGR_TShardFilter_EnumValues[1<<12] = "sf_shard12";
+	$RSMGR_TShardFilter_EnumValues[1<<13] = "sf_shard13";
+	$RSMGR_TShardFilter_EnumValues[1<<14] = "sf_shard14";
+	$RSMGR_TShardFilter_EnumValues[1<<15] = "sf_shard15";
+	$RSMGR_TShardFilter_EnumValues[1<<16] = "sf_shard16";
+	$RSMGR_TShardFilter_EnumValues[1<<17] = "sf_shard17";
+	$RSMGR_TShardFilter_EnumValues[1<<18] = "sf_shard18";
+	$RSMGR_TShardFilter_EnumValues[1<<19] = "sf_shard19";
+	$RSMGR_TShardFilter_EnumValues[1<<20] = "sf_shard20";
+	$RSMGR_TShardFilter_EnumValues[1<<21] = "sf_shard21";
+	$RSMGR_TShardFilter_EnumValues[1<<22] = "sf_shard22";
+	$RSMGR_TShardFilter_EnumValues[1<<23] = "sf_shard23";
+	$RSMGR_TShardFilter_EnumValues[1<<24] = "sf_shard24";
+	$RSMGR_TShardFilter_EnumValues[1<<25] = "sf_shard25";
+	$RSMGR_TShardFilter_EnumValues[1<<26] = "sf_shard26";
+	$RSMGR_TShardFilter_EnumValues[1<<27] = "sf_shard27";
+	$RSMGR_TShardFilter_EnumValues[1<<28] = "sf_shard28";
+	$RSMGR_TShardFilter_EnumValues[1<<29] = "sf_shard29";
+	$RSMGR_TShardFilter_EnumValues[1<<30] = "sf_shard30";
+	$RSMGR_TShardFilter_EnumValues[1<<31] = "sf_shard31";
+	$RSMGR_TShardFilter_EnumValues[-1] = "invalid";
+	$RSMGR_TShardFilter_InvalidValue = -1;
 
 	class RSMGR_TShardFilter
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TShardFilter_InvalidValue;
 			$this->Value = $RSMGR_TShardFilter_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TShardFilter_EnumValues;
 			return $RSMGR_TShardFilter_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TShardFilter_EnumValues;
@@ -786,15 +773,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TShardFilter_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TShardFilter_InvalidValue;
@@ -804,36 +791,35 @@
 			else
 				$this->Value = $RSMGR_TShardFilter_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	$arrayCounter = 0;
-	$RSMGR_TSessionEvent_EnumValues[$arrayCounter++] = "se_char_enter";
-	$RSMGR_TSessionEvent_EnumValues[$arrayCounter++] = "se_char_leave";
-	$RSMGR_TSessionEvent_EnumValues[$arrayCounter++] = "se_session_closing";
-	$RSMGR_TSessionEvent_EnumValues[$arrayCounter] = "invalid";
-	$RSMGR_TSessionEvent_InvalidValue = $arrayCounter;
+	$RSMGR_TSessionEvent_EnumValues[0] = "se_char_enter";
+	$RSMGR_TSessionEvent_EnumValues[1] = "se_char_leave";
+	$RSMGR_TSessionEvent_EnumValues[2] = "se_session_closing";
+	$RSMGR_TSessionEvent_EnumValues[4] = "invalid";
+	$RSMGR_TSessionEvent_InvalidValue = 4;
 
 	class RSMGR_TSessionEvent
 	{
 		var $Value;
-		
+
 		function __construct()
 		{
 			global $RSMGR_TSessionEvent_InvalidValue;
 			$this->Value = $RSMGR_TSessionEvent_InvalidValue;
 		}
-			
+
 		function toString()
 		{
 			global $RSMGR_TSessionEvent_EnumValues;
 			return $RSMGR_TSessionEvent_EnumValues[$this->Value];
 		}
-		
+
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionEvent_EnumValues;
@@ -845,15 +831,15 @@
 					return;
 				}
 			}
-			
+
 			$this->Value = $RSMGR_TSessionEvent_InvalidValue;
 		}
-		
+
 		function toInt()
 		{
 			return $this->Value;
 		}
-		
+
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionEvent_InvalidValue;
@@ -863,7 +849,7 @@
 			else
 				$this->Value = $RSMGR_TSessionEvent_InvalidValue;
 		}
-	}	
+	}
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -897,8 +883,8 @@
 				$msg->serialEnum($levelFilter);
 				$msg->serialString($language);
 				$msg->serialEnum($orientation);
-				$msg->serialUint32($subscriptionClosed);
-				$msg->serialUint32($autoInvite);
+				$msg->serialUInt8($subscriptionClosed);
+				$msg->serialUInt8($autoInvite);
 	
 			return parent::sendMessage($msg);
 
@@ -955,8 +941,8 @@
 				$msg->serialEnum($guildFilter);
 				$msg->serialEnum($shardFilter);
 				$msg->serialEnum($levelFilter);
-				$msg->serialUint32($subscriptionClosed);
-				$msg->serialUint32($autoInvite);
+				$msg->serialUInt8($subscriptionClosed);
+				$msg->serialUInt8($autoInvite);
 				$msg->serialString($language);
 				$msg->serialEnum($orientation);
 	
@@ -1359,7 +1345,7 @@
 
 
 		}
-	
+
 
 		function waitCallback()
 		{
@@ -1394,14 +1380,14 @@
 
 			return true;
 		}
-		
+
 
 		function invokeResult_skel(&$message)
 		{
 			$message->serialUint32($userId);
 				$message->serialUint32($resultCode);
 				$message->serialString($resultString);
-				
+	
 			$this->invokeResult($userId, $resultCode, $resultString);
 		}
 
@@ -1411,7 +1397,7 @@
 				$message->serialUint32($sessionId);
 				$message->serialUInt8($result);
 				$message->serialString($resultString);
-				
+	
 			$this->scheduleSessionResult($charId, $sessionId, $result, $resultString);
 		}
 
@@ -1434,14 +1420,14 @@
 				
 			$levelFilter = new RSMGR_TLevelFilter;
 	$message->serialEnum($levelFilter);
-				$message->serialUint32($subscriptionClosed);
-				$message->serialUint32($autoInvite);
+				$message->serialUInt8($subscriptionClosed);
+				$message->serialUInt8($autoInvite);
 				$message->serialString($language);
 				
 			$orientation = new RSMGR_TSessionOrientation;
 	$message->serialEnum($orientation);
 				$message->serialString($description);
-				
+	
 			$this->sessionInfoResult($charId, $sessionId, $raceFilter, $religionFilter, $guildFilter, $shardFilter, $levelFilter, $subscriptionClosed, $autoInvite, $language, $orientation, $description);
 		}
 
@@ -1454,7 +1440,7 @@
 				
 			$participantStatus = new RSMGR_TSessionPartStatus;
 	$message->serialEnum($participantStatus);
-				
+	
 			$this->joinSessionResult($userId, $sessionId, $result, $shardAddr, $participantStatus);
 		}
 
@@ -1467,8 +1453,8 @@
 				
 			$participantStatus = new RSMGR_TSessionPartStatus;
 	$message->serialEnum($participantStatus);
-				$message->serialUint32($securityCheckForFastDisconnection);
-				
+				$message->serialUInt16($securityCheckForFastDisconnection);
+	
 			$this->joinSessionResultExt($userId, $sessionId, $result, $shardAddr, $participantStatus, $securityCheckForFastDisconnection);
 		}
 
@@ -1476,13 +1462,13 @@
 		{
 			$message->serialUint32($userId);
 				$message->serialString($result);
-				
+	
 			$this->getShardsResult($userId, $result);
 		}
 
 
 		/////////////////////////////////////////////////////////////////
-		// Copy paste this part of code in your derived class 
+		// Copy paste this part of code in your derived class
 		//	and implement code to ract to incoming message
 		/////////////////////////////////////////////////////////////////
 		// Generic response to invoke.
@@ -1710,7 +1696,7 @@
 
 
 		}
-	
+
 
 		function waitCallback()
 		{
@@ -1748,13 +1734,13 @@
 
 			return true;
 		}
-		
+
 
 		function sessionList_skel(&$message)
 		{
 			$message->serialUint32($charId);
 				$message->serialUint32($sessions);
-				
+	
 			$this->sessionList($charId, $sessions);
 		}
 
@@ -1763,46 +1749,46 @@
 			$message->serialUint32($charId);
 				$message->serialUint32($sessionId);
 				$message->serialUint32($characters);
-				
+	
 			$this->charList($charId, $sessionId, $characters);
 		}
 
 		function playerRatings_skel(&$message)
 		{
 			$message->serialUint32($charId);
-				$message->serialUint32($scenarioRated);
+				$message->serialUInt8($scenarioRated);
 				$message->serialUint32($rateFun);
 				$message->serialUint32($rateDifficulty);
 				$message->serialUint32($rateAccessibility);
 				$message->serialUint32($rateOriginality);
 				$message->serialUint32($rateDirection);
-				
+	
 			$this->playerRatings($charId, $scenarioRated, $rateFun, $rateDifficulty, $rateAccessibility, $rateOriginality, $rateDirection);
 		}
 
 		function sessionAverageScores_skel(&$message)
 		{
-			$message->serialUint32($scenarioRated);
+			$message->serialUInt8($scenarioRated);
 				$message->serialUint32($rateFun);
 				$message->serialUint32($rateDifficulty);
 				$message->serialUint32($rateAccessibility);
 				$message->serialUint32($rateOriginality);
 				$message->serialUint32($rateDirection);
 				$message->serialUint32($rrpTotal);
-				
+	
 			$this->sessionAverageScores($scenarioRated, $rateFun, $rateDifficulty, $rateAccessibility, $rateOriginality, $rateDirection, $rrpTotal);
 		}
 
 		function scenarioAverageScores_skel(&$message)
 		{
-			$message->serialUint32($scenarioRated);
+			$message->serialUInt8($scenarioRated);
 				$message->serialUint32($rateFun);
 				$message->serialUint32($rateDifficulty);
 				$message->serialUint32($rateAccessibility);
 				$message->serialUint32($rateOriginality);
 				$message->serialUint32($rateDirection);
 				$message->serialUint32($rrpTotal);
-				
+	
 			$this->scenarioAverageScores($scenarioRated, $rateFun, $rateDifficulty, $rateAccessibility, $rateOriginality, $rateDirection, $rrpTotal);
 		}
 
@@ -1812,7 +1798,7 @@
 				$message->serialUint32($authorRating);
 				$message->serialUint32($AMRating);
 				$message->serialUint32($masterlessRating);
-				
+	
 			$this->ringRatings($charId, $authorRating, $AMRating, $masterlessRating);
 		}
 
@@ -1821,13 +1807,13 @@
 			$message->serialUint32($charId);
 				$message->serialUint32($ringPoints);
 				$message->serialUint32($maxRingPoints);
-				
+	
 			$this->ringPoints($charId, $ringPoints, $maxRingPoints);
 		}
 
 
 		/////////////////////////////////////////////////////////////////
-		// Copy paste this part of code in your derived class 
+		// Copy paste this part of code in your derived class
 		//	and implement code to ract to incoming message
 		/////////////////////////////////////////////////////////////////
 		// Return the list of available session

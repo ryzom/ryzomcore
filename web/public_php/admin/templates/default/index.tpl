@@ -160,9 +160,9 @@
 {section name=note loop=$tool_note_list}
 		<tr>
 {if $tool_note_list[note].note_mode == 0}
-			<td align="center"><a href="javascript:void(0);" onclick="return overlib('{$tool_note_list[note].note_data}', WIDTH, 250, STICKY, DRAGGABLE, CAPTION, '{$tool_note_list[note].note_title2}', CENTER, CLOSECLICK, ANCHOR, 'ol_anchor_right', ANCHORALIGN, 'LL', 'UR');" onmouseout="nd();">{$tool_note_list[note].note_title}</a></td>
+			<td align="center"><a href="javascript:void(0);" onclick="return overlib('{$tool_note_list[note].note_data|smarty:nodefaults}', WIDTH, 250, STICKY, DRAGGABLE, CAPTION, '{$tool_note_list[note].note_title2|smarty:nodefaults}', CENTER, CLOSECLICK, ANCHOR, 'ol_anchor_right', ANCHORALIGN, 'LL', 'UR');" onmouseout="nd();">{$tool_note_list[note].note_title|smarty:nodefaults}</a></td>
 {elseif $tool_note_list[note].note_mode == 1}
-			<td align="center"><a href="javascript:openWindow('{$tool_note_list[note].note_popup_uri}','{$tool_note_list[note].note_title}');">{$tool_note_list[note].note_title}</a></td>
+			<td align="center"><a href="javascript:openWindow('{$tool_note_list[note].note_popup_uri|escape:'javascript'|escape:'html'|smarty:nodefaults}','{$tool_note_list[note].note_title2|smarty:nodefaults}');">{$tool_note_list[note].note_title|smarty:nodefaults}</a></td>
 {/if}
 		</tr>
 {/section}
@@ -180,7 +180,7 @@
 {elseif $tool_hd_list[hd].hd_percent >= 75}{assign var="hdtrclass" value="row_orange_light"}
 {else}{assign var="hdtrclass" value="row0"}{/if}
 		<tr class="{$hdtrclass}">
-			<td align="left" ><a href="javascript:void(0);" onmouseover="return overlib('{$tool_hd_list[hd].summary}', OFFSETX, 40, OFFSETY, 10);" onmouseout="return nd();">{$tool_hd_list[hd].hd_server}</a></td>
+			<td align="left" ><a href="javascript:void(0);" onmouseover="return overlib('{$tool_hd_list[hd].summary|escape:'javascript'|escape:'html'|smarty:nodefaults}', OFFSETX, 40, OFFSETY, 10);" onmouseout="return nd();">{$tool_hd_list[hd].hd_server}</a></td>
 			<td align="right">{$tool_hd_list[hd].hd_percent}%</td>
 		</tr>
 {/section}
@@ -320,27 +320,27 @@
 {assign var="check_name" value=$tool_services_list[service].AliasName}
 		<tr class="{$trclass}">
 			<td><input class="check" type="checkbox" name="service_{$tool_services_list[service].AliasName}" value="{$tool_services_list[service].AliasName}" {if $tool_service_select_list.$check_name}checked{/if}></td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].AliasName}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].AliasName}</td>
 {if !$iPhone}
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{if $tool_services_list[service].ShardName != ""}{$tool_services_list[service].ShardName}{else}?{/if}{if $tool_services_list[service].ShardId != ""}/{$tool_services_list[service].ShardId}{/if}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{if $tool_services_list[service].ShardName != ""}{$tool_services_list[service].ShardName}{else}?{/if}{if $tool_services_list[service].ShardId != ""}/{$tool_services_list[service].ShardId}{/if}</td>
 {*<td>{$tool_services_list[service].LongName}</td>*}
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].ShortName}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].ShortName}</td>
 {*<td>{$tool_services_list[service].ServiceAlias}</td>*}
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].Hostname}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].RunningState}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].RunningOrders}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1}>{$tool_services_list[service].RunningTags}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].Hostname}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].RunningState}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].RunningOrders}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass1|smarty:nodefaults}>{$tool_services_list[service].RunningTags}</td>
 {/if}
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].State}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].NoReportSince}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].StartCounter}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].State}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].NoReportSince}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].StartCounter}</td>
 {if !$iPhone}
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].UserSpeedLoop}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].UserSpeedLoop}</td>
 {/if}
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].TickSpeedLoop}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].ProcessUsedMemory}</td>
-			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].NbPlayers}</td>
-			<td nowrap onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2}>{$tool_services_list[service].UpTime}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].TickSpeedLoop}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].ProcessUsedMemory}</td>
+			<td onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].NbPlayers}</td>
+			<td nowrap onclick="CheckToggle(document.qlist.service_{$tool_services_list[service].AliasName})" {$tdclass2|smarty:nodefaults}>{$tool_services_list[service].UpTime}</td>
 		</tr>
 {/if}
 {/section}

@@ -841,13 +841,13 @@ public:
 	/// called to copy from another sheet (operator= + care ptrs)
 	void reloadSheet(const CStaticItem &o);
 
-#ifndef NO_EGS_VARS
 	/** Get the base weigth for an item.
 	 *	This weight must be multiplied by the craft parameter weight value
 	 *	to obtain the real item weight.
+	 *	Defined in the EGS (egs_sheets_impl.cpp), not in the sheets library:
+	 *	it reads the craft parameter variables.
 	 */
 	float getBaseWeight() const;
-#endif
 	
 	std::vector<SItemSpecialEffect> lookForEffects(ITEM_SPECIAL_EFFECT::TItemSpecialEffect effectType) const;
 

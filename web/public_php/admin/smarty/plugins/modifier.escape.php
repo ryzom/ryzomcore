@@ -21,6 +21,19 @@
  */
 function smarty_modifier_escape($string, $esc_type = 'html', $char_set = 'ISO-8859-1')
 {
+    // The tool sets default_modifiers = escape:"html", so every variable
+    // reference compiles through here -- including {section loop=$arr}
+    // attributes and other non-strings. Escaping an array nulled the whole
+    // menu bar on php 7 (count(null) = 0) and is a TypeError on php 8:
+    // hand non-scalars back untouched and stringify the scalars, the
+    // escaping below only means anything for strings.
+    if (!is_string($string)) {
+        if (is_int($string) || is_float($string) || is_bool($string)) {
+            $string = (string)$string;
+        } else {
+            return $string;
+        }
+    }
     switch ($esc_type) {
         case 'html':
             return htmlspecialchars($string, ENT_QUOTES, $char_set);

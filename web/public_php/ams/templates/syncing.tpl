@@ -11,7 +11,7 @@
 				<p>{$syncing_info}</p>
 				{if $shard eq "online"}
 				<div class="alert alert-success">
-					<span class="icon-refresh icon-white"></span>{$shard_online}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
+					<span class="icon-refresh icon-white"></span>{$shard_online nofilter}<a href="#" id="sync" onclick="sync()">{$syncing_sync}</a>
 					<script>
 						function sync(){
 							xmlhttp=new XMLHttpRequest();
@@ -22,7 +22,7 @@
 				</div>
 				{else}
 				<div class="alert alert-error">
-					<strong><span class="icon-refresh icon-white"></span></strong> {$shard_offline}
+					<strong><span class="icon-refresh icon-white"></span></strong> {$shard_offline nofilter}
 				</div>
 				{/if}
 				</center>

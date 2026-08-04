@@ -202,7 +202,7 @@
 			$sql  = "INSERT INTO ". NELDB_USER_TABLE;
 			$sql .= " (`user_name`,`user_password`,`user_group_id`,`user_created`,`user_active`)";
 			$sql .= " VALUES ";
-			$sql .= " ('". $db->sql_escape_string($user_name) ."','". md5($user_password) ."','". intval($user_group) ."','". time() ."','". intval($user_active) ."')";
+			$sql .= " ('". $db->sql_escape_string($user_name) ."','". $db->sql_escape_string(nt_auth_hash_password($user_password)) ."','". intval($user_group) ."','". time() ."','". intval($user_active) ."')";
 			$db->sql_query($sql);
 			return "";
 		}
@@ -256,7 +256,7 @@
 		}
 
 		$sql_ext = "";
-		if ($user_password != '')	$sql_ext = ",user_password='". md5($user_password) ."'";
+		if ($user_password != '')	$sql_ext = ",user_password='". $db->sql_escape_string(nt_auth_hash_password($user_password)) ."'";
 
 		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_name='". $db->sql_escape_string($user_name) ."',user_group_id='". intval($user_group) ."',user_active='". intval($user_active) ."'". $sql_ext ." WHERE user_id=". intval($user_id);
 		$db->sql_query($sql);
@@ -472,12 +472,55 @@
 		return $data;
 	}
 
+	/*
+	 * Menu application_uri values are written into href and used for the
+	 * post-login redirect. Keep them relative to this site: no scheme
+	 * (javascript:, data:, http:), no protocol-relative //, no CR/LF.
+	 */
+	function tool_admin_safe_app_uri($uri)
+	{
+		$uri = trim(str_replace(array("\r", "\n", "\0"), '', (string)$uri));
+		if ($uri === '')
+			return '';
+		if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $uri) || strpos($uri, '//') === 0)
+			return '';
+		if ($uri[0] === '/')
+			$uri = ltrim($uri, '/');
+		if ($uri === '' || !preg_match('#^[A-Za-z0-9._/?=&%+-]+$#', $uri))
+			return '';
+		if (strlen($uri) > 255)
+			$uri = substr($uri, 0, 255);
+		return $uri;
+	}
+
+	/*
+	 * Icon paths land in img src. Relative path only, no traversal.
+	 */
+	function tool_admin_safe_app_icon($icon)
+	{
+		$icon = trim(str_replace(array("\r", "\n", "\0"), '', (string)$icon));
+		if ($icon === '')
+			return '';
+		if (preg_match('#^[a-z][a-z0-9+.-]*:#i', $icon) || strpos($icon, '//') === 0)
+			return '';
+		if (strpos($icon, '..') !== false)
+			return '';
+		if (!preg_match('#^[A-Za-z0-9._/-]+$#', $icon))
+			return '';
+		if (strlen($icon) > 128)
+			$icon = substr($icon, 0, 128);
+		return $icon;
+	}
+
 	function tool_admin_applications_add($application_name, $application_uri, $application_restriction, $application_icon, $application_order, $application_visible)
 	{
 		global $db;
 
 		$application_name = trim($application_name);
 		if ($application_name == '')	return "/!\ Error: application name is empty!";
+
+		$application_uri = tool_admin_safe_app_uri($application_uri);
+		$application_icon = tool_admin_safe_app_icon($application_icon);
 
 		$application_exists = tool_admin_applications_name_exist($application_name);
 		if (!$application_exists)
@@ -532,6 +575,9 @@
 
 		$application_name = trim($application_name);
 		if ($application_name == "")	return "/!\ Error: application name is empty!";
+
+		$application_uri = tool_admin_safe_app_uri($application_uri);
+		$application_icon = tool_admin_safe_app_icon($application_icon);
 
 		$sql = "SELECT * FROM ". NELDB_APPLICATION_TABLE ." WHERE application_name='". $db->sql_escape_string($application_name) ."' AND application_id<>". intval($application_id);
 		if ($result = $db->sql_query($sql))
@@ -1672,6 +1718,13 @@
 	}
 
 	//function tool_admin_domains_update_nel($domain_id, $domain_name, $domain_version, $domain_status)
+	// FIXME: status is the only nel.domain field this tool can touch. Creating a
+	// domain, or editing the fields the login and ring web paths actually read
+	// (login_address, session_manager_address, ring_db_name, web_host,
+	// patch_urls), still means writing the row by hand -- setup only does it for
+	// the dev shard, and install.php deliberately refuses the job. Same for
+	// nel.shard and the ring st_mainland session row. Whatever picks this up
+	// should own all three together; see public_php/account/admin.php.
 	function tool_admin_domains_update_nel($domain_id, $domain_name, $domain_status)
 	{
 		global $db;

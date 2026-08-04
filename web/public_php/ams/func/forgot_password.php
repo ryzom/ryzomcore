@@ -16,12 +16,18 @@ function forgot_password(){
         $webUser = new WebUsers($target_id);
         $target_username = $webUser->getUsername();
         $target_hashedPass = $webUser->getHashedPass();
-        $hashed_key = hash('sha512',$target_hashedPass);
+        // time-limited HMAC; the previous form was a permanent sha512 of the
+        // password hash and never expired on its own
+        $hashed_key = WebUsers::createPasswordResetToken($target_id, $target_hashedPass);
 
-        if ( isset( $_COOKIE['Language'] ) ) {
+        // the cookie is client supplied and becomes part of the .ini path
+        // below, so only let a bare language code through, the same way
+        // Helpers::loadTranslations() does
+        global $DEFAULT_LANGUAGE;
+        if ( isset( $_COOKIE['Language'] ) && is_string( $_COOKIE['Language'] )
+             && preg_match( '/^[A-Za-z_-]{2,10}$/', $_COOKIE['Language'] ) ) {
             $lang = $_COOKIE['Language'];
         }else{
-            global $DEFAULT_LANGUAGE;
             $lang = $DEFAULT_LANGUAGE;
         }
 
@@ -34,7 +40,9 @@ function forgot_password(){
 
         //create the reset url
         global $WEBPATH;
-        $resetURL = $WEBPATH . "?page=reset_password&user=". $target_username . "&email=" . $email . "&key=" . $hashed_key;
+        $resetURL = $WEBPATH . "?page=reset_password&user=" . rawurlencode($target_username)
+              . "&email=" . rawurlencode($email)
+              . "&key=" . rawurlencode($hashed_key);
         //set email stuff
         $recipient = $email;
         $subject = $mailText['email_subject_forgot_password'];

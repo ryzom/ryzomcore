@@ -3,6 +3,17 @@
 error_reporting(0); // Set E_ALL for debuging
 
 require_once(dirname(dirname(dirname(__DIR__))) . '/config.php');
+require_once( $AMS_LIB . '/libinclude.php' );
+session_start();
+
+// This is a file manager endpoint. It is configured read only below, but it
+// still walks and lists a directory on request, so it is not for anonymous
+// callers.
+if (!WebUsers::isLoggedIn()) {
+	header('HTTP/1.1 403 Forbidden');
+	echo '{"error":"Access denied"}';
+	return;
+}
 
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinderConnector.class.php';
 include_once dirname(__FILE__).DIRECTORY_SEPARATOR.'elFinder.class.php';

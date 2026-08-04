@@ -24,6 +24,28 @@
 
 
 /**
+ * Reduce an uploaded archive name to a plain "<name>.zip" that is safe to
+ * append to a path. The name is supplied by the browser and is used to build
+ * both the temp file and the plugin directory, so a directory part or a ".."
+ * in it would let the upload be written anywhere the web server can reach.
+ *
+ * @param  $name the untrusted file name
+ * @return the sanitised name, or false when it is not a usable .zip name
+ */
+function plugin_archive_name( $name ) {
+    $name = basename( str_replace( "\\", "/", (string)$name ) );
+
+     if ( !preg_match( '/^([A-Za-z0-9._-]+)\.zip$/i', $name, $matches ) ) {
+        return false;
+         }
+    // no leading dots, so the name can never be "." ".." or a hidden file
+    if ( $matches[1] === '' || $matches[1][0] === '.' || strpos( $matches[1], '..' ) !== false ) {
+        return false;
+         }
+    return $matches[1] . '.zip';
+    }
+
+/**
  * This function is used in installing plugins or adding updates
  * for previously installed plugins.
  *
@@ -32,8 +54,10 @@ function install_plugin() {
 
     $result = array();
 
-     // if logged in
-    if ( WebUsers :: isLoggedIn() ) {
+     // Installing a plugin puts new php code on the server. Moderators could
+    // already open the plugin page, but upload/activate is an RCE surface, so
+    // only admins may install.
+    if ( WebUsers :: isLoggedIn() && Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) ) {
 
         // path of temporary folder for storing files
         $temp_path = "../../ams_lib/temp";
@@ -48,9 +72,17 @@ function install_plugin() {
         // checking the server if file is uploaded or not
         if ( ( isset( $_FILES["file"] ) ) && ( $_FILES["file"]["size"] > 0 ) )
              {
-            $fileName = $_FILES["file"]["name"]; //the files name takes from the HTML form
-             $fileTmpLoc = $_FILES["file"]["tmp_name"]; //file in the PHP tmp folder
-             $dir = trim( $_FILES["file"]["name"], ".zip" );
+            // the name comes from the browser: strip any directory part and
+            // anything that is not a plain plugin archive name, otherwise the
+            // upload below can be made to land anywhere on the server
+            $fileName = plugin_archive_name( $_FILES["file"]["name"] );
+             if ( $fileName === false )
+                 {
+                echo "Please select a file with .zip extension to upload.";
+                 throw new SystemExit();
+                 }
+            $fileTmpLoc = $_FILES["file"]["tmp_name"]; //file in the PHP tmp folder
+             $dir = substr( $fileName, 0, -4 ); // the name without ".zip"
              $target_path = "../../ams_lib/plugins/$dir"; //path in which the zip extraction is to be done
              $destination = "../../ams_lib/plugins/";
 
@@ -76,10 +108,14 @@ function install_plugin() {
             // checking for the command to install plugin is given or not
             if ( !isset( $_POST['install_plugin'] ) )
                  {
-                if ( ( $_FILES["file"]["type"] == 'application/zip' ) )
+                // the browser supplied content type is not evidence of
+                // anything, so check that the upload really is an archive
+                $zip_probe = new ZipArchive();
+                 if ( $zip_probe -> open( $fileTmpLoc ) === true )
                      {
-                    if ( move_uploaded_file( $fileTmpLoc, $temp_path . "/" . $fileName ) ) {
-                        echo "$fileName upload is complete.</br>" . "<button type='submit' class='btn btn-primary' style='margin-left:5px; margin-top:10px;' name='install_plugin'>Install Plugin</button></br>";
+                    $zip_probe -> close();
+                     if ( move_uploaded_file( $fileTmpLoc, $temp_path . "/" . $fileName ) ) {
+                        echo htmlspecialchars( $fileName, ENT_QUOTES ) . " upload is complete.</br>" . "<button type='submit' class='btn btn-primary' style='margin-left:5px; margin-top:10px;' name='install_plugin'>Install Plugin</button></br>";
                          throw new SystemExit();
                          }
                     else
@@ -109,7 +145,7 @@ function install_plugin() {
                          $install_result['FileName'] = $target_path;
                          $install_result['Name'] = $result['PluginName'];
                          $install_result['Type'] = $result['Type'];
-                         if ( Ticket_User :: isMod( unserialize( $_SESSION['ticket_user'] ) ) )
+                         if ( Ticket_User :: isAdmin( unserialize( $_SESSION['ticket_user'] ) ) )
                              {
                             $install_result['Permission'] = 'admin';
                              }
@@ -164,20 +200,9 @@ function install_plugin() {
  */
 function zipExtraction( $target_path, $destination )
  {
-    $zip = new ZipArchive();
-     $x = $zip -> open( $target_path );
-     if ( $x === true ) {
-        if ( $zip -> extractTo( $destination ) )
-             {
-            $zip -> close();
-             return true;
-             }
-        else
-             {
-            $zip -> close();
-             return false;
-             }
-        }
+    // Plugincache does the same job but refuses archives whose entries would
+    // be written outside of $destination
+    return Plugincache :: zipExtraction( $target_path, $destination );
     }
 
 /**

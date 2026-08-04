@@ -142,6 +142,7 @@ using namespace MAXMATH;
 
 #include <nel/3d/nav_mouse_listener.h>
 
+#include "viewer_listener.h"
 #include "zp_state.h"
 #include "patch_topo_snapshot.h"
 
@@ -628,6 +629,16 @@ static bool zpXformSubdivide(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *map
 	return topoSubdividePatches(pm, rp, sel, err, mapper, evalPm);
 }
 
+// Edge-level subdivide (plan mA4): single-axis 1->2 splits driven by the edge selection,
+// with the optional strip walk. The propagate flag is op state like the weld threshold.
+static bool s_SubdivPropagate = false;
+static bool zpXformSubdivideEdges(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
+                                  const std::set<uint> &sel, std::string &err,
+                                  const SPatchMesh *evalPm)
+{
+	return topoSubdivideEdges(pm, rp, sel, s_SubdivPropagate, err, mapper, evalPm);
+}
+
 // Weld threshold handed to the adapter through a file-static: the shared runner's
 // transform signature is selection-only, and the threshold is op state like the brush
 // size, not selection data.
@@ -661,13 +672,16 @@ static bool zpXformAddQuad(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* m
 
 // The extrude vector rides file-statics like the weld threshold (op state, not selection).
 static float s_ExtrudeDX = 0.f, s_ExtrudeDY = 0.f, s_ExtrudeDZ = 0.f;
+static float s_ExtrudeOutline = 0.f;
 static float s_LastExtrude = 8.f;
+static float s_LastOutline = 0.f;
+static bool s_LastExtrudeLocal = false;
 static bool zpXformExtrude(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper *mapper,
                            const std::set<uint> &sel, std::string &err,
                            const SPatchMesh *evalPm)
 {
 	return topoExtrudePatches(pm, rp, mapper, sel, s_ExtrudeDX, s_ExtrudeDY, s_ExtrudeDZ,
-	                          err, evalPm);
+	                          err, evalPm, s_ExtrudeOutline);
 }
 
 static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
@@ -678,6 +692,15 @@ static bool zpXformDetachElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper 
 	// stay unmapped, nothing dies; the duplicates copy EVAL positions so a mapper-driven
 	// boundary stays an invisible seam.
 	return topoDetachElements(pm, rp, sel, err, evalPm);
+}
+
+static bool zpXformCopyElement(SPatchMesh &pm, SRPatchMesh &rp, SPmVertMapper * /* mapper */,
+                               const std::set<uint> &sel, std::string &err,
+                               const SPatchMesh *evalPm)
+{
+	// The Copy variant (mA7): clone the selection as a coincident island; the original
+	// stays untouched. Pure addition, paint copies verbatim.
+	return topoCopyElements(pm, rp, sel, err, evalPm);
 }
 
 /**
@@ -713,6 +736,32 @@ uint zpSubdividePatchSelection()
 }
 
 /**
+ * Subdivide across the EDGE selection (edge level): each adjacent patch splits once,
+ * along the parameter crossing the selected edge - a 1->2 split; with Propagate the
+ * split walks the strip until it loops or exits an open border. Neighbors that do not
+ * split take the canonical T-junction bind.
+ */
+uint zpSubdivideEdgeSelection()
+{
+	return zpRunTopoOpEdges("subdivide", "painter.subdivideEdgeSelection()",
+	                        zpXformSubdivideEdges);
+}
+
+/** The Propagate checkbox (recorded as an absolute state op for replay fidelity). */
+void zpSetSubdividePropagate(bool on)
+{
+	if (on == s_SubdivPropagate)
+		return;
+	s_SubdivPropagate = on;
+	ZPSCRIPT::record(NLMISC::toString("painter.setSubdividePropagate(%s)",
+	                                  on ? "true" : "false"));
+}
+
+bool zpSubdividePropagate() { return s_SubdivPropagate; }
+
+void zpSubdivPropToggleClicked() { zpSetSubdividePropagate(!s_SubdivPropagate); }
+
+/**
  * Weld the selected vertices (target-weld: clusters within the threshold merge onto their
  * lowest member, which keeps its position; coincident open edges fuse - the stitch).
  * Vertex-level selection; the runner's face-selection guard is bypassed by feeding the
@@ -736,27 +785,87 @@ float zpLastWeldThreshold() { return s_WeldThreshold; }
  * edges rise WITHOUT a wall - the ligo border profile is a cross-file contract. One
  * Kind 6 stroke through the shared runner.
  */
-uint zpExtrudePatchSelection(float dz)
+/**
+ * The full form (plan mA5/mA6): height along world Z or along the selection's own
+ * NORMAL (Group semantics - one selection, one area-weighted eval normal), plus the
+ * bevel outline. The legacy Bevel smoothing radios are deliberately skipped: walls are
+ * fresh paintable surface, and edge smoothing is the no-smooth flag's job.
+ */
+uint zpExtrudePatchSelectionEx(float h, float outline, bool localNormal)
 {
-	if (dz == 0.f)
+	if (h == 0.f)
 	{
 		g_PropStatusMsg = "extrude: zero height";
 		return 0;
 	}
-	s_ExtrudeDX = 0.f;
-	s_ExtrudeDY = 0.f;
+	float dx = 0.f, dy = 0.f, dz = h;
+	if (localNormal)
+	{
+		// Area-weighted average normal of the selected patches' EVAL surfaces, in object
+		// space (the eval mirror): the diagonal cross (V2-V0)x(V3-V1) is twice the area
+		// vector of a planar quad, so summing the raw crosses weights by area for free.
+		long double nx = 0, ny = 0, nz = 0;
+		for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+		     it != g_PatchFaceSel.end(); ++it)
+		{
+			const SPaintZone *pz = zpFindPaintZone(it->first);
+			if (!pz || it->second >= pz->Ep.Pm.Patches.size())
+				continue;
+			const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz->Ep.Pm.Patches[it->second];
+			const float *v0 = pz->Ep.Pm.Verts[pp.V[0]].Pos;
+			const float *v1 = pz->Ep.Pm.Verts[pp.V[1]].Pos;
+			const float *v2 = pz->Ep.Pm.Verts[pp.V[2]].Pos;
+			const float *v3 = pz->Ep.Pm.Verts[pp.V[3]].Pos;
+			const long double d1x = (long double)v2[0] - v0[0], d1y = (long double)v2[1] - v0[1],
+			                  d1z = (long double)v2[2] - v0[2];
+			const long double d2x = (long double)v3[0] - v1[0], d2y = (long double)v3[1] - v1[1],
+			                  d2z = (long double)v3[2] - v1[2];
+			nx += d1y * d2z - d1z * d2y;
+			ny += d1z * d2x - d1x * d2z;
+			nz += d1x * d2y - d1y * d2x;
+		}
+		const long double nl = sqrtl(nx * nx + ny * ny + nz * nz);
+		if (nl < 1e-9L)
+		{
+			g_PropStatusMsg = "extrude: selection has no usable normal";
+			printf("%s\n", g_PropStatusMsg.c_str());
+			fflush(stdout);
+			return 0;
+		}
+		dx = (float)(nx / nl * h);
+		dy = (float)(ny / nl * h);
+		dz = (float)(nz / nl * h);
+	}
+	s_ExtrudeDX = dx;
+	s_ExtrudeDY = dy;
 	s_ExtrudeDZ = dz;
-	s_LastExtrude = dz;
+	s_ExtrudeOutline = outline;
+	s_LastExtrude = h;
+	s_LastOutline = outline;
+	s_LastExtrudeLocal = localNormal;
 	return zpRunTopoOp("extrude",
-	                   NLMISC::toString("painter.extrudePatchSelection(%.9g)", dz),
+	                   NLMISC::toString("painter.extrudePatchSelection(%.9g, %.9g, %s)",
+	                                    h, outline, localNormal ? "true" : "false"),
 	                   zpXformExtrude);
 }
 
-/** The last-used extrude height (seeds the panel dialog). */
+/** Extrude by `dz` along world Z (the m54 form; the shift-drag commit's path). */
+uint zpExtrudePatchSelection(float dz)
+{
+	return zpExtrudePatchSelectionEx(dz, 0.f, false);
+}
+
+/** The last-used extrude dialog state (seeds the modal). */
 float zpLastExtrudeHeight() { return s_LastExtrude; }
+float zpLastExtrudeOutline() { return s_LastOutline; }
+bool zpLastExtrudeLocal() { return s_LastExtrudeLocal; }
 
 /** Extrude dialog OK / drag commit. */
 void zpPatchExtrudeClicked(float dz) { zpExtrudePatchSelection(dz); }
+void zpPatchExtrudeExClicked(float h, float outline, bool local)
+{
+	zpExtrudePatchSelectionEx(h, outline, local);
+}
 
 /** Weld dialog OK. */
 void zpPatchWeldThresholdClicked(float distance) { zpWeldPatchSelection(distance); }
@@ -1002,6 +1111,215 @@ bool zpPatchTessQuery(uint zoneId, uint patchIdx, int &uOut, int &vOut)
 	return true;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Vertex continuity type (the legacy Coplanar / Corner pair, vertex level).
+//
+// The type lives in bit 0 of the PatchMesh vertex Flags word (PVERT_COPLANAR; corner = 0)
+// - pinned empirically over the whole corpus with --pm-flags-probe before this op existed:
+// vertex Flags carries ONLY the values 0 and 1 (no hidden bits, unlike patches), and every
+// flagged vertex's attached tangent directions measure coplanar within 1e-6 while unflagged
+// vertices spread up to ~0.5 deviation. The toggle is a value op through the shared runner
+// (the SmGroup shape); the CONSTRAINT applies at handle-move time in zpApplyPatchXform and
+// the preview, not here - toggling moves no geometry.
+
+static bool s_CoplanarOn = false;
+static bool zpXformVertCoplanar(SPatchMesh &pm, SRPatchMesh & /* rp */,
+                                SPmVertMapper * /* mapper */, const std::set<uint> &sel,
+                                std::string &err, const SPatchMesh * /* evalPm */)
+{
+	bool changed = false;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		if (*it >= pm.Verts.size())
+		{
+			err = "vertex index out of range";
+			return false;
+		}
+		const sint32 f = pm.Verts[*it].Flags;
+		const sint32 nf = s_CoplanarOn ? (f | 1) : (f & ~1);
+		if (nf != f)
+		{
+			pm.Verts[*it].Flags = nf;
+			changed = true;
+		}
+	}
+	if (!changed)
+	{
+		err = s_CoplanarOn ? "selection is already coplanar" : "selection is already corner";
+		return false;
+	}
+	return true;
+}
+
+/** Set the vertex selection's continuity type (true = coplanar, false = corner). */
+uint zpSetVertexCoplanar(bool on)
+{
+	s_CoplanarOn = on;
+	return zpRunTopoOpVerts("vertex type",
+	                        NLMISC::toString("painter.setVertexCoplanar(%s)",
+	                                         on ? "true" : "false"),
+	                        zpXformVertCoplanar);
+}
+
+/** Tri-state over the vertex selection: 0 = all corner, 1 = all coplanar, 2 = mixed/empty. */
+int zpVertCoplanarTriState()
+{
+	bool any = false, all = true, seen = false;
+	for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+	     it != g_PatchVertSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || it->second >= pz->Ep.Pm.Verts.size())
+			continue;
+		seen = true;
+		const bool c = (pz->Ep.Pm.Verts[it->second].Flags & 1) != 0;
+		any = any || c;
+		all = all && c;
+	}
+	if (!seen)
+		return 2;
+	return all ? 1 : (any ? 2 : 0);
+}
+
+/** Scene-menu pair click (1 = coplanar, 0 = corner). */
+void zpPatchCoplanarClicked(int on) { zpSetVertexCoplanar(on != 0); }
+
+// ---------------------------------------------------------------------------------------------
+// Auto / Manual interior (the second context-menu pair, patch level; plan mA2).
+//
+// PATCH_AUTO = bit 0 of the patch Flags word (the probe: 645k auto, 1,073 authored
+// MANUAL patches across 47 converted desert files). Switching auto -> manual BAKES the
+// currently DERIVED interiors into the stored vecs - they become authored, and the four
+// interior controls become real, editable points; manual -> auto abandons the stored
+// values (evaluation re-derives them; the values stay in the file as dead bytes exactly
+// as the corpus leaves them).
+
+static bool s_PatchAutoOn = false;
+static bool zpXformPatchAuto(SPatchMesh &pm, SRPatchMesh & /* rp */, SPmVertMapper *mapper,
+                             const std::set<uint> &sel, std::string &err,
+                             const SPatchMesh *evalPm)
+{
+	bool changed = false;
+	for (std::set<uint>::const_iterator it = sel.begin(); it != sel.end(); ++it)
+	{
+		if (*it >= pm.Patches.size())
+		{
+			err = "patch index out of range";
+			return false;
+		}
+		SPmPatch &pp = pm.Patches[*it];
+		const bool isAuto = (pp.Flags & 1) != 0;
+		if (s_PatchAutoOn == isAuto)
+			continue;
+		if (!s_PatchAutoOn)
+		{
+			// auto -> manual: bake. The eval mirror's interior positions ARE the derived
+			// values (patch_eval recomputes auto interiors in place), so the bake copies
+			// them into the stored slots. A MAPPED interior takes the value through its
+			// Delta against the record's Original (eval = input + Delta once the auto
+			// recompute stops overwriting it).
+			for (int k = 0; k < 4; ++k)
+			{
+				const sint32 iv = pp.Interior[k];
+				if (iv < 0 || (size_t)iv >= pm.Vecs.size())
+					continue;
+				float pos[3];
+				if (evalPm && (size_t)iv < evalPm->Vecs.size())
+					memcpy(pos, evalPm->Vecs[iv].Pos, 12);
+				else
+					memcpy(pos, pm.Vecs[iv].Pos, 12);
+				if (mapper)
+				{
+					for (size_t r = 0; r < mapper->VecMap.size(); ++r)
+					{
+						SPmMapVert &m = mapper->VecMap[r];
+						if (m.Vert != iv)
+							continue;
+						for (int c = 0; c < 3; ++c)
+							m.Delta[c] = (float)((long double)pos[c] - m.Original[c]);
+						break;
+					}
+				}
+				memcpy(pm.Vecs[iv].Pos, pos, 12);
+			}
+		}
+		pp.Flags = s_PatchAutoOn ? (pp.Flags | 1) : (pp.Flags & ~1);
+		changed = true;
+	}
+	if (!changed)
+	{
+		err = s_PatchAutoOn ? "selection is already auto" : "selection is already manual";
+		return false;
+	}
+	return true;
+}
+
+/** Set the face selection's interior mode (true = auto, false = manual + bake). */
+uint zpSetPatchAuto(bool on)
+{
+	s_PatchAutoOn = on;
+	return zpRunTopoOp("interior mode",
+	                   NLMISC::toString("painter.setPatchAuto(%s)", on ? "true" : "false"),
+	                   zpXformPatchAuto);
+}
+
+/** Tri-state over the face selection: 0 = all manual, 1 = all auto, 2 = mixed/empty. */
+int zpPatchAutoTriState()
+{
+	bool any = false, all = true, seen = false;
+	for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+	     it != g_PatchFaceSel.end(); ++it)
+	{
+		const SPaintZone *pz = zpFindPaintZone(it->first);
+		if (!pz || it->second >= pz->Ep.Pm.Patches.size())
+			continue;
+		seen = true;
+		const bool a = (pz->Ep.Pm.Patches[it->second].Flags & 1) != 0;
+		any = any || a;
+		all = all && a;
+	}
+	if (!seen)
+		return 2;
+	return all ? 1 : (any ? 2 : 0);
+}
+
+/** Scene-menu pair click (1 = auto, 0 = manual). */
+void zpPatchAutoClicked(int on) { zpSetPatchAuto(on != 0); }
+
+/** Script/gate read access: one patch's stored Flags word. */
+bool zpPatchFlagsQuery(uint zoneId, uint patchIdx, sint32 &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size())
+		return false;
+	out = pz->Ep.Pm.Patches[patchIdx].Flags;
+	return true;
+}
+
+/** Interior vec INDEX of a patch corner slot (the selection handle for manual editing). */
+bool zpPatchInteriorIndexQuery(uint zoneId, uint patchIdx, uint slot, uint &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || patchIdx >= pz->Ep.Pm.Patches.size() || slot >= 4)
+		return false;
+	const sint32 iv = pz->Ep.Pm.Patches[patchIdx].Interior[slot];
+	if (iv < 0)
+		return false;
+	out = (uint)iv;
+	return true;
+}
+
+/** Script/gate read access: one vertex's stored Flags word (through the eval mirror,
+ *  whose flags mirror the stored stream). */
+bool zpPatchVertFlagsQuery(uint zoneId, uint vertIdx, sint32 &out)
+{
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (!pz || vertIdx >= pz->Ep.Pm.Verts.size())
+		return false;
+	out = pz->Ep.Pm.Verts[vertIdx].Flags;
+	return true;
+}
+
 /** Panel grid click: the Max tri-state rule - a bit carried by ALL selected patches
  *  clears, anything else (off or mixed) sets. */
 void zpPatchSmGroupClicked(int bit)
@@ -1094,10 +1412,20 @@ std::string zpSanitizeBrickName(const std::string &name)
  * nothing moves and the zone still exports as one node; grab the island afterwards with
  * the Element expand. Kaetemi's reframing of legacy detach for the brick world.
  */
-uint zpDetachPatchSelection()
+uint zpDetachPatchSelection(bool copy)
 {
+	if (copy)
+		return zpRunTopoOp("detach copy", "painter.detachPatchSelection(true)",
+		                   zpXformCopyElement);
 	return zpRunTopoOp("detach", "painter.detachPatchSelection()", zpXformDetachElement);
 }
+
+// The panel Detach button's Copy checkbox (session display state, like the weld
+// threshold seed - the recorder captures the resolved call, not the checkbox).
+static bool s_DetachCopy = false;
+void zpSetDetachCopy(bool on) { s_DetachCopy = on; }
+bool zpDetachCopy() { return s_DetachCopy; }
+void zpDetachCopyToggleClicked() { s_DetachCopy = !s_DetachCopy; }
 
 /**
  * Detach the selected patches into a NEW BRICK FILE next to the source (patch level, one
@@ -1105,7 +1433,7 @@ uint zpDetachPatchSelection()
  * story is designed; splitting a multi-cell zone is its use). `nameIn` empty = auto
  * ("<source>-det", collision-bumped). Returns the detached patch count.
  */
-uint zpDetachToFile(const std::string &nameIn)
+uint zpDetachToFile(const std::string &nameIn, bool copy)
 {
 	if (!g_PaintCtx.Core || !g_PaintCtx.Zones)
 		return 0;
@@ -1256,6 +1584,22 @@ uint zpDetachToFile(const std::string &nameIn)
 		}
 	}
 
+	// --- COPY mode (mA7): the new brick is written and the session changes NOTHING -
+	// no source delete, no snapshot, no rebuild. Deliberately not undoable: there is no
+	// session mutation at all, and a save is never undone anyway.
+	if (copy)
+	{
+		name = NLMISC::CFile::getFilenameWithoutExtension(target);
+		printf("detach copy: zone %u, %u patches -> %s (%s target)\n", zoneId,
+		       (uint)sel.size(), target.c_str(), targetStream.Local ? "modifier" : "base");
+		fflush(stdout);
+		ZPSCRIPT::record("painter.detachToFile(\"" + name + "\", true)");
+		g_PropStatusMsg = NLMISC::toString("detach copy: %u patch%s -> %s.max",
+		                                   (uint)sel.size(), sel.size() == 1 ? "" : "es",
+		                                   name.c_str());
+		return (uint)sel.size();
+	}
+
 	// --- Pass 2: the SOURCE loses the selection - the normal delete flow, Kind 6 undoable
 	// (the zone set is unchanged; the new file is not opened).
 	// Same anchor-cell fixup as the shared runner: detaching the west half of a multi-cell
@@ -1346,7 +1690,7 @@ uint zpDetachToFile(const std::string &nameIn)
 }
 
 /** Bridge wrapper: panel Detach button (auto name). */
-void zpPatchDetachClicked() { zpDetachPatchSelection(); }
+void zpPatchDetachClicked() { zpDetachPatchSelection(s_DetachCopy); }
 
 // ---------------------------------------------------------------------------------------------
 // Attach: merge another open editable zone's patches into this one.
@@ -2050,7 +2394,15 @@ void zpWeldTargetToggleClicked()
 void zpPatchDeleteClicked() { zpDeletePatchSelection(); }
 void zpPatchTurnCcwClicked() { zpTurnPatchSelection(true); }
 void zpPatchTurnCwClicked() { zpTurnPatchSelection(false); }
-void zpPatchSubdivideClicked() { zpSubdividePatchSelection(); }
+/** The one Subdiv button serves both levels: patch selection -> 1->4, edge selection ->
+ *  the 1->2 split across each selected edge. */
+void zpPatchSubdivideClicked()
+{
+	if (g_PaintCtx.Paint && g_PaintCtx.Paint->SubObj == CPaintMouseListener::SubEdge)
+		zpSubdivideEdgeSelection();
+	else
+		zpSubdividePatchSelection();
+}
 void zpPatchWeldClicked() { zpWeldPatchSelection(0.1f); } // legacy default threshold
 void zpPatchAddQuadClicked() { zpAddQuadPatchSelection(); }
 

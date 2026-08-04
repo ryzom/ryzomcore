@@ -32,8 +32,15 @@
 	$link = NULL;
 	$page_name="stats_query.php";
 	$page_max = 50;
-	$dev_ip="192.168.1.169"; //ip WHERE sql error are displayed
-//	$private_network = "/192\.168\.1\./i"; //ip WHERE the cmd=view function works
+	// Access gate: REMOTE_ADDR must match $StatsPrivateNetwork (from
+	// login/config.php / config_user.php), or the request must carry a
+	// matching $StatsQuerySecret. Default network is the historical
+	// 192.168.1.* allowlist — override it on real deployments.
+	global $StatsPrivateNetwork, $StatsQuerySecret;
+	$private_network = (isset($StatsPrivateNetwork) && $StatsPrivateNetwork !== '')
+		? $StatsPrivateNetwork
+		: '/^192\\.168\\.1\\./';
+	$stats_query_secret = isset($StatsQuerySecret) ? (string)$StatsQuerySecret : '';
 
 
 	function toHMS($time)
@@ -72,37 +79,52 @@
 		return $ret;
 	}
 
-	//get the ip of the viewer
+	// Peer address only. HTTP_CLIENT_IP / X-Forwarded-For are set by the
+	// caller, so trusting them would let anyone claim a private address and
+	// open the detailed error path and the whole view.
 	function getIp()
 	{
-		if (getenv("HTTP_CLIENT_IP"))
-		{
-			$ip = getenv("HTTP_CLIENT_IP");
-		}
-		elseif(getenv("HTTP_X_FORWARDED_FOR"))
-		{
-			$ip = getenv("HTTP_X_FORWARDED_FOR");
-		}
-		else
-		{
-			$ip = getenv("REMOTE_ADDR");
-		}
-		return $ip;
+		if (!empty($_SERVER['REMOTE_ADDR']))
+			return $_SERVER['REMOTE_ADDR'];
+		$ip = getenv("REMOTE_ADDR");
+		return ($ip !== false && $ip !== '') ? $ip : '';
 	}
 
 
-	// if the player ip is the dev ip then the sql error is explain
-	function die2($debug_str)
+	// Detailed SQL errors only for addresses that would also get the view.
+	function stats_query_authorized()
 	{
-//		global $private_network;
-//		if ( preg_match($private_network, getIp()) )
-//		{
+		global $private_network, $stats_query_secret;
+		if ($stats_query_secret !== '')
+		{
+			$token = '';
+			if (isset($_GET['token']) && is_string($_GET['token']))
+				$token = $_GET['token'];
+			elseif (isset($_POST['token']) && is_string($_POST['token']))
+				$token = $_POST['token'];
+			elseif (isset($_SERVER['HTTP_X_STATS_TOKEN']) && is_string($_SERVER['HTTP_X_STATS_TOKEN']))
+				$token = $_SERVER['HTTP_X_STATS_TOKEN'];
+			if ($token !== '' && hash_equals($stats_query_secret, $token))
+				return true;
+		}
+		$ip = getIp();
+		if ($private_network !== '' && @preg_match($private_network, $ip))
+			return true;
+		return false;
+	}
+
+	// if the player ip is the dev ip then the sql error is explain
+	function die2($debug_str = "")
+	{
+		// the failing query and the mysql error text are only for us
+		if ( stats_query_authorized() )
+		{
 			die($debug_str);
-//		}
-//		else
-//		{
-//			die("GENERIC_ERROR");
-//		}
+		}
+		else
+		{
+			die("GENERIC_ERROR");
+		}
 	}
 
 	// get head or post infos return default if no valuees
@@ -115,12 +137,14 @@
 
 	$cmd = getPost("cmd", "view");
 
-	$show_dl=getPost("show_dl", "1");
-	$show_ddl=getPost("show_ddl", "1");
-	$show_du=getPost("show_du", "1");
-	$show_hdu=getPost("show_hdu", "1");
-	$show_hdu2=getPost("show_hdu2", "1");
-	$show_hddetails=getPost("show_hddetails", "0");
+	// all of these end up in the urls this page builds and in the date
+	// arithmetic below, so keep them numeric
+	$show_dl=(int)getPost("show_dl", "1");
+	$show_ddl=(int)getPost("show_ddl", "1");
+	$show_du=(int)getPost("show_du", "1");
+	$show_hdu=(int)getPost("show_hdu", "1");
+	$show_hdu2=(int)getPost("show_hdu2", "1");
+	$show_hddetails=(int)getPost("show_hddetails", "0");
 
 	function getHref()
 	{
@@ -141,9 +165,9 @@
 	// do a simple sql query return the result of the query
 	function getSimpleQueryResult($query, &$link)
 	{
-		$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: $query<br/>".mysql_error()."<br/>  ");
+		$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: $query<br/>".mysqli_error($link)."<br/>  ");
 		
-		if ( ($row = mysql_fetch_array($result)) )
+		if ( ($row = mysqli_fetch_array($result)) )
 		{
 			return $row["ret"];
 
@@ -165,34 +189,37 @@
 
 		if ($link == NULL)
 		{
-			$link = mysql_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+			$link = mysqli_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+			if (function_exists('nel_mysqli_set_charset'))
+				nel_mysqli_set_charset($link);
 			$newConnection = 1;
 
-			mysql_select_db ($StatsDBName, $link) or die2 (__FILE__. " " .__LINE__." can't access to the table dbname:$StatsDBName");
+			mysqli_select_db ($link, $StatsDBName) or die2 (__FILE__. " " .__LINE__." can't access to the table dbname:$StatsDBName");
 		}
 
 
-		$str = str_replace("'", "", $str);
-		$str = str_replace( '"', "", $str);
-
+		// Strip-quotes was not enough (backslash, multibyte, etc.); escape
+		// the same way stats.php already does for the same table.
+		$str = mysqli_real_escape_string($link, $str);
 
 		$query= "INSERT INTO `log` ( `log` )"
 			. "VALUES ("
 			. "'$str'"
 			. ")";
 
-		$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+		$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
 		if ($newConnection == 1)
 		{
-			mysql_close($link);
+			mysqli_close($link);
 			$link = NULL;
 		}
 
 	}
-	function err_callback($errno, $errmsg, $filename, $linenum, $vars)
+	// $vars optional: php 8 calls error handlers with four arguments
+	function err_callback($errno, $errmsg, $filename, $linenum, $vars = null)
 	{
-		echo "error: line $linenum, $errmsg <br/>";
-	//	debug($errmsg);
+		// Do not echo PHP errors to the client; they go to the log table.
+		debug("$filename $linenum $errmsg");
 	}
 
 	//extract infos FROM sessions
@@ -233,8 +260,8 @@
 					."AND install_users.user_id "
 					."IN ( SELECT sessions.user_id FROM sessions WHERE $condition2 )";
 
-				$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
-				if ( ($row = mysql_fetch_array($result)) ) 
+				$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+				if ( ($row = mysqli_fetch_array($result)) ) 
 				{ 
 
 					$ret["DU_P3"] = $row["DU_P3"];
@@ -283,8 +310,8 @@
 				. " FROM sessions"
 				. " WHERE $condition2";
 
-				$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
-				if ( ($row = mysql_fetch_array($result) ) )
+				$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+				if ( ($row = mysqli_fetch_array($result) ) )
 				{
 					$ret["all_session"] = $row["all_session"];
 					$ret["clean_start"] = $row["clean_start"];
@@ -474,15 +501,15 @@
 						 echo "<td><a href=\"".getHref()."&selected=$day\">".($i+1)."</a></td>";
 					}
 
-					echo "<td>".$row["DU_DL"]."</td>\n";
-					echo "<td>".$row["DU_IN"]."</td>\n";
-					echo "<td>".$row["DU_FI"]."</td>\n";
-					echo "<td>".$row["DU_AL"]."</td>\n";
-					echo "<td>".$row["DU_CS"]."</td>\n";
-					echo "<td>".$row["DU_AG"]."</td>\n";
-					echo "<td>".$row["DU_P1"]."</td>\n";
-					echo "<td>".$row["DU_P2"]."</td>\n";
-					echo "<td>".$row["DU_P3"]."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_DL"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_IN"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_FI"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_AL"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_CS"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_AG"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_P1"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_P2"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["DU_P3"], ENT_QUOTES)."</td>\n";
 					echo "</tr>\n";
 				}
 
@@ -509,9 +536,9 @@
 		$query = "SELECT COUNT(`session_id`) AS max"
 		.	" FROM `sessions`"
 		.	" WHERE $condition";
-		$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+		$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
 		$max_result = 0;
-		if ( ($row = mysql_fetch_array($result)) ) { $max_result = $row["max"];}
+		if ( ($row = mysqli_fetch_array($result)) ) { $max_result = $row["max"];}
 
 		//display sumary infos (if title clicked make apears or disapears the menu)
 		$old_value = $show_ddl;
@@ -539,9 +566,9 @@
 			.	"</tr>\n";
 
 			$query = "SELECT COUNT(`session_id`) AS max FROM `sessions` WHERE $condition";
-			$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+			$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
 			$max_result=0;
-			if ( ($row = mysql_fetch_array($result)) ) { $max_result = $row["max"]; }
+			if ( ($row = mysqli_fetch_array($result)) ) { $max_result = $row["max"]; }
 
 
 
@@ -550,27 +577,27 @@
 			 .	" WHERE $condition"
 			 .	" ORDER by `user_id` desc, `start_download` desc"
 			 .	" LIMIT ".($page_download * $page_max)." , ".$page_max;
-			$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+			$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
 
-			while ( ($row = mysql_fetch_array($result)) )
+			while ( ($row = mysqli_fetch_array($result)) )
 			{
 				echo "<tr>";
 				echo "<td>"
 				.$row["user_id"]
 				."</td>\n";
-				echo "<td>".$row["ip"]."</td>\n";
-				echo "<td>".$row["lang"]."</td>\n";
-				echo "<td>".$row["package"]."</td>\n";
-				echo "<td>".$row["protocol"]."</td>\n";
-				echo "<td>".$row["size_download"]."</td>\n";
-				echo "<td>".$row["size_install"]."</td>\n";
-				echo "<td>".$row["start_download"]."</td>\n";
-				echo "<td>".$row["start_install"]."</td>\n";
-				echo "<td>".$row["stop_install"]."</td>\n";
-				echo "<td>" .	toHMS(strtotime($row["stop_download"]) - strtotime($row["start_download"]) ) ."</td>\n";
-				echo "<td>".$row["percent_download"]."</td>\n";
-				echo "<td>".$row["percent_install"]."</td>\n";
-				echo "<td>".$row["previous_download"]."</td>\n";
+				echo "<td>".htmlspecialchars($row["ip"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["lang"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["package"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["protocol"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["size_download"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["size_install"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["start_download"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["start_install"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["stop_install"], ENT_QUOTES)."</td>\n";
+				echo "<td>" .	toHMS(strtotime(htmlspecialchars($row["stop_download"], ENT_QUOTES)) - strtotime(htmlspecialchars($row["start_download"], ENT_QUOTES)) ) ."</td>\n";
+				echo "<td>".htmlspecialchars($row["percent_download"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["percent_install"], ENT_QUOTES)."</td>\n";
+				echo "<td>".htmlspecialchars($row["previous_download"], ENT_QUOTES)."</td>\n";
 				echo "</tr>\n";
 			}
 			echo "</table>\n";
@@ -597,8 +624,8 @@
 			.	" WHERE install_users.user_id='" . $id . "' AND install_users.user_id = sessions.user_id AND $condition"
 			.	" ORDER BY sessions.session_id DESC";
 
-		$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
-		if ( ($row = mysql_fetch_array($result)) )
+		$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+		if ( ($row = mysqli_fetch_array($result)) )
 		{
 			$ret["session_id"] = $row["session_id"];
 			$ret["time"] = strtotime($row["stop_download"]) -  strtotime($row["start_download"]) ;
@@ -628,9 +655,9 @@
 	
 //		$query = "SELECT COUNT(install_users.user_id) AS max FROM install_users WHERE $condition2 AND install_users.user_id in (SELECT DISTINCT(sessions.user_id) from sessions where $condition)";
 		$query = "SELECT COUNT(DISTINCT(sessions.user_id)) AS max FROM  `install_users`,`sessions` WHERE $condition2 AND install_users.user_id = sessions.user_id AND $condition";
-		$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+		$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
 		$max_result = 0;
-		if ( ($row = mysql_fetch_array($result)) ) { $max_result = $row["max"];}
+		if ( ($row = mysqli_fetch_array($result)) ) { $max_result = $row["max"];}
 
 		if ($install_state==1)
 		{
@@ -704,33 +731,33 @@
 			.	" GROUP by `sessions`.`user_id`"
 			.	" ORDER by `sessions`.`user_id` desc"
 			.	" LIMIT ".($nbpages * $page_max)." , ".$page_max;
-			$result = mysql_query ($query, $link) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
+			$result = mysqli_query ($link, $query) or die2 (__FILE__. " " .__LINE__." can't execute the query: ".$query);
 
 
-			while ( ($row = mysql_fetch_array($result)) )
+			while ( ($row = mysqli_fetch_array($result)) )
 			{
 				$ret = lastSession($row["user_id"], $condition, $link);
 				echo "<tr>";
-				echo "<td>".$row["user_id"]."</td>\n";
+				echo "<td>".htmlspecialchars($row["user_id"], ENT_QUOTES)."</td>\n";
 				if ($show_hddetails == 0)
 				{
-					echo "<td>".$row["first_install"]."</td>\n";
-					echo "<td>".$row["last_install"]."</td>\n";
-					echo "<td>".$row["install_count2"]."</td>\n";
-					echo "<td>".toHMS($row["waiting_time"])."</td>\n";
+					echo "<td>".htmlspecialchars($row["first_install"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["last_install"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["install_count2"], ENT_QUOTES)."</td>\n";
+					echo "<td>".toHMS(htmlspecialchars($row["waiting_time"], ENT_QUOTES))."</td>\n";
 					echo "<td>".toHMS($ret["time"])."</td>\n";
 				}
 				if ($install_state) { echo "<td>".$ret["percent"]."</td>\n"; }
-				echo "<td>".$row["memory"]."</td>\n";
+				echo "<td>".htmlspecialchars($row["memory"], ENT_QUOTES)."</td>\n";
 				if ($show_hddetails == 1)
 				{
-					echo "<td>".$row["os"]."</td>\n";
-					echo "<td>".$row["proc"]."</td>\n";
+					echo "<td>".htmlspecialchars($row["os"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["proc"], ENT_QUOTES)."</td>\n";
 
-					echo "<td>".$row["video_card"]."</td>\n";
-					echo "<td>".$row["driver_version"]."</td>\n";
+					echo "<td>".htmlspecialchars($row["video_card"], ENT_QUOTES)."</td>\n";
+					echo "<td>".htmlspecialchars($row["driver_version"], ENT_QUOTES)."</td>\n";
 				}
-				echo "<td>".$row["state"]."</td>\n";
+				echo "<td>".htmlspecialchars($row["state"], ENT_QUOTES)."</td>\n";
 				echo "</tr>\n";
 			}
 			echo "</table>\n";
@@ -795,12 +822,15 @@
 		$date = date('Y-m-d H:i:s', time());
 		$ip = getIp();
 		$log = getenv("query_string");
-		$link = mysql_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." can't connect to database host:$StatsDBHost user:$StatsDBUserName");
-		mysql_select_db ($StatsDBName, $link) or die2 (__FILE__. " " .__LINE__." can't access to the table dbname:$StatsDBName");
+		$link = mysqli_connect($StatsDBHost, $StatsDBUserName, $StatsDBPassword, NULL, $DBPort) or die2 (__FILE__. " " .__LINE__." can't connect to database host:$StatsDBHost user:$StatsDBUserName");
+		if (function_exists('nel_mysqli_set_charset'))
+			nel_mysqli_set_charset($link);
+		mysqli_select_db ($link, $StatsDBName) or die2 (__FILE__. " " .__LINE__." can't access to the table dbname:$StatsDBName");
 
 
-		//verify passwd AND ip is private
-//		if (preg_match($private_network, getIp()) )
+		// verify network allowlist and/or shared secret
+		if (!stats_query_authorized())
+			die("GENERIC_ERROR");
 		{
 			//xhtml header + style
 			echo '<!doctype html public "-//w3c//dtd html 4.01 transitional//en>'."\n"
@@ -857,13 +887,13 @@
 
 			//display summary stat by day for current month
 
-			$selected = getPost("selected", strtotime(date('Y-m-d', time())));
-			$page_download = getPost("page_download", "1");
+			$selected = (int)getPost("selected", strtotime(date('Y-m-d', time())));
+			$page_download = (int)getPost("page_download", "1");
 			$page_download = $page_download -1;
 			if ($page_download < 0) { $page_download = 0;}
-			$page_users = getPost("page_users", "1");
+			$page_users = (int)getPost("page_users", "1");
 			$page_users = $page_users -1;
-			$page_users2 = getPost("page_users2", "1");
+			$page_users2 = (int)getPost("page_users2", "1");
 			$page_users2 = $page_users2 -1;
 			if ($page_users < 0) { $page_users = 0;}
 			if ($page_users2 < 0) { $page_users2 = 0;}
@@ -875,7 +905,7 @@
 			$date_last_int = strtotime($date_last);
 			$nbday = round( ($date_last_int +1 - $date_first_int ) / (24*3600));
 
-			$display = getPost("display", "0");
+			$display = (int)getPost("display", "0");
 
 			$date = getdate($selected);
 			// display server time
@@ -922,7 +952,7 @@
 			echo "<br/><br/>computed in " . ( $dt2["sec"] - $dt["sec"] +  ($dt2["usec"] - $dt["usec"]) / 1000000  ). "s";
 			echo "</body>\n</html>\n";
 	
-			mysql_close($link);
+			mysqli_close($link);
 			unset($link);
 
 		} //end check ip

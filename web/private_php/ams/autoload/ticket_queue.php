@@ -81,7 +81,21 @@ class Ticket_Queue{
     * @param $how specifies if the tickets should be or shouldn't be assigned/forwarded to the group/user selected.
     */
     public function createQueue($userid, $groupid, $what, $how, $who){
-        
+        // $what / $how / $who only select fixed SQL fragments, never as values,
+        // but an unknown combination used to leave $selectfrom / $assign
+        // undefined and still run a half-built query. Refuse anything outside
+        // the known sets.
+        $allowed_who = array('user', 'support_group');
+        $allowed_how = array('both', 'assigned', 'not_assigned');
+        $allowed_what = array('waiting_for_support', 'waiting_for_users', 'closed');
+        if (!in_array($who, $allowed_who, true)
+            || !in_array($how, $allowed_how, true)
+            || !in_array($what, $allowed_what, true)) {
+            $this->query = 'SELECT * FROM `ticket` WHERE 0';
+            $this->params = array();
+            return;
+        }
+
         if($who == "user"){
             $selectfrom = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User";
             if ($how == "both"){
@@ -91,7 +105,7 @@ class Ticket_Queue{
             }else if ($how == "not_assigned"){
                 $assign = "(tu.TUserId != :id OR a.Ticket IS NULL)";
             }
-        }else if ($who == "support_group"){
+        }else {
             $selectfrom = "SELECT * FROM `ticket` t LEFT JOIN `assigned` a ON t.TId = a.Ticket LEFT JOIN `ticket_user` tu ON tu.TUserId = a.User LEFT JOIN `forwarded` f ON t.TId = f.Ticket";
             if ($how == "both"){
                 $assign = "";
@@ -100,39 +114,30 @@ class Ticket_Queue{
             }else if ($how == "not_assigned"){
                 $assign = "(f.Group != :id  OR f.Ticket IS NULL)" ;
             }
-        
         }
         
         if ($what == "waiting_for_support"){
             $status = "t.Status = 1";
         }else if ($what == "waiting_for_users"){
             $status = "t.Status = 0";
-        }else if ($what == "closed"){
+        }else {
             $status = "t.Status = 3";
         }
         
         if ($assign == "") {
-            $query = $selectfrom;
-            if(isset($status)){
-                $query = $query . " WHERE " . $status;
-            }
+            $query = $selectfrom . " WHERE " . $status;
         } else {
-            $query = $selectfrom ." WHERE " . $assign;
-            if(isset($status)){
-                $query = $query . " AND " . $status;
-            }
+            $query = $selectfrom ." WHERE " . $assign . " AND " . $status;
         }
-        
 
         if($who == "user"){
             $params = array('id' => $userid);
-        }else if ($who == "support_group"){
+        }else {
             $params = array('id' => $groupid);
-        }  
+        }
         
         $this->query = $query;
         $this->params = $params;
-        //print_r($this);
     }
     
     

@@ -253,6 +253,41 @@ static bool zpCornerSelectedAnyNode(const SPaintZone &pz, uint16 vert)
 	return false;
 }
 
+/** The drag offset of an effectively-moving handle - selected through this node, or
+ *  through a sibling node of the same object (the drag then lives in that node's
+ *  displayed space and converts through object space). False when it is not moving. */
+static bool zpTanMovingOffset(const SPaintZone &pz, uint16 vecIdx, NLMISC::CVector &off)
+{
+	if (zpTanSelectedEffective(pz, vecIdx))
+	{
+		float wp[3];
+		if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
+			off = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		else
+			off = s_DragDelta;
+		return true;
+	}
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		const SPaintZone &other = zones[z];
+		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
+			continue;
+		if (!zpTanSelectedEffective(other, vecIdx))
+			continue;
+		float wp[3];
+		if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
+			continue;
+		const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
+		const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
+		off = zpXformDelta(od, pz.DisplayTM);
+		return true;
+	}
+	return false;
+}
+
 /**
  * Preview offset for a HANDLE.
  *
@@ -308,30 +343,39 @@ NLMISC::CVector zpTanOffset(const SPaintZone &pz, uint16 vecIdx)
 	if (!s_Dragging || !g_PaintCtx.Zones)
 		return kNoOffset;
 	// EFFECTIVE membership: Lock Handles expands the selection over the owner group, and
-	// the same predicate drives the commit and the live push.
-	if (zpTanSelectedEffective(pz, vecIdx))
+	// the same predicate drives the commit and the live push - selected through this node
+	// or through a sibling node of the same object.
 	{
-		float wp[3];
-		if (zpPatchTangentWorld(pz.ZoneId, vecIdx, wp))
-			return zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
-		return s_DragDelta;
+		NLMISC::CVector off;
+		if (zpTanMovingOffset(pz, vecIdx, off))
+			return off;
 	}
-	// Selected through another node of the same object: the drag is in that node's displayed
-	// space, so it comes back to object space through it and out again through this one.
-	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
-	for (uint z = 0; z < zones.size(); ++z)
+	// Coplanar continuity: an UNMOVING handle of a coplanar vertex follows the plane its
+	// moving siblings tilt - the commit writes exactly this through the same helper
+	// (zpCoplanarSiblingReaim), the parity discipline.
+	if (zpHandleMode() && owner != (uint16)0xffff && zpVertCoplanarConstrained(pz, owner))
 	{
-		const SPaintZone &other = zones[z];
-		if (other.Node != pz.Node || other.ZoneId == pz.ZoneId)
-			continue;
-		if (!zpTanSelectedEffective(other, vecIdx))
-			continue;
-		float wp[3];
-		if (!zpPatchTangentWorld(other.ZoneId, vecIdx, wp))
-			continue;
-		const NLMISC::CVector d = zpDragOffsetAt(NLMISC::CVector(wp[0], wp[1], wp[2]));
-		const NLMISC::CVector od = zpXformDelta(d, MAXMATH::inverseM3(other.DisplayTM));
-		return zpXformDelta(od, pz.DisplayTM);
+		std::vector<uint16> att;
+		zpVertexTangents(pz, owner, att);
+		std::vector<uint16> movedVecs;
+		std::vector<NLMISC::CVector> movedOffs;
+		for (size_t k = 0; k < att.size(); ++k)
+		{
+			if (att[k] == vecIdx)
+				continue;
+			NLMISC::CVector o;
+			if (zpTanMovingOffset(pz, att[k], o))
+			{
+				movedVecs.push_back(att[k]);
+				movedOffs.push_back(o);
+			}
+		}
+		if (!movedVecs.empty())
+		{
+			NLMISC::CVector off;
+			if (zpCoplanarSiblingReaim(pz, vecIdx, owner, movedVecs, movedOffs, off))
+				return off;
+		}
 	}
 	return kNoOffset;
 }
@@ -370,6 +414,8 @@ static void zpCollectCageLines(const SPaintZone &pz, int subObj,
 	const NLMISC::CVector liftV(0.f, 0.f, kPatchLift);
 	for (uint p = 0; p < pz.Patches.size(); ++p)
 	{
+		if (zpPatchIsHidden(pz.ZoneId, p))
+			continue; // hidden: no cage (the landscape still renders the surface)
 		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
 		const NL3D::CPatchInfo &cpi = pz.Patches[p];
 		// At patch level the whole cell lights up, so its four chains count as selected
@@ -422,6 +468,9 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	// out would leave the other three looking freely movable, which they are not.)
 	static const NLMISC::CRGBA kVertBoundColor(0, 0, 0, 255);
 	static const NLMISC::CRGBA kTanColor(80, 230, 120, 255); // handle green
+	// MANUAL interiors are real editable points; violet keeps the
+	// green/white/black/red language clean.
+	static const NLMISC::CRGBA kIntColor(200, 120, 255, 255);
 
 	const NLMISC::CMatrix viewMat = camera->getMatrix().inverted();
 	const NL3D::CFrustum &fr = camera->getFrustum();
@@ -450,6 +499,10 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	std::set<uint16> seen;
 	for (uint p = 0; p < pz.Patches.size(); ++p)
 	{
+		// Hidden patches contribute no markers; a vertex shared with a visible patch is
+		// still reached through that one (the loop skips BEFORE the seen-set).
+		if (zpPatchIsHidden(pz.ZoneId, p))
+			continue;
 		const NL3D::CPatchInfo &pi = pz.Patches[p];
 		for (uint c = 0; c < 4; ++c)
 		{
@@ -498,6 +551,8 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 	std::set<uint16> seenVec;
 	for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
 	{
+		if (zpPatchIsHidden(pz.ZoneId, p))
+			continue;
 		const NL3D::CPatchInfo &pi = pz.Patches[p];
 		const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
 		for (uint j = 0; j < 8; ++j)
@@ -524,6 +579,34 @@ void zpDrawPatchLattice(NL3D::IDriver *driver, NL3D::CCamera *camera,
 			NL3D::CDRU::drawQuad((hx - tanHalfPx) / (float)winW, (hy - tanHalfPx) / (float)winH,
 			                     (hx + tanHalfPx) / (float)winW, (hy + tanHalfPx) / (float)winH,
 			                     *driver, hcol, NL3D::CViewport());
+		}
+		// MANUAL interiors (PATCH_AUTO clear), the mA2 editing surface: drawn for selected
+		// corners only, exactly the handle discipline - auto interiors are derived and
+		// never appear.
+		if (!(pz.Ep.Pm.Patches[p].Flags & 1))
+		{
+			const PIPELINE::MAX::NELPATCH::SPmPatch &pmp = pz.Ep.Pm.Patches[p];
+			for (uint j = 0; j < 4; ++j)
+			{
+				if (!g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[j])))
+					continue;
+				if (pmp.Interior[j] < 0)
+					continue;
+				const uint16 vi = (uint16)pmp.Interior[j];
+				if (!seenVec.insert(vi).second)
+					continue;
+				NLMISC::CVector v;
+				if (!zpProjectLifted(viewMat, fr, pi.Patch.Interiors[j] + zpTanOffset(pz, vi),
+				                     kPatchLift, v))
+					continue;
+				const bool sel = g_PatchTanSel.count(TPatchVertId(pz.ZoneId, vi)) != 0;
+				const NLMISC::CRGBA &icol = sel ? kVertSelColor : kIntColor;
+				const float hx = floorf(v.x * (float)winW + 0.5f);
+				const float hy = floorf(v.y * (float)winH + 0.5f);
+				NL3D::CDRU::drawQuad((hx - tanHalfPx) / (float)winW, (hy - tanHalfPx) / (float)winH,
+				                     (hx + tanHalfPx) / (float)winW, (hy + tanHalfPx) / (float)winH,
+				                     *driver, icol, NL3D::CViewport());
+			}
 		}
 	}
 }
@@ -1030,6 +1113,8 @@ bool zpPickPatchVertex(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, f
 		std::set<uint16> seen;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue; // what is not drawn cannot be picked
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			for (uint c = 0; c < 4; ++c)
 			{
@@ -1081,6 +1166,8 @@ bool zpPickPatchEdge(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, flo
 			continue;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			const NL3D::CBezierPatch &bp = pi.Patch;
 			for (uint e = 0; e < 4; ++e)
@@ -1136,6 +1223,8 @@ bool zpPickPatchFace(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, flo
 			continue;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
 			float qx[4], qy[4];
 			bool ok = true;
@@ -1226,6 +1315,8 @@ static void zpCollectPatchArrows(std::vector<NLMISC::CLine> &out)
 			continue;
 		for (uint p = 0; p < pz.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NLMISC::CVector *V = pz.Patches[p].Patch.Vertices;
 			// Bilinear frame point: u toward ring V3, v toward ring V1; base at v=0.70,
 			// tip at v=0.30 - the MINUS v the additive arrows agree with.
@@ -1333,6 +1424,8 @@ bool zpPickPatchTangent(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 		std::set<uint16> seen;
 		for (uint p = 0; p < pz.Patches.size() && p < pz.Ep.Pm.Patches.size(); ++p)
 		{
+			if (zpPatchIsHidden(pz.ZoneId, p))
+				continue;
 			const NL3D::CPatchInfo &pi = pz.Patches[p];
 			const PIPELINE::MAX::NELPATCH::SPmPatch &pp = pz.Ep.Pm.Patches[p];
 			for (uint j = 0; j < 8; ++j)
@@ -1354,6 +1447,27 @@ bool zpPickPatchTangent(NL3D::CCamera *camera, NL3D::IDriver *driver, float mx, 
 				vecOut = (uint16)pp.Vec[j];
 				found = true;
 			}
+			// MANUAL interiors pick exactly like handles (auto ones are derived and are
+			// not offered - they are not drawn either).
+			if (!(pp.Flags & 1))
+				for (uint j = 0; j < 4; ++j)
+				{
+					if (!g_PatchVertSel.count(TPatchVertId(pz.ZoneId, pi.BaseVertices[j])))
+						continue;
+					if (pp.Interior[j] < 0 || !seen.insert((uint16)pp.Interior[j]).second)
+						continue;
+					NLMISC::CVector v;
+					if (!zpProjectLifted(viewMat, fr, pi.Patch.Interiors[j], kPatchLift, v))
+						continue;
+					const float dx = (v.x - mx) * aspect, dy = v.y - my;
+					const float d = sqrtf(dx * dx + dy * dy);
+					if (d >= best)
+						continue;
+					best = d;
+					zoneOut = pz.ZoneId;
+					vecOut = (uint16)pp.Interior[j];
+					found = true;
+				}
 		}
 	}
 	return found;

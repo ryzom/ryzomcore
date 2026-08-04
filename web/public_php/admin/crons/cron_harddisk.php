@@ -1,12 +1,23 @@
 <?php
 
+	// Runs aes.execScript on every domain that has HD checks enabled. Over
+	// http that is a free "talk to every AES" button; only allow CLI (the
+	// companion .sh is how this is meant to be scheduled).
+	if (PHP_SAPI !== 'cli')
+	{
+		header('HTTP/1.1 403 Forbidden');
+		echo "Access denied\n";
+		return;
+	}
+
     ob_start();
     set_time_limit(180); // 3 min time out
 
     define('NELTOOL_NO_USER_NEEDED',    true);
     define('NELTOOL_CRON_DEBUG',        false);
 
-	if ($_GET['dbg']) define('NELTOOL_CRON_DEBUG', true);
+	// dbg only makes sense from the CLI flags/env, not a query string
+	if (getenv('NELTOOL_CRON_DEBUG')) define('NELTOOL_CRON_DEBUG', true);
 
 	if (defined('NELTOOL_CRON_DEBUG')) echo "Checking HDs ... \n";
 

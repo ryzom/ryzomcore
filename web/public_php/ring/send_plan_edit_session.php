@@ -17,7 +17,10 @@
 		die;
 	}
 
-	planEditSession($charId, $domainId, $_POST["session_type"], $_POST["title"], $_POST["description"]);
+	planEditSession($charId, $domainId,
+		isset($_POST["session_type"]) ? $_POST["session_type"] : "",
+		isset($_POST["title"]) ? strval($_POST["title"]) : "",
+		isset($_POST["description"]) ? strval($_POST["description"]) : "");
 	
 	echo "Finish<br>";
 	echo '<a href="web_start.php">Return to start menu</a>';

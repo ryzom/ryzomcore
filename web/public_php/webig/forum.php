@@ -31,6 +31,10 @@
 	global $forum;
 	global $page;
 
+	// $page becomes part of the file name below
+	if (isset($page) && $page != "" && !safe_index_param($page))
+		die("ERROR: Bad parameters");
+
 	check_character_belongs_to_guild($user_login, $forum);
 
 	$forum_dir = build_user_dir($forum, $shard);
@@ -41,6 +45,11 @@
 		include_once('thread_utils.php');
 		build_forum_page($forum);
 	}
+
+	// a page number past the last page still has no file after the rebuild,
+	// and fopen(false)/fread(false) is fatal instead of a blank page
+	if (!file_exists($fname))
+		die("INTERNAL ERROR 10");
 
 	$f = fopen($fname, 'r');
 	echo fread($f, filesize($fname));

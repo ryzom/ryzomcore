@@ -39,6 +39,9 @@
 		nt_auth_set_session_var('view_shard_id', $view_shard_id);
 	}
 
+	if (!tool_main_check_user_domain($view_domain_id))	$view_domain_id = null;
+	if (!tool_main_check_user_shard($view_shard_id))	$view_shard_id	= null;
+
 	$tpl->assign('tool_domain_list',		$nel_user['access']['domains']);
 	$tpl->assign('tool_domain_selected',	$view_domain_id);
 
@@ -80,14 +83,21 @@
 			$view_file_name = base64_decode($NELTOOL['GET_VARS']['fileview']);
 			$tpl->assign('tool_file_list',	$tool_las_file_list);
 
+			// only open a name that is already on the directory listing we
+			// built ourselves; anything else would follow a caller-chosen path
 			$view_file_data = tool_las_check_for_file($tool_las_file_list, $view_file_name);
+			if ($view_file_data === null)
+			{
+				nt_common_redirect('tool_log_analyser.php');
+				exit();
+			}
 
 			if (isset($NELTOOL['GET_VARS']['downloadraw']))
 			{
 				if ($fp = fopen($view_file_data['path'] . $view_file_data['name'], 'r'))
 				{
 					header("Content-type: text/plain");
-					header("Content-Disposition: attachment; filename=las_raw_". $view_file_data['name']);
+					header("Content-Disposition: attachment; filename=las_raw_". tool_las_safe_download_name($view_file_data['name']));
 					header("Pragma: no-cache");
 					header("Expires: 0");
 					fpassthru($fp);
@@ -175,7 +185,7 @@
 					if (isset($NELTOOL['POST_VARS']['services_las']))
 					{
 						$tool_services_las = $NELTOOL['POST_VARS']['services_las'];
-						$tpl->assign('tool_post_data',	base64_encode(serialize($NELTOOL['POST_VARS'])));
+						$tpl->assign('tool_post_data',	nt_pack_request_data($NELTOOL['POST_VARS']));
 
 						$service_search_database	= $NELTOOL['POST_VARS']['service_search_database'];
 						$service_search_file_name	= $NELTOOL['POST_VARS']['service_search_file_name'];
@@ -189,6 +199,19 @@
 
 						$file_name_error_msg 	= null;
 						$start_date_error_msg	= null;
+						// Filename, dates and database id all go into an AES
+						// service command as separate words. Spaces or path
+						// separators in any of them reframe the argument list.
+						if (!is_string($service_search_file_name) || !preg_match('/^[A-Za-z0-9._-]{1,64}$/', $service_search_file_name))
+							$file_name_error_msg = "Filename must be a plain name (letters, digits, ._- only).";
+						if (!is_string($service_search_start_date) || !preg_match('/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$/', $service_search_start_date))
+							$start_date_error_msg = "Start date must look like YYYY-MM-DD.";
+						if ($service_search_end_date !== '' && (!is_string($service_search_end_date) || !preg_match('/^\d{4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2})?)?$/', $service_search_end_date)))
+							$start_date_error_msg = "End date must look like YYYY-MM-DD.";
+						if ($service_search_database !== '0' && $service_search_database !== '1' && $service_search_database !== 0 && $service_search_database !== 1)
+							$file_name_error_msg = "Invalid database selection.";
+						else
+							$service_search_database = (int)$service_search_database;
 
 						switch ($tool_services_las)
 						{
@@ -260,12 +283,16 @@
 								if (isset($NELTOOL['POST_VARS']['service_text']) && !$file_name_error_msg && !$start_date_error_msg)
 								{
 									$service_text = trim(stripslashes(html_entity_decode($NELTOOL['POST_VARS']['service_text'], ENT_QUOTES)));
-									$tpl->assign('tool_form_service_text', htmlentities($service_text,ENT_QUOTES));
+									$tpl->assign('tool_form_service_text', $service_text); // the template escapes it
 
+									// text rides inside a quoted AES argument;
+									// addslashes is not enough against a quote
+									// that leaves the string and a second command
+									$service_text = tool_main_frame_quoted_arg($service_text, 256);
 									if ($service_text != '')
 									{
 										$service_command = 'executeToFile '. $AS_LAS_LocalPath . $service_search_file_name ;
-										$service_command .= ' searchString '. $service_search_database .' "'. addslashes($service_text) .'" ';
+										$service_command .= ' searchString '. $service_search_database .' "'. $service_text .'" ';
 										$service_command .= $service_search_start_date;
 										if ($service_search_end_date != '')	$service_command .= ' '. $service_search_end_date;
 
@@ -297,6 +324,15 @@
 
 							case 'execute':
 
+								// Free-form AES execute is the same power as the
+								// main panel; require the same application right
+								// so tool_las alone is not a privilege escalation.
+								if (!tool_admin_applications_check('tool_main_execute'))
+								{
+									nt_common_add_debug('LAS free execute denied: missing tool_main_execute');
+									break;
+								}
+
 								if (isset($NELTOOL['POST_VARS']['service_command']))
 								{
 									$service_command = trim(stripslashes(html_entity_decode($NELTOOL['POST_VARS']['service_command'], ENT_QUOTES)));
@@ -318,7 +354,7 @@
 											}
 											else
 											{
-												$tpl->assign('tool_execute_command', 	htmlentities($service_command, ENT_QUOTES));
+												$tpl->assign('tool_execute_command', 	$service_command); // the template escapes it
 											}
 										}
 									}

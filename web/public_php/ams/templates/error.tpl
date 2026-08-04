@@ -69,7 +69,7 @@
 			{$error_code}
 		</p>
                 {if $error_code eq "404"}
-                    <p class="not-found">{$title404}</p>
+                    <p class="not-found">{$title404 nofilter}</p>
                     <div class="clear"></div>
                     <div class="content">
                     {$error_message404}

@@ -140,11 +140,21 @@ struct SPaintUIBridge
 	void (*moveToZoneDir)(int dir); // scene-menu compass, 0=N..7=NW
 	void (*weldTargetToggle)(); // arm/disarm the target-weld drag mode
 	void (*patchWeldThreshold)(float distance); // weld dialog OK
-	void (*patchExtrude)(float dz); // extrude dialog OK / shift-drag commit
+	void (*patchExtrude)(float dz); // shift-drag commit (Z-constrained)
+	void (*patchExtrudeEx)(float h, float outline, bool local); // extrude dialog OK
 	void (*patchFilterVertsToggle)(); // Selection block: pick filter checkboxes
 	void (*patchFilterVecsToggle)();
 	void (*patchLockHandlesToggle)();
 	void (*arrowsToggle)();          // orientation arrows (tile additive layer + patch overlay)
+	void (*patchVertCoplanar)(int on); // scene-menu vertex type pair (1 coplanar, 0 corner)
+	void (*patchInteriorMode)(int on); // scene-menu interior pair (1 auto, 0 manual+bake)
+	void (*patchHide)();             // hide the current level's selection (session-only)
+	void (*patchUnhideAll)();
+	void (*patchSubdivPropToggle)(); // edge-subdivide Propagate checkbox
+	void (*patchDetachCopyToggle)(); // Detach's Copy checkbox
+	/** Reset paint (mA8): target resolution for the confirm modal, then the bare op. */
+	bool (*resetPaintTarget)(uint &zoneOut, std::string &labelOut);
+	void (*resetPaint)(uint zoneId);
 	void (*patchSmGroup)(int bit);   // Surface Properties: 32-button grid (tri-state click)
 	void (*patchSmGroupClear)();     // Clear All
 	void (*patchTessDelta)(int axis, int d); // 0 = U, 1 = V; +-1 steps, absolute-set apply
@@ -173,6 +183,13 @@ struct SPaintUIBridge
 	bool WeldTargetArmed; // target-weld command mode (panel Target toggle pushed state)
 	float WeldThreshold;  // last-used weld distance (seeds the dialog)
 	float ExtrudeHeight;  // last-used extrude height (seeds the dialog)
+	float ExtrudeOutline; // last-used bevel outline (seeds the dialog)
+	bool ExtrudeLocal;    // last-used normal mode (seeds the radio pair)
+	int VertCoplanar; // vertex selection's continuity type: 0 corner, 1 coplanar, 2 mixed/empty
+	int PatchAuto;    // face selection's interior mode: 0 manual, 1 auto, 2 mixed/empty
+	uint HiddenCount; // session hide set size (freezes Unhide All at 0)
+	bool SubdivPropagate; // edge-subdivide strip walk toggle
+	bool DetachCopy;      // Detach clones instead of splitting
 	bool FilterVerts, FilterVecs; // vertex-level pick filters (both off is impossible)
 	bool LockHandles;             // a handle move takes the corner's other handles along
 	bool ShowArrows;              // orientation arrows toggle state
@@ -233,91 +250,35 @@ struct SPaintUIBridge
 	char PropStatus[96]; // "read-only" / last edit
 
 	SPaintUIBridge()
-		: selectMode(nullptr)
-	    , selectSubObject(nullptr)
-	    , selectTileSetDelta(nullptr)
-	    , selectTileSetAbs(nullptr)
-	    ,
-		  toggleTileSize(nullptr)
-	    ,
-		  brushSizeDelta(nullptr)
-	    , groupDelta(nullptr)
-	    , toggleLockBorders(nullptr)
-	    ,
-		  undo(nullptr)
-	    , redo(nullptr)
-	    , fill(nullptr)
-	    , save(nullptr)
-	    , saveTo(nullptr)
-	    , saveOverwrite(nullptr)
-	    ,
-		  saveFileOverwrite(nullptr)
-	    , saveFileCopy(nullptr)
-	    , fileDir(nullptr)
-	    ,
-		  seasonNext(nullptr)
-	    , seasonSelect(nullptr)
-	    , seasonMenuFill(nullptr)
-	    ,
-		  colorRadiusDelta(nullptr)
-	    , hardnessDelta(nullptr)
-	    , opacityDelta(nullptr)
-	    ,
-		  cycleBrushMask(nullptr)
-	    , toggleMaskMode(nullptr)
-	    , displaceIndexDelta(nullptr)
-	    ,
-		  displaceIndexAbs(nullptr)
-	    , togglePalette(nullptr)
-	    , toggleBoard(nullptr)
-	    , setBrushColor(nullptr)
-	    ,
-		  propRotateDelta(nullptr)
-	    , propToggleSymmetry(nullptr)
-	    , propTogglePassable(nullptr)
-	    ,
-		  propToggleUseBBox(nullptr)
-	    ,
-		  patchBind(nullptr)
-	    , patchUnbind(nullptr)
-	    , patchNoSmooth(nullptr)
-	    , patchDelete(nullptr)
-	    ,
-		  patchTurnCcw(nullptr)
-	    , patchTurnCw(nullptr)
-	    , patchSubdivide(nullptr)
-	    , patchWeld(nullptr)
-	    , patchAddQuad(nullptr)
-	    ,
-		  patchDetach(nullptr)
-	    , patchElement(nullptr)
-	    , moveToZoneDir(nullptr)
-	    , weldTargetToggle(nullptr)
-	    ,
-		  patchWeldThreshold(nullptr)
-	    , patchExtrude(nullptr)
-	    ,
-		  patchFilterVertsToggle(nullptr)
-	    , patchFilterVecsToggle(nullptr)
-	    , patchLockHandlesToggle(nullptr)
-	    ,
-		  arrowsToggle(nullptr)
-	    ,
-		  patchSmGroup(nullptr)
-	    , patchSmGroupClear(nullptr)
-	    , patchTessDelta(nullptr)
-	    , patchBalance(nullptr)
-	    ,
-		  setTileSize256(nullptr)
-	    , setHardnessAbs(nullptr)
-	    , setOpacityAbs(nullptr)
-	    ,
-		  setColorRadiusAbs(nullptr)
-	    ,
+		: selectMode(NULL), selectSubObject(NULL), selectTileSetDelta(NULL), selectTileSetAbs(NULL),
+		  toggleTileSize(NULL),
+		  brushSizeDelta(NULL), groupDelta(NULL), toggleLockBorders(NULL),
+		  undo(NULL), redo(NULL), fill(NULL), save(NULL), saveTo(NULL), saveOverwrite(NULL),
+		  saveFileOverwrite(NULL), saveFileCopy(NULL), fileDir(NULL),
+		  seasonNext(NULL), seasonSelect(NULL), seasonMenuFill(NULL),
+		  colorRadiusDelta(NULL), hardnessDelta(NULL), opacityDelta(NULL),
+		  cycleBrushMask(NULL), toggleMaskMode(NULL), displaceIndexDelta(NULL),
+		  displaceIndexAbs(NULL), togglePalette(NULL), toggleBoard(NULL), setBrushColor(NULL),
+		  propRotateDelta(NULL), propToggleSymmetry(NULL), propTogglePassable(NULL),
+		  propToggleUseBBox(NULL),
+		  patchBind(NULL), patchUnbind(NULL), patchNoSmooth(NULL), patchDelete(NULL),
+		  patchTurnCcw(NULL), patchTurnCw(NULL), patchSubdivide(NULL), patchWeld(NULL), patchAddQuad(NULL),
+		  patchDetach(NULL), patchElement(NULL), moveToZoneDir(NULL), weldTargetToggle(NULL),
+		  patchWeldThreshold(NULL), patchExtrude(NULL), patchExtrudeEx(NULL),
+		  patchVertCoplanar(NULL), patchInteriorMode(NULL),
+		  patchHide(NULL), patchUnhideAll(NULL), patchSubdivPropToggle(NULL),
+		  patchDetachCopyToggle(NULL), resetPaintTarget(NULL), resetPaint(NULL),
+		  patchFilterVertsToggle(NULL), patchFilterVecsToggle(NULL), patchLockHandlesToggle(NULL),
+		  arrowsToggle(NULL),
+		  patchSmGroup(NULL), patchSmGroupClear(NULL), patchTessDelta(NULL), patchBalance(NULL),
+		  setTileSize256(NULL), setHardnessAbs(NULL), setOpacityAbs(NULL),
+		  setColorRadiusAbs(NULL),
 		  HaveCore(false), Mode(0), SubObj(0),
 		  PatchSelVerts(0), PatchSelEdges(0), PatchSelFaces(0), PatchSelTans(0),
 		  PatchNoSmooth(2), PatchSelZones(0), MoveDirMask(0), WeldTargetArmed(false),
-		  WeldThreshold(0.1f), ExtrudeHeight(8.f),
+		  WeldThreshold(0.1f), ExtrudeHeight(8.f), ExtrudeOutline(0.f), ExtrudeLocal(false),
+		  VertCoplanar(2), PatchAuto(2), HiddenCount(0), SubdivPropagate(false),
+		  DetachCopy(false),
 		  FilterVerts(true), FilterVecs(true), LockHandles(false),
 		  ShowArrows(false),
 		  SmGroupAll(0), SmGroupAny(0), TessU(0), TessV(0),

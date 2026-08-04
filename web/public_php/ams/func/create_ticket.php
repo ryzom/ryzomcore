@@ -45,8 +45,10 @@ function create_ticket(){
             if(  ($_POST['target_id'] == $_SESSION['id']) ||  Ticket_User::isMod(unserialize($_SESSION['ticket_user']))  ){
 
                 $category = filter_var($_POST['Category'], FILTER_SANITIZE_NUMBER_INT);
-                $title = filter_var($_POST['Title'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-                $content = filter_var($_POST['Content'], FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+                // escaping happens in Ticket::create_Ticket and
+                // Ticket_Reply::createReply, which every caller goes through
+                $title = $_POST['Title'];
+                $content = $_POST['Content'];
                 try{
                     if($_POST['target_id'] == $_SESSION['id']){
                         //if the ticket is being made for the executing user himself
@@ -69,7 +71,7 @@ function create_ticket(){
                    
                 }catch (PDOException $e) {
                     //ERROR: LIB DB is not online!
-                    print_r($e);
+                    error_log($e->getMessage());
                     throw new SystemExit();
                     header("Cache-Control: max-age=1");
                     header("Location: index.php");
