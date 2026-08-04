@@ -639,6 +639,14 @@ public:
 typedef NLMISC::CSmartPtr<CCreature> CCreaturePtr;
 typedef NLMISC::CSmartPtr<CCreature const> CCreatureCPtr;
 
+// Parses a fight script component string and registers it on the creature.
+// Defined by the linking application, not by the ai sheets library: the AI
+// service builds the component through CFightScriptCompReader
+// (ai_script_comp.cpp), while sheets_packer_shard ignores the components and
+// only carries the serialized strings. A missing definition is a link error,
+// so no consumer can silently lose script components.
+void readCreatureScriptComp(CCreature &creature, std::string const &scriptCompStr);
+
 //////////////////////////////////////////////////////////////////////////////
 // CRaceStats                                                               //
 //////////////////////////////////////////////////////////////////////////////

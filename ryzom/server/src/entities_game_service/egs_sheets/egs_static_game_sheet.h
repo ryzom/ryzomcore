@@ -871,12 +871,12 @@ public:
 	/// read the sheet
 	virtual void readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &form, const NLMISC::CSheetId &sheetId );
 
-#ifndef NO_EGS_VARS
 	/// select a loot set
+	/// Defined in the EGS (egs_sheets_impl.cpp), not in the sheets library:
+	/// it rolls on the EGS random generator.
 	NLMISC::CSheetId selectRandomLootSet() const;
 
 	const CStaticLootSet *selectRandomCustomLootSet() const;
-#endif
 
 	// return the version of this class, increments this value when the content of this class changed
 	static uint getVersion () { return 1; }

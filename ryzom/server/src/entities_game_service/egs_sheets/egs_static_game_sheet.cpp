@@ -45,7 +45,6 @@ const float MeanSuccessFactor = 0.65f;
 const float Offset = -0.5f;
 */
 
-extern CRandom RandomGenerator;
 
 map< pair<uint16, uint16>, CStaticGameBrick *> CStaticGameBrick::_Bricks;
 
@@ -2092,87 +2091,6 @@ void CStaticLootTable::readGeorges( const NLMISC::CSmartPtr<NLGEORGES::UForm> &f
 	
 } // CStaticLootTable::readGeorges //
 
-#ifndef NO_EGS_VARS
-/// selectRandomLootSet
-CSheetId CStaticLootTable::selectRandomLootSet() const
-{
-	if( LootSets.empty() )
-		return CSheetId::Unknown;
-
-	// compute the probability sum
-	uint16 probabilitySum = 0;
-	map<CSheetId,uint16>::const_iterator itconst;
-	for( itconst = LootSets.begin(); itconst != LootSets.end(); ++itconst )
-	{
-		probabilitySum += (*itconst).second;
-	}
-
-	// choose a random number between and probabilitySum
-	uint32 randWeight;
-	if( probabilitySum == 0 )
-		randWeight = 0;
-	else
-		randWeight = RandomGenerator.rand(probabilitySum-1) + 1;
-
-	// "concatenate" weights of each index, when the random value is reached we'll have the index to use
-	uint16 w = 0;
-	for( itconst = LootSets.begin(); itconst != LootSets.end(); ++itconst )
-	{
-		w += (*itconst).second;
-		if( randWeight <= w )
-		{
-			break;
-		}
-	}
-	if( itconst != LootSets.end() )
-	{
-		return (*itconst).first;
-	}
-
-	nlwarning("<CStaticLootTable::selectRandomLootSet> can't find any lootset rand=%d probabilitySum=%d weightCount=%d",randWeight,probabilitySum,LootSets.size());
-	return CSheetId::Unknown;
-}
-
-const CStaticLootSet *CStaticLootTable::selectRandomCustomLootSet() const
-{
-	if( CustomLootSets.empty() )
-		return 0;
-
-	// compute the probability sum
-	uint16 probabilitySum = 0;
-	multimap<uint16, CStaticLootSet>::const_iterator it = CustomLootSets.begin();
-	for( ; it != CustomLootSets.end(); ++it )
-	{
-		probabilitySum += (*it).first;
-	}
-	
-	// choose a random number between and probabilitySum
-	uint32 randWeight;
-	if( probabilitySum == 0 )
-		randWeight = 0;
-	else
-		randWeight = RandomGenerator.rand(probabilitySum-1) + 1;
-	
-	// "concatenate" weights of each index, when the random value is reached we'll have the index to use
-	uint16 w = 0;
-	for (it = CustomLootSets.begin(); it != CustomLootSets.end(); ++it )
-	{
-		w += (*it).first;
-		if( randWeight <= w )
-		{
-			break;
-		}
-	}
-
-	if( it != CustomLootSets.end() )
-	{
-		return &(it->second);
-	}
-
-	nlwarning("Can't find any lootset rand=%d probabilitySum=%d weightCount=%d",randWeight,probabilitySum,CustomLootSets.size());
-	return 0;
-}
-#endif
 
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////// Static Race Statistics //////////////////////////////

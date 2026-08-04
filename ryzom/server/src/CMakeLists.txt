@@ -4,6 +4,8 @@
 IF(WITH_RYZOM_TOOLS OR WITH_RYZOM_SERVER)
   ADD_SUBDIRECTORY(server_share)
   ADD_SUBDIRECTORY(ai_share)
+  # Service sheet code compiled once, shared with sheets_packer_shard.
+  ADD_SUBDIRECTORY(sheets)
 ENDIF()
 
 IF(WITH_RYZOM_SERVER)
