@@ -1,6 +1,9 @@
 <?php 
-	include('../tools/validate_cookie.php');
-	include('ring_session_manager_itf.php');
+	// _once like every other ring page: a plain include here is one refactor
+	// away from a function/class redeclare fatal (the exact break the
+	// login/config.php charset helper caused across this directory once)
+	include_once('../tools/validate_cookie.php');
+	include_once('ring_session_manager_itf.php');
 	include_once('../tools/domain_info.php');
 	include_once('../login/config.php');
 
