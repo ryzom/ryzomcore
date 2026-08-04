@@ -35,7 +35,7 @@ TARGET_LINK_LIBRARIES(sheets_packer_shard
 NL_DEFAULT_PROPS(sheets_packer_shard "Ryzom, Tools: Sheets Packer Shard")
 NL_ADD_RUNTIME_FLAGS(sheets_packer_shard)
 
-TARGET_COMPILE_DEFINITIONS(sheets_packer_shard PRIVATE NO_EGS_VARS DNO_AI_COMP)
+TARGET_COMPILE_DEFINITIONS(sheets_packer_shard PRIVATE NO_EGS_VARS NO_AI_COMP)
 
 IF (MSVC)
     SET_TARGET_PROPERTIES(sheets_packer_shard PROPERTIES COMPILE_FLAGS "/bigobj") # TODO replace with target_compile_options
