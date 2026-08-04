@@ -21,11 +21,11 @@ IF(WITH_RYZOM_TOOLS)
     ADD_SUBDIRECTORY(pdr_util)
     ADD_SUBDIRECTORY(patch_gen)
 
-    # IF(WIN32)
-    #   IF(MYSQL_FOUND)
-    #     ADD_SUBDIRECTORY(sheets_packer_shard)
-    #   ENDIF()
-    # ENDIF()
+    # Needs the sheet libraries from ryzom/server/src/sheets, which the top
+    # level only adds when MySQL is found (the gate on the server tree).
+    IF(MYSQL_FOUND)
+      ADD_SUBDIRECTORY(sheets_packer_shard)
+    ENDIF()
   ENDIF()
 
   IF(WITH_LIGO AND WITH_NET)
