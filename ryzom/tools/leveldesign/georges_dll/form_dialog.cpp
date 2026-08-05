@@ -254,7 +254,7 @@ void CFormDialog::getVirtualDfnFromDocument (const NLGEORGES::CFormDfn *_dfn, co
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, "Dfn:", 
-				_T(GEORGES_EDIT_BASE_REG_KEY) _T("\\Virtual Dfn MemCombo"), false, true, "*.dfn");
+				GEORGES_EDIT_BASE_REG_KEY_T _T("\\Virtual Dfn MemCombo"), false, true, "*.dfn");
 
 			// Get from document
 			memCombo->getFromDocument (*doc->getFormPtr ());
@@ -465,7 +465,7 @@ void CFormDialog::getArrayFromDocument (const char *structName, uint structId, u
 
 			// Create the widget
 			memCombo->create (WS_CHILD|WS_TABSTOP, currentPos, this, WidgetIndexCount, "Array size:", 
-				_T(GEORGES_EDIT_BASE_REG_KEY) _T("\\Array Size MemCombo"), true, false, NULL);
+				GEORGES_EDIT_BASE_REG_KEY_T _T("\\Array Size MemCombo"), true, false, NULL);
 
 			// Get from document
 			memCombo->getFromDocument (*doc->getFormPtr ());

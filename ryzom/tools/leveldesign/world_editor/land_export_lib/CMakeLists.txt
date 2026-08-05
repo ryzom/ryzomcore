@@ -6,7 +6,7 @@ add_library(Ryzom::landexport ALIAS ryzom_landexport)
 
 TARGET_LINK_LIBRARIES(ryzom_landexport
         PUBLIC
-        Ryzom::landexport
+        Ryzom::export
         NeL::misc
         NeL::ligo
         NeL::georges

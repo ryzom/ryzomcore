@@ -1,3 +1,9 @@
+# zone_painter is C++11 (std::lround, snprintf, ...) and its atlas step needs a
+# host build_interface tool — out of scope for the VS2008 reference toolchain.
+IF(MSVC AND MSVC_VERSION LESS 1600)
+	RETURN()
+ENDIF()
+
 FILE(GLOB SRCS *.cpp)
 FILE(GLOB HDRS *.h)
 

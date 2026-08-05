@@ -5,6 +5,7 @@ SOURCE_GROUP("" FILES ${SRC})
 ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 ADD_EXECUTABLE(ryzom_mission_compiler_fe WIN32 ${SRC})
+SET_TARGET_PROPERTIES(ryzom_mission_compiler_fe PROPERTIES NL_MFC_UNICODE_APP ON) # unicode MFC GUI: pre-VS2010 links need the explicit wWinMain entry (see NL_DEFAULT_PROPS)
 
 TARGET_LINK_LIBRARIES(ryzom_mission_compiler_fe
         PRIVATE

@@ -285,6 +285,10 @@ public:
 
 	/// Constructors
 	UTransform() { _Object = nullptr; }
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	UTransform(::CNullPtrT) { _Object = NULL; }
+#endif
 	UTransform(class CTransform *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CTransform *object) { _Object = (ITransformable*)object; }

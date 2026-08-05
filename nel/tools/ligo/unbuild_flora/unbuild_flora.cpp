@@ -332,7 +332,7 @@ bool writeFlora()
 {
 	ofstream fo;
 #ifdef NL_OS_WINDOWS
-	fo.open(utf8ToWide(s_PrimitiveFile));
+	fo.open(utf8ToWide(s_PrimitiveFile).c_str()); // .c_str(): the wstring overload is C++11; the wchar_t* one is the VS-era extension
 #else
 	fo.open(s_PrimitiveFile);
 #endif

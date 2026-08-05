@@ -187,6 +187,10 @@ public:
 
 	/// Constructors
 	UParticleSystemInstance() { _Object = nullptr; }
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	UParticleSystemInstance(::CNullPtrT) { _Object = NULL; }
+#endif
 	UParticleSystemInstance(class CParticleSystemModel *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CParticleSystemModel *object) { _Object = (ITransformable*)object; }

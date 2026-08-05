@@ -676,7 +676,7 @@ bool CGeorgesEditApp::getColor (NLMISC::CRGBA &color)
 	// Get custom colors
 	COLORREF arrayColor[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	HKEY hKey;
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Custom Colors"), 0, KEY_READ, &hKey)==ERROR_SUCCESS)
+	if (RegOpenKeyEx(HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY_T _T("\\Custom Colors"), 0, KEY_READ, &hKey)==ERROR_SUCCESS)
 	{
 		DWORD len=sizeof(arrayColor);
 		DWORD type;
@@ -701,7 +701,7 @@ bool CGeorgesEditApp::getColor (NLMISC::CRGBA &color)
 
 		// Save the custom colors
 		HKEY hKey;
-		if (RegCreateKey(HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Custom Colors"), &hKey)==ERROR_SUCCESS)
+		if (RegCreateKey(HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY_T _T("\\Custom Colors"), &hKey)==ERROR_SUCCESS)
 		{
 			RegSetValueEx (hKey, _T(""), 0, REG_BINARY, (LPBYTE)(arrayColor), sizeof(arrayColor));
 			RegCloseKey (hKey);
@@ -942,7 +942,7 @@ void CGeorgesEditApp::OnViewRefresh()
 void CGeorgesEditApp::saveWindowState (const CWnd *wnd, const TCHAR *name, bool controlBar)
 {
 	HKEY hKey;
-	nlverify (RegCreateKey (HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Windows states"), &hKey) == ERROR_SUCCESS);
+	nlverify (RegCreateKey (HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY_T _T("\\Windows states"), &hKey) == ERROR_SUCCESS);
 
 	// Get the position
 	WINDOWPLACEMENT wndpl;
@@ -958,7 +958,7 @@ void CGeorgesEditApp::saveWindowState (const CWnd *wnd, const TCHAR *name, bool 
 void CGeorgesEditApp::loadWindowState (CWnd *wnd, const TCHAR *name, bool mdiChildWnd, bool controlBar)
 {
 	HKEY hKey;
-	if (RegOpenKey (HKEY_CURRENT_USER, _T(GEORGES_EDIT_BASE_REG_KEY "\\Windows states"), &hKey) == ERROR_SUCCESS)
+	if (RegOpenKey (HKEY_CURRENT_USER, GEORGES_EDIT_BASE_REG_KEY_T _T("\\Windows states"), &hKey) == ERROR_SUCCESS)
 	{
 		// Get the value
 		WINDOWPLACEMENT wndpl;

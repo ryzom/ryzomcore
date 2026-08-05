@@ -8,6 +8,7 @@ LIST(REMOVE_ITEM SRC ${SRC2})
 #ENABLE_LANGUAGE(RC)
 
 ADD_EXECUTABLE(tile_edit WIN32 ${SRC} tile_edit_exe.rc)
+SET_TARGET_PROPERTIES(tile_edit PROPERTIES NL_MFC_UNICODE_APP ON) # unicode MFC GUI: pre-VS2010 links need the explicit wWinMain entry (see NL_DEFAULT_PROPS)
 
 TARGET_LINK_LIBRARIES(tile_edit PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(tile_edit "NeL, Tools, 3D: Tile Editor")

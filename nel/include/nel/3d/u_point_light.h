@@ -115,6 +115,10 @@ public:
 
 	/// Constructors
 	UPointLight() { _Object = nullptr; }
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	UPointLight(::CNullPtrT) { _Object = NULL; }
+#endif
 	UPointLight(class CPointLightModel *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CPointLightModel *object) { _Object = (ITransformable*)object; }

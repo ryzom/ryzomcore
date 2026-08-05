@@ -1,6 +1,8 @@
 FILE(GLOB SRC *.cpp)
 
-ADD_EXECUTABLE(nl_sample_gui WIN32 ${SRC})
+# console app: the sample defines main(), not WinMain — the WIN32 keyword made
+# MSVC links look for a GUI entry point that doesn't exist
+ADD_EXECUTABLE(nl_sample_gui ${SRC})
 
 TARGET_LINK_LIBRARIES(nl_sample_gui NeL::misc NeL::3d NeL::gui)
 NL_DEFAULT_PROPS(nl_sample_gui "NeL, Samples: GUI")
@@ -36,7 +38,7 @@ SET(GUI_SAMPLE_EXTRAS_DIR "${CMAKE_CURRENT_BINARY_DIR}/extra_textures")
 # Only wire the atlas pack when the graphics tree is actually present.
 # Desktop CI configurations that don't stage ryzomcore_graphics still build
 # the binary; the atlas is only needed to actually launch the sample.
-IF(EXISTS "${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png")
+IF(EXISTS "${NL_GRAPHICS_DIR}/interfaces/v3_fullscreen/color_palette.png" AND NL_BUILD_INTERFACE_TOOL)
   ADD_CUSTOM_COMMAND(
     OUTPUT "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.png" "${GUI_SAMPLE_ASSETS_DIR}/gui_sample_atlas.txt"
     COMMAND ${CMAKE_COMMAND} -E make_directory "${GUI_SAMPLE_ASSETS_DIR}"
