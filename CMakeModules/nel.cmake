@@ -67,19 +67,30 @@ MACRO(NL_DEFAULT_PROPS name label)
     ENDIF()
   ENDIF()
 
-  # VS2008-era toolchains that cannot run CMake's mt.exe manifest embedding (the VS2008/Wine
-  # trees — mt.exe page-faults under Wine outright) would otherwise ship DLLs/EXEs WITHOUT
-  # their VC90 SxS manifest; on real Windows the CRT then never resolves through WinSxS and
-  # LoadLibrary fails with error 126 (hit by the 3ds Max plugin set, PMD §10z-seize). Embed the
-  # dependent-assembly manifest through the resource compiler instead (RT_MANIFEST = type 24;
-  # id 1 for EXEs, id 2 = ISOLATIONAWARE for DLLs) — rc.exe works fine under Wine. Directories
-  # that compile with MFC (_AFXDLL via ADD_DEFINITIONS, e.g. object_viewer) get the CRT+MFC
-  # manifest. The manifests reference the RTM version (9.0.21022.8); publisher policy upgrades
-  # to whatever VC90 SP1 redist the target machine carries — the VS2008 default convention.
-  # Gate: NL_EMBED_SXS_MANIFEST_RC is set by the toolchain that needs it (the Wine one sets it
-  # in vs2008-toolchain.cmake); real-Windows builds keep CMake's own mt-based embedding and
-  # must NOT also get a resource-compiled manifest (mt would collide with the existing
-  # RT_MANIFEST resource).
+  # VS2008 under Wine cannot use CMake's own manifest embedding: the non-incremental
+  # vs_link_exe flow delegates to /MANIFEST:EMBED, VS2010+ syntax that VS2008's link.exe
+  # rejects (LNK1117). Binaries shipped without their VC90 SxS manifest fail on real Windows
+  # with LoadLibrary error 126 — the CRT only resolves through WinSxS there (hit by the 3ds
+  # Max plugin set, PMD §10z-seize). Two alternative embedding mechanisms, toolchain-gated:
+  #
+  # NL_EMBED_SXS_MANIFEST_MT — the traditional VS2008 three-stage flow: link /MANIFEST writes
+  # the sidecar next to the binary, a POST_BUILD mt.exe pass embeds it as RT_MANIFEST (id 1
+  # for EXEs, id 2 = ISOLATIONAWARE for DLLs). The linker-generated manifest is exact per
+  # target (CRT and, when linked, MFC dependent assemblies, RTM 9.0.21022.8 versions;
+  # publisher policy upgrades to the installed redist — the VS2008 default convention).
+  # Requires a working mt.exe: under Wine that means a prefix with real .NET 2.0 (mt
+  # instantiates the CLR metadata dispenser even for native manifests and page-faults
+  # without an engine behind mscoree; the packaged CI prefix carries it).
+  #
+  # NL_EMBED_SXS_MANIFEST_RC — fallback for prefixes without a working mt.exe: embed a static
+  # dependent-assembly manifest through the resource compiler (RT_MANIFEST = type 24; rc.exe
+  # works fine under Wine). MFC detection is by directory _AFXDLL definition or the explicit
+  # NL_SXS_MANIFEST_MFC target property; the static manifests live in CMakeModules/manifests/.
+  #
+  # Real-Windows builds set neither and keep CMake's own embedding; the mechanisms are
+  # mutually exclusive (mt collides with an existing RT_MANIFEST resource).
+  # (the MT flow is applied at the END of this macro: the EXECUTABLE subsystem block below
+  # overwrites LINK_FLAGS wholesale, so the appended /MANIFEST must come after it)
   IF(NL_EMBED_SXS_MANIFEST_RC AND MSVC AND MSVC_VERSION LESS 1600
      AND (${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY OR ${type} STREQUAL EXECUTABLE))
     IF(${type} STREQUAL EXECUTABLE)
@@ -129,6 +140,42 @@ MACRO(NL_DEFAULT_PROPS name label)
       SOVERSION ${NL_VERSION_MAJOR}
       COMPILE_FLAGS "/GA"
       LINK_FLAGS "/VERSION:${NL_VERSION_MAJOR}.${NL_VERSION_MINOR} /SUBSYSTEM:${_SUBSYSTEM},${_SUBSYSTEM_VERSION}")
+
+    # Unicode MFC GUI apps: the VS-era linker infers the entry point by probing WinMain/
+    # wWinMain in the command-line objects only — wWinMain lives in the MFC import lib
+    # (mfcs90u), so inference locks onto the ANSI CRT startup and fails with an unresolved
+    # _WinMain@16. Projects built inside Visual Studio inherit the explicit entry from the
+    # IDE's Unicode linker defaults; standalone VC9 links need it spelled out. Opt-in per
+    # target (NL_MFC_UNICODE_APP property) — CMAKE_MFC_FLAG can't gate this: FindCustomMFC
+    # sets it globally, and plain ANSI WinMain apps must keep the inferred entry.
+    GET_TARGET_PROPERTY(_NL_MFC_APP ${name} NL_MFC_UNICODE_APP)
+    IF(_VALUE AND MSVC AND MSVC_VERSION LESS 1600 AND _NL_MFC_APP)
+      SET_PROPERTY(TARGET ${name} APPEND_STRING PROPERTY LINK_FLAGS " /ENTRY:wWinMainCRTStartup")
+    ENDIF()
+  ENDIF()
+
+  # NL_EMBED_SXS_MANIFEST_MT — the traditional VS2008 three-stage manifest flow: link
+  # /MANIFEST writes the sidecar next to the binary, a POST_BUILD mt.exe pass embeds it as
+  # RT_MANIFEST (id 1 for EXEs, id 2 = ISOLATIONAWARE for DLLs). Applied last because the
+  # EXECUTABLE subsystem block above overwrites LINK_FLAGS wholesale. The linker-generated
+  # manifest is exact per target (CRT and, when linked, MFC dependent assemblies). Requires
+  # a working mt.exe: under Wine that means a prefix with real .NET 2.0 (mt instantiates the
+  # CLR metadata dispenser even for native manifests and page-faults without an engine
+  # behind mscoree; the packaged CI prefix carries it).
+  IF(NL_EMBED_SXS_MANIFEST_MT AND MSVC AND MSVC_VERSION LESS 1600
+     AND (${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY OR ${type} STREQUAL EXECUTABLE))
+    IF(${type} STREQUAL EXECUTABLE)
+      SET(_NL_MANIFEST_ID 1)
+    ELSE()
+      SET(_NL_MANIFEST_ID 2)
+    ENDIF()
+    # /MANIFEST alone: the linker's default sidecar name is <output>.manifest next to the
+    # binary, which is exactly what the mt pass below consumes — no /MANIFESTFILE needed.
+    SET_PROPERTY(TARGET ${name} APPEND_STRING PROPERTY LINK_FLAGS " /MANIFEST")
+    ADD_CUSTOM_COMMAND(TARGET ${name} POST_BUILD
+      COMMAND "${CMAKE_MT}" -nologo -manifest "$<TARGET_FILE:${name}>.manifest" "-outputresource:$<TARGET_FILE:${name}>;${_NL_MANIFEST_ID}"
+      COMMENT "Embedding SxS manifest (mt) ${name}"
+      VERBATIM)
   ENDIF()
 ENDMACRO(NL_DEFAULT_PROPS)
 
@@ -166,9 +213,16 @@ ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 MACRO(NL_MFC_DLL_WORKAROUND name)
   IF(MSVC)
     TARGET_COMPILE_DEFINITIONS(${name} PRIVATE _USRDLL)
+    # The static-portion MFC lib is toolset-versioned (mfcs90u for VC9, mfcs140u for
+    # VS2015+); pick by compiler version rather than hardcoding the modern one.
+    IF(MSVC_VERSION LESS 1600)
+      SET(_NL_MFCS_VER 90)
+    ELSE()
+      SET(_NL_MFCS_VER 140)
+    ENDIF()
     TARGET_LINK_LIBRARIES(${name} PRIVATE
-      $<$<CONFIG:Debug>:mfcs140ud>
-      $<$<CONFIG:Release>:mfcs140u>
+      $<$<CONFIG:Debug>:mfcs${_NL_MFCS_VER}ud>
+      $<$<CONFIG:Release>:mfcs${_NL_MFCS_VER}u>
     )
   ENDIF()
 ENDMACRO(NL_MFC_DLL_WORKAROUND)
