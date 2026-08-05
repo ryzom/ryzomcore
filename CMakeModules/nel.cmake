@@ -163,17 +163,24 @@ MACRO(NL_DEFAULT_PROPS name label)
   # CLR metadata dispenser even for native manifests and page-faults without an engine
   # behind mscoree; the packaged CI prefix carries it).
   IF(NL_EMBED_SXS_MANIFEST_MT AND MSVC AND MSVC_VERSION LESS 1600
-     AND (${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY OR ${type} STREQUAL EXECUTABLE))
+     AND (${type} STREQUAL SHARED_LIBRARY OR ${type} STREQUAL MODULE_LIBRARY OR ${type} STREQUAL EXECUTABLE)
+     AND CMAKE_VERSION VERSION_LESS 3.30)
+    # CMake 3.30+ forwards --msvc-ver to its vs_link tool, detects the pre-VS2010 linker
+    # and runs the classic link-manifest-then-mt pass itself with internally consistent
+    # sidecar paths — adding our own /MANIFEST + POST_BUILD there just fights it. This
+    # block only fills the gap for older CMake, whose vs_link assumes /MANIFEST:EMBED
+    # (VS2010+ syntax the winecl-link wrapper must strip) and never invokes mt.
     IF(${type} STREQUAL EXECUTABLE)
       SET(_NL_MANIFEST_ID 1)
     ELSE()
       SET(_NL_MANIFEST_ID 2)
     ENDIF()
     # /MANIFEST alone: the linker's default sidecar name is <output>.manifest next to the
-    # binary, which is exactly what the mt pass below consumes — no /MANIFESTFILE needed.
+    # binary, which is exactly what the mt pass consumes — no /MANIFESTFILE needed. The
+    # embed_manifest.sh wrapper treats a missing sidecar as success.
     SET_PROPERTY(TARGET ${name} APPEND_STRING PROPERTY LINK_FLAGS " /MANIFEST")
     ADD_CUSTOM_COMMAND(TARGET ${name} POST_BUILD
-      COMMAND "${CMAKE_MT}" -nologo -manifest "$<TARGET_FILE:${name}>.manifest" "-outputresource:$<TARGET_FILE:${name}>;${_NL_MANIFEST_ID}"
+      COMMAND "${CMAKE_SOURCE_DIR}/tool/wine_vs2008/embed_manifest.sh" "${CMAKE_MT}" "$<TARGET_FILE:${name}>" "${_NL_MANIFEST_ID}"
       COMMENT "Embedding SxS manifest (mt) ${name}"
       VERBATIM)
   ENDIF()

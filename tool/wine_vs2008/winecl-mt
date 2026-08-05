@@ -1,6 +1,36 @@
 #!/bin/bash
 . "$(dirname "$0")/winecl-env"
-translate_args "$@"
+# mt.exe parses any leading-'/' argument as an option, so Unix-absolute path
+# arguments (the -manifest sidecar, the -outputresource target) must ALWAYS be
+# translated to Windows form — including paths that don't exist yet or anymore
+# (winepath converts fine without the file), where the generic translate_args
+# existence check would leave them raw and mt would fail with c1010007.
+ARGS=()
+for a in "$@"; do
+	case "$a" in
+		[-/]outputresource:*)
+			pfx="${a%%:*}"; rest="${a#*:}"
+			case "$rest" in
+				/*) ARGS+=("$pfx:$(winepath -w "$rest" 2>/dev/null)") ;;
+				*) ARGS+=("$a") ;;
+			esac
+			;;
+		-nologo|/nologo|-manifest|/manifest|-verbose|/verbose)
+			ARGS+=("$a")
+			;;
+		//*)
+			# looks like an option-with-path or a path; leave true options alone
+			ARGS+=("$a")
+			;;
+		/*/*)
+			# bare Unix-absolute path argument (e.g. the manifest file)
+			ARGS+=("$(winepath -w "$a" 2>/dev/null)")
+			;;
+		*)
+			ARGS+=("$a")
+			;;
+	esac
+done
 # mt.exe instantiates the .NET CorMetaDataDispenser even for plain native
 # manifests; the prefix must carry a real .NET 2.0 (the packaged CI prefix
 # does) or mt page-faults on a NULL CLR interface.
