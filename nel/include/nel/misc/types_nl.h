@@ -195,6 +195,30 @@
 #define NL_ALIGNAS(type)
 #endif
 
+// nullptr requires C++11 (VC++ 2010, GCC 4.6); emulate on older toolchains.
+// 'nullptr' is an ordinary identifier in C++03, so a named constant suffices — no macro.
+// The emulation converts to any pointer or member pointer but never to arithmetic types,
+// so overload resolution matches the C++11 builds.
+// (If VC6's member templates choke on this, drop to '#define nullptr 0' for _MSC_VER < 1300.)
+#if (defined(_MSC_VER) && (_MSC_VER < 1600)) || (!defined(_MSC_VER) && defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__))
+#define NL_NO_NULLPTR_TYPE
+const class CNullPtrT
+{
+public:
+	template<class T> operator T *() const { return 0; } // any object/function pointer
+	template<class C, class T> operator T C::*() const { return 0; } // any member pointer
+private:
+	void operator&() const; // taking the address is forbidden, as with real nullptr
+} nullptr = {};
+// Direct comparisons; VC++ 2008 cannot deduce T in 'T *' against function
+// pointer operands, so T is deliberately fully generic. An arithmetic left-hand
+// side then compiles here where C++11 rejects it; the C++11 builds catch those.
+template<class T> inline bool operator==(T p, const CNullPtrT &) { return p == 0; }
+template<class T> inline bool operator==(const CNullPtrT &, T p) { return p == 0; }
+template<class T> inline bool operator!=(T p, const CNullPtrT &) { return p != 0; }
+template<class T> inline bool operator!=(const CNullPtrT &, T p) { return p != 0; }
+#endif
+
 #ifdef NL_CPP17
 #define NL_REGISTER
 #else
