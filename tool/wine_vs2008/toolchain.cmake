@@ -87,6 +87,11 @@ set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "/MD /Z7 /O2 /Ob1 /DNDEBUG" CACHE STRING "" F
 # format). CMAKE_PREFIX_PATH is the standard mechanism each individual
 # FindZLIB/FindBoost/etc. module actually searches.
 file(GLOB NLWINE_EXTERNAL_DIRS "${_NLWINE_EXTERNAL}/*")
+if(NOT NLWINE_EXTERNAL_DIRS)
+	# Fail fast: with an empty prefix path the Find modules silently fall back to
+	# the Linux host's own headers (host zlib.h found, no matching .lib ever).
+	message(FATAL_ERROR "No externals found under ${_NLWINE_EXTERNAL} — extract 2019q4_external_v90_x86 there or set NL_WINE_VS2008_EXTERNAL")
+endif()
 set(CMAKE_PREFIX_PATH ${NLWINE_EXTERNAL_DIRS} CACHE STRING "" FORCE)
 
 # Manifest embedding follows the traditional VS2008 three-stage flow:

@@ -1407,7 +1407,13 @@ MACRO(SETUP_EXTERNAL)
   ENDIF()
 
   IF(WIN32)
-    IF (HUNTER_ENABLED)
+    IF (HUNTER_ENABLED OR NOT WITH_EXTERNAL)
+      # Legacy unified externals tree (single include/+lib/ layout). Current builds pass
+      # per-library roots via CMAKE_PREFIX_PATH with WITH_EXTERNAL=OFF; don't hard-require
+      # the legacy package then. Note the probe matches ANY dir with include/zlib.h — with
+      # a populated prefix path it self-matches the zlib entry (benign), but with an empty
+      # one it can reach the hardcoded /usr fallback and poison every later find with host
+      # headers, so keep it QUIET rather than letting it fail or match loudly.
       FIND_PACKAGE(External QUIET)
     ELSE()
       FIND_PACKAGE(External REQUIRED)

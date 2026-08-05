@@ -79,8 +79,11 @@ jobs:
           curl -sSfO "$TOOLCHAIN_PREFIX_URL"
           7z x -y -o"$HOME" toolchain_v90_prefix.7z > /dev/null
           rm toolchain_v90_prefix.7z
+          # the externals archive is bare (boost/, curl/, ... at the root) —
+          # extract into a named directory
           curl -sSfO "$EXTERNAL_URL"
-          7z x -y -o"$HOME" 2019q4_external_v90_x86.7z > /dev/null
+          mkdir -p "$HOME/2019q4_external_v90_x86"
+          7z x -y -o"$HOME/2019q4_external_v90_x86" 2019q4_external_v90_x86.7z > /dev/null
           rm 2019q4_external_v90_x86.7z
 
       - name: Set up toolchain
