@@ -844,7 +844,9 @@ MACRO(NL_SETUP_BUILD)
       ADD_PLATFORM_LINKFLAGS("/LARGEADDRESSAWARE")
     ENDIF()
 
-    # Exceptions are only set for C++
+    # Exceptions are only set for C++. CMake's default CXX flags already carry /EHsc;
+    # strip it so the /EHa override doesn't emit D9025 on every translation unit.
+    STRING(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     SET(PLATFORM_CXXFLAGS "${PLATFORM_CXXFLAGS} /EHa")
 
     IF(WITH_SYMBOLS)
