@@ -1,0 +1,7 @@
+#!/bin/bash
+. "$(dirname "$0")/winecl-env"
+translate_args "$@"
+# mt.exe instantiates the .NET CorMetaDataDispenser even for plain native
+# manifests; the prefix must carry a real .NET 2.0 (the packaged CI prefix
+# does) or mt page-faults on a NULL CLR interface.
+exec wine "C:\\Program Files\\Microsoft SDKs\\Windows\\v6.0A\\Bin\\mt.exe" "${ARGS[@]}"
