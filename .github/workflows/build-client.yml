@@ -55,17 +55,14 @@ jobs:
           # can't work there. The VS 18 2026 generator needs CMake >= 4.2, and
           # CMake 4.x needs CMAKE_POLICY_VERSION_MINIMUM for Hunter's older dep
           # recipes (< 3.5 minimums). CLI -G overrides the preset generator.
-          # hunter + windows-2025 parked: Hunter 0.26.10 itself handles VS2026,
-          # and its deps build (libxml2 green) until Boost — whose b2 bootstrap
-          # doesn't know the VS 18 toolset ("Unknown toolset: vcunk"), and even
-          # Boost 1.90 has open VS2026 issues upstream (boostorg/boost#1123).
-          # Re-enable when a Hunter Boost pin bootstraps under VS2026; until
-          # then VS2026 coverage comes from the vcpkg job below.
-          #- os: windows-2025
-          #  cmake_preset: ci-windows-ryzom-client-hunter
-          #  cmake_generator: "Visual Studio 18 2026"
-          #  cmake_version: "4.4.2"
-          #  cmake_policy_min: "3.5"
+          # hunter + windows-2025: needs the patched Boost pin from
+          # CMakeModules/HunterConfig.cmake (1.86.0 with b2 5.4.2 — stock
+          # 1.86 b2 doesn't know the VS 18 toolset, "Unknown toolset: vcunk").
+          - os: windows-2025
+            cmake_preset: ci-windows-ryzom-client-hunter
+            cmake_generator: "Visual Studio 18 2026"
+            cmake_version: "4.4.2"
+            cmake_policy_min: "3.5"
           - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-vcpkg
             vcpkg: true
