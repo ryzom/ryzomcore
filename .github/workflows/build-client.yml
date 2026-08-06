@@ -158,8 +158,8 @@ jobs:
     - uses: actions/cache/restore@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
-        key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
-        restore-keys: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-
+        key: ${{ matrix.os }}-hunter-v2-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        restore-keys: ${{ matrix.os }}-hunter-v2-${{ steps.strings.outputs.week }}-
 
     - uses: actions/cache@v6
       if: runner.os == 'Windows'
@@ -197,7 +197,7 @@ jobs:
     - uses: actions/cache/save@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
-        key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        key: ${{ matrix.os }}-hunter-v2-${{ steps.strings.outputs.week }}-${{ github.sha }}
 
     - uses: actions/cache/save@v6
       if: (matrix.vcpkg == true)
