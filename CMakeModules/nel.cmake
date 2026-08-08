@@ -474,6 +474,7 @@ MACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
   OPTION(WITH_RYZOM_CUSTOM_PATCH_SERVER "Only use patch server from CFG file"     OFF)
   OPTION(WITH_RYZOM_STEAM         "Enable Steam features"                         OFF)
   OPTION(WITH_RYZOM_SANDBOX       "Enable Sandbox under OS X"                     OFF)
+  OPTION(WITH_RYZOM_XSLT          "Enable xslt to generate sources"               OFF)
 ENDMACRO(NL_SETUP_RYZOM_DEFAULT_OPTIONS)
 
 MACRO(NL_SETUP_SNOWBALLS_DEFAULT_OPTIONS)

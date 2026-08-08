@@ -261,7 +261,7 @@ namespace <xsl:value-of select="@name"/>
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				<xsl:value-of select="@name"/>Skel::TInterceptor *interceptor = NULL;
+				<xsl:value-of select="@name"/>Skel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast &lt; NLNET::CModuleBase* &gt;(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -269,7 +269,7 @@ namespace <xsl:value-of select="@name"/>
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~<xsl:value-of select="@name"/>Proxy()
@@ -307,7 +307,7 @@ namespace <xsl:value-of select="@name"/>
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -2510,14 +2510,14 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		 *	interface).
 		 */
 <xsl:if test="@extend">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 			:	<xsl:value-of select="@extend"/>Itf(replacementAdaptor)
 		{}
 </xsl:if>
 <xsl:if test="not(@extend)">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 		{
-			if (replacementAdaptor == NULL)
+			if (replacementAdaptor == nullptr)
 			{
 				// use default callback server
 				_CallbackServer = CUniquePtr&lt;ICallbackServerAdaptor&gt;(new CNelCallbackServerAdaptor(this));
@@ -2598,7 +2598,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 
 			<xsl:value-of select="../@name"/>Itf *callback = (<xsl:value-of select="../@name"/>Itf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 <xsl:for-each select="param">
 <xsl:if test="not(@array)">
@@ -2740,14 +2740,14 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		}
 
 <xsl:if test="@extend">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 			:	<xsl:value-of select="@extend"/>ClientItf(adaptorReplacement)
 		{}
 </xsl:if>
 <xsl:if test="not(@extend)">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 		{
-			if (adaptorReplacement == NULL)
+			if (adaptorReplacement == nullptr)
 			{
 				// use the default Nel adaptor
 				_CallbackClient = CUniquePtr&lt;ICallbackClientAdaptor&gt;(new CNelCallbackClientAdaptor(this));
@@ -2826,7 +2826,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 
 			<xsl:value-of select="../@name"/>ClientItf *callback = (<xsl:value-of select="../@name"/>ClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 <xsl:for-each select="param">
 

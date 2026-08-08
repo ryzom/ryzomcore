@@ -37,6 +37,43 @@ LIST(REMOVE_ITEM HEADER ${CMAKE_CURRENT_SOURCE_DIR}/enum_template.h)
 NL_TARGET_LIB(ryzom_gameshare ${HEADER} ${PRIV_TIME_H} ${SRC} ${SRC_TIME} ${R2})
 add_library(Ryzom::gameshare ALIAS ryzom_gameshare)
 
+if (WITH_RYZOM_XSLT)
+	add_custom_command(
+			OUTPUT ring_session_manager_itf.cpp
+			COMMAND LibXslt::xsltproc
+			--stringparam output cpp
+			--stringparam filename ring_session_manager_itf
+			--output "${CMAKE_CURRENT_SOURCE_DIR}/ring_session_manager_itf.cpp"
+			${CMAKE_CURRENT_SOURCE_DIR}/generate_module_interface.xslt
+			${CMAKE_CURRENT_SOURCE_DIR}/ring_session_manager_itf.xml
+			DEPENDS generate_module_interface.xslt ring_session_manager_itf.xml
+			VERBATIM
+	)
+	add_custom_command(
+			OUTPUT ring_session_manager_itf.h
+			COMMAND LibXslt::xsltproc
+			--stringparam output header
+			--stringparam filename ring_session_manager_itf
+			--output "${CMAKE_CURRENT_SOURCE_DIR}/ring_session_manager_itf.h"
+			${CMAKE_CURRENT_SOURCE_DIR}/generate_module_interface.xslt
+			${CMAKE_CURRENT_SOURCE_DIR}/ring_session_manager_itf.xml
+			DEPENDS generate_module_interface.xslt ring_session_manager_itf.xml
+			VERBATIM
+	)
+
+	add_custom_target(ryzom_generate
+			DEPENDS
+			ring_session_manager_itf.h
+			ring_session_manager_itf.cpp
+	)
+
+	target_sources(ryzom_gameshare
+			PRIVATE
+			ring_session_manager_itf.h
+			ring_session_manager_itf.cpp
+	)
+endif ()
+
 TARGET_INCLUDE_DIRECTORIES(ryzom_gameshare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_gameshare
