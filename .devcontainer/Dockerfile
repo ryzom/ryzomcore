@@ -32,6 +32,7 @@ RUN apt update && \
         libswscale-dev \
         libvorbis-dev \
         libxml2-dev \
+        libxslt1-dev \
         mingw-w64 \
         mingw-w64-tools \
         nasm \

@@ -47,6 +47,7 @@ runs:
           libcurl4-openssl-dev libssl-dev \
           libsquish-dev \
           libgsf-1-dev \
+          libxslt1-dev \
           qtbase5-dev qttools5-dev qttools5-dev-tools
 
     - name: Install Dependency

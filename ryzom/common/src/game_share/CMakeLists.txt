@@ -38,6 +38,7 @@ NL_TARGET_LIB(ryzom_gameshare ${HEADER} ${PRIV_TIME_H} ${SRC} ${SRC_TIME} ${R2})
 add_library(Ryzom::gameshare ALIAS ryzom_gameshare)
 
 if (WITH_RYZOM_XSLT)
+	# TODO extract function
 	add_custom_command(
 			OUTPUT ring_session_manager_itf.cpp
 			COMMAND LibXslt::xsltproc
