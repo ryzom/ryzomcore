@@ -38,14 +38,9 @@ NL_TARGET_LIB(ryzom_gameshare ${HEADER} ${PRIV_TIME_H} ${SRC} ${SRC_TIME} ${R2})
 add_library(Ryzom::gameshare ALIAS ryzom_gameshare)
 
 if (WITH_RYZOM_XSLT)
-	add_module_interface(
-			ring_session_manager_itf
-			XML_SOURCE ring_session_manager_itf.xml
-	)
-	add_module_interface(
-			character_sync_itf
-			XML_SOURCE character_sync_itf.xml
-	)
+	add_module_interface(XML_SOURCE character_sync_itf.xml)
+	add_module_interface(XML_SOURCE r2_modules_itf.xml)
+	add_module_interface(XML_SOURCE ring_session_manager_itf.xml)
 endif ()
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_gameshare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
