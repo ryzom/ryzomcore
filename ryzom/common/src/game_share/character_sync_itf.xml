@@ -1,7 +1,7 @@
 <generator header_tag="CHARACTER_SYNC_ITF">
 
 	<include file="nel/misc/entity_id.h"/>
-	<include file="r2_share/r2_basic_types.h"/>
+	<include file="game_share/r2_basic_types.h"/>
 	<include file="continent.h"/>
 	<cpp-include file="stdpch.h"/>
 
@@ -35,9 +35,9 @@
 			<!-- activate serial generation -->
 			<serial/>
 
-			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id the the character"/>
+			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id of the character"/>
 			<property type="std::string"		name="CharName"		byref="true"	doc="The name of the character"/>
-			<property type="uint32"				name="HomeSessionId"				doc="The session id the the character home mainland"/>
+			<property type="uint32"				name="HomeSessionId"				doc="The session id of the character home mainland"/>
 			<property type="sint32"				name="BestCombatLevel"				doc="The best combat level of the character"/>
 			<property type="uint32"				name="GuildId"						doc="The guild id of this player"/>
 			<property type="CONTINENT::TRespawnPointCounters" name="RespawnPoints"

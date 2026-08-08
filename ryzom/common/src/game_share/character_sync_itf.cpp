@@ -1,3 +1,4 @@
+
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -19,7 +20,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-
+	
 #include "character_sync_itf.h"
 
 namespace CHARSYNC
@@ -28,7 +29,7 @@ namespace CHARSYNC
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-
+	
 
 	const CCharacterSyncSkel::TMessageHandlerMap &CCharacterSyncSkel::getMessageHandlers() const
 	{
@@ -38,43 +39,43 @@ namespace CHARSYNC
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_ACH"), &CCharacterSyncSkel::addCharacter_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_DCH"), &CCharacterSyncSkel::deleteCharacter_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPDCG"), &CCharacterSyncSkel::updateCharGuild_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPDCR"), &CCharacterSyncSkel::updateCharRespawnPoints_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPDCL"), &CCharacterSyncSkel::updateCharsBestLevel_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPCNF"), &CCharacterSyncSkel::updateCharNewbieFlag_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPDCA"), &CCharacterSyncSkel::updateCharAllegiance_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPDCHMSI"), &CCharacterSyncSkel::updateCharHomeMainlandSessionId_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("CS_UPDCS"), &CCharacterSyncSkel::syncUserChars_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			init = true;
 		}
 
@@ -97,7 +98,7 @@ namespace CHARSYNC
 		return true;
 	}
 
-
+	
 	void CCharacterSyncSkel::addCharacter_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CCharacterSyncSkel_addCharacter_CS_ACH);
@@ -450,7 +451,7 @@ namespace CHARSYNC
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-
+	
 
 	const CNameUnifierSkel::TMessageHandlerMap &CNameUnifierSkel::getMessageHandlers() const
 	{
@@ -460,39 +461,39 @@ namespace CHARSYNC
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_RNUC"), &CNameUnifierSkel::registerNameUnifierClient_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_VCN"), &CNameUnifierSkel::validateCharacterName_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_ANTC"), &CNameUnifierSkel::assignNameToCharacter_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_RC"), &CNameUnifierSkel::renameCharacter_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_RLGN"), &CNameUnifierSkel::registerLoadedGuildNames_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_VGN"), &CNameUnifierSkel::validateGuildName_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_AG"), &CNameUnifierSkel::addGuild_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NU_RG"), &CNameUnifierSkel::removeGuild_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			init = true;
 		}
 
@@ -515,8 +516,8 @@ namespace CHARSYNC
 		return true;
 	}
 
-
-	void CNameUnifierSkel::registerNameUnifierClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	
+	void CNameUnifierSkel::registerNameUnifierClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CNameUnifierSkel_registerNameUnifierClient_NU_RNUC);
 		registerNameUnifierClient(sender);
@@ -844,7 +845,7 @@ namespace CHARSYNC
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-
+	
 
 	const CNameUnifierClientSkel::TMessageHandlerMap &CNameUnifierClientSkel::getMessageHandlers() const
 	{
@@ -854,47 +855,47 @@ namespace CHARSYNC
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_IET"), &CNameUnifierClientSkel::initEIdTranslator_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_UET"), &CNameUnifierClientSkel::updateEIdTranslator_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_VCNR"), &CNameUnifierClientSkel::validateCharacterNameResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_ACNR"), &CNameUnifierClientSkel::assignCharacterNameResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_CR"), &CNameUnifierClientSkel::characterRenamed_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_UCUAV"), &CNameUnifierClientSkel::userCharUpdatedAndValidated_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_UCSF"), &CNameUnifierClientSkel::userCharSyncFailed_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_GR"), &CNameUnifierClientSkel::guildRenamed_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_VGNR"), &CNameUnifierClientSkel::validateGuildNameResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			res = handlers.insert(std::make_pair(std::string("NUC_RCFG"), &CNameUnifierClientSkel::removeCharFromGuild_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-
+			
 			init = true;
 		}
 
@@ -917,7 +918,7 @@ namespace CHARSYNC
 		return true;
 	}
 
-
+	
 	void CNameUnifierClientSkel::initEIdTranslator_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CNameUnifierClientSkel_initEIdTranslator_NUC_IET);
