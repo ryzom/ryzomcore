@@ -5940,13 +5940,13 @@ namespace RSMGR
 		// The invited char id is deducted from the name by using.
 		// the full name rules for shard resolution.
 		// Return invoke_result with the following error codes :
-		// 		0   :	no error
-		// 		100 :	unknown onwer char
-		// 		101 :	player already invited
-		// 		102 :	no current session
-		// 		103 :	internal error
-		// 		104 :	invited char not found
-		// 		plus all the error code from inviteCharacter in the ring session manager interface
+		//   0   : no error
+		//   100 : unknown onwer char
+		//   101 : player already invited
+		//   102 : no current session
+		//   103 : internal error
+		//   104 : invited char not found
+		//   plus all the error code from inviteCharacter in the ring session manager interface
 		virtual void on_inviteCharacterByName(NLNET::TSockId from, uint32 charId, std::string invitedCharName) =0;
 
 		// Ask for character existing rating for the current session scenario
@@ -6141,13 +6141,13 @@ namespace RSMGR
 		// The invited char id is deducted from the name by using.
 		// the full name rules for shard resolution.
 		// Return invoke_result with the following error codes :
-		// 		0   :	no error
-		// 		100 :	unknown onwer char
-		// 		101 :	player already invited
-		// 		102 :	no current session
-		// 		103 :	internal error
-		// 		104 :	invited char not found
-		// 		plus all the error code from inviteCharacter in the ring session manager interface
+		//   0   : no error
+		//   100 : unknown onwer char
+		//   101 : player already invited
+		//   102 : no current session
+		//   103 : internal error
+		//   104 : invited char not found
+		//   plus all the error code from inviteCharacter in the ring session manager interface
 
 		void inviteCharacterByName(uint32 charId, std::string invitedCharName)
 		{

@@ -2529,7 +2529,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			}
 		}
 </xsl:if>
-		virtual ~<xsl:value-of select="@name"/>Itf()
+		virtual ~<xsl:value-of select="@name"/>Itf()<xsl:if test="@extend"> NL_OVERRIDE</xsl:if>
 		{
 		}
 
@@ -2760,7 +2760,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		}
 </xsl:if>
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(const NLNET::CInetHost &amp;address)
+		virtual void connectItf(const NLNET::CInetHost &amp;address)<xsl:if test="@extend"> NL_OVERRIDE</xsl:if>
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
@@ -2787,7 +2787,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		/** Must be called evenly, update the network subclass to receive message
 		 *	and dispatch invokation returns.
 		 */
-		virtual void update()
+		virtual void update()<xsl:if test="@extend"> NL_OVERRIDE</xsl:if>
 		{
 			H_AUTO(<xsl:value-of select="@name"/>_update);
 
