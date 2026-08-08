@@ -19,8 +19,7 @@
 	<!-- #####         Root template matcher               ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="generator">
-<xsl:if test="$output != 'php'">
-// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
@@ -124,7 +123,7 @@ namespace <xsl:value-of select="@name"/>
 	<!-- ######################################################### -->
 	<xsl:template match="include" mode="header">
 #include "<xsl:value-of select="@file"/>"
-	</xsl:template>
+</xsl:template>
 	<xsl:template match="sys-include" mode="header">
 #include &lt;<xsl:value-of select="@file"/>&gt;
 	</xsl:template>

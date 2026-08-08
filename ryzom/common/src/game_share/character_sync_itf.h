@@ -1,4 +1,3 @@
-
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -32,11 +31,11 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 #include "game_share/r2_basic_types.h"
-	
+
 #include "continent.h"
-	
+
 namespace CHARSYNC
 {
 	

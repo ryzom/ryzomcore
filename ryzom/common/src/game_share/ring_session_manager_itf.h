@@ -1,4 +1,3 @@
-
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -34,19 +33,19 @@
 #include "game_share/callback_adaptor.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 #include "game_share/r2_basic_types.h"
-	
+
 #include "game_share/r2_share_itf.h"
-	
+
 #include "nel/net/login_cookie.h"
-	
+
 #include "game_share/welcome_service_itf.h"
-	
+
 #include "game_share/character_sync_itf.h"
-	
+
 #include "game_share/security_check.h"
-	
+
 namespace RSMGR
 {
 	
