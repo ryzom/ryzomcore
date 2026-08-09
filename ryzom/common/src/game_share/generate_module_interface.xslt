@@ -891,19 +891,17 @@ namespace <xsl:value-of select="@name"/>
 	<!-- for non database 'by reference' property, generate a non const get accessor -->
 		<xsl:text>		</xsl:text><xsl:value-of select="$property/@type"/> &amp;get<xsl:value-of select="$property/@name"/>()
 		{
-			return _<xsl:value-of select="$property/@name"/>;
-		}
+			return _<xsl:value-of select="$property/@name"/><xsl:text>;
+		}</xsl:text>
 </xsl:if>
 
 		void set<xsl:value-of select="$property/@name"/>(const <xsl:value-of select="$property/@type"/> &amp;value)
-		{
-<xsl:if test="../database">
+		{<xsl:if test="../database">
 			if (_<xsl:value-of select="$property/@name"/> != value)
 			{
 				if (getPersistentState() != NOPE::os_transient)
 					setPersistentState(NOPE::os_dirty);
 </xsl:if>
-
 				<xsl:variable name="relation" select="parent[@db_col = $property/@db_col]"/>
 				<xsl:if test="$relation">
 					<!-- this property is a child/parent relation, update the parent -->
@@ -913,9 +911,7 @@ namespace <xsl:value-of select="@name"/>
 				if (parent &amp;&amp; getPersistentState() != NOPE::os_transient )
 					parent->remove<xsl:value-of select="$relation/@child_name"/>Child(this);
 				</xsl:if>
-
-				_<xsl:value-of select="$property/@name"/> = value;
-
+				_<xsl:value-of select="$property/@name"/><xsl:text> = value;</xsl:text>
 <xsl:if test="$relation">
 					<!-- this property is a child/parent relation, update the parent -->
 
@@ -927,7 +923,7 @@ namespace <xsl:value-of select="@name"/>
 			}
 </xsl:if>
 		}
-	</xsl:when>
+</xsl:when>
 	<xsl:otherwise>
 		<xsl:text>		</xsl:text><xsl:value-of select="$property/@type"/> get<xsl:value-of select="$property/@name"/>() const
 		{
@@ -935,17 +931,13 @@ namespace <xsl:value-of select="@name"/>
 		}
 
 		void set<xsl:value-of select="$property/@name"/>(<xsl:value-of select="$property/@type"/> value)
-		{
-<xsl:if test="../database">
+		{<xsl:if test="../database">
 			if (_<xsl:value-of select="$property/@name"/> != value)
 			{
 				if (getPersistentState() != NOPE::os_transient)
-					setPersistentState(NOPE::os_dirty);
-</xsl:if>
-				_<xsl:value-of select="$property/@name"/> = value;
-<xsl:if test="../database">
-			}
-</xsl:if>
+					setPersistentState(NOPE::os_dirty);</xsl:if>
+				_<xsl:value-of select="$property/@name"/> = value;<xsl:if test="../database">
+			}</xsl:if>
 		}
 </xsl:otherwise>
 </xsl:choose>
@@ -1293,9 +1285,10 @@ namespace <xsl:value-of select="@name"/>
 <xsl:if test="not(database)">
 <xsl:text>
 		// constructor
-		</xsl:text><xsl:value-of select="$className"/>()
-		{
-<xsl:if test="property[@default]">			// Default initialisation
+		</xsl:text><xsl:value-of select="$className"/><xsl:text>()
+		{</xsl:text>
+<xsl:if test="property[@default]">
+			// Default initialisation
 </xsl:if>
 <xsl:for-each select="property[@default]">
 <xsl:text>			</xsl:text>_<xsl:value-of select="@name"/> = <xsl:value-of select="@default"/>;
@@ -1434,11 +1427,10 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:if test="serial or message">
 <xsl:text>
 		void serial(NLMISC::IStream &amp;s)
-		{
-</xsl:text>
+		{</xsl:text>
 	<xsl:for-each select="property">
-<xsl:text>			s.serial</xsl:text><xsl:value-of select="@serial"/>(_<xsl:value-of select="@name"/>)<xsl:text>;
-</xsl:text>
+		<xsl:text>
+			s.serial</xsl:text><xsl:value-of select="@serial"/>(_<xsl:value-of select="@name"/>)<xsl:text>;</xsl:text>
 	</xsl:for-each>
 		}
 </xsl:if>

@@ -31,10 +31,10 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 namespace CMDEXE
 {
-	
+
 
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -59,12 +59,12 @@ namespace CMDEXE
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
 		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
 		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
 		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -118,7 +118,7 @@ namespace CMDEXE
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CCommandExecutorSkel::TInterceptor *interceptor = NULL;
+				CCommandExecutorSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -126,7 +126,7 @@ namespace CMDEXE
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CCommandExecutorProxy()
@@ -143,7 +143,7 @@ namespace CMDEXE
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sendCommand(NLNET::CMessage &__message, const std::string &commandName, const NLMISC::CEntityId &senderEId, bool haveTarget, const NLMISC::CEntityId &targetEId, const std::string &arg);
-	
+
 
 
 

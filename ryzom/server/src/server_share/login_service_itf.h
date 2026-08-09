@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -36,17 +33,17 @@
 #include "game_share/callback_adaptor.h"
 
 #include "nel/net/login_cookie.h"
-	
+
 namespace LS
 {
-	
+
 
 	class CLoginServiceWebItf 
 	{
 	protected:
 
 		/// the callback server adaptor
-		CUniquePtr<ICallbackServerAdaptor>	_CallbackServer;	
+		CUniquePtr<ICallbackServerAdaptor>	_CallbackServer;
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
 		{
@@ -80,12 +77,12 @@ namespace LS
 
 	public:
 		/** Constructor, if you specify a replacement adaptor, then the object
-		 *	become owner of the adaptor (and it will be released with the 
+		 *	become owner of the adaptor (and it will be released with the
 		 *	interface).
 		 */
-		CLoginServiceWebItf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+		CLoginServiceWebItf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 		{
-			if (replacementAdaptor == NULL)
+			if (replacementAdaptor == nullptr)
 			{
 				// use default callback server
 				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
@@ -182,10 +179,10 @@ namespace LS
 			nldebug("CLoginServiceWeb::cb_login received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CLoginServiceWebItf *callback = (CLoginServiceWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			std::string	ipAddress;
@@ -211,10 +208,10 @@ namespace LS
 			nldebug("CLoginServiceWeb::cb_logout received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CLoginServiceWebItf *callback = (CLoginServiceWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			nlRead(message, serial, userId);
@@ -251,18 +248,18 @@ namespace LS
 		virtual void on_logout(NLNET::TSockId from, uint32 userId) =0;
 
 	};
+
 	
-	
-	/** This is the client side of the interface 
+	/** This is the client side of the interface
 	 *	Derive from this class to invoke method on the callback server
-	 */	
+	 */
 
 	class CLoginServiceWebClientItf 
 	{
 	protected:
 
 		/// the callback client adaptor
-		CUniquePtr < ICallbackClientAdaptor >	_CallbackClient;
+		CUniquePtr<ICallbackClientAdaptor>	_CallbackClient;
 
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
@@ -301,34 +298,34 @@ namespace LS
 
 				initialized = true;
 			}
-			
+
 			std::map < std::string, std::string>::const_iterator it(messageNames.find(methodName));
 			if (it != messageNames.end())
 				return it->second;
-			
+
 
 			static std::string emptyString;
-			
+
 			return emptyString;
 
 		}
-		
-		CLoginServiceWebClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+
+		CLoginServiceWebClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 		{
-			if (adaptorReplacement == NULL)
+			if (adaptorReplacement == nullptr)
 			{
 				// use the default Nel adaptor
-				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
+				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(new CNelCallbackClientAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(adaptorReplacement);
+				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(adaptorReplacement);
 			}
 		}
 
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(const NLNET::CInetHost & address)
+		virtual void connectItf(const NLNET::CInetHost &address)
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
@@ -404,10 +401,10 @@ namespace LS
 			nldebug("CLoginServiceWebClient::cb_loginResult received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackClientAdaptor *adaptor = static_cast< ICallbackClientAdaptor *>(netbase.getUserData());
-			
+
 			CLoginServiceWebClientItf *callback = (CLoginServiceWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			std::string	cookie;
@@ -432,10 +429,10 @@ namespace LS
 			nldebug("CLoginServiceWebClient::cb_logoutResult received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackClientAdaptor *adaptor = static_cast< ICallbackClientAdaptor *>(netbase.getUserData());
-			
+
 			CLoginServiceWebClientItf *callback = (CLoginServiceWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	errorCode;
 			std::string	reason;

@@ -170,7 +170,7 @@
 			<property type="TCharacterNameResult"	name="Result"/>
 			<property type="uint32"					name="UserId"/>
 			<property type="uint8"					name="CharIndex"/>
-			<property type="ucstring"				name="FullName"/>
+			<property type="ucstring"				name="FullName"	byref="true"/>
 
 		</class>
 

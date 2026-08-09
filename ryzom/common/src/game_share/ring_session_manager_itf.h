@@ -1812,9 +1812,7 @@ namespace RSMGR
 
 		void setSessionId(TSessionId value)
 		{
-
 				_SessionId = value;
-
 		}
 		// The type of the session
 		TSessionType getSessionType() const
@@ -1824,9 +1822,7 @@ namespace RSMGR
 
 		void setSessionType(TSessionType value)
 		{
-
 				_SessionType = value;
-
 		}
 		// Instance ID that host this session
 		uint32 getInstanceId() const
@@ -1836,9 +1832,7 @@ namespace RSMGR
 
 		void setInstanceId(uint32 value)
 		{
-
 				_InstanceId = value;
-
 		}
 		// Number of characters currently playing in the session (player and pioneer)
 		uint32 getNbPlayingChars() const
@@ -1848,9 +1842,7 @@ namespace RSMGR
 
 		void setNbPlayingChars(uint32 value)
 		{
-
 				_NbPlayingChars = value;
-
 		}
 
 		bool operator == (const TRunningSessionInfo &other) const
@@ -1865,7 +1857,6 @@ namespace RSMGR
 		// constructor
 		TRunningSessionInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -1874,7 +1865,6 @@ namespace RSMGR
 			s.serial(_SessionType);
 			s.serial(_InstanceId);
 			s.serial(_NbPlayingChars);
-
 		}
 
 
@@ -4869,9 +4859,7 @@ namespace RSMGR
 
 		void setSessionId(TSessionId value)
 		{
-
 				_SessionId = value;
-
 		}
 		//
 		bool getRequesterCharInvited() const
@@ -4881,9 +4869,7 @@ namespace RSMGR
 
 		void setRequesterCharInvited(bool value)
 		{
-
 				_RequesterCharInvited = value;
-
 		}
 		//
 		bool getRequesterCharKicked() const
@@ -4893,9 +4879,7 @@ namespace RSMGR
 
 		void setRequesterCharKicked(bool value)
 		{
-
 				_RequesterCharKicked = value;
-
 		}
 		//
 		const std::string &getOwnerName() const
@@ -4908,16 +4892,11 @@ namespace RSMGR
 			return _OwnerName;
 		}
 
-
 		void setOwnerName(const std::string &value)
 		{
-
-
 				_OwnerName = value;
-
-
 		}
-			//
+		//
 		const std::string &getTitle() const
 		{
 			return _Title;
@@ -4928,16 +4907,11 @@ namespace RSMGR
 			return _Title;
 		}
 
-
 		void setTitle(const std::string &value)
 		{
-
-
 				_Title = value;
-
-
 		}
-			//
+		//
 		const std::string &getDescription() const
 		{
 			return _Description;
@@ -4948,16 +4922,11 @@ namespace RSMGR
 			return _Description;
 		}
 
-
 		void setDescription(const std::string &value)
 		{
-
-
 				_Description = value;
-
-
 		}
-			//
+		//
 		TAnimMode getAnimMode() const
 		{
 			return _AnimMode;
@@ -4965,9 +4934,7 @@ namespace RSMGR
 
 		void setAnimMode(TAnimMode value)
 		{
-
 				_AnimMode = value;
-
 		}
 		//
 		R2::TSessionLevel getSessionLevel() const
@@ -4977,9 +4944,7 @@ namespace RSMGR
 
 		void setSessionLevel(R2::TSessionLevel value)
 		{
-
 				_SessionLevel = value;
-
 		}
 		//
 		bool getAllowFreeTrial() const
@@ -4989,9 +4954,7 @@ namespace RSMGR
 
 		void setAllowFreeTrial(bool value)
 		{
-
 				_AllowFreeTrial = value;
-
 		}
 		//
 		uint32 getLaunchDate() const
@@ -5001,9 +4964,7 @@ namespace RSMGR
 
 		void setLaunchDate(uint32 value)
 		{
-
 				_LaunchDate = value;
-
 		}
 		//
 		uint32 getNbConnectedPlayer() const
@@ -5013,9 +4974,7 @@ namespace RSMGR
 
 		void setNbConnectedPlayer(uint32 value)
 		{
-
 				_NbConnectedPlayer = value;
-
 		}
 		//
 		const std::string &getLanguage() const
@@ -5028,16 +4987,11 @@ namespace RSMGR
 			return _Language;
 		}
 
-
 		void setLanguage(const std::string &value)
 		{
-
-
 				_Language = value;
-
-
 		}
-			//
+		//
 		TSessionOrientation getOrientation() const
 		{
 			return _Orientation;
@@ -5045,9 +4999,7 @@ namespace RSMGR
 
 		void setOrientation(TSessionOrientation value)
 		{
-
 				_Orientation = value;
-
 		}
 		//
 		uint32 getNbRating() const
@@ -5057,9 +5009,7 @@ namespace RSMGR
 
 		void setNbRating(uint32 value)
 		{
-
 				_NbRating = value;
-
 		}
 		//
 		uint32 getRateFun() const
@@ -5069,9 +5019,7 @@ namespace RSMGR
 
 		void setRateFun(uint32 value)
 		{
-
 				_RateFun = value;
-
 		}
 		//
 		uint32 getRateDifficulty() const
@@ -5081,9 +5029,7 @@ namespace RSMGR
 
 		void setRateDifficulty(uint32 value)
 		{
-
 				_RateDifficulty = value;
-
 		}
 		//
 		uint32 getRateAccessibility() const
@@ -5093,9 +5039,7 @@ namespace RSMGR
 
 		void setRateAccessibility(uint32 value)
 		{
-
 				_RateAccessibility = value;
-
 		}
 		//
 		uint32 getRateOriginality() const
@@ -5105,9 +5049,7 @@ namespace RSMGR
 
 		void setRateOriginality(uint32 value)
 		{
-
 				_RateOriginality = value;
-
 		}
 		//
 		uint32 getRateDirection() const
@@ -5117,9 +5059,7 @@ namespace RSMGR
 
 		void setRateDirection(uint32 value)
 		{
-
 				_RateDirection = value;
-
 		}
 		//
 		uint32 getScenarioRRPTotal() const
@@ -5129,9 +5069,7 @@ namespace RSMGR
 
 		void setScenarioRRPTotal(uint32 value)
 		{
-
 				_ScenarioRRPTotal = value;
-
 		}
 
 		bool operator == (const TSessionDesc &other) const
@@ -5162,7 +5100,6 @@ namespace RSMGR
 		// constructor
 		TSessionDesc()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -5187,7 +5124,6 @@ namespace RSMGR
 			s.serial(_RateOriginality);
 			s.serial(_RateDirection);
 			s.serial(_ScenarioRRPTotal);
-
 		}
 
 
@@ -5234,9 +5170,7 @@ namespace RSMGR
 
 		void setCharId(uint32 value)
 		{
-
 				_CharId = value;
-
 		}
 		//
 		bool getConnected() const
@@ -5246,9 +5180,7 @@ namespace RSMGR
 
 		void setConnected(bool value)
 		{
-
 				_Connected = value;
-
 		}
 		//
 		bool getKicked() const
@@ -5258,9 +5190,7 @@ namespace RSMGR
 
 		void setKicked(bool value)
 		{
-
 				_Kicked = value;
-
 		}
 		//
 		const std::string &getCharName() const
@@ -5273,16 +5203,11 @@ namespace RSMGR
 			return _CharName;
 		}
 
-
 		void setCharName(const std::string &value)
 		{
-
-
 				_CharName = value;
-
-
 		}
-			//
+		//
 		const std::string &getGuildName() const
 		{
 			return _GuildName;
@@ -5293,16 +5218,11 @@ namespace RSMGR
 			return _GuildName;
 		}
 
-
 		void setGuildName(const std::string &value)
 		{
-
-
 				_GuildName = value;
-
-
 		}
-			//
+		//
 		uint32 getShardId() const
 		{
 			return _ShardId;
@@ -5310,9 +5230,7 @@ namespace RSMGR
 
 		void setShardId(uint32 value)
 		{
-
 				_ShardId = value;
-
 		}
 		//
 		R2::TSessionLevel getLevel() const
@@ -5322,9 +5240,7 @@ namespace RSMGR
 
 		void setLevel(R2::TSessionLevel value)
 		{
-
 				_Level = value;
-
 		}
 		//
 		CHARSYNC::TRace getRace() const
@@ -5334,9 +5250,7 @@ namespace RSMGR
 
 		void setRace(CHARSYNC::TRace value)
 		{
-
 				_Race = value;
-
 		}
 		//
 		CHARSYNC::TCivilisation getCivilisation() const
@@ -5346,9 +5260,7 @@ namespace RSMGR
 
 		void setCivilisation(CHARSYNC::TCivilisation value)
 		{
-
 				_Civilisation = value;
-
 		}
 		//
 		CHARSYNC::TCult getCult() const
@@ -5358,9 +5270,7 @@ namespace RSMGR
 
 		void setCult(CHARSYNC::TCult value)
 		{
-
 				_Cult = value;
-
 		}
 		//
 		TSessionPartStatus getPartStatus() const
@@ -5370,9 +5280,7 @@ namespace RSMGR
 
 		void setPartStatus(TSessionPartStatus value)
 		{
-
 				_PartStatus = value;
-
 		}
 
 		bool operator == (const TCharDesc &other) const
@@ -5394,7 +5302,6 @@ namespace RSMGR
 		// constructor
 		TCharDesc()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -5410,7 +5317,6 @@ namespace RSMGR
 			s.serial(_Civilisation);
 			s.serial(_Cult);
 			s.serial(_PartStatus);
-
 		}
 
 

@@ -507,16 +507,11 @@ namespace CHARSYNC
 			return _CharEId;
 		}
 
-
 		void setCharEId(const NLMISC::CEntityId &value)
 		{
-
-
 				_CharEId = value;
-
-
 		}
-			// The name of the character
+		// The name of the character
 		const std::string &getCharName() const
 		{
 			return _CharName;
@@ -527,16 +522,11 @@ namespace CHARSYNC
 			return _CharName;
 		}
 
-
 		void setCharName(const std::string &value)
 		{
-
-
 				_CharName = value;
-
-
 		}
-			// The session id of the character home mainland
+		// The session id of the character home mainland
 		uint32 getHomeSessionId() const
 		{
 			return _HomeSessionId;
@@ -544,9 +534,7 @@ namespace CHARSYNC
 
 		void setHomeSessionId(uint32 value)
 		{
-
 				_HomeSessionId = value;
-
 		}
 		// The best combat level of the character
 		sint32 getBestCombatLevel() const
@@ -556,9 +544,7 @@ namespace CHARSYNC
 
 		void setBestCombatLevel(sint32 value)
 		{
-
 				_BestCombatLevel = value;
-
 		}
 		// The guild id of this player
 		uint32 getGuildId() const
@@ -568,9 +554,7 @@ namespace CHARSYNC
 
 		void setGuildId(uint32 value)
 		{
-
 				_GuildId = value;
-
 		}
 		// the list of respawn points validated by the character
 		const CONTINENT::TRespawnPointCounters &getRespawnPoints() const
@@ -583,16 +567,11 @@ namespace CHARSYNC
 			return _RespawnPoints;
 		}
 
-
 		void setRespawnPoints(const CONTINENT::TRespawnPointCounters &value)
 		{
-
-
 				_RespawnPoints = value;
-
-
 		}
-			//
+		//
 		TRace getRace() const
 		{
 			return _Race;
@@ -600,9 +579,7 @@ namespace CHARSYNC
 
 		void setRace(TRace value)
 		{
-
 				_Race = value;
-
 		}
 		//
 		TCivilisation getCivilisation() const
@@ -612,9 +589,7 @@ namespace CHARSYNC
 
 		void setCivilisation(TCivilisation value)
 		{
-
 				_Civilisation = value;
-
 		}
 		//
 		TCult getCult() const
@@ -624,9 +599,7 @@ namespace CHARSYNC
 
 		void setCult(TCult value)
 		{
-
 				_Cult = value;
-
 		}
 		//
 		bool getNewcomer() const
@@ -636,9 +609,7 @@ namespace CHARSYNC
 
 		void setNewcomer(bool value)
 		{
-
 				_Newcomer = value;
-
 		}
 
 		bool operator == (const TCharInfo &other) const
@@ -659,7 +630,6 @@ namespace CHARSYNC
 		// constructor
 		TCharInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -674,7 +644,6 @@ namespace CHARSYNC
 			s.serial(_Civilisation);
 			s.serial(_Cult);
 			s.serial(_Newcomer);
-
 		}
 
 
@@ -707,16 +676,11 @@ namespace CHARSYNC
 			return _CharEId;
 		}
 
-
 		void setCharEId(const NLMISC::CEntityId &value)
 		{
-
-
 				_CharEId = value;
-
-
 		}
-			// The best combat level of the character
+		// The best combat level of the character
 		sint32 getBestCombatLevel() const
 		{
 			return _BestCombatLevel;
@@ -724,9 +688,7 @@ namespace CHARSYNC
 
 		void setBestCombatLevel(sint32 value)
 		{
-
 				_BestCombatLevel = value;
-
 		}
 
 		bool operator == (const TCharBestLevelInfo &other) const
@@ -739,14 +701,12 @@ namespace CHARSYNC
 		// constructor
 		TCharBestLevelInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_CharEId);
 			s.serial(_BestCombatLevel);
-
 		}
 
 
@@ -1108,9 +1068,7 @@ namespace CHARSYNC
 
 		void setResult(TCharacterNameResult value)
 		{
-
 				_Result = value;
-
 		}
 		//
 		uint32 getUserId() const
@@ -1120,9 +1078,7 @@ namespace CHARSYNC
 
 		void setUserId(uint32 value)
 		{
-
 				_UserId = value;
-
 		}
 		//
 		uint8 getCharIndex() const
@@ -1132,21 +1088,22 @@ namespace CHARSYNC
 
 		void setCharIndex(uint8 value)
 		{
-
 				_CharIndex = value;
-
 		}
 		//
-		ucstring getFullName() const
+		const ucstring &getFullName() const
 		{
 			return _FullName;
 		}
 
-		void setFullName(ucstring value)
+		ucstring &getFullName()
 		{
+			return _FullName;
+		}
 
+		void setFullName(const ucstring &value)
+		{
 				_FullName = value;
-
 		}
 
 		bool operator == (const CValidateNameResult &other) const
@@ -1161,7 +1118,6 @@ namespace CHARSYNC
 		// constructor
 		CValidateNameResult()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -1170,7 +1126,6 @@ namespace CHARSYNC
 			s.serial(_UserId);
 			s.serial(_CharIndex);
 			s.serial(_FullName);
-
 		}
 
 
@@ -1202,16 +1157,11 @@ namespace CHARSYNC
 			return _GuildName;
 		}
 
-
 		void setGuildName(const ucstring &value)
 		{
-
-
 				_GuildName = value;
-
-
 		}
-			//
+		//
 		uint32 getGuildId() const
 		{
 			return _GuildId;
@@ -1219,9 +1169,7 @@ namespace CHARSYNC
 
 		void setGuildId(uint32 value)
 		{
-
 				_GuildId = value;
-
 		}
 
 		bool operator == (const CGuildInfo &other) const
@@ -1234,14 +1182,12 @@ namespace CHARSYNC
 		// constructor
 		CGuildInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_GuildName);
 			s.serial(_GuildId);
-
 		}
 
 
@@ -1472,9 +1418,7 @@ namespace CHARSYNC
 
 		void setUserId(uint32 value)
 		{
-
 				_UserId = value;
-
 		}
 		//
 		uint8 getCharIndex() const
@@ -1484,9 +1428,7 @@ namespace CHARSYNC
 
 		void setCharIndex(uint8 value)
 		{
-
 				_CharIndex = value;
-
 		}
 		//
 		const ucstring &getName() const
@@ -1499,16 +1441,11 @@ namespace CHARSYNC
 			return _Name;
 		}
 
-
 		void setName(const ucstring &value)
 		{
-
-
 				_Name = value;
-
-
 		}
-			//
+		//
 		const std::string &getUserName() const
 		{
 			return _UserName;
@@ -1519,16 +1456,11 @@ namespace CHARSYNC
 			return _UserName;
 		}
 
-
 		void setUserName(const std::string &value)
 		{
-
-
 				_UserName = value;
-
-
 		}
-			//
+		//
 		const uint32 &getShardId() const
 		{
 			return _ShardId;
@@ -1539,16 +1471,11 @@ namespace CHARSYNC
 			return _ShardId;
 		}
 
-
 		void setShardId(const uint32 &value)
 		{
-
-
 				_ShardId = value;
-
-
 		}
-	
+
 		bool operator == (const TNameEntry &other) const
 		{
 			return _UserId == other._UserId
@@ -1562,7 +1489,6 @@ namespace CHARSYNC
 		// constructor
 		TNameEntry()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -1572,7 +1498,6 @@ namespace CHARSYNC
 			s.serial(_Name);
 			s.serial(_UserName);
 			s.serial(_ShardId);
-
 		}
 
 
@@ -1609,9 +1534,7 @@ namespace CHARSYNC
 
 		void setCharId(uint32 value)
 		{
-
 				_CharId = value;
-
 		}
 		//
 		const ucstring &getCharName() const
@@ -1624,16 +1547,11 @@ namespace CHARSYNC
 			return _CharName;
 		}
 
-
 		void setCharName(const ucstring &value)
 		{
-
-
 				_CharName = value;
-
-
 		}
-			//
+		//
 		uint32 getHomeSessionId() const
 		{
 			return _HomeSessionId;
@@ -1641,9 +1559,7 @@ namespace CHARSYNC
 
 		void setHomeSessionId(uint32 value)
 		{
-
 				_HomeSessionId = value;
-
 		}
 		//
 		bool getIsOwnerOfActiveAnimSession() const
@@ -1653,9 +1569,7 @@ namespace CHARSYNC
 
 		void setIsOwnerOfActiveAnimSession(bool value)
 		{
-
 				_IsOwnerOfActiveAnimSession = value;
-
 		}
 		//
 		uint32 getActiveAnimSessionId() const
@@ -1665,9 +1579,7 @@ namespace CHARSYNC
 
 		void setActiveAnimSessionId(uint32 value)
 		{
-
 				_ActiveAnimSessionId = value;
-
 		}
 		//
 		uint32 getEditionSessionId() const
@@ -1677,9 +1589,7 @@ namespace CHARSYNC
 
 		void setEditionSessionId(uint32 value)
 		{
-
 				_EditionSessionId = value;
-
 		}
 
 		bool operator == (const TCharSyncResultEntry &other) const
@@ -1709,7 +1619,6 @@ namespace CHARSYNC
 			s.serial(_IsOwnerOfActiveAnimSession);
 			s.serial(_ActiveAnimSessionId);
 			s.serial(_EditionSessionId);
-
 		}
 
 

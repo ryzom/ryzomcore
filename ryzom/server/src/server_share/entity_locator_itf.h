@@ -31,10 +31,10 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 namespace ENTITYLOC
 {
-	
+
 	class TConnectedCharInfo;
 
 	class TCharConnectionEvent;
@@ -62,16 +62,11 @@ namespace ENTITYLOC
 			return _CharEId;
 		}
 
-
 		void setCharEId(const NLMISC::CEntityId &value)
 		{
-
-
 				_CharEId = value;
-
-				
 		}
-			// the date of last disconnection of the character
+		// the date of last disconnection of the character
 		uint32 getLastDisconnectionDate() const
 		{
 			return _LastDisconnectionDate;
@@ -79,11 +74,9 @@ namespace ENTITYLOC
 
 		void setLastDisconnectionDate(uint32 value)
 		{
-
 				_LastDisconnectionDate = value;
-
 		}
-	
+
 		bool operator == (const TConnectedCharInfo &other) const
 		{
 			return _CharEId == other._CharEId
@@ -94,19 +87,17 @@ namespace ENTITYLOC
 		// constructor
 		TConnectedCharInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_CharEId);
 			s.serial(_LastDisconnectionDate);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -210,7 +201,7 @@ namespace ENTITYLOC
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CEntityLocatorSkel::TInterceptor *interceptor = NULL;
+				CEntityLocatorSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -218,7 +209,7 @@ namespace ENTITYLOC
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CEntityLocatorProxy()
@@ -243,19 +234,19 @@ namespace ENTITYLOC
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_initState(NLNET::CMessage &__message, const std::vector < uint32 > &connectedUsers, const std::vector < TConnectedCharInfo > &connectedChars);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_playerConnected(NLNET::CMessage &__message, uint32 userId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_playerDisconnected(NLNET::CMessage &__message, uint32 userId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_charConnected(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId, uint32 lastDisconnectionDate);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_charDisconnected(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId);
-	
+
 
 
 
@@ -267,7 +258,7 @@ namespace ENTITYLOC
 	class TCharConnectionEvent
 	{
 	protected:
-		// The character id of the character
+		// The character id the the character
 		uint32	_CharId;
 		// Type of the event : true for a connection, false otherwise
 		bool	_Connection;
@@ -276,7 +267,7 @@ namespace ENTITYLOC
 		// Last Connection Date
 		uint32	_lastConnectionDate;
 	public:
-		// The character id of the character
+		// The character id the the character
 		uint32 getCharId() const
 		{
 			return _CharId;
@@ -284,11 +275,9 @@ namespace ENTITYLOC
 
 		void setCharId(uint32 value)
 		{
-
 				_CharId = value;
-
 		}
-			// Type of the event : true for a connection, false otherwise
+		// Type of the event : true for a connection, false otherwise
 		bool getConnection() const
 		{
 			return _Connection;
@@ -296,11 +285,9 @@ namespace ENTITYLOC
 
 		void setConnection(bool value)
 		{
-
 				_Connection = value;
-
 		}
-			// The privilege of the character (e.g :GM:DEV:)
+		// The privilege of the character (e.g :GM:DEV:)
 		std::string getPrivilege() const
 		{
 			return _Privilege;
@@ -308,11 +295,9 @@ namespace ENTITYLOC
 
 		void setPrivilege(std::string value)
 		{
-
 				_Privilege = value;
-
 		}
-			// Last Connection Date
+		// Last Connection Date
 		uint32 getlastConnectionDate() const
 		{
 			return _lastConnectionDate;
@@ -320,11 +305,9 @@ namespace ENTITYLOC
 
 		void setlastConnectionDate(uint32 value)
 		{
-
 				_lastConnectionDate = value;
-
 		}
-	
+
 		bool operator == (const TCharConnectionEvent &other) const
 		{
 			return _CharId == other._CharId
@@ -337,7 +320,6 @@ namespace ENTITYLOC
 		// constructor
 		TCharConnectionEvent()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -346,12 +328,11 @@ namespace ENTITYLOC
 			s.serial(_Connection);
 			s.serial(_Privilege);
 			s.serial(_lastConnectionDate);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -439,7 +420,7 @@ namespace ENTITYLOC
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CEntityLocatorClientSkel::TInterceptor *interceptor = NULL;
+				CEntityLocatorClientSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -447,7 +428,7 @@ namespace ENTITYLOC
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CEntityLocatorClientProxy()
@@ -474,7 +455,7 @@ namespace ENTITYLOC
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -483,7 +464,7 @@ namespace ENTITYLOC
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_connectionEvents(NLNET::CMessage &__message, const std::vector < TCharConnectionEvent > &events);
-	
+
 
 
 

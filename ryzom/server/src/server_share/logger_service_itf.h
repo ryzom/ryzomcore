@@ -31,16 +31,16 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 #include "nel/misc/sheet_id.h"
-	
-#include "game_share/inventories.h"
-	
+
+#include "inventories.h"
+
 #include <vector>
 	
 namespace LGS
 {
-	
+
 	class TParamDesc;
 
 	class TListParamValues;
@@ -69,11 +69,11 @@ namespace LGS
 			end_of_enum,
 
 			invalid_val,
-			
+
 			/// Number of enumerated values
 			nb_enum_items = 8
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -90,13 +90,13 @@ namespace LGS
 				indexTable.insert(std::make_pair(spt_entityId, 5));
 				indexTable.insert(std::make_pair(spt_sheetId, 6));
 				indexTable.insert(std::make_pair(spt_itemId, 7));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -110,9 +110,9 @@ namespace LGS
 				NL_STRING_CONVERSION_TABLE_ENTRY(spt_sheetId)
 				NL_STRING_CONVERSION_TABLE_ENTRY(spt_itemId)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};                                                                                             
-			static NLMISC::CStringConversion<TValues>                                                                
-			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)   
+			};
+			static NLMISC::CStringConversion<TValues>
+			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
 			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
@@ -191,16 +191,16 @@ namespace LGS
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 
 
 //	template <class T>	LGS::TSupportedParamType getParamType();
@@ -591,16 +591,11 @@ namespace LGS
 			return _Name;
 		}
 
-
 		void setName(const std::string &value)
 		{
-
-
 				_Name = value;
-
-				
 		}
-			// Type of the parameter
+		// Type of the parameter
 		TSupportedParamType getType() const
 		{
 			return _Type;
@@ -608,11 +603,9 @@ namespace LGS
 
 		void setType(TSupportedParamType value)
 		{
-
 				_Type = value;
-
 		}
-			// Flag indicating that this parameter is a list
+		// Flag indicating that this parameter is a list
 		bool getList() const
 		{
 			return _List;
@@ -620,11 +613,9 @@ namespace LGS
 
 		void setList(bool value)
 		{
-
 				_List = value;
-
 		}
-	
+
 		bool operator == (const TParamDesc &other) const
 		{
 			return _Name == other._Name
@@ -640,18 +631,17 @@ namespace LGS
 			_List = false;
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_Name);
 			s.serial(_Type);
 			s.serial(_List);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -663,10 +653,10 @@ namespace LGS
 	class TListParamValues
 	{
 	protected:
-		// 
+		//
 		std::list < TParamValue >	_Params;
 	public:
-		// 
+		//
 		const std::list < TParamValue > &getParams() const
 		{
 			return _Params;
@@ -677,16 +667,11 @@ namespace LGS
 			return _Params;
 		}
 
-
 		void setParams(const std::list < TParamValue > &value)
 		{
-
-
 				_Params = value;
-
-				
 		}
-	
+
 		bool operator == (const TListParamValues &other) const
 		{
 			return _Params == other._Params;
@@ -696,18 +681,16 @@ namespace LGS
 		// constructor
 		TListParamValues()
 		{
-
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serialCont(_Params);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -725,9 +708,9 @@ namespace LGS
 		bool	_Context;
 		// The textual content of the log, contains '__CLOSE_CONTEXT__' to close a log context
 		std::string	_LogText;
-		// 
+		//
 		std::vector < TParamDesc >	_Params;
-		// 
+		//
 		std::vector < TParamDesc >	_ListParams;
 	public:
 		// The name of the log, used to identify the log
@@ -738,11 +721,9 @@ namespace LGS
 
 		void setLogName(std::string value)
 		{
-
 				_LogName = value;
-
 		}
-			// This log is a context log
+		// This log is a context log
 		bool getContext() const
 		{
 			return _Context;
@@ -750,11 +731,9 @@ namespace LGS
 
 		void setContext(bool value)
 		{
-
 				_Context = value;
-
 		}
-			// The textual content of the log, contains '__CLOSE_CONTEXT__' to close a log context
+		// The textual content of the log, contains '__CLOSE_CONTEXT__' to close a log context
 		std::string getLogText() const
 		{
 			return _LogText;
@@ -762,11 +741,9 @@ namespace LGS
 
 		void setLogText(std::string value)
 		{
-
 				_LogText = value;
-
 		}
-			// 
+		//
 		const std::vector < TParamDesc > &getParams() const
 		{
 			return _Params;
@@ -777,16 +754,11 @@ namespace LGS
 			return _Params;
 		}
 
-
 		void setParams(const std::vector < TParamDesc > &value)
 		{
-
-
 				_Params = value;
-
-				
 		}
-			// 
+		//
 		const std::vector < TParamDesc > &getListParams() const
 		{
 			return _ListParams;
@@ -797,16 +769,11 @@ namespace LGS
 			return _ListParams;
 		}
 
-
 		void setListParams(const std::vector < TParamDesc > &value)
 		{
-
-
 				_ListParams = value;
-
-				
 		}
-	
+
 		bool operator == (const TLogDefinition &other) const
 		{
 			return _LogName == other._LogName
@@ -824,7 +791,7 @@ namespace LGS
 			_Context = false;
 
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_LogName);
@@ -832,12 +799,11 @@ namespace LGS
 			s.serial(_LogText);
 			s.serialCont(_Params);
 			s.serialCont(_ListParams);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -850,16 +816,16 @@ namespace LGS
 	class TLogInfo
 	{
 	protected:
-		// 
+		//
 		std::string	_LogName;
-		// 
+		//
 		uint32	_TimeStamp;
-		// 
+		//
 		std::vector < TParamValue >	_Params;
-		// 
+		//
 		std::vector < TListParamValues >	_ListParams;
 	public:
-		// 
+		//
 		std::string getLogName() const
 		{
 			return _LogName;
@@ -867,11 +833,9 @@ namespace LGS
 
 		void setLogName(std::string value)
 		{
-
 				_LogName = value;
-
 		}
-			// 
+		//
 		uint32 getTimeStamp() const
 		{
 			return _TimeStamp;
@@ -879,11 +843,9 @@ namespace LGS
 
 		void setTimeStamp(uint32 value)
 		{
-
 				_TimeStamp = value;
-
 		}
-			// 
+		//
 		const std::vector < TParamValue > &getParams() const
 		{
 			return _Params;
@@ -894,16 +856,11 @@ namespace LGS
 			return _Params;
 		}
 
-
 		void setParams(const std::vector < TParamValue > &value)
 		{
-
-
 				_Params = value;
-
-				
 		}
-			// 
+		//
 		const std::vector < TListParamValues > &getListParams() const
 		{
 			return _ListParams;
@@ -914,16 +871,11 @@ namespace LGS
 			return _ListParams;
 		}
 
-
 		void setListParams(const std::vector < TListParamValues > &value)
 		{
-
-
 				_ListParams = value;
-
-				
 		}
-	
+
 		bool operator == (const TLogInfo &other) const
 		{
 			return _LogName == other._LogName
@@ -936,21 +888,19 @@ namespace LGS
 		// constructor
 		TLogInfo()
 		{
-
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_LogName);
 			s.serial(_TimeStamp);
 			s.serialCont(_Params);
 			s.serialCont(_ListParams);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -979,12 +929,12 @@ namespace LGS
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
 		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
 		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
 		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -1044,7 +994,7 @@ namespace LGS
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CLoggerServiceSkel::TInterceptor *interceptor = NULL;
+				CLoggerServiceSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -1052,7 +1002,7 @@ namespace LGS
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CLoggerServiceProxy()
@@ -1073,10 +1023,10 @@ namespace LGS
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_registerClient(NLNET::CMessage &__message, uint32 shardId, const std::vector < TLogDefinition > &logDef);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportLog(NLNET::CMessage &__message, const std::vector < TLogInfo > &logInfos);
-	
+
 
 
 

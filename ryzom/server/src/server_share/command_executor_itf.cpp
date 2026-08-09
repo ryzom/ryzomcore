@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "command_executor_itf.h"
 
 namespace CMDEXE
@@ -28,7 +28,7 @@ namespace CMDEXE
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CCommandExecutorSkel::TMessageHandlerMap &CCommandExecutorSkel::getMessageHandlers() const
 	{
@@ -38,15 +38,15 @@ namespace CMDEXE
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("CE_SC"), &CCommandExecutorSkel::sendCommand_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CCommandExecutorSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -65,7 +65,7 @@ namespace CMDEXE
 		return true;
 	}
 
-	
+
 	void CCommandExecutorSkel::sendCommand_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CCommandExecutorSkel_sendCommand_CE_SC);
@@ -91,9 +91,9 @@ namespace CMDEXE
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_sendCommand(__message, commandName, senderEId, haveTarget, targetEId, arg);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

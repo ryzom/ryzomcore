@@ -206,13 +206,13 @@ namespace R2
 
 		void fromSkillName(const std::string &skillName)
 		{
-			// we considere the lenght of the skill name to be proportional to the level
+			// we consider the length of the skill name to be proportional to the level
 			if (skillName.size() < 2)
 			{
 				// skill name too short
 				_Value = invalid_val;
 			}
-			uint32 size = skillName.size()-1;
+			uint32 size = (uint32)skillName.size()-1;
 			if (size < end_of_enum)
 				_Value = TValues(size);
 			else
@@ -270,16 +270,11 @@ namespace R2
 			return _ScenarioKey;
 		}
 
-
 		void setScenarioKey(const NLMISC::CHashKeyMD5 &value)
 		{
-
-
 				_ScenarioKey = value;
-
-
 		}
-			//
+		//
 		const std::string &getScenarioTitle() const
 		{
 			return _ScenarioTitle;
@@ -290,16 +285,11 @@ namespace R2
 			return _ScenarioTitle;
 		}
 
-
 		void setScenarioTitle(const std::string &value)
 		{
-
-
 				_ScenarioTitle = value;
-
-
 		}
-			//
+		//
 		const std::string &getScenarioDesc() const
 		{
 			return _ScenarioDesc;
@@ -310,16 +300,11 @@ namespace R2
 			return _ScenarioDesc;
 		}
 
-
 		void setScenarioDesc(const std::string &value)
 		{
-
-
 				_ScenarioDesc = value;
-
-
 		}
-			//
+		//
 		TSessionLevel getSessionLevel() const
 		{
 			return _SessionLevel;
@@ -327,9 +312,7 @@ namespace R2
 
 		void setSessionLevel(TSessionLevel value)
 		{
-
 				_SessionLevel = value;
-
 		}
 		//
 		const std::string &getScenarioAuthorName() const
@@ -342,16 +325,11 @@ namespace R2
 			return _ScenarioAuthorName;
 		}
 
-
 		void setScenarioAuthorName(const std::string &value)
 		{
-
-
 				_ScenarioAuthorName = value;
-
-
 		}
-			//
+		//
 		uint32 getSessionAnimatorCharId() const
 		{
 			return _SessionAnimatorCharId;
@@ -359,9 +337,7 @@ namespace R2
 
 		void setSessionAnimatorCharId(uint32 value)
 		{
-
 				_SessionAnimatorCharId = value;
-
 		}
 		//
 		bool getDMLess() const
@@ -371,9 +347,7 @@ namespace R2
 
 		void setDMLess(bool value)
 		{
-
 				_DMLess = value;
-
 		}
 		//
 		const std::string &getMissionTag() const
@@ -386,16 +360,11 @@ namespace R2
 			return _MissionTag;
 		}
 
-
 		void setMissionTag(const std::string &value)
 		{
-
-
 				_MissionTag = value;
-
-
 		}
-	
+
 		bool operator == (const TRunningScenarioInfo &other) const
 		{
 			return _ScenarioKey == other._ScenarioKey
@@ -412,7 +381,6 @@ namespace R2
 		// constructor
 		TRunningScenarioInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
@@ -425,7 +393,6 @@ namespace R2
 			s.serial(_SessionAnimatorCharId);
 			s.serial(_DMLess);
 			s.serial(_MissionTag);
-
 		}
 
 
@@ -1723,16 +1690,11 @@ namespace R2
 			return _ItemSheet;
 		}
 
-
 		void setItemSheet(const NLMISC::CSheetId &value)
 		{
-
-
 				_ItemSheet = value;
-
-
 		}
-			//
+		//
 		const ucstring &getName() const
 		{
 			return _Name;
@@ -1743,16 +1705,11 @@ namespace R2
 			return _Name;
 		}
 
-
 		void setName(const ucstring &value)
 		{
-
-
 				_Name = value;
-
-
 		}
-	
+
 		bool operator == (const TCharMappedInfo &other) const
 		{
 			return _ItemSheet == other._ItemSheet
@@ -1763,14 +1720,12 @@ namespace R2
 		// constructor
 		TCharMappedInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_ItemSheet);
 			s.serial(_Name);
-
 		}
 
 

@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "entity_locator_itf.h"
 
 namespace ENTITYLOC
@@ -28,7 +28,7 @@ namespace ENTITYLOC
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CEntityLocatorSkel::TMessageHandlerMap &CEntityLocatorSkel::getMessageHandlers() const
 	{
@@ -38,31 +38,31 @@ namespace ENTITYLOC
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("EL_IS"), &CEntityLocatorSkel::initState_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("EL_PC"), &CEntityLocatorSkel::playerConnected_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("EL_PD"), &CEntityLocatorSkel::playerDisconnected_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("EL_CC"), &CEntityLocatorSkel::charConnected_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("EL_CD"), &CEntityLocatorSkel::charDisconnected_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CEntityLocatorSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -81,7 +81,7 @@ namespace ENTITYLOC
 		return true;
 	}
 
-	
+
 	void CEntityLocatorSkel::initState_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CEntityLocatorSkel_initState_EL_IS);
@@ -135,9 +135,9 @@ namespace ENTITYLOC
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_initState(__message, connectedUsers, connectedChars);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -153,9 +153,9 @@ namespace ENTITYLOC
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_playerConnected(__message, userId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -171,9 +171,9 @@ namespace ENTITYLOC
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_playerDisconnected(__message, userId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -189,9 +189,9 @@ namespace ENTITYLOC
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_charConnected(__message, charEId, lastDisconnectionDate);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -207,9 +207,9 @@ namespace ENTITYLOC
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_charDisconnected(__message, charEId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -271,7 +271,7 @@ namespace ENTITYLOC
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CEntityLocatorClientSkel::TMessageHandlerMap &CEntityLocatorClientSkel::getMessageHandlers() const
 	{
@@ -281,15 +281,15 @@ namespace ENTITYLOC
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("ELC_CE"), &CEntityLocatorClientSkel::connectionEvents_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CEntityLocatorClientSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -308,7 +308,7 @@ namespace ENTITYLOC
 		return true;
 	}
 
-	
+
 	void CEntityLocatorClientSkel::connectionEvents_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CEntityLocatorClientSkel_connectionEvents_ELC_CE);
@@ -326,9 +326,9 @@ namespace ENTITYLOC
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_connectionEvents(__message, events);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

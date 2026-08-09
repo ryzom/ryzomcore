@@ -43,13 +43,13 @@
 
 		void fromSkillName(const std::string &amp;skillName)
 		{
-			// we considere the lenght of the skill name to be proportional to the level
+			// we consider the length of the skill name to be proportional to the level
 			if (skillName.size() &lt; 2)
 			{
 				// skill name too short
 				_Value = invalid_val;
 			}
-			uint32 size = skillName.size()-1;
+			uint32 size = (uint32)skillName.size()-1;
 			if (size &lt; end_of_enum)
 				_Value = TValues(size);
 			else
