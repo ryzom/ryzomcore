@@ -84,7 +84,7 @@
 -->
 namespace <xsl:value-of select="@name"/>
 {
-	<!-- forward declaration of class -->
+<!-- forward declaration of class -->
 <xsl:for-each select="class">
 	class <xsl:value-of select="@name"/>;
 <xsl:if test="database">
@@ -336,8 +336,8 @@ namespace <xsl:value-of select="@name"/>
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	<xsl:variable name="skelName" select="concat(@name, 'Skel')"/>
-	<xsl:variable name="proxyName" select="concat(@name, 'Proxy')"/>
+<xsl:variable name="skelName" select="concat(@name, 'Skel')"/>
+<xsl:variable name="proxyName" select="concat(@name, 'Proxy')"/>
 
 	const <xsl:value-of select="$skelName"/>::TMessageHandlerMap &amp;<xsl:value-of select="$skelName"/>::getMessageHandlers() const
 	{
@@ -347,11 +347,11 @@ namespace <xsl:value-of select="@name"/>
 		if (!init)
 		{
 			std::pair &lt; TMessageHandlerMap::iterator, bool &gt; res;
-			<xsl:for-each select="method">
+<xsl:for-each select="method">
 			res = handlers.insert(std::make_pair(std::string("<xsl:value-of select="@msg"/>"), &amp;<xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			</xsl:for-each>
+</xsl:for-each>
 			init = true;
 		}
 
@@ -374,7 +374,7 @@ namespace <xsl:value-of select="@name"/>
 		return true;
 	}
 
-	<xsl:for-each select="method">
+<xsl:for-each select="method">
 <xsl:choose>
 <xsl:when test="not(return)">
 	void <xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;__message)
@@ -725,7 +725,7 @@ namespace <xsl:value-of select="@name"/>
 			/// Number of enumerated values
 			nb_enum_items = <xsl:value-of select="count(item)"/>
 		};
-		<!-- generate an index table if the enum is 'linear' -->
+<!-- generate an index table if the enum is 'linear' -->
 		<xsl:if test="count(item/@value) = 0 or (count(item/@value) = 1 and item[1]/@value)">
 		/// Index table to convert enum value to linear index table
 		const std::map&lt;TValues, uint32&gt; &amp;getIndexTable() const
@@ -734,16 +734,15 @@ namespace <xsl:value-of select="@name"/>
 			static bool init = false;
 			if (!init)
 			{
-				// fill the index table
-			<xsl:for-each select="item">
-<xsl:text>	indexTable.insert(std::make_pair(</xsl:text><xsl:value-of select="@name"/>, <xsl:value-of select="position()-1"/>));
-			</xsl:for-each>
+				// fill the index table<xsl:for-each select="item"><xsl:text>
+				indexTable.insert(std::make_pair(</xsl:text><xsl:value-of select="@name"/>, <xsl:value-of select="position()-1"/>));</xsl:for-each>
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		</xsl:if>
+</xsl:if>
 
 		static const NLMISC::CStringConversion&lt;TValues&gt; &amp;getConversionTable()
 		{
@@ -754,11 +753,8 @@ namespace <xsl:value-of select="@name"/>
 </xsl:if>			};
 			static NLMISC::CStringConversion&lt;TValues&gt;
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-<xsl:if test="@bitset='true'">			empty_val);
-</xsl:if>
-<xsl:if test="not(@bitset='true')">			invalid_val);
-</xsl:if>
+			/ sizeof(TValues_nl_string_conversion_table[0]),  <xsl:if test="@bitset='true'">empty_val</xsl:if><xsl:if test="not(@bitset='true')">invalid_val</xsl:if>);
+
 			return conversionTable;
 		}
 
@@ -837,7 +833,7 @@ namespace <xsl:value-of select="@name"/>
 			return getConversionTable().isValid(_Value);
 		}
 
-		<!-- generate an index table if the enum is 'linear' -->
+<!-- generate an index table if the enum is 'linear' -->
 		<xsl:if test="count(item/@value) = 0 or (count(item/@value) = 1 and item[1]/@value)">
 		uint32 asIndex()
 		{
@@ -845,14 +841,14 @@ namespace <xsl:value-of select="@name"/>
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		</xsl:if>
+</xsl:if>
 
 		<!-- insert user code if any -->
 		<xsl:if test="header_code">
 <xsl:value-of select="header_code"/>
 		</xsl:if>
 	};
-	</xsl:template>
+</xsl:template>
 
 
 
@@ -909,7 +905,7 @@ namespace <xsl:value-of select="@name"/>
 
 				_<xsl:value-of select="$property/@name"/> = value;
 
-				<xsl:if test="$relation">
+<xsl:if test="$relation">
 					<!-- this property is a child/parent relation, update the parent -->
 
 				<xsl:value-of select="$relation/@class"/>Ptr parent = <xsl:value-of select="$relation/@class"/>::loadFromCache(_<xsl:value-of select="$property/@name"/>);

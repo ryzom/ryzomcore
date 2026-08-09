@@ -57,7 +57,7 @@
 			<!-- activate serial generation -->
 			<serial/>
 
-			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id the the character"/>
+			<property type="NLMISC::CEntityId"	name="CharEId"		byref="true"	doc="The entity id of the character"/>
 			<property type="sint32"				name="BestCombatLevel"				doc="The best combat level of the character"/>
 		</class>
 

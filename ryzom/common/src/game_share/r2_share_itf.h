@@ -206,13 +206,13 @@ namespace R2
 
 		void fromSkillName(const std::string &skillName)
 		{
-			// we considere the length of the skill name to be proportional to the level
+			// we considere the lenght of the skill name to be proportional to the level
 			if (skillName.size() < 2)
 			{
 				// skill name too short
 				_Value = invalid_val;
 			}
-			uint32 size = (uint32)skillName.size()-1;
+			uint32 size = skillName.size()-1;
 			if (size < end_of_enum)
 				_Value = TValues(size);
 			else
@@ -234,32 +234,32 @@ namespace R2
 				default: BOMB("Invalid value being converted to level - returning 1",return 1);
 			}
 		}
-
+			
 	};
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class TRunningScenarioInfo
 	{
 	protected:
-		//
+		// 
 		NLMISC::CHashKeyMD5	_ScenarioKey;
-		//
+		// 
 		std::string	_ScenarioTitle;
-		//
+		// 
 		std::string	_ScenarioDesc;
-		//
+		// 
 		TSessionLevel	_SessionLevel;
-		//
+		// 
 		std::string	_ScenarioAuthorName;
-		//
+		// 
 		uint32	_SessionAnimatorCharId;
-		//
+		// 
 		bool	_DMLess;
-		//
+		// 
 		std::string	_MissionTag;
 	public:
-		//
+		// 
 		const NLMISC::CHashKeyMD5 &getScenarioKey() const
 		{
 			return _ScenarioKey;
@@ -279,7 +279,7 @@ namespace R2
 
 
 		}
-			//
+			// 
 		const std::string &getScenarioTitle() const
 		{
 			return _ScenarioTitle;
@@ -299,7 +299,7 @@ namespace R2
 
 
 		}
-			//
+			// 
 		const std::string &getScenarioDesc() const
 		{
 			return _ScenarioDesc;
@@ -319,7 +319,7 @@ namespace R2
 
 
 		}
-			//
+			// 
 		TSessionLevel getSessionLevel() const
 		{
 			return _SessionLevel;
@@ -331,7 +331,7 @@ namespace R2
 				_SessionLevel = value;
 
 		}
-			//
+			// 
 		const std::string &getScenarioAuthorName() const
 		{
 			return _ScenarioAuthorName;
@@ -351,7 +351,7 @@ namespace R2
 
 
 		}
-			//
+			// 
 		uint32 getSessionAnimatorCharId() const
 		{
 			return _SessionAnimatorCharId;
@@ -363,7 +363,7 @@ namespace R2
 				_SessionAnimatorCharId = value;
 
 		}
-			//
+			// 
 		bool getDMLess() const
 		{
 			return _DMLess;
@@ -375,7 +375,7 @@ namespace R2
 				_DMLess = value;
 
 		}
-			//
+			// 
 		const std::string &getMissionTag() const
 		{
 			return _MissionTag;
@@ -395,7 +395,7 @@ namespace R2
 
 
 		}
-
+	
 		bool operator == (const TRunningScenarioInfo &other) const
 		{
 			return _ScenarioKey == other._ScenarioKey
@@ -427,15 +427,15 @@ namespace R2
 			s.serial(_MissionTag);
 
 		}
-
+		
 
 	private:
-
+	
 
 	};
 
 
-
+	
 
 	struct TPioneerRight
 	{
@@ -594,9 +594,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -607,7 +607,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-
+		
 		void connectAnimationModePlay_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void askMissionItemsDescription_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -706,22 +706,22 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_connectAnimationModePlay(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_askMissionItemsDescription(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_askActPositionDescriptions(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_askUserTriggerDescriptions(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onUserTriggerTriggered(NLNET::CMessage &__message, uint32 actId, uint32 triggerId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onDssTarget(NLNET::CMessage &__message, const std::vector<std::string> &args);
-
+	
 
 
 
@@ -752,9 +752,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -765,7 +765,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-
+		
 		void startingScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void startScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -982,82 +982,82 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_startingScenario(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_startScenario(NLNET::CMessage &__message, bool ok, const TScenarioHeaderSerializer &header, const CObjectSerializerServer &data, uint32 startingAct);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_advConnACK(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onUserComponentRegistered(NLNET::CMessage &__message, const NLMISC::CHashKeyMD5 &md5);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onUserComponentDownloading(NLNET::CMessage &__message, const NLMISC::CHashKeyMD5 &md5);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onScenarioUploadAsked(NLNET::CMessage &__message, uint32 msgId, const CObjectSerializerServer &hlScenario, bool mustBrodcast);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeSetAsked(NLNET::CMessage &__message, uint32 msgId, const std::string &instanceId, const std::string &attrName, const R2::CObjectSerializerServer &value);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeInsertAsked(NLNET::CMessage &__message, uint32 msgId, const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObjectSerializerServer &value);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeEraseAsked(NLNET::CMessage &__message, uint32 msgId, const std::string &instanceId, const std::string &attrName, sint32 position);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeMoveAsked(NLNET::CMessage &__message, uint32 msgId, const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onMapConnectionAsked(NLNET::CMessage &__message, TSessionId scenarioId, bool updateHighLevel, bool mustTp, R2::TUserRole role);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onCharModeUpdateAsked(NLNET::CMessage &__message, R2::TCharMode mode);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onTpPositionAsked(NLNET::CMessage &__message, float x, float y, float z);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_tpToEntryPoint(NLNET::CMessage &__message, uint32 actIndex);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setStartingAct(NLNET::CMessage &__message, uint32 actIndex);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onScenarioRingAccessUpdated(NLNET::CMessage &__message, bool ok, const std::string &ringAccess, const std::string &errMsg);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_saveScenarioFile(NLNET::CMessage &__message, const std::string &md5, const R2::TScenarioHeaderSerializer &header);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_loadScenarioFile(NLNET::CMessage &__message, const std::string &md5, const std::string &signature);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_saveUserComponentFile(NLNET::CMessage &__message, const std::string &md5, const R2::TScenarioHeaderSerializer &header);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_loadUserComponentFile(NLNET::CMessage &__message, const std::string &md5, const std::string &signature);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportOneCharacterToAnother(NLNET::CMessage &__message, TSessionId sessionId, uint32 sourceId, uint32 destId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportWhileUploadingScenario(NLNET::CMessage &__message, const std::string &island, const std::string &entryPoint, const std::string &season);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_multiPartMsgHead(NLNET::CMessage &__message, uint32 charId, const std::string &msgName, uint32 nbPacket, uint32 size);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_multiPartMsgBody(NLNET::CMessage &__message, uint32 charId, uint32 partId, const std::vector<uint8> &data);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_multiPartMsgFoot(NLNET::CMessage &__message, uint32 charId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_forwardToDss(NLNET::CMessage &__message, uint32 charId, const NLNET::CMessage &msg);
-
+	
 
 
 
@@ -1088,9 +1088,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1101,7 +1101,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-
+		
 		void startingScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void startScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1378,7 +1378,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1397,7 +1397,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1416,7 +1416,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1435,7 +1435,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1454,7 +1454,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1473,7 +1473,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1492,7 +1492,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1511,7 +1511,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1530,7 +1530,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1549,7 +1549,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1568,7 +1568,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1587,7 +1587,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
+				auto proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1596,106 +1596,106 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_startingScenario(NLNET::CMessage &__message, uint32 charId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_startScenario(NLNET::CMessage &__message, bool ok, uint32 startingAct, const std::string &errorMsg);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onUserComponentRegistered(NLNET::CMessage &__message, const NLMISC::CHashKeyMD5 &md5);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onUserComponentUploading(NLNET::CMessage &__message, const NLMISC::CHashKeyMD5 &md5);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onScenarioUploaded(NLNET::CMessage &__message, const R2::CObjectSerializerClient &hlScenario);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeSet(NLNET::CMessage &__message, const std::string &instanceId, const std::string &attrName, const R2::CObjectSerializerClient &value);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeInserted(NLNET::CMessage &__message, const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObjectSerializerClient &value);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeErased(NLNET::CMessage &__message, const std::string &instanceId, const std::string &attrName, sint32 position);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onNodeMoved(NLNET::CMessage &__message, const std::string &instanceId1, const std::string &attrName1, sint32 position1, const std::string &instanceId2, const std::string &attrName2, sint32 position2);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onQuotaUpdated(NLNET::CMessage &__message, uint32 maxNpcs, uint32 maxStaticObjects);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onCharModeUpdated(NLNET::CMessage &__message, R2::TCharMode mode);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onTestModeDisconnected(NLNET::CMessage &__message, TSessionId sessionId, uint32 lastActIndex, R2::TScenarioSessionType animationType);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onTpPositionSimulated(NLNET::CMessage &__message, TSessionId sessionId, uint64 characterId64, sint32 x, sint32 y, sint32 z, uint8 scenarioSeason);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onKicked(NLNET::CMessage &__message, uint32 timeBeforeDisconnection, bool mustKick);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onDisconnected(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_scheduleStartAct(NLNET::CMessage &__message, uint32 errorId, uint32 actId, uint32 nbSeconds);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onAnimationModePlayConnected(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateScenarioHeader(NLNET::CMessage &__message, const R2::TScenarioHeaderSerializer &scenarioHeader);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateMissionItemsDescription(NLNET::CMessage &__message, TSessionId sessionId, const std::vector<R2::TMissionItem> &missionItem);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateActPositionDescriptions(NLNET::CMessage &__message, const R2::TActPositionDescriptions &actPositionDescriptions);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateUserTriggerDescriptions(NLNET::CMessage &__message, const R2::TUserTriggerDescriptions &userTriggerDescriptions);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onCurrentActIndexUpdated(NLNET::CMessage &__message, uint32 actIndex);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateTalkingAsList(NLNET::CMessage &__message, const std::vector<uint32> &botsId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateIncarningList(NLNET::CMessage &__message, const std::vector<uint32> &botsId);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_systemMsg(NLNET::CMessage &__message, const std::string &msgType, const std::string &who, const std::string &msg);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onRingAccessUpdated(NLNET::CMessage &__message, const std::string &ringAccess);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_saveScenarioFileAccepted(NLNET::CMessage &__message, const std::string &md5, const std::string &signature, bool isAccepted);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_loadScenarioFileAccepted(NLNET::CMessage &__message, const std::string &md5, bool ok);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_saveUserComponentFileAccepted(NLNET::CMessage &__message, const std::string &md5, const std::string &signature, bool isAccepted);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_loadUserComponentFileAccepted(NLNET::CMessage &__message, const std::string &md5, bool ok);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_multiPartMsgHead(NLNET::CMessage &__message, const std::string &msgName, uint32 nbPacket, uint32 size);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_multiPartMsgBody(NLNET::CMessage &__message, uint32 partId, uint32 packetSize);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_multiPartMsgFoot(NLNET::CMessage &__message);
-
+	
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_ackMsg(NLNET::CMessage &__message, uint32 msgId, bool ok);
-
+	
 
 
 
@@ -1707,12 +1707,12 @@ namespace R2
 	class TCharMappedInfo
 	{
 	protected:
-		//
+		// 
 		NLMISC::CSheetId	_ItemSheet;
-		//
+		// 
 		ucstring	_Name;
 	public:
-		//
+		// 
 		const NLMISC::CSheetId &getItemSheet() const
 		{
 			return _ItemSheet;
@@ -1732,7 +1732,7 @@ namespace R2
 
 
 		}
-			//
+			// 
 		const ucstring &getName() const
 		{
 			return _Name;
@@ -1752,7 +1752,7 @@ namespace R2
 
 
 		}
-
+	
 		bool operator == (const TCharMappedInfo &other) const
 		{
 			return _ItemSheet == other._ItemSheet
@@ -1772,15 +1772,15 @@ namespace R2
 			s.serial(_Name);
 
 		}
-
+		
 
 	private:
-
+	
 
 	};
 
 
-
+	
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -1806,9 +1806,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1819,7 +1819,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-
+		
 		void storeItemNamesForAIInstance_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		// declare one interceptor member of the skeleton
@@ -1888,12 +1888,12 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_storeItemNamesForAIInstance(NLNET::CMessage &__message, uint32 aiInstance, const std::vector < TCharMappedInfo > &itemInfos);
-
+	
 
 
 
 	};
 
 }
-
+	
 #endif

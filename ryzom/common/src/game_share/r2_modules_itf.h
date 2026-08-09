@@ -42,7 +42,7 @@
 
 namespace R2
 {
-	
+
 	class TR2SbmSessionInfo;
 
 

@@ -38,7 +38,7 @@
 
 namespace CHARSYNC
 {
-	
+
 	class TCharInfo;
 
 	class TCharBestLevelInfo;
@@ -71,7 +71,7 @@ namespace CHARSYNC
 			/// Number of enumerated values
 			nb_enum_items = 4
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -84,13 +84,13 @@ namespace CHARSYNC
 				indexTable.insert(std::make_pair(r_matis, 1));
 				indexTable.insert(std::make_pair(r_tryker, 2));
 				indexTable.insert(std::make_pair(r_zorai, 3));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -103,8 +103,7 @@ namespace CHARSYNC
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -182,16 +181,16 @@ namespace CHARSYNC
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 
 	struct TCivilisation
 	{
@@ -212,7 +211,7 @@ namespace CHARSYNC
 			/// Number of enumerated values
 			nb_enum_items = 5
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -226,13 +225,13 @@ namespace CHARSYNC
 				indexTable.insert(std::make_pair(c_matis, 2));
 				indexTable.insert(std::make_pair(c_tryker, 3));
 				indexTable.insert(std::make_pair(c_zorai, 4));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -246,8 +245,7 @@ namespace CHARSYNC
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -325,16 +323,16 @@ namespace CHARSYNC
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 
 	struct TCult
 	{
@@ -353,7 +351,7 @@ namespace CHARSYNC
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -365,13 +363,13 @@ namespace CHARSYNC
 				indexTable.insert(std::make_pair(c_neutral, 0));
 				indexTable.insert(std::make_pair(c_kami, 1));
 				indexTable.insert(std::make_pair(c_karavan, 2));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -383,8 +381,7 @@ namespace CHARSYNC
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -462,16 +459,16 @@ namespace CHARSYNC
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-		// Info about a character, used for block tranfert
+	// Info about a character, used for block tranfert
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -517,7 +514,7 @@ namespace CHARSYNC
 
 				_CharEId = value;
 
-				
+
 		}
 			// The name of the character
 		const std::string &getCharName() const
@@ -537,7 +534,7 @@ namespace CHARSYNC
 
 				_CharName = value;
 
-				
+
 		}
 			// The session id of the character home mainland
 		uint32 getHomeSessionId() const
@@ -593,7 +590,7 @@ namespace CHARSYNC
 
 				_RespawnPoints = value;
 
-				
+
 		}
 			// 
 		TRace getRace() const
@@ -694,12 +691,12 @@ namespace CHARSYNC
 	class TCharBestLevelInfo
 	{
 	protected:
-		// The entity id the the character
+		// The entity id of the character
 		NLMISC::CEntityId	_CharEId;
 		// The best combat level of the character
 		sint32	_BestCombatLevel;
 	public:
-		// The entity id the the character
+		// The entity id of the character
 		const NLMISC::CEntityId &getCharEId() const
 		{
 			return _CharEId;
@@ -717,7 +714,7 @@ namespace CHARSYNC
 
 				_CharEId = value;
 
-				
+
 		}
 			// The best combat level of the character
 		sint32 getBestCombatLevel() const
@@ -971,7 +968,7 @@ namespace CHARSYNC
 			/// Number of enumerated values
 			nb_enum_items = 3
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -983,13 +980,13 @@ namespace CHARSYNC
 				indexTable.insert(std::make_pair(cnr_ok, 0));
 				indexTable.insert(std::make_pair(cnr_invalid_name, 1));
 				indexTable.insert(std::make_pair(cnr_already_exist, 2));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -1001,8 +998,7 @@ namespace CHARSYNC
 			};
 			static NLMISC::CStringConversion<TValues>
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]), 
-			invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
 		}
@@ -1080,16 +1076,16 @@ namespace CHARSYNC
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class CValidateNameResult
@@ -1213,7 +1209,7 @@ namespace CHARSYNC
 
 				_GuildName = value;
 
-				
+
 		}
 			// 
 		uint32 getGuildId() const
@@ -1510,7 +1506,7 @@ namespace CHARSYNC
 
 				_Name = value;
 
-				
+
 		}
 			// 
 		const std::string &getUserName() const
@@ -1530,7 +1526,7 @@ namespace CHARSYNC
 
 				_UserName = value;
 
-				
+
 		}
 			// 
 		const uint32 &getShardId() const
@@ -1550,7 +1546,7 @@ namespace CHARSYNC
 
 				_ShardId = value;
 
-				
+
 		}
 	
 		bool operator == (const TNameEntry &other) const
@@ -1635,7 +1631,7 @@ namespace CHARSYNC
 
 				_CharName = value;
 
-				
+
 		}
 			// 
 		uint32 getHomeSessionId() const

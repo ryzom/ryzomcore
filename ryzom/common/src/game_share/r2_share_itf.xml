@@ -239,7 +239,7 @@
 
 
 			<method name="onScenarioRingAccessUpdated" msg="SRAU">
-				<doc line="Update the the ring access of a scenario."/>
+				<doc line="Update the ring access of a scenario."/>
 				<param type="bool" name="ok" />
 				<param type="std::string" name="ringAccess" byref="true" />
 				<param type="std::string" name="errMsg" byref="true" />

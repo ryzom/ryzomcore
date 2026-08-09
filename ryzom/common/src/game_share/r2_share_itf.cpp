@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-
+	
 #include "r2_share_itf.h"
 
 namespace R2
@@ -86,25 +86,25 @@ namespace R2
 	}
 
 
-	void CShareServerAnimationItfSkel::connectAnimationModePlay_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareServerAnimationItfSkel::connectAnimationModePlay_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareServerAnimationItfSkel_connectAnimationModePlay_RCAMP);
 		connectAnimationModePlay(sender);
 	}
 
-	void CShareServerAnimationItfSkel::askMissionItemsDescription_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareServerAnimationItfSkel::askMissionItemsDescription_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareServerAnimationItfSkel_askMissionItemsDescription_SAID);
 		askMissionItemsDescription(sender);
 	}
 
-	void CShareServerAnimationItfSkel::askActPositionDescriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareServerAnimationItfSkel::askActPositionDescriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareServerAnimationItfSkel_askActPositionDescriptions_SAAPD);
 		askActPositionDescriptions(sender);
 	}
 
-	void CShareServerAnimationItfSkel::askUserTriggerDescriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareServerAnimationItfSkel::askUserTriggerDescriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareServerAnimationItfSkel_askUserTriggerDescriptions_SAUTD);
 		askUserTriggerDescriptions(sender);
@@ -434,7 +434,7 @@ namespace R2
 	}
 
 
-	void CShareServerEditionItfSkel::startingScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareServerEditionItfSkel::startingScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareServerEditionItfSkel_startingScenario_RSS1);
 		startingScenario(sender);
@@ -454,7 +454,7 @@ namespace R2
 		startScenario(sender, ok, header, data, startingAct);
 	}
 
-	void CShareServerEditionItfSkel::advConnACK_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareServerEditionItfSkel::advConnACK_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareServerEditionItfSkel_advConnACK_ADC_ACK);
 		advConnACK(sender);
@@ -1825,7 +1825,7 @@ namespace R2
 		onKicked(sender, timeBeforeDisconnection, mustKick);
 	}
 
-	void CShareClientEditionItfSkel::onDisconnected_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareClientEditionItfSkel::onDisconnected_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareClientEditionItfSkel_onDisconnected_COD);
 		onDisconnected(sender);
@@ -1843,7 +1843,7 @@ namespace R2
 		scheduleStartAct(sender, errorId, actId, nbSeconds);
 	}
 
-	void CShareClientEditionItfSkel::onAnimationModePlayConnected_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareClientEditionItfSkel::onAnimationModePlayConnected_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareClientEditionItfSkel_onAnimationModePlayConnected_OAMC);
 		onAnimationModePlayConnected(sender);
@@ -1993,7 +1993,7 @@ namespace R2
 		multiPartMsgBody(sender, partId, packetSize);
 	}
 
-	void CShareClientEditionItfSkel::multiPartMsgFoot_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
+	void CShareClientEditionItfSkel::multiPartMsgFoot_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CShareClientEditionItfSkel_multiPartMsgFoot_DSS_FOOT);
 		multiPartMsgFoot(sender);
