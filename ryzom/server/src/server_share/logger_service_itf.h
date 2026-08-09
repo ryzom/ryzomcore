@@ -34,7 +34,7 @@
 
 #include "nel/misc/sheet_id.h"
 
-#include "inventories.h"
+#include "game_share/inventories.h"
 
 #include <vector>
 	
