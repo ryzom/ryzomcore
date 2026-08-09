@@ -199,6 +199,10 @@ public:
 	CSmartPtr() { Ptr=NULL; SMART_TRACE("ctor()"); }
 	/// Attach a ptr to a SmartPtr.
 	CSmartPtr(T* p) { Ptr=p; if(Ptr) Ptr->crefs++; SMART_TRACE("ctor(T*)"); }
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	CSmartPtr(::CNullPtrT) { Ptr=NULL; SMART_TRACE("ctor(null)"); }
+#endif
 	/// Copy constructor.
 	CSmartPtr(const CSmartPtr &copy) { Ptr=copy.Ptr; if(Ptr) Ptr->crefs++; SMART_TRACE("ctor(Copy)"); }
 	/// Release the SmartPtr.
@@ -220,6 +224,10 @@ public:
 	CSmartPtr& operator=(T* p);
 	/// operator=. Giving a NULL pointer is a valid operation.
 	CSmartPtr& operator=(const CSmartPtr &p);
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Exact match for assignment from the emulated nullptr; the T* and CSmartPtr overloads are otherwise ambiguous.
+	CSmartPtr& operator=(::CNullPtrT) { return operator=((T*)NULL); }
+#endif
 	/// operator<. Compare the pointers.
 	bool operator<(const CSmartPtr &p) const;
 
@@ -310,6 +318,10 @@ public:
 	CRefPtr();
 	/// Attach a ptr to a RefPtr.
 	CRefPtr(T *v);
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	CRefPtr(::CNullPtrT) { pinfo = &CRefCount::NullPtrInfo; Ptr = NULL; }
+#endif
 	/// Copy constructor.
 	CRefPtr(const CRefPtr &copy);
 	/// Release the RefPtr.
@@ -328,6 +340,10 @@ public:
 	CRefPtr& operator=(T *v);
 	/// operator=. Giving a NULL pointer is a valid operation.
 	CRefPtr& operator=(const CRefPtr &copy);
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Exact match for assignment from the emulated nullptr; the T* and CRefPtr overloads are otherwise ambiguous.
+	CRefPtr& operator=(::CNullPtrT) { return operator=((T*)NULL); }
+#endif
 
 
 	/**

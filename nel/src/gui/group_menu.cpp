@@ -1688,7 +1688,7 @@ namespace NLGUI
 		if (lineIndex > _Lines.size())
 		{
 			nlwarning("Bad index");
-			return nullptr;
+			return std::string();
 		}
 		return _Lines[lineIndex].AHName;
 	}
@@ -1699,7 +1699,7 @@ namespace NLGUI
 		if (lineIndex > _Lines.size())
 		{
 			nlwarning("Bad index");
-			return nullptr;
+			return std::string();
 		}
 		return _Lines[lineIndex].AHParams;
 	}

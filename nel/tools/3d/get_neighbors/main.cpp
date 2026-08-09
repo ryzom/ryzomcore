@@ -19,6 +19,17 @@
 #include <string.h>
 #include <ctype.h>
 
+// Local copy of the NeL nullptr emulation from nel/misc/types_nl.h (this tool includes no NeL headers)
+#if (defined(_MSC_VER) && (_MSC_VER < 1600)) || (!defined(_MSC_VER) && defined(__cplusplus) && (__cplusplus < 201103L) && !defined(__GXX_EXPERIMENTAL_CXX0X__))
+const class CNullPtrT
+{
+public:
+	template<class T> operator T *() const { return 0; } // any object/function pointer
+	template<class C, class T> operator T C::*() const { return 0; } // any member pointer
+private:
+	void operator&() const; // taking the address is forbidden, as with real nullptr
+} nullptr = {};
+#endif
 
 void	nameToXY(const char *str, int &x, int &y)
 {

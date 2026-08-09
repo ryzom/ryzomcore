@@ -1,0 +1,22 @@
+#!/bin/bash
+. "$(dirname "$0")/winecl-env"
+translate_args "$@"
+# CMake's own `cmake -E vs_link_exe --manifests` helper unconditionally
+# appends /MANIFEST:EMBED,ID=1 for MSVC+Ninja regardless of target MSVC
+# version - that syntax postdates VS2008's link.exe (LNK1117 syntax
+# error). Strip it; manifest embedding instead follows the traditional
+# VS2008 flow (link /MANIFEST writes the sidecar, a post-build mt.exe
+# step embeds it - NL_EMBED_SXS_MANIFEST_MT in CMakeModules/nel.cmake).
+#
+# /DEBUG:NONE /INCREMENTAL:NO: link.exe's PDB-based incremental-link and
+# debug bookkeeping through mspdb80.dll breaks under Wine (LNK1101
+# "incorrect MSPDB80.DLL version", persists on a pristine XP toolchain
+# copy). /Z7 debug info stays embedded in the objects regardless.
+FILTERED=()
+for a in "${ARGS[@]}"; do
+	case "$a" in
+		/MANIFEST:EMBED*) ;;
+		*) FILTERED+=("$a") ;;
+	esac
+done
+exec wine "C:\\Program Files\\Microsoft Visual Studio 9.0\\VC\\bin\\link.exe" "${FILTERED[@]}" /DEBUG:NONE /INCREMENTAL:NO

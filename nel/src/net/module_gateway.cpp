@@ -2332,8 +2332,10 @@ namespace NLNET
 
 			log.displayNL("The gateway has %u locally plugged module :", _PluggedModules.getAToBMap().size());
 			{
-				for (const auto& [_, module] : _PluggedModules.getAToBMap())
+				TPluggedModules::TAToBMap::const_iterator first(_PluggedModules.getAToBMap().begin()), last(_PluggedModules.getAToBMap().end());
+				for (; first != last; ++first)
 				{
+					IModule *module = first->second;
 					log.displayNL("    ID:%5u : \tName = '%s' \tclass = '%s'",
 						module->getModuleId(),
 						module->getModuleName().c_str(),
@@ -2344,8 +2346,11 @@ namespace NLNET
 
 			log.displayNL("The gateway as %u transport activated :", _Transports.size());
 			{
-				for (const auto& [name, transport] : _Transports)
+				TTransportList::iterator first(_Transports.begin()), last(_Transports.end());
+				for (; first != last; ++first)
 				{
+					const string &name = first->first;
+					IGatewayTransport *transport = first->second;
 
 					log.displayNL("Transport '%s' (transport class is '%s') :",
 						name.c_str(),

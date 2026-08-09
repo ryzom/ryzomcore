@@ -482,11 +482,7 @@ void CPSValueGradientFunc<T>::setValuesUnpacked(const T *valueTab, uint32 numVal
 	_MaxValue = _MinValue = valueTab[0];
 	_NbValues = (numValues - 1) * nbStages;
 	_Tab.resize(_NbValues + 1);
-#ifdef NL_COMP_VC14
-	std::copy(valueTab, valueTab + _NbValues + 1, stdext::make_checked_array_iterator(&_Tab[0], _Tab.size()));
-#else
 	std::copy(valueTab, valueTab + _NbValues + 1, &_Tab[0]);
-#endif
 }
 
 

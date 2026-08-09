@@ -190,6 +190,10 @@ public:
 
 	/// Constructors
 	UMaterial() { _Object = nullptr; }
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	UMaterial(::CNullPtrT) { _Object = NULL; }
+#endif
 	UMaterial(class CMaterial *object) { _Object = object; };
 	/// Attach an object to this proxy
 	void			attach(class CMaterial *object) { _Object = object; }
