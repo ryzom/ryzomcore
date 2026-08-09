@@ -1816,7 +1816,7 @@ namespace RSMGR
 				_SessionId = value;
 
 		}
-			// The type of the session
+		// The type of the session
 		TSessionType getSessionType() const
 		{
 			return _SessionType;
@@ -1828,7 +1828,7 @@ namespace RSMGR
 				_SessionType = value;
 
 		}
-			// Instance ID that host this session
+		// Instance ID that host this session
 		uint32 getInstanceId() const
 		{
 			return _InstanceId;
@@ -1840,7 +1840,7 @@ namespace RSMGR
 				_InstanceId = value;
 
 		}
-			// Number of characters currently playing in the session (player and pioneer)
+		// Number of characters currently playing in the session (player and pioneer)
 		uint32 getNbPlayingChars() const
 		{
 			return _NbPlayingChars;
@@ -1852,7 +1852,7 @@ namespace RSMGR
 				_NbPlayingChars = value;
 
 		}
-	
+
 		bool operator == (const TRunningSessionInfo &other) const
 		{
 			return _SessionId == other._SessionId
@@ -1876,10 +1876,10 @@ namespace RSMGR
 			s.serial(_NbPlayingChars);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -2169,22 +2169,22 @@ namespace RSMGR
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_registerDSS(NLNET::CMessage &__message, uint32 shardId, const std::vector < TRunningSessionInfo > &runningSessions);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sessionCreated(NLNET::CMessage &__message, const RSMGR::TRunningSessionInfo &sessionInfo);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportSessionEvent(NLNET::CMessage &__message, RSMGR::TSessionEvent event, TSessionId sessionId, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_scenarioStarted(NLNET::CMessage &__message, TSessionId sessionId, const R2::TRunningScenarioInfo &scenarioInfo);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportCharacterKicked(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_scenarioEnded(NLNET::CMessage &__message, TSessionId sessionId, const R2::TRunningScenarioInfo &scenarioInfo, uint32 rrpScored, uint32 scenarioPointScored, uint32 timeTaken, const std::vector < uint32 > &participants);
-	
+
 
 
 
@@ -2351,31 +2351,31 @@ namespace RSMGR
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_createSession(NLNET::CMessage &__message, uint32 ownerCharId, TSessionId sessionId, const RSMGR::TSessionType &type);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_addCharacterInSession(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId, const WS::TUserRole &enterAs, const std::string &ringAccess, bool newcomer);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_closeSession(NLNET::CMessage &__message, TSessionId sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_stopHibernation(NLNET::CMessage &__message, TSessionId sessionId, uint32 ownerId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_characterKicked(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_characterUnkicked(NLNET::CMessage &__message, TSessionId sessionId, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportOneCharacterToAnother(NLNET::CMessage &__message, TSessionId sessionId, uint32 sourceCharId, uint32 destCharId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_hibernateSession(NLNET::CMessage &__message, TSessionId sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setSessionStartParams(NLNET::CMessage &__message, uint32 charId, TSessionId sessionId, const std::string &initialIslandLocation, const std::string &initialEntryPointLocation, const std::string &initialSeason);
-	
+
 
 
 
@@ -4820,48 +4820,48 @@ namespace RSMGR
 	class TSessionDesc
 	{
 	protected:
-		// 
+		//
 		TSessionId	_SessionId;
-		// 
+		//
 		bool	_RequesterCharInvited;
-		// 
+		//
 		bool	_RequesterCharKicked;
-		// 
+		//
 		std::string	_OwnerName;
-		// 
+		//
 		std::string	_Title;
-		// 
+		//
 		std::string	_Description;
-		// 
+		//
 		TAnimMode	_AnimMode;
-		// 
+		//
 		R2::TSessionLevel	_SessionLevel;
-		// 
+		//
 		bool	_AllowFreeTrial;
-		// 
+		//
 		uint32	_LaunchDate;
-		// 
+		//
 		uint32	_NbConnectedPlayer;
-		// 
+		//
 		std::string	_Language;
-		// 
+		//
 		TSessionOrientation	_Orientation;
-		// 
+		//
 		uint32	_NbRating;
-		// 
+		//
 		uint32	_RateFun;
-		// 
+		//
 		uint32	_RateDifficulty;
-		// 
+		//
 		uint32	_RateAccessibility;
-		// 
+		//
 		uint32	_RateOriginality;
-		// 
+		//
 		uint32	_RateDirection;
-		// 
+		//
 		uint32	_ScenarioRRPTotal;
 	public:
-		// 
+		//
 		TSessionId getSessionId() const
 		{
 			return _SessionId;
@@ -4873,7 +4873,7 @@ namespace RSMGR
 				_SessionId = value;
 
 		}
-			// 
+		//
 		bool getRequesterCharInvited() const
 		{
 			return _RequesterCharInvited;
@@ -4885,7 +4885,7 @@ namespace RSMGR
 				_RequesterCharInvited = value;
 
 		}
-			// 
+		//
 		bool getRequesterCharKicked() const
 		{
 			return _RequesterCharKicked;
@@ -4897,7 +4897,7 @@ namespace RSMGR
 				_RequesterCharKicked = value;
 
 		}
-			// 
+		//
 		const std::string &getOwnerName() const
 		{
 			return _OwnerName;
@@ -4917,7 +4917,7 @@ namespace RSMGR
 
 
 		}
-			// 
+			//
 		const std::string &getTitle() const
 		{
 			return _Title;
@@ -4937,7 +4937,7 @@ namespace RSMGR
 
 
 		}
-			// 
+			//
 		const std::string &getDescription() const
 		{
 			return _Description;
@@ -4957,7 +4957,7 @@ namespace RSMGR
 
 
 		}
-			// 
+			//
 		TAnimMode getAnimMode() const
 		{
 			return _AnimMode;
@@ -4969,7 +4969,7 @@ namespace RSMGR
 				_AnimMode = value;
 
 		}
-			// 
+		//
 		R2::TSessionLevel getSessionLevel() const
 		{
 			return _SessionLevel;
@@ -4981,7 +4981,7 @@ namespace RSMGR
 				_SessionLevel = value;
 
 		}
-			// 
+		//
 		bool getAllowFreeTrial() const
 		{
 			return _AllowFreeTrial;
@@ -4993,7 +4993,7 @@ namespace RSMGR
 				_AllowFreeTrial = value;
 
 		}
-			// 
+		//
 		uint32 getLaunchDate() const
 		{
 			return _LaunchDate;
@@ -5005,7 +5005,7 @@ namespace RSMGR
 				_LaunchDate = value;
 
 		}
-			// 
+		//
 		uint32 getNbConnectedPlayer() const
 		{
 			return _NbConnectedPlayer;
@@ -5017,7 +5017,7 @@ namespace RSMGR
 				_NbConnectedPlayer = value;
 
 		}
-			// 
+		//
 		const std::string &getLanguage() const
 		{
 			return _Language;
@@ -5037,7 +5037,7 @@ namespace RSMGR
 
 
 		}
-			// 
+			//
 		TSessionOrientation getOrientation() const
 		{
 			return _Orientation;
@@ -5049,7 +5049,7 @@ namespace RSMGR
 				_Orientation = value;
 
 		}
-			// 
+		//
 		uint32 getNbRating() const
 		{
 			return _NbRating;
@@ -5061,7 +5061,7 @@ namespace RSMGR
 				_NbRating = value;
 
 		}
-			// 
+		//
 		uint32 getRateFun() const
 		{
 			return _RateFun;
@@ -5073,7 +5073,7 @@ namespace RSMGR
 				_RateFun = value;
 
 		}
-			// 
+		//
 		uint32 getRateDifficulty() const
 		{
 			return _RateDifficulty;
@@ -5085,7 +5085,7 @@ namespace RSMGR
 				_RateDifficulty = value;
 
 		}
-			// 
+		//
 		uint32 getRateAccessibility() const
 		{
 			return _RateAccessibility;
@@ -5097,7 +5097,7 @@ namespace RSMGR
 				_RateAccessibility = value;
 
 		}
-			// 
+		//
 		uint32 getRateOriginality() const
 		{
 			return _RateOriginality;
@@ -5109,7 +5109,7 @@ namespace RSMGR
 				_RateOriginality = value;
 
 		}
-			// 
+		//
 		uint32 getRateDirection() const
 		{
 			return _RateDirection;
@@ -5121,7 +5121,7 @@ namespace RSMGR
 				_RateDirection = value;
 
 		}
-			// 
+		//
 		uint32 getScenarioRRPTotal() const
 		{
 			return _ScenarioRRPTotal;
@@ -5133,7 +5133,7 @@ namespace RSMGR
 				_ScenarioRRPTotal = value;
 
 		}
-	
+
 		bool operator == (const TSessionDesc &other) const
 		{
 			return _SessionId == other._SessionId
@@ -5189,10 +5189,10 @@ namespace RSMGR
 			s.serial(_ScenarioRRPTotal);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -5203,30 +5203,30 @@ namespace RSMGR
 	class TCharDesc
 	{
 	protected:
-		// 
+		//
 		uint32	_CharId;
-		// 
+		//
 		bool	_Connected;
-		// 
+		//
 		bool	_Kicked;
-		// 
+		//
 		std::string	_CharName;
-		// 
+		//
 		std::string	_GuildName;
-		// 
+		//
 		uint32	_ShardId;
-		// 
+		//
 		R2::TSessionLevel	_Level;
-		// 
+		//
 		CHARSYNC::TRace	_Race;
-		// 
+		//
 		CHARSYNC::TCivilisation	_Civilisation;
-		// 
+		//
 		CHARSYNC::TCult	_Cult;
-		// 
+		//
 		TSessionPartStatus	_PartStatus;
 	public:
-		// 
+		//
 		uint32 getCharId() const
 		{
 			return _CharId;
@@ -5238,7 +5238,7 @@ namespace RSMGR
 				_CharId = value;
 
 		}
-			// 
+		//
 		bool getConnected() const
 		{
 			return _Connected;
@@ -5250,7 +5250,7 @@ namespace RSMGR
 				_Connected = value;
 
 		}
-			// 
+		//
 		bool getKicked() const
 		{
 			return _Kicked;
@@ -5262,7 +5262,7 @@ namespace RSMGR
 				_Kicked = value;
 
 		}
-			// 
+		//
 		const std::string &getCharName() const
 		{
 			return _CharName;
@@ -5282,7 +5282,7 @@ namespace RSMGR
 
 
 		}
-			// 
+			//
 		const std::string &getGuildName() const
 		{
 			return _GuildName;
@@ -5302,7 +5302,7 @@ namespace RSMGR
 
 
 		}
-			// 
+			//
 		uint32 getShardId() const
 		{
 			return _ShardId;
@@ -5314,7 +5314,7 @@ namespace RSMGR
 				_ShardId = value;
 
 		}
-			// 
+		//
 		R2::TSessionLevel getLevel() const
 		{
 			return _Level;
@@ -5326,7 +5326,7 @@ namespace RSMGR
 				_Level = value;
 
 		}
-			// 
+		//
 		CHARSYNC::TRace getRace() const
 		{
 			return _Race;
@@ -5338,7 +5338,7 @@ namespace RSMGR
 				_Race = value;
 
 		}
-			// 
+		//
 		CHARSYNC::TCivilisation getCivilisation() const
 		{
 			return _Civilisation;
@@ -5350,7 +5350,7 @@ namespace RSMGR
 				_Civilisation = value;
 
 		}
-			// 
+		//
 		CHARSYNC::TCult getCult() const
 		{
 			return _Cult;
@@ -5362,7 +5362,7 @@ namespace RSMGR
 				_Cult = value;
 
 		}
-			// 
+		//
 		TSessionPartStatus getPartStatus() const
 		{
 			return _PartStatus;
@@ -5374,7 +5374,7 @@ namespace RSMGR
 				_PartStatus = value;
 
 		}
-	
+
 		bool operator == (const TCharDesc &other) const
 		{
 			return _CharId == other._CharId
@@ -5412,10 +5412,10 @@ namespace RSMGR
 			s.serial(_PartStatus);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 

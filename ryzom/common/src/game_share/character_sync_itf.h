@@ -487,13 +487,13 @@ namespace CHARSYNC
 		uint32	_GuildId;
 		// the list of respawn points validated by the character
 		CONTINENT::TRespawnPointCounters	_RespawnPoints;
-		// 
+		//
 		TRace	_Race;
-		// 
+		//
 		TCivilisation	_Civilisation;
-		// 
+		//
 		TCult	_Cult;
-		// 
+		//
 		bool	_Newcomer;
 	public:
 		// The entity id of the character
@@ -548,7 +548,7 @@ namespace CHARSYNC
 				_HomeSessionId = value;
 
 		}
-			// The best combat level of the character
+		// The best combat level of the character
 		sint32 getBestCombatLevel() const
 		{
 			return _BestCombatLevel;
@@ -560,7 +560,7 @@ namespace CHARSYNC
 				_BestCombatLevel = value;
 
 		}
-			// The guild id of this player
+		// The guild id of this player
 		uint32 getGuildId() const
 		{
 			return _GuildId;
@@ -572,7 +572,7 @@ namespace CHARSYNC
 				_GuildId = value;
 
 		}
-			// the list of respawn points validated by the character
+		// the list of respawn points validated by the character
 		const CONTINENT::TRespawnPointCounters &getRespawnPoints() const
 		{
 			return _RespawnPoints;
@@ -592,7 +592,7 @@ namespace CHARSYNC
 
 
 		}
-			// 
+			//
 		TRace getRace() const
 		{
 			return _Race;
@@ -604,7 +604,7 @@ namespace CHARSYNC
 				_Race = value;
 
 		}
-			// 
+		//
 		TCivilisation getCivilisation() const
 		{
 			return _Civilisation;
@@ -616,7 +616,7 @@ namespace CHARSYNC
 				_Civilisation = value;
 
 		}
-			// 
+		//
 		TCult getCult() const
 		{
 			return _Cult;
@@ -628,7 +628,7 @@ namespace CHARSYNC
 				_Cult = value;
 
 		}
-			// 
+		//
 		bool getNewcomer() const
 		{
 			return _Newcomer;
@@ -640,7 +640,7 @@ namespace CHARSYNC
 				_Newcomer = value;
 
 		}
-	
+
 		bool operator == (const TCharInfo &other) const
 		{
 			return _CharEId == other._CharEId
@@ -676,10 +676,10 @@ namespace CHARSYNC
 			s.serial(_Newcomer);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -728,7 +728,7 @@ namespace CHARSYNC
 				_BestCombatLevel = value;
 
 		}
-	
+
 		bool operator == (const TCharBestLevelInfo &other) const
 		{
 			return _CharEId == other._CharEId
@@ -748,10 +748,10 @@ namespace CHARSYNC
 			s.serial(_BestCombatLevel);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -920,31 +920,31 @@ namespace CHARSYNC
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_addCharacter(NLNET::CMessage &__message, const TCharInfo &charInfo);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_deleteCharacter(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateCharGuild(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId, uint32 guildId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateCharRespawnPoints(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId, const CONTINENT::TRespawnPointCounters &respawnPoints);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateCharsBestLevel(NLNET::CMessage &__message, const std::vector < TCharBestLevelInfo > &charLevelInfos);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateCharNewbieFlag(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId, bool newbie);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateCharAllegiance(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId, TCivilisation civilisation, TCult cult);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateCharHomeMainlandSessionId(NLNET::CMessage &__message, const NLMISC::CEntityId &charEId, TSessionId homeMainlandSessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_syncUserChars(NLNET::CMessage &__message, uint32 userId, const std::vector < TCharInfo > &charInfos);
-	
+
 
 
 
@@ -1091,16 +1091,16 @@ namespace CHARSYNC
 	class CValidateNameResult
 	{
 	protected:
-		// 
+		//
 		TCharacterNameResult	_Result;
-		// 
+		//
 		uint32	_UserId;
-		// 
+		//
 		uint8	_CharIndex;
-		// 
+		//
 		ucstring	_FullName;
 	public:
-		// 
+		//
 		TCharacterNameResult getResult() const
 		{
 			return _Result;
@@ -1112,7 +1112,7 @@ namespace CHARSYNC
 				_Result = value;
 
 		}
-			// 
+		//
 		uint32 getUserId() const
 		{
 			return _UserId;
@@ -1124,7 +1124,7 @@ namespace CHARSYNC
 				_UserId = value;
 
 		}
-			// 
+		//
 		uint8 getCharIndex() const
 		{
 			return _CharIndex;
@@ -1136,7 +1136,7 @@ namespace CHARSYNC
 				_CharIndex = value;
 
 		}
-			// 
+		//
 		ucstring getFullName() const
 		{
 			return _FullName;
@@ -1148,7 +1148,7 @@ namespace CHARSYNC
 				_FullName = value;
 
 		}
-	
+
 		bool operator == (const CValidateNameResult &other) const
 		{
 			return _Result == other._Result
@@ -1172,10 +1172,10 @@ namespace CHARSYNC
 			s.serial(_FullName);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -1186,12 +1186,12 @@ namespace CHARSYNC
 	class CGuildInfo
 	{
 	protected:
-		// 
+		//
 		ucstring	_GuildName;
-		// 
+		//
 		uint32	_GuildId;
 	public:
-		// 
+		//
 		const ucstring &getGuildName() const
 		{
 			return _GuildName;
@@ -1211,7 +1211,7 @@ namespace CHARSYNC
 
 
 		}
-			// 
+			//
 		uint32 getGuildId() const
 		{
 			return _GuildId;
@@ -1223,7 +1223,7 @@ namespace CHARSYNC
 				_GuildId = value;
 
 		}
-	
+
 		bool operator == (const CGuildInfo &other) const
 		{
 			return _GuildName == other._GuildName
@@ -1243,10 +1243,10 @@ namespace CHARSYNC
 			s.serial(_GuildId);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -1421,28 +1421,28 @@ namespace CHARSYNC
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_registerNameUnifierClient(NLNET::CMessage &__message);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_validateCharacterName(NLNET::CMessage &__message, uint32 userId, uint8 charIndex, const std::string &name, uint32 homeMainlandSessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_assignNameToCharacter(NLNET::CMessage &__message, uint32 charId, const std::string &name, uint32 homeSessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_renameCharacter(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_registerLoadedGuildNames(NLNET::CMessage &__message, uint32 chardId, const std::vector < CGuildInfo > &guildInfos);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_validateGuildName(NLNET::CMessage &__message, uint32 guildId, const ucstring &guildName);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_addGuild(NLNET::CMessage &__message, uint32 shardId, uint32 guildId, const ucstring &guildName);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_removeGuild(NLNET::CMessage &__message, uint32 shardId, uint32 guildId);
-	
+
 
 
 
@@ -1453,18 +1453,18 @@ namespace CHARSYNC
 	class TNameEntry
 	{
 	protected:
-		// 
+		//
 		uint32	_UserId;
-		// 
+		//
 		uint8	_CharIndex;
-		// 
+		//
 		ucstring	_Name;
-		// 
+		//
 		std::string	_UserName;
-		// 
+		//
 		uint32	_ShardId;
 	public:
-		// 
+		//
 		uint32 getUserId() const
 		{
 			return _UserId;
@@ -1476,7 +1476,7 @@ namespace CHARSYNC
 				_UserId = value;
 
 		}
-			// 
+		//
 		uint8 getCharIndex() const
 		{
 			return _CharIndex;
@@ -1488,7 +1488,7 @@ namespace CHARSYNC
 				_CharIndex = value;
 
 		}
-			// 
+		//
 		const ucstring &getName() const
 		{
 			return _Name;
@@ -1508,7 +1508,7 @@ namespace CHARSYNC
 
 
 		}
-			// 
+			//
 		const std::string &getUserName() const
 		{
 			return _UserName;
@@ -1528,7 +1528,7 @@ namespace CHARSYNC
 
 
 		}
-			// 
+			//
 		const uint32 &getShardId() const
 		{
 			return _ShardId;
@@ -1574,10 +1574,10 @@ namespace CHARSYNC
 			s.serial(_ShardId);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -1588,20 +1588,20 @@ namespace CHARSYNC
 	class TCharSyncResultEntry
 	{
 	protected:
-		// 
+		//
 		uint32	_CharId;
-		// 
+		//
 		ucstring	_CharName;
-		// 
+		//
 		uint32	_HomeSessionId;
-		// 
+		//
 		bool	_IsOwnerOfActiveAnimSession;
-		// 
+		//
 		uint32	_ActiveAnimSessionId;
-		// 
+		//
 		uint32	_EditionSessionId;
 	public:
-		// 
+		//
 		uint32 getCharId() const
 		{
 			return _CharId;
@@ -1613,7 +1613,7 @@ namespace CHARSYNC
 				_CharId = value;
 
 		}
-			// 
+		//
 		const ucstring &getCharName() const
 		{
 			return _CharName;
@@ -1633,7 +1633,7 @@ namespace CHARSYNC
 
 
 		}
-			// 
+			//
 		uint32 getHomeSessionId() const
 		{
 			return _HomeSessionId;
@@ -1645,7 +1645,7 @@ namespace CHARSYNC
 				_HomeSessionId = value;
 
 		}
-			// 
+		//
 		bool getIsOwnerOfActiveAnimSession() const
 		{
 			return _IsOwnerOfActiveAnimSession;
@@ -1657,7 +1657,7 @@ namespace CHARSYNC
 				_IsOwnerOfActiveAnimSession = value;
 
 		}
-			// 
+		//
 		uint32 getActiveAnimSessionId() const
 		{
 			return _ActiveAnimSessionId;
@@ -1669,7 +1669,7 @@ namespace CHARSYNC
 				_ActiveAnimSessionId = value;
 
 		}
-			// 
+		//
 		uint32 getEditionSessionId() const
 		{
 			return _EditionSessionId;
@@ -1681,7 +1681,7 @@ namespace CHARSYNC
 				_EditionSessionId = value;
 
 		}
-	
+
 		bool operator == (const TCharSyncResultEntry &other) const
 		{
 			return _CharId == other._CharId
@@ -1711,10 +1711,10 @@ namespace CHARSYNC
 			s.serial(_EditionSessionId);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -1954,34 +1954,34 @@ namespace CHARSYNC
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_initEIdTranslator(NLNET::CMessage &__message, bool firstPacket, bool lastPacket, const std::vector < TNameEntry > &nameEntries);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_updateEIdTranslator(NLNET::CMessage &__message, const std::vector < uint32 > &releasedNames, const std::vector < TNameEntry > &changedNames);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_validateCharacterNameResult(NLNET::CMessage &__message, const CValidateNameResult &nameResult);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_assignCharacterNameResult(NLNET::CMessage &__message, const CValidateNameResult &nameResult);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_characterRenamed(NLNET::CMessage &__message, uint32 charId, const std::string &newName, bool sendSummary);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_userCharUpdatedAndValidated(NLNET::CMessage &__message, uint32 userId, const std::vector < TCharSyncResultEntry > &charInfos);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_userCharSyncFailed(NLNET::CMessage &__message, uint32 userId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_guildRenamed(NLNET::CMessage &__message, uint32 guildId, const ucstring &newName);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_validateGuildNameResult(NLNET::CMessage &__message, uint32 guildId, const ucstring &guildName, TCharacterNameResult result);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_removeCharFromGuild(NLNET::CMessage &__message, uint32 charId, uint32 guildId);
-	
+
 
 
 

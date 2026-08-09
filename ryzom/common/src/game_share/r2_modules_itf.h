@@ -329,40 +329,40 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_getStartParams(NLNET::CMessage &__message, uint32 charId, TSessionId lastStoredSessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_askSetUserCharActPosition(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_activateEasterEgg(NLNET::CMessage &__message, uint32 easterEggId, TSessionId scenarioId, uint32 actId, const std::string &items, float x, float y, float z, float heading, const std::string &grpCtrl, const std::string &name, const std::string &look);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_dssMessage(NLNET::CMessage &__message, TSessionId sessionId, const std::string &mode, const std::string &who, const std::string &msg);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setScenarioPoints(NLNET::CMessage &__message, TSessionId sessionId, float scenarioPoints);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_startScenarioTiming(NLNET::CMessage &__message, TSessionId sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_endScenarioTiming(NLNET::CMessage &__message, TSessionId sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_deactivateEasterEgg(NLNET::CMessage &__message, uint32 easterEggId, TSessionId scenarioId, uint32 actId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onEasterEggLooted(NLNET::CMessage &__message, uint32 eggId, TSessionId scenarioId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onCharTargetReceived(NLNET::CMessage &__message, const NLMISC::CEntityId &eid, const NLMISC::CEntityId &creatureId, uint32 creatureAlias, TDataSetRow creatureRowId, const ucstring &name, uint32 nameId, const std::vector<std::string> &params, bool alived);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportCharacter(NLNET::CMessage &__message, const NLMISC::CEntityId &player, float x, float y, float z);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_characterReady(NLNET::CMessage &__message, const NLMISC::CEntityId &charEid);
-	
+
 
 
 
@@ -633,82 +633,82 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setUserCharStartParams(NLNET::CMessage &__message, uint32 charId, const CFarPosition &farPos, bool reloadPos, uint8 scenarioSeason, R2::TUserRole role);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_charJoinAnimSession(NLNET::CMessage &__message, uint32 charId, uint32 sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_charLeaveAnimSession(NLNET::CMessage &__message, uint32 charId, uint32 sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setUserCharActPosition(NLNET::CMessage &__message, uint32 charId, const CFarPosition &farPos, uint8 season);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_animSessionStarted(NLNET::CMessage &__message, TSessionId sessionId, const TRunningScenarioInfo &scenarioInfo);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_animSessionEnded(NLNET::CMessage &__message, TSessionId sessionId, uint32 scenarioScore, NLMISC::TTime timeTaken);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_scenarioEnded(NLNET::CMessage &__message, TSessionId sessionId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sendItemDescription(NLNET::CMessage &__message, TSessionId sessionId, const std::vector<R2::TMissionItem> &missionItem);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_activateEasterEgg(NLNET::CMessage &__message, uint32 easterEggId, TSessionId scenarioId, uint32 aiInstanceId, const std::vector<R2::TItemAndQuantity> &items, const CFarPosition &pos, const std::string &name, const std::string &look);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_deactivateEasterEgg(NLNET::CMessage &__message, uint32 easterEggId, TSessionId scenarioId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_deactivateEasterEggs(NLNET::CMessage &__message, const std::set<uint32> &items, TSessionId scenarioId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sendCharTargetToDss(NLNET::CMessage &__message, const NLMISC::CEntityId &eid, const std::vector<std::string> &params);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_onTpPositionAsked(NLNET::CMessage &__message, const NLMISC::CEntityId &eid, float x, float y, float z, uint8 season, const R2::TR2TpInfos &teleportInfos);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_disconnectChar(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_returnToPreviousSession(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setPioneerRight(NLNET::CMessage &__message, uint32 charId, bool isDM);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportOneCharacterToAnother(NLNET::CMessage &__message, uint32 sourceId, uint32 destId, uint8 season);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_teleportCharacterToNpc(NLNET::CMessage &__message, uint32 sourceId, const NLMISC::CEntityId &destEid, uint8 season);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_setUserCharCurrentSession(NLNET::CMessage &__message, uint32 charId, TSessionId oldSessionId, const CFarPosition &respawnPoint, R2::TUserRole role);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportLinkedSession(NLNET::CMessage &__message, TSessionId editionSession, TSessionId animationSession);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportUnlinkedSession(NLNET::CMessage &__message, TSessionId editionSession, TSessionId animationSession);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_giveRewardMessage(NLNET::CMessage &__message, TDataSetRow characterRowId, TDataSetRow creatureRowId, const std::string &rewardText, const std::string &rareRewardText, const std::string &inventoryFullText, const std::string &notEnoughPointsText);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportNpcControl(NLNET::CMessage &__message, const NLMISC::CEntityId &playerEid, const NLMISC::CEntityId &botEid);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportStopNpcControl(NLNET::CMessage &__message, const NLMISC::CEntityId &playerEid, const NLMISC::CEntityId &botEid);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_subscribeCharacterInRingUniverse(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_unsubscribeCharacterInRingUniverse(NLNET::CMessage &__message, uint32 charId);
-	
+
 
 
 
@@ -841,7 +841,7 @@ namespace R2
 				_SessionId = value;
 
 		}
-			// the date of last disconnection of the last character
+		// the date of last disconnection of the last character
 		uint32 getDateEmpty() const
 		{
 			return _DateEmpty;
@@ -853,7 +853,7 @@ namespace R2
 				_DateEmpty = value;
 
 		}
-	
+
 		bool operator == (const TR2SbmSessionInfo &other) const
 		{
 			return _SessionId == other._SessionId
@@ -873,10 +873,10 @@ namespace R2
 			s.serial(_DateEmpty);
 
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
@@ -1007,16 +1007,16 @@ namespace R2
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportDeletedSessions(NLNET::CMessage &__message, const std::vector<TSessionId> &sessionIds);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportHibernatedSessions(NLNET::CMessage &__message, const std::vector<TSessionId> &sessionIds);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_reportSavedSessions(NLNET::CMessage &__message, const std::vector< TR2SbmSessionInfo > &sessionInfos);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_registerDss(NLNET::CMessage &__message, TShardId shardId);
-	
+
 
 
 

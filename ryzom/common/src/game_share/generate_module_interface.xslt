@@ -8,7 +8,19 @@
 	<xsl:param name="filename"/>
 
 	<!-- A special template applyer that is mode aware -->
-	<xsl:template name="myApplyTemplate"><xsl:choose><xsl:when test="$output = 'header'"><xsl:apply-templates mode="header"/></xsl:when><xsl:when test="$output = 'cpp'"><xsl:apply-templates  mode="cpp"/></xsl:when><xsl:when test="$output = 'php'"><xsl:apply-templates mode="php"/></xsl:when></xsl:choose></xsl:template>
+	<xsl:template name="myApplyTemplate">
+		<xsl:choose>
+			<xsl:when test="$output = 'header'">
+				<xsl:apply-templates mode="header"/>
+			</xsl:when>
+			<xsl:when test="$output = 'cpp'">
+				<xsl:apply-templates mode="cpp"/>
+			</xsl:when>
+			<xsl:when test="$output = 'php'">
+				<xsl:apply-templates mode="php"/>
+			</xsl:when>
+		</xsl:choose>
+	</xsl:template>
 
 	<!-- some stupide template to remove unwanted text from output -->
 	<xsl:template match="text()" mode="php"/>
@@ -106,7 +118,7 @@ namespace <xsl:value-of select="@name"/>
 	</xsl:template>
 
 	<!-- _______________________________________ -->
-	<xsl:template match="namespace" mode="cpp">
+<xsl:template match="namespace" mode="cpp">
 #include "<xsl:value-of select="$filename"/>.h"
 
 namespace <xsl:value-of select="@name"/>
@@ -130,7 +142,7 @@ namespace <xsl:value-of select="@name"/>
 
 	<xsl:template match="cpp-include" mode="cpp">
 #include "<xsl:value-of select="@file"/>"
-	</xsl:template>
+</xsl:template>
 
 	<xsl:template match="php-include" mode="php">
 <xsl:text>&lt;?php
@@ -320,7 +332,7 @@ namespace <xsl:value-of select="@name"/>
 <xsl:text>
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &amp;buildMessageFor_</xsl:text><xsl:value-of select="@name"/>(NLNET::CMessage &amp;__message<xsl:call-template name="makeParamList"/>);
-	</xsl:for-each>
+</xsl:for-each>
 
 
 
@@ -858,7 +870,7 @@ namespace <xsl:value-of select="@name"/>
 
 	<xsl:template name="makeProperty">
 		<xsl:param name="property"/>
-		<xsl:text>		</xsl:text>// <xsl:value-of select="$property/@doc"/><xsl:text>
+		<xsl:text>		//</xsl:text><xsl:if test="$property/@doc != ''"><xsl:text> </xsl:text></xsl:if><xsl:value-of select="$property/@doc"/><xsl:text>
 </xsl:text>
 		<xsl:text>		</xsl:text><xsl:value-of select="$property/@type"/><xsl:text>	_</xsl:text><xsl:value-of select="$property/@name"/><xsl:text>;
 </xsl:text>
@@ -867,8 +879,7 @@ namespace <xsl:value-of select="@name"/>
 	<!--/////////////////////////////////////////////////////////-->
 	<xsl:template name="makePropertyAccessor">
 		<xsl:param name="property"/>
-		<xsl:text>		</xsl:text>// <xsl:value-of select="$property/@doc"/><xsl:text>
-</xsl:text>
+		<xsl:text>		//</xsl:text><xsl:if test="$property/@doc != ''"><xsl:text> </xsl:text></xsl:if><xsl:value-of select="$property/@doc"/><xsl:text>&#xa;</xsl:text>
 <xsl:choose>
 	<xsl:when test="$property/@byref = 'true'">
 		<xsl:text>		</xsl:text>const <xsl:value-of select="$property/@type"/> &amp;get<xsl:value-of select="$property/@name"/>() const
@@ -936,9 +947,9 @@ namespace <xsl:value-of select="@name"/>
 			}
 </xsl:if>
 		}
-	</xsl:otherwise>
+</xsl:otherwise>
 </xsl:choose>
-	</xsl:template>
+</xsl:template>
 
 
 	<!--/////////////////////////////////////////////////////////-->
@@ -1430,10 +1441,10 @@ namespace <xsl:value-of select="@name"/>
 </xsl:text>
 	</xsl:for-each>
 		}
-		</xsl:if>
+</xsl:if>
 
 	private:
-	<!-- generate private child container modifier -->
+<!-- generate private child container modifier -->
 <xsl:for-each select="child_class[relation = 'one-to-many' and cont='vector']">
 
 		/// add a child in the container

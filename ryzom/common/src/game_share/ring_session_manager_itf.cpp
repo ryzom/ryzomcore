@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "ring_session_manager_itf.h"
 
 namespace RSMGR
