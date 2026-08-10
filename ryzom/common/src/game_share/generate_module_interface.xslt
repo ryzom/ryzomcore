@@ -318,7 +318,7 @@ namespace <xsl:value-of select="@name"/>
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}

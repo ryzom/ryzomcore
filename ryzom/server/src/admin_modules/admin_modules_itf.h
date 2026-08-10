@@ -2017,7 +2017,7 @@ namespace ADMIN
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -2036,7 +2036,7 @@ namespace ADMIN
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -2055,7 +2055,7 @@ namespace ADMIN
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}

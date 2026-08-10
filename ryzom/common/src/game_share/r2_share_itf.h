@@ -1345,7 +1345,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1364,7 +1364,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1383,7 +1383,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1402,7 +1402,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1421,7 +1421,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1440,7 +1440,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1459,7 +1459,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1478,7 +1478,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1497,7 +1497,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1516,7 +1516,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1535,7 +1535,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
@@ -1554,7 +1554,7 @@ namespace R2
 
 			for (; first != last; ++first)
 			{
-				auto proxy = *first;
+				NLNET::IModuleProxy *proxy = *first;
 
 				proxy->sendModuleMessage(sender, message);
 			}
