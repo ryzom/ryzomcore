@@ -31,10 +31,10 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 namespace CHATUNI
 {
-	
+
 	// The player locator is not available, could'nt do the job
 	// No IOS module for the addresse hosting shard
 	// No character synchronizer to retreive sender name
@@ -59,11 +59,11 @@ namespace CHATUNI
 			end_of_enum,
 
 			invalid_val,
-			
+
 			/// Number of enumerated values
 			nb_enum_items = 6
 		};
-		
+
 		/// Index table to convert enum value to linear index table
 		const std::map<TValues, uint32> &getIndexTable() const
 		{
@@ -78,13 +78,13 @@ namespace CHATUNI
 				indexTable.insert(std::make_pair(fi_sender_char_unknown, 3));
 				indexTable.insert(std::make_pair(fi_dest_char_unknown, 4));
 				indexTable.insert(std::make_pair(fi_char_offline, 5));
-			
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		
+
 
 		static const NLMISC::CStringConversion<TValues> &getConversionTable()
 		{
@@ -96,9 +96,9 @@ namespace CHATUNI
 				NL_STRING_CONVERSION_TABLE_ENTRY(fi_dest_char_unknown)
 				NL_STRING_CONVERSION_TABLE_ENTRY(fi_char_offline)
 				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};                                                                                             
-			static NLMISC::CStringConversion<TValues>                                                                
-			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)   
+			};
+			static NLMISC::CStringConversion<TValues>
+			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
 			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
 
 			return conversionTable;
@@ -177,16 +177,16 @@ namespace CHATUNI
 			return getConversionTable().isValid(_Value);
 		}
 
-		
+
 		uint32 asIndex()
 		{
 			std::map<TValues, uint32>::const_iterator it(getIndexTable().find(_Value));
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		
+
 	};
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -210,12 +210,12 @@ namespace CHATUNI
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -225,7 +225,7 @@ namespace CHATUNI
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void sendFarTell_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		// declare one interceptor member of the skeleton
@@ -271,7 +271,7 @@ namespace CHATUNI
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CChatUnifierSkel::TInterceptor *interceptor = NULL;
+				CChatUnifierSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -279,7 +279,7 @@ namespace CHATUNI
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CChatUnifierProxy()
@@ -298,7 +298,7 @@ namespace CHATUNI
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_sendFarTell(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const ucstring &text);
-	
+
 
 
 
@@ -327,12 +327,12 @@ namespace CHATUNI
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -342,7 +342,7 @@ namespace CHATUNI
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void recvFarTellFail_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void recvFarTell_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -414,7 +414,7 @@ namespace CHATUNI
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CChatUnifierClientSkel::TInterceptor *interceptor = NULL;
+				CChatUnifierClientSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -422,7 +422,7 @@ namespace CHATUNI
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CChatUnifierClientProxy()
@@ -457,7 +457,7 @@ namespace CHATUNI
 		static void broadcast_farGuildChat(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const ucstring &text)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_farGuildChat(message , senderName, guildId, text);
 
@@ -476,7 +476,7 @@ namespace CHATUNI
 		static void broadcast_farGuildChat2(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, const ucstring &phraseName)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_farGuildChat2(message , senderName, guildId, phraseName);
 
@@ -495,7 +495,7 @@ namespace CHATUNI
 		static void broadcast_farGuildChat2Ex(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const ucstring &senderName, uint32 guildId, uint32 phraseId)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_farGuildChat2Ex(message , senderName, guildId, phraseId);
 
@@ -514,7 +514,7 @@ namespace CHATUNI
 		static void broadcast_universeBroadcast(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_universeBroadcast(message , senderName, senderHomeSession, text);
 
@@ -533,7 +533,7 @@ namespace CHATUNI
 		static void broadcast_dynChanBroadcast(ProxyIterator first, ProxyIterator last, NLNET::IModule *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text)
 		{
 			NLNET::CMessage message;
-			
+
 			// create the message to send to multiple dest
 			buildMessageFor_dynChanBroadcast(message , chanId, senderName, text);
 
@@ -548,33 +548,33 @@ namespace CHATUNI
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_recvFarTellFail(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, const ucstring &destName, TFailInfo failInfo);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_recvFarTell(NLNET::CMessage &__message, const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const ucstring &text);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_farGuildChat(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const ucstring &text);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_farGuildChat2(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, const ucstring &phraseName);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_farGuildChat2Ex(NLNET::CMessage &__message, const ucstring &senderName, uint32 guildId, uint32 phraseId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_universeBroadcast(NLNET::CMessage &__message, const ucstring &senderName, uint32 senderHomeSession, const ucstring &text);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_dynChanBroadcast(NLNET::CMessage &__message, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_recvBroadcastMessage(NLNET::CMessage &__message, const ucstring &message);
-	
+
 
 
 
 	};
 
 }
-	
+
 #endif

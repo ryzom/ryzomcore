@@ -1,7 +1,7 @@
 <generator header_tag="LOGGER_SERVICE_ITF">
 	<include file="nel/misc/entity_id.h"/>
 	<include file="nel/misc/sheet_id.h"/>
-	<include file="inventories.h"/>
+	<include file="game_share/inventories.h"/>
 	<sys-include file="vector"/>
 	<cpp-include file="stdpch.h"/>
 

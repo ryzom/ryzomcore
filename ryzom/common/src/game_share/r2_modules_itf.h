@@ -837,11 +837,9 @@ namespace R2
 
 		void setSessionId(TSessionId value)
 		{
-
 				_SessionId = value;
-
 		}
-			// the date of last disconnection of the last character
+		// the date of last disconnection of the last character
 		uint32 getDateEmpty() const
 		{
 			return _DateEmpty;
@@ -849,9 +847,7 @@ namespace R2
 
 		void setDateEmpty(uint32 value)
 		{
-
 				_DateEmpty = value;
-
 		}
 
 		bool operator == (const TR2SbmSessionInfo &other) const
@@ -864,14 +860,12 @@ namespace R2
 		// constructor
 		TR2SbmSessionInfo()
 		{
-
 		}
 
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_SessionId);
 			s.serial(_DateEmpty);
-
 		}
 
 
