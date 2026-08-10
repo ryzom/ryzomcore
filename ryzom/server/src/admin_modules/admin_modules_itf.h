@@ -774,7 +774,7 @@ namespace ADMIN
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class TGraphDatas
@@ -836,7 +836,7 @@ namespace ADMIN
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class THighRezData
@@ -893,7 +893,7 @@ namespace ADMIN
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class THighRezDatas
@@ -993,7 +993,7 @@ namespace ADMIN
 	};
 
 
-	
+
 
 	struct TShardOrders
 	{
@@ -1717,7 +1717,7 @@ namespace ADMIN
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -1743,9 +1743,9 @@ namespace ADMIN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1756,7 +1756,7 @@ namespace ADMIN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void upServiceUpdate_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void graphUpdate_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1883,9 +1883,9 @@ namespace ADMIN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1896,7 +1896,7 @@ namespace ADMIN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void setShardOrders_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void shutdownShard_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2116,9 +2116,9 @@ namespace ADMIN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -2129,7 +2129,7 @@ namespace ADMIN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void serviceCmd_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void serviceCmdNoReturn_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2214,5 +2214,5 @@ namespace ADMIN
 	};
 
 }
-	
+
 #endif

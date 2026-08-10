@@ -76,7 +76,7 @@ namespace PATCHMAN
 	}
 
 
-	void CFileReceiverSkel::setupSubscriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CFileReceiverSkel::setupSubscriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CFileReceiverSkel_setupSubscriptions_FR_SETUP_SUBS);
 		setupSubscriptions(sender);
@@ -328,7 +328,7 @@ namespace PATCHMAN
 		unsubscribe(sender, fileSpec);
 	}
 
-	void CFileRepositorySkel::unsubscribeAll_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CFileRepositorySkel::unsubscribeAll_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CFileRepositorySkel_unsubscribeAll_FR_UNSUBSCRIBE_ALL);
 		unsubscribeAll(sender);
@@ -1195,7 +1195,7 @@ namespace PATCHMAN
 		registerAdministeredModule(sender, requireApplierUpdates, requireTerminalUpdates, requireDepCfgUpdates, isAdministered);
 	}
 
-	void CServerPatchManagerSkel::requestRefresh_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CServerPatchManagerSkel::requestRefresh_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CServerPatchManagerSkel_requestRefresh_SPM_REFRESH);
 		requestRefresh(sender);
@@ -1553,7 +1553,7 @@ namespace PATCHMAN
 	}
 
 
-	void CDeploymentConfigurationSynchroniserSkel::requestSync_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CDeploymentConfigurationSynchroniserSkel::requestSync_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CDeploymentConfigurationSynchroniserSkel_requestSync_DEPCFG_REQUEST);
 		requestSync(sender);

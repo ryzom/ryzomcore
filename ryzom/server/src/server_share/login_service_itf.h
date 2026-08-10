@@ -470,5 +470,5 @@ namespace LS
 	};
 
 }
-	
+
 #endif

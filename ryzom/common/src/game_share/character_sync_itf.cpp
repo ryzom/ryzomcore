@@ -516,7 +516,7 @@ namespace CHARSYNC
 	}
 
 
-	void CNameUnifierSkel::registerNameUnifierClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
+	void CNameUnifierSkel::registerNameUnifierClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &/* __message */)
 	{
 		H_AUTO(CNameUnifierSkel_registerNameUnifierClient_NU_RNUC);
 		registerNameUnifierClient(sender);

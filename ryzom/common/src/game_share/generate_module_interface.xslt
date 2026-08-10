@@ -115,7 +115,7 @@ namespace <xsl:value-of select="@name"/>
 </xsl:for-each>
 <xsl:call-template name="myApplyTemplate"/>
 }
-	</xsl:template>
+</xsl:template>
 
 	<!-- _______________________________________ -->
 <xsl:template match="namespace" mode="cpp">
@@ -195,19 +195,20 @@ namespace <xsl:value-of select="@name"/>
 </xsl:if>
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;message);
 	private:
 
-		typedef void (<xsl:value-of select="@name"/>Skel::*TMessageHandler)(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;message);
+		typedef void (<xsl:value-of select="@name"/><xsl:text>Skel::*TMessageHandler)(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;message);
 		typedef std::map&lt;std::string, TMessageHandler&gt;	TMessageHandlerMap;
 
 		const TMessageHandlerMap &amp;getMessageHandlers() const;
 
+</xsl:text>
 		<xsl:for-each select="method">
 <xsl:choose>
 <xsl:when test="not(return)">
@@ -389,7 +390,8 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="method">
 <xsl:choose>
 <xsl:when test="not(return)">
-	void <xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;__message)
+	void <xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;<xsl:choose>
+	<xsl:when test="not(param)">/* __message */</xsl:when><xsl:otherwise>__message</xsl:otherwise></xsl:choose>)
 	{
 		H_AUTO(<xsl:value-of select="$skelName"/>_<xsl:value-of select="@name"/>_<xsl:value-of select="@msg"/>);
 <xsl:for-each select="param">
@@ -1540,11 +1542,12 @@ namespace <xsl:value-of select="@name"/>
 		// Set the persistent state of the object and do some house keeping
 		void setPersistentState(NOPE::TObjectState state);
 
-</xsl:if>
+</xsl:if><xsl:text>
 
 	};
 
 
+</xsl:text>
 	</xsl:template>
 
 

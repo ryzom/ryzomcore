@@ -71,7 +71,7 @@
 				default: BOMB("Invalid value being converted to level - returning 1",return 1);
 			}
 		}
-			</header_code>
+</header_code>
 		</enum>
 
 		<class name="TRunningScenarioInfo">

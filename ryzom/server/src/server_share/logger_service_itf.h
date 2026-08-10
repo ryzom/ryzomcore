@@ -646,7 +646,7 @@ namespace LGS
 	};
 
 
-		// A vector of parameter value
+	// A vector of parameter value
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -695,7 +695,7 @@ namespace LGS
 	};
 
 
-		// Definition of a log entry
+	// Definition of a log entry
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -808,7 +808,7 @@ namespace LGS
 	};
 
 
-		// A log entry data. This contains the parameter of a log 
+	// A log entry data. This contains the parameter of a log 
 	// entry to be stored in the log archive
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -905,7 +905,7 @@ namespace LGS
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -931,9 +931,9 @@ namespace LGS
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -944,7 +944,7 @@ namespace LGS
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void registerClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void reportLog_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1033,5 +1033,5 @@ namespace LGS
 	};
 
 }
-	
+
 #endif

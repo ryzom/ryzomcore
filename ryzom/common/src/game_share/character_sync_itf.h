@@ -653,7 +653,7 @@ namespace CHARSYNC
 	};
 
 
-		// Info about a the best level of a character, used for block tranfert
+	// Info about a the best level of a character, used for block tranfert
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -716,7 +716,7 @@ namespace CHARSYNC
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -742,9 +742,9 @@ namespace CHARSYNC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -755,7 +755,7 @@ namespace CHARSYNC
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void addCharacter_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void deleteCharacter_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1135,7 +1135,7 @@ namespace CHARSYNC
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class CGuildInfo
@@ -1197,7 +1197,7 @@ namespace CHARSYNC
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -1223,9 +1223,9 @@ namespace CHARSYNC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1236,7 +1236,7 @@ namespace CHARSYNC
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void registerNameUnifierClient_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void validateCharacterName_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1507,7 +1507,7 @@ namespace CHARSYNC
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class TCharSyncResultEntry
@@ -1628,7 +1628,7 @@ namespace CHARSYNC
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -1654,9 +1654,9 @@ namespace CHARSYNC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1667,7 +1667,7 @@ namespace CHARSYNC
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void initEIdTranslator_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void updateEIdTranslator_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1897,5 +1897,5 @@ namespace CHARSYNC
 	};
 
 }
-	
+
 #endif

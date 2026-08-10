@@ -234,7 +234,7 @@ namespace R2
 				default: BOMB("Invalid value being converted to level - returning 1",return 1);
 			}
 		}
-			
+
 	};
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -402,7 +402,7 @@ namespace R2
 	};
 
 
-	
+
 
 	struct TPioneerRight
 	{
@@ -561,9 +561,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -574,7 +574,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void connectAnimationModePlay_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void askMissionItemsDescription_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -719,9 +719,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -732,7 +732,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void startingScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void startScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1055,9 +1055,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1068,7 +1068,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void startingScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void startScenario_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1735,7 +1735,7 @@ namespace R2
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -1761,9 +1761,9 @@ namespace R2
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -1774,7 +1774,7 @@ namespace R2
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void storeItemNamesForAIInstance_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		// declare one interceptor member of the skeleton
@@ -1850,5 +1850,5 @@ namespace R2
 	};
 
 }
-	
+
 #endif

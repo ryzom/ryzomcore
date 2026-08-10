@@ -102,7 +102,7 @@ namespace ENTITYLOC
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -128,9 +128,9 @@ namespace ENTITYLOC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -141,7 +141,7 @@ namespace ENTITYLOC
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void initState_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void playerConnected_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -337,7 +337,7 @@ namespace ENTITYLOC
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -363,9 +363,9 @@ namespace ENTITYLOC
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -376,7 +376,7 @@ namespace ENTITYLOC
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void connectionEvents_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		// declare one interceptor member of the skeleton
@@ -471,5 +471,5 @@ namespace ENTITYLOC
 	};
 
 }
-	
+
 #endif

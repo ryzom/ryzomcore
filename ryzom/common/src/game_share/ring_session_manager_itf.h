@@ -1874,7 +1874,7 @@ namespace RSMGR
 	};
 
 
-		// A character enter the session
+	// A character enter the session
 	// A character leave the session
 	// The session is almost closed
 
@@ -2039,9 +2039,9 @@ namespace RSMGR
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -2052,7 +2052,7 @@ namespace RSMGR
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void registerDSS_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void sessionCreated_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -2205,9 +2205,9 @@ namespace RSMGR
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -2218,7 +2218,7 @@ namespace RSMGR
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void createSession_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void addCharacterInSession_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -5133,7 +5133,7 @@ namespace RSMGR
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class TCharDesc
@@ -5326,7 +5326,7 @@ namespace RSMGR
 	};
 
 
-		// Callback interface used by client to request session info
+	// Callback interface used by client to request session info
 
 	class CSessionBrowserServerWebItf : public CRingSessionManagerWebItf
 
@@ -6365,5 +6365,5 @@ namespace RSMGR
 	};
 
 }
-	
+
 #endif

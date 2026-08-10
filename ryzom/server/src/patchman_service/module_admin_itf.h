@@ -69,9 +69,9 @@ namespace PATCHMAN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -82,7 +82,7 @@ namespace PATCHMAN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void setupSubscriptions_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void cbFileInfo_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -209,9 +209,9 @@ namespace PATCHMAN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -222,7 +222,7 @@ namespace PATCHMAN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void requestFileInfo_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void requestFileData_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -369,9 +369,9 @@ namespace PATCHMAN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -382,7 +382,7 @@ namespace PATCHMAN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void executeCommand_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void installVersion_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -502,9 +502,9 @@ namespace PATCHMAN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -515,7 +515,7 @@ namespace PATCHMAN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void declareState_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void declareModuleDown_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -709,9 +709,9 @@ namespace PATCHMAN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -722,7 +722,7 @@ namespace PATCHMAN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void registerAdministeredModule_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void requestRefresh_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -909,9 +909,9 @@ namespace PATCHMAN
 
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
@@ -922,7 +922,7 @@ namespace PATCHMAN
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void requestSync_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void sync_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -1011,5 +1011,5 @@ namespace PATCHMAN
 	};
 
 }
-	
+
 #endif
