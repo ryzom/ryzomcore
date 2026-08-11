@@ -43,6 +43,7 @@ if (WITH_RYZOM_XSLT)
 			r2_modules_itf.xml
 			r2_share_itf.xml
 			ring_session_manager_itf.xml
+			welcome_service_itf.xml
 	)
 endif ()
 
