@@ -1,4 +1,4 @@
-"""Ryzom Forgery object viewer: browse and inspect .shape files.
+"""Ryzom Forgery object editor: browse, inspect and edit .shape files.
 
 3D display is supported for CMesh, CMeshMRM (finest LOD) and CMeshMultiLod
 (slot 0, whose geometry is itself a CMesh/CMeshMRM). Other shape types
@@ -70,9 +70,9 @@ def _build_geom(vertex_buffer, indices):
 	return geom
 
 
-class ObjectViewerApp(ForgeryApp):
+class ObjectEditorApp(ForgeryApp):
 	def __init__(self, data_root=DEFAULT_DATA_ROOT):
-		ForgeryApp.__init__(self, explorer_root=data_root, title="Ryzom Forgery - Object Viewer",
+		ForgeryApp.__init__(self, explorer_root=data_root, title="Ryzom Forgery - Object Editor",
 		                     explorer_default_filter="*.shape")
 
 		self.data_root = Path(data_root)
@@ -98,7 +98,7 @@ class ObjectViewerApp(ForgeryApp):
 		self.commands.register_global("Export settings...", lambda items: self.export_dialog.open())
 
 	def on_selection_changed(self, items):
-		print(f"[object_viewer] selection changed: {[item.name for item in items]}")
+		print(f"[object_editor] selection changed: {[item.name for item in items]}")
 		if len(items) == 1 and items[0].suffix.lower() == ".shape":
 			self._load_shape(items[0])
 
@@ -126,7 +126,7 @@ class ObjectViewerApp(ForgeryApp):
 		for vertex_buffer, material_id, indices in iter_render_passes(self.shape_file.value):
 			if not indices:
 				continue
-			print(f"[object_viewer] pass {pass_count}: material={material_id} "
+			print(f"[object_editor] pass {pass_count}: material={material_id} "
 			      f"verts={vertex_buffer.num_verts} tris={len(indices) // 3} "
 			      f"channels={list(vertex_buffer.channels.keys())}")
 			geom = _build_geom(vertex_buffer, indices)
@@ -168,12 +168,12 @@ class ObjectViewerApp(ForgeryApp):
 
 		texture = material.textures[0] if material.textures else None
 		if texture is None:
-			print(f"[object_viewer] material {material_id}: no texture")
+			print(f"[object_editor] material {material_id}: no texture")
 		elif not texture.file_name:
-			print(f"[object_viewer] material {material_id}: texture slot present "
+			print(f"[object_editor] material {material_id}: texture slot present "
 			      f"(class={texture.class_name}) but no file_name")
 		else:
-			print(f"[object_viewer] material {material_id}: texture reference {texture.file_name!r}")
+			print(f"[object_editor] material {material_id}: texture reference {texture.file_name!r}")
 			panda_texture = load_panda_texture(self.asset_index, texture.file_name, cache=self._texture_cache)
 			if panda_texture is not None:
 				node_path.set_texture(panda_texture)
@@ -195,4 +195,4 @@ class ObjectViewerApp(ForgeryApp):
 
 
 if __name__ == "__main__":
-	ObjectViewerApp().run()
+	ObjectEditorApp().run()

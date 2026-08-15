@@ -1,5 +1,5 @@
 """Shared geometry/material extraction for CMesh/CMeshMRM/CMeshMultiLod
-`.shape` values -- used both by the live 3D viewer (`apps/object_viewer.py`)
+`.shape` values -- used both by the live 3D editor (`apps/object_editor.py`)
 and by the .shape exporters (`shape_export.py`), so the two don't each
 maintain their own copy of "how to walk a parsed shape's render passes".
 """
