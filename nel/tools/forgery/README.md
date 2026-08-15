@@ -14,3 +14,12 @@ This package depends on `pynel` (the standard explorer browses `.bnp`
 archive contents via `pynel.ryzom_bnp`). `pynel` isn't published to PyPI, so
 it's not listed in `pyproject.toml`'s dependencies — `dev.sh` installs it as
 an editable sibling checkout (`../pynel`) instead, same as `ryztart`/`kyss`.
+
+`apps/shape_exporter.py` is a command-line exception to that (no GUI): it
+converts a single `.shape` to `.obj`/`.dae`/`.stl`/`.gltf`/`.glb` (format
+picked from the output file's extension), reusing the same export code as
+the object viewer's "Export to..." commands.
+
+```sh
+./dev.sh apps/shape_exporter.py path/to/aaa.shape path/to/bbb.obj
+```
