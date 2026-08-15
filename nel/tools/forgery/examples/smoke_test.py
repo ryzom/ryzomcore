@@ -2,7 +2,7 @@
 sysinfo/explorer/panel layout.
 
 Not an actual tool, just a way to visually check the base lib works before
-any real tool app (e.g. the object viewer) is built on top of it. The
+any real tool app (e.g. the object editor) is built on top of it. The
 explorer root is this examples/ directory itself, just so there's something
 to browse without depending on a real Ryzom data tree.
 """
