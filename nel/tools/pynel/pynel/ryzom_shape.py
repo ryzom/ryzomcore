@@ -1094,7 +1094,20 @@ def _write_vertex_buffer(f: _Writer, vb: VertexBuffer) -> None:
 def _parse_index_buffer(f: _Reader) -> List[int]:
 	ver = f.version()
 	if ver < 1:
-		raise ShapeParseError("legacy (pre-1) CIndexBuffer (primitive block) format is not supported")
+		# Version 0: "primitive block" -- separate line/triangle/quad sections,
+		# only the triangle one carries renderable indices (as 32-bit, always,
+		# regardless of _NbIndexes's usual 16/32-bit resident format). See the
+		# `ver < 1` branch of CIndexBuffer::serial in nel/src/3d/index_buffer.cpp.
+		f.u32()  # line count
+		f.u32()  # line capacity
+		f.cont_uint_vector(4, "I")  # line indexes, unused
+		nb_indexes = f.u32() * 3  # triangle count -> _NbIndexes
+		f.u32()  # triangle capacity
+		indexes = f.cont_uint_vector(4, "I")
+		f.u32()  # quad count
+		f.u32()  # quad capacity
+		f.cont_uint_vector(4, "I")  # quad indexes, unused
+		return indexes[:nb_indexes]
 	nb_indexes = f.u32()
 	f.u32()  # _Capacity
 	indexes = f.cont_uint_vector(4, "I")
