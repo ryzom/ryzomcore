@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-16 — 🎨 Move scale-reference toggles to the viewport, size icons consistently
+
+Moved the "Cube (1x1x1)" / "Smallest character" / "Tallest character" scale-reference
+toggles (`apps/object_editor.py`) from a text-button row inside the right-hand panel to a
+top-left viewport bar, matching the bottom-left `_draw_viewport_toggles()` bar's
+positioning pattern -- icon buttons (`ICON_FA_CUBE`/`ICON_FA_CHILD`/`ICON_FA_MALE`) instead
+of text labels.
+
+Both this new bar and the existing bottom-left one now render at 1.5x the normal UI icon
+size (`ForgeryApp.large_icon_font`, a second Font Awesome font loaded standalone -- this
+imgui_bundle version has no per-window font-scale API to reach for instead) and use a
+square `_icon_button(..., square=True)` size (`imgui.get_frame_height()` on both axes)
+instead of ImGui's default auto-size, which otherwise made each button only as wide as its
+own glyph -- visibly inconsistent between different Font Awesome icons.
+
 ## 2026-08-16 — ✨ Add .fbx import and move .dae import to assimp
 
 Added `.fbx` import support to Forgery (`ryzom_forgery/shape_import.py`, wired into both

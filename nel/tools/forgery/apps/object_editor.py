@@ -49,6 +49,14 @@ _REFERENCE_SHAPES = [
 ]
 _REFERENCE_GAP = 1.5  # meters between reference objects (and the main shape), beyond their own bbox width
 
+# Icon for each toggle in the top-left viewport button bar (see
+# _draw_reference_shapes_toggles()) -- these read as "important, chunky
+# toggles" next to the smaller bottom-left _draw_viewport_toggles() bar, so
+# they're drawn with app.large_icon_font (2x _ICON_FONT_SIZE, see app.py's
+# _load_icon_font()) instead of the normal merged-into-text-font icon glyphs.
+_REFERENCE_ICONS = {"Cube (1x1x1)": fa_icons.ICON_FA_CUBE, "Smallest character": fa_icons.ICON_FA_CHILD,
+                     "Tallest character": fa_icons.ICON_FA_MALE}
+
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
 
@@ -95,14 +103,18 @@ _MULTI_BITMAP_SLOT_LABELS = [
 ]
 
 
-def _icon_button(icon, tooltip, active=False):
+def _icon_button(icon, tooltip, active=False, square=False):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
 	self-explanatory. `active` highlights it (toggle-button style) when the
-	feature it controls is currently on."""
+	feature it controls is currently on. `square` sizes it to the current
+	font's frame height on both axes, so a row of these all matches -- without
+	it, imgui.button()'s default auto-size makes each button only as wide as
+	its own glyph, which visibly varies between Font Awesome icons."""
 	if active:
 		imgui.push_style_color(imgui.Col_.button.value, (0.26, 0.59, 0.98, 0.8))
-	clicked = imgui.button(icon)
+	size = (imgui.get_frame_height(), imgui.get_frame_height()) if square else (0, 0)
+	clicked = imgui.button(icon, size)
 	if active:
 		imgui.pop_style_color()
 	if imgui.is_item_hovered():
@@ -578,17 +590,24 @@ class ObjectEditorApp(ForgeryApp):
 		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
 		         | imgui.WindowFlags_.always_auto_resize.value)
 		with imgui_ctx.begin("##viewport-toggles", flags=flags):
-			if _icon_button(fa_icons.ICON_FA_TABLE, "Floor grid (1m squares, sized to the object)", self._grid_visible):
+			if self.large_icon_font is not None:
+				imgui.push_font(self.large_icon_font, self.large_icon_font_size)
+			if _icon_button(fa_icons.ICON_FA_TABLE, "Floor grid (1m squares, sized to the object)",
+			                self._grid_visible, square=True):
 				self._toggle_grid()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_COMPASS, "World X/Y/Z axes", self._world_axes_visible):
+			if _icon_button(fa_icons.ICON_FA_COMPASS, "World X/Y/Z axes", self._world_axes_visible, square=True):
 				self._toggle_world_axes()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_CROSSHAIRS, "Object pivot X/Y/Z axes", self._pivot_axes_visible):
+			if _icon_button(fa_icons.ICON_FA_CROSSHAIRS, "Object pivot X/Y/Z axes",
+			                self._pivot_axes_visible, square=True):
 				self._toggle_pivot_axes()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_ADJUST, "50% object transparency", self._object_transparent):
+			if _icon_button(fa_icons.ICON_FA_ADJUST, "50% object transparency",
+			                self._object_transparent, square=True):
 				self._toggle_object_transparency()
+			if self.large_icon_font is not None:
+				imgui.pop_font()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def reset_object_rotation(self):
@@ -694,20 +713,31 @@ class ObjectEditorApp(ForgeryApp):
 			if bbox is not None:
 				cursor_x += bbox.half_size.x * 2 + _REFERENCE_GAP
 
-	def _draw_reference_shapes_row(self):
-		imgui.text("Scale reference:")
-		for label, _ in _REFERENCE_SHAPES:
-			imgui.same_line()
-			active = label in self._reference_active
-			if active:
-				imgui.push_style_color(imgui.Col_.button.value, (0.2, 0.65, 0.2, 1.0))
-				imgui.push_style_color(imgui.Col_.button_hovered.value, (0.25, 0.7, 0.25, 1.0))
-				imgui.push_style_color(imgui.Col_.button_active.value, (0.15, 0.55, 0.15, 1.0))
-			if imgui.button(label):
-				self._toggle_reference_shape(label)
-			if active:
-				imgui.pop_style_color(3)
-		imgui.separator()
+	def _draw_reference_shapes_toggles(self):
+		"""Top-left viewport bar for the 3 scale-reference toggles (Cube /
+		shortest / tallest character) -- square icon buttons at 2x
+		_draw_viewport_toggles()'s icon size (app.large_icon_font), since
+		these are a more prominent, deliberately-reached-for control."""
+		display_size = imgui.get_io().display_size
+		if display_size.y <= 0:
+			return
+
+		x = self.explorer_width + _VIEWPORT_TOGGLE_MARGIN_PX
+		y = _VIEWPORT_TOGGLE_MARGIN_PX
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("##reference-shapes-toggles", flags=flags):
+			if self.large_icon_font is not None:
+				imgui.push_font(self.large_icon_font, self.large_icon_font_size)
+			for i, (label, _) in enumerate(_REFERENCE_SHAPES):
+				if i > 0:
+					imgui.same_line()
+				if _icon_button(_REFERENCE_ICONS[label], label, label in self._reference_active, square=True):
+					self._toggle_reference_shape(label)
+			if self.large_icon_font is not None:
+				imgui.pop_font()
 
 	@staticmethod
 	def _apply_material_common(node_path, material):
@@ -1342,10 +1372,10 @@ class ObjectEditorApp(ForgeryApp):
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
 		self._draw_viewport_toggles()
+		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()
 		self._draw_replace_match_popup()
-		self._draw_reference_shapes_row()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)

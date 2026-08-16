@@ -80,11 +80,21 @@ class ForgeryApp(ShowBase):
 		self.accept("imgui-new-frame", self.draw_ui)
 
 	def _load_icon_font(self):
+		# self.large_icon_font (1.5x _ICON_FONT_SIZE, standalone -- not merged
+		# into the default font like the one above) is for spots that want a
+		# bigger icon-only button than the normal UI text size, e.g.
+		# object_editor.py's viewport toggle bars: push_font()/pop_font()
+		# around those buttons, since there's no per-window font-scale API in
+		# this imgui_bundle version to reach for instead.
 		if not _ICON_FONT_PATH.exists():
+			self.large_icon_font = None
+			self.large_icon_font_size = _ICON_FONT_SIZE * 1.5
 			return
 		font_config = imgui.ImFontConfig()
 		font_config.merge_mode = True
 		imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), _ICON_FONT_SIZE, font_config)
+		self.large_icon_font_size = _ICON_FONT_SIZE * 1.5
+		self.large_icon_font = imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), self.large_icon_font_size)
 
 	def draw_panel(self):
 		"""Override in subclasses to draw the app-specific right panel content each frame."""
