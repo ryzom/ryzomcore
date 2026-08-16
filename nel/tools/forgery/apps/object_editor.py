@@ -40,6 +40,7 @@ _COLOR_POPUP_ID = "material-color-picker"
 
 # CMaterial flag/enum values (nel/include/nel/3d/material.h), needed to render
 # translucent materials (e.g. glass) correctly instead of opaque.
+_IDRV_MAT_ZWRITE = 0x00000004
 _IDRV_MAT_BLEND = 0x00000080
 _IDRV_MAT_DOUBLE_SIDED = 0x00000100
 _IDRV_MAT_ALPHA_TEST = 0x00000200
@@ -241,6 +242,7 @@ class ObjectEditorApp(ForgeryApp):
 		node_path.clear_transparency()
 		node_path.clear_attrib(ColorBlendAttrib)
 		node_path.clear_attrib(AlphaTestAttrib)
+		node_path.clear_depth_write()
 
 		materials = getattr(self.shape_file.value, "materials", None)
 		material = materials[material_id] if materials and material_id < len(materials) else None
@@ -250,6 +252,13 @@ class ObjectEditorApp(ForgeryApp):
 		# glass) look wrong when both faces of the geometry render, since
 		# their blend stacks each overlapping face's contribution.
 		node_path.set_two_sided(bool(material.flags & _IDRV_MAT_DOUBLE_SIDED) if material is not None else True)
+
+		# Follow CMaterial::ZWRITE too: blended materials (e.g. glass) often
+		# have it off on purpose, so they don't occlude whatever's behind
+		# them in the depth buffer -- leaving depth write on (Panda's
+		# default) made such materials intermittently hide unrelated
+		# geometry depending on draw order.
+		node_path.set_depth_write(bool(material.flags & _IDRV_MAT_ZWRITE) if material is not None else True)
 
 		override_color = self._material_override_colors.get(material_id)
 		if override_color is not None:

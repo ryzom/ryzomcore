@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-16 — 🐛 Respect CMaterial::ZWRITE for blended materials in object_editor
+
+Follow-up to the transparency work below: `apt_snowglobe.shape`'s glass sphere
+(material 5, `flags=0x90` -- BLEND|LIGHTING, no ZWRITE bit) intermittently hid geometry
+behind it (its base pedestal, and the grass patch under the reindeer) depending on draw
+order, reproducing across app restarts but not always within a session -- confusing to
+track down since toggling the material color override (which forces a full
+`_reapply_material()`) sometimes "fixed" it, and it always looked fine from inside the
+globe (camera past the glass, so it's simply not in the view frustum).
+
+Root cause: `_apply_material()` never touched depth-write state, so every material wrote
+depth (Panda3D's default), including ones the shape data explicitly marks as not writing
+it (`CMaterial::flags & IDRV_MAT_ZWRITE`, checked in
+`driver_opengl_material.cpp:497`'s `enableZWrite()`) -- exactly the ones meant to be
+translucent and therefore not occlude what's behind them. Whichever object happened to
+z-sort before the glass in a given run got its depth buffer values overwritten by the
+(otherwise correctly alpha-blended) glass sphere, so anything drawn after failed the
+depth test and never appeared. Ruled out an alpha-channel decoding bug first (checked
+`apt_snowglobe_alpha.tga` -- actually a `.dds` via the extension fallback again -- alpha
+sampled uniformly ~0.15, consistent with a deliberately subtle glass tint, not a decode
+failure) before landing on this.
+
+Added `_IDRV_MAT_ZWRITE` and `node_path.set_depth_write(bool(material.flags &
+_IDRV_MAT_ZWRITE))` (default `True` when there's no material), matching `_two_sided`'s
+existing pattern of following the shape's own flag instead of a fixed default.
+
 ## 2026-08-16 — 🐛 Render material transparency (blend/alpha-test) in object_editor
 
 `_apply_material()` (`apps/object_editor.py`) only ever set up an opaque `Material`
