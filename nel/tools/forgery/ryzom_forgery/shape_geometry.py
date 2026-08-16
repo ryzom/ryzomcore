@@ -110,15 +110,26 @@ def load_panda_texture(asset_index, name, cache=None):
 			# DDS is a compressed/GPU-native format; PNMImage can't read it,
 			# Texture has a dedicated loader for it.
 			texture = PandaTexture()
-			if not texture.read_dds(StringStream(data), ref.name, False):
+			try:
+				decoded = texture.read_dds(StringStream(data), ref.name, False)
+			except AssertionError as exc:
+				# Some DDS files in the wild have a malformed header (e.g. a
+				# linearSize field that doesn't match the actual pitch) that
+				# trips an assert inside Panda3D's C++ reader instead of
+				# read_dds() returning False gracefully.
+				print(f"[shape_geometry] malformed DDS header in {ref.name!r}: {exc}")
+				decoded = False
+			if not decoded:
 				print(f"[shape_geometry] failed to decode DDS texture {ref.name!r}")
 				texture = None
 		elif data is not None:
 			image = PNMImage()
 			if image.read(StringStream(data), ref.name):
-				# NeL stores texture V with the opposite origin from
-				# Panda3D; without this the texture renders upside-down.
-				image.flip(False, True, False)
+				# NeL's V-origin flip (relative to Panda3D) is applied once,
+				# uniformly for every texture format, via the UV coordinates
+				# written in _build_geom() -- not here, since the DDS path
+				# has no equivalent way to flip a compressed image's pixel
+				# rows after decoding.
 				texture = PandaTexture()
 				texture.load(image)
 			else:

@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-08-16 — 🐛 Render material transparency (blend/alpha-test) in object_editor
+
+`_apply_material()` (`apps/object_editor.py`) only ever set up an opaque `Material`
+(diffuse/ambient/emissive/specular) and a texture -- `CMaterial::flags` (BLEND,
+ALPHA_TEST, DOUBLE_SIDED) were parsed by pynel but completely ignored by the viewer, so
+every shape rendered fully opaque and double-sided regardless of what the material
+actually specified. Found via `12thanniv_flacon.shape` (glass, should be translucent) and
+`ge_mission_xmass_tree.shape` (foliage, should be alpha-tested cutout).
+
+Added `_IDRV_MAT_BLEND`/`_IDRV_MAT_DOUBLE_SIDED`/`_IDRV_MAT_ALPHA_TEST` flag constants and
+a `_TBLEND_TO_PANDA_OPERAND` table mapping `CMaterial::TBlend` (material.h) to
+`panda3d.core.ColorBlendAttrib.Operand`, in the enum's own declaration order. `flags &
+BLEND` now sets an explicit `ColorBlendAttrib` built from the material's actual
+`src_blend`/`dst_blend` (not always the ordinary alpha srcalpha/invsrcalpha case -- e.g.
+`12thanniv_flacon_body.tga`'s glass turned out to use `one/one`, i.e. genuine additive
+blending, confirmed against the shape's own parsed data via the .agentcom bridge); `flags &
+ALPHA_TEST` sets an `AlphaTestAttrib(M_greater, alpha_test_threshold)`, matching the
+engine's own `glAlphaFunc(GL_GREATER, threshold)` (`driver_opengl_material.cpp:456`).
+`set_two_sided()` now also follows `flags & DOUBLE_SIDED` instead of always being forced
+on -- forcing it made additive-blend materials double their contribution from unwanted
+backface overdraw, visibly whitening `12thanniv_flacon_body`. An initial version also
+forced `TransparencyAttrib.M_alpha` alongside the explicit `ColorBlendAttrib`; removed
+after user request, since it's redundant (the explicit attrib already wins) and not
+correct for non-alpha blend funcs like the flacon's.
+
+Also fixed two adjacent bugs hit while testing: `load_panda_texture()`
+(`ryzom_forgery/shape_geometry.py`) crashed the whole app with an uncaught `AssertionError`
+(`linear_size == header.pitch`, `panda/src/gobj/texture.cxx:8921`) on a malformed DDS
+header (`ge_mission_xmass_tree_star.tga`, which -- like several textures here -- actually
+resolves to a `.dds` file via `AssetIndex.find_texture()`'s extension fallback); now caught
+and treated as a normal decode failure. And the DDS-loading path had no equivalent of the
+PNM path's `image.flip(False, True, False)` (NeL vs Panda3D V-origin), so any texture that
+happened to resolve to `.dds` rendered upside-down (confirmed on the xmas tree's foliage,
+tip pointing the wrong way) while `.tga`/`.png`-backed ones didn't; the flip is now done
+once, uniformly, on the UV coordinates in `_build_geom()` instead of per-format at texture
+load time.
+
+## 2026-08-16 — 🐛 Fix object_editor's default camera distance being too close
+
+`ObjectEditorApp._load_shape()` framed a newly loaded shape's camera at `radius * 3.0`,
+which the user found consistently too close (had to manually zoom out ~6 mouse-wheel
+notches on every load to reach a comfortable distance). Since each wheel notch scales
+distance by `1/zoom_speed` (`camera.py`'s `_zoom()`, `zoom_speed=0.9`), 6 notches is a
+`(1/0.9)^6 ≈ 1.88x` factor; changed the framing multiplier to `radius * 5.65` (`3.0 *
+1.88`, rounded) to match that as the new default.
+
 ## 2026-08-16 — ✨ Let object_editor convert a simple material to Multi Bitmap
 
 A material imported from `.obj`/`.dae` (via the new `shape_importer.py`) always lands as

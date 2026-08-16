@@ -9,8 +9,8 @@ render yet.
 from pathlib import Path
 
 from panda3d.core import (
-	Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat, GeomVertexWriter,
-	Material as PandaMaterial, Point3,
+	AlphaTestAttrib, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat,
+	GeomVertexWriter, Material as PandaMaterial, Point3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
@@ -37,6 +37,27 @@ _OVERWRITE_POPUP_ID = "Overwrite shape?"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _COLOR_POPUP_ID = "material-color-picker"
+
+# CMaterial flag/enum values (nel/include/nel/3d/material.h), needed to render
+# translucent materials (e.g. glass) correctly instead of opaque.
+_IDRV_MAT_BLEND = 0x00000080
+_IDRV_MAT_DOUBLE_SIDED = 0x00000100
+_IDRV_MAT_ALPHA_TEST = 0x00000200
+
+# CMaterial::TBlend (material.h) -> panda3d.core.ColorBlendAttrib.Operand, in
+# TBlend's own declaration order so the enum's int value is the list index.
+_TBLEND_TO_PANDA_OPERAND = [
+	ColorBlendAttrib.O_one,
+	ColorBlendAttrib.O_zero,
+	ColorBlendAttrib.O_incoming_alpha,
+	ColorBlendAttrib.O_one_minus_incoming_alpha,
+	ColorBlendAttrib.O_incoming_color,
+	ColorBlendAttrib.O_one_minus_incoming_color,
+	ColorBlendAttrib.O_constant_color,
+	ColorBlendAttrib.O_one_minus_constant_color,
+	ColorBlendAttrib.O_constant_alpha,
+	ColorBlendAttrib.O_one_minus_constant_alpha,
+]
 
 # Multi Bitmap slot index -> (quality label, ecosystem label, season label),
 # the three known Georges/engine conventions documented in
@@ -102,7 +123,11 @@ def _build_geom(vertex_buffer, indices):
 	if texcoords:
 		uv_writer = GeomVertexWriter(vdata, "texcoord")
 		for uv in texcoords:
-			uv_writer.add_data2(uv[0], uv[1])
+			# NeL stores texture V with the opposite origin from Panda3D; flip
+			# here (once, for every format) rather than per-texture-format at
+			# load time, since the DDS path (unlike the PNM path) has no way
+			# to flip a compressed image's pixel rows after the fact.
+			uv_writer.add_data2(uv[0], 1.0 - uv[1])
 
 	triangles = GeomTriangles(Geom.UH_static)
 	for i in range(0, len(indices), 3):
@@ -206,18 +231,25 @@ class ObjectEditorApp(ForgeryApp):
 		if bbox is not None:
 			center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
 			radius = max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1)
-			self.orbit_camera.frame(center, radius * 3.0)
+			self.orbit_camera.frame(center, radius * 5.65)
 
 	def _apply_material(self, node_path, material_id):
-		# Force double-sided rendering (like 3ds Max's "2-Sided" material
-		# flag): the game engine may rely on backface culling plus paired
-		# geometry to fake thickness, which leaves single-sided faces you
-		# can see through in a standalone viewer with no matching backface.
-		node_path.set_two_sided(True)
 		node_path.clear_texture()
 		node_path.clear_color()
 		node_path.clear_material()
 		node_path.clear_light()
+		node_path.clear_transparency()
+		node_path.clear_attrib(ColorBlendAttrib)
+		node_path.clear_attrib(AlphaTestAttrib)
+
+		materials = getattr(self.shape_file.value, "materials", None)
+		material = materials[material_id] if materials and material_id < len(materials) else None
+
+		# Follow the shape's own CMaterial::DOUBLE_SIDED flag rather than
+		# always forcing two-sided rendering: some materials (e.g. additive
+		# glass) look wrong when both faces of the geometry render, since
+		# their blend stacks each overlapping face's contribution.
+		node_path.set_two_sided(bool(material.flags & _IDRV_MAT_DOUBLE_SIDED) if material is not None else True)
 
 		override_color = self._material_override_colors.get(material_id)
 		if override_color is not None:
@@ -234,10 +266,8 @@ class ObjectEditorApp(ForgeryApp):
 			node_path.set_color(override_color, 1)
 			return
 
-		materials = getattr(self.shape_file.value, "materials", None)
-		if not materials or material_id >= len(materials):
+		if material is None:
 			return
-		material = materials[material_id]
 
 		panda_material = PandaMaterial()
 		panda_material.set_diffuse(rgba_to_color(material.diffuse))
@@ -247,6 +277,16 @@ class ObjectEditorApp(ForgeryApp):
 		panda_material.set_shininess(material.shininess)
 		panda_material.set_twoside(True)
 		node_path.set_material(panda_material)
+
+		if material.flags & _IDRV_MAT_BLEND:
+			src_op = _TBLEND_TO_PANDA_OPERAND[material.src_blend]
+			dst_op = _TBLEND_TO_PANDA_OPERAND[material.dst_blend]
+			node_path.set_attrib(ColorBlendAttrib.make(ColorBlendAttrib.M_add, src_op, dst_op))
+		elif material.flags & _IDRV_MAT_ALPHA_TEST:
+			# Cutout transparency (e.g. foliage): discard texels below the
+			# threshold outright rather than blending, matching the engine's
+			# own glAlphaFunc(GL_GREATER, threshold) (driver_opengl_material.cpp).
+			node_path.set_attrib(AlphaTestAttrib.make(AlphaTestAttrib.M_greater, material.alpha_test_threshold))
 
 		texture = material.textures[0] if material.textures else None
 		if texture is None:
