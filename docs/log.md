@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-16 — ✨ Let object_editor convert a simple material to Multi Bitmap
+
+A material imported from `.obj`/`.dae` (via the new `shape_importer.py`) always lands as
+a plain single-texture material -- there's no way for those formats to express a Multi
+Bitmap variant set. Added a "convert" icon button (fa-clone; fa-images, tried first,
+turned out to be missing from imgui_bundle's bundled `fontawesome-webfont.ttf` -- added
+in FA 4.7, this font predates it, confirmed by hand-parsing the ttf's `cmap` table since
+`fontTools` wasn't installed) next to each simple-material row in the Materials tab:
+`_convert_to_multi_bitmap()` swaps slot 0's `CTextureFile` for a `CTextureMultiFile`
+seeded with a single set (index 0 = the current texture), so the material immediately
+moves into the Multi Bitmap section, ready for more slots to be filled in.
+
+Confirmed this is safe to save with only one slot filled: `CTextureMultiFile::getTexIndex()`
+(`nel/src/3d/texture_multi_file.cpp:55-67`) already falls back to index 0 whenever the
+engine asks for a season/quality index past the end of `_FileNames` (`selectTexture()`
+itself never validates the index, just stores it) -- so a partially-filled Multi Bitmap
+material just always shows its slot 0 texture until more slots are added, no crash or
+out-of-bounds read regardless of what the game requests.
+
 ## 2026-08-16 — ✨ Add .obj/.dae -> .shape import to Forgery
 
 Added `ryzom_forgery/shape_import.py` and `apps/shape_importer.py` (CLI:
