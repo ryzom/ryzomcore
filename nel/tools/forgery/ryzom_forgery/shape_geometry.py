@@ -4,6 +4,8 @@ and by the .shape exporters (`shape_export.py`), so the two don't each
 maintain their own copy of "how to walk a parsed shape's render passes".
 """
 
+import dataclasses
+
 from panda3d.core import PNMImage, StringStream, Texture as PandaTexture
 
 from pynel.ryzom_shape import Mesh, MeshGeom, MeshMRM, MeshMRMGeom, MeshMultiLod
@@ -15,10 +17,45 @@ def _passes_from_mesh_geom(geom: MeshGeom):
 			yield geom.vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
+def _resolve_lod_geomorphs(vertex_buffer, lod):
+	"""Returns a copy of vertex_buffer with its geomorph placeholder wedges
+	resolved to a static value for this lod.
+
+	A CMeshMRM's progressive mesh reserves a block of empty wedges (position/
+	normal/uv all zero, a default-constructed CWedge()) shared for geomorph
+	blending between adjacent LODs -- wedge index i for i < len(lod.geomorphs)
+	is one of these, meant to be filled at render time by
+	CMeshMRMGeom::applyGeomorph, blending toward geomorphs[i]'s "end" wedge as
+	detail increases (see mrm_builder.cpp's wedge-decal step). For a static,
+	non-transitioning render of this lod (this tool doesn't animate LOD
+	blending), the resolved value is always exactly that "end" wedge --
+	without this, those vertices render collapsed at the origin.
+	"""
+	if not lod.geomorphs:
+		return vertex_buffer
+
+	channels = {}
+	for name, values in vertex_buffer.channels.items():
+		resolved = list(values)
+		for wedge_index, (_start, end) in enumerate(lod.geomorphs):
+			if end < len(values):
+				resolved[wedge_index] = values[end]
+		channels[name] = resolved
+
+	return dataclasses.replace(vertex_buffer, channels=channels)
+
+
 def _passes_from_mrm_geom(geom: MeshMRMGeom):
+	# lods[-1], not lods[0]: CMeshMRM's progressive mesh is streamed
+	# coarsest-first (see CMeshMRMGeom::loadFirstLod/loadNextLod in
+	# nel/src/3d/mesh_mrm.cpp, and chooseLod's alphaMRM=0 -> numLod=0
+	# mapping to the *lowest* poly count) -- lods[0] is the least detailed,
+	# lods[-1] the most, matching MeshMRMGeom.num_triangles's own convention.
 	if geom.lods:
-		for rdr_pass in geom.lods[0].rdr_passes:
-			yield geom.vertex_buffer, rdr_pass.material_id, rdr_pass.indices
+		lod = geom.lods[-1]
+		vertex_buffer = _resolve_lod_geomorphs(geom.vertex_buffer, lod)
+		for rdr_pass in lod.rdr_passes:
+			yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
 def iter_render_passes(shape_value):

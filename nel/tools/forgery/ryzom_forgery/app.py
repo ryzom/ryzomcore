@@ -4,11 +4,19 @@ from direct.showbase.ShowBase import ShowBase
 from panda3d.core import AmbientLight, DirectionalLight, WindowProperties
 
 import p3dimgui
+import imgui_bundle
 from imgui_bundle import imgui, imgui_ctx
 
 from .commands import CommandRegistry
 from .explorer import DEFAULT_FILTER, Explorer
 from .sysinfo import SysInfoBar
+
+# Font Awesome 4 (the only icon font imgui_bundle ships a .ttf for), merged
+# into the default font so any tool app can use icons_fontawesome_4's
+# ICON_FA_* glyphs in a normal imgui.text/button/etc call instead of a text
+# label -- the default ImGui font alone has no icon glyphs at all.
+_ICON_FONT_PATH = Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts" / "fontawesome-webfont.ttf"
+_ICON_FONT_SIZE = 14.0
 
 # Sysinfo is a fixed thin strip; explorer/panel are pinned in place (no_move)
 # but resizable in width via SetNextWindowSizeConstraints (height is locked
@@ -44,6 +52,7 @@ class ForgeryApp(ShowBase):
 		self.disableMouse()
 
 		p3dimgui.init()
+		self._load_icon_font()
 
 		# Applying a Material (as tool apps do for shape rendering) has no
 		# visible effect without at least one light in the scene -- without
@@ -69,6 +78,13 @@ class ForgeryApp(ShowBase):
 		self.explorer.on_selection_changed = self._on_explorer_selection_changed
 
 		self.accept("imgui-new-frame", self.draw_ui)
+
+	def _load_icon_font(self):
+		if not _ICON_FONT_PATH.exists():
+			return
+		font_config = imgui.ImFontConfig()
+		font_config.merge_mode = True
+		imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), _ICON_FONT_SIZE, font_config)
 
 	def draw_panel(self):
 		"""Override in subclasses to draw the app-specific right panel content each frame."""

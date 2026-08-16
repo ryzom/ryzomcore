@@ -1,5 +1,71 @@
 # Changelog
 
+## 2026-08-16 — 🐛 Fix CMeshMRM rendering the wrong (coarsest) LOD, and resolve geomorph placeholder wedges
+
+Found while investigating Forgery's object_editor showing too few materials/an oddly
+shaped flag on `zo_paneau_armure.shape`: `ryzom_forgery/shape_geometry.py`'s
+`_passes_from_mrm_geom` read `geom.lods[0]`, assuming it was the finest (most detailed)
+LOD. Verified against `nel/src/3d/mesh_mrm.cpp` (`CMeshMRMGeom::chooseLod`'s alphaMRM
+math, and the "just first lod is loaded" progressive-streaming comment) and pynel's own
+`MeshMRMGeom.num_triangles` property (already using `lods[-1]`) that `lods[0]` is
+actually the *coarsest* LOD. Fixed to `lods[-1]`. Confirmed empirically: 18 of 41 real
+multi-LOD `.shape` files sampled have a different material set between `lods[0]` and
+`lods[-1]`, always fewer materials/triangles in `lods[0]` (e.g. `zo_paneau_armure.shape`:
+3 materials/6 tris vs. 5 materials/38 tris).
+
+Switching to the finer LOD surfaced a second, deeper bug: some of its vertices rendered
+collapsed at the origin. Root-caused to `CMeshMRM`'s geomorph mechanism (see
+`mrm_builder.cpp`'s wedge-decal step and `CMeshMRMGeom::applyGeomorph` in
+`mesh_mrm.cpp`): the progressive mesh reserves a block of empty placeholder wedges
+(position/normal/uv all zero, a default `CWedge()`) shared for smooth blending between
+adjacent LODs, which pynel was silently discarding instead of parsing (fixed on the
+`ryzom/pynel` branch: new `MrmLod.geomorphs`). `shape_geometry.py` gained
+`_resolve_lod_geomorphs()`, which substitutes each placeholder wedge's channels with its
+geomorph "end" wedge (the correct static resolution, matching `applyGeomorph`'s blend at
+alphaLod=0) before yielding render passes for a LOD. Verified via the bridge: the
+previously-collapsed flag vertices on `zo_paneau_armure.shape` now resolve to real,
+coherent positions matching the rest of the geometry.
+
+## 2026-08-16 — ✨ Add a Multi Bitmap material editor to Forgery's object_editor
+
+Added editing of a `.shape`'s materials to `object_editor.py`, focused on the "Multi
+Bitmap" mechanism (`CTextureMultiFile`, see `docs/material_options.md`'s dedicated
+section): a per-material texture slot can hold up to 8 alternate images, of which one is
+selected at runtime based on context (season, item quality, creature ecosystem...).
+
+The panel gained a "Materials" / "All Properties" tab bar (the latter is the pre-existing
+generic `draw_properties()` tree, unchanged). The new Materials tab lists every material,
+grouped simple-texture materials first, then Multi Bitmap ones:
+- Multi Bitmap materials are shown per *slot index* (0-7) rather than per material --
+  picking a slot is a whole-shape appearance choice, so its "Select" button (green when
+  active) switches every Multi Bitmap material to that index at once. Each slot's label
+  shows all three known Georges/engine numbering conventions for that index side by side
+  (quality tiers from `item_map.typ`, creature ecosystem from `_creature_texture.typ`,
+  and season from `EGSPD::CSeason` in `ryzom/common/src/game_share/season.h` -- which one
+  actually applies depends on the shape). An "Expand" toggle reveals a per-material row
+  to hand-edit that slot's texture (editable filename + a native file-browse button).
+- Simple-texture materials get the same editable filename + browse row.
+- Every material row has a color-swatch button (opens a picker, plus a "No color"
+  option) that swaps that material's 3D geometry to a flat color -- lighting/material are
+  explicitly disabled for that override (`set_material_off`/`set_light_off`), since a lit
+  NodePath shades from its attached Material rather than `set_color()`. This is a
+  viewer-only visualization, never written to the `.shape`.
+- Icon-only buttons (Font Awesome 4, the only icon font `imgui_bundle` ships a `.ttf`
+  for -- merged into the default font in the shared `ryzom_forgery/app.py`, so any
+  Forgery tool app can use `icons_fontawesome_4` glyphs) replace the earlier text
+  buttons, each with a hover tooltip for discoverability.
+- The doc-derived Multi Bitmap explanation (from `material_options.md`, via a new
+  `ryzom_forgery/material_docs.py` that splits the doc on its `## Title {#key}` headers)
+  shows in the status bar in orange on hover, rather than as an ImGui tooltip (too wide
+  for that use).
+- "Save" (asks for a one-time per-session overwrite confirmation, then writes back to
+  the loaded `.shape`'s path) and "Save As..." (always prompts for a new path) persist
+  edits via `pynel.ryzom_shape.save_shape` -- confirmed via the bridge that an edited
+  Multi Bitmap selection survives a save + re-parse round-trip.
+- Every typed or browsed texture file name is lower-cased at the point of entry too
+  (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
+  mixed-case names from real data don't linger once touched.
+
 ## 2026-08-15 — 📝 Add player-friendly material options doc, rename object_viewer to object_editor
 
 Added `nel/tools/forgery/docs/material_options.md`, a plain-language (non-technical,
