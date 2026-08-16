@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-08-16 — ✨ Add .obj/.dae -> .shape import to Forgery
+
+Added `ryzom_forgery/shape_import.py` and `apps/shape_importer.py` (CLI:
+`shape_importer.py INPUT.{obj,dae} OUTPUT.shape`), the reverse of the existing
+`shape_exporter.py`/`shape_export.py`. Only `CMesh` can be produced this way -- unlike
+`CMeshMRM`, pynel's `dumps()` writes `CMesh` geometry field-by-field rather than copying
+bytes from an already-parsed file, so it's the only shape type buildable from scratch.
+That means no LOD levels on an imported shape; investigated whether an existing tool
+could add them afterward (`CMRMBuilder`, `nel/include/nel/3d/mrm_builder.h`): it operates
+on the engine-native `CMesh::CMeshBuild` struct, not anything 3dsMax-specific, so it's
+architecturally reusable, but no standalone CLI wrapping it exists today (the only
+current caller is the 3dsMax-plugin-only `pipeline_max_export_shape`) -- writing one is a
+separate, C++-only chantier (`CMRMBuilder` has no Python binding), noted for later.
+
+`.obj`/`.mtl` are hand-parsed (same reasoning as the hand-written `.obj` exporter: simple
+dependency-free text format) -- vertices/normals/texcoords, faces grouped by `usemtl`
+(fan-triangulated if >3 verts per face, negative/relative indices resolved), materials
+read from the referenced `mtllib` (Kd/Ka/Ks/Ns/d/Tr/map_Kd). `.dae` goes through
+`pycollada` (already a dependency for `.dae` export) -- iterates
+`doc.scene.objects("geometry")`'s bound `BoundTriangleSet`s (skipping non-triangle
+primitives), reading each `Triangle`'s already-dereferenced vertex/normal/texcoord
+values and its bound `Material.effect` (diffuse/ambient/specular/shininess/transparency,
+falling back to a neutral default when a property is a texture `Map` rather than a plain
+color). Both formats share an extracted `_assemble_mesh()` (dedup vertices into one
+shared buffer, build the single matrix block/materials/bbox/MeshBase/MeshGeom) and a
+generalized `_build_material()`.
+
+Material defaults for properties the source format doesn't specify are grounded in
+`nel/include/nel/3d/material.h`'s own documented default-construction values (line 273):
+shader=Normal(0), src/dst blend=srcalpha(2)/invsrcalpha(3), z_function=lessequal(5),
+flags=ZWRITE|LIGHTING|DOUBLE_SIDED.
+
+Validated via the bridge with a full round-trip per format: export a real `.shape`
+(`zo_paneau_armure.shape`) to `.obj`/`.dae`, import it back with the new importer, save
+as a new `.shape`, re-parse. Both formats landed on identical numbers (5 materials, 66
+verts, 38 tris, all 5 texture names correctly recovered), matching the original. Found
+and fixed two bugs in the process: a generator-exhaustion bug in the bbox min/max
+computation (`xs`/`ys`/`zs` consumed twice), and `.dae`'s `Triangle.material` being a
+`collada.material.Material` rather than directly an `Effect` (needed `.effect`). User
+confirmed both imported shapes render correctly and are editable in object_editor.py's
+Materials tab like any other shape.
+
 ## 2026-08-16 — 🐛 Fix CMeshMRM rendering the wrong (coarsest) LOD, and resolve geomorph placeholder wedges
 
 Found while investigating Forgery's object_editor showing too few materials/an oddly
