@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-16 — ✨ Add Ctrl+drag object manipulation to Forgery
+
+Comparing a loaded shape against reference objects previously required orbiting the whole
+scene, which swung the reference objects around too. Reworked `object_editor.py`'s
+viewport controls in `ryzom_forgery/camera.py` and `ryzom_forgery/navcube.py`:
+
+- `OrbitCamera`: plain left-click-drag now orbits the camera (was middle-click), plain
+  middle-click-drag pans it (shift no longer required). Both are now gated off while Ctrl
+  is held, so they don't fight the new object controls below.
+- New `ObjectManipulator` class: Ctrl+left-click-drag rotates the shape itself around its
+  own pivot, Ctrl+middle-click-drag moves it -- both camera-relative (the drag direction
+  follows the current view angle at any camera orientation), independent of the camera
+  controls. The rotation composition initially used the wrong Panda3D quaternion
+  multiplication order (`delta * pivot.getQuat()`), which silently applied the delta in
+  the object's own already-rotated local frame instead of the camera's fixed world frame
+  -- fixed to `pivot.getQuat() * delta` (Panda composes left-operand-first).
+- The object's pivot is seeded from the shape's own `default_rot_quat` on load (full
+  quaternion, since real shapes can have roll/tilt, not just heading/pitch -- confirmed
+  2506/3997 shapes in the live data have a non-identity `default_rot_quat`). This is a
+  pure viewer-side transform: Ctrl+drag never writes back to `default_rot_euler`/
+  `default_rot_quat` in the shape file.
+- The gizmo's cube grew a second, 2x smaller inner cube that live-mirrors the object's
+  current rotation, while the outer cube (still representing the camera/scene) became
+  semi-transparent so both stay visible together. Held Ctrl swaps which of the two reads
+  as "active" (orange vs. blue), showing which one a drag is about to affect.
+- The gizmo's "Reset" button now resets the object's rotation instead of the camera's view
+  while Ctrl is held. `object_editor.py` tracks a baseline quat for this (the loaded
+  `default_rot_quat`, or whatever rotation was in effect at the last successful save --
+  saving never writes the rotation to the file, but does move the in-session baseline).
+
 ## 2026-08-16 — ✨ Split object_editor's Materials tab into Textures + Materials
 
 The old single "Materials" tab conflated two different concerns -- editing texture

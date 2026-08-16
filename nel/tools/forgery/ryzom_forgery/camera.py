@@ -29,8 +29,8 @@ AXIS_LABELS = {
 class OrbitCamera:
 	"""Blender-style orbit camera controller.
 
-	Middle-mouse drag orbits around the target, shift+middle-mouse drag pans
-	the target freely, mouse wheel always zooms. Input is ignored while Dear
+	Left-mouse drag orbits around the target, middle-mouse drag pans the
+	target freely, mouse wheel always zooms. Input is ignored while Dear
 	ImGui wants the mouse (e.g. dragging a slider), so tool UI and viewport
 	input don't fight over the same drag.
 	"""
@@ -92,24 +92,28 @@ class OrbitCamera:
 
 	def _update(self, task):
 		mw = self.app.mouseWatcherNode
-		if not mw.hasMouse() or self._mouse_captured_by_ui():
+		# Ctrl held means Ctrl+drag acts on the object instead (see
+		# ObjectManipulator below) -- without this, both would respond to
+		# the same drag at once.
+		if not mw.hasMouse() or self._mouse_captured_by_ui() or mw.isButtonDown(KeyboardButton.control()):
 			self._last_mouse = None
 			return task.cont
 
 		mouse = mw.getMouse()
 		mouse_pos = (mouse.getX(), mouse.getY())
-		middle_down = mw.isButtonDown(MouseButton.two())
+		orbit_down = mw.isButtonDown(MouseButton.one())
+		pan_down = mw.isButtonDown(MouseButton.two())
+		dragging = orbit_down or pan_down
 
-		if middle_down and self._last_mouse is not None:
+		if dragging and self._last_mouse is not None:
 			dx = mouse_pos[0] - self._last_mouse[0]
 			dy = mouse_pos[1] - self._last_mouse[1]
-			shift_down = mw.isButtonDown(KeyboardButton.shift())
-			if shift_down:
+			if pan_down:
 				self._pan(dx, dy)
 			else:
 				self._orbit(dx, dy)
 
-		self._last_mouse = mouse_pos if middle_down else None
+		self._last_mouse = mouse_pos if dragging else None
 
 		return task.cont
 
@@ -199,3 +203,97 @@ class OrbitCamera:
 		)
 		self.app.camera.setPos(self.target + offset)
 		self.app.camera.lookAt(self.target, self.up_hint)
+
+
+class ObjectManipulator:
+	"""Rotates/moves a NodePath (the shape being inspected) via Ctrl+drag --
+	Ctrl+left-mouse spins it in place, Ctrl+middle-mouse moves it in world
+	space, tracking the cursor the same screen-space-accurate way
+	OrbitCamera's own pan does. Mutually exclusive with OrbitCamera's plain
+	(no-Ctrl) drag controls -- both check for the Ctrl modifier so only one
+	responds to a given drag.
+
+	Rotation is applied as an incremental quaternion multiplied onto
+	whatever orientation the pivot already has, rather than tracked as a
+	separate heading/pitch pair set via setHpr() -- the pivot may already be
+	seeded with the shape's own CMaterial::DefaultRotQuat (object_editor.py's
+	_display_shape()), which can have a real roll component (an object tilted
+	sideways, not just turned or tipped), and setHpr(h, p, 0) would silently
+	discard that on the first drag."""
+
+	def __init__(self, app, pivot, orbit_camera):
+		self.app = app
+		self.pivot = pivot
+		self.orbit_camera = orbit_camera  # only read for its .distance, to scale _move() the same way OrbitCamera._pan() does
+
+		self.rotate_speed = 200.0  # degrees per full mouse-width drag, matches OrbitCamera.orbit_speed
+
+		self._last_mouse = None
+		self.app.taskMgr.add(self._update, "object-manipulator-update")
+
+	def _mouse_captured_by_ui(self):
+		imgui = getattr(self.app, "imgui", None)
+		return imgui is not None and imgui.isMouseCaptured()
+
+	def _update(self, task):
+		mw = self.app.mouseWatcherNode
+		if not mw.hasMouse() or self._mouse_captured_by_ui() or not mw.isButtonDown(KeyboardButton.control()):
+			self._last_mouse = None
+			return task.cont
+
+		mouse = mw.getMouse()
+		mouse_pos = (mouse.getX(), mouse.getY())
+		rotate_down = mw.isButtonDown(MouseButton.one())
+		move_down = mw.isButtonDown(MouseButton.two())
+		dragging = rotate_down or move_down
+
+		if dragging and self._last_mouse is not None:
+			dx = mouse_pos[0] - self._last_mouse[0]
+			dy = mouse_pos[1] - self._last_mouse[1]
+			if move_down:
+				self._move(dx, dy)
+			else:
+				self._rotate(dx, dy)
+
+		self._last_mouse = mouse_pos if dragging else None
+		return task.cont
+
+	def _rotate(self, dx, dy):
+		# Fully camera-relative (trackball-style): horizontal drag turns the
+		# object around the camera's current up axis (yaw), vertical drag
+		# around its current right axis (pitch) -- neither is the world Z
+		# axis, so both track the current view at any camera angle. Composed
+		# and applied ON TOP of the pivot's existing orientation, not
+		# replacing it, so a shape already tilted by default_rot_quat stays
+		# tilted as you spin it further.
+		#
+		# Panda3D's Quat * Quat composes as "this" happening AFTER "other" in
+		# WORLD space when written other * this -- i.e. old.xform(delta.xform(v))
+		# for `old * delta`, which applies delta in old's *local* frame first.
+		# We want the opposite (delta expressed in the fixed world/camera
+		# frame, applied on top of whatever the object's current orientation
+		# is), so it must be `pivot.getQuat() * delta`, not `delta * pivot.getQuat()`
+		# -- the reversed order silently rotated around the object's own
+		# (already-tilted) axes instead of the camera-fixed ones.
+		cam_quat = self.app.camera.getQuat(self.app.render)
+		yaw = Quat()
+		yaw.setFromAxisAngle(dx * self.rotate_speed, cam_quat.getUp())
+		pitch = Quat()
+		pitch.setFromAxisAngle(-dy * self.rotate_speed, cam_quat.getRight())
+		delta = pitch * yaw
+		self.pivot.setQuat(self.pivot.getQuat() * delta)
+
+	def _move(self, dx, dy):
+		# Same screen-space-accurate scale as OrbitCamera._pan(), just added
+		# instead of subtracted: grabbing and dragging the object itself
+		# should follow the cursor, unlike panning the camera's target
+		# (which moves opposite the drag so the *world* seems to follow it).
+		quat = self.app.camera.getQuat(self.app.render)
+		fov = self.app.camLens.getFov()
+		distance = self.orbit_camera.distance
+		right_scale = distance * tan(radians(fov.x / 2))
+		up_scale = distance * tan(radians(fov.y / 2))
+		pos = self.pivot.get_pos()
+		pos += quat.getRight() * dx * right_scale
+		pos += quat.getUp() * dy * up_scale
+		self.pivot.set_pos(pos)

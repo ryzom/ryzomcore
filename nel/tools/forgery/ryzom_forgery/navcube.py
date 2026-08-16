@@ -12,8 +12,8 @@ from math import cos, pi, radians, sin
 from panda3d.core import (
 	BitMask32, Camera, CollisionHandlerQueue, CollisionNode, CollisionPolygon,
 	CollisionRay, CollisionTraverser, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, LineSegs, NodePath, PerspectiveLens, Point3,
-	TextNode, Vec3,
+	GeomVertexFormat, GeomVertexWriter, KeyboardButton, LineSegs, NodePath, PerspectiveLens, Point3,
+	TextNode, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import imgui, imgui_ctx
@@ -31,10 +31,36 @@ _FACE_BASIS = {
 	"-z": (Vec3(0, 0, -1), Vec3(0, 1, 0), Vec3(1, 0, 0)),
 }
 
-_FACE_COLOR = (0.28, 0.28, 0.31, 1.0)
-_FACE_COLOR_HOVER = (0.85, 0.65, 0.2, 1.0)
-_EDGE_COLOR = (0.45, 0.45, 0.475, 1.0)
+_OUTER_FACE_ALPHA = 0.35  # the outer cube represents the scene -- see through it to the inner (object) cube
+_FACE_COLOR = (0.28, 0.28, 0.31, _OUTER_FACE_ALPHA)
+_FACE_COLOR_HOVER = (0.85, 0.65, 0.2, _OUTER_FACE_ALPHA)
+_EDGE_COLOR = (1.0, 1.0, 1.0, 1.0)  # always retinted via set_color_scale() in _update(), see below
 _HALF = 1.0
+
+# Inner cube: represents the object being inspected (spun independently of
+# the outer, scene-representing cube once object rotation is wired up), at
+# half the outer cube's size so both stay clearly distinguishable.
+_INNER_HALF = _HALF / 2.0
+_INNER_FACE_COLOR = (1.0, 1.0, 1.0, 1.0)  # always retinted via set_color_scale(), see below
+_INNER_EDGE_COLOR = (1.0, 1.0, 1.0, 1.0)  # always retinted via set_color_scale(), see below
+
+# Which of the outer (scene/camera) or inner (object) cube is currently
+# being acted on -- Ctrl held means the object -- is shown by swapping these
+# two colors between the outer cube's edges and the inner cube's faces, via
+# set_color_scale() rather than set_color(): LineSegs-built edge geometry
+# turned out not to respond to a plain set_color() override (its baked-in
+# per-vertex color always won), while set_color_scale() (a separate
+# ColorScaleAttrib, multiplied in regardless of the underlying color source)
+# reliably repaints it. Edges get a darkened version of whichever of the two
+# is current, so they read as edges rather than blending into the faces.
+_ACTIVE_COLOR = (0.95, 0.6, 0.15, 1.0)  # orange: whichever of the two is currently being manipulated
+_INACTIVE_COLOR = (0.5, 0.75, 0.95, 1.0)  # blue: the other one
+_EDGE_DARKEN = 0.6
+
+
+def _darken(color, factor=_EDGE_DARKEN):
+	r, g, b, a = color
+	return (r * factor, g * factor, b * factor, a)
 
 # Reference triad drawn through the cube: NeL/Ryzom convention, Z is up.
 # Standard RGB-for-XYZ color coding so the axes read at a glance.
@@ -60,21 +86,22 @@ _UI_FLAGS = (
 	| imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value)
 
 
-def _face_corners(axis):
+def _face_corners(axis, half=_HALF):
 	normal, u, v = _FACE_BASIS[axis]
-	center = normal * _HALF
+	center = normal * half
+	u, v = u * half, v * half
 	# CCW winding as seen from the +normal side, so the face's own normal
 	# (used both for shading and for the collision polygon's plane) faces
 	# outward, away from the cube.
 	return [center - u - v, center + u - v, center + u + v, center - u + v]
 
 
-def _make_face_geom(axis):
+def _make_face_geom(axis, half=_HALF, color=_FACE_COLOR, name_prefix="navcube-face"):
 	normal, _u, _v = _FACE_BASIS[axis]
-	corners = _face_corners(axis)
+	corners = _face_corners(axis, half)
 
 	vformat = GeomVertexFormat.get_v3n3c4()
-	vdata = GeomVertexData(f"navcube-face-{axis}", vformat, Geom.UH_static)
+	vdata = GeomVertexData(f"{name_prefix}-{axis}", vformat, Geom.UH_static)
 	vdata.set_num_rows(4)
 
 	vertex_writer = GeomVertexWriter(vdata, "vertex")
@@ -83,7 +110,7 @@ def _make_face_geom(axis):
 	for corner in corners:
 		vertex_writer.add_data3(corner)
 		normal_writer.add_data3(normal)
-		color_writer.add_data4(*_FACE_COLOR)
+		color_writer.add_data4(*color)
 
 	triangles = GeomTriangles(Geom.UH_static)
 	triangles.add_vertices(0, 1, 2)
@@ -95,8 +122,8 @@ def _make_face_geom(axis):
 	return geom
 
 
-def _make_face_collision(axis):
-	return CollisionPolygon(*[Point3(corner) for corner in _face_corners(axis)])
+def _make_face_collision(axis, half=_HALF):
+	return CollisionPolygon(*[Point3(corner) for corner in _face_corners(axis, half)])
 
 
 def _orbit_offset(heading, pitch, distance):
@@ -144,9 +171,10 @@ class NavigationCube:
 	via a Panda3D task, independent of ImGui.
 	"""
 
-	def __init__(self, app, orbit_camera):
+	def __init__(self, app, orbit_camera, object_pivot):
 		self.app = app
 		self.orbit_camera = orbit_camera
+		self.object_pivot = object_pivot  # mirrored live by the inner cube -- see _update()
 
 		self.scene = NodePath("navcube-scene")
 		self._face_nodes = {}
@@ -154,6 +182,14 @@ class NavigationCube:
 			geom_node = GeomNode(f"navcube-face-{axis}")
 			geom_node.add_geom(_make_face_geom(axis))
 			face_np = self.scene.attach_new_node(geom_node)
+			# The outer cube represents the scene, seen through to the inner
+			# (object) cube -- see through() needs both the blend mode and a
+			# sort/bin that draws it after opaque geometry, or the inner cube
+			# (drawn later, same default bin) could show through it wrongly
+			# depending on draw order; M_dual handles the depth-write side of
+			# that (opaque-looking passes still write depth, the blended pass
+			# doesn't) without needing a manual bin/sort here.
+			face_np.set_transparency(TransparencyAttrib.M_dual)
 
 			collision_node = CollisionNode(f"navcube-hit-{axis}")
 			collision_node.add_solid(_make_face_collision(axis))
@@ -163,7 +199,9 @@ class NavigationCube:
 
 			self._face_nodes[axis] = face_np
 
-		self._build_edges()
+		self._build_inner_cube()
+
+		self._outer_edges_np = self._build_edges()
 		self._build_axes()
 		self._build_axis_labels()
 
@@ -202,9 +240,30 @@ class NavigationCube:
 		app.taskMgr.add(self._update, "navcube-update")
 		app.accept("mouse1", self._on_click)
 
-	def _build_edges(self):
-		verts = [
-			Vec3(sx, sy, sz) for sx in (-_HALF, _HALF) for sy in (-_HALF, _HALF) for sz in (-_HALF, _HALF)]
+	def _build_inner_cube(self):
+		"""Smaller, fully opaque cube inside the (now semi-transparent) outer
+		one: the outer cube represents the scene/viewing angle (what the
+		gizmo has always shown), the inner one will represent the object
+		being inspected's own rotation once that's wired up separately from
+		the camera. `self.inner_np` is the pivot to rotate for that -- not
+		rotated by anything yet, just built here. Faces and edges are kept
+		as two separate NodePaths (`_inner_faces_np`/`_inner_edges_np`) so
+		_update() can tint them two different shades (edges darker) instead
+		of one flat color for the whole cube."""
+		self.inner_np = self.scene.attach_new_node("navcube-inner")
+
+		self._inner_faces_np = self.inner_np.attach_new_node("navcube-inner-faces")
+		for axis in _AXES:
+			geom_node = GeomNode(f"navcube-inner-face-{axis}")
+			geom_node.add_geom(_make_face_geom(axis, half=_INNER_HALF, color=_INNER_FACE_COLOR, name_prefix="navcube-inner-face"))
+			face_np = self._inner_faces_np.attach_new_node(geom_node)
+			face_np.set_light_off()
+
+		self._inner_edges_np = self._build_edges(
+			half=_INNER_HALF, color=_INNER_EDGE_COLOR, name="navcube-inner-edges", parent=self.inner_np)
+
+	def _build_edges(self, half=_HALF, color=_EDGE_COLOR, name="navcube-edges", parent=None):
+		verts = [Vec3(sx, sy, sz) for sx in (-half, half) for sy in (-half, half) for sz in (-half, half)]
 		# Index into the 8 corners above (order: x is the slowest-varying bit,
 		# then y, then z), listing the 12 edges of the cube.
 		edge_pairs = [
@@ -213,18 +272,19 @@ class NavigationCube:
 			(0, 4), (1, 5), (2, 6), (3, 7),  # edges along x
 		]
 
-		lines = LineSegs("navcube-edges")
+		lines = LineSegs(name)
 		lines.set_thickness(1.5)
-		lines.set_color(*_EDGE_COLOR)
+		lines.set_color(*color)
 		for a, b in edge_pairs:
 			lines.move_to(verts[a])
 			lines.draw_to(verts[b])
 
-		edges_np = self.scene.attach_new_node(lines.create())
+		edges_np = (parent or self.scene).attach_new_node(lines.create())
 		edges_np.set_light_off()
 		# Nudged slightly outward so the wireframe doesn't z-fight with the
 		# face quads it sits right on top of.
 		edges_np.set_scale(1.01)
+		return edges_np
 
 	def _build_axes(self):
 		# Positive half only (center -> tip): the negative half would just
@@ -297,9 +357,25 @@ class NavigationCube:
 		# a rotate_step() call, and the two visibly disagree.
 		self.cam_np.look_at(Point3(0, 0, 0), self.orbit_camera.up_hint)
 
+		# Mirrors the object's actual current orientation (whatever
+		# object_editor.py's _object_pivot is at -- seeded from the shape's
+		# own default_rot_quat on load, then spun further via Ctrl+drag).
+		self.inner_np.set_quat(self.object_pivot.get_quat())
+
 		self._hovered_axis = None if self._mouse_captured_by_ui() else self._pick_axis_at_mouse()
 		for axis, face_np in self._face_nodes.items():
 			face_np.set_color(_FACE_COLOR_HOVER if axis == self._hovered_axis else _FACE_COLOR)
+
+		# Ctrl held means Ctrl+drag acts on the object (inner cube) instead
+		# of the camera (outer cube) -- see ObjectManipulator/OrbitCamera in
+		# camera.py. Swapping which of the two reads as "active" (orange) is
+		# the only way to tell which one a drag is about to affect.
+		object_active = self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control())
+		outer_color = _INACTIVE_COLOR if object_active else _ACTIVE_COLOR
+		inner_color = _ACTIVE_COLOR if object_active else _INACTIVE_COLOR
+		self._outer_edges_np.set_color_scale(outer_color)
+		self._inner_faces_np.set_color_scale(inner_color)
+		self._inner_edges_np.set_color_scale(_darken(inner_color))
 
 		return task.cont
 
@@ -374,8 +450,14 @@ class NavigationCube:
 			imgui.pop_item_flag()
 			imgui.same_line()
 
+			# Ctrl held means "Reset" targets the object (inner cube) instead
+			# of the camera (outer cube) -- mirrors the same Ctrl modifier
+			# ObjectManipulator/OrbitCamera use to pick which one a drag acts on.
 			if imgui.button("Reset"):
-				self.orbit_camera.reset()
+				if self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control()):
+					self.app.reset_object_rotation()
+				else:
+					self.orbit_camera.reset()
 			imgui.same_line()
 
 			imgui.push_item_flag(imgui.ItemFlags_.button_repeat.value, True)

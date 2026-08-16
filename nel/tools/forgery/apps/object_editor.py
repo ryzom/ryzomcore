@@ -10,13 +10,13 @@ from pathlib import Path
 
 from panda3d.core import (
 	AlphaTestAttrib, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat,
-	GeomVertexWriter, Material as PandaMaterial, Point3,
+	GeomVertexWriter, Material as PandaMaterial, Point3, Quat,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from ryzom_forgery.app import ForgeryApp
-from ryzom_forgery.camera import OrbitCamera
+from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
 from ryzom_forgery.asset_index import AssetIndex
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
@@ -35,6 +35,18 @@ DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 # Shape types pynel's save_shape() can actually write back out -- matches
 # ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save/Save As UI only shows for these.
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}
+
+# Toggleable scale-reference shapes shown alongside whatever's loaded, for an
+# at-a-glance sense of scale -- a 1x1x1 cube and the shortest/tallest playable
+# character shapes, kept in this repo (not the Ryzom data tree) since they're
+# tool fixtures, not game assets.
+_REFERENCE_EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
+_REFERENCE_SHAPES = [
+	("Cube (1x1x1)", "ge_mission_1_caisse.shape"),
+	("Smallest character", "npc_dummy_short.shape"),
+	("Tallest character", "npc_dummy_tall.shape"),
+]
+_REFERENCE_GAP = 1.5  # meters between reference objects (and the main shape), beyond their own bbox width
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
@@ -161,9 +173,17 @@ class ObjectEditorApp(ForgeryApp):
 		self._preview_texture_refs = {}  # texture name -> imgui.ImTextureRef, for thumbnail/tooltip previews in the UI
 		self._color_texture_refs = {}  # (r,g,b,a) rounded -> imgui.ImTextureRef, for plain-color material swatches
 
-		self.model_root = self.render.attach_new_node("shape-root")
+		# Ctrl+drag (ObjectManipulator) rotates/moves this pivot instead of
+		# the camera -- kept separate from model_root itself since that gets
+		# torn down and rebuilt on every shape load/replace, but the pivot
+		# (and whatever rotation/position the user set up on it) shouldn't be.
+		self._object_pivot = self.render.attach_new_node("object-pivot")
+		self.model_root = self._object_pivot.attach_new_node("shape-root")
 		self.shape_file = None
 		self.shape_error = None
+		self._reference_root = self.render.attach_new_node("reference-root")
+		self._reference_shapes = {}  # label -> ShapeFile or None (failed to load), lazily parsed once
+		self._reference_active = set()  # labels currently shown
 		self._material_node_paths = {}  # material_id -> list[NodePath], to re-apply a material live after an edit
 		self._multi_bitmap_expanded = set()  # slot indices currently expanded in the Multi Bitmap editor
 		self._multi_bitmap_hint_shown = False  # whether the status bar currently shows one of our doc hints
@@ -182,7 +202,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._replace_match_popup_opened = False  # whether open_popup() has been called yet for the current _replace_pending_mesh
 
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
-		self.nav_cube = NavigationCube(self, self.orbit_camera)
+		self.object_manipulator = ObjectManipulator(self, self._object_pivot, self.orbit_camera)
+		self.nav_cube = NavigationCube(self, self.orbit_camera, self._object_pivot)
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
@@ -355,7 +376,7 @@ class ObjectEditorApp(ForgeryApp):
 		"""Common reset before showing any shape in the viewer -- a `.shape`
 		opened from the Explorer, or a mesh imported as a brand-new shape."""
 		self.model_root.remove_node()
-		self.model_root = self.render.attach_new_node("shape-root")
+		self.model_root = self._object_pivot.attach_new_node("shape-root")
 		self.shape_error = None
 		self._material_node_paths = {}
 		self._multi_bitmap_expanded = set()
@@ -371,7 +392,35 @@ class ObjectEditorApp(ForgeryApp):
 		replace-geometry flow can skip resetting the editing state that's
 		meant to survive it, e.g. material overrides)."""
 		self.shape_file = shape_file
+
+		# CMeshBase::DefaultRotQuat is what the engine actually rotates the
+		# object by at instance creation (nel/src/3d/mesh_base.cpp) -- not
+		# just an editor default. Seeding _object_pivot with it up front, on
+		# a fresh load, means the shape (and the navcube gizmo's inner cube,
+		# which mirrors _object_pivot) already shows its real in-game tilt
+		# instead of looking un-rotated until you happen to notice
+		# default_rot_quat in the All Properties tab. A geometry-only
+		# replace (_replace_geometry(), which calls _rebuild_geometry()
+		# directly and never this method) deliberately does NOT re-seed --
+		# it must preserve whatever the user already set up via Ctrl+drag.
+		base = getattr(shape_file.value, "base", None)
+		if base is not None:
+			rot = base.default_rot_quat
+			self._object_pivot.set_quat(Quat(rot.w, rot.x, rot.y, rot.z))
+
+		# Baseline for the gizmo's Ctrl+Reset (see reset_object_rotation()) --
+		# whatever the object's rotation is right after loading, until a save
+		# makes the current Ctrl+drag rotation the new baseline instead.
+		self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
+
 		self._rebuild_geometry()
+
+	def reset_object_rotation(self):
+		"""Restores the object pivot to its baseline rotation (the shape's own
+		default_rot_quat on load, or whatever rotation was in effect at the
+		last successful save -- see _write_shape()). Bound to the gizmo's
+		Reset button while Ctrl is held (see navcube.py's draw_controls())."""
+		self._object_pivot.set_quat(self._object_pivot_base_quat)
 
 	def _rebuild_geometry(self):
 		"""(Re)builds the 3D render passes + camera framing from
@@ -379,7 +428,7 @@ class ObjectEditorApp(ForgeryApp):
 		a Mesh's geometry in place (which intentionally does NOT go through
 		_reset_shape_state(), so material edits survive it)."""
 		self.model_root.remove_node()
-		self.model_root = self.render.attach_new_node("shape-root")
+		self.model_root = self._object_pivot.attach_new_node("shape-root")
 		self.shape_error = None
 		self._material_node_paths = {}
 
@@ -407,7 +456,89 @@ class ObjectEditorApp(ForgeryApp):
 			radius = max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1)
 			self.orbit_camera.frame(center, radius * 5.65)
 
-	def _apply_material(self, node_path, material_id):
+		self._rebuild_reference_shapes()
+
+	def _get_reference_shape(self, label):
+		"""Lazily parses (once) and caches a reference shape by label."""
+		if label in self._reference_shapes:
+			return self._reference_shapes[label]
+		filename = dict(_REFERENCE_SHAPES)[label]
+		path = _REFERENCE_EXAMPLES_DIR / filename
+		try:
+			shape_file = parse_shape(path.read_bytes())
+		except (OSError, ShapeParseError) as exc:
+			print(f"[object_editor] failed to load reference shape {label!r} ({path}): {exc}")
+			shape_file = None
+		self._reference_shapes[label] = shape_file
+		return shape_file
+
+	def _toggle_reference_shape(self, label):
+		if label in self._reference_active:
+			self._reference_active.discard(label)
+		elif self._get_reference_shape(label) is not None:
+			self._reference_active.add(label)
+		self._rebuild_reference_shapes()
+
+	def _build_reference_geometry(self, shape_value, parent_node_path):
+		materials = getattr(shape_value, "materials", None)
+		for vertex_buffer, material_id, indices in iter_render_passes(shape_value):
+			if not indices:
+				continue
+			geom = _build_geom(vertex_buffer, indices)
+			geom_node = GeomNode(f"ref-pass-{material_id}")
+			geom_node.add_geom(geom)
+			node_path = parent_node_path.attach_new_node(geom_node)
+			material = materials[material_id] if materials and material_id < len(materials) else None
+			self._apply_material_common(node_path, material)
+			self._apply_material_texture(node_path, material)
+
+	def _rebuild_reference_shapes(self):
+		"""Lines up the currently-active reference shapes side by side, just
+		past the main shape's own bbox (bottoms/centers aligned on X, so
+		comparing sizes doesn't need any camera repositioning)."""
+		self._reference_root.remove_node()
+		self._reference_root = self.render.attach_new_node("reference-root")
+
+		main_bbox = shape_bbox(self.shape_file.value) if self.shape_file is not None else None
+		cursor_x = (main_bbox.center.x + main_bbox.half_size.x + _REFERENCE_GAP) if main_bbox is not None else 0.0
+
+		for label, _ in _REFERENCE_SHAPES:
+			if label not in self._reference_active:
+				continue
+			shape_file = self._reference_shapes.get(label)
+			if shape_file is None:
+				continue
+			bbox = shape_bbox(shape_file.value)
+			node_path = self._reference_root.attach_new_node(label)
+			if bbox is not None:
+				node_path.set_x(cursor_x + bbox.half_size.x - bbox.center.x)
+			self._build_reference_geometry(shape_file.value, node_path)
+			if bbox is not None:
+				cursor_x += bbox.half_size.x * 2 + _REFERENCE_GAP
+
+	def _draw_reference_shapes_row(self):
+		imgui.text("Scale reference:")
+		for label, _ in _REFERENCE_SHAPES:
+			imgui.same_line()
+			active = label in self._reference_active
+			if active:
+				imgui.push_style_color(imgui.Col_.button.value, (0.2, 0.65, 0.2, 1.0))
+				imgui.push_style_color(imgui.Col_.button_hovered.value, (0.25, 0.7, 0.25, 1.0))
+				imgui.push_style_color(imgui.Col_.button_active.value, (0.15, 0.55, 0.15, 1.0))
+			if imgui.button(label):
+				self._toggle_reference_shape(label)
+			if active:
+				imgui.pop_style_color(3)
+		imgui.separator()
+
+	@staticmethod
+	def _apply_material_common(node_path, material):
+		"""Clears any render state possibly left over from a previous
+		material, then applies the parts that don't depend on
+		material_id/override-color bookkeeping: two-sided, depth-write.
+		Shared by _apply_material() (the current shape's own, editable
+		materials) and reference-shape rendering (_build_reference_geometry()),
+		which has no material_id/override-color concept of its own."""
 		node_path.clear_texture()
 		node_path.clear_color()
 		node_path.clear_material()
@@ -416,9 +547,6 @@ class ObjectEditorApp(ForgeryApp):
 		node_path.clear_attrib(ColorBlendAttrib)
 		node_path.clear_attrib(AlphaTestAttrib)
 		node_path.clear_depth_write()
-
-		materials = getattr(self.shape_file.value, "materials", None)
-		material = materials[material_id] if materials and material_id < len(materials) else None
 
 		# Follow the shape's own CMaterial::DOUBLE_SIDED flag rather than
 		# always forcing two-sided rendering: some materials (e.g. additive
@@ -433,21 +561,10 @@ class ObjectEditorApp(ForgeryApp):
 		# geometry depending on draw order.
 		node_path.set_depth_write(bool(material.flags & _IDRV_MAT_ZWRITE) if material is not None else True)
 
-		override_color = self._material_override_colors.get(material_id)
-		if override_color is not None:
-			# A manual color override (see the material color picker button)
-			# replaces the texture entirely, so the material reads unambiguously
-			# as "flagged this color" rather than a tinted texture. Lighting and
-			# the Material (diffuse/ambient/...) must also be disabled here: a
-			# lit NodePath computes its shaded color from its Material, not from
-			# set_color(), so leaving either on would still show the old texture's
-			# material tint instead of the flat override color.
-			node_path.set_texture_off(1)
-			node_path.set_material_off(1)
-			node_path.set_light_off(1)
-			node_path.set_color(override_color, 1)
-			return
-
+	def _apply_material_texture(self, node_path, material):
+		"""Material color/blend/alpha-test/texture -- the part of rendering
+		a material that _apply_material_common() doesn't cover. Assumes the
+		caller already handled clearing and any color override."""
 		if material is None:
 			return
 
@@ -471,16 +588,32 @@ class ObjectEditorApp(ForgeryApp):
 			node_path.set_attrib(AlphaTestAttrib.make(AlphaTestAttrib.M_greater, material.alpha_test_threshold))
 
 		texture = material.textures[0] if material.textures else None
-		if texture is None:
-			print(f"[object_editor] material {material_id}: no texture")
-		elif not texture.file_name:
-			print(f"[object_editor] material {material_id}: texture slot present "
-			      f"(class={texture.class_name}) but no file_name")
-		else:
-			print(f"[object_editor] material {material_id}: texture reference {texture.file_name!r}")
+		if texture is not None and texture.file_name:
 			panda_texture = load_panda_texture(self.asset_index, texture.file_name, cache=self._texture_cache)
 			if panda_texture is not None:
 				node_path.set_texture(panda_texture)
+
+	def _apply_material(self, node_path, material_id):
+		materials = getattr(self.shape_file.value, "materials", None)
+		material = materials[material_id] if materials and material_id < len(materials) else None
+		self._apply_material_common(node_path, material)
+
+		override_color = self._material_override_colors.get(material_id)
+		if override_color is not None:
+			# A manual color override (see the material color picker button)
+			# replaces the texture entirely, so the material reads unambiguously
+			# as "flagged this color" rather than a tinted texture. Lighting and
+			# the Material (diffuse/ambient/...) must also be disabled here: a
+			# lit NodePath computes its shaded color from its Material, not from
+			# set_color(), so leaving either on would still show the old texture's
+			# material tint instead of the flat override color.
+			node_path.set_texture_off(1)
+			node_path.set_material_off(1)
+			node_path.set_light_off(1)
+			node_path.set_color(override_color, 1)
+			return
+
+		self._apply_material_texture(node_path, material)
 
 	def _reapply_material(self, material_id):
 		"""Re-runs _apply_material on every NodePath using this material, e.g.
@@ -801,6 +934,12 @@ class ObjectEditorApp(ForgeryApp):
 			save_shape(path, self.shape_file)
 			self._save_status = f"Saved to {path}"
 			print(f"[object_editor] {self._save_status}")
+			# The viewer-only Ctrl+drag rotation is never written into the
+			# shape's own default_rot_quat (see _display_shape()), but a save
+			# is a natural point to treat "where the object is now" as the new
+			# reset baseline -- otherwise Ctrl+Reset would keep snapping back
+			# to the pre-save orientation forever.
+			self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
 		except (OSError, ShapeWriteError) as exc:
 			self._save_status = f"Save failed: {exc}"
 			print(f"[object_editor] {self._save_status}")
@@ -1027,6 +1166,7 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog.draw()
 		self.import_dialog.draw()
 		self._draw_replace_match_popup()
+		self._draw_reference_shapes_row()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)
