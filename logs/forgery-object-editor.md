@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-08-16 — ✨ Split object_editor's Materials tab into Textures + Materials
+
+The old single "Materials" tab conflated two different concerns -- editing texture
+references and editing material properties -- under a UI that was really only about
+textures. Split into two tabs (order: Textures, Materials, All Properties):
+
+- **Textures** (renamed from "Materials"): unchanged texture-editing rows (text field +
+  browse icon, Multi Bitmap set editor), now prefixed with each row's material index
+  (`#N`) and showing an actual texture thumbnail instead of a flat color swatch.
+- **Materials** (new): one row per material -- index, a Simple bitmap/Multi Bitmap/Color
+  type badge, a "Double-sided" checkbox (toggles `CMaterial::flags & IDRV_MAT_DOUBLE_SIDED`
+  live, hidden for Color materials), and conversion actions: Simple/Color -> Multi Bitmap
+  (existing), and the reverse -- Multi Bitmap -> Simple bitmap (only offered when slot 0 /
+  Low Quality is the only populated set) or -> Color (only when no set has a texture --
+  `_multi_bitmap_populated_slots()`), both lossless by construction since they're only
+  shown when nothing would be discarded.
+
+Thumbnails: `_get_preview_texture_ref()` resolves a texture by name via the existing
+`load_panda_texture()`/`_texture_cache` and wraps it with `self.imgui.loadTexture()`
+(`p3dimgui`'s backend, exposed as `ObjectEditorApp.imgui` since `ShowBase` sets the global
+`base` to the app instance) into an `imgui.ImTextureRef`, cached by name -- new territory
+for this codebase, no prior `imgui.image()`/`image_button()` usage. Hovering a thumbnail
+shows a bigger version in a tooltip. An untextured material's own diffuse color reuses the
+exact same `image_button` widget rather than a hand-drawn look-alike: a hand-drawn border
+around a plain `color_button` (tried first, positioned via `get_item_rect_min/max()` +
+`ImDrawList.add_rect()`) never looked quite like a real thumbnail's border/hover
+highlight, so `shape_geometry.solid_color_texture()` now builds a 1x1 texture filled with
+the color instead, going through the identical rendering path
+(`_get_color_texture_ref()`/`_draw_color_preview_button()`).
+
+Textures tab semantics: for an untextured material, that same color swatch
+(`_draw_texture_color_button()`) now edits `CMaterial::diffuse` directly and for real --
+saved with the shape -- unlike the Materials tab's own color button
+(`_draw_material_color_button()`), which stays a temporary, per-session visualization
+override (`_material_override_colors`, never written to the shape) for spotting which
+faces use a given material. Once a texture is set, editing stops being offered there at
+all (the diffuse color becomes moot) -- the swatch turns into a plain preview. That preview
+first used a bare `imgui.image()`, which rendered visibly smaller than a real thumbnail
+button (no button frame padding); switched to a *disabled* `image_button` instead so the
+size matches exactly, which took `imgui.is_item_hovered(HoveredFlags_.allow_when_disabled)`
+to keep the hover-zoom tooltip working (disabled items don't report hovered by default).
+The same disabled-preview treatment now applies to Multi Bitmap's per-slot rows too: those
+never supported real color editing to begin with (a texture-variant slot isn't "a color"),
+so they never got the Materials-tab override button either -- just a static preview
+(or an empty placeholder for an unpopulated slot).
+
+Fixed one crash hit while testing: `_set_material_diffuse_color()` initially sliced
+`color[:3]` off the `color_picker4()` return value, which is an `ImVec4`, not a plain
+tuple -- `ImVec4.__getitem__` only accepts a single int index, not a slice. Reads `.x/.y/.z/.w`
+explicitly instead.
+
 ## 2026-08-16 — ✨ Wire up .obj/.dae import as a new shape or a geometry replace
 
 Finished the import flow started in "Rework the Forgery Explorer's navigation and add an

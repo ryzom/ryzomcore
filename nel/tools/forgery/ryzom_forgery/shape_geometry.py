@@ -86,6 +86,20 @@ def rgba_to_color(rgba):
 	return (rgba.r / 255.0, rgba.g / 255.0, rgba.b / 255.0, rgba.a / 255.0)
 
 
+def solid_color_texture(color):
+	"""A 1x1 Panda3D Texture filled with `color` (r, g, b[, a] floats 0-1) --
+	lets a plain material color be shown with the exact same UI widget as a
+	real texture (e.g. an ImGui image_button), border/hover styling and all,
+	instead of a hand-approximated look-alike."""
+	image = PNMImage(1, 1, 4)  # explicit 4 channels: set_xel_a() needs an alpha channel to exist
+	r, g, b = color[0], color[1], color[2]
+	a = color[3] if len(color) > 3 else 1.0
+	image.set_xel_a(0, 0, r, g, b, a)
+	texture = PandaTexture()
+	texture.load(image)
+	return texture
+
+
 def load_panda_texture(asset_index, name, cache=None):
 	"""Resolves and decodes a material texture reference (by base file name,
 	as stored in the shape's Texture.file_name) into a Panda3D Texture, via

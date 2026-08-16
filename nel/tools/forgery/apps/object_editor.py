@@ -24,9 +24,11 @@ from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.shape_export import EXPORT_FORMATS
-from ryzom_forgery.shape_geometry import iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox
+from ryzom_forgery.shape_geometry import (
+	iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, solid_color_texture,
+)
 
-from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
+from pynel.ryzom_shape import Rgba, ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
 
 DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 
@@ -39,6 +41,7 @@ _REPLACE_MATCH_POPUP_ID = "Match materials"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _COLOR_POPUP_ID = "material-color-picker"
+_DIFFUSE_COLOR_POPUP_ID = "material-diffuse-picker"
 
 # CMaterial flag/enum values (nel/include/nel/3d/material.h), needed to render
 # translucent materials (e.g. glass) correctly instead of opaque.
@@ -93,7 +96,7 @@ def _multi_bitmap_slot_label(index):
 	if 0 <= index < len(_MULTI_BITMAP_SLOT_LABELS):
 		quality, ecosystem, season = _MULTI_BITMAP_SLOT_LABELS[index]
 		labels = " / ".join(label for label in (quality, ecosystem, season) if label)
-		return f"{index} - {labels}"
+		return labels or str(index)
 	return str(index)
 
 
@@ -155,6 +158,8 @@ class ObjectEditorApp(ForgeryApp):
 		self.sysinfo.set_status(f"{len(self.asset_index)} assets indexed")
 
 		self._texture_cache = {}
+		self._preview_texture_refs = {}  # texture name -> imgui.ImTextureRef, for thumbnail/tooltip previews in the UI
+		self._color_texture_refs = {}  # (r,g,b,a) rounded -> imgui.ImTextureRef, for plain-color material swatches
 
 		self.model_root = self.render.attach_new_node("shape-root")
 		self.shape_file = None
@@ -492,13 +497,121 @@ class ObjectEditorApp(ForgeryApp):
 			self._material_override_colors[material_id] = tuple(color)
 		self._reapply_material(material_id)
 
-	def _draw_material_color_button(self, material_id):
-		"""A small color-swatch button: click to open a picker (plus a "No
-		color" option) that sets/clears that material's flat-color override,
-		visualizing on the 3D model exactly which faces use that material."""
+	def _get_preview_texture_ref(self, name):
+		"""Resolves a texture by name (like _apply_material does for
+		rendering) into an imgui.ImTextureRef for UI thumbnails/tooltips,
+		cached. Returns None if there's no name or it can't be decoded."""
+		if not name:
+			return None
+		tex_ref = self._preview_texture_refs.get(name)
+		if tex_ref is not None:
+			return tex_ref
+		panda_texture = load_panda_texture(self.asset_index, name, cache=self._texture_cache)
+		if panda_texture is None:
+			return None
+		tex_ref = self.imgui.loadTexture(panda_texture)
+		self._preview_texture_refs[name] = tex_ref
+		return tex_ref
+
+	def _draw_thumbnail_button(self, str_id, tex_ref, tooltip, size=24):
+		"""Common image_button + hover-zoom-tooltip widget: shared by real
+		texture thumbnails and solid-color swatches, so a plain material
+		color gets the exact same button chrome/hover style as a real
+		texture instead of a hand-approximated look-alike."""
+		clicked = imgui.image_button(str_id, tex_ref, (size, size))
+		if imgui.is_item_hovered():
+			if imgui.begin_tooltip():
+				imgui.image(tex_ref, (192, 192))
+				if tooltip:
+					imgui.text(tooltip)
+				imgui.end_tooltip()
+		return clicked
+
+	def _draw_texture_preview_button(self, str_id, name, size=24):
+		"""An image_button thumbnail for texture `name` (a plain color-button
+		placeholder if there's no name or it can't be resolved), with a
+		bigger preview shown in a tooltip on hover. Returns True if clicked."""
+		tex_ref = self._get_preview_texture_ref(name)
+		if tex_ref is None:
+			return imgui.color_button(str_id, (0.5, 0.5, 0.5, 0.4), 0, (size, size))
+		return self._draw_thumbnail_button(str_id, tex_ref, name, size)
+
+	def _draw_texture_preview_static(self, name, size=24):
+		"""Same thumbnail button (size, frame, hover-zoom tooltip) as
+		_draw_texture_preview_button, but disabled -- for spots where
+		clicking it wouldn't do anything (e.g. the Textures tab once a
+		texture is already set: the text field/browse icon next to it are
+		the actual controls), so it doesn't look clickable when it isn't.
+		A plain imgui.image() looked visibly smaller: image_button adds the
+		usual button frame padding around the image that a bare image()
+		doesn't get, and disabling it (rather than swapping widget types)
+		keeps that same size."""
+		tex_ref = self._get_preview_texture_ref(name)
+		if tex_ref is None:
+			imgui.dummy((size, size))
+			return
+		imgui.begin_disabled(True)
+		imgui.image_button("##preview", tex_ref, (size, size))
+		imgui.end_disabled()
+		if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+			if imgui.begin_tooltip():
+				imgui.image(tex_ref, (192, 192))
+				imgui.text(name)
+				imgui.end_tooltip()
+
+	def _get_color_texture_ref(self, color):
+		"""A 1x1 solid-color Texture (see shape_geometry.solid_color_texture)
+		wrapped as an imgui.ImTextureRef, cached by color."""
+		key = tuple(round(c, 3) for c in color)
+		tex_ref = self._color_texture_refs.get(key)
+		if tex_ref is not None:
+			return tex_ref
+		tex_ref = self.imgui.loadTexture(solid_color_texture(color))
+		self._color_texture_refs[key] = tex_ref
+		return tex_ref
+
+	def _draw_color_preview_button(self, str_id, color, size=24):
+		"""Same image_button widget as _draw_texture_preview_button, but for
+		a plain color (e.g. an untextured material's own diffuse color) --
+		filled into a tiny solid-color texture rather than hand-drawing a
+		look-alike border/hover style around a plain color_button."""
+		tex_ref = self._get_color_texture_ref(color)
+		tooltip = f"RGBA {tuple(round(c, 2) for c in color)}"
+		return self._draw_thumbnail_button(str_id, tex_ref, tooltip, size)
+
+	def _draw_material_color_button(self, material_id, preview_name=...):
+		"""A material's color-override button: a flat color swatch once an
+		override is set, otherwise a texture preview thumbnail (see
+		_draw_texture_preview_button). Either way, clicking it opens the same
+		picker (plus a "No color" option) that sets/clears the override,
+		visualizing on the 3D model exactly which faces use this material.
+
+		`preview_name`, if given, overrides which texture the preview shows
+		-- for a Multi Bitmap slot row, that's the slot's own texture, not
+		necessarily the material's currently active one (the default,
+		looked up from slot 0 when `preview_name` is left as the sentinel)."""
 		override_color = self._material_override_colors.get(material_id)
-		swatch_color = override_color if override_color is not None else (0.5, 0.5, 0.5, 0.4)
-		if imgui.color_button(f"##color-{material_id}", swatch_color, 0, (20, 0)):
+		if override_color is not None:
+			# A forced/manual color: plain color_button, deliberately not the
+			# same image_button look as real shape data (texture or diffuse
+			# color) below -- that difference in chrome is what marks it as
+			# an override at a glance.
+			clicked = imgui.color_button(f"##color-{material_id}", override_color, 0, (24, 24))
+		else:
+			materials = getattr(self.shape_file.value, "materials", None)
+			material = materials[material_id] if materials and material_id < len(materials) else None
+			if preview_name is ...:
+				texture = material.textures[0] if material is not None and material.textures else None
+				preview_name = texture.file_name if texture is not None else None
+			if preview_name:
+				clicked = self._draw_texture_preview_button(f"##color-{material_id}", preview_name)
+			else:
+				# No texture at all -- this material is just a flat color
+				# (e.g. anlor_stick.shape's untextured wood/metal parts), so
+				# show its own diffuse color rather than a generic placeholder.
+				diffuse = rgba_to_color(material.diffuse) if material is not None else (0.5, 0.5, 0.5, 0.4)
+				clicked = self._draw_color_preview_button(f"##color-{material_id}", diffuse)
+		if clicked:
 			imgui.open_popup(f"{_COLOR_POPUP_ID}-{material_id}")
 
 		if imgui.begin_popup(f"{_COLOR_POPUP_ID}-{material_id}"):
@@ -510,6 +623,34 @@ class ObjectEditorApp(ForgeryApp):
 			changed, new_color = imgui.color_picker4(f"##picker-{material_id}", current)
 			if changed:
 				self._set_material_override_color(material_id, new_color)
+			imgui.end_popup()
+
+	@staticmethod
+	def _set_material_diffuse_color(material, color):
+		r, g, b, a = color.x, color.y, color.z, color.w
+		material.diffuse = Rgba(round(r * 255), round(g * 255), round(b * 255), round(a * 255))
+
+	def _draw_texture_color_button(self, material_id, material):
+		"""Textures tab only: when a material has no texture at all, its
+		swatch button lets you edit CMaterial::diffuse directly -- a real,
+		saved modification of the shape (unlike the Materials tab's color
+		button, which is a temporary visualization override, never saved).
+		Once a texture is set, this just previews it: the material is a
+		texture now, not a color, so it's no longer clickable for color."""
+		texture = material.textures[0] if material.textures else None
+		if texture is not None and texture.file_name:
+			self._draw_texture_preview_static(texture.file_name)
+			return
+
+		diffuse = rgba_to_color(material.diffuse)
+		if self._draw_color_preview_button(f"##diffuse-{material_id}", diffuse):
+			imgui.open_popup(f"{_DIFFUSE_COLOR_POPUP_ID}-{material_id}")
+
+		if imgui.begin_popup(f"{_DIFFUSE_COLOR_POPUP_ID}-{material_id}"):
+			changed, new_color = imgui.color_picker4(f"##diffuse-picker-{material_id}", diffuse)
+			if changed:
+				self._set_material_diffuse_color(material, new_color)
+				self._reapply_material(material_id)
 			imgui.end_popup()
 
 	def _start_texture_browse(self, key, on_result):
@@ -614,7 +755,13 @@ class ObjectEditorApp(ForgeryApp):
 					self._ensure_multi_bitmap_slot(texture, index)
 					imgui.push_id(f"mb-mat-{material_id}")
 
-					self._draw_material_color_button(material_id)
+					slot_name = texture.file_names[index]
+					if slot_name:
+						self._draw_texture_preview_static(slot_name)
+					else:
+						imgui.dummy((24, 24))
+					imgui.same_line()
+					imgui.text(f"#{material_id}")
 					imgui.same_line()
 
 					imgui.set_next_item_width(220)
@@ -727,7 +874,7 @@ class ObjectEditorApp(ForgeryApp):
 		if self._save_status:
 			imgui.text_wrapped(self._save_status)
 
-	def _draw_materials_tab(self):
+	def _draw_textures_tab(self):
 		materials = getattr(self.shape_file.value, "materials", None)
 		if not materials:
 			imgui.text("No materials.")
@@ -745,6 +892,62 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._draw_multi_bitmap_editor()
 		self._poll_texture_browse_dialogs()
+
+	def _toggle_material_double_sided(self, material_id, material):
+		material.flags ^= _IDRV_MAT_DOUBLE_SIDED
+		self._reapply_material(material_id)
+
+	def _draw_materials_tab(self):
+		materials = getattr(self.shape_file.value, "materials", None)
+		if not materials:
+			imgui.text("No materials.")
+			return
+
+		multi_bitmap_ids = {material_id for material_id, _ in self._multi_bitmap_entries()}
+
+		for material_id, material in enumerate(materials):
+			imgui.push_id(f"mat-row-{material_id}")
+
+			self._draw_material_color_button(material_id)
+			imgui.same_line()
+			imgui.text(f"#{material_id}")
+			imgui.same_line()
+
+			is_multi = material_id in multi_bitmap_ids
+			texture = material.textures[0] if material.textures else None
+			has_texture = texture is not None and bool(texture.file_name)
+			if is_multi:
+				badge = "Multi Bitmap"
+			elif has_texture:
+				badge = "Simple bitmap"
+			else:
+				badge = "Color"
+			imgui.text_disabled(badge)
+			imgui.same_line()
+
+			if badge != "Color":
+				double_sided = bool(material.flags & _IDRV_MAT_DOUBLE_SIDED)
+				changed, double_sided = imgui.checkbox("Double-sided", double_sided)
+				if changed:
+					self._toggle_material_double_sided(material_id, material)
+
+			if not is_multi:
+				imgui.same_line()
+				if _icon_button(fa_icons.ICON_FA_CLONE, "Convert to Multi Bitmap (add season/quality/ecosystem variants)"):
+					self._convert_to_multi_bitmap(material_id, material)
+			else:
+				populated = self._multi_bitmap_populated_slots(texture)
+				if not populated:
+					imgui.same_line()
+					if _icon_button(fa_icons.ICON_FA_UNDO, "Convert to Color (no set has a texture)"):
+						self._convert_multi_bitmap_to_color(material_id, material)
+				elif populated == [0]:
+					imgui.same_line()
+					if _icon_button(fa_icons.ICON_FA_UNDO, "Convert to Simple bitmap (only Low Quality has a texture)"):
+						self._convert_multi_bitmap_to_simple(material_id, material)
+
+			imgui.pop_id()
+			imgui.separator()
 
 	@staticmethod
 	def _set_simple_material_texture(material, file_name):
@@ -774,10 +977,31 @@ class ObjectEditorApp(ForgeryApp):
 			material.textures = [new_texture]
 		self._reapply_material(material_id)
 
+	@staticmethod
+	def _multi_bitmap_populated_slots(texture):
+		return [i for i, name in enumerate(texture.file_names) if name]
+
+	def _convert_multi_bitmap_to_simple(self, material_id, material):
+		"""The reverse of _convert_to_multi_bitmap(): only offered when slot
+		0 (Low Quality) is the Multi Bitmap's only populated set, so nothing
+		is lost -- swaps it for a plain CTextureFile using that texture."""
+		texture = material.textures[0]
+		name = texture.file_names[0] if texture.file_names else ""
+		material.textures[0] = Texture(class_name="CTextureFile", file_name=name)
+		self._reapply_material(material_id)
+
+	def _convert_multi_bitmap_to_color(self, material_id, material):
+		"""Only offered when a Multi Bitmap material has no texture set in
+		any slot -- clears its texture entirely, making it a plain color."""
+		material.textures = []
+		self._reapply_material(material_id)
+
 	def _draw_simple_material_row(self, material_id, material):
 		imgui.push_id(f"mat-simple-{material_id}")
 
-		self._draw_material_color_button(material_id)
+		self._draw_texture_color_button(material_id, material)
+		imgui.same_line()
+		imgui.text(f"#{material_id}")
 		imgui.same_line()
 
 		texture = material.textures[0] if material.textures else None
@@ -795,10 +1019,6 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_simple_material_texture(material, file_name)
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
-		imgui.same_line()
-
-		if _icon_button(fa_icons.ICON_FA_CLONE, "Convert to Multi Bitmap (add season/quality/ecosystem variants)"):
-			self._convert_to_multi_bitmap(material_id, material)
 
 		imgui.pop_id()
 
@@ -819,6 +1039,9 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.separator()
 
 		if imgui.begin_tab_bar("##panel-tabs"):
+			if imgui.begin_tab_item_simple("Textures"):
+				self._draw_textures_tab()
+				imgui.end_tab_item()
 			if imgui.begin_tab_item_simple("Materials"):
 				self._draw_materials_tab()
 				imgui.end_tab_item()
