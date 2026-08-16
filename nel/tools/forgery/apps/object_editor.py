@@ -307,7 +307,7 @@ class ObjectEditorApp(ForgeryApp):
 			self.export_dialog.export(items[0], export_format, self.asset_index)
 
 	def _draw_import_toolbar_button(self):
-		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae)..."):
+		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae/.fbx)..."):
 			self.import_dialog.open(self.shape_file is not None)
 
 	def _on_import_new_shape(self, mesh, source_path):

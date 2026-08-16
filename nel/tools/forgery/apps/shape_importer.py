@@ -1,7 +1,7 @@
 """Ryzom Forgery shape importer: command-line mesh format -> .shape converter.
 
 Usage:
-	shape_importer.py INPUT.{obj,dae} OUTPUT.shape
+	shape_importer.py INPUT.{obj,dae,fbx} OUTPUT.shape
 
 The input format is picked from INPUT's extension. Produces a `CMesh` -- no
 LOD levels (see ryzom_forgery/shape_import.py's module docstring for why
@@ -11,11 +11,11 @@ CMeshMRM can't be built this way).
 import argparse
 from pathlib import Path
 
-from ryzom_forgery.shape_import import ShapeImportError, import_dae, import_obj
+from ryzom_forgery.shape_import import ShapeImportError, import_dae, import_fbx, import_obj
 
 from pynel.ryzom_shape import ShapeFile, save_shape
 
-IMPORTERS = {"obj": import_obj, "dae": import_dae}
+IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx}
 
 
 def _find_importer(input_path: Path):
@@ -29,7 +29,7 @@ def _find_importer(input_path: Path):
 
 def main(argv=None):
 	parser = argparse.ArgumentParser(description="Import a mesh file into a Ryzom .shape file.")
-	parser.add_argument("input", type=Path, help="Source mesh file (.obj)")
+	parser.add_argument("input", type=Path, help="Source mesh file (.obj/.dae/.fbx)")
 	parser.add_argument("output", type=Path, help="Destination .shape file")
 	args = parser.parse_args(argv)
 

@@ -10,7 +10,10 @@ turning an imported mesh into a real progressive-LOD `CMeshMRM` needs
 Python binding; out of scope here (see docs/log.md for the investigation).
 
 `.obj`/`.mtl` are hand-parsed here for the same reason `shape_export.py`
-hand-writes them: simple, dependency-free text formats.
+hand-writes them: simple, dependency-free text formats. `.dae` and `.fbx` go
+through `assimp-py` instead (see `_import_via_assimp()`) -- both are complex
+enough formats that hand-parsing isn't worth it once a real importer library
+is already a dependency.
 """
 
 from dataclasses import dataclass, field
@@ -315,107 +318,191 @@ def import_obj(path: Path) -> Mesh:
 
 
 # ---------------------------------------------------------------------------
-# .dae
+# .dae / .fbx (via assimp-py)
 # ---------------------------------------------------------------------------
+#
+# Both formats go through the same Assimp-based path: Assimp auto-detects the
+# format from content/extension, and exposes the same Scene/Mesh/Material API
+# regardless of source, so there's nothing format-specific left to write once
+# node transforms are handled generically (see _iter_mesh_instances()).
+#
+# .dae used to be hand-parsed via pycollada instead (kept no longer, see git
+# history) -- swapped once assimp-py was already a dependency for .fbx,
+# confirmed to produce identical vertex positions on Forgery's own .dae
+# exports (which write a `Y_UP` <asset><up_axis> tag via pycollada's own
+# default while leaving vertex data in Ryzom's actual Z-up coordinates
+# untouched -- Assimp does not auto-rotate based on that tag, verified
+# against `test.dae`, so re-importing Forgery's own exports round-trips fine).
+
+# 4x4 identity, row-major (Assimp's own aiMatrix4x4 convention: each inner
+# tuple is one row, translation is the 4th element of the first 3 rows --
+# assimp-py's Node.transformation is documented to mirror this verbatim).
+_IDENTITY_MATRIX = ((1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0))
 
 
-def _dae_effect_rgb(value, default: Tuple[float, float, float]) -> Tuple[float, float, float]:
-	"""An Effect property (diffuse/ambient/specular/...) is either a plain
-	RGBA tuple or a `collada.material.Map` (textured) -- textured properties
-	fall back to `default` here, same as .obj materials with no `Kd` line."""
-	from collada.material import Map
-	if value is None or isinstance(value, Map):
-		return default
-	return (value[0], value[1], value[2])
+def _mat_mul_mat(a, b):
+	return tuple(tuple(sum(a[i][k] * b[k][j] for k in range(4)) for j in range(4)) for i in range(4))
 
 
-def _dae_effect_texture_name(value) -> Optional[str]:
-	from collada.material import Map
-	if not isinstance(value, Map):
-		return None
-	try:
-		return Path(value.sampler.surface.image.path).name
-	except AttributeError:
-		return None
-
-
-def _build_material_from_dae_material(dae_material) -> Material:
-	"""`dae_material` is a bound `collada.material.Material` (`Triangle.material`
-	on a `BoundTriangleSet`) -- its `.effect` carries the actual shading data."""
-	effect = dae_material.effect if dae_material is not None else None
-	if effect is None:
-		return _build_material()
-
-	opacity = 1.0
-	transparency = getattr(effect, "transparency", None)
-	if isinstance(transparency, (int, float)):
-		opacity = float(transparency)
-
-	return _build_material(
-		diffuse=_dae_effect_rgb(effect.diffuse, (0.8, 0.8, 0.8)),
-		ambient=_dae_effect_rgb(effect.ambient, (0.2, 0.2, 0.2)),
-		specular=_dae_effect_rgb(effect.specular, (0.0, 0.0, 0.0)),
-		shininess=float(effect.shininess or 0.0),
-		opacity=opacity,
-		texture_name=_dae_effect_texture_name(effect.diffuse),
+def _mat_mul_point(m, p):
+	x, y, z = p
+	return (
+		m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3],
+		m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3],
+		m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3],
 	)
 
 
-def import_dae(path: Path) -> Mesh:
-	"""Parses `path` (a COLLADA .dae) via `pycollada`, returning a
-	ready-to-save Mesh. Only triangulated geometry is read (COLLADA's
-	<polylist>/<lines>/... primitive types are skipped)."""
-	from collada import Collada
+def _mat_mul_dir(m, v):
+	"""Like _mat_mul_point() but ignoring translation (for normals) -- uses
+	the matrix's own upper-left 3x3 rather than an inverse-transpose, which
+	is only exactly correct for rotation/uniform-scale transforms. Good
+	enough here: non-uniform-scaled FBX nodes are rare, and obj/dae import
+	don't handle that case either (they have no node transforms at all)."""
+	x, y, z = v
+	return (
+		m[0][0] * x + m[0][1] * y + m[0][2] * z,
+		m[1][0] * x + m[1][1] * y + m[1][2] * z,
+		m[2][0] * x + m[2][1] * y + m[2][2] * z,
+	)
 
-	doc = Collada(str(path))
+
+def _normalize(v):
+	"""Assimp's generated normals (Process_GenNormals) come back at whatever
+	magnitude the cross product happened to produce in the file's original
+	(pre Process_GlobalScale) units -- e.g. 100x too long for a
+	centimeters-authored FBX -- rather than unit length, so every normal
+	needs renormalizing after the node transform is applied, regardless of
+	source."""
+	x, y, z = v
+	length = (x * x + y * y + z * z) ** 0.5
+	return (x / length, y / length, z / length) if length > 1e-12 else (0.0, 0.0, 1.0)
+
+
+def _iter_mesh_instances(node, parent_transform):
+	"""Walks the assimp scene graph, yielding (mesh_index, world_transform)
+	for every mesh referenced by every node -- a mesh can be instanced by
+	more than one node, and each node's own transform (and its ancestors')
+	must be baked into that instance's vertices, since a CMesh has no scene
+	graph of its own to carry it (see _assemble_mesh()'s single matrix block)."""
+	transform = _mat_mul_mat(parent_transform, node.transformation)
+	for mesh_index in node.mesh_indices:
+		yield mesh_index, transform
+	for child in node.children:
+		yield from _iter_mesh_instances(child, transform)
+
+
+def _mesh_positions(mesh):
+	data = list(mesh.vertices)
+	return [tuple(data[i:i + 3]) for i in range(0, len(data), 3)]
+
+
+def _mesh_normals(mesh):
+	data = list(mesh.normals)
+	return [tuple(data[i:i + 3]) for i in range(0, len(data), 3)] if data else None
+
+
+def _mesh_texcoords(mesh):
+	if not mesh.texcoords or not len(mesh.texcoords[0]):
+		return None
+	data = list(mesh.texcoords[0])
+	stride = mesh.num_uv_components[0]
+	return [tuple(data[i:i + 2]) for i in range(0, len(data), stride)]
+
+
+def _build_material_from_assimp_material(material: dict) -> Material:
+	"""`material` is one of assimp_py.Scene.materials' plain dicts (property
+	name -> value, see assimp-py's own docs) -- COLOR_*/SHININESS/OPACITY are
+	always present (Assimp fills in its own defaults), TEXTURES is a dict of
+	texture-type-int -> [file paths, ...], only present for slots that
+	actually have one."""
+	import assimp_py
+
+	textures = material.get("TEXTURES", {})
+	diffuse_paths = textures.get(assimp_py.TextureType_DIFFUSE)
+
+	def rgb(key, default):
+		# COLLADA <color> values come back as RGBA (4 components); FBX/obj
+		# ones are plain RGB (3) -- keep only the first 3 either way, alpha is
+		# tracked separately via OPACITY.
+		return tuple(material.get(key, default))[:3]
+
+	return _build_material(
+		diffuse=rgb("COLOR_DIFFUSE", (0.8, 0.8, 0.8)),
+		ambient=rgb("COLOR_AMBIENT", (0.2, 0.2, 0.2)),
+		specular=rgb("COLOR_SPECULAR", (0.0, 0.0, 0.0)),
+		shininess=float(material.get("SHININESS", 0.0)),
+		opacity=float(material.get("OPACITY", 1.0)),
+		texture_name=diffuse_paths[0] if diffuse_paths else None,
+	)
+
+
+def _import_via_assimp(path: Path) -> Mesh:
+	"""Parses `path` (.dae or .fbx) via assimp-py, returning a ready-to-save
+	Mesh. Unlike the hand-parsed .obj path, both formats carry their own node
+	hierarchy with per-node transforms -- baked into each mesh instance's
+	vertices here (see _iter_mesh_instances()) since a CMesh has none of its
+	own. Each assimp mesh is already an indexed vertex buffer (no manual
+	per-corner dedup needed either)."""
+	import assimp_py
+
+	path = Path(path)
+	# Process_GlobalScale normalizes the scene to 1 unit = 1 meter using the
+	# file's own embedded unit metadata -- without it, a file authored in
+	# centimeters (the common default, e.g. Blender's FBX exporter) comes back
+	# 100x too large, since Assimp otherwise leaves that conversion factor
+	# sitting on the root node's scale instead of applying it.
+	flags = (assimp_py.Process_Triangulate | assimp_py.Process_JoinIdenticalVertices
+	         | assimp_py.Process_GenNormals | assimp_py.Process_GlobalScale)
+	scene = assimp_py.import_file(str(path), flags)
+
+	if scene.num_meshes == 0:
+		raise ShapeImportError(f"no meshes found in {path}")
+
+	has_normals = any(len(scene.meshes[i].normals) for i in range(scene.num_meshes))
+	has_uvs = any(len(scene.meshes[i].texcoords) and len(scene.meshes[i].texcoords[0]) for i in range(scene.num_meshes))
 
 	positions: List[Tuple[float, float, float]] = []
 	normals: List[Tuple[float, float, float]] = []
 	texcoords: List[Tuple[float, float]] = []
-	combined_index: Dict[Tuple[Tuple[float, ...], Optional[Tuple[float, ...]], Optional[Tuple[float, ...]]], int] = {}
-
-	material_order: List[str] = []  # first-seen order, keyed by the bound Effect's id (or _DEFAULT_MATERIAL_NAME)
-	material_ids: Dict[str, int] = {}
-	material_by_name: Dict[str, object] = {}  # name -> bound collada.material.Material (or None)
+	material_order: List[int] = []  # first-seen order of assimp material indices, becomes RdrPass material_id order
 	pass_indices: Dict[int, List[int]] = {}
 
-	def material_id_for(dae_material) -> int:
-		name = dae_material.id if dae_material is not None else _DEFAULT_MATERIAL_NAME
-		if name not in material_ids:
-			material_ids[name] = len(material_order)
-			material_order.append(name)
-			material_by_name[name] = dae_material
-			pass_indices[material_ids[name]] = []
-		return material_ids[name]
+	for mesh_index, transform in _iter_mesh_instances(scene.root_node, _IDENTITY_MATRIX):
+		mesh = scene.meshes[mesh_index]
+		mesh_positions = _mesh_positions(mesh)
+		mesh_normals = _mesh_normals(mesh)
+		mesh_texcoords = _mesh_texcoords(mesh)
+		base_index = len(positions)
 
-	def combined_vertex_id(position, normal, uv) -> int:
-		key = (tuple(position), tuple(normal) if normal is not None else None, tuple(uv) if uv is not None else None)
-		if key in combined_index:
-			return combined_index[key]
-		index = len(positions)
-		positions.append(key[0])
-		if normal is not None:
-			normals.append(key[1])
-		if uv is not None:
-			texcoords.append((key[2][0], key[2][1]))
-		combined_index[key] = index
-		return index
+		for i, position in enumerate(mesh_positions):
+			positions.append(_mat_mul_point(transform, position))
+			if has_normals:
+				normal = mesh_normals[i] if mesh_normals else (0.0, 0.0, 1.0)
+				normals.append(_normalize(_mat_mul_dir(transform, normal)))
+			if has_uvs:
+				texcoords.append(mesh_texcoords[i] if mesh_texcoords else (0.0, 0.0))
 
-	for bound_geom in doc.scene.objects("geometry"):
-		for primitive in bound_geom.primitives():
-			if not hasattr(primitive, "triangles"):
-				continue  # skip non-triangle primitives (lines, unsupported polylists, ...)
-			for tri in primitive.triangles():
-				material_id = material_id_for(tri.material)
-				for i in range(3):
-					normal = tri.normals[i] if tri.normals is not None else None
-					uv = tri.texcoords[0][i] if tri.texcoords else None
-					pass_indices[material_id].append(combined_vertex_id(tri.vertices[i], normal, uv))
+		if mesh.material_index not in pass_indices:
+			material_order.append(mesh.material_index)
+			pass_indices[mesh.material_index] = []
+		pass_indices[mesh.material_index].extend(base_index + index for index in mesh.indices)
 
 	if not positions:
-		raise ShapeImportError(f"no triangles found in {path}")
+		raise ShapeImportError(f"no vertices found in {path}")
 
-	materials = [_build_material_from_dae_material(material_by_name[name]) for name in material_order]
-	rdr_passes = [RdrPass(material_id=material_ids[name], indices=pass_indices[material_ids[name]])
-	              for name in material_order]
+	materials = [_build_material_from_assimp_material(scene.materials[mid]) for mid in material_order]
+	rdr_passes = [RdrPass(material_id=i, indices=pass_indices[mid]) for i, mid in enumerate(material_order)]
 	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes)
+
+
+def import_dae(path: Path) -> Mesh:
+	"""Parses `path` (a COLLADA .dae) via assimp-py, returning a ready-to-save
+	Mesh -- see _import_via_assimp()."""
+	return _import_via_assimp(path)
+
+
+def import_fbx(path: Path) -> Mesh:
+	"""Parses `path` (an FBX) via assimp-py, returning a ready-to-save Mesh --
+	see _import_via_assimp()."""
+	return _import_via_assimp(path)

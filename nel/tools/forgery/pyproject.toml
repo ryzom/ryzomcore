@@ -7,7 +7,7 @@ name = "ryzom_forgery"
 version = "0.1.0"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
-dependencies = ["panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib"]
+dependencies = ["panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py"]
 
 [tool.setuptools]
 packages = ["ryzom_forgery"]

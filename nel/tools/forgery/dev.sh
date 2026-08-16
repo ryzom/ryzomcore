@@ -11,7 +11,12 @@ cd "$(dirname "$0")"
 
 if [[ ! -d .venv ]]; then
 	echo "Creating Python virtual env..."
-	python3 -m venv .venv
+	# Prefer 3.12: some dependencies (e.g. assimp-py) only ship precompiled
+	# wheels up to 3.13, and a too-new interpreter (e.g. a distro's bleeding-edge
+	# python3) silently falls back to building them from source, which fails
+	# outright for packages whose sdist doesn't bundle their native submodules.
+	PYTHON=$(command -v python3.12 || command -v python3.13 || command -v python3)
+	"$PYTHON" -m venv .venv
 	.venv/bin/pip install --upgrade pip -q
 	.venv/bin/pip install -e ../pynel -q
 	.venv/bin/pip install -e . -q

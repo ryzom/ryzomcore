@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-08-16 — ✨ Add .fbx import and move .dae import to assimp
+
+Added `.fbx` import support to Forgery (`ryzom_forgery/shape_import.py`, wired into both
+the object_editor's import dialog and the `shape_importer.py` CLI), via the `assimp-py`
+PyPI package -- picked over `pyassimp` (ctypes wrapper needing a system-installed
+`libassimp.so`, not portable across a shared Forgery install) since it ships self-contained
+precompiled wheels for Linux/macOS/Windows. Those wheels only go up to Python 3.13 though
+(no cp314 yet, and no cp38 either, ruling out staying aligned with ryztart's older Python),
+so `dev.sh` now creates the `.venv` with `python3.12`/`python3.13` if available, falling
+back to whatever `python3` resolves to only if neither is found.
+
+`.dae` import was then also switched from the hand-rolled `pycollada`-based parser to the
+same assimp path (`_import_via_assimp()`, shared with `.fbx` -- Assimp auto-detects format
+from content, so there's nothing format-specific left once node-transform handling is
+generic). Verified assimp doesn't auto-rotate based on a `.dae`'s `<up_axis>` tag before
+switching (Forgery's own .dae exporter writes a `Y_UP` tag via pycollada's own default
+while leaving vertex data in Ryzom's actual Z-up coordinates untouched -- an auto-rotating
+importer would have silently broken re-importing Forgery's own exports). `pycollada`
+itself stays a dependency regardless, since `shape_export.py`'s .dae *exporter* still uses
+it directly (assimp-py only wraps Assimp's import side, not export).
+
+Two real bugs found while validating end-to-end through the bridge on a Blender-exported
+test .fbx and the repo's own `test.dae`: `Process_GlobalScale` was needed (an FBX authored
+in centimeters, e.g. Blender's default export, otherwise comes back 100x too large --
+Assimp leaves that unit conversion sitting on the root node's scale unless asked to apply
+it), and Assimp's generated normals (`Process_GenNormals`) come back at the pre-GlobalScale
+magnitude rather than unit length, so they're now explicitly renormalized after each node
+transform is applied. Also: COLLADA colors come back as RGBA (4 components) from assimp
+where FBX/obj ones are plain RGB (3) -- `_build_material_from_assimp_material()` now slices
+to the first 3 either way.
+
 ## 2026-08-16 — ✨ Add viewport helper toggles to Forgery object_editor
 
 Added a small icon-button bar bottom-left of the 3D viewport (`_draw_viewport_toggles()`
