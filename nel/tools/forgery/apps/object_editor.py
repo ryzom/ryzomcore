@@ -531,6 +531,22 @@ class ObjectEditorApp(ForgeryApp):
 		else:
 			material.textures = [Texture(class_name="CTextureFile", file_name=file_name)]
 
+	def _convert_to_multi_bitmap(self, material_id, material):
+		"""Turns slot 0's plain texture into a `CTextureMultiFile` with a
+		single set (the current texture, at index 0) -- e.g. for a material
+		imported from .obj/.dae, always single-texture, that needs to become
+		editable in the Multi Bitmap section (season/quality/ecosystem
+		variants)."""
+		texture = material.textures[0] if material.textures else None
+		current_name = texture.file_name if texture else ""
+		new_texture = Texture(
+			class_name="CTextureMultiFile", file_name=current_name, file_names=[current_name], selected_index=0)
+		if material.textures:
+			material.textures[0] = new_texture
+		else:
+			material.textures = [new_texture]
+		self._reapply_material(material_id)
+
 	def _draw_simple_material_row(self, material_id, material):
 		imgui.push_id(f"mat-simple-{material_id}")
 
@@ -552,6 +568,10 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_simple_material_texture(material, file_name)
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
+		imgui.same_line()
+
+		if _icon_button(fa_icons.ICON_FA_CLONE, "Convert to Multi Bitmap (add season/quality/ecosystem variants)"):
+			self._convert_to_multi_bitmap(material_id, material)
 
 		imgui.pop_id()
 
