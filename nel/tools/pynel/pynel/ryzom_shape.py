@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Read-only reader for Ryzom/NeL .shape files (3D meshes).
+"""Reader/writer for Ryzom/NeL .shape files (3D meshes).
 
 Format reverse-engineered from nel/src/3d/shape.cpp (CShapeStream, the
 "SHAP" magic and the polymorphic-pointer dispatch), plus the serial()
@@ -29,18 +29,27 @@ CParticleSystemShape (particle_system_shape.cpp). Shared building blocks
 were verified against material.cpp, vertex_buffer.cpp, index_buffer.cpp,
 matrix.cpp, track.h and texture_file.cpp.
 
-Unlike .ig, this reader is READ-ONLY: .shape geometry (in particular
-CMeshMRM's progressive multi-resolution deltas) has no practical use case
-for round-trip editing, so no writer is provided.
+Reading (`parse_shape`/`load_shape`) supports every shape type above,
+including CTextureFile/CTextureMultiFile/CTextureCube, the
+CMeshVPWindTree/CMeshVPPerPixelLight vertex programs, and the optional
+CLodCharacterTexture field.
+
+Writing (`dumps`/`save_shape`) only covers CMesh, CMeshMRM,
+CMeshMRMSkinned and CMeshMultiLod (see `dumps`'s docstring for exactly
+what's editable vs. copied back byte-for-byte for each) -- CSkeletonShape,
+CFlareShape, CWaterShape, CWaveMakerShape, CSegRemanenceShape and
+CParticleSystemShape are read-only, no writer is provided for those.
+
+Note this reader is not byte-exact on one point: CTextureFile/
+CTextureMultiFile file names are lower-cased on read (texture names aren't
+case-sensitive, and real data mixes casing), so parsing a shape and
+immediately re-dumping it without any other edit can still change those
+names' case in the output.
 
 Known limitations (all fail with a clear ShapeParseError rather than
 silently producing wrong data):
-  - Only NULL and CTextureFile textures are supported; other ITexture
-    subclasses (CTextureBump, CTextureMultiFile, procedural textures...)
-    are not decodable by this reader.
-  - Mesh vertex programs (CMeshVPWindTree, CMeshVPPerPixelLight) are not
-    supported; meshes using them will raise.
-  - CLodCharacterTexture (an optional, rarely-used field) is not supported.
+  - Other, less common ITexture subclasses (CTextureBump, procedural
+    textures...) beyond the three listed above are not decodable.
   - CWaterShape/CFlareShape almost always reference unsupported texture
     classes in real game data, so full parsing of those is mostly
     theoretical; the type will still be identified before the error.
@@ -207,6 +216,12 @@ class _Reader:
 		n = self.cont_len()
 		if n:
 			self._take(n * 8)
+
+	def pair_vector(self) -> List[Tuple[int, int]]:
+		"""Like skip_pair_vector(), but actually decoded: serialCont() of a
+		vector<CMRMWedgeGeom> (Start, End -- both uint32, no per-element version)."""
+		n = self.cont_len()
+		return [(self.u32(), self.u32()) for _ in range(n)]
 
 	def string_vector(self) -> List[str]:
 		n = self.cont_len()
@@ -490,7 +505,10 @@ def _parse_itexture_base(f: _Reader) -> None:
 def _parse_texture_file(f: _Reader) -> Texture:
 	ver = f.version()
 	_parse_itexture_base(f)
-	file_name = f.string()
+	# Texture names aren't case-sensitive; normalized to lowercase here so
+	# every consumer sees a consistent casing regardless of what's on disk
+	# (real data is a mix, e.g. "ZO-toit2.tga" vs "ZO_flag_AS.TGA").
+	file_name = f.string().lower()
 	allow_degradation = f.boolean() if ver >= 1 else None
 	return Texture(class_name="CTextureFile", file_name=file_name, allow_degradation=allow_degradation)
 
@@ -502,7 +520,7 @@ def _parse_texture_multi_file(f: _Reader) -> Texture:
 	f.version()
 	_parse_itexture_base(f)
 	n = f.cont_len()
-	file_names = [f.string() for _ in range(n)]
+	file_names = [f.string().lower() for _ in range(n)]  # see _parse_texture_file's lower() note
 	curr_selected = f.u32()
 	selected_name = file_names[curr_selected] if 0 <= curr_selected < len(file_names) else None
 	return Texture(
@@ -543,14 +561,16 @@ def _write_itexture_base(f: _Writer) -> None:
 def _write_texture_file(f: _Writer, tex: Texture) -> None:
 	f.version(1)
 	_write_itexture_base(f)
-	f.string(tex.file_name or "")
+	# See _parse_texture_file's note: lower-cased on write too, in case a
+	# Texture was built by hand rather than round-tripped through the reader.
+	f.string((tex.file_name or "").lower())
 	f.boolean(bool(tex.allow_degradation))
 
 
 def _write_texture_multi_file(f: _Writer, tex: Texture) -> None:
 	f.version(0)
 	_write_itexture_base(f)
-	file_names = tex.file_names or []
+	file_names = [name.lower() for name in (tex.file_names or [])]
 	f.string_vector(file_names)
 	selected = tex.selected_index
 	if selected is None:
@@ -558,7 +578,7 @@ def _write_texture_multi_file(f: _Writer, tex: Texture) -> None:
 		# hand); a captured index -- even one out of range in the original
 		# file -- is preserved verbatim rather than "fixed".
 		try:
-			selected = file_names.index(tex.file_name) if tex.file_name else 0
+			selected = file_names.index(tex.file_name.lower()) if tex.file_name else 0
 		except ValueError:
 			selected = 0
 	f.u32(selected)
@@ -1663,6 +1683,14 @@ class MrmLevelDetail:
 class MrmLod:
 	n_wedges: int
 	rdr_passes: List[RdrPass]
+	# (start_wedge, end_wedge) per reserved geomorph placeholder wedge: wedge
+	# index i < len(geomorphs) is a CWedge() default (position/normal/uv all
+	# zero) the engine only fills at render time by blending toward
+	# geomorphs[i] -- see CMeshMRMGeom::applyGeomorph in mesh_mrm.cpp and
+	# CMRMBuilder's wedge decal step in mrm_builder.cpp. For a static
+	# (non-transitioning) render of this lod, the correct resolved value is
+	# always the "end" wedge (see shape_geometry.py's geomorph resolution).
+	geomorphs: List[Tuple[int, int]] = field(default_factory=list)
 
 	@property
 	def num_triangles(self) -> int:
@@ -1759,7 +1787,7 @@ def _parse_mesh_mrm_geom(f: _Reader) -> MeshMRMGeom:
 		n_wedges_lod = f.u32()
 		m = f.cont_len()
 		rdr_passes = [_parse_rdr_pass(f) for _ in range(m)]
-		f.skip_pair_vector()  # Geomorphs: vector<CMRMWedgeGeom(Start,End)>
+		geomorphs = f.pair_vector()  # Geomorphs: vector<CMRMWedgeGeom(Start,End)>
 		f.cont_uint_vector(4, "I")  # MatrixInfluences
 		for _ in range(4):  # InfluencedVertices[4]
 			f.cont_uint_vector(4, "I")
@@ -1770,7 +1798,7 @@ def _parse_mesh_mrm_geom(f: _Reader) -> MeshMRMGeom:
 		f.version()  # serialLodVertexData version
 		_parse_vertex_buffer_subset(f, flags, types, vertex_color_format, vbuffer, start_wedge, end_wedge)
 
-		lods.append(MrmLod(n_wedges=n_wedges_lod, rdr_passes=rdr_passes))
+		lods.append(MrmLod(n_wedges=n_wedges_lod, rdr_passes=rdr_passes, geomorphs=geomorphs))
 
 	return MeshMRMGeom(
 		bones_name=bones_name,
@@ -1871,6 +1899,7 @@ def _parse_packed_vertex(f: _Reader) -> PackedVertex:
 class MeshMRMSkinnedLod:
 	n_wedges: int
 	rdr_passes: List[RdrPass]
+	geomorphs: List[Tuple[int, int]] = field(default_factory=list)  # see MrmLod.geomorphs
 
 	@property
 	def num_triangles(self) -> int:
@@ -1889,11 +1918,11 @@ def _parse_mesh_mrm_skinned_lod(f: _Reader) -> MeshMRMSkinnedLod:
 	n_wedges = f.u32()
 	m = f.cont_len()
 	rdr_passes = [_parse_mrm_skinned_rdr_pass(f) for _ in range(m)]
-	f.skip_pair_vector()  # Geomorphs
+	geomorphs = f.pair_vector()  # Geomorphs
 	f.cont_uint_vector(4, "I")  # MatrixInfluences
 	for _ in range(4):  # InfluencedVertices[4]
 		f.cont_uint_vector(4, "I")
-	return MeshMRMSkinnedLod(n_wedges=n_wedges, rdr_passes=rdr_passes)
+	return MeshMRMSkinnedLod(n_wedges=n_wedges, rdr_passes=rdr_passes, geomorphs=geomorphs)
 
 
 @dataclass
