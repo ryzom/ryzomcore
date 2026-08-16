@@ -321,15 +321,22 @@ créer un objet complet différent pour chaque variante.
   Quality`(6), `Obiwan Quality`(7) — jusqu'à 8 apparences différentes pour
   un seul modèle 3D selon la qualité de fabrication de l'objet.
 - Pour l'apparence générale d'une créature selon la région où elle vit, le
-  type `_creature_texture.typ` propose : `none`(0), `Lacustre`(1),
-  `Desert`(2), `Jungle`(3), `Primr`(4, Racines Primordiales), `goo`(5, la
-  Goo) — une créature peut ainsi avoir un pelage/une texture différente
-  selon l'écosystème où elle apparaît, sans dupliquer son modèle 3D.
+  type `_creature_texture.typ` propose : `none`(0, étiqueté ainsi dans la
+  fiche mais correspond en pratique à la Forêt), `Lacustre`(1), `Desert`(2),
+  `Jungle`(3), `Primr`(4, Racines Primordiales), `goo`(5, la Goo) — une
+  créature peut ainsi avoir un pelage/une texture différente selon
+  l'écosystème où elle apparaît, sans dupliquer son modèle 3D.
+- Pour une apparence qui change avec la saison du jeu, le moteur définit
+  `Spring`(0), `Summer`(1), `Autumn`(2), `Winter`(3)
+  (`EGSPD::CSeason` dans `ryzom/common/src/game_share/season.h`) — ce sont
+  ces mêmes 4 premiers indices que choisit automatiquement la valeur
+  spéciale `-1` ("Season") du champ `Texture` mentionné ci-dessus, en
+  fonction de la saison en cours sur le serveur.
 
 Le nombre exact d'apparences disponibles (jusqu'à 8) et ce que chaque
-valeur représente dépend donc entièrement de la fiche Georges qui utilise
-ce mécanisme — le moteur, lui, ne voit qu'un simple numéro d'image à
-choisir.
+valeur représente dépend donc entièrement de la fiche Georges (ou, pour la
+saison, du moteur lui-même) qui utilise ce mécanisme — le format du
+`.shape`, lui, ne voit qu'un simple numéro d'image à choisir.
 
 *Note technique : dans l'éditeur 3dsMax, ce réglage remplace le type
 d'image "Bitmap" habituel par un type spécial "Nel Multi Bitmap" sur

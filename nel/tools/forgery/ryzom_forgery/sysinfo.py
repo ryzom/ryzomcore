@@ -12,9 +12,11 @@ class SysInfoBar:
 
 	def __init__(self):
 		self.status = ""
+		self.status_color = None  # (r, g, b, a) or None for the default text color
 
-	def set_status(self, text: str):
+	def set_status(self, text: str, color=None):
 		self.status = text
+		self.status_color = color
 
 	def draw(self):
 		framerate = imgui.get_io().framerate
@@ -23,4 +25,7 @@ class SysInfoBar:
 
 		if self.status:
 			imgui.same_line(spacing=20)
-			imgui.text(self.status)
+			if self.status_color is not None:
+				imgui.text_colored(self.status_color, self.status)
+			else:
+				imgui.text(self.status)
