@@ -6,14 +6,15 @@
 render yet.
 """
 
+from math import ceil
 from pathlib import Path
 
 from panda3d.core import (
 	AlphaTestAttrib, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat,
-	GeomVertexWriter, Material as PandaMaterial, Point3, Quat,
+	GeomVertexWriter, LineSegs, Material as PandaMaterial, Point3, Quat, TransparencyAttrib,
 )
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
 
 from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
@@ -94,14 +95,72 @@ _MULTI_BITMAP_SLOT_LABELS = [
 ]
 
 
-def _icon_button(icon, tooltip):
+def _icon_button(icon, tooltip, active=False):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
-	self-explanatory."""
+	self-explanatory. `active` highlights it (toggle-button style) when the
+	feature it controls is currently on."""
+	if active:
+		imgui.push_style_color(imgui.Col_.button.value, (0.26, 0.59, 0.98, 0.8))
 	clicked = imgui.button(icon)
+	if active:
+		imgui.pop_style_color()
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(tooltip)
 	return clicked
+
+
+# Viewport helper toggles (floor grid, world/pivot axes) drawn bottom-left of
+# the 3D viewport -- see ObjectEditorApp._draw_viewport_toggles(). Grid squares
+# are 1x1m, matching how shapes are actually scaled in-game. Both the grid's
+# footprint and the axes' length are re-derived from the loaded shape's own
+# bounding box each time geometry is (re)built (see _rebuild_viewport_helpers()),
+# so they scale to cover whatever object is on screen instead of a fixed size
+# that's too small for a building and absurdly oversized for a trinket. The
+# constants below are only the fallback used before any shape is loaded.
+_GRID_SQUARES = 10
+_GRID_STEP = 1.0
+_GRID_COLOR = (0.5, 0.5, 0.5, 1.0)
+_GRID_MARGIN_SQUARES = 2  # extra squares of margin around the bbox footprint
+_MIN_GRID_SQUARES = 4
+
+# World axes use the conventional red/green/blue X/Y/Z scheme (matches
+# navcube.py's own gizmo); pivot axes deliberately use a different palette so
+# both can be shown together without one being mistaken for the other.
+_WORLD_AXIS_COLORS = {"x": (0.95, 0.25, 0.25, 1.0), "y": (0.3, 0.85, 0.3, 1.0), "z": (0.3, 0.55, 1.0, 1.0)}
+_PIVOT_AXIS_COLORS = {"x": (0.95, 0.2, 0.85, 1.0), "y": (0.95, 0.85, 0.15, 1.0), "z": (0.2, 0.9, 0.9, 1.0)}
+_AXIS_VECTORS = {"x": (1.0, 0.0, 0.0), "y": (0.0, 1.0, 0.0), "z": (0.0, 0.0, 1.0)}
+_AXIS_LENGTH = 3.0  # fallback, before any shape is loaded
+_AXIS_MARGIN_FACTOR = 1.2  # how far axes extend past the bbox radius
+
+_VIEWPORT_TOGGLE_MARGIN_PX = 10
+_OBJECT_TRANSPARENCY_ALPHA = 0.5
+
+
+def _build_grid_geom(center_x, center_y, z, squares):
+	"""LineSegs floor grid on the world XY plane at height `z`, centered on
+	(center_x, center_y): `squares` x `squares` squares, _GRID_STEP meters each."""
+	half = squares * _GRID_STEP / 2.0
+	lines = LineSegs("floor-grid")
+	lines.set_color(*_GRID_COLOR)
+	for i in range(squares + 1):
+		coord = -half + i * _GRID_STEP
+		lines.move_to(center_x + coord, center_y - half, z)
+		lines.draw_to(center_x + coord, center_y + half, z)
+		lines.move_to(center_x - half, center_y + coord, z)
+		lines.draw_to(center_x + half, center_y + coord, z)
+	return lines.create()
+
+
+def _build_axes_geom(colors, length):
+	"""LineSegs X/Y/Z axes through the origin, each spanning +/-length along
+	its axis, colored per `colors` (one of _WORLD_AXIS_COLORS/_PIVOT_AXIS_COLORS)."""
+	lines = LineSegs("axes")
+	for axis, vector in _AXIS_VECTORS.items():
+		lines.set_color(*colors[axis])
+		lines.move_to(-vector[0] * length, -vector[1] * length, -vector[2] * length)
+		lines.draw_to(vector[0] * length, vector[1] * length, vector[2] * length)
+	return lines.create()
 
 
 def _multi_bitmap_slot_label(index):
@@ -179,6 +238,26 @@ class ObjectEditorApp(ForgeryApp):
 		# (and whatever rotation/position the user set up on it) shouldn't be.
 		self._object_pivot = self.render.attach_new_node("object-pivot")
 		self.model_root = self._object_pivot.attach_new_node("shape-root")
+
+		# Viewport helper toggles (see _draw_viewport_toggles()) -- built once
+		# and just shown/hidden, except _object_transparent which has to be
+		# re-applied after every _rebuild_geometry() since model_root itself
+		# gets torn down and recreated then.
+		self._grid_visible = False
+		self._world_axes_visible = False
+		self._pivot_axes_visible = False
+		self._object_transparent = False
+		self._viewport_toggle_size = (10.0, 10.0)
+
+		# Real geometry (sized to the loaded shape's bbox) is built by
+		# _rebuild_viewport_helpers(), called below and again from
+		# _rebuild_geometry() -- these placeholders just give it something to
+		# remove_node() the first time.
+		self._grid_np = self.render.attach_new_node("floor-grid-placeholder")
+		self._world_axes_np = self.render.attach_new_node("world-axes-placeholder")
+		self._pivot_axes_np = self._object_pivot.attach_new_node("pivot-axes-placeholder")
+		self._rebuild_viewport_helpers(None)
+
 		self.shape_file = None
 		self.shape_error = None
 		self._reference_root = self.render.attach_new_node("reference-root")
@@ -415,6 +494,103 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._rebuild_geometry()
 
+	def _rebuild_viewport_helpers(self, bbox):
+		"""(Re)builds the floor grid + world/pivot axes geometry, sized and
+		centered to `bbox` (the just-loaded shape's bounding box, or None
+		before any shape is loaded / for a shape with no renderable geometry --
+		falls back to a fixed default size then). Called from __init__ and
+		from _rebuild_geometry() every time the shape (and so its bbox)
+		changes, so these always scale to cover whatever's on screen instead
+		of a fixed size that's tiny for a building and huge for a trinket."""
+		if bbox is not None:
+			radius = max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1)
+			grid_squares = max(
+				_MIN_GRID_SQUARES,
+				ceil(max(bbox.half_size.x, bbox.half_size.y) * 2 / _GRID_STEP) + _GRID_MARGIN_SQUARES)
+			grid_center_x, grid_center_y = bbox.center.x, bbox.center.y
+			# Fixed at world Z=0 (not the bbox's own bottom) so it reads as an
+			# actual ground reference -- whether the object floats above it or
+			# sinks below it is exactly the thing this grid is meant to show.
+			grid_z = 0.0
+			axis_length = radius * _AXIS_MARGIN_FACTOR
+		else:
+			grid_squares = _GRID_SQUARES
+			grid_center_x = grid_center_y = grid_z = 0.0
+			axis_length = _AXIS_LENGTH
+
+		self._grid_np.remove_node()
+		self._grid_np = self.render.attach_new_node(
+			_build_grid_geom(grid_center_x, grid_center_y, grid_z, grid_squares))
+		self._grid_np.set_light_off()
+		if not self._grid_visible:
+			self._grid_np.hide()
+
+		self._world_axes_np.remove_node()
+		self._world_axes_np = self.render.attach_new_node(_build_axes_geom(_WORLD_AXIS_COLORS, axis_length))
+		self._world_axes_np.set_light_off()
+		if not self._world_axes_visible:
+			self._world_axes_np.hide()
+
+		self._pivot_axes_np.remove_node()
+		self._pivot_axes_np = self._object_pivot.attach_new_node(_build_axes_geom(_PIVOT_AXIS_COLORS, axis_length))
+		self._pivot_axes_np.set_light_off()
+		if not self._pivot_axes_visible:
+			self._pivot_axes_np.hide()
+
+	def _toggle_grid(self):
+		self._grid_visible = not self._grid_visible
+		(self._grid_np.show if self._grid_visible else self._grid_np.hide)()
+
+	def _toggle_world_axes(self):
+		self._world_axes_visible = not self._world_axes_visible
+		(self._world_axes_np.show if self._world_axes_visible else self._world_axes_np.hide)()
+
+	def _toggle_pivot_axes(self):
+		self._pivot_axes_visible = not self._pivot_axes_visible
+		(self._pivot_axes_np.show if self._pivot_axes_visible else self._pivot_axes_np.hide)()
+
+	def _apply_object_transparency(self):
+		if self._object_transparent:
+			self.model_root.set_transparency(TransparencyAttrib.M_alpha)
+			self.model_root.set_color_scale(1, 1, 1, _OBJECT_TRANSPARENCY_ALPHA)
+		else:
+			self.model_root.clear_transparency()
+			self.model_root.clear_color_scale()
+
+	def _toggle_object_transparency(self):
+		self._object_transparent = not self._object_transparent
+		self._apply_object_transparency()
+
+	def _draw_viewport_toggles(self):
+		"""Small floating icon-button bar bottom-left of the 3D viewport (same
+		positioning pattern as navcube.py's draw_controls()): floor grid,
+		world axes, object-pivot axes, 50% object transparency."""
+		display_size = imgui.get_io().display_size
+		win_h = display_size.y
+		if win_h <= 0:
+			return
+
+		width, height = self._viewport_toggle_size
+		x = self.explorer_width + _VIEWPORT_TOGGLE_MARGIN_PX
+		y = win_h - self.sysinfo_height - _VIEWPORT_TOGGLE_MARGIN_PX - height
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("##viewport-toggles", flags=flags):
+			if _icon_button(fa_icons.ICON_FA_TABLE, "Floor grid (1m squares, sized to the object)", self._grid_visible):
+				self._toggle_grid()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_COMPASS, "World X/Y/Z axes", self._world_axes_visible):
+				self._toggle_world_axes()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_CROSSHAIRS, "Object pivot X/Y/Z axes", self._pivot_axes_visible):
+				self._toggle_pivot_axes()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_ADJUST, "50% object transparency", self._object_transparent):
+				self._toggle_object_transparency()
+			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
 	def reset_object_rotation(self):
 		"""Restores the object pivot to its baseline rotation (the shape's own
 		default_rot_quat on load, or whatever rotation was in effect at the
@@ -429,6 +605,7 @@ class ObjectEditorApp(ForgeryApp):
 		_reset_shape_state(), so material edits survive it)."""
 		self.model_root.remove_node()
 		self.model_root = self._object_pivot.attach_new_node("shape-root")
+		self._apply_object_transparency()
 		self.shape_error = None
 		self._material_node_paths = {}
 
@@ -455,6 +632,7 @@ class ObjectEditorApp(ForgeryApp):
 			center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
 			radius = max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1)
 			self.orbit_camera.frame(center, radius * 5.65)
+		self._rebuild_viewport_helpers(bbox)
 
 		self._rebuild_reference_shapes()
 
@@ -1163,6 +1341,7 @@ class ObjectEditorApp(ForgeryApp):
 
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
+		self._draw_viewport_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()
 		self._draw_replace_match_popup()

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-16 — ✨ Add viewport helper toggles to Forgery object_editor
+
+Added a small icon-button bar bottom-left of the 3D viewport (`_draw_viewport_toggles()`
+in `apps/object_editor.py`), four toggles off by default:
+
+- Floor grid (`ICON_FA_TABLE`): 1x1m squares on the world XY plane, fixed at world Z=0 so
+  it reads as an actual ground reference (whether the object floats above or sinks below
+  it is exactly what this is meant to show -- deliberately NOT anchored to the object's own
+  bbox bottom, per explicit feedback after the first version did that).
+- World axes (`ICON_FA_COMPASS`) and object-pivot axes (`ICON_FA_CROSSHAIRS`, attached to
+  `_object_pivot` so they rotate/move with the object): colored X/Y/Z lines through the
+  origin, two different color palettes (red/green/blue vs magenta/yellow/cyan) so both can
+  be shown together without confusing one for the other.
+- 50% object transparency (`ICON_FA_ADJUST`): `TransparencyAttrib.M_alpha` +
+  `set_color_scale(1,1,1,0.5)` on `model_root`, re-applied after every `_rebuild_geometry()`
+  call since `model_root` itself gets torn down and recreated then.
+
+Both the grid's footprint (squares count, X/Y center) and the axes' length are re-derived
+from the loaded shape's own bounding box each time geometry is rebuilt
+(`_rebuild_viewport_helpers()`), so they scale to cover whatever object is on screen instead
+of a fixed size that's tiny for a building and huge for a trinket.
+
 ## 2026-08-16 — ✨ Add Ctrl+drag object manipulation to Forgery
 
 Comparing a loaded shape against reference objects previously required orbiting the whole
