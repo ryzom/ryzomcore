@@ -165,6 +165,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
+		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
 		self._save_overwrite_confirmed = False  # session-scoped: asked once, no more Save confirmations after that
 		self._confirm_overwrite_open = False
 		self._save_dialog = None  # in-flight portable_file_dialogs.save_file, for Save As
@@ -218,6 +219,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
 		self._shape_source_path = item.path if item.bnp_path is None else None
+		self._shape_source_name = item.name
 		self._save_status = ""
 
 		try:
@@ -558,7 +560,17 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.text_disabled("Save unavailable (loaded from inside a .bnp archive)")
 
 		if imgui.button("Save As..."):
-			default_path = str(self._shape_source_path) if self._shape_source_path is not None else ""
+			# Prefer the shape's own source path (e.g. saving an edited .shape
+			# back near where it came from); fall back to wherever the
+			# Explorer is currently browsing, plus the original file name if
+			# known (e.g. a shape loaded from inside a .bnp, which has no
+			# real on-disk path of its own to reuse) -- this used to open
+			# with no default folder or name at all in that case.
+			if self._shape_source_path is not None:
+				default_path = str(self._shape_source_path)
+			else:
+				name = self._shape_source_name or "untitled.shape"
+				default_path = str(Path(self.explorer.root) / name)
 			self._save_dialog = pfd.save_file("Save shape as", default_path, ["Ryzom shape", "*.shape"])
 
 		self._draw_save_confirmation_popup()

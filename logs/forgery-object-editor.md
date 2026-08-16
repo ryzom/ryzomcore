@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-16 — 🐛 Default Save As's folder/name to the Explorer's current location
+
+`_draw_save_buttons()`'s "Save As..." defaulted to `self._shape_source_path` when set, but
+fell back to an empty string otherwise -- notably for a shape loaded from inside a `.bnp`
+(which has no real on-disk path of its own), opening the native save dialog with no folder
+*or* file name pre-filled at all. Added `self._shape_source_name` (the original file name,
+set in `_load_shape()` alongside `_shape_source_path` but kept even when that one is
+`None`) and now fall back to `self.explorer.root / self._shape_source_name` -- the
+Explorer's current folder, with the shape's own name pre-filled.
+
 ## 2026-08-16 — ✨ Rework the Forgery Explorer's navigation and add an import entry point
 
 Reworked `ryzom_forgery/explorer.py`'s browsing UX end to end, driven by live feedback
