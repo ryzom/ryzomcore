@@ -1,5 +1,73 @@
 # Changelog
 
+## 2026-08-16 — ✨ Add .obj/.dae -> .shape import to Forgery
+
+Added `ryzom_forgery/shape_import.py` and `apps/shape_importer.py` (CLI:
+`shape_importer.py INPUT.{obj,dae} OUTPUT.shape`), the reverse of the existing
+`shape_exporter.py`/`shape_export.py`. Only `CMesh` can be produced this way -- unlike
+`CMeshMRM`, pynel's `dumps()` writes `CMesh` geometry field-by-field rather than copying
+bytes from an already-parsed file, so it's the only shape type buildable from scratch.
+That means no LOD levels on an imported shape; investigated whether an existing tool
+could add them afterward (`CMRMBuilder`, `nel/include/nel/3d/mrm_builder.h`): it operates
+on the engine-native `CMesh::CMeshBuild` struct, not anything 3dsMax-specific, so it's
+architecturally reusable, but no standalone CLI wrapping it exists today (the only
+current caller is the 3dsMax-plugin-only `pipeline_max_export_shape`) -- writing one is a
+separate, C++-only chantier (`CMRMBuilder` has no Python binding), noted for later.
+
+`.obj`/`.mtl` are hand-parsed (same reasoning as the hand-written `.obj` exporter: simple
+dependency-free text format) -- vertices/normals/texcoords, faces grouped by `usemtl`
+(fan-triangulated if >3 verts per face, negative/relative indices resolved), materials
+read from the referenced `mtllib` (Kd/Ka/Ks/Ns/d/Tr/map_Kd). `.dae` goes through
+`pycollada` (already a dependency for `.dae` export) -- iterates
+`doc.scene.objects("geometry")`'s bound `BoundTriangleSet`s (skipping non-triangle
+primitives), reading each `Triangle`'s already-dereferenced vertex/normal/texcoord
+values and its bound `Material.effect` (diffuse/ambient/specular/shininess/transparency,
+falling back to a neutral default when a property is a texture `Map` rather than a plain
+color). Both formats share an extracted `_assemble_mesh()` (dedup vertices into one
+shared buffer, build the single matrix block/materials/bbox/MeshBase/MeshGeom) and a
+generalized `_build_material()`.
+
+Material defaults for properties the source format doesn't specify are grounded in
+`nel/include/nel/3d/material.h`'s own documented default-construction values (line 273):
+shader=Normal(0), src/dst blend=srcalpha(2)/invsrcalpha(3), z_function=lessequal(5),
+flags=ZWRITE|LIGHTING|DOUBLE_SIDED.
+
+Validated via the bridge with a full round-trip per format: export a real `.shape`
+(`zo_paneau_armure.shape`) to `.obj`/`.dae`, import it back with the new importer, save
+as a new `.shape`, re-parse. Both formats landed on identical numbers (5 materials, 66
+verts, 38 tris, all 5 texture names correctly recovered), matching the original. Found
+and fixed two bugs in the process: a generator-exhaustion bug in the bbox min/max
+computation (`xs`/`ys`/`zs` consumed twice), and `.dae`'s `Triangle.material` being a
+`collada.material.Material` rather than directly an `Effect` (needed `.effect`). User
+confirmed both imported shapes render correctly and are editable in object_editor.py's
+Materials tab like any other shape.
+
+## 2026-08-16 — 🐛 Fix CMeshMRM rendering the wrong (coarsest) LOD, and resolve geomorph placeholder wedges
+
+Found while investigating Forgery's object_editor showing too few materials/an oddly
+shaped flag on `zo_paneau_armure.shape`: `ryzom_forgery/shape_geometry.py`'s
+`_passes_from_mrm_geom` read `geom.lods[0]`, assuming it was the finest (most detailed)
+LOD. Verified against `nel/src/3d/mesh_mrm.cpp` (`CMeshMRMGeom::chooseLod`'s alphaMRM
+math, and the "just first lod is loaded" progressive-streaming comment) and pynel's own
+`MeshMRMGeom.num_triangles` property (already using `lods[-1]`) that `lods[0]` is
+actually the *coarsest* LOD. Fixed to `lods[-1]`. Confirmed empirically: 18 of 41 real
+multi-LOD `.shape` files sampled have a different material set between `lods[0]` and
+`lods[-1]`, always fewer materials/triangles in `lods[0]` (e.g. `zo_paneau_armure.shape`:
+3 materials/6 tris vs. 5 materials/38 tris).
+
+Switching to the finer LOD surfaced a second, deeper bug: some of its vertices rendered
+collapsed at the origin. Root-caused to `CMeshMRM`'s geomorph mechanism (see
+`mrm_builder.cpp`'s wedge-decal step and `CMeshMRMGeom::applyGeomorph` in
+`mesh_mrm.cpp`): the progressive mesh reserves a block of empty placeholder wedges
+(position/normal/uv all zero, a default `CWedge()`) shared for smooth blending between
+adjacent LODs, which pynel was silently discarding instead of parsing (fixed on the
+`ryzom/pynel` branch: new `MrmLod.geomorphs`). `shape_geometry.py` gained
+`_resolve_lod_geomorphs()`, which substitutes each placeholder wedge's channels with its
+geomorph "end" wedge (the correct static resolution, matching `applyGeomorph`'s blend at
+alphaLod=0) before yielding render passes for a LOD. Verified via the bridge: the
+previously-collapsed flag vertices on `zo_paneau_armure.shape` now resolve to real,
+coherent positions matching the rest of the geometry.
+
 ## 2026-08-16 — ✨ Add a Multi Bitmap material editor to Forgery's object_editor
 
 Added editing of a `.shape`'s materials to `object_editor.py`, focused on the "Multi
