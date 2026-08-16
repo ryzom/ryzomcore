@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-08-16 — ✨ Wire up .obj/.dae import as a new shape or a geometry replace
+
+Finished the import flow started in "Rework the Forgery Explorer's navigation and add an
+import entry point": `ImportDialog`'s two active modes now actually do something instead
+of printing a TODO placeholder.
+
+Split `_load_shape()`'s body into `_reset_shape_state()` (editing state that should be
+cleared -- Multi Bitmap expand state, material color overrides, save path/name...) and
+`_display_shape()`/`_rebuild_geometry()` (deriving 3D render passes + camera framing from
+whatever `self.shape_file` currently is), so both a `.shape` opened from the Explorer and a
+freshly imported mesh go through the same rendering path, and a geometry *replace* can
+reuse `_rebuild_geometry()` alone without wiping the material edits it's meant to survive.
+
+"Import as new shape" (`_on_import_new_shape()`) wraps the parsed `Mesh` into a
+`ShapeFile(type_name="Mesh", ...)` and displays it fresh, pre-filling
+`_shape_source_name` from the source file's own name (`<stem>.shape`) so "Save As"
+defaults sensibly for it too (see the entry below).
+
+"Replace in current shape" (`_on_import_replace()`/`_replace_geometry()`) only swaps
+`self.shape_file.value.geom` for the imported mesh's -- `self.shape_file.value.materials`
+(and any blend/alpha-test/2-sided/Multi Bitmap edits already made to them) is left
+completely untouched, which is the entire point of this mode over a plain re-import.
+Restricted to `type_name == "Mesh"`: `MeshMRM`/`MeshMRMSkinned`/`MeshMultiLod` shapes parse
+their geometry into real Python structures, but `dumps()`
+(`pynel/ryzom_shape.py:2538`) writes those three types' geometry back out as `_raw_geom` --
+the *original* captured bytes, verbatim, never reconstructed from the parsed fields -- so
+mutating their in-memory geometry would render correctly in the viewer while silently
+saving the old, untouched geometry to disk. Only `CMesh` has a real writer
+(`_write_mesh()`) that serializes from the live dataclass fields.
+
+When the imported mesh's material count doesn't match the current shape's, a "Match
+materials" modal lists each imported material (by texture name) with a combo to map it
+onto an existing material index or "Add as new material"; confirming remaps the imported
+geometry's per-render-pass `material_id`s through that mapping (appending any "new" picks
+to the current material list) before calling `_replace_geometry()`. Hit and fixed a real
+bug here during testing (`anlor_stick.shape`, mismatched counts): the match popup's
+`imgui.open_popup()` was called synchronously from inside `_on_import_replace()`, itself
+called while still nested inside `ImportDialog`'s own "Import mesh" popup (not yet
+`end_popup()`-ed for the rest of that frame) -- opening a popup from inside another
+not-yet-closed one silently failed to register at all ("rien du tout": no popup, no
+error, no visible change). Fixed by not calling `open_popup()` there at all -- just
+recording the pending mesh/mapping -- and having `_draw_replace_match_popup()` open it
+itself on the next frame, from `draw_panel()`'s own top-level call, outside any nested
+popup context.
+
 ## 2026-08-16 — 🐛 Default Save As's folder/name to the Explorer's current location
 
 `_draw_save_buttons()`'s "Save As..." defaulted to `self._shape_source_path` when set, but

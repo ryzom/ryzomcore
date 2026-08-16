@@ -16,8 +16,10 @@ IMPORTERS = {"obj": import_obj, "dae": import_dae}
 
 
 class ImportDialog:
-	"""`on_new_shape(mesh)` and `on_replace(mesh)` are called with the parsed
-	`pynel.ryzom_shape.Mesh` once the user picks a mode in the popup."""
+	"""`on_new_shape(mesh, source_path)` and `on_replace(mesh)` are called
+	with the parsed `pynel.ryzom_shape.Mesh` once the user picks a mode in
+	the popup -- `source_path` is the imported .obj/.dae's own path, handed
+	back so the new shape can default its name/save location to it."""
 
 	def __init__(self, on_new_shape, on_replace):
 		self._on_new_shape = on_new_shape
@@ -25,6 +27,7 @@ class ImportDialog:
 
 		self._file_dialog = None
 		self._pending_mesh = None  # parsed Mesh, waiting on the mode popup
+		self._pending_path = None  # the source file it was parsed from
 		self._has_current_shape = False
 		self._status = ""
 
@@ -60,6 +63,7 @@ class ImportDialog:
 			self._status = f"Import failed: {exc}"
 			return
 
+		self._pending_path = path
 		self._status = ""
 		imgui.open_popup(_MODE_POPUP_ID)
 
@@ -77,12 +81,14 @@ class ImportDialog:
 
 		if imgui.button("Import as new shape"):
 			mesh, self._pending_mesh = self._pending_mesh, None
+			path, self._pending_path = self._pending_path, None
 			imgui.close_current_popup()
-			self._on_new_shape(mesh)
+			self._on_new_shape(mesh, path)
 
 		imgui.begin_disabled(not self._has_current_shape)
 		if imgui.button("Replace in current shape"):
 			mesh, self._pending_mesh = self._pending_mesh, None
+			self._pending_path = None
 			imgui.close_current_popup()
 			self._on_replace(mesh)
 		imgui.end_disabled()
@@ -94,6 +100,7 @@ class ImportDialog:
 		imgui.separator()
 		if imgui.button("Cancel"):
 			self._pending_mesh = None
+			self._pending_path = None
 			imgui.close_current_popup()
 
 		imgui.end_popup()

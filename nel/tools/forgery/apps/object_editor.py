@@ -26,7 +26,7 @@ from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox
 
-from pynel.ryzom_shape import ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
+from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
 
 DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 
@@ -35,6 +35,7 @@ DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
+_REPLACE_MATCH_POPUP_ID = "Match materials"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _COLOR_POPUP_ID = "material-color-picker"
@@ -171,6 +172,10 @@ class ObjectEditorApp(ForgeryApp):
 		self._save_dialog = None  # in-flight portable_file_dialogs.save_file, for Save As
 		self._save_status = ""
 
+		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
+		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
+		self._replace_match_popup_opened = False  # whether open_popup() has been called yet for the current _replace_pending_mesh
+
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
 		self.nav_cube = NavigationCube(self, self.orbit_camera)
 		self.export_dialog = ExportDialog()
@@ -200,17 +205,150 @@ class ObjectEditorApp(ForgeryApp):
 		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae)..."):
 			self.import_dialog.open(self.shape_file is not None)
 
-	def _on_import_new_shape(self, mesh):
-		# TODO: wire up for real once the geometry-loading path is split out
-		# of _load_shape() (next plan step) -- for now just confirms the
-		# dialog/popup flow reaches here with a parsed Mesh.
-		print(f"[object_editor] import as new shape: {len(mesh.materials)} material(s) (not wired up yet)")
+	def _on_import_new_shape(self, mesh, source_path):
+		# Only CMesh can be built from scratch this way (see
+		# ryzom_forgery/shape_import.py's module docstring) -- matches
+		# shape_importer.py's CLI equivalent.
+		self._reset_shape_state()
+		if source_path is not None:
+			self._shape_source_name = source_path.stem + ".shape"
+		self._display_shape(ShapeFile(type_name="Mesh", value=mesh))
 
 	def _on_import_replace(self, mesh):
-		# TODO: wire up once geometry-replace + material-count matching are implemented.
-		print(f"[object_editor] import replace: {len(mesh.materials)} material(s) (not wired up yet)")
+		if self.shape_file is None:
+			return
+		if self.shape_file.type_name != "Mesh":
+			self._save_status = (
+				f"Can't replace geometry: the current shape is a {self.shape_file.type_name!r}, "
+				f"only a plain Mesh's geometry can be swapped this way.")
+			return
+
+		current_materials = self.shape_file.value.materials
+		if len(mesh.materials) == len(current_materials):
+			# Same convention the .obj/.dae exporter itself used to number
+			# materials in the first place -- indices already line up.
+			self._replace_geometry(mesh, index_map=None)
+		else:
+			# open_popup() isn't called here: this runs while still nested
+			# inside ImportDialog's own "Import mesh" popup (not yet closed
+			# for the rest of this frame), and opening one popup from inside
+			# another that hasn't ended yet silently failed to register.
+			# _draw_replace_match_popup() opens it itself, next frame,
+			# from draw_panel()'s top level instead.
+			self._replace_pending_mesh = mesh
+			self._replace_mapping = [None] * len(mesh.materials)
+
+	def _replace_geometry(self, mesh, index_map):
+		"""Swaps the current Mesh's geometry (vertex buffer, matrix
+		blocks/render passes, bbox...) for `mesh.geom`, leaving
+		self.shape_file.value's materials (and whatever editing was done to
+		them) untouched. `index_map`, if given, remaps each render pass's
+		material_id from `mesh`'s own material indices to the current
+		shape's (used for the mismatched-material-count case, after
+		_draw_replace_match_popup() resolved a mapping)."""
+		if index_map is not None:
+			for matrix_block in mesh.geom.matrix_blocks:
+				for rdr_pass in matrix_block.rdr_passes:
+					rdr_pass.material_id = index_map[rdr_pass.material_id]
+
+		self.shape_file.value.geom = mesh.geom
+		self._rebuild_geometry()
+		self._save_status = "Geometry replaced."
+
+	def _describe_current_material(self, index):
+		material = self.shape_file.value.materials[index]
+		texture = material.textures[0] if material.textures else None
+		name = texture.file_name if texture is not None and texture.file_name else None
+		return f"{index}: {name}" if name else f"{index}: (no texture)"
+
+	def _draw_replace_match_popup(self):
+		"""Mismatched material counts between the imported mesh and the
+		current shape: lets the user match each imported material to an
+		existing one (keeping its edits) or add it as a new material,
+		before _replace_geometry() actually swaps the geometry in."""
+		if self._replace_pending_mesh is None:
+			self._replace_match_popup_opened = False
+			return
+
+		if not self._replace_match_popup_opened:
+			imgui.open_popup(_REPLACE_MATCH_POPUP_ID)
+			self._replace_match_popup_opened = True
+
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_REPLACE_MATCH_POPUP_ID, None, flags)
+		if not opened:
+			return
+
+		mesh = self._replace_pending_mesh
+		current_materials = self.shape_file.value.materials
+		imgui.text(f"The imported mesh has {len(mesh.materials)} material(s), "
+		           f"the current shape has {len(current_materials)} -- match each one:")
+		imgui.separator()
+
+		for i, material in enumerate(mesh.materials):
+			texture = material.textures[0] if material.textures else None
+			label = texture.file_name if texture is not None and texture.file_name else f"material {i}"
+			imgui.text(label)
+			imgui.same_line()
+			imgui.push_id(f"replace-match-{i}")
+
+			target = self._replace_mapping[i]
+			preview = "Add as new material" if target is None else self._describe_current_material(target)
+			imgui.set_next_item_width(220)
+			if imgui.begin_combo("##target", preview):
+				clicked, _ = imgui.selectable("Add as new material", target is None)
+				if clicked:
+					self._replace_mapping[i] = None
+				for j in range(len(current_materials)):
+					clicked, _ = imgui.selectable(self._describe_current_material(j), target == j)
+					if clicked:
+						self._replace_mapping[i] = j
+				imgui.end_combo()
+
+			imgui.pop_id()
+
+		imgui.separator()
+		if imgui.button("Replace"):
+			self._confirm_replace_matching()
+			imgui.close_current_popup()
+		imgui.same_line()
+		if imgui.button("Cancel"):
+			self._replace_pending_mesh = None
+			imgui.close_current_popup()
+
+		imgui.end_popup()
+
+	def _confirm_replace_matching(self):
+		mesh, self._replace_pending_mesh = self._replace_pending_mesh, None
+		current_materials = self.shape_file.value.materials
+
+		index_map = {}
+		for i, target in enumerate(self._replace_mapping):
+			if target is None:
+				current_materials.append(mesh.materials[i])
+				index_map[i] = len(current_materials) - 1
+			else:
+				index_map[i] = target
+
+		self._replace_geometry(mesh, index_map)
 
 	def _load_shape(self, item):
+		self._reset_shape_state()
+		self._shape_source_path = item.path if item.bnp_path is None else None
+		self._shape_source_name = item.name
+
+		try:
+			shape_file = parse_shape(item.read_bytes())
+		except ShapeParseError as exc:
+			self.shape_file = None
+			self.shape_error = str(exc)
+			return
+
+		self._display_shape(shape_file)
+
+	def _reset_shape_state(self):
+		"""Common reset before showing any shape in the viewer -- a `.shape`
+		opened from the Explorer, or a mesh imported as a brand-new shape."""
 		self.model_root.remove_node()
 		self.model_root = self.render.attach_new_node("shape-root")
 		self.shape_error = None
@@ -218,16 +356,27 @@ class ObjectEditorApp(ForgeryApp):
 		self._multi_bitmap_expanded = set()
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
-		self._shape_source_path = item.path if item.bnp_path is None else None
-		self._shape_source_name = item.name
+		self._shape_source_path = None
+		self._shape_source_name = None
 		self._save_status = ""
 
-		try:
-			self.shape_file = parse_shape(item.read_bytes())
-		except ShapeParseError as exc:
-			self.shape_file = None
-			self.shape_error = str(exc)
-			return
+	def _display_shape(self, shape_file):
+		"""Renders an already-parsed/-built ShapeFile. Assumes
+		_reset_shape_state() was already called (separate so a
+		replace-geometry flow can skip resetting the editing state that's
+		meant to survive it, e.g. material overrides)."""
+		self.shape_file = shape_file
+		self._rebuild_geometry()
+
+	def _rebuild_geometry(self):
+		"""(Re)builds the 3D render passes + camera framing from
+		self.shape_file.value -- shared by _display_shape() and by replacing
+		a Mesh's geometry in place (which intentionally does NOT go through
+		_reset_shape_state(), so material edits survive it)."""
+		self.model_root.remove_node()
+		self.model_root = self.render.attach_new_node("shape-root")
+		self.shape_error = None
+		self._material_node_paths = {}
 
 		pass_count = 0
 		for vertex_buffer, material_id, indices in iter_render_passes(self.shape_file.value):
@@ -657,6 +806,7 @@ class ObjectEditorApp(ForgeryApp):
 		self.nav_cube.draw_controls()
 		self.export_dialog.draw()
 		self.import_dialog.draw()
+		self._draw_replace_match_popup()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)
