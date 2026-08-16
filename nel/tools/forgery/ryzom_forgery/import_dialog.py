@@ -1,0 +1,99 @@
+"""Import flow UI for .obj/.dae -> .shape: asks for a source mesh file
+(native dialog), then how to bring it in -- as a brand-new shape, or
+replacing the currently open one's geometry while keeping its materials
+(and any edits made to them: blend/alpha-test/2-sided/Multi Bitmap...).
+"""
+
+from pathlib import Path
+
+from imgui_bundle import imgui, portable_file_dialogs as pfd
+
+from ryzom_forgery.shape_import import ShapeImportError, import_dae, import_obj
+
+_MODE_POPUP_ID = "Import mesh"
+
+IMPORTERS = {"obj": import_obj, "dae": import_dae}
+
+
+class ImportDialog:
+	"""`on_new_shape(mesh)` and `on_replace(mesh)` are called with the parsed
+	`pynel.ryzom_shape.Mesh` once the user picks a mode in the popup."""
+
+	def __init__(self, on_new_shape, on_replace):
+		self._on_new_shape = on_new_shape
+		self._on_replace = on_replace
+
+		self._file_dialog = None
+		self._pending_mesh = None  # parsed Mesh, waiting on the mode popup
+		self._has_current_shape = False
+		self._status = ""
+
+	def open(self, has_current_shape):
+		"""Opens a native file picker for a source .obj/.dae. `has_current_shape`
+		gates whether "Replace in current shape" is offered in the mode popup."""
+		self._has_current_shape = has_current_shape
+		self._file_dialog = pfd.open_file("Import mesh", "", ["Mesh files", "*.obj *.dae"])
+
+	def draw(self):
+		"""Call once per ImGui frame."""
+		self._poll_file_dialog()
+		self._draw_mode_popup()
+
+	def _poll_file_dialog(self):
+		if self._file_dialog is None or not self._file_dialog.ready(0):
+			return
+		dialog, self._file_dialog = self._file_dialog, None
+		result = dialog.result()
+		if not result:
+			return
+
+		path = Path(result[0])
+		extension = path.suffix.lstrip(".").lower()
+		importer = IMPORTERS.get(extension)
+		if importer is None:
+			self._status = f"Unsupported mesh format: {path.suffix!r}"
+			return
+
+		try:
+			self._pending_mesh = importer(path)
+		except (OSError, ShapeImportError) as exc:
+			self._status = f"Import failed: {exc}"
+			return
+
+		self._status = ""
+		imgui.open_popup(_MODE_POPUP_ID)
+
+	def _draw_mode_popup(self):
+		if self._pending_mesh is None:
+			return
+
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_MODE_POPUP_ID, None, flags)
+		if not opened:
+			return
+
+		imgui.text(f"{len(self._pending_mesh.materials)} material(s) in the imported mesh.")
+		imgui.separator()
+
+		if imgui.button("Import as new shape"):
+			mesh, self._pending_mesh = self._pending_mesh, None
+			imgui.close_current_popup()
+			self._on_new_shape(mesh)
+
+		imgui.begin_disabled(not self._has_current_shape)
+		if imgui.button("Replace in current shape"):
+			mesh, self._pending_mesh = self._pending_mesh, None
+			imgui.close_current_popup()
+			self._on_replace(mesh)
+		imgui.end_disabled()
+
+		imgui.begin_disabled(True)
+		imgui.button("Add to current shape (coming soon)")
+		imgui.end_disabled()
+
+		imgui.separator()
+		if imgui.button("Cancel"):
+			self._pending_mesh = None
+			imgui.close_current_popup()
+
+		imgui.end_popup()

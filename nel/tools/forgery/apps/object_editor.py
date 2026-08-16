@@ -19,6 +19,7 @@ from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery.asset_index import AssetIndex
 from ryzom_forgery.export_dialog import ExportDialog
+from ryzom_forgery.import_dialog import ImportDialog
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery.properties import draw_properties
@@ -172,12 +173,14 @@ class ObjectEditorApp(ForgeryApp):
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
 		self.nav_cube = NavigationCube(self, self.orbit_camera)
 		self.export_dialog = ExportDialog()
+		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
 		for export_format in EXPORT_FORMATS:
 			self.commands.register_for_extension(
 				".shape", f"Export to .{export_format.extension}",
 				lambda items, fmt=export_format: self._on_export_command(items, fmt))
 		self.commands.register_global("Export settings...", lambda items: self.export_dialog.open())
+		self.explorer.extra_toolbar = self._draw_import_toolbar_button
 
 	def on_selection_changed(self, items):
 		print(f"[object_editor] selection changed: {[item.name for item in items]}")
@@ -191,6 +194,20 @@ class ObjectEditorApp(ForgeryApp):
 	def _on_export_command(self, items, export_format):
 		if items:
 			self.export_dialog.export(items[0], export_format, self.asset_index)
+
+	def _draw_import_toolbar_button(self):
+		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae)..."):
+			self.import_dialog.open(self.shape_file is not None)
+
+	def _on_import_new_shape(self, mesh):
+		# TODO: wire up for real once the geometry-loading path is split out
+		# of _load_shape() (next plan step) -- for now just confirms the
+		# dialog/popup flow reaches here with a parsed Mesh.
+		print(f"[object_editor] import as new shape: {len(mesh.materials)} material(s) (not wired up yet)")
+
+	def _on_import_replace(self, mesh):
+		# TODO: wire up once geometry-replace + material-count matching are implemented.
+		print(f"[object_editor] import replace: {len(mesh.materials)} material(s) (not wired up yet)")
 
 	def _load_shape(self, item):
 		self.model_root.remove_node()
@@ -627,6 +644,7 @@ class ObjectEditorApp(ForgeryApp):
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
 		self.export_dialog.draw()
+		self.import_dialog.draw()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)

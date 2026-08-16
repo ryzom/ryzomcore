@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-08-16 — ✨ Rework the Forgery Explorer's navigation and add an import entry point
+
+Reworked `ryzom_forgery/explorer.py`'s browsing UX end to end, driven by live feedback
+over several rounds via the .agentcom bridge:
+
+- Search input and extension-filter combo are now side by side (`imgui.same_line()`),
+  both with hidden labels (`"##search"`/`"##filter"`) instead of visible "Search"/"Filter"
+  text taking up their own rows.
+- The root path is now an editable text field (`"##path"`) instead of plain `imgui.text()`,
+  with folder-name autocomplete: a bordered box lists matching subdirectories, navigable
+  with Up/Down and Enter, or clicked directly. Landed on an inline child (not a
+  freestanding overlay `imgui.begin()`/`end()` window, tried first) after the overlay
+  version's clicks stopped registering -- moving keyboard focus off the path input on the
+  same click that hit a suggestion apparently broke that click's hit-testing; the fix also
+  needed decoupling "is the box open" from `is_item_active()` alone (checking whether the
+  box itself is hovered/focused too), since focus already leaves the input by the time its
+  own click is processed. Picking a suggestion now also appends a trailing `/`, refocuses
+  the path input and re-shows suggestions for the new directory immediately -- typing a
+  full path can flow continuously, one folder at a time, without touching the mouse.
+  Suggestions are uncapped with the box scrolling past 8 rows instead.
+- Favorite folders: a star button toggles the current folder in/out of a persisted list
+  (`ryzom_forgery/explorer_config.py`, JSON via a new shared `ryzom_forgery/config_dir.py`
+  extracted from `export_config.py`'s `_config_dir()`), browsable from a "Favorites" combo
+  dropdown (switched from a row of buttons after that overflowed with more than a few
+  favorites) -- each entry has its own star to remove it, same toggle metaphor as the
+  main button.
+- Replaced the recursive expand/collapse tree with flat, single-click navigation: clicking
+  a sub-folder or `.bnp` navigates straight into it (a new `_current_bnp` state represents
+  "browsing this archive's flat entry list"), with `..` to go back up; the path bar and
+  favorites star now track wherever navigation actually is.
+- Dotfiles/dotfolders are hidden by default (`_is_hidden()`, applied to both the file list
+  and path autocomplete), with a "Show hidden files/folders" toggle on the list's own
+  right-click context menu (`begin_popup_context_window(..., no_open_over_items)`, so it
+  doesn't fight with `_draw_leaf`'s per-item command menu).
+
+Also added `ryzom_forgery/import_dialog.py` (`ImportDialog`, mirroring `ExportDialog`'s
+shape): picks a `.obj`/`.dae` via a native file dialog, then a mode popup -- "Import as new
+shape" / "Replace in current shape" / "Add to current shape" (disabled, future work) -- the
+point being that replacing geometry in an already-open shape can keep its materials (and
+whatever editing was done to them: blend/alpha-test/2-sided/Multi Bitmap...) intact, unlike
+a fresh `.obj` -> `.shape` import which can't carry any of that. Wired an upload-icon
+toolbar button into the Explorer (`Explorer.extra_toolbar`, a new optional per-app hook
+next to Refresh) and `ImportDialog.draw()` into `object_editor.py`'s panel; the two actual
+import modes themselves are still `# TODO` stubs (next plan steps), the toolbar button
+currently only proves the file-pick -> mode-popup flow reaches `object_editor.py` with a
+parsed `Mesh`.
+
+The Refresh button also became an icon-only button (`ICON_FA_SYNC`) to match, freeing up
+space for the upload button next to it. An icon initially added for the ".." row turned out
+not to render (this bundled Font Awesome 4 `.ttf` predates several FA5-renamed icon
+aliases despite the generated Python bindings still defining constants for them --
+`ICON_FA_LEVEL_UP_ALT` was one of these, same class of issue as the missing `fa-images`
+noted in the "Let object_editor convert a simple material to Multi Bitmap" entry further
+down); reverted that row to plain text rather than chase down another working glyph name.
+
 ## 2026-08-16 — 🐛 Respect CMaterial::ZWRITE for blended materials in object_editor
 
 Follow-up to the transparency work below: `apt_snowglobe.shape`'s glass sphere
