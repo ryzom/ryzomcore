@@ -987,7 +987,10 @@ class ObjectEditorApp(ForgeryApp):
 		_display_shape()) -- on BOTH _object_pivot and model_root, regardless
 		of which one that row's pivot lock currently targets, so the result
 		always reads as a clean reset rather than only clearing whichever of
-		the two happens to be locked right now."""
+		the two happens to be locked right now. Used by reset_object_transform()
+		(the gizmo's Home button, a deliberately total reset); the panel's own
+		per-row Reset button uses _reset_transform_row() instead, which only
+		touches the currently selected reference frame."""
 		if prop == "position":
 			self._object_pivot.set_pos(0, 0, 0)
 			self.model_root.set_pos(0, 0, 0)
@@ -998,6 +1001,23 @@ class ObjectEditorApp(ForgeryApp):
 			self._object_pivot.set_scale(1, 1, 1)
 			self.model_root.set_scale(1, 1, 1)
 
+	def _reset_transform_row(self, prop):
+		"""Resets `prop` to its default -- position/scale to identity,
+		rotation to the shape's own baseline (_object_pivot_base_quat) if
+		that's the currently selected node, identity otherwise -- only on
+		whichever node _transform_node() currently owns (pivot-locked or
+		not), leaving the other reference frame untouched. Bound to the
+		panel's own per-row Reset button; see _reset_transform() for the
+		gizmo's Home button, which resets both frames at once instead."""
+		node = self._transform_node(prop)
+		if prop == "position":
+			node.set_pos(0, 0, 0)
+		elif prop == "rotation":
+			is_pivot = node is self._object_pivot
+			node.set_quat(self._object_pivot_base_quat if is_pivot else Quat())
+		else:
+			node.set_scale(1, 1, 1)
+
 	def reset_object_transform(self):
 		"""Resets position, rotation, and scale together -- bound to the
 		gizmo's Home button while the object is targeted (see
@@ -1007,18 +1027,23 @@ class ObjectEditorApp(ForgeryApp):
 
 	def _draw_transform_panel(self):
 		"""Position/Rotation/Scale editor, floating in the viewport flush
-		against the left edge of the navcube gizmo's own pixel rect,
-		vertically centered on it. One row per property: a pivot-lock
+		against the left edge of the navcube gizmo's own pixel rect, its
+		bottom edge aligned with _draw_viewport_toggles()'s bottom-left icon
+		bar (same y formula, own height). One row per property: a pivot-lock
 		toggle, X/Y/Z axis-lock toggles, X/Y/Z value fields (live,
 		see _get_transform_values()/_set_transform_axis()), and a
 		row reset button (_reset_transform()). Hidden until a shape (with a
 		pivot worth editing) is loaded."""
 		if self.shape_file is None:
 			return
-		left, _right, top, bottom = self.nav_cube._panel_px
+		display_size = imgui.get_io().display_size
+		win_h = display_size.y
+		if win_h <= 0:
+			return
+		left, _right, _top, _bottom = self.nav_cube._panel_px
 		width, height = self._transform_panel_size
 		x = left - _VIEWPORT_TOGGLE_MARGIN_PX - width
-		y = (top + bottom) / 2.0 - height / 2.0
+		y = win_h - self.sysinfo_height - _VIEWPORT_TOGGLE_MARGIN_PX - height
 		imgui.set_next_window_pos((x, y))
 		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
 		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
@@ -1064,8 +1089,8 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_transform_axis(prop, axis_index, new_value)
 
 		imgui.same_line()
-		if _icon_button(fa_icons.ICON_FA_UNDO, f"Reset {label.lower()}", square=True):
-			self._reset_transform(prop)
+		if _icon_button(fa_icons.ICON_FA_UNDO, f"Reset {label.lower()} (current reference frame only)", square=True):
+			self._reset_transform_row(prop)
 
 		imgui.pop_id()
 

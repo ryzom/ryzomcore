@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-17 — 🐛 Fix the transform panel's row Reset and vertical position
+
+Two follow-ups to the Position/Rotation/Scale panel added earlier the same session:
+
+- Its per-row Reset button (`_icon_button(ICON_FA_UNDO)`) reset BOTH `_object_pivot` and
+  `model_root` unconditionally, regardless of that row's pivot-lock state -- so resetting
+  while the pivot was locked (editing `model_root`) also silently wiped out the pivot's own
+  transform, and vice versa. Added `_reset_transform_row(prop)`, which only resets whichever
+  node `_transform_node()` currently owns, leaving the other reference frame untouched.
+  `_reset_transform()` itself is unchanged and kept for `reset_object_transform()` (the
+  gizmo's Home button), which is deliberately a total reset of both frames at once regardless
+  of any row's current lock state.
+- `_draw_transform_panel()` was vertically centered on the navcube gizmo's own pixel rect;
+  moved to align its bottom edge with `_draw_viewport_toggles()`'s bottom-left icon bar
+  instead (same `win_h - sysinfo_height - margin - own_height` formula), so the two floating
+  panels read as a matched pair along the bottom of the viewport.
+
 ## 2026-08-17 — ✨ Add a Position/Rotation/Scale panel to object_editor
 
 New floating window in the viewport, flush against the left edge of the navcube gizmo's own
