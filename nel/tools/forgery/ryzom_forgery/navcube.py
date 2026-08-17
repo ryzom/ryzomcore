@@ -12,11 +12,13 @@ from math import cos, pi, radians, sin
 from panda3d.core import (
 	BitMask32, Camera, CollisionHandlerQueue, CollisionNode, CollisionPolygon,
 	CollisionRay, CollisionTraverser, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, KeyboardButton, LineSegs, NodePath, PerspectiveLens, Point3,
+	GeomVertexFormat, GeomVertexWriter, KeyboardButton, LineSegs, MouseButton, NodePath, PerspectiveLens, Point3,
 	TextNode, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
+
+from .camera import object_targeted
 
 _AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 
@@ -214,7 +216,14 @@ class NavigationCube:
 		self.cam_np = self.scene.attach_new_node(camera_node)
 
 		self.region = app.win.make_display_region(0, 0, 0, 0)
-		self.region.set_sort(20)
+		# Below ShowBase's own 2D UI DisplayRegion (makeCamera2d()'s default
+		# sort=10, where p3dimgui's overlay lives -- see backend.py, it
+		# parents onto base.pixel2d), so this region -- despite being a
+		# separate 3D DisplayRegion, not part of the ImGui draw list at all
+		# -- renders BEFORE the UI and never paints over ImGui windows or
+		# tooltips that happen to overlap its rect (e.g. draw_controls()'s
+		# button bar, positioned right above it).
+		self.region.set_sort(5)
 		self.region.set_clear_color_active(True)
 		self.region.set_clear_color((0.0, 0.0, 0.0, 1.0))
 		self.region.set_clear_depth_active(True)
@@ -369,11 +378,13 @@ class NavigationCube:
 		for axis, face_np in self._face_nodes.items():
 			face_np.set_color(_FACE_COLOR_HOVER if axis == self._hovered_axis else _FACE_COLOR)
 
-		# Ctrl held means Ctrl+drag acts on the object (inner cube) instead
-		# of the camera (outer cube) -- see ObjectManipulator/OrbitCamera in
-		# camera.py. Swapping which of the two reads as "active" (orange) is
-		# the only way to tell which one a drag is about to affect.
-		object_active = self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control())
+		# Ctrl held (or app.target_mode forcing one or the other, see the
+		# mode icon in draw_controls()) means a drag acts on the object
+		# (inner cube) instead of the camera (outer cube) -- see
+		# ObjectManipulator/OrbitCamera in camera.py. Swapping which of the
+		# two reads as "active" (orange) is the only way to tell which one a
+		# drag is about to affect.
+		object_active = object_targeted(self.app)
 		outer_color = _INACTIVE_COLOR if object_active else _ACTIVE_COLOR
 		inner_color = _ACTIVE_COLOR if object_active else _INACTIVE_COLOR
 		self._outer_edges_np.set_color_scale(outer_color)
@@ -443,17 +454,112 @@ class NavigationCube:
 			imgui.set_tooltip("Roll view 90° clockwise" if clockwise else "Roll view 90° counter-clockwise")
 		return clicked
 
+	def _draw_status_icon(self):
+		"""Small clickable square, bottom-right of the directional pad,
+		showing which mouse-drag mode is currently active: a pointer by
+		default, or rotate/move/scale while the corresponding mouse button is
+		held -- matching OrbitCamera/ObjectManipulator's own left/middle/right
+		drag bindings (Ctrl or not; either way the same button does the same
+		kind of action, so it's not distinguished here). Clicking it cycles
+		app.forced_drag_mode (pointer -> move -> rotate -> scale -> pointer);
+		while forced (icon turned orange), OrbitCamera/ObjectManipulator let
+		a plain left-click-drag alone perform that action instead of needing
+		the matching button held, in whichever of the two contexts (Ctrl or
+		not) is currently active."""
+		size = imgui.get_frame_height()
+		forced = self.app.forced_drag_mode
+
+		clicked = imgui.button("##drag-mode-status", (size, size))
+		if clicked:
+			self.app.forced_drag_mode = {None: "move", "move": "rotate", "rotate": "scale"}.get(forced)
+
+		if forced is not None:
+			mode = forced
+		else:
+			mode = None
+			mw = self.app.mouseWatcherNode
+			imgui_backend = getattr(self.app, "imgui", None)
+			captured = imgui_backend is not None and imgui_backend.isMouseCaptured()
+			if not captured and mw.hasMouse():
+				if mw.isButtonDown(MouseButton.one()):
+					mode = "rotate"
+				elif mw.isButtonDown(MouseButton.two()):
+					mode = "move"
+				elif mw.isButtonDown(MouseButton.three()):
+					mode = "scale"
+
+		rect_min, rect_max = imgui.get_item_rect_min(), imgui.get_item_rect_max()
+		center = ((rect_min.x + rect_max.x) / 2.0, (rect_min.y + rect_max.y) / 2.0)
+		draw_list = imgui.get_window_draw_list()
+		color = imgui.get_color_u32(_ACTIVE_COLOR if forced is not None else imgui.Col_.text.value)
+		if mode == "rotate":
+			# No dedicated Font Awesome 4 rotate glyph -- see _draw_rotate_icon().
+			_draw_rotate_icon(draw_list, center, size / 2.0 - 5.0, color, clockwise=True)
+		else:
+			icon = {
+				"move": fa_icons.ICON_FA_ARROWS_ALT,
+				"scale": fa_icons.ICON_FA_EXPAND,
+			}.get(mode, fa_icons.ICON_FA_MOUSE_POINTER)
+			text_size = imgui.calc_text_size(icon)
+			draw_list.add_text((center[0] - text_size.x / 2.0, center[1] - text_size.y / 2.0), color, icon)
+		if imgui.is_item_hovered():
+			if forced is None:
+				imgui.set_tooltip("Current drag mode: left = rotate, middle = move, right = scale\nClick to force a mode (plain left-click alone)")
+			else:
+				imgui.set_tooltip(f"Forced drag mode: {forced} (plain left-click alone)\nClick to cycle, or back to pointer to restore normal left/middle/right")
+
+	def _draw_mode_icon(self):
+		"""Small clickable square, bottom-left of the directional pad
+		(mirroring _draw_status_icon()'s bottom-right placement), showing
+		and controlling app.target_mode: whether a drag targets the camera
+		or the object. Clicking it cycles Ctrl-decides (keyboard icon by
+		default, white) -> camera (orange) -> object (orange) -> Ctrl-decides;
+		forced to one or the other, every drag acts on that one regardless
+		of Ctrl (see camera.py's object_targeted(), which both
+		OrbitCamera/ObjectManipulator and this gizmo's own cube colors
+		read). While Ctrl-decides, the icon still reflects Ctrl's live state
+		(camera/object glyph, but white, not orange -- not forced, just
+		showing what Ctrl currently means)."""
+		size = imgui.get_frame_height()
+		mode = self.app.target_mode
+
+		clicked = imgui.button("##target-mode", (size, size))
+		if clicked:
+			self.app.target_mode = {None: "camera", "camera": "object"}.get(mode)
+
+		if mode is not None:
+			live_mode = mode
+		else:
+			live_mode = "object" if self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control()) else "camera"
+
+		rect_min, rect_max = imgui.get_item_rect_min(), imgui.get_item_rect_max()
+		center = ((rect_min.x + rect_max.x) / 2.0, (rect_min.y + rect_max.y) / 2.0)
+		draw_list = imgui.get_window_draw_list()
+		color = imgui.get_color_u32(_ACTIVE_COLOR if mode is not None else imgui.Col_.text.value)
+		icon = {"camera": fa_icons.ICON_FA_CAMERA, "object": fa_icons.ICON_FA_CUBE}.get(live_mode, fa_icons.ICON_FA_KEYBOARD)
+		text_size = imgui.calc_text_size(icon)
+		draw_list.add_text((center[0] - text_size.x / 2.0, center[1] - text_size.y / 2.0), color, icon)
+		if imgui.is_item_hovered():
+			if mode is None:
+				imgui.set_tooltip("Drag target: Ctrl held decides camera/object\nClick to force one")
+			else:
+				imgui.set_tooltip(f"Drag target forced to: {mode}\nClick to cycle, or back to keyboard icon for Ctrl to decide")
+
 	def draw_controls(self):
 		"""Draws the reset-view / face-step / roll buttons above the gizmo
 		(the XYZ legend is drawn straight into the 3D gizmo scene itself, see
 		_build_axis_labels()), laid out as --
-		  ccw  ^   cw
-		  <  HOME  >
-		       v
+		     ccw  ^   cw
+		     <  HOME  >
+		  [mode] v  [status]
 		Each arrow snaps to the adjacent face in that direction (always lands
 		on one of the 6 axis-aligned views, see OrbitCamera.step_to_face());
 		the 2 top corners instead roll the current face view 90°
-		(OrbitCamera.roll_step()) without changing which face is shown.
+		(OrbitCamera.roll_step()) without changing which face is shown. The
+		bottom-left/right icons are the odd ones out -- [mode]
+		(_draw_mode_icon()) toggles app.target_mode (camera/object drag
+		target), [status] (_draw_status_icon()) shows/forces
+		app.forced_drag_mode; see their own docstrings.
 		Call once per frame from draw_panel() -- this is a separate floating
 		(borderless), auto-sized window positioned from the gizmo's own pixel
 		rect, not part of the docked panel's own layout."""
@@ -462,9 +568,6 @@ class NavigationCube:
 		width, height = self._controls_size
 		imgui.set_next_window_pos((center_x - width / 2.0, top - height - _UI_GAP_PX))
 		with imgui_ctx.begin("##navcube-controls", flags=_UI_FLAGS):
-			icon_size = imgui.get_frame_height()
-			side_indent = icon_size + imgui.get_style().item_spacing.x
-
 			# Held-down buttons call the OrbitCamera step every frame (via
 			# is_item_active(), true continuously while the mouse is down on
 			# the item) rather than relying on ImGui's button_repeat -- that
@@ -492,11 +595,12 @@ class NavigationCube:
 			if imgui.is_item_active():
 				self.orbit_camera.step_to_face("left")
 			imgui.same_line()
-			# Ctrl held means Home targets the object (inner cube) instead of
-			# the camera (outer cube) -- mirrors the same Ctrl modifier
-			# ObjectManipulator/OrbitCamera use to pick which one a drag acts on.
+			# Ctrl held (or app.target_mode forcing one or the other) means
+			# Home targets the object instead of the camera -- mirrors the
+			# same modifier ObjectManipulator/OrbitCamera use to pick which
+			# one a drag acts on.
 			if self._icon_button(fa_icons.ICON_FA_HOME, "Reset view (Ctrl: reset object rotation)"):
-				if self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control()):
+				if object_targeted(self.app):
 					self.app.reset_object_rotation()
 				else:
 					self.orbit_camera.reset()
@@ -505,11 +609,18 @@ class NavigationCube:
 			if imgui.is_item_active():
 				self.orbit_camera.step_to_face("right")
 
-			# Row 3: Down, indented under the center column.
-			imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + side_indent)
+			# Row 3: drag-target mode icon, Down, drag-mode status icon --
+			# same 3 columns as rows 1-2, so unlike those two icons' first
+			# appearance (before this row had a real bottom-left button),
+			# no manual indent is needed to center Down under the middle
+			# column anymore.
+			self._draw_mode_icon()
+			imgui.same_line()
 			self._icon_button(fa_icons.ICON_FA_ARROW_DOWN, "Show the face below")
 			if imgui.is_item_active():
 				self.orbit_camera.step_to_face("down")
+			imgui.same_line()
+			self._draw_status_icon()
 
 			window_size = imgui.get_window_size()
 			self._controls_size = (window_size.x, window_size.y)

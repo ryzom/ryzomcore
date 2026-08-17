@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add drag-mode status/force icons to the navcube pad
+
+Two new small icons in `NavigationCube.draw_controls()`'s directional pad, bottom-left and
+bottom-right:
+
+- `_draw_status_icon()` (bottom-right) shows which mouse-drag action is currently active --
+  a pointer by default, or rotate/move/scale while the matching mouse button is held (left/
+  middle/right, in either the camera or the object context). Clicking it cycles
+  `app.forced_drag_mode` through pointer -> move -> rotate -> scale -> pointer; while forced
+  (icon turns orange), a plain left-click-drag alone performs that action, without needing to
+  hold the button that normally triggers it.
+- `_draw_mode_icon()` (bottom-left) shows/controls `app.target_mode`: whether a drag targets
+  the camera or the object. Clicking it cycles Ctrl-decides (the normal behavior, camera/object
+  glyph reflecting Ctrl's live state, white) -> camera (orange, ignores Ctrl) -> object (orange)
+  -> Ctrl-decides again.
+
+Both `OrbitCamera`/`ObjectManipulator` (`camera.py`) read these each frame via a new shared
+`object_targeted(app)` helper (replacing their previous hardcoded `KeyboardButton.control()`
+checks) and per-button forcing logic in their own `_update()`, so `app.target_mode`/
+`forced_drag_mode` transparently override the normal Ctrl/left/middle/right split wherever it
+was previously checked -- including the gizmo's own inner/outer cube coloring and the Home
+button's reset-view-vs-reset-object choice, which already depended on the same Ctrl check.
+
+The "scale" status icon initially showed as a "?" tofu glyph: `ICON_FA_EXPAND_ARROWS_ALT`'s
+codepoint exists in the Python FA4 icon-name bindings but not in the actual bundled
+`fontawesome-webfont.ttf` -- swapped for `ICON_FA_EXPAND`, which does render.
+
 ## 2026-08-17 — ✨ Add right-mouse zoom/scale and a navcube directional pad
 
 Right mouse button was unused by both `OrbitCamera` and `ObjectManipulator`

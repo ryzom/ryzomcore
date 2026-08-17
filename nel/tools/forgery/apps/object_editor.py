@@ -435,6 +435,19 @@ class ObjectEditorApp(ForgeryApp):
 		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
 		self._replace_match_popup_opened = False  # whether open_popup() has been called yet for the current _replace_pending_mesh
 
+		# Overrides which action a plain left-click drag performs, in either
+		# OrbitCamera (no Ctrl) or ObjectManipulator (Ctrl) -- None means the
+		# normal left/middle/right split; "move"/"rotate"/"scale" forces
+		# left-click alone to do that one, in whichever of the two contexts
+		# is currently active. Set by clicking navcube.py's status icon.
+		self.forced_drag_mode = None
+
+		# Overrides whether a drag targets the camera (OrbitCamera) or the
+		# object (ObjectManipulator) -- None means the normal Ctrl-held
+		# split; "camera"/"object" forces every drag to that one regardless
+		# of Ctrl. Set by clicking navcube.py's mode icon.
+		self.target_mode = None
+
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
 		self.object_manipulator = ObjectManipulator(self, self._object_pivot, self.orbit_camera)
 		self.nav_cube = NavigationCube(self, self.orbit_camera, self._object_pivot)

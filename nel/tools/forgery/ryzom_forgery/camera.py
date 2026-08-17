@@ -15,6 +15,18 @@ AXIS_VIEWS = {
 	"-z": (0.0, -90.0),
 }
 
+def object_targeted(app):
+	"""Whether a drag right now should act on the object (ObjectManipulator)
+	rather than the camera (OrbitCamera) -- app.target_mode (None = the
+	normal Ctrl-held split; "camera"/"object" forces one or the other
+	regardless of Ctrl) overrides plain Ctrl state, see navcube.py's mode
+	icon. Shared by both controllers' _update() and NavigationCube's own
+	gizmo-color logic, so all three always agree on which is active."""
+	if app.target_mode is not None:
+		return app.target_mode == "object"
+	return app.mouseWatcherNode.isButtonDown(KeyboardButton.control())
+
+
 # Navigation-cube face label for each axis view (Ryzom Studio / 3ds Max naming).
 AXIS_LABELS = {
 	"+x": "RIGHT",
@@ -198,10 +210,10 @@ class OrbitCamera:
 			self._advance_anim()
 
 		mw = self.app.mouseWatcherNode
-		# Ctrl held means Ctrl+drag acts on the object instead (see
-		# ObjectManipulator below) -- without this, both would respond to
-		# the same drag at once.
-		if not mw.hasMouse() or self._mouse_captured_by_ui() or mw.isButtonDown(KeyboardButton.control()):
+		# Ctrl held (or app.target_mode forcing "object") means a drag acts
+		# on the object instead (see ObjectManipulator below) -- without
+		# this, both would respond to the same drag at once.
+		if not mw.hasMouse() or self._mouse_captured_by_ui() or object_targeted(self.app):
 			self._last_mouse = None
 			return task.cont
 
@@ -210,6 +222,17 @@ class OrbitCamera:
 		orbit_down = mw.isButtonDown(MouseButton.one())
 		pan_down = mw.isButtonDown(MouseButton.two())
 		zoom_down = mw.isButtonDown(MouseButton.three())
+
+		# navcube.py's status icon can force plain left-click alone to do
+		# one specific action instead of the normal left/middle/right split
+		# -- middle/right still do their own normal thing regardless, this
+		# only ever ADDS to what a left-click-only drag does.
+		forced = self.app.forced_drag_mode
+		if forced is not None and orbit_down:
+			orbit_down = forced == "rotate"
+			pan_down = pan_down or forced == "move"
+			zoom_down = zoom_down or forced == "scale"
+
 		dragging = orbit_down or pan_down or zoom_down
 
 		if dragging:
@@ -402,7 +425,7 @@ class ObjectManipulator:
 
 	def _update(self, task):
 		mw = self.app.mouseWatcherNode
-		if not mw.hasMouse() or self._mouse_captured_by_ui() or not mw.isButtonDown(KeyboardButton.control()):
+		if not mw.hasMouse() or self._mouse_captured_by_ui() or not object_targeted(self.app):
 			self._last_mouse = None
 			return task.cont
 
@@ -411,6 +434,15 @@ class ObjectManipulator:
 		rotate_down = mw.isButtonDown(MouseButton.one())
 		move_down = mw.isButtonDown(MouseButton.two())
 		scale_down = mw.isButtonDown(MouseButton.three())
+
+		# See OrbitCamera._update()'s own forced_drag_mode handling --
+		# same idea, for the Ctrl-held/object-manipulation context.
+		forced = self.app.forced_drag_mode
+		if forced is not None and rotate_down:
+			rotate_down = forced == "rotate"
+			move_down = move_down or forced == "move"
+			scale_down = scale_down or forced == "scale"
+
 		dragging = rotate_down or move_down or scale_down
 
 		if dragging and self._last_mouse is not None:
