@@ -21,22 +21,49 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from pynel.ryzom_shape import (
-	AABBox, Material, MatrixBlock, Mesh, MeshBase, MeshGeom, Quaternion, RdrPass, Rgba, Texture, Vector3,
+	AABBox, Material, MatrixBlock, Mesh, MeshBase, MeshGeom, Quaternion, RdrPass, Rgba, Texture, TexEnv, Vector3,
 	VertexBuffer,
 )
 
 # CMaterial's own documented default-construction values (nel/include/nel/3d/material.h:273):
 # "normal shader, SrcBlend is srcalpha, dstblend is invsrcalpha, ZFunction is lessequal, ZBias is 0".
 _SHADER_NORMAL = 0
-_BLEND_SRCALPHA = 2
-_BLEND_INVSRCALPHA = 3
 _ZFUNC_LESSEQUAL = 5
 _MAT_FLAG_ZWRITE = 0x00000004
 _MAT_FLAG_LIGHTING = 0x00000010
 _MAT_FLAG_DOUBLE_SIDED = 0x00000100
-_DEFAULT_MATERIAL_FLAGS = _MAT_FLAG_ZWRITE | _MAT_FLAG_LIGHTING | _MAT_FLAG_DOUBLE_SIDED
+_DEFAULT_MATERIAL_FLAGS = _MAT_FLAG_ZWRITE | _MAT_FLAG_LIGHTING
 
 _DEFAULT_MATERIAL_NAME = "__default__"  # faces with no `usemtl` in effect
+
+# _build_material()'s fixed defaults, deliberately NOT read from the source
+# .obj/.dae/.fbx's own diffuse/ambient/specular/opacity/shininess -- these
+# match the real Ryzom content pipeline instead: the 3ds Max NeL exporter
+# (nel/tools/3d/plugin_max/nel_mesh_lib/export_material.cpp) reads every one
+# of these off the NeL-material-plugin instance the artist assigns in 3ds Max
+# itself, which is unrelated to whatever the imported source file's own
+# material data says -- an artist who leaves that plugin's fields untouched
+# (typical for a simple textured prop) gets exactly these values, confirmed
+# by comparing an artist's real Cinema4D->.fbx->3dsMax->.shape export against
+# the same .fbx imported directly through here (see docs/log.md). Only the
+# diffuse texture reference carries over from the source file.
+_NEL_DEFAULT_GRAY = Rgba(150, 150, 150, 255)  # 3ds Max's own "Standard material" default diffuse/ambient swatch
+_NEL_DEFAULT_SPECULAR = Rgba(0, 0, 0, 0)
+_NEL_DEFAULT_SHININESS = 8.0  # 2^(glossiness*10)*4 at 3ds Max's default 10% Glossiness
+_NEL_DEFAULT_DIST_MAX = 1000.0
+
+# CMaterial::setShader()'s own documented default stage-0 texture blending
+# once a texture is assigned (material.h:427-429): modulate the texture by
+# the material's Diffuse color/alpha (RGBArg1/AlphaArg1 = Diffuse rather than
+# the engine's own baseline default of Previous) -- what 3ds Max's NeL
+# exporter writes for a texture whose "Texture Shader" rollout was left at
+# its own default setting (confirmed the same way as the constants above).
+_MODULATE_TEX_ENV = TexEnv(
+	op_rgb=1, src_arg0_rgb=0, op_arg0_rgb=0, src_arg1_rgb=2, op_arg1_rgb=0,
+	op_alpha=1, src_arg0_alpha=0, op_arg0_alpha=2, src_arg1_alpha=2, op_arg1_alpha=2,
+	constant_color=Rgba(255, 255, 255, 255),
+	src_arg2_rgb=1, op_arg2_rgb=0, src_arg2_alpha=1, op_arg2_alpha=2,
+)
 
 
 class ShapeImportError(Exception):
@@ -170,42 +197,50 @@ def parse_mtl(path: Path) -> Dict[str, MtlMaterial]:
 # ---------------------------------------------------------------------------
 
 
-def _clamp01(value: float) -> float:
-	return max(0.0, min(1.0, value))
+def _texture_base_name(texture_name: str) -> str:
+	"""Reduces a texture reference to a plain base file name, as Ryzom
+	Texture.file_name always is -- an imported .fbx/.dae routinely carries an
+	absolute path instead (the exporting tool's own disk location, useless on
+	another machine), and on a Windows-authored file that path uses
+	backslashes, which pathlib.Path().name leaves untouched on POSIX (it only
+	splits on `/`), so both separators are normalized here before taking the
+	last component."""
+	return Path(texture_name.replace("\\", "/")).name
 
 
-def _to_rgba(color: Tuple[float, float, float], alpha: float = 1.0) -> Rgba:
-	r, g, b = color
-	return Rgba(round(_clamp01(r) * 255), round(_clamp01(g) * 255), round(_clamp01(b) * 255), round(_clamp01(alpha) * 255))
-
-
-def _build_material(
-		diffuse: Tuple[float, float, float] = (0.8, 0.8, 0.8),
-		ambient: Tuple[float, float, float] = (0.2, 0.2, 0.2),
-		specular: Tuple[float, float, float] = (0.0, 0.0, 0.0),
-		shininess: float = 0.0,
-		opacity: float = 1.0,
-		texture_name: Optional[str] = None) -> Material:
+def _build_material(texture_name: Optional[str] = None, double_sided: bool = False) -> Material:
+	"""Builds a "blank NeL material" (see _NEL_DEFAULT_GRAY et al above) with
+	just a diffuse texture reference -- the only thing that reliably carries
+	over from an imported .obj/.dae/.fbx's own material data (see the module
+	comment there for why the rest deliberately doesn't). `double_sided` is
+	the one exception: unlike color/shininess/etc (an artistic choice that
+	gets manually redone in 3ds Max anyway), it's a real geometric necessity
+	(thin panels/foliage with no back faces) that the source file's own
+	material setting is worth honoring."""
 	textures: List[Optional[Texture]] = []
+	tex_envs: List[Optional[TexEnv]] = []
 	if texture_name:
-		textures = [Texture(class_name="CTextureFile", file_name=Path(texture_name).name.lower(), allow_degradation=True)]
+		textures = [Texture(class_name="CTextureFile", file_name=_texture_base_name(texture_name).lower(), allow_degradation=True)]
+		tex_envs = [_MODULATE_TEX_ENV]
 
+	flags = _DEFAULT_MATERIAL_FLAGS | (_MAT_FLAG_DOUBLE_SIDED if double_sided else 0)
 	return Material(
 		shader_type=_SHADER_NORMAL,
-		flags=_DEFAULT_MATERIAL_FLAGS,
-		src_blend=_BLEND_SRCALPHA,
-		dst_blend=_BLEND_INVSRCALPHA,
+		flags=flags,
+		src_blend=0,
+		dst_blend=0,
 		z_function=_ZFUNC_LESSEQUAL,
 		z_bias=0.0,
 		color=Rgba(255, 255, 255, 255),
 		emissive=Rgba(0, 0, 0, 255),
-		ambient=_to_rgba(ambient),
-		diffuse=_to_rgba(diffuse, opacity),
-		specular=_to_rgba(specular),
-		shininess=shininess,
+		ambient=_NEL_DEFAULT_GRAY,
+		diffuse=_NEL_DEFAULT_GRAY,
+		specular=_NEL_DEFAULT_SPECULAR,
+		shininess=_NEL_DEFAULT_SHININESS,
 		alpha_test_threshold=0.5,
 		tex_coord_gen_mode=0,
 		textures=textures,
+		tex_envs=tex_envs,
 	)
 
 
@@ -242,6 +277,7 @@ def _assemble_mesh(
 		default_rot_euler=Vector3(0.0, 0.0, 0.0),
 		default_rot_quat=Quaternion(0.0, 0.0, 0.0, 1.0),
 		default_scale=Vector3(1.0, 1.0, 1.0),
+		dist_max=_NEL_DEFAULT_DIST_MAX,
 	)
 	geom = MeshGeom(
 		bones_name=[], mesh_morpher=None, vertex_buffer=vertex_buffer,
@@ -290,11 +326,7 @@ def build_mesh(obj_mesh: ObjMesh, mtl_materials: Dict[str, MtlMaterial]) -> Mesh
 
 	def material_for(name: str) -> Material:
 		mtl = mtl_materials.get(name)
-		if mtl is None:
-			return _build_material()
-		return _build_material(
-			diffuse=mtl.diffuse, ambient=mtl.ambient, specular=mtl.specular,
-			shininess=mtl.shininess, opacity=mtl.opacity, texture_name=mtl.diffuse_texture)
+		return _build_material(texture_name=mtl.diffuse_texture if mtl is not None else None)
 
 	materials = [material_for(name) for name in material_order]
 	rdr_passes = [RdrPass(material_id=material_ids[name], indices=pass_indices[material_ids[name]])
@@ -412,28 +444,20 @@ def _mesh_texcoords(mesh):
 
 def _build_material_from_assimp_material(material: dict) -> Material:
 	"""`material` is one of assimp_py.Scene.materials' plain dicts (property
-	name -> value, see assimp-py's own docs) -- COLOR_*/SHININESS/OPACITY are
-	always present (Assimp fills in its own defaults), TEXTURES is a dict of
-	texture-type-int -> [file paths, ...], only present for slots that
-	actually have one."""
+	name -> value, see assimp-py's own docs) -- only its diffuse texture and
+	double-sided flag (if any) are used, see _build_material()'s own
+	docstring for why the rest of the source material's own
+	COLOR_*/SHININESS/OPACITY is deliberately ignored. TWOSIDED (Assimp's
+	own name for AI_MATKEY_TWOSIDED) is only present in the dict at all when
+	the source file set it explicitly -- absent means "use the format's own
+	default", which for every format Forgery imports is single-sided."""
 	import assimp_py
 
 	textures = material.get("TEXTURES", {})
 	diffuse_paths = textures.get(assimp_py.TextureType_DIFFUSE)
-
-	def rgb(key, default):
-		# COLLADA <color> values come back as RGBA (4 components); FBX/obj
-		# ones are plain RGB (3) -- keep only the first 3 either way, alpha is
-		# tracked separately via OPACITY.
-		return tuple(material.get(key, default))[:3]
-
 	return _build_material(
-		diffuse=rgb("COLOR_DIFFUSE", (0.8, 0.8, 0.8)),
-		ambient=rgb("COLOR_AMBIENT", (0.2, 0.2, 0.2)),
-		specular=rgb("COLOR_SPECULAR", (0.0, 0.0, 0.0)),
-		shininess=float(material.get("SHININESS", 0.0)),
-		opacity=float(material.get("OPACITY", 1.0)),
 		texture_name=diffuse_paths[0] if diffuse_paths else None,
+		double_sided=bool(material.get("TWOSIDED", False)),
 	)
 
 

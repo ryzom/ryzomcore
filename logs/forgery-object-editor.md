@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-17 — ✨ Match 3dsMax's material export defaults when importing meshes
+
+`shape_import.py`'s importers used to build each material straight from the source
+`.obj`/`.dae`/`.fbx`'s own diffuse/ambient/specular/shininess/opacity data -- which turns
+out not to be how real Ryzom content's materials actually come about. Reading
+`nel/tools/3d/plugin_max/nel_mesh_lib/export_material.cpp` and `nel/src/3d/material.cpp`
+showed that 3dsMax's exporter always reads these values off the NeL-material-plugin
+instance an artist assigns in 3dsMax itself, completely independent of whatever the
+original imported source file's own material data said -- confirmed by comparing a real
+artist's Cinema4D->.fbx->3dsMax->.shape export against the same .fbx imported directly
+through here.
+
+`_build_material()` now always builds a "blank NeL material" (ambient/diffuse = 3dsMax's
+own Standard-material gray `Rgba(150,150,150,255)`, specular = `Rgba(0,0,0,0)`,
+shininess = 8.0 matching 3dsMax's default 10% Glossiness, `_MODULATE_TEX_ENV` matching
+`CMaterial::setShader()`'s documented stage-0 default once a texture is assigned), keeping
+only the diffuse texture reference from the source file -- plus `double_sided`, the one
+property honored from the source material after all, since it's a real geometric necessity
+(thin panels/foliage with no back faces) rather than an artistic choice that gets manually
+redone in 3dsMax anyway. Read from Assimp's own `TWOSIDED` material property (present only
+when the source file set it explicitly), defaulting off otherwise.
+
 ## 2026-08-17 — 🐛 Fix icon button tooltips rendering blank under the large icon font
 
 `_icon_button()`'s callers that use the 1.5x large icon font (`_draw_viewport_toggles()`,
