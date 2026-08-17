@@ -16,7 +16,7 @@ from panda3d.core import (
 	TextNode, TransparencyAttrib, Vec3,
 )
 
-from imgui_bundle import imgui, imgui_ctx
+from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
 
 _AXES = ("+x", "-x", "+y", "-y", "+z", "-z")
 
@@ -126,23 +126,15 @@ def _make_face_collision(axis, half=_HALF):
 	return CollisionPolygon(*[Point3(corner) for corner in _face_corners(axis, half)])
 
 
-def _orbit_offset(heading, pitch, distance):
-	"""Same offset formula as OrbitCamera._update_camera_pos(), so the
-	gizmo's fixed-distance camera turns in lockstep with the real one."""
-	h_rad, p_rad = radians(heading), radians(pitch)
-	return Vec3(
-		distance * cos(p_rad) * sin(h_rad),
-		-distance * cos(p_rad) * cos(h_rad),
-		distance * sin(p_rad),
-	)
-
-
 def _draw_rotate_icon(draw_list, center, radius, color, clockwise):
-	"""Draws a circular-arrow rotation icon (an open arc + an arrowhead at
-	its leading end) into an ImGui draw list. Hand-drawn rather than a font
-	glyph -- this project only loads ImGui's default font (ASCII only), no
-	icon font with rotation-arrow characters in its range."""
-	arc_start, arc_end = (radians(-50.0), radians(230.0)) if clockwise else (radians(230.0), radians(-50.0))
+	"""Draws a circular-arrow roll icon (an open arc + an arrowhead at its
+	leading end) into an ImGui draw list. Hand-drawn rather than a font glyph
+	-- Font Awesome 4 (the only icon font this project ships) has no
+	dedicated rotate-left/rotate-right glyph. Angles are negated from the
+	"natural" -50/230 degree sweep to mirror the icon vertically (ImGui's
+	y-down screen space would otherwise draw it upside down relative to how
+	a clock face reads)."""
+	arc_start, arc_end = (radians(50.0), radians(-230.0)) if clockwise else (radians(-230.0), radians(50.0))
 	draw_list.path_clear()
 	draw_list.path_arc_to(center, radius, arc_start, arc_end, 16)
 	draw_list.path_stroke(color, False, 1.6)
@@ -161,6 +153,17 @@ def _draw_rotate_icon(draw_list, center, radius, color, clockwise):
 	p1 = (tip[0] + wing * cos(tangent + spread), tip[1] + wing * sin(tangent + spread))
 	p2 = (tip[0] + wing * cos(tangent - spread), tip[1] + wing * sin(tangent - spread))
 	draw_list.add_triangle_filled(tip, p1, p2, color)
+
+
+def _orbit_offset(heading, pitch, distance):
+	"""Same offset formula as OrbitCamera._update_camera_pos(), so the
+	gizmo's fixed-distance camera turns in lockstep with the real one."""
+	h_rad, p_rad = radians(heading), radians(pitch)
+	return Vec3(
+		distance * cos(p_rad) * sin(h_rad),
+		-distance * cos(p_rad) * cos(h_rad),
+		distance * sin(p_rad),
+	)
 
 
 class NavigationCube:
@@ -352,9 +355,9 @@ class NavigationCube:
 
 		heading, pitch = self.orbit_camera.heading, self.orbit_camera.pitch
 		self.cam_np.set_pos(_orbit_offset(heading, pitch, _CAM_DISTANCE))
-		# Mirror the main camera's up_hint too, not just heading/pitch --
-		# otherwise the gizmo stays level while the main view is tilted from
-		# a rotate_step() call, and the two visibly disagree.
+		# Mirror the main camera's up_hint too, not just heading/pitch, so the
+		# two can't silently disagree if up_hint is ever driven away from
+		# world Z by something other than snap_to_axis()/reset().
 		self.cam_np.look_at(Point3(0, 0, 0), self.orbit_camera.up_hint)
 
 		# Mirrors the object's actual current orientation (whatever
@@ -416,54 +419,97 @@ class NavigationCube:
 		if axis is not None:
 			self.orbit_camera.snap_to_axis(axis)
 
-	def _icon_button(self, str_id, clockwise):
+	def _icon_button(self, icon, tooltip):
 		"""A square, auto-sized (to match a normal text button's height)
-		button showing a hand-drawn rotation icon instead of a label."""
+		icon-only button with a hover tooltip -- Font Awesome glyph, already
+		merged into ImGui's default font by ForgeryApp._load_icon_font() by
+		the time any tool app constructs a NavigationCube."""
 		size = imgui.get_frame_height()
-		clicked = imgui.button(str_id, (size, size))
+		clicked = imgui.button(icon, (size, size))
+		if imgui.is_item_hovered():
+			imgui.set_tooltip(tooltip)
+		return clicked
 
+	def _roll_button(self, clockwise):
+		"""Square icon button showing a hand-drawn circular-arrow roll icon
+		(see _draw_rotate_icon()) instead of a font glyph."""
+		size = imgui.get_frame_height()
+		clicked = imgui.button("##roll-cw" if clockwise else "##roll-ccw", (size, size))
 		rect_min, rect_max = imgui.get_item_rect_min(), imgui.get_item_rect_max()
 		center = ((rect_min.x + rect_max.x) / 2.0, (rect_min.y + rect_max.y) / 2.0)
 		color = imgui.get_color_u32(imgui.Col_.text.value)
 		_draw_rotate_icon(imgui.get_window_draw_list(), center, size / 2.0 - 5.0, color, clockwise)
+		if imgui.is_item_hovered():
+			imgui.set_tooltip("Roll view 90° clockwise" if clockwise else "Roll view 90° counter-clockwise")
 		return clicked
 
 	def draw_controls(self):
-		"""Draws the reset-view / rotate-90 buttons in a single bar above
-		the gizmo (the XYZ legend is drawn straight into the 3D gizmo scene
-		itself, see _build_axis_labels()). Call once per frame from
-		draw_panel() -- this is a separate floating (borderless), auto-sized
-		window positioned from the gizmo's own pixel rect, not part of the
-		docked panel's own layout."""
+		"""Draws the reset-view / face-step / roll buttons above the gizmo
+		(the XYZ legend is drawn straight into the 3D gizmo scene itself, see
+		_build_axis_labels()), laid out as --
+		  ccw  ^   cw
+		  <  HOME  >
+		       v
+		Each arrow snaps to the adjacent face in that direction (always lands
+		on one of the 6 axis-aligned views, see OrbitCamera.step_to_face());
+		the 2 top corners instead roll the current face view 90°
+		(OrbitCamera.roll_step()) without changing which face is shown.
+		Call once per frame from draw_panel() -- this is a separate floating
+		(borderless), auto-sized window positioned from the gizmo's own pixel
+		rect, not part of the docked panel's own layout."""
 		left, right, top, _bottom = self._panel_px
 		center_x = (left + right) / 2.0
 		width, height = self._controls_size
 		imgui.set_next_window_pos((center_x - width / 2.0, top - height - _UI_GAP_PX))
 		with imgui_ctx.begin("##navcube-controls", flags=_UI_FLAGS):
-			# ButtonRepeat makes imgui.button() fire repeatedly (at
-			# io.key_repeat_delay/rate) while held down, instead of only once
-			# on click -- exactly the "hold to keep rotating" behavior wanted
-			# here, without any custom timer/held-state tracking.
-			imgui.push_item_flag(imgui.ItemFlags_.button_repeat.value, True)
-			if self._icon_button("##rotate-left", clockwise=False):
-				self.orbit_camera.rotate_step(-1)
-			imgui.pop_item_flag()
-			imgui.same_line()
+			icon_size = imgui.get_frame_height()
+			side_indent = icon_size + imgui.get_style().item_spacing.x
 
-			# Ctrl held means "Reset" targets the object (inner cube) instead
-			# of the camera (outer cube) -- mirrors the same Ctrl modifier
+			# Held-down buttons call the OrbitCamera step every frame (via
+			# is_item_active(), true continuously while the mouse is down on
+			# the item) rather than relying on ImGui's button_repeat -- that
+			# fires clicks on its own fixed timer, independent of how long
+			# OrbitCamera's own step animation takes, which could leave a
+			# stutter of a frame or more between one step finishing and the
+			# next repeat-fired click arriving. step_to_face()/roll_step()
+			# already no-op while a step is still in flight, so polling every
+			# frame just means the next step starts on the exact frame the
+			# previous one finishes, however long that took.
+			self._roll_button(clockwise=False)
+			if imgui.is_item_active():
+				self.orbit_camera.roll_step(-1)
+			imgui.same_line()
+			self._icon_button(fa_icons.ICON_FA_ARROW_UP, "Show the face above")
+			if imgui.is_item_active():
+				self.orbit_camera.step_to_face("up")
+			imgui.same_line()
+			self._roll_button(clockwise=True)
+			if imgui.is_item_active():
+				self.orbit_camera.roll_step(1)
+
+			# Row 2: Left, Home (reset), Right.
+			self._icon_button(fa_icons.ICON_FA_ARROW_LEFT, "Show the face to the left")
+			if imgui.is_item_active():
+				self.orbit_camera.step_to_face("left")
+			imgui.same_line()
+			# Ctrl held means Home targets the object (inner cube) instead of
+			# the camera (outer cube) -- mirrors the same Ctrl modifier
 			# ObjectManipulator/OrbitCamera use to pick which one a drag acts on.
-			if imgui.button("Reset"):
+			if self._icon_button(fa_icons.ICON_FA_HOME, "Reset view (Ctrl: reset object rotation)"):
 				if self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control()):
 					self.app.reset_object_rotation()
 				else:
 					self.orbit_camera.reset()
 			imgui.same_line()
+			self._icon_button(fa_icons.ICON_FA_ARROW_RIGHT, "Show the face to the right")
+			if imgui.is_item_active():
+				self.orbit_camera.step_to_face("right")
 
-			imgui.push_item_flag(imgui.ItemFlags_.button_repeat.value, True)
-			if self._icon_button("##rotate-right", clockwise=True):
-				self.orbit_camera.rotate_step(1)
-			imgui.pop_item_flag()
+			# Row 3: Down, indented under the center column.
+			imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + side_indent)
+			self._icon_button(fa_icons.ICON_FA_ARROW_DOWN, "Show the face below")
+			if imgui.is_item_active():
+				self.orbit_camera.step_to_face("down")
 
 			window_size = imgui.get_window_size()
 			self._controls_size = (window_size.x, window_size.y)

@@ -1,5 +1,67 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add right-mouse zoom/scale and a navcube directional pad
+
+Right mouse button was unused by both `OrbitCamera` and `ObjectManipulator`
+(`ryzom_forgery/camera.py`) -- both only ever responded to left (orbit/rotate) and middle
+(pan/move) drag. It's now wired up as a smooth, continuous alternative to wheel zoom:
+
+- `OrbitCamera`: plain right-mouse drag zooms (`_zoom_drag()`), same direction convention as
+  wheel zoom (dragging up zooms in) but continuous instead of discrete notches, via the same
+  exponential falloff as `_zoom()`'s own `zoom_speed`, scaled by a new `zoom_drag_speed`.
+- `ObjectManipulator`: Ctrl + right-mouse drag scales the object uniformly (`_scale()`,
+  clamped to `min_scale`/`max_scale`) -- dragging up grows it, matching the same "up" feel as
+  the camera's own zoom-in, so both gestures make the object read bigger on screen. Applied to
+  the shared `_object_pivot`, the same node Ctrl+left/middle already rotate/move, so it
+  persists across shape rebuilds the same way.
+
+Separately, `NavigationCube.draw_controls()` (`ryzom_forgery/navcube.py`) replaces its old
+rotate-left/Reset/rotate-right single-row bar (hand-drawn circular-arrow icons rolling the
+view around its own forward axis) with a 3x3 pad:
+
+```
+  ccw  ^   cw
+  <  HOME  >
+       v
+```
+
+The 4 arrows (`OrbitCamera.step_to_face()`) step the view by a clean 90 degrees to the
+adjacent axis-aligned face in that screen direction; the 2 top corners (`roll_step()`) instead
+roll the current face view by 90 degrees without changing which face is shown. The center
+button is a Home icon instead of a "Reset" text label, keeping its previous behavior (reset
+view, or Ctrl+click to reset the object's rotation instead).
+
+Both are a single explicit rotation of the current offset (position - target) and `up_hint` by
+a fixed axis-angle (new `OrbitCamera._start_axis_anim()`/`_advance_anim()`, animating the
+rotation ANGLE itself and re-deriving heading/pitch from the rotated offset each frame, so the
+view traces the true circular arc of the rotation) -- not a jump to a value pulled from a
+heading/pitch lookup table, which is what the existing `_start_anim()` (independent
+heading/pitch/up_hint lerps, kept for `snap_to_axis()`'s arbitrary-retarget case, e.g. clicking
+a gizmo face directly) does. This distinction mattered in practice: `OrbitCamera` parameterizes
+the view as heading/pitch/up_hint, and heading becomes a meaningless `atan2(0, 0)`-style
+artifact exactly at a pole (+z/-z, where forward is +/-Z) -- re-deriving a rotation axis from it
+rotated a further step around the wrong axis, and hardcoding `up_hint` back to world Z on every
+step was degenerate for `lookAt()` right at a pole (parallel to forward), leaving Panda's
+fallback "up" resolution to pick an uncontrolled axis. `step_to_face()`'s up/down instead reads
+the rotation axis live from the camera's actual current right vector
+(`self.app.camera.getQuat().getRight()`, immune to the singularity since it reflects whatever's
+actually rendered), and left/right rotates around `self.up_hint` itself instead of resetting it
+to world Z, so a previous up/down step's roll carries through a later left/right step instead
+of being silently corrected away. `setFromAxisAngle()`'s unit-length assertion on the rotation
+axis is guarded against too, since chained rotations could drift `up_hint` off unit length over
+many steps without an explicit re-normalize.
+
+Holding a button polls `imgui.is_item_active()` every frame instead of relying on ImGui's
+`button_repeat` flag, and `step_to_face()`/`roll_step()` no-op while a step animation is
+already in flight -- button_repeat's own fixed timer, independent of how long a step animation
+takes, left either a stutter (repeat fires before the previous step's animation naturally
+clears) or an interrupted, half-finished rotation if the button was released mid-step. Polling
+every frame starts the next step on the exact frame the previous one completes, and lets the
+in-flight step always finish once started. The "axis" animation kind also uses a constant
+angular velocity rather than smoothstep easing, since smoothstep's zero velocity at both ends
+of every chained step read as a stutter at each 90-degree boundary when several play back to
+back from a held button.
+
 ## 2026-08-17 — ✨ Add per-reference-shape placement and transparency controls to object_editor
 
 The top-left viewport toggles for the 3 scale-reference shapes (Cube / smallest character /
