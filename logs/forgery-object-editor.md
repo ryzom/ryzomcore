@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-17 — ✨ Resolve imported meshes' textures from their own folder as a fallback
+
+An `.obj`/`.dae`/`.fbx`'s own texture references routinely point next to the source file
+(or an `.fbx`'s own `<name>.fbm` sibling folder, or a conventional `tex`/`textures`/`data`
+subfolder) rather than anywhere inside the Ryzom asset root object_editor otherwise searches
+via `AssetIndex` -- previously the only way to see such a texture at all was to also have it
+somewhere in the indexed data tree.
+
+Added `shape_import.texture_search_dirs_for(path)` (the imported file's own folder, plus its
+`.fbm` sibling for `.fbx`) and `shape_geometry._find_local_texture_ref()` (checked as a
+fallback by `load_panda_texture()`'s new `search_dirs` param only once the `AssetIndex`
+itself comes up empty, same case-insensitive/extension-fallback matching as
+`AssetIndex.find_texture()`). `object_editor.py` now tracks `self._texture_search_dirs` per
+loaded shape: the file's own folder for a `.shape` opened from the Explorer,
+`texture_search_dirs_for()` for a freshly imported mesh (both the "import as new shape" and
+"replace geometry" flows -- `ImportDialog.on_replace` now threads the source path through for
+this).
+
 ## 2026-08-17 — 🐛 Fix FBX/DAE import axis conversion and null-channel crashes
 
 Two robustness bugs in `shape_import.py`'s `_import_via_assimp()` (used by both `.fbx` and

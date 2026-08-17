@@ -556,3 +556,17 @@ def import_fbx(path: Path) -> Mesh:
 	"""Parses `path` (an FBX) via assimp-py, returning a ready-to-save Mesh --
 	see _import_via_assimp()."""
 	return _import_via_assimp(path)
+
+
+def texture_search_dirs_for(path: Path) -> List[Path]:
+	"""Folders worth falling back to (see shape_geometry.load_panda_texture's
+	search_dirs) when resolving a texture referenced by `path`'s own imported
+	material data -- just `path`'s own folder, plus its `<name>.fbm` sibling
+	for an `.fbx`: the conventional folder 3ds Max/FBX SDK-based exporters
+	(and Autodesk's own FBX Converter) drop embedded/referenced texture files
+	into next to the .fbx itself, named after it."""
+	path = Path(path)
+	dirs = [path.parent]
+	if path.suffix.lower() == ".fbx":
+		dirs.append(path.parent / f"{path.stem}.fbm")
+	return dirs

@@ -28,6 +28,7 @@ from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
 	iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, solid_color_texture,
 )
+from ryzom_forgery.shape_import import texture_search_dirs_for
 
 from pynel.ryzom_shape import Rgba, ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
 
@@ -292,6 +293,7 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
+		self._texture_search_dirs = []  # extra folders (see shape_geometry.load_panda_texture's search_dirs) to fall back to for this shape's textures -- an imported mesh's own folder, tex/textures/data subfolders included
 		self._save_overwrite_confirmed = False  # session-scoped: asked once, no more Save confirmations after that
 		self._confirm_overwrite_open = False
 		self._save_dialog = None  # in-flight portable_file_dialogs.save_file, for Save As
@@ -338,9 +340,15 @@ class ObjectEditorApp(ForgeryApp):
 		self._reset_shape_state()
 		if source_path is not None:
 			self._shape_source_name = source_path.stem + ".shape"
+			# The imported file's own folder (see load_panda_texture()'s
+			# search_dirs) -- an .fbx/.dae/.obj's textures routinely sit right
+			# next to it (or in a tex/textures/data subfolder, or an .fbx's
+			# own <name>.fbm sibling) rather than anywhere in the Ryzom asset
+			# root this app otherwise searches.
+			self._texture_search_dirs = texture_search_dirs_for(source_path)
 		self._display_shape(ShapeFile(type_name="Mesh", value=mesh))
 
-	def _on_import_replace(self, mesh):
+	def _on_import_replace(self, mesh, source_path):
 		if self.shape_file is None:
 			return
 		if self.shape_file.type_name != "Mesh":
@@ -348,6 +356,12 @@ class ObjectEditorApp(ForgeryApp):
 				f"Can't replace geometry: the current shape is a {self.shape_file.type_name!r}, "
 				f"only a plain Mesh's geometry can be swapped this way.")
 			return
+
+		if source_path is not None:
+			# Any material the mismatched-count remap path below adds from
+			# the imported mesh (see _replace_geometry()) carries that mesh's
+			# own texture names -- same reasoning as _on_import_new_shape().
+			self._texture_search_dirs.extend(texture_search_dirs_for(source_path))
 
 		current_materials = self.shape_file.value.materials
 		if len(mesh.materials) == len(current_materials):
@@ -462,6 +476,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._reset_shape_state()
 		self._shape_source_path = item.path if item.bnp_path is None else None
 		self._shape_source_name = item.name
+		if self._shape_source_path is not None:
+			self._texture_search_dirs = [self._shape_source_path.parent]
 
 		try:
 			shape_file = parse_shape(item.read_bytes())
@@ -484,6 +500,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_override_colors = {}
 		self._shape_source_path = None
 		self._shape_source_name = None
+		self._texture_search_dirs = []
 		self._save_status = ""
 
 	def _display_shape(self, shape_file):

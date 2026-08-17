@@ -5,10 +5,20 @@ maintain their own copy of "how to walk a parsed shape's render passes".
 """
 
 import dataclasses
+from pathlib import Path
 
 from panda3d.core import PNMImage, StringStream, Texture as PandaTexture
 
 from pynel.ryzom_shape import Mesh, MeshGeom, MeshMRM, MeshMRMGeom, MeshMultiLod
+
+from .asset_index import AssetRef, TEXTURE_FALLBACK_EXTENSIONS
+
+# Subfolders (relative to each of load_panda_texture()'s search_dirs, "" =
+# the dir itself) checked for a texture that isn't anywhere in the indexed
+# Ryzom asset root -- an imported .fbx/.dae/.obj routinely references
+# textures sitting right next to the source file, or in one of these
+# conventional sibling folders, rather than inside the game's own data tree.
+_LOCAL_TEXTURE_SUBDIRS = ("", "tex", "textures", "data")
 
 
 def _passes_from_mesh_geom(geom: MeshGeom):
@@ -100,17 +110,47 @@ def solid_color_texture(color):
 	return texture
 
 
-def load_panda_texture(asset_index, name, cache=None):
+def _find_local_texture_ref(name, search_dirs):
+	"""Fallback for load_panda_texture() when `name` isn't in the AssetIndex
+	at all -- checks each of `search_dirs` (typically just the folder an
+	imported mesh file was loaded from) and their tex/textures/data
+	subfolders, same name-matching rules as AssetIndex.find_texture()
+	(case-insensitive, also tries swapping the extension for another common
+	texture one)."""
+	candidates = [name.lower()]
+	stem = Path(name).stem.lower()
+	candidates += [stem + extension for extension in TEXTURE_FALLBACK_EXTENSIONS]
+
+	for base_dir in search_dirs:
+		for subdir in _LOCAL_TEXTURE_SUBDIRS:
+			folder = (base_dir / subdir) if subdir else base_dir
+			if not folder.is_dir():
+				continue
+			try:
+				entries = {path.name.lower(): path for path in folder.iterdir() if path.is_file()}
+			except OSError:
+				continue
+			for candidate in candidates:
+				match = entries.get(candidate)
+				if match is not None:
+					return AssetRef(name=match.name, path=match)
+	return None
+
+
+def load_panda_texture(asset_index, name, cache=None, search_dirs=None):
 	"""Resolves and decodes a material texture reference (by base file name,
 	as stored in the shape's Texture.file_name) into a Panda3D Texture, via
-	the given AssetIndex. Returns None if it can't be found/decoded. `cache`,
-	if given, is a dict reused across calls to avoid re-decoding the same
-	texture for multiple materials/passes."""
+	the given AssetIndex, falling back to _find_local_texture_ref(search_dirs)
+	if given and the AssetIndex doesn't have it. Returns None if it can't be
+	found/decoded. `cache`, if given, is a dict reused across calls to avoid
+	re-decoding the same texture for multiple materials/passes."""
 	if cache is not None and name in cache:
 		return cache[name]
 
 	texture = None
 	ref = asset_index.find_texture(name)
+	if ref is None and search_dirs:
+		ref = _find_local_texture_ref(name, search_dirs)
 	if ref is None:
 		print(f"[shape_geometry] texture not found in asset index: {name!r}")
 	else:

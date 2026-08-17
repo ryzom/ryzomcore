@@ -16,10 +16,12 @@ IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx}
 
 
 class ImportDialog:
-	"""`on_new_shape(mesh, source_path)` and `on_replace(mesh)` are called
-	with the parsed `pynel.ryzom_shape.Mesh` once the user picks a mode in
-	the popup -- `source_path` is the imported .obj/.dae/.fbx's own path, handed
-	back so the new shape can default its name/save location to it."""
+	"""`on_new_shape(mesh, source_path)` and `on_replace(mesh, source_path)`
+	are called with the parsed `pynel.ryzom_shape.Mesh` once the user picks a
+	mode in the popup -- `source_path` is the imported .obj/.dae/.fbx's own
+	path, handed back so the new-shape flow can default its name/save
+	location to it, and both flows can fall back to looking for the mesh's
+	textures next to it (see object_editor.py's _texture_search_dirs)."""
 
 	def __init__(self, on_new_shape, on_replace):
 		self._on_new_shape = on_new_shape
@@ -88,9 +90,9 @@ class ImportDialog:
 		imgui.begin_disabled(not self._has_current_shape)
 		if imgui.button("Replace in current shape"):
 			mesh, self._pending_mesh = self._pending_mesh, None
-			self._pending_path = None
+			path, self._pending_path = self._pending_path, None
 			imgui.close_current_popup()
-			self._on_replace(mesh)
+			self._on_replace(mesh, path)
 		imgui.end_disabled()
 
 		imgui.begin_disabled(True)
