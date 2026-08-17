@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add track evaluation to pynel's .anim reader
+
+`evaluate_track(track, time)` in `ryzom_animation.py` (+ CLI `ryzom-anim eval FILE.anim
+TRACK TIME`), evaluating any of the module's track kinds at an arbitrary time, with each
+kind's own real looping/interpolation semantics replicated from the C++ rather than a single
+approximate generic algorithm:
+
+- Constant tracks (`CTrackDefault*`): return the value directly, ignoring `time`.
+- `CTrackSampled*`: per-key times rebuilt from the `TimeBlock` frame indices (the C++'s own
+  frame-quantized dichotomy search in `CTrackSampledCommon::evalTime()` is only a compactness
+  optimization over this same data -- a plain bisect on the flat list gives the same result),
+  lerp for vectors, slerp for quaternions. Past the last key, the value holds rather than
+  blending back to the first key across the loop seam -- matches what `evalTime()` actually
+  does, not a limitation on this side.
+- `CTrackKeyFramerLinear*`: loop bounds re-derived from `RangeLock`/the first-last keyframe's
+  own time, replicating `ITrackKeyFramer::compile()` (the serialized RangeBegin/RangeEnd are
+  only authoritative when `RangeLock` is false, which isn't the common case). Looping past the
+  last key blends explicitly back to the first one (`dateNext == loopEnd`), per
+  `ITrackKeyFramer::eval()` -- a genuinely different loop behavior from the sampled tracks
+  above, not an inconsistency.
+
+Validated via the bridge on the same two real files as Step 1: a looping 8.1s Bip01 rotation
+track gives near-identical quaternions at t=0.0 and t=8.1 (confirms the wrap), a mid-clip time
+gives a properly normalized interpolated quaternion, and a material UV-scroll float track
+interpolates linearly as expected.
+
 ## 2026-08-17 — ✨ Add .anim (CAnimation) read support to pynel
 
 New module `nel/tools/pynel/pynel/ryzom_animation.py` (self-contained, own `_Reader`/

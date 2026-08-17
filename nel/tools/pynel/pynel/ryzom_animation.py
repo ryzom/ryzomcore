@@ -42,6 +42,7 @@ Usage:
 """
 
 import argparse
+import bisect
 import math
 import struct
 from dataclasses import dataclass
@@ -371,6 +372,150 @@ _CLASS_PARSERS["CTrackKeyFramerLinearFloat"] = lambda f: _parse_keyframer_linear
 
 
 # ---------------------------------------------------------------------------
+# Track evaluation
+# ---------------------------------------------------------------------------
+
+
+def _clamp(x: float, lo: float, hi: float) -> float:
+	return lo if x < lo else hi if x > hi else x
+
+
+def _slerp(a: Quaternion, b: Quaternion, t: float) -> Quaternion:
+	ax, ay, az, aw = a.x, a.y, a.z, a.w
+	bx, by, bz, bw = b.x, b.y, b.z, b.w
+	dot = ax * bx + ay * by + az * bz + aw * bw
+	if dot < 0.0:
+		bx, by, bz, bw, dot = -bx, -by, -bz, -bw, -dot
+	dot = _clamp(dot, -1.0, 1.0)
+	if dot > 0.9995:
+		rx = ax + (bx - ax) * t
+		ry = ay + (by - ay) * t
+		rz = az + (bz - az) * t
+		rw = aw + (bw - aw) * t
+	else:
+		theta0 = math.acos(dot)
+		theta = theta0 * t
+		sin_theta0 = math.sin(theta0)
+		s0 = math.cos(theta) - dot * math.sin(theta) / sin_theta0
+		s1 = math.sin(theta) / sin_theta0
+		rx = ax * s0 + bx * s1
+		ry = ay * s0 + by * s1
+		rz = az * s0 + bz * s1
+		rw = aw * s0 + bw * s1
+	length = math.sqrt(rx * rx + ry * ry + rz * rz + rw * rw)
+	if length > 0:
+		rx, ry, rz, rw = rx / length, ry / length, rz / length, rw / length
+	return Quaternion(rx, ry, rz, rw)
+
+
+def _lerp_value(a, b, t: float):
+	if isinstance(a, Quaternion):
+		return _slerp(a, b, t)
+	if isinstance(a, Vector3):
+		return Vector3(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, a.z + (b.z - a.z) * t)
+	return a + (b - a) * t
+
+
+def _sampled_key_times(track: Track) -> List[float]:
+	"""Per-key times, relative to `track.begin_time` (i.e. frame * delta_time),
+	rebuilt from the TimeBlock frame indices -- CTrackSampledCommon::evalTime()'s
+	own frame-quantized dichotomy search is just a compactness optimization over
+	this same data, so a plain bisect on this flat list gives the same result."""
+	times: List[float] = []
+	for block in track.time_blocks or []:
+		for t in block.times:
+			frame = block.time_offset + t
+			times.append(frame * track.delta_time)
+	return times
+
+
+def _evaluate_sampled(track: Track, time: float):
+	keys = track.keys
+	if not keys:
+		raise ValueError(f"track {track.class_name!r} has no keys")
+	if len(keys) == 1:
+		return keys[0]
+
+	local_time = time - track.begin_time
+	total_range = track.total_range or 0.0
+	if track.loop_mode and total_range > 0 and (local_time < 0 or local_time >= total_range):
+		local_time -= math.floor(local_time / total_range) * total_range
+		if local_time < 0 or local_time >= total_range:
+			local_time = 0.0
+
+	times = _sampled_key_times(track)
+	idx = bisect.bisect_right(times, local_time) - 1
+	if idx < 0:
+		return keys[0]
+	if idx >= len(keys) - 1:
+		# past the last key: CTrackSampledCommon::evalTime() holds the last key's
+		# value rather than blending back to the first one across the loop seam.
+		return keys[-1]
+	t0, t1 = times[idx], times[idx + 1]
+	frac = 0.0 if t1 <= t0 else _clamp((local_time - t0) / (t1 - t0), 0.0, 1.0)
+	return _lerp_value(keys[idx], keys[idx + 1], frac)
+
+
+def _evaluate_keyframer(track: Track, time: float):
+	keyframes = track.keyframes
+	if not keyframes:
+		raise ValueError(f"track {track.class_name!r} has no keyframes")
+	if len(keyframes) == 1:
+		return keyframes[0].value
+
+	# ITrackKeyFramer::compile(): when RangeLock is set (the common/default case),
+	# the serialized RangeBegin/RangeEnd are ignored and the loop bounds are
+	# re-derived from the first/last keyframe's own time instead.
+	if track.range_lock:
+		loop_start = keyframes[0].time
+		loop_end = keyframes[-1].time
+	else:
+		loop_start = track.begin_time
+		loop_end = track.end_time
+	total_range = loop_end - loop_start
+
+	date = time
+	if track.loop_mode and total_range > 0 and (date < loop_start or date >= loop_end):
+		local = date - loop_start
+		local -= math.floor(local / total_range) * total_range
+		date = loop_start + local
+		if date < loop_start or date >= loop_end:
+			date = loop_start
+
+	times = [k.time for k in keyframes]
+	idx = bisect.bisect_right(times, date) - 1
+	if idx < 0:
+		return keyframes[0].value
+	if idx >= len(keyframes) - 1:
+		if track.loop_mode and total_range > 0:
+			# ITrackKeyFramer::eval(): looping past the last key blends back
+			# toward the first one (dateNext == loop_end), unlike sampled tracks.
+			t0 = times[idx]
+			frac = 0.0 if loop_end <= t0 else _clamp((date - t0) / (loop_end - t0), 0.0, 1.0)
+			return _lerp_value(keyframes[idx].value, keyframes[0].value, frac)
+		return keyframes[-1].value
+	t0, t1 = times[idx], times[idx + 1]
+	frac = 0.0 if t1 <= t0 else _clamp((date - t0) / (t1 - t0), 0.0, 1.0)
+	return _lerp_value(keyframes[idx].value, keyframes[idx + 1].value, frac)
+
+
+def evaluate_track(track: Track, time: float):
+	"""Evaluates `track` at `time` (seconds), returning a plain float, Vector3,
+	or Quaternion -- interpolating (slerp for rotations, lerp otherwise) between
+	the two surrounding keys. A constant track (CTrackDefaultVector/Quat) always
+	returns its single value regardless of `time`. Outside the track's own
+	range, the value clamps to the nearest end unless `track.loop_mode` is set."""
+	if track.value is not None:
+		return track.value
+	if track.keyframes is not None:
+		return _evaluate_keyframer(track, time)
+	if track.keys is not None:
+		return _evaluate_sampled(track, time)
+	raise ValueError(f"track {track.class_name!r} has neither a constant value, "
+	                  f"keyframes, nor sampled keys")
+
+
+# ---------------------------------------------------------------------------
 # Top level
 # ---------------------------------------------------------------------------
 
@@ -440,6 +585,11 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 	p_dump = sub.add_parser("dump", help="print a summary of a .anim file")
 	p_dump.add_argument("path", type=Path)
 
+	p_eval = sub.add_parser("eval", help="evaluate one track at a given time")
+	p_eval.add_argument("path", type=Path)
+	p_eval.add_argument("track_name")
+	p_eval.add_argument("time", type=float)
+
 	return parser
 
 
@@ -453,6 +603,14 @@ def _main() -> None:
 
 	if args.command == "dump":
 		_dump(anim)
+	elif args.command == "eval":
+		index = anim.id_by_name.get(args.track_name)
+		if index is None:
+			raise SystemExit(f"no such track: {args.track_name!r}")
+		track = anim.tracks[index]
+		if track is None:
+			raise SystemExit(f"track {args.track_name!r} is null")
+		print(evaluate_track(track, args.time))
 
 
 if __name__ == "__main__":
