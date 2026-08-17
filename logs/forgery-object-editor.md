@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add a live wind-sway preview to object_editor for WindTree shapes
+
+object_editor could already display a shape's `WindTreeParams` (read-only, via the generic
+"All Properties" tab), but had no way to actually see the wind animation it describes --
+scoped down from an initial "editable WindTree UI" idea to preview-only first, since editing
+parameters blind isn't useful without seeing what they actually do.
+
+Added a viewer-only "Wind preview" panel (`_draw_wind_controls()`: Animate toggle, Strength
+0-3 slider, Direction 0-360° slider -- shown only when the loaded shape has wind data,
+mirrors the engine's own `CScene::setGlobalWindPower/Direction` scene setting rather than
+anything saved to the shape) and a per-frame animation task (`_update_wind()`), ported from
+`nel/src/3d/meshvp_wind_tree.cpp` and its `wind_tree_vp.glsl` vertex decode: each vertex's
+`PrimaryColor` channel encodes its level-0/1/2 wind blend weight (R) and which of 4
+level-1/level-2 phase branches it swings with (G/B), combined with per-level
+frequency/power/bias oscillation (`cos(2*pi*t)`) and the global strength/direction from the
+new controls (`_build_wind_state()` precomputes the per-vertex decode once in
+`numpy` arrays; `_update_wind()` recomputes positions every frame and writes them back via a
+`GeomVertexRewriter`).
+
+Needed splitting `_build_geom()` into `_build_vertex_data()` (builds the shared
+`GeomVertexData` once per `_rebuild_geometry()` call, now `Geom.UH_dynamic` for shapes with
+wind data so Panda3D doesn't assume the position buffer is upload-once) and a smaller
+`_build_geom()` (just the per-pass triangle indices) -- every render pass already indexed
+into the exact same vertex array, so this also means the vertex data (and its per-frame
+wind update) is built/updated once per shape instead of once per material pass.
+
 ## 2026-08-17 — ✨ Resolve imported meshes' textures from their own folder as a fallback
 
 An `.obj`/`.dae`/`.fbx`'s own texture references routinely point next to the source file

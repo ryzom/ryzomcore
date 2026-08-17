@@ -83,6 +83,18 @@ def iter_render_passes(shape_value):
 			yield from _passes_from_mrm_geom(slot_geom)
 
 
+def shape_geom(shape_value):
+	"""Returns the MeshGeom/MeshMRMGeom for a CMesh/CMeshMRM/CMeshMultiLod
+	(slot 0) shape value -- same dispatch as iter_render_passes(), for code
+	that needs geom-level data (e.g. vertex_program/WindTreeParams) rather
+	than per-pass vertex buffers. None for any other shape type."""
+	if isinstance(shape_value, (Mesh, MeshMRM)):
+		return shape_value.geom
+	if isinstance(shape_value, MeshMultiLod) and shape_value.slots:
+		return shape_value.slots[0].mesh_geom
+	return None
+
+
 def shape_bbox(shape_value):
 	if isinstance(shape_value, (Mesh, MeshMRM)):
 		return shape_value.bbox

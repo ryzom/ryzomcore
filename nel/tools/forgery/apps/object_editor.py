@@ -6,12 +6,15 @@
 render yet.
 """
 
-from math import ceil
+from math import ceil, cos, pi, radians, sin
 from pathlib import Path
 
+import numpy
+
 from panda3d.core import (
-	AlphaTestAttrib, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat,
-	GeomVertexWriter, LineSegs, Material as PandaMaterial, Point3, Quat, TransparencyAttrib,
+	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
+	GeomVertexFormat, GeomVertexRewriter, GeomVertexWriter, LineSegs, Material as PandaMaterial, Point3, Quat,
+	TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
@@ -26,11 +29,13 @@ from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
-	iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, solid_color_texture,
+	iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, shape_geom, solid_color_texture,
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 
-from pynel.ryzom_shape import Rgba, ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
+from pynel.ryzom_shape import (
+	Rgba, ShapeFile, ShapeParseError, ShapeWriteError, Texture, WindTreeParams, parse_shape, save_shape,
+)
 
 DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 
@@ -185,6 +190,48 @@ def _build_axes_geom(colors, length):
 	return lines.create()
 
 
+class _WindState:
+	"""Per-loaded-shape data for the live wind preview (see
+	ObjectEditorApp._update_wind()) -- built once in _rebuild_geometry() from
+	the shape's WindTreeParams + PrimaryColor vertex channel, then read every
+	frame by the animation task. `vdata` (the shared GeomVertexData every
+	render pass's Geom points at, see _build_vertex_data()) is filled in by
+	the caller once it's built."""
+
+	def __init__(self, params, base_positions, factors, idx2, idx3):
+		self.params = params
+		self.base_positions = base_positions  # (N,3) float32
+		self.factors = factors  # (N,3) float32, level-0/1/2 blend weight per vertex
+		self.idx2 = idx2  # (N,) int, which of the 4 level-1 phase branches each vertex follows
+		self.idx3 = idx3  # (N,) int, same for level-2
+		self.current_time = [0.0, 0.0, 0.0]  # per level, wrapped to [0, 1), see _update_wind()
+		self.vdata = None
+
+
+def _build_wind_state(wind_params, vertex_buffer):
+	"""Precomputes the per-vertex data _update_wind() needs every frame, from
+	the shape's own PrimaryColor channel -- encodes, per vertex, its level-0/
+	1/2 wind blend weight (R) and which of the 4 level-1/level-2 phase
+	branches it swings with (G/B), exactly like the engine's own
+	wind_tree_vp.glsl decodes it (`vprimaryColor.xxx*3 + (0,-1,-2)` clamped,
+	and `vprimaryColor.yz*3.99` truncated to an index) -- see
+	nel/src/3d/meshvp_wind_tree.cpp for the reference implementation this
+	whole preview is ported from. None if the shape has no PrimaryColor data
+	to decode (WindTreeParams present but no per-vertex assignment yet)."""
+	positions = vertex_buffer.channels.get("Position")
+	colors = vertex_buffer.channels.get("PrimaryColor")
+	if not positions or not colors:
+		return None
+
+	base_positions = numpy.array(positions, dtype=numpy.float32)
+	rgb = numpy.array([(c.r, c.g, c.b) for c in colors], dtype=numpy.float32) / 255.0
+	r, g, b = rgb[:, 0], rgb[:, 1], rgb[:, 2]
+	factors = numpy.clip(numpy.stack([r * 3.0, r * 3.0 - 1.0, r * 3.0 - 2.0], axis=1), 0.0, 1.0).astype(numpy.float32)
+	idx2 = numpy.minimum((g * 3.99).astype(numpy.int32), 3)
+	idx3 = numpy.minimum((b * 3.99).astype(numpy.int32), 3)
+	return _WindState(wind_params, base_positions, factors, idx2, idx3)
+
+
 def _multi_bitmap_slot_label(index):
 	if 0 <= index < len(_MULTI_BITMAP_SLOT_LABELS):
 		quality, ecosystem, season = _MULTI_BITMAP_SLOT_LABELS[index]
@@ -207,7 +254,7 @@ def _build_geom(vertex_buffer, indices):
 	else:
 		vformat = GeomVertexFormat.get_v3()
 
-	vdata = GeomVertexData("shape", vformat, Geom.UH_static)
+	vdata = GeomVertexData("shape", vformat, Geom.UH_dynamic if dynamic else Geom.UH_static)
 	vdata.set_num_rows(vertex_buffer.num_verts)
 
 	vertex_writer = GeomVertexWriter(vdata, "vertex")
@@ -222,12 +269,33 @@ def _build_geom(vertex_buffer, indices):
 	if texcoords:
 		uv_writer = GeomVertexWriter(vdata, "texcoord")
 		for uv in texcoords:
-			# NeL stores texture V with the opposite origin from Panda3D; flip
-			# here (once, for every format) rather than per-texture-format at
-			# load time, since the DDS path (unlike the PNM path) has no way
-			# to flip a compressed image's pixel rows after the fact.
+			# NeL .shape files always store texture V with the opposite
+			# origin from Panda3D; flip here (once, for every shape,
+			# regardless of source -- shape_import.py's importers convert
+			# .obj/.dae/.fbx's own native V convention into this same NeL one
+			# at import time, precisely so this flip can stay simple and
+			# unconditional and every *saved* .shape file is correct on its
+			# own, not just correct-looking in Forgery for as long as it
+			# remembers where a shape came from).
+			#
+			# Deliberately NOT wrapped to [0, 1) here, even though some
+			# shapes' UVs go beyond that range (e.g. a whole render pass at V
+			# in [1, 2) on ooc_summer_raceline.shape) -- reducing each vertex
+			# mod 1 independently breaks any triangle whose UVs straddle an
+			# integer boundary (routine for tiling textures, e.g. a
+			# cylindrical trunk wrapping around): one corner jumps to the far
+			# side of the texture while the others don't, stretching the
+			# whole image across that triangle. The out-of-range values are
+			# left as-is; the texture's own wrap mode (see
+			# load_panda_texture()) is what needs to repeat correctly instead.
 			uv_writer.add_data2(uv[0], 1.0 - uv[1])
 
+	return vdata
+
+
+def _build_geom(vdata, indices):
+	"""Builds one render pass's Geom (just its triangle indices) against an
+	already-built, shared vdata (see _build_vertex_data())."""
 	triangles = GeomTriangles(Geom.UH_static)
 	for i in range(0, len(indices), 3):
 		triangles.add_vertices(indices[i], indices[i + 1], indices[i + 2])
@@ -306,6 +374,17 @@ class ObjectEditorApp(ForgeryApp):
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
 		self.object_manipulator = ObjectManipulator(self, self._object_pivot, self.orbit_camera)
 		self.nav_cube = NavigationCube(self, self.orbit_camera, self._object_pivot)
+
+		# Wind preview (see _rebuild_geometry()/_update_wind()) -- viewer-only
+		# controls, never saved to the shape (mirrors the engine's own
+		# CScene::setGlobalWindPower/Direction, a scene setting, not a
+		# per-shape one). self._wind_state is None whenever the loaded shape
+		# has no WindTreeParams+PrimaryColor data to animate.
+		self._wind_state = None
+		self._wind_power = 1.0
+		self._wind_direction_deg = 0.0
+		self._wind_animate = True
+		self.taskMgr.add(self._update_wind, "object-editor-wind")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
@@ -599,6 +678,86 @@ class ObjectEditorApp(ForgeryApp):
 		self._object_transparent = not self._object_transparent
 		self._apply_object_transparency()
 
+	def _update_wind(self, task):
+		"""Per-frame wind animation, ported from nel/src/3d/meshvp_wind_tree.cpp
+		(CMeshVPWindTree::setupPerMesh()/setupPerInstanceConstants()) and its
+		wind_tree_vp.glsl vertex decode -- see _build_wind_state()'s docstring.
+		No-op whenever the loaded shape has nothing to animate, or the user
+		paused it (self._wind_animate)."""
+		state = self._wind_state
+		if state is None or not self._wind_animate or state.vdata is None:
+			return task.cont
+
+		dt = ClockObject.get_global_clock().get_dt()
+		params = state.params
+
+		# Wind direction is a WORLD-space vector (matches the engine: the same
+		# global wind blows every instance the same way, see
+		# CScene::getGlobalWindDirection()) -- converted to the object's own
+		# local space the same way setupPerInstanceConstants() does, via the
+		# inverse of the pivot's current *rotation only* (a pure direction,
+		# translation doesn't apply), so Ctrl-dragging the object to face a
+		# different way doesn't change how the wind reads relative to it.
+		direction_rad = radians(self._wind_direction_deg)
+		wind_dir_world = Vec3(cos(direction_rad), sin(direction_rad), 0.0)
+		pivot_quat = self._object_pivot.get_quat(self.render)
+		inv_pivot_quat = Quat(pivot_quat)
+		inv_pivot_quat.invert_in_place()
+		wind_dir_local = inv_pivot_quat.xform(wind_dir_world)
+
+		def speed_cos(t):
+			return cos(2.0 * pi * t)
+
+		max_delta = []
+		for i in range(3):
+			state.current_time[i] = (
+				state.current_time[i] + dt * (params.frequency[i] + params.frequency_wind_factor[i] * self._wind_power)
+			) % 1.0
+			max_delta.append(Vec3(
+				wind_dir_local.x * params.power_xy[i] * self._wind_power,
+				wind_dir_local.y * params.power_xy[i] * self._wind_power,
+				params.power_z[i] * self._wind_power,
+			))
+
+		f0 = speed_cos(state.current_time[0]) + params.bias[0]
+		wind_l1 = numpy.array([max_delta[0].x, max_delta[0].y, max_delta[0].z], dtype=numpy.float32) * f0
+
+		wind_l2 = numpy.empty((4, 3), dtype=numpy.float32)
+		wind_l3 = numpy.empty((4, 3), dtype=numpy.float32)
+		for k in range(4):
+			f2 = speed_cos(state.current_time[1] + k * 0.25) + params.bias[1]
+			wind_l2[k] = (max_delta[1].x * f2, max_delta[1].y * f2, max_delta[1].z * f2)
+			f3 = speed_cos(state.current_time[2] + k * 0.25) + params.bias[2]
+			wind_l3[k] = (max_delta[2].x * f3, max_delta[2].y * f3, max_delta[2].z * f3)
+
+		offset = (state.factors[:, 0:1] * wind_l1
+		          + wind_l2[state.idx2] * state.factors[:, 1:2]
+		          + wind_l3[state.idx3] * state.factors[:, 2:3])
+		new_positions = state.base_positions + offset
+
+		rewriter = GeomVertexRewriter(state.vdata, "vertex")
+		for row in range(new_positions.shape[0]):
+			rewriter.set_row(row)
+			rewriter.set_data3(float(new_positions[row, 0]), float(new_positions[row, 1]), float(new_positions[row, 2]))
+
+		return task.cont
+
+	def _draw_wind_controls(self):
+		"""Viewer-only wind preview controls (strength/direction/play-pause),
+		see _update_wind() -- only shown when the loaded shape actually has
+		wind data to animate (self._wind_state), since there's nothing to
+		preview otherwise."""
+		if self._wind_state is None:
+			return
+
+		imgui.text("Wind preview")
+		_, self._wind_animate = imgui.checkbox("Animate", self._wind_animate)
+		imgui.set_next_item_width(160)
+		_, self._wind_power = imgui.slider_float("Strength", self._wind_power, 0.0, 3.0)
+		imgui.set_next_item_width(160)
+		_, self._wind_direction_deg = imgui.slider_float("Direction", self._wind_direction_deg, 0.0, 360.0, "%.0f deg")
+		imgui.separator()
+
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport (same
 		positioning pattern as navcube.py's draw_controls()): floor grid,
@@ -651,7 +810,13 @@ class ObjectEditorApp(ForgeryApp):
 		self._apply_object_transparency()
 		self.shape_error = None
 		self._material_node_paths = {}
+		self._wind_state = None
 
+		geom_value = shape_geom(self.shape_file.value)
+		wind_params = geom_value.vertex_program if geom_value is not None else None
+		wind_params = wind_params if isinstance(wind_params, WindTreeParams) else None
+
+		vdata = None
 		pass_count = 0
 		for vertex_buffer, material_id, indices in iter_render_passes(self.shape_file.value):
 			if not indices:
@@ -659,13 +824,24 @@ class ObjectEditorApp(ForgeryApp):
 			print(f"[object_editor] pass {pass_count}: material={material_id} "
 			      f"verts={vertex_buffer.num_verts} tris={len(indices) // 3} "
 			      f"channels={list(vertex_buffer.channels.keys())}")
-			geom = _build_geom(vertex_buffer, indices)
+			if vdata is None:
+				# Built once, not per-pass: every pass indexes into the exact
+				# same vertex array (see iter_render_passes()), and the wind
+				# preview needs a single vdata to update per frame rather than
+				# one per pass.
+				vdata = _build_vertex_data(vertex_buffer, dynamic=wind_params is not None)
+				if wind_params is not None:
+					self._wind_state = _build_wind_state(wind_params, vertex_buffer)
+			geom = _build_geom(vdata, indices)
 			geom_node = GeomNode(f"pass-{pass_count}")
 			geom_node.add_geom(geom)
 			node_path = self.model_root.attach_new_node(geom_node)
 			self._material_node_paths.setdefault(material_id, []).append(node_path)
 			self._apply_material(node_path, material_id)
 			pass_count += 1
+
+		if self._wind_state is not None:
+			self._wind_state.vdata = vdata
 
 		if pass_count == 0:
 			self.shape_error = f"No renderable 3D geometry for shape type {self.shape_file.type_name!r}"
@@ -1408,6 +1584,8 @@ class ObjectEditorApp(ForgeryApp):
 
 		imgui.text(f"Type: {self.shape_file.type_name}")
 		imgui.separator()
+
+		self._draw_wind_controls()
 
 		if imgui.begin_tab_bar("##panel-tabs"):
 			if imgui.begin_tab_item_simple("Textures"):
