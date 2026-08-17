@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-17 — 🐛 Fix icon button tooltips rendering blank under the large icon font
+
+`_icon_button()`'s callers that use the 1.5x large icon font (`_draw_viewport_toggles()`,
+`_draw_reference_shapes_toggles()`) pushed that font around the *entire* toggle bar,
+including each button's hover tooltip -- but the bundled Font Awesome `.ttf` only has icon
+glyphs, no letters, so a tooltip rendered under it came out blank instead of the intended
+text. `_icon_button()` now takes an optional `large_font` (ImFont, size) pair and pushes it
+only around the button glyph itself, popping it before drawing the tooltip -- both callers
+now pass `large_font` per-button instead of wrapping the whole bar in `push_font()`/
+`pop_font()`.
+
 ## 2026-08-16 — 🎨 Move scale-reference toggles to the viewport, size icons consistently
 
 Moved the "Cube (1x1x1)" / "Smallest character" / "Tallest character" scale-reference

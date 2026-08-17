@@ -103,18 +103,27 @@ _MULTI_BITMAP_SLOT_LABELS = [
 ]
 
 
-def _icon_button(icon, tooltip, active=False, square=False):
+def _icon_button(icon, tooltip, active=False, square=False, large_font=None):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
 	self-explanatory. `active` highlights it (toggle-button style) when the
 	feature it controls is currently on. `square` sizes it to the current
 	font's frame height on both axes, so a row of these all matches -- without
 	it, imgui.button()'s default auto-size makes each button only as wide as
-	its own glyph, which visibly varies between Font Awesome icons."""
+	its own glyph, which visibly varies between Font Awesome icons.
+	`large_font`, if given, is an (ImFont, size) pair (app.large_icon_font,
+	app.large_icon_font_size) pushed around just the button glyph itself --
+	NOT the tooltip below, which needs the normal text font: that font is
+	icon-glyphs-only, so a tooltip drawn under it renders as blank/invisible
+	text instead of readable words."""
 	if active:
 		imgui.push_style_color(imgui.Col_.button.value, (0.26, 0.59, 0.98, 0.8))
+	if large_font is not None:
+		imgui.push_font(*large_font)
 	size = (imgui.get_frame_height(), imgui.get_frame_height()) if square else (0, 0)
 	clicked = imgui.button(icon, size)
+	if large_font is not None:
+		imgui.pop_font()
 	if active:
 		imgui.pop_style_color()
 	if imgui.is_item_hovered():
@@ -589,25 +598,23 @@ class ObjectEditorApp(ForgeryApp):
 		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
 		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
 		         | imgui.WindowFlags_.always_auto_resize.value)
+		large_font = (self.large_icon_font, self.large_icon_font_size) if self.large_icon_font is not None else None
 		with imgui_ctx.begin("##viewport-toggles", flags=flags):
-			if self.large_icon_font is not None:
-				imgui.push_font(self.large_icon_font, self.large_icon_font_size)
 			if _icon_button(fa_icons.ICON_FA_TABLE, "Floor grid (1m squares, sized to the object)",
-			                self._grid_visible, square=True):
+			                self._grid_visible, square=True, large_font=large_font):
 				self._toggle_grid()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_COMPASS, "World X/Y/Z axes", self._world_axes_visible, square=True):
+			if _icon_button(fa_icons.ICON_FA_COMPASS, "World X/Y/Z axes",
+			                self._world_axes_visible, square=True, large_font=large_font):
 				self._toggle_world_axes()
 			imgui.same_line()
 			if _icon_button(fa_icons.ICON_FA_CROSSHAIRS, "Object pivot X/Y/Z axes",
-			                self._pivot_axes_visible, square=True):
+			                self._pivot_axes_visible, square=True, large_font=large_font):
 				self._toggle_pivot_axes()
 			imgui.same_line()
 			if _icon_button(fa_icons.ICON_FA_ADJUST, "50% object transparency",
-			                self._object_transparent, square=True):
+			                self._object_transparent, square=True, large_font=large_font):
 				self._toggle_object_transparency()
-			if self.large_icon_font is not None:
-				imgui.pop_font()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def reset_object_rotation(self):
@@ -728,16 +735,14 @@ class ObjectEditorApp(ForgeryApp):
 		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
 		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
 		         | imgui.WindowFlags_.always_auto_resize.value)
+		large_font = (self.large_icon_font, self.large_icon_font_size) if self.large_icon_font is not None else None
 		with imgui_ctx.begin("##reference-shapes-toggles", flags=flags):
-			if self.large_icon_font is not None:
-				imgui.push_font(self.large_icon_font, self.large_icon_font_size)
 			for i, (label, _) in enumerate(_REFERENCE_SHAPES):
 				if i > 0:
 					imgui.same_line()
-				if _icon_button(_REFERENCE_ICONS[label], label, label in self._reference_active, square=True):
+				if _icon_button(_REFERENCE_ICONS[label], label, label in self._reference_active,
+				                square=True, large_font=large_font):
 					self._toggle_reference_shape(label)
-			if self.large_icon_font is not None:
-				imgui.pop_font()
 
 	@staticmethod
 	def _apply_material_common(node_path, material):
