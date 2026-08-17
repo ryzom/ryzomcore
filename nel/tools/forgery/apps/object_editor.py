@@ -411,6 +411,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._reference_root = self.render.attach_new_node("reference-root")
 		self._reference_shapes = {}  # label -> ShapeFile or None (failed to load), lazily parsed once
 		self._reference_active = set()  # labels currently shown
+		self._reference_placement = {}  # label -> "origin"/"pivot"; missing/"auto" = default side-by-side layout
+		self._reference_transparent = set()  # labels currently shown at 50% transparency
 		self._material_node_paths = {}  # material_id -> list[NodePath], to re-apply a material live after an edit
 		self._multi_bitmap_expanded = set()  # slot indices currently expanded in the Multi Bitmap editor
 		self._material_expanded = set()  # material_ids currently expanded in the Materials tab's property editor
@@ -986,12 +988,30 @@ class ObjectEditorApp(ForgeryApp):
 			self._reference_active.add(label)
 		self._rebuild_reference_shapes()
 
+	def _set_reference_placement(self, label, placement):
+		"""Clicking the already-active placement button turns it back off
+		(back to the default side-by-side layout) instead of being stuck on."""
+		current = self._reference_placement.get(label, "auto")
+		self._reference_placement[label] = "auto" if current == placement else placement
+		self._rebuild_reference_shapes()
+
+	def _toggle_reference_transparency(self, label):
+		if label in self._reference_transparent:
+			self._reference_transparent.discard(label)
+		else:
+			self._reference_transparent.add(label)
+		self._rebuild_reference_shapes()
+
 	def _build_reference_geometry(self, shape_value, parent_node_path):
 		materials = getattr(shape_value, "materials", None)
+		vdata = None
 		for vertex_buffer, material_id, indices in iter_render_passes(shape_value):
 			if not indices:
 				continue
-			geom = _build_geom(vertex_buffer, indices)
+			if vdata is None:
+				# Built once, not per-pass -- see _build_vertex_data()'s docstring.
+				vdata = _build_vertex_data(vertex_buffer)
+			geom = _build_geom(vdata, indices)
 			geom_node = GeomNode(f"ref-pass-{material_id}")
 			geom_node.add_geom(geom)
 			node_path = parent_node_path.attach_new_node(geom_node)
@@ -1002,7 +1022,10 @@ class ObjectEditorApp(ForgeryApp):
 	def _rebuild_reference_shapes(self):
 		"""Lines up the currently-active reference shapes side by side, just
 		past the main shape's own bbox (bottoms/centers aligned on X, so
-		comparing sizes doesn't need any camera repositioning)."""
+		comparing sizes doesn't need any camera repositioning) -- unless a
+		shape has its own placement mode set (see _set_reference_placement()),
+		in which case it's placed at the world origin or the main object's
+		pivot instead, and skipped when advancing the side-by-side cursor."""
 		self._reference_root.remove_node()
 		self._reference_root = self.render.attach_new_node("reference-root")
 
@@ -1017,17 +1040,31 @@ class ObjectEditorApp(ForgeryApp):
 				continue
 			bbox = shape_bbox(shape_file.value)
 			node_path = self._reference_root.attach_new_node(label)
-			if bbox is not None:
-				node_path.set_x(cursor_x + bbox.half_size.x - bbox.center.x)
+			placement = self._reference_placement.get(label, "auto")
+			if placement == "origin":
+				node_path.set_pos(self.render, 0, 0, 0)
+			elif placement == "pivot":
+				node_path.set_pos(self.render, self._object_pivot.get_pos(self.render))
+			else:
+				if bbox is not None:
+					node_path.set_x(cursor_x + bbox.half_size.x - bbox.center.x)
 			self._build_reference_geometry(shape_file.value, node_path)
-			if bbox is not None:
+			if label in self._reference_transparent:
+				node_path.set_transparency(TransparencyAttrib.M_alpha)
+				node_path.set_color_scale(1, 1, 1, _OBJECT_TRANSPARENCY_ALPHA)
+			if placement == "auto" and bbox is not None:
 				cursor_x += bbox.half_size.x * 2 + _REFERENCE_GAP
 
 	def _draw_reference_shapes_toggles(self):
 		"""Top-left viewport bar for the 3 scale-reference toggles (Cube /
 		shortest / tallest character) -- square icon buttons at 2x
 		_draw_viewport_toggles()'s icon size (app.large_icon_font), since
-		these are a more prominent, deliberately-reached-for control."""
+		these are a more prominent, deliberately-reached-for control. Once a
+		reference shape is active, 3 more square buttons appear stacked
+		vertically right below its toggle (placement: origin/pivot, plus a
+		transparency toggle) -- each shape's column is its own imgui group so
+		everything stays aligned regardless of how many buttons the column
+		has."""
 		display_size = imgui.get_io().display_size
 		if display_size.y <= 0:
 			return
@@ -1043,9 +1080,23 @@ class ObjectEditorApp(ForgeryApp):
 			for i, (label, _) in enumerate(_REFERENCE_SHAPES):
 				if i > 0:
 					imgui.same_line()
-				if _icon_button(_REFERENCE_ICONS[label], label, label in self._reference_active,
-				                square=True, large_font=large_font):
-					self._toggle_reference_shape(label)
+				imgui.push_id(f"ref-shape-{label}")
+				with imgui_ctx.begin_group():
+					if _icon_button(_REFERENCE_ICONS[label], label, label in self._reference_active,
+					                square=True, large_font=large_font):
+						self._toggle_reference_shape(label)
+					if label in self._reference_active:
+						placement = self._reference_placement.get(label, "auto")
+						if _icon_button(fa_icons.ICON_FA_DOT_CIRCLE, "Place at 0,0,0",
+						                placement == "origin", square=True, large_font=large_font):
+							self._set_reference_placement(label, "origin")
+						if _icon_button(fa_icons.ICON_FA_ANCHOR, "Place on the object's pivot",
+						                placement == "pivot", square=True, large_font=large_font):
+							self._set_reference_placement(label, "pivot")
+						if _icon_button(fa_icons.ICON_FA_ADJUST, "50% transparent",
+						                label in self._reference_transparent, square=True, large_font=large_font):
+							self._toggle_reference_transparency(label)
+				imgui.pop_id()
 
 	@staticmethod
 	def _apply_material_common(node_path, material):

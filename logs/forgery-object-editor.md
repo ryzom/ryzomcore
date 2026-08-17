@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add per-reference-shape placement and transparency controls to object_editor
+
+The top-left viewport toggles for the 3 scale-reference shapes (Cube / smallest character /
+tallest character, `_draw_reference_shapes_toggles()`) previously only had one behavior once
+activated: line up next to the main shape's bbox, side by side. Now, while a reference shape
+is active, 3 more square icon buttons appear stacked vertically right below its toggle
+button (each shape's own `imgui.begin_group()` column, so columns stay independently aligned
+regardless of how many buttons are shown):
+
+- Place at 0,0,0 -- moves the reference shape to the world origin.
+- Place on the object's pivot -- moves it to `self._object_pivot`'s current world position
+  (which can differ from the origin once the user has Ctrl-dragged the main object around
+  via `ObjectManipulator`).
+- 50% transparent -- independent toggle, same `TransparencyAttrib.M_alpha` +
+  `set_color_scale` approach as the main object's own transparency toggle.
+
+The two placement buttons are a persistent, mutually exclusive mode per shape (clicking the
+active one turns it back off, back to the default side-by-side layout) rather than a
+one-shot move, re-applied every time `_rebuild_reference_shapes()` runs (shape change,
+another reference toggled, etc.) via two new per-label state dicts:
+`self._reference_placement` and `self._reference_transparent`.
+
+Also fixed a pre-existing crash in `_build_reference_geometry()` (`TypeError: Geom.Geom()
+argument 0 must be panda3d.core.GeomVertexData, not VertexBuffer`), hit as soon as any
+reference shape was toggled on, which made testing the above impossible until fixed: it
+passed the raw `vertex_buffer` from `iter_render_passes()` straight to `_build_geom()`
+instead of first building a `GeomVertexData` via `_build_vertex_data()`, unlike the main
+shape's own geometry-building code path.
+
 ## 2026-08-17 — 💄 Move object_editor's wind preview controls to a floating panel
 
 The wind preview controls (`_draw_wind_controls()`: Animate/Strength/Direction) were drawn
