@@ -599,9 +599,9 @@ class NavigationCube:
 			# Home targets the object instead of the camera -- mirrors the
 			# same modifier ObjectManipulator/OrbitCamera use to pick which
 			# one a drag acts on.
-			if self._icon_button(fa_icons.ICON_FA_HOME, "Reset view (Ctrl: reset object rotation)"):
+			if self._icon_button(fa_icons.ICON_FA_HOME, "Reset view (Ctrl: reset object position/rotation/scale)"):
 				if object_targeted(self.app):
-					self.app.reset_object_rotation()
+					self.app.reset_object_transform()
 				else:
 					self.orbit_camera.reset()
 			imgui.same_line()

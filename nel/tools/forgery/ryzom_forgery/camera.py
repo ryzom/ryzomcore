@@ -458,12 +458,24 @@ class ObjectManipulator:
 		self._last_mouse = mouse_pos if dragging else None
 		return task.cont
 
+	def _target_node(self, prop):
+		"""_object_pivot (self.pivot) by default, or app.model_root when
+		that property's row has its pivot lock on in the Position/Rotation/
+		Scale panel (object_editor.py's _draw_transform_panel()) -- edits
+		then move the object within a pivot that stays put, instead of
+		taking the pivot along with it. Mirrors (and must stay in sync
+		with) ObjectEditorApp._transform_node()'s own copy of this same
+		pivot-lock lookup."""
+		if self.app.transform_locks[prop]["pivot"]:
+			return self.app.model_root
+		return self.pivot
+
 	def _rotate(self, dx, dy):
 		# Fully camera-relative (trackball-style): horizontal drag turns the
 		# object around the camera's current up axis (yaw), vertical drag
 		# around its current right axis (pitch) -- neither is the world Z
 		# axis, so both track the current view at any camera angle. Composed
-		# and applied ON TOP of the pivot's existing orientation, not
+		# and applied ON TOP of the node's existing orientation, not
 		# replacing it, so a shape already tilted by default_rot_quat stays
 		# tilted as you spin it further.
 		#
@@ -472,37 +484,77 @@ class ObjectManipulator:
 		# for `old * delta`, which applies delta in old's *local* frame first.
 		# We want the opposite (delta expressed in the fixed world/camera
 		# frame, applied on top of whatever the object's current orientation
-		# is), so it must be `pivot.getQuat() * delta`, not `delta * pivot.getQuat()`
-		# -- the reversed order silently rotated around the object's own
+		# is), so it must be `quat * delta`, not `delta * quat` -- the
+		# reversed order silently rotated around the object's own
 		# (already-tilted) axes instead of the camera-fixed ones.
+		node = self._target_node("rotation")
+		locks = self.app.transform_locks["rotation"]
+
 		cam_quat = self.app.camera.getQuat(self.app.render)
 		yaw = Quat()
 		yaw.setFromAxisAngle(dx * self.rotate_speed, cam_quat.getUp())
 		pitch = Quat()
 		pitch.setFromAxisAngle(-dy * self.rotate_speed, cam_quat.getRight())
 		delta = pitch * yaw
-		self.pivot.setQuat(self.pivot.getQuat() * delta)
+
+		# get_quat(render)/set_quat(render, ...) apply the drag's world-frame
+		# delta correctly whether `node` is the pivot itself (parented
+		# directly to render) or model_root (parented to the pivot, which
+		# may itself be rotated) -- Panda handles the parent-relative
+		# conversion either way. Locks are then enforced afterwards, in
+		# `node`'s own LOCAL Euler HPR (X=pitch, Y=roll, Z=heading, matching
+		# ObjectEditorApp._get_transform_values()) by simply restoring a
+		# locked axis's pre-drag value -- not a true constrained rotation,
+		# but matches what the panel's per-axis fields already mean.
+		pre_h, pre_p, pre_r = node.get_hpr()
+		node.set_quat(self.app.render, node.get_quat(self.app.render) * delta)
+		h, p, r = node.get_hpr()
+		node.set_hpr(pre_h if locks["z"] else h, pre_p if locks["x"] else p, pre_r if locks["y"] else r)
 
 	def _move(self, dx, dy):
 		# Same screen-space-accurate scale as OrbitCamera._pan(), just added
 		# instead of subtracted: grabbing and dragging the object itself
 		# should follow the cursor, unlike panning the camera's target
 		# (which moves opposite the drag so the *world* seems to follow it).
+		node = self._target_node("position")
+		locks = self.app.transform_locks["position"]
+
 		quat = self.app.camera.getQuat(self.app.render)
 		fov = self.app.camLens.getFov()
 		distance = self.orbit_camera.distance
 		right_scale = distance * tan(radians(fov.x / 2))
 		up_scale = distance * tan(radians(fov.y / 2))
-		pos = self.pivot.get_pos()
-		pos += quat.getRight() * dx * right_scale
-		pos += quat.getUp() * dy * up_scale
-		self.pivot.set_pos(pos)
+		world_delta = quat.getRight() * dx * right_scale + quat.getUp() * dy * up_scale
+
+		# The drag direction is necessarily computed in world space (it
+		# tracks the camera), but a locked axis means `node`'s own LOCAL X/Y/Z
+		# doesn't change (matching the panel's fields, plain get_pos()/
+		# set_pos() with no render argument) -- so the world-space delta is
+		# converted into node's local frame first via its parent, same as
+		# _rotate()'s use of get_quat(render)/set_quat(render, ...) for the
+		# same reason.
+		local_delta = node.get_parent().get_relative_vector(self.app.render, world_delta)
+		if locks["x"]:
+			local_delta.x = 0.0
+		if locks["y"]:
+			local_delta.y = 0.0
+		if locks["z"]:
+			local_delta.z = 0.0
+		node.set_pos(node.get_pos() + local_delta)
 
 	def _scale(self, dy):
-		# Same exponential feel as OrbitCamera._zoom_drag(), just applied to
-		# the pivot's own scale instead of the camera distance -- dragging up
-		# grows the object, down shrinks it. Assumes a uniform scale (the
-		# pivot only ever gets set_scale()'d here, never per-axis).
+		# Same exponential feel as OrbitCamera._zoom_drag(), applied to
+		# whichever axes of the node's own scale aren't locked (see the
+		# Position/Rotation/Scale panel) -- dragging up grows it, down
+		# shrinks it. Locked axes are skipped entirely, so e.g. locking X
+		# scales only Y/Z, no longer uniformly across all three.
+		node = self._target_node("scale")
+		locks = self.app.transform_locks["scale"]
+
 		factor = pow(1.0 / self.scale_speed, dy * self.scale_drag_speed)
-		new_scale = max(self.min_scale, min(self.max_scale, self.pivot.get_scale().x * factor))
-		self.pivot.set_scale(new_scale)
+		values = list(node.get_scale())
+		for axis_index, axis_name in enumerate("xyz"):
+			if locks[axis_name]:
+				continue
+			values[axis_index] = max(self.min_scale, min(self.max_scale, values[axis_index] * factor))
+		node.set_scale(*values)

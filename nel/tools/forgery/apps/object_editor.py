@@ -129,21 +129,25 @@ _MULTI_BITMAP_SLOT_LABELS = [
 ]
 
 
-def _icon_button(icon, tooltip, active=False, square=False, large_font=None):
+_ACTIVE_COLOR = (0.26, 0.59, 0.98, 0.8)  # blue -- default "on" highlight
+_LOCKED_COLOR = (0.45, 0.45, 0.45, 0.8)  # grey -- "on" highlight for a lock toggle specifically
+
+
+def _icon_button(icon, tooltip, active=False, square=False, large_font=None, active_color=_ACTIVE_COLOR):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
-	self-explanatory. `active` highlights it (toggle-button style) when the
-	feature it controls is currently on. `square` sizes it to the current
-	font's frame height on both axes, so a row of these all matches -- without
-	it, imgui.button()'s default auto-size makes each button only as wide as
-	its own glyph, which visibly varies between Font Awesome icons.
-	`large_font`, if given, is an (ImFont, size) pair (app.large_icon_font,
-	app.large_icon_font_size) pushed around just the button glyph itself --
-	NOT the tooltip below, which needs the normal text font: that font is
-	icon-glyphs-only, so a tooltip drawn under it renders as blank/invisible
-	text instead of readable words."""
+	self-explanatory. `active` highlights it (toggle-button style, in
+	`active_color`) when the feature it controls is currently on. `square`
+	sizes it to the current font's frame height on both axes, so a row of
+	these all matches -- without it, imgui.button()'s default auto-size
+	makes each button only as wide as its own glyph, which visibly varies
+	between Font Awesome icons. `large_font`, if given, is an (ImFont, size)
+	pair (app.large_icon_font, app.large_icon_font_size) pushed around just
+	the button glyph itself -- NOT the tooltip below, which needs the normal
+	text font: that font is icon-glyphs-only, so a tooltip drawn under it
+	renders as blank/invisible text instead of readable words."""
 	if active:
-		imgui.push_style_color(imgui.Col_.button.value, (0.26, 0.59, 0.98, 0.8))
+		imgui.push_style_color(imgui.Col_.button.value, active_color)
 	if large_font is not None:
 		imgui.push_font(*large_font)
 	size = (imgui.get_frame_height(), imgui.get_frame_height()) if square else (0, 0)
@@ -396,6 +400,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._pivot_axes_visible = False
 		self._object_transparent = False
 		self._viewport_toggle_size = (10.0, 10.0)
+		self._transform_panel_size = (10.0, 10.0)
 
 		# Real geometry (sized to the loaded shape's bbox) is built by
 		# _rebuild_viewport_helpers(), called below and again from
@@ -447,6 +452,18 @@ class ObjectEditorApp(ForgeryApp):
 		# split; "camera"/"object" forces every drag to that one regardless
 		# of Ctrl. Set by clicking navcube.py's mode icon.
 		self.target_mode = None
+
+		# Per-row lock state for the Position/Rotation/Scale panel (see
+		# _draw_transform_panel()) -- "pivot": locked routes edits to
+		# model_root's own local transform instead of _object_pivot's (see
+		# _transform_node()), so the object moves within a pivot that stays
+		# put, instead of taking the pivot along with it (the default).
+		# "x"/"y"/"z": locked means that axis never changes, from either the
+		# text field or a Ctrl+drag (ObjectManipulator reads this too).
+		self.transform_locks = {
+			prop: {"pivot": False, "x": False, "y": False, "z": False}
+			for prop in ("position", "rotation", "scale")
+		}
 
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
 		self.object_manipulator = ObjectManipulator(self, self._object_pivot, self.orbit_camera)
@@ -916,12 +933,141 @@ class ObjectEditorApp(ForgeryApp):
 				self._toggle_object_transparency()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
-	def reset_object_rotation(self):
-		"""Restores the object pivot to its baseline rotation (the shape's own
-		default_rot_quat on load, or whatever rotation was in effect at the
-		last successful save -- see _write_shape()). Bound to the gizmo's
-		Reset button while Ctrl is held (see navcube.py's draw_controls())."""
-		self._object_pivot.set_quat(self._object_pivot_base_quat)
+	def _transform_node(self, prop):
+		"""The NodePath position/rotation/scale editing for `prop`
+		("position"/"rotation"/"scale") currently applies to -- _object_pivot
+		by default (moves the object along with it, the existing Ctrl+drag
+		behavior), or model_root itself when that row's pivot lock is on
+		(see _draw_transform_panel()): edits then change the object's own
+		local offset within the pivot, so the pivot's world transform stays
+		put instead of moving with it."""
+		return self.model_root if self.transform_locks[prop]["pivot"] else self._object_pivot
+
+	def _get_transform_values(self, prop):
+		"""Current (x, y, z) for `prop`, from whichever node _transform_node()
+		says currently owns it. Rotation is Euler degrees around each world
+		axis (NodePath.get_hpr()'s heading/pitch/roll are Z/X/Y respectively),
+		not the raw quaternion -- matches the panel's X/Y/Z fields."""
+		node = self._transform_node(prop)
+		if prop == "position":
+			v = node.get_pos()
+			return (v.x, v.y, v.z)
+		if prop == "rotation":
+			h, p, r = node.get_hpr()
+			return (p, r, h)
+		v = node.get_scale()
+		return (v.x, v.y, v.z)
+
+	def _set_transform_axis(self, prop, axis_index, value):
+		"""Sets one axis (0=X, 1=Y, 2=Z) of `prop` to `value`, on whichever
+		node _transform_node() currently owns it -- a no-op if that axis is
+		locked (see _draw_transform_panel()); ObjectManipulator (camera.py)
+		enforces the same lock for Ctrl+drag."""
+		if self.transform_locks[prop]["xyz"[axis_index]]:
+			return
+		node = self._transform_node(prop)
+		if prop == "position":
+			values = list(node.get_pos())
+			values[axis_index] = value
+			node.set_pos(*values)
+		elif prop == "rotation":
+			h, p, r = node.get_hpr()
+			values = [p, r, h]
+			values[axis_index] = value
+			p, r, h = values
+			node.set_hpr(h, p, r)
+		else:
+			values = list(node.get_scale())
+			values[axis_index] = value
+			node.set_scale(*values)
+
+	def _reset_transform(self, prop):
+		"""Resets `prop` to its default -- position/scale to identity,
+		rotation to the shape's own baseline (_object_pivot_base_quat, see
+		_display_shape()) -- on BOTH _object_pivot and model_root, regardless
+		of which one that row's pivot lock currently targets, so the result
+		always reads as a clean reset rather than only clearing whichever of
+		the two happens to be locked right now."""
+		if prop == "position":
+			self._object_pivot.set_pos(0, 0, 0)
+			self.model_root.set_pos(0, 0, 0)
+		elif prop == "rotation":
+			self._object_pivot.set_quat(self._object_pivot_base_quat)
+			self.model_root.set_quat(Quat())  # Quat()'s default constructor is the identity rotation
+		else:
+			self._object_pivot.set_scale(1, 1, 1)
+			self.model_root.set_scale(1, 1, 1)
+
+	def reset_object_transform(self):
+		"""Resets position, rotation, and scale together -- bound to the
+		gizmo's Home button while the object is targeted (see
+		navcube.py's draw_controls())."""
+		for prop in ("position", "rotation", "scale"):
+			self._reset_transform(prop)
+
+	def _draw_transform_panel(self):
+		"""Position/Rotation/Scale editor, floating in the viewport flush
+		against the left edge of the navcube gizmo's own pixel rect,
+		vertically centered on it. One row per property: a pivot-lock
+		toggle, X/Y/Z axis-lock toggles, X/Y/Z value fields (live,
+		see _get_transform_values()/_set_transform_axis()), and a
+		row reset button (_reset_transform()). Hidden until a shape (with a
+		pivot worth editing) is loaded."""
+		if self.shape_file is None:
+			return
+		left, _right, top, bottom = self.nav_cube._panel_px
+		width, height = self._transform_panel_size
+		x = left - _VIEWPORT_TOGGLE_MARGIN_PX - width
+		y = (top + bottom) / 2.0 - height / 2.0
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("##transform-panel", flags=flags):
+			self._draw_transform_row("position", "Pos", "%.3f")
+			self._draw_transform_row("rotation", "Rot", "%.2f")
+			self._draw_transform_row("scale", "Scl", "%.3f")
+			self._transform_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
+	def _draw_transform_row(self, prop, label, value_format):
+		"""One _draw_transform_panel() row -- see its own docstring. `label`
+		is the row's own text label (not editable); `value_format` sets the
+		X/Y/Z fields' display precision (position/scale: float32 is good to
+		~7 significant digits, well past what's ever meaningful in meters or
+		a scale multiplier here -- 3 decimals; rotation: 2 decimals, since a
+		float32 quaternion's angular resolution is far finer than 0.01
+		degrees already)."""
+		imgui.push_id(f"xform-{prop}")
+		locks = self.transform_locks[prop]
+
+		imgui.text(label)
+		imgui.same_line()
+		if _icon_button(fa_icons.ICON_FA_ANCHOR,
+		                "Lock pivot: edits move the object within a fixed pivot, instead of moving the pivot itself",
+		                locks["pivot"], square=True, active_color=_LOCKED_COLOR):
+			locks["pivot"] = not locks["pivot"]
+
+		values = list(self._get_transform_values(prop))
+		for axis_index, axis_name in enumerate("XYZ"):
+			axis_locked = locks[axis_name.lower()]
+			imgui.same_line()
+			if _icon_button(axis_name, f"Lock {axis_name} (never changes, drag or typed)",
+			                axis_locked, square=True, active_color=_LOCKED_COLOR):
+				locks[axis_name.lower()] = not axis_locked
+
+			imgui.same_line()
+			imgui.set_next_item_width(70)
+			imgui.begin_disabled(axis_locked)
+			changed, new_value = imgui.input_float(f"##{prop}-{axis_name}", values[axis_index], format=value_format)
+			imgui.end_disabled()
+			if changed:
+				self._set_transform_axis(prop, axis_index, new_value)
+
+		imgui.same_line()
+		if _icon_button(fa_icons.ICON_FA_UNDO, f"Reset {label.lower()}", square=True):
+			self._reset_transform(prop)
+
+		imgui.pop_id()
 
 	def _rebuild_geometry(self):
 		"""(Re)builds the 3D render passes + camera framing from
@@ -1940,6 +2086,7 @@ class ObjectEditorApp(ForgeryApp):
 
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
+		self._draw_transform_panel()
 		self._draw_viewport_toggles()
 		self._draw_wind_controls()
 		self._draw_reference_shapes_toggles()

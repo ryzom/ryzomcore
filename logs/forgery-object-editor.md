@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add a Position/Rotation/Scale panel to object_editor
+
+New floating window in the viewport, flush against the left edge of the navcube gizmo's own
+pixel rect, vertically centered on it (`ObjectEditorApp._draw_transform_panel()`, called from
+`draw_panel()`, hidden until a shape is loaded). One row each for Pos/Rot/Scl, live real-time
+values:
+
+- A pivot-lock toggle (anchor icon): unlocked (default) edits `_object_pivot` itself, moving
+  the object along with it -- the existing Ctrl+drag behavior. Locked routes edits to
+  `model_root`'s own local transform instead, so the object moves within a pivot that stays
+  put (`_transform_node()` picks which node a row currently owns).
+- X/Y/Z lock toggles per row: a locked axis never changes, from the field or a Ctrl+drag.
+  Locking scale's X, for example, leaves Y/Z free to resize while X stays fixed. Lock buttons
+  now render in grey (`_LOCKED_COLOR`, a new `active_color` param on `_icon_button()`, default
+  unchanged blue) instead of the same blue as every other toggle button, and a locked axis's
+  input field is wrapped in `imgui.begin_disabled()` so it visibly greys out and stops
+  accepting input rather than just silently ignoring edits.
+- X/Y/Z value fields (`imgui.input_float`, `_get_transform_values()`/`_set_transform_axis()`):
+  position in meters (3 decimals), rotation in degrees (`NodePath.get_hpr()`/`set_hpr()`,
+  X/Y/Z = pitch/roll/heading; 2 decimals), scale as a multiplier (3 decimals) -- checked NeL's
+  actual float precision (`CVector`/`CQuat` are both plain 32-bit `float`, ~7 significant
+  digits) to ground these, rather than guessing a decimal count.
+- A per-row reset button, resetting both `_object_pivot` and `model_root` regardless of which
+  one is currently locked, so the result always reads as a clean reset. The navcube gizmo's
+  Home button, while the object is targeted, now calls the same reset for all 3 rows at once
+  (`reset_object_transform()`, replacing the old rotation-only `reset_object_rotation()`).
+
+`ObjectManipulator` (`camera.py`)'s Ctrl+drag `_move()`/`_rotate()`/`_scale()` enforce the same
+per-row pivot/axis locks (`_target_node()` mirrors `_transform_node()`'s own lookup) so dragging
+respects them exactly like the text fields do:
+- `_move()` converts the drag's necessarily-world-space delta into the target node's own local
+  frame (`parent.get_relative_vector(render, ...)`) before zeroing locked axes and applying it,
+  so "locked" consistently means the same local X/Y/Z the fields show, whether editing the
+  pivot (parent = render, local already = world) or `model_root` (parent = the pivot, which may
+  itself be rotated).
+- `_rotate()` applies the drag's world-frame delta via `get_quat(render)`/`set_quat(render,
+  ...)` (handles the pivot-vs-model_root parent-relative conversion automatically either way),
+  then restores any locked axis's pre-drag local HPR component afterwards -- not a true
+  constrained rotation, but matches what the per-axis fields already mean.
+- `_scale()` now applies its drag factor per-axis, skipping locked ones, instead of always
+  scaling all three uniformly.
+
 ## 2026-08-17 — ✨ Add drag-mode status/force icons to the navcube pad
 
 Two new small icons in `NavigationCube.draw_controls()`'s directional pad, bottom-left and
