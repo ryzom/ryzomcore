@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-08-17 — ⚡ Fix wind preview dropping from 60 to ~38fps on real prop-sized meshes
+
+`_update_wind()`'s per-frame vertex update used a `GeomVertexRewriter` loop, one Python-level
+`set_row()`/`set_data3()` call pair per vertex -- fine for a handful of vertices, but a real
+prop (`ooc_summer_raceline.shape`, 28k verts) dropped 60fps to ~38fps purely from Python call
+overhead, not actual work.
+
+Replaced it with a single vectorized write into a numpy view onto the vertex array's raw
+buffer (`GeomVertexArrayData` supports the buffer protocol directly, confirmed writable via
+`modify_array()` and round-tripped through a `GeomVertexReader` to verify the write actually
+lands). First attempt cached that numpy view across frames and only wrote into the same
+buffer each time -- silently stopped animating anything past the first frame, since
+`modify_array()` (not writing into the buffer it returns) is what bumps the array's
+modification stamp Panda3D's GSG checks to decide the GPU-side vertex buffer needs
+re-uploading. Fixed by calling `modify_array()` fresh every frame (itself cheap, no data
+copy) and only caching the row layout (stride/vertex-column offset), which can't change for a
+given vdata's lifetime.
+
 ## 2026-08-17 — 🐛 Cap the wind preview's Strength slider to the engine's real range
 
 `_draw_wind_controls()`'s Strength slider used an arbitrary `0.0-3.0` range. Checked what the

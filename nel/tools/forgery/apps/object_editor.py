@@ -13,7 +13,7 @@ import numpy
 
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexRewriter, GeomVertexWriter, LineSegs, Material as PandaMaterial, Point3, Quat,
+	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, Point3, Quat,
 	Texture as PandaTexture, TransparencyAttrib, Vec3,
 )
 
@@ -212,6 +212,12 @@ class _WindState:
 		self.idx3 = idx3  # (N,) int, same for level-2
 		self.current_time = [0.0, 0.0, 0.0]  # per level, wrapped to [0, 1), see _update_wind()
 		self.vdata = None
+		# vdata's array-0 layout (floats per row / the "vertex" column's start
+		# offset within a row) -- fixed for the shape's lifetime once vdata is
+		# built, so computed once and cached, unlike the numpy view itself
+		# (see _update_wind(), that must be re-acquired every frame).
+		self.vertex_stride = None
+		self.vertex_pos_offset = None
 
 
 def _build_wind_state(wind_params, vertex_buffer):
@@ -785,10 +791,32 @@ class ObjectEditorApp(ForgeryApp):
 		          + wind_l3[state.idx3] * state.factors[:, 2:3])
 		new_positions = state.base_positions + offset
 
-		rewriter = GeomVertexRewriter(state.vdata, "vertex")
-		for row in range(new_positions.shape[0]):
-			rewriter.set_row(row)
-			rewriter.set_data3(float(new_positions[row, 0]), float(new_positions[row, 1]), float(new_positions[row, 2]))
+		# A per-row GeomVertexRewriter loop (tried first) means one
+		# Python-level set_row()/set_data3() call pair per vertex, every
+		# frame -- fine for a handful of vertices, but a real prop-sized mesh
+		# (e.g. 28k verts on ooc_summer_raceline.shape) dropped this from
+		# 60fps to ~38fps, all in Python call overhead rather than actual
+		# work. GeomVertexArrayData supports the buffer protocol directly
+		# (confirmed writable via modify_array()), so a numpy view onto it
+		# lets every vertex's position be written in one vectorized C-level
+		# assignment instead -- but modify_array() itself (not just writing
+		# into the buffer it returns) is what bumps the array's modification
+		# stamp Panda3D's GSG checks to know the GPU-side vertex buffer needs
+		# re-uploading; caching the numpy view across frames and only writing
+		# into the same buffer (tried first) silently stopped animating
+		# anything after the first frame, since nothing told the renderer the
+		# data had changed. modify_array() itself is cheap (no data copy), so
+		# it's called fresh every frame -- only the row layout (stride/offset)
+		# is cached, since that can't change for this vdata's lifetime.
+		array_data = state.vdata.modify_array(0)
+		if state.vertex_pos_offset is None:
+			array_format = array_data.get_array_format()
+			state.vertex_stride = array_format.get_stride() // 4
+			state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
+
+		view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
+		pos_offset = state.vertex_pos_offset
+		view[:, pos_offset:pos_offset + 3] = new_positions
 
 		return task.cont
 
