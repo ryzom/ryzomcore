@@ -1,0 +1,459 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026  Nuno Gonçalves (Ulukyn) <nuno@troispetits.net>
+# Copyright (C) 2026  Claude Sonnet 5 (Anthropic) <noreply@anthropic.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Reader for Ryzom/NeL .anim files (CAnimation -- skeleton animation clips).
+
+Format reverse-engineered from nel/src/3d/animation.cpp (CAnimation::serial,
+the "NEL_ANIM" magic and the CTrackVector poly-ptr dispatch), plus the
+serial() methods of the track types it can hold: CTrackDefaultVector/
+CTrackDefaultQuat (track.h, a constant value -- same encoding as a
+CSkeletonShape bone's own DefaultPos/DefaultRotQuat) and CTrackSampledVector/
+CTrackSampledQuat (track_sampled_vector.cpp, track_sampled_quat.cpp,
+track_sampled_common.cpp -- real keyframed data, quantized to compact
+`sint16` for quaternions via CQuatPack, and organized into CTimeBlocks for
+fast time lookup). The magic bytes are NELID("_LEN") followed by
+NELID("MINA"), which -- because NELID reverses the 4-char literal when
+packing it into a uint32 on a little-endian build -- serialize on disk as
+the plainly readable ASCII string "NEL_ANIM" (verified against a real
+ryzom-data .anim file's header bytes).
+
+Only the two track kinds above are supported; any other ITrack subclass
+(e.g. CTrackKeyframer) fails with a clear AnimationParseError rather than
+silently producing wrong data. Read-only -- there is no writer yet.
+
+Usage:
+	from ryzom_animation import load_animation
+	anim = load_animation("walk.anim")
+	print(anim.name, len(anim.tracks), anim.id_by_name)
+"""
+
+import argparse
+import math
+import struct
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, BinaryIO, Dict, List, Optional, Union
+
+MAGIC = b"NEL_ANIM"  # on-disk bytes for NELID("_LEN") + NELID("MINA"), see CAnimation::serial
+
+
+class AnimationParseError(Exception):
+	pass
+
+
+@dataclass
+class Vector3:
+	x: float
+	y: float
+	z: float
+
+
+@dataclass
+class Quaternion:
+	x: float
+	y: float
+	z: float
+	w: float
+
+
+@dataclass
+class TimeBlock:
+	time_offset: int
+	key_offset: int
+	times: List[int]  # per-key time, in samples relative to time_offset (not seconds)
+
+
+@dataclass
+class Keyframe:
+	time: float
+	value: Union[float, Vector3, Quaternion]
+
+
+@dataclass
+class Track:
+	"""A single animated channel (e.g. "Bip01 Head.rotquat", see
+	Animation.id_by_name). `class_name` says which of the three supported
+	kinds this is:
+	- CTrackDefaultVector/CTrackDefaultQuat: a constant value the whole
+	  clip -- only `value` is set.
+	- CTrackSampledVector/CTrackSampledQuat: real keyframed data, pre-sampled
+	  at a fixed rate -- `keys` (already decompressed/unpacked to plain
+	  Vector3/Quaternion, see CQuatPack::unpack) plus the
+	  CTrackSampledCommon timing fields; `time_blocks` groups them for fast
+	  time lookup rather than storing an explicit time per key.
+	- CTrackKeyFramerLinearVector/CTrackKeyFramerLinearQuat: real keyframed
+	  data, irregularly spaced -- `keyframes` (explicit (time, value) pairs).
+	"""
+	class_name: str
+	value: Optional[Union[Vector3, Quaternion]] = None
+	loop_mode: Optional[bool] = None
+	begin_time: Optional[float] = None
+	end_time: Optional[float] = None
+	total_range: Optional[float] = None
+	oo_total_range: Optional[float] = None
+	delta_time: Optional[float] = None
+	oo_delta_time: Optional[float] = None
+	time_blocks: Optional[List[TimeBlock]] = None
+	keys: Optional[List[Union[Vector3, Quaternion]]] = None
+	keyframes: Optional[List[Keyframe]] = None  # CTrackKeyFramerLinear* only
+	range_lock: Optional[bool] = None  # CTrackKeyFramerLinear* only
+
+
+@dataclass
+class Animation:
+	name: str
+	id_by_name: Dict[str, int]  # e.g. "Bip01 Head.rotquat" -> index into tracks
+	tracks: List[Optional[Track]]
+	min_end_time: Optional[float] = None  # version >= 1
+	sss_shapes: Optional[List[str]] = None  # version >= 2
+
+
+class _Reader:
+	"""Minimal binary reader matching NeL's CIFile little-endian encoding."""
+
+	def __init__(self, data: bytes):
+		self._data = data
+		self._pos = 0
+		self.seen: Dict[int, Any] = {}
+
+	def _take(self, size: int) -> bytes:
+		end = self._pos + size
+		if end > len(self._data):
+			raise AnimationParseError(
+				f"unexpected end of file at offset {self._pos} (needed {size} bytes)"
+			)
+		chunk = self._data[self._pos:end]
+		self._pos = end
+		return chunk
+
+	def tell(self) -> int:
+		return self._pos
+
+	def u8(self) -> int:
+		return self._take(1)[0]
+
+	def s16(self) -> int:
+		return struct.unpack("<h", self._take(2))[0]
+
+	def u16(self) -> int:
+		return struct.unpack("<H", self._take(2))[0]
+
+	def u32(self) -> int:
+		return struct.unpack("<I", self._take(4))[0]
+
+	def s32(self) -> int:
+		return struct.unpack("<i", self._take(4))[0]
+
+	def u64(self) -> int:
+		return struct.unpack("<Q", self._take(8))[0]
+
+	def f32(self) -> float:
+		return struct.unpack("<f", self._take(4))[0]
+
+	def boolean(self) -> bool:
+		return self.u8() != 0
+
+	def string(self) -> str:
+		length = self.u32()
+		return self._take(length).decode("latin-1")
+
+	def string_vector(self) -> List[str]:
+		n = self.cont_len()
+		return [self.string() for _ in range(n)]
+
+	def vector3(self) -> Vector3:
+		return Vector3(self.f32(), self.f32(), self.f32())
+
+	def quaternion(self) -> Quaternion:
+		return Quaternion(self.f32(), self.f32(), self.f32(), self.f32())
+
+	def version(self) -> int:
+		"""Mirrors IStream::serialVersion: one byte, or 0xFF + a uint32."""
+		b = self.u8()
+		if b == 0xFF:
+			return self.u32()
+		return b
+
+	def check_magic(self, expected: bytes) -> None:
+		got = self._take(len(expected))
+		if got != expected:
+			raise AnimationParseError(f"bad magic: expected {expected!r}, got {got!r}")
+
+	def cont_len(self) -> int:
+		"""Length prefix used by serialCont()/CObjectVector::serial() for generic containers."""
+		return self.s32()
+
+	def cont_uint_vector(self, item_size: int, fmt: str) -> List[int]:
+		"""serialCont()/CObjectVector::serial() of a vector<uintN>: length-prefixed primitive vector."""
+		n = self.cont_len()
+		if n == 0:
+			return []
+		data = self._take(n * item_size)
+		return list(struct.unpack(f"<{n}{fmt}", data))
+
+
+# ---------------------------------------------------------------------------
+# Polymorphic pointer dispatch (IStream::serialIStreamable, used for _TrackVector)
+# ---------------------------------------------------------------------------
+
+_CLASS_PARSERS: Dict[str, Any] = {}
+
+
+def _read_poly_ptr(f: _Reader):
+	"""Mirrors IStream::serialIStreamable: node id, then class name + body if new."""
+	node = f.u64()
+	if node == 0:
+		return None
+	if node in f.seen:
+		return f.seen[node]
+	class_name = f.string()
+	parser = _CLASS_PARSERS.get(class_name)
+	if parser is None:
+		raise AnimationParseError(
+			f"unsupported track class {class_name!r} at offset {f.tell()}: cannot safely "
+			f"skip a polymorphic object of unknown format"
+		)
+	obj = parser(f)
+	f.seen[node] = obj
+	return obj
+
+
+# ---------------------------------------------------------------------------
+# Tracks
+# ---------------------------------------------------------------------------
+
+_OO32767 = 1.0 / 32767  # CQuatPack::unpack's own scale factor (nel/src/3d/track_sampled_quat.cpp)
+
+
+def _unpack_quat(x: int, y: int, z: int, w: int) -> Quaternion:
+	"""Mirrors CQuatPack::unpack: scale the packed sint16s back to floats,
+	then re-normalize (quantization alone doesn't round-trip to unit length)."""
+	qx, qy, qz, qw = x * _OO32767, y * _OO32767, z * _OO32767, w * _OO32767
+	length = math.sqrt(qx * qx + qy * qy + qz * qz + qw * qw)
+	if length > 0:
+		qx, qy, qz, qw = qx / length, qy / length, qz / length, qw / length
+	return Quaternion(qx, qy, qz, qw)
+
+
+def _parse_track_default_vector(f: _Reader) -> Track:
+	f.version()
+	return Track(class_name="CTrackDefaultVector", value=f.vector3())
+
+
+_CLASS_PARSERS["CTrackDefaultVector"] = _parse_track_default_vector
+
+
+def _parse_track_default_quat(f: _Reader) -> Track:
+	f.version()
+	return Track(class_name="CTrackDefaultQuat", value=f.quaternion())
+
+
+_CLASS_PARSERS["CTrackDefaultQuat"] = _parse_track_default_quat
+
+
+def _parse_time_block(f: _Reader) -> TimeBlock:
+	f.version()
+	time_offset = f.u16()
+	key_offset = f.u32()
+	times = f.cont_uint_vector(1, "B")
+	return TimeBlock(time_offset=time_offset, key_offset=key_offset, times=times)
+
+
+def _parse_time_blocks(f: _Reader) -> List[TimeBlock]:
+	n = f.cont_len()
+	return [_parse_time_block(f) for _ in range(n)]
+
+
+def _parse_sampled_common(f: _Reader):
+	"""Mirrors CTrackSampledCommon::serialCommon() -- shared timing fields for
+	both CTrackSampledVector and CTrackSampledQuat."""
+	f.version()
+	loop_mode = f.boolean()
+	begin_time = f.f32()
+	end_time = f.f32()
+	total_range = f.f32()
+	oo_total_range = f.f32()
+	delta_time = f.f32()
+	oo_delta_time = f.f32()
+	time_blocks = _parse_time_blocks(f)
+	return loop_mode, begin_time, end_time, total_range, oo_total_range, delta_time, oo_delta_time, time_blocks
+
+
+def _parse_track_sampled_vector(f: _Reader) -> Track:
+	f.version()  # CTrackSampledVector::serial's own wrapper -- always delegates to serialCommon, no legacy branch
+	(loop_mode, begin_time, end_time, total_range, oo_total_range,
+	 delta_time, oo_delta_time, time_blocks) = _parse_sampled_common(f)
+	n = f.cont_len()
+	keys = [f.vector3() for _ in range(n)]
+	return Track(
+		class_name="CTrackSampledVector", loop_mode=loop_mode, begin_time=begin_time, end_time=end_time,
+		total_range=total_range, oo_total_range=oo_total_range, delta_time=delta_time,
+		oo_delta_time=oo_delta_time, time_blocks=time_blocks, keys=keys,
+	)
+
+
+_CLASS_PARSERS["CTrackSampledVector"] = _parse_track_sampled_vector
+
+
+def _parse_track_sampled_quat(f: _Reader) -> Track:
+	"""CTrackSampledQuat::serial has an extra legacy branch (version <= 0)
+	that reads the same timing fields directly, without CTrackSampledCommon's
+	own leading serialVersion(0) -- real/current data is version 1, but both
+	are implemented for correctness."""
+	ver = f.version()
+	if ver <= 0:
+		loop_mode = f.boolean()
+		begin_time = f.f32()
+		end_time = f.f32()
+		total_range = f.f32()
+		oo_total_range = f.f32()
+		delta_time = f.f32()
+		oo_delta_time = f.f32()
+		time_blocks = _parse_time_blocks(f)
+	else:
+		(loop_mode, begin_time, end_time, total_range, oo_total_range,
+		 delta_time, oo_delta_time, time_blocks) = _parse_sampled_common(f)
+	n = f.cont_len()
+	keys = [_unpack_quat(f.s16(), f.s16(), f.s16(), f.s16()) for _ in range(n)]
+	return Track(
+		class_name="CTrackSampledQuat", loop_mode=loop_mode, begin_time=begin_time, end_time=end_time,
+		total_range=total_range, oo_total_range=oo_total_range, delta_time=delta_time,
+		oo_delta_time=oo_delta_time, time_blocks=time_blocks, keys=keys,
+	)
+
+
+_CLASS_PARSERS["CTrackSampledQuat"] = _parse_track_sampled_quat
+
+
+def _parse_keyframer_linear(f: _Reader, class_name: str, value_reader) -> Track:
+	"""Mirrors ITrackKeyFramer<CKeyT>::serial() (track_keyframer.h): unlike
+	the CTrackSampled* kind, keys here are stored as an explicit
+	std::map<time, CKeyT> (irregularly spaced), not pre-sampled at a fixed
+	rate. `value_reader` reads one CKeyT.Value (CKey<T>::serial is just its
+	own leading version() + the raw value, no compression here)."""
+	f.version()
+	n = f.cont_len()
+	keyframes = []
+	for _ in range(n):
+		time = f.f32()
+		f.version()  # CKey<T>::serial's own leading serialVersion(0)
+		keyframes.append(Keyframe(time=time, value=value_reader(f)))
+	range_lock = f.boolean()
+	range_begin = f.f32()
+	range_end = f.f32()
+	loop_mode = f.boolean()
+	return Track(
+		class_name=class_name, loop_mode=loop_mode, begin_time=range_begin, end_time=range_end,
+		keyframes=keyframes, range_lock=range_lock,
+	)
+
+
+_CLASS_PARSERS["CTrackKeyFramerLinearQuat"] = lambda f: _parse_keyframer_linear(
+	f, "CTrackKeyFramerLinearQuat", _Reader.quaternion)
+_CLASS_PARSERS["CTrackKeyFramerLinearVector"] = lambda f: _parse_keyframer_linear(
+	f, "CTrackKeyFramerLinearVector", _Reader.vector3)
+_CLASS_PARSERS["CTrackKeyFramerLinearFloat"] = lambda f: _parse_keyframer_linear(
+	f, "CTrackKeyFramerLinearFloat", _Reader.f32)
+
+
+# ---------------------------------------------------------------------------
+# Top level
+# ---------------------------------------------------------------------------
+
+
+def parse_animation(data: bytes) -> Animation:
+	f = _Reader(data)
+	f.check_magic(MAGIC)
+	version = f.version()
+	name = f.string()
+
+	n = f.cont_len()
+	id_by_name: Dict[str, int] = {}
+	for _ in range(n):
+		key = f.string()
+		id_by_name[key] = f.u32()
+
+	track_count = f.cont_len()
+	tracks = [_read_poly_ptr(f) for _ in range(track_count)]
+
+	min_end_time = f.f32() if version >= 1 else None
+	sss_shapes = f.string_vector() if version >= 2 else None
+
+	return Animation(name=name, id_by_name=id_by_name, tracks=tracks,
+	                  min_end_time=min_end_time, sss_shapes=sss_shapes)
+
+
+def load_animation(path: Union[str, Path, BinaryIO]) -> Animation:
+	"""Load and parse a .anim file from a path or an open binary file object."""
+	if isinstance(path, (str, Path)):
+		data = Path(path).read_bytes()
+	else:
+		data = path.read()
+	return parse_animation(data)
+
+
+# ---------------------------------------------------------------------------
+# CLI
+# ---------------------------------------------------------------------------
+
+
+def _dump(anim: Animation) -> None:
+	print(f"name: {anim.name!r}")
+	print(f"tracks: {len(anim.tracks)}")
+	if anim.min_end_time is not None:
+		print(f"min_end_time: {anim.min_end_time}")
+	if anim.sss_shapes:
+		print(f"sss_shapes: {anim.sss_shapes}")
+	for track_name, index in sorted(anim.id_by_name.items(), key=lambda kv: kv[1]):
+		track = anim.tracks[index] if 0 <= index < len(anim.tracks) else None
+		if track is None:
+			print(f"  [{index}] {track_name}: (null track)")
+			continue
+		if track.keys is not None:
+			print(f"  [{index}] {track_name}: {track.class_name}, {len(track.keys)} keys, "
+			      f"{track.begin_time:.3f}-{track.end_time:.3f}s")
+		elif track.keyframes is not None:
+			print(f"  [{index}] {track_name}: {track.class_name}, {len(track.keyframes)} keyframes, "
+			      f"{track.begin_time:.3f}-{track.end_time:.3f}s")
+		else:
+			print(f"  [{index}] {track_name}: {track.class_name}, constant value = {track.value}")
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
+	parser = argparse.ArgumentParser(description="Read Ryzom .anim files (skeleton animation clips)")
+	sub = parser.add_subparsers(dest="command", required=True)
+
+	p_dump = sub.add_parser("dump", help="print a summary of a .anim file")
+	p_dump.add_argument("path", type=Path)
+
+	return parser
+
+
+def _main() -> None:
+	args = _build_arg_parser().parse_args()
+
+	try:
+		anim = load_animation(args.path)
+	except AnimationParseError as exc:
+		raise SystemExit(f"cannot parse {args.path}: {exc}")
+
+	if args.command == "dump":
+		_dump(anim)
+
+
+if __name__ == "__main__":
+	_main()

@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add .anim (CAnimation) read support to pynel
+
+New module `nel/tools/pynel/pynel/ryzom_animation.py` (self-contained, own `_Reader`/
+`_CLASS_PARSERS` like `ryzom_ig.py`, not sharing `ryzom_shape.py`'s -- matches the existing
+per-format module convention). CLI: `ryzom-anim dump FILE.anim`.
+
+Format reverse-engineered from `nel/src/3d/animation.cpp` (`CAnimation::serial`) and the
+`serial()` of every track kind it can hold. The 8-byte magic (`NELID("_LEN")` then
+`NELID("MINA")`) turned out to serialize on disk as the plainly readable ASCII string
+`"NEL_ANIM"` -- confirmed directly against a real `ryzom-data` `.anim` file's header bytes
+before writing a single line of parsing code, rather than trusting the macro's byte order in
+the abstract.
+
+`CAnimation` itself: name, a `{track name -> index}` map (e.g. `"Bip01 Head.rotquat"`), and a
+poly-ptr vector of tracks -- same class-name-dispatch mechanism `ryzom_shape.py` already uses
+for shapes, duplicated here rather than imported (see above). Six track classes implemented,
+matching what two real files actually contain (a 64-track Bip01 dance animation and a
+3-track material UV-scroll animation, both parse cleanly end to end via the bridge):
+
+- `CTrackDefaultVector`/`CTrackDefaultQuat`: a single constant value for the whole clip.
+- `CTrackSampledVector`/`CTrackSampledQuat`: real keyframed data, pre-sampled at a fixed rate
+  and organized into `CTimeBlock`s for fast time lookup. Rotations are additionally quantized
+  to `sint16` via `CQuatPack` (9 bytes/key instead of 16) -- unpacked back to plain
+  `Quaternion` at parse time (divide by 32767, renormalize, mirroring `CQuatPack::unpack`
+  exactly) rather than exposing the compressed form, so callers never need to know packing was
+  involved.
+- `CTrackKeyFramerLinearVector`/`Quat`/`Float`: **not in the original plan** (which only
+  anticipated the two kinds above) -- discovered by running the parser against real files and
+  hitting `unsupported track class` errors twice, each time cross-checked against
+  `track_keyframer.h`/`key.h` before adding support. Explicit irregularly-spaced
+  `(time, value)` keyframes (a `std::map<float, CKeyT>`), structurally simpler than the
+  sampled kind (no compression, no TimeBlocks) but a genuinely different on-disk shape,
+  captured as `Track.keyframes` (`List[Keyframe]`) rather than reusing the sampled kind's
+  `Track.keys` field.
+
+Read-only, no writer -- not needed for this chantier's goal (Forgery previewing an object
+attached to an animated bone), and NeL's own `CAnimation` writing side wasn't audited.
+
 ## 2026-08-16 — ✨ Normalize .shape texture and .bnp entry names to lowercase in pynel
 
 Texture file names aren't case-sensitive, and real Ryzom data mixes casing (e.g.
