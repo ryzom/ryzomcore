@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-08-17 — 🐛 Apply BLEND and ALPHA_TEST material flags independently
+
+`_apply_material_texture()` used `if flags & BLEND: ... elif flags & ALPHA_TEST: ...`,
+silently dropping the alpha-test cutout whenever blend was also enabled on the same
+material. Checked the real engine (`driver_opengl_material.cpp:473-493`): `enableBlend()`
+and `enableAlphaTest()` are two entirely separate `if` blocks, each driven only by its own
+flag -- both GL states can be active together (alpha test discards fully-transparent texels
+outright first, blend still applies a soft fade to whatever's left). Changed the `elif` to a
+second independent `if`.
+
 ## 2026-08-17 — ⚡ Fix wind preview dropping from 60 to ~38fps on real prop-sized meshes
 
 `_update_wind()`'s per-frame vertex update used a `GeomVertexRewriter` loop, one Python-level

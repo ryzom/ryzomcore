@@ -1063,11 +1063,18 @@ class ObjectEditorApp(ForgeryApp):
 		panda_material.set_twoside(True)
 		node_path.set_material(panda_material)
 
+		# BLEND and ALPHA_TEST are independent GL states in the real engine
+		# (driver_opengl_material.cpp: enableBlend()/enableAlphaTest() are two
+		# separate `if` blocks, each driven only by its own flag) -- both can
+		# be active together (alpha test discards fully-transparent texels
+		# outright, blend still applies a soft fade to what's left). This was
+		# wrongly an `if`/`elif` here, silently dropping alpha test whenever
+		# blend was also on.
 		if material.flags & _IDRV_MAT_BLEND:
 			src_op = _TBLEND_TO_PANDA_OPERAND[material.src_blend]
 			dst_op = _TBLEND_TO_PANDA_OPERAND[material.dst_blend]
 			node_path.set_attrib(ColorBlendAttrib.make(ColorBlendAttrib.M_add, src_op, dst_op))
-		elif material.flags & _IDRV_MAT_ALPHA_TEST:
+		if material.flags & _IDRV_MAT_ALPHA_TEST:
 			# Cutout transparency (e.g. foliage): discard texels below the
 			# threshold outright rather than blending, matching the engine's
 			# own glAlphaFunc(GL_GREATER, threshold) (driver_opengl_material.cpp).
