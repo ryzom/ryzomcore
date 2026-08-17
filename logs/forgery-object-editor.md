@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-08-17 — ✨ Add an expandable Transparency editor to object_editor's Materials tab
+
+First step of a broader "material editor: full parameter coverage" chantier (`__TODO__.md`)
+-- the Materials tab only ever exposed double-sided; everything else (blend, alpha test,
+colors, lighting, shader type...) was read from the shape and used for rendering, but never
+editable.
+
+Each material row now gets an expand chevron (same pattern as the Multi Bitmap slot rows),
+revealing one or more collapsible category sections -- only "Transparency" exists yet, via a
+new generic `_draw_material_section(material_id, key, label, draw_fn, material)` helper so
+later steps (base colors, lighting, shader type, textures, lightmaps, depth, other) just add
+sibling sections. `_draw_material_transparency_section()` exposes:
+
+- `flags & BLEND` toggle, with "Alpha Blend"/"Additive" preset buttons (pre-filling
+  `src_blend`/`dst_blend` with the most common values -- srcalpha/invsrcalpha and one/one
+  respectively, per `docs/material_options.md`'s existing "Mélange" section) plus the raw
+  Src/Dst Blend combos (`_TBLEND_NAMES`, `CMaterial::TBlend`'s own member names) for full
+  control.
+- `flags & ALPHA_TEST` toggle + `alpha_test_threshold` slider.
+- Diffuse alpha ("Opacity") slider -- only shown when Blend or Alpha Test is actually on,
+  since it has no visible effect otherwise (confirmed the material renders fully opaque
+  regardless of diffuse alpha with neither flag set).
+
+Each control shows its docs/material_options.md explanation in the status bar on hover (same
+mechanism the Multi Bitmap editor already uses, factored into a new `_doc_hint_if_hovered()`
+helper) -- added a new `{#blend-factors}` doc section explaining what each raw Src/Dst Blend
+value (`one`/`zero`/`srcalpha`/`invsrcalpha`/`srccolor`/`invsrccolor`/`blendConstant*`)
+actually multiplies, since the existing `{#blend}` section only covered the two presets.
+
+Hit and fixed an ImGui "2 visible items with same ID" warning while testing: the material
+row's own expand chevron and `_draw_material_section()`'s chevron use the exact same icon
+glyph as their button ID, both under the same `push_id(f"mat-row-{material_id}")` scope with
+no further distinction -- `_draw_material_section()` now wraps itself in `push_id(key)`.
+
 ## 2026-08-17 — 🐛 Apply BLEND and ALPHA_TEST material flags independently
 
 `_apply_material_texture()` used `if flags & BLEND: ... elif flags & ALPHA_TEST: ...`,

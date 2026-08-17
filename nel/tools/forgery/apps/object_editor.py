@@ -92,6 +92,20 @@ _TBLEND_TO_PANDA_OPERAND = [
 	ColorBlendAttrib.O_one_minus_constant_alpha,
 ]
 
+# CMaterial::TBlend's own member names (material.h), same order as
+# _TBLEND_TO_PANDA_OPERAND above -- for the Src/Dst Blend combo boxes in the
+# Materials tab's Transparency section.
+_TBLEND_NAMES = [
+	"one", "zero", "srcalpha", "invsrcalpha", "srccolor", "invsrccolor",
+	"blendConstantColor", "blendConstantInvColor", "blendConstantAlpha", "blendConstantInvAlpha",
+]
+
+# Src/Dst Blend presets (docs/material_options.md's "Mélange" section
+# promises these two shortcuts, pre-filling the raw src/dst combos with the
+# most common values -- classic alpha blending vs. additive/glow effects).
+_TBLEND_PRESET_ALPHA = (2, 3)  # srcalpha, invsrcalpha
+_TBLEND_PRESET_ADDITIVE = (0, 0)  # one, one
+
 # Opaque backdrop drawn behind texture preview thumbnails/hover-zooms (see
 # ObjectEditorApp._draw_image_opaque_bg()) -- most textures are mostly
 # transparent (e.g. a shape cut from a square atlas), which otherwise blends
@@ -399,7 +413,10 @@ class ObjectEditorApp(ForgeryApp):
 		self._reference_active = set()  # labels currently shown
 		self._material_node_paths = {}  # material_id -> list[NodePath], to re-apply a material live after an edit
 		self._multi_bitmap_expanded = set()  # slot indices currently expanded in the Multi Bitmap editor
+		self._material_expanded = set()  # material_ids currently expanded in the Materials tab's property editor
+		self._material_section_expanded = set()  # (material_id, section_key) pairs currently expanded within that
 		self._multi_bitmap_hint_shown = False  # whether the status bar currently shows one of our doc hints
+		self._material_hint_shown = False  # same, for the material property editor's own doc hints
 		self._texture_browse_dialogs = {}  # key -> (in-flight portable_file_dialogs.open_file, on_result callback)
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
 
@@ -620,6 +637,8 @@ class ObjectEditorApp(ForgeryApp):
 		self.shape_error = None
 		self._material_node_paths = {}
 		self._multi_bitmap_expanded = set()
+		self._material_expanded = set()
+		self._material_section_expanded = set()
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
 		self._shape_source_path = None
@@ -1568,8 +1587,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._draw_multi_bitmap_editor()
 		self._poll_texture_browse_dialogs()
 
-	def _toggle_material_double_sided(self, material_id, material):
-		material.flags ^= _IDRV_MAT_DOUBLE_SIDED
+	def _toggle_material_flag(self, material_id, material, flag):
+		material.flags ^= flag
 		self._reapply_material(material_id)
 
 	def _draw_materials_tab(self):
@@ -1579,6 +1598,7 @@ class ObjectEditorApp(ForgeryApp):
 			return
 
 		multi_bitmap_ids = {material_id for material_id, _ in self._multi_bitmap_entries()}
+		hovered_hint = None
 
 		for material_id, material in enumerate(materials):
 			imgui.push_id(f"mat-row-{material_id}")
@@ -1604,7 +1624,7 @@ class ObjectEditorApp(ForgeryApp):
 				double_sided = bool(material.flags & _IDRV_MAT_DOUBLE_SIDED)
 				changed, double_sided = imgui.checkbox("Double-sided", double_sided)
 				if changed:
-					self._toggle_material_double_sided(material_id, material)
+					self._toggle_material_flag(material_id, material, _IDRV_MAT_DOUBLE_SIDED)
 
 			if not is_multi:
 				imgui.same_line()
@@ -1621,8 +1641,154 @@ class ObjectEditorApp(ForgeryApp):
 					if _icon_button(fa_icons.ICON_FA_UNDO, "Convert to Simple bitmap (only Low Quality has a texture)"):
 						self._convert_multi_bitmap_to_simple(material_id, material)
 
+			imgui.same_line()
+			expanded = material_id in self._material_expanded
+			expand_icon = fa_icons.ICON_FA_CHEVRON_DOWN if expanded else fa_icons.ICON_FA_CHEVRON_RIGHT
+			if _icon_button(expand_icon, "Collapse" if expanded else "Expand: edit every material property"):
+				if expanded:
+					self._material_expanded.discard(material_id)
+				else:
+					self._material_expanded.add(material_id)
+
+			if expanded:
+				imgui.indent()
+				section_hint = self._draw_material_section(
+					material_id, "transparency", "Transparency", self._draw_material_transparency_section, material)
+				if section_hint:
+					hovered_hint = section_hint
+				imgui.unindent()
+
 			imgui.pop_id()
 			imgui.separator()
+
+		if hovered_hint:
+			self.sysinfo.set_status(hovered_hint, color=_STATUS_HINT_COLOR)
+			self._material_hint_shown = True
+		elif self._material_hint_shown:
+			self.sysinfo.set_status("")
+			self._material_hint_shown = False
+
+	def _draw_material_section(self, material_id, key, label, draw_fn, material):
+		"""One collapsible category (e.g. "Transparency") within a material's
+		expanded property editor (see _draw_materials_tab()) -- same
+		expand/collapse chevron pattern as the Multi Bitmap slot rows and the
+		material row itself, one level deeper. `self._material_section_expanded`
+		is keyed by (material_id, key) since the same category key repeats
+		across materials. Its own expand chevron uses the exact same icon
+		glyph as the material row's own expand chevron (see
+		_draw_materials_tab()) -- both live under that same
+		push_id(f"mat-row-{material_id}") scope, so without a push_id of its
+		own here, ImGui saw two visible buttons with an identical ID
+		(warning: "2 visible items with same ID") whenever both happened to
+		show the same collapsed/expanded icon."""
+		imgui.push_id(key)
+		section_id = (material_id, key)
+		expanded = section_id in self._material_section_expanded
+		expand_icon = fa_icons.ICON_FA_CHEVRON_DOWN if expanded else fa_icons.ICON_FA_CHEVRON_RIGHT
+		if _icon_button(expand_icon, "Collapse" if expanded else f"Expand: edit {label}"):
+			if expanded:
+				self._material_section_expanded.discard(section_id)
+			else:
+				self._material_section_expanded.add(section_id)
+		imgui.same_line()
+		imgui.text(label)
+
+		hint = None
+		if expanded:
+			imgui.indent()
+			hint = draw_fn(material_id, material)
+			imgui.unindent()
+		imgui.pop_id()
+		return hint
+
+	def _doc_hint_if_hovered(self, key):
+		"""Returns docs/material_options.md's player-facing summary for `key`
+		(see material_docs.py) if the item just drawn is currently hovered,
+		else None -- same "orange status bar hint" mechanism the Multi Bitmap
+		editor already uses (_draw_multi_bitmap_editor()), reused here so the
+		material property editor's own, much less self-explanatory options
+		(blend funcs, alpha test...) get the same inline documentation."""
+		if not imgui.is_item_hovered():
+			return None
+		doc = self.material_docs.get(key)
+		return doc.summary if doc else None
+
+	def _draw_material_transparency_section(self, material_id, material):
+		"""CMaterial's transparency-related fields: BLEND (advanced blending,
+		e.g. glass/additive effects), ALPHA_TEST (cutout transparency, e.g.
+		foliage), and the "simple" opacity carried by diffuse's own alpha
+		channel when neither of those flags is set. See
+		docs/material_options.md's "Mélange"/"Test alpha"/"Opacité" sections
+		for the player-facing explanation of each -- returns whichever of
+		those was hovered this frame (see _draw_material_section()), or None."""
+		hint = None
+
+		blend_on = bool(material.flags & _IDRV_MAT_BLEND)
+		changed, blend_on = imgui.checkbox("Blend (advanced transparency)", blend_on)
+		hint = self._doc_hint_if_hovered("blend") or hint
+		if changed:
+			self._toggle_material_flag(material_id, material, _IDRV_MAT_BLEND)
+
+		if blend_on:
+			imgui.indent()
+			if imgui.button("Alpha Blend"):
+				material.src_blend, material.dst_blend = _TBLEND_PRESET_ALPHA
+				self._reapply_material(material_id)
+			hint = self._doc_hint_if_hovered("blend") or hint
+			imgui.same_line()
+			if imgui.button("Additive"):
+				material.src_blend, material.dst_blend = _TBLEND_PRESET_ADDITIVE
+				self._reapply_material(material_id)
+			hint = self._doc_hint_if_hovered("blend") or hint
+			imgui.set_next_item_width(180)
+			src_changed, src_index = imgui.combo("Src Blend", material.src_blend, _TBLEND_NAMES)
+			hint = self._doc_hint_if_hovered("blend-factors") or hint
+			if src_changed and src_index != material.src_blend:
+				material.src_blend = src_index
+				self._reapply_material(material_id)
+			imgui.set_next_item_width(180)
+			dst_changed, dst_index = imgui.combo("Dst Blend", material.dst_blend, _TBLEND_NAMES)
+			hint = self._doc_hint_if_hovered("blend-factors") or hint
+			if dst_changed and dst_index != material.dst_blend:
+				material.dst_blend = dst_index
+				self._reapply_material(material_id)
+			imgui.unindent()
+
+		alpha_test_on = bool(material.flags & _IDRV_MAT_ALPHA_TEST)
+		changed, alpha_test_on = imgui.checkbox("Alpha test (cutout transparency)", alpha_test_on)
+		hint = self._doc_hint_if_hovered("alpha-test") or hint
+		if changed:
+			self._toggle_material_flag(material_id, material, _IDRV_MAT_ALPHA_TEST)
+
+		if alpha_test_on:
+			imgui.indent()
+			imgui.set_next_item_width(180)
+			changed, threshold = imgui.slider_float("Threshold", material.alpha_test_threshold, 0.0, 1.0)
+			hint = self._doc_hint_if_hovered("alpha-test") or hint
+			if changed and threshold != material.alpha_test_threshold:
+				material.alpha_test_threshold = threshold
+				self._reapply_material(material_id)
+			imgui.unindent()
+
+		if blend_on or alpha_test_on:
+			# Diffuse alpha has no visible effect at all otherwise: with
+			# neither flag set, the material renders fully opaque regardless
+			# of this value (confirmed against driver_opengl_material.cpp --
+			# blend is what actually consumes alpha as a blend factor, and
+			# alpha test is the only other consumer, via the default TexEnv's
+			# Modulate/AlphaArg1=Diffuse combining texture*diffuse alpha
+			# before the glAlphaFunc() cutoff). Hiding it otherwise avoids
+			# offering a slider that visibly does nothing.
+			imgui.set_next_item_width(180)
+			current_opacity = material.diffuse.a / 255.0
+			changed, opacity = imgui.slider_float("Opacity (diffuse alpha)", current_opacity, 0.0, 1.0)
+			hint = self._doc_hint_if_hovered("opacity") or hint
+			if changed:
+				d = material.diffuse
+				material.diffuse = Rgba(d.r, d.g, d.b, round(opacity * 255))
+				self._reapply_material(material_id)
+
+		return hint
 
 	@staticmethod
 	def _set_simple_material_texture(material, file_name):
