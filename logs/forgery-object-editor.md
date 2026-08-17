@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-17 — 💄 Move object_editor's wind preview controls to a floating panel
+
+The wind preview controls (`_draw_wind_controls()`: Animate/Strength/Direction) were drawn
+inline at the top of the right-hand "Panel" window, ahead of the Textures/Materials/All
+Properties tabs. Since wind preview isn't a shape property -- it's a viewer-only playback
+control -- it's now a separate floating ImGui window, anchored top-right of the 3D viewport
+flush against the left edge of the side panel, always visible regardless of which panel tab
+is active (same auto-size tracking pattern used by `_draw_viewport_toggles()`'s floating
+bottom-left icon bar). Only shown when the loaded shape actually has wind data
+(`self._wind_state is not None`), same as before.
+
+A separate attempt in the same session to make the app window start maximized was reverted:
+Panda3D's `WindowProperties` has no native "maximize" call, and Ryzom Forgery is meant to be
+shared across Windows/Linux (X11 and Wayland)/macOS users, so OS/display-server-specific
+hacks (`xdotool`/`wmctrl`, which are X11-only) were ruled out. A `screeninfo`-based
+approximation was also ruled out since it only reports full monitor resolution, not the
+work area excluding taskbars/panels, so it wouldn't be a faithful "maximize" either.
+
+Instead, `ForgeryApp` (`ryzom_forgery/app.py`) now starts with a bigger-than-default window
+(1600x900, vs. Panda3D's own ~800x600 default) the first time an app is launched, and from
+then on remembers the window's last position/size across launches, persisted to
+`~/.ryzom_forgery/<slugified-app-title>.json` (one file per tool app, e.g. `object_editor.py`'s
+"Ryzom Forgery - Object Editor" title). Geometry is captured by overriding `windowEvent()`
+(saving on every resize/move, which also covers the final geometry right before the window
+closes) -- a plain cross-platform approach with no extra dependency and no OS-specific code.
+
 ## 2026-08-17 — ✨ Add an expandable Transparency editor to object_editor's Materials tab
 
 First step of a broader "material editor: full parameter coverage" chantier (`__TODO__.md`)

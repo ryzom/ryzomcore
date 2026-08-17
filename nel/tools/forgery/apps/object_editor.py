@@ -446,6 +446,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._wind_power = 1.0
 		self._wind_direction_deg = 0.0
 		self._wind_animate = True
+		self._wind_panel_size = (10.0, 10.0)
 		self.taskMgr.add(self._update_wind, "object-editor-wind")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
@@ -843,17 +844,27 @@ class ObjectEditorApp(ForgeryApp):
 		"""Viewer-only wind preview controls (strength/direction/play-pause),
 		see _update_wind() -- only shown when the loaded shape actually has
 		wind data to animate (self._wind_state), since there's nothing to
-		preview otherwise."""
+		preview otherwise. Not a shape property, so it's a floating window
+		top-right of the 3D viewport rather than part of the side panel,
+		positioned flush against the panel's left edge (same auto-size
+		tracking pattern as _draw_viewport_toggles)."""
 		if self._wind_state is None:
 			return
 
-		imgui.text("Wind preview")
-		_, self._wind_animate = imgui.checkbox("Animate", self._wind_animate)
-		imgui.set_next_item_width(160)
-		_, self._wind_power = imgui.slider_float("Strength", self._wind_power, 0.0, 1.0)
-		imgui.set_next_item_width(160)
-		_, self._wind_direction_deg = imgui.slider_float("Direction", self._wind_direction_deg, 0.0, 360.0, "%.0f deg")
-		imgui.separator()
+		display_width = imgui.get_io().display_size.x
+		win_w, win_h = self._wind_panel_size
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("Wind preview", flags=flags):
+			_, self._wind_animate = imgui.checkbox("Animate", self._wind_animate)
+			imgui.set_next_item_width(160)
+			_, self._wind_power = imgui.slider_float("Strength", self._wind_power, 0.0, 1.0)
+			imgui.set_next_item_width(160)
+			_, self._wind_direction_deg = imgui.slider_float("Direction", self._wind_direction_deg, 0.0, 360.0, "%.0f deg")
+			self._wind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport (same
@@ -1866,6 +1877,7 @@ class ObjectEditorApp(ForgeryApp):
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
 		self._draw_viewport_toggles()
+		self._draw_wind_controls()
 		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()
@@ -1880,8 +1892,6 @@ class ObjectEditorApp(ForgeryApp):
 
 		imgui.text(f"Type: {self.shape_file.type_name}")
 		imgui.separator()
-
-		self._draw_wind_controls()
 
 		if imgui.begin_tab_bar("##panel-tabs"):
 			if imgui.begin_tab_item_simple("Textures"):

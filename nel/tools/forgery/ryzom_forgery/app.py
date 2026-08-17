@@ -1,3 +1,5 @@
+import json
+import re
 from pathlib import Path
 
 from direct.showbase.ShowBase import ShowBase
@@ -26,6 +28,18 @@ _SYSINFO_FLAGS = _PINNED_FLAGS | imgui.WindowFlags_.no_resize.value | imgui.Wind
 _SIDE_PANEL_MIN_WIDTH = 150
 _SIDE_PANEL_MAX_WIDTH = 900
 
+# Panda3D's own default window size (~800x600 depending on config.prc) is
+# cramped for these tools -- used as the starting size the very first time an
+# app runs, before any geometry has been saved for it. From then on, the
+# window's last position/size (per app, keyed by its title) is remembered
+# across launches -- see _load_window_geometry()/_save_window_geometry().
+_DEFAULT_WINDOW_SIZE = (1600, 900)
+_WINDOW_GEOMETRY_DIR = Path.home() / ".ryzom_forgery"
+
+
+def _slugify(title):
+	return re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_")
+
 
 class ForgeryApp(ShowBase):
 	"""Base class for Ryzom Forgery tool apps.
@@ -43,8 +57,16 @@ class ForgeryApp(ShowBase):
 	             explorer_default_filter=DEFAULT_FILTER):
 		ShowBase.__init__(self)
 
+		self._window_geometry_path = _WINDOW_GEOMETRY_DIR / f"{_slugify(title)}.json"
+
 		props = WindowProperties()
 		props.setTitle(title)
+		geometry = self._load_window_geometry()
+		if geometry is not None:
+			props.setOrigin(geometry["x"], geometry["y"])
+			props.setSize(geometry["width"], geometry["height"])
+		else:
+			props.setSize(*_DEFAULT_WINDOW_SIZE)
 		self.win.requestProperties(props)
 
 		# Default trackball camera controls would conflict with a tool's own
@@ -78,6 +100,30 @@ class ForgeryApp(ShowBase):
 		self.explorer.on_selection_changed = self._on_explorer_selection_changed
 
 		self.accept("imgui-new-frame", self.draw_ui)
+
+	def windowEvent(self, win):
+		super().windowEvent(win)
+		if win == self.win:
+			self._save_window_geometry()
+
+	def _load_window_geometry(self):
+		try:
+			data = json.loads(self._window_geometry_path.read_text())
+		except (OSError, ValueError):
+			return None
+		if not all(isinstance(data.get(key), int) for key in ("x", "y", "width", "height")):
+			return None
+		return data
+
+	def _save_window_geometry(self):
+		props = self.win.getProperties()
+		data = {"x": props.getXOrigin(), "y": props.getYOrigin(),
+		        "width": props.getXSize(), "height": props.getYSize()}
+		try:
+			self._window_geometry_path.parent.mkdir(parents=True, exist_ok=True)
+			self._window_geometry_path.write_text(json.dumps(data))
+		except OSError:
+			pass
 
 	def _load_icon_font(self):
 		# self.large_icon_font (1.5x _ICON_FONT_SIZE, standalone -- not merged
