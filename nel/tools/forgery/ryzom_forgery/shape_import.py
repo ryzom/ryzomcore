@@ -358,18 +358,37 @@ def import_obj(path: Path) -> Mesh:
 # regardless of source, so there's nothing format-specific left to write once
 # node transforms are handled generically (see _iter_mesh_instances()).
 #
+# Both Assimp's FBX and Collada loaders always normalize whatever up axis the
+# source file declares into Assimp's own canonical Y-up (Collada:
+# ColladaLoader.cpp's ConvertScene(), rotates unless already Y_UP -- FBX:
+# FBXConverter.cpp's correctRootTransform(), reads the file's UpAxis/
+# FrontAxis/CoordAxis metadata and bakes the equivalent conversion into the
+# root node's transform), so _iter_mesh_instances() below is seeded with
+# _YUP_TO_ZUP_MATRIX instead of a plain identity, converting that canonical
+# Y-up into Ryzom's own Z-up on the way out (confirmed necessary: a shape
+# authored in Cinema4D, exported to .fbx, then imported to 3ds Max and saved
+# as `.shape` from there came out with a different bbox orientation than the
+# same .fbx imported directly through here, since 3ds Max's own FBX importer
+# targets its native Z-up while Assimp always targets Y-up).
+#
 # .dae used to be hand-parsed via pycollada instead (kept no longer, see git
-# history) -- swapped once assimp-py was already a dependency for .fbx,
-# confirmed to produce identical vertex positions on Forgery's own .dae
-# exports (which write a `Y_UP` <asset><up_axis> tag via pycollada's own
-# default while leaving vertex data in Ryzom's actual Z-up coordinates
-# untouched -- Assimp does not auto-rotate based on that tag, verified
-# against `test.dae`, so re-importing Forgery's own exports round-trips fine).
+# history) -- swapped once assimp-py was already a dependency for .fbx. The
+# apparent round-trip match against Forgery's own .dae exports found while
+# validating that swap (see docs/log.md) was this same Y-up normalization
+# being a no-op: those exports declare a `Y_UP` <asset><up_axis> tag (a
+# pycollada default) while actually holding Z-up data, so re-importing them
+# without _YUP_TO_ZUP_MATRIX happened to match by pure coincidence -- it
+# would have silently mis-rotated any *correctly* Z_UP-tagged .dae.
 
-# 4x4 identity, row-major (Assimp's own aiMatrix4x4 convention: each inner
-# tuple is one row, translation is the 4th element of the first 3 rows --
-# assimp-py's Node.transformation is documented to mirror this verbatim).
-_IDENTITY_MATRIX = ((1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+# Converts Assimp's canonical Y-up (X=right, Y=up, Z=forward) into Ryzom's
+# Z-up (X=right, Z=up, Y=forward): newX=x, newY=-z, newZ=y -- the exact
+# inverse of ColladaLoader.cpp's own Z_UP-to-Y_UP conversion matrix (see the
+# comment above), a proper rotation (determinant +1, no mirroring, so vertex
+# winding/normals need no correction beyond this). Row-major, matching
+# Assimp's own aiMatrix4x4 convention (assimp-py's Node.transformation
+# mirrors it verbatim) -- this is used as _iter_mesh_instances()'s starting
+# "parent" transform, so it composes through the whole node walk for free.
+_YUP_TO_ZUP_MATRIX = ((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, -1.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0))
 
 
 def _mat_mul_mat(a, b):
@@ -430,6 +449,8 @@ def _mesh_positions(mesh):
 
 
 def _mesh_normals(mesh):
+	if not mesh.normals:
+		return None
 	data = list(mesh.normals)
 	return [tuple(data[i:i + 3]) for i in range(0, len(data), 3)] if data else None
 
@@ -483,8 +504,13 @@ def _import_via_assimp(path: Path) -> Mesh:
 	if scene.num_meshes == 0:
 		raise ShapeImportError(f"no meshes found in {path}")
 
-	has_normals = any(len(scene.meshes[i].normals) for i in range(scene.num_meshes))
-	has_uvs = any(len(scene.meshes[i].texcoords) and len(scene.meshes[i].texcoords[0]) for i in range(scene.num_meshes))
+	# assimp-py returns None (not an empty list/memoryview) for a channel a
+	# mesh has none of at all -- e.g. .texcoords itself for a UV-less mesh --
+	# so every len() here needs an `x and` guard first.
+	has_normals = any(scene.meshes[i].normals and len(scene.meshes[i].normals) for i in range(scene.num_meshes))
+	has_uvs = any(
+		scene.meshes[i].texcoords and scene.meshes[i].texcoords[0] and len(scene.meshes[i].texcoords[0])
+		for i in range(scene.num_meshes))
 
 	positions: List[Tuple[float, float, float]] = []
 	normals: List[Tuple[float, float, float]] = []
@@ -492,7 +518,7 @@ def _import_via_assimp(path: Path) -> Mesh:
 	material_order: List[int] = []  # first-seen order of assimp material indices, becomes RdrPass material_id order
 	pass_indices: Dict[int, List[int]] = {}
 
-	for mesh_index, transform in _iter_mesh_instances(scene.root_node, _IDENTITY_MATRIX):
+	for mesh_index, transform in _iter_mesh_instances(scene.root_node, _YUP_TO_ZUP_MATRIX):
 		mesh = scene.meshes[mesh_index]
 		mesh_positions = _mesh_positions(mesh)
 		mesh_normals = _mesh_normals(mesh)

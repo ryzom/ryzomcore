@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-08-17 — 🐛 Fix FBX/DAE import axis conversion and null-channel crashes
+
+Two robustness bugs in `shape_import.py`'s `_import_via_assimp()` (used by both `.fbx` and
+`.dae`), found while validating the material-defaults fix above against a real Cinema4D->
+`.fbx`->3dsMax->`.shape` export: the shape's bbox orientation didn't match the same `.fbx`
+imported directly through Forgery. Root cause: `_iter_mesh_instances()` was seeded with a
+plain identity matrix, silently assuming the source file's axes already matched Ryzom's
+Z-up -- but Assimp's own FBX and Collada loaders both always normalize whatever up axis a
+source file declares into Assimp's own canonical Y-up first (`FBXConverter.cpp`'s
+`correctRootTransform()`, `ColladaLoader.cpp`'s `ConvertScene()`), so 3dsMax's own
+Z-up-targeting FBX importer and Forgery's Y-up-targeting one were disagreeing on a
+mid-import convention neither had actually been told about. Replaced the identity seed with
+`_YUP_TO_ZUP_MATRIX`, the exact inverse of Assimp's own Y-up normalization.
+
+Also fixed two related crashes on meshes assimp-py returns as having no data for a given
+channel at all: `assimp_py.Mesh.normals`/`.texcoords` come back as `None` (not an empty
+list/memoryview) in that case, which `_mesh_normals()` and `_import_via_assimp()`'s
+`has_normals`/`has_uvs` detection didn't guard against before calling `len()` on it.
+
 ## 2026-08-17 — ✨ Match 3dsMax's material export defaults when importing meshes
 
 `shape_import.py`'s importers used to build each material straight from the source
