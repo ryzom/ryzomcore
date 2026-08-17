@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-08-17 — 🐛 Cap the wind preview's Strength slider to the engine's real range
+
+`_draw_wind_controls()`'s Strength slider used an arbitrary `0.0-3.0` range. Checked what the
+real client/engine ever actually passes to `CScene::setGlobalWindPower()`: the weather system
+(`ryzom/client/src/weather_manager_client.cpp`) computes it as `0.1 + 0.9 * windIntensity`
+(or the equivalent sheet-driven `TreeMinWindIntensity`/`TreeMaxWindIntensity`, both defaulting
+to 0.1/1.0 in `weather_function_sheet.cpp`), the static `client.cfg` fallback defaults to
+`0.10` (`client_cfg.cpp`), and the engine's own pre-client default is `0.2`
+(`nel/src/3d/scene.cpp`) -- consistently `[0.1, 1.0]` in practice, matching the range NeL's
+own `object_viewer` debug tool (`global_wind_dlg.cpp`) already uses for the same slider.
+Changed the max to `1.0` to match.
+
 ## 2026-08-17 — 🐛 Fix texture orientation, wrap-mode, and caching bugs across imports/saves/reloads
 
 A long live-testing session on `fy_acc_civbanner.shape` ("texture upside down in Forgery,

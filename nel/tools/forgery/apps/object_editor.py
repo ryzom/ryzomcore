@@ -803,7 +803,7 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.text("Wind preview")
 		_, self._wind_animate = imgui.checkbox("Animate", self._wind_animate)
 		imgui.set_next_item_width(160)
-		_, self._wind_power = imgui.slider_float("Strength", self._wind_power, 0.0, 3.0)
+		_, self._wind_power = imgui.slider_float("Strength", self._wind_power, 0.0, 1.0)
 		imgui.set_next_item_width(160)
 		_, self._wind_direction_deg = imgui.slider_float("Direction", self._wind_direction_deg, 0.0, 360.0, "%.0f deg")
 		imgui.separator()
