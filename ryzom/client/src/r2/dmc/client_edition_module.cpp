@@ -723,7 +723,7 @@ void CClientEditionModule::requestCreateScenario(CObject* scenario)
 bool CClientEditionModule::requestTeleportOneCharacterToAnother(uint32 sessionId, uint32 sourceCharId, uint32 destCharId)
 {
 	//H_AUTO(R2_CClientEditionModule_requestTeleportOneCharacterToAnother)
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.teleportOneCharacterToAnother(this, (TSessionId)sessionId, sourceCharId, destCharId);
@@ -736,7 +736,7 @@ void CClientEditionModule::requestUpdateRtScenario( CObject* scenario)
 	//H_AUTO(R2_CClientEditionModule_requestUpdateRtScenario)
 	//	CSerialFactoryBackup fb;
 	CMessage message ("requestUpdateRtScenario");
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CObjectSerializerServer obj(scenario);
 	obj.compress();
 	message.serial(obj);
@@ -750,7 +750,7 @@ void CClientEditionModule::requestCreatePrimitives()
 {
 	//H_AUTO(R2_CClientEditionModule_requestCreatePrimitives)
 	CMessage message ("DBG_CREATE_PRIMITIVES");
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	_ServerEditionProxy->sendModuleMessage(this, message );
 }
 
@@ -759,7 +759,7 @@ void CClientEditionModule::requestStopTest()
 {
 	//H_AUTO(R2_CClientEditionModule_requestStopTest)
 	CMessage message ("STOP_TEST");
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	_ServerEditionProxy->sendModuleMessage(this, message );
 }
 
@@ -770,7 +770,7 @@ bool CClientEditionModule::requestUploadScenario(CObject* scenario)
 {
 	//H_AUTO(R2_CClientEditionModule_requestUploadScenario)
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	CObjectSerializerServer body(scenario);
@@ -827,7 +827,7 @@ void CClientEditionModule::requestSetNodeNoTest(const std::string& instanceId, c
 {
 	//H_AUTO(R2_CClientEditionModule_requestSetNodeNoTest)
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	CObjectSerializerServer value2(value);
 	value2.compress();
@@ -848,7 +848,7 @@ void CClientEditionModule::requestEraseNode( const std::string& instanceId, cons
 	}
 
 //	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	uint32 messageId = _ServerAnswerForseener->onNodeErased(instanceId, attrName, position);
 	proxy.onNodeEraseAsked(this, messageId, instanceId, attrName, position);
@@ -873,7 +873,7 @@ void CClientEditionModule::requestInsertNode(const std::string& instanceId, cons
 		}
 	}
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	CObjectSerializerServer value2(value);
 	value2.compress();
@@ -904,7 +904,7 @@ void CClientEditionModule::requestMoveNode(
 	if (dest) nlassert(!dest->getGhost());
 //	CSerialFactoryBackup fb;
 
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	uint32 messageId = _ServerAnswerForseener->onNodeMoved(instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
 	proxy.onNodeMoveAsked(this, messageId, instanceId, attrName, position, destInstanceId, destAttrName, destPosition);
@@ -915,7 +915,7 @@ void CClientEditionModule::requestMapConnection( uint32 scenarioId, bool mustTp,
 {
 	//H_AUTO(R2_CClientEditionModule_requestMapConnection)
 	//	CSerialFactoryBackup fb;
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return);
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.onMapConnectionAsked(this, (TSessionId)scenarioId, mustTp, mustUpdateHighLevel,  R2::TUserRole::ur_editor);
 }
@@ -1216,7 +1216,7 @@ bool CClientEditionModule::requestStartScenario()
 {
 	//H_AUTO(R2_CClientEditionModule_	)
 
-	BOMB_IF(_ServerEditionProxy == NULL, "Server Edition Module not connected", return false);
+	BOMB_IF(_ServerEditionProxy == nullptr, "Server Edition Module not connected", return false);
 
 	CEditor::connectionMsg("uimR2EDGoToDMMode");
 

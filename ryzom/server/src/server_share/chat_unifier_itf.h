@@ -463,9 +463,7 @@ namespace CHATUNI
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -482,9 +480,7 @@ namespace CHATUNI
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -501,9 +497,7 @@ namespace CHATUNI
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -520,9 +514,7 @@ namespace CHATUNI
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}
@@ -539,9 +531,7 @@ namespace CHATUNI
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}

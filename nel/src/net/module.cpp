@@ -128,7 +128,7 @@ namespace NLNET
 
 	void IModuleFactory::registerModuleInFactory(TModulePtr module)
 	{
-		nlassert(module != NULL);
+		nlassert(module != nullptr);
 
 		nlassert(_ModuleInstances.find(module) == _ModuleInstances.end());
 
@@ -302,7 +302,7 @@ namespace NLNET
 		if (!_ModuleTasks.empty())
 		{
 			// there is a task running, queue in the message
-			_SyncMessages.push_back(make_pair(senderModuleProxy, message));
+			_SyncMessages.emplace_back(senderModuleProxy, message);
 		}
 		else
 		{

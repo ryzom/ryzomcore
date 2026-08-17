@@ -979,8 +979,7 @@ namespace NLNET
 					}
 					else
 					{
-						if (proxy->_SecurityData != nullptr)
-							delete proxy->_SecurityData;
+						delete proxy->_SecurityData;
 						proxy->_SecurityData = modDesc.SecDesc.SecurityData;
 					}
 				}
@@ -1240,7 +1239,7 @@ namespace NLNET
 				{
 					IModule *module = first->second;
 					if (removedModule->getGatewayRoute() != nullptr
-				        || module->getModuleId() != removedModule->getForeignModuleId())
+						|| module->getModuleId() != removedModule->getForeignModuleId())
 					{
 						module->_onModuleDown(removedModule);
 					}
@@ -1326,7 +1325,7 @@ namespace NLNET
 			if (addresseeProxy->getGatewayRoute() == nullptr)
 			{
 				// the module is local, just forward the call to the dispatcher
-				nlassert(senderProxy != NULL);
+				nlassert(senderProxy != nullptr);
 				nlassert(_ModuleProxies.find(senderProxy->getModuleProxyId()) != _ModuleProxies.end());
 
 				// invert the message for immediate dispatching if needed
@@ -1349,7 +1348,7 @@ namespace NLNET
 					// dispatch the message at next gateway update
 					// this provide a coherent behavior between local and distant module message exchange
 
-					_LocalMessages.push_back(TLocalMessage());
+					_LocalMessages.emplace_back();
 					TLocalMessage &lm = _LocalMessages.back();
 					lm.SenderProxyId = senderProxy->getModuleProxyId();
 					lm.AddresseProxyId = addresseeProxy->getModuleProxyId();
@@ -1974,7 +1973,7 @@ namespace NLNET
 
 			CMessage updateMsg("MOD_UPD");
 
-			// compil all update in a single message
+			// compile all updates in a single message
 			while (!route->PendingEvents.empty())
 			{
 				CGatewayRoute::TPendingEvent &pe = route->PendingEvents.front();

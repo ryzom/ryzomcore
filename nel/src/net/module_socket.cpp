@@ -59,8 +59,7 @@ namespace NLNET
 
 	void CModuleSocket::_onModulePlugged(const TModulePtr &pluggedModule)
 	{
-		TPluggedModules::TBToAMap::const_iterator it(_PluggedModules.getBToAMap().find(pluggedModule));
-		if (it != _PluggedModules.getBToAMap().end())
+		if (isPlugged(pluggedModule))
 		{
 			throw IModule::EModuleAlreadyPluggedHere();
 		}
@@ -73,8 +72,7 @@ namespace NLNET
 
 	void CModuleSocket::_onModuleUnplugged(const TModulePtr &pluggedModule)
 	{
-		TPluggedModules::TBToAMap::const_iterator it(_PluggedModules.getBToAMap().find(pluggedModule));
-		if (it == _PluggedModules.getBToAMap().end())
+		if (!isPlugged(pluggedModule))
 		{
 			throw EModuleNotPluggedHere();
 		}
@@ -85,10 +83,17 @@ namespace NLNET
 		_PluggedModules.removeWithB(pluggedModule);
 	}
 
+    bool CModuleSocket::isPlugged(const IModule *module) const
+    {
+	    const TPluggedModules::TBToAMap &map = _PluggedModules.getBToAMap();
+	    const TPluggedModules::TBToAMap::const_iterator &it(std::find_if(map.begin(), map.end(), [module](const auto &entry) { return entry.first == module; }));
+
+		return it != map.end();
+    }
+
 	void CModuleSocket::sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message)
 	{
-		TPluggedModules::TBToAMap::const_iterator it(_PluggedModules.getBToAMap().find(senderModule));
-		if (it == _PluggedModules.getBToAMap().end())
+		if (!isPlugged(senderModule))
 		{
 			throw EModuleNotPluggedHere();
 		}
@@ -100,8 +105,7 @@ namespace NLNET
 
 	void CModuleSocket::broadcastModuleMessage(IModule *senderModule, const NLNET::CMessage &message)
 	{
-		TPluggedModules::TBToAMap::const_iterator it(_PluggedModules.getBToAMap().find(senderModule));
-		if (it == _PluggedModules.getBToAMap().end())
+		if (!isPlugged(senderModule))
 		{
 			throw EModuleNotPluggedHere();
 		}
