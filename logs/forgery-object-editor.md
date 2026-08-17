@@ -1,5 +1,52 @@
 # Changelog
 
+## 2026-08-17 — 🐛 Fix texture orientation, wrap-mode, and caching bugs across imports/saves/reloads
+
+A long live-testing session on `fy_acc_civbanner.shape` ("texture upside down in Forgery,
+correct in-game") and freshly-imported `.fbx` shapes ("all textures shifted") surfaced
+several distinct, compounding bugs:
+
+- **`p3dimgui`'s `loadTexture()` mutates its argument in-place**: `_get_preview_texture_ref()`
+  (Materials tab thumbnails) was passing the exact same cached `Texture` object also applied
+  to the live 3D material -- `p3dimgui/backend.py`'s `loadTexture()` calls `pnm.flip(False,
+  True, False)` on it for ImGui's own row-order convention, silently flipping the
+  3D-rendered texture too the first time a shape's thumbnail was ever drawn. Fixed by passing
+  `panda_texture.make_copy()` instead of the shared cached object.
+- **UV wrap mode was never set at all** (Panda3D's own default, `WM_clamp`, is correct for a
+  single non-tiling texture per material but wrong for shapes that deliberately tile UVs past
+  `[0, 1]`, e.g. `ooc_summer_raceline.shape`'s V up to 2.0). Tried reducing UVs modulo 1 first
+  -- reverted immediately, since it breaks any triangle whose UVs straddle an integer
+  boundary (routine for a wrapped cylindrical texture), stretching the whole triangle's image.
+  Real fix: `_uvs_need_repeat()` auto-detects per-shape (margin of 0.05, to not misfire on an
+  imported mesh's float noise around 1.0) whether the whole `TexCoord0` channel relies on
+  tiling, and `load_panda_texture()`'s new `repeat` param sets `WM_repeat` only then.
+- **Imported meshes' UVs were never converted to NeL's own V-origin convention**: verified
+  against Assimp's own FBX/OBJ reader source that neither flips V on read (both already match
+  OpenGL/Panda3D's own convention, the opposite of a `.shape` file's). A first attempt fixed
+  this at *display* time only (a session flag disabling `object_editor.py`'s own V-flip for
+  imported shapes) -- wrong on two counts: the flag was never reset between shape loads (so
+  importing anything once silently broke every subsequently loaded real `.shape` for the rest
+  of the session), and more fundamentally, it only affected the live Panda3D vertex data, not
+  what actually gets written to disk -- a freshly imported-then-saved `.shape` round-tripped
+  wrong once reloaded, since nothing in the file itself encoded which convention its UVs were
+  in. Real fix: the V-flip now happens once, at import time, in `shape_import.py`'s
+  `_assemble_mesh()` (shared by every importer), so the *saved* `.shape` data is correct on
+  its own; `object_editor.py`'s own flip in `_build_vertex_data()` is back to being simple and
+  unconditional for every shape alike.
+- **`self._texture_cache`/`self._preview_texture_refs` were never cleared between shape
+  loads**: both are keyed by texture name only, so loading a shape whose textures need
+  `WM_repeat` and then a different shape sharing a same-named texture (but needing `WM_clamp`,
+  or resolving to a different file via different `_texture_search_dirs`) silently reused the
+  first shape's cached `Texture` object and wrap mode. Both caches are now reset in
+  `_reset_shape_state()`.
+- Texture preview thumbnails/tooltips also gained an opaque black backdrop
+  (`_draw_image_opaque_bg()`, `_PREVIEW_BG_COLOR`, `image_button(..., bg_col=...)`) and drop
+  their alpha channel entirely on the throwaway preview copy (`set_format(F_rgb)`) -- most of
+  these textures are mostly transparent (e.g. a shape cut from a square atlas), which made the
+  real color underneath unreadable regardless of backdrop; safe to do only on the copy, now
+  that it's confirmed independent of the shared 3D-material texture (see the `loadTexture()`
+  fix above).
+
 ## 2026-08-17 — ✨ Add a live wind-sway preview to object_editor for WindTree shapes
 
 object_editor could already display a shape's `WindTreeParams` (read-only, via the generic

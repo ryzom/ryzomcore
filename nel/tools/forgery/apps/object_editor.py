@@ -14,7 +14,7 @@ import numpy
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
 	GeomVertexFormat, GeomVertexRewriter, GeomVertexWriter, LineSegs, Material as PandaMaterial, Point3, Quat,
-	TransparencyAttrib, Vec3,
+	Texture as PandaTexture, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
@@ -91,6 +91,12 @@ _TBLEND_TO_PANDA_OPERAND = [
 	ColorBlendAttrib.O_constant_alpha,
 	ColorBlendAttrib.O_one_minus_constant_alpha,
 ]
+
+# Opaque backdrop drawn behind texture preview thumbnails/hover-zooms (see
+# ObjectEditorApp._draw_image_opaque_bg()) -- most textures are mostly
+# transparent (e.g. a shape cut from a square atlas), which otherwise blends
+# into the panel's own background and makes the preview hard to read.
+_PREVIEW_BG_COLOR = (0.0, 0.0, 0.0, 1.0)
 
 # Multi Bitmap slot index -> (quality label, ecosystem label, season label),
 # the three known Georges/engine conventions documented in
@@ -240,7 +246,39 @@ def _multi_bitmap_slot_label(index):
 	return str(index)
 
 
-def _build_geom(vertex_buffer, indices):
+# How far outside [0, 1] a UV has to land before it's treated as genuine tiling
+# intent (see _uvs_need_repeat()) rather than float imprecision from an .fbx/
+# .dae/.obj import (assimp/Blender routinely overshoot by a thousandth or so) --
+# real tiling content overshoots by at least a whole unit (e.g. V up to 2.0 on
+# ooc_summer_raceline.shape), nowhere close to this margin.
+_UV_REPEAT_MARGIN = 0.05
+
+
+def _uvs_need_repeat(texcoords):
+	"""Whether `texcoords` (a shape's whole TexCoord0 channel) actually relies
+	on the texture wrapping/repeating (see load_panda_texture()'s `repeat`
+	param) -- Panda3D's own default wrap mode is clamp, correct for the
+	common case of a single, non-tiling texture per material, but wrong for
+	shapes that deliberately go outside [0, 1] for tiling. Real, native NeL
+	shapes do this often (repeating a wall/floor texture); imported meshes'
+	UVs staying just barely outside [0, 1] (e.g. 1.0008) is float noise, not
+	tiling intent, and switching those to repeat too visibly shifts the
+	texture instead (a fraction of a pixel wrapping becomes a full, visible
+	seam once the *whole* texture wraps around the boundary)."""
+	if not texcoords:
+		return False
+	return any(
+		u < -_UV_REPEAT_MARGIN or u > 1.0 + _UV_REPEAT_MARGIN or v < -_UV_REPEAT_MARGIN or v > 1.0 + _UV_REPEAT_MARGIN
+		for u, v in texcoords)
+
+
+def _build_vertex_data(vertex_buffer, dynamic=False):
+	"""Builds the GeomVertexData for `vertex_buffer` -- shared by every render
+	pass's Geom (all of a mesh's passes index into the exact same vertex
+	array, see iter_render_passes()), so it's built once per _rebuild_geometry()
+	call rather than once per pass. `dynamic`, when the loaded shape has wind
+	animation data (see _update_wind()), marks the vertex column UH_dynamic so
+	Panda3D doesn't assume the position data is upload-once-and-forget."""
 	positions = vertex_buffer.channels.get("Position")
 	normals = vertex_buffer.channels.get("Normal")
 	texcoords = vertex_buffer.channels.get("TexCoord0")
@@ -362,6 +400,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
 		self._texture_search_dirs = []  # extra folders (see shape_geometry.load_panda_texture's search_dirs) to fall back to for this shape's textures -- an imported mesh's own folder, tex/textures/data subfolders included
+		self._texture_needs_repeat = False  # see _uvs_need_repeat() -- whether the loaded shape's own UVs rely on texture tiling
 		self._save_overwrite_confirmed = False  # session-scoped: asked once, no more Save confirmations after that
 		self._confirm_overwrite_open = False
 		self._save_dialog = None  # in-flight portable_file_dialogs.save_file, for Save As
@@ -580,7 +619,18 @@ class ObjectEditorApp(ForgeryApp):
 		self._shape_source_path = None
 		self._shape_source_name = None
 		self._texture_search_dirs = []
+		self._texture_needs_repeat = False
 		self._save_status = ""
+		# Both keyed by texture *name* only, not by which shape/search_dirs
+		# resolved it -- two different shapes can use the same texture name
+		# for genuinely different files (different _texture_search_dirs
+		# fallbacks) or the same file with different wrap-mode needs (see
+		# _uvs_need_repeat()), which only gets applied the first time a name
+		# is loaded (load_panda_texture()'s cache). Carrying either cache
+		# over to a newly loaded shape risked reusing another shape's
+		# resolved texture/wrap mode outright.
+		self._texture_cache = {}
+		self._preview_texture_refs = {}
 
 	def _display_shape(self, shape_file):
 		"""Renders an already-parsed/-built ShapeFile. Assumes
@@ -811,6 +861,7 @@ class ObjectEditorApp(ForgeryApp):
 		self.shape_error = None
 		self._material_node_paths = {}
 		self._wind_state = None
+		self._texture_needs_repeat = False
 
 		geom_value = shape_geom(self.shape_file.value)
 		wind_params = geom_value.vertex_program if geom_value is not None else None
@@ -832,6 +883,7 @@ class ObjectEditorApp(ForgeryApp):
 				vdata = _build_vertex_data(vertex_buffer, dynamic=wind_params is not None)
 				if wind_params is not None:
 					self._wind_state = _build_wind_state(wind_params, vertex_buffer)
+				self._texture_needs_repeat = _uvs_need_repeat(vertex_buffer.channels.get("TexCoord0"))
 			geom = _build_geom(vdata, indices)
 			geom_node = GeomNode(f"pass-{pass_count}")
 			geom_node.add_geom(geom)
@@ -995,7 +1047,9 @@ class ObjectEditorApp(ForgeryApp):
 
 		texture = material.textures[0] if material.textures else None
 		if texture is not None and texture.file_name:
-			panda_texture = load_panda_texture(self.asset_index, texture.file_name, cache=self._texture_cache)
+			panda_texture = load_panda_texture(
+				self.asset_index, texture.file_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+				repeat=self._texture_needs_repeat)
 			if panda_texture is not None:
 				node_path.set_texture(panda_texture)
 
@@ -1045,22 +1099,63 @@ class ObjectEditorApp(ForgeryApp):
 		tex_ref = self._preview_texture_refs.get(name)
 		if tex_ref is not None:
 			return tex_ref
-		panda_texture = load_panda_texture(self.asset_index, name, cache=self._texture_cache)
+		panda_texture = load_panda_texture(
+			self.asset_index, name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+			repeat=self._texture_needs_repeat)
 		if panda_texture is None:
 			return None
-		tex_ref = self.imgui.loadTexture(panda_texture)
+		# p3dimgui's loadTexture() mutates whatever Texture it's given
+		# in-place (backend.py: texture.store(pnm); pnm.flip(...); texture.load(pnm)
+		# -- flips it vertically and reloads it into the SAME object, for
+		# ImGui's own OpenGL-vs-Panda row-order convention). `panda_texture`
+		# here is the exact same cached object _apply_material_texture() put
+		# on the live 3D material (self._texture_cache is shared) -- passing
+		# it straight to loadTexture() would silently flip the 3D-rendered
+		# texture too, the first time this shape's preview thumbnail/tooltip
+		# is ever drawn. A throwaway copy absorbs the mutation instead.
+		#
+		# That copy is also where alpha gets dropped (format -> RGB): most of
+		# these textures are mostly transparent everywhere (e.g. a shape cut
+		# from a square atlas), and alpha blending genuinely hides the real
+		# color underneath low-alpha pixels -- no backdrop color can undo
+		# that (see _draw_image_opaque_bg(), still used as a fallback for
+		# whatever's left translucent). Safe to do on this copy specifically
+		# now that it's confirmed independent of the live 3D material's own
+		# texture (see above) -- doing this to the shared one would have
+		# made the actual 3D-rendered object opaque too.
+		preview_texture = panda_texture.make_copy()
+		preview_texture.set_format(PandaTexture.F_rgb)
+		tex_ref = self.imgui.loadTexture(preview_texture)
 		self._preview_texture_refs[name] = tex_ref
 		return tex_ref
+
+	@staticmethod
+	def _draw_image_opaque_bg(tex_ref, size):
+		"""imgui.image() (unlike image_button()) has no bg_col param -- draws
+		an opaque black rect behind it by hand instead, so a texture with
+		transparency (routinely most of the image, e.g. a banner cut out of a
+		square atlas) doesn't blend into the panel's own dark background and
+		become hard to actually see. Same reasoning as the bg_col passed to
+		image_button() everywhere else in this file."""
+		pos = imgui.get_cursor_screen_pos()
+		width, height = size
+		imgui.get_window_draw_list().add_rect_filled(
+			pos, (pos.x + width, pos.y + height), imgui.get_color_u32(_PREVIEW_BG_COLOR))
+		imgui.image(tex_ref, size)
 
 	def _draw_thumbnail_button(self, str_id, tex_ref, tooltip, size=24):
 		"""Common image_button + hover-zoom-tooltip widget: shared by real
 		texture thumbnails and solid-color swatches, so a plain material
 		color gets the exact same button chrome/hover style as a real
-		texture instead of a hand-approximated look-alike."""
-		clicked = imgui.image_button(str_id, tex_ref, (size, size))
+		texture instead of a hand-approximated look-alike. Both the thumbnail
+		and the hover preview get an opaque white backdrop (see
+		_draw_image_opaque_bg()) -- textures are routinely mostly transparent
+		(e.g. a shape cut out of a square atlas), which otherwise blends into
+		the panel and makes the preview hard to read for no benefit here."""
+		clicked = imgui.image_button(str_id, tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR)
 		if imgui.is_item_hovered():
 			if imgui.begin_tooltip():
-				imgui.image(tex_ref, (192, 192))
+				self._draw_image_opaque_bg(tex_ref, (192, 192))
 				if tooltip:
 					imgui.text(tooltip)
 				imgui.end_tooltip()
@@ -1090,11 +1185,11 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.dummy((size, size))
 			return
 		imgui.begin_disabled(True)
-		imgui.image_button("##preview", tex_ref, (size, size))
+		imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR)
 		imgui.end_disabled()
 		if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
 			if imgui.begin_tooltip():
-				imgui.image(tex_ref, (192, 192))
+				self._draw_image_opaque_bg(tex_ref, (192, 192))
 				imgui.text(name)
 				imgui.end_tooltip()
 

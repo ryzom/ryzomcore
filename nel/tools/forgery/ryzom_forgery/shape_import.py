@@ -256,7 +256,19 @@ def _assemble_mesh(
 		channels["Normal"] = normals
 		types[1] = 7  # Normal: float3
 	if texcoords:
-		channels["TexCoord0"] = texcoords
+		# .obj/.dae/.fbx (hand-parsed or via assimp-py) all use the format's
+		# own native V-origin convention (0 at the bottom, matching OpenGL --
+		# verified against assimp's own FBX/OBJ reader source, neither flips
+		# it), the opposite of what real NeL .shape files store (V=0 at the
+		# top -- see object_editor.py's _build_vertex_data()). Converting
+		# here, once, at import time, rather than working around it at
+		# display time, is what actually makes the *saved* .shape file
+		# correct on its own -- a viewer-side-only flip would round-trip
+		# wrong (looks right in Forgery only for as long as it remembers
+		# this mesh came from an import; wrong once reloaded as a plain
+		# .shape, and wrong in the real engine too, which has no such
+		# per-file memory).
+		channels["TexCoord0"] = [(u, 1.0 - v) for u, v in texcoords]
 		types[2] = 4  # TexCoord0: float2
 
 	vertex_buffer = VertexBuffer(

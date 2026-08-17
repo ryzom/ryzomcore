@@ -149,13 +149,17 @@ def _find_local_texture_ref(name, search_dirs):
 	return None
 
 
-def load_panda_texture(asset_index, name, cache=None, search_dirs=None):
+def load_panda_texture(asset_index, name, cache=None, search_dirs=None, repeat=False):
 	"""Resolves and decodes a material texture reference (by base file name,
 	as stored in the shape's Texture.file_name) into a Panda3D Texture, via
 	the given AssetIndex, falling back to _find_local_texture_ref(search_dirs)
 	if given and the AssetIndex doesn't have it. Returns None if it can't be
 	found/decoded. `cache`, if given, is a dict reused across calls to avoid
-	re-decoding the same texture for multiple materials/passes."""
+	re-decoding the same texture for multiple materials/passes -- `repeat`
+	only has an effect the first time a given `name` is actually loaded (a
+	cache hit skips straight past it), matching how the wrap mode is really a
+	property of how the shape's own UVs use the texture, not of the texture
+	file itself."""
 	if cache is not None and name in cache:
 		return cache[name]
 
@@ -164,7 +168,7 @@ def load_panda_texture(asset_index, name, cache=None, search_dirs=None):
 	if ref is None and search_dirs:
 		ref = _find_local_texture_ref(name, search_dirs)
 	if ref is None:
-		print(f"[shape_geometry] texture not found in asset index: {name!r}")
+		print(f"[shape_geometry] texture not found: {name!r}")
 	else:
 		try:
 			data = ref.read_bytes()
@@ -191,15 +195,34 @@ def load_panda_texture(asset_index, name, cache=None, search_dirs=None):
 		elif data is not None:
 			image = PNMImage()
 			if image.read(StringStream(data), ref.name):
-				# NeL's V-origin flip (relative to Panda3D) is applied once,
-				# uniformly for every texture format, via the UV coordinates
-				# written in _build_geom() -- not here, since the DDS path
-				# has no equivalent way to flip a compressed image's pixel
-				# rows after decoding.
+				# NeL .shape files' V-origin flip (relative to Panda3D) is
+				# applied once, unconditionally, for every texture format
+				# alike, via the UV coordinates written in
+				# object_editor.py's _build_vertex_data() -- not here, since
+				# the DDS path has no equivalent way to flip a compressed
+				# image's pixel rows after decoding. That flip is safe to
+				# apply to every shape's data uniformly (real .shape files
+				# and freshly-imported .obj/.dae/.fbx ones alike) because
+				# shape_import.py's importers already convert the source
+				# format's own V convention into this same NeL one at import
+				# time, in _assemble_mesh() -- see its comment there.
 				texture = PandaTexture()
 				texture.load(image)
 			else:
 				print(f"[shape_geometry] failed to decode texture {ref.name!r}")
+
+	if texture is not None and repeat:
+		# Panda3D's own default wrap mode is already WM_clamp, correct for
+		# the common case of a single, non-tiling texture per material --
+		# only overridden when the caller (object_editor.py's
+		# _uvs_need_repeat()) actually found UVs relying on tiling (e.g. a
+		# whole render pass at V in [1, 2) on ooc_summer_raceline.shape).
+		# Switching every texture to repeat unconditionally visibly shifted
+		# imported (.fbx/.dae/.obj) meshes' textures instead: their UVs
+		# routinely overshoot [0, 1] by float noise with no tiling intent,
+		# and repeat wraps that into a full, visible seam.
+		texture.set_wrap_u(PandaTexture.WM_repeat)
+		texture.set_wrap_v(PandaTexture.WM_repeat)
 
 	if cache is not None:
 		cache[name] = texture
