@@ -15,13 +15,13 @@ from pynel.ryzom_shape import (
 )
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh, skin_vertex
 
-from .asset_index import AssetRef, TEXTURE_FALLBACK_EXTENSIONS
+from .search_paths import FoundEntry, TEXTURE_FALLBACK_EXTENSIONS
 
 # Subfolders (relative to each of load_panda_texture()'s search_dirs, "" =
-# the dir itself) checked for a texture that isn't anywhere in the indexed
-# Ryzom asset root -- an imported .fbx/.dae/.obj routinely references
-# textures sitting right next to the source file, or in one of these
-# conventional sibling folders, rather than inside the game's own data tree.
+# the dir itself) checked for a texture that isn't found by name (`finder`)
+# elsewhere -- an imported .fbx/.dae/.obj routinely references textures
+# sitting right next to the source file, or in one of these conventional
+# sibling folders, rather than inside the configured search paths.
 _LOCAL_TEXTURE_SUBDIRS = ("", "tex", "textures", "data")
 
 
@@ -215,10 +215,10 @@ def solid_color_texture(color):
 
 
 def _find_local_texture_ref(name, search_dirs):
-	"""Fallback for load_panda_texture() when `name` isn't in the AssetIndex
-	at all -- checks each of `search_dirs` (typically just the folder an
+	"""Fallback for load_panda_texture() when `finder` doesn't have `name`
+	either -- checks each of `search_dirs` (typically just the folder an
 	imported mesh file was loaded from) and their tex/textures/data
-	subfolders, same name-matching rules as AssetIndex.find_texture()
+	subfolders, same name-matching rules as search_paths.find_texture()
 	(case-insensitive, also tries swapping the extension for another common
 	texture one)."""
 	candidates = [name.lower()]
@@ -237,34 +237,33 @@ def _find_local_texture_ref(name, search_dirs):
 			for candidate in candidates:
 				match = entries.get(candidate)
 				if match is not None:
-					return AssetRef(name=match.name, path=match)
+					return FoundEntry(name=match.name, fs_path=match, bnp_path=None)
 	return None
 
 
-def load_panda_texture(asset_index, name, cache=None, search_dirs=None, repeat=False, extra_finder=None):
+def load_panda_texture(name, cache=None, search_dirs=None, repeat=False, finder=None):
 	"""Resolves and decodes a material texture reference (by base file name,
-	as stored in the shape's Texture.file_name) into a Panda3D Texture, via
-	the given AssetIndex, falling back in turn to
-	_find_local_texture_ref(search_dirs) and then `extra_finder(name)` (e.g.
-	SearchPathsDialog.find_texture, the user-configured, .bnp-aware search
-	paths from the Settings tab's "Paths" section) if the AssetIndex doesn't
-	have it. `extra_finder` just needs to return something with `.name` and
-	`.read_bytes()`, same duck-typed shape as an AssetRef. Returns None if it
-	can't be found/decoded. `cache`, if given, is a dict reused across calls
-	to avoid re-decoding the same texture for multiple materials/passes --
-	`repeat` only has an effect the first time a given `name` is actually
-	loaded (a cache hit skips straight past it), matching how the wrap mode
-	is really a property of how the shape's own UVs use the texture, not of
-	the texture file itself."""
+	as stored in the shape's Texture.file_name) into a Panda3D Texture:
+	tries `search_dirs` (_find_local_texture_ref(), typically just the
+	loaded shape's own folder) first, then `finder(name)` (e.g.
+	SearchPathsDialog.find_texture, the user-configured, .bnp-aware,
+	priority-ordered search paths from the Settings tab's "Paths" section --
+	the only place Forgery resolves textures from). `finder` just needs to
+	return something with `.name` and `.read_bytes()`, same duck-typed shape
+	as a search_paths.FoundEntry. Returns None if it can't be found/decoded.
+	`cache`, if given, is a dict reused across calls to avoid re-decoding the
+	same texture for multiple materials/passes -- `repeat` only has an
+	effect the first time a given `name` is actually loaded (a cache hit
+	skips straight past it), matching how the wrap mode is really a
+	property of how the shape's own UVs use the texture, not of the texture
+	file itself."""
 	if cache is not None and name in cache:
 		return cache[name]
 
 	texture = None
-	ref = asset_index.find_texture(name)
-	if ref is None and search_dirs:
-		ref = _find_local_texture_ref(name, search_dirs)
-	if ref is None and extra_finder is not None:
-		ref = extra_finder(name)
+	ref = _find_local_texture_ref(name, search_dirs) if search_dirs else None
+	if ref is None and finder is not None:
+		ref = finder(name)
 	if ref is None:
 		print(f"[shape_geometry] texture not found: {name!r}")
 	else:

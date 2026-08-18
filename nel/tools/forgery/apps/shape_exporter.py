@@ -13,8 +13,8 @@ a reference to their original file name instead.
 import argparse
 from pathlib import Path
 
-from ryzom_forgery.asset_index import AssetIndex
-from ryzom_forgery.export_config import TEXTURE_MODE_COPY_PNG, TEXTURE_MODE_REFERENCE_ONLY
+from ryzom_forgery import search_paths
+from ryzom_forgery.settings import SearchPathDir, TEXTURE_MODE_COPY_PNG, TEXTURE_MODE_REFERENCE_ONLY
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 
 from pynel.ryzom_shape import ShapeParseError, parse_shape
@@ -49,10 +49,13 @@ def main(argv=None):
 	if texture_mode == TEXTURE_MODE_COPY_PNG and args.data_root is None:
 		raise SystemExit("--texture-mode copy_png requires --data-root")
 
-	asset_index = None
+	texture_finder = None
 	if args.data_root is not None:
-		asset_index = AssetIndex(args.data_root)
-		asset_index.build()
+		# A single, recursive search path rooted at --data-root -- same
+		# .bnp-aware scan the GUI's own "Paths" list uses, just a one-shot,
+		# uncached index (this is a short-lived CLI process).
+		entries = search_paths.build_texture_index([SearchPathDir(path=str(args.data_root), recursive=True)])
+		texture_finder = lambda name: search_paths.find_texture(entries, name)
 
 	try:
 		shape_file = parse_shape(args.input.read_bytes())
@@ -63,7 +66,7 @@ def main(argv=None):
 	args.output.parent.mkdir(parents=True, exist_ok=True)
 
 	try:
-		written = export_format.export(shape_file.value, materials, args.output, texture_mode, asset_index)
+		written = export_format.export(shape_file.value, materials, args.output, texture_mode, texture_finder)
 	except ValueError as exc:
 		raise SystemExit(f"Export failed: {exc}")
 

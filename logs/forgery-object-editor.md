@@ -1,5 +1,54 @@
 # Changelog
 
+## 2026-08-18 — ✨ Add Panoply support and unify Forgery settings into one TOML file
+
+Unified the three separate JSON config files under `~/.config/ryzom_forgery/`
+(`export_settings.json`, `explorer_settings.json`, `search_paths_settings.json`) into a
+single `ryzom_forgery/settings.py` module (`Settings`/`ExportSettings`/`SearchPathDir`
+dataclasses) persisted as one hand-editable `settings.toml`, via `tomlkit` (new
+dependency, chosen over `tomli-w` for its comment/formatting-preserving round-trip). No
+migration path from the old JSON files -- explicitly a one-time, single-machine
+transition; they're left untouched on disk but never read again. Every settings-owning
+component (`ExportDialog`, `Explorer`, `SearchPathsDialog`) reloads the full `Settings`
+fresh before writing its own section back, so concurrent edits to different sections
+never clobber each other.
+
+Removed the separate `AssetIndex`/"data root" texture-resolution mechanism
+(`ryzom_forgery/asset_index.py`, deleted) entirely, merging it into the existing
+priority-ordered "Paths" search-path list -- a folder with "recursive" on covers the same
+case a dedicated data root did. `load_panda_texture()`, `shape_export.py`,
+`shape_exporter.py` (CLI) and `export_dialog.py` now take a generic `texture_finder`
+callable instead of an `AssetIndex`. Added up/down reorder buttons per folder in Settings
+> Paths, since priority order now determines which folder's copy of a texture wins.
+
+Added Ryzom's "panoply" armor-texture-variant system (`ryzom_forgery/panoply.py`): a
+material texture like `tr_hof_armor00_handupside_c1.tga` can have real per-race
+(`fy`/`ma`/`tr`/`zo`) x per-user-color (`u1..uN`) on-disk variants
+(`<base>_<race>_u<N>.tga`), listed in `characters_maps_hr.bnp@panoply_files.txt`. When
+that list is reachable via the search paths and the current material's texture has
+variants in it, a "Panoply" section (race buttons, then user-color buttons for the
+selected race) now appears after the texture in both the Textures and Materials tabs.
+Selecting a variant is a pure render-time override, tracked per `(material_id, slot)` --
+it never touches the shape's own material data, but does affect both the live 3D
+viewport and the Materials tab's preview thumbnail.
+
+Search-path scan performance: added a scanned-file count + elapsed time to the Paths
+status text, and a `.bnp` table-listing cache (`bnp_table_cache.json`) alongside the
+existing `.skel`/`.anim` bone-name cache -- measured to not be the bottleneck on a real
+~161k-entry tree (4.12s vs 5.13s baseline). The real cost was `pathlib.Path.is_dir()`'s
+per-child `stat()` syscall and raw Python object overhead for the ~10^5 `FoundEntry`
+instances built per scan; fixed by switching the directory walk to `os.scandir()`
+(reuses `readdir()`'s cached file type) with an iterative stack instead of a
+self-recursive generator, and making `FoundEntry` a `slots=True` dataclass (5.13s ->
+3.6s).
+
+Settings tab UI polish: sections are now collapsible (closed by default), export settings
+save immediately on every field change instead of via a separate "Save" button, missing
+icons added ("Add folder", "Choose folder...", relocated next to "Output folder:"), and
+the object_editor Save button is now always visible but grayed out (with an explanatory
+tooltip) when the loaded shape came from inside a `.bnp` archive, instead of being hidden
+behind a "Save unavailable" text label.
+
 ## 2026-08-18 — ✨ Add skinning preview and generalized search paths
 
 Two chantiers' worth of work, validated end to end against real creature data over the

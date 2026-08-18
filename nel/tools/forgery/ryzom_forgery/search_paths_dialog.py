@@ -1,13 +1,17 @@
 """Settings UI ("Paths" section) + scan logic for Forgery's generic search
-paths: user-configured folders (recursive or not, .bnp-aware, see
-search_paths.py) used to find .skel files compatible with the loaded shape's
-own skinning bones (CSkeletonModel::remapSkinBones-equivalent matching),
-.anim files compatible with a given skeleton, and to resolve textures not
-found in the game's own indexed data tree (see shape_geometry.py's
-load_panda_texture()).
+paths: user-configured, priority-ordered folders (recursive or not,
+.bnp-aware, see search_paths.py) -- the *only* place Forgery resolves
+`.shape`/.skel/.anim/texture files from (no separate "data root"/asset
+index; a plain folder here, with recursive on, covers that same case).
+Finds .skel files compatible with the loaded shape's own skinning bones
+(CSkeletonModel::remapSkinBones-equivalent matching), .anim files compatible
+with a given skeleton, resolves material texture references (see
+shape_geometry.py's load_panda_texture()), and picks up Ryzom's
+"panoply_files.txt" (see panoply.py) if one is found among them.
 """
 
 import threading
+import time
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
@@ -15,9 +19,11 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_d
 from pynel.ryzom_animation import AnimationParseError, parse_animation
 from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
 
-from ryzom_forgery import search_paths
-from ryzom_forgery.asset_index import TEXTURE_FALLBACK_EXTENSIONS
-from ryzom_forgery.search_paths import SearchPathDir
+from ryzom_forgery import panoply, search_paths
+from ryzom_forgery import settings as app_settings
+from ryzom_forgery.settings import SearchPathDir
+
+_PANOPLY_FILE_NAME = "panoply_files.txt"
 
 
 def _animation_bone_names(anim):
@@ -79,7 +85,7 @@ def _truncate_path_to_width(path, max_width):
 
 class SearchPathsDialog:
 	def __init__(self):
-		self._config = search_paths.load()
+		self._dirs = app_settings.load().search_paths
 		self._add_dir_dialog = None
 
 		# Built by reload() (run on a background thread -- parsing every
@@ -93,6 +99,7 @@ class SearchPathsDialog:
 		self._animation_entries = {}  # {name: search_paths.FoundEntry}
 		self._animation_bones = {}  # {name: frozenset(bone names)} -- for compatible_animations_for()
 		self._texture_entries = {}  # {name.lower(): search_paths.FoundEntry}
+		self._panoply_variants = {}  # {base texture stem: {race: [user color, ...]}}, see panoply.py
 		self._scan_status = ""
 		self._scanning = False
 		self._scanned_once = False
@@ -111,9 +118,18 @@ class SearchPathsDialog:
 			return
 		result = self._add_dir_dialog.result()
 		self._add_dir_dialog = None
-		if result and not any(entry.path == result for entry in self._config.dirs):
-			self._config.dirs.append(SearchPathDir(path=result))
-			search_paths.save(self._config)
+		if result and not any(entry.path == result for entry in self._dirs):
+			self._dirs.append(SearchPathDir(path=result))
+			self._save()
+
+	def _save(self):
+		"""Re-loads the shared settings file fresh and overwrites only the
+		`search_paths` section with our own current state -- see
+		export_dialog.py's own _save() for why (other components persist
+		their own section independently)."""
+		fresh = app_settings.load()
+		fresh.search_paths = self._dirs
+		app_settings.save(fresh)
 
 	def ensure_scanned(self):
 		"""Kicks off a first background scan the first time it's needed
@@ -137,23 +153,35 @@ class SearchPathsDialog:
 
 	def _reload_worker(self):
 		"""Runs off the main thread (see reload()). Builds every result
-		dict fresh, consulting/refreshing the on-disk scan cache
-		(search_paths.load_scan_cache()/save_scan_cache()) so a file whose
-		(mtime, size) hasn't changed since it was last parsed is skipped
-		entirely -- only genuinely new/changed .skel/.anim files actually
-		get parsed. Texture entries need no parsing at all (just the file
-		reference), so they're always cheap regardless of caching."""
+		dict fresh, consulting/refreshing two on-disk caches: the .bnp table
+		listing itself (search_paths.load_bnp_table_cache()/
+		save_bnp_table_cache() -- opening+reading every .bnp's own table is
+		the dominant cost of a scan across a real data tree, far more than
+		iterating directories or indexing the resulting entries, so this is
+		the one that actually matters for scan speed) and the parsed .skel/
+		.anim bone-name cache (search_paths.load_scan_cache()/
+		save_scan_cache()) so a file whose (mtime, size) hasn't changed
+		since it was last parsed is skipped entirely."""
+		start_time = time.monotonic()
+		bnp_table_cache = search_paths.load_bnp_table_cache()
 		cache = search_paths.load_scan_cache()
 		cache_dirty = False
 		skeleton_entries, skeleton_bones = {}, {}
 		animation_entries, animation_bones = {}, {}
 		texture_entries = {}
+		panoply_variants = {}
 		total = 0
 
-		for found in search_paths.iter_all_entries(self._config):
+		for found in search_paths.iter_all_entries(self._dirs, bnp_table_cache):
 			total += 1
 			lower_name = found.name.lower()
 			texture_entries.setdefault(lower_name, found)
+			if lower_name == _PANOPLY_FILE_NAME and not panoply_variants:
+				try:
+					panoply_variants = panoply.parse_panoply_files(found.read_bytes().decode("latin-1"))
+				except OSError:
+					pass
+				continue
 			is_skel = lower_name.endswith(".skel")
 			is_anim = lower_name.endswith(".anim")
 			if not (is_skel or is_anim):
@@ -185,15 +213,19 @@ class SearchPathsDialog:
 
 		if cache_dirty:
 			search_paths.save_scan_cache(cache)
+		search_paths.save_bnp_table_cache(bnp_table_cache)
 
 		self._skeleton_entries = skeleton_entries
 		self._skeleton_bones = skeleton_bones
 		self._animation_entries = animation_entries
 		self._animation_bones = animation_bones
+		self._panoply_variants = panoply_variants
 		self._texture_entries = texture_entries
+		elapsed = time.monotonic() - start_time
+		panoply_note = f", panoply_files.txt found ({len(panoply_variants)} textures)" if panoply_variants else ""
 		self._scan_status = (
-			f"Found {len(skeleton_entries)} skeleton(s), {len(animation_entries)} animation(s) "
-			f"in {total} file(s) scanned")
+			f"{total} asset(s) scanned in {elapsed:.2f}s -- {len(skeleton_entries)} skeleton(s), "
+			f"{len(animation_entries)} animation(s){panoply_note}")
 		self._scanning = False
 
 	@staticmethod
@@ -273,48 +305,69 @@ class SearchPathsDialog:
 			return None
 
 	def find_texture(self, name):
-		"""Same matching rules as AssetIndex.find_texture()/shape_geometry's
-		own _find_local_texture_ref(): case-insensitive exact name first,
-		then the same base name with each of TEXTURE_FALLBACK_EXTENSIONS --
-		just against this dialog's own scanned (.bnp-aware) index instead of
-		the game's own AssetIndex."""
-		candidates = [name.lower()]
-		stem = Path(name).stem.lower()
-		candidates += [stem + extension for extension in TEXTURE_FALLBACK_EXTENSIONS]
-		for candidate in candidates:
-			match = self._texture_entries.get(candidate)
-			if match is not None:
-				return match
-		return None
+		"""Resolves `name` against this dialog's own scanned (.bnp-aware)
+		texture index -- see search_paths.find_texture() for the matching
+		rules (case-insensitive, extension fallback)."""
+		return search_paths.find_texture(self._texture_entries, name)
+
+	def panoply_variants_for(self, base_texture_name):
+		"""{race: [user color, ...]} of panoply variants panoply_files.txt
+		lists for `base_texture_name` (e.g. "tr_hof_armor00_handupside_c1.tga")
+		-- {} if no panoply_files.txt was found by the last scan, or this
+		texture has no variants in it."""
+		stem = Path(base_texture_name).stem.lower()
+		return self._panoply_variants.get(stem, {})
 
 	def draw_settings_content(self):
 		"""Embedded in object_editor.py's Settings tab, under its own
 		"Paths" section -- these are app-wide search folders, not tied to
-		any one shape."""
-		imgui.text("Folders searched:")
+		any one shape. Order matters: the first folder that has a given
+		file wins (iter_all_entries()/find_texture() both just take the
+		first match, in list order) -- the up/down buttons let a folder be
+		promoted/demoted in priority instead of only add/remove."""
+		imgui.text("Folders searched (top = highest priority):")
 		style = imgui.get_style()
 		recursive_width = imgui.get_frame_height() + style.item_inner_spacing.x + imgui.calc_text_size("Recursive").x
+		reorder_width = imgui.calc_text_size(fa_icons.ICON_FA_ARROW_UP).x + style.frame_padding.x * 2
 		remove_width = imgui.calc_text_size(fa_icons.ICON_FA_TRASH).x + style.frame_padding.x * 2
 		remove_index = None
-		for index, entry in enumerate(self._config.dirs):
+		move_up_index = None
+		move_down_index = None
+		for index, entry in enumerate(self._dirs):
 			imgui.push_id(str(index))
-			path_width = imgui.get_content_region_avail().x - recursive_width - remove_width - style.item_spacing.x * 2
+			path_width = (imgui.get_content_region_avail().x - recursive_width - remove_width
+			              - 2 * reorder_width - style.item_spacing.x * 4)
 			imgui.text(_truncate_path_to_width(entry.path, max(path_width, 20)))
 			if imgui.is_item_hovered():
 				imgui.set_tooltip(entry.path)
 			imgui.same_line()
 			changed, entry.recursive = imgui.checkbox("Recursive", entry.recursive)
 			if changed:
-				search_paths.save(self._config)
+				self._save()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_ARROW_UP, "Move up (higher priority)", disabled=index == 0):
+				move_up_index = index
+			imgui.same_line()
+			if _icon_button(
+					fa_icons.ICON_FA_ARROW_DOWN, "Move down (lower priority)", disabled=index == len(self._dirs) - 1):
+				move_down_index = index
 			imgui.same_line()
 			if _icon_button(fa_icons.ICON_FA_TRASH, "Remove this folder"):
 				remove_index = index
 			imgui.pop_id()
+		if move_up_index is not None:
+			self._dirs[move_up_index - 1], self._dirs[move_up_index] = \
+				self._dirs[move_up_index], self._dirs[move_up_index - 1]
+			self._save()
+		if move_down_index is not None:
+			self._dirs[move_down_index + 1], self._dirs[move_down_index] = \
+				self._dirs[move_down_index], self._dirs[move_down_index + 1]
+			self._save()
 		if remove_index is not None:
-			del self._config.dirs[remove_index]
-			search_paths.save(self._config)
+			del self._dirs[remove_index]
+			self._save()
 
-		if _icon_button(fa_icons.ICON_FA_FOLDER_PLUS, "Add folder..."):
+		if _icon_button(fa_icons.ICON_FA_PLUS, "Add folder..."):
 			self._add_dir_dialog = pfd.select_folder("Choose a search folder")
 		imgui.same_line()
 		if _icon_button(fa_icons.ICON_FA_SYNC, "Reload", disabled=self._scanning):

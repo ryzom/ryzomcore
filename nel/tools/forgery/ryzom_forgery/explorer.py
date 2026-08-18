@@ -9,7 +9,7 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
 
 from pynel.ryzom_bnp import BnpReader, BnpError
 
-from . import explorer_config
+from . import settings as app_settings
 from .commands import CommandRegistry
 
 BNP_EXTENSIONS = (".bnp", ".bnpe")
@@ -85,7 +85,7 @@ class Explorer:
 		self.extension_filter = default_filter
 		self.extension_presets = list(extension_presets) if extension_presets else list(FILTER_PRESETS)
 
-		self._config = explorer_config.load()
+		self._favorites = app_settings.load().explorer_favorites
 
 		self._path_input = str(self.root)  # edited text of the path bar, synced from self.root when it changes elsewhere
 		self._path_input_root = self.root  # which self.root the above was last synced from
@@ -257,7 +257,7 @@ class Explorer:
 		return interacted
 
 	def _draw_favorites(self):
-		is_favorite = str(self.root) in self._config.favorites
+		is_favorite = str(self.root) in self._favorites
 		imgui.push_style_color(imgui.Col_.text.value, _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR)
 		tooltip = "Remove current folder from favorites" if is_favorite else "Add current folder to favorites"
 		if _icon_button(fa_icons.ICON_FA_STAR, tooltip):
@@ -266,9 +266,9 @@ class Explorer:
 
 		imgui.same_line()
 		if imgui.begin_combo("##favorites", "Favorites"):
-			if not self._config.favorites:
+			if not self._favorites:
 				imgui.text_disabled("(none yet -- click the star to add the current folder)")
-			for favorite in list(self._config.favorites):
+			for favorite in list(self._favorites):
 				imgui.push_id(favorite)
 				imgui.push_style_color(imgui.Col_.text.value, _FAVORITE_STAR_COLOR)
 				if _icon_button(fa_icons.ICON_FA_STAR, "Remove from favorites"):
@@ -285,11 +285,16 @@ class Explorer:
 			imgui.end_combo()
 
 	def _toggle_favorite(self, path: str):
-		if path in self._config.favorites:
-			self._config.favorites.remove(path)
+		if path in self._favorites:
+			self._favorites.remove(path)
 		else:
-			self._config.favorites.append(path)
-		explorer_config.save(self._config)
+			self._favorites.append(path)
+		# Re-loads fresh and overwrites only our own section -- other
+		# components (export, search paths, data_root) persist independently
+		# and may have changed their own section since our own __init__.
+		fresh = app_settings.load()
+		fresh.explorer_favorites = self._favorites
+		app_settings.save(fresh)
 
 	def draw(self):
 		if _icon_button(fa_icons.ICON_FA_SYNC, "Refresh"):

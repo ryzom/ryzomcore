@@ -21,13 +21,14 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, port
 
 from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
-from ryzom_forgery.asset_index import AssetIndex
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
+from ryzom_forgery import panoply
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
+from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
 	finest_skinned_lod, iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, shape_geom,
@@ -43,8 +44,6 @@ from pynel.ryzom_shape import (
 	parse_shape, save_shape,
 )
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh
-
-DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 
 # Shape types pynel's save_shape() can actually write back out -- matches
 # ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save/Save As UI only shows for these.
@@ -425,16 +424,18 @@ def _build_geom(vdata, indices):
 
 
 class ObjectEditorApp(ForgeryApp):
-	def __init__(self, data_root=DEFAULT_DATA_ROOT):
-		ForgeryApp.__init__(self, explorer_root=data_root, title="Ryzom Forgery - Object Editor",
+	def __init__(self):
+		# The Explorer starts out wherever the highest-priority configured
+		# search path points (there's no separate "data root" concept --
+		# see ryzom_forgery.search_paths_dialog's own module docstring),
+		# falling back to the user's home folder the very first time
+		# there's nothing configured yet.
+		configured_dirs = app_settings.load().search_paths
+		explorer_root = Path(configured_dirs[0].path) if configured_dirs else Path.home()
+		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Object Editor",
 		                     explorer_default_filter="*.shape")
 
-		self.data_root = Path(data_root)
 		self.material_docs = load_material_docs()
-		self.asset_index = AssetIndex(self.data_root)
-		self.sysinfo.set_status("Indexing assets...")
-		self.asset_index.build()
-		self.sysinfo.set_status(f"{len(self.asset_index)} assets indexed")
 
 		self._texture_cache = {}
 		self._preview_texture_refs = {}  # texture name -> imgui.ImTextureRef, for thumbnail/tooltip previews in the UI
@@ -482,6 +483,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_hint_shown = False  # same, for the material property editor's own doc hints
 		self._texture_browse_dialogs = {}  # key -> (in-flight portable_file_dialogs.open_file, on_result callback)
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
+		self._panoply_selection = {}  # (material_id, slot) -> (race, user_color), render-only, never touches shape data
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
@@ -539,6 +541,12 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.search_paths_dialog = SearchPathsDialog()
+		# Kicked off immediately (background thread, see ensure_scanned()) so
+		# the very first shape loaded already has a populated texture/skel/
+		# anim/panoply index, instead of possibly rendering with missing
+		# textures while a scan started only on that first load is still
+		# catching up.
+		self.search_paths_dialog.ensure_scanned()
 		# Skinning preview (see _update_skin_preview_time()/_draw_bone_preview_controls()):
 		# the skeleton/animation driving a loaded CMeshMRMSkinned's own skin
 		# (see _update_skin_preview() below). Independent of the loaded
@@ -993,6 +1001,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_section_expanded = set()
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
+		self._panoply_selection = {}
 		self._shape_source_path = None
 		self._shape_source_name = None
 		self._texture_search_dirs = []
@@ -1015,7 +1024,6 @@ class ObjectEditorApp(ForgeryApp):
 		replace-geometry flow can skip resetting the editing state that's
 		meant to survive it, e.g. material overrides)."""
 		self.shape_file = shape_file
-		self.search_paths_dialog.ensure_scanned()
 
 		# CMeshBase::DefaultRotQuat is what the engine actually rotates the
 		# object by at instance creation (nel/src/3d/mesh_base.cpp) -- not
@@ -1569,7 +1577,7 @@ class ObjectEditorApp(ForgeryApp):
 			node_path = parent_node_path.attach_new_node(geom_node)
 			material = materials[material_id] if materials and material_id < len(materials) else None
 			self._apply_material_common(node_path, material)
-			self._apply_material_texture(node_path, material)
+			self._apply_material_texture(node_path, material, None)
 
 	def _rebuild_reference_shapes(self):
 		"""Lines up the currently-active reference shapes side by side, just
@@ -1680,7 +1688,62 @@ class ObjectEditorApp(ForgeryApp):
 		# geometry depending on draw order.
 		node_path.set_depth_write(bool(material.flags & _IDRV_MAT_ZWRITE) if material is not None else True)
 
-	def _apply_material_texture(self, node_path, material):
+	def _resolve_panoply_texture_name(self, material_id, slot, base_name):
+		"""`base_name` unchanged, unless a panoply race/user-color has been
+		picked for (material_id, slot) (see _draw_panoply_section()) -- in
+		which case the real per-race/per-user-color file name (panoply.py's
+		variant_file_name()) is returned instead. Only ever affects what
+		gets loaded for rendering/preview -- the shape's own material data
+		(base_name itself) is never modified."""
+		selection = self._panoply_selection.get((material_id, slot))
+		if selection is None:
+			return base_name
+		race, user_color = selection
+		return panoply.variant_file_name(base_name, race, user_color)
+
+	def _draw_panoply_section(self, material_id, base_texture_name):
+		"""Ryzom's per-race/per-user-color armor texture variants (see
+		panoply.py) for `base_texture_name`, if any were found in a scanned
+		panoply_files.txt (self.search_paths_dialog) -- shared by the
+		Textures and Materials tabs, "à la suite" of the texture they're
+		about. Race buttons first (only the ones with variants), then
+		u1..uN for whichever race is currently selected. Purely a render
+		override (_resolve_panoply_texture_name()) -- never edits the
+		shape's own material data, so this draws no preview of its own
+		either (there's nothing shape-accurate to preview until the actual
+		render/Materials-tab preview picks up the override)."""
+		if not base_texture_name:
+			return
+		variants = self.search_paths_dialog.panoply_variants_for(base_texture_name)
+		if not variants:
+			return
+		key = (material_id, 0)
+		selection = self._panoply_selection.get(key)
+		selected_race = selection[0] if selection else None
+
+		imgui.text("Panoply:")
+		for race in panoply.RACES:
+			user_colors = variants.get(race)
+			if not user_colors:
+				continue
+			imgui.same_line()
+			active = race == selected_race
+			if _icon_button(race, f"Race {race!r}", active=active):
+				if active:
+					self._panoply_selection.pop(key, None)
+				else:
+					self._panoply_selection[key] = (race, user_colors[0])
+				self._reapply_material(material_id)
+
+		if selected_race is not None:
+			for user_color in variants.get(selected_race, []):
+				imgui.same_line()
+				active = selection == (selected_race, user_color)
+				if _icon_button(f"u{user_color}", f"User color {user_color}", active=active):
+					self._panoply_selection[key] = (selected_race, user_color)
+					self._reapply_material(material_id)
+
+	def _apply_material_texture(self, node_path, material, material_id):
 		"""Material color/blend/alpha-test/texture -- the part of rendering
 		a material that _apply_material_common() doesn't cover. Assumes the
 		caller already handled clearing and any color override."""
@@ -1715,9 +1778,15 @@ class ObjectEditorApp(ForgeryApp):
 
 		texture = material.textures[0] if material.textures else None
 		if texture is not None and texture.file_name:
+			resolved_name = self._resolve_panoply_texture_name(material_id, 0, texture.file_name)
+			# A panoply override changes which file gets loaded, never the
+			# shape's own material data (texture.file_name) -- see
+			# _resolve_panoply_texture_name()'s own note. The texture cache
+			# is keyed by the resolved name, so base and each variant are
+			# cached independently.
 			panda_texture = load_panda_texture(
-				self.asset_index, texture.file_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-				repeat=self._texture_needs_repeat, extra_finder=self.search_paths_dialog.find_texture)
+				resolved_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+				repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture)
 			if panda_texture is not None:
 				node_path.set_texture(panda_texture)
 
@@ -1741,7 +1810,7 @@ class ObjectEditorApp(ForgeryApp):
 			node_path.set_color(override_color, 1)
 			return
 
-		self._apply_material_texture(node_path, material)
+		self._apply_material_texture(node_path, material, material_id)
 
 	def _reapply_material(self, material_id):
 		"""Re-runs _apply_material on every NodePath using this material, e.g.
@@ -1768,8 +1837,8 @@ class ObjectEditorApp(ForgeryApp):
 		if tex_ref is not None:
 			return tex_ref
 		panda_texture = load_panda_texture(
-			self.asset_index, name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-			repeat=self._texture_needs_repeat, extra_finder=self.search_paths_dialog.find_texture)
+			name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+			repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture)
 		if panda_texture is None:
 			return None
 		# p3dimgui's loadTexture() mutates whatever Texture it's given
@@ -1905,6 +1974,8 @@ class ObjectEditorApp(ForgeryApp):
 			if preview_name is ...:
 				texture = material.textures[0] if material is not None and material.textures else None
 				preview_name = texture.file_name if texture is not None else None
+				if preview_name:
+					preview_name = self._resolve_panoply_texture_name(material_id, 0, preview_name)
 			if preview_name:
 				clicked = self._draw_texture_preview_button(f"##color-{material_id}", preview_name)
 			else:
@@ -1958,8 +2029,11 @@ class ObjectEditorApp(ForgeryApp):
 	def _start_texture_browse(self, key, on_result):
 		"""Opens a native file picker for a texture; on_result(file_name) is
 		called with just the chosen file's base name once picked, matching
-		how texture references are stored (name only, no path)."""
-		dialog = pfd.open_file("Choose texture", str(self.data_root), ["Textures", "*.tga *.dds *.png"])
+		how texture references are stored (name only, no path). Starts
+		wherever the shape itself came from, if known -- a texture is far
+		more likely to sit next to (or under) it than anywhere else."""
+		start_dir = str(self._shape_source_path.parent) if self._shape_source_path is not None else ""
+		dialog = pfd.open_file("Choose texture", start_dir, ["Textures", "*.tga *.dds *.png"])
 		self._texture_browse_dialogs[key] = (dialog, on_result)
 
 	def _poll_texture_browse_dialogs(self):
@@ -2180,13 +2254,13 @@ class ObjectEditorApp(ForgeryApp):
 
 		writable = self.shape_file is not None and self.shape_file.type_name in _WRITABLE_SHAPE_TYPES
 		if writable:
-			if self._shape_source_path is not None:
-				if imgui.button(f"{fa_icons.ICON_FA_SAVE} Save"):
-					self._on_save_clicked()
-				imgui.same_line()
-			else:
-				imgui.text_disabled("Save unavailable (loaded from inside a .bnp archive)")
-				imgui.same_line()
+			imgui.begin_disabled(self._shape_source_path is None)
+			if imgui.button(f"{fa_icons.ICON_FA_SAVE} Save"):
+				self._on_save_clicked()
+			imgui.end_disabled()
+			if imgui.is_item_hovered() and self._shape_source_path is None:
+				imgui.set_tooltip("Save unavailable -- loaded from inside a .bnp archive")
+			imgui.same_line()
 
 			if imgui.button("Save As..."):
 				# Prefer the shape's own source path (e.g. saving an edited
@@ -2214,7 +2288,7 @@ class ObjectEditorApp(ForgeryApp):
 							self._shape_source_path.parent if self._shape_source_path is not None else None)
 						self.export_dialog.export(
 							self.shape_file.value, self._shape_source_name or "shape", export_format,
-							self.asset_index, source_folder=source_folder)
+							self.search_paths_dialog.find_texture, source_folder=source_folder)
 				imgui.end_popup()
 			imgui.same_line()
 
@@ -2321,6 +2395,9 @@ class ObjectEditorApp(ForgeryApp):
 				if section_hint:
 					hovered_hint = section_hint
 				imgui.unindent()
+
+			if not is_multi:
+				self._draw_panoply_section(material_id, texture.file_name if texture is not None else None)
 
 			imgui.pop_id()
 			imgui.separator()
@@ -2525,6 +2602,8 @@ class ObjectEditorApp(ForgeryApp):
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
 
+		self._draw_panoply_section(material_id, current_value)
+
 		imgui.pop_id()
 
 	def panel_title(self):
@@ -2569,13 +2648,10 @@ class ObjectEditorApp(ForgeryApp):
 					draw_properties(self.shape_file.value)
 					imgui.end_tab_item()
 			if imgui.begin_tab_item_simple("Settings"):
-				imgui.text("Export")
-				imgui.separator()
-				self.export_dialog.draw_settings_content()
-				imgui.spacing()
-				imgui.text("Paths")
-				imgui.separator()
-				self.search_paths_dialog.draw_settings_content()
+				if imgui.collapsing_header("Export"):
+					self.export_dialog.draw_settings_content()
+				if imgui.collapsing_header("Paths"):
+					self.search_paths_dialog.draw_settings_content()
 				imgui.end_tab_item()
 			imgui.end_tab_bar()
 
