@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-18 — 🐛 Fix texture preview corruption and make Panoply shape-wide
+
+Fixed `_get_preview_texture_ref()` (thumbnails/tooltips in the Textures and Materials
+tabs): it dropped alpha via `Texture.set_format(F_rgb)` on an already-decoded texture,
+which only relabels the stored ram image's component count without repacking its bytes
+from 4 to 3 per pixel -- every pixel after the first then read shifted by one channel,
+producing a scrambled checkerboard look for any texture with an actual alpha channel
+(found on `tr_hom_armor00_epaule_c1.png`, a plain valid RGBA PNG). Replaced with a
+`PNMImage` round-trip (`store()` -> `remove_alpha()` -> `load()`), which repacks the
+pixel data correctly and also works for a compressed source texture.
+
+Reworked the Panoply feature (added earlier this session) after realizing its design was
+wrong: race and user-color are not a per-material choice, they're shape-wide -- race is a
+skin-tone difference (Fyros tanned, Matis pale, Tryker in between, Zorai blue) and user
+color is the item's craft color, both meant to be uniform across a whole equipped piece.
+Replaced the per-`(material_id, slot)` `_panoply_selection` dict with a single shape-wide
+`(race, user_color)` tuple (or `None`), and `_resolve_panoply_texture_name()` now just
+checks whether the specific texture being resolved has a variant for that pick, falling
+back to the base name untouched otherwise (expected for parts that don't change color,
+e.g. a buckle or a weapon). The picker itself (`_draw_global_panoply_section()`) is now
+drawn once, at the top of both the Textures and Materials tabs, instead of repeated under
+every material row -- the previous per-material placement had also silently never
+included Multi Bitmap materials (armor pieces, almost always Multi Bitmap, never got a
+Panoply section at all). Race buttons offered are the union of every race with a variant
+across every texture the shape currently uses; user-color buttons for the selected race
+are now on their own line below the race buttons rather than trailing on the same line.
+Selecting a race/user-color now re-applies every material (`_reapply_all_materials()`,
+new), not just one, since the shape-wide change can affect any of the shape's textures at
+once.
+
 ## 2026-08-18 — ✨ Add Panoply support and unify Forgery settings into one TOML file
 
 Unified the three separate JSON config files under `~/.config/ryzom_forgery/`

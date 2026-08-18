@@ -13,8 +13,8 @@ import numpy
 
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, Point3, Quat,
-	Texture as PandaTexture, TransparencyAttrib, Vec3,
+	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, PNMImage, Point3,
+	Quat, Texture as PandaTexture, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
@@ -483,7 +483,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_hint_shown = False  # same, for the material property editor's own doc hints
 		self._texture_browse_dialogs = {}  # key -> (in-flight portable_file_dialogs.open_file, on_result callback)
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
-		self._panoply_selection = {}  # (material_id, slot) -> (race, user_color), render-only, never touches shape data
+		self._panoply_selection = None  # (race, user_color) or None -- shape-wide, render-only, never touches shape data
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
@@ -1001,7 +1001,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_section_expanded = set()
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
-		self._panoply_selection = {}
+		self._panoply_selection = None
 		self._shape_source_path = None
 		self._shape_source_name = None
 		self._texture_search_dirs = []
@@ -1688,60 +1688,91 @@ class ObjectEditorApp(ForgeryApp):
 		# geometry depending on draw order.
 		node_path.set_depth_write(bool(material.flags & _IDRV_MAT_ZWRITE) if material is not None else True)
 
-	def _resolve_panoply_texture_name(self, material_id, slot, base_name):
-		"""`base_name` unchanged, unless a panoply race/user-color has been
-		picked for (material_id, slot) (see _draw_panoply_section()) -- in
-		which case the real per-race/per-user-color file name (panoply.py's
-		variant_file_name()) is returned instead. Only ever affects what
-		gets loaded for rendering/preview -- the shape's own material data
-		(base_name itself) is never modified."""
-		selection = self._panoply_selection.get((material_id, slot))
-		if selection is None:
+	def _resolve_panoply_texture_name(self, base_name):
+		"""`base_name` unchanged, unless a shape-wide panoply race/user-color
+		has been picked (see _draw_global_panoply_section()) AND this
+		particular texture actually has a variant for it -- a shape's parts
+		that don't change color (e.g. a buckle, a weapon) simply have no
+		entry in panoply_files.txt for their base name and keep rendering
+		with `base_name` as-is, same as if nothing were selected. Only ever
+		affects what gets loaded for rendering/preview -- the shape's own
+		material data (base_name itself) is never modified."""
+		if self._panoply_selection is None or not base_name:
 			return base_name
-		race, user_color = selection
+		race, user_color = self._panoply_selection
+		variants = self.search_paths_dialog.panoply_variants_for(base_name)
+		if user_color not in variants.get(race, ()):
+			return base_name
 		return panoply.variant_file_name(base_name, race, user_color)
 
-	def _draw_panoply_section(self, material_id, base_texture_name):
+	def _shape_texture_names(self):
+		"""Every distinct, currently-active texture base name across the
+		whole shape's materials (slot 0 -- for a Multi Bitmap material,
+		texture.file_name is whichever quality/season/ecosystem set is
+		presently selected, same one _apply_material_texture() renders) --
+		the set _draw_global_panoply_section() checks against
+		panoply_files.txt to decide which race/user-color buttons to offer."""
+		materials = getattr(self.shape_file.value, "materials", None) or []
+		names = set()
+		for material in materials:
+			texture = material.textures[0] if material.textures else None
+			if texture is not None and texture.file_name:
+				names.add(texture.file_name)
+		return names
+
+	def _draw_global_panoply_section(self):
 		"""Ryzom's per-race/per-user-color armor texture variants (see
-		panoply.py) for `base_texture_name`, if any were found in a scanned
-		panoply_files.txt (self.search_paths_dialog) -- shared by the
-		Textures and Materials tabs, "à la suite" of the texture they're
-		about. Race buttons first (only the ones with variants), then
-		u1..uN for whichever race is currently selected. Purely a render
-		override (_resolve_panoply_texture_name()) -- never edits the
-		shape's own material data, so this draws no preview of its own
-		either (there's nothing shape-accurate to preview until the actual
-		render/Materials-tab preview picks up the override)."""
-		if not base_texture_name:
+		panoply.py), shape-wide: a single race + user-color choice applies to
+		every one of the shape's textures at once -- the race is a skin-tone
+		difference (Fyros tanned, Matis pale, Tryker in between, Zorai blue)
+		and the user color is the item's craft color, both meant to be
+		uniform across a whole equipped piece, not picked per texture. A
+		texture with no variant for the current pick (e.g. a part that
+		doesn't change color) just keeps rendering its own base name --
+		that's expected, not a missing-data problem. Shown once, at the top
+		of the Textures and Materials tabs alike (shared by both, "à la
+		suite" of nothing in particular this time -- there's no one texture
+		it belongs under anymore).
+
+		Race buttons offered are the union across every texture the shape
+		actually uses right now (some armor pieces have variants only for
+		some races/user-colors -- no single texture's own list is
+		authoritative for what to show). Purely a render override
+		(_resolve_panoply_texture_name()) -- never edits the shape's own
+		material data."""
+		texture_names = self._shape_texture_names()
+		available = {}
+		for name in texture_names:
+			for race, user_colors in self.search_paths_dialog.panoply_variants_for(name).items():
+				available.setdefault(race, set()).update(user_colors)
+		if not available:
 			return
-		variants = self.search_paths_dialog.panoply_variants_for(base_texture_name)
-		if not variants:
-			return
-		key = (material_id, 0)
-		selection = self._panoply_selection.get(key)
-		selected_race = selection[0] if selection else None
+
+		selected_race = self._panoply_selection[0] if self._panoply_selection else None
 
 		imgui.text("Panoply:")
 		for race in panoply.RACES:
-			user_colors = variants.get(race)
+			user_colors = available.get(race)
 			if not user_colors:
 				continue
 			imgui.same_line()
 			active = race == selected_race
 			if _icon_button(race, f"Race {race!r}", active=active):
 				if active:
-					self._panoply_selection.pop(key, None)
+					self._panoply_selection = None
 				else:
-					self._panoply_selection[key] = (race, user_colors[0])
-				self._reapply_material(material_id)
+					self._panoply_selection = (race, min(user_colors))
+				self._reapply_all_materials()
 
 		if selected_race is not None:
-			for user_color in variants.get(selected_race, []):
-				imgui.same_line()
-				active = selection == (selected_race, user_color)
+			for index, user_color in enumerate(sorted(available.get(selected_race, ()))):
+				if index > 0:
+					imgui.same_line()
+				active = self._panoply_selection == (selected_race, user_color)
 				if _icon_button(f"u{user_color}", f"User color {user_color}", active=active):
-					self._panoply_selection[key] = (selected_race, user_color)
-					self._reapply_material(material_id)
+					self._panoply_selection = (selected_race, user_color)
+					self._reapply_all_materials()
+		imgui.separator()
 
 	def _apply_material_texture(self, node_path, material, material_id):
 		"""Material color/blend/alpha-test/texture -- the part of rendering
@@ -1778,7 +1809,7 @@ class ObjectEditorApp(ForgeryApp):
 
 		texture = material.textures[0] if material.textures else None
 		if texture is not None and texture.file_name:
-			resolved_name = self._resolve_panoply_texture_name(material_id, 0, texture.file_name)
+			resolved_name = self._resolve_panoply_texture_name(texture.file_name)
 			# A panoply override changes which file gets loaded, never the
 			# shape's own material data (texture.file_name) -- see
 			# _resolve_panoply_texture_name()'s own note. The texture cache
@@ -1818,6 +1849,13 @@ class ObjectEditorApp(ForgeryApp):
 		for node_path in self._material_node_paths.get(material_id, []):
 			self._apply_material(node_path, material_id)
 
+	def _reapply_all_materials(self):
+		"""_reapply_material() for every material -- a shape-wide change (the
+		panoply race/user-color pick) affects any material whose texture has
+		a variant for it, not just one."""
+		for material_id in self._material_node_paths:
+			self._reapply_material(material_id)
+
 	def _set_material_override_color(self, material_id, color):
 		"""Sets (or, if color is None, clears) a material's manual flat-color
 		override -- the "no color" option in its color picker button."""
@@ -1851,17 +1889,32 @@ class ObjectEditorApp(ForgeryApp):
 		# texture too, the first time this shape's preview thumbnail/tooltip
 		# is ever drawn. A throwaway copy absorbs the mutation instead.
 		#
-		# That copy is also where alpha gets dropped (format -> RGB): most of
-		# these textures are mostly transparent everywhere (e.g. a shape cut
-		# from a square atlas), and alpha blending genuinely hides the real
-		# color underneath low-alpha pixels -- no backdrop color can undo
-		# that (see _draw_image_opaque_bg(), still used as a fallback for
-		# whatever's left translucent). Safe to do on this copy specifically
-		# now that it's confirmed independent of the live 3D material's own
-		# texture (see above) -- doing this to the shared one would have
-		# made the actual 3D-rendered object opaque too.
+		# That copy is also where alpha gets dropped: most of these textures
+		# are mostly transparent everywhere (e.g. a shape cut from a square
+		# atlas), and alpha blending genuinely hides the real color underneath
+		# low-alpha pixels -- no backdrop color can undo that (see
+		# _draw_image_opaque_bg(), still used as a fallback for whatever's
+		# left translucent). Safe to do on this copy specifically now that
+		# it's confirmed independent of the live 3D material's own texture
+		# (see above) -- doing this to the shared one would have made the
+		# actual 3D-rendered object opaque too.
+		#
+		# Done via a PNMImage round-trip (store() -> remove_alpha() ->
+		# load()), not Texture.set_format(F_rgb) directly: set_format() only
+		# relabels the already-stored ram image's component count, it doesn't
+		# actually repack the pixel bytes from 4 to 3 per pixel -- every pixel
+		# after the first then reads shifted by one channel, which looked
+		# exactly like a scrambled checkerboard for any texture that actually
+		# had an alpha channel. store() decodes through the real pixel data
+		# (works for a compressed source too), giving a real RGB buffer to
+		# reload from.
 		preview_texture = panda_texture.make_copy()
-		preview_texture.set_format(PandaTexture.F_rgb)
+		pnm_image = PNMImage()
+		preview_texture.store(pnm_image)
+		if pnm_image.has_alpha():
+			pnm_image.remove_alpha()
+			preview_texture = PandaTexture()
+			preview_texture.load(pnm_image)
 		tex_ref = self.imgui.loadTexture(preview_texture)
 		self._preview_texture_refs[name] = tex_ref
 		return tex_ref
@@ -1975,7 +2028,7 @@ class ObjectEditorApp(ForgeryApp):
 				texture = material.textures[0] if material is not None and material.textures else None
 				preview_name = texture.file_name if texture is not None else None
 				if preview_name:
-					preview_name = self._resolve_panoply_texture_name(material_id, 0, preview_name)
+					preview_name = self._resolve_panoply_texture_name(preview_name)
 			if preview_name:
 				clicked = self._draw_texture_preview_button(f"##color-{material_id}", preview_name)
 			else:
@@ -2314,6 +2367,8 @@ class ObjectEditorApp(ForgeryApp):
 
 		multi_bitmap_ids = {material_id for material_id, _ in self._multi_bitmap_entries()}
 
+		self._draw_global_panoply_section()
+
 		imgui.text("Simple textures")
 		imgui.separator()
 		simple_ids = [material_id for material_id in range(len(materials)) if material_id not in multi_bitmap_ids]
@@ -2337,6 +2392,8 @@ class ObjectEditorApp(ForgeryApp):
 
 		multi_bitmap_ids = {material_id for material_id, _ in self._multi_bitmap_entries()}
 		hovered_hint = None
+
+		self._draw_global_panoply_section()
 
 		for material_id, material in enumerate(materials):
 			imgui.push_id(f"mat-row-{material_id}")
@@ -2395,9 +2452,6 @@ class ObjectEditorApp(ForgeryApp):
 				if section_hint:
 					hovered_hint = section_hint
 				imgui.unindent()
-
-			if not is_multi:
-				self._draw_panoply_section(material_id, texture.file_name if texture is not None else None)
 
 			imgui.pop_id()
 			imgui.separator()
@@ -2601,8 +2655,6 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_simple_material_texture(material, file_name)
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
-
-		self._draw_panoply_section(material_id, current_value)
 
 		imgui.pop_id()
 
