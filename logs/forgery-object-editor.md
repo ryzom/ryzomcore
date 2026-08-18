@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-08-18 — 🐛 Fix CMeshMRMSkinned rendering, blank textures, and Explorer UX (Step 4)
+
+Real visual validation of the new CMeshMRMSkinned pipeline (`fo_carnitree.shape`+`.skel`,
+tested live by the user on their own machine), which surfaced two real bugs:
+
+- `_rebuild_geometry()` crashed on any skinned shape:
+  `MeshMRMSkinnedGeom.vertex_program` doesn't exist (only `MeshGeom`/`MeshMRMGeom` have it --
+  no wind animation support for skinned characters in NeL). Switched to `getattr(...,
+  "vertex_program", None)`.
+- The shape rendered fully white -- its `CTextureMultiFile` materials all have slot 0 (the
+  stored "current" selection) empty; `pynel.ryzom_shape` faithfully preserves that as-is, so
+  it's not a parsing bug, just real content whose default slot happens to be unpopulated (the
+  real client picks its Multi Bitmap slot dynamically at runtime -- quality/ecosystem/season
+  -- rather than trusting whatever was last saved as "current"). Added
+  `_auto_select_multi_bitmap_slot()`, called once when a shape loads: if every material's
+  currently-selected slot is empty, switches to the first slot that actually has a texture in
+  at least one material, so the shape doesn't render blank by default.
+
+Also fixed, from separate user feedback while testing:
+
+- Explorer click behavior was inconsistent: a `.shape` auto-loaded on a plain single click,
+  while `.skel`/`.anim` always needed a right-click command. Removed the single-click
+  auto-load for `.shape` (`on_selection_changed()`) -- right-click -> "Load in
+  viewer"/"Load as bone-preview skeleton"/"...animation" is now the one consistent way to
+  load any of the three.
+- Added file-type icons to the Explorer's leaf rows (`explorer.py`'s `_LEAF_ICONS`) --
+  previously only folders/.bnp archives had one. First attempt used `ICON_FA_BONE`/
+  `ICON_FA_WALKING` for `.skel`/`.anim`, silently invisible: those are Font Awesome 5
+  additions, and the actual font file loaded here (`app.py`'s `_ICON_FONT_PATH`,
+  `fontawesome-webfont.ttf`) is genuine FA 4.7, confirmed by parsing its `cmap` table
+  directly (no `fontTools` available on the target machine to just ask a library) -- neither
+  codepoint is present at all. Replaced with `ICON_FA_MALE`/`ICON_FA_FILM`, confirmed present
+  in the same file the same way.
+- Added a "Settings" tab (always visible, even with no shape loaded) holding the export
+  settings that used to live behind a right-click "Export settings..." command -- global
+  app preferences reachable via a right-click on a file read as out of place, since every
+  other command there acts on the selected file. `ExportDialog._draw_settings_window()`
+  (its own floating window, `open()`-triggered) became `draw_settings_content()`, embedded
+  directly in the new tab instead.
+
 ## 2026-08-18 — ✨ Render and animate CMeshMRMSkinned shapes in object_editor (Step 3)
 
 The main loaded shape can now be a skinned character/creature, not just weapons/props: when

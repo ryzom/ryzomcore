@@ -573,13 +573,14 @@ class ObjectEditorApp(ForgeryApp):
 			self.commands.register_for_extension(
 				".shape", f"Export to .{export_format.extension}",
 				lambda items, fmt=export_format: self._on_export_command(items, fmt))
-		self.commands.register_global("Export settings...", lambda items: self.export_dialog.open())
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
 
 	def on_selection_changed(self, items):
+		# Selecting alone no longer auto-loads anything -- .shape used to,
+		# .skel/.anim never did, which read as inconsistent. Right-click ->
+		# "Load in viewer"/"Load as bone-preview skeleton"/"...animation" is
+		# now the one way to load any of them, matching across all three.
 		print(f"[object_editor] selection changed: {[item.name for item in items]}")
-		if len(items) == 1 and items[0].suffix.lower() == ".shape":
-			self._load_shape(items[0])
 
 	def _on_load_command(self, items):
 		if items:
@@ -989,6 +990,36 @@ class ObjectEditorApp(ForgeryApp):
 		self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
 
 		self._rebuild_geometry()
+		self._auto_select_multi_bitmap_slot()
+
+	def _auto_select_multi_bitmap_slot(self):
+		"""If the shape's own stored Multi Bitmap selection (a CTextureMultiFile's
+		_CurrSelectedTexture, faithfully preserved as-is by pynel -- see
+		ryzom_shape.py) points at a slot that's empty for every material
+		(common for creatures/props only exported with a subset of the
+		quality/ecosystem/season variants filled in -- e.g. fo_carnitree.shape,
+		whose slot 0 is empty across all 5 materials), the shape renders
+		blank/white by default. Auto-switches to the first slot that actually
+		has a texture in at least one material instead -- the real client
+		picks its slot dynamically (graphics quality/ecosystem/season) rather
+		than trusting whatever was last saved as "current", so there's no
+		single "correct" slot to fall back to anyway; this just finds
+		*something* to show rather than nothing."""
+		entries = self._multi_bitmap_entries()
+		if not entries:
+			return
+		representative = entries[0][1]
+		current_index = representative.selected_index
+		if current_index is not None and any(
+				current_index < len(texture.file_names) and texture.file_names[current_index]
+				for _material_id, texture in entries):
+			return  # already resolves to something for at least one material
+
+		slot_count = max(len(_MULTI_BITMAP_SLOT_LABELS), max(len(t.file_names) for _, t in entries))
+		for index in range(slot_count):
+			if any(index < len(texture.file_names) and texture.file_names[index] for _material_id, texture in entries):
+				self._select_multi_bitmap_slot(entries, index)
+				return
 
 	def _rebuild_viewport_helpers(self, bbox):
 		"""(Re)builds the floor grid + world/pivot axes geometry, sized and
@@ -1387,7 +1418,9 @@ class ObjectEditorApp(ForgeryApp):
 		self._texture_needs_repeat = False
 
 		geom_value = shape_geom(self.shape_file.value)
-		wind_params = geom_value.vertex_program if geom_value is not None else None
+		# CMeshMRMSkinnedGeom has no vertex_program field at all (no wind
+		# animation support for skinned characters/creatures in NeL).
+		wind_params = getattr(geom_value, "vertex_program", None)
 		wind_params = wind_params if isinstance(wind_params, WindTreeParams) else None
 
 		# CMeshMRMSkinned needs a skeleton to render at all -- reuses the
@@ -2420,26 +2453,34 @@ class ObjectEditorApp(ForgeryApp):
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)
 
-		if self.shape_file is None:
+		if self.shape_file is not None:
+			imgui.text(f"Type: {self.shape_file.type_name}")
+			imgui.separator()
+		else:
 			imgui.text("Select a .shape file in the explorer.")
-			return
 
-		imgui.text(f"Type: {self.shape_file.type_name}")
-		imgui.separator()
-
+		# The tab bar itself is always shown (not gated behind a loaded
+		# shape) so Settings -- an app-wide preference, not tied to any one
+		# shape -- stays reachable even with nothing loaded yet. The other
+		# three tabs only make sense once there's a shape to describe.
 		if imgui.begin_tab_bar("##panel-tabs"):
-			if imgui.begin_tab_item_simple("Textures"):
-				self._draw_textures_tab()
-				imgui.end_tab_item()
-			if imgui.begin_tab_item_simple("Materials"):
-				self._draw_materials_tab()
-				imgui.end_tab_item()
-			if imgui.begin_tab_item_simple("All Properties"):
-				draw_properties(self.shape_file.value)
+			if self.shape_file is not None:
+				if imgui.begin_tab_item_simple("Textures"):
+					self._draw_textures_tab()
+					imgui.end_tab_item()
+				if imgui.begin_tab_item_simple("Materials"):
+					self._draw_materials_tab()
+					imgui.end_tab_item()
+				if imgui.begin_tab_item_simple("All Properties"):
+					draw_properties(self.shape_file.value)
+					imgui.end_tab_item()
+			if imgui.begin_tab_item_simple("Settings"):
+				self.export_dialog.draw_settings_content()
 				imgui.end_tab_item()
 			imgui.end_tab_bar()
 
-		self._draw_save_buttons()
+		if self.shape_file is not None:
+			self._draw_save_buttons()
 
 
 if __name__ == "__main__":

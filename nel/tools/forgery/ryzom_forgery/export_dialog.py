@@ -26,15 +26,9 @@ class ExportDialog:
 		self._confirm_texture_mode = self._config.texture_mode
 		self._confirm_remember_texture = False
 
-		self._settings_open = False
 		self._settings_folder_dialog = None  # separate instance, independent of an in-flight export
 
 		self._status = ""
-
-	def open(self):
-		"""Opens the always-available settings window (not tied to a
-		specific export)."""
-		self._settings_open = True
 
 	def export(self, item, export_format, asset_index):
 		"""Starts exporting `item` (an Explorer .shape entry) via
@@ -51,11 +45,12 @@ class ExportDialog:
 			self._folder_dialog = pfd.select_folder("Choose export folder", str(source_folder))
 
 	def draw(self):
-		"""Call once per ImGui frame."""
+		"""Call once per ImGui frame -- everything here except
+		draw_settings_content() (embedded by the caller in its own Settings
+		tab, see that method's docstring)."""
 		self._poll_folder_dialog()
 		self._poll_settings_folder_dialog()
 		self._draw_confirmation_popup()
-		self._draw_settings_window()
 
 	def _poll_folder_dialog(self):
 		if self._folder_dialog is None or not self._folder_dialog.ready(0):
@@ -156,32 +151,33 @@ class ExportDialog:
 		if result:
 			self._config.output_folder = result
 
-	def _draw_settings_window(self):
-		if not self._settings_open:
-			return
+	def draw_settings_content(self):
+		"""Export settings, meant to be embedded directly in the host app's
+		own "Settings" tab (see object_editor.py's draw_panel()) rather than
+		a separate floating window -- these are app-wide preferences, not
+		tied to any one shape, so they belong somewhere always reachable
+		rather than behind a right-click command on a file (which read as
+		out of place: every other right-click command there acts on the
+		selected file)."""
+		imgui.text(f"Output folder: {self._config.output_folder or '(not set)'}")
+		if imgui.button("Choose folder..."):
+			self._start_settings_folder_dialog()
+		_, self._config.remember_output_folder = imgui.checkbox(
+			"Always use this folder (skip asking)", self._config.remember_output_folder)
 
-		opened, self._settings_open = imgui.begin("Export settings", self._settings_open)
-		if opened:
-			imgui.text(f"Output folder: {self._config.output_folder or '(not set)'}")
-			if imgui.button("Choose folder..."):
-				self._start_settings_folder_dialog()
-			_, self._config.remember_output_folder = imgui.checkbox(
-				"Always use this folder (skip asking)", self._config.remember_output_folder)
+		imgui.separator()
+		imgui.text("Default texture handling:")
+		if imgui.radio_button("Copy as .png next to the export", self._config.texture_mode == TEXTURE_MODE_COPY_PNG):
+			self._config.texture_mode = TEXTURE_MODE_COPY_PNG
+		if imgui.radio_button(
+				"Reference original filename only", self._config.texture_mode == TEXTURE_MODE_REFERENCE_ONLY):
+			self._config.texture_mode = TEXTURE_MODE_REFERENCE_ONLY
+		_, self._config.remember_texture_mode = imgui.checkbox(
+			"Always use this choice (skip asking)", self._config.remember_texture_mode)
 
+		if imgui.button("Save"):
+			export_config.save(self._config)
+
+		if self._status:
 			imgui.separator()
-			imgui.text("Default texture handling:")
-			if imgui.radio_button("Copy as .png next to the export", self._config.texture_mode == TEXTURE_MODE_COPY_PNG):
-				self._config.texture_mode = TEXTURE_MODE_COPY_PNG
-			if imgui.radio_button(
-					"Reference original filename only", self._config.texture_mode == TEXTURE_MODE_REFERENCE_ONLY):
-				self._config.texture_mode = TEXTURE_MODE_REFERENCE_ONLY
-			_, self._config.remember_texture_mode = imgui.checkbox(
-				"Always use this choice (skip asking)", self._config.remember_texture_mode)
-
-			if imgui.button("Save"):
-				export_config.save(self._config)
-
-			if self._status:
-				imgui.separator()
-				imgui.text_wrapped(self._status)
-		imgui.end()
+			imgui.text_wrapped(self._status)

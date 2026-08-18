@@ -15,6 +15,20 @@ from .commands import CommandRegistry
 BNP_EXTENSIONS = (".bnp", ".bnpe")
 DEFAULT_FILTER = "*"
 FILTER_PRESETS = ["*.shape", "*.skel", "*.anim", "*"]
+# Leaf-file icons by extension -- a plain filename alone doesn't read at a
+# glance as "this is a 3D mesh" vs "this is a skeleton" vs "this is an
+# animation clip" the way folders/.bnp archives already have their own icon.
+_LEAF_ICONS = {
+	".shape": fa_icons.ICON_FA_CUBE,
+	# ICON_FA_BONE/ICON_FA_WALKING (tried first) are Font Awesome 5 additions --
+	# the actual font file loaded here (app.py's _ICON_FONT_PATH,
+	# fontawesome-webfont.ttf) is genuine FA 4.7, which doesn't have those
+	# glyphs at all (silently invisible, not even a fallback box). Stuck to
+	# icons confirmed present in the classic FA4 set instead.
+	".skel": fa_icons.ICON_FA_MALE,
+	".anim": fa_icons.ICON_FA_FILM,
+}
+_DEFAULT_LEAF_ICON = fa_icons.ICON_FA_FILE
 _MAX_VISIBLE_PATH_SUGGESTIONS = 8  # box scrolls instead of growing past this many rows
 _FAVORITE_STAR_COLOR = (1.0, 0.8, 0.0, 1.0)
 _NON_FAVORITE_STAR_COLOR = (0.5, 0.5, 0.5, 1.0)
@@ -416,7 +430,8 @@ class Explorer:
 		if key in self._selection:
 			flags |= imgui.TreeNodeFlags_.selected.value
 
-		imgui.tree_node_ex(key, flags, item.name)
+		icon = _LEAF_ICONS.get(item.suffix.lower(), _DEFAULT_LEAF_ICON)
+		imgui.tree_node_ex(key, flags, f"{icon} {item.name}")
 
 		if imgui.is_item_clicked():
 			additive = self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control())
