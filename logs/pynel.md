@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-08-18 — ✨ Add CPU linear-blend skinning for CMeshMRMSkinned
+
+New module `pynel/ryzom_skin.py`: `skin_mesh(geom, skeleton, bone_world_matrices)` resolves
+every vertex's final position/normal from up to 4 weighted bone influences
+(`nel/src/3d/mesh_mrm_skinned.cpp:1163-1240` confirms a `PackedVertex.matrices[i]` is a direct
+index into the mesh's own `bones_name` list, not an indirection through anything else).
+`BoneSkinMatrix = WorldMatrix(bone) * InvBindPos(bone)` (`bone.cpp:228-241`) -- the caller
+supplies `WorldMatrix` per bone already evaluated (typically via
+`ryzom_animation.evaluate_bone_world_matrix()`), keeping this module decoupled from
+`ryzom_animation` entirely (only depends on `ryzom_shape`). `ryzom_shape.Matrix`'s sparse
+on-disk encoding is converted to a dense 4x4 for `InvBindPos` -- `Scale33`/`proj` are dropped,
+confirmed unused by the engine's own `mulPoint()`/`mulVector()`.
+
+Validated against a real non-humanoid creature (`fo_carnitree.shape`/`.skel`, 35 bones, 1255
+vertices): the skinned bind-pose position range matches the shape's own stored bbox on all
+three axes almost to the last decimal, and every normal comes out unit-length.
+
+The first validation attempt used a humanoid (fyros female) shape instead, and consistently
+skinned ~0.95m off from its bbox regardless of which skeleton variant or animation was fed in.
+Traced to a real, non-buggy property of that rig: `Bip01` (root bone) has `default_pos=(0,0,0)`
+in the `.skel`, while its `InvBindPos` implies a genuine ~0.95m bind height -- the client
+re-applies the character's true height separately, through the "Gabarit" system
+(`ryzom/client/src/gabarit.cpp`, a per-bone scale blended from body-type `.skel` variants), not
+through the root bone's own position. `skin_mesh()` itself has no bug here; it faithfully
+reproduces whatever `WorldMatrix` it's given -- humanoid `.skel` files just aren't
+self-sufficient for a correct bind pose without also replicating Gabarit, which is out of
+scope for this module.
+
 ## 2026-08-18 — ✨ Add bone world-pose evaluation to pynel's .anim reader
 
 `evaluate_bone_world_matrix(skeleton, bone_name, anim, time)` in `ryzom_animation.py` (+ CLI
