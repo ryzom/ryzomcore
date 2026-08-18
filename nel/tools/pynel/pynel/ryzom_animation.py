@@ -381,12 +381,22 @@ def _clamp(x: float, lo: float, hi: float) -> float:
 
 
 def _slerp(a: Quaternion, b: Quaternion, t: float) -> Quaternion:
+	"""CQuat::slerp() -- deliberately does NOT correct for `a`/`b` being on
+	opposite hemispheres (dot < 0): the real engine's own implementation has
+	that correction commented out (nel/include/nel/misc/quat.h, left with a
+	"????" by the original author), relying entirely on exported animation
+	data already having consecutive keys pre-baked onto the same hemisphere
+	(see CTrackSampledQuat's own docstring on that guarantee). Reproducing
+	that exactly -- rather than "fixing" it with the textbook shortest-path
+	correction -- matters because this needs to match what the real client
+	actually renders, including for the rarer tracks (typically
+	CTrackKeyFramerLinearQuat, legacy biped exports) that aren't perfectly
+	hemisphere-consistent: correcting it here produced visibly different
+	(e.g. upside-down-looking) interpolated poses compared to the real
+	client for exactly that data."""
 	ax, ay, az, aw = a.x, a.y, a.z, a.w
 	bx, by, bz, bw = b.x, b.y, b.z, b.w
-	dot = ax * bx + ay * by + az * bz + aw * bw
-	if dot < 0.0:
-		bx, by, bz, bw, dot = -bx, -by, -bz, -bw, -dot
-	dot = _clamp(dot, -1.0, 1.0)
+	dot = _clamp(ax * bx + ay * by + az * bz + aw * bw, -1.0, 1.0)
 	if dot > 0.9995:
 		rx = ax + (bx - ax) * t
 		ry = ay + (by - ay) * t
@@ -488,11 +498,16 @@ def _evaluate_keyframer(track: Track, time: float):
 		return keyframes[0].value
 	if idx >= len(keyframes) - 1:
 		if track.loop_mode and total_range > 0:
-			# ITrackKeyFramer::eval(): looping past the last key blends back
-			# toward the first one (dateNext == loop_end), unlike sampled tracks.
-			t0 = times[idx]
-			frac = 0.0 if loop_end <= t0 else _clamp((date - t0) / (loop_end - t0), 0.0, 1.0)
-			return _lerp_value(keyframes[idx].value, keyframes[0].value, frac)
+			# ITrackKeyFramer::eval(): at the exact loop seam (`date` was
+			# already wrapped into [loop_start, loop_end) above and lands
+			# exactly on the last keyframe's own time), the engine's search
+			# for a `previous` key fails to find one at this exact point --
+			# `evalKey()` then takes its previous==NULL branch and returns
+			# the wrapped-to `next` key's value (the first keyframe)
+			# directly, with NO interpolation at all, unlike every other
+			# segment. Blending toward it (what this used to do) is a real,
+			# if narrow, divergence from the engine right at the seam.
+			return keyframes[0].value
 		return keyframes[-1].value
 	t0, t1 = times[idx], times[idx + 1]
 	frac = 0.0 if t1 <= t0 else _clamp((date - t0) / (t1 - t0), 0.0, 1.0)
@@ -584,13 +599,99 @@ def _mat_get_pos(m: tuple) -> Vector3:
 	return Vector3(m[0][3], m[1][3], m[2][3])
 
 
+def _matrix_field_to_dense(m) -> tuple:
+	"""Converts a parsed ryzom_shape.Matrix (CMatrix's sparse on-disk
+	encoding) to the dense 4x4 form used here -- same conversion as
+	pynel.ryzom_skin's own _matrix_field_to_dense(), duplicated rather than
+	imported (this module stays decoupled from ryzom_skin, see its own
+	docstring on the same convention in reverse)."""
+	if m is None:
+		return _mat_identity()
+	rot = m.rot or (1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+	trans = m.trans or (0.0, 0.0, 0.0)
+	return (
+		(rot[0], rot[1], rot[2], trans[0]),
+		(rot[3], rot[4], rot[5], trans[1]),
+		(rot[6], rot[7], rot[8], trans[2]),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def _invert_matrix(m: tuple) -> tuple:
+	"""General inverse of a 4x4 matrix whose bottom row is (0,0,0,1) --
+	CMatrix::inverted()'s "speed 34" path (matrix.cpp:1126-1171): the 3x3
+	part inverted via the standard cofactor/adjugate formula (handles a
+	non-uniform scale baked into it too, same as CMatrix::slowInvert33(),
+	used whenever MAT_SCALEANY is set -- true for InvBindPos), then the
+	translation re-derived from that inverted 3x3 (matrix.cpp:1150-1158)
+	rather than naively negated. Only used to reconstruct a root bone's real
+	bind orientation from InvBindPos (see _bone_local_matrix()) -- this
+	project never needs to invert a MAT_PROJ matrix."""
+	a11, a12, a13, tx = m[0]
+	a21, a22, a23, ty = m[1]
+	a31, a32, a33, tz = m[2]
+
+	c11 = a22 * a33 - a23 * a32
+	c12 = -(a21 * a33 - a23 * a31)
+	c13 = a21 * a32 - a22 * a31
+	c21 = -(a12 * a33 - a13 * a32)
+	c22 = a11 * a33 - a13 * a31
+	c23 = -(a11 * a32 - a12 * a31)
+	c31 = a12 * a23 - a13 * a22
+	c32 = -(a11 * a23 - a13 * a21)
+	c33 = a11 * a22 - a12 * a21
+
+	det = a11 * c11 + a12 * c12 + a13 * c13
+	if det == 0:
+		return _mat_identity()  # matches CMatrix::inverted()'s own fallback
+	inv_det = 1.0 / det
+
+	r11, r12, r13 = c11 * inv_det, c21 * inv_det, c31 * inv_det
+	r21, r22, r23 = c12 * inv_det, c22 * inv_det, c32 * inv_det
+	r31, r32, r33 = c13 * inv_det, c23 * inv_det, c33 * inv_det
+
+	ntx = r11 * -tx + r12 * -ty + r13 * -tz
+	nty = r21 * -tx + r22 * -ty + r23 * -tz
+	ntz = r31 * -tx + r32 * -ty + r33 * -tz
+
+	return (
+		(r11, r12, r13, ntx),
+		(r21, r22, r23, nty),
+		(r31, r32, r33, ntz),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
 def _bone_local_matrix(bone, anim: Optional[Animation], time: float) -> Tuple[tuple, Vector3]:
 	"""The bone's local transform at `time` (and the Scale value used to build
 	it, needed by the caller for CBone::compute()'s UnheritScale compensation
 	below), animated where `anim` has a track for it (looked up as
 	"{bone.name}.pos"/".rotquat"/".scale") and falling back to the bone's own
 	default_* from the .skel otherwise. Matches NLMISC::CTransformable's
-	`Local = T(Pos+Pivot) * R * S * T(-Pivot)`."""
+	`Local = T(Pos+Pivot) * R * S * T(-Pivot)`.
+
+	Exception: a root bone (father_id<0) with no animation track overriding
+	its position/rotation. The Max exporter deliberately writes DefaultPos/
+	DefaultRotQuat as identity for the root (nel/tools/3d/plugin_max/
+	nel_mesh_lib/export_skinning.cpp:307-313 -- "Root must be exported with
+	Identity because path are setuped interactively in the root of the
+	skeleton"): real gameplay supplies the character's actual world
+	orientation externally instead of ever using this placeholder. But
+	InvBindPos is baked from the bone's REAL bind-time orientation in Max,
+	not this placeholder -- so naively using the placeholder here (as if it
+	were the real bind pose) leaves every bone's skin matrix off by that
+	real orientation, since it never cancels out against InvBindPos. The fix
+	mirrors what the placeholder is meant to be overridden BY: reconstruct
+	the real bind orientation as the inverse of InvBindPos, exactly what a
+	"facing the same way it was bound" placement would evaluate to."""
+	if bone.father_id < 0:
+		pos_idx = anim.id_by_name.get(f"{bone.name}.pos") if anim is not None else None
+		rot_idx = anim.id_by_name.get(f"{bone.name}.rotquat") if anim is not None else None
+		has_pos_track = pos_idx is not None and anim.tracks[pos_idx] is not None
+		has_rot_track = rot_idx is not None and anim.tracks[rot_idx] is not None
+		if not has_pos_track and not has_rot_track:
+			return _invert_matrix(_matrix_field_to_dense(bone.inv_bind_pos)), bone.default_scale
+
 	pos, rot, scale = bone.default_pos, bone.default_rot_quat, bone.default_scale
 	pivot = bone.default_pivot
 	if anim is not None:
@@ -670,6 +771,46 @@ def evaluate_bone_world_matrix(skeleton, bone_name: str,
 			local_skeleton_matrix = _mat_mul(local_skeleton_matrix, local)
 		parent_scale = scale
 	return local_skeleton_matrix
+
+
+def evaluate_all_bone_world_matrices(skeleton, anim: Optional[Animation] = None, time: float = 0.0) -> dict:
+	"""{bone name: world-space 4x4 matrix} for every bone in `skeleton` at
+	`time` -- same math as evaluate_bone_world_matrix() (CBone::compute(),
+	UnheritScale included), but computed once for the whole skeleton in a
+	single O(bone count) pass instead of calling evaluate_bone_world_matrix()
+	once per bone: that function independently re-walks each bone's own
+	father_id chain up to the root every time it's called, so bones that
+	share most of their ancestor chain (e.g. every bone of one limb, sharing
+	the spine/root) redo the exact same parent matrix multiplications over
+	and over. Here each bone's world matrix is computed exactly once and
+	memoized (by index, via a closure over `computed`, recursing into the
+	father first if it isn't cached yet) -- correct regardless of whether
+	`skeleton.bones` happens to already be parent-before-child ordered.
+	Meant for a whole animated character re-skinned every frame (see
+	object_editor.py's _update_skin_preview()), where evaluate_bone_world_matrix()
+	called once per bone becomes the dominant per-frame cost for anything
+	past a handful of bones."""
+	computed = {}  # index -> (world_matrix, local_scale) -- local_scale is what a child's own UnheritScale reads
+
+	def compute(index):
+		cached = computed.get(index)
+		if cached is not None:
+			return cached
+		bone = skeleton.bones[index]
+		local, scale = _bone_local_matrix(bone, anim, time)
+		if bone.father_id is None or bone.father_id < 0:
+			world = local
+		else:
+			parent_world, parent_scale = compute(bone.father_id)
+			if bone.unherit_scale:
+				comp = _unherit_scale_comp(parent_scale, _mat_get_pos(local))
+				world = _mat_mul(_mat_mul(parent_world, comp), local)
+			else:
+				world = _mat_mul(parent_world, local)
+		computed[index] = (world, scale)
+		return computed[index]
+
+	return {bone.name: compute(index)[0] for index, bone in enumerate(skeleton.bones)}
 
 
 def animation_duration(anim: Animation) -> float:

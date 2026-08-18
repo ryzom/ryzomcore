@@ -1,5 +1,42 @@
 # Changelog
 
+## 2026-08-18 — 🐛 Fix skinning pose bugs in pynel animation eval
+
+Three bugs in `ryzom_animation.py`'s bone pose evaluation, found while validating Forgery's
+new Skinning preview against real creature data (`tr_mo_zerx.shape`/`.skel`/`_baillement.anim`,
+via `nel/tools/pynel/pynel/ryzom_bnp.py`'s `BnpReader` against the shipped `.bnp` archives).
+
+- **Root bone bind pose**: the Max exporter (`nel/tools/3d/plugin_max/nel_mesh_lib/
+  export_skinning.cpp:307-313`) deliberately writes a skeleton's root bone `DefaultPos`/
+  `DefaultRotQuat` as identity -- "path are setuped interactively in the root of the
+  skeleton", i.e. real placement/orientation is meant to come from game code, not the
+  `.skel` file. But `InvBindPos` is baked from the bone's real bind-time orientation in Max,
+  not this placeholder. `_bone_local_matrix()` now reconstructs that real orientation as the
+  inverse of `InvBindPos` (new `_invert_matrix()`/`_matrix_field_to_dense()` helpers, ported
+  from `CMatrix::inverted()`) whenever no animation track overrides the root's position/
+  rotation. Without this, every bone's skin matrix carried a constant, skeleton-wide rotation
+  offset inherited from the root -- visible as the whole mesh rigidly misoriented (confirmed
+  numerically: `World(bind) * InvBindPos` was a constant non-identity matrix across every
+  bone tested, not just the root, since the offset propagates down the whole hierarchy).
+- **`_slerp()`**: no longer corrects for the two quaternions being on opposite hemispheres.
+  The real engine's `CQuat::slerp()` (`nel/include/nel/misc/quat.h`) has that correction
+  commented out, relying entirely on exported animation data already having consecutive keys
+  pre-baked onto the same hemisphere -- "fixing" it in the port made playback diverge from
+  what the real client renders for the rarer tracks (legacy `CTrackKeyFramerLinearQuat`,
+  typical of biped exports) that aren't perfectly hemisphere-consistent.
+- **`_evaluate_keyframer()` loop seam**: at the exact point an animation wraps back to its
+  first key, the real engine (`ITrackKeyFramer::eval()`, `track_keyframer.h`) doesn't
+  interpolate at all -- it snaps directly to the first key's value (`previous` stays `NULL`
+  at that exact point). The port previously blended toward it instead.
+
+Also added `evaluate_all_bone_world_matrices()`: computes every bone's world matrix in a
+single O(bone count) pass (each bone's local matrix computed once and memoized, parent
+resolved via recursion instead of independently re-walked), instead of calling
+`evaluate_bone_world_matrix()` once per bone -- O(bone count × hierarchy depth), redoing the
+same shared-ancestor matrix multiplications over and over. Wired into Forgery's per-frame
+re-skin (`object_editor.py`'s `_bone_world_matrices_for()`), where the old approach was
+costing 5-30+ fps on real creatures with 30-90 bones.
+
 ## 2026-08-18 — ✨ Add CPU linear-blend skinning for CMeshMRMSkinned
 
 New module `pynel/ryzom_skin.py`: `skin_mesh(geom, skeleton, bone_world_matrices)` resolves
