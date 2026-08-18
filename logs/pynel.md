@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-08-18 — ✨ Add bone world-pose evaluation to pynel's .anim reader
+
+`evaluate_bone_world_matrix(skeleton, bone_name, anim, time)` in `ryzom_animation.py` (+ CLI
+`ryzom-anim pose SKEL.skel ANIM.anim BONE TIME`), closing out the ".anim read + track
+evaluation" chantier (Step 3-4, now fully done). Composes a bone's world-space 4x4 matrix at
+an arbitrary time by walking up `father_id` from `pynel.ryzom_shape.SkeletonShape`, using each
+ancestor's `.pos`/`.rotquat`/`.scale` animation track when the clip has one (falling back to
+the bone's own `default_*` from the `.skel` otherwise) -- so it also works with `anim=None` to
+preview a static bind pose.
+
+Matrix math (`_mat_translate`/`_mat_rotate`/`_mat_scale`/`_mat_mul`) replicates
+`NLMISC::CMatrix`'s exact row-major layout and quaternion-to-rotation formulas
+(`CMatrix::setRot(CQuat)`/`mulPoint`, `misc/matrix.cpp`), not a generic linear-algebra
+convention picked independently -- needed since composing matrices in the wrong convention
+would silently produce plausible-looking but wrong results.
+
+**Found only by testing against a real skeleton, not anticipated in the original plan**: a
+naive `WorldParent * Local` composition gave non-orthonormal rotation submatrices (row
+magnitudes around 11 instead of 1). Root cause is `CBone::UnheritScale` (`bone.cpp:160-226`,
+true by default for every bone): a child bone inherits its father's translation but *not* its
+non-uniform scale -- 3dsMax biped rigs bake bone length/thickness into that scale, and without
+this compensation it would visibly stretch every child bone's own geometry. The engine inserts
+a compensation matrix (`T*(1/FatherScale)*T⁻¹`, scaling the child's local translation point
+by the inverse father scale around itself) between parent and child whenever `UnheritScale` is
+set -- replicated exactly rather than approximated.
+
+Validated via the bridge on a real Fyros skeleton+animation pair
+(`fy_hof_skel_mid_fat.skel` + `fy_hof_emot_20_anniversary_dance.anim`): `Bip01 R Hand`'s
+composed rotation submatrix is properly orthonormal at two different times, and the root bone
+`Bip01` (no father, no UnheritScale compensation needed) resolves to the identity matrix as
+expected. No in-engine reference renderer was available for a pixel-perfect comparison;
+judged sufficient without one.
+
 ## 2026-08-17 — ✨ Add track evaluation to pynel's .anim reader
 
 `evaluate_track(track, time)` in `ryzom_animation.py` (+ CLI `ryzom-anim eval FILE.anim

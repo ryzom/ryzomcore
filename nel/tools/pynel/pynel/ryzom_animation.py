@@ -47,7 +47,7 @@ import math
 import struct
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, BinaryIO, Dict, List, Optional, Union
+from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
 
 MAGIC = b"NEL_ANIM"  # on-disk bytes for NELID("_LEN") + NELID("MINA"), see CAnimation::serial
 
@@ -516,6 +516,163 @@ def evaluate_track(track: Track, time: float):
 
 
 # ---------------------------------------------------------------------------
+# Bone pose evaluation
+# ---------------------------------------------------------------------------
+
+# NLMISC::CMatrix, as 4 rows of 4 floats (row-major, matches
+# CMatrix::mulPoint()'s a11*x+a12*y+a13*z+a14 layout exactly): applying a
+# matrix to a point is `_mat_point(m, p)`, composing two is `_mat_mul(a, b)`.
+
+
+def _mat_identity():
+	return (
+		(1.0, 0.0, 0.0, 0.0),
+		(0.0, 1.0, 0.0, 0.0),
+		(0.0, 0.0, 1.0, 0.0),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def _mat_translate(v) -> tuple:
+	return (
+		(1.0, 0.0, 0.0, v.x),
+		(0.0, 1.0, 0.0, v.y),
+		(0.0, 0.0, 1.0, v.z),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def _mat_scale(v) -> tuple:
+	return (
+		(v.x, 0.0, 0.0, 0.0),
+		(0.0, v.y, 0.0, 0.0),
+		(0.0, 0.0, v.z, 0.0),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def _mat_rotate(q) -> tuple:
+	"""CMatrix::setRot(const CQuat&), replicated exactly (same a_ij formulas)."""
+	x2, y2, z2 = q.x + q.x, q.y + q.y, q.z + q.z
+	xx, xy, xz = q.x * x2, q.x * y2, q.x * z2
+	yy, yz, zz = q.y * y2, q.y * z2, q.z * z2
+	wx, wy, wz = q.w * x2, q.w * y2, q.w * z2
+	return (
+		(1.0 - (yy + zz), xy - wz, xz + wy, 0.0),
+		(xy + wz, 1.0 - (xx + zz), yz - wx, 0.0),
+		(xz - wy, yz + wx, 1.0 - (xx + yy), 0.0),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def _mat_mul(a: tuple, b: tuple) -> tuple:
+	return tuple(
+		tuple(sum(a[i][k] * b[k][j] for k in range(4)) for j in range(4))
+		for i in range(4)
+	)
+
+
+def _mat_point(m: tuple, v) -> Vector3:
+	return Vector3(
+		m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z + m[0][3],
+		m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z + m[1][3],
+		m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z + m[2][3],
+	)
+
+
+def _mat_get_pos(m: tuple) -> Vector3:
+	return Vector3(m[0][3], m[1][3], m[2][3])
+
+
+def _bone_local_matrix(bone, anim: Optional[Animation], time: float) -> Tuple[tuple, Vector3]:
+	"""The bone's local transform at `time` (and the Scale value used to build
+	it, needed by the caller for CBone::compute()'s UnheritScale compensation
+	below), animated where `anim` has a track for it (looked up as
+	"{bone.name}.pos"/".rotquat"/".scale") and falling back to the bone's own
+	default_* from the .skel otherwise. Matches NLMISC::CTransformable's
+	`Local = T(Pos+Pivot) * R * S * T(-Pivot)`."""
+	pos, rot, scale = bone.default_pos, bone.default_rot_quat, bone.default_scale
+	pivot = bone.default_pivot
+	if anim is not None:
+		pos_idx = anim.id_by_name.get(f"{bone.name}.pos")
+		if pos_idx is not None and anim.tracks[pos_idx] is not None:
+			pos = evaluate_track(anim.tracks[pos_idx], time)
+		rot_idx = anim.id_by_name.get(f"{bone.name}.rotquat")
+		if rot_idx is not None and anim.tracks[rot_idx] is not None:
+			rot = evaluate_track(anim.tracks[rot_idx], time)
+		scale_idx = anim.id_by_name.get(f"{bone.name}.scale")
+		if scale_idx is not None and anim.tracks[scale_idx] is not None:
+			scale = evaluate_track(anim.tracks[scale_idx], time)
+	neg_pivot = Vector3(-pivot.x, -pivot.y, -pivot.z)
+	pos_pivot = Vector3(pos.x + pivot.x, pos.y + pivot.y, pos.z + pivot.z)
+	m = _mat_translate(pos_pivot)
+	m = _mat_mul(m, _mat_rotate(rot))
+	m = _mat_mul(m, _mat_scale(scale))
+	m = _mat_mul(m, _mat_translate(neg_pivot))
+	return m, scale
+
+
+def _unherit_scale_comp(father_scale: Vector3, local_trans: Vector3) -> tuple:
+	"""CBone::compute()'s UnheritScale compensation matrix: scales
+	`local_trans` (the child's own local translation) by `1/father_scale`
+	around `local_trans` itself, so a parent's non-uniform scale (typical of
+	3dsMax biped rigs, baked into bone matrices to represent bone
+	length/thickness) doesn't visually stretch the child's own geometry --
+	only its position relative to the father is affected, matching the
+	engine's real skinning behavior."""
+	inv = Vector3(1.0 / father_scale.x, 1.0 / father_scale.y, 1.0 / father_scale.z)
+	new_trans = Vector3(
+		local_trans.x - inv.x * local_trans.x,
+		local_trans.y - inv.y * local_trans.y,
+		local_trans.z - inv.z * local_trans.z,
+	)
+	sm = _mat_scale(inv)
+	return (
+		(sm[0][0], sm[0][1], sm[0][2], new_trans.x),
+		(sm[1][0], sm[1][1], sm[1][2], new_trans.y),
+		(sm[2][0], sm[2][1], sm[2][2], new_trans.z),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def evaluate_bone_world_matrix(skeleton, bone_name: str,
+                                anim: Optional[Animation] = None,
+                                time: float = 0.0) -> tuple:
+	"""The world-space 4x4 matrix (see `_mat_*` above) of the bone named
+	`bone_name` in `skeleton` (a `pynel.ryzom_shape.SkeletonShape`) at `time`,
+	composed by walking up `father_id` to the root -- replicating
+	`CBone::compute()` exactly, including its UnheritScale handling (the
+	default for every bone) which keeps a parent's non-uniform scale from
+	stretching its children's own local geometry. `anim` is optional --
+	without it (or where it has no track for a given bone) every bone uses its
+	`.skel` default pose, so this also works to preview a static bind pose."""
+	index = skeleton.bone_map.get(bone_name)
+	if index is None:
+		raise ValueError(f"no such bone: {bone_name!r}")
+
+	chain = []
+	while index is not None and index >= 0:
+		bone = skeleton.bones[index]
+		chain.append(bone)
+		index = bone.father_id if bone.father_id >= 0 else None
+	chain.reverse()  # root first
+
+	local_skeleton_matrix = None
+	parent_scale = None
+	for bone in chain:
+		local, scale = _bone_local_matrix(bone, anim, time)
+		if local_skeleton_matrix is None:
+			local_skeleton_matrix = local
+		elif bone.unherit_scale:
+			comp = _unherit_scale_comp(parent_scale, _mat_get_pos(local))
+			local_skeleton_matrix = _mat_mul(_mat_mul(local_skeleton_matrix, comp), local)
+		else:
+			local_skeleton_matrix = _mat_mul(local_skeleton_matrix, local)
+		parent_scale = scale
+	return local_skeleton_matrix
+
+
+# ---------------------------------------------------------------------------
 # Top level
 # ---------------------------------------------------------------------------
 
@@ -590,11 +747,30 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 	p_eval.add_argument("track_name")
 	p_eval.add_argument("time", type=float)
 
+	p_pose = sub.add_parser("pose", help="evaluate a bone's world matrix at a given time")
+	p_pose.add_argument("skel_path", type=Path)
+	p_pose.add_argument("anim_path", type=Path)
+	p_pose.add_argument("bone_name")
+	p_pose.add_argument("time", type=float)
+
 	return parser
 
 
 def _main() -> None:
 	args = _build_arg_parser().parse_args()
+
+	if args.command == "pose":
+		from pynel.ryzom_shape import ShapeParseError, load_shape
+
+		try:
+			skeleton = load_shape(args.skel_path).value
+			anim = load_animation(args.anim_path)
+		except (ShapeParseError, AnimationParseError) as exc:
+			raise SystemExit(f"cannot parse: {exc}")
+		m = evaluate_bone_world_matrix(skeleton, args.bone_name, anim, args.time)
+		for row in m:
+			print("  ".join(f"{v:10.4f}" for v in row))
+		return
 
 	try:
 		anim = load_animation(args.path)
