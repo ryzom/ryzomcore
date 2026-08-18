@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-08-18 — ✨ Extend shape_geometry.py for CMeshMRMSkinned (Step 2)
+
+`iter_render_passes()` gained optional `skeleton`/`bone_world_matrices` parameters, used only
+for `CMeshMRMSkinned` (`_passes_from_mrm_skinned_geom()`, new): resolves the finest LOD's
+geomorph placeholders (same idea as the existing `_resolve_lod_geomorphs()`, adapted to a
+`PackedVertex` list instead of a plain channels dict), then skins via pynel's new
+`ryzom_skin` module (`bone_skin_matrices_for_mesh()` once, `skin_vertex()` per vertex),
+producing a regular `VertexBuffer` (Position/Normal/TexCoord0 channels) so callers don't need
+to special-case skinned shapes downstream. Without a skeleton (not yet loaded by the caller),
+a skinned shape simply yields no passes -- same as any other shape type with nothing
+renderable, rather than raising. `shape_geom()`/`shape_bbox()` also extended (trivial: the
+geom/bbox are already fully known without any skinning).
+
+Validated via the bridge on the same `fo_carnitree.shape`/`.skel` pair used for
+`ryzom_skin.py`'s own validation: correct bbox, 5 material passes, the expected channel set,
+and confirmed empty when no skeleton is supplied.
+
 ## 2026-08-18 — ✨ Add a bone-attach animation preview (Steps 1-2)
 
 New independent state (not tied to the loaded `.shape`): a `.skel` and `.anim` can be loaded

@@ -9,7 +9,11 @@ from pathlib import Path
 
 from panda3d.core import PNMImage, StringStream, Texture as PandaTexture
 
-from pynel.ryzom_shape import Mesh, MeshGeom, MeshMRM, MeshMRMGeom, MeshMultiLod
+from pynel.ryzom_shape import (
+	Mesh, MeshGeom, MeshMRM, MeshMRMGeom, MeshMRMSkinned, MeshMRMSkinnedGeom, MeshMultiLod,
+	VertexBuffer,
+)
+from pynel.ryzom_skin import bone_skin_matrices_for_mesh, skin_vertex
 
 from .asset_index import AssetRef, TEXTURE_FALLBACK_EXTENSIONS
 
@@ -55,6 +59,48 @@ def _resolve_lod_geomorphs(vertex_buffer, lod):
 	return dataclasses.replace(vertex_buffer, channels=channels)
 
 
+def _resolve_skinned_lod_geomorphs(packed_vertices, lod):
+	"""Same idea as _resolve_lod_geomorphs(), for a CMeshMRMSkinned's
+	PackedVertex list instead of a plain VertexBuffer's channels -- wedge
+	index i for i < len(lod.geomorphs) is a geomorph placeholder, resolved to
+	its "end" wedge for a static (non-blending) render of this lod."""
+	if not lod.geomorphs:
+		return packed_vertices
+	resolved = list(packed_vertices)
+	for wedge_index, (_start, end) in enumerate(lod.geomorphs):
+		if end < len(packed_vertices):
+			resolved[wedge_index] = packed_vertices[end]
+	return resolved
+
+
+def _passes_from_mrm_skinned_geom(geom: MeshMRMSkinnedGeom, skeleton, bone_world_matrices):
+	"""Skins geom.packed_vertices against `skeleton` (a
+	pynel.ryzom_shape.SkeletonShape) at whatever pose `bone_world_matrices`
+	(a {bone name: 4x4 matrix} dict, e.g. from
+	pynel.ryzom_animation.evaluate_bone_world_matrix(), one entry per bone in
+	geom.bones_name) represents, and yields (vertex_buffer, material_id,
+	indices) passes -- same shape as the other _passes_from_*_geom() helpers,
+	so callers don't need to special-case CMeshMRMSkinned."""
+	if not geom.lods:
+		return
+	lod = geom.lods[-1]  # finest lod, see _passes_from_mrm_geom()'s own note
+	bone_skin_matrices = bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices)
+	resolved = _resolve_skinned_lod_geomorphs(geom.packed_vertices, lod)
+	skinned = [skin_vertex(v, geom.decompact_scale, bone_skin_matrices) for v in resolved]
+	vertex_buffer = VertexBuffer(
+		name="skinned",
+		num_verts=len(skinned),
+		vertex_color_format=0,
+		channels={
+			"Position": [(v.pos.x, v.pos.y, v.pos.z) for v in skinned],
+			"Normal": [(v.normal.x, v.normal.y, v.normal.z) for v in skinned],
+			"TexCoord0": [v.uv for v in skinned],
+		},
+	)
+	for rdr_pass in lod.rdr_passes:
+		yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
+
+
 def _passes_from_mrm_geom(geom: MeshMRMGeom):
 	# lods[-1], not lods[0]: CMeshMRM's progressive mesh is streamed
 	# coarsest-first (see CMeshMRMGeom::loadFirstLod/loadNextLod in
@@ -68,9 +114,13 @@ def _passes_from_mrm_geom(geom: MeshMRMGeom):
 			yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
-def iter_render_passes(shape_value):
+def iter_render_passes(shape_value, skeleton=None, bone_world_matrices=None):
 	"""Yields (vertex_buffer, material_id, indices) for the renderable
-	geometry of a CMesh/CMeshMRM/CMeshMultiLod(slot 0) shape value."""
+	geometry of a CMesh/CMeshMRM/CMeshMultiLod(slot 0)/CMeshMRMSkinned shape
+	value. `skeleton`/`bone_world_matrices` are only used for CMeshMRMSkinned
+	(see _passes_from_mrm_skinned_geom()) -- without them (skeleton not yet
+	loaded by the caller), a skinned shape simply yields nothing, same as a
+	shape type with no renderable geometry at all."""
 	if isinstance(shape_value, Mesh):
 		yield from _passes_from_mesh_geom(shape_value.geom)
 	elif isinstance(shape_value, MeshMRM):
@@ -81,14 +131,18 @@ def iter_render_passes(shape_value):
 			yield from _passes_from_mesh_geom(slot_geom)
 		elif isinstance(slot_geom, MeshMRMGeom):
 			yield from _passes_from_mrm_geom(slot_geom)
+	elif isinstance(shape_value, MeshMRMSkinned):
+		if skeleton is not None and bone_world_matrices is not None:
+			yield from _passes_from_mrm_skinned_geom(shape_value.geom, skeleton, bone_world_matrices)
 
 
 def shape_geom(shape_value):
-	"""Returns the MeshGeom/MeshMRMGeom for a CMesh/CMeshMRM/CMeshMultiLod
-	(slot 0) shape value -- same dispatch as iter_render_passes(), for code
-	that needs geom-level data (e.g. vertex_program/WindTreeParams) rather
-	than per-pass vertex buffers. None for any other shape type."""
-	if isinstance(shape_value, (Mesh, MeshMRM)):
+	"""Returns the MeshGeom/MeshMRMGeom/MeshMRMSkinnedGeom for a
+	CMesh/CMeshMRM/CMeshMultiLod(slot 0)/CMeshMRMSkinned shape value -- same
+	dispatch as iter_render_passes(), for code that needs geom-level data
+	(e.g. vertex_program/WindTreeParams) rather than per-pass vertex buffers.
+	None for any other shape type."""
+	if isinstance(shape_value, (Mesh, MeshMRM, MeshMRMSkinned)):
 		return shape_value.geom
 	if isinstance(shape_value, MeshMultiLod) and shape_value.slots:
 		return shape_value.slots[0].mesh_geom
@@ -96,7 +150,7 @@ def shape_geom(shape_value):
 
 
 def shape_bbox(shape_value):
-	if isinstance(shape_value, (Mesh, MeshMRM)):
+	if isinstance(shape_value, (Mesh, MeshMRM, MeshMRMSkinned)):
 		return shape_value.bbox
 	if isinstance(shape_value, MeshMultiLod) and shape_value.slots:
 		slot_geom = shape_value.slots[0].mesh_geom
