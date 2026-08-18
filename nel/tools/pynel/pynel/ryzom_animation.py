@@ -672,6 +672,17 @@ def evaluate_bone_world_matrix(skeleton, bone_name: str,
 	return local_skeleton_matrix
 
 
+def animation_duration(anim: Animation) -> float:
+	"""The clip's overall length in seconds: the latest `end_time` among its
+	tracks (constant tracks have none and don't count -- they don't bound the
+	clip's length)."""
+	duration = 0.0
+	for track in anim.tracks:
+		if track is not None and track.end_time is not None:
+			duration = max(duration, track.end_time)
+	return duration
+
+
 # ---------------------------------------------------------------------------
 # Top level
 # ---------------------------------------------------------------------------

@@ -13,7 +13,7 @@ import numpy
 
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, Point3, Quat,
+	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Mat4, Material as PandaMaterial, Point3, Quat,
 	Texture as PandaTexture, TransparencyAttrib, Vec3,
 )
 
@@ -33,8 +33,12 @@ from ryzom_forgery.shape_geometry import (
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 
+from pynel.ryzom_animation import (
+	Animation, AnimationParseError, animation_duration, evaluate_bone_world_matrix, parse_animation,
+)
 from pynel.ryzom_shape import (
-	Rgba, ShapeFile, ShapeParseError, ShapeWriteError, Texture, WindTreeParams, parse_shape, save_shape,
+	Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture, WindTreeParams, parse_shape,
+	save_shape,
 )
 
 DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
@@ -42,6 +46,12 @@ DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 # Shape types pynel's save_shape() can actually write back out -- matches
 # ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save/Save As UI only shows for these.
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}
+
+# Dummy attach bones the client hardcodes for weapons/shields (character_cl.cpp/
+# character_3d.cpp) -- no generic naming convention, just these fixed names.
+# Only used to preselect/flag likely choices in the bone-preview combo; the
+# user still picks manually since not every skeleton has these.
+_SUGGESTED_ATTACH_BONES = ("box_arme", "box_arme_gauche", "Box_bouclier", "stick_1")
 
 # Toggleable scale-reference shapes shown alongside whatever's loaded, for an
 # at-a-glance sense of scale -- a 1x1x1 cube and the shortest/tallest playable
@@ -482,6 +492,26 @@ class ObjectEditorApp(ForgeryApp):
 		self.taskMgr.add(self._update_wind, "object-editor-wind")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
+		# Bone-attach preview (see _update_bone_preview()/_draw_bone_preview_controls()):
+		# lets you check how an object looks rigidly attached to an animated
+		# bone (weapon/staff grip), mirroring the engine's own
+		# CSkeletonModel::stickObject() -- see logs/pynel.md's bone
+		# world-matrix entry. Independent of the loaded .shape.
+		self._bone_preview_skeleton = None
+		self._bone_preview_skeleton_name = ""
+		self._bone_preview_animation = None
+		self._bone_preview_animation_name = ""
+		self._bone_preview_animation_duration = 0.0
+		self._bone_preview_bone_name = None
+		self._bone_preview_time = 0.0
+		self._bone_preview_playing = True
+		self._bone_preview_panel_size = (10.0, 10.0)
+		self.taskMgr.add(self._update_bone_preview, "object-editor-bone-preview")
+		self.commands.register_for_extension(
+			".skel", "Load as bone-preview skeleton", self._on_load_skeleton_command)
+		self.commands.register_for_extension(
+			".anim", "Load as bone-preview animation", self._on_load_animation_command)
+
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
 		for export_format in EXPORT_FORMATS:
 			self.commands.register_for_extension(
@@ -498,6 +528,124 @@ class ObjectEditorApp(ForgeryApp):
 	def _on_load_command(self, items):
 		if items:
 			self._load_shape(items[0])
+
+	@property
+	def _bone_preview_active(self):
+		return self._bone_preview_skeleton is not None and self._bone_preview_bone_name is not None
+
+	def _on_load_skeleton_command(self, items):
+		if not items:
+			return
+		item = items[0]
+		try:
+			shape_file = parse_shape(item.read_bytes())
+		except ShapeParseError as exc:
+			print(f"[object_editor] cannot parse skeleton {item.name}: {exc}")
+			return
+		if not isinstance(shape_file.value, SkeletonShape):
+			print(f"[object_editor] {item.name} is not a CSkeletonShape")
+			return
+		self._bone_preview_skeleton = shape_file.value
+		self._bone_preview_skeleton_name = item.name
+		if self._bone_preview_bone_name not in shape_file.value.bone_map:
+			self._bone_preview_bone_name = next(
+				(name for name in _SUGGESTED_ATTACH_BONES if name in shape_file.value.bone_map),
+				next(iter(shape_file.value.bone_map), None))
+
+	def _on_load_animation_command(self, items):
+		if not items:
+			return
+		item = items[0]
+		try:
+			anim = parse_animation(item.read_bytes())
+		except AnimationParseError as exc:
+			print(f"[object_editor] cannot parse animation {item.name}: {exc}")
+			return
+		self._bone_preview_animation = anim
+		self._bone_preview_animation_name = item.name
+		self._bone_preview_animation_duration = animation_duration(anim)
+		self._bone_preview_time = 0.0
+
+	def _unload_bone_preview(self):
+		self._bone_preview_skeleton = None
+		self._bone_preview_skeleton_name = ""
+		self._bone_preview_animation = None
+		self._bone_preview_animation_name = ""
+		self._bone_preview_animation_duration = 0.0
+		self._bone_preview_bone_name = None
+		self._bone_preview_time = 0.0
+
+	def _update_bone_preview(self, task):
+		"""Per-frame: drives _object_pivot from the chosen bone's world matrix
+		(pynel's evaluate_bone_world_matrix(), mirroring the engine's own
+		CSkeletonModel::stickObject()) whenever a skeleton + bone are picked --
+		with no animation loaded, it just holds the .skel's static bind pose.
+		No-op otherwise, same pattern as _update_wind()."""
+		if not self._bone_preview_active:
+			return task.cont
+		if self._bone_preview_playing and self._bone_preview_animation_duration > 0:
+			dt = ClockObject.get_global_clock().get_dt()
+			self._bone_preview_time = (self._bone_preview_time + dt) % self._bone_preview_animation_duration
+		m = evaluate_bone_world_matrix(
+			self._bone_preview_skeleton, self._bone_preview_bone_name,
+			self._bone_preview_animation, self._bone_preview_time)
+		self._object_pivot.set_mat(Mat4(
+			m[0][0], m[1][0], m[2][0], 0.0,
+			m[0][1], m[1][1], m[2][1], 0.0,
+			m[0][2], m[1][2], m[2][2], 0.0,
+			m[0][3], m[1][3], m[2][3], 1.0,
+		))
+		return task.cont
+
+	def _draw_bone_preview_controls(self):
+		"""Floating window for the bone-attach preview (see
+		_update_bone_preview()) -- shown once a .skel has been loaded via the
+		Explorer's right-click "Load as bone-preview skeleton" command.
+		Positioned the same way as _draw_wind_controls(), stacked right below
+		it (both top-right of the viewport, flush against the panel)."""
+		if self._bone_preview_skeleton is None:
+			return
+
+		display_width = imgui.get_io().display_size.x
+		win_w, win_h = self._bone_preview_panel_size
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX
+		if self._wind_state is not None:
+			y += self._wind_panel_size[1] + _VIEWPORT_TOGGLE_MARGIN_PX
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("Bone attach preview", flags=flags):
+			imgui.text(f"Skeleton: {self._bone_preview_skeleton_name}")
+			imgui.text(f"Animation: {self._bone_preview_animation_name or '(none, bind pose)'}")
+
+			bone_names = sorted(self._bone_preview_skeleton.bone_map)
+			imgui.set_next_item_width(220)
+			preview = self._bone_preview_bone_name or "(choose a bone)"
+			if imgui.begin_combo("Bone", preview):
+				for name in bone_names:
+					suggested = name in _SUGGESTED_ATTACH_BONES
+					label = f"{name} *" if suggested else name
+					clicked, _ = imgui.selectable(label, name == self._bone_preview_bone_name)
+					if clicked:
+						self._bone_preview_bone_name = name
+				imgui.end_combo()
+
+			if self._bone_preview_animation is not None:
+				icon = fa_icons.ICON_FA_PAUSE if self._bone_preview_playing else fa_icons.ICON_FA_PLAY
+				if _icon_button(icon, "Play/pause"):
+					self._bone_preview_playing = not self._bone_preview_playing
+				imgui.same_line()
+				imgui.set_next_item_width(160)
+				changed, new_time = imgui.slider_float(
+					"##bone-preview-time", self._bone_preview_time,
+					0.0, max(self._bone_preview_animation_duration, 0.001), "%.2f s")
+				if changed:
+					self._bone_preview_time = new_time
+
+			if _icon_button(fa_icons.ICON_FA_TIMES, "Unload skeleton/animation, stop preview"):
+				self._unload_bone_preview()
+			self._bone_preview_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _on_export_command(self, items, export_format):
 		if items:
@@ -1064,6 +1212,12 @@ class ObjectEditorApp(ForgeryApp):
 		degrees already)."""
 		imgui.push_id(f"xform-{prop}")
 		locks = self.transform_locks[prop]
+		# The bone-attach preview drives _object_pivot directly every frame
+		# (see _update_bone_preview()) -- editing it by hand here would just
+		# get overwritten (or fight with it while paused), so the whole row
+		# is read-only (still live-updating) whenever it's the targeted node.
+		bone_driven = self._bone_preview_active and self._transform_node(prop) is self._object_pivot
+		imgui.begin_disabled(bone_driven)
 
 		imgui.text(label)
 		imgui.same_line()
@@ -1092,6 +1246,7 @@ class ObjectEditorApp(ForgeryApp):
 		if _icon_button(fa_icons.ICON_FA_UNDO, f"Reset {label.lower()} (current reference frame only)", square=True):
 			self._reset_transform_row(prop)
 
+		imgui.end_disabled()
 		imgui.pop_id()
 
 	def _rebuild_geometry(self):
@@ -2114,6 +2269,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._draw_transform_panel()
 		self._draw_viewport_toggles()
 		self._draw_wind_controls()
+		self._draw_bone_preview_controls()
 		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()

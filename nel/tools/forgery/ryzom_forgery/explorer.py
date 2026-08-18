@@ -14,7 +14,7 @@ from .commands import CommandRegistry
 
 BNP_EXTENSIONS = (".bnp", ".bnpe")
 DEFAULT_FILTER = "*"
-FILTER_PRESETS = ["*.shape", "*"]
+FILTER_PRESETS = ["*.shape", "*.skel", "*.anim", "*"]
 _MAX_VISIBLE_PATH_SUGGESTIONS = 8  # box scrolls instead of growing past this many rows
 _FAVORITE_STAR_COLOR = (1.0, 0.8, 0.0, 1.0)
 _NON_FAVORITE_STAR_COLOR = (0.5, 0.5, 0.5, 1.0)

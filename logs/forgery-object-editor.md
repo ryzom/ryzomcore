@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-08-18 — ✨ Add a bone-attach animation preview (Steps 1-2)
+
+New independent state (not tied to the loaded `.shape`): a `.skel` and `.anim` can be loaded
+via new right-click Explorer commands (`.skel`/`.anim` added to `explorer.py`'s
+`FILTER_PRESETS`), then a bone picked from a combo (known attach dummies -- `box_arme`,
+`box_arme_gauche`, `Box_bouclier`, `stick_1` -- flagged with a `*` when present, but any bone
+is selectable). A new floating "Bone attach preview" window (same positioning pattern as
+`_draw_wind_controls()`, stacked below it) shows what's loaded plus Play/Pause and a time
+scrubber once an animation is loaded.
+
+Each frame (`_update_bone_preview()`, a `_update_wind()`-style task), the chosen bone's world
+matrix is evaluated via pynel's new `evaluate_bone_world_matrix()` and applied to
+`_object_pivot` with `NodePath.set_mat()` -- mirroring the engine's own
+`CSkeletonModel::stickObject()` (the loaded object rigidly follows the bone, no full skeleton
+displayed, per the earlier scoping decision). With no animation loaded, this just holds the
+`.skel`'s static bind pose.
+
+Converting pynel's row-major, column-vector matrix convention (`NLMISC::CMatrix`'s own
+layout) to Panda3D's row-vector convention needed a transpose of the rotation block (rows
+become columns) with the translation moved from the last column to the last row -- get this
+backwards and the result looks plausible (loads, doesn't crash) but is subtly wrong, so it's
+called out explicitly in `_update_bone_preview()`'s `Mat4(...)` construction rather than left
+implicit.
+
+Conflict with the existing Position/Rotation/Scale panel: whichever row currently targets
+`_object_pivot` (see the panel's own pivot-lock) is disabled (grayed out, but still
+live-reading current values) while the bone preview drives it, since editing it by hand would
+either get silently overwritten next frame or fight with playback while paused.
+
+Step 3 (visual validation via the bridge) is still open -- turned out to need a rendered
+body for a meaningful test, which object_editor can't do yet (see the new "rendu
+CMeshMRMSkinned" chantier). `evaluate_bone_world_matrix()` itself was already validated
+structurally in `logs/pynel.md`.
+
 ## 2026-08-17 — 🐛 Fix the transform panel's row Reset and vertical position
 
 Two follow-ups to the Position/Rotation/Scale panel added earlier the same session:
