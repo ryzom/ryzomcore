@@ -13,7 +13,7 @@ import numpy
 
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Mat4, Material as PandaMaterial, Point3, Quat,
+	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, Point3, Quat,
 	Texture as PandaTexture, TransparencyAttrib, Vec3,
 )
 
@@ -27,6 +27,7 @@ from ryzom_forgery.import_dialog import ImportDialog
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery.properties import draw_properties
+from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
 	finest_skinned_lod, iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, shape_geom,
@@ -35,7 +36,7 @@ from ryzom_forgery.shape_geometry import (
 from ryzom_forgery.shape_import import texture_search_dirs_for
 
 from pynel.ryzom_animation import (
-	Animation, AnimationParseError, animation_duration, evaluate_bone_world_matrix, parse_animation,
+	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
 )
 from pynel.ryzom_shape import (
 	MeshMRMSkinned, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture, WindTreeParams,
@@ -48,12 +49,6 @@ DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 # Shape types pynel's save_shape() can actually write back out -- matches
 # ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save/Save As UI only shows for these.
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}
-
-# Dummy attach bones the client hardcodes for weapons/shields (character_cl.cpp/
-# character_3d.cpp) -- no generic naming convention, just these fixed names.
-# Only used to preselect/flag likely choices in the bone-preview combo; the
-# user still picks manually since not every skeleton has these.
-_SUGGESTED_ATTACH_BONES = ("box_arme", "box_arme_gauche", "Box_bouclier", "stick_1")
 
 # Toggleable scale-reference shapes shown alongside whatever's loaded, for an
 # at-a-glance sense of scale -- a 1x1x1 cube and the shortest/tallest playable
@@ -143,9 +138,10 @@ _MULTI_BITMAP_SLOT_LABELS = [
 
 _ACTIVE_COLOR = (0.26, 0.59, 0.98, 0.8)  # blue -- default "on" highlight
 _LOCKED_COLOR = (0.45, 0.45, 0.45, 0.8)  # grey -- "on" highlight for a lock toggle specifically
+_COMPATIBLE_COLOR = (0.35, 0.85, 0.35, 1.0)  # green -- "this .skel matches the loaded shape's bones"
 
 
-def _icon_button(icon, tooltip, active=False, square=False, large_font=None, active_color=_ACTIVE_COLOR):
+def _icon_button(icon, tooltip, active=False, square=False, large_font=None, active_color=_ACTIVE_COLOR, disabled=False):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
 	self-explanatory. `active` highlights it (toggle-button style, in
@@ -162,8 +158,10 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 		imgui.push_style_color(imgui.Col_.button.value, active_color)
 	if large_font is not None:
 		imgui.push_font(*large_font)
+	imgui.begin_disabled(disabled)
 	size = (imgui.get_frame_height(), imgui.get_frame_height()) if square else (0, 0)
 	clicked = imgui.button(icon, size)
+	imgui.end_disabled()
 	if large_font is not None:
 		imgui.pop_font()
 	if active:
@@ -540,21 +538,23 @@ class ObjectEditorApp(ForgeryApp):
 		self.taskMgr.add(self._update_wind, "object-editor-wind")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
-		# Bone-attach preview (see _update_bone_preview()/_draw_bone_preview_controls()):
-		# lets you check how an object looks rigidly attached to an animated
-		# bone (weapon/staff grip), mirroring the engine's own
-		# CSkeletonModel::stickObject() -- see logs/pynel.md's bone
-		# world-matrix entry. Independent of the loaded .shape.
+		self.search_paths_dialog = SearchPathsDialog()
+		# Skinning preview (see _update_skin_preview_time()/_draw_bone_preview_controls()):
+		# the skeleton/animation driving a loaded CMeshMRMSkinned's own skin
+		# (see _update_skin_preview() below). Independent of the loaded
+		# .shape (a skeleton/animation can be picked before or after loading
+		# the shape they're meant to drive).
 		self._bone_preview_skeleton = None
 		self._bone_preview_skeleton_name = ""
 		self._bone_preview_animation = None
 		self._bone_preview_animation_name = ""
 		self._bone_preview_animation_duration = 0.0
-		self._bone_preview_bone_name = None
 		self._bone_preview_time = 0.0
 		self._bone_preview_playing = True
 		self._bone_preview_panel_size = (10.0, 10.0)
-		self.taskMgr.add(self._update_bone_preview, "object-editor-bone-preview")
+		self._skeleton_file_dialog = None  # in-flight portable_file_dialogs.open_file, for the Skinning preview's own "load a .skel" icon button
+		self._animation_file_dialog = None  # same, for its "load a .anim" icon button
+		self.taskMgr.add(self._update_skin_preview_time, "object-editor-skin-preview-time")
 		# Live re-skinning of a loaded CMeshMRMSkinned (see _build_skin_state()/
 		# _update_skin_preview()) -- reuses the same skeleton/animation state
 		# above, whenever the *main* shape itself is skinned (a character/
@@ -569,10 +569,6 @@ class ObjectEditorApp(ForgeryApp):
 			".anim", "Load as bone-preview animation", self._on_load_animation_command)
 
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
-		for export_format in EXPORT_FORMATS:
-			self.commands.register_for_extension(
-				".shape", f"Export to .{export_format.extension}",
-				lambda items, fmt=export_format: self._on_export_command(items, fmt))
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
 
 	def on_selection_changed(self, items):
@@ -586,31 +582,37 @@ class ObjectEditorApp(ForgeryApp):
 		if items:
 			self._load_shape(items[0])
 
-	@property
-	def _bone_preview_active(self):
-		return self._bone_preview_skeleton is not None and self._bone_preview_bone_name is not None
-
 	def _on_load_skeleton_command(self, items):
 		if not items:
 			return
 		item = items[0]
+		self._load_skeleton_bytes(item.read_bytes(), item.name)
+
+	def _load_skeleton_bytes(self, data, name):
+		"""Parses `data` as a .skel, applying it as the Skinning preview's
+		skeleton if valid -- shared by the Explorer's right-click "Load as
+		bone-preview skeleton" command and the Skinning preview's own "load
+		from disk" icon button (_poll_skeleton_file_dialog())."""
 		try:
-			shape_file = parse_shape(item.read_bytes())
+			shape_file = parse_shape(data)
 		except ShapeParseError as exc:
-			print(f"[object_editor] cannot parse skeleton {item.name}: {exc}")
+			print(f"[object_editor] cannot parse skeleton {name}: {exc}")
 			return
 		if not isinstance(shape_file.value, SkeletonShape):
-			print(f"[object_editor] {item.name} is not a CSkeletonShape")
+			print(f"[object_editor] {name} is not a CSkeletonShape")
 			return
-		self._bone_preview_skeleton = shape_file.value
-		self._bone_preview_skeleton_name = item.name
-		if self._bone_preview_bone_name not in shape_file.value.bone_map:
-			self._bone_preview_bone_name = next(
-				(name for name in _SUGGESTED_ATTACH_BONES if name in shape_file.value.bone_map),
-				next(iter(shape_file.value.bone_map), None))
-		# The main shape might itself be CMeshMRMSkinned and was waiting on a
-		# skeleton to render at all (see _rebuild_geometry()) -- now that one
-		# just got loaded, rebuild so it actually shows up.
+		self._apply_bone_preview_skeleton(shape_file.value, name)
+
+	def _apply_bone_preview_skeleton(self, skeleton, name):
+		"""Shared by the Explorer's right-click "Load as bone-preview
+		skeleton" command and the Skinning preview's own Skeleton combo
+		(see _draw_bone_preview_controls())."""
+		self._bone_preview_skeleton = skeleton
+		self._bone_preview_skeleton_name = name
+		# The main shape might itself be CMeshMRMSkinned and was rendering its
+		# rigid bind-pose fallback for lack of a skeleton (see
+		# _rebuild_geometry()) -- now that one just got picked, rebuild so it
+		# renders skinned instead.
 		if self.shape_file is not None:
 			self._rebuild_geometry()
 
@@ -618,13 +620,23 @@ class ObjectEditorApp(ForgeryApp):
 		if not items:
 			return
 		item = items[0]
+		self._apply_bone_preview_animation_bytes(item.read_bytes(), item.name)
+
+	def _apply_bone_preview_animation_bytes(self, data, name):
+		"""Parses `data` as a .anim, applying it as the Skinning preview's
+		animation if valid -- shared by the Explorer's right-click "Load as
+		bone-preview animation" command, the Animation combo, and the "load
+		from disk" icon button (_poll_animation_file_dialog())."""
 		try:
-			anim = parse_animation(item.read_bytes())
+			anim = parse_animation(data)
 		except AnimationParseError as exc:
-			print(f"[object_editor] cannot parse animation {item.name}: {exc}")
+			print(f"[object_editor] cannot parse animation {name}: {exc}")
 			return
+		self._apply_bone_preview_animation(anim, name)
+
+	def _apply_bone_preview_animation(self, anim, name):
 		self._bone_preview_animation = anim
-		self._bone_preview_animation_name = item.name
+		self._bone_preview_animation_name = name
 		self._bone_preview_animation_duration = animation_duration(anim)
 		self._bone_preview_time = 0.0
 
@@ -634,24 +646,26 @@ class ObjectEditorApp(ForgeryApp):
 		self._bone_preview_animation = None
 		self._bone_preview_animation_name = ""
 		self._bone_preview_animation_duration = 0.0
-		self._bone_preview_bone_name = None
 		self._bone_preview_time = 0.0
 		if self.shape_file is not None:
 			self._rebuild_geometry()
 
 	def _bone_world_matrices_for(self, names):
 		"""{bone name: 4x4 world matrix} for every name in `names` that's
-		actually in the loaded skeleton (see pynel's evaluate_bone_world_matrix()),
-		at the current bone-preview time/animation -- {} if no skeleton is
-		loaded. Shared by the bone-attach preview and the skinned-shape
-		re-skin, both driven by the same loaded skeleton/animation state."""
+		actually in the loaded skeleton, at the current preview time/
+		animation -- {} if no skeleton is loaded. Computes the *whole*
+		skeleton's world matrices in one pass (pynel's
+		evaluate_all_bone_world_matrices(), O(bone count) instead of
+		evaluate_bone_world_matrix() once per name, which independently
+		re-walks each bone's own ancestor chain -- called every frame for a
+		loaded skinned shape's re-skin (_update_skin_preview()), where that
+		redundant work was the dominant per-frame cost past a handful of
+		bones)."""
 		skeleton = self._bone_preview_skeleton
 		if skeleton is None:
 			return {}
-		return {
-			name: evaluate_bone_world_matrix(skeleton, name, self._bone_preview_animation, self._bone_preview_time)
-			for name in names if name in skeleton.bone_map
-		}
+		all_matrices = evaluate_all_bone_world_matrices(skeleton, self._bone_preview_animation, self._bone_preview_time)
+		return {name: all_matrices[name] for name in names if name in skeleton.bone_map}
 
 	def _update_skin_preview(self, task):
 		"""Per-frame: re-skins the loaded shape's geometry in place (see
@@ -660,7 +674,7 @@ class ObjectEditorApp(ForgeryApp):
 		skin_vertex()/skin_mesh() (fine for one-off/CLI use, far too slow
 		called per-vertex every frame for a real character mesh -- see
 		_update_wind()'s own note on exactly this same tradeoff). No-op
-		otherwise, same pattern as _update_wind()/_update_bone_preview()."""
+		otherwise, same pattern as _update_wind()/_update_skin_preview_time()."""
 		state = self._skin_state
 		if state is None or state.vdata is None:
 			return task.cont
@@ -696,39 +710,28 @@ class ObjectEditorApp(ForgeryApp):
 		view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = weighted_normal
 		return task.cont
 
-	def _update_bone_preview(self, task):
-		"""Per-frame: drives _object_pivot from the chosen bone's world matrix
-		(pynel's evaluate_bone_world_matrix(), mirroring the engine's own
-		CSkeletonModel::stickObject()) whenever a skeleton + bone are picked --
-		with no animation loaded, it just holds the .skel's static bind pose.
-		Time advancement itself doesn't depend on a bone being chosen here --
-		_update_skin_preview() (a loaded skinned shape's own re-skin) needs
-		self._bone_preview_time to keep moving even with no attach bone
-		selected, since skinning a character doesn't require picking one."""
+	def _update_skin_preview_time(self, task):
+		"""Per-frame: advances self._bone_preview_time while playing -- the
+		clock driving the Skinning preview's animation (_update_skin_preview()
+		re-skins the loaded shape's geometry against it every frame)."""
 		if self._bone_preview_playing and self._bone_preview_animation_duration > 0:
 			dt = ClockObject.get_global_clock().get_dt()
 			self._bone_preview_time = (self._bone_preview_time + dt) % self._bone_preview_animation_duration
-		if not self._bone_preview_active:
-			return task.cont
-		m = evaluate_bone_world_matrix(
-			self._bone_preview_skeleton, self._bone_preview_bone_name,
-			self._bone_preview_animation, self._bone_preview_time)
-		self._object_pivot.set_mat(Mat4(
-			m[0][0], m[1][0], m[2][0], 0.0,
-			m[0][1], m[1][1], m[2][1], 0.0,
-			m[0][2], m[1][2], m[2][2], 0.0,
-			m[0][3], m[1][3], m[2][3], 1.0,
-		))
 		return task.cont
 
 	def _draw_bone_preview_controls(self):
-		"""Floating window for the bone-attach preview (see
-		_update_bone_preview()) -- shown once a .skel has been loaded via the
-		Explorer's right-click "Load as bone-preview skeleton" command.
-		Positioned the same way as _draw_wind_controls(), stacked right below
-		it (both top-right of the viewport, flush against the panel)."""
-		if self._bone_preview_skeleton is None:
+		"""Floating "Skinning preview" window: picks the skeleton/animation
+		driving the loaded shape's own skinning, if it's a CMeshMRMSkinned
+		(see _update_skin_preview()). Shown as soon as a shape is loaded (not
+		gated on a skeleton being picked yet) so the Skeleton combo below is
+		reachable even before any skeleton is chosen. Positioned the same way
+		as _draw_wind_controls(), stacked right below it (both top-right of
+		the viewport, flush against the panel)."""
+		if self.shape_file is None:
 			return
+
+		is_skinned = isinstance(self.shape_file.value, MeshMRMSkinned)
+		shape_bones = set(shape_geom(self.shape_file.value).bones_name) if is_skinned else set()
 
 		display_width = imgui.get_io().display_size.x
 		win_w, win_h = self._bone_preview_panel_size
@@ -739,21 +742,69 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.set_next_window_pos((x, y))
 		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
 		         | imgui.WindowFlags_.always_auto_resize.value)
-		with imgui_ctx.begin("Bone attach preview", flags=flags):
-			imgui.text(f"Skeleton: {self._bone_preview_skeleton_name}")
-			imgui.text(f"Animation: {self._bone_preview_animation_name or '(none, bind pose)'}")
-
-			bone_names = sorted(self._bone_preview_skeleton.bone_map)
+		with imgui_ctx.begin("Skinning preview", flags=flags):
+			# Every .skel found by the last scan (see SearchPathsDialog.reload(),
+			# triggered by the reload icon below), sorted first/highlighted
+			# green when it's actually compatible with the loaded shape's own
+			# skinning bones -- picking an incompatible one is still allowed,
+			# same as the engine itself doesn't refuse an incompatible bind,
+			# just remaps missing bones to the root (CSkeletonModel::remapSkinBones).
+			scanned_names = self.search_paths_dialog.scanned_skeleton_names()
+			compatible_names = set(self.search_paths_dialog.compatible_for(shape_bones)) if is_skinned else set()
+			# Compatible ones first (still sorted among themselves), then the
+			# rest -- the match everyone actually wants shouldn't be buried
+			# alphabetically among dozens of irrelevant skeletons.
+			ordered_names = sorted(compatible_names) + sorted(name for name in scanned_names if name not in compatible_names)
 			imgui.set_next_item_width(220)
-			preview = self._bone_preview_bone_name or "(choose a bone)"
-			if imgui.begin_combo("Bone", preview):
-				for name in bone_names:
-					suggested = name in _SUGGESTED_ATTACH_BONES
-					label = f"{name} *" if suggested else name
-					clicked, _ = imgui.selectable(label, name == self._bone_preview_bone_name)
+			preview = self._bone_preview_skeleton_name or "(choose a skeleton)"
+			if imgui.begin_combo("##skeleton-combo", preview):
+				for name in ordered_names:
+					compatible = name in compatible_names
+					if compatible:
+						imgui.push_style_color(imgui.Col_.text.value, _COMPATIBLE_COLOR)
+					clicked, _ = imgui.selectable(name, name == self._bone_preview_skeleton_name)
+					if compatible:
+						imgui.pop_style_color()
 					if clicked:
-						self._bone_preview_bone_name = name
+						self._apply_bone_preview_skeleton(self.search_paths_dialog.skeleton_for(name), name)
 				imgui.end_combo()
+			imgui.same_line()
+			if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##skeleton-file", "Load a skeleton from disk..."):
+				self._skeleton_file_dialog = pfd.open_file("Choose a .skel file", "", ["Ryzom skeleton", "*.skel"])
+			imgui.same_line()
+			if _icon_button(
+					fa_icons.ICON_FA_SYNC, "Rescan the configured search paths",
+					disabled=self.search_paths_dialog.scanning):
+				self.search_paths_dialog.reload()
+			if self.search_paths_dialog.scanning:
+				imgui.text_disabled("Scanning search paths...")
+
+			# Same idea as the Skeleton combo above, but the other way around
+			# (see SearchPathsDialog.compatible_animations_for()): an
+			# animation is compatible when ITS OWN tracked bones are all
+			# present in the *currently chosen* skeleton -- so this list is
+			# empty until a skeleton is picked.
+			animation_names = self.search_paths_dialog.scanned_animation_names()
+			compatible_animations = set(self.search_paths_dialog.compatible_animations_for(self._bone_preview_skeleton))
+			ordered_animations = (
+				sorted(compatible_animations)
+				+ sorted(name for name in animation_names if name not in compatible_animations))
+			imgui.set_next_item_width(220)
+			preview = self._bone_preview_animation_name or "(none, bind pose)"
+			if imgui.begin_combo("##animation-combo", preview):
+				for name in ordered_animations:
+					compatible = name in compatible_animations
+					if compatible:
+						imgui.push_style_color(imgui.Col_.text.value, _COMPATIBLE_COLOR)
+					clicked, _ = imgui.selectable(name, name == self._bone_preview_animation_name)
+					if compatible:
+						imgui.pop_style_color()
+					if clicked:
+						self._apply_bone_preview_animation(self.search_paths_dialog.animation_for(name), name)
+				imgui.end_combo()
+			imgui.same_line()
+			if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##animation-file", "Load an animation from disk..."):
+				self._animation_file_dialog = pfd.open_file("Choose a .anim file", "", ["Ryzom animation", "*.anim"])
 
 			if self._bone_preview_animation is not None:
 				icon = fa_icons.ICON_FA_PAUSE if self._bone_preview_playing else fa_icons.ICON_FA_PLAY
@@ -770,10 +821,6 @@ class ObjectEditorApp(ForgeryApp):
 			if _icon_button(fa_icons.ICON_FA_TIMES, "Unload skeleton/animation, stop preview"):
 				self._unload_bone_preview()
 			self._bone_preview_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
-
-	def _on_export_command(self, items, export_format):
-		if items:
-			self.export_dialog.export(items[0], export_format, self.asset_index)
 
 	def _draw_import_toolbar_button(self):
 		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae/.fbx)..."):
@@ -968,6 +1015,7 @@ class ObjectEditorApp(ForgeryApp):
 		replace-geometry flow can skip resetting the editing state that's
 		meant to survive it, e.g. material overrides)."""
 		self.shape_file = shape_file
+		self.search_paths_dialog.ensure_scanned()
 
 		# CMeshBase::DefaultRotQuat is what the engine actually rotates the
 		# object by at instance creation (nel/src/3d/mesh_base.cpp) -- not
@@ -1366,12 +1414,6 @@ class ObjectEditorApp(ForgeryApp):
 		degrees already)."""
 		imgui.push_id(f"xform-{prop}")
 		locks = self.transform_locks[prop]
-		# The bone-attach preview drives _object_pivot directly every frame
-		# (see _update_bone_preview()) -- editing it by hand here would just
-		# get overwritten (or fight with it while paused), so the whole row
-		# is read-only (still live-updating) whenever it's the targeted node.
-		bone_driven = self._bone_preview_active and self._transform_node(prop) is self._object_pivot
-		imgui.begin_disabled(bone_driven)
 
 		imgui.text(label)
 		imgui.same_line()
@@ -1400,7 +1442,6 @@ class ObjectEditorApp(ForgeryApp):
 		if _icon_button(fa_icons.ICON_FA_UNDO, f"Reset {label.lower()} (current reference frame only)", square=True):
 			self._reset_transform_row(prop)
 
-		imgui.end_disabled()
 		imgui.pop_id()
 
 	def _rebuild_geometry(self):
@@ -1423,11 +1464,12 @@ class ObjectEditorApp(ForgeryApp):
 		wind_params = getattr(geom_value, "vertex_program", None)
 		wind_params = wind_params if isinstance(wind_params, WindTreeParams) else None
 
-		# CMeshMRMSkinned needs a skeleton to render at all -- reuses the
-		# bone-attach preview's own loaded skeleton/animation (see
-		# _bone_world_matrices_for()), independent of any attach bone chosen
-		# there. Without one loaded yet, iter_render_passes() below simply
-		# yields nothing, same as any shape type with no renderable geometry.
+		# CMeshMRMSkinned reuses the Skinning preview's own loaded skeleton/
+		# animation (see _bone_world_matrices_for()), independent of any
+		# attach bone chosen there. Without one loaded yet,
+		# iter_render_passes() below still renders -- its own rigid bind-pose
+		# fallback, matching the real client's behavior for an unskinned
+		# CMeshMRMSkinned instance.
 		is_skinned = isinstance(self.shape_file.value, MeshMRMSkinned)
 		skeleton = self._bone_preview_skeleton if is_skinned else None
 		bone_world_matrices = self._bone_world_matrices_for(geom_value.bones_name) if skeleton is not None else None
@@ -1466,11 +1508,7 @@ class ObjectEditorApp(ForgeryApp):
 			self._skin_state.vdata = vdata
 
 		if pass_count == 0:
-			if is_skinned and skeleton is None:
-				self.shape_error = "No skeleton loaded -- right-click a .skel in the Explorer and choose " \
-				                    "\"Load as bone-preview skeleton\" to render this CMeshMRMSkinned shape."
-			else:
-				self.shape_error = f"No renderable 3D geometry for shape type {self.shape_file.type_name!r}"
+			self.shape_error = f"No renderable 3D geometry for shape type {self.shape_file.type_name!r}"
 
 		bbox = shape_bbox(self.shape_file.value)
 		if bbox is not None:
@@ -1679,7 +1717,7 @@ class ObjectEditorApp(ForgeryApp):
 		if texture is not None and texture.file_name:
 			panda_texture = load_panda_texture(
 				self.asset_index, texture.file_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-				repeat=self._texture_needs_repeat)
+				repeat=self._texture_needs_repeat, extra_finder=self.search_paths_dialog.find_texture)
 			if panda_texture is not None:
 				node_path.set_texture(panda_texture)
 
@@ -1731,7 +1769,7 @@ class ObjectEditorApp(ForgeryApp):
 			return tex_ref
 		panda_texture = load_panda_texture(
 			self.asset_index, name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-			repeat=self._texture_needs_repeat)
+			repeat=self._texture_needs_repeat, extra_finder=self.search_paths_dialog.find_texture)
 		if panda_texture is None:
 			return None
 		# p3dimgui's loadTexture() mutates whatever Texture it's given
@@ -2113,36 +2151,86 @@ class ObjectEditorApp(ForgeryApp):
 		if result:
 			self._write_shape(Path(result))
 
-	def _draw_save_buttons(self):
-		if self.shape_file.type_name not in _WRITABLE_SHAPE_TYPES:
+	def _poll_skeleton_file_dialog(self):
+		if self._skeleton_file_dialog is None or not self._skeleton_file_dialog.ready(0):
 			return
+		result = self._skeleton_file_dialog.result()
+		self._skeleton_file_dialog = None
+		if result:
+			path = Path(result[0])
+			self._load_skeleton_bytes(path.read_bytes(), path.name)
 
+	def _poll_animation_file_dialog(self):
+		if self._animation_file_dialog is None or not self._animation_file_dialog.ready(0):
+			return
+		result = self._animation_file_dialog.result()
+		self._animation_file_dialog = None
+		if result:
+			path = Path(result[0])
+			self._apply_bone_preview_animation_bytes(path.read_bytes(), path.name)
+
+	def _draw_bottom_bar(self):
+		"""Single horizontal bar at the very bottom of the panel: Save/Save
+		As (only for a loaded, writable shape), Export (format picker, then
+		the existing ExportDialog flow -- see ExportDialog.export() --
+		applied to the shape's current in-memory state, edits included, not
+		a re-read from disk/bnp), and Quit flush against the right edge.
+		Always drawn (even with nothing loaded) so Quit stays reachable."""
 		imgui.separator()
-		if self._shape_source_path is not None:
-			if imgui.button("Save"):
-				self._on_save_clicked()
-			imgui.same_line()
-		else:
-			imgui.text_disabled("Save unavailable (loaded from inside a .bnp archive)")
 
-		if imgui.button("Save As..."):
-			# Prefer the shape's own source path (e.g. saving an edited .shape
-			# back near where it came from); fall back to wherever the
-			# Explorer is currently browsing, plus the original file name if
-			# known (e.g. a shape loaded from inside a .bnp, which has no
-			# real on-disk path of its own to reuse) -- this used to open
-			# with no default folder or name at all in that case.
+		writable = self.shape_file is not None and self.shape_file.type_name in _WRITABLE_SHAPE_TYPES
+		if writable:
 			if self._shape_source_path is not None:
-				default_path = str(self._shape_source_path)
+				if imgui.button(f"{fa_icons.ICON_FA_SAVE} Save"):
+					self._on_save_clicked()
+				imgui.same_line()
 			else:
-				name = self._shape_source_name or "untitled.shape"
-				default_path = str(Path(self.explorer.root) / name)
-			self._save_dialog = pfd.save_file("Save shape as", default_path, ["Ryzom shape", "*.shape"])
+				imgui.text_disabled("Save unavailable (loaded from inside a .bnp archive)")
+				imgui.same_line()
 
-		self._draw_save_confirmation_popup()
-		self._poll_save_dialog()
-		if self._save_status:
-			imgui.text_wrapped(self._save_status)
+			if imgui.button("Save As..."):
+				# Prefer the shape's own source path (e.g. saving an edited
+				# .shape back near where it came from); fall back to
+				# wherever the Explorer is currently browsing, plus the
+				# original file name if known (e.g. a shape loaded from
+				# inside a .bnp, which has no real on-disk path of its own
+				# to reuse) -- this used to open with no default folder or
+				# name at all in that case.
+				if self._shape_source_path is not None:
+					default_path = str(self._shape_source_path)
+				else:
+					name = self._shape_source_name or "untitled.shape"
+					default_path = str(Path(self.explorer.root) / name)
+				self._save_dialog = pfd.save_file("Save shape as", default_path, ["Ryzom shape", "*.shape"])
+			imgui.same_line()
+
+			if imgui.button("Export..."):
+				imgui.open_popup("##export-format-popup")
+			if imgui.begin_popup("##export-format-popup"):
+				for export_format in EXPORT_FORMATS:
+					clicked, _ = imgui.selectable(f"{export_format.label} (.{export_format.extension})", False)
+					if clicked:
+						source_folder = (
+							self._shape_source_path.parent if self._shape_source_path is not None else None)
+						self.export_dialog.export(
+							self.shape_file.value, self._shape_source_name or "shape", export_format,
+							self.asset_index, source_folder=source_folder)
+				imgui.end_popup()
+			imgui.same_line()
+
+		quit_label = "Quit"
+		quit_width = imgui.calc_text_size(quit_label).x + imgui.get_style().frame_padding.x * 2
+		avail = imgui.get_content_region_avail().x
+		if avail > quit_width:
+			imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + avail - quit_width)
+		if imgui.button(quit_label):
+			self.userExit()
+
+		if writable:
+			self._draw_save_confirmation_popup()
+			self._poll_save_dialog()
+			if self._save_status:
+				imgui.text_wrapped(self._save_status)
 
 	def _draw_textures_tab(self):
 		materials = getattr(self.shape_file.value, "materials", None)
@@ -2439,6 +2527,9 @@ class ObjectEditorApp(ForgeryApp):
 
 		imgui.pop_id()
 
+	def panel_title(self):
+		return self._shape_source_name or "Panel"
+
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
 		self._draw_transform_panel()
@@ -2448,6 +2539,9 @@ class ObjectEditorApp(ForgeryApp):
 		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()
+		self.search_paths_dialog.draw()
+		self._poll_skeleton_file_dialog()
+		self._poll_animation_file_dialog()
 		self._draw_replace_match_popup()
 
 		if self.shape_error:
@@ -2475,12 +2569,17 @@ class ObjectEditorApp(ForgeryApp):
 					draw_properties(self.shape_file.value)
 					imgui.end_tab_item()
 			if imgui.begin_tab_item_simple("Settings"):
+				imgui.text("Export")
+				imgui.separator()
 				self.export_dialog.draw_settings_content()
+				imgui.spacing()
+				imgui.text("Paths")
+				imgui.separator()
+				self.search_paths_dialog.draw_settings_content()
 				imgui.end_tab_item()
 			imgui.end_tab_bar()
 
-		if self.shape_file is not None:
-			self._draw_save_buttons()
+		self._draw_bottom_bar()
 
 
 if __name__ == "__main__":

@@ -146,6 +146,12 @@ class ForgeryApp(ShowBase):
 		"""Override in subclasses to draw the app-specific right panel content each frame."""
 		pass
 
+	def panel_title(self):
+		"""Override in subclasses for a more useful right-panel window title
+		than the generic "Panel" (e.g. the name of whatever's currently
+		loaded there)."""
+		return "Panel"
+
 	def on_selection_changed(self, items):
 		"""Override in subclasses to react to the explorer's selection changing."""
 		pass
@@ -186,6 +192,9 @@ class ForgeryApp(ShowBase):
 		imgui.set_next_window_size((self.panel_width, body_height), cond=once)
 		imgui.set_next_window_size_constraints(
 			(_SIDE_PANEL_MIN_WIDTH, body_height), (_SIDE_PANEL_MAX_WIDTH, body_height))
-		with imgui_ctx.begin("Panel", flags=_PINNED_FLAGS):
+		# "###panel" keeps the window's ImGui identity (position/size
+		# persistence) stable even though the displayed title itself
+		# (panel_title()) changes with whatever's currently loaded.
+		with imgui_ctx.begin(f"{self.panel_title()}###panel", flags=_PINNED_FLAGS):
 			self.panel_width = imgui.get_window_size().x
 			self.draw_panel()

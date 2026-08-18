@@ -30,19 +30,21 @@ class ExportDialog:
 
 		self._status = ""
 
-	def export(self, item, export_format, asset_index):
-		"""Starts exporting `item` (an Explorer .shape entry) via
-		`export_format`. Asks for an output folder (and, if applicable,
-		texture handling) unless those are already remembered."""
+	def export(self, shape_value, name, export_format, asset_index, source_folder=None):
+		"""Starts exporting `shape_value` (the shape currently open in the
+		editor, possibly edited -- see object_editor.py's Export button in
+		the bottom bar) via `export_format`. `name` supplies the output
+		file's stem. Asks for an output folder (and, if applicable, texture
+		handling) unless those are already remembered."""
 		self._pending = {
-			"item": item, "format": export_format, "asset_index": asset_index, "folder_just_picked": False,
+			"shape_value": shape_value, "name": name, "format": export_format, "asset_index": asset_index,
+			"folder_just_picked": False,
 		}
 		if self._config.remember_output_folder and self._config.output_folder:
 			self._pending["folder"] = self._config.output_folder
 			self._open_confirmation_if_needed()
 		else:
-			source_folder = item.bnp_path.parent if item.bnp_path is not None else item.path.parent
-			self._folder_dialog = pfd.select_folder("Choose export folder", str(source_folder))
+			self._folder_dialog = pfd.select_folder("Choose export folder", str(source_folder or ""))
 
 	def draw(self):
 		"""Call once per ImGui frame -- everything here except
@@ -133,7 +135,8 @@ class ExportDialog:
 		pending, self._pending = self._pending, None
 		try:
 			written = export_shape(
-				pending["item"], pending["format"], pending["folder"], pending["texture_mode"], pending["asset_index"])
+				pending["shape_value"], pending["name"], pending["format"], pending["folder"],
+				pending["texture_mode"], pending["asset_index"])
 			self._status = f"Exported {len(written)} file(s) to {pending['folder']}"
 			print(f"[export] {self._status}: {[str(path) for path in written]}")
 		except Exception as exc:

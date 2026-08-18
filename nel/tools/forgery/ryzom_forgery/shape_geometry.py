@@ -82,6 +82,33 @@ def finest_skinned_lod(geom: MeshMRMSkinnedGeom):
 	return lod, resolved
 
 
+def _passes_from_mrm_skinned_geom_rigid(geom: MeshMRMSkinnedGeom):
+	"""Same shape as _passes_from_mrm_skinned_geom(), but with no skeleton at
+	all: yields the mesh's raw bind-pose local vertices (decompacted, not
+	skinned by any bone matrix) -- matching the real Ryzom client's own
+	fallback for a CMeshMRMSkinned with no skeleton attached
+	(CMeshMRMSkinnedGeom::render()'s "no skeleton" path in
+	nel/src/3d/mesh_mrm_skinned.cpp, itself sourced from _VBufferFinal/
+	getVertexBuffer() -- ugly/rigid, but lets the shape be inspected before a
+	compatible .skel is picked)."""
+	resolved_lod = finest_skinned_lod(geom)
+	if resolved_lod is None:
+		return
+	lod, resolved = resolved_lod
+	vertex_buffer = VertexBuffer(
+		name="rigid",
+		num_verts=len(resolved),
+		vertex_color_format=0,
+		channels={
+			"Position": [v.decompact_pos(geom.decompact_scale) for v in resolved],
+			"Normal": [v.decompact_normal() for v in resolved],
+			"TexCoord0": [v.decompact_uv() for v in resolved],
+		},
+	)
+	for rdr_pass in lod.rdr_passes:
+		yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
+
+
 def _passes_from_mrm_skinned_geom(geom: MeshMRMSkinnedGeom, skeleton, bone_world_matrices):
 	"""Skins geom.packed_vertices against `skeleton` (a
 	pynel.ryzom_shape.SkeletonShape) at whatever pose `bone_world_matrices`
@@ -127,9 +154,9 @@ def iter_render_passes(shape_value, skeleton=None, bone_world_matrices=None):
 	"""Yields (vertex_buffer, material_id, indices) for the renderable
 	geometry of a CMesh/CMeshMRM/CMeshMultiLod(slot 0)/CMeshMRMSkinned shape
 	value. `skeleton`/`bone_world_matrices` are only used for CMeshMRMSkinned
-	(see _passes_from_mrm_skinned_geom()) -- without them (skeleton not yet
-	loaded by the caller), a skinned shape simply yields nothing, same as a
-	shape type with no renderable geometry at all."""
+	(see _passes_from_mrm_skinned_geom()) -- without them (no skeleton loaded
+	yet by the caller), a skinned shape still renders, via
+	_passes_from_mrm_skinned_geom_rigid()'s raw bind-pose fallback."""
 	if isinstance(shape_value, Mesh):
 		yield from _passes_from_mesh_geom(shape_value.geom)
 	elif isinstance(shape_value, MeshMRM):
@@ -143,6 +170,8 @@ def iter_render_passes(shape_value, skeleton=None, bone_world_matrices=None):
 	elif isinstance(shape_value, MeshMRMSkinned):
 		if skeleton is not None and bone_world_matrices is not None:
 			yield from _passes_from_mrm_skinned_geom(shape_value.geom, skeleton, bone_world_matrices)
+		else:
+			yield from _passes_from_mrm_skinned_geom_rigid(shape_value.geom)
 
 
 def shape_geom(shape_value):
@@ -212,17 +241,21 @@ def _find_local_texture_ref(name, search_dirs):
 	return None
 
 
-def load_panda_texture(asset_index, name, cache=None, search_dirs=None, repeat=False):
+def load_panda_texture(asset_index, name, cache=None, search_dirs=None, repeat=False, extra_finder=None):
 	"""Resolves and decodes a material texture reference (by base file name,
 	as stored in the shape's Texture.file_name) into a Panda3D Texture, via
-	the given AssetIndex, falling back to _find_local_texture_ref(search_dirs)
-	if given and the AssetIndex doesn't have it. Returns None if it can't be
-	found/decoded. `cache`, if given, is a dict reused across calls to avoid
-	re-decoding the same texture for multiple materials/passes -- `repeat`
-	only has an effect the first time a given `name` is actually loaded (a
-	cache hit skips straight past it), matching how the wrap mode is really a
-	property of how the shape's own UVs use the texture, not of the texture
-	file itself."""
+	the given AssetIndex, falling back in turn to
+	_find_local_texture_ref(search_dirs) and then `extra_finder(name)` (e.g.
+	SearchPathsDialog.find_texture, the user-configured, .bnp-aware search
+	paths from the Settings tab's "Paths" section) if the AssetIndex doesn't
+	have it. `extra_finder` just needs to return something with `.name` and
+	`.read_bytes()`, same duck-typed shape as an AssetRef. Returns None if it
+	can't be found/decoded. `cache`, if given, is a dict reused across calls
+	to avoid re-decoding the same texture for multiple materials/passes --
+	`repeat` only has an effect the first time a given `name` is actually
+	loaded (a cache hit skips straight past it), matching how the wrap mode
+	is really a property of how the shape's own UVs use the texture, not of
+	the texture file itself."""
 	if cache is not None and name in cache:
 		return cache[name]
 
@@ -230,6 +263,8 @@ def load_panda_texture(asset_index, name, cache=None, search_dirs=None, repeat=F
 	ref = asset_index.find_texture(name)
 	if ref is None and search_dirs:
 		ref = _find_local_texture_ref(name, search_dirs)
+	if ref is None and extra_finder is not None:
+		ref = extra_finder(name)
 	if ref is None:
 		print(f"[shape_geometry] texture not found: {name!r}")
 	else:

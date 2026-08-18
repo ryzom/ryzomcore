@@ -1,5 +1,53 @@
 # Changelog
 
+## 2026-08-18 — ✨ Add skinning preview and generalized search paths
+
+Two chantiers' worth of work, validated end to end against real creature data over the
+`.agentcom` bridge (`tr_mo_zerx.shape`/`.skel`/`_baillement.anim`).
+
+**Rigid rendering + compatible-skeleton detection**: a `CMeshMRMSkinned` no longer needs a
+`.skel` loaded to render at all -- `shape_geometry.py` gained
+`_passes_from_mrm_skinned_geom_rigid()`, a fallback that renders the mesh's raw bind-pose
+local vertices (decompacted, unskinned), matching the real client's own fallback for an
+unskinned `CMeshMRMSkinned` instance (`CMeshMRMSkinnedGeom::render()`'s "no skeleton" path,
+`mesh_mrm_skinned.cpp:589-801`).
+
+**Generalized, `.bnp`-aware search paths** (`ryzom_forgery/search_paths.py` +
+`search_paths_dialog.py`, replacing the earlier `.skel`-only `skel_search_config.py`/
+`skel_search_dialog.py`): user-configured folders (recursive or not; a `.bnp` sitting in a
+scanned folder is always descended into, recursive or not, since it's a single filesystem
+node) used to find `.skel`/`.anim` files compatible with the loaded shape/skeleton, and as an
+extra fallback for texture resolution (`shape_geometry.py`'s `load_panda_texture()`). Scanning
+runs on a background thread (`_reload_worker()`, kicked off automatically the first time a
+shape is displayed) with a persistent on-disk cache
+(`~/.cache/ryzom_forgery/skel_anim_scan_cache.json` on Linux, `cache_dir.py`) keyed by each
+file's `(mtime, size)` -- an unchanged file is never re-parsed. Only each `.skel`/`.anim`'s
+bone names are kept in memory for the compatibility lists; the full parse only happens once,
+on demand, when the user actually picks one.
+
+**"Skinning preview" window** (renamed from "Bone attach preview"): always visible once a
+shape is loaded, with `Skeleton`/`Animation` combos listing every scanned candidate
+(compatible ones sorted first and highlighted green), a "load from disk" icon button, and a
+"Reload" icon button. The bone-attach mechanism itself (`_update_bone_preview`, the "Bone"
+combo, `_SUGGESTED_ATTACH_BONES`) was removed entirely: its design didn't make sense (an
+object attaches to a bone of an *external* character's skeleton, never its own) --
+`.todo/forgery-object-editor.md` keeps a note on what a real redesign would need.
+
+**Settings tab** reorganized into "Export"/"Paths" sections. **Bottom bar**: Save/Save As
+(unchanged logic, just relocated), a new Export button (format picker, then the existing
+`ExportDialog` flow -- now exports the shape's live in-memory state, edits included, not a
+disk/bnp re-read; `export_shape()`/`ExportDialog.export()` dropped their now-redundant
+`ExplorerItem`-based path once the Explorer's own "Export to .xxx" commands were removed), and
+Quit (`base.userExit()`) flush right. The panel's window title shows the loaded shape's name
+instead of the generic "Panel" (`ForgeryApp.panel_title()`, overridable per app).
+
+Smaller fixes along the way: a real perf issue (5-30+ fps lost while an animation played,
+traced to `evaluate_bone_world_matrix()` being called once per bone every frame -- fixed on
+the pynel side, see `logs/pynel.md`), a duplicate ImGui id between the two "load from disk"
+icon buttons, and the Explorer's double-click now runs whatever the right-click menu's first
+command would (`CommandRegistry.commands_for_selection()` already preserves registration
+order).
+
 ## 2026-08-18 — 🐛 Fix CMeshMRMSkinned rendering, blank textures, and Explorer UX (Step 4)
 
 Real visual validation of the new CMeshMRMSkinned pipeline (`fo_carnitree.shape`+`.skel`,

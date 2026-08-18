@@ -21,8 +21,6 @@ from typing import Callable, List, Optional
 from ryzom_forgery.export_config import TEXTURE_MODE_COPY_PNG
 from ryzom_forgery.shape_geometry import iter_render_passes, load_panda_texture, rgba_to_color, texture_to_pnm_image
 
-from pynel.ryzom_shape import parse_shape
-
 
 @dataclass
 class ExportFormat:
@@ -402,15 +400,16 @@ EXPORT_FORMATS = [
 ]
 
 
-def export_shape(item, export_format: ExportFormat, output_dir, texture_mode: str, asset_index) -> List[Path]:
-	"""Parses `item` (an Explorer .shape entry) and exports it via
-	`export_format` into `output_dir`. Returns the list of files written.
-	Raises `pynel.ryzom_shape.ShapeParseError` or `ValueError` (unsupported
-	shape type / no renderable geometry) on failure."""
-	shape_file = parse_shape(item.read_bytes())
-	materials = getattr(shape_file.value, "materials", None)
-
-	stem = Path(item.name).stem
+def export_shape(
+		shape_value, name: str, export_format: ExportFormat, output_dir, texture_mode: str, asset_index,
+) -> List[Path]:
+	"""Exports an already-parsed shape value -- e.g. the live, possibly-edited
+	state of the shape currently open in the editor -- via `export_format`
+	into `output_dir`. `name` supplies the output file's stem (typically the
+	source .shape's own file name). Returns the list of files written.
+	Raises `ValueError` (unsupported shape type / no renderable geometry) on
+	failure."""
+	materials = getattr(shape_value, "materials", None)
+	stem = Path(name).stem
 	output_path = Path(output_dir) / f"{stem}.{export_format.extension}"
-
-	return export_format.export(shape_file.value, materials, output_path, texture_mode, asset_index)
+	return export_format.export(shape_value, materials, output_path, texture_mode, asset_index)
