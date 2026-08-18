@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-18 — ✨ Render and animate CMeshMRMSkinned shapes in object_editor (Step 3)
+
+The main loaded shape can now be a skinned character/creature, not just weapons/props: when
+it's `CMeshMRMSkinned`, `_rebuild_geometry()` reuses the bone-attach preview's own loaded
+skeleton/animation state (no separate "load a skeleton for the main shape" flow -- one
+skeleton context serves both features) to skin it via `_build_skin_state()` +
+`_update_skin_preview()`. Without a skeleton loaded yet, a clear status message tells the
+user to load one via the Explorer's right-click command, instead of the generic "no
+renderable geometry" message.
+
+`_update_skin_preview()` recomputes the skin every frame with a fully vectorized numpy path
+(gather each vertex's up to 4 influence matrices, batched `einsum` for position and normal,
+weighted sum, renormalize) rather than calling pynel's own `ryzom_skin.skin_vertex()` in a
+per-vertex Python loop -- the same performance tradeoff already hit and documented for the
+wind preview (`_update_wind()`'s own note: a real prop-sized mesh dropped 60fps to ~38fps
+even with a *much* cheaper per-vertex formula than 4-bone blend skinning). Results are
+written into the shared vertex buffer with the same buffer-protocol/modification-stamp
+technique `_update_wind()` already established.
+
+`_update_bone_preview()`'s time advancement was decoupled from having an attach bone chosen
+-- a loaded skeleton + animation is now enough to drive the skin preview's playback, even
+without also picking a bone for the separate weapon-attach use case.
+
+Validated with a direct numerical cross-check against pynel's own (already-validated)
+`ryzom_skin.skin_mesh()` on `fo_carnitree`: max deviation ~4e-7 (float32 noise), 0 vertices
+out of tolerance. The first comparison attempt showed a ~2.9m discrepancy -- traced to a bad
+test reference (comparing the finest lod's *resolved* vertices against the *unresolved*
+`packed_vertices` list; this particular model's finest lod turned out to have 88 geomorph
+placeholders, not zero as assumed), not an actual bug in the vectorized skinning.
+
 ## 2026-08-18 — ✨ Extend shape_geometry.py for CMeshMRMSkinned (Step 2)
 
 `iter_render_passes()` gained optional `skeleton`/`bone_world_matrices` parameters, used only

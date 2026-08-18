@@ -59,18 +59,27 @@ def _resolve_lod_geomorphs(vertex_buffer, lod):
 	return dataclasses.replace(vertex_buffer, channels=channels)
 
 
-def _resolve_skinned_lod_geomorphs(packed_vertices, lod):
-	"""Same idea as _resolve_lod_geomorphs(), for a CMeshMRMSkinned's
-	PackedVertex list instead of a plain VertexBuffer's channels -- wedge
-	index i for i < len(lod.geomorphs) is a geomorph placeholder, resolved to
-	its "end" wedge for a static (non-blending) render of this lod."""
+def finest_skinned_lod(geom: MeshMRMSkinnedGeom):
+	"""The finest lod (geom.lods[-1], see _passes_from_mrm_geom()'s own note
+	on this convention) plus its geomorph-resolved PackedVertex list -- wedge
+	index i for i < len(lod.geomorphs) is a placeholder, resolved here to its
+	"end" wedge for a static (non-blending) render of this lod, same idea as
+	_resolve_lod_geomorphs() for a plain VertexBuffer's channels. None if the
+	geom has no lods at all. Exposed (not just used internally by
+	_passes_from_mrm_skinned_geom()) since a live per-frame re-skin (e.g.
+	object_editor's animated preview) needs this same resolved vertex list to
+	build its own static per-vertex tables once, ahead of time."""
+	if not geom.lods:
+		return None
+	lod = geom.lods[-1]
+	packed_vertices = geom.packed_vertices
 	if not lod.geomorphs:
-		return packed_vertices
+		return lod, packed_vertices
 	resolved = list(packed_vertices)
 	for wedge_index, (_start, end) in enumerate(lod.geomorphs):
 		if end < len(packed_vertices):
 			resolved[wedge_index] = packed_vertices[end]
-	return resolved
+	return lod, resolved
 
 
 def _passes_from_mrm_skinned_geom(geom: MeshMRMSkinnedGeom, skeleton, bone_world_matrices):
@@ -81,11 +90,11 @@ def _passes_from_mrm_skinned_geom(geom: MeshMRMSkinnedGeom, skeleton, bone_world
 	geom.bones_name) represents, and yields (vertex_buffer, material_id,
 	indices) passes -- same shape as the other _passes_from_*_geom() helpers,
 	so callers don't need to special-case CMeshMRMSkinned."""
-	if not geom.lods:
+	resolved_lod = finest_skinned_lod(geom)
+	if resolved_lod is None:
 		return
-	lod = geom.lods[-1]  # finest lod, see _passes_from_mrm_geom()'s own note
+	lod, resolved = resolved_lod
 	bone_skin_matrices = bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices)
-	resolved = _resolve_skinned_lod_geomorphs(geom.packed_vertices, lod)
 	skinned = [skin_vertex(v, geom.decompact_scale, bone_skin_matrices) for v in resolved]
 	vertex_buffer = VertexBuffer(
 		name="skinned",

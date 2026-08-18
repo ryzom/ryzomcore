@@ -29,7 +29,8 @@ from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
-	iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, shape_geom, solid_color_texture,
+	finest_skinned_lod, iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, shape_geom,
+	solid_color_texture,
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 
@@ -37,9 +38,10 @@ from pynel.ryzom_animation import (
 	Animation, AnimationParseError, animation_duration, evaluate_bone_world_matrix, parse_animation,
 )
 from pynel.ryzom_shape import (
-	Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture, WindTreeParams, parse_shape,
-	save_shape,
+	MeshMRMSkinned, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture, WindTreeParams,
+	parse_shape, save_shape,
 )
+from pynel.ryzom_skin import bone_skin_matrices_for_mesh
 
 DEFAULT_DATA_ROOT = Path("~/.local/share/Ryzom/ryzom_live/data").expanduser()
 
@@ -270,6 +272,52 @@ def _build_wind_state(wind_params, vertex_buffer):
 	idx2 = numpy.minimum((g * 3.99).astype(numpy.int32), 3)
 	idx3 = numpy.minimum((b * 3.99).astype(numpy.int32), 3)
 	return _WindState(wind_params, base_positions, factors, idx2, idx3)
+
+
+class _SkinState:
+	"""Per-loaded-shape data for live CMeshMRMSkinned re-skinning (see
+	ObjectEditorApp._update_skin_preview()) -- built once in _rebuild_geometry()
+	from the finest lod's resolved PackedVertex list, then read every frame by
+	the animation task. `vdata` is filled in by the caller once it's built,
+	same as _WindState."""
+
+	def __init__(self, geom, skeleton, bone_names, local_positions, local_normals, bone_indices, weights):
+		self.geom = geom
+		self.skeleton = skeleton
+		self.bone_names = bone_names  # geom.bones_name, same order/indices as bone_indices
+		self.local_positions = local_positions  # (N,4) float32, homogeneous (w=1)
+		self.local_normals = local_normals  # (N,4) float32, homogeneous (w=0, no translation)
+		self.bone_indices = bone_indices  # (N,4) int32, indices into bone_names
+		self.weights = weights  # (N,4) float32, already /255
+		self.vdata = None
+		self.vertex_stride = None
+		self.vertex_pos_offset = None
+		self.vertex_normal_offset = None
+
+
+def _build_skin_state(geom, skeleton):
+	"""Precomputes the static per-vertex tables _update_skin_preview() blends
+	every frame, from the finest lod's geomorph-resolved PackedVertex list
+	(see finest_skinned_lod()) -- None if the geom has no lods at all."""
+	resolved_lod = finest_skinned_lod(geom)
+	if resolved_lod is None:
+		return None
+	_lod, resolved = resolved_lod
+
+	n = len(resolved)
+	local_positions = numpy.empty((n, 4), dtype=numpy.float32)
+	local_normals = numpy.empty((n, 4), dtype=numpy.float32)
+	bone_indices = numpy.empty((n, 4), dtype=numpy.int32)
+	weights = numpy.empty((n, 4), dtype=numpy.float32)
+	local_positions[:, 3] = 1.0
+	local_normals[:, 3] = 0.0
+	for i, v in enumerate(resolved):
+		local_positions[i, :3] = v.decompact_pos(geom.decompact_scale)
+		local_normals[i, :3] = v.decompact_normal()
+		bone_indices[i] = v.matrices
+		weights[i] = [w / 255.0 for w in v.weights]
+
+	return _SkinState(geom, skeleton, list(geom.bones_name), local_positions, local_normals, bone_indices, weights)
 
 
 def _multi_bitmap_slot_label(index):
@@ -507,6 +555,14 @@ class ObjectEditorApp(ForgeryApp):
 		self._bone_preview_playing = True
 		self._bone_preview_panel_size = (10.0, 10.0)
 		self.taskMgr.add(self._update_bone_preview, "object-editor-bone-preview")
+		# Live re-skinning of a loaded CMeshMRMSkinned (see _build_skin_state()/
+		# _update_skin_preview()) -- reuses the same skeleton/animation state
+		# above, whenever the *main* shape itself is skinned (a character/
+		# creature body), independent of the bone-attach preview's own chosen
+		# attach bone. self._skin_state is None whenever the loaded shape isn't
+		# CMeshMRMSkinned, or no skeleton is loaded yet.
+		self._skin_state = None
+		self.taskMgr.add(self._update_skin_preview, "object-editor-skin-preview")
 		self.commands.register_for_extension(
 			".skel", "Load as bone-preview skeleton", self._on_load_skeleton_command)
 		self.commands.register_for_extension(
@@ -551,6 +607,11 @@ class ObjectEditorApp(ForgeryApp):
 			self._bone_preview_bone_name = next(
 				(name for name in _SUGGESTED_ATTACH_BONES if name in shape_file.value.bone_map),
 				next(iter(shape_file.value.bone_map), None))
+		# The main shape might itself be CMeshMRMSkinned and was waiting on a
+		# skeleton to render at all (see _rebuild_geometry()) -- now that one
+		# just got loaded, rebuild so it actually shows up.
+		if self.shape_file is not None:
+			self._rebuild_geometry()
 
 	def _on_load_animation_command(self, items):
 		if not items:
@@ -574,18 +635,80 @@ class ObjectEditorApp(ForgeryApp):
 		self._bone_preview_animation_duration = 0.0
 		self._bone_preview_bone_name = None
 		self._bone_preview_time = 0.0
+		if self.shape_file is not None:
+			self._rebuild_geometry()
+
+	def _bone_world_matrices_for(self, names):
+		"""{bone name: 4x4 world matrix} for every name in `names` that's
+		actually in the loaded skeleton (see pynel's evaluate_bone_world_matrix()),
+		at the current bone-preview time/animation -- {} if no skeleton is
+		loaded. Shared by the bone-attach preview and the skinned-shape
+		re-skin, both driven by the same loaded skeleton/animation state."""
+		skeleton = self._bone_preview_skeleton
+		if skeleton is None:
+			return {}
+		return {
+			name: evaluate_bone_world_matrix(skeleton, name, self._bone_preview_animation, self._bone_preview_time)
+			for name in names if name in skeleton.bone_map
+		}
+
+	def _update_skin_preview(self, task):
+		"""Per-frame: re-skins the loaded shape's geometry in place (see
+		_build_skin_state()) whenever it's a CMeshMRMSkinned with a skeleton
+		loaded -- vectorized (numpy), unlike pynel.ryzom_skin's plain-Python
+		skin_vertex()/skin_mesh() (fine for one-off/CLI use, far too slow
+		called per-vertex every frame for a real character mesh -- see
+		_update_wind()'s own note on exactly this same tradeoff). No-op
+		otherwise, same pattern as _update_wind()/_update_bone_preview()."""
+		state = self._skin_state
+		if state is None or state.vdata is None:
+			return task.cont
+
+		bone_world_matrices = self._bone_world_matrices_for(state.bone_names)
+		bone_skin_matrices = bone_skin_matrices_for_mesh(state.geom, state.skeleton, bone_world_matrices)
+		matrices = numpy.array(bone_skin_matrices, dtype=numpy.float32)  # (B,4,4)
+
+		# state.bone_indices: (N,4) int, one of the B bones per influence slot
+		# -- gathers each vertex's own 4 candidate matrices in one shot.
+		gathered = matrices[state.bone_indices]  # (N,4,4,4): (vertex, slot, row, col)
+		transformed_pos = numpy.einsum("nsij,nj->nsi", gathered, state.local_positions)
+		weighted_pos = (transformed_pos[:, :, :3] * state.weights[:, :, None]).sum(axis=1)
+
+		transformed_normal = numpy.einsum("nsij,nj->nsi", gathered, state.local_normals)
+		weighted_normal = (transformed_normal[:, :, :3] * state.weights[:, :, None]).sum(axis=1)
+		lengths = numpy.linalg.norm(weighted_normal, axis=1, keepdims=True)
+		lengths[lengths == 0] = 1.0
+		weighted_normal /= lengths
+
+		# Same buffer-protocol/modification-stamp technique as _update_wind()
+		# -- see its own docstring for why a per-row GeomVertexRewriter loop
+		# isn't used instead.
+		array_data = state.vdata.modify_array(0)
+		if state.vertex_pos_offset is None:
+			array_format = array_data.get_array_format()
+			state.vertex_stride = array_format.get_stride() // 4
+			state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
+			state.vertex_normal_offset = array_format.get_column(InternalName.get_normal()).get_start() // 4
+
+		view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
+		view[:, state.vertex_pos_offset:state.vertex_pos_offset + 3] = weighted_pos
+		view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = weighted_normal
+		return task.cont
 
 	def _update_bone_preview(self, task):
 		"""Per-frame: drives _object_pivot from the chosen bone's world matrix
 		(pynel's evaluate_bone_world_matrix(), mirroring the engine's own
 		CSkeletonModel::stickObject()) whenever a skeleton + bone are picked --
 		with no animation loaded, it just holds the .skel's static bind pose.
-		No-op otherwise, same pattern as _update_wind()."""
-		if not self._bone_preview_active:
-			return task.cont
+		Time advancement itself doesn't depend on a bone being chosen here --
+		_update_skin_preview() (a loaded skinned shape's own re-skin) needs
+		self._bone_preview_time to keep moving even with no attach bone
+		selected, since skinning a character doesn't require picking one."""
 		if self._bone_preview_playing and self._bone_preview_animation_duration > 0:
 			dt = ClockObject.get_global_clock().get_dt()
 			self._bone_preview_time = (self._bone_preview_time + dt) % self._bone_preview_animation_duration
+		if not self._bone_preview_active:
+			return task.cont
 		m = evaluate_bone_world_matrix(
 			self._bone_preview_skeleton, self._bone_preview_bone_name,
 			self._bone_preview_animation, self._bone_preview_time)
@@ -1260,15 +1383,28 @@ class ObjectEditorApp(ForgeryApp):
 		self.shape_error = None
 		self._material_node_paths = {}
 		self._wind_state = None
+		self._skin_state = None
 		self._texture_needs_repeat = False
 
 		geom_value = shape_geom(self.shape_file.value)
 		wind_params = geom_value.vertex_program if geom_value is not None else None
 		wind_params = wind_params if isinstance(wind_params, WindTreeParams) else None
 
+		# CMeshMRMSkinned needs a skeleton to render at all -- reuses the
+		# bone-attach preview's own loaded skeleton/animation (see
+		# _bone_world_matrices_for()), independent of any attach bone chosen
+		# there. Without one loaded yet, iter_render_passes() below simply
+		# yields nothing, same as any shape type with no renderable geometry.
+		is_skinned = isinstance(self.shape_file.value, MeshMRMSkinned)
+		skeleton = self._bone_preview_skeleton if is_skinned else None
+		bone_world_matrices = self._bone_world_matrices_for(geom_value.bones_name) if skeleton is not None else None
+		if is_skinned and skeleton is not None:
+			self._skin_state = _build_skin_state(geom_value, skeleton)
+
 		vdata = None
 		pass_count = 0
-		for vertex_buffer, material_id, indices in iter_render_passes(self.shape_file.value):
+		for vertex_buffer, material_id, indices in iter_render_passes(
+				self.shape_file.value, skeleton=skeleton, bone_world_matrices=bone_world_matrices):
 			if not indices:
 				continue
 			print(f"[object_editor] pass {pass_count}: material={material_id} "
@@ -1276,10 +1412,10 @@ class ObjectEditorApp(ForgeryApp):
 			      f"channels={list(vertex_buffer.channels.keys())}")
 			if vdata is None:
 				# Built once, not per-pass: every pass indexes into the exact
-				# same vertex array (see iter_render_passes()), and the wind
-				# preview needs a single vdata to update per frame rather than
-				# one per pass.
-				vdata = _build_vertex_data(vertex_buffer, dynamic=wind_params is not None)
+				# same vertex array (see iter_render_passes()), and the wind/
+				# skin preview needs a single vdata to update per frame rather
+				# than one per pass.
+				vdata = _build_vertex_data(vertex_buffer, dynamic=wind_params is not None or self._skin_state is not None)
 				if wind_params is not None:
 					self._wind_state = _build_wind_state(wind_params, vertex_buffer)
 				self._texture_needs_repeat = _uvs_need_repeat(vertex_buffer.channels.get("TexCoord0"))
@@ -1293,9 +1429,15 @@ class ObjectEditorApp(ForgeryApp):
 
 		if self._wind_state is not None:
 			self._wind_state.vdata = vdata
+		if self._skin_state is not None:
+			self._skin_state.vdata = vdata
 
 		if pass_count == 0:
-			self.shape_error = f"No renderable 3D geometry for shape type {self.shape_file.type_name!r}"
+			if is_skinned and skeleton is None:
+				self.shape_error = "No skeleton loaded -- right-click a .skel in the Explorer and choose " \
+				                    "\"Load as bone-preview skeleton\" to render this CMeshMRMSkinned shape."
+			else:
+				self.shape_error = f"No renderable 3D geometry for shape type {self.shape_file.type_name!r}"
 
 		bbox = shape_bbox(self.shape_file.value)
 		if bbox is not None:
