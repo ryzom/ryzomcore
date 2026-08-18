@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-08-18 — ✨ Generalize Panoply to all 4 axes and fix small-shape framing
+
+Generalized Panoply (`ryzom_forgery/panoply.py`) from the race+user-color pair alone to
+all 4 axes real production data actually uses (found by reading
+`nel/tools/3d/panoply_maker/panoply_maker.cpp` and the real `.cfg` files in
+`ryzom-data/leveldesign/workspace/common/characters_maps_hr/`): `skin` (race skin
+tone, renamed from the earlier "race" to match the real `skin_color_id` config key --
+FY/MA/TR/ZO), `user` (item craft color, U1..U8), `hair` (H1..H6), `eyes` (E1..E8). Each
+axis is independent -- an armor texture only ever carries skin+user masks, a hairstyle
+carries skin+hair, a face texture carries skin+eyes; `hair`/`eyes` never apply to armor
+and vice versa, purely because that's which mask files existed for a given base texture
+at build time, not something Forgery has to special-case. Rewrote
+`parse_panoply_files()` to strip whichever `_<color_id>` suffix tokens are actually
+present, generically, instead of only recognizing the fixed `_<race>_u<N>` pattern --
+this alone found panoply variants for 1013 base textures instead of 379 (every
+hairstyle/face texture that has no race+user combo was previously invisible to the
+tool entirely).
+
+Selection UX: only `skin` can be deselected (falling back to the shape's true base
+texture, clearing every other axis too since none of them resolve to a real file
+without a skin picked); `user`/`hair`/`eyes`, once picked, can only be switched to a
+different value, never turned off -- there's no real "..._U1.tga" file on disk without
+a skin paired with it. The first axis picked from an empty selection now auto-fills
+every other available axis with its first value, instead of resolving to a texture that
+was never actually generated (e.g. picking only a skin used to try loading
+"..._FY.tga", which doesn't exist -- only "..._FY_U1.tga" does -- and rendered blank).
+
+Fixed hairstyle shapes rendering invisible: Panda3D's default lens near plane (1.0
+world unit) clipped them out entirely once `OrbitCamera.frame()`'s distance (bbox
+radius, floored at 0.1, times 5.65) landed under 1.0 for a hairstyle's thin bbox --
+the whole mesh sat behind the near plane. `ForgeryApp.__init__` (`ryzom_forgery/app.py`)
+now sets `camLens.set_near_far(0.02, 20000.0)` explicitly, with real headroom for
+Ryzom's actual asset scale range (tiny props to whole ecosystems) instead of relying on
+Panda3D's one-size-fits-all default.
+
 ## 2026-08-18 — 🐛 Fix texture preview corruption and make Panoply shape-wide
 
 Fixed `_get_preview_texture_ref()` (thumbnails/tooltips in the Textures and Materials

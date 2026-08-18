@@ -311,10 +311,12 @@ class SearchPathsDialog:
 		return search_paths.find_texture(self._texture_entries, name)
 
 	def panoply_variants_for(self, base_texture_name):
-		"""{race: [user color, ...]} of panoply variants panoply_files.txt
-		lists for `base_texture_name` (e.g. "tr_hof_armor00_handupside_c1.tga")
-		-- {} if no panoply_files.txt was found by the last scan, or this
-		texture has no variants in it."""
+		"""{axis: [value, ...]} (panoply.AXES) of panoply variants
+		panoply_files.txt lists for `base_texture_name` (e.g.
+		"tr_hof_armor00_handupside_c1.tga") -- an axis with an empty list
+		means this texture has no mask for it (e.g. armor never has
+		hair/eyes). {} (every axis empty) if no panoply_files.txt was found
+		by the last scan, or this texture has no variants in it at all."""
 		stem = Path(base_texture_name).stem.lower()
 		return self._panoply_variants.get(stem, {})
 

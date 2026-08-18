@@ -73,6 +73,16 @@ class ForgeryApp(ShowBase):
 		# camera controller.
 		self.disableMouse()
 
+		# Panda3D's default lens near plane (1.0 world unit) clips out small
+		# shapes entirely once OrbitCamera.frame() puts the camera closer
+		# than that -- e.g. a hairstyle's own bbox radius can floor out at
+		# its 0.1 minimum (see object_editor.py's _display_shape()), giving
+		# a framing distance well under 1.0, so the whole mesh sat behind the
+		# near plane and simply never rendered. Ryzom assets range from tiny
+		# props to whole ecosystems, so both near and far need real headroom
+		# rather than relying on Panda3D's one-size-fits-all default.
+		self.camLens.set_near_far(0.02, 20000.0)
+
 		p3dimgui.init()
 		self._load_icon_font()
 

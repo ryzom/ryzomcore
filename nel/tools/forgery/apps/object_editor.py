@@ -483,7 +483,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_hint_shown = False  # same, for the material property editor's own doc hints
 		self._texture_browse_dialogs = {}  # key -> (in-flight portable_file_dialogs.open_file, on_result callback)
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
-		self._panoply_selection = None  # (race, user_color) or None -- shape-wide, render-only, never touches shape data
+		self._panoply_selection = {}  # axis (panoply.AXES) -> value, shape-wide, render-only, never touches shape data
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
@@ -1001,7 +1001,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_section_expanded = set()
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
-		self._panoply_selection = None
+		self._panoply_selection = {}
 		self._shape_source_path = None
 		self._shape_source_name = None
 		self._texture_search_dirs = []
@@ -1689,21 +1689,27 @@ class ObjectEditorApp(ForgeryApp):
 		node_path.set_depth_write(bool(material.flags & _IDRV_MAT_ZWRITE) if material is not None else True)
 
 	def _resolve_panoply_texture_name(self, base_name):
-		"""`base_name` unchanged, unless a shape-wide panoply race/user-color
-		has been picked (see _draw_global_panoply_section()) AND this
-		particular texture actually has a variant for it -- a shape's parts
+		"""`base_name` unchanged, unless one or more shape-wide panoply axis
+		values have been picked (see _draw_global_panoply_section()) AND this
+		particular texture actually has a variant for them -- a shape's parts
 		that don't change color (e.g. a buckle, a weapon) simply have no
 		entry in panoply_files.txt for their base name and keep rendering
-		with `base_name` as-is, same as if nothing were selected. Only ever
-		affects what gets loaded for rendering/preview -- the shape's own
-		material data (base_name itself) is never modified."""
-		if self._panoply_selection is None or not base_name:
+		with `base_name` as-is, same as if nothing were selected. Only the
+		axes this specific texture actually has masks for are applied (e.g.
+		an armor texture only ever has race/user, never hair/eyes, even if
+		the shape-wide selection includes a hair pick for some other
+		texture). Only ever affects what gets loaded for rendering/preview --
+		the shape's own material data (base_name itself) is never modified."""
+		if not self._panoply_selection or not base_name:
 			return base_name
-		race, user_color = self._panoply_selection
-		variants = self.search_paths_dialog.panoply_variants_for(base_name)
-		if user_color not in variants.get(race, ()):
+		available = self.search_paths_dialog.panoply_variants_for(base_name)
+		dims = {
+			axis: value for axis, value in self._panoply_selection.items()
+			if value in available.get(axis, ())
+		}
+		if not dims:
 			return base_name
-		return panoply.variant_file_name(base_name, race, user_color)
+		return panoply.variant_file_name(base_name, **dims)
 
 	def _shape_texture_names(self):
 		"""Every distinct, currently-active texture base name across the
@@ -1711,7 +1717,7 @@ class ObjectEditorApp(ForgeryApp):
 		texture.file_name is whichever quality/season/ecosystem set is
 		presently selected, same one _apply_material_texture() renders) --
 		the set _draw_global_panoply_section() checks against
-		panoply_files.txt to decide which race/user-color buttons to offer."""
+		panoply_files.txt to decide which axis buttons to offer."""
 		materials = getattr(self.shape_file.value, "materials", None) or []
 		names = set()
 		for material in materials:
@@ -1720,57 +1726,76 @@ class ObjectEditorApp(ForgeryApp):
 				names.add(texture.file_name)
 		return names
 
-	def _draw_global_panoply_section(self):
-		"""Ryzom's per-race/per-user-color armor texture variants (see
-		panoply.py), shape-wide: a single race + user-color choice applies to
-		every one of the shape's textures at once -- the race is a skin-tone
-		difference (Fyros tanned, Matis pale, Tryker in between, Zorai blue)
-		and the user color is the item's craft color, both meant to be
-		uniform across a whole equipped piece, not picked per texture. A
-		texture with no variant for the current pick (e.g. a part that
-		doesn't change color) just keeps rendering its own base name --
-		that's expected, not a missing-data problem. Shown once, at the top
-		of the Textures and Materials tabs alike (shared by both, "à la
-		suite" of nothing in particular this time -- there's no one texture
-		it belongs under anymore).
+	_PANOPLY_AXIS_LABELS = {"skin": "Skin", "user": "User color", "hair": "Hair", "eyes": "Eyes"}
 
-		Race buttons offered are the union across every texture the shape
-		actually uses right now (some armor pieces have variants only for
-		some races/user-colors -- no single texture's own list is
-		authoritative for what to show). Purely a render override
-		(_resolve_panoply_texture_name()) -- never edits the shape's own
-		material data."""
+	def _draw_global_panoply_section(self):
+		"""Ryzom's pre-baked texture recolors (see panoply.py), shape-wide:
+		each axis's pick (skin tone, user/craft color, hair color, eye color)
+		applies to every one of the shape's textures at once, independently
+		of the other axes -- skin is a race skin-tone difference (Fyros
+		tanned, Matis pale, Tryker in between, Zorai blue), user color is an
+		item's craft color, both meant to be uniform across a whole equipped
+		piece, not picked per texture; hair/eyes are the same idea for a
+		head/face shape. A texture with no mask for a given axis (e.g. an
+		armor piece has no hair/eyes masks, a hairstyle has no user masks)
+		just keeps rendering its own base name for that axis -- expected, not
+		a missing-data problem (see _resolve_panoply_texture_name()). Shown
+		once, at the top of the Textures and Materials tabs alike. Purely a
+		render override -- never edits the shape's own material data.
+
+		Buttons offered on each axis are the union across every texture the
+		shape actually uses right now (no single texture's own list is
+		authoritative for what to show, since different textures can support
+		different axes/values). No real texture on disk is ever the base
+		name alone with just one axis picked (e.g. "..._FY.tga" doesn't
+		exist, only "..._FY_U1.tga" does -- panoply_maker's masks are always
+		baked together whenever more than one applies to the same texture),
+		so the first click on an empty selection backfills every other
+		available axis with its first value too, instead of resolving to a
+		texture that isn't actually on disk (rendering as blank/white)."""
 		texture_names = self._shape_texture_names()
-		available = {}
+		available = {axis: set() for axis in panoply.AXES}
 		for name in texture_names:
-			for race, user_colors in self.search_paths_dialog.panoply_variants_for(name).items():
-				available.setdefault(race, set()).update(user_colors)
-		if not available:
+			for axis, values in self.search_paths_dialog.panoply_variants_for(name).items():
+				available[axis].update(values)
+		if not any(available.values()):
 			return
 
-		selected_race = self._panoply_selection[0] if self._panoply_selection else None
+		axis_values = {}
+		for axis in panoply.AXES:
+			values = panoply.RACES if axis == "skin" else sorted(available[axis])
+			axis_values[axis] = [value for value in values if value in available[axis]]
 
-		imgui.text("Panoply:")
-		for race in panoply.RACES:
-			user_colors = available.get(race)
-			if not user_colors:
+		for axis in panoply.AXES:
+			values = axis_values[axis]
+			if not values:
 				continue
-			imgui.same_line()
-			active = race == selected_race
-			if _icon_button(race, f"Race {race!r}", active=active):
-				if active:
-					self._panoply_selection = None
-				else:
-					self._panoply_selection = (race, min(user_colors))
-				self._reapply_all_materials()
-
-		if selected_race is not None:
-			for index, user_color in enumerate(sorted(available.get(selected_race, ()))):
-				if index > 0:
-					imgui.same_line()
-				active = self._panoply_selection == (selected_race, user_color)
-				if _icon_button(f"u{user_color}", f"User color {user_color}", active=active):
-					self._panoply_selection = (selected_race, user_color)
+			selected = self._panoply_selection.get(axis)
+			imgui.text(f"{self._PANOPLY_AXIS_LABELS[axis]}:")
+			for value in values:
+				imgui.same_line()
+				active = value == selected
+				label = value if axis == "skin" else f"{axis[0]}{value}"
+				if _icon_button(label, f"{self._PANOPLY_AXIS_LABELS[axis]} {value!r}", active=active):
+					if active:
+						# Only "skin" can be turned back off (falling back to
+						# the shape's own base texture, its meaningful "no
+						# override" state) -- user/hair/eyes never had a
+						# "none" state to begin with (no real texture on disk
+						# for e.g. just "..._U1.tga" alone, always paired with
+						# a skin), so clicking their already-active button is
+						# a no-op, not a way to leave the shape half-resolved.
+						if axis == "skin":
+							self._panoply_selection.clear()
+						else:
+							continue
+					else:
+						was_empty = not self._panoply_selection
+						self._panoply_selection[axis] = value
+						if was_empty:
+							for other_axis, other_values in axis_values.items():
+								if other_axis != axis and other_values:
+									self._panoply_selection[other_axis] = other_values[0]
 					self._reapply_all_materials()
 		imgui.separator()
 
