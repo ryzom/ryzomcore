@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-08-19 — ✨ Show Panoply mask thumbnails under panoplied textures
+
+Added `_draw_panoply_masks_for()`: below a panoplied texture's own row in the Materials
+tab, shows thumbnails of the grayscale masks (mask weight in the red channel)
+`panoply_maker` actually baked this texture's variants from -- e.g. for
+`tr_hom_armor00_epaule_c1.tga`, the `tr_hom_armor00_epaule_c1_skin.png`/`..._user.png`
+masks sitting in a sibling `mask/` folder next to the base texture, resolved through
+the same search-paths lookup as any other texture. Only axes the texture actually has
+Panoply variants for are checked (`search_paths_dialog.panoply_variants_for()`); if
+none of their mask files resolve under the current search paths, nothing is drawn --
+purely an informational aid for understanding how a variant was built, no functional
+effect on rendering or editing either way. Wired into both the main per-slot texture
+panel and the "simple" texture picker used by non-slot material fields.
+
 ## 2026-08-18 — ✨ Generalize Panoply to all 4 axes and fix small-shape framing
 
 Generalized Panoply (`ryzom_forgery/panoply.py`) from the race+user-color pair alone to

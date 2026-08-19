@@ -1799,6 +1799,40 @@ class ObjectEditorApp(ForgeryApp):
 					self._reapply_all_materials()
 		imgui.separator()
 
+	def _draw_panoply_masks_for(self, base_texture_name):
+		"""Below a panoplied texture's own row: thumbnails of the grayscale
+		masks (mask weight in the red channel) panoply_maker actually baked
+		this texture's variants from -- e.g. for
+		"tr_hom_armor00_epaule_c1.tga", "tr_hom_armor00_epaule_c1_skin.png"/
+		"..._user.png" sitting in a sibling "mask/" folder next to the base
+		texture, resolved through the same search-paths lookup as any other
+		texture (so wherever the user's search paths actually cover that
+		"mask/" subfolder). Only axes this specific texture has panoply
+		variants for are even checked; if none of their mask files actually
+		resolve (not covered by the current search paths, even though
+		panoply_files.txt lists variants for this texture), nothing is drawn
+		at all -- these are purely an informational aid for understanding
+		how a variant was built, no functional effect either way."""
+		if not base_texture_name:
+			return
+		available = self.search_paths_dialog.panoply_variants_for(base_texture_name)
+		stem = Path(base_texture_name).stem
+		mask_names = []
+		for axis in panoply.AXES:
+			if not available.get(axis):
+				continue
+			mask_name = f"{stem}_{axis}.tga"
+			if self.search_paths_dialog.find_texture(mask_name) is not None:
+				mask_names.append(mask_name)
+		if not mask_names:
+			return
+		imgui.text_disabled("Masks:")
+		for mask_name in mask_names:
+			imgui.same_line()
+			imgui.push_id(mask_name)
+			self._draw_texture_preview_static(mask_name)
+			imgui.pop_id()
+
 	def _apply_material_texture(self, node_path, material, material_id):
 		"""Material color/blend/alpha-test/texture -- the part of rendering
 		a material that _apply_material_common() doesn't cover. Assumes the
@@ -2478,6 +2512,8 @@ class ObjectEditorApp(ForgeryApp):
 					hovered_hint = section_hint
 				imgui.unindent()
 
+			self._draw_panoply_masks_for(texture.file_name if texture is not None else None)
+
 			imgui.pop_id()
 			imgui.separator()
 
@@ -2680,6 +2716,8 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_simple_material_texture(material, file_name)
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
+
+		self._draw_panoply_masks_for(current_value)
 
 		imgui.pop_id()
 
