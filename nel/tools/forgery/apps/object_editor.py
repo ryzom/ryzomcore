@@ -493,6 +493,13 @@ class ObjectEditorApp(ForgeryApp):
 		# recompute stays valid across shapes/reloads as long as the base
 		# texture + masks it read from haven't actually changed on disk.
 		self._live_panoply_cache = panoply_live.LiveColorizeCache()
+		# {resolved variant name: (base_name, dims)} for _update_panoply_freshness()
+		# to keep re-checking, and {resolved variant name: signature} for it to
+		# compare against -- both reset on shape reload below, together with
+		# _texture_cache itself (see _reset_shape_state()).
+		self._panoply_texture_sources = {}
+		self._panoply_texture_signatures = {}
+		self._panoply_freshness_last_check = 0.0
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
@@ -547,6 +554,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._wind_animate = True
 		self._wind_panel_size = (10.0, 10.0)
 		self.taskMgr.add(self._update_wind, "object-editor-wind")
+		self.taskMgr.add(self._update_panoply_freshness, "object-editor-panoply-freshness")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.search_paths_dialog = SearchPathsDialog()
@@ -1026,6 +1034,10 @@ class ObjectEditorApp(ForgeryApp):
 		# resolved texture/wrap mode outright.
 		self._texture_cache = {}
 		self._preview_texture_refs = {}
+		# Same reasoning as _texture_cache just above -- also keyed by
+		# resolved texture name only.
+		self._panoply_texture_sources = {}
+		self._panoply_texture_signatures = {}
 
 	def _display_shape(self, shape_file):
 		"""Renders an already-parsed/-built ShapeFile. Assumes
@@ -1727,13 +1739,54 @@ class ObjectEditorApp(ForgeryApp):
 		load_panda_texture(resolved_name, cache=self._texture_cache, ...)
 		(3D render, thumbnails, popups) then picks it up transparently
 		through that cache's own name lookup, no special case of their own
-		needed. Never writes to disk."""
+		needed. Never writes to disk. Also records `base_name`/`dims` under
+		the resolved name in self._panoply_texture_sources, so
+		_update_panoply_freshness() can keep re-checking this combination
+		later even though this method itself only runs again when the
+		material actually gets re-applied."""
 		dims = self._panoply_dims_for(base_name)
 		if not dims:
 			return base_name
 		resolved_name = panoply.variant_file_name(base_name, **dims)
+		self._panoply_texture_sources[resolved_name] = (base_name, dims)
 		self._ensure_live_panoply_texture(base_name, resolved_name, dims)
 		return resolved_name
+
+	def _resolve_panoply_refs(self, base_name, dims):
+		"""Every search_paths.FoundEntry a live recompute of this
+		(base_name, dims) combination would need or want to know about: the
+		base texture (None if it can't be resolved at all), each dims
+		axis's mask (only the ones that actually resolve -- missing ones
+		are just absent from the dict, not None entries), and whatever's
+		already on disk for the baked variant name itself (None if
+		nothing's there). Shared by _ensure_live_panoply_texture() (decides
+		whether/how to (re)compute) and _update_panoply_freshness() (decides
+		whether a previously-resolved combination needs re-checking) so
+		both always resolve names exactly the same way."""
+		finder = self.search_paths_dialog.find_texture
+		base_ref = resolve_texture_ref(base_name, self._texture_search_dirs, finder)
+		stem = Path(base_name).stem
+		mask_refs = {}
+		for axis in dims:
+			mask_ref = resolve_texture_ref(f"{stem}_{axis}.tga", self._texture_search_dirs, finder)
+			if mask_ref is not None:
+				mask_refs[axis] = mask_ref
+		resolved_name = panoply.variant_file_name(base_name, **dims)
+		baked_ref = resolve_texture_ref(resolved_name, self._texture_search_dirs, finder)
+		return base_ref, mask_refs, baked_ref
+
+	@staticmethod
+	def _panoply_freshness_signature(base_ref, mask_refs, baked_ref):
+		"""(base mtime, sorted mask mtimes, baked mtime-or-None) for a
+		resolved combination's current sources -- not "is this stale"
+		(panoply_live.is_baked_stale() already answers that), but "has
+		anything actually changed since I last looked", which is what
+		_update_panoply_freshness() needs to avoid re-evicting/recomputing
+		an unstale-but-not-baked live combination every single tick."""
+		base_mtime = base_ref.cache_stat()[0] if base_ref is not None else None
+		mask_mtimes = tuple(sorted((axis, ref.cache_stat()[0]) for axis, ref in mask_refs.items()))
+		baked_mtime = baked_ref.cache_stat()[0] if baked_ref is not None else None
+		return base_mtime, mask_mtimes, baked_mtime
 
 	def _ensure_live_panoply_texture(self, base_name, resolved_name, dims):
 		"""Best-effort: if `resolved_name` isn't already cached and the
@@ -1746,27 +1799,21 @@ class ObjectEditorApp(ForgeryApp):
 		any mask this selection needs can't be resolved, or this texture's
 		race doesn't actually have one of the selected axes (e.g. no "eyes"
 		for zorai) -- falls through to whatever load_panda_texture() itself
-		finds on disk instead, same as if this method didn't exist."""
+		finds on disk instead, same as if this method didn't exist. Records
+		the freshness signature seen at this point either way (even when
+		the baked file was fine as-is), so _update_panoply_freshness() has
+		a baseline to compare later ticks against."""
 		if resolved_name in self._texture_cache:
 			return
-		finder = self.search_paths_dialog.find_texture
-		base_ref = resolve_texture_ref(base_name, self._texture_search_dirs, finder)
-		if base_ref is None:
-			return
+		base_ref, mask_refs, baked_ref = self._resolve_panoply_refs(base_name, dims)
+		if base_ref is None or set(mask_refs) != set(dims):
+			return  # missing the base texture or a mask one of the selected axes needs -- can't compute this live
 
-		stem = Path(base_name).stem
-		mask_refs = {}
-		for axis in dims:
-			mask_ref = resolve_texture_ref(f"{stem}_{axis}.tga", self._texture_search_dirs, finder)
-			if mask_ref is not None:
-				mask_refs[axis] = mask_ref
-		if set(mask_refs) != set(dims):
-			return  # missing a mask for one of the selected axes -- can't compute this combination live
-
-		baked_ref = resolve_texture_ref(resolved_name, self._texture_search_dirs, finder)
+		self._panoply_texture_signatures[resolved_name] = self._panoply_freshness_signature(base_ref, mask_refs, baked_ref)
 		if not panoply_live.is_baked_stale(baked_ref, base_ref, mask_refs):
 			return  # the baked file on disk is fine as-is -- load_panda_texture() will load it normally
 
+		stem = Path(base_name).stem
 		cache_key = panoply_live.LiveColorizeCache.make_key(base_name, dims, base_ref, mask_refs)
 		result_rgba = self._live_panoply_cache.get(cache_key)
 		if result_rgba is None:
@@ -1778,7 +1825,7 @@ class ObjectEditorApp(ForgeryApp):
 			for axis in panoply.AXES:
 				if axis not in dims:
 					continue
-				params = panoply_config.get_color_params(axis, dims[axis], race)
+				params = panoply_config.get_color_params(axis, panoply.color_id_for(axis, dims[axis]), race)
 				if params is None:
 					return
 				mask_rgba = panoply_texture.ref_to_rgba_array(mask_refs[axis])
@@ -1789,6 +1836,41 @@ class ObjectEditorApp(ForgeryApp):
 			self._live_panoply_cache.set(cache_key, result_rgba)
 
 		self._texture_cache[resolved_name] = panoply_texture.rgba_array_to_texture(result_rgba)
+
+	_PANOPLY_FRESHNESS_CHECK_INTERVAL = 1.0  # seconds
+
+	def _update_panoply_freshness(self, task):
+		"""Runs about once a second: re-resolves every Panoply-affected
+		texture name currently in play (self._panoply_texture_sources)
+		against its current on-disk sources and compares that to the
+		signature recorded when it was last resolved
+		(_panoply_freshness_signature()) -- on a mismatch (a base texture,
+		mask, or baked file was added/edited/removed since), evicts it from
+		self._texture_cache and forces every material to re-apply, which
+		re-runs _resolve_panoply_texture_name()/_ensure_live_panoply_texture()
+		for it. This is Forgery's whole answer to "I edited a mask in Gimp,
+		now what" -- picked automatically, with no manual reload action:
+		see .todo/forgery-object-editor.md's Phase A Step 5 for why a
+		manual "Reload" button was decided against once this existed."""
+		if task.time - self._panoply_freshness_last_check < self._PANOPLY_FRESHNESS_CHECK_INTERVAL:
+			return task.cont
+		self._panoply_freshness_last_check = task.time
+
+		changed = False
+		for resolved_name, (base_name, dims) in list(self._panoply_texture_sources.items()):
+			if resolved_name not in self._texture_cache:
+				continue
+			base_ref, mask_refs, baked_ref = self._resolve_panoply_refs(base_name, dims)
+			if base_ref is None or set(mask_refs) != set(dims):
+				continue
+			signature = self._panoply_freshness_signature(base_ref, mask_refs, baked_ref)
+			if signature != self._panoply_texture_signatures.get(resolved_name):
+				del self._texture_cache[resolved_name]
+				self._panoply_texture_signatures.pop(resolved_name, None)
+				changed = True
+		if changed:
+			self._reapply_all_materials()
+		return task.cont
 
 	def _shape_texture_names(self):
 		"""Every distinct, currently-active texture base name across the

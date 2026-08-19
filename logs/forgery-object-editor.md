@@ -1,5 +1,46 @@
 # Changelog
 
+## 2026-08-19 — ✨ Auto-detect edited Panoply sources instead of a Reload button
+
+Phase A Step 5 of the "génération live des textures Panoply" chantier (see
+`.todo/forgery-object-editor.md`): decided with the user against adding a manual
+"Reload" action -- a real auto-detection makes one redundant, so instead made the
+mtime-based freshness check (Step 3/4) actually run continuously instead of only once
+at first resolution. New periodic task `_update_panoply_freshness()` (registered
+alongside `_update_wind()`/`_update_skin_preview()`, throttled to about once a second
+via a `task.time` gate, same `taskMgr.add()` pattern already used for those): re-
+resolves every Panoply-affected texture name currently in play
+(`self._panoply_texture_sources`, newly recorded by `_resolve_panoply_texture_name()`
+on every call) against its current on-disk sources, compares that to the signature
+recorded when it was last resolved (new `_panoply_freshness_signature()` -- base/mask/
+baked mtimes, distinct from `panoply_live.is_baked_stale()`'s "is this good enough"
+check, since a live-but-not-stale combination must NOT be re-evicted every tick just
+because it still has no baked file backing it), and on a mismatch evicts it from
+`self._texture_cache` and forces every material to re-apply. `_ensure_live_panoply_texture()`
+and the new resolution-refs logic were factored out into a shared
+`_resolve_panoply_refs()` so both the initial resolution and the periodic re-check
+resolve names identically.
+
+While building the standalone test harness for this (calling the real
+`ObjectEditorApp` methods against a fake `self` + real copied `ryzom-data` files,
+without booting the whole ShowBase/imgui app), caught and fixed a real bug the
+earlier, narrower Step 4 tests hadn't exercised: `_ensure_live_panoply_texture()` was
+passing `_panoply_selection`'s raw dims values (a bare int for `user`/`hair`/`eyes`,
+e.g. `7`, and a lowercase race code for `skin`, e.g. `"zo"`) straight to
+`panoply_config.get_color_params()`, which actually expects the same `"U7"`/`"ZO"`-style
+`color_id` strings the real `.cfg`/`panoply_colors.toml` use -- silently returning
+`None` and aborting every live compute before it started. Fixed by extracting
+`panoply.py`'s existing (but private) axis-letter-prepending logic out of
+`variant_file_name()` into a new public `panoply.color_id_for(axis, value)`, used by
+both `variant_file_name()` (unchanged behavior) and `_ensure_live_panoply_texture()`
+(the fix). Validated end-to-end on the real machine: a first resolution live-computes
+and caches a texture with no baked file backing it; an unrelated freshness tick
+doesn't evict it; editing a copy of a real mask file (content + mtime) gets detected
+on the next tick, evicting the cache entry and triggering exactly one reapply; re-
+resolving afterwards recomputes a texture that's actually pixel-different from the
+first (confirming the edit was picked up, not just cache-missed); a further tick with
+nothing new changed doesn't reapply again.
+
 ## 2026-08-19 — ✨ Wire live Panoply recoloring into texture resolution
 
 Phase A Step 4 (final step of Phase A) of the "génération live des textures Panoply"

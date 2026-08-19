@@ -89,6 +89,20 @@ def parse_panoply_files(text: str) -> Dict[str, Dict[str, List]]:
 	return variants
 
 
+def color_id_for(axis: str, value) -> str:
+	"""The panoply_common.cfg/panoply_<race>.cfg-style color_id token for one
+	axis/value pair -- "skin" values are the bare race code
+	(parse_panoply_files()'s own lowercased form, e.g. "tr") uppercased to
+	"TR"; the other 3 axes' values are the bare int their token's digits
+	parsed to (e.g. 4), reassembled with their axis letter to "U4". Matches
+	panoply_common.cfg's/panoply_<race>.cfg's own `<axis>_color_id` entries
+	(and panoply_colors.toml's `id` fields, read from those same configs --
+	see panoply_config.py), so this is what object_editor.py's
+	_ensure_live_panoply_texture() must pass as color_id to
+	panoply_config.get_color_params()."""
+	return value.upper() if axis == "skin" else f"{_AXIS_LETTER[axis]}{value}"
+
+
 def variant_file_name(base_texture_name: str, **dims: Dict[str, object]) -> str:
 	"""The real file name for `base_texture_name` (e.g.
 	"tr_hof_armor00_handupside_c1.tga") carrying the given axis values (e.g.
@@ -105,5 +119,5 @@ def variant_file_name(base_texture_name: str, **dims: Dict[str, object]) -> str:
 		value = dims.get(axis)
 		if value is None:
 			continue
-		parts.append(value.upper() if axis == "skin" else f"{_AXIS_LETTER[axis]}{value}")
+		parts.append(color_id_for(axis, value))
 	return "_".join(parts) + suffix
