@@ -40,8 +40,13 @@ Notes:
     unique within an archive regardless of source sub-directory.
   - No compression, no CRC, no timestamps.
   - Name lookup is case-insensitive at runtime (CBigFile lowercases names for
-    its internal binary-search table), so this library also compares names
-    case-insensitively, while preserving the original case on disk/listing.
+    its internal binary-search table). This library goes one step further and
+    normalizes every entry name to lowercase on both read and write (list(),
+    extract_all(), pack_directory(), add_file()...), rather than just
+    comparing case-insensitively while preserving whatever case is on disk --
+    real archives mix casing (e.g. "ZO_flag_AS.TGA" vs "zo-toit2.tga"), and
+    it's one less thing to worry about when cross-referencing names against
+    other tools (e.g. Ryzom Forgery) that also normalize to lowercase.
 
 Usage:
 	from ryzom_bnp import BnpReader, pack_directory, add_file, remove_file
@@ -74,7 +79,7 @@ class BnpEntry:
 
 
 def _encode_name(name: str) -> bytes:
-	raw = name.encode("latin-1")
+	raw = name.lower().encode("latin-1")
 	if len(raw) > MAX_NAME_LEN:
 		raise BnpError(f"file name too long for .bnp (max {MAX_NAME_LEN} bytes): {name!r}")
 	return raw
@@ -99,7 +104,7 @@ def _read_table(fh: BinaryIO) -> List[BnpEntry]:
 	entries = []
 	for _ in range(n):
 		name_len = fh.read(1)[0]
-		name = fh.read(name_len).decode("latin-1")
+		name = fh.read(name_len).decode("latin-1").lower()
 		size, pos = struct.unpack("<II", fh.read(8))
 		entries.append(BnpEntry(name=name, size=size, pos=pos))
 	return entries
