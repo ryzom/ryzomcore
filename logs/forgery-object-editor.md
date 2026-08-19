@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-08-19 — ✨ Add freshness check and cache for live Panoply recoloring
+
+Phase A Step 3 of the "génération live des textures Panoply" chantier (see
+`.todo/forgery-object-editor.md`): new `ryzom_forgery/panoply_live.py`, pure logic with
+no disk I/O of its own -- callers (Step 4's wiring) pass already-resolved
+`search_paths.FoundEntry`-like objects for the baked variant (if any), the base
+texture, and each relevant mask. `is_baked_stale()` says whether a live recompute is
+needed at all: true if nothing baked resolved on disk, or its mtime is older than the
+base texture's or any relevant mask's (`cache_stat()`, the same signal
+`search_paths.py`'s own scan cache already relies on to detect changed files).
+`LiveColorizeCache` memoizes one computed image per (base texture, axis selection,
+source mtimes) key, so an edited base/mask file naturally misses the cache instead of
+serving a stale result, without needing an explicit invalidation call -- and a session
+only ever accumulates one entry per distinct combination actually viewed, small enough
+in practice that no eviction was added. Validated on the real machine via the
+`.agentcom` bridge with fake ref objects covering: no baked file, baked older/newer
+than base, baked newer than base but older than a mask, baked mtime exactly equal to
+base's (treated as fresh), and cache key stability/change across repeated vs. edited
+vs. differently-selected combinations.
+
 ## 2026-08-19 — ✨ Bundle Panoply's real color palette into Forgery
 
 Phase A Step 2 of the "génération live des textures Panoply" chantier (see
