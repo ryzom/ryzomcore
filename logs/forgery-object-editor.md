@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-08-19 — ✨ Bundle Panoply's real color palette into Forgery
+
+Phase A Step 2 of the "génération live des textures Panoply" chantier (see
+`.todo/forgery-object-editor.md`), revised from the original plan of parsing
+`panoply_common.cfg`/`panoply_<race>.cfg` live from the user's search paths: instead,
+consolidated the real production palette (read from
+`ryzom-data/leveldesign/workspace/common/characters_maps_hr/panoply_common.cfg` +
+`panoply_fyros/matis/tryker/zorai/generique.cfg`) once into a new bundled
+`ryzom_forgery/panoply_colors.toml`, so the feature doesn't need the user to add
+`ryzom-data`'s leveldesign tree to their search paths just to read these constants.
+`skin`/`user` (common to every texture) live at the TOML's top level; `hair`/`eyes`
+(race-specific -- zorai has no `eyes` axis, `generique` has neither) live under a
+per-race table (`fyros`/`matis`/`tryker`/`zorai`), matching the real
+`panoply_maker.cpp` pipeline's own common+race `.cfg` pairing
+(`ryzom-data/leveldesign/workspace/common/characters_maps_hr/directories.py`'s
+`MapPanoplySourceDirectories`). New `ryzom_forgery/panoply_config.py` loads it
+(`tomlkit`, matching `settings.py`'s existing TOML usage) and exposes
+`get_color_params(axis, color_id, race=None)` / `available_color_ids(axis, race=None)`,
+plus `RACE_PREFIX_TO_TABLE` mapping a base texture's 2-letter file name prefix
+(`fy_`/`ma_`/`tr_`/`zo_`/`ge_`) to the matching race table. Validated on the real
+machine via the `.agentcom` bridge: all 60 values across every axis/race/color_id
+compared byte-for-byte against a from-scratch regex parse of the 5 real source `.cfg`
+files (0 mismatches), plus confirmed zorai has no `eyes` entries and `generique` has
+neither `hair` nor `eyes`.
+
 ## 2026-08-19 — ✨ Add pure NumPy port of Panoply's color-shift algorithm
 
 New `ryzom_forgery/panoply_colorize.py` (Phase A Step 1 of the "génération live des
