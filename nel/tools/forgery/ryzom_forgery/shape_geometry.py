@@ -241,29 +241,39 @@ def _find_local_texture_ref(name, search_dirs):
 	return None
 
 
+def resolve_texture_ref(name, search_dirs=None, finder=None):
+	"""Resolves a texture reference by name, the same two-step order
+	load_panda_texture() uses internally: `search_dirs`
+	(_find_local_texture_ref(), typically just the loaded shape's own
+	folder) first, then `finder(name)` (e.g. SearchPathsDialog.find_texture).
+	None if neither finds it. Exposed separately (not just inlined in
+	load_panda_texture()) for callers that need to resolve a specific
+	texture reference -- to inspect it (e.g. panoply_live.is_baked_stale())
+	or decode it themselves (e.g. panoply_texture.ref_to_rgba_array()) --
+	without going through load_panda_texture()'s own name-keyed cache."""
+	ref = _find_local_texture_ref(name, search_dirs) if search_dirs else None
+	if ref is None and finder is not None:
+		ref = finder(name)
+	return ref
+
+
 def load_panda_texture(name, cache=None, search_dirs=None, repeat=False, finder=None):
 	"""Resolves and decodes a material texture reference (by base file name,
-	as stored in the shape's Texture.file_name) into a Panda3D Texture:
-	tries `search_dirs` (_find_local_texture_ref(), typically just the
-	loaded shape's own folder) first, then `finder(name)` (e.g.
-	SearchPathsDialog.find_texture, the user-configured, .bnp-aware,
-	priority-ordered search paths from the Settings tab's "Paths" section --
-	the only place Forgery resolves textures from). `finder` just needs to
-	return something with `.name` and `.read_bytes()`, same duck-typed shape
-	as a search_paths.FoundEntry. Returns None if it can't be found/decoded.
-	`cache`, if given, is a dict reused across calls to avoid re-decoding the
-	same texture for multiple materials/passes -- `repeat` only has an
-	effect the first time a given `name` is actually loaded (a cache hit
-	skips straight past it), matching how the wrap mode is really a
-	property of how the shape's own UVs use the texture, not of the texture
-	file itself."""
+	as stored in the shape's Texture.file_name) into a Panda3D Texture --
+	see resolve_texture_ref() for how `name` is actually found. `finder`
+	just needs to return something with `.name` and `.read_bytes()`, same
+	duck-typed shape as a search_paths.FoundEntry. Returns None if it can't
+	be found/decoded. `cache`, if given, is a dict reused across calls to
+	avoid re-decoding the same texture for multiple materials/passes --
+	`repeat` only has an effect the first time a given `name` is actually
+	loaded (a cache hit skips straight past it), matching how the wrap mode
+	is really a property of how the shape's own UVs use the texture, not of
+	the texture file itself."""
 	if cache is not None and name in cache:
 		return cache[name]
 
 	texture = None
-	ref = _find_local_texture_ref(name, search_dirs) if search_dirs else None
-	if ref is None and finder is not None:
-		ref = finder(name)
+	ref = resolve_texture_ref(name, search_dirs, finder)
 	if ref is None:
 		print(f"[shape_geometry] texture not found: {name!r}")
 	else:

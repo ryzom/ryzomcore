@@ -1,5 +1,46 @@
 # Changelog
 
+## 2026-08-19 — ✨ Wire live Panoply recoloring into texture resolution
+
+Phase A Step 4 (final step of Phase A) of the "génération live des textures Panoply"
+chantier (see `.todo/forgery-object-editor.md`): object_editor.py can now render a
+Panoply variant it never found baked on disk, or that's older than the base texture or
+mask it should have been built from, by recomputing it live in memory. New
+`ryzom_forgery/panoply_texture.py`: Panda3D glue decoding a resolved texture reference
+into the HxWx4 uint8 RGBA array `panoply_colorize.py` expects (`ref_to_rgba_array()`,
+via a throwaway `Texture` + `get_ram_image_as("RGBA")`) and building a `Texture` back
+from a recolored result (`rgba_array_to_texture()`, `set_ram_image_as(..., "RGBA")`) --
+validated on the real machine that the two agree with each other and round-trip
+losslessly (both against synthetic data and a real texture file), even though the row
+order they use internally turned out to be vertically flipped relative to `PNMImage`'s
+own top-down one -- never an issue since every `panoply_colorize` operation is
+per-pixel, not spatial. `panoply_colorize.py` gained `colorize()`, chaining
+`convert_bitmap()` once per selected axis the same way `panoply_maker.cpp` applies
+successive masks in place. `shape_geometry.py`'s `load_panda_texture()` had its
+name-resolution step (search_dirs then `finder`) extracted into a new
+`resolve_texture_ref()`, reused by the new code without duplicating that logic or
+reaching into a private helper.
+
+The actual wiring lives in `object_editor.py`: `_resolve_panoply_texture_name()` now
+also calls a new `_ensure_live_panoply_texture()`, which -- only when the resolved
+variant is missing/stale (`panoply_live.is_baked_stale()`) and every mask the current
+axis selection needs is actually available -- recolors the base texture live
+(`panoply_config.py` for the real target hue/lightness/saturation/luminosity/contrast,
+keyed by the base texture's 2-letter race prefix for hair/eyes) and pre-inserts the
+result into `self._texture_cache` under the resolved name itself. Every existing
+caller of `load_panda_texture(resolved_name, cache=self._texture_cache, ...)` -- 3D
+render, thumbnails, color-picker popups alike -- then picks it up transparently
+through that cache's own name lookup, with no special case of their own; a no-op
+(falls through to whatever's on disk) whenever a needed source can't be resolved.
+Never writes to disk. Raw recolored arrays are memoized in the (Step 3)
+`LiveColorizeCache` so a shape reload doesn't force a recompute for an unchanged
+combination. Validated on the real machine: the full chain (decode real base + skin +
+user masks from `ryzom-data`, colorize with real `panoply_config.py` parameters,
+rebuild into a `Texture`, store back to a `PNMImage`) run end-to-end -- alpha
+preserved exactly, a real, plausible color shift where the masks are strong, no shift
+where they're weak, and the final stored image spot-checked pixel-for-pixel against
+the in-memory result with zero mismatches.
+
 ## 2026-08-19 — ✨ Add freshness check and cache for live Panoply recoloring
 
 Phase A Step 3 of the "génération live des textures Panoply" chantier (see

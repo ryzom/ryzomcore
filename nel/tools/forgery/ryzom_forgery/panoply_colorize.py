@@ -160,3 +160,21 @@ def convert_bitmap(current_rgb_u8, mask_u8, hue, lightness, saturation, luminosi
 		/ _BLEND_DIVISOR
 	)
 	return _to_uint8(blended)
+
+
+def colorize(base_rgba_u8, axis_masks):
+	"""Applies convert_bitmap() once per (mask, params) in axis_masks, in
+	order, chaining each axis's RGB output into the next -- same as
+	panoply_maker.cpp applying successive masks onto one resultBitmap in
+	place. axis_masks: an iterable of (mask_u8 HxW, params), params being
+	anything with .hue/.lightness/.saturation/.luminosity/.contrast (e.g.
+	panoply_config.ColorParams). Alpha is preserved from base_rgba_u8
+	throughout, untouched by any axis -- matches convertBitmap()'s own
+	`dest->A = src->A`."""
+	rgb = base_rgba_u8[..., :3]
+	for mask_u8, params in axis_masks:
+		rgb = convert_bitmap(rgb, mask_u8, params.hue, params.lightness, params.saturation, params.luminosity, params.contrast)
+	out = numpy.empty_like(base_rgba_u8)
+	out[..., :3] = rgb
+	out[..., 3] = base_rgba_u8[..., 3]
+	return out

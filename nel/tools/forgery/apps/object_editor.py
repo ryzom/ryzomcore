@@ -26,13 +26,17 @@ from ryzom_forgery.import_dialog import ImportDialog
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply
+from ryzom_forgery import panoply_colorize
+from ryzom_forgery import panoply_config
+from ryzom_forgery import panoply_live
+from ryzom_forgery import panoply_texture
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
-	finest_skinned_lod, iter_render_passes, load_panda_texture, rgba_to_color, shape_bbox, shape_geom,
-	solid_color_texture,
+	finest_skinned_lod, iter_render_passes, load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox,
+	shape_geom, solid_color_texture,
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 
@@ -484,6 +488,11 @@ class ObjectEditorApp(ForgeryApp):
 		self._texture_browse_dialogs = {}  # key -> (in-flight portable_file_dialogs.open_file, on_result callback)
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
 		self._panoply_selection = {}  # axis (panoply.AXES) -> value, shape-wide, render-only, never touches shape data
+		# Not reset on shape reload (unlike _panoply_selection/_texture_cache
+		# above) -- keyed by source mtimes (see LiveColorizeCache), so a live
+		# recompute stays valid across shapes/reloads as long as the base
+		# texture + masks it read from haven't actually changed on disk.
+		self._live_panoply_cache = panoply_live.LiveColorizeCache()
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
 		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
@@ -1688,28 +1697,98 @@ class ObjectEditorApp(ForgeryApp):
 		# geometry depending on draw order.
 		node_path.set_depth_write(bool(material.flags & _IDRV_MAT_ZWRITE) if material is not None else True)
 
-	def _resolve_panoply_texture_name(self, base_name):
-		"""`base_name` unchanged, unless one or more shape-wide panoply axis
-		values have been picked (see _draw_global_panoply_section()) AND this
-		particular texture actually has a variant for them -- a shape's parts
-		that don't change color (e.g. a buckle, a weapon) simply have no
-		entry in panoply_files.txt for their base name and keep rendering
-		with `base_name` as-is, same as if nothing were selected. Only the
-		axes this specific texture actually has masks for are applied (e.g.
-		an armor texture only ever has race/user, never hair/eyes, even if
-		the shape-wide selection includes a hair pick for some other
-		texture). Only ever affects what gets loaded for rendering/preview --
-		the shape's own material data (base_name itself) is never modified."""
+	def _panoply_dims_for(self, base_name):
+		"""Shape-wide panoply axis selection (_panoply_selection, see
+		_draw_global_panoply_section()) narrowed down to just the axes
+		`base_name` actually has a variant for, per panoply_files.txt --
+		{} if nothing is selected, or this texture has no variants at all
+		(e.g. a buckle/weapon that doesn't change color). Shared by
+		_resolve_panoply_texture_name() (what file name to try loading) and
+		_ensure_live_panoply_texture() (what to try computing live if that
+		file turns out to be missing/stale)."""
 		if not self._panoply_selection or not base_name:
-			return base_name
+			return {}
 		available = self.search_paths_dialog.panoply_variants_for(base_name)
-		dims = {
+		return {
 			axis: value for axis, value in self._panoply_selection.items()
 			if value in available.get(axis, ())
 		}
+
+	def _resolve_panoply_texture_name(self, base_name):
+		"""`base_name` unchanged, unless _panoply_dims_for() finds one or
+		more applicable axis picks -- only ever affects what gets loaded for
+		rendering/preview, the shape's own material data (base_name itself)
+		is never modified. When the resulting variant is missing or stale on
+		disk (older than the base texture or a mask it was built from --
+		panoply_live.is_baked_stale()), and every mask this selection needs
+		is actually available, pre-computes it live in memory
+		(_ensure_live_panoply_texture()) and inserts it into
+		self._texture_cache under the resolved name -- every caller of
+		load_panda_texture(resolved_name, cache=self._texture_cache, ...)
+		(3D render, thumbnails, popups) then picks it up transparently
+		through that cache's own name lookup, no special case of their own
+		needed. Never writes to disk."""
+		dims = self._panoply_dims_for(base_name)
 		if not dims:
 			return base_name
-		return panoply.variant_file_name(base_name, **dims)
+		resolved_name = panoply.variant_file_name(base_name, **dims)
+		self._ensure_live_panoply_texture(base_name, resolved_name, dims)
+		return resolved_name
+
+	def _ensure_live_panoply_texture(self, base_name, resolved_name, dims):
+		"""Best-effort: if `resolved_name` isn't already cached and the
+		already-baked file for it turns out to be missing/stale
+		(panoply_live.is_baked_stale()), recolors the base texture live in
+		memory (panoply_colorize.py, parameters from panoply_config.py) and
+		pre-inserts the result into self._texture_cache -- see
+		_resolve_panoply_texture_name()'s docstring for why that's enough
+		for every caller to pick it up. A no-op whenever the base texture or
+		any mask this selection needs can't be resolved, or this texture's
+		race doesn't actually have one of the selected axes (e.g. no "eyes"
+		for zorai) -- falls through to whatever load_panda_texture() itself
+		finds on disk instead, same as if this method didn't exist."""
+		if resolved_name in self._texture_cache:
+			return
+		finder = self.search_paths_dialog.find_texture
+		base_ref = resolve_texture_ref(base_name, self._texture_search_dirs, finder)
+		if base_ref is None:
+			return
+
+		stem = Path(base_name).stem
+		mask_refs = {}
+		for axis in dims:
+			mask_ref = resolve_texture_ref(f"{stem}_{axis}.tga", self._texture_search_dirs, finder)
+			if mask_ref is not None:
+				mask_refs[axis] = mask_ref
+		if set(mask_refs) != set(dims):
+			return  # missing a mask for one of the selected axes -- can't compute this combination live
+
+		baked_ref = resolve_texture_ref(resolved_name, self._texture_search_dirs, finder)
+		if not panoply_live.is_baked_stale(baked_ref, base_ref, mask_refs):
+			return  # the baked file on disk is fine as-is -- load_panda_texture() will load it normally
+
+		cache_key = panoply_live.LiveColorizeCache.make_key(base_name, dims, base_ref, mask_refs)
+		result_rgba = self._live_panoply_cache.get(cache_key)
+		if result_rgba is None:
+			base_rgba = panoply_texture.ref_to_rgba_array(base_ref)
+			if base_rgba is None:
+				return
+			race = panoply_config.RACE_PREFIX_TO_TABLE.get(stem[:2].lower())
+			axis_masks = []
+			for axis in panoply.AXES:
+				if axis not in dims:
+					continue
+				params = panoply_config.get_color_params(axis, dims[axis], race)
+				if params is None:
+					return
+				mask_rgba = panoply_texture.ref_to_rgba_array(mask_refs[axis])
+				if mask_rgba is None:
+					return
+				axis_masks.append((mask_rgba[..., 0], params))  # mask weight lives in the red channel
+			result_rgba = panoply_colorize.colorize(base_rgba, axis_masks)
+			self._live_panoply_cache.set(cache_key, result_rgba)
+
+		self._texture_cache[resolved_name] = panoply_texture.rgba_array_to_texture(result_rgba)
 
 	def _shape_texture_names(self):
 		"""Every distinct, currently-active texture base name across the
