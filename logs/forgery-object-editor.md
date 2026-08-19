@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-08-19 — ✨ Add pure NumPy port of Panoply's color-shift algorithm
+
+New `ryzom_forgery/panoply_colorize.py` (Phase A Step 1 of the "génération live des
+textures Panoply" chantier, see `.todo/forgery-object-editor.md`): a pure, I/O-free
+NumPy port of the color-shift algorithm real Panoply variants are baked with --
+`nel/tools/3d/panoply_maker/color_modifier.cpp`'s `CColorModifier::evalBitmapStats()`/
+`convertBitmap()`, plus the underlying HLS conversions from
+`nel/src/misc/rgba.cpp` (`CRGBA::convertToHLS`/`buildFromHLS`, `CBGRA::blendFromui`).
+Takes a base texture + one grayscale mask + the 5 target parameters (hue/lightness/
+saturation/luminosity/contrast) and returns the recolored image, matching how
+`panoply_maker.cpp` chains masks in place across axes
+(`cm.convertBitmap(resultBitmap, resultBitmap, mask, ...)`). One deliberate departure
+from the C++: `evalBitmapStats`'s hue average uses a standard intensity-weighted
+circular mean (sin/cos vector average) instead of the original's order-dependent
+running-unwrap trick, since the vectorized form needs an order-independent formula --
+this is the textbook way to average circular quantities, not an approximation of the
+original. Not aiming for bit-exact parity (accepted with the user, see the chantier
+notes) -- validated instead with targeted sanity checks run on the real machine via
+the `.agentcom` bridge: mask=0 is a no-op (exact pixel identity), mask=255 with
+current-stats parameters (no actual shift) only introduces ~1/255 truncation noise,
+RGB->HLS->RGB roundtrips similarly within ~1/255, and pure red/green/blue map to the
+expected 0°/120°/240° hues.
+
 ## 2026-08-19 — ✨ Show Panoply mask thumbnails under panoplied textures
 
 Added `_draw_panoply_masks_for()`: below a panoplied texture's own row in the Materials
