@@ -1,3 +1,5 @@
+import json
+import re
 from pathlib import Path
 
 from direct.showbase.ShowBase import ShowBase
@@ -26,6 +28,18 @@ _SYSINFO_FLAGS = _PINNED_FLAGS | imgui.WindowFlags_.no_resize.value | imgui.Wind
 _SIDE_PANEL_MIN_WIDTH = 150
 _SIDE_PANEL_MAX_WIDTH = 900
 
+# Panda3D's own default window size (~800x600 depending on config.prc) is
+# cramped for these tools -- used as the starting size the very first time an
+# app runs, before any geometry has been saved for it. From then on, the
+# window's last position/size (per app, keyed by its title) is remembered
+# across launches -- see _load_window_geometry()/_save_window_geometry().
+_DEFAULT_WINDOW_SIZE = (1600, 900)
+_WINDOW_GEOMETRY_DIR = Path.home() / ".ryzom_forgery"
+
+
+def _slugify(title):
+	return re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_")
+
 
 class ForgeryApp(ShowBase):
 	"""Base class for Ryzom Forgery tool apps.
@@ -43,13 +57,31 @@ class ForgeryApp(ShowBase):
 	             explorer_default_filter=DEFAULT_FILTER):
 		ShowBase.__init__(self)
 
+		self._window_geometry_path = _WINDOW_GEOMETRY_DIR / f"{_slugify(title)}.json"
+
 		props = WindowProperties()
 		props.setTitle(title)
+		geometry = self._load_window_geometry()
+		if geometry is not None:
+			props.setOrigin(geometry["x"], geometry["y"])
+			props.setSize(geometry["width"], geometry["height"])
+		else:
+			props.setSize(*_DEFAULT_WINDOW_SIZE)
 		self.win.requestProperties(props)
 
 		# Default trackball camera controls would conflict with a tool's own
 		# camera controller.
 		self.disableMouse()
+
+		# Panda3D's default lens near plane (1.0 world unit) clips out small
+		# shapes entirely once OrbitCamera.frame() puts the camera closer
+		# than that -- e.g. a hairstyle's own bbox radius can floor out at
+		# its 0.1 minimum (see object_editor.py's _display_shape()), giving
+		# a framing distance well under 1.0, so the whole mesh sat behind the
+		# near plane and simply never rendered. Ryzom assets range from tiny
+		# props to whole ecosystems, so both near and far need real headroom
+		# rather than relying on Panda3D's one-size-fits-all default.
+		self.camLens.set_near_far(0.02, 20000.0)
 
 		p3dimgui.init()
 		self._load_icon_font()
@@ -79,16 +111,56 @@ class ForgeryApp(ShowBase):
 
 		self.accept("imgui-new-frame", self.draw_ui)
 
+	def windowEvent(self, win):
+		super().windowEvent(win)
+		if win == self.win:
+			self._save_window_geometry()
+
+	def _load_window_geometry(self):
+		try:
+			data = json.loads(self._window_geometry_path.read_text())
+		except (OSError, ValueError):
+			return None
+		if not all(isinstance(data.get(key), int) for key in ("x", "y", "width", "height")):
+			return None
+		return data
+
+	def _save_window_geometry(self):
+		props = self.win.getProperties()
+		data = {"x": props.getXOrigin(), "y": props.getYOrigin(),
+		        "width": props.getXSize(), "height": props.getYSize()}
+		try:
+			self._window_geometry_path.parent.mkdir(parents=True, exist_ok=True)
+			self._window_geometry_path.write_text(json.dumps(data))
+		except OSError:
+			pass
+
 	def _load_icon_font(self):
+		# self.large_icon_font (1.5x _ICON_FONT_SIZE, standalone -- not merged
+		# into the default font like the one above) is for spots that want a
+		# bigger icon-only button than the normal UI text size, e.g.
+		# object_editor.py's viewport toggle bars: push_font()/pop_font()
+		# around those buttons, since there's no per-window font-scale API in
+		# this imgui_bundle version to reach for instead.
 		if not _ICON_FONT_PATH.exists():
+			self.large_icon_font = None
+			self.large_icon_font_size = _ICON_FONT_SIZE * 1.5
 			return
 		font_config = imgui.ImFontConfig()
 		font_config.merge_mode = True
 		imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), _ICON_FONT_SIZE, font_config)
+		self.large_icon_font_size = _ICON_FONT_SIZE * 1.5
+		self.large_icon_font = imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), self.large_icon_font_size)
 
 	def draw_panel(self):
 		"""Override in subclasses to draw the app-specific right panel content each frame."""
 		pass
+
+	def panel_title(self):
+		"""Override in subclasses for a more useful right-panel window title
+		than the generic "Panel" (e.g. the name of whatever's currently
+		loaded there)."""
+		return "Panel"
 
 	def on_selection_changed(self, items):
 		"""Override in subclasses to react to the explorer's selection changing."""
@@ -130,6 +202,9 @@ class ForgeryApp(ShowBase):
 		imgui.set_next_window_size((self.panel_width, body_height), cond=once)
 		imgui.set_next_window_size_constraints(
 			(_SIDE_PANEL_MIN_WIDTH, body_height), (_SIDE_PANEL_MAX_WIDTH, body_height))
-		with imgui_ctx.begin("Panel", flags=_PINNED_FLAGS):
+		# "###panel" keeps the window's ImGui identity (position/size
+		# persistence) stable even though the displayed title itself
+		# (panel_title()) changes with whatever's currently loaded.
+		with imgui_ctx.begin(f"{self.panel_title()}###panel", flags=_PINNED_FLAGS):
 			self.panel_width = imgui.get_window_size().x
 			self.draw_panel()

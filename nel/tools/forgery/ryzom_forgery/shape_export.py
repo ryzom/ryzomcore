@@ -18,10 +18,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, List, Optional
 
-from ryzom_forgery.export_config import TEXTURE_MODE_COPY_PNG
+from ryzom_forgery.settings import TEXTURE_MODE_COPY_PNG
 from ryzom_forgery.shape_geometry import iter_render_passes, load_panda_texture, rgba_to_color, texture_to_pnm_image
-
-from pynel.ryzom_shape import parse_shape
 
 
 @dataclass
@@ -29,11 +27,11 @@ class ExportFormat:
 	extension: str
 	label: str
 	supports_materials: bool
-	# (shape_value, materials, output_path, texture_mode, asset_index) -> list[Path] of files written
+	# (shape_value, materials, output_path, texture_mode, texture_finder) -> list[Path] of files written
 	export: Callable
 
 
-def _resolve_material_texture(asset_index, material, output_dir: Path, texture_mode: str, texture_cache: dict):
+def _resolve_material_texture(texture_finder, material, output_dir: Path, texture_mode: str, texture_cache: dict):
 	"""Returns the texture file name to reference in an exported material
 	(or None if it has none), writing a decoded .png copy next to the
 	export first if `texture_mode` asks for it. `texture_cache` is reused
@@ -50,7 +48,7 @@ def _resolve_material_texture(asset_index, material, output_dir: Path, texture_m
 	if png_name in texture_cache:
 		return png_name if texture_cache[png_name] else None
 
-	panda_texture = load_panda_texture(asset_index, source_name)
+	panda_texture = load_panda_texture(source_name, finder=texture_finder)
 	if panda_texture is None:
 		texture_cache[png_name] = False
 		return None
@@ -61,7 +59,7 @@ def _resolve_material_texture(asset_index, material, output_dir: Path, texture_m
 	return png_name
 
 
-def _export_obj(shape_value, materials, output_path: Path, texture_mode: str, asset_index) -> List[Path]:
+def _export_obj(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
 	output_dir = output_path.parent
 	mtl_path = output_path.with_suffix(".mtl")
 
@@ -142,7 +140,7 @@ def _export_obj(shape_value, materials, output_path: Path, texture_mode: str, as
 			diffuse = rgba_to_color(material.diffuse)
 			mtl_lines.append(f"Kd {diffuse[0]} {diffuse[1]} {diffuse[2]}\n")
 			mtl_lines.append(f"d {diffuse[3]}\n")
-			texture_name = _resolve_material_texture(asset_index, material, output_dir, texture_mode, texture_cache)
+			texture_name = _resolve_material_texture(texture_finder, material, output_dir, texture_mode, texture_cache)
 			if texture_name:
 				mtl_lines.append(f"map_Kd {texture_name}\n")
 				written.append(output_dir / texture_name)
@@ -163,7 +161,7 @@ def _triangle_normal(a, b, c):
 	return (nx / length, ny / length, nz / length)
 
 
-def _export_stl(shape_value, materials, output_path: Path, texture_mode: str, asset_index) -> List[Path]:
+def _export_stl(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
 	# Geometry only: STL has no concept of materials/UVs, so every pass is
 	# just merged into one flat triangle soup, with a fresh per-triangle
 	# facet normal computed from the winding (not reused from the source
@@ -197,7 +195,7 @@ def _export_stl(shape_value, materials, output_path: Path, texture_mode: str, as
 	return [output_path]
 
 
-def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, asset_index) -> List[Path]:
+def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
 	import numpy
 	from collada import Collada
 	from collada import geometry as col_geometry
@@ -228,7 +226,7 @@ def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, as
 			texture_name = None
 			if material is not None:
 				texture_name = _resolve_material_texture(
-					asset_index, material, output_path.parent, texture_mode, texture_cache)
+					texture_finder, material, output_path.parent, texture_mode, texture_cache)
 
 			if texture_name:
 				image = col_material.CImage(f"image_{material_id}", texture_name)
@@ -287,7 +285,7 @@ def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, as
 	return written
 
 
-def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode: str, asset_index):
+def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode: str, texture_finder):
 	"""Shared by .gltf and .glb -- pygltflib's `GLTF2.save()` picks the JSON
 	vs. binary container based on the output path's extension, so the
 	document itself is built identically for both."""
@@ -355,7 +353,7 @@ def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode
 			texture_name = None
 			if material is not None:
 				texture_name = _resolve_material_texture(
-					asset_index, material, output_path.parent, texture_mode, texture_cache)
+					texture_finder, material, output_path.parent, texture_mode, texture_cache)
 			if texture_name:
 				if texture_name not in created_images:
 					doc.images.append(pygltflib.Image(uri=texture_name))
@@ -383,8 +381,8 @@ def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode
 	return doc, written
 
 
-def _export_gltf_or_glb(shape_value, materials, output_path: Path, texture_mode: str, asset_index) -> List[Path]:
-	doc, written = _build_gltf_document(shape_value, materials, output_path, texture_mode, asset_index)
+def _export_gltf_or_glb(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
+	doc, written = _build_gltf_document(shape_value, materials, output_path, texture_mode, texture_finder)
 	doc.save(str(output_path))
 	if output_path.suffix.lower() == ".gltf":
 		# .glb embeds the binary blob in the file itself; .gltf (JSON) instead
@@ -402,15 +400,16 @@ EXPORT_FORMATS = [
 ]
 
 
-def export_shape(item, export_format: ExportFormat, output_dir, texture_mode: str, asset_index) -> List[Path]:
-	"""Parses `item` (an Explorer .shape entry) and exports it via
-	`export_format` into `output_dir`. Returns the list of files written.
-	Raises `pynel.ryzom_shape.ShapeParseError` or `ValueError` (unsupported
-	shape type / no renderable geometry) on failure."""
-	shape_file = parse_shape(item.read_bytes())
-	materials = getattr(shape_file.value, "materials", None)
-
-	stem = Path(item.name).stem
+def export_shape(
+		shape_value, name: str, export_format: ExportFormat, output_dir, texture_mode: str, texture_finder,
+) -> List[Path]:
+	"""Exports an already-parsed shape value -- e.g. the live, possibly-edited
+	state of the shape currently open in the editor -- via `export_format`
+	into `output_dir`. `name` supplies the output file's stem (typically the
+	source .shape's own file name). Returns the list of files written.
+	Raises `ValueError` (unsupported shape type / no renderable geometry) on
+	failure."""
+	materials = getattr(shape_value, "materials", None)
+	stem = Path(name).stem
 	output_path = Path(output_dir) / f"{stem}.{export_format.extension}"
-
-	return export_format.export(shape_file.value, materials, output_path, texture_mode, asset_index)
+	return export_format.export(shape_value, materials, output_path, texture_mode, texture_finder)

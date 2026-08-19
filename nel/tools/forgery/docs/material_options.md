@@ -201,6 +201,48 @@ qui préremplissent ces deux listes avec les valeurs les plus courantes.*
 
 ---
 
+## Facteurs de mélange (Src/Dst Blend) {#blend-factors}
+
+**Résumé :** Les deux listes déroulantes détaillées du réglage Mélange —
+chacune dit "par quoi multiplier cette couleur avant de l'additionner à
+l'autre".
+
+La formule utilisée pour combiner un pixel transparent avec ce qu'il y a
+déjà à l'écran est toujours la même :
+
+```
+résultat = (couleur de l'objet × Src Blend) + (couleur déjà affichée × Dst Blend)
+```
+
+"Src" (source) désigne l'objet qu'on est en train de dessiner ; "Dst"
+(destination) désigne ce qui est déjà à l'écran, derrière lui. Chaque
+liste choisit un "facteur" — un nombre (ou une couleur) par lequel
+multiplier avant d'additionner :
+
+- **one** : multiplie par 1 — la couleur est prise à 100%, sans changement.
+- **zero** : multiplie par 0 — annule complètement cette couleur.
+- **srcalpha** : multiplie par la transparence (alpha) de l'objet dessiné.
+  Plus l'objet est transparent, moins ce terme compte.
+- **invsrcalpha** : l'inverse — multiplie par *(1 − alpha de l'objet)*.
+  Plus l'objet est transparent, plus ce terme compte.
+- **srccolor** : multiplie par la couleur (RGB) de l'objet dessiné.
+- **invsrccolor** : multiplie par *(1 − couleur de l'objet)*, soit sa
+  couleur "négative".
+- **blendConstantColor** / **blendConstantInvColor** : multiplie par une
+  couleur fixe à part (ou son inverse) plutôt que par une couleur venant du
+  pixel — rarement utilisé, réservé à des effets spéciaux.
+- **blendConstantAlpha** / **blendConstantInvAlpha** : pareil, mais avec
+  juste la transparence de cette couleur fixe.
+
+Les deux raccourcis du réglage Mélange combinent ces facteurs ainsi :
+
+- **Alpha Blend** = Src `srcalpha`, Dst `invsrcalpha` → `résultat = objet ×
+  alpha + fond × (1 − alpha)` — le mélange classique décrit plus haut.
+- **Additif** = Src `one`, Dst `one` → `résultat = objet + fond` —
+  l'addition décrite plus haut.
+
+---
+
 ## Test alpha (Alpha Test) {#alpha-test}
 
 **Résumé :** Une transparence "tout ou rien" : chaque pixel est soit

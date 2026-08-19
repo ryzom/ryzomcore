@@ -1,22 +1,33 @@
 """Export flow UI for .shape -> .obj/.dae/.stl: asks for an output folder
 (native dialog) and, for formats that carry materials, how to handle
 textures -- each with a "remember this choice" checkbox that persists into
-`export_config`. A separate always-available settings window lets those
-remembered choices be reviewed/changed without triggering an export.
+the shared settings file (see `ryzom_forgery.settings`). A separate
+always-available settings window lets those remembered choices be
+reviewed/changed without triggering an export.
 """
 
-from imgui_bundle import imgui, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
 
-from ryzom_forgery import export_config
-from ryzom_forgery.export_config import TEXTURE_MODE_COPY_PNG, TEXTURE_MODE_REFERENCE_ONLY
+from ryzom_forgery import settings as app_settings
+from ryzom_forgery.settings import TEXTURE_MODE_COPY_PNG, TEXTURE_MODE_REFERENCE_ONLY
 from ryzom_forgery.shape_export import export_shape
 
 _CONFIRM_POPUP_ID = "Export"
 
 
+def _icon_button(icon, tooltip):
+	"""Same minimal icon-button-with-tooltip pattern as search_paths_dialog.py's
+	own _icon_button() -- each module keeps its own tiny copy, matching how
+	this codebase already does it."""
+	clicked = imgui.button(icon)
+	if imgui.is_item_hovered():
+		imgui.set_tooltip(tooltip)
+	return clicked
+
+
 class ExportDialog:
 	def __init__(self):
-		self._config = export_config.load()
+		self._config = app_settings.load().export
 
 		self._pending = None  # dict, set by export(), cleared once resolved/cancelled
 		self._folder_dialog = None  # active portable_file_dialogs.select_folder, for an in-flight export
@@ -26,36 +37,44 @@ class ExportDialog:
 		self._confirm_texture_mode = self._config.texture_mode
 		self._confirm_remember_texture = False
 
-		self._settings_open = False
 		self._settings_folder_dialog = None  # separate instance, independent of an in-flight export
 
 		self._status = ""
 
-	def open(self):
-		"""Opens the always-available settings window (not tied to a
-		specific export)."""
-		self._settings_open = True
+	def _save(self):
+		"""Re-loads the shared settings file fresh and overwrites only the
+		`export` section with our own current state, rather than saving a
+		copy of the whole file cached since __init__ -- other components
+		(Explorer favorites, search paths, data_root) persist independently
+		and may have changed their own section since then; blindly saving a
+		stale full copy would silently revert those."""
+		fresh = app_settings.load()
+		fresh.export = self._config
+		app_settings.save(fresh)
 
-	def export(self, item, export_format, asset_index):
-		"""Starts exporting `item` (an Explorer .shape entry) via
-		`export_format`. Asks for an output folder (and, if applicable,
-		texture handling) unless those are already remembered."""
+	def export(self, shape_value, name, export_format, texture_finder, source_folder=None):
+		"""Starts exporting `shape_value` (the shape currently open in the
+		editor, possibly edited -- see object_editor.py's Export button in
+		the bottom bar) via `export_format`. `name` supplies the output
+		file's stem. Asks for an output folder (and, if applicable, texture
+		handling) unless those are already remembered."""
 		self._pending = {
-			"item": item, "format": export_format, "asset_index": asset_index, "folder_just_picked": False,
+			"shape_value": shape_value, "name": name, "format": export_format, "texture_finder": texture_finder,
+			"folder_just_picked": False,
 		}
 		if self._config.remember_output_folder and self._config.output_folder:
 			self._pending["folder"] = self._config.output_folder
 			self._open_confirmation_if_needed()
 		else:
-			source_folder = item.bnp_path.parent if item.bnp_path is not None else item.path.parent
-			self._folder_dialog = pfd.select_folder("Choose export folder", str(source_folder))
+			self._folder_dialog = pfd.select_folder("Choose export folder", str(source_folder or ""))
 
 	def draw(self):
-		"""Call once per ImGui frame."""
+		"""Call once per ImGui frame -- everything here except
+		draw_settings_content() (embedded by the caller in its own Settings
+		tab, see that method's docstring)."""
 		self._poll_folder_dialog()
 		self._poll_settings_folder_dialog()
 		self._draw_confirmation_popup()
-		self._draw_settings_window()
 
 	def _poll_folder_dialog(self):
 		if self._folder_dialog is None or not self._folder_dialog.ready(0):
@@ -119,7 +138,7 @@ class ExportDialog:
 				self._config.texture_mode = self._confirm_texture_mode
 				if self._confirm_remember_texture:
 					self._config.remember_texture_mode = True
-			export_config.save(self._config)
+			self._save()
 
 			pending["texture_mode"] = self._confirm_texture_mode if pending["format"].supports_materials \
 				else TEXTURE_MODE_REFERENCE_ONLY
@@ -138,7 +157,8 @@ class ExportDialog:
 		pending, self._pending = self._pending, None
 		try:
 			written = export_shape(
-				pending["item"], pending["format"], pending["folder"], pending["texture_mode"], pending["asset_index"])
+				pending["shape_value"], pending["name"], pending["format"], pending["folder"],
+				pending["texture_mode"], pending["texture_finder"])
 			self._status = f"Exported {len(written)} file(s) to {pending['folder']}"
 			print(f"[export] {self._status}: {[str(path) for path in written]}")
 		except Exception as exc:
@@ -155,33 +175,40 @@ class ExportDialog:
 		self._settings_folder_dialog = None
 		if result:
 			self._config.output_folder = result
+			self._save()
 
-	def _draw_settings_window(self):
-		if not self._settings_open:
-			return
+	def draw_settings_content(self):
+		"""Export settings, meant to be embedded directly in the host app's
+		own "Settings" tab (see object_editor.py's draw_panel()) rather than
+		a separate floating window -- these are app-wide preferences, not
+		tied to any one shape, so they belong somewhere always reachable
+		rather than behind a right-click command on a file (which read as
+		out of place: every other right-click command there acts on the
+		selected file). Every field saves itself immediately on change --
+		no separate Save button/step."""
+		imgui.text(f"Output folder: {self._config.output_folder or '(not set)'}")
+		imgui.same_line()
+		if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Choose folder..."):
+			self._start_settings_folder_dialog()
+		changed, self._config.remember_output_folder = imgui.checkbox(
+			"Always use this folder (skip asking)", self._config.remember_output_folder)
+		if changed:
+			self._save()
 
-		opened, self._settings_open = imgui.begin("Export settings", self._settings_open)
-		if opened:
-			imgui.text(f"Output folder: {self._config.output_folder or '(not set)'}")
-			if imgui.button("Choose folder..."):
-				self._start_settings_folder_dialog()
-			_, self._config.remember_output_folder = imgui.checkbox(
-				"Always use this folder (skip asking)", self._config.remember_output_folder)
+		imgui.separator()
+		imgui.text("Default texture handling:")
+		if imgui.radio_button("Copy as .png next to the export", self._config.texture_mode == TEXTURE_MODE_COPY_PNG):
+			self._config.texture_mode = TEXTURE_MODE_COPY_PNG
+			self._save()
+		if imgui.radio_button(
+				"Reference original filename only", self._config.texture_mode == TEXTURE_MODE_REFERENCE_ONLY):
+			self._config.texture_mode = TEXTURE_MODE_REFERENCE_ONLY
+			self._save()
+		changed, self._config.remember_texture_mode = imgui.checkbox(
+			"Always use this choice (skip asking)", self._config.remember_texture_mode)
+		if changed:
+			self._save()
 
+		if self._status:
 			imgui.separator()
-			imgui.text("Default texture handling:")
-			if imgui.radio_button("Copy as .png next to the export", self._config.texture_mode == TEXTURE_MODE_COPY_PNG):
-				self._config.texture_mode = TEXTURE_MODE_COPY_PNG
-			if imgui.radio_button(
-					"Reference original filename only", self._config.texture_mode == TEXTURE_MODE_REFERENCE_ONLY):
-				self._config.texture_mode = TEXTURE_MODE_REFERENCE_ONLY
-			_, self._config.remember_texture_mode = imgui.checkbox(
-				"Always use this choice (skip asking)", self._config.remember_texture_mode)
-
-			if imgui.button("Save"):
-				export_config.save(self._config)
-
-			if self._status:
-				imgui.separator()
-				imgui.text_wrapped(self._status)
-		imgui.end()
+			imgui.text_wrapped(self._status)
