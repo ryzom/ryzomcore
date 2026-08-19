@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -14,31 +14,20 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "stdmisc.h"
+#include "nel/misc/atomic.h"
 
+namespace NLMISC {
 
-#include "stdpch.h"
-#include "skills_build.h"
-#include "skills.h"
-#include "nel/georges/u_form_elm.h"
+#if !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32)
 
-void loadSkillsSummaryFromSheet(const NLGEORGES::UFormElm &item,const std::string &prefix,std::vector<CSkillSummary> &dest)
+void nlYield()
 {
-	dest.clear();
-	for(uint k = 0; k < (sint)SKILLS::NUM_SKILLS; ++k)
-	{
-		uint16 skillValue;
-		std::string skillName = prefix;
-		const std::string &rTmp = SKILLS::getSkillCategoryName(k);
-		skillName += rTmp;
-		skillName += ".";
-		skillName += SKILLS::toString(k);
-		if(item.getValueByName(skillValue, skillName.c_str()))
-		{
-			if (skillValue != 0)
-			{
-				dest.push_back(CSkillSummary(k, skillValue));
-			}
-		}
-	}
-
+	::SwitchToThread();
 }
+
+#endif /* !defined(NL_ATOMIC_CPP14) && defined(NL_ATOMIC_WIN32) */
+
+} /* namespace NLMISC */
+
+/* end of file */

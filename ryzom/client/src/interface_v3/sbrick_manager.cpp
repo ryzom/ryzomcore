@@ -354,7 +354,7 @@ TOOL_TYPE::TCraftingToolType	CSBrickManager::CBrickContainer::getFaberPlanToolTy
 void			CSBrickManager::makeVisualBrickForSkill()
 {
 	// clear
-	for (uint i = 0; i < SKILLS::NUM_SKILLS; ++i)
+	for (uint i = 0; i < (sint)SKILLS::NUM_SKILLS; ++i)
 	{
 		_VisualBrickForSkill[i] = CSheetId();
 	}
@@ -369,7 +369,7 @@ void			CSBrickManager::makeVisualBrickForSkill()
 		// List only bricks with family == BIF
 		if (brickSheet->BrickFamily == BRICK_FAMILIES::BIF)
 		{
-			if (brickSheet->getSkill() < SKILLS::NUM_SKILLS)
+			if (brickSheet->getSkill() < (sint)SKILLS::NUM_SKILLS)
 			{
 				_VisualBrickForSkill[brickSheet->getSkill()] = brickSheet->Id;
 			}
@@ -380,7 +380,7 @@ void			CSBrickManager::makeVisualBrickForSkill()
 // ***************************************************************************
 CSheetId		CSBrickManager::getVisualBrickForSkill(SKILLS::ESkills s)
 {
-	if(s<SKILLS::NUM_SKILLS)
+	if(s< (sint)SKILLS::NUM_SKILLS)
 		return _VisualBrickForSkill[s];
 	else
 		return CSheetId();
