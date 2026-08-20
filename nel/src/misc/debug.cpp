@@ -324,7 +324,18 @@ typedef enum _NEL_MINIDUMP_TYPE
 	MiniDumpWithCodeSegs = 0x00002000
 } NEL_MINIDUMP_TYPE;
 
-static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
+// Persistent handler (HANDLER_NONE: we keep our own SE translator / EDebug flow as the
+// primary crash detection, we don't let Breakpad install its own automatic filters).
+// Even with HANDLER_NONE, Breakpad unconditionally creates its own internal dedicated
+// handler thread + semaphores, used by WriteMinidumpForException() below: it captures the
+// requesting thread ID on the calling (crashed) thread, wakes its own handler thread to
+// actually write the dump there (not on the crashed thread, whose stack may be corrupted),
+// then blocks the crashed thread until done. This is exactly the dedicated-thread pattern
+// a previous version of this code hand-rolled -- using Breakpad's own tested
+// implementation instead correctly attributes the crash to the right thread.
+static google_breakpad::ExceptionHandler *DumpHandler = NULL;
+
+static void WriteMiniDumpNow()
 {
 	string dumpPath = getLogDirectory();
 
@@ -337,6 +348,63 @@ static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
 		google_breakpad::ExceptionHandler::HANDLER_NONE
 	);
 	handler.WriteMinidump();
+}
+
+// Refreshes DumpHandler's dump path from the current getLogDirectory() right before use:
+// it can change after startup (eg. changeLogDirectory() from a -logsdir arg), well after
+// ensureDumpHandler() created the persistent handler, so the path can't just be baked in once.
+static void refreshDumpHandlerPath()
+{
+	string dumpPath = getLogDirectory();
+	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
+	DumpHandler->set_dump_path(wpath);
+}
+
+// Last-resort, process-wide filter: catches anything that falls through
+// _set_se_translator (eg. a fault on a thread that never installed it, such as a raw
+// CreateThread()'d thread elsewhere in the codebase). Attributes the dump to the actual
+// faulting thread via WriteMinidumpForException(), called here on that same thread.
+static LONG WINAPI unhandledExceptionFilter(EXCEPTION_POINTERS *excpInfo)
+{
+	if (DumpHandler)
+	{
+		refreshDumpHandlerPath();
+		DumpHandler->WriteMinidumpForException(excpInfo);
+	}
+	else
+		WriteMiniDumpNow();
+	return EXCEPTION_EXECUTE_HANDLER;
+}
+
+// Pre-creates the persistent Breakpad handler used by DumpMiniDump()/unhandledExceptionFilter,
+// so nothing needs to allocate while handling an actual crash. Safe to call more than once.
+static void ensureDumpHandler()
+{
+	if (DumpHandler)
+		return;
+
+	SetUnhandledExceptionFilter(unhandledExceptionFilter);
+
+	string dumpPath = getLogDirectory();
+	std::wstring wpath = dumpPath.empty() ? L"." : std::wstring(dumpPath.begin(), dumpPath.end());
+	DumpHandler = new google_breakpad::ExceptionHandler(
+		wpath,
+		NULL,
+		NULL,
+		NULL,
+		google_breakpad::ExceptionHandler::HANDLER_NONE
+	);
+}
+
+static void DumpMiniDump(PEXCEPTION_POINTERS excpInfo)
+{
+	if (DumpHandler)
+	{
+		refreshDumpHandlerPath();
+		DumpHandler->WriteMinidumpForException(excpInfo);
+	}
+	else
+		WriteMiniDumpNow();
 }
 
 class EDebug : public ETrapDebug
@@ -352,9 +420,8 @@ public:
 
 	void createWhat ()
 	{
-		string shortExc, longExc, subject;
+		string shortExc, longExc;
 		string addr, ext;
-		ULONG_PTR skipNFirst = 0;
 		_Reason.clear();
 
 		if (m_pexp == NULL)
@@ -411,10 +478,7 @@ public:
 			case STATUS_ILLEGAL_VLM_REFERENCE        : shortExc="Illegal VLM Reference"; longExc.clear(); break;
 #endif
 			case 0xE06D7363                          : shortExc="Microsoft C++ Exception"; longExc="Microsoft C++ Exception"; break;	// cpp exception
-			case 0xACE0ACE                           : shortExc.clear(); longExc.clear();
-				if (m_pexp->ExceptionRecord->NumberParameters == 1)
-					skipNFirst = m_pexp->ExceptionRecord->ExceptionInformation [0];
-				break;	// just want the stack
+			case 0xACE0ACE                           : shortExc.clear(); longExc.clear(); break;	// just want the stack
 			default                                  : shortExc="Unknown Exception"; longExc="Unknown Exception "+toString("0x%X", m_pexp->ExceptionRecord->ExceptionCode); break;
 			};
 
@@ -426,93 +490,13 @@ public:
 					addr = " at <NULL>";
 			}
 
-			string progname;
-			if(!shortExc.empty() || !longExc.empty())
-			{
-				wchar_t name[1024];
-				GetModuleFileNameW (NULL, name, 1023);
-				progname = CFile::getFilename(wideToUtf8(name));
-				progname += " ";
-			}
-
-			subject = progname + shortExc + addr;
-
 			if (_Reason.empty())
 			{
 				if (!shortExc.empty()) _Reason += shortExc + " exception generated" + addr + ext + ".\n";
 				if (!longExc.empty()) _Reason += longExc + ".\n";
 			}
 
-			// display the stack
-			addStackAndLogToReason (skipNFirst);
-
-			if(!shortExc.empty() || !longExc.empty())
-			{
-				// yoyo: allow only to send the crash report once. Because users usually click ignore,
-				// which create noise into list of bugs (once a player crash, it will surely continues to do it).
-				report(progname + shortExc, subject, _Reason, NL_CRASH_DUMP_FILE, true, !isCrashAlreadyReported(), ReportAbort);
-				// TODO: Does this need to be synchronous? Why does this not handle the report result?
-
-				// no more sent mail for crash
-				setCrashAlreadyReported(true);
-			}
 		}
-	}
-
-	// display the callstack
-	void addStackAndLogToReason (ULONG_PTR /* skipNFirst */ = 0)
-	{
-#ifdef NL_OS_WINDOWS
-#elif !defined(NL_OS_MAC)
-		// Make place for stack frames and function names
-		const uint MaxFrame=64;
-		void *trace[MaxFrame];
-		char **messages = (char **)NULL;
-		int i, trace_size = 0;
-
-		trace_size = backtrace(trace, MaxFrame);
-		messages = backtrace_symbols(trace, trace_size);
-		result += "Callstack:\n";
-		_Reason += "-------------------------------\n";
-		for (i=0; i<trace_size; ++i)
-			_Reason += toString("%i : %s\n", i, messages[i]);
-		// free the messages
-		free(messages);
-#endif
-
-// 		_Reason += "-------------------------------\n";
-// 		_Reason += "\n";
-// 		if(DefaultMemDisplayer)
-// 		{
-// 			_Reason += "Log with no filter:\n";
-// 			_Reason += "-------------------------------\n";
-// 			DefaultMemDisplayer->write (_Reason);
-// 		}
-// 		else
-// 		{
-// 			_Reason += "No log\n";
-// 		}
-//		_Reason += "-------------------------------\n";
-
-		// add specific information about the application
-// 		if(CrashCallback)
-// 		{
-// 			_Reason += "User Crash Callback:\n";
-// 			_Reason += "-------------------------------\n";
-// 			static bool looping = false;
-// 			if(looping)
-// 			{
-// 				_Reason += "******* WARNING: crashed in the user crash callback *******\n";
-// 				looping = false;
-// 			}
-// 			else
-// 			{
-// 				looping = true;
-// 				_Reason += CrashCallback();
-// 				looping = false;
-// 			}
-// 			_Reason += "-------------------------------\n";
-// 		}
 	}
 
 	string getSourceInfo (DWORD_TYPE addr)
@@ -989,6 +973,11 @@ void attachExceptionHandler()
 #ifndef NL_COMP_MINGW
 #	ifdef NL_OS_WINDOWS
 	_set_se_translator(exceptionTranslator);
+	// Reserve stack headroom so DumpMiniDump() still has room to run
+	// if the crash being handled is itself a stack overflow
+	ULONG stackGuaranteeBytes = 64 * 1024;
+	SetThreadStackGuarantee(&stackGuaranteeBytes);
+	ensureDumpHandler();
 #	endif // NL_OS_WINDOWS
 #endif //!NL_COMP_MINGW
 }
@@ -1021,6 +1010,11 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 				_set_se_translator(exceptionTranslator);
 				SetEnvironmentVariableA( SE_TRANSLATOR_IN_MAIN_MODULE, "1" );
 			}
+			// Reserve stack headroom so DumpMiniDump() still has room to run
+			// if the crash being handled is itself a stack overflow
+			ULONG stackGuaranteeBytes = 64 * 1024;
+			SetThreadStackGuarantee(&stackGuaranteeBytes);
+			ensureDumpHandler();
 		}
 #	endif // NL_OS_WINDOWS
 #endif //!NL_COMP_MINGW
@@ -1589,5 +1583,37 @@ NLMISC_CATEGORISED_COMMAND(nel, readaccess, "read a uint8 value in an invalid ad
 }
 
 #endif // FINAL_VERSION
+
+// Always available, even in FINAL_VERSION: crash-dump handler self-tests.
+NLMISC_CATEGORISED_COMMAND(nel, crashtest, "generate a real crash, to test that the minidump/crash handler produces a single clean report", "")
+{
+	if (args.size() != 0) return false;
+	uint8 *adr = (uint8*)0;
+	*adr = 123;
+	return true;
+}
+
+#ifdef NL_OS_WINDOWS
+// Test-only helper for crashtestreal: faults on its own thread, with no SE translator
+// installed on it, so the fault reaches the client outside of any command/Lua call stack
+// (unlike crashtest, which faults inside ICommand::execute() and gets its EDebug exception
+// swallowed by that function's own catch(const exception&)).
+static DWORD WINAPI DeferredCrashThreadProc(LPVOID /* param */)
+{
+	Sleep(500); // let the crashtestreal command already return before faulting
+	uint8 *adr = (uint8*)0;
+	*adr = 123;
+	return 0;
+}
+#endif
+
+NLMISC_CATEGORISED_COMMAND(nel, crashtestreal, "generate a real crash on its own thread, outside any command/Lua call stack, to verify the client actually closes with a clean dump", "")
+{
+	if (args.size() != 0) return false;
+#ifdef NL_OS_WINDOWS
+	CreateThread(NULL, 0, DeferredCrashThreadProc, NULL, 0, NULL);
+#endif
+	return true;
+}
 
 } // NLMISC
