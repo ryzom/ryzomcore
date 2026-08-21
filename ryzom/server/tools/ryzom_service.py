@@ -69,31 +69,16 @@ class RyzomService():
 					if not os.path.isfile(lock_file):
 						break
 					sleep(1)
-
-		cmd = " ".join(["schroot", "-p", "-c", "atys", "-b", "-n", self.service_name+"_session"])
-		print(cmd)
-		self.schroot = pexpect.spawn(cmd, encoding="utf-8")
-		sleep(0.5)
-		self.schroot_session = self.service_name + "_session"
-		cmd = " ".join(["schroot", "-p", "-r", "-c", str(self.schroot_session), "--"]+sys.argv[2:])
-		print(cmd)
-		self.p = pexpect.spawn(" ".join(["schroot", "-p", "-r", "-c", str(self.schroot_session), "--"]+sys.argv[2:]), encoding="utf-8", maxread=1)
+		print(os.getcwd())
+		print(sys.argv[2:])
+		self.p = pexpect.spawn(" ".join(sys.argv[2:]), encoding="utf-8", maxread=1)
 		sleep(0.5)
 		if not os.path.isdir(f"{self.service_name}"):
 			os.makedirs(f"{self.service_name}")
 		with open(f"{self.service_name}/{self.service_name}.state", "w") as f:
 			f.write("RUNNING")
-		self.schroot_pid = self.p.pid
-		# Check subprocessus
-		pid = None
-		while not pid:
-			current_process = psutil.Process(self.schroot_pid)
-			children = current_process.children(recursive=True)
-			for child in children:
-				pid = child.pid
-			sleep(0.1)
-		self.service_pid = pid
-		print(f"Service started in chroot {self.schroot_session} with pid {self.service_pid}")
+		self.service_pid = self.p.pid
+		print(f"Service started with pid {self.service_pid}")
 		sys.stdout.flush()
 
 		os.makedirs(self.FIFO_DIR, exist_ok=True)
@@ -160,7 +145,6 @@ class RyzomService():
 			os.unlink(self.fifo_path)
 		if self.p.isalive():
 			self.p.terminate()
-		subprocess.run(["schroot", "-e", "-c", self.schroot_session])
 		print("Bye!")
 
 if __name__ == "__main__":

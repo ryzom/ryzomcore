@@ -1234,8 +1234,10 @@ void CCharacterCL::updateVisualPropertyOrient(const NLMISC::TGameCycle &gameCycl
 	// if no skeleton we set the orientation
 	if(_Skeleton.empty())
 	{
-		// server forces the entity orientation even if it cannot turn
-		front(CVector((float)cos(_TheoreticalOrientation), (float)sin(_TheoreticalOrientation), 0.f), true, true, true);
+		// Respect the sheet's 'Turn' property: a skeleton-less entity
+		// (e.g. a static decoration) that cannot turn must not be forced
+		// to face the server-sent orientation on every update.
+		front(CVector((float)cos(_TheoreticalOrientation), (float)sin(_TheoreticalOrientation), 0.f), true, true, _CanTurn);
 		dir(front(), false, false);
 		if(_Primitive)
 			_Primitive->setOrientation(_TheoreticalOrientation, dynamicWI);
@@ -3091,7 +3093,7 @@ KeyChosen:
 					// look in behaviour if there's a spell to play
 					if (_CurrentAttack)
 					{
-						if (_CurrentAttackInfo.Intensity >= 1 &&  _CurrentAttackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+						if (_CurrentAttackInfo.Intensity >= 1 &&  _CurrentAttackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 						{
 							MAGICFX::TSpellCastStage attackStage;
 							switch(newKey)
@@ -3700,7 +3702,8 @@ void CCharacterCL::beginCast(const MBEHAV::CBehaviour &behaviour)
 		dirToTarget.z = 0;
 		dirToTarget.normalize();
 		front( dirToTarget );
-		dir( dirToTarget );
+		if(_CanTurn)
+			dir( dirToTarget );
 	}
 
 	switch(behaviour.Behaviour)
@@ -4391,7 +4394,7 @@ void CCharacterCL::computeTargetStickMode(const CAttackSheet &sheet, const CAtta
 	bool hasPhysicalImpact = false;
 	if (attackInfo.Localisation != BODY::UnknownBodyPart &&
 		attackInfo.PhysicalImpactIntensity >= 1 &&
-		attackInfo.PhysicalImpactIntensity <= MAGICFX::NUM_SPELL_POWER &&
+		attackInfo.PhysicalImpactIntensity <= (int)MAGICFX::NUM_SPELL_POWER &&
 		attackInfo.HitType != HITTYPE::Failed &&
 		attackInfo.HitType != HITTYPE::Undefined &&
 		attackInfo.DamageType != DMGTYPE::UNDEFINED)
@@ -4450,7 +4453,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 	destPB.StartDate = spawnDate;
 	destPB.EndDate = hitDate;
 	// choose fx for projectile
-	if (attackInfo.Intensity >= 1 && attackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+	if (attackInfo.Intensity >= 1 && attackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 	{
 		destPB.ProjectileAspect = &currentAttack->ProjectileFX;
 	}
@@ -4465,7 +4468,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 	}
 	else
 	{
-		if (attackInfo.Intensity  >= 1 && attackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER) // impact has same intensity than projectile
+		if (attackInfo.Intensity  >= 1 && attackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER) // impact has same intensity than projectile
 		{
 			destPB.ImpactAspect = &currentAttack->ImpactFX;
 		}
@@ -4873,7 +4876,8 @@ void CCharacterCL::applyBehaviour(const CBehaviourContext &bc)	// virtual
 				frontYawBefore = frontYaw();
 				front( dirToTarget );
 			}
-			dir( dirToTarget );
+			if(_CanTurn)
+				dir( dirToTarget );
 		}
 
 		// Apply the state animation chosen before
