@@ -61,7 +61,7 @@ CSkillManager::CSkillManager()
 	_UnblockTitle = NULL;
 	_Tree= NULL;
 
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		_SkillValues[i]= NULL;
 		_SkillBaseValues[i]= NULL;
@@ -106,12 +106,12 @@ void CSkillManager::initInGame()
 	// **** Data error management
 	// For each skills
 	uint	i;
-	for (i = 0; i < SKILLS::NUM_SKILLS; ++i)
+	for (i = 0; i < (sint)SKILLS::NUM_SKILLS; ++i)
 	{
 		vector<SKILLS::ESkills>		&children= _Tree->SkillsTree[i].ChildSkills;
 		for (sint32 j = 0; j < (sint32)children.size(); ++j)
 		{
-			if (children[j] >= SKILLS::NUM_SKILLS)
+			if (children[j] >= (int)SKILLS::NUM_SKILLS)
 			{
 				children.erase(children.begin()+j);
 				j--;
@@ -120,7 +120,7 @@ void CSkillManager::initInGame()
 	}
 
 	// **** Min Skill Value mgt, also update max child skill value
-	for(i=0;i<NUM_SKILLS;++i)
+	for(i=0;i<(uint)NUM_SKILLS;++i)
 	{
 		_MinSkillValue[i]= getMaxSkillValue(getParent(SKILLS::ESkills(i)));
 	}
@@ -150,7 +150,7 @@ void CSkillManager::initInGame()
 	// **** Player State management
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// get now the nodes on Skill values
-	for(i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		_SkillValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:SKILL", i), false);
 		_SkillBaseValues[i]= NLGUI::CDBManager::getInstance()->getDbProp(toString("SERVER:CHARACTER_INFO:SKILLS:%d:BaseSKILL", i), false);
@@ -172,7 +172,7 @@ void CSkillManager::uninitInGame()
 	_Tree= NULL;
 
 	uint i;
-	for(i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		_SkillValues[i]= NULL;
 		_SkillBaseValues[i]= NULL;
@@ -191,7 +191,7 @@ void CSkillManager::uninitInGame()
 bool CSkillManager::isUnknown (SKILLS::ESkills eSkill)
 {
 	nlassert(_Tree);
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return true;
 	return _Tree->SkillsTree[eSkill].Skill == SKILLS::unknown;
 }
@@ -200,10 +200,10 @@ bool CSkillManager::isUnknown (SKILLS::ESkills eSkill)
 ESkills CSkillManager::getParent (ESkills eSkill)
 {
 	nlassert(_Tree);
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return SKILLS::unknown;
 	if ((_Tree->SkillsTree[eSkill].ParentSkill < 0) ||
-		(_Tree->SkillsTree[eSkill].ParentSkill >= SKILLS::NUM_SKILLS))
+		(_Tree->SkillsTree[eSkill].ParentSkill >= (int)SKILLS::NUM_SKILLS))
 		return SKILLS::unknown;
 	return _Tree->SkillsTree[eSkill].ParentSkill;
 }
@@ -213,7 +213,7 @@ const std::vector<SKILLS::ESkills> &CSkillManager::getChildren(SKILLS::ESkills e
 {
 	nlassert(_Tree);
 	static	vector<SKILLS::ESkills>	emptyVect;
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return emptyVect;
 	return _Tree->SkillsTree[eSkill].ChildSkills;
 }
@@ -224,7 +224,7 @@ bool	CSkillManager::areSkillOnSameBranch(SKILLS::ESkills s0, SKILLS::ESkills s1)
 {
 	SKILLS::ESkills	parent;
 
-	if ((s0 < 0) || (s0 >= SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= SKILLS::NUM_SKILLS))
+	if ((s0 < 0) || (s0 >= (int)SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= (int)SKILLS::NUM_SKILLS))
 		return false;
 
 	// No if only one is unknown
@@ -265,7 +265,7 @@ bool	CSkillManager::isSkillAncestor(SKILLS::ESkills s0, SKILLS::ESkills s1)
 {
 	SKILLS::ESkills	parent;
 
-	if ((s0 < 0) || (s0 >= SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= SKILLS::NUM_SKILLS))
+	if ((s0 < 0) || (s0 >= (int)SKILLS::NUM_SKILLS) || (s1 < 0) || (s1 >= (int)SKILLS::NUM_SKILLS))
 		return false;
 
 	// No if only one is unknown
@@ -293,7 +293,7 @@ bool	CSkillManager::isSkillAncestor(SKILLS::ESkills s0, SKILLS::ESkills s1)
 // ***************************************************************************
 uint32	CSkillManager::getMinSkillValue(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 	return _MinSkillValue[eSkill];
 }
@@ -302,7 +302,7 @@ uint32	CSkillManager::getMinSkillValue(SKILLS::ESkills eSkill)
 uint32	CSkillManager::getMaxSkillValue(SKILLS::ESkills eSkill)
 {
 	nlassert(_Tree);
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 	return _Tree->SkillsTree[eSkill].MaxSkillValue;
 }
@@ -310,7 +310,7 @@ uint32	CSkillManager::getMaxSkillValue(SKILLS::ESkills eSkill)
 // ***************************************************************************
 uint32	CSkillManager::getSkillValue(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 
 	CCDBNodeLeaf	*node= _SkillValues[eSkill];
@@ -323,7 +323,7 @@ uint32	CSkillManager::getSkillValue(SKILLS::ESkills eSkill)
 // ***************************************************************************
 uint32	CSkillManager::getBaseSkillValue(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 
 	CCDBNodeLeaf	*node= _SkillBaseValues[eSkill];
@@ -376,7 +376,7 @@ uint32	CSkillManager::getBestSkillValue(SKILLS::ESkills eSkill)
 // ***************************************************************************
 uint32	CSkillManager::getBaseSkillValueMaxChildren(SKILLS::ESkills eSkill)
 {
-	if ((eSkill < 0) || (eSkill >= SKILLS::NUM_SKILLS))
+	if ((eSkill < 0) || (eSkill >= (int)SKILLS::NUM_SKILLS))
 		return 0;
 	return _MaxChildBaseSkillValue[eSkill];
 }
@@ -413,7 +413,7 @@ bool	CSkillManager::checkBaseSkillMetRequirement(SKILLS::ESkills eSkill, uint32 
 void	CSkillManager::computeMaxChildValues()
 {
 	// Update all MaxBaseSkill
-	for( uint i = 0 ; i < NUM_SKILLS ; ++i )
+	for( uint i = 0 ; i < (uint)NUM_SKILLS ; ++i )
 	{
 		const SKILLS::ESkills skill = SKILLS::ESkills(i);
 		const uint32 value = getBaseSkillValue(skill);
@@ -461,7 +461,7 @@ void	CSkillManager::onSkillChange()
 {
 	// **** Check cache (don't call onSkillChange if just PROGRESS_BAR changed)
 	bool	someChange= false;
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 	{
 		// SKILL
 		if(_SkillValues[i])
