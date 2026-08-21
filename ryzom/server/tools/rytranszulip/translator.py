@@ -25,8 +25,7 @@ import json
 import deepl
 
 from time import sleep, time
-from ryzom_service import RyzomService, RyzomMessage
-from marguez.logger import printer
+from ryzom_service import RyzomService, RyzomMessage, printer
 
 class Translator(RyzomService):
 
