@@ -1,9 +1,10 @@
 import json
 import re
+import time
 from pathlib import Path
 
 from direct.showbase.ShowBase import ShowBase
-from panda3d.core import AmbientLight, DirectionalLight, WindowProperties
+from panda3d.core import AmbientLight, DirectionalLight, Texture, WindowProperties
 
 import p3dimgui
 import imgui_bundle
@@ -11,7 +12,9 @@ from imgui_bundle import imgui, imgui_ctx
 
 from .commands import CommandRegistry
 from .explorer import DEFAULT_FILTER, Explorer
+from .splash import Splash
 from .sysinfo import SysInfoBar
+from .workspace_setup_dialog import WorkspaceSetupDialog
 
 # Font Awesome 4 (the only icon font imgui_bundle ships a .ttf for), merged
 # into the default font so any tool app can use icons_fontawesome_4's
@@ -35,6 +38,8 @@ _SIDE_PANEL_MAX_WIDTH = 900
 # across launches -- see _load_window_geometry()/_save_window_geometry().
 _DEFAULT_WINDOW_SIZE = (1600, 900)
 _WINDOW_GEOMETRY_DIR = Path.home() / ".ryzom_forgery"
+_ICON_PATH = Path(__file__).resolve().parent.parent / "forgery.png"
+_SPLASH_PATH = Path(__file__).resolve().parent.parent / "splashscreen.png"
 
 
 def _slugify(title):
@@ -55,13 +60,25 @@ class ForgeryApp(ShowBase):
 	def __init__(self, explorer_root, title="Ryzom Forgery",
 	             explorer_width=300, panel_width=320, sysinfo_height=28,
 	             explorer_default_filter=DEFAULT_FILTER):
-		ShowBase.__init__(self)
-
 		self._window_geometry_path = _WINDOW_GEOMETRY_DIR / f"{_slugify(title)}.json"
+		geometry = self._load_window_geometry()
+
+		# winfo_screenwidth()/screenheight() report the whole virtual desktop
+		# on multi-monitor X11 setups, so centering on those would straddle
+		# both screens -- center on the target window's own monitor instead,
+		# using its last known position/size (falling back to the virtual
+		# desktop center only on this app's very first launch).
+		center_on = (geometry["x"], geometry["y"], geometry["width"], geometry["height"]) if geometry else None
+		splash = Splash(_SPLASH_PATH, center_on=center_on) if _SPLASH_PATH.exists() else None
+		if splash is not None:
+			time.sleep(1)
+
+		ShowBase.__init__(self)
 
 		props = WindowProperties()
 		props.setTitle(title)
-		geometry = self._load_window_geometry()
+		if _ICON_PATH.exists():
+			props.setIconFilename(str(_ICON_PATH))
 		if geometry is not None:
 			props.setOrigin(geometry["x"], geometry["y"])
 			props.setSize(geometry["width"], geometry["height"])
@@ -85,6 +102,11 @@ class ForgeryApp(ShowBase):
 
 		p3dimgui.init()
 		self._load_icon_font()
+		self._panel_watermark_tex_ref = None
+		if _SPLASH_PATH.exists():
+			watermark_texture = Texture()
+			watermark_texture.read(str(_SPLASH_PATH))
+			self._panel_watermark_tex_ref = self.imgui.loadTexture(watermark_texture)
 
 		# Applying a Material (as tool apps do for shape rendering) has no
 		# visible effect without at least one light in the scene -- without
@@ -105,11 +127,15 @@ class ForgeryApp(ShowBase):
 
 		self.commands = CommandRegistry()
 		self.sysinfo = SysInfoBar()
+		self.workspace_setup_dialog = WorkspaceSetupDialog()
 		self.explorer = Explorer(self, Path(explorer_root), self.commands,
 		                          default_filter=explorer_default_filter)
 		self.explorer.on_selection_changed = self._on_explorer_selection_changed
 
 		self.accept("imgui-new-frame", self.draw_ui)
+
+		if splash is not None:
+			splash.close()
 
 	def windowEvent(self, win):
 		super().windowEvent(win)
@@ -162,6 +188,26 @@ class ForgeryApp(ShowBase):
 		loaded there)."""
 		return "Panel"
 
+	_PANEL_WATERMARK_SIZE = 256
+	_PANEL_WATERMARK_COLOR = (1.0, 1.0, 1.0, 0.30)
+
+	_PANEL_WATERMARK_MARGIN = 12
+
+	def _draw_panel_watermark(self):
+		"""Faint branding image horizontally centered at the bottom of the
+		panel, drawn before draw_panel()'s own widgets so it sits behind them
+		in the same window's draw list -- low enough alpha to stay out of the
+		way of whatever's drawn on top."""
+		window_pos = imgui.get_window_pos()
+		window_size = imgui.get_window_size()
+		size = self._PANEL_WATERMARK_SIZE
+		margin = self._PANEL_WATERMARK_MARGIN
+		p_max = (window_pos.x + window_size.x / 2 + size / 2, window_pos.y + window_size.y - margin)
+		p_min = (p_max[0] - size, p_max[1] - size)
+		imgui.get_window_draw_list().add_image(
+			self._panel_watermark_tex_ref, p_min, p_max, (0, 0), (1, 1),
+			imgui.get_color_u32(self._PANEL_WATERMARK_COLOR))
+
 	def on_selection_changed(self, items):
 		"""Override in subclasses to react to the explorer's selection changing."""
 		pass
@@ -179,6 +225,8 @@ class ForgeryApp(ShowBase):
 		self.on_selection_changed(items)
 
 	def draw_ui(self):
+		self.workspace_setup_dialog.draw()
+
 		display_size = imgui.get_io().display_size
 		width, height = display_size.x, display_size.y
 		body_height = height - self.sysinfo_height
@@ -207,4 +255,6 @@ class ForgeryApp(ShowBase):
 		# (panel_title()) changes with whatever's currently loaded.
 		with imgui_ctx.begin(f"{self.panel_title()}###panel", flags=_PINNED_FLAGS):
 			self.panel_width = imgui.get_window_size().x
+			if self._panel_watermark_tex_ref is not None:
+				self._draw_panel_watermark()
 			self.draw_panel()
