@@ -19,6 +19,7 @@
 
 
 import os
+import re
 import sys
 import json
 import deepl
@@ -47,6 +48,10 @@ class Translator(RyzomService):
 		self.infos += f"[bright_green]Last Deepl Error: [orange1]{self.last_deep_error}"
 		self.updateInfos()
 
+	def escapeImages(self, text):
+		pattern = re.compile(r"!\[[^\]]*]\([^)]+\)")
+		return pattern.sub(lambda m: "<x>"+m.group(0)+"</x>", text)
+
 	def escapeQuotes(self, text, level):
 		if level <= 2:
 			return text
@@ -68,7 +73,8 @@ class Translator(RyzomService):
 
 	def translateWithDeepl(self, m):
 		client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
-		text = self.escapeQuotes(m.text, 8)
+		text = self.escapeImages(m.text)
+		text = self.escapeQuotes(text, 8)
 		dst_lang = self.dst_lang.upper()
 		try:
 			result = client.translate_text(
