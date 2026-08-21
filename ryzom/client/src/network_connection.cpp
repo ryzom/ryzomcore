@@ -448,16 +448,16 @@ void	CNetworkConnection::initCookie(const string &cookie, const string &addr)
 		_FrontendAddress = addr;
 
 		if (!cookie.empty ())
-			_LoginCookie.setFromString (cookie);
-		else if (ClientCfg.ConfigFile.exists ("UserId"))
+			_LoginCookie.setFromString(cookie);
+		else if (ClientCfg.ConfigFile.exists("UserId"))
 		{
-			uint32 uid = ClientCfg.ConfigFile.getVar ("UserId").asInt();
+			uint32 uid = ClientCfg.ConfigFile.getVar("UserId").asInt();
 			_LoginCookie.set(0, 0, uid);
 			Cookie = _LoginCookie.toString(); // to be able to do '/reconnect'
 			nlinfo ("Set the cookie with the UserId %d set in config file", uid);
 		}
 
-		nlinfo ("Network initialisation with front end '%s' and cookie %s",_FrontendAddress.c_str(), _LoginCookie.toString().c_str ());
+		nlinfo ("Network initialisation with front end '%s'",_FrontendAddress.c_str());
 	}
 
 	_ConnectionState = NotConnected;
@@ -655,7 +655,7 @@ bool	CNetworkConnection::connect(string &result)
 		nlinfo ("There's no shards.cfg, or bad file format, can't copy common files");
 	}
 
-	nlinfo ("CNET[%p]: Connecting to '%s' with cookie '%s'", this, _FrontendAddress.c_str(), _LoginCookie.toString().c_str ());
+	nlinfo ("CNET[%p]: Connecting to '%s'", this, _FrontendAddress.c_str());
 
 	// then connect to the frontend using the udp sock
 //ace faut faire la nouveau login client 	result = CLoginClient::connectToShard (_FrontendAddress, _Connection);
@@ -1015,8 +1015,6 @@ void	CNetworkConnection::sendSystemLogin()
 	}
 
 	statsSend( length );
-	nlinfo( "CNET[%p]: sent LOGIN cookie=%s", this, _LoginCookie.toString().c_str() );
-	//nlinfo( "CNET[%p]: sent LOGIN cookie=%s at attempt %u at %u ms", this, _LoginCookie.toString().c_str(), nbAttempts, (uint32)(CTime::getLocalTime()-attemptStartTime) );
 }
 
 bool	CNetworkConnection::stateLogin()

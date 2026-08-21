@@ -9,7 +9,7 @@
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Zulip Dispatcher ==-
@@ -80,8 +80,20 @@ class ZulipDispatcher(ZulipService):
 			"local_id": "ryzom-ig",
 			"queue_id": self.getZulipQueueId(),
 		}
-		print("Send message to Zulip", request)
-		result = self.zulip.send_message(request)
+
+		zipped_request = {
+			"type": message_type,
+			"to": channel,
+			"topic": "",
+			"content": "".join([ s[0] for s in  content.split() ]),
+			"local_id": "ryzom-ig",
+			"queue_id": self.getZulipQueueId(),
+		}
+		print("Send message to Zulip", zipped_request)
+		try:
+			result = self.zulip.send_message(request)
+		except Exception as e:
+			print("Error sending message", e)
 		print("Result:", result)
 		if result["result"] == "success":
 			return result["id"]
@@ -90,7 +102,6 @@ class ZulipDispatcher(ZulipService):
 		return None
 
 	def sendTranslation(self, message_id, m):
-		print(m.output(), m.source_lang)
 		if message_id > 0 and m.translation and m.source_lang:
 			# Normalize Zulip-style upload markdown in translation as well
 			clean_translation = self.convert_zulip_upload_links(m.translation)
@@ -98,12 +109,15 @@ class ZulipDispatcher(ZulipService):
 				"message_id": message_id,
 				"content": "<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+(clean_translation if clean_translation is not None else ""),
 			}
-			result = self.zulip.update_message(request)
-			print("Sent translation to Zulip", request, result)
-			return True
-			return result["result"] == "success"
-		else:
-			return True
+			try:
+				result = self.zulip.update_message(request)
+			except Exception as e:
+				print("Error update message", e)
+				return False
+			else:
+				request["content"] = "".join([ s[0] for s in  request["content"].split() ])
+				print("Sent translation to Zulip", request, result)
+		return True
 
 	def run(self):
 		last_ids = {}
@@ -112,10 +126,11 @@ class ZulipDispatcher(ZulipService):
 			last_ids[lang] = self.getLastChatLangID(lang)
 			print(lang, last_ids[lang])
 
+		chat_id = self.getLastChatID()
+		print("chat id", chat_id)
 		while True:
 			chat_id = self.getLastChatID()
 			if last_ids[lang]+1 < chat_id+1:
-				#print("chat_id", chat_id)
 				for lang in ALL_LANGS:
 					#print(lang, "{} -> {}".format(last_ids[lang]+1, chat_id+1))
 					for i in range(last_ids[lang]+1, chat_id+1):
@@ -127,15 +142,12 @@ class ZulipDispatcher(ZulipService):
 						if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
 							if lang == "wk":
 								if message.source != "zulip":
-									print(lang, "New message {}".format(i), message, "=>", result)
 									result = self.sendMessage(message)
 									if result != None:
 										self.addZulipMessageId(i, result)
-										print("Added to DB")
 							else:
 								message_id = None
 								tries = 50
-								print("Get Zulip message id from chat", message.source_message_id)
 								while not message_id:
 									if message.source == "zulip":
 										source_message = self.getRyzomMessage(message.source_message_id)
@@ -147,11 +159,12 @@ class ZulipDispatcher(ZulipService):
 									if tries <= 0:
 										break
 
-								print(lang, "New translation {}".format(i), message, "<=", message_id)
 								if message_id:
 									result = self.sendTranslation(int(message_id), message)
 								else:
 									result = True
+						else:
+							result = True
 
 						if result:
 							last_ids[lang] = i

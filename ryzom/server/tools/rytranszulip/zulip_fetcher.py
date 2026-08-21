@@ -2,23 +2,23 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom IOS Fetcher ==-
-# 
+#
 # This script wait in a loop for all lines send to chat.log, parse them and fill the memcached server
-# 
+#
 # Message in format:  2025/05/17 01:42:18 INF 4155664128 IOS-136 : player:~Ulukyn|Ulueta|en|*|hello my friend
 # Message out format: (SENDER, CHANNEL, CHANNEL_ID, SOURCE_LANG, DST_LANGS, TEXT)
 #     ex. ("Ulueta", "player", "~Ulukyn", "en", "*", "hello my friend")
-# 
+#
 
 import os
 import sys
@@ -39,12 +39,11 @@ class ZulipFetcher(ZulipService):
 		self.stats = {"messages": 0}
 		self.admin_id = self.zulip.get_profile()["user_id"]
 		self.last_update_guilds = 0
-		self.shard = sys.argv[1].lower()
+		self.shard = host = self.config["shard"]["name"]
 		self.guilds_prefixes = {"atys": "0x00165", "gingo": "0x002f5"}
 
 	def checkMessages(self, event):
 		msg = event["message"]
-		print(msg)
 		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
 			return
 
@@ -59,7 +58,7 @@ class ZulipFetcher(ZulipService):
 					channel_id = dest[1]["full_name"].lower()
 				else:
 					channel_id = dest[0]["full_name"].lower()
-				
+
 				message = RyzomMessage("zulip", sender, channel, "tell:"+channel_id, "wk", "*", message)
 				self.addRyzomMessage(message)
 		else:
@@ -68,7 +67,6 @@ class ZulipFetcher(ZulipService):
 			if stream["result"] == "error":
 				print(f"Error stream {stream_id}", stream["msg"])
 				return
-			print(stream)
 			if stream["stream"]["creator_id"] != self.admin_id: # or msg["subject"] != "general chat":
 				return
 			channel = dest.lower()
@@ -87,12 +85,12 @@ class ZulipFetcher(ZulipService):
 				channel_id = channel[2:].strip()
 			else:
 				channel_id = channel[1:].strip().lower()
-			
+
 			lang = msg["translation_lang"] if "translation_lang" in msg else "en"
 			message = RyzomMessage("zulip", sender.lower(), channel, channel_id, lang, "*", message, source_message_id=msg["id"])
 			self.addRyzomMessage(message)
-			
-	
+
+
 	def run(self):
 		print("Fetching Zulip messages")
 		self.setZulipQueueId(self.zulip.registerMessages())

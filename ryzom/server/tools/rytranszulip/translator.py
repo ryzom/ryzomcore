@@ -2,20 +2,20 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Translator ==-
-# 
+#
 # This script is look in memcached server if a new message require translations, send it to DeepL and put it back into memcached server
-# 
+#
 
 
 import os
@@ -84,7 +84,7 @@ class Translator(RyzomService):
 			print("DeepL Error..."+repr(e))
 			return None
 		final_text = result.text.replace("<x>", "").replace("</x>", "")
-		return final_text
+		return (final_text,  result.billed_characters)
 
 
 	def checkMessages(self):
@@ -96,23 +96,24 @@ class Translator(RyzomService):
 				if message.translated_lang == "WK" and message.channel != "player":
 					if message.source_lang != self.dst_lang:
 						if message.langs == "*" or self.dst_lang in message.langs.split("-"):
-							translation = self.translateWithDeepl(message)
+							translation, billed_characters = self.translateWithDeepl(message)
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"
-							print("✅ "+str(i), repr(message.text), "➡️ ", translation)
+							#print("✅ "+str(i), repr(message.text), "➡️ ", translation)
+							print(f"DEEPL|{message.channel}|{billed_characters}")
 							message.translation = translation
 							message.translated_lang = self.dst_lang.upper()
 							message.source_message_id = i
 							self.addRyzomMessage(message)
-						else:
-							print("🚫 "+str(i), repr(message.text))
-					else:
-						print("🔲 "+str(i), repr(message.text))
+						#else:
+							#print("🚫 "+str(i), repr(message.text))
+					#else:
+						#print("🔲 "+str(i), repr(message.text))
 				self.next_id = i
 		self.current_id = self.next_id
-	
-	
+
+
 	def run(self):
 		self.current_id = self.getLastChatID()
 		self.next_id = self.current_id

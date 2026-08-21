@@ -503,6 +503,7 @@ CInterfaceManager::CInterfaceManager()
 	_InterfaceScaleChanged = false;
 	_InterfaceScale = 1.0f;
 	_InterfaceScaleAuto = false;
+	_InterfaceScale768 = false;
 	_DescTextTarget = NULL;
 	_ConfigLoaded = false;
 	_LogState = false;
@@ -2225,7 +2226,17 @@ void CInterfaceManager::drawViews(NL3D::UCamera camera)
 	if (_InterfaceScaleChanged)
 	{
 		if (_InterfaceScaleAuto)
-			CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+		{
+			uint32	w,h;
+			CViewRenderer::getInstance()->getScreenSize(w, h);
+
+			if (_InterfaceScale768)
+				CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1024, 768);
+			else if (w < 1920 || h < 1080)
+				CViewRenderer::getInstance()->setInterfaceScale(1.0f);
+			else
+				CViewRenderer::getInstance()->setInterfaceScale(1.0f, 1920, 1080);
+		}
 		else
 			CViewRenderer::getInstance()->setInterfaceScale(_InterfaceScale);
 

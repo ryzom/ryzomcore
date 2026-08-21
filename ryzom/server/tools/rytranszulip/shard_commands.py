@@ -3,19 +3,19 @@
 #############################################
 #  _______________________________
 #  \______   \__    ___/\____    /
-#   |       _/ |    |     /     / 
-#   |    |   \ |    |    /     /_ 
+#   |       _/ |    |     /     /
+#   |    |   \ |    |    /     /_
 #   |____|_  / |____|   /_______ \
 #          \/                   \/
-# 
+#
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Shard Commands ==-
-# 
+#
 # This script wait in a loop for all commands put by shard in memecached
-# 
+#
 
 
 import os
@@ -54,21 +54,21 @@ class ShardCommands(RyzomService):
 		self.scriptfile = __file__
 		self.log_sections["messages"] = ("db", "Shard-Command-Last", "Shard-Command-{}", "")
 		self.stats = {"commands": 0}
-		self.shard = sys.argv[1]
+		self.shard = host = self.config["shard"]["name"]
 		self.domain = "("+self.shard[0].upper()+self.shard[1:]+")"
 		self.updateStats()
 		self.db = None
 		try:
 			self.db = mysql.connector.connect(
-				host = self.config["DB_webig"]["host"],
-				user = self.config["DB_webig"]["user"],
-				passwd = self.config["DB_webig"]["pass"],
+				host = self.config["db_webig"]["host"],
+				user = self.config["db_webig"]["user"],
+				passwd = self.config["db_webig"]["pass"],
 				database = "webig",
 			)
 			print("MySQL Database connection successful")
 		except mysql.connector.Error as err:
 			print(f"Error: '{err}'")
-		
+
 	def updateStats(self):
 		self.infos = f"[orange1]Shard: [/orange1]{self.shard}"
 		self.updateInfos()
@@ -78,7 +78,7 @@ class ShardCommands(RyzomService):
 			url=f"/users/{user}?include_custom_profile_fields=true",
 			method="GET",
 		)
-		
+
 		if ret["result"] == "success":
 			return ret["user"]
 		return None
@@ -120,15 +120,15 @@ class ShardCommands(RyzomService):
 			title=""
 
 			user = self.getUser(user_email)
-			
+
 			print("User", user)
 			if user and "profile_data" in user:
 				if CUSTOM_PROFILE_GUILD in user["profile_data"]:
 					old_guild = user["profile_data"][CUSTOM_PROFILE_GUILD]["value"]
 				if CUSTOM_PROFILE_TITLE in user["profile_data"]:
 					title = user["profile_data"][CUSTOM_PROFILE_TITLE]["value"]
-			
-			
+
+
 			if command[2]:
 				print("Current Title:", title, "New:", command[2])
 				if not title:
@@ -141,25 +141,25 @@ class ShardCommands(RyzomService):
 						url="/users/"+user_email+"?profile_data="+urllib.parse.quote_plus("[{\"id\":"+CUSTOM_PROFILE_TITLE+", \"value\": \""+command[2]+"\"}]"),
 						method="PATCH",
 					))
-							
+
 			if len(command) >= 4 and command[3]:
 				gid = int(self.getGuildId(command[3]))-0x6500000
 				new_guild = "🔰 "+command[3]+f" ({gid:0>5X})"
-				
+
 			print(old_guild, "vs", new_guild)
-			if new_guild and new_guild != old_guild:
+			if new_guild:
 				print(self.addSubscription(user_email, new_guild))
-		
+
 			if old_guild and new_guild != old_guild:
 				print("Remove", self.zulip.remove_subscriptions([old_guild], principals = [user_email]))
-			
+
 			if new_guild != old_guild:
 				print(self.zulip.call_endpoint(
 					url="/users/"+user_email+"?profile_data="+urllib.parse.quote_plus("[{\"id\":"+CUSTOM_PROFILE_GUILD+", \"value\": \""+new_guild+"\"}]"),
 					method="PATCH",
 				))
 
-	
+
 	def addFactionChannelToCharacter(self, command):
 		if len(command) >= 3 and command[2] != "FACTION_RF":
 			if command[2][:8] == "FACTION_":
@@ -169,7 +169,7 @@ class ShardCommands(RyzomService):
 			print("Add sub:", self.addSubscription(command[1].lower()+"@ig.ryzom.com", name))
 			return True
 		return False
-	
+
 	def removeFactionChannelForCharacter(self, command):
 		if len(command) >= 3 and command[2] != "FACTION_RF":
 			if command[2][:8] == "FACTION_":
@@ -193,39 +193,29 @@ class ShardCommands(RyzomService):
 			return True
 		return False
 
+	def manageMessage(self, i):
+		command = self.getRyzomCommand(i)
+		if command != None:
+			print(f"New Command #{i} = {command}")
+			self.updateActivity(False)
+			if hasattr(self, command[0]) and callable(getattr(self, command[0])) and getattr(self, command[0])(command):
+				self.stats["commands"] += 1
+				self.updateStats()
+		self.current_id = i
+			
 	def checkMessages(self):
 		last_id = self.getLastCommandID()
-		#if self.current_id+1 != last_id+1:
-		#	print("Current:", self.current_id+1, "Last:", last_id)
-		for i in range(self.current_id+1, last_id+1, 1):
-			command = self.getRyzomCommand(i)
-			#command = self.fake_command
-			if command != None:
-				print("New Command", i, command)
-				self.updateActivity(False)
-				if hasattr(self, command[0]) and callable(getattr(self, command[0])) and getattr(self, command[0])(command):
-					self.stats["commands"] += 1
-					self.updateStats()
-				self.next_id = i
-
-
-			self.setLastManagedCommandID(i)
-		self.current_id = self.next_id
-	
-	def run(self):
-		#self.fake_command = ["playerConnects", "Ulueta", "YES"]
-		#self.fake_command = ["addFactionChannelToCharacter", "Ulueta", "DYN1"]
-		#self.fake_command = ["removeFactionChannelForCharacter", "Ulueta", "DYN1"]
-		#self.fake_command = ["playerConnects", "Ulueta", ""]
-		#self.fake_command = ['deleteMember', 'Les Senseis Atysiens', 'Ulueta']
-		self.current_id = self.getLastManagedCommandID()
-		last_id = self.getLastCommandID()
 		if self.current_id > last_id:
-			print("Fix current id")
-			self.setLastManagedCommandID(last_id)
-			self.current_id = self.getLastManagedCommandID()
-		self.next_id = self.current_id
-		print("Managing shard commands...")
+			print(f"Back from {self.current_id} to {last_id}")
+			self.manageMessage(last_id)
+
+		for i in range(self.current_id+1, last_id, 1):
+			self.manageMessage(i)
+		self.setLastManagedCommandID(self.current_id)
+
+	def run(self):
+		self.current_id = self.getLastManagedCommandID()
+		print(f"Managing shard commands from {self.current_id}...")
 		while True:
 			self.checkMessages()
 			self.updateActivity()
@@ -234,4 +224,8 @@ class ShardCommands(RyzomService):
 if __name__ == "__main__":
 	shardCommands = ShardCommands()
 	shardCommands.register()
+	if len(sys.argv) > 1:
+		if sys.argv[1] == "reset":
+			shardCommands.setLastManagedCommandID(0)
+			sys.exit(0)
 	shardCommands.run()

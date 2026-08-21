@@ -12,49 +12,264 @@
 # Copyright (C) 2019  Winch Gate Property Limited
 # This program is free software: read https://ryzom.com/dev/copying.html for more details
 #
-# This script helps to manage the shard using a screen session.
-# You can start, join, stop and get state of services
+# RIBS CLI — Control RIBS agent from the command line
+#
+# Usage:
+#   shard list                  — list all processes
+#   shard services              — list available services
+#   shard start <name>          — start a service or process
+#   shard start                 — start the whole shard (ryzom_shard.py + notify)
+#   shard stop <name>           — stop a service or process
+#   shard stop                  — stop the whole shard (ryzom_shard.py + clean schroots + notify)
+#   shard restart <name>        — restart a service or process
+#   shard status <name>         — show status of a process
+#   shard log <name> [stderr]   — tail stdout (or stderr) log
+#   shard runs                  — show recent run history
+#   shard clean                 — clean unused schroot sessions (meant to be run from a root cron)
 #
 
-CMD=$1
-DOMAIN=shard
+AGENT_URL="${RIBS_LOCAL_AGENT:-http://127.0.0.1:9081}"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 
-if [[ ! -z "$2" ]]
-then
-	SHARD_PATH=$2
-fi
+# Direct requests (not proxied by the central server) carry no X-Ribs-Groups
+# header, so the agent treats them as belonging to no group. "dev" has full
+# rights, hence its use here for this local admin CLI.
+# (Not named RIBS_GROUPS: that env var is already used elsewhere with a
+# different, colon-separated format and would silently override this.)
+SHARD_CLI_GROUPS="${SHARD_CLI_GROUPS:-dev}"
 
-if [[ -z "$CMD" ]]
-then
-	echo
-	echo "Commands:"
-	echo "  'start' to start the shard"
-	echo "  'stop'  to stop the shard"
-	echo "  'join'  to show the shard"
-	echo "  'dev'   to show the shard in textual dev mode"
-	echo
-	printf "Enter a command: "
-	read CMD
-fi
+# ── Helpers ──────────────────────────────────────────────────────────────────
 
-if [ "$CMD" = "stop" ]
-then
-	python3 $SHARD_PATH/tools/shard.py stop
-fi
+_get()  { curl -sf -H "X-Ribs-Groups: $SHARD_CLI_GROUPS" "$AGENT_URL$1"; }
+_post() { curl -sf -H "X-Ribs-Groups: $SHARD_CLI_GROUPS" -X POST "$AGENT_URL$1"; }
 
-if [ "$CMD" = "start" ]
-then
-	python3 $SHARD_PATH/tools/shard.py start
-fi
+_require_name() {
+	if [ -z "$1" ]; then
+		echo "Error: process/service name required" >&2
+		exit 1
+	fi
+}
 
+_json_field() {
+	# Extract a field from JSON without jq dependency (basic grep/sed fallback)
+	if command -v jq &>/dev/null; then
+		echo "$1" | jq -r "$2"
+	else
+		echo "$1" | grep -o "\"${3}\":[^,}]*" | sed 's/"[^"]*"://;s/"//g;s/^ //'
+	fi
+}
 
-if [ "$CMD" = "join" ]
-then
-	python3 $SHARD_PATH/tools/shard.py
-fi
+# ── Commands ─────────────────────────────────────────────────────────────────
 
+cmd_list() {
+	local data
+	data=$(_get "/process") || { echo "Agent unreachable at $AGENT_URL" >&2; exit 1; }
 
-if [ "$CMD" = "dev" ]
-then
-	textual run $SHARD_PATH/tools/shard.py --dev
-fi
+	if command -v jq &>/dev/null; then
+		echo "$data" | jq -r '
+			.processes[]
+			| [.name, .status, (.pids | map(.pid) | join(","))]
+			| @tsv
+		' | awk -F'\t' 'BEGIN { printf "%-40s %-10s %s\n", "NAME", "STATUS", "PIDS" }
+		                        { printf "%-40s %-10s %s\n", $1, $2, $3 }'
+	else
+		echo "$data"
+	fi
+}
+
+cmd_services() {
+	local data
+	data=$(_get "/services") || { echo "Agent unreachable at $AGENT_URL" >&2; exit 1; }
+
+	if command -v jq &>/dev/null; then
+		echo "$data" | jq -r '
+			.services[]
+			| [.name, (if .description == "" then "-" else .description end)]
+			| @tsv
+		' | awk -F'\t' 'BEGIN { printf "%-30s %s\n", "SERVICE", "DESCRIPTION" }
+		                        { printf "%-30s %s\n", $1, $2 }'
+	else
+		echo "$data"
+	fi
+}
+
+_get_status() {
+	local name="$1"
+	local data
+	data=$(_get "/process") || { echo "Agent unreachable at $AGENT_URL" >&2; exit 1; }
+
+	if command -v jq &>/dev/null; then
+		echo "$data" | jq -r --arg name "$name" '.processes[] | select(.name == $name) | .status'
+	else
+		echo "$data" | grep -o "\"name\":\"${name}\"[^}]*\"status\":\"[^\"]*\"" | sed 's/.*"status":"//;s/"//'
+	fi
+}
+
+cmd_status() {
+	_require_name "$1"
+	local data
+	data=$(_get "/process") || { echo "Agent unreachable at $AGENT_URL" >&2; exit 1; }
+
+	if command -v jq &>/dev/null; then
+		local result
+		result=$(echo "$data" | jq -r --arg name "$1" '
+			.processes[] | select(.name == $name)
+			| "Name:   " + .name + "\nStatus: " + .status +
+			  "\nPIDs:   " + (.pids | map("pid=" + .pid + " cpu=" + (.cpu|tostring) + "% mem=" + (.mem|tostring) + "MB") | join(", "))
+		')
+		if [ -z "$result" ]; then
+			echo "Process '$1' not found"
+			exit 1
+		fi
+		echo "$result"
+	else
+		echo "$data"
+	fi
+}
+
+cmd_start() {
+	if [ -z "$1" ]; then
+		python3 "$SCRIPT_DIR/ryzom_shard.py" start
+		bash "$SCRIPT_DIR/notify_state.sh" ShardStarting
+		return
+	fi
+	# Try service start first, fall back to process start
+	local resp
+	resp=$(_post "/services/$1/start" 2>/dev/null) \
+		|| resp=$(_post "/process/$1/start" 2>/dev/null) \
+		|| { echo "Failed to start '$1' — not found as service or process" >&2; exit 1; }
+	echo "Started: $1"
+}
+
+cmd_stop() {
+	if [ -z "$1" ]; then
+		python3 "$SCRIPT_DIR/ryzom_shard.py" stop
+
+		echo "Cleaning schroots..."
+		# Get sessions from both mount table and schroot session files
+		local sessions
+		sessions=$(
+			{
+				mount | grep /run/schroot/mount/ | grep /home | cut -d/ -f 7
+				schroot --list --all-sessions 2>/dev/null | sed 's/^session://'
+			} | sort -u
+		)
+		for session in $sessions; do
+			echo "$session"
+			schroot --end-session -c "$session" 2>/dev/null
+		done
+		rm -f /var/lib/schroot/session/atys-*
+
+		bash "$SCRIPT_DIR/notify_state.sh" ShardStopped
+		return
+	fi
+	_require_name "$1"
+	local status
+	status=$(_get_status "$1")
+	if [ "$status" != "active" ]; then
+		echo "'$1' is not running (status: ${status:-not found}), nothing to stop"
+		exit 0
+	fi
+	local resp
+	resp=$(_post "/services/$1/stop" 2>/dev/null) \
+		|| resp=$(_post "/process/$1/stop" 2>/dev/null) \
+		|| { echo "Failed to stop '$1'" >&2; exit 1; }
+	echo "Stopped: $1"
+}
+
+cmd_restart() {
+	_require_name "$1"
+	local resp
+	resp=$(_post "/services/$1/restart" 2>/dev/null) \
+		|| resp=$(_post "/process/$1/restart" 2>/dev/null) \
+		|| { echo "Failed to restart '$1'" >&2; exit 1; }
+	echo "Restarted: $1"
+}
+
+cmd_log() {
+	_require_name "$1"
+	local stream="${2:-stdout}"
+	if [ "$stream" != "stdout" ] && [ "$stream" != "stderr" ]; then
+		echo "Error: stream must be 'stdout' or 'stderr'" >&2
+		exit 1
+	fi
+	echo "Streaming $stream log for '$1' (Ctrl+C to stop)..."
+	# SSE stream: extract data lines only
+	curl -sf -N -H "X-Ribs-Groups: $SHARD_CLI_GROUPS" "$AGENT_URL/process/$1/log/$stream" \
+		| grep --line-buffered "^data:" \
+		| sed -u 's/^data: [0-9.]*  *//'
+}
+
+cmd_runs() {
+	local lines="${1:-50}"
+	local data
+	data=$(_get "/runs?lines=$lines") || { echo "Agent unreachable at $AGENT_URL" >&2; exit 1; }
+
+	if command -v jq &>/dev/null; then
+		echo "$data" | jq -r '.history[]'
+	else
+		echo "$data"
+	fi
+}
+
+_session_busy() {
+	# fuser -m would match the whole device behind the mountpoint (bind-mounted
+	# on the host root), so check /proc/*/root directly for precision instead
+	local mountpoint="$1"
+	local p root
+	for p in /proc/[0-9]*; do
+		root=$(readlink "$p/root" 2>/dev/null)
+		[[ "$root" == "$mountpoint"* ]] && return 0
+	done
+	return 1
+}
+
+cmd_clean() {
+	echo "Cleaning unused schroot sessions..."
+	local sessions
+	sessions=$(
+		{
+			mount | grep /run/schroot/mount/ | awk '{print $3}' | sed 's#^/run/schroot/mount/##; s#/.*##'
+			schroot --list --all-sessions 2>/dev/null | sed 's/^session://'
+			ls /var/lib/schroot/session/ 2>/dev/null
+		} | sort -u
+	)
+	for session in $sessions; do
+		[ -z "$session" ] && continue
+		local mountpoint="/run/schroot/mount/$session"
+		if [ -d "$mountpoint" ] && _session_busy "$mountpoint"; then
+			echo "Skipping $session (in use)"
+			continue
+		fi
+		echo "Cleaning $session"
+		schroot --end-session -c "$session" 2>/dev/null
+		# Unmount submounts (proc, home, ...) first, then the session's own root mount
+		mount | grep -E "on ${mountpoint}(/| )" | awk '{print $3}' | sort -r | xargs -r umount -l
+		rmdir "$mountpoint" 2>/dev/null
+		rm -f "/var/lib/schroot/session/$session"
+	done
+}
+
+cmd_help() {
+	sed -n '15,28p' "$0" | sed 's/^# \?//'
+}
+
+# ── Dispatch ─────────────────────────────────────────────────────────────────
+
+case "${1:-help}" in
+	list)        cmd_list ;;
+	services)    cmd_services ;;
+	status)      cmd_status "$2" ;;
+	start)       cmd_start "$2" ;;
+	stop)        cmd_stop "$2" ;;
+	restart)     cmd_restart "$2" ;;
+	log)         cmd_log "$2" "$3" ;;
+	runs)        cmd_runs "$2" ;;
+	clean)       cmd_clean ;;
+	help|--help) cmd_help ;;
+	*)
+		echo "Unknown command: $1" >&2
+		cmd_help >&2
+		exit 1
+		;;
+esac

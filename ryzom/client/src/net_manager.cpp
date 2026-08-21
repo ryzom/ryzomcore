@@ -2784,9 +2784,13 @@ void updateInventoryFromStream (NLMISC::CBitMemStream &impulse, const CInventory
 				{
 					uint32 slotIndex;
 					impulse.serial( slotIndex, CInventoryCategoryTemplate::SlotBitSize );
-					nlinfo("Slot %d", slotIndex);
 					// Access the database leaf
 					CCDBNodeBranch *slotNode = safe_cast<CCDBNodeBranch*>(inventoryNode->getNode( (uint32)slotIndex ));
+					if (!slotNode)
+					{
+						nlwarning ("Problem with slot: %s", slotIndex);
+						continue;
+					}
 					CCDBNodeLeaf *leafNode = type_cast<CCDBNodeLeaf*>(slotNode->find( INVENTORIES::InfoVersionStr ));
 					BOMB_IF( !leafNode, "Inventory slot property missing in database", continue );
 
@@ -3854,11 +3858,12 @@ bool CNetManager::update()
 		{
 			if (!IgnoreEntityDbUpdates  || change.ShortId == 0)
 			{
-				// Remove the old entity.
-				EntitiesMngr.remove(change.ShortId, false);
-				// Create the new entity.
-				if(EntitiesMngr.create(change.ShortId, get(change.ShortId), change.NewEntityInfo) == 0)
-					nlwarning("CNetManager::update : entity in the slot '%u' has not been created.", change.ShortId);
+				// changeEntitySheet() preserves the entity's identity (slot,
+				// target/selection) when this is only a sheet/appearance
+				// change on the same underlying server entity; it falls back
+				// to a full remove+create when the slot is genuinely taken
+				// over by a different entity.
+				EntitiesMngr.changeEntitySheet(change.ShortId, get(change.ShortId), change.NewEntityInfo);
 			}
 			else
 			{

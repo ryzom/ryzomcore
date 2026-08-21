@@ -110,9 +110,6 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 	if (!item->getMovable() && _InterlocutorView != NULL && form->Family != ITEMFAMILY::PET_ANIMAL_TICKET && (!form->DropOrSell || item->getUnMovable()))
 		return false;
 
-	// pet animal ticket must be exchangeable only if shardExchangeable
-	if (form->Family == ITEMFAMILY::PET_ANIMAL_TICKET && !form->ShardExchangeable)
-			return false;
 
 	// Can't trade items locked by owner
 	if (item->getLockedByOwner())

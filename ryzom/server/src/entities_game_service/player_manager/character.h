@@ -2371,7 +2371,10 @@ public:
 
 	/// get/set the last guild enter time
 	NLMISC::TGameCycle getGuildEnterTime() const;
-	void setGuildEnterTime(NLMISC::TGameCycle time);
+	void setGuildEnterTime(NLMISC::TGameCycle time, uint32 era);
+
+	/// get/set the last guild enter time
+	NLMISC::TGameCycle getGuildEnterEra() const;
 
 	/// updates the guild flag field in the mirror, according to character clan and preferences
 	void updateGuildFlag() const;
@@ -3855,6 +3858,7 @@ private:
 
 	/// last guild enter time  (if player are in guild since 21 days)
 	NLMISC::TGameCycle _GuildEnterTime;
+	uint32 _GuildEnterEra;
 
 	/// guild id of the player
 	bool _UseFactionSymbol;
@@ -4244,9 +4248,9 @@ private:
 
 	bool _PowoCanAccesRoomInv;
 	bool _PowoCanAccessGuildInv;
-	
+
 	bool _IsTeleportFromRespawn;
-	
+
 	uint32 _LastRespawnTick;
 	uint32 _LastTpTick;
 	uint32 _LastOverSpeedTick;
@@ -4254,7 +4258,7 @@ private:
 	uint32 _LastUnMountTick;
 	uint32 _LastFreeMount;
 	uint32 _LastExchangeMount;
-	
+
 public:
 	void setWebCommandIndex(uint32 index)
 	{

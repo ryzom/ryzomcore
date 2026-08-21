@@ -1,7 +1,0 @@
-name: Manage Coredumps
-description: Extract backtrace and delete coredumps
-group: Services
-steps:
-  - name: run
-    dir: /home/nevrax/repos/ryzom-core/ryzom/server/tools
-    command: python monitor_coredumps.py /var/lib/systemd/coredump/

@@ -527,7 +527,7 @@ end
 
 
 function setupArkUrls()
-	debug("Setup Lm Events")
+	debug("Setup Lm Events v2")
 	local ui = getUI("ui:interface:map:content:map_content:lm_events:html")
 	ui.home = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=12517&command=reset_all&no_html_header=1&continent=&posx=$posx$&posy=$posy$"
 	ui:browse("home")
@@ -1074,5 +1074,54 @@ function S2E1:newQuake(timer)
 
 end
 
+
+function arkRpMessageShowCapPopup(timer)
+	local ui = getUI("ui:interface:cap_popup")
+	ui:updateCoords()
+	setOnDraw(ui, "")
+	setTopWindow(ui)
+	ui.alpha = 255
+	ui.pop_max_h = getUI("ui:interface:cap_popup:html:text_list").h_real + 8
+	if ui.pop_max_h < 80 then
+		ui.pop_max_h = 155
+	end
+	ui.h = ui.pop_max_h
+	ui.y = getUI("ui:interface").h - 90
+	ui.x = math.floor(getUI("ui:interface").w / 2) - 400
+
+	if timer then
+		game.autoHideCapStartTime = nltime.getLocalTime()
+		game.autoHideCapTimer = timer
+		setOnDraw(getUI("ui:interface:cap_popup"), "game:autoHideCapPopup()")
+	else
+		setOnDraw(getUI("ui:interface:cap_popup"), "game:tempfixCapPopup()")
+	end
+end
+
+function game:autoHideCapPopup()
+	local ui = getUI("ui:interface:cap_popup")
+
+	ui.pop_max_h = getUI("ui:interface:cap_popup:html:text_list").h_real + 8
+	if ui.pop_max_h < 80 then
+		ui.pop_max_h = 155
+	end
+	ui.h = ui.pop_max_h
+
+	if game.autoHideCapTimer == 0 then
+		alpha = nltime.getLocalTime() - game.autoHideCapStartTime
+		if alpha >= 254*5 then
+			setOnDraw(getUI("ui:interface:cap_popup"), "")
+			ui.active=false
+		else
+			ui.alpha=255-math.floor(alpha/5)
+		end
+	else
+		if game.autoHideCapStartTime + game.autoHideCapTimer < nltime.getLocalTime() then
+			game.autoHideCapStartTime = nltime.getLocalTime()
+			game.autoHideCapTimer = 0
+		end
+	end
+end
+
 -- VERSION --
-RYZOM_ARK_VERSION = 366
+FILE_ARK_VERSION = 184

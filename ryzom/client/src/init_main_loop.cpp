@@ -1493,6 +1493,7 @@ void loadBackgroundBitmap (TBackground background)
 		filename = name+"_0."+ext;
 	else
 		filename = name+"_1."+ext;
+
 	switch (background)
 	{
 	case ElevatorBackground:
@@ -1539,36 +1540,59 @@ void loadBackgroundBitmap (TBackground background)
 	{
 		LoadingMaterialFull = Driver->createMaterial();
 		LoadingMaterialFull.initUnlit();
-		LoadingMaterialFull.setAlphaTest (true);
+		LoadingMaterialFull.setAlphaTest(true);
 	}
 
 	// Bitmap is not the same ?
 	if ((filename != LoadingBitmapFilename) && Driver)
 	{
-		destroyLoadingBitmap ();
+		destroyLoadingBitmap();
 		LoadingBitmapFilename = filename;
 
 		// Build a background filename
-		name = CFile::getFilenameWithoutExtension (filename);
-		ext = CFile::getExtension (filename);
+		name = CFile::getFilenameWithoutExtension(filename);
+		ext = CFile::getExtension(filename);
 
-		if (!CPath::lookup (name+"_0."+ext, false, false).empty())
+		std::string lang = ClientCfg.LanguageCode;
+
+		// candidate names:
+		std::string lang0 = name + "_" + lang + "_0." + ext;
+		std::string lang1 = name + "_" + lang + "_1." + ext;
+		std::string def0 = name + "_0." + ext;
+		std::string def1 = name + "_1." + ext;
+
+		bool lang0Exists = !CPath::lookup(lang0, false, false).empty();
+		bool lang1Exists = !CPath::lookup(lang1, false, false).empty();
+		bool def0Exists = !CPath::lookup(def0, false, false).empty();
+		bool def1Exists = !CPath::lookup(def1, false, false).empty();
+
+		if (lang0Exists && lang1Exists)
 		{
-			LoadingBitmap = Driver->createTextureFile(name+"_0."+ext);
-			LoadingBitmapFull = Driver->createTextureFile(name+"_1."+ext);
+			// Use language-specific loading screens if both variants exist
+			LoadingBitmap = Driver->createTextureFile(lang0);
+			LoadingBitmapFull = Driver->createTextureFile(lang1);
+		}
+		else if (def0Exists && def1Exists)
+		{
+			// Fallback to default 0/1 pair
+			LoadingBitmap = Driver->createTextureFile(def0);
+			LoadingBitmapFull = Driver->createTextureFile(def1);
 		}
 		else
 		{
+			// Last fallback: use the plain filename for both
 			LoadingBitmap = Driver->createTextureFile(filename);
 			LoadingBitmapFull = Driver->createTextureFile(filename);
 		}
-		LoadingMaterial.setTexture (0, LoadingBitmap);
-		LoadingMaterialFull.setTexture (0, LoadingBitmapFull);
+
+		LoadingMaterial.setTexture(0, LoadingBitmap);
+		LoadingMaterialFull.setTexture(0, LoadingBitmapFull);
 		nlassert(LoadingBitmap);
 		nlassert(LoadingBitmapFull);
 		LoadingBitmap->setAllowDegradation(false);
 		LoadingBitmapFull->setAllowDegradation(false);
 	}
+
 	for(uint i = 0; i < ClientCfg.Logos.size(); i++)
 	{
 		std::vector<string> res;
@@ -1613,6 +1637,13 @@ void setLoadingContinent (CContinent *continent)
 
 void initWelcomeWindow()
 {
+	CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
+	if (sb.CurrentJoinMode!=CFarTP::LaunchEditor && NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool())
+	{
+		std::vector<string> v;
+		CWidgetManager::getInstance()->runProcedure ("welcome_opened", NULL, v);
+	}
+	/*
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CInterfaceGroup* welcomeWnd = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:welcome_info"));
 	if(welcomeWnd)
@@ -1620,7 +1651,7 @@ void initWelcomeWindow()
 		bool welcomeDbProp  = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:WELCOME")->getValueBool();
 		CSessionBrowserImpl	&sb = CSessionBrowserImpl::getInstance();
 		welcomeWnd->setActive((sb.CurrentJoinMode!=CFarTP::LaunchEditor) && welcomeDbProp);
-	}
+	}*/
 }
 
 // ***************************************************************************

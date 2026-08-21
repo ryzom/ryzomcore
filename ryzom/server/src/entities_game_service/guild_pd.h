@@ -67,6 +67,9 @@ public:
 	uint32							getCreationDate() const;
 	void							setCreationDate(uint32 __v, bool forceWrite=false);
 
+	uint32							getCreationEra() const;
+	void							setCreationEra(uint32 __v, bool forceWrite=false);
+
 	uint32							getXP() const;
 	void							setXP(uint32 __v, bool forceWrite=false);
 
@@ -203,6 +206,7 @@ protected:
 	uint64							_Icon;
 	uint32							_Building;
 	uint32							_Version;
+	uint32							_CreationEra;
 	std::map<TCharacterId, CGuildMemberPD*>	_Members;
 	CGuildFameContainerPD*			_FameContainer;
 	CGuildContainerPD*				_Parent;

@@ -382,6 +382,7 @@ CCharacter::CCharacter()
 	//	_CarriedWeight = 0;
 	_GuildId = 0;
 	_LastGuildId = 0;
+	_GuildEnterEra = 0;
 	_GuildEnterTime = 0;
 	_UseFactionSymbol = false;
 	_SavedVersion = 0;
@@ -715,6 +716,7 @@ void CCharacter::clear()
 	_GuildId = 0;
 	_LastGuildId = 0;
 	_GuildEnterTime = 0;
+	_GuildEnterEra = 0;
 	_CreationPointsRepartition = 0;
 	_ForbidAuraUseStartDate = 0;
 	_ForbidAuraUseEndDate = 0;
@@ -1642,8 +1644,19 @@ uint32 CCharacter::tickUpdate()
 		nextUpdate = 8;
 	}
 
+
+	if (hasMoved() && !haveAnyPrivilege() && getInvisibility())
+	{
+		nlinfo("Not Priv, Not afk and Invisible => made visible");
+		setInvisibility(false);
+		setWhoSeesMe(~0);
+		setAggroableOverride(true);
+		setAggroableSave(true);
+	}
+
 	_SavedPosX = _EntityState.X();
 	_SavedPosY = _EntityState.Y();
+
 	// ARK Check Position
 	vector<string> missionToRemove;
 
@@ -6749,6 +6762,18 @@ void CCharacter::onAnimalSpawned(CPetSpawnConfirmationMsg::TSpawnError SpawnStat
 			if (c) {
 				c->setIsAPet(true);
 				c->setName("pet_of_"+getName().toString());
+
+				uint32 program = c->getBotChatProgram();
+				if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+				{
+					program |= 1 << BOTCHATTYPE::WebPageFlag;
+					c->setBotChatProgram(program);
+				}
+
+				const string &wpn = c->getWebPageName();
+				(string &)wpn = "MENU_MOUNT_IT";
+				const string &wp = c->getWebPage();
+				(string &)wp = toString("app_arcc action=mScript_Run&script_name=MountARenta&player=%s&sheet=%s", getName().toString().c_str(), c->getType().toString().c_str());
 			}
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
 			freeSpeedMode = true;
@@ -15732,7 +15757,13 @@ string CCharacter::getTargetInfos()
 			CMirrorPropValueRO<TYPE_CELL> srcCell(TheDataset, dsr, DSPropertyCELL);
 			sint32 cell = srcCell;
 
-			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title;
+			string riderName;
+			CCharacter *rider = PlayerManager.getChar( cTarget->getRiderEntity() );
+			if ( rider )
+				riderName = rider->getName().toString();
+
+
+			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title+"|"+riderName;
 		}
 	}
 
@@ -19179,15 +19210,6 @@ void CCharacter::setAfkState(bool isAfk)
 			}
 		}
 	}
-
-	if (isAfk == false && !haveAnyPrivilege() && getInvisibility())
-	{
-		nlinfo("Not Priv, Not afk and Invisible => made visible");
-		setInvisibility(false);
-		setWhoSeesMe(~0);
-		setAggroableOverride(true);
-		setAggroableSave(true);
-	}
 }
 
 //----------------------------------------------------------------------------
@@ -21622,10 +21644,15 @@ void CCharacter::outpostSideChosen(bool neutral, OUTPOSTENUMS::TPVPSide side)
 			if (outpost->getName().substr(0, 14) != "outpost_nexus_")
 			{
 				CGuildMember* member = guild->getMemberFromEId(_Id);
-				if (member != NULL && ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (86400/CTickEventHandler::getGameTimeStep())) < OutpostDaysForGvX.get())
+				if (member != NULL)
 				{
-					side = OUTPOSTENUMS::UnknownPVPSide;
-					nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+					nlinfo("Check Need days = 21, %" NL_I64 "u, %" NL_I64 "u", NLMISC::CTime::getSeconds64bSince1970(), member->getRealEnterTimestamp());
+					if (((NLMISC::CTime::getSeconds64bSince1970() - member->getRealEnterTimestamp()) / 86400) < OutpostDaysForGvX.get())
+					{
+						side = OUTPOSTENUMS::UnknownPVPSide;
+						nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+						sendDynamicSystemMessage(_EntityRowId, "OUTPOST_CANT_PARTICIPATE_21DAYS");
+					}
 				}
 			}
 

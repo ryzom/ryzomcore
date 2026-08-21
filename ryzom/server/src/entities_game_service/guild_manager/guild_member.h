@@ -20,6 +20,8 @@
 #include "egs_pd.h"
 #include "../../gameplay_module_lib/gameplay_module_lib.h"
 
+extern NLMISC::CVariable<uint32> CurrentEra;
+
 /**
  * A guild member core class. This is persistant data (except InfoVersion related data)
  * \author Nicolas Brigand
@@ -33,10 +35,14 @@ public:
 
 	/// set the index of the member in the guild
 	inline void setMemberIndex(uint16 idx );
-	/// get the index of the member in the guild 
+	/// get the index of the member in the guild
 	inline uint16 getMemberIndex()const;
 	/// set the grade of the member
 	inline void setMemberGrade( EGSPD::CGuildGrade::TGuildGrade grade );
+	/// get the real enter time (ERA + EnterTime)
+	inline uint64 getRealEnterTime() const;
+	/// get the real enter time (ERA + EnterTime) in seconds timestamp
+	inline uint64 getRealEnterTimestamp() const;
 	/// return the dynamic (ingame id of the member )
 	NLMISC::CEntityId getIngameEId() const
 	{
@@ -45,7 +51,7 @@ public:
 		return _IngameEId;
 	}
 	/// set the dynamic (ingame id of the member )
-	void setDynamicId(uint8 id) 
+	void setDynamicId(uint8 id)
 	{
 		_IngameEId = getId();
 		_IngameEId.setDynamicId( id );
@@ -82,6 +88,28 @@ inline void CGuildMember::setMemberGrade( EGSPD::CGuildGrade::TGuildGrade grade 
 	EGS_PD_AST(guild);
 	guild->setMemberClientDB( this );
 }
+
+//----------------------------------------------------------------------------
+inline uint64 CGuildMember::getRealEnterTime()const
+{
+	uint64 realEnterTime = static_cast<uint64>(getEnterEra());
+	realEnterTime = realEnterTime << 32;
+	realEnterTime |= (static_cast<uint64>(getEnterTime()) & 0xFFFFFFFF);
+
+	return realEnterTime;
+}
+
+
+//----------------------------------------------------------------------------
+inline uint64 CGuildMember::getRealEnterTimestamp()const
+{
+	uint64 realEnterTime = getRealEnterTime();
+
+	NLMISC::TGameCycle tick_dt = CTickEventHandler::getGameCycle(CurrentEra) - realEnterTime;
+	uint32 s_dt = tick_dt / 10;
+	return NLMISC::CTime::getSeconds64bSince1970() - s_dt;
+}
+
 
 #endif // RY_GUILD_MEMBER_H
 

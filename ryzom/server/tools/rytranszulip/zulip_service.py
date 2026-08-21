@@ -8,7 +8,7 @@
 #          \/                   \/
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # Base class for Ryzom <-> Deepl <-> Zulip system
@@ -112,7 +112,7 @@ class ZulipClient(zulip.Client):
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
-			print(event)
+			#print(event)
 			if event["type"] == "message":
 				callback(event)
 		self.call(event_callback, ["message"], None, **kwargs)
@@ -122,7 +122,6 @@ class ZulipService(RyzomService):
 
 	def __init__(self):
 		super().__init__()
-		self.base_url = self.config["zulip"]["site"]
 		while True:
 			try:
 				self.zulip = ZulipClient(config_file=".zuliprc")#email=self.config["zulip"]["email"], api_key=self.config["zulip"]["key"], site=self.base_url)
@@ -166,10 +165,3 @@ class ZulipService(RyzomService):
 	def getZulipMessage(self, i, lang):
 		return self.client.get("Zulip-Chat-"+lang+"-"+str(i))
 
-	def convert_zulip_upload_links(self, text):
-		if not text:
-			return text
-		pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
-		def repl(match):
-			return f"{self.base_url}{match.group(1)}"
-		return pattern.sub(repl, text)
