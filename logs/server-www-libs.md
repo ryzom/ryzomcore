@@ -1,3 +1,10 @@
+## 2026-08-22 — 🐛 Fix duplicate config.php include causing redeclare fatal
+
+Follow-up fixes after deploying the `♻️ Reorganize www/ and harden login security` commit to `main/rendor-staging`.
+
+- Added an optional `www/myconfig.php` include in `config.php` (loaded right after `ryzom_load_ini('/etc/ryzom/shard.ini')`, before the default `define()` fallbacks), each wrapped in `defined()` checks so a value set in `myconfig.php` takes precedence over the built-in default. Renamed `OAUTH_GAME_ACCESS` to `OAUTH_ACCESS_URL` and added `GAME_SUBSCRIPTION_URL`; both external calls in `r2_login_user.php` (OAuth login and subscription check) are now guarded with `defined(...) && CONST` so they can be disabled entirely via `myconfig.php`. Applied the same guard to the Steam auth check (`STEAM_APP_ID`).
+- Fixed a production fatal (`Cannot redeclare ryzom_load_ini()`) caused by `tools/validate_cookie.php` and `ring/plan_edit_session.php` loading `config.php` (and, in the latter's case, `validate_cookie.php`/`ring_session_manager_itf.php` too) via a plain `include()` instead of `include_once()`. Since `login/r2_login.php` already loads `config.php` via `include_once` earlier in the same request, the later plain `include()` re-executed it and redeclared its function — a pre-existing latent bug, not introduced by the reorg, but only reachable through the request chains touched by this session's restructuring.
+
 ## 2026-08-22 — ♻️ Reorganize www/ and harden login security
 
 Restructured `ryzom/server/www/` for clarity and removed several legacy security issues in preparation for the codebase going public.
