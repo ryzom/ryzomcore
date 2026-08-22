@@ -1629,7 +1629,7 @@ public:
 		{
 			sint	index;
 			fromString(Params, index);
-			if(index>=0 && index<SKILLS::NUM_SKILLS)
+			if(index>=0 && index<(sint)SKILLS::NUM_SKILLS)
 				pPM->setBookFilter(BRICK_TYPE::UNKNOWN, (SKILLS::ESkills)index);
 			else
 				pPM->setBookFilter(BRICK_TYPE::UNKNOWN, SKILLS::unknown);

@@ -108,14 +108,14 @@ class ZulipClient(zulip.Client):
 				callback(event)
 
 	def registerMessages(self, **kwargs):
-		self.doRegister(["message"], None, **kwargs)
+		self.doRegister(["message", "update_message"], None, **kwargs)
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
 			#print(event)
-			if event["type"] == "message":
+			if event["type"] in ("message", "update_message"):
 				callback(event)
-		self.call(event_callback, ["message"], None, **kwargs)
+		self.call(event_callback, ["message", "update_message"], None, **kwargs)
 
 
 class ZulipService(RyzomService):
