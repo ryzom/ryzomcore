@@ -68,7 +68,6 @@ class ZulipFetcher(ZulipService):
 				print(f"Error stream {stream_id}", stream["msg"])
 				return
 			if stream["stream"]["creator_id"] != self.admin_id: # or msg["subject"] != "general chat":
-				print(f"RYZOM_DEBUG ignoring message {msg.get('id')}: stream {stream_id} not created by the bot (creator_id={stream['stream']['creator_id']}, admin_id={self.admin_id})")
 				return
 			channel = dest.lower()
 			if channel[0] == u"🔰":
@@ -93,8 +92,7 @@ class ZulipFetcher(ZulipService):
 			self.client.set(f"Zulip-Msg-Lang-{msg['id']}", source_lang, 24*60*60)
 
 			ryzom_message = RyzomMessage("zulip", sender.lower(), channel, channel_id, source_lang, "*", message, source_message_id=msg["id"])
-			ryzom_id = self.addRyzomMessage(ryzom_message)
-			print(f"RYZOM_DEBUG ingested zulip message {msg['id']} as Ryzom-Chat-{ryzom_id}, source_lang={source_lang!r}, translated_lang=WK, content={message!r}")
+			self.addRyzomMessage(ryzom_message)
 
 	def checkMessages(self, event):
 		msg = event["message"]
@@ -103,16 +101,13 @@ class ZulipFetcher(ZulipService):
 		self.ingestZulipMessage(msg)
 
 	def checkUpdatedMessage(self, event):
-		print(f"RYZOM_DEBUG update_message event received: message_id={event.get('message_id')} user_id={event.get('user_id')} rendering_only={event.get('rendering_only')} has_content={'content' in event}")
 		# Only react to actual content edits by a real user; ignore rendering-only
 		# fixups (e.g. link preview refresh) and edits with no content change.
 		if event.get("rendering_only") or "content" not in event:
-			print(f"RYZOM_DEBUG ignoring update_message {event.get('message_id')}: rendering_only or no content change")
 			return
 		# Edits made by the Ryzom bot itself are how translations get added to a
 		# message; reacting to them here would create a translation loop.
 		if event.get("user_id") == self.admin_id:
-			print(f"RYZOM_DEBUG ignoring update_message {event.get('message_id')}: edit made by the bot itself (admin_id={self.admin_id})")
 			return
 
 		message_id = event["message_id"]
@@ -124,7 +119,6 @@ class ZulipFetcher(ZulipService):
 		# Reuse the original message's language, so a re-translation isn't
 		# mistakenly sourced from the requesting bot's own language.
 		source_lang = self.client.get(f"Zulip-Msg-Lang-{message_id}")
-		print(f"RYZOM_DEBUG re-ingesting edited message {message_id} for re-translation, source_lang={source_lang!r}")
 		self.ingestZulipMessage(result["message"], source_lang=source_lang)
 
 	def dispatchEvent(self, event):

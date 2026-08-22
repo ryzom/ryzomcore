@@ -102,7 +102,6 @@ class ZulipDispatcher(ZulipService):
 		return None
 
 	def sendTranslation(self, message_id, m):
-		print(f"RYZOM_DEBUG sendTranslation called: zulip_message_id={message_id} translated_lang={m.translated_lang} has_translation={bool(m.translation)} source_lang={m.source_lang}")
 		if message_id > 0 and m.translation and m.source_lang:
 			# Normalize Zulip-style upload markdown in translation as well
 			clean_translation = self.convert_zulip_upload_links(m.translation)
