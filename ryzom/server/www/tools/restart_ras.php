@@ -12,7 +12,9 @@
 // Copyright (C) 2019  Winch Gate Property Limited
 // This program is free software: read https://ryzom.com/dev/copying.html for more details
 
-include_once(dirname(__DIR__).'/libs/admin_modules_itf.php');
+if (php_sapi_name() !== 'cli')
+	die('no soup for you!');
 
-$args = array_slice($argv, 1);
-queryShard('egs', implode(" ", $args), '', false);
+include_once(dirname(__DIR__).'/libs/admin_modules_itf.php');
+var_dump(queryShard('ras', 'quit', '', true));
+

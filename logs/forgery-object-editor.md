@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-08-21 — ✨ Add app icon and startup splashscreen to ForgeryApp
+
+Added to `ryzom_forgery/app.py`, the shared `ForgeryApp` base class every tool app
+(including Patina/`object_editor.py`) inherits from, so both apply automatically
+everywhere:
+
+- Window icon: `forgery.png` (128x128, at the `nel/tools/forgery/` root) set via
+  `WindowProperties.setIconFilename()` when building the window's initial properties.
+- Startup splashscreen: new `ryzom_forgery/splash.py` module, `Splash` class. Shows
+  `splashscreen.png` (512x512, same root) in a borderless, always-on-top Tkinter
+  window, running on its own thread with its own Tk mainloop so it keeps repainting
+  while the caller thread does the actual (blocking) Panda3D startup work. Centered on
+  the app's last known window position (`center_on`, from the geometry already saved
+  per-app in `~/.ryzom_forgery/*.json`) rather than on `winfo_screenwidth/height()`,
+  which reports the whole virtual desktop (not a single monitor) on multi-monitor X11
+  setups and would otherwise center the splash right at the seam between two screens.
+
+Tried and discarded two approaches to also hide the real Panda3D window itself while it
+loads underneath the splash: `WindowProperties.setOpen(False)` (only honored if set at
+window *creation*, and even then some window managers flash it mapped for a frame
+before the hide request lands) and creating it at an off-screen origin/minimum size
+(window managers are free to ignore position/size requests entirely -- e.g. tiling WMs
+enforce their own layout). Since neither is reliably honored across window managers,
+settled for the simplest option instead: `ShowBase.__init__()` (which creates the real
+window) is delayed by a flat 1-second `time.sleep()` after the splash is already up, so
+the splash has already fully rendered before the real window even exists, whatever the
+window manager then does with it. `Splash.close()` still enforces its own 1.2s minimum
+display duration on top of that, mainly to cover the rest of a tool app's own init work
+(explorer, lights, icon font, etc).
+
 ## 2026-08-19 — ✨ Auto-detect edited Panoply sources instead of a Reload button
 
 Phase A Step 5 of the "génération live des textures Panoply" chantier (see
