@@ -1,8 +1,8 @@
 <?php 
-	include('../tools/validate_cookie.php');
-	include('ring_session_manager_itf.php');
+	include_once('../tools/validate_cookie.php');
+	include_once('ring_session_manager_itf.php');
 	include_once('../libs/domain_info.php');
-	include('../config.php');
+	include_once('../config.php');
 
 	function scheduleSessionResult($charId, $sessionId, $result, $resultString)
 	{
