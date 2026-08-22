@@ -31,18 +31,19 @@ class RingUser {
 			$this->client = $clientApplication;
 
 		$this->db->select();
-
-		$sub_url = 'https://me.ryzom.com/api/oauth/gameaccess?tokenA='.urlencode($login).'&secure='.urlencode($password).'&user_agent='.urlencode($_SERVER['HTTP_USER_AGENT']);
-		$oauth = @json_decode(file_get_contents($sub_url), true);
-		if (isset($oauth['access']) && $oauth['access']) {
-			if (isset($oauth['user_id'])) {
-				$this->user =  $this->db->querySingle('SELECT * FROM user WHERE UId='.$this->db->e($oauth['user_id']));
-				if ($this->user) {
-					$this->password = $this->user['Password'];
-					$this->login = $this->user['Login'];
+		if (defined('OAUTH_ACCESS_URL') && OAUTH_ACCESS_URL) {
+			$sub_url = OAUTH_ACCESS_URL.'?tokenA='.urlencode($login).'&secure='.urlencode($password).'&user_agent='.urlencode($_SERVER['HTTP_USER_AGENT']);
+			$oauth = @json_decode(file_get_contents($sub_url), true);
+			if (isset($oauth['access']) && $oauth['access']) {
+				if (isset($oauth['user_id'])) {
+					$this->user =  $this->db->querySingle('SELECT * FROM user WHERE UId='.$this->db->e($oauth['user_id']));
+					if ($this->user) {
+						$this->password = $this->user['Password'];
+						$this->login = $this->user['Login'];
+					}
+				} else {
+					$this->user = array('token_auth' => $oauth['access']);
 				}
-			} else {
-				$this->user = array('token_auth' => $oauth['access']);
 			}
 		}
 
@@ -86,7 +87,7 @@ class RingUser {
 		$this->steamid = NULL;
 		$this->steamuser = NULL;
 
-		if (isset($_GET['steam_auth_session_ticket'])) {
+		if (defined('STEAM_APP_ID') && STEAM_APP_ID && isset($_GET['steam_auth_session_ticket'])) {
 			$ticket = $_GET['steam_auth_session_ticket'];
 			$infos = file_get_contents('https://api.steampowered.com/ISteamUserAuth/AuthenticateUserTicket/v1/?key='.STEAM_API_KEY.'&appid='.STEAM_APP_ID.'&ticket='.$ticket);
 			$this->logFile->logStr($infos);
@@ -212,36 +213,36 @@ class RingUser {
 
 		if ($this->client == 'ryzom_live') { // Check :TRB: and remove it if sub
 
-			// NEW WAY 2020
-			$user_agent = $_SERVER['HTTP_USER_AGENT'];
-			$token = base64_encode(hash_hmac('sha512', $this->uid.$this->getUserIpAddr(), ME_API_KEY, true));
-			$sub_url = 'https://me.ryzom.com/api/account/subscription?user_id='.$this->uid.'&token='.urlencode($token).'&hash='.$this->getUserIpAddr().'&user_agent='.urlencode($user_agent);
+			if (defined('GAME_SUBSCRIPTION_URL') && GAME_SUBSCRIPTION_URL) {
+				$user_agent = $_SERVER['HTTP_USER_AGENT'];
+				$token = base64_encode(hash_hmac('sha512', $this->uid.$this->getUserIpAddr(), ME_API_KEY, true));
+				$sub_url = GAME_SUBSCRIPTION_URL.'?user_id='.$this->uid.'&token='.urlencode($token).'&hash='.$this->getUserIpAddr().'&user_agent='.urlencode($user_agent);
 
-			$lang = isset($_GET['lg']) ? $_GET['lg'] : 'unknown';
-			$sub_url .= '&lang='.urlencode(substr($lang, 0, 10));
-			$sub_content = file_get_contents($sub_url);
-			$me_sub = json_decode($sub_content, true);
+				$lang = isset($_GET['lg']) ? $_GET['lg'] : 'unknown';
+				$sub_url .= '&lang='.urlencode(substr($lang, 0, 10));
+				$sub_content = file_get_contents($sub_url);
+				$me_sub = json_decode($sub_content, true);
 
-			if ($me_sub == 'banned')
-				dieError(4446, $this->client);
+				if ($me_sub == 'banned')
+					dieError(4446, $this->client);
 
-			if ($me_sub == 'suspended')
-				dieError(4447, $this->client);
+				if ($me_sub == 'suspended')
+					dieError(4447, $this->client);
 
-			if ($me_sub == 'multiboxing')
-				dieError(4448, $this->client);
+				if ($me_sub == 'multiboxing')
+					dieError(4448, $this->client);
 
-			if ($me_sub == 'vpn')
-				dieError(4449, $this->client);
+				if ($me_sub == 'vpn')
+					dieError(4449, $this->client);
+				$is_premium = $me_sub == 'premium' || $this->user['Privilege'] || $this->user['GMId'];
 
-			$is_premium = $me_sub == 'premium' || $this->user['Privilege'] || $this->user['GMId'];
-
-			if ($is_premium) {
-				//// UPDATE FOR SUB ACCOUNT : remove :TRB: tag
-				$this->removePriv('TRB');
-			} else {
-				//// UPDATE FOR UNSUB ACCOUNT : add :TRB: tag
-				$this->addPriv('TRB');
+				if ($is_premium) {
+					//// UPDATE FOR SUB ACCOUNT : remove :TRB: tag
+					$this->removePriv('TRB');
+				} else {
+					//// UPDATE FOR UNSUB ACCOUNT : add :TRB: tag
+					$this->addPriv('TRB');
+				}
 			}
 		} else {
 			/// On yubo, all accounts are premium except accounts with :F2P: tag

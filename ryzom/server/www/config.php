@@ -29,5 +29,14 @@ function ryzom_load_ini($file_path) {
 
 ryzom_load_ini('/etc/ryzom/shard.ini');
 
-define('ACCEPT_UNKNOWN_USER', false);
-define('AUTO_CREATE_RING_INFO', true);
+if (file_exists(__DIR__.'/myconfig.php'))
+	include_once(__DIR__.'/myconfig.php');
+
+if (!defined('ACCEPT_UNKNOWN_USER'))
+	define('ACCEPT_UNKNOWN_USER', false);
+if (!defined('OAUTH_ACCESS_URL'))
+	define('OAUTH_ACCESS_URL', 'https://me.ryzom.com/api/oauth/gameaccess');
+if (!defined('GAME_SUBSCRIPTION_URL'))
+	define('GAME_SUBSCRIPTION_URL', 'https://me.ryzom.com/api/account/subscription');
+if (!defined('AUTO_CREATE_RING_INFO'))
+	define('AUTO_CREATE_RING_INFO', true);
