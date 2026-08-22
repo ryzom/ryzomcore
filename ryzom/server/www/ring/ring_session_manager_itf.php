@@ -20,19 +20,19 @@
 	class RSMGR_TSessionPartStatus
 	{
 		var $Value;
-
+		
 		function RSMGR_TSessionPartStatus()
 		{
 			global $RSMGR_TSessionPartStatus_InvalidValue;
 			$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TSessionPartStatus_EnumValues;
 			return $RSMGR_TSessionPartStatus_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionPartStatus_EnumValues;
@@ -44,15 +44,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionPartStatus_InvalidValue;
@@ -62,7 +62,7 @@
 			else
 				$this->Value = $RSMGR_TSessionPartStatus_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -80,19 +80,19 @@
 	class RSMGR_TSessionType
 	{
 		var $Value;
-
+		
 		function RSMGR_TSessionType()
 		{
 			global $RSMGR_TSessionType_InvalidValue;
 			$this->Value = $RSMGR_TSessionType_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TSessionType_EnumValues;
 			return $RSMGR_TSessionType_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionType_EnumValues;
@@ -104,15 +104,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TSessionType_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionType_InvalidValue;
@@ -122,7 +122,7 @@
 			else
 				$this->Value = $RSMGR_TSessionType_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -142,19 +142,19 @@
 	class RSMGR_TSessionOrientation
 	{
 		var $Value;
-
+		
 		function RSMGR_TSessionOrientation()
 		{
 			global $RSMGR_TSessionOrientation_InvalidValue;
 			$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TSessionOrientation_EnumValues;
 			return $RSMGR_TSessionOrientation_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionOrientation_EnumValues;
@@ -166,15 +166,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionOrientation_InvalidValue;
@@ -184,7 +184,7 @@
 			else
 				$this->Value = $RSMGR_TSessionOrientation_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -202,19 +202,19 @@
 	class RSMGR_TSessionState
 	{
 		var $Value;
-
+		
 		function RSMGR_TSessionState()
 		{
 			global $RSMGR_TSessionState_InvalidValue;
 			$this->Value = $RSMGR_TSessionState_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TSessionState_EnumValues;
 			return $RSMGR_TSessionState_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionState_EnumValues;
@@ -226,15 +226,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TSessionState_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionState_InvalidValue;
@@ -244,7 +244,7 @@
 			else
 				$this->Value = $RSMGR_TSessionState_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -260,19 +260,19 @@
 	class RSMGR_TAnimMode
 	{
 		var $Value;
-
+		
 		function RSMGR_TAnimMode()
 		{
 			global $RSMGR_TAnimMode_InvalidValue;
 			$this->Value = $RSMGR_TAnimMode_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TAnimMode_EnumValues;
 			return $RSMGR_TAnimMode_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TAnimMode_EnumValues;
@@ -284,15 +284,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TAnimMode_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TAnimMode_InvalidValue;
@@ -302,7 +302,7 @@
 			else
 				$this->Value = $RSMGR_TAnimMode_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -318,19 +318,19 @@
 	class RSMGR_TAccessType
 	{
 		var $Value;
-
+		
 		function RSMGR_TAccessType()
 		{
 			global $RSMGR_TAccessType_InvalidValue;
 			$this->Value = $RSMGR_TAccessType_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TAccessType_EnumValues;
 			return $RSMGR_TAccessType_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TAccessType_EnumValues;
@@ -342,15 +342,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TAccessType_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TAccessType_InvalidValue;
@@ -360,7 +360,7 @@
 			else
 				$this->Value = $RSMGR_TAccessType_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -376,19 +376,19 @@
 	class RSMGR_TRuleType
 	{
 		var $Value;
-
+		
 		function RSMGR_TRuleType()
 		{
 			global $RSMGR_TRuleType_InvalidValue;
 			$this->Value = $RSMGR_TRuleType_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TRuleType_EnumValues;
 			return $RSMGR_TRuleType_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TRuleType_EnumValues;
@@ -400,15 +400,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TRuleType_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TRuleType_InvalidValue;
@@ -418,7 +418,7 @@
 			else
 				$this->Value = $RSMGR_TRuleType_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -438,19 +438,19 @@
 	class RSMGR_TLevelFilter
 	{
 		var $Value;
-
+		
 		function RSMGR_TLevelFilter()
 		{
 			global $RSMGR_TLevelFilter_InvalidValue;
 			$this->Value = $RSMGR_TLevelFilter_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TLevelFilter_EnumValues;
 			return $RSMGR_TLevelFilter_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TLevelFilter_EnumValues;
@@ -462,15 +462,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TLevelFilter_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TLevelFilter_InvalidValue;
@@ -480,7 +480,7 @@
 			else
 				$this->Value = $RSMGR_TLevelFilter_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -497,19 +497,19 @@
 	class RSMGR_TEstimatedDuration
 	{
 		var $Value;
-
+		
 		function RSMGR_TEstimatedDuration()
 		{
 			global $RSMGR_TEstimatedDuration_InvalidValue;
 			$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TEstimatedDuration_EnumValues;
 			return $RSMGR_TEstimatedDuration_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TEstimatedDuration_EnumValues;
@@ -521,15 +521,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TEstimatedDuration_InvalidValue;
@@ -539,7 +539,7 @@
 			else
 				$this->Value = $RSMGR_TEstimatedDuration_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -557,19 +557,19 @@
 	class RSMGR_TRaceFilter
 	{
 		var $Value;
-
+		
 		function RSMGR_TRaceFilter()
 		{
 			global $RSMGR_TRaceFilter_InvalidValue;
 			$this->Value = $RSMGR_TRaceFilter_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TRaceFilter_EnumValues;
 			return $RSMGR_TRaceFilter_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TRaceFilter_EnumValues;
@@ -581,15 +581,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TRaceFilter_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TRaceFilter_InvalidValue;
@@ -599,7 +599,7 @@
 			else
 				$this->Value = $RSMGR_TRaceFilter_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -616,19 +616,19 @@
 	class RSMGR_TReligionFilter
 	{
 		var $Value;
-
+		
 		function RSMGR_TReligionFilter()
 		{
 			global $RSMGR_TReligionFilter_InvalidValue;
 			$this->Value = $RSMGR_TReligionFilter_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TReligionFilter_EnumValues;
 			return $RSMGR_TReligionFilter_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TReligionFilter_EnumValues;
@@ -640,15 +640,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TReligionFilter_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TReligionFilter_InvalidValue;
@@ -658,7 +658,7 @@
 			else
 				$this->Value = $RSMGR_TReligionFilter_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -674,19 +674,19 @@
 	class RSMGR_TGuildFilter
 	{
 		var $Value;
-
+		
 		function RSMGR_TGuildFilter()
 		{
 			global $RSMGR_TGuildFilter_InvalidValue;
 			$this->Value = $RSMGR_TGuildFilter_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TGuildFilter_EnumValues;
 			return $RSMGR_TGuildFilter_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TGuildFilter_EnumValues;
@@ -698,15 +698,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TGuildFilter_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TGuildFilter_InvalidValue;
@@ -716,7 +716,7 @@
 			else
 				$this->Value = $RSMGR_TGuildFilter_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -762,19 +762,19 @@
 	class RSMGR_TShardFilter
 	{
 		var $Value;
-
+		
 		function RSMGR_TShardFilter()
 		{
 			global $RSMGR_TShardFilter_InvalidValue;
 			$this->Value = $RSMGR_TShardFilter_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TShardFilter_EnumValues;
 			return $RSMGR_TShardFilter_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TShardFilter_EnumValues;
@@ -786,15 +786,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TShardFilter_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TShardFilter_InvalidValue;
@@ -804,7 +804,7 @@
 			else
 				$this->Value = $RSMGR_TShardFilter_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
@@ -821,19 +821,19 @@
 	class RSMGR_TSessionEvent
 	{
 		var $Value;
-
+		
 		function RSMGR_TSessionEvent()
 		{
 			global $RSMGR_TSessionEvent_InvalidValue;
 			$this->Value = $RSMGR_TSessionEvent_InvalidValue;
 		}
-
+			
 		function toString()
 		{
 			global $RSMGR_TSessionEvent_EnumValues;
 			return $RSMGR_TSessionEvent_EnumValues[$this->Value];
 		}
-
+		
 		function fromString($strValue)
 		{
 			global $RSMGR_TSessionEvent_EnumValues;
@@ -845,15 +845,15 @@
 					return;
 				}
 			}
-
+			
 			$this->Value = $RSMGR_TSessionEvent_InvalidValue;
 		}
-
+		
 		function toInt()
 		{
 			return $this->Value;
 		}
-
+		
 		function fromInt($intValue)
 		{
 			global $RSMGR_TSessionEvent_InvalidValue;
@@ -863,14 +863,14 @@
 			else
 				$this->Value = $RSMGR_TSessionEvent_InvalidValue;
 		}
-	}
+	}	
 ?>
 <?php
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	require_once('tools/nel_message.php');
+	require_once('../libs/nel_message.php');
 
 	class CRingSessionManagerWeb extends CCallbackClient
 	{
@@ -899,7 +899,7 @@
 				$msg->serialEnum($orientation);
 				$msg->serialUint32($subscriptionClosed);
 				$msg->serialUint32($autoInvite);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -916,7 +916,7 @@
 				$msg->serialUint32($initialIslandLocation);
 				$msg->serialUint32($initialEntryPointLocation);
 				$msg->serialUint32($initialSeason);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -930,7 +930,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -959,7 +959,7 @@
 				$msg->serialUint32($autoInvite);
 				$msg->serialString($language);
 				$msg->serialEnum($orientation);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -973,7 +973,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -987,7 +987,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1001,7 +1001,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1014,7 +1014,7 @@
 
 
 			$msg->serialUint32($charId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1028,7 +1028,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($friendCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1042,7 +1042,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($friendCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1056,7 +1056,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($bannedCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1070,7 +1070,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($bannedCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1084,7 +1084,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($friendDMCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1098,7 +1098,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($friendDMCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1114,7 +1114,7 @@
 				$msg->serialUint32($charId);
 				$msg->serialString($relation);
 				$msg->serialString($comments);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1130,7 +1130,7 @@
 				$msg->serialUint32($sessionId);
 				$msg->serialUint32($invitedCharId);
 				$msg->serialEnum($charRole);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1145,7 +1145,7 @@
 			$msg->serialUint32($ownerCharId);
 				$msg->serialUint32($sessionId);
 				$msg->serialUint32($removedCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1159,7 +1159,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1173,7 +1173,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1188,7 +1188,7 @@
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
 				$msg->serialString($clientApplication);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1202,7 +1202,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialString($clientApplication);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1216,7 +1216,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialString($clientApplication);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1229,7 +1229,7 @@
 
 
 			$msg->serialUint32($charId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1242,7 +1242,7 @@
 
 
 			$msg->serialUint32($charId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1257,7 +1257,7 @@
 			$msg->serialUint32($ownerCharId);
 				$msg->serialUint32($sessionId);
 				$msg->serialUint32($kickedCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1272,7 +1272,7 @@
 			$msg->serialUint32($ownerCharId);
 				$msg->serialUint32($sessionId);
 				$msg->serialUint32($unkickedCharId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1287,7 +1287,7 @@
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
 				$msg->serialUint32($guildId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1302,7 +1302,7 @@
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
 				$msg->serialUint32($guildId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1319,7 +1319,7 @@
 				$msg->serialString($title);
 				$msg->serialUint32($numPlayer);
 				$msg->serialString($playType);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1335,7 +1335,7 @@
 				$msg->serialUint32($sessionId);
 				$msg->serialString($entryType);
 				$msg->serialString($text);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1354,12 +1354,12 @@
 				$msg->serialUint32($rateAccessibility);
 				$msg->serialUint32($rateOriginality);
 				$msg->serialUint32($rateDirection);
-
+	
 			return parent::sendMessage($msg);
 
 
 		}
-
+	
 
 		function waitCallback()
 		{
@@ -1394,14 +1394,14 @@
 
 			return true;
 		}
-
+		
 
 		function invokeResult_skel(&$message)
 		{
 			$message->serialUint32($userId);
 				$message->serialUint32($resultCode);
 				$message->serialString($resultString);
-
+				
 			$this->invokeResult($userId, $resultCode, $resultString);
 		}
 
@@ -1411,7 +1411,7 @@
 				$message->serialUint32($sessionId);
 				$message->serialUInt8($result);
 				$message->serialString($resultString);
-
+				
 			$this->scheduleSessionResult($charId, $sessionId, $result, $resultString);
 		}
 
@@ -1419,29 +1419,29 @@
 		{
 			$message->serialUint32($charId);
 				$message->serialUint32($sessionId);
-
+				
 			$raceFilter = new RSMGR_TRaceFilter;
 	$message->serialEnum($raceFilter);
-
+				
 			$religionFilter = new RSMGR_TReligionFilter;
 	$message->serialEnum($religionFilter);
-
+				
 			$guildFilter = new RSMGR_TGuildFilter;
 	$message->serialEnum($guildFilter);
-
+				
 			$shardFilter = new RSMGR_TShardFilter;
 	$message->serialEnum($shardFilter);
-
+				
 			$levelFilter = new RSMGR_TLevelFilter;
 	$message->serialEnum($levelFilter);
 				$message->serialUint32($subscriptionClosed);
 				$message->serialUint32($autoInvite);
 				$message->serialString($language);
-
+				
 			$orientation = new RSMGR_TSessionOrientation;
 	$message->serialEnum($orientation);
 				$message->serialString($description);
-
+				
 			$this->sessionInfoResult($charId, $sessionId, $raceFilter, $religionFilter, $guildFilter, $shardFilter, $levelFilter, $subscriptionClosed, $autoInvite, $language, $orientation, $description);
 		}
 
@@ -1451,10 +1451,10 @@
 				$message->serialUint32($sessionId);
 				$message->serialUint32($result);
 				$message->serialString($shardAddr);
-
+				
 			$participantStatus = new RSMGR_TSessionPartStatus;
 	$message->serialEnum($participantStatus);
-
+				
 			$this->joinSessionResult($userId, $sessionId, $result, $shardAddr, $participantStatus);
 		}
 
@@ -1464,11 +1464,11 @@
 				$message->serialUint32($sessionId);
 				$message->serialUint32($result);
 				$message->serialString($shardAddr);
-
+				
 			$participantStatus = new RSMGR_TSessionPartStatus;
 	$message->serialEnum($participantStatus);
 				$message->serialUint32($securityCheckForFastDisconnection);
-
+				
 			$this->joinSessionResultExt($userId, $sessionId, $result, $shardAddr, $participantStatus, $securityCheckForFastDisconnection);
 		}
 
@@ -1476,13 +1476,13 @@
 		{
 			$message->serialUint32($userId);
 				$message->serialString($result);
-
+				
 			$this->getShardsResult($userId, $result);
 		}
 
 
 		/////////////////////////////////////////////////////////////////
-		// Copy paste this part of code in your derived class
+		// Copy paste this part of code in your derived class 
 		//	and implement code to ract to incoming message
 		/////////////////////////////////////////////////////////////////
 		// Generic response to invoke.
@@ -1571,7 +1571,7 @@
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	require_once('tools/nel_message.php');
+	require_once('../libs/nel_message.php');
 
 	class CSessionBrowserServerWeb extends CCallbackClient
 	{
@@ -1584,7 +1584,7 @@
 
 			$msg->serialUint32($userId);
 				$msg->serialUint32($cookie);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1597,7 +1597,7 @@
 
 
 			$msg->serialUint32($charId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1611,7 +1611,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1625,7 +1625,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($invitedCharName);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1639,7 +1639,7 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1652,7 +1652,7 @@
 
 
 			$msg->serialUint32($sessionId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1665,7 +1665,7 @@
 
 
 			$msg->serialUint32($md5);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1678,7 +1678,7 @@
 
 
 			$msg->serialUint32($charId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1691,7 +1691,7 @@
 
 
 			$msg->serialUint32($charId);
-
+	
 			return parent::sendMessage($msg);
 
 
@@ -1705,12 +1705,12 @@
 
 			$msg->serialUint32($charId);
 				$msg->serialUint32($msg);
-
+	
 			return parent::sendMessage($msg);
 
 
 		}
-
+	
 
 		function waitCallback()
 		{
@@ -1748,13 +1748,13 @@
 
 			return true;
 		}
-
+		
 
 		function sessionList_skel(&$message)
 		{
 			$message->serialUint32($charId);
 				$message->serialUint32($sessions);
-
+				
 			$this->sessionList($charId, $sessions);
 		}
 
@@ -1763,7 +1763,7 @@
 			$message->serialUint32($charId);
 				$message->serialUint32($sessionId);
 				$message->serialUint32($characters);
-
+				
 			$this->charList($charId, $sessionId, $characters);
 		}
 
@@ -1776,7 +1776,7 @@
 				$message->serialUint32($rateAccessibility);
 				$message->serialUint32($rateOriginality);
 				$message->serialUint32($rateDirection);
-
+				
 			$this->playerRatings($charId, $scenarioRated, $rateFun, $rateDifficulty, $rateAccessibility, $rateOriginality, $rateDirection);
 		}
 
@@ -1789,7 +1789,7 @@
 				$message->serialUint32($rateOriginality);
 				$message->serialUint32($rateDirection);
 				$message->serialUint32($rrpTotal);
-
+				
 			$this->sessionAverageScores($scenarioRated, $rateFun, $rateDifficulty, $rateAccessibility, $rateOriginality, $rateDirection, $rrpTotal);
 		}
 
@@ -1802,7 +1802,7 @@
 				$message->serialUint32($rateOriginality);
 				$message->serialUint32($rateDirection);
 				$message->serialUint32($rrpTotal);
-
+				
 			$this->scenarioAverageScores($scenarioRated, $rateFun, $rateDifficulty, $rateAccessibility, $rateOriginality, $rateDirection, $rrpTotal);
 		}
 
@@ -1812,7 +1812,7 @@
 				$message->serialUint32($authorRating);
 				$message->serialUint32($AMRating);
 				$message->serialUint32($masterlessRating);
-
+				
 			$this->ringRatings($charId, $authorRating, $AMRating, $masterlessRating);
 		}
 
@@ -1821,13 +1821,13 @@
 			$message->serialUint32($charId);
 				$message->serialUint32($ringPoints);
 				$message->serialUint32($maxRingPoints);
-
+				
 			$this->ringPoints($charId, $ringPoints, $maxRingPoints);
 		}
 
 
 		/////////////////////////////////////////////////////////////////
-		// Copy paste this part of code in your derived class
+		// Copy paste this part of code in your derived class 
 		//	and implement code to ract to incoming message
 		/////////////////////////////////////////////////////////////////
 		// Return the list of available session

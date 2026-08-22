@@ -1,8 +1,8 @@
 <?php
-
-include_once('validate_cookie.php');
-include_once('domain_info.php');
-include_once('ring_session_manager_itf.php');
+	require_once('../tools/validate_cookie.php');
+	include_once('../config.php');
+	include_once('../libs/domain_info.php');
+	include_once('ring_session_manager_itf.php');
 
 class JoinShardCb extends CRingSessionManagerWeb
 {
@@ -14,6 +14,8 @@ class JoinShardCb extends CRingSessionManagerWeb
 		global $JoinSessionResultCode, $JoinSessionResultMsg;
 		$JoinSessionResultCode = $result;
 		$JoinSessionResultMsg = $shardAddr;
+		file_put_contents('/home/nevrax/tmp/join_shard_out.log', 'joinSessionResult'.var_export([$userId, $sessionId, $result, $shardAddr, $participantStatus], true));
+	
 		if ($result != 0)
 		{
 			global $FSHostLuaMode, $FSHostResult, $FSHostResultStr;
@@ -53,10 +55,10 @@ class JoinShardCb extends CRingSessionManagerWeb
 		global $getShardListCallback;
 
 		$onlineShardsBySessionId = array();
-		$resultArray = split(';', $resultStr);
+		$resultArray = explode(';', $resultStr);
 		foreach ($resultArray as $shardInfo)
 		{
-			$shardAttr = split(',', $shardInfo);
+			$shardAttr = explode(',', $shardInfo);
 			if (isset($shardAttr[1]))
 				$onlineShardsBySessionId[$shardAttr[0]] = $shardAttr[1];
 		}
@@ -120,7 +122,7 @@ function joinShardFromIdPost( $destSessionId )
 function joinShardFromId( $userId, $domainId, $destSessionId )
 {
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
@@ -148,7 +150,7 @@ function joinShardFromId( $userId, $domainId, $destSessionId )
 function getShardList($userId, $domainId)
 {
 	$domainInfo = getDomainInfo($domainId);
-	$addr = split(":", $domainInfo["session_manager_address"]);
+	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
 
@@ -184,13 +186,13 @@ function displayAllShards(&$onlineShardsBySessionId)
 	}
 
 	// List all shards of the domain, including offline ones
-	global $DBName;
-	mysql_select_db ($DBName) or die ("Can't access to the db dbname:$DBName");
+	$link = mysqli_connect(DB_NEL_HOST, DB_NEL_USER, DB_NEL_PASS) or die ("Can't connect to database host:".DB_NEL_HOST." user:".DB_NEL_USER);
+	mysqli_select_db ($link, DB_NEL_NAME) or die ("Can't access to the db dbname:".DB_NEL_NAME);
 	$query = "select * from shard where domain_id = $domainId";
-	$resShards = mysql_query ($query) or die ("Can't execute the query: ".$query." ".mysql_error());
+	$resShards = mysqli_query ($link, $query) or die ("Can't execute the query: ".$query." ".mysqli_error($link));
 	echo "Select a shard to join:<br>";
 	//echo "<form name='far_tp' action='join_shard.php' method='post'>";
-	while ($rowShard = mysql_fetch_array($resShards))
+	while ($rowShard = mysqli_fetch_array($resShards))
 	{
 		$mainlandSessionId = $rowShard['FixedSessionId'];
 		$isOnline = isset($onlineShardsBySessionId[$mainlandSessionId]);
@@ -219,7 +221,7 @@ function displayAllShards(&$onlineShardsBySessionId)
 function joinMainland($userId, $domainId)
 {
 	$domainInfo = getDomainInfo($domainId);
-//	$addr = split(":", $domainInfo["session_manager_address"]);
+
 	$addr = explode(":", $domainInfo["session_manager_address"]);
 	$RSMHost = $addr[0];
 	$RSMPort = $addr[1];
@@ -227,14 +229,16 @@ function joinMainland($userId, $domainId)
 	// request get to the session manager
 	$joinsShard = new JoinShardCb;
 	$res = "";
-	$joinsShard->connect($RSMHost, $RSMPort, $res);
+	$out = $joinsShard->connect($RSMHost, $RSMPort, $res);
 
 	// set the shard Id to allow any character (by using the special value '15')
 	$charId = ($userId<<4)+15;
 	global $FSHostLuaMode, $verbose;
 	if ($FSHostLuaMode && $verbose)
 		echo "Joining a mainland shard for $charId...<br>";
-	$joinsShard->joinMainland($charId, $domainInfo["domain_name"]);
+
+
+	$out = $joinsShard->joinMainland($charId, $domainInfo["domain_name"]);
 
 	// wait the the return message
 	if ($joinsShard->waitCallback() == false)
@@ -244,6 +248,7 @@ function joinMainland($userId, $domainId)
 		return false;
 	}
 	global $FSHostResult;
+
 	return $FSHostResult;
 }
 ?>

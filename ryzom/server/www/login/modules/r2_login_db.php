@@ -1,10 +1,4 @@
 <?php
-
-function _e($value) {
-	global $RingDb;
-	return mysqli_real_escape_string($RingDb->db, $value);
-}
-
 class LoginDB {
 
 	function __construct($DBHost, $DBUserName, $DBPassword, $DefaultDBName) {
@@ -18,6 +12,10 @@ class LoginDB {
 	function connect() {
 		$this->db = mysqli_connect($this->host, $this->user, $this->pass) or die(errorMsgBlock(3004, 'DB', $this->host, $this->user));
 		return $this->db;
+	}
+
+	function e($value) {
+		return mysqli_real_escape_string($this->db, $value);
 	}
 
 	function select($db='') {
@@ -43,10 +41,6 @@ class LoginDB {
 		if (mysqli_num_rows($result))
 			return mysqli_fetch_array($result);
 		return array();
-	}
-
-	function getLastId() {
-		return mysqli_insert_id($this->db);
 	}
 
 }
