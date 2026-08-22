@@ -68,7 +68,7 @@ class MonitorServices():
 			if time.time() - last_ras_update > 1:
 				updates += 1
 
-				with open("/home/nevrax/www/login/server_open_status", "r") as f:
+				with open("/home/nevrax/www/login/status/server_open_status", "r") as f:
 					new_open_status = f.read().strip()
 					if server_open_status != new_open_status:
 						print("Server Open Status =", new_open_status)
