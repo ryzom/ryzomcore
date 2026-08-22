@@ -29,14 +29,12 @@ class ZulipClient(zulip.Client):
 			else:
 				res = self.register(event_types, narrow, **kwargs)
 			if "error" in res["result"]:
-				print(f"RYZOM_DEBUG register() failed for event_types={event_types}: {res.get('msg')}")
 				if self.verbose:
 					print("Server returned error:\n{}".format(res["msg"]))
 				time.sleep(1)
 			else:
 				self.queue_id = res["queue_id"]
 				self.last_event_id = res["last_event_id"]
-				print(f"RYZOM_DEBUG registered queue {self.queue_id} for event_types={event_types}")
 				print(self.queue_id)
 				return self.queue_id
 
@@ -106,7 +104,6 @@ class ZulipClient(zulip.Client):
 					# longpolling protocol, not something that clients
 					# need to handle.
 					continue
-				print(f"RYZOM_DEBUG raw event received on queue {self.queue_id}: type={event['type']!r}")
 				print(self.queue_id)
 				callback(event)
 
