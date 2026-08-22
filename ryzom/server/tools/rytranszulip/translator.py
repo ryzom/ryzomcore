@@ -107,6 +107,7 @@ class Translator(RyzomService):
 							status = "✅" if translation else "🛑"
 							#print("✅ "+str(i), repr(message.text), "➡️ ", translation)
 							print(f"DEEPL|{message.channel}|{billed_characters}")
+							print(f"RYZOM_DEBUG translated Ryzom-Chat-{i} into {self.dst_lang}: source_message_id={message.source_message_id} translation={translation!r}")
 							message.translation = translation
 							message.translated_lang = self.dst_lang.upper()
 							message.source_message_id = i
