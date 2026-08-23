@@ -42,6 +42,19 @@ pf = ryzom_primitive.load_primitive("dummy.primitive")
 cmb = collision_mesh_build.load_cmb("apartment.cmb")
 ```
 
+### Following a log file
+
+`LogFollower` tails a log file like `tail -F`, surviving rotation
+(copytruncate or create/rename) and the file being briefly missing:
+
+```python
+from pynel.log_follower import LogFollower
+
+for line in LogFollower("/var/log/foo.log"):
+	if "ERROR" in line:
+		print(line)
+```
+
 ## Planned: Georges sheets (`.creature`, `.item`, ...)
 
 Not implemented yet. See [`docs/georges_sheets.md`](docs/georges_sheets.md)
