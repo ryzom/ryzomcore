@@ -7,6 +7,7 @@ class LoginCb extends CLoginServiceWeb {
 		$this->db = $db;
 		$this->domainInfo = $ServerDomain->domainInfo;
 		$this->domainId = $ServerDomain->id;
+		$this->isBeta = $ServerDomain->isBeta;
 	}
 
 
@@ -26,16 +27,13 @@ class LoginCb extends CLoginServiceWeb {
 			global $FSHostLuaMode, $FSHostResultStr;
 			$FSHostLuaMode = false;
 			$res = joinMainland($userId, $this->domainId, $this->domainInfo['domain_name']);
-
 			if ($res) {
-				// return the cookie to the user, il will then be used as an auth to browse the site and to connect to the shard
-				//echo "1#".$cookie."#http://".$RingWebHost."/ring/web_start.php\n";
-// use this line to use woopra stats
-//                  echo "1#".$cookie."#".$FSHostResultStr."#http://".$RingWebHost."/ring/web_start.php#http://".$RingWebHostPHP."/ring/#1\n";
 				echo '1#'.$cookie.'#'.$FSHostResultStr.'#http://'.$RingWebHost.'/ring/web_start.php#http://'.$RingWebHostPHP.'/ring/'."\n";
 				// return the ring domain information
-				echo $this->domainInfo['patch_version'].'#'.$this->domainInfo['backup_patch_url'].'#'.$this->domainInfo['patch_urls'];
-
+				if ($this->isBeta)
+					echo $this->isBeta['patch_version'].'#'.$this->isBeta['backup_patch_url'].'#'.$this->isBeta['patch_urls'];
+				else
+					echo $this->domainInfo['patch_version'].'#'.$this->domainInfo['backup_patch_url'].'#'.$this->domainInfo['patch_urls'];
 			} else {
 				global $JoinSessionResultCode, $JoinSessionResultMsg;
 				echo errorMsgBlock(BASE_TRANSLATED_RSM_ERROR_NUM + $JoinSessionResultCode, $JoinSessionResultCode, $JoinSessionResultMsg, $userId);

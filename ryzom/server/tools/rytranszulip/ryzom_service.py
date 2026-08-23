@@ -187,8 +187,8 @@ class RyzomService():
 	def addRyzomMessage(self, message):
 		self.last_chat_id = self.client.incr("Ryzom-Chat-LastID", 1)
 		self.client.set("Ryzom-Chat-"+str(self.last_chat_id), message.get(), 24*60*60)
-
-		print("Set", "Ryzom-Chat-"+str(self.last_chat_id), "=", message.output_zipped())
+		log_content = "".join([ s[0] for s in  message.get()[6].split() ])
+		print(f"💬 {self.last_chat_id} = {log_content}")
 		return self.last_chat_id
 
 	def getRyzomMessage(self, i):
@@ -208,7 +208,10 @@ class RyzomService():
 	def convert_zulip_upload_links(self, text):
 		if not text:
 			return text
-		pattern = re.compile(r"\[[^\]]*]\((/user_uploads/[^)]+)\)")
+		# Keep the surrounding [alt](...) (or ![alt](...)) markdown syntax intact;
+		# only the relative path inside the parentheses is made absolute. Dropping
+		# the brackets would leave a bare "!https://..." that Zulip won't embed as an image.
+		pattern = re.compile(r"(\[[^\]]*]\()(/user_uploads/[^)]+)(\))")
 		def repl(match):
-			return f"{self.base_url}{match.group(1)}"
+			return f"{match.group(1)}{self.base_url}{match.group(2)}{match.group(3)}"
 		return pattern.sub(repl, text)
