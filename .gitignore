@@ -292,7 +292,6 @@ setup.ini
 
 .claude/
 .agentcom/
-.todo/
 
 # Dear ImGui runtime layout
 imgui.ini
