@@ -12,6 +12,7 @@ build_forgery_wheel:
     - if: $CI_COMMIT_BRANCH == "main/forgery-release"
       changes:
         - nel/tools/forgery/**/*
+        - .gitlab-ci.yml
   before_script:
     - python --version ; pip --version
     - pip install --upgrade pip build
@@ -30,11 +31,13 @@ upload_forgery_wheel:
     - if: $CI_COMMIT_BRANCH == "main/forgery-release"
       changes:
         - nel/tools/forgery/**/*
+        - .gitlab-ci.yml
   needs:
     - job: build_forgery_wheel
   script:
     - |
       wheel=$(ls build/ryzom_forgery-*-py3-none-any.whl)
-      curl --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+      curl --fail-with-body -sS \
+           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
            --upload-file "$wheel" \
            "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/ryzom_forgery/$CI_COMMIT_REF_SLUG/ryzom_forgery-$CI_COMMIT_REF_SLUG-py3-none-any.whl"
