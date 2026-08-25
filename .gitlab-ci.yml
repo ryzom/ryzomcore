@@ -37,13 +37,13 @@ upload_forgery_wheel:
   script:
     - |
       wheel=$(ls build/ryzom_forgery-*-py3-none-any.whl)
-      # The registry path (version folder) can contain hyphens, but the
-      # uploaded *filename* must be a valid wheel name (PEP 427): the
-      # version field is delimited by "-", so CI_COMMIT_REF_SLUG's own
-      # hyphens (main-forgery-release) would break pip's parsing of it --
-      # underscore instead, filename-only.
-      version_tag="${CI_COMMIT_REF_SLUG//-/_}"
+      # The registry path (version folder) can be any string, but the
+      # uploaded *filename*'s version field must be a valid PEP 440 version
+      # (pip parses it on install) -- CI_COMMIT_REF_SLUG (main-forgery-release)
+      # isn't one. Real version tracking happens separately, by comparing
+      # pyproject.toml's version (see ryztart's ryzom_forgery_launcher), not
+      # via this filename -- so a fixed, meaningless "0" is fine here.
       curl --fail-with-body -sS \
            --header "JOB-TOKEN: $CI_JOB_TOKEN" \
            --upload-file "$wheel" \
-           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/ryzom_forgery/$CI_COMMIT_REF_SLUG/ryzom_forgery-$version_tag-py3-none-any.whl"
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/ryzom_forgery/$CI_COMMIT_REF_SLUG/ryzom_forgery-0-py3-none-any.whl"
