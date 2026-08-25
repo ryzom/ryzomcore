@@ -1,11 +1,14 @@
 """Single unified TOML settings file for every Ryzom Forgery tool app
-preference (export flow, Explorer favorites, generic search paths) -- one
-file at `config_dir()/"settings.toml"` instead of one JSON file per concern,
-since a single, easy to read/edit-by-hand file is what actually matters here
-over any of these being independently loadable. There's no separate "data
-root": a search path with recursive on covers that same case, so resolving
-everything (shapes' textures, .skel/.anim compatibility, panoply) through
-this one priority-ordered list is the only mechanism -- see
+preference (export flow, Explorer favorites, generic search paths,
+workspaces) -- one file at `config_dir()/"settings.toml"` instead of one
+JSON file per concern, since a single, easy to read/edit-by-hand file is
+what actually matters here over any of these being independently loadable.
+
+`workspaces_root` is the one actual "data root" concept: a single folder,
+shared across every Forgery app, containing one subfolder per editable
+workspace (see workspaces.py). It is unrelated to `search_paths`, which
+stays a read-only, priority-ordered list of extra folders to resolve assets
+from (shapes' textures, .skel/.anim compatibility, panoply) -- see
 search_paths_dialog.py.
 """
 
@@ -43,6 +46,12 @@ class Settings:
 	explorer_favorites: List[str] = field(default_factory=list)
 	export: ExportSettings = field(default_factory=ExportSettings)
 	search_paths: List[SearchPathDir] = field(default_factory=list)
+	# Root folder containing one subfolder per workspace (see workspaces.py)
+	# -- shared across every Forgery app, unlike export.output_folder.
+	workspaces_root: Optional[str] = None
+	# Name of the active workspace (subfolder of workspaces_root), or None
+	# if no workspace is currently active.
+	active_workspace: Optional[str] = None
 
 
 def load() -> Settings:
@@ -54,6 +63,8 @@ def load() -> Settings:
 
 	settings = Settings()
 	settings.explorer_favorites = list(data.get("explorer_favorites", []))
+	settings.workspaces_root = data.get("workspaces_root") or None
+	settings.active_workspace = data.get("active_workspace") or None
 
 	export_data = data.get("export", {})
 	for field_name in settings.export.__dataclass_fields__:
@@ -72,6 +83,11 @@ def save(settings: Settings) -> None:
 	doc.add(tomlkit.comment("Ryzom Forgery settings -- safe to edit by hand."))
 
 	doc["explorer_favorites"] = settings.explorer_favorites
+
+	if settings.workspaces_root is not None:
+		doc["workspaces_root"] = settings.workspaces_root
+	if settings.active_workspace is not None:
+		doc["active_workspace"] = settings.active_workspace
 
 	export_table = tomlkit.table()
 	for key, value in asdict(settings.export).items():

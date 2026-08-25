@@ -1,13 +1,17 @@
 """Settings UI ("Paths" section) + scan logic for Forgery's generic search
 paths: user-configured, priority-ordered folders (recursive or not,
-.bnp-aware, see search_paths.py) -- the *only* place Forgery resolves
-`.shape`/.skel/.anim/texture files from (no separate "data root"/asset
-index; a plain folder here, with recursive on, covers that same case).
-Finds .skel files compatible with the loaded shape's own skinning bones
-(CSkeletonModel::remapSkinBones-equivalent matching), .anim files compatible
-with a given skeleton, resolves material texture references (see
-shape_geometry.py's load_panda_texture()), and picks up Ryzom's
+.bnp-aware, see search_paths.py) that Forgery resolves `.shape`/.skel/.anim/
+texture files from. Finds .skel files compatible with the loaded shape's own
+skinning bones (CSkeletonModel::remapSkinBones-equivalent matching), .anim
+files compatible with a given skeleton, resolves material texture references
+(see shape_geometry.py's load_panda_texture()), and picks up Ryzom's
 "panoply_files.txt" (see panoply.py) if one is found among them.
+
+The active workspace's own folder (see workspaces.py) is injected ahead of
+these user-configured folders -- always highest priority, never persisted
+into `settings.search_paths` itself -- via set_workspace_dir(), kept in sync
+by the host app whenever the active workspace changes (see
+object_editor.py's wiring of WorkspaceSetupDialog.on_active_workspace_changed).
 """
 
 import threading
@@ -24,6 +28,11 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import SearchPathDir
 
 _PANOPLY_FILE_NAME = "panoply_files.txt"
+# Same on/off icon-color-toggle pattern as explorer.py's favorite star
+# (_FAVORITE_STAR_COLOR/_NON_FAVORITE_STAR_COLOR) -- white/orange
+# instead of a checkbox, to save row width.
+_RECURSIVE_ON_COLOR = (1.0, 0.6, 0.0, 1.0)
+_RECURSIVE_OFF_COLOR = (1.0, 1.0, 1.0, 1.0)
 
 
 def _animation_bone_names(anim):
@@ -88,6 +97,12 @@ class SearchPathsDialog:
 		self._dirs = app_settings.load().search_paths
 		self._add_dir_dialog = None
 
+		# The active workspace's own folder, always searched first -- see
+		# set_workspace_dir(); kept separate from self._dirs (recursive,
+		# never persisted, never shown/edited alongside the user's own
+		# entries in draw_settings_content() beyond a read-only mention).
+		self._workspace_dir = None
+
 		# Built by reload() (run on a background thread -- parsing every
 		# .skel/.anim under a real data tree is far too slow to do on the
 		# main/render thread, see _reload_worker()) -- each swapped in as a
@@ -131,6 +146,21 @@ class SearchPathsDialog:
 		fresh.search_paths = self._dirs
 		app_settings.save(fresh)
 
+	def set_workspace_dir(self, path):
+		"""Injects `path` (the active workspace's own folder, or None) ahead
+		of the user-configured search_paths -- called by the host app
+		whenever the active workspace changes (see object_editor.py). Always
+		reloads: the old workspace's assets must stop resolving and the new
+		one's must start, immediately, not just on the next manual Reload."""
+		new_dir = SearchPathDir(path=str(path), recursive=True) if path is not None else None
+		if new_dir == self._workspace_dir:
+			return
+		self._workspace_dir = new_dir
+		self.reload()
+
+	def _effective_dirs(self):
+		return ([self._workspace_dir] if self._workspace_dir is not None else []) + self._dirs
+
 	def ensure_scanned(self):
 		"""Kicks off a first background scan the first time it's needed
 		(see object_editor.py's _display_shape()) -- so a freshly-opened
@@ -172,7 +202,7 @@ class SearchPathsDialog:
 		panoply_variants = {}
 		total = 0
 
-		for found in search_paths.iter_all_entries(self._dirs, bnp_table_cache):
+		for found in search_paths.iter_all_entries(self._effective_dirs(), bnp_table_cache):
 			total += 1
 			lower_name = found.name.lower()
 			texture_entries.setdefault(lower_name, found)
@@ -328,8 +358,14 @@ class SearchPathsDialog:
 		first match, in list order) -- the up/down buttons let a folder be
 		promoted/demoted in priority instead of only add/remove."""
 		imgui.text("Folders searched (top = highest priority):")
+		if self._workspace_dir is not None:
+			suffix = " (active workspace, always first)"
+			available = imgui.get_content_region_avail().x - imgui.calc_text_size(suffix).x
+			imgui.text_disabled(_truncate_path_to_width(self._workspace_dir.path, max(available, 20)) + suffix)
+			if imgui.is_item_hovered():
+				imgui.set_tooltip(self._workspace_dir.path)
 		style = imgui.get_style()
-		recursive_width = imgui.get_frame_height() + style.item_inner_spacing.x + imgui.calc_text_size("Recursive").x
+		recursive_width = imgui.calc_text_size(fa_icons.ICON_FA_SITEMAP).x + style.frame_padding.x * 2
 		reorder_width = imgui.calc_text_size(fa_icons.ICON_FA_ARROW_UP).x + style.frame_padding.x * 2
 		remove_width = imgui.calc_text_size(fa_icons.ICON_FA_TRASH).x + style.frame_padding.x * 2
 		remove_index = None
@@ -343,9 +379,13 @@ class SearchPathsDialog:
 			if imgui.is_item_hovered():
 				imgui.set_tooltip(entry.path)
 			imgui.same_line()
-			changed, entry.recursive = imgui.checkbox("Recursive", entry.recursive)
-			if changed:
+			tooltip = "Recursive: includes subfolders (click to toggle)" if entry.recursive \
+				else "Not recursive: this folder only (click to toggle)"
+			imgui.push_style_color(imgui.Col_.text.value, _RECURSIVE_ON_COLOR if entry.recursive else _RECURSIVE_OFF_COLOR)
+			if _icon_button(fa_icons.ICON_FA_SITEMAP, tooltip):
+				entry.recursive = not entry.recursive
 				self._save()
+			imgui.pop_style_color()
 			imgui.same_line()
 			if _icon_button(fa_icons.ICON_FA_ARROW_UP, "Move up (higher priority)", disabled=index == 0):
 				move_up_index = index

@@ -39,6 +39,7 @@ from ryzom_forgery.shape_geometry import (
 	shape_geom, solid_color_texture,
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
+from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
@@ -50,7 +51,7 @@ from pynel.ryzom_shape import (
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh
 
 # Shape types pynel's save_shape() can actually write back out -- matches
-# ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save/Save As UI only shows for these.
+# ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save UI only shows for these.
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}
 
 # Toggleable scale-reference shapes shown alongside whatever's loaded, for an
@@ -427,6 +428,13 @@ def _build_geom(vdata, indices):
 	return geom
 
 
+APP_INFO = {
+	"id": "object_editor",
+	"name": "Object Editor",
+	"description": "Browse, inspect and edit .shape files (Patina).",
+}
+
+
 class ObjectEditorApp(ForgeryApp):
 	def __init__(self):
 		# The Explorer starts out wherever the highest-priority configured
@@ -436,7 +444,7 @@ class ObjectEditorApp(ForgeryApp):
 		# there's nothing configured yet.
 		configured_dirs = app_settings.load().search_paths
 		explorer_root = Path(configured_dirs[0].path) if configured_dirs else Path.home()
-		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Object Editor",
+		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Patina",
 		                     explorer_default_filter="*.shape")
 
 		self.material_docs = load_material_docs()
@@ -502,12 +510,11 @@ class ObjectEditorApp(ForgeryApp):
 		self._panoply_freshness_last_check = 0.0
 
 		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
-		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
+		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Export's default filename
 		self._texture_search_dirs = []  # extra folders (see shape_geometry.load_panda_texture's search_dirs) to fall back to for this shape's textures -- an imported mesh's own folder, tex/textures/data subfolders included
 		self._texture_needs_repeat = False  # see _uvs_need_repeat() -- whether the loaded shape's own UVs rely on texture tiling
 		self._save_overwrite_confirmed = False  # session-scoped: asked once, no more Save confirmations after that
 		self._confirm_overwrite_open = False
-		self._save_dialog = None  # in-flight portable_file_dialogs.save_file, for Save As
 		self._save_status = ""
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
@@ -558,6 +565,14 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.search_paths_dialog = SearchPathsDialog()
+		self.workspace_setup_dialog = WorkspaceSetupDialog()
+		# Active workspace's folder always searched first (see the
+		# Workspaces chantier in `.todo/forgery-object-editor.md`) -- synced
+		# on every change via this callback, and once right away here so a
+		# workspace already active from a previous session is in effect
+		# before the first scan below.
+		self.workspace_setup_dialog.on_active_workspace_changed = self.search_paths_dialog.set_workspace_dir
+		self.search_paths_dialog.set_workspace_dir(self.workspace_setup_dialog.active_workspace_dir)
 		# Kicked off immediately (background thread, see ensure_scanned()) so
 		# the very first shape loaded already has a populated texture/skel/
 		# anim/panoply index, instead of possibly rendering with missing
@@ -2490,14 +2505,6 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.close_current_popup()
 		imgui.end_popup()
 
-	def _poll_save_dialog(self):
-		if self._save_dialog is None or not self._save_dialog.ready(0):
-			return
-		result = self._save_dialog.result()
-		self._save_dialog = None
-		if result:
-			self._write_shape(Path(result))
-
 	def _poll_skeleton_file_dialog(self):
 		if self._skeleton_file_dialog is None or not self._skeleton_file_dialog.ready(0):
 			return
@@ -2517,12 +2524,18 @@ class ObjectEditorApp(ForgeryApp):
 			self._apply_bone_preview_animation_bytes(path.read_bytes(), path.name)
 
 	def _draw_bottom_bar(self):
-		"""Single horizontal bar at the very bottom of the panel: Save/Save
-		As (only for a loaded, writable shape), Export (format picker, then
-		the existing ExportDialog flow -- see ExportDialog.export() --
-		applied to the shape's current in-memory state, edits included, not
-		a re-read from disk/bnp), and Quit flush against the right edge.
-		Always drawn (even with nothing loaded) so Quit stays reachable."""
+		"""Two rows pinned at the very bottom of the panel: the active
+		workspace (its own row -- see WorkspaceSetupDialog.draw_active_workspace_row()),
+		then Save (only for a loaded, writable shape -- always targets the
+		active workspace, see the Workspaces chantier in
+		`.todo/forgery-object-editor.md`), Export (format picker, then the
+		existing ExportDialog flow -- see ExportDialog.export() -- applied
+		to the shape's current in-memory state, edits included, not a
+		re-read from disk/bnp), and Quit flush against the right edge.
+		Always drawn (even with nothing loaded) so Quit/the workspace row
+		stay reachable."""
+		imgui.separator()
+		self.workspace_setup_dialog.draw_active_workspace_row()
 		imgui.separator()
 
 		writable = self.shape_file is not None and self.shape_file.type_name in _WRITABLE_SHAPE_TYPES
@@ -2533,22 +2546,6 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.end_disabled()
 			if imgui.is_item_hovered() and self._shape_source_path is None:
 				imgui.set_tooltip("Save unavailable -- loaded from inside a .bnp archive")
-			imgui.same_line()
-
-			if imgui.button("Save As..."):
-				# Prefer the shape's own source path (e.g. saving an edited
-				# .shape back near where it came from); fall back to
-				# wherever the Explorer is currently browsing, plus the
-				# original file name if known (e.g. a shape loaded from
-				# inside a .bnp, which has no real on-disk path of its own
-				# to reuse) -- this used to open with no default folder or
-				# name at all in that case.
-				if self._shape_source_path is not None:
-					default_path = str(self._shape_source_path)
-				else:
-					name = self._shape_source_name or "untitled.shape"
-					default_path = str(Path(self.explorer.root) / name)
-				self._save_dialog = pfd.save_file("Save shape as", default_path, ["Ryzom shape", "*.shape"])
 			imgui.same_line()
 
 			if imgui.button("Export..."):
@@ -2575,7 +2572,6 @@ class ObjectEditorApp(ForgeryApp):
 
 		if writable:
 			self._draw_save_confirmation_popup()
-			self._poll_save_dialog()
 			if self._save_status:
 				imgui.text_wrapped(self._save_status)
 
@@ -2895,6 +2891,7 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog.draw()
 		self.import_dialog.draw()
 		self.search_paths_dialog.draw()
+		self.workspace_setup_dialog.draw()
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
 		self._draw_replace_match_popup()
@@ -2924,6 +2921,8 @@ class ObjectEditorApp(ForgeryApp):
 					draw_properties(self.shape_file.value)
 					imgui.end_tab_item()
 			if imgui.begin_tab_item_simple("Settings"):
+				if imgui.collapsing_header("Workspaces"):
+					self.workspace_setup_dialog.draw_settings_content()
 				if imgui.collapsing_header("Export"):
 					self.export_dialog.draw_settings_content()
 				if imgui.collapsing_header("Paths"):
@@ -2934,5 +2933,9 @@ class ObjectEditorApp(ForgeryApp):
 		self._draw_bottom_bar()
 
 
-if __name__ == "__main__":
+def main(argv=None):
 	ObjectEditorApp().run()
+
+
+if __name__ == "__main__":
+	main()

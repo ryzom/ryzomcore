@@ -270,11 +270,6 @@ class Explorer:
 				imgui.text_disabled("(none yet -- click the star to add the current folder)")
 			for favorite in list(self._favorites):
 				imgui.push_id(favorite)
-				imgui.push_style_color(imgui.Col_.text.value, _FAVORITE_STAR_COLOR)
-				if _icon_button(fa_icons.ICON_FA_STAR, "Remove from favorites"):
-					self._toggle_favorite(favorite)
-				imgui.pop_style_color()
-				imgui.same_line()
 				clicked, _ = imgui.selectable(Path(favorite).name or favorite, False)
 				if imgui.is_item_hovered():
 					imgui.set_tooltip(favorite)
