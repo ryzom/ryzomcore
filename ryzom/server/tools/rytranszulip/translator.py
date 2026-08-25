@@ -19,13 +19,13 @@
 
 
 import os
+import re
 import sys
 import json
 import deepl
 
 from time import sleep, time
-from ryzom_service import RyzomService, RyzomMessage
-from marguez.logger import printer
+from ryzom_service import RyzomService, RyzomMessage, printer
 
 class Translator(RyzomService):
 
@@ -46,6 +46,10 @@ class Translator(RyzomService):
 		self.infos = f"[bright_green]Messages checked: [bright_yellow]{messages}  \t[bright_green]Translated Messages: [bright_yellow]{translated_messages}\n"
 		self.infos += f"[bright_green]Last Deepl Error: [orange1]{self.last_deep_error}"
 		self.updateInfos()
+
+	def escapeImages(self, text):
+		pattern = re.compile(r"!\[[^\]]*]\([^)]+\)")
+		return pattern.sub(lambda m: "<x>"+m.group(0)+"</x>", text)
 
 	def escapeQuotes(self, text, level):
 		if level <= 2:
@@ -68,7 +72,8 @@ class Translator(RyzomService):
 
 	def translateWithDeepl(self, m):
 		client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
-		text = self.escapeQuotes(m.text, 8)
+		text = self.escapeImages(m.text)
+		text = self.escapeQuotes(text, 8)
 		dst_lang = self.dst_lang.upper()
 		try:
 			result = client.translate_text(
@@ -100,8 +105,6 @@ class Translator(RyzomService):
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"
-							#print("✅ "+str(i), repr(message.text), "➡️ ", translation)
-							print(f"DEEPL|{message.channel}|{billed_characters}")
 							message.translation = translation
 							message.translated_lang = self.dst_lang.upper()
 							message.source_message_id = i

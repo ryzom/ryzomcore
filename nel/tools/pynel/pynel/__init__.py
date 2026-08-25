@@ -9,4 +9,5 @@ Submodules:
 	ryzom_bnp       -- read/write .bnp (Big File package) archives
 	ryzom_primitive -- read/write .primitive (LIGO primitive tree) files
 	collision_mesh_build -- read/write .cmb (indoor collision mesh interchange) files
+	log_follower    -- tail -F-like log follower, survives rotation/truncation
 """

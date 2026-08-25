@@ -281,22 +281,19 @@ nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
 nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
 
 # Configs
-ryzom/server/www/config.php
-ryzom/server/tools/config.sh
+ryzom/server/www/login/vendor/
+ryzom/server/www/login/server_open_status
 setup.ini
 
-server_open_status
 
 # Temp
 *.tmp
 *.out
 
-setup.ini
-ryzom/server/www/login/server_open_status
-
 .claude/
 .agentcom/
-.todo/
 
 # Dear ImGui runtime layout
 imgui.ini
+
+

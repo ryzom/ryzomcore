@@ -46,6 +46,9 @@ class IosFetcher(RyzomService):
 		self.guilds = {}
 
 		self.db = None
+		self.connectDb()
+
+	def connectDb(self):
 		try:
 			self.db = mysql.connector.connect(
 				host = self.config["db_webig"]["host"],
@@ -56,6 +59,15 @@ class IosFetcher(RyzomService):
 			print("MySQL Database connection successful")
 		except mysql.connector.Error as err:
 			print(f"Error: '{err}'")
+
+	def ensureDbConnection(self):
+		try:
+			if self.db is None:
+				raise mysql.connector.Error("No database connection")
+			self.db.ping(reconnect=True, attempts=3, delay=5)
+		except mysql.connector.Error as err:
+			print(f"Error: '{err}', reconnecting...")
+			self.connectDb()
 
 	def follow(self, thefile):
 		thefile.seek(0, os.SEEK_END)
@@ -92,6 +104,7 @@ class IosFetcher(RyzomService):
 				pass
 
 	def getGuildName(self, gid):
+		self.ensureDbConnection()
 		cursor = self.db.cursor()
 		try:
 			cursor.execute("SELECT * FROM guilds WHERE guild_id='"+gid+"' AND deleted = 0")
@@ -124,7 +137,6 @@ class IosFetcher(RyzomService):
 				channel_id = ""
 
 			if not channel in ("say", "shout", "arround", "universe", "tell", "region", "guild", "team", "dyn"):
-				print(channel+" 🛑 "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 				return
 
 			if channel == "guild":
@@ -144,7 +156,6 @@ class IosFetcher(RyzomService):
 						channel = "⚜️  "+channel_id[8:]
 					channel_id = "dyn:"+channel_id
 				elif channel_id[:7] == "League_":
-					print(channel+" 🛑 "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 					return
 				else:
 					channel = "❇️  "+channel_id
@@ -166,10 +177,8 @@ class IosFetcher(RyzomService):
 				sender = ssender[1]
 
 			sline[6] = "".join([ s[0] for s in  sline[6].split() ])
-			print("ios logs", "✅ "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 			message = RyzomMessage("ios", sender, channel, channel_id, source_lang, langs, message)
 			last_id = self.addRyzomMessage(message)
-			print("last_id", last_id)
 
 	def run(self):
 		loglines = self.follow(self.logfile)

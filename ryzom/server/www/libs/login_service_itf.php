@@ -3,7 +3,7 @@
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 
-	require_once('tools/nel_message.php');
+	require_once('../libs/nel_message.php');
 
 	class CLoginServiceWeb extends CCallbackClient
 	{
@@ -55,7 +55,6 @@
 			default:
 				return false;
 			}
-
 			return true;
 		}
 
