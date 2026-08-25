@@ -10,4 +10,4 @@ requires-python = ">=3.10"
 dependencies = ["panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py", "tomlkit"]
 
 [tool.setuptools]
-packages = ["ryzom_forgery"]
+packages = ["ryzom_forgery", "ryzom_forgery.apps"]
