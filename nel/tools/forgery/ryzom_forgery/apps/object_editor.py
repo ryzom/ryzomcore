@@ -1222,14 +1222,18 @@ class ObjectEditorApp(ForgeryApp):
 				self._load_shape(ExplorerItem(path=shape_path, name=settings.last_shape_name))
 
 		# The shape displays right away, but its textures are resolved via
-		# self.search_paths_dialog.find_texture() -- backed by the
-		# background scan ensure_scanned() (called right after this in
-		# __init__) just started, and very likely still running this early.
-		# Rather than delaying the shape's own appearance until that scan
-		# finishes, show it untextured immediately with a popup saying so,
-		# and refresh every material once the scan completes (see
+		# self.search_paths_dialog.find_texture() -- backed by the index
+		# ensure_scanned() (called just before this in __init__) built.
+		# has_scanned_data (not just scanning) is what actually matters
+		# here: a cache-hit startup already published a real (if possibly
+		# slightly stale) index synchronously, so the still-running
+		# background refresh scan has nothing left for this popup to wait
+		# on. Only a genuinely cold start (no cache yet, index still empty)
+		# needs to show the shape untextured with a popup saying so, and
+		# refresh every material once that first scan completes (see
 		# _draw_restore_scan_popup()).
-		if self.shape_file is not None and self.search_paths_dialog.scanning:
+		if self.shape_file is not None and self.search_paths_dialog.scanning \
+				and not self.search_paths_dialog.has_scanned_data:
 			self._restore_scan_popup_open = True
 
 	def _draw_restore_scan_popup(self):
@@ -2216,7 +2220,12 @@ class ObjectEditorApp(ForgeryApp):
 		for name in texture_names:
 			for axis, values in self.search_paths_dialog.panoply_variants_for(name).items():
 				available[axis].update(values)
+
+		imgui.text("Panoply:")
 		if not any(available.values()):
+			imgui.same_line()
+			imgui.text_disabled("no variants detected for this shape's textures")
+			imgui.separator()
 			return
 
 		axis_values = {}
@@ -2257,38 +2266,85 @@ class ObjectEditorApp(ForgeryApp):
 					self._reapply_all_materials()
 		imgui.separator()
 
+	def _create_panoply_mask(self, base_texture_name, axis):
+		"""Creates a new mask file for `axis` -- solid black (0 weight
+		everywhere, no effect until painted over), at the same pixel
+		dimensions as `base_texture_name`'s own texture -- directly in the
+		active workspace's masks/ folder. Picked from the "+" button in
+		_draw_panoply_masks_for()."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return
+		base_panda_texture = load_panda_texture(
+			base_texture_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+			finder=self.search_paths_dialog.find_texture)
+		width = base_panda_texture.get_x_size() if base_panda_texture is not None else 256
+		height = base_panda_texture.get_y_size() if base_panda_texture is not None else 256
+		image = PNMImage(width, height)
+		image.fill(0, 0, 0)
+		stem = Path(base_texture_name).stem
+		dest = workspace_dir / "masks" / f"{stem}_{axis}.tga"
+		try:
+			dest.parent.mkdir(parents=True, exist_ok=True)
+			image.write(str(dest))
+		except OSError as exc:
+			self._save_status = f"Could not create mask {dest.name}: {exc}"
+			print(f"[object_editor] {self._save_status}")
+			return
+		self._save_status = f"Created mask {dest.name}"
+		print(f"[object_editor] {self._save_status}")
+
 	def _draw_panoply_masks_for(self, base_texture_name):
-		"""Below a panoplied texture's own row: thumbnails of the grayscale
-		masks (mask weight in the red channel) panoply_maker actually baked
-		this texture's variants from -- e.g. for
-		"tr_hom_armor00_epaule_c1.tga", "tr_hom_armor00_epaule_c1_skin.png"/
-		"..._user.png" sitting in a sibling "mask/" folder next to the base
-		texture, resolved through the same search-paths lookup as any other
-		texture (so wherever the user's search paths actually cover that
-		"mask/" subfolder). Only axes this specific texture has panoply
-		variants for are even checked; if none of their mask files actually
-		resolve (not covered by the current search paths, even though
-		panoply_files.txt lists variants for this texture), nothing is drawn
-		at all -- these are purely an informational aid for understanding
-		how a variant was built, no functional effect either way."""
+		"""Below a material's own texture row: thumbnails of whichever
+		grayscale masks (mask weight in the red channel) already resolve for
+		it -- e.g. for "tr_hom_armor00_epaule_c1.tga",
+		"tr_hom_armor00_epaule_c1_skin.png"/"..._user.png" sitting in a
+		sibling "mask/" folder next to the base texture, resolved through
+		the same search-paths lookup as any other texture (so wherever the
+		user's search paths actually cover that "mask/" subfolder) --
+		regardless of whether panoply_files.txt happens to list this texture
+		at all. A "+" button offers to create any axis (panoply.AXES) that
+		doesn't have a mask yet, directly in the workspace -- the way a
+		plain, not-yet-panoplied texture gets its first mask."""
 		if not base_texture_name:
 			return
-		available = self.search_paths_dialog.panoply_variants_for(base_texture_name)
 		stem = Path(base_texture_name).stem
 		mask_names = []
+		missing_axes = []
 		for axis in panoply.AXES:
-			if not available.get(axis):
-				continue
 			mask_name = f"{stem}_{axis}.tga"
 			if self.search_paths_dialog.find_texture(mask_name) is not None:
 				mask_names.append(mask_name)
-		if not mask_names:
-			return
+			else:
+				missing_axes.append(axis)
 		imgui.text_disabled("Masks:")
 		for mask_name in mask_names:
 			imgui.same_line()
 			imgui.push_id(mask_name)
-			self._draw_texture_preview_static(mask_name)
+			self._draw_texture_preview_static(mask_name, subdir="masks")
+			imgui.same_line()
+			# No material field to rewrite on copy (unlike a real texture
+			# reference) -- a mask is only ever derived from the base
+			# texture's own name + axis, never stored anywhere editable, so
+			# on_copied is a no-op; the copy alone is enough for the next
+			# frame's find_texture() to resolve to it (the active
+			# workspace's own folders are already in the search paths).
+			self._draw_texture_copy_button(mask_name, lambda new_name: None, subdir="masks")
+			imgui.pop_id()
+
+		if missing_axes:
+			imgui.same_line()
+			imgui.push_id(f"add-mask-{stem}")
+			disabled = self.workspace_setup_dialog.active_workspace_dir is None
+			if _icon_button(fa_icons.ICON_FA_PLUS, "Add a mask for a missing axis", disabled=disabled):
+				imgui.open_popup("add-mask-popup")
+			if imgui.begin_popup("add-mask-popup"):
+				for axis in missing_axes:
+					clicked, _ = imgui.selectable(self._PANOPLY_AXIS_LABELS[axis], False)
+					if clicked:
+						self._create_panoply_mask(base_texture_name, axis)
+						imgui.close_current_popup()
+				imgui.end_popup()
 			imgui.pop_id()
 
 	def _apply_material_texture(self, node_path, material, material_id):
@@ -2477,7 +2533,7 @@ class ObjectEditorApp(ForgeryApp):
 			return imgui.color_button(str_id, (0.5, 0.5, 0.5, 0.4), 0, (size, size))
 		return self._draw_thumbnail_button(str_id, tex_ref, name, size)
 
-	def _draw_texture_preview_static(self, name, size=24, badge=None):
+	def _draw_texture_preview_static(self, name, size=24, badge=None, subdir="tex"):
 		"""Same thumbnail button (size, frame, hover-zoom tooltip) as
 		_draw_texture_preview_button, but a plain reveal-in-file-manager
 		action instead of whatever a real texture-picker button would do
@@ -2492,7 +2548,10 @@ class ObjectEditorApp(ForgeryApp):
 		`badge` (e.g. a material index), if given, is overlaid directly on
 		the thumbnail -- see _draw_preview_badge() -- instead of a separate
 		imgui.text() label, which would cost horizontal space this panel
-		doesn't have to spare."""
+		doesn't have to spare. `subdir` ("tex" or "masks", see
+		_is_texture_in_workspace()) decides which workspace folder
+		"already in the workspace" is checked against, for the green
+		border (see _draw_preview_workspace_border())."""
 		tex_ref = self._get_preview_texture_ref(name)
 		if tex_ref is None:
 			imgui.dummy((size, size))
@@ -2503,6 +2562,8 @@ class ObjectEditorApp(ForgeryApp):
 			if imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR) and can_reveal:
 				reveal_in_system_file_manager(resolved.fs_path)
 			imgui.end_disabled()
+			if self._is_texture_in_workspace(name, subdir):
+				self._draw_preview_workspace_border()
 			if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
 				if imgui.begin_tooltip():
 					self._draw_image_opaque_bg(tex_ref, (192, 192))
@@ -2541,6 +2602,20 @@ class ObjectEditorApp(ForgeryApp):
 		draw_list = imgui.get_window_draw_list()
 		draw_list.add_text(font, small_size, shadow_pos, imgui.get_color_u32((0.0, 0.0, 0.0, 1.0)), text)
 		draw_list.add_text(font, small_size, pos, imgui.get_color_u32((1.0, 1.0, 1.0, 1.0)), text)
+
+	@staticmethod
+	def _draw_preview_workspace_border(thickness=2):
+		"""Outlines whichever preview button/thumbnail was just drawn in
+		_TEXTURE_IN_WORKSPACE_COLOR -- same green already used for a texture
+		reference's own text field (see _draw_simple_material_row()/
+		_draw_multi_bitmap_editor()), now also on the thumbnail itself.
+		Manually drawn (not a pushed Col_.border style color): image_button()
+		only actually shows a border when the current style's frame border
+		size is non-zero, which isn't guaranteed."""
+		item_min = imgui.get_item_rect_min()
+		item_max = imgui.get_item_rect_max()
+		color = imgui.get_color_u32(_TEXTURE_IN_WORKSPACE_COLOR)
+		imgui.get_window_draw_list().add_rect(item_min, item_max, color, thickness=thickness)
 
 	def _get_color_texture_ref(self, color):
 		"""A 1x1 solid-color Texture (see shape_geometry.solid_color_texture)
@@ -2810,27 +2885,29 @@ class ObjectEditorApp(ForgeryApp):
 			return None
 		return resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
 
-	def _texture_copy_destination(self, ref):
-		"""<active workspace>/tex/<ref's own bare name>, or None without an
-		active workspace configured."""
+	def _texture_copy_destination(self, ref, subdir="tex"):
+		"""<active workspace>/<subdir>/<ref's own bare name>, or None without
+		an active workspace configured. `subdir` defaults to "tex" (a real
+		material texture); pass "masks" for a Panoply mask file instead (see
+		_draw_panoply_masks_for())."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		if workspace_dir is None:
 			return None
-		return workspace_dir / "tex" / ref.name
+		return workspace_dir / subdir / ref.name
 
-	def _is_texture_in_workspace(self, file_name):
+	def _is_texture_in_workspace(self, file_name, subdir="tex"):
 		"""True if `file_name` currently resolves to a file already sitting
-		in the active workspace's own tex/ folder -- used to color-code
+		in the active workspace's own `subdir` folder -- used to color-code
 		texture references in the UI (see _draw_texture_copy_button())."""
 		ref = self._resolve_texture(file_name)
 		if ref is None or ref.fs_path is None:
 			return False
-		dest = self._texture_copy_destination(ref)
+		dest = self._texture_copy_destination(ref, subdir)
 		return dest is not None and ref.fs_path.resolve() == dest.resolve()
 
-	def _copy_texture_to_workspace(self, file_name):
+	def _copy_texture_to_workspace(self, file_name, subdir="tex"):
 		"""Resolves `file_name` (absolute path or bare name alike) and
-		copies its bytes into the active workspace's tex/ folder, unless
+		copies its bytes into the active workspace's `subdir` folder, unless
 		it's already sitting there. Returns the resulting bare (lowercased,
 		matching how a typed/browsed texture name is normalized elsewhere)
 		file name to store back on the material, or None if nothing could
@@ -2841,7 +2918,7 @@ class ObjectEditorApp(ForgeryApp):
 		if ref is None:
 			print(f"[object_editor] could not resolve texture {file_name!r} to copy")
 			return None
-		dest = self._texture_copy_destination(ref)
+		dest = self._texture_copy_destination(ref, subdir)
 		if dest is None:
 			return None
 		if not (ref.fs_path is not None and ref.fs_path.resolve() == dest.resolve()):
@@ -2853,24 +2930,24 @@ class ObjectEditorApp(ForgeryApp):
 				return None
 		return ref.name.lower()
 
-	def _draw_texture_copy_button(self, current_value, on_copied):
+	def _draw_texture_copy_button(self, current_value, on_copied, subdir="tex"):
 		"""Small icon button, next to a texture reference field: copies
-		that one texture into the active workspace's tex/ folder and
+		that one texture into the active workspace's `subdir` folder and
 		rewrites the reference to the resulting bare name via
 		`on_copied(new_name)` -- deliberately opt-in per texture rather
 		than an automatic copy-everything-on-save, so the workspace's
-		tex/ only ever holds textures the user actually chose to bring in
-		for editing. Once it's already there, this becomes an "Edit"
-		button instead (see _draw_texture_edit_button()) -- copying it
-		again would be a no-op, so there's nothing useful left for this
+		tex/ (or masks/) only ever holds files the user actually chose to
+		bring in for editing. Once it's already there, this becomes an
+		"Edit" button instead (see _draw_texture_edit_button()) -- copying
+		it again would be a no-op, so there's nothing useful left for this
 		button to do besides launch an editor on it."""
-		if self._is_texture_in_workspace(current_value):
+		if self._is_texture_in_workspace(current_value, subdir):
 			self._draw_texture_edit_button(current_value)
 			return
 		disabled = not current_value or self.workspace_setup_dialog.active_workspace_dir is None
 		imgui.begin_disabled(disabled)
-		if _icon_button(fa_icons.ICON_FA_DOWNLOAD, "Copy this texture into the active workspace"):
-			new_name = self._copy_texture_to_workspace(current_value)
+		if _icon_button(fa_icons.ICON_FA_DOWNLOAD, f"Copy this file into the active workspace's {subdir}/"):
+			new_name = self._copy_texture_to_workspace(current_value, subdir)
 			if new_name is not None:
 				on_copied(new_name)
 		imgui.end_disabled()
