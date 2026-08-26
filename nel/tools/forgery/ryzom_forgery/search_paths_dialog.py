@@ -19,6 +19,8 @@ import time
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
 
 from pynel.ryzom_animation import AnimationParseError, parse_animation
 from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
@@ -28,6 +30,10 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import SearchPathDir
 
 _PANOPLY_FILE_NAME = "panoply_files.txt"
+# Bulk operations (extracting a .bnp, a git checkout, a texture batch export
+# from another tool...) fire dozens of individual FS events in a burst --
+# without debouncing, each one would kick off its own full rescan.
+_WATCH_DEBOUNCE_SECONDS = 0.5
 # Same on/off icon-color-toggle pattern as explorer.py's favorite star
 # (_FAVORITE_STAR_COLOR/_NON_FAVORITE_STAR_COLOR) -- white/orange
 # instead of a checkbox, to save row width.
@@ -92,6 +98,32 @@ def _truncate_path_to_width(path, max_width):
 	return best
 
 
+class _DebouncedReloadHandler(FileSystemEventHandler):
+	"""Coalesces a burst of filesystem events into a single `on_settled`
+	call, fired _WATCH_DEBOUNCE_SECONDS after the last event -- watchdog
+	calls on_any_event() from its own OS-native watcher thread, never the
+	main/render thread, same as any other background worker here."""
+
+	def __init__(self, on_settled):
+		self._on_settled = on_settled
+		self._timer = None
+		self._lock = threading.Lock()
+
+	def on_any_event(self, event):
+		with self._lock:
+			if self._timer is not None:
+				self._timer.cancel()
+			self._timer = threading.Timer(_WATCH_DEBOUNCE_SECONDS, self._on_settled)
+			self._timer.daemon = True
+			self._timer.start()
+
+	def cancel(self):
+		with self._lock:
+			if self._timer is not None:
+				self._timer.cancel()
+				self._timer = None
+
+
 class SearchPathsDialog:
 	def __init__(self):
 		self._dirs = app_settings.load().search_paths
@@ -102,6 +134,12 @@ class SearchPathsDialog:
 		# never persisted, never shown/edited alongside the user's own
 		# entries in draw_settings_content() beyond a read-only mention).
 		self._workspace_dir = None
+		# Watches _workspace_dir on disk so external changes (another tool
+		# writing a shape, a git checkout, a manual copy...) get picked up
+		# without the user having to hit Reload -- (re)started in
+		# set_workspace_dir(), never for the user-configured self._dirs
+		# (those are covered by the manual Reload button, same as before).
+		self._workspace_observer = None
 
 		# Built by reload() (run on a background thread -- parsing every
 		# .skel/.anim under a real data tree is far too slow to do on the
@@ -151,12 +189,39 @@ class SearchPathsDialog:
 		of the user-configured search_paths -- called by the host app
 		whenever the active workspace changes (see object_editor.py). Always
 		reloads: the old workspace's assets must stop resolving and the new
-		one's must start, immediately, not just on the next manual Reload."""
+		one's must start, immediately, not just on the next manual Reload.
+		Also (re)starts a filesystem watcher on the new folder -- see
+		_start_workspace_watch()."""
 		new_dir = SearchPathDir(path=str(path), recursive=True) if path is not None else None
 		if new_dir == self._workspace_dir:
 			return
 		self._workspace_dir = new_dir
+		self._start_workspace_watch(path)
 		self.reload()
+
+	def _start_workspace_watch(self, path):
+		"""Stops any previous watch and, if `path` is set, starts a fresh
+		one -- native OS APIs via watchdog (inotify/FSEvents/
+		ReadDirectoryChangesW, with a polling fallback where none of those
+		are available), the most robust cross-platform option. Silently
+		gives up on a watch failure (e.g. an exotic filesystem inotify
+		can't watch) -- external changes just won't auto-refresh then, no
+		worse than before this existed, and not worth crashing over."""
+		if self._workspace_observer is not None:
+			self._workspace_observer.stop()
+			self._workspace_observer = None
+		if path is None:
+			return
+		handler = _DebouncedReloadHandler(self.reload)
+		observer = Observer()
+		try:
+			observer.schedule(handler, str(path), recursive=True)
+			observer.daemon = True
+			observer.start()
+		except OSError as e:
+			print(f"[search_paths_dialog] could not watch workspace folder {path!r}: {e}")
+			return
+		self._workspace_observer = observer
 
 	def _effective_dirs(self):
 		return ([self._workspace_dir] if self._workspace_dir is not None else []) + self._dirs

@@ -8,7 +8,7 @@ version = "0.1.2"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
 dependencies = [
-	"panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py", "tomlkit",
+	"panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py", "tomlkit", "watchdog",
 	# pynel isn't on PyPI (see README.md) -- direct URL dependency instead,
 	# pointing at the wheel published by ryzom-core's own CI (.gitlab-ci.yml,
 	# build_pynel_wheel/upload_pynel_wheel) so `pip install` of this wheel
