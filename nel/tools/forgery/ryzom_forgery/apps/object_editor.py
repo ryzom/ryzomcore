@@ -27,9 +27,7 @@ from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
-from ryzom_forgery.import_watcher import (
-	MaterialCountMismatch, UnsupportedShapeTypeError, ImportWatcher, update_existing_shape,
-)
+from ryzom_forgery.import_watcher import ImportWatcher
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply
@@ -45,7 +43,7 @@ from ryzom_forgery.shape_geometry import (
 	finest_skinned_lod, iter_render_passes, load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox,
 	shape_geom, solid_color_texture,
 )
-from ryzom_forgery.shape_import import ShapeImportError, texture_search_dirs_for
+from ryzom_forgery.shape_import import texture_search_dirs_for
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog
 from ryzom_forgery.workspaces import SUBDIRS as WORKSPACE_SUBDIRS, ensure_structure, reveal_in_system_file_manager
 
@@ -98,6 +96,12 @@ _IMPORT_CONFLICT_SAVE_COLOR = (0.85, 0.55, 0.15, 1.0)  # orange
 _IMPORT_CONFLICT_DISCARD_COLOR = (0.85, 0.35, 0.55, 1.0)  # pink
 _IMPORT_CONFLICT_BACKUP_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
 _IMPORT_CONFLICT_CANCEL_COLOR = (0.8, 0.75, 0.15, 1.0)  # yellow
+
+# ImportWatcher outcome messages on the sysinfo status bar (see
+# _flush_pending_import_status()) -- same red as self.shape_error elsewhere
+# in this file, same green as _IMPORT_CONFLICT_BACKUP_COLOR above.
+_IMPORT_STATUS_ERROR_COLOR = (1.0, 0.4, 0.4, 1.0)  # red
+_IMPORT_STATUS_SUCCESS_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
 
 # _draw_bottom_bar()'s Save/Quit buttons.
 _SAVE_BUTTON_COLOR = (0.6, 0.85, 0.65, 1.0)  # pastel green
@@ -633,12 +637,18 @@ class ObjectEditorApp(ForgeryApp):
 		# and whose debounced callback doesn't carry per-file info anyway --
 		# see the "Auto-export imports/ -> shapes/" chantier).
 		self.import_watcher = ImportWatcher(
-			is_shape_open=self._is_shape_open_at, on_open_shape_conflict=self._on_open_shape_conflict)
+			is_shape_open=self._is_shape_open_at, on_open_shape_conflict=self._on_open_shape_conflict,
+			on_status=self._on_import_status)
 		# Set from ImportWatcher's own background thread (see
 		# _on_open_shape_conflict()); drawn once per frame from draw_panel()
 		# (_draw_import_conflict_popup()) since it needs imgui -- main-thread-only.
 		self._pending_import_conflict = None  # (source_path, target_path) or None
 		self._import_conflict_popup_opened = False
+		# Same cross-thread-safe queuing as _pending_import_conflict above --
+		# set from ImportWatcher's background thread (_on_import_status()),
+		# drained once per frame in draw_ui() since sysinfo.set_status() needs
+		# imgui state that's main-thread-only.
+		self._pending_import_status = None  # (message, is_error) or None
 		# Active workspace's folder always searched first (see the
 		# Workspaces chantier in `.todo/forgery-object-editor.md`) -- synced
 		# on every change via this callback, and once right away here so a
@@ -737,6 +747,26 @@ class ObjectEditorApp(ForgeryApp):
 		work on the main thread."""
 		self._pending_import_conflict = (source_path, target_path)
 
+	def _on_import_status(self, message, is_error):
+		"""ImportWatcher's `on_status` hook -- runs off its own background
+		thread, so only queues state; _flush_pending_import_status() (called
+		once per frame from draw_panel()) does the actual imgui work on the
+		main thread, same reasoning as _on_open_shape_conflict() above."""
+		self._pending_import_status = (message, is_error)
+
+	def _flush_pending_import_status(self):
+		"""Surfaces the last ImportWatcher outcome (queued by
+		_on_import_status()) on the sysinfo status bar -- red for a failure,
+		green for a successful auto-export/update/backup-and-reexport, same
+		colors as _IMPORT_CONFLICT_DISCARD_COLOR/_IMPORT_CONFLICT_BACKUP_COLOR
+		use elsewhere in this file for the same "bad"/"safe" meaning."""
+		if self._pending_import_status is None:
+			return
+		message, is_error = self._pending_import_status
+		self._pending_import_status = None
+		color = _IMPORT_STATUS_ERROR_COLOR if is_error else _IMPORT_STATUS_SUCCESS_COLOR
+		self.sysinfo.set_status(message, color=color)
+
 	def _reload_shape_value_from_disk(self, target_path):
 		"""Pulls target_path's just-rewritten geometry/materials back into the
 		viewport without resetting editor-only state (material override
@@ -772,20 +802,15 @@ class ObjectEditorApp(ForgeryApp):
 		return buffer.getvalue() != on_disk
 
 	def _apply_import_conflict_update(self, source_path, target_path):
-		"""Common tail of every _draw_import_conflict_popup() choice: runs
-		update_existing_shape() and, on success, refreshes the viewport --
-		errors (e.g. Step 4's material-count-mismatch case, not implemented
-		yet) are reported the same way _write_shape() reports a save failure."""
-		try:
-			update_existing_shape(source_path, target_path)
-		except (OSError, ShapeImportError, ShapeParseError, ShapeWriteError,
-		        MaterialCountMismatch, UnsupportedShapeTypeError) as exc:
-			self._save_status = f"Auto-update of {target_path.name} failed: {exc}"
-			print(f"[object_editor] {self._save_status}")
-			return
-		self._reload_shape_value_from_disk(target_path)
-		self._save_status = f"Auto-updated {target_path.name} from {source_path.name}"
-		print(f"[object_editor] {self._save_status}")
+		"""Common tail of every _draw_import_conflict_popup() choice: routes
+		through ImportWatcher._update_existing_target() -- same update /
+		material-count-mismatch-backup-and-reexport / error handling and
+		sysinfo-bar reporting as the automatic (shape-not-open) path, so
+		there's a single outcome-reporting story regardless of whether the
+		target happened to be open in the viewport. Refreshes the viewport
+		from disk only if target_path actually ended up rewritten."""
+		if self.import_watcher._update_existing_target(source_path, target_path):
+			self._reload_shape_value_from_disk(target_path)
 
 	def _draw_import_conflict_popup(self):
 		"""The shape currently open in the viewport is also the auto-export
@@ -3559,6 +3584,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._draw_replace_match_popup()
 		self._draw_restore_scan_popup()
 		self._draw_import_conflict_popup()
+		self._flush_pending_import_status()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)

@@ -1,5 +1,37 @@
 # Changelog
 
+## 2026-08-27 — ✨ Auto-export imports/ -> shapes/ Step 4+5: mismatch backup, sysbar status
+
+Finished the "Auto-export imports/ -> shapes/" chantier:
+
+**Step 4** (material-count mismatch): design changed from the original plan (a viewport-takeover
+popup reusing `_draw_replace_match_popup()`) to fully automatic instead, per the user, avoiding
+the discard-unsaved-work risk a viewport takeover would carry on whatever else is open. New
+`ImportWatcher._backup_and_reexport()` in `import_watcher.py`: on `MaterialCountMismatch`, renames
+the existing target to `<stem>_backup_<YYYYMMDD_HHMMSS><suffix>` (same convention as the manual
+Save-as-backup flow) and re-exports the newly imported mesh fresh under the real target name. No
+popup, no viewport takeover, no `object_editor.py` wiring needed for this part.
+
+**Step 5** (status messages): new `on_status(message, is_error)` hook on `ImportWatcher`, via a
+`_report()` helper that both prints and (if given) calls the hook, for every outcome (export,
+update, backup-and-reexport, or any failure). `object_editor.py` wires it to
+`_on_import_status()`/`_flush_pending_import_status()` -- same cross-thread queue-then-drain-once-
+per-frame pattern as the existing import-conflict popup, since the hook fires off ImportWatcher's
+background thread -- surfacing the message on the sysinfo status bar (red for a failure, green for
+success, new `_IMPORT_STATUS_ERROR_COLOR`/`_IMPORT_STATUS_SUCCESS_COLOR`).
+
+Also unified the "target is the shape currently open in the viewport" conflict-resolution path
+(`_apply_import_conflict_update()`): it used to call `update_existing_shape()` directly and just
+report a mismatch as a failure via a separate `self._save_status` mechanism, without ever falling
+back to Step 4's backup-and-reexport. Discovered live: a `.obj` mismatch on an open shape reported
+under the panel's Save/Quit row instead of the sysbar, and failed instead of backing up. Now routes
+through the same `ImportWatcher._update_existing_target()` (made to return True/False so the
+caller knows whether to refresh the viewport) as the automatic path -- single outcome-reporting
+story regardless of whether the target was open.
+
+`test.sh` extended to 6 tests (was 5): new test confirms a material-count mismatch gets backed up
+and the target re-exported under its original name. All 6 pass on the real machine.
+
 ## 2026-08-27 — 🐛 Fix Patina's restart-loop bug and add a 5s splash self-destruct safety net
 
 Finished a UI font/size Settings feature (Settings > Tools: font picker, size drag, "Restart now"

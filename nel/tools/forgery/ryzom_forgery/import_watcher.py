@@ -6,6 +6,7 @@ automatically -- see the "Auto-export imports/ -> shapes/" chantier in
 
 import re
 import threading
+from datetime import datetime
 from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
@@ -36,8 +37,8 @@ class UnsupportedShapeTypeError(Exception):
 
 class MaterialCountMismatch(Exception):
 	"""The imported mesh and the existing target shape don't have the same
-	number of materials -- needs the interactive matching popup (see the
-	chantier's Step 4), left to the caller to route there."""
+	number of materials -- left to the caller to route to
+	ImportWatcher._backup_and_reexport()."""
 
 
 def sanitize_shape_name(stem: str) -> str:
@@ -175,10 +176,11 @@ class ImportWatcher:
 	whenever the active workspace changes (see object_editor.py); pass None
 	to stop watching."""
 
-	def __init__(self, is_shape_open=None, on_open_shape_conflict=None):
-		"""Both hooks run off the main/render thread (see _handle_settled()),
-		and are optional -- without them (e.g. test.sh's headless use), an
-		existing target is always updated in place directly.
+	def __init__(self, is_shape_open=None, on_open_shape_conflict=None, on_status=None):
+		"""All three hooks run off the main/render thread (see
+		_handle_settled()), and are optional -- without them (e.g. test.sh's
+		headless use), an existing target is always updated in place directly
+		and outcomes are only printed.
 
 		`is_shape_open(target_path)`, if given, is consulted before an
 		existing target is touched: True means the host app currently has
@@ -192,11 +194,23 @@ class ImportWatcher:
 		called instead of the automatic update whenever `is_shape_open`
 		returned True -- the host app's hook to ask the user how to proceed
 		(save first / discard / save-as-backup-first -- see
-		object_editor.py's _on_open_shape_conflict())."""
+		object_editor.py's _on_open_shape_conflict()).
+
+		`on_status(message, is_error)`, if given, is called for every outcome
+		(new shape written, updated, backed up and re-exported, or a failure)
+		alongside the unconditional `print()` -- the host app's hook to
+		surface the same message in its own UI (see object_editor.py's
+		_on_import_status())."""
 		self._is_shape_open = is_shape_open
 		self._on_open_shape_conflict = on_open_shape_conflict
+		self._on_status = on_status
 		self._observer = None
 		self._workspace_dir = None
+
+	def _report(self, message, is_error=False):
+		print(f"[import_watcher] {message}")
+		if self._on_status is not None:
+			self._on_status(message, is_error)
 
 	def set_workspace_dir(self, workspace_dir):
 		"""Stops any previous watch and, if `workspace_dir` is set, starts a
@@ -219,15 +233,12 @@ class ImportWatcher:
 			observer.daemon = True
 			observer.start()
 		except OSError as exc:
-			print(f"[import_watcher] could not watch {imports_dir!r}: {exc}")
+			self._report(f"could not watch {imports_dir!r}: {exc}", is_error=True)
 			return
 		self._observer = observer
 
 	def _handle_settled(self, source_path):
-		"""Runs off the main/render thread (see _DebouncedImportHandler).
-		Step 4 of the chantier still needs to add the material-count-mismatch
-		path (the interactive matching popup) -- until then, a mismatch is
-		left untouched."""
+		"""Runs off the main/render thread (see _DebouncedImportHandler)."""
 		workspace_dir = self._workspace_dir
 		if workspace_dir is None:
 			return
@@ -237,9 +248,9 @@ class ImportWatcher:
 			try:
 				export_new_shape(source_path, target_path)
 			except (OSError, ShapeImportError, ShapeWriteError) as exc:
-				print(f"[import_watcher] auto-export of {source_path.name} failed: {exc}")
+				self._report(f"auto-export of {source_path.name} failed: {exc}", is_error=True)
 			else:
-				print(f"[import_watcher] auto-exported {source_path.name} -> {target_path}")
+				self._report(f"auto-exported {source_path.name} -> {target_path.name}")
 			return
 
 		if self._is_shape_open is not None and self._is_shape_open(target_path):
@@ -254,15 +265,44 @@ class ImportWatcher:
 		factored out so both the automatic path (_handle_settled(), when the
 		target isn't open in the viewport) and the host app's own conflict
 		resolution (object_editor.py's _on_open_shape_conflict(), once the
-		user picked how to proceed) can trigger it."""
+		user picked how to proceed) can trigger it. Returns True if
+		target_path ended up rewritten (a straight update or a
+		backup-and-reexport), False on any failure -- so a caller that also
+		needs to refresh an in-memory copy (object_editor.py's
+		_apply_import_conflict_update()) knows whether target_path is
+		actually safe to re-read."""
 		try:
 			update_existing_shape(source_path, target_path)
 		except MaterialCountMismatch as exc:
-			print(f"[import_watcher] {target_path.name}: {exc} -- "
-			      f"needs manual matching in Patina (Step 4 not implemented yet)")
+			self._report(f"{target_path.name}: {exc} -- backing up and re-exporting", is_error=True)
+			return self._backup_and_reexport(source_path, target_path)
 		except UnsupportedShapeTypeError as exc:
-			print(f"[import_watcher] {target_path.name}: {exc}")
+			self._report(f"{target_path.name}: {exc}", is_error=True)
+			return False
 		except (OSError, ShapeImportError, ShapeParseError, ShapeWriteError) as exc:
-			print(f"[import_watcher] auto-update of {target_path.name} failed: {exc}")
+			self._report(f"auto-update of {target_path.name} failed: {exc}", is_error=True)
+			return False
 		else:
-			print(f"[import_watcher] auto-updated {target_path.name} from {source_path.name}")
+			self._report(f"auto-updated {target_path.name} from {source_path.name}")
+			return True
+
+	def _backup_and_reexport(self, source_path, target_path):
+		"""Material-count mismatch fallback: rather than an interactive
+		matching popup, the existing target is preserved as a timestamped
+		backup (same `<stem>_backup_<YYYYMMDD_HHMMSS><suffix>` naming as the
+		manual Save-as-backup flow in object_editor.py) and the newly imported
+		mesh is exported fresh under the real target name -- fully automatic,
+		no viewport takeover, no popup. Returns True/False, see
+		_update_existing_target()."""
+		timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+		backup_path = target_path.with_name(f"{target_path.stem}_backup_{timestamp}{target_path.suffix}")
+		try:
+			target_path.rename(backup_path)
+			export_new_shape(source_path, target_path)
+		except (OSError, ShapeImportError, ShapeWriteError) as exc:
+			self._report(f"backup-and-reexport of {target_path.name} failed: {exc}", is_error=True)
+			return False
+		else:
+			self._report(f"backed up {target_path.name} -> {backup_path.name}, "
+			             f"re-exported from {source_path.name}")
+			return True
