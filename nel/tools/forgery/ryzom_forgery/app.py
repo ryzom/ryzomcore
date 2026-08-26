@@ -1,5 +1,8 @@
 import json
+import os
 import re
+import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -10,6 +13,7 @@ import p3dimgui
 import imgui_bundle
 from imgui_bundle import imgui, imgui_ctx
 
+from . import settings as app_settings
 from .commands import CommandRegistry
 from .explorer import DEFAULT_FILTER, Explorer
 from .splash import Splash
@@ -22,6 +26,23 @@ from .workspace_setup_dialog import WorkspaceSetupDialog
 # label -- the default ImGui font alone has no icon glyphs at all.
 _ICON_FONT_PATH = Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts" / "fontawesome-webfont.ttf"
 _ICON_FONT_SIZE = 14.0
+
+# UI text font choices offered in Settings (see Settings.ui_font_name/
+# ui_font_size in settings.py, and _draw_ui_font_settings() in
+# object_editor.py) -- every regular (non-icon) .ttf imgui_bundle itself
+# ships, so no extra font files need bundling in the wheel. Key is what's
+# stored in settings.toml and shown in the picker; value is the path
+# relative to imgui_bundle's own assets/fonts/ directory.
+_FONTS_DIR = Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts"
+_AVAILABLE_FONTS = {
+	"Roboto Bold": "Roboto/Roboto-Bold.ttf",
+	"Roboto Regular": "Roboto/Roboto-Regular.ttf",
+	"Roboto Bold Italic": "Roboto/Roboto-BoldItalic.ttf",
+	"Roboto Italic": "Roboto/Roboto-RegularItalic.ttf",
+	"Droid Sans": "DroidSans.ttf",
+	"Inconsolata (monospace)": "Inconsolata-Medium.ttf",
+}
+_DEFAULT_FONT_NAME = "Roboto Bold"
 
 # Sysinfo is a fixed thin strip; explorer/panel are pinned in place (no_move)
 # but resizable in width via SetNextWindowSizeConstraints (height is locked
@@ -129,6 +150,7 @@ class ForgeryApp(ShowBase):
 		# either -- force it, for the same "everything looks a bit washed
 		# out" reason as the background colors above.
 		style.set_color_(imgui.Col_.text.value, (1.0, 1.0, 1.0, 1.0))
+		self._load_ui_font()
 		self._load_icon_font()
 		self._panel_watermark_tex_ref = None
 		if _SPLASH_PATH.exists():
@@ -186,6 +208,28 @@ class ForgeryApp(ShowBase):
 		OS's own window-close control. No-op here."""
 		pass
 
+	def relaunch(self):
+		"""Relaunches this app with the exact same command line
+		(sys.executable + sys.argv, so this works the same whether launched
+		via `python -m ryzom_forgery.apps.object_editor`, a direct script
+		path, or however ryztart itself invokes it -- sys.argv reflects the
+		actual invocation regardless). Uses os.execv rather than
+		spawning a subprocess and exiting this one separately -- execv
+		replaces this process in place (same PID), so there is never a
+		moment with two copies alive, and no way for a slow/failed shutdown
+		of the old one to pile up extra processes. Used e.g. by the UI
+		font/size Settings, which only take effect on a fresh font atlas
+		build at startup -- see _load_ui_font().
+
+		Named relaunch() rather than restart() deliberately -- ShowBase
+		(our own base class) already defines its own restart(), called from
+		inside ShowBase.__init__ itself to start the IGLOOP task. A same-named
+		override here would shadow that and fire on every single app launch,
+		mid-__init__, via os.execv -- an infinite same-PID re-exec loop
+		disguised as "the app keeps restarting itself for no reason"."""
+		os.execv(sys.executable, [sys.executable] + sys.argv)
+		os.execv(sys.executable, [sys.executable] + sys.argv)
+
 	def _load_window_geometry(self):
 		try:
 			data = json.loads(self._window_geometry_path.read_text())
@@ -204,6 +248,23 @@ class ForgeryApp(ShowBase):
 			self._window_geometry_path.write_text(json.dumps(data))
 		except OSError:
 			pass
+
+	def _load_ui_font(self):
+		"""Loads the user's chosen UI font (Settings.ui_font_name/
+		ui_font_size, see _AVAILABLE_FONTS above) as ImGui's default font,
+		right before _load_icon_font() merges Font Awesome's glyphs into
+		whichever font was most recently added to the atlas -- so the icons
+		end up merged into this one rather than into ImGui's own built-in
+		default. Falls back to _DEFAULT_FONT_NAME if the stored choice is
+		stale (a font file imgui_bundle no longer ships, e.g. after an
+		imgui_bundle upgrade)."""
+		settings = app_settings.load()
+		relative_path = _AVAILABLE_FONTS.get(settings.ui_font_name) or _AVAILABLE_FONTS[_DEFAULT_FONT_NAME]
+		font_path = _FONTS_DIR / relative_path
+		if not font_path.exists():
+			return
+		font = imgui.get_io().fonts.add_font_from_file_ttf(str(font_path), settings.ui_font_size)
+		imgui.get_io().font_default = font
 
 	def _load_icon_font(self):
 		# self.large_icon_font (1.5x _ICON_FONT_SIZE, standalone -- not merged

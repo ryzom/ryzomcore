@@ -70,6 +70,12 @@ class Settings:
 	# texture already lives in the active workspace. None until the user
 	# picks one in Settings -- the button stays disabled until then.
 	image_editor_path: Optional[str] = None
+	# UI text font -- key into app.py's _AVAILABLE_FONTS, and its size in
+	# points. Applied once at startup (ForgeryApp.__init__ builds the font
+	# atlas before the first frame) -- a change here only takes effect after
+	# restarting the app, no live atlas rebuild.
+	ui_font_name: str = "Roboto Bold"
+	ui_font_size: float = 14.0
 
 
 def load() -> Settings:
@@ -89,6 +95,8 @@ def load() -> Settings:
 	settings.last_shape_bnp = data.get("last_shape_bnp") or None
 	settings.last_shape_name = data.get("last_shape_name") or None
 	settings.image_editor_path = data.get("image_editor_path") or None
+	settings.ui_font_name = data.get("ui_font_name") or settings.ui_font_name
+	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
 
 	export_data = data.get("export", {})
 	for field_name in settings.export.__dataclass_fields__:
@@ -124,6 +132,8 @@ def save(settings: Settings) -> None:
 		doc["last_shape_name"] = settings.last_shape_name
 	if settings.image_editor_path is not None:
 		doc["image_editor_path"] = settings.image_editor_path
+	doc["ui_font_name"] = settings.ui_font_name
+	doc["ui_font_size"] = settings.ui_font_size
 
 	export_table = tomlkit.table()
 	for key, value in asdict(settings.export).items():

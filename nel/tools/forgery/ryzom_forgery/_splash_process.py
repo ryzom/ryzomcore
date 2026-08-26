@@ -48,6 +48,16 @@ def main(argv=None):
 	label.image = image  # keep a reference -- PhotoImage has no other owner otherwise
 	label.pack()
 
+	# Self-destruct safety net: normally Splash.close() (in the parent
+	# process) terminates this process well before this fires. But if the
+	# parent dies unexpectedly (crash, kill -9...) without ever calling
+	# close(), there's nothing else to stop this window from lingering
+	# forever -- an orphaned splash for every failed launch, piling up
+	# indefinitely. 5s comfortably covers a normal startup (min_duration
+	# above it is only 1.2s) while still bounding the damage from a dead
+	# parent to a single lingering window, never an accumulation.
+	root.after(5000, root.destroy)
+
 	root.mainloop()
 
 

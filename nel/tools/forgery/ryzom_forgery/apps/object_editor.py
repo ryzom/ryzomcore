@@ -22,7 +22,7 @@ from panda3d.core import (
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
 
-from ryzom_forgery.app import ForgeryApp
+from ryzom_forgery.app import _AVAILABLE_FONTS, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
@@ -98,6 +98,11 @@ _IMPORT_CONFLICT_SAVE_COLOR = (0.85, 0.55, 0.15, 1.0)  # orange
 _IMPORT_CONFLICT_DISCARD_COLOR = (0.85, 0.35, 0.55, 1.0)  # pink
 _IMPORT_CONFLICT_BACKUP_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
 _IMPORT_CONFLICT_CANCEL_COLOR = (0.8, 0.75, 0.15, 1.0)  # yellow
+
+# _draw_bottom_bar()'s Save/Quit buttons.
+_SAVE_BUTTON_COLOR = (0.6, 0.85, 0.65, 1.0)  # pastel green
+_QUIT_BUTTON_COLOR = (0.9, 0.55, 0.7, 1.0)  # pink
+
 _COLOR_POPUP_ID = "material-color-picker"
 _DIFFUSE_COLOR_POPUP_ID = "material-diffuse-picker"
 
@@ -3134,6 +3139,35 @@ class ObjectEditorApp(ForgeryApp):
 		if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Choose an image editor executable..."):
 			self._image_editor_dialog = pfd.open_file("Choose image editor executable")
 
+	def _draw_ui_font_settings(self):
+		"""Settings tab -- lets the user pick the UI text font/size (see
+		ForgeryApp._load_ui_font(), Settings.ui_font_name/ui_font_size).
+		Takes effect on the next launch only -- no live font-atlas rebuild."""
+		settings = app_settings.load()
+		font_names = list(_AVAILABLE_FONTS)
+		current_index = font_names.index(settings.ui_font_name) if settings.ui_font_name in font_names else 0
+
+		imgui.text("Font: ")
+		imgui.same_line()
+		imgui.set_next_item_width(200)
+		changed, new_index = imgui.combo("##ui-font-name", current_index, font_names)
+		if changed:
+			settings.ui_font_name = font_names[new_index]
+			app_settings.save(settings)
+
+		imgui.text("Size: ")
+		imgui.same_line()
+		imgui.set_next_item_width(100)
+		changed, new_size = imgui.drag_float("##ui-font-size", settings.ui_font_size, v_speed=0.5, v_min=8.0, v_max=32.0)
+		if changed:
+			settings.ui_font_size = new_size
+			app_settings.save(settings)
+
+		if imgui.button("Restart now"):
+			self.relaunch()
+		imgui.same_line()
+		imgui.text_disabled("Restart Patina for a font/size change to take effect.")
+
 	def _draw_bottom_bar(self):
 		"""Pinned at the very bottom of the panel: Save (only for a loaded,
 		writable shape -- always targets the active workspace, see the
@@ -3152,7 +3186,7 @@ class ObjectEditorApp(ForgeryApp):
 		if writable:
 			save_path = self._workspace_shape_save_path()
 			imgui.begin_disabled(save_path is None)
-			if imgui.button(f"{fa_icons.ICON_FA_SAVE} Save"):
+			if _colored_button(f"{fa_icons.ICON_FA_SAVE} Save", _SAVE_BUTTON_COLOR):
 				self._on_save_clicked()
 			imgui.end_disabled()
 			if imgui.is_item_hovered() and save_path is None:
@@ -3178,7 +3212,7 @@ class ObjectEditorApp(ForgeryApp):
 		avail = imgui.get_content_region_avail().x
 		if avail > quit_width:
 			imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + avail - quit_width)
-		if imgui.button(quit_label):
+		if _colored_button(quit_label, _QUIT_BUTTON_COLOR):
 			self.userExit()
 
 		if writable:
@@ -3559,6 +3593,8 @@ class ObjectEditorApp(ForgeryApp):
 					self.search_paths_dialog.draw_settings_content()
 				if imgui.collapsing_header("Tools"):
 					self._draw_image_editor_settings()
+					imgui.separator()
+					self._draw_ui_font_settings()
 				imgui.end_tab_item()
 			imgui.end_tab_bar()
 

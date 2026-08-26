@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-08-27 — 🐛 Fix Patina's restart-loop bug and add a 5s splash self-destruct safety net
+
+Finished a UI font/size Settings feature (Settings > Tools: font picker, size drag, "Restart now"
+button) that had been left uncommitted, but its `ForgeryApp.restart()` method silently shadowed
+Panda3D's own `ShowBase.restart()` -- called internally by `ShowBase.__init__()` to start the
+IGLOOP render/input task -- so on every single launch, mid-`__init__`, *our* `restart()` fired
+instead and re-exec'd (`os.execv`) the whole process, forever, before a window ever fully opened.
+Fixed by renaming to `relaunch()`, which doesn't collide with anything in the `ShowBase` API.
+
+Root-caused by bisecting with `sys.exit()` calls dropped at increasing depth through `__init__`
+until the exact call site surfaced in the stack -- much faster than the several turns spent
+guessing beforehand (an unrelated native `import imgui_bundle` crash turned out to be a red
+herring from a different, coincidental issue on the same machine).
+
+Independently of that root cause, `_splash_process.py` (the separate Tk process showing the
+splash image while the main app starts up) had no way to notice its parent had died -- a crash
+anywhere before `Splash.close()` runs left it orphaned forever, and enough failed launches in a
+row could pile up unkillable-feeling process litter. Added `root.after(5000, root.destroy)`: a
+self-destruct that fires regardless of what happens to the parent, bounding the damage from any
+future crash (of any kind) to a single lingering window for at most 5s, never an accumulation.
+
+Also: moved the font Settings' "Restart now" button to the front of its line (was after the
+explanatory text, now before it), and colored the bottom bar's Save (pastel green) and Quit
+(pink) buttons via the existing `_colored_button()` helper, matching the color-coding convention
+already used for the import-conflict popup's own buttons.
+
 ## 2026-08-26 — 🔖 Bump Forgery version to 0.1.21
 
 Routine version bump covering the import-conflict popup polish, app-wide ImGui style fixes, and
