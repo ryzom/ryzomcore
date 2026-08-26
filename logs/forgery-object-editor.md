@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-26 — ✨ Reveal texture in file manager; edit-in-workspace image editor button
+
+Two related additions to the Textures tab:
+
+- `_draw_texture_preview_static()`'s thumbnail button was always force-disabled
+  (`clicking it wouldn't do anything`); now clickable whenever the texture actually
+  resolves to a real file on disk (`self._resolve_texture(name).fs_path is not
+  None` -- still disabled for an unresolvable reference or one living inside a
+  `.bnp`, which has no file of its own to show), and reveals it in the OS's file
+  manager on click. New `workspaces.py` `reveal_in_system_file_manager()`: Windows
+  (`explorer /select,`) and macOS (`open -R`) both select the file itself; Linux has
+  no cross-desktop-environment equivalent, so falls back to
+  `open_in_system_file_manager()` on the parent folder there instead.
+- The per-texture "copy to workspace" button (added earlier this session) now turns
+  into an "Edit" button once that texture already lives in the workspace -- copying
+  it again would be a no-op, so launching an external editor on it is the only
+  useful action left. `Settings.image_editor_path` (new field) holds the
+  configured editor executable, picked via a new "Tools" section in the Settings
+  tab (`_draw_image_editor_settings()`, same `portable_file_dialogs.open_file()`
+  poll pattern as the Skinning preview's `.skel`/`.anim` pickers); the Edit button
+  stays disabled with an explanatory tooltip until one is set.
+
 ## 2026-08-26 — ✨ Overlay the material index on its texture preview instead of a separate label
 
 In the Textures tab, each material row showed a separate `#N` label next to its
