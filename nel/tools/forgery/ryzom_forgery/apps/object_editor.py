@@ -7,6 +7,7 @@ render yet.
 """
 
 import subprocess
+from datetime import datetime
 from math import ceil, cos, pi, radians, sin
 from pathlib import Path
 
@@ -25,6 +26,9 @@ from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
+from ryzom_forgery.import_watcher import (
+	MaterialCountMismatch, UnsupportedShapeTypeError, ImportWatcher, update_existing_shape,
+)
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply
@@ -40,9 +44,9 @@ from ryzom_forgery.shape_geometry import (
 	finest_skinned_lod, iter_render_passes, load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox,
 	shape_geom, solid_color_texture,
 )
-from ryzom_forgery.shape_import import texture_search_dirs_for
+from ryzom_forgery.shape_import import ShapeImportError, texture_search_dirs_for
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog
-from ryzom_forgery.workspaces import reveal_in_system_file_manager
+from ryzom_forgery.workspaces import SUBDIRS as WORKSPACE_SUBDIRS, ensure_structure, reveal_in_system_file_manager
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
@@ -79,6 +83,7 @@ _REFERENCE_ICONS = {"Cube (1x1x1)": fa_icons.ICON_FA_CUBE, "Smallest character":
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
+_IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
@@ -575,14 +580,32 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.search_paths_dialog = SearchPathsDialog()
+		# Wexplorer (Explorer.pinned_folders, see _on_active_workspace_changed())
+		# covers the whole active workspace already watched by search_paths_dialog
+		# -- piggybacks on that same watch instead of a 3rd Observer, so any
+		# on-disk change (this app's own writes included: Save, auto-export...)
+		# refreshes the Wexplorer's listing without a manual Refresh click.
+		self.search_paths_dialog.on_workspace_changed = self.explorer.refresh
 		self.workspace_setup_dialog = WorkspaceSetupDialog()
+		# Own dedicated watch on the active workspace's imports/ subfolder
+		# (not folded into search_paths_dialog's own workspace-wide watcher,
+		# which is a shared/generic component used by other Forgery apps too,
+		# and whose debounced callback doesn't carry per-file info anyway --
+		# see the "Auto-export imports/ -> shapes/" chantier).
+		self.import_watcher = ImportWatcher(
+			is_shape_open=self._is_shape_open_at, on_open_shape_conflict=self._on_open_shape_conflict)
+		# Set from ImportWatcher's own background thread (see
+		# _on_open_shape_conflict()); drawn once per frame from draw_panel()
+		# (_draw_import_conflict_popup()) since it needs imgui -- main-thread-only.
+		self._pending_import_conflict = None  # (source_path, target_path) or None
+		self._import_conflict_popup_opened = False
 		# Active workspace's folder always searched first (see the
 		# Workspaces chantier in `.todo/forgery-object-editor.md`) -- synced
 		# on every change via this callback, and once right away here so a
 		# workspace already active from a previous session is in effect
 		# before the first scan below.
-		self.workspace_setup_dialog.on_active_workspace_changed = self.search_paths_dialog.set_workspace_dir
-		self.search_paths_dialog.set_workspace_dir(self.workspace_setup_dialog.active_workspace_dir)
+		self.workspace_setup_dialog.on_active_workspace_changed = self._on_active_workspace_changed
+		self._on_active_workspace_changed(self.workspace_setup_dialog.active_workspace_dir)
 		# Kicked off immediately (background thread, see ensure_scanned()) so
 		# the very first shape loaded already has a populated texture/skel/
 		# anim/panoply index, instead of possibly rendering with missing
@@ -621,6 +644,7 @@ class ObjectEditorApp(ForgeryApp):
 
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
+		self.explorer.extra_header = self.workspace_setup_dialog.draw_active_workspace_row
 
 		# Last, once every piece of state _load_shape()/_reset_shape_state()
 		# touches actually exists -- reopens wherever the Explorer/loaded
@@ -634,6 +658,121 @@ class ObjectEditorApp(ForgeryApp):
 		# "Load in viewer"/"Load as bone-preview skeleton"/"...animation" is
 		# now the one way to load any of them, matching across all three.
 		print(f"[object_editor] selection changed: {[item.name for item in items]}")
+
+	def _on_active_workspace_changed(self, workspace_dir):
+		"""Fans the active-workspace change out to every folder-scoped watcher
+		this app owns -- called by WorkspaceSetupDialog (see __init__)."""
+		if workspace_dir is not None:
+			# Backfills any SUBDIRS missing on disk (a folder introduced in a
+			# later Forgery version, or removed by hand) -- idempotent.
+			# WorkspaceSetupDialog.set_active_workspace() already does this
+			# too, but only when a workspace is picked/created interactively;
+			# this covers every other path into this method, in particular
+			# __init__ resuming a workspace already active from a previous
+			# session (read straight off active_workspace_dir, bypassing
+			# set_active_workspace() entirely).
+			ensure_structure(workspace_dir)
+		self.search_paths_dialog.set_workspace_dir(workspace_dir)
+		self.import_watcher.set_workspace_dir(workspace_dir)
+		# Explorer.pinned_folders (see explorer.py): each workspace subfolder
+		# (tex/shapes/anims/skels/exports/imports) as its own expandable tree
+		# section above Favorites, so the workspace's own content stays
+		# browsable/loadable-from no matter where the Explorer is currently
+		# navigated to.
+		if workspace_dir is None:
+			self.explorer.pinned_folders = []
+		else:
+			self.explorer.pinned_folders = [(subdir, workspace_dir / subdir) for subdir in WORKSPACE_SUBDIRS]
+
+	def _is_shape_open_at(self, target_path):
+		"""ImportWatcher's `is_shape_open` hook -- runs off its own background
+		thread, but only ever reads a couple of plain attributes (no
+		imgui/Panda3D calls), same as other cross-thread reads in this app."""
+		return self.shape_file is not None and self._workspace_shape_save_path() == target_path
+
+	def _on_open_shape_conflict(self, source_path, target_path):
+		"""ImportWatcher's `on_open_shape_conflict` hook -- runs off its own
+		background thread, so only queues state; _draw_import_conflict_popup()
+		(called once per frame from draw_panel()) does the actual imgui/disk
+		work on the main thread."""
+		self._pending_import_conflict = (source_path, target_path)
+
+	def _reload_shape_value_from_disk(self, target_path):
+		"""Pulls target_path's just-rewritten geometry/materials back into the
+		viewport without resetting editor-only state (material override
+		colors, expanded panels, camera...) or re-seeding the pivot rotation
+		-- same minimal-disruption approach as _replace_geometry(), since
+		conceptually this *is* a replace (this exact shape, new geometry from
+		an import), just triggered by the auto-export watcher instead of the
+		manual Import -> Replace flow."""
+		shape_file = parse_shape(target_path.read_bytes())
+		self.shape_file.value = shape_file.value
+		self._rebuild_geometry()
+
+	def _apply_import_conflict_update(self, source_path, target_path):
+		"""Common tail of every _draw_import_conflict_popup() choice: runs
+		update_existing_shape() and, on success, refreshes the viewport --
+		errors (e.g. Step 4's material-count-mismatch case, not implemented
+		yet) are reported the same way _write_shape() reports a save failure."""
+		try:
+			update_existing_shape(source_path, target_path)
+		except (OSError, ShapeImportError, ShapeParseError, ShapeWriteError,
+		        MaterialCountMismatch, UnsupportedShapeTypeError) as exc:
+			self._save_status = f"Auto-update of {target_path.name} failed: {exc}"
+			print(f"[object_editor] {self._save_status}")
+			return
+		self._reload_shape_value_from_disk(target_path)
+		self._save_status = f"Auto-updated {target_path.name} from {source_path.name}"
+		print(f"[object_editor] {self._save_status}")
+
+	def _draw_import_conflict_popup(self):
+		"""The shape currently open in the viewport is also the auto-export
+		watcher's target for a just-changed import/ source file -- Patina has
+		no dirty-edit tracking, so silently overwriting it could discard
+		in-progress work; this asks how to proceed instead (see the chantier
+		discussion)."""
+		if self._pending_import_conflict is None:
+			self._import_conflict_popup_opened = False
+			return
+
+		if not self._import_conflict_popup_opened:
+			imgui.open_popup(_IMPORT_CONFLICT_POPUP_ID)
+			self._import_conflict_popup_opened = True
+
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_IMPORT_CONFLICT_POPUP_ID, None, flags)
+		if not opened:
+			return
+
+		source_path, target_path = self._pending_import_conflict
+		imgui.text(f"{target_path.name} is open in the viewport and about to be updated\n"
+		           f"from the changed import {source_path.name}.")
+		imgui.text_wrapped("Any edit made in Patina since the last Save isn't tracked, "
+		                    "so it can't tell whether you have unsaved work.")
+		imgui.separator()
+
+		if imgui.button("Save then import"):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+			self._write_shape(target_path)
+			self._apply_import_conflict_update(source_path, target_path)
+		if imgui.button("Import without saving (discard current edits)"):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+			self._apply_import_conflict_update(source_path, target_path)
+		if imgui.button("Save as a backup copy, then import"):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+			timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+			backup_path = target_path.with_name(f"{target_path.stem}_backup_{timestamp}{target_path.suffix}")
+			self._write_shape(backup_path)
+			self._apply_import_conflict_update(source_path, target_path)
+		imgui.separator()
+		if imgui.button("Cancel (leave the on-disk file untouched)"):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+
+		imgui.end_popup()
 
 	def _on_load_command(self, items):
 		if items:
@@ -2845,18 +2984,17 @@ class ObjectEditorApp(ForgeryApp):
 			self._image_editor_dialog = pfd.open_file("Choose image editor executable")
 
 	def _draw_bottom_bar(self):
-		"""Two rows pinned at the very bottom of the panel: the active
-		workspace (its own row -- see WorkspaceSetupDialog.draw_active_workspace_row()),
-		then Save (only for a loaded, writable shape -- always targets the
-		active workspace, see the Workspaces chantier in
-		`.todo/forgery-object-editor.md`), Export (format picker, then the
-		existing ExportDialog flow -- see ExportDialog.export() -- applied
-		to the shape's current in-memory state, edits included, not a
-		re-read from disk/bnp), and Quit flush against the right edge.
-		Always drawn (even with nothing loaded) so Quit/the workspace row
-		stay reachable."""
-		imgui.separator()
-		self.workspace_setup_dialog.draw_active_workspace_row()
+		"""Pinned at the very bottom of the panel: Save (only for a loaded,
+		writable shape -- always targets the active workspace, see the
+		Workspaces chantier in `.todo/forgery-object-editor.md`), Export
+		(format picker, then the existing ExportDialog flow -- see
+		ExportDialog.export() -- applied to the shape's current in-memory
+		state, edits included, not a re-read from disk/bnp), and Quit flush
+		against the right edge. Always drawn (even with nothing loaded) so
+		Quit stays reachable. The active-workspace row used to live here too
+		-- moved to the top of the Explorer window instead (see
+		Explorer.extra_header in __init__), always reachable there regardless
+		of what's loaded in this panel."""
 		imgui.separator()
 
 		writable = self.shape_file is not None and self.shape_file.type_name in _WRITABLE_SHAPE_TYPES
@@ -3235,6 +3373,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_image_editor_dialog()
 		self._draw_replace_match_popup()
 		self._draw_restore_scan_popup()
+		self._draw_import_conflict_popup()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)

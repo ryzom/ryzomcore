@@ -7,7 +7,7 @@ than copied byte-for-byte from an already-parsed file, so it's the only
 shape type pynel can construct from scratch. A `CMesh` has no LOD levels --
 turning an imported mesh into a real progressive-LOD `CMeshMRM` needs
 `CMRMBuilder` (`nel/include/nel/3d/mrm_builder.h`), a C++-only class with no
-Python binding; out of scope here (see docs/log.md for the investigation).
+Python binding; out of scope here (see logs/forgery-object-editor.md for the investigation).
 
 `.obj`/`.mtl` are hand-parsed here for the same reason `shape_export.py`
 hand-writes them: simple, dependency-free text formats. `.dae` and `.fbx` go
@@ -45,7 +45,7 @@ _DEFAULT_MATERIAL_NAME = "__default__"  # faces with no `usemtl` in effect
 # material data says -- an artist who leaves that plugin's fields untouched
 # (typical for a simple textured prop) gets exactly these values, confirmed
 # by comparing an artist's real Cinema4D->.fbx->3dsMax->.shape export against
-# the same .fbx imported directly through here (see docs/log.md). Only the
+# the same .fbx imported directly through here (see logs/forgery-object-editor.md). Only the
 # diffuse texture reference carries over from the source file.
 _NEL_DEFAULT_GRAY = Rgba(150, 150, 150, 255)  # 3ds Max's own "Standard material" default diffuse/ambient swatch
 _NEL_DEFAULT_SPECULAR = Rgba(0, 0, 0, 0)
@@ -406,7 +406,7 @@ def import_obj(path: Path) -> Mesh:
 # .dae used to be hand-parsed via pycollada instead (kept no longer, see git
 # history) -- swapped once assimp-py was already a dependency for .fbx. The
 # apparent round-trip match against Forgery's own .dae exports found while
-# validating that swap (see docs/log.md) was this same Y-up normalization
+# validating that swap (see logs/forgery-object-editor.md) was this same Y-up normalization
 # being a no-op: those exports declare a `Y_UP` <asset><up_axis> tag (a
 # pycollada default) while actually holding Z-up data, so re-importing them
 # without _YUP_TO_ZUP_MATRIX happened to match by pure coincidence -- it
@@ -589,6 +589,17 @@ def import_fbx(path: Path) -> Mesh:
 	"""Parses `path` (an FBX) via assimp-py, returning a ready-to-save Mesh --
 	see _import_via_assimp()."""
 	return _import_via_assimp(path)
+
+
+# Single source of truth for "which import_*() handles this extension" --
+# shared by every caller (import_dialog.py, apps/shape_importer.py,
+# import_watcher.py) instead of each redefining its own copy.
+IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx}
+
+
+def find_importer(path: Path):
+	"""The IMPORTERS entry for `path`'s extension, or None if unsupported."""
+	return IMPORTERS.get(Path(path).suffix.lstrip(".").lower())
 
 
 def texture_search_dirs_for(path: Path) -> List[Path]:

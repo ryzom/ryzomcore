@@ -8,11 +8,9 @@ from pathlib import Path
 
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 
-from ryzom_forgery.shape_import import ShapeImportError, import_dae, import_fbx, import_obj
+from ryzom_forgery.shape_import import ShapeImportError, find_importer
 
 _MODE_POPUP_ID = "Import mesh"
-
-IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx}
 
 
 class ImportDialog:
@@ -53,8 +51,7 @@ class ImportDialog:
 			return
 
 		path = Path(result[0])
-		extension = path.suffix.lstrip(".").lower()
-		importer = IMPORTERS.get(extension)
+		importer = find_importer(path)
 		if importer is None:
 			self._status = f"Unsupported mesh format: {path.suffix!r}"
 			return

@@ -11,16 +11,13 @@ CMeshMRM can't be built this way).
 import argparse
 from pathlib import Path
 
-from ryzom_forgery.shape_import import ShapeImportError, import_dae, import_fbx, import_obj
+from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, find_importer
 
 from pynel.ryzom_shape import ShapeFile, save_shape
 
-IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx}
-
 
 def _find_importer(input_path: Path):
-	extension = input_path.suffix.lstrip(".").lower()
-	importer = IMPORTERS.get(extension)
+	importer = find_importer(input_path)
 	if importer is None:
 		supported = ", ".join(sorted(IMPORTERS))
 		raise SystemExit(f"Unsupported input format {input_path.suffix!r} (supported: {supported})")

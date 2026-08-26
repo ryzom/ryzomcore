@@ -1,5 +1,83 @@
 # Changelog
 
+## 2026-08-26 — ✨ Wexplorer: browsable workspace folders in the Explorer sidebar
+
+Added the "Wexplorer": each active-workspace folder (`tex`/`shapes`/`anims`/`skels`/`exports`/
+`imports`) now shows as its own expandable tree section in the Explorer sidebar, always
+reachable regardless of where the Explorer is currently browsing. New `Explorer.pinned_folders`
+(list of `(label, Path)`) + `_draw_pinned_folders()`/`_draw_tree_children()` in `explorer.py`:
+unlike the main view's flat click-to-navigate `_draw_dir_contents()`, sub-folders expand in
+place; file entries reuse the existing `_draw_leaf()`, so double-click-to-load and the
+right-click command menu (Load in viewer/as bone-preview skeleton/animation...) work exactly
+like the main view. `object_editor.py`'s `_on_active_workspace_changed()` now sets
+`self.explorer.pinned_folders` to the active workspace's own subfolders.
+
+Every folder in the Wexplorer shows its own visible-entry count (e.g. "shapes (12)") --
+factored the already-duplicated directory-listing/caching logic in `explorer.py` into a shared
+`_list_dir()` used by every listing method. The Wexplorer shows every file regardless of the
+shared search/extension-filter state (that filter stays scoped to the main arborescence only);
+texture files (`.tga`/`.dds`/`.png`/`.jpg`/`.jpeg`/`.bmp`) get a real thumbnail instead of a
+generic icon.
+
+Also moved `WorkspaceSetupDialog.draw_active_workspace_row()` (the workspace combo + reveal-in-
+file-manager button) from the bottom of the right panel to the very top of the Explorer window,
+via a new generic `Explorer.extra_header` hook (mirrors the existing `extra_toolbar` hook, keeps
+Explorer itself workspace-agnostic). Final top-to-bottom order in the Explorer window: Current
+Workspace row -> Wexplorer -> Refresh/Import toolbar -> search+filter+path bar -> Favorites ->
+the main arborescence.
+
+The Wexplorer auto-refreshes when the workspace changes on disk (this app's own writes
+included), piggybacking on `search_paths_dialog.py`'s existing workspace-wide watcher instead of
+adding a third `Observer`: new generic `on_workspace_changed` callback hook, fired alongside its
+own `reload()` once the watch settles, wired to `self.explorer.refresh`.
+
+Backfilled a gap where a workspace missing some `SUBDIRS` (e.g. a folder introduced in a later
+Forgery version) only got them created when the workspace was re-picked interactively --
+`_on_active_workspace_changed()` now also calls `ensure_structure()` itself, covering every path
+into it (including `__init__` resuming a workspace already active from a previous session).
+
+Two performance bugs found and fixed while testing this feature:
+- `search_paths_dialog.py`'s workspace watcher reacted to *every* watchdog event type, including
+  `'opened'`/`'closed_no_write'` -- pure read access (e.g. from `_load_shape()`'s own
+  `item.read_bytes()` on a shape living under the watched workspace), not an actual content
+  change. This pre-existing bug (predates this session) triggered a full search-path rescan on
+  every single shape load, visibly slowing the UI -- only surfaced now because the Wexplorer
+  makes loading many shapes in a row far more common. Fixed with an event-type filter (same
+  approach as the Auto-export watcher's own handler, see below).
+- Expanding a `tex/` folder decoded every texture thumbnail synchronously on the main/render
+  thread the first time -- fine for many small files, but a real 4096x4096 Ryzom texture took
+  over a second to decode, visibly stalling the UI (raw PNG decode cost, unlike the `.dds`
+  format real shape textures normally use, which loads near-instantly). Fixed by moving thumbnail
+  decoding to a background thread per texture (own `_decode_thumbnail_worker()`, same pattern as
+  `search_paths_dialog.py`'s own background scan), downscaling to 32px before the now-cheap GPU
+  upload on the main thread.
+
+## 2026-08-26 — ✨ Auto-export imports/ -> shapes/: headless mesh-import engine for Forgery workspaces
+
+New `ryzom_forgery/import_watcher.py`: watches a workspace's `imports/` folder for created/
+modified `.obj`/`.dae`/`.fbx` files (debounced watchdog `Observer`, own per-file debounce so one
+file's write burst doesn't reset another's pending timer) and keeps `<workspace>/shapes/` in
+sync automatically. Source file names are sanitized to a safe `.shape` base name (every
+character outside `[A-Za-z0-9_-]` becomes `_`, case kept). If the target shape doesn't exist
+yet, it's a full headless import (`export_new_shape()`, same path as `apps/shape_importer.py`'s
+CLI). If it already exists and both meshes have the same material count, `update_existing_shape()`
+replaces the geometry and updates only each material's diffuse texture reference where it
+changed (`_update_diffuse_texture()`) -- every other material edit made in Patina (blend,
+alpha-test, 2-sided, further Multi Bitmap stages...) survives. A material-count mismatch raises
+`MaterialCountMismatch`, left for a future Patina UI to resolve (not yet implemented).
+
+Wired into `object_editor.py` via a new `ImportWatcher`, started/restarted whenever the active
+workspace changes. Since Patina has no dirty-edit tracking, silently auto-updating the shape
+currently open in the viewport risked discarding unsaved work -- when the auto-export target is
+that exact shape, a new confirmation popup (`_draw_import_conflict_popup()`) instead offers
+"Save then import" / "Import without saving" / "Save as a backup copy, then import"
+(auto-named `<name>_backup_<timestamp>.shape`) / Cancel.
+
+Also centralized the `IMPORTERS`/extension-dispatch dict (previously redefined identically in
+`import_dialog.py` and `apps/shape_importer.py`) into `shape_import.py` itself as the single
+source of truth, and fixed 3 stale `docs/log.md` references there (moved to
+`logs/forgery-object-editor.md` a while ago).
+
 ## 2026-08-26 — ✨ Reveal texture in file manager; edit-in-workspace image editor button
 
 Two related additions to the Textures tab:

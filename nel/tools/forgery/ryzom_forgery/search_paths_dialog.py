@@ -34,6 +34,13 @@ _PANOPLY_FILE_NAME = "panoply_files.txt"
 # from another tool...) fire dozens of individual FS events in a burst --
 # without debouncing, each one would kick off its own full rescan.
 _WATCH_DEBOUNCE_SECONDS = 0.5
+# watchdog also reports pure-read access ('opened'/'closed_no_write', e.g.
+# from this app's own _load_shape() just reading a .shape file that happens
+# to live under the watched workspace) -- without filtering these out, every
+# shape load anywhere inside the workspace triggered a full rescan. Only
+# actual content changes should count (same filtering as import_watcher.py's
+# own _DebouncedImportHandler).
+_RELEVANT_EVENT_TYPES = {"created", "deleted", "modified", "moved"}
 # Same on/off icon-color-toggle pattern as explorer.py's favorite star
 # (_FAVORITE_STAR_COLOR/_NON_FAVORITE_STAR_COLOR) -- white/orange
 # instead of a checkbox, to save row width.
@@ -99,10 +106,12 @@ def _truncate_path_to_width(path, max_width):
 
 
 class _DebouncedReloadHandler(FileSystemEventHandler):
-	"""Coalesces a burst of filesystem events into a single `on_settled`
-	call, fired _WATCH_DEBOUNCE_SECONDS after the last event -- watchdog
-	calls on_any_event() from its own OS-native watcher thread, never the
-	main/render thread, same as any other background worker here."""
+	"""Coalesces a burst of *content-changing* filesystem events (see
+	_RELEVANT_EVENT_TYPES -- pure-read access is ignored) into a single
+	`on_settled` call, fired _WATCH_DEBOUNCE_SECONDS after the last event --
+	watchdog calls on_any_event() from its own OS-native watcher thread,
+	never the main/render thread, same as any other background worker
+	here."""
 
 	def __init__(self, on_settled):
 		self._on_settled = on_settled
@@ -110,6 +119,8 @@ class _DebouncedReloadHandler(FileSystemEventHandler):
 		self._lock = threading.Lock()
 
 	def on_any_event(self, event):
+		if event.event_type not in _RELEVANT_EVENT_TYPES:
+			return
 		with self._lock:
 			if self._timer is not None:
 				self._timer.cancel()
@@ -156,6 +167,13 @@ class SearchPathsDialog:
 		self._scan_status = ""
 		self._scanning = False
 		self._scanned_once = False
+
+		# Optional callback(), fired alongside reload() whenever the workspace
+		# watch above settles -- the host app's hook for anything else that
+		# should also react to the workspace changing on disk (e.g.
+		# object_editor.py's Wexplorer, via Explorer.refresh()), without this
+		# generic dialog needing to know what that is.
+		self.on_workspace_changed = None
 
 	@property
 	def scanning(self):
@@ -212,7 +230,7 @@ class SearchPathsDialog:
 			self._workspace_observer = None
 		if path is None:
 			return
-		handler = _DebouncedReloadHandler(self.reload)
+		handler = _DebouncedReloadHandler(self._on_workspace_settled)
 		observer = Observer()
 		try:
 			observer.schedule(handler, str(path), recursive=True)
@@ -222,6 +240,14 @@ class SearchPathsDialog:
 			print(f"[search_paths_dialog] could not watch workspace folder {path!r}: {e}")
 			return
 		self._workspace_observer = observer
+
+	def _on_workspace_settled(self):
+		"""_DebouncedReloadHandler's callback for the workspace watch --
+		runs reload() as before, then the host app's own extra hook, if any
+		(see on_workspace_changed)."""
+		self.reload()
+		if self.on_workspace_changed is not None:
+			self.on_workspace_changed()
 
 	def _effective_dirs(self):
 		return ([self._workspace_dir] if self._workspace_dir is not None else []) + self._dirs
