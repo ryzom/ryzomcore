@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-08-26 — 🔖 Bump Forgery version to 0.1.21
+
+Routine version bump covering the import-conflict popup polish, app-wide ImGui style fixes, and
+the reference-examples packaging fix -- required for ryztart's auto-update to fire.
+
+## 2026-08-26 — 🐛 Ship Patina's reference example shapes in the pip wheel
+
+Patina's 3 built-in reference shapes ("Cube (1x1x1)", "Smallest character", "Tallest character")
+were failing to load on any real `pip install` of the Forgery wheel: `_REFERENCE_EXAMPLES_DIR`
+already correctly pointed at `ryzom_forgery/examples/` (inside the installable package), but the
+actual `.shape` files had only ever lived in a sibling `nel/tools/forgery/examples/` folder,
+outside the package -- fine for a source checkout, silently missing from an installed wheel, since
+setuptools only bundles files inside the package directory and only what
+`[tool.setuptools.package-data]` explicitly lists. Moved just the 3 needed `.shape` files
+(`ge_mission_1_caisse.shape`, `npc_dummy_short.shape`, `npc_dummy_tall.shape`, ~1.3MB total) into
+`ryzom_forgery/examples/` and added `"examples/*.shape"` to `pyproject.toml`'s package-data --
+no code change needed, the path formula was already correct for that location.
+
+## 2026-08-26 — ✨ Import-conflict popup polish, app-wide ImGui style fixes
+
+Follow-ups from live-testing the import-conflict popup (`_draw_import_conflict_popup()`, Step 3 of
+the auto-export imports/ chantier):
+
+- The popup used to open unconditionally whenever the target shape was the one open in the
+  viewport, regardless of whether there was actually anything unsaved. New
+  `_has_unsaved_changes_at()` serializes the in-memory shape to bytes (`save_shape()` into an
+  `io.BytesIO()`, no disk write) and compares against a fresh read of the target file -- exact,
+  without needing to track every individual edit throughout the editor. The popup now only opens
+  on a real conflict; otherwise it auto-updates silently, same as when the shape isn't open at all.
+- Reworded the 3 action buttons, color-coded them (orange/pink/green, new `_colored_button()`
+  helper with derived hover/active shades) and centered them (new `_center_next_widget()` helper).
+- App-wide ImGui style fixes in `ForgeryApp.__init__` (`app.py`, shared by every Forgery tool app):
+  rounded corners (`frame_rounding`), forced pure white text and fully opaque window/popup
+  backgrounds (both were left at Dear ImGui's slightly-translucent stock defaults, never touched
+  before, so every popup in every Forgery app always looked a bit hazy). Chasing a pushed
+  pure-black button text color rendering as `0x0A` instead of `0x00` led to the real culprit:
+  `ModalWindowDimBg` (meant to only dim whatever's *behind* a modal popup) was blending over the
+  modal's own content too in this rendering pipeline -- confirmed by the arithmetic matching
+  exactly (`0.4 * 0.1 + 0.6 * 0 = 0.04` -> `0x0A`). Disabled entirely rather than toned down, so
+  popup colors/text now render exactly as set; the trade-off is no more dimming of whatever's
+  behind a modal popup.
+
 ## 2026-08-26 — 🔖 Bump Forgery version to 0.1.20
 
 Routine version bump covering this batch of Patina changes (Panoply masks/always-show/add-mask,
