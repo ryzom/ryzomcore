@@ -1,5 +1,70 @@
 # Changelog
 
+## 2026-08-26 — 🔖 Bump Forgery version to 0.1.20
+
+Routine version bump covering this batch of Patina changes (Panoply masks/always-show/add-mask,
+scan performance work, splash timing fix) -- required for ryztart's auto-update to fire.
+
+## 2026-08-26 — 🐛 Keep startup splash open until the first real UI frame
+
+`Splash.close()` (`splash.py`) used to be called at the end of `ForgeryApp.__init__` -- before
+`ShowBase`'s own `run()` loop actually fires its first frame, so the splash could disappear a
+moment before anything was really on screen. Now `ForgeryApp` keeps the `Splash` instance open
+(`self._splash`) and only closes it on the very first `draw_ui()` call instead, so its `min_duration`
+floor (1.2s by default) is measured against real elapsed time up to the first visible frame, not
+just up to the end of Python-side construction. `close()` itself is unchanged: it only sleeps for
+whatever's left of `min_duration`, so a slow-enough startup (already past that floor on its own)
+still closes immediately with no extra wait.
+
+## 2026-08-26 — ⚡ Skip external rescan on workspace change, persist scan cache, incremental scan
+
+Three related performance fixes to `search_paths_dialog.py`'s asset scanning, all found and
+root-caused through real-machine profiling:
+
+- A texture/mask copy into the active workspace was triggering a full external-search-paths
+  rescan, even though only the workspace (already covered by its own watchdog observer) had
+  changed. Split scanning into two independent halves (`_ScanResult` for `_external_result`/
+  `_workspace_result`, merged via `_merge_and_publish()`) so a workspace-only change
+  (`_reload_workspace_only()`) never re-walks the external paths.
+- The external scan's dominant cost is the directory walk itself, re-paid on every app startup.
+  The scan result is now persisted to disk (`external_scan_index_cache.json`) and loaded
+  synchronously at startup for an instant (if possibly slightly stale) index, while a real full
+  scan always still runs in the background afterwards to self-correct.
+- Converting that background scan to a per-frame time-sliced generator (to avoid GIL contention
+  with the render thread -- see below) initially made things *worse*: `.anim` parse failures for
+  several `CTrackKeyFramer*` classes `pynel.ryzom_animation.parse_animation()` doesn't support
+  were never cached, so every scan re-attempted and re-failed the same expensive parses forever.
+  Fixed by caching failures too, not just successes.
+- The scan itself was moved from a background thread to a generator advanced a small
+  (~2ms) time-bounded slice per frame on the main thread -- a background thread doing this much
+  CPU-bound dict/object-building work contends for the GIL with the render thread badly enough to
+  drag FPS well under 30 for the scan's whole duration. The incremental version trades wall-clock
+  scan time for never blocking the UI thread.
+- A further ~1.2s freeze was found right at the *end* of a full scan: `_save_external_index_cache()`
+  (JSON-serializing the ~10^5-entry index and writing it to disk) ran synchronously in a single
+  frame. Moved that save (plus the smaller `save_scan_cache()`/`save_bnp_table_cache()`) to a
+  background thread -- safe here (unlike the scan itself) since it's a one-shot ~1s burst once per
+  finished scan, not sustained multi-second background work.
+
+## 2026-08-26 — ✨ Panoply masks/ folder, always-show section, add-mask button
+
+Several Panoply-related UI improvements to Patina's Textures/Materials tabs:
+
+- The "Panoply" section in `_draw_global_panoply_section()` used to draw nothing at all when none
+  of a shape's textures had a detected variant, giving no indication Panoply was even checked --
+  it's now always shown, with a disabled explanatory message when nothing matches.
+- New `masks` workspace subfolder (`workspaces.SUBDIRS`). `_draw_panoply_masks_for()` now shows a
+  copy/edit button next to each resolved mask thumbnail (reusing the same
+  copy-to-workspace/edit-in-image-editor mechanism as a real texture, generalized with a `subdir`
+  parameter), and a "+" button offering to create a mask (solid black, same pixel size as the base
+  texture, written straight to the workspace's `masks/` folder) for any Panoply axis that doesn't
+  have a resolved mask file yet -- independent of whether `panoply_files.txt` already declares
+  that axis, since turning a plain texture into a panoplied one from scratch is a normal workflow
+  here.
+- The same green "already in the workspace" border used on texture reference text fields is now
+  also drawn around the thumbnail itself (`_draw_preview_workspace_border()`), for the simple
+  material row, Multi Bitmap slots, and the new Panoply masks row alike.
+
 ## 2026-08-26 — ✨ Wexplorer: browsable workspace folders in the Explorer sidebar
 
 Added the "Wexplorer": each active-workspace folder (`tex`/`shapes`/`anims`/`skels`/`exports`/
