@@ -21,6 +21,7 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, port
 
 from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
+from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
 from ryzom_forgery.material_docs import load_material_docs
@@ -76,8 +77,11 @@ _REFERENCE_ICONS = {"Cube (1x1x1)": fa_icons.ICON_FA_CUBE, "Smallest character":
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
+_RESTORE_SCAN_POPUP_ID = "Scanning assets"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
+_TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
+_TEXTURE_IN_WORKSPACE_COLOR = (0.4, 1.0, 0.4, 1.0)  # green -- this texture reference already lives in the active workspace's tex/
 _COLOR_POPUP_ID = "material-color-picker"
 _DIFFUSE_COLOR_POPUP_ID = "material-diffuse-picker"
 
@@ -430,8 +434,9 @@ def _build_geom(vdata, indices):
 
 APP_INFO = {
 	"id": "object_editor",
-	"name": "Object Editor",
-	"description": "Browse, inspect and edit .shape files (Patina).",
+	"name": "Patina",
+	"subtitle": "Object Editor",
+	"description": "Browse, inspect and edit .shape files.",
 }
 
 
@@ -509,13 +514,16 @@ class ObjectEditorApp(ForgeryApp):
 		self._panoply_texture_signatures = {}
 		self._panoply_freshness_last_check = 0.0
 
-		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
-		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Export's default filename
+		self._shape_source_path = None  # Path this shape was loaded from on disk, or None if loaded from inside a .bnp -- Save no longer depends on this (always targets the active workspace instead), only _texture_search_dirs/dialog-default-folder purposes still do
+		self._shape_source_bnp_path = None  # set alongside _shape_source_path when the shape lives inside a .bnp -- see _save_session_state()
+		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- also Save's destination filename within the workspace's shapes/ folder
 		self._texture_search_dirs = []  # extra folders (see shape_geometry.load_panda_texture's search_dirs) to fall back to for this shape's textures -- an imported mesh's own folder, tex/textures/data subfolders included
 		self._texture_needs_repeat = False  # see _uvs_need_repeat() -- whether the loaded shape's own UVs rely on texture tiling
 		self._save_overwrite_confirmed = False  # session-scoped: asked once, no more Save confirmations after that
 		self._confirm_overwrite_open = False
+		self._pending_save_path = None  # workspace destination shown/used by the overwrite-confirmation popup
 		self._save_status = ""
+		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
 		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
@@ -610,6 +618,12 @@ class ObjectEditorApp(ForgeryApp):
 
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
+
+		# Last, once every piece of state _load_shape()/_reset_shape_state()
+		# touches actually exists -- reopens wherever the Explorer/loaded
+		# shape were when the previous session quit (see
+		# _save_session_state()/_restore_session_state()).
+		self._restore_session_state()
 
 	def on_selection_changed(self, items):
 		# Selecting alone no longer auto-loads anything -- .shape used to,
@@ -1008,6 +1022,7 @@ class ObjectEditorApp(ForgeryApp):
 	def _load_shape(self, item):
 		self._reset_shape_state()
 		self._shape_source_path = item.path if item.bnp_path is None else None
+		self._shape_source_bnp_path = item.bnp_path
 		self._shape_source_name = item.name
 		if self._shape_source_path is not None:
 			self._texture_search_dirs = [self._shape_source_path.parent]
@@ -1020,6 +1035,86 @@ class ObjectEditorApp(ForgeryApp):
 			return
 
 		self._display_shape(shape_file)
+
+	def _save_session_state(self):
+		"""Persists where the Explorer is browsing and which shape is
+		loaded (see settings.py's last_folder/last_bnp/last_shape_* fields)
+		so the next launch can pick up right where this one left off --
+		called right before quitting (see _draw_bottom_bar()'s Quit
+		button). Best-effort: this is a nice-to-have, not worth failing
+		Quit over."""
+		try:
+			fresh = app_settings.load()
+			fresh.last_folder = str(self.explorer.root)
+			fresh.last_bnp = str(self.explorer._current_bnp) if self.explorer._current_bnp is not None else None
+			shape_path = self._shape_source_bnp_path if self._shape_source_bnp_path is not None else self._shape_source_path
+			fresh.last_shape_path = str(shape_path) if shape_path is not None else None
+			fresh.last_shape_bnp = str(self._shape_source_bnp_path) if self._shape_source_bnp_path is not None else None
+			fresh.last_shape_name = self._shape_source_name
+			app_settings.save(fresh)
+		except OSError as exc:
+			print(f"[object_editor] could not save session state: {exc}")
+
+	def _restore_session_state(self):
+		"""Reopens whatever the Explorer/loaded shape were at the end of
+		the previous session (see _save_session_state()) -- called once
+		from __init__(), after self.explorer/search_paths_dialog are set
+		up. Best-effort: a folder/shape that's since moved or vanished is
+		silently skipped, same as active_workspace_path()'s own handling
+		of a vanished workspace, not worth an error dialog over."""
+		settings = app_settings.load()
+		if settings.last_folder and Path(settings.last_folder).is_dir():
+			self.explorer._navigate_to(Path(settings.last_folder))
+			if settings.last_bnp and Path(settings.last_bnp).is_file():
+				self.explorer._enter_bnp(Path(settings.last_bnp))
+
+		if not (settings.last_shape_name and settings.last_shape_path):
+			return
+		if settings.last_shape_bnp:
+			bnp_path = Path(settings.last_shape_bnp)
+			if bnp_path.is_file():
+				self._load_shape(ExplorerItem(path=bnp_path, name=settings.last_shape_name, bnp_path=bnp_path))
+		else:
+			shape_path = Path(settings.last_shape_path)
+			if shape_path.is_file():
+				self._load_shape(ExplorerItem(path=shape_path, name=settings.last_shape_name))
+
+		# The shape displays right away, but its textures are resolved via
+		# self.search_paths_dialog.find_texture() -- backed by the
+		# background scan ensure_scanned() (called right after this in
+		# __init__) just started, and very likely still running this early.
+		# Rather than delaying the shape's own appearance until that scan
+		# finishes, show it untextured immediately with a popup saying so,
+		# and refresh every material once the scan completes (see
+		# _draw_restore_scan_popup()).
+		if self.shape_file is not None and self.search_paths_dialog.scanning:
+			self._restore_scan_popup_open = True
+
+	def _draw_restore_scan_popup(self):
+		"""Drawn every frame from draw_panel() while a shape was just
+		restored (see _restore_session_state()) before the search-path scan
+		it needs for textures had finished -- closes itself and refreshes
+		every material the moment the scan completes."""
+		if not self._restore_scan_popup_open:
+			return
+		if not imgui.is_popup_open(_RESTORE_SCAN_POPUP_ID):
+			imgui.open_popup(_RESTORE_SCAN_POPUP_ID)
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_RESTORE_SCAN_POPUP_ID, None, flags)
+		if opened:
+			imgui.text("Scanning assets for textures...")
+			if not self.search_paths_dialog.scanning:
+				# load_panda_texture() unconditionally caches its result, a
+				# miss (None) included -- the very first resolution attempt
+				# (right after the shape was restored, well before the scan
+				# populated the index) would otherwise poison every texture
+				# name as "not found" forever, so _reapply_all_materials()
+				# alone would just keep re-serving those same stale misses.
+				self._texture_cache.clear()
+				self._reapply_all_materials()
+				imgui.close_current_popup()
+				self._restore_scan_popup_open = False
+			imgui.end_popup()
 
 	def _reset_shape_state(self):
 		"""Common reset before showing any shape in the viewer -- a `.shape`
@@ -1035,6 +1130,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_override_colors = {}
 		self._panoply_selection = {}
 		self._shape_source_path = None
+		self._shape_source_bnp_path = None  # set alongside _shape_source_path when the shape lives inside a .bnp -- see _save_session_state()
 		self._shape_source_name = None
 		self._texture_search_dirs = []
 		self._texture_needs_repeat = False
@@ -2239,7 +2335,7 @@ class ObjectEditorApp(ForgeryApp):
 			return imgui.color_button(str_id, (0.5, 0.5, 0.5, 0.4), 0, (size, size))
 		return self._draw_thumbnail_button(str_id, tex_ref, name, size)
 
-	def _draw_texture_preview_static(self, name, size=24):
+	def _draw_texture_preview_static(self, name, size=24, badge=None):
 		"""Same thumbnail button (size, frame, hover-zoom tooltip) as
 		_draw_texture_preview_button, but disabled -- for spots where
 		clicking it wouldn't do anything (e.g. the Textures tab once a
@@ -2248,19 +2344,55 @@ class ObjectEditorApp(ForgeryApp):
 		A plain imgui.image() looked visibly smaller: image_button adds the
 		usual button frame padding around the image that a bare image()
 		doesn't get, and disabling it (rather than swapping widget types)
-		keeps that same size."""
+		keeps that same size.
+
+		`badge` (e.g. a material index), if given, is overlaid directly on
+		the thumbnail -- see _draw_preview_badge() -- instead of a separate
+		imgui.text() label, which would cost horizontal space this panel
+		doesn't have to spare."""
 		tex_ref = self._get_preview_texture_ref(name)
 		if tex_ref is None:
 			imgui.dummy((size, size))
-			return
-		imgui.begin_disabled(True)
-		imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR)
-		imgui.end_disabled()
-		if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
-			if imgui.begin_tooltip():
-				self._draw_image_opaque_bg(tex_ref, (192, 192))
-				imgui.text(name)
-				imgui.end_tooltip()
+		else:
+			imgui.begin_disabled(True)
+			imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR)
+			imgui.end_disabled()
+			if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+				if imgui.begin_tooltip():
+					self._draw_image_opaque_bg(tex_ref, (192, 192))
+					imgui.text(name)
+					imgui.end_tooltip()
+		if badge is not None:
+			self._draw_preview_badge(badge)
+
+	@staticmethod
+	def _draw_preview_badge(text, scale=0.7):
+		"""Overlays `text` (e.g. "3") in the bottom-right corner of
+		whichever preview button/thumbnail/color-swatch was just drawn, at
+		`scale`x the normal font size -- takes no extra horizontal layout
+		space, unlike a separate imgui.text() next to it, which is the
+		point: these rows are already tight on width. A 1px black shadow
+		keeps it legible over a bright/busy thumbnail.
+
+		add_text()'s explicit-size overload draws at any size regardless
+		of the currently pushed font scale, but calc_text_size() always
+		measures at the *current* (full) size -- so the small size's own
+		footprint is estimated by scaling that measurement down, rather
+		than actually re-measuring at `scale` (glyph metrics scale
+		linearly with size in ImGui's font atlas, so this is exact, not
+		an approximation)."""
+		font = imgui.get_font()
+		full_size = imgui.get_font_size()
+		small_size = full_size * scale
+		full_text_size = imgui.calc_text_size(text)
+		text_w, text_h = full_text_size.x * scale, full_text_size.y * scale
+
+		item_max = imgui.get_item_rect_max()
+		pos = (item_max.x - text_w - 1, item_max.y - text_h - 1)
+		shadow_pos = (pos[0] + 1, pos[1] + 1)
+		draw_list = imgui.get_window_draw_list()
+		draw_list.add_text(font, small_size, shadow_pos, imgui.get_color_u32((0.0, 0.0, 0.0, 1.0)), text)
+		draw_list.add_text(font, small_size, pos, imgui.get_color_u32((1.0, 1.0, 1.0, 1.0)), text)
 
 	def _get_color_texture_ref(self, color):
 		"""A 1x1 solid-color Texture (see shape_geometry.solid_color_texture)
@@ -2342,14 +2474,16 @@ class ObjectEditorApp(ForgeryApp):
 		button, which is a temporary visualization override, never saved).
 		Once a texture is set, this just previews it: the material is a
 		texture now, not a color, so it's no longer clickable for color."""
+		badge = str(material_id)
 		texture = material.textures[0] if material.textures else None
 		if texture is not None and texture.file_name:
-			self._draw_texture_preview_static(texture.file_name)
+			self._draw_texture_preview_static(texture.file_name, badge=badge)
 			return
 
 		diffuse = rgba_to_color(material.diffuse)
 		if self._draw_color_preview_button(f"##diffuse-{material_id}", diffuse):
 			imgui.open_popup(f"{_DIFFUSE_COLOR_POPUP_ID}-{material_id}")
+		self._draw_preview_badge(badge)
 
 		if imgui.begin_popup(f"{_DIFFUSE_COLOR_POPUP_ID}-{material_id}"):
 			changed, new_color = imgui.color_picker4(f"##diffuse-picker-{material_id}", diffuse)
@@ -2458,41 +2592,47 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.text_disabled(preview or "(empty)")
 
 			if expanded:
-				imgui.indent()
 				for material_id, texture in entries:
 					self._ensure_multi_bitmap_slot(texture, index)
 					imgui.push_id(f"mb-mat-{material_id}")
 
 					slot_name = texture.file_names[index]
+					badge = str(material_id)
 					if slot_name:
-						self._draw_texture_preview_static(slot_name)
+						self._draw_texture_preview_static(slot_name, badge=badge)
 					else:
 						imgui.dummy((24, 24))
-					imgui.same_line()
-					imgui.text(f"#{material_id}")
+						self._draw_preview_badge(badge)
 					imgui.same_line()
 
-					imgui.set_next_item_width(220)
+					def _set_slot(value, material_id=material_id, texture=texture, index=index):
+						texture.file_names[index] = value
+						if texture.selected_index == index:
+							texture.file_name = value
+							self._reapply_material(material_id)
+
 					current_value = texture.file_names[index]
+					in_workspace = self._is_texture_in_workspace(current_value)
+					imgui.set_next_item_width(220)
+					imgui.push_style_color(
+						imgui.Col_.text.value, _TEXTURE_IN_WORKSPACE_COLOR if in_workspace else _TEXTURE_NORMAL_COLOR)
 					changed, new_value = imgui.input_text(f"##text-{index}", current_value)
+					imgui.pop_style_color()
+					if imgui.is_item_hovered() and current_value:
+						imgui.set_tooltip(current_value + ("\n(in the active workspace)" if in_workspace else ""))
 					new_value = new_value.lower()  # texture names aren't case-sensitive
 					if changed and new_value != current_value:
-						texture.file_names[index] = new_value
-						if texture.selected_index == index:
-							texture.file_name = new_value
-							self._reapply_material(material_id)
+						_set_slot(new_value)
 					imgui.same_line()
 					if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Browse for a texture file"):
-						def _on_result(file_name, material_id=material_id, texture=texture, index=index):
+						def _on_result(file_name, texture=texture, index=index, _set_slot=_set_slot):
 							self._ensure_multi_bitmap_slot(texture, index)
-							texture.file_names[index] = file_name
-							if texture.selected_index == index:
-								texture.file_name = file_name
-								self._reapply_material(material_id)
+							_set_slot(file_name)
 						self._start_texture_browse(("multi-bitmap", material_id, index), _on_result)
+					imgui.same_line()
+					self._draw_texture_copy_button(current_value, _set_slot)
 
 					imgui.pop_id()
-				imgui.unindent()
 
 			imgui.pop_id()
 			imgui.separator()
@@ -2504,8 +2644,88 @@ class ObjectEditorApp(ForgeryApp):
 			self.sysinfo.set_status("")
 			self._multi_bitmap_hint_shown = False
 
+	def _workspace_shape_save_path(self):
+		"""Where Save writes to -- always <active workspace>/shapes/<name>,
+		regardless of where the shape was originally loaded from (even from
+		inside a .bnp, which used to disable Save entirely). None if there's
+		no active workspace configured yet, or no shape name is known."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None or not self._shape_source_name:
+			return None
+		return workspace_dir / "shapes" / self._shape_source_name
+
+	def _resolve_texture(self, file_name):
+		"""resolve_texture_ref(), pre-bound to this shape's own
+		_texture_search_dirs/finder -- the same lookup the viewport itself
+		uses to display a texture."""
+		if not file_name:
+			return None
+		return resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+
+	def _texture_copy_destination(self, ref):
+		"""<active workspace>/tex/<ref's own bare name>, or None without an
+		active workspace configured."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return None
+		return workspace_dir / "tex" / ref.name
+
+	def _is_texture_in_workspace(self, file_name):
+		"""True if `file_name` currently resolves to a file already sitting
+		in the active workspace's own tex/ folder -- used to color-code
+		texture references in the UI (see _draw_texture_copy_button())."""
+		ref = self._resolve_texture(file_name)
+		if ref is None or ref.fs_path is None:
+			return False
+		dest = self._texture_copy_destination(ref)
+		return dest is not None and ref.fs_path.resolve() == dest.resolve()
+
+	def _copy_texture_to_workspace(self, file_name):
+		"""Resolves `file_name` (absolute path or bare name alike) and
+		copies its bytes into the active workspace's tex/ folder, unless
+		it's already sitting there. Returns the resulting bare (lowercased,
+		matching how a typed/browsed texture name is normalized elsewhere)
+		file name to store back on the material, or None if nothing could
+		be done -- no active workspace, unresolvable reference, or a copy
+		failure (logged, not raised; the caller just leaves the material's
+		current reference untouched in that case)."""
+		ref = self._resolve_texture(file_name)
+		if ref is None:
+			print(f"[object_editor] could not resolve texture {file_name!r} to copy")
+			return None
+		dest = self._texture_copy_destination(ref)
+		if dest is None:
+			return None
+		if not (ref.fs_path is not None and ref.fs_path.resolve() == dest.resolve()):
+			try:
+				dest.parent.mkdir(parents=True, exist_ok=True)
+				dest.write_bytes(ref.read_bytes())
+			except OSError as exc:
+				print(f"[object_editor] could not copy texture {ref.name!r} to workspace: {exc}")
+				return None
+		return ref.name.lower()
+
+	def _draw_texture_copy_button(self, current_value, on_copied):
+		"""Small icon button, next to a texture reference field, that copies
+		that one texture into the active workspace's tex/ folder and
+		rewrites the reference to the resulting bare name via
+		`on_copied(new_name)`. Disabled once the texture already lives
+		there (or there's nothing to copy) -- deliberately opt-in per
+		texture rather than an automatic copy-everything-on-save, so the
+		workspace's tex/ only ever holds textures the user actually chose
+		to bring in for editing."""
+		disabled = not current_value or self.workspace_setup_dialog.active_workspace_dir is None \
+			or self._is_texture_in_workspace(current_value)
+		imgui.begin_disabled(disabled)
+		if _icon_button(fa_icons.ICON_FA_DOWNLOAD, "Copy this texture into the active workspace"):
+			new_name = self._copy_texture_to_workspace(current_value)
+			if new_name is not None:
+				on_copied(new_name)
+		imgui.end_disabled()
+
 	def _write_shape(self, path):
 		try:
+			path.parent.mkdir(parents=True, exist_ok=True)
 			save_shape(path, self.shape_file)
 			self._save_status = f"Saved to {path}"
 			print(f"[object_editor] {self._save_status}")
@@ -2520,9 +2740,13 @@ class ObjectEditorApp(ForgeryApp):
 			print(f"[object_editor] {self._save_status}")
 
 	def _on_save_clicked(self):
+		save_path = self._workspace_shape_save_path()
+		if save_path is None:
+			return
 		if self._save_overwrite_confirmed:
-			self._write_shape(self._shape_source_path)
+			self._write_shape(save_path)
 		else:
+			self._pending_save_path = save_path
 			self._confirm_overwrite_open = True
 			imgui.open_popup(_OVERWRITE_POPUP_ID)
 
@@ -2535,14 +2759,14 @@ class ObjectEditorApp(ForgeryApp):
 		if not opened:
 			return
 
-		imgui.text(f"Overwrite this file?\n{self._shape_source_path}")
+		imgui.text(f"Overwrite this file?\n{self._pending_save_path}")
 		imgui.text_wrapped("You won't be asked again this session.")
 		imgui.separator()
 		if imgui.button("Overwrite"):
 			self._save_overwrite_confirmed = True
 			self._confirm_overwrite_open = False
 			imgui.close_current_popup()
-			self._write_shape(self._shape_source_path)
+			self._write_shape(self._pending_save_path)
 		imgui.same_line()
 		if imgui.button("Cancel"):
 			self._confirm_overwrite_open = False
@@ -2584,12 +2808,13 @@ class ObjectEditorApp(ForgeryApp):
 
 		writable = self.shape_file is not None and self.shape_file.type_name in _WRITABLE_SHAPE_TYPES
 		if writable:
-			imgui.begin_disabled(self._shape_source_path is None)
+			save_path = self._workspace_shape_save_path()
+			imgui.begin_disabled(save_path is None)
 			if imgui.button(f"{fa_icons.ICON_FA_SAVE} Save"):
 				self._on_save_clicked()
 			imgui.end_disabled()
-			if imgui.is_item_hovered() and self._shape_source_path is None:
-				imgui.set_tooltip("Save unavailable -- loaded from inside a .bnp archive")
+			if imgui.is_item_hovered() and save_path is None:
+				imgui.set_tooltip("Save unavailable -- set up a Workspaces folder and pick an active workspace first")
 			imgui.same_line()
 
 			if imgui.button("Export..."):
@@ -2899,13 +3124,17 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._draw_texture_color_button(material_id, material)
 		imgui.same_line()
-		imgui.text(f"#{material_id}")
-		imgui.same_line()
 
 		texture = material.textures[0] if material.textures else None
 		current_value = texture.file_name if (texture and texture.file_name) else ""
+		in_workspace = self._is_texture_in_workspace(current_value)
 		imgui.set_next_item_width(220)
+		imgui.push_style_color(
+			imgui.Col_.text.value, _TEXTURE_IN_WORKSPACE_COLOR if in_workspace else _TEXTURE_NORMAL_COLOR)
 		changed, new_value = imgui.input_text("##text", current_value)
+		imgui.pop_style_color()
+		if imgui.is_item_hovered() and current_value:
+			imgui.set_tooltip(current_value + ("\n(in the active workspace)" if in_workspace else ""))
 		new_value = new_value.lower()  # texture names aren't case-sensitive
 		if changed and new_value != current_value:
 			self._set_simple_material_texture(material, new_value)
@@ -2917,10 +3146,22 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_simple_material_texture(material, file_name)
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
+		imgui.same_line()
+
+		def _on_copied(new_name, material_id=material_id, material=material):
+			self._set_simple_material_texture(material, new_name)
+			self._reapply_material(material_id)
+		self._draw_texture_copy_button(current_value, _on_copied)
 
 		self._draw_panoply_masks_for(current_value)
 
 		imgui.pop_id()
+
+	def _on_exit(self):
+		"""Runs right before the process actually exits, whether that was
+		requested via the in-app Quit button or the OS's own window-close
+		control -- see app.py's ForgeryApp.__init__()/_on_exit()."""
+		self._save_session_state()
 
 	def panel_title(self):
 		return self._shape_source_name or "Panel"
@@ -2939,6 +3180,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
 		self._draw_replace_match_popup()
+		self._draw_restore_scan_popup()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)
