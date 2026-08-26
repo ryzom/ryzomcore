@@ -65,6 +65,11 @@ class Settings:
 	last_shape_path: Optional[str] = None
 	last_shape_bnp: Optional[str] = None
 	last_shape_name: Optional[str] = None
+	# Path to an external image editor executable (e.g. GIMP/Krita/Photoshop),
+	# used by the Textures tab's "Edit" button (see object_editor.py) once a
+	# texture already lives in the active workspace. None until the user
+	# picks one in Settings -- the button stays disabled until then.
+	image_editor_path: Optional[str] = None
 
 
 def load() -> Settings:
@@ -83,6 +88,7 @@ def load() -> Settings:
 	settings.last_shape_path = data.get("last_shape_path") or None
 	settings.last_shape_bnp = data.get("last_shape_bnp") or None
 	settings.last_shape_name = data.get("last_shape_name") or None
+	settings.image_editor_path = data.get("image_editor_path") or None
 
 	export_data = data.get("export", {})
 	for field_name in settings.export.__dataclass_fields__:
@@ -116,6 +122,8 @@ def save(settings: Settings) -> None:
 		doc["last_shape_bnp"] = settings.last_shape_bnp
 	if settings.last_shape_name is not None:
 		doc["last_shape_name"] = settings.last_shape_name
+	if settings.image_editor_path is not None:
+		doc["image_editor_path"] = settings.image_editor_path
 
 	export_table = tomlkit.table()
 	for key, value in asdict(settings.export).items():

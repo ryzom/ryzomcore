@@ -6,6 +6,7 @@
 render yet.
 """
 
+import subprocess
 from math import ceil, cos, pi, radians, sin
 from pathlib import Path
 
@@ -41,6 +42,7 @@ from ryzom_forgery.shape_geometry import (
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog
+from ryzom_forgery.workspaces import reveal_in_system_file_manager
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
@@ -602,6 +604,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._bone_preview_panel_size = (10.0, 10.0)
 		self._skeleton_file_dialog = None  # in-flight portable_file_dialogs.open_file, for the Skinning preview's own "load a .skel" icon button
 		self._animation_file_dialog = None  # same, for its "load a .anim" icon button
+		self._image_editor_dialog = None  # same, for the Settings tab's image editor executable picker
 		self.taskMgr.add(self._update_skin_preview_time, "object-editor-skin-preview-time")
 		# Live re-skinning of a loaded CMeshMRMSkinned (see _build_skin_state()/
 		# _update_skin_preview()) -- reuses the same skeleton/animation state
@@ -2337,14 +2340,15 @@ class ObjectEditorApp(ForgeryApp):
 
 	def _draw_texture_preview_static(self, name, size=24, badge=None):
 		"""Same thumbnail button (size, frame, hover-zoom tooltip) as
-		_draw_texture_preview_button, but disabled -- for spots where
-		clicking it wouldn't do anything (e.g. the Textures tab once a
-		texture is already set: the text field/browse icon next to it are
-		the actual controls), so it doesn't look clickable when it isn't.
-		A plain imgui.image() looked visibly smaller: image_button adds the
-		usual button frame padding around the image that a bare image()
-		doesn't get, and disabling it (rather than swapping widget types)
-		keeps that same size.
+		_draw_texture_preview_button, but a plain reveal-in-file-manager
+		action instead of whatever a real texture-picker button would do
+		(the text field/browse icon next to it are the actual editing
+		controls for that) -- disabled only when there's no real file to
+		reveal (unresolvable, or living inside a `.bnp`, which has no
+		files of its own on disk). A plain imgui.image() looked visibly
+		smaller: image_button adds the usual button frame padding around
+		the image that a bare image() doesn't get, and disabling it
+		(rather than swapping widget types) keeps that same size.
 
 		`badge` (e.g. a material index), if given, is overlaid directly on
 		the thumbnail -- see _draw_preview_badge() -- instead of a separate
@@ -2354,13 +2358,18 @@ class ObjectEditorApp(ForgeryApp):
 		if tex_ref is None:
 			imgui.dummy((size, size))
 		else:
-			imgui.begin_disabled(True)
-			imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR)
+			resolved = self._resolve_texture(name)
+			can_reveal = resolved is not None and resolved.fs_path is not None
+			imgui.begin_disabled(not can_reveal)
+			if imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR) and can_reveal:
+				reveal_in_system_file_manager(resolved.fs_path)
 			imgui.end_disabled()
 			if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
 				if imgui.begin_tooltip():
 					self._draw_image_opaque_bg(tex_ref, (192, 192))
 					imgui.text(name)
+					if can_reveal:
+						imgui.text_disabled("Click to reveal in file manager")
 					imgui.end_tooltip()
 		if badge is not None:
 			self._draw_preview_badge(badge)
@@ -2706,22 +2715,43 @@ class ObjectEditorApp(ForgeryApp):
 		return ref.name.lower()
 
 	def _draw_texture_copy_button(self, current_value, on_copied):
-		"""Small icon button, next to a texture reference field, that copies
+		"""Small icon button, next to a texture reference field: copies
 		that one texture into the active workspace's tex/ folder and
 		rewrites the reference to the resulting bare name via
-		`on_copied(new_name)`. Disabled once the texture already lives
-		there (or there's nothing to copy) -- deliberately opt-in per
-		texture rather than an automatic copy-everything-on-save, so the
-		workspace's tex/ only ever holds textures the user actually chose
-		to bring in for editing."""
-		disabled = not current_value or self.workspace_setup_dialog.active_workspace_dir is None \
-			or self._is_texture_in_workspace(current_value)
+		`on_copied(new_name)` -- deliberately opt-in per texture rather
+		than an automatic copy-everything-on-save, so the workspace's
+		tex/ only ever holds textures the user actually chose to bring in
+		for editing. Once it's already there, this becomes an "Edit"
+		button instead (see _draw_texture_edit_button()) -- copying it
+		again would be a no-op, so there's nothing useful left for this
+		button to do besides launch an editor on it."""
+		if self._is_texture_in_workspace(current_value):
+			self._draw_texture_edit_button(current_value)
+			return
+		disabled = not current_value or self.workspace_setup_dialog.active_workspace_dir is None
 		imgui.begin_disabled(disabled)
 		if _icon_button(fa_icons.ICON_FA_DOWNLOAD, "Copy this texture into the active workspace"):
 			new_name = self._copy_texture_to_workspace(current_value)
 			if new_name is not None:
 				on_copied(new_name)
 		imgui.end_disabled()
+
+	def _draw_texture_edit_button(self, current_value):
+		"""Launches the user's configured external image editor (Settings
+		tab -> Tools) on `current_value`'s resolved file -- shown instead
+		of the copy button once a texture already lives in the active
+		workspace. Disabled, with an explanatory tooltip, until an editor
+		executable is actually configured."""
+		editor_path = app_settings.load().image_editor_path
+		disabled = not editor_path
+		imgui.begin_disabled(disabled)
+		if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this texture in the configured image editor"):
+			resolved = self._resolve_texture(current_value)
+			if resolved is not None and resolved.fs_path is not None:
+				subprocess.Popen([editor_path, str(resolved.fs_path)])
+		imgui.end_disabled()
+		if disabled and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+			imgui.set_tooltip("Set an image editor executable in Settings -> Tools first")
 
 	def _write_shape(self, path):
 		try:
@@ -2790,6 +2820,29 @@ class ObjectEditorApp(ForgeryApp):
 		if result:
 			path = Path(result[0])
 			self._apply_bone_preview_animation_bytes(path.read_bytes(), path.name)
+
+	def _poll_image_editor_dialog(self):
+		if self._image_editor_dialog is None or not self._image_editor_dialog.ready(0):
+			return
+		result = self._image_editor_dialog.result()
+		self._image_editor_dialog = None
+		if result:
+			fresh = app_settings.load()
+			fresh.image_editor_path = result[0]
+			app_settings.save(fresh)
+
+	def _draw_image_editor_settings(self):
+		"""Settings tab -- lets the user pick an external image editor
+		executable, used by the Textures tab's "Edit" button (see
+		_draw_texture_edit_button()) once a texture already lives in the
+		active workspace."""
+		settings = app_settings.load()
+		imgui.text("Image editor: ")
+		imgui.same_line()
+		imgui.text(settings.image_editor_path or "(not set)")
+		imgui.same_line()
+		if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Choose an image editor executable..."):
+			self._image_editor_dialog = pfd.open_file("Choose image editor executable")
 
 	def _draw_bottom_bar(self):
 		"""Two rows pinned at the very bottom of the panel: the active
@@ -3179,6 +3232,7 @@ class ObjectEditorApp(ForgeryApp):
 		self.workspace_setup_dialog.draw()
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
+		self._poll_image_editor_dialog()
 		self._draw_replace_match_popup()
 		self._draw_restore_scan_popup()
 
@@ -3213,6 +3267,8 @@ class ObjectEditorApp(ForgeryApp):
 					self.export_dialog.draw_settings_content()
 				if imgui.collapsing_header("Paths"):
 					self.search_paths_dialog.draw_settings_content()
+				if imgui.collapsing_header("Tools"):
+					self._draw_image_editor_settings()
 				imgui.end_tab_item()
 			imgui.end_tab_bar()
 

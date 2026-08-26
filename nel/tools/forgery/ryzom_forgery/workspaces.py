@@ -76,3 +76,20 @@ def open_in_system_file_manager(path: Path) -> None:
 		subprocess.Popen(["open", str(path)])
 	else:
 		subprocess.Popen(["xdg-open", str(path)])
+
+
+def reveal_in_system_file_manager(path: Path) -> None:
+	"""Opens `path`'s *containing folder* in the OS's own file manager, with
+	`path` itself selected/highlighted where the platform actually supports
+	that -- Windows (`explorer /select,`) and macOS (`open -R`) both have an
+	official mechanism for this; Linux has no cross-desktop-environment
+	equivalent (a specific file manager like Nautilus/Dolphin does, but
+	there's no universal command), so this falls back to
+	open_in_system_file_manager() on the parent folder there instead (opens
+	the folder, just doesn't select the file within it)."""
+	if sys.platform == "win32":
+		subprocess.Popen(["explorer", "/select,{}".format(path)])
+	elif sys.platform == "darwin":
+		subprocess.Popen(["open", "-R", str(path)])
+	else:
+		open_in_system_file_manager(path.parent)
