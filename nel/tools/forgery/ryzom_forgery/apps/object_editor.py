@@ -13,7 +13,7 @@ import numpy
 
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, PNMImage, Point3,
+	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, NodePath, PNMImage, Point3,
 	Quat, Texture as PandaTexture, TransparencyAttrib, Vec3,
 )
 
@@ -1342,7 +1342,13 @@ class ObjectEditorApp(ForgeryApp):
 		says currently owns it. Rotation is Euler degrees around each world
 		axis (NodePath.get_hpr()'s heading/pitch/roll are Z/X/Y respectively),
 		not the raw quaternion -- matches the panel's X/Y/Z fields."""
-		node = self._transform_node(prop)
+		return self._node_transform_values(self._transform_node(prop), prop)
+
+	def _node_transform_values(self, node, prop):
+		"""Like _get_transform_values(), but for an explicit `node` instead
+		of whichever one _transform_node() currently owns `prop` -- reset
+		needs both _object_pivot's and model_root's own current values
+		regardless of which one is presently the active pivot."""
 		if prop == "position":
 			v = node.get_pos()
 			return (v.x, v.y, v.z)
@@ -1351,6 +1357,38 @@ class ObjectEditorApp(ForgeryApp):
 			return (p, r, h)
 		v = node.get_scale()
 		return (v.x, v.y, v.z)
+
+	def _set_node_transform(self, node, prop, values):
+		"""Sets `node`'s `prop` to `values` -- same (x, y, z)/(p, r, h)
+		order as _node_transform_values()."""
+		if prop == "position":
+			node.set_pos(*values)
+		elif prop == "rotation":
+			p, r, h = values
+			node.set_hpr(h, p, r)
+		else:
+			node.set_scale(*values)
+
+	def _quat_to_prh(self, quat):
+		"""(pitch, roll, heading) for `quat` -- same order _node_transform_values()
+		uses for rotation. Panda's NodePath.get_hpr() has no quaternion
+		equivalent that's proven safe here, so this goes through a scratch,
+		unattached, never-rendered NodePath instead."""
+		scratch = NodePath("scratch")
+		scratch.set_quat(quat)
+		h, p, r = scratch.get_hpr()
+		return (p, r, h)
+
+	def _reset_node_transform(self, node, prop, target):
+		"""Resets `node`'s `prop` to `target` (same order as
+		_node_transform_values()), except any axis currently locked
+		(self.transform_locks[prop]), which keeps its current value instead
+		-- the same per-axis lock _set_transform_axis() already enforces
+		for manual edits and camera.py's Ctrl-drag."""
+		locks = self.transform_locks[prop]
+		current = self._node_transform_values(node, prop)
+		values = [current[i] if locks["xyz"[i]] else target[i] for i in range(3)]
+		self._set_node_transform(node, prop, values)
 
 	def _set_transform_axis(self, prop, axis_index, value):
 		"""Sets one axis (0=X, 1=Y, 2=Z) of `prop` to `value`, on whichever
@@ -1381,36 +1419,42 @@ class ObjectEditorApp(ForgeryApp):
 		_display_shape()) -- on BOTH _object_pivot and model_root, regardless
 		of which one that row's pivot lock currently targets, so the result
 		always reads as a clean reset rather than only clearing whichever of
-		the two happens to be locked right now. Used by reset_object_transform()
-		(the gizmo's Home button, a deliberately total reset); the panel's own
-		per-row Reset button uses _reset_transform_row() instead, which only
-		touches the currently selected reference frame."""
+		the two happens to be locked right now. Any axis currently locked
+		(see _draw_transform_panel()) keeps its current value instead of
+		being reset, same as a manual edit on that axis would be a no-op.
+		Used by reset_object_transform() (the gizmo's Home button, a
+		deliberately total reset); the panel's own per-row Reset button uses
+		_reset_transform_row() instead, which only touches the currently
+		selected reference frame."""
 		if prop == "position":
-			self._object_pivot.set_pos(0, 0, 0)
-			self.model_root.set_pos(0, 0, 0)
+			pivot_target = model_target = (0, 0, 0)
 		elif prop == "rotation":
-			self._object_pivot.set_quat(self._object_pivot_base_quat)
-			self.model_root.set_quat(Quat())  # Quat()'s default constructor is the identity rotation
+			pivot_target = self._quat_to_prh(self._object_pivot_base_quat)
+			model_target = (0, 0, 0)  # Quat()'s default constructor is the identity rotation
 		else:
-			self._object_pivot.set_scale(1, 1, 1)
-			self.model_root.set_scale(1, 1, 1)
+			pivot_target = model_target = (1, 1, 1)
+		self._reset_node_transform(self._object_pivot, prop, pivot_target)
+		self._reset_node_transform(self.model_root, prop, model_target)
 
 	def _reset_transform_row(self, prop):
 		"""Resets `prop` to its default -- position/scale to identity,
 		rotation to the shape's own baseline (_object_pivot_base_quat) if
 		that's the currently selected node, identity otherwise -- only on
 		whichever node _transform_node() currently owns (pivot-locked or
-		not), leaving the other reference frame untouched. Bound to the
-		panel's own per-row Reset button; see _reset_transform() for the
-		gizmo's Home button, which resets both frames at once instead."""
+		not), leaving the other reference frame untouched. Any axis
+		currently locked keeps its current value instead, same as
+		_reset_transform(). Bound to the panel's own per-row Reset button;
+		see _reset_transform() for the gizmo's Home button, which resets
+		both frames at once instead."""
 		node = self._transform_node(prop)
 		if prop == "position":
-			node.set_pos(0, 0, 0)
+			target = (0, 0, 0)
 		elif prop == "rotation":
 			is_pivot = node is self._object_pivot
-			node.set_quat(self._object_pivot_base_quat if is_pivot else Quat())
+			target = self._quat_to_prh(self._object_pivot_base_quat) if is_pivot else (0, 0, 0)
 		else:
-			node.set_scale(1, 1, 1)
+			target = (1, 1, 1)
+		self._reset_node_transform(node, prop, target)
 
 	def reset_object_transform(self):
 		"""Resets position, rotation, and scale together -- bound to the
