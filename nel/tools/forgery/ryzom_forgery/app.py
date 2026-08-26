@@ -104,6 +104,31 @@ class ForgeryApp(ShowBase):
 		self.camLens.set_near_far(0.02, 20000.0)
 
 		p3dimgui.init()
+		style = imgui.get_style()
+		# Rounded corners app-wide (buttons, inputs, checkboxes...) instead of
+		# ImGui's sharp-cornered default -- purely cosmetic, applies to every
+		# Forgery tool app since it's set once here in the shared base class.
+		style.frame_rounding = 4.0
+		# Dear ImGui's stock dark theme leaves every popup/window background
+		# noticeably translucent (WindowBg/PopupBg alpha ~0.94 by default) --
+		# never touched before now, so every popup in every Forgery app has
+		# always looked slightly hazy. Fully opaque backgrounds read as
+		# crisp/solid instead.
+		style.set_color_(imgui.Col_.window_bg.value, (0.06, 0.06, 0.06, 1.0))
+		style.set_color_(imgui.Col_.popup_bg.value, (0.08, 0.08, 0.08, 1.0))
+		# ModalWindowDimBg is meant to only dim whatever's *behind* a modal
+		# popup -- in this rendering pipeline it was instead blending over
+		# the modal's own content too (confirmed: a pushed pure-black text
+		# color was rendering as 0x0A instead of 0x00, exactly matching
+		# alpha=0.4 blended with the dim color -- 0.4*0.1 + 0.6*0 = 0.04).
+		# Disabled entirely rather than just toned down, so every popup's own
+		# colors/text render exactly as set -- the trade-off is no dimming of
+		# whatever's behind a modal popup anymore.
+		style.set_color_(imgui.Col_.modal_window_dim_bg.value, (0.0, 0.0, 0.0, 0.0))
+		# Dear ImGui's dark theme default for regular text isn't pure white
+		# either -- force it, for the same "everything looks a bit washed
+		# out" reason as the background colors above.
+		style.set_color_(imgui.Col_.text.value, (1.0, 1.0, 1.0, 1.0))
 		self._load_icon_font()
 		self._panel_watermark_tex_ref = None
 		if _SPLASH_PATH.exists():

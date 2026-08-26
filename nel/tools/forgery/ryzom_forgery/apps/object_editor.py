@@ -6,6 +6,7 @@
 render yet.
 """
 
+import io
 import subprocess
 from datetime import datetime
 from math import ceil, cos, pi, radians, sin
@@ -89,6 +90,14 @@ _RESTORE_SCAN_POPUP_ID = "Scanning assets"
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
 _TEXTURE_IN_WORKSPACE_COLOR = (0.4, 1.0, 0.4, 1.0)  # green -- this texture reference already lives in the active workspace's tex/
+
+# _draw_import_conflict_popup()'s 4 choice buttons, color-coded by how
+# "safe" each one is with the in-memory edits (green: nothing lost, orange:
+# both kept but in 2 files, pink: current edits discarded, yellow: no-op).
+_IMPORT_CONFLICT_SAVE_COLOR = (0.85, 0.55, 0.15, 1.0)  # orange
+_IMPORT_CONFLICT_DISCARD_COLOR = (0.85, 0.35, 0.55, 1.0)  # pink
+_IMPORT_CONFLICT_BACKUP_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
+_IMPORT_CONFLICT_CANCEL_COLOR = (0.8, 0.75, 0.15, 1.0)  # yellow
 _COLOR_POPUP_ID = "material-color-picker"
 _DIFFUSE_COLOR_POPUP_ID = "material-diffuse-picker"
 
@@ -183,6 +192,32 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 		imgui.pop_style_color()
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(tooltip)
+	return clicked
+
+
+def _center_next_widget(width):
+	"""Shifts the cursor so a `width`-wide widget drawn right after this call
+	lands horizontally centered in the current window's content region --
+	e.g. _draw_import_conflict_popup()'s buttons, each a different width
+	(auto-sized to its own label) but all centered under each other. A no-op
+	if `width` is already at least as wide as the available space."""
+	avail = imgui.get_content_region_avail().x
+	if avail > width:
+		imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + (avail - width) / 2)
+
+
+def _colored_button(label, color):
+	"""A plain text button (unlike _icon_button above) tinted `color`, with
+	lighter/darker hover/active variants derived from it -- see
+	_draw_import_conflict_popup()'s 4 choices, color-coded by how "safe"
+	each one is."""
+	r, g, b, a = color
+	imgui.push_style_color(imgui.Col_.button.value, color)
+	imgui.push_style_color(imgui.Col_.button_hovered.value, (min(r + 0.1, 1.0), min(g + 0.1, 1.0), min(b + 0.1, 1.0), a))
+	imgui.push_style_color(imgui.Col_.button_active.value, (max(r - 0.1, 0.0), max(g - 0.1, 0.0), max(b - 0.1, 0.0), a))
+	imgui.push_style_color(imgui.Col_.text.value, (0.0, 0.0, 0.0, 1.0))
+	clicked = imgui.button(label)
+	imgui.pop_style_color(4)
 	return clicked
 
 
@@ -709,6 +744,28 @@ class ObjectEditorApp(ForgeryApp):
 		self.shape_file.value = shape_file.value
 		self._rebuild_geometry()
 
+	def _has_unsaved_changes_at(self, target_path):
+		"""True if the in-memory shape currently open differs from what's on
+		disk at `target_path` -- lets _draw_import_conflict_popup() only
+		actually ask something when there's a real conflict, instead of on
+		every single open-shape auto-update. Rather than tracking every
+		individual edit throughout the whole editor (a much bigger, more
+		error-prone undertaking -- easy to miss a spot that mutates
+		self.shape_file without going through it), serializes the in-memory
+		shape to bytes (save_shape() accepts any BinaryIO, so this never
+		touches disk) and compares against a fresh read of the file -- exact
+		and always in sync with reality, at the cost of one extra
+		parse+serialize per conflict check (cheap next to the geometry
+		import itself, and only ever runs when the target is the shape
+		that's actually open)."""
+		buffer = io.BytesIO()
+		save_shape(buffer, self.shape_file)
+		try:
+			on_disk = target_path.read_bytes()
+		except OSError:
+			return True
+		return buffer.getvalue() != on_disk
+
 	def _apply_import_conflict_update(self, source_path, target_path):
 		"""Common tail of every _draw_import_conflict_popup() choice: runs
 		update_existing_shape() and, on success, refreshes the viewport --
@@ -727,15 +784,23 @@ class ObjectEditorApp(ForgeryApp):
 
 	def _draw_import_conflict_popup(self):
 		"""The shape currently open in the viewport is also the auto-export
-		watcher's target for a just-changed import/ source file -- Patina has
-		no dirty-edit tracking, so silently overwriting it could discard
-		in-progress work; this asks how to proceed instead (see the chantier
-		discussion)."""
+		watcher's target for a just-changed import/ source file -- if the
+		in-memory shape has actually diverged from what's on disk (see
+		_has_unsaved_changes_at()), overwriting the file could silently
+		discard that in-progress work, so this asks how to proceed instead of
+		auto-updating (see the chantier discussion). When there's nothing
+		unsaved, this behaves exactly like the "not currently open" case --
+		no popup, straight to the update."""
 		if self._pending_import_conflict is None:
 			self._import_conflict_popup_opened = False
 			return
 
 		if not self._import_conflict_popup_opened:
+			source_path, target_path = self._pending_import_conflict
+			if not self._has_unsaved_changes_at(target_path):
+				self._pending_import_conflict = None
+				self._apply_import_conflict_update(source_path, target_path)
+				return
 			imgui.open_popup(_IMPORT_CONFLICT_POPUP_ID)
 			self._import_conflict_popup_opened = True
 
@@ -747,20 +812,28 @@ class ObjectEditorApp(ForgeryApp):
 		source_path, target_path = self._pending_import_conflict
 		imgui.text(f"{target_path.name} is open in the viewport and about to be updated\n"
 		           f"from the changed import {source_path.name}.")
-		imgui.text_wrapped("Any edit made in Patina since the last Save isn't tracked, "
-		                    "so it can't tell whether you have unsaved work.")
+		imgui.text_wrapped("This shape has unsaved changes in Patina -- choose how to proceed.")
 		imgui.separator()
 
-		if imgui.button("Save then import"):
+		save_label = f"Save this shape then import {source_path.name}"
+		discard_label = f"Import {source_path.name} without saving"
+		backup_label = "Save a copy of this shape"
+		cancel_label = "Cancel (leave the on-disk file untouched)"
+		frame_padding_x2 = imgui.get_style().frame_padding.x * 2
+
+		_center_next_widget(imgui.calc_text_size(save_label).x + frame_padding_x2)
+		if _colored_button(save_label, _IMPORT_CONFLICT_SAVE_COLOR):
 			self._pending_import_conflict = None
 			imgui.close_current_popup()
 			self._write_shape(target_path)
 			self._apply_import_conflict_update(source_path, target_path)
-		if imgui.button("Import without saving (discard current edits)"):
+		_center_next_widget(imgui.calc_text_size(discard_label).x + frame_padding_x2)
+		if _colored_button(discard_label, _IMPORT_CONFLICT_DISCARD_COLOR):
 			self._pending_import_conflict = None
 			imgui.close_current_popup()
 			self._apply_import_conflict_update(source_path, target_path)
-		if imgui.button("Save as a backup copy, then import"):
+		_center_next_widget(imgui.calc_text_size(backup_label).x + frame_padding_x2)
+		if _colored_button(backup_label, _IMPORT_CONFLICT_BACKUP_COLOR):
 			self._pending_import_conflict = None
 			imgui.close_current_popup()
 			timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -768,7 +841,8 @@ class ObjectEditorApp(ForgeryApp):
 			self._write_shape(backup_path)
 			self._apply_import_conflict_update(source_path, target_path)
 		imgui.separator()
-		if imgui.button("Cancel (leave the on-disk file untouched)"):
+		_center_next_widget(imgui.calc_text_size(cancel_label).x + frame_padding_x2)
+		if _colored_button(cancel_label, _IMPORT_CONFLICT_CANCEL_COLOR):
 			self._pending_import_conflict = None
 			imgui.close_current_popup()
 
