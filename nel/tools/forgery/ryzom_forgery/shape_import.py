@@ -197,18 +197,33 @@ def parse_mtl(path: Path) -> Dict[str, MtlMaterial]:
 # ---------------------------------------------------------------------------
 
 
-def _texture_base_name(texture_name: str) -> str:
-	"""Reduces a texture reference to a plain base file name, as Ryzom
-	Texture.file_name always is -- an imported .fbx/.dae routinely carries an
-	absolute path instead (the exporting tool's own disk location, useless on
-	another machine), and on a Windows-authored file that path uses
-	backslashes, which pathlib.Path().name leaves untouched on POSIX (it only
-	splits on `/`), so both separators are normalized here before taking the
-	last component."""
-	return Path(texture_name.replace("\\", "/")).name
+def _texture_base_name(texture_name: str, base_dir: Optional[Path] = None) -> str:
+	"""Resolves a texture reference against `base_dir` (the imported mesh
+	file's own folder) if it isn't already absolute -- an imported
+	.fbx/.dae/.obj routinely carries either kind, and on a Windows-authored
+	file an absolute one uses backslashes, which pathlib.Path().name leaves
+	untouched on POSIX (it only splits on `/`), so both separators are
+	normalized first either way.
+
+	If that resolves to a real file *right now*, the full resolved path is
+	kept as-is (see shape_geometry.resolve_texture_ref()'s absolute-path
+	handling) -- lets the shape render immediately without the user having
+	to separately hunt down/re-link the texture. Explicitly copying it into
+	the active workspace later (see object_editor.py's texture-copy button)
+	is what turns this into a normal bare name, portable across machines.
+	Falls back to just the bare file name (today's behavior) when there's
+	nothing on disk to preserve."""
+	normalized = texture_name.replace("\\", "/")
+	candidate = Path(normalized)
+	if not candidate.is_absolute() and base_dir is not None:
+		candidate = base_dir / candidate
+	if candidate.is_file():
+		return str(candidate.resolve())
+	return Path(normalized).name
 
 
-def _build_material(texture_name: Optional[str] = None, double_sided: bool = False) -> Material:
+def _build_material(texture_name: Optional[str] = None, double_sided: bool = False,
+                     base_dir: Optional[Path] = None) -> Material:
 	"""Builds a "blank NeL material" (see _NEL_DEFAULT_GRAY et al above) with
 	just a diffuse texture reference -- the only thing that reliably carries
 	over from an imported .obj/.dae/.fbx's own material data (see the module
@@ -220,7 +235,12 @@ def _build_material(texture_name: Optional[str] = None, double_sided: bool = Fal
 	textures: List[Optional[Texture]] = []
 	tex_envs: List[Optional[TexEnv]] = []
 	if texture_name:
-		textures = [Texture(class_name="CTextureFile", file_name=_texture_base_name(texture_name).lower(), allow_degradation=True)]
+		resolved = _texture_base_name(texture_name, base_dir)
+		# A resolved absolute path must keep its real on-disk casing
+		# (significant on Linux/macOS); only a bare name is case-insensitive
+		# in Ryzom's own texture lookup.
+		file_name = resolved if Path(resolved).is_absolute() else resolved.lower()
+		textures = [Texture(class_name="CTextureFile", file_name=file_name, allow_degradation=True)]
 		tex_envs = [_MODULATE_TEX_ENV]
 
 	flags = _DEFAULT_MATERIAL_FLAGS | (_MAT_FLAG_DOUBLE_SIDED if double_sided else 0)
@@ -298,7 +318,7 @@ def _assemble_mesh(
 	return Mesh(base=base, geom=geom)
 
 
-def build_mesh(obj_mesh: ObjMesh, mtl_materials: Dict[str, MtlMaterial]) -> Mesh:
+def build_mesh(obj_mesh: ObjMesh, mtl_materials: Dict[str, MtlMaterial], base_dir: Optional[Path] = None) -> Mesh:
 	has_normals = bool(obj_mesh.normals)
 	has_uvs = bool(obj_mesh.texcoords)
 
@@ -338,7 +358,7 @@ def build_mesh(obj_mesh: ObjMesh, mtl_materials: Dict[str, MtlMaterial]) -> Mesh
 
 	def material_for(name: str) -> Material:
 		mtl = mtl_materials.get(name)
-		return _build_material(texture_name=mtl.diffuse_texture if mtl is not None else None)
+		return _build_material(texture_name=mtl.diffuse_texture if mtl is not None else None, base_dir=base_dir)
 
 	materials = [material_for(name) for name in material_order]
 	rdr_passes = [RdrPass(material_id=material_ids[name], indices=pass_indices[material_ids[name]])
@@ -358,7 +378,7 @@ def import_obj(path: Path) -> Mesh:
 		if mtl_path.is_file():
 			mtl_materials.update(parse_mtl(mtl_path))
 
-	return build_mesh(obj_mesh, mtl_materials)
+	return build_mesh(obj_mesh, mtl_materials, base_dir=path.parent)
 
 
 # ---------------------------------------------------------------------------
@@ -475,7 +495,7 @@ def _mesh_texcoords(mesh):
 	return [tuple(data[i:i + 2]) for i in range(0, len(data), stride)]
 
 
-def _build_material_from_assimp_material(material: dict) -> Material:
+def _build_material_from_assimp_material(material: dict, base_dir: Optional[Path] = None) -> Material:
 	"""`material` is one of assimp_py.Scene.materials' plain dicts (property
 	name -> value, see assimp-py's own docs) -- only its diffuse texture and
 	double-sided flag (if any) are used, see _build_material()'s own
@@ -491,6 +511,7 @@ def _build_material_from_assimp_material(material: dict) -> Material:
 	return _build_material(
 		texture_name=diffuse_paths[0] if diffuse_paths else None,
 		double_sided=bool(material.get("TWOSIDED", False)),
+		base_dir=base_dir,
 	)
 
 
@@ -553,7 +574,7 @@ def _import_via_assimp(path: Path) -> Mesh:
 	if not positions:
 		raise ShapeImportError(f"no vertices found in {path}")
 
-	materials = [_build_material_from_assimp_material(scene.materials[mid]) for mid in material_order]
+	materials = [_build_material_from_assimp_material(scene.materials[mid], path.parent) for mid in material_order]
 	rdr_passes = [RdrPass(material_id=i, indices=pass_indices[mid]) for i, mid in enumerate(material_order)]
 	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes)
 

@@ -250,7 +250,20 @@ def resolve_texture_ref(name, search_dirs=None, finder=None):
 	load_panda_texture()) for callers that need to resolve a specific
 	texture reference -- to inspect it (e.g. panoply_live.is_baked_stale())
 	or decode it themselves (e.g. panoply_texture.ref_to_rgba_array()) --
-	without going through load_panda_texture()'s own name-keyed cache."""
+	without going through load_panda_texture()'s own name-keyed cache.
+
+	`name` may also be a full absolute path (see shape_import.py's
+	_texture_base_name() -- an imported .obj/.dae/.fbx keeps one as-is
+	instead of collapsing to a bare name, as long as it resolves to a real
+	file at import time): resolved directly, bypassing search_dirs/finder
+	entirely, since those only ever match by bare name. A stale absolute
+	reference (the file's since moved/gone) falls back to a by-name search
+	on just its basename instead of failing outright."""
+	ref_path = Path(name)
+	if ref_path.is_absolute():
+		if ref_path.is_file():
+			return FoundEntry(name=ref_path.name, fs_path=ref_path, bnp_path=None)
+		name = ref_path.name
 	ref = _find_local_texture_ref(name, search_dirs) if search_dirs else None
 	if ref is None and finder is not None:
 		ref = finder(name)
