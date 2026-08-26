@@ -52,6 +52,19 @@ class Settings:
 	# Name of the active workspace (subfolder of workspaces_root), or None
 	# if no workspace is currently active.
 	active_workspace: Optional[str] = None
+	# Restore-on-launch session state (see object_editor.py's
+	# _save_session_state()/_restore_session_state()) -- where the Explorer
+	# was browsing and which shape was loaded, so relaunching the app looks
+	# like it was never closed. last_shape_bnp/last_bnp are set only when
+	# the shape/folder being browsed lives inside a .bnp archive (a .bnp
+	# has no real sub-folder concept of its own, so browsing "inside" one
+	# is really still browsing last_folder, just displaying that archive's
+	# contents -- see explorer.py's _current_bnp).
+	last_folder: Optional[str] = None
+	last_bnp: Optional[str] = None
+	last_shape_path: Optional[str] = None
+	last_shape_bnp: Optional[str] = None
+	last_shape_name: Optional[str] = None
 
 
 def load() -> Settings:
@@ -65,6 +78,11 @@ def load() -> Settings:
 	settings.explorer_favorites = list(data.get("explorer_favorites", []))
 	settings.workspaces_root = data.get("workspaces_root") or None
 	settings.active_workspace = data.get("active_workspace") or None
+	settings.last_folder = data.get("last_folder") or None
+	settings.last_bnp = data.get("last_bnp") or None
+	settings.last_shape_path = data.get("last_shape_path") or None
+	settings.last_shape_bnp = data.get("last_shape_bnp") or None
+	settings.last_shape_name = data.get("last_shape_name") or None
 
 	export_data = data.get("export", {})
 	for field_name in settings.export.__dataclass_fields__:
@@ -88,6 +106,16 @@ def save(settings: Settings) -> None:
 		doc["workspaces_root"] = settings.workspaces_root
 	if settings.active_workspace is not None:
 		doc["active_workspace"] = settings.active_workspace
+	if settings.last_folder is not None:
+		doc["last_folder"] = settings.last_folder
+	if settings.last_bnp is not None:
+		doc["last_bnp"] = settings.last_bnp
+	if settings.last_shape_path is not None:
+		doc["last_shape_path"] = settings.last_shape_path
+	if settings.last_shape_bnp is not None:
+		doc["last_shape_bnp"] = settings.last_shape_bnp
+	if settings.last_shape_name is not None:
+		doc["last_shape_name"] = settings.last_shape_name
 
 	export_table = tomlkit.table()
 	for key, value in asdict(settings.export).items():

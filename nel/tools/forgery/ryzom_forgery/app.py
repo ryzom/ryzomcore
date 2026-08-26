@@ -70,8 +70,6 @@ class ForgeryApp(ShowBase):
 		# desktop center only on this app's very first launch).
 		center_on = (geometry["x"], geometry["y"], geometry["width"], geometry["height"]) if geometry else None
 		splash = Splash(_SPLASH_PATH, center_on=center_on) if _SPLASH_PATH.exists() else None
-		if splash is not None:
-			time.sleep(1)
 
 		ShowBase.__init__(self)
 
@@ -134,6 +132,18 @@ class ForgeryApp(ShowBase):
 
 		self.accept("imgui-new-frame", self.draw_ui)
 
+		# ShowBase.windowEvent() (see the override below) already calls
+		# self.userExit() itself the moment the OS's own close button/Alt+F4/
+		# etc sets the window's getOpen() to False -- userExit() -> Panda3D's
+		# own finalizeExit() -> self.exitFunc() (if set) -> sys.exit(). That
+		# SystemExit unwinds straight out of super().windowEvent(win) inside
+		# our own override below, well before it would ever reach any code
+		# placed after that call there -- exitFunc is the one hook Panda3D
+		# actually guarantees to run first, no matter which of the two paths
+		# (this, or the in-app Quit button, which also just calls
+		# self.userExit() -- see object_editor.py) triggered the exit.
+		self.exitFunc = self._on_exit
+
 		if splash is not None:
 			splash.close()
 
@@ -141,6 +151,13 @@ class ForgeryApp(ShowBase):
 		super().windowEvent(win)
 		if win == self.win:
 			self._save_window_geometry()
+
+	def _on_exit(self):
+		"""Hook for subclasses: called once, right before the process
+		actually exits (self.exitFunc, set in __init__ above), regardless
+		of whether that was requested via the in-app Quit button or the
+		OS's own window-close control. No-op here."""
+		pass
 
 	def _load_window_geometry(self):
 		try:
