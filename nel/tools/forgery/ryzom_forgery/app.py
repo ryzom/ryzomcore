@@ -69,7 +69,12 @@ class ForgeryApp(ShowBase):
 		# using its last known position/size (falling back to the virtual
 		# desktop center only on this app's very first launch).
 		center_on = (geometry["x"], geometry["y"], geometry["width"], geometry["height"]) if geometry else None
-		splash = Splash(_SPLASH_PATH, center_on=center_on) if _SPLASH_PATH.exists() else None
+		# Kept open past the end of __init__ -- closed on the first real
+		# draw_ui() call below instead, so it covers the actual gap until
+		# something is on screen, not just Python-side construction (there's
+		# a real gap between __init__ returning and ShowBase's run() loop
+		# firing its first frame).
+		self._splash = Splash(_SPLASH_PATH, center_on=center_on) if _SPLASH_PATH.exists() else None
 
 		ShowBase.__init__(self)
 
@@ -143,9 +148,6 @@ class ForgeryApp(ShowBase):
 		# (this, or the in-app Quit button, which also just calls
 		# self.userExit() -- see object_editor.py) triggered the exit.
 		self.exitFunc = self._on_exit
-
-		if splash is not None:
-			splash.close()
 
 	def windowEvent(self, win):
 		super().windowEvent(win)
@@ -242,6 +244,10 @@ class ForgeryApp(ShowBase):
 		self.on_selection_changed(items)
 
 	def draw_ui(self):
+		if self._splash is not None:
+			self._splash.close()
+			self._splash = None
+
 		self.workspace_setup_dialog.draw()
 
 		display_size = imgui.get_io().display_size
