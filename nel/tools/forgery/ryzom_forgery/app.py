@@ -38,8 +38,8 @@ _SIDE_PANEL_MAX_WIDTH = 900
 # across launches -- see _load_window_geometry()/_save_window_geometry().
 _DEFAULT_WINDOW_SIZE = (1600, 900)
 _WINDOW_GEOMETRY_DIR = Path.home() / ".ryzom_forgery"
-_ICON_PATH = Path(__file__).resolve().parent.parent / "forgery.png"
-_SPLASH_PATH = Path(__file__).resolve().parent.parent / "splashscreen.png"
+_ICON_PATH = Path(__file__).resolve().parent / "forgery.png"
+_SPLASH_PATH = Path(__file__).resolve().parent / "splashscreen.png"
 
 
 def _slugify(title):

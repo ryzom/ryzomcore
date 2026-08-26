@@ -18,3 +18,9 @@ dependencies = [
 
 [tool.setuptools]
 packages = ["ryzom_forgery", "ryzom_forgery.apps"]
+
+[tool.setuptools.package-data]
+# Non-.py runtime data setuptools wouldn't otherwise bundle into the wheel
+# (only .py files are picked up by default) -- see panoply_config.py's
+# _TOML_PATH.
+ryzom_forgery = ["panoply_colors.toml", "forgery.png", "splashscreen.png"]
