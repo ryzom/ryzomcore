@@ -1,5 +1,158 @@
 # Changelog
 
+## 2026-08-26 — ✨ Overlay the material index on its texture preview instead of a separate label
+
+In the Textures tab, each material row showed a separate `#N` label next to its
+color/texture swatch, taking up horizontal width this (already narrow) panel doesn't
+have to spare -- same issue for the Multi Bitmap editor's own per-material rows, which
+also had an `imgui.indent()` around them eating further left margin for no real
+navigational benefit (there's nothing else at that indent level to distinguish it
+from).
+
+Removed both labels-as-separate-text and the Multi Bitmap indent; added
+`_draw_preview_badge()`, which overlays the index directly on the swatch/thumbnail
+that was just drawn (bottom-right corner, at 70% of the normal font size, 1px black
+shadow for legibility over any thumbnail color) via `ImDrawList.add_text()`'s
+explicit font+size overload -- draws at any size regardless of the currently pushed
+font, while `calc_text_size()` only ever measures at the current (full) one, so the
+small size's own footprint is derived by scaling that measurement down (exact, not an
+approximation: glyph metrics scale linearly with size in ImGui's font atlas).
+
+## 2026-08-26 — ✨ Restore last folder/workspace/shape on next launch
+
+`Settings` gained `last_folder`/`last_bnp`/`last_shape_path`/`last_shape_bnp`/
+`last_shape_name` (`settings.py`) -- `active_workspace` didn't need anything new, it's
+already persisted live on every change. `_save_session_state()` writes these from the
+Explorer's current `root`/`_current_bnp` and the loaded shape's `_shape_source_path`/
+`_shape_source_bnp_path` (new field, tracks `ExplorerItem.bnp_path` alongside the
+existing `_shape_source_path`, which is deliberately `None` for a `.bnp`-loaded shape
+-- without also keeping `bnp_path` there was no way to reconstruct that case on
+restore). `_restore_session_state()`, called once at the end of `ObjectEditorApp.__init__()`,
+reverses this: navigates the Explorer back, re-enters the `.bnp` if one was open, and
+reloads the shape via a reconstructed `ExplorerItem`. Best-effort throughout -- a
+moved/deleted folder or shape is silently skipped, not an error.
+
+Wiring this to actually run on every exit path took a second pass: the in-app Quit
+button's own `self._save_session_state()` call (right before `self.userExit()`) never
+fired when the OS's own window-close control (X button/Alt+F4) was used instead,
+because `ShowBase.windowEvent()` (Panda3D's own base implementation, called via
+`super().windowEvent(win)` in `app.py`'s override) already calls `self.userExit()`
+itself the instant it sees the window's `getOpen()` go `False` -- and `userExit()`'s
+`sys.exit()` unwinds straight out of that `super()` call, skipping everything placed
+after it in the override, including a `getOpen()` check that was tried first and never
+actually reached. Replaced with Panda3D's own `exitFunc` hook (`self.exitFunc =
+self._on_exit` in `ForgeryApp.__init__`) -- the one thing `userExit()`/`finalizeExit()`
+is guaranteed to call before actually exiting, regardless of which of the two paths
+triggered it. `ObjectEditorApp._on_exit()` overrides it to call
+`_save_session_state()`; the Quit button now just calls `self.userExit()` directly,
+same as it always did.
+
+## 2026-08-26 — 🐛 Run the startup splashscreen as a separate process, not a thread
+
+The splashscreen (added 2026-08-21 below) ran Tk/Tcl on a background thread inside the
+main Forgery process. This reliably crashed (`Tcl_AsyncDelete: async handler deleted by
+the wrong thread`, `abort (core dumped)`) once this same process started spawning more
+of its own background threads elsewhere (the workspace filesystem watcher and its
+debounced reload worker, added the same session -- see below): Tcl/Tk is not
+thread-safe at all, and while `splash.py`'s own thread created and destroyed its `Tk()`
+root on the same thread throughout, the `tkinter` module's own `_default_root` global
+(and/or delayed cyclic-GC of lingering Tk-wrapped Python objects) could still end up
+finalized from whichever *other* thread happened to trigger garbage collection at the
+wrong moment. Tried clearing `_default_root`/forcing `gc.collect()` and blocking
+`close()`'s thread-join without a timeout first -- reduced how often it happened but
+didn't eliminate it.
+
+Settled on the actually-robust fix: moved the whole splashscreen into its own OS
+process. New `ryzom_forgery/_splash_process.py` (a standalone script, no threading of
+its own at all -- just `tk.Tk()` + `mainloop()` on that process's own main thread) is
+launched via `subprocess.Popen([sys.executable, "-m", "ryzom_forgery._splash_process",
+...])` from `splash.py`'s `Splash.__init__()`; `close()` now just waits out
+`min_duration` then `terminate()`s + `wait()`s on that process. No IPC of any kind
+needed -- the child has no self-close timer, the parent simply kills it when ready.
+This also happens to be the only fix that would ever have worked on macOS, where a GUI
+toolkit is restricted to a process's own *main* thread outright (a background thread
+could never satisfy that constraint, regardless of any Tcl-specific fix) -- a separate
+process sidesteps both constraints for the same reason: there's no way for this
+process's other threads to interact with a different process's Tcl interpreter at all.
+
+## 2026-08-26 — ✨ Per-texture "copy to workspace" button; keep valid absolute texture paths on import
+
+Two related changes, both about a texture reference not necessarily living in the
+active workspace's own `tex/` folder:
+
+- `shape_import.py`: an imported `.obj`/`.dae`/`.fbx`'s texture reference used to
+  always collapse to just its bare file name (`_texture_base_name()`), discarding a
+  relative/absolute path even when it resolves to a real file right now -- meaning the
+  shape would render untextured immediately after import unless that exact bare name
+  also happened to exist somewhere in the configured search paths. Now resolves the
+  reference against the source file's own folder (`base_dir`, threaded through
+  `build_mesh()`/`_build_material_from_assimp_material()`) if it isn't already
+  absolute, and keeps the full resolved path as `Texture.file_name` when it points at
+  a real file, falling back to the bare name only when there's nothing on disk to
+  preserve. `shape_geometry.resolve_texture_ref()` gained matching support for
+  resolving `name` as an absolute path directly (bypassing the by-name search
+  entirely), with a stale/moved absolute reference falling back to a by-name search on
+  its own basename rather than failing outright.
+- `object_editor.py`'s Textures tab: rather than auto-copying every referenced texture
+  into the workspace on Save (tried first, reverted -- would silently clutter
+  `tex/` with textures nobody actually chose to bring in for editing), added an
+  explicit per-texture "copy to workspace" icon button (simple textures and each of
+  the 3 Multi Bitmap masks alike), disabled once that texture already lives there. The
+  texture reference's own text field is colored green when it currently resolves
+  inside the active workspace's `tex/`, the normal color otherwise.
+
+## 2026-08-26 — ✨ Save now always targets the active workspace, even for a .bnp-loaded shape
+
+`_write_shape()` used to overwrite `_shape_source_path` -- wherever the shape was
+*opened* from on disk -- contradicting `_draw_bottom_bar()`'s own docstring, which
+already claimed Save "always targets the active workspace" (leftover from an earlier,
+never-finished pass at the Workspaces chantier). A shape loaded from inside a `.bnp`
+had Save disabled outright, since there was no real on-disk path to overwrite.
+
+Added `_workspace_shape_save_path()` (`<active workspace>/shapes/<name>.shape`, `None`
+without an active workspace or a known shape name) and switched the Save
+button/overwrite-confirmation flow to use it instead of `_shape_source_path` --
+Save now works for a `.bnp`-loaded shape too, always writing a fresh copy into the
+workspace rather than touching the original source.
+
+## 2026-08-26 — ✨ Watch the active workspace folder for external changes
+
+Added `watchdog` as a dependency; `search_paths_dialog.py`'s `set_workspace_dir()` now
+(re)starts an `Observer` on the new active workspace folder (native OS APIs --
+inotify/FSEvents/ReadDirectoryChangesW, the most robust cross-platform option),
+stopping any previous one first. A new `_DebouncedReloadHandler` coalesces a burst of
+filesystem events (extracting a `.bnp`, a git checkout, a texture batch export from
+another tool...) into a single `reload()` call 0.5s after the last event, instead of
+one rescan per individual file event. A watch failure (e.g. an exotic filesystem
+`inotify` can't watch) is logged and otherwise ignored -- external changes just won't
+auto-refresh then, no worse than before this existed.
+
+## 2026-08-26 — ✨ Add `imports/` to a workspace's standard subfolders
+
+`workspaces.py`'s `SUBDIRS` gained `imports` alongside the existing
+`tex`/`shapes`/`anims`/`skels`/`exports`. Since `ensure_structure()` (which creates
+every `SUBDIRS` entry) was previously only ever called from `create_workspace()`, a
+workspace created before this change would never get the new folder -- 
+`workspace_setup_dialog.py`'s `set_active_workspace()` now also calls
+`ensure_structure()` on every activation (idempotent), so switching back into an
+older workspace backfills any folder introduced since it was first created.
+
+## 2026-08-26 — ✨ Show version and authors in the status bar; don't reset locked transform axes
+
+Two small, independent additions:
+
+- `sysinfo.py`'s `SysInfoBar` now shows `"Ryzom Forgery v{version} -- Ulukyn,
+  Claude@anthropic"` right-aligned in the bottom status bar, `version` read once via
+  `importlib.metadata.version("ryzom_forgery")` (falls back to `"dev"` if not
+  installed as a package).
+- `object_editor.py`'s transform reset (the gizmo's Home button, and each panel row's
+  own Reset button) used to always reset position/rotation/scale to their defaults
+  regardless of any per-axis lock (`self.transform_locks`) -- the same lock
+  `_set_transform_axis()` already respects for manual edits and `camera.py`'s
+  Ctrl-drag. Added `_reset_node_transform()`/`_node_transform_values()`/
+  `_set_node_transform()`/`_quat_to_prh()` helpers so a reset now only overwrites
+  axes that aren't currently locked, leaving locked ones at their existing value.
+
 ## 2026-08-21 — ✨ Add app icon and startup splashscreen to ForgeryApp
 
 Added to `ryzom_forgery/app.py`, the shared `ForgeryApp` base class every tool app
