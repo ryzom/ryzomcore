@@ -8,8 +8,8 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_d
 
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.workspaces import (
-	active_workspace_path, create_workspace, is_root_configured, list_workspaces,
-	open_in_system_file_manager,
+	active_workspace_path, create_workspace, ensure_structure, is_root_configured, list_workspaces,
+	open_in_system_file_manager, workspace_path,
 )
 
 _POPUP_ID = "Set up Workspaces folder"
@@ -86,6 +86,12 @@ class WorkspaceSetupDialog:
 	def set_active_workspace(self, name):
 		self._settings.active_workspace = name
 		self._save()
+		if name is not None:
+			# Backfills any SUBDIRS added since this workspace was first
+			# created (e.g. a folder introduced in a later Forgery version)
+			# -- idempotent, so this is safe on every activation, not just
+			# creation.
+			ensure_structure(workspace_path(self._settings.workspaces_root, name))
 		if self.on_active_workspace_changed is not None:
 			self.on_active_workspace_changed(self.active_workspace_dir)
 
