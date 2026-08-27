@@ -185,6 +185,18 @@ class WorkspaceSetupDialog:
 				self._new_workspace_error = "A workspace with this name already exists."
 			else:
 				create_workspace(self._settings.workspaces_root, name)
+				# Convenience default: a fresh workspace starts out synced to
+				# wherever the user last pointed any workspace's sync folder
+				# at (see settings.py's Settings.last_workspace_sync_folder),
+				# rather than unconfigured every time -- still just a
+				# starting point, editable right away from Settings > Tools.
+				# Same reload-fresh-then-overwrite-only-our-fields pattern as
+				# _save(), but for a different field, so kept separate from it.
+				if self._settings.last_workspace_sync_folder is not None:
+					fresh = app_settings.load()
+					fresh.workspace_sync_folders[name] = self._settings.last_workspace_sync_folder
+					app_settings.save(fresh)
+					self._settings = fresh
 				self.set_active_workspace(name)
 				imgui.close_current_popup()
 		imgui.same_line()

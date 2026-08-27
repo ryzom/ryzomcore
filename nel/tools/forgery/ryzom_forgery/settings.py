@@ -13,7 +13,7 @@ search_paths_dialog.py.
 """
 
 from dataclasses import asdict, dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import tomlkit
 
@@ -52,6 +52,16 @@ class Settings:
 	# Name of the active workspace (subfolder of workspaces_root), or None
 	# if no workspace is currently active.
 	active_workspace: Optional[str] = None
+	# Per-workspace external mirror folder (see workspace_sync.py) -- keyed
+	# by workspace name, same as active_workspace above. A workspace absent
+	# from this dict has no sync folder configured (auto-mirroring is a
+	# no-op for it). last_workspace_sync_folder is the most recently set
+	# value across any workspace, used only to pre-fill a newly-created
+	# workspace's own entry as a convenience default (see
+	# workspace_setup_dialog.py's "Create" flow) -- never read back for an
+	# existing workspace, which always uses its own dict entry instead.
+	workspace_sync_folders: Dict[str, str] = field(default_factory=dict)
+	last_workspace_sync_folder: Optional[str] = None
 	# Restore-on-launch session state (see object_editor.py's
 	# _save_session_state()/_restore_session_state()) -- where the Explorer
 	# was browsing and which shape was loaded, so relaunching the app looks
@@ -89,6 +99,10 @@ def load() -> Settings:
 	settings.explorer_favorites = list(data.get("explorer_favorites", []))
 	settings.workspaces_root = data.get("workspaces_root") or None
 	settings.active_workspace = data.get("active_workspace") or None
+	settings.workspace_sync_folders = {
+		str(name): str(path) for name, path in data.get("workspace_sync_folders", {}).items()
+	}
+	settings.last_workspace_sync_folder = data.get("last_workspace_sync_folder") or None
 	settings.last_folder = data.get("last_folder") or None
 	settings.last_bnp = data.get("last_bnp") or None
 	settings.last_shape_path = data.get("last_shape_path") or None
@@ -120,6 +134,9 @@ def save(settings: Settings) -> None:
 		doc["workspaces_root"] = settings.workspaces_root
 	if settings.active_workspace is not None:
 		doc["active_workspace"] = settings.active_workspace
+	doc["workspace_sync_folders"] = dict(settings.workspace_sync_folders)
+	if settings.last_workspace_sync_folder is not None:
+		doc["last_workspace_sync_folder"] = settings.last_workspace_sync_folder
 	if settings.last_folder is not None:
 		doc["last_folder"] = settings.last_folder
 	if settings.last_bnp is not None:

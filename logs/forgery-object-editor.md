@@ -1,5 +1,68 @@
 # Changelog
 
+## 2026-08-27 — 🔖 Patina 1.0.0: textures, sync, UI polish
+
+**Texture combo picker.** Replaced the free-text `imgui.input_text` for a material's texture (both
+the simple/diffuse material row and each Multi Bitmap slot) with a combo box listing the active
+workspace's `tex/` folder contents (`_workspace_texture_names()`/`_draw_texture_name_combo()`,
+`apps/object_editor.py`). Re-lists `tex/` fresh every time the dropdown opens (a plain
+`Path.iterdir()`, cheap enough to just always redo) rather than caching -- always shows what's
+actually on disk without needing a watchdog for the listing itself. The current value is still
+shown as-is even when it isn't (yet) one of the listed names -- Browse/Copy stay the way to set
+anything else, unchanged.
+
+**Crash fix in the texture-freshness poll.** `_update_texture_freshness()`'s mtime check
+(`ref.cache_stat()`) could throw `FileNotFoundError` if a tracked texture file got deleted/renamed
+between being resolved and being stat'd (e.g. an external rename while Patina was running) --
+uncaught, this killed the whole Panda task manager, hanging the app. Now caught (both there and in
+the freshness baseline seeded in `_apply_material_texture()`): the cached texture is just left as
+the last-known-good one instead of crashing.
+
+**Sync workspace to an external folder.** New Settings > Tools option: pick a folder per workspace
+(`Settings.workspace_sync_folders`, keyed by workspace name; `Settings.last_workspace_sync_folder`
+pre-fills a newly-created workspace's own entry as a convenience default). New dedicated watchdog
+`Observer` (`workspace_sync.py`, same debounced-per-file pattern as `import_watcher.py`, its own
+thread rather than folded into an existing shared watcher -- see the module's own docstring)
+watches `anims/`, `shapes/`, `skels/`, `tex/` and mirrors any created/modified/moved file into
+`<sync folder>/forgery/<workspace name>/<same relative path>` -- copy-only, a file removed from
+the workspace is left as-is on the sync side. A "Sync now" button (orange, only shown when
+something's actually missing -- `WorkspaceSyncWatcher.refresh_fully_synced()`, an existence-only
+check recomputed on workspace/folder changes, never every frame) catches up anything that predates
+the live watch, running on a background thread.
+
+**Settings/tabs UI polish**, all in `apps/object_editor.py`:
+- Fixed an imgui ID collision between the image-editor and sync-folder folder-picker buttons (both
+  used the bare folder icon as their id -- `_icon_button()` derives the widget id from its first
+  arg only, tooltip text included nowhere in it).
+- Removed the "Export" Settings section (no longer relevant) -- the Export button/flow itself is
+  untouched, only its Settings-tab configuration UI is gone.
+- Folded "Workspaces folder" into "Paths" (it's a path setting too, just the one special-cased
+  root instead of a priority-ordered list) -- the separate "Workspaces" section is gone.
+- Image editor and sync folder paths now truncate-to-width with a full-path tooltip on hover
+  (same helper as the Workspaces-folder/search-paths rows) instead of overflowing the panel.
+- The sync-folder folder picker now opens on the already-configured folder instead of blank.
+- Panel tabs (Textures/Materials/All Properties/Settings) recolored (lightgreen/lightcyan/gray/
+  yellow) and switched to icon-only headers (`_begin_tab_item_with_icon()`, black glyph for
+  contrast against the light tab colors, full name as a hover tooltip instead of visible text).
+
+## 2026-08-27 — ✨ Live-reload edited workspace textures (normal + Multi Bitmap)
+
+Generalized the existing Panoply live-refresh mechanism (`_update_panoply_freshness`, which
+already picked up edited recolor masks automatically) to plain, non-Panoply textures too --
+answers "if I change a texture in the workspace, does Patina pick it up automatically": now yes,
+for any texture actually in use by the loaded shape, including whichever Multi Bitmap slot is
+currently selected (no special-casing needed there -- only the selected slot's name is ever
+actually loaded/cached in the first place).
+
+Renamed to `_update_texture_freshness()` (same 1/sec `taskMgr` task, same eviction + `_reapply_
+all_materials()` pattern): the existing Panoply loop is untouched, plus a new pass over every
+other name already in `self._texture_cache`, comparing mtimes against a baseline seeded at load
+time in `_apply_material_texture()` (so the very first freshness tick after a texture loads never
+sees a spurious "changed"). Deliberately restricted to files inside the active workspace
+(`FoundEntry.fs_path`, skipping `.bnp` entries and anything outside it) -- per the user, this
+keeps the workspace the one place edits get picked up live, textures from other search paths
+(mods, the Ryzom install...) are left alone even if a shape happens to reference one.
+
 ## 2026-08-27 — ✨ Auto-export imports/ -> shapes/ Step 4+5: mismatch backup, sysbar status
 
 Finished the "Auto-export imports/ -> shapes/" chantier:
