@@ -83,10 +83,10 @@ namespace NLNET
 		_PluggedModules.removeWithB(pluggedModule);
 	}
 
-    bool CModuleSocket::isPlugged(const IModule *module) const
+    bool CModuleSocket::isPlugged(IModule *module) const
     {
 	    const TPluggedModules::TBToAMap &map = _PluggedModules.getBToAMap();
-	    const TPluggedModules::TBToAMap::const_iterator &it(std::find_if(map.begin(), map.end(), [module](const auto &entry) { return entry.first == module; }));
+	    const TPluggedModules::TBToAMap::const_iterator &it(map.find(module));
 
 		return it != map.end();
     }
