@@ -40,6 +40,6 @@ lib, cette app ne fait que l'assemblage argparse + gestion des erreurs CLI
  `nel/tools/forgery/pyproject.toml` — comme les deux autres apps CLI du projet,
  s'utilise via `./dev.sh ryzom_forgery/apps/dds_export.py ...` ou
  `python -m ryzom_forgery.apps.dds_export`.
-- Pas encore appelé par Patina — c'est `dds_export.build_dds`/`load_rgba` (les
- fonctions de bibliothèque, pas cette app CLI) qui seront réutilisées par le futur
- watcher d'auto-export `tex/` → `dds/` (chantier `patina-tex-dds-autoexport`).
+- Pas appelé par Patina — c'est `dds_export.build_dds`/`load_rgba` (les fonctions de
+ bibliothèque, pas cette app CLI) que réutilise le watcher d'auto-export `tex/` →
+ `dds/` (`tex_dds_sync.py`, voir `docs/tex_dds_sync.md`).

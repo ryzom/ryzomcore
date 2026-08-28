@@ -1,7 +1,7 @@
 # dds_export
 
 **Fichier :** `nel/tools/forgery/ryzom_forgery/dds_export.py` (~280 lignes, créé le
-2026-08-27, pas encore committé au moment de l'écriture de ce doc)
+2026-08-27)
 
 ## Rôle
 
@@ -45,9 +45,9 @@ Ce module est une **bibliothèque pure**, sans CLI (même convention que
 
 - CLI : `apps/dds_export.py` (voir `docs/apps/dds_export.md`) — `input`, `-o/--output`,
  `-a/--algo {1,1a,3,5}`, `-m/--mipmap`, `-g/--grayscale`, `-r/--reduce`.
-- Pas encore intégré dans Patina (`apps/object_editor.py` ne l'importe pas au moment de
- l'écriture de ce doc) — prérequis du chantier `patina-tex-dds-autoexport`
- (`/repos/project-todos/ryzom-core/patina-tex-dds-autoexport.md`).
+- Intégré dans Patina via `tex_dds_sync.py`/`workspace_watch.py` (voir
+ `docs/tex_dds_sync.md`, `docs/workspace_watch.md`) : `tex/` est auto-synchronisé vers
+ `dds/` dans le workspace, ce module y fournit `build_dds`/`load_rgba`/`pick_default_algo`.
 - Utilisé pour corriger manuellement 3 fichiers `objects/occ_stuff/anlor/
  halloween_mo_statue_0{1,2,3}_spec.dds` de `ryzom-data` qui étaient en réalité des PNG
  renommés en `.dds` (voir convention `_spec` ci-dessous).
