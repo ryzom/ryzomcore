@@ -1348,7 +1348,7 @@ namespace NLNET
 					// dispatch the message at next gateway update
 					// this provide a coherent behavior between local and distant module message exchange
 
-					_LocalMessages.emplace_back();
+					_LocalMessages.push_back(TLocalMessage());
 					TLocalMessage &lm = _LocalMessages.back();
 					lm.SenderProxyId = senderProxy->getModuleProxyId();
 					lm.AddresseProxyId = addresseeProxy->getModuleProxyId();

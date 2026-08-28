@@ -302,7 +302,7 @@ namespace NLNET
 		if (!_ModuleTasks.empty())
 		{
 			// there is a task running, queue in the message
-			_SyncMessages.emplace_back(senderModuleProxy, message);
+			_SyncMessages.push_back(make_pair(senderModuleProxy, message));
 		}
 		else
 		{
