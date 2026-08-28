@@ -1231,7 +1231,7 @@ void CServerEditionModule::onModuleUp(NLNET::IModuleProxy *senderModuleProxy)
 	const std::string &moduleName = senderModuleProxy->getModuleClassName();
 	if (moduleName == "RingSessionManager")
 	{
-		nlassert(_SessionManager == NULL);
+		nlassert(_SessionManager == nullptr);
 		_SessionManager = senderModuleProxy;
 		if (!_WaitingForBS){ updateRSMGR(); }
 	}

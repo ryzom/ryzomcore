@@ -82,24 +82,24 @@ public:
 		return ret;
 	}
 
-	void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId)
+	void onServiceUp(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE
 	{
 	}
 	/// A nel layer 5 service has stopped.
-	void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId)
+	void onServiceDown(const std::string &serviceName, NLNET::TServiceId serviceId) NL_OVERRIDE
 	{
 	}
-	void onModuleUpdate()
+	void onModuleUpdate() NL_OVERRIDE
 	{
 	}
 	/** The service main loop is terminating it job', all module will be
 	 *	disconnected and removed after this callback.
 	 */
-	void onApplicationExit()
+	void onApplicationExit() NL_OVERRIDE
 	{
 	}
 
-	void onModuleUp(NLNET::IModuleProxy *moduleProxy)
+	void onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		ModuleUpCalled++;
 
@@ -153,12 +153,12 @@ public:
 		return false;
 	}
 
-	void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy)
+	void onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		SecurityUpdateCalled++;
 	}
 
-	void onModuleSocketEvent(NLNET::IModuleSocket *moduleSocket, IModule::TModuleSocketEvent eventType)
+	void onModuleSocketEvent(NLNET::IModuleSocket *moduleSocket, IModule::TModuleSocketEvent eventType) NL_OVERRIDE
 	{
 	}
 
@@ -457,28 +457,28 @@ public:
 		SecurityUpdateCalled = 0;
 	}
 
-	virtual std::string			buildModuleManifest() const
+	virtual std::string			buildModuleManifest() const NL_OVERRIDE
 	{
 		return Name;
 	}
 
-	virtual void				onModuleUp(NLNET::IModuleProxy *moduleProxy)
+	virtual void				onModuleUp(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		ModuleUpCalled++;
 	}
 
-	virtual void				onModuleDown(NLNET::IModuleProxy *moduleProxy)
+	virtual void				onModuleDown(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		ModuleDownCalled++;
 	}
 
-	virtual bool				onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message)
+	virtual bool				onProcessModuleMessage(NLNET::IModuleProxy *senderModuleProxy, const NLNET::CMessage &message) NL_OVERRIDE
 	{
 		ProcessMessageCalled++;
 		return false;
 	}
 
-	virtual void				onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy)
+	virtual void				onModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) NL_OVERRIDE
 	{
 		SecurityUpdateCalled++;
 	}

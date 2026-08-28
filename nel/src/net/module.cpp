@@ -128,7 +128,7 @@ namespace NLNET
 
 	void IModuleFactory::registerModuleInFactory(TModulePtr module)
 	{
-		nlassert(module != NULL);
+		nlassert(module != nullptr);
 
 		nlassert(_ModuleInstances.find(module) == _ModuleInstances.end());
 

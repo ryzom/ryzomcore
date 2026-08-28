@@ -27,6 +27,8 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
   FIND_PACKAGE(MySQL)
   IF(MYSQL_FOUND)
     ADD_SUBDIRECTORY(server)
+  ELSE ()
+    message(WARNING Server dependencies are not build due to missing MySQL package)
   ENDIF()
 ENDIF()
 
