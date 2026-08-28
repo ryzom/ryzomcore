@@ -407,10 +407,14 @@ def import_obj(path: Path) -> Mesh:
 # history) -- swapped once assimp-py was already a dependency for .fbx. The
 # apparent round-trip match against Forgery's own .dae exports found while
 # validating that swap (see logs/forgery-object-editor.md) was this same Y-up normalization
-# being a no-op: those exports declare a `Y_UP` <asset><up_axis> tag (a
-# pycollada default) while actually holding Z-up data, so re-importing them
-# without _YUP_TO_ZUP_MATRIX happened to match by pure coincidence -- it
-# would have silently mis-rotated any *correctly* Z_UP-tagged .dae.
+# being a no-op: those exports used to declare a `Y_UP` <asset><up_axis> tag
+# (pycollada's own default) while actually holding Z-up data, so
+# re-importing them without _YUP_TO_ZUP_MATRIX happened to match by pure
+# coincidence -- it would have silently mis-rotated any *correctly*
+# Z_UP-tagged .dae. Fixed in shape_export.py's _export_dae() (now declares
+# the true Z_UP), so this module's own unconditional _YUP_TO_ZUP_MATRIX
+# handles Forgery's own re-exported .dae correctly too, same as any other
+# properly-tagged one.
 
 # Converts Assimp's canonical Y-up (X=right, Y=up, Z=forward) into Ryzom's
 # Z-up (X=right, Z=up, Y=forward): newX=x, newY=-z, newZ=y -- the exact
@@ -591,10 +595,17 @@ def import_fbx(path: Path) -> Mesh:
 	return _import_via_assimp(path)
 
 
+def import_gltf(path: Path) -> Mesh:
+	"""Parses `path` (a glTF, JSON or binary .glb) via assimp-py, returning a
+	ready-to-save Mesh -- see _import_via_assimp(). Symmetric with
+	shape_export.py's own .gltf/.glb export (`_export_gltf_or_glb()`)."""
+	return _import_via_assimp(path)
+
+
 # Single source of truth for "which import_*() handles this extension" --
 # shared by every caller (import_dialog.py, apps/shape_importer.py,
 # import_watcher.py) instead of each redefining its own copy.
-IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx}
+IMPORTERS = {"obj": import_obj, "dae": import_dae, "fbx": import_fbx, "gltf": import_gltf, "glb": import_gltf}
 
 
 def find_importer(path: Path):

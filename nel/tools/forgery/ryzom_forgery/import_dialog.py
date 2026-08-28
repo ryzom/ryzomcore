@@ -1,6 +1,6 @@
-"""Import flow UI for .obj/.dae/.fbx -> .shape: asks for a source mesh file
-(native dialog), then how to bring it in -- as a brand-new shape, or
-replacing the currently open one's geometry while keeping its materials
+"""Import flow UI for .obj/.dae/.fbx/.gltf/.glb -> .shape: asks for a source
+mesh file (native dialog), then how to bring it in -- as a brand-new shape,
+or replacing the currently open one's geometry while keeping its materials
 (and any edits made to them: blend/alpha-test/2-sided/Multi Bitmap...).
 """
 
@@ -16,7 +16,7 @@ _MODE_POPUP_ID = "Import mesh"
 class ImportDialog:
 	"""`on_new_shape(mesh, source_path)` and `on_replace(mesh, source_path)`
 	are called with the parsed `pynel.ryzom_shape.Mesh` once the user picks a
-	mode in the popup -- `source_path` is the imported .obj/.dae/.fbx's own
+	mode in the popup -- `source_path` is the imported mesh file's own
 	path, handed back so the new-shape flow can default its name/save
 	location to it, and both flows can fall back to looking for the mesh's
 	textures next to it (see object_editor.py's _texture_search_dirs)."""
@@ -32,10 +32,12 @@ class ImportDialog:
 		self._status = ""
 
 	def open(self, has_current_shape):
-		"""Opens a native file picker for a source .obj/.dae/.fbx. `has_current_shape`
+		"""Opens a native file picker for a source mesh file (see
+		shape_import.IMPORTERS for the supported extensions). `has_current_shape`
 		gates whether "Replace in current shape" is offered in the mode popup."""
 		self._has_current_shape = has_current_shape
-		self._file_dialog = pfd.open_file("Import mesh", "", ["Mesh files", "*.obj *.dae *.fbx"])
+		self._file_dialog = pfd.open_file(
+			"Import mesh", "", ["Mesh files", "*.obj *.dae *.fbx *.gltf *.glb"])
 
 	def draw(self):
 		"""Call once per ImGui frame."""

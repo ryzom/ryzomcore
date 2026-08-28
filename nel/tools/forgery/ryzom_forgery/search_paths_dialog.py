@@ -54,8 +54,8 @@ _WATCH_DEBOUNCE_SECONDS = 0.5
 # from this app's own _load_shape() just reading a .shape file that happens
 # to live under the watched workspace) -- without filtering these out, every
 # shape load anywhere inside the workspace triggered a full rescan. Only
-# actual content changes should count (same filtering as import_watcher.py's
-# own _DebouncedImportHandler).
+# actual content changes should count (same filtering as
+# workspace_watch.py's own _DebouncedHandler).
 _RELEVANT_EVENT_TYPES = {"created", "deleted", "modified", "moved"}
 # Same on/off icon-color-toggle pattern as explorer.py's favorite star
 # (_FAVORITE_STAR_COLOR/_NON_FAVORITE_STAR_COLOR) -- white/orange

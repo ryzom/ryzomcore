@@ -12,7 +12,7 @@ from typing import List, Optional
 
 # Every workspace gets these subfolders up front so tools can rely on them
 # existing rather than mkdir-on-demand scattered across call sites.
-SUBDIRS = ("tex", "masks", "shapes", "anims", "skels", "exports", "imports")
+SUBDIRS = ("tex", "dds", "masks", "shapes", "anims", "skels", "exports", "imports")
 
 
 def is_root_configured(root: Optional[str]) -> bool:

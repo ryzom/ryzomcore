@@ -1,129 +1,70 @@
 """Mirrors files from an active workspace's anims/, shapes/, skels/, and
-tex/ subfolders into an external sync folder -- see the "Sync workspace to
+dds/ subfolders into an external sync folder -- see the "Sync workspace to
 an external folder" chantier in
 `project-todos/ryzom-core/forgery-object-editor.md`. Copy-only: a file
 removed from the workspace is left as-is in the sync folder, never deleted
 there.
+
+Doesn't own its own filesystem watch -- `handle_settled()` is meant to be
+registered onto a shared `workspace_watch.WorkspaceWatcher` for each of
+SYNCED_SUBDIRS (see apps/object_editor.py). See workspace_watch.py's
+module docstring for why this was consolidated out of a dedicated Observer
+per feature.
 """
 
 import shutil
+import tempfile
 import threading
 from pathlib import Path
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
-
-# Same value as import_watcher.py/search_paths_dialog.py's own watches -- an
-# inactivity debounce (the timer restarts on every event), so it's robust
-# regardless of how long a given file takes to finish writing.
-_WATCH_DEBOUNCE_SECONDS = 0.5
-
-_RELEVANT_EVENT_TYPES = {"created", "modified", "moved"}
+from pynel.ryzom_bnp import pack_directory
 
 # Deliberately not masks/exports/imports/ -- masks are Panoply recolor
 # inputs (not shipped assets themselves), exports/ is the export dialog's
 # own output staging area, and imports/ is the auto-export watcher's own
 # staging area (its own output already lands in shapes/, which is synced).
-_SYNCED_SUBDIRS = ("anims", "shapes", "skels", "tex")
-
-
-class _DebouncedSyncHandler(FileSystemEventHandler):
-	"""Same coalescing idea as import_watcher.py's own
-	_DebouncedImportHandler: each changed file's own burst of write events is
-	debounced independently (per-path timer), so editing one file doesn't
-	reset another file's pending timer. watchdog calls on_any_event() from
-	its own OS-native watcher thread, never the main/render thread."""
-
-	def __init__(self, on_settled):
-		self._on_settled = on_settled
-		self._timers = {}
-		self._lock = threading.Lock()
-
-	def on_any_event(self, event):
-		if event.is_directory or event.event_type not in _RELEVANT_EVENT_TYPES:
-			return
-		# FileMovedEvent (a file renamed/dropped into place) carries the final
-		# path as dest_path instead of src_path.
-		path = Path(getattr(event, "dest_path", None) or event.src_path)
-		with self._lock:
-			timer = self._timers.pop(path, None)
-			if timer is not None:
-				timer.cancel()
-			timer = threading.Timer(_WATCH_DEBOUNCE_SECONDS, self._fire, args=(path,))
-			timer.daemon = True
-			self._timers[path] = timer
-			timer.start()
-
-	def _fire(self, path):
-		with self._lock:
-			self._timers.pop(path, None)
-		self._on_settled(path)
-
-	def cancel(self):
-		with self._lock:
-			for timer in self._timers.values():
-				timer.cancel()
-			self._timers.clear()
+# tex/ isn't synced either as of the patina-tex-dds-autoexport chantier --
+# dds/ (the generated .dds mirror of tex/, see tex_dds_sync.py) is what the
+# game client actually needs, so that's what gets synced instead.
+SYNCED_SUBDIRS = ("anims", "shapes", "skels", "dds")
 
 
 class WorkspaceSyncWatcher:
-	"""Watches the active workspace's anims/shapes/skels/tex subfolders (see
-	_SYNCED_SUBDIRS) and mirrors any created/modified/moved file into a
-	configured external sync folder, preserving its path relative to the
-	workspace root. A no-op end to end without both a workspace and a sync
-	folder configured.
+	"""Mirrors the active workspace's anims/shapes/skels/dds subfolders (see
+	SYNCED_SUBDIRS) into a configured external sync folder, preserving each
+	file's path relative to the workspace root. A no-op end to end without
+	both a workspace and a sync folder configured.
 
 	Call set_workspace_dir() whenever the active workspace changes (pass
-	None to stop watching), and set_sync_folder() whenever the configured
+	None to stop tracking), and set_sync_folder() whenever the configured
 	sync folder itself changes (see object_editor.py's Settings > Tools UI)
 	-- independent of each other, so either can be set/cleared without
-	touching the other."""
+	touching the other. Doesn't watch the filesystem itself -- register
+	handle_settled onto a shared WorkspaceWatcher for each of
+	SYNCED_SUBDIRS instead."""
 
 	def __init__(self):
-		self._observer = None
 		self._workspace_dir = None
 		self._sync_folder = None
 		self._fully_synced = True  # see refresh_fully_synced()/is_fully_synced()
 		self._syncing = False  # see sync_now()/is_syncing()
 
 	def set_workspace_dir(self, workspace_dir):
-		"""Stops any previous watch and, if `workspace_dir` is set, starts a
-		fresh one on its anims/shapes/skels/tex subfolders -- same
-		native-OS-API-via-watchdog approach, and same
-		silently-give-up-on-failure-per-folder reasoning, as
-		import_watcher.py's own workspace watch."""
-		if self._observer is not None:
-			self._observer.stop()
-			self._observer = None
+		"""Tracks the active workspace and ensures its synced subfolders
+		exist. Pass None when no workspace is active."""
 		self._workspace_dir = Path(workspace_dir) if workspace_dir is not None else None
-		if self._workspace_dir is None:
-			return
-
-		handler = _DebouncedSyncHandler(self._handle_settled)
-		observer = Observer()
-		scheduled = False
-		for subdir in _SYNCED_SUBDIRS:
-			watched_dir = self._workspace_dir / subdir
-			watched_dir.mkdir(parents=True, exist_ok=True)
-			try:
-				observer.schedule(handler, str(watched_dir), recursive=True)
-				scheduled = True
-			except OSError as exc:
-				print(f"[workspace_sync] could not watch {watched_dir!r}: {exc}")
-		if not scheduled:
-			return
-		observer.daemon = True
-		observer.start()
-		self._observer = observer
+		if self._workspace_dir is not None:
+			for subdir in SYNCED_SUBDIRS:
+				(self._workspace_dir / subdir).mkdir(parents=True, exist_ok=True)
 
 	def set_sync_folder(self, sync_folder):
-		"""None disables mirroring (still watching, but _handle_settled()
-		becomes a no-op) without tearing down/rebuilding the watch itself."""
+		"""None disables mirroring (handle_settled() becomes a no-op)
+		without touching the shared watcher's registration itself."""
 		self._sync_folder = Path(sync_folder) if sync_folder else None
 		self.refresh_fully_synced()
 
 	def _iter_workspace_files(self):
-		for subdir in _SYNCED_SUBDIRS:
+		for subdir in SYNCED_SUBDIRS:
 			base = self._workspace_dir / subdir
 			if not base.is_dir():
 				continue
@@ -155,11 +96,11 @@ class WorkspaceSyncWatcher:
 		return self._syncing
 
 	def sync_now(self):
-		"""Manual catch-up: mirrors every current anims/shapes/skels/tex
+		"""Manual catch-up: mirrors every current anims/shapes/skels/dds
 		file right away, regardless of whether the live watch already
 		caught it -- for whatever predates the watch itself (see
 		refresh_fully_synced()). Runs on a background thread (reusing
-		_handle_settled() for the actual per-file copy, same as the watch's
+		handle_settled() for the actual per-file copy, same as the watch's
 		own debounced callback) since a workspace can hold a lot of files --
 		same reasoning as SearchPathsDialog's own background scan."""
 		if self._workspace_dir is None or self._sync_folder is None or self._syncing:
@@ -169,12 +110,13 @@ class WorkspaceSyncWatcher:
 
 	def _sync_now_worker(self):
 		for path in self._iter_workspace_files():
-			self._handle_settled(path)
+			self.handle_settled(path)
 		self.refresh_fully_synced()
 		self._syncing = False
 
-	def _handle_settled(self, source_path):
-		"""Runs off the watchdog Observer's own background thread."""
+	def handle_settled(self, source_path):
+		"""Registered onto a shared WorkspaceWatcher for each of
+		SYNCED_SUBDIRS -- runs off that watcher's background thread."""
 		workspace_dir = self._workspace_dir
 		sync_folder = self._sync_folder
 		if workspace_dir is None or sync_folder is None:
@@ -192,7 +134,7 @@ class WorkspaceSyncWatcher:
 		# sync_folder -- keeps this tool's output identifiable and separate
 		# from anything else already living there, and lets several
 		# workspaces share the same sync folder without their shapes/anims/
-		# skels/tex colliding with each other.
+		# skels/dds colliding with each other.
 		dest_path = sync_folder / "forgery" / workspace_dir.name / relative_path
 		try:
 			dest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -201,3 +143,25 @@ class WorkspaceSyncWatcher:
 			print(f"[workspace_sync] failed to mirror {relative_path}: {exc}")
 		else:
 			print(f"[workspace_sync] mirrored {relative_path} -> {dest_path}")
+
+
+def pack_workspace_bnp(workspace_dir, bnp_path):
+	"""Packs every file under this workspace's SYNCED_SUBDIRS (the same
+	scope an external sync folder receives) into a single flat `.bnp` --
+	the "Full workspace" option in Patina's export format menu (see the
+	patina-export-rework chantier). Stages a flat copy first (a `.bnp` has
+	no sub-folder concept, and `SYNCED_SUBDIRS` may hold same-named files
+	in different sub-folders which would collide -- unlikely in practice
+	given each sub-folder holds a distinct asset type, but `pack_directory()`
+	raises `pynel.ryzom_bnp.BnpError` if it ever happens)."""
+	workspace_dir = Path(workspace_dir)
+	with tempfile.TemporaryDirectory() as staging:
+		staging_path = Path(staging)
+		for subdir in SYNCED_SUBDIRS:
+			base = workspace_dir / subdir
+			if not base.is_dir():
+				continue
+			for path in base.rglob("*"):
+				if path.is_file():
+					shutil.copy2(path, staging_path / path.name)
+		pack_directory(staging_path, bnp_path)

@@ -1,27 +1,24 @@
-"""Watches a workspace's `imports/` folder for new/changed `.obj`/`.dae`/`.fbx`
-source meshes and keeps `<workspace>/shapes/<name>.shape` in sync
+"""Watches a workspace's `imports/` folder for new/changed source meshes
+(any format `shape_import.IMPORTERS` knows -- .obj/.dae/.fbx/.gltf/.glb) and
+keeps `<workspace>/shapes/<name>.shape` in sync
 automatically -- see the "Auto-export imports/ -> shapes/" chantier in
 `project-todos/ryzom-core/forgery-object-editor.md`.
+
+Doesn't own its own filesystem watch -- `handle_settled()` is meant to be
+registered onto a shared `workspace_watch.WorkspaceWatcher` for the
+"imports" subfolder (see apps/object_editor.py). See workspace_watch.py's
+module docstring for why this was consolidated out of a dedicated Observer
+per feature.
 """
 
 import re
-import threading
 from datetime import datetime
 from pathlib import Path
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
-
-from ryzom_forgery.shape_import import ShapeImportError, find_importer
+from ryzom_forgery.shape_geometry import IDENTITY_QUAT
+from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, find_importer
 
 from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
-
-# Same value as search_paths_dialog.py's own workspace watch -- an
-# inactivity debounce (the timer restarts on every event), so it's robust
-# regardless of how long a given source file takes to finish writing.
-_WATCH_DEBOUNCE_SECONDS = 0.5
-
-_RELEVANT_EVENT_TYPES = {"created", "modified", "moved"}
 
 # Only letters, digits, '_' and '-' survive; everything else (spaces, accents,
 # punctuation...) becomes '_'. Case is kept as-is.
@@ -121,66 +118,36 @@ def update_existing_shape(source_path: Path, target_path: Path) -> None:
 			f"{len(existing_materials)}")
 
 	shape_file.value.geom = mesh.geom
+	# The imported mesh's own default_rot_quat is identity (a fresh import
+	# always is), but the *export* that produced source_path already baked
+	# the target's own default_rot_quat into its vertices (see
+	# shape_export.py's export_shape()) -- so the new geometry here already
+	# represents the correct final orientation. Resetting the target's
+	# default_rot_quat to identity avoids applying that rotation a second
+	# time on top of already-rotated geometry.
+	base = getattr(shape_file.value, "base", None)
+	if base is not None:
+		base.default_rot_quat = IDENTITY_QUAT
 	for existing_material, imported_material in zip(existing_materials, mesh.materials):
 		_update_diffuse_texture(existing_material, imported_material)
 
 	save_shape(target_path, shape_file)
 
 
-class _DebouncedImportHandler(FileSystemEventHandler):
-	"""Same coalescing idea as search_paths_dialog.py's own
-	_DebouncedReloadHandler, but keyed per source file rather than firing one
-	shared callback for the whole watched folder: each mesh's own burst of
-	write events is debounced independently, so editing one file doesn't
-	reset another's pending timer. watchdog calls on_any_event() from its own
-	OS-native watcher thread, never the main/render thread -- same as any
-	other background worker here."""
-
-	def __init__(self, on_settled):
-		self._on_settled = on_settled
-		self._timers = {}
-		self._lock = threading.Lock()
-
-	def on_any_event(self, event):
-		if event.is_directory or event.event_type not in _RELEVANT_EVENT_TYPES:
-			return
-		# FileMovedEvent (a file renamed/dropped into place) carries the final
-		# path as dest_path instead of src_path.
-		path = Path(getattr(event, "dest_path", None) or event.src_path)
-		if find_importer(path) is None:
-			return
-		with self._lock:
-			timer = self._timers.pop(path, None)
-			if timer is not None:
-				timer.cancel()
-			timer = threading.Timer(_WATCH_DEBOUNCE_SECONDS, self._fire, args=(path,))
-			timer.daemon = True
-			self._timers[path] = timer
-			timer.start()
-
-	def _fire(self, path):
-		with self._lock:
-			self._timers.pop(path, None)
-		self._on_settled(path)
-
-	def cancel(self):
-		with self._lock:
-			for timer in self._timers.values():
-				timer.cancel()
-			self._timers.clear()
-
-
 class ImportWatcher:
-	"""Watches the active workspace's `imports/` folder and keeps `shapes/`
-	in sync -- see this module's docstring. Call `set_workspace_dir()`
+	"""Keeps the active workspace's `shapes/` in sync with its `imports/`
+	folder -- see this module's docstring. Call `set_workspace_dir()`
 	whenever the active workspace changes (see object_editor.py); pass None
-	to stop watching."""
+	to stop tracking. Doesn't watch the filesystem itself -- register
+	`handle_settled` onto a shared `workspace_watch.WorkspaceWatcher` for
+	the "imports" subfolder instead."""
 
 	def __init__(self, is_shape_open=None, on_open_shape_conflict=None, on_status=None):
-		"""All three hooks run off the main/render thread (see
-		_handle_settled()), and are optional -- without them (e.g. test.sh's
-		headless use), an existing target is always updated in place directly
-		and outcomes are only printed.
+		"""All three hooks run off whatever thread calls handle_settled()
+		(the shared WorkspaceWatcher's background thread in practice), and
+		are optional -- without them (e.g. test.sh's headless use), an
+		existing target is always updated in place directly and outcomes are
+		only printed.
 
 		`is_shape_open(target_path)`, if given, is consulted before an
 		existing target is touched: True means the host app currently has
@@ -204,7 +171,6 @@ class ImportWatcher:
 		self._is_shape_open = is_shape_open
 		self._on_open_shape_conflict = on_open_shape_conflict
 		self._on_status = on_status
-		self._observer = None
 		self._workspace_dir = None
 
 	def _report(self, message, is_error=False):
@@ -213,34 +179,30 @@ class ImportWatcher:
 			self._on_status(message, is_error)
 
 	def set_workspace_dir(self, workspace_dir):
-		"""Stops any previous watch and, if `workspace_dir` is set, starts a
-		fresh one on its `imports/` subfolder -- same native-OS-API-via-
-		watchdog approach, and same silently-give-up-on-failure reasoning, as
-		search_paths_dialog.py's own workspace watch."""
-		if self._observer is not None:
-			self._observer.stop()
-			self._observer = None
+		"""Tracks the active workspace and ensures its `imports/` subfolder
+		exists. Pass None when no workspace is active."""
 		self._workspace_dir = Path(workspace_dir) if workspace_dir is not None else None
-		if self._workspace_dir is None:
-			return
+		if self._workspace_dir is not None:
+			(self._workspace_dir / "imports").mkdir(parents=True, exist_ok=True)
 
-		imports_dir = self._workspace_dir / "imports"
-		imports_dir.mkdir(parents=True, exist_ok=True)
-		handler = _DebouncedImportHandler(self._handle_settled)
-		observer = Observer()
-		try:
-			observer.schedule(handler, str(imports_dir), recursive=True)
-			observer.daemon = True
-			observer.start()
-		except OSError as exc:
-			self._report(f"could not watch {imports_dir!r}: {exc}", is_error=True)
-			return
-		self._observer = observer
-
-	def _handle_settled(self, source_path):
-		"""Runs off the main/render thread (see _DebouncedImportHandler)."""
+	def handle_settled(self, source_path):
+		"""Registered onto a shared WorkspaceWatcher for the "imports"
+		subfolder -- runs off that watcher's background thread. Silently
+		ignores files that no longer exist (deleted before/while the
+		debounce settled -- imports/ is a one-way staging area, nothing to
+		clean up on delete, unlike tex/'s dds/ mirror). Reports (not
+		silently ignores) a file whose format find_importer() doesn't know
+		how to import (see IMPORTERS in shape_import.py) -- dropping
+		one in imports/ used to do nothing with no feedback at all."""
 		workspace_dir = self._workspace_dir
 		if workspace_dir is None:
+			return
+		if not source_path.is_file():
+			return
+		if find_importer(source_path) is None:
+			self._report(
+				f"{source_path.name}: unsupported import format {source_path.suffix!r} "
+				f"(supported: {', '.join(sorted(IMPORTERS))})", is_error=True)
 			return
 		target_path = target_shape_path(workspace_dir, source_path)
 
@@ -262,7 +224,7 @@ class ImportWatcher:
 
 	def _update_existing_target(self, source_path, target_path):
 		"""The actual `update_existing_shape()` call + outcome logging,
-		factored out so both the automatic path (_handle_settled(), when the
+		factored out so both the automatic path (handle_settled(), when the
 		target isn't open in the viewport) and the host app's own conflict
 		resolution (object_editor.py's _on_open_shape_conflict(), once the
 		user picked how to proceed) can trigger it. Returns True if

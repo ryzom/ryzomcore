@@ -1,5 +1,143 @@
 # Changelog
 
+## 2026-08-28 — 🐛 Fix texture filter loss; add UV editing in Patina
+
+**Root cause found and fixed for the "blur vs stries" texture quality bug.** A plain
+open+save of any `.shape` through Patina (no edits at all) was silently destroying its
+textures' GPU sampling quality: `pynel`'s `_parse_itexture_base()` read `_UploadFormat`/
+`_WrapS`/`_WrapT`/`_MinFilter`/`_MagFilter`/`_LoadGrayscaleAsAlpha` from the file and threw
+them away, while `_write_itexture_base()` hardcoded all of them to `0` on save --
+`MagFilter=0`/`MinFilter=0` are literally `Nearest`/`NearestMipMapOff` in the engine's own
+enum (`nel/include/nel/3d/texture.h`), forcing every re-saved texture from smooth trilinear
+filtering to blocky/aliased nearest-neighbor with no mipmaps, regardless of what the
+original author actually set. Found via an exhaustive, evidence-first investigation
+(byte-level diff of a pristine `.bnp`-unpacked shape vs. the same shape re-saved once
+through Patina with zero edits -- every other field decoded identically; only this one
+was silently rewritten). Fixed: `Texture` now carries `upload_format`/`wrap_s`/`wrap_t`/
+`min_filter`/`mag_filter`/`load_grayscale_as_alpha` as `Optional` fields (`None` = no real
+value captured, e.g. a freshly imported mesh -- never `None` for an actually-parsed file),
+round-tripped faithfully instead of discarded.
+
+**New Patina UI: "Texture filtering" and "Texture offset/tiling/rotation" material
+sections.** Wrap S/T, Mag/Min Filter and a "grayscale = alpha mask" checkbox, wired to
+Patina's own 3D preview live (`load_panda_texture()` now applies these to the Panda3D
+`Texture` object -- previously relied on a same-for-every-texture heuristic guess for
+wrap and ignored filters entirely, which is exactly why the bug above was invisible in
+Patina and only showed up in the real client). Separately, `Material.tex_user_mat`
+(the 3dsMax material editor's UV Offset/Tiling/Rotation, already round-tripped correctly
+by `pynel` but never exposed anywhere) is now editable too, via `decompose_uv_matrix`/
+`compose_uv_matrix` (shape_geometry.py) translating the generic NeL matrix into friendly
+(offset U/V, scale U/V, rotation) fields, reflected live in the 3D viewport via
+`uv_matrix_to_panda_mat4()`. Confirmed correct against the real client by hands-on testing
+with a purpose-built quadrant-colored "F" test texture (unambiguous under any rotation or
+mirroring) on a plain test cube: Offset U/V sign, a V-axis mirror (Panda3D's V convention
+runs opposite the raw file's, on top of the existing per-vertex UV flip), and rotation
+direction. Rotation and tiling (Scale != 1) are mutually exclusive in the UI (each greyed
+out until the other is back at its neutral value) -- combining them produces a genuine GPU
+wrap artifact (extra/missing visible tile repeats along the rotated axis, inherent to how
+hardware texture-repeat interacts with a rotated coordinate system, not fixable in
+software) -- and a full scan of `ryzom_live/data`'s 235 `.bnp` archives (2600 shapes)
+confirmed no real shape combines the two, so nothing is lost by disallowing it.
+
+**Also fixed: the object's own rotation (Ctrl+drag / Position-Rotation-Scale panel) was
+never actually saved.** `_write_shape()` now writes the pivot's current world rotation
+into the shape's `default_rot_quat` on every save (previously purely a live-viewer aid,
+silently discarded on save/reload) -- correctly reading whichever of `_object_pivot` or
+`model_root` the Rotation row's pivot-lock had targeted, and using Panda3D's actual
+`LQuaternion` component order (real part first, not `(x, y, z, w)` as the `get_x/y/z/w()`
+names would suggest -- confirmed empirically, an identity quaternion's `get_x()` returned
+`1.0`, not `0.0`).
+
+**Smaller fixes/polish:** the Position/Rotation/Scale panel's X/Y/Z fields and the new
+texture transform fields are now `imgui.drag_float` (drag to adjust, double-click/Ctrl+
+click to type an exact value) instead of plain typed-only fields. New `docs/material_
+options.md` section documenting texture filtering/wrap and the rotation+tiling limit.
+
+## 2026-08-27 — ✨ Patina: DDS auto-export + export flow rework
+
+**New `.dds` export pipeline (`ryzom_forgery/dds_export.py` + CLI `apps/dds_export.py`).**
+Python/Panda3D counterpart of `nel/tools/3d/tga_2_dds/tga2dds.cpp` +
+`s3tc_compressor.cpp`: `build_dds(rgba, algo, build_mipmaps, reduce)` assembles a full
+`.dds` file (magic + `DDS_HEADER`/`DDS_PIXELFORMAT`, verified field-for-field against
+`s3tc_compressor.h` and `CBitmap::readDDS`'s own index-based reads) from an RGBA array,
+compressing each mip level's DXT1/DXT1A/DXT3/DXT5 blocks via Panda3D's
+`Texture.compress_ram_image()` instead of the original's libsquish (not aiming for
+bit-exact block data -- squish's 20-year-old exact version/fork is unrecoverable, and
+only the container + valid block format matter, since that's all the client's loader
+checks). `load_rgba()` fixes a real bug found while validating this against a production
+asset: `Texture.load(PNMImage)` flips rows (Panda's RAM image is bottom-up like OpenGL;
+PNMImage/DDS are top-down), silently producing a vertically-mirrored `.dds` otherwise.
+Also ports `tga2dds.cpp`'s `-r` (reduce) and `-g` (grayscale-as-alpha vs. luminance) CLI
+options. Validated against real `ryzom-data` assets: header byte-for-byte identical to a
+shipped `.dds`, and used to fix 3 `objects/occ_stuff/anlor/halloween_mo_statue_0{1,2,3}_
+spec.dds` files that had actually been saved as plain PNGs with a `.dds` extension.
+
+**Unified workspace filesystem watcher (`ryzom_forgery/workspace_watch.py`).**
+`import_watcher.py` and `workspace_sync.py` used to each own a dedicated
+`watchdog.observers.Observer` with a near-identical per-file debounce handler; a third
+was about to be added for the new `tex/` -> `dds/` auto-export. Consolidated into one
+`WorkspaceWatcher`: a single `Observer` recursively watching the whole workspace root,
+dispatching each settled file to whichever callbacks are `register()`ed for the
+top-level subfolder it falls under. The separate-Observer pattern gave no real
+concurrency/frame-smoothness benefit (Panda3D's render loop was already decoupled from
+these watchers via cross-thread status queuing; watchdog's OS-level wait is
+idle-cost-free regardless of Observer count) -- it was organic duplication. A single
+shared implementation is also easier to instrument/harden than several near-identical
+ones. `ImportWatcher`/`WorkspaceSyncWatcher` keep their existing conversion/sync logic
+but no longer own an `Observer` -- they expose a public `handle_settled(path)` instead.
+
+**`tex/` -> `dds/` auto-export (`ryzom_forgery/tex_dds_sync.py`), new workspace
+subfolder `dds/`.** Every TGA/PNG in a workspace's `tex/` now gets a matching `.dds` (with
+mipmaps) automatically maintained in a new `dds/` subfolder: regenerated on
+create/modify, removed on delete, with a `reconcile()` catch-up pass (mtime-based,
+regenerate stale/missing, delete orphans) run whenever a workspace is opened. Applies
+uniformly to every file under `tex/`, Multi Bitmap variants included -- this is a
+file-level mirror, not aware of which shape/material actually uses a given texture.
+Specular textures aren't special-cased (Patina doesn't manage texture roles/slots yet,
+so `tex/` never contains a recognizable specular file in practice). `workspace_sync.py`'s
+external-sync scope switched from `tex/` to `dds/` (`anims`/`shapes`/`skels`/`dds`) --
+the external sync folder now receives actual game-loadable `.dds`, not raw sources.
+
+**Export flow rework (`export_dialog.py`, `apps/object_editor.py`'s bottom bar).**
+Removed `remember_output_folder`/`output_folder`/`remember_texture_mode` entirely (the
+whole `ExportSettings` dataclass, now empty, deleted) -- these were single settings
+shared across every workspace rather than per-workspace, so once checked once they stuck
+regardless of which workspace was active, which read as the export folder being
+permanently "stuck" to one place. The output folder is now asked every time. Along the
+way, found and deleted genuinely dead code: `export_dialog.draw_settings_content()`
+(and its two folder-dialog helpers) was never actually called from the Settings tab.
+
+The confirmation popup was reworked: filename + full path, then 3 colored buttons that
+each directly trigger the export (no separate Export/Cancel step anymore) -- "Copy
+textures with export" (light green, same as before), "Make a Zip archive with textures"
+(light cyan, new: same file set, archived into one `.zip` via stdlib `zipfile` instead
+of left loose), "Export without the textures" (pink, reference-only). STL (no materials
+at all) shows a single plain gray "Export" button instead.
+
+Two workspace-only additions: a quick `[Export]` button (blue) to the left of
+`[Export as...]` (renamed from `[Export...]`, also recolored blue -- both were briefly
+pink like `[Quit]` before a follow-up fix moved them to blue to stay visually distinct)
+that skips the folder/texture prompts entirely and writes straight to
+`<workspace>/exports/` (reference-only -- textures already live locally or as an
+absolute path, nothing to copy); and a `"Full workspace (<name>.bnp)"` entry in both
+format-picking menus, packaging the whole workspace's `SYNCED_SUBDIRS` content (same
+scope as the external sync folder) into a single `.bnp`
+(`workspace_sync.pack_workspace_bnp()`, staged flat via a temp dir then
+`pynel.ryzom_bnp.pack_directory()`).
+
+**Forgery-wide documentation pass.** Added ~30 markdown docs under
+`nel/tools/forgery/docs/` (one per module, plus `docs/apps/` for each app), covering
+every module in `ryzom_forgery/` that wasn't already documented -- workspace/sync/import
+watchers, the Panoply pipeline, shape import/export, viewport/camera/navcube, and Patina
+itself. Written by reading each source file in full; deliberately reference symbols by
+name only, never by line number (a first pass cited exact lines, which rotted after the
+very next edit shifted everything below it -- names stay valid, lines don't). Also
+documented the actual runtime Panoply system (`nel/tools/pynel/panoply.md`): the offline
+`panoply_maker` bake pipeline, the real production color slots (`skin`=race, `user`=8
+player colors, `eyes`, `hair`), and the separate LOD-only runtime HLS recoloring path
+(`hls_bank_maker`/`CAsyncTextureManager`) -- distinct from the never-shipped
+`_usercolor` blend mechanism in `tga2dds.cpp`.
+
 ## 2026-08-27 — 🔖 Patina 1.0.0: textures, sync, UI polish
 
 **Texture combo picker.** Replaced the free-text `imgui.input_text` for a material's texture (both
