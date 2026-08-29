@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-08-29 — ✨ Add .hlsinfo writer + CConfigFile port (ryzom-cfg)
+
+Two additions to pynel, part of the panoply_maker Python port:
+
+- **`.hlsinfo` writer**: `dumps_hlsinfo()`/`save_hlsinfo()` added to
+  `hls_bank_texture_info.py`, symmetric with the existing reader. Round-trip
+  (`parse_hlsinfo` -> `dumps_hlsinfo`) validated byte-identical against all 10 real
+  `.hlsinfo` files available. Needed so the upcoming Forgery `panoply_maker` port can
+  write its output in the same format the native tool produces.
+- **`config_file.py`, new module**: full port of NeL's `CConfigFile` format (`.cfg` --
+  `client.cfg`, `panoply_*.cfg`, and every other NeL/Ryzom tool config), from the real
+  flex/bison grammar (`nel/src/misc/config_file/cf_lexical.lpp`/`cf_gramatical.ypp`).
+  Scope grew beyond panoply during this port: `client.cfg` loads through the exact same
+  `CConfigFile` class, and this is meant to replace ryztart's own hand-rolled `.cfg`
+  parser (which doesn't cover the full format), so it's a generic reusable module, not
+  panoply-specific. Covers comments, arrays, arithmetic expressions (`+ - * /`,
+  parentheses, unary minus), variable references, `+=` (array extension), and the
+  `RootConfigFilename`/`Root`/`FromLocalFile` multi-file override semantics (e.g.
+  `client.cfg` falling back to `client_default.cfg`) -- `#fileline` (an internal
+  multi-file line-tracking marker, never hand-authored) is explicitly not ported.
+  `Document` keeps a file's exact original text and only rewrites the touched
+  statement's value on `set()`, so `dumps()`/`save()` round-trips byte-identically when
+  nothing was changed -- validated on the 7 real `panoply_*.cfg` files. `ConfigFile`
+  (the multi-file merged view) validated against the real `client.cfg` ->
+  `client_default.cfg` chain (292 variables merged, `RootConfigFilename` followed
+  automatically). A regex-ordering bug (`REAL`'s pattern tried the no-fraction form
+  before the fraction-required one, so `0.1` tokenized as `0.` + `1` -- plain regex
+  alternation is first-match, not flex's longest-match) was found and fixed during this
+  validation. New `ryzom-cfg` console script (`dump`/`set` subcommands).
+
+Registered both in `pyproject.toml`, bumped pynel to 0.4.0, documented in
+`docs/config_file.md` (new) and `README.md`.
+
 ## 2026-08-29 — ✨ Add ryzom-hlsbank CLI (dump + add)
 
 New `pynel.hls_texture_bank` CLI, registered as the `ryzom-hlsbank` console script.

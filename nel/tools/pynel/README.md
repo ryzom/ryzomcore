@@ -28,6 +28,8 @@ Installing the package also provides console scripts:
 - `ryzom-cmb` -- read `.cmb` (indoor collision mesh interchange) files
 - `ryzom-hlsbank` -- read/append `.hlsbank` (HLS-colorisable texture bank)
   files, see [`docs/hls_texture_bank.md`](docs/hls_texture_bank.md)
+- `ryzom-cfg` -- read/write `.cfg` (`CConfigFile` format, e.g. `client.cfg`,
+  `panoply_*.cfg`) files, see [`docs/config_file.md`](docs/config_file.md)
 
 Run any of them with `--help` for usage details.
 

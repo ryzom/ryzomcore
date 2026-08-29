@@ -149,6 +149,49 @@ class _Reader:
 		return self._pos >= len(self._data)
 
 
+class _Writer:
+	"""Minimal binary writer matching NeL's COFile little-endian encoding."""
+
+	def __init__(self):
+		self._chunks: List[bytes] = []
+
+	def u8(self, v: int) -> None:
+		self._chunks.append(struct.pack("<B", v))
+
+	def u32(self, v: int) -> None:
+		self._chunks.append(struct.pack("<I", v))
+
+	def s32(self, v: int) -> None:
+		self._chunks.append(struct.pack("<i", v))
+
+	def f32(self, v: float) -> None:
+		self._chunks.append(struct.pack("<f", v))
+
+	def boolean(self, v: bool) -> None:
+		self.u8(1 if v else 0)
+
+	def version(self, v: int) -> None:
+		if v < 0xFF:
+			self.u8(v)
+		else:
+			self.u8(0xFF)
+			self.u32(v)
+
+	def string(self, s: str) -> None:
+		encoded = s.encode("latin-1")
+		self.u32(len(encoded))
+		self.raw(encoded)
+
+	def cont_len(self, n: int) -> None:
+		self.s32(n)
+
+	def raw(self, data: bytes) -> None:
+		self._chunks.append(data)
+
+	def getvalue(self) -> bytes:
+		return b"".join(self._chunks)
+
+
 def _parse_hls_mod(f: _Reader) -> HLSMod:
 	f.version()
 	return HLSMod(d_hue=f.f32(), d_lum=f.f32(), d_sat=f.f32())
@@ -194,6 +237,62 @@ def parse_hlsinfo(data: bytes) -> HLSBankTextureInfo:
 	return HLSBankTextureInfo(
 		divided_by_2=divided_by_2, src_bitmap_dds=src_bitmap_dds, masks=masks, instances=instances,
 	)
+
+
+def _write_hls_mod(f: _Writer, mod: HLSMod) -> None:
+	f.version(0)
+	f.f32(mod.d_hue)
+	f.f32(mod.d_lum)
+	f.f32(mod.d_sat)
+
+
+def _write_mask_bitmap(f: _Writer, mask: MaskBitmap) -> None:
+	f.version(0)
+	f.u32(mask.width)
+	f.u32(mask.height)
+	f.cont_len(len(mask.pixels))
+	f.raw(mask.pixels)
+
+
+def _write_texture_instance(f: _Writer, inst: TextureInstance) -> None:
+	f.version(0)
+	f.string(inst.name)
+	f.cont_len(len(inst.mods))
+	for mod in inst.mods:
+		_write_hls_mod(f, mod)
+
+
+def dumps_hlsinfo(info: HLSBankTextureInfo) -> bytes:
+	"""Re-serialize a .hlsinfo to bytes. Round-trip (load_hlsinfo -> dumps_hlsinfo) must
+	be byte-identical to the original file -- same validation approach as
+	hls_texture_bank.dumps_hlsbank()."""
+	f = _Writer()
+
+	f.version(0)
+	f.boolean(info.divided_by_2)
+
+	# CDXTCBitmap: version(0), then serialCont(_Data) (a raw .dds file)
+	f.version(0)
+	f.cont_len(len(info.src_bitmap_dds))
+	f.raw(info.src_bitmap_dds)
+
+	f.cont_len(len(info.masks))
+	for mask in info.masks:
+		_write_mask_bitmap(f, mask)
+
+	f.cont_len(len(info.instances))
+	for inst in info.instances:
+		_write_texture_instance(f, inst)
+
+	return f.getvalue()
+
+
+def save_hlsinfo(path: Union[str, Path, BinaryIO], info: HLSBankTextureInfo) -> None:
+	data = dumps_hlsinfo(info)
+	if hasattr(path, "write"):
+		path.write(data)
+	else:
+		Path(path).write_bytes(data)
 
 
 def load_hlsinfo(path: Union[str, Path, BinaryIO]) -> HLSBankTextureInfo:
