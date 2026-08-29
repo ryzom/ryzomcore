@@ -2,6 +2,9 @@
 
 Python tools for Ryzom/NeL data formats (`.ig`, `.shape`, `.bnp`, `.primitive`, `.cmb`) and admin protocols.
 
+> Development on this package happens on the `ryzom/pynel` branch. Forgery's own work
+> branch is `ryzom/forgery` (see its README).
+
 ## Installation
 
 Directly from GitLab, without cloning the whole `ryzom-core` repository:
@@ -45,6 +48,20 @@ shape = ryzom_shape.load_shape("object.shape")
 bnp = ryzom_bnp.BnpReader("data.bnp")
 pf = ryzom_primitive.load_primitive("dummy.primitive")
 cmb = collision_mesh_build.load_cmb("apartment.cmb")
+```
+
+### Locating a user's Ryzom repository checkouts
+
+`repository_paths` is a small per-user JSON settings file shared across
+every pynel-based tool, so a user only has to point out where their
+`ryzom-core`/`ryzom-data`/`ryzom-private-data`/`ryzom-docker` checkouts live
+once. See [`docs/repository_paths.md`](docs/repository_paths.md).
+
+```python
+from pynel import repository_paths
+
+if repository_paths.is_valid("ryzom-data"):
+	data_root = repository_paths.get("ryzom-data")
 ```
 
 ### Following a log file
