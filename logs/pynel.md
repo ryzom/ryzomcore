@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-08-29 — ✨ Add ryzom-hlsbank CLI (dump + add)
+
+New `pynel.hls_texture_bank` CLI, registered as the `ryzom-hlsbank` console script.
+`dump <bank.hlsbank>` lists every color texture and item instance in a `.hlsbank` file,
+useful to audit which armor names are actually present (e.g. checking for items missing
+due to lost `.hlsinfo` sources). `add <bank.hlsbank> <hlsinfo...> -o <output.hlsbank>`
+appends new entries from one or more `.hlsinfo` files into an existing bank, wrapping the
+already-validated `append_texture_info()` writer (`pynel.hls_texture_bank`) and the
+`.hlsinfo` reader (`pynel.hls_bank_texture_info`) added earlier. This is the pynel
+equivalent of the native `hls_bank_maker`, but incremental (append-only, no need for
+every historical item's sources) instead of full-rebuild-only. Validated against a real
+`.hlsinfo` (`tr_hom_civil01_hand_r1.hlsinfo`): appends cleanly, leaves the existing 1574
+color textures / 19733 instances of `characters.hlsbank` byte-for-byte unchanged, adds 32
+new instances. Bumped pynel to 0.3.0.
+
 ## 2026-08-18 — 🐛 Fix skinning pose bugs in pynel animation eval
 
 Three bugs in `ryzom_animation.py`'s bone pose evaluation, found while validating Forgery's

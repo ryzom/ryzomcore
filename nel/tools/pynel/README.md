@@ -18,13 +18,16 @@ pip install -e nel/tools/pynel
 
 ## Command-line tools
 
-Installing the package also provides five console scripts:
+Installing the package also provides console scripts:
 
 - `ryzom-ig` -- read/write `.ig` (Instance Group) files
 - `ryzom-shape` -- read/write `.shape` (3D mesh) files
+- `ryzom-anim` -- read `.anim` (skeletal animation) files
 - `ryzom-bnp` -- read/write `.bnp` (Big File package) archives
 - `ryzom-primitive` -- read/write `.primitive` (LIGO primitive tree) files
 - `ryzom-cmb` -- read `.cmb` (indoor collision mesh interchange) files
+- `ryzom-hlsbank` -- read/append `.hlsbank` (HLS-colorisable texture bank)
+  files, see [`docs/hls_texture_bank.md`](docs/hls_texture_bank.md)
 
 Run any of them with `--help` for usage details.
 
