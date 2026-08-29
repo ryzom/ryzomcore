@@ -26,6 +26,19 @@ if [[ ! -d $VIRTUAL_ENV ]]; then
 	$VIRTUAL_ENV/bin/pip install -e . -q
 fi
 
+# pynel is developed alongside Forgery (../pynel, editable install) but on its own
+# branch/release cadence -- an editable install picks up source changes for free, but
+# NOT a version bump alone (pyproject.toml's own `version` field), since nothing else
+# changed to trigger a re-resolve. Re-run `pip install -e` whenever the installed
+# version drifts from ../pynel/pyproject.toml's, so a fresh `git pull`/branch switch
+# there is never silently stale in this venv.
+INSTALLED_PYNEL_VERSION=$($VIRTUAL_ENV/bin/python -c "import importlib.metadata as m; print(m.version('pynel'))" 2>/dev/null || echo "")
+PYNEL_PYPROJECT_VERSION=$(grep -m1 '^version' ../pynel/pyproject.toml | sed -E 's/version = "(.*)"/\1/')
+if [[ "$INSTALLED_PYNEL_VERSION" != "$PYNEL_PYPROJECT_VERSION" ]]; then
+	echo "pynel version changed ($INSTALLED_PYNEL_VERSION -> $PYNEL_PYPROJECT_VERSION), reinstalling..."
+	$VIRTUAL_ENV/bin/pip install -e ../pynel -q
+fi
+
 if [[ $# -eq 0 ]]; then
 	echo "Usage: ./dev.sh <path/to/app.py> [args...]"
 	exit 1
