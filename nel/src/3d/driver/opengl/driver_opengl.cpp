@@ -334,6 +334,12 @@ CDriverGL::CDriverGL()
 	std::fill(ARBWaterShader, ARBWaterShader + 8, 0);
 	_CurWaterPassIsARB = false;
 
+	ARBSpecularShader = 0;
+	ARBSpecularShaderNoTex = 0;
+	ARBPPLStage0Shader = 0;
+	ARBPPLStage2Shader = 0;
+	std::fill(ARBLightmapShader, ARBLightmapShader + 3, 0);
+
 ///	buildCausticCubeMapTex();
 
 	_SpecularBatchOn= false;
@@ -1750,15 +1756,16 @@ void CDriverGL::checkForPerPixelLightingSupport()
 	H_AUTO_OGL(CDriverGL_checkForPerPixelLightingSupport)
 
 	// we need at least 3 texture stages and cube map support + EnvCombine4 or 3 support
-	// TODO : support for EnvCombine3
-	// TODO : support for less than 3 stages
+	// ARBFragmentProgram can be used as fallback for EnvCombine4/3
 
-	_SupportPerPixelShaderNoSpec = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
+	bool hasCombine = _Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3 || _Extensions.ARBFragmentProgram;
+
+	_SupportPerPixelShaderNoSpec = hasCombine
 								   && _Extensions.ARBTextureCubeMap
 								   && _Extensions.NbTextureStages >= 3
 								   && (_Extensions.NVVertexProgram || _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
 
-	_SupportPerPixelShader = (_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3)
+	_SupportPerPixelShader = hasCombine
 							 && _Extensions.ARBTextureCubeMap
 							 && _Extensions.NbTextureStages >= 2
 							 && (_Extensions.NVVertexProgram || _Extensions.ARBVertexProgram || _Extensions.EXTVertexShader);
@@ -2104,6 +2111,129 @@ static const char *WaterCodeWithFogForARBFragmentProgram =
 "END\n";
 
 // ***************************************************************************
+// Fragment programs to emulate GL_ATI_texture_env_combine3 / GL_NV_texture_env_combine4
+// for hardware that has GL_ARB_fragment_program but not the texture env combine extensions.
+
+// Specular pass with base texture in stage 0:
+// Stage 0 equivalent: prev = tex0 * primary_color (modulate)
+// Stage 1 equivalent: result.rgb = tex1 * prev.a + prev (MAD), result.a = primary.a
+static const char *SpecularTexEnvCombineARBFragmentProgram =
+"!!ARBfp1.0\n\
+TEMP base;\n\
+TEMP cube;\n\
+TEMP prev;\n\
+TEX base, fragment.texcoord[0], texture[0], 2D;\n\
+TEX cube, fragment.texcoord[1], texture[1], CUBE;\n\
+MUL prev, base, fragment.color.primary;\n\
+MAD result.color.rgb, cube, prev.a, prev;\n\
+MOV result.color.a, fragment.color.primary.a;\n\
+END\n";
+
+// Specular pass without base texture in stage 0:
+// Stage 0 equivalent: prev = primary_color
+// Stage 1 equivalent: result.rgb = tex1 + prev (since mul factor = 1)
+static const char *SpecularTexEnvCombineNoTexARBFragmentProgram =
+"!!ARBfp1.0\n\
+TEMP cube;\n\
+TEX cube, fragment.texcoord[1], texture[1], CUBE;\n\
+ADD result.color.rgb, cube, fragment.color.primary;\n\
+MOV result.color.a, fragment.color.primary.a;\n\
+END\n";
+
+// PPL stage 0: DiffuseCubeMap * LightColor + DiffuseGouraud
+// constant0 = PPLightDiffuseColor
+// stage 1 keeps default: modulate with texture
+static const char *PPLStage0ARBFragmentProgram =
+"!!ARBfp1.0\n\
+PARAM lightColor = program.env[0];\n\
+TEMP diffCube;\n\
+TEMP prev;\n\
+TEMP tex1;\n\
+TEX diffCube, fragment.texcoord[0], texture[0], CUBE;\n\
+MAD prev.rgb, diffCube, lightColor, fragment.color.primary;\n\
+MOV prev.a, fragment.color.primary.a;\n\
+TEX tex1, fragment.texcoord[1], texture[1], 2D;\n\
+MUL result.color.rgb, tex1, prev;\n\
+MOV result.color.a, prev.a;\n\
+END\n";
+
+// PPL stage 2: SpecularCubeMap * SpecularLightColor + Previous
+// constant2 = PPLightSpecularColor
+// stage 0 = cubemap * constant + primary (PPL stage 0)
+// stage 1 = modulate with texture (default)
+// stage 2 = cubemap * constant + previous
+static const char *PPLStage2ARBFragmentProgram =
+"!!ARBfp1.0\n\
+PARAM diffuseColor = program.env[0];\n\
+PARAM specularColor = program.env[1];\n\
+TEMP diffCube;\n\
+TEMP prev;\n\
+TEMP tex1;\n\
+TEMP specCube;\n\
+TEX diffCube, fragment.texcoord[0], texture[0], CUBE;\n\
+MAD prev.rgb, diffCube, diffuseColor, fragment.color.primary;\n\
+MOV prev.a, fragment.color.primary.a;\n\
+TEX tex1, fragment.texcoord[1], texture[1], 2D;\n\
+MUL prev.rgb, tex1, prev;\n\
+TEX specCube, fragment.texcoord[2], texture[2], CUBE;\n\
+MAD result.color.rgb, specCube, specularColor, prev;\n\
+MOV result.color.a, prev.a;\n\
+END\n";
+
+// Lightmap fragment programs: N lightmaps * constants + base texture
+// Stage layout: lightmap stages first, then base texture last
+// 1 lightmap stage (2 texture units: lm at 0, base at 1)
+static const char *LightmapShader1ARBFragmentProgram =
+"!!ARBfp1.0\n\
+PARAM lmColor0 = program.env[0];\n\
+TEMP lm;\n\
+TEMP prev;\n\
+TEMP base;\n\
+TEX lm, fragment.texcoord[0], texture[0], 2D;\n\
+MAD prev, lm, lmColor0, fragment.color.primary;\n\
+TEX base, fragment.texcoord[1], texture[1], 2D;\n\
+MUL result.color.rgb, base, prev;\n\
+MOV result.color.a, base.a;\n\
+END\n";
+
+// 2 lightmap stages (3 texture units: lm0 at 0, lm1 at 1, base at 2)
+static const char *LightmapShader2ARBFragmentProgram =
+"!!ARBfp1.0\n\
+PARAM lmColor0 = program.env[0];\n\
+PARAM lmColor1 = program.env[1];\n\
+TEMP lm;\n\
+TEMP prev;\n\
+TEMP base;\n\
+TEX lm, fragment.texcoord[0], texture[0], 2D;\n\
+MAD prev, lm, lmColor0, fragment.color.primary;\n\
+TEX lm, fragment.texcoord[1], texture[1], 2D;\n\
+MAD prev, lm, lmColor1, prev;\n\
+TEX base, fragment.texcoord[2], texture[2], 2D;\n\
+MUL result.color.rgb, base, prev;\n\
+MOV result.color.a, base.a;\n\
+END\n";
+
+// 3 lightmap stages (4 texture units: lm0 at 0, lm1 at 1, lm2 at 2, base at 3)
+static const char *LightmapShader3ARBFragmentProgram =
+"!!ARBfp1.0\n\
+PARAM lmColor0 = program.env[0];\n\
+PARAM lmColor1 = program.env[1];\n\
+PARAM lmColor2 = program.env[2];\n\
+TEMP lm;\n\
+TEMP prev;\n\
+TEMP base;\n\
+TEX lm, fragment.texcoord[0], texture[0], 2D;\n\
+MAD prev, lm, lmColor0, fragment.color.primary;\n\
+TEX lm, fragment.texcoord[1], texture[1], 2D;\n\
+MAD prev, lm, lmColor1, prev;\n\
+TEX lm, fragment.texcoord[2], texture[2], 2D;\n\
+MAD prev, lm, lmColor2, prev;\n\
+TEX base, fragment.texcoord[3], texture[3], 2D;\n\
+MUL result.color.rgb, base, prev;\n\
+MOV result.color.a, base.a;\n\
+END\n";
+
+// ***************************************************************************
 /** Load a ARB_fragment_program_code, and ensure it is loaded natively
   */
 uint loadARBFragmentProgramStringNative(const char *prog, bool forceNativePrograms)
@@ -2312,6 +2442,48 @@ void CDriverGL::initFragmentShaders()
 	}
 
 	// if none of the previous programs worked, fallback on NV_texture_shader, or (todo) simpler shader
+
+	///////////////////////////////////////////
+	// COMBINE4/COMBINE3 FALLBACK SHADERS   //
+	///////////////////////////////////////////
+
+	// When NVTextureEnvCombine4 and ATITextureEnvCombine3 are not available,
+	// use ARB_fragment_program to emulate the MAD (multiply-add) operation
+	// needed for specular reflection, per-pixel lighting, and lightmaps.
+	if (_Extensions.ARBFragmentProgram
+		&& !_Extensions.NVTextureEnvCombine4
+		&& !_Extensions.ATITextureEnvCombine3)
+	{
+		nlinfo("COMBINE: Using ARB_fragment_program fallback for combine3/combine4");
+
+		ARBSpecularShader = loadARBFragmentProgramStringNative(SpecularTexEnvCombineARBFragmentProgram, false);
+		if (!ARBSpecularShader)
+			nlwarning("COMBINE: Failed to load specular shader");
+
+		ARBSpecularShaderNoTex = loadARBFragmentProgramStringNative(SpecularTexEnvCombineNoTexARBFragmentProgram, false);
+		if (!ARBSpecularShaderNoTex)
+			nlwarning("COMBINE: Failed to load specular shader (no tex)");
+
+		ARBPPLStage0Shader = loadARBFragmentProgramStringNative(PPLStage0ARBFragmentProgram, false);
+		if (!ARBPPLStage0Shader)
+			nlwarning("COMBINE: Failed to load PPL stage 0 shader");
+
+		ARBPPLStage2Shader = loadARBFragmentProgramStringNative(PPLStage2ARBFragmentProgram, false);
+		if (!ARBPPLStage2Shader)
+			nlwarning("COMBINE: Failed to load PPL stage 2 shader");
+
+		ARBLightmapShader[0] = loadARBFragmentProgramStringNative(LightmapShader1ARBFragmentProgram, false);
+		if (!ARBLightmapShader[0])
+			nlwarning("COMBINE: Failed to load lightmap shader (1 stage)");
+
+		ARBLightmapShader[1] = loadARBFragmentProgramStringNative(LightmapShader2ARBFragmentProgram, false);
+		if (!ARBLightmapShader[1])
+			nlwarning("COMBINE: Failed to load lightmap shader (2 stages)");
+
+		ARBLightmapShader[2] = loadARBFragmentProgramStringNative(LightmapShader3ARBFragmentProgram, false);
+		if (!ARBLightmapShader[2])
+			nlwarning("COMBINE: Failed to load lightmap shader (3 stages)");
+	}
 #endif
 }
 
@@ -2328,6 +2500,39 @@ void CDriverGL::deleteARBFragmentPrograms()
 			GLuint progId = (GLuint) ARBWaterShader[k];
 			nglDeleteProgramsARB(1, &progId);
 			ARBWaterShader[k] = 0;
+		}
+	}
+	if (ARBSpecularShader)
+	{
+		GLuint progId = (GLuint) ARBSpecularShader;
+		nglDeleteProgramsARB(1, &progId);
+		ARBSpecularShader = 0;
+	}
+	if (ARBSpecularShaderNoTex)
+	{
+		GLuint progId = (GLuint) ARBSpecularShaderNoTex;
+		nglDeleteProgramsARB(1, &progId);
+		ARBSpecularShaderNoTex = 0;
+	}
+	if (ARBPPLStage0Shader)
+	{
+		GLuint progId = (GLuint) ARBPPLStage0Shader;
+		nglDeleteProgramsARB(1, &progId);
+		ARBPPLStage0Shader = 0;
+	}
+	if (ARBPPLStage2Shader)
+	{
+		GLuint progId = (GLuint) ARBPPLStage2Shader;
+		nglDeleteProgramsARB(1, &progId);
+		ARBPPLStage2Shader = 0;
+	}
+	for(uint k = 0; k < 3; ++k)
+	{
+		if (ARBLightmapShader[k])
+		{
+			GLuint progId = (GLuint) ARBLightmapShader[k];
+			nglDeleteProgramsARB(1, &progId);
+			ARBLightmapShader[k] = 0;
 		}
 	}
 #endif

@@ -711,11 +711,20 @@ void CDriverGL::computeLightMapInfos (const CMaterial &mat)
 
 	// Compute how many pass, according to driver caps.
 	_NLightMapPerPass = inlGetNumTextStages()-1;
-	// Can do more than 2 texture stages only if NVTextureEnvCombine4 or ATITextureEnvCombine3
+	// Can do more than 2 texture stages only if NVTextureEnvCombine4 or ATITextureEnvCombine3 or ARBFragmentProgram fallback
 	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3)
 	{
-		_NLightMapPerPass = 1;
-		_LightMapNoMulAddFallBack= true;
+		if (ARBLightmapShader[0])
+		{
+			// With ARB fragment program fallback, limit to 3 lightmaps per pass (max supported by our shaders)
+			_NLightMapPerPass = std::min(_NLightMapPerPass, (uint)3);
+			_LightMapNoMulAddFallBack= false;
+		}
+		else
+		{
+			_NLightMapPerPass = 1;
+			_LightMapNoMulAddFallBack= true;
+		}
 	}
 	else
 	{
@@ -889,8 +898,8 @@ void			CDriverGL::setupLightMapPass(uint pass)
 				}
 				else
 				{
-					// Here, we are sure that texEnvCombine4 or texEnvCombine3 is OK.
-					nlassert(_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3);
+					// Here, we are sure that texEnvCombine4 or texEnvCombine3 or ARBFragmentProgram is OK.
+					nlassert(_Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3 || ARBLightmapShader[0]);
 
 					// setup constant color with Lightmap factor.
 					stdEnv.ConstantColor=lmapFactor;
@@ -1018,6 +1027,32 @@ void			CDriverGL::setupLightMapPass(uint pass)
 		}
 	}
 
+#ifndef USE_OPENGLES
+	// ARB fragment program fallback for lightmap combine
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3 && !_LightMapNoMulAddFallBack)
+	{
+		uint nlm = nstages - 1; // number of lightmap stages (nstages includes base texture)
+		if (nlm >= 1 && nlm <= 3 && ARBLightmapShader[nlm - 1])
+		{
+			nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBLightmapShader[nlm - 1]);
+			glEnable(GL_FRAGMENT_PROGRAM_ARB);
+			// Set lightmap factor colors as program.env parameters
+			uint lmId = pass * _NLightMapPerPass;
+			for (uint li = 0; li < nlm; ++li)
+			{
+				uint wlm = _LightMapLUT[lmId + li];
+				CRGBA lmapFactor = mat._LightMaps[wlm].Factor;
+				CRGBA lmcDiff = mat._LightMaps[wlm].LMCDiffuse;
+				// Compute factor * diffuse as float, using (x + x>>7) to approximate x * (256/255) for proper [0,255]->[0,1] mapping
+				float r = ((float)lmapFactor.R * ((float)lmcDiff.R + (lmcDiff.R >> 7))) / (255.f * 255.f);
+				float g = ((float)lmapFactor.G * ((float)lmcDiff.G + (lmcDiff.G >> 7))) / (255.f * 255.f);
+				float b = ((float)lmapFactor.B * ((float)lmcDiff.B + (lmcDiff.B >> 7))) / (255.f * 255.f);
+				nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, li, r, g, b, 1.f);
+			}
+		}
+	}
+#endif
+
 	// setup blend / lighting.
 	//=========================
 
@@ -1094,6 +1129,14 @@ void			CDriverGL::setupLightMapPass(uint pass)
 void			CDriverGL::endLightMapMultiPass()
 {
 	H_AUTO_OGL(CDriverGL_endLightMapMultiPass)
+#ifndef USE_OPENGLES
+	// Disable ARB fragment program if it was used for lightmap fallback
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3
+		&& !_LightMapNoMulAddFallBack && ARBLightmapShader[0])
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+	}
+#endif
 	// Flag the fact that VertexSetup is dirty (special lightmap). reseted in activeVertexBuffer(), and setupMaterial()
 	// NB: if no lightmaps, no setupUVPtr() has been called => don't need to flag
 	// (important else crash if graphist error while exporting a Lightmap material, with a MeshVertexProgram (WindTree) )
@@ -1241,6 +1284,8 @@ sint			CDriverGL::beginSpecularMultiPass()
 		return 1;
 
 	if( _Extensions.NVTextureEnvCombine4 || _Extensions.ATITextureEnvCombine3) // NVidia or ATI optimization
+		return 1;
+	else if (ARBSpecularShader || ARBSpecularShaderNoTex) // ARB fragment program fallback
 		return 1;
 	else
 		return 2;
@@ -1414,6 +1459,20 @@ void			CDriverGL::setupSpecularPass(uint pass)
 			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, GL_SRC_ALPHA );
 		}
 	}
+	else if (ARBSpecularShader || ARBSpecularShaderNoTex)
+	{
+		// Use ARB fragment program fallback for single pass specular
+		GLuint shader = 0;
+		if (mat.getTexture(0) != NULL)
+			shader = ARBSpecularShader; // use texture variant if base texture exists
+		if (!shader)
+			shader = ARBSpecularShaderNoTex; // fallback to no-texture variant
+		if (shader)
+		{
+			nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, shader);
+			glEnable(GL_FRAGMENT_PROGRAM_ARB);
+		}
+	}
 	else
 #endif
 	{
@@ -1474,6 +1533,14 @@ void			CDriverGL::setupSpecularPass(uint pass)
 void			CDriverGL::endSpecularMultiPass()
 {
 	H_AUTO_OGL(CDriverGL_endSpecularMultiPass)
+#ifndef USE_OPENGLES
+	// Disable ARB fragment program if it was used for specular fallback
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3
+		&& (ARBSpecularShader || ARBSpecularShaderNoTex))
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+	}
+#endif
 	// End specular , only if not Batching mode.
 	if(!_SpecularBatchOn)
 		setupSpecularEnd();
@@ -1653,6 +1720,24 @@ void			CDriverGL::setupPPLPass(uint pass)
 
 	// setup the tex envs
 
+#ifndef USE_OPENGLES
+	// ARB fragment program fallback: handles all 3 stages in one program
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3 && ARBPPLStage2Shader)
+	{
+		nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBPPLStage2Shader);
+		glEnable(GL_FRAGMENT_PROGRAM_ARB);
+		// Set diffuse light color as env param 0
+		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
+			_PPLightDiffuseColor.R / 255.f, _PPLightDiffuseColor.G / 255.f,
+			_PPLightDiffuseColor.B / 255.f, _PPLightDiffuseColor.A / 255.f);
+		// Set specular light color as env param 1
+		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 1,
+			_PPLightSpecularColor.R / 255.f, _PPLightSpecularColor.G / 255.f,
+			_PPLightSpecularColor.B / 255.f, _PPLightSpecularColor.A / 255.f);
+		return;
+	}
+#endif
+
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1
 	if(_CurrentTexEnvSpecial[0] != TexEnvSpecialPPLStage0)
 	{
@@ -1815,7 +1900,14 @@ void			CDriverGL::setupPPLPass(uint pass)
 void			CDriverGL::endPPLMultiPass()
 {
 	H_AUTO_OGL(CDriverGL_endPPLMultiPass)
-	// nothing to do there ...
+#ifndef USE_OPENGLES
+	// Disable ARB fragment program if it was used for PPL fallback
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3
+		&& ARBPPLStage2Shader)
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+	}
+#endif
 }
 
 // ******PER PIXEL LIGHTING, NO SPECULAR**************************************
@@ -1853,6 +1945,20 @@ void			CDriverGL::setupPPLNoSpecPass(uint pass)
 	}
 
 	// setup the tex envs
+
+#ifndef USE_OPENGLES
+	// ARB fragment program fallback: handles stages 0 and 1 in one program
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3 && ARBPPLStage0Shader)
+	{
+		nglBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, ARBPPLStage0Shader);
+		glEnable(GL_FRAGMENT_PROGRAM_ARB);
+		// Set diffuse light color as env param 0
+		nglProgramEnvParameter4fARB(GL_FRAGMENT_PROGRAM_ARB, 0,
+			_PPLightDiffuseColor.R / 255.f, _PPLightDiffuseColor.G / 255.f,
+			_PPLightDiffuseColor.B / 255.f, _PPLightDiffuseColor.A / 255.f);
+		return;
+	}
+#endif
 
 	// Stage 0 is rgb = DiffuseCubeMap * LightColor + DiffuseGouraud * 1 (TODO : EnvCombine3)
 	if(_CurrentTexEnvSpecial[0] != TexEnvSpecialPPLStage0)
@@ -1923,7 +2029,14 @@ void			CDriverGL::setupPPLNoSpecPass(uint pass)
 void			CDriverGL::endPPLNoSpecMultiPass()
 {
 	H_AUTO_OGL(CDriverGL_endPPLNoSpecMultiPass)
-	// nothing to do there ...
+#ifndef USE_OPENGLES
+	// Disable ARB fragment program if it was used for PPL NoSpec fallback
+	if (!_Extensions.NVTextureEnvCombine4 && !_Extensions.ATITextureEnvCombine3
+		&& ARBPPLStage0Shader)
+	{
+		glDisable(GL_FRAGMENT_PROGRAM_ARB);
+	}
+#endif
 }
 
 // ***************************************************************************
