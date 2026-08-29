@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-08-29 — ✨ Add resample()/exact colorize port to panoply_maker.py
+
+New `ryzom_forgery/panoply_maker.py`, first pieces of a Python port of
+`nel/tools/3d/panoply_maker/panoply_maker.cpp` (the offline tool that bakes an item's
+colorized texture variants and the `.hlsinfo` used to build `characters.hlsbank`), so
+both the C++ and Python versions can eventually be cross-validated the same way
+`hls_bank_maker` already was (see pynel's `docs/hls_texture_bank.md`).
+
+- **`resample()`**: pure-NumPy port of `CBitmap::resamplePicture32`/`resamplePicture8`
+  (`nel/src/misc/bitmap.cpp`) -- the separable area-average/half-pixel filter
+  `panoply_maker` uses to build a `.hlsinfo`'s low-def `SrcBitmap`/`Masks`, deliberately
+  not reusing `dds_export.py`'s simpler box filter (different pixel values). Implemented
+  via a weight-matrix + `numpy.einsum` approach covering equal/magnify/minify, plus the
+  exact-2x integer-rounding fast path kept as its own code path (its rounding genuinely
+  differs from the general float pipeline's, not just a perf shortcut).
+- **`eval_bitmap_stats_exact()`/`convert_bitmap_exact()`/`colorize_exact()`**: exact,
+  order-dependent port of `CColorModifier::evalBitmapStats`/`convertBitmap`
+  (`color_modifier.cpp`). The existing `panoply_colorize.py` (built for object_editor's
+  live Panoply preview) already ports the same math, but its hue average is a vectorized
+  order-*independent* circular mean, explicitly not aiming for bit-exact parity --
+  confirmed with Nuno this divergence reaches `.hlsinfo`'s `DHue` field (the only
+  *measured* value; `DLum`/`DSat` are copied straight from config) and would break
+  byte-exact cross-validation. Decision: keep `panoply_colorize.py`'s fast approximation
+  for the interactive live-preview path, add this exact/sequential port (reuses
+  `panoply_colorize.py`'s order-independent per-pixel helpers for everything except the
+  hue accumulation, which is a literal pixel-by-pixel port of the C++'s
+  running-mean-with-360°-unwrap loop) for this offline generation path, where it only
+  runs once per item and speed doesn't matter.
+
+Not yet cross-validated against real data -- this repo's dev sandbox has no numpy/panda3d
+and project policy is to never execute project code there; needs running on the real
+machine next. Documented in new `docs/panoply_maker.md`.
+
 ## 2026-08-21 — ✨ Add app icon and startup splashscreen to ForgeryApp
 
 Added to `ryzom_forgery/app.py`, the shared `ForgeryApp` base class every tool app
