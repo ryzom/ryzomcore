@@ -96,8 +96,9 @@ def color_id_for(axis: str, value) -> str:
 	"TR"; the other 3 axes' values are the bare int their token's digits
 	parsed to (e.g. 4), reassembled with their axis letter to "U4". Matches
 	panoply_common.cfg's/panoply_<race>.cfg's own `<axis>_color_id` entries
-	(and panoply_colors.toml's `id` fields, read from those same configs --
-	see panoply_config.py), so this is what object_editor.py's
+	(and the bundled panoply.cfg's `<axis>_color_id`/`<race>_<axis>_color_id`
+	entries, read from those same real values -- see panoply_config.py), so
+	this is what object_editor.py's
 	_ensure_live_panoply_texture() must pass as color_id to
 	panoply_config.get_color_params()."""
 	return value.upper() if axis == "skin" else f"{_AXIS_LETTER[axis]}{value}"

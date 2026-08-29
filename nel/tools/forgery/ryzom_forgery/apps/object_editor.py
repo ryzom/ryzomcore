@@ -7,6 +7,7 @@ render yet.
 """
 
 import io
+import shutil
 import subprocess
 from datetime import datetime
 from math import ceil, cos, pi, radians, sin
@@ -24,6 +25,7 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, port
 
 from ryzom_forgery.app import _AVAILABLE_FONTS, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
+from ryzom_forgery import dds_export
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
@@ -31,6 +33,7 @@ from ryzom_forgery.import_watcher import ImportWatcher
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply
+from ryzom_forgery import panoply_bake
 from ryzom_forgery import panoply_colorize
 from ryzom_forgery import panoply_config
 from ryzom_forgery import panoply_live
@@ -59,6 +62,7 @@ from pynel.ryzom_shape import (
 	WindTreeParams, parse_shape, save_shape,
 )
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh
+from pynel import repository_paths
 
 # Shape types pynel's save_shape() can actually write back out -- matches
 # ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save UI only shows for these.
@@ -88,6 +92,7 @@ _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
 _IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
+_PANOPLY_BAKE_BLOCKED_POPUP_ID = "Can't bake Panoply variants"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
@@ -667,6 +672,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._pending_save_path = None  # workspace destination shown/used by the overwrite-confirmation popup
 		self._save_status = ""
 		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
+		self._panoply_bake_blocked = False  # see _bake_panoply_real()/_draw_panoply_bake_blocked_popup()
+		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
 		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
@@ -737,9 +744,12 @@ class ObjectEditorApp(ForgeryApp):
 		self.workspace_watch = WorkspaceWatcher()
 		self.workspace_watch.register("imports", self.import_watcher.handle_settled)
 		self.workspace_watch.register("tex", self.tex_dds_sync.handle_settled)
+		self.workspace_watch.register("panoply.cfg", self._on_panoply_cfg_settled)
 		for _synced_subdir in SYNCED_SUBDIRS:
 			self.workspace_watch.register(_synced_subdir, self.workspace_sync.handle_settled)
 		self._workspace_sync_folder_dialog = None  # active portable_file_dialogs.select_folder, or None
+		self._repository_paths_dialog = None  # active portable_file_dialogs.select_folder, or None
+		self._repository_paths_dialog_repo = None  # which pynel.repository_paths.REPOSITORIES entry _repository_paths_dialog is for
 		# Set from ImportWatcher's own background thread (see
 		# _on_open_shape_conflict()); drawn once per frame from draw_panel()
 		# (_draw_import_conflict_popup()) since it needs imgui -- main-thread-only.
@@ -824,6 +834,7 @@ class ObjectEditorApp(ForgeryApp):
 			# set_active_workspace() entirely).
 			ensure_structure(workspace_dir)
 		self.search_paths_dialog.set_workspace_dir(workspace_dir)
+		panoply_config.set_workspace_dir(workspace_dir)
 		self.import_watcher.set_workspace_dir(workspace_dir)
 		self.workspace_sync.set_workspace_dir(workspace_dir)
 		self.tex_dds_sync.set_workspace_dir(workspace_dir)
@@ -2437,6 +2448,22 @@ class ObjectEditorApp(ForgeryApp):
 		self._texture_freshness_last_check = task.time
 
 		changed = False
+		if self._panoply_cfg_changed:
+			# The workspace's panoply.cfg (or its absence) changed -- see
+			# _on_panoply_cfg_settled(). Every already-rendered Panoply
+			# texture was colorized with whatever parameters were active at
+			# the time, and neither _texture_cache nor _live_panoply_cache's
+			# keys depend on those parameters (see LiveColorizeCache.make_key()),
+			# so nothing else would ever notice this changed -- evict every
+			# Panoply-tracked entry and drop the whole live-colorize cache,
+			# forcing a full recompute against the new colors below.
+			self._panoply_cfg_changed = False
+			for resolved_name in list(self._panoply_texture_sources):
+				self._texture_cache.pop(resolved_name, None)
+			self._panoply_texture_signatures.clear()
+			self._live_panoply_cache.clear()
+			changed = True
+
 		for resolved_name, (base_name, dims) in list(self._panoply_texture_sources.items()):
 			if resolved_name not in self._texture_cache:
 				continue
@@ -2494,6 +2521,42 @@ class ObjectEditorApp(ForgeryApp):
 
 	_PANOPLY_AXIS_LABELS = {"skin": "Skin", "user": "User color", "hair": "Hair", "eyes": "Eyes"}
 
+	def _copy_panoply_cfg_to_workspace(self):
+		"""Copies the bundled default panoply.cfg (panoply_config.py) as-is
+		into the active workspace's root, as an editable starting point --
+		once there, panoply_config._resolve_cfg_path() always prefers it
+		over the bundled default from then on (both for the live-preview
+		colors and any real bake -- see _bake_panoply_real()). Picked from
+		the gear icon next to "Panoply:" in _draw_global_panoply_section()."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return
+		dest = panoply_config.workspace_cfg_path(workspace_dir)
+		try:
+			shutil.copyfile(panoply_config.bundled_cfg_path(), dest)
+		except OSError as exc:
+			self._save_status = f"Could not copy panoply.cfg: {exc}"
+			print(f"[object_editor] {self._save_status}")
+			return
+		self._save_status = f"Copied panoply.cfg to workspace ({dest})"
+		print(f"[object_editor] {self._save_status}")
+
+	def _on_panoply_cfg_settled(self, path):
+		"""Registered onto the shared WorkspaceWatcher for the workspace
+		root's own panoply.cfg -- a root-level file's relative_to(workspace_dir)
+		has a single part, which WorkspaceWatcher._dispatch() treats as its
+		own "subdir" key, so this fires whenever <workspace>/panoply.cfg
+		itself settles (created, edited, or deleted), same mechanism as the
+		"tex"/"imports" subfolder registrations just needs no subfolder here.
+		Runs off that watcher's background thread -- only sets a flag,
+		_update_texture_freshness() (main thread, ~once a second) does the
+		actual cache eviction + material re-apply on the next tick. Without
+		this, an edited workspace panoply.cfg would never be picked up by
+		the live preview: panoply_config.py's own cache invalidates itself
+		lazily by mtime, but nothing else would know to recompute/re-cache
+		the already-rendered Panoply textures for the new colors."""
+		self._panoply_cfg_changed = True
+
 	def _draw_global_panoply_section(self):
 		"""Ryzom's pre-baked texture recolors (see panoply.py), shape-wide:
 		each axis's pick (skin tone, user/craft color, hair color, eye color)
@@ -2526,6 +2589,14 @@ class ObjectEditorApp(ForgeryApp):
 				available[axis].update(values)
 
 		imgui.text("Panoply:")
+		imgui.same_line()
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		has_override = workspace_dir is not None and panoply_config.workspace_cfg_path(workspace_dir).is_file()
+		tooltip = (
+			"panoply.cfg already exists in this workspace (edit it directly to change colors)" if has_override
+			else "Copy the bundled panoply.cfg into this workspace, to edit its colors")
+		if _icon_button(fa_icons.ICON_FA_COG, tooltip, disabled=workspace_dir is None or has_override):
+			self._copy_panoply_cfg_to_workspace()
 		if not any(available.values()):
 			imgui.same_line()
 			imgui.text_disabled("no variants detected for this shape's textures")
@@ -2598,6 +2669,83 @@ class ObjectEditorApp(ForgeryApp):
 		self._save_status = f"Created mask {dest.name}"
 		print(f"[object_editor] {self._save_status}")
 
+	def _bake_panoply_real(self, base_texture_name):
+		"""Real offline Panoply bake (panoply_bake.py -- the exact,
+		non-live-preview port of panoply_maker.cpp, see
+		/repos/project-todos/ryzom-core/panoply-runtime-tint.md) for one
+		base texture: writes every color variant into the active workspace's
+		tex/, and an updated .hlsinfo/panoply_files.txt/characters.hlsbank
+		into its build/ (started from, never overwriting, the real
+		production files under ryzom-data's final_bnps/characters_maps_hr/,
+		see panoply_bake.bake_and_write()'s docstring). Distinct from the
+		approximate live-preview already driving the axis pickers in
+		_draw_global_panoply_section() -- this produces the real baked files
+		panoply_maker.exe would, not just a render override. Restricted to
+		plain on-disk files (FoundEntry.fs_path) -- a base texture or mask
+		living only inside a .bnp can't be baked from here.
+
+		Refuses to do anything at all -- no textures written either -- if
+		ryzom-data isn't configured (pynel.repository_paths): that's the one
+		hard dependency this needs to know where the real
+		characters.hlsbank/panoply_files.txt to build on top of live."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return
+		if not repository_paths.is_valid("ryzom-data"):
+			self._panoply_bake_blocked = True
+			imgui.open_popup(_PANOPLY_BAKE_BLOCKED_POPUP_ID)
+			return
+		entry = self.search_paths_dialog.find_texture(base_texture_name)
+		if entry is None or entry.fs_path is None:
+			self._save_status = f"Can't bake {base_texture_name}: not a plain file on disk"
+			print(f"[object_editor] {self._save_status}")
+			return
+
+		stem = Path(base_texture_name).stem
+		race = panoply_config.RACE_PREFIX_TO_TABLE.get(stem[:2].lower())
+		axes = panoply_bake.axes_for_source(stem, race)
+
+		def _mask_loader(mask_ext):
+			mask_entry = self.search_paths_dialog.find_texture(f"{stem}_{mask_ext}.tga")
+			if mask_entry is None or mask_entry.fs_path is None:
+				return None
+			return panoply_bake.load_mask_luminance(mask_entry.fs_path)
+
+		data_root = repository_paths.get("ryzom-data")
+		hlsbank_source = data_root / "final_bnps" / "characters_maps_hr" / "characters.hlsbank"
+		panoply_files_source = data_root / "final_bnps" / "characters_maps_hr" / "panoply_files.txt"
+
+		try:
+			base_rgba = dds_export.load_rgba(str(entry.fs_path))
+			written = panoply_bake.bake_and_write(
+				stem, base_rgba, axes, _mask_loader, workspace_dir / "tex", workspace_dir / "build",
+				hlsbank_source, panoply_files_source,
+			)
+		except (OSError, RuntimeError) as exc:
+			self._save_status = f"Bake failed for {base_texture_name}: {exc}"
+			print(f"[object_editor] {self._save_status}")
+			return
+
+		self._save_status = f"Baked {len(written)} variant(s) of {base_texture_name} to tex/ + build/"
+		print(f"[object_editor] {self._save_status}")
+
+	def _draw_panoply_bake_blocked_popup(self):
+		if not self._panoply_bake_blocked:
+			return
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_PANOPLY_BAKE_BLOCKED_POPUP_ID, None, flags)
+		if not opened:
+			return
+		imgui.text_wrapped(
+			"The ryzom-data repository isn't configured yet -- a real bake needs its "
+			"final_bnps/characters_maps_hr/characters.hlsbank and panoply_files.txt as "
+			"a starting point. Nothing was written.\n\n"
+			"Configure it in Settings > Paths, then try again.")
+		if imgui.button("OK"):
+			self._panoply_bake_blocked = False
+			imgui.close_current_popup()
+		imgui.end_popup()
+
 	def _draw_panoply_masks_for(self, base_texture_name):
 		"""Below a material's own texture row: thumbnails of whichever
 		grayscale masks (mask weight in the red channel) already resolve for
@@ -2635,6 +2783,12 @@ class ObjectEditorApp(ForgeryApp):
 			# workspace's own folders are already in the search paths).
 			self._draw_texture_copy_button(mask_name, lambda new_name: None, subdir="masks")
 			imgui.pop_id()
+
+		if mask_names:
+			imgui.same_line()
+			disabled = self.workspace_setup_dialog.active_workspace_dir is None
+			if _icon_button(fa_icons.ICON_FA_FIRE, "Bake real Panoply variants (writes tex/ + tex/hlsinfo/)", disabled=disabled):
+				self._bake_panoply_real(base_texture_name)
 
 		if missing_axes:
 			imgui.same_line()
@@ -3547,6 +3701,44 @@ class ObjectEditorApp(ForgeryApp):
 				imgui.same_line()
 				imgui.text_disabled("Syncing...")
 
+	def _poll_repository_paths_dialog(self):
+		if self._repository_paths_dialog is None or not self._repository_paths_dialog.ready(0):
+			return
+		result = self._repository_paths_dialog.result()
+		repo_name = self._repository_paths_dialog_repo
+		self._repository_paths_dialog = None
+		self._repository_paths_dialog_repo = None
+		if not result:
+			return
+		repository_paths.set_path(repo_name, result)
+
+	def _draw_repository_paths_settings(self):
+		"""Settings tab -- one folder picker per pynel.repository_paths.REPOSITORIES
+		entry, so any tool built on pynel (this app included -- see
+		_bake_panoply_real()'s ryzom-data dependency) can resolve "where is
+		ryzom-data on this machine" without asking the user again. Stored
+		outside Forgery's own settings.toml (see repository_paths.py's own
+		docstring on why)."""
+		configured = repository_paths.load()
+		style = imgui.get_style()
+		button_width = imgui.calc_text_size(fa_icons.ICON_FA_FOLDER_OPEN).x + style.frame_padding.x * 2
+
+		for repo_name in repository_paths.REPOSITORIES:
+			label = f"{repo_name}: "
+			path_text = configured.get(repo_name) or "(not set)"
+			available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
+			             - button_width - style.item_spacing.x)
+
+			imgui.text(label)
+			imgui.same_line()
+			imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
+			if repo_name in configured and imgui.is_item_hovered():
+				imgui.set_tooltip(configured[repo_name])
+			imgui.same_line()
+			if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##repo-{repo_name}", f"Choose the {repo_name} checkout..."):
+				self._repository_paths_dialog_repo = repo_name
+				self._repository_paths_dialog = pfd.select_folder(f"Choose {repo_name}", configured.get(repo_name, ""))
+
 	def _draw_ui_font_settings(self):
 		"""Settings tab -- lets the user pick the UI text font/size (see
 		ForgeryApp._load_ui_font(), Settings.ui_font_name/ui_font_size).
@@ -3654,6 +3846,7 @@ class ObjectEditorApp(ForgeryApp):
 		if _colored_button(quit_label, _QUIT_BUTTON_COLOR):
 			self.userExit()
 
+		self._draw_panoply_bake_blocked_popup()
 		if writable:
 			self._draw_save_confirmation_popup()
 			if self._save_status:
@@ -4175,6 +4368,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_animation_file_dialog()
 		self._poll_image_editor_dialog()
 		self._poll_workspace_sync_folder_dialog()
+		self._poll_repository_paths_dialog()
 		self._draw_replace_match_popup()
 		self._draw_restore_scan_popup()
 		self._draw_import_conflict_popup()
@@ -4219,6 +4413,8 @@ class ObjectEditorApp(ForgeryApp):
 					self.workspace_setup_dialog.draw_settings_content()
 					imgui.separator()
 					self.search_paths_dialog.draw_settings_content()
+					imgui.separator()
+					self._draw_repository_paths_settings()
 				if imgui.collapsing_header("Tools"):
 					self._draw_image_editor_settings()
 					imgui.separator()

@@ -2034,6 +2034,126 @@ grouped simple-texture materials first, then Multi Bitmap ones:
   (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
   mixed-case names from real data don't linger once touched.
 
+## 2026-08-29 — ✨ Real Panoply bake in Patina (panoply_bake.py, build/ output, repository_paths gating)
+
+Completes the panoply_maker Python port (see `logs/pynel.md`'s `.hlsinfo`
+writer/`CConfigFile` entries and `panoply_maker.py`'s earlier `resample()`/
+`colorize_exact()`/`build_masks_from_config()`/`generate_color_combinations()`
+ports) with the glue layer and wires it into Patina as a real, opt-in bake
+action -- distinct from the existing approximate live-preview
+(`panoply_colorize.py`/`panoply_live.py`, kept as-is for interactive speed).
+Cross-validated against the real `panoply_maker.exe` (via `.agentcom`
+bridge, on the real `ryw_hom_caster01_pantabottes_c1/c2/c3` sources): same
+24 `.tga` variants produced, no errors, `.hlsinfo` sizes matched, and `.tga`
+pixel output came back essentially byte-exact (max per-byte diff 1, mean
+0.00, 0% of bytes with diff>20) -- well past the "stretch goal, not a hard
+requirement" bar this port was scoped with. About 8x slower than the native
+binary on the same 24-variant run (~2.4s vs ~19s), not a concern for the
+intended occasional-offline-bake usage.
+
+Cross-validation surfaced one real bug: `dds_export.save_rgba()` wrote
+24-bit RGB `.tga` instead of preserving the source's 32-bit RGBA -- a
+Panda3D `PNMImage`/TGA-writer limitation (the in-memory image had 4
+channels/`has_alpha()==True` right up to `write()`, but the file came back
+3-channel on re-read every time; `.png` through the same code path kept
+alpha fine). Fixed with a hand-rolled `_save_tga_rgba()` (18-byte-header
+uncompressed 32-bit TGA writer, bypassing Panda3D entirely for `.tga`, same
+pattern as this module's existing manual `.dds` writer) -- its first
+`imageDescriptor` byte guess (top-left origin + alpha bits declared) didn't
+match the real tool's own header; byte-diffing the two headers showed the
+real writer uses `imageDescriptor=0x00` (bottom-left origin, alpha bits left
+undeclared despite writing real alpha data -- a common TGA writer
+convention), fixed to match exactly.
+
+**New `ryzom_forgery/panoply_bake.py`**: the file-I/O-free math
+(`panoply_maker.py`) glued to `dds_export.py` (DXT5/mip building, TGA/PNG
+I/O) and `pynel.hls_bank_texture_info`/`hls_texture_bank` (`.hlsinfo`/
+`.hlsbank` serialization) -- `axes_for_source()` (autonomous mode: builds
+`ColorMaskAxis` candidates from `panoply_config.py`, no `.cfg` needed),
+`build_active_masks()`, `bake_source()` (pure math + DDS building, no I/O),
+and two end-to-end writers: `bake_flat()` (plain `.hlsinfo`, matches the
+real `panoply_maker.exe`'s own behavior exactly, used for byte-exact
+cross-validation against that binary) and `bake_and_write()` (the real
+"next patch" workflow, see below).
+
+**Real bake output: a dedicated `build/` folder, never `ryzom-data` itself.**
+A bake writes baked textures into the workspace's `tex/`, and an updated
+`.hlsinfo` + `panoply_files.txt` + `characters.hlsbank` into the workspace's
+`build/` -- starting from, but never overwriting, the real production files
+at `<ryzom-data>/final_bnps/characters_maps_hr/`. `merge_panoply_files_txt()`
+never reorders existing lines (only appends new names, minimal diff against
+the real file); `load_or_empty_hlsbank()` starts from an empty
+`HLSTextureBank()` if the real `characters.hlsbank` doesn't exist yet
+(true as of this writing -- Nuno hasn't copied it into `ryzom-data` yet);
+consecutive bakes in one session accumulate into `build/`'s own state
+(`_pick_existing()` prefers `build/`'s own files over the pristine
+`ryzom-data` ones once they exist) rather than each restarting from
+scratch. Known gap, not fixed: `hls_texture_bank.append_texture_info()` has
+no duplicate-instance detection, so re-baking the same item twice in one
+session appends a second `ColorTexture` instead of replacing the first.
+
+**New `pynel.repository_paths`** (see `logs/pynel.md`) resolves where
+`ryzom-data` actually lives on a given machine, exposed in Patina's Settings
+> Paths as one folder picker per repo (`_draw_repository_paths_settings`).
+Patina's new "Bake real Panoply variants" button
+(`object_editor._bake_panoply_real`, fire icon next to a texture's mask
+thumbnails once at least one mask resolves) refuses to do anything at all
+-- no textures written either -- if `ryzom-data` isn't configured, showing
+a modal popup instead (`_draw_panoply_bake_blocked_popup`) rather than
+silently baking into a `build/` with no real starting point.
+
+**Unified `panoply.cfg`, no `.cfg` ever exposed to the end user.** Patina is
+an end-user tool: it must never ask someone to pick or hand-craft a real
+production `panoply_*.cfg` (there were 6 of them -- `panoply_common.cfg` +
+one per race -- investigated and confirmed they consolidate cleanly into
+one file). `panoply_config.py` was rewritten to read a single bundled
+`ryzom_forgery/panoply.cfg` (real production values, `CConfigFile` syntax,
+comments kept, race-scoped axes prefixed `<race>_hair_*`/`<race>_eyes_*`
+since `.cfg` keys have no native race-scoping) instead of the previous
+`panoply_colors.toml` snapshot -- same public API
+(`get_color_params()`/`available_color_ids()`/`RACE_PREFIX_TO_TABLE`), so
+`object_editor.py`/`panoply_maker.py` needed no further changes. A
+workspace's own `panoply.cfg`, if present, always overrides the bundled
+default entirely; Patina's new gear-icon button next to "Panoply:" copies
+the bundled file into the active workspace as an editable starting point
+(`_copy_panoply_cfg_to_workspace`). `panoply_colors.toml` deleted.
+
+**New `ryzom_forgery/apps/panoply_maker.py`** CLI, dual-mode: autonomous
+(`--input`/`--output`/`--build`, colors from `panoply_config.py`, gated on
+`ryzom-data` being configured, uses `bake_and_write()`) or an explicit
+`.cfg` positional argument (real per-race production shape, uses
+`bake_flat()`, no `ryzom-data` dependency -- the cross-validation path).
+New `dds_export.save_rgba()` (TGA/PNG writer, symmetric to the existing
+`load_rgba()`) needed for writing the full-res baked outputs.
+
+**Live preview didn't pick up an edited workspace `panoply.cfg`.** Caught
+while reasoning through the design (Nuno asked directly): neither
+`_texture_cache` nor `panoply_live.LiveColorizeCache` key on the color
+parameters themselves (only on base name/axes/source mtimes), so an edited
+`.cfg` was invisible to both even though `panoply_config.py` itself already
+reloads it lazily by mtime -- the already-rendered textures just stayed
+cached forever. First instinct was adding the `.cfg`'s mtime to
+`_update_texture_freshness()`'s existing per-second poll, but Nuno pointed
+out the workspace already has an event-driven watcher
+(`workspace_watch.WorkspaceWatcher`) used for `tex/`/`imports/` -- and since
+(unlike base textures/masks, which can live anywhere in search paths) a
+live-editable `panoply.cfg` only ever makes sense at the workspace root,
+that watcher already covers it. Registered `"panoply.cfg"` on it (a
+root-level file's relative path has one part, which
+`WorkspaceWatcher._dispatch()` already treats as its own "subdir" key --
+no code change needed in `workspace_watch.py` itself). The callback
+(background thread) only sets a flag; `_update_texture_freshness()` (main
+thread, already-existing per-second task) consumes it next tick: evicts
+every Panoply-tracked `_texture_cache` entry and calls the new
+`LiveColorizeCache.clear()` (no per-entry eviction existed before -- the
+key's own mtime-based staleness was previously assumed to be the only
+invalidation ever needed), then reuses the same re-apply-all-materials path
+every other freshness change already triggers.
+
+Docs updated/added: `docs/panoply_bake.md` (new), `docs/apps/panoply_maker.md`
+(new), `docs/panoply_maker.md`, `docs/panoply_config.md`, `docs/dds_export.md`,
+`docs/panoply_live.md`, `docs/apps/object_editor.md`.
+
 ## 2026-08-15 — 📝 Add player-friendly material options doc, rename object_viewer to object_editor
 
 Added `nel/tools/forgery/docs/material_options.md`, a plain-language (non-technical,

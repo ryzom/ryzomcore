@@ -35,10 +35,15 @@ class LiveColorizeCache:
 	mtimes) combination -- keying on the sources' own mtimes (rather than
 	just base name + axis values) means an edited base texture or mask
 	naturally misses the cache instead of serving a now-stale result,
-	without needing any explicit invalidation call. Grows at most one entry
-	per distinct combination actually viewed in a session, which stays small
-	in practice (a handful of axis picks across a shape's own textures) --
-	no eviction needed."""
+	without needing any explicit invalidation call for *that* case. Grows at
+	most one entry per distinct combination actually viewed in a session,
+	which stays small in practice (a handful of axis picks across a shape's
+	own textures) -- no per-entry eviction needed. The key deliberately does
+	NOT depend on the color parameters themselves (hue/lightness/...), only
+	on which axis values were picked -- so a change to those parameters
+	(panoply_config.py's source .cfg being edited) is invisible to this
+	cache's own key and needs an explicit clear() from the caller instead
+	(see object_editor._on_panoply_cfg_settled())."""
 
 	def __init__(self):
 		self._entries = {}
@@ -55,3 +60,11 @@ class LiveColorizeCache:
 
 	def set(self, key, image) -> None:
 		self._entries[key] = image
+
+	def clear(self) -> None:
+		"""Drops every memoized entry -- needed when something outside this
+		cache's own key (base name, axis selection, source mtimes) changes
+		what a given combination should render as, e.g. a workspace
+		panoply.cfg edit changing the color parameters themselves (see
+		object_editor._on_panoply_cfg_settled())."""
+		self._entries.clear()

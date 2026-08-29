@@ -37,6 +37,12 @@ le lecteur DDS du client (`CBitmap::readDDS`, `nel/src/misc/bitmap.cpp`) vérifi
  (luminance visible).
 - `pick_default_algo(rgba)` — même heuristique par défaut que `tga2dds.cpp` : DXT5 si un
  pixel non opaque existe, DXT1 sinon.
+- `save_rgba(path, rgba)` — écrit un array HxWx4 uint8 (top-down, même convention que
+ `load_rgba`) en TGA/PNG non compressé (format déduit de l'extension de `path`) via une
+ `Texture` Panda3D jetable. Symétrique de `load_rgba` : reflippe les lignes avant de les
+ donner à la `Texture` (RAM image bottom-up), puis `Texture.store(PNMImage)` pour écrire.
+ Utilisé par `panoply_bake.bake_and_write()` pour les textures baked plein format (pas de
+ `.dds` — seul le `SrcBitmap` bas-def d'un `.hlsinfo` passe par `build_dds`).
 
 Ce module est une **bibliothèque pure**, sans CLI (même convention que
 `shape_export.py`/`shape_import.py`) — la CLI vit dans `apps/dds_export.py`.

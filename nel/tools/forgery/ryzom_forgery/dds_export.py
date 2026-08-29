@@ -237,6 +237,80 @@ def load_rgba(path: str, grayscale_as_luminance: bool = False) -> numpy.ndarray:
 	return rgba
 
 
+def _save_tga_rgba(path: str, rgba: numpy.ndarray) -> None:
+	"""Writes an HxWx4 uint8 RGBA array as an uncompressed 32-bit TGA
+	(image type 2, no color map, no RLE -- the simplest TGA variant, no
+	decoder-compatibility concerns). Hand-rolled instead of going through
+	Panda3D's PNMImage/Texture.store() like the .png path below: verified
+	on the real machine (2026-08-29, panoply_maker cross-validation) that
+	this Panda3D build's TGA writer silently drops the alpha channel even
+	when the source PNMImage has 4 channels/CTFourChannel/has_alpha() ==
+	True right before write() -- no PNMImage API found to force it, so this
+	format has to bypass Panda3D entirely to match the real panoply_maker's
+	32-bit output.
+
+	18-byte header, TGA_HEADER layout (image/x-tga spec): idLength(1)
+	colorMapType(1) imageType(1) colorMapSpec(5) xOrigin(2) yOrigin(2)
+	width(2) height(2) pixelDepth(1) imageDescriptor(1). Pixel data is
+	BGRA per pixel (TGA's truecolor byte order, not RGBA).
+
+	imageDescriptor is written as 0x00 (bottom-left origin, 0 alpha bits
+	declared despite the real 32bpp alpha channel) -- confirmed byte-exact
+	against the real panoply_maker's own header on the real machine
+	(2026-08-29): it doesn't set the top-left-origin bit (0x20) or declare
+	alpha bits (0x08) even though it does write a real alpha channel (many
+	TGA writers leave this field at 0 and let readers infer alpha from
+	pixelDepth==32 instead). Bottom-left origin means rows are stored
+	bottom-to-top, so this function's `rgba` (row 0 = top, per this
+	module's usual top-down contract) is flipped before writing."""
+	height, width = rgba.shape[:2]
+	header = struct.pack(
+		"<BBBHHBHHHHBB",
+		0, 0, 2,        # idLength, colorMapType, imageType (uncompressed truecolor)
+		0, 0,           # colorMapSpec: first entry index, length
+		0,              # colorMapSpec: bits per entry
+		0, 0,           # xOrigin, yOrigin
+		width, height,
+		32, 0x00,       # pixelDepth, imageDescriptor (bottom-left origin, matches real panoply_maker)
+	)
+	bgra = numpy.flipud(rgba)[..., [2, 1, 0, 3]]
+	with open(path, "wb") as f:
+		f.write(header)
+		f.write(numpy.ascontiguousarray(bgra).tobytes())
+
+
+def save_rgba(path: str, rgba: numpy.ndarray) -> None:
+	"""Writes an HxWx4 uint8 RGBA array to `path` (a plain, uncompressed
+	image -- .tga/.png, whichever `path`'s extension picks), for
+	panoply_bake.py's baked full-res outputs (panoply_maker never writes
+	.dds for those, only the low-def .hlsinfo SrcBitmap goes through
+	build_dds()).
+
+	`rgba` is expected in top-down row order (row 0 = top), same contract as
+	load_rgba()'s return value.
+
+	.tga goes through _save_tga_rgba() above (hand-rolled, see its
+	docstring for why). Everything else goes through a throwaway Panda3D
+	Texture/PNMImage -- Texture's own RAM image is bottom-up (see
+	load_rgba()'s docstring, verified on the real machine), so it's flipped
+	here before handing rows to the Texture, the mirror image of
+	load_rgba()'s flip on the way in."""
+	if path.lower().endswith(".tga"):
+		_save_tga_rgba(path, rgba)
+		return
+
+	tex = Texture()
+	height, width = rgba.shape[:2]
+	tex.setup_2d_texture(width, height, Texture.T_unsigned_byte, Texture.F_rgba)
+	tex.set_ram_image_as(numpy.ascontiguousarray(numpy.flipud(rgba)).tobytes(), "RGBA")
+
+	from panda3d.core import PNMImage
+	image = PNMImage()
+	tex.store(image)
+	if not image.write(path):
+		raise RuntimeError(f"panda3d failed to write image: {path}")
+
+
 def pick_default_algo(rgba: numpy.ndarray) -> int:
 	"""Same default heuristic as tga2dds.cpp: DXT5 if the bitmap has any
 	non-opaque pixel, DXT1 otherwise."""
