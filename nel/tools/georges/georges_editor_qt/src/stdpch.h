@@ -14,27 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#ifndef NL_STDPCH_H
+#define NL_STDPCH_H
+
 #include <nel/misc/types_nl.h>
-#include "callback.h"
 
-// STL includes
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
-// NeL includes
-// #include <nel/misc/debug.h>
+#include <nel/misc/common.h>
 
-// Project includes
-
-// using namespace std;
-// using namespace NLMISC;
-
-namespace NLQT {
-
-typedef CCallback<bool, const int &> CTestCallback;
-bool test_blah(const int &) { return false; }
-class CTestMeeeee { public: CTestMeeeee() { } bool test_method(const int &) { return true; } };
-void dummy_callback_cpp() { int whaha = 0; CTestCallback testCallback; testCallback.callback(whaha); testCallback = CTestCallback(test_blah); 
-	CTestMeeeee blahsomething; testCallback = CTestCallback(&blahsomething, &CTestMeeeee::test_method); }
-
-} /* namespace NLQT */
-
-/* end of file */
+#endif

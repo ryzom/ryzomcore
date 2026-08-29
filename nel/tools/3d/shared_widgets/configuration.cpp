@@ -26,9 +26,6 @@
 #include <nel/misc/path.h>
 #include <nel/misc/i18n.h>
 
-// Project includes
-#include "nel_qt_config.h"
-
 using namespace std;
 using namespace NLMISC;
 
@@ -44,13 +41,13 @@ CConfiguration::~CConfiguration()
 	
 }
 
-void CConfiguration::init()
+void CConfiguration::init(const std::string &configFile)
 {	
 	// verify data
 	nlassert(m_ConfigCallbacks.empty());
 	
 	// load config
-	m_ConfigFile.load(NLQT_CONFIG_FILE);
+	m_ConfigFile.load(configFile);
 	
 	// log config
 	CConfiguration::setAndCallback("NegFiltersDebug", CConfigCallback(this, &CConfiguration::cfcbLogFilter));

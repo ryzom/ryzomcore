@@ -31,8 +31,8 @@
 #include <nel/net/login_cookie.h>
 
 // Project includes
-#include "configuration.h"
-#include "internationalization.h"
+#include "../../../tools/3d/shared_widgets/configuration.h"
+#include "../../../tools/3d/shared_widgets/internationalization.h"
 #include "sound_utilities.h"
 
 class QTreeView;

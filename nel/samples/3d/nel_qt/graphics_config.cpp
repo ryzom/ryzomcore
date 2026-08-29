@@ -31,8 +31,8 @@
 // Project includes
 #include "../../../tools/3d/shared_widgets/common.h"
 #include "main_window.h"
-#include "configuration.h"
-#include "internationalization.h"
+#include "../../../tools/3d/shared_widgets/configuration.h"
+#include "../../../tools/3d/shared_widgets/internationalization.h"
 #include "undo_redo_binders.h"
 
 using namespace std;

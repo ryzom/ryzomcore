@@ -22,12 +22,14 @@
 
 // NeL includes
 #include <nel/misc/singleton.h>
+#include <nel/misc/callback.h>
 
 // Project includes
-#include "callback.h"
 #include "configuration.h"
 
 namespace NLQT {
+
+typedef NLMISC::CCallback<void> CEmptyCallback;
 
 /**
  * CInternationalization
@@ -41,7 +43,7 @@ public:
 	CInternationalization();
 	virtual ~CInternationalization();
 
-	void init(CConfiguration *configuration);
+	void init(CConfiguration *configuration, const std::string &version = "");
 	void release();
 	
 	/// Sets the language code, but does not store to the config file

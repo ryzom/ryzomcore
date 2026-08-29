@@ -32,6 +32,7 @@
 #include <nel/3d/u_driver.h>
 
 // Project includes
+#include "nel_qt_config.h"
 #include "../../../tools/3d/shared_widgets/common.h"
 #include "../../../tools/3d/shared_widgets/command_log.h"
 #include "graphics_viewport.h"
@@ -59,13 +60,13 @@ CMainWindow::CMainWindow(const QMap<QString, QSize> &customSizeHints, QWidget *p
 	
 	m_UndoStack = new QUndoStack(this);
 
-	m_Configuration.init();
+	m_Configuration.init(NLQT_CONFIG_FILE);
 	
 	m_OriginalPalette = QApplication::palette();
 	m_Configuration.setAndCallback("QtStyle", CConfigCallback(this, &CMainWindow::cfcbQtStyle));
 	m_Configuration.setAndCallback("QtPalette", CConfigCallback(this, &CMainWindow::cfcbQtPalette));
 	
-	m_Internationalization.init(&m_Configuration);
+	m_Internationalization.init(&m_Configuration, NLQT_VERSION);
 	m_Internationalization.enableCallback(CEmptyCallback(this, &CMainWindow::incbLanguageCode));
 
 	m_GraphicsViewport = new CGraphicsViewport(this);

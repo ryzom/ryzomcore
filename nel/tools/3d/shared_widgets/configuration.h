@@ -26,13 +26,11 @@
 #include <nel/misc/rgba.h>
 #include <nel/misc/ucstring.h>
 #include <nel/misc/singleton.h>
-
-// Project includes
-#include "callback.h"
+#include <nel/misc/callback.h>
 
 namespace NLQT {
 
-typedef CCallback<void, NLMISC::CConfigFile::CVar &> CConfigCallback;
+typedef NLMISC::CCallback<void, NLMISC::CConfigFile::CVar &> CConfigCallback;
 
 /**
  * CConfiguration
@@ -46,7 +44,7 @@ public:
 	CConfiguration();
 	virtual ~CConfiguration();
 
-	void init();
+	void init(const std::string &configFile);
 	void release();
 	
 	void updateUtilities();
