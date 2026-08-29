@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-08-29 — ✨ Add repository_paths (shared 4-repo checkout locations)
+
+New `pynel.repository_paths` module: a small per-user JSON settings file
+(`config_dir()/"repository_paths.json"`, own OS-detection reimplementation since pynel
+has zero dependencies and must not depend on Forgery) mapping the 4 git repositories a
+Ryzom Core contributor typically checks out side by side --
+`REPOSITORIES = ("ryzom-core", "ryzom-data", "ryzom-private-data", "ryzom-docker")` --
+to their local paths on a given machine. `load()`/`save()`/`set_path()`/`get()`/
+`is_valid()` (configured AND currently a real directory).
+
+Motivated by Forgery/Patina's real Panoply bake (`ryzom_forgery.panoply_bake`, see the
+Forgery log below): it needs `ryzom-data`'s real `characters.hlsbank`/
+`panoply_files.txt` (`final_bnps/characters_maps_hr/`) as the source to append newly
+baked items into, and rather than inventing a Forgery-only setting for that, this lives
+in pynel so any tool built on it (Forgery, a future ryztart integration) resolves
+"where is ryzom-data" the same way, configured once. Deliberately outside
+`ryzom_forgery.settings` (Forgery's own tomlkit-based file) for that reason.
+
+Validated in-sandbox (no external dependency involved): set/get/is_valid round-trip,
+unconfigured-repo/unknown-repo-name handling all confirmed. Documented in
+`docs/repository_paths.md` (new) + `README.md`. Bumped pynel to 0.5.0.
+
 ## 2026-08-29 — ✨ Add .hlsinfo writer + CConfigFile port (ryzom-cfg)
 
 Two additions to pynel, part of the panoply_maker Python port:
