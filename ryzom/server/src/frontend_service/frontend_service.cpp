@@ -62,6 +62,7 @@
 #include "module_manager.h"
 #include "client_host.h"
 #include "fe_stat.h"
+#include "quic_transceiver.h"
 
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
@@ -1310,7 +1311,7 @@ void CFrontEndService::init()
 #else
 		nlinfo( " Full-frequency mode" );
 #endif
-		_SendSub.init( _ReceiveSub.dataSock(), &_ReceiveSub.clientMap(), &_History, &PrioSub );
+		_SendSub.init( &_ReceiveSub.receiveTask()->DataSock, &_ReceiveSub.clientMap(), &_History, &PrioSub );
 		installConfigVar( ConfigFile, "ClientBandwidth", cfcbClientBandwidth );
 		installConfigVar( ConfigFile, "TotalBandwidth", cfcbTotalBandwidth );
 
@@ -1536,22 +1537,61 @@ bool CFrontEndService::update()
 
 
 	uint32 now = CTime::getSecondsSince1970();
-	bool noRecentComm = now - CFEReceiveTask::LastUDPPacketReceived > DelayBeforeUPDAlert;
-	// check for potential communication problem
-	if (CLoginServer::getNbPendingUsers() != 0
-		|| this->_ReceiveSub.getNbClient() != 0)
+
+	// Detect communication failure: a login cookie has been pending for longer
+	// than the alert delay without any UDP/QUIC packet being received.
+	// PendingCookieReceived is set when a cookie arrives and cleared when a
+	// packet is received, so this only triggers when comms are truly broken.
+	uint32 pendingCookie = CFEReceiveTask::PendingCookieReceived;
+	bool commsFailure = pendingCookie != 0 && (now - pendingCookie > DelayBeforeUPDAlert);
+
+	// Self-recovery: when comms failure is detected, rebind UDP socket and
+	// restart QUIC listener. Only trigger recovery once per failure episode.
 	{
-		if (noRecentComm)
+		static bool recoveryPending = false;
+
+		if (commsFailure)
 		{
-			// raise the alert for a limited time
 			addStatusTag("CheckUDPComm");
+
+			if (!recoveryPending)
+			{
+				recoveryPending = true;
+				nlwarning("UDP communication failure detected, attempting self-recovery");
+
+				// Request the receive task to rebind its socket to recover
+				// from persistent kernel socket state corruption
+				_ReceiveSub.receiveTask()->requireRebind();
+
+				// Also restart the QUIC listener in case it has failed
+				CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
+				if (quic && quic->isConfigEnabled() && !quic->listening())
+				{
+					quic->restart();
+				}
+			}
+		}
+		else
+		{
+			removeStatusTag("CheckUDPComm");
+			recoveryPending = false;
 		}
 	}
 
-	if (!noRecentComm)
+	// Check QUIC listener health independently of UDP comm status.
+	// If QUIC was enabled but the listener stopped unexpectedly, restart it.
+	// Throttle to avoid continuous restart attempts (check once per DelayBeforeUPDAlert period).
 	{
-		// clear the UDP alert tag (if set)
-		removeStatusTag("CheckUDPComm");
+		static uint32 lastQuicCheck = 0;
+		if (now - lastQuicCheck > DelayBeforeUPDAlert)
+		{
+			lastQuicCheck = now;
+			CQuicTransceiver *quic = _ReceiveSub.quicTransceiver();
+			if (quic && quic->isConfigEnabled() && !quic->listening())
+			{
+				quic->restart();
+			}
+		}
 	}
 
 	return true;
@@ -1710,13 +1750,11 @@ void CFrontEndService::setClientsToSynchronizeState()
 
 void CFrontEndService::newCookieCallback(const NLNET::CLoginCookie &cookie)
 {
-	// update the last UPD packet date 
-	if (CFEReceiveTask::LastUDPPacketReceived == 0)
-	{
-		// set the date to 'now'. If no UPD traffic is detected after
-		// a predetermined timer, an alert is set in the service status line.
-		CFEReceiveTask::LastUDPPacketReceived = CTime::getSecondsSince1970();
-	}
+	// Record that a login cookie has arrived — a client is trying to connect.
+	// Only set if not already pending (first pending cookie starts the timer).
+	// This will be cleared when a UDP/QUIC packet is successfully received.
+	if (CFEReceiveTask::PendingCookieReceived == 0)
+		CFEReceiveTask::PendingCookieReceived = CTime::getSecondsSince1970();
 }
 
 
@@ -1972,6 +2010,16 @@ NLMISC_CLASS_COMMAND_IMPL(CFrontEndService, dump)
 	log.displayNL("Frontend internal state :");
 	log.displayNL("Listen address: %s", CLoginServer::getListenAddress().c_str() );
 	log.displayNL("UDP sock listening on %s", _ReceiveSub.dataSock()->localAddr().asString().c_str() );
+	return true;
+}
+
+
+NLMISC_COMMAND( simulateCommsFailure, "Simulate a UDP communication failure to test the recovery mechanism (rebind UDP socket, restart QUIC, notify WS)", "" )
+{
+	// Simulate a pending cookie that's been waiting long enough to trigger
+	uint32 now = CTime::getSecondsSince1970();
+	CFEReceiveTask::PendingCookieReceived = now - (uint32)DelayBeforeUPDAlert - 1;
+	log.displayNL("Simulated comms failure: PendingCookieReceived set to trigger. Recovery will fire on next update cycle.");
 	return true;
 }
 

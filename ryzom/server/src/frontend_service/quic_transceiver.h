@@ -293,6 +293,9 @@ public:
 	/// Shutdown a connection
 	void shutdown(CQuicUserContext *user);
 
+	/// Restart the QUIC listener (stop + start on same port) to recover from failure
+	void restart();
+
 private:
 	friend CQuicTransceiverImpl;
 	friend CQuicUserContext;
@@ -302,6 +305,9 @@ private:
 
 	/// User configuration
 	uint32 m_MsgSize;
+
+	/// Port the listener was started on (for restart)
+	uint16 m_ListenPort = 0;
 
 	/// Received datagram
 	void datagramReceived(CQuicUserContext *user, const uint8 *buffer, uint32 length);
