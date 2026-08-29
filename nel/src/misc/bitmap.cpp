@@ -165,6 +165,17 @@ uint8 CBitmap::load(NLMISC::IStream &f, uint mipMapSkip)
 	}
 #endif // USE_GIF
 
+	if (fileType == KTX_HEADER)
+	{
+#ifdef NEL_ALL_BITMAP_WHITE
+		uint8 result = readKTX(f, mipMapSkip);
+		MakeWhite (*this);
+		return result;
+#else // NEL_ALL_BITMAP_WHITE
+		return readKTX(f, mipMapSkip);
+#endif // NEL_ALL_BITMAP_WHITE
+	}
+
 	// assuming it's TGA
 	NLMISC::IStream::TSeekOrigin origin= f.begin;
 	if(!f.seek (0, origin))
@@ -3666,6 +3677,34 @@ void	CBitmap::loadSize(NLMISC::IStream &f, uint32 &retWidth, uint32 &retHeight)
 
 		retWidth = lsWidth;
 		retHeight = lsHeight;
+	}
+	else if(fileType == KTX_HEADER)
+	{
+		// skip remaining 8 bytes of KTX identifier
+		f.seek(8, IStream::current);
+
+		// read endianness indicator using raw read (KTX has its own endianness handling)
+		uint32 endianness;
+		f.serialBuffer((uint8 *)&endianness, 4);
+		bool mustSwap = (endianness == 0x01020304);
+
+		// skip glType, glTypeSize, glFormat, glInternalFormat, glBaseInternalFormat (5 uint32s)
+		f.seek(5 * 4, IStream::current);
+
+		// read pixelWidth and pixelHeight using raw reads
+		uint32 w, h;
+		f.serialBuffer((uint8 *)&w, 4);
+		f.serialBuffer((uint8 *)&h, 4);
+
+		if (mustSwap)
+		{
+			NLMISC_BSWAP32(w);
+			NLMISC_BSWAP32(h);
+		}
+
+		retWidth = w;
+		// Per spec: pixelHeight 0 means 1D texture, treat as height 1
+		retHeight = (h == 0) ? 1 : h;
 	}
 	// assuming it's TGA
 	else
