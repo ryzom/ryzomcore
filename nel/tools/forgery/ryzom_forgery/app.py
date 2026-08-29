@@ -1,4 +1,5 @@
 import json
+import math
 import os
 import re
 import subprocess
@@ -182,6 +183,10 @@ class ForgeryApp(ShowBase):
 		                          default_filter=explorer_default_filter)
 		self.explorer.on_selection_changed = self._on_explorer_selection_changed
 
+		# (section, field_key, expires_at) or None -- see
+		# request_settings_attention() below.
+		self._settings_attention = None
+
 		self.accept("imgui-new-frame", self.draw_ui)
 
 		# ShowBase.windowEvent() (see the override below) already calls
@@ -312,6 +317,64 @@ class ForgeryApp(ShowBase):
 		imgui.get_window_draw_list().add_image(
 			self._panel_watermark_tex_ref, p_min, p_max, (0, 0), (1, 1),
 			imgui.get_color_u32(self._PANEL_WATERMARK_COLOR))
+
+	def request_settings_attention(self, section, field_key, duration=3.0):
+		"""Ask the Settings tab to select itself, expand `section` (a
+		Settings collapsing_header's own label, e.g. "Tools"/"Paths"), and
+		flash the field identified by `field_key` for `duration` seconds --
+		the shared alternative to a disabled button+tooltip or a blocking
+		popup when an action needs a Settings value that isn't configured
+		yet (e.g. an external editor path, a repository path). Any Forgery
+		app's UI code can call this from a button's click handler; a
+		subclass wires _consume_settings_tab_flags()/
+		_consume_settings_section_open()/_begin_attention_flash() into its
+		own Settings tab drawing code to actually act on it (see
+		object_editor.py's Settings tab for the reference wiring)."""
+		self._settings_attention = (section, field_key, time.time() + duration)
+
+	def _consume_settings_tab_flags(self):
+		"""Call where the Settings tab item itself begins (whatever draws
+		its imgui.begin_tab_item/begin_tab_item_simple) -- returns the
+		TabItemFlags to pass so it's forced selected this frame if an
+		attention request is still pending, 0 otherwise. Doesn't clear the
+		request -- _consume_settings_section_open()/_begin_attention_flash()
+		below still need it this same frame, once the tab's own content is
+		what's actually being drawn."""
+		if self._settings_attention is not None and self._settings_attention[2] > time.time():
+			return imgui.TabItemFlags_.set_selected.value
+		return 0
+
+	def _consume_settings_section_open(self, section):
+		"""Call right before drawing a Settings collapsing_header -- forces
+		it open this frame if the pending attention request targets it."""
+		if self._settings_attention is not None and self._settings_attention[0] == section:
+			imgui.set_next_item_open(True)
+
+	def _begin_attention_flash(self, field_key):
+		"""Call right before drawing a specific field's own widget(s) --
+		pushes a pulsing border color/thickness around it while an
+		attention request targets `field_key`. Returns whether it pushed
+		anything, for _end_attention_flash() to match (imgui's
+		push/pop style calls must always balance). Clears the request once
+		it expires, so the flash eventually stops on its own without
+		needing a separate timeout mechanism."""
+		if self._settings_attention is None:
+			return False
+		section, key, expires_at = self._settings_attention
+		if key != field_key:
+			return False
+		if expires_at <= time.time():
+			self._settings_attention = None
+			return False
+		pulse = (math.sin(time.time() * 6.0) + 1.0) / 2.0
+		imgui.push_style_color(imgui.Col_.border.value, (1.0, 0.4 + pulse * 0.4, 0.0, 1.0))
+		imgui.push_style_var(imgui.StyleVar_.frame_border_size.value, 2.0)
+		return True
+
+	def _end_attention_flash(self, active):
+		if active:
+			imgui.pop_style_var()
+			imgui.pop_style_color()
 
 	def on_selection_changed(self, items):
 		"""Override in subclasses to react to the explorer's selection changing."""

@@ -2034,6 +2034,43 @@ grouped simple-texture materials first, then Multi Bitmap ones:
   (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
   mixed-case names from real data don't linger once touched.
 
+## 2026-08-29 — ✨ Settings-attention: jump-to-and-flash instead of popup/disabled buttons
+
+New shared mechanism in `ForgeryApp` (`app.py`, base class every Forgery app subclasses):
+`request_settings_attention(section, field_key, duration=3.0)`. Instead of a disabled
+button with an explanatory tooltip, or a blocking modal popup, a blocked action now jumps
+the user straight to the relevant Settings field: forces the Settings tab selected
+(`imgui.TabItemFlags_.set_selected` passed into `_begin_tab_item_with_icon`, which gained
+a `flags` param for this), forces the right `collapsing_header` section open
+(`imgui.set_next_item_open(True)`), and pulses an orange border around the specific field
+for a few seconds (`sin(time.time()*k)`-driven color/border-size push around just that
+field's draw call). Three consumer helpers (`_consume_settings_tab_flags()`,
+`_consume_settings_section_open()`, `_begin_attention_flash()`/`_end_attention_flash()`)
+do the actual imgui wiring; any subclass app calls `request_settings_attention()` from a
+button's click handler and wires the three consumers into its own Settings tab drawing.
+
+Migrated three previously-disabled/popup-blocked actions in `object_editor.py`:
+- Texture "Edit" button (`_draw_texture_edit_button`): no longer disabled when
+  `image_editor_path` is unset -- always clickable, jumps to Settings > Tools instead.
+- panoply.cfg "Edit" button (`_draw_global_panoply_section`): same for `text_editor_path`.
+- Real Panoply bake (`_bake_panoply_real`): no longer opens a blocking modal popup when
+  `ryzom-data` isn't configured (`pynel.repository_paths`) -- jumps to Settings > Paths
+  instead. The now-unused popup infra (`_PANOPLY_BAKE_BLOCKED_POPUP_ID`,
+  `_panoply_bake_blocked`, `_draw_panoply_bake_blocked_popup`) was removed entirely.
+
+Also added, same session: `_bake_panoply_real_all()` -- a "bake all" fire-icon button next
+to the panoply.cfg gear/edit button in `_draw_global_panoply_section`, looping over every
+texture the loaded shape uses and baking each one that has at least one resolvable mask.
+Complements (doesn't replace) the existing per-texture fire button in
+`_draw_panoply_masks_for`, since `_bake_panoply_real()` itself only ever handles one base
+texture at a time (each texture can have its own distinct set of masks).
+
+Exact imgui_bundle API names used here (`TabItemFlags_.set_selected`,
+`begin_tab_item_simple`'s `flags` param, `set_next_item_open`) weren't verifiable from the
+sandbox (no panda3d/imgui_bundle installed there) -- written by convention with the rest
+of this codebase's already-working imgui_bundle usage. Validated on the real machine
+(2026-08-29, Nuno): works as designed, no API mismatch.
+
 ## 2026-08-29 — ✨ Patina: text editor for panoply.cfg, bake-all button
 
 Two UX follow-ups to the real Panoply bake integration (see the entry right below):

@@ -92,7 +92,6 @@ _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
 _IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
-_PANOPLY_BAKE_BLOCKED_POPUP_ID = "Can't bake Panoply variants"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
@@ -300,7 +299,7 @@ def _pop_tab_color():
 	imgui.pop_style_color(3)
 
 
-def _begin_tab_item_with_icon(icon, label):
+def _begin_tab_item_with_icon(icon, label, flags=0):
 	"""Same as imgui.begin_tab_item_simple(label), just icon-only (no
 	visible text -- `label` only lives in the hidden ##id part and a hover
 	tooltip) with the icon glyph itself forced black, readable against the
@@ -309,9 +308,13 @@ def _begin_tab_item_with_icon(icon, label):
 	begin_tab_item_simple call itself (the tab header, drawn immediately
 	regardless of whether it's the active tab) -- popped before the
 	tooltip, so that stays whatever color tooltips normally are, and before
-	a tab's own content too, so that isn't forced black along with it."""
+	a tab's own content too, so that isn't forced black along with it.
+
+	`flags` (added 2026-08-29) forwards to begin_tab_item_simple as-is --
+	needed so ObjectEditorApp._consume_settings_tab_flags() can force the
+	Settings tab selected for a pending request_settings_attention()."""
 	imgui.push_style_color(imgui.Col_.text.value, (0.0, 0.0, 0.0, 1.0))
-	opened = imgui.begin_tab_item_simple(f"{icon}##{label}")
+	opened = imgui.begin_tab_item_simple(f"{icon}##{label}", flags)
 	imgui.pop_style_color()
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(label)
@@ -672,7 +675,6 @@ class ObjectEditorApp(ForgeryApp):
 		self._pending_save_path = None  # workspace destination shown/used by the overwrite-confirmation popup
 		self._save_status = ""
 		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
-		self._panoply_bake_blocked = False  # see _bake_panoply_real()/_draw_panoply_bake_blocked_popup()
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
@@ -2595,12 +2597,11 @@ class ObjectEditorApp(ForgeryApp):
 		has_override = workspace_dir is not None and panoply_config.workspace_cfg_path(workspace_dir).is_file()
 		if has_override:
 			editor_path = app_settings.load().text_editor_path
-			imgui.begin_disabled(not editor_path)
 			if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this workspace's panoply.cfg in the configured text editor"):
-				subprocess.Popen([editor_path, str(panoply_config.workspace_cfg_path(workspace_dir))])
-			imgui.end_disabled()
-			if not editor_path and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
-				imgui.set_tooltip("Set a text editor executable in Settings -> Tools first")
+				if not editor_path:
+					self.request_settings_attention("Tools", "text_editor_path")
+				else:
+					subprocess.Popen([editor_path, str(panoply_config.workspace_cfg_path(workspace_dir))])
 		else:
 			tooltip = "Copy the bundled panoply.cfg into this workspace, to edit its colors"
 			if _icon_button(fa_icons.ICON_FA_COG, tooltip, disabled=workspace_dir is None):
@@ -2699,15 +2700,16 @@ class ObjectEditorApp(ForgeryApp):
 		living only inside a .bnp can't be baked from here.
 
 		Refuses to do anything at all -- no textures written either -- if
-		ryzom-data isn't configured (pynel.repository_paths): that's the one
-		hard dependency this needs to know where the real
+		ryzom-data isn't configured (pynel.repository_paths): jumps to
+		Settings > Paths and flashes the field instead (2026-08-29, see
+		ForgeryApp.request_settings_attention()) -- that's the one hard
+		dependency this needs to know where the real
 		characters.hlsbank/panoply_files.txt to build on top of live."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		if workspace_dir is None:
 			return
 		if not repository_paths.is_valid("ryzom-data"):
-			self._panoply_bake_blocked = True
-			imgui.open_popup(_PANOPLY_BAKE_BLOCKED_POPUP_ID)
+			self.request_settings_attention("Paths", "ryzom-data")
 			return
 		entry = self.search_paths_dialog.find_texture(base_texture_name)
 		if entry is None or entry.fs_path is None:
@@ -2759,23 +2761,6 @@ class ObjectEditorApp(ForgeryApp):
 				self.search_paths_dialog.find_texture(f"{stem}_{axis}.tga") is not None for axis in panoply.AXES)
 			if has_mask:
 				self._bake_panoply_real(name)
-
-	def _draw_panoply_bake_blocked_popup(self):
-		if not self._panoply_bake_blocked:
-			return
-		flags = imgui.WindowFlags_.always_auto_resize.value
-		opened, _ = imgui.begin_popup_modal(_PANOPLY_BAKE_BLOCKED_POPUP_ID, None, flags)
-		if not opened:
-			return
-		imgui.text_wrapped(
-			"The ryzom-data repository isn't configured yet -- a real bake needs its "
-			"final_bnps/characters_maps_hr/characters.hlsbank and panoply_files.txt as "
-			"a starting point. Nothing was written.\n\n"
-			"Configure it in Settings > Paths, then try again.")
-		if imgui.button("OK"):
-			self._panoply_bake_blocked = False
-			imgui.close_current_popup()
-		imgui.end_popup()
 
 	def _draw_panoply_masks_for(self, base_texture_name):
 		"""Below a material's own texture row: thumbnails of whichever
@@ -3542,18 +3527,18 @@ class ObjectEditorApp(ForgeryApp):
 		"""Launches the user's configured external image editor (Settings
 		tab -> Tools) on `current_value`'s resolved file -- shown instead
 		of the copy button once a texture already lives in the active
-		workspace. Disabled, with an explanatory tooltip, until an editor
-		executable is actually configured."""
+		workspace. Always clickable (2026-08-29): if no editor is
+		configured yet, jumps to Settings > Tools and flashes the field
+		instead of just sitting disabled with a tooltip (see
+		ForgeryApp.request_settings_attention())."""
 		editor_path = app_settings.load().image_editor_path
-		disabled = not editor_path
-		imgui.begin_disabled(disabled)
 		if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this texture in the configured image editor"):
-			resolved = self._resolve_texture(current_value)
-			if resolved is not None and resolved.fs_path is not None:
-				subprocess.Popen([editor_path, str(resolved.fs_path)])
-		imgui.end_disabled()
-		if disabled and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
-			imgui.set_tooltip("Set an image editor executable in Settings -> Tools first")
+			if not editor_path:
+				self.request_settings_attention("Tools", "image_editor_path")
+			else:
+				resolved = self._resolve_texture(current_value)
+				if resolved is not None and resolved.fs_path is not None:
+					subprocess.Popen([editor_path, str(resolved.fs_path)])
 
 	def _write_shape(self, path):
 		try:
@@ -3678,6 +3663,7 @@ class ObjectEditorApp(ForgeryApp):
 		available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
 		             - button_width - style.item_spacing.x)
 
+		flashing = self._begin_attention_flash("image_editor_path")
 		imgui.text(label)
 		imgui.same_line()
 		imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
@@ -3686,6 +3672,7 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.same_line()
 		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##image-editor", "Choose an image editor executable..."):
 			self._image_editor_dialog = pfd.open_file("Choose image editor executable")
+		self._end_attention_flash(flashing)
 
 	def _draw_text_editor_settings(self):
 		"""Settings tab -- lets the user pick an external text editor
@@ -3701,6 +3688,7 @@ class ObjectEditorApp(ForgeryApp):
 		available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
 		             - button_width - style.item_spacing.x)
 
+		flashing = self._begin_attention_flash("text_editor_path")
 		imgui.text(label)
 		imgui.same_line()
 		imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
@@ -3709,6 +3697,7 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.same_line()
 		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##text-editor", "Choose a text editor executable..."):
 			self._text_editor_dialog = pfd.open_file("Choose text editor executable")
+		self._end_attention_flash(flashing)
 
 	def _poll_workspace_sync_folder_dialog(self):
 		if self._workspace_sync_folder_dialog is None or not self._workspace_sync_folder_dialog.ready(0):
@@ -3793,6 +3782,7 @@ class ObjectEditorApp(ForgeryApp):
 			available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
 			             - button_width - style.item_spacing.x)
 
+			flashing = self._begin_attention_flash(repo_name)
 			imgui.text(label)
 			imgui.same_line()
 			imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
@@ -3802,6 +3792,7 @@ class ObjectEditorApp(ForgeryApp):
 			if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##repo-{repo_name}", f"Choose the {repo_name} checkout..."):
 				self._repository_paths_dialog_repo = repo_name
 				self._repository_paths_dialog = pfd.select_folder(f"Choose {repo_name}", configured.get(repo_name, ""))
+			self._end_attention_flash(flashing)
 
 	def _draw_ui_font_settings(self):
 		"""Settings tab -- lets the user pick the UI text font/size (see
@@ -3910,7 +3901,6 @@ class ObjectEditorApp(ForgeryApp):
 		if _colored_button(quit_label, _QUIT_BUTTON_COLOR):
 			self.userExit()
 
-		self._draw_panoply_bake_blocked_popup()
 		if writable:
 			self._draw_save_confirmation_popup()
 			if self._save_status:
@@ -4470,16 +4460,18 @@ class ObjectEditorApp(ForgeryApp):
 					imgui.end_tab_item()
 				_pop_tab_color()
 			_push_tab_color(_TAB_COLOR_SETTINGS)
-			if _begin_tab_item_with_icon(fa_icons.ICON_FA_COG, "Settings"):
+			if _begin_tab_item_with_icon(fa_icons.ICON_FA_COG, "Settings", flags=self._consume_settings_tab_flags()):
 				# Workspaces folder folded in here (not its own header) --
 				# it's a path setting like search_paths, just the one
 				# special-cased root instead of a priority-ordered list.
+				self._consume_settings_section_open("Paths")
 				if imgui.collapsing_header("Paths"):
 					self.workspace_setup_dialog.draw_settings_content()
 					imgui.separator()
 					self.search_paths_dialog.draw_settings_content()
 					imgui.separator()
 					self._draw_repository_paths_settings()
+				self._consume_settings_section_open("Tools")
 				if imgui.collapsing_header("Tools"):
 					self._draw_image_editor_settings()
 					imgui.separator()
