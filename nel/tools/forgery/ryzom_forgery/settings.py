@@ -70,6 +70,11 @@ class Settings:
 	# texture already lives in the active workspace. None until the user
 	# picks one in Settings -- the button stays disabled until then.
 	image_editor_path: Optional[str] = None
+	# Same idea as image_editor_path, but for plain text files (e.g. VS Code,
+	# Notepad++, gedit) -- used by the Panoply section's "Edit" button once a
+	# workspace panoply.cfg already exists (see object_editor.py's
+	# _draw_global_panoply_section()).
+	text_editor_path: Optional[str] = None
 	# UI text font -- key into app.py's _AVAILABLE_FONTS, and its size in
 	# points. Applied once at startup (ForgeryApp.__init__ builds the font
 	# atlas before the first frame) -- a change here only takes effect after
@@ -99,6 +104,7 @@ def load() -> Settings:
 	settings.last_shape_bnp = data.get("last_shape_bnp") or None
 	settings.last_shape_name = data.get("last_shape_name") or None
 	settings.image_editor_path = data.get("image_editor_path") or None
+	settings.text_editor_path = data.get("text_editor_path") or None
 	settings.ui_font_name = data.get("ui_font_name") or settings.ui_font_name
 	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
 
@@ -134,6 +140,8 @@ def save(settings: Settings) -> None:
 		doc["last_shape_name"] = settings.last_shape_name
 	if settings.image_editor_path is not None:
 		doc["image_editor_path"] = settings.image_editor_path
+	if settings.text_editor_path is not None:
+		doc["text_editor_path"] = settings.text_editor_path
 	doc["ui_font_name"] = settings.ui_font_name
 	doc["ui_font_size"] = settings.ui_font_size
 

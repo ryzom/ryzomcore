@@ -2034,6 +2034,24 @@ grouped simple-texture materials first, then Multi Bitmap ones:
   (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
   mixed-case names from real data don't linger once touched.
 
+## 2026-08-29 — ✨ Patina: text editor for panoply.cfg, bake-all button
+
+Two UX follow-ups to the real Panoply bake integration (see the entry right below):
+
+- The gear icon next to "Panoply:" (`_copy_panoply_cfg_to_workspace`) is now replaced by
+  a pencil/edit button once a workspace `panoply.cfg` already exists, instead of just
+  staying disabled with a tooltip. Launches a newly-added, separately configurable text
+  editor (`settings.text_editor_path`, Settings > Tools > "Text editor:") -- same pattern
+  as the existing image editor setting used by the Textures tab's own "Edit" button, just
+  mirrored for plain text files.
+- New "bake all" button (fire icon) next to that gear/edit button: loops over every
+  texture the loaded shape uses and bakes each one that has at least one resolvable
+  Panoply mask (`_bake_panoply_real_all()`). The existing per-texture fire button (in
+  `_draw_panoply_masks_for`, next to each texture's own mask thumbnails) stays available
+  for baking just one texture -- `_bake_panoply_real()` itself only ever handles one base
+  texture at a time (each texture can have its own distinct set of masks), so "bake all"
+  is a thin loop on top rather than a change to that function's own scope.
+
 ## 2026-08-29 — ✨ Real Panoply bake in Patina (panoply_bake.py, build/ output, repository_paths gating)
 
 Completes the panoply_maker Python port (see `logs/pynel.md`'s `.hlsinfo`

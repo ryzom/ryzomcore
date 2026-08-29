@@ -789,6 +789,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._skeleton_file_dialog = None  # in-flight portable_file_dialogs.open_file, for the Skinning preview's own "load a .skel" icon button
 		self._animation_file_dialog = None  # same, for its "load a .anim" icon button
 		self._image_editor_dialog = None  # same, for the Settings tab's image editor executable picker
+		self._text_editor_dialog = None  # same, for the Settings tab's text editor executable picker
 		self.taskMgr.add(self._update_skin_preview_time, "object-editor-skin-preview-time")
 		# Live re-skinning of a loaded CMeshMRMSkinned (see _build_skin_state()/
 		# _update_skin_preview()) -- reuses the same skeleton/animation state
@@ -2592,11 +2593,24 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.same_line()
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		has_override = workspace_dir is not None and panoply_config.workspace_cfg_path(workspace_dir).is_file()
-		tooltip = (
-			"panoply.cfg already exists in this workspace (edit it directly to change colors)" if has_override
-			else "Copy the bundled panoply.cfg into this workspace, to edit its colors")
-		if _icon_button(fa_icons.ICON_FA_COG, tooltip, disabled=workspace_dir is None or has_override):
-			self._copy_panoply_cfg_to_workspace()
+		if has_override:
+			editor_path = app_settings.load().text_editor_path
+			imgui.begin_disabled(not editor_path)
+			if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this workspace's panoply.cfg in the configured text editor"):
+				subprocess.Popen([editor_path, str(panoply_config.workspace_cfg_path(workspace_dir))])
+			imgui.end_disabled()
+			if not editor_path and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+				imgui.set_tooltip("Set a text editor executable in Settings -> Tools first")
+		else:
+			tooltip = "Copy the bundled panoply.cfg into this workspace, to edit its colors"
+			if _icon_button(fa_icons.ICON_FA_COG, tooltip, disabled=workspace_dir is None):
+				self._copy_panoply_cfg_to_workspace()
+		imgui.same_line()
+		if _icon_button(
+			fa_icons.ICON_FA_FIRE, "Bake real Panoply variants for every texture of this shape (writes tex/ + build/)",
+			disabled=workspace_dir is None,
+		):
+			self._bake_panoply_real_all()
 		if not any(available.values()):
 			imgui.same_line()
 			imgui.text_disabled("no variants detected for this shape's textures")
@@ -2728,6 +2742,23 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._save_status = f"Baked {len(written)} variant(s) of {base_texture_name} to tex/ + build/"
 		print(f"[object_editor] {self._save_status}")
+
+	def _bake_panoply_real_all(self):
+		"""Bakes every texture of the currently loaded shape that has at
+		least one resolvable Panoply mask (same "has a mask" check as
+		_draw_panoply_masks_for()'s own mask_names list) -- the "bake all"
+		counterpart to the per-texture fire button in _draw_panoply_masks_for(),
+		shown next to the gear/edit button in _draw_global_panoply_section()
+		since baking is naturally a shape-wide action from the user's point
+		of view, even though _bake_panoply_real() itself only ever handles
+		one base texture at a time (each texture can have its own distinct
+		set of masks)."""
+		for name in self._shape_texture_names():
+			stem = Path(name).stem
+			has_mask = any(
+				self.search_paths_dialog.find_texture(f"{stem}_{axis}.tga") is not None for axis in panoply.AXES)
+			if has_mask:
+				self._bake_panoply_real(name)
 
 	def _draw_panoply_bake_blocked_popup(self):
 		if not self._panoply_bake_blocked:
@@ -3623,6 +3654,16 @@ class ObjectEditorApp(ForgeryApp):
 			fresh.image_editor_path = result[0]
 			app_settings.save(fresh)
 
+	def _poll_text_editor_dialog(self):
+		if self._text_editor_dialog is None or not self._text_editor_dialog.ready(0):
+			return
+		result = self._text_editor_dialog.result()
+		self._text_editor_dialog = None
+		if result:
+			fresh = app_settings.load()
+			fresh.text_editor_path = result[0]
+			app_settings.save(fresh)
+
 	def _draw_image_editor_settings(self):
 		"""Settings tab -- lets the user pick an external image editor
 		executable, used by the Textures tab's "Edit" button (see
@@ -3645,6 +3686,29 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.same_line()
 		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##image-editor", "Choose an image editor executable..."):
 			self._image_editor_dialog = pfd.open_file("Choose image editor executable")
+
+	def _draw_text_editor_settings(self):
+		"""Settings tab -- lets the user pick an external text editor
+		executable, used by the Panoply section's "Edit" button (see
+		_draw_global_panoply_section()) once a workspace panoply.cfg already
+		exists. Same pattern as _draw_image_editor_settings() above."""
+		settings = app_settings.load()
+		label = "Text editor: "
+		path_text = settings.text_editor_path or "(not set)"
+
+		style = imgui.get_style()
+		button_width = imgui.calc_text_size(fa_icons.ICON_FA_FOLDER_OPEN).x + style.frame_padding.x * 2
+		available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
+		             - button_width - style.item_spacing.x)
+
+		imgui.text(label)
+		imgui.same_line()
+		imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
+		if settings.text_editor_path and imgui.is_item_hovered():
+			imgui.set_tooltip(settings.text_editor_path)
+		imgui.same_line()
+		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##text-editor", "Choose a text editor executable..."):
+			self._text_editor_dialog = pfd.open_file("Choose text editor executable")
 
 	def _poll_workspace_sync_folder_dialog(self):
 		if self._workspace_sync_folder_dialog is None or not self._workspace_sync_folder_dialog.ready(0):
@@ -4367,6 +4431,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
 		self._poll_image_editor_dialog()
+		self._poll_text_editor_dialog()
 		self._poll_workspace_sync_folder_dialog()
 		self._poll_repository_paths_dialog()
 		self._draw_replace_match_popup()
@@ -4417,6 +4482,8 @@ class ObjectEditorApp(ForgeryApp):
 					self._draw_repository_paths_settings()
 				if imgui.collapsing_header("Tools"):
 					self._draw_image_editor_settings()
+					imgui.separator()
+					self._draw_text_editor_settings()
 					imgui.separator()
 					self._draw_workspace_sync_settings()
 					imgui.separator()
