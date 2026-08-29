@@ -2034,6 +2034,44 @@ grouped simple-texture materials first, then Multi Bitmap ones:
   (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
   mixed-case names from real data don't linger once touched.
 
+## 2026-08-29 — ✨ Threaded Panoply bake with a live progress popup
+
+The real Panoply bake (`_bake_panoply_real`/`_bake_panoply_real_all`) used to run
+synchronously on the main thread -- fine for one texture, but slow enough overall
+(~1s/variant, per the earlier cross-validation timing) that baking several textures at
+once (the new "bake all" button) froze the whole UI for however long that took, with no
+feedback. Nuno asked for a progress popup (current texture, current variant, an overall
+bar) -- which needs the bake to actually run off the main thread for the UI to keep
+redrawing while it works.
+
+`panoply_bake.py`: `bake_source()`/`bake_flat()`/`bake_and_write()` all gained an optional
+`on_variant(suffix, index, total)` callback, called right after each variant is computed
+(`total` from a new `_total_combinations()` helper -- the product of each active mask's
+own color count, known ahead of time without consuming the generator). Called
+synchronously wherever `bake_source()` itself runs -- no threading in this module, that's
+left entirely to the caller.
+
+`object_editor.py`: new `_start_panoply_bake(texture_names)` -- does the
+active-workspace/`ryzom-data` checks (via `request_settings_attention`, imgui-safe, main
+thread only) then spawns a daemon `threading.Thread` running `_run_panoply_bake()`, which
+loops `_bake_panoply_real()` over every name, feeding an `on_variant` callback that
+updates `self._bake_progress` (a plain dict -- safe enough under the GIL for simple field
+writes polled from the main thread, no lock needed) in place. `_bake_panoply_real` itself
+lost its own workspace/`ryzom-data` checks (those moved to `_start_panoply_bake`, since
+neither imgui calls nor `request_settings_attention` are safe off the main thread) and
+gained the `on_variant` passthrough. Both the per-texture fire button and
+`_bake_panoply_real_all()` now go through `_start_panoply_bake()` instead of calling
+`_bake_panoply_real()` directly. New `_draw_bake_progress_popup()` (called every frame
+from `draw_ui`, read-only view of `self._bake_progress`): a modal showing "Texture i/N:
+name", "Variant j/M: suffix", and an `imgui.progress_bar` (texture position + current
+texture's own variant fraction) -- an OK button appears once `done` (or on error) to
+close it and reset `self._bake_progress` to `None`. Refuses to start a second bake while
+one is still running.
+
+Written this session, not yet run/validated on the real machine as of this entry (same
+sandbox limitation as the rest of this Panoply work -- no panda3d/imgui_bundle installed
+there).
+
 ## 2026-08-29 — ✨ Settings-attention: jump-to-and-flash instead of popup/disabled buttons
 
 New shared mechanism in `ForgeryApp` (`app.py`, base class every Forgery app subclasses):

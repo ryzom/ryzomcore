@@ -9,6 +9,7 @@ render yet.
 import io
 import shutil
 import subprocess
+import threading
 from datetime import datetime
 from math import ceil, cos, pi, radians, sin
 from pathlib import Path
@@ -92,6 +93,7 @@ _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
 _IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
+_BAKE_PROGRESS_POPUP_ID = "Baking Panoply variants"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
 _TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
@@ -676,6 +678,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._save_status = ""
 		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
+		self._bake_progress = None  # dict or None -- see _start_panoply_bake()/_draw_bake_progress_popup()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
 		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
@@ -2684,7 +2687,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._save_status = f"Created mask {dest.name}"
 		print(f"[object_editor] {self._save_status}")
 
-	def _bake_panoply_real(self, base_texture_name):
+	def _bake_panoply_real(self, base_texture_name, on_variant=None):
 		"""Real offline Panoply bake (panoply_bake.py -- the exact,
 		non-live-preview port of panoply_maker.cpp, see
 		/repos/project-todos/ryzom-core/panoply-runtime-tint.md) for one
@@ -2699,23 +2702,20 @@ class ObjectEditorApp(ForgeryApp):
 		plain on-disk files (FoundEntry.fs_path) -- a base texture or mask
 		living only inside a .bnp can't be baked from here.
 
-		Refuses to do anything at all -- no textures written either -- if
-		ryzom-data isn't configured (pynel.repository_paths): jumps to
-		Settings > Paths and flashes the field instead (2026-08-29, see
-		ForgeryApp.request_settings_attention()) -- that's the one hard
-		dependency this needs to know where the real
-		characters.hlsbank/panoply_files.txt to build on top of live."""
+		Runs on _start_panoply_bake()'s background thread (2026-08-29) --
+		never touches imgui or Settings-attention (the active-workspace/
+		ryzom-data checks live in _start_panoply_bake() instead, on the main
+		thread, before the thread is even started -- neither imgui calls nor
+		request_settings_attention() are safe off the main thread).
+		`on_variant`, if given, is forwarded straight to
+		panoply_bake.bake_and_write() for live progress reporting. Returns
+		the list of written texture paths (empty if nothing was written)."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
-		if workspace_dir is None:
-			return
-		if not repository_paths.is_valid("ryzom-data"):
-			self.request_settings_attention("Paths", "ryzom-data")
-			return
 		entry = self.search_paths_dialog.find_texture(base_texture_name)
 		if entry is None or entry.fs_path is None:
 			self._save_status = f"Can't bake {base_texture_name}: not a plain file on disk"
 			print(f"[object_editor] {self._save_status}")
-			return
+			return []
 
 		stem = Path(base_texture_name).stem
 		race = panoply_config.RACE_PREFIX_TO_TABLE.get(stem[:2].lower())
@@ -2735,32 +2735,133 @@ class ObjectEditorApp(ForgeryApp):
 			base_rgba = dds_export.load_rgba(str(entry.fs_path))
 			written = panoply_bake.bake_and_write(
 				stem, base_rgba, axes, _mask_loader, workspace_dir / "tex", workspace_dir / "build",
-				hlsbank_source, panoply_files_source,
+				hlsbank_source, panoply_files_source, on_variant=on_variant,
 			)
 		except (OSError, RuntimeError) as exc:
 			self._save_status = f"Bake failed for {base_texture_name}: {exc}"
 			print(f"[object_editor] {self._save_status}")
-			return
+			return []
 
-		self._save_status = f"Baked {len(written)} variant(s) of {base_texture_name} to tex/ + build/"
-		print(f"[object_editor] {self._save_status}")
+		return written
+
+	def _panoply_texture_has_mask(self, base_texture_name):
+		"""Same "has at least one resolvable mask" check as
+		_draw_panoply_masks_for()'s own mask_names list -- shared by
+		_bake_panoply_real_all() below and that method's fire button."""
+		stem = Path(base_texture_name).stem
+		return any(self.search_paths_dialog.find_texture(f"{stem}_{axis}.tga") is not None for axis in panoply.AXES)
 
 	def _bake_panoply_real_all(self):
-		"""Bakes every texture of the currently loaded shape that has at
-		least one resolvable Panoply mask (same "has a mask" check as
-		_draw_panoply_masks_for()'s own mask_names list) -- the "bake all"
-		counterpart to the per-texture fire button in _draw_panoply_masks_for(),
-		shown next to the gear/edit button in _draw_global_panoply_section()
-		since baking is naturally a shape-wide action from the user's point
-		of view, even though _bake_panoply_real() itself only ever handles
-		one base texture at a time (each texture can have its own distinct
-		set of masks)."""
-		for name in self._shape_texture_names():
-			stem = Path(name).stem
-			has_mask = any(
-				self.search_paths_dialog.find_texture(f"{stem}_{axis}.tga") is not None for axis in panoply.AXES)
-			if has_mask:
-				self._bake_panoply_real(name)
+		"""Starts a background bake (see _start_panoply_bake()) of every
+		texture of the currently loaded shape that has at least one
+		resolvable Panoply mask -- the "bake all" counterpart to the
+		per-texture fire button in _draw_panoply_masks_for(), shown next to
+		the gear/edit button in _draw_global_panoply_section() since baking
+		is naturally a shape-wide action from the user's point of view, even
+		though _bake_panoply_real() itself only ever handles one base
+		texture at a time (each texture can have its own distinct set of
+		masks)."""
+		names = [name for name in self._shape_texture_names() if self._panoply_texture_has_mask(name)]
+		self._start_panoply_bake(names)
+
+	def _start_panoply_bake(self, texture_names):
+		"""Starts a background thread that bakes every name in
+		`texture_names` (in order) via _bake_panoply_real(), updating
+		self._bake_progress as it goes so _draw_bake_progress_popup() can
+		render live feedback (current texture/variant, an overall progress
+		bar) -- baking is CPU-bound (numpy) and slow enough (~1s/variant on
+		the real machine, 2026-08-29 cross-validation) that running it on
+		the main thread would freeze the whole UI for however long the bake
+		takes. Call from the main thread only: the checks below do imgui/
+		request_settings_attention calls, which aren't safe off the main
+		thread -- only _run_panoply_bake() (pure numpy/file I/O) actually
+		runs in the background thread."""
+		if self._bake_progress is not None and not self._bake_progress["done"]:
+			return  # a bake is already running
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return
+		if not repository_paths.is_valid("ryzom-data"):
+			self.request_settings_attention("Paths", "ryzom-data")
+			return
+		if not texture_names:
+			return
+
+		self._bake_progress = {
+			"texture_index": 0, "texture_total": len(texture_names), "texture_name": texture_names[0],
+			"variant_suffix": "", "variant_index": 0, "variant_total": 0,
+			"done": False, "error": None,
+		}
+		thread = threading.Thread(target=self._run_panoply_bake, args=(list(texture_names),), daemon=True)
+		thread.start()
+
+	def _run_panoply_bake(self, texture_names):
+		"""Background-thread body for _start_panoply_bake() above -- never
+		touches imgui or Settings-attention, only self._bake_progress (plain
+		dict field writes, safe enough under the GIL for this simple
+		main-thread-polls-it use, no lock needed) and _bake_panoply_real()'s
+		own numpy/file I/O."""
+		total_written = 0
+		for index, name in enumerate(texture_names):
+			progress = self._bake_progress
+			progress["texture_index"] = index
+			progress["texture_name"] = name
+			progress["variant_suffix"] = ""
+			progress["variant_index"] = 0
+			progress["variant_total"] = 0
+
+			def _on_variant(suffix, variant_index, variant_total, progress=progress):
+				progress["variant_suffix"] = suffix
+				progress["variant_index"] = variant_index
+				progress["variant_total"] = variant_total
+
+			written = self._bake_panoply_real(name, on_variant=_on_variant)
+			total_written += len(written)
+
+		self._bake_progress["done"] = True
+		self._save_status = f"Baked {total_written} variant(s) across {len(texture_names)} texture(s) to tex/ + build/"
+		print(f"[object_editor] {self._save_status}")
+
+	def _draw_bake_progress_popup(self):
+		"""Modal, opened/kept open for the whole lifetime of a background
+		bake (see _start_panoply_bake()) -- shows the current texture/
+		variant being baked and an overall progress bar, closes itself once
+		done (or on error, after the user acknowledges it). Read-only view
+		of self._bake_progress, which the background thread updates -- no
+		imgui calls happen on that thread, only here on the main one."""
+		progress = self._bake_progress
+		if progress is None:
+			return
+		if not imgui.is_popup_open(_BAKE_PROGRESS_POPUP_ID):
+			imgui.open_popup(_BAKE_PROGRESS_POPUP_ID)
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_BAKE_PROGRESS_POPUP_ID, None, flags)
+		if not opened:
+			return
+
+		if progress["error"] is not None:
+			imgui.text_colored((1.0, 0.4, 0.4, 1.0), f"Bake failed: {progress['error']}")
+			if imgui.button("OK"):
+				self._bake_progress = None
+				imgui.close_current_popup()
+			imgui.end_popup()
+			return
+
+		imgui.text(f"Texture {progress['texture_index'] + 1}/{progress['texture_total']}: {progress['texture_name']}")
+		if progress["variant_total"]:
+			imgui.text(f"Variant {progress['variant_index'] + 1}/{progress['variant_total']}: {progress['variant_suffix']}")
+		else:
+			imgui.text("Variant: (starting...)")
+		texture_total = max(progress["texture_total"], 1)
+		texture_fraction = progress["texture_index"] / texture_total
+		variant_fraction = ((progress["variant_index"] + 1) / progress["variant_total"] / texture_total
+		                     if progress["variant_total"] else 0.0)
+		imgui.progress_bar(min(1.0, texture_fraction + variant_fraction), (300, 0))
+		if progress["done"]:
+			if imgui.button("OK"):
+				self._bake_progress = None
+				imgui.close_current_popup()
+		imgui.end_popup()
 
 	def _draw_panoply_masks_for(self, base_texture_name):
 		"""Below a material's own texture row: thumbnails of whichever
@@ -2804,7 +2905,7 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.same_line()
 			disabled = self.workspace_setup_dialog.active_workspace_dir is None
 			if _icon_button(fa_icons.ICON_FA_FIRE, "Bake real Panoply variants (writes tex/ + tex/hlsinfo/)", disabled=disabled):
-				self._bake_panoply_real(base_texture_name)
+				self._start_panoply_bake([base_texture_name])
 
 		if missing_axes:
 			imgui.same_line()
@@ -4426,6 +4527,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_repository_paths_dialog()
 		self._draw_replace_match_popup()
 		self._draw_restore_scan_popup()
+		self._draw_bake_progress_popup()
 		self._draw_import_conflict_popup()
 		self._flush_pending_import_status()
 

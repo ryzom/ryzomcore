@@ -87,8 +87,21 @@ def build_active_masks(axes: List[ColorMaskAxis], mask_loader: Callable[[str], O
 	return active
 
 
+def _total_combinations(active_masks: List[ActiveMask]) -> int:
+	"""Number of variants generate_color_combinations() will yield for
+	`active_masks` -- the product of each active mask's own color count (1,
+	the single no-color-yet case, if there are no active masks at all),
+	known ahead of time without consuming the generator -- used to report
+	(index, total) progress via bake_source()'s on_variant callback."""
+	total = 1
+	for active_mask in active_masks:
+		total *= len(active_mask.axis.colors)
+	return total
+
+
 def bake_source(
 	base_rgba_u8: numpy.ndarray, active_masks: List[ActiveMask], low_def_shift: int = 3, default_separator: str = "_",
+	on_variant: Optional[Callable[[str, int, int], None]] = None,
 ) -> Tuple[hlsinfo.HLSBankTextureInfo, List[Tuple[str, numpy.ndarray]]]:
 	"""Full per-source-texture bake: builds the .hlsinfo's low-def SrcBitmap
 	(DXT5, mipmapped, via dds_export.build_dds()) and Masks (resample()'d
@@ -98,6 +111,12 @@ def bake_source(
 	`info.instances` -- each `info.instances[i].name` is left empty for the
 	caller to fill in once it knows the real output file name (stem + suffix
 	+ configured output_format), matching combos[i]'s suffix.
+
+	`on_variant(suffix, index, total)`, if given, is called right after each
+	variant is computed (index is 0-based, total from _total_combinations())
+	-- e.g. for a progress popup driven from a background bake thread (see
+	object_editor.py). Called synchronously on whatever thread bake_source()
+	itself runs on, same as everything else here -- no threading of its own.
 
 	No disk I/O here -- see apps/panoply_maker.py (CLI) and
 	object_editor.py's Patina "bake" action for what writes the outputs
@@ -115,14 +134,17 @@ def bake_source(
 		low_def_mask = resample(active_mask.mask_u8, low_w, low_h)
 		masks.append(hlsinfo.MaskBitmap(width=low_w, height=low_h, pixels=numpy.ascontiguousarray(low_def_mask).tobytes()))
 
+	total = _total_combinations(active_masks)
 	combos = []
 	instances = []
-	for suffix, result_rgba, mods in generate_color_combinations(base_rgba_u8, active_masks, default_separator):
+	for index, (suffix, result_rgba, mods) in enumerate(generate_color_combinations(base_rgba_u8, active_masks, default_separator)):
 		combos.append((suffix, result_rgba))
 		instances.append(hlsinfo.TextureInstance(
 			name="",
 			mods=[hlsinfo.HLSMod(d_hue=d_hue, d_lum=d_lum, d_sat=d_sat) for d_hue, d_lum, d_sat in mods],
 		))
+		if on_variant is not None:
+			on_variant(suffix, index, total)
 
 	info = hlsinfo.HLSBankTextureInfo(divided_by_2=False, src_bitmap_dds=src_bitmap_dds, masks=masks, instances=instances)
 	return info, combos
@@ -185,6 +207,7 @@ def _write_variants(
 def bake_flat(
 	stem: str, base_rgba_u8: numpy.ndarray, axes: List[ColorMaskAxis], mask_loader: Callable[[str], Optional[numpy.ndarray]],
 	output_dir: Path, hls_info_dir: Path, low_def_shift: int = 3, default_separator: str = "_", output_format: str = "tga",
+	on_variant: Optional[Callable[[str, int, int], None]] = None,
 ) -> List[Path]:
 	"""End-to-end single-source bake matching the real panoply_maker.exe's
 	own behavior exactly: writes baked variants into `output_dir` and one
@@ -194,9 +217,11 @@ def bake_flat(
 	mode apps/panoply_maker.py's explicit-`.cfg` cross-validation path uses,
 	since it needs byte-exact comparison against the real binary's own
 	output, not the "next patch" build_dir workflow bake_and_write() below
-	implements for autonomous/Patina use."""
+	implements for autonomous/Patina use.
+
+	`on_variant`: see bake_source()'s own docstring -- forwarded as-is."""
 	active_masks = build_active_masks(axes, mask_loader)
-	info, combos = bake_source(base_rgba_u8, active_masks, low_def_shift, default_separator)
+	info, combos = bake_source(base_rgba_u8, active_masks, low_def_shift, default_separator, on_variant)
 	written, _output_names = _write_variants(stem, info, combos, output_dir, output_format)
 	hls_info_dir.mkdir(parents=True, exist_ok=True)
 	hlsinfo.save_hlsinfo(hls_info_dir / f"{stem}.hlsinfo", info)
@@ -207,6 +232,7 @@ def bake_and_write(
 	stem: str, base_rgba_u8: numpy.ndarray, axes: List[ColorMaskAxis], mask_loader: Callable[[str], Optional[numpy.ndarray]],
 	output_dir: Path, build_dir: Path, hlsbank_source: Optional[Path] = None, panoply_files_source: Optional[Path] = None,
 	low_def_shift: int = 3, default_separator: str = "_", output_format: str = "tga",
+	on_variant: Optional[Callable[[str, int, int], None]] = None,
 ) -> List[Path]:
 	"""End-to-end single-source bake, disk I/O included:
 	build_active_masks() + bake_source(), then:
@@ -233,9 +259,11 @@ def bake_and_write(
 	(object_editor.py, one source at a time) -- written once here so the two
 	never drift apart. Returns the list of written texture file paths (not
 	the `.hlsinfo`/`panoply_files.txt`/`.hlsbank` paths, all always at
-	fixed names under `build_dir`)."""
+	fixed names under `build_dir`).
+
+	`on_variant`: see bake_source()'s own docstring -- forwarded as-is."""
 	active_masks = build_active_masks(axes, mask_loader)
-	info, combos = bake_source(base_rgba_u8, active_masks, low_def_shift, default_separator)
+	info, combos = bake_source(base_rgba_u8, active_masks, low_def_shift, default_separator, on_variant)
 	written, output_names = _write_variants(stem, info, combos, output_dir, output_format)
 
 	build_dir.mkdir(parents=True, exist_ok=True)

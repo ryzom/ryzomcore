@@ -38,7 +38,7 @@ Panda3D) vs `panoply_colorize.py` (math pure).
   `mask_loader(mask_ext)` renvoie un masque réel (`None` sinon) — port de
   l'étape 3 de `BuildColoredVersionForOneBitmap` ("seules les extensions de
   masque avec un fichier trouvé deviennent actives").
-- `bake_source(base_rgba_u8, active_masks, low_def_shift=3, default_separator="_")`
+- `bake_source(base_rgba_u8, active_masks, low_def_shift=3, default_separator="_", on_variant=None)`
   — construit le `SrcBitmap` bas-def du `.hlsinfo` (`resample` +
   `dds_export.build_dds(..., DXT5, build_mipmaps=True)`), ses `Masks`
   (`resample`é à la même taille bas-def), et lance
@@ -46,12 +46,18 @@ Panda3D) vs `panoply_colorize.py` (math pure).
   résolution. Renvoie `(HLSBankTextureInfo, [(name_suffix, result_rgba_u8), ...])`
   — `instances[i].name` est laissé vide, à remplir par l'appelant (il connaît
   seul le nom de fichier final : stem + suffixe + `output_format`). Aucun
-  I/O disque ici.
+  I/O disque ici. `on_variant(suffix, index, total)` (2026-08-29), si fourni,
+  est appelé juste après chaque variante calculée — `total` vient de
+  `_total_combinations()` (produit du nombre de couleurs de chaque masque
+  actif, calculé sans consommer le générateur) ; utilisé par Patina pour la
+  popup de progression du bake (voir `docs/apps/object_editor.md`), appelé
+  de façon synchrone sur le thread où tourne `bake_source()` lui-même — pas
+  de thread ici, la responsabilité du threading reste à l'appelant.
 - `_write_variants(stem, info, combos, output_dir, output_format)` — écrit
   chaque image de `combos` dans `output_dir` (`dds_export.save_rgba`),
   remplace `info.instances[i].name` en place. Partagé par les deux fonctions
   bout-en-bout ci-dessous.
-- `bake_flat(stem, base_rgba_u8, axes, mask_loader, output_dir, hls_info_dir, low_def_shift=3, default_separator="_", output_format="tga")`
+- `bake_flat(stem, base_rgba_u8, axes, mask_loader, output_dir, hls_info_dir, low_def_shift=3, default_separator="_", output_format="tga", on_variant=None)`
   — bout en bout, comportement **identique au vrai `panoply_maker.exe`** :
   `build_active_masks` + `bake_source` + `_write_variants` + un `.hlsinfo`
   brut dans `hls_info_dir`, rien d'autre (pas de `characters.hlsbank`/
@@ -59,7 +65,7 @@ Panda3D) vs `panoply_colorize.py` (math pure).
   `hls_bank_maker` qui s'en charge séparément). Mode utilisé par
   `apps/panoply_maker.py` en mode `.cfg` explicite (cross-validation
   byte-exacte contre le vrai binaire).
-- `bake_and_write(stem, base_rgba_u8, axes, mask_loader, output_dir, build_dir, hlsbank_source=None, panoply_files_source=None, low_def_shift=3, default_separator="_", output_format="tga")`
+- `bake_and_write(stem, base_rgba_u8, axes, mask_loader, output_dir, build_dir, hlsbank_source=None, panoply_files_source=None, low_def_shift=3, default_separator="_", output_format="tga", on_variant=None)`
   — bout en bout, workflow "next patch" (2026-08-29, Nuno) : `build_active_masks`
   + `bake_source` + `_write_variants` dans `output_dir`, puis écrit
   `build_dir/{stem}.hlsinfo`, `build_dir/panoply_files.txt` et
