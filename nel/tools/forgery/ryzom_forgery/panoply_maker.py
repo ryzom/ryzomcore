@@ -32,9 +32,13 @@ for a literal per-pixel port of the hue-average's running-mean-with-360deg-
 unwrap correction instead -- see eval_bitmap_stats_exact()'s docstring.
 """
 
+from dataclasses import dataclass, field
+from typing import Iterator, List, Tuple
+
 import numpy
 
 from ryzom_forgery.panoply_colorize import _brightness_contrast, _to_uint8, hls_to_rgb, rgb_to_hls
+from ryzom_forgery.panoply_config import ColorParams
 
 # Panoply's blend weight divisor, see panoply_colorize.py's _BLEND_DIVISOR.
 _BLEND_DIVISOR = 256.0
@@ -194,14 +198,16 @@ def eval_bitmap_stats_exact(rgb_u8: numpy.ndarray, mask_u8: numpy.ndarray):
 
 
 def convert_bitmap_exact(current_rgb_u8: numpy.ndarray, mask_u8: numpy.ndarray, hue: float,
-						  lightness: float, saturation: float, luminosity: float, contrast: float) -> numpy.ndarray:
+						  lightness: float, saturation: float, luminosity: float, contrast: float):
 	"""Exact-hue-stats counterpart to panoply_colorize.convert_bitmap() --
 	same per-pixel recolor/contrast/blend (all order-independent, so those
 	stay vectorized), but measures the axis's hue delta with
 	eval_bitmap_stats_exact() instead of the fast approximation. Port of
 	CColorModifier::convertBitmap (color_modifier.cpp:30-90); see that
 	function's docstring counterpart in panoply_colorize.py for the shared
-	per-pixel math."""
+	per-pixel math. Returns (result_rgb_u8, delta_hue) -- delta_hue is the
+	C++'s retDeltaHue out-param, needed by callers building a .hlsinfo
+	TextureInstance's Mods."""
 	target_hue, _target_s, _target_l, grey_level = eval_bitmap_stats_exact(current_rgb_u8, mask_u8)
 	delta_h = hue - target_hue
 
@@ -223,7 +229,7 @@ def convert_bitmap_exact(current_rgb_u8: numpy.ndarray, mask_u8: numpy.ndarray, 
 		(current_rgb_u8.astype(numpy.float64) * (_BLEND_DIVISOR - coef) + contrasted_u8.astype(numpy.float64) * coef)
 		/ _BLEND_DIVISOR
 	)
-	return _to_uint8(blended)
+	return _to_uint8(blended), delta_h
 
 
 def colorize_exact(base_rgba_u8: numpy.ndarray, axis_masks) -> numpy.ndarray:
@@ -231,11 +237,127 @@ def colorize_exact(base_rgba_u8: numpy.ndarray, axis_masks) -> numpy.ndarray:
 	convert_bitmap_exact() once per (mask, params) in axis_masks, in order,
 	same as panoply_maker.cpp applying successive masks onto one
 	resultBitmap in place. See colorize()'s docstring for the argument
-	shape (unchanged here)."""
+	shape (unchanged here). Discards delta_hue -- use
+	generate_color_combinations() instead when a .hlsinfo needs to be built
+	from the result."""
 	rgb = base_rgba_u8[..., :3]
 	for mask_u8, params in axis_masks:
-		rgb = convert_bitmap_exact(rgb, mask_u8, params.hue, params.lightness, params.saturation, params.luminosity, params.contrast)
+		rgb, _delta_hue = convert_bitmap_exact(rgb, mask_u8, params.hue, params.lightness, params.saturation, params.luminosity, params.contrast)
 	out = numpy.empty_like(base_rgba_u8)
 	out[..., :3] = rgb
 	out[..., 3] = base_rgba_u8[..., 3]
 	return out
+
+
+@dataclass
+class ColorMaskAxis:
+	"""One mask extension's full set of configured colors -- port of
+	panoply_maker.cpp's CColorMask (TColorMaskVect's element type)."""
+
+	mask_ext: str
+	colors: List[ColorParams] = field(default_factory=list)
+
+
+def build_masks_from_config(cfg) -> List[ColorMaskAxis]:
+	"""Port of BuildMasksFromConfigFile (panoply_maker.cpp:418-455): reads
+	`mask_extensions` and, for each extension `X`, its six parallel
+	`X_hues`/`X_lightness`/`X_saturations`/`X_luminosities`/`X_constrasts`
+	(sic, matches the real config key's typo)/`X_color_id` arrays.
+
+	`cfg` is anything with a `.get(name) -> list` method -- a
+	`pynel.config_file.Document` or `ConfigFile` in practice, kept
+	duck-typed here so this module doesn't need to depend on pynel."""
+	mask_extensions = cfg.get("mask_extensions")
+	axes = []
+	for mask_ext in mask_extensions:
+		mask_ext = str(mask_ext)
+		hues = cfg.get(f"{mask_ext}_hues")
+		lightness = cfg.get(f"{mask_ext}_lightness")
+		saturations = cfg.get(f"{mask_ext}_saturations")
+		luminosities = cfg.get(f"{mask_ext}_luminosities")
+		contrasts = cfg.get(f"{mask_ext}_constrasts")
+		color_ids = cfg.get(f"{mask_ext}_color_id")
+
+		lengths = {len(hues), len(lightness), len(saturations), len(luminosities), len(contrasts), len(color_ids)}
+		if len(lengths) != 1:
+			raise ValueError(f"all color descriptors for mask '{mask_ext}' must have the same number of arguments")
+
+		colors = [
+			ColorParams(
+				id=str(color_ids[i]), hue=float(hues[i]), lightness=float(lightness[i]),
+				saturation=float(saturations[i]), luminosity=float(luminosities[i]), contrast=float(contrasts[i]),
+			)
+			for i in range(len(color_ids))
+		]
+		axes.append(ColorMaskAxis(mask_ext=mask_ext, colors=colors))
+	return axes
+
+
+@dataclass
+class ActiveMask:
+	"""One mask actually found on disk for a given source texture -- port of
+	panoply_maker.cpp's CLoopInfo (minus the Counter field, which
+	generate_color_combinations() below tracks itself instead of mutating
+	shared state, unlike the C++'s reused-across-calls static vector)."""
+
+	axis: ColorMaskAxis
+	mask_u8: numpy.ndarray  # HxW uint8, full source resolution
+
+
+def generate_color_combinations(
+	base_rgba_u8: numpy.ndarray, active_masks: List[ActiveMask], default_separator: str = "_",
+) -> Iterator[Tuple[str, numpy.ndarray, List[Tuple[float, float, float]]]]:
+	"""Port of BuildColoredVersionForOneBitmap's combinatorial loop
+	(panoply_maker.cpp:790-880), minus file I/O -- that's left to a caller,
+	same split as panoply_colorize.py (pure math) / panoply_texture.py
+	(Panda3D glue). For every combination of color IDs across
+	`active_masks` (multi-radix odometer, last mask's counter increments
+	fastest -- matches the C++'s counter-increment order exactly), yields
+	`(name_suffix, result_rgba_u8, mods)`:
+
+	- `name_suffix`: e.g. `"_C1_U3"` for a 2-mask item, in active-mask
+	  order -- append to the base file name for the output file name AND
+	  the `.hlsinfo` TextureInstance name (matches
+	  `outputFileName = fileName + sep + ColID...`).
+	- `result_rgba_u8`: the recolored HxWx4 uint8 image for this
+	  combination, alpha preserved from `base_rgba_u8`.
+	- `mods`: one `(d_hue, d_lum, d_sat)` tuple per active mask, in order --
+	  build a `pynel.hls_bank_texture_info.HLSMod`/`TextureInstance` from
+	  these directly (`d_lum`/`d_sat` are the configured
+	  lightness/saturation verbatim, `d_hue` is convert_bitmap_exact()'s
+	  measured delta).
+
+	With no active masks (item has no colorisable axis), yields a single
+	`("", base_rgba_u8.copy(), [])` -- matches the C++ still writing one
+	(uncolorized) output file in that case."""
+	if not active_masks:
+		yield "", base_rgba_u8.copy(), []
+		return
+
+	counters = [0] * len(active_masks)
+	while True:
+		rgb = base_rgba_u8[..., :3].copy()
+		suffix = ""
+		mods = []
+		for i, am in enumerate(active_masks):
+			color = am.axis.colors[counters[i]]
+			rgb, delta_hue = convert_bitmap_exact(rgb, am.mask_u8, color.hue, color.lightness, color.saturation, color.luminosity, color.contrast)
+			mods.append((delta_hue, color.lightness, color.saturation))
+			suffix += default_separator + color.id
+
+		result = numpy.empty_like(base_rgba_u8)
+		result[..., :3] = rgb
+		result[..., 3] = base_rgba_u8[..., 3]
+		yield suffix, result, mods
+
+		# multi-radix odometer: last mask's counter increments fastest, carries left
+		i = len(active_masks) - 1
+		while i >= 0:
+			counters[i] += 1
+			if counters[i] == len(active_masks[i].axis.colors):
+				counters[i] = 0
+				i -= 1
+			else:
+				break
+		if i < 0:
+			break

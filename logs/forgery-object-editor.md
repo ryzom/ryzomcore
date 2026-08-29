@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-08-29 — ✨ Add BuildMasksFromConfigFile + combinatorial loop to panoply_maker.py
+
+Two more pieces of the `panoply_maker.py` offline generation port (see the previous entry
+below for `resample()`/the exact colorize port):
+
+- **`ColorMaskAxis`/`build_masks_from_config()`**: port of `BuildMasksFromConfigFile`
+  (`panoply_maker.cpp`) -- reads `mask_extensions` and each extension's 6 parallel
+  `X_hues`/`X_lightness`/`X_saturations`/`X_luminosities`/`X_constrasts`/`X_color_id`
+  config arrays. Takes any object with a `.get(name) -> list` method (a
+  `pynel.config_file.Document`/`ConfigFile` in practice, duck-typed so this module
+  doesn't hard-depend on pynel). Validated against the real, self-contained
+  `current_panoply.cfg`: `skin` axis resolves to 4 colors (FY/MA/TR/ZO), `user` to 8
+  (U1-U8), values match the file.
+- **`ActiveMask`/`generate_color_combinations()`**: port of
+  `BuildColoredVersionForOneBitmap`'s combinatorial loop -- a multi-radix odometer over
+  each active mask's color IDs (last mask's counter increments fastest, matching the C++
+  exactly), chaining `convert_bitmap_exact()` calls onto one accumulating result per
+  combination. Mask discovery/lookup and file I/O are deliberately left out of this
+  function, same split as `panoply_colorize.py` (pure math) / `panoply_texture.py`
+  (Panda3D glue) -- a future glue layer will own that. `convert_bitmap_exact()` changed
+  to return `(result, delta_hue)` instead of just `result`, since building a `.hlsinfo`
+  instance's `Mods` needs that measured delta (previously computed internally and
+  dropped).
+
+`generate_color_combinations()` itself not yet run against real data -- needs numpy,
+same sandbox blocker as the rest of this port (see previous entry).
+
 ## 2026-08-29 — ✨ Add resample()/exact colorize port to panoply_maker.py
 
 New `ryzom_forgery/panoply_maker.py`, first pieces of a Python port of

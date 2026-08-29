@@ -50,19 +50,36 @@ generation (runs once per item, speed doesn't matter).
   `hls_to_rgb`/`_brightness_contrast`/`_to_uint8` -- all order-independent)
   for everything except the hue accumulation, which is a literal
   pixel-by-pixel port of the C++'s running-mean-with-360°-unwrap loop
-  (inherently sequential, can't vectorize with NumPy). Not yet run against
-  real data (same validation blocker as `resample()`).
+  (inherently sequential, can't vectorize with NumPy). `convert_bitmap_exact()`
+  returns `(result, delta_hue)` -- the delta is the C++'s `retDeltaHue`
+  out-param, needed to build a `.hlsinfo` instance's `Mods`. Not yet run
+  against real data (same validation blocker as `resample()`).
+- **`ColorMaskAxis`/`build_masks_from_config()`**: port of
+  `BuildMasksFromConfigFile` -- reads `mask_extensions` and each extension's
+  6 parallel `X_hues`/`X_lightness`/`X_saturations`/`X_luminosities`/
+  `X_constrasts`/`X_color_id` arrays via any `pynel.config_file`-shaped
+  object (`.get(name) -> list`, duck-typed so this module doesn't hard-depend
+  on pynel). Validated against the real, self-contained `current_panoply.cfg`
+  (`skin`: 4 colors FY/MA/TR/ZO, `user`: 8 colors U1-U8, values match the
+  file) -- this part needs no numpy, so it *could* be tested directly.
+- **`ActiveMask`/`generate_color_combinations()`**: port of
+  `BuildColoredVersionForOneBitmap`'s combinatorial loop -- a multi-radix
+  odometer over each active mask's color IDs (last mask's counter
+  increments fastest, matching the C++ exactly), chaining
+  `convert_bitmap_exact()` calls onto one accumulating result per
+  combination, yielding `(name_suffix, result_rgba, mods)` per combination.
+  File I/O and mask discovery/lookup (`<name>_<mask_ext>.<ext>` next to the
+  source texture, or under `additionnal_paths`) are deliberately **not**
+  in this function -- left to a future glue layer, same split as
+  `panoply_colorize.py` (pure math) / `panoply_texture.py` (Panda3D glue).
+  Not yet run against real data (needs numpy).
 
 ## What's not started yet
 
-- `BuildMasksFromConfigFile` (cfg -> per-axis `CColorModifier` list) --
-  straightforward now that `pynel.config_file` exists to read the
-  `panoply_*.cfg`.
-- `BuildColoredVersionForOneBitmap`'s combinatorial loop (multi-radix
-  odometer over each active mask's color IDs, chaining `convert_bitmap_exact`
-  calls onto one accumulating result bitmap per combination) and the mask
-  discovery/lookup logic (`<name>_<mask_ext>.<ext>` next to the source
-  texture, or under `additionnal_paths`).
+- Mask discovery/lookup glue (`<name>_<mask_ext>.<ext>` next to the source
+  texture, or under `additionnal_paths`) and actual file I/O (loading
+  source/mask images, writing output `.tga`/`.png` + `.hlsinfo`) --
+  everything `generate_color_combinations()` deliberately left out.
 - Cross-validation against the real `panoply_maker` binary (available via
   `ryzom-docker/studio/output/`, same recipe as the `hls_bank_maker`
   cross-validation documented in pynel's `docs/hls_texture_bank.md`) --
