@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ryzom_forgery"
-version = "1.2.1"
+version = "1.2.2"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
 dependencies = [
@@ -13,7 +13,7 @@ dependencies = [
 	# pointing at the wheel published by ryzom-core's own CI (.gitlab-ci.yml,
 	# build_pynel_wheel/upload_pynel_wheel) so `pip install` of this wheel
 	# alone pulls pynel in too, no separate install step needed.
-	"pynel @ https://gitlab.com/api/v4/projects/ryzom%2Fryzom-core/packages/generic/pynel/main-forgery-release/pynel-0-py3-none-any.whl",
+	"pynel @ https://gitlab.com/api/v4/projects/ryzom%2Fryzom-core/packages/generic/pynel/ryzom-pynel/pynel-0-py3-none-any.whl",
 ]
 
 [tool.setuptools]

@@ -5,14 +5,19 @@ stages:
 # Builds the ryzom_forgery wheel and publishes it to this project's generic
 # package registry, under a fixed URL keyed by the branch (CI_COMMIT_REF_SLUG),
 # overwritten on every publish -- see /repos/project-todos/ryztart/forgery_integration.md
+#
+# ryzom_forgery and pynel each have their own dedicated branch
+# (ryzom/forgery, ryzom/pynel) -- no dev/release-gating workflow, commits
+# land directly there. This also sidesteps a real gitlab-ci gotcha: with
+# both wheels sharing one branch (the old main/forgery-release), a big
+# multi-package commit (e.g. a merge) could touch both wheels' `changes:`
+# paths at once and trigger a spurious rebuild of the wheel that didn't
+# actually change -- a dedicated branch per wheel makes that impossible.
 build_forgery_wheel:
   stage: build
   image: python:3.12
   rules:
-    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
-      changes:
-        - nel/tools/forgery/**/*
-        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == "ryzom/forgery"
   before_script:
     - python --version ; pip --version
     - pip install --upgrade pip build
@@ -28,10 +33,7 @@ upload_forgery_wheel:
   stage: release
   image: curlimages/curl:latest
   rules:
-    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
-      changes:
-        - nel/tools/forgery/**/*
-        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == "ryzom/forgery"
   needs:
     - job: build_forgery_wheel
   script:
@@ -39,7 +41,7 @@ upload_forgery_wheel:
       wheel=$(ls build/ryzom_forgery-*-py3-none-any.whl)
       # The registry path (version folder) can be any string, but the
       # uploaded *filename*'s version field must be a valid PEP 440 version
-      # (pip parses it on install) -- CI_COMMIT_REF_SLUG (main-forgery-release)
+      # (pip parses it on install) -- CI_COMMIT_REF_SLUG (ryzom-forgery)
       # isn't one. Real version tracking happens separately, by comparing
       # pyproject.toml's version (see ryztart's ryzom_forgery_launcher), not
       # via this filename -- so a fixed, meaningless "0" is fine here.
@@ -56,10 +58,7 @@ build_pynel_wheel:
   stage: build
   image: python:3.12
   rules:
-    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
-      changes:
-        - nel/tools/pynel/**/*
-        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == "ryzom/pynel"
   before_script:
     - python --version ; pip --version
     - pip install --upgrade pip build
@@ -75,10 +74,7 @@ upload_pynel_wheel:
   stage: release
   image: curlimages/curl:latest
   rules:
-    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
-      changes:
-        - nel/tools/pynel/**/*
-        - .gitlab-ci.yml
+    - if: $CI_COMMIT_BRANCH == "ryzom/pynel"
   needs:
     - job: build_pynel_wheel
   script:
