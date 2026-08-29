@@ -2418,10 +2418,31 @@ bool mainLoop()
 			}
 
 			// If the device is lost then no rendering will occur, so let some time to other applications
-			if (Driver->isLost())
 			{
-				nlSleep(50);
-				nldebug("lost device");
+				static NLMISC::TTime lostDeviceStartTime = 0;
+				if (Driver->isLost())
+				{
+					if (lostDeviceStartTime == 0)
+						lostDeviceStartTime = ryzomGetLocalTime();
+
+					nlSleep(50);
+					nldebug("lost device");
+
+					// If the device stays lost for too long, force disconnect
+					NLMISC::TTime lostDuration = ryzomGetLocalTime() - lostDeviceStartTime;
+					if (lostDuration > 30000)
+					{
+						nlwarning("Device lost for %u ms, forcing disconnect", (uint32)lostDuration);
+						lostDeviceStartTime = 0;
+						NetMngr.disconnect();
+						loginFinished = true;
+						break;
+					}
+				}
+				else
+				{
+					lostDeviceStartTime = 0;
+				}
 			}
 		}
 		else
