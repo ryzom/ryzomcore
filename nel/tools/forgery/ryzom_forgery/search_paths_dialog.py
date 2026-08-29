@@ -24,6 +24,7 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_d
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
+from pynel import repository_paths
 from pynel.ryzom_animation import AnimationParseError, parse_animation
 from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
 
@@ -275,6 +276,8 @@ class SearchPathsDialog:
 		self._animation_bones = {}  # {name: frozenset(bone names)} -- for compatible_animations_for()
 		self._texture_entries = {}  # {name.lower(): search_paths.FoundEntry}
 		self._panoply_variants = {}  # {base texture stem: {race: [user color, ...]}}, see panoply.py
+		self._ryzom_data_panoply_variants = {}  # see _load_ryzom_data_panoply_variants()
+		self._ryzom_data_panoply_mtime = None
 		self._scan_status = ""
 		# Two independent flags, not one shared -- at startup, set_workspace_dir()'s
 		# own workspace-only scan and ensure_scanned()'s full reload() must be
@@ -633,20 +636,67 @@ class SearchPathsDialog:
 			animation_entries=animation_entries, animation_bones=animation_bones,
 			texture_entries=texture_entries, panoply_variants=panoply_variants, total=total)
 
+	def _load_ryzom_data_panoply_variants(self):
+		"""panoply_files.txt straight from the configured ryzom-data
+		checkout (`<ryzom-data>/final_bnps/characters_maps_hr/panoply_files.txt`,
+		via `pynel.repository_paths` -- see docs/repository_paths.md), if
+		configured and the file exists -- {} otherwise. This is the
+		*working-copy* file, edited by hand as new items are added (see
+		panoply_bake.py's own use of the same file as a bake source) --
+		takes priority over whatever panoply_files.txt _scan_dirs_incremental()
+		happens to find inside a shipped characters_maps_hr.bnp along the
+		user's generic search paths (see _merge_and_publish()), since that
+		shipped copy only reflects whatever last went through the real
+		hls_bank_maker build, which lags behind ryzom-data's own working
+		copy for anything not built yet (2026-08-29: this is exactly why
+		ryw_mark1_hof_caster01_pantabottes's masks weren't showing up in
+		Patina even though the .dds files already exist under
+		ryzom-data/final_bnps/characters_maps_hr/mark_1/ -- the shipped
+		.bnp's panoply_files.txt was never updated for them).
+
+		Cached by mtime -- called every _merge_and_publish(), which itself
+		only runs once per finished scan, but a plain read+parse of the real
+		ryzom-data panoply_files.txt (comparable size to the shipped copy,
+		681KB per the chantier notes) isn't free enough to redo pointlessly
+		on every merge if the file hasn't actually changed."""
+		if not repository_paths.is_valid("ryzom-data"):
+			return {}
+		path = repository_paths.get("ryzom-data") / "final_bnps" / "characters_maps_hr" / "panoply_files.txt"
+		try:
+			mtime = path.stat().st_mtime
+		except OSError:
+			return {}
+		if self._ryzom_data_panoply_mtime == mtime:
+			return self._ryzom_data_panoply_variants
+		try:
+			variants = panoply.parse_panoply_files(path.read_text(encoding="latin-1"))
+		except OSError:
+			return {}
+		self._ryzom_data_panoply_variants = variants
+		self._ryzom_data_panoply_mtime = mtime
+		return variants
+
 	def _merge_and_publish(self):
 		"""Combines _external_result and _workspace_result into the public
 		dicts every other method reads -- the workspace wins on a name
 		collision (matches the old single-pass scan's own priority order:
 		the workspace was always searched first). Each dict is swapped in as a
 		whole fresh object, never mutated in place, so a frame reading it
-		mid-merge just sees the previous complete result, never a torn one."""
+		mid-merge just sees the previous complete result, never a torn one.
+
+		_panoply_variants specifically (2026-08-29): ryzom-data's own working
+		copy (_load_ryzom_data_panoply_variants()) wins over both halves of
+		the scan if configured and non-empty -- see that method's docstring
+		for why ryzom-data needs to take priority over whatever a shipped
+		characters_maps_hr.bnp happens to carry."""
 		external, workspace = self._external_result, self._workspace_result
 		self._skeleton_entries = {**external.skeleton_entries, **workspace.skeleton_entries}
 		self._skeleton_bones = {**external.skeleton_bones, **workspace.skeleton_bones}
 		self._animation_entries = {**external.animation_entries, **workspace.animation_entries}
 		self._animation_bones = {**external.animation_bones, **workspace.animation_bones}
 		self._texture_entries = {**external.texture_entries, **workspace.texture_entries}
-		self._panoply_variants = workspace.panoply_variants or external.panoply_variants
+		self._panoply_variants = (
+			self._load_ryzom_data_panoply_variants() or workspace.panoply_variants or external.panoply_variants)
 
 	@staticmethod
 	def _parse_bones(found, is_skel):

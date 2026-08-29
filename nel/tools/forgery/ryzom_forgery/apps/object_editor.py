@@ -654,6 +654,7 @@ class ObjectEditorApp(ForgeryApp):
 		# 180-degree-rotated one look identical to its matrix decomposition).
 		self._tex_transform_ui_state = {}
 		self._panoply_selection = {}  # axis (panoply.AXES) -> value, shape-wide, render-only, never touches shape data
+		self._panoply_selection_defaulted = False  # see _draw_global_panoply_section()'s auto-default-once logic
 		# Not reset on shape reload (unlike _panoply_selection/_texture_cache
 		# above) -- keyed by source mtimes (see LiveColorizeCache), so a live
 		# recompute stays valid across shapes/reloads as long as the base
@@ -1536,6 +1537,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_override_colors = {}
 		self._tex_transform_ui_state = {}
 		self._panoply_selection = {}
+		self._panoply_selection_defaulted = False
 		self._shape_source_path = None
 		self._shape_source_bnp_path = None  # set alongside _shape_source_path when the shape lives inside a .bnp -- see _save_session_state()
 		self._shape_source_name = None
@@ -2625,6 +2627,24 @@ class ObjectEditorApp(ForgeryApp):
 		for axis in panoply.AXES:
 			values = panoply.RACES if axis == "skin" else sorted(available[axis])
 			axis_values[axis] = [value for value in values if value in available[axis]]
+
+		# Auto-default once per shape (2026-08-29): without this, a freshly
+		# loaded shape with real variants (_panoply_selection still empty,
+		# per _reset_shape_state()) rendered blank/white until the user
+		# clicked a button themselves -- same backfill-with-first-value
+		# logic as an empty-selection click below, just applied proactively
+		# the first time real variants are detected instead of waiting for
+		# a click. _panoply_selection_defaulted (not "is _panoply_selection
+		# empty") is what gates this, so it fires exactly once per shape --
+		# a later click on "skin" that deliberately clears back to the
+		# shape's own base texture (see below) must stay cleared, not get
+		# re-defaulted right back on the next frame.
+		if not self._panoply_selection_defaulted and any(axis_values.values()):
+			for axis, values in axis_values.items():
+				if values:
+					self._panoply_selection[axis] = values[0]
+			self._panoply_selection_defaulted = True
+			self._reapply_all_materials()
 
 		for axis in panoply.AXES:
 			values = axis_values[axis]

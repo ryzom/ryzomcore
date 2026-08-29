@@ -23,6 +23,8 @@ import re
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from .search_paths import TEXTURE_FALLBACK_EXTENSIONS
+
 # Axis name -> (regex matching one filename token for this axis, letter used
 # to build a variant file name back from a value). "skin" tokens are the
 # literal 2-letter race codes themselves (FY/MA/TR/ZO), not a letter+digit
@@ -54,18 +56,29 @@ def _classify_token(token: str):
 def parse_panoply_files(text: str) -> Dict[str, Dict[str, List]]:
 	"""{base texture stem (lowercase, no extension): {axis: [values, sorted]}}
 	from panoply_files.txt's raw content (one file name per line, e.g.
-	"tr_hof_armor00_handupside_c1_FY_U1.tga"). Trailing "_<color_id>" tokens
-	are stripped one at a time (in whatever order they appear -- real output
-	order is skin/user/hair/eyes, but nothing here depends on that) until one
-	doesn't match a known axis; what's left is the base name. A line with no
-	recognizable suffix at all (the un-panoplied base texture itself,
-	routinely also listed) contributes nothing."""
+	"tr_hof_armor00_handupside_c1_FY_U1.tga" for a shipped-.bnp copy, or
+	"...FY_U1.dds" for ryzom-data's own working copy under
+	final_bnps/characters_maps_hr/ -- see search_paths_dialog.py's
+	_load_ryzom_data_panoply_variants() -- extension isn't a reliable
+	signal of which source a given panoply_files.txt came from, so every
+	extension in TEXTURE_FALLBACK_EXTENSIONS is accepted here, not just
+	.tga (2026-08-29: found hardcoded to .tga only, silently dropping
+	every line of a real .dds-listing panoply_files.txt -- confirmed via
+	ryw_mark1_hof_caster01_pantabottes showing "no variants detected" in
+	Patina despite its 24 real .dds entries being present in the file).
+	Trailing "_<color_id>" tokens are stripped one at a time (in whatever
+	order they appear -- real output order is skin/user/hair/eyes, but
+	nothing here depends on that) until one doesn't match a known axis;
+	what's left is the base name. A line with no recognizable suffix at
+	all (the un-panoplied base texture itself, routinely also listed)
+	contributes nothing."""
 	variants: Dict[str, Dict[str, List]] = {}
 	for line in text.splitlines():
 		name = line.strip()
-		if not name.lower().endswith(".tga"):
+		suffix = Path(name).suffix.lower()
+		if suffix not in TEXTURE_FALLBACK_EXTENSIONS:
 			continue
-		tokens = name[:-len(".tga")].split("_")
+		tokens = name[:-len(suffix)].split("_")
 
 		found: Dict[str, object] = {}
 		while tokens:

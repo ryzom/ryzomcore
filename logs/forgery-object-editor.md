@@ -2034,6 +2034,59 @@ grouped simple-texture materials first, then Multi Bitmap ones:
   (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
   mixed-case names from real data don't linger once touched.
 
+## 2026-08-29 — ✨ Auto-default the Panoply selection once real variants are detected
+
+Follow-up to the panoply_files.txt fixes right below: once those made
+`ryw_mark1_hof_caster01_pantabottes`'s "User color" buttons actually show up, the shape
+still rendered blank/white until Nuno clicked one himself -- `_panoply_selection` starts
+empty on every shape load, and nothing was proactively filling it in even though a real
+variant was right there to show by default.
+
+New `self._panoply_selection_defaulted` flag (reset alongside `_panoply_selection` on
+shape load): `_draw_global_panoply_section()` now applies the same "first value per
+available axis" backfill an empty-selection click already did, but automatically, the
+first time real variants are detected for a freshly loaded shape -- gated on this new
+flag rather than "`_panoply_selection` is empty", specifically so that later clicking
+"skin" to deliberately clear back to the shape's own base texture (an existing, meaningful
+state) doesn't get silently re-defaulted right back on the next frame.
+
+## 2026-08-29 — ✨ Prioritize ryzom-data's own panoply_files.txt over the shipped .bnp's
+
+Nuno hit this directly: Patina wasn't showing any Panoply masks/variants for
+`ryw_mark1_hof_caster01_pantabottes` even though the `.dds` files already exist under
+`ryzom-data/final_bnps/characters_maps_hr/mark_1/` -- traced to `search_paths_dialog.py`
+picking up `panoply_files.txt` opportunistically from whichever `characters_maps_hr.bnp`
+it finds along the user's generic search paths, a shipped copy that only reflects the
+last real `hls_bank_maker` build and had simply never been regenerated for the hof
+variant (only "hom" has ever gone through `panoply_maker` -- see the
+panoply-runtime-tint chantier). `ryzom-data`'s own `final_bnps/characters_maps_hr/panoply_files.txt`
+is the working copy Nuno edits by hand as new items are added, and already lists the hof
+entries.
+
+New `SearchPathsDialog._load_ryzom_data_panoply_variants()`: reads that file directly via
+`pynel.repository_paths` (mtime-cached), now checked **first** in `_merge_and_publish()`
+-- wins over both halves of the existing scan-based detection (workspace, then generic
+search paths) whenever `ryzom-data` is configured and has the file; falls back to the
+previous behavior otherwise (unconfigured, or the file doesn't exist there yet). Doc:
+`docs/search_paths.md` updated.
+
+**Second, pre-existing bug found while validating the above**: even reading the right
+file, Patina still reported "no variants detected" for `ryw_mark1_hof_caster01_pantabottes`.
+Traced to `panoply.parse_panoply_files()` hardcoding `.tga` as the only accepted line
+extension -- silently dropping every single line of a real production `panoply_files.txt`
+like `ryzom-data/final_bnps/characters_maps_hr/panoply_files.txt`, which lists `.dds`
+(confirmed: `grep -c` found the 24 real hof entries in the file, all ending `.dds`, all
+skipped). Fixed to accept any extension in `search_paths.TEXTURE_FALLBACK_EXTENSIONS`
+(`.tga`/`.png`/`.dds`) instead. Verified the fixed parsing logic directly in the sandbox
+against a synthetic sample matching the real hof entries (pure-Python, no numpy/panda3d
+needed for this one function) -- correctly extracts `user: [1, 2, ...]` for the right
+stem now. This bug predates today's session entirely (nothing about
+`_load_ryzom_data_panoply_variants()` caused it, it just routed real `.dds`-listing data
+through this function for the first time) -- unclear whether the shipped `.bnp` copies
+Patina previously read from happen to use `.tga` naming (masking the bug so far) or
+whether Panoply detection from a shipped `.bnp` was simply never exercised end-to-end
+before. Doc: `docs/panoply_parsing.md` updated.
+
 ## 2026-08-29 — ✨ Threaded Panoply bake with a live progress popup
 
 The real Panoply bake (`_bake_panoply_real`/`_bake_panoply_real_all`) used to run

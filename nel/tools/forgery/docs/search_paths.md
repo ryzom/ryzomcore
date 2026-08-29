@@ -113,6 +113,19 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  texture contre l'index scanné.
 - `panoply_variants_for(base_texture_name)` (`search_paths_dialog.py`) :
  variantes panoply pour une texture de base donnée.
+- `_load_ryzom_data_panoply_variants` (`search_paths_dialog.py`, 2026-08-29) : lit
+ `panoply_files.txt` directement depuis `<ryzom-data>/final_bnps/characters_maps_hr/`
+ (via `pynel.repository_paths`, cache par mtime), **prioritaire** dans
+ `_merge_and_publish` sur celui trouvé dans un `characters_maps_hr.bnp` shippé le long
+ des search paths génériques — le fichier de `ryzom-data` est la copie de travail,
+ éditée à la main au fur et à mesure des ajouts, alors que celui du `.bnp` shippé ne
+ reflète que le dernier vrai build `hls_bank_maker` et peut être en retard (cas vécu :
+ les masques de `ryw_mark1_hof_caster01_pantabottes` invisibles dans Patina alors que
+ les `.dds` existent déjà sous `ryzom-data/final_bnps/characters_maps_hr/mark_1/`, le
+ `panoply_files.txt` du `.bnp` shippé n'ayant jamais été régénéré pour eux). `{}` si
+ `ryzom-data` n'est pas configuré ou que le fichier n'existe pas — dans ce cas,
+ `_merge_and_publish` retombe sur le comportement précédent (workspace puis search
+ paths génériques).
 - `draw_settings_content` (`search_paths_dialog.py`) : dessine la
  liste de dossiers (chemin tronqué avec tooltip, bascule récursif/non,
  boutons monter/descendre/supprimer, ajouter, recharger) — intégrée dans
