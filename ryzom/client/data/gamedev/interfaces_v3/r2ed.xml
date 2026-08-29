@@ -2171,9 +2171,13 @@ text_y="-2"
 							 y="1" posref="BR BL" w="70" hardtext="uiR2EdLink" fontsize="12" y_text="-5" params_l="r2:linkColor()"/>	
 						</group>
 
+						<!-- any equipment checkbox -->
+						<instance template="label_toggle_button" id="all_equipment" posparent="labels_line" 
+						 posref="BL TL" x="0" y="-2" w="200" hardtext="uiR2EdAllEquipment" fontsize="10" y_text="-2" params_l="r2:toggleAllEquipment()"/>
+
 						<!-- helmet -->
-						<instance template="label_combo_box_slider" id="helmet" posparent="labels_line" 
-						 posref="BL TL" hardtext="uiR2EdHelmet" y="-7" on_change_params="r2:updatePieceEquipment()"
+						<instance template="label_combo_box_slider" id="helmet" posparent="all_equipment" 
+						 posref="BL TL" hardtext="uiR2EdHelmet" y="-5" on_change_params="r2:updatePieceEquipment()"
 						 params="r2:updatePieceEquipmentColor('local')" end_params="r2:updatePieceEquipmentColor('commit')"
 						 cancel_params="r2:updatePieceEquipmentColor('cancel')"/>
 

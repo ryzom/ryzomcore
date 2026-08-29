@@ -291,6 +291,21 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 		editNotes.input_string = ""
 	end
 
+	-- restore "all equipment" checkbox from NPC state
+	r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
+	local allEquipToggle = npcUI:find("all_equipment")
+	if allEquipToggle then
+		allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
+	end
+
+	-- update color slider range based on all equipment state
+	local maxVal = r2:getColorSliderMax()
+	for i=1, r2.equipmentAttNb do
+		local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+		assert(slider)
+		slider.max = maxVal
+	end
+
 	-- update avoidable equipment
 	r2:updateEquipment(instance, false)
 
@@ -309,7 +324,11 @@ function npcCustomPropertySheetDisplayerTable:updateAllPrivate(instance)
 	local leftHandIndex = instance.WeaponLeftHand
 
 	local handsKey = rightHandIndex..":"..leftHandIndex..":"..handsLevel
-	local weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][comboBox.Env.nameComboBox][handsKey] 
+	local effId = r2:getEffectiveEquipmentId(instance, comboBox.Env.nameComboBox)
+	local weaponsName = r2.itemIndexEquipmentToSelectionText[effId][comboBox.Env.nameComboBox][handsKey]
+	if weaponsName == nil then
+		weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][comboBox.Env.nameComboBox][handsKey]
+	end
 	comboBox.Env.locked = true
 	comboBox.selection_text = weaponsName
 	comboBox.Env.locked = false
@@ -511,7 +530,14 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 			comboBox = npcUI:find(cbbName):find("combo_box")
 			assert(comboBox)
 
-			local CBText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][cbbName][instance[attributeName]]	
+			local effId = r2:getEffectiveEquipmentId(instance, cbbName)
+			local CBText = r2.itemIndexEquipmentToSelectionText[effId][cbbName][instance[attributeName]]
+			if CBText==nil then
+				local origLookup = r2.itemIndexEquipmentToSelectionText[instance.Equipment]
+				if origLookup and origLookup[cbbName] then
+					CBText = origLookup[cbbName][instance[attributeName]]
+				end
+			end
 			if CBText==nil then CBText= r2.noPiece end
 			if attributeName == "HairType" then				
 				slider = npcUI:find("slider_haircut")
@@ -567,15 +593,16 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 				slider = npcUI:find(v1):find("slider")
 				local comboBox = npcUI:find(cbbName):find("combo_box")
 				local propName = r2.equipmentEnv[v1].propName
+				local effId = r2:getEffectiveEquipmentId(instance, v1)
 				local comboText 
 				if propName=="HairType" then
 					if r2.hasHelmet then
-						comboText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][v1][instance[propName]]
+						comboText = r2.itemIndexEquipmentToSelectionText[effId][v1][instance[propName]]
 					else
 						comboText = r2.noPiece
 					end
 				else
-					comboText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][v1][instance[propName]]
+					comboText = r2.itemIndexEquipmentToSelectionText[effId][v1][instance[propName]]
 				end
 			end
 			return 
@@ -594,6 +621,22 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		local link = false
 		if instance.LinkColor==1 then link=true end
 		toggleB.pushed = not link
+	end
+
+	-- USE ALL EQUIPMENT
+	if attributeName == "UseAllEquipment" then
+		r2.allEquipmentEnabled = (instance.UseAllEquipment == 1)
+		local allEquipToggle = npcUI:find("all_equipment")
+		if allEquipToggle then
+			allEquipToggle.toggle_butt.pushed = not r2.allEquipmentEnabled
+		end
+		local maxVal = r2:getColorSliderMax()
+		for i=1, r2.equipmentAttNb do
+			local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+			assert(slider)
+			slider.max = maxVal
+		end
+		r2:updateEquipment(instance, false, true)
 	end
 
 	-- BODY SETS / FACE SETS/ FACE MORPH
@@ -625,7 +668,11 @@ function npcCustomPropertySheetDisplayerTable:onAttrModified(instance, attribute
 		local leftHandIndex = instance.WeaponLeftHand
 
 		local handsKey = rightHandIndex..":"..leftHandIndex..":"..handsLevel
-		local weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][weaponsCB.Env.nameComboBox][handsKey] 
+		local effId = r2:getEffectiveEquipmentId(instance, weaponsCB.Env.nameComboBox)
+		local weaponsName = r2.itemIndexEquipmentToSelectionText[effId][weaponsCB.Env.nameComboBox][handsKey]
+		if weaponsName == nil then
+			weaponsName = r2.itemIndexEquipmentToSelectionText[instance.Equipment][weaponsCB.Env.nameComboBox][handsKey]
+		end
 		if weaponsName then
 			weaponsCB.Env.locked = true
 			weaponsCB.selection_text = weaponsName
@@ -792,9 +839,7 @@ function r2:initNpcEditor()
 	local npcUI = getUI("ui:interface:r2ed_npc")
 
 	-- equipment color sliders
-	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
-	local maxVal = 5
-	if tonumber(levelDesignEnabled)==1 then maxVal = 7 end
+	local maxVal = r2:getColorSliderMax()
 
 	for i=1, r2.equipmentAttNb do 
 		local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
@@ -2042,6 +2087,8 @@ r2.equipmentPalette = {}
 r2.itemIndexEquipmentToSelectionText = {}
 r2.equipmentEnv = {}
 r2.noPiece = i18n.get("uiR2EdNoPiece")
+r2.allEquipmentEnabled = false
+r2.allEquipmentId = "r2_all_equipment"
 
 r2.equipmentAttNb = 6
 
@@ -2060,6 +2107,18 @@ r2.equipmentSets = {}
 
 r2.linkColorB = false
 r2.linkedColor = 0
+
+-----------------------------------------------------------------------------------------------
+-- Returns the maximum color index for equipment color sliders.
+-- Default range is 0..5 (6 colors); expanded to 0..7 (8 colors) when
+-- LevelDesignEnabled is set or when "all equipment" mode is enabled.
+function r2:getColorSliderMax()
+	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
+	if tonumber(levelDesignEnabled) == 1 or r2.allEquipmentEnabled then
+		return 7
+	end
+	return 5
+end
 
 function r2:initEquipmentEnv()
 
@@ -2134,6 +2193,9 @@ function r2:initEquipmentEnv()
 			r2.itemIndexEquipmentToSelectionText[equId][comboName][0] = r2.noPiece
 		end
 	end
+
+	-- Build the merged "all equipment" palette after all individual palettes are initialized
+	r2:buildAllEquipmentPalette()
 end
 
 -----------------------------------------------------------------------------------------------
@@ -2183,8 +2245,188 @@ function r2.addR2PlayerEquipment(paletteElt, equipmentTable)
 end
 
 -----------------------------------------------------------------------------------------------
+-- Classify an equipment ID into a combat category for weapon grouping.
+-- Returns a category string: "melee", "magic", "healer", "guard", "civil", or "player".
+function r2:getEquipmentCombatCategory(equipmentId)
+	if equipmentId == nil or equipmentId == "" then return nil end
+	if string.find(equipmentId, "melee_dd_") or string.find(equipmentId, "melee_tank_")
+	   or string.find(equipmentId, "light_melee_") then
+		return "melee"
+	elseif string.find(equipmentId, "mage_") then
+		return "magic"
+	elseif string.find(equipmentId, "healer_") then
+		return "healer"
+	elseif string.find(equipmentId, "guard_") then
+		return "guard"
+	elseif string.find(equipmentId, "civil_") then
+		return "civil"
+	end
+	-- player race equipment types (no hands slot, but categorize for completeness)
+	local playerRaces = { "fyros_equipment", "matis_equipment", "tryker_equipment", "zorai_equipment" }
+	for _, race in ipairs(playerRaces) do
+		if equipmentId == race then return "player" end
+	end
+	return nil
+end
 
-function r2:updateEquipment(instance, init)
+-----------------------------------------------------------------------------------------------
+-- Helper: build a dedup key for a weapon entry (rightHand:leftHand:handsLevel).
+local function weaponDedupKey(item)
+	return (item.rightHand or "") .. ":" .. (item.leftHand or "") .. ":" .. (item.handsLevel or "")
+end
+
+-----------------------------------------------------------------------------------------------
+-- Build a merged equipment palette containing all outfit items from every equipment palette.
+-- Also builds merged weapon palettes per combat category so that "all equipment" mode
+-- expands weapon choices within the same combat type across all races and levels.
+function r2:buildAllEquipmentPalette()
+	local outfitSlots = { "helmet", "chest_plate", "legs", "boots", "gloves", "arms_guard" }
+	local merged = {}
+	for _, slot in ipairs(outfitSlots) do
+		merged[slot] = {}
+		-- add "None" entry at the beginning so users can unequip any slot
+		table.insert(merged[slot], {["trad"]=r2.noPiece, ["itemFile"]=""})
+		local seen = {} -- track by itemFile to avoid duplicates
+		for equId, equTable in pairs(r2.equipmentPalette) do
+			if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") and equTable[slot] then
+				for _, item in ipairs(equTable[slot]) do
+					if item.itemFile and item.itemFile ~= "" and not seen[item.itemFile] then
+						seen[item.itemFile] = true
+						table.insert(merged[slot], {["trad"]=item.trad, ["itemFile"]=item.itemFile})
+					end
+				end
+			end
+		end
+	end
+	r2.equipmentPalette[r2.allEquipmentId] = merged
+
+	-- Build lookup tables for the merged outfit palette
+	r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId] = {}
+	for _, slot in ipairs(outfitSlots) do
+		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot] = {}
+		for _, item in ipairs(merged[slot]) do
+			local itemIndex = getSheetId(item.itemFile)
+			r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][itemIndex] = item.trad
+		end
+		r2.itemIndexEquipmentToSelectionText[r2.allEquipmentId][slot][0] = r2.noPiece
+	end
+
+	-- Discover which combat categories exist
+	local categoriesFound = {}
+	for equId, equTable in pairs(r2.equipmentPalette) do
+		if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") then
+			local category = r2:getEquipmentCombatCategory(equId)
+			if category and equTable["hands"] then
+				categoriesFound[category] = true
+			end
+		end
+	end
+
+	-- Build merged weapon palette tables per category
+	for category, _ in pairs(categoriesFound) do
+		local weaponPaletteId = "r2_all_weapons_" .. category
+		local mergedHands = {}
+		local seen = {}
+		for equId, equTable in pairs(r2.equipmentPalette) do
+			if equId ~= r2.allEquipmentId and not string.find(equId, "r2_all_weapons_") then
+				local cat = r2:getEquipmentCombatCategory(equId)
+				if cat == category and equTable["hands"] then
+					for _, item in ipairs(equTable["hands"]) do
+						local key = weaponDedupKey(item)
+						if not seen[key] then
+							seen[key] = true
+							table.insert(mergedHands, {
+								["trad"] = item.trad,
+								["rightHand"] = item.rightHand,
+								["leftHand"] = item.leftHand,
+								["handsLevel"] = item.handsLevel
+							})
+						end
+					end
+				end
+			end
+		end
+		r2.equipmentPalette[weaponPaletteId] = { ["hands"] = mergedHands }
+
+		-- Build lookup tables for the merged weapon palette
+		r2.itemIndexEquipmentToSelectionText[weaponPaletteId] = {}
+		r2.itemIndexEquipmentToSelectionText[weaponPaletteId]["hands"] = {}
+		for _, item in ipairs(mergedHands) do
+			local rightHandIndex = getSheetId(item.rightHand)
+			local leftHandIndex = getSheetId(item.leftHand)
+			local handsKey = rightHandIndex .. ":" .. leftHandIndex .. ":" .. item.handsLevel
+			r2.itemIndexEquipmentToSelectionText[weaponPaletteId]["hands"][handsKey] = item.trad
+		end
+		r2.itemIndexEquipmentToSelectionText[weaponPaletteId]["hands"][0] = r2.noPiece
+	end
+end
+
+-----------------------------------------------------------------------------------------------
+-- Returns the effective equipment ID for a given slot.
+-- When "all equipment" is enabled:
+--   - For outfit slots: returns the merged all-outfit palette ID.
+--   - For "hands" slot: returns the merged weapon palette for the NPC's combat category,
+--     which expands weapon choices across all races and levels within the same combat type.
+-- When "all equipment" is disabled, always returns the NPC's actual equipment ID.
+function r2:getEffectiveEquipmentId(instance, slotName)
+	if r2.allEquipmentEnabled then
+		if slotName == "hands" then
+			local category = r2:getEquipmentCombatCategory(instance.Equipment)
+			if category then
+				local weaponPaletteId = "r2_all_weapons_" .. category
+				if r2.equipmentPalette[weaponPaletteId] then
+					return weaponPaletteId
+				end
+			end
+			return instance.Equipment
+		else
+			return r2.allEquipmentId
+		end
+	end
+	return instance.Equipment
+end
+
+-------------------------------------------------------------------------------------------------------
+-- Toggle the "all equipment" checkbox: persist and repopulate combo boxes.
+-- All property changes (UseAllEquipment + any equipment reversions) are grouped
+-- into a single undo action using requestNewAction/requestEndAction.
+function r2:toggleAllEquipment()
+
+	local npcUI = getUI("ui:interface:r2ed_npc")
+	assert(npcUI)
+
+	local toggleB = npcUI:find("all_equipment").toggle_butt
+	assert(toggleB)
+	r2.allEquipmentEnabled = not toggleB.pushed
+
+	-- update color slider range
+	local maxVal = r2:getColorSliderMax()
+	for i=1, r2.equipmentAttNb do
+		local slider = npcUI:find(r2.equipementComboB[i]):find("slider")
+		assert(slider)
+		slider.max = maxVal
+	end
+
+	-- persist the state and repopulate combo boxes in a single undo action
+	local selection = r2:getSelectedInstance()
+	if selection then
+		r2.requestNewAction(i18n.get("uiR2EDUpdateEquipmentPieceAction"))
+		-- prevent updatePieceEquipment from creating separate undo entries
+		-- when equipment is reverted during combo box repopulation
+		r2.selectEquipmentSet = true
+		local val = 0
+		if r2.allEquipmentEnabled then val = 1 end
+		r2:setNpcAttribute(selection.InstanceId, "UseAllEquipment", val)
+		-- repopulate equipment combo boxes without resetting link color
+		r2:updateEquipment(selection, false, true)
+		r2.selectEquipmentSet = false
+		r2.requestEndAction()
+	end
+end
+
+-----------------------------------------------------------------------------------------------
+
+function r2:updateEquipment(instance, init, skipLinkColor)
 
 	local equipmentId = instance.Equipment
 
@@ -2197,14 +2439,18 @@ function r2:updateEquipment(instance, init)
 	if r2.equipmentPalette[equipmentId] then
 
 		for k, v in pairs(r2.equipmentPalette[equipmentId]) do
+			local effId = r2:getEffectiveEquipmentId(instance, k)
+			local effTable = r2.equipmentPalette[effId]
 			comboBox = npcUI:find(k):find("combo_box")
 			assert(comboBox)
 			
 			comboBox:resetTexts()
 			
-			for k1, v1 in pairs(v) do
-				comboBox:addText(v1.trad)
-			end	
+			if effTable and effTable[k] then
+				for k1, v1 in pairs(effTable[k]) do
+					comboBox:addText(v1.trad)
+				end
+			end
 		end
 
 		if init then r2.hasHelmet = false end
@@ -2229,10 +2475,12 @@ function r2:updateEquipment(instance, init)
 	comboBox.view_text = r2.emptyComboLine
 	comboBoxPopup.view_text = r2.emptyComboLine
 
-	local toggleB = npcUI:find("color_link").toggle_butt
-	assert(toggleB)
-	toggleB.pushed = true
-	r2:linkColor()
+	if not skipLinkColor then
+		local toggleB = npcUI:find("color_link").toggle_butt
+		assert(toggleB)
+		toggleB.pushed = true
+		r2:linkColor()
+	end
 
 	-- update selection texts
 	local comboBox, slider
@@ -2243,7 +2491,15 @@ function r2:updateEquipment(instance, init)
 		slider = npcUI:find(k):find("slider")
 		local line = npcUI:find(k):find("line_slider")
 
-		local CBText = r2.itemIndexEquipmentToSelectionText[instance.Equipment][comboBox.Env.nameComboBox][instance[v.propName] ]
+		local effId = r2:getEffectiveEquipmentId(instance, comboBox.Env.nameComboBox)
+		local CBText = r2.itemIndexEquipmentToSelectionText[effId][comboBox.Env.nameComboBox][instance[v.propName] ]
+		if CBText==nil then
+			-- try original equipment ID as fallback
+			local origLookup = r2.itemIndexEquipmentToSelectionText[instance.Equipment]
+			if origLookup and origLookup[comboBox.Env.nameComboBox] then
+				CBText = origLookup[comboBox.Env.nameComboBox][instance[v.propName] ]
+			end
+		end
 		if CBText==nil then CBText=r2.noPiece end
 		comboBox.Env.locked = true
 		comboBox.selection_text = CBText
@@ -2324,11 +2580,16 @@ function r2:updatePieceEquipment()
 			assert(sliderHairColor)
 		end
 		local itemFile = ""
-		for k, v in pairs(r2.equipmentPalette[selection.Equipment][nameComboBox]) do
+		local effId = r2:getEffectiveEquipmentId(selection, nameComboBox)
+		for k, v in pairs(r2.equipmentPalette[effId][nameComboBox]) do
 			if v.trad == equipmentType then itemFile = v.itemFile break end
 		end
 
-		itemIndex = getSheetId(itemFile)
+		if itemFile == "" then
+			itemIndex = 0
+		else
+			itemIndex = getSheetId(itemFile)
+		end
 		if not getUICaller().Env.locked then
 			r2:setNpcAttribute(selection.InstanceId, r2.equipmentEnv[nameComboBox].propName, itemIndex)
 		end
@@ -2380,7 +2641,8 @@ function r2:updateWeapons()
 	local equipmentType = hands.selection_text
 
 	local handsTable
-	for k, v in pairs(r2.equipmentPalette[selection.Equipment][hands.Env.nameComboBox]) do
+	local effId = r2:getEffectiveEquipmentId(selection, hands.Env.nameComboBox)
+	for k, v in pairs(r2.equipmentPalette[effId][hands.Env.nameComboBox]) do
 		if v.trad == equipmentType then handsTable = v break end
 	end
 	assert(handsTable)
@@ -2607,9 +2869,7 @@ function r2:randomColor()
 	local npcUI = getUI("ui:interface:r2ed_npc")
 	assert(npcUI)
 
-	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
-	local maxVal = 5
-	if tonumber(levelDesignEnabled)==1 then maxVal = 7 end
+	local maxVal = r2:getColorSliderMax()
 
 	if r2.linkColorB then
 		local randomColor = math.random(0, maxVal)
@@ -2724,9 +2984,7 @@ function r2:randomNPCEquipment(equipmentId, result)
 	result["WeaponLeftHand"] = weaponLH
 
 	-- random equipment color
-	local levelDesignEnabled = getClientCfgVar("LevelDesignEnabled")
-	local maxVal = 5
-	if tonumber(levelDesignEnabled)==1 then maxVal = 7 end
+	local maxVal = r2:getColorSliderMax()
 	result["JacketColor"] = math.random(0, maxVal)
 	result["ArmColor"] = math.random(0, maxVal)
 	result["HandsColor"] = math.random(0, maxVal)
