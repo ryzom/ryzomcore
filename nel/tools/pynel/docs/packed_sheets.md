@@ -1,9 +1,13 @@
-# `.packed_sheets` (`creature.packed_sheets` first) — investigation notes
+# `.packed_sheets` — investigation notes
 
-Status: **`creature.packed_sheets` implemented** (`pynel/ryzom_packed_sheets.py`,
-CLI `ryzom-packed-sheets`), validated against the real file (28545 entries,
-consumed with no trailing bytes, no exception). Sample files used for this
-investigation: `~/.local/share/Ryzom/ryzom_live/data/creature.packed_sheets`
+Status: **implemented** for `creature.packed_sheets` and
+`item.packed_sheets`/`sitem.packed_sheets` (`pynel/ryzom_packed_sheets.py`,
+CLI `ryzom-packed-sheets`), validated against real files: 28545 creature
+entries, 799 item entries, 8761 sitem entries, all consumed with no trailing
+bytes and no exception; the `Family`-keyed union in `CItemSheet` spot-checked
+across all 27 `ITEMFAMILY` values (decoded struct present exactly where the
+C++ switch has a case, `None` everywhere else). Sample files used:
+`~/.local/share/Ryzom/ryzom_live/data/{creature,item,sitem}.packed_sheets`
 and `sheet_id.bin` (inside `~/.local/share/Ryzom/ryzom_live/data/leveldesign.bnp`).
 
 ## Where the actual `.shape` comes from (NOT in `.creature`)
@@ -31,11 +35,12 @@ it's a natural next question and easy to get wrong:
   some other convention (possibly baked per-skeleton, or resolved from
   `id_anim_set_base_name`/`id_automaton` some other way) that hasn't been
   traced yet. Flagged here as an open question, not solved.
-- **Next step, not started**: implement `item.packed_sheets`
-  (`CItemSheet`, `ryzom/client/src/client_sheets/item_sheet.{h,cpp}`) the
-  same way this doc covers `CCharacterSheet`, so `Equipment.id_item` can be
-  resolved to a real `.shape` filename. Separate investigation/session, same
-  pattern as this doc.
+- **Implemented**: `item.packed_sheets`/`sitem.packed_sheets` (`CItemSheet`,
+  see the dedicated section below) — `Equipment.id_item` can now be resolved
+  to a real `.shape` filename by looking up that name in `item_packed_sheets`'s
+  entries (keyed by `sheet_id.bin`-resolved name) and reading `id_shape`/the
+  race-gender variants. Confirmed end-to-end: `fyhc1.creature`'s `body` slot
+  (`fy_civil01_gilet.item`) resolves to an `ItemSheet` whose `family=ARMOR`.
 
 ## What a `.packed_sheets` file is
 
@@ -260,17 +265,137 @@ For `creature.packed_sheets`, every entry's `type` is expected to be
 misparsing) if some other type shows up in a real file, since only
 `CCharacterSheet` is implemented in the first version.
 
-## Other sheet types (deliberately out of scope for v1)
+## `CItemSheet::serial` (`ryzom/client/src/client_sheets/item_sheet.cpp:681`), for `item.packed_sheets`/`sitem.packed_sheets`
+
+Both the `item` and `sitem` extensions map to `CItemSheet`
+(`sheet_manager.cpp`'s `readGeorges`: `extension == "sitem" || extension == "item"`),
+sharing the same `TypeVersion[]` entry: version **44**. This is the class
+that actually holds `.shape` filenames — see "Where the actual `.shape`
+comes from" above; `CharacterSheet.<slot>.id_item` names one of these
+sheets, and *this* sheet's `IdShape*` fields are the real mesh.
+
+Flat, linear serial (no version branches beyond the one conditional switch
+at the very end, gated on `Family`, itself a serialized field so decoding
+is unambiguous). Field order:
+
+```
+IdShape                 string   (base shape; use this if no race/gender-specific one below applies)
+IdShapeFemale           string
+IdShapeFyros            string
+IdShapeFyrosFemale      string
+IdShapeMatis            string
+IdShapeMatisFemale      string
+IdShapeTryker           string
+IdShapeTrykerFemale     string
+IdShapeZorai            string
+IdShapeZoraiFemale      string
+SlotBF                  u64      bitfield, bit N set = usable in SLOTTYPE::TSlotType N
+MapVariant               u32
+Family                   sint32 (serialEnum, ITEMFAMILY::EItemFamily — see below, determines the union block at the end)
+ItemType                 sint32 (serialEnum, ITEM_TYPE::TItemType)
+IdIconMain               string
+IdIconBack               string
+IdIconOver               string
+IdIconOver2              string
+IconColor                rgba (4×u8)
+IconBackColor            rgba
+IconOverColor            rgba
+IconOver2Color           rgba
+IdIconText               string
+IdAnimSet                string
+Color                    sint8
+HasFx                    bool
+DropOrSell               bool
+IsItemNoRent             bool
+NeverHideWhenEquipped    bool
+Stackable                u32
+IsConsumable             bool
+Bulk                     f32
+EquipTime                u32
+FX                       CItemFXSheet   (see below)
+IdEffect1                string
+IdEffect2                string
+IdEffect3                string
+IdEffect4                string
+MpItemParts              cont<CMpItemPart>
+CraftPlan                u32   (CSheetId, raw — resolve via sheet_id.bin like any other)
+RequiredCharac            sint32 (serialEnum, CHARACTERISTICS::TCharacteristics)
+RequiredCharacLevel      u16
+RequiredSkill             sint32 (serialEnum, SKILLS::ESkills)
+RequiredSkillLevel       u16
+ItemOrigin                sint32 (serialEnum, ITEM_ORIGIN::EItemOrigin)
+Scroll                   CScroll   (always present, regardless of Family — read unconditionally)
+<union>                  present only if Family selects one of the cases below; absent (zero bytes) for
+                          any Family not listed (incl. SCROLL, whose data already went out via Scroll above)
+```
+
+The trailing union, keyed on `Family` (values from `ITEMFAMILY::EItemFamily`,
+`ryzom/common/src/game_share/item_family.h` — no gaps, plain sequential
+auto-increment from `UNDEFINED=0`):
+
+```
+Family value        struct read       fields (all serialEnum unless noted)
+COSMETIC             CCosmetic         VPValue: u32, Gender: enum
+ARMOR                 CArmor            ArmorType: enum
+MELEE_WEAPON          CMeleeWeapon      WeaponType: enum, Skill: enum, DamageType: enum, MeleeRange: sint32
+RANGE_WEAPON          CRangeWeapon      WeaponType: enum, Skill: enum, RangeWeaponType: enum
+AMMO                  CAmmo             Skill: enum, DamageType: enum, Magazine: sint32
+RAW_MATERIAL           CMp               Ecosystem: enum, MpCategory: enum, HarvestSkill: enum, Family: enum,
+                                         ItemPartBF: u64, UsedAsCraftRequirement: bool, MpColor: sint8, StatEnergy: u16
+SHIELD                 CShield           ShieldType: enum
+CRAFTING_TOOL/
+HARVEST_TOOL/
+TAMING_TOOL             CTool             Skill: enum, CraftingToolType: enum, CommandRange: sint32, MaxDonkey: sint32
+GUILD_OPTION            CGuildOption      MoneyCost: u32, XPCost: sint32
+PET_ANIMAL_TICKET       CPet              Slot: sint32
+TELEPORT                CTeleport         Type: enum
+CONSUMABLE              CConsumable       OverdoseTimer: u16, ConsumptionTime: u16, Properties: cont<string>
+SCROLL                 (nothing — commented out in C++, Scroll field above already covers it)
+any other value        (nothing)
+```
+
+`CMpItemPart` (element of `MpItemParts`):
+```
+OriginFilter   u8
+Stats[34]      34 × u8   (RM_FABER_STAT_TYPE::NumRMStatType, static_assert'd == 34 in the C++ — if a future
+                          file version bumps this, the version guard (44) will already have changed too)
+```
+
+`CScroll` (always present):
+```
+Texture       string
+LuaCommand    string
+WebCommand    string
+Label         string
+```
+
+`CItemFXSheet` (`item_fx_sheet.cpp:76`, the `FX` field):
+```
+TrailMinSliceTime   f32
+TrailMaxSliceTime   f32
+AttackFXOffset      vector3
+Trail               string   (private _Trail, but serialized as a plain string like everything else)
+AdvantageFX         string
+AttackFX             string
+AttackFXRot         vector3
+ImpactFXDelay        f32
+StaticFXs           cont<CStaticFX>   (item_fx_sheet.cpp:122):
+                       Name   string
+                       Bone   string
+                       Offset vector3
+```
+
+## Other sheet types (deliberately out of scope beyond `.creature`/`.item`/`.sitem`)
 
 `CSheetManagerEntry::serial` (sheet_manager.cpp:290) is a big switch over
-~25 `CEntitySheet` subclasses (`CItemSheet`, `CBuildingSheet`,
-`CSBrickSheet`, ...), each its own class with its own `serial()`
-(`ryzom/client/src/client_sheets/*.cpp`) and its own version number in
-`TypeVersion[]`. Each one is a separate, similarly-sized investigation —
-not attempted here. When picking up another `.packed_sheets` extension
-later, the pattern to follow is exactly this doc: find the class in
-`sheet_manager.cpp`'s `readGeorges`/`serial` switch, read its `serial()`
-top to bottom, note its `TypeVersion[]` entry, write it up before coding.
+~25 `CEntitySheet` subclasses (`CBuildingSheet`, `CSBrickSheet`, ...), each
+its own class with its own `serial()` (`ryzom/client/src/client_sheets/*.cpp`)
+and its own version number in `TypeVersion[]`. Each one is a separate,
+similarly-sized investigation — not attempted here. When picking up another
+`.packed_sheets` extension later, the pattern to follow is exactly this doc:
+find the class in `sheet_manager.cpp`'s `readGeorges`/`serial` switch, read
+its `serial()` top to bottom, note its `TypeVersion[]` entry, write it up
+before coding.
 
 ## Suggested plan for implementation
 

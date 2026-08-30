@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-08-30 — ✨ Add item/sitem.packed_sheets support to ryzom_packed_sheets, pynel 0.7.0
+
+Extends `pynel.ryzom_packed_sheets` (see the entry below for the initial
+`creature.packed_sheets` support) with `item.packed_sheets`/
+`sitem.packed_sheets` (`CEntitySheet::ITEM` / `CItemSheet`, both extensions
+share the same class and `TypeVersion[]` entry, version 44) —
+`parse_item_packed_sheets()`/`load_item_packed_sheets()`, new `ItemSheet`
+dataclass plus its sub-structures (`ItemFX`, `StaticFX`, `MpItemPart`,
+`Scroll`, `Rgba`) and the 11 `Family`-keyed union variants
+(`Cosmetic`/`Armor`/`MeleeWeapon`/`RangeWeapon`/`Ammo`/`Mp`/`Shield`/`Tool`/
+`GuildOption`/`Pet`/`Teleport`/`Consumable`, dispatched off
+`ITEMFAMILY::EItemFamily` exactly like the real `CItemSheet::serial` switch).
+CLI `ryzom-packed-sheets dump` now auto-detects creature vs. item from the
+filename (or `--kind`).
+
+Directly motivated by a gap found while validating `creature.packed_sheets`
+last entry (below): `CharacterSheet.<slot>.id_item` only names an
+`.item`/`.sitem` sheet, not a real `.shape` — the actual mesh filename
+(`IdShape` + 4 race × 2 gender variants) only lives in *this* sheet. That
+loop is now closed: `fyhc1.creature`'s `body` slot (`fy_civil01_gilet.item`)
+resolves through `item.packed_sheets` to a real `ARMOR`-family `ItemSheet`.
+
+Header/dependency-block parsing refactored into a shared
+`_parse_packed_sheets_header()`/`_parse_entity_map()` pair, reused by both
+`parse_creature_packed_sheets()` and the new `parse_item_packed_sheets()` —
+same header, same map-of-`(type, id, payload)` shape, only the payload
+parser and expected type/version differ.
+
+Format documented in `docs/packed_sheets.md` (new sections: full
+`CItemSheet::serial` field order, the `Family` → union-struct dispatch
+table, `CItemFXSheet`). Validated against all three real files on the
+maintainer's machine: 799 `item.packed_sheets` entries and 8761
+`sitem.packed_sheets` entries, both fully consumed with no trailing bytes
+and no exception; the union dispatch spot-checked across all 27
+`ITEMFAMILY` values in the real `sitem.packed_sheets` (decoded struct
+present exactly where `CItemSheet::serial`'s switch has a case for that
+family, `None` everywhere else, matching the C++ exactly).
+
 ## 2026-08-30 — ✨ Add ryzom_packed_sheets (creature.packed_sheets + sheet_id.bin), pynel 0.6.0
 
 New `pynel.ryzom_packed_sheets` module (CLI `ryzom-packed-sheets`): reads

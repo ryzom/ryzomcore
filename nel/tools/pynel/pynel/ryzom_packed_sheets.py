@@ -23,8 +23,9 @@ ryzom/client/src/sheet_manager.cpp (CSheetManagerEntry::serial, TypeVersion[]) a
 ryzom/client/src/client_sheets/character_sheet.cpp (CCharacterSheet::serial) — see
 nel/tools/pynel/docs/packed_sheets.md for the full writeup.
 
-Only `creature.packed_sheets` (CEntitySheet::FAUNA / CCharacterSheet) is supported
-so far. Other sheet types (item, sbrick, mission, ...) raise PackedSheetsParseError.
+Supports `creature.packed_sheets` (CEntitySheet::FAUNA / CCharacterSheet) and
+`item.packed_sheets`/`sitem.packed_sheets` (CEntitySheet::ITEM / CItemSheet).
+Other sheet types (sbrick, mission, ...) raise PackedSheetsParseError.
 
 Read-only: the client always regenerates this cache from the source Georges sheets,
 there's no reason for pynel to write it back.
@@ -59,9 +60,24 @@ ENTITY_SHEET_TYPES = [
 	"FACTION",
 ]
 FAUNA_TYPE = ENTITY_SHEET_TYPES.index("FAUNA")
+ITEM_TYPE = ENTITY_SHEET_TYPES.index("ITEM")
 
 # TypeVersion[] entry for "creature" in ryzom/client/src/sheet_manager.cpp
 CREATURE_SHEET_VERSION = 17
+# TypeVersion[] entry shared by "item" and "sitem" (both map to CItemSheet)
+ITEM_SHEET_VERSION = 44
+
+# ITEMFAMILY::EItemFamily (ryzom/common/src/game_share/item_family.h) — plain sequential
+# auto-increment from UNDEFINED=0, no gaps. Order is the wire encoding, do not reorder.
+ITEM_FAMILY_NAMES = [
+	"UNDEFINED", "SERVICE", "ARMOR", "MELEE_WEAPON", "RANGE_WEAPON", "AMMO", "RAW_MATERIAL",
+	"SHIELD", "CRAFTING_TOOL", "HARVEST_TOOL", "TAMING_TOOL", "TRAINING_TOOL", "AI", "BRICK",
+	"FOOD", "JEWELRY", "CORPSE", "CARRION", "BAG", "STACK", "DEAD_SEED", "TELEPORT",
+	"GUILD_FLAG", "LIVING_SEED", "LITTLE_SEED", "MEDIUM_SEED", "BIG_SEED", "VERY_BIG_SEED",
+	"MISSION_ITEM", "CRYSTALLIZED_SPELL", "ITEM_SAP_RECHARGE", "PET_ANIMAL_TICKET",
+	"GUILD_OPTION", "HANDLED_ITEM", "COSMETIC", "CONSUMABLE", "XP_CATALYSER", "SCROLL",
+	"SCROLL_R2", "COMMAND_TICKET", "GENERIC_ITEM",
+]
 
 
 class PackedSheetsParseError(Exception):
@@ -104,6 +120,14 @@ class Vector3:
 	x: float
 	y: float
 	z: float
+
+
+@dataclass
+class Rgba:
+	r: int
+	g: int
+	b: int
+	a: int
 
 
 @dataclass
@@ -184,8 +208,187 @@ class CharacterSheet:
 
 @dataclass
 class PackedSheets:
-	dictionary: List[str] = field(default_factory=list)  # source .creature filenames (informational)
-	entries: Dict[int, CharacterSheet] = field(default_factory=dict)  # keyed by raw CSheetId
+	"""Generic container: entries holds CharacterSheet for creature.packed_sheets,
+	ItemSheet for item.packed_sheets/sitem.packed_sheets, keyed by raw CSheetId."""
+	dictionary: List[str] = field(default_factory=list)  # source Georges filenames (informational)
+	entries: Dict[int, object] = field(default_factory=dict)
+
+
+@dataclass
+class MpItemPart:
+	"""CItemSheet::CMpItemPart (item_sheet.h) — element of ItemSheet.mp_item_parts."""
+	origin_filter: int
+	stats: List[int]  # RM_FABER_STAT_TYPE::NumRMStatType (34) entries, one per stat type
+
+
+@dataclass
+class Scroll:
+	"""CItemSheet::CScroll — always present regardless of Family."""
+	texture: str
+	lua_command: str
+	web_command: str
+	label: str
+
+
+@dataclass
+class StaticFX:
+	"""CItemFXSheet::CStaticFX (item_fx_sheet.h)."""
+	name: str
+	bone: str
+	offset: Vector3
+
+
+@dataclass
+class ItemFX:
+	"""CItemFXSheet (item_fx_sheet.cpp), the ItemSheet.fx field."""
+	trail_min_slice_time: float
+	trail_max_slice_time: float
+	attack_fx_offset: Vector3
+	trail: str
+	advantage_fx: str
+	attack_fx: str
+	attack_fx_rot: Vector3
+	impact_fx_delay: float
+	static_fxs: List[StaticFX]
+
+
+# CItemSheet's Family-specific union members (item_sheet.h). Exactly one of these (or
+# none) is present on ItemSheet.family_data, selected by ItemSheet.family — see
+# docs/packed_sheets.md for the Family -> struct dispatch table.
+@dataclass
+class Cosmetic:
+	vp_value: int
+	gender: int
+
+
+@dataclass
+class Armor:
+	armor_type: int
+
+
+@dataclass
+class MeleeWeapon:
+	weapon_type: int
+	skill: int
+	damage_type: int
+	melee_range: int
+
+
+@dataclass
+class RangeWeapon:
+	weapon_type: int
+	skill: int
+	range_weapon_type: int
+
+
+@dataclass
+class Ammo:
+	skill: int
+	damage_type: int
+	magazine: int
+
+
+@dataclass
+class Mp:
+	ecosystem: int
+	mp_category: int
+	harvest_skill: int
+	family: int  # RM_FAMILY::TRMFamily -- unrelated to ItemSheet.family (ITEMFAMILY)
+	item_part_bf: int
+	used_as_craft_requirement: bool
+	mp_color: int
+	stat_energy: int
+
+
+@dataclass
+class Shield:
+	shield_type: int
+
+
+@dataclass
+class Tool:
+	"""Shared by CRAFTING_TOOL/HARVEST_TOOL/TAMING_TOOL families."""
+	skill: int
+	crafting_tool_type: int
+	command_range: int
+	max_donkey: int
+
+
+@dataclass
+class GuildOption:
+	money_cost: int
+	xp_cost: int
+
+
+@dataclass
+class Pet:
+	slot: int
+
+
+@dataclass
+class Teleport:
+	type: int
+
+
+@dataclass
+class Consumable:
+	overdose_timer: int
+	consumption_time: int
+	properties: List[str]
+
+
+@dataclass
+class ItemSheet:
+	"""CItemSheet (ryzom/client/src/client_sheets/item_sheet.cpp), the
+	CEntitySheet::ITEM payload of an item.packed_sheets/sitem.packed_sheets entry."""
+	sheet_id: int  # raw CSheetId (u32); resolve via sheet_id.bin for a readable name
+	id_shape: str
+	id_shape_female: str
+	id_shape_fyros: str
+	id_shape_fyros_female: str
+	id_shape_matis: str
+	id_shape_matis_female: str
+	id_shape_tryker: str
+	id_shape_tryker_female: str
+	id_shape_zorai: str
+	id_shape_zorai_female: str
+	slot_bf: int
+	map_variant: int
+	family: int  # ITEMFAMILY::EItemFamily, see ITEM_FAMILY_NAMES; selects family_data below
+	item_type: int
+	id_icon_main: str
+	id_icon_back: str
+	id_icon_over: str
+	id_icon_over2: str
+	icon_color: Rgba
+	icon_back_color: Rgba
+	icon_over_color: Rgba
+	icon_over2_color: Rgba
+	id_icon_text: str
+	id_anim_set: str
+	color: int
+	has_fx: bool
+	drop_or_sell: bool
+	is_item_no_rent: bool
+	never_hide_when_equipped: bool
+	stackable: int
+	is_consumable: bool
+	bulk: float
+	equip_time: int
+	fx: ItemFX
+	id_effect1: str
+	id_effect2: str
+	id_effect3: str
+	id_effect4: str
+	mp_item_parts: List[MpItemPart]
+	craft_plan: int  # raw CSheetId
+	required_charac: int
+	required_charac_level: int
+	required_skill: int
+	required_skill_level: int
+	item_origin: int
+	scroll: Scroll
+	family_data: object  # one of Cosmetic/Armor/MeleeWeapon/.../Consumable, or None
 
 
 class _Reader:
@@ -220,6 +423,9 @@ class _Reader:
 	def s32(self) -> int:
 		return struct.unpack("<i", self._take(4))[0]
 
+	def u64(self) -> int:
+		return struct.unpack("<Q", self._take(8))[0]
+
 	def f32(self) -> float:
 		return struct.unpack("<f", self._take(4))[0]
 
@@ -229,6 +435,9 @@ class _Reader:
 	def string(self) -> str:
 		length = self.u32()
 		return self._take(length).decode("latin-1")
+
+	def rgba(self) -> Rgba:
+		return Rgba(self.u8(), self.u8(), self.u8(), self.u8())
 
 	def cont_len(self) -> int:
 		"""Length prefix used by serialCont() for generic containers."""
@@ -416,9 +625,168 @@ def _parse_character_sheet(f: _Reader, sheet_id: int) -> CharacterSheet:
 	)
 
 
-def parse_creature_packed_sheets(data: bytes) -> PackedSheets:
-	f = _Reader(data)
+def _parse_mp_item_part(f: _Reader) -> MpItemPart:
+	origin_filter = f.u8()
+	stats = [f.u8() for _ in range(34)]  # RM_FABER_STAT_TYPE::NumRMStatType
+	return MpItemPart(origin_filter=origin_filter, stats=stats)
 
+
+def _parse_scroll(f: _Reader) -> Scroll:
+	return Scroll(texture=f.string(), lua_command=f.string(), web_command=f.string(), label=f.string())
+
+
+def _parse_static_fx(f: _Reader) -> StaticFX:
+	return StaticFX(name=f.string(), bone=f.string(), offset=_parse_vector3(f))
+
+
+def _parse_item_fx(f: _Reader) -> ItemFX:
+	trail_min_slice_time = f.f32()
+	trail_max_slice_time = f.f32()
+	attack_fx_offset = _parse_vector3(f)
+	trail = f.string()
+	advantage_fx = f.string()
+	attack_fx = f.string()
+	attack_fx_rot = _parse_vector3(f)
+	impact_fx_delay = f.f32()
+	n_static_fxs = f.cont_len()
+	static_fxs = [_parse_static_fx(f) for _ in range(n_static_fxs)]
+	return ItemFX(
+		trail_min_slice_time=trail_min_slice_time, trail_max_slice_time=trail_max_slice_time,
+		attack_fx_offset=attack_fx_offset, trail=trail, advantage_fx=advantage_fx, attack_fx=attack_fx,
+		attack_fx_rot=attack_fx_rot, impact_fx_delay=impact_fx_delay, static_fxs=static_fxs,
+	)
+
+
+# Family -> union member parser (item_sheet.cpp:740 switch). Families not listed here
+# (including SCROLL, whose data already went out via ItemSheet.scroll) carry no union data.
+def _parse_family_data(f: _Reader, family: int):
+	name = ITEM_FAMILY_NAMES[family] if 0 <= family < len(ITEM_FAMILY_NAMES) else None
+
+	if name == "COSMETIC":
+		return Cosmetic(vp_value=f.u32(), gender=f.s32())
+	if name == "ARMOR":
+		return Armor(armor_type=f.s32())
+	if name == "MELEE_WEAPON":
+		return MeleeWeapon(weapon_type=f.s32(), skill=f.s32(), damage_type=f.s32(), melee_range=f.s32())
+	if name == "RANGE_WEAPON":
+		return RangeWeapon(weapon_type=f.s32(), skill=f.s32(), range_weapon_type=f.s32())
+	if name == "AMMO":
+		return Ammo(skill=f.s32(), damage_type=f.s32(), magazine=f.s32())
+	if name == "RAW_MATERIAL":
+		ecosystem = f.s32()
+		mp_category = f.s32()
+		harvest_skill = f.s32()
+		mp_family = f.s32()
+		item_part_bf = f.u64()
+		used_as_craft_requirement = f.boolean()
+		mp_color = f.s8()
+		stat_energy = f.u16()
+		return Mp(ecosystem=ecosystem, mp_category=mp_category, harvest_skill=harvest_skill,
+			family=mp_family, item_part_bf=item_part_bf,
+			used_as_craft_requirement=used_as_craft_requirement, mp_color=mp_color, stat_energy=stat_energy)
+	if name == "SHIELD":
+		return Shield(shield_type=f.s32())
+	if name in ("CRAFTING_TOOL", "HARVEST_TOOL", "TAMING_TOOL"):
+		return Tool(skill=f.s32(), crafting_tool_type=f.s32(), command_range=f.s32(), max_donkey=f.s32())
+	if name == "GUILD_OPTION":
+		return GuildOption(money_cost=f.u32(), xp_cost=f.s32())
+	if name == "PET_ANIMAL_TICKET":
+		return Pet(slot=f.s32())
+	if name == "TELEPORT":
+		return Teleport(type=f.s32())
+	if name == "CONSUMABLE":
+		overdose_timer = f.u16()
+		consumption_time = f.u16()
+		n_properties = f.cont_len()
+		properties = [f.string() for _ in range(n_properties)]
+		return Consumable(overdose_timer=overdose_timer, consumption_time=consumption_time, properties=properties)
+
+	return None  # SCROLL (data already in ItemSheet.scroll) and any other/unknown family
+
+
+def _parse_item_sheet(f: _Reader, sheet_id: int) -> ItemSheet:
+	id_shape = f.string()
+	id_shape_female = f.string()
+	id_shape_fyros = f.string()
+	id_shape_fyros_female = f.string()
+	id_shape_matis = f.string()
+	id_shape_matis_female = f.string()
+	id_shape_tryker = f.string()
+	id_shape_tryker_female = f.string()
+	id_shape_zorai = f.string()
+	id_shape_zorai_female = f.string()
+	slot_bf = f.u64()
+	map_variant = f.u32()
+	family = f.s32()  # serialEnum
+	item_type = f.s32()  # serialEnum
+	id_icon_main = f.string()
+	id_icon_back = f.string()
+	id_icon_over = f.string()
+	id_icon_over2 = f.string()
+	icon_color = f.rgba()
+	icon_back_color = f.rgba()
+	icon_over_color = f.rgba()
+	icon_over2_color = f.rgba()
+	id_icon_text = f.string()
+	id_anim_set = f.string()
+	color = f.s8()
+	has_fx = f.boolean()
+	drop_or_sell = f.boolean()
+	is_item_no_rent = f.boolean()
+	never_hide_when_equipped = f.boolean()
+	stackable = f.u32()
+	is_consumable = f.boolean()
+	bulk = f.f32()
+	equip_time = f.u32()
+
+	fx = _parse_item_fx(f)
+
+	id_effect1 = f.string()
+	id_effect2 = f.string()
+	id_effect3 = f.string()
+	id_effect4 = f.string()
+
+	n_mp_item_parts = f.cont_len()
+	mp_item_parts = [_parse_mp_item_part(f) for _ in range(n_mp_item_parts)]
+
+	craft_plan = f.u32()  # CSheetId
+
+	required_charac = f.s32()  # serialEnum
+	required_charac_level = f.u16()
+	required_skill = f.s32()  # serialEnum
+	required_skill_level = f.u16()
+
+	item_origin = f.s32()  # serialEnum
+
+	scroll = _parse_scroll(f)
+
+	family_data = _parse_family_data(f, family)
+
+	return ItemSheet(
+		sheet_id=sheet_id, id_shape=id_shape, id_shape_female=id_shape_female,
+		id_shape_fyros=id_shape_fyros, id_shape_fyros_female=id_shape_fyros_female,
+		id_shape_matis=id_shape_matis, id_shape_matis_female=id_shape_matis_female,
+		id_shape_tryker=id_shape_tryker, id_shape_tryker_female=id_shape_tryker_female,
+		id_shape_zorai=id_shape_zorai, id_shape_zorai_female=id_shape_zorai_female,
+		slot_bf=slot_bf, map_variant=map_variant, family=family, item_type=item_type,
+		id_icon_main=id_icon_main, id_icon_back=id_icon_back, id_icon_over=id_icon_over,
+		id_icon_over2=id_icon_over2, icon_color=icon_color, icon_back_color=icon_back_color,
+		icon_over_color=icon_over_color, icon_over2_color=icon_over2_color,
+		id_icon_text=id_icon_text, id_anim_set=id_anim_set, color=color, has_fx=has_fx,
+		drop_or_sell=drop_or_sell, is_item_no_rent=is_item_no_rent,
+		never_hide_when_equipped=never_hide_when_equipped, stackable=stackable,
+		is_consumable=is_consumable, bulk=bulk, equip_time=equip_time, fx=fx,
+		id_effect1=id_effect1, id_effect2=id_effect2, id_effect3=id_effect3, id_effect4=id_effect4,
+		mp_item_parts=mp_item_parts, craft_plan=craft_plan, required_charac=required_charac,
+		required_charac_level=required_charac_level, required_skill=required_skill,
+		required_skill_level=required_skill_level, item_origin=item_origin, scroll=scroll,
+		family_data=family_data,
+	)
+
+
+def _parse_packed_sheets_header(f: _Reader, expected_class_version: int, version_what: str):
+	"""Header + dependency blocks common to every .packed_sheets file
+	(load_form.h::loadForm). Returns (dictionary, entry_count)."""
 	f.check_magic(MAGIC)
 	f.check_u32(PACKED_SHEET_VERSION, "PACKED_SHEET_VERSION")
 	f.skip_stream_version()
@@ -443,26 +811,51 @@ def parse_creature_packed_sheets(data: bytes) -> PackedSheets:
 		)
 
 	n_entries = f.u32()
-	f.check_u32(CREATURE_SHEET_VERSION, "creature sheet class version")
+	f.check_u32(expected_class_version, version_what)
 
 	n_map = f.cont_len()
 	if n_map != n_entries:
 		raise PackedSheetsParseError(f"entry count mismatch: header says {n_entries}, map has {n_map}")
 
-	entries: Dict[int, CharacterSheet] = {}
+	return dictionary, n_map
+
+
+def _parse_entity_map(f: _Reader, n_map: int, expected_type: int, parse_payload, what: str) -> Dict[int, object]:
+	entries: Dict[int, object] = {}
 	for _ in range(n_map):
 		sheet_id = f.u32()  # map key (CSheetId)
 
 		sheet_type = f.s32()  # CSheetManagerEntry::serial: serialEnum(TType)
-		if sheet_type != FAUNA_TYPE:
+		if sheet_type != expected_type:
 			type_name = ENTITY_SHEET_TYPES[sheet_type] if 0 <= sheet_type < len(ENTITY_SHEET_TYPES) else str(sheet_type)
 			raise PackedSheetsParseError(
 				f"unsupported sheet type {type_name!r} for CSheetId {sheet_id} "
-				f"(only FAUNA/CCharacterSheet is implemented, see docs/packed_sheets.md)"
+				f"(only {what} is implemented, see docs/packed_sheets.md)"
 			)
 
 		entry_sheet_id = f.u32()  # CEntitySheet::Id, serialized again by initSheet()
-		entries[sheet_id] = _parse_character_sheet(f, entry_sheet_id)
+		entries[sheet_id] = parse_payload(f, entry_sheet_id)
+
+	return entries
+
+
+def parse_creature_packed_sheets(data: bytes) -> PackedSheets:
+	f = _Reader(data)
+	dictionary, n_map = _parse_packed_sheets_header(f, CREATURE_SHEET_VERSION, "creature sheet class version")
+	entries = _parse_entity_map(f, n_map, FAUNA_TYPE, _parse_character_sheet, "FAUNA/CCharacterSheet")
+
+	if not f.eof():
+		raise PackedSheetsParseError(f"{f.remaining} trailing bytes after parsing .packed_sheets content")
+
+	return PackedSheets(dictionary=dictionary, entries=entries)
+
+
+def parse_item_packed_sheets(data: bytes) -> PackedSheets:
+	"""Parses both item.packed_sheets and sitem.packed_sheets — same class (CItemSheet),
+	same version (44), only the source Georges extension differs."""
+	f = _Reader(data)
+	dictionary, n_map = _parse_packed_sheets_header(f, ITEM_SHEET_VERSION, "item sheet class version")
+	entries = _parse_entity_map(f, n_map, ITEM_TYPE, _parse_item_sheet, "ITEM/CItemSheet")
 
 	if not f.eof():
 		raise PackedSheetsParseError(f"{f.remaining} trailing bytes after parsing .packed_sheets content")
@@ -478,6 +871,14 @@ def load_creature_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheet
 	return parse_creature_packed_sheets(data)
 
 
+def load_item_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
+	if hasattr(path, "read"):
+		data = path.read()
+	else:
+		data = Path(path).read_bytes()
+	return parse_item_packed_sheets(data)
+
+
 def load_sheet_id_bin(path: Union[str, Path, BinaryIO]) -> Dict[int, str]:
 	if hasattr(path, "read"):
 		data = path.read()
@@ -486,7 +887,18 @@ def load_sheet_id_bin(path: Union[str, Path, BinaryIO]) -> Dict[int, str]:
 	return parse_sheet_id_bin(data)
 
 
-def _dump(packed: PackedSheets, names: Dict[int, str]) -> None:
+def _guess_kind(path: Path) -> str:
+	stem = path.name.lower()
+	if stem.startswith("creature"):
+		return "creature"
+	if stem.startswith("sitem") or stem.startswith("item"):
+		return "item"
+	raise PackedSheetsParseError(
+		f"cannot guess sheet kind from filename {path.name!r}, pass --kind explicitly"
+	)
+
+
+def _dump_creature(packed: PackedSheets, names: Dict[int, str]) -> None:
 	print(f"dictionary: {len(packed.dictionary)} source .creature files")
 	print(f"entries: {len(packed.entries)}")
 	for sheet_id, sheet in sorted(packed.entries.items(), key=lambda kv: names.get(kv[0], "")):
@@ -495,12 +907,24 @@ def _dump(packed: PackedSheets, names: Dict[int, str]) -> None:
 			f"max_speed={sheet.max_speed:.3f} skel={sheet.id_skel_filename!r}")
 
 
+def _dump_item(packed: PackedSheets, names: Dict[int, str]) -> None:
+	print(f"dictionary: {len(packed.dictionary)} source .item/.sitem files")
+	print(f"entries: {len(packed.entries)}")
+	for sheet_id, sheet in sorted(packed.entries.items(), key=lambda kv: names.get(kv[0], "")):
+		name = names.get(sheet_id, f"#{sheet_id}")
+		family = ITEM_FAMILY_NAMES[sheet.family] if 0 <= sheet.family < len(ITEM_FAMILY_NAMES) else sheet.family
+		print(f"  {name}  family={family} shape={sheet.id_shape!r} "
+			f"stackable={sheet.stackable} bulk={sheet.bulk:.2f}")
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
-	parser = argparse.ArgumentParser(description="Read Ryzom creature.packed_sheets files")
+	parser = argparse.ArgumentParser(description="Read Ryzom .packed_sheets files (creature, item, sitem)")
 	sub = parser.add_subparsers(dest="command", required=True)
 
-	p_dump = sub.add_parser("dump", help="print a summary of a creature.packed_sheets file")
+	p_dump = sub.add_parser("dump", help="print a summary of a .packed_sheets file")
 	p_dump.add_argument("path", type=Path)
+	p_dump.add_argument("--kind", choices=("creature", "item"), default=None,
+		help="sheet kind; guessed from the filename (creature*/item*/sitem*) if omitted")
 	p_dump.add_argument("--sheet-id-bin", type=Path, default=None,
 		help="loose sheet_id.bin path, to resolve CSheetId to readable names")
 	p_dump.add_argument("--bnp", type=Path, default=None,
@@ -513,14 +937,19 @@ def _main() -> None:
 	args = _build_arg_parser().parse_args()
 
 	if args.command == "dump":
-		packed = load_creature_packed_sheets(args.path)
+		kind = args.kind or _guess_kind(args.path)
+
 		names: Dict[int, str] = {}
 		if args.sheet_id_bin:
 			names = load_sheet_id_bin(args.sheet_id_bin)
 		elif args.bnp:
 			from pynel.ryzom_bnp import BnpReader
 			names = parse_sheet_id_bin(BnpReader(args.bnp).read_file("sheet_id.bin"))
-		_dump(packed, names)
+
+		if kind == "creature":
+			_dump_creature(load_creature_packed_sheets(args.path), names)
+		else:
+			_dump_item(load_item_packed_sheets(args.path), names)
 
 
 if __name__ == "__main__":

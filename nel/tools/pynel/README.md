@@ -33,8 +33,9 @@ Installing the package also provides console scripts:
   files, see [`docs/hls_texture_bank.md`](docs/hls_texture_bank.md)
 - `ryzom-cfg` -- read/write `.cfg` (`CConfigFile` format, e.g. `client.cfg`,
   `panoply_*.cfg`) files, see [`docs/config_file.md`](docs/config_file.md)
-- `ryzom-packed-sheets` -- read `creature.packed_sheets` (Georges sheet binary
-  cache) and `sheet_id.bin`, see [`docs/packed_sheets.md`](docs/packed_sheets.md)
+- `ryzom-packed-sheets` -- read `creature.packed_sheets`/`item.packed_sheets`/
+  `sitem.packed_sheets` (Georges sheet binary cache) and `sheet_id.bin`, see
+  [`docs/packed_sheets.md`](docs/packed_sheets.md)
 
 Run any of them with `--help` for usage details.
 
