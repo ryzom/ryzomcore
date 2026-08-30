@@ -17,9 +17,10 @@ from pathlib import Path
 import numpy
 
 from panda3d.core import (
-	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, NodePath, PNMImage, Point3,
-	Quat, Texture as PandaTexture, TextureStage, TransformState, TransparencyAttrib, Vec3,
+	AlphaTestAttrib, ClockObject, ColorBlendAttrib, DepthTestAttrib, Geom, GeomNode, GeomTriangles,
+	GeomVertexData, GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial,
+	NodePath, PNMImage, Point3, Quat, RenderAttrib, Shader, Texture as PandaTexture, TextureStage,
+	TransformState, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
@@ -45,8 +46,8 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
 	IDENTITY_QUAT, compose_uv_matrix, decompose_uv_matrix, finest_skinned_lod, iter_render_passes,
-	load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox, shape_geom, solid_color_texture,
-	texture_to_pnm_image, uv_matrix_to_panda_mat4,
+	load_panda_cube_texture, load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox,
+	shape_geom, solid_color_texture, texture_to_pnm_image, uv_matrix_to_panda_mat4,
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher
@@ -140,9 +141,89 @@ _IDRV_MAT_BLEND = 0x00000080
 _IDRV_MAT_DOUBLE_SIDED = 0x00000100
 _IDRV_MAT_ALPHA_TEST = 0x00000200
 _IDRV_MAT_TEX_ADDR = 0x00000400
+# CMaterial::TShader (material.h) -- Material.shader_type's value, not a flag
+# bit. Specular: stage 0 is the diffuse texture, stage 1 is a dedicated
+# specular/gloss map (flat texture or CTextureCube) whose color is added to
+# stage 0's, modulated by stage 0's own alpha (driver_opengl_material.cpp's
+# setupSpecularPass(): result = Tex0.rgb + Tex0.alpha * Tex1.rgb).
+_IDRV_MAT_SHADER_NORMAL = 0
+_IDRV_MAT_SHADER_LIGHTMAP = 3
+_IDRV_MAT_SHADER_SPECULAR = 4
+
+# Render-mode dropdown options (_draw_material_render_mode_section): only
+# modes with confirmed real usage in ryzom-data are listed at all (a
+# shape-wide scan found zero shapes using UserColor/PerPixelLighting/Water),
+# and only the ones Patina actually renders differently are selectable --
+# LightMap is real (44 shapes) but not implemented yet, so it's listed
+# disabled rather than dropped, unlike the zero-usage modes.
+_SHADER_MODE_OPTIONS = [
+	(_IDRV_MAT_SHADER_NORMAL, "Normal", True),
+	(_IDRV_MAT_SHADER_SPECULAR, "Specular", True),
+	(_IDRV_MAT_SHADER_LIGHTMAP, "LightMap", False),
+]
 # Per-stage "this stage's tex_user_mat is enabled" bit -- material.cpp's
 # CMaterial::enableUserTexMat()/getFlags(): stage 0 is bit 0x00100000.
 _IDRV_MAT_USER_TEX_MAT_STAGE0 = 0x00100000
+
+# Specular overlay pass (_update_specular_overlay()): a tiny, self-contained
+# GLSL shader for the reflection-vector cubemap sample only -- fixed-function
+# TexGenAttrib (GL_TEXTURE_GEN/reflection map) turned out not to work at all
+# under Panda3D's modern (core-profile) OpenGL path (confirmed empirically:
+# a flat-color test on the same instanced node rendered fine, but the
+# identical setup with TexGenAttrib.M_world_cube_map bound never showed
+# anything). The overlay was already unlit/unmaterialed by design (the real
+# engine's own additive specular pass just samples raw texels, no
+# relighting), so this shader doesn't need to reimplement any of Panda3D's
+# own ambient/diffuse/light pipeline -- it only computes the world-space
+# reflection vector and does `specular_map(reflectDir).rgb * diffuse_map
+# (texcoord).a`. `is_cube_map` picks between reflection-vector sampling
+# (CTextureCube) and plain UV0 sampling (a flat file specular map) at
+# runtime -- cheap enough for this preview tool not to bother with two
+# separate shader variants.
+_SPECULAR_OVERLAY_VERTEX_SHADER = """
+#version 150
+uniform mat4 p3d_ModelViewProjectionMatrix;
+uniform mat4 p3d_ModelMatrix;
+uniform mat4 p3d_ViewMatrixInverse;
+in vec4 p3d_Vertex;
+in vec3 p3d_Normal;
+in vec2 p3d_MultiTexCoord0;
+out vec2 texcoord;
+out vec3 world_normal;
+out vec3 view_dir;
+
+void main() {
+	gl_Position = p3d_ModelViewProjectionMatrix * p3d_Vertex;
+	texcoord = p3d_MultiTexCoord0;
+	vec3 world_pos = (p3d_ModelMatrix * p3d_Vertex).xyz;
+	world_normal = normalize(mat3(p3d_ModelMatrix) * p3d_Normal);
+	vec3 camera_pos = p3d_ViewMatrixInverse[3].xyz;
+	view_dir = normalize(world_pos - camera_pos);
+}
+"""
+_SPECULAR_OVERLAY_FRAGMENT_SHADER = """
+#version 150
+uniform sampler2D diffuse_map;
+uniform samplerCube specular_cube_map;
+uniform sampler2D specular_flat_map;
+uniform int is_cube_map;
+in vec2 texcoord;
+in vec3 world_normal;
+in vec3 view_dir;
+out vec4 p3d_FragColor;
+
+void main() {
+	float diffuse_alpha = texture(diffuse_map, texcoord).a;
+	vec3 specular_color;
+	if (is_cube_map != 0) {
+		vec3 reflect_dir = reflect(view_dir, normalize(world_normal));
+		specular_color = texture(specular_cube_map, reflect_dir).rgb;
+	} else {
+		specular_color = texture(specular_flat_map, texcoord).rgb;
+	}
+	p3d_FragColor = vec4(specular_color * diffuse_alpha, 1.0);
+}
+"""
 
 # CMaterial::TBlend (material.h) -> panda3d.core.ColorBlendAttrib.Operand, in
 # TBlend's own declaration order so the enum's int value is the list index.
@@ -599,6 +680,19 @@ class ObjectEditorApp(ForgeryApp):
 		self.material_docs = load_material_docs()
 
 		self._texture_cache = {}
+		self._cube_texture_cache = {}
+		# Dummy 1x1 textures fed to whichever sampler the specular overlay
+		# shader's active branch (is_cube_map) doesn't use -- GLSL still
+		# requires every declared sampler to be bound to a texture of the
+		# right type, even one it never actually samples this draw.
+		self._dummy_2d_texture = PandaTexture("dummy-2d")
+		self._dummy_2d_texture.setup_2d_texture(1, 1, PandaTexture.T_unsigned_byte, PandaTexture.F_rgba)
+		self._dummy_2d_texture.set_ram_image(bytes(4))
+		self._dummy_cube_texture = PandaTexture("dummy-cube")
+		self._dummy_cube_texture.setup_cube_map(1, PandaTexture.T_unsigned_byte, PandaTexture.F_rgba)
+		self._dummy_cube_texture.set_ram_image(bytes(4 * 6))
+		self._specular_overlay_shader = Shader.make(
+			Shader.SL_GLSL, vertex=_SPECULAR_OVERLAY_VERTEX_SHADER, fragment=_SPECULAR_OVERLAY_FRAGMENT_SHADER)
 		# {name: mtime} for _texture_cache entries NOT tracked by
 		# self._panoply_texture_signatures -- see _update_texture_freshness().
 		self._texture_freshness_mtimes = {}
@@ -1553,6 +1647,7 @@ class ObjectEditorApp(ForgeryApp):
 		# over to a newly loaded shape risked reusing another shape's
 		# resolved texture/wrap mode outright.
 		self._texture_cache = {}
+		self._cube_texture_cache = {}
 		self._texture_freshness_mtimes = {}
 		self._preview_texture_refs = {}
 		# Same reasoning as _texture_cache just above -- also keyed by
@@ -2942,6 +3037,64 @@ class ObjectEditorApp(ForgeryApp):
 				imgui.end_popup()
 			imgui.pop_id()
 
+	def _update_specular_overlay(self, node_path, diffuse_texture, specular_texture):
+		"""CMaterial::TShader::Specular's highlight, reproduced the way the
+		real engine does it -- driver_opengl_material.cpp's
+		beginSpecularMultiPass()/setupSpecularPass() literally run this as a
+		SECOND additive render pass (material.h's own doc comment: "This is
+		done in 2 passes") -- an instanced sibling NodePath (same GeomNode,
+		no vertex duplication) drawn on top with additive blending,
+		computing `specular_map(reflectDir).rgb * diffuse_map(texcoord).a`.
+		Uses a small dedicated GLSL shader (_SPECULAR_OVERLAY_VERTEX_SHADER/
+		_SPECULAR_OVERLAY_FRAGMENT_SHADER) just for this -- fixed-function
+		TexGenAttrib (GL_TEXTURE_GEN reflection mapping), tried first,
+		doesn't work at all under Panda3D's modern OpenGL path (confirmed
+		empirically: identical setup minus TexGenAttrib rendered fine with a
+		flat test color, but never showed anything once cubemap TexGen was
+		involved). The overlay is unlit/unmaterialed by design already (the
+		real engine's own additive pass just samples raw texels, no
+		relighting), so this shader doesn't reimplement any of Panda3D's own
+		ambient/diffuse/light pipeline -- it's scoped to this one pass only,
+		the base pass (and its normal fixed-function lighting) is untouched.
+		`node_path`'s own python tag tracks the overlay so repeated calls
+		(live material edits) update it in place instead of piling up
+		copies."""
+		overlay = node_path.get_python_tag("specular_overlay") if node_path.has_python_tag("specular_overlay") else None
+		if diffuse_texture is None or specular_texture is None:
+			if overlay is not None and not overlay.is_empty():
+				overlay.remove_node()
+			if node_path.has_python_tag("specular_overlay"):
+				node_path.clear_python_tag("specular_overlay")
+			return
+
+		if overlay is None or overlay.is_empty():
+			# A plain attach_new_node(node_path.node()) under the SAME parent
+			# doesn't create a genuine second instance -- Panda3D collapses
+			# it into the same single edge, so removing "overlay" later would
+			# also destroy the original geometry (confirmed empirically,
+			# there's no doc warning about this). instance_to() under a
+			# fresh, otherwise-empty wrapper node does create an independent,
+			# safely-removable second edge; render state set on the wrapper
+			# cascades down to the instanced geometry as normal.
+			overlay = node_path.get_parent().attach_new_node("specular-overlay")
+			node_path.instance_to(overlay)
+			node_path.set_python_tag("specular_overlay", overlay)
+		overlay.set_transform(node_path.get_transform())
+
+		is_cube_map = specular_texture.get_texture_type() == PandaTexture.TT_cube_map
+		overlay.set_shader(self._specular_overlay_shader)
+		overlay.set_shader_input("diffuse_map", diffuse_texture)
+		overlay.set_shader_input("specular_cube_map", specular_texture if is_cube_map else self._dummy_cube_texture)
+		overlay.set_shader_input("specular_flat_map", specular_texture if not is_cube_map else self._dummy_2d_texture)
+		overlay.set_shader_input("is_cube_map", 1 if is_cube_map else 0)
+
+		overlay.set_attrib(ColorBlendAttrib.make(ColorBlendAttrib.M_add, ColorBlendAttrib.O_one, ColorBlendAttrib.O_one))
+		overlay.set_attrib(DepthTestAttrib.make(RenderAttrib.M_less_equal))
+		overlay.set_depth_write(False)
+		overlay.set_light_off(1)
+		overlay.set_material_off(1)
+		overlay.set_bin("transparent", 0)
+
 	def _apply_material_texture(self, node_path, material, material_id):
 		"""Material color/blend/alpha-test/texture -- the part of rendering
 		a material that _apply_material_common() doesn't cover. Assumes the
@@ -2976,6 +3129,7 @@ class ObjectEditorApp(ForgeryApp):
 			node_path.set_attrib(AlphaTestAttrib.make(AlphaTestAttrib.M_greater, material.alpha_test_threshold))
 
 		texture = material.textures[0] if material.textures else None
+		panda_texture = None
 		if texture is not None and texture.file_name:
 			resolved_name = self._resolve_panoply_texture_name(texture.file_name)
 			# A panoply override changes which file gets loaded, never the
@@ -3003,6 +3157,27 @@ class ObjectEditorApp(ForgeryApp):
 							self._texture_freshness_mtimes[resolved_name] = ref.cache_stat()[0]
 						except OSError:
 							pass  # gone by the time we stat it -- see _update_texture_freshness()'s own guard
+
+		specular_texture = None
+		if material is not None and material.shader_type == _IDRV_MAT_SHADER_SPECULAR and len(material.textures) > 1:
+			stage1 = material.textures[1]
+			if stage1 is not None and stage1.class_name == "CTextureCube":
+				cube_key = tuple(sub.file_name if sub is not None else None for sub in (stage1.sub_textures or []))
+				if cube_key in self._cube_texture_cache:
+					specular_texture = self._cube_texture_cache[cube_key]
+				else:
+					specular_texture = load_panda_cube_texture(
+						stage1.sub_textures, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+						repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture)
+					self._cube_texture_cache[cube_key] = specular_texture
+			elif stage1 is not None and stage1.file_name:
+				specular_texture = load_panda_texture(
+					stage1.file_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+					repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture,
+					wrap_s=stage1.wrap_s, wrap_t=stage1.wrap_t,
+					min_filter=stage1.min_filter, mag_filter=stage1.mag_filter,
+					load_grayscale_as_alpha=stage1.load_grayscale_as_alpha)
+		self._update_specular_overlay(node_path, panda_texture, specular_texture)
 
 		tex_user_mat = None
 		if material is not None and material.flags & _IDRV_MAT_TEX_ADDR and material.flags & _IDRV_MAT_USER_TEX_MAT_STAGE0:
@@ -3383,11 +3558,32 @@ class ObjectEditorApp(ForgeryApp):
 	def _select_multi_bitmap_slot(self, entries, index):
 		"""The "Select" button: switches every Multi Bitmap material of the
 		shape to the same slot index at once -- picking "Medium Quality" is a
-		whole-object appearance choice, not a per-material one."""
+		whole-object appearance choice, not a per-material one. Also syncs
+		stage 1's specular map when the material is in Specular mode and
+		stage 1 is itself multi-file (real content: a CTextureCube whose 6
+		faces are each their own CTextureMultiFile, tracking the same
+		per-slot dye choice as stage 0, e.g. nospec/spec_base/spec_luxe) --
+		without this, switching slots only ever changed the diffuse texture,
+		leaving the specular cubemap permanently stuck on whichever variant
+		happened to be selected when the shape was authored (e.g. index 0 /
+		nospec.png, which shows no specular at all regardless of slot)."""
+		materials = self.shape_file.value.materials
 		for material_id, texture in entries:
 			self._ensure_multi_bitmap_slot(texture, index)
 			texture.selected_index = index
 			texture.file_name = texture.file_names[index]
+
+			material = materials[material_id]
+			if (material.shader_type == _IDRV_MAT_SHADER_SPECULAR and len(material.textures) > 1
+					and material.textures[1] is not None):
+				stage1 = material.textures[1]
+				faces = stage1.sub_textures if stage1.class_name == "CTextureCube" else [stage1]
+				for face in faces or []:
+					if face is not None and face.file_names:
+						self._ensure_multi_bitmap_slot(face, index)
+						face.selected_index = index
+						face.file_name = face.file_names[index]
+
 			self._reapply_material(material_id)
 
 	def _draw_multi_bitmap_editor(self):
@@ -3477,10 +3673,70 @@ class ObjectEditorApp(ForgeryApp):
 					imgui.same_line()
 					self._draw_texture_copy_button(current_value, _set_slot)
 
+					material = self.shape_file.value.materials[material_id]
+					if (material.shader_type == _IDRV_MAT_SHADER_SPECULAR and len(material.textures) > 1
+							and material.textures[1] is not None):
+						def _set_specular_slot(value, material=material, index=index):
+							stage1 = material.textures[1]
+							faces = stage1.sub_textures if stage1.class_name == "CTextureCube" else [stage1]
+							should_reapply = False
+							for face in faces or []:
+								if face is None:
+									continue
+								while len(face.file_names) <= index:
+									face.file_names.append("")
+								face.file_names[index] = value
+								if face.selected_index == index:
+									face.file_name = value
+									should_reapply = True
+							if should_reapply:
+								self._reapply_material(material_id)
+
+						current_specular = self._specular_preview_name_for_slot(material, index) or ""
+						self._draw_texture_preview_static(current_specular, badge="S")
+						imgui.same_line()
+						specular_in_workspace = self._is_texture_in_workspace(current_specular)
+						imgui.push_style_color(
+							imgui.Col_.text.value,
+							_TEXTURE_IN_WORKSPACE_COLOR if specular_in_workspace else _TEXTURE_NORMAL_COLOR)
+						changed, new_value = self._draw_texture_name_combo(f"##specular-combo-{index}", current_specular)
+						imgui.pop_style_color()
+						if imgui.is_item_hovered() and current_specular:
+							source_path = self._texture_source_path_text(current_specular)
+							tooltip = source_path or current_specular
+							if specular_in_workspace:
+								tooltip += "\n(in the active workspace)"
+							imgui.set_tooltip(tooltip)
+						if changed and new_value != current_specular:
+							_set_specular_slot(new_value)
+						imgui.same_line()
+						if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Browse for a specular/gloss map file"):
+							def _on_specular_result(file_name, _set_specular_slot=_set_specular_slot):
+								_set_specular_slot(file_name)
+							self._start_texture_browse(("specular-multi", material_id, index), _on_specular_result)
+						imgui.same_line()
+						self._draw_texture_copy_button(current_specular, _set_specular_slot)
+
 					imgui.pop_id()
 
 			imgui.pop_id()
 			imgui.separator()
+
+		# Panoply masks/bake button (2026-08-29): previously only drawn for
+		# plain single-texture materials (see the two other
+		# _draw_panoply_masks_for() call sites) -- Multi Bitmap materials
+		# never got this at all, so a shape whose active material is Multi
+		# Bitmap (found while investigating
+		# ryw_mark1_hof_caster01_pantabottes, which had no bake button/
+		# message anywhere) had no way to bake real Panoply variants for it.
+		# Drawn once for the representative's own active slot
+		# (representative.file_name, kept in sync with
+		# representative.selected_index by _set_slot() above) -- not once
+		# per expanded slot, since a "which color" pick is shape-wide
+		# (_draw_global_panoply_section()), not something that makes sense
+		# to bake separately per quality/season variant.
+		if representative.file_name:
+			self._draw_panoply_masks_for(representative.file_name)
 
 		if hovered_hint:
 			self.sysinfo.set_status(hovered_hint, color=_STATUS_HINT_COLOR)
@@ -3552,6 +3808,13 @@ class ObjectEditorApp(ForgeryApp):
 		changed = False
 		new_value = current_value
 		if imgui.begin_combo(imgui_id, current_value):
+			# Empty entry first -- the only way to clear a slot from this
+			# combo alone (Browse only ever sets a real file; nothing here
+			# could remove one without this).
+			clicked, _ = imgui.selectable("(none)", current_value == "")
+			if clicked:
+				new_value = ""
+				changed = True
 			for name in self._workspace_texture_names():
 				clicked, _ = imgui.selectable(name, name == current_value)
 				if clicked:
@@ -4052,6 +4315,64 @@ class ObjectEditorApp(ForgeryApp):
 		material.flags ^= flag
 		self._reapply_material(material_id)
 
+	def _set_material_shader_type(self, material_id, material, shader_type):
+		material.shader_type = shader_type
+		self._reapply_material(material_id)
+
+	def _draw_material_render_mode_section(self, material_id, material):
+		"""CMaterial::TShader picker -- see _SHADER_MODE_OPTIONS for which
+		modes are listed/selectable and why. Picking a disabled option is
+		not possible (imgui.begin_disabled() around its selectable makes it
+		inert), so only Normal<->Specular switches actually do anything.
+		No visible label (id-only "##render-mode") and a tight width -- this
+		sits inline in the compact material header row, next to the
+		Single/Multi picker (_draw_material_kind_selector())."""
+		current_label = next(
+			(label for value, label, _ in _SHADER_MODE_OPTIONS if value == material.shader_type),
+			f"? ({material.shader_type})",
+		)
+		imgui.set_next_item_width(90)
+		if imgui.begin_combo("##render-mode", current_label):
+			for value, label, enabled in _SHADER_MODE_OPTIONS:
+				imgui.begin_disabled(not enabled)
+				clicked, _ = imgui.selectable(label, value == material.shader_type)
+				imgui.end_disabled()
+				if clicked and enabled and value != material.shader_type:
+					self._set_material_shader_type(material_id, material, value)
+			imgui.end_combo()
+		return self._doc_hint_if_hovered("render-mode")
+
+	def _draw_material_kind_selector(self, material_id, material, is_multi, texture):
+		"""Single/Multi picker replacing the old three-way "Color"/"Simple
+		bitmap"/"Multi Bitmap" text badge + separate convert icon buttons --
+		id-only ("##bitmap-kind"), no visible label, tight width, same
+		compact-row spirit as the render-mode combo next to it. "Color"
+		(no texture at all) counts as "Single" here, same as a simple
+		bitmap -- both convert to "Multi" the same way
+		(_convert_to_multi_bitmap()). Multi -> Single is only offered when
+		the reverse conversion is actually lossless (same constraint the old
+		icon buttons enforced): no slot populated (-> Color) or only the Low
+		Quality slot populated (-> Simple bitmap); otherwise "Single" is
+		listed but disabled, since real per-quality/season/ecosystem
+		variants would be silently discarded."""
+		populated = self._multi_bitmap_populated_slots(texture) if is_multi else None
+		can_go_single = not is_multi or not populated or populated == [0]
+		current_label = "Multi" if is_multi else "Single"
+		imgui.set_next_item_width(70)
+		if imgui.begin_combo("##bitmap-kind", current_label):
+			imgui.begin_disabled(is_multi and not can_go_single)
+			single_clicked, _ = imgui.selectable("Single", not is_multi)
+			imgui.end_disabled()
+			if single_clicked and is_multi and can_go_single:
+				if not populated:
+					self._convert_multi_bitmap_to_color(material_id, material)
+				else:
+					self._convert_multi_bitmap_to_simple(material_id, material)
+			multi_clicked, _ = imgui.selectable("Multi", is_multi)
+			if multi_clicked and not is_multi:
+				self._convert_to_multi_bitmap(material_id, material)
+			imgui.end_combo()
+
 	def _draw_materials_tab(self):
 		materials = getattr(self.shape_file.value, "materials", None)
 		if not materials:
@@ -4074,35 +4395,14 @@ class ObjectEditorApp(ForgeryApp):
 			is_multi = material_id in multi_bitmap_ids
 			texture = material.textures[0] if material.textures else None
 			has_texture = texture is not None and bool(texture.file_name)
-			if is_multi:
-				badge = "Multi Bitmap"
-			elif has_texture:
-				badge = "Simple bitmap"
-			else:
-				badge = "Color"
-			imgui.text_disabled(badge)
+			badge = "Multi Bitmap" if is_multi else ("Simple bitmap" if has_texture else "Color")
+
+			self._draw_material_kind_selector(material_id, material, is_multi, texture)
 			imgui.same_line()
-
 			if badge != "Color":
-				double_sided = bool(material.flags & _IDRV_MAT_DOUBLE_SIDED)
-				changed, double_sided = imgui.checkbox("Double-sided", double_sided)
-				if changed:
-					self._toggle_material_flag(material_id, material, _IDRV_MAT_DOUBLE_SIDED)
-
-			if not is_multi:
-				imgui.same_line()
-				if _icon_button(fa_icons.ICON_FA_CLONE, "Convert to Multi Bitmap (add season/quality/ecosystem variants)"):
-					self._convert_to_multi_bitmap(material_id, material)
-			else:
-				populated = self._multi_bitmap_populated_slots(texture)
-				if not populated:
-					imgui.same_line()
-					if _icon_button(fa_icons.ICON_FA_UNDO, "Convert to Color (no set has a texture)"):
-						self._convert_multi_bitmap_to_color(material_id, material)
-				elif populated == [0]:
-					imgui.same_line()
-					if _icon_button(fa_icons.ICON_FA_UNDO, "Convert to Simple bitmap (only Low Quality has a texture)"):
-						self._convert_multi_bitmap_to_simple(material_id, material)
+				render_mode_hint = self._draw_material_render_mode_section(material_id, material)
+				if render_mode_hint:
+					hovered_hint = render_mode_hint
 
 			imgui.same_line()
 			expanded = material_id in self._material_expanded
@@ -4115,8 +4415,12 @@ class ObjectEditorApp(ForgeryApp):
 
 			if expanded:
 				imgui.indent()
-				section_hint = self._draw_material_section(
-					material_id, "transparency", "Transparency", self._draw_material_transparency_section, material)
+				if badge != "Color":
+					double_sided = bool(material.flags & _IDRV_MAT_DOUBLE_SIDED)
+					changed, double_sided = imgui.checkbox("Double-sided", double_sided)
+					if changed:
+						self._toggle_material_flag(material_id, material, _IDRV_MAT_DOUBLE_SIDED)
+				section_hint = self._draw_material_transparency_section(material_id, material)
 				if section_hint:
 					hovered_hint = section_hint
 				if badge != "Color":
@@ -4340,25 +4644,6 @@ class ObjectEditorApp(ForgeryApp):
 		is correctly stored/round-tripped in the .shape either way."""
 		hint = None
 		stage0_flag = _IDRV_MAT_USER_TEX_MAT_STAGE0
-		enabled = bool(material.flags & _IDRV_MAT_TEX_ADDR) and bool(material.flags & stage0_flag)
-		changed, enabled = imgui.checkbox("Offset/tile/rotate this texture", enabled)
-		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
-		if changed:
-			if enabled:
-				material.flags |= _IDRV_MAT_TEX_ADDR | stage0_flag
-				if material.tex_user_mat.get(0) is None:
-					material.tex_user_mat[0] = compose_uv_matrix(0.0, 0.0, 1.0, 1.0, 0.0)
-			else:
-				material.flags &= ~stage0_flag
-				# Other 3 stages' enable bits (0x00200000/0x00400000/0x00800000,
-				# see material.h's enableUserTexMat()) -- IDRV_MAT_TEX_ADDR only
-				# turns off once none of the 4 are set anymore.
-				if not (material.flags & 0x00F00000):
-					material.flags &= ~_IDRV_MAT_TEX_ADDR
-			self._reapply_material(material_id)
-
-		if not enabled:
-			return hint
 
 		# Tracked independently per material_id rather than re-derived from
 		# Material.tex_user_mat[0] every frame, so a slider drag doesn't
@@ -4428,6 +4713,9 @@ class ObjectEditorApp(ForgeryApp):
 		if any_changed:
 			material.tex_user_mat[0] = compose_uv_matrix(
 				state["offset_u"], state["offset_v"], state["scale_u"], state["scale_v"], state["rotation"])
+			# No enable checkbox anymore -- a real edit here is what turns
+			# this on now, matching enableUserTexMat()'s own per-stage bit.
+			material.flags |= _IDRV_MAT_TEX_ADDR | stage0_flag
 			self._reapply_material(material_id)
 
 		return hint
@@ -4443,6 +4731,22 @@ class ObjectEditorApp(ForgeryApp):
 			material.textures[0] = Texture(class_name="CTextureFile", file_name=file_name)
 		else:
 			material.textures = [Texture(class_name="CTextureFile", file_name=file_name)]
+
+	@staticmethod
+	def _set_specular_material_texture(material, file_name):
+		"""Sets stage 1's (Specular shader mode) texture file name -- for a
+		CTextureCube, applied to every one of its 6 faces at once (matching
+		real content, which always duplicates the same file across all 6
+		faces rather than genuinely varying per-face). Only meaningful once
+		shader_type is already Specular with a real stage-1 Texture object
+		there -- doesn't create one from scratch, unlike
+		_set_simple_material_texture()'s slot-0 handling, since there's no
+		single obvious default texture class to create it as."""
+		stage1 = material.textures[1]
+		faces = stage1.sub_textures if stage1.class_name == "CTextureCube" else [stage1]
+		for face in faces or []:
+			if face is not None:
+				face.file_name = file_name
 
 	def _convert_to_multi_bitmap(self, material_id, material):
 		"""Turns slot 0's plain texture into a `CTextureMultiFile` with a
@@ -4515,9 +4819,85 @@ class ObjectEditorApp(ForgeryApp):
 			self._reapply_material(material_id)
 		self._draw_texture_copy_button(current_value, _on_copied)
 
+		if material.shader_type == _IDRV_MAT_SHADER_SPECULAR and len(material.textures) > 1 and material.textures[1] is not None:
+			current_specular = self._specular_preview_name(material) or ""
+			self._draw_texture_preview_static(current_specular, badge="S")
+			imgui.same_line()
+			specular_in_workspace = self._is_texture_in_workspace(current_specular)
+			imgui.push_style_color(
+				imgui.Col_.text.value, _TEXTURE_IN_WORKSPACE_COLOR if specular_in_workspace else _TEXTURE_NORMAL_COLOR)
+			changed, new_value = self._draw_texture_name_combo("##specular-combo", current_specular)
+			imgui.pop_style_color()
+			if imgui.is_item_hovered() and current_specular:
+				source_path = self._texture_source_path_text(current_specular)
+				tooltip = source_path or current_specular
+				if specular_in_workspace:
+					tooltip += "\n(in the active workspace)"
+				imgui.set_tooltip(tooltip)
+			if changed and new_value != current_specular:
+				self._set_specular_material_texture(material, new_value)
+				self._reapply_material(material_id)
+			imgui.same_line()
+
+			if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Browse for a specular/gloss map file"):
+				def _on_specular_result(file_name, material_id=material_id, material=material):
+					self._set_specular_material_texture(material, file_name)
+					self._reapply_material(material_id)
+				self._start_texture_browse(("specular", material_id), _on_specular_result)
+			imgui.same_line()
+
+			def _on_specular_copied(new_name, material_id=material_id, material=material):
+				self._set_specular_material_texture(material, new_name)
+				self._reapply_material(material_id)
+			self._draw_texture_copy_button(current_specular, _on_specular_copied)
+
 		self._draw_panoply_masks_for(current_value)
 
 		imgui.pop_id()
+
+	@staticmethod
+	def _specular_preview_name(material):
+		"""A representative file name for material.textures[1] when the
+		material is in Specular mode -- for a CTextureCube, its first
+		populated face (real content duplicates the same file across all 6
+		faces, per the shape-wide scan noted in the specular chantier, so
+		any one face is a faithful preview); for a flat file, that file
+		directly. None when there's nothing to preview (Normal mode, no
+		stage-1 texture, or an all-empty cube)."""
+		if material is None or material.shader_type != _IDRV_MAT_SHADER_SPECULAR or len(material.textures) < 2:
+			return None
+		stage1 = material.textures[1]
+		if stage1 is None:
+			return None
+		if stage1.class_name == "CTextureCube":
+			for sub in stage1.sub_textures or []:
+				if sub is not None and sub.file_name:
+					return sub.file_name
+			return None
+		return stage1.file_name or None
+
+	@staticmethod
+	def _specular_preview_name_for_slot(material, index):
+		"""Same as _specular_preview_name(), but resolves a specific Multi
+		Bitmap slot index rather than the material's currently *selected*
+		variant -- in real data, stage 1's CTextureCube faces are
+		themselves CTextureMultiFile, with file_names lining up 1:1 with
+		stage 0's own per-slot dye choices (e.g. nospec/spec_base/spec_luxe
+		tracking the same c1..c8 index the diffuse texture uses)."""
+		if material is None or material.shader_type != _IDRV_MAT_SHADER_SPECULAR or len(material.textures) < 2:
+			return None
+		stage1 = material.textures[1]
+		if stage1 is None:
+			return None
+		faces = stage1.sub_textures if stage1.class_name == "CTextureCube" else [stage1]
+		for face in faces or []:
+			if face is None:
+				continue
+			if face.file_names and index < len(face.file_names) and face.file_names[index]:
+				return face.file_names[index]
+			if not face.file_names and face.file_name:
+				return face.file_name
+		return None
 
 	def _on_exit(self):
 		"""Runs right before the process actually exits, whether that was

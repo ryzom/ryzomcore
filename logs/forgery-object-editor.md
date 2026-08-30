@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-08-30 — ✨ Render CMaterial::TShader::Specular in Patina
+
+Patina previously rendered every material's diffuse texture alpha as plain transparency
+(`ColorBlendAttrib`/`AlphaTestAttrib`) and never looked past texture stage 0. For
+`CMaterial::TShader::Specular` materials (`shader_type == 4`, `material.h:179-190`) --
+confirmed on real content (`ryw_mark1_hof_caster01_pantabottes.shape` and, via a
+shape-wide scan of all 2491 `.shape` files in ryzom-data, ~28% of the 1247 parseable
+ones: weapons, lanterns, glassware, statues, jewelry, on top of Ryw_Mark_I armor) --
+the diffuse alpha is instead a mask for a dedicated stage-1 specular/gloss map
+(flat texture or `CTextureCube` reflection cubemap), and was simply invisible.
+
+- **`shape_geometry.load_panda_cube_texture()`**: assembles a Panda3D cube map from a
+  `CTextureCube`'s 6 faces (NeL's own positive_x/negative_x/positive_y/negative_y/
+  positive_z/negative_z face order already matches Panda3D's cube-map z-slice order).
+- **`object_editor._update_specular_overlay()`**: reproduces the real engine's own
+  2-pass technique (`driver_opengl_material.cpp`'s `beginSpecularMultiPass()`/
+  `setupSpecularPass()`, `material.h`'s own doc comment: "this is done in 2 passes") --
+  an instanced sibling NodePath (`NodePath.instance_to()`, no vertex duplication) drawn
+  additively on top, computing `specular_map(reflectDir).rgb * diffuse_map(texcoord).a`.
+  Needed a small dedicated GLSL shader (`_SPECULAR_OVERLAY_VERTEX_SHADER`/
+  `_SPECULAR_OVERLAY_FRAGMENT_SHADER`) for the cubemap reflection sampling: fixed-function
+  `TexGenAttrib.M_world_cube_map` (tried first, to stay consistent with the rest of this
+  attrib-only file) turned out not to work at all under Panda3D's modern (core-profile)
+  OpenGL path, confirmed by isolated testing (a flat-color test on the same node
+  rendered fine; the identical setup with TexGen never showed anything). The shader is
+  scoped to just this one already-unlit/unmaterialed pass, so it doesn't reimplement any
+  of Panda3D's own ambient/diffuse/light pipeline -- the base pass is untouched.
+- Root cause of "no visible specular no matter which dye variant is selected":
+  `_select_multi_bitmap_slot()` (the Multi Bitmap "Select" button) only ever updated
+  stage 0 (diffuse)'s `selected_index`/`file_name`. In real content, stage 1's
+  `CTextureCube` faces are themselves `CTextureMultiFile`, tracking the same per-slot
+  dye choice independently (e.g. nospec/spec_base/spec_luxe) -- without syncing them,
+  the specular cubemap stayed permanently stuck on whichever variant was selected when
+  the shape was authored (usually the black "nospec" placeholder). Fixed by syncing
+  stage 1's faces alongside stage 0.
+- New material-row UI: a compact, label-less "Render mode" combo (Normal/Specular
+  clickable; LightMap listed but disabled -- real shader used by 44 shapes per the same
+  scan, just not implemented yet; UserColor/PerPixelLighting/Water dropped entirely,
+  zero real usage) next to a new compact Single/Multi combo that replaces the old
+  three-way "Color"/"Simple bitmap"/"Multi Bitmap" text badge and separate convert
+  buttons (same conversion constraints as before). A "Specular" texture row (editable:
+  preview, combo, browse, copy -- same controls as any other texture row) appears
+  wherever applicable, in both the Textures tab's simple-material row and the Multi
+  Bitmap per-slot editor.
+- Smaller fixes made in passing: `_draw_texture_name_combo()` gained an empty "(none)"
+  entry (previously the only way to clear a texture slot was Browse, which can only set
+  a real file, never clear one); the "Texture offset/tiling/rotation" section's enable
+  checkbox was removed (the sliders are always visible now and flip the underlying
+  flags on the first real edit) since it added a step without adding real value.
+
 ## 2026-08-29 — ✨ Add BuildMasksFromConfigFile + combinatorial loop to panoply_maker.py
 
 Two more pieces of the `panoply_maker.py` offline generation port (see the previous entry

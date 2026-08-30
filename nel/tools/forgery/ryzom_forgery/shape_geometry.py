@@ -438,6 +438,49 @@ def load_panda_texture(name, cache=None, search_dirs=None, repeat=False, finder=
 	return texture
 
 
+def load_panda_cube_texture(sub_textures, cache=None, search_dirs=None, repeat=False, finder=None):
+	"""Assembles a Panda3D cube-map Texture from a CTextureCube's 6 faces
+	(pynel Texture.sub_textures). NeL's own face order -- texture_cube.h's
+	TFace enum: positive_x, negative_x, positive_y, negative_y, positive_z,
+	negative_z -- is the same order Panda3D expects for a cube map's ram
+	image z-slices, so sub_textures[i] maps straight to z=i with no
+	reordering. A missing/undecodable face falls back to the first
+	successfully decoded one (a cube map with a hole is worse than one with
+	a repeated face). `cache` is the same per-2D-texture decode cache
+	load_panda_texture() takes -- this only adds the cost of reassembling
+	the 6 (already-cached) faces into one cube texture, not re-decoding
+	them."""
+	if not sub_textures or len(sub_textures) != 6:
+		return None
+
+	faces = []
+	for face_tex in sub_textures:
+		if face_tex is None or not face_tex.file_name:
+			faces.append(None)
+			continue
+		faces.append(load_panda_texture(
+			face_tex.file_name, cache=cache, search_dirs=search_dirs, repeat=repeat, finder=finder,
+			wrap_s=face_tex.wrap_s, wrap_t=face_tex.wrap_t,
+			min_filter=face_tex.min_filter, mag_filter=face_tex.mag_filter,
+			load_grayscale_as_alpha=face_tex.load_grayscale_as_alpha))
+
+	decoded = [t for t in faces if t is not None]
+	if not decoded:
+		return None
+	fallback = decoded[0]
+	faces = [t if t is not None else fallback for t in faces]
+
+	size = fallback.get_x_size()
+	if any(t.get_x_size() != size or t.get_y_size() != size for t in faces):
+		print("[shape_geometry] cube map faces have mismatched sizes, skipping")
+		return None
+
+	cube_texture = PandaTexture()
+	cube_texture.setup_cube_map(size, PandaTexture.T_unsigned_byte, PandaTexture.F_rgba)
+	cube_texture.set_ram_image(b"".join(t.get_ram_image_as("RGBA") for t in faces))
+	return cube_texture
+
+
 def decompose_uv_matrix(matrix):
 	"""Decomposes a texture-stage UV Matrix (Material.tex_user_mat[stage] --
 	NeL's generic CMatrix, loaded verbatim as the OpenGL texture matrix, see
