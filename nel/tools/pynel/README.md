@@ -1,6 +1,6 @@
 # pynel
 
-Python tools for Ryzom/NeL data formats (`.ig`, `.shape`, `.bnp`, `.primitive`, `.cmb`) and admin protocols.
+Python tools for Ryzom/NeL data formats (`.ig`, `.shape`, `.bnp`, `.primitive`, `.cmb`, `.packed_sheets`) and admin protocols.
 
 > Development on this package happens on the `ryzom/pynel` branch. Forgery's own work
 > branch is `ryzom/forgery` (see its README).
@@ -33,6 +33,8 @@ Installing the package also provides console scripts:
   files, see [`docs/hls_texture_bank.md`](docs/hls_texture_bank.md)
 - `ryzom-cfg` -- read/write `.cfg` (`CConfigFile` format, e.g. `client.cfg`,
   `panoply_*.cfg`) files, see [`docs/config_file.md`](docs/config_file.md)
+- `ryzom-packed-sheets` -- read `creature.packed_sheets` (Georges sheet binary
+  cache) and `sheet_id.bin`, see [`docs/packed_sheets.md`](docs/packed_sheets.md)
 
 Run any of them with `--help` for usage details.
 
@@ -41,13 +43,15 @@ Run any of them with `--help` for usage details.
 Each tool is also usable as a Python module:
 
 ```python
-from pynel import ryzom_ig, ryzom_shape, ryzom_bnp, ryzom_primitive, collision_mesh_build
+from pynel import ryzom_ig, ryzom_shape, ryzom_bnp, ryzom_primitive, collision_mesh_build, ryzom_packed_sheets
 
 ig = ryzom_ig.load_ig("street.ig")
 shape = ryzom_shape.load_shape("object.shape")
 bnp = ryzom_bnp.BnpReader("data.bnp")
 pf = ryzom_primitive.load_primitive("dummy.primitive")
 cmb = collision_mesh_build.load_cmb("apartment.cmb")
+packed = ryzom_packed_sheets.load_creature_packed_sheets("creature.packed_sheets")
+names = ryzom_packed_sheets.parse_sheet_id_bin(bnp.read_file("sheet_id.bin"))  # sheet_id.bin ships inside leveldesign.bnp
 ```
 
 ### Locating a user's Ryzom repository checkouts

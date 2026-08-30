@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pynel"
-version = "0.5.0"
-description = "Python tools for Ryzom/NeL data formats (.ig, .shape, .anim, .bnp, .primitive, .cmb) and admin protocols"
+version = "0.6.0"
+description = "Python tools for Ryzom/NeL data formats (.ig, .shape, .anim, .bnp, .primitive, .cmb, .packed_sheets) and admin protocols"
 requires-python = ">=3.8"
 dependencies = []
 
@@ -18,6 +18,7 @@ ryzom-primitive = "pynel.ryzom_primitive:_main"
 ryzom-cmb = "pynel.collision_mesh_build:_main"
 ryzom-hlsbank = "pynel.hls_texture_bank:_main"
 ryzom-cfg = "pynel.config_file:_main"
+ryzom-packed-sheets = "pynel.ryzom_packed_sheets:_main"
 
 [tool.setuptools]
 packages = ["pynel"]

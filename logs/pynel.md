@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-08-30 — ✨ Add ryzom_packed_sheets (creature.packed_sheets + sheet_id.bin), pynel 0.6.0
+
+New `pynel.ryzom_packed_sheets` module (CLI `ryzom-packed-sheets`): reads
+`creature.packed_sheets` (the client's binary cache of `.creature` Georges
+sheets, `NLGEORGES::loadForm()`/`CSheetManagerEntry`/`CCharacterSheet`) and
+`sheet_id.bin` (raw `CSheetId` -> readable sheet name, `map<uint32,string>`,
+ships inside `leveldesign.bnp`). Read-only: the client always regenerates
+this cache from the source sheets, so there's no reason to write it back.
+
+Format fully reverse-engineered from `nel/include/nel/georges/load_form.h`,
+`nel/include/nel/misc/sheet_id.{h,cpp}`, `ryzom/client/src/sheet_manager.cpp`
+and `ryzom/client/src/client_sheets/character_sheet.cpp` — see
+`nel/tools/pynel/docs/packed_sheets.md` for the full writeup, including
+version guards (`PACKED_SHEET_VERSION=5`, creature class version 17) and the
+exact `CCharacterSheet::serial` field order (~50 fields incl. 9 equipment
+slots, ground FX, body-to-bone mapping, attack lists).
+
+Only `CEntitySheet::FAUNA`/`CCharacterSheet` is implemented — the other ~25
+sheet types the format supports (`.item`, `.sbrick`, `.mission`, ...) raise
+`PackedSheetsParseError` and are left for future sessions, one per type, same
+investigation pattern.
+
+Validated against the real file on the maintainer's machine: parses all
+28545 entries of a live `creature.packed_sheets` with no trailing bytes and
+no exception, names resolved correctly via `sheet_id.bin`, and full-field
+dumps of two real NPCs cross-checked by hand (a bare-bodied
+`basic_fyros_male.creature` and an equipped `fyhc1.creature`).
+
+While inspecting `fyhc1.creature`'s equipment, confirmed that a
+`CharacterSheet`'s `.shape` filenames are **not** in `creature.packed_sheets`
+itself: non-empty `Equipment.id_item` fields are `.item`/`.sitem` sheet
+names, and the real shape only shows up one level further via
+`CItemSheet::getShape()` (race/gender variants) — `item.packed_sheets` isn't
+implemented yet, noted as the natural next step in `docs/packed_sheets.md`.
+Also corrected an initial wrong assumption that `automaton_list.packed_sheets`
+would hold shape references — it's actually an animation state-machine
+(`CAutomatonStateSheet`), unrelated to meshes.
+
 ## 2026-08-29 — ✨ Add repository_paths (shared 4-repo checkout locations)
 
 New `pynel.repository_paths` module: a small per-user JSON settings file
