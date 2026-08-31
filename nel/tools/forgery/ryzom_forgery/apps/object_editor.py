@@ -10,6 +10,7 @@ import io
 import shutil
 import subprocess
 import threading
+import time
 from datetime import datetime
 from math import ceil, cos, pi, radians, sin
 from pathlib import Path
@@ -27,6 +28,7 @@ from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, port
 
 from ryzom_forgery.app import _AVAILABLE_FONTS, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
+from ryzom_forgery import creature_ref
 from ryzom_forgery import dds_export
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
@@ -60,8 +62,8 @@ from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
 )
 from pynel.ryzom_shape import (
-	Matrix, MeshMRMSkinned, Quaternion, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture,
-	WindTreeParams, parse_shape, save_shape,
+	Matrix, MeshMRM, MeshMRMSkinned, Quaternion, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape,
+	Texture, Vector3, WindTreeParams, parse_shape, save_shape,
 )
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh
 from pynel import repository_paths
@@ -149,6 +151,63 @@ _IDRV_MAT_TEX_ADDR = 0x00000400
 _IDRV_MAT_SHADER_NORMAL = 0
 _IDRV_MAT_SHADER_LIGHTMAP = 3
 _IDRV_MAT_SHADER_SPECULAR = 4
+
+# CMaterial::TTexSource (material.h) -- TexEnv.src_arg*_alpha's values.
+_TEX_SOURCE_TEXTURE = 0
+_TEX_SOURCE_PREVIOUS = 1
+# (Diffuse=2, Constant=3 also exist but aren't distinguished below -- both
+# mean "not texture-derived" for _material_alpha_from_texture()'s purposes.)
+# CMaterial::TTexOperator (material.h) -- TexEnv.op_alpha's values.
+_TEX_OP_REPLACE = 0
+
+
+def _stage_alpha_sources(tex_env):
+	"""TTexSource values that actually feed this one texture stage's alpha
+	result, per its own op_alpha (CMaterial::TTexOperator, material.h) --
+	Replace only reads arg0, every other op (Modulate/Add/...) combines
+	arg0 and arg1. Doesn't model arg2/interpolation ops precisely (none of
+	the real character materials found so far use them for alpha) -- good
+	enough to tell "still texture-derived" from "overridden to a constant"."""
+	if tex_env.op_alpha == _TEX_OP_REPLACE:
+		return (tex_env.src_arg0_alpha,)
+	return (tex_env.src_arg0_alpha, tex_env.src_arg1_alpha)
+
+
+def _material_alpha_from_texture(material):
+	"""True if this material's final composited alpha (after ALL its
+	texture stages, not just stage 0) still traces back to a texture's own
+	alpha -- False if some later stage's texenv overrides it away to a
+	constant (Diffuse or Constant, CMaterial::TTexSource).
+
+	Needed because a common Ryzom multi-texture pattern -- e.g. a 2nd decal/
+	makeup texture stage modulated onto stage 0's RGB, but with
+	op_alpha=Replace sourced from Diffuse -- deliberately discards the base
+	texture's own alpha for the final draw (makes the whole pass opaque,
+	regardless of either texture's content). Confirmed real, 2026-08-30:
+	fy_hof_visage.shape's makeup-layer material has exactly this shape, and
+	alpha-testing stage 0's (grayscale-as-alpha) texture alone -- as if it
+	were the final result -- wrongly discarded the whole pass depending on
+	which part of the face texture that stage's own UVs happened to sample
+	(worked fine for fy_hom_visage.shape's equivalent material only by
+	UV-content coincidence, not because the logic was actually correct).
+
+	Only tracks alpha, not RGB compositing -- RGB blending across stages is
+	a separate visual-fidelity concern (a missing decal layer looks
+	incomplete, not literally invisible), out of scope for this fix."""
+	tex_envs = material.tex_envs or []
+	textures = material.textures or []
+	depends_on_texture = True
+	for texture, tex_env in zip(textures, tex_envs):
+		if texture is None or tex_env is None:
+			continue
+		sources = _stage_alpha_sources(tex_env)
+		if _TEX_SOURCE_TEXTURE in sources:
+			depends_on_texture = True
+		elif _TEX_SOURCE_PREVIOUS in sources:
+			pass  # inherits whatever depends_on_texture already was
+		else:
+			depends_on_texture = False  # Diffuse or Constant -- overridden away from any texture
+	return depends_on_texture
 
 # Render-mode dropdown options (_draw_material_render_mode_section): only
 # modes with confirmed real usage in ryzom-data are listed at all (a
@@ -423,6 +482,14 @@ _MIN_GRID_SQUARES = 4
 # both can be shown together without one being mistaken for the other.
 _WORLD_AXIS_COLORS = {"x": (0.95, 0.25, 0.25, 1.0), "y": (0.3, 0.85, 0.3, 1.0), "z": (0.3, 0.55, 1.0, 1.0)}
 _PIVOT_AXIS_COLORS = {"x": (0.95, 0.2, 0.85, 1.0), "y": (0.95, 0.85, 0.15, 1.0), "z": (0.2, 0.9, 0.9, 1.0)}
+# A 3rd, again visually distinct palette (bright orange/lime/violet) for the
+# Bind preview's attach-point marker (_apply_loaded_shape_to_creature()) --
+# the actual target the loaded shape's own pivot (magenta/yellow/cyan above)
+# needs to be moved onto for a correct in-game grip point, see that marker's
+# own docstring (2026-08-31, Nuno: "je dois OBLIGATOIREMENT visualiser ce
+# point de préhension [...] je veux savoir précisement ce que je dois
+# changer... le pivot de mon arme n'est pas sur le point d'attache").
+_ATTACH_POINT_AXIS_COLORS = {"x": (1.0, 0.55, 0.05, 1.0), "y": (0.55, 0.95, 0.15, 1.0), "z": (0.65, 0.3, 0.95, 1.0)}
 _AXIS_VECTORS = {"x": (1.0, 0.0, 0.0), "y": (0.0, 1.0, 0.0), "z": (0.0, 0.0, 1.0)}
 _AXIS_LENGTH = 3.0  # fallback, before any shape is loaded
 _AXIS_MARGIN_FACTOR = 1.2  # how far axes extend past the bbox radius
@@ -548,6 +615,18 @@ def _build_skin_state(geom, skeleton):
 		bone_indices[i] = v.matrices
 		weights[i] = [w / 255.0 for w in v.weights]
 
+	# Bug found and fixed 2026-08-30 (see shape_geometry.py's
+	# _numpy_skin_batch() for the full writeup, same root cause): a
+	# zero-weight slot's own matrix_id isn't guaranteed valid content (only
+	# slot 0 is, per CMesh::CSkinWeight's own doc comment) -- confirmed
+	# real on ma_hof_armor01_pantabottes.shape, a matrix_id of 77 into an
+	# 8-bone array, only in an unused slot. _update_skin_preview() gathers
+	# all 4 slots unconditionally every frame before weighting, so this
+	# crashed on load. Clamp to slot 0's own index (always valid) wherever
+	# weight is 0 -- its contribution is zeroed out by the weight anyway,
+	# regardless of which bone the clamp picks.
+	bone_indices = numpy.where(weights > 0, bone_indices, bone_indices[:, :1])
+
 	return _SkinState(geom, skeleton, list(geom.bones_name), local_positions, local_normals, bone_indices, weights)
 
 
@@ -657,6 +736,44 @@ def _build_geom(vdata, indices):
 	return geom
 
 
+def _is_shape_skinned(shape_value):
+	"""True if `shape_value` has real skin data to drive from a skeleton --
+	either a CMeshMRMSkinned (always skinned) or a plain CMeshMRM that
+	happens to carry its own skin data too (geom.skinned, a separate,
+	older on-disk format -- confirmed real, 2026-08-30, e.g. Ryzom's
+	*_visage.shape face pieces are plain CMeshMRM, not CMeshMRMSkinned, yet
+	are skinned -- see shape_geometry.py's _passes_from_mrm_geom() and
+	pynel.ryzom_skin.skin_mesh_mrm_geom()). Use this everywhere instead of
+	`isinstance(shape_value, MeshMRMSkinned)` alone -- that check alone
+	silently treats a skinned CMeshMRM as rigid."""
+	if isinstance(shape_value, MeshMRMSkinned):
+		return True
+	if isinstance(shape_value, MeshMRM):
+		return bool(shape_value.geom.skinned)
+	return False
+
+
+def _nel_matrix_to_panda_mat4(m):
+	"""Converts one of pynel.ryzom_animation.evaluate_all_bone_world_matrices()'s
+	raw 4x4 matrices (a tuple of rows, m[row][col], NeL's row-major/column-3-
+	translation convention -- v' = M * v as a column vector, same convention
+	_mat_translate()/_mat_mul() in ryzom_animation.py use) into a Panda3D
+	Mat4, whose own convention is the transpose of that (row-vector on the
+	left, v' = v * M, translation in the LAST ROW -- see
+	shape_geometry.py-adjacent uv_matrix_to_panda_mat4()'s own Mat4(...)
+	calls for another example of this same row/last-row-translation shape).
+	NOT independently verified against a real bind visually yet (no GUI in
+	this dev environment) -- if a bound shape ends up offset/misoriented,
+	this transpose direction is the first thing to double check."""
+	from panda3d.core import Mat4
+	return Mat4(
+		m[0][0], m[1][0], m[2][0], 0.0,
+		m[0][1], m[1][1], m[2][1], 0.0,
+		m[0][2], m[1][2], m[2][2], 0.0,
+		m[0][3], m[1][3], m[2][3], 1.0,
+	)
+
+
 APP_INFO = {
 	"id": "object_editor",
 	"name": "Patina",
@@ -724,10 +841,57 @@ class ObjectEditorApp(ForgeryApp):
 		self._grid_np = self.render.attach_new_node("floor-grid-placeholder")
 		self._world_axes_np = self.render.attach_new_node("world-axes-placeholder")
 		self._pivot_axes_np = self._object_pivot.attach_new_node("pivot-axes-placeholder")
+		# Bind preview's attach-point target marker -- see
+		# _apply_loaded_shape_to_creature(), the only place that (re)builds
+		# it (not _rebuild_viewport_helpers(), which never runs for this:
+		# it's driven by the CREATURE's bone, not the loaded shape's own
+		# bbox/geometry).
+		self._attach_point_axes_np = self.render.attach_new_node("attach-point-axes-placeholder")
 		self._rebuild_viewport_helpers(None)
 
 		self.shape_file = None
 		self.shape_error = None
+		# Creature/NPC assembler (see _rebuild_assembled_creature()) -- the
+		# full skeleton + every resolved body-part shape of the creature
+		# currently picked in the Bind preview (_draw_bind_controls()),
+		# shown as a standing reference alongside whatever's loaded, same
+		# spirit as _reference_root's scale-reference shapes but built from
+		# creature_ref data instead of a fixed bundled example.
+		self._assembled_creature_root = self.render.attach_new_node("assembled-creature-root")
+		self._show_assembled_creature = False
+		self._assembled_creature_bone_matrices = {}  # see _frame_camera()
+		# slot_name -> NodePath for the creature's own disk-parsed body-part
+		# shapes -- built once per creature SELECTION by
+		# _rebuild_assembled_creature() (expensive: disk read + shape parse +
+		# skin per slot). The loaded shape's own place within the group (one
+		# of: replacing one of these slots, a rigid attach-point weapon, or
+		# an "undefined" catch-all -- see _apply_loaded_shape_to_creature())
+		# is layered on top separately and cheaply (no disk I/O) whenever
+		# just the loaded shape/its binding choice changes.
+		self._assembled_creature_base_nodes = {}
+		self._assembled_creature_loaded_shape_node = None  # see _apply_loaded_shape_to_creature()
+		# The loaded-shape node's own inner "-content" child (see
+		# _build_assembled_shape_geometry()) -- kept up to date with
+		# self._object_pivot's LIVE rotation every frame (see
+		# _update_bound_shape_rotation()), not just a one-time snapshot at
+		# build time, so a Ctrl+drag rotation edit on the main shape is
+		# reflected on its bound copy immediately too (bug found 2026-08-30,
+		# Nuno: "ça marche quand je le load, mais apres je modifie les
+		# valeurs.. ça ne change rien du tout").
+		self._assembled_creature_loaded_shape_content_root = None
+		# True only for the skinned slot-override case (see
+		# _apply_loaded_shape_to_creature()) -- there, the skin binding to
+		# the creature's own skeleton already fully determines world
+		# position, so _update_bound_shape_rotation() must track rotation
+		# ONLY for it (matching CMeshBase::DefaultRotQuat's own real-engine
+		# semantics, layered on top of skinning); the rigid attach-point/
+		# undefined cases track the FULL position+rotation+scale instead
+		# (bug found 2026-08-31, Nuno: "t'as fais du caca sur les shape
+		# skinnés.. ils sont pas du tout au bon endroit" -- the full-matrix
+		# sync added for weapons was wrongly applied to skinned armor too,
+		# double-offsetting already-skin-placed vertices by whatever
+		# position/scale the main shape's own pivot happened to be at).
+		self._assembled_creature_loaded_shape_is_skinned_override = False
 		self._reference_root = self.render.attach_new_node("reference-root")
 		self._reference_shapes = {}  # label -> ShapeFile or None (failed to load), lazily parsed once
 		self._reference_active = set()  # labels currently shown
@@ -888,6 +1052,38 @@ class ObjectEditorApp(ForgeryApp):
 		self._bone_preview_panel_size = (10.0, 10.0)
 		self._skeleton_file_dialog = None  # in-flight portable_file_dialogs.open_file, for the Skinning preview's own "load a .skel" icon button
 		self._animation_file_dialog = None  # same, for its "load a .anim" icon button
+		# Bind preview (see _draw_bind_controls()): lets a non-skinned shape
+		# (e.g. a weapon) be bound to a chosen attach point (bone) of one of
+		# Patina's curated reference creatures, or (for a skinned shape) let
+		# it stand in for one slot of the assembled creature (e.g. preview
+		# fy_HOM_armor01_bottes.shape in place of the creature's own default
+		# fy_HOM_civil01_bottes.shape for "feet") -- see
+		# /repos/project-todos/ryzom-core/forgery-object-editor.md "Creature/
+		# NPC binder + assembler in Patina". Own dedicated skeleton field,
+		# deliberately NOT _bone_preview_skeleton (2026-08-30, Nuno: picking
+		# a Bind-preview creature silently swapped that shared field, which
+		# _update_skin_preview()'s per-frame task also reads for the *main*
+		# shape's live re-skin -- so selecting a creature made that task
+		# recompute every frame against a wrong/mismatched skeleton
+		# indefinitely, with a real CPU cost independent of whether the
+		# assembled creature itself was even visible or in view. See
+		# _apply_bone_preview_skeleton()'s own docstring for the feature
+		# that field actually belongs to).
+		self._bind_creatures = {}  # name -> creature_ref.CreatureRecord, see _ensure_bind_creatures()
+		self._bind_cache_rebuild = None  # dict or None -- see _start_bind_cache_rebuild()/_ensure_bind_creatures()
+		self._bind_creature_name = ""
+		self._bind_skeleton = None  # the picked creature's own skeleton, or None
+		self._bind_skeleton_name = ""  # its scanned (on-disk-cased) name, see _resolve_scanned_skeleton_name()
+		self._bind_attach_point = ""  # bone name picked in the attach-point combo (non-skinned shapes); "" = unbound
+		self._bind_slot_override = ""  # creature_ref.BODY_SLOTS entry or "hair" (skinned shapes); "" = no override
+		# self._bind_slot_overrides itself (shape-stem-lowercased ->
+		# manually-picked slot, persisted to the active workspace's own
+		# build/bind_slot_overrides.json) is set by _on_active_workspace_changed()
+		# above, called earlier in __init__ -- not re-initialized here, that
+		# would clobber what it just loaded for a workspace already active
+		# from a previous session. See its own assignment there for the
+		# full docstring.
+		self._bind_panel_size = (10.0, 10.0)
 		self._image_editor_dialog = None  # same, for the Settings tab's image editor executable picker
 		self._text_editor_dialog = None  # same, for the Settings tab's text editor executable picker
 		self.taskMgr.add(self._update_skin_preview_time, "object-editor-skin-preview-time")
@@ -899,6 +1095,7 @@ class ObjectEditorApp(ForgeryApp):
 		# CMeshMRMSkinned, or no skeleton is loaded yet.
 		self._skin_state = None
 		self.taskMgr.add(self._update_skin_preview, "object-editor-skin-preview")
+		self.taskMgr.add(self._update_bound_shape_rotation, "object-editor-bound-shape-rotation")
 		self.commands.register_for_extension(
 			".skel", "Load as bone-preview skeleton", self._on_load_skeleton_command)
 		self.commands.register_for_extension(
@@ -952,6 +1149,25 @@ class ObjectEditorApp(ForgeryApp):
 			self.explorer.pinned_folders = []
 		else:
 			self.explorer.pinned_folders = [(subdir, workspace_dir / subdir) for subdir in WORKSPACE_SUBDIRS]
+		# Forces a fresh _ensure_bind_creatures() lookup: a different (or no
+		# longer) active workspace may have its own creatures_ref.txt
+		# override, resolving to a different cache than before.
+		self._bind_creatures = {}
+		# A rebuild in flight for the PREVIOUS workspace would otherwise
+		# block _ensure_bind_creatures() from starting one for this new
+		# workspace (it only starts one when self._bind_cache_rebuild is
+		# None) -- the old thread still finishes and writes its own
+		# workspace's cache file harmlessly (its target path was captured by
+		# value), just no longer tracked here.
+		self._bind_cache_rebuild = None
+		# Loaded once here (startup, and again on every later workspace
+		# switch) rather than re-read from disk on every shape load --
+		# _auto_detect_bind_slot() only ever reads this in-memory copy;
+		# _write_shape() is the only thing that updates the on-disk file
+		# (and this copy in lockstep, via _save_bind_slot_override()).
+		self._bind_slot_overrides = (
+			creature_ref.load_slot_overrides(creature_ref.workspace_slot_overrides_path(workspace_dir))
+			if workspace_dir is not None else {})
 
 	def _is_shape_open_at(self, target_path):
 		"""ImportWatcher's `is_shape_open` hook -- runs off its own background
@@ -1136,7 +1352,13 @@ class ObjectEditorApp(ForgeryApp):
 	def _apply_bone_preview_skeleton(self, skeleton, name):
 		"""Shared by the Explorer's right-click "Load as bone-preview
 		skeleton" command and the Skinning preview's own Skeleton combo
-		(see _draw_bone_preview_controls())."""
+		(see _draw_bone_preview_controls()) -- this is the *main* loaded
+		shape's own skeleton, read every frame by _update_skin_preview()'s
+		live re-skin task. NOT used by the Bind preview's creature picker
+		(_select_bind_creature() has its own separate _bind_skeleton field
+		instead) -- the two used to share this one, which made picking a
+		Bind-preview creature silently redirect the main shape's per-frame
+		re-skin to the creature's skeleton too (2026-08-30)."""
 		self._bone_preview_skeleton = skeleton
 		self._bone_preview_skeleton_name = name
 		# The main shape might itself be CMeshMRMSkinned and was rendering its
@@ -1240,6 +1462,55 @@ class ObjectEditorApp(ForgeryApp):
 		view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = weighted_normal
 		return task.cont
 
+	def _update_bound_shape_rotation(self, task):
+		"""Per-frame: keeps the Bind preview's loaded-shape-on-creature
+		copy's own local offset (self._assembled_creature_loaded_shape_content_root,
+		see _build_assembled_shape_geometry()) matching the main shape's
+		CURRENT position/rotation/scale edits -- a cheap matrix copy, not a
+		geometry rebuild, so a live Ctrl+drag or Properties-panel edit on
+		the main shape shows up on its bound copy immediately too (bug
+		found 2026-08-30, Nuno: rotation alone wasn't enough, "pos et scale
+		marchent pas" either).
+
+		model_root.get_mat(self.render) is exactly this offset: _object_pivot
+		is parented directly to self.render at true (0,0,0)/scale-1 (only
+		ever rotated, seeded from base.default_rot_quat on load, see
+		_display_shape()), and model_root itself carries any pivot-locked
+		edits on top (_transform_node()) -- so their COMPOSED matrix
+		relative to render *is* "whatever the shape's own intrinsic
+		placement + every edit since load add up to", with no absolute
+		world position baked in to fight with wherever the bound copy is
+		already correctly anchored (skinned onto the creature, or set to an
+		attach-point bone -- see _apply_loaded_shape_to_creature()).
+		content_root.set_mat(matrix) (single-argument form, no coordinate-
+		space conversion) applies that composed matrix as content_root's
+		own LOCAL transform within its already-correctly-anchored parent,
+		exactly like _build_assembled_shape_geometry()'s own initial
+		set_quat(base.default_rot_quat) did for rotation alone -- this
+		fully supersedes that one-time snapshot every frame from here on.
+
+		EXCEPTION: the skinned slot-override case
+		(self._assembled_creature_loaded_shape_is_skinned_override) is left
+		alone entirely -- position, rotation, AND scale. Verified 2026-08-31
+		(transform.cpp:946 CTransform::updateWorldMatrixFromFather()): a
+		skinned instance's own Default{Pos,RotQuat,Scale} has ZERO effect in
+		the real game, not just position/scale -- the skin binding to the
+		creature's own skeleton alone fully determines every vertex's final
+		position (see _build_assembled_shape_geometry()'s own matching
+		is_skinned check). Layering ANY of the main shape's own edits on top
+		here would just double-offset/rotate already-correctly-placed
+		vertices away from a result the real client could ever produce (bug
+		found 2026-08-31, Nuno: "t'as fais du caca sur les shape skinnés..
+		ils sont pas du tout au bon endroit", then "t'es sur que la rotation
+		dois s'appliquer aussi?" -- no, confirmed).
+
+		No-op whenever nothing is currently bound."""
+		content_root = self._assembled_creature_loaded_shape_content_root
+		if (content_root is not None and not content_root.is_empty()
+				and not self._assembled_creature_loaded_shape_is_skinned_override):
+			content_root.set_mat(self.model_root.get_mat(self.render))
+		return task.cont
+
 	def _update_skin_preview_time(self, task):
 		"""Per-frame: advances self._bone_preview_time while playing -- the
 		clock driving the Skinning preview's animation (_update_skin_preview()
@@ -1251,17 +1522,21 @@ class ObjectEditorApp(ForgeryApp):
 
 	def _draw_bone_preview_controls(self):
 		"""Floating "Skinning preview" window: picks the skeleton/animation
-		driving the loaded shape's own skinning, if it's a CMeshMRMSkinned
-		(see _update_skin_preview()). Shown as soon as a shape is loaded (not
-		gated on a skeleton being picked yet) so the Skeleton combo below is
-		reachable even before any skeleton is chosen. Positioned the same way
-		as _draw_wind_controls(), stacked right below it (both top-right of
-		the viewport, flush against the panel)."""
-		if self.shape_file is None:
+		driving the loaded shape's own live re-skin (self._bone_preview_skeleton,
+		read every frame by _update_skin_preview()) -- only shown for a
+		CMeshMRMSkinned, the one shape type that actually needs live
+		re-skinning; a rigid shape has nothing for this panel to drive.
+		Deliberately separate from _draw_bind_controls()'s own
+		self._bind_skeleton (Bind preview's creature picker) -- they used to
+		share one field, which made picking a Bind-preview creature silently
+		redirect the main shape's per-frame re-skin too (2026-08-30, see
+		_bind_skeleton's own docstring). Positioned the same way as
+		_draw_wind_controls(), stacked right below it (both top-right of the
+		viewport, flush against the panel)."""
+		if self.shape_file is None or not _is_shape_skinned(self.shape_file.value):
 			return
 
-		is_skinned = isinstance(self.shape_file.value, MeshMRMSkinned)
-		shape_bones = set(shape_geom(self.shape_file.value).bones_name) if is_skinned else set()
+		shape_bones = set(shape_geom(self.shape_file.value).bones_name)
 
 		display_width = imgui.get_io().display_size.x
 		win_w, win_h = self._bone_preview_panel_size
@@ -1280,7 +1555,7 @@ class ObjectEditorApp(ForgeryApp):
 			# same as the engine itself doesn't refuse an incompatible bind,
 			# just remaps missing bones to the root (CSkeletonModel::remapSkinBones).
 			scanned_names = self.search_paths_dialog.scanned_skeleton_names()
-			compatible_names = set(self.search_paths_dialog.compatible_for(shape_bones)) if is_skinned else set()
+			compatible_names = set(self.search_paths_dialog.compatible_for(shape_bones))
 			# Compatible ones first (still sorted among themselves), then the
 			# rest -- the match everyone actually wants shouldn't be buried
 			# alphabetically among dozens of irrelevant skeletons.
@@ -1351,6 +1626,674 @@ class ObjectEditorApp(ForgeryApp):
 			if _icon_button(fa_icons.ICON_FA_TIMES, "Unload skeleton/animation, stop preview"):
 				self._unload_bone_preview()
 			self._bone_preview_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
+	def _ensure_bind_creatures(self):
+		"""Lazily loads the curated creature list + its distilled cache (see
+		creature_ref.py) for the Bind preview's creature combo -- cheap once
+		loaded: the bundled cache is a plain pre-generated JSON read, no
+		.packed_sheets parsing involved for the 8 default reference
+		creatures. Invalidated (see _on_active_workspace_changed()) whenever
+		the active workspace changes, since a different workspace may have
+		its own creatures_ref.txt override resolving to a different cache.
+
+		A WORKSPACE override list's own cache never ships pre-generated
+		(unlike the bundled list's) -- kicks off a background rebuild (see
+		_start_bind_cache_rebuild()) when it's missing or older than the
+		list file. 2026-08-30 gap found by Nuno: this was never wired up at
+		all -- editing/copying creatures_ref.txt into a workspace produced a
+		permanently empty combo (no cache ever existed for it to read), not
+		a partial/stale one."""
+		if self._bind_cache_rebuild is not None and self._bind_cache_rebuild["done"]:
+			if self._bind_cache_rebuild["error"]:
+				self._save_status = f"Creature cache rebuild failed: {self._bind_cache_rebuild['error']}"
+				print(f"[object_editor] {self._save_status}")
+			self._bind_cache_rebuild = None
+			self._bind_creatures = {}  # force the reload below, picking up whatever the rebuild just wrote
+
+		if self._bind_creatures:
+			return self._bind_creatures
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		list_path = creature_ref.resolve_list_path(workspace_dir)
+		cache_path = creature_ref.resolve_cache_path(workspace_dir)
+		entries = creature_ref.load_creature_entries(list_path)
+		cache = creature_ref.load_cache(cache_path)
+		self._bind_creatures = {label: cache[label] for _sheet, label in entries if label in cache}
+
+		is_workspace_list = workspace_dir is not None and list_path == creature_ref.workspace_list_path(workspace_dir)
+		if is_workspace_list and self._bind_cache_rebuild is None:
+			cache_mtime = cache_path.stat().st_mtime if cache_path.is_file() else None
+			list_mtime = list_path.stat().st_mtime
+			if cache_mtime is None or list_mtime > cache_mtime:
+				self._start_bind_cache_rebuild(workspace_dir, entries)
+		return self._bind_creatures
+
+	def _resolve_data_bytes(self, name):
+		"""Resolves `name` (a plain file name, e.g. "creature.packed_sheets"
+		or "sheet_id.bin") against the same scanned search-path index
+		find_texture() already uses for .shape/.skel/texture names -- despite
+		the name, it indexes every file found (any extension, .bnp contents
+		included) across the user's configured search folders, so it works
+		unchanged for these too. None if not found by the last scan."""
+		entry = self.search_paths_dialog.find_texture(name)
+		return entry.read_bytes() if entry is not None else None
+
+	def _start_bind_cache_rebuild(self, workspace_dir, entries):
+		"""Starts a background thread rebuilding the workspace's own
+		creatures_cache.json from real .packed_sheets data (see
+		creature_ref.build_cache(), ~1-6s depending on how much of
+		creature.packed_sheets's 28545 entries needs parsing -- far too slow
+		for the main/UI thread). Call from the main thread only, same
+		threading split as _start_panoply_bake()/_run_panoply_bake(): only
+		_run_bind_cache_rebuild() (pure file I/O/pynel parsing) runs off it."""
+		progress = {"done": False, "error": None}
+		self._bind_cache_rebuild = progress
+		thread = threading.Thread(target=self._run_bind_cache_rebuild, args=(workspace_dir, list(entries), progress), daemon=True)
+		thread.start()
+
+	def _run_bind_cache_rebuild(self, workspace_dir, entries, progress):
+		"""Background-thread body for _start_bind_cache_rebuild() -- never
+		touches imgui, only the `progress` dict passed in (plain dict field
+		writes, same safe-under-the-GIL reasoning as _run_panoply_bake()) and
+		creature_ref.build_cache()/save_cache()'s own file I/O. Writes to the
+		`progress` local, NOT self._bind_cache_rebuild -- switching the
+		active workspace mid-rebuild resets that attribute to a fresh dict
+		(or None, see _on_active_workspace_changed()), so writing through it
+		here could crash this thread (None isn't subscriptable) or mark an
+		unrelated newer rebuild as done before its own thread finished
+		(found 2026-08-30 via code review, matching this exact reachable
+		case -- unlike panoply bake's own self._bake_progress, which has no
+		equivalent reset-while-running path)."""
+		try:
+			from pynel import ryzom_packed_sheets as ps
+			needed = ("creature.packed_sheets", "item.packed_sheets", "sitem.packed_sheets", "sheet_id.bin")
+			raw = {name: self._resolve_data_bytes(name) for name in needed}
+			missing = [name for name, data in raw.items() if data is None]
+			if missing:
+				raise FileNotFoundError(f"not found in scanned search paths: {', '.join(missing)}")
+			sheet_id_names = ps.parse_sheet_id_bin(raw["sheet_id.bin"])
+			records = creature_ref.build_cache(
+				entries, io.BytesIO(raw["creature.packed_sheets"]), io.BytesIO(raw["item.packed_sheets"]),
+				io.BytesIO(raw["sitem.packed_sheets"]), sheet_id_names)
+			creature_ref.save_cache(creature_ref.workspace_cache_path(workspace_dir), records)
+		except Exception as exc:
+			progress["error"] = str(exc)
+			print(f"[object_editor] creature cache rebuild failed: {exc}")
+		finally:
+			progress["done"] = True
+
+	def _resolve_scanned_skeleton_name(self, wanted):
+		"""Case-insensitive match of `wanted` against the scanned .skel
+		index. creature.packed_sheets stores a skeleton filename in
+		whatever case the source .creature sheet happened to use (e.g.
+		"FY_HOF_skel.skel"), which doesn't necessarily match the real
+		file's on-disk name (confirmed on a real install, 2026-08-30:
+		"fy_hof_skel.skel", all lowercase) -- SearchPathsDialog itself
+		indexes/looks up skeletons by exact name (see skeleton_for()), so
+		this is needed before calling it. Returns the actually-scanned
+		name, or None if nothing matches even case-insensitively."""
+		wanted_lower = wanted.lower()
+		for name in self.search_paths_dialog.scanned_skeleton_names():
+			if name.lower() == wanted_lower:
+				return name
+		return None
+
+	@staticmethod
+	def _resolve_bone_name(skeleton, wanted):
+		"""Case-insensitive match of `wanted` against `skeleton.bone_map` --
+		BodyToBone/weapon attach-point names (creature_ref.bind_attach_points())
+		aren't guaranteed to match the skeleton's own bone-name casing
+		exactly, same class of mismatch as _resolve_scanned_skeleton_name().
+		None if `skeleton` is None or nothing matches even case-insensitively."""
+		if skeleton is None:
+			return None
+		wanted_lower = wanted.lower()
+		for name in skeleton.bone_map:
+			if name.lower() == wanted_lower:
+				return name
+		return None
+
+	def _select_bind_creature(self, name):
+		"""Picks `name` in the Bind preview's creature combo: loads its
+		skeleton (via the same scanned-search-path index the Skinning
+		preview uses, see SearchPathsDialog.skeleton_for(), through
+		_resolve_scanned_skeleton_name()'s case-insensitive match), resets
+		any previously chosen attach point (since a different creature's
+		skeleton may not even have a bone by that name), and shows the
+		assembled creature right away (2026-08-30, Nuno: no reason to make
+		picking a creature and toggling it visible two separate steps).
+		Deliberately does NOT reset _bind_slot_override -- comparing how the
+		same loaded shape looks across several creatures is a real use
+		case, so switching creature must keep it (2026-08-30, Nuno: "quand
+		je change de pnj ça fais sauter la selection du slot" -- an earlier
+		version of this method wrongly cleared it here, meant to fix a
+		DIFFERENT bug -- the loaded shape rendering twice, once standalone
+		and once on the creature -- that's now fixed at its real source
+		instead, see _apply_loaded_shape_to_creature()'s unconditional
+		model_root hide)."""
+		self._bind_creature_name = name
+		self._bind_attach_point = ""
+		record = self._bind_creatures.get(name)
+		if record is None:
+			# "(none)": deselecting the creature entirely (name == "" from
+			# the combo's own "(none)" entry, or an otherwise-unknown name)
+			# -- nothing to show, so unlike a real pick this does NOT force
+			# _show_assembled_creature back on.
+			self._bind_skeleton = None
+			self._bind_skeleton_name = ""
+			self._show_assembled_creature = False
+			self._rebuild_assembled_creature()
+			return
+		self._show_assembled_creature = True
+		scanned_name = self._resolve_scanned_skeleton_name(record.skel)
+		skeleton = self.search_paths_dialog.skeleton_for(scanned_name) if scanned_name is not None else None
+		self._bind_skeleton = skeleton
+		self._bind_skeleton_name = scanned_name or ""
+		# Forces the main shape's own Panoply "skin" (race) selection to
+		# match the picked creature's race (CreatureRecord.race, same 0-3
+		# EGSPD::CPeople::TPeople indexing as panoply.RACES's own
+		# ("fy","ma","tr","zo") order) -- without this, previewing e.g.
+		# fy_HOM_armor01_bottes.shape bound to a Fyros creature could still
+		# render with whatever race variant (say "zo") happened to be
+		# selected from earlier, a mismatched skin tone on the wrong body
+		# (bug found 2026-08-30, Nuno: "il faut que tu force le skin
+		# panoply en fonction du pnj qu'on charge"). Harmless no-op if the
+		# loaded shape's textures have no "skin" variants at all --
+		# _reapply_all_materials() just won't find anything to change.
+		if 0 <= record.race < len(panoply.RACES):
+			self._panoply_selection["skin"] = panoply.RACES[record.race]
+			self._reapply_all_materials()
+		# Deliberately not routed through _apply_bone_preview_skeleton() --
+		# that would also reassign the *main* shape's live-re-skin skeleton
+		# (_bone_preview_skeleton) to this creature's, see _bind_skeleton's
+		# own docstring for why that's wrong. No need to touch
+		# _rebuild_geometry()/model_root here at all: whichever of the loaded
+		# shape's three placements applies (see
+		# _apply_loaded_shape_to_creature()) is entirely resolved by
+		# _rebuild_assembled_creature() below, which calls that method itself.
+		self._rebuild_assembled_creature()
+
+	def _copy_creatures_ref_to_workspace(self):
+		"""Copies the bundled default creatures_ref.txt into the active
+		workspace, as an editable starting point -- same copy-then-edit
+		mechanism as _copy_panoply_cfg_to_workspace(), see that method's own
+		docstring. Picked from the gear icon in _draw_bind_controls()."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return
+		dest = creature_ref.workspace_list_path(workspace_dir)
+		try:
+			shutil.copyfile(creature_ref.bundled_list_path(), dest)
+		except OSError as exc:
+			self._save_status = f"Could not copy creatures_ref.txt: {exc}"
+			print(f"[object_editor] {self._save_status}")
+			return
+		self._save_status = f"Copied creatures_ref.txt to workspace ({dest})"
+		print(f"[object_editor] {self._save_status}")
+		# Re-resolve against the new override next _ensure_bind_creatures()
+		# call -- note this doesn't yet (re)build a cache for names added to
+		# the copy beyond the bundled 8 (see the chantier notes) -- those
+		# just won't show up in the combo until that's wired up.
+		self._bind_creatures = {}
+
+	def _save_bind_slot_override(self):
+		"""Persists the Bind preview's CURRENT slot-combo pick
+		(self._bind_slot_override) for the currently loaded shape into the
+		active workspace's own bind_slot_overrides.json (see
+		creature_ref.workspace_slot_overrides_path()) and self._bind_slot_overrides
+		(the in-memory copy _auto_detect_bind_slot() actually reads), so
+		it's remembered the next time this shape loads -- higher priority
+		there than the bundled shape_slot_index.json. Called ONLY from
+		_write_shape(), when the shape itself is actually saved (2026-08-30,
+		Nuno: "que ça ne sauve le slot QUE si on sauve le shape" -- picking
+		a slot to preview/compare shouldn't silently persist a correction
+		the user never actually confirmed by saving). An empty
+		self._bind_slot_override removes any existing entry (picking
+		"(none)" before saving is a deliberate correction too, e.g. for a
+		shape the bundled index got wrong). No-op if there's no active
+		workspace or no shape loaded -- nothing to key the entry by, or
+		nowhere to write it."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None or not self._shape_source_name:
+			return
+		stem = Path(self._shape_source_name).stem.lower()
+		if self._bind_slot_override:
+			self._bind_slot_overrides[stem] = self._bind_slot_override
+		else:
+			self._bind_slot_overrides.pop(stem, None)
+		creature_ref.save_slot_overrides(
+			creature_ref.workspace_slot_overrides_path(workspace_dir), self._bind_slot_overrides)
+
+	def _auto_detect_bind_slot(self):
+		"""Auto-preselects the Bind preview's slot-override combo from, in
+		priority order: (1) the active workspace's own manual corrections
+		(self._bind_slot_overrides, loaded once by
+		_on_active_workspace_changed() -- see _write_shape()'s own note on
+		when this actually gets saved back to disk); (2) the loaded
+		shape's own equipment-slot data (SLOTTYPE::TSlotType /
+		CItemSheet.slot_bf, via creature_ref.load_shape_slot_index()'s
+		bundled index) -- Nuno, 2026-08-30: "je charge
+		fy_HOM_armor01_bottes.shape [...] qu'il sache déjà [...] quoi
+		remplacer". Called from _display_shape() for every shape load.
+		Silent no-op (leaves the combo on "(none)") when neither source has
+		an answer, or the shape maps to a hand/weapon slot (out of
+		BODY_SLOTS' scope) -- the manual combo/attach-point list remains
+		available as a fallback in all cases."""
+		self._bind_slot_override = ""
+		if not self._shape_source_name:
+			return
+		stem = Path(self._shape_source_name).stem.lower()
+		slot = self._bind_slot_overrides.get(stem)
+		if not slot:
+			slot = creature_ref.load_shape_slot_index().get(stem)
+		if slot:
+			self._bind_slot_override = slot
+		# Cheap (no disk I/O): reuses whatever's already built for every
+		# other slot, see _apply_loaded_shape_to_creature()'s own docstring
+		# for why this, and not the expensive _rebuild_assembled_creature(),
+		# is what belongs on the per-shape-load path.
+		self._apply_loaded_shape_to_creature()
+
+	def _rebuild_assembled_creature(self):
+		"""(Re)builds the full-body reference under _assembled_creature_root
+		from the currently-picked Bind-preview creature -- skeleton + every
+		resolved body-part shape (creature_ref.BODY_SLOTS), plus its first
+		hairstyle option if any (HairItemList lists interchangeable style
+		*choices*, not several worn at once -- showing just one avoids
+		stacking every alternative on top of each other). Static bind-pose
+		only, no animation (this is a standing reference, not a preview of
+		movement).
+
+		EXPENSIVE (disk read + shape parse + skin per slot, ~seconds for the
+		full body pre-vectorization, still visible cost after) -- only call
+		this when the creature SELECTION itself changes (picking a creature
+		in the combo, toggling the assembled-creature visibility on), never
+		on every loaded shape. Where the loaded shape itself fits in (a slot
+		override, an attach-point weapon, or neither) is layered on top
+		afterwards by _apply_loaded_shape_to_creature(), which this method
+		itself calls once at the end -- 2026-08-30, Nuno: routing every
+		shape load through this full rebuild (to keep that in sync) made
+		ordinary Explorer browsing laggy the moment a Bind-preview creature
+		was shown, even though only the loaded shape's own placement
+		actually needed to change."""
+		self._assembled_creature_root.remove_node()
+		self._assembled_creature_root = self.render.attach_new_node("assembled-creature-root")
+		self._assembled_creature_base_nodes = {}
+		self._assembled_creature_loaded_shape_node = None
+		self._assembled_creature_loaded_shape_content_root = None
+		# Carries the whole creature's pivot offset ONCE, so every child shape
+		# below -- whether positioned at local-space identity (a skinned
+		# body-part mesh, its bone_world_matrices already IS its final
+		# position) or at a specific bone's matrix (a rigid, non-skinned one,
+		# see the slot_name handling below) -- ends up in the same space as
+		# the main loaded object, without each needing its own set_pos.
+		self._assembled_creature_root.set_pos(self.render, self._object_pivot.get_pos(self.render))
+		self._assembled_creature_bone_matrices = {}  # see _frame_camera()
+		if not self._show_assembled_creature:
+			self._apply_loaded_shape_to_creature()
+			return
+		record = self._bind_creatures.get(self._bind_creature_name)
+		skeleton = self._bind_skeleton
+		if record is None or skeleton is None:
+			self._apply_loaded_shape_to_creature()
+			return
+
+		bone_world_matrices = evaluate_all_bone_world_matrices(skeleton)
+		self._assembled_creature_bone_matrices = bone_world_matrices
+		shape_entries = list(record.slots.items())  # (slot_name, shape_name)
+		if record.hair:
+			shape_entries.append(("hair", record.hair[0]))
+
+		built_count = 0
+		t_total_start = time.perf_counter()
+		for slot_name, shape_name in shape_entries:
+			t0 = time.perf_counter()
+			entry = self.search_paths_dialog.find_texture(shape_name)
+			t1 = time.perf_counter()
+			if entry is None:
+				print(f"[object_editor] assembled creature: {shape_name!r} not found in scanned search paths")
+				continue
+			try:
+				data = entry.read_bytes()
+				t2 = time.perf_counter()
+				shape_file = parse_shape(data)
+				t3 = time.perf_counter()
+			except (ShapeParseError, OSError) as exc:
+				print(f"[object_editor] assembled creature: cannot parse {shape_name!r}: {exc}")
+				continue
+			node_path = self._assembled_creature_root.attach_new_node(shape_name)
+			# No special positioning needed here: face/head pieces (e.g.
+			# *_visage.shape) turned out to be real skinned CMeshMRM (not
+			# CMeshMRMSkinned, see _is_shape_skinned()) -- once
+			# _build_assembled_shape_geometry() skins them like any other
+			# body part, they land in the right place on their own, same
+			# identity-plus-root-offset transform as everything else.
+			t4 = time.perf_counter()
+			self._build_assembled_shape_geometry(shape_file.value, skeleton, bone_world_matrices, node_path, slot_name)
+			t5 = time.perf_counter()
+			self._assembled_creature_base_nodes[slot_name] = node_path
+			built_count += 1
+		t_total_end = time.perf_counter()
+		self._apply_loaded_shape_to_creature()
+
+	def _apply_loaded_shape_to_creature(self):
+		"""(Re)shows wherever the currently loaded shape (self.shape_file)
+		belongs relative to the Bind-preview creature -- exactly one of:
+		(a) skinned into a body-part slot (self._bind_slot_override),
+		hiding that slot's own default piece; (b) rigid, positioned at a
+		chosen attach-point bone (self._bind_attach_point) -- a hand-held
+		weapon; or (c) neither -- an "undefined" catch-all, shown at the
+		creature root's own identity transform (the same place it would
+		sit standalone). Simplified 2026-08-30 (Nuno: "tu fais une
+		structure tres simple displayed_creature avec tous les slots [...]
+		et meme un slot undefined si aucun slot n'est choisi") -- one
+		unconditional rule replaces the previous scattered
+		show()/hide() calls: self.model_root (the loaded shape's own
+		standalone rendering, from _rebuild_geometry()) is shown whenever
+		no creature is actually being displayed, and hidden -- ALWAYS,
+		unconditionally -- whenever one is, because the loaded shape then
+		always has a place inside the creature group instead (one of the
+		three cases above). Exactly one of the two ever renders the loaded
+		shape at a time, never both (bug found 2026-08-30, screenshot: two
+		disconnected hand pieces "floating" was model_root rendering
+		standalone AND unposed, at the same time as an identical copy
+		correctly skinned into the creature).
+
+		Cheap: no disk I/O, reuses _assembled_creature_base_nodes built by
+		_rebuild_assembled_creature() -- safe to call every time just the
+		loaded shape or its binding choice changes (auto-detect on every
+		shape load, manual slot/attach-point combo pick) without
+		re-parsing the other ~6 body-part shapes from disk each time -- see
+		_rebuild_assembled_creature()'s own docstring for the perf
+		regression this split was introduced to fix."""
+		if self._assembled_creature_loaded_shape_node is not None:
+			self._assembled_creature_loaded_shape_node.remove_node()
+			self._assembled_creature_loaded_shape_node = None
+			self._assembled_creature_loaded_shape_content_root = None
+		for node_path in self._assembled_creature_base_nodes.values():
+			node_path.show()
+		# Only ever (re)shown in the attach-point branch below -- removed
+		# here unconditionally first so every OTHER case (no creature, slot
+		# override, "undefined") starts from "not shown" rather than needing
+		# its own explicit hide.
+		self._attach_point_axes_np.remove_node()
+
+		creature_shown = self._bind_skeleton is not None and bool(self._assembled_creature_bone_matrices)
+		if self.shape_file is None or not creature_shown:
+			self.model_root.show()
+			# Pivot gizmo back under _object_pivot (its normal home) --
+			# see below for why it moves to content_root while bound.
+			if self._pivot_axes_np.get_parent() != self._object_pivot:
+				self._pivot_axes_np.reparent_to(self._object_pivot)
+				self._pivot_axes_np.clear_transform()
+			self._frame_camera()
+			return
+		self.model_root.hide()
+
+		override_slot = self._bind_slot_override
+		if override_slot:
+			base_node = self._assembled_creature_base_nodes.get(override_slot)
+			if base_node is not None:
+				base_node.hide()
+			node_path = self._assembled_creature_root.attach_new_node(f"{override_slot}-override")
+			content_root = self._build_assembled_shape_geometry(
+				self.shape_file.value, self._bind_skeleton, self._assembled_creature_bone_matrices, node_path, override_slot)
+			self._assembled_creature_loaded_shape_is_skinned_override = _is_shape_skinned(self.shape_file.value)
+		elif self._bind_attach_point and self._bind_attach_point in self._bind_skeleton.bone_map:
+			# Rigid, not skinned (skeleton=None forces iter_render_passes()'s
+			# own bind-pose fallback -- see _build_assembled_shape_geometry(),
+			# even for a shape that happens to be technically skinned data,
+			# same reasoning _rebuild_geometry()'s attach-point case used to
+			# rely on before this consolidation), then positioned by hand at
+			# the chosen bone's current world matrix.
+			node_path = self._assembled_creature_root.attach_new_node("attach-point")
+			content_root = self._build_assembled_shape_geometry(self.shape_file.value, None, None, node_path, "attach-point")
+			self._assembled_creature_loaded_shape_is_skinned_override = False
+			bone_matrix = self._assembled_creature_bone_matrices[self._bind_attach_point]
+			node_path.set_mat(_nel_matrix_to_panda_mat4(bone_matrix))
+			# Visual target marker for the bone itself, distinct from the
+			# object's own pivot axes (_pivot_axes_np) -- lets the user
+			# directly compare "where my shape's own local origin currently
+			# is" (the pivot gizmo, moves with position/rotation/scale edits)
+			# against "where the real client will actually stick it"
+			# (this marker, fixed at the bone), instead of having to guess
+			# (2026-08-31, Nuno: "je dois OBLIGATOIREMENT visualiser ce
+			# point de préhension [...] le pivot de mon arme n'est pas sur
+			# le point d'attache"). Sized off the loaded shape's own bbox,
+			# same reasoning _rebuild_viewport_helpers() uses for the other
+			# axes -- a fixed size would be comically large for a dagger and
+			# invisible for a two-handed sword.
+			bbox = shape_bbox(self.shape_file.value)
+			axis_length = (max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1) * _AXIS_MARGIN_FACTOR
+			               if bbox is not None else _AXIS_LENGTH)
+			self._attach_point_axes_np = self._assembled_creature_root.attach_new_node(
+				_build_axes_geom(_ATTACH_POINT_AXIS_COLORS, axis_length))
+			self._attach_point_axes_np.set_light_off()
+			self._attach_point_axes_np.set_mat(_nel_matrix_to_panda_mat4(bone_matrix))
+		else:
+			# "undefined": doesn't correspond to any creature part -- shown
+			# rigid (same skeleton=None reasoning as the attach-point case
+			# above, no creature bone to skin an unrelated shape against) at
+			# _assembled_creature_root's own identity transform, i.e. the
+			# same place model_root would otherwise sit.
+			node_path = self._assembled_creature_root.attach_new_node("undefined")
+			content_root = self._build_assembled_shape_geometry(self.shape_file.value, None, None, node_path, "undefined")
+			self._assembled_creature_loaded_shape_is_skinned_override = False
+
+		self._assembled_creature_loaded_shape_node = node_path
+		# _update_bound_shape_rotation() keeps this synced with
+		# self._object_pivot's LIVE rotation every frame from here on --
+		# the set_quat() from base.default_rot_quat inside
+		# _build_assembled_shape_geometry() above was only ever the initial
+		# value (matches _object_pivot's own at load time), not a live link.
+		self._assembled_creature_loaded_shape_content_root = content_root
+		# Pivot gizmo moves here too, off _object_pivot (its standalone-view
+		# home, still at the pre-bind world position) -- content_root IS
+		# "the object's own local origin", already correctly positioned
+		# wherever the bound copy actually sits (skinned slot, attach-point
+		# bone, or undefined-at-creature-root) and kept live in sync by
+		# _update_bound_shape_rotation(). Without this the gizmo still
+		# rotated with edits (it inherited _object_pivot's rotation) but
+		# stayed frozen at the pre-bind position, completely disconnected
+		# from the actually-rendered mesh (bug found 2026-08-31, Nuno: "mon
+		# objet tourne autour d'un axe qui n'est pas le pivot [...] il est
+		# resté à sa position avant le bind").
+		self._pivot_axes_np.reparent_to(content_root)
+		self._pivot_axes_np.clear_transform()
+		self._frame_camera()
+
+	def _build_assembled_shape_geometry(self, shape_value, skeleton, bone_world_matrices, parent_node_path, slot_name):
+		"""Same idea as _build_reference_geometry() (a non-editable preview
+		shape, material_id=None so it never touches the main shape's own
+		override-color/multi-bitmap-slot state), but skinned against
+		`skeleton`/`bone_world_matrices` like the main shape's own
+		_rebuild_geometry() does for a CMeshMRMSkinned -- body-part shapes
+		are themselves skinned meshes bound to the whole creature skeleton,
+		not static props."""
+		materials = getattr(shape_value, "materials", None)
+		is_skinned = _is_shape_skinned(shape_value)
+		# Same CMeshBase::DefaultRotQuat the main shape's own standalone
+		# view seeds _object_pivot with (_display_shape()) -- the engine's
+		# real per-instance rotation, layered on TOP of whatever skinning
+		# already did, not replaced by it. Missing here made a bound/
+		# overridden shape with a non-identity export rotation (confirmed
+		# real on some armor pieces) render mis-rotated once shown on a
+		# creature (bug found 2026-08-30, Nuno: "les rotations ne sont plus
+		# prises en compte"). Applied to a dedicated child node, not
+		# `parent_node_path` itself, so it composes correctly regardless of
+		# how the CALLER positions parent_node_path afterwards (e.g. the
+		# attach-point case's own set_mat() in
+		# _apply_loaded_shape_to_creature()).
+		#
+		# ONLY for a RIGID (not is_skinned) shape, though -- verified
+		# 2026-08-31 against the real client's own world-matrix update,
+		# transform.cpp:946 CTransform::updateWorldMatrixFromFather():
+		# `if(!isSkinned() && _AncestorSkeletonModel) _WorldMatrix =
+		# parentWM * _LocalMatrix；` -- when isSkinned() is true, this whole
+		# block (and so _LocalMatrix, built from Default{Pos,RotQuat,Scale})
+		# is skipped entirely; a skinned mesh's final vertex positions come
+		# purely from applySkin()'s bone-matrix math
+		# (skeleton_model.h:computeBoneMatrixes3x4(), no instance transform
+		# involved at all -- confirmed no PreMul variant is used for regular
+		# skinning). So for a skinned piece, DefaultRotQuat (and Pos/Scale)
+		# has ZERO effect in the real game, not just position/scale --
+		# applying it here for a skinned body-part/override was itself a
+		# bug (an earlier "fix" for a rotation report that happened to look
+		# right only because that particular shape's default_rot_quat was
+		# identity, Nuno: "t'es sur que la rotation dois s'appliquer
+		# aussi?").
+		base = getattr(shape_value, "base", None)
+		content_root = parent_node_path.attach_new_node(f"{slot_name}-content")
+		if base is not None and not is_skinned:
+			rot = base.default_rot_quat
+			content_root.set_quat(Quat(rot.w, rot.x, rot.y, rot.z))
+		vdata = None
+		pass_count = 0
+		for vertex_buffer, material_id, indices in iter_render_passes(
+				shape_value, skeleton=skeleton if is_skinned else None,
+				bone_world_matrices=bone_world_matrices if is_skinned else None):
+			if not indices:
+				continue
+			if vdata is None:
+				vdata = _build_vertex_data(vertex_buffer)
+			geom = _build_geom(vdata, indices)
+			geom_node = GeomNode(f"assembled-pass-{material_id}")
+			geom_node.add_geom(geom)
+			node_path = content_root.attach_new_node(geom_node)
+			material = materials[material_id] if materials and material_id < len(materials) else None
+			self._apply_material_common(node_path, material)
+			self._apply_material_texture(node_path, material, None)
+			texture_names = [t.file_name if t is not None else None for t in material.textures] if material is not None else None
+			pass_count += 1
+		return content_root
+
+	def _draw_bind_controls(self):
+		"""Floating "Bind preview" window: previews the loaded shape on one
+		of Patina's curated reference creatures. Two real cases (confirmed
+		2026-08-30, correcting an earlier wrong design -- see
+		/repos/project-todos/ryzom-core/forgery-object-editor.md "Creature/
+		NPC binder + assembler in Patina"):
+
+		- **Skinned shape** (most equipment, including armor -- confirmed
+		  most "armor" pieces are skinned meshes, not rigid props): it's
+		  already bound to the whole skeleton, not one point. What's
+		  actually useful here is picking which creature *slot* it should
+		  stand in for (e.g. preview `fy_HOM_armor01_bottes.shape` in place
+		  of the creature's own default `fy_HOM_civil01_bottes.shape` for
+		  "feet") -- see `_bind_slot_override`, consumed by
+		  _rebuild_assembled_creature().
+		- **Non-skinned shape**: the real "bound to one attach point" case,
+		  but only for the 2 hand slots in practice -- creature_ref.
+		  WEAPON_ATTACH_POINTS (box_arme/box_arme_gauche/Box_bouclier),
+		  hardcoded in character_cl.cpp, not general equipment (CONFIRMED
+		  WRONG EARLIER: CCharacterSheet.BodyToBone is NOT attach-point
+		  data, see CreatureRecord.body_to_bone's own docstring -- almost
+		  nothing in real content actually needs a single attach point).
+
+		Shown for any loaded shape (both cases share the creature picker),
+		stacked below _draw_bone_preview_controls() ("Skinning preview",
+		shown only for a skinned shape) when that one is also showing."""
+		if self.shape_file is None:
+			return
+
+		is_skinned = _is_shape_skinned(self.shape_file.value)
+		creatures = self._ensure_bind_creatures()
+
+		display_width = imgui.get_io().display_size.x
+		win_w, win_h = self._bind_panel_size
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX
+		if self._wind_state is not None:
+			y += self._wind_panel_size[1] + _VIEWPORT_TOGGLE_MARGIN_PX
+		if is_skinned:
+			# Skinning preview is shown above for a skinned shape (same
+			# precondition already checked there) -- stack below its
+			# current size (updated earlier this same frame, draw_panel()
+			# calls it before this method).
+			y += self._bone_preview_panel_size[1] + _VIEWPORT_TOGGLE_MARGIN_PX
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("Bind preview", flags=flags):
+			if self._bind_cache_rebuild is not None and not self._bind_cache_rebuild["done"]:
+				imgui.text_disabled("Rebuilding creature cache...")
+			imgui.set_next_item_width(220)
+			preview = self._bind_creature_name or "(choose a creature)"
+			if imgui.begin_combo("##bind-creature-combo", preview):
+				clicked, _ = imgui.selectable("(none)", self._bind_creature_name == "")
+				if clicked:
+					self._select_bind_creature("")
+				for name in sorted(creatures):
+					clicked, _ = imgui.selectable(name, name == self._bind_creature_name)
+					if clicked:
+						self._select_bind_creature(name)
+				imgui.end_combo()
+			imgui.same_line()
+			workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+			has_override = workspace_dir is not None and creature_ref.workspace_list_path(workspace_dir).is_file()
+			if has_override:
+				editor_path = app_settings.load().text_editor_path
+				tooltip = "Edit this workspace's creatures_ref.txt in the configured text editor"
+				if _icon_button(f"{fa_icons.ICON_FA_EDIT}##creatures-ref", tooltip):
+					if not editor_path:
+						self.request_settings_attention("Tools", "text_editor_path")
+					else:
+						subprocess.Popen([editor_path, str(creature_ref.workspace_list_path(workspace_dir))])
+			else:
+				tooltip = "Copy the bundled creatures_ref.txt into this workspace, to track more creatures"
+				if _icon_button(f"{fa_icons.ICON_FA_COG}##creatures-ref", tooltip, disabled=workspace_dir is None):
+					self._copy_creatures_ref_to_workspace()
+
+			if is_skinned:
+				slot_names = list(creature_ref.BODY_SLOTS) + ["hair"]
+				imgui.set_next_item_width(220)
+				preview = self._bind_slot_override or "(none)"
+				if imgui.begin_combo("##bind-slot-override-combo", preview):
+					clicked, _ = imgui.selectable("(none)", self._bind_slot_override == "")
+					if clicked:
+						self._bind_slot_override = ""
+						self._apply_loaded_shape_to_creature()
+					for slot_name in slot_names:
+						clicked, _ = imgui.selectable(slot_name, slot_name == self._bind_slot_override)
+						if clicked:
+							self._bind_slot_override = slot_name
+							was_hidden = not self._show_assembled_creature
+							self._show_assembled_creature = True
+							# Turning visibility on here (rather than via the
+							# ICON_FA_MALE toggle) needs the expensive full
+							# rebuild first -- _assembled_creature_base_nodes
+							# is empty/stale while hidden (see
+							# _rebuild_assembled_creature()'s early-return).
+							if was_hidden:
+								self._rebuild_assembled_creature()
+							else:
+								self._apply_loaded_shape_to_creature()
+					imgui.end_combo()
+			else:
+				imgui.set_next_item_width(220)
+				preview = self._bind_attach_point or "(none)"
+				if imgui.begin_combo("##bind-attach-point-combo", preview):
+					clicked, _ = imgui.selectable("(none)", self._bind_attach_point == "")
+					if clicked:
+						self._bind_attach_point = ""
+						self._apply_loaded_shape_to_creature()
+					for curated_name in creature_ref.WEAPON_ATTACH_POINTS:
+						resolved_name = self._resolve_bone_name(self._bind_skeleton, curated_name)
+						clicked, _ = imgui.selectable(curated_name, curated_name == self._bind_attach_point)
+						if clicked:
+							if resolved_name is None:
+								print(f"[object_editor] Bind preview: attach point {curated_name!r} not found in "
+								      f"the loaded skeleton's own bones")
+							self._bind_attach_point = resolved_name if resolved_name is not None else curated_name
+							self._apply_loaded_shape_to_creature()
+					imgui.end_combo()
+
+			if _icon_button(
+					fa_icons.ICON_FA_MALE, "Show this creature fully assembled as a standing reference",
+					self._show_assembled_creature, disabled=not self._bind_creature_name):
+				self._show_assembled_creature = not self._show_assembled_creature
+				self._rebuild_assembled_creature()
+
+			self._bind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_import_toolbar_button(self):
 		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae/.fbx/.gltf/.glb)..."):
@@ -1654,6 +2597,10 @@ class ObjectEditorApp(ForgeryApp):
 		# resolved texture name only.
 		self._panoply_texture_sources = {}
 		self._panoply_texture_signatures = {}
+		# Re-detected per shape in _display_shape() (via
+		# _auto_detect_bind_slot()) -- a different shape's own slot never
+		# applies to a newly loaded one, manual or auto.
+		self._bind_slot_override = ""
 
 	def _display_shape(self, shape_file):
 		"""Renders an already-parsed/-built ShapeFile. Assumes
@@ -1662,20 +2609,33 @@ class ObjectEditorApp(ForgeryApp):
 		meant to survive it, e.g. material overrides)."""
 		self.shape_file = shape_file
 
-		# CMeshBase::DefaultRotQuat is what the engine actually rotates the
-		# object by at instance creation (nel/src/3d/mesh_base.cpp) -- not
-		# just an editor default. Seeding _object_pivot with it up front, on
-		# a fresh load, means the shape (and the navcube gizmo's inner cube,
-		# which mirrors _object_pivot) already shows its real in-game tilt
-		# instead of looking un-rotated until you happen to notice
-		# default_rot_quat in the All Properties tab. A geometry-only
-		# replace (_replace_geometry(), which calls _rebuild_geometry()
-		# directly and never this method) deliberately does NOT re-seed --
-		# it must preserve whatever the user already set up via Ctrl+drag.
+		# CMeshBase::DefaultPos/DefaultRotQuat/DefaultScale are what the
+		# engine actually places/rotates/scales the object by at instance
+		# creation (nel/src/3d/mesh_base.cpp:instanciateMeshBase(), verified
+		# 2026-08-30 against the real client's own attach-point path too:
+		# entity_cl.cpp's SInstanceCL::createLoading() creates the instance
+		# -- Pos/RotQuat/Scale already applied at that point -- *then*
+		# stickObject() parents it to the bone, with nothing in between
+		# that resets them) -- not just an editor default. Seeding
+		# _object_pivot with all three up front, on a fresh load, means the
+		# shape (and the navcube gizmo's inner cube, which mirrors
+		# _object_pivot) already shows its real in-game placement instead
+		# of looking wrong until you happen to notice these fields in the
+		# All Properties tab -- previously only rotation was seeded (Nuno,
+		# 2026-08-31: needed for authoring an attach-point weapon's own
+		# grip-point offset, e.g. after rescaling a shared mesh reused
+		# across several items). A geometry-only replace (_replace_geometry(),
+		# which calls _rebuild_geometry() directly and never this method)
+		# deliberately does NOT re-seed -- it must preserve whatever the
+		# user already set up via Ctrl+drag/the Transform panel.
 		base = getattr(shape_file.value, "base", None)
 		if base is not None:
 			rot = base.default_rot_quat
 			self._object_pivot.set_quat(Quat(rot.w, rot.x, rot.y, rot.z))
+			pos = base.default_pos
+			self._object_pivot.set_pos(pos.x, pos.y, pos.z)
+			scale = base.default_scale
+			self._object_pivot.set_scale(scale.x, scale.y, scale.z)
 
 		# Baseline for the gizmo's Ctrl+Reset (see reset_object_rotation()) --
 		# whatever the object's rotation is right after loading, until a save
@@ -1684,6 +2644,7 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._rebuild_geometry()
 		self._auto_select_multi_bitmap_slot()
+		self._auto_detect_bind_slot()
 
 	def _auto_select_multi_bitmap_slot(self):
 		"""If the shape's own stored Multi Bitmap selection (a CTextureMultiFile's
@@ -2093,9 +3054,26 @@ class ObjectEditorApp(ForgeryApp):
 		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
 		         | imgui.WindowFlags_.always_auto_resize.value)
 		with imgui_ctx.begin("##transform-panel", flags=flags):
+			# A skinned shape's own Default{Pos,RotQuat,Scale} has ZERO
+			# effect in the real game (verified 2026-08-31,
+			# transform.cpp:946 CTransform::updateWorldMatrixFromFather():
+			# the whole _WorldMatrix = parentWM * _LocalMatrix composition
+			# is skipped entirely when isSkinned() -- final vertex
+			# positions come purely from skin binding to whatever skeleton
+			# it's on). Editing/saving these here would silently do nothing
+			# in-game, so the panel is grayed out rather than left looking
+			# functional (2026-08-31, Nuno: "il faudrait alors que ce soit
+			# grisé ou alors virer la fenetre d'edition des axes" -- after
+			# confirming this the hard way on a skinned armor piece).
+			is_skinned = _is_shape_skinned(self.shape_file.value)
+			if is_skinned:
+				imgui.text_disabled("Skinned shape: position/rotation/scale")
+				imgui.text_disabled("have no effect in-game, editing disabled.")
+			imgui.begin_disabled(is_skinned)
 			self._draw_transform_row("position", "Pos", "%.3f")
 			self._draw_transform_row("rotation", "Rot", "%.2f")
 			self._draw_transform_row("scale", "Scl", "%.3f")
+			imgui.end_disabled()
 			self._transform_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_transform_row(self, prop, label, value_format):
@@ -2141,6 +3119,53 @@ class ObjectEditorApp(ForgeryApp):
 
 		imgui.pop_id()
 
+	def _frame_camera(self):
+		"""Frames the camera around everything currently visible: the main
+		loaded shape (if any) plus, when shown, the assembled creature's
+		rough extent -- from its skeleton's own bone world positions (see
+		_rebuild_assembled_creature()'s _assembled_creature_bone_matrices),
+		a coarse stand-in for a proper bbox of its skinned meshes but good
+		enough for camera framing (union of bone positions always covers
+		the actual mesh, since nothing skins further from its own bones
+		than a reasonable creature's proportions). Called after either the
+		main shape or the assembled creature changes -- was previously
+		inline in _rebuild_geometry(), now also reused by
+		_rebuild_assembled_creature() (2026-08-30: framing only ever
+		considered the main object, so toggling the assembled creature on
+		didn't bring it into view)."""
+		mins = []
+		maxs = []
+
+		if self.shape_file is not None:
+			bbox = shape_bbox(self.shape_file.value)
+			if bbox is not None:
+				# shape_bbox() is in model_root's own local space (pre-pivot-
+				# rotation) -- go through model_root's current transform
+				# (includes _object_pivot's rotation, e.g. a seeded
+				# default_rot_quat) to get a world/render-space point.
+				local_center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
+				center = self.render.get_relative_point(self.model_root, local_center)
+				half = bbox.half_size
+				mins.append((center.x - half.x, center.y - half.y, center.z - half.z))
+				maxs.append((center.x + half.x, center.y + half.y, center.z + half.z))
+
+		if self._show_assembled_creature and self._assembled_creature_bone_matrices:
+			pivot_pos = self._object_pivot.get_pos(self.render)
+			xs = [m[0][3] + pivot_pos.x for m in self._assembled_creature_bone_matrices.values()]
+			ys = [m[1][3] + pivot_pos.y for m in self._assembled_creature_bone_matrices.values()]
+			zs = [m[2][3] + pivot_pos.z for m in self._assembled_creature_bone_matrices.values()]
+			mins.append((min(xs), min(ys), min(zs)))
+			maxs.append((max(xs), max(ys), max(zs)))
+
+		if not mins:
+			return
+
+		min_x, min_y, min_z = (min(m[i] for m in mins) for i in range(3))
+		max_x, max_y, max_z = (max(m[i] for m in maxs) for i in range(3))
+		center = Point3((min_x + max_x) / 2, (min_y + max_y) / 2, (min_z + max_z) / 2)
+		radius = max(max_x - min_x, max_y - min_y, max_z - min_z, 0.2) / 2
+		self.orbit_camera.frame(center, radius * 5.65)
+
 	def _rebuild_geometry(self):
 		"""(Re)builds the 3D render passes + camera framing from
 		self.shape_file.value -- shared by _display_shape() and by replacing
@@ -2167,10 +3192,17 @@ class ObjectEditorApp(ForgeryApp):
 		# iter_render_passes() below still renders -- its own rigid bind-pose
 		# fallback, matching the real client's behavior for an unskinned
 		# CMeshMRMSkinned instance.
-		is_skinned = isinstance(self.shape_file.value, MeshMRMSkinned)
+		is_skinned = _is_shape_skinned(self.shape_file.value)
 		skeleton = self._bone_preview_skeleton if is_skinned else None
 		bone_world_matrices = self._bone_world_matrices_for(geom_value.bones_name) if skeleton is not None else None
-		if is_skinned and skeleton is not None:
+		# Live per-frame re-skin (_update_skin_preview()) only supports the
+		# CMeshMRMSkinned packed-vertex format (_build_skin_state() assumes
+		# geom.packed_vertices/decompact_scale) -- a plain skinned CMeshMRM
+		# (geom.skinned, see _is_shape_skinned()) still renders skinned below
+		# via iter_render_passes(), just statically at the current pose
+		# rather than re-skinned live every frame if the animation/time
+		# changes. Extending the live path to that format too is future work.
+		if isinstance(self.shape_file.value, MeshMRMSkinned) and skeleton is not None:
 			self._skin_state = _build_skin_state(geom_value, skeleton)
 
 		vdata = None
@@ -2208,16 +3240,7 @@ class ObjectEditorApp(ForgeryApp):
 			self.shape_error = f"No renderable 3D geometry for shape type {self.shape_file.type_name!r}"
 
 		bbox = shape_bbox(self.shape_file.value)
-		if bbox is not None:
-			local_center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
-			# shape_bbox() is in model_root's own local space (pre-pivot-
-			# rotation) -- OrbitCamera.frame() expects a world/render-space
-			# target, so this must go through model_root's current transform
-			# (which includes _object_pivot's rotation, e.g. a seeded
-			# default_rot_quat) rather than being used as-is.
-			center = self.render.get_relative_point(self.model_root, local_center)
-			radius = max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1)
-			self.orbit_camera.frame(center, radius * 5.65)
+		self._frame_camera()
 		self._rebuild_viewport_helpers(bbox)
 
 		self._rebuild_reference_shapes()
@@ -2741,6 +3764,18 @@ class ObjectEditorApp(ForgeryApp):
 			self._panoply_selection_defaulted = True
 			self._reapply_all_materials()
 
+		# Bind preview (_select_bind_creature()) forces "skin" to the picked
+		# creature's own race -- same condition _apply_loaded_shape_to_creature()
+		# uses for "is a creature actually being shown". Without disabling
+		# the other race buttons here, clicking one manually while a
+		# creature is shown silently re-mismatches skin tone vs body again
+		# (the exact bug this forcing was added to fix) with no visual sign
+		# anything is different, which reads as "the force is buggy/
+		# unreliable" rather than "this is locked to the creature's race"
+		# (2026-08-30, Nuno: "quand tu force le skin de panoply il faut
+		# griser les autres.. sinon on pense qu'il y a un bug").
+		skin_forced_by_creature = self._bind_skeleton is not None and bool(self._assembled_creature_bone_matrices)
+
 		for axis in panoply.AXES:
 			values = axis_values[axis]
 			if not values:
@@ -2751,7 +3786,11 @@ class ObjectEditorApp(ForgeryApp):
 				imgui.same_line()
 				active = value == selected
 				label = value if axis == "skin" else f"{axis[0]}{value}"
-				if _icon_button(label, f"{self._PANOPLY_AXIS_LABELS[axis]} {value!r}", active=active):
+				tooltip = f"{self._PANOPLY_AXIS_LABELS[axis]} {value!r}"
+				locked = axis == "skin" and skin_forced_by_creature and not active
+				if locked:
+					tooltip += f" (locked to {self._bind_creature_name}'s own race -- deselect the creature to change)"
+				if _icon_button(label, tooltip, active=active, disabled=locked):
 					if active:
 						# Only "skin" can be turned back off (falling back to
 						# the shape's own base texture, its meaningful "no
@@ -3122,10 +4161,15 @@ class ObjectEditorApp(ForgeryApp):
 			src_op = _TBLEND_TO_PANDA_OPERAND[material.src_blend]
 			dst_op = _TBLEND_TO_PANDA_OPERAND[material.dst_blend]
 			node_path.set_attrib(ColorBlendAttrib.make(ColorBlendAttrib.M_add, src_op, dst_op))
-		if material.flags & _IDRV_MAT_ALPHA_TEST:
+		if material.flags & _IDRV_MAT_ALPHA_TEST and _material_alpha_from_texture(material):
 			# Cutout transparency (e.g. foliage): discard texels below the
 			# threshold outright rather than blending, matching the engine's
 			# own glAlphaFunc(GL_GREATER, threshold) (driver_opengl_material.cpp).
+			# Skipped when a later texture stage's own texenv overrides the
+			# final alpha away from any texture (see
+			# _material_alpha_from_texture()) -- alpha-testing stage 0's
+			# texture in isolation would then test against a value the real
+			# engine never actually uses for this material.
 			node_path.set_attrib(AlphaTestAttrib.make(AlphaTestAttrib.M_greater, material.alpha_test_threshold))
 
 		texture = material.textures[0] if material.textures else None
@@ -3948,14 +4992,31 @@ class ObjectEditorApp(ForgeryApp):
 				# rot.z) (real first, positionally) elsewhere in this file.
 				base.default_rot_quat = Quaternion(
 					x=total_quat.get_y(), y=total_quat.get_z(), z=total_quat.get_w(), w=total_quat.get_x())
+				# Same reasoning as rotation just above: position/scale
+				# edits can land on either _object_pivot or model_root
+				# depending on that row's pivot lock (_transform_node()), so
+				# the WORLD pos/scale relative to render is what actually
+				# reflects the total edit either way. Verified 2026-08-30
+				# these fields are genuinely used by the real client for
+				# attach-point placement (entity_cl.cpp: the instance's
+				# Default* already applied at creation survive
+				# stickObject() unchanged) -- not editor-only, unlike
+				# DefaultPivot, which stays untouched here (rotation/scale
+				# CENTER, not the object's own placement -- see
+				# mesh_base.cpp:353's separate setPivot() call).
+				world_pos = self.model_root.get_pos(self.render)
+				base.default_pos = Vector3(x=world_pos.x, y=world_pos.y, z=world_pos.z)
+				world_scale = self.model_root.get_scale(self.render)
+				base.default_scale = Vector3(x=world_scale.x, y=world_scale.y, z=world_scale.z)
 			path.parent.mkdir(parents=True, exist_ok=True)
 			save_shape(path, self.shape_file)
+			self._save_bind_slot_override()
 			self._save_status = f"Saved to {path}"
 			print(f"[object_editor] {self._save_status}")
-			# The pivot's rotation is now baked into default_rot_quat above,
-			# so it's also the natural new reset baseline -- otherwise
-			# Ctrl+Reset would keep snapping back to the pre-save orientation
-			# forever.
+			# The pivot's rotation/position/scale are now baked into
+			# base.default_* above, so they're also the natural new reset
+			# baseline -- otherwise Ctrl+Reset would keep snapping back to
+			# the pre-save values forever.
 			self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
 		except (OSError, ShapeWriteError) as exc:
 			self._save_status = f"Save failed: {exc}"
@@ -4914,6 +5975,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._draw_viewport_toggles()
 		self._draw_wind_controls()
 		self._draw_bone_preview_controls()
+		self._draw_bind_controls()
 		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()

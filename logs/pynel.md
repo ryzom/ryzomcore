@@ -1,5 +1,109 @@
 # Changelog
 
+## 2026-08-31 — 🐛 Fix CMesh::CSkinWeight interleaving bug; add skin_mesh_mrm_geom(), pynel 0.8.0
+
+**`ryzom_shape.py`'s `_parse_skin_weight()` bug found and fixed.** `CMesh::CSkinWeight::serial()`
+(`mesh.cpp:2451-2457`) stores its 4 influence slots *interleaved* --
+`MatrixId[0], Weights[0], MatrixId[1], Weights[1], ...` -- but the existing
+parser read all 4 `MatrixId`s first, then all 4 `Weights`, silently
+producing garbage `matrix_id`/`weight` pairings for any vertex using more
+than one influence slot. Found while building Patina's creature/NPC
+assembler (Forgery): a numpy-vectorized re-skin of `ma_hof_armor01_
+pantabottes.shape` crashed with a `matrix_id` of 77 into an 8-bone array --
+traced back to this interleaving mismatch, not the vectorization itself.
+
+**New `ryzom_skin.skin_mesh_mrm_geom()`**: skins a classic `CMeshMRM`'s own
+(non-`CMeshMRMSkinned`) skin data. Confirmed real on actual content
+(`*_visage.shape` face pieces: `CMeshMRMGeom.skinned=True`, `bones_name`/
+`skin_weights` populated, despite being a plain `CMeshMRM`) -- a
+`CMeshMRMSkinned`-only `is_skinned` check misses this entirely, silently
+rendering such pieces rigid. Different on-disk storage than
+`CMeshMRMSkinned`'s packed-vertex pool: `geom.vertex_buffer`'s Position/
+Normal channels hold plain per-vertex values, and `geom.skin_weights[i]` is
+a parallel `(matrix_id: 4-tuple, weight: 4-tuple)` for that same vertex
+index -- already-normalized floats, no `/255` packed-weight scaling needed
+unlike `CSkinWeight`'s own byte-compressed weights.
+
+Both found/fixed while building Patina's Bind preview (creature/NPC binder
++ assembler) -- see `logs/forgery-object-editor.md`'s own entry for the
+full feature writeup.
+
+## 2026-08-30 — ✨ Add item/sitem.packed_sheets support to ryzom_packed_sheets, pynel 0.7.0
+
+Extends `pynel.ryzom_packed_sheets` (see the entry below for the initial
+`creature.packed_sheets` support) with `item.packed_sheets`/
+`sitem.packed_sheets` (`CEntitySheet::ITEM` / `CItemSheet`, both extensions
+share the same class and `TypeVersion[]` entry, version 44) —
+`parse_item_packed_sheets()`/`load_item_packed_sheets()`, new `ItemSheet`
+dataclass plus its sub-structures (`ItemFX`, `StaticFX`, `MpItemPart`,
+`Scroll`, `Rgba`) and the 11 `Family`-keyed union variants
+(`Cosmetic`/`Armor`/`MeleeWeapon`/`RangeWeapon`/`Ammo`/`Mp`/`Shield`/`Tool`/
+`GuildOption`/`Pet`/`Teleport`/`Consumable`, dispatched off
+`ITEMFAMILY::EItemFamily` exactly like the real `CItemSheet::serial` switch).
+CLI `ryzom-packed-sheets dump` now auto-detects creature vs. item from the
+filename (or `--kind`).
+
+Directly motivated by a gap found while validating `creature.packed_sheets`
+last entry (below): `CharacterSheet.<slot>.id_item` only names an
+`.item`/`.sitem` sheet, not a real `.shape` — the actual mesh filename
+(`IdShape` + 4 race × 2 gender variants) only lives in *this* sheet. That
+loop is now closed: `fyhc1.creature`'s `body` slot (`fy_civil01_gilet.item`)
+resolves through `item.packed_sheets` to a real `ARMOR`-family `ItemSheet`.
+
+Header/dependency-block parsing refactored into a shared
+`_parse_packed_sheets_header()`/`_parse_entity_map()` pair, reused by both
+`parse_creature_packed_sheets()` and the new `parse_item_packed_sheets()` —
+same header, same map-of-`(type, id, payload)` shape, only the payload
+parser and expected type/version differ.
+
+Format documented in `docs/packed_sheets.md` (new sections: full
+`CItemSheet::serial` field order, the `Family` → union-struct dispatch
+table, `CItemFXSheet`). Validated against all three real files on the
+maintainer's machine: 799 `item.packed_sheets` entries and 8761
+`sitem.packed_sheets` entries, both fully consumed with no trailing bytes
+and no exception; the union dispatch spot-checked across all 27
+`ITEMFAMILY` values in the real `sitem.packed_sheets` (decoded struct
+present exactly where `CItemSheet::serial`'s switch has a case for that
+family, `None` everywhere else, matching the C++ exactly).
+
+## 2026-08-30 — ✨ Add ryzom_packed_sheets (creature.packed_sheets + sheet_id.bin), pynel 0.6.0
+
+New `pynel.ryzom_packed_sheets` module (CLI `ryzom-packed-sheets`): reads
+`creature.packed_sheets` (the client's binary cache of `.creature` Georges
+sheets, `NLGEORGES::loadForm()`/`CSheetManagerEntry`/`CCharacterSheet`) and
+`sheet_id.bin` (raw `CSheetId` -> readable sheet name, `map<uint32,string>`,
+ships inside `leveldesign.bnp`). Read-only: the client always regenerates
+this cache from the source sheets, so there's no reason to write it back.
+
+Format fully reverse-engineered from `nel/include/nel/georges/load_form.h`,
+`nel/include/nel/misc/sheet_id.{h,cpp}`, `ryzom/client/src/sheet_manager.cpp`
+and `ryzom/client/src/client_sheets/character_sheet.cpp` — see
+`nel/tools/pynel/docs/packed_sheets.md` for the full writeup, including
+version guards (`PACKED_SHEET_VERSION=5`, creature class version 17) and the
+exact `CCharacterSheet::serial` field order (~50 fields incl. 9 equipment
+slots, ground FX, body-to-bone mapping, attack lists).
+
+Only `CEntitySheet::FAUNA`/`CCharacterSheet` is implemented — the other ~25
+sheet types the format supports (`.item`, `.sbrick`, `.mission`, ...) raise
+`PackedSheetsParseError` and are left for future sessions, one per type, same
+investigation pattern.
+
+Validated against the real file on the maintainer's machine: parses all
+28545 entries of a live `creature.packed_sheets` with no trailing bytes and
+no exception, names resolved correctly via `sheet_id.bin`, and full-field
+dumps of two real NPCs cross-checked by hand (a bare-bodied
+`basic_fyros_male.creature` and an equipped `fyhc1.creature`).
+
+While inspecting `fyhc1.creature`'s equipment, confirmed that a
+`CharacterSheet`'s `.shape` filenames are **not** in `creature.packed_sheets`
+itself: non-empty `Equipment.id_item` fields are `.item`/`.sitem` sheet
+names, and the real shape only shows up one level further via
+`CItemSheet::getShape()` (race/gender variants) — `item.packed_sheets` isn't
+implemented yet, noted as the natural next step in `docs/packed_sheets.md`.
+Also corrected an initial wrong assumption that `automaton_list.packed_sheets`
+would hold shape references — it's actually an animation state-machine
+(`CAutomatonStateSheet`), unrelated to meshes.
+
 ## 2026-08-29 — ✨ Add repository_paths (shared 4-repo checkout locations)
 
 New `pynel.repository_paths` module: a small per-user JSON settings file

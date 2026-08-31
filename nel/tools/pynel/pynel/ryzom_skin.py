@@ -15,7 +15,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""CPU linear-blend skinning for CMeshMRMSkinned (nel/src/3d/mesh_mrm_skinned.cpp).
+"""CPU linear-blend skinning for CMeshMRMSkinned (nel/src/3d/mesh_mrm_skinned.cpp)
+and classic CMeshMRM's own, separate skin data (nel/src/3d/mesh_mrm_skin.cpp,
+see skin_mesh_mrm_geom() below) -- two different on-disk formats for the same
+underlying idea (a CMeshMRM can itself be skinned, independently of whether
+it's the newer CMeshMRMSkinned class).
 
 Resolves each vertex's final position/normal from up to 4 weighted bone
 influences, given already-evaluated bone world matrices -- typically from
@@ -47,7 +51,7 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import Dict, List, Optional
 
-from pynel.ryzom_shape import Matrix, MeshMRMSkinnedGeom, PackedVertex, SkeletonShape, Vector3
+from pynel.ryzom_shape import Matrix, MeshMRMGeom, MeshMRMSkinnedGeom, PackedVertex, SkeletonShape, Vector3
 
 
 def _mat_identity() -> tuple:
@@ -163,3 +167,63 @@ def skin_mesh(geom: MeshMRMSkinnedGeom, skeleton: SkeletonShape,
 	returning one SkinnedVertex per input vertex, same order."""
 	bone_skin_matrices = bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices)
 	return [skin_vertex(v, geom.decompact_scale, bone_skin_matrices) for v in geom.packed_vertices]
+
+
+def skin_mesh_mrm_geom(geom: MeshMRMGeom, skeleton: SkeletonShape,
+                        bone_world_matrices: Dict[str, tuple]) -> List[SkinnedVertex]:
+	"""Skins a classic CMeshMRM's own (non-CMeshMRMSkinned) skin data --
+	confirmed real, 2026-08-30 (e.g. Ryzom's *_visage.shape face pieces:
+	`CMeshMRMGeom.skinned=True`, `bones_name` populated, `skin_weights` set,
+	despite being a plain CMeshMRM, not CMeshMRMSkinned -- was silently
+	rendered rigid before this, since Forgery's is_skinned check only
+	tested for the CMeshMRMSkinned class).
+
+	Different on-disk storage than CMeshMRMSkinned's packed_vertices pool:
+	`geom.vertex_buffer`'s Position/Normal channels hold plain (already-
+	decompacted) per-vertex values, and `geom.skin_weights[i]` is a parallel
+	`(matrix_id: 4-tuple of int, weight: 4-tuple of float)` for that same
+	vertex index `i` -- weights here are already-normalized floats used
+	directly (`CMeshMRMGeom::applySkin()`, mesh_mrm_skin.cpp:118-136:
+	`boneMat3x4[...].mulSetPoint(vertex, Weights[k], dst)`, no /255 scaling
+	unlike PackedVertex's byte-compressed weights in skin_vertex() above).
+	`matrix_id` indexes the same `geom.bones_name` list either way, so
+	bone_skin_matrices_for_mesh() (which only reads `geom.bones_name`) is
+	reused as-is. Returns one SkinnedVertex per vertex_buffer vertex, same
+	order/index space as the input channels (safe to feed straight into
+	shape_geometry.py's _resolve_lod_geomorphs(), same as the input buffer
+	it replaces)."""
+	bone_skin_matrices = bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices)
+	positions = geom.vertex_buffer.channels.get("Position", [])
+	normals = geom.vertex_buffer.channels.get("Normal", [])
+	uvs = geom.vertex_buffer.channels.get("TexCoord0", [])
+
+	result = []
+	for i, (matrix_ids, weights) in enumerate(geom.skin_weights):
+		local_pos = Vector3(*positions[i])
+		local_normal = Vector3(*normals[i]) if i < len(normals) else Vector3(0.0, 0.0, 0.0)
+
+		pos = Vector3(0.0, 0.0, 0.0)
+		normal = Vector3(0.0, 0.0, 0.0)
+		any_weight = False
+		for slot in range(4):
+			weight = weights[slot]
+			if weight == 0 and slot > 0:
+				continue
+			any_weight = any_weight or weight > 0
+			m = bone_skin_matrices[matrix_ids[slot]]
+			p = _mat_point(m, local_pos)
+			n = _mat_vector(m, local_normal)
+			pos = Vector3(pos.x + p.x * weight, pos.y + p.y * weight, pos.z + p.z * weight)
+			normal = Vector3(normal.x + n.x * weight, normal.y + n.y * weight, normal.z + n.z * weight)
+
+		if not any_weight:
+			pos, normal = local_pos, local_normal
+		else:
+			length = sqrt(normal.x * normal.x + normal.y * normal.y + normal.z * normal.z)
+			if length > 0:
+				normal = Vector3(normal.x / length, normal.y / length, normal.z / length)
+
+		uv = uvs[i] if i < len(uvs) else (0.0, 0.0)
+		result.append(SkinnedVertex(pos=pos, normal=normal, uv=uv))
+
+	return result

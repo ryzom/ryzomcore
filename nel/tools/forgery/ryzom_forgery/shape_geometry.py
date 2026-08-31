@@ -15,7 +15,7 @@ from pynel.ryzom_shape import (
 	Matrix, Mesh, MeshGeom, MeshMRM, MeshMRMGeom, MeshMRMSkinned, MeshMRMSkinnedGeom, MeshMultiLod,
 	Quaternion, VertexBuffer,
 )
-from pynel.ryzom_skin import bone_skin_matrices_for_mesh, skin_vertex
+from pynel.ryzom_skin import bone_skin_matrices_for_mesh
 
 from .search_paths import FoundEntry, TEXTURE_FALLBACK_EXTENSIONS
 
@@ -147,6 +147,62 @@ def _passes_from_mrm_skinned_geom_rigid(geom: MeshMRMSkinnedGeom):
 		yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
+def _numpy_skin_batch(local_positions, local_normals, matrix_ids, weights, bone_skin_matrices):
+	"""Vectorized (numpy) equivalent of pynel.ryzom_skin's per-vertex
+	skin_vertex()/skin_mesh_mrm_geom() loops -- same linear-blend formula
+	(BoneSkinMatrix_i(localPos) weighted-summed over up to 4 influences),
+	just computed for the whole mesh in one batch instead of once per
+	vertex in plain Python. `local_positions`/`local_normals`: (N,3)
+	float32. `matrix_ids`: (N,4) int, indices into `bone_skin_matrices`
+	(same convention as PackedVertex.matrices / CMeshMRMGeom.skin_weights's
+	matrix_id). `weights`: (N,4) float32, already normalized to sum to ~1
+	(caller divides PackedVertex's 0-255 packed weights by 255 first --
+	CMeshMRMGeom.skin_weights's own floats need no such scaling, see
+	skin_mesh_mrm_geom()'s own docstring). `bone_skin_matrices`: (B,4,4)
+	float32. Introduced 2026-08-30: building 7+ skinned body-part shapes
+	for Patina's creature assembler in pure Python took ~100-160ms each
+	(~700ms total per rebuild) -- this cuts that down to the cost of a
+	handful of numpy ops per shape, same technique object_editor.py's own
+	_update_skin_preview() already uses for its live per-frame re-skin.
+	Returns (positions, normals), each (N,3) float32."""
+	pos_h = numpy.concatenate([local_positions, numpy.ones((len(local_positions), 1), dtype=numpy.float32)], axis=1)
+	normal_h = numpy.concatenate([local_normals, numpy.zeros((len(local_normals), 1), dtype=numpy.float32)], axis=1)
+
+	# The plain-Python original (skin_vertex()) skips any slot>0 with
+	# weight==0 entirely ("if weight == 0 and slot > 0: continue") --
+	# CMesh::CSkinWeight's own doc comment ("if you don't use all matrix
+	# for this vertex, use at least the 0th matrix") confirms unused slots'
+	# matrix_id is content the exporter never bothered making valid, only
+	# slot 0 is guaranteed real. Gathering all 4 slots unconditionally (as
+	# fancy-indexing needs to, before weighting) can hit one of those,
+	# crashing on a garbage/out-of-range id whose contribution would've
+	# been zero anyway (confirmed real, 2026-08-30:
+	# fy_hof_civil01_armpad.shape had a matrix_id of 17 into a 13-bone
+	# array, only in an unused, zero-weight slot) -- clamp those to a safe
+	# index first, since a weight of 0 zeroes out whatever garbage would
+	# otherwise be gathered there regardless of which bone it nominally is.
+	safe_matrix_ids = numpy.where(weights > 0, matrix_ids, 0)
+	gathered = bone_skin_matrices[safe_matrix_ids]  # (N,4,4,4): (vertex, slot, row, col)
+	transformed_pos = numpy.einsum("nsij,nj->nsi", gathered, pos_h)
+	weighted_pos = (transformed_pos[:, :, :3] * weights[:, :, None]).sum(axis=1)
+	transformed_normal = numpy.einsum("nsij,nj->nsi", gathered, normal_h)
+	weighted_normal = (transformed_normal[:, :, :3] * weights[:, :, None]).sum(axis=1)
+
+	lengths = numpy.linalg.norm(weighted_normal, axis=1, keepdims=True)
+	lengths[lengths == 0] = 1.0
+	weighted_normal = weighted_normal / lengths
+
+	# No real influence at all (shouldn't happen for well-formed content,
+	# see skin_vertex()'s own note) -- fall back to the raw local vertex
+	# rather than an all-zero point.
+	no_influence = weights.sum(axis=1) == 0
+	if no_influence.any():
+		weighted_pos[no_influence] = local_positions[no_influence]
+		weighted_normal[no_influence] = local_normals[no_influence]
+
+	return weighted_pos, weighted_normal
+
+
 def _passes_from_mrm_skinned_geom(geom: MeshMRMSkinnedGeom, skeleton, bone_world_matrices):
 	"""Skins geom.packed_vertices against `skeleton` (a
 	pynel.ryzom_shape.SkeletonShape) at whatever pose `bone_world_matrices`
@@ -154,57 +210,111 @@ def _passes_from_mrm_skinned_geom(geom: MeshMRMSkinnedGeom, skeleton, bone_world
 	pynel.ryzom_animation.evaluate_bone_world_matrix(), one entry per bone in
 	geom.bones_name) represents, and yields (vertex_buffer, material_id,
 	indices) passes -- same shape as the other _passes_from_*_geom() helpers,
-	so callers don't need to special-case CMeshMRMSkinned."""
+	so callers don't need to special-case CMeshMRMSkinned. Vectorized (numpy)
+	via _numpy_skin_batch() -- see its own docstring for why."""
 	resolved_lod = finest_skinned_lod(geom)
 	if resolved_lod is None:
 		return
 	lod, resolved = resolved_lod
-	bone_skin_matrices = bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices)
-	skinned = [skin_vertex(v, geom.decompact_scale, bone_skin_matrices) for v in resolved]
+	bone_skin_matrices = numpy.array(bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices), dtype=numpy.float32)
+
+	local_positions = numpy.array([v.decompact_pos(geom.decompact_scale) for v in resolved], dtype=numpy.float32)
+	local_normals = numpy.array([v.decompact_normal() for v in resolved], dtype=numpy.float32)
+	matrix_ids = numpy.array([v.matrices for v in resolved], dtype=numpy.int64)
+	weights = numpy.array([v.weights for v in resolved], dtype=numpy.float32) / 255.0
+	uvs = [v.decompact_uv() for v in resolved]
+
+	positions, normals = _numpy_skin_batch(local_positions, local_normals, matrix_ids, weights, bone_skin_matrices)
 	vertex_buffer = VertexBuffer(
 		name="skinned",
-		num_verts=len(skinned),
+		num_verts=len(resolved),
 		vertex_color_format=0,
 		channels={
-			"Position": [(v.pos.x, v.pos.y, v.pos.z) for v in skinned],
-			"Normal": [(v.normal.x, v.normal.y, v.normal.z) for v in skinned],
-			"TexCoord0": [v.uv for v in skinned],
+			"Position": [tuple(p) for p in positions],
+			"Normal": [tuple(n) for n in normals],
+			"TexCoord0": uvs,
 		},
 	)
 	for rdr_pass in lod.rdr_passes:
 		yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
-def _passes_from_mrm_geom(geom: MeshMRMGeom):
+def _passes_from_mrm_geom(geom: MeshMRMGeom, skeleton=None, bone_world_matrices=None):
 	# lods[-1], not lods[0]: CMeshMRM's progressive mesh is streamed
 	# coarsest-first (see CMeshMRMGeom::loadFirstLod/loadNextLod in
 	# nel/src/3d/mesh_mrm.cpp, and chooseLod's alphaMRM=0 -> numLod=0
 	# mapping to the *lowest* poly count) -- lods[0] is the least detailed,
 	# lods[-1] the most, matching MeshMRMGeom.num_triangles's own convention.
-	if geom.lods:
-		lod = geom.lods[-1]
-		vertex_buffer = _resolve_lod_geomorphs(geom.vertex_buffer, lod)
-		for rdr_pass in lod.rdr_passes:
-			yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
+	if not geom.lods:
+		return
+	lod = geom.lods[-1]
+
+	# A plain CMeshMRM (not CMeshMRMSkinned) can itself carry skin data --
+	# confirmed real, 2026-08-30, e.g. Ryzom's *_visage.shape face pieces
+	# (geom.skinned=True, geom.bones_name/geom.skin_weights populated).
+	# Previously always rendered rigid regardless (this branch had no
+	# skeleton-aware path at all) -- was the actual cause of a "face sits at
+	# the wrong height, differently per race" bug in Patina's creature
+	# assembler, not a positioning/transform issue as first assumed. See
+	# pynel.ryzom_skin.skin_mesh_mrm_geom() for the different on-disk skin
+	# data format vs. CMeshMRMSkinned's.
+	if geom.skinned and skeleton is not None and bone_world_matrices is not None:
+		# Vectorized (numpy) equivalent of pynel.ryzom_skin.skin_mesh_mrm_geom()
+		# -- see _numpy_skin_batch()'s own docstring for why. skin_weights'
+		# floats are already normalized (unlike PackedVertex's 0-255 packed
+		# ones, see skin_mesh_mrm_geom()'s own docstring), no /255 needed here.
+		bone_skin_matrices = numpy.array(bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices), dtype=numpy.float32)
+		local_positions = numpy.array(geom.vertex_buffer.channels.get("Position", []), dtype=numpy.float32)
+		# pynel.ryzom_skin.skin_mesh_mrm_geom()'s own per-vertex reference
+		# falls back to a zero vector for any vertex the Normal channel
+		# doesn't cover (missing entirely, or shorter than Position) --
+		# matched here rather than feeding the raw channel straight to
+		# _numpy_skin_batch(), which assumes local_normals is already
+		# (N,3): an absent/short channel there crashes outright (an empty
+		# list becomes a 1-D (0,) array, invalid for the batch's own
+		# axis=1 concatenate) instead of degrading gracefully.
+		normal_channel = geom.vertex_buffer.channels.get("Normal", [])
+		local_normals = numpy.zeros_like(local_positions)
+		if normal_channel:
+			normal_array = numpy.array(normal_channel, dtype=numpy.float32)
+			n = min(len(normal_array), len(local_normals))
+			local_normals[:n] = normal_array[:n]
+		matrix_ids = numpy.array([w[0] for w in geom.skin_weights], dtype=numpy.int64)
+		weights = numpy.array([w[1] for w in geom.skin_weights], dtype=numpy.float32)
+
+		positions, normals = _numpy_skin_batch(local_positions, local_normals, matrix_ids, weights, bone_skin_matrices)
+		source_buffer = dataclasses.replace(geom.vertex_buffer, channels={
+			**geom.vertex_buffer.channels,
+			"Position": [tuple(p) for p in positions],
+			"Normal": [tuple(n) for n in normals],
+		})
+	else:
+		source_buffer = geom.vertex_buffer
+
+	vertex_buffer = _resolve_lod_geomorphs(source_buffer, lod)
+	for rdr_pass in lod.rdr_passes:
+		yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
 def iter_render_passes(shape_value, skeleton=None, bone_world_matrices=None):
 	"""Yields (vertex_buffer, material_id, indices) for the renderable
 	geometry of a CMesh/CMeshMRM/CMeshMultiLod(slot 0)/CMeshMRMSkinned shape
-	value. `skeleton`/`bone_world_matrices` are only used for CMeshMRMSkinned
-	(see _passes_from_mrm_skinned_geom()) -- without them (no skeleton loaded
-	yet by the caller), a skinned shape still renders, via
-	_passes_from_mrm_skinned_geom_rigid()'s raw bind-pose fallback."""
+	value. `skeleton`/`bone_world_matrices` drive skinning for CMeshMRMSkinned
+	(_passes_from_mrm_skinned_geom()) and, when a CMeshMRM's own geom.skinned
+	is True, for that classic format's own skin data too (_passes_from_mrm_geom(),
+	see pynel.ryzom_skin.skin_mesh_mrm_geom()) -- without them (no skeleton
+	loaded yet by the caller), either kind still renders, at its raw bind-pose
+	local vertices."""
 	if isinstance(shape_value, Mesh):
 		yield from _passes_from_mesh_geom(shape_value.geom)
 	elif isinstance(shape_value, MeshMRM):
-		yield from _passes_from_mrm_geom(shape_value.geom)
+		yield from _passes_from_mrm_geom(shape_value.geom, skeleton, bone_world_matrices)
 	elif isinstance(shape_value, MeshMultiLod) and shape_value.slots:
 		slot_geom = shape_value.slots[0].mesh_geom
 		if isinstance(slot_geom, MeshGeom):
 			yield from _passes_from_mesh_geom(slot_geom)
 		elif isinstance(slot_geom, MeshMRMGeom):
-			yield from _passes_from_mrm_geom(slot_geom)
+			yield from _passes_from_mrm_geom(slot_geom, skeleton, bone_world_matrices)
 	elif isinstance(shape_value, MeshMRMSkinned):
 		if skeleton is not None and bone_world_matrices is not None:
 			yield from _passes_from_mrm_skinned_geom(shape_value.geom, skeleton, bone_world_matrices)

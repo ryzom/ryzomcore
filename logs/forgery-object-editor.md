@@ -1,5 +1,92 @@
 # Changelog
 
+## 2026-08-31 — ✨ Creature/NPC binder + assembler in Patina ("Bind preview"), Forgery 1.7.0
+
+New "Bind preview" panel: preview any loaded `.shape` bound to one of 8 curated
+reference creatures (Fyros/Matis/Tryker/Zorai x Male/Female), either replacing one of
+its body-part slots (skinned equipment) or stuck to a weapon attach point (rigid
+props). Full design background in
+`/repos/project-todos/ryzom-core/forgery-object-editor.md` while it was in progress.
+
+**Data layer.** New `ryzom_forgery/creature_ref.py`: `creatures_ref.txt` (bundled
+default list, workspace-overridable) + a pre-generated `creatures_ref_cache.json`
+(distilled `.creature` -> skeleton + resolved `.shape` per `BODY_SLOTS` slot, via
+`pynel.ryzom_packed_sheets`'s `creature`/`item`/`sitem.packed_sheets` chain) so the 8
+bundled creatures cost zero first-load parsing. A workspace's own overridden
+`creatures_ref.txt` gets its cache rebuilt automatically in a background thread
+(`_start_bind_cache_rebuild()`, mtime-triggered) -- this was originally entirely
+unwired (a real gap: editing/copying `creatures_ref.txt` into a workspace produced a
+permanently empty combo, since nothing ever built its cache).
+
+**Slot auto-detect.** New bundled `shape_slot_index.json` (shape-stem -> `BODY_SLOTS`
+entry), built offline from every `item.packed_sheets`/`sitem.packed_sheets` entry's
+`CItemSheet.SlotBF` bitmask (`SLOTTYPE::TSlotType`, NOTE the enum starts at
+`UNDEFINED=0` -- an off-by-one here first put every CHEST-slot item under "arms"
+instead of "body"). A workspace-local `build/bind_slot_overrides.json` layers manual
+corrections on top, loaded once at startup/workspace-switch and written back only when
+the shape itself is saved (not on every combo pick -- a preview choice shouldn't
+silently persist an unconfirmed correction).
+
+**Rendering architecture**, `_apply_loaded_shape_to_creature()`: the loaded shape
+always occupies exactly one of three places once a creature is shown -- a skinned
+body-part slot (override), a rigid attach-point bone (`WEAPON_ATTACH_POINTS`:
+`box_arme`/`box_arme_gauche`/`Box_bouclier`, the only real single-point attach data --
+`CCharacterSheet.BodyToBone` was first wrongly assumed to be attach-point data, it's
+actually combat hit-location lookup), or an "undefined" catch-all at the creature's own
+root transform. `self.model_root` (the shape's standalone rendering) is unconditionally
+hidden whenever a creature is shown, never both at once (was previously the source of a
+"floating disconnected hand pieces" bug: the standalone copy kept rendering, unposed,
+alongside a correctly-placed one on the creature).
+
+**Position/rotation/scale**: `_update_bound_shape_rotation()` keeps the bound copy's
+placement live-synced to the main shape's own Ctrl+drag/Properties-panel edits every
+frame (a matrix copy, not a geometry rebuild) -- but only for the RIGID case. Verified
+against the real client (`transform.cpp:946`, `CTransform::updateWorldMatrixFromFather()`):
+a skinned instance's own `Default{Pos,RotQuat,Scale}` has zero effect in-game --
+`_WorldMatrix = parentWM * _LocalMatrix` is only ever computed `if(!isSkinned() &&
+_AncestorSkeletonModel)`; skin binding to the creature's own skeleton alone determines
+final vertex positions (`applySkin()`'s bone-matrix math, no instance transform
+involved). The Transform panel is now grayed out entirely for a skinned shape, since
+editing/saving there would silently do nothing in the real game. `default_pos`/
+`default_scale` (previously never touched by Patina at all, only `default_rot_quat`
+was) are now seeded/saved the same way rotation already was, for the rigid case --
+confirmed genuinely used in-game via `entity_cl.cpp`'s own item-instance creation path
+(`Scene->createInstance()` applies them, then `stickObject()` parents to the bone with
+nothing resetting them in between).
+
+**Visualization**: a 3rd axes marker (distinct orange/lime/violet palette, alongside
+world axes and the existing pivot axes) drawn exactly at the target attach-point bone
+when one's selected, sized off the loaded shape's own bbox -- lets a weapon's own
+local-origin/grip-point (what actually gets stuck to the bone in-game) be visually lined
+up against the target bone by eye. The pivot-axes gizmo itself is reparented to the
+bound copy's own content root while bound (was previously stuck showing the shape's
+pre-bind standalone position while the actual rendered copy moved elsewhere, misleading
+Ctrl-drag feedback).
+
+**Panoply**: picking a creature now forces the main shape's Panoply "skin" (race)
+selection to the creature's own race (`panoply.RACES[record.race]`), with the other
+race buttons grayed out while forced -- otherwise a mismatched race texture could stay
+selected from before, silently wrong on the new creature. Also fixed: a picked slot/
+attach-point choice used to get dropped every time a different creature was selected
+(a since-corrected earlier fix for a different bug wrongly reset it there too) --
+comparing the same loaded shape across several creatures is a real workflow, the choice
+now survives a creature switch.
+
+**Perf**: routing every single shape load through the full creature-assembly rebuild
+(~350-700ms: disk read + shape parse + skin, per body part) made ordinary Explorer
+browsing laggy the moment a creature was shown. Split into an expensive
+`_rebuild_assembled_creature()` (only on an actual creature-selection change) and a
+cheap `_apply_loaded_shape_to_creature()` (every shape load/binding-choice change,
+reuses already-built body-part nodes, no disk I/O).
+
+Two pynel bugs found and fixed along the way (own entry in `logs/pynel.md`): `CMesh::
+CSkinWeight`'s interleaved-not-grouped serialization format, and classic `CMeshMRM`'s
+own (non-`CMeshMRMSkinned`) skin data format, needed for face pieces that turned out to
+be skinned despite not being `CMeshMRMSkinned`. `shape_geometry.py`'s skinning gained a
+numpy-vectorized batch path (`_numpy_skin_batch()`, ~10x faster than the prior
+pure-Python per-vertex loop) for building the up-to-7 body-part shapes per creature
+rebuild.
+
 ## 2026-08-30 — ✨ Render CMaterial::TShader::Specular in Patina
 
 Patina previously rendered every material's diffuse texture alpha as plain transparency

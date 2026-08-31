@@ -258,6 +258,19 @@ clôture), car c'est moins coûteux en performance que le mélange classique
 et évite certains problèmes d'affichage (objets transparents qui
 s'affichent dans le mauvais ordre).
 
+*Note technique : ce test s'applique à l'alpha **final**, après combinaison
+de toutes les textures actives du matériau (voir *Combinaison des
+textures* plus bas) — pas seulement à la première. Un matériau à plusieurs
+textures peut très bien faire dépendre son alpha final uniquement de la
+couleur diffuse du sommet (via l'opération "Remplacer" sur un stage
+suivant), auquel cas le test alpha ne dépend d'aucune texture du tout,
+même si le matériau en a plusieurs — tester la première texture seule dans
+ce cas donnerait un résultat que le vrai moteur n'utilise jamais. Bug réel
+trouvé et corrigé dans Patina le 2026-08-30 (voir
+`docs/apps/object_editor.md`, `_material_alpha_from_texture`) : un visage
+de personnage entièrement invisible pour une race précise, à cause de
+cette confusion.*
+
 ---
 
 ## Décalage de profondeur (Z-Bias) {#z-bias}

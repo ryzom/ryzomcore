@@ -1,0 +1,262 @@
+{
+	"Fyros Female": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 1,
+		"hair": [
+			"fy_HOF_cheveux_long01.shape",
+			"fy_HOF_cheveux_medium01.shape",
+			"fy_HOF_cheveux_shave01.shape",
+			"fy_HOF_cheveux_short01.shape"
+		],
+		"name": "Fyros Female",
+		"race": 0,
+		"skel": "FY_HOF_skel.skel",
+		"slots": {
+			"arms": "fy_HOF_civil01_armpad.shape",
+			"body": "fy_HOF_civil01_gilet.shape",
+			"face": "fy_HOF_VISAGE.shape",
+			"feet": "fy_HOF_civil01_bottes.shape",
+			"hands": "TR_HOF_civil01_hand.shape",
+			"legs": "fy_HOF_civil01_pantabottes.shape"
+		}
+	},
+	"Fyros Male": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 0,
+		"hair": [
+			"fy_HOM_cheveux_long01.shape",
+			"fy_HOM_cheveux_medium01.shape",
+			"fy_HOM_cheveux_shave01.shape",
+			"fy_HOM_cheveux_short01.shape"
+		],
+		"name": "Fyros Male",
+		"race": 0,
+		"skel": "FY_HOM_skel.skel",
+		"slots": {
+			"arms": "fy_HOM_civil01_armpad.shape",
+			"body": "fy_HOM_civil01_gilet.shape",
+			"face": "fy_HOM_VISAGE.shape",
+			"feet": "fy_HOM_civil01_bottes.shape",
+			"hands": "TR_HOM_civil01_hand.shape",
+			"legs": "fy_HOM_civil01_pantabottes.shape"
+		}
+	},
+	"Matis Female": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 1,
+		"hair": [
+			"MA_HOF_cheveux_long01.shape",
+			"MA_HOF_cheveux_medium01.shape",
+			"MA_HOF_cheveux_shave01.shape",
+			"MA_HOF_cheveux_short01.shape"
+		],
+		"name": "Matis Female",
+		"race": 1,
+		"skel": "MA_HOF_skel.skel",
+		"slots": {
+			"arms": "MA_HOF_civil01_armpad.shape",
+			"body": "MA_HOF_civil01_gilet.shape",
+			"face": "MA_HOF_visage.shape",
+			"feet": "MA_HOF_civil01_bottes.shape",
+			"hands": "TR_HOF_civil01_hand.shape",
+			"head": "MA_HOF_cheveux_medium01.shape",
+			"legs": "MA_HOF_civil01_pantabottes.shape"
+		}
+	},
+	"Matis Male": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 0,
+		"hair": [
+			"MA_HOM_cheveux_long01.shape",
+			"MA_HOM_cheveux_medium01.shape",
+			"MA_HOM_cheveux_shave01.shape",
+			"MA_HOM_cheveux_short01.shape"
+		],
+		"name": "Matis Male",
+		"race": 1,
+		"skel": "MA_HOM_skel.skel",
+		"slots": {
+			"arms": "MA_HOM_civil01_armpad.shape",
+			"body": "MA_HOM_civil01_gilet.shape",
+			"face": "MA_HOM_visage.shape",
+			"feet": "MA_HOM_civil01_bottes.shape",
+			"hands": "TR_HOM_civil01_hand.shape",
+			"head": "MA_HOM_cheveux_medium01.shape",
+			"legs": "MA_HOM_civil01_pantabottes.shape"
+		}
+	},
+	"Tryker Female": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 1,
+		"hair": [
+			"TR_HOF_cheveux_long01.shape",
+			"TR_HOF_cheveux_medium01.shape",
+			"TR_HOF_cheveux_shave01.shape",
+			"TR_HOF_cheveux_short01.shape"
+		],
+		"name": "Tryker Female",
+		"race": 2,
+		"skel": "TR_HOF_skel.skel",
+		"slots": {
+			"arms": "TR_HOF_civil01_armpad.shape",
+			"body": "TR_HOF_civil01_gilet.shape",
+			"face": "TR_HOF_VISAGE.shape",
+			"feet": "TR_HOF_civil01_bottes.shape",
+			"hands": "TR_HOF_civil01_hand.shape",
+			"head": "TR_HOF_VISAGE.shape",
+			"legs": "TR_HOF_civil01_pantabottes.shape"
+		}
+	},
+	"Tryker Male": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 0,
+		"hair": [
+			"TR_HOM_cheveux_long01.shape",
+			"TR_HOM_cheveux_medium01.shape",
+			"TR_HOM_cheveux_shave01.shape",
+			"TR_HOM_cheveux_short01.shape"
+		],
+		"name": "Tryker Male",
+		"race": 2,
+		"skel": "TR_HOM_skel.skel",
+		"slots": {
+			"arms": "TR_HOM_civil01_armpad.shape",
+			"body": "TR_HOM_civil01_gilet.shape",
+			"face": "TR_HOM_VISAGE.shape",
+			"feet": "TR_HOM_civil01_bottes.shape",
+			"hands": "TR_HOM_civil01_hand.shape",
+			"legs": "TR_HOM_civil01_pantabottes.shape"
+		}
+	},
+	"Zorai Female": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 1,
+		"hair": [
+			"ZO_HOF_cheveux_long01.shape",
+			"ZO_HOF_cheveux_medium01.shape",
+			"ZO_HOF_cheveux_shave01.shape",
+			"ZO_HOF_cheveux_short01.shape"
+		],
+		"name": "Zorai Female",
+		"race": 3,
+		"skel": "ZO_HOF_skel.skel",
+		"slots": {
+			"arms": "ZO_HOF_civil01_armpad.shape",
+			"body": "ZO_HOF_civil01_gilet.shape",
+			"face": "ZO_HOF_VISAGE.shape",
+			"feet": "ZO_HOF_civil01_bottes.shape",
+			"hands": "TR_HOF_civil01_hand.shape",
+			"legs": "ZO_HOF_civil01_pantabottes.shape"
+		}
+	},
+	"Zorai Male": {
+		"body_to_bone": {
+			"chest": "Bip01 Spine2",
+			"head": "Bip01 Head",
+			"left_arm": "Bip01 L UpperArm",
+			"left_foot": "Bip01 L Foot",
+			"left_hand": "Bip01 L Hand",
+			"left_leg": "Bip01 L Calf",
+			"right_arm": "Bip01 R UpperArm",
+			"right_foot": "Bip01 R Foot",
+			"right_hand": "Bip01 R Hand",
+			"right_leg": "Bip01 R Calf"
+		},
+		"gender": 0,
+		"hair": [
+			"ZO_HOM_cheveux_long01.shape",
+			"ZO_HOM_cheveux_medium01.shape",
+			"ZO_HOM_cheveux_shave01.shape",
+			"ZO_HOM_cheveux_short01.shape"
+		],
+		"name": "Zorai Male",
+		"race": 3,
+		"skel": "ZO_HOM_skel.skel",
+		"slots": {
+			"arms": "ZO_HOM_civil01_armpad.shape",
+			"body": "ZO_HOM_civil01_gilet.shape",
+			"face": "ZO_HOM_VISAGE.shape",
+			"feet": "ZO_HOM_civil01_bottes.shape",
+			"hands": "TR_HOM_civil01_hand.shape",
+			"head": "ZO_HOM_cheveux_medium01.shape",
+			"legs": "ZO_HOM_civil01_pantabottes.shape"
+		}
+	}
+}

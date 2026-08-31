@@ -1745,9 +1745,21 @@ class MeshMRMGeom:
 
 
 def _parse_skin_weight(f: _Reader):
-	matrix_id = tuple(f.u32() for _ in range(4))
-	weight = tuple(f.f32() for _ in range(4))
-	return (matrix_id, weight)
+	"""CMesh::CSkinWeight::serial() (mesh.cpp:2451-2457): interleaved per
+	slot -- MatrixId[0], Weights[0], MatrixId[1], Weights[1], ... -- NOT 4
+	MatrixIds followed by 4 Weights. Confirmed against a real bug
+	(2026-08-30): reading it as two separate 4-blocks silently shifted
+	every value by one field, so a matrix_id came out holding a Weight
+	float's raw bit pattern reinterpreted as an int (e.g. 1065353216 ==
+	IEEE-754 1.0) -- undetected until something first actually consumed
+	MeshMRMGeom.skin_weights (nothing had, until Patina's creature
+	assembler's skinned-CMeshMRM support)."""
+	matrix_id = [0, 0, 0, 0]
+	weight = [0.0, 0.0, 0.0, 0.0]
+	for i in range(4):
+		matrix_id[i] = f.u32()
+		weight[i] = f.f32()
+	return (tuple(matrix_id), tuple(weight))
 
 
 def _skip_shadow_skin(f: _Reader) -> None:
