@@ -366,3 +366,44 @@ length-prefixed sections (lines, triangles, quads), each a `(count, capacity)` h
 followed by its index vector. Only the triangle section carries renderable indices
 (`_NbIndexes = triangle_count * 3`); the line and quad sections are read and discarded
 to stay positioned correctly in the stream.
+
+## 2026-08-31 — ✨ Add CMeshMRMSkinned geometry writer to pynel, pynel 0.8.0
+
+`dumps()`/`save_shape()` previously only reconstructed `CMeshBase` (materials) for
+`CMeshMRMSkinned` -- the geometry was always copied back byte-for-byte from the raw
+bytes captured at parse time, so editing `geom.packed_vertices` (or anything else in
+the parsed geometry) had no effect on the written file. This is the format every
+character customization piece in `characters_shapes.bnp` uses
+(hairstyles/clothing/accessories), so it blocked any tool wanting to actually edit one.
+
+Added `_write_packed_vertex()`, `_write_mrm_skinned_rdr_pass()`,
+`_write_mesh_mrm_skinned_lod()`, `_write_mesh_mrm_skinned_geom()`,
+`_write_mesh_mrm_skinned()`, wired into `dumps()` as `CMeshMRMSkinned`'s own branch
+(`CMeshMRM`/`CMeshMultiLod` keep the old raw-copy fallback, untouched). Two
+sub-structures that were previously read and silently discarded --
+`CShadowSkin` (`_skip_shadow_skin()`, a simplified single-bone-rigid-skinned
+shadow-casting proxy mesh, not the real geometry -- see
+`nel/include/nel/3d/shadow_skin.h`) and each lod's trailing
+`MatrixInfluences`/`InfluencedVertices[4]` -- are now captured as opaque raw byte
+spans (`MeshMRMSkinnedGeom._raw_shadow_skin`, `MeshMRMSkinnedLod._raw_matrix_influences`)
+and re-emitted verbatim, rather than modeled field-by-field (nothing needs to edit
+them). Every version byte in this whole geometry subtree turned out to be `0` on real
+data (probed via temporary debug prints, removed again), so no per-version branching
+was needed in the new writer.
+
+Also added `PackedVertex.with_pos(pos, decompact_scale)`, the inverse of
+`decompact_pos()` -- compacts a float position back to the format's `int16`
+representation, raising `ShapeWriteError` if a component doesn't fit.
+
+Validated: geometry-only round-trip (parse a real `.shape`, re-dump with zero edits,
+compare against the captured raw bytes) is byte-exact on two real files
+(`fy_hof_cheveux_shave01.shape`, `tr_hof_cheveux_shave01.shape`). Editing positions and
+writing them back necessarily loses a little precision from the `int16` compaction --
+observed gaps after a real edit-then-reparse round-trip were within the format's own
+worst-case quantization bound (`sqrt(3) * decompact_scale/2`), not a bug.
+
+Also added `nel/tools/pynel/docs/shape_format.md` -- the `.shape` format had no
+dedicated doc despite being the most complex parser in the project (every other
+format module has one, e.g. `pacs_format.md`, `packed_sheets.md`); this covers the
+container structure, per-class read/write coverage, the `CMeshMRMSkinned` compacted
+vertex format, and the `CShadowSkin` explanation above in one place.

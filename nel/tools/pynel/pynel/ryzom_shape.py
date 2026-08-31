@@ -62,7 +62,7 @@ Usage:
 
 import argparse
 import struct
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
 
@@ -1751,7 +1751,17 @@ def _parse_skin_weight(f: _Reader):
 
 
 def _skip_shadow_skin(f: _Reader) -> None:
-	"""CShadowSkin: a simplified shadow-casting proxy mesh, not real content -- skip it."""
+	"""CShadowSkin (nel/include/nel/3d/shadow_skin.h): a simplified proxy
+	mesh built at export time (CMeshGeom::buildShadowSkin() in mesh.cpp) and
+	used only to render the character's shadow (CShadowSkin::applySkin() +
+	CMeshMRMSkinnedInstance::renderShadowSkinGeom()/renderShadowSkinPrimitives()),
+	never the real visible mesh. Its vertices (CShadowVertex: a position plus
+	a single MatrixId) use *one-bone rigid skinning*, unlike the real mesh's
+	4-bone weighted skin (PackedVertex.matrices/weights) -- a shadow doesn't
+	need that precision, so this is a cheaper mesh to transform every frame
+	for shadow rendering. Not real content -- skip it (or, in the writer,
+	capture/re-emit it as opaque bytes -- see
+	MeshMRMSkinnedGeom._raw_shadow_skin)."""
 	n = f.cont_len()  # Vertices: vector<CShadowVertex>, each version(0)+CVector(12)+MatrixId(4)=17 bytes
 	for _ in range(n):
 		f.version()
@@ -1900,6 +1910,26 @@ class PackedVertex:
 	def decompact_pos(self, decompact_scale: float) -> Tuple[float, float, float]:
 		return tuple(c * decompact_scale for c in self.pos)
 
+	def with_pos(self, pos: Tuple[float, float, float], decompact_scale: float) -> "PackedVertex":
+		"""Returns a copy with `pos` (world-space, same units as decompact_pos())
+		compacted back into the int16 representation, using the shared
+		`decompact_scale` -- the inverse of decompact_pos(). Raises
+		ShapeWriteError if a component doesn't fit in int16 once compacted
+		(decompact_scale is shared mesh-wide, chosen to cover the original
+		mesh's own bounding box -- a moved vertex landing far outside that
+		range means the caller moved it further than this mesh's scale can
+		represent, not a bug in compaction itself)."""
+		compacted = []
+		for c in pos:
+			v = round(c / decompact_scale)
+			if not (-32768 <= v <= 32767):
+				raise ShapeWriteError(
+					f"position component {c} does not fit in int16 at decompact_scale={decompact_scale} "
+					f"(compacted to {v}, must be in [-32768, 32767])"
+				)
+			compacted.append(v)
+		return replace(self, pos=tuple(compacted))
+
 	def decompact_normal(self) -> Tuple[float, float, float]:
 		return tuple(c / _MRM_SKINNED_NORMAL_FACTOR for c in self.normal)
 
@@ -1925,6 +1955,11 @@ class MeshMRMSkinnedLod:
 	n_wedges: int
 	rdr_passes: List[RdrPass]
 	geomorphs: List[Tuple[int, int]] = field(default_factory=list)  # see MrmLod.geomorphs
+	# MatrixInfluences + InfluencedVertices[4] (vector<uint32> x5) trailing this
+	# lod -- kept as opaque bytes (not modeled field-by-field) since nothing
+	# in pynel needs to edit them; re-emitted verbatim by the writer so a
+	# round-trip stays byte-exact.
+	_raw_matrix_influences: bytes = b""
 
 	@property
 	def num_triangles(self) -> int:
@@ -1944,10 +1979,15 @@ def _parse_mesh_mrm_skinned_lod(f: _Reader) -> MeshMRMSkinnedLod:
 	m = f.cont_len()
 	rdr_passes = [_parse_mrm_skinned_rdr_pass(f) for _ in range(m)]
 	geomorphs = f.pair_vector()  # Geomorphs
+	raw_start = f.tell()
 	f.cont_uint_vector(4, "I")  # MatrixInfluences
 	for _ in range(4):  # InfluencedVertices[4]
 		f.cont_uint_vector(4, "I")
-	return MeshMRMSkinnedLod(n_wedges=n_wedges, rdr_passes=rdr_passes, geomorphs=geomorphs)
+	raw_matrix_influences = f._data[raw_start:f.tell()]
+	return MeshMRMSkinnedLod(
+		n_wedges=n_wedges, rdr_passes=rdr_passes, geomorphs=geomorphs,
+		_raw_matrix_influences=raw_matrix_influences,
+	)
 
 
 @dataclass
@@ -1958,6 +1998,12 @@ class MeshMRMSkinnedGeom:
 	packed_vertices: List[PackedVertex]
 	decompact_scale: float
 	lods: List[MeshMRMSkinnedLod]
+	# CShadowSkin -- see _skip_shadow_skin()'s docstring for what this is.
+	# Kept as opaque bytes, same reasoning as
+	# MeshMRMSkinnedLod._raw_matrix_influences: nothing in pynel needs to
+	# edit it, so there's no reason to model its CShadowVertex list and
+	# triangle indices field-by-field -- just re-emit the bytes unchanged.
+	_raw_shadow_skin: bytes = b""
 
 	@property
 	def num_vertices(self) -> int:
@@ -1989,7 +2035,9 @@ def _parse_mesh_mrm_skinned_geom(f: _Reader) -> MeshMRMSkinnedGeom:
 	packed_vertices = [_parse_packed_vertex(f) for _ in range(n)]
 	decompact_scale = f.f32()
 
+	shadow_start = f.tell()
 	_skip_shadow_skin(f)
+	raw_shadow_skin = f._data[shadow_start:f.tell()]
 
 	n = f.cont_len()
 	lods = [_parse_mesh_mrm_skinned_lod(f) for _ in range(n)]
@@ -2001,6 +2049,7 @@ def _parse_mesh_mrm_skinned_geom(f: _Reader) -> MeshMRMSkinnedGeom:
 		packed_vertices=packed_vertices,
 		decompact_scale=decompact_scale,
 		lods=lods,
+		_raw_shadow_skin=raw_shadow_skin,
 	)
 
 
@@ -2041,6 +2090,72 @@ def _parse_mesh_mrm_skinned(f: _Reader) -> MeshMRMSkinned:
 
 
 _CLASS_PARSERS["CMeshMRMSkinned"] = _parse_mesh_mrm_skinned
+
+
+def _write_packed_vertex(f: _Writer, pv: PackedVertex) -> None:
+	f.version(0)
+	f.s16(pv.pos[0])
+	f.s16(pv.pos[1])
+	f.s16(pv.pos[2])
+	f.s16(pv.normal[0])
+	f.s16(pv.normal[1])
+	f.s16(pv.normal[2])
+	f.s16(pv.uv[0])
+	f.s16(pv.uv[1])
+	for i in range(4):
+		f.u8(pv.matrices[i])
+		f.u8(pv.weights[i])
+
+
+def _write_mrm_skinned_rdr_pass(f: _Writer, rp: RdrPass) -> None:
+	f.version(0)
+	f.u32(rp.material_id)
+	f.cont_uint_vector(rp.indices, 2, "H")
+
+
+def _write_mesh_mrm_skinned_lod(f: _Writer, lod: MeshMRMSkinnedLod) -> None:
+	f.version(0)
+	f.u32(lod.n_wedges)
+	f.cont_len(len(lod.rdr_passes))
+	for rp in lod.rdr_passes:
+		_write_mrm_skinned_rdr_pass(f, rp)
+	f.pair_vector(lod.geomorphs)
+	f.raw(lod._raw_matrix_influences)
+
+
+def _write_mesh_mrm_skinned_geom(f: _Writer, geom: MeshMRMSkinnedGeom) -> None:
+	"""Always writes the latest CMeshMRMSkinnedGeom format (version 0, the
+	only one seen in real data so far -- see the writer functions below for
+	the same convention on their own sub-structures)."""
+	f.version(0)
+	f.string_vector(geom.bones_name)
+	f.aabbox(geom.bbox)
+	ld = geom.level_detail
+	f.u32(ld.max_face_used)
+	f.u32(ld.min_face_used)
+	f.f32(ld.distance_finest)
+	f.f32(ld.distance_middle)
+	f.f32(ld.distance_coarsest)
+	f.f32(ld.oo_distance_delta)
+	f.f32(ld.distance_pow)
+
+	f.version(0)  # CPackedVertexBuffer version
+	f.cont_len(len(geom.packed_vertices))
+	for pv in geom.packed_vertices:
+		_write_packed_vertex(f, pv)
+	f.f32(geom.decompact_scale)
+
+	f.raw(geom._raw_shadow_skin)
+
+	f.cont_len(len(geom.lods))
+	for lod in geom.lods:
+		_write_mesh_mrm_skinned_lod(f, lod)
+
+
+def _write_mesh_mrm_skinned(f: _Writer, mesh: MeshMRMSkinned) -> None:
+	f.version(mesh._version)
+	_write_mesh_base(f, mesh.base)
+	_write_mesh_mrm_skinned_geom(f, mesh.geom)
 
 
 # ---------------------------------------------------------------------------
@@ -2536,12 +2651,14 @@ def dumps(shape_file: ShapeFile) -> bytes:
 	(CSkeletonShape, CFlareShape, CWaterShape, CWaveMakerShape,
 	CSegRemanenceShape and CParticleSystemShape are read-only).
 
-	CMesh is rewritten field-by-field, so its geometry (vertices, triangles,
-	materials) is fully editable. For the other three, only the shared
-	CMeshBase (materials/textures, via `.materials`) is reconstructed from
-	the parsed data -- their geometry is copied back byte-for-byte exactly
-	as it was read. CMeshMRM's progressive multi-resolution deltas are not
-	meant to be hand-edited; that belongs to the 3D export pipeline.
+	CMesh and CMeshMRMSkinned are rewritten field-by-field, so their geometry
+	(vertices, triangles, materials -- plus, for CMeshMRMSkinned,
+	`packed_vertices`' compacted positions/normals/uv/skin data) is fully
+	editable. For CMeshMRM/CMeshMultiLod, only the shared CMeshBase
+	(materials/textures, via `.materials`) is reconstructed from the parsed
+	data -- their geometry is still copied back byte-for-byte exactly as it
+	was read. CMeshMRM's progressive multi-resolution deltas are not meant
+	to be hand-edited; that belongs to the 3D export pipeline.
 	"""
 	value = shape_file.value
 	type_name = shape_file.type_name
@@ -2556,8 +2673,10 @@ def dumps(shape_file: ShapeFile) -> bytes:
 
 	if type_name == "Mesh":
 		_write_mesh(f, value)
+	elif type_name == "MeshMRMSkinned":
+		_write_mesh_mrm_skinned(f, value)
 	else:
-		# MeshMRM / MeshMRMSkinned / MeshMultiLod: editable materials, opaque geometry.
+		# MeshMRM / MeshMultiLod: editable materials, opaque geometry.
 		f.version(value._version)
 		_write_mesh_base(f, value.base)
 		f.raw(value._raw_geom)
