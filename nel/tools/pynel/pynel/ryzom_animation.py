@@ -49,6 +49,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, BinaryIO, Dict, List, Optional, Tuple, Union
 
+import numpy
+
 MAGIC = b"NEL_ANIM"  # on-disk bytes for NELID("_LEN") + NELID("MINA"), see CAnimation::serial
 
 
@@ -789,28 +791,126 @@ def evaluate_all_bone_world_matrices(skeleton, anim: Optional[Animation] = None,
 	Meant for a whole animated character re-skinned every frame (see
 	object_editor.py's _update_skin_preview()), where evaluate_bone_world_matrix()
 	called once per bone becomes the dominant per-frame cost for anything
-	past a handful of bones."""
-	computed = {}  # index -> (world_matrix, local_scale) -- local_scale is what a child's own UnheritScale reads
+	past a handful of bones.
+
+	2026-08-31, Nuno: "10 fps de perdu" in Patina's Bind preview live
+	playback (which calls this once per frame for a ~60-100 bone skeleton)
+	traced to THIS function -- 6.5ms/frame, pure Python. Per-bone LOCAL
+	matrix composition (T*R*S*T, 4 chained _mat_mul() calls each, 64
+	multiply-adds via nested Python loops per call) has no cross-bone
+	dependency at all, unlike the hierarchy walk below -- so it's vectorized
+	here as ONE batched numpy computation across every bone at once (closed-
+	form: the 3x3 rotation-scale block is R's columns scaled by `scale`,
+	translation is `RS @ (-pivot) + pos + pivot` -- see _bone_local_matrix()'s
+	own T(pos+pivot)*R*S*T(-pivot) docstring, this is the same math with the
+	chained-matmul intermediate matrices multiplied out by hand instead of
+	built at runtime). Only the parent-before-child hierarchy accumulation
+	(inherently sequential -- a child needs its parent's already-computed
+	world matrix) stays a per-bone loop, now just one or two 4x4 matmuls per
+	bone instead of the full local-matrix build too. Track evaluation itself
+	(evaluate_track(), varying keyframe structures per bone) stays per-bone
+	Python -- not the measured bottleneck, and not easily batchable without a
+	much bigger rewrite."""
+	bones = skeleton.bones
+	n = len(bones)
+	if n == 0:
+		return {}
+
+	positions = numpy.empty((n, 3), dtype=numpy.float64)
+	rotations = numpy.empty((n, 4), dtype=numpy.float64)  # x, y, z, w
+	scales = numpy.empty((n, 3), dtype=numpy.float64)
+	pivots = numpy.empty((n, 3), dtype=numpy.float64)
+	root_override_indices = []  # see _bone_local_matrix()'s own root-bone/InvBindPos note
+
+	for i, bone in enumerate(bones):
+		pos, rot, scale = bone.default_pos, bone.default_rot_quat, bone.default_scale
+		pivot = bone.default_pivot
+		if bone.father_id < 0:
+			pos_idx = anim.id_by_name.get(f"{bone.name}.pos") if anim is not None else None
+			rot_idx = anim.id_by_name.get(f"{bone.name}.rotquat") if anim is not None else None
+			has_pos_track = pos_idx is not None and anim.tracks[pos_idx] is not None
+			has_rot_track = rot_idx is not None and anim.tracks[rot_idx] is not None
+			if not has_pos_track and not has_rot_track:
+				root_override_indices.append(i)
+				positions[i] = (0.0, 0.0, 0.0)
+				rotations[i] = (0.0, 0.0, 0.0, 1.0)
+				scales[i] = (scale.x, scale.y, scale.z)
+				pivots[i] = (0.0, 0.0, 0.0)
+				continue
+		if anim is not None:
+			pos_idx = anim.id_by_name.get(f"{bone.name}.pos")
+			if pos_idx is not None and anim.tracks[pos_idx] is not None:
+				pos = evaluate_track(anim.tracks[pos_idx], time)
+			rot_idx = anim.id_by_name.get(f"{bone.name}.rotquat")
+			if rot_idx is not None and anim.tracks[rot_idx] is not None:
+				rot = evaluate_track(anim.tracks[rot_idx], time)
+			scale_idx = anim.id_by_name.get(f"{bone.name}.scale")
+			if scale_idx is not None and anim.tracks[scale_idx] is not None:
+				scale = evaluate_track(anim.tracks[scale_idx], time)
+		positions[i] = (pos.x, pos.y, pos.z)
+		rotations[i] = (rot.x, rot.y, rot.z, rot.w)
+		scales[i] = (scale.x, scale.y, scale.z)
+		pivots[i] = (pivot.x, pivot.y, pivot.z)
+
+	# CMatrix::setRot(const CQuat&), vectorized -- same a_ij formulas as
+	# _mat_rotate() above, computed for every bone's quaternion at once.
+	qx, qy, qz, qw = rotations[:, 0], rotations[:, 1], rotations[:, 2], rotations[:, 3]
+	x2, y2, z2 = qx + qx, qy + qy, qz + qz
+	xx, xy, xz = qx * x2, qx * y2, qx * z2
+	yy, yz, zz = qy * y2, qy * z2, qz * z2
+	wx, wy, wz = qw * x2, qw * y2, qw * z2
+	rot_matrices = numpy.empty((n, 3, 3), dtype=numpy.float64)
+	rot_matrices[:, 0, 0] = 1.0 - (yy + zz)
+	rot_matrices[:, 0, 1] = xy - wz
+	rot_matrices[:, 0, 2] = xz + wy
+	rot_matrices[:, 1, 0] = xy + wz
+	rot_matrices[:, 1, 1] = 1.0 - (xx + zz)
+	rot_matrices[:, 1, 2] = yz - wx
+	rot_matrices[:, 2, 0] = xz - wy
+	rot_matrices[:, 2, 1] = yz + wx
+	rot_matrices[:, 2, 2] = 1.0 - (xx + yy)
+
+	rs_matrices = rot_matrices * scales[:, None, :]  # R * S: scale each column
+	trans = numpy.einsum("nij,nj->ni", rs_matrices, -pivots) + positions + pivots
+
+	local_matrices = numpy.zeros((n, 4, 4), dtype=numpy.float64)
+	local_matrices[:, :3, :3] = rs_matrices
+	local_matrices[:, :3, 3] = trans
+	local_matrices[:, 3, 3] = 1.0
+
+	for i in root_override_indices:
+		local_matrices[i] = numpy.array(_invert_matrix(_matrix_field_to_dense(bones[i].inv_bind_pos)), dtype=numpy.float64)
+
+	computed = {}  # index -> (world_matrix numpy (4,4), local_scale numpy (3,)) -- local_scale is what a child's own UnheritScale reads
 
 	def compute(index):
 		cached = computed.get(index)
 		if cached is not None:
 			return cached
-		bone = skeleton.bones[index]
-		local, scale = _bone_local_matrix(bone, anim, time)
+		bone = bones[index]
+		local = local_matrices[index]
+		scale = scales[index]
 		if bone.father_id is None or bone.father_id < 0:
 			world = local
 		else:
 			parent_world, parent_scale = compute(bone.father_id)
 			if bone.unherit_scale:
-				comp = _unherit_scale_comp(parent_scale, _mat_get_pos(local))
-				world = _mat_mul(_mat_mul(parent_world, comp), local)
+				inv = 1.0 / parent_scale
+				local_trans = local[:3, 3]
+				comp = numpy.eye(4, dtype=numpy.float64)
+				comp[[0, 1, 2], [0, 1, 2]] = inv
+				comp[:3, 3] = local_trans - inv * local_trans
+				world = parent_world @ comp @ local
 			else:
-				world = _mat_mul(parent_world, local)
+				world = parent_world @ local
 		computed[index] = (world, scale)
 		return computed[index]
 
-	return {bone.name: compute(index)[0] for index, bone in enumerate(skeleton.bones)}
+	# Converted back to plain nested tuples of Python floats (not numpy
+	# scalars) -- matches evaluate_bone_world_matrix()'s own return type,
+	# what every caller (e.g. pynel.ryzom_skin.bone_skin_matrices_for_mesh(),
+	# object_editor.py's _nel_matrix_to_panda_mat4()) already expects.
+	return {bone.name: tuple(tuple(row) for row in compute(index)[0].tolist()) for index, bone in enumerate(bones)}
 
 
 def animation_duration(anim: Animation) -> float:

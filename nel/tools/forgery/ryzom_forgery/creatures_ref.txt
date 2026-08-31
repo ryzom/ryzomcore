@@ -1,8 +1,8 @@
 fyhu1 Fyros Male
 mahu1 Matis Male
-trhc1 Tryker Male
-zohc1 Zorai Male
-fyfc1 Fyros Female
-mafc1 Matis Female
-trfc1 Tryker Female
-zofc1 Zorai Female
+trhu1 Tryker Male
+zohu1 Zorai Male
+fyfu1 Fyros Female
+mafu1 Matis Female
+trfu1 Tryker Female
+zofu1 Zorai Female

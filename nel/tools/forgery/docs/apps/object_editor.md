@@ -186,6 +186,19 @@ skinné), soit collé à un point d'attache d'arme (objet rigide).
   la race du PNJ (`panoply.RACES[record.race]`), les autres boutons de race grisés tant
   que c'est forcé.
 
+**Mode/animation + lecture live, ajouté 2026-08-31.** Un combo "Mode" (NORMAL/COMBAT/
+SWIM/SIT/MOUNT_NORMAL/REST/DEATH, `creature_ref.ANIM_MODES`) pose le PNJ assemblé sur
+l'animation réelle que le jeu jouerait pour ce `MBEHAV::EMode`, résolue via la même
+chaîne que `computeAnimSet()` (`creature_ref.resolve_animation()`, cache bundlé
+`creatures_anim_cache.json` — voir `nel/tools/pynel/docs/packed_sheets.md` pour le détail
+du format `animset_list.packed_sheets`). Un bouton Play/Pause à côté anime réellement la
+pose au lieu d'une simple photo à t=0 : chaque pièce du corps skinnée est re-skinnée à
+chaque frame (`_update_assembled_creature_skin`, `_SkinState`/`_MrmSkinState` selon que
+le shape est un `CMeshMRMSkinned` ou un `CMeshMRM` classiquement skinné — ce dernier
+concerne les pièces de visage `*_VISAGE.shape`, qui sinon resteraient figées pendant que
+le reste du corps bouge). L'arme au point d'attache suit aussi le mouvement du bras en
+direct (repositionnée chaque frame, pas seulement à la construction).
+
 ### Copie de textures vers le workspace / édition externe
 
 - `_copy_texture_to_workspace`/`_is_texture_in_workspace`/`_texture_copy_destination` (object_editor.py) : copie opt-in (jamais automatique) d'une texture résolue vers `tex/` (ou `masks/`) du workspace actif.

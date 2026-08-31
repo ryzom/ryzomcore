@@ -1,5 +1,54 @@
 # Changelog
 
+## 2026-08-31 — ✨ Add NPC Mode/animation picker + live playback to Patina's Bind preview, Forgery 1.9.0
+
+Extends the Bind preview (see the "Creature/NPC binder + assembler" entry below) with
+real game-accurate posing and animation, on top of `mode_and_behaviour.h`'s
+`MBEHAV::EMode`. Full design background/chantier history in
+`/repos/project-todos/ryzom-core/patina-npc-animations.md` while it was in progress.
+
+**Mode picker (static pose).** A new "Mode" combo (NORMAL/COMBAT/SWIM/SIT/
+MOUNT_NORMAL/REST/DEATH) in the Bind preview, next to the creature combo. Resolves the
+real `.anim` file the game would play for that mode via the same name-composition chain
+the client's own `computeAnimSet()` uses (`ryzom/client/src/misc.cpp:334`):
+`<AnimSetBaseName>_<mode fragment>_<right hand>_<left hand>`, looked up in a new
+pynel-parsed format, `animset_list.packed_sheets` (`CAnimationSetListSheet`), with the
+mode fragment itself coming from a separate raw Georges form (`mode2animset.string_array`,
+not part of `.packed_sheets` at all). See `nel/tools/pynel/docs/packed_sheets.md`'s new
+`animset_list.packed_sheets` section for the full byte layout. `creature_ref.py` gained
+`anim_set_base_name` (a new `CreatureRecord` field, distinct from the `.creature` sheet's
+own name), `ANIM_MODES`, `resolve_animation()`, and a new bundled distilled cache,
+`creatures_anim_cache.json` (same "pre-generated, zero runtime `.packed_sheets` parsing"
+pattern as `creatures_ref_cache.json`).
+
+**Live playback.** A Play/Pause button next to the Mode combo actually animates the
+pose instead of a static snapshot at t=0 -- every live-capable body-part shape of the
+assembled creature is re-skinned every frame. Two different live re-skin paths depending
+on the real shape's own vertex-weight format: `_SkinState`/`_build_skin_state()` (already
+existed, for `CMeshMRMSkinned`'s packed-vertex format -- generalized here from "the
+loaded shape alone" to "every body-part shape at once"), and a new
+`_MrmSkinState`/`_build_mrm_skin_state()`/`_reskin_mrm_state()` pair for a plain skinned
+`CMeshMRM`'s own `geom.skin_weights` layout (confirmed real for the curated creatures'
+`*_VISAGE.shape` face pieces -- without this second path they'd stay frozen while the
+rest of the body/hair moves, a visually jarring mismatch). A rigid attach-point weapon's
+world position is now also refreshed every frame (previously computed once at build
+time, so it stayed frozen during playback).
+
+**Perf.** Two rounds of optimization after a reported "10 fps de perdu": precomputing
+each shape's static inverse-bind matrices once instead of every frame
+(`_bone_inv_bind_matrices()`/`_bone_skin_matrices_numpy()`, replacing
+`pynel.ryzom_skin.bone_skin_matrices_for_mesh()`'s own per-frame reconversion) only
+recovered 1-2 fps -- live profiling found the real bottleneck one layer down, in pynel
+itself: `evaluate_all_bone_world_matrices()` (see `pynel.md`'s own entry), 6.5ms/frame
+of pure-Python matrix math for a single skeleton. Vectorizing that function (pynel
+0.10.0) brought it down to 1.56ms/frame (~4x), confirmed as a real fps win in practice,
+not just a micro-benchmark.
+
+**Bugfixes found during validation:** `creatures_ref.txt`'s sheet ids had drifted out of
+sync with its own pre-generated caches (`*c1` -> `*u1`, caches regenerated to match);
+`_select_bind_creature()` was resetting `_bind_attach_point` on every creature switch
+(now kept, matching `_bind_slot_override`'s existing "keep it" treatment).
+
 ## 2026-08-31 — ✨ Creature/NPC binder + assembler in Patina ("Bind preview"), Forgery 1.7.0
 
 New "Bind preview" panel: preview any loaded `.shape` bound to one of 8 curated

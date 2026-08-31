@@ -108,6 +108,16 @@ class CreatureRecord:
 	# preview's attach-point combo must NOT be built from this -- see
 	# WEAPON_ATTACH_POINTS below for the actual (very short) real list.
 	body_to_bone: Dict[str, str] = field(default_factory=dict)
+	# CCharacterSheet.id_anim_set_base_name -- the fragment computeAnimSet()
+	# (ryzom/client/src/misc.cpp:334) composes into the real AnimSet lookup
+	# key, "<this>_<mode fragment>_<right hand>_<left hand>". NOT the same as
+	# `name`/the .creature sheet stem -- confirmed 2026-08-31 on real data:
+	# every one of the 8 curated creatures' own base name is just "fy_hom" or
+	# "fy_hof" (by gender only, same for every race -- all humanoid skeletons
+	# share the same base locomotion animset). See
+	# creature_anim.resolve_animation()/creatures_anim_cache.json for how
+	# this turns into a real .anim filename per MBEHAV::EMode.
+	anim_set_base_name: str = ""
 
 	def to_dict(self) -> dict:
 		return asdict(self)
@@ -118,6 +128,7 @@ class CreatureRecord:
 			name=data["name"], skel=data["skel"], race=data["race"], gender=data["gender"],
 			slots=dict(data.get("slots", {})), hair=list(data.get("hair", [])),
 			body_to_bone=dict(data.get("body_to_bone", {})),
+			anim_set_base_name=data.get("anim_set_base_name", ""),
 		)
 
 
@@ -293,6 +304,7 @@ def build_cache(
 		records[label] = CreatureRecord(
 			name=label, skel=sheet.id_skel_filename, race=sheet.race, gender=sheet.gender,
 			slots=slots, hair=hair, body_to_bone=body_to_bone,
+			anim_set_base_name=sheet.id_anim_set_base_name,
 		)
 
 	return records
@@ -389,3 +401,112 @@ def load_slot_overrides(path: Path) -> Dict[str, str]:
 def save_slot_overrides(path: Path, overrides: Dict[str, str]) -> None:
 	path.parent.mkdir(parents=True, exist_ok=True)
 	path.write_text(json.dumps(overrides, indent="\t", sort_keys=True), encoding="utf-8")
+
+
+_BUNDLED_ANIM_CACHE_PATH = Path(__file__).parent / "creatures_anim_cache.json"
+
+# MBEHAV::EMode names (ryzom/common/src/game_share/mode_and_behaviour.h)
+# Patina's Bind preview exposes for animation preview -- a curated subset,
+# restricted to modes mode2animset.string_array actually maps to a
+# *distinct* fragment (UNKNOWN_MODE and NORMAL both -> "default" on real
+# data, 2026-08-31, so only NORMAL is kept; COMBAT_FLOAT/MOUNT_SWIM/
+# SWIM_DEATH dropped too -- variants of COMBAT/MOUNT_NORMAL/DEATH, not
+# meaningfully different for a static standing-reference preview).
+ANIM_MODES = ("NORMAL", "COMBAT", "SWIM", "SIT", "MOUNT_NORMAL", "REST", "DEATH")
+
+
+def build_anim_cache(
+	records: Dict[str, "CreatureRecord"], animset_list_packed_sheets_path: Path, mode2animset_path: Path,
+) -> Dict[str, Dict[str, Dict[str, str]]]:
+	"""Distills, for every distinct CreatureRecord.anim_set_base_name in
+	`records`, {ANIM_MODES entry: {TAnimStateSheetId name: real .anim
+	filename}} -- the same name-composition computeAnimSet() uses
+	(ryzom/client/src/misc.cpp:334: "<base>_<mode fragment>_<right hand>_
+	<left hand>", right/left hand left empty here -- no weapon-in-hand
+	override for the curated reference creatures), resolved through the
+	real animset_list.packed_sheets/mode2animset.string_array data (see
+	nel/tools/pynel/docs/packed_sheets.md's own "animset_list.packed_sheets"
+	section). Only the FIRST animation of each state's Animations list is
+	kept (drops the Next/NextWeight random-variety alternatives) -- good
+	enough for "preview this creature's Idle/Walk/Run", not a live-game
+	accurate weighted choice. A mode missing from the real data entirely
+	(confirmed 2026-08-31: EAT/ALERT/HUNGRY have no fy_hom_*/fy_hof_*
+	animset on the maintainer's install) is silently skipped, same as the
+	real client's own "fall back to default" behavior, just without the
+	fallback itself -- the UI simply won't offer that mode's absent states.
+	Not run at Patina runtime -- offline-generated (like
+	shape_slot_index.json) into the bundled creatures_anim_cache.json via
+	save_anim_cache()."""
+	from pynel import ryzom_packed_sheets as ps
+
+	mode_fragments = ps.parse_mode2animset_string_array(Path(mode2animset_path).read_bytes())
+	packed = ps.load_animation_set_list_packed_sheets(animset_list_packed_sheets_path)
+	if len(packed.entries) != 1:
+		raise ValueError(f"expected exactly 1 top-level ANIMATION_SET_LIST entry, got {len(packed.entries)}")
+	sheet = next(iter(packed.entries.values()))
+	anim_sets_by_name = {a.name.lower(): a for a in sheet.anim_set_list}
+
+	base_names = {record.anim_set_base_name for record in records.values() if record.anim_set_base_name}
+	result: Dict[str, Dict[str, Dict[str, str]]] = {}
+	for base_name in base_names:
+		per_mode: Dict[str, Dict[str, str]] = {}
+		for mode_name in ANIM_MODES:
+			fragment = mode_fragments.get(mode_name)
+			if not fragment:
+				continue
+			composed = f"{base_name}_{fragment}__.animation_set".lower()
+			anim_set = anim_sets_by_name.get(composed)
+			if anim_set is None:
+				continue
+			states = {}
+			for state in anim_set.animation_states:
+				if not state.animations:
+					continue
+				state_name = (
+					ps.ANIM_STATE_NAMES[state.state] if 0 <= state.state < len(ps.ANIM_STATE_NAMES) else str(state.state))
+				states[state_name] = state.animations[0].id_anim
+			if states:
+				per_mode[mode_name] = states
+		if per_mode:
+			result[base_name] = per_mode
+	return result
+
+
+def save_anim_cache(path: Path, cache: Dict[str, Dict[str, Dict[str, str]]]) -> None:
+	path.parent.mkdir(parents=True, exist_ok=True)
+	path.write_text(json.dumps(cache, indent="\t", sort_keys=True), encoding="utf-8")
+
+
+def bundled_anim_cache_path() -> Path:
+	"""The bundled pre-generated {anim_set_base_name: {mode: {state: .anim}}}
+	cache -- ships inside the Forgery package itself, same "distilled cache,
+	zero runtime .packed_sheets parsing" pattern as bundled_cache_path()/
+	bundled_shape_slot_index_path()."""
+	return _BUNDLED_ANIM_CACHE_PATH
+
+
+_anim_cache_cache: Optional[Dict[str, Dict[str, Dict[str, str]]]] = None
+
+
+def load_anim_cache() -> Dict[str, Dict[str, Dict[str, str]]]:
+	"""Lazily loads+caches the bundled animation cache for the process's
+	lifetime -- a plain JSON read, no .packed_sheets parsing at runtime."""
+	global _anim_cache_cache
+	if _anim_cache_cache is None:
+		if _BUNDLED_ANIM_CACHE_PATH.is_file():
+			_anim_cache_cache = json.loads(_BUNDLED_ANIM_CACHE_PATH.read_text(encoding="utf-8"))
+		else:
+			_anim_cache_cache = {}
+	return _anim_cache_cache
+
+
+def resolve_animation(record: "CreatureRecord", mode_name: str, state_name: str = "Idle") -> Optional[str]:
+	"""The real .anim filename for `record` playing `mode_name` in
+	`state_name` (default "Idle", the standing-reference case Bind preview
+	needs first), or None if the bundled cache has nothing for that
+	combination (mode not offered for this creature's own anim_set_base_name,
+	or that particular state has no animation in it)."""
+	cache = load_anim_cache()
+	per_mode = cache.get(record.anim_set_base_name, {})
+	states = per_mode.get(mode_name, {})
+	return states.get(state_name)

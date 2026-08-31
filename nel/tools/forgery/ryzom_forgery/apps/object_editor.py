@@ -47,7 +47,7 @@ from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
-	IDENTITY_QUAT, compose_uv_matrix, decompose_uv_matrix, finest_skinned_lod, iter_render_passes,
+	IDENTITY_QUAT, _numpy_skin_batch, compose_uv_matrix, decompose_uv_matrix, finest_skinned_lod, iter_render_passes,
 	load_panda_cube_texture, load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox,
 	shape_geom, solid_color_texture, texture_to_pnm_image, uv_matrix_to_panda_mat4,
 )
@@ -65,7 +65,7 @@ from pynel.ryzom_shape import (
 	Matrix, MeshMRM, MeshMRMSkinned, Quaternion, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape,
 	Texture, Vector3, WindTreeParams, parse_shape, save_shape,
 )
-from pynel.ryzom_skin import bone_skin_matrices_for_mesh
+from pynel.ryzom_skin import _matrix_field_to_dense
 from pynel import repository_paths
 
 # Shape types pynel's save_shape() can actually write back out -- matches
@@ -572,6 +572,38 @@ def _build_wind_state(wind_params, vertex_buffer):
 	return _WindState(wind_params, base_positions, factors, idx2, idx3)
 
 
+_IDENTITY4 = numpy.eye(4, dtype=numpy.float32)
+
+
+def _bone_inv_bind_matrices(bone_names, skeleton):
+	"""(B,4,4) float32 numpy array of each of `bone_names`'s own static
+	inverse-bind-pose matrix (CBone.inv_bind_pos -- see
+	pynel.ryzom_skin._matrix_field_to_dense()) -- precomputed ONCE per shape
+	at build time (_build_skin_state()/_build_mrm_skin_state()), not
+	reconverted from its sparse on-disk Matrix form every single frame for
+	every shape the way pynel.ryzom_skin.bone_skin_matrices_for_mesh() does
+	(fine for its original one-shape use case, the dominant avoidable
+	per-frame cost once Bind preview started re-skinning ~8 shapes at once,
+	bug found 2026-08-31, Nuno: "10 fps de perdu"). Identity for any bone
+	missing from `skeleton.bone_map`."""
+	matrices = numpy.empty((len(bone_names), 4, 4), dtype=numpy.float32)
+	for i, name in enumerate(bone_names):
+		bone_index = skeleton.bone_map.get(name)
+		matrices[i] = _matrix_field_to_dense(skeleton.bones[bone_index].inv_bind_pos) if bone_index is not None else _IDENTITY4
+	return matrices
+
+
+def _bone_skin_matrices_numpy(bone_names, inv_bind_matrices, bone_world_matrices):
+	"""Per-frame counterpart of _bone_inv_bind_matrices(): gathers the
+	CURRENT world matrix of each of `bone_names` (the only part that
+	actually changes frame to frame) and combines it with the precomputed
+	static inv-bind matrices in a single batched numpy matmul, instead of
+	pynel.ryzom_skin.bone_skin_matrices_for_mesh()'s own per-bone pure-Python
+	loop. Identity for any bone missing from `bone_world_matrices`."""
+	world = numpy.array([bone_world_matrices.get(name, _IDENTITY4) for name in bone_names], dtype=numpy.float32)
+	return numpy.matmul(world, inv_bind_matrices)
+
+
 class _SkinState:
 	"""Per-loaded-shape data for live CMeshMRMSkinned re-skinning (see
 	ObjectEditorApp._update_skin_preview()) -- built once in _rebuild_geometry()
@@ -587,6 +619,7 @@ class _SkinState:
 		self.local_normals = local_normals  # (N,4) float32, homogeneous (w=0, no translation)
 		self.bone_indices = bone_indices  # (N,4) int32, indices into bone_names
 		self.weights = weights  # (N,4) float32, already /255
+		self.inv_bind_matrices = _bone_inv_bind_matrices(bone_names, skeleton)  # (B,4,4), see _bone_inv_bind_matrices()
 		self.vdata = None
 		self.vertex_stride = None
 		self.vertex_pos_offset = None
@@ -628,6 +661,137 @@ def _build_skin_state(geom, skeleton):
 	bone_indices = numpy.where(weights > 0, bone_indices, bone_indices[:, :1])
 
 	return _SkinState(geom, skeleton, list(geom.bones_name), local_positions, local_normals, bone_indices, weights)
+
+
+def _reskin_state(state, bone_world_matrices):
+	"""Blends `state`'s precomputed per-vertex tables (see _build_skin_state())
+	against `bone_world_matrices` and writes the result straight into
+	`state.vdata` -- the vectorized (numpy) math ObjectEditorApp._update_skin_preview()
+	used to do inline for the loaded shape's own live re-skin, factored out here
+	so ObjectEditorApp._update_assembled_creature_skin() can reuse it for every
+	body-part shape of an assembled Bind-preview creature too (2026-08-31, Nuno:
+	"Possible d'avoir un bouton pour lancer l'animation?"). No-op if `state.vdata`
+	isn't built yet."""
+	if state.vdata is None:
+		return
+	matrices = _bone_skin_matrices_numpy(state.bone_names, state.inv_bind_matrices, bone_world_matrices)  # (B,4,4)
+
+	# state.bone_indices: (N,4) int, one of the B bones per influence slot --
+	# gathers each vertex's own 4 candidate matrices in one shot.
+	gathered = matrices[state.bone_indices]  # (N,4,4,4): (vertex, slot, row, col)
+	transformed_pos = numpy.einsum("nsij,nj->nsi", gathered, state.local_positions)
+	weighted_pos = (transformed_pos[:, :, :3] * state.weights[:, :, None]).sum(axis=1)
+
+	transformed_normal = numpy.einsum("nsij,nj->nsi", gathered, state.local_normals)
+	weighted_normal = (transformed_normal[:, :, :3] * state.weights[:, :, None]).sum(axis=1)
+	lengths = numpy.linalg.norm(weighted_normal, axis=1, keepdims=True)
+	lengths[lengths == 0] = 1.0
+	weighted_normal /= lengths
+
+	# Same buffer-protocol/modification-stamp technique as _update_wind() --
+	# see its own docstring for why a per-row GeomVertexRewriter loop isn't
+	# used instead.
+	array_data = state.vdata.modify_array(0)
+	if state.vertex_pos_offset is None:
+		array_format = array_data.get_array_format()
+		state.vertex_stride = array_format.get_stride() // 4
+		state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
+		state.vertex_normal_offset = array_format.get_column(InternalName.get_normal()).get_start() // 4
+
+	view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
+	view[:, state.vertex_pos_offset:state.vertex_pos_offset + 3] = weighted_pos
+	view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = weighted_normal
+
+
+class _MrmSkinState:
+	"""Per-loaded-shape data for live re-skin of a plain skinned CMeshMRM
+	body-part shape (e.g. *_visage.shape face pieces, geom.skinned=True but
+	NOT the packed-vertex CMeshMRMSkinned format _SkinState/_build_skin_state()
+	handle) -- same idea, different on-disk skin-weight layout
+	(geom.skin_weights, one (matrix_ids, weights) pair per vertex, see
+	shape_geometry._passes_from_mrm_geom()), so it needs its own per-vertex
+	tables, PLUS its own geomorph-wedge resolution step
+	(shape_geometry._resolve_lod_geomorphs()'s own numpy equivalent --
+	precomputed once here as (dst, src) index arrays, applied every frame
+	instead of once at build time, see _reskin_mrm_state()). Bug found
+	2026-08-31, Nuno: "vu que tout le corps + cheveux bougent, ben le visage
+	doit bouger aussi" -- face pieces were rendering skinned but frozen at
+	whatever pose they were built with, the same limitation
+	ObjectEditorApp._rebuild_geometry() already accepts for the *main*
+	shape's own live re-skin ("extending the live path to that format too is
+	future work") -- worth doing here since Bind preview assembles several
+	body-part shapes at once and a frozen face next to a moving body/hair is
+	visually jarring in a way a single standalone shape's own limitation
+	never was."""
+
+	def __init__(self, geom, skeleton, bone_names, local_positions, local_normals, matrix_ids, weights, geomorph_dst, geomorph_src):
+		self.geom = geom
+		self.skeleton = skeleton
+		self.bone_names = bone_names
+		self.local_positions = local_positions  # (N,3) float32
+		self.local_normals = local_normals  # (N,3) float32
+		self.matrix_ids = matrix_ids  # (N,4) int64
+		self.weights = weights  # (N,4) float32, already normalized
+		self.geomorph_dst = geomorph_dst  # (K,) int64 -- geomorph placeholder wedge indices
+		self.geomorph_src = geomorph_src  # (K,) int64 -- the "end" wedge each one resolves to
+		self.inv_bind_matrices = _bone_inv_bind_matrices(bone_names, skeleton)  # (B,4,4), see _bone_inv_bind_matrices()
+		self.vdata = None
+		self.vertex_stride = None
+		self.vertex_pos_offset = None
+		self.vertex_normal_offset = None
+
+
+def _build_mrm_skin_state(geom, skeleton):
+	"""Precomputes the static per-vertex tables _reskin_mrm_state() blends
+	every frame, from geom's own raw (unresolved) vertex buffer -- None if
+	geom isn't actually skinned, has no lods, or has no vertices at all."""
+	if not geom.skinned or not geom.lods:
+		return None
+	lod = geom.lods[-1]
+	local_positions = numpy.array(geom.vertex_buffer.channels.get("Position", []), dtype=numpy.float32)
+	if len(local_positions) == 0:
+		return None
+	normal_channel = geom.vertex_buffer.channels.get("Normal", [])
+	local_normals = numpy.zeros_like(local_positions)
+	if normal_channel:
+		normal_array = numpy.array(normal_channel, dtype=numpy.float32)
+		n = min(len(normal_array), len(local_normals))
+		local_normals[:n] = normal_array[:n]
+	matrix_ids = numpy.array([w[0] for w in geom.skin_weights], dtype=numpy.int64)
+	weights = numpy.array([w[1] for w in geom.skin_weights], dtype=numpy.float32)
+
+	n = len(local_positions)
+	geomorph_dst = [wedge_index for wedge_index, (_start, end) in enumerate(lod.geomorphs) if end < n]
+	geomorph_src = [end for _start, end in lod.geomorphs if end < n]
+
+	return _MrmSkinState(
+		geom, skeleton, list(geom.bones_name), local_positions, local_normals, matrix_ids, weights,
+		numpy.array(geomorph_dst, dtype=numpy.int64), numpy.array(geomorph_src, dtype=numpy.int64))
+
+
+def _reskin_mrm_state(state, bone_world_matrices):
+	"""Live per-frame equivalent of shape_geometry._passes_from_mrm_geom()'s
+	skin + geomorph-resolve steps, for a plain skinned CMeshMRM body-part
+	shape -- see _MrmSkinState's own docstring. No-op if state.vdata isn't
+	built yet."""
+	if state.vdata is None:
+		return
+	bone_skin_matrices = _bone_skin_matrices_numpy(state.bone_names, state.inv_bind_matrices, bone_world_matrices)
+	positions, normals = _numpy_skin_batch(state.local_positions, state.local_normals, state.matrix_ids, state.weights, bone_skin_matrices)
+	if len(state.geomorph_dst):
+		positions[state.geomorph_dst] = positions[state.geomorph_src]
+		normals[state.geomorph_dst] = normals[state.geomorph_src]
+
+	array_data = state.vdata.modify_array(0)
+	if state.vertex_pos_offset is None:
+		array_format = array_data.get_array_format()
+		state.vertex_stride = array_format.get_stride() // 4
+		state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
+		state.vertex_normal_offset = array_format.get_column(InternalName.get_normal()).get_start() // 4
+
+	view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
+	view[:, state.vertex_pos_offset:state.vertex_pos_offset + 3] = positions
+	view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = normals
 
 
 def _multi_bitmap_slot_label(index):
@@ -869,6 +1033,16 @@ class ObjectEditorApp(ForgeryApp):
 		# is layered on top separately and cheaply (no disk I/O) whenever
 		# just the loaded shape/its binding choice changes.
 		self._assembled_creature_base_nodes = {}
+		# slot_name -> _SkinState for every MeshMRMSkinned body-part shape
+		# above (built alongside _assembled_creature_base_nodes, see
+		# _build_assembled_shape_geometry()'s own skin_state return value) --
+		# read every frame by _update_assembled_creature_skin() while the
+		# Bind preview's Play button is active. A plain skinned CMeshMRM
+		# body part (the *_visage.shape face pieces, confirmed real
+		# 2026-08-31) has no entry here -- stays at whatever pose was baked
+		# in at build time, same limitation _rebuild_geometry() already
+		# accepts for the main shape's own live re-skin.
+		self._assembled_creature_skin_states = {}
 		self._assembled_creature_loaded_shape_node = None  # see _apply_loaded_shape_to_creature()
 		# The loaded-shape node's own inner "-content" child (see
 		# _build_assembled_shape_geometry()) -- kept up to date with
@@ -892,6 +1066,11 @@ class ObjectEditorApp(ForgeryApp):
 		# double-offsetting already-skin-placed vertices by whatever
 		# position/scale the main shape's own pivot happened to be at).
 		self._assembled_creature_loaded_shape_is_skinned_override = False
+		# The loaded shape's own _SkinState when it's a skinned slot override
+		# (see above) -- read every frame by _update_assembled_creature_skin()
+		# alongside _assembled_creature_skin_states, None for the attach-point/
+		# undefined cases (skeleton=None there, see _build_assembled_shape_geometry()).
+		self._assembled_creature_loaded_shape_skin_state = None
 		self._reference_root = self.render.attach_new_node("reference-root")
 		self._reference_shapes = {}  # label -> ShapeFile or None (failed to load), lazily parsed once
 		self._reference_active = set()  # labels currently shown
@@ -1076,6 +1255,19 @@ class ObjectEditorApp(ForgeryApp):
 		self._bind_skeleton_name = ""  # its scanned (on-disk-cased) name, see _resolve_scanned_skeleton_name()
 		self._bind_attach_point = ""  # bone name picked in the attach-point combo (non-skinned shapes); "" = unbound
 		self._bind_slot_override = ""  # creature_ref.BODY_SLOTS entry or "hair" (skinned shapes); "" = no override
+		self._bind_mode = ""  # creature_ref.ANIM_MODES entry; "" = raw bind pose (no animation posing)
+		# Live playback of the animation _bind_mode resolves to (Play button,
+		# _draw_bind_controls(), 2026-08-31: "Possible d'avoir un bouton pour
+		# lancer l'animation?") -- _bind_animation is the parsed Animation
+		# object (None whenever _bind_mode is "" or resolution/parsing
+		# failed, see _rebuild_assembled_creature()), read every frame by
+		# _update_assembled_creature_skin() alongside _bind_anim_time, which
+		# _update_bind_anim_time() advances/loops while _bind_anim_playing.
+		# Same playing-by-default choice _bone_preview_playing already makes.
+		self._bind_animation = None
+		self._bind_anim_duration = 0.0
+		self._bind_anim_time = 0.0
+		self._bind_anim_playing = True
 		# self._bind_slot_overrides itself (shape-stem-lowercased ->
 		# manually-picked slot, persisted to the active workspace's own
 		# build/bind_slot_overrides.json) is set by _on_active_workspace_changed()
@@ -1096,6 +1288,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._skin_state = None
 		self.taskMgr.add(self._update_skin_preview, "object-editor-skin-preview")
 		self.taskMgr.add(self._update_bound_shape_rotation, "object-editor-bound-shape-rotation")
+		self.taskMgr.add(self._update_bind_anim_time, "object-editor-bind-anim-time")
+		self.taskMgr.add(self._update_assembled_creature_skin, "object-editor-assembled-creature-skin")
 		self.commands.register_for_extension(
 			".skel", "Load as bone-preview skeleton", self._on_load_skeleton_command)
 		self.commands.register_for_extension(
@@ -1426,40 +1620,14 @@ class ObjectEditorApp(ForgeryApp):
 		skin_vertex()/skin_mesh() (fine for one-off/CLI use, far too slow
 		called per-vertex every frame for a real character mesh -- see
 		_update_wind()'s own note on exactly this same tradeoff). No-op
-		otherwise, same pattern as _update_wind()/_update_skin_preview_time()."""
+		otherwise, same pattern as _update_wind()/_update_skin_preview_time().
+		The actual blend math lives in the module-level _reskin_state(), shared
+		with _update_assembled_creature_skin()'s own per-body-part re-skin."""
 		state = self._skin_state
 		if state is None or state.vdata is None:
 			return task.cont
-
 		bone_world_matrices = self._bone_world_matrices_for(state.bone_names)
-		bone_skin_matrices = bone_skin_matrices_for_mesh(state.geom, state.skeleton, bone_world_matrices)
-		matrices = numpy.array(bone_skin_matrices, dtype=numpy.float32)  # (B,4,4)
-
-		# state.bone_indices: (N,4) int, one of the B bones per influence slot
-		# -- gathers each vertex's own 4 candidate matrices in one shot.
-		gathered = matrices[state.bone_indices]  # (N,4,4,4): (vertex, slot, row, col)
-		transformed_pos = numpy.einsum("nsij,nj->nsi", gathered, state.local_positions)
-		weighted_pos = (transformed_pos[:, :, :3] * state.weights[:, :, None]).sum(axis=1)
-
-		transformed_normal = numpy.einsum("nsij,nj->nsi", gathered, state.local_normals)
-		weighted_normal = (transformed_normal[:, :, :3] * state.weights[:, :, None]).sum(axis=1)
-		lengths = numpy.linalg.norm(weighted_normal, axis=1, keepdims=True)
-		lengths[lengths == 0] = 1.0
-		weighted_normal /= lengths
-
-		# Same buffer-protocol/modification-stamp technique as _update_wind()
-		# -- see its own docstring for why a per-row GeomVertexRewriter loop
-		# isn't used instead.
-		array_data = state.vdata.modify_array(0)
-		if state.vertex_pos_offset is None:
-			array_format = array_data.get_array_format()
-			state.vertex_stride = array_format.get_stride() // 4
-			state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
-			state.vertex_normal_offset = array_format.get_column(InternalName.get_normal()).get_start() // 4
-
-		view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
-		view[:, state.vertex_pos_offset:state.vertex_pos_offset + 3] = weighted_pos
-		view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = weighted_normal
+		_reskin_state(state, bone_world_matrices)
 		return task.cont
 
 	def _update_bound_shape_rotation(self, task):
@@ -1509,6 +1677,67 @@ class ObjectEditorApp(ForgeryApp):
 		if (content_root is not None and not content_root.is_empty()
 				and not self._assembled_creature_loaded_shape_is_skinned_override):
 			content_root.set_mat(self.model_root.get_mat(self.render))
+		return task.cont
+
+	def _update_bind_anim_time(self, task):
+		"""Per-frame: advances self._bind_anim_time while playing -- the clock
+		driving the Bind preview's live playback (Play button,
+		_draw_bind_controls()). _update_assembled_creature_skin() re-skins
+		every body-part shape against this time every frame. Same loop-by-
+		duration pattern as _update_skin_preview_time()'s own clock."""
+		if self._bind_anim_playing and self._bind_anim_duration > 0:
+			dt = ClockObject.get_global_clock().get_dt()
+			self._bind_anim_time = (self._bind_anim_time + dt) % self._bind_anim_duration
+		return task.cont
+
+	def _update_assembled_creature_skin(self, task):
+		"""Per-frame: re-skins every live-capable body-part shape of the
+		assembled Bind-preview creature (_assembled_creature_skin_states,
+		built by _build_assembled_shape_geometry() for each skinned slot --
+		either a _SkinState, for CMeshMRMSkinned's packed-vertex format, or a
+		_MrmSkinState, for a plain skinned CMeshMRM's own geom.skin_weights
+		layout, e.g. *_visage.shape face pieces), plus the loaded shape's own
+		skinned-override placement if any
+		(_assembled_creature_loaded_shape_skin_state), plus the loaded
+		shape's own rigid attach-point placement if any (weapons don't have a
+		_SkinState at all -- skeleton=None is passed for that case in
+		_build_assembled_shape_geometry() -- but still need their WORLD
+		POSITION refreshed every frame, otherwise a weapon stays frozen at
+		whatever bone matrix build time happened to compute, bug found
+		2026-08-31, Nuno: "l'arme qui ne bouge pas"). No-op whenever no
+		animation is currently resolved (self._bind_animation is None -- no
+		Mode picked, or resolution/parsing failed, see
+		_rebuild_assembled_creature()) or no creature skeleton is loaded.
+
+		Bone world matrices are computed ONCE per frame for the whole
+		skeleton and reused by every re-skin call below -- same
+		"whole-skeleton batch, not per-bone" reasoning
+		_bone_world_matrices_for() already documents, now paying off across
+		several shapes at once instead of just the main shape's own."""
+		if self._bind_animation is None or self._bind_skeleton is None:
+			return task.cont
+		bone_world_matrices = evaluate_all_bone_world_matrices(
+			self._bind_skeleton, self._bind_animation, self._bind_anim_time)
+		self._assembled_creature_bone_matrices = bone_world_matrices
+		for state in self._assembled_creature_skin_states.values():
+			if isinstance(state, _MrmSkinState):
+				_reskin_mrm_state(state, bone_world_matrices)
+			else:
+				_reskin_state(state, bone_world_matrices)
+		loaded_state = self._assembled_creature_loaded_shape_skin_state
+		if loaded_state is not None:
+			if isinstance(loaded_state, _MrmSkinState):
+				_reskin_mrm_state(loaded_state, bone_world_matrices)
+			else:
+				_reskin_state(loaded_state, bone_world_matrices)
+		if (not self._bind_slot_override and self._bind_attach_point
+				and self._bind_attach_point in self._bind_skeleton.bone_map
+				and self._assembled_creature_loaded_shape_node is not None):
+			bone_matrix = bone_world_matrices[self._bind_attach_point]
+			panda_mat = _nel_matrix_to_panda_mat4(bone_matrix)
+			self._assembled_creature_loaded_shape_node.set_mat(panda_mat)
+			if not self._attach_point_axes_np.is_empty():
+				self._attach_point_axes_np.set_mat(panda_mat)
 		return task.cont
 
 	def _update_skin_preview_time(self, task):
@@ -1756,22 +1985,24 @@ class ObjectEditorApp(ForgeryApp):
 		"""Picks `name` in the Bind preview's creature combo: loads its
 		skeleton (via the same scanned-search-path index the Skinning
 		preview uses, see SearchPathsDialog.skeleton_for(), through
-		_resolve_scanned_skeleton_name()'s case-insensitive match), resets
-		any previously chosen attach point (since a different creature's
-		skeleton may not even have a bone by that name), and shows the
-		assembled creature right away (2026-08-30, Nuno: no reason to make
-		picking a creature and toggling it visible two separate steps).
-		Deliberately does NOT reset _bind_slot_override -- comparing how the
-		same loaded shape looks across several creatures is a real use
-		case, so switching creature must keep it (2026-08-30, Nuno: "quand
-		je change de pnj ça fais sauter la selection du slot" -- an earlier
-		version of this method wrongly cleared it here, meant to fix a
+		_resolve_scanned_skeleton_name()'s case-insensitive match), and
+		shows the assembled creature right away (2026-08-30, Nuno: no
+		reason to make picking a creature and toggling it visible two
+		separate steps).
+		Deliberately does NOT reset _bind_slot_override or
+		_bind_attach_point -- comparing how the same loaded shape/weapon
+		looks across several creatures is a real use case, so switching
+		creature must keep both (2026-08-30, Nuno: "quand je change de pnj
+		ça fais sauter la selection du slot" -- an earlier version of this
+		method wrongly cleared _bind_slot_override here, meant to fix a
 		DIFFERENT bug -- the loaded shape rendering twice, once standalone
 		and once on the creature -- that's now fixed at its real source
 		instead, see _apply_loaded_shape_to_creature()'s unconditional
-		model_root hide)."""
+		model_root hide. 2026-08-31, Nuno: same complaint for
+		_bind_attach_point -- safe to keep too, since WEAPON_ATTACH_POINTS
+		is a small fixed list shared by every humanoid skeleton used here,
+		not arbitrary skeleton-specific bone names)."""
 		self._bind_creature_name = name
-		self._bind_attach_point = ""
 		record = self._bind_creatures.get(name)
 		if record is None:
 			# "(none)": deselecting the creature entirely (name == "" from
@@ -1918,6 +2149,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._assembled_creature_root.remove_node()
 		self._assembled_creature_root = self.render.attach_new_node("assembled-creature-root")
 		self._assembled_creature_base_nodes = {}
+		self._assembled_creature_skin_states = {}
 		self._assembled_creature_loaded_shape_node = None
 		self._assembled_creature_loaded_shape_content_root = None
 		# Carries the whole creature's pivot offset ONCE, so every child shape
@@ -1928,6 +2160,9 @@ class ObjectEditorApp(ForgeryApp):
 		# the main loaded object, without each needing its own set_pos.
 		self._assembled_creature_root.set_pos(self.render, self._object_pivot.get_pos(self.render))
 		self._assembled_creature_bone_matrices = {}  # see _frame_camera()
+		self._bind_animation = None
+		self._bind_anim_duration = 0.0
+		self._bind_anim_time = 0.0
 		if not self._show_assembled_creature:
 			self._apply_loaded_shape_to_creature()
 			return
@@ -1937,7 +2172,33 @@ class ObjectEditorApp(ForgeryApp):
 			self._apply_loaded_shape_to_creature()
 			return
 
-		bone_world_matrices = evaluate_all_bone_world_matrices(skeleton)
+		# Bind preview's Mode combo (_draw_bind_controls): poses the standing
+		# reference against the real animation MBEHAV::EMode resolves to for
+		# this creature (creature_ref.resolve_animation(), via the bundled
+		# creatures_anim_cache.json -- see nel/tools/pynel/docs/
+		# packed_sheets.md's "animset_list.packed_sheets" section for the
+		# full chain), e.g. show it crouched in "SIT" or squared-up in
+		# "COMBAT" instead of always the skeleton's raw bind pose. Resolved
+		# once here into self._bind_animation -- _update_assembled_creature_skin()
+		# reads it every frame (self._bind_anim_time, advanced by
+		# _update_bind_anim_time() while the Play button is active) to
+		# actually animate every live-capable body-part shape, not just pose
+		# a static snapshot at t=0 (2026-08-31, Nuno: "Possible d'avoir un
+		# bouton pour lancer l'animation?").
+		if self._bind_mode:
+			anim_name = creature_ref.resolve_animation(record, self._bind_mode, "Idle")
+			if anim_name is not None:
+				entry = self.search_paths_dialog.find_texture(anim_name)
+				if entry is not None:
+					try:
+						self._bind_animation = parse_animation(entry.read_bytes())
+						self._bind_anim_duration = animation_duration(self._bind_animation)
+					except AnimationParseError as exc:
+						print(f"[object_editor] Bind preview: cannot parse animation {anim_name!r}: {exc}")
+				else:
+					print(f"[object_editor] Bind preview: animation {anim_name!r} not found in scanned search paths")
+
+		bone_world_matrices = evaluate_all_bone_world_matrices(skeleton, self._bind_animation, self._bind_anim_time)
 		self._assembled_creature_bone_matrices = bone_world_matrices
 		shape_entries = list(record.slots.items())  # (slot_name, shape_name)
 		if record.hair:
@@ -1968,9 +2229,12 @@ class ObjectEditorApp(ForgeryApp):
 			# body part, they land in the right place on their own, same
 			# identity-plus-root-offset transform as everything else.
 			t4 = time.perf_counter()
-			self._build_assembled_shape_geometry(shape_file.value, skeleton, bone_world_matrices, node_path, slot_name)
+			_content_root, skin_state = self._build_assembled_shape_geometry(
+				shape_file.value, skeleton, bone_world_matrices, node_path, slot_name)
 			t5 = time.perf_counter()
 			self._assembled_creature_base_nodes[slot_name] = node_path
+			if skin_state is not None:
+				self._assembled_creature_skin_states[slot_name] = skin_state
 			built_count += 1
 		t_total_end = time.perf_counter()
 		self._apply_loaded_shape_to_creature()
@@ -2009,6 +2273,7 @@ class ObjectEditorApp(ForgeryApp):
 			self._assembled_creature_loaded_shape_node.remove_node()
 			self._assembled_creature_loaded_shape_node = None
 			self._assembled_creature_loaded_shape_content_root = None
+			self._assembled_creature_loaded_shape_skin_state = None
 		for node_path in self._assembled_creature_base_nodes.values():
 			node_path.show()
 		# Only ever (re)shown in the attach-point branch below -- removed
@@ -2035,7 +2300,7 @@ class ObjectEditorApp(ForgeryApp):
 			if base_node is not None:
 				base_node.hide()
 			node_path = self._assembled_creature_root.attach_new_node(f"{override_slot}-override")
-			content_root = self._build_assembled_shape_geometry(
+			content_root, self._assembled_creature_loaded_shape_skin_state = self._build_assembled_shape_geometry(
 				self.shape_file.value, self._bind_skeleton, self._assembled_creature_bone_matrices, node_path, override_slot)
 			self._assembled_creature_loaded_shape_is_skinned_override = _is_shape_skinned(self.shape_file.value)
 		elif self._bind_attach_point and self._bind_attach_point in self._bind_skeleton.bone_map:
@@ -2046,7 +2311,8 @@ class ObjectEditorApp(ForgeryApp):
 			# rely on before this consolidation), then positioned by hand at
 			# the chosen bone's current world matrix.
 			node_path = self._assembled_creature_root.attach_new_node("attach-point")
-			content_root = self._build_assembled_shape_geometry(self.shape_file.value, None, None, node_path, "attach-point")
+			content_root, self._assembled_creature_loaded_shape_skin_state = self._build_assembled_shape_geometry(
+				self.shape_file.value, None, None, node_path, "attach-point")
 			self._assembled_creature_loaded_shape_is_skinned_override = False
 			bone_matrix = self._assembled_creature_bone_matrices[self._bind_attach_point]
 			node_path.set_mat(_nel_matrix_to_panda_mat4(bone_matrix))
@@ -2076,7 +2342,8 @@ class ObjectEditorApp(ForgeryApp):
 			# _assembled_creature_root's own identity transform, i.e. the
 			# same place model_root would otherwise sit.
 			node_path = self._assembled_creature_root.attach_new_node("undefined")
-			content_root = self._build_assembled_shape_geometry(self.shape_file.value, None, None, node_path, "undefined")
+			content_root, self._assembled_creature_loaded_shape_skin_state = self._build_assembled_shape_geometry(
+				self.shape_file.value, None, None, node_path, "undefined")
 			self._assembled_creature_loaded_shape_is_skinned_override = False
 
 		self._assembled_creature_loaded_shape_node = node_path
@@ -2146,6 +2413,23 @@ class ObjectEditorApp(ForgeryApp):
 		if base is not None and not is_skinned:
 			rot = base.default_rot_quat
 			content_root.set_quat(Quat(rot.w, rot.x, rot.y, rot.z))
+		# Live re-skin support (_update_assembled_creature_skin(), Bind
+		# preview's Play button, 2026-08-31: "vu que tout le corps + cheveux
+		# bougent, ben le visage doit bouger aussi") -- two different
+		# per-vertex data layouts depending on the real shape type, so two
+		# different _SkinState-like builders/reskin functions
+		# (_update_assembled_creature_skin() dispatches on isinstance()):
+		# CMeshMRMSkinned's packed-vertex format (_build_skin_state()/
+		# _reskin_state()) vs. a plain skinned CMeshMRM's own
+		# geom.skin_weights layout (_build_mrm_skin_state()/
+		# _reskin_mrm_state(), e.g. *_visage.shape face pieces).
+		skin_state = None
+		if is_skinned and skeleton is not None:
+			geom_value = shape_geom(shape_value)
+			if isinstance(shape_value, MeshMRMSkinned):
+				skin_state = _build_skin_state(geom_value, skeleton)
+			else:
+				skin_state = _build_mrm_skin_state(geom_value, skeleton)
 		vdata = None
 		pass_count = 0
 		for vertex_buffer, material_id, indices in iter_render_passes(
@@ -2154,7 +2438,7 @@ class ObjectEditorApp(ForgeryApp):
 			if not indices:
 				continue
 			if vdata is None:
-				vdata = _build_vertex_data(vertex_buffer)
+				vdata = _build_vertex_data(vertex_buffer, dynamic=skin_state is not None)
 			geom = _build_geom(vdata, indices)
 			geom_node = GeomNode(f"assembled-pass-{material_id}")
 			geom_node.add_geom(geom)
@@ -2164,7 +2448,9 @@ class ObjectEditorApp(ForgeryApp):
 			self._apply_material_texture(node_path, material, None)
 			texture_names = [t.file_name if t is not None else None for t in material.textures] if material is not None else None
 			pass_count += 1
-		return content_root
+		if skin_state is not None:
+			skin_state.vdata = vdata
+		return content_root, skin_state
 
 	def _draw_bind_controls(self):
 		"""Floating "Bind preview" window: previews the loaded shape on one
@@ -2242,6 +2528,46 @@ class ObjectEditorApp(ForgeryApp):
 				tooltip = "Copy the bundled creatures_ref.txt into this workspace, to track more creatures"
 				if _icon_button(f"{fa_icons.ICON_FA_COG}##creatures-ref", tooltip, disabled=workspace_dir is None):
 					self._copy_creatures_ref_to_workspace()
+
+			# Poses the standing reference against a real animation instead of
+			# the skeleton's raw bind pose (creature_ref.resolve_animation(),
+			# see _rebuild_assembled_creature()'s own note on the full
+			# Mode->AnimSet->.anim resolution chain). Disabled without a
+			# creature picked -- nothing to pose.
+			imgui.set_next_item_width(220)
+			preview = self._bind_mode or "(bind pose)"
+			imgui.begin_disabled(not self._bind_creature_name)
+			if imgui.begin_combo("##bind-mode-combo", preview):
+				clicked, _ = imgui.selectable("(bind pose)", self._bind_mode == "")
+				if clicked:
+					self._bind_mode = ""
+					self._rebuild_assembled_creature()
+				for mode_name in creature_ref.ANIM_MODES:
+					clicked, _ = imgui.selectable(mode_name, mode_name == self._bind_mode)
+					if clicked:
+						self._bind_mode = mode_name
+						self._rebuild_assembled_creature()
+				imgui.end_combo()
+			imgui.end_disabled()
+
+			# Live playback (Play button, 2026-08-31: "Possible d'avoir un
+			# bouton pour lancer l'animation?") -- only shown once a Mode
+			# actually resolved to a real, parsed animation (self._bind_animation,
+			# see _rebuild_assembled_creature()). Re-skins every live-capable
+			# body-part shape every frame while playing (_update_assembled_creature_skin()),
+			# same Play/Pause + time-slider layout as the Skinning preview's
+			# own animation controls above.
+			if self._bind_animation is not None:
+				icon = fa_icons.ICON_FA_PAUSE if self._bind_anim_playing else fa_icons.ICON_FA_PLAY
+				if _icon_button(f"{icon}##bind-anim-play", "Play/pause"):
+					self._bind_anim_playing = not self._bind_anim_playing
+				imgui.same_line()
+				imgui.set_next_item_width(160)
+				changed, new_time = imgui.slider_float(
+					"##bind-anim-time", self._bind_anim_time,
+					0.0, max(self._bind_anim_duration, 0.001), "%.2f s")
+				if changed:
+					self._bind_anim_time = new_time
 
 			if is_skinned:
 				slot_names = list(creature_ref.BODY_SLOTS) + ["hair"]

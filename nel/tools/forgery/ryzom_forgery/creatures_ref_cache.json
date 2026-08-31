@@ -1,5 +1,6 @@
 {
 	"Fyros Female": {
+		"anim_set_base_name": "fy_hof",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -23,15 +24,16 @@
 		"race": 0,
 		"skel": "FY_HOF_skel.skel",
 		"slots": {
-			"arms": "fy_HOF_civil01_armpad.shape",
-			"body": "fy_HOF_civil01_gilet.shape",
+			"arms": "tr_HOF_underwear_armpad.shape",
+			"body": "fy_HOF_underwear_gilet.shape",
 			"face": "fy_HOF_VISAGE.shape",
-			"feet": "fy_HOF_civil01_bottes.shape",
-			"hands": "TR_HOF_civil01_hand.shape",
-			"legs": "fy_HOF_civil01_pantabottes.shape"
+			"feet": "tr_HOF_underwear_bottes.shape",
+			"hands": "tr_HOF_underwear_hand.shape",
+			"legs": "fy_HOF_underwear_pantabottes.shape"
 		}
 	},
 	"Fyros Male": {
+		"anim_set_base_name": "fy_hom",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -55,15 +57,16 @@
 		"race": 0,
 		"skel": "FY_HOM_skel.skel",
 		"slots": {
-			"arms": "fy_HOM_civil01_armpad.shape",
-			"body": "fy_HOM_civil01_gilet.shape",
+			"arms": "tr_HOM_underwear_armpad.shape",
+			"body": "tr_HOM_underwear_gilet.shape",
 			"face": "fy_HOM_VISAGE.shape",
-			"feet": "fy_HOM_civil01_bottes.shape",
-			"hands": "TR_HOM_civil01_hand.shape",
-			"legs": "fy_HOM_civil01_pantabottes.shape"
+			"feet": "tr_HOM_underwear_bottes.shape",
+			"hands": "tr_HOM_underwear_hand.shape",
+			"legs": "fy_HOM_underwear_pantabottes.shape"
 		}
 	},
 	"Matis Female": {
+		"anim_set_base_name": "fy_hof",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -87,16 +90,17 @@
 		"race": 1,
 		"skel": "MA_HOF_skel.skel",
 		"slots": {
-			"arms": "MA_HOF_civil01_armpad.shape",
-			"body": "MA_HOF_civil01_gilet.shape",
+			"arms": "tr_HOF_underwear_armpad.shape",
+			"body": "MA_HOF_underwear_gilet.shape",
 			"face": "MA_HOF_visage.shape",
-			"feet": "MA_HOF_civil01_bottes.shape",
-			"hands": "TR_HOF_civil01_hand.shape",
-			"head": "MA_HOF_cheveux_medium01.shape",
-			"legs": "MA_HOF_civil01_pantabottes.shape"
+			"feet": "tr_HOF_underwear_bottes.shape",
+			"hands": "tr_HOF_underwear_hand.shape",
+			"head": "MA_HOF_cheveux_long01.shape",
+			"legs": "MA_HOF_underwear_pantabottes.shape"
 		}
 	},
 	"Matis Male": {
+		"anim_set_base_name": "fy_hom",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -120,16 +124,17 @@
 		"race": 1,
 		"skel": "MA_HOM_skel.skel",
 		"slots": {
-			"arms": "MA_HOM_civil01_armpad.shape",
-			"body": "MA_HOM_civil01_gilet.shape",
+			"arms": "tr_HOM_underwear_armpad.shape",
+			"body": "tr_HOM_underwear_gilet.shape",
 			"face": "MA_HOM_visage.shape",
-			"feet": "MA_HOM_civil01_bottes.shape",
-			"hands": "TR_HOM_civil01_hand.shape",
-			"head": "MA_HOM_cheveux_medium01.shape",
-			"legs": "MA_HOM_civil01_pantabottes.shape"
+			"feet": "tr_HOM_underwear_bottes.shape",
+			"hands": "tr_HOM_underwear_hand.shape",
+			"head": "MA_HOM_cheveux_long01.shape",
+			"legs": "MA_HOM_underwear_pantabottes.shape"
 		}
 	},
 	"Tryker Female": {
+		"anim_set_base_name": "fy_hof",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -153,16 +158,16 @@
 		"race": 2,
 		"skel": "TR_HOF_skel.skel",
 		"slots": {
-			"arms": "TR_HOF_civil01_armpad.shape",
-			"body": "TR_HOF_civil01_gilet.shape",
+			"arms": "TR_HOF_underwear_armpad.shape",
+			"body": "TR_HOF_underwear_gilet.shape",
 			"face": "TR_HOF_VISAGE.shape",
-			"feet": "TR_HOF_civil01_bottes.shape",
-			"hands": "TR_HOF_civil01_hand.shape",
-			"head": "TR_HOF_VISAGE.shape",
-			"legs": "TR_HOF_civil01_pantabottes.shape"
+			"feet": "TR_HOF_underwear_bottes.shape",
+			"hands": "TR_HOF_underwear_hand.shape",
+			"legs": "TR_HOF_underwear_pantabottes.shape"
 		}
 	},
 	"Tryker Male": {
+		"anim_set_base_name": "fy_hom",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -186,15 +191,16 @@
 		"race": 2,
 		"skel": "TR_HOM_skel.skel",
 		"slots": {
-			"arms": "TR_HOM_civil01_armpad.shape",
-			"body": "TR_HOM_civil01_gilet.shape",
+			"arms": "TR_HOM_underwear_armpad.shape",
+			"body": "TR_HOM_underwear_gilet.shape",
 			"face": "TR_HOM_VISAGE.shape",
-			"feet": "TR_HOM_civil01_bottes.shape",
-			"hands": "TR_HOM_civil01_hand.shape",
-			"legs": "TR_HOM_civil01_pantabottes.shape"
+			"feet": "TR_HOM_underwear_bottes.shape",
+			"hands": "TR_HOM_underwear_hand.shape",
+			"legs": "TR_HOM_underwear_pantabottes.shape"
 		}
 	},
 	"Zorai Female": {
+		"anim_set_base_name": "fy_hof",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -218,15 +224,16 @@
 		"race": 3,
 		"skel": "ZO_HOF_skel.skel",
 		"slots": {
-			"arms": "ZO_HOF_civil01_armpad.shape",
-			"body": "ZO_HOF_civil01_gilet.shape",
+			"arms": "TR_HOF_underwear_armpad.shape",
+			"body": "ZO_HOF_underwear_gilet.shape",
 			"face": "ZO_HOF_VISAGE.shape",
-			"feet": "ZO_HOF_civil01_bottes.shape",
-			"hands": "TR_HOF_civil01_hand.shape",
-			"legs": "ZO_HOF_civil01_pantabottes.shape"
+			"feet": "TR_HOF_underwear_bottes.shape",
+			"hands": "TR_HOF_underwear_hand.shape",
+			"legs": "ZO_HOF_underwear_pantabottes.shape"
 		}
 	},
 	"Zorai Male": {
+		"anim_set_base_name": "fy_hom",
 		"body_to_bone": {
 			"chest": "Bip01 Spine2",
 			"head": "Bip01 Head",
@@ -250,13 +257,12 @@
 		"race": 3,
 		"skel": "ZO_HOM_skel.skel",
 		"slots": {
-			"arms": "ZO_HOM_civil01_armpad.shape",
-			"body": "ZO_HOM_civil01_gilet.shape",
+			"arms": "TR_HOM_underwear_armpad.shape",
+			"body": "TR_HOM_underwear_gilet.shape",
 			"face": "ZO_HOM_VISAGE.shape",
-			"feet": "ZO_HOM_civil01_bottes.shape",
-			"hands": "TR_HOM_civil01_hand.shape",
-			"head": "ZO_HOM_cheveux_medium01.shape",
-			"legs": "ZO_HOM_civil01_pantabottes.shape"
+			"feet": "TR_HOM_underwear_bottes.shape",
+			"hands": "TR_HOM_underwear_hand.shape",
+			"legs": "ZO_HOM_underwear_pantabottes.shape"
 		}
 	}
 }

@@ -1,5 +1,59 @@
 # Changelog
 
+## 2026-08-31 — ⚡ Vectorize evaluate_all_bone_world_matrices(), add numpy dependency, pynel 0.10.0
+
+Traced a "10 fps de perdu" report in Patina's Bind preview live playback (Forgery, see
+its own changelog entry) to `ryzom_animation.evaluate_all_bone_world_matrices()`:
+6.5ms/frame for one ~80-bone skeleton, pure-Python tuple matrix math (`_bone_local_matrix()`'s
+T*R*S*T composition, 4 chained `_mat_mul()` calls per bone, 64 multiply-adds each via
+nested Python loops).
+
+The per-bone LOCAL matrix composition has no cross-bone dependency at all (unlike the
+parent-before-child WORLD-matrix hierarchy walk, inherently sequential) -- vectorized
+here as one batched numpy computation across every bone at once, via a closed-form
+rewrite of T(pos+pivot)*R*S*T(-pivot) (the 3x3 rotation-scale block is R's columns
+scaled by `scale`, translation is `RS @ (-pivot) + pos + pivot`). Only the hierarchy
+accumulation stays a per-bone Python loop, now just one or two 4x4 numpy matmuls per
+bone instead of the full local-matrix build too. `evaluate_bone_world_matrix()` (the
+single-bone entry point) is untouched -- not the measured bottleneck, and used as the
+correctness reference for validation (max abs error 6.7e-16, float noise, across 5
+different animation times on a real 79-bone skeleton). Track evaluation itself
+(`evaluate_track()`, varying keyframe structures per bone) stays per-bone Python, not
+the measured bottleneck.
+
+Result: 6.5ms -> 1.56ms per call (~4x) in a 200-call micro-benchmark, confirmed as a
+real fps win in Patina's own Play button too, not just the benchmark.
+
+pynel gains a real dependency for this (`numpy`, was `dependencies = []`) -- a
+deliberate tradeoff accepted for this specific hot path, not a general policy change.
+
+## 2026-08-31 — ✨ Add animset_list.packed_sheets + mode2animset.string_array support, pynel 0.9.0
+
+Built for Patina's Bind preview Mode picker (Forgery, see its own changelog entry):
+resolving an `MBEHAV::EMode` (`ryzom/common/src/game_share/mode_and_behaviour.h`) down
+to a real per-state `.anim` filename needs two new pieces, neither previously supported.
+
+**`ryzom_packed_sheets.py`: `animset_list.packed_sheets`** (`CAnimationSetListSheet`,
+`ANIMATION_SET_LIST` entity type, wire version 25) -- new dataclasses
+(`AnimationSetListSheet`/`AnimationSetSheet`/`AnimationStateSheet`/`AnimationSheet`/
+`AnimationFXSetSheet`/`AnimationFXSheet`), `parse_animation_set_list_packed_sheets()`/
+`load_...()`, and the full ~150-entry `TAnimStateSheetId` name table
+(`ANIM_STATE_NAMES`) so a state shows up as e.g. `"Idle"`/`"SitMode"` instead of a bare
+integer. `CanReplaceStickMode`/`CanReplaceStickBone` (inside `CAnimationFXSetSheet`) are
+interleaved per-index in the real `serial()`, not two separate arrays -- easy to get
+wrong, documented explicitly in `packed_sheets.md`. Validated against real data: 665
+`CAnimationSetSheet` entries, no exceptions, no trailing bytes;
+`fy_hof_default__.animation_set` resolved to real states matching the real client's own
+behavior (`Idle`=`FY_HOF_idle.anim`, `Run`=`fy_hof_course.anim`, etc).
+
+**`mode2animset.string_array`**: NOT a `.packed_sheets` file at all -- confirmed via the
+`.agentcom` bridge to be a raw Georges FORM (plain XML), loaded directly by the client at
+runtime, not compiled into any binary format. New `parse_mode2animset_string_array()`/
+`load_...()` using `xml.etree.ElementTree`.
+
+Full byte layout + this format's own quirks documented in
+`nel/tools/pynel/docs/packed_sheets.md`'s new `animset_list.packed_sheets` section.
+
 ## 2026-08-31 — 🐛 Fix CMesh::CSkinWeight interleaving bug; add skin_mesh_mrm_geom(), pynel 0.8.0
 
 **`ryzom_shape.py`'s `_parse_skin_weight()` bug found and fixed.** `CMesh::CSkinWeight::serial()`

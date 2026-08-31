@@ -23,8 +23,12 @@ ryzom/client/src/sheet_manager.cpp (CSheetManagerEntry::serial, TypeVersion[]) a
 ryzom/client/src/client_sheets/character_sheet.cpp (CCharacterSheet::serial) — see
 nel/tools/pynel/docs/packed_sheets.md for the full writeup.
 
-Supports `creature.packed_sheets` (CEntitySheet::FAUNA / CCharacterSheet) and
-`item.packed_sheets`/`sitem.packed_sheets` (CEntitySheet::ITEM / CItemSheet).
+Supports `creature.packed_sheets` (CEntitySheet::FAUNA / CCharacterSheet),
+`item.packed_sheets`/`sitem.packed_sheets` (CEntitySheet::ITEM / CItemSheet), and
+`animset_list.packed_sheets` (CEntitySheet::ANIMATION_SET_LIST / CAnimationSetListSheet
+-- the Mode/Behaviour -> real .anim filename mapping, see mode2Anim()/computeAnimSet()
+in ryzom/client/src/misc.cpp for how a name like "fyhc1_NORMAL__.animation_set" gets
+composed and looked up against AnimationSetSheet.name).
 Other sheet types (sbrick, mission, ...) raise PackedSheetsParseError.
 
 Read-only: the client always regenerates this cache from the source Georges sheets,
@@ -61,11 +65,51 @@ ENTITY_SHEET_TYPES = [
 ]
 FAUNA_TYPE = ENTITY_SHEET_TYPES.index("FAUNA")
 ITEM_TYPE = ENTITY_SHEET_TYPES.index("ITEM")
+ANIMATION_SET_LIST_TYPE = ENTITY_SHEET_TYPES.index("ANIMATION_SET_LIST")
 
 # TypeVersion[] entry for "creature" in ryzom/client/src/sheet_manager.cpp
 CREATURE_SHEET_VERSION = 17
 # TypeVersion[] entry shared by "item" and "sitem" (both map to CItemSheet)
 ITEM_SHEET_VERSION = 44
+# TypeVersion[] entry for "animset_list" (CAnimationSetListSheet)
+ANIMATION_SET_LIST_SHEET_VERSION = 25
+
+# CAnimationStateSheet::TAnimStateSheetId (ryzom/client/src/client_sheets/
+# animation_set_list_sheet.h) -- order is the wire encoding (CAnimationStateSheet.state
+# field), do not reorder. StaticStateCount itself is a sentinel, not a real state.
+ANIM_STATE_NAMES = [
+	"Idle", "Run", "Walk", "TurnLeft", "TurnRight", "Emote",
+	"CastGoodBegin", "CastGoodSuccess", "CastGoodFail", "CastGoodFumble",
+	"CastBadBegin", "CastBadSuccess", "CastBadFail", "CastBadFumble",
+	"CastNeutralBegin", "CastNeutralSuccess", "CastNeutralFail", "CastNeutralFumble",
+	"OffensiveCastInit", "OffensiveCastBegin", "OffensiveCastLoop", "OffensiveCastFail",
+	"OffensiveCastFumble", "OffensiveCastSuccess", "OffensiveCastLink",
+	"CurativeCastInit", "CurativeCastBegin", "CurativeCastLoop", "CurativeCastFail",
+	"CurativeCastFumble", "CurativeCastSuccess", "CurativeCastLink",
+	"MixedCastInit", "MixedCastBegin", "MixedCastLoop", "MixedCastFail",
+	"MixedCastFumble", "MixedCastSuccess", "MixedCastLink",
+	"AcidCastInit", "BlindCastInit", "ColdCastInit", "ElecCastInit", "FearCastInit",
+	"FireCastInit", "HealHPCastInit", "MadCastInit", "PoisonCastInit", "RootCastInit",
+	"RotCastInit", "ShockCastInit", "SleepCastInit", "SlowCastInit", "StunCastInit",
+	"AcidCastLoop", "BlindCastLoop", "ColdCastLoop", "ElecCastLoop", "FearCastLoop",
+	"FireCastLoop", "HealHPCastLoop", "MadCastLoop", "PoisonCastLoop", "RootCastLoop",
+	"RotCastLoop", "ShockCastLoop", "SleepCastLoop", "SlowCastLoop", "StunCastLoop",
+	"AcidCastFail", "BlindCastFail", "ColdCastFail", "ElecCastFail", "FearCastFail",
+	"FireCastFail", "HealHPCastFail", "MadCastFail", "PoisonCastFail", "RootCastFail",
+	"RotCastFail", "ShockCastFail", "SleepCastFail", "SlowCastFail", "StunCastFail",
+	"AcidCastEnd", "BlindCastEnd", "ColdCastEnd", "ElecCastEnd", "FearCastEnd",
+	"FireCastEnd", "HealHPCastEnd", "MadCastEnd", "PoisonCastEnd", "RootCastEnd",
+	"RotCastEnd", "ShockCastEnd", "SleepCastEnd", "SlowCastEnd", "StunCastEnd",
+	"DefaultAtkLow", "DefaultAtkMiddle", "DefaultAtkHigh",
+	"PowerfulAtkLow", "PowerfulAtkMiddle", "PowerfulAtkHigh",
+	"AreaAtkLow", "AreaAtkMiddle", "AreaAtkHigh",
+	"Attack1", "Attack2", "FirstPersonAttack",
+	"Impact", "Death", "DeathIdle",
+	"LootInit", "LootEnd", "ProspectingInit", "ProspectingEnd", "CareInit", "CareEnd",
+	"UseInit", "UseBegin", "UseLoop", "UseEnd",
+	"StunBegin", "StunLoop", "StunEnd",
+	"SitMode", "SitEnd", "StrafeLeft", "StrafeRight",
+]
 
 # ITEMFAMILY::EItemFamily (ryzom/common/src/game_share/item_family.h) — plain sequential
 # auto-increment from UNDEFINED=0, no gaps. Order is the wire encoding, do not reorder.
@@ -212,6 +256,87 @@ class PackedSheets:
 	ItemSheet for item.packed_sheets/sitem.packed_sheets, keyed by raw CSheetId."""
 	dictionary: List[str] = field(default_factory=list)  # source Georges filenames (informational)
 	entries: Dict[int, object] = field(default_factory=dict)
+
+
+@dataclass
+class AnimationFXStickMode:
+	"""CFXStickMode (client_sheets/fx_stick_mode.h) — TStickMode enum kept raw (no
+	Python-side name table yet), see fx_stick_mode.h for the values."""
+	mode: int
+	user_bone_name: str
+
+
+@dataclass
+class AnimationFXSheet:
+	"""CAnimationFXSheet (animation_fx_sheet.h), element of AnimationFXSetSheet.fx."""
+	ps_name: str
+	stick_mode: AnimationFXStickMode
+	user_param: List[float]  # 4 entries
+	trajectory_anim: str
+	color: Rgba
+	scale_fx: bool
+	repeat_mode: int  # CAnimationFXSheet::TRepeatMode (Loop=0/Respawn/RespawnAndCut)
+	ray_ref_length: float
+
+
+@dataclass
+class AnimationFXSetSheet:
+	"""CAnimationFXSetSheet (animation_fx_set_sheet.h) — not decoded for any real use
+	yet (Patina doesn't render particle FX), only parsed here so the reader correctly
+	advances past it inside CAnimationSheet."""
+	fx: List[AnimationFXSheet]
+	can_replace_stick_mode: List[bool]  # 4 entries
+	can_replace_stick_bone: List[bool]  # 4 entries
+
+
+@dataclass
+class AnimationSheet:
+	"""CAnimationSheet (client_sheets/animation_set_list_sheet.h) — one concrete
+	animation choice within a AnimationStateSheet.animations list."""
+	id_anim: str  # the real .anim filename, e.g. "fy_hom_normal_walk.anim"
+	apply_character_scale_pos_factor: bool
+	id_fx: str  # legacy single-fx name, superseded by fx_set
+	head_controlable: bool
+	virtual_rot: float
+	fx_set: AnimationFXSetSheet
+	reverse: bool
+	hide_at_end_anim: bool
+	next: List[int]  # alternative-animation indices into this same AnimationStateSheet.animations
+	next_weight: List[int]  # parallel to next, relative pick weight
+	job_restriction: int
+	race_restriction: int  # EGSPD::CPeople::TPeople, raw
+
+
+@dataclass
+class AnimationStateSheet:
+	"""CAnimationStateSheet (client_sheets/animation_set_list_sheet.h), element of
+	AnimationSetSheet.animation_states -- one MBEHAV::EBehaviour-derived state
+	(state_name/state are ANIM_STATE_NAMES[state])."""
+	animations: List[AnimationSheet]
+	state: int  # index into ANIM_STATE_NAMES
+	state_name: str  # redundant with ANIM_STATE_NAMES[state], kept as an on-disk cross-check
+	id_lod_character_animation: str
+	display_objects: bool
+	melee_impact_delay: float
+
+
+@dataclass
+class AnimationSetSheet:
+	"""CAnimationSetSheet (client_sheets/animation_set_list_sheet.h), element of
+	AnimationSetListSheet.anim_set_list -- name matches computeAnimSet()'s own
+	composed lookup key, e.g. "fyhc1_NORMAL__.animation_set"."""
+	name: str
+	animation_states: List[AnimationStateSheet]  # sparse, indexed by AnimationStateSheet.state
+	is_walk_essential: bool
+	is_run_essential: bool
+
+
+@dataclass
+class AnimationSetListSheet:
+	"""CAnimationSetListSheet (client_sheets/animation_set_list_sheet.h), the
+	CEntitySheet::ANIMATION_SET_LIST payload of an animset_list.packed_sheets entry."""
+	sheet_id: int
+	anim_set_list: List[AnimationSetSheet]
 
 
 @dataclass
@@ -429,6 +554,9 @@ class _Reader:
 	def f32(self) -> float:
 		return struct.unpack("<f", self._take(4))[0]
 
+	def f64(self) -> float:
+		return struct.unpack("<d", self._take(8))[0]
+
 	def boolean(self) -> bool:
 		return self.u8() != 0
 
@@ -482,6 +610,37 @@ def parse_sheet_id_bin(data: bytes) -> Dict[int, str]:
 		raise PackedSheetsParseError(f"{f.remaining} trailing bytes after parsing sheet_id.bin")
 
 	return result
+
+
+def parse_mode2animset_string_array(data: bytes) -> Dict[str, str]:
+	"""mode2animset.string_array: NOT a .packed_sheets file at all -- a raw Georges
+	FORM, read straight from the XML tree at runtime by mode2Anim() (misc.cpp:265),
+	never compiled into any binary cache. Confirmed real (2026-08-31): plain XML,
+	<FORM><STRUCT><ARRAY Name="array"><ATOM Name="NORMAL" Value="default"/>...
+	</ARRAY></STRUCT></FORM> -- one ATOM per MBEHAV::EMode name (mode_and_behaviour.h),
+	its Value the animset name-fragment computeAnimSet() (misc.cpp:334) composes into
+	"<AnimSetBaseName>_<fragment>_<rightHand>_<leftHand>". Returns {mode name: fragment},
+	e.g. {"NORMAL": "default", "COMBAT": "combat", "SWIM": "swim", ...}."""
+	import xml.etree.ElementTree as ET
+	root = ET.fromstring(data)
+	array = root.find(".//ARRAY[@Name='array']")
+	if array is None:
+		raise PackedSheetsParseError("mode2animset.string_array: no <ARRAY Name=\"array\"> node found")
+	result: Dict[str, str] = {}
+	for atom in array.findall("ATOM"):
+		name = atom.get("Name")
+		value = atom.get("Value")
+		if name is not None and value is not None:
+			result[name] = value
+	return result
+
+
+def load_mode2animset_string_array(path: Union[str, Path, BinaryIO]) -> Dict[str, str]:
+	if hasattr(path, "read"):
+		data = path.read()
+	else:
+		data = Path(path).read_bytes()
+	return parse_mode2animset_string_array(data)
 
 
 def _parse_equipment(f: _Reader) -> Equipment:
@@ -784,6 +943,99 @@ def _parse_item_sheet(f: _Reader, sheet_id: int) -> ItemSheet:
 	)
 
 
+def _parse_fx_stick_mode(f: _Reader) -> AnimationFXStickMode:
+	mode = f.s32()  # serialEnum
+	user_bone_name = f.string()  # CStringMapper::localSerialString -- plain string on disk
+	return AnimationFXStickMode(mode=mode, user_bone_name=user_bone_name)
+
+
+def _parse_animation_fx_sheet(f: _Reader) -> AnimationFXSheet:
+	ps_name = f.string()
+	stick_mode = _parse_fx_stick_mode(f)
+	user_param = [f.f32() for _ in range(4)]
+	trajectory_anim = f.string()
+	color = f.rgba()
+	scale_fx = f.boolean()
+	repeat_mode = f.s32()  # serialEnum
+	ray_ref_length = f.f32()
+	return AnimationFXSheet(
+		ps_name=ps_name, stick_mode=stick_mode, user_param=user_param,
+		trajectory_anim=trajectory_anim, color=color, scale_fx=scale_fx,
+		repeat_mode=repeat_mode, ray_ref_length=ray_ref_length,
+	)
+
+
+def _parse_animation_fx_set_sheet(f: _Reader) -> AnimationFXSetSheet:
+	n = f.cont_len()
+	fx = [_parse_animation_fx_sheet(f) for _ in range(n)]
+	# CAnimationFXSetSheet::serial: interleaved per index, NOT two separate arrays --
+	# f.serial(CanReplaceStickMode[k]); f.serial(CanReplaceStickBone[k]); for k in 0..3.
+	can_replace_stick_mode = []
+	can_replace_stick_bone = []
+	for _ in range(4):  # CAnimationFXSetSheet::MaxNumFX
+		can_replace_stick_mode.append(f.boolean())
+		can_replace_stick_bone.append(f.boolean())
+	return AnimationFXSetSheet(
+		fx=fx, can_replace_stick_mode=can_replace_stick_mode, can_replace_stick_bone=can_replace_stick_bone,
+	)
+
+
+def _parse_animation_sheet(f: _Reader) -> AnimationSheet:
+	id_anim = f.string()  # CStaticStringMapper::serial -- plain string on disk
+	apply_character_scale_pos_factor = f.boolean()
+	id_fx = f.string()
+	head_controlable = f.boolean()
+	virtual_rot = f.f64()
+	fx_set = _parse_animation_fx_set_sheet(f)
+	reverse = f.boolean()
+	hide_at_end_anim = f.boolean()
+	n_next = f.cont_len()
+	next_ = [f.s8() for _ in range(n_next)]
+	n_next_weight = f.cont_len()
+	next_weight = [f.u16() for _ in range(n_next_weight)]
+	job_restriction = f.u32()
+	race_restriction = f.s32()  # serialEnum
+	return AnimationSheet(
+		id_anim=id_anim, apply_character_scale_pos_factor=apply_character_scale_pos_factor,
+		id_fx=id_fx, head_controlable=head_controlable, virtual_rot=virtual_rot, fx_set=fx_set,
+		reverse=reverse, hide_at_end_anim=hide_at_end_anim, next=next_, next_weight=next_weight,
+		job_restriction=job_restriction, race_restriction=race_restriction,
+	)
+
+
+def _parse_animation_state_sheet(f: _Reader) -> AnimationStateSheet:
+	n = f.cont_len()
+	animations = [_parse_animation_sheet(f) for _ in range(n)]
+	state = f.u16()
+	state_name = f.string()
+	id_lod_character_animation = f.string()  # CStaticStringMapper::serial -- plain string
+	display_objects = f.boolean()
+	melee_impact_delay = f.f32()
+	return AnimationStateSheet(
+		animations=animations, state=state, state_name=state_name,
+		id_lod_character_animation=id_lod_character_animation,
+		display_objects=display_objects, melee_impact_delay=melee_impact_delay,
+	)
+
+
+def _parse_animation_set_sheet(f: _Reader) -> AnimationSetSheet:
+	name = f.string()
+	n = f.cont_len()
+	animation_states = [_parse_animation_state_sheet(f) for _ in range(n)]
+	is_walk_essential = f.boolean()
+	is_run_essential = f.boolean()
+	return AnimationSetSheet(
+		name=name, animation_states=animation_states,
+		is_walk_essential=is_walk_essential, is_run_essential=is_run_essential,
+	)
+
+
+def _parse_animation_set_list_sheet(f: _Reader, sheet_id: int) -> AnimationSetListSheet:
+	n = f.cont_len()
+	anim_set_list = [_parse_animation_set_sheet(f) for _ in range(n)]
+	return AnimationSetListSheet(sheet_id=sheet_id, anim_set_list=anim_set_list)
+
+
 def _parse_packed_sheets_header(f: _Reader, expected_class_version: int, version_what: str):
 	"""Header + dependency blocks common to every .packed_sheets file
 	(load_form.h::loadForm). Returns (dictionary, entry_count)."""
@@ -863,6 +1115,20 @@ def parse_item_packed_sheets(data: bytes) -> PackedSheets:
 	return PackedSheets(dictionary=dictionary, entries=entries)
 
 
+def parse_animation_set_list_packed_sheets(data: bytes) -> PackedSheets:
+	f = _Reader(data)
+	dictionary, n_map = _parse_packed_sheets_header(
+		f, ANIMATION_SET_LIST_SHEET_VERSION, "animation set list sheet class version")
+	entries = _parse_entity_map(
+		f, n_map, ANIMATION_SET_LIST_TYPE, _parse_animation_set_list_sheet,
+		"ANIMATION_SET_LIST/CAnimationSetListSheet")
+
+	if not f.eof():
+		raise PackedSheetsParseError(f"{f.remaining} trailing bytes after parsing .packed_sheets content")
+
+	return PackedSheets(dictionary=dictionary, entries=entries)
+
+
 def load_creature_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
 	if hasattr(path, "read"):
 		data = path.read()
@@ -879,6 +1145,14 @@ def load_item_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
 	return parse_item_packed_sheets(data)
 
 
+def load_animation_set_list_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
+	if hasattr(path, "read"):
+		data = path.read()
+	else:
+		data = Path(path).read_bytes()
+	return parse_animation_set_list_packed_sheets(data)
+
+
 def load_sheet_id_bin(path: Union[str, Path, BinaryIO]) -> Dict[int, str]:
 	if hasattr(path, "read"):
 		data = path.read()
@@ -893,6 +1167,8 @@ def _guess_kind(path: Path) -> str:
 		return "creature"
 	if stem.startswith("sitem") or stem.startswith("item"):
 		return "item"
+	if stem.startswith("animset_list"):
+		return "animset_list"
 	raise PackedSheetsParseError(
 		f"cannot guess sheet kind from filename {path.name!r}, pass --kind explicitly"
 	)
@@ -917,14 +1193,27 @@ def _dump_item(packed: PackedSheets, names: Dict[int, str]) -> None:
 			f"stackable={sheet.stackable} bulk={sheet.bulk:.2f}")
 
 
+def _dump_animset_list(packed: PackedSheets, names: Dict[int, str]) -> None:
+	print(f"dictionary: {len(packed.dictionary)} source .animset_list files")
+	print(f"entries: {len(packed.entries)}")
+	for sheet_id, sheet in sorted(packed.entries.items(), key=lambda kv: names.get(kv[0], "")):
+		name = names.get(sheet_id, f"#{sheet_id}")
+		print(f"  {name}  anim_sets={len(sheet.anim_set_list)}")
+		for anim_set in sheet.anim_set_list:
+			states = ", ".join(
+				ANIM_STATE_NAMES[s.state] if 0 <= s.state < len(ANIM_STATE_NAMES) else str(s.state)
+				for s in anim_set.animation_states if s.animations)
+			print(f"    {anim_set.name!r}  states=[{states}]")
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
-	parser = argparse.ArgumentParser(description="Read Ryzom .packed_sheets files (creature, item, sitem)")
+	parser = argparse.ArgumentParser(description="Read Ryzom .packed_sheets files (creature, item, sitem, animset_list)")
 	sub = parser.add_subparsers(dest="command", required=True)
 
 	p_dump = sub.add_parser("dump", help="print a summary of a .packed_sheets file")
 	p_dump.add_argument("path", type=Path)
-	p_dump.add_argument("--kind", choices=("creature", "item"), default=None,
-		help="sheet kind; guessed from the filename (creature*/item*/sitem*) if omitted")
+	p_dump.add_argument("--kind", choices=("creature", "item", "animset_list"), default=None,
+		help="sheet kind; guessed from the filename (creature*/item*/sitem*/animset_list*) if omitted")
 	p_dump.add_argument("--sheet-id-bin", type=Path, default=None,
 		help="loose sheet_id.bin path, to resolve CSheetId to readable names")
 	p_dump.add_argument("--bnp", type=Path, default=None,
@@ -948,6 +1237,8 @@ def _main() -> None:
 
 		if kind == "creature":
 			_dump_creature(load_creature_packed_sheets(args.path), names)
+		elif kind == "animset_list":
+			_dump_animset_list(load_animation_set_list_packed_sheets(args.path), names)
 		else:
 			_dump_item(load_item_packed_sheets(args.path), names)
 
