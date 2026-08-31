@@ -2556,3 +2556,44 @@ length-prefixed sections (lines, triangles, quads), each a `(count, capacity)` h
 followed by its index vector. Only the triangle section carries renderable indices
 (`_NbIndexes = triangle_count * 3`); the line and quad sections are read and discarded
 to stay positioned correctly in the stream.
+
+## 2026-08-31 — ✨ Add hairstyle_conform CLI + race_reference cache to Forgery
+
+Added `ryzom_forgery/shape_geometry.py` functions for identifying and snapping a
+hairstyle's boundary: `boundary_edges()`/`boundary_loops()` (open-edge detection via
+connected components), `build_face_vertex_index()` + `main_seam_loop()` (the real
+face-welded seam loop, identified by exact position coincidence with a race's face
+mesh -- picking "the largest boundary loop" is wrong in general, a voluminous
+hairstyle built from independent hair-strand cards can have several loops that don't
+touch the face at all), `seam_ring_by_angle()`/`seam_loop_by_angle_indexed()`/
+`interpolate_seam_ring()`, and `conform_hairstyle_boundary()` (rigid pre-alignment by
+seam centroid, then per-vertex angle-interpolated snap onto a target race's seam
+ring -- non-boundary vertices only receive the rigid translation).
+
+Added `ryzom_forgery/race_reference.py` + bundled `race_reference.cfg`: per
+race/gender key, resolves a face mesh + reference hairstyle by name through Forgery's
+own search paths, and caches the derived `face_index`/`seam_ring` in memory keyed by
+each resolved file's own `(path, mtime)` -- same bundled-default + workspace-override
++ mtime-cache pattern as `panoply_config.py`.
+
+Added `ryzom_forgery/apps/hairstyle_conform.py`, a CLI (`shape_exporter.py`'s
+argparse-only pattern, no GUI):
+`hairstyle_conform.py SOURCE.shape SOURCE_RACE_KEY TARGET_RACE_KEY OUTPUT.shape --search-path PATH [--workspace DIR]`.
+Only `CMeshMRMSkinned` is supported (the only shape type with a pynel geometry
+writer, see the matching pynel log entry).
+
+Validated end-to-end on real extracted game data (not just synthetic tests): the
+corrected boundary-loop detection was checked against a real voluminous hairstyle
+(`fy_hof_cheveux_basic02.shape`, which has 9 boundary loops, only one of which is the
+real face seam), and the resulting conform was compared against the user's own
+hand-adapted cross-race version of the same hairstyle -- average gap to the
+hand-adapted boundary roughly halved versus the earlier (buggy) largest-loop
+heuristic.
+
+This is part of a broader cross-race hairstyle adaptation investigation that has
+since been set aside as more complex than initially hoped (not every hairstyle of a
+given race shares the same face seam, so a "record once, replay everywhere" transfer
+of manual edits doesn't generalize automatically) -- see
+`/repos/project-todos/ryzom-core/hairstyle-cross-race-conform.md` for the full
+writeup. The code landing here is functional and validated on its own terms
+regardless of that broader pause.

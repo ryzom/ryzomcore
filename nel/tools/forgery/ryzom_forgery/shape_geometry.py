@@ -4,6 +4,7 @@ and by the .shape exporters (`shape_export.py`), so the two don't each
 maintain their own copy of "how to walk a parsed shape's render passes".
 """
 
+import collections
 import dataclasses
 import math
 from pathlib import Path
@@ -342,6 +343,175 @@ def shape_bbox(shape_value):
 		slot_geom = shape_value.slots[0].mesh_geom
 		return slot_geom.bbox if slot_geom is not None else None
 	return None
+
+
+def boundary_edges(indices):
+	"""Edges belonging to exactly one triangle in `indices` -- the open border
+	of the mesh those triangles form."""
+	edge_count = {}
+	for i in range(0, len(indices), 3):
+		a, b, c = indices[i], indices[i + 1], indices[i + 2]
+		for u, v in ((a, b), (b, c), (c, a)):
+			key = (u, v) if u < v else (v, u)
+			edge_count[key] = edge_count.get(key, 0) + 1
+	return [edge for edge, count in edge_count.items() if count == 1]
+
+
+def boundary_loops(indices):
+	"""Groups boundary_edges(indices) into connected components (closed loops
+	or open chains). Returns a list of vertex-index sets, one per component."""
+	edges = boundary_edges(indices)
+	adjacency = collections.defaultdict(set)
+	for a, b in edges:
+		adjacency[a].add(b)
+		adjacency[b].add(a)
+	seen = set()
+	loops = []
+	for start in adjacency:
+		if start in seen:
+			continue
+		stack = [start]
+		component = set()
+		while stack:
+			vertex = stack.pop()
+			if vertex in component:
+				continue
+			component.add(vertex)
+			stack.extend(adjacency[vertex] - component)
+		seen |= component
+		loops.append(component)
+	return loops
+
+
+_FACE_WELD_PRECISION = 4  # decimals -- matches the ~1e-4 exact-coincidence threshold used throughout
+
+
+def build_face_vertex_index(face_positions):
+	"""Maps each of `face_positions` (rounded to _FACE_WELD_PRECISION
+	decimals) to its vertex index. Build this ONCE per face shape and reuse
+	it across every hairstyle of that race/gender -- main_seam_loop() needs
+	it to tell which boundary loop is actually welded onto the face, and
+	rescanning all ~2500 face vertices for every hairstyle would be wasted
+	repeat work."""
+	return {tuple(round(c, _FACE_WELD_PRECISION) for c in p): i for i, p in enumerate(face_positions)}
+
+
+def _is_welded(position, face_index):
+	return tuple(round(c, _FACE_WELD_PRECISION) for c in position) in face_index
+
+
+def main_seam_loop(positions, indices, face_index):
+	"""Returns the boundary_loops(indices) component with the most vertices
+	welded onto the face mesh described by `face_index` (see
+	build_face_vertex_index()) -- i.e. the loop actually soldered to the
+	scalp, as opposed to picking "the largest loop" (an earlier heuristic
+	that's wrong in general: a hairstyle built from several independent
+	hair-strand cards has multiple boundary loops, and the largest one isn't
+	necessarily the one touching the face -- seen on
+	fy_hof_cheveux_basic02.shape, where two 30-vertex strand loops outrank
+	the real 26-vertex face seam). None if the mesh has no boundary, or none
+	of its loops has any vertex welded to the face."""
+	loops = boundary_loops(indices)
+	if not loops:
+		return None
+	weld_counts = [sum(1 for i in loop if _is_welded(positions[i], face_index)) for loop in loops]
+	best_index = max(range(len(loops)), key=lambda i: weld_counts[i])
+	return loops[best_index] if weld_counts[best_index] > 0 else None
+
+
+def seam_ring_by_angle(positions, indices, face_index):
+	"""Returns main_seam_loop(positions, indices, face_index) as an ordered
+	list of (angle_deg, position) pairs, sorted by angle around the loop's
+	own vertical-axis centroid (x,y) -- the ordering used as the target
+	curve to interpolate an arbitrary angle's position against (see the
+	projection step that consumes this). Empty list if no loop is welded to
+	the face."""
+	loop = main_seam_loop(positions, indices, face_index)
+	if not loop:
+		return []
+	points = [positions[i] for i in loop]
+	cx = sum(p[0] for p in points) / len(points)
+	cy = sum(p[1] for p in points) / len(points)
+	ring = sorted(
+		((math.degrees(math.atan2(p[1] - cy, p[0] - cx)), p) for p in points),
+		key=lambda item: item[0],
+	)
+	return ring
+
+
+def seam_loop_by_angle_indexed(positions, indices, face_index):
+	"""Like seam_ring_by_angle(), but keyed by original vertex index instead
+	of position -- used to know exactly which vertex of the source mesh's
+	own vertex buffer to move when conforming its boundary onto another
+	shape's seam ring (see conform_hairstyle_boundary())."""
+	loop = main_seam_loop(positions, indices, face_index)
+	if not loop:
+		return []
+	points = [positions[i] for i in loop]
+	cx = sum(p[0] for p in points) / len(points)
+	cy = sum(p[1] for p in points) / len(points)
+	return sorted(
+		((math.degrees(math.atan2(positions[i][1] - cy, positions[i][0] - cx)), i) for i in loop),
+		key=lambda item: item[0],
+	)
+
+
+def interpolate_seam_ring(ring, angle_deg):
+	"""Returns the position on `ring` (as returned by seam_ring_by_angle(),
+	sorted ascending by angle) at `angle_deg`, linearly interpolating
+	between the two ring points bracketing it -- wrapping around the +-180
+	degree seam, since the ring covers a full loop around the head."""
+	angles = [a for a, _ in ring]
+	q = angle_deg
+	while q < angles[0]:
+		q += 360.0
+	while q >= angles[0] + 360.0:
+		q -= 360.0
+	extended = list(ring) + [(angles[0] + 360.0, ring[0][1])]
+	for (a0, p0), (a1, p1) in zip(extended, extended[1:]):
+		if a0 <= q <= a1:
+			t = 0.0 if a1 == a0 else (q - a0) / (a1 - a0)
+			return tuple(p0[k] + t * (p1[k] - p0[k]) for k in range(3))
+	return ring[-1][1]  # unreachable in practice, kept as a safe fallback
+
+
+def conform_hairstyle_boundary(positions, indices, source_face_index, target_ring):
+	"""Returns a new list of positions (same length/order as `positions`)
+	for a hairstyle mesh whose main seam loop (see main_seam_loop(), found
+	here using `source_face_index` -- the *source* race/gender's own face,
+	see build_face_vertex_index()) should instead fit another race/gender's
+	head -- as described by `target_ring` (a seam_ring_by_angle() result
+	computed on that *target* race's own baseline hairstyle, e.g.
+	tr_hof_cheveux_shave01, against the target race's own face).
+
+	Two operations, per the user's own manual workflow:
+	  1. Rigid pre-alignment: the whole mesh is translated by the difference
+	     between `target_ring`'s centroid and the source seam loop's own
+	     centroid (translation only, no rotation) -- brings the two seams as
+	     close as possible before any per-vertex change, avoiding an
+	     over-stretched/sunken result.
+	  2. Boundary snap: each (now pre-aligned) boundary vertex is placed
+	     exactly on `target_ring`, interpolated at that vertex's own angle --
+	     guaranteeing no seam gap against the target head.
+
+	Non-boundary vertices only receive the rigid translation from step 1 --
+	restyling the interior for the new head shape is intentionally left to
+	manual work in a 3D tool, every hairstyle differs too much for a general
+	algorithm to do that part."""
+	loop_angles = seam_loop_by_angle_indexed(positions, indices, source_face_index)
+	if not loop_angles or not target_ring:
+		return list(positions)
+
+	source_points = [positions[i] for _, i in loop_angles]
+	source_centroid = tuple(sum(p[k] for p in source_points) / len(source_points) for k in range(3))
+	target_centroid = tuple(sum(p[k] for _, p in target_ring) / len(target_ring) for k in range(3))
+	translation = tuple(target_centroid[k] - source_centroid[k] for k in range(3))
+
+	new_positions = [tuple(p[k] + translation[k] for k in range(3)) for p in positions]
+	for angle, vertex_index in loop_angles:
+		new_positions[vertex_index] = interpolate_seam_ring(target_ring, angle)
+
+	return new_positions
 
 
 def rgba_to_color(rgba):
