@@ -2597,3 +2597,38 @@ of manual edits doesn't generalize automatically) -- see
 `/repos/project-todos/ryzom-core/hairstyle-cross-race-conform.md` for the full
 writeup. The code landing here is functional and validated on its own terms
 regardless of that broader pause.
+
+## 2026-08-31 — 🐛 Scale UI fonts by ryztart's own DPI detection, Forgery 1.10.1
+
+A user running at 125% OS display scaling reported the UI font rendering far too
+large. Root cause: Panda3D's own windowing has zero DPI-awareness on Linux (confirmed
+by reading `x11GraphicsWindow.cxx` directly -- no Xft.dpi/XRandR/XSETTINGS query
+anywhere), unlike SDL/GLFW-based Dear ImGui apps, which delegate that to their
+windowing library. Panda3D's `dpi-aware` config variable only affects Windows
+(`SetProcessDpiAwareness`), a no-op on Linux/X11.
+
+Rather than reimplementing fragile, platform-specific DPI queries inside Forgery
+itself (Xft.dpi/xrandr aren't reliably available, don't cover Wayland, and vary by
+compositor), reused a detection that already exists one layer up: ryztart (the
+launcher, a separate project) is built on `pywebview`, whose `webview.screens[i].scale`
+already abstracts Qt/GTK/Cocoa DPI detection across X11/Wayland/Windows/macOS.
+ryztart's `ryzom_forgery_launcher.launcher.call_LaunchApp()` now reads
+`webview.screens[0].scale` (primary screen only -- same known "one number" limitation
+every simple DPI scheme has for multi-monitor setups with differing scales) and passes
+it to the spawned Forgery subprocess via a `RYZOM_FORGERY_DPI_SCALE` env var.
+
+`app.py` gained `_dpi_scale()` (reads that env var, defaults to `1.0` when launched
+directly, e.g. via `dev.sh`, with no ryztart involved), applied to every UI font size
+loaded in `_load_ui_font()`/`_load_icon_font()` (the regular font, the icon font
+merged into it, and the standalone "large icon" font).
+
+Validated end-to-end at 100% scaling on the maintainer's own machine (ryztart
+correctly reports `scale=1.0`, no regression) -- not yet validated at an actual
+non-1.0 scale (no machine available to test that directly); the original 125%
+report came from a different user, who will test this fix in practice. Also
+confirmed via research that on Wayland compositors specifically (e.g. Wayfire),
+whether this fix helps or *makes things worse* depends on that compositor's own
+Xwayland scaling mode: Wayfire bitmap-stretches Xwayland clients by default (its own
+`force_xwayland_scaling` option changes that, at the cost of needing exactly this kind
+of app-side DPI compensation) -- noted here in case a future report describes
+double-scaled (now too-small, not too-large) text on some other compositor.

@@ -45,6 +45,21 @@ _AVAILABLE_FONTS = {
 }
 _DEFAULT_FONT_NAME = "Roboto Bold"
 
+
+def _dpi_scale() -> float:
+	"""RYZOM_FORGERY_DPI_SCALE, set by ryztart's launcher (see
+	ryzom_forgery_launcher/launcher.py's _dpiScale(), pywebview's own
+	screen.scale -- Qt/GTK/Cocoa under the hood, abstracts X11/Wayland/
+	Windows/macOS DPI detection none of which Panda3D's own windowing has
+	any support for). Multiplies every UI font size so text stays a
+	consistent physical size instead of tracking Panda3D's raw (DPI-unaware
+	on Linux) window pixel size. 1.0 (no scaling) when launched directly
+	(e.g. dev.sh, no ryztart involved) or on a malformed/missing value."""
+	try:
+		return float(os.environ.get("RYZOM_FORGERY_DPI_SCALE", "1.0"))
+	except ValueError:
+		return 1.0
+
 # Sysinfo is a fixed thin strip; explorer/panel are pinned in place (no_move)
 # but resizable in width via SetNextWindowSizeConstraints (height is locked
 # to the constraint range instead, so only the width can actually change).
@@ -268,7 +283,8 @@ class ForgeryApp(ShowBase):
 		font_path = _FONTS_DIR / relative_path
 		if not font_path.exists():
 			return
-		font = imgui.get_io().fonts.add_font_from_file_ttf(str(font_path), settings.ui_font_size)
+		font_size = settings.ui_font_size * _dpi_scale()
+		font = imgui.get_io().fonts.add_font_from_file_ttf(str(font_path), font_size)
 		imgui.get_io().font_default = font
 
 	def _load_icon_font(self):
@@ -278,14 +294,15 @@ class ForgeryApp(ShowBase):
 		# object_editor.py's viewport toggle bars: push_font()/pop_font()
 		# around those buttons, since there's no per-window font-scale API in
 		# this imgui_bundle version to reach for instead.
+		icon_font_size = _ICON_FONT_SIZE * _dpi_scale()
 		if not _ICON_FONT_PATH.exists():
 			self.large_icon_font = None
-			self.large_icon_font_size = _ICON_FONT_SIZE * 1.5
+			self.large_icon_font_size = icon_font_size * 1.5
 			return
 		font_config = imgui.ImFontConfig()
 		font_config.merge_mode = True
-		imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), _ICON_FONT_SIZE, font_config)
-		self.large_icon_font_size = _ICON_FONT_SIZE * 1.5
+		imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), icon_font_size, font_config)
+		self.large_icon_font_size = icon_font_size * 1.5
 		self.large_icon_font = imgui.get_io().fonts.add_font_from_file_ttf(str(_ICON_FONT_PATH), self.large_icon_font_size)
 
 	def draw_panel(self):
