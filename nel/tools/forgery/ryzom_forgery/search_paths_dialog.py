@@ -876,7 +876,7 @@ class SearchPathsDialog:
 			del self._dirs[remove_index]
 			self._save()
 
-		if _icon_button(fa_icons.ICON_FA_PLUS, "Add folder..."):
+		if _icon_button(f"{fa_icons.ICON_FA_PLUS}##add-search-folder", "Add folder..."):
 			self._add_dir_dialog = pfd.select_folder("Choose a search folder")
 		imgui.same_line()
 		if _icon_button(fa_icons.ICON_FA_SYNC, "Reload", disabled=self.scanning):

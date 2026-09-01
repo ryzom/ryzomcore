@@ -592,7 +592,7 @@ class WorkspaceSetupDialog:
 	def draw_settings_content(self):
 		"""Embedded in the host app's Settings tab, same spot as
 		export_dialog.py's draw_settings_content()."""
-		label = "Workspaces folder: "
+		label = "Workspaces: "
 		path_text = self._settings.workspaces_root or "(not set)"
 
 		style = imgui.get_style()

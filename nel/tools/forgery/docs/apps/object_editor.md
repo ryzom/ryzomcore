@@ -20,6 +20,16 @@ Point d'entrée : `main(argv=None)` (object_editor.py) instancie `ObjectEditorAp
 
 ## Architecture générale
 
+**Split en cours (démarré 2026-09-01, voir `project-todos/ryzom-core/forgery-object-editor.md`) :**
+`ObjectEditorApp` est progressivement découpée en mixins par thème, sous
+`apps/object_editor_mixins/` (pur déplacement de code, aucun changement de
+comportement) — `ObjectEditorApp` elle-même en hérite toujours. À ce stade :
+`SettingsDialogsMixin` (`settings_dialogs.py`, l'onglet Settings et la barre
+du bas) est fait ; le reste des méthodes ci-dessous annotées "(object_editor.py)"
+vivra ailleurs au fur et à mesure des prochaines étapes -- ces annotations ne
+seront remises à jour dans l'ensemble du document qu'une fois le split
+terminé, pour éviter une réécriture partielle à chaque étape.
+
 ### Classe principale
 
 `class ObjectEditorApp(ForgeryApp)` (object_editor.py) est la seule classe applicative du fichier. Son `__init__` (object_editor.py) :
@@ -114,7 +124,7 @@ déplié, appelé juste avant), `_begin_attention_flash(field_key)`/`_end_attent
 (entoure le champ ciblé). Utilisé par : bouton "Edit" texture (`image_editor_path`,
 `_draw_texture_edit_button`), bouton "Edit" `panoply.cfg` (`text_editor_path`,
 `_draw_global_panoply_section`), bake réel (`ryzom-data`, `_bake_panoply_real`).
-- `_draw_repository_paths_settings` / `_poll_repository_paths_dialog` (object_editor.py) : Settings > Paths, un sélecteur de dossier par dépôt (`pynel.repository_paths.REPOSITORIES` -- ryzom-core/ryzom-data/ryzom-private-data/ryzom-docker), même motif que `workspace_setup_dialog`/`_draw_workspace_sync_settings`. Persisté par pynel (`repository_paths.json`), partagé avec tout autre outil basé sur pynel — voir `docs/repository_paths.md` de pynel.
+- `_draw_repository_paths_settings` / `_poll_repository_paths_dialog` (`object_editor_mixins/settings_dialogs.py`, voir la note "Split object_editor.py into theme files" plus bas) : Settings > Paths, un sélecteur de dossier par dépôt (`pynel.repository_paths.REPOSITORIES` -- ryzom-core/ryzom-data/ryzom-private-data/ryzom-docker), même motif que `workspace_setup_dialog`/`_draw_workspace_sync_settings`. Persisté par pynel (`repository_paths.json`), partagé avec tout autre outil basé sur pynel — voir `docs/repository_paths.md` de pynel.
 - `_copy_panoply_cfg_to_workspace` (object_editor.py) : copie le `panoply.cfg` bundlé (`panoply_config.bundled_cfg_path()`) tel quel vers la racine du workspace actif (`panoply_config.workspace_cfg_path()`) — point de départ éditable ; une fois là, il prime systématiquement sur le bundlé (`panoply_config._resolve_cfg_path()`), pour la preview live comme pour le bake réel. Patina ne demande jamais explicitement à l'utilisateur de choisir/fabriquer un `.cfg` (voir `docs/panoply_config.md`).
 - `_on_panoply_cfg_settled` (object_editor.py, ajouté 2026-08-29) : enregistré sur `self.workspace_watch` pour `"panoply.cfg"` (un fichier à la racine du workspace a un seul segment dans son chemin relatif, que `WorkspaceWatcher._dispatch()` traite comme sa propre clé "subdir", même mécanisme que les enregistrements `"tex"`/`"imports"` -- pas besoin d'un sous-dossier dédié). Tourne sur le thread background du watcher : se contente de positionner `self._panoply_cfg_changed = True`. Sans ça, éditer le `panoply.cfg` du workspace pendant que Patina tourne n'aurait **aucun effet visible** : `panoply_config.py` recharge bien son `.cfg` en interne (cache invalidé par mtime), mais ni `_texture_cache` ni `panoply_live.LiveColorizeCache` (dont la clé ne dépend pas des paramètres de couleur, seulement de `base_name`/axes/mtimes des sources) ne savent que quelque chose a changé -- confirmé en lisant `_panoply_freshness_signature`/`LiveColorizeCache.make_key`, aucun des deux ne touche au `.cfg`.
 - `_update_texture_freshness` (object_editor.py) consomme ce flag au tick suivant (thread principal, ~1x/seconde) : évince tout `_texture_cache` marqué Panoply (`_panoply_texture_sources`), vide `_panoply_texture_signatures` et appelle `self._live_panoply_cache.clear()` (nouvelle méthode, `panoply_live.py`), puis force le réaffichage complet comme toute autre détection de changement dans cette même fonction.
@@ -211,7 +221,7 @@ direct (repositionnée chaque frame, pas seulement à la construction).
 - `_on_active_workspace_changed(workspace_dir)` (object_editor.py) : point central qui propage un changement de workspace actif à `search_paths_dialog`, `import_watcher`, `workspace_sync`, `tex_dds_sync`, `workspace_watch`, et reconstruit `explorer.pinned_folders` (une entrée épinglée par sous-dossier de workspace, dont `dds/` depuis le chantier `patina-tex-dds-autoexport`).
 - Le watch de `search_paths_dialog` couvre déjà tout le workspace ; `explorer.pinned_folders` (Wexplorer) réutilise ce même watch via `on_workspace_changed = self.explorer.refresh` (object_editor.py) plutôt que d'ouvrir un `Observer` de plus.
 - **Depuis le 2026-08-27** : `import_watcher`, `workspace_sync` et `tex_dds_sync` (nouveau, conversion `tex/` → `dds/`, voir `docs/tex_dds_sync.md`) ne possèdent plus chacun leur propre `Observer` dédié -- ils partagent un unique `self.workspace_watch` (`ryzom_forgery.workspace_watch.WorkspaceWatcher`, voir `docs/workspace_watch.md`), sur lequel chacun enregistre sa callback `handle_settled` pour le(s) sous-dossier(s) qui le concernent (`"imports"`, `"tex"`, et `workspace_sync.SYNCED_SUBDIRS` = `anims`/`shapes`/`skels`/`dds`). Changement demandé par l'utilisateur : les `Observer` séparés n'apportaient aucun bénéfice réel (voir `docs/workspace_watch.md`), c'était de la duplication organique.
-- Réglages Settings → Paths/Tools : `_draw_workspace_sync_settings` (object_editor.py, bouton "Sync now" si pas totalement synchronisé), `_draw_image_editor_settings` (object_editor.py), `_draw_text_editor_settings` (object_editor.py, 2026-08-29, même motif — utilisé par le bouton crayon du `panoply.cfg`, voir "Intégration Panoply"), `_draw_ui_font_settings` (object_editor.py, nécessite un redémarrage — `self.relaunch`).
+- Réglages Settings → Paths/Tools (`object_editor_mixins/settings_dialogs.py`) : `_draw_workspace_sync_settings` (bouton "Sync now" si pas totalement synchronisé), `_draw_image_editor_settings`, `_draw_text_editor_settings` (2026-08-29, même motif — utilisé par le bouton crayon du `panoply.cfg`, voir "Intégration Panoply"), `_draw_ui_font_settings` (nécessite un redémarrage manuel de Patina -- pas de bouton "Restart now" dans l'app, retiré 2026-09-01 : ne fonctionnait pas lancé via ryztart).
 
 ### Session (restauration au démarrage)
 
