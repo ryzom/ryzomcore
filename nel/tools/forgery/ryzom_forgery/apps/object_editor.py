@@ -26,7 +26,7 @@ from panda3d.core import (
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
 
-from ryzom_forgery.app import _AVAILABLE_FONTS, ForgeryApp
+from ryzom_forgery.app import _AVAILABLE_FONTS, _dpi_scale, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
 from ryzom_forgery import creature_ref
 from ryzom_forgery import dds_export
@@ -1177,6 +1177,8 @@ class ObjectEditorApp(ForgeryApp):
 		# refreshes the Wexplorer's listing without a manual Refresh click.
 		self.search_paths_dialog.on_workspace_changed = self.explorer.refresh
 		self.workspace_setup_dialog = WorkspaceSetupDialog()
+		self.workspace_setup_dialog.on_dpi_preview_changed = self.set_live_ui_scale_preview
+		self.workspace_setup_dialog.on_setup_finished = self.relaunch
 		# import_watcher/workspace_sync/tex_dds_sync each keep their own
 		# conversion/sync logic and state, but share a single filesystem
 		# watch (self.workspace_watch, one Observer/one debounce handler for
@@ -5646,10 +5648,23 @@ class ObjectEditorApp(ForgeryApp):
 			settings.ui_font_size = new_size
 			app_settings.save(settings)
 
+		imgui.text("DPI scale: ")
+		imgui.same_line()
+		imgui.set_next_item_width(100)
+		changed, new_dpi_scale = imgui.drag_float(
+			"##ui-dpi-scale", settings.dpi_scale, v_speed=0.01, v_min=0.5, v_max=3.0, format="%.2fx")
+		if changed:
+			new_dpi_scale = max(0.5, min(3.0, new_dpi_scale))
+			settings.dpi_scale = new_dpi_scale
+			app_settings.save(settings)
+			# Text preview only (see app.py's set_live_ui_scale_preview()) --
+			# paddings/spacing/button sizes still need the relaunch below.
+			self.set_live_ui_scale_preview(_dpi_scale() * new_dpi_scale)
+
 		if imgui.button("Restart now"):
 			self.relaunch()
 		imgui.same_line()
-		imgui.text_disabled("Restart Patina for a font/size change to take effect.")
+		imgui.text_disabled("Restart Patina for a font/size/DPI change to fully take effect.")
 
 	def _draw_bottom_bar(self):
 		"""Pinned at the very bottom of the panel: Save (only for a loaded,

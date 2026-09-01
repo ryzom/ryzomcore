@@ -60,6 +60,18 @@ def _dpi_scale() -> float:
 	except ValueError:
 		return 1.0
 
+
+def _effective_ui_scale(settings) -> float:
+	"""The actual multiplier applied to every UI size (fonts, icons, and --
+	via ForgeryApp.__init__'s style.scale_all_sizes() call -- every style
+	metric: paddings, spacing, button/scrollbar sizes, corner rounding...):
+	_dpi_scale() (auto-detected, from ryztart) times Settings.dpi_scale (the
+	user's own manual fine-tune, set from the first-launch setup popup or
+	Settings > UI later, see workspace_setup_dialog.py/object_editor.py's
+	_draw_ui_font_settings()). Every call site that used to read
+	_dpi_scale() directly for sizing now reads this instead."""
+	return _dpi_scale() * settings.dpi_scale
+
 # Sysinfo is a fixed thin strip; explorer/panel are pinned in place (no_move)
 # but resizable in width via SetNextWindowSizeConstraints (height is locked
 # to the constraint range instead, so only the width can actually change).
@@ -166,6 +178,21 @@ class ForgeryApp(ShowBase):
 		# either -- force it, for the same "everything looks a bit washed
 		# out" reason as the background colors above.
 		style.set_color_(imgui.Col_.text.value, (1.0, 1.0, 1.0, 1.0))
+		# Whole-UI DPI scale (paddings, spacing, button/scrollbar sizes, the
+		# frame_rounding/colors just set above included) -- ScaleAllSizes()
+		# only ever multiplies whatever's already there, so this has to run
+		# after every other one-off style tweak above it, not before.
+		# Applied exactly once here, at startup, from ImGui's own freshly
+		# built (p3dimgui.init(), right above) style -- deliberately NOT
+		# also live-rescaled while the DPI control in the setup popup/
+		# Settings tab is being dragged (see set_live_ui_scale_preview()):
+		# repeatedly calling ScaleAllSizes() relative to an already-scaled
+		# style floors several fields towards zero over many small steps,
+		# which crashed for real in earlier testing. self._ui_scale is kept
+		# around so _load_ui_font()/_load_icon_font() (below) and the live
+		# font-only preview can read it.
+		self._ui_scale = _effective_ui_scale(app_settings.load())
+		style.scale_all_sizes(self._ui_scale)
 		self._load_ui_font()
 		self._load_icon_font()
 		self._panel_watermark_tex_ref = None
@@ -194,6 +221,8 @@ class ForgeryApp(ShowBase):
 		self.commands = CommandRegistry()
 		self.sysinfo = SysInfoBar()
 		self.workspace_setup_dialog = WorkspaceSetupDialog()
+		self.workspace_setup_dialog.on_dpi_preview_changed = self.set_live_ui_scale_preview
+		self.workspace_setup_dialog.on_setup_finished = self.relaunch
 		self.explorer = Explorer(self, Path(explorer_root), self.commands,
 		                          default_filter=explorer_default_filter)
 		self.explorer.on_selection_changed = self._on_explorer_selection_changed
@@ -250,6 +279,25 @@ class ForgeryApp(ShowBase):
 		os.execv(sys.executable, [sys.executable] + sys.argv)
 		os.execv(sys.executable, [sys.executable] + sys.argv)
 
+	def set_live_ui_scale_preview(self, candidate_scale):
+		"""Live *text-only* DPI preview -- called every frame by
+		WorkspaceSetupDialog.on_dpi_preview_changed (setup popup) or
+		object_editor.py's own DPI control (Settings tab) while the user is
+		dragging a candidate value, before it's actually saved/applied.
+
+		Deliberately does NOT touch style.scale_all_sizes() here (paddings,
+		spacing, button/scrollbar sizes stay exactly as they were set at
+		startup until a relaunch()) -- only updates self._ui_scale, which
+		draw_ui() reads fresh every frame for its push_font(font, size) call
+		(ImGui 1.92+'s dynamic font sizing, re-rasterizes on demand, no
+		atlas rebuild needed). Repeatedly rescaling the whole style live
+		while dragging a slider crashed for real in earlier testing (
+		ScaleAllSizes() floors several fields to whole pixels, and doing
+		that many times in a row relative to an already-scaled style erodes
+		them towards zero) -- text-only keeps the live preview useful
+		without touching that fragile path at all."""
+		self._ui_scale = candidate_scale
+
 	def _load_window_geometry(self):
 		try:
 			data = json.loads(self._window_geometry_path.read_text())
@@ -278,12 +326,20 @@ class ForgeryApp(ShowBase):
 		default. Falls back to _DEFAULT_FONT_NAME if the stored choice is
 		stale (a font file imgui_bundle no longer ships, e.g. after an
 		imgui_bundle upgrade)."""
+		# self._ui_font_size_base: the unscaled point size draw_ui() combines
+		# with the *current* self._ui_scale every frame (imgui's dynamic
+		# font sizing, push_font(font, size) -- ImGui 1.92+, no atlas
+		# rebuild needed) for a live preview while the DPI control is being
+		# adjusted -- set unconditionally, before the early-return below,
+		# since draw_ui() needs a valid value regardless of whether a
+		# custom font file actually loaded.
 		settings = app_settings.load()
+		self._ui_font_size_base = settings.ui_font_size
 		relative_path = _AVAILABLE_FONTS.get(settings.ui_font_name) or _AVAILABLE_FONTS[_DEFAULT_FONT_NAME]
 		font_path = _FONTS_DIR / relative_path
 		if not font_path.exists():
 			return
-		font_size = settings.ui_font_size * _dpi_scale()
+		font_size = settings.ui_font_size * self._ui_scale
 		font = imgui.get_io().fonts.add_font_from_file_ttf(str(font_path), font_size)
 		imgui.get_io().font_default = font
 
@@ -294,7 +350,7 @@ class ForgeryApp(ShowBase):
 		# object_editor.py's viewport toggle bars: push_font()/pop_font()
 		# around those buttons, since there's no per-window font-scale API in
 		# this imgui_bundle version to reach for instead.
-		icon_font_size = _ICON_FONT_SIZE * _dpi_scale()
+		icon_font_size = _ICON_FONT_SIZE * self._ui_scale
 		if not _ICON_FONT_PATH.exists():
 			self.large_icon_font = None
 			self.large_icon_font_size = icon_font_size * 1.5
@@ -414,6 +470,17 @@ class ForgeryApp(ShowBase):
 			self._splash.close()
 			self._splash = None
 
+		# Dynamic font sizing (imgui_bundle's push_font(font, size) --
+		# ImGui 1.92+'s on-demand glyph rasterization, no atlas rebuild
+		# needed): re-requests the already-loaded default font at the
+		# *current* self._ui_scale every single frame, so a live DPI
+		# preview (see set_live_ui_scale_preview()) shows genuinely crisp
+		# text -- no FontGlobalScale-style softening, and no atlas rebuild
+		# needed for this part even after the value is actually saved
+		# (only a font *family* change still needs relaunch(), since a
+		# different .ttf has to be loaded into the atlas first).
+		imgui.push_font(None, self._ui_font_size_base * self._ui_scale)
+
 		self.workspace_setup_dialog.draw()
 
 		display_size = imgui.get_io().display_size
@@ -447,3 +514,5 @@ class ForgeryApp(ShowBase):
 			if self._panel_watermark_tex_ref is not None:
 				self._draw_panel_watermark()
 			self.draw_panel()
+
+		imgui.pop_font()

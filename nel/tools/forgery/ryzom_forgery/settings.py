@@ -81,6 +81,17 @@ class Settings:
 	# restarting the app, no live atlas rebuild.
 	ui_font_name: str = "Roboto Bold"
 	ui_font_size: float = 14.0
+	# Manual DPI multiplier, set from the first-launch setup popup (see
+	# workspace_setup_dialog.py) or Settings > UI later -- combined with the
+	# auto-detected _dpi_scale() (app.py, RYZOM_FORGERY_DPI_SCALE env var
+	# from ryztart) via app.py's _effective_ui_scale(), rather than
+	# replacing it: ryztart's own detection stays the base, this is the
+	# user's manual fine-tune on top. Same "next launch only" caveat as
+	# ui_font_size/ui_font_name above. Defaults to 2.0 rather than 1.0 (no
+	# scaling) -- picked as a starting point that reads reasonably on both
+	# FullHD and 4K displays, since ryztart's own auto-detection isn't
+	# always available/correct (e.g. launched directly via dev.sh).
+	dpi_scale: float = 2.0
 
 
 def load() -> Settings:
@@ -107,6 +118,7 @@ def load() -> Settings:
 	settings.text_editor_path = data.get("text_editor_path") or None
 	settings.ui_font_name = data.get("ui_font_name") or settings.ui_font_name
 	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
+	settings.dpi_scale = data.get("dpi_scale") or settings.dpi_scale
 
 	settings.search_paths = [
 		SearchPathDir(path=entry["path"], recursive=bool(entry.get("recursive", False)))
@@ -144,6 +156,7 @@ def save(settings: Settings) -> None:
 		doc["text_editor_path"] = settings.text_editor_path
 	doc["ui_font_name"] = settings.ui_font_name
 	doc["ui_font_size"] = settings.ui_font_size
+	doc["dpi_scale"] = settings.dpi_scale
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 

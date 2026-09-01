@@ -6,12 +6,13 @@
 
 UI ImGui pour configurer et utiliser le système de "workspace" (modèle de
 données dans `workspaces.py`, non documenté ici) : la popup **obligatoire**
-de première utilisation (dossier racine `settings.workspaces_root` + nom du
-premier workspace -- aucun moyen de la fermer sans la compléter), le
-sélecteur de workspace actif affiché dans le panneau principal (toujours un
-workspace actif dès qu'il en existe un, pas d'état "(none)"), le popup de
-création d'un nouveau workspace, et le contenu de l'onglet Settings pour
-changer le dossier racine plus tard (workspace_setup_dialog.py).
+de première utilisation (échelle DPI + dossier racine
+`settings.workspaces_root` + nom du premier workspace -- aucun moyen de la
+fermer sans compléter dossier et nom), le sélecteur de workspace actif
+affiché dans le panneau principal (toujours un workspace actif dès qu'il en
+existe un, pas d'état "(none)"), le popup de création d'un nouveau
+workspace, et le contenu de l'onglet Settings pour changer le dossier racine
+plus tard (workspace_setup_dialog.py).
 
 ## API principale
 
@@ -25,12 +26,18 @@ changer le dossier racine plus tard (workspace_setup_dialog.py).
 - `class WorkspaceSetupDialog` (workspace_setup_dialog.py) :
   - `__init__` (workspace_setup_dialog.py) : charge les settings, prépare
  l'état du dialogue de sélection de dossier (`portable_file_dialogs`,
- polling non bloquant comme `export_dialog.py`), le champ en attente de la
- popup de setup (`_setup_workspace_name`/`_setup_error`, non écrits dans
- les settings avant "Finish"), le drapeau `_prompt_offered`, et l'état du
- popup de création de workspace. Expose `on_active_workspace_changed`, un
- callback que l'app hôte branche pour resynchroniser la résolution des
- chemins de recherche (`SearchPathsDialog.set_workspace_dir`).
+ polling non bloquant comme `export_dialog.py`), les champs en attente de
+ la popup de setup (`_setup_workspace_name`/`_setup_dpi_scale`/
+ `_setup_error`, non écrits dans les settings avant "Finish"), le drapeau
+ `_prompt_offered`, et l'état du popup de création de workspace. Expose
+ `on_active_workspace_changed` (callback branché par l'app hôte pour
+ resynchroniser `SearchPathsDialog.set_workspace_dir`),
+ `on_dpi_preview_changed` (appelé chaque frame avec la valeur DPI
+ candidate tant que le contrôle de la popup de setup est affiché -- l'app
+ hôte y branche `ForgeryApp.set_live_ui_scale_preview`, voir
+ `docs/app.md`), et `on_setup_finished` (appelé une fois après "Finish" --
+ l'app hôte y branche `ForgeryApp.relaunch`, nécessaire pour que le DPI
+ s'applique pleinement au style, pas juste au texte).
   - `is_configured` (workspace_setup_dialog.py) — vrai si
  `workspaces_root` est configuré et existe (délègue à
  `workspaces.is_root_configured`). Ne dit rien à lui seul d'un workspace
@@ -77,15 +84,21 @@ changer le dossier racine plus tard (workspace_setup_dialog.py).
  `settings.last_workspace_sync_folder` utilisé (workspace_setup_dialog.py),
  simple point de départ éditable ensuite dans Settings > Tools.
   - `_draw_prompt_popup` (workspace_setup_dialog.py) — popup
- **obligatoire** de première utilisation, sans bouton "Later"/skip : le
- choix du dossier racine ("Choose folder...") et le nom du premier
- workspace (`input_text`) ; le bouton "Finish" ne s'active que quand
- racine + nom sont tous deux renseignés. Reste ouverte tant que
+ **obligatoire** de première utilisation, sans bouton "Later"/skip : un
+ contrôle d'échelle DPI (`imgui.drag_float`, `0.5x`-`3.0x`, aperçu texte
+ en direct via `on_dpi_preview_changed` -- voir `docs/app.md`'s
+ `set_live_ui_scale_preview`, seul le texte prévisualise en direct, pas
+ le reste du style), le choix du dossier racine ("Choose folder..."), et
+ le nom du premier workspace (`input_text`) ; le bouton "Finish" ne
+ s'active que quand racine + nom sont tous deux renseignés (le DPI a
+ toujours une valeur valide par défaut). Reste ouverte tant que
  `_needs_setup()` est vrai.
   - `_finish_setup` (workspace_setup_dialog.py) — validation du nom
  (pas de doublon), crée le workspace (`workspaces.create_workspace`),
- puis `set_active_workspace(name)` (sauvegarde `workspaces_root` +
- `active_workspace` en un seul `_save`).
+ `set_active_workspace(name)` (sauvegarde `workspaces_root` +
+ `active_workspace` en un seul `_save`), puis sauvegarde `dpi_scale`
+ séparément et appelle `on_setup_finished` (typiquement
+ `ForgeryApp.relaunch`).
   - `_poll_folder_dialog` (workspace_setup_dialog.py) — récupère le
  résultat du sélecteur de dossier non bloquant une fois prêt et
  sauvegarde ; ne ferme plus aucun popup lui-même (le dossier n'est qu'une
@@ -108,10 +121,12 @@ changer le dossier racine plus tard (workspace_setup_dialog.py).
  longtemps (deux `begin_popup_modal`/mêmes IDs de widgets soumis deux
  fois par frame).
 - `apps/object_editor.py` instancie **une seconde** `WorkspaceSetupDialog`
- séparée, et y câble `on_active_workspace_changed` sur elle-même (pas sur
- celle de `app.py`) — à noter, deux instances distinctes chargent chacune
- leurs propres settings ; leur cohérence dépend entièrement du pattern
- reload-fresh de `_save`.
+ séparée, et y câble `on_active_workspace_changed`, `on_dpi_preview_changed`,
+ `on_setup_finished` sur elle-même (pas sur celle de `app.py`) — à noter,
+ deux instances distinctes chargent chacune leurs propres settings ; leur
+ cohérence dépend entièrement du pattern reload-fresh de `_save`. Un oubli
+ de câblage sur l'une des deux instances romprait silencieusement l'aperçu
+ DPI en direct ou le redémarrage final pour cette app-là seulement.
 - `popup_utils.center_next_popup()` est appelé avant chaque
  `begin_popup_modal` de ce fichier, pour ouvrir les deux popups centrées
  sur le viewport plutôt qu'à une position ImGui par défaut.

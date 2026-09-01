@@ -1,5 +1,67 @@
 # Changelog
 
+## 2026-09-01 — ✨ Manual DPI scale control (text live preview), Forgery 2.2.0
+
+Re-added the DPI scale control abandoned earlier the same day (see the
+2.1.0 entry below), this time with a much narrower live-preview scope after
+several real crashes chasing a full live whole-UI rescale:
+
+- New `Settings.dpi_scale` (`float`, defaults to `2.0` -- picked to read
+  reasonably on both FullHD and 4K displays rather than `1.0`/no scaling),
+  combined with the existing `_dpi_scale()` (auto-detected from ryztart's
+  `RYZOM_FORGERY_DPI_SCALE`) via `app.py`'s new `_effective_ui_scale(settings)`
+  -- the effective factor is the product of both, not a replacement of the
+  auto-detection.
+- A DPI control (`imgui.drag_float`, `0.5x`-`3.0x`) is offered in two
+  places: the mandatory first-launch setup popup (`workspace_setup_dialog.py`)
+  and Settings > UI (`apps/object_editor.py`'s `_draw_ui_font_settings()`,
+  next to the existing font name/size controls).
+- Live preview is **text only**: `ForgeryApp.set_live_ui_scale_preview()`
+  now just updates `self._ui_scale`, read every frame by `draw_ui()`'s
+  `imgui.push_font(None, self._ui_font_size_base * self._ui_scale)` (ImGui
+  1.92+'s dynamic font sizing -- re-rasterizes on demand, no atlas rebuild,
+  no blur). `style.scale_all_sizes()` (paddings, spacing, button/scrollbar
+  sizes) is applied exactly **once**, at startup, from a freshly built
+  style -- never rescaled again while a candidate value is being dragged.
+  Confirming (the popup's "Finish", or "Restart now" in Settings) saves
+  `dpi_scale` and calls `relaunch()` (`os.execv`) to apply the full style
+  scale cleanly from a fresh start.
+
+That last restriction is deliberate, not a simplification for its own
+sake -- the abandoned earlier attempt tried to live-rescale the *whole*
+style (not just fonts) while dragging the popup's slider, and broke in
+three different ways in real testing:
+
+1. `io.font_global_scale` doesn't exist at all on the installed
+   `imgui_bundle` build (a newer ImGui 1.92+ dynamic-font-sizing version,
+   confirmed via `AttributeError` in real testing) -- the intended
+   mechanism for a soft, atlas-free text rescale simply wasn't available;
+   `push_font(font, size)` (also 1.92+) turned out to be the real
+   equivalent, and is what's used now.
+2. `style.scale_all_sizes()` floors several fields to whole pixels
+   (`ImFloor`). Rescaling *incrementally*, relative to whatever was already
+   applied (`scale_all_sizes(candidate / self._ui_scale)` every frame while
+   dragging), erodes those fields towards zero much faster than a single
+   direct computation would -- confirmed as the cause of a real
+   `IM_ASSERT(thickness > 0.0f)` crash in `imgui_widgets.cpp`, reproducible
+   specifically while *lowering* the DPI value (erosion only ever shrinks).
+3. Even after fixing that by rebuilding the whole style from
+   `imgui.style_colors_dark()` on every candidate value instead of
+   rescaling incrementally, a real, never-explained Panda3D crash appeared
+   (`AssertionError: !_center.is_nan() && !cnan(_radius)` in
+   `boundingSphere.I`, during `igLoop`/`renderFrame()` -- nothing to do
+   with ImGui on the surface) that reproduced on every single launch once
+   that style-rebuild call was reachable from `ForgeryApp.__init__` at all,
+   even with `dpi_scale` sitting at a completely neutral `1.0`. Root cause
+   never identified.
+
+Given all three, live-rescaling the whole style was dropped entirely rather
+than kept chasing -- `style.scale_all_sizes()` now only ever runs once per
+process lifetime, which is the same shape the DPI scaling code had *before*
+any of this work started (see the 1.10.1 entry near the bottom of this
+file), just now combined with a user-editable multiplier on top of
+ryztart's own auto-detection.
+
 ## 2026-09-01 — ✨ Mandatory workspace setup popup, centered popups, shape-reopen confirmation, Forgery 2.1.0
 
 Three related UI changes to Patina (`object_editor.py`) and the shared

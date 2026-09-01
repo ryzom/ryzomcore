@@ -51,6 +51,23 @@ shapes, compatibilité `.skel`/`.anim`, panoplies).
  fois au démarrage (l'atlas de police est construit avant la première
  frame), un changement ne prend effet qu'au redémarrage — pas de
  reconstruction d'atlas à chaud.
+  - `dpi_scale: float = 2.0` (défaut choisi pour rester lisible aussi bien
+ en FullHD qu'en 4K, plutôt que `1.0`/aucun scaling) : multiplicateur DPI
+ manuel, choisi dans la
+ popup obligatoire de première utilisation (`workspace_setup_dialog.py`)
+ ou dans l'onglet Settings ensuite (`apps/object_editor.py`'s
+ `_draw_ui_font_settings`). Combiné avec `_dpi_scale()` (`app.py`,
+ auto-détecté depuis `RYZOM_FORGERY_DPI_SCALE`) via `app.py`'s
+ `_effective_ui_scale(settings)` — le facteur effectif est le produit des
+ deux, pas un remplacement de l'auto-détection. Comme `ui_font_size`, ne
+ s'applique pleinement (paddings/spacing/tailles de boutons, via
+ `style.scale_all_sizes()`) qu'après un redémarrage (`ForgeryApp.relaunch`)
+ ; un aperçu en direct existe pour le texte seul
+ (`ForgeryApp.set_live_ui_scale_preview`, via le système de police
+ dynamique d'ImGui — voir `docs/app.md`), pas pour le reste du style,
+ délibérément : rescaler le style entier de façon répétée pendant qu'on
+ bouge un slider a provoqué de vrais crashs en test réel (voir
+ `docs/app.md`).
 - `load -> Settings` (`settings.py`) : parse
  `config_dir/"settings.toml"` avec `tomlkit`. Renvoie un `Settings`
  par défaut (valeurs vierges) si le fichier est absent ou invalide
@@ -114,7 +131,9 @@ fois qu'il a besoin d'une valeur à jour.
  la même frame) pourraient en théorie s'écraser l'une l'autre si les deux
  ont chargé leur `fresh` avant que l'autre n'ait sauvegardé. Rien dans le
  code lu ne protège explicitement contre ce cas.
-- `ui_font_size`/`ui_font_name` sont les deux seuls champs de préférence
- qui nécessitent un redémarrage complet pour prendre effet (documenté en
- commentaire, `settings.py`) — cohérent avec l'existence de
- `ForgeryApp.relaunch` dans `app.py`.
+- `ui_font_size`/`ui_font_name`/`dpi_scale` sont les champs de préférence
+ qui nécessitent un redémarrage complet pour prendre pleinement effet
+ (documenté en commentaire, `settings.py`) — cohérent avec l'existence de
+ `ForgeryApp.relaunch` dans `app.py`. `dpi_scale` a en plus un aperçu en
+ direct du texte seul avant ce redémarrage (voir
+ `ForgeryApp.set_live_ui_scale_preview`).

@@ -55,9 +55,10 @@ class WorkspaceSetupDialog:
 		self._folder_dialog = None  # active portable_file_dialogs.select_folder
 		self._prompt_offered = False
 
-		# Mandatory setup popup's own pending field -- not written to
+		# Mandatory setup popup's own pending fields -- not written to
 		# settings until "Finish" is clicked (see _draw_prompt_popup()).
 		self._setup_workspace_name = ""
+		self._setup_dpi_scale = self._settings.dpi_scale
 		self._setup_error = ""
 
 		self._new_workspace_pending = False  # set inside the combo, popup opened right after end_combo()
@@ -68,6 +69,17 @@ class WorkspaceSetupDialog:
 		# active workspace's Path (or None) every time it changes, so search
 		# resolution (SearchPathsDialog.set_workspace_dir()) stays in sync.
 		self.on_active_workspace_changed = None
+		# Set by the host app (see app.py's ForgeryApp.__init__) -- called
+		# every frame the setup popup's DPI control is up, with the
+		# candidate value being tried, so its text preview updates live
+		# (see app.py's set_live_ui_scale_preview()).
+		self.on_dpi_preview_changed = None
+		# Set by the host app -- called once the mandatory setup popup's
+		# "Finish" is clicked, after its settings are saved. A relaunch is
+		# needed for the DPI value to fully apply (paddings/spacing/button
+		# sizes are only set once at startup, not live -- see
+		# app.py's set_live_ui_scale_preview() for why).
+		self.on_setup_finished = None
 
 	def is_configured(self) -> bool:
 		return is_root_configured(self._settings.workspaces_root)
@@ -276,6 +288,17 @@ class WorkspaceSetupDialog:
 		imgui.spacing()
 
 		imgui.separator()
+		imgui.text("Interface scale:")
+		imgui.same_line()
+		imgui.set_next_item_width(140)
+		_, self._setup_dpi_scale = imgui.drag_float(
+			"##setup-dpi-scale", self._setup_dpi_scale, v_speed=0.01, v_min=0.5, v_max=3.0, format="%.2fx")
+		self._setup_dpi_scale = max(0.5, min(3.0, self._setup_dpi_scale))
+		if self.on_dpi_preview_changed is not None:
+			self.on_dpi_preview_changed(self._setup_dpi_scale)
+		imgui.text_disabled("Text preview updates live; the rest of the interface after Finish.")
+
+		imgui.separator()
 		imgui.text("Workspaces folder:")
 		imgui.same_line()
 		path_text = self._settings.workspaces_root or "(not set)"
@@ -309,8 +332,21 @@ class WorkspaceSetupDialog:
 			self._setup_error = "A workspace with this name already exists."
 			return
 		create_workspace(self._settings.workspaces_root, name)
-		self.set_active_workspace(name)
+		self.set_active_workspace(name)  # also saves workspaces_root, via _save()
+
+		fresh = app_settings.load()
+		fresh.dpi_scale = self._setup_dpi_scale
+		app_settings.save(fresh)
+		self._settings = fresh
+
+		# Closed regardless of on_setup_finished being wired -- the normal
+		# path (relaunch(), an os.execv that replaces the process) never
+		# actually reaches the next frame for this to matter, but a host
+		# app that didn't wire the callback would otherwise be left with
+		# this popup stuck open forever despite being fully configured now.
 		imgui.close_current_popup()
+		if self.on_setup_finished is not None:
+			self.on_setup_finished()
 
 	def _poll_folder_dialog(self):
 		if self._folder_dialog is None or not self._folder_dialog.ready(0):

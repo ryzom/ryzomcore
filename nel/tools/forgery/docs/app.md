@@ -27,11 +27,13 @@ pour ajouter leur logique métier.
  configure la fenêtre (titre, icône, taille/position), désactive la
  caméra trackball par défaut (`disableMouse`), élargit le near/far plane
  de la caméra (`app.py`, `0.02`–`20000.0`), initialise `p3dimgui`,
- applique le thème (coins arrondis, fonds opaques, texte blanc pur),
- charge les polices, crée le watermark du panneau, ajoute un éclairage
- ambiant + directionnel, instancie `CommandRegistry`, `SysInfoBar`,
- `WorkspaceSetupDialog` et `Explorer`, puis abonne `draw_ui` à l'événement
- Panda3D `imgui-new-frame`.
+ applique le thème (coins arrondis, fonds opaques, texte blanc pur) et le
+ facteur DPI effectif à tout le style en un seul `style.scale_all_sizes()`
+ (voir `self._ui_scale`/`_effective_ui_scale` ci-dessous — une seule fois
+ ici, jamais rescalé à nouveau ensuite), charge les polices, crée le
+ watermark du panneau, ajoute un éclairage ambiant + directionnel,
+ instancie `CommandRegistry`, `SysInfoBar`, `WorkspaceSetupDialog` et
+ `Explorer`, puis abonne `draw_ui` à l'événement Panda3D `imgui-new-frame`.
 - `windowEvent(self, win)` (`app.py`) : surcharge Panda3D ; sauvegarde
  la géométrie de la fenêtre à chaque événement fenêtre concernant la
  fenêtre principale.
@@ -40,9 +42,9 @@ pour ajouter leur logique métier.
  process (branché sur `self.exitFunc`, `app.py`).
 - `relaunch(self)` (`app.py`) : relance le process avec la même ligne
  de commande via `os.execv` (remplace le process en place, même PID).
- Utilisé quand un changement de police/taille de police ne peut prendre
- effet qu'au démarrage. Nommée `relaunch` et non `restart` délibérément —
- voir Pièges ci-dessous.
+ Utilisé quand un changement de police/taille de police/DPI ne peut
+ prendre pleinement effet qu'au démarrage. Nommée `relaunch` et non
+ `restart` délibérément — voir Pièges ci-dessous.
 - `_load_window_geometry(self)` / `_save_window_geometry(self)`
  (`app.py`, `app.py`) : persistent la position/taille de fenêtre
  dans `~/.ryzom_forgery/<titre_slugifié>.json`, par app (clé = titre de
@@ -54,17 +56,43 @@ pour ajouter leur logique métier.
  capot, seule source fiable qu'on ait : le fenêtrage propre de Panda3D n'a
  aucune détection DPI sous Linux). `1.0` (aucun scaling) si l'app est
  lancée directement (`dev.sh`, sans passer par Ryztart).
+- `_effective_ui_scale(settings)` (`app.py`, fonction module) : le
+ multiplicateur réellement appliqué à toute taille d'UI —
+ `_dpi_scale() * settings.dpi_scale` (voir `docs/settings.md`).
+ L'auto-détection de Ryztart reste la base, `Settings.dpi_scale` (choisi
+ dans la popup obligatoire de première utilisation ou l'onglet Settings
+ ensuite) vient l'affiner par-dessus.
+- `self._ui_scale` (`ForgeryApp.__init__`, `app.py`) : le facteur
+ `_effective_ui_scale()` calculé une fois au démarrage, juste avant
+ l'unique appel à `style.scale_all_sizes()`. Relu ensuite par
+ `_load_ui_font`/`_load_icon_font` (ci-dessous) et par `draw_ui`'s
+ `push_font` à chaque frame -- **mais jamais réinjecté dans
+ `scale_all_sizes()` après ce premier appel** (voir Pièges).
+ `set_live_ui_scale_preview(candidate_scale)` le met à jour en direct
+ (texte seulement, voir `draw_ui` ci-dessous) sans y toucher.
+- `self._ui_font_size_base` (`_load_ui_font`, `app.py`) : la taille de
+ police non multipliée (`Settings.ui_font_size` tel quel), combinée à
+ `self._ui_scale` chaque frame par `draw_ui()` (`push_font`).
 - `_load_ui_font(self)` (`app.py`) : charge la police choisie par
  l'utilisateur (`Settings.ui_font_name`/`ui_font_size`, voir
- `docs/settings.md`), multipliée par `_dpi_scale()`, comme police par
- défaut d'ImGui ; retombe sur `_DEFAULT_FONT_NAME` ("Roboto Bold") si le
- fichier stocké n'existe plus.
+ `docs/settings.md`), multipliée par `self._ui_scale` (et non plus
+ `_dpi_scale()` directement), comme police par défaut d'ImGui ; retombe
+ sur `_DEFAULT_FONT_NAME` ("Roboto Bold") si le fichier stocké n'existe
+ plus.
 - `_load_icon_font(self)` (`app.py`) : fusionne les glyphes Font
  Awesome 4 dans la police par défaut (pour utiliser `ICON_FA_*` dans un
  `imgui.text`/`button` normal), et construit en plus `self.large_icon_font`
- (1.5× `_ICON_FONT_SIZE * _dpi_scale()`), une police icône autonome pour
+ (1.5× `_ICON_FONT_SIZE * self._ui_scale`), une police icône autonome pour
  les gros boutons icône-seule (ex. barres de bascule du viewport dans
- `object_editor.py`).
+ `object_editor.py`) — fixée une fois au démarrage, pas d'aperçu en direct
+ pour cette police-là.
+- `set_live_ui_scale_preview(self, candidate_scale)` (`app.py`) : aperçu
+ DPI en direct **texte seulement** — appelé chaque frame par
+ `WorkspaceSetupDialog.on_dpi_preview_changed` (popup de setup) ou
+ `object_editor.py`'s propre contrôle DPI (onglet Settings) tant qu'une
+ valeur candidate est en cours d'ajustement. Se contente de mettre à jour
+ `self._ui_scale` -- ne touche **pas** `style.scale_all_sizes()` (voir
+ Pièges pour pourquoi c'est délibéré).
 - `draw_panel(self)` / `panel_title(self)` (`app.py`, `app.py`) :
  points d'extension no-op/generic à surcharger par les sous-classes.
 - `_draw_panel_watermark(self)` (`app.py`) : dessine le filigrane de
@@ -75,9 +103,15 @@ pour ajouter leur logique métier.
  l'Explorer ; met à jour le statut de la sysinfo bar puis délègue au hook
  surchargeable `on_selection_changed`.
 - `draw_ui(self)` (`app.py`) : callback appelé à chaque frame ImGui.
- Ferme le splash au tout premier appel, dessine le dialogue de setup de
- workspace, puis positionne/dessine les trois fenêtres pinnées (sysinfo,
- Explorer, panel) selon `display_size` et les largeurs courantes.
+ Enveloppe tout son contenu dans `imgui.push_font(None,
+ self._ui_font_size_base * self._ui_scale)` / `imgui.pop_font()` (`None` =
+ garde la police actuellement chargée, juste redemandée à la taille
+ courante -- système de police dynamique d'ImGui 1.92+, aucune
+ reconstruction d'atlas nécessaire, texte net même pendant l'aperçu DPI
+ en direct). Ferme le splash au tout premier appel, dessine le dialogue
+ de setup de workspace, puis positionne/dessine les trois fenêtres
+ pinnées (sysinfo, Explorer, panel) selon `display_size` et les largeurs
+ courantes.
 
 ## Utilisation
 
