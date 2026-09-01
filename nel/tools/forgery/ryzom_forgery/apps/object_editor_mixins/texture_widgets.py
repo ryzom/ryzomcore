@@ -534,22 +534,6 @@ class TextureWidgetsMixin:
 			imgui.pop_id()
 			imgui.separator()
 
-		# Panoply masks/bake button (2026-08-29): previously only drawn for
-		# plain single-texture materials (see the two other
-		# _draw_panoply_masks_for() call sites) -- Multi Bitmap materials
-		# never got this at all, so a shape whose active material is Multi
-		# Bitmap (found while investigating
-		# ryw_mark1_hof_caster01_pantabottes, which had no bake button/
-		# message anywhere) had no way to bake real Panoply variants for it.
-		# Drawn once for the representative's own active slot
-		# (representative.file_name, kept in sync with
-		# representative.selected_index by _set_slot() above) -- not once
-		# per expanded slot, since a "which color" pick is shape-wide
-		# (_draw_global_panoply_section()), not something that makes sense
-		# to bake separately per quality/season variant.
-		if representative.file_name:
-			self._draw_panoply_masks_for(representative.file_name)
-
 		if hovered_hint:
 			self.sysinfo.set_status(hovered_hint, color=_STATUS_HINT_COLOR)
 			self._multi_bitmap_hint_shown = True

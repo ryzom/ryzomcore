@@ -30,8 +30,9 @@ référence à l'échelle), `MeshImportMixin` (`mesh_import.py`, import/
 remplacement de géométrie), `ViewportTransformMixin` (`viewport_transform.py`,
 grille/axes, transparence, vent, panneau transform, framing caméra,
 `_rebuild_geometry`), `ShapeIOMixin` (`shape_io.py`, chargement/sauvegarde,
-session, popups liées au shape) et `TextureWidgetsMixin` (`texture_widgets.py`,
-miniatures/couleurs, éditeur Multi Bitmap, combo texture, copie workspace)
+session, popups liées au shape), `TextureWidgetsMixin` (`texture_widgets.py`,
+miniatures/couleurs, éditeur Multi Bitmap, combo texture, copie workspace) et
+`PanoplyUIMixin` (`panoply_ui.py`, section Panoply globale, fraîcheur/bake)
 sont faits ; le reste des méthodes ci-dessous annotées "(object_editor.py)"
 vivra ailleurs au fur et à mesure des prochaines étapes -- ces annotations ne
 seront remises à jour dans l'ensemble du document qu'une fois le split
