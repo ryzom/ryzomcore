@@ -34,6 +34,12 @@ _EXPORT_AS_BUTTON_COLOR = (0.65, 0.8, 0.95, 1.0)  # light blue
 _QUICK_EXPORT_BUTTON_COLOR = (0.4, 0.65, 0.9, 1.0)  # blue -- workspace-only quick export
 _QUIT_BUTTON_COLOR = (0.9, 0.55, 0.7, 1.0)  # pink
 
+# Shared convention for every strictly binary Oui/Non confirmation popup
+# (e.g. _draw_load_shape_unsaved_popup(), _draw_replace_match_popup()) --
+# lightgreen for "confirm", pink for "cancel".
+_CONFIRM_YES_COLOR = (0.565, 0.933, 0.565, 1.0)  # lightgreen
+_CONFIRM_NO_COLOR = (1.0, 0.753, 0.796, 1.0)  # pink
+
 
 def _icon_button(icon, tooltip, active=False, square=False, large_font=None, active_color=_ACTIVE_COLOR, disabled=False):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
