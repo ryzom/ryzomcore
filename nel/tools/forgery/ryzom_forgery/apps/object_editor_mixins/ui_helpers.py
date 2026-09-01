@@ -40,6 +40,17 @@ _QUIT_BUTTON_COLOR = (0.9, 0.55, 0.7, 1.0)  # pink
 _CONFIRM_YES_COLOR = (0.565, 0.933, 0.565, 1.0)  # lightgreen
 _CONFIRM_NO_COLOR = (1.0, 0.753, 0.796, 1.0)  # pink
 
+_STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
+_TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
+_TEXTURE_IN_WORKSPACE_COLOR = (0.4, 1.0, 0.4, 1.0)  # green -- this texture reference already lives in the active workspace's tex/
+
+# CMaterial::TShader (material.h) -- Material.shader_type's value, not a flag
+# bit. Specular: stage 0 is the diffuse texture, stage 1 is a dedicated
+# specular/gloss map (flat texture or CTextureCube) whose color is added to
+# stage 0's, modulated by stage 0's own alpha (driver_opengl_material.cpp's
+# setupSpecularPass(): result = Tex0.rgb + Tex0.alpha * Tex1.rgb).
+_IDRV_MAT_SHADER_SPECULAR = 4
+
 # Multi Bitmap slot index -> (quality label, ecosystem label, season label),
 # the three known Georges/engine conventions documented in
 # docs/material_options.md (item_map.typ's map_variant, _creature_texture.typ,
