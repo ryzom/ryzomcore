@@ -99,6 +99,8 @@ _REPLACE_MATCH_POPUP_ID = "Match materials"
 _IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
 _REOPEN_SHAPE_POPUP_ID = "Reopen last shape?"
+_LOAD_SHAPE_UNSAVED_POPUP_ID = "Unsaved changes"
+_LOAD_SHAPE_UNSAVED_POPUP_MIN_WIDTH = 300.0
 # See _scan_active_workspace_virtual_categories().
 _VIRTUAL_CATEGORIES_RESCAN_INTERVAL = 1.0
 _BAKE_PROGRESS_POPUP_ID = "Baking Panoply variants"
@@ -130,6 +132,12 @@ _IMPORT_CONFLICT_CANCEL_COLOR = (0.8, 0.75, 0.15, 1.0)  # yellow
 # in this file, same green as _IMPORT_CONFLICT_BACKUP_COLOR above.
 _IMPORT_STATUS_ERROR_COLOR = (1.0, 0.4, 0.4, 1.0)  # red
 _IMPORT_STATUS_SUCCESS_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
+
+# Shared convention for every strictly binary Oui/Non confirmation popup
+# (e.g. _draw_load_shape_unsaved_popup()) -- lightgreen for "confirm",
+# pink for "cancel".
+_CONFIRM_YES_COLOR = (0.565, 0.933, 0.565, 1.0)  # lightgreen
+_CONFIRM_NO_COLOR = (1.0, 0.753, 0.796, 1.0)  # pink
 
 # _draw_bottom_bar()'s Save/Export/Quit buttons -- blue for the export
 # buttons (not pink, to stay visually distinct from Quit's pink).
@@ -1122,6 +1130,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
 		self._pending_reopen_shape_item = None  # ExplorerItem awaiting a Yes/No decision, or None -- see _restore_session_state()/_draw_reopen_shape_popup()
 		self._reopen_shape_prompt_open = False
+		self._pending_load_shape_item = None  # ExplorerItem queued to load once the unsaved-changes prompt is answered, or None -- see _request_load_shape()/_draw_load_shape_unsaved_popup()
+		self._load_shape_unsaved_prompt_open = False
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
 		self._virtual_categories_cache = None  # {category: [Path, ...]} or None -- see _scan_active_workspace_virtual_categories()
 		self._virtual_categories_cache_time = 0.0
@@ -1466,25 +1476,32 @@ class ObjectEditorApp(ForgeryApp):
 
 	def _has_unsaved_changes_at(self, target_path):
 		"""True if the in-memory shape currently open differs from what's on
-		disk at `target_path` -- lets _draw_import_conflict_popup() only
-		actually ask something when there's a real conflict, instead of on
-		every single open-shape auto-update. Rather than tracking every
-		individual edit throughout the whole editor (a much bigger, more
-		error-prone undertaking -- easy to miss a spot that mutates
-		self.shape_file without going through it), serializes the in-memory
-		shape to bytes (save_shape() accepts any BinaryIO, so this never
-		touches disk) and compares against a fresh read of the file -- exact
-		and always in sync with reality, at the cost of one extra
-		parse+serialize per conflict check (cheap next to the geometry
-		import itself, and only ever runs when the target is the shape
-		that's actually open)."""
-		buffer = io.BytesIO()
-		save_shape(buffer, self.shape_file)
+		disk at `target_path` -- lets _draw_import_conflict_popup() and
+		_request_load_shape() only actually ask something when there's a
+		real conflict, instead of on every single auto-update/load attempt.
+		Rather than tracking every individual edit throughout the whole
+		editor (a much bigger, more error-prone undertaking -- easy to miss
+		a spot that mutates self.shape_file without going through it), bakes
+		the current viewport transform (_bake_transform_into_shape(), same
+		as a real save does -- otherwise a pending position/rotation/scale
+		edit would compare equal and be missed) and serializes the result to
+		a `target_path.name + '~'` backup file next to `target_path`, then
+		compares that against a fresh read of `target_path` -- exact and
+		always in sync with reality. The backup is deliberately left on disk
+		(refreshed on every check) as a crash-recovery copy, not just a
+		throwaway comparison buffer."""
+		self._bake_transform_into_shape()
+		backup_path = target_path.with_name(target_path.name + "~")
 		try:
+			save_shape(backup_path, self.shape_file)
+		except (OSError, ShapeWriteError):
+			return True
+		try:
+			backup_bytes = backup_path.read_bytes()
 			on_disk = target_path.read_bytes()
 		except OSError:
 			return True
-		return buffer.getvalue() != on_disk
+		return backup_bytes != on_disk
 
 	def _apply_import_conflict_update(self, source_path, target_path):
 		"""Common tail of every _draw_import_conflict_popup() choice: routes
@@ -1566,7 +1583,69 @@ class ObjectEditorApp(ForgeryApp):
 
 	def _on_load_command(self, items):
 		if items:
-			self._load_shape(items[0])
+			self._request_load_shape(items[0])
+
+	def _request_load_shape(self, item):
+		"""Routes every shape-load entry point through the unsaved-changes
+		guard: loads `item` immediately unless the currently open shape is
+		at risk of losing edits, in which case the load is queued and
+		_draw_load_shape_unsaved_popup() asks first instead of silently
+		discarding in-progress work. A shape loaded from a plain file
+		(_shape_source_path set) is checked against that file directly; one
+		loaded from inside a .bnp has no such file, so it's checked against
+		wherever Save would actually write it instead
+		(_workspace_shape_save_path()) -- if that resolves to nothing (no
+		active workspace, or genuinely no copy anywhere in it yet), there's
+		nothing to compare against and the edit is unconditionally at risk,
+		same as _has_unsaved_changes_at() already treats a missing file."""
+		unsaved = False
+		if self.shape_file is not None:
+			target_path = self._shape_source_path
+			if target_path is None:
+				target_path = self._workspace_shape_save_path()
+			unsaved = target_path is None or self._has_unsaved_changes_at(target_path)
+		if unsaved:
+			self._pending_load_shape_item = item
+			self._load_shape_unsaved_prompt_open = True
+			return
+		self._load_shape(item)
+
+	def _draw_load_shape_unsaved_popup(self):
+		"""Drawn every frame from draw_panel() while a shape load is queued
+		behind the unsaved-changes guard (see _request_load_shape()) -- Yes
+		discards the current shape's unsaved edits and loads the queued
+		item, No cancels the load and keeps the current shape as-is."""
+		if not self._load_shape_unsaved_prompt_open:
+			return
+		if not imgui.is_popup_open(_LOAD_SHAPE_UNSAVED_POPUP_ID):
+			imgui.open_popup(_LOAD_SHAPE_UNSAVED_POPUP_ID)
+		center_next_popup()
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_LOAD_SHAPE_UNSAVED_POPUP_ID, None, flags)
+		if opened:
+			# An always_auto_resize modal sizes itself off the widest item
+			# actually drawn; text_wrapped() alone wraps against whatever
+			# (possibly tiny) width the window already has, which -- with
+			# nothing else wide in this popup (unlike e.g.
+			# _draw_import_conflict_popup()'s long button labels) --
+			# collapses into a narrow one-word-per-line column. This
+			# invisible dummy reserves a sane minimum width up front so the
+			# text below has something real to wrap against.
+			imgui.dummy((_LOAD_SHAPE_UNSAVED_POPUP_MIN_WIDTH, 0))
+			imgui.text_wrapped(
+				f"{self._shape_source_name} has unsaved changes. Loading "
+				f"{self._pending_load_shape_item.name} will discard them.")
+			if _colored_button("OK", _CONFIRM_YES_COLOR):
+				item, self._pending_load_shape_item = self._pending_load_shape_item, None
+				self._load_shape_unsaved_prompt_open = False
+				imgui.close_current_popup()
+				self._load_shape(item)
+			imgui.same_line()
+			if _colored_button("Cancel", _CONFIRM_NO_COLOR):
+				self._pending_load_shape_item = None
+				self._load_shape_unsaved_prompt_open = False
+				imgui.close_current_popup()
+			imgui.end_popup()
 
 	def _on_load_skeleton_command(self, items):
 		if not items:
@@ -2808,11 +2887,11 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.pop_id()
 
 		imgui.separator()
-		if imgui.button("Replace"):
+		if _colored_button("Replace", _CONFIRM_YES_COLOR):
 			self._confirm_replace_matching()
 			imgui.close_current_popup()
 		imgui.same_line()
-		if imgui.button("Cancel"):
+		if _colored_button("Cancel", _CONFIRM_NO_COLOR):
 			self._replace_pending_mesh = None
 			imgui.close_current_popup()
 
@@ -2943,13 +3022,13 @@ class ObjectEditorApp(ForgeryApp):
 		opened, _ = imgui.begin_popup_modal(_REOPEN_SHAPE_POPUP_ID, None, flags)
 		if opened:
 			imgui.text(f"Reopen \"{self._pending_reopen_shape_item.name}\" from last session?")
-			if _colored_button("Yes", _SAVE_BUTTON_COLOR):
+			if _colored_button("Yes", _CONFIRM_YES_COLOR):
 				self._load_pending_reopen_shape()
 				self._reopen_shape_prompt_open = False
 				self._pending_reopen_shape_item = None
 				imgui.close_current_popup()
 			imgui.same_line()
-			if _colored_button("No", _QUIT_BUTTON_COLOR):
+			if _colored_button("No", _CONFIRM_NO_COLOR):
 				self._reopen_shape_prompt_open = False
 				self._pending_reopen_shape_item = None
 				imgui.close_current_popup()
@@ -5399,46 +5478,51 @@ class ObjectEditorApp(ForgeryApp):
 				if resolved is not None and resolved.fs_path is not None:
 					subprocess.Popen([editor_path, str(resolved.fs_path)])
 
+	def _bake_transform_into_shape(self):
+		"""Whatever position/rotation/scale the object is currently at
+		becomes the shape's own base.default_pos/default_rot_quat/
+		default_scale: this is meant to be an authoring tool for those
+		values, not just a live-viewer aid, so they must survive a
+		save/reload round trip rather than silently reverting. Shared by
+		_write_shape() (a real save) and _has_unsaved_changes_at() (which
+		needs the same baking before comparing, or a pending transform-only
+		edit reads as unsaved=False -- see the chantier discussion)."""
+		base = getattr(self.shape_file.value, "base", None)
+		if base is None:
+			return
+		# Read model_root's WORLD rotation (not just _object_pivot's own) --
+		# _transform_node("rotation") lets the Rotation panel edit either
+		# node depending on that row's pivot lock, and model_root's world
+		# quat always reflects the total either way (it's pivot's rotation
+		# composed with model_root's own local one, identity when unlocked).
+		total_quat = self.model_root.get_quat(self.render)
+		# Panda3D's LQuaternion stores (real, i, j, k) internally, and its
+		# inherited get_x/y/z/w() accessors read that raw slot order rather
+		# than remapping to (i, j, k, real) -- confirmed empirically (an
+		# identity quat's get_x() came back 1.0, the real part, not 0.0) and
+		# consistent with how _display_shape() already builds a Panda Quat
+		# via Quat(rot.w, rot.x, rot.y, rot.z) (real first, positionally)
+		# elsewhere in this file.
+		base.default_rot_quat = Quaternion(
+			x=total_quat.get_y(), y=total_quat.get_z(), z=total_quat.get_w(), w=total_quat.get_x())
+		# Same reasoning as rotation just above: position/scale edits can
+		# land on either _object_pivot or model_root depending on that row's
+		# pivot lock (_transform_node()), so the WORLD pos/scale relative to
+		# render is what actually reflects the total edit either way.
+		# Verified 2026-08-30 these fields are genuinely used by the real
+		# client for attach-point placement (entity_cl.cpp: the instance's
+		# Default* already applied at creation survive stickObject()
+		# unchanged) -- not editor-only, unlike DefaultPivot, which stays
+		# untouched here (rotation/scale CENTER, not the object's own
+		# placement -- see mesh_base.cpp:353's separate setPivot() call).
+		world_pos = self.model_root.get_pos(self.render)
+		base.default_pos = Vector3(x=world_pos.x, y=world_pos.y, z=world_pos.z)
+		world_scale = self.model_root.get_scale(self.render)
+		base.default_scale = Vector3(x=world_scale.x, y=world_scale.y, z=world_scale.z)
+
 	def _write_shape(self, path):
 		try:
-			# Whatever rotation the object is currently at becomes the
-			# shape's own default_rot_quat on save: this is meant to be an
-			# authoring tool for that value, not just a live-viewer aid, so
-			# it must survive a save/reload round trip rather than silently
-			# reverting. Read model_root's WORLD rotation (not just
-			# _object_pivot's own) -- _transform_node("rotation") lets the
-			# Rotation panel edit either node depending on that row's pivot
-			# lock, and model_root's world quat always reflects the total
-			# either way (it's pivot's rotation composed with model_root's
-			# own local one, identity when unlocked).
-			base = getattr(self.shape_file.value, "base", None)
-			if base is not None:
-				total_quat = self.model_root.get_quat(self.render)
-				# Panda3D's LQuaternion stores (real, i, j, k) internally, and
-				# its inherited get_x/y/z/w() accessors read that raw slot
-				# order rather than remapping to (i, j, k, real) -- confirmed
-				# empirically (an identity quat's get_x() came back 1.0, the
-				# real part, not 0.0) and consistent with how _display_shape()
-				# already builds a Panda Quat via Quat(rot.w, rot.x, rot.y,
-				# rot.z) (real first, positionally) elsewhere in this file.
-				base.default_rot_quat = Quaternion(
-					x=total_quat.get_y(), y=total_quat.get_z(), z=total_quat.get_w(), w=total_quat.get_x())
-				# Same reasoning as rotation just above: position/scale
-				# edits can land on either _object_pivot or model_root
-				# depending on that row's pivot lock (_transform_node()), so
-				# the WORLD pos/scale relative to render is what actually
-				# reflects the total edit either way. Verified 2026-08-30
-				# these fields are genuinely used by the real client for
-				# attach-point placement (entity_cl.cpp: the instance's
-				# Default* already applied at creation survive
-				# stickObject() unchanged) -- not editor-only, unlike
-				# DefaultPivot, which stays untouched here (rotation/scale
-				# CENTER, not the object's own placement -- see
-				# mesh_base.cpp:353's separate setPivot() call).
-				world_pos = self.model_root.get_pos(self.render)
-				base.default_pos = Vector3(x=world_pos.x, y=world_pos.y, z=world_pos.z)
-				world_scale = self.model_root.get_scale(self.render)
-				base.default_scale = Vector3(x=world_scale.x, y=world_scale.y, z=world_scale.z)
+			self._bake_transform_into_shape()
 			path.parent.mkdir(parents=True, exist_ok=True)
 			save_shape(path, self.shape_file)
 			self._save_bind_slot_override()
@@ -5477,13 +5561,13 @@ class ObjectEditorApp(ForgeryApp):
 		imgui.text(f"Overwrite this file?\n{self._pending_save_path}")
 		imgui.text_wrapped("You won't be asked again this session.")
 		imgui.separator()
-		if imgui.button("Overwrite"):
+		if _colored_button("Overwrite", _CONFIRM_YES_COLOR):
 			self._save_overwrite_confirmed = True
 			self._confirm_overwrite_open = False
 			imgui.close_current_popup()
 			self._write_shape(self._pending_save_path)
 		imgui.same_line()
-		if imgui.button("Cancel"):
+		if _colored_button("Cancel", _CONFIRM_NO_COLOR):
 			self._confirm_overwrite_open = False
 			imgui.close_current_popup()
 		imgui.end_popup()
@@ -6477,6 +6561,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_repository_paths_dialog()
 		self._draw_replace_match_popup()
 		self._draw_reopen_shape_popup()
+		self._draw_load_shape_unsaved_popup()
 		self._draw_restore_scan_popup()
 		self._draw_bake_progress_popup()
 		self._draw_import_conflict_popup()

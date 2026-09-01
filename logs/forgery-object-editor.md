@@ -1,5 +1,61 @@
 # Changelog
 
+## 2026-09-01 — ✨ Guard shape loads, single-click, popup colors
+
+Three related UX changes to the Explorer / shape-loading flow, Forgery
+3.0.1:
+
+1. **Single-click load.** `explorer.py`'s `_draw_leaf` now fires the first
+   registered `CommandRegistry` command for the clicked item on a plain
+   single click (`imgui.is_item_clicked()`), instead of requiring a double
+   click. Applies to every file type in the Explorer, not just `.shape`
+   (same command-dispatch code path either way).
+
+2. **Unsaved-changes guard before loading another shape.** Every shape-load
+   entry point (Explorer click, previous-session reopen) now routes through
+   `_request_load_shape()`, which checks whether the currently open shape
+   is at risk of losing edits before replacing it:
+   - `_bake_transform_into_shape()` (new, extracted out of `_write_shape()`)
+     writes the viewport's current position/rotation/scale into
+     `shape_file.value.base.default_*`, exactly like a real Save already
+     did.
+   - `_has_unsaved_changes_at(target_path)` (reworked) calls that bake, then
+     serializes the shape to a `<name>.shape~` file written next to
+     `target_path` (kept on disk afterwards as a crash-recovery copy, not
+     just a comparison scratch buffer) and compares its bytes against
+     `target_path`'s.
+   - For a shape loaded from a plain file, `target_path` is that file
+     directly. For a shape loaded from inside a `.bnp` (no such file to
+     compare against), `target_path` is wherever Save would actually write
+     it instead (`_workspace_shape_save_path()`) -- if that resolves to
+     nothing (no active workspace, or genuinely no copy anywhere in it
+     yet), there's nothing to compare and the load is unconditionally
+     treated as at-risk.
+   - On a detected conflict, `_draw_load_shape_unsaved_popup()` blocks the
+     load behind an OK/Cancel choice instead of silently discarding
+     in-progress work.
+   - Known accepted limitation: baking the transform before *every* check
+     (not just a real save) round-trips position/rotation/scale through
+     Panda3D's float32 `NodePath` storage, which can register as "unsaved"
+     with zero real edits when the shape's original default transform
+     isn't exactly float32-representable. A proper fix is deferred to a
+     future real edit-history/dirty-tracking chantier; for now this is
+     accepted as an occasional extra confirmation popup, not a regression.
+
+3. **Oui/Non popup color convention.** New shared constants
+   `_CONFIRM_YES_COLOR` (lightgreen) / `_CONFIRM_NO_COLOR` (pink), applied
+   via `_colored_button` to every strictly binary confirm/cancel popup:
+   the new unsaved-changes popup (OK/Cancel), `_draw_replace_match_popup`
+   (Replace/Cancel), `_draw_reopen_shape_popup` (Yes/No), and
+   `_draw_save_confirmation_popup` (Overwrite/Cancel). `_draw_restore_scan_popup`
+   has no buttons (self-closing) so nothing changed there;
+   `_draw_import_conflict_popup` keeps its existing 4-way semantic colors
+   (it isn't a plain Oui/Non). Also fixed a layout bug on the new popup: an
+   `always_auto_resize` modal with only short button labels and no forced
+   minimum width collapsed `imgui.text_wrapped()`'s message into a
+   near-unreadable single-word-per-line column -- fixed with an invisible
+   `imgui.dummy()` spacer reserving a sane minimum width before the text.
+
 ## 2026-09-01 — ✨ Workspace projects, virtual file categories, exclusion rules, Forgery 3.0.0
 
 Major rework of the workspace system (feedback: "at usage it's not great"),

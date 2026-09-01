@@ -71,8 +71,9 @@ en plus ou à la place.
  `_MAX_CONCURRENT_THUMBNAIL_DECODES` en parallèle), upload GPU fait sur le
  thread principal une fois l'image prête.
 - `_draw_leaf` (`explorer.py`) : dessine une ligne fichier (icône
- ou vignette, sélection, double-clic = première commande du menu
- contextuel, clic droit = menu contextuel complet).
+ ou vignette, sélection, simple clic = première commande du menu
+ contextuel (ex. charger un `.shape`, depuis 2026-09-01 — auparavant
+ double-clic), clic droit = menu contextuel complet).
 - `_select` / `_item_key` (`explorer.py`) : gestion de la
  sélection multiple, clé stable qui distingue un fichier réel d'une entrée
  `.bnp` (`f"{bnp_path}!{name}"`).
