@@ -42,6 +42,7 @@ from ryzom_forgery import panoply_colorize
 from ryzom_forgery import panoply_config
 from ryzom_forgery import panoply_live
 from ryzom_forgery import panoply_texture
+from ryzom_forgery.popup_utils import center_next_popup
 from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
@@ -96,6 +97,7 @@ _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
 _IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
+_REOPEN_SHAPE_POPUP_ID = "Reopen last shape?"
 _BAKE_PROGRESS_POPUP_ID = "Baking Panoply variants"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
@@ -1115,6 +1117,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._pending_save_path = None  # workspace destination shown/used by the overwrite-confirmation popup
 		self._save_status = ""
 		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
+		self._pending_reopen_shape_item = None  # ExplorerItem awaiting a Yes/No decision, or None -- see _restore_session_state()/_draw_reopen_shape_popup()
+		self._reopen_shape_prompt_open = False
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
 		self._bake_progress = None  # dict or None -- see _start_panoply_bake()/_draw_bake_progress_popup()
 
@@ -1474,6 +1478,7 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.open_popup(_IMPORT_CONFLICT_POPUP_ID)
 			self._import_conflict_popup_opened = True
 
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_IMPORT_CONFLICT_POPUP_ID, None, flags)
 		if not opened:
@@ -2727,6 +2732,7 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.open_popup(_REPLACE_MATCH_POPUP_ID)
 			self._replace_match_popup_opened = True
 
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_REPLACE_MATCH_POPUP_ID, None, flags)
 		if not opened:
@@ -2822,12 +2828,17 @@ class ObjectEditorApp(ForgeryApp):
 			print(f"[object_editor] could not save session state: {exc}")
 
 	def _restore_session_state(self):
-		"""Reopens whatever the Explorer/loaded shape were at the end of
+		"""Reopens whatever folder the Explorer was browsing at the end of
 		the previous session (see _save_session_state()) -- called once
 		from __init__(), after self.explorer/search_paths_dialog are set
-		up. Best-effort: a folder/shape that's since moved or vanished is
+		up. Best-effort: a folder that's since moved or vanished is
 		silently skipped, same as active_workspace_path()'s own handling
-		of a vanished workspace, not worth an error dialog over."""
+		of a vanished workspace, not worth an error dialog over.
+
+		The previously-loaded shape itself is no longer auto-reopened here
+		-- only queued as a pending Yes/No prompt (see
+		_draw_reopen_shape_popup()/_load_pending_reopen_shape()), asked
+		once the first frame is up."""
 		settings = app_settings.load()
 		if settings.last_folder and Path(settings.last_folder).is_dir():
 			self.explorer._navigate_to(Path(settings.last_folder))
@@ -2839,26 +2850,69 @@ class ObjectEditorApp(ForgeryApp):
 		if settings.last_shape_bnp:
 			bnp_path = Path(settings.last_shape_bnp)
 			if bnp_path.is_file():
-				self._load_shape(ExplorerItem(path=bnp_path, name=settings.last_shape_name, bnp_path=bnp_path))
+				self._pending_reopen_shape_item = ExplorerItem(
+					path=bnp_path, name=settings.last_shape_name, bnp_path=bnp_path)
 		else:
 			shape_path = Path(settings.last_shape_path)
 			if shape_path.is_file():
-				self._load_shape(ExplorerItem(path=shape_path, name=settings.last_shape_name))
+				self._pending_reopen_shape_item = ExplorerItem(path=shape_path, name=settings.last_shape_name)
+
+		if self._pending_reopen_shape_item is not None:
+			self._reopen_shape_prompt_open = True
+
+	def _load_pending_reopen_shape(self):
+		"""Actually loads self._pending_reopen_shape_item (see
+		_restore_session_state()) -- called once the user answers "Yes" to
+		_draw_reopen_shape_popup()."""
+		self._load_shape(self._pending_reopen_shape_item)
 
 		# The shape displays right away, but its textures are resolved via
 		# self.search_paths_dialog.find_texture() -- backed by the index
-		# ensure_scanned() (called just before this in __init__) built.
-		# has_scanned_data (not just scanning) is what actually matters
-		# here: a cache-hit startup already published a real (if possibly
-		# slightly stale) index synchronously, so the still-running
-		# background refresh scan has nothing left for this popup to wait
-		# on. Only a genuinely cold start (no cache yet, index still empty)
-		# needs to show the shape untextured with a popup saying so, and
-		# refresh every material once that first scan completes (see
-		# _draw_restore_scan_popup()).
+		# ensure_scanned() (called just before _restore_session_state() in
+		# __init__) built. has_scanned_data (not just scanning) is what
+		# actually matters here: a cache-hit startup already published a
+		# real (if possibly slightly stale) index synchronously, so the
+		# still-running background refresh scan has nothing left for this
+		# popup to wait on. Only a genuinely cold start (no cache yet,
+		# index still empty) needs to show the shape untextured with a
+		# popup saying so, and refresh every material once that first scan
+		# completes (see _draw_restore_scan_popup()).
 		if self.shape_file is not None and self.search_paths_dialog.scanning \
 				and not self.search_paths_dialog.has_scanned_data:
 			self._restore_scan_popup_open = True
+
+	def _draw_reopen_shape_popup(self):
+		"""Drawn every frame from draw_panel() while a previous session's
+		shape is queued for a reopen decision (see
+		_restore_session_state()) -- asks Yes/No instead of the old
+		auto-reopen, naming the shape. No leaves nothing loaded; the
+		pending item is discarded either way once answered (last_shape_*
+		itself is untouched in settings.toml, so it's offered again next
+		launch same as this one)."""
+		if not self._reopen_shape_prompt_open:
+			return
+		if not imgui.is_popup_open(_REOPEN_SHAPE_POPUP_ID):
+			imgui.open_popup(_REOPEN_SHAPE_POPUP_ID)
+		# always=True: this can open on the very first ImGui frame (queued
+		# from __init__ via _restore_session_state()), before Panda3D's
+		# requested window geometry has actually settled -- see
+		# center_next_popup()'s own docstring.
+		center_next_popup(always=True)
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_REOPEN_SHAPE_POPUP_ID, None, flags)
+		if opened:
+			imgui.text(f"Reopen \"{self._pending_reopen_shape_item.name}\" from last session?")
+			if _colored_button("Yes", _SAVE_BUTTON_COLOR):
+				self._load_pending_reopen_shape()
+				self._reopen_shape_prompt_open = False
+				self._pending_reopen_shape_item = None
+				imgui.close_current_popup()
+			imgui.same_line()
+			if _colored_button("No", _QUIT_BUTTON_COLOR):
+				self._reopen_shape_prompt_open = False
+				self._pending_reopen_shape_item = None
+				imgui.close_current_popup()
+			imgui.end_popup()
 
 	def _draw_restore_scan_popup(self):
 		"""Drawn every frame from draw_panel() while a shape was just
@@ -2869,6 +2923,7 @@ class ObjectEditorApp(ForgeryApp):
 			return
 		if not imgui.is_popup_open(_RESTORE_SCAN_POPUP_ID):
 			imgui.open_popup(_RESTORE_SCAN_POPUP_ID)
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_RESTORE_SCAN_POPUP_ID, None, flags)
 		if opened:
@@ -4314,6 +4369,7 @@ class ObjectEditorApp(ForgeryApp):
 			return
 		if not imgui.is_popup_open(_BAKE_PROGRESS_POPUP_ID):
 			imgui.open_popup(_BAKE_PROGRESS_POPUP_ID)
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_BAKE_PROGRESS_POPUP_ID, None, flags)
 		if not opened:
@@ -5363,6 +5419,7 @@ class ObjectEditorApp(ForgeryApp):
 		if not self._confirm_overwrite_open:
 			return
 
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_OVERWRITE_POPUP_ID, None, flags)
 		if not opened:
@@ -6306,7 +6363,6 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog.draw()
 		self.import_dialog.draw()
 		self.search_paths_dialog.draw()
-		self.workspace_setup_dialog.draw()
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
 		self._poll_image_editor_dialog()
@@ -6314,6 +6370,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._poll_workspace_sync_folder_dialog()
 		self._poll_repository_paths_dialog()
 		self._draw_replace_match_popup()
+		self._draw_reopen_shape_popup()
 		self._draw_restore_scan_popup()
 		self._draw_bake_progress_popup()
 		self._draw_import_conflict_popup()

@@ -8,6 +8,7 @@ from pathlib import Path
 
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 
+from ryzom_forgery.popup_utils import center_next_popup
 from ryzom_forgery.shape_import import ShapeImportError, find_importer
 
 _MODE_POPUP_ID = "Import mesh"
@@ -72,6 +73,7 @@ class ImportDialog:
 		if self._pending_mesh is None:
 			return
 
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_MODE_POPUP_ID, None, flags)
 		if not opened:

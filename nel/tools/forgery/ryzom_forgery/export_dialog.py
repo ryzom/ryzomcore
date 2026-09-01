@@ -11,6 +11,7 @@ from pathlib import Path
 
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 
+from ryzom_forgery.popup_utils import center_next_popup
 from ryzom_forgery.settings import TEXTURE_MODE_COPY_PNG, TEXTURE_MODE_REFERENCE_ONLY
 from ryzom_forgery.shape_export import export_shape
 from ryzom_forgery.workspace_sync import pack_workspace_bnp
@@ -105,6 +106,7 @@ class ExportDialog:
 		if not self._confirm_open:
 			return
 
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_CONFIRM_POPUP_ID, None, flags)
 		if not opened:

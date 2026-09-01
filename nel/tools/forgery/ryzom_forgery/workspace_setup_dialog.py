@@ -7,15 +7,15 @@ per workspace (see workspaces.py). Mirrors export_dialog.py's non-blocking
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery.popup_utils import center_next_popup
 from ryzom_forgery.workspaces import (
 	active_workspace_path, create_workspace, ensure_structure, is_root_configured, list_workspaces,
 	open_in_system_file_manager, workspace_path,
 )
 
-_POPUP_ID = "Set up Workspaces folder"
+_POPUP_ID = "Welcome to Ryzom Forgery"
 _NEW_WORKSPACE_POPUP_ID = "New workspace"
 _ELLIPSIS = "..."
-_NONE_LABEL = "(none)"
 _NEW_LABEL = "<new>"
 
 
@@ -53,10 +53,12 @@ class WorkspaceSetupDialog:
 	def __init__(self):
 		self._settings = app_settings.load()
 		self._folder_dialog = None  # active portable_file_dialogs.select_folder
-		# Cancelling the startup prompt only skips it for this session -- the
-		# folder can still be set later from the Settings tab (draw_settings_content()).
-		self._prompt_dismissed = False
 		self._prompt_offered = False
+
+		# Mandatory setup popup's own pending field -- not written to
+		# settings until "Finish" is clicked (see _draw_prompt_popup()).
+		self._setup_workspace_name = ""
+		self._setup_error = ""
 
 		self._new_workspace_pending = False  # set inside the combo, popup opened right after end_combo()
 		self._new_workspace_name = ""
@@ -69,6 +71,14 @@ class WorkspaceSetupDialog:
 
 	def is_configured(self) -> bool:
 		return is_root_configured(self._settings.workspaces_root)
+
+	def _needs_setup(self) -> bool:
+		"""True until both a Workspaces folder and an active workspace are
+		set -- having no active workspace is no longer a valid steady state
+		(see the mandatory setup popup below), so this is stricter than
+		is_configured() (which only gates the "Current workspace" combo on
+		there being anything to list)."""
+		return not (self.is_configured() and self._settings.active_workspace)
 
 	@property
 	def active_workspace_name(self):
@@ -109,9 +119,34 @@ class WorkspaceSetupDialog:
 		"""Call once per frame from the host app (see app.py's draw_ui())."""
 		self._poll_folder_dialog()
 
-		if not self._prompt_offered and not self._prompt_dismissed and not self.is_configured():
+		# Self-heal: a Workspaces folder that already has workspaces in it
+		# (hand-edited settings.toml, or upgrading from before this field
+		# existed) but no active one picked yet -- silently activate the
+		# first one instead of forcing the mandatory setup popup below on
+		# someone who's already set this up.
+		if self.is_configured() and not self._settings.active_workspace:
+			names = self.workspace_names()
+			if names:
+				self.set_active_workspace(names[0])
+
+		if not self._prompt_offered and self._needs_setup():
 			self._prompt_offered = True
 			imgui.open_popup(_POPUP_ID)
+
+		# OpenPopup()/BeginPopupModal() both resolve their popup's actual ID
+		# using the current window/ID-stack context at the time they're
+		# called -- draw_active_workspace_row() (called from inside the
+		# Explorer window, see object_editor.py's Explorer.extra_header)
+		# only *requests* this one (self._new_workspace_pending) rather than
+		# calling open_popup() itself, so the real call happens here instead,
+		# at the same top-level context _draw_new_workspace_popup() calls
+		# begin_popup_modal() from right below. Calling OpenPopup() from
+		# inside Explorer's window context while BeginPopupModal() is called
+		# from here (no parent window) previously computed two different
+		# IDs for the same string, so the popup could never actually open.
+		if self._new_workspace_pending:
+			self._new_workspace_pending = False
+			imgui.open_popup(_NEW_WORKSPACE_POPUP_ID)
 
 		self._draw_prompt_popup()
 		self._draw_new_workspace_popup()
@@ -124,7 +159,14 @@ class WorkspaceSetupDialog:
 		root is configured, since there's nothing to list otherwise."""
 		names = self.workspace_names()
 		current = self._settings.active_workspace if self._settings.active_workspace in names else None
-		preview = current or _NONE_LABEL
+		# Self-heal: the active workspace named in settings no longer
+		# exists on disk (renamed/deleted outside the app) but others do --
+		# having no active workspace isn't a valid steady state anymore, so
+		# fall back to the first one rather than showing "(none)".
+		if current is None and names:
+			self.set_active_workspace(names[0])
+			current = names[0]
+		preview = current or "(none)"
 
 		imgui.text("Current workspace:")
 		imgui.same_line()
@@ -132,16 +174,12 @@ class WorkspaceSetupDialog:
 		imgui.begin_disabled(not self.is_configured())
 		imgui.set_next_item_width(width)
 		if imgui.begin_combo("##workspace-selector", preview):
-			clicked, _ = imgui.selectable(_NONE_LABEL, current is None)
-			if clicked:
-				self.set_active_workspace(None)
 			if names:
-				imgui.separator()
 				for name in names:
 					clicked, _ = imgui.selectable(name, name == current)
 					if clicked:
 						self.set_active_workspace(name)
-			imgui.separator()
+				imgui.separator()
 			clicked, _ = imgui.selectable(_NEW_LABEL, False)
 			if clicked:
 				self._new_workspace_name = ""
@@ -159,13 +197,15 @@ class WorkspaceSetupDialog:
 			open_in_system_file_manager(active_path)
 		imgui.end_disabled()
 
-		# Deferred: begin_popup_modal() can't nest inside begin_combo()'s own
-		# popup, so the actual open_popup() call happens right after end_combo().
-		if self._new_workspace_pending:
-			self._new_workspace_pending = False
-			imgui.open_popup(_NEW_WORKSPACE_POPUP_ID)
+		# self._new_workspace_pending only *requests* the popup here --
+		# the actual open_popup() call happens in draw() instead, at the
+		# same top-level context begin_popup_modal() is called from (see
+		# draw()'s own comment for why: this method runs nested inside the
+		# Explorer window, which would give OpenPopup() a different
+		# resolved ID than a call from draw()'s top-level context).
 
 	def _draw_new_workspace_popup(self):
+		center_next_popup()
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_NEW_WORKSPACE_POPUP_ID, None, flags)
 		if not opened:
@@ -205,23 +245,72 @@ class WorkspaceSetupDialog:
 		imgui.end_popup()
 
 	def _draw_prompt_popup(self):
+		"""Mandatory first-launch setup -- no "Later"/skip: a Workspaces
+		folder and an active workspace are required for the app to be
+		usable at all (shapes are only ever saved into a workspace, never
+		elsewhere), so this stays open until "Finish" actually completes
+		it."""
+		# Only touch SetNextWindowPos while this popup is actually open --
+		# this method runs every frame for the app's entire lifetime (not
+		# gated behind an instance flag like the other popups below), so
+		# calling center_next_popup() unconditionally left a pending
+		# "next window position" unconsumed on every frame this popup
+		# *isn't* open, which was interfering with the very next
+		# Begin-family call that frame (_draw_new_workspace_popup()'s own
+		# begin_popup_modal() -- symptom: <new> in the combo stopped
+		# opening its popup at all). always=True: can open on essentially
+		# the very first ImGui frame, before Panda3D's requested window
+		# geometry has actually settled -- see center_next_popup()'s own
+		# docstring.
+		if imgui.is_popup_open(_POPUP_ID):
+			center_next_popup(always=True)
 		flags = imgui.WindowFlags_.always_auto_resize.value
 		opened, _ = imgui.begin_popup_modal(_POPUP_ID, None, flags)
 		if not opened:
 			return
 
 		imgui.text_wrapped(
-			"No Workspaces folder is set up yet. It holds your editable workspaces "
-			"(one subfolder each), shared by every Forgery app -- shapes are only ever "
-			"saved into a workspace, never elsewhere.")
+			"A Workspaces folder is required before you can do anything -- it holds "
+			"your editable workspaces (one subfolder each), shared by every Forgery "
+			"app. Shapes are only ever saved into a workspace, never elsewhere.")
 		imgui.spacing()
-		if imgui.button("Choose folder..."):
-			self._folder_dialog = pfd.select_folder("Choose Workspaces folder", "")
+
+		imgui.separator()
+		imgui.text("Workspaces folder:")
 		imgui.same_line()
-		if imgui.button("Later"):
-			self._prompt_dismissed = True
-			imgui.close_current_popup()
+		path_text = self._settings.workspaces_root or "(not set)"
+		imgui.text_disabled(_truncate_path_to_width(path_text, 220))
+		if self._settings.workspaces_root and imgui.is_item_hovered():
+			imgui.set_tooltip(self._settings.workspaces_root)
+		imgui.same_line()
+		if imgui.button("Choose folder..."):
+			self._folder_dialog = pfd.select_folder("Choose Workspaces folder", self._settings.workspaces_root or "")
+
+		imgui.separator()
+		imgui.text("First workspace name:")
+		imgui.set_next_item_width(220)
+		_, self._setup_workspace_name = imgui.input_text("##setup-workspace-name", self._setup_workspace_name)
+		if self._setup_error:
+			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._setup_error)
+		imgui.separator()
+
+		ready = is_root_configured(self._settings.workspaces_root) and bool(self._setup_workspace_name.strip())
+		imgui.begin_disabled(not ready)
+		if imgui.button("Finish"):
+			self._finish_setup()
+		imgui.end_disabled()
+		if not ready and imgui.is_item_hovered():
+			imgui.set_tooltip("Pick a Workspaces folder and name your first workspace first.")
 		imgui.end_popup()
+
+	def _finish_setup(self):
+		name = self._setup_workspace_name.strip()
+		if name in self.workspace_names():
+			self._setup_error = "A workspace with this name already exists."
+			return
+		create_workspace(self._settings.workspaces_root, name)
+		self.set_active_workspace(name)
+		imgui.close_current_popup()
 
 	def _poll_folder_dialog(self):
 		if self._folder_dialog is None or not self._folder_dialog.ready(0):
@@ -232,7 +321,6 @@ class WorkspaceSetupDialog:
 			return
 		self._settings.workspaces_root = result
 		self._save()
-		imgui.close_current_popup()
 
 	def draw_settings_content(self):
 		"""Embedded in the host app's Settings tab, same spot as

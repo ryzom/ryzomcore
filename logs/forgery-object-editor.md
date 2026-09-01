@@ -1,5 +1,79 @@
 # Changelog
 
+## 2026-09-01 — ✨ Mandatory workspace setup popup, centered popups, shape-reopen confirmation, Forgery 2.1.0
+
+Three related UI changes to Patina (`object_editor.py`) and the shared
+`WorkspaceSetupDialog`:
+
+1. First launch (or an empty config) now shows a mandatory setup popup
+   asking for the Workspaces folder and the name of the first workspace --
+   no "Later"/skip button, it stays open until both are provided. Having no
+   active workspace is no longer a valid steady state once a Workspaces
+   folder is configured: `WorkspaceSetupDialog._needs_setup()` requires both
+   a root folder and an active workspace, and the "Current workspace" combo
+   no longer offers a "(none)" choice -- self-heals to the first available
+   workspace instead if the recorded active one vanished from disk, or none
+   was ever picked despite the root being configured (upgrading from before
+   this behavior existed, or a hand-edited `settings.toml`).
+2. On relaunch, Patina no longer auto-reopens the last session's shape --
+   it asks Yes/No first (`_draw_reopen_shape_popup()`, colored buttons: green
+   Yes reusing the Save button's color, pink No reusing Quit's), naming the
+   shape. `_restore_session_state()` now only queues the previous shape as
+   `_pending_reopen_shape_item` instead of loading it directly;
+   `_load_pending_reopen_shape()` does the actual load once the user answers
+   Yes.
+3. Every modal popup across Forgery now opens centered on the main
+   viewport instead of wherever ImGui last left the cursor/layout -- new
+   shared `popup_utils.center_next_popup()`, wired into all 10
+   `begin_popup_modal()` call sites (`export_dialog.py`, `import_dialog.py`,
+   `workspace_setup_dialog.py`, `object_editor.py`). Takes an `always=True`
+   mode for popups that can open on essentially the very first ImGui frame
+   (the mandatory setup popup, the reopen-shape prompt) -- Panda3D's
+   requested window geometry is only a *request* to the window manager, not
+   synchronously applied, so the main viewport can still report a
+   stale/transient size on that first frame; the default `Cond_.appearing`
+   would then lock the popup off-center forever since it only positions
+   once, so these two instead keep recentering every frame (trading away
+   drag-to-reposition, not something anyone does with a short-lived
+   confirmation anyway).
+
+Two bugs found and fixed along the way, both real, both pre-existing (not
+introduced by the above):
+
+- `apps/object_editor.py`'s `draw_panel()` was calling
+  `self.workspace_setup_dialog.draw()` a second time, redundant with
+  `app.py`'s own top-level call in `draw_ui()` -- every widget ID inside
+  (`##workspace-selector`, the popups' own contents) got submitted twice per
+  frame. Removed the redundant call; `app.py`'s is the only one left.
+- The "create new workspace" popup (`<new>` in the "Current workspace"
+  combo) stopped opening entirely once `WorkspaceSetupDialog` gained the
+  code above: `imgui.open_popup()`/`imgui.begin_popup_modal()` both resolve
+  a popup's actual internal ID from the current ImGui window/ID-stack
+  context at the time they're called, not just the string passed in.
+  `draw_active_workspace_row()` (which requests the popup) runs nested
+  inside the Explorer window (`object_editor.py`'s `Explorer.extra_header`),
+  while `_draw_new_workspace_popup()`'s `begin_popup_modal()` is called from
+  `WorkspaceSetupDialog.draw()` at the top level, no parent window -- two
+  different contexts computing two different IDs for the same string, so
+  the popup could never actually open. Confirmed live with `is_popup_open()`
+  returning `True` right after `open_popup()` (inside the Explorer window)
+  but `False` from `_draw_new_workspace_popup()`'s own top-level context.
+  Fixed by moving the actual `open_popup()` call into `draw()` itself (the
+  same top-level context `begin_popup_modal()` already runs from) --
+  `draw_active_workspace_row()` now only sets a pending flag,
+  `_new_workspace_pending`, consumed there.
+
+Also explored and abandoned mid-session: a live, whole-UI DPI scale control
+bundled into the same setup popup (`Settings.dpi_scale`, combined with the
+existing ryztart-detected `_dpi_scale()`). Repeatedly crashed in real
+testing across several fix attempts (`io.font_global_scale` missing
+entirely from the installed `imgui_bundle` build; `ImGuiStyle.ScaleAllSizes()`
+floor-eroding style fields to zero when rescaled incrementally across many
+drag-slider frames; and finally an unexplained Panda3D `BoundingSphere` NaN
+assert that only appeared after switching the style-scaling approach to
+reset-from-baseline every frame) -- reverted entirely rather than keep
+chasing it. Not present in this version; may be revisited separately later.
+
 ## 2026-08-31 — 🐛 Scale UI fonts by ryztart's own DPI detection, Forgery 1.10.1
 
 A user running at 125% OS display scaling reported the UI font rendering far too
