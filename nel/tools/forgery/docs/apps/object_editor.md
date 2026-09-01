@@ -25,7 +25,8 @@ Point d'entrée : `main(argv=None)` (object_editor.py) instancie `ObjectEditorAp
 `apps/object_editor_mixins/` (pur déplacement de code, aucun changement de
 comportement) — `ObjectEditorApp` elle-même en hérite toujours. À ce stade :
 `SettingsDialogsMixin` (`settings_dialogs.py`, l'onglet Settings et la barre
-du bas) est fait ; le reste des méthodes ci-dessous annotées "(object_editor.py)"
+du bas) et `ReferenceShapesMixin` (`reference_shapes.py`, les 3 shapes de
+référence à l'échelle) sont faits ; le reste des méthodes ci-dessous annotées "(object_editor.py)"
 vivra ailleurs au fur et à mesure des prochaines étapes -- ces annotations ne
 seront remises à jour dans l'ensemble du document qu'une fois le split
 terminé, pour éviter une réécriture partielle à chaque étape.

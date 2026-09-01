@@ -18,6 +18,9 @@ from imgui_bundle import imgui
 
 _ACTIVE_COLOR = (0.26, 0.59, 0.98, 0.8)  # blue -- default "on" highlight
 
+_VIEWPORT_TOGGLE_MARGIN_PX = 10
+_OBJECT_TRANSPARENCY_ALPHA = 0.5
+
 # Shape types pynel's save_shape() can actually write back out -- matches
 # ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save UI only shows for these.
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}

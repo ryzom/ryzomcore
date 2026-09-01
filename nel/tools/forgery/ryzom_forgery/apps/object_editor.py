@@ -18,10 +18,9 @@ from pathlib import Path
 import numpy
 
 from panda3d.core import (
-	AlphaTestAttrib, ClockObject, ColorBlendAttrib, DepthTestAttrib, Geom, GeomNode, GeomTriangles,
-	GeomVertexData, GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial,
-	NodePath, PNMImage, Point3, Quat, RenderAttrib, Shader, Texture as PandaTexture, TextureStage,
-	TransformState, TransparencyAttrib, Vec3,
+	AlphaTestAttrib, ClockObject, ColorBlendAttrib, DepthTestAttrib, GeomNode, InternalName, LineSegs,
+	Material as PandaMaterial, NodePath, PNMImage, Point3, Quat, RenderAttrib, Shader, Texture as PandaTexture,
+	TextureStage, TransformState, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
@@ -70,28 +69,12 @@ from pynel.ryzom_shape import (
 from pynel.ryzom_skin import _matrix_field_to_dense
 from pynel import repository_paths
 
+from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import _build_geom, _build_vertex_data
+from ryzom_forgery.apps.object_editor_mixins.reference_shapes import ReferenceShapesMixin
 from ryzom_forgery.apps.object_editor_mixins.settings_dialogs import SettingsDialogsMixin
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _colored_button, _icon_button
-
-# Toggleable scale-reference shapes shown alongside whatever's loaded, for an
-# at-a-glance sense of scale -- a 1x1x1 cube and the shortest/tallest playable
-# character shapes, kept in this repo (not the Ryzom data tree) since they're
-# tool fixtures, not game assets.
-_REFERENCE_EXAMPLES_DIR = Path(__file__).resolve().parent.parent / "examples"
-_REFERENCE_SHAPES = [
-	("Cube (1x1x1)", "ge_mission_1_caisse.shape"),
-	("Smallest character", "npc_dummy_short.shape"),
-	("Tallest character", "npc_dummy_tall.shape"),
-]
-_REFERENCE_GAP = 1.5  # meters between reference objects (and the main shape), beyond their own bbox width
-
-# Icon for each toggle in the top-left viewport button bar (see
-# _draw_reference_shapes_toggles()) -- these read as "important, chunky
-# toggles" next to the smaller bottom-left _draw_viewport_toggles() bar, so
-# they're drawn with app.large_icon_font (2x _ICON_FONT_SIZE, see app.py's
-# _load_icon_font()) instead of the normal merged-into-text-font icon glyphs.
-_REFERENCE_ICONS = {"Cube (1x1x1)": fa_icons.ICON_FA_CUBE, "Smallest character": fa_icons.ICON_FA_CHILD,
-                     "Tallest character": fa_icons.ICON_FA_MALE}
+from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+	_colored_button, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _VIEWPORT_TOGGLE_MARGIN_PX,
+)
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
@@ -451,9 +434,6 @@ _AXIS_VECTORS = {"x": (1.0, 0.0, 0.0), "y": (0.0, 1.0, 0.0), "z": (0.0, 0.0, 1.0
 _AXIS_LENGTH = 3.0  # fallback, before any shape is loaded
 _AXIS_MARGIN_FACTOR = 1.2  # how far axes extend past the bbox radius
 
-_VIEWPORT_TOGGLE_MARGIN_PX = 10
-_OBJECT_TRANSPARENCY_ALPHA = 0.5
-
 
 def _build_grid_geom(center_x, center_y, z, squares):
 	"""LineSegs floor grid on the world XY plane at height `z`, centered on
@@ -785,78 +765,6 @@ def _uvs_need_repeat(texcoords):
 		for u, v in texcoords)
 
 
-def _build_vertex_data(vertex_buffer, dynamic=False):
-	"""Builds the GeomVertexData for `vertex_buffer` -- shared by every render
-	pass's Geom (all of a mesh's passes index into the exact same vertex
-	array, see iter_render_passes()), so it's built once per _rebuild_geometry()
-	call rather than once per pass. `dynamic`, when the loaded shape has wind
-	animation data (see _update_wind()), marks the vertex column UH_dynamic so
-	Panda3D doesn't assume the position data is upload-once-and-forget."""
-	positions = vertex_buffer.channels.get("Position")
-	normals = vertex_buffer.channels.get("Normal")
-	texcoords = vertex_buffer.channels.get("TexCoord0")
-
-	if normals and texcoords:
-		vformat = GeomVertexFormat.get_v3n3t2()
-	elif normals:
-		vformat = GeomVertexFormat.get_v3n3()
-	elif texcoords:
-		vformat = GeomVertexFormat.get_v3t2()
-	else:
-		vformat = GeomVertexFormat.get_v3()
-
-	vdata = GeomVertexData("shape", vformat, Geom.UH_dynamic if dynamic else Geom.UH_static)
-	vdata.set_num_rows(vertex_buffer.num_verts)
-
-	vertex_writer = GeomVertexWriter(vdata, "vertex")
-	for p in positions:
-		vertex_writer.add_data3(p[0], p[1], p[2])
-
-	if normals:
-		normal_writer = GeomVertexWriter(vdata, "normal")
-		for n in normals:
-			normal_writer.add_data3(n[0], n[1], n[2])
-
-	if texcoords:
-		uv_writer = GeomVertexWriter(vdata, "texcoord")
-		for uv in texcoords:
-			# NeL .shape files always store texture V with the opposite
-			# origin from Panda3D; flip here (once, for every shape,
-			# regardless of source -- shape_import.py's importers convert
-			# .obj/.dae/.fbx's own native V convention into this same NeL one
-			# at import time, precisely so this flip can stay simple and
-			# unconditional and every *saved* .shape file is correct on its
-			# own, not just correct-looking in Forgery for as long as it
-			# remembers where a shape came from).
-			#
-			# Deliberately NOT wrapped to [0, 1) here, even though some
-			# shapes' UVs go beyond that range (e.g. a whole render pass at V
-			# in [1, 2) on ooc_summer_raceline.shape) -- reducing each vertex
-			# mod 1 independently breaks any triangle whose UVs straddle an
-			# integer boundary (routine for tiling textures, e.g. a
-			# cylindrical trunk wrapping around): one corner jumps to the far
-			# side of the texture while the others don't, stretching the
-			# whole image across that triangle. The out-of-range values are
-			# left as-is; the texture's own wrap mode (see
-			# load_panda_texture()) is what needs to repeat correctly instead.
-			uv_writer.add_data2(uv[0], 1.0 - uv[1])
-
-	return vdata
-
-
-def _build_geom(vdata, indices):
-	"""Builds one render pass's Geom (just its triangle indices) against an
-	already-built, shared vdata (see _build_vertex_data())."""
-	triangles = GeomTriangles(Geom.UH_static)
-	for i in range(0, len(indices), 3):
-		triangles.add_vertices(indices[i], indices[i + 1], indices[i + 2])
-	triangles.close_primitive()
-
-	geom = Geom(vdata)
-	geom.add_primitive(triangles)
-	return geom
-
-
 def _is_shape_skinned(shape_value):
 	"""True if `shape_value` has real skin data to drive from a skeleton --
 	either a CMeshMRMSkinned (always skinned) or a plain CMeshMRM that
@@ -903,7 +811,7 @@ APP_INFO = {
 }
 
 
-class ObjectEditorApp(SettingsDialogsMixin, ForgeryApp):
+class ObjectEditorApp(ReferenceShapesMixin, SettingsDialogsMixin, ForgeryApp):
 	def __init__(self):
 		# The Explorer starts out wherever the highest-priority configured
 		# search path points (there's no separate "data root" concept --
@@ -3689,137 +3597,6 @@ class ObjectEditorApp(SettingsDialogsMixin, ForgeryApp):
 		self._rebuild_viewport_helpers(bbox)
 
 		self._rebuild_reference_shapes()
-
-	def _get_reference_shape(self, label):
-		"""Lazily parses (once) and caches a reference shape by label."""
-		if label in self._reference_shapes:
-			return self._reference_shapes[label]
-		filename = dict(_REFERENCE_SHAPES)[label]
-		path = _REFERENCE_EXAMPLES_DIR / filename
-		try:
-			shape_file = parse_shape(path.read_bytes())
-		except (OSError, ShapeParseError) as exc:
-			print(f"[object_editor] failed to load reference shape {label!r} ({path}): {exc}")
-			shape_file = None
-		self._reference_shapes[label] = shape_file
-		return shape_file
-
-	def _toggle_reference_shape(self, label):
-		if label in self._reference_active:
-			self._reference_active.discard(label)
-		elif self._get_reference_shape(label) is not None:
-			self._reference_active.add(label)
-		self._rebuild_reference_shapes()
-
-	def _set_reference_placement(self, label, placement):
-		"""Clicking the already-active placement button turns it back off
-		(back to the default side-by-side layout) instead of being stuck on."""
-		current = self._reference_placement.get(label, "auto")
-		self._reference_placement[label] = "auto" if current == placement else placement
-		self._rebuild_reference_shapes()
-
-	def _toggle_reference_transparency(self, label):
-		if label in self._reference_transparent:
-			self._reference_transparent.discard(label)
-		else:
-			self._reference_transparent.add(label)
-		self._rebuild_reference_shapes()
-
-	def _build_reference_geometry(self, shape_value, parent_node_path):
-		materials = getattr(shape_value, "materials", None)
-		vdata = None
-		for vertex_buffer, material_id, indices in iter_render_passes(shape_value):
-			if not indices:
-				continue
-			if vdata is None:
-				# Built once, not per-pass -- see _build_vertex_data()'s docstring.
-				vdata = _build_vertex_data(vertex_buffer)
-			geom = _build_geom(vdata, indices)
-			geom_node = GeomNode(f"ref-pass-{material_id}")
-			geom_node.add_geom(geom)
-			node_path = parent_node_path.attach_new_node(geom_node)
-			material = materials[material_id] if materials and material_id < len(materials) else None
-			self._apply_material_common(node_path, material)
-			self._apply_material_texture(node_path, material, None)
-
-	def _rebuild_reference_shapes(self):
-		"""Lines up the currently-active reference shapes side by side, just
-		past the main shape's own bbox (bottoms/centers aligned on X, so
-		comparing sizes doesn't need any camera repositioning) -- unless a
-		shape has its own placement mode set (see _set_reference_placement()),
-		in which case it's placed at the world origin or the main object's
-		pivot instead, and skipped when advancing the side-by-side cursor."""
-		self._reference_root.remove_node()
-		self._reference_root = self.render.attach_new_node("reference-root")
-
-		main_bbox = shape_bbox(self.shape_file.value) if self.shape_file is not None else None
-		cursor_x = (main_bbox.center.x + main_bbox.half_size.x + _REFERENCE_GAP) if main_bbox is not None else 0.0
-
-		for label, _ in _REFERENCE_SHAPES:
-			if label not in self._reference_active:
-				continue
-			shape_file = self._reference_shapes.get(label)
-			if shape_file is None:
-				continue
-			bbox = shape_bbox(shape_file.value)
-			node_path = self._reference_root.attach_new_node(label)
-			placement = self._reference_placement.get(label, "auto")
-			if placement == "origin":
-				node_path.set_pos(self.render, 0, 0, 0)
-			elif placement == "pivot":
-				node_path.set_pos(self.render, self._object_pivot.get_pos(self.render))
-			else:
-				if bbox is not None:
-					node_path.set_x(cursor_x + bbox.half_size.x - bbox.center.x)
-			self._build_reference_geometry(shape_file.value, node_path)
-			if label in self._reference_transparent:
-				node_path.set_transparency(TransparencyAttrib.M_alpha)
-				node_path.set_color_scale(1, 1, 1, _OBJECT_TRANSPARENCY_ALPHA)
-			if placement == "auto" and bbox is not None:
-				cursor_x += bbox.half_size.x * 2 + _REFERENCE_GAP
-
-	def _draw_reference_shapes_toggles(self):
-		"""Top-left viewport bar for the 3 scale-reference toggles (Cube /
-		shortest / tallest character) -- square icon buttons at 2x
-		_draw_viewport_toggles()'s icon size (app.large_icon_font), since
-		these are a more prominent, deliberately-reached-for control. Once a
-		reference shape is active, 3 more square buttons appear stacked
-		vertically right below its toggle (placement: origin/pivot, plus a
-		transparency toggle) -- each shape's column is its own imgui group so
-		everything stays aligned regardless of how many buttons the column
-		has."""
-		display_size = imgui.get_io().display_size
-		if display_size.y <= 0:
-			return
-
-		x = self.explorer_width + _VIEWPORT_TOGGLE_MARGIN_PX
-		y = _VIEWPORT_TOGGLE_MARGIN_PX
-		imgui.set_next_window_pos((x, y))
-		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
-		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
-		         | imgui.WindowFlags_.always_auto_resize.value)
-		large_font = (self.large_icon_font, self.large_icon_font_size) if self.large_icon_font is not None else None
-		with imgui_ctx.begin("##reference-shapes-toggles", flags=flags):
-			for i, (label, _) in enumerate(_REFERENCE_SHAPES):
-				if i > 0:
-					imgui.same_line()
-				imgui.push_id(f"ref-shape-{label}")
-				with imgui_ctx.begin_group():
-					if _icon_button(_REFERENCE_ICONS[label], label, label in self._reference_active,
-					                square=True, large_font=large_font):
-						self._toggle_reference_shape(label)
-					if label in self._reference_active:
-						placement = self._reference_placement.get(label, "auto")
-						if _icon_button(fa_icons.ICON_FA_DOT_CIRCLE, "Place at 0,0,0",
-						                placement == "origin", square=True, large_font=large_font):
-							self._set_reference_placement(label, "origin")
-						if _icon_button(fa_icons.ICON_FA_ANCHOR, "Place on the object's pivot",
-						                placement == "pivot", square=True, large_font=large_font):
-							self._set_reference_placement(label, "pivot")
-						if _icon_button(fa_icons.ICON_FA_ADJUST, "50% transparent",
-						                label in self._reference_transparent, square=True, large_font=large_font):
-							self._toggle_reference_transparency(label)
-				imgui.pop_id()
 
 	@staticmethod
 	def _apply_material_common(node_path, material):
