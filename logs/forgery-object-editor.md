@@ -1,5 +1,81 @@
 # Changelog
 
+## 2026-08-31 — 🐛 Scale UI fonts by ryztart's own DPI detection, Forgery 1.10.1
+
+A user running at 125% OS display scaling reported the UI font rendering far too
+large. Root cause: Panda3D's own windowing has zero DPI-awareness on Linux (confirmed
+by reading `x11GraphicsWindow.cxx` directly -- no Xft.dpi/XRandR/XSETTINGS query
+anywhere), unlike SDL/GLFW-based Dear ImGui apps, which delegate that to their
+windowing library. Panda3D's `dpi-aware` config variable only affects Windows
+(`SetProcessDpiAwareness`), a no-op on Linux/X11.
+
+Rather than reimplementing fragile, platform-specific DPI queries inside Forgery
+itself (Xft.dpi/xrandr aren't reliably available, don't cover Wayland, and vary by
+compositor), reused a detection that already exists one layer up: ryztart (the
+launcher, a separate project) is built on `pywebview`, whose `webview.screens[i].scale`
+already abstracts Qt/GTK/Cocoa DPI detection across X11/Wayland/Windows/macOS.
+ryztart's `ryzom_forgery_launcher.launcher.call_LaunchApp()` now reads
+`webview.screens[0].scale` (primary screen only -- same known "one number" limitation
+every simple DPI scheme has for multi-monitor setups with differing scales) and passes
+it to the spawned Forgery subprocess via a `RYZOM_FORGERY_DPI_SCALE` env var.
+
+`app.py` gained `_dpi_scale()` (reads that env var, defaults to `1.0` when launched
+directly, e.g. via `dev.sh`, with no ryztart involved), applied to every UI font size
+loaded in `_load_ui_font()`/`_load_icon_font()` (the regular font, the icon font
+merged into it, and the standalone "large icon" font).
+
+Validated end-to-end at 100% scaling on the maintainer's own machine (ryztart
+correctly reports `scale=1.0`, no regression) -- not yet validated at an actual
+non-1.0 scale (no machine available to test that directly); the original 125%
+report came from a different user, who will test this fix in practice. Also
+confirmed via research that on Wayland compositors specifically (e.g. Wayfire),
+whether this fix helps or *makes things worse* depends on that compositor's own
+Xwayland scaling mode: Wayfire bitmap-stretches Xwayland clients by default (its own
+`force_xwayland_scaling` option changes that, at the cost of needing exactly this kind
+of app-side DPI compensation) -- noted here in case a future report describes
+double-scaled (now too-small, not too-large) text on some other compositor.
+
+## 2026-08-31 — ✨ Add hairstyle_conform CLI + race_reference cache to Forgery
+
+Added `ryzom_forgery/shape_geometry.py` functions for identifying and snapping a
+hairstyle's boundary: `boundary_edges()`/`boundary_loops()` (open-edge detection via
+connected components), `build_face_vertex_index()` + `main_seam_loop()` (the real
+face-welded seam loop, identified by exact position coincidence with a race's face
+mesh -- picking "the largest boundary loop" is wrong in general, a voluminous
+hairstyle built from independent hair-strand cards can have several loops that don't
+touch the face at all), `seam_ring_by_angle()`/`seam_loop_by_angle_indexed()`/
+`interpolate_seam_ring()`, and `conform_hairstyle_boundary()` (rigid pre-alignment by
+seam centroid, then per-vertex angle-interpolated snap onto a target race's seam
+ring -- non-boundary vertices only receive the rigid translation).
+
+Added `ryzom_forgery/race_reference.py` + bundled `race_reference.cfg`: per
+race/gender key, resolves a face mesh + reference hairstyle by name through Forgery's
+own search paths, and caches the derived `face_index`/`seam_ring` in memory keyed by
+each resolved file's own `(path, mtime)` -- same bundled-default + workspace-override
++ mtime-cache pattern as `panoply_config.py`.
+
+Added `ryzom_forgery/apps/hairstyle_conform.py`, a CLI (`shape_exporter.py`'s
+argparse-only pattern, no GUI):
+`hairstyle_conform.py SOURCE.shape SOURCE_RACE_KEY TARGET_RACE_KEY OUTPUT.shape --search-path PATH [--workspace DIR]`.
+Only `CMeshMRMSkinned` is supported (the only shape type with a pynel geometry
+writer, see the matching pynel log entry).
+
+Validated end-to-end on real extracted game data (not just synthetic tests): the
+corrected boundary-loop detection was checked against a real voluminous hairstyle
+(`fy_hof_cheveux_basic02.shape`, which has 9 boundary loops, only one of which is the
+real face seam), and the resulting conform was compared against the user's own
+hand-adapted cross-race version of the same hairstyle -- average gap to the
+hand-adapted boundary roughly halved versus the earlier (buggy) largest-loop
+heuristic.
+
+This is part of a broader cross-race hairstyle adaptation investigation that has
+since been set aside as more complex than initially hoped (not every hairstyle of a
+given race shares the same face seam, so a "record once, replay everywhere" transfer
+of manual edits doesn't generalize automatically) -- see
+`/repos/project-todos/ryzom-core/hairstyle-cross-race-conform.md` for the full
+writeup. The code landing here is functional and validated on its own terms
+regardless of that broader pause.
+
 ## 2026-08-31 — ✨ Add NPC Mode/animation picker + live playback to Patina's Bind preview, Forgery 1.9.0
 
 Extends the Bind preview (see the "Creature/NPC binder + assembler" entry below) with
@@ -185,6 +261,272 @@ the diffuse alpha is instead a mask for a dedicated stage-1 specular/gloss map
   a real file, never clear one); the "Texture offset/tiling/rotation" section's enable
   checkbox was removed (the sliders are always visible now and flip the underlying
   flags on the first real edit) since it added a step without adding real value.
+
+## 2026-08-29 — ✨ Auto-default the Panoply selection once real variants are detected
+
+Follow-up to the panoply_files.txt fixes right below: once those made
+`ryw_mark1_hof_caster01_pantabottes`'s "User color" buttons actually show up, the shape
+still rendered blank/white until Nuno clicked one himself -- `_panoply_selection` starts
+empty on every shape load, and nothing was proactively filling it in even though a real
+variant was right there to show by default.
+
+New `self._panoply_selection_defaulted` flag (reset alongside `_panoply_selection` on
+shape load): `_draw_global_panoply_section()` now applies the same "first value per
+available axis" backfill an empty-selection click already did, but automatically, the
+first time real variants are detected for a freshly loaded shape -- gated on this new
+flag rather than "`_panoply_selection` is empty", specifically so that later clicking
+"skin" to deliberately clear back to the shape's own base texture (an existing, meaningful
+state) doesn't get silently re-defaulted right back on the next frame.
+
+## 2026-08-29 — ✨ Prioritize ryzom-data's own panoply_files.txt over the shipped .bnp's
+
+Nuno hit this directly: Patina wasn't showing any Panoply masks/variants for
+`ryw_mark1_hof_caster01_pantabottes` even though the `.dds` files already exist under
+`ryzom-data/final_bnps/characters_maps_hr/mark_1/` -- traced to `search_paths_dialog.py`
+picking up `panoply_files.txt` opportunistically from whichever `characters_maps_hr.bnp`
+it finds along the user's generic search paths, a shipped copy that only reflects the
+last real `hls_bank_maker` build and had simply never been regenerated for the hof
+variant (only "hom" has ever gone through `panoply_maker` -- see the
+panoply-runtime-tint chantier). `ryzom-data`'s own `final_bnps/characters_maps_hr/panoply_files.txt`
+is the working copy Nuno edits by hand as new items are added, and already lists the hof
+entries.
+
+New `SearchPathsDialog._load_ryzom_data_panoply_variants()`: reads that file directly via
+`pynel.repository_paths` (mtime-cached), now checked **first** in `_merge_and_publish()`
+-- wins over both halves of the existing scan-based detection (workspace, then generic
+search paths) whenever `ryzom-data` is configured and has the file; falls back to the
+previous behavior otherwise (unconfigured, or the file doesn't exist there yet). Doc:
+`docs/search_paths.md` updated.
+
+**Second, pre-existing bug found while validating the above**: even reading the right
+file, Patina still reported "no variants detected" for `ryw_mark1_hof_caster01_pantabottes`.
+Traced to `panoply.parse_panoply_files()` hardcoding `.tga` as the only accepted line
+extension -- silently dropping every single line of a real production `panoply_files.txt`
+like `ryzom-data/final_bnps/characters_maps_hr/panoply_files.txt`, which lists `.dds`
+(confirmed: `grep -c` found the 24 real hof entries in the file, all ending `.dds`, all
+skipped). Fixed to accept any extension in `search_paths.TEXTURE_FALLBACK_EXTENSIONS`
+(`.tga`/`.png`/`.dds`) instead. Verified the fixed parsing logic directly in the sandbox
+against a synthetic sample matching the real hof entries (pure-Python, no numpy/panda3d
+needed for this one function) -- correctly extracts `user: [1, 2, ...]` for the right
+stem now. This bug predates today's session entirely (nothing about
+`_load_ryzom_data_panoply_variants()` caused it, it just routed real `.dds`-listing data
+through this function for the first time) -- unclear whether the shipped `.bnp` copies
+Patina previously read from happen to use `.tga` naming (masking the bug so far) or
+whether Panoply detection from a shipped `.bnp` was simply never exercised end-to-end
+before. Doc: `docs/panoply_parsing.md` updated.
+
+## 2026-08-29 — ✨ Threaded Panoply bake with a live progress popup
+
+The real Panoply bake (`_bake_panoply_real`/`_bake_panoply_real_all`) used to run
+synchronously on the main thread -- fine for one texture, but slow enough overall
+(~1s/variant, per the earlier cross-validation timing) that baking several textures at
+once (the new "bake all" button) froze the whole UI for however long that took, with no
+feedback. Nuno asked for a progress popup (current texture, current variant, an overall
+bar) -- which needs the bake to actually run off the main thread for the UI to keep
+redrawing while it works.
+
+`panoply_bake.py`: `bake_source()`/`bake_flat()`/`bake_and_write()` all gained an optional
+`on_variant(suffix, index, total)` callback, called right after each variant is computed
+(`total` from a new `_total_combinations()` helper -- the product of each active mask's
+own color count, known ahead of time without consuming the generator). Called
+synchronously wherever `bake_source()` itself runs -- no threading in this module, that's
+left entirely to the caller.
+
+`object_editor.py`: new `_start_panoply_bake(texture_names)` -- does the
+active-workspace/`ryzom-data` checks (via `request_settings_attention`, imgui-safe, main
+thread only) then spawns a daemon `threading.Thread` running `_run_panoply_bake()`, which
+loops `_bake_panoply_real()` over every name, feeding an `on_variant` callback that
+updates `self._bake_progress` (a plain dict -- safe enough under the GIL for simple field
+writes polled from the main thread, no lock needed) in place. `_bake_panoply_real` itself
+lost its own workspace/`ryzom-data` checks (those moved to `_start_panoply_bake`, since
+neither imgui calls nor `request_settings_attention` are safe off the main thread) and
+gained the `on_variant` passthrough. Both the per-texture fire button and
+`_bake_panoply_real_all()` now go through `_start_panoply_bake()` instead of calling
+`_bake_panoply_real()` directly. New `_draw_bake_progress_popup()` (called every frame
+from `draw_ui`, read-only view of `self._bake_progress`): a modal showing "Texture i/N:
+name", "Variant j/M: suffix", and an `imgui.progress_bar` (texture position + current
+texture's own variant fraction) -- an OK button appears once `done` (or on error) to
+close it and reset `self._bake_progress` to `None`. Refuses to start a second bake while
+one is still running.
+
+Written this session, not yet run/validated on the real machine as of this entry (same
+sandbox limitation as the rest of this Panoply work -- no panda3d/imgui_bundle installed
+there).
+
+## 2026-08-29 — ✨ Settings-attention: jump-to-and-flash instead of popup/disabled buttons
+
+New shared mechanism in `ForgeryApp` (`app.py`, base class every Forgery app subclasses):
+`request_settings_attention(section, field_key, duration=3.0)`. Instead of a disabled
+button with an explanatory tooltip, or a blocking modal popup, a blocked action now jumps
+the user straight to the relevant Settings field: forces the Settings tab selected
+(`imgui.TabItemFlags_.set_selected` passed into `_begin_tab_item_with_icon`, which gained
+a `flags` param for this), forces the right `collapsing_header` section open
+(`imgui.set_next_item_open(True)`), and pulses an orange border around the specific field
+for a few seconds (`sin(time.time()*k)`-driven color/border-size push around just that
+field's draw call). Three consumer helpers (`_consume_settings_tab_flags()`,
+`_consume_settings_section_open()`, `_begin_attention_flash()`/`_end_attention_flash()`)
+do the actual imgui wiring; any subclass app calls `request_settings_attention()` from a
+button's click handler and wires the three consumers into its own Settings tab drawing.
+
+Migrated three previously-disabled/popup-blocked actions in `object_editor.py`:
+- Texture "Edit" button (`_draw_texture_edit_button`): no longer disabled when
+  `image_editor_path` is unset -- always clickable, jumps to Settings > Tools instead.
+- panoply.cfg "Edit" button (`_draw_global_panoply_section`): same for `text_editor_path`.
+- Real Panoply bake (`_bake_panoply_real`): no longer opens a blocking modal popup when
+  `ryzom-data` isn't configured (`pynel.repository_paths`) -- jumps to Settings > Paths
+  instead. The now-unused popup infra (`_PANOPLY_BAKE_BLOCKED_POPUP_ID`,
+  `_panoply_bake_blocked`, `_draw_panoply_bake_blocked_popup`) was removed entirely.
+
+Also added, same session: `_bake_panoply_real_all()` -- a "bake all" fire-icon button next
+to the panoply.cfg gear/edit button in `_draw_global_panoply_section`, looping over every
+texture the loaded shape uses and baking each one that has at least one resolvable mask.
+Complements (doesn't replace) the existing per-texture fire button in
+`_draw_panoply_masks_for`, since `_bake_panoply_real()` itself only ever handles one base
+texture at a time (each texture can have its own distinct set of masks).
+
+Exact imgui_bundle API names used here (`TabItemFlags_.set_selected`,
+`begin_tab_item_simple`'s `flags` param, `set_next_item_open`) weren't verifiable from the
+sandbox (no panda3d/imgui_bundle installed there) -- written by convention with the rest
+of this codebase's already-working imgui_bundle usage. Validated on the real machine
+(2026-08-29, Nuno): works as designed, no API mismatch.
+
+## 2026-08-29 — ✨ Patina: text editor for panoply.cfg, bake-all button
+
+Two UX follow-ups to the real Panoply bake integration (see the entry right below):
+
+- The gear icon next to "Panoply:" (`_copy_panoply_cfg_to_workspace`) is now replaced by
+  a pencil/edit button once a workspace `panoply.cfg` already exists, instead of just
+  staying disabled with a tooltip. Launches a newly-added, separately configurable text
+  editor (`settings.text_editor_path`, Settings > Tools > "Text editor:") -- same pattern
+  as the existing image editor setting used by the Textures tab's own "Edit" button, just
+  mirrored for plain text files.
+- New "bake all" button (fire icon) next to that gear/edit button: loops over every
+  texture the loaded shape uses and bakes each one that has at least one resolvable
+  Panoply mask (`_bake_panoply_real_all()`). The existing per-texture fire button (in
+  `_draw_panoply_masks_for`, next to each texture's own mask thumbnails) stays available
+  for baking just one texture -- `_bake_panoply_real()` itself only ever handles one base
+  texture at a time (each texture can have its own distinct set of masks), so "bake all"
+  is a thin loop on top rather than a change to that function's own scope.
+
+## 2026-08-29 — ✨ Real Panoply bake in Patina (panoply_bake.py, build/ output, repository_paths gating)
+
+Completes the panoply_maker Python port (see `logs/pynel.md`'s `.hlsinfo`
+writer/`CConfigFile` entries and `panoply_maker.py`'s earlier `resample()`/
+`colorize_exact()`/`build_masks_from_config()`/`generate_color_combinations()`
+ports) with the glue layer and wires it into Patina as a real, opt-in bake
+action -- distinct from the existing approximate live-preview
+(`panoply_colorize.py`/`panoply_live.py`, kept as-is for interactive speed).
+Cross-validated against the real `panoply_maker.exe` (via `.agentcom`
+bridge, on the real `ryw_hom_caster01_pantabottes_c1/c2/c3` sources): same
+24 `.tga` variants produced, no errors, `.hlsinfo` sizes matched, and `.tga`
+pixel output came back essentially byte-exact (max per-byte diff 1, mean
+0.00, 0% of bytes with diff>20) -- well past the "stretch goal, not a hard
+requirement" bar this port was scoped with. About 8x slower than the native
+binary on the same 24-variant run (~2.4s vs ~19s), not a concern for the
+intended occasional-offline-bake usage.
+
+Cross-validation surfaced one real bug: `dds_export.save_rgba()` wrote
+24-bit RGB `.tga` instead of preserving the source's 32-bit RGBA -- a
+Panda3D `PNMImage`/TGA-writer limitation (the in-memory image had 4
+channels/`has_alpha()==True` right up to `write()`, but the file came back
+3-channel on re-read every time; `.png` through the same code path kept
+alpha fine). Fixed with a hand-rolled `_save_tga_rgba()` (18-byte-header
+uncompressed 32-bit TGA writer, bypassing Panda3D entirely for `.tga`, same
+pattern as this module's existing manual `.dds` writer) -- its first
+`imageDescriptor` byte guess (top-left origin + alpha bits declared) didn't
+match the real tool's own header; byte-diffing the two headers showed the
+real writer uses `imageDescriptor=0x00` (bottom-left origin, alpha bits left
+undeclared despite writing real alpha data -- a common TGA writer
+convention), fixed to match exactly.
+
+**New `ryzom_forgery/panoply_bake.py`**: the file-I/O-free math
+(`panoply_maker.py`) glued to `dds_export.py` (DXT5/mip building, TGA/PNG
+I/O) and `pynel.hls_bank_texture_info`/`hls_texture_bank` (`.hlsinfo`/
+`.hlsbank` serialization) -- `axes_for_source()` (autonomous mode: builds
+`ColorMaskAxis` candidates from `panoply_config.py`, no `.cfg` needed),
+`build_active_masks()`, `bake_source()` (pure math + DDS building, no I/O),
+and two end-to-end writers: `bake_flat()` (plain `.hlsinfo`, matches the
+real `panoply_maker.exe`'s own behavior exactly, used for byte-exact
+cross-validation against that binary) and `bake_and_write()` (the real
+"next patch" workflow, see below).
+
+**Real bake output: a dedicated `build/` folder, never `ryzom-data` itself.**
+A bake writes baked textures into the workspace's `tex/`, and an updated
+`.hlsinfo` + `panoply_files.txt` + `characters.hlsbank` into the workspace's
+`build/` -- starting from, but never overwriting, the real production files
+at `<ryzom-data>/final_bnps/characters_maps_hr/`. `merge_panoply_files_txt()`
+never reorders existing lines (only appends new names, minimal diff against
+the real file); `load_or_empty_hlsbank()` starts from an empty
+`HLSTextureBank()` if the real `characters.hlsbank` doesn't exist yet
+(true as of this writing -- Nuno hasn't copied it into `ryzom-data` yet);
+consecutive bakes in one session accumulate into `build/`'s own state
+(`_pick_existing()` prefers `build/`'s own files over the pristine
+`ryzom-data` ones once they exist) rather than each restarting from
+scratch. Known gap, not fixed: `hls_texture_bank.append_texture_info()` has
+no duplicate-instance detection, so re-baking the same item twice in one
+session appends a second `ColorTexture` instead of replacing the first.
+
+**New `pynel.repository_paths`** (see `logs/pynel.md`) resolves where
+`ryzom-data` actually lives on a given machine, exposed in Patina's Settings
+> Paths as one folder picker per repo (`_draw_repository_paths_settings`).
+Patina's new "Bake real Panoply variants" button
+(`object_editor._bake_panoply_real`, fire icon next to a texture's mask
+thumbnails once at least one mask resolves) refuses to do anything at all
+-- no textures written either -- if `ryzom-data` isn't configured, showing
+a modal popup instead (`_draw_panoply_bake_blocked_popup`) rather than
+silently baking into a `build/` with no real starting point.
+
+**Unified `panoply.cfg`, no `.cfg` ever exposed to the end user.** Patina is
+an end-user tool: it must never ask someone to pick or hand-craft a real
+production `panoply_*.cfg` (there were 6 of them -- `panoply_common.cfg` +
+one per race -- investigated and confirmed they consolidate cleanly into
+one file). `panoply_config.py` was rewritten to read a single bundled
+`ryzom_forgery/panoply.cfg` (real production values, `CConfigFile` syntax,
+comments kept, race-scoped axes prefixed `<race>_hair_*`/`<race>_eyes_*`
+since `.cfg` keys have no native race-scoping) instead of the previous
+`panoply_colors.toml` snapshot -- same public API
+(`get_color_params()`/`available_color_ids()`/`RACE_PREFIX_TO_TABLE`), so
+`object_editor.py`/`panoply_maker.py` needed no further changes. A
+workspace's own `panoply.cfg`, if present, always overrides the bundled
+default entirely; Patina's new gear-icon button next to "Panoply:" copies
+the bundled file into the active workspace as an editable starting point
+(`_copy_panoply_cfg_to_workspace`). `panoply_colors.toml` deleted.
+
+**New `ryzom_forgery/apps/panoply_maker.py`** CLI, dual-mode: autonomous
+(`--input`/`--output`/`--build`, colors from `panoply_config.py`, gated on
+`ryzom-data` being configured, uses `bake_and_write()`) or an explicit
+`.cfg` positional argument (real per-race production shape, uses
+`bake_flat()`, no `ryzom-data` dependency -- the cross-validation path).
+New `dds_export.save_rgba()` (TGA/PNG writer, symmetric to the existing
+`load_rgba()`) needed for writing the full-res baked outputs.
+
+**Live preview didn't pick up an edited workspace `panoply.cfg`.** Caught
+while reasoning through the design (Nuno asked directly): neither
+`_texture_cache` nor `panoply_live.LiveColorizeCache` key on the color
+parameters themselves (only on base name/axes/source mtimes), so an edited
+`.cfg` was invisible to both even though `panoply_config.py` itself already
+reloads it lazily by mtime -- the already-rendered textures just stayed
+cached forever. First instinct was adding the `.cfg`'s mtime to
+`_update_texture_freshness()`'s existing per-second poll, but Nuno pointed
+out the workspace already has an event-driven watcher
+(`workspace_watch.WorkspaceWatcher`) used for `tex/`/`imports/` -- and since
+(unlike base textures/masks, which can live anywhere in search paths) a
+live-editable `panoply.cfg` only ever makes sense at the workspace root,
+that watcher already covers it. Registered `"panoply.cfg"` on it (a
+root-level file's relative path has one part, which
+`WorkspaceWatcher._dispatch()` already treats as its own "subdir" key --
+no code change needed in `workspace_watch.py` itself). The callback
+(background thread) only sets a flag; `_update_texture_freshness()` (main
+thread, already-existing per-second task) consumes it next tick: evicts
+every Panoply-tracked `_texture_cache` entry and calls the new
+`LiveColorizeCache.clear()` (no per-entry eviction existed before -- the
+key's own mtime-based staleness was previously assumed to be the only
+invalidation ever needed), then reuses the same re-apply-all-materials path
+every other freshness change already triggers.
+
+Docs updated/added: `docs/panoply_bake.md` (new), `docs/apps/panoply_maker.md`
+(new), `docs/panoply_maker.md`, `docs/panoply_config.md`, `docs/dds_export.md`,
+`docs/panoply_live.md`, `docs/apps/object_editor.md`.
 
 ## 2026-08-29 — ✨ Add BuildMasksFromConfigFile + combinatorial loop to panoply_maker.py
 
@@ -2220,272 +2562,6 @@ grouped simple-texture materials first, then Multi Bitmap ones:
   (on top of pynel's own read/write normalization, from the `ryzom/pynel` branch), so
   mixed-case names from real data don't linger once touched.
 
-## 2026-08-29 — ✨ Auto-default the Panoply selection once real variants are detected
-
-Follow-up to the panoply_files.txt fixes right below: once those made
-`ryw_mark1_hof_caster01_pantabottes`'s "User color" buttons actually show up, the shape
-still rendered blank/white until Nuno clicked one himself -- `_panoply_selection` starts
-empty on every shape load, and nothing was proactively filling it in even though a real
-variant was right there to show by default.
-
-New `self._panoply_selection_defaulted` flag (reset alongside `_panoply_selection` on
-shape load): `_draw_global_panoply_section()` now applies the same "first value per
-available axis" backfill an empty-selection click already did, but automatically, the
-first time real variants are detected for a freshly loaded shape -- gated on this new
-flag rather than "`_panoply_selection` is empty", specifically so that later clicking
-"skin" to deliberately clear back to the shape's own base texture (an existing, meaningful
-state) doesn't get silently re-defaulted right back on the next frame.
-
-## 2026-08-29 — ✨ Prioritize ryzom-data's own panoply_files.txt over the shipped .bnp's
-
-Nuno hit this directly: Patina wasn't showing any Panoply masks/variants for
-`ryw_mark1_hof_caster01_pantabottes` even though the `.dds` files already exist under
-`ryzom-data/final_bnps/characters_maps_hr/mark_1/` -- traced to `search_paths_dialog.py`
-picking up `panoply_files.txt` opportunistically from whichever `characters_maps_hr.bnp`
-it finds along the user's generic search paths, a shipped copy that only reflects the
-last real `hls_bank_maker` build and had simply never been regenerated for the hof
-variant (only "hom" has ever gone through `panoply_maker` -- see the
-panoply-runtime-tint chantier). `ryzom-data`'s own `final_bnps/characters_maps_hr/panoply_files.txt`
-is the working copy Nuno edits by hand as new items are added, and already lists the hof
-entries.
-
-New `SearchPathsDialog._load_ryzom_data_panoply_variants()`: reads that file directly via
-`pynel.repository_paths` (mtime-cached), now checked **first** in `_merge_and_publish()`
--- wins over both halves of the existing scan-based detection (workspace, then generic
-search paths) whenever `ryzom-data` is configured and has the file; falls back to the
-previous behavior otherwise (unconfigured, or the file doesn't exist there yet). Doc:
-`docs/search_paths.md` updated.
-
-**Second, pre-existing bug found while validating the above**: even reading the right
-file, Patina still reported "no variants detected" for `ryw_mark1_hof_caster01_pantabottes`.
-Traced to `panoply.parse_panoply_files()` hardcoding `.tga` as the only accepted line
-extension -- silently dropping every single line of a real production `panoply_files.txt`
-like `ryzom-data/final_bnps/characters_maps_hr/panoply_files.txt`, which lists `.dds`
-(confirmed: `grep -c` found the 24 real hof entries in the file, all ending `.dds`, all
-skipped). Fixed to accept any extension in `search_paths.TEXTURE_FALLBACK_EXTENSIONS`
-(`.tga`/`.png`/`.dds`) instead. Verified the fixed parsing logic directly in the sandbox
-against a synthetic sample matching the real hof entries (pure-Python, no numpy/panda3d
-needed for this one function) -- correctly extracts `user: [1, 2, ...]` for the right
-stem now. This bug predates today's session entirely (nothing about
-`_load_ryzom_data_panoply_variants()` caused it, it just routed real `.dds`-listing data
-through this function for the first time) -- unclear whether the shipped `.bnp` copies
-Patina previously read from happen to use `.tga` naming (masking the bug so far) or
-whether Panoply detection from a shipped `.bnp` was simply never exercised end-to-end
-before. Doc: `docs/panoply_parsing.md` updated.
-
-## 2026-08-29 — ✨ Threaded Panoply bake with a live progress popup
-
-The real Panoply bake (`_bake_panoply_real`/`_bake_panoply_real_all`) used to run
-synchronously on the main thread -- fine for one texture, but slow enough overall
-(~1s/variant, per the earlier cross-validation timing) that baking several textures at
-once (the new "bake all" button) froze the whole UI for however long that took, with no
-feedback. Nuno asked for a progress popup (current texture, current variant, an overall
-bar) -- which needs the bake to actually run off the main thread for the UI to keep
-redrawing while it works.
-
-`panoply_bake.py`: `bake_source()`/`bake_flat()`/`bake_and_write()` all gained an optional
-`on_variant(suffix, index, total)` callback, called right after each variant is computed
-(`total` from a new `_total_combinations()` helper -- the product of each active mask's
-own color count, known ahead of time without consuming the generator). Called
-synchronously wherever `bake_source()` itself runs -- no threading in this module, that's
-left entirely to the caller.
-
-`object_editor.py`: new `_start_panoply_bake(texture_names)` -- does the
-active-workspace/`ryzom-data` checks (via `request_settings_attention`, imgui-safe, main
-thread only) then spawns a daemon `threading.Thread` running `_run_panoply_bake()`, which
-loops `_bake_panoply_real()` over every name, feeding an `on_variant` callback that
-updates `self._bake_progress` (a plain dict -- safe enough under the GIL for simple field
-writes polled from the main thread, no lock needed) in place. `_bake_panoply_real` itself
-lost its own workspace/`ryzom-data` checks (those moved to `_start_panoply_bake`, since
-neither imgui calls nor `request_settings_attention` are safe off the main thread) and
-gained the `on_variant` passthrough. Both the per-texture fire button and
-`_bake_panoply_real_all()` now go through `_start_panoply_bake()` instead of calling
-`_bake_panoply_real()` directly. New `_draw_bake_progress_popup()` (called every frame
-from `draw_ui`, read-only view of `self._bake_progress`): a modal showing "Texture i/N:
-name", "Variant j/M: suffix", and an `imgui.progress_bar` (texture position + current
-texture's own variant fraction) -- an OK button appears once `done` (or on error) to
-close it and reset `self._bake_progress` to `None`. Refuses to start a second bake while
-one is still running.
-
-Written this session, not yet run/validated on the real machine as of this entry (same
-sandbox limitation as the rest of this Panoply work -- no panda3d/imgui_bundle installed
-there).
-
-## 2026-08-29 — ✨ Settings-attention: jump-to-and-flash instead of popup/disabled buttons
-
-New shared mechanism in `ForgeryApp` (`app.py`, base class every Forgery app subclasses):
-`request_settings_attention(section, field_key, duration=3.0)`. Instead of a disabled
-button with an explanatory tooltip, or a blocking modal popup, a blocked action now jumps
-the user straight to the relevant Settings field: forces the Settings tab selected
-(`imgui.TabItemFlags_.set_selected` passed into `_begin_tab_item_with_icon`, which gained
-a `flags` param for this), forces the right `collapsing_header` section open
-(`imgui.set_next_item_open(True)`), and pulses an orange border around the specific field
-for a few seconds (`sin(time.time()*k)`-driven color/border-size push around just that
-field's draw call). Three consumer helpers (`_consume_settings_tab_flags()`,
-`_consume_settings_section_open()`, `_begin_attention_flash()`/`_end_attention_flash()`)
-do the actual imgui wiring; any subclass app calls `request_settings_attention()` from a
-button's click handler and wires the three consumers into its own Settings tab drawing.
-
-Migrated three previously-disabled/popup-blocked actions in `object_editor.py`:
-- Texture "Edit" button (`_draw_texture_edit_button`): no longer disabled when
-  `image_editor_path` is unset -- always clickable, jumps to Settings > Tools instead.
-- panoply.cfg "Edit" button (`_draw_global_panoply_section`): same for `text_editor_path`.
-- Real Panoply bake (`_bake_panoply_real`): no longer opens a blocking modal popup when
-  `ryzom-data` isn't configured (`pynel.repository_paths`) -- jumps to Settings > Paths
-  instead. The now-unused popup infra (`_PANOPLY_BAKE_BLOCKED_POPUP_ID`,
-  `_panoply_bake_blocked`, `_draw_panoply_bake_blocked_popup`) was removed entirely.
-
-Also added, same session: `_bake_panoply_real_all()` -- a "bake all" fire-icon button next
-to the panoply.cfg gear/edit button in `_draw_global_panoply_section`, looping over every
-texture the loaded shape uses and baking each one that has at least one resolvable mask.
-Complements (doesn't replace) the existing per-texture fire button in
-`_draw_panoply_masks_for`, since `_bake_panoply_real()` itself only ever handles one base
-texture at a time (each texture can have its own distinct set of masks).
-
-Exact imgui_bundle API names used here (`TabItemFlags_.set_selected`,
-`begin_tab_item_simple`'s `flags` param, `set_next_item_open`) weren't verifiable from the
-sandbox (no panda3d/imgui_bundle installed there) -- written by convention with the rest
-of this codebase's already-working imgui_bundle usage. Validated on the real machine
-(2026-08-29, Nuno): works as designed, no API mismatch.
-
-## 2026-08-29 — ✨ Patina: text editor for panoply.cfg, bake-all button
-
-Two UX follow-ups to the real Panoply bake integration (see the entry right below):
-
-- The gear icon next to "Panoply:" (`_copy_panoply_cfg_to_workspace`) is now replaced by
-  a pencil/edit button once a workspace `panoply.cfg` already exists, instead of just
-  staying disabled with a tooltip. Launches a newly-added, separately configurable text
-  editor (`settings.text_editor_path`, Settings > Tools > "Text editor:") -- same pattern
-  as the existing image editor setting used by the Textures tab's own "Edit" button, just
-  mirrored for plain text files.
-- New "bake all" button (fire icon) next to that gear/edit button: loops over every
-  texture the loaded shape uses and bakes each one that has at least one resolvable
-  Panoply mask (`_bake_panoply_real_all()`). The existing per-texture fire button (in
-  `_draw_panoply_masks_for`, next to each texture's own mask thumbnails) stays available
-  for baking just one texture -- `_bake_panoply_real()` itself only ever handles one base
-  texture at a time (each texture can have its own distinct set of masks), so "bake all"
-  is a thin loop on top rather than a change to that function's own scope.
-
-## 2026-08-29 — ✨ Real Panoply bake in Patina (panoply_bake.py, build/ output, repository_paths gating)
-
-Completes the panoply_maker Python port (see `logs/pynel.md`'s `.hlsinfo`
-writer/`CConfigFile` entries and `panoply_maker.py`'s earlier `resample()`/
-`colorize_exact()`/`build_masks_from_config()`/`generate_color_combinations()`
-ports) with the glue layer and wires it into Patina as a real, opt-in bake
-action -- distinct from the existing approximate live-preview
-(`panoply_colorize.py`/`panoply_live.py`, kept as-is for interactive speed).
-Cross-validated against the real `panoply_maker.exe` (via `.agentcom`
-bridge, on the real `ryw_hom_caster01_pantabottes_c1/c2/c3` sources): same
-24 `.tga` variants produced, no errors, `.hlsinfo` sizes matched, and `.tga`
-pixel output came back essentially byte-exact (max per-byte diff 1, mean
-0.00, 0% of bytes with diff>20) -- well past the "stretch goal, not a hard
-requirement" bar this port was scoped with. About 8x slower than the native
-binary on the same 24-variant run (~2.4s vs ~19s), not a concern for the
-intended occasional-offline-bake usage.
-
-Cross-validation surfaced one real bug: `dds_export.save_rgba()` wrote
-24-bit RGB `.tga` instead of preserving the source's 32-bit RGBA -- a
-Panda3D `PNMImage`/TGA-writer limitation (the in-memory image had 4
-channels/`has_alpha()==True` right up to `write()`, but the file came back
-3-channel on re-read every time; `.png` through the same code path kept
-alpha fine). Fixed with a hand-rolled `_save_tga_rgba()` (18-byte-header
-uncompressed 32-bit TGA writer, bypassing Panda3D entirely for `.tga`, same
-pattern as this module's existing manual `.dds` writer) -- its first
-`imageDescriptor` byte guess (top-left origin + alpha bits declared) didn't
-match the real tool's own header; byte-diffing the two headers showed the
-real writer uses `imageDescriptor=0x00` (bottom-left origin, alpha bits left
-undeclared despite writing real alpha data -- a common TGA writer
-convention), fixed to match exactly.
-
-**New `ryzom_forgery/panoply_bake.py`**: the file-I/O-free math
-(`panoply_maker.py`) glued to `dds_export.py` (DXT5/mip building, TGA/PNG
-I/O) and `pynel.hls_bank_texture_info`/`hls_texture_bank` (`.hlsinfo`/
-`.hlsbank` serialization) -- `axes_for_source()` (autonomous mode: builds
-`ColorMaskAxis` candidates from `panoply_config.py`, no `.cfg` needed),
-`build_active_masks()`, `bake_source()` (pure math + DDS building, no I/O),
-and two end-to-end writers: `bake_flat()` (plain `.hlsinfo`, matches the
-real `panoply_maker.exe`'s own behavior exactly, used for byte-exact
-cross-validation against that binary) and `bake_and_write()` (the real
-"next patch" workflow, see below).
-
-**Real bake output: a dedicated `build/` folder, never `ryzom-data` itself.**
-A bake writes baked textures into the workspace's `tex/`, and an updated
-`.hlsinfo` + `panoply_files.txt` + `characters.hlsbank` into the workspace's
-`build/` -- starting from, but never overwriting, the real production files
-at `<ryzom-data>/final_bnps/characters_maps_hr/`. `merge_panoply_files_txt()`
-never reorders existing lines (only appends new names, minimal diff against
-the real file); `load_or_empty_hlsbank()` starts from an empty
-`HLSTextureBank()` if the real `characters.hlsbank` doesn't exist yet
-(true as of this writing -- Nuno hasn't copied it into `ryzom-data` yet);
-consecutive bakes in one session accumulate into `build/`'s own state
-(`_pick_existing()` prefers `build/`'s own files over the pristine
-`ryzom-data` ones once they exist) rather than each restarting from
-scratch. Known gap, not fixed: `hls_texture_bank.append_texture_info()` has
-no duplicate-instance detection, so re-baking the same item twice in one
-session appends a second `ColorTexture` instead of replacing the first.
-
-**New `pynel.repository_paths`** (see `logs/pynel.md`) resolves where
-`ryzom-data` actually lives on a given machine, exposed in Patina's Settings
-> Paths as one folder picker per repo (`_draw_repository_paths_settings`).
-Patina's new "Bake real Panoply variants" button
-(`object_editor._bake_panoply_real`, fire icon next to a texture's mask
-thumbnails once at least one mask resolves) refuses to do anything at all
--- no textures written either -- if `ryzom-data` isn't configured, showing
-a modal popup instead (`_draw_panoply_bake_blocked_popup`) rather than
-silently baking into a `build/` with no real starting point.
-
-**Unified `panoply.cfg`, no `.cfg` ever exposed to the end user.** Patina is
-an end-user tool: it must never ask someone to pick or hand-craft a real
-production `panoply_*.cfg` (there were 6 of them -- `panoply_common.cfg` +
-one per race -- investigated and confirmed they consolidate cleanly into
-one file). `panoply_config.py` was rewritten to read a single bundled
-`ryzom_forgery/panoply.cfg` (real production values, `CConfigFile` syntax,
-comments kept, race-scoped axes prefixed `<race>_hair_*`/`<race>_eyes_*`
-since `.cfg` keys have no native race-scoping) instead of the previous
-`panoply_colors.toml` snapshot -- same public API
-(`get_color_params()`/`available_color_ids()`/`RACE_PREFIX_TO_TABLE`), so
-`object_editor.py`/`panoply_maker.py` needed no further changes. A
-workspace's own `panoply.cfg`, if present, always overrides the bundled
-default entirely; Patina's new gear-icon button next to "Panoply:" copies
-the bundled file into the active workspace as an editable starting point
-(`_copy_panoply_cfg_to_workspace`). `panoply_colors.toml` deleted.
-
-**New `ryzom_forgery/apps/panoply_maker.py`** CLI, dual-mode: autonomous
-(`--input`/`--output`/`--build`, colors from `panoply_config.py`, gated on
-`ryzom-data` being configured, uses `bake_and_write()`) or an explicit
-`.cfg` positional argument (real per-race production shape, uses
-`bake_flat()`, no `ryzom-data` dependency -- the cross-validation path).
-New `dds_export.save_rgba()` (TGA/PNG writer, symmetric to the existing
-`load_rgba()`) needed for writing the full-res baked outputs.
-
-**Live preview didn't pick up an edited workspace `panoply.cfg`.** Caught
-while reasoning through the design (Nuno asked directly): neither
-`_texture_cache` nor `panoply_live.LiveColorizeCache` key on the color
-parameters themselves (only on base name/axes/source mtimes), so an edited
-`.cfg` was invisible to both even though `panoply_config.py` itself already
-reloads it lazily by mtime -- the already-rendered textures just stayed
-cached forever. First instinct was adding the `.cfg`'s mtime to
-`_update_texture_freshness()`'s existing per-second poll, but Nuno pointed
-out the workspace already has an event-driven watcher
-(`workspace_watch.WorkspaceWatcher`) used for `tex/`/`imports/` -- and since
-(unlike base textures/masks, which can live anywhere in search paths) a
-live-editable `panoply.cfg` only ever makes sense at the workspace root,
-that watcher already covers it. Registered `"panoply.cfg"` on it (a
-root-level file's relative path has one part, which
-`WorkspaceWatcher._dispatch()` already treats as its own "subdir" key --
-no code change needed in `workspace_watch.py` itself). The callback
-(background thread) only sets a flag; `_update_texture_freshness()` (main
-thread, already-existing per-second task) consumes it next tick: evicts
-every Panoply-tracked `_texture_cache` entry and calls the new
-`LiveColorizeCache.clear()` (no per-entry eviction existed before -- the
-key's own mtime-based staleness was previously assumed to be the only
-invalidation ever needed), then reuses the same re-apply-all-materials path
-every other freshness change already triggers.
-
-Docs updated/added: `docs/panoply_bake.md` (new), `docs/apps/panoply_maker.md`
-(new), `docs/panoply_maker.md`, `docs/panoply_config.md`, `docs/dds_export.md`,
-`docs/panoply_live.md`, `docs/apps/object_editor.md`.
-
 ## 2026-08-15 — 📝 Add player-friendly material options doc, rename object_viewer to object_editor
 
 Added `nel/tools/forgery/docs/material_options.md`, a plain-language (non-technical,
@@ -2556,79 +2632,3 @@ length-prefixed sections (lines, triangles, quads), each a `(count, capacity)` h
 followed by its index vector. Only the triangle section carries renderable indices
 (`_NbIndexes = triangle_count * 3`); the line and quad sections are read and discarded
 to stay positioned correctly in the stream.
-
-## 2026-08-31 — ✨ Add hairstyle_conform CLI + race_reference cache to Forgery
-
-Added `ryzom_forgery/shape_geometry.py` functions for identifying and snapping a
-hairstyle's boundary: `boundary_edges()`/`boundary_loops()` (open-edge detection via
-connected components), `build_face_vertex_index()` + `main_seam_loop()` (the real
-face-welded seam loop, identified by exact position coincidence with a race's face
-mesh -- picking "the largest boundary loop" is wrong in general, a voluminous
-hairstyle built from independent hair-strand cards can have several loops that don't
-touch the face at all), `seam_ring_by_angle()`/`seam_loop_by_angle_indexed()`/
-`interpolate_seam_ring()`, and `conform_hairstyle_boundary()` (rigid pre-alignment by
-seam centroid, then per-vertex angle-interpolated snap onto a target race's seam
-ring -- non-boundary vertices only receive the rigid translation).
-
-Added `ryzom_forgery/race_reference.py` + bundled `race_reference.cfg`: per
-race/gender key, resolves a face mesh + reference hairstyle by name through Forgery's
-own search paths, and caches the derived `face_index`/`seam_ring` in memory keyed by
-each resolved file's own `(path, mtime)` -- same bundled-default + workspace-override
-+ mtime-cache pattern as `panoply_config.py`.
-
-Added `ryzom_forgery/apps/hairstyle_conform.py`, a CLI (`shape_exporter.py`'s
-argparse-only pattern, no GUI):
-`hairstyle_conform.py SOURCE.shape SOURCE_RACE_KEY TARGET_RACE_KEY OUTPUT.shape --search-path PATH [--workspace DIR]`.
-Only `CMeshMRMSkinned` is supported (the only shape type with a pynel geometry
-writer, see the matching pynel log entry).
-
-Validated end-to-end on real extracted game data (not just synthetic tests): the
-corrected boundary-loop detection was checked against a real voluminous hairstyle
-(`fy_hof_cheveux_basic02.shape`, which has 9 boundary loops, only one of which is the
-real face seam), and the resulting conform was compared against the user's own
-hand-adapted cross-race version of the same hairstyle -- average gap to the
-hand-adapted boundary roughly halved versus the earlier (buggy) largest-loop
-heuristic.
-
-This is part of a broader cross-race hairstyle adaptation investigation that has
-since been set aside as more complex than initially hoped (not every hairstyle of a
-given race shares the same face seam, so a "record once, replay everywhere" transfer
-of manual edits doesn't generalize automatically) -- see
-`/repos/project-todos/ryzom-core/hairstyle-cross-race-conform.md` for the full
-writeup. The code landing here is functional and validated on its own terms
-regardless of that broader pause.
-
-## 2026-08-31 — 🐛 Scale UI fonts by ryztart's own DPI detection, Forgery 1.10.1
-
-A user running at 125% OS display scaling reported the UI font rendering far too
-large. Root cause: Panda3D's own windowing has zero DPI-awareness on Linux (confirmed
-by reading `x11GraphicsWindow.cxx` directly -- no Xft.dpi/XRandR/XSETTINGS query
-anywhere), unlike SDL/GLFW-based Dear ImGui apps, which delegate that to their
-windowing library. Panda3D's `dpi-aware` config variable only affects Windows
-(`SetProcessDpiAwareness`), a no-op on Linux/X11.
-
-Rather than reimplementing fragile, platform-specific DPI queries inside Forgery
-itself (Xft.dpi/xrandr aren't reliably available, don't cover Wayland, and vary by
-compositor), reused a detection that already exists one layer up: ryztart (the
-launcher, a separate project) is built on `pywebview`, whose `webview.screens[i].scale`
-already abstracts Qt/GTK/Cocoa DPI detection across X11/Wayland/Windows/macOS.
-ryztart's `ryzom_forgery_launcher.launcher.call_LaunchApp()` now reads
-`webview.screens[0].scale` (primary screen only -- same known "one number" limitation
-every simple DPI scheme has for multi-monitor setups with differing scales) and passes
-it to the spawned Forgery subprocess via a `RYZOM_FORGERY_DPI_SCALE` env var.
-
-`app.py` gained `_dpi_scale()` (reads that env var, defaults to `1.0` when launched
-directly, e.g. via `dev.sh`, with no ryztart involved), applied to every UI font size
-loaded in `_load_ui_font()`/`_load_icon_font()` (the regular font, the icon font
-merged into it, and the standalone "large icon" font).
-
-Validated end-to-end at 100% scaling on the maintainer's own machine (ryztart
-correctly reports `scale=1.0`, no regression) -- not yet validated at an actual
-non-1.0 scale (no machine available to test that directly); the original 125%
-report came from a different user, who will test this fix in practice. Also
-confirmed via research that on Wayland compositors specifically (e.g. Wayfire),
-whether this fix helps or *makes things worse* depends on that compositor's own
-Xwayland scaling mode: Wayfire bitmap-stretches Xwayland clients by default (its own
-`force_xwayland_scaling` option changes that, at the cost of needing exactly this kind
-of app-side DPI compensation) -- noted here in case a future report describes
-double-scaled (now too-small, not too-large) text on some other compositor.
