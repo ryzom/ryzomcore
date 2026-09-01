@@ -47,15 +47,24 @@ pour ajouter leur logique métier.
  (`app.py`, `app.py`) : persistent la position/taille de fenêtre
  dans `~/.ryzom_forgery/<titre_slugifié>.json`, par app (clé = titre de
  fenêtre slugifié).
+- `_dpi_scale()` (`app.py`, fonction module) : lit la variable d'env
+ `RYZOM_FORGERY_DPI_SCALE` (`1.0` par défaut si absente/invalide) — posée
+ par le launcher Ryztart (`ryzom_forgery_launcher.launcher.call_LaunchApp()`,
+ dépôt `ryztart`) via `webview.screens[0].scale` (Qt/GTK/Cocoa sous le
+ capot, seule source fiable qu'on ait : le fenêtrage propre de Panda3D n'a
+ aucune détection DPI sous Linux). `1.0` (aucun scaling) si l'app est
+ lancée directement (`dev.sh`, sans passer par Ryztart).
 - `_load_ui_font(self)` (`app.py`) : charge la police choisie par
  l'utilisateur (`Settings.ui_font_name`/`ui_font_size`, voir
- `docs/settings.md`) comme police par défaut d'ImGui ; retombe sur
- `_DEFAULT_FONT_NAME` ("Roboto Bold") si le fichier stocké n'existe plus.
+ `docs/settings.md`), multipliée par `_dpi_scale()`, comme police par
+ défaut d'ImGui ; retombe sur `_DEFAULT_FONT_NAME` ("Roboto Bold") si le
+ fichier stocké n'existe plus.
 - `_load_icon_font(self)` (`app.py`) : fusionne les glyphes Font
  Awesome 4 dans la police par défaut (pour utiliser `ICON_FA_*` dans un
  `imgui.text`/`button` normal), et construit en plus `self.large_icon_font`
- (1.5× la taille), une police icône autonome pour les gros boutons
- icône-seule (ex. barres de bascule du viewport dans `object_editor.py`).
+ (1.5× `_ICON_FONT_SIZE * _dpi_scale()`), une police icône autonome pour
+ les gros boutons icône-seule (ex. barres de bascule du viewport dans
+ `object_editor.py`).
 - `draw_panel(self)` / `panel_title(self)` (`app.py`, `app.py`) :
  points d'extension no-op/generic à surcharger par les sous-classes.
 - `_draw_panel_watermark(self)` (`app.py`) : dessine le filigrane de
