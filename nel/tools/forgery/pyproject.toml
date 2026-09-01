@@ -4,10 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ryzom_forgery"
-version = "0.1.0"
+version = "1.2.1"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
-dependencies = ["panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py", "tomlkit"]
+dependencies = [
+	"panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py", "tomlkit", "watchdog",
+	# pynel isn't on PyPI (see README.md) -- direct URL dependency instead,
+	# pointing at the wheel published by ryzom-core's own CI (.gitlab-ci.yml,
+	# build_pynel_wheel/upload_pynel_wheel) so `pip install` of this wheel
+	# alone pulls pynel in too, no separate install step needed.
+	"pynel @ https://gitlab.com/api/v4/projects/ryzom%2Fryzom-core/packages/generic/pynel/main-forgery-release/pynel-0-py3-none-any.whl",
+]
 
 [tool.setuptools]
-packages = ["ryzom_forgery"]
+packages = ["ryzom_forgery", "ryzom_forgery.apps"]
+
+[tool.setuptools.package-data]
+# Non-.py runtime data setuptools wouldn't otherwise bundle into the wheel
+# (only .py files are picked up by default) -- see panoply_config.py's
+# _TOML_PATH.
+ryzom_forgery = ["panoply_colors.toml", "forgery.png", "splashscreen.png", "examples/*.shape"]
