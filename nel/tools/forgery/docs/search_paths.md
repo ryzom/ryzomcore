@@ -52,9 +52,13 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  le coût cumulatif de `yield from` à chaque profondeur ; utilise
  `os.scandir` plutôt que `Path.iterdir` pour réutiliser le type de
  fichier déjà renvoyé par `readdir` et éviter un `stat` par enfant.
-- `iter_all_entries(dirs, bnp_table_cache=None)` (`search_paths.py`) :
+- `iter_all_entries(dirs, bnp_table_cache=None, exclude=None)` (`search_paths.py`) :
  génère tous les `FoundEntry` de tous les dossiers configurés, dans l'ordre
- de priorité.
+ de priorité. `exclude` (forgery-workspace-projects chantier, 2026-09) est
+ un simple callable optionnel `FoundEntry -> bool` (jamais un type
+ workspace-spécifique importé ici, pour garder ce module générique) --
+ seul `_reload_workspace_only` (ci-dessous) en passe un réellement, jamais
+ les scans de dossiers externes.
 - `build_texture_index(dirs)` / `find_texture(entries_by_lower_name, name)`
  (`search_paths.py`) : version simple, non mise en cache, pour des
  appelants ponctuels (ex. le CLI `shape_exporter.py`, un process par
@@ -83,14 +87,26 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
 - `_reload_workspace_only` (`search_paths_dialog.py`) : (re)scanne
  uniquement le dossier du workspace actif ; contrairement à `reload`, un
  appel pendant qu'un scan est déjà en cours **remplace** le générateur en
- cours plutôt que d'être ignoré.
-- `_scan_dirs_incremental` (`search_paths_dialog.py`) : le cœur du
- scan, un **générateur** qui `yield` après chaque entrée traitée — permet à
+ cours plutôt que d'être ignoré. Construit `exclude` via
+ `_make_workspace_exclude(workspace_root, exclusion_rules)` (charge
+ `Settings.exclusion_rules` à chaque appel) et le passe à
+ `_scan_dirs_incremental` -- c'est le seul endroit qui le fait, `reload()`
+ (externe) n'a pas de notion d'exclusion.
+- `_make_workspace_exclude(workspace_root, exclusion_rules)`
+ (`search_paths_dialog.py`, fonction module, 2026-09) : construit le
+ prédicat ci-dessus -- calcule le dossier relatif de chaque `FoundEntry`
+ (l'archive `.bnp` elle-même si l'entrée vit dedans, pas le nom interne)
+ et délègue à `virtual_categories.is_path_excluded()` (voir
+ `docs/virtual_categories.md`) pour la décision dossier/motif fichier.
+- `_scan_dirs_incremental(dirs, bnp_table_cache, cache, exclude=None)`
+ (`search_paths_dialog.py`) : le cœur du scan, un **générateur** qui
+ `yield` après chaque entrée traitée — permet à
  `_advance_external_scan`/`_advance_workspace_scan` de le piloter en
  tranches sur le thread principal. Construit l'index de textures, la liste
  de `.skel`/`.anim` compatibles (avec cache de parsing par `(mtime, size)`,
  y compris un cache des **échecs** de parsing pour ne jamais retenter un
  fichier connu comme non parsable), et détecte/parse `panoply_files.txt`.
+ `exclude` est simplement transmis tel quel à `iter_all_entries`.
 - `ensure_scanned` (`search_paths_dialog.py`) : à appeler une seule
  fois au premier besoin réel (voir `object_editor.py`) — charge un cache
  disque de l'index externe s'il existe (affichage immédiat, potentiellement

@@ -149,6 +149,20 @@ class Explorer:
 		# folders). Unlike the main flat/click-to-navigate view
 		# (_draw_dir_contents()), sub-folders expand in place here.
 		self.pinned_folders = []
+		# Optional callable() -> {category_name: [Path, ...]} -- when set
+		# (e.g. object_editor.py's active workspace, see the
+		# forgery-workspace-projects chantier), drawn the same way as
+		# pinned_folders above (persistent, expandable, above Favorites)
+		# but flat per category rather than mirroring real subfolders: a
+		# workspace's files are grouped by virtual category (shapes/
+		# textures/3d files/masks/anims/skels/others -- see
+		# virtual_categories.py) regardless of where they actually live on
+		# disk. Deliberately decoupled from virtual_categories.py itself
+		# (no import here) -- the host app owns the scan/caching/exclusion-
+		# rules concerns, this just draws whatever dict it hands back, in
+		# the order its keys already come in (virtual_categories.scan_workspace()
+		# builds them in a stable, deliberate category order).
+		self.virtual_categories_source = None
 
 	def selected_items(self) -> list:
 		return list(self._selection.values())
@@ -306,6 +320,29 @@ class Explorer:
 				imgui.tree_pop()
 			imgui.pop_id()
 
+	def _draw_pinned_virtual_categories(self):
+		"""Same visual slot/pattern as _draw_pinned_folders() above (one
+		expandable tree section each), but for virtual_categories_source()'s
+		category -> files buckets instead of real subfolders -- each
+		category is a flat list (no further nesting: the whole point is
+		that a file's real location on disk no longer matters), reusing
+		_draw_leaf() as-is so selecting/double-click-to-load/the
+		right-click command menu all behave exactly like every other entry
+		in the Wexplorer."""
+		if self.virtual_categories_source is None:
+			return
+		buckets = self.virtual_categories_source()
+		for category, paths in buckets.items():
+			imgui.push_id(f"virtual-{category}")
+			opened = imgui.tree_node_ex(
+				"##virtual-category-root", imgui.TreeNodeFlags_.open_on_arrow.value,
+				f"{fa_icons.ICON_FA_FOLDER_OPEN} {category} ({len(paths)})")
+			if opened:
+				for entry in sorted(paths, key=lambda path: path.name.lower()):
+					self._draw_leaf(ExplorerItem(path=entry, name=entry.name), show_thumbnail=True)
+				imgui.tree_pop()
+			imgui.pop_id()
+
 	def _draw_tree_children(self, dir_path: Path):
 		"""Recursive, expand-in-place listing of `dir_path`'s own entries --
 		unlike _draw_dir_contents() (the main view: flat, click-to-navigate,
@@ -386,6 +423,7 @@ class Explorer:
 			imgui.separator()
 
 		self._draw_pinned_folders()
+		self._draw_pinned_virtual_categories()
 		imgui.separator()
 
 		if _icon_button(fa_icons.ICON_FA_SYNC, "Refresh"):

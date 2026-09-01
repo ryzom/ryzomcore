@@ -28,7 +28,7 @@ from pynel import repository_paths
 from pynel.ryzom_animation import AnimationParseError, parse_animation
 from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
 
-from ryzom_forgery import panoply, search_paths
+from ryzom_forgery import panoply, search_paths, virtual_categories
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import SearchPathDir
 
@@ -63,6 +63,26 @@ _RELEVANT_EVENT_TYPES = {"created", "deleted", "modified", "moved"}
 # instead of a checkbox, to save row width.
 _RECURSIVE_ON_COLOR = (1.0, 0.6, 0.0, 1.0)
 _RECURSIVE_OFF_COLOR = (1.0, 1.0, 1.0, 1.0)
+
+
+def _make_workspace_exclude(workspace_root: Path, exclusion_rules):
+	"""Builds the `exclude` predicate _reload_workspace_only() passes to
+	_scan_dirs_incremental()/search_paths.iter_all_entries() -- an excluded
+	workspace file (folder or file-pattern rule, see
+	virtual_categories.is_path_excluded()) is skipped entirely from the
+	texture/.skel/.anim index, same "never taken into account in search"
+	rule as the virtual Explorer categories use for the search side of
+	things (unlike their own display bucketing, where a file-pattern match
+	still shows, just in "others" -- irrelevant here, this predicate only
+	ever gates indexing)."""
+	def exclude(found) -> bool:
+		fs_path = found.bnp_path if found.fs_path is None else found.fs_path
+		try:
+			relative_dir = fs_path.relative_to(workspace_root).parent
+		except ValueError:
+			return False
+		return virtual_categories.is_path_excluded(relative_dir, found.name, exclusion_rules)
+	return exclude
 
 
 def _animation_bone_names(anim):
@@ -512,7 +532,9 @@ class SearchPathsDialog:
 		bnp_table_cache = search_paths.load_bnp_table_cache()
 		cache = search_paths.load_scan_cache()
 		self._workspace_scan_caches = (bnp_table_cache, cache)
-		self._workspace_scan_gen = self._scan_dirs_incremental([self._workspace_dir], bnp_table_cache, cache)
+		exclude = _make_workspace_exclude(Path(self._workspace_dir.path), app_settings.load().exclusion_rules)
+		self._workspace_scan_gen = self._scan_dirs_incremental(
+			[self._workspace_dir], bnp_table_cache, cache, exclude=exclude)
 
 	def _advance_workspace_scan(self):
 		"""Same idea as _advance_external_scan(), for the workspace half."""
@@ -534,7 +556,7 @@ class SearchPathsDialog:
 			self._workspace_scan_gen = None
 			self._workspace_scan_caches = None
 
-	def _scan_dirs_incremental(self, dirs, bnp_table_cache, cache):
+	def _scan_dirs_incremental(self, dirs, bnp_table_cache, cache, exclude=None):
 		"""Pure scan of exactly `dirs` -- no side effects on `self` (the
 		caller decides what to do with the result and when to persist
 		`bnp_table_cache`/`cache`, both mutated in place here: the .bnp
@@ -556,14 +578,19 @@ class SearchPathsDialog:
 		~100ns-1us, negligible against a real scan's own per-entry cost) and
 		gives the finest-grained, most responsive time-slicing. The final
 		_ScanResult comes back as the exhausted generator's own
-		`StopIteration.value` (a `return` inside a generator)."""
+		`StopIteration.value` (a `return` inside a generator).
+
+		`exclude`, forwarded to search_paths.iter_all_entries() as-is --
+		only ever set for the workspace half (see _reload_workspace_only()'s
+		_make_workspace_exclude()), never for the external search paths,
+		which have no exclusion-rules concept of their own."""
 		skeleton_entries, skeleton_bones = {}, {}
 		animation_entries, animation_bones = {}, {}
 		texture_entries = {}
 		panoply_variants = {}
 		total = 0
 
-		entries = search_paths.iter_all_entries(dirs, bnp_table_cache)
+		entries = search_paths.iter_all_entries(dirs, bnp_table_cache, exclude=exclude)
 		while True:
 			# Unconditional, right at the top of the loop body -- every
 			# iteration yields exactly once this way regardless of which of

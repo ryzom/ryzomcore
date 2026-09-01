@@ -32,6 +32,37 @@ class SearchPathDir:
 	recursive: bool = False
 
 
+EXCLUSION_KIND_FOLDER = "folder"
+EXCLUSION_KIND_FILE = "file"
+
+
+@dataclass
+class ExclusionRule:
+	"""One entry of Settings.exclusion_rules -- see workspaces.py's virtual
+	category scan for how these are actually applied. `pattern` is a plain
+	relative path (folder kind) or glob (file kind), relative to a
+	workspace's own root.
+
+	kind="folder": nothing under this folder counts anywhere -- not in the
+	Wexplorer's virtual categories, not in search-path indexing.
+	kind="file": matching files still show (bucketed into the "others"
+	virtual category), but are never returned by search/indexing."""
+	pattern: str
+	kind: str = EXCLUSION_KIND_FOLDER
+
+
+def _default_exclusion_rules() -> List[ExclusionRule]:
+	"""exports/ avoids an import -> shape -> export loop (an exported file
+	re-imported as if it were a source); build/ is derived/final output,
+	not source -- dds/ lives inside it (build/dds/) rather than being its
+	own top-level workspace subfolder, so it's covered by this same rule
+	with no dedicated dds entry needed."""
+	return [
+		ExclusionRule(pattern="exports", kind=EXCLUSION_KIND_FOLDER),
+		ExclusionRule(pattern="build", kind=EXCLUSION_KIND_FOLDER),
+	]
+
+
 @dataclass
 class Settings:
 	explorer_favorites: List[str] = field(default_factory=list)
@@ -42,6 +73,20 @@ class Settings:
 	# Name of the active workspace (subfolder of workspaces_root), or None
 	# if no workspace is currently active.
 	active_workspace: Optional[str] = None
+	# Name of the active project (subfolder of workspaces_root, itself
+	# holding one subfolder per workspace -- see workspaces.py). None is
+	# also the marker used to detect a config that predates projects
+	# (workspaces_root/active_workspace already set, but this still None)
+	# -- same pattern as dpi_scale being None before this field existed,
+	# see workspace_setup_dialog.py's migration flow.
+	active_project: Optional[str] = None
+	# User-editable exclusion rules applied to every workspace's virtual
+	# category scan (see workspaces.py) and to search-path indexing -- see
+	# ExclusionRule's own docstring for the folder/file distinction.
+	# Defaults to _default_exclusion_rules() (exports/, build/) rather than
+	# an empty list, since those two are needed for basic sane behavior
+	# (see that function's docstring), not just examples.
+	exclusion_rules: List[ExclusionRule] = field(default_factory=_default_exclusion_rules)
 	# Per-workspace external mirror folder (see workspace_sync.py) -- keyed
 	# by workspace name, same as active_workspace above. A workspace absent
 	# from this dict has no sync folder configured (auto-mirroring is a
@@ -105,6 +150,7 @@ def load() -> Settings:
 	settings.explorer_favorites = list(data.get("explorer_favorites", []))
 	settings.workspaces_root = data.get("workspaces_root") or None
 	settings.active_workspace = data.get("active_workspace") or None
+	settings.active_project = data.get("active_project") or None
 	settings.workspace_sync_folders = {
 		str(name): str(path) for name, path in data.get("workspace_sync_folders", {}).items()
 	}
@@ -124,6 +170,20 @@ def load() -> Settings:
 		SearchPathDir(path=entry["path"], recursive=bool(entry.get("recursive", False)))
 		for entry in data.get("search_paths", []) if isinstance(entry, dict) and "path" in entry
 	]
+
+	if "exclusion_rules" in data:
+		# Key present (even as an empty list) means the user's own saved
+		# state -- respected as-is, including a deliberately cleared list.
+		# Malformed entries (missing "pattern") are silently skipped, same
+		# tolerance as search_paths above.
+		settings.exclusion_rules = [
+			ExclusionRule(pattern=entry["pattern"], kind=entry.get("kind", EXCLUSION_KIND_FOLDER))
+			for entry in data.get("exclusion_rules", []) if isinstance(entry, dict) and "pattern" in entry
+		]
+	# else: key absent (config predates this field) -- settings already
+	# holds _default_exclusion_rules() from the Settings() constructor
+	# above, nothing to do.
+
 	return settings
 
 
@@ -137,6 +197,8 @@ def save(settings: Settings) -> None:
 		doc["workspaces_root"] = settings.workspaces_root
 	if settings.active_workspace is not None:
 		doc["active_workspace"] = settings.active_workspace
+	if settings.active_project is not None:
+		doc["active_project"] = settings.active_project
 	doc["workspace_sync_folders"] = dict(settings.workspace_sync_folders)
 	if settings.last_workspace_sync_folder is not None:
 		doc["last_workspace_sync_folder"] = settings.last_workspace_sync_folder
@@ -159,6 +221,7 @@ def save(settings: Settings) -> None:
 	doc["dpi_scale"] = settings.dpi_scale
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
+	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]
 
 	directory = config_dir()
 	directory.mkdir(parents=True, exist_ok=True)

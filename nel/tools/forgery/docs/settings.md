@@ -33,7 +33,26 @@ shapes, compatibilité `.skel`/`.anim`, panoplies).
   - `explorer_favorites: List[str]`
   - `export: ExportSettings`
   - `search_paths: List[SearchPathDir]`
-  - `workspaces_root: Optional[str]`, `active_workspace: Optional[str]`
+  - `workspaces_root: Optional[str]`, `active_project: Optional[str]`,
+ `active_workspace: Optional[str]` (forgery-workspace-projects chantier,
+ 2026-09) — `active_project` sert aussi de marqueur de migration : `None`
+ alors que `workspaces_root`/`active_workspace` sont déjà définis signale
+ une config d'avant l'existence des projets (workspaces directement sous
+ `workspaces_root`) -- voir `workspace_setup_dialog.py`'s flux de
+ migration (`docs/workspace_setup_dialog.md`), même principe que
+ `dpi_scale` avant qu'il devienne un simple `float`.
+  - `exclusion_rules: List[ExclusionRule]` (forgery-workspace-projects
+ chantier) : règles appliquées au scan virtuel d'un workspace
+ (`virtual_categories.py`) et à l'indexation des search paths
+ (`search_paths_dialog.py`) — `ExclusionRule(pattern: str, kind: "folder"|"file")`.
+ `kind="folder"` : rien sous ce dossier ne compte nulle part (ni affichage
+ Wexplorer, ni recherche). `kind="file"` (glob) : le fichier reste affiché
+ (catégorie `others`) mais n'est jamais retourné par la recherche. Défaut
+ (`_default_exclusion_rules()`, `settings.py`) : deux entrées dossier,
+ `exports` (évite une boucle import → shape → export) et `build` (sortie
+ dérivée/finale, `dds/` y vit désormais -- voir `docs/workspaces.md`).
+ Éditable dans Settings > Paths (`apps/object_editor.py`'s
+ `_draw_exclusion_rules_settings`).
   - `workspace_sync_folders: Dict[str, str]` (dossier miroir externe par
  workspace, voir `workspace_sync.py`) et
  `last_workspace_sync_folder: Optional[str]` (dernière valeur définie,
@@ -78,7 +97,11 @@ shapes, compatibilité `.skel`/`.anim`, panoplies).
  `export` du TOML (`settings.py`), et `search_paths` est reconstruit
  uniquement à partir des entrées qui sont des dicts contenant une clé
  `"path"` (`settings.py`, entrées malformées silencieusement
- ignorées).
+ ignorées). `exclusion_rules` suit un principe différent des autres listes :
+ si la clé TOML est **absente**, les deux règles par défaut
+ (`_default_exclusion_rules()`) restent en place (config d'avant ce champ) ;
+ si la clé est **présente** (même `[]`), elle est respectée telle quelle,
+ y compris une liste explicitement vidée par l'utilisateur.
 - `save(settings: Settings) -> None` (`settings.py`) : reconstruit un
  document `tomlkit` de zéro (pas d'édition en place du fichier existant),
  avec un commentaire d'en-tête ("safe to edit by hand"). N'écrit chaque

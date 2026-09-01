@@ -54,10 +54,11 @@ from ryzom_forgery.shape_geometry import (
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
 from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher
+from ryzom_forgery import virtual_categories
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog, _truncate_path_to_width
 from ryzom_forgery.workspace_sync import WorkspaceSyncWatcher, SYNCED_SUBDIRS
 from ryzom_forgery.workspace_watch import WorkspaceWatcher
-from ryzom_forgery.workspaces import SUBDIRS as WORKSPACE_SUBDIRS, ensure_structure, reveal_in_system_file_manager
+from ryzom_forgery.workspaces import ensure_structure, reveal_in_system_file_manager
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
@@ -98,6 +99,8 @@ _REPLACE_MATCH_POPUP_ID = "Match materials"
 _IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
 _RESTORE_SCAN_POPUP_ID = "Scanning assets"
 _REOPEN_SHAPE_POPUP_ID = "Reopen last shape?"
+# See _scan_active_workspace_virtual_categories().
+_VIRTUAL_CATEGORIES_RESCAN_INTERVAL = 1.0
 _BAKE_PROGRESS_POPUP_ID = "Baking Panoply variants"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
@@ -1120,6 +1123,8 @@ class ObjectEditorApp(ForgeryApp):
 		self._pending_reopen_shape_item = None  # ExplorerItem awaiting a Yes/No decision, or None -- see _restore_session_state()/_draw_reopen_shape_popup()
 		self._reopen_shape_prompt_open = False
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
+		self._virtual_categories_cache = None  # {category: [Path, ...]} or None -- see _scan_active_workspace_virtual_categories()
+		self._virtual_categories_cache_time = 0.0
 		self._bake_progress = None  # dict or None -- see _start_panoply_bake()/_draw_bake_progress_popup()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
@@ -1321,7 +1326,7 @@ class ObjectEditorApp(ForgeryApp):
 	def _on_active_workspace_changed(self, workspace_dir):
 		"""Fans the active-workspace change out to every folder-scoped watcher
 		this app owns -- called by WorkspaceSetupDialog (see __init__)."""
-		if workspace_dir is not None:
+		if workspace_dir is not None and not self.workspace_setup_dialog.is_active_workspace_external():
 			# Backfills any SUBDIRS missing on disk (a folder introduced in a
 			# later Forgery version, or removed by hand) -- idempotent.
 			# WorkspaceSetupDialog.set_active_workspace() already does this
@@ -1329,7 +1334,10 @@ class ObjectEditorApp(ForgeryApp):
 			# this covers every other path into this method, in particular
 			# __init__ resuming a workspace already active from a previous
 			# session (read straight off active_workspace_dir, bypassing
-			# set_active_workspace() entirely).
+			# set_active_workspace() entirely). Never for an *external*
+			# workspace though (see workspaces.py's own module docstring) --
+			# a folder registered via <Import Folder> is never restructured,
+			# whatever's already there is taken as-is.
 			ensure_structure(workspace_dir)
 		self.search_paths_dialog.set_workspace_dir(workspace_dir)
 		panoply_config.set_workspace_dir(workspace_dir)
@@ -1340,15 +1348,22 @@ class ObjectEditorApp(ForgeryApp):
 		workspace_name = self.workspace_setup_dialog.active_workspace_name
 		sync_folders = app_settings.load().workspace_sync_folders
 		self.workspace_sync.set_sync_folder(sync_folders.get(workspace_name) if workspace_name else None)
-		# Explorer.pinned_folders (see explorer.py): each workspace subfolder
-		# (tex/shapes/anims/skels/exports/imports) as its own expandable tree
-		# section above Favorites, so the workspace's own content stays
+		# Explorer.virtual_categories_source (see explorer.py): the active
+		# workspace's own content, grouped by virtual category
+		# (shapes/textures/3d files/masks/anims/skels/others -- see
+		# virtual_categories.py) rather than real subfolders, so it stays
 		# browsable/loadable-from no matter where the Explorer is currently
-		# navigated to.
+		# navigated to. Forcing the cache stale here (rather than leaving
+		# the previous workspace's scan showing for up to
+		# _VIRTUAL_CATEGORIES_RESCAN_INTERVAL seconds) matters more here
+		# than it would for an in-place file change -- switching workspaces
+		# is an unmistakable jump, a stale listing from the *previous* one
+		# would be actively misleading, not just momentarily outdated.
+		self._virtual_categories_cache = None
 		if workspace_dir is None:
-			self.explorer.pinned_folders = []
+			self.explorer.virtual_categories_source = None
 		else:
-			self.explorer.pinned_folders = [(subdir, workspace_dir / subdir) for subdir in WORKSPACE_SUBDIRS]
+			self.explorer.virtual_categories_source = self._scan_active_workspace_virtual_categories
 		# Forces a fresh _ensure_bind_creatures() lookup: a different (or no
 		# longer) active workspace may have its own creatures_ref.txt
 		# override, resolving to a different cache than before.
@@ -1368,6 +1383,30 @@ class ObjectEditorApp(ForgeryApp):
 		self._bind_slot_overrides = (
 			creature_ref.load_slot_overrides(creature_ref.workspace_slot_overrides_path(workspace_dir))
 			if workspace_dir is not None else {})
+
+	def _scan_active_workspace_virtual_categories(self):
+		"""Explorer.virtual_categories_source callback (see
+		_on_active_workspace_changed()) -- a full recursive scan
+		(virtual_categories.scan_workspace()) is real disk I/O, and
+		draw() runs every ImGui frame, so this is throttled to at most
+		once every _VIRTUAL_CATEGORIES_RESCAN_INTERVAL seconds rather than
+		tied to a specific filesystem-watch event (workspace_watch.py's
+		own per-subdir registration doesn't cover arbitrary/nonstandard
+		nesting, which is exactly the case a virtual category has to
+		handle) -- good enough for a single workspace's typically modest
+		file count, and self-corrects within about a second of any change
+		made through or outside Forgery."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return {}
+		now = time.monotonic()
+		stale = (self._virtual_categories_cache is None
+		         or now - self._virtual_categories_cache_time > _VIRTUAL_CATEGORIES_RESCAN_INTERVAL)
+		if stale:
+			exclusion_rules = app_settings.load().exclusion_rules
+			self._virtual_categories_cache = virtual_categories.scan_workspace(workspace_dir, exclusion_rules)
+			self._virtual_categories_cache_time = now
+		return self._virtual_categories_cache
 
 	def _is_shape_open_at(self, target_path):
 		"""ImportWatcher's `is_shape_open` hook -- runs off its own background
@@ -5174,14 +5213,22 @@ class ObjectEditorApp(ForgeryApp):
 			self._multi_bitmap_hint_shown = False
 
 	def _workspace_shape_save_path(self):
-		"""Where Save writes to -- always <active workspace>/shapes/<name>,
-		regardless of where the shape was originally loaded from (even from
-		inside a .bnp, which used to disable Save entirely). None if there's
-		no active workspace configured yet, or no shape name is known."""
+		"""Where Save writes to -- overwrites wherever a file named
+		self._shape_source_name already exists anywhere in the active
+		workspace (any real nesting, exclusion rules respected -- see
+		virtual_categories.find_existing_file()), regardless of where the
+		shape was originally loaded from (even from inside a .bnp, which
+		used to disable Save entirely) or which real subfolder it actually
+		lives in; falls back to <active workspace>/shapes/<name> only for a
+		genuinely new asset with no existing match anywhere. None if
+		there's no active workspace configured yet, or no shape name is
+		known."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		if workspace_dir is None or not self._shape_source_name:
 			return None
-		return workspace_dir / "shapes" / self._shape_source_name
+		exclusion_rules = app_settings.load().exclusion_rules
+		existing = virtual_categories.find_existing_file(workspace_dir, self._shape_source_name, exclusion_rules)
+		return existing if existing is not None else workspace_dir / "shapes" / self._shape_source_name
 
 	def _texture_source_path_text(self, file_name):
 		"""Human-readable full path of whatever file `file_name` actually
@@ -5594,6 +5641,50 @@ class ObjectEditorApp(ForgeryApp):
 		if not result:
 			return
 		repository_paths.set_path(repo_name, result)
+
+	def _draw_exclusion_rules_settings(self):
+		"""Settings tab, "Paths" section -- edits Settings.exclusion_rules
+		(see settings.py's ExclusionRule, and workspaces.py's virtual
+		category scan / search-path indexing, both of which consume it):
+		a folder-kind rule hides everything under it everywhere (Wexplorer
+		display and search/indexing alike); a file-kind rule only hides
+		from search -- matching files still show, bucketed into "others"
+		(see ExclusionRule's own docstring). Same immediate-save-on-change,
+		no separate Save button, convention as every other Settings field
+		in this tab. Ships with two folder defaults (exports/, build/, see
+		settings.py's _default_exclusion_rules()) but nothing here treats
+		those specially -- removable/editable like any other entry."""
+		imgui.text_wrapped(
+			"Excluded from every workspace -- folders are hidden everywhere, "
+			"file patterns only from search (still shown, under \"others\"):")
+		settings = app_settings.load()
+		remove_index = None
+		for index, rule in enumerate(settings.exclusion_rules):
+			imgui.push_id(f"exclusion-rule-{index}")
+			is_folder = rule.kind == app_settings.EXCLUSION_KIND_FOLDER
+			icon = fa_icons.ICON_FA_FOLDER if is_folder else fa_icons.ICON_FA_FILE
+			tooltip = "Folder (click to switch to file pattern)" if is_folder \
+				else "File pattern (click to switch to folder)"
+			if _icon_button(icon, tooltip, active=is_folder):
+				rule.kind = app_settings.EXCLUSION_KIND_FILE if is_folder else app_settings.EXCLUSION_KIND_FOLDER
+				app_settings.save(settings)
+			imgui.same_line()
+			imgui.set_next_item_width(220)
+			changed, new_pattern = imgui.input_text("##exclusion-rule-pattern", rule.pattern)
+			if changed:
+				rule.pattern = new_pattern
+				app_settings.save(settings)
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_TRASH, "Remove this exclusion rule"):
+				remove_index = index
+			imgui.pop_id()
+		if remove_index is not None:
+			del settings.exclusion_rules[remove_index]
+			app_settings.save(settings)
+
+		if _icon_button(fa_icons.ICON_FA_PLUS, "Add exclusion rule"):
+			settings.exclusion_rules.append(app_settings.ExclusionRule(pattern="", kind=app_settings.EXCLUSION_KIND_FOLDER))
+			app_settings.save(settings)
 
 	def _draw_repository_paths_settings(self):
 		"""Settings tab -- one folder picker per pynel.repository_paths.REPOSITORIES
@@ -6429,6 +6520,8 @@ class ObjectEditorApp(ForgeryApp):
 				self._consume_settings_section_open("Paths")
 				if imgui.collapsing_header("Paths"):
 					self.workspace_setup_dialog.draw_settings_content()
+					imgui.separator()
+					self._draw_exclusion_rules_settings()
 					imgui.separator()
 					self.search_paths_dialog.draw_settings_content()
 					imgui.separator()

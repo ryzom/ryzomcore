@@ -1,5 +1,71 @@
 # Changelog
 
+## 2026-09-01 — ✨ Workspace projects, virtual file categories, exclusion rules, Forgery 3.0.0
+
+Major rework of the workspace system (feedback: "at usage it's not great"),
+two related changes:
+
+1. **Project folders.** `settings.workspaces_root` now holds *project*
+   folders, each containing one or more workspace folders, instead of
+   workspaces living directly under the root
+   (`<root>/<project>/<workspace>/...`). `workspaces.py` reworked around a
+   `(root, project, workspace)` triple: `list_projects`/`create_project`,
+   `list_workspaces(root, project)`, `create_workspace(root, project, name)`.
+   A project can also reference *external* workspaces -- folders living
+   anywhere else on disk, registered (never copied) in the project's own
+   `external_workspaces.toml` manifest (`list_external_workspaces`/
+   `add_external_workspace`/`external_workspace_path`) via a new
+   `<Import Folder>` entry next to `<New>` in the Wexplorer's Workspace
+   combo. An external workspace is never restructured/backfilled with the
+   standard SUBDIRS -- whatever's already there is taken as-is.
+
+   The Wexplorer's old single "Current workspace" combo is now two
+   stacked combos (Project, then Workspace scoped to it) --
+   `workspace_setup_dialog.py`'s `_draw_project_row`/`_draw_workspace_row`.
+   The mandatory first-launch setup popup now also asks for a project name
+   (pre-filled "Ryzom", workspace name pre-filled "WIP"). A config from
+   before this chantier (`workspaces_root`/`active_workspace` already set,
+   `active_project` still the `None` marker) gets a shorter migration-only
+   popup instead, asking just for a project name -- confirming it moves
+   *every* folder currently sitting directly under `workspaces_root` into
+   the new project (`workspaces.migrate_legacy_workspaces`), not just the
+   active one.
+
+2. **Virtual (dynamic) Wexplorer categories.** Inside a workspace, the
+   Wexplorer no longer mirrors the real on-disk folder tree -- new
+   `virtual_categories.py` classifies every file, anywhere in the
+   workspace's real nesting, into one of `shapes`/`textures`/`3d files`/
+   `masks`/`anims`/`skels`/`others`, purely by name (extension, or a
+   `_<axis>` suffix for a Panoply mask, same 4 axes as `panoply.py`'s
+   `AXES`). Nothing is moved on disk -- `explorer.py` gained a
+   `virtual_categories_source` callback (same pattern as its existing
+   `pinned_folders`, but flat per category instead of mirroring real
+   subfolders), fed by `object_editor.py`'s
+   `_scan_active_workspace_virtual_categories()` (throttled to at most one
+   full recursive scan per second, not tied to a specific filesystem-watch
+   event). Save/export target resolution changed to match: saving a shape
+   now overwrites wherever a same-named file already exists anywhere in
+   the workspace (`virtual_categories.find_existing_file`, most recently
+   modified wins on a real duplicate), falling back to the canonical
+   `shapes/` subfolder only for a genuinely new asset --
+   `_workspace_shape_save_path()` no longer assumes a fixed location. This
+   pass only covers shape save/export; texture/mask/other asset paths
+   still target their fixed canonical subfolders.
+
+   New user-editable exclusion rules (`Settings.exclusion_rules`, a Paths
+   > Settings section, `_draw_exclusion_rules_settings()`) control both of
+   the above and search-path indexing: a **folder** rule hides everything
+   under it everywhere (Wexplorer display and `search_paths_dialog.py`
+   indexing alike, via `search_paths.iter_all_entries()`'s new optional
+   `exclude` callable, only ever passed for the active workspace's own
+   scan, never external search paths); a **file pattern** rule only hides
+   from search -- matching files still show, bucketed into `others`.
+   Ships with two folder defaults: `exports/` (avoids an import -> shape ->
+   export loop) and `build/` (derived/final output -- `dds/` moves inside
+   it, `build/dds/`, no longer its own top-level workspace subfolder).
+   Masks are explicitly *not* excluded from anything -- they're Panoply
+   source input, not derived output.
+
 ## 2026-09-01 — ✨ Manual DPI scale control (text live preview), Forgery 2.2.0
 
 Re-added the DPI scale control abandoned earlier the same day (see the

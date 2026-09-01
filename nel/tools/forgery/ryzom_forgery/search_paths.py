@@ -13,7 +13,7 @@ import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator, List, Optional
+from typing import Callable, Iterator, List, Optional
 
 from pynel.ryzom_bnp import BnpError, BnpReader
 
@@ -138,7 +138,8 @@ def _iter_dir_entries(directory: Path, recursive: bool, bnp_table_cache: dict) -
 					yield FoundEntry(name=child.name, fs_path=Path(child.path), bnp_path=None)
 
 
-def iter_all_entries(dirs: List, bnp_table_cache: Optional[dict] = None) -> Iterator[FoundEntry]:
+def iter_all_entries(dirs: List, bnp_table_cache: Optional[dict] = None,
+                      exclude: Optional[Callable[[FoundEntry], bool]] = None) -> Iterator[FoundEntry]:
 	"""Every file found (on disk or inside a .bnp) across every configured
 	folder (a list of `ryzom_forgery.settings.SearchPathDir`, in priority
 	order -- see find_texture()'s note on why that order matters) --
@@ -148,13 +149,23 @@ def iter_all_entries(dirs: List, bnp_table_cache: Optional[dict] = None) -> Iter
 	and populated in place with each .bnp's entry-name listing (see
 	load_bnp_table_cache()/save_bnp_table_cache()) -- pass None (the
 	default) for a one-shot, uncached call (e.g. build_texture_index(),
-	where nothing persists across calls anyway)."""
+	where nothing persists across calls anyway). `exclude`, if given, is
+	called with each FoundEntry and skips it when it returns True --
+	deliberately just a plain callable, not anything workspace-specific
+	imported here, so this module stays the generic scanning logic it
+	already is (see SearchPathsDialog._reload_workspace_only(), the only
+	caller that actually passes one, for the workspace-exclusion-rules use
+	case)."""
 	if bnp_table_cache is None:
 		bnp_table_cache = {}
 	for entry in dirs:
 		directory = Path(entry.path)
-		if directory.is_dir():
-			yield from _iter_dir_entries(directory, entry.recursive, bnp_table_cache)
+		if not directory.is_dir():
+			continue
+		for found in _iter_dir_entries(directory, entry.recursive, bnp_table_cache):
+			if exclude is not None and exclude(found):
+				continue
+			yield found
 
 
 def build_texture_index(dirs: List) -> dict:
