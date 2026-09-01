@@ -40,6 +40,22 @@ _QUIT_BUTTON_COLOR = (0.9, 0.55, 0.7, 1.0)  # pink
 _CONFIRM_YES_COLOR = (0.565, 0.933, 0.565, 1.0)  # lightgreen
 _CONFIRM_NO_COLOR = (1.0, 0.753, 0.796, 1.0)  # pink
 
+# Multi Bitmap slot index -> (quality label, ecosystem label, season label),
+# the three known Georges/engine conventions documented in
+# docs/material_options.md (item_map.typ's map_variant, _creature_texture.typ,
+# and EGSPD::CSeason in ryzom/common/src/game_share/season.h) -- which one
+# actually applies depends on the shape, so all three are always shown together.
+_MULTI_BITMAP_SLOT_LABELS = [
+	("Low Quality", "Forest", "Spring"),  # "Forest": labelled "none" in _creature_texture.typ, but means Forest in practice
+	("Medium Quality", "Lacustre", "Summer"),
+	("High Quality", "Desert", "Autumn"),
+	("Super Quality", "Jungle", "Winter"),
+	("XL Quality", "Primr", None),
+	("Suprem Quality", "goo", None),
+	("Divine Quality", None, None),
+	("Obiwan Quality", None, None),
+]
+
 
 def _icon_button(icon, tooltip, active=False, square=False, large_font=None, active_color=_ACTIVE_COLOR, disabled=False):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
