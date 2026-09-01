@@ -42,13 +42,23 @@ upload_forgery_wheel:
       # The registry path (version folder) can be any string, but the
       # uploaded *filename*'s version field must be a valid PEP 440 version
       # (pip parses it on install) -- CI_COMMIT_REF_SLUG (ryzom-forgery)
-      # isn't one. Real version tracking happens separately, by comparing
-      # pyproject.toml's version (see ryztart's ryzom_forgery_launcher), not
-      # via this filename -- so a fixed, meaningless "0" is fine here.
+      # isn't one. Real version tracking happens separately, via the
+      # ryzom_forgery-version.txt marker uploaded below (see ryztart's
+      # ryzom_forgery_launcher), not via this filename -- so a fixed,
+      # meaningless "0" is fine here.
       curl --fail-with-body -sS \
            --header "JOB-TOKEN: $CI_JOB_TOKEN" \
            --upload-file "$wheel" \
            "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/ryzom_forgery/$CI_COMMIT_REF_SLUG/ryzom_forgery-0-py3-none-any.whl"
+      # Published only once the wheel above is actually up -- ryztart's
+      # ryzom_forgery_launcher reads this instead of pyproject.toml directly,
+      # since the raw git file reflects the commit instantly on push, well
+      # before this job finishes building/uploading the matching wheel.
+      version=$(grep -m1 '^version' nel/tools/forgery/pyproject.toml | sed -E 's/^version\s*=\s*"([^"]+)"/\1/')
+      echo -n "$version" | curl --fail-with-body -sS \
+           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file - \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/ryzom_forgery/$CI_COMMIT_REF_SLUG/ryzom_forgery-version.txt"
 
 # ryzom_forgery depends on pynel at runtime (not on PyPI -- see
 # nel/tools/forgery/README.md), referenced from its own pyproject.toml as a
