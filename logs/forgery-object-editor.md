@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-09-02 — ✨ Split object_editor.py into theme mixins, Forgery 3.0.1-3.0.10 (final smoke pass still pending)
+## 2026-09-02 — ✨ Split object_editor.py into theme mixins, Forgery 3.0.1-3.0.10
 
 `object_editor.py` ("Patina") had grown into a 6635-line, 185-method
 god-object on a single `ObjectEditorApp` class. Split into theme mixin
@@ -116,11 +116,11 @@ lifecycle methods (`__init__`, `on_selection_changed`,
 `_on_exit`, `panel_title`, `draw_panel`) inheriting from every mixin. Manually
 tested on the real machine: Skinning preview panel, Bind preview (creature
 selection/assembly), bind control panels -- all confirmed working unchanged.
-**Still outstanding**: the chantier's own final step, a full manual smoke
-pass across *every* touched feature (materials/panoply, import/replace mesh,
-viewport helpers, save) on the real machine, hasn't been run yet as of this
-entry -- individual features were tested step by step as each mixin landed,
-but not as one final end-to-end pass over the whole reorganized file.
+Chantier closed out with a final full manual smoke pass on the real machine
+(open a shape, edit materials/panoply, bind a creature, import/replace mesh,
+toggle viewport helpers, save) -- confirmed the reorganization changed
+nothing observable, on top of each mixin's own step-by-step testing as it
+landed.
 
 ## 2026-09-01 — ✨ Guard shape loads, single-click, popup colors
 
