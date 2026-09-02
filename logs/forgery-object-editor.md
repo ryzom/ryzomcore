@@ -1,5 +1,119 @@
 # Changelog
 
+## 2026-09-02 — ✨ Split object_editor.py into theme mixins, Forgery 3.0.1-3.0.9 (final smoke pass still pending)
+
+`object_editor.py` ("Patina") had grown into a 6635-line, 185-method
+god-object on a single `ObjectEditorApp` class. Split into theme mixin
+classes under a new `ryzom_forgery/apps/object_editor_mixins/` package, a
+pure code-motion reorganization (no behavior change intended) done in
+small, individually reviewed/tested steps rather than one big commit --
+each mixin extracted, verified (see below), then manually tested on the
+real machine before moving to the next. This was explicitly a prerequisite
+for a planned future chantier (`forgery-edit-history`, not started yet):
+`self.shape_file` was mutated from 40+ scattered call sites across the one
+file, making reliable dirty-tracking impractical -- with mutations now
+organized by theme, each mixin is a natural place to route its own edits
+through a future shared tracked-mutation helper.
+
+**Mixins extracted, in order**: `settings_dialogs.py` (Settings tab +
+bottom bar), `reference_shapes.py` (the 3 scale-reference shapes),
+`mesh_import.py` (import-new/replace-geometry flow), `viewport_transform.py`
+(grid/axes, object transparency, wind, transform panel, camera framing,
+`_rebuild_geometry`), `shape_io.py` (load/save, session state, reopen/
+unsaved/import-conflict popups), `texture_widgets.py` (shared texture/color
+preview widgets, Multi Bitmap editor, workspace texture combo/copy),
+`panoply_ui.py` (global Panoply section, live-preview freshness tracking,
+masks, real bake + progress popup), `materials.py` (material apply/reapply,
+color/texture editing, Textures/Materials tabs), and last -- deliberately
+saved for last per Nuno's call, since it's the largest and most
+state-coupled -- `creature_bind.py` (Skinning preview + Bind preview:
+creature assembly, slot override/attach-point placement, live re-skin).
+`object_editor.py` itself is now reduced to imports, a handful of small
+module-scope helpers/shader sources `__init__` still needs, and
+`ObjectEditorApp` holding only lifecycle methods (`__init__`,
+`on_selection_changed`, `_on_active_workspace_changed`,
+`_scan_active_workspace_virtual_categories`, `_on_exit`, `panel_title`,
+`draw_panel`) plus inheriting from every mixin -- 729 lines, down from
+6635.
+
+**Shared "no-dependency" helper modules**, also under
+`object_editor_mixins/`: `ui_helpers.py` (generic ImGui button helpers +
+shared constants), `geometry_helpers.py` (pure Panda3D geometry-building
+functions), `skin_state_helpers.py` (pure numpy/Panda3D live-skinning math
+-- `_WindState`/`_SkinState`/`_MrmSkinState` and their build/reskin
+functions, shared by the main shape's own live preview and the Bind
+preview's assembled creature). These exist specifically to avoid a real
+circular-import crash found partway through step 1: `object_editor.py` can
+be loaded under two different `sys.modules` identities depending on launch
+path (`python -m ryzom_forgery.apps.object_editor` registers it as
+`__main__`; `ryzom_forgery/__init__.py`'s app-discovery, used by ryztart,
+imports it as `ryzom_forgery.apps.object_editor`) -- a mixin importing
+anything back from `object_editor.py` at module level re-triggers a second,
+full re-execution of that file under the other identity the first time
+both code paths are in play, landing on an `ImportError` for a name that
+isn't defined yet on the partially-initialized module. Fix: every mixin
+and every shared helper module only ever imports from these dependency-free
+modules (or straight from third-party/`ryzom_forgery`/`pynel` modules),
+never from `object_editor.py` itself.
+
+**Verification method**: a throwaway static-analysis script (not committed,
+sandbox scratchpad only) parsed `object_editor.py` + every mixin via `ast`
+after each step and checked: (1) every method present on `ObjectEditorApp`
+before the step still exists exactly once across the class + all mixins
+after; (2) signatures (args/decorators) are byte-identical for every method
+present on both sides -- a pure move changes zero signatures; (3) every
+`self.<name>(...)` call site resolves to a real method somewhere scanned
+(catches a call left pointing at something dropped/renamed); (4) every
+module-level constant/function defined in a shared mixin module and still
+referenced by real code in `object_editor.py` is actually imported there
+(catches exactly the "moved a constant, forgot to re-import it" class of
+bug -- caught twice in practice, see below). Content-identical moves (steps
+with no shared-dependency extraction needed) were also spot-checked with a
+literal `diff` between the pre-move block and the post-move mixin file.
+
+**Bugs found and fixed along the way** (all pre-existing logic, exposed or
+caught by this refactor, not new features):
+
+- The circular-import crash above (step 1, before the `ui_helpers.py`
+  pattern was established) -- `NameError: name 'SettingsDialogsMixin' is
+  not defined` / `ImportError ... partially initialized module`, diagnosed
+  from the real traceback down to the dual-module-identity root cause.
+- Missing `##id` suffixes causing real ImGui ID collisions between two
+  buttons using the same bare icon glyph as their only ID, in the same
+  `push_id()` scope: the exclusion-rules "+" button vs. the search-paths
+  "+" button (both "Paths" section); the Multi Bitmap editor's per-texture
+  Panoply bake button vs. the global Panoply section's own bake-all button
+  (same tab); diffuse vs. specular texture preview thumbnail, copy button,
+  edit button, and browse button all sharing one ID each within a single
+  material row once a material could actually have both (previously latent
+  since almost no real material had a populated stage-1 specular texture
+  to trigger the specular half at all).
+- The Multi Bitmap editor's own trailing "Masks:" section (a
+  `_draw_panoply_masks_for()` call tacked onto the end, for the
+  representative slot's texture only) was dead weight duplicating the
+  global Panoply section's own bake-all button one screen up, and the
+  source of the bake-button ID collision above -- removed entirely.
+- Materials in Specular render mode with no stage-1 texture yet had no way
+  to get one from the UI at all (`_set_material_shader_type()` only ever
+  flipped the enum, never created the texture object) -- fixed to create
+  an empty `CTextureCube` (6 blank faces) by default, informed by a
+  real full-data scan (`pynel`, via the `.agentcom` bridge, run on the
+  real machine): 6559 `.shape` files scanned, 988 real Specular materials
+  found, every single one using a cube map, zero using a flat file -- cube
+  is the only default backed by real content. That fix's first version
+  crashed (`TypeError: object of type 'NoneType' has no len()`) the first
+  time the Multi Bitmap editor's own specular-slot sync touched a freshly
+  created face, since `Texture.file_names` defaults to `None` and nothing
+  else initializes it before that code path assumes a real list -- fixed
+  by seeding `file_names=[]` on each created face.
+
+Version bumped once per step (Forgery 3.0.1 through 3.0.9, one full-minor
+step per mixin extracted). **Still outstanding**: the chantier's own final
+step, a full manual smoke pass across every touched feature on the real
+machine, hasn't been run yet as of this entry -- individual features were
+tested step by step as each mixin landed, but not as one final end-to-end
+pass over the whole reorganized file.
+
 ## 2026-09-01 — ✨ Guard shape loads, single-click, popup colors
 
 Three related UX changes to the Explorer / shape-loading flow, Forgery
