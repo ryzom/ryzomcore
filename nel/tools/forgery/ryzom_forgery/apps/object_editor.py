@@ -20,7 +20,7 @@ from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
 from ryzom_forgery import creature_ref
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
-from ryzom_forgery.import_watcher import ImportWatcher
+from ryzom_forgery.import_watcher import ImportWatcher, IMPORT_EXTENSIONS
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply_config
@@ -29,10 +29,10 @@ from ryzom_forgery.properties import draw_properties
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
-from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher
+from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher, TEX_EXTENSIONS
 from ryzom_forgery import virtual_categories
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog, _truncate_path_to_width
-from ryzom_forgery.workspace_sync import WorkspaceSyncWatcher, SYNCED_SUBDIRS
+from ryzom_forgery.workspace_sync import WorkspaceSyncWatcher, SYNCED_EXTENSIONS
 from ryzom_forgery.workspace_watch import WorkspaceWatcher
 from ryzom_forgery.workspaces import ensure_structure
 
@@ -408,15 +408,18 @@ class ObjectEditorApp(
 		# near-identical dedicated Observers, consolidated 2026-08-27).
 		self.import_watcher = ImportWatcher(
 			is_shape_open=self._is_shape_open_at, on_open_shape_conflict=self._on_open_shape_conflict,
-			on_status=self._on_import_status)
-		self.workspace_sync = WorkspaceSyncWatcher()
-		self.tex_dds_sync = TexDdsSyncWatcher(on_status=self._on_import_status)
+			on_status=self._on_import_status,
+			on_name_conflict=lambda a, b: self._on_name_conflict("imports", a, b))
+		self.workspace_sync = WorkspaceSyncWatcher(
+			on_name_conflict=lambda a, b: self._on_name_conflict("sync", a, b))
+		self.tex_dds_sync = TexDdsSyncWatcher(
+			on_status=self._on_import_status,
+			on_name_conflict=lambda a, b: self._on_name_conflict("textures", a, b))
 		self.workspace_watch = WorkspaceWatcher()
-		self.workspace_watch.register("imports", self.import_watcher.handle_settled)
-		self.workspace_watch.register("tex", self.tex_dds_sync.handle_settled)
-		self.workspace_watch.register("panoply.cfg", self._on_panoply_cfg_settled)
-		for _synced_subdir in SYNCED_SUBDIRS:
-			self.workspace_watch.register(_synced_subdir, self.workspace_sync.handle_settled)
+		self.workspace_watch.register_extension(IMPORT_EXTENSIONS, self.import_watcher.handle_settled)
+		self.workspace_watch.register_extension(TEX_EXTENSIONS, self.tex_dds_sync.handle_settled)
+		self.workspace_watch.register_exact("panoply.cfg", self._on_panoply_cfg_settled)
+		self.workspace_watch.register_extension(SYNCED_EXTENSIONS, self.workspace_sync.handle_settled)
 		self._workspace_sync_folder_dialog = None  # active portable_file_dialogs.select_folder, or None
 		self._repository_paths_dialog = None  # active portable_file_dialogs.select_folder, or None
 		self._repository_paths_dialog_repo = None  # which pynel.repository_paths.REPOSITORIES entry _repository_paths_dialog is for
@@ -430,6 +433,16 @@ class ObjectEditorApp(
 		# drained once per frame in draw_ui() since sysinfo.set_status() needs
 		# imgui state that's main-thread-only.
 		self._pending_import_status = None  # (message, is_error) or None
+		# Same cross-thread-safe queuing pattern, fed by the 3 watchers'
+		# own on_name_conflict hook (import_watcher/tex_dds_sync/
+		# workspace_sync alike) -- appended, not overwritten, since a single
+		# startup scan can surface several independent conflicts at once
+		# (see _on_name_conflict()/_draw_name_conflict_popup() in
+		# shape_io.py).
+		self._pending_name_conflicts = []  # [(group, path_a, path_b), ...]
+		self._name_conflict_popup_opened = False
+		self._name_conflict_field_a = ""
+		self._name_conflict_field_b = ""
 		# Active workspace's folder always searched first (see the
 		# Workspaces chantier in `.todo/forgery-object-editor.md`) -- synced
 		# on every change via this callback, and once right away here so a
@@ -656,6 +669,7 @@ class ObjectEditorApp(
 		self._draw_restore_scan_popup()
 		self._draw_bake_progress_popup()
 		self._draw_import_conflict_popup()
+		self._draw_name_conflict_popup()
 		self._flush_pending_import_status()
 
 		if self.shape_error:

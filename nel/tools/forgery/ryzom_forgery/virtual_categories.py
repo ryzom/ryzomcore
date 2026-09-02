@@ -123,6 +123,20 @@ def _iter_included_files(workspace_root: Path, exclusion_rules) -> Iterator[Path
 			yield current_dir / filename
 
 
+def iter_included_files(workspace_root: Path, exclusion_rules) -> Iterator[Path]:
+	"""Every file under `workspace_root` that isn't excluded at all, folder
+	or file-kind alike -- unlike _iter_included_files() above (only prunes
+	folder-kind, kept file-kind-excluded files visible for
+	scan_workspace()/find_existing_file()'s own display/save-target
+	purposes), this is for the workspace watcher's own extension-triggered
+	scans (see workspace_watch.py, import_watcher.py, tex_dds_sync.py,
+	workspace_sync.py): an excluded file must never be auto-imported/
+	converted/synced, full stop."""
+	for file_path in _iter_included_files(workspace_root, exclusion_rules):
+		if not _is_file_excluded(file_path.name, exclusion_rules):
+			yield file_path
+
+
 def scan_workspace(workspace_root: Path, exclusion_rules) -> Dict[str, List[Path]]:
 	"""Recursively scans `workspace_root`, bucketed by virtual category
 	(see categorize()) -- regardless of which real subfolder a file

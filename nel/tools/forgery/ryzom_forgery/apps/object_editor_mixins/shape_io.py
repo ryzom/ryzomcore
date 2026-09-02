@@ -11,7 +11,7 @@ itself -- see ui_helpers.py's module docstring for why.
 from datetime import datetime
 from pathlib import Path
 
-from imgui_bundle import imgui
+from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui
 from panda3d.core import Quat
 
 from pynel.ryzom_shape import Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
@@ -21,8 +21,9 @@ from ryzom_forgery import virtual_categories
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.popup_utils import center_next_popup
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT
+from ryzom_forgery.workspaces import reveal_in_system_file_manager
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
-	_colored_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR, _MULTI_BITMAP_SLOT_LABELS,
+	_colored_button, _icon_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR, _MULTI_BITMAP_SLOT_LABELS,
 )
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
@@ -45,6 +46,18 @@ _IMPORT_CONFLICT_CANCEL_COLOR = (0.8, 0.75, 0.15, 1.0)  # yellow
 # in this file, same green as _IMPORT_CONFLICT_BACKUP_COLOR above.
 _IMPORT_STATUS_ERROR_COLOR = (1.0, 0.4, 0.4, 1.0)  # red
 _IMPORT_STATUS_SUCCESS_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
+
+# _draw_name_conflict_popup(): the workspace watcher's shared duplicate-
+# name guard (see duplicate_name_guard.py) fires on_name_conflict() for 3
+# independent groups (import_watcher/tex_dds_sync/workspace_sync), each
+# flattening its matched files to a name-only output -- this one popup
+# handles all 3, the message just varies by group.
+_NAME_CONFLICT_POPUP_ID = "Duplicate file name"
+_NAME_CONFLICT_MESSAGES = {
+	"imports": "These two source meshes would both export to the same shapes/<name>.shape file:",
+	"textures": "These two textures would both convert to the same build/dds/<name>.dds file:",
+	"sync": "These two files would both sync to the same external file name:",
+}
 
 
 def _center_next_widget(width):
@@ -91,6 +104,143 @@ class ShapeIOMixin:
 		self._pending_import_status = None
 		color = _IMPORT_STATUS_ERROR_COLOR if is_error else _IMPORT_STATUS_SUCCESS_COLOR
 		self.sysinfo.set_status(message, color=color)
+
+	def _on_name_conflict(self, group, path_a, path_b):
+		"""on_name_conflict hook shared by import_watcher/tex_dds_sync/
+		workspace_sync (see duplicate_name_guard.py) -- runs off whichever
+		background thread detected it, so only queues state;
+		_draw_name_conflict_popup() (called once per frame from
+		draw_panel()) does the actual imgui/disk work on the main thread.
+		Appended, not overwritten -- a single startup scan can surface
+		several independent conflicts at once, each gets its own popup in
+		turn."""
+		self._pending_name_conflicts.append((group, path_a, path_b))
+
+	def _apply_name_conflict_keep(self, keep_path, delete_path):
+		"""Deletes `delete_path` -- the resulting real filesystem delete
+		event settles through the normal watch, which hands the surviving
+		`keep_path` back to whichever watcher was blocking on it (see
+		DuplicateNameGuard.remove()), so no direct call into
+		import_watcher/tex_dds_sync/workspace_sync is needed here."""
+		try:
+			delete_path.unlink()
+		except OSError as exc:
+			self.sysinfo.set_status(f"Could not delete {delete_path.name}: {exc}", color=_IMPORT_STATUS_ERROR_COLOR)
+
+	def _apply_name_conflict_rename(self, path_a, path_b, name_a, name_b):
+		"""Renames whichever of the two files actually got a different name
+		typed into the popup (a field left unchanged is a no-op) -- the
+		resulting real filesystem rename settles through the normal watch
+		like any other rename, re-checking both the old (now-gone) and new
+		name normally."""
+		for path, new_name in ((path_a, name_a), (path_b, name_b)):
+			new_name = new_name.strip()
+			if not new_name or new_name == path.name:
+				continue
+			try:
+				path.rename(path.with_name(new_name))
+			except OSError as exc:
+				self.sysinfo.set_status(f"Could not rename {path.name}: {exc}", color=_IMPORT_STATUS_ERROR_COLOR)
+
+	def _draw_name_conflict_popup(self):
+		"""Two different source files sharing the same output name (see
+		_on_name_conflict()) -- neither is being processed
+		(imported/converted/synced) by whichever watcher detected it until
+		this is resolved here: keep one (deletes the other), or rename one
+		or both (both kept). Handles the oldest still-pending conflict
+		first; a conflict resolved from outside this popup (e.g. one file
+		deleted by hand) while it's queued or open is simply dropped, no
+		popup shown for it."""
+		if not self._pending_name_conflicts:
+			self._name_conflict_popup_opened = False
+			return
+		# None of these is nested under this popup -- any of them can be
+		# open at the very same frames this one wants to open (the reopen/
+		# restore-scan pair at startup; the import-conflict popup from a
+		# live fs event racing with this one's own background-thread
+		# trigger), and Dear ImGui doesn't cleanly support two
+		# independently-opened top-level modals fighting over the popup
+		# stack on the same frames (confirmed live, 2026-09-02: caused the
+		# reopen-shape popup to flicker and become unclickable). Simplest
+		# robust fix: this popup just waits its turn rather than trying to
+		# coexist -- _pending_name_conflicts stays queued, nothing is lost.
+		if (self._reopen_shape_prompt_open or self._restore_scan_popup_open
+		        or self._pending_import_conflict is not None):
+			return
+		group, path_a, path_b = self._pending_name_conflicts[0]
+
+		if not self._name_conflict_popup_opened:
+			if not path_a.exists() or not path_b.exists():
+				self._pending_name_conflicts.pop(0)
+				return
+			self._name_conflict_field_a = path_a.name
+			self._name_conflict_field_b = path_b.name
+			imgui.open_popup(_NAME_CONFLICT_POPUP_ID)
+			self._name_conflict_popup_opened = True
+
+		# always=True (not the default appearing-only): a conflict can be
+		# detected by a background thread's startup scan (set_workspace_dir(),
+		# called from __init__) before the very first ImGui frame, when
+		# Panda3D's own window geometry can still be stale -- same reasoning
+		# as _draw_reopen_shape_popup()'s own center_next_popup() call, see
+		# center_next_popup()'s own docstring.
+		center_next_popup(always=True)
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_NAME_CONFLICT_POPUP_ID, None, flags)
+		if not opened:
+			return
+
+		if not path_a.exists() or not path_b.exists():
+			self._pending_name_conflicts.pop(0)
+			self._name_conflict_popup_opened = False
+			imgui.close_current_popup()
+			imgui.end_popup()
+			return
+
+		imgui.text_wrapped(_NAME_CONFLICT_MESSAGES.get(group, "These two files share the same name:"))
+		imgui.separator()
+
+		for label, path, field_attr in (
+			("1", path_a, "_name_conflict_field_a"), ("2", path_b, "_name_conflict_field_b")):
+			imgui.text(f"File {label}:")
+			imgui.same_line()
+			if _icon_button(
+				f"{fa_icons.ICON_FA_EYE}##name-conflict-reveal-{label}",
+				f"Reveal {path} in the system file manager"):
+				reveal_in_system_file_manager(path)
+			imgui.set_next_item_width(300)
+			_, new_value = imgui.input_text(f"##name-conflict-{label}", getattr(self, field_attr))
+			setattr(self, field_attr, new_value)
+			if imgui.is_item_hovered():
+				imgui.set_tooltip(str(path))
+
+		imgui.separator()
+		can_rename = (
+			self._name_conflict_field_a.strip() != "" and self._name_conflict_field_b.strip() != ""
+			and self._name_conflict_field_a.strip().lower() != self._name_conflict_field_b.strip().lower())
+
+		if imgui.button("Keep only file 1"):
+			self._pending_name_conflicts.pop(0)
+			self._name_conflict_popup_opened = False
+			imgui.close_current_popup()
+			self._apply_name_conflict_keep(path_a, path_b)
+		imgui.same_line()
+		if imgui.button("Keep only file 2"):
+			self._pending_name_conflicts.pop(0)
+			self._name_conflict_popup_opened = False
+			imgui.close_current_popup()
+			self._apply_name_conflict_keep(path_b, path_a)
+		imgui.same_line()
+		imgui.begin_disabled(not can_rename)
+		if _colored_button("Rename", _CONFIRM_YES_COLOR):
+			self._pending_name_conflicts.pop(0)
+			self._name_conflict_popup_opened = False
+			imgui.close_current_popup()
+			self._apply_name_conflict_rename(
+				path_a, path_b, self._name_conflict_field_a, self._name_conflict_field_b)
+		imgui.end_disabled()
+
+		imgui.end_popup()
 
 	def _reload_shape_value_from_disk(self, target_path):
 		"""Pulls target_path's just-rewritten geometry/materials back into the
@@ -166,6 +316,13 @@ class ShapeIOMixin:
 		no popup, straight to the update."""
 		if self._pending_import_conflict is None:
 			self._import_conflict_popup_opened = False
+			return
+		# Same reasoning as _draw_name_conflict_popup()'s own wait-your-turn
+		# guard -- Dear ImGui doesn't cleanly support two independently-
+		# opened top-level modals fighting over the popup stack on the same
+		# frames (confirmed live, 2026-09-02: caused visible flicker).
+		if (self._reopen_shape_prompt_open or self._restore_scan_popup_open
+		        or self._pending_name_conflicts or self._name_conflict_popup_opened):
 			return
 
 		if not self._import_conflict_popup_opened:

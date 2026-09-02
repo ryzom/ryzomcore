@@ -1,24 +1,40 @@
-"""Watches a workspace's `imports/` folder for new/changed source meshes
-(any format `shape_import.IMPORTERS` knows -- .obj/.dae/.fbx/.gltf/.glb) and
+"""Watches a workspace for new/changed source meshes anywhere in it (any
+format `shape_import.IMPORTERS` knows -- .obj/.dae/.fbx/.gltf/.glb) and
 keeps `<workspace>/shapes/<name>.shape` in sync
 automatically -- see the "Auto-export imports/ -> shapes/" chantier in
 `project-todos/ryzom-core/forgery-object-editor.md`.
 
 Doesn't own its own filesystem watch -- `handle_settled()` is meant to be
-registered onto a shared `workspace_watch.WorkspaceWatcher` for the
-"imports" subfolder (see apps/object_editor.py). See workspace_watch.py's
-module docstring for why this was consolidated out of a dedicated Observer
-per feature.
+registered onto a shared `workspace_watch.WorkspaceWatcher` via
+`register_extension()` for `IMPORTERS`'s extensions (see
+apps/object_editor.py). See workspace_watch.py's module docstring for why
+this was consolidated out of a dedicated Observer per feature.
+
+Reworked 2026-09-02 (see the workspace-watcher chantier in
+project-todos/ryzom-core/forgery-object-editor.md): triggers on a matching
+source anywhere in the workspace now, not just `imports/` (that folder is
+still created as the suggested default drop zone, just no longer special
+to the watcher itself). Since two different sources anywhere in the
+workspace sharing a target name (after sanitize_shape_name(), case-
+insensitive) would silently collide on the same `shapes/<name>.shape`, a
+`DuplicateNameGuard` (see that module) tracks them and routes a collision
+to `on_name_conflict()` instead of exporting/updating either file.
 """
 
 import re
+import threading
 from datetime import datetime
 from pathlib import Path
 
+from ryzom_forgery import settings as app_settings
+from ryzom_forgery.duplicate_name_guard import DuplicateNameGuard
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT
 from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, find_importer
+from ryzom_forgery.virtual_categories import iter_included_files
 
 from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
+
+IMPORT_EXTENSIONS = {f".{ext}" for ext in IMPORTERS}
 
 # Only letters, digits, '_' and '-' survive; everything else (spaces, accents,
 # punctuation...) becomes '_'. Case is kept as-is.
@@ -135,15 +151,16 @@ def update_existing_shape(source_path: Path, target_path: Path) -> None:
 
 
 class ImportWatcher:
-	"""Keeps the active workspace's `shapes/` in sync with its `imports/`
-	folder -- see this module's docstring. Call `set_workspace_dir()`
-	whenever the active workspace changes (see object_editor.py); pass None
-	to stop tracking. Doesn't watch the filesystem itself -- register
-	`handle_settled` onto a shared `workspace_watch.WorkspaceWatcher` for
-	the "imports" subfolder instead."""
+	"""Keeps the active workspace's `shapes/` in sync with source meshes
+	found anywhere in it -- see this module's docstring. Call
+	`set_workspace_dir()` whenever the active workspace changes (see
+	object_editor.py); pass None to stop tracking. Doesn't watch the
+	filesystem itself -- register `handle_settled` onto a shared
+	`workspace_watch.WorkspaceWatcher` via `register_extension()` for
+	`IMPORTERS`'s extensions instead."""
 
-	def __init__(self, is_shape_open=None, on_open_shape_conflict=None, on_status=None):
-		"""All three hooks run off whatever thread calls handle_settled()
+	def __init__(self, is_shape_open=None, on_open_shape_conflict=None, on_status=None, on_name_conflict=None):
+		"""All four hooks run off whatever thread calls handle_settled()
 		(the shared WorkspaceWatcher's background thread in practice), and
 		are optional -- without them (e.g. test.sh's headless use), an
 		existing target is always updated in place directly and outcomes are
@@ -167,11 +184,19 @@ class ImportWatcher:
 		(new shape written, updated, backed up and re-exported, or a failure)
 		alongside the unconditional `print()` -- the host app's hook to
 		surface the same message in its own UI (see object_editor.py's
-		_on_import_status())."""
+		_on_import_status()).
+
+		`on_name_conflict(path_a, path_b)`, if given, is called whenever two
+		different sources would produce the same target `shapes/<name>.shape`
+		(see DuplicateNameGuard) -- neither is processed until the host app
+		resolves it."""
 		self._is_shape_open = is_shape_open
 		self._on_open_shape_conflict = on_open_shape_conflict
 		self._on_status = on_status
 		self._workspace_dir = None
+		self._guard = DuplicateNameGuard(
+			key_of=lambda path: sanitize_shape_name(path.stem).lower(),
+			on_conflict=on_name_conflict or (lambda path_a, path_b: None))
 
 	def _report(self, message, is_error=False):
 		print(f"[import_watcher] {message}")
@@ -179,32 +204,60 @@ class ImportWatcher:
 			self._on_status(message, is_error)
 
 	def set_workspace_dir(self, workspace_dir):
-		"""Tracks the active workspace and ensures its `imports/` subfolder
-		exists. Pass None when no workspace is active."""
+		"""Tracks the active workspace, ensures its `imports/` subfolder
+		exists (still the suggested default drop zone, no longer special to
+		the watcher itself), and rebuilds the duplicate-name index on a
+		background thread -- only to catch a conflict that already existed
+		before this session started watching; doesn't re-trigger export/
+		update for anything not already tracked as safe (this watcher is
+		event-driven, not a reconciler like tex_dds_sync/workspace_sync).
+		Pass None when no workspace is active."""
 		self._workspace_dir = Path(workspace_dir) if workspace_dir is not None else None
+		self._guard.reset()
 		if self._workspace_dir is not None:
 			(self._workspace_dir / "imports").mkdir(parents=True, exist_ok=True)
+			threading.Thread(target=self._rebuild_index, daemon=True).start()
+
+	def _import_sources(self):
+		exclusion_rules = app_settings.load().exclusion_rules
+		return (
+			path for path in iter_included_files(self._workspace_dir, exclusion_rules)
+			if path.suffix.lower() in IMPORT_EXTENSIONS)
+
+	def _rebuild_index(self):
+		if self._workspace_dir is not None:
+			self._guard.scan(self._import_sources())
 
 	def handle_settled(self, source_path):
-		"""Registered onto a shared WorkspaceWatcher for the "imports"
-		subfolder -- runs off that watcher's background thread. Silently
-		ignores files that no longer exist (deleted before/while the
-		debounce settled -- imports/ is a one-way staging area, nothing to
-		clean up on delete, unlike tex/'s dds/ mirror). Reports (not
-		silently ignores) a file whose format find_importer() doesn't know
-		how to import (see IMPORTERS in shape_import.py) -- dropping
-		one in imports/ used to do nothing with no feedback at all."""
+		"""Registered onto a shared WorkspaceWatcher via register_extension()
+		for IMPORTERS's extensions -- runs off that watcher's background
+		thread. A file that no longer exists (deleted, or the source side of
+		a rename) is dropped from the duplicate-name index -- if that
+		resolves a conflict, the surviving path is processed right away
+		(it was held back the whole time the conflict stood)."""
 		workspace_dir = self._workspace_dir
 		if workspace_dir is None:
 			return
 		if not source_path.is_file():
+			survivor = self._guard.remove(source_path)
+			if survivor is not None:
+				self._process(survivor)
 			return
 		if find_importer(source_path) is None:
 			self._report(
 				f"{source_path.name}: unsupported import format {source_path.suffix!r} "
 				f"(supported: {', '.join(sorted(IMPORTERS))})", is_error=True)
 			return
-		target_path = target_shape_path(workspace_dir, source_path)
+		if not self._guard.update(source_path):
+			return  # conflicting with another source sharing the same target name -- on_name_conflict already fired
+		self._process(source_path)
+
+	def _process(self, source_path):
+		"""The actual export-new/update-existing decision, factored out of
+		handle_settled() so a conflict's surviving path (see
+		DuplicateNameGuard.remove()) can be processed the same way once the
+		conflict clears."""
+		target_path = target_shape_path(self._workspace_dir, source_path)
 
 		if not target_path.exists():
 			try:

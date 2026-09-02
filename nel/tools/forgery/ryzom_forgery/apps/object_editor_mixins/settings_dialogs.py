@@ -134,10 +134,10 @@ class SettingsDialogsMixin:
 
 	def _draw_workspace_sync_settings(self):
 		"""Settings tab -- lets the user pick an external folder the active
-		workspace's anims/shapes/skels/tex get auto-mirrored into (see
-		workspace_sync.py). Per-workspace: switching the active workspace
-		shows/edits that workspace's own folder, not a single global one
-		(see _on_active_workspace_changed())."""
+		workspace's .shape/.anim/.skel/.dds files get auto-mirrored into,
+		flat (see workspace_sync.py). Per-workspace: switching the active
+		workspace shows/edits that workspace's own folder, not a single
+		global one (see _on_active_workspace_changed())."""
 		workspace_name = self.workspace_setup_dialog.active_workspace_name
 		label = "Sync folder: "
 		path_text = "(no active workspace)" if workspace_name is None else (
@@ -155,7 +155,7 @@ class SettingsDialogsMixin:
 		if workspace_name is not None and imgui.is_item_hovered():
 			imgui.set_tooltip(path_text)
 		imgui.same_line()
-		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##sync-folder", "Choose a folder to mirror this workspace's anims/shapes/skels/tex into..."):
+		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##sync-folder", "Choose a folder to mirror this workspace's .shape/.anim/.skel/.dds files into..."):
 			current = app_settings.load().workspace_sync_folders.get(workspace_name) if workspace_name else None
 			self._workspace_sync_folder_dialog = pfd.select_folder("Choose sync folder", current or "")
 		imgui.end_disabled()

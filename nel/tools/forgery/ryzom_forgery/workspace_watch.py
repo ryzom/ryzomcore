@@ -1,7 +1,9 @@
 """Generic debounced filesystem watcher for a workspace: a single watchdog
 Observer (one background thread) recursively watching the whole workspace
 root, dispatching each settled per-file change to whichever callbacks are
-registered for the top-level subfolder the file lives under.
+registered for it -- either by file extension (any folder, see
+register_extension()) or by one exact workspace-relative path (see
+register_exact()).
 
 Replaces what used to be one independent Observer per feature
 (import_watcher.py, workspace_sync.py), each duplicating the same per-path
@@ -13,6 +15,16 @@ cross-thread status queuing on the app side -- it was organic duplication,
 not a deliberate perf design. A single shared implementation is also
 easier to instrument/harden (logging, crash isolation per callback) than
 several near-identical ones.
+
+Dispatch was originally keyed on the changed file's top-level subfolder
+(e.g. "tex", "imports"), matching the workspace's old fixed-subfolder
+layout. Reworked (2026-09-02) to key on file extension instead, regardless
+of which real subfolder a file lives in -- following the same
+virtual-category display rework as virtual_categories.py (files browsed by
+extension, not by real location). Excluded paths (Settings.exclusion_rules,
+same rules virtual_categories.py's own scan already respects) are now
+skipped entirely at dispatch, for every registration -- previously not
+checked at all here.
 """
 
 import threading
@@ -20,6 +32,9 @@ from pathlib import Path
 
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
+
+from . import settings
+from .virtual_categories import is_path_excluded
 
 # Same value every per-feature watcher in this codebase used independently
 # before this consolidation -- an inactivity debounce (the timer restarts
@@ -77,11 +92,14 @@ class _DebouncedHandler(FileSystemEventHandler):
 class WorkspaceWatcher:
 	"""Watches an active workspace's root recursively with a single
 	Observer/debounce handler, dispatching each settled file path to every
-	callback registered for the top-level subfolder it falls under (e.g.
-	"tex", "imports").
+	callback registered for it -- by extension (register_extension(),
+	anywhere in the workspace) or by one exact relative path
+	(register_exact()). A path matching Settings.exclusion_rules (folder or
+	file-pattern kind, see virtual_categories.is_path_excluded()) never
+	reaches any callback.
 
-	register(subdir, callback) any time, before or after
-	set_workspace_dir() -- callback(path: Path) is invoked from a
+	register_extension()/register_exact() can be called any time, before or
+	after set_workspace_dir() -- callback(path: Path) is invoked from a
 	background thread once a settle period has passed since the file's
 	last change; `path` may no longer exist (deleted). A callback that
 	raises is caught and logged -- one broken conversion must never take
@@ -94,10 +112,22 @@ class WorkspaceWatcher:
 		self._observer = None
 		self._handler = None
 		self._workspace_dir = None
-		self._callbacks = {}  # {subdir_name: [callback, ...]}
+		self._extension_callbacks = {}  # {".ext" (lowercase): [callback, ...]}
+		self._exact_callbacks = {}  # {"relative/posix/path": [callback, ...]}
 
-	def register(self, subdir, callback):
-		self._callbacks.setdefault(subdir, []).append(callback)
+	def register_extension(self, extensions, callback):
+		"""`callback` fires for any settled file anywhere in the workspace
+		(excluded paths aside) whose suffix, lowercased, is in `extensions`
+		(an iterable of ".ext" strings) -- not tied to any particular
+		subfolder."""
+		for extension in extensions:
+			self._extension_callbacks.setdefault(extension.lower(), []).append(callback)
+
+	def register_exact(self, relative_path, callback):
+		"""`callback` fires only for the one workspace-relative file at
+		`relative_path` (e.g. "panoply.cfg") -- for a config file, not an
+		asset category, so extension-based matching doesn't apply."""
+		self._exact_callbacks.setdefault(relative_path, []).append(callback)
 
 	def set_workspace_dir(self, workspace_dir):
 		"""Stops any previous watch and, if `workspace_dir` is set, starts a
@@ -135,10 +165,14 @@ class WorkspaceWatcher:
 		except ValueError:
 			return  # shouldn't happen -- watched paths are always under workspace_dir
 		if not relative.parts:
-			return  # the workspace root itself, not a file within a subfolder
-		subdir = relative.parts[0]
-		for callback in self._callbacks.get(subdir, ()):
+			return  # the workspace root itself, not a file within it
+		if is_path_excluded(relative.parent, path.name, settings.load().exclusion_rules):
+			return
+
+		callbacks = list(self._exact_callbacks.get(relative.as_posix(), ()))
+		callbacks += self._extension_callbacks.get(path.suffix.lower(), ())
+		for callback in callbacks:
 			try:
 				callback(path)
 			except Exception as exc:  # noqa: BLE001 -- one broken callback must not affect the others or kill the watcher
-				print(f"[workspace_watch] callback for {subdir}/ failed on {path}: {exc}")
+				print(f"[workspace_watch] callback for {relative} failed on {path}: {exc}")

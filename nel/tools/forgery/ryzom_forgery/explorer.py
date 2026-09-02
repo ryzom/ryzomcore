@@ -660,6 +660,10 @@ class Explorer:
 			icon = _LEAF_ICONS.get(item.suffix.lower(), _DEFAULT_LEAF_ICON)
 			imgui.tree_node_ex(key, flags, f"{icon} {item.name}")
 
+		if imgui.is_item_hovered():
+			tooltip = str(item.path) if item.bnp_path is None else f"{item.path} ! {item.name}"
+			imgui.set_tooltip(tooltip)
+
 		if imgui.is_item_clicked():
 			additive = self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control())
 			self._select(item, key, additive)

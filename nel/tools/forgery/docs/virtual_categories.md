@@ -54,7 +54,18 @@ dans `others`.
 - `_iter_included_files(workspace_root, exclusion_rules)`
  (`virtual_categories.py`) — le générateur `os.walk`-based partagé par
  `scan_workspace`/`find_existing_file`, seul endroit qui élague
- effectivement les dossiers exclus.
+ effectivement les dossiers exclus. N'élague que les dossiers -- une
+ exclusion **fichier** laisse le fichier dans la sortie (voir
+ `scan_workspace()` ci-dessus, qui applique cette distinction lui-même).
+- `iter_included_files(workspace_root, exclusion_rules)` (public, ajouté
+ 2026-09-02) — même parcours, mais applique aussi les exclusions **fichier**
+ (`_is_file_excluded`), donc ne renvoie que des fichiers réellement inclus,
+ dossier et fichier confondus. Pour un appelant qui doit **complètement**
+ ignorer l'exclu, pas juste le recatégoriser (`scan_workspace()`) ou le
+ comparer à la recherche (`is_path_excluded()`) -- utilisé par le workspace
+ watcher (`workspace_watch.py`, `import_watcher.py`, `tex_dds_sync.py`,
+ `workspace_sync.py`) : un fichier exclu ne doit jamais déclencher
+ d'auto-import/conversion/sync, point final.
 
 ## Utilisation
 

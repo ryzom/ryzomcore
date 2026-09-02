@@ -1,5 +1,75 @@
 # Changelog
 
+## 2026-09-02 — ✨ Workspace watcher: extension-based triggers anywhere + duplicate-name guard, Forgery 3.0.11
+
+Follow-up to the virtual-category display rework (files browsed by extension
+regardless of real subfolder, see `virtual_categories.py`): the workspace
+watcher (`workspace_watch.py` + its 3 consumers) used to dispatch by fixed
+top-level subfolder name (`"imports"`, `"tex"`, `SYNCED_SUBDIRS`), so a file
+dropped anywhere else never triggered anything -- inconsistent with the
+display now treating the whole workspace as one flat pool per extension.
+
+**`workspace_watch.py`**: `register(subdir, cb)` replaced by
+`register_extension(extensions, cb)` (dispatch by `path.suffix.lower()`,
+any folder) and `register_exact(relative_path, cb)` (unchanged behavior,
+for `panoply.cfg` only, a config file not an asset category).
+`_dispatch()` now reads `Settings.exclusion_rules` and skips a path
+entirely (via `virtual_categories.is_path_excluded()`, itself gained a new
+public `iter_included_files()` applying both folder- and file-kind
+exclusions) before either dispatch mode -- previously not checked at all
+here, so an excluded folder (e.g. `build/`) could still trigger a
+re-import/re-convert.
+
+**Flattened outputs, per Nuno's direction**: `tex_dds_sync.py`'s
+`.tga`/`.png` -> `.dds` mirror is now flat in `build/dds/<stem>.dds`
+(fixes a found pre-existing bug in passing: this module read/wrote a
+top-level `<workspace>/dds/`, but `workspaces.py` actually creates
+`build/dds/`, `_BUILD_SUBDIRS` -- the two were never the same folder).
+`workspace_sync.py`'s external mirror is also flat
+(`<sync_folder>/forgery/<workspace>/<filename>`, no subfolders) -- matches
+`.bnp` packing (`pack_workspace_bnp()` already flattens the same 4
+extensions before packing), and a same-name collision would surface at
+pack time regardless.
+
+**Duplicate-name guard**: flattening + "anywhere" triggers together mean
+two different source files can now silently collide on the same output
+name. New shared `duplicate_name_guard.py` (`DuplicateNameGuard`), one
+instance per group, each with its own comparison key -- **stem** for
+imports (-> `shapes/<stem>.shape`) and textures (-> `build/dds/<stem>.dds`,
+since the source extension varies but the output doesn't), **full
+filename** for sync (nothing is converted there, so only a truly identical
+name collides -- `chest.shape` and `chest.dds` don't). Checked at
+workspace-open (background-thread scan, before any conversion for a
+colliding pair) and on every settled create/rename event. On conflict, a
+shared popup (`shape_io.py`'s `_draw_name_conflict_popup()`): 2 editable
+name fields pre-filled with each file's current name, a full-path tooltip,
+a reveal-in-file-manager button per field, and 3 actions -- keep 1 (deletes
+2), keep 2 (deletes 1), or rename (enabled only once the fields differ --
+the resulting real filesystem rename settles through the normal watch like
+any other). A conflict resolved from outside the popup (one file
+deleted/renamed by hand) is dropped silently, no stale popup.
+
+**2 real popup bugs found and fixed while testing this on the real
+machine** (Nuno): the new conflict popup could open before the very first
+ImGui frame (background-thread startup scan, same class of bug already
+known for the reopen-last-shape popup) -- fixed with
+`center_next_popup(always=True)`. Worse: this popup (and the pre-existing
+import-conflict popup, same flaw) could race with the reopen-shape/
+restore-scan popups at startup -- Dear ImGui doesn't cleanly support two
+independently-opened top-level modals fighting over the popup stack on the
+same frames, which made the reopen-shape popup flicker and become
+unclickable. First fix attempt (reset the local "opened" flag so a failed
+`begin_popup_modal()` retries) made it actively worse (retried every
+single frame, permanent flicker) -- reverted. Real fix: both new-conflict-
+style popups now simply wait their turn (`return` without opening) while
+`_reopen_shape_prompt_open`/`_restore_scan_popup_open`/the other conflict
+popup's own pending state is true, instead of trying to coexist.
+
+Small unrelated addition in the same session: `explorer.py`'s `_draw_leaf()`
+now shows a hover tooltip with the item's full path (or
+`archive.bnp ! entry.name` for a `.bnp` entry) -- was previously only
+visible by other means.
+
 ## 2026-09-02 — ✨ Split object_editor.py into theme mixins, Forgery 3.0.1-3.0.10
 
 `object_editor.py` ("Patina") had grown into a 6635-line, 185-method
