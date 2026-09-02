@@ -204,15 +204,19 @@ class ForgeryApp(ShowBase):
 		# Applying a Material (as tool apps do for shape rendering) has no
 		# visible effect without at least one light in the scene -- without
 		# this, lit geometry renders black regardless of its texture.
-		ambient = AmbientLight("ambient")
-		ambient.set_color((0.4, 0.4, 0.4, 1))
-		self.render.set_light(self.render.attach_new_node(ambient))
+		# Stored as instance attributes (not just local vars) so a subclass
+		# (e.g. object_editor.py's Lighting panel) can read/adjust them
+		# later -- the creation/defaults themselves are unchanged.
+		self.ambient_light = AmbientLight("ambient")
+		self.ambient_light.set_color((0.4, 0.4, 0.4, 1))
+		self.ambient_light_np = self.render.attach_new_node(self.ambient_light)
+		self.render.set_light(self.ambient_light_np)
 
-		sun = DirectionalLight("sun")
-		sun.set_color((0.8, 0.8, 0.8, 1))
-		sun_np = self.render.attach_new_node(sun)
-		sun_np.set_hpr(45, -45, 0)
-		self.render.set_light(sun_np)
+		self.sun_light = DirectionalLight("sun")
+		self.sun_light.set_color((0.8, 0.8, 0.8, 1))
+		self.sun_light_np = self.render.attach_new_node(self.sun_light)
+		self.sun_light_np.set_hpr(45, -45, 0)
+		self.render.set_light(self.sun_light_np)
 
 		self.explorer_width = explorer_width
 		self.panel_width = panel_width

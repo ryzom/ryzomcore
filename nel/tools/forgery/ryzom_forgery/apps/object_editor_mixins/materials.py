@@ -548,6 +548,10 @@ class MaterialsMixin:
 				section_hint = self._draw_material_transparency_section(material_id, material)
 				if section_hint:
 					hovered_hint = section_hint
+				section_hint = self._draw_material_section(
+					material_id, "lighting", "Lighting", self._draw_material_lighting_section, material)
+				if section_hint:
+					hovered_hint = section_hint
 				if badge != "Color":
 					section_hint = self._draw_material_section(
 						material_id, "texture-filtering", "Texture filtering",
@@ -692,6 +696,44 @@ class MaterialsMixin:
 				d = material.diffuse
 				material.diffuse = Rgba(d.r, d.g, d.b, round(opacity * 255))
 				self._reapply_material(material_id)
+
+		return hint
+
+	def _draw_material_lighting_section(self, material_id, material):
+		"""CMaterial's ambient/specular/emissive/shininess fields -- already
+		read and applied to the Panda3D preview (_apply_material_common()),
+		but never editable until now: with the scene's only 2 lights fixed/
+		uncontrollable (see the Lighting viewport panel,
+		viewport_transform.py's _draw_light_controls()), there was no way to
+		actually see any of them react. `ambient` only reacts to the
+		scene's AmbientLight; `specular`/`shininess` only to the sun (a
+		directional light); `emissive` never reacts to any light at all
+		(self-illumination, always visible regardless of scene lighting).
+		Alpha is preserved as-is on write -- these 3 colors don't use it for
+		anything CMaterial-side, only RGB is meaningful here."""
+		hint = None
+
+		for field_name, label, doc_key in (
+			("ambient", "Ambient", "basic-colors"),
+			("specular", "Specular", "specular-glossiness"),
+			("emissive", "Emissive", "self-illumination"),
+		):
+			current = rgba_to_color(getattr(material, field_name))[:3]
+			imgui.set_next_item_width(180)
+			changed, new_color = imgui.color_edit3(label, current)
+			hint = self._doc_hint_if_hovered(doc_key) or hint
+			if changed:
+				existing = getattr(material, field_name)
+				r, g, b = new_color
+				setattr(material, field_name, Rgba(round(r * 255), round(g * 255), round(b * 255), existing.a))
+				self._reapply_material(material_id)
+
+		imgui.set_next_item_width(180)
+		changed, shininess = imgui.slider_float("Shininess", material.shininess, 0.0, 128.0)
+		hint = self._doc_hint_if_hovered("specular-glossiness") or hint
+		if changed:
+			material.shininess = shininess
+			self._reapply_material(material_id)
 
 		return hint
 

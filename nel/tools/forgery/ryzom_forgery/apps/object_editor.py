@@ -230,6 +230,26 @@ class ObjectEditorApp(
 		# it's driven by the CREATURE's bone, not the loaded shape's own
 		# bbox/geometry).
 		self._attach_point_axes_np = self.render.attach_new_node("attach-point-axes-placeholder")
+		# Sun-direction gizmo (see _rebuild_viewport_helpers()'s own build of
+		# it, and viewport_transform.py's _update_sun_light()/
+		# _apply_light_settings()) -- placeholder for the same
+		# remove_node()-on-rebuild reason as the 3 above.
+		self._sun_gizmo_np = self.render.attach_new_node("sun-gizmo-placeholder")
+		# Open/closed state for every floating viewport panel (Wind,
+		# Skinning preview, Bind preview, Lighting), toggled from the
+		# right-edge icon taskbar (_draw_panel_taskbar()) -- default True to
+		# match the pre-taskbar behavior (auto-shown whenever applicable);
+		# each panel's own _draw_..._controls() force-closes it if its
+		# shape-applicability check goes from true to false. Set before the
+		# first _rebuild_viewport_helpers() call below since the sun gizmo's
+		# initial visibility depends on _light_panel_open. See the
+		# "Floating viewport panels: taskbar + draggable" chantier in
+		# project-todos/ryzom-core/forgery-object-editor.md.
+		self._wind_panel_open = True
+		self._bone_preview_panel_open = True
+		self._bind_panel_open = True
+		self._light_panel_open = True
+		self._panel_taskbar_size = (10.0, 10.0)
 		self._rebuild_viewport_helpers(None)
 
 		self.shape_file = None
@@ -387,6 +407,23 @@ class ObjectEditorApp(
 		self._wind_animate = True
 		self._wind_panel_size = (10.0, 10.0)
 		self.taskMgr.add(self._update_wind, "object-editor-wind")
+		# Lighting panel (see _apply_light_settings()/_update_sun_light()/
+		# _draw_light_controls()) -- viewer-only controls over app.py's 2
+		# scene lights, so a material's ambient/specular/emissive/shininess
+		# (read/applied already, but never editable until this chantier) can
+		# actually be previewed. Ambient has no direction to animate; the
+		# sun's heading/intensity are the only fields Play modulates, pitch
+		# stays exactly at its manual value regardless of Play.
+		self._ambient_light_color = (0.4, 0.4, 0.4)
+		self._ambient_light_intensity = 1.0
+		self._sun_light_color = (0.8, 0.8, 0.8)
+		self._sun_light_intensity = 1.0
+		self._sun_heading_deg = 45.0
+		self._sun_pitch_deg = -45.0
+		self._sun_playing = False
+		self._light_panel_size = (10.0, 10.0)
+		self._apply_light_settings()
+		self.taskMgr.add(self._update_sun_light, "object-editor-sun-light")
 		self.taskMgr.add(self._update_texture_freshness, "object-editor-texture-freshness")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
@@ -650,8 +687,10 @@ class ObjectEditorApp(
 		self.nav_cube.draw_controls()
 		self._draw_transform_panel()
 		self._draw_viewport_toggles()
+		self._draw_panel_taskbar()
 		self._draw_wind_controls()
 		self._draw_bone_preview_controls()
+		self._draw_light_controls()
 		self._draw_bind_controls()
 		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()

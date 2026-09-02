@@ -1,5 +1,118 @@
 # Changelog
 
+## 2026-09-02 — ✨ Adjustable scene lighting, material Lighting section, floating-panel taskbar, Forgery 3.0.12
+
+Patina's materials tab already read/applied `ambient`/`specular`/`emissive`/
+`shininess` to the Panda3D preview but had no UI to edit any of them, and
+the scene's only 2 lights (`app.py`'s `AmbientLight`/`DirectionalLight`)
+were hardcoded with no controls -- editing those 4 fields would never have
+visibly changed anything. Both landed together.
+
+**Lighting model**: `ambient` only reacts to the `AmbientLight` (uniform, no
+direction); `diffuse`/`specular`/`shininess` only react to a directional
+light (needs a direction) -- the sun covers that; `emissive` never reacts to
+any light (self-illumination, independent). 2 lights, made controllable,
+exercise all 4 fields -- no need for Point/Spotlight.
+
+**New "Lighting" viewport panel**: Ambient (color + intensity 0-4) and Sun
+(color + intensity 0-4 + heading 0-360° + pitch -90/90°, all manual) plus a
+Play/Pause button that continuously advances heading at a fixed rate --
+intensity always matches the manual baseline regardless of heading (a first
+version simulated a day/night cycle, dimming based on heading via
+`sin()`, but that meant a manually-set heading and the same heading reached
+via Play disagreed on how bright it looked -- confusing, dropped per
+Nuno's call after live testing). A small solid unlit yellow globe gizmo
+(`geometry_helpers._build_sun_globe_geom()`, a coarse 6x8 UV sphere,
+position+color vertex format) marks the sun's direction in the viewport,
+sized off the loaded shape's bbox and positioned ~2x its radius out, synced
+every frame to follow the object and match the sun's orientation --
+originally also had a 4-pronged ray fan and a shaft back to the object
+(read as an arrow, not a sun) and a live-adjustable "Distance" slider
+(removed: a `DirectionalLight` has no position at all, so "distance" had
+nothing physical to represent, pure cosmetic noise) -- all trimmed back to
+just the globe per iterative feedback.
+
+**New "Lighting" section in the Materials tab**: color pickers for
+`ambient`/`specular`/`emissive`, a `shininess` slider (0-128), wired to the
+existing `material_options.md` doc-hint keys (`basic-colors`/
+`specular-glossiness`/`self-illumination`) instead of new ones that didn't
+exist yet.
+
+**Investigated at Nuno's request**: does the real game even render
+per-pixel specular, i.e. would `shininess` matter more if Patina's preview
+used a shader instead of Panda3D's classic fixed-function per-vertex
+lighting? Checked the real client's OpenGL driver
+(`driver_opengl_states.cpp`/`driver_opengl_material.cpp` in the full
+ryzom-core checkout) -- confirmed the shipped game *also* renders standard
+materials per-vertex (`glMaterialfv`+`GL_SMOOTH`, no shader); a
+`CMaterial::PerPixelLighting` shader type exists in the format but is never
+actually set on any material or mesh anywhere in the codebase, dead
+infrastructure. So Patina's current per-vertex behavior already matches the
+real game -- switching to `set_shader_auto()` would make the preview
+diverge from actual in-game appearance, not converge; left untouched.
+
+Also scanned all 2491 `.shape` files in `ryzom-data` (1246 parsed with
+materials, 3589 materials total) for real-world usage of these 4 fields:
+ambient non-black in 97.6% of materials, shininess non-zero in 100% --
+but both turned out to be near-universal exporter defaults, not hand-tuned
+choices: cross-checked against `nel/tools/3d/plugin_max/nel_mesh_lib/
+export_material.cpp`'s conversion formula (`shininess = pow(2, glossiness
+* 10) * 4`, `ambient` read straight from 3ds Max's own material swatch) --
+the recurring values (`4.0`, `8.0`, `22.63`... shininess; `(150,150,150)`/
+`(255,255,255)` ambient) are exactly what that formula produces at round
+Max "Glossiness" percentages/the Standard material's default grey, meaning
+most content simply never touched these fields by hand. Specular (49%) and
+especially emissive (6.1%) are far more likely to reflect real per-material
+choices. Confirmed in passing: `shape_import.py`'s own `_build_material()`
+(the .obj/.dae/.fbx/.gltf/.glb import path) already defaults new materials
+to the same values this scan found as the common exporter baseline
+(`Rgba(150,150,150,255)` ambient, `shininess=8.0` via the identical
+formula at Max's default 10% Glossiness) -- already correct, no change
+needed there.
+
+**Floating viewport panels: taskbar + draggable, instead of a forced stack.**
+Found while testing the Lighting panel above: `_draw_bind_controls()`
+(creature_bind.py) stacked itself below Wind + Skinning preview, but was
+written before the new Lighting panel existed, so it never accounted for
+Lighting's height -- Bind preview rendered exactly on top of it. Every one
+of these floating panels (Wind, Skinning preview, Bind preview, Lighting)
+also set `WindowFlags_.no_move` and called `imgui.set_next_window_pos()`
+every single frame (not just once on open), deliberately, so a panel that
+disappears (e.g. Wind, shape-dependent) doesn't leave a gap -- but it meant
+every new panel had to know every other panel's current height to stack
+correctly (got this wrong once, see above), and nothing could ever be
+dragged, so 2 panels landing on the same spot was unrecoverable short of
+closing one.
+
+Dropped the forced cascading stack entirely. New vertical icon taskbar on
+the viewport's right edge (`_draw_panel_taskbar()`, same square-icon-toggle
+pattern as `_draw_viewport_toggles()`'s existing bottom-left bar), one icon
+per panel, toggling its own open/closed state
+(`_wind_panel_open`/`_bone_preview_panel_open`/`_bind_panel_open`/
+`_light_panel_open`, default `True` to match the old always-shown-when-
+applicable behavior). A panel not applicable to the loaded shape (Wind: no
+`WindTreeParams`; Skinning preview: not skinned) gets its icon disabled
+rather than hidden, so the bar's layout never jumps around; an open panel
+that stops being applicable force-closes itself too. Each panel now
+positions itself only the very first time it's ever opened
+(`imgui.Cond_.once` -- unlike `Cond_.appearing`, this doesn't refire on
+every later close/reopen, so a dragged position sticks for the session),
+then `no_move` is dropped so it can be dragged anywhere and stays there
+(Dear ImGui's own per-window state remembers position without any code on
+this app's side).
+
+Confirmed live (Nuno) what actually forced this rework: Dear ImGui does not
+cleanly support two independently-opened top-level modals/panels fighting
+over placement on the same frames -- the new Lighting panel landing exactly
+on Bind preview wasn't just a stacking-math mistake, it exposed that the
+whole forced-position-every-frame approach couldn't scale past a couple of
+panels. A first attempted fix (reset a panel's "opened" flag whenever
+`begin_popup_modal()`/`begin()` unexpectedly returned False, so it would
+retry opening next frame) made things actively worse -- constant re-opening
+attempts every frame caused visible flicker and made the reopen-last-shape
+popup unclickable. Reverted in favor of the taskbar rework above, which
+sidesteps the contention entirely instead of trying to recover from it.
+
 ## 2026-09-02 — ✨ Workspace watcher: extension-based triggers anywhere + duplicate-name guard, Forgery 3.0.11
 
 Follow-up to the virtual-category display rework (files browsed by extension

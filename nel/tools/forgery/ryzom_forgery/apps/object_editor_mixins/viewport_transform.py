@@ -21,9 +21,9 @@ from pynel.ryzom_shape import MeshMRMSkinned, WindTreeParams
 
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
-	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_grid_geom, _build_vertex_data,
-	_GRID_MARGIN_SQUARES, _GRID_SQUARES, _GRID_STEP, _is_shape_skinned, _MIN_GRID_SQUARES, _PIVOT_AXIS_COLORS,
-	_uvs_need_repeat, _WORLD_AXIS_COLORS,
+	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_grid_geom, _build_sun_globe_geom,
+	_build_vertex_data, _GRID_MARGIN_SQUARES, _GRID_SQUARES, _GRID_STEP, _is_shape_skinned, _MIN_GRID_SQUARES,
+	_PIVOT_AXIS_COLORS, _uvs_need_repeat, _WORLD_AXIS_COLORS,
 )
 from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import _build_skin_state, _build_wind_state
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
@@ -31,6 +31,15 @@ from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 )
 
 _LOCKED_COLOR = (0.45, 0.45, 0.45, 0.8)  # grey -- "on" highlight for a lock toggle specifically
+
+# _update_sun_light()'s Play rotation rate -- a full 360deg cycle every 12s,
+# fast enough to actually watch a specular highlight sweep across a shape
+# without feeling like a slideshow, slow enough to still land on a precise
+# angle by eye if the user pauses right after the interesting part.
+_SUN_PLAY_SPEED_DEG_PER_SEC = 30.0
+
+# _draw_light_controls()'s Ambient/Sun intensity sliders.
+_LIGHT_INTENSITY_MAX = 4.0
 
 # _draw_transform_row()'s per-property drag_float() speed/range -- position
 # in meters (no hard limit needed for a 3D scene), rotation in degrees (a
@@ -90,6 +99,22 @@ class ViewportTransformMixin:
 		self._pivot_axes_np.set_light_off()
 		if not self._pivot_axes_visible:
 			self._pivot_axes_np.hide()
+
+		# Sun gizmo (a small globe marker, see _build_sun_globe_geom()) --
+		# world-space like the world axes (the sun's own orientation,
+		# self.sun_light_np, is world-space too, parented to self.render in
+		# app.py), synced every frame by _update_sun_light() (position
+		# follows the object, orientation matches the sun) -- this only
+		# (re)builds the globe mesh itself, sized/placed off the current
+		# shape's bbox like the pivot/world axes. Visibility mirrors
+		# self._light_panel_open (no separate toggle -- see
+		# _draw_panel_taskbar()).
+		self._sun_gizmo_np.remove_node()
+		self._sun_gizmo_np = self.render.attach_new_node("sun-gizmo")
+		self._sun_gizmo_np.attach_new_node(_build_sun_globe_geom(axis_length))
+		self._sun_gizmo_np.set_light_off()
+		if not self._light_panel_open:
+			self._sun_gizmo_np.hide()
 
 	def _toggle_grid(self):
 		self._grid_visible = not self._grid_visible
@@ -205,20 +230,28 @@ class ViewportTransformMixin:
 		"""Viewer-only wind preview controls (strength/direction/play-pause),
 		see _update_wind() -- only shown when the loaded shape actually has
 		wind data to animate (self._wind_state), since there's nothing to
-		preview otherwise. Not a shape property, so it's a floating window
-		top-right of the 3D viewport rather than part of the side panel,
-		positioned flush against the panel's left edge (same auto-size
-		tracking pattern as _draw_viewport_toggles)."""
+		preview otherwise, and only while self._wind_panel_open (toggled
+		from the right-edge taskbar, see _draw_panel_taskbar()) -- force-
+		closed the moment the loaded shape stops having wind data, so a
+		shape switch never leaves a stale open panel with nothing to show.
+		Not a shape property, so it's a floating window rather than part of
+		the side panel; positioned only once, the first time it's ever
+		opened (Cond_.once -- unlike Cond_.appearing, this does NOT refire
+		on every later close/reopen, so a dragged position sticks for the
+		rest of the session), then left free to be dragged anywhere."""
 		if self._wind_state is None:
+			self._wind_panel_open = False
+			return
+		if not self._wind_panel_open:
 			return
 
 		display_width = imgui.get_io().display_size.x
+		taskbar_w = self._panel_taskbar_size[0]
 		win_w, win_h = self._wind_panel_size
-		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - win_w
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
 		y = _VIEWPORT_TOGGLE_MARGIN_PX
-		imgui.set_next_window_pos((x, y))
-		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
-		         | imgui.WindowFlags_.always_auto_resize.value)
+		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Wind preview", flags=flags):
 			_, self._wind_animate = imgui.checkbox("Animate", self._wind_animate)
 			imgui.set_next_item_width(160)
@@ -226,6 +259,106 @@ class ViewportTransformMixin:
 			imgui.set_next_item_width(160)
 			_, self._wind_direction_deg = imgui.slider_float("Direction", self._wind_direction_deg, 0.0, 360.0, "%.0f deg")
 			self._wind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
+	def _apply_light_settings(self):
+		"""Pushes the current Ambient/Sun settings (see
+		_draw_light_controls()) onto the real Panda3D light nodes app.py
+		created (self.ambient_light/self.sun_light/self.sun_light_np) --
+		color x intensity, the sun's heading/pitch as its HPR. Called once
+		at startup and after every manual edit; _update_sun_light() drives
+		the sun's own color/HPR directly itself while Play is active,
+		instead of going through here every frame."""
+		r, g, b = self._ambient_light_color
+		self.ambient_light.set_color((
+			r * self._ambient_light_intensity, g * self._ambient_light_intensity,
+			b * self._ambient_light_intensity, 1))
+
+		r, g, b = self._sun_light_color
+		self.sun_light.set_color((
+			r * self._sun_light_intensity, g * self._sun_light_intensity,
+			b * self._sun_light_intensity, 1))
+		self.sun_light_np.set_hpr(self._sun_heading_deg, self._sun_pitch_deg, 0)
+
+	def _update_sun_light(self, task):
+		"""Per-frame. While Play is active (self._sun_playing), advances the
+		sun's heading at a fixed rate and re-applies it via
+		_apply_light_settings() -- same intensity as the manual baseline at
+		every heading, no day/night dimming (tried, dropped: it made Play
+		and a manually-set heading disagree on how the same angle looks,
+		confusing rather than useful -- 2026-09-02, Nuno). Pitch is never
+		touched here, only ever set manually (see _draw_light_controls()).
+
+		Independently of Play, also keeps the sun gizmo (see
+		_rebuild_viewport_helpers()) in sync every frame: shown/hidden with
+		self._light_panel_open, positioned at the object's own world
+		position (so it visually follows the loaded shape, even though the
+		sun's orientation itself is world-space, not object-relative) and
+		oriented to match self.sun_light_np's current HPR exactly."""
+		if self._sun_playing:
+			dt = ClockObject.get_global_clock().get_dt()
+			self._sun_heading_deg = (self._sun_heading_deg + dt * _SUN_PLAY_SPEED_DEG_PER_SEC) % 360.0
+			self._apply_light_settings()
+
+		if self._light_panel_open:
+			self._sun_gizmo_np.show()
+			self._sun_gizmo_np.set_pos(self.render, self._object_pivot.get_pos(self.render))
+			self._sun_gizmo_np.set_hpr(self.render, self.sun_light_np.get_hpr(self.render))
+		else:
+			self._sun_gizmo_np.hide()
+
+		return task.cont
+
+	def _draw_light_controls(self):
+		"""Viewer-only Ambient/Sun controls (see _apply_light_settings()/
+		_update_sun_light()) -- lets a material's ambient/specular/emissive/
+		shininess (see materials.py's own Lighting section) actually be
+		previewed: those 4 fields were already read/applied to the preview
+		but the scene's only 2 lights were fixed/uncontrollable, so editing
+		them would never visibly change anything. Always applicable (unlike
+		the wind/bone-preview panels, lighting isn't shape-specific), but
+		still only shown while self._light_panel_open (toggled from the
+		right-edge taskbar, see _draw_panel_taskbar()). Positioned only
+		once, the first time it's ever opened (see _draw_wind_controls()'s
+		own comment on Cond_.once), then left free to be dragged anywhere."""
+		if not self._light_panel_open:
+			return
+
+		display_width = imgui.get_io().display_size.x
+		taskbar_w = self._panel_taskbar_size[0]
+		win_w, win_h = self._light_panel_size
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX + 220.0
+		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
+		with imgui_ctx.begin("Lighting", flags=flags):
+			imgui.text("Ambient")
+			imgui.set_next_item_width(160)
+			changed_a, self._ambient_light_color = imgui.color_edit3(
+				"Color##ambient-light", self._ambient_light_color)
+			imgui.set_next_item_width(160)
+			changed_b, self._ambient_light_intensity = imgui.slider_float(
+				"Intensity##ambient-light", self._ambient_light_intensity, 0.0, _LIGHT_INTENSITY_MAX)
+
+			imgui.separator()
+			imgui.text("Sun")
+			imgui.set_next_item_width(160)
+			changed_c, self._sun_light_color = imgui.color_edit3("Color##sun-light", self._sun_light_color)
+			imgui.set_next_item_width(160)
+			changed_d, self._sun_light_intensity = imgui.slider_float(
+				"Intensity##sun-light", self._sun_light_intensity, 0.0, _LIGHT_INTENSITY_MAX)
+			imgui.set_next_item_width(160)
+			changed_e, self._sun_heading_deg = imgui.slider_float(
+				"Heading##sun-light", self._sun_heading_deg, 0.0, 360.0, "%.0f deg")
+			imgui.set_next_item_width(160)
+			changed_f, self._sun_pitch_deg = imgui.slider_float(
+				"Pitch##sun-light", self._sun_pitch_deg, -90.0, 90.0, "%.0f deg")
+			icon = fa_icons.ICON_FA_PAUSE if self._sun_playing else fa_icons.ICON_FA_PLAY
+			if _icon_button(f"{icon}##sun-light-play", "Play/pause the sun's day-night cycle"):
+				self._sun_playing = not self._sun_playing
+
+			if changed_a or changed_b or changed_c or changed_d or changed_e or changed_f:
+				self._apply_light_settings()
+			self._light_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport (same
@@ -261,6 +394,48 @@ class ViewportTransformMixin:
 			                self._object_transparent, square=True, large_font=large_font):
 				self._toggle_object_transparency()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
+	def _draw_panel_taskbar(self):
+		"""Vertical icon bar, flush against the side panel's left edge --
+		one square toggle per floating viewport panel (Wind, Skinning
+		preview, Bind preview, Lighting), same _icon_button(square=True)
+		convention as _draw_viewport_toggles()'s own bar, just stacked
+		vertically (no same_line() between icons) instead of horizontally.
+		A panel not applicable to the currently loaded shape gets its icon
+		disabled rather than hidden, so this bar's own layout never jumps
+		around as shapes are loaded/switched -- each _draw_..._controls()
+		method still force-closes itself the moment it stops being
+		applicable (see e.g. _draw_wind_controls()'s own comment)."""
+		display_size = imgui.get_io().display_size
+		if display_size.y <= 0:
+			return
+
+		wind_applicable = self._wind_state is not None
+		bone_preview_applicable = self.shape_file is not None and _is_shape_skinned(self.shape_file.value)
+		bind_applicable = self.shape_file is not None
+
+		width, height = self._panel_taskbar_size
+		x = display_size.x - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - width
+		y = _VIEWPORT_TOGGLE_MARGIN_PX
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		large_font = (self.large_icon_font, self.large_icon_font_size) if self.large_icon_font is not None else None
+		with imgui_ctx.begin("##panel-taskbar", flags=flags):
+			if _icon_button(fa_icons.ICON_FA_WIND, "Wind preview", self._wind_panel_open,
+			                square=True, large_font=large_font, disabled=not wind_applicable):
+				self._wind_panel_open = not self._wind_panel_open
+			if _icon_button(fa_icons.ICON_FA_BONE, "Skinning preview", self._bone_preview_panel_open,
+			                square=True, large_font=large_font, disabled=not bone_preview_applicable):
+				self._bone_preview_panel_open = not self._bone_preview_panel_open
+			if _icon_button(fa_icons.ICON_FA_USERS, "Bind preview", self._bind_panel_open,
+			                square=True, large_font=large_font, disabled=not bind_applicable):
+				self._bind_panel_open = not self._bind_panel_open
+			if _icon_button(fa_icons.ICON_FA_SUN, "Lighting", self._light_panel_open,
+			                square=True, large_font=large_font):
+				self._light_panel_open = not self._light_panel_open
+			self._panel_taskbar_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _transform_node(self, prop):
 		"""The NodePath position/rotation/scale editing for `prop`

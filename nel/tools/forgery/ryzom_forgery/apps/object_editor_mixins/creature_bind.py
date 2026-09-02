@@ -308,23 +308,29 @@ class CreatureBindMixin:
 		self._bind_skeleton (Bind preview's creature picker) -- they used to
 		share one field, which made picking a Bind-preview creature silently
 		redirect the main shape's per-frame re-skin too (2026-08-30, see
-		_bind_skeleton's own docstring). Positioned the same way as
-		_draw_wind_controls(), stacked right below it (both top-right of the
-		viewport, flush against the panel)."""
+		_bind_skeleton's own docstring). Only shown while
+		self._bone_preview_panel_open (toggled from the right-edge taskbar,
+		see viewport_transform.py's _draw_panel_taskbar()) -- force-closed
+		the moment the loaded shape stops being skinned, so a shape switch
+		never leaves a stale open panel with nothing to show. Positioned
+		only once, the first time it's ever opened (see
+		_draw_wind_controls()'s own comment on Cond_.once), then left free
+		to be dragged anywhere."""
 		if self.shape_file is None or not _is_shape_skinned(self.shape_file.value):
+			self._bone_preview_panel_open = False
+			return
+		if not self._bone_preview_panel_open:
 			return
 
 		shape_bones = set(shape_geom(self.shape_file.value).bones_name)
 
 		display_width = imgui.get_io().display_size.x
+		taskbar_w = self._panel_taskbar_size[0]
 		win_w, win_h = self._bone_preview_panel_size
-		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - win_w
-		y = _VIEWPORT_TOGGLE_MARGIN_PX
-		if self._wind_state is not None:
-			y += self._wind_panel_size[1] + _VIEWPORT_TOGGLE_MARGIN_PX
-		imgui.set_next_window_pos((x, y))
-		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
-		         | imgui.WindowFlags_.always_auto_resize.value)
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX + 60.0
+		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Skinning preview", flags=flags):
 			# Every .skel found by the last scan (see SearchPathsDialog.reload(),
 			# triggered by the reload icon below), sorted first/highlighted
@@ -1025,29 +1031,28 @@ class CreatureBindMixin:
 		  nothing in real content actually needs a single attach point).
 
 		Shown for any loaded shape (both cases share the creature picker),
-		stacked below _draw_bone_preview_controls() ("Skinning preview",
-		shown only for a skinned shape) when that one is also showing."""
+		only while self._bind_panel_open (toggled from the right-edge
+		taskbar, see viewport_transform.py's _draw_panel_taskbar()) --
+		force-closed the moment no shape is loaded at all. Positioned only
+		once, the first time it's ever opened (see _draw_wind_controls()'s
+		own comment on Cond_.once), then left free to be dragged anywhere
+		-- no longer needs to know about any other panel's current size."""
 		if self.shape_file is None:
+			self._bind_panel_open = False
+			return
+		if not self._bind_panel_open:
 			return
 
 		is_skinned = _is_shape_skinned(self.shape_file.value)
 		creatures = self._ensure_bind_creatures()
 
 		display_width = imgui.get_io().display_size.x
+		taskbar_w = self._panel_taskbar_size[0]
 		win_w, win_h = self._bind_panel_size
-		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - win_w
-		y = _VIEWPORT_TOGGLE_MARGIN_PX
-		if self._wind_state is not None:
-			y += self._wind_panel_size[1] + _VIEWPORT_TOGGLE_MARGIN_PX
-		if is_skinned:
-			# Skinning preview is shown above for a skinned shape (same
-			# precondition already checked there) -- stack below its
-			# current size (updated earlier this same frame, draw_panel()
-			# calls it before this method).
-			y += self._bone_preview_panel_size[1] + _VIEWPORT_TOGGLE_MARGIN_PX
-		imgui.set_next_window_pos((x, y))
-		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
-		         | imgui.WindowFlags_.always_auto_resize.value)
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX + 120.0
+		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Bind preview", flags=flags):
 			if self._bind_cache_rebuild is not None and not self._bind_cache_rebuild["done"]:
 				imgui.text_disabled("Rebuilding creature cache...")

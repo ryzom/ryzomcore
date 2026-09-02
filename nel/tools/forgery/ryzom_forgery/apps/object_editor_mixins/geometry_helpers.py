@@ -7,7 +7,9 @@ module's docstring for why a mixin must never import back from
 object_editor.py.
 """
 
-from panda3d.core import Geom, GeomTriangles, GeomVertexData, GeomVertexFormat, GeomVertexWriter, LineSegs
+from math import cos, pi, sin
+
+from panda3d.core import Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat, GeomVertexWriter, LineSegs
 
 from pynel.ryzom_shape import MeshMRM, MeshMRMSkinned
 
@@ -59,6 +61,65 @@ def _build_axes_geom(colors, length):
 		lines.move_to(-vector[0] * length, -vector[1] * length, -vector[2] * length)
 		lines.draw_to(vector[0] * length, vector[1] * length, vector[2] * length)
 	return lines.create()
+
+
+# Warm yellow/gold, evokes "sun" -- distinct from every other gizmo palette
+# above so it's never mistaken for one of them.
+_SUN_GIZMO_COLOR = (1.0, 0.85, 0.2, 1.0)
+_SUN_GLOBE_FRACTION = 0.06  # solid globe radius, as a fraction of length -- small, just a marker
+# `length` here is already axis_length (bbox radius * _AXIS_MARGIN_FACTOR,
+# 1.2 -- see _rebuild_viewport_helpers()), so this factor is chosen to land
+# the globe at roughly 2x the shape's own bbox radius (2.0 / 1.2), not 2x
+# axis_length itself.
+_SUN_GLOBE_DISTANCE_FACTOR = 2.0 / _AXIS_MARGIN_FACTOR
+_SUN_GLOBE_RINGS = 6
+_SUN_GLOBE_SEGMENTS = 8
+
+
+def _build_sun_globe_geom(length):
+	"""Small solid unlit sphere (position+color triangle mesh, coarse --
+	6x8 -- since it's a tiny marker, not a real render target) at local
+	(0, -distance, 0), radius and distance both derived from `length` (the
+	loaded shape's own bbox-relative axis length, see
+	_rebuild_viewport_helpers()). Deliberately just the globe, no ray fan/
+	direction indicator, and no adjustable distance -- both tried, both
+	dropped as more distracting than useful / not actually meaningful (a
+	DirectionalLight has no position at all, so a "distance" control had
+	nothing real to represent -- 2026-09-02, Nuno)."""
+	radius = length * _SUN_GLOBE_FRACTION
+	center_y = -length * _SUN_GLOBE_DISTANCE_FACTOR
+
+	vdata = GeomVertexData("sun-globe", GeomVertexFormat.get_v3c4(), Geom.UH_static)
+	vdata.set_num_rows((_SUN_GLOBE_RINGS + 1) * (_SUN_GLOBE_SEGMENTS + 1))
+	vertex_writer = GeomVertexWriter(vdata, "vertex")
+	color_writer = GeomVertexWriter(vdata, "color")
+	for ring in range(_SUN_GLOBE_RINGS + 1):
+		theta = pi * ring / _SUN_GLOBE_RINGS
+		for seg in range(_SUN_GLOBE_SEGMENTS + 1):
+			phi = 2.0 * pi * seg / _SUN_GLOBE_SEGMENTS
+			x = radius * sin(theta) * cos(phi)
+			y = radius * sin(theta) * sin(phi)
+			z = radius * cos(theta)
+			vertex_writer.add_data3(x, center_y + y, z)
+			color_writer.add_data4(*_SUN_GIZMO_COLOR)
+
+	triangles = GeomTriangles(Geom.UH_static)
+	stride = _SUN_GLOBE_SEGMENTS + 1
+	for ring in range(_SUN_GLOBE_RINGS):
+		for seg in range(_SUN_GLOBE_SEGMENTS):
+			i0 = ring * stride + seg
+			i1 = i0 + 1
+			i2 = i0 + stride
+			i3 = i2 + 1
+			triangles.add_vertices(i0, i2, i1)
+			triangles.add_vertices(i1, i2, i3)
+	triangles.close_primitive()
+
+	geom = Geom(vdata)
+	geom.add_primitive(triangles)
+	node = GeomNode("sun-globe")
+	node.add_geom(geom)
+	return node
 
 
 # How far outside [0, 1] a UV has to land before it's treated as genuine tiling
