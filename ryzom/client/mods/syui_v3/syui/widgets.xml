@@ -1824,6 +1824,9 @@
     <action id="equip"
             name="uimEquip"
             handler="inv_auto_equip" />
+    <action id="item_chat_link"
+            name="uiChatLinkMenuItem"
+            handler="link_item_in_chat" />
     <action id="infos"
             name="uimBoldInfo"
             handler="open_item_help" />
@@ -1850,6 +1853,9 @@
          extends="base_menu"
          on_active="item_menu_base_check" >
     <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
+    <action id="item_chat_link"
+            name="uiChatLinkMenuItem"
+            handler="link_item_in_chat" />
     <action id="destroy"
             name="uimDestroy"
             handler="proc"
@@ -1876,6 +1882,9 @@
             name="uimMoveTo">
       <!--<action id="bag"    name="uimMtBag"         handler="proc" params="move_to_bag" /> -->
     </action>
+    <action id="item_chat_link"
+            name="uiChatLinkMenuItem"
+            handler="link_item_in_chat" />
     <action id="infos"
             name="uimBoldInfo"
             handler="open_item_help"

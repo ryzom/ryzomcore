@@ -37,6 +37,7 @@
 #include "nel/gui/group_menu.h"
 #include "../global.h"
 #include "nel/gui/group_html.h"
+#include "chat_link_ui.h"
 
 //
 #include "game_share/inventories.h"
@@ -1773,6 +1774,136 @@ class CHandlerItemCristalReload : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerItemCristalReload, "item_cristal_reload" );
 
 // **********************************************************************************************************
+static bool resolveItemForChatLink(CDBCtrlSheet *item, uint32 &slotId)
+{
+	if (!item || item->getType() != CCtrlSheetInfo::SheetType_Item || item->getSheetId() == 0 || item->getQuantity() == 0)
+		return false;
+
+	INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)item->getInventoryIndex();
+	if (inventory == INVENTORIES::handling || inventory == INVENTORIES::equipment)
+	{
+		const std::string equipmentPath = getInventory().getDBIndexPath(item);
+		CCDBNodeLeaf *indexInBag = equipmentPath.empty() ? NULL :
+			NLGUI::CDBManager::getInstance()->getDbProp(equipmentPath + ":INDEX_IN_BAG", false);
+		if (!indexInBag || indexInBag->getValue16() <= 0)
+			return false;
+		slotId = getInventory().getItemSlotId("INVENTORY:BAG", uint(indexInBag->getValue16() - 1));
+	}
+	else
+		slotId = getInventory().getItemSlotId(item);
+
+	const CItemImage *itemImage = getInventory().getServerItem(slotId);
+	return itemImage && itemImage->getSheetID() == item->getSheetId();
+}
+
+// **********************************************************************************************************
+static bool isItemForChatLink(CDBCtrlSheet *item)
+{
+	uint32 ignoredSlotId = 0;
+	return resolveItemForChatLink(item, ignoredSlotId);
+}
+
+// **********************************************************************************************************
+static void insertItemLinkIntoChat(CHAT_LINK::CItemSnapshot snapshot)
+{
+	bool customTextOmitted = false;
+	std::string marker = CHAT_LINK::createItemMarker(snapshot, &customTextOmitted);
+	CHAT_LINK::TInsertResult result = marker.empty() ? CHAT_LINK::InsertInputFull : CHAT_LINK::insertIntoChat(marker);
+	if (result == CHAT_LINK::InsertNoChat)
+		return;
+	if (result == CHAT_LINK::InsertInputFull)
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(
+			CI18N::get("uiChatLinkDoesNotFit"));
+	}
+	else if (result == CHAT_LINK::InsertOk && customTextOmitted)
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(
+			CI18N::get("uiChatLinkCustomTextOmittedSender"));
+	}
+}
+
+class CItemChatLinkInfoWaiter : public IItemInfoWaiter
+{
+public:
+	CItemChatLinkInfoWaiter() : ItemId(0), Quality(0), Pending(false) {}
+	CHAT_LINK::CItemSnapshot Snapshot;
+	uint64 ItemId;
+	uint16 Quality;
+	bool Pending;
+
+	void cancel()
+	{
+		if (Pending)
+			getInventory().removeItemInfoWaiter(this);
+		Snapshot = CHAT_LINK::CItemSnapshot();
+		ItemSheet = 0;
+		ItemSlotId = 0;
+		ItemId = 0;
+		Quality = 0;
+		Pending = false;
+	}
+
+	void begin(const CHAT_LINK::CItemSnapshot &snapshot, uint32 itemSlotId, const CItemImage *item)
+	{
+		cancel();
+		Snapshot = snapshot;
+		ItemSheet = snapshot.SheetId;
+		ItemSlotId = itemSlotId;
+		ItemId = item ? item->getItemId() : 0;
+		Quality = item ? item->getQuality() : 0;
+		Pending = true;
+		getInventory().addItemInfoWaiter(this);
+	}
+
+	virtual void infoReceived()
+	{
+		CHAT_LINK::CItemSnapshot snapshot = Snapshot;
+		const uint32 itemSlotId = ItemSlotId;
+		const uint64 itemId = ItemId;
+		const uint16 quality = Quality;
+		cancel();
+
+		const CItemImage *item = getInventory().getServerItem(itemSlotId);
+		if (!item || item->getSheetID() != snapshot.SheetId || item->getQuality() != quality ||
+			(itemId != 0 && item->getItemId() != itemId))
+			return;
+		snapshot.Info = getInventory().getItemInfo(itemSlotId);
+		insertItemLinkIntoChat(snapshot);
+	}
+};
+static CItemChatLinkInfoWaiter ItemChatLinkInfoWaiter;
+
+void cancelPendingItemChatLink()
+{
+	ItemChatLinkInfoWaiter.cancel();
+}
+
+class CHandlerLinkItemInChat : public IActionHandler
+{
+	void execute(CCtrlBase * /* pCaller */, const std::string & /* params */)
+	{
+		CDBCtrlSheet *item = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		uint32 slotId = 0;
+		if (!resolveItemForChatLink(item, slotId))
+			return;
+
+		CHAT_LINK::CItemSnapshot snapshot;
+		if (!CHAT_LINK::captureItemSnapshot(item, slotId, snapshot))
+			return;
+		if (getInventory().isItemInfoAvailable(slotId) && !getInventory().isItemInfoUpToDate(slotId))
+		{
+			const CItemImage *serverItem = getInventory().getServerItem(slotId);
+			ItemChatLinkInfoWaiter.begin(snapshot, slotId, serverItem);
+			return;
+		}
+
+		insertItemLinkIntoChat(snapshot);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerLinkItemInChat, "link_item_in_chat" );
+
+// **********************************************************************************************************
 class CItemMenuInBagInfoWaiter
 : public IItemInfoWaiter
 {
@@ -1867,6 +1998,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		CViewTextMenu	*pItemInfos = dynamic_cast<CViewTextMenu*>(pMenu->getView("infos"));
 		CViewTextMenu	*pItemTextDisplay = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_text_display"));
 		CViewTextMenu	*pItemTextEdition = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_text_edition"));
+		CViewTextMenu	*pItemChatLink = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_chat_link"));
 
 
 		// **** Active Entries
@@ -1879,10 +2011,12 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pXpCatalyserUse) pXpCatalyserUse->setActive(false);
 		if(pItemTextDisplay) pItemTextDisplay->setActive(false);
 		if(pItemTextEdition) pItemTextEdition->setActive(false);
+		if(pItemChatLink) pItemChatLink->setActive(false);
 
 		if(pLockUnlock) pLockUnlock->setActive(true);
 
 		const CItemSheet *pIS = pCS->asItemSheet();
+		if (pItemChatLink) pItemChatLink->setActive(pIS != NULL && isItemForChatLink(pCS));
 		if (pIS != NULL && invId != INVENTORIES::guild)
 		{
 			if (pCrisEnchant && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL && !bIsLockedByOwner)
@@ -2147,6 +2281,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pDestroy)		pDestroy->setGrayed(true);
 			if(pLockUnlock)		pLockUnlock->setGrayed(true);
 			if(pMoveSubMenu)	pMoveSubMenu->setGrayed(true);
+			if(pItemChatLink)	pItemChatLink->setGrayed(true);
 			if(pMoveToBag)		pMoveToBag->setGrayed(true);
 			for(i=0;i<MAX_INVENTORY_ANIMAL;i++)
 			{
@@ -2167,6 +2302,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if(pDestroy)		pDestroy->setGrayed(false);
 			if(pLockUnlock)		pLockUnlock->setGrayed(false);
 			if(pMoveSubMenu)	pMoveSubMenu->setGrayed(false);
+			if(pItemChatLink)	pItemChatLink->setGrayed(false);
 
 			// check each inventory dest if available
 			if(pMoveToBag)		pMoveToBag->setGrayed(!invMngr.isInventoryAvailable(INVENTORIES::bag));
@@ -2291,6 +2427,8 @@ class CHandlerItemMenuBaseCheck : public IActionHandler
 		// Get all needed text entries
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
 		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
+		CViewTextMenu	*pItemChatLink = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_chat_link"));
+		if (pItemChatLink) pItemChatLink->setActive(isItemForChatLink(pCS));
 
 		if (pCS->getLockedByOwner())
 		{

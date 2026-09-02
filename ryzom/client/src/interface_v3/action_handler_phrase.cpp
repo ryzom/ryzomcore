@@ -44,6 +44,7 @@
 #include "inventory_manager.h"
 #include "game_share/memorization_set_types.h"
 #include "action_handler_help.h"
+#include "chat_link_ui.h"
 #include "bot_chat_page_all.h"
 #include "bot_chat_page_trade.h"
 #include "../net_manager.h"
@@ -753,12 +754,16 @@ public:
 	static bool isMacro;
 	static sint32 sPhraseId;
 	static sint32 macroId;
+	static bool hasLinkedPhrase;
+	static CSPhraseCom linkedPhrase;
 
 	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if(ctrl && ctrl->isSPhraseIdMemory())
 		{
+			hasLinkedPhrase = false;
+			linkedPhrase.clear();
 			haveLastPhraseElement = true;
 			isMacro = ctrl->isMacro();
 			sPhraseId = ctrl->getSPhraseId();
@@ -777,6 +782,60 @@ bool CHandlerPhraseMemoryCopy::haveLastPhraseElement = false;
 bool CHandlerPhraseMemoryCopy::isMacro = false;
 sint32 CHandlerPhraseMemoryCopy::sPhraseId = 0;
 sint32 CHandlerPhraseMemoryCopy::macroId = 0;
+bool CHandlerPhraseMemoryCopy::hasLinkedPhrase = false;
+CSPhraseCom CHandlerPhraseMemoryCopy::linkedPhrase;
+
+static bool getCopyableLinkedPhrase(CSPhraseCom &phrase)
+{
+	CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+	if (!getLinkedSabrinaPhrase(sheet, phrase))
+		return false;
+
+	CSBrickManager *brickManager = CSBrickManager::getInstance();
+	if (!brickManager)
+		return false;
+	for (uint i = 0; i < phrase.Bricks.size(); ++i)
+	{
+		if (!brickManager->isBrickKnown(phrase.Bricks[i]))
+			return false;
+	}
+	return true;
+}
+
+// **********************************************************************************************************
+class CHandlerCheckLinkedPhraseCopy : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string & /* params */)
+	{
+		CGroupMenu *menu = dynamic_cast<CGroupMenu*>(pCaller);
+		CViewTextMenu *copy = menu ? dynamic_cast<CViewTextMenu*>(menu->getView("copy")) : NULL;
+		if (!copy)
+			return;
+		CSPhraseCom phrase;
+		copy->setGrayed(!getCopyableLinkedPhrase(phrase));
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerCheckLinkedPhraseCopy, "chat_link_phrase_copy_check");
+
+// **********************************************************************************************************
+class CHandlerCopyLinkedPhrase : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string & /* params */)
+	{
+		CSPhraseCom phrase;
+		if (!getCopyableLinkedPhrase(phrase))
+			return;
+		CHandlerPhraseMemoryCopy::linkedPhrase = phrase;
+		CHandlerPhraseMemoryCopy::hasLinkedPhrase = true;
+		CHandlerPhraseMemoryCopy::haveLastPhraseElement = true;
+		CHandlerPhraseMemoryCopy::isMacro = false;
+		CHandlerPhraseMemoryCopy::sPhraseId = 0;
+		CHandlerPhraseMemoryCopy::macroId = 0;
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerCopyLinkedPhrase, "copy_linked_phrase");
 
 
 // **********************************************************************************************************
@@ -844,8 +903,10 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 			if(!newPhraseId)
 				return;
 
-			// set it, copy from srcPhraseId
-			pPM->setPhrase(newPhraseId, pPM->getPhrase(srcPhraseId));
+			// A linked phrase has no local phrase id before it is pasted.
+			const CSPhraseCom &srcPhrase = CHandlerPhraseMemoryCopy::hasLinkedPhrase ?
+				CHandlerPhraseMemoryCopy::linkedPhrase : pPM->getPhrase(srcPhraseId);
+			pPM->setPhrase(newPhraseId, srcPhrase);
 
 			// send learn to server
 			pPM->sendLearnToServer(newPhraseId);
@@ -1520,6 +1581,44 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseUpdateAllMemoryRegenTickRange, "phrase_upd
 
 
 // ***************************************************************************
+static void insertPhraseLinkIntoChat(const CSPhraseCom &phrase)
+{
+	std::string marker = CHAT_LINK::createPhraseMarker(phrase);
+	if (marker.empty())
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(
+			CI18N::get("uiChatLinkDoesNotFit"));
+		return;
+	}
+	CHAT_LINK::TInsertResult result = CHAT_LINK::insertIntoChat(marker);
+	if (result == CHAT_LINK::InsertNoChat)
+		return;
+	if (result == CHAT_LINK::InsertInputFull)
+		CInterfaceManager::getInstance()->displaySystemInfo(
+			CI18N::get("uiChatLinkDoesNotFit"));
+}
+
+class CHandlerLinkPhraseInChat : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const string & /* params */)
+	{
+		CDBCtrlSheet *ctrl = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		if (!ctrl)
+			return;
+
+		CSPhraseCom phrase;
+		if (ctrl->isSPhraseId())
+			phrase = CSPhraseManager::getInstance()->getPhrase(ctrl->getSPhraseId());
+		else if (ctrl->isSPhrase())
+			CSPhraseManager::getInstance()->buildPhraseFromSheet(phrase, ctrl->getSheetId());
+		if (!phrase.empty())
+			insertPhraseLinkIntoChat(phrase);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerLinkPhraseInChat, "link_phrase_in_chat");
+
+// ***************************************************************************
 /// Called when we right click on a brick in the memories
 class CHandlerPhraseCheckCanCristalize: public IActionHandler
 {
@@ -1531,28 +1630,47 @@ public:
 		CSPhraseManager *pPM = CSPhraseManager::getInstance();
 		CSBrickManager *pBM = CSBrickManager::getInstance();
 		CInterfaceElement *pCristalizeMenuOption = CWidgetManager::getInstance()->getElementFromId(sCristalizePath);
+		CGroupMenu *phraseMenu = dynamic_cast<CGroupMenu*>(pCaller);
+		CViewTextMenu *pPhraseChatLink = phraseMenu ? dynamic_cast<CViewTextMenu*>(phraseMenu->getView("phrase_chat_link")) : NULL;
 
-		if (pCristalizeMenuOption == NULL) return;
+		if (pPhraseChatLink) pPhraseChatLink->setActive(false);
 		// The default is to not display the cristalize menu option
-		pCristalizeMenuOption->setActive(false);
+		if (pCristalizeMenuOption) pCristalizeMenuOption->setActive(false);
 		if (pCaller == NULL) return;
 
 		// Get the interface control sheet
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
-		if (!pCS->isSPhraseIdMemory()) return;
+		bool memoryPhrase = pCS->isSPhraseIdMemory();
+		if (pPhraseChatLink)
+		{
+			const char *memoryOnlyIds[] = { "for", "edi", "cut", "copy" };
+			for (uint i = 0; i < sizeof(memoryOnlyIds) / sizeof(memoryOnlyIds[0]); ++i)
+			{
+				CInterfaceElement *entry = phraseMenu->getView(memoryOnlyIds[i]);
+				if (entry) entry->setActive(memoryPhrase);
+			}
+		}
+		if (pCS->isSPhrase())
+		{
+			CInterfaceElement *info = phraseMenu ? phraseMenu->getView("inf") : NULL;
+			if (info) info->setActive(true);
+			if (pPhraseChatLink) pPhraseChatLink->setActive(true);
+			return;
+		}
+		if (!pCS->isSPhraseId()) return;
 
-		// If its a phrase id in memory then get the phrase
-
-		const CSPhraseCom &phrase = pPM->getPhrase(pCS->getSheetId());
+		const CSPhraseCom &phrase = pPM->getPhrase(pCS->getSPhraseId());
 		if (phrase.empty()) return;
+		if (pPhraseChatLink) pPhraseChatLink->setActive(true);
+		if (!memoryPhrase) return;
 
 		// If the phrase is not empty get the root to known if its a magic phrase or not
 		// And if its a magic phrase display the cristalize menu option
 
 		CSBrickSheet *pBrick = pBM->getBrick(phrase.Bricks[0]);
-		if (pBrick != NULL)
+		if (pBrick != NULL && pCristalizeMenuOption)
 		{
 			if (pBrick->isMagic())
 			{

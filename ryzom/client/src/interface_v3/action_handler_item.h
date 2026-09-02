@@ -19,6 +19,8 @@
 
 #include "inventory_manager.h"
 
+void cancelPendingItemChatLink();
+
 class CInterfaceItemEdition
 {
 private:

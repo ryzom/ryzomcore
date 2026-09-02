@@ -1835,6 +1835,9 @@ void CDBCtrlSheet::setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bri
 			setupCharBitmaps(26-2, 1);
 		}
 	}
+
+	_LastSheetId = _SheetId.getSInt32();
+	_NeedSetup = false;
 }
 
 // ***************************************************************************
@@ -3706,36 +3709,9 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 		}
 		else
 		{
-			// delegate setup of context he help ( & window ) to lua
-			CInterfaceManager *im = CInterfaceManager::getInstance();
-			CLuaState *ls= CLuaManager::getInstance().getLuaState();
-			{
-				CLuaStackRestorer lsr(ls, 0);
-				CSPhraseManager	*pPM= CSPhraseManager::getInstance();
-				_PhraseAdapter = new CSPhraseComAdpater;
-				_PhraseAdapter->Phrase = pPM->getPhrase(phraseId);
-				CLuaIHM::pushReflectableOnStack(*ls, _PhraseAdapter);
-				ls->pushGlobalTable();
-				CLuaObject game(*ls);
-				game = game["game"];
-				game.callMethodByNameNoThrow("updatePhraseTooltip", 1, 1);
-				// retrieve result from stack
-				if (!ls->empty())
-				{
-#ifdef RYZOM_LUA_UCSTRING
-					ucstring tmpHelp; // Compatibility
-					CLuaIHM::pop(*ls, tmpHelp);
-					help = tmpHelp.toUtf8();
-#else
-					help = ls->toString();
-					ls->pop();
-#endif
-				}
-				else
-				{
-					nlwarning("Ucstring result expected when calling 'game:updatePhraseTooltip', possible script error");
-				}
-			}
+			_PhraseAdapter = new CSPhraseComAdpater;
+			_PhraseAdapter->Phrase = CSPhraseManager::getInstance()->getPhrase(phraseId);
+			help = _PhraseAdapter->updateTooltip();
 		}
 		/*
 		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
@@ -4756,6 +4732,9 @@ void CDBCtrlSheet::initArmourColors()
 // ***************************************************************************
 string CDBCtrlSheet::getItemActualName() const
 {
+	if (!_ItemActualNameOverride.empty())
+		return _ItemActualNameOverride;
+
 	const CItemSheet *pIS= asItemSheet();
 	if(!pIS)
 		return string();

@@ -582,6 +582,10 @@ public:
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
 	std::string getItemActualName() const;
+	// Override the item name for a chat link.
+	void setItemActualNameOverride(const std::string &name) { _ItemActualNameOverride = name; }
+	// setup icon from phrases
+	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName, uint8 phraseIconIndex = std::numeric_limits<uint8>::max());
 
 	/// true if support drag copy (with CTRL). action handler has to check control.
 	bool	canDragCopy() const {return _DragCopy;}
@@ -646,9 +650,6 @@ protected:
 	void setupOutpostBuilding();
 	// optSheet is for special faber
 	void setupDisplayAsSBrick(sint32 sheet, sint32 optSheet = 0, bool force = false);
-	// setup icon from phrases
-	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName, uint8 phraseIconIndex = std::numeric_limits<uint8>::max());
-
 	// draw a number and returns the width of the drawn number
 	sint32 drawNumber(sint32 x, sint32 y, sint32 wSheet, sint32 hSheet, NLMISC::CRGBA color, sint32 value, bool rightAlign=true);
 
@@ -842,6 +843,7 @@ protected:
 	sint64		_NotifyAnimEndTime;
 
 	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
+	std::string _ItemActualNameOverride;
 private:
 	mutable TSheetType			_ActualType;
 

@@ -24,8 +24,11 @@
 #include "stdpch.h"
 // client
 #include "chat_text_manager.h"
+#include "chat_link_codec.h"
+#include "chat_link_ui.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/group_paragraph.h"
+#include "nel/misc/i18n.h"
 #include "interface_manager.h"
 
 using namespace std;
@@ -158,8 +161,8 @@ static CInterfaceGroup *buildLineWithCommand(CInterfaceGroup *commandGroup, CVie
 
 static inline bool	isUrlTag(const string &s, string::size_type index, string::size_type textSize)
 {
-	// Format http://, https://
-	// or markdown style (title)[http://..]
+	// Format http://, https:// or ryzom://
+	// or markdown style (title)[url]
 	if(textSize > index+7)
 	{
 		bool markdown = false;
@@ -167,7 +170,7 @@ static inline bool	isUrlTag(const string &s, string::size_type index, string::si
 		// advance index to url section if markdown style link is detected
 		if (s[i] == '(')
 		{
-			// scan for ')[http://'
+			// scan for ')['
 			while(i < textSize-9)
 			{
 				if (s[i] == ')' && s[i+1] == '[')
@@ -188,7 +191,10 @@ static inline bool	isUrlTag(const string &s, string::size_type index, string::si
 
 		if (textSize > i + 7)
 		{
-			bool isUrl = (toLowerAscii(s.substr(i, 7)) == "http://" || toLowerAscii(s.substr(i, 8)) == "https://");
+			bool isUrl = (toLowerAscii(s.substr(i, 7)) == "http://" ||
+				toLowerAscii(s.substr(i, 8)) == "https://" ||
+				s.compare(i, strlen(CHAT_LINK::ItemPrefix), CHAT_LINK::ItemPrefix) == 0 ||
+				s.compare(i, strlen(CHAT_LINK::PhrasePrefix), CHAT_LINK::PhrasePrefix) == 0);
 			// match "text http://" and not "texthttp://"
 			if (isUrl && i > 0 && !markdown)
 			{
@@ -473,7 +479,10 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	bool hasUrl;
 	{
 		string s = toLowerAscii(msg);
-		hasUrl = (s.find("http://") || s.find("https://"));
+		hasUrl = (s.find("http://") != string::npos ||
+			s.find("https://") != string::npos ||
+			s.find(CHAT_LINK::ItemPrefix) != string::npos ||
+			s.find(CHAT_LINK::PhrasePrefix) != string::npos);
 	}
 
 	for (string::size_type i = pos; i< textSize;)
@@ -507,9 +516,34 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 				//vt->setColor(color);
 				vt->setColor(col);
 
+				const bool itemLink = CHAT_LINK::isItemUrl(url);
+				const bool phraseLink = CHAT_LINK::isPhraseUrl(url);
+				CHAT_LINK::CItemSnapshot itemSnapshot;
+				CSPhraseCom phrase;
+				const bool validItemLink = itemLink && CHAT_LINK::decodeItemSnapshot(url, itemSnapshot);
+				const bool validPhraseLink = phraseLink && CHAT_LINK::decodePhrase(url, phrase);
+				if (validItemLink)
+					itemSnapshot.Name = title.empty() ? CI18N::get("uiChatLinkDefaultItemName") : title;
+				if (validPhraseLink)
+					phrase.Name.fromUtf8(title.empty() ? CI18N::get("uiAction") : title);
+				if (itemLink)
+					vt->setColor(NLMISC::CRGBA(255, 205, 80, 255));
+				else if (phraseLink)
+					vt->setColor(NLMISC::CRGBA(110, 205, 255, 255));
+
 				if (title.size() > 0)
 				{
 					vt->LinkTitle = title;
+					vt->setText(vt->LinkTitle);
+				}
+				else if (validItemLink)
+				{
+					vt->LinkTitle = itemSnapshot.Name;
+					vt->setText(vt->LinkTitle);
+				}
+				else if (validPhraseLink)
+				{
+					vt->LinkTitle = phrase.Name.toUtf8();
 					vt->setText(vt->LinkTitle);
 				}
 				else
@@ -532,6 +566,30 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 				}
 				vt->setActionOnLeftClick("lua");
 				vt->setParamsOnLeftClick("game:chatUrl('" + url + "')");
+				if (itemLink)
+				{
+					if (validItemLink)
+					{
+						vt->setLinkContextHelp(itemSnapshot.Name);
+						vt->setActionOnContextHelp("item_chat_link_tooltip");
+					}
+					else
+						vt->setLinkContextHelp(CI18N::get("uiChatLinkInvalid"));
+					vt->setActionOnLeftClick("open_item_chat_link");
+					vt->setParamsOnLeftClick(url + "\n" + (validItemLink ? itemSnapshot.Name : title));
+				}
+				else if (phraseLink)
+				{
+					if (validPhraseLink)
+					{
+						vt->setLinkContextHelp(phrase.Name.toUtf8());
+						vt->setActionOnContextHelp("phrase_chat_link_tooltip");
+					}
+					else
+						vt->setLinkContextHelp(CI18N::get("uiChatLinkInvalid"));
+					vt->setActionOnLeftClick("open_phrase_chat_link");
+					vt->setParamsOnLeftClick(url + "\n" + (validPhraseLink ? phrase.Name.toUtf8() : title));
+				}
 
 				para->addChildLink(vt);
 

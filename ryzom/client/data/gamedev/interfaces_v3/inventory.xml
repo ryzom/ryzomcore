@@ -1648,6 +1648,10 @@
             name="uimInfos"
             handler="open_phraseid_help"
             icon="brick_default.tga" />
+    <action id="phrase_chat_link"
+            name="uiChatLinkMenuAction"
+            handler="link_phrase_in_chat"
+            icon="ico_range.tga" />
     <action id="cut"
             name="uiEditCut"
             handler="phrase_memory_copy"
@@ -1656,6 +1660,16 @@
     <action id="copy"
             name="uiEditCopy"
             handler="phrase_memory_copy"
+            icon="r2ed_tool_copy.tga" />
+  </group>
+  <!-- context menu for a linked action -->
+  <group type="menu"
+         id="cm_chat_link_phrase"
+         extends="base_menu"
+         on_active="chat_link_phrase_copy_check">
+    <action id="copy"
+            name="uiEditCopy"
+            handler="copy_linked_phrase"
             icon="r2ed_tool_copy.tga" />
   </group>
   <!-- context menu for memory button, when slot is empty -->

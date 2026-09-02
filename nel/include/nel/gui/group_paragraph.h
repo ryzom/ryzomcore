@@ -39,6 +39,15 @@ namespace NLGUI
 
 		CCtrlLink (const TCtorParam &param) : CCtrlButton(param)
 		{}
+
+		void setContextHelpWindowName(const std::string &name) { _ContextHelpWindowName = name; }
+		virtual std::string getContextHelpWindowName() const
+		{
+			return _ContextHelpWindowName.empty() ? CCtrlButton::getContextHelpWindowName() : _ContextHelpWindowName;
+		}
+
+	private:
+		std::string _ContextHelpWindowName;
 	};
 
 	// ----------------------------------------------------------------------------
