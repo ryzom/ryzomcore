@@ -140,7 +140,7 @@ class TextureWidgetsMixin:
 			return imgui.color_button(str_id, (0.5, 0.5, 0.5, 0.4), 0, (size, size))
 		return self._draw_thumbnail_button(str_id, tex_ref, name, size)
 
-	def _draw_texture_preview_static(self, name, size=24, badge=None, subdir="tex"):
+	def _draw_texture_preview_static(self, name, size=24, badge=None, subdir="tex", str_id="##preview"):
 		"""Same thumbnail button (size, frame, hover-zoom tooltip) as
 		_draw_texture_preview_button, but a plain reveal-in-file-manager
 		action instead of whatever a real texture-picker button would do
@@ -158,7 +158,11 @@ class TextureWidgetsMixin:
 		doesn't have to spare. `subdir` ("tex" or "masks", see
 		_is_texture_in_workspace()) decides which workspace folder
 		"already in the workspace" is checked against, for the green
-		border (see _draw_preview_workspace_border())."""
+		border (see _draw_preview_workspace_border()). `str_id` must be
+		overridden by the caller whenever more than one of these can be
+		drawn in the same push_id() scope (e.g. a material row's diffuse
+		AND specular preview side by side) -- imgui.image_button()'s own ID
+		is otherwise just this literal label text, identical every time."""
 		tex_ref = self._get_preview_texture_ref(name)
 		if tex_ref is None:
 			imgui.dummy((size, size))
@@ -166,7 +170,7 @@ class TextureWidgetsMixin:
 			resolved = self._resolve_texture(name)
 			can_reveal = resolved is not None and resolved.fs_path is not None
 			imgui.begin_disabled(not can_reveal)
-			if imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR) and can_reveal:
+			if imgui.image_button(str_id, tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR) and can_reveal:
 				reveal_in_system_file_manager(resolved.fs_path)
 			imgui.end_disabled()
 			if self._is_texture_in_workspace(name, subdir):
@@ -505,7 +509,7 @@ class TextureWidgetsMixin:
 								self._reapply_material(material_id)
 
 						current_specular = self._specular_preview_name_for_slot(material, index) or ""
-						self._draw_texture_preview_static(current_specular, badge="S")
+						self._draw_texture_preview_static(current_specular, badge="S", str_id="##preview-specular")
 						imgui.same_line()
 						specular_in_workspace = self._is_texture_in_workspace(current_specular)
 						imgui.push_style_color(
@@ -522,12 +526,12 @@ class TextureWidgetsMixin:
 						if changed and new_value != current_specular:
 							_set_specular_slot(new_value)
 						imgui.same_line()
-						if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Browse for a specular/gloss map file"):
+						if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##specular", "Browse for a specular/gloss map file"):
 							def _on_specular_result(file_name, _set_specular_slot=_set_specular_slot):
 								_set_specular_slot(file_name)
 							self._start_texture_browse(("specular-multi", material_id, index), _on_specular_result)
 						imgui.same_line()
-						self._draw_texture_copy_button(current_specular, _set_specular_slot)
+						self._draw_texture_copy_button(current_specular, _set_specular_slot, str_id_suffix="##specular")
 
 					imgui.pop_id()
 
@@ -671,7 +675,7 @@ class TextureWidgetsMixin:
 				return None
 		return dest.name.lower()
 
-	def _draw_texture_copy_button(self, current_value, on_copied, subdir="tex"):
+	def _draw_texture_copy_button(self, current_value, on_copied, subdir="tex", str_id_suffix=""):
 		"""Small icon button, next to a texture reference field: copies
 		that one texture into the active workspace's `subdir` folder and
 		rewrites the reference to the resulting bare name via
@@ -681,28 +685,33 @@ class TextureWidgetsMixin:
 		bring in for editing. Once it's already there, this becomes an
 		"Edit" button instead (see _draw_texture_edit_button()) -- copying
 		it again would be a no-op, so there's nothing useful left for this
-		button to do besides launch an editor on it."""
+		button to do besides launch an editor on it. `str_id_suffix` must
+		be overridden by the caller whenever more than one of these can be
+		drawn in the same push_id() scope (e.g. a material row's diffuse
+		AND specular texture side by side) -- the icon glyph alone is
+		otherwise the same imgui ID every time."""
 		if self._is_texture_in_workspace(current_value, subdir):
-			self._draw_texture_edit_button(current_value)
+			self._draw_texture_edit_button(current_value, str_id_suffix=str_id_suffix)
 			return
 		disabled = not current_value or self.workspace_setup_dialog.active_workspace_dir is None
 		imgui.begin_disabled(disabled)
-		if _icon_button(fa_icons.ICON_FA_DOWNLOAD, f"Copy this file into the active workspace's {subdir}/"):
+		if _icon_button(f"{fa_icons.ICON_FA_DOWNLOAD}{str_id_suffix}", f"Copy this file into the active workspace's {subdir}/"):
 			new_name = self._copy_texture_to_workspace(current_value, subdir)
 			if new_name is not None:
 				on_copied(new_name)
 		imgui.end_disabled()
 
-	def _draw_texture_edit_button(self, current_value):
+	def _draw_texture_edit_button(self, current_value, str_id_suffix=""):
 		"""Launches the user's configured external image editor (Settings
 		tab -> Tools) on `current_value`'s resolved file -- shown instead
 		of the copy button once a texture already lives in the active
 		workspace. Always clickable (2026-08-29): if no editor is
 		configured yet, jumps to Settings > Tools and flashes the field
 		instead of just sitting disabled with a tooltip (see
-		ForgeryApp.request_settings_attention())."""
+		ForgeryApp.request_settings_attention()). `str_id_suffix`: see
+		_draw_texture_copy_button()'s own docstring."""
 		editor_path = app_settings.load().image_editor_path
-		if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this texture in the configured image editor"):
+		if _icon_button(f"{fa_icons.ICON_FA_EDIT}{str_id_suffix}", "Edit this texture in the configured image editor"):
 			if not editor_path:
 				self.request_settings_attention("Tools", "image_editor_path")
 			else:

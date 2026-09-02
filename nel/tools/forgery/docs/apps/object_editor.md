@@ -31,9 +31,11 @@ remplacement de géométrie), `ViewportTransformMixin` (`viewport_transform.py`,
 grille/axes, transparence, vent, panneau transform, framing caméra,
 `_rebuild_geometry`), `ShapeIOMixin` (`shape_io.py`, chargement/sauvegarde,
 session, popups liées au shape), `TextureWidgetsMixin` (`texture_widgets.py`,
-miniatures/couleurs, éditeur Multi Bitmap, combo texture, copie workspace) et
+miniatures/couleurs, éditeur Multi Bitmap, combo texture, copie workspace),
 `PanoplyUIMixin` (`panoply_ui.py`, section Panoply globale, fraîcheur/bake)
-sont faits ; le reste des méthodes ci-dessous annotées "(object_editor.py)"
+et `MaterialsMixin` (`materials.py`, application/edition des matériaux,
+overlay specular, onglets Textures/Materials) sont faits ; le reste des
+méthodes ci-dessous annotées "(object_editor.py)"
 vivra ailleurs au fur et à mesure des prochaines étapes -- ces annotations ne
 seront remises à jour dans l'ensemble du document qu'une fois le split
 terminé, pour éviter une réécriture partielle à chaque étape.
