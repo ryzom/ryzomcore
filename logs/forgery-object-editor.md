@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026-09-02 — ✨ Split object_editor.py into theme mixins, Forgery 3.0.1-3.0.9 (final smoke pass still pending)
+## 2026-09-02 — ✨ Split object_editor.py into theme mixins, Forgery 3.0.1-3.0.10 (final smoke pass still pending)
 
 `object_editor.py` ("Patina") had grown into a 6635-line, 185-method
 god-object on a single `ObjectEditorApp` class. Split into theme mixin
@@ -107,12 +107,20 @@ caught by this refactor, not new features):
   else initializes it before that code path assumes a real list -- fixed
   by seeding `file_names=[]` on each created face.
 
-Version bumped once per step (Forgery 3.0.1 through 3.0.9, one full-minor
-step per mixin extracted). **Still outstanding**: the chantier's own final
-step, a full manual smoke pass across every touched feature on the real
-machine, hasn't been run yet as of this entry -- individual features were
-tested step by step as each mixin landed, but not as one final end-to-end
-pass over the whole reorganized file.
+Version bumped once per step (Forgery 3.0.1 through 3.0.10, one full-minor
+step per mixin extracted). With `creature_bind.py` landed, `object_editor.py`
+itself was reduced to exactly what step "Reduce object_editor.py" called for
+-- 726 lines, only imports, module-scope helpers, and `ObjectEditorApp`'s own
+lifecycle methods (`__init__`, `on_selection_changed`,
+`_on_active_workspace_changed`, `_scan_active_workspace_virtual_categories`,
+`_on_exit`, `panel_title`, `draw_panel`) inheriting from every mixin. Manually
+tested on the real machine: Skinning preview panel, Bind preview (creature
+selection/assembly), bind control panels -- all confirmed working unchanged.
+**Still outstanding**: the chantier's own final step, a full manual smoke
+pass across *every* touched feature (materials/panoply, import/replace mesh,
+viewport helpers, save) on the real machine, hasn't been run yet as of this
+entry -- individual features were tested step by step as each mixin landed,
+but not as one final end-to-end pass over the whole reorganized file.
 
 ## 2026-09-01 — ✨ Guard shape loads, single-click, popup colors
 
