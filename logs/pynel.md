@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-04 — 🐛 Fix CMaterial::CLightMap version-0 ambient field, pynel 0.9.2
+
+Found while chasing one of the still-unsupported shapes flagged by the previous entry's
+survey (`gen_aub_int_table_1.shape`): `_parse_material()`'s light-map branch
+(`ver>=7`, i.e. `CMaterial` version 7+) unconditionally read a 4th `Rgba`
+(`LMCAmbient`) for every light map entry. Real `CMaterial::CLightMap::serial2`
+(`material.cpp:458-468`) only serializes that field when the light map's own
+inner version is >=1 -- it was added later than the rest of the struct, so
+older shapes still carry `CLightMap` at version 0, where it's simply absent
+(not a default value, an omitted field). The `MaterialLightMap.ambient` field
+was already `Optional[Rgba]` in the dataclass (anticipating exactly this),
+but the reader never actually left it `None` -- a comment claiming the
+version was "fixed at 1 when written" turned out to be an unverified
+assumption, wrong for this older data. Reading `LMCAmbient` unconditionally
+silently desynced every field after it for any shape still carrying a
+version-0 light map, surfacing much later as a confusing, unrelated-looking
+crash (bogus polymorphic-pointer node ids, "unsupported class ''" -- see
+this entry's investigation in the conversation, not reproduced here).
+
+Fixed by reading the light map's own version first and gating `LMCAmbient`
+on `ver>=1`, matching the engine exactly. Verified: full live_data re-scan,
+`Mesh` fully-parsed count 1670 -> 1671; the majority of the remaining
+type-only shapes turned out to have a different, still-unidentified cause
+(most don't hit this particular light-map code path at all) -- not chased
+further here.
+
 ## 2026-09-04 — 🐛 Support CTextureBlend/CTextureBump/legacy CVertexBuffer, pynel 0.9.1
 
 A live_data survey (`nel/tools/forgery/docs/shape_type_survey.md`) found `pynel.ryzom_shape`

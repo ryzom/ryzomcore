@@ -834,10 +834,16 @@ def _parse_material(f: _Reader) -> Material:
 		if ver >= 7:
 			n = f.u32()
 			for _ in range(n):
-				f.version()  # CLightMap::serial2 version (fixed at 1 when written)
+				# CLightMap::serial2 (material.cpp): LMCAmbient was added in
+				# version 1 -- older shapes still have it at version 0, where
+				# it's simply absent (not a default value, an omitted field).
+				# Assuming it was "always written as 1" here was wrong and
+				# desynced every field read after it for any shape still
+				# carrying a version-0 light map.
+				lm_ver = f.version()
 				factor = f.rgba()
 				diffuse_lm = f.rgba()
-				ambient_lm = f.rgba()
+				ambient_lm = f.rgba() if lm_ver >= 1 else None
 				tex = _read_texture_ptr(f)
 				light_maps.append(MaterialLightMap(factor=factor, diffuse=diffuse_lm, ambient=ambient_lm, texture=tex))
 			light_maps_mulx2 = f.boolean()
