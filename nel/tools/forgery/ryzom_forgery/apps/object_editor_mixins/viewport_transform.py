@@ -21,11 +21,14 @@ from pynel.ryzom_shape import MeshMRMSkinned, WindTreeParams
 
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
-	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_grid_geom, _build_sun_globe_geom,
-	_build_vertex_data, _GRID_MARGIN_SQUARES, _GRID_SQUARES, _GRID_STEP, _is_shape_skinned, _MIN_GRID_SQUARES,
-	_PIVOT_AXIS_COLORS, _uvs_need_repeat, _WORLD_AXIS_COLORS,
+	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_grid_geom,
+	_build_shadow_skin_ground_node, _build_shadow_skin_vdata, _build_sun_globe_geom, _build_vertex_data,
+	_GRID_MARGIN_SQUARES, _GRID_SQUARES, _GRID_STEP, _is_shape_skinned, _MIN_GRID_SQUARES, _PIVOT_AXIS_COLORS,
+	_SHADOW_SKIN_COLOR, _SHADOW_SKIN_GROUND_OFFSET, _SHADOW_SKIN_GROUND_Z, _uvs_need_repeat, _WORLD_AXIS_COLORS,
 )
-from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import _build_skin_state, _build_wind_state
+from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
+	_build_shadow_skin_preview_state, _build_skin_state, _build_wind_state,
+)
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 	_icon_button, _OBJECT_TRANSPARENCY_ALPHA, _VIEWPORT_TOGGLE_MARGIN_PX,
 )
@@ -127,6 +130,11 @@ class ViewportTransformMixin:
 	def _toggle_pivot_axes(self):
 		self._pivot_axes_visible = not self._pivot_axes_visible
 		(self._pivot_axes_np.show if self._pivot_axes_visible else self._pivot_axes_np.hide)()
+
+	def _toggle_shadow_skin_preview(self):
+		self._shadow_skin_visible = not self._shadow_skin_visible
+		if self._shadow_skin_np is not None:
+			(self._shadow_skin_np.show if self._shadow_skin_visible else self._shadow_skin_np.hide)()
 
 	def _apply_object_transparency(self):
 		if self._object_transparent:
@@ -393,6 +401,17 @@ class ViewportTransformMixin:
 			if _icon_button(fa_icons.ICON_FA_ADJUST, "50% object transparency",
 			                self._object_transparent, square=True, large_font=large_font):
 				self._toggle_object_transparency()
+			if self._shadow_skin_np is not None or self._shadow_skin_visible:
+				imgui.same_line()
+				shadow_animated = self._shadow_skin_state is not None and self._shadow_skin_state.bone_names is not None
+				shadow_tooltip = (
+					"CShadowSkin ground-shadow preview (animated to the current pose)"
+					if shadow_animated else
+					"CShadowSkin ground-shadow preview (static bind pose -- load a skeleton in Skinning "
+					"preview to animate it)")
+				if _icon_button(fa_icons.ICON_FA_CLONE, shadow_tooltip,
+				                self._shadow_skin_visible, square=True, large_font=large_font):
+					self._toggle_shadow_skin_preview()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_panel_taskbar(self):
@@ -721,6 +740,14 @@ class ViewportTransformMixin:
 		self._material_node_paths = {}
 		self._wind_state = None
 		self._skin_state = None
+		self._shadow_skin_state = None
+		# Parented to self.render (world space, see the build block further
+		# down for why), NOT model_root -- unlike model_root itself, it's not
+		# torn down by the remove_node() above, so it must be removed here
+		# explicitly before a fresh one is (maybe) built for the new shape.
+		if self._shadow_skin_np is not None:
+			self._shadow_skin_np.remove_node()
+			self._shadow_skin_np = None
 		self._texture_needs_repeat = False
 
 		geom_value = shape_geom(self.shape_file.value)
@@ -747,6 +774,39 @@ class ViewportTransformMixin:
 		# changes. Extending the live path to that format too is future work.
 		if isinstance(self.shape_file.value, MeshMRMSkinned) and skeleton is not None:
 			self._skin_state = _build_skin_state(geom_value, skeleton)
+
+		# CShadowSkin ground-shadow preview (opt-in, see
+		# _toggle_shadow_skin_preview()) -- unlike self._skin_state above,
+		# this does NOT require a skeleton: without one, it's shown flattened
+		# onto the ground at its raw bind-pose position (no bone transform),
+		# same fallback idea as iter_render_passes()' own rigid bind-pose
+		# render further below. _shadow_skin_state (built with a skeleton
+		# when one's loaded) is what makes it track the current pose live
+		# every frame instead of staying static -- see
+		# _build_shadow_skin_preview_state()'s own docstring. None whenever
+		# geom.shadow_skin is empty.
+		#
+		# Parented to self.render (WORLD space), NOT model_root, unlike every
+		# other per-shape geometry built in this method: _reskin_shadow_skin_state()
+		# (the per-frame task) writes already-ground-projected WORLD
+		# positions straight into this node's vdata -- parenting under
+		# model_root would apply the object pivot's own transform ON TOP of
+		# those, incorrectly moving/rotating a shadow that's supposed to stay
+		# flat on the world ground plane regardless of how the loaded shape
+		# itself is being rotated/positioned in the editor. Built here rather
+		# than _rebuild_viewport_helpers() because its triangle list is
+		# specific to the just-(re)loaded shape's own CShadowSkin, same as
+		# self._skin_state.
+		if isinstance(self.shape_file.value, MeshMRMSkinned) and geom_value.shadow_skin.vertices:
+			self._shadow_skin_state = _build_shadow_skin_preview_state(geom_value, skeleton)
+			shadow_vdata = _build_shadow_skin_vdata(geom_value.shadow_skin)
+			self._shadow_skin_state.vdata = shadow_vdata
+			shadow_node = _build_shadow_skin_ground_node(shadow_vdata, geom_value.shadow_skin)
+			self._shadow_skin_np = self.render.attach_new_node(shadow_node)
+			self._shadow_skin_np.set_light_off()
+			self._shadow_skin_np.set_color(*_SHADOW_SKIN_COLOR)
+			if not self._shadow_skin_visible:
+				self._shadow_skin_np.hide()
 
 		vdata = None
 		pass_count = 0

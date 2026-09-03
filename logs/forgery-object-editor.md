@@ -1,5 +1,80 @@
 # Changelog
 
+## 2026-09-03 — ✨ Rebuild CShadowSkin after geometry edits, ground-shadow preview, Forgery 3.0.13
+
+`CShadowSkin` (the shadow-casting proxy mesh trailing a `CMeshMRMSkinned`'s
+packed vertex buffer, see pynel's matching `pynel 0.8.1` log entry) used to
+just get copied through byte-for-byte, unedited, by every Forgery tool that
+touches geometry -- fine as long as nothing did. Investigated 2026-09-02/03:
+confirmed on real live data
+(`~/.local/share/Ryzom/ryzom_live/data/characters_shapes.bnp`) that this is
+a real, not just theoretical, gap -- Nuno's own hand-made cross-race
+hairstyle variants (`fy_hof_cheveux_medium01_ma/_tr/_zo.shape`) ship with a
+completely empty `CShadowSkin`, because whatever produced them (before
+`hairstyle_conform.py` existed) never (re)ran the offline
+`nel/tools/3d/build_shadow_skin` tool afterwards. Confirmed this isn't
+hairstyle-specific either: every equippable character piece and virtually
+every creature ships as `CMeshMRMSkinned`, and `CMeshMRMSkinnedGeom` never
+auto-builds `CShadowSkin` at load time the way the legacy plain `CMesh`
+path does -- so any geometry edit on any such shape needs the same fix.
+
+**`shape_geometry.rebuild_shadow_skin()`**: pure-Python reimplementation of
+`build_shadow_skin`'s own `addShadowMesh()` algorithm -- picks one of the
+shape's own already-baked LODs and deduplicates its vertices by
+`(position, dominant bone)`, reindexing that LOD's triangles onto the
+deduplicated set (no re-triangulation, matching the official tool). Found
+and fixed a real bug along the way: a coarser LOD's geomorph placeholder
+vertices (`MeshMRMSkinnedLod.geomorphs`, same mechanism `CMeshMRM` already
+had) need resolving to their "end" target before dedup, or they merge
+together incorrectly (caught via a real-fixture mismatch: 72 vertices
+instead of 84 on `fy_hof_cheveux_medium01.shape`'s own LOD 3, traced to
+placeholder vertices reading their own dummy bone-0/position-0 data instead
+of their target's). Validated against every non-empty `CShadowSkin` in both
+`characters_shapes.bnp` (423/423) and `fauna_shapes.bnp` (168/168) --
+matching vertex/triangle counts and, for the fixture, an exact multiset
+match once float rounding is accounted for (triangle *order* legitimately
+differs from the original file -- a harmless vertex-numbering permutation,
+not a correctness issue).
+
+**Source LOD selection**: `infer_shadow_skin_lod_index()` recovers which LOD
+an existing (possibly stale) `CShadowSkin` was built from by matching its
+triangle-index count against each LOD's own render-pass index count (exact
+by construction, since `build_shadow_skin` reuses a LOD's triangle list
+as-is). When there's nothing to infer from (empty `CShadowSkin`),
+`default_shadow_skin_lod_index()` applies a content-type-agnostic rule
+derived purely from the shape's own LOD triangle counts, verified against
+the full live dataset: character pieces always land on LOD index 3
+regardless of face count (423/423, ratio-driven), while creatures cluster
+around a hard ~1000-triangle cap (r=-0.88 vs. face count, r=-0.18 vs.
+physical bbox size -- confirms a triangle budget, not a size-based
+decision) -- so the rule is "coarsest LOD with >=~1000 triangles if one
+exists, else LOD index 3", which reproduces both regimes without ever
+needing to know whether a shape is a creature or a character piece.
+
+**Wired in**: `hairstyle_conform.py` rebuilds `CShadowSkin` right after
+writing its conformed boundary positions back. New standalone CLI
+`apps/rebuild_shadow_skin.py` (mirrors `hairstyle_conform.py`'s own
+structure) rebuilds one independently of any edit, with an optional
+`--lod` override -- e.g. to backfill Nuno's pre-existing empty
+`_ma`/`_tr`/`_zo` variants.
+
+**Patina ground-shadow preview**: opt-in viewport toggle (new icon next to
+the existing grid/axes/transparency ones) shows an approximate cast shadow
+-- the rebuilt `CShadowSkin`'s vertices flattened onto the world ground
+plane along the Lighting panel's own current sun direction (no new light
+control needed), rendered as a flat opaque black shape (tried
+semi-transparent grey first, dropped: overlapping triangles double up
+under alpha blending into visible streaking -- opaque sidesteps that
+entirely, 2026-09-03, Nuno). Works with or without a skeleton loaded in
+Skinning preview -- unposed/static without one, live-reposed every frame
+with one, same "no skeleton needed for a static render" fallback the main
+mesh already has. Deliberately not a real shadow-map render: no soft
+edges, no terrain-shape wrapping, no blending with other body-part shadows
+-- an earlier design (a wireframe of the proxy shown in-place on the
+character, no projection at all) was built first and then discarded once
+it became clear it answered "does the rebuilt data look structurally sane"
+but not the actually-wanted "will the shadow look right in game" question.
+
 ## 2026-09-02 — ✨ Adjustable scene lighting, material Lighting section, floating-panel taskbar, Forgery 3.0.12
 
 Patina's materials tab already read/applied `ambient`/`specular`/`emissive`/

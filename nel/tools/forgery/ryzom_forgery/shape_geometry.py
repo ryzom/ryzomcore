@@ -14,7 +14,7 @@ from panda3d.core import PNMImage, StringStream, Texture as PandaTexture
 
 from pynel.ryzom_shape import (
 	Matrix, Mesh, MeshGeom, MeshMRM, MeshMRMGeom, MeshMRMSkinned, MeshMRMSkinnedGeom, MeshMultiLod,
-	Quaternion, VertexBuffer,
+	Quaternion, ShadowSkin, ShadowVertex, Vector3, VertexBuffer,
 )
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh
 
@@ -512,6 +512,109 @@ def conform_hairstyle_boundary(positions, indices, source_face_index, target_rin
 		new_positions[vertex_index] = interpolate_seam_ring(target_ring, angle)
 
 	return new_positions
+
+
+# Content-type-agnostic default LOD for rebuild_shadow_skin() when there's no
+# existing CShadowSkin to infer a target from (see
+# infer_shadow_skin_lod_index()) -- nothing in a .shape records whether it's
+# a creature or a character piece, and real data (verified 2026-09-02/03,
+# see forgery-object-editor.md's chantier writeup) shows the two use
+# genuinely different (ratio, maxFace) conventions: character pieces always
+# land on LOD index 3 regardless of face count (423/423 in
+# characters_shapes.bnp), while creatures cluster their chosen LOD's actual
+# triangle count around a hard ~1000-triangle cap (r=-0.88 vs. face count,
+# r=-0.18 vs. physical bbox size, across fauna_shapes.bnp) whenever their
+# finest LOD exceeds it.
+_SHADOW_SKIN_DEFAULT_TARGET_TRIANGLES = 1000
+_SHADOW_SKIN_DEFAULT_FALLBACK_LOD_INDEX = 3
+
+
+def default_shadow_skin_lod_index(geom: MeshMRMSkinnedGeom) -> int:
+	"""Pick the coarsest LOD with >=_SHADOW_SKIN_DEFAULT_TARGET_TRIANGLES
+	triangles if one exists; otherwise fall back to
+	_SHADOW_SKIN_DEFAULT_FALLBACK_LOD_INDEX. Reproduces both real-data
+	regimes described above without ever needing to classify the shape's
+	content type -- it's derived purely from the shape's own LOD triangle
+	counts."""
+	candidates = [i for i, lod in enumerate(geom.lods) if lod.num_triangles >= _SHADOW_SKIN_DEFAULT_TARGET_TRIANGLES]
+	if candidates:
+		return min(candidates, key=lambda i: geom.lods[i].num_triangles)
+	return min(_SHADOW_SKIN_DEFAULT_FALLBACK_LOD_INDEX, len(geom.lods) - 1)
+
+
+def infer_shadow_skin_lod_index(geom: MeshMRMSkinnedGeom) -> int:
+	"""Which of geom.lods an existing (possibly stale) CShadowSkin was built
+	from, recovered by matching its Triangles count against each LOD's own
+	total render-pass index count -- build_shadow_skin never re-triangulates,
+	it reuses a LOD's own triangle list as-is, just reindexed onto a
+	deduplicated vertex set (see rebuild_shadow_skin()), so the index count
+	is preserved exactly. Falls back to default_shadow_skin_lod_index() if
+	CShadowSkin is empty, or its Triangles count doesn't match exactly one
+	LOD (ambiguous or untracked origin)."""
+	shadow_skin = geom.shadow_skin
+	if shadow_skin.vertices:
+		target = len(shadow_skin.triangles)
+		matches = [i for i, lod in enumerate(geom.lods) if sum(len(rp.indices) for rp in lod.rdr_passes) == target]
+		if len(matches) == 1:
+			return matches[0]
+	return default_shadow_skin_lod_index(geom)
+
+
+def _dominant_bone(packed_vertex):
+	"""The bone (matrix id) with the highest of the vertex's up to 4 skin
+	weights -- CShadowVertex uses one-bone rigid skinning, see ShadowSkin's
+	own docstring. Mirrors addShadowMesh()'s own max-weight scan
+	(nel/tools/3d/build_shadow_skin/main.cpp)."""
+	return max(zip(packed_vertex.matrices, packed_vertex.weights), key=lambda mw: mw[1])[0]
+
+
+def rebuild_shadow_skin(geom: MeshMRMSkinnedGeom, lod_index: int) -> ShadowSkin:
+	"""Rebuild geom's CShadowSkin from one of its own existing LODs (index
+	`lod_index` -- see infer_shadow_skin_lod_index()/
+	default_shadow_skin_lod_index() to pick one), mirroring
+	nel/tools/3d/build_shadow_skin/main.cpp's addShadowMesh() in pure
+	Python: geometric decimation itself is never redone here (or by the
+	official tool) -- a LOD's own already-baked vertex/triangle set is
+	simply deduplicated by (position, dominant bone) and its triangle
+	indices reindexed onto that deduplicated set. The official tool's final
+	stripify pass (vertex-cache render order) is skipped -- pure GPU perf,
+	irrelevant to correctness.
+
+	Geomorph placeholder indices (raw index i < len(lod.geomorphs), see
+	_resolve_lod_geomorphs()'s own docstring -- this applies to
+	MeshMRMSkinnedLod.geomorphs same as MrmLod.geomorphs) are resolved to
+	their "end" target's real position/bone before dedup, exactly like
+	addShadowMesh()'s own vertexUsed[] resolution -- found and fixed
+	2026-09-03 via a real fixture mismatch (fy_hof_cheveux_medium01.shape's
+	LOD 3 rebuilt to 72 vertices instead of the original's 84: several of
+	its early, placeholder-only indices were being read with their own
+	empty CWedge()-equivalent data -- all bone 0/position 0 -- instead of
+	being resolved first, silently over-merging them together)."""
+	lod = geom.lods[lod_index]
+	positions = [pv.decompact_pos(geom.decompact_scale) for pv in geom.packed_vertices]
+	dominant_bones = [_dominant_bone(pv) for pv in geom.packed_vertices]
+	geomorph_ends = [end for _start, end in lod.geomorphs]
+
+	def resolve(raw_index):
+		return geomorph_ends[raw_index] if raw_index < len(geomorph_ends) else raw_index
+
+	raw_indices = [idx for rp in lod.rdr_passes for idx in rp.indices]
+	used_indices = sorted({resolve(idx) for idx in raw_indices})
+
+	shadow_vertices = []
+	shadow_index_by_key = {}
+	remap = {}
+	for i in used_indices:
+		key = (positions[i], dominant_bones[i])
+		shadow_index = shadow_index_by_key.get(key)
+		if shadow_index is None:
+			shadow_index = len(shadow_vertices)
+			shadow_vertices.append(ShadowVertex(position=Vector3(*positions[i]), matrix_id=dominant_bones[i]))
+			shadow_index_by_key[key] = shadow_index
+		remap[i] = shadow_index
+
+	triangles = [remap[resolve(idx)] for idx in raw_indices]
+	return ShadowSkin(vertices=shadow_vertices, triangles=triangles)
 
 
 def rgba_to_color(rgba):

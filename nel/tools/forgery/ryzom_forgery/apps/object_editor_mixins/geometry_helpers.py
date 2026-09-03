@@ -165,6 +165,58 @@ def _is_shape_skinned(shape_value):
 	return False
 
 
+# Flat opaque black -- reads as an actual (approximate) cast shadow, not a
+# debug gizmo, so no bright/distinct color needed like the other overlays.
+# Deliberately opaque, not semi-transparent (tried first, dropped 2026-09-03,
+# Nuno: overlapping triangles double up under alpha blending, showing as
+# visible streaking where the mesh's own triangles overlap) -- fully opaque
+# means overlap is invisible, every triangle just paints the same color.
+_SHADOW_SKIN_COLOR = (0.0, 0.0, 0.0, 1.0)
+# World Z the shadow is projected onto -- matches the floor grid's own fixed
+# Z=0 (see _rebuild_viewport_helpers()'s own "actual ground reference" note).
+_SHADOW_SKIN_GROUND_Z = 0.0
+# Nudged slightly above the ground plane to avoid z-fighting with the floor
+# grid's own lines (both would otherwise sit at the exact same Z).
+_SHADOW_SKIN_GROUND_OFFSET = 0.01
+
+
+def _build_shadow_skin_vdata(shadow_skin):
+	"""GeomVertexData (position-only, UH_dynamic) for the CShadowSkin ground-
+	shadow preview -- one row per ShadowVertex, seeded at its raw (un-
+	projected) bind-pose position; overwritten every frame with its actual
+	ground-projected position by _reskin_shadow_skin_state() before the
+	first real frame is seen (same buffer-rewrite technique as
+	_update_skin_preview()/_update_wind())."""
+	vdata = GeomVertexData("shadow-skin", GeomVertexFormat.get_v3(), Geom.UH_dynamic)
+	vdata.set_num_rows(len(shadow_skin.vertices))
+	vertex_writer = GeomVertexWriter(vdata, "vertex")
+	for v in shadow_skin.vertices:
+		vertex_writer.add_data3(v.position.x, v.position.y, v.position.z)
+	return vdata
+
+
+def _build_shadow_skin_ground_node(vdata, shadow_skin):
+	"""Filled mesh (GeomTriangles, same triangle list as the CShadowSkin
+	itself) over `vdata`'s vertices -- an approximate "blob shadow" flattened
+	onto the ground plane by _reskin_shadow_skin_state() every frame, NOT a
+	real shadow-map render (no soft edges, no terrain-shape wrapping, no
+	blending with other body-part shadows -- see the 2026-09-03 discussion
+	for what this consciously leaves out). Color/light-off/transparency
+	applied by the caller via NodePath methods, same as the wireframe
+	overlays elsewhere in this module."""
+	triangles = GeomTriangles(Geom.UH_static)
+	tris = shadow_skin.triangles
+	for i in range(0, len(tris), 3):
+		triangles.add_vertices(tris[i], tris[i + 1], tris[i + 2])
+	triangles.close_primitive()
+
+	geom = Geom(vdata)
+	geom.add_primitive(triangles)
+	node = GeomNode("shadow-skin-ground")
+	node.add_geom(geom)
+	return node
+
+
 def _build_vertex_data(vertex_buffer, dynamic=False):
 	"""Builds the GeomVertexData for `vertex_buffer` -- shared by every render
 	pass's Geom (all of a mesh's passes index into the exact same vertex

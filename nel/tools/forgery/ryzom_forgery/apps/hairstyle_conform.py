@@ -34,7 +34,10 @@ from pynel.ryzom_shape import MeshMRMSkinned, ShapeParseError, ShapeWriteError, 
 
 from ryzom_forgery import race_reference, search_paths
 from ryzom_forgery.settings import SearchPathDir
-from ryzom_forgery.shape_geometry import conform_hairstyle_boundary, iter_render_passes, seam_loop_by_angle_indexed
+from ryzom_forgery.shape_geometry import (
+	conform_hairstyle_boundary, infer_shadow_skin_lod_index, iter_render_passes, rebuild_shadow_skin,
+	seam_loop_by_angle_indexed,
+)
 
 
 def _load_positions_indices(shape_value):
@@ -100,12 +103,25 @@ def main(argv=None):
 		source_positions, source_indices, source_ref.face_index, target_ref.seam_ring)
 
 	geom = source_shape_file.value.geom
+	# Infer before overwriting packed_vertices below -- infer_shadow_skin_lod_index()
+	# reads the *current* (pre-edit) CShadowSkin to recover which LOD it was
+	# built from (or falls back to a content-agnostic default if there's
+	# none), so this must run against the stale positions/shadow skin still
+	# in place.
+	shadow_skin_lod_index = infer_shadow_skin_lod_index(geom)
 	try:
 		geom.packed_vertices = [
 			pv.with_pos(new_positions[i], geom.decompact_scale) for i, pv in enumerate(geom.packed_vertices)
 		]
 	except ShapeWriteError as exc:
 		raise SystemExit(f"Failed to write conformed positions back: {exc}")
+
+	# Keep the shadow-casting proxy mesh in sync with the just-edited boundary
+	# -- see forgery-object-editor.md's "CShadowSkin rebuild after geometry
+	# edits" chantier: CMeshMRMSkinned never rebuilds this at load time, so a
+	# geometry edit that leaves it untouched would ship a shadow silhouette
+	# stale relative to the new boundary.
+	geom.shadow_skin = rebuild_shadow_skin(geom, shadow_skin_lod_index)
 
 	args.output.parent.mkdir(parents=True, exist_ok=True)
 	save_shape(args.output, source_shape_file)

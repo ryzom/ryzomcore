@@ -17,7 +17,7 @@ import time
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
-from panda3d.core import ClockObject, GeomNode, Mat4, Quat
+from panda3d.core import ClockObject, GeomNode, Mat4, Quat, Vec3
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
@@ -30,9 +30,11 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_vertex_data, _is_shape_skinned,
+	_SHADOW_SKIN_GROUND_OFFSET, _SHADOW_SKIN_GROUND_Z,
 )
 from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
-	_build_mrm_skin_state, _build_skin_state, _MrmSkinState, _reskin_mrm_state, _reskin_state,
+	_build_mrm_skin_state, _build_skin_state, _MrmSkinState, _reskin_mrm_state, _reskin_shadow_skin_state,
+	_reskin_state,
 )
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button, _VIEWPORT_TOGGLE_MARGIN_PX
 
@@ -177,6 +179,32 @@ class CreatureBindMixin:
 			return task.cont
 		bone_world_matrices = self._bone_world_matrices_for(state.bone_names)
 		_reskin_state(state, bone_world_matrices)
+		return task.cont
+
+	def _update_shadow_skin_preview(self, task):
+		"""Per-frame: re-poses and ground-projects the CShadowSkin shadow
+		preview in place (see _build_shadow_skin_preview_state()/
+		_reskin_shadow_skin_state()), same task pattern as
+		_update_skin_preview() just above. `bone_world_matrices` is only
+		fetched when state.bone_names isn't None (a skeleton is loaded) --
+		see _ShadowSkinPreviewState's own docstring on its "static" case.
+
+		Sun direction: self.sun_light_np's own forward axis (+Y, Panda3D's
+		DirectionalLight convention -- matches _build_sun_globe_geom()'s
+		placement at local (0, -distance, 0), i.e. "behind" the object along
+		-Y, so light travels the opposite way, +Y), read fresh every frame
+		since the Lighting panel's heading/pitch (or Play) can change it live
+		-- no separate light control needed for this preview, it reuses
+		whatever the Lighting panel is currently set to."""
+		state = self._shadow_skin_state
+		if state is None or state.vdata is None:
+			return task.cont
+		bone_world_matrices = (
+			self._bone_world_matrices_for(state.bone_names) if state.bone_names is not None else {})
+		sun_direction = self.render.get_relative_vector(self.sun_light_np, Vec3(0, 1, 0))
+		_reskin_shadow_skin_state(
+			state, bone_world_matrices, (sun_direction.x, sun_direction.y, sun_direction.z),
+			_SHADOW_SKIN_GROUND_Z + _SHADOW_SKIN_GROUND_OFFSET)
 		return task.cont
 
 	def _update_bound_shape_rotation(self, task):

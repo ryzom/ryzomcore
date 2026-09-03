@@ -214,6 +214,7 @@ class ObjectEditorApp(
 		self._world_axes_visible = False
 		self._pivot_axes_visible = False
 		self._object_transparent = False
+		self._shadow_skin_visible = False
 		self._viewport_toggle_size = (10.0, 10.0)
 		self._transform_panel_size = (10.0, 10.0)
 
@@ -564,6 +565,12 @@ class ObjectEditorApp(
 		# CMeshMRMSkinned, or no skeleton is loaded yet.
 		self._skin_state = None
 		self.taskMgr.add(self._update_skin_preview, "object-editor-skin-preview")
+		# CShadowSkin preview overlay (see _toggle_shadow_skin_preview()) --
+		# same gating/pattern as self._skin_state just above, None whenever
+		# there's no CShadowSkin to preview or no skeleton loaded yet.
+		self._shadow_skin_state = None
+		self._shadow_skin_np = None
+		self.taskMgr.add(self._update_shadow_skin_preview, "object-editor-shadow-skin-preview")
 		self.taskMgr.add(self._update_bound_shape_rotation, "object-editor-bound-shape-rotation")
 		self.taskMgr.add(self._update_bind_anim_time, "object-editor-bind-anim-time")
 		self.taskMgr.add(self._update_assembled_creature_skin, "object-editor-assembled-creature-skin")

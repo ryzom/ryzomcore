@@ -195,6 +195,107 @@ def _reskin_state(state, bone_world_matrices):
 	view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = weighted_normal
 
 
+class _ShadowSkinPreviewState:
+	"""Per-loaded-shape data for the live CShadowSkin ground-shadow preview
+	(see ObjectEditorApp._update_shadow_skin_preview()) -- built once in
+	_rebuild_geometry() from geom.shadow_skin, then read every frame by the
+	animation task, which poses it (if a skeleton is loaded) and flattens it
+	onto the ground plane along the current sun direction (see
+	_reskin_shadow_skin_state()). One bone per vertex when posed
+	(CShadowVertex's own rigid skinning, see pynel.ryzom_shape.ShadowSkin's
+	docstring), no weight blending needed -- a strict simplification of
+	_SkinState's 4-slot weighted case. `bone_names`/`bone_indices`/
+	`inv_bind_matrices` are None when built without a skeleton (see
+	_build_shadow_skin_preview_state()) -- the preview then just shows the
+	shape's own raw bind-pose positions, ground-projected but unposed."""
+
+	def __init__(self, local_positions, bone_names=None, bone_indices=None, inv_bind_matrices=None):
+		self.local_positions = local_positions  # (N,4) float32, homogeneous (w=1)
+		self.bone_names = bone_names  # None if no skeleton loaded -- static preview
+		self.bone_indices = bone_indices  # (N,) int32, indices into bone_names, or None
+		self.inv_bind_matrices = inv_bind_matrices  # or None
+		self.vdata = None
+		self.vertex_stride = None
+		self.vertex_pos_offset = None
+
+
+def _build_shadow_skin_preview_state(geom, skeleton):
+	"""Precomputes the static per-vertex tables _reskin_shadow_skin_state()
+	uses every frame, from geom.shadow_skin -- None if it's empty (nothing to
+	preview). Unlike _build_skin_state(), a skeleton isn't required: without
+	one, the returned state just carries raw bind-pose positions (posing is
+	skipped every frame, see _reskin_shadow_skin_state()) -- same "static
+	fallback" idea as iter_render_passes()' own unposed render of an
+	unskinned CMeshMRMSkinned instance."""
+	shadow_skin = geom.shadow_skin
+	if not shadow_skin.vertices:
+		return None
+
+	n = len(shadow_skin.vertices)
+	local_positions = numpy.empty((n, 4), dtype=numpy.float32)
+	local_positions[:, 3] = 1.0
+	for i, v in enumerate(shadow_skin.vertices):
+		local_positions[i, :3] = (v.position.x, v.position.y, v.position.z)
+
+	if skeleton is None:
+		return _ShadowSkinPreviewState(local_positions)
+
+	bone_names = list(geom.bones_name)
+	bone_indices = numpy.empty(n, dtype=numpy.int32)
+	for i, v in enumerate(shadow_skin.vertices):
+		bone_indices[i] = v.matrix_id
+	inv_bind_matrices = _bone_inv_bind_matrices(bone_names, skeleton)
+	return _ShadowSkinPreviewState(local_positions, bone_names, bone_indices, inv_bind_matrices)
+
+
+def _reskin_shadow_skin_state(state, bone_world_matrices, sun_direction, ground_z):
+	"""Poses `state`'s precomputed per-vertex tables against
+	`bone_world_matrices` (skipped entirely if state.bone_names is None --
+	see _build_shadow_skin_preview_state()'s "static" case), then flattens
+	every vertex onto the Z=`ground_z` plane by following `sun_direction`
+	(a plain (x,y,z) tuple, the direction the light travels -- see
+	ObjectEditorApp._update_shadow_skin_preview()'s own note on where this
+	comes from) until it reaches that height, and writes the result into
+	`state.vdata` -- same buffer-rewrite technique as _reskin_state(). This
+	is a flat "blob shadow" approximation, not a real shadow-map render (no
+	soft edges, no terrain-shape wrapping, no blending with other body-part
+	shadows -- see the 2026-09-03 discussion for why). No-op if
+	`state.vdata` isn't built yet."""
+	if state.vdata is None:
+		return
+	if state.bone_names is not None:
+		matrices = _bone_skin_matrices_numpy(state.bone_names, state.inv_bind_matrices, bone_world_matrices)  # (B,4,4)
+		gathered = matrices[state.bone_indices]  # (N,4,4)
+		posed = numpy.einsum("nij,nj->ni", gathered, state.local_positions)[:, :3]
+	else:
+		posed = state.local_positions[:, :3]
+
+	dx, dy, dz = sun_direction
+	# Guard against a near-horizontal sun (dz~0): the ray toward the ground
+	# would need to travel an enormous (or infinite) distance sideways --
+	# clamp so the shadow just stretches very far instead of overflowing to
+	# +-inf/NaN.
+	if -1e-4 < dz < 1e-4:
+		dz = -1e-4 if dz <= 0 else 1e-4
+	t = (ground_z - posed[:, 2]) / dz
+	ground_pos = posed.copy()
+	ground_pos[:, 0] += dx * t
+	ground_pos[:, 1] += dy * t
+	ground_pos[:, 2] = ground_z
+
+	# Same buffer-protocol/modification-stamp technique as _update_wind() --
+	# see its own docstring for why a per-row GeomVertexRewriter loop isn't
+	# used instead.
+	array_data = state.vdata.modify_array(0)
+	if state.vertex_pos_offset is None:
+		array_format = array_data.get_array_format()
+		state.vertex_stride = array_format.get_stride() // 4
+		state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
+
+	view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
+	view[:, state.vertex_pos_offset:state.vertex_pos_offset + 3] = ground_pos
+
+
 class _MrmSkinState:
 	"""Per-loaded-shape data for live re-skin of a plain skinned CMeshMRM
 	body-part shape (e.g. *_visage.shape face pieces, geom.skinned=True but

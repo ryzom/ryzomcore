@@ -91,9 +91,10 @@ dépendance à `app.py`/`ForgeryApp`, pas d'app graphique Panda3D/ImGui.
   reçoit que la translation rigide de pré-alignement, jamais de
   déformation — restylisation intentionnellement hors scope (voir
   `shape_geometry.py`'s `conform_hairstyle_boundary()` docstring).
-- `CShadowSkin` et `MatrixInfluences`/`InfluencedVertices` (voir
-  `shape_format.md` §4) sont recopiés tels quels par le writer pynel — pas
-  régénérés après l'édition des positions ; potentiellement périmés si un
-  futur usage édite des géométries plus profondément que ce cas (frontière
-  connue, pas d'impact visuel constaté sur les cas testés jusqu'ici).
+- `CShadowSkin` est reconstruit après l'édition des positions
+  (`shape_geometry.rebuild_shadow_skin()`, à partir du LOD inféré par
+  `infer_shadow_skin_lod_index()` avant l'édition -- voir
+  `shape_format.md` §4). `MatrixInfluences`/`InfluencedVertices` restent en
+  revanche recopiés tels quels par le writer pynel, non régénérés --
+  toujours hors scope, aucun usage n'en a besoin à ce jour.
 - Dossier parent de `output` créé automatiquement si besoin.
