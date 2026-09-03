@@ -144,6 +144,9 @@ class _Reader:
 	def tell(self) -> int:
 		return self._pos
 
+	def remaining(self) -> int:
+		return len(self._data) - self._pos
+
 	def u8(self) -> int:
 		return self._take(1)[0]
 
@@ -506,6 +509,12 @@ class Texture:
 	min_filter: Optional[int] = None
 	mag_filter: Optional[int] = None
 	load_grayscale_as_alpha: Optional[bool] = None
+	blend_textures: Optional[List[Optional["Texture"]]] = None  # CTextureBlend: the 2 source textures
+	blend_factor: Optional[int] = None  # CTextureBlend: 0..256
+	sharing_enabled: Optional[bool] = None  # CTextureBlend: _SharingEnabled
+	height_map: Optional["Texture"] = None  # CTextureBump: _HeightMap
+	disable_sharing: Optional[bool] = None  # CTextureBump: _DisableSharing
+	force_normalize: Optional[bool] = None  # CTextureBump: _ForceNormalize
 
 
 def _parse_itexture_base(f: _Reader) -> Dict[str, Any]:
@@ -565,6 +574,45 @@ def _parse_texture_cube(f: _Reader) -> Texture:
 _CLASS_PARSERS["CTextureCube"] = _parse_texture_cube
 
 
+def _parse_texture_blend(f: _Reader) -> Texture:
+	"""CTextureBlend::serial (texture_blend.cpp): version(0), ITexture base,
+	2x polymorphic texture pointer (_BlendTex), then _SharingEnabled/_BlendFactor
+	in that order (f.serial(_SharingEnabled, _BlendFactor))."""
+	f.version()
+	base = _parse_itexture_base(f)
+	blend_textures = [_read_poly_ptr(f) for _ in range(2)]
+	sharing_enabled = f.boolean()
+	blend_factor = f.u16()
+	return Texture(
+		class_name="CTextureBlend", blend_textures=blend_textures,
+		sharing_enabled=sharing_enabled, blend_factor=blend_factor, **base,
+	)
+
+
+_CLASS_PARSERS["CTextureBlend"] = _parse_texture_blend
+
+
+def _parse_texture_bump(f: _Reader) -> Texture:
+	"""CTextureBump::serial (texture_bump.cpp): version(3), ITexture base,
+	1x polymorphic texture pointer (_HeightMap), _DisableSharing, a legacy
+	unused bool (ver>=1), then _ForceNormalize (ver>=2, defaults to True --
+	the class's own construction default -- when the file predates it)."""
+	ver = f.version()
+	base = _parse_itexture_base(f)
+	height_map = _read_poly_ptr(f)
+	disable_sharing = f.boolean()
+	if ver >= 1:
+		f.boolean()  # legacy "forceAbsoluteOffset" flag, unused even by the engine itself
+	force_normalize = f.boolean() if ver >= 2 else True
+	return Texture(
+		class_name="CTextureBump", height_map=height_map,
+		disable_sharing=disable_sharing, force_normalize=force_normalize, **base,
+	)
+
+
+_CLASS_PARSERS["CTextureBump"] = _parse_texture_bump
+
+
 def _read_texture_ptr(f: _Reader) -> Optional[Texture]:
 	return _read_poly_ptr(f)
 
@@ -617,10 +665,31 @@ def _write_texture_cube(f: _Writer, tex: Texture) -> None:
 		_write_texture_ptr(f, sub_textures[i] if i < len(sub_textures) else None)
 
 
+def _write_texture_blend(f: _Writer, tex: Texture) -> None:
+	f.version(0)
+	_write_itexture_base(f, tex)
+	blend_textures = tex.blend_textures or [None, None]
+	for i in range(2):
+		_write_texture_ptr(f, blend_textures[i] if i < len(blend_textures) else None)
+	f.boolean(tex.sharing_enabled if tex.sharing_enabled is not None else True)
+	f.u16(tex.blend_factor if tex.blend_factor is not None else 0)
+
+
+def _write_texture_bump(f: _Writer, tex: Texture) -> None:
+	f.version(3)
+	_write_itexture_base(f, tex)
+	_write_texture_ptr(f, tex.height_map)
+	f.boolean(bool(tex.disable_sharing))
+	f.boolean(False)  # legacy "forceAbsoluteOffset" flag, always false on write
+	f.boolean(tex.force_normalize if tex.force_normalize is not None else True)
+
+
 _TEXTURE_WRITERS = {
 	"CTextureFile": _write_texture_file,
 	"CTextureMultiFile": _write_texture_multi_file,
 	"CTextureCube": _write_texture_cube,
+	"CTextureBlend": _write_texture_blend,
+	"CTextureBump": _write_texture_bump,
 }
 
 
@@ -1074,11 +1143,131 @@ def _parse_vertex_buffer_subset(f: _Reader, flags: int, types: List[int], vertex
 		f._take(8)  # _UVRouting: 8 raw uint8
 
 
+# Old (pre-CVertexBuffer-v2) per-vertex-format flags, distinct from the
+# modern TValue-indexed bitmask used everywhere else in this module -- see
+# CVertexBuffer::remapV2Flags (vertex_buffer.cpp) for the source of truth.
+_OLD_VF_XYZ = 0x00000001
+_OLD_VF_W0 = 0x00000002
+_OLD_VF_W1 = 0x00000004
+_OLD_VF_W2 = 0x00000008
+_OLD_VF_W3 = 0x00000010
+_OLD_VF_NORMAL = 0x00000020
+_OLD_VF_COLOR = 0x00000040
+_OLD_VF_SPECULAR = 0x00000080
+_OLD_VF_UV0 = 0x00000100
+_OLD_VF_PALETTE_SKIN = 0x00010000 | _OLD_VF_W0 | _OLD_VF_W1 | _OLD_VF_W2 | _OLD_VF_W3
+
+
+def _remap_old_vb_flags(old_flags: int) -> Tuple[int, int]:
+	"""Mirrors CVertexBuffer::remapV2Flags: old flat bitmask -> (modern
+	TValue-indexed flags bitmask, weight_count). weight_count is 0-4 -- the
+	old format serializes exactly that many weight floats per vertex,
+	unlike the modern format's fixed-by-TType channel width."""
+	new_flags = 0
+	weight_count = 0
+	if old_flags & _OLD_VF_XYZ:
+		new_flags |= 1 << 0  # PositionFlag
+	if old_flags & _OLD_VF_NORMAL:
+		new_flags |= 1 << 1  # NormalFlag
+	if old_flags & _OLD_VF_COLOR:
+		new_flags |= 1 << 10  # PrimaryColorFlag
+	if old_flags & _OLD_VF_SPECULAR:
+		new_flags |= 1 << 11  # SecondaryColorFlag
+	for stage in range(8):
+		if old_flags & (_OLD_VF_UV0 << stage):
+			new_flags |= 1 << (2 + stage)  # TexCoordNFlag
+	if old_flags & _OLD_VF_W0:
+		weight_count = 1
+		new_flags |= 1 << 12  # WeightFlag
+	if old_flags & _OLD_VF_W1:
+		weight_count = 2
+		new_flags |= 1 << 12
+	if old_flags & _OLD_VF_W2:
+		weight_count = 3
+		new_flags |= 1 << 12
+	if old_flags & _OLD_VF_W3:
+		weight_count = 4
+		new_flags |= 1 << 12
+	if old_flags & _OLD_VF_PALETTE_SKIN:
+		new_flags |= 1 << 13  # PaletteSkinFlag
+	return new_flags, weight_count
+
+
+def _parse_vertex_buffer_old(f: _Reader, ver: int) -> VertexBuffer:
+	"""Mirrors CVertexBuffer::serialOldV1Minus (pre-2 format, ver 0 or 1):
+	no header/subset split, no per-channel TType -- flat old-style flags,
+	a vertex count, then each vertex serialized field-by-field in a fixed
+	order (position, normal, 8 UV stages, primary/secondary color, weights,
+	palette skin). CPaletteSkin (4x uint8 MatrixId) only exists for ver>=1."""
+	old_flags = f.u32()
+	new_flags, weight_count = _remap_old_vb_flags(old_flags)
+	num_verts = f.u32()
+
+	has_palette_skin_flag = ver >= 1 and (new_flags & (1 << 13))
+	per_vertex_size = (
+		(12 if new_flags & (1 << 0) else 0)  # Position: 3x float
+		+ (12 if new_flags & (1 << 1) else 0)  # Normal: 3x float
+		+ 8 * sum(1 for stage in range(8) if new_flags & (1 << (2 + stage)))  # TexCoordN: 2x float
+		+ (4 if new_flags & (1 << 10) else 0)  # PrimaryColor: 4x uint8
+		+ (4 if new_flags & (1 << 11) else 0)  # SecondaryColor: 4x uint8
+		+ (4 * weight_count if new_flags & (1 << 12) else 0)  # Weight: weight_count x float
+		+ (4 if has_palette_skin_flag else 0)  # PaletteSkin: 4x uint8
+	)
+	# Unlike the modern header/subset path, an all-zero old_flags (or any
+	# other implausible combination) doesn't naturally hit a bounds check --
+	# the per-vertex loop below would just silently read nothing at all,
+	# leaving num_verts (however bogus) unvalidated and every subsequent
+	# read desynced with no useful error message pointing back here. Catch
+	# it explicitly instead, mirroring what _Reader._take() already does
+	# for over-long reads.
+	# per_vertex_size==0 (old_flags had none of the recognized bits, e.g. a
+	# plain 0) would otherwise vacuously pass the bounds check below (0
+	# bytes needed for any num_verts) while a real vertex buffer always has
+	# at least a position -- that combination is on its own already proof
+	# of a desync, regardless of what's left in the stream.
+	if num_verts > 0 and per_vertex_size == 0:
+		raise ShapeParseError(
+			f"legacy CVertexBuffer (ver={ver}): old_flags={old_flags:#x} maps to no "
+			f"recognized value flags, yet num_verts={num_verts} -- likely a parse "
+			f"desync upstream of this vertex buffer"
+		)
+	if num_verts * per_vertex_size > f.remaining():
+		raise ShapeParseError(
+			f"legacy CVertexBuffer (ver={ver}): implausible num_verts={num_verts} with "
+			f"old_flags={old_flags:#x} (needs {num_verts * per_vertex_size} bytes, only "
+			f"{f.remaining()} remain) -- likely a parse desync upstream of this vertex buffer"
+		)
+
+	vb = VertexBuffer(name="", num_verts=num_verts, vertex_color_format=0)
+	for i in range(_NUM_VALUE):
+		if new_flags & (1 << i):
+			vb.channels[_VALUE_NAMES[i]] = []
+
+	for _vid in range(num_verts):
+		if new_flags & (1 << 0):
+			vb.channels["Position"].append(f.vector3())
+		if new_flags & (1 << 1):
+			vb.channels["Normal"].append(f.vector3())
+		for stage in range(8):
+			if new_flags & (1 << (2 + stage)):
+				vb.channels[f"TexCoord{stage}"].append(f.vector2())
+		if new_flags & (1 << 10):
+			vb.channels["PrimaryColor"].append(f.rgba())
+		if new_flags & (1 << 11):
+			vb.channels["SecondaryColor"].append(f.rgba())
+		if new_flags & (1 << 12):
+			vb.channels["Weight"].append(tuple(f.f32() for _ in range(weight_count)))
+		if has_palette_skin_flag:
+			vb.channels["PaletteSkin"].append((f.u8(), f.u8(), f.u8(), f.u8()))
+
+	return vb
+
+
 def _parse_vertex_buffer(f: _Reader) -> VertexBuffer:
 	"""Full CVertexBuffer::serial (header + all vertex data in one shot)."""
 	ver = f.version()
 	if ver < 2:
-		raise ShapeParseError("legacy (pre-2) CVertexBuffer format is not supported")
+		return _parse_vertex_buffer_old(f, ver)
 	flags, types, vertex_color_format, num_verts, vb = _parse_vertex_buffer_header(f)
 	_parse_vertex_buffer_subset(f, flags, types, vertex_color_format, vb, 0, num_verts)
 	return vb

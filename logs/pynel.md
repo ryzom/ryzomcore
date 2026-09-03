@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-09-04 — 🐛 Support CTextureBlend/CTextureBump/legacy CVertexBuffer, pynel 0.9.1
+
+A live_data survey (`nel/tools/forgery/docs/shape_type_survey.md`) found `pynel.ryzom_shape`
+failing to fully parse ~35% (1398/3998) of real `.shape` files. Root cause: three
+unsupported formats -- `CTextureBlend` and `CTextureBump` (`ITexture` subclasses used
+mostly by `CWaterShape`'s reflection/bump textures), and the pre-2 `CVertexBuffer`
+format (`CVertexBuffer::serialOldV1Minus`, a handful of very old `CMesh` shapes
+predating the header/subset split).
+
+Added `_parse_texture_blend()`/`_write_texture_blend()` and
+`_parse_texture_bump()`/`_write_texture_bump()`, registered in `_CLASS_PARSERS`/
+`_TEXTURE_WRITERS` alongside the existing `CTextureFile`/`CTextureMultiFile`/
+`CTextureCube` support, reusing the already-factored `_parse_itexture_base()`/
+`_write_itexture_base()` helper. Added `_parse_vertex_buffer_old()` +
+`_remap_old_vb_flags()` (mirroring `CVertexBuffer::remapV2Flags`) for the legacy
+vertex format; write-back stays out of scope, same as the rest of the writer's
+existing "upgrade to current version on save" behavior (see `shape_format.md` §3).
+
+Also added a sanity check in `_parse_vertex_buffer_old()`: an all-zero/implausible
+`old_flags`+`num_verts` combination now raises a clear `ShapeParseError` pointing at
+the vertex buffer, instead of silently reading nothing and letting the corruption
+surface many fields later as a confusing crash far from the real cause. Caught for
+real on `construction.bnp:gen_aub_int_table_1.shape` and 4 similar shapes -- these
+turned out to have a genuinely different, still-unsupported issue further upstream
+(in `_parse_mesh_base`/`_parse_mesh_geom` for very old `CMeshGeom` versions), out of
+this fix's scope, but now failing legibly instead of desyncing silently.
+
+Verified via the bridge, re-scanning all of live_data: fully-parsed count went from
+2600/3998 to 2818/3998 (+218), all of it `CWaterShape` (0/218 -> 218/218 fully
+parsed) -- confirming water shapes were the main real-world user of the two new
+texture classes. `CMesh`/`CMeshMultiLod`'s own remaining failures are unaffected
+(unrelated causes: an unsupported vertex-program class, and the old-`CMeshGeom`
+issue above) -- a possible follow-up, not done here.
+
 ## 2026-09-03 — ✨ Recover animset_list.packed_sheets/mode2animset + batched bone-world-matrix eval, pynel 0.9.0
 
 Branch-recovery, not new work: commit `9d3b956ba2` (31 Aug, "Add NPC

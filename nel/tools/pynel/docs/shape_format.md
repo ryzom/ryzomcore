@@ -28,28 +28,47 @@ polymorphic-pointer node -- a class-name string followed by that class's own
 | `CMeshMultiLod` | `mesh_multi_lod.cpp` | yes | materials only, geometry copied back byte-for-byte |
 | `CSkeletonShape` | `skeleton_shape.cpp`, `bone.cpp` | yes | read-only |
 | `CFlareShape` | `flare_shape.cpp` | yes* | read-only |
-| `CWaterShape` / `CWaveMakerShape` | `water_shape.cpp` | yes* | read-only |
+| `CWaterShape` | `water_shape.cpp` | yes | read-only |
+| `CWaveMakerShape` | `water_shape.cpp` | yes | read-only |
 | `CSegRemanenceShape` | `seg_remanence_shape.cpp` | yes | read-only |
 | `CParticleSystemShape` | `particle_system_shape.cpp` | yes | read-only |
 
-\* `CWaterShape`/`CFlareShape` almost always reference texture classes this
-reader can't decode (see §3), so full parsing of those two is mostly
-theoretical in practice -- the type is still identified before the error.
+\* `CFlareShape` still tends to reference texture classes this reader can't
+decode (see §3), so full parsing of it is mostly theoretical in practice --
+the type is still identified before the error. `CWaterShape` used to be in
+the same boat (its reflection/bump textures are almost always
+`CTextureBlend`/`CTextureBump`) but now fully parses -- see below.
 
 Shared building blocks (`CMaterial`, `CVertexBuffer`, `CIndexBuffer`,
 `CMatrix`, `CTrackDefault*`, `ITexture`) were verified against
 `material.cpp`, `vertex_buffer.cpp`, `index_buffer.cpp`, `matrix.cpp`,
 `track.h` and `texture_file.cpp`.
 
-Reading also covers `CTextureFile`/`CTextureMultiFile`/`CTextureCube`, the
-`CMeshVPWindTree`/`CMeshVPPerPixelLight` vertex programs, and the optional
-`CLodCharacterTexture` field.
+Reading also covers `CTextureFile`/`CTextureMultiFile`/`CTextureCube`/
+`CTextureBlend`/`CTextureBump`, the `CMeshVPWindTree`/`CMeshVPPerPixelLight`
+vertex programs, and the optional `CLodCharacterTexture` field. `CVertexBuffer`
+is supported down to version 0 (`CVertexBuffer::serialOldV1Minus`'s old flat
+flags format, predating the header/subset split) -- see `logs/pynel.md`'s
+2026-09-04 entry for how that gap and the two texture classes were found and
+closed (a live_data survey, `nel/tools/forgery/docs/shape_type_survey.md`).
 
 ## 3. Known limitations
 
-- Other, less common `ITexture` subclasses (`CTextureBump`, procedural
-  textures...) are not decodable -- fails with a clear `ShapeParseError`
-  rather than producing wrong data.
+- Other, less common `ITexture` subclasses (procedural textures, etc.) are
+  not decodable -- fails with a clear `ShapeParseError` rather than
+  producing wrong data.
+- A handful of very old `CMesh` shapes (`CMeshGeom` version 0, predating
+  `CMeshVPWindTree`/`CMeshVPPerPixelLight`/mesh-morpher support) still fail
+  to parse for a different, still-unidentified reason further upstream in
+  `_parse_mesh_base()`/`_parse_mesh_geom()` -- not the same gap as the old
+  `CVertexBuffer` format above (that one's now supported); this manifests as
+  a clear `ShapeParseError` pointing at the vertex buffer (rather than a
+  silent desync) since the 2026-09-04 fix, but the actual root cause wasn't
+  tracked down. Affects a small number of `construction.bnp` shapes.
+- One shape seen so far uses a `CVertexBuffer` header predating version 1
+  (`_parse_vertex_buffer_header`'s own `ver < 1` case) -- narrower than, and
+  not covered by, the version-0-whole-format support above. Not investigated
+  since it's a single file in current live_data.
 - `CTextureFile`/`CTextureMultiFile` file names are lower-cased on read
   (texture names aren't case-sensitive, and real data mixes casing), so
   parsing a shape and immediately re-dumping it without any other edit can
@@ -157,6 +176,30 @@ attribute) plus per-material-block, per-matrix-block render passes with
 geometry is freely editable -- this is the format `nel/tools/forgery`'s
 `shape_import.py`/`shape_export.py` target when producing new shapes (e.g.
 importing a `.dae`/`.fbx`), rather than `CMeshMRMSkinned`.
+
+## 6. MRM vs `CMeshMultiLod` -- two different LOD mechanisms
+
+Both reduce detail with distance, but at a different granularity:
+
+- **MRM** (`CMeshMRM`/`CMeshMRMSkinned`) is a **single** mesh whose detail
+  changes **continuously** via geomorphing -- vertices interpolate smoothly
+  between resolutions as the camera distance changes. The LOD levels are
+  precomputed at build time by `CMRMBuilder` (progressively collapsing
+  vertices); there's no visible popping.
+- **`CMeshMultiLod`** (`mesh_multi_lod.cpp`) is a **container of several
+  independent meshes** ("slots", `CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot`),
+  each with its own `DistMax` and `BlendLength`. A slot can be any kind of
+  mesh -- a plain `CMesh`, an MRM, or a "coarse mesh" (an ultra-low-poly
+  version rendered separately by `CCoarseMeshManager`, typical for
+  far-away objects). The engine switches **discretely** between slots based
+  on distance, alpha-blending over `BlendLength` to hide the pop.
+
+Nothing prevents nesting one inside the other: a `CMeshMultiLod` slot can
+itself be a `CMeshMRM`, combining continuous LOD up close with a discrete
+switch to a coarse mesh far away. In `live_data`, `CMeshMultiLod` (410
+shapes) is the more common of the two container/continuous approaches
+outside of characters, where `CMeshMRMSkinned` (631 shapes) dominates
+instead -- see `nel/tools/forgery/docs/shape_type_survey.md` for the full breakdown.
 
 ## Usage
 
