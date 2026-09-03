@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-09-03 — ✨ Recover animset_list.packed_sheets/mode2animset + batched bone-world-matrix eval, pynel 0.9.0
+
+Branch-recovery, not new work: commit `9d3b956ba2` (31 Aug, "Add NPC
+Mode/animation picker + live playback to Patina") touched both
+`nel/tools/forgery/` and `nel/tools/pynel/`, but was committed on
+`ryzom/forgery` instead of `ryzom/pynel` -- the dedicated branch for pynel
+changes (see `project_ryzom_core_work_branches`) -- so `ryzom/pynel`, and
+anything built from it (including the published wheel Forgery's own
+`pyproject.toml` depends on), never received the pynel-side half. Found
+2026-09-03 while wiring Forgery's real skel/anim lookup chantier
+(`logs/forgery-object-editor.md`'s matching entry): `creature_ref.build_anim_cache()`
+called two functions that plain didn't exist in this worktree.
+
+Nothing was actually lost -- fully reachable from `ryzom/forgery`'s own git
+history the whole time. Re-applied cleanly onto this branch's tip (only
+conflict was the version number itself):
+
+**`ryzom_packed_sheets.py`: `animset_list.packed_sheets`** (`CAnimationSetListSheet`,
+`ANIMATION_SET_LIST` entity type, wire version 25) -- new dataclasses
+(`AnimationSetListSheet`/`AnimationSetSheet`/`AnimationStateSheet`/`AnimationSheet`/
+`AnimationFXSetSheet`/`AnimationFXSheet`), `parse_animation_set_list_packed_sheets()`/
+`load_...()`, and the full `TAnimStateSheetId` name table (`ANIM_STATE_NAMES`).
+
+**`mode2animset.string_array`**: not a `.packed_sheets` file at all -- a raw
+Georges FORM (plain XML) loaded directly by the client at runtime. New
+`parse_mode2animset_string_array()`/`load_...()` using `xml.etree.ElementTree`.
+
+**`ryzom_animation.py`: `evaluate_all_bone_world_matrices()`** -- batched
+numpy evaluation of every bone's world matrix at once (new `numpy`
+dependency), instead of `evaluate_bone_world_matrix()` re-walking each
+bone's parent chain independently -- traced to a 10fps hit in Patina's Bind
+preview live playback on a ~60-100 bone skeleton.
+
+Full byte layout documented in `docs/packed_sheets.md`'s `animset_list.packed_sheets`
+section.
+
 ## 2026-09-03 — ✨ Model CShadowSkin field-by-field, pynel 0.8.1
 
 `MeshMRMSkinnedGeom` used to keep `CShadowSkin` (the shadow-casting proxy
