@@ -1,0 +1,4042 @@
+# Shape type survey (live_data)
+
+Scanned 235 `.bnp` archives under `/home/ulukyn/.local/share/Ryzom/ryzom_live/data` -- 3998 `.shape` entries found.
+
+3998 classified by root type (2818 fully parsed, 1180 type-only -- their material/geometry data uses a legacy format pynel's parser doesn't fully support yet, but the root class is still readable). 0 could not be classified at all.
+
+**Updated 2026-09-04**: after fixing pynel's `CTextureBlend`/`CTextureBump`/legacy `CVertexBuffer` gaps (see `nel/tools/pynel/docs/shape_format.md` and `logs/pynel.md`), every `WaterShape` now fully parses (was 0/218, now 218/218). Remaining type-only entries stem from other, still-unsupported gaps (an unsupported vertex-program class, and very old `CMeshGeom` versions) -- out of scope for that fix.
+
+## Counts
+
+| Type | Fully parsed | Type-only (legacy data) | Total |
+|---|---|---|---|
+| Mesh | 1670 | 918 | 2588 |
+| MeshMRMSkinned | 631 | 0 | 631 |
+| MeshMultiLod | 148 | 262 | 410 |
+| WaterShape | 218 | 0 | 218 |
+| SegRemanenceShape | 82 | 0 | 82 |
+| MeshMRM | 57 | 0 | 57 |
+| FlareShape | 10 | 0 | 10 |
+| ParticleSystemShape | 2 | 0 | 2 |
+
+## Mesh (2588)
+
+- bagne_shapes.bnp:canope_bagne_02.shape
+- bagne_shapes.bnp:canope_bagne_03.shape
+- bagne_shapes.bnp:canope_bagne_04.shape
+- bagne_shapes.bnp:canope_bagne_05.shape
+- bagne_shapes.bnp:canope_bagne_06.shape
+- bagne_shapes.bnp:canope_bagne_07.shape
+- bagne_shapes.bnp:canope_bagne_08.shape
+- bagne_shapes.bnp:canope_bagne_09.shape
+- bagne_shapes.bnp:canope_bagne_10.shape
+- bagne_shapes.bnp:canope_bagne_11.shape
+- bagne_shapes.bnp:canope_bagne_12.shape
+- bagne_shapes.bnp:canope_bagne_13.shape
+- bagne_shapes.bnp:canope_bagne_14.shape
+- bagne_shapes.bnp:canope_bagne_15.shape
+- bagne_shapes.bnp:canope_bagne_19.shape
+- bagne_shapes.bnp:canope_bagne_24.shape
+- bagne_shapes.bnp:canope_bagne_27.shape
+- bagne_shapes.bnp:canope_bagne_29.shape
+- bagne_shapes.bnp:canope_bagne_30.shape
+- bagne_shapes.bnp:canope_bagne_31.shape
+- bagne_shapes.bnp:canope_bagne_32.shape
+- bagne_shapes.bnp:canope_bagne_33.shape
+- bagne_shapes.bnp:canope_bagne_34.shape
+- bagne_shapes.bnp:canope_bagne_35.shape
+- bagne_shapes.bnp:canope_bagne_36.shape
+- bagne_shapes.bnp:sky_primes_racines_bagne.shape
+- characters_maps_fy_hof_visage_hr.bnp:rp_fyros_hof_contest_2022_a.shape
+- characters_maps_tr_hof_visage_hr.bnp:rp_tryker_hof_contest_2022_b.shape
+- characters_shapes.bnp:ca_hom_ingeneer_armpad.shape
+- characters_shapes.bnp:ca_hom_ingeneer_botte.shape
+- characters_shapes.bnp:ca_hom_ingeneer_casque.shape
+- characters_shapes.bnp:ca_hom_ingeneer_pantabotte.shape
+- characters_shapes.bnp:ca_hom_ingeneer_torse.shape
+- characters_shapes.bnp:ca_ship.shape
+- characters_shapes.bnp:ca_spaceship2.shape
+- characters_shapes.bnp:fy_hof_armor01_hand_fp.shape
+- characters_shapes.bnp:fy_hom_armor01_hand_fp.shape
+- characters_shapes.bnp:ma_hof_armor01_hand_fp.shape
+- characters_shapes.bnp:ma_hom_armor01_hand_fp.shape
+- characters_shapes.bnp:ma_roadsign_poteau_1.shape
+- characters_shapes.bnp:ma_roadsign_poteau_2.shape
+- characters_shapes.bnp:ryw_mark1_hof_caster01_pantabottes.shape
+- characters_shapes.bnp:ryw_mark1_hom_caster01_pantabottes.shape
+- characters_shapes.bnp:tr_hof_armor01_hand_fp.shape
+- characters_shapes.bnp:tr_hof_civil01_hand_fp.shape
+- characters_shapes.bnp:tr_hof_underwear_hand_fp.shape
+- characters_shapes.bnp:tr_hom_armor01_hand_fp.shape
+- characters_shapes.bnp:tr_hom_cheveux_short03s2_fy.shape
+- characters_shapes.bnp:tr_hom_cheveux_short03s2_ma.shape
+- characters_shapes.bnp:tr_hom_cheveux_short03s2_tr.shape
+- characters_shapes.bnp:tr_hom_cheveux_short03s2_zo.shape
+- characters_shapes.bnp:tr_hom_civil01_hand_fp.shape
+- characters_shapes.bnp:tr_hom_underwear_hand_fp.shape
+- characters_shapes.bnp:zo_hof_armor01_hand_fp.shape
+- characters_shapes.bnp:zo_hof_cheveux_artistic01.shape
+- characters_shapes.bnp:zo_hom_armor01_hand_fp.shape
+- construction.bnp:gen_autel_kami_ambre.shape
+- construction.bnp:gen_bt_caravane.shape
+- construction.bnp:gen_bt_drapeau_revendication.shape
+- construction.bnp:gen_bt_maison_porteleft.shape
+- construction.bnp:gen_bt_maison_porteleft01.shape
+- construction.bnp:gen_bt_totem.shape
+- construction.bnp:marauder_cn_yurt_small.shape
+- corrupted_moor_shapes.bnp:foret-moor_ruine1.shape
+- corrupted_moor_shapes.bnp:foret-moor_ruine2.shape
+- corrupted_moor_shapes.bnp:foret-moor_ruine3.shape
+- corrupted_moor_shapes.bnp:foret-moor_ruine5.shape
+- corrupted_moor_shapes.bnp:moor_chute1.shape
+- corrupted_moor_shapes.bnp:moor_chute2.shape
+- desert_shapes.bnp:forga_face_bloqcam.shape
+- desert_shapes.bnp:fy_acc_appliquemurale_a_07_forge.shape
+- desert_shapes.bnp:fy_acc_appliquemurale_a_28.shape
+- desert_shapes.bnp:fy_acc_appliquemurale_a_29.shape
+- desert_shapes.bnp:fy_acc_appliquemurale_a_49.shape
+- desert_shapes.bnp:fy_acc_appliquemurale_a_50.shape
+- desert_shapes.bnp:fy_brandon_waterfall_a.shape
+- desert_shapes.bnp:fy_brandon_waterfall_b.shape
+- desert_shapes.bnp:fy_bt_sheriff_lampmur15_fy_sheriff.shape
+- desert_shapes.bnp:fy_fire_camp.shape
+- desert_shapes.bnp:fy_oasis_inn_lift.shape
+- desert_shapes.bnp:fy_oasis_inn_lift01.shape
+- desert_shapes.bnp:fy_trykerinn_tree.shape
+- fauna_shapes.bnp:black_mo_kitinega.shape
+- fauna_shapes.bnp:black_mo_phytopsy.shape
+- fauna_shapes.bnp:black_mo_phytopsy_tronc.shape
+- fauna_shapes.bnp:go_carnitree_boss.shape
+- fauna_shapes.bnp:tr_mo_capryni_mount.shape
+- fauna_shapes.bnp:tr_mo_gubani_mount.shape
+- fauna_shapes.bnp:tr_mo_kitin_queen_jo.shape
+- fyros_shapes.bnp:brasierchauf.shape
+- fyros_shapes.bnp:canope_fyros.shape
+- fyros_shapes.bnp:canope_fyros_newbie.shape
+- fyros_shapes.bnp:ciel.shape
+- fyros_shapes.bnp:conerotor.shape
+- fyros_shapes.bnp:fy_acc_applique360_a_1.shape
+- fyros_shapes.bnp:fy_acc_appliquemurale_a_1.shape
+- fyros_shapes.bnp:fy_acc_ascenseur_porte.shape
+- fyros_shapes.bnp:fy_acc_beastskin_a_1.shape
+- fyros_shapes.bnp:fy_acc_bouteilles.shape
+- fyros_shapes.bnp:fy_acc_caisse_a_1.shape
+- fyros_shapes.bnp:fy_acc_caissetriangulaire_a_1.shape
+- fyros_shapes.bnp:fy_acc_carpet_a.shape
+- fyros_shapes.bnp:fy_acc_chaudron_a_1.shape
+- fyros_shapes.bnp:fy_acc_gonfalon_a_1.shape
+- fyros_shapes.bnp:fy_acc_grospot_a_1.shape
+- fyros_shapes.bnp:fy_acc_lanterne_b_1.shape
+- fyros_shapes.bnp:fy_acc_reverb_a_1.shape
+- fyros_shapes.bnp:fy_acc_skull_a_1.shape
+- fyros_shapes.bnp:fy_acc_tabouret_b.shape
+- fyros_shapes.bnp:fy_acc_tonneauclosed_a_1.shape
+- fyros_shapes.bnp:fy_cn_mairie_entree-a_appliquemurale.shape
+- fyros_shapes.bnp:fy_cn_mairie_entree-b_appliquemurale.shape
+- fyros_shapes.bnp:fy_cn_mairie_int_appliquemurale_b.shape
+- fyros_shapes.bnp:fy_cn_mairie_int_appliquemurale_h.shape
+- fyros_shapes.bnp:fy_enseigne.shape
+- fyros_shapes.bnp:fy_forge_feu.shape
+- fyros_shapes.bnp:fy_mairie_puit_carre1.shape
+- fyros_shapes.bnp:fy_mairie_puit_carre2.shape
+- fyros_shapes.bnp:fy_mairie_puit_carre3.shape
+- fyros_shapes.bnp:fy_mairie_puit_ronda1.shape
+- fyros_shapes.bnp:fy_mairie_puit_ronda2.shape
+- fyros_shapes.bnp:fy_mairie_puit_ronda3.shape
+- fyros_shapes.bnp:fy_mairie_puit_rondb1.shape
+- fyros_shapes.bnp:fy_mairie_puit_rondb2.shape
+- fyros_shapes.bnp:fy_mairie_puit_rondb3.shape
+- fyros_shapes.bnp:fy_sky_day.shape
+- fyros_shapes.bnp:fy_sky_day_fog.shape
+- fyros_shapes.bnp:fy_smoke_elevateur_col01.shape
+- fyros_shapes.bnp:grillecarre_taverne.shape
+- fyros_shapes.bnp:halo.shape
+- fyros_shapes.bnp:lumfum.shape
+- fyros_shapes.bnp:lumlucarne.shape
+- fyros_shapes.bnp:lumvitraux.shape
+- indoors_shapes.bnp:fy_acc_tabouret_a_appart.shape
+- indoors_shapes.bnp:fy_acc_tabouret_b_appart.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_01.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_02.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_03.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_04.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_05.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_06.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_07.shape
+- indoors_shapes.bnp:fy_acc_tabouret_hall_reunion_08.shape
+- indoors_shapes.bnp:fy_bt_hall_conseil_godlight.shape
+- indoors_shapes.bnp:halo_appart.shape
+- indoors_shapes.bnp:ma_acc_chaise01_hall_reunion.shape
+- indoors_shapes.bnp:ma_acc_chaise01_hall_reunion01.shape
+- indoors_shapes.bnp:ma_acc_chaise02_hall_reunion.shape
+- indoors_shapes.bnp:ma_acc_chaise03_hall_reunion.shape
+- indoors_shapes.bnp:ma_acc_chaise04_hall_reunion.shape
+- indoors_shapes.bnp:ma_acc_chaise_hall_reunion.shape
+- indoors_shapes.bnp:ma_acc_chaise_hall_reunion01.shape
+- indoors_shapes.bnp:ma_appart_chaise_00.shape
+- indoors_shapes.bnp:ma_appart_chaise_01.shape
+- indoors_shapes.bnp:ma_appart_chaise_02.shape
+- indoors_shapes.bnp:ma_appart_lance.shape
+- indoors_shapes.bnp:ma_appart_palmier.shape
+- indoors_shapes.bnp:ma_appart_plantes.shape
+- indoors_shapes.bnp:ma_appart_plantgrass.shape
+- indoors_shapes.bnp:ma_appart_plantgrass01.shape
+- indoors_shapes.bnp:ma_reu_palmier.shape
+- indoors_shapes.bnp:ma_reu_plantegrasse_ext.shape
+- indoors_shapes.bnp:ma_reu_plantegrasse_mid.shape
+- indoors_shapes.bnp:ma_reu_plantes_ext.shape
+- indoors_shapes.bnp:ma_reu_plantes_mid.shape
+- indoors_shapes.bnp:tr_appart.shape
+- indoors_shapes.bnp:tr_appartement_light.shape
+- indoors_shapes.bnp:tr_conseil_fond_marin.shape
+- indoors_shapes.bnp:tr_hall_reu_vitrine_decors.shape
+- indoors_shapes.bnp:tr_piece_npc_fond_marin.shape
+- indoors_shapes.bnp:zo_bt_appart_boulelight.shape
+- indoors_shapes.bnp:zo_hall_conseil_boulelight.shape
+- indoors_shapes.bnp:zo_hall_couloir_boulelight.shape
+- indoors_shapes.bnp:zo_hall_reu_boulelight.shape
+- indoors_shapes.bnp:zo_hall_vitrine_boulelight.shape
+- indoors_shapes.bnp:zo_table_lampe.shape
+- indoors_shapes.bnp:zo_table_lampe_hall_reunion.shape
+- interfaces.bnp:arrow.shape
+- interfaces.bnp:empty.shape
+- interfaces.bnp:nb_matis_clouds.shape
+- interfaces.bnp:shadow.shape
+- jungle_shapes.bnp:ma_agora_lights_ma_agora.shape
+- jungle_shapes.bnp:ma_barriere_a_02.shape
+- jungle_shapes.bnp:ma_barriere_b_02.shape
+- jungle_shapes.bnp:newbieland_lights_ma_agora.shape
+- jungle_shapes.bnp:waterfall01_jungle-2_waterfall.shape
+- jungle_shapes.bnp:waterfall01_jungle-5_waterfall.shape
+- jungle_shapes.bnp:waterfall01_jungle2-2_waterfall.shape
+- jungle_shapes.bnp:waterfall02_jungle-2_waterfall.shape
+- jungle_shapes.bnp:waterfall02_jungle-5_waterfall.shape
+- jungle_shapes.bnp:waterfall02_jungle2-2_waterfall.shape
+- jungle_shapes.bnp:waterfall_01_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_02_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_03_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_04_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_05_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_06_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_07_combes_plateaux.shape
+- jungle_shapes.bnp:waterfall_08_combes_plateaux.shape
+- jungle_shapes.bnp:zo_agora_ambre_spherext_zo_agora_village_a.shape
+- jungle_shapes.bnp:zo_agora_ambre_zo_agora_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_10_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_11_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_12_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_1_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_2_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_3_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_4_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_5_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_6_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_7_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_8_village_a.shape
+- jungle_shapes.bnp:zo_atelier_ambre_zo_atelier_9_village_a.shape
+- jungle_shapes.bnp:zo_autel_ambre_zo_autel_village_a.shape
+- jungle_shapes.bnp:zo_bar_ambre01_zo_bar_village_a.shape
+- jungle_shapes.bnp:zo_bar_ambre01_zo_bar_village_b.shape
+- jungle_shapes.bnp:zo_bar_ambre01_zo_bar_village_c.shape
+- jungle_shapes.bnp:zo_bar_ambre01_zo_bar_village_d.shape
+- jungle_shapes.bnp:zo_boulight_mairie_zo_mairie_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_ambre_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_ambrecour_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_eau.shape
+- jungle_shapes.bnp:zo_bt_monastere_ju_fougereaa01_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_ju_vegetb01_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_ju_vegetb02_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_ju_vegetb03_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_vege02_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_vege1_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_bt_monastere_vege2_zo_monastere_village_a.shape
+- jungle_shapes.bnp:zo_cluster_mairie_extb_village_a.shape
+- jungle_shapes.bnp:zo_com_ambre.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_1_village_a.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_1_village_b.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_1_village_c.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_1_village_d.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_2_village_a.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_2_village_b.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_2_village_c.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_2_village_d.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_3_village_a.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_3_village_b.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_3_village_c.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_3_village_d.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_4_village_a.shape
+- jungle_shapes.bnp:zo_com_ambre_zo_comm_5_village_a.shape
+- jungle_shapes.bnp:zo_imm_ambre_nb_01.shape
+- jungle_shapes.bnp:zo_imm_ambre_nb_02.shape
+- jungle_shapes.bnp:zo_imm_ambre_nb_03.shape
+- jungle_shapes.bnp:zo_imm_ambre_nb_04.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_1_village_a.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_1_village_b.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_1_village_c.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_1_village_d.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_2_village_a.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_2_village_b.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_2_village_c.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_2_village_d.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_3_village_a.shape
+- jungle_shapes.bnp:zo_imm_ambre_zo_imm_4_village_a.shape
+- jungle_shapes.bnp:zo_imm_ambrenb_05.shape
+- jungle_shapes.bnp:zo_imm_boule_nb_01.shape
+- jungle_shapes.bnp:zo_imm_boule_nb_02.shape
+- jungle_shapes.bnp:zo_imm_boule_nb_03.shape
+- jungle_shapes.bnp:zo_imm_boule_nb_04.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_1_village_a.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_1_village_b.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_1_village_c.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_1_village_d.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_2_village_a.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_2_village_b.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_2_village_c.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_2_village_d.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_3_village_a.shape
+- jungle_shapes.bnp:zo_imm_boule_zo_imm_4_village_a.shape
+- jungle_shapes.bnp:zo_imm_boulenb_05.shape
+- jungle_shapes.bnp:zo_module_mairie_lampe_zo_mod_mairie_1_village_a.shape
+- jungle_shapes.bnp:zo_module_mairie_lampe_zo_mod_mairie_2_village_a.shape
+- jungle_shapes.bnp:zo_module_mairie_lampe_zo_mod_mairie_3_village_a.shape
+- jungle_shapes.bnp:zo_module_mairie_lampe_zo_mod_mairie_4_village_a.shape
+- jungle_shapes.bnp:zo_module_mairie_lampe_zo_mod_mairie_5_village_a.shape
+- jungle_shapes.bnp:zo_module_mairie_lampe_zo_mod_mairie_6_village_a.shape
+- jungle_shapes.bnp:zo_portezorai_veget_zo_porte_village_a.shape
+- jungle_shapes.bnp:zo_portezorai_veget_zo_porte_village_b.shape
+- jungle_shapes.bnp:zo_portezorai_veget_zo_porte_village_c.shape
+- jungle_shapes.bnp:zo_portezorai_veget_zo_porte_village_d.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_01_artisant_01_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_01_artisant_02_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_02_artisant_01_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_02_artisant_02_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_03_artisant_01_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_03_artisant_02_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_04_artisant_01_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_appart_04_artisant_02_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_bar_01_artisant_01_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_bar_01_artisant_02_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_bar_02_artisant_01_village_a.shape
+- lacustre_shapes.bnp:tr_artisan_lampiote_bar_02_artisant_02_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_01_bar_village_b.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_02_appart01_village_d.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_02_appart02_village_d.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_agora_magasin_01_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_agora_magasin_02_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart01_village_b.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart02_village_b.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart02_village_d.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_01_magasin_01_village_c.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_02_magasin_01_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_02_magasin_02_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_02_magasin_village_c.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_03_magasin_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_fond_ilot_4.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_village_nb_01.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_village_nb_02.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_village_nb_03.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_village_nb_04.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_appart_village_nb_05.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_bar_01_magasin_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_bar_02_magasin_village_a.shape
+- lacustre_shapes.bnp:tr_magasin_lampiote_bar_magasin_village_c.shape
+- lacustre_shapes.bnp:tr_module-mairie_lampiote_01_village_a.shape
+- lacustre_shapes.bnp:tr_module-mairie_lampiote_02_village_a.shape
+- lacustre_shapes.bnp:tr_module-mairie_lampiote_03_village_a.shape
+- lacustre_shapes.bnp:tr_module-mairie_lampiote_04_village_a.shape
+- lacustre_shapes.bnp:tr_s3_flower_a.shape
+- lacustre_shapes.bnp:tr_s3_flower_b.shape
+- lacustre_shapes.bnp:tr_s3_flower_c.shape
+- lacustre_shapes.bnp:tr_waterfall_01_a.shape
+- lacustre_shapes.bnp:tr_waterfall_01_b.shape
+- lacustre_shapes.bnp:tr_waterfall_02_a.shape
+- lacustre_shapes.bnp:tr_waterfall_02_b.shape
+- lacustre_shapes.bnp:tr_waterfall_03_a.shape
+- lacustre_shapes.bnp:tr_waterfall_03_b.shape
+- lacustre_shapes.bnp:tr_waterfall_04_a.shape
+- lacustre_shapes.bnp:tr_waterfall_04_b.shape
+- lacustre_shapes.bnp:tr_waterfall_05_a.shape
+- lacustre_shapes.bnp:tr_waterfall_05_b.shape
+- lacustre_shapes.bnp:tr_waterfall_06_a.shape
+- lacustre_shapes.bnp:tr_waterfall_06_b.shape
+- lacustre_shapes.bnp:tr_waterfall_07_a.shape
+- lacustre_shapes.bnp:tr_waterfall_07_b.shape
+- lacustre_shapes.bnp:tr_waterfall_08_a.shape
+- lacustre_shapes.bnp:tr_waterfall_08_b.shape
+- lacustre_shapes.bnp:tr_waterfall_09_a.shape
+- lacustre_shapes.bnp:tr_waterfall_09_b.shape
+- lacustre_shapes.bnp:tr_waterfall_10_b.shape
+- matis_shapes.bnp:canope_matis.shape
+- matis_shapes.bnp:ma_acc_chaise.shape
+- matis_shapes.bnp:ma_asc_porte_bas.shape
+- matis_shapes.bnp:ma_asc_porte_droite.shape
+- matis_shapes.bnp:ma_asc_porte_gauche.shape
+- matis_shapes.bnp:ma_bourgeon_porte_bas.shape
+- matis_shapes.bnp:ma_bourgeon_porte_droite.shape
+- matis_shapes.bnp:ma_bourgeon_porte_gauche.shape
+- matis_shapes.bnp:ma_serre_palma07.shape
+- matis_shapes.bnp:ma_serre_palmier.shape
+- matis_shapes.bnp:ma_serre_plantegrasse03.shape
+- matis_shapes.bnp:ma_serre_plantegrasse04.shape
+- matis_shapes.bnp:ma_serre_plantegrasse05.shape
+- matis_shapes.bnp:ma_serre_plantegrasse06.shape
+- matis_shapes.bnp:ma_serre_plante_fond_left.shape
+- matis_shapes.bnp:ma_serre_plante_fond_right.shape
+- matis_shapes.bnp:ma_serre_plante_left.shape
+- matis_shapes.bnp:ma_serre_plante_midle_left.shape
+- matis_shapes.bnp:ma_serre_plante_midle_right.shape
+- matis_shapes.bnp:ma_serre_plante_right.shape
+- matis_shapes.bnp:ma_sky_day.shape
+- matis_shapes.bnp:ma_sky_day_fog.shape
+- matis_shapes.bnp:waterfall01_maserre.shape
+- matis_shapes.bnp:waterfall02_maserre.shape
+- newbieland_shapes.bnp:canope_newbieland.shape
+- objects.bnp:12thanniv_flacon.shape
+- objects.bnp:anlor_stick.shape
+- objects.bnp:anlor_weapon01.shape
+- objects.bnp:apt_painting_20years.shape
+- objects.bnp:apt_snowglobe.shape
+- objects.bnp:atys_games_podium_1.shape
+- objects.bnp:atys_games_podium_2.shape
+- objects.bnp:atys_games_podium_3.shape
+- objects.bnp:avent2021.shape
+- objects.bnp:biblio.shape
+- objects.bnp:book_nexus_rifts.shape
+- objects.bnp:box03.shape
+- objects.bnp:ca_wea_trooper_gun.shape
+- objects.bnp:card_pumpkin.shape
+- objects.bnp:card_skull.shape
+- objects.bnp:cm_acc_banner.shape
+- objects.bnp:coussin.shape
+- objects.bnp:coussin_rond.shape
+- objects.bnp:diplomeflyner2592.shape
+- objects.bnp:diplomeflyner2603.shape
+- objects.bnp:dung.shape
+- objects.bnp:event_15years_cake.shape
+- objects.bnp:event_20years_cake_p0.shape
+- objects.bnp:event_20years_cake_p1.shape
+- objects.bnp:event_20years_cake_p2.shape
+- objects.bnp:event_20years_cake_p3.shape
+- objects.bnp:eventshadowalkers__a.shape
+- objects.bnp:eventshadowalkers__b.shape
+- objects.bnp:eventshadowalkers__c.shape
+- objects.bnp:eventtournoi2021.shape
+- objects.bnp:fy_acc_baniere.shape
+- objects.bnp:fy_acc_bowl.shape
+- objects.bnp:fy_acc_civbanner.shape
+- objects.bnp:fy_acc_civbanner_handled.shape
+- objects.bnp:fy_acc_pick_a.shape
+- objects.bnp:fy_acc_pyre.shape
+- objects.bnp:fy_acc_vase.shape
+- objects.bnp:fy_acc_vase2.shape
+- objects.bnp:fy_con_defensetower.shape
+- objects.bnp:fy_con_defensetower_scaffolding.shape
+- objects.bnp:fy_con_defensewall1.shape
+- objects.bnp:fy_con_defensewall2.shape
+- objects.bnp:fy_con_defensewall3.shape
+- objects.bnp:fy_con_defensewall4.shape
+- objects.bnp:fy_con_defensewall5.shape
+- objects.bnp:fy_drinkingglass_01.shape
+- objects.bnp:fy_drinkingglass_02.shape
+- objects.bnp:fy_drinkingglass_03.shape
+- objects.bnp:fy_wea_baton.shape
+- objects.bnp:fy_wea_dague.shape
+- objects.bnp:fy_wea_epee1m.shape
+- objects.bnp:fy_wea_epee2m.shape
+- objects.bnp:fy_wea_fusarc.shape
+- objects.bnp:fy_wea_fusil.shape
+- objects.bnp:fy_wea_gatling.shape
+- objects.bnp:fy_wea_grand_bouclier.shape
+- objects.bnp:fy_wea_grenade.shape
+- objects.bnp:fy_wea_hache1m.shape
+- objects.bnp:fy_wea_hache2m.shape
+- objects.bnp:fy_wea_lance1m.shape
+- objects.bnp:fy_wea_lance2m.shape
+- objects.bnp:fy_wea_lanceroquette.shape
+- objects.bnp:fy_wea_masse1m.shape
+- objects.bnp:fy_wea_masse2m.shape
+- objects.bnp:fy_wea_petit_bouclier.shape
+- objects.bnp:fy_wea_pistolarc.shape
+- objects.bnp:fy_wea_pistolet.shape
+- objects.bnp:ge_acc_10anniversarycake.shape
+- objects.bnp:ge_acc_balle_01.shape
+- objects.bnp:ge_acc_balle_02.shape
+- objects.bnp:ge_acc_balle_03.shape
+- objects.bnp:ge_acc_candys.shape
+- objects.bnp:ge_acc_caravan_objet.shape
+- objects.bnp:ge_acc_cattlestick_a.shape
+- objects.bnp:ge_acc_fiole.shape
+- objects.bnp:ge_acc_hachoire_a.shape
+- objects.bnp:ge_acc_kbij_enclume_a.shape
+- objects.bnp:ge_acc_maillet_a_1.shape
+- objects.bnp:ge_acc_mountingstick_a.shape
+- objects.bnp:ge_acc_petstick_a.shape
+- objects.bnp:ge_acc_phial_alchemyst.shape
+- objects.bnp:ge_acc_phial_gerderite.shape
+- objects.bnp:ge_acc_pick_a.shape
+- objects.bnp:ge_acc_pick_o.shape
+- objects.bnp:ge_acc_pinceau.shape
+- objects.bnp:ge_acc_pommade.shape
+- objects.bnp:ge_acc_pre_order_item.shape
+- objects.bnp:ge_acc_present.shape
+- objects.bnp:ge_acc_present_empty.shape
+- objects.bnp:ge_acc_teddy-arma_01.shape
+- objects.bnp:ge_acc_teddy-bodoc_01.shape
+- objects.bnp:ge_acc_teddy-cute_01.shape
+- objects.bnp:ge_acc_teddy-gubani_01.shape
+- objects.bnp:ge_acc_teddy-lumper_01.shape
+- objects.bnp:ge_acc_teddy-madakam_01.shape
+- objects.bnp:ge_acc_teddy-ploderos_01.shape
+- objects.bnp:ge_acc_teddy-ragus_01.shape
+- objects.bnp:ge_acc_teddy-torbak_01.shape
+- objects.bnp:ge_acc_toolbox.shape
+- objects.bnp:ge_acc_winch_a.shape
+- objects.bnp:ge_acc_woodpiece.shape
+- objects.bnp:ge_chest_closed.shape
+- objects.bnp:ge_chest_filed.shape
+- objects.bnp:ge_chest_opened.shape
+- objects.bnp:ge_easterbasket.shape
+- objects.bnp:ge_fy_wea_trib_gattling.shape
+- objects.bnp:ge_fy_wea_trib_grand_bouclier.shape
+- objects.bnp:ge_fy_wea_trib_hache1m.shape
+- objects.bnp:ge_fy_wea_trib_hache2m.shape
+- objects.bnp:ge_fy_wea_trib_launcher.shape
+- objects.bnp:ge_gift_blue.shape
+- objects.bnp:ge_gift_blue_yubo.shape
+- objects.bnp:ge_gift_green.shape
+- objects.bnp:ge_gift_green_yubo.shape
+- objects.bnp:ge_gift_red.shape
+- objects.bnp:ge_gift_red_yubo.shape
+- objects.bnp:ge_gift_yellow.shape
+- objects.bnp:ge_gift_yellow_yubo.shape
+- objects.bnp:ge_hof_acc_gauntlet_gen.shape
+- objects.bnp:ge_hom_acc_gauntlet_gen.shape
+- objects.bnp:ge_kapo_mortier_a_1.shape
+- objects.bnp:ge_kapo_pilon_a_1.shape
+- objects.bnp:ge_kapo_pilon_o.shape
+- objects.bnp:ge_kbij_marteau_a.shape
+- objects.bnp:ge_kbij_marteau_o.shape
+- objects.bnp:ge_kcou_aiguille_a.shape
+- objects.bnp:ge_kcou_aiguille_o.shape
+- objects.bnp:ge_kcou_etoffe_a.shape
+- objects.bnp:ge_kcui_louche_a.shape
+- objects.bnp:ge_kcui_marmite_a.shape
+- objects.bnp:ge_kmar_roulette_a.shape
+- objects.bnp:ge_kmar_skin_a.shape
+- objects.bnp:ge_kmec_grip_a.shape
+- objects.bnp:ge_kmec_stick_a.shape
+- objects.bnp:ge_kwc_ciseau_a.shape
+- objects.bnp:ge_kwc_ciseau_o.shape
+- objects.bnp:ge_kwc_pieu_a.shape
+- objects.bnp:ge_kwj_ciseau_a.shape
+- objects.bnp:ge_kwj_ciseau_o.shape
+- objects.bnp:ge_kwj_tube_a.shape
+- objects.bnp:ge_large_easter_egg.shape
+- objects.bnp:ge_livre.shape
+- objects.bnp:ge_ma_wea_trib_lance1m.shape
+- objects.bnp:ge_ma_wea_trib_lance2m.shape
+- objects.bnp:ge_ma_wea_trib_pistolet.shape
+- objects.bnp:ge_mission_1_caisse.shape
+- objects.bnp:ge_mission_1_caisse_flya.shape
+- objects.bnp:ge_mission_1_caisse_flyb.shape
+- objects.bnp:ge_mission_1_caisse_flyc.shape
+- objects.bnp:ge_mission_1_tonneau.shape
+- objects.bnp:ge_mission_3_caisses.shape
+- objects.bnp:ge_mission_3_jarres.shape
+- objects.bnp:ge_mission_3_tonneaux.shape
+- objects.bnp:ge_mission_altar_kamik.shape
+- objects.bnp:ge_mission_barriere.shape
+- objects.bnp:ge_mission_barriere_kami.shape
+- objects.bnp:ge_mission_barriere_karavan.shape
+- objects.bnp:ge_mission_barriere_t.shape
+- objects.bnp:ge_mission_borne.shape
+- objects.bnp:ge_mission_borne_teleport_caravan.shape
+- objects.bnp:ge_mission_borne_teleport_kami.shape
+- objects.bnp:ge_mission_calendar.shape
+- objects.bnp:ge_mission_capsule.shape
+- objects.bnp:ge_mission_carapace_b.shape
+- objects.bnp:ge_mission_carapace_bull.shape
+- objects.bnp:ge_mission_cercle_runique.shape
+- objects.bnp:ge_mission_charette.shape
+- objects.bnp:ge_mission_charette_ok.shape
+- objects.bnp:ge_mission_charogneinsect.shape
+- objects.bnp:ge_mission_charognemammal.shape
+- objects.bnp:ge_mission_chef_wea_fy.shape
+- objects.bnp:ge_mission_chef_wea_ma.shape
+- objects.bnp:ge_mission_chef_wea_tr.shape
+- objects.bnp:ge_mission_chef_wea_zo.shape
+- objects.bnp:ge_mission_chrono.shape
+- objects.bnp:ge_mission_clock_big.shape
+- objects.bnp:ge_mission_clock_medium.shape
+- objects.bnp:ge_mission_clock_small.shape
+- objects.bnp:ge_mission_coffre.shape
+- objects.bnp:ge_mission_coffre_old.shape
+- objects.bnp:ge_mission_comptoir.shape
+- objects.bnp:ge_mission_crane.shape
+- objects.bnp:ge_mission_defense_wall.shape
+- objects.bnp:ge_mission_easter_egg.shape
+- objects.bnp:ge_mission_eboulis_fy.shape
+- objects.bnp:ge_mission_eboulis_ju.shape
+- objects.bnp:ge_mission_eboulis_tr.shape
+- objects.bnp:ge_mission_eolienne_tr.shape
+- objects.bnp:ge_mission_epee_diam.shape
+- objects.bnp:ge_mission_etandard_kami.shape
+- objects.bnp:ge_mission_etendard_karavan.shape
+- objects.bnp:ge_mission_evenement.shape
+- objects.bnp:ge_mission_feu_off.shape
+- objects.bnp:ge_mission_fortuna_wheel_base.shape
+- objects.bnp:ge_mission_fortuna_wheel_ring.shape
+- objects.bnp:ge_mission_fy_paneau_armor.shape
+- objects.bnp:ge_mission_fy_paneau_bijoux.shape
+- objects.bnp:ge_mission_fy_paneau_focus.shape
+- objects.bnp:ge_mission_fy_paneau_haircut.shape
+- objects.bnp:ge_mission_fy_paneau_melee.shape
+- objects.bnp:ge_mission_fy_paneau_range.shape
+- objects.bnp:ge_mission_fy_paneau_raw.shape
+- objects.bnp:ge_mission_fy_paneau_tatoo.shape
+- objects.bnp:ge_mission_fy_paneau_tools.shape
+- objects.bnp:ge_mission_gate.shape
+- objects.bnp:ge_mission_gate_gong.shape
+- objects.bnp:ge_mission_gift-brown.shape
+- objects.bnp:ge_mission_gift-green.shape
+- objects.bnp:ge_mission_gift-purple.shape
+- objects.bnp:ge_mission_gift-red.shape
+- objects.bnp:ge_mission_gift-turquoise.shape
+- objects.bnp:ge_mission_gift.shape
+- objects.bnp:ge_mission_grande_barriere_karavan.shape
+- objects.bnp:ge_mission_hall_of_fame.shape
+- objects.bnp:ge_mission_jarre.shape
+- objects.bnp:ge_mission_jarre_couchee.shape
+- objects.bnp:ge_mission_justice_flame.shape
+- objects.bnp:ge_mission_kami_acc_pick_a.shape
+- objects.bnp:ge_mission_karavan_acc_pick_a.shape
+- objects.bnp:ge_mission_kite_kami.shape
+- objects.bnp:ge_mission_kite_kamique.shape
+- objects.bnp:ge_mission_kite_karavan.shape
+- objects.bnp:ge_mission_laptop.shape
+- objects.bnp:ge_mission_larvicultor_table.shape
+- objects.bnp:ge_mission_ma_paneau_armor.shape
+- objects.bnp:ge_mission_ma_paneau_bar.shape
+- objects.bnp:ge_mission_ma_paneau_bijoux.shape
+- objects.bnp:ge_mission_ma_paneau_focus.shape
+- objects.bnp:ge_mission_ma_paneau_haircut.shape
+- objects.bnp:ge_mission_ma_paneau_melee.shape
+- objects.bnp:ge_mission_ma_paneau_range.shape
+- objects.bnp:ge_mission_ma_paneau_raw.shape
+- objects.bnp:ge_mission_ma_paneau_tatoo.shape
+- objects.bnp:ge_mission_ma_paneau_tools.shape
+- objects.bnp:ge_mission_machine_karavan.shape
+- objects.bnp:ge_mission_maduk.shape
+- objects.bnp:ge_mission_maison_ruine.shape
+- objects.bnp:ge_mission_mass_diam.shape
+- objects.bnp:ge_mission_mur_ruine.shape
+- objects.bnp:ge_mission_mur_ruine_b.shape
+- objects.bnp:ge_mission_objet_pack_1.shape
+- objects.bnp:ge_mission_objet_pack_2.shape
+- objects.bnp:ge_mission_objet_pack_3.shape
+- objects.bnp:ge_mission_objet_pack_4.shape
+- objects.bnp:ge_mission_objet_pack_5.shape
+- objects.bnp:ge_mission_oeuf_kitin.shape
+- objects.bnp:ge_mission_ossement.shape
+- objects.bnp:ge_mission_ossements_b.shape
+- objects.bnp:ge_mission_outpost_drill_kami.shape
+- objects.bnp:ge_mission_outpost_drill_kami_meche.shape
+- objects.bnp:ge_mission_outpost_drill_kami_step.shape
+- objects.bnp:ge_mission_outpost_drill_karavan.shape
+- objects.bnp:ge_mission_outpost_drill_karavan_meche.shape
+- objects.bnp:ge_mission_outpost_drill_karavan_step.shape
+- objects.bnp:ge_mission_outpost_infostele.shape
+- objects.bnp:ge_mission_outpost_module_construction.shape
+- objects.bnp:ge_mission_outpost_townhall.shape
+- objects.bnp:ge_mission_panneau.shape
+- objects.bnp:ge_mission_pique_diam.shape
+- objects.bnp:ge_mission_portail_kami.shape
+- objects.bnp:ge_mission_portail_karavan.shape
+- objects.bnp:ge_mission_prison.shape
+- objects.bnp:ge_mission_prison_90x100.shape
+- objects.bnp:ge_mission_puit.shape
+- objects.bnp:ge_mission_pumpkin.shape
+- objects.bnp:ge_mission_racecup.shape
+- objects.bnp:ge_mission_reverbere.shape
+- objects.bnp:ge_mission_reward_kami_bigshield.shape
+- objects.bnp:ge_mission_reward_karavan_bigshield.shape
+- objects.bnp:ge_mission_ringate_teleport.shape
+- objects.bnp:ge_mission_ringate_teleport_sphere.shape
+- objects.bnp:ge_mission_rucksack.shape
+- objects.bnp:ge_mission_sac_a.shape
+- objects.bnp:ge_mission_sac_a_flyner_fruit.shape
+- objects.bnp:ge_mission_sac_a_mr_snow_spices.shape
+- objects.bnp:ge_mission_sac_a_psykopla.shape
+- objects.bnp:ge_mission_sac_b.shape
+- objects.bnp:ge_mission_scrollmaker.shape
+- objects.bnp:ge_mission_snowman01.shape
+- objects.bnp:ge_mission_snowman02.shape
+- objects.bnp:ge_mission_socle_flame.shape
+- objects.bnp:ge_mission_souche.shape
+- objects.bnp:ge_mission_souche2.shape
+- objects.bnp:ge_mission_spot_goo.shape
+- objects.bnp:ge_mission_spot_kitin.shape
+- objects.bnp:ge_mission_stand.shape
+- objects.bnp:ge_mission_statue_jena_karavan.shape
+- objects.bnp:ge_mission_stele.shape
+- objects.bnp:ge_mission_stele_kami.shape
+- objects.bnp:ge_mission_stele_karavan.shape
+- objects.bnp:ge_mission_table.shape
+- objects.bnp:ge_mission_talkie.shape
+- objects.bnp:ge_mission_temple_of_jena.shape
+- objects.bnp:ge_mission_temple_of_jena_tete.shape
+- objects.bnp:ge_mission_temple_of_maduk.shape
+- objects.bnp:ge_mission_temple_of_maduk_inf.shape
+- objects.bnp:ge_mission_temple_of_maduk_sup.shape
+- objects.bnp:ge_mission_tente.shape
+- objects.bnp:ge_mission_tente_fy.shape
+- objects.bnp:ge_mission_tente_kamique.shape
+- objects.bnp:ge_mission_tente_karavan.shape
+- objects.bnp:ge_mission_tente_ma.shape
+- objects.bnp:ge_mission_tente_tr.shape
+- objects.bnp:ge_mission_tente_zo.shape
+- objects.bnp:ge_mission_tente_zo_rescuer.shape
+- objects.bnp:ge_mission_tombe_a.shape
+- objects.bnp:ge_mission_tombe_b.shape
+- objects.bnp:ge_mission_tombe_c.shape
+- objects.bnp:ge_mission_tombe_d.shape
+- objects.bnp:ge_mission_tombe_e.shape
+- objects.bnp:ge_mission_tourcombat_kamique.shape
+- objects.bnp:ge_mission_tourcombat_karavan.shape
+- objects.bnp:ge_mission_tourgarde.shape
+- objects.bnp:ge_mission_tourgarde_karavan.shape
+- objects.bnp:ge_mission_tr_paneau_armor.shape
+- objects.bnp:ge_mission_tr_paneau_bijoux.shape
+- objects.bnp:ge_mission_tr_paneau_haircut.shape
+- objects.bnp:ge_mission_tr_paneau_melee.shape
+- objects.bnp:ge_mission_tr_paneau_range.shape
+- objects.bnp:ge_mission_tr_paneau_raw.shape
+- objects.bnp:ge_mission_tr_paneau_tatoo.shape
+- objects.bnp:ge_mission_tr_paneau_tools.shape
+- objects.bnp:ge_mission_tryker_bombe.shape
+- objects.bnp:ge_mission_tryker_mine.shape
+- objects.bnp:ge_mission_tryker_mine_paneau.shape
+- objects.bnp:ge_mission_under_construction_building.shape
+- objects.bnp:ge_mission_xmass_tree.shape
+- objects.bnp:ge_mission_xmass_tree_without_star.shape
+- objects.bnp:ge_mission_yubo_stick.shape
+- objects.bnp:ge_mission_zo_paneau_armor.shape
+- objects.bnp:ge_mission_zo_paneau_bar.shape
+- objects.bnp:ge_mission_zo_paneau_bijoux.shape
+- objects.bnp:ge_mission_zo_paneau_focus.shape
+- objects.bnp:ge_mission_zo_paneau_haircut.shape
+- objects.bnp:ge_mission_zo_paneau_melee.shape
+- objects.bnp:ge_mission_zo_paneau_range.shape
+- objects.bnp:ge_mission_zo_paneau_raw.shape
+- objects.bnp:ge_mission_zo_paneau_tatoo.shape
+- objects.bnp:ge_mission_zo_paneau_tools.shape
+- objects.bnp:ge_partylamp_01.shape
+- objects.bnp:ge_partylamp_02.shape
+- objects.bnp:ge_partylamp_03.shape
+- objects.bnp:ge_picture_bodoc.shape
+- objects.bnp:ge_picture_yubo.shape
+- objects.bnp:ge_pvp_big_shield.shape
+- objects.bnp:ge_pvp_spire_kami.shape
+- objects.bnp:ge_pvp_spire_karavan.shape
+- objects.bnp:ge_pvp_spire_socle.shape
+- objects.bnp:ge_racloire_a.shape
+- objects.bnp:ge_rite_geo_tryker.shape
+- objects.bnp:ge_secator_a.shape
+- objects.bnp:ge_stylet.shape
+- objects.bnp:ge_toolbox_campfire.shape
+- objects.bnp:ge_toolbox_mektoub.shape
+- objects.bnp:ge_tr_map_panel.shape
+- objects.bnp:ge_tr_wea_trib_dague.shape
+- objects.bnp:ge_tr_wea_trib_epee1m.shape
+- objects.bnp:ge_tr_wea_trib_epee2m.shape
+- objects.bnp:ge_tr_wea_trib_fusil.shape
+- objects.bnp:ge_tr_wea_trib_pistolarc.shape
+- objects.bnp:ge_tr_wea_trib_pistolet.shape
+- objects.bnp:ge_training_weight.shape
+- objects.bnp:ge_treasure_box_camp.shape
+- objects.bnp:ge_treasure_box_camp_open.shape
+- objects.bnp:ge_treasure_box_fy.shape
+- objects.bnp:ge_treasure_box_gen.shape
+- objects.bnp:ge_treasure_box_ma.shape
+- objects.bnp:ge_treasure_box_mar.shape
+- objects.bnp:ge_treasure_box_mar_open.shape
+- objects.bnp:ge_treasure_box_tr.shape
+- objects.bnp:ge_treasure_box_zo.shape
+- objects.bnp:ge_wea_baton.shape
+- objects.bnp:ge_wea_dague.shape
+- objects.bnp:ge_wea_epee1m.shape
+- objects.bnp:ge_wea_epee2m.shape
+- objects.bnp:ge_wea_fusarc.shape
+- objects.bnp:ge_wea_fusil.shape
+- objects.bnp:ge_wea_gatling.shape
+- objects.bnp:ge_wea_grand_bouclier.shape
+- objects.bnp:ge_wea_hache1m.shape
+- objects.bnp:ge_wea_hache2m.shape
+- objects.bnp:ge_wea_high_baton1m.shape
+- objects.bnp:ge_wea_high_dague.shape
+- objects.bnp:ge_wea_high_epee1m.shape
+- objects.bnp:ge_wea_high_epee2m.shape
+- objects.bnp:ge_wea_high_hache1m.shape
+- objects.bnp:ge_wea_high_hache1m_b.shape
+- objects.bnp:ge_wea_high_hache2m.shape
+- objects.bnp:ge_wea_high_hache2m_b.shape
+- objects.bnp:ge_wea_high_lance1m.shape
+- objects.bnp:ge_wea_high_lance2m.shape
+- objects.bnp:ge_wea_high_lance2m_b.shape
+- objects.bnp:ge_wea_high_masse1m.shape
+- objects.bnp:ge_wea_high_masse2m.shape
+- objects.bnp:ge_wea_lance1m.shape
+- objects.bnp:ge_wea_lance2m.shape
+- objects.bnp:ge_wea_lanceroquette.shape
+- objects.bnp:ge_wea_masse1m.shape
+- objects.bnp:ge_wea_masse2m.shape
+- objects.bnp:ge_wea_petit_bouclier.shape
+- objects.bnp:ge_wea_pistolarc.shape
+- objects.bnp:ge_wea_pistolet.shape
+- objects.bnp:ge_xmas_baniere.shape
+- objects.bnp:ge_zo_map_table.shape
+- objects.bnp:ge_zo_wea_masse1m.shape
+- objects.bnp:ge_zo_wea_trib_baton.shape
+- objects.bnp:ge_zo_wea_trib_fusarc.shape
+- objects.bnp:ge_zo_wea_trib_grand_bouclier.shape
+- objects.bnp:ge_zo_wea_trib_masse1m.shape
+- objects.bnp:ge_zo_wea_trib_masse2m.shape
+- objects.bnp:ge_zo_wea_trib_petit_bouclier.shape
+- objects.bnp:gen_apt_mirror.shape
+- objects.bnp:gen_bt_telepod_access.shape
+- objects.bnp:gen_frame_hori.shape
+- objects.bnp:gen_frame_vert.shape
+- objects.bnp:gen_mission_1_caisse.shape
+- objects.bnp:gen_mission_1_tonneau.shape
+- objects.bnp:gen_mission_3_caisses.shape
+- objects.bnp:gen_mission_3_tonneaux.shape
+- objects.bnp:gen_mission_outpost_flag_socle.shape
+- objects.bnp:gigabossrendorsilan1.shape
+- objects.bnp:gun01.shape
+- objects.bnp:halloween_apt_varinx.shape
+- objects.bnp:halloween_mo_statue_01.shape
+- objects.bnp:halloween_mo_statue_02.shape
+- objects.bnp:halloween_mo_statue_03.shape
+- objects.bnp:handled_easter_nest.shape
+- objects.bnp:handled_easter_nest_filled.shape
+- objects.bnp:ic_ice_stick.shape
+- objects.bnp:ju_lianesola_au.shape
+- objects.bnp:kami_acc_factionbanner.shape
+- objects.bnp:kara_acc_factionbanner.shape
+- objects.bnp:ld_picture_firme.shape
+- objects.bnp:ld_picture_halloween_valcorenoch.shape
+- objects.bnp:ld_picture_kj.shape
+- objects.bnp:ld_picture_ld.shape
+- objects.bnp:ld_picture_purplegubani_landscape.shape
+- objects.bnp:ld_picture_shalah.shape
+- objects.bnp:ma_acc_baniere.shape
+- objects.bnp:ma_acc_bowl.shape
+- objects.bnp:ma_acc_bugnet.shape
+- objects.bnp:ma_acc_civbanner.shape
+- objects.bnp:ma_acc_civbanner_handled.shape
+- objects.bnp:ma_acc_painting_cicho_trivaldo.shape
+- objects.bnp:ma_acc_painting_ciochi_miapi.shape
+- objects.bnp:ma_acc_painting_easel.shape
+- objects.bnp:ma_acc_painting_liccio_chiacco.shape
+- objects.bnp:ma_acc_painting_liccio_chialdo.shape
+- objects.bnp:ma_acc_pick_a.shape
+- objects.bnp:ma_baniere.shape
+- objects.bnp:ma_drinkingglass_01.shape
+- objects.bnp:ma_drinkingglass_02.shape
+- objects.bnp:ma_drinkingglass_03.shape
+- objects.bnp:ma_leatribute.shape
+- objects.bnp:ma_tool_handcolor.shape
+- objects.bnp:ma_wea_baton.shape
+- objects.bnp:ma_wea_dague.shape
+- objects.bnp:ma_wea_epee1m.shape
+- objects.bnp:ma_wea_epee2m.shape
+- objects.bnp:ma_wea_fusarc.shape
+- objects.bnp:ma_wea_fusil.shape
+- objects.bnp:ma_wea_gatling.shape
+- objects.bnp:ma_wea_grand_bouclier.shape
+- objects.bnp:ma_wea_grenade.shape
+- objects.bnp:ma_wea_hache1m.shape
+- objects.bnp:ma_wea_hache2m.shape
+- objects.bnp:ma_wea_lance1m.shape
+- objects.bnp:ma_wea_lance2m.shape
+- objects.bnp:ma_wea_lanceroquette.shape
+- objects.bnp:ma_wea_masse1m.shape
+- objects.bnp:ma_wea_masse2m.shape
+- objects.bnp:ma_wea_petit_bouclier.shape
+- objects.bnp:ma_wea_pistolarc.shape
+- objects.bnp:ma_wea_pistolet.shape
+- objects.bnp:marauder_acc_citybanner.shape
+- objects.bnp:marauder_acc_factionbanner.shape
+- objects.bnp:mektoub_footstep_l.shape
+- objects.bnp:mektoub_footstep_r.shape
+- objects.bnp:obj_treasure_map.shape
+- objects.bnp:ooc_easter_chest.shape
+- objects.bnp:ooc_easter_eggpedestal.shape
+- objects.bnp:ooc_easter_pictureframe.shape
+- objects.bnp:ooc_summer-apt_medalstand1.shape
+- objects.bnp:ooc_summer-apt_medalstand2.shape
+- objects.bnp:ooc_summer-apt_medalstand3.shape
+- objects.bnp:ooc_summer-banner.shape
+- objects.bnp:ooc_summer-banner_buoy.shape
+- objects.bnp:ooc_summer-beachball.shape
+- objects.bnp:ooc_summer-parasol.shape
+- objects.bnp:ooc_summer-pedestal_medal1.shape
+- objects.bnp:ooc_summer-pedestal_medal2.shape
+- objects.bnp:ooc_summer-pedestal_medal3.shape
+- objects.bnp:ooc_summer-raceline.shape
+- objects.bnp:ooc_summer-racepoint_fy.shape
+- objects.bnp:ooc_summer-racepoint_ma.shape
+- objects.bnp:ooc_summer-racepoint_pr.shape
+- objects.bnp:ooc_summer-racepoint_tr.shape
+- objects.bnp:ooc_summer-racepoint_zo.shape
+- objects.bnp:ooc_summer-sandbucket.shape
+- objects.bnp:ooc_summer-sandbucket_deco.shape
+- objects.bnp:ooc_summer-sandbucket_empty.shape
+- objects.bnp:ooc_summer-sandbucket_shovel.shape
+- objects.bnp:ooc_summer-sandcastle.shape
+- objects.bnp:ooc_summer-sandcastle_deco.shape
+- objects.bnp:ooc_summer-sandcastle_destroyed.shape
+- objects.bnp:ooc_summer-sandhill.shape
+- objects.bnp:ooc_summer-sandhill_deco.shape
+- objects.bnp:ra_rite_sign_1a.shape
+- objects.bnp:ra_rite_sign_1b.shape
+- objects.bnp:ra_rite_sign_1c.shape
+- objects.bnp:ra_rite_sign_1d.shape
+- objects.bnp:ra_rite_sign_2a.shape
+- objects.bnp:ra_rite_sign_2b.shape
+- objects.bnp:ra_rite_sign_2c.shape
+- objects.bnp:ra_rite_sign_3a.shape
+- objects.bnp:ra_rite_sign_3b.shape
+- objects.bnp:ra_rite_sign_3c.shape
+- objects.bnp:ra_rite_sign_3d.shape
+- objects.bnp:ranger_acc_factionbanner.shape
+- objects.bnp:ryw_dague_mark1.shape
+- objects.bnp:ryw_epee_1m_mark1.shape
+- objects.bnp:ryw_epee_2m_mark1.shape
+- objects.bnp:smariagemaraud.shape
+- objects.bnp:snowhill.shape
+- objects.bnp:tp_diamand.shape
+- objects.bnp:tp_socle.shape
+- objects.bnp:tr_acc_baniere.shape
+- objects.bnp:tr_acc_bowl.shape
+- objects.bnp:tr_acc_civbanner.shape
+- objects.bnp:tr_acc_civbanner_handled.shape
+- objects.bnp:tr_acc_pick_a.shape
+- objects.bnp:tr_escalier_en_eau.shape
+- objects.bnp:tr_wea_baton.shape
+- objects.bnp:tr_wea_dague.shape
+- objects.bnp:tr_wea_epee1m.shape
+- objects.bnp:tr_wea_epee2m.shape
+- objects.bnp:tr_wea_fusarc.shape
+- objects.bnp:tr_wea_fusil.shape
+- objects.bnp:tr_wea_gatling.shape
+- objects.bnp:tr_wea_grandbouclier.shape
+- objects.bnp:tr_wea_grenade.shape
+- objects.bnp:tr_wea_hache1m.shape
+- objects.bnp:tr_wea_hache2m.shape
+- objects.bnp:tr_wea_lance1m.shape
+- objects.bnp:tr_wea_lance2m.shape
+- objects.bnp:tr_wea_lanceroquette.shape
+- objects.bnp:tr_wea_masse1m.shape
+- objects.bnp:tr_wea_masse2m.shape
+- objects.bnp:tr_wea_petit_bouclier.shape
+- objects.bnp:tr_wea_pistolarc.shape
+- objects.bnp:tr_wea_pistolet.shape
+- objects.bnp:tr_wea_pistolet_sousmarin.shape
+- objects.bnp:ul_mission_hall_of_fame.shape
+- objects.bnp:water_bomb.shape
+- objects.bnp:xmas_acc_candycane_star.shape
+- objects.bnp:xmas_balla_1m_beige.shape
+- objects.bnp:xmas_balla_1m_black.shape
+- objects.bnp:xmas_balla_1m_blue.shape
+- objects.bnp:xmas_balla_1m_green.shape
+- objects.bnp:xmas_balla_1m_purple.shape
+- objects.bnp:xmas_balla_1m_red.shape
+- objects.bnp:xmas_balla_1m_turquoise.shape
+- objects.bnp:xmas_balla_1m_white.shape
+- objects.bnp:xmas_balla_20cm_beige.shape
+- objects.bnp:xmas_balla_20cm_black.shape
+- objects.bnp:xmas_balla_20cm_blue.shape
+- objects.bnp:xmas_balla_20cm_green.shape
+- objects.bnp:xmas_balla_20cm_purple.shape
+- objects.bnp:xmas_balla_20cm_red.shape
+- objects.bnp:xmas_balla_20cm_turquoise.shape
+- objects.bnp:xmas_balla_20cm_white.shape
+- objects.bnp:xmas_balla_2m_beige.shape
+- objects.bnp:xmas_balla_2m_black.shape
+- objects.bnp:xmas_balla_2m_blue.shape
+- objects.bnp:xmas_balla_2m_green.shape
+- objects.bnp:xmas_balla_2m_purple.shape
+- objects.bnp:xmas_balla_2m_red.shape
+- objects.bnp:xmas_balla_2m_turquoise.shape
+- objects.bnp:xmas_balla_2m_white.shape
+- objects.bnp:xmas_ballb_1m_beige.shape
+- objects.bnp:xmas_ballb_1m_black.shape
+- objects.bnp:xmas_ballb_1m_blue.shape
+- objects.bnp:xmas_ballb_1m_green.shape
+- objects.bnp:xmas_ballb_1m_purple.shape
+- objects.bnp:xmas_ballb_1m_red.shape
+- objects.bnp:xmas_ballb_1m_turquoise.shape
+- objects.bnp:xmas_ballb_1m_white.shape
+- objects.bnp:xmas_ballb_20cm_beige.shape
+- objects.bnp:xmas_ballb_20cm_black.shape
+- objects.bnp:xmas_ballb_20cm_blue.shape
+- objects.bnp:xmas_ballb_20cm_green.shape
+- objects.bnp:xmas_ballb_20cm_purple.shape
+- objects.bnp:xmas_ballb_20cm_red.shape
+- objects.bnp:xmas_ballb_20cm_turquoise.shape
+- objects.bnp:xmas_ballb_20cm_white.shape
+- objects.bnp:xmas_ballb_2m_beige.shape
+- objects.bnp:xmas_ballb_2m_black.shape
+- objects.bnp:xmas_ballb_2m_blue.shape
+- objects.bnp:xmas_ballb_2m_green.shape
+- objects.bnp:xmas_ballb_2m_purple.shape
+- objects.bnp:xmas_ballb_2m_red.shape
+- objects.bnp:xmas_ballb_2m_turquoise.shape
+- objects.bnp:xmas_ballb_2m_white.shape
+- objects.bnp:xmas_ballc_1m_beige.shape
+- objects.bnp:xmas_ballc_1m_black.shape
+- objects.bnp:xmas_ballc_1m_blue.shape
+- objects.bnp:xmas_ballc_1m_green.shape
+- objects.bnp:xmas_ballc_1m_purple.shape
+- objects.bnp:xmas_ballc_1m_red.shape
+- objects.bnp:xmas_ballc_1m_turquoise.shape
+- objects.bnp:xmas_ballc_1m_white.shape
+- objects.bnp:xmas_ballc_20cm_beige.shape
+- objects.bnp:xmas_ballc_20cm_black.shape
+- objects.bnp:xmas_ballc_20cm_blue.shape
+- objects.bnp:xmas_ballc_20cm_green.shape
+- objects.bnp:xmas_ballc_20cm_purple.shape
+- objects.bnp:xmas_ballc_20cm_red.shape
+- objects.bnp:xmas_ballc_20cm_turquoise.shape
+- objects.bnp:xmas_ballc_20cm_white.shape
+- objects.bnp:xmas_ballc_2m_beige.shape
+- objects.bnp:xmas_ballc_2m_black.shape
+- objects.bnp:xmas_ballc_2m_blue.shape
+- objects.bnp:xmas_ballc_2m_green.shape
+- objects.bnp:xmas_ballc_2m_purple.shape
+- objects.bnp:xmas_ballc_2m_red.shape
+- objects.bnp:xmas_ballc_2m_turquoise.shape
+- objects.bnp:xmas_ballc_2m_white.shape
+- objects.bnp:xmas_balld_1m_beige.shape
+- objects.bnp:xmas_balld_1m_black.shape
+- objects.bnp:xmas_balld_1m_blue.shape
+- objects.bnp:xmas_balld_1m_green.shape
+- objects.bnp:xmas_balld_1m_purple.shape
+- objects.bnp:xmas_balld_1m_red.shape
+- objects.bnp:xmas_balld_1m_turquoise.shape
+- objects.bnp:xmas_balld_1m_white.shape
+- objects.bnp:xmas_balld_20cm_beige.shape
+- objects.bnp:xmas_balld_20cm_black.shape
+- objects.bnp:xmas_balld_20cm_blue.shape
+- objects.bnp:xmas_balld_20cm_green.shape
+- objects.bnp:xmas_balld_20cm_purple.shape
+- objects.bnp:xmas_balld_20cm_red.shape
+- objects.bnp:xmas_balld_20cm_turquoise.shape
+- objects.bnp:xmas_balld_20cm_white.shape
+- objects.bnp:xmas_balld_2m_beige.shape
+- objects.bnp:xmas_balld_2m_black.shape
+- objects.bnp:xmas_balld_2m_blue.shape
+- objects.bnp:xmas_balld_2m_green.shape
+- objects.bnp:xmas_balld_2m_purple.shape
+- objects.bnp:xmas_balld_2m_red.shape
+- objects.bnp:xmas_balld_2m_turquoise.shape
+- objects.bnp:xmas_balld_2m_white.shape
+- objects.bnp:xmas_fy_lantern.shape
+- objects.bnp:xmas_fy_stable.shape
+- objects.bnp:xmas_gen_lantern.shape
+- objects.bnp:xmas_gingerbread.shape
+- objects.bnp:xmas_gingerstar.shape
+- objects.bnp:xmas_gingertree.shape
+- objects.bnp:xmas_gingerubo.shape
+- objects.bnp:xmas_gingeryubo.shape
+- objects.bnp:xmas_gubanistatue.shape
+- objects.bnp:xmas_lights_01.shape
+- objects.bnp:xmas_lights_02.shape
+- objects.bnp:xmas_lights_03.shape
+- objects.bnp:xmas_oven.shape
+- objects.bnp:xmas_pictureframea.shape
+- objects.bnp:xmas_present_empty.shape
+- objects.bnp:xmas_sleigh.shape
+- objects.bnp:xmas_sleighgifts.shape
+- objects.bnp:xmas_snowglobe.shape
+- objects.bnp:xmas_snowglobe2.shape
+- objects.bnp:xmas_snowman.shape
+- objects.bnp:xmas_spikestar.shape
+- objects.bnp:xmas_stable2022.shape
+- objects.bnp:xmas_stable2022_deco.shape
+- objects.bnp:xmas_staffwreath.shape
+- objects.bnp:xmas_statue.shape
+- objects.bnp:xmas_sugarcane.shape
+- objects.bnp:xmas_tr_mektoub_selle.shape
+- objects.bnp:xmas_tree-balls.shape
+- objects.bnp:xmas_tree-pole_blue.shape
+- objects.bnp:xmas_tree-pole_green.shape
+- objects.bnp:xmas_tree-pole_red.shape
+- objects.bnp:xmas_tree-poleribbon_blue.shape
+- objects.bnp:xmas_tree-poleribbon_green.shape
+- objects.bnp:xmas_tree-poleribbon_red.shape
+- objects.bnp:xmas_tree-poletape_blue.shape
+- objects.bnp:xmas_tree-poletape_green.shape
+- objects.bnp:xmas_tree-poletape_red.shape
+- objects.bnp:xmas_tree-ribbonballsa.shape
+- objects.bnp:xmas_tree-ribbonballsb.shape
+- objects.bnp:xmas_tree.shape
+- objects.bnp:xmas_wreathballs.shape
+- objects.bnp:xmas_wreathyubo.shape
+- objects.bnp:xmas_yubostatue.shape
+- objects.bnp:zo_acc_baniere.shape
+- objects.bnp:zo_acc_bowl.shape
+- objects.bnp:zo_acc_civbanner.shape
+- objects.bnp:zo_acc_civbanner_handled.shape
+- objects.bnp:zo_acc_pick_a.shape
+- objects.bnp:zo_wea_baton.shape
+- objects.bnp:zo_wea_dague.shape
+- objects.bnp:zo_wea_epee1m.shape
+- objects.bnp:zo_wea_epee2m.shape
+- objects.bnp:zo_wea_fusarc.shape
+- objects.bnp:zo_wea_fusil.shape
+- objects.bnp:zo_wea_gatling.shape
+- objects.bnp:zo_wea_grand_bouclier.shape
+- objects.bnp:zo_wea_grenade.shape
+- objects.bnp:zo_wea_hache1m.shape
+- objects.bnp:zo_wea_hache2m.shape
+- objects.bnp:zo_wea_lance1m.shape
+- objects.bnp:zo_wea_lance2m.shape
+- objects.bnp:zo_wea_lanceroquette.shape
+- objects.bnp:zo_wea_masse1m.shape
+- objects.bnp:zo_wea_masse2m.shape
+- objects.bnp:zo_wea_petit_bouclier.shape
+- objects.bnp:zo_wea_pistolarc.shape
+- objects.bnp:zo_wea_pistolet.shape
+- objects.bnp:zombi_yubo.shape
+- objects.bnp:zombie_izam.shape
+- objects.bnp:zombie_messabe.shape
+- primes_racines_shapes.bnp:pr_ruine_c_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_a01_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_a02_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_a03_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_a_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_a_fyros_d.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_a_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_b_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_d01_fyros_d.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_d03_fyros_d.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_d_fyros_d.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_e02_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_e03_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_fyros_e_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_a01_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_a02_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_a_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_a_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_b01_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_b02_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_b_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_c01_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_c_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_fyros_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e01_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e02_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e03_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e04_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e04_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e04_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e04_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e04_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e04_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e05_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e05_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e05_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e05_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e05_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e06_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e06_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e07_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e07_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e08_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e09_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_fyros_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_fyros_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_fyros_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_fyros_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_fyros_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_tryker_a.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_tryker_b.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_tryker_c.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryker_e_tryker_e.shape
+- primes_racines_shapes.bnp:pr_ruine_tryler_d01_tryker_d.shape
+- primes_racines_shapes.bnp:pr_ruine_tryler_d_tryker_d.shape
+- primes_racines_shapes.bnp:[nelligo] some vertices are not the same.shape
+- primes_racines_shapes.bnp:[nelligo] the vertex has been inserted in the edge list.shape
+- primes_racines_shapes.bnp:[nelligo] the vertex has not been inserted in the edge list.shape
+- r2_misc.bnp:r2_entity_count_too_high.shape
+- r2_misc.bnp:r2_entity_place_holder.shape
+- r2_misc.bnp:r2_instance_link.shape
+- r2_misc.bnp:r2_region_vertex.shape
+- r2_misc.bnp:r2_road_flag.shape
+- r2_misc.bnp:road_flag.shape
+- route_gouffre_shapes.bnp:canope_gouffre_01.shape
+- route_gouffre_shapes.bnp:canope_gouffre_02.shape
+- route_gouffre_shapes.bnp:canope_gouffre_03.shape
+- route_gouffre_shapes.bnp:canope_gouffre_04.shape
+- route_gouffre_shapes.bnp:canope_gouffre_05.shape
+- route_gouffre_shapes.bnp:canope_gouffre_06.shape
+- route_gouffre_shapes.bnp:canope_gouffre_07.shape
+- route_gouffre_shapes.bnp:canope_gouffre_08.shape
+- route_gouffre_shapes.bnp:canope_gouffre_09.shape
+- route_gouffre_shapes.bnp:canope_gouffre_10.shape
+- route_gouffre_shapes.bnp:canope_gouffre_100.shape
+- route_gouffre_shapes.bnp:canope_gouffre_101.shape
+- route_gouffre_shapes.bnp:canope_gouffre_102.shape
+- route_gouffre_shapes.bnp:canope_gouffre_103.shape
+- route_gouffre_shapes.bnp:canope_gouffre_104.shape
+- route_gouffre_shapes.bnp:canope_gouffre_105.shape
+- route_gouffre_shapes.bnp:canope_gouffre_106.shape
+- route_gouffre_shapes.bnp:canope_gouffre_107.shape
+- route_gouffre_shapes.bnp:canope_gouffre_108.shape
+- route_gouffre_shapes.bnp:canope_gouffre_109.shape
+- route_gouffre_shapes.bnp:canope_gouffre_11.shape
+- route_gouffre_shapes.bnp:canope_gouffre_110.shape
+- route_gouffre_shapes.bnp:canope_gouffre_12.shape
+- route_gouffre_shapes.bnp:canope_gouffre_13.shape
+- route_gouffre_shapes.bnp:canope_gouffre_14.shape
+- route_gouffre_shapes.bnp:canope_gouffre_15.shape
+- route_gouffre_shapes.bnp:canope_gouffre_16.shape
+- route_gouffre_shapes.bnp:canope_gouffre_17.shape
+- route_gouffre_shapes.bnp:canope_gouffre_18.shape
+- route_gouffre_shapes.bnp:canope_gouffre_19.shape
+- route_gouffre_shapes.bnp:canope_gouffre_20.shape
+- route_gouffre_shapes.bnp:canope_gouffre_21.shape
+- route_gouffre_shapes.bnp:canope_gouffre_22.shape
+- route_gouffre_shapes.bnp:canope_gouffre_23.shape
+- route_gouffre_shapes.bnp:canope_gouffre_24.shape
+- route_gouffre_shapes.bnp:canope_gouffre_25.shape
+- route_gouffre_shapes.bnp:canope_gouffre_26.shape
+- route_gouffre_shapes.bnp:canope_gouffre_27.shape
+- route_gouffre_shapes.bnp:canope_gouffre_28.shape
+- route_gouffre_shapes.bnp:canope_gouffre_29.shape
+- route_gouffre_shapes.bnp:canope_gouffre_30.shape
+- route_gouffre_shapes.bnp:canope_gouffre_31.shape
+- route_gouffre_shapes.bnp:canope_gouffre_32.shape
+- route_gouffre_shapes.bnp:canope_gouffre_33.shape
+- route_gouffre_shapes.bnp:canope_gouffre_34.shape
+- route_gouffre_shapes.bnp:canope_gouffre_35.shape
+- route_gouffre_shapes.bnp:canope_gouffre_36.shape
+- route_gouffre_shapes.bnp:canope_gouffre_37.shape
+- route_gouffre_shapes.bnp:canope_gouffre_38.shape
+- route_gouffre_shapes.bnp:canope_gouffre_39.shape
+- route_gouffre_shapes.bnp:canope_gouffre_40.shape
+- route_gouffre_shapes.bnp:canope_gouffre_41.shape
+- route_gouffre_shapes.bnp:canope_gouffre_42.shape
+- route_gouffre_shapes.bnp:canope_gouffre_43.shape
+- route_gouffre_shapes.bnp:canope_gouffre_44.shape
+- route_gouffre_shapes.bnp:canope_gouffre_45.shape
+- route_gouffre_shapes.bnp:canope_gouffre_46.shape
+- route_gouffre_shapes.bnp:canope_gouffre_47.shape
+- route_gouffre_shapes.bnp:canope_gouffre_48.shape
+- route_gouffre_shapes.bnp:canope_gouffre_49.shape
+- route_gouffre_shapes.bnp:canope_gouffre_50.shape
+- route_gouffre_shapes.bnp:canope_gouffre_51.shape
+- route_gouffre_shapes.bnp:canope_gouffre_52.shape
+- route_gouffre_shapes.bnp:canope_gouffre_53.shape
+- route_gouffre_shapes.bnp:canope_gouffre_54.shape
+- route_gouffre_shapes.bnp:canope_gouffre_55.shape
+- route_gouffre_shapes.bnp:canope_gouffre_56.shape
+- route_gouffre_shapes.bnp:canope_gouffre_57.shape
+- route_gouffre_shapes.bnp:canope_gouffre_58.shape
+- route_gouffre_shapes.bnp:canope_gouffre_59.shape
+- route_gouffre_shapes.bnp:canope_gouffre_60.shape
+- route_gouffre_shapes.bnp:canope_gouffre_61.shape
+- route_gouffre_shapes.bnp:canope_gouffre_62.shape
+- route_gouffre_shapes.bnp:canope_gouffre_63.shape
+- route_gouffre_shapes.bnp:canope_gouffre_64.shape
+- route_gouffre_shapes.bnp:canope_gouffre_65.shape
+- route_gouffre_shapes.bnp:canope_gouffre_67.shape
+- route_gouffre_shapes.bnp:canope_gouffre_69.shape
+- route_gouffre_shapes.bnp:canope_gouffre_70.shape
+- route_gouffre_shapes.bnp:canope_gouffre_72.shape
+- route_gouffre_shapes.bnp:canope_gouffre_74.shape
+- route_gouffre_shapes.bnp:canope_gouffre_75.shape
+- route_gouffre_shapes.bnp:canope_gouffre_76.shape
+- route_gouffre_shapes.bnp:canope_gouffre_77.shape
+- route_gouffre_shapes.bnp:canope_gouffre_78.shape
+- route_gouffre_shapes.bnp:canope_gouffre_79.shape
+- route_gouffre_shapes.bnp:canope_gouffre_80.shape
+- route_gouffre_shapes.bnp:canope_gouffre_81.shape
+- route_gouffre_shapes.bnp:canope_gouffre_82.shape
+- route_gouffre_shapes.bnp:canope_gouffre_83.shape
+- route_gouffre_shapes.bnp:canope_gouffre_84.shape
+- route_gouffre_shapes.bnp:canope_gouffre_85.shape
+- route_gouffre_shapes.bnp:canope_gouffre_86.shape
+- route_gouffre_shapes.bnp:canope_gouffre_89.shape
+- route_gouffre_shapes.bnp:canope_gouffre_90.shape
+- route_gouffre_shapes.bnp:canope_gouffre_91.shape
+- route_gouffre_shapes.bnp:canope_gouffre_92.shape
+- route_gouffre_shapes.bnp:canope_gouffre_94.shape
+- route_gouffre_shapes.bnp:canope_gouffre_95.shape
+- route_gouffre_shapes.bnp:canope_gouffre_96.shape
+- route_gouffre_shapes.bnp:canope_gouffre_97.shape
+- route_gouffre_shapes.bnp:canope_gouffre_98.shape
+- route_gouffre_shapes.bnp:canope_gouffre_99.shape
+- route_gouffre_shapes.bnp:sky_primes_racines_route_gouffre.shape
+- sfx.bnp:bata01.shape
+- sfx.bnp:bata02.shape
+- sfx.bnp:bata03.shape
+- sfx.bnp:beam3da.shape
+- sfx.bnp:beam3db.shape
+- sfx.bnp:beam3dc.shape
+- sfx.bnp:beama01.shape
+- sfx.bnp:beama02.shape
+- sfx.bnp:beamgroundcircle.shape
+- sfx.bnp:birda02.shape
+- sfx.bnp:birda03.shape
+- sfx.bnp:buga.shape
+- sfx.bnp:bugballa01.shape
+- sfx.bnp:bugballa02.shape
+- sfx.bnp:bugballa03.shape
+- sfx.bnp:bugballaemit01.shape
+- sfx.bnp:bugballaemit02.shape
+- sfx.bnp:bugballaemit03.shape
+- sfx.bnp:bugballb01.shape
+- sfx.bnp:bugballb02.shape
+- sfx.bnp:bugballb03.shape
+- sfx.bnp:colibrisa.shape
+- sfx.bnp:colibrisb.shape
+- sfx.bnp:cone_stun.shape
+- sfx.bnp:cricketa.shape
+- sfx.bnp:de_flower01.shape
+- sfx.bnp:de_flower02.shape
+- sfx.bnp:de_flower03.shape
+- sfx.bnp:de_flower04.shape
+- sfx.bnp:de_flower05.shape
+- sfx.bnp:de_flower06.shape
+- sfx.bnp:dragonflya.shape
+- sfx.bnp:flashmask01.shape
+- sfx.bnp:flashmask02.shape
+- sfx.bnp:flashmask03.shape
+- sfx.bnp:flymesh.shape
+- sfx.bnp:fo_flower01.shape
+- sfx.bnp:fo_flower02.shape
+- sfx.bnp:fo_flower03.shape
+- sfx.bnp:fo_flower04.shape
+- sfx.bnp:fo_flower05.shape
+- sfx.bnp:fo_flower06.shape
+- sfx.bnp:fungusa01.shape
+- sfx.bnp:fungusa02.shape
+- sfx.bnp:fungusa03.shape
+- sfx.bnp:fungusa04.shape
+- sfx.bnp:fungusa05.shape
+- sfx.bnp:fungusa06.shape
+- sfx.bnp:fx_telepod01.shape
+- sfx.bnp:fx_telepodadd01.shape
+- sfx.bnp:fx_telepodroof01.shape
+- sfx.bnp:fx_telepodroofadd01.shape
+- sfx.bnp:ge_feudecamp.shape
+- sfx.bnp:ge_mission_ossement.shape
+- sfx.bnp:healingcreature01.shape
+- sfx.bnp:healingcreature02.shape
+- sfx.bnp:healingcreature03.shape
+- sfx.bnp:hostilecreature01.shape
+- sfx.bnp:hostilecreature02.shape
+- sfx.bnp:hostilecreature03.shape
+- sfx.bnp:kamidebrita.shape
+- sfx.bnp:kamidebritb.shape
+- sfx.bnp:kamidebritc.shape
+- sfx.bnp:knowlege_book01.shape
+- sfx.bnp:knowlege_book02.shape
+- sfx.bnp:knowlege_box.shape
+- sfx.bnp:knowlege_box_fy.shape
+- sfx.bnp:knowlege_box_ma.shape
+- sfx.bnp:knowlege_box_tr.shape
+- sfx.bnp:knowlege_box_zo.shape
+- sfx.bnp:knowlege_topbox.shape
+- sfx.bnp:knowlege_topbox_fy.shape
+- sfx.bnp:knowlege_topbox_ma.shape
+- sfx.bnp:knowlege_topbox_tr.shape
+- sfx.bnp:knowlege_topbox_zo.shape
+- sfx.bnp:lightning.shape
+- sfx.bnp:lightning01.shape
+- sfx.bnp:lightning02.shape
+- sfx.bnp:ma_fx_bird01.shape
+- sfx.bnp:ma_fx_bird02.shape
+- sfx.bnp:ma_fx_bird03.shape
+- sfx.bnp:ma_fx_bird04.shape
+- sfx.bnp:ma_fx_frog_01.shape
+- sfx.bnp:ma_fx_frog_02.shape
+- sfx.bnp:ma_fx_frog_03.shape
+- sfx.bnp:ma_fx_hyppokamp01.shape
+- sfx.bnp:ma_fx_hyppokamp02.shape
+- sfx.bnp:ma_fx_paradisiacbird01.shape
+- sfx.bnp:ma_fx_paradisiacbird02.shape
+- sfx.bnp:ma_fx_paradisiacbird03.shape
+- sfx.bnp:ma_fx_paradisiacbird04.shape
+- sfx.bnp:ma_fx_rat00.shape
+- sfx.bnp:ma_fx_rat01.shape
+- sfx.bnp:ma_fx_rat02.shape
+- sfx.bnp:ma_fx_rat03.shape
+- sfx.bnp:ma_fx_rat04.shape
+- sfx.bnp:ma_fx_scorpion_01.shape
+- sfx.bnp:ma_fx_scorpion_02.shape
+- sfx.bnp:ma_fx_scorpion_03.shape
+- sfx.bnp:ma_fx_scorpion_04.shape
+- sfx.bnp:ma_wea_petit_bouclier_glow.shape
+- sfx.bnp:ma_wea_petit_bouclier_glow2.shape
+- sfx.bnp:mag_impact_blunt.shape
+- sfx.bnp:mag_impact_cold01.shape
+- sfx.bnp:mag_impact_cold02.shape
+- sfx.bnp:mag_impact_cold03.shape
+- sfx.bnp:mag_impact_cold_fragment.shape
+- sfx.bnp:mag_impact_fear01.shape
+- sfx.bnp:mag_impact_fear02.shape
+- sfx.bnp:mag_impact_pierce.shape
+- sfx.bnp:mag_impact_slash.shape
+- sfx.bnp:medusea.shape
+- sfx.bnp:medusea01.shape
+- sfx.bnp:medusea02.shape
+- sfx.bnp:medusea03.shape
+- sfx.bnp:medusea04.shape
+- sfx.bnp:medusea05.shape
+- sfx.bnp:medusea06.shape
+- sfx.bnp:mixtecreature01.shape
+- sfx.bnp:mixtecreature02.shape
+- sfx.bnp:mixtecreature03.shape
+- sfx.bnp:mo_swarmplant_stingbug.shape
+- sfx.bnp:mp_ressources_gen.shape
+- sfx.bnp:neutrecreature.shape
+- sfx.bnp:neutrecreature02.shape
+- sfx.bnp:neutrecreature03.shape
+- sfx.bnp:neutrecreature04.shape
+- sfx.bnp:nrgcircle01.shape
+- sfx.bnp:nrgcircle02.shape
+- sfx.bnp:papillona01.shape
+- sfx.bnp:papillona02.shape
+- sfx.bnp:papillonb01.shape
+- sfx.bnp:papillonb02.shape
+- sfx.bnp:papillonc01.shape
+- sfx.bnp:papillonc02.shape
+- sfx.bnp:papillond01.shape
+- sfx.bnp:papillond02.shape
+- sfx.bnp:pr_fx_crevette_a.shape
+- sfx.bnp:pr_fx_crevette_b.shape
+- sfx.bnp:pr_fx_crevette_c.shape
+- sfx.bnp:pr_fx_frog_01.shape
+- sfx.bnp:pr_fx_frog_02.shape
+- sfx.bnp:pr_fx_frog_03.shape
+- sfx.bnp:pr_fx_lombriquea.shape
+- sfx.bnp:pr_fx_lombriqueb.shape
+- sfx.bnp:pr_fx_lombriquec.shape
+- sfx.bnp:pr_fx_rat00.shape
+- sfx.bnp:pr_fx_rat01.shape
+- sfx.bnp:pr_fx_rat02.shape
+- sfx.bnp:pr_fx_rat03.shape
+- sfx.bnp:pr_fx_rat04.shape
+- sfx.bnp:pr_fx_sakapatate.shape
+- sfx.bnp:rayon.shape
+- sfx.bnp:rectangle01.shape
+- sfx.bnp:resistmesh.shape
+- sfx.bnp:ringrune01.shape
+- sfx.bnp:ringrune02.shape
+- sfx.bnp:rippleshocka00.shape
+- sfx.bnp:rippleshocka01.shape
+- sfx.bnp:root01.shape
+- sfx.bnp:root02.shape
+- sfx.bnp:root03.shape
+- sfx.bnp:root04.shape
+- sfx.bnp:root05.shape
+- sfx.bnp:root06.shape
+- sfx.bnp:root07.shape
+- sfx.bnp:sfx_acidball01.shape
+- sfx.bnp:sfx_acidball02.shape
+- sfx.bnp:sfx_acidball03.shape
+- sfx.bnp:sfx_acidball04.shape
+- sfx.bnp:sfx_boule.shape
+- sfx.bnp:sfx_cold_fragment01.shape
+- sfx.bnp:sfx_echarde.shape
+- sfx.bnp:sfx_glueweb01.shape
+- sfx.bnp:sfx_glueweb02.shape
+- sfx.bnp:sfx_glueweb03.shape
+- sfx.bnp:sfx_glueweb04.shape
+- sfx.bnp:sfx_iceprism_a.shape
+- sfx.bnp:sfx_iceprism_b.shape
+- sfx.bnp:sfx_iceprism_c.shape
+- sfx.bnp:sfx_kitinegg_a.shape
+- sfx.bnp:sfx_kitinegg_b.shape
+- sfx.bnp:sfx_kitinegg_c.shape
+- sfx.bnp:sfx_kitinegg_d.shape
+- sfx.bnp:sfx_kitinegg_e.shape
+- sfx.bnp:sfx_lightning00.shape
+- sfx.bnp:sfx_lightning01.shape
+- sfx.bnp:sfx_lightning02.shape
+- sfx.bnp:sfx_lightning03.shape
+- sfx.bnp:sfx_lightning_b_01.shape
+- sfx.bnp:sfx_lightning_b_02.shape
+- sfx.bnp:sfx_lightning_b_03.shape
+- sfx.bnp:sfx_mo_charogneinsect.shape
+- sfx.bnp:sfx_mo_charognemammal.shape
+- sfx.bnp:sfx_mo_goocharogneinsect.shape
+- sfx.bnp:sfx_mo_goocharognemammal.shape
+- sfx.bnp:sfx_snake00.shape
+- sfx.bnp:sfx_snake01.shape
+- sfx.bnp:sfx_snake02.shape
+- sfx.bnp:sfx_spheremirror.shape
+- sfx.bnp:sfx_sphereshield.shape
+- sfx.bnp:shockcone01.shape
+- sfx.bnp:shockcone02.shape
+- sfx.bnp:shockcone03.shape
+- sfx.bnp:shockcone04.shape
+- sfx.bnp:shockwave01.shape
+- sfx.bnp:shockwave02.shape
+- sfx.bnp:shockwave03.shape
+- sfx.bnp:shockwave04.shape
+- sfx.bnp:sphere01.shape
+- sfx.bnp:sphere02.shape
+- sfx.bnp:sphere03.shape
+- sfx.bnp:sphere04.shape
+- sfx.bnp:sphere05.shape
+- sfx.bnp:sphere06.shape
+- sfx.bnp:splashcouronea01.shape
+- sfx.bnp:splashcouronea02.shape
+- sfx.bnp:splashcouronea03.shape
+- sfx.bnp:splashcouronea04.shape
+- sfx.bnp:tr_blur1.shape
+- sfx.bnp:tr_blur2.shape
+- sfx.bnp:tr_fx_bigbird_01.shape
+- sfx.bnp:tr_fx_bigbird_02.shape
+- sfx.bnp:tr_fx_bigbird_03.shape
+- sfx.bnp:tr_fx_bigbird_04.shape
+- sfx.bnp:tr_fx_bigbird_05.shape
+- sfx.bnp:tr_fx_bird01.shape
+- sfx.bnp:tr_fx_bird02.shape
+- sfx.bnp:tr_fx_bird03.shape
+- sfx.bnp:tr_fx_bird04.shape
+- sfx.bnp:tr_wea_hache2m_trail_00.shape
+- sky.bnp:de_clouds_dome_altitude.shape
+- sky.bnp:de_clouds_dome_altitude_fallbackpass0.shape
+- sky.bnp:de_clouds_dome_heavy.shape
+- sky.bnp:de_clouds_dome_heavy_fallbackpass0.shape
+- sky.bnp:de_clouds_dome_light.shape
+- sky.bnp:de_clouds_dome_light_fallbackpass0.shape
+- sky.bnp:de_flareoclusion.shape
+- sky.bnp:de_horizon_dome.shape
+- sky.bnp:de_sky_dome.shape
+- sky.bnp:de_sky_dome_fallbackpass0.shape
+- sky.bnp:fo_clouds_dome_altitude.shape
+- sky.bnp:fo_clouds_dome_altitude_fallbackpass0.shape
+- sky.bnp:fo_clouds_dome_heavy.shape
+- sky.bnp:fo_clouds_dome_heavy_fallbackpass0.shape
+- sky.bnp:fo_clouds_dome_light.shape
+- sky.bnp:fo_clouds_dome_light_fallbackpass0.shape
+- sky.bnp:fo_flareoclusion.shape
+- sky.bnp:fo_horizon_dome.shape
+- sky.bnp:fo_sky_dome.shape
+- sky.bnp:fo_sky_dome_fallbackpass0.shape
+- sky.bnp:ju_clouds_dome_altitude.shape
+- sky.bnp:ju_clouds_dome_altitude_fallbackpass0.shape
+- sky.bnp:ju_clouds_dome_heavy.shape
+- sky.bnp:ju_clouds_dome_heavy_fallbackpass0.shape
+- sky.bnp:ju_clouds_dome_light.shape
+- sky.bnp:ju_clouds_dome_light_fallbackpass0.shape
+- sky.bnp:ju_flareoclusion.shape
+- sky.bnp:ju_horizon_dome.shape
+- sky.bnp:ju_sky_dome.shape
+- sky.bnp:ju_sky_dome_fallbackpass0.shape
+- sky.bnp:la_clouds_dome_altitude.shape
+- sky.bnp:la_clouds_dome_altitude_fallbackpass0.shape
+- sky.bnp:la_clouds_dome_heavy.shape
+- sky.bnp:la_clouds_dome_heavy_fallbackpass0.shape
+- sky.bnp:la_clouds_dome_light.shape
+- sky.bnp:la_clouds_dome_light_fallbackpass0.shape
+- sky.bnp:la_flareoclusion.shape
+- sky.bnp:la_horizon_dome.shape
+- sky.bnp:la_sky_dome.shape
+- sky.bnp:la_sky_dome_fallbackpass0.shape
+- sources_shapes.bnp:canope_source_01.shape
+- sources_shapes.bnp:canope_source_02.shape
+- sources_shapes.bnp:canope_source_04.shape
+- sources_shapes.bnp:canope_source_05.shape
+- sources_shapes.bnp:canope_source_06.shape
+- sources_shapes.bnp:canope_source_07.shape
+- sources_shapes.bnp:canope_source_08.shape
+- sources_shapes.bnp:canope_source_09.shape
+- sources_shapes.bnp:canope_source_10.shape
+- sources_shapes.bnp:canope_source_11.shape
+- sources_shapes.bnp:canope_source_12.shape
+- sources_shapes.bnp:canope_source_14.shape
+- sources_shapes.bnp:canope_source_15.shape
+- sources_shapes.bnp:canope_source_16.shape
+- sources_shapes.bnp:canope_source_17.shape
+- sources_shapes.bnp:canope_source_18.shape
+- sources_shapes.bnp:canope_source_19.shape
+- sources_shapes.bnp:canope_source_20.shape
+- sources_shapes.bnp:canope_source_21.shape
+- sources_shapes.bnp:canope_source_22.shape
+- sources_shapes.bnp:canope_source_23.shape
+- sources_shapes.bnp:sky_primes_racines_sources.shape
+- terre_shapes.bnp:canope_terre_01.shape
+- terre_shapes.bnp:canope_terre_02.shape
+- terre_shapes.bnp:canope_terre_03.shape
+- terre_shapes.bnp:canope_terre_04.shape
+- terre_shapes.bnp:canope_terre_05.shape
+- terre_shapes.bnp:canope_terre_06.shape
+- terre_shapes.bnp:canope_terre_07.shape
+- terre_shapes.bnp:canope_terre_08.shape
+- terre_shapes.bnp:canope_terre_09.shape
+- terre_shapes.bnp:canope_terre_10.shape
+- terre_shapes.bnp:canope_terre_11.shape
+- terre_shapes.bnp:canope_terre_12.shape
+- terre_shapes.bnp:canope_terre_13.shape
+- terre_shapes.bnp:canope_terre_14.shape
+- terre_shapes.bnp:canope_terre_15.shape
+- terre_shapes.bnp:canope_terre_16.shape
+- terre_shapes.bnp:canope_terre_17.shape
+- terre_shapes.bnp:canope_terre_18.shape
+- terre_shapes.bnp:canope_terre_19.shape
+- terre_shapes.bnp:canope_terre_20.shape
+- terre_shapes.bnp:canope_terre_21.shape
+- terre_shapes.bnp:canope_terre_22.shape
+- terre_shapes.bnp:canope_terre_23.shape
+- terre_shapes.bnp:canope_terre_24.shape
+- terre_shapes.bnp:canope_terre_25.shape
+- terre_shapes.bnp:canope_terre_26.shape
+- terre_shapes.bnp:canope_terre_27.shape
+- terre_shapes.bnp:canope_terre_28.shape
+- terre_shapes.bnp:canope_terre_29.shape
+- terre_shapes.bnp:canope_terre_30.shape
+- terre_shapes.bnp:canope_terre_31.shape
+- terre_shapes.bnp:canope_terre_32.shape
+- terre_shapes.bnp:canope_terre_33.shape
+- terre_shapes.bnp:canope_terre_34.shape
+- terre_shapes.bnp:canope_terre_35.shape
+- terre_shapes.bnp:canope_terre_36.shape
+- terre_shapes.bnp:canope_terre_37.shape
+- terre_shapes.bnp:canope_terre_38.shape
+- terre_shapes.bnp:canope_terre_39.shape
+- terre_shapes.bnp:canope_terre_40.shape
+- terre_shapes.bnp:canope_terre_41.shape
+- terre_shapes.bnp:canope_terre_42.shape
+- terre_shapes.bnp:canope_terre_43.shape
+- terre_shapes.bnp:canope_terre_44.shape
+- terre_shapes.bnp:canope_terre_45.shape
+- terre_shapes.bnp:canope_terre_47.shape
+- terre_shapes.bnp:canope_terre_48.shape
+- terre_shapes.bnp:canope_terre_50.shape
+- terre_shapes.bnp:canope_terre_51.shape
+- terre_shapes.bnp:canope_terre_52.shape
+- terre_shapes.bnp:canope_terre_55.shape
+- terre_shapes.bnp:canope_terre_56.shape
+- terre_shapes.bnp:canope_terre_57.shape
+- terre_shapes.bnp:canope_terre_58.shape
+- terre_shapes.bnp:canope_terre_59.shape
+- terre_shapes.bnp:canope_terre_60.shape
+- terre_shapes.bnp:canope_terre_61.shape
+- terre_shapes.bnp:canope_terre_62.shape
+- terre_shapes.bnp:canope_terre_63.shape
+- terre_shapes.bnp:canope_terre_64.shape
+- terre_shapes.bnp:canope_terre_65.shape
+- terre_shapes.bnp:canope_terre_66.shape
+- terre_shapes.bnp:canope_terre_67.shape
+- terre_shapes.bnp:canope_terre_68.shape
+- terre_shapes.bnp:canope_terre_69.shape
+- terre_shapes.bnp:canope_terre_71.shape
+- terre_shapes.bnp:canope_terre_72.shape
+- terre_shapes.bnp:canope_terre_73.shape
+- terre_shapes.bnp:canope_terre_74.shape
+- terre_shapes.bnp:canope_terre_75.shape
+- terre_shapes.bnp:sky_primes_racines_terre.shape
+- tryker_shapes.bnp:canope_tryker.shape
+- tryker_shapes.bnp:coffre.shape
+- tryker_shapes.bnp:tr_ascenseur_porte.shape
+- tryker_shapes.bnp:tr_barge_porte_asc_1er.shape
+- tryker_shapes.bnp:tr_barge_porte_asc_rdc.shape
+- tryker_shapes.bnp:tr_barge_porte_ext_left.shape
+- tryker_shapes.bnp:tr_barge_porte_ext_right.shape
+- tryker_shapes.bnp:tr_barge_porte_int_left.shape
+- tryker_shapes.bnp:tr_barge_porte_int_right.shape
+- tryker_shapes.bnp:tr_drapeaux_bar_blue.shape
+- tryker_shapes.bnp:tr_drapeaux_bar_green.shape
+- tryker_shapes.bnp:tr_drapeaux_bar_red.shape
+- tryker_shapes.bnp:tr_drapeaux_bar_yellow.shape
+- tryker_shapes.bnp:tr_drapeaux_blue.shape
+- tryker_shapes.bnp:tr_drapeaux_green.shape
+- tryker_shapes.bnp:tr_drapeaux_red.shape
+- tryker_shapes.bnp:tr_drapeaux_yellow.shape
+- tryker_shapes.bnp:tr_sky_day.shape
+- tryker_shapes.bnp:tr_sky_day_fog.shape
+- zorai_shapes.bnp:canope_zorai.shape
+- zorai_shapes.bnp:zo_asc_porte_droite.shape
+- zorai_shapes.bnp:zo_asc_porte_gauche.shape
+- zorai_shapes.bnp:zo_bt_monastere_ambrecouloir.shape
+- zorai_shapes.bnp:zo_mairie_globes.shape
+- construction.bnp:gen_aub_int.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_chaise.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_lampe_a.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_lampemur_01.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_lampemur_02.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_lampemur_03.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_lampemur_04.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_table_1.shape (type-only, legacy data format)
+- construction.bnp:gen_aub_int_tonneaux_b.shape (type-only, legacy data format)
+- construction.bnp:gen_autel_kami.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_atelier.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_atelier_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_atelier_caisse.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_atelier_sac.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_aub_entree.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_aub_ext.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_autel_kami_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_caisse03.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_comptoir.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_comptoir_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_comptoir_caisse.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecole.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecole_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecole_caisses.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecurie.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecurie_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecurie_caisses.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecurie_ported.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecurie_porteg.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ecurie_tonneau.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_maison.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_maison_commune_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_maison_commune_caisses.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_maison_commune_tonneau.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_ruines.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_silo.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_silo_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_silo_caisse.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_silo_tonneau.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tour_portebas.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tour_portehaut.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tour_porteleft.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tour_porteright.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tourgarde.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tourgarde_barriere.shape (type-only, legacy data format)
+- construction.bnp:gen_bt_tourgarde_caisses.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_big_palmito.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_dessus_mur_02.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_mur_nord_est_always_visible.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_mur_sud_est_always_visibleobject02-1.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_mur_sud_est_always_visibleobject02_2.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_mur_sud_interieur-a.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part01.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part01c.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part02.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part03.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part04.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part05.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part06.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part10.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part11.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part12-bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part12.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part13.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part14.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part15.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part15_bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part15ter.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part16.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part16_bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part17.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part18_bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part_01b.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_part_dessus_mur_01.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_small_palmito_nord-1.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_small_palmito_nord.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_small_palmito_nord_2.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_small_palmitosud-ter.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_small_palmitosud.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_small_palmitosud_bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:agora_sud_escalier_always_visible.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_appliquemurale_a_1.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_03.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_04.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_05.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_06.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_07.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_08.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_09.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_1.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_10.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_11.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_12.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_13.shape (type-only, legacy data format)
+- desert_shapes.bnp:auberge_acc_table_b_14.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part01.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part01bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part02.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part03.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part04.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part05.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part06.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part07.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part07bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part08.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part09.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part09bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part10.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part10bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part10ter.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part11.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part12.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part13.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part13bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part14.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part15.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part150.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part16.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part17.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part17bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part18.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part19.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part20.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part21.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part23.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part24.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part25.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part26.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part27.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part28.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part29.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part30.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part31.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part32.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part33.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part34.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part35.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part36.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part37.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part38.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part39.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part40.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part41bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part42.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part43.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part44.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part44_bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part45.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part46.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part47.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part48.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part50.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part51.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part52.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part53.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part54.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part55.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part56.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part57.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part60.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part60bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part61.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part62_nyg.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_part63.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_tunnel_nord-sud_part1.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_tunnel_nord-sud_part2.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_tunnel_nord-sud_part3.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_tunnel_nord-sud_part4.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_tunnel_nord-sud_part5.shape (type-only, legacy data format)
+- desert_shapes.bnp:city_tunnel_nord-sud_part6.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_10.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_11.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_12.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_13.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_2.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_3.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_4.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_4bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_5-bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_5.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_5ter.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_6.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_7.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_8bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:commercesruesplaces_9.shape (type-only, legacy data format)
+- desert_shapes.bnp:entreevilleborders-bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:entreevilleborders.shape (type-only, legacy data format)
+- desert_shapes.bnp:entrvillefauxtoitencarton.shape (type-only, legacy data format)
+- desert_shapes.bnp:escalier_agora_npv.shape (type-only, legacy data format)
+- desert_shapes.bnp:escalier_ecole_de_guerre_bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:ext-forge.shape (type-only, legacy data format)
+- desert_shapes.bnp:fontaine.shape (type-only, legacy data format)
+- desert_shapes.bnp:fumext.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_appliquemurale_nb01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_appliquemurale_nb02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_appliquemurale_nb03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_appliquemurale_nb04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_appliquemurale_nb05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_nb01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_nb02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_nb03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_nb04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_acc_sas_module_nb05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_brandon_ponton.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_bt_sheriff_base_ext_fy_sheriff.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_bt_sheriff_coque_ext_fy_sheriff.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_bt_sheriff_facade_top_fy_sheriff.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_bt_sheriff_ok_ascen_fy_sheriff.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_bt_sheriff_ok_ascen_fy_sheriff_1er.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_bt_sheriff_plato_ext_fy_sheriff.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_bridge_a_156_eo.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_bridge_a_canyon.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_bridge_b_canyon.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_bridge_c_159_eq.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_bridge_d01_mz_bridge.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_bridge_d02_mz_bridge.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_a.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_a_nb01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_a_nb02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_a_nb03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_a_nb04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_a_nb05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_caravanserail_b.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_ascenseur_exterieur.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_exterieur.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_int_01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_int_02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_int_03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_int_04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_int_05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_fortress_int_06.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_mairie_entree-ext_a.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_mairie_entree-ext_b.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_module_nb01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_module_nb02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_module_nb03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_module_nb04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_module_nb05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_trykerinn_a_ext.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_cn_trykerinn_a_int.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_domext.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_forge_couronne_forge.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_forge_escalier_forge.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_forge_forge_forge.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_acc_appliq_a_1.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_acc_table_b_02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_acc_table_b_1.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_encensoir06.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_porte02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_porte03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_fortress_porte04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_04.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_05.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_06.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_inn_a_table_b_07.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_mairie_ext.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_oasis_inn_a_1floor2.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_oasis_inn_a_ext.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_oasis_inn_a_rdc.shape (type-only, legacy data format)
+- desert_shapes.bnp:fy_oasis_inn_b_1floor1.shape (type-only, legacy data format)
+- desert_shapes.bnp:fycity_dbledoorr_48.shape (type-only, legacy data format)
+- desert_shapes.bnp:fycity_dbledoorr_49.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcitydoorb-dx-left16.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea09.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea10.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea11.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea12.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea13.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea15.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea16.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypea17.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypeb.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypeb01.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypeb02.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypeb03.shape (type-only, legacy data format)
+- desert_shapes.bnp:fyrcityechoptypeb04.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_autel_kami_oasis_kamik.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_aub_ext_oasis_kamik.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_comptoir_barriere_oasis_kamik.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_comptoir_caisse_oasis_kamik.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_comptoir_oasis_kamik.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_comptoire_oasis_kamik.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_fy_brandon.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_fy_oasis.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_fy_oasis_ported.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_fy_oasis_porteg.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_ported_fy_brandon.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_ported_villefyros_est.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_ported_villefyros_nord.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_ported_villefyros_sud.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_porteg_fy_brandon.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_porteg_villefyros_est.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_porteg_villefyros_nord.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_porteg_villefyros_sud.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_villefyros_est.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_villefyros_nord.shape (type-only, legacy data format)
+- desert_shapes.bnp:gen_bt_ecurie_villefyros_sud.shape (type-only, legacy data format)
+- desert_shapes.bnp:inter_forge_haut_forge.shape (type-only, legacy data format)
+- desert_shapes.bnp:object01.shape (type-only, legacy data format)
+- desert_shapes.bnp:porteentreebrazier.shape (type-only, legacy data format)
+- desert_shapes.bnp:porteentreebrazier01.shape (type-only, legacy data format)
+- desert_shapes.bnp:porteentreebrazier02.shape (type-only, legacy data format)
+- desert_shapes.bnp:porteentreebrazier03.shape (type-only, legacy data format)
+- desert_shapes.bnp:raccordentreeville-bis.shape (type-only, legacy data format)
+- desert_shapes.bnp:raccordentreeville.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part01.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part02.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part03.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part03b.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part04.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part05.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part06.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part07.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part08.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part09.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part10.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part11.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part12.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part13.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part14.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part15.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part15b.shape (type-only, legacy data format)
+- desert_shapes.bnp:sanctuaire_part51.shape (type-only, legacy data format)
+- desert_shapes.bnp:sol-tunnel-ecoledeguerre.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part01.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part70.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part71.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part72.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part74.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part75.shape (type-only, legacy data format)
+- desert_shapes.bnp:street_part76.shape (type-only, legacy data format)
+- desert_shapes.bnp:tissub01.shape (type-only, legacy data format)
+- desert_shapes.bnp:tissub02.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_bas1.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_bas2.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_bas3.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_haut1.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_haut10.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_haut3.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_haut4.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_haut6.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnel_acces_haut8.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnels_ecole_de_guerre.shape (type-only, legacy data format)
+- desert_shapes.bnp:tunnels_ecole_de_guerre03.shape (type-only, legacy data format)
+- fyros_shapes.bnp:ambre.shape (type-only, legacy data format)
+- fyros_shapes.bnp:ambre1.shape (type-only, legacy data format)
+- fyros_shapes.bnp:ambre2.shape (type-only, legacy data format)
+- fyros_shapes.bnp:ambre3.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneb1.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneb2.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneb3.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneb4.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneb5.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneb6.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneh1.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneh2.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneh3.shape (type-only, legacy data format)
+- fyros_shapes.bnp:areneh4.shape (type-only, legacy data format)
+- fyros_shapes.bnp:chaud.shape (type-only, legacy data format)
+- fyros_shapes.bnp:chaud01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:chaudiere.shape (type-only, legacy data format)
+- fyros_shapes.bnp:colonnes.shape (type-only, legacy data format)
+- fyros_shapes.bnp:couloirb.shape (type-only, legacy data format)
+- fyros_shapes.bnp:couloirh.shape (type-only, legacy data format)
+- fyros_shapes.bnp:decoup_stair_bot.shape (type-only, legacy data format)
+- fyros_shapes.bnp:decoup_stairs_top.shape (type-only, legacy data format)
+- fyros_shapes.bnp:domeint.shape (type-only, legacy data format)
+- fyros_shapes.bnp:entreporte.shape (type-only, legacy data format)
+- fyros_shapes.bnp:etagere.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fumint.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fumintasc.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_ascenseur.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_jukeboxbar.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_sas_a.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_sas_a_appliquemurale.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_sas_b.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_sas_b_appliquemurale.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_statuefem.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_table_b_1.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_table_taverne_01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_table_taverne_02.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_table_taverne_03.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_acc_table_taverne_04.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_cage_ascenceur.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_chaudron.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_lampmur02.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_lampmur09.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_lampmur11.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_lampmur14.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_modif_ok_inter_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_modif_ok_inter_assistant.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_modif_ok_inter_prison.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_modif_ok_inter_sherif.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_ascen.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_elevator_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_elevator_armurie01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_porte01_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_porte02_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_porte03_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_porte_assistant.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_porte_prison.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_porte_sherif.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_sas01_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_sas02_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_sas3_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_sas4_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_bt_sheriff_ok_sas5_armurie.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_cn_mairie_entree-a.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_cn_mairie_entree-b.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_cn_mairie_int.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_cn_mairie_salle_a.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_cn_mairie_salle_b.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_foorge_cordage.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_forge_appliquemurale.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_forge_couronne.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_forge_escalier.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_forge_forge.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_forge_matiere_premiere.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_forge_soufflet.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smoke_cage_elevateur.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smoke_elevateur.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smoke_elevateur_1er.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smokehouse_appliquemurale_bas.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smokehouse_appliquemurale_entree.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smokehouse_appliquemurale_haut.shape (type-only, legacy data format)
+- fyros_shapes.bnp:fy_smokehouse_canape.shape (type-only, legacy data format)
+- fyros_shapes.bnp:hall.shape (type-only, legacy data format)
+- fyros_shapes.bnp:hammam.shape (type-only, legacy data format)
+- fyros_shapes.bnp:inter_forge_bas.shape (type-only, legacy data format)
+- fyros_shapes.bnp:inter_forge_haut.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa02.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa03.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa04.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa05.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa06.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa07.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa09.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa10.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa11.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa12.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa13.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa14.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa15.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa16.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa17.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa18.shape (type-only, legacy data format)
+- fyros_shapes.bnp:lampa19.shape (type-only, legacy data format)
+- fyros_shapes.bnp:mur.shape (type-only, legacy data format)
+- fyros_shapes.bnp:palme_type_c.shape (type-only, legacy data format)
+- fyros_shapes.bnp:palme_type_c2.shape (type-only, legacy data format)
+- fyros_shapes.bnp:palme_type_c3.shape (type-only, legacy data format)
+- fyros_shapes.bnp:palme_type_c4.shape (type-only, legacy data format)
+- fyros_shapes.bnp:porte_etagea-a.shape (type-only, legacy data format)
+- fyros_shapes.bnp:porte_etagea-b.shape (type-only, legacy data format)
+- fyros_shapes.bnp:porte_etageb-a.shape (type-only, legacy data format)
+- fyros_shapes.bnp:porte_etageb-b.shape (type-only, legacy data format)
+- fyros_shapes.bnp:porte_taverne_inside_a.shape (type-only, legacy data format)
+- fyros_shapes.bnp:rotor.shape (type-only, legacy data format)
+- fyros_shapes.bnp:skull01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:soussol.shape (type-only, legacy data format)
+- fyros_shapes.bnp:table07.shape (type-only, legacy data format)
+- fyros_shapes.bnp:table08.shape (type-only, legacy data format)
+- fyros_shapes.bnp:taverne_lampmur01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:taverne_lampmur03.shape (type-only, legacy data format)
+- fyros_shapes.bnp:tonneauclosed.shape (type-only, legacy data format)
+- fyros_shapes.bnp:tonneauclosed01.shape (type-only, legacy data format)
+- fyros_shapes.bnp:tonneauclosed02.shape (type-only, legacy data format)
+- fyros_shapes.bnp:tunnelb.shape (type-only, legacy data format)
+- fyros_shapes.bnp:tunnelh.shape (type-only, legacy data format)
+- indoors_shapes.bnp:appart_feu01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:appart_feu02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:detach_apart.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_acc_appliquemurale_a_1_aprt.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_acc_armoire.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_acc_lit.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_acc_table_appart_joueur.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_acc_table_hall_reunion_01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_acc_table_hall_reunion_02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_appart_joueur.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_appart_joueur_feu01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_appart_joueur_socle.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_appart_joueur_socle01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_bt_hall_conseil.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_bt_hall_conseil_appliquemurale.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_cn_salle_npc.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_cn_salle_npc_appliquemurale.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_encensoir.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_encensoir07.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_encensoir08.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_hall_reunion_appliquemurale.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_hall_vitrine.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_tr_palmtree_a_03.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_tr_palmtree_a_04.shape (type-only, legacy data format)
+- indoors_shapes.bnp:fy_tr_palmtree_a_05.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_acc_tabbe_hall_reunion01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_armoire.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_banniere_00.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_banniere_01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_banniere_02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_banniere_03.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_banniere_04.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_coffre.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_lit.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_table_00.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_appart_table_01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_banniere_hall_reunion_01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_banniere_hall_reunion_02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_banniere_hall_reunion_03.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_banniere_hall_reunion_04.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_banniere_hall_reunion_05.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_branche_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_hall_conseil.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_int_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_int_hall_vitrine.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_plafonier_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_plafonier_hall_vitrine.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_salle_npc.shape (type-only, legacy data format)
+- indoors_shapes.bnp:ma_stairs_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:skin.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_arrmoire.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_lit.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf01_hall_runion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf02_hall_runion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf03_hall_runion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf04_hall_runion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf05_hall_runion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_pouf06_hall_runion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_acc_table.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_appartement_coffre.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_appartement_fauteuil.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_appartement_fenetres.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_conseil.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_conseil_baniere.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_conseil_fakewater01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_conseil_fakewater02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_hall_couloir.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_hall_reunion_coffre.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_hall_reunion_table.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_hall_vitrine.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_papyrus_a.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_papyrus_b.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_papyrus_c.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_papyrus_d.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_papyrus_e.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_piece_npc.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_stairs_hall_reunion_a.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_stairs_hall_reunion_b.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_stairs_hall_reunion_c.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_stairs_hall_reunion_d.shape (type-only, legacy data format)
+- indoors_shapes.bnp:tr_stairs_hall_reunion_e.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_acc_armoire.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_acc_lit.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_bt_apart_coffre_fort.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_bt_appart.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_bt_salle_npc.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_01.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_01_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_02.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_02_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_03.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_03_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_04_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_05_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_chaise_06_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_conseil.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_projecteur.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_coffre_fort.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_couloir.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_drapo_a.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_drapo_b.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_drapo_c.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_drapo_d.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_drapo_e.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reu_vitrine.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_hall_reunion.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_table.shape (type-only, legacy data format)
+- indoors_shapes.bnp:zo_table_hall_reunion.shape (type-only, legacy data format)
+- interfaces.bnp:helice00.shape (type-only, legacy data format)
+- interfaces.bnp:helice01.shape (type-only, legacy data format)
+- interfaces.bnp:helice02.shape (type-only, legacy data format)
+- interfaces.bnp:helice03.shape (type-only, legacy data format)
+- interfaces.bnp:helice04.shape (type-only, legacy data format)
+- interfaces.bnp:nb_fyros.shape (type-only, legacy data format)
+- interfaces.bnp:nb_matis.shape (type-only, legacy data format)
+- interfaces.bnp:nb_tryker.shape (type-only, legacy data format)
+- interfaces.bnp:nb_zorai.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ge_newbieland_starting_village.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_zo_ecurie_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_zo_ecurie_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_zo_ecurie_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_ported_zo_ecurie_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_zo_ecurie_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_zo_ecurie_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_zo_ecurie_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_porteg_zo_ecurie_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_zo_ecurie_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_zo_ecurie_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_zo_ecurie_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:gen_bt_ecurie_zo_ecurie_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_agora_ma_agora.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_autel_kamique_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bar_ext_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bar_exterieur_ma_bar_ext_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bar_exterieur_ma_bar_ext_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bar_exterieur_ma_bar_ext_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_barriere_villaged_a_51.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon2_ext_2_village2_lod.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon_ext_2_village1_lod.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-village1_lod.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-village2_lod.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-village1.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_imm_ext-village2.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_2_ext_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_ext_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_ext_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_ext_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_ext_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_ext_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_immeuble_exterieur_ma_imm_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_mairie_ext_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_portes_ma_portes_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_portes_ma_portes_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_portes_ma_portes_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_portes_ma_portes_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_serre_exterieur_corps_ma_serre_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:newbieland_ma_agora.shape (type-only, legacy data format)
+- jungle_shapes.bnp:newbieland_ma_agora_debris.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ruine_matis.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ruine_matis_1.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ruine_matis_2.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-01_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-01_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-01_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-01_nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-01nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-02_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-02_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-02_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-02_nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-02nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-03_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-03_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-03_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-03_nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext-03nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext1_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext2_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_acc_ascenseur_ext3_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_agora_bras_zo_agora_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_agora_place_zo_agora_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_autel_base_zo_autel_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_autel_bloc_zo_autel_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_ambre_centre_zo_bar_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_ambre_centre_zo_bar_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_ambre_centre_zo_bar_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_ambre_centre_zo_bar_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_arbre_zo_bar_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_arbre_zo_bar_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_arbre_zo_bar_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_arbre_zo_bar_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_sol_zo_bar_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_sol_zo_bar_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_sol_zo_bar_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bar_sol_zo_bar_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_chapiteau_zo_monastere_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_ecorce_zo_monastere_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_exterieur_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_interieur_zo_monastere_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_roseaux01_zo_monastere_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_roseaux02_zo_monastere_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_bt_monastere_roseaux03_zo_monastere_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbre_zo_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_arbrenb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rect_zo_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_imm_rectnb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_mairie_ext_zo_mairie_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_10_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_11_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_12_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_5_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_6_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_7_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_8_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_bloc_zo_atelier_9_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_10_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_11_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_12_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_5_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_6_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_7_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_8_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_atelier_zo_atelier_9_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_3_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_3_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_3_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commerce_zo_comm_5_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_commercezo_imm_village_nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_mairie_zo_mod_mairie_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_mairie_zo_mod_mairie_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_mairie_zo_mod_mairie_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_mairie_zo_mod_mairie_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_mairie_zo_mod_mairie_5_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_module_mairie_zo_mod_mairie_6_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_porte_zo_porte_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_porte_zo_porte_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_porte_zo_porte_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_porte_zo_porte_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide01_zo_porte_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide01_zo_porte_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide01_zo_porte_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide01_zo_porte_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide02_zo_porte_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide02_zo_porte_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide02_zo_porte_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_portezorai_pyramide02_zo_porte_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_ported_tr_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_ported_tr_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_ported_tr_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_ported_tr_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_porteg_tr_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_porteg_tr_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_porteg_tr_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_porteg_tr_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_tr_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_tr_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_tr_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:gen_bt_ecurie_tr_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_bar_loupiote_inter.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_lupiote_agora_rdc_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_mairie_lanterne_interne_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_kami_branche_1_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_kami_branche_2_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_appart_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_appart_02_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lampmurale_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_appart_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_appart_02_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_interne_village_nb_05.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_acc_ascenseur.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_acc_tabbe.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_annexe_debris1.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_annexe_debris2.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_annexe_int.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_bar_interieur_a.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_bar_interieur_b.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_bourgeon_debris03.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_bourgeon_debris1.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_bourgeon_debris2.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_bourgeon_int.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_com_debris1.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_com_debris2.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_com_int.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_mairie_1er.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_mairie_couloir.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_mairie_rdc.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_serre_exterieur_couloir.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_serre_interieur.shape (type-only, legacy data format)
+- matis_shapes.bnp:ma_serre_pots.shape (type-only, legacy data format)
+- outgame.bnp:fy_appart_joueur_outgame.shape (type-only, legacy data format)
+- outgame.bnp:ma_appart_outgame.shape (type-only, legacy data format)
+- outgame.bnp:tr_appart_outgame.shape (type-only, legacy data format)
+- outgame.bnp:zo_appart_outgame.shape (type-only, legacy data format)
+- r2_misc.bnp:instance_link.shape (type-only, legacy data format)
+- tryker_shapes.bnp:tr_ascenseur.shape (type-only, legacy data format)
+- tryker_shapes.bnp:tr_barge.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_acc_ascenseur.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_acc_ascenseur_ext.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_acc_ascenseur_rdc.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_acc_ascenseur_ss.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_bt_monastere_couloira.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_bt_monastere_couloirb.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_bt_monastere_entrea.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_bt_monastere_entreb.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_bt_monastere_sortiea.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_bt_monastere_sortieb.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_mairie_couloir.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_mairie_rdc.shape (type-only, legacy data format)
+- zorai_shapes.bnp:zo_mairie_sous-sol.shape (type-only, legacy data format)
+
+## MeshMRMSkinned (631)
+
+- characters_shapes.bnp:ca_hof_armor01_armpad.shape
+- characters_shapes.bnp:ca_hof_armor01_bottes.shape
+- characters_shapes.bnp:ca_hof_armor01_gilet.shape
+- characters_shapes.bnp:ca_hof_armor01_hand.shape
+- characters_shapes.bnp:ca_hof_armor01_hum_armpad.shape
+- characters_shapes.bnp:ca_hof_armor01_hum_bottes.shape
+- characters_shapes.bnp:ca_hof_armor01_hum_gilet.shape
+- characters_shapes.bnp:ca_hof_armor01_hum_hand.shape
+- characters_shapes.bnp:ca_hof_armor01_hum_pantabottes.shape
+- characters_shapes.bnp:ca_hof_armor01_pantabottes.shape
+- characters_shapes.bnp:ca_hof_armor02_armpad.shape
+- characters_shapes.bnp:ca_hof_armor02_bottes.shape
+- characters_shapes.bnp:ca_hof_armor02_gilet.shape
+- characters_shapes.bnp:ca_hof_armor02_hand.shape
+- characters_shapes.bnp:ca_hof_armor02_hum_armpad.shape
+- characters_shapes.bnp:ca_hof_armor02_hum_bottes.shape
+- characters_shapes.bnp:ca_hof_armor02_hum_gilet.shape
+- characters_shapes.bnp:ca_hof_armor02_hum_hand.shape
+- characters_shapes.bnp:ca_hof_armor02_hum_pantabottes.shape
+- characters_shapes.bnp:ca_hof_armor02_pantabottes.shape
+- characters_shapes.bnp:ca_hof_casque01.shape
+- characters_shapes.bnp:ca_hof_casque01_hum.shape
+- characters_shapes.bnp:ca_hof_casque02.shape
+- characters_shapes.bnp:ca_hof_casque02_hum.shape
+- characters_shapes.bnp:ca_hof_casque03.shape
+- characters_shapes.bnp:ca_hof_casque04.shape
+- characters_shapes.bnp:ca_hof_commander_armpad.shape
+- characters_shapes.bnp:ca_hof_commander_bottes.shape
+- characters_shapes.bnp:ca_hof_commander_casque.shape
+- characters_shapes.bnp:ca_hof_commander_gilet.shape
+- characters_shapes.bnp:ca_hof_commander_hand.shape
+- characters_shapes.bnp:ca_hof_commander_pantabottes.shape
+- characters_shapes.bnp:ca_hof_medic_armpad.shape
+- characters_shapes.bnp:ca_hof_medic_bottes.shape
+- characters_shapes.bnp:ca_hof_medic_casque.shape
+- characters_shapes.bnp:ca_hof_medic_gilet.shape
+- characters_shapes.bnp:ca_hof_medic_hand.shape
+- characters_shapes.bnp:ca_hof_medic_pantabottes.shape
+- characters_shapes.bnp:ca_hom_armor01_armpad.shape
+- characters_shapes.bnp:ca_hom_armor01_bottes.shape
+- characters_shapes.bnp:ca_hom_armor01_gilet.shape
+- characters_shapes.bnp:ca_hom_armor01_hand.shape
+- characters_shapes.bnp:ca_hom_armor01_hum_armpad.shape
+- characters_shapes.bnp:ca_hom_armor01_hum_bottes.shape
+- characters_shapes.bnp:ca_hom_armor01_hum_gilet.shape
+- characters_shapes.bnp:ca_hom_armor01_hum_hand.shape
+- characters_shapes.bnp:ca_hom_armor01_hum_pantabottes.shape
+- characters_shapes.bnp:ca_hom_armor01_pantabottes.shape
+- characters_shapes.bnp:ca_hom_armor02_armpad.shape
+- characters_shapes.bnp:ca_hom_armor02_bottes.shape
+- characters_shapes.bnp:ca_hom_armor02_gilet.shape
+- characters_shapes.bnp:ca_hom_armor02_hand.shape
+- characters_shapes.bnp:ca_hom_armor02_hum_armpad.shape
+- characters_shapes.bnp:ca_hom_armor02_hum_bottes.shape
+- characters_shapes.bnp:ca_hom_armor02_hum_gilet.shape
+- characters_shapes.bnp:ca_hom_armor02_hum_hand.shape
+- characters_shapes.bnp:ca_hom_armor02_hum_pantabottes.shape
+- characters_shapes.bnp:ca_hom_armor02_pantabottes.shape
+- characters_shapes.bnp:ca_hom_casque01.shape
+- characters_shapes.bnp:ca_hom_casque01_hum.shape
+- characters_shapes.bnp:ca_hom_casque02.shape
+- characters_shapes.bnp:ca_hom_casque02_hum.shape
+- characters_shapes.bnp:ca_hom_casque03.shape
+- characters_shapes.bnp:ca_hom_casque04.shape
+- characters_shapes.bnp:ca_hom_ingeneer_hand.shape
+- characters_shapes.bnp:ca_hom_trooper_armpad.shape
+- characters_shapes.bnp:ca_hom_trooper_botte.shape
+- characters_shapes.bnp:ca_hom_trooper_casque.shape
+- characters_shapes.bnp:ca_hom_trooper_hand.shape
+- characters_shapes.bnp:ca_hom_trooper_pantabotte.shape
+- characters_shapes.bnp:ca_hom_trooper_torse.shape
+- characters_shapes.bnp:fy_hof_armor00_armpad.shape
+- characters_shapes.bnp:fy_hof_armor00_bottes.shape
+- characters_shapes.bnp:fy_hof_armor00_gilet.shape
+- characters_shapes.bnp:fy_hof_armor00_hand.shape
+- characters_shapes.bnp:fy_hof_armor00_pantabottes.shape
+- characters_shapes.bnp:fy_hof_armor01_armpad.shape
+- characters_shapes.bnp:fy_hof_armor01_bottes.shape
+- characters_shapes.bnp:fy_hof_armor01_gilet.shape
+- characters_shapes.bnp:fy_hof_armor01_hand.shape
+- characters_shapes.bnp:fy_hof_armor01_pantabottes.shape
+- characters_shapes.bnp:fy_hof_casque01.shape
+- characters_shapes.bnp:fy_hof_caster01_bottes_armor00.shape
+- characters_shapes.bnp:fy_hof_caster01_bottes_armor01.shape
+- characters_shapes.bnp:fy_hof_caster01_bottes_civil01.shape
+- characters_shapes.bnp:fy_hof_caster01_pantabottes.shape
+- characters_shapes.bnp:fy_hof_cheveux_artistic01.shape
+- characters_shapes.bnp:fy_hof_cheveux_artistic02.shape
+- characters_shapes.bnp:fy_hof_cheveux_artistic03.shape
+- characters_shapes.bnp:fy_hof_cheveux_artistic04.shape
+- characters_shapes.bnp:fy_hof_cheveux_basic01.shape
+- characters_shapes.bnp:fy_hof_cheveux_basic02.shape
+- characters_shapes.bnp:fy_hof_cheveux_long01.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium01.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium01_ma.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium01_tr.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium01_zo.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium02.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium03.shape
+- characters_shapes.bnp:fy_hof_cheveux_medium04.shape
+- characters_shapes.bnp:fy_hof_cheveux_shave01.shape
+- characters_shapes.bnp:fy_hof_cheveux_short01.shape
+- characters_shapes.bnp:fy_hof_cheveux_style01.shape
+- characters_shapes.bnp:fy_hof_cheveux_style02.shape
+- characters_shapes.bnp:fy_hof_civil01_armpad.shape
+- characters_shapes.bnp:fy_hof_civil01_bottes.shape
+- characters_shapes.bnp:fy_hof_civil01_gilet.shape
+- characters_shapes.bnp:fy_hof_civil01_pantabottes.shape
+- characters_shapes.bnp:fy_hof_underwear_gilet.shape
+- characters_shapes.bnp:fy_hof_underwear_pantabottes.shape
+- characters_shapes.bnp:fy_hom_armor00_armpad.shape
+- characters_shapes.bnp:fy_hom_armor00_bottes.shape
+- characters_shapes.bnp:fy_hom_armor00_gilet.shape
+- characters_shapes.bnp:fy_hom_armor00_hand.shape
+- characters_shapes.bnp:fy_hom_armor00_pantabottes.shape
+- characters_shapes.bnp:fy_hom_armor01_armpad.shape
+- characters_shapes.bnp:fy_hom_armor01_bottes.shape
+- characters_shapes.bnp:fy_hom_armor01_gilet.shape
+- characters_shapes.bnp:fy_hom_armor01_hand.shape
+- characters_shapes.bnp:fy_hom_armor01_lead_armpad.shape
+- characters_shapes.bnp:fy_hom_armor01_lead_bottes.shape
+- characters_shapes.bnp:fy_hom_armor01_lead_gilet.shape
+- characters_shapes.bnp:fy_hom_armor01_lead_pantabottes.shape
+- characters_shapes.bnp:fy_hom_armor01_pantabottes.shape
+- characters_shapes.bnp:fy_hom_casque01.shape
+- characters_shapes.bnp:fy_hom_caster01_bottes_armor00.shape
+- characters_shapes.bnp:fy_hom_caster01_bottes_armor01.shape
+- characters_shapes.bnp:fy_hom_caster01_bottes_civil01.shape
+- characters_shapes.bnp:fy_hom_caster01_pantabottes.shape
+- characters_shapes.bnp:fy_hom_cheveux_artistic01.shape
+- characters_shapes.bnp:fy_hom_cheveux_artistic02.shape
+- characters_shapes.bnp:fy_hom_cheveux_artistic03.shape
+- characters_shapes.bnp:fy_hom_cheveux_artistic04.shape
+- characters_shapes.bnp:fy_hom_cheveux_basic01.shape
+- characters_shapes.bnp:fy_hom_cheveux_basic02.shape
+- characters_shapes.bnp:fy_hom_cheveux_lead.shape
+- characters_shapes.bnp:fy_hom_cheveux_long01.shape
+- characters_shapes.bnp:fy_hom_cheveux_long02.shape
+- characters_shapes.bnp:fy_hom_cheveux_medium01.shape
+- characters_shapes.bnp:fy_hom_cheveux_medium01s2.shape
+- characters_shapes.bnp:fy_hom_cheveux_medium01s2_ma.shape
+- characters_shapes.bnp:fy_hom_cheveux_medium01s2_tr.shape
+- characters_shapes.bnp:fy_hom_cheveux_medium01s2_zo.shape
+- characters_shapes.bnp:fy_hom_cheveux_medium02.shape
+- characters_shapes.bnp:fy_hom_cheveux_shave01.shape
+- characters_shapes.bnp:fy_hom_cheveux_short01.shape
+- characters_shapes.bnp:fy_hom_cheveux_short02.shape
+- characters_shapes.bnp:fy_hom_cheveux_style01.shape
+- characters_shapes.bnp:fy_hom_cheveux_style02.shape
+- characters_shapes.bnp:fy_hom_civil01_armpad.shape
+- characters_shapes.bnp:fy_hom_civil01_bottes.shape
+- characters_shapes.bnp:fy_hom_civil01_gilet.shape
+- characters_shapes.bnp:fy_hom_civil01_pantabottes.shape
+- characters_shapes.bnp:fy_hom_underwear_pantabottes.shape
+- characters_shapes.bnp:ge_hof_armor02_armpad.shape
+- characters_shapes.bnp:ge_hof_armor02_bottes.shape
+- characters_shapes.bnp:ge_hof_armor02_gilet.shape
+- characters_shapes.bnp:ge_hof_armor02_pantabottes.shape
+- characters_shapes.bnp:ge_hof_armor03_armpad.shape
+- characters_shapes.bnp:ge_hof_armor03_bottes.shape
+- characters_shapes.bnp:ge_hof_armor03_gilet.shape
+- characters_shapes.bnp:ge_hof_armor03_pantabottes.shape
+- characters_shapes.bnp:ge_hof_armor04_armpad.shape
+- characters_shapes.bnp:ge_hof_armor04_bottes.shape
+- characters_shapes.bnp:ge_hof_armor04_gilet.shape
+- characters_shapes.bnp:ge_hof_armor04_hand.shape
+- characters_shapes.bnp:ge_hof_armor04_pantabottes.shape
+- characters_shapes.bnp:ge_hof_casque01.shape
+- characters_shapes.bnp:ge_hof_caster00_pantabottes.shape
+- characters_shapes.bnp:ge_hof_caster_pvp_pantabottes.shape
+- characters_shapes.bnp:ge_hom_armor02_armpad.shape
+- characters_shapes.bnp:ge_hom_armor02_bottes.shape
+- characters_shapes.bnp:ge_hom_armor02_gilet.shape
+- characters_shapes.bnp:ge_hom_armor02_pantabottes.shape
+- characters_shapes.bnp:ge_hom_armor03_armpad.shape
+- characters_shapes.bnp:ge_hom_armor03_bottes.shape
+- characters_shapes.bnp:ge_hom_armor03_gilet.shape
+- characters_shapes.bnp:ge_hom_armor03_pantabottes.shape
+- characters_shapes.bnp:ge_hom_armor04_armpad.shape
+- characters_shapes.bnp:ge_hom_armor04_bottes.shape
+- characters_shapes.bnp:ge_hom_armor04_gilet.shape
+- characters_shapes.bnp:ge_hom_armor04_hand.shape
+- characters_shapes.bnp:ge_hom_armor04_pantabottes.shape
+- characters_shapes.bnp:ge_hom_casque01.shape
+- characters_shapes.bnp:ge_hom_casque02.shape
+- characters_shapes.bnp:ge_hom_caster00_pantabottes.shape
+- characters_shapes.bnp:ge_hom_caster_pvp_pantabottes.shape
+- characters_shapes.bnp:ma_hof_armor00_armpad.shape
+- characters_shapes.bnp:ma_hof_armor00_bottes.shape
+- characters_shapes.bnp:ma_hof_armor00_gilet.shape
+- characters_shapes.bnp:ma_hof_armor00_hand.shape
+- characters_shapes.bnp:ma_hof_armor00_pantabottes.shape
+- characters_shapes.bnp:ma_hof_armor01_armpad.shape
+- characters_shapes.bnp:ma_hof_armor01_bottes.shape
+- characters_shapes.bnp:ma_hof_armor01_gilet.shape
+- characters_shapes.bnp:ma_hof_armor01_hand.shape
+- characters_shapes.bnp:ma_hof_armor01_pantabottes.shape
+- characters_shapes.bnp:ma_hof_casque01.shape
+- characters_shapes.bnp:ma_hof_caster01_bottes_armor00.shape
+- characters_shapes.bnp:ma_hof_caster01_bottes_armor01.shape
+- characters_shapes.bnp:ma_hof_caster01_bottes_civil01.shape
+- characters_shapes.bnp:ma_hof_caster01_pantabottes.shape
+- characters_shapes.bnp:ma_hof_cheveux_artistic01.shape
+- characters_shapes.bnp:ma_hof_cheveux_artistic02.shape
+- characters_shapes.bnp:ma_hof_cheveux_artistic03.shape
+- characters_shapes.bnp:ma_hof_cheveux_basic01.shape
+- characters_shapes.bnp:ma_hof_cheveux_basic02.shape
+- characters_shapes.bnp:ma_hof_cheveux_basic03.shape
+- characters_shapes.bnp:ma_hof_cheveux_long01.shape
+- characters_shapes.bnp:ma_hof_cheveux_long02.shape
+- characters_shapes.bnp:ma_hof_cheveux_medium01.shape
+- characters_shapes.bnp:ma_hof_cheveux_medium02.shape
+- characters_shapes.bnp:ma_hof_cheveux_shave01.shape
+- characters_shapes.bnp:ma_hof_cheveux_short01.shape
+- characters_shapes.bnp:ma_hof_cheveux_short02.shape
+- characters_shapes.bnp:ma_hof_cheveux_style01.shape
+- characters_shapes.bnp:ma_hof_cheveux_style02.shape
+- characters_shapes.bnp:ma_hof_civil01_armpad.shape
+- characters_shapes.bnp:ma_hof_civil01_bottes.shape
+- characters_shapes.bnp:ma_hof_civil01_gilet.shape
+- characters_shapes.bnp:ma_hof_civil01_pantabottes.shape
+- characters_shapes.bnp:ma_hof_underwear_gilet.shape
+- characters_shapes.bnp:ma_hof_underwear_pantabottes.shape
+- characters_shapes.bnp:ma_hom_armor00_armpad.shape
+- characters_shapes.bnp:ma_hom_armor00_bottes.shape
+- characters_shapes.bnp:ma_hom_armor00_gilet.shape
+- characters_shapes.bnp:ma_hom_armor00_hand.shape
+- characters_shapes.bnp:ma_hom_armor00_pantabottes.shape
+- characters_shapes.bnp:ma_hom_armor01_armpad.shape
+- characters_shapes.bnp:ma_hom_armor01_bottes.shape
+- characters_shapes.bnp:ma_hom_armor01_gilet.shape
+- characters_shapes.bnp:ma_hom_armor01_hand.shape
+- characters_shapes.bnp:ma_hom_armor01_lead_armpad.shape
+- characters_shapes.bnp:ma_hom_armor01_lead_bottes.shape
+- characters_shapes.bnp:ma_hom_armor01_lead_gilet.shape
+- characters_shapes.bnp:ma_hom_armor01_lead_pantabottes.shape
+- characters_shapes.bnp:ma_hom_armor01_pantabottes.shape
+- characters_shapes.bnp:ma_hom_casque01.shape
+- characters_shapes.bnp:ma_hom_caster01_bottes_armor00.shape
+- characters_shapes.bnp:ma_hom_caster01_bottes_armor01.shape
+- characters_shapes.bnp:ma_hom_caster01_bottes_civil01.shape
+- characters_shapes.bnp:ma_hom_caster01_pantabottes.shape
+- characters_shapes.bnp:ma_hom_cheveux_artistic01.shape
+- characters_shapes.bnp:ma_hom_cheveux_artistic02.shape
+- characters_shapes.bnp:ma_hom_cheveux_artistic03.shape
+- characters_shapes.bnp:ma_hom_cheveux_artistic04.shape
+- characters_shapes.bnp:ma_hom_cheveux_basic01.shape
+- characters_shapes.bnp:ma_hom_cheveux_basic02.shape
+- characters_shapes.bnp:ma_hom_cheveux_basic03.shape
+- characters_shapes.bnp:ma_hom_cheveux_lead.shape
+- characters_shapes.bnp:ma_hom_cheveux_long01.shape
+- characters_shapes.bnp:ma_hom_cheveux_long02.shape
+- characters_shapes.bnp:ma_hom_cheveux_medium01.shape
+- characters_shapes.bnp:ma_hom_cheveux_medium02.shape
+- characters_shapes.bnp:ma_hom_cheveux_medium03.shape
+- characters_shapes.bnp:ma_hom_cheveux_shave01.shape
+- characters_shapes.bnp:ma_hom_cheveux_short01.shape
+- characters_shapes.bnp:ma_hom_cheveux_style01.shape
+- characters_shapes.bnp:ma_hom_civil01_armpad.shape
+- characters_shapes.bnp:ma_hom_civil01_bottes.shape
+- characters_shapes.bnp:ma_hom_civil01_gilet.shape
+- characters_shapes.bnp:ma_hom_civil01_pantabottes.shape
+- characters_shapes.bnp:ma_hom_underwear_pantabottes.shape
+- characters_shapes.bnp:tr_hof_armor00_armpad.shape
+- characters_shapes.bnp:tr_hof_armor00_bottes.shape
+- characters_shapes.bnp:tr_hof_armor00_gilet.shape
+- characters_shapes.bnp:tr_hof_armor00_hand.shape
+- characters_shapes.bnp:tr_hof_armor00_pantabottes.shape
+- characters_shapes.bnp:tr_hof_armor01_armpad.shape
+- characters_shapes.bnp:tr_hof_armor01_bottes.shape
+- characters_shapes.bnp:tr_hof_armor01_gilet.shape
+- characters_shapes.bnp:tr_hof_armor01_hand.shape
+- characters_shapes.bnp:tr_hof_armor01_pantabottes.shape
+- characters_shapes.bnp:tr_hof_casque01.shape
+- characters_shapes.bnp:tr_hof_caster01_bottes_armor00.shape
+- characters_shapes.bnp:tr_hof_caster01_bottes_armor01.shape
+- characters_shapes.bnp:tr_hof_caster01_bottes_civil01.shape
+- characters_shapes.bnp:tr_hof_caster01_bottes_underwear.shape
+- characters_shapes.bnp:tr_hof_caster01_pantabottes.shape
+- characters_shapes.bnp:tr_hof_cheveux_artistic01.shape
+- characters_shapes.bnp:tr_hof_cheveux_basic01.shape
+- characters_shapes.bnp:tr_hof_cheveux_basic02.shape
+- characters_shapes.bnp:tr_hof_cheveux_basic03.shape
+- characters_shapes.bnp:tr_hof_cheveux_basic04.shape
+- characters_shapes.bnp:tr_hof_cheveux_long01.shape
+- characters_shapes.bnp:tr_hof_cheveux_medium01.shape
+- characters_shapes.bnp:tr_hof_cheveux_medium02.shape
+- characters_shapes.bnp:tr_hof_cheveux_shave01.shape
+- characters_shapes.bnp:tr_hof_cheveux_short01.shape
+- characters_shapes.bnp:tr_hof_cheveux_short02.shape
+- characters_shapes.bnp:tr_hof_cheveux_short03.shape
+- characters_shapes.bnp:tr_hof_cheveux_short03_fy.shape
+- characters_shapes.bnp:tr_hof_cheveux_short03_ma.shape
+- characters_shapes.bnp:tr_hof_cheveux_short03_zo.shape
+- characters_shapes.bnp:tr_hof_cheveux_style01.shape
+- characters_shapes.bnp:tr_hof_cheveux_style02.shape
+- characters_shapes.bnp:tr_hof_cheveux_style03.shape
+- characters_shapes.bnp:tr_hof_civil01_armpad.shape
+- characters_shapes.bnp:tr_hof_civil01_bottes.shape
+- characters_shapes.bnp:tr_hof_civil01_gilet.shape
+- characters_shapes.bnp:tr_hof_civil01_hand.shape
+- characters_shapes.bnp:tr_hof_civil01_pantabottes.shape
+- characters_shapes.bnp:tr_hof_refugee_gilet.shape
+- characters_shapes.bnp:tr_hof_refugee_pantabottes.shape
+- characters_shapes.bnp:tr_hof_underwear_armpad.shape
+- characters_shapes.bnp:tr_hof_underwear_bottes.shape
+- characters_shapes.bnp:tr_hof_underwear_gilet.shape
+- characters_shapes.bnp:tr_hof_underwear_hand.shape
+- characters_shapes.bnp:tr_hof_underwear_pantabottes.shape
+- characters_shapes.bnp:tr_hom_armor00_armpad.shape
+- characters_shapes.bnp:tr_hom_armor00_bottes.shape
+- characters_shapes.bnp:tr_hom_armor00_gilet.shape
+- characters_shapes.bnp:tr_hom_armor00_hand.shape
+- characters_shapes.bnp:tr_hom_armor00_lead_armpad.shape
+- characters_shapes.bnp:tr_hom_armor00_lead_bottes.shape
+- characters_shapes.bnp:tr_hom_armor00_lead_gilet.shape
+- characters_shapes.bnp:tr_hom_armor00_lead_pantabottes.shape
+- characters_shapes.bnp:tr_hom_armor00_pantabottes.shape
+- characters_shapes.bnp:tr_hom_armor01_armpad.shape
+- characters_shapes.bnp:tr_hom_armor01_bottes.shape
+- characters_shapes.bnp:tr_hom_armor01_gilet.shape
+- characters_shapes.bnp:tr_hom_armor01_hand.shape
+- characters_shapes.bnp:tr_hom_armor01_pantabottes.shape
+- characters_shapes.bnp:tr_hom_casque01.shape
+- characters_shapes.bnp:tr_hom_caster01_bottes_armor00.shape
+- characters_shapes.bnp:tr_hom_caster01_bottes_armor01.shape
+- characters_shapes.bnp:tr_hom_caster01_bottes_civil01.shape
+- characters_shapes.bnp:tr_hom_caster01_bottes_underwear.shape
+- characters_shapes.bnp:tr_hom_caster01_pantabottes.shape
+- characters_shapes.bnp:tr_hom_cheveux_artistic01.shape
+- characters_shapes.bnp:tr_hom_cheveux_artistic02.shape
+- characters_shapes.bnp:tr_hom_cheveux_artistic03.shape
+- characters_shapes.bnp:tr_hom_cheveux_basic01.shape
+- characters_shapes.bnp:tr_hom_cheveux_basic02.shape
+- characters_shapes.bnp:tr_hom_cheveux_lead.shape
+- characters_shapes.bnp:tr_hom_cheveux_long01.shape
+- characters_shapes.bnp:tr_hom_cheveux_medium01.shape
+- characters_shapes.bnp:tr_hom_cheveux_medium02.shape
+- characters_shapes.bnp:tr_hom_cheveux_medium03.shape
+- characters_shapes.bnp:tr_hom_cheveux_medium04.shape
+- characters_shapes.bnp:tr_hom_cheveux_shave01.shape
+- characters_shapes.bnp:tr_hom_cheveux_short01.shape
+- characters_shapes.bnp:tr_hom_cheveux_style01.shape
+- characters_shapes.bnp:tr_hom_cheveux_style02.shape
+- characters_shapes.bnp:tr_hom_cheveux_style03.shape
+- characters_shapes.bnp:tr_hom_civil01_armpad.shape
+- characters_shapes.bnp:tr_hom_civil01_bottes.shape
+- characters_shapes.bnp:tr_hom_civil01_gilet.shape
+- characters_shapes.bnp:tr_hom_civil01_hand.shape
+- characters_shapes.bnp:tr_hom_civil01_pantabottes.shape
+- characters_shapes.bnp:tr_hom_refugee_armpad.shape
+- characters_shapes.bnp:tr_hom_refugee_gilet.shape
+- characters_shapes.bnp:tr_hom_refugee_pantabottes.shape
+- characters_shapes.bnp:tr_hom_refugee_pantabottes_02.shape
+- characters_shapes.bnp:tr_hom_underwear_armpad.shape
+- characters_shapes.bnp:tr_hom_underwear_bottes.shape
+- characters_shapes.bnp:tr_hom_underwear_gilet.shape
+- characters_shapes.bnp:tr_hom_underwear_hand.shape
+- characters_shapes.bnp:tr_hom_underwear_pantabottes.shape
+- characters_shapes.bnp:zo_hof_armor00_armpad.shape
+- characters_shapes.bnp:zo_hof_armor00_bottes.shape
+- characters_shapes.bnp:zo_hof_armor00_gilet.shape
+- characters_shapes.bnp:zo_hof_armor00_hand.shape
+- characters_shapes.bnp:zo_hof_armor00_pantabottes.shape
+- characters_shapes.bnp:zo_hof_armor01_armpad.shape
+- characters_shapes.bnp:zo_hof_armor01_bottes.shape
+- characters_shapes.bnp:zo_hof_armor01_gilet.shape
+- characters_shapes.bnp:zo_hof_armor01_hand.shape
+- characters_shapes.bnp:zo_hof_armor01_pantabottes.shape
+- characters_shapes.bnp:zo_hof_casque01.shape
+- characters_shapes.bnp:zo_hof_caster01_bottes_armor00.shape
+- characters_shapes.bnp:zo_hof_caster01_bottes_armor01.shape
+- characters_shapes.bnp:zo_hof_caster01_bottes_civil01.shape
+- characters_shapes.bnp:zo_hof_caster01_pantabottes.shape
+- characters_shapes.bnp:zo_hof_cheveux_artistic02.shape
+- characters_shapes.bnp:zo_hof_cheveux_artistic03.shape
+- characters_shapes.bnp:zo_hof_cheveux_artistic04.shape
+- characters_shapes.bnp:zo_hof_cheveux_artistic05.shape
+- characters_shapes.bnp:zo_hof_cheveux_basic01.shape
+- characters_shapes.bnp:zo_hof_cheveux_basic02.shape
+- characters_shapes.bnp:zo_hof_cheveux_long01.shape
+- characters_shapes.bnp:zo_hof_cheveux_long02.shape
+- characters_shapes.bnp:zo_hof_cheveux_medium01.shape
+- characters_shapes.bnp:zo_hof_cheveux_medium02.shape
+- characters_shapes.bnp:zo_hof_cheveux_shave01.shape
+- characters_shapes.bnp:zo_hof_cheveux_short01.shape
+- characters_shapes.bnp:zo_hof_cheveux_short02.shape
+- characters_shapes.bnp:zo_hof_cheveux_style01.shape
+- characters_shapes.bnp:zo_hof_civil01_armpad.shape
+- characters_shapes.bnp:zo_hof_civil01_bottes.shape
+- characters_shapes.bnp:zo_hof_civil01_gilet.shape
+- characters_shapes.bnp:zo_hof_civil01_pantabottes.shape
+- characters_shapes.bnp:zo_hof_underwear_gilet.shape
+- characters_shapes.bnp:zo_hof_underwear_pantabottes.shape
+- characters_shapes.bnp:zo_hom_armor00_armpad.shape
+- characters_shapes.bnp:zo_hom_armor00_bottes.shape
+- characters_shapes.bnp:zo_hom_armor00_gilet.shape
+- characters_shapes.bnp:zo_hom_armor00_hand.shape
+- characters_shapes.bnp:zo_hom_armor00_pantabottes.shape
+- characters_shapes.bnp:zo_hom_armor01_armpad.shape
+- characters_shapes.bnp:zo_hom_armor01_bottes.shape
+- characters_shapes.bnp:zo_hom_armor01_gilet.shape
+- characters_shapes.bnp:zo_hom_armor01_hand.shape
+- characters_shapes.bnp:zo_hom_armor01_pantabottes.shape
+- characters_shapes.bnp:zo_hom_casque01.shape
+- characters_shapes.bnp:zo_hom_caster01_bottes_armor00.shape
+- characters_shapes.bnp:zo_hom_caster01_bottes_armor01.shape
+- characters_shapes.bnp:zo_hom_caster01_bottes_civil01.shape
+- characters_shapes.bnp:zo_hom_caster01_lead_pantabottes.shape
+- characters_shapes.bnp:zo_hom_caster01_pantabottes.shape
+- characters_shapes.bnp:zo_hom_cheveux_artistic01.shape
+- characters_shapes.bnp:zo_hom_cheveux_artistic02.shape
+- characters_shapes.bnp:zo_hom_cheveux_artistic03.shape
+- characters_shapes.bnp:zo_hom_cheveux_artistic04.shape
+- characters_shapes.bnp:zo_hom_cheveux_artistic05.shape
+- characters_shapes.bnp:zo_hom_cheveux_basic01.shape
+- characters_shapes.bnp:zo_hom_cheveux_lead.shape
+- characters_shapes.bnp:zo_hom_cheveux_long01.shape
+- characters_shapes.bnp:zo_hom_cheveux_long02.shape
+- characters_shapes.bnp:zo_hom_cheveux_long03.shape
+- characters_shapes.bnp:zo_hom_cheveux_medium01.shape
+- characters_shapes.bnp:zo_hom_cheveux_medium02.shape
+- characters_shapes.bnp:zo_hom_cheveux_shave01.shape
+- characters_shapes.bnp:zo_hom_cheveux_short01.shape
+- characters_shapes.bnp:zo_hom_cheveux_style01.shape
+- characters_shapes.bnp:zo_hom_cheveux_style02.shape
+- characters_shapes.bnp:zo_hom_civil01_armpad.shape
+- characters_shapes.bnp:zo_hom_civil01_bottes.shape
+- characters_shapes.bnp:zo_hom_civil01_gilet.shape
+- characters_shapes.bnp:zo_hom_civil01_lead_armpad.shape
+- characters_shapes.bnp:zo_hom_civil01_lead_bottes.shape
+- characters_shapes.bnp:zo_hom_civil01_lead_gilet.shape
+- characters_shapes.bnp:zo_hom_civil01_pantabottes.shape
+- characters_shapes.bnp:zo_hom_underwear_gilet.shape
+- characters_shapes.bnp:zo_hom_underwear_pantabottes.shape
+- fauna_shapes.bnp:fo_carnitree.shape
+- fauna_shapes.bnp:fo_carnitree_boss.shape
+- fauna_shapes.bnp:fy_mo_frahar.shape
+- fauna_shapes.bnp:fy_mo_frahar_boss.shape
+- fauna_shapes.bnp:fy_mo_swarmplant.shape
+- fauna_shapes.bnp:fy_mo_swarmplant_boss.shape
+- fauna_shapes.bnp:ge_christmas_dag.shape
+- fauna_shapes.bnp:go_mo_c03.shape
+- fauna_shapes.bnp:go_mo_c04.shape
+- fauna_shapes.bnp:go_mo_c05.shape
+- fauna_shapes.bnp:go_mo_chorani.shape
+- fauna_shapes.bnp:go_mo_clapclap.shape
+- fauna_shapes.bnp:go_mo_cococlaw.shape
+- fauna_shapes.bnp:go_mo_cute.shape
+- fauna_shapes.bnp:go_mo_diranak.shape
+- fauna_shapes.bnp:go_mo_estrasson.shape
+- fauna_shapes.bnp:go_mo_filin.shape
+- fauna_shapes.bnp:go_mo_frahar.shape
+- fauna_shapes.bnp:go_mo_gibbai.shape
+- fauna_shapes.bnp:go_mo_h03.shape
+- fauna_shapes.bnp:go_mo_h04.shape
+- fauna_shapes.bnp:go_mo_hachtaha.shape
+- fauna_shapes.bnp:go_mo_jungler.shape
+- fauna_shapes.bnp:go_mo_kakty.shape
+- fauna_shapes.bnp:go_mo_kazoar.shape
+- fauna_shapes.bnp:go_mo_kitifly.shape
+- fauna_shapes.bnp:go_mo_kitihank.shape
+- fauna_shapes.bnp:go_mo_kitikil.shape
+- fauna_shapes.bnp:go_mo_kitimandib.shape
+- fauna_shapes.bnp:go_mo_kitinagan.shape
+- fauna_shapes.bnp:go_mo_kitinarak.shape
+- fauna_shapes.bnp:go_mo_kitinega.shape
+- fauna_shapes.bnp:go_mo_kitinocto.shape
+- fauna_shapes.bnp:go_mo_regus.shape
+- fauna_shapes.bnp:go_mo_ryzerb.shape
+- fauna_shapes.bnp:go_mo_ryzoholo.shape
+- fauna_shapes.bnp:go_mo_ryzoholok.shape
+- fauna_shapes.bnp:go_mo_vampignon.shape
+- fauna_shapes.bnp:go_mo_varinx.shape
+- fauna_shapes.bnp:go_mo_yber.shape
+- fauna_shapes.bnp:ju_mo_endrobouchea.shape
+- fauna_shapes.bnp:ju_mo_endrobouchea_boss.shape
+- fauna_shapes.bnp:ju_mo_sapenslaver.shape
+- fauna_shapes.bnp:ju_mo_sapenslaver_boss.shape
+- fauna_shapes.bnp:pr_mo_dag.shape
+- fauna_shapes.bnp:pr_mo_h06.shape
+- fauna_shapes.bnp:pr_mo_phytopsy.shape
+- fauna_shapes.bnp:pr_mo_phytopsy_boss.shape
+- fauna_shapes.bnp:tr_mo_arma.shape
+- fauna_shapes.bnp:tr_mo_arma_boss.shape
+- fauna_shapes.bnp:tr_mo_balduse.shape
+- fauna_shapes.bnp:tr_mo_balduse_boss.shape
+- fauna_shapes.bnp:tr_mo_bul.shape
+- fauna_shapes.bnp:tr_mo_bul_boss.shape
+- fauna_shapes.bnp:tr_mo_c01.shape
+- fauna_shapes.bnp:tr_mo_c01_boss.shape
+- fauna_shapes.bnp:tr_mo_c02.shape
+- fauna_shapes.bnp:tr_mo_c02_boss.shape
+- fauna_shapes.bnp:tr_mo_c03.shape
+- fauna_shapes.bnp:tr_mo_c03_boss.shape
+- fauna_shapes.bnp:tr_mo_c04.shape
+- fauna_shapes.bnp:tr_mo_c04_boss.shape
+- fauna_shapes.bnp:tr_mo_c05.shape
+- fauna_shapes.bnp:tr_mo_c05_boss.shape
+- fauna_shapes.bnp:tr_mo_c06.shape
+- fauna_shapes.bnp:tr_mo_c06_boss.shape
+- fauna_shapes.bnp:tr_mo_c07.shape
+- fauna_shapes.bnp:tr_mo_c07_boss.shape
+- fauna_shapes.bnp:tr_mo_capryni.shape
+- fauna_shapes.bnp:tr_mo_capryni_boss.shape
+- fauna_shapes.bnp:tr_mo_chorani.shape
+- fauna_shapes.bnp:tr_mo_chorani_boss.shape
+- fauna_shapes.bnp:tr_mo_clapclap.shape
+- fauna_shapes.bnp:tr_mo_clapclap_boss.shape
+- fauna_shapes.bnp:tr_mo_cococlaw.shape
+- fauna_shapes.bnp:tr_mo_cococlaw_boss.shape
+- fauna_shapes.bnp:tr_mo_cute.shape
+- fauna_shapes.bnp:tr_mo_cute_boss.shape
+- fauna_shapes.bnp:tr_mo_dag.shape
+- fauna_shapes.bnp:tr_mo_diranak.shape
+- fauna_shapes.bnp:tr_mo_diranak_boss.shape
+- fauna_shapes.bnp:tr_mo_electroalg.shape
+- fauna_shapes.bnp:tr_mo_electroalg_boss.shape
+- fauna_shapes.bnp:tr_mo_estrasson.shape
+- fauna_shapes.bnp:tr_mo_estrasson_boss.shape
+- fauna_shapes.bnp:tr_mo_filin.shape
+- fauna_shapes.bnp:tr_mo_filin_boss.shape
+- fauna_shapes.bnp:tr_mo_gnoof_mount.shape
+- fauna_shapes.bnp:tr_mo_h01.shape
+- fauna_shapes.bnp:tr_mo_h01_boss.shape
+- fauna_shapes.bnp:tr_mo_h02.shape
+- fauna_shapes.bnp:tr_mo_h02_boss.shape
+- fauna_shapes.bnp:tr_mo_h03.shape
+- fauna_shapes.bnp:tr_mo_h04.shape
+- fauna_shapes.bnp:tr_mo_h04_boss.shape
+- fauna_shapes.bnp:tr_mo_h05.shape
+- fauna_shapes.bnp:tr_mo_h05_boss.shape
+- fauna_shapes.bnp:tr_mo_h06.shape
+- fauna_shapes.bnp:tr_mo_h06_boss.shape
+- fauna_shapes.bnp:tr_mo_h07.shape
+- fauna_shapes.bnp:tr_mo_h07_albino.shape
+- fauna_shapes.bnp:tr_mo_h07_boss.shape
+- fauna_shapes.bnp:tr_mo_h08.shape
+- fauna_shapes.bnp:tr_mo_h08_boss.shape
+- fauna_shapes.bnp:tr_mo_h09.shape
+- fauna_shapes.bnp:tr_mo_h09_boss.shape
+- fauna_shapes.bnp:tr_mo_h10.shape
+- fauna_shapes.bnp:tr_mo_h10_boss.shape
+- fauna_shapes.bnp:tr_mo_h11.shape
+- fauna_shapes.bnp:tr_mo_h11_boss.shape
+- fauna_shapes.bnp:tr_mo_h12.shape
+- fauna_shapes.bnp:tr_mo_h12_boss.shape
+- fauna_shapes.bnp:tr_mo_hachtaha.shape
+- fauna_shapes.bnp:tr_mo_hachtaha_boss.shape
+- fauna_shapes.bnp:tr_mo_jungler.shape
+- fauna_shapes.bnp:tr_mo_jungler_boss.shape
+- fauna_shapes.bnp:tr_mo_kakty.shape
+- fauna_shapes.bnp:tr_mo_kakty_boss.shape
+- fauna_shapes.bnp:tr_mo_kami_guide_2.shape
+- fauna_shapes.bnp:tr_mo_kami_guide_3.shape
+- fauna_shapes.bnp:tr_mo_kami_guide_4.shape
+- fauna_shapes.bnp:tr_mo_kami_preacher_2.shape
+- fauna_shapes.bnp:tr_mo_kami_preacher_3.shape
+- fauna_shapes.bnp:tr_mo_kami_preacher_4.shape
+- fauna_shapes.bnp:tr_mo_kamiforet.shape
+- fauna_shapes.bnp:tr_mo_kamiguard.shape
+- fauna_shapes.bnp:tr_mo_kazoar.shape
+- fauna_shapes.bnp:tr_mo_kazoar_boss.shape
+- fauna_shapes.bnp:tr_mo_kitifly.shape
+- fauna_shapes.bnp:tr_mo_kitifly_boss.shape
+- fauna_shapes.bnp:tr_mo_kitihank.shape
+- fauna_shapes.bnp:tr_mo_kitihank_boss.shape
+- fauna_shapes.bnp:tr_mo_kitikil.shape
+- fauna_shapes.bnp:tr_mo_kitikil_boss.shape
+- fauna_shapes.bnp:tr_mo_kitimandib.shape
+- fauna_shapes.bnp:tr_mo_kitimandib_boss.shape
+- fauna_shapes.bnp:tr_mo_kitin_queen.shape
+- fauna_shapes.bnp:tr_mo_kitinagan.shape
+- fauna_shapes.bnp:tr_mo_kitinagan_boss.shape
+- fauna_shapes.bnp:tr_mo_kitinarak.shape
+- fauna_shapes.bnp:tr_mo_kitinarak_boss.shape
+- fauna_shapes.bnp:tr_mo_kitinega.shape
+- fauna_shapes.bnp:tr_mo_kitinega_boss.shape
+- fauna_shapes.bnp:tr_mo_kitinocto.shape
+- fauna_shapes.bnp:tr_mo_kitinocto_boss.shape
+- fauna_shapes.bnp:tr_mo_lightbird.shape
+- fauna_shapes.bnp:tr_mo_lightbird_boss.shape
+- fauna_shapes.bnp:tr_mo_mektoub.shape
+- fauna_shapes.bnp:tr_mo_mektoub_boss.shape
+- fauna_shapes.bnp:tr_mo_mektoub_pack.shape
+- fauna_shapes.bnp:tr_mo_mektoub_selle.shape
+- fauna_shapes.bnp:tr_mo_pucetron.shape
+- fauna_shapes.bnp:tr_mo_pucetron_boss.shape
+- fauna_shapes.bnp:tr_mo_regus.shape
+- fauna_shapes.bnp:tr_mo_regus_boss.shape
+- fauna_shapes.bnp:tr_mo_ryzerb.shape
+- fauna_shapes.bnp:tr_mo_ryzerb_boss.shape
+- fauna_shapes.bnp:tr_mo_ryzoholo.shape
+- fauna_shapes.bnp:tr_mo_ryzoholo_boss.shape
+- fauna_shapes.bnp:tr_mo_ryzoholok.shape
+- fauna_shapes.bnp:tr_mo_ryzoholok_boss.shape
+- fauna_shapes.bnp:tr_mo_sagass_selle.shape
+- fauna_shapes.bnp:tr_mo_vampignon.shape
+- fauna_shapes.bnp:tr_mo_vampignon_boss.shape
+- fauna_shapes.bnp:tr_mo_varinx.shape
+- fauna_shapes.bnp:tr_mo_varinx_boss.shape
+- fauna_shapes.bnp:tr_mo_yber.shape
+- fauna_shapes.bnp:tr_mo_yber_boss.shape
+- fauna_shapes.bnp:tr_mo_zerx.shape
+- fauna_shapes.bnp:tr_mo_zerx_boss.shape
+- fauna_shapes.bnp:zo_mo_dag_boss.shape
+- fauna_shapes.bnp:zo_mo_gibbai.shape
+- fauna_shapes.bnp:zo_mo_gibbai_boss.shape
+- objects.bnp:anlor_hof_helmet01.shape
+- objects.bnp:anlor_hom_helmet01.shape
+- objects.bnp:ca_hof_acc_gauntlet.shape
+- objects.bnp:ca_hom_acc_gauntlet.shape
+- objects.bnp:fy_hof_acc_gauntlet.shape
+- objects.bnp:fy_hom_acc_gauntlet.shape
+- objects.bnp:ge_hof_acc_gauntlet.shape
+- objects.bnp:ge_hof_acc_gauntlet_kami.shape
+- objects.bnp:ge_hof_mission_reward_outpost_gauntlet.shape
+- objects.bnp:ge_hom_acc_gauntlet.shape
+- objects.bnp:ge_hom_acc_gauntlet_kami.shape
+- objects.bnp:ge_hom_mission_reward_outpost_gauntlet.shape
+- objects.bnp:ge_mission_reward_kami_f_dress.shape
+- objects.bnp:ge_mission_reward_kami_h_dress.shape
+- objects.bnp:ge_mission_reward_karavan_f_dress.shape
+- objects.bnp:ge_mission_reward_karavan_h_dress.shape
+- objects.bnp:ma_hof_acc_gauntlet.shape
+- objects.bnp:ma_hom_acc_gauntlet.shape
+- objects.bnp:tr_hof_acc_gauntlet.shape
+- objects.bnp:tr_hom_acc_gauntlet.shape
+- objects.bnp:tr_mo_arma_mount.shape
+- objects.bnp:zo_hof_acc_gauntlet.shape
+- objects.bnp:zo_hom_acc_gauntlet.shape
+
+## MeshMultiLod (410)
+
+- desert_shapes.bnp:fy_s1_baobab_a.shape
+- desert_shapes.bnp:fy_s1_baobab_b.shape
+- desert_shapes.bnp:fy_s1_baobab_c.shape
+- desert_shapes.bnp:fy_s1_burnedtree_a.shape
+- desert_shapes.bnp:fy_s1_burnedtree_b.shape
+- desert_shapes.bnp:fy_s1_burnedtree_c.shape
+- desert_shapes.bnp:fy_s1_burnedtree_d.shape
+- desert_shapes.bnp:fy_s1_burnedtree_growth_a.shape
+- desert_shapes.bnp:fy_s1_burnedtree_growth_b.shape
+- desert_shapes.bnp:fy_s2_coconuts_a.shape
+- desert_shapes.bnp:fy_s2_coconuts_b.shape
+- desert_shapes.bnp:fy_s2_lovejail_a.shape
+- desert_shapes.bnp:fy_s2_lovejail_b.shape
+- desert_shapes.bnp:fy_s2_lovejail_c.shape
+- desert_shapes.bnp:fy_s2_palmtree_a.shape
+- desert_shapes.bnp:fy_s2_palmtree_b.shape
+- desert_shapes.bnp:fy_s2_palmtree_c.shape
+- desert_shapes.bnp:fy_s2_palmtree_d.shape
+- desert_shapes.bnp:fy_s2_palmtree_e.shape
+- desert_shapes.bnp:fy_s2_papaleaf_a.shape
+- desert_shapes.bnp:fy_s2_papaleaf_b.shape
+- desert_shapes.bnp:fy_s2_savantree_a.shape
+- desert_shapes.bnp:fy_s2_savantree_b.shape
+- desert_shapes.bnp:fy_s2_savantree_c.shape
+- desert_shapes.bnp:fy_s2_savantree_d.shape
+- desert_shapes.bnp:fy_s3_termitiere_a.shape
+- desert_shapes.bnp:fy_s3_termitiere_b.shape
+- desert_shapes.bnp:fy_s3_termitiere_c.shape
+- desert_shapes.bnp:fy_s3_termitiere_d.shape
+- jungle_shapes.bnp:fo_s1_arbragrelot.shape
+- jungle_shapes.bnp:fo_s1_giant_tree.shape
+- jungle_shapes.bnp:fo_s1_giant_trunk.shape
+- jungle_shapes.bnp:fo_s2_arbragrelot.shape
+- jungle_shapes.bnp:fo_s2_big_tree.shape
+- jungle_shapes.bnp:fo_s2_bigroot_a.shape
+- jungle_shapes.bnp:fo_s2_bigroot_b.shape
+- jungle_shapes.bnp:fo_s2_bigroot_c.shape
+- jungle_shapes.bnp:fo_s2_birch.shape
+- jungle_shapes.bnp:fo_s2_spiketree.shape
+- jungle_shapes.bnp:fo_s3_birch.shape
+- jungle_shapes.bnp:fo_s3_buissonaepine.shape
+- jungle_shapes.bnp:fo_s3_champignou_a.shape
+- jungle_shapes.bnp:fo_s3_champignou_b.shape
+- jungle_shapes.bnp:fo_s3_fougere.shape
+- jungle_shapes.bnp:ju_s1_bamboo.shape
+- jungle_shapes.bnp:ju_s1_canopy_tree.shape
+- jungle_shapes.bnp:ju_s2_big_tree.shape
+- jungle_shapes.bnp:ju_s2_young_tree.shape
+- jungle_shapes.bnp:ju_s3_bamboo.shape
+- jungle_shapes.bnp:ju_s3_banana_tree.shape
+- jungle_shapes.bnp:ju_s3_bush_tree.shape
+- jungle_shapes.bnp:ju_s3_dead_tree.shape
+- jungle_shapes.bnp:ju_s3_fantree.shape
+- jungle_shapes.bnp:ju_s3_plante.shape
+- jungle_shapes.bnp:ju_s3_plantegrasse.shape
+- jungle_shapes.bnp:ju_s3_tree.shape
+- jungle_shapes.bnp:ma_lampadaire_blue.shape
+- jungle_shapes.bnp:ma_lampadaire_red.shape
+- jungle_shapes.bnp:ma_lampadaire_white.shape
+- jungle_shapes.bnp:ma_lampadaire_yellow.shape
+- jungle_shapes.bnp:ma_milestone.shape
+- jungle_shapes.bnp:zo_lampadaire_black.shape
+- jungle_shapes.bnp:zo_lampadaire_blue.shape
+- jungle_shapes.bnp:zo_lampadaire_green.shape
+- jungle_shapes.bnp:zo_lampadaire_yellow.shape
+- lacustre_shapes.bnp:tr_arche_01_village_a.shape
+- lacustre_shapes.bnp:tr_arche_village_a.shape
+- lacustre_shapes.bnp:tr_helicebar_village_d.shape
+- lacustre_shapes.bnp:tr_lampiote_agora_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_01_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_01_village_d.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_02_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_02_village_b.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_02_village_d.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_03_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_04_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_appart_01_village_c.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_appart_02_village_c.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_fond_ilot_4.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_village_b.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_village_nb_01.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_village_nb_02.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_village_nb_03.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_village_nb_04.shape
+- lacustre_shapes.bnp:tr_lampiote_arche_saucisse_village_nb_05.shape
+- lacustre_shapes.bnp:tr_lampiote_bar_01_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_bar_02_village_a.shape
+- lacustre_shapes.bnp:tr_lampiote_bar__village_c.shape
+- lacustre_shapes.bnp:tr_lampiote_bar_village_b.shape
+- lacustre_shapes.bnp:tr_lampiote_bar_village_d.shape
+- lacustre_shapes.bnp:tr_mairie_lampiote_arche_village_a.shape
+- lacustre_shapes.bnp:tr_s1_bamboo_a.shape
+- lacustre_shapes.bnp:tr_s1_kelp_a.shape
+- lacustre_shapes.bnp:tr_s1_kelp_b.shape
+- lacustre_shapes.bnp:tr_s2_bamboo_a.shape
+- lacustre_shapes.bnp:tr_s2_champiflot_a.shape
+- lacustre_shapes.bnp:tr_s2_lokness_a.shape
+- lacustre_shapes.bnp:tr_s2_lokness_b.shape
+- lacustre_shapes.bnp:tr_s2_lokness_c.shape
+- lacustre_shapes.bnp:tr_s2_mangrove_a.shape
+- lacustre_shapes.bnp:tr_s2_mangrove_b.shape
+- lacustre_shapes.bnp:tr_s2_nenufly_a.shape
+- lacustre_shapes.bnp:tr_s2_palmtree_a.shape
+- lacustre_shapes.bnp:tr_s2_palmtree_b.shape
+- lacustre_shapes.bnp:tr_s2_palmtree_c.shape
+- lacustre_shapes.bnp:tr_s2_palmtree_d.shape
+- lacustre_shapes.bnp:tr_s2_palmtree_e.shape
+- lacustre_shapes.bnp:tr_s2_palmtree_f.shape
+- lacustre_shapes.bnp:tr_s2_sailtree_a.shape
+- lacustre_shapes.bnp:tr_s2_wigweed_a.shape
+- lacustre_shapes.bnp:tr_s3_aquabole_a.shape
+- lacustre_shapes.bnp:tr_s3_aquabole_b.shape
+- lacustre_shapes.bnp:tr_s3_aquafeather_a.shape
+- lacustre_shapes.bnp:tr_s3_aquafeather_b.shape
+- lacustre_shapes.bnp:tr_s3_aquafeather_c.shape
+- lacustre_shapes.bnp:tr_s3_nenufly_b.shape
+- lacustre_shapes.bnp:tr_s3_trumpet_a.shape
+- lacustre_shapes.bnp:tr_s3_trumpet_b.shape
+- lacustre_shapes.bnp:tr_s3_trumpet_c.shape
+- lacustre_shapes.bnp:tr_s3_trumpet_d.shape
+- objects.bnp:bw_rotaflore_flore.shape
+- objects.bnp:xmas_zo_lantern.shape
+- primes_racines_shapes.bnp:pr_s1_lumiseed_a.shape
+- primes_racines_shapes.bnp:pr_s1_lumiseed_b.shape
+- primes_racines_shapes.bnp:pr_s1_lumiseed_c.shape
+- primes_racines_shapes.bnp:pr_s1_lumiseed_d.shape
+- primes_racines_shapes.bnp:pr_s1_rotaflore_a.shape
+- primes_racines_shapes.bnp:pr_s1_rotaflore_b.shape
+- primes_racines_shapes.bnp:pr_s1_rotaflore_c.shape
+- primes_racines_shapes.bnp:pr_s2_mycotree_a.shape
+- primes_racines_shapes.bnp:pr_s2_mycotree_b.shape
+- primes_racines_shapes.bnp:pr_s2_planipushes_a.shape
+- primes_racines_shapes.bnp:pr_s2_planipushes_b.shape
+- primes_racines_shapes.bnp:pr_s2_planipushes_c.shape
+- primes_racines_shapes.bnp:pr_s2_planipushes_d.shape
+- primes_racines_shapes.bnp:pr_s2_toopetz_a.shape
+- primes_racines_shapes.bnp:pr_s2_toopetz_b.shape
+- primes_racines_shapes.bnp:pr_s2_toopetz_c.shape
+- primes_racines_shapes.bnp:pr_s3_amoeba_a.shape
+- primes_racines_shapes.bnp:pr_s3_amoeba_b.shape
+- primes_racines_shapes.bnp:pr_s3_amoeba_c.shape
+- primes_racines_shapes.bnp:pr_s3_cokamool_a.shape
+- primes_racines_shapes.bnp:pr_s3_cokamool_b.shape
+- primes_racines_shapes.bnp:pr_s3_cokamool_c.shape
+- primes_racines_shapes.bnp:pr_s3_ploomweed_a.shape
+- primes_racines_shapes.bnp:pr_s3_ploomweed_b.shape
+- primes_racines_shapes.bnp:pr_s3_small_lumiseed_a.shape
+- primes_racines_shapes.bnp:pr_s3_small_lumiseed_b.shape
+- jungle_shapes.bnp:ma_annexe_ext_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_annexe_ext_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_annexe_ext_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_annexe_ext_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon2_ext_2_village2.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon_ext_2_village1.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon_ext_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon_ext_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon_ext_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_bourgeon_ext_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_4_ext_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_5_ext_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-nb_04.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-village1.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext-village2.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_3_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_5_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_ma_com_ext_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_ma_com_ext_3_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_ma_com_ext_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:ma_com_ext_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_nb_01.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_nb_02.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_nb_03.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_nb_05.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_1_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_1_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_1_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_1_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_2_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_2_village_b.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_2_village_c.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_2_village_d.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_3_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeuble_zo_imm_4_village_a.shape (type-only, legacy data format)
+- jungle_shapes.bnp:zo_exterieur_immeublezo_imm_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_agora_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_01_artisant_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_01_artisant_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_02_artisant_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_02_artisant_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_03_artisant_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_03_artisant_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_04_artisant_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_appart_04_artisant_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_bar_01_artisant_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_bar_01_artisant_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_bar_02_artisant_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_artisan_bar_02_artisant_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_bar_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_bar_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_bar__village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_bar_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_bar_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere01_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere02_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere_embarquadere_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_embarquadere_embarquadere_02_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicebar_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicebar_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicebar__village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicebar_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_appart_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_appart_02_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_helicesaucisse_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_lupiote_agora_1st_floor_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_01_bar_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_02_appart01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_02_appart02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_agora_magasin_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_agora_magasin_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart01_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_01_magasin_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_02_magasin_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_02_magasin_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_02_magasin_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_03_magasin_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_appart_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_bar_01_magasin_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_bar_02_magasin_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_magasin_bar_magasin_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_mairie_helicemairie_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_mairie_lampmurale_1er_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_mairie_lanterne_portes_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_mairie_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_kami_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_mairie_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_mairie_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_mairie_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_module_mairie_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat01_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat03_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat04_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_03_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_04_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_05_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_06_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_07_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_08_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_09_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton-flat_10_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton01_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton03_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton04_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton05_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_01_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_02_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_03_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_03_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_03_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_03_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_03_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_04_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_04_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_05_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_05_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_05_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_06_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_06_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_06_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_07_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_07_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_08_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_08_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_08_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_09_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_09_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_09_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_10_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_10_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_11_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_11_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_12_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_12_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_13_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_13_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_14_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_14_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_15_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_16_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_17_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_18_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_19_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_20_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_21_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_22_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_23_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_24_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_25_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_26_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_27_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_28_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_29_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_30_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_31_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_32_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_ponton_33_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_appart_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_appart_02_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_02_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_03_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_04_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_appart_01_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_appart_02_village_c.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_lanterne_portes_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_village_b.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_village_nb_02.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_village_nb_03.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_saucisse_village_nb_05.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_01_fond_ilot_4.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_01_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_01_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_01_village_nb_01.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_01_village_nb_04.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_02_village_a.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_02_village_d.shape (type-only, legacy data format)
+- lacustre_shapes.bnp:tr_triangle_03_village_d.shape (type-only, legacy data format)
+
+## WaterShape (218)
+
+- corrupted_moor_shapes.bnp:ju_water_chlorolake.shape
+- corrupted_moor_shapes.bnp:ju_water_lm8.shape
+- corrupted_moor_shapes.bnp:ju_water_moorriver.shape
+- desert_shapes.bnp:fy_brandon_lake.shape
+- desert_shapes.bnp:fy_brandon_river_01.shape
+- desert_shapes.bnp:fy_brandon_river_02.shape
+- desert_shapes.bnp:fy_brandon_river_03.shape
+- desert_shapes.bnp:fy_brandon_river_04.shape
+- desert_shapes.bnp:fy_brandon_river_05.shape
+- desert_shapes.bnp:fy_brandon_river_06.shape
+- desert_shapes.bnp:fy_brandon_river_07.shape
+- desert_shapes.bnp:fy_brandon_river_08.shape
+- desert_shapes.bnp:fy_cn_trykerinn_eau.shape
+- desert_shapes.bnp:fy_flotte_oasis_kamique.shape
+- desert_shapes.bnp:fy_flotte_oasis_nb.shape
+- desert_shapes.bnp:fy_oasis_mid_n.shape
+- desert_shapes.bnp:fy_oasis_mid_s.shape
+- desert_shapes.bnp:fy_oasis_w.shape
+- desert_shapes.bnp:fy_oasis_w1.shape
+- desert_shapes.bnp:fy_oasis_w2.shape
+- desert_shapes.bnp:water_fyros_oasis_est.shape
+- fyros_shapes.bnp:fy_smoke_water.shape
+- fyros_shapes.bnp:water_fyros_oasis01.shape
+- fyros_shapes.bnp:water_fyros_oasis02.shape
+- indoors_shapes.bnp:zo_hallconseil_water.shape
+- jungle_shapes.bnp:ju_water_combe1.shape
+- jungle_shapes.bnp:ju_water_combe2.shape
+- jungle_shapes.bnp:ju_water_combe_plateau.shape
+- jungle_shapes.bnp:ju_water_jungle2_coude.shape
+- jungle_shapes.bnp:ju_water_jungle2_cul-de-sac.shape
+- jungle_shapes.bnp:ju_water_jungle_coude.shape
+- jungle_shapes.bnp:ju_water_jungle_coude2.shape
+- jungle_shapes.bnp:ju_water_jungle_cul-de-sac.shape
+- jungle_shapes.bnp:ju_water_jungle_cul-de-sac2.shape
+- jungle_shapes.bnp:ju_water_jungle_geyzer.shape
+- jungle_shapes.bnp:ju_water_marais_01.shape
+- jungle_shapes.bnp:ju_water_marais_02.shape
+- jungle_shapes.bnp:ju_water_marais_03.shape
+- jungle_shapes.bnp:water_lac_tryker_newbieland.shape
+- lacustre_shapes.bnp:tr_water_ilot_butte.shape
+- lacustre_shapes.bnp:tr_water_ilot_croix.shape
+- lacustre_shapes.bnp:tr_waterfall_10_a.shape
+- lacustre_shapes.bnp:water_bassin-3.shape
+- lacustre_shapes.bnp:water_village_nb_01.shape
+- lacustre_shapes.bnp:water_village_nb_02.shape
+- lacustre_shapes.bnp:water_village_nb_03.shape
+- lacustre_shapes.bnp:water_village_nb_04.shape
+- lacustre_shapes.bnp:water_village_nb_05.shape
+- matis_shapes.bnp:ma_serre_eau.shape
+- primes_racines_shapes.bnp:mz_pointcentral.shape
+- primes_racines_shapes.bnp:pr_05_coulee_b.shape
+- primes_racines_shapes.bnp:pr_05_coule_a.shape
+- primes_racines_shapes.bnp:pr_eau.shape
+- primes_racines_shapes.bnp:pr_lac2.shape
+- primes_racines_shapes.bnp:pr_mz_coule_a.shape
+- r2_lakes.bnp:water_r2_lacustre_01.shape
+- r2_lakes.bnp:water_r2_lacustre_02.shape
+- r2_lakes.bnp:water_r2_lacustre_03.shape
+- r2_lakes.bnp:water_r2_lacustre_04.shape
+- r2_lakes.bnp:water_r2_lacustre_05.shape
+- r2_lakes.bnp:water_r2_lacustre_06.shape
+- r2_lakes.bnp:water_r2_lacustre_07.shape
+- r2_lakes.bnp:water_r2_lacustre_08.shape
+- r2_misc.bnp:ju_water_combe1_ring2.shape
+- r2_misc.bnp:ju_water_combe2_ring2.shape
+- r2_misc.bnp:ju_water_jungle_geyzer_ring2.shape
+- r2_misc.bnp:water_r2_lacustre.shape
+- tryker_island_shapes.bnp:water_tryker_island.shape
+- tryker_newbie_shapes.bnp:water_tryker_newbie.shape
+- tryker_shapes.bnp:tr_water_00.shape
+- tryker_shapes.bnp:tr_water_01.shape
+- tryker_shapes.bnp:tr_water_02.shape
+- tryker_shapes.bnp:water01.shape
+- tryker_shapes.bnp:water02.shape
+- tryker_shapes.bnp:water03.shape
+- tryker_shapes.bnp:water04.shape
+- tryker_shapes.bnp:water05.shape
+- tryker_shapes.bnp:water06.shape
+- tryker_shapes.bnp:water07.shape
+- tryker_shapes.bnp:water08.shape
+- tryker_shapes.bnp:water09.shape
+- tryker_shapes.bnp:water10.shape
+- tryker_shapes.bnp:water11.shape
+- tryker_shapes.bnp:water12.shape
+- tryker_shapes.bnp:water13.shape
+- tryker_shapes.bnp:water14.shape
+- tryker_shapes.bnp:water15.shape
+- tryker_shapes.bnp:water16.shape
+- tryker_shapes.bnp:water17.shape
+- tryker_shapes.bnp:water18.shape
+- tryker_shapes.bnp:water19.shape
+- tryker_shapes.bnp:water20.shape
+- tryker_shapes.bnp:water21.shape
+- tryker_shapes.bnp:water22.shape
+- tryker_shapes.bnp:water23.shape
+- tryker_shapes.bnp:water24.shape
+- tryker_shapes.bnp:water25.shape
+- tryker_shapes.bnp:water27.shape
+- tryker_shapes.bnp:water28.shape
+- tryker_shapes.bnp:water35.shape
+- tryker_shapes.bnp:water36.shape
+- tryker_shapes.bnp:water_extens_01.shape
+- tryker_shapes.bnp:water_extens_02.shape
+- tryker_shapes.bnp:water_extens_03.shape
+- tryker_shapes.bnp:water_extens_04.shape
+- tryker_shapes.bnp:water_extens_05.shape
+- tryker_shapes.bnp:waterbassina01.shape
+- tryker_shapes.bnp:waterbassina02.shape
+- tryker_shapes.bnp:waterbassina03.shape
+- tryker_shapes.bnp:waterbassina04.shape
+- tryker_shapes.bnp:waterbassina05.shape
+- tryker_shapes.bnp:waterbassina06.shape
+- tryker_shapes.bnp:waterbassina07.shape
+- tryker_shapes.bnp:waterbassina08.shape
+- tryker_shapes.bnp:waterbassina09.shape
+- tryker_shapes.bnp:waterbassina10.shape
+- tryker_shapes.bnp:waterbassina11.shape
+- tryker_shapes.bnp:waterbassina12.shape
+- tryker_shapes.bnp:waterbassina13.shape
+- tryker_shapes.bnp:waterbassina14.shape
+- tryker_shapes.bnp:waterbassina15.shape
+- tryker_shapes.bnp:waterbassina16.shape
+- tryker_shapes.bnp:waterbassinb01.shape
+- tryker_shapes.bnp:waterbassinb02.shape
+- tryker_shapes.bnp:waterbassinb03.shape
+- tryker_shapes.bnp:waterbassinb04.shape
+- tryker_shapes.bnp:waterbassinb05.shape
+- tryker_shapes.bnp:waterbassinb06.shape
+- tryker_shapes.bnp:waterbassinb07.shape
+- tryker_shapes.bnp:waterbassinb08.shape
+- tryker_shapes.bnp:waterbassinb09.shape
+- tryker_shapes.bnp:waterbassinb10.shape
+- tryker_shapes.bnp:waterbassinb11.shape
+- tryker_shapes.bnp:waterbassinb12.shape
+- tryker_shapes.bnp:waterbassinb13.shape
+- tryker_shapes.bnp:waterbassinb14.shape
+- tryker_shapes.bnp:waterbassinb15.shape
+- tryker_shapes.bnp:waterbassinb17.shape
+- tryker_shapes.bnp:waterbassinb18.shape
+- tryker_shapes.bnp:waterbassinb19.shape
+- tryker_shapes.bnp:waterbassinb20.shape
+- tryker_shapes.bnp:waterbassinb21.shape
+- tryker_shapes.bnp:waterbassinb22.shape
+- tryker_shapes.bnp:waterbassinb23.shape
+- tryker_shapes.bnp:waterbassinb24.shape
+- tryker_shapes.bnp:waterbassinb25.shape
+- tryker_shapes.bnp:waterbassinb26.shape
+- tryker_shapes.bnp:waterbassinb27.shape
+- tryker_shapes.bnp:waterbassinb28.shape
+- tryker_shapes.bnp:waterbassinb29.shape
+- tryker_shapes.bnp:waterbassinb31.shape
+- tryker_shapes.bnp:waterbassinb32.shape
+- tryker_shapes.bnp:watercanopee01.shape
+- tryker_shapes.bnp:watercanopee02.shape
+- tryker_shapes.bnp:watercanopee03.shape
+- tryker_shapes.bnp:watercanopee04.shape
+- tryker_shapes.bnp:watercanopee05.shape
+- tryker_shapes.bnp:watercanopee06.shape
+- tryker_shapes.bnp:watercanopee07.shape
+- tryker_shapes.bnp:watercanopee08.shape
+- tryker_shapes.bnp:watercanopee09.shape
+- tryker_shapes.bnp:watercanopee10.shape
+- tryker_shapes.bnp:watercanopee11.shape
+- tryker_shapes.bnp:watercanopee12.shape
+- tryker_shapes.bnp:watercanopee13.shape
+- tryker_shapes.bnp:watercanopee14.shape
+- tryker_shapes.bnp:watercanopee15.shape
+- tryker_shapes.bnp:watercanopee16.shape
+- tryker_shapes.bnp:watercanopee17.shape
+- tryker_shapes.bnp:watercanopee18.shape
+- tryker_shapes.bnp:watercanopee19.shape
+- tryker_shapes.bnp:watercanopee20.shape
+- tryker_shapes.bnp:watercanopee21.shape
+- tryker_shapes.bnp:watercanopee22.shape
+- tryker_shapes.bnp:watercanopee23.shape
+- tryker_shapes.bnp:watercanopee24.shape
+- tryker_shapes.bnp:watercanopee25.shape
+- tryker_shapes.bnp:watercanopee26.shape
+- tryker_shapes.bnp:watercanopee27.shape
+- tryker_shapes.bnp:watercanopee28.shape
+- tryker_shapes.bnp:watercanopee29.shape
+- tryker_shapes.bnp:watercanopee30.shape
+- tryker_shapes.bnp:watercanopee31.shape
+- tryker_shapes.bnp:watercanopee32.shape
+- tryker_shapes.bnp:watercanopee33.shape
+- tryker_shapes.bnp:watercanopee34.shape
+- tryker_shapes.bnp:watercanopee35.shape
+- tryker_shapes.bnp:watercanopee36.shape
+- tryker_shapes.bnp:watercanopee37.shape
+- tryker_shapes.bnp:watercanopee38.shape
+- tryker_shapes.bnp:watercanopee39.shape
+- tryker_shapes.bnp:watercanopee40.shape
+- tryker_shapes.bnp:watercanopee41.shape
+- tryker_shapes.bnp:watercanopee42.shape
+- tryker_shapes.bnp:watercanopee43.shape
+- tryker_shapes.bnp:watercanopee44.shape
+- tryker_shapes.bnp:watercanopee45.shape
+- tryker_shapes.bnp:watercanopee46.shape
+- tryker_shapes.bnp:watercanopee47.shape
+- tryker_shapes.bnp:watercanopee48.shape
+- tryker_shapes.bnp:watercanopee49.shape
+- tryker_shapes.bnp:watermarais01.shape
+- tryker_shapes.bnp:watermarais02.shape
+- tryker_shapes.bnp:watermarais03.shape
+- tryker_shapes.bnp:watermarais04.shape
+- tryker_shapes.bnp:watermarais05.shape
+- tryker_shapes.bnp:watermarais06.shape
+- tryker_shapes.bnp:watermarais07.shape
+- tryker_shapes.bnp:watermarais08.shape
+- tryker_shapes.bnp:watermarais09.shape
+- tryker_shapes.bnp:watermarais10.shape
+- tryker_shapes.bnp:watermarais11.shape
+- tryker_shapes.bnp:watermarais12.shape
+- tryker_shapes.bnp:watermarais13.shape
+- tryker_shapes.bnp:watermarais14.shape
+- tryker_shapes.bnp:watermarais15.shape
+- tryker_shapes.bnp:watermarais16.shape
+- tryker_shapes.bnp:watermarais17.shape
+
+## SegRemanenceShape (82)
+
+- sfx.bnp:fy_wea_baton_trail_00.shape
+- sfx.bnp:fy_wea_dague_trail_00.shape
+- sfx.bnp:fy_wea_epee1m_trail_00.shape
+- sfx.bnp:fy_wea_epee2m_trail_00.shape
+- sfx.bnp:fy_wea_hache1m_trail_00.shape
+- sfx.bnp:fy_wea_hache2m_trail_00.shape
+- sfx.bnp:fy_wea_lance1m_trail_00.shape
+- sfx.bnp:fy_wea_lance2m_trail_00.shape
+- sfx.bnp:fy_wea_masse1m_trail_00.shape
+- sfx.bnp:fy_wea_masse2m_trail_00.shape
+- sfx.bnp:ge_acc_pick_a_trail_00.shape
+- sfx.bnp:ge_acc_pick_o_trail_car.shape
+- sfx.bnp:ge_acc_pick_o_trail_kam.shape
+- sfx.bnp:ge_fy_wea_trib_hache1m_trail_car.shape
+- sfx.bnp:ge_fy_wea_trib_hache1m_trail_gen.shape
+- sfx.bnp:ge_fy_wea_trib_hache1m_trail_kam.shape
+- sfx.bnp:ge_fy_wea_trib_hache2m_trail_car.shape
+- sfx.bnp:ge_fy_wea_trib_hache2m_trail_gen.shape
+- sfx.bnp:ge_fy_wea_trib_hache2m_trail_kam.shape
+- sfx.bnp:ge_ma_wea_trib_lance1m_trail_car.shape
+- sfx.bnp:ge_ma_wea_trib_lance1m_trail_gen.shape
+- sfx.bnp:ge_ma_wea_trib_lance1m_trail_kam.shape
+- sfx.bnp:ge_ma_wea_trib_lance2m_trail_car.shape
+- sfx.bnp:ge_ma_wea_trib_lance2m_trail_gen.shape
+- sfx.bnp:ge_ma_wea_trib_lance2m_trail_kam.shape
+- sfx.bnp:ge_tr_wea_trib_dague_trail_car.shape
+- sfx.bnp:ge_tr_wea_trib_dague_trail_gen.shape
+- sfx.bnp:ge_tr_wea_trib_dague_trail_kam.shape
+- sfx.bnp:ge_tr_wea_trib_epee1m_trail_car.shape
+- sfx.bnp:ge_tr_wea_trib_epee1m_trail_gen.shape
+- sfx.bnp:ge_tr_wea_trib_epee1m_trail_kam.shape
+- sfx.bnp:ge_tr_wea_trib_epee2m_trail_car.shape
+- sfx.bnp:ge_tr_wea_trib_epee2m_trail_gen.shape
+- sfx.bnp:ge_tr_wea_trib_epee2m_trail_kam.shape
+- sfx.bnp:ge_wea_baton_trail_00.shape
+- sfx.bnp:ge_wea_dague_trail_00.shape
+- sfx.bnp:ge_wea_epee1m_trail_00.shape
+- sfx.bnp:ge_wea_epee2m_trail_00.shape
+- sfx.bnp:ge_wea_hache1m_trail_00.shape
+- sfx.bnp:ge_wea_hache2m_trail_00.shape
+- sfx.bnp:ge_wea_lance1m_trail_00.shape
+- sfx.bnp:ge_wea_lance2m_trail_00.shape
+- sfx.bnp:ge_wea_masse1m_trail_00.shape
+- sfx.bnp:ge_wea_masse2m_trail_00.shape
+- sfx.bnp:ge_zo_wea_trib_baton_trail_car.shape
+- sfx.bnp:ge_zo_wea_trib_baton_trail_gen.shape
+- sfx.bnp:ge_zo_wea_trib_baton_trail_kam.shape
+- sfx.bnp:ge_zo_wea_trib_masse1m_trail_car.shape
+- sfx.bnp:ge_zo_wea_trib_masse1m_trail_gen.shape
+- sfx.bnp:ge_zo_wea_trib_masse1m_trail_kam.shape
+- sfx.bnp:ge_zo_wea_trib_masse2m_trail_car.shape
+- sfx.bnp:ge_zo_wea_trib_masse2m_trail_gen.shape
+- sfx.bnp:ge_zo_wea_trib_masse2m_trail_kam.shape
+- sfx.bnp:ma_wea_baton_trail_00.shape
+- sfx.bnp:ma_wea_dague_trail_00.shape
+- sfx.bnp:ma_wea_epee1m_trail_00.shape
+- sfx.bnp:ma_wea_epee2m_trail_00.shape
+- sfx.bnp:ma_wea_hache1m_trail_00.shape
+- sfx.bnp:ma_wea_hache2m_trail_00.shape
+- sfx.bnp:ma_wea_lance1m_trail_00.shape
+- sfx.bnp:ma_wea_lance2m_trail_00.shape
+- sfx.bnp:ma_wea_masse1m_trail_00.shape
+- sfx.bnp:ma_wea_masse2m_trail_00.shape
+- sfx.bnp:tr_wea_baton_trail_00.shape
+- sfx.bnp:tr_wea_dague_trail_00.shape
+- sfx.bnp:tr_wea_epee1m_trail_00.shape
+- sfx.bnp:tr_wea_epee2m_trail_00.shape
+- sfx.bnp:tr_wea_hache1m_trail_00.shape
+- sfx.bnp:tr_wea_lance1m_trail_00.shape
+- sfx.bnp:tr_wea_lance2m_trail_00.shape
+- sfx.bnp:tr_wea_masse1m_trail_00.shape
+- sfx.bnp:tr_wea_masse2m_trail_00.shape
+- sfx.bnp:zo_wea_baton_trail_00.shape
+- sfx.bnp:zo_wea_dague_trail_00.shape
+- sfx.bnp:zo_wea_epee1m_trail_00.shape
+- sfx.bnp:zo_wea_epee2m_trail_00.shape
+- sfx.bnp:zo_wea_hache1m_trail_00.shape
+- sfx.bnp:zo_wea_hache2m_trail_00.shape
+- sfx.bnp:zo_wea_lance1m_trail_00.shape
+- sfx.bnp:zo_wea_lance2m_trail_00.shape
+- sfx.bnp:zo_wea_masse1m_trail_00.shape
+- sfx.bnp:zo_wea_masse2m_trail_00.shape
+
+## MeshMRM (57)
+
+- characters_shapes.bnp:fy_hof_visage.shape
+- characters_shapes.bnp:fy_hom_visage.shape
+- characters_shapes.bnp:ge_bt_kami_destroyer.shape
+- characters_shapes.bnp:ma_hof_visage.shape
+- characters_shapes.bnp:ma_hom_visage.shape
+- characters_shapes.bnp:npc_dummy_short.shape
+- characters_shapes.bnp:npc_dummy_tall.shape
+- characters_shapes.bnp:tr_hof_visage.shape
+- characters_shapes.bnp:tr_hom_visage.shape
+- characters_shapes.bnp:zo_hof_visage.shape
+- characters_shapes.bnp:zo_hom_visage.shape
+- corrupted_moor_shapes.bnp:foret-moor_ruine4.shape
+- indoors_shapes.bnp:ma_appart_fleure.shape
+- jungle_shapes.bnp:ma_lampadaire.shape
+- jungle_shapes.bnp:ma_paneau_armure.shape
+- jungle_shapes.bnp:ma_paneau_melee.shape
+- jungle_shapes.bnp:ma_paneau_object.shape
+- jungle_shapes.bnp:ma_paneau_range.shape
+- jungle_shapes.bnp:ma_paneau_tool.shape
+- jungle_shapes.bnp:zo_paneau_armure.shape
+- jungle_shapes.bnp:zo_paneau_melee.shape
+- jungle_shapes.bnp:zo_paneau_object.shape
+- jungle_shapes.bnp:zo_paneau_range.shape
+- jungle_shapes.bnp:zo_paneau_tool.shape
+- lacustre_shapes.bnp:tr_bar_acc_pouf_01_village_a.shape
+- lacustre_shapes.bnp:tr_bar_acc_pouf_02_village_a.shape
+- lacustre_shapes.bnp:tr_bar_acc_pouf__village_c.shape
+- lacustre_shapes.bnp:tr_bar_acc_pouf_village_b.shape
+- lacustre_shapes.bnp:tr_bar_acc_pouf_village_d.shape
+- lacustre_shapes.bnp:tr_bar_acc_table_01_village_a.shape
+- lacustre_shapes.bnp:tr_bar_acc_table_02_village_a.shape
+- lacustre_shapes.bnp:tr_bar_acc_table__village_c.shape
+- lacustre_shapes.bnp:tr_bar_acc_table_village_b.shape
+- lacustre_shapes.bnp:tr_bar_acc_table_village_d.shape
+- lacustre_shapes.bnp:tr_module_kami_feuille_01_village_a.shape
+- lacustre_shapes.bnp:tr_module_kami_feuille_02_village_a.shape
+- objects.bnp:ge_mission_altar_karavan.shape
+- objects.bnp:ge_mission_black_kirosta_dard.shape
+- objects.bnp:ge_mission_enclos.shape
+- objects.bnp:ge_mission_hut.shape
+- objects.bnp:ge_mission_outpost_drill_marauder_step.shape
+- objects.bnp:ge_mission_outpost_drill_maraudeur.shape
+- objects.bnp:ge_mission_outpost_drill_maraudeur_cilo.shape
+- objects.bnp:ge_mission_outpost_drill_maraudeur_extractor.shape
+- objects.bnp:ge_mission_ruine_tour.shape
+- objects.bnp:ge_mission_tonneau_broke.shape
+- objects.bnp:ge_mission_totem_kamik.shape
+- objects.bnp:ge_mission_totem_kitin.shape
+- objects.bnp:ge_mission_totem_oiseau.shape
+- objects.bnp:ge_mission_totem_pachyderm.shape
+- objects.bnp:ge_mission_tr_paneau_focus.shape
+- objects.bnp:gen_mission_tonneau_broke.shape
+- objects.bnp:tr_mo_dag_stick.shape
+- objects.bnp:trough_empty.shape
+- objects.bnp:trough_full.shape
+- objects.bnp:xmas_apt_mektoub_selle.shape
+- objects.bnp:xmas_ma_lantern.shape
+
+## FlareShape (10)
+
+- construction.bnp:gen_autel_flare04.shape
+- construction.bnp:gen_bt_comptoir_nelflare01.shape
+- construction.bnp:gen_bt_comptoir_nelflare02.shape
+- jungle_shapes.bnp:ge_newbieland_starting_village_nelflare01.shape
+- jungle_shapes.bnp:ge_newbieland_starting_village_nelflare02.shape
+- sfx.bnp:flare_preoder_item.shape
+- sky.bnp:de_sun_flare.shape
+- sky.bnp:fo_sun_flare.shape
+- sky.bnp:ju_sun_flare.shape
+- sky.bnp:la_sun_flare.shape
+
+## ParticleSystemShape (2)
+
+- zorai_shapes.bnp:zo_bt_mon_flare_couloir.shape
+- zorai_shapes.bnp:zo_flare.shape
