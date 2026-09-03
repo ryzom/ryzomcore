@@ -14,7 +14,7 @@ itself -- see ui_helpers.py's module docstring for why.
 import subprocess
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 from panda3d.core import PNMImage, Texture as PandaTexture
 
 from pynel.ryzom_shape import Rgba
@@ -711,7 +711,7 @@ class TextureWidgetsMixin:
 		ForgeryApp.request_settings_attention()). `str_id_suffix`: see
 		_draw_texture_copy_button()'s own docstring."""
 		editor_path = app_settings.load().image_editor_path
-		if _icon_button(f"{fa_icons.ICON_FA_EDIT}{str_id_suffix}", "Edit this texture in the configured image editor"):
+		if _icon_button(f"{fa_icons.ICON_FA_PEN_TO_SQUARE}{str_id_suffix}", "Edit this texture in the configured image editor"):
 			if not editor_path:
 				self.request_settings_attention("Tools", "image_editor_path")
 			else:

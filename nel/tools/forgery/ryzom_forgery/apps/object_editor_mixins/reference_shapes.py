@@ -12,7 +12,7 @@ object_editor.py itself -- see ui_helpers.py's module docstring for why.
 
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 from panda3d.core import GeomNode, TransparencyAttrib
 
 from pynel.ryzom_shape import ShapeParseError, parse_shape
@@ -41,7 +41,7 @@ _REFERENCE_GAP = 1.5  # meters between reference objects (and the main shape), b
 # they're drawn with app.large_icon_font (2x _ICON_FONT_SIZE, see app.py's
 # _load_icon_font()) instead of the normal merged-into-text-font icon glyphs.
 _REFERENCE_ICONS = {"Cube (1x1x1)": fa_icons.ICON_FA_CUBE, "Smallest character": fa_icons.ICON_FA_CHILD,
-                     "Tallest character": fa_icons.ICON_FA_MALE}
+                     "Tallest character": fa_icons.ICON_FA_PERSON}
 
 
 class ReferenceShapesMixin:
@@ -165,13 +165,13 @@ class ReferenceShapesMixin:
 						self._toggle_reference_shape(label)
 					if label in self._reference_active:
 						placement = self._reference_placement.get(label, "auto")
-						if _icon_button(fa_icons.ICON_FA_DOT_CIRCLE, "Place at 0,0,0",
+						if _icon_button(fa_icons.ICON_FA_CIRCLE_DOT, "Place at 0,0,0",
 						                placement == "origin", square=True, large_font=large_font):
 							self._set_reference_placement(label, "origin")
 						if _icon_button(fa_icons.ICON_FA_ANCHOR, "Place on the object's pivot",
 						                placement == "pivot", square=True, large_font=large_font):
 							self._set_reference_placement(label, "pivot")
-						if _icon_button(fa_icons.ICON_FA_ADJUST, "50% transparent",
+						if _icon_button(fa_icons.ICON_FA_CIRCLE_HALF_STROKE, "50% transparent",
 						                label in self._reference_transparent, square=True, large_font=large_font):
 							self._toggle_reference_transparency(label)
 				imgui.pop_id()

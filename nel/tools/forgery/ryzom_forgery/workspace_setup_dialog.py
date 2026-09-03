@@ -8,9 +8,10 @@ polling pattern.
 
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery.icon_colors import pastel_color_for
 from ryzom_forgery.popup_utils import center_next_popup
 from ryzom_forgery.workspaces import (
 	active_workspace_path, create_project, create_workspace, ensure_structure, external_workspace_path,
@@ -31,7 +32,9 @@ _DEFAULT_WORKSPACE_NAME = "WIP"
 
 
 def _icon_button(icon, tooltip):
+	imgui.push_style_color(imgui.Col_.text.value, pastel_color_for(icon))
 	clicked = imgui.button(icon)
+	imgui.pop_style_color()
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(tooltip)
 	return clicked

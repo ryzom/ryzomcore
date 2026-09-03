@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
@@ -30,6 +30,7 @@ from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
 
 from ryzom_forgery import panoply, search_paths, virtual_categories
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery.icon_colors import pastel_color_for
 from ryzom_forgery.settings import SearchPathDir
 
 _PANOPLY_FILE_NAME = "panoply_files.txt"
@@ -98,14 +99,19 @@ def _animation_bone_names(anim):
 	return names
 
 
-def _icon_button(icon, tooltip, disabled=False):
+def _icon_button(icon, tooltip, disabled=False, color=None):
 	"""Same minimal icon-button-with-tooltip pattern as explorer.py's own
 	_icon_button() -- each module keeps its own tiny copy rather than
 	sharing one, matching how this codebase already does it (see also
-	object_editor.py's own, more featureful version)."""
+	object_editor.py's own, more featureful version). Tinted a deterministic
+	pastel color (see icon_colors.py) unless `color` is given -- needed by
+	the Recursive toggle's own on/off color, which a pastel tint would
+	otherwise silently override."""
+	imgui.push_style_color(imgui.Col_.text.value, color if color is not None else pastel_color_for(icon))
 	imgui.begin_disabled(disabled)
 	clicked = imgui.button(icon)
 	imgui.end_disabled()
+	imgui.pop_style_color()
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(tooltip)
 	return clicked
@@ -848,11 +854,10 @@ class SearchPathsDialog:
 			imgui.same_line()
 			tooltip = "Recursive: includes subfolders (click to toggle)" if entry.recursive \
 				else "Not recursive: this folder only (click to toggle)"
-			imgui.push_style_color(imgui.Col_.text.value, _RECURSIVE_ON_COLOR if entry.recursive else _RECURSIVE_OFF_COLOR)
-			if _icon_button(fa_icons.ICON_FA_SITEMAP, tooltip):
+			recursive_color = _RECURSIVE_ON_COLOR if entry.recursive else _RECURSIVE_OFF_COLOR
+			if _icon_button(fa_icons.ICON_FA_SITEMAP, tooltip, color=recursive_color):
 				entry.recursive = not entry.recursive
 				self._save()
-			imgui.pop_style_color()
 			imgui.same_line()
 			if _icon_button(fa_icons.ICON_FA_ARROW_UP, "Move up (higher priority)", disabled=index == 0):
 				move_up_index = index
@@ -879,7 +884,7 @@ class SearchPathsDialog:
 		if _icon_button(f"{fa_icons.ICON_FA_PLUS}##add-search-folder", "Add folder..."):
 			self._add_dir_dialog = pfd.select_folder("Choose a search folder")
 		imgui.same_line()
-		if _icon_button(fa_icons.ICON_FA_SYNC, "Reload", disabled=self.scanning):
+		if _icon_button(fa_icons.ICON_FA_ARROWS_ROTATE, "Reload", disabled=self.scanning):
 			self.reload()
 
 		if self._scan_status:

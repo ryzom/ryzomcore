@@ -14,7 +14,7 @@ from math import ceil, cos, pi, radians, sin
 
 import numpy
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 from panda3d.core import ClockObject, GeomNode, InternalName, NodePath, Point3, Quat, TransparencyAttrib, Vec3
 
 from pynel.ryzom_shape import MeshMRMSkinned, WindTreeParams
@@ -398,7 +398,7 @@ class ViewportTransformMixin:
 			                self._pivot_axes_visible, square=True, large_font=large_font):
 				self._toggle_pivot_axes()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_ADJUST, "50% object transparency",
+			if _icon_button(fa_icons.ICON_FA_CIRCLE_HALF_STROKE, "50% object transparency",
 			                self._object_transparent, square=True, large_font=large_font):
 				self._toggle_object_transparency()
 			if self._shadow_skin_np is not None or self._shadow_skin_visible:
@@ -676,7 +676,7 @@ class ViewportTransformMixin:
 				self._set_transform_axis(prop, axis_index, new_value)
 
 		imgui.same_line()
-		if _icon_button(fa_icons.ICON_FA_UNDO, f"Reset {label.lower()} (current reference frame only)", square=True):
+		if _icon_button(fa_icons.ICON_FA_ARROW_ROTATE_LEFT, f"Reset {label.lower()} (current reference frame only)", square=True):
 			self._reset_transform_row(prop)
 
 		imgui.pop_id()

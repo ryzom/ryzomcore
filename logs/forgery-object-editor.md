@@ -1,5 +1,88 @@
 # Changelog
 
+## 2026-09-03 — ✨ Real skel/anim lookup for the Skinning preview, FA6 icons, Forgery 3.1.0
+
+Two earlier attempts at a real (non-heuristic) skeleton/animation lookup for
+the Skinning preview's Skeleton/Animation combos never landed. Today's combos
+used to pick "compatible" entries purely by comparing bone-name sets
+(`SearchPathsDialog.compatible_for()`/`compatible_animations_for()`), noisy
+since most humanoid skeletons share the same Bip01 chain.
+
+**Root recovery first**: found while wiring this up that
+`creature_ref.build_anim_cache()` called two `pynel.ryzom_packed_sheets`
+functions (`parse_mode2animset_string_array()`,
+`load_animation_set_list_packed_sheets()`) that didn't exist in the
+`ryzom/pynel` worktree at all. Traced to commit `9d3b956ba2` (31 Aug, "Add
+NPC Mode/animation picker + live playback to Patina"): it touched both
+`nel/tools/forgery/` and `nel/tools/pynel/`, but was committed on
+`ryzom/forgery` instead of `ryzom/pynel` -- the dedicated branch for pynel
+changes -- so `ryzom/pynel` (and anything built from it, including the
+published wheel) never received the pynel-side half. Nothing was actually
+lost (fully reachable from `ryzom/forgery`'s own history); re-applied
+cleanly onto `ryzom/pynel`'s tip (0.8.1 -> 0.9.0, `numpy` dependency added
+for the same commit's batched bone-world-matrix evaluation code).
+
+**`settings.live_data_path`** (`live_data.py`, `LiveDataSetupDialog`): a new,
+Patina-specific mandatory path setting for the Ryzom Live client's own "data"
+folder -- auto-detected via `ryzom.ini` (mirroring ryztart's own
+`RyzomConfigIni.getLocationUser()`/`getServersFromIni()`, `appdirs.user_data_dir("Ryzom", ...)`,
+`[Atys]` section, never a hardcoded path), blocking popup only when
+auto-detection fails.
+
+**`creature_full_index.py`**: builds a `.creature` -> (skel, anim_set_base_name,
+slot/hair shapes) forward index over EVERY entry in `creature.packed_sheets`
+(28545 on a real install, ~full build in a few seconds), inverts it into
+`shape name -> [(creature, skel, anim_set_base_name), ...]`, and resolves real
+per-anim_set_base_name animation lists via
+`creature_ref.build_anim_cache_from_bytes()` (generalized from the curated
+Bind-preview cache to cover every base name found, not just 2). sha1-keyed
+staleness (deliberate exception to this codebase's usual mtime-based cache
+pattern -- game data is fixed, not user-edited) against a cache at
+`config_dir()/live_data_index.json`, rebuilt via a background thread +
+blocking progress popup (`live_data_index_dialog.py`, same pattern as
+`panoply_ui.py`'s bake popup) whenever a source file's hash changes.
+
+Design correction along the way (Nuno): originally planned to key this index
+by `.skel`, but a `.skel` can be shared by several `.creature` each with
+their own `anim_set_base_name` (12/91 skels on real data) -- resolving via
+the `.creature` (what a `.shape` actually belongs to, through its
+equipment-item chain) instead of the `.skel` directly sidesteps that
+ambiguity entirely.
+
+`creature_bind.py`'s `_draw_bone_preview_controls()` now prefers this real
+index (skeleton highlighting, then animation highlighting once a
+real-matched skeleton is chosen) over the old bone-name heuristic, which
+still serves as the fallback for any shape not covered by the index (e.g. a
+custom/mod shape no real `.creature` equips). Two bugs found and fixed while
+validating end to end against real data: the inverted index was keyed by the
+raw filename (with `.shape` extension) while the lookup stripped it, so
+nothing ever matched at all; and clicking a real-cache entry whose case
+didn't match the actual on-disk file's name (`creature.packed_sheets` casing
+is inconsistent, confirmed before for skeleton names, now also for
+animations) crashed instead of falling back gracefully.
+
+Known follow-up, not yet investigated (see project-todos): a real quadruped
+run animation now reachable through this path plays with a wrong root
+orientation (stationary but tilted, not translating) and many shapes float
+above the ground plane -- likely a `pynel.ryzom_animation.evaluate_all_bone_world_matrices()`
+root-bone handling issue never previously exercised (prior testing only ever
+covered the 8 curated humanoid Bind-preview creatures).
+
+**Font Awesome 4 -> 6 migration**: `icons_fontawesome_6` (already bundled in
+`imgui_bundle` as `Font_Awesome_6_Free-Solid-900.otf`, no new dependency)
+replaces FA4 across all 16 files using icons -- fixes several icons that were
+silently blank under FA4 (`ICON_FA_WIND`, `ICON_FA_BONE`, ...) and a
+disabled-button tooltip bug (`imgui.is_item_hovered()` doesn't report a
+disabled item as hovered by default; needs `HoveredFlags_.allow_when_disabled`).
+New `icon_colors.py`: a deterministic (sha1-seeded, not truly random) pastel
+color per icon glyph, applied to every `_icon_button` except `navcube.py`'s
+own gizmo buttons (already color-coded for a different meaning -- forced
+drag/target mode). `Col_.button`/`button_hovered`/`button_active` (`app.py`)
+changed from ImGui's stock blue to neutral gray (was clashing with
+blue-family icon tints), and `_ACTIVE_COLOR` (toggle-on highlight,
+`ui_helpers.py`) changed from blue to light gray, with active icons darkened
+for contrast against that lighter background.
+
 ## 2026-09-03 — ✨ Rebuild CShadowSkin after geometry edits, ground-shadow preview, Forgery 3.0.13
 
 `CShadowSkin` (the shadow-casting proxy mesh trailing a `CMeshMRMSkinned`'s

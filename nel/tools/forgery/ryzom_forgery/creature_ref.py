@@ -253,23 +253,12 @@ def build_cache(
 	# read "FY_HOF_skel.skel" while the real file on disk is
 	# "fy_hof_skel.skel"). Never assume any name here matches another
 	# source's casing -- always lowercase both sides before comparing.
-	name_to_id = {}
-	for sheet_id, sheet_name in sheet_id_names.items():
-		name_to_id.setdefault(sheet_name.lower(), sheet_id)
+	name_to_id = build_name_to_id(sheet_id_names)
 
 	creature_data = ps.load_creature_packed_sheets(creature_packed_sheets)
 	item_data = ps.load_item_packed_sheets(item_packed_sheets)
 	sitem_data = ps.load_item_packed_sheets(sitem_packed_sheets)
 	items_by_id = {**item_data.entries, **sitem_data.entries}
-
-	def resolve_item_shape(id_item: str, race: int, gender: int) -> str:
-		if not id_item:
-			return ""
-		item_id = name_to_id.get(id_item.lower())
-		item = items_by_id.get(item_id) if item_id is not None else None
-		if item is None:
-			return ""
-		return shape_from_item(item, race, gender)
 
 	records: Dict[str, CreatureRecord] = {}
 	for sheet_stem, label in entries:
@@ -279,35 +268,61 @@ def build_cache(
 		if sheet is None:
 			print(f"[creature_ref] {full_name!r} (label {label!r}) not found in creature.packed_sheets, skipped")
 			continue
-
-		slots = {}
-		for slot_name in BODY_SLOTS:
-			equipment = getattr(sheet, slot_name)
-			shape = resolve_item_shape(equipment.id_item, sheet.race, sheet.gender)
-			if shape:
-				slots[slot_name] = shape
-
-		hair = []
-		for equipment in sheet.hair_item_list:
-			shape = resolve_item_shape(equipment.id_item, sheet.race, sheet.gender)
-			if shape:
-				hair.append(shape)
-
-		body_to_bone = {
-			part: getattr(sheet.body_to_bone, part)
-			for part in (
-				"head", "chest", "left_arm", "right_arm", "left_hand",
-				"right_hand", "left_leg", "right_leg", "left_foot", "right_foot",
-			)
-		}
-
-		records[label] = CreatureRecord(
-			name=label, skel=sheet.id_skel_filename, race=sheet.race, gender=sheet.gender,
-			slots=slots, hair=hair, body_to_bone=body_to_bone,
-			anim_set_base_name=sheet.id_anim_set_base_name,
-		)
+		records[label] = creature_record_from_sheet(label, sheet, items_by_id, name_to_id)
 
 	return records
+
+
+def build_name_to_id(sheet_id_names: Dict[int, str]) -> Dict[str, int]:
+	"""Lowercased sheet-name -> CSheetId lookup, shared by build_cache() and
+	creature_full_index.py -- see build_cache()'s own docstring note on why
+	lowercased (sheet_id.bin/Georges casing is inconsistent)."""
+	name_to_id: Dict[str, int] = {}
+	for sheet_id, sheet_name in sheet_id_names.items():
+		name_to_id.setdefault(sheet_name.lower(), sheet_id)
+	return name_to_id
+
+
+def creature_record_from_sheet(label: str, sheet, items_by_id: dict, name_to_id: Dict[str, int]) -> "CreatureRecord":
+	"""Distills one already-parsed CharacterSheet into a CreatureRecord --
+	factored out of build_cache() so creature_full_index.py's uncurated,
+	every-entry build can reuse the exact same field-by-field logic instead
+	of drifting from it."""
+	def resolve_item_shape(id_item: str, race: int, gender: int) -> str:
+		if not id_item:
+			return ""
+		item_id = name_to_id.get(id_item.lower())
+		item = items_by_id.get(item_id) if item_id is not None else None
+		if item is None:
+			return ""
+		return shape_from_item(item, race, gender)
+
+	slots = {}
+	for slot_name in BODY_SLOTS:
+		equipment = getattr(sheet, slot_name)
+		shape = resolve_item_shape(equipment.id_item, sheet.race, sheet.gender)
+		if shape:
+			slots[slot_name] = shape
+
+	hair = []
+	for equipment in sheet.hair_item_list:
+		shape = resolve_item_shape(equipment.id_item, sheet.race, sheet.gender)
+		if shape:
+			hair.append(shape)
+
+	body_to_bone = {
+		part: getattr(sheet.body_to_bone, part)
+		for part in (
+			"head", "chest", "left_arm", "right_arm", "left_hand",
+			"right_hand", "left_leg", "right_leg", "left_foot", "right_foot",
+		)
+	}
+
+	return CreatureRecord(
+		name=label, skel=sheet.id_skel_filename, race=sheet.race, gender=sheet.gender,
+		slots=slots, hair=hair, body_to_bone=body_to_bone,
+		anim_set_base_name=sheet.id_anim_set_base_name,
+	)
 
 
 _ITEM_SHAPE_FIELDS = (
@@ -437,10 +452,20 @@ def build_anim_cache(
 	Not run at Patina runtime -- offline-generated (like
 	shape_slot_index.json) into the bundled creatures_anim_cache.json via
 	save_anim_cache()."""
+	return build_anim_cache_from_bytes(
+		records, Path(animset_list_packed_sheets_path).read_bytes(), Path(mode2animset_path).read_bytes())
+
+
+def build_anim_cache_from_bytes(
+	records: Dict[str, "CreatureRecord"], animset_list_packed_sheets_bytes: bytes, mode2animset_bytes: bytes,
+) -> Dict[str, Dict[str, Dict[str, str]]]:
+	"""Same as build_anim_cache(), but from already-read bytes -- needed by
+	creature_full_index.py, whose source files may come from inside a .bnp
+	archive (no real on-disk path to hand build_anim_cache() instead)."""
 	from pynel import ryzom_packed_sheets as ps
 
-	mode_fragments = ps.parse_mode2animset_string_array(Path(mode2animset_path).read_bytes())
-	packed = ps.load_animation_set_list_packed_sheets(animset_list_packed_sheets_path)
+	mode_fragments = ps.parse_mode2animset_string_array(mode2animset_bytes)
+	packed = ps.parse_animation_set_list_packed_sheets(animset_list_packed_sheets_bytes)
 	if len(packed.entries) != 1:
 		raise ValueError(f"expected exactly 1 top-level ANIMATION_SET_LIST entry, got {len(packed.entries)}")
 	sheet = next(iter(packed.entries.values()))

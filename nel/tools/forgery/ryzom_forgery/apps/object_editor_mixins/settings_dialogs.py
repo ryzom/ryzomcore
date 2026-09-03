@@ -15,7 +15,7 @@ launched).
 
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from pynel import repository_paths
 
@@ -318,7 +318,7 @@ class SettingsDialogsMixin:
 		if writable:
 			save_path = self._workspace_shape_save_path()
 			imgui.begin_disabled(save_path is None)
-			if _colored_button(f"{fa_icons.ICON_FA_SAVE} Save", _SAVE_BUTTON_COLOR):
+			if _colored_button(f"{fa_icons.ICON_FA_FLOPPY_DISK} Save", _SAVE_BUTTON_COLOR):
 				self._on_save_clicked()
 			imgui.end_disabled()
 			if imgui.is_item_hovered() and save_path is None:

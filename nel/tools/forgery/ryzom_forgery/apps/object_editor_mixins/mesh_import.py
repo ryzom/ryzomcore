@@ -8,7 +8,7 @@ Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
 itself -- see ui_helpers.py's module docstring for why.
 """
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 from panda3d.core import Quat
 
 from pynel.ryzom_shape import ShapeFile

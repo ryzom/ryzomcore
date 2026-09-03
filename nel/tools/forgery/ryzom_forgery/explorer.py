@@ -6,12 +6,13 @@ from typing import Optional
 
 from panda3d.core import KeyboardButton, PNMImage, Texture as PandaTexture
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 
 from pynel.ryzom_bnp import BnpReader, BnpError
 
 from . import settings as app_settings
 from .commands import CommandRegistry
+from .icon_colors import pastel_color_for
 
 BNP_EXTENSIONS = (".bnp", ".bnpe")
 DEFAULT_FILTER = "*"
@@ -21,12 +22,7 @@ FILTER_PRESETS = ["*.shape", "*.skel", "*.anim", "*"]
 # animation clip" the way folders/.bnp archives already have their own icon.
 _LEAF_ICONS = {
 	".shape": fa_icons.ICON_FA_CUBE,
-	# ICON_FA_BONE/ICON_FA_WALKING (tried first) are Font Awesome 5 additions --
-	# the actual font file loaded here (app.py's _ICON_FONT_PATH,
-	# fontawesome-webfont.ttf) is genuine FA 4.7, which doesn't have those
-	# glyphs at all (silently invisible, not even a fallback box). Stuck to
-	# icons confirmed present in the classic FA4 set instead.
-	".skel": fa_icons.ICON_FA_MALE,
+	".skel": fa_icons.ICON_FA_PERSON,
 	".anim": fa_icons.ICON_FA_FILM,
 }
 _DEFAULT_LEAF_ICON = fa_icons.ICON_FA_FILE
@@ -47,11 +43,16 @@ _FAVORITE_STAR_COLOR = (1.0, 0.8, 0.0, 1.0)
 _NON_FAVORITE_STAR_COLOR = (0.5, 0.5, 0.5, 1.0)
 
 
-def _icon_button(icon, tooltip):
+def _icon_button(icon, tooltip, color=None):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
-	self-explanatory."""
+	self-explanatory. Tinted a deterministic pastel color (see icon_colors.py)
+	unless `color` is given -- needed by _draw_favorites()'s star, whose
+	gold/gray already means something (favorited or not), which a pastel
+	tint would otherwise silently override."""
+	imgui.push_style_color(imgui.Col_.text.value, color if color is not None else pastel_color_for(icon))
 	clicked = imgui.button(icon)
+	imgui.pop_style_color()
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(tooltip)
 	return clicked
@@ -368,7 +369,7 @@ class Explorer:
 					imgui.tree_pop()
 			elif entry.suffix.lower() in BNP_EXTENSIONS:
 				opened = imgui.tree_node_ex(
-					str(entry), imgui.TreeNodeFlags_.open_on_arrow.value, f"{fa_icons.ICON_FA_ARCHIVE} {entry.name}")
+					str(entry), imgui.TreeNodeFlags_.open_on_arrow.value, f"{fa_icons.ICON_FA_BOX_ARCHIVE} {entry.name}")
 				if opened:
 					for bnp_entry in self._bnp_entries(entry):
 						self._draw_leaf(
@@ -379,11 +380,10 @@ class Explorer:
 
 	def _draw_favorites(self):
 		is_favorite = str(self.root) in self._favorites
-		imgui.push_style_color(imgui.Col_.text.value, _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR)
 		tooltip = "Remove current folder from favorites" if is_favorite else "Add current folder to favorites"
-		if _icon_button(fa_icons.ICON_FA_STAR, tooltip):
+		star_color = _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR
+		if _icon_button(fa_icons.ICON_FA_STAR, tooltip, color=star_color):
 			self._toggle_favorite(str(self.root))
-		imgui.pop_style_color()
 
 		imgui.same_line()
 		if imgui.begin_combo("##favorites", "Favorites"):
@@ -426,7 +426,7 @@ class Explorer:
 		self._draw_pinned_virtual_categories()
 		imgui.separator()
 
-		if _icon_button(fa_icons.ICON_FA_SYNC, "Refresh"):
+		if _icon_button(fa_icons.ICON_FA_ARROWS_ROTATE, "Refresh"):
 			self.refresh()
 		if self.extra_toolbar is not None:
 			imgui.same_line()
@@ -521,7 +521,7 @@ class Explorer:
 			elif entry.suffix.lower() in BNP_EXTENSIONS:
 				if not self._matches_filters(entry.name) and not self._bnp_has_visible_entries(entry):
 					continue
-				clicked, _ = imgui.selectable(f"{fa_icons.ICON_FA_ARCHIVE} {entry.name}", False)
+				clicked, _ = imgui.selectable(f"{fa_icons.ICON_FA_BOX_ARCHIVE} {entry.name}", False)
 				if clicked:
 					self._enter_bnp(entry)
 			elif self._matches_filters(entry.name):

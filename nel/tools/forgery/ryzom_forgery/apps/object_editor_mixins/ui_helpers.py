@@ -16,7 +16,9 @@ module (never from each other), avoids the cycle entirely.
 
 from imgui_bundle import imgui
 
-_ACTIVE_COLOR = (0.26, 0.59, 0.98, 0.8)  # blue -- default "on" highlight
+from ryzom_forgery.icon_colors import darken, pastel_color_for
+
+_ACTIVE_COLOR = (0.7, 0.7, 0.7, 1.0)  # light gray -- default "on" highlight, matches the button family's own gray scale (app.py) instead of clashing with it as ImGui's stock blue used to
 
 _VIEWPORT_TOGGLE_MARGIN_PX = 10
 _OBJECT_TRANSPARENCY_ALPHA = 0.5
@@ -80,9 +82,18 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 	pair (app.large_icon_font, app.large_icon_font_size) pushed around just
 	the button glyph itself -- NOT the tooltip below, which needs the normal
 	text font: that font is icon-glyphs-only, so a tooltip drawn under it
-	renders as blank/invisible text instead of readable words."""
+	renders as blank/invisible text instead of readable words. The glyph
+	itself is tinted a deterministic pastel color (see icon_colors.py) --
+	independent of `active`'s own button-background highlight, both can be
+	on at once (confirmed with Nuno, 2026-09-03: no conflict between the
+	two signals). While `active`, that pastel is darkened first -- the
+	light `active_color` background (gray by default, see _ACTIVE_COLOR)
+	would otherwise wash out a normal light pastel glyph (Nuno, 2026-09-03)."""
+	icon_color = pastel_color_for(icon)
 	if active:
 		imgui.push_style_color(imgui.Col_.button.value, active_color)
+		icon_color = darken(icon_color)
+	imgui.push_style_color(imgui.Col_.text.value, icon_color)
 	if large_font is not None:
 		imgui.push_font(*large_font)
 	imgui.begin_disabled(disabled)
@@ -91,9 +102,16 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 	imgui.end_disabled()
 	if large_font is not None:
 		imgui.pop_font()
+	imgui.pop_style_color()
 	if active:
 		imgui.pop_style_color()
-	if imgui.is_item_hovered():
+	# allow_when_disabled: ImGui's default IsItemHovered() reports False
+	# for a disabled item, so without this a disabled icon button (e.g.
+	# _draw_panel_taskbar()'s Wind/Skinning/Bind entries when not
+	# applicable to the loaded shape) never shows its tooltip -- exactly
+	# when a user hovering a grayed-out button most wants to know why
+	# (found by Nuno, 2026-09-03).
+	if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
 		imgui.set_tooltip(tooltip)
 	return clicked
 

@@ -25,8 +25,9 @@ principal (navcube.py).
  `_make_face_geom` (navcube.py), `_make_face_collision`
  (navcube.py) — génèrent quads + polygones de collision par face.
 - `_draw_rotate_icon` (navcube.py) — dessine une icône flèche circulaire
- à la main (arc + triangle) car Font Awesome 4 n'a pas de glyphe
- rotation-gauche/droite dédié.
+ à la main (arc + triangle) car aucun glyphe Font Awesome (FA4 ou FA6) ne
+ distingue rotation horaire/anti-horaire (les glyphes `rotate*` sont
+ génériques, non directionnels).
 - `_orbit_offset(heading, pitch, distance)` (navcube.py) — même formule
  que `OrbitCamera._update_camera_pos`, pour que la caméra du gizmo
  tourne en lock-step avec la vraie.

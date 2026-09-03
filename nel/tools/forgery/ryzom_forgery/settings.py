@@ -137,6 +137,16 @@ class Settings:
 	# FullHD and 4K displays, since ryztart's own auto-detection isn't
 	# always available/correct (e.g. launched directly via dev.sh).
 	dpi_scale: float = 2.0
+	# Root of the Ryzom Live client's own game-data folder (creature.packed_sheets,
+	# item.packed_sheets, sheet_id.bin, .bnp archives, etc) -- distinct from
+	# both workspaces_root (Forgery's own editable data) and search_paths
+	# (arbitrary extra asset folders): this one is specifically the real
+	# client install's "data" folder, needed to build the real skel/anim
+	# lookup caches (see creature_ref.py, live_data.py). Auto-detected at
+	# first launch via ryzom.ini (see live_data.py's detect_atys_live_data_path())
+	# when possible -- see live_data_setup_dialog.py -- None until then or
+	# until the user sets/confirms it.
+	live_data_path: Optional[str] = None
 
 
 def load() -> Settings:
@@ -165,6 +175,7 @@ def load() -> Settings:
 	settings.ui_font_name = data.get("ui_font_name") or settings.ui_font_name
 	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
 	settings.dpi_scale = data.get("dpi_scale") or settings.dpi_scale
+	settings.live_data_path = data.get("live_data_path") or None
 
 	settings.search_paths = [
 		SearchPathDir(path=entry["path"], recursive=bool(entry.get("recursive", False)))
@@ -219,6 +230,8 @@ def save(settings: Settings) -> None:
 	doc["ui_font_name"] = settings.ui_font_name
 	doc["ui_font_size"] = settings.ui_font_size
 	doc["dpi_scale"] = settings.dpi_scale
+	if settings.live_data_path is not None:
+		doc["live_data_path"] = settings.live_data_path
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]

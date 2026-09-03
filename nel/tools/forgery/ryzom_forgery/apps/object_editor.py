@@ -13,7 +13,7 @@ import numpy
 
 from panda3d.core import NodePath, Shader, Texture as PandaTexture
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 
 from ryzom_forgery.app import _AVAILABLE_FONTS, _dpi_scale, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
@@ -31,6 +31,8 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher, TEX_EXTENSIONS
 from ryzom_forgery import virtual_categories
+from ryzom_forgery.live_data_index_dialog import LiveDataIndexDialog
+from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog, _truncate_path_to_width
 from ryzom_forgery.workspace_sync import WorkspaceSyncWatcher, SYNCED_EXTENSIONS
 from ryzom_forgery.workspace_watch import WorkspaceWatcher
@@ -438,6 +440,13 @@ class ObjectEditorApp(
 		self.workspace_setup_dialog = WorkspaceSetupDialog()
 		self.workspace_setup_dialog.on_dpi_preview_changed = self.set_live_ui_scale_preview
 		self.workspace_setup_dialog.on_setup_finished = self.relaunch
+		# Patina-only (real skel/anim lookups, see creature_ref.py/live_data.py)
+		# -- deliberately not a generic ForgeryApp field like
+		# workspace_setup_dialog above, since other Forgery apps have no use
+		# for it and shouldn't be blocked by its popup.
+		self.live_data_dialog = LiveDataSetupDialog()
+		self.live_data_index_dialog = LiveDataIndexDialog()
+		self.live_data_dialog.on_refresh_requested = self._force_rebuild_live_data_index
 		# import_watcher/workspace_sync/tex_dds_sync each keep their own
 		# conversion/sync logic and state, but share a single filesystem
 		# watch (self.workspace_watch, one Observer/one debounce handler for
@@ -690,6 +699,24 @@ class ObjectEditorApp(
 	def panel_title(self):
 		return self._shape_source_name or "Panel"
 
+	def draw_ui(self):
+		"""Adds live_data_dialog's own mandatory-popup draw on top of
+		ForgeryApp.draw_ui()'s generic workspace_setup_dialog one -- see
+		live_data_dialog's own field docstring for why this is Patina-only
+		rather than a generic ForgeryApp field/call."""
+		super().draw_ui()
+		self.live_data_dialog.draw()
+		# Only meaningful once a live_data_path is actually configured --
+		# ensure_built() is a no-op on None, same "nothing to check yet"
+		# gate as the popup above only opening once setup is needed.
+		self.live_data_index_dialog.ensure_built(self.live_data_dialog.live_data_dir)
+		self.live_data_index_dialog.draw()
+
+	def _force_rebuild_live_data_index(self):
+		"""Settings tab's refresh button (live_data_setup_dialog.py's
+		on_refresh_requested)."""
+		self.live_data_index_dialog.force_rebuild(self.live_data_dialog.live_data_dir)
+
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
 		self._draw_transform_panel()
@@ -739,7 +766,7 @@ class ObjectEditorApp(
 					imgui.end_tab_item()
 				_pop_tab_color()
 				_push_tab_color(_TAB_COLOR_MATERIALS)
-				if _begin_tab_item_with_icon(fa_icons.ICON_FA_PAINT_BRUSH, "Materials"):
+				if _begin_tab_item_with_icon(fa_icons.ICON_FA_PAINTBRUSH, "Materials"):
 					self._draw_materials_tab()
 					imgui.end_tab_item()
 				_pop_tab_color()
@@ -749,13 +776,15 @@ class ObjectEditorApp(
 					imgui.end_tab_item()
 				_pop_tab_color()
 			_push_tab_color(_TAB_COLOR_SETTINGS)
-			if _begin_tab_item_with_icon(fa_icons.ICON_FA_COG, "Settings", flags=self._consume_settings_tab_flags()):
+			if _begin_tab_item_with_icon(fa_icons.ICON_FA_GEAR, "Settings", flags=self._consume_settings_tab_flags()):
 				# Workspaces folder folded in here (not its own header) --
 				# it's a path setting like search_paths, just the one
 				# special-cased root instead of a priority-ordered list.
 				self._consume_settings_section_open("Paths")
-				if imgui.collapsing_header(f"{fa_icons.ICON_FA_MAP_SIGNS} Paths"):
+				if imgui.collapsing_header(f"{fa_icons.ICON_FA_SIGNS_POST} Paths"):
 					self.workspace_setup_dialog.draw_settings_content()
+					imgui.separator()
+					self.live_data_dialog.draw_settings_content()
 					imgui.separator()
 					self._draw_exclusion_rules_settings()
 					imgui.separator()

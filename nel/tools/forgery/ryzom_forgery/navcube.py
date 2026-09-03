@@ -16,7 +16,7 @@ from panda3d.core import (
 	TextNode, TransparencyAttrib, Vec3,
 )
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 
 from .camera import object_targeted
 
@@ -131,8 +131,9 @@ def _make_face_collision(axis, half=_HALF):
 def _draw_rotate_icon(draw_list, center, radius, color, clockwise):
 	"""Draws a circular-arrow roll icon (an open arc + an arrowhead at its
 	leading end) into an ImGui draw list. Hand-drawn rather than a font glyph
-	-- Font Awesome 4 (the only icon font this project ships) has no
-	dedicated rotate-left/rotate-right glyph. Angles are negated from the
+	-- no single Font Awesome glyph distinguishes clockwise from
+	counter-clockwise the way this needs (ICON_FA_ROTATE-family icons are
+	generic/undirected). Angles are negated from the
 	"natural" -50/230 degree sweep to mirror the icon vertically (ImGui's
 	y-down screen space would otherwise draw it upside down relative to how
 	a clock face reads)."""
@@ -493,13 +494,13 @@ class NavigationCube:
 		draw_list = imgui.get_window_draw_list()
 		color = imgui.get_color_u32(_ACTIVE_COLOR if forced is not None else imgui.Col_.text.value)
 		if mode == "rotate":
-			# No dedicated Font Awesome 4 rotate glyph -- see _draw_rotate_icon().
+			# No single directional rotate glyph -- see _draw_rotate_icon().
 			_draw_rotate_icon(draw_list, center, size / 2.0 - 5.0, color, clockwise=True)
 		else:
 			icon = {
-				"move": fa_icons.ICON_FA_ARROWS_ALT,
+				"move": fa_icons.ICON_FA_UP_RIGHT_AND_DOWN_LEFT_FROM_CENTER,
 				"scale": fa_icons.ICON_FA_EXPAND,
-			}.get(mode, fa_icons.ICON_FA_MOUSE_POINTER)
+			}.get(mode, fa_icons.ICON_FA_ARROW_POINTER)
 			text_size = imgui.calc_text_size(icon)
 			draw_list.add_text((center[0] - text_size.x / 2.0, center[1] - text_size.y / 2.0), color, icon)
 		if imgui.is_item_hovered():
@@ -599,7 +600,7 @@ class NavigationCube:
 			# Home targets the object instead of the camera -- mirrors the
 			# same modifier ObjectManipulator/OrbitCamera use to pick which
 			# one a drag acts on.
-			if self._icon_button(fa_icons.ICON_FA_HOME, "Reset view (Ctrl: reset object position/rotation/scale)"):
+			if self._icon_button(fa_icons.ICON_FA_HOUSE, "Reset view (Ctrl: reset object position/rotation/scale)"):
 				if object_targeted(self.app):
 					self.app.reset_object_transform()
 				else:

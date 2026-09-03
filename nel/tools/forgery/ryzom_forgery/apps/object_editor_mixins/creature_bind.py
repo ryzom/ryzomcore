@@ -16,7 +16,7 @@ import threading
 import time
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
 from panda3d.core import ClockObject, GeomNode, Mat4, Quat, Vec3
 
 from pynel.ryzom_animation import (
@@ -24,6 +24,7 @@ from pynel.ryzom_animation import (
 )
 from pynel.ryzom_shape import MeshMRMSkinned, ShapeParseError, SkeletonShape, parse_shape
 
+from ryzom_forgery import creature_full_index
 from ryzom_forgery import creature_ref
 from ryzom_forgery import panoply
 from ryzom_forgery import settings as app_settings
@@ -360,64 +361,131 @@ class CreatureBindMixin:
 		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
 		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Skinning preview", flags=flags):
-			# Every .skel found by the last scan (see SearchPathsDialog.reload(),
-			# triggered by the reload icon below), sorted first/highlighted
-			# green when it's actually compatible with the loaded shape's own
-			# skinning bones -- picking an incompatible one is still allowed,
-			# same as the engine itself doesn't refuse an incompatible bind,
-			# just remaps missing bones to the root (CSkeletonModel::remapSkinBones).
+			# Real data first: if the loaded shape's own file name is
+			# referenced by a real .creature's equipment (see
+			# creature_full_index.py -- built from creature.packed_sheets/
+			# item.packed_sheets/sitem.packed_sheets, not a guess), that
+			# creature's own skel is the actual answer, no heuristic needed.
+			# Falls back to the old bone-name-subset heuristic
+			# (SearchPathsDialog.compatible_for()) only when the shape isn't
+			# in that index at all (e.g. a custom/mod shape no real
+			# .creature equips) -- picking an incompatible one either way is
+			# still allowed, same as the engine itself doesn't refuse an
+			# incompatible bind, just remaps missing bones to the root
+			# (CSkeletonModel::remapSkinBones).
+			real_shape_matches = (
+				creature_full_index.creatures_for_shape(self._shape_source_name) if self._shape_source_name else [])
+			real_skels = sorted({skel for _, skel, _ in real_shape_matches if skel})
 			scanned_names = self.search_paths_dialog.scanned_skeleton_names()
-			compatible_names = set(self.search_paths_dialog.compatible_for(shape_bones))
+			compatible_names = (
+				set(real_skels) if real_skels else set(self.search_paths_dialog.compatible_for(shape_bones)))
 			# Compatible ones first (still sorted among themselves), then the
 			# rest -- the match everyone actually wants shouldn't be buried
-			# alphabetically among dozens of irrelevant skeletons.
-			ordered_names = sorted(compatible_names) + sorted(name for name in scanned_names if name not in compatible_names)
+			# alphabetically among dozens of irrelevant skeletons. Case-insensitive
+			# membership -- real_skels comes from creature.packed_sheets data,
+			# which doesn't necessarily match the real on-disk file's own case
+			# (confirmed 2026-08-30: "FY_HOF_skel.skel" vs real "fy_hof_skel.skel").
+			compatible_lower = {name.lower() for name in compatible_names}
+			ordered_names = (
+				sorted(compatible_names)
+				+ sorted(name for name in scanned_names if name.lower() not in compatible_lower))
 			imgui.set_next_item_width(220)
 			preview = self._bone_preview_skeleton_name or "(choose a skeleton)"
 			if imgui.begin_combo("##skeleton-combo", preview):
 				for name in ordered_names:
-					compatible = name in compatible_names
+					compatible = name.lower() in compatible_lower
 					if compatible:
 						imgui.push_style_color(imgui.Col_.text.value, _COMPATIBLE_COLOR)
 					clicked, _ = imgui.selectable(name, name == self._bone_preview_skeleton_name)
 					if compatible:
 						imgui.pop_style_color()
 					if clicked:
-						self._apply_bone_preview_skeleton(self.search_paths_dialog.skeleton_for(name), name)
+						# name may come from real_skels (creature_full_index.py),
+						# whose case doesn't necessarily match the scanned
+						# on-disk file (see _resolve_scanned_skeleton_name()'s
+						# own docstring) -- resolve first, same reasoning as
+						# the Animation combo's own click handler below.
+						resolved_name = self._resolve_scanned_skeleton_name(name)
+						skeleton = self.search_paths_dialog.skeleton_for(resolved_name) if resolved_name else None
+						if skeleton is not None:
+							self._apply_bone_preview_skeleton(skeleton, name)
+						else:
+							self._save_status = f"Skeleton not found in scanned search paths: {name}"
+							print(f"[object_editor] {self._save_status}")
 				imgui.end_combo()
 			imgui.same_line()
 			if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##skeleton-file", "Load a skeleton from disk..."):
 				self._skeleton_file_dialog = pfd.open_file("Choose a .skel file", "", ["Ryzom skeleton", "*.skel"])
 			imgui.same_line()
 			if _icon_button(
-					fa_icons.ICON_FA_SYNC, "Rescan the configured search paths",
+					fa_icons.ICON_FA_ARROWS_ROTATE, "Rescan the configured search paths",
 					disabled=self.search_paths_dialog.scanning):
 				self.search_paths_dialog.reload()
 			if self.search_paths_dialog.scanning:
 				imgui.text_disabled("Scanning search paths...")
 
-			# Same idea as the Skeleton combo above, but the other way around
-			# (see SearchPathsDialog.compatible_animations_for()): an
-			# animation is compatible when ITS OWN tracked bones are all
-			# present in the *currently chosen* skeleton -- so this list is
-			# empty until a skeleton is picked.
+			# Same real-data-first idea as the Skeleton combo above: if the
+			# *currently chosen* skeleton is one of real_skels (a real
+			# creature's own skel, not a heuristic guess), its real
+			# anim_set_base_name(s) resolve to the actual .anim files that
+			# creature plays (creature_full_index.py's own "anim_cache",
+			# generalized from creature_ref.build_anim_cache() to every
+			# base name found, not just the curated 2) -- flattened across
+			# every mode/state. Falls back to the old bone-subset heuristic
+			# (SearchPathsDialog.compatible_animations_for(): an animation is
+			# "compatible" when ITS OWN tracked bones are all present in the
+			# chosen skeleton) only when the chosen skeleton isn't a real
+			# match for this shape.
+			chosen_skel_lower = (self._bone_preview_skeleton_name or "").lower()
+			real_base_names = sorted({
+				base for _, skel, base in real_shape_matches
+				if skel.lower() == chosen_skel_lower and base})
+			if real_base_names:
+				anim_cache = creature_full_index.load_index().get("anim_cache", {})
+				compatible_animations = {
+					anim_name
+					for base in real_base_names
+					for states in anim_cache.get(base, {}).values()
+					for anim_name in states.values()}
+			else:
+				compatible_animations = set(
+					self.search_paths_dialog.compatible_animations_for(self._bone_preview_skeleton))
 			animation_names = self.search_paths_dialog.scanned_animation_names()
-			compatible_animations = set(self.search_paths_dialog.compatible_animations_for(self._bone_preview_skeleton))
+			# Case-insensitive membership -- creature.packed_sheets/animset_list
+			# data doesn't necessarily match the real on-disk file's own case
+			# (same class of mismatch as _resolve_scanned_skeleton_name()'s
+			# own docstring), so a plain `in` check would miss real matches.
+			compatible_lower = {name.lower() for name in compatible_animations}
 			ordered_animations = (
 				sorted(compatible_animations)
-				+ sorted(name for name in animation_names if name not in compatible_animations))
+				+ sorted(name for name in animation_names if name.lower() not in compatible_lower))
 			imgui.set_next_item_width(220)
 			preview = self._bone_preview_animation_name or "(none, bind pose)"
 			if imgui.begin_combo("##animation-combo", preview):
 				for name in ordered_animations:
-					compatible = name in compatible_animations
+					compatible = name.lower() in compatible_lower
 					if compatible:
 						imgui.push_style_color(imgui.Col_.text.value, _COMPATIBLE_COLOR)
 					clicked, _ = imgui.selectable(name, name == self._bone_preview_animation_name)
 					if compatible:
 						imgui.pop_style_color()
 					if clicked:
-						self._apply_bone_preview_animation(self.search_paths_dialog.animation_for(name), name)
+						# name may come from the real anim_cache (creature_full_index.py),
+						# whose case doesn't necessarily match the scanned
+						# on-disk file (see _resolve_scanned_animation_name()'s
+						# own docstring) -- resolve first, and guard against
+						# a real-cache entry that isn't actually scanned/
+						# present at all (animation_for() -> None), which
+						# _apply_bone_preview_animation() isn't meant to
+						# handle (see its sibling _apply_bone_preview_animation_bytes()'s
+						# own parse-failure guard).
+						resolved_name = self._resolve_scanned_animation_name(name)
+						anim = self.search_paths_dialog.animation_for(resolved_name) if resolved_name else None
+						if anim is not None:
+							self._apply_bone_preview_animation(anim, name)
+						else:
+							self._save_status = f"Animation not found in scanned search paths: {name}"
+							print(f"[object_editor] {self._save_status}")
 				imgui.end_combo()
 			imgui.same_line()
 			if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##animation-file", "Load an animation from disk..."):
@@ -435,7 +503,7 @@ class CreatureBindMixin:
 				if changed:
 					self._bone_preview_time = new_time
 
-			if _icon_button(fa_icons.ICON_FA_TIMES, "Unload skeleton/animation, stop preview"):
+			if _icon_button(fa_icons.ICON_FA_XMARK, "Unload skeleton/animation, stop preview"):
 				self._unload_bone_preview()
 			self._bone_preview_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
@@ -545,6 +613,22 @@ class CreatureBindMixin:
 		name, or None if nothing matches even case-insensitively."""
 		wanted_lower = wanted.lower()
 		for name in self.search_paths_dialog.scanned_skeleton_names():
+			if name.lower() == wanted_lower:
+				return name
+		return None
+
+	def _resolve_scanned_animation_name(self, wanted):
+		"""Same case-insensitive resolution as _resolve_scanned_skeleton_name(),
+		for animation names -- needed before calling
+		SearchPathsDialog.animation_for(), which also indexes by exact
+		on-disk name. Without this, clicking a real anim_cache entry (see
+		creature_full_index.py) whose case doesn't match the scanned file
+		(confirmed 2026-09-03: e.g. "FO_S3_carnitree_Atk1.anim" from the
+		cache vs "fo_s3_carnitree_atk1.anim" on disk) made animation_for()
+		return None, which _apply_bone_preview_animation() then crashed on
+		(animation_duration(None))."""
+		wanted_lower = wanted.lower()
+		for name in self.search_paths_dialog.scanned_animation_names():
 			if name.lower() == wanted_lower:
 				return name
 		return None
@@ -1101,14 +1185,14 @@ class CreatureBindMixin:
 			if has_override:
 				editor_path = app_settings.load().text_editor_path
 				tooltip = "Edit this workspace's creatures_ref.txt in the configured text editor"
-				if _icon_button(f"{fa_icons.ICON_FA_EDIT}##creatures-ref", tooltip):
+				if _icon_button(f"{fa_icons.ICON_FA_PEN_TO_SQUARE}##creatures-ref", tooltip):
 					if not editor_path:
 						self.request_settings_attention("Tools", "text_editor_path")
 					else:
 						subprocess.Popen([editor_path, str(creature_ref.workspace_list_path(workspace_dir))])
 			else:
 				tooltip = "Copy the bundled creatures_ref.txt into this workspace, to track more creatures"
-				if _icon_button(f"{fa_icons.ICON_FA_COG}##creatures-ref", tooltip, disabled=workspace_dir is None):
+				if _icon_button(f"{fa_icons.ICON_FA_GEAR}##creatures-ref", tooltip, disabled=workspace_dir is None):
 					self._copy_creatures_ref_to_workspace()
 
 			# Poses the standing reference against a real animation instead of
@@ -1167,7 +1251,7 @@ class CreatureBindMixin:
 							was_hidden = not self._show_assembled_creature
 							self._show_assembled_creature = True
 							# Turning visibility on here (rather than via the
-							# ICON_FA_MALE toggle) needs the expensive full
+							# ICON_FA_PERSON toggle) needs the expensive full
 							# rebuild first -- _assembled_creature_base_nodes
 							# is empty/stale while hidden (see
 							# _rebuild_assembled_creature()'s early-return).
@@ -1196,7 +1280,7 @@ class CreatureBindMixin:
 					imgui.end_combo()
 
 			if _icon_button(
-					fa_icons.ICON_FA_MALE, "Show this creature fully assembled as a standing reference",
+					fa_icons.ICON_FA_PERSON, "Show this creature fully assembled as a standing reference",
 					self._show_assembled_creature, disabled=not self._bind_creature_name):
 				self._show_assembled_creature = not self._show_assembled_creature
 				self._rebuild_assembled_creature()

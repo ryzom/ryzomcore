@@ -21,11 +21,17 @@ from .splash import Splash
 from .sysinfo import SysInfoBar
 from .workspace_setup_dialog import WorkspaceSetupDialog
 
-# Font Awesome 4 (the only icon font imgui_bundle ships a .ttf for), merged
-# into the default font so any tool app can use icons_fontawesome_4's
+# Font Awesome 6 Solid -- imgui_bundle bundles this .otf too (not just the
+# older FA4 .ttf a stale comment here used to claim was "the only one"),
+# merged into the default font so any tool app can use icons_fontawesome_6's
 # ICON_FA_* glyphs in a normal imgui.text/button/etc call instead of a text
-# label -- the default ImGui font alone has no icon glyphs at all.
-_ICON_FONT_PATH = Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts" / "fontawesome-webfont.ttf"
+# label -- the default ImGui font alone has no icon glyphs at all. Switched
+# from FA4 2026-09-03 (Nuno): FA4 kept missing icons Forgery actually wanted
+# (wind, bone, sync, home, save, ...) -- FA6 Solid covers every ICON_FA_*
+# name used across this codebase, see the icons_fontawesome_6 module for the
+# full up-to-date list instead of guessing from FA4-era names.
+_ICON_FONT_PATH = (
+	Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts" / "Font_Awesome_6_Free-Solid-900.otf")
 _ICON_FONT_SIZE = 14.0
 
 # UI text font choices offered in Settings (see Settings.ui_font_name/
@@ -165,6 +171,16 @@ class ForgeryApp(ShowBase):
 		# crisp/solid instead.
 		style.set_color_(imgui.Col_.window_bg.value, (0.06, 0.06, 0.06, 1.0))
 		style.set_color_(imgui.Col_.popup_bg.value, (0.08, 0.08, 0.08, 1.0))
+		# Dear ImGui's stock dark theme's default Button color is itself a
+		# blue (~#4296fa) -- fought for contrast against icon_colors.py's own
+		# blue/sky/indigo pastel tints (an icon glyph in that hue family all
+		# but disappeared into its own button's idle background). Neutral
+		# gray instead, distinct from window_bg/popup_bg above, so every
+		# icon color (and the existing blue _ACTIVE_COLOR toggle-highlight,
+		# see ui_helpers.py) reads clearly against it (Nuno, 2026-09-03).
+		style.set_color_(imgui.Col_.button.value, (0.2, 0.2, 0.2, 1.0))
+		style.set_color_(imgui.Col_.button_hovered.value, (0.28, 0.28, 0.28, 1.0))
+		style.set_color_(imgui.Col_.button_active.value, (0.35, 0.35, 0.35, 1.0))
 		# ModalWindowDimBg is meant to only dim whatever's *behind* a modal
 		# popup -- in this rendering pipeline it was instead blending over
 		# the modal's own content too (confirmed: a pushed pure-black text

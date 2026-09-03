@@ -14,7 +14,7 @@ import subprocess
 import threading
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 from panda3d.core import PNMImage
 
 from pynel import repository_paths
@@ -344,14 +344,14 @@ class PanoplyUIMixin:
 		has_override = workspace_dir is not None and panoply_config.workspace_cfg_path(workspace_dir).is_file()
 		if has_override:
 			editor_path = app_settings.load().text_editor_path
-			if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this workspace's panoply.cfg in the configured text editor"):
+			if _icon_button(fa_icons.ICON_FA_PEN_TO_SQUARE, "Edit this workspace's panoply.cfg in the configured text editor"):
 				if not editor_path:
 					self.request_settings_attention("Tools", "text_editor_path")
 				else:
 					subprocess.Popen([editor_path, str(panoply_config.workspace_cfg_path(workspace_dir))])
 		else:
 			tooltip = "Copy the bundled panoply.cfg into this workspace, to edit its colors"
-			if _icon_button(fa_icons.ICON_FA_COG, tooltip, disabled=workspace_dir is None):
+			if _icon_button(fa_icons.ICON_FA_GEAR, tooltip, disabled=workspace_dir is None):
 				self._copy_panoply_cfg_to_workspace()
 		imgui.same_line()
 		if _icon_button(

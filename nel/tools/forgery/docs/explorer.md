@@ -97,12 +97,12 @@ en plus ou à la place.
  `_decode_thumbnail_worker` importe `load_panda_texture` localement plutôt
  qu'en tête de module (`explorer.py`), pour éviter de transformer ce
  cycle en import impossible.
-- **Icônes FA4, pas FA5** : les glyphes `.skel`/`.anim` visés initialement
- (`ICON_FA_BONE`, `ICON_FA_WALKING`) n'existent pas dans la police FA 4.7
- réellement chargée par l'app — ils restent invisibles sans même un
- rectangle de repli. Le code utilise donc `ICON_FA_MALE`/`ICON_FA_FILM`
- (`explorer.py`). Toute nouvelle icône doit être vérifiée dans la
- police FA4 réellement embarquée avant utilisation.
+- **Police d'icônes = FA6 Solid** (depuis le 2026-09-03, remplace FA4) :
+ `app.py` charge `Font_Awesome_6_Free-Solid-900.otf` (déjà présent dans
+ `imgui_bundle`, pas de dépendance en plus), et tous les modules importent
+ `icons_fontawesome_6`. `.skel` utilise `ICON_FA_PERSON`, `.anim`
+ `ICON_FA_FILM` (`explorer.py`) — plus de contournement nécessaire, FA6
+ couvre tous les noms `ICON_FA_*` utilisés dans le projet.
 - **Vignettes jamais invalidées** : `_thumbnail_tex_refs` n'est jamais vidé
  (contrairement à `_dir_cache`/`_bnp_cache` que `refresh` nettoie) — posé
  comme acceptable car un dossier `tex/` de workspace ne grossit pas vers les

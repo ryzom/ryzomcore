@@ -11,7 +11,7 @@ itself -- see ui_helpers.py's module docstring for why.
 from datetime import datetime
 from pathlib import Path
 
-from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 from panda3d.core import Quat
 
 from pynel.ryzom_shape import Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
