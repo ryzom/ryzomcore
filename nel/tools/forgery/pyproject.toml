@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ryzom_forgery"
-version = "3.1.0"
+version = "3.1.1"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
 dependencies = [
@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [tool.setuptools]
-packages = ["ryzom_forgery", "ryzom_forgery.apps"]
+packages = ["ryzom_forgery", "ryzom_forgery.apps", "ryzom_forgery.apps.object_editor_mixins"]
 
 [tool.setuptools.package-data]
 # Non-.py runtime data setuptools wouldn't otherwise bundle into the wheel

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-03 — 🐛 Package object_editor_mixins in the wheel, Forgery 3.1.1
+
+`pyproject.toml`'s `[tool.setuptools] packages` listed `ryzom_forgery` and
+`ryzom_forgery.apps` but not `ryzom_forgery.apps.object_editor_mixins` --
+setuptools only includes packages explicitly listed here (no
+`find_packages()`), so this subpackage (with its own `__init__.py`, home to
+most of `ObjectEditorApp`'s mixins since the theme-file split chantier)
+never actually shipped in a real built/installed wheel, even though it's
+always been present in the source tree. Invisible in dev/editable installs
+(those just point at the source directly), but broke ryztart's own
+`list_apps()` (`ModuleNotFoundError: No module named
+'ryzom_forgery.apps.object_editor_mixins'`) the moment it evaluated a real
+installed wheel.
+
 ## 2026-09-03 — ✨ Real skel/anim lookup for the Skinning preview, FA6 icons, Forgery 3.1.0
 
 Two earlier attempts at a real (non-heuristic) skeleton/animation lookup for
