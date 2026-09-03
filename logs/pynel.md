@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-09-03 — ✨ Model CShadowSkin field-by-field, pynel 0.8.1
+
+`MeshMRMSkinnedGeom` used to keep `CShadowSkin` (the shadow-casting proxy
+mesh trailing the packed vertex buffer) as opaque bytes
+(`_raw_shadow_skin`), re-emitted unchanged by the writer -- fine as long as
+nothing needed to edit it. New `ShadowVertex`/`ShadowSkin` dataclasses
+(`ryzom_shape.py`) parse/write it field-by-field instead
+(`geom.shadow_skin`), so Ryzom Forgery can rebuild it after a geometry edit
+(see `logs/forgery-object-editor.md`'s matching entry for why: editing
+`packed_vertices` used to silently leave the old shadow proxy stale or,
+commonly, permanently empty -- `CMeshMRMSkinnedGeom` never auto-builds this
+at load time, unlike the legacy plain `CMesh` path).
+
+Verified geometry-level byte-exact round-trip (parse, re-dump with zero
+edits, compare against the captured raw geometry bytes -- same method
+`shape_format.md` §4 already used for `packed_vertices`) on real live data:
+435/435 character pieces (`characters_shapes.bnp`) and 173/173 creatures
+(`fauna_shapes.bnp`).
+
+`docs/shape_format.md` §4 updated to match -- see its own history for the
+investigation that found this needed doing at all (empty `CShadowSkin` on
+Nuno's own hand-made cross-race hairstyle variants, confirmed against
+`~/.local/share/Ryzom/ryzom_live/data/`).
+
 ## 2026-08-30 — ✨ Add item/sitem.packed_sheets support to ryzom_packed_sheets, pynel 0.7.0
 
 Extends `pynel.ryzom_packed_sheets` (see the entry below for the initial

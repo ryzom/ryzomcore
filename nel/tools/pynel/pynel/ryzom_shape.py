@@ -1745,29 +1745,73 @@ class MeshMRMGeom:
 
 
 def _parse_skin_weight(f: _Reader):
-	matrix_id = tuple(f.u32() for _ in range(4))
-	weight = tuple(f.f32() for _ in range(4))
-	return (matrix_id, weight)
+	# CMesh::CSkinWeight::serial() (mesh.cpp) interleaves MatrixId[i]/Weight[i]
+	# per slot, NOT 4 MatrixIds followed by 4 Weights -- confirmed real,
+	# 2026-09-02, via a fy_HOF_VISAGE.shape IndexError (garbage matrix ids
+	# that were actually float Weight bytes misread as uint32).
+	matrix_id = []
+	weight = []
+	for _ in range(4):
+		matrix_id.append(f.u32())
+		weight.append(f.f32())
+	return (tuple(matrix_id), tuple(weight))
 
 
-def _skip_shadow_skin(f: _Reader) -> None:
-	"""CShadowSkin (nel/include/nel/3d/shadow_skin.h): a simplified proxy
-	mesh built at export time (CMeshGeom::buildShadowSkin() in mesh.cpp) and
-	used only to render the character's shadow (CShadowSkin::applySkin() +
+@dataclass
+class ShadowVertex:
+	"""CShadowVertex (nel/include/nel/3d/shadow_skin.h): a position plus a
+	single MatrixId -- *one-bone rigid skinning*, unlike the real mesh's
+	4-bone weighted skin (PackedVertex.matrices/weights). A shadow doesn't
+	need that precision, so this is cheaper to transform every frame for
+	shadow rendering."""
+	position: Vector3
+	matrix_id: int
+
+
+@dataclass
+class ShadowSkin:
+	"""CShadowSkin: a simplified proxy mesh built offline by the standalone
+	tool `nel/tools/3d/build_shadow_skin/main.cpp` (not by the exporter --
+	see `addShadowMesh()` there) and used only to render the character's
+	shadow (CShadowSkin::applySkin() +
 	CMeshMRMSkinnedInstance::renderShadowSkinGeom()/renderShadowSkinPrimitives()),
-	never the real visible mesh. Its vertices (CShadowVertex: a position plus
-	a single MatrixId) use *one-bone rigid skinning*, unlike the real mesh's
-	4-bone weighted skin (PackedVertex.matrices/weights) -- a shadow doesn't
-	need that precision, so this is a cheaper mesh to transform every frame
-	for shadow rendering. Not real content -- skip it (or, in the writer,
-	capture/re-emit it as opaque bytes -- see
-	MeshMRMSkinnedGeom._raw_shadow_skin)."""
+	never the real visible mesh. `build_shadow_skin` never re-triangulates:
+	it picks one of the mesh's own existing LODs and deduplicates its
+	vertices by (position, dominant bone) -- see
+	ryzom_forgery.shape_geometry's rebuild_shadow_skin() for the Python
+	reimplementation. Empty (no vertices/triangles) is a valid, common
+	state: `CMeshMRMSkinnedGeom::compileRunTime()` never auto-builds this at
+	load time (unlike the legacy plain CMesh path), so plenty of real
+	shapes ship without one -- such a piece is simply skipped when the
+	engine groups skins for the owning skeleton's shadow map (see
+	CSkeletonModel::renderShadowSkins(), skeleton_model.cpp)."""
+	vertices: List[ShadowVertex] = field(default_factory=list)
+	triangles: List[int] = field(default_factory=list)  # flat index list, len % 3 == 0
+
+	@property
+	def num_triangles(self) -> int:
+		return len(self.triangles) // 3
+
+
+def _parse_shadow_skin(f: _Reader) -> ShadowSkin:
 	n = f.cont_len()  # Vertices: vector<CShadowVertex>, each version(0)+CVector(12)+MatrixId(4)=17 bytes
+	vertices = []
 	for _ in range(n):
 		f.version()
-		f.vector3()
-		f.u32()
-	f.cont_uint_vector(4, "I")  # Triangles
+		position = f.vector3()
+		matrix_id = f.u32()
+		vertices.append(ShadowVertex(position=position, matrix_id=matrix_id))
+	triangles = f.cont_uint_vector(4, "I")  # Triangles
+	return ShadowSkin(vertices=vertices, triangles=triangles)
+
+
+def _write_shadow_skin(f: _Writer, skin: ShadowSkin) -> None:
+	f.cont_len(len(skin.vertices))
+	for v in skin.vertices:
+		f.version(0)
+		f.vector3(v.position)
+		f.u32(v.matrix_id)
+	f.cont_uint_vector(skin.triangles, 4, "I")
 
 
 def _parse_mesh_mrm_geom(f: _Reader) -> MeshMRMGeom:
@@ -1809,7 +1853,7 @@ def _parse_mesh_mrm_geom(f: _Reader) -> MeshMRMGeom:
 		n = f.cont_len()
 		skin_weights = [_parse_skin_weight(f) for _ in range(n)]
 
-	_skip_shadow_skin(f)
+	_parse_shadow_skin(f)  # CMeshMRMGeom has no writer yet, so nowhere to keep this -- discarded
 
 	# Lod offset table: relative sint32 offsets, only used for seeking; read & ignore
 	for _ in range(n_lods):
@@ -1998,12 +2042,8 @@ class MeshMRMSkinnedGeom:
 	packed_vertices: List[PackedVertex]
 	decompact_scale: float
 	lods: List[MeshMRMSkinnedLod]
-	# CShadowSkin -- see _skip_shadow_skin()'s docstring for what this is.
-	# Kept as opaque bytes, same reasoning as
-	# MeshMRMSkinnedLod._raw_matrix_influences: nothing in pynel needs to
-	# edit it, so there's no reason to model its CShadowVertex list and
-	# triangle indices field-by-field -- just re-emit the bytes unchanged.
-	_raw_shadow_skin: bytes = b""
+	# See ShadowSkin's own docstring for what this is.
+	shadow_skin: ShadowSkin = field(default_factory=ShadowSkin)
 
 	@property
 	def num_vertices(self) -> int:
@@ -2035,9 +2075,7 @@ def _parse_mesh_mrm_skinned_geom(f: _Reader) -> MeshMRMSkinnedGeom:
 	packed_vertices = [_parse_packed_vertex(f) for _ in range(n)]
 	decompact_scale = f.f32()
 
-	shadow_start = f.tell()
-	_skip_shadow_skin(f)
-	raw_shadow_skin = f._data[shadow_start:f.tell()]
+	shadow_skin = _parse_shadow_skin(f)
 
 	n = f.cont_len()
 	lods = [_parse_mesh_mrm_skinned_lod(f) for _ in range(n)]
@@ -2049,7 +2087,7 @@ def _parse_mesh_mrm_skinned_geom(f: _Reader) -> MeshMRMSkinnedGeom:
 		packed_vertices=packed_vertices,
 		decompact_scale=decompact_scale,
 		lods=lods,
-		_raw_shadow_skin=raw_shadow_skin,
+		shadow_skin=shadow_skin,
 	)
 
 
@@ -2145,7 +2183,7 @@ def _write_mesh_mrm_skinned_geom(f: _Writer, geom: MeshMRMSkinnedGeom) -> None:
 		_write_packed_vertex(f, pv)
 	f.f32(geom.decompact_scale)
 
-	f.raw(geom._raw_shadow_skin)
+	_write_shadow_skin(f, geom.shadow_skin)
 
 	f.cont_len(len(geom.lods))
 	for lod in geom.lods:

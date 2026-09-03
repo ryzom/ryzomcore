@@ -88,32 +88,50 @@ writers).
 
 Trailing the packed vertex buffer, every `CMeshMRMSkinnedGeom` carries a
 `CShadowSkin` section (`nel/include/nel/3d/shadow_skin.h`): a **separate,
-simplified mesh** built at export time
-(`CMeshGeom::buildShadowSkin()` in `mesh.cpp`) and used only to render the
-character's shadow (`CShadowSkin::applySkin()` +
+simplified mesh** built *offline*, by the standalone tool
+`nel/tools/3d/build_shadow_skin/main.cpp` (its `addShadowMesh()`), never by
+the exporter itself -- and used only to render the character's shadow
+(`CShadowSkin::applySkin()` +
 `CMeshMRMSkinnedInstance::renderShadowSkinGeom()`/`renderShadowSkinPrimitives()`)
--- never the real visible mesh.
+-- never the real visible mesh. (The legacy plain `CMesh` path has its own,
+unrelated `buildShadowSkin()` in `mesh.cpp` that auto-builds a 1:1 copy at
+*load* time -- doesn't apply to `CMeshMRMSkinned`.)
 
 Its vertices (`CShadowVertex`: a position plus a single `MatrixId`) use
 **one-bone rigid skinning**, unlike the real mesh's 4-bone weighted skin --
 a shadow doesn't need that precision, so this is a cheaper mesh to
-transform every frame for shadow rendering.
+transform every frame for shadow rendering. `build_shadow_skin` never
+re-triangulates: it picks one of the mesh's own already-baked LODs and
+deduplicates its vertices by `(position, dominant bone)`, reindexing that
+LOD's own triangle list onto the deduplicated set.
 
-pynel doesn't model `CShadowSkin` field-by-field: nothing needs to edit it,
-so it's read as one opaque byte span
-(`MeshMRMSkinnedGeom._raw_shadow_skin`) and re-emitted unchanged by the
-writer. Same treatment for a smaller trailing block per lod,
-`MatrixInfluences`/`InfluencedVertices[4]` (`MeshMRMSkinnedLod._raw_matrix_influences`)
--- also fully discarded by the original read-only parser, also nothing
-pynel needs to edit.
+pynel models `CShadowSkin` field-by-field (`ShadowSkin`/`ShadowVertex` in
+`ryzom_shape.py`, `MeshMRMSkinnedGeom.shadow_skin`) -- `ryzom_forgery.
+shape_geometry.rebuild_shadow_skin()` reimplements `addShadowMesh()` in
+pure Python on top of it (see `infer_shadow_skin_lod_index()`/
+`default_shadow_skin_lod_index()` for how the source LOD is picked), used
+by `hairstyle_conform.py` and the standalone `rebuild_shadow_skin.py` CLI.
+Empty (no vertices/triangles) is a valid, common state -- see the "known
+gap" paragraph below for why plenty of real shapes ship that way. A
+smaller trailing block per lod, `MatrixInfluences`/`InfluencedVertices[4]`
+(`MeshMRMSkinnedLod._raw_matrix_influences`) is still kept as opaque
+bytes -- nothing needs to edit that one, so it's still fully discarded by
+the original read-only parser and just re-emitted verbatim by the writer.
 
-**Known gap, not yet addressed** (see [[forgery-object-editor]]'s "FUTURE:
-CShadowSkin investigation" note): editing `packed_vertices`' positions (e.g.
-via `ryzom_forgery.shape_geometry.conform_hairstyle_boundary()`) leaves the
-old `CShadowSkin` bytes untouched -- if a real geometry edit changes the
-mesh's silhouette enough to matter, the shadow proxy would then be stale
-relative to the edited mesh. Whether that's ever visually significant
-hasn't been investigated.
+**Addressed 2026-09-03** (was: "known gap, not yet addressed" -- see
+[[forgery-object-editor]]'s "CShadowSkin rebuild after geometry edits"
+chantier for the full investigation): editing `packed_vertices`' positions
+(e.g. via `conform_hairstyle_boundary()`) used to leave the old
+`CShadowSkin` bytes untouched. Confirmed real and visually relevant on
+live data -- `CMeshMRMSkinnedGeom::compileRunTime()` never auto-builds this
+at load time (unlike the legacy `CMesh` path above), so a shape that never
+had `build_shadow_skin` (re)run on it after an edit ships with either a
+stale or, commonly, a completely empty `CShadowSkin` -- such a piece is
+then silently skipped when the engine groups skins for the owning
+skeleton's shadow map (`CSkeletonModel::renderShadowSkins()`,
+`skeleton_model.cpp`). `hairstyle_conform.py` now rebuilds `CShadowSkin`
+after every boundary edit; any other future geometry-editing tool should
+do the same.
 
 ### Round-trip fidelity, as actually verified
 
