@@ -18,13 +18,18 @@ pip install -e nel/tools/pynel
 
 ## Command-line tools
 
-Installing the package also provides five console scripts:
+Installing the package also provides console scripts:
 
 - `ryzom-ig` -- read/write `.ig` (Instance Group) files
 - `ryzom-shape` -- read/write `.shape` (3D mesh) files
+- `ryzom-anim` -- read `.anim` (skeletal animation) files
 - `ryzom-bnp` -- read/write `.bnp` (Big File package) archives
 - `ryzom-primitive` -- read/write `.primitive` (LIGO primitive tree) files
 - `ryzom-cmb` -- read `.cmb` (indoor collision mesh interchange) files
+- `ryzom-hlsbank` -- read/append `.hlsbank` (HLS-colorisable texture bank)
+  files, see [`docs/hls_texture_bank.md`](docs/hls_texture_bank.md)
+- `ryzom-cfg` -- read/write `.cfg` (`CConfigFile` format, e.g. `client.cfg`,
+  `panoply_*.cfg`) files, see [`docs/config_file.md`](docs/config_file.md)
 
 Run any of them with `--help` for usage details.
 
@@ -40,6 +45,19 @@ shape = ryzom_shape.load_shape("object.shape")
 bnp = ryzom_bnp.BnpReader("data.bnp")
 pf = ryzom_primitive.load_primitive("dummy.primitive")
 cmb = collision_mesh_build.load_cmb("apartment.cmb")
+```
+
+### Following a log file
+
+`LogFollower` tails a log file like `tail -F`, surviving rotation
+(copytruncate or create/rename) and the file being briefly missing:
+
+```python
+from pynel.log_follower import LogFollower
+
+for line in LogFollower("/var/log/foo.log"):
+	if "ERROR" in line:
+		print(line)
 ```
 
 ## Planned: Georges sheets (`.creature`, `.item`, ...)

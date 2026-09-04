@@ -1,5 +1,714 @@
 # Changelog
 
+## 2026-08-29 — ✨ Add BuildMasksFromConfigFile + combinatorial loop to panoply_maker.py
+
+Two more pieces of the `panoply_maker.py` offline generation port (see the previous entry
+below for `resample()`/the exact colorize port):
+
+- **`ColorMaskAxis`/`build_masks_from_config()`**: port of `BuildMasksFromConfigFile`
+  (`panoply_maker.cpp`) -- reads `mask_extensions` and each extension's 6 parallel
+  `X_hues`/`X_lightness`/`X_saturations`/`X_luminosities`/`X_constrasts`/`X_color_id`
+  config arrays. Takes any object with a `.get(name) -> list` method (a
+  `pynel.config_file.Document`/`ConfigFile` in practice, duck-typed so this module
+  doesn't hard-depend on pynel). Validated against the real, self-contained
+  `current_panoply.cfg`: `skin` axis resolves to 4 colors (FY/MA/TR/ZO), `user` to 8
+  (U1-U8), values match the file.
+- **`ActiveMask`/`generate_color_combinations()`**: port of
+  `BuildColoredVersionForOneBitmap`'s combinatorial loop -- a multi-radix odometer over
+  each active mask's color IDs (last mask's counter increments fastest, matching the C++
+  exactly), chaining `convert_bitmap_exact()` calls onto one accumulating result per
+  combination. Mask discovery/lookup and file I/O are deliberately left out of this
+  function, same split as `panoply_colorize.py` (pure math) / `panoply_texture.py`
+  (Panda3D glue) -- a future glue layer will own that. `convert_bitmap_exact()` changed
+  to return `(result, delta_hue)` instead of just `result`, since building a `.hlsinfo`
+  instance's `Mods` needs that measured delta (previously computed internally and
+  dropped).
+
+`generate_color_combinations()` itself not yet run against real data -- needs numpy,
+same sandbox blocker as the rest of this port (see previous entry).
+
+## 2026-08-29 — ✨ Add resample()/exact colorize port to panoply_maker.py
+
+New `ryzom_forgery/panoply_maker.py`, first pieces of a Python port of
+`nel/tools/3d/panoply_maker/panoply_maker.cpp` (the offline tool that bakes an item's
+colorized texture variants and the `.hlsinfo` used to build `characters.hlsbank`), so
+both the C++ and Python versions can eventually be cross-validated the same way
+`hls_bank_maker` already was (see pynel's `docs/hls_texture_bank.md`).
+
+- **`resample()`**: pure-NumPy port of `CBitmap::resamplePicture32`/`resamplePicture8`
+  (`nel/src/misc/bitmap.cpp`) -- the separable area-average/half-pixel filter
+  `panoply_maker` uses to build a `.hlsinfo`'s low-def `SrcBitmap`/`Masks`, deliberately
+  not reusing `dds_export.py`'s simpler box filter (different pixel values). Implemented
+  via a weight-matrix + `numpy.einsum` approach covering equal/magnify/minify, plus the
+  exact-2x integer-rounding fast path kept as its own code path (its rounding genuinely
+  differs from the general float pipeline's, not just a perf shortcut).
+- **`eval_bitmap_stats_exact()`/`convert_bitmap_exact()`/`colorize_exact()`**: exact,
+  order-dependent port of `CColorModifier::evalBitmapStats`/`convertBitmap`
+  (`color_modifier.cpp`). The existing `panoply_colorize.py` (built for object_editor's
+  live Panoply preview) already ports the same math, but its hue average is a vectorized
+  order-*independent* circular mean, explicitly not aiming for bit-exact parity --
+  confirmed with Nuno this divergence reaches `.hlsinfo`'s `DHue` field (the only
+  *measured* value; `DLum`/`DSat` are copied straight from config) and would break
+  byte-exact cross-validation. Decision: keep `panoply_colorize.py`'s fast approximation
+  for the interactive live-preview path, add this exact/sequential port (reuses
+  `panoply_colorize.py`'s order-independent per-pixel helpers for everything except the
+  hue accumulation, which is a literal pixel-by-pixel port of the C++'s
+  running-mean-with-360°-unwrap loop) for this offline generation path, where it only
+  runs once per item and speed doesn't matter.
+
+Not yet cross-validated against real data -- this repo's dev sandbox has no numpy/panda3d
+and project policy is to never execute project code there; needs running on the real
+machine next. Documented in new `docs/panoply_maker.md`.
+
+## 2026-08-28 — 🐛 Fix texture filter loss; add UV editing in Patina
+
+**Root cause found and fixed for the "blur vs stries" texture quality bug.** A plain
+open+save of any `.shape` through Patina (no edits at all) was silently destroying its
+textures' GPU sampling quality: `pynel`'s `_parse_itexture_base()` read `_UploadFormat`/
+`_WrapS`/`_WrapT`/`_MinFilter`/`_MagFilter`/`_LoadGrayscaleAsAlpha` from the file and threw
+them away, while `_write_itexture_base()` hardcoded all of them to `0` on save --
+`MagFilter=0`/`MinFilter=0` are literally `Nearest`/`NearestMipMapOff` in the engine's own
+enum (`nel/include/nel/3d/texture.h`), forcing every re-saved texture from smooth trilinear
+filtering to blocky/aliased nearest-neighbor with no mipmaps, regardless of what the
+original author actually set. Found via an exhaustive, evidence-first investigation
+(byte-level diff of a pristine `.bnp`-unpacked shape vs. the same shape re-saved once
+through Patina with zero edits -- every other field decoded identically; only this one
+was silently rewritten). Fixed: `Texture` now carries `upload_format`/`wrap_s`/`wrap_t`/
+`min_filter`/`mag_filter`/`load_grayscale_as_alpha` as `Optional` fields (`None` = no real
+value captured, e.g. a freshly imported mesh -- never `None` for an actually-parsed file),
+round-tripped faithfully instead of discarded.
+
+**New Patina UI: "Texture filtering" and "Texture offset/tiling/rotation" material
+sections.** Wrap S/T, Mag/Min Filter and a "grayscale = alpha mask" checkbox, wired to
+Patina's own 3D preview live (`load_panda_texture()` now applies these to the Panda3D
+`Texture` object -- previously relied on a same-for-every-texture heuristic guess for
+wrap and ignored filters entirely, which is exactly why the bug above was invisible in
+Patina and only showed up in the real client). Separately, `Material.tex_user_mat`
+(the 3dsMax material editor's UV Offset/Tiling/Rotation, already round-tripped correctly
+by `pynel` but never exposed anywhere) is now editable too, via `decompose_uv_matrix`/
+`compose_uv_matrix` (shape_geometry.py) translating the generic NeL matrix into friendly
+(offset U/V, scale U/V, rotation) fields, reflected live in the 3D viewport via
+`uv_matrix_to_panda_mat4()`. Confirmed correct against the real client by hands-on testing
+with a purpose-built quadrant-colored "F" test texture (unambiguous under any rotation or
+mirroring) on a plain test cube: Offset U/V sign, a V-axis mirror (Panda3D's V convention
+runs opposite the raw file's, on top of the existing per-vertex UV flip), and rotation
+direction. Rotation and tiling (Scale != 1) are mutually exclusive in the UI (each greyed
+out until the other is back at its neutral value) -- combining them produces a genuine GPU
+wrap artifact (extra/missing visible tile repeats along the rotated axis, inherent to how
+hardware texture-repeat interacts with a rotated coordinate system, not fixable in
+software) -- and a full scan of `ryzom_live/data`'s 235 `.bnp` archives (2600 shapes)
+confirmed no real shape combines the two, so nothing is lost by disallowing it.
+
+**Also fixed: the object's own rotation (Ctrl+drag / Position-Rotation-Scale panel) was
+never actually saved.** `_write_shape()` now writes the pivot's current world rotation
+into the shape's `default_rot_quat` on every save (previously purely a live-viewer aid,
+silently discarded on save/reload) -- correctly reading whichever of `_object_pivot` or
+`model_root` the Rotation row's pivot-lock had targeted, and using Panda3D's actual
+`LQuaternion` component order (real part first, not `(x, y, z, w)` as the `get_x/y/z/w()`
+names would suggest -- confirmed empirically, an identity quaternion's `get_x()` returned
+`1.0`, not `0.0`).
+
+**Smaller fixes/polish:** the Position/Rotation/Scale panel's X/Y/Z fields and the new
+texture transform fields are now `imgui.drag_float` (drag to adjust, double-click/Ctrl+
+click to type an exact value) instead of plain typed-only fields. New `docs/material_
+options.md` section documenting texture filtering/wrap and the rotation+tiling limit.
+
+## 2026-08-27 — ✨ Patina: DDS auto-export + export flow rework
+
+**New `.dds` export pipeline (`ryzom_forgery/dds_export.py` + CLI `apps/dds_export.py`).**
+Python/Panda3D counterpart of `nel/tools/3d/tga_2_dds/tga2dds.cpp` +
+`s3tc_compressor.cpp`: `build_dds(rgba, algo, build_mipmaps, reduce)` assembles a full
+`.dds` file (magic + `DDS_HEADER`/`DDS_PIXELFORMAT`, verified field-for-field against
+`s3tc_compressor.h` and `CBitmap::readDDS`'s own index-based reads) from an RGBA array,
+compressing each mip level's DXT1/DXT1A/DXT3/DXT5 blocks via Panda3D's
+`Texture.compress_ram_image()` instead of the original's libsquish (not aiming for
+bit-exact block data -- squish's 20-year-old exact version/fork is unrecoverable, and
+only the container + valid block format matter, since that's all the client's loader
+checks). `load_rgba()` fixes a real bug found while validating this against a production
+asset: `Texture.load(PNMImage)` flips rows (Panda's RAM image is bottom-up like OpenGL;
+PNMImage/DDS are top-down), silently producing a vertically-mirrored `.dds` otherwise.
+Also ports `tga2dds.cpp`'s `-r` (reduce) and `-g` (grayscale-as-alpha vs. luminance) CLI
+options. Validated against real `ryzom-data` assets: header byte-for-byte identical to a
+shipped `.dds`, and used to fix 3 `objects/occ_stuff/anlor/halloween_mo_statue_0{1,2,3}_
+spec.dds` files that had actually been saved as plain PNGs with a `.dds` extension.
+
+**Unified workspace filesystem watcher (`ryzom_forgery/workspace_watch.py`).**
+`import_watcher.py` and `workspace_sync.py` used to each own a dedicated
+`watchdog.observers.Observer` with a near-identical per-file debounce handler; a third
+was about to be added for the new `tex/` -> `dds/` auto-export. Consolidated into one
+`WorkspaceWatcher`: a single `Observer` recursively watching the whole workspace root,
+dispatching each settled file to whichever callbacks are `register()`ed for the
+top-level subfolder it falls under. The separate-Observer pattern gave no real
+concurrency/frame-smoothness benefit (Panda3D's render loop was already decoupled from
+these watchers via cross-thread status queuing; watchdog's OS-level wait is
+idle-cost-free regardless of Observer count) -- it was organic duplication. A single
+shared implementation is also easier to instrument/harden than several near-identical
+ones. `ImportWatcher`/`WorkspaceSyncWatcher` keep their existing conversion/sync logic
+but no longer own an `Observer` -- they expose a public `handle_settled(path)` instead.
+
+**`tex/` -> `dds/` auto-export (`ryzom_forgery/tex_dds_sync.py`), new workspace
+subfolder `dds/`.** Every TGA/PNG in a workspace's `tex/` now gets a matching `.dds` (with
+mipmaps) automatically maintained in a new `dds/` subfolder: regenerated on
+create/modify, removed on delete, with a `reconcile()` catch-up pass (mtime-based,
+regenerate stale/missing, delete orphans) run whenever a workspace is opened. Applies
+uniformly to every file under `tex/`, Multi Bitmap variants included -- this is a
+file-level mirror, not aware of which shape/material actually uses a given texture.
+Specular textures aren't special-cased (Patina doesn't manage texture roles/slots yet,
+so `tex/` never contains a recognizable specular file in practice). `workspace_sync.py`'s
+external-sync scope switched from `tex/` to `dds/` (`anims`/`shapes`/`skels`/`dds`) --
+the external sync folder now receives actual game-loadable `.dds`, not raw sources.
+
+**Export flow rework (`export_dialog.py`, `apps/object_editor.py`'s bottom bar).**
+Removed `remember_output_folder`/`output_folder`/`remember_texture_mode` entirely (the
+whole `ExportSettings` dataclass, now empty, deleted) -- these were single settings
+shared across every workspace rather than per-workspace, so once checked once they stuck
+regardless of which workspace was active, which read as the export folder being
+permanently "stuck" to one place. The output folder is now asked every time. Along the
+way, found and deleted genuinely dead code: `export_dialog.draw_settings_content()`
+(and its two folder-dialog helpers) was never actually called from the Settings tab.
+
+The confirmation popup was reworked: filename + full path, then 3 colored buttons that
+each directly trigger the export (no separate Export/Cancel step anymore) -- "Copy
+textures with export" (light green, same as before), "Make a Zip archive with textures"
+(light cyan, new: same file set, archived into one `.zip` via stdlib `zipfile` instead
+of left loose), "Export without the textures" (pink, reference-only). STL (no materials
+at all) shows a single plain gray "Export" button instead.
+
+Two workspace-only additions: a quick `[Export]` button (blue) to the left of
+`[Export as...]` (renamed from `[Export...]`, also recolored blue -- both were briefly
+pink like `[Quit]` before a follow-up fix moved them to blue to stay visually distinct)
+that skips the folder/texture prompts entirely and writes straight to
+`<workspace>/exports/` (reference-only -- textures already live locally or as an
+absolute path, nothing to copy); and a `"Full workspace (<name>.bnp)"` entry in both
+format-picking menus, packaging the whole workspace's `SYNCED_SUBDIRS` content (same
+scope as the external sync folder) into a single `.bnp`
+(`workspace_sync.pack_workspace_bnp()`, staged flat via a temp dir then
+`pynel.ryzom_bnp.pack_directory()`).
+
+**Forgery-wide documentation pass.** Added ~30 markdown docs under
+`nel/tools/forgery/docs/` (one per module, plus `docs/apps/` for each app), covering
+every module in `ryzom_forgery/` that wasn't already documented -- workspace/sync/import
+watchers, the Panoply pipeline, shape import/export, viewport/camera/navcube, and Patina
+itself. Written by reading each source file in full; deliberately reference symbols by
+name only, never by line number (a first pass cited exact lines, which rotted after the
+very next edit shifted everything below it -- names stay valid, lines don't). Also
+documented the actual runtime Panoply system (`nel/tools/pynel/panoply.md`): the offline
+`panoply_maker` bake pipeline, the real production color slots (`skin`=race, `user`=8
+player colors, `eyes`, `hair`), and the separate LOD-only runtime HLS recoloring path
+(`hls_bank_maker`/`CAsyncTextureManager`) -- distinct from the never-shipped
+`_usercolor` blend mechanism in `tga2dds.cpp`.
+
+## 2026-08-27 — 🔖 Patina 1.0.0: textures, sync, UI polish
+
+**Texture combo picker.** Replaced the free-text `imgui.input_text` for a material's texture (both
+the simple/diffuse material row and each Multi Bitmap slot) with a combo box listing the active
+workspace's `tex/` folder contents (`_workspace_texture_names()`/`_draw_texture_name_combo()`,
+`apps/object_editor.py`). Re-lists `tex/` fresh every time the dropdown opens (a plain
+`Path.iterdir()`, cheap enough to just always redo) rather than caching -- always shows what's
+actually on disk without needing a watchdog for the listing itself. The current value is still
+shown as-is even when it isn't (yet) one of the listed names -- Browse/Copy stay the way to set
+anything else, unchanged.
+
+**Crash fix in the texture-freshness poll.** `_update_texture_freshness()`'s mtime check
+(`ref.cache_stat()`) could throw `FileNotFoundError` if a tracked texture file got deleted/renamed
+between being resolved and being stat'd (e.g. an external rename while Patina was running) --
+uncaught, this killed the whole Panda task manager, hanging the app. Now caught (both there and in
+the freshness baseline seeded in `_apply_material_texture()`): the cached texture is just left as
+the last-known-good one instead of crashing.
+
+**Sync workspace to an external folder.** New Settings > Tools option: pick a folder per workspace
+(`Settings.workspace_sync_folders`, keyed by workspace name; `Settings.last_workspace_sync_folder`
+pre-fills a newly-created workspace's own entry as a convenience default). New dedicated watchdog
+`Observer` (`workspace_sync.py`, same debounced-per-file pattern as `import_watcher.py`, its own
+thread rather than folded into an existing shared watcher -- see the module's own docstring)
+watches `anims/`, `shapes/`, `skels/`, `tex/` and mirrors any created/modified/moved file into
+`<sync folder>/forgery/<workspace name>/<same relative path>` -- copy-only, a file removed from
+the workspace is left as-is on the sync side. A "Sync now" button (orange, only shown when
+something's actually missing -- `WorkspaceSyncWatcher.refresh_fully_synced()`, an existence-only
+check recomputed on workspace/folder changes, never every frame) catches up anything that predates
+the live watch, running on a background thread.
+
+**Settings/tabs UI polish**, all in `apps/object_editor.py`:
+- Fixed an imgui ID collision between the image-editor and sync-folder folder-picker buttons (both
+  used the bare folder icon as their id -- `_icon_button()` derives the widget id from its first
+  arg only, tooltip text included nowhere in it).
+- Removed the "Export" Settings section (no longer relevant) -- the Export button/flow itself is
+  untouched, only its Settings-tab configuration UI is gone.
+- Folded "Workspaces folder" into "Paths" (it's a path setting too, just the one special-cased
+  root instead of a priority-ordered list) -- the separate "Workspaces" section is gone.
+- Image editor and sync folder paths now truncate-to-width with a full-path tooltip on hover
+  (same helper as the Workspaces-folder/search-paths rows) instead of overflowing the panel.
+- The sync-folder folder picker now opens on the already-configured folder instead of blank.
+- Panel tabs (Textures/Materials/All Properties/Settings) recolored (lightgreen/lightcyan/gray/
+  yellow) and switched to icon-only headers (`_begin_tab_item_with_icon()`, black glyph for
+  contrast against the light tab colors, full name as a hover tooltip instead of visible text).
+
+## 2026-08-27 — ✨ Live-reload edited workspace textures (normal + Multi Bitmap)
+
+Generalized the existing Panoply live-refresh mechanism (`_update_panoply_freshness`, which
+already picked up edited recolor masks automatically) to plain, non-Panoply textures too --
+answers "if I change a texture in the workspace, does Patina pick it up automatically": now yes,
+for any texture actually in use by the loaded shape, including whichever Multi Bitmap slot is
+currently selected (no special-casing needed there -- only the selected slot's name is ever
+actually loaded/cached in the first place).
+
+Renamed to `_update_texture_freshness()` (same 1/sec `taskMgr` task, same eviction + `_reapply_
+all_materials()` pattern): the existing Panoply loop is untouched, plus a new pass over every
+other name already in `self._texture_cache`, comparing mtimes against a baseline seeded at load
+time in `_apply_material_texture()` (so the very first freshness tick after a texture loads never
+sees a spurious "changed"). Deliberately restricted to files inside the active workspace
+(`FoundEntry.fs_path`, skipping `.bnp` entries and anything outside it) -- per the user, this
+keeps the workspace the one place edits get picked up live, textures from other search paths
+(mods, the Ryzom install...) are left alone even if a shape happens to reference one.
+
+## 2026-08-27 — ✨ Auto-export imports/ -> shapes/ Step 4+5: mismatch backup, sysbar status
+
+Finished the "Auto-export imports/ -> shapes/" chantier:
+
+**Step 4** (material-count mismatch): design changed from the original plan (a viewport-takeover
+popup reusing `_draw_replace_match_popup()`) to fully automatic instead, per the user, avoiding
+the discard-unsaved-work risk a viewport takeover would carry on whatever else is open. New
+`ImportWatcher._backup_and_reexport()` in `import_watcher.py`: on `MaterialCountMismatch`, renames
+the existing target to `<stem>_backup_<YYYYMMDD_HHMMSS><suffix>` (same convention as the manual
+Save-as-backup flow) and re-exports the newly imported mesh fresh under the real target name. No
+popup, no viewport takeover, no `object_editor.py` wiring needed for this part.
+
+**Step 5** (status messages): new `on_status(message, is_error)` hook on `ImportWatcher`, via a
+`_report()` helper that both prints and (if given) calls the hook, for every outcome (export,
+update, backup-and-reexport, or any failure). `object_editor.py` wires it to
+`_on_import_status()`/`_flush_pending_import_status()` -- same cross-thread queue-then-drain-once-
+per-frame pattern as the existing import-conflict popup, since the hook fires off ImportWatcher's
+background thread -- surfacing the message on the sysinfo status bar (red for a failure, green for
+success, new `_IMPORT_STATUS_ERROR_COLOR`/`_IMPORT_STATUS_SUCCESS_COLOR`).
+
+Also unified the "target is the shape currently open in the viewport" conflict-resolution path
+(`_apply_import_conflict_update()`): it used to call `update_existing_shape()` directly and just
+report a mismatch as a failure via a separate `self._save_status` mechanism, without ever falling
+back to Step 4's backup-and-reexport. Discovered live: a `.obj` mismatch on an open shape reported
+under the panel's Save/Quit row instead of the sysbar, and failed instead of backing up. Now routes
+through the same `ImportWatcher._update_existing_target()` (made to return True/False so the
+caller knows whether to refresh the viewport) as the automatic path -- single outcome-reporting
+story regardless of whether the target was open.
+
+`test.sh` extended to 6 tests (was 5): new test confirms a material-count mismatch gets backed up
+and the target re-exported under its original name. All 6 pass on the real machine.
+
+## 2026-08-27 — 🐛 Fix Patina's restart-loop bug and add a 5s splash self-destruct safety net
+
+Finished a UI font/size Settings feature (Settings > Tools: font picker, size drag, "Restart now"
+button) that had been left uncommitted, but its `ForgeryApp.restart()` method silently shadowed
+Panda3D's own `ShowBase.restart()` -- called internally by `ShowBase.__init__()` to start the
+IGLOOP render/input task -- so on every single launch, mid-`__init__`, *our* `restart()` fired
+instead and re-exec'd (`os.execv`) the whole process, forever, before a window ever fully opened.
+Fixed by renaming to `relaunch()`, which doesn't collide with anything in the `ShowBase` API.
+
+Root-caused by bisecting with `sys.exit()` calls dropped at increasing depth through `__init__`
+until the exact call site surfaced in the stack -- much faster than the several turns spent
+guessing beforehand (an unrelated native `import imgui_bundle` crash turned out to be a red
+herring from a different, coincidental issue on the same machine).
+
+Independently of that root cause, `_splash_process.py` (the separate Tk process showing the
+splash image while the main app starts up) had no way to notice its parent had died -- a crash
+anywhere before `Splash.close()` runs left it orphaned forever, and enough failed launches in a
+row could pile up unkillable-feeling process litter. Added `root.after(5000, root.destroy)`: a
+self-destruct that fires regardless of what happens to the parent, bounding the damage from any
+future crash (of any kind) to a single lingering window for at most 5s, never an accumulation.
+
+Also: moved the font Settings' "Restart now" button to the front of its line (was after the
+explanatory text, now before it), and colored the bottom bar's Save (pastel green) and Quit
+(pink) buttons via the existing `_colored_button()` helper, matching the color-coding convention
+already used for the import-conflict popup's own buttons.
+
+## 2026-08-26 — 🔖 Bump Forgery version to 0.1.21
+
+Routine version bump covering the import-conflict popup polish, app-wide ImGui style fixes, and
+the reference-examples packaging fix -- required for ryztart's auto-update to fire.
+
+## 2026-08-26 — 🐛 Ship Patina's reference example shapes in the pip wheel
+
+Patina's 3 built-in reference shapes ("Cube (1x1x1)", "Smallest character", "Tallest character")
+were failing to load on any real `pip install` of the Forgery wheel: `_REFERENCE_EXAMPLES_DIR`
+already correctly pointed at `ryzom_forgery/examples/` (inside the installable package), but the
+actual `.shape` files had only ever lived in a sibling `nel/tools/forgery/examples/` folder,
+outside the package -- fine for a source checkout, silently missing from an installed wheel, since
+setuptools only bundles files inside the package directory and only what
+`[tool.setuptools.package-data]` explicitly lists. Moved just the 3 needed `.shape` files
+(`ge_mission_1_caisse.shape`, `npc_dummy_short.shape`, `npc_dummy_tall.shape`, ~1.3MB total) into
+`ryzom_forgery/examples/` and added `"examples/*.shape"` to `pyproject.toml`'s package-data --
+no code change needed, the path formula was already correct for that location.
+
+## 2026-08-26 — ✨ Import-conflict popup polish, app-wide ImGui style fixes
+
+Follow-ups from live-testing the import-conflict popup (`_draw_import_conflict_popup()`, Step 3 of
+the auto-export imports/ chantier):
+
+- The popup used to open unconditionally whenever the target shape was the one open in the
+  viewport, regardless of whether there was actually anything unsaved. New
+  `_has_unsaved_changes_at()` serializes the in-memory shape to bytes (`save_shape()` into an
+  `io.BytesIO()`, no disk write) and compares against a fresh read of the target file -- exact,
+  without needing to track every individual edit throughout the editor. The popup now only opens
+  on a real conflict; otherwise it auto-updates silently, same as when the shape isn't open at all.
+- Reworded the 3 action buttons, color-coded them (orange/pink/green, new `_colored_button()`
+  helper with derived hover/active shades) and centered them (new `_center_next_widget()` helper).
+- App-wide ImGui style fixes in `ForgeryApp.__init__` (`app.py`, shared by every Forgery tool app):
+  rounded corners (`frame_rounding`), forced pure white text and fully opaque window/popup
+  backgrounds (both were left at Dear ImGui's slightly-translucent stock defaults, never touched
+  before, so every popup in every Forgery app always looked a bit hazy). Chasing a pushed
+  pure-black button text color rendering as `0x0A` instead of `0x00` led to the real culprit:
+  `ModalWindowDimBg` (meant to only dim whatever's *behind* a modal popup) was blending over the
+  modal's own content too in this rendering pipeline -- confirmed by the arithmetic matching
+  exactly (`0.4 * 0.1 + 0.6 * 0 = 0.04` -> `0x0A`). Disabled entirely rather than toned down, so
+  popup colors/text now render exactly as set; the trade-off is no more dimming of whatever's
+  behind a modal popup.
+
+## 2026-08-26 — 🔖 Bump Forgery version to 0.1.20
+
+Routine version bump covering this batch of Patina changes (Panoply masks/always-show/add-mask,
+scan performance work, splash timing fix) -- required for ryztart's auto-update to fire.
+
+## 2026-08-26 — 🐛 Keep startup splash open until the first real UI frame
+
+`Splash.close()` (`splash.py`) used to be called at the end of `ForgeryApp.__init__` -- before
+`ShowBase`'s own `run()` loop actually fires its first frame, so the splash could disappear a
+moment before anything was really on screen. Now `ForgeryApp` keeps the `Splash` instance open
+(`self._splash`) and only closes it on the very first `draw_ui()` call instead, so its `min_duration`
+floor (1.2s by default) is measured against real elapsed time up to the first visible frame, not
+just up to the end of Python-side construction. `close()` itself is unchanged: it only sleeps for
+whatever's left of `min_duration`, so a slow-enough startup (already past that floor on its own)
+still closes immediately with no extra wait.
+
+## 2026-08-26 — ⚡ Skip external rescan on workspace change, persist scan cache, incremental scan
+
+Three related performance fixes to `search_paths_dialog.py`'s asset scanning, all found and
+root-caused through real-machine profiling:
+
+- A texture/mask copy into the active workspace was triggering a full external-search-paths
+  rescan, even though only the workspace (already covered by its own watchdog observer) had
+  changed. Split scanning into two independent halves (`_ScanResult` for `_external_result`/
+  `_workspace_result`, merged via `_merge_and_publish()`) so a workspace-only change
+  (`_reload_workspace_only()`) never re-walks the external paths.
+- The external scan's dominant cost is the directory walk itself, re-paid on every app startup.
+  The scan result is now persisted to disk (`external_scan_index_cache.json`) and loaded
+  synchronously at startup for an instant (if possibly slightly stale) index, while a real full
+  scan always still runs in the background afterwards to self-correct.
+- Converting that background scan to a per-frame time-sliced generator (to avoid GIL contention
+  with the render thread -- see below) initially made things *worse*: `.anim` parse failures for
+  several `CTrackKeyFramer*` classes `pynel.ryzom_animation.parse_animation()` doesn't support
+  were never cached, so every scan re-attempted and re-failed the same expensive parses forever.
+  Fixed by caching failures too, not just successes.
+- The scan itself was moved from a background thread to a generator advanced a small
+  (~2ms) time-bounded slice per frame on the main thread -- a background thread doing this much
+  CPU-bound dict/object-building work contends for the GIL with the render thread badly enough to
+  drag FPS well under 30 for the scan's whole duration. The incremental version trades wall-clock
+  scan time for never blocking the UI thread.
+- A further ~1.2s freeze was found right at the *end* of a full scan: `_save_external_index_cache()`
+  (JSON-serializing the ~10^5-entry index and writing it to disk) ran synchronously in a single
+  frame. Moved that save (plus the smaller `save_scan_cache()`/`save_bnp_table_cache()`) to a
+  background thread -- safe here (unlike the scan itself) since it's a one-shot ~1s burst once per
+  finished scan, not sustained multi-second background work.
+
+## 2026-08-26 — ✨ Panoply masks/ folder, always-show section, add-mask button
+
+Several Panoply-related UI improvements to Patina's Textures/Materials tabs:
+
+- The "Panoply" section in `_draw_global_panoply_section()` used to draw nothing at all when none
+  of a shape's textures had a detected variant, giving no indication Panoply was even checked --
+  it's now always shown, with a disabled explanatory message when nothing matches.
+- New `masks` workspace subfolder (`workspaces.SUBDIRS`). `_draw_panoply_masks_for()` now shows a
+  copy/edit button next to each resolved mask thumbnail (reusing the same
+  copy-to-workspace/edit-in-image-editor mechanism as a real texture, generalized with a `subdir`
+  parameter), and a "+" button offering to create a mask (solid black, same pixel size as the base
+  texture, written straight to the workspace's `masks/` folder) for any Panoply axis that doesn't
+  have a resolved mask file yet -- independent of whether `panoply_files.txt` already declares
+  that axis, since turning a plain texture into a panoplied one from scratch is a normal workflow
+  here.
+- The same green "already in the workspace" border used on texture reference text fields is now
+  also drawn around the thumbnail itself (`_draw_preview_workspace_border()`), for the simple
+  material row, Multi Bitmap slots, and the new Panoply masks row alike.
+
+## 2026-08-26 — ✨ Wexplorer: browsable workspace folders in the Explorer sidebar
+
+Added the "Wexplorer": each active-workspace folder (`tex`/`shapes`/`anims`/`skels`/`exports`/
+`imports`) now shows as its own expandable tree section in the Explorer sidebar, always
+reachable regardless of where the Explorer is currently browsing. New `Explorer.pinned_folders`
+(list of `(label, Path)`) + `_draw_pinned_folders()`/`_draw_tree_children()` in `explorer.py`:
+unlike the main view's flat click-to-navigate `_draw_dir_contents()`, sub-folders expand in
+place; file entries reuse the existing `_draw_leaf()`, so double-click-to-load and the
+right-click command menu (Load in viewer/as bone-preview skeleton/animation...) work exactly
+like the main view. `object_editor.py`'s `_on_active_workspace_changed()` now sets
+`self.explorer.pinned_folders` to the active workspace's own subfolders.
+
+Every folder in the Wexplorer shows its own visible-entry count (e.g. "shapes (12)") --
+factored the already-duplicated directory-listing/caching logic in `explorer.py` into a shared
+`_list_dir()` used by every listing method. The Wexplorer shows every file regardless of the
+shared search/extension-filter state (that filter stays scoped to the main arborescence only);
+texture files (`.tga`/`.dds`/`.png`/`.jpg`/`.jpeg`/`.bmp`) get a real thumbnail instead of a
+generic icon.
+
+Also moved `WorkspaceSetupDialog.draw_active_workspace_row()` (the workspace combo + reveal-in-
+file-manager button) from the bottom of the right panel to the very top of the Explorer window,
+via a new generic `Explorer.extra_header` hook (mirrors the existing `extra_toolbar` hook, keeps
+Explorer itself workspace-agnostic). Final top-to-bottom order in the Explorer window: Current
+Workspace row -> Wexplorer -> Refresh/Import toolbar -> search+filter+path bar -> Favorites ->
+the main arborescence.
+
+The Wexplorer auto-refreshes when the workspace changes on disk (this app's own writes
+included), piggybacking on `search_paths_dialog.py`'s existing workspace-wide watcher instead of
+adding a third `Observer`: new generic `on_workspace_changed` callback hook, fired alongside its
+own `reload()` once the watch settles, wired to `self.explorer.refresh`.
+
+Backfilled a gap where a workspace missing some `SUBDIRS` (e.g. a folder introduced in a later
+Forgery version) only got them created when the workspace was re-picked interactively --
+`_on_active_workspace_changed()` now also calls `ensure_structure()` itself, covering every path
+into it (including `__init__` resuming a workspace already active from a previous session).
+
+Two performance bugs found and fixed while testing this feature:
+- `search_paths_dialog.py`'s workspace watcher reacted to *every* watchdog event type, including
+  `'opened'`/`'closed_no_write'` -- pure read access (e.g. from `_load_shape()`'s own
+  `item.read_bytes()` on a shape living under the watched workspace), not an actual content
+  change. This pre-existing bug (predates this session) triggered a full search-path rescan on
+  every single shape load, visibly slowing the UI -- only surfaced now because the Wexplorer
+  makes loading many shapes in a row far more common. Fixed with an event-type filter (same
+  approach as the Auto-export watcher's own handler, see below).
+- Expanding a `tex/` folder decoded every texture thumbnail synchronously on the main/render
+  thread the first time -- fine for many small files, but a real 4096x4096 Ryzom texture took
+  over a second to decode, visibly stalling the UI (raw PNG decode cost, unlike the `.dds`
+  format real shape textures normally use, which loads near-instantly). Fixed by moving thumbnail
+  decoding to a background thread per texture (own `_decode_thumbnail_worker()`, same pattern as
+  `search_paths_dialog.py`'s own background scan), downscaling to 32px before the now-cheap GPU
+  upload on the main thread.
+
+## 2026-08-26 — ✨ Auto-export imports/ -> shapes/: headless mesh-import engine for Forgery workspaces
+
+New `ryzom_forgery/import_watcher.py`: watches a workspace's `imports/` folder for created/
+modified `.obj`/`.dae`/`.fbx` files (debounced watchdog `Observer`, own per-file debounce so one
+file's write burst doesn't reset another's pending timer) and keeps `<workspace>/shapes/` in
+sync automatically. Source file names are sanitized to a safe `.shape` base name (every
+character outside `[A-Za-z0-9_-]` becomes `_`, case kept). If the target shape doesn't exist
+yet, it's a full headless import (`export_new_shape()`, same path as `apps/shape_importer.py`'s
+CLI). If it already exists and both meshes have the same material count, `update_existing_shape()`
+replaces the geometry and updates only each material's diffuse texture reference where it
+changed (`_update_diffuse_texture()`) -- every other material edit made in Patina (blend,
+alpha-test, 2-sided, further Multi Bitmap stages...) survives. A material-count mismatch raises
+`MaterialCountMismatch`, left for a future Patina UI to resolve (not yet implemented).
+
+Wired into `object_editor.py` via a new `ImportWatcher`, started/restarted whenever the active
+workspace changes. Since Patina has no dirty-edit tracking, silently auto-updating the shape
+currently open in the viewport risked discarding unsaved work -- when the auto-export target is
+that exact shape, a new confirmation popup (`_draw_import_conflict_popup()`) instead offers
+"Save then import" / "Import without saving" / "Save as a backup copy, then import"
+(auto-named `<name>_backup_<timestamp>.shape`) / Cancel.
+
+Also centralized the `IMPORTERS`/extension-dispatch dict (previously redefined identically in
+`import_dialog.py` and `apps/shape_importer.py`) into `shape_import.py` itself as the single
+source of truth, and fixed 3 stale `docs/log.md` references there (moved to
+`logs/forgery-object-editor.md` a while ago).
+
+## 2026-08-26 — ✨ Reveal texture in file manager; edit-in-workspace image editor button
+
+Two related additions to the Textures tab:
+
+- `_draw_texture_preview_static()`'s thumbnail button was always force-disabled
+  (`clicking it wouldn't do anything`); now clickable whenever the texture actually
+  resolves to a real file on disk (`self._resolve_texture(name).fs_path is not
+  None` -- still disabled for an unresolvable reference or one living inside a
+  `.bnp`, which has no file of its own to show), and reveals it in the OS's file
+  manager on click. New `workspaces.py` `reveal_in_system_file_manager()`: Windows
+  (`explorer /select,`) and macOS (`open -R`) both select the file itself; Linux has
+  no cross-desktop-environment equivalent, so falls back to
+  `open_in_system_file_manager()` on the parent folder there instead.
+- The per-texture "copy to workspace" button (added earlier this session) now turns
+  into an "Edit" button once that texture already lives in the workspace -- copying
+  it again would be a no-op, so launching an external editor on it is the only
+  useful action left. `Settings.image_editor_path` (new field) holds the
+  configured editor executable, picked via a new "Tools" section in the Settings
+  tab (`_draw_image_editor_settings()`, same `portable_file_dialogs.open_file()`
+  poll pattern as the Skinning preview's `.skel`/`.anim` pickers); the Edit button
+  stays disabled with an explanatory tooltip until one is set.
+
+## 2026-08-26 — ✨ Overlay the material index on its texture preview instead of a separate label
+
+In the Textures tab, each material row showed a separate `#N` label next to its
+color/texture swatch, taking up horizontal width this (already narrow) panel doesn't
+have to spare -- same issue for the Multi Bitmap editor's own per-material rows, which
+also had an `imgui.indent()` around them eating further left margin for no real
+navigational benefit (there's nothing else at that indent level to distinguish it
+from).
+
+Removed both labels-as-separate-text and the Multi Bitmap indent; added
+`_draw_preview_badge()`, which overlays the index directly on the swatch/thumbnail
+that was just drawn (bottom-right corner, at 70% of the normal font size, 1px black
+shadow for legibility over any thumbnail color) via `ImDrawList.add_text()`'s
+explicit font+size overload -- draws at any size regardless of the currently pushed
+font, while `calc_text_size()` only ever measures at the current (full) one, so the
+small size's own footprint is derived by scaling that measurement down (exact, not an
+approximation: glyph metrics scale linearly with size in ImGui's font atlas).
+
+## 2026-08-26 — ✨ Restore last folder/workspace/shape on next launch
+
+`Settings` gained `last_folder`/`last_bnp`/`last_shape_path`/`last_shape_bnp`/
+`last_shape_name` (`settings.py`) -- `active_workspace` didn't need anything new, it's
+already persisted live on every change. `_save_session_state()` writes these from the
+Explorer's current `root`/`_current_bnp` and the loaded shape's `_shape_source_path`/
+`_shape_source_bnp_path` (new field, tracks `ExplorerItem.bnp_path` alongside the
+existing `_shape_source_path`, which is deliberately `None` for a `.bnp`-loaded shape
+-- without also keeping `bnp_path` there was no way to reconstruct that case on
+restore). `_restore_session_state()`, called once at the end of `ObjectEditorApp.__init__()`,
+reverses this: navigates the Explorer back, re-enters the `.bnp` if one was open, and
+reloads the shape via a reconstructed `ExplorerItem`. Best-effort throughout -- a
+moved/deleted folder or shape is silently skipped, not an error.
+
+Wiring this to actually run on every exit path took a second pass: the in-app Quit
+button's own `self._save_session_state()` call (right before `self.userExit()`) never
+fired when the OS's own window-close control (X button/Alt+F4) was used instead,
+because `ShowBase.windowEvent()` (Panda3D's own base implementation, called via
+`super().windowEvent(win)` in `app.py`'s override) already calls `self.userExit()`
+itself the instant it sees the window's `getOpen()` go `False` -- and `userExit()`'s
+`sys.exit()` unwinds straight out of that `super()` call, skipping everything placed
+after it in the override, including a `getOpen()` check that was tried first and never
+actually reached. Replaced with Panda3D's own `exitFunc` hook (`self.exitFunc =
+self._on_exit` in `ForgeryApp.__init__`) -- the one thing `userExit()`/`finalizeExit()`
+is guaranteed to call before actually exiting, regardless of which of the two paths
+triggered it. `ObjectEditorApp._on_exit()` overrides it to call
+`_save_session_state()`; the Quit button now just calls `self.userExit()` directly,
+same as it always did.
+
+## 2026-08-26 — 🐛 Run the startup splashscreen as a separate process, not a thread
+
+The splashscreen (added 2026-08-21 below) ran Tk/Tcl on a background thread inside the
+main Forgery process. This reliably crashed (`Tcl_AsyncDelete: async handler deleted by
+the wrong thread`, `abort (core dumped)`) once this same process started spawning more
+of its own background threads elsewhere (the workspace filesystem watcher and its
+debounced reload worker, added the same session -- see below): Tcl/Tk is not
+thread-safe at all, and while `splash.py`'s own thread created and destroyed its `Tk()`
+root on the same thread throughout, the `tkinter` module's own `_default_root` global
+(and/or delayed cyclic-GC of lingering Tk-wrapped Python objects) could still end up
+finalized from whichever *other* thread happened to trigger garbage collection at the
+wrong moment. Tried clearing `_default_root`/forcing `gc.collect()` and blocking
+`close()`'s thread-join without a timeout first -- reduced how often it happened but
+didn't eliminate it.
+
+Settled on the actually-robust fix: moved the whole splashscreen into its own OS
+process. New `ryzom_forgery/_splash_process.py` (a standalone script, no threading of
+its own at all -- just `tk.Tk()` + `mainloop()` on that process's own main thread) is
+launched via `subprocess.Popen([sys.executable, "-m", "ryzom_forgery._splash_process",
+...])` from `splash.py`'s `Splash.__init__()`; `close()` now just waits out
+`min_duration` then `terminate()`s + `wait()`s on that process. No IPC of any kind
+needed -- the child has no self-close timer, the parent simply kills it when ready.
+This also happens to be the only fix that would ever have worked on macOS, where a GUI
+toolkit is restricted to a process's own *main* thread outright (a background thread
+could never satisfy that constraint, regardless of any Tcl-specific fix) -- a separate
+process sidesteps both constraints for the same reason: there's no way for this
+process's other threads to interact with a different process's Tcl interpreter at all.
+
+## 2026-08-26 — ✨ Per-texture "copy to workspace" button; keep valid absolute texture paths on import
+
+Two related changes, both about a texture reference not necessarily living in the
+active workspace's own `tex/` folder:
+
+- `shape_import.py`: an imported `.obj`/`.dae`/`.fbx`'s texture reference used to
+  always collapse to just its bare file name (`_texture_base_name()`), discarding a
+  relative/absolute path even when it resolves to a real file right now -- meaning the
+  shape would render untextured immediately after import unless that exact bare name
+  also happened to exist somewhere in the configured search paths. Now resolves the
+  reference against the source file's own folder (`base_dir`, threaded through
+  `build_mesh()`/`_build_material_from_assimp_material()`) if it isn't already
+  absolute, and keeps the full resolved path as `Texture.file_name` when it points at
+  a real file, falling back to the bare name only when there's nothing on disk to
+  preserve. `shape_geometry.resolve_texture_ref()` gained matching support for
+  resolving `name` as an absolute path directly (bypassing the by-name search
+  entirely), with a stale/moved absolute reference falling back to a by-name search on
+  its own basename rather than failing outright.
+- `object_editor.py`'s Textures tab: rather than auto-copying every referenced texture
+  into the workspace on Save (tried first, reverted -- would silently clutter
+  `tex/` with textures nobody actually chose to bring in for editing), added an
+  explicit per-texture "copy to workspace" icon button (simple textures and each of
+  the 3 Multi Bitmap masks alike), disabled once that texture already lives there. The
+  texture reference's own text field is colored green when it currently resolves
+  inside the active workspace's `tex/`, the normal color otherwise.
+
+## 2026-08-26 — ✨ Save now always targets the active workspace, even for a .bnp-loaded shape
+
+`_write_shape()` used to overwrite `_shape_source_path` -- wherever the shape was
+*opened* from on disk -- contradicting `_draw_bottom_bar()`'s own docstring, which
+already claimed Save "always targets the active workspace" (leftover from an earlier,
+never-finished pass at the Workspaces chantier). A shape loaded from inside a `.bnp`
+had Save disabled outright, since there was no real on-disk path to overwrite.
+
+Added `_workspace_shape_save_path()` (`<active workspace>/shapes/<name>.shape`, `None`
+without an active workspace or a known shape name) and switched the Save
+button/overwrite-confirmation flow to use it instead of `_shape_source_path` --
+Save now works for a `.bnp`-loaded shape too, always writing a fresh copy into the
+workspace rather than touching the original source.
+
+## 2026-08-26 — ✨ Watch the active workspace folder for external changes
+
+Added `watchdog` as a dependency; `search_paths_dialog.py`'s `set_workspace_dir()` now
+(re)starts an `Observer` on the new active workspace folder (native OS APIs --
+inotify/FSEvents/ReadDirectoryChangesW, the most robust cross-platform option),
+stopping any previous one first. A new `_DebouncedReloadHandler` coalesces a burst of
+filesystem events (extracting a `.bnp`, a git checkout, a texture batch export from
+another tool...) into a single `reload()` call 0.5s after the last event, instead of
+one rescan per individual file event. A watch failure (e.g. an exotic filesystem
+`inotify` can't watch) is logged and otherwise ignored -- external changes just won't
+auto-refresh then, no worse than before this existed.
+
+## 2026-08-26 — ✨ Add `imports/` to a workspace's standard subfolders
+
+`workspaces.py`'s `SUBDIRS` gained `imports` alongside the existing
+`tex`/`shapes`/`anims`/`skels`/`exports`. Since `ensure_structure()` (which creates
+every `SUBDIRS` entry) was previously only ever called from `create_workspace()`, a
+workspace created before this change would never get the new folder -- 
+`workspace_setup_dialog.py`'s `set_active_workspace()` now also calls
+`ensure_structure()` on every activation (idempotent), so switching back into an
+older workspace backfills any folder introduced since it was first created.
+
+## 2026-08-26 — ✨ Show version and authors in the status bar; don't reset locked transform axes
+
+Two small, independent additions:
+
+- `sysinfo.py`'s `SysInfoBar` now shows `"Ryzom Forgery v{version} -- Ulukyn,
+  Claude@anthropic"` right-aligned in the bottom status bar, `version` read once via
+  `importlib.metadata.version("ryzom_forgery")` (falls back to `"dev"` if not
+  installed as a package).
+- `object_editor.py`'s transform reset (the gizmo's Home button, and each panel row's
+  own Reset button) used to always reset position/rotation/scale to their defaults
+  regardless of any per-axis lock (`self.transform_locks`) -- the same lock
+  `_set_transform_axis()` already respects for manual edits and `camera.py`'s
+  Ctrl-drag. Added `_reset_node_transform()`/`_node_transform_values()`/
+  `_set_node_transform()`/`_quat_to_prh()` helpers so a reset now only overwrites
+  axes that aren't currently locked, leaving locked ones at their existing value.
+
+## 2026-08-21 — ✨ Add app icon and startup splashscreen to ForgeryApp
+
+Added to `ryzom_forgery/app.py`, the shared `ForgeryApp` base class every tool app
+(including Patina/`object_editor.py`) inherits from, so both apply automatically
+everywhere:
+
+- Window icon: `forgery.png` (128x128, at the `nel/tools/forgery/` root) set via
+  `WindowProperties.setIconFilename()` when building the window's initial properties.
+- Startup splashscreen: new `ryzom_forgery/splash.py` module, `Splash` class. Shows
+  `splashscreen.png` (512x512, same root) in a borderless, always-on-top Tkinter
+  window, running on its own thread with its own Tk mainloop so it keeps repainting
+  while the caller thread does the actual (blocking) Panda3D startup work. Centered on
+  the app's last known window position (`center_on`, from the geometry already saved
+  per-app in `~/.ryzom_forgery/*.json`) rather than on `winfo_screenwidth/height()`,
+  which reports the whole virtual desktop (not a single monitor) on multi-monitor X11
+  setups and would otherwise center the splash right at the seam between two screens.
+
+Tried and discarded two approaches to also hide the real Panda3D window itself while it
+loads underneath the splash: `WindowProperties.setOpen(False)` (only honored if set at
+window *creation*, and even then some window managers flash it mapped for a frame
+before the hide request lands) and creating it at an off-screen origin/minimum size
+(window managers are free to ignore position/size requests entirely -- e.g. tiling WMs
+enforce their own layout). Since neither is reliably honored across window managers,
+settled for the simplest option instead: `ShowBase.__init__()` (which creates the real
+window) is delayed by a flat 1-second `time.sleep()` after the splash is already up, so
+the splash has already fully rendered before the real window even exists, whatever the
+window manager then does with it. `Splash.close()` still enforces its own 1.2s minimum
+display duration on top of that, mainly to cover the rest of a tool app's own init work
+(explorer, lights, icon font, etc).
+
 ## 2026-08-19 — ✨ Auto-detect edited Panoply sources instead of a Reload button
 
 Phase A Step 5 of the "génération live des textures Panoply" chantier (see
