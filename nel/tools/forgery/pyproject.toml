@@ -4,16 +4,23 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ryzom_forgery"
-version = "3.1.2"
+version = "3.1.3"
 description = "Shared Panda3D + ImGui scaffolding for the Ryzom Forgery tool suite"
 requires-python = ">=3.10"
 dependencies = [
-	"panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "assimp-py", "tomlkit", "watchdog", "appdirs",
+	"panda3d", "panda3d-imgui", "numpy", "pycollada", "pygltflib", "tomlkit", "watchdog", "appdirs",
 	# pynel isn't on PyPI (see README.md) -- direct URL dependency instead,
 	# pointing at the wheel published by ryzom-core's own CI (.gitlab-ci.yml,
 	# build_pynel_wheel/upload_pynel_wheel) so `pip install` of this wheel
 	# alone pulls pynel in too, no separate install step needed.
 	"pynel @ https://gitlab.com/api/v4/projects/ryzom%2Fryzom-core/packages/generic/pynel/ryzom-pynel/pynel-0-py3-none-any.whl",
+	# assimp-py: our fork (bones/animations read+write, cf. project-todos/assimp_py/bones_animations.md)
+	# instead of the PyPI package -- published per-platform by gitlab.com/ryzom/assimp_py's own CI
+	# (.gitlab-ci.yml, upload_wheel_linux/windows/macos), same direct-URL mechanism as pynel above.
+	# One entry per platform (env markers), since these are compiled wheels, not a universal one.
+	"assimp-py @ https://gitlab.com/api/v4/projects/ryzom%2Fassimp_py/packages/generic/assimp_py/master/assimp_py-0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl ; sys_platform == 'linux'",
+	"assimp-py @ https://gitlab.com/api/v4/projects/ryzom%2Fassimp_py/packages/generic/assimp_py/master/assimp_py-0-cp312-cp312-win_amd64.whl ; sys_platform == 'win32'",
+	"assimp-py @ https://gitlab.com/api/v4/projects/ryzom%2Fassimp_py/packages/generic/assimp_py/master/assimp_py-0-cp312-cp312-macosx_10_13_universal2.whl ; sys_platform == 'darwin'",
 ]
 
 [tool.setuptools]
