@@ -2721,7 +2721,7 @@ NLMISC_COMMAND(killPlayer,"Kill a player","<uid>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot orientation groupname x y z look cell")
+NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot orientation groupname x y z look cell [<target entityid to replace>]")
 {
 
 	if (args.size () < 12)
@@ -2831,8 +2831,13 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 	if (isChar)
 		playerId = c->getId();
 
+	// Replace an existing entity (e.g. a temporary mount) instead of spawning at x,y,z
+	CEntityId targetEntityId;
+	if (args.size() >= 13)
+		targetEntityId = CEntityId(args[12]);
+
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
-	uint32 messageVersion = 1;
+	uint32 messageVersion = 2;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
 	msgout.serial(playerId);
@@ -2847,6 +2852,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 	msgout.serial(botsName);
 	msgout.serial(look);
 	msgout.serial(cell);
+	msgout.serial(targetEntityId);
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 
 	return true;
@@ -3589,7 +3595,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 
 // spawnMount 2 sagass_mount_00.creature "Mount$#Property of Ulukyn"
 //-----------------------------------------------
-NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet custom name>] [x,-y,z] [cell]")
+NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet custom name>] [x,-y,z] [cell] [<target entityid to replace>]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3641,7 +3647,7 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 	}
 
 
-	if (args.size() >= 5)
+	if (args.size() >= 5 && args[4] != '*')
 	{
 		fromString(args[4], msg.Cell);
 	}
@@ -3651,6 +3657,23 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 		msg.Cell = mirrorCell;
 	}
 
+	// Replace an existing entity (e.g. a NPC group) instead of spawning near a point
+	if (args.size() >= 6 && args[5] != '*')
+	{
+		CEntityId targetEntityId(args[5]);
+		if (targetEntityId == CEntityId::Unknown)
+		{
+			log.displayNL("ERR: invalid target entity id");
+			return true;
+		}
+
+		msg.SpawnMode = CPetSpawnMsg::REPLACE_ENTITY;
+		msg.TargetMirrorRow = TheDataset.getDataSetRow(targetEntityId);
+		msg.AIInstanceId = (uint16)c->getInstanceNumber();
+		CWorldInstances::instance().msgToAIInstance(msg.AIInstanceId, msg);
+		log.displayNL("OK");
+		return true;
+	}
 
 	CContinent * continent = CZoneManager::getInstance().getContinent(msg.Coordinate_X, msg.Coordinate_Y);
 	if (!continent)
