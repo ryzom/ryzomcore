@@ -1621,8 +1621,13 @@ def _parse_mesh_base(f: _Reader) -> MeshBase:
 			stage_list = []
 			for _ in range(m):
 				f.version()
-				mat_id = f.u32()
-				stage_id = f.u32()
+				# CMatStage::serial (mesh_base.h:89-104): MatId/StageId are
+				# uint8, not uint32 -- reading them as u32 silently consumed 6
+				# extra garbage bytes per stage entry, desyncing everything
+				# after any non-empty StageList (i.e. any lightmapped material
+				# referencing a stage, common on architecture pieces).
+				mat_id = f.u8()
+				stage_id = f.u8()
 				stage_list.append((mat_id, stage_id))
 			light_infos.append(LightMapInfoList(light_group=light_group, animated_light=animated_light, stage_list=stage_list))
 	else:
@@ -1684,8 +1689,8 @@ def _write_mesh_base(f: _Writer, base: MeshBase) -> None:
 		f.cont_len(len(li.stage_list))
 		for mat_id, stage_id in li.stage_list:
 			f.version(0)
-			f.u32(mat_id)
-			f.u32(stage_id)
+			f.u8(mat_id)
+			f.u8(stage_id)
 
 	f.boolean(base.is_lightable if base.is_lightable is not None else True)
 	f.boolean(bool(base.use_lighting_local_attenuation))

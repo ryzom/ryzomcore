@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pynel"
-version = "0.9.2"
+version = "0.9.3"
 description = "Python tools for Ryzom/NeL data formats (.ig, .shape, .anim, .bnp, .primitive, .cmb, .packed_sheets) and admin protocols"
 requires-python = ">=3.8"
 dependencies = ["numpy"]

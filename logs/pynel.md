@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-09-04 — 🐛 Fix CMatStage field width (u8, not u32), pynel 0.9.3
+
+The real fix for the bulk of the remaining live_data parse failures the previous two
+entries chipped away at without finding the main cause: `_parse_mesh_base()`'s
+`_LightInfos` reader (`ver>=8` branch, `CLightMapInfoList::StageList`) read each
+`CMatStage`'s `MatId`/`StageId` as `u32` -- 4 bytes each. The real struct
+(`mesh_base.h:89-104`) declares them `uint8`, 1 byte each: `f.serial(MatId);
+f.serial(StageId);` with no size hint in the API to catch the mismatch by
+inspection. Reading them as u32 silently consumed 6 extra garbage bytes per stage
+entry, desyncing every field read afterward -- for any shape with a non-empty
+`StageList`, i.e. any material referencing a lightmap stage, which turns out to be
+the overwhelmingly common case for architecture/decor pieces (`shader_type==LightMap`
+materials, found via the earlier `CLightMap::serial2` investigation but misdiagnosed
+as the cause back then -- it wasn't, this was).
+
+Fixed both the reader and `_write_mesh_base()`'s matching writer (same `u32`->`u8`
+mistake, would have produced corrupt files on any edit-and-save round-trip of a
+lightmapped material with a non-empty stage list, previously just as
+untested/unverified as the reader).
+
+Verified via a full live_data re-scan: fully-parsed count jumped from 2819/3998 to
+**3997/3998** -- every remaining failure resolved except the one already-documented
+`city_part28.shape` (pre-version-1 `CVertexBuffer` header, unrelated, still out of
+scope). All 37 shapes previously listed in `shape_format.md` §3 as "still-unidentified
+CMeshGeom version 0" failures are now fully parsed by this same fix -- that whole
+investigation was chasing a symptom of this one root cause, not a separate gap;
+`shape_format.md` corrected accordingly.
+
 ## 2026-09-04 — 🐛 Fix CMaterial::CLightMap version-0 ambient field, pynel 0.9.2
 
 Found while chasing one of the still-unsupported shapes flagged by the previous entry's
