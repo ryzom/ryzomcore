@@ -32,7 +32,6 @@ from .workspace_setup_dialog import WorkspaceSetupDialog
 # full up-to-date list instead of guessing from FA4-era names.
 _ICON_FONT_PATH = (
 	Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts" / "Font_Awesome_6_Free-Solid-900.otf")
-_ICON_FONT_SIZE = 14.0
 
 # UI text font choices offered in Settings (see Settings.ui_font_name/
 # ui_font_size in settings.py, and _draw_ui_font_settings() in
@@ -364,13 +363,22 @@ class ForgeryApp(ShowBase):
 		imgui.get_io().font_default = font
 
 	def _load_icon_font(self):
-		# self.large_icon_font (1.5x _ICON_FONT_SIZE, standalone -- not merged
-		# into the default font like the one above) is for spots that want a
-		# bigger icon-only button than the normal UI text size, e.g.
-		# object_editor.py's viewport toggle bars: push_font()/pop_font()
+		# self.large_icon_font (1.5x the merged icon size below, standalone --
+		# not merged into the default font like the one above) is for spots
+		# that want a bigger icon-only button than the normal UI text size,
+		# e.g. object_editor.py's viewport toggle bars: push_font()/pop_font()
 		# around those buttons, since there's no per-window font-scale API in
 		# this imgui_bundle version to reach for instead.
-		icon_font_size = _ICON_FONT_SIZE * self._ui_scale
+		# icon_font_size tracks the UI font's own size (self._ui_font_size_base,
+		# set by _load_ui_font() right before this is called) rather than a
+		# fixed point size: a merged icon glyph rasterized noticeably larger
+		# than the surrounding text overflows the frame's line height (based
+		# on the base font's own metrics), cropping into -- or entirely past
+		# -- the frame's top padding. Worst at small ui_font_size values
+		# (9-12) combined with a high ui_scale, where a fixed-size icon used
+		# to be proportionally largest relative to the text (reported/
+		# repro'd by Nuno, 2026-09-04).
+		icon_font_size = self._ui_font_size_base * self._ui_scale
 		if not _ICON_FONT_PATH.exists():
 			self.large_icon_font = None
 			self.large_icon_font_size = icon_font_size * 1.5

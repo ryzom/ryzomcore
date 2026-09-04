@@ -80,12 +80,16 @@ pour ajouter leur logique métier.
  sur `_DEFAULT_FONT_NAME` ("Roboto Bold") si le fichier stocké n'existe
  plus.
 - `_load_icon_font(self)` (`app.py`) : fusionne les glyphes Font
- Awesome 4 dans la police par défaut (pour utiliser `ICON_FA_*` dans un
- `imgui.text`/`button` normal), et construit en plus `self.large_icon_font`
- (1.5× `_ICON_FONT_SIZE * self._ui_scale`), une police icône autonome pour
- les gros boutons icône-seule (ex. barres de bascule du viewport dans
- `object_editor.py`) — fixée une fois au démarrage, pas d'aperçu en direct
- pour cette police-là.
+ Awesome 6 dans la police par défaut (pour utiliser `ICON_FA_*` dans un
+ `imgui.text`/`button` normal) à la taille de la police UI elle-même
+ (`self._ui_font_size_base * self._ui_scale` — pas une taille fixe :
+ un glyphe icône fusionné sensiblement plus grand que le texte autour
+ déborde de la hauteur de ligne et rogne le padding du haut, cf. bug
+ rapporté/reproduit par Nuno le 2026-09-04), et construit en plus
+ `self.large_icon_font` (1.5× cette même taille), une police icône
+ autonome pour les gros boutons icône-seule (ex. barres de bascule du
+ viewport dans `object_editor.py`) — fixée une fois au démarrage, pas
+ d'aperçu en direct pour cette police-là.
 - `set_live_ui_scale_preview(self, candidate_scale)` (`app.py`) : aperçu
  DPI en direct **texte seulement** — appelé chaque frame par
  `WorkspaceSetupDialog.on_dpi_preview_changed` (popup de setup) ou

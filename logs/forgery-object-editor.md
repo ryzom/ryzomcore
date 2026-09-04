@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-09-04 — 🐛 Scale merged icon glyphs to the UI font size, Forgery 3.1.2
+
+A user on Windows reported tabs and some buttons (e.g. Save) missing their
+top padding. Reproduced locally on Linux (Nuno, 2026-09-04) with a DPI scale
+of 1.5-2.0 combined with a small UI font size (9-12pt) -- any font family,
+worse the larger the gap between the DPI scale and the font size, and
+outright cropped at DPI 1.5 with a 9pt font.
+
+Root cause: `_load_icon_font()` (`app.py`) merged Font Awesome 6's glyphs
+into the default font at a fixed point size (`_ICON_FONT_SIZE = 14.0`,
+scaled only by `self._ui_scale`), completely independent of
+`Settings.ui_font_size`. When the user's chosen UI font size was small
+relative to that fixed 14pt, the merged icon glyph rendered noticeably
+taller than the surrounding text -- since ImGui computes a tab/button's
+frame height from the base font's own line metrics (not the icon glyph's
+actual rasterized size), the oversized icon glyph overflowed above the
+line, cropping into (or entirely past) the frame's top padding. Because
+`self._ui_scale` multiplies both the fixed icon size and the user's font
+size by the same factor, the absolute pixel overflow grew with the DPI
+scale too, matching the "worse at higher DPI" symptom exactly.
+
+Fix: `icon_font_size` in `_load_icon_font()` now tracks
+`self._ui_font_size_base * self._ui_scale` (the same size the UI font
+itself is loaded at) instead of the fixed 14pt constant, so the merged
+icon glyph always stays proportioned to the surrounding text regardless of
+the user's font/size choice. `self.large_icon_font` (viewport toggle bars'
+bigger icon-only buttons) still scales at 1.5x that size, now relative to
+the corrected base instead of the old fixed one. `docs/app.md` updated to
+match (also fixed a stale "Font Awesome 4" mention there, left over from
+the 2026-09-03 FA4->FA6 switch).
+
 ## 2026-09-03 — 🐛 Package object_editor_mixins in the wheel, Forgery 3.1.1
 
 `pyproject.toml`'s `[tool.setuptools] packages` listed `ryzom_forgery` and
