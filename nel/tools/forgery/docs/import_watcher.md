@@ -41,10 +41,19 @@ pour le watcher lui-même).
 - **Ne possède pas son propre `Observer`.** `set_workspace_dir` mémorise le workspace
  actif, crée `imports/` (toujours créé, juste plus spécial au watcher), et lance sur un
  thread de fond un scan complet du workspace pour reconstruire l'index anti-doublon (sans
- rien réimporter — ce watcher est événementiel, pas un réconciliateur comme
- `tex_dds_sync`/`workspace_sync`, voir plus bas). `handle_settled` est enregistrée par
- `apps/object_editor.py` sur un `workspace_watch.WorkspaceWatcher` partagé via
- `register_extension(IMPORT_EXTENSIONS, ...)`.
+ rien réimporter par lui-même). `handle_settled` est enregistrée par `apps/object_editor.py`
+ sur un `workspace_watch.WorkspaceWatcher` partagé via `register_extension(IMPORT_EXTENSIONS,
+ ...)`.
+- `reconcile()` / `_reconcile_worker()` — ajouté 2026-09-04 (chantier
+ `workspace_switch_reconcile`, `project-todos/forgery/`) : rattrapage automatique sur un
+ thread de fond, appelé par `apps/object_editor.py::_on_active_workspace_changed()` à
+ chaque ouverture/changement de workspace (lancement de Patina inclus). Scanne toutes les
+ sources connues comme sûres (`_import_sources()` + `DuplicateNameGuard.scan`) et appelle
+ `_process(source_path)` pour celles dont le `.shape` cible n'existe pas ou dont la source
+ est plus récente (`source.stat().st_mtime > target.stat().st_mtime`) — même moteur que
+ `handle_settled`/`_process` (gestion du conflit shape-ouverte, du `MaterialCountMismatch`,
+ des messages de statut, incluse gratuitement). Même principe que `tex_dds_sync.reconcile()`
+ pour les textures.
 
 ## Garde-fou anti-doublon
 

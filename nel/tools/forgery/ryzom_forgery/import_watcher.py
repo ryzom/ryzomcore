@@ -228,6 +228,27 @@ class ImportWatcher:
 		if self._workspace_dir is not None:
 			self._guard.scan(self._import_sources())
 
+	def reconcile(self):
+		"""Auto-called by object_editor.py after a workspace becomes active
+		(see _on_active_workspace_changed()) -- catches up on every source
+		that changed while nothing was watching (Patina wasn't running, or
+		this is the very first workspace of the session): re-exports/updates
+		any source whose target `.shape` is missing or older than it, same
+		as `tex_dds_sync.reconcile()` does for textures. Runs on a
+		background thread, since a workspace can hold a lot of files."""
+		if self._workspace_dir is not None:
+			threading.Thread(target=self._reconcile_worker, daemon=True).start()
+
+	def _reconcile_worker(self):
+		workspace_dir = self._workspace_dir
+		if workspace_dir is None:
+			return
+		safe_sources = self._guard.scan(self._import_sources())
+		for source_path in safe_sources:
+			target_path = target_shape_path(workspace_dir, source_path)
+			if not target_path.exists() or source_path.stat().st_mtime > target_path.stat().st_mtime:
+				self._process(source_path)
+
 	def handle_settled(self, source_path):
 		"""Registered onto a shared WorkspaceWatcher via register_extension()
 		for IMPORTERS's extensions -- runs off that watcher's background

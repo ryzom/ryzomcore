@@ -104,6 +104,27 @@ class WorkspaceSyncWatcher:
 		if self._workspace_dir is not None:
 			self._guard.scan(self._synced_sources())
 
+	def reconcile(self):
+		"""Auto-called by object_editor.py once both the active workspace and
+		its sync folder are known (right after set_workspace_dir() and
+		set_sync_folder(), see _on_active_workspace_changed()) -- rebuilds
+		the duplicate-name index fresh and triggers a sync_now() pass if the
+		result isn't already fully synced, so files that piled up while
+		nothing was watching (a previous session, or a workspace/sync-folder
+		switch) get mirrored automatically on workspace open instead of
+		silently waiting for the user to notice and press "Sync now"
+		themselves. A no-op without both a workspace and a sync folder
+		configured, or while already syncing. Runs on a background thread."""
+		if self._workspace_dir is None or self._sync_folder is None or self._syncing:
+			return
+		threading.Thread(target=self._reconcile_worker, daemon=True).start()
+
+	def _reconcile_worker(self):
+		self._guard.scan(self._synced_sources())
+		self.refresh_fully_synced()
+		if not self._fully_synced:
+			self.sync_now()
+
 	def refresh_fully_synced(self):
 		"""Recomputes whether every currently known-safe workspace file
 		already has a mirrored copy on the sync-folder side -- existence

@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-09-04 — 🐛 Auto-reconcile export/sync on workspace open, Forgery 3.1.5
+
+Fixed two workspace-switch gaps: neither `ImportWatcher` nor `WorkspaceSyncWatcher`
+caught up on anything that changed while Patina wasn't watching (a previous session,
+or the very first workspace opened this run) -- `set_workspace_dir()` only ever
+rebuilds each watcher's duplicate-name index, by design (event-driven, not a
+reconciler, unlike `tex_dds_sync.py` which already had its own `reconcile()`).
+
+Also found and fixed a real race in `WorkspaceSyncWatcher`: `set_sync_folder()`,
+called right after `set_workspace_dir()` in `_on_active_workspace_changed()`,
+computed `refresh_fully_synced()` against an index that `set_workspace_dir()`'s own
+background `_rebuild_index()` thread hadn't finished repopulating yet -- `all()` over
+the still-empty set trivially returned `True`, so `is_fully_synced()` read `True`
+right after a workspace switch even though nothing had actually been mirrored yet,
+hiding the "Sync now" button with no way to trigger a manual catch-up either.
+
+Added `ImportWatcher.reconcile()` (scans every import source, re-exports/updates any
+whose target `.shape` is missing or older than it, reusing `_process()`'s existing
+conflict/backup handling) and `WorkspaceSyncWatcher.reconcile()` (rebuilds the index
+fresh, then triggers `sync_now()` if not already fully synced) -- both called from
+`object_editor.py::_on_active_workspace_changed()` right after `set_sync_folder()`,
+so both the workspace and its sync folder are already known and the earlier race
+can't recur.
+
 ## 2026-09-04 — 🐛 Scale merged icon glyphs to the UI font size, Forgery 3.1.2
 
 A user on Windows reported tabs and some buttons (e.g. Save) missing their

@@ -42,6 +42,14 @@ une fois empaqueté.
   - `refresh_fully_synced` — simple test d'existence (pas de comparaison
  de contenu/mtime), sur l'ensemble actuellement sûr, pour afficher ou non le bouton
  "Sync now" côté UI.
+  - `reconcile()` / `_reconcile_worker()` — ajouté 2026-09-04 (chantier
+ `workspace_switch_reconcile`, `project-todos/forgery/`) : appelé par
+ `apps/object_editor.py::_on_active_workspace_changed()` juste après `set_workspace_dir`
+ **et** `set_sync_folder` (dans cet ordre précis, voir Points notables), sur un thread de
+ fond : reconstruit l'index (`_guard.scan`), recalcule `refresh_fully_synced()`, et
+ déclenche `sync_now()` si le résultat n'est pas déjà `True` — rattrape automatiquement,
+ à l'ouverture/changement de workspace, tout ce qui a dérivé pendant que rien ne
+ surveillait (sans attendre que l'utilisateur remarque et clique sur "Sync now").
   - `handle_settled` — copie effective via `shutil.copy2`, vers
  `<sync_folder>/forgery/<nom du workspace>/<nom de fichier>` — le préfixe
  `forgery/<workspace>/` isole plusieurs workspaces dans le même dossier de sync sans
@@ -86,6 +94,15 @@ workspace, est réel dans les deux cas).
  — c'est un simple test d'existence, donc ça peut afficher "tout synchronisé" alors
  qu'une version plus récente existe côté workspace sans avoir encore déclenché le
  watch.
+- **Race corrigée (2026-09-04, chantier `workspace_switch_reconcile`)** : `set_sync_folder`,
+ appelé juste après `set_workspace_dir` dans `_on_active_workspace_changed()`, calculait
+ `refresh_fully_synced()` alors que l'index anti-doublon (reconstruit en tâche de fond par
+ `set_workspace_dir`) était encore vide — `is_fully_synced()` retombait donc à `True` à
+ tort juste après un changement de workspace (bouton "Sync now" caché, rien resynchronisé).
+ `reconcile()`, appelé après les deux, recalcule l'état sur un index frais et corrige ça.
+- `reconcile()` refait son propre scan (`_guard.scan`) alors que `sync_now()`, qu'il
+ appelle en cas de besoin, en refait un second en interne — léger doublon accepté par
+ simplicité plutôt que par souci d'optimisation prématurée.
 - **Ne possède pas son propre `Observer`.** La surveillance filesystem elle-même (un
  seul `Observer` partagé avec `import_watcher`/`tex_dds_sync`) vit dans
  `workspace_watch.WorkspaceWatcher` — voir `docs/workspace_watch.md` pour le pourquoi

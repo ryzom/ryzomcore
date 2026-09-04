@@ -630,6 +630,15 @@ class ObjectEditorApp(
 		workspace_name = self.workspace_setup_dialog.active_workspace_name
 		sync_folders = app_settings.load().workspace_sync_folders
 		self.workspace_sync.set_sync_folder(sync_folders.get(workspace_name) if workspace_name else None)
+		# Catches up on anything that changed while nothing was watching
+		# (Patina wasn't running, or this is the first workspace of the
+		# session) -- neither watcher's own set_workspace_dir() re-triggers
+		# export/sync by itself (event-driven only, see their docstrings).
+		# Called here, after set_sync_folder() above, not from inside
+		# set_workspace_dir() itself -- avoids racing workspace_sync's own
+		# reconcile() against the previous workspace's sync folder.
+		self.import_watcher.reconcile()
+		self.workspace_sync.reconcile()
 		# Explorer.virtual_categories_source (see explorer.py): the active
 		# workspace's own content, grouped by virtual category
 		# (shapes/textures/3d files/masks/anims/skels/others -- see
