@@ -57,18 +57,45 @@ closed (a live_data survey, `nel/tools/forgery/docs/shape_type_survey.md`).
 - Other, less common `ITexture` subclasses (procedural textures, etc.) are
   not decodable -- fails with a clear `ShapeParseError` rather than
   producing wrong data.
-- A handful of very old `CMesh` shapes (`CMeshGeom` version 0, predating
+- A handful of very old shapes (`CMeshGeom` version 0, predating
   `CMeshVPWindTree`/`CMeshVPPerPixelLight`/mesh-morpher support) still fail
-  to parse for a different, still-unidentified reason further upstream in
-  `_parse_mesh_base()`/`_parse_mesh_geom()` -- not the same gap as the old
-  `CVertexBuffer` format above (that one's now supported); this manifests as
-  a clear `ShapeParseError` pointing at the vertex buffer (rather than a
-  silent desync) since the 2026-09-04 fix, but the actual root cause wasn't
-  tracked down. Affects a small number of `construction.bnp` shapes.
-- One shape seen so far uses a `CVertexBuffer` header predating version 1
-  (`_parse_vertex_buffer_header`'s own `ver < 1` case) -- narrower than, and
-  not covered by, the version-0-whole-format support above. Not investigated
-  since it's a single file in current live_data.
+  to parse for a different, still-unidentified reason further upstream, in
+  `_parse_mesh_base()` (not `_parse_mesh_geom()` itself -- the corruption is
+  already present by the time `CMeshGeom`'s own version byte is read) --
+  not the same gap as the old `CVertexBuffer` format above (that one's now
+  supported) or the `CMaterial::CLightMap` version-0 `LMCAmbient` bug fixed
+  in pynel 0.9.2 (checked: doesn't explain these specific files either).
+  Ruled out so far: `CTextureBlend`/`CTextureBump` (absent from the affected
+  files' raw bytes). Not investigated further -- these are all old,
+  low-priority decor/furniture pieces. Manifests either as a clear
+  `ShapeParseError` pointing at the vertex buffer (an all-zero/implausible
+  old-format flags+count combination, `_parse_vertex_buffer_old()`'s own
+  sanity check) or as "unsupported class ''" (a bogus polymorphic-pointer
+  node id read where `CMeshGeom`'s `vertex_program` field should be, for
+  files whose own `CMeshGeom` version happens to be >=3). Affected files
+  (37 total, all effectively dead ends for now):
+  - `construction.bnp`: `gen_aub_int_table_1`, `gen_bt_aub_entree`,
+    `gen_bt_ecurie_tonneau`, `gen_bt_tour_porteleft`, `gen_bt_tour_porteright`
+  - `desert_shapes.bnp`: `agora_part16_bis`, `agora_part18_bis`,
+    `sanctuaire_part03b`, `street_part72`
+  - `fyros_shapes.bnp`: `fy_smoke_elevateur`
+  - `indoors_shapes.bnp`: `fy_encensoir08`, `ma_appart_banniere_00`..`04`,
+    `ma_appart_lit`, `ma_banniere_hall_reunion_02`..`05`,
+    `ma_branche_hall_reunion`, `tr_acc_arrmoire`, `tr_acc_table`,
+    `tr_appartement_fauteuil`, `tr_hall_reunion_coffre`, `tr_papyrus_a`..`e`,
+    `zo_bt_apart_coffre_fort`, `zo_hall_reu_coffre_fort`, `zo_chaise_01`..`04`
+    (and their `_hall_reunion` variants)
+  - `lacustre_shapes.bnp`: `tr_module_kami_branche_1_village_a`,
+    `tr_module_kami_branche_2_village_a`
+  - `matis_shapes.bnp`: `ma_serre_pots`
+  - `tryker_shapes.bnp`: `tr_ascenseur`
+  - `zorai_shapes.bnp`: `zo_acc_ascenseur`, `zo_acc_ascenseur_rdc`,
+    `zo_acc_ascenseur_ss`
+- One shape (`desert_shapes.bnp:city_part28.shape`) uses a `CVertexBuffer`
+  header predating version 1 (`_parse_vertex_buffer_header`'s own `ver < 1`
+  case) -- narrower than, and not covered by, the version-0-whole-format
+  support above. Not investigated since it's a single file in current
+  live_data.
 - `CTextureFile`/`CTextureMultiFile` file names are lower-cased on read
   (texture names aren't case-sensitive, and real data mixes casing), so
   parsing a shape and immediately re-dumping it without any other edit can
