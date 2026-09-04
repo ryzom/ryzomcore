@@ -9,7 +9,7 @@
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Dispatcher ==-
@@ -54,9 +54,9 @@ class IosDispatcher(RyzomService):
 
 	def runIOSCommand(self, command):
 		if self.ryzomAS.connect("127.0.0.1", 46700):
-			out = command.split(" ", 3)
-			out[3] = "".join([ s[0] for s in  out[3].split() ])
-			print("▶️ ", " ".join(out), "[", self.ryzomAS.service_cmd("ios", command) ,"]")
+			out = "".join([ s[0] for s in  command.split(" ")[3].split() ])
+			print("▶️ ", out)
+			self.ryzomAS.service_cmd("ios", command)
 			self.ryzomAS.close()
 			return True
 		else:
@@ -65,9 +65,9 @@ class IosDispatcher(RyzomService):
 
 	def runEGSCommand(self, command):
 		if self.ryzomAS.connect("127.0.0.1", 46700):
-			out = command.split(" ")
-			out[3] = "".join([ s[0] for s in  out[3].split() ])
-			print("▶️ ", " ".join(out), "[", self.ryzomAS.service_cmd("egs", command) ,"]")
+			out = "".join([ s[0] for s in  command.split(" ")[3].split() ])
+			print("▶️ ", out)
+			self.ryzomAS.service_cmd("egs", command)
 			self.ryzomAS.close()
 			return True
 		else:
@@ -116,7 +116,6 @@ class IosDispatcher(RyzomService):
 		for i in range(self.current_id+1, last_id+1, 1):
 			message = self.getRyzomMessage(i)
 			if message != None:
-				print("New Message", message.output_zipped())
 				self.updateActivity(False)
 				self.stats["messages"] += 1
 				status = self.sendToService(message)

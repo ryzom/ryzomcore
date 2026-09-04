@@ -8,7 +8,7 @@
 #          \/                   \/
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom IOS Fetcher ==-
@@ -42,13 +42,13 @@ class ZulipFetcher(ZulipService):
 		self.shard = host = self.config["shard"]["name"]
 		self.guilds_prefixes = {"atys": "0x00165", "gingo": "0x002f5"}
 
-	def checkMessages(self, event):
-		msg = event["message"]
-		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
-			return
-
+	def ingestZulipMessage(self, msg, source_lang=None):
 		raw_msg = msg["content"]
 		message = self.convert_zulip_upload_links(raw_msg)
+		# Drop the "!" from image markdown: Zulip auto-embeds a plain [alt](url)
+		# link to an image just as well, and this sidesteps every issue caused
+		# by the "!" downstream (DeepL typographic spacing, link conversion, etc.)
+		message = re.sub(r"!(\[[^\]]*]\([^)]+\))", r"\1", message)
 		sender = msg["sender_full_name"]
 		dest = msg["display_recipient"]
 		if msg["type"] == "private":
@@ -86,15 +86,51 @@ class ZulipFetcher(ZulipService):
 			else:
 				channel_id = channel[1:].strip().lower()
 
-			lang = msg["translation_lang"] if "translation_lang" in msg else "en"
-			message = RyzomMessage("zulip", sender.lower(), channel, channel_id, lang, "*", message, source_message_id=msg["id"])
-			self.addRyzomMessage(message)
+			if source_lang is None:
+				# Language of the original message, so it can be reused if this message gets edited later
+				source_lang = msg["translation_lang"] if "translation_lang" in msg else "en"
+			self.client.set(f"Zulip-Msg-Lang-{msg['id']}", source_lang, 24*60*60)
 
+			ryzom_message = RyzomMessage("zulip", sender.lower(), channel, channel_id, source_lang, "*", message, source_message_id=msg["id"])
+			self.addRyzomMessage(ryzom_message)
+
+	def checkMessages(self, event):
+		msg = event["message"]
+		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
+			return
+		self.ingestZulipMessage(msg)
+
+	def checkUpdatedMessage(self, event):
+		# Only react to actual content edits by a real user; ignore rendering-only
+		# fixups (e.g. link preview refresh) and edits with no content change.
+		if event.get("rendering_only") or "content" not in event:
+			return
+		# Edits made by the Ryzom bot itself are how translations get added to a
+		# message; reacting to them here would create a translation loop.
+		if event.get("user_id") == self.admin_id:
+			return
+
+		message_id = event["message_id"]
+		result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET", request={"apply_markdown": False})
+		if result["result"] == "error":
+			print(f"Error fetching edited message {message_id}", result["msg"])
+			return
+
+		# Reuse the original message's language, so a re-translation isn't
+		# mistakenly sourced from the requesting bot's own language.
+		source_lang = self.client.get(f"Zulip-Msg-Lang-{message_id}")
+		self.ingestZulipMessage(result["message"], source_lang=source_lang)
+
+	def dispatchEvent(self, event):
+		if event["type"] == "message":
+			self.checkMessages(event)
+		elif event["type"] == "update_message":
+			self.checkUpdatedMessage(event)
 
 	def run(self):
 		print("Fetching Zulip messages")
 		self.setZulipQueueId(self.zulip.registerMessages())
-		self.zulip.manageMessages(self.checkMessages)
+		self.zulip.manageMessages(self.dispatchEvent)
 
 if __name__ == "__main__":
 	fetcher = ZulipFetcher()

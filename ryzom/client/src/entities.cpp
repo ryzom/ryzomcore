@@ -29,6 +29,7 @@
 #include "entities.h"
 #include "entity_cl.h"
 #include "fx_cl.h"
+#include "weather.h"
 #include "forage_source_cl.h"
 #include "item_cl.h"
 #include "pacs_client.h"
@@ -871,15 +872,36 @@ bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const
 		}
 		else if (param == "texture")
 		{
-			if (!values[i].empty())
+			string texture = values[i];
+
+			if (texture == "#season#" || texture.empty())
 			{
-				for(uint j=0;j<instance.getNumMaterials();j++)
+				uint8 selectedTextureSet = (uint8)::computeCurrSeason();
+				instance.selectTextureSet(selectedTextureSet);
+				texture = "";
+			}
+			else if (texture[0] == '#')
+			{
+				uint8 selectedTextureSet;
+				fromString(texture.substr(1), selectedTextureSet);
+				instance.selectTextureSet(selectedTextureSet);
+				texture = "";
+			}
+
+			std::vector<string>texList;
+			if (!texture.empty())
+				splitString(texture, " ", texList);
+
+			for(uint j=0;j<instance.getNumMaterials();j++)
+			{
+
+				if (!texture.empty())
 				{
 					sint numStages = instance.getMaterial(j).getLastTextureStage() + 1;
 					for(sint l = 0; l < numStages; l++)
 					{
 						if (instance.getMaterial(j).isTextureFile((uint) l))
-							instance.getMaterial(j).setTextureFileName(values[i], (uint) l);
+							instance.getMaterial(j).setTextureFileName(texList[std::min((int)j, (int)texList.size()-1)], (uint) l);
 					}
 				}
 			}
@@ -1127,6 +1149,146 @@ CShapeInstanceReference CEntityManager::getShapeInstanceUnderPos(float x, float 
 // \param TClientDataSetIndex : persitent id while the entity is connected.
 // \return CEntityCL * : pointer on the new entity.
 //-----------------------------------------------
+CEntityCL *CEntityManager::buildEntity(uint slot, uint32 form)
+{
+	// Check parameter : form.
+	CEntitySheet *entitySheet = SheetMngr.get((CSheetId)form);
+	if(entitySheet == 0)
+	{
+		nlwarning("EM:create: Attempt on create an entity with a bad form number %d (%s) for the slot '%d' trying to compute the default one.", form, ((CSheetId)form).toString().c_str(), slot);
+		CSheetId defaultEntity;
+		if(defaultEntity.buildSheetId(ClientCfg.DefaultEntity)==false)
+		{
+			nlwarning("EM:create: The default entity (%s) is not in the sheetid.bin.", ClientCfg.DefaultEntity.c_str());
+			return 0;
+		}
+		entitySheet = SheetMngr.get(defaultEntity);
+		if(entitySheet == 0)
+		{
+			nlwarning("EM:create: The default entity (%s) is not in the sheet manager.", ClientCfg.DefaultEntity.c_str());
+			return 0;
+		}
+	}
+
+	// Create the entity according to the type.
+	CEntityCL *newEntity = 0;
+
+	switch(entitySheet->type())
+	{
+	case CEntitySheet::RACE_STATS:
+	case CEntitySheet::CHAR:
+		if (slot == 0)
+		{
+			nlassert (UserEntity == NULL);
+			UserEntity = new CUserEntity;
+			newEntity = UserEntity;
+		}
+		else
+		{
+			newEntity = new CPlayerCL;
+		}
+		break;
+
+	case CEntitySheet::FAUNA:
+	{
+		CCharacterSheet *sheet = NLMISC::safe_cast<CCharacterSheet *>(entitySheet);
+		if (!sheet->R2Npc) newEntity = new CCharacterCL;
+		else newEntity = new CPlayerR2CL;
+	}
+	break;
+	case CEntitySheet::FLORA:
+		newEntity = new CCharacterCL;
+		break;
+
+	case CEntitySheet::FX:
+		newEntity = new CFxCL;
+		break;
+
+	case CEntitySheet::ITEM:
+		newEntity = new CItemCL;
+		break;
+
+	case CEntitySheet::FORAGE_SOURCE:
+		newEntity = new CForageSourceCL;
+		break;
+
+	default:
+		pushDebugStr(NLMISC::toString("Unknown Form Type '%d' -> entity not created.", entitySheet->type()));
+		break;
+	}
+
+	// If the entity has been right created.
+	if(newEntity)
+	{
+		// Set the sheet Id.
+		newEntity->sheetId((CSheetId)form);
+		// Set the slot.
+		newEntity->slot(slot);
+		// Build the entity from a sheet.
+		if(!newEntity->build(entitySheet))
+		{
+			// Everyone except the User
+			if(slot != 0)
+			{
+				nlwarning("EM:%d: Cannot build the Entity -> REMOVE IT", slot);
+				delete newEntity;
+				newEntity = 0;
+			}
+			// The User
+			else
+				nlerror("EM: Cannot build the User");
+		}
+	}
+	// Entity Not Allocated
+	else
+		pushDebugStr(NLMISC::toString("Cannot Allocated the Entity in the slot '%d'.", slot));
+	// Log problems about the entity creation.
+	flushDebugStack(NLMISC::toString("Create Entity in slot '%d' with Form '%s' :", slot, ((CSheetId)form).toString().c_str()));
+
+	return newEntity;
+}// buildEntity //
+
+void CEntityManager::finalizeEntityInSlot(uint slot, CEntityCL *newEntity, const TNewEntityInfo& newEntityInfo)
+{
+	// Set the DataSet Index. AFTER slot(), so bar manager is correctly init
+	newEntity->dataSetId(newEntityInfo.DataSetIndex);
+	// Set the Mission Giver Alias
+	newEntity->npcAlias(newEntityInfo.Alias);
+	// Apply properties backuped;
+	applyBackupedProperties(slot);
+	// register to the ground fx manager
+	if(newEntity->supportGroundFX())
+	{
+		_EntityGroundFXHandle[slot] = _GroundFXManager.add(newEntity);
+	}
+}// finalizeEntityInSlot //
+
+void CEntityManager::destroyEntityInSlot(uint slot)
+{
+	CEntityCL *oldEntity = _Entities[slot];
+	if(oldEntity == 0)
+		return;
+
+	// remove from ground fx manager
+	if(oldEntity->supportGroundFX())
+	{
+		_GroundFXManager.remove(_EntityGroundFXHandle[slot]);
+	}
+
+	// notify the projectile manager that entity has been removed
+	CProjectileManager::getInstance().entityRemoved(slot);
+
+	// notify the Bar Manager
+	CBarManager::getInstance()->delEntity(oldEntity->slot());
+
+	// previous UnderPos?
+	if(_LastEntityUnderPos==oldEntity)
+		_LastEntityUnderPos= NULL;
+
+	_Entities[slot] = 0;
+	delete oldEntity;
+}// destroyEntityInSlot //
+
 CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& newEntityInfo)
 {
 	// DEBUG
@@ -1158,127 +1320,123 @@ CEntityCL *CEntityManager::create(uint slot, uint32 form, const TNewEntityInfo& 
 	if(_Entities[slot])
 	{
 		nlwarning("EM:create: There is already an entity in the slot '%u' ! Old entity will be removed.", slot);
-		// remove from ground fx manager
-		// TODO : test if entity has ground fxs
-		if (_Entities[slot]->supportGroundFX())
-		{
-			_GroundFXManager.remove(_EntityGroundFXHandle[slot]);
-		}
-		delete _Entities[slot];
-		_Entities[slot] = 0;
+		destroyEntityInSlot(slot);
 	}
 
-	// Check parameter : form.
-	CEntitySheet *entitySheet = SheetMngr.get((CSheetId)form);
-	if(entitySheet == 0)
-	{
-		nlwarning("EM:create: Attempt on create an entity with a bad form number %d (%s) for the slot '%d' trying to compute the default one.", form, ((CSheetId)form).toString().c_str(), slot);
-		CSheetId defaultEntity;
-		if(defaultEntity.buildSheetId(ClientCfg.DefaultEntity)==false)
-		{
-			nlwarning("EM:create: The default entity (%s) is not in the sheetid.bin.", ClientCfg.DefaultEntity.c_str());
-			return 0;
-		}
-		entitySheet = SheetMngr.get(defaultEntity);
-		if(entitySheet == 0)
-		{
-			nlwarning("EM:create: The default entity (%s) is not in the sheet manager.", ClientCfg.DefaultEntity.c_str());
-			return 0;
-		}
-	}
-
-	// Create the entity according to the type.
-
-
-	switch(entitySheet->type())
-	{
-	case CEntitySheet::RACE_STATS:
-	case CEntitySheet::CHAR:
-		if (slot == 0)
-		{
-			nlassert (UserEntity == NULL);
-			UserEntity = new CUserEntity;
-			_Entities[slot] = UserEntity;
-		}
-		else
-		{
-			_Entities[slot] = new CPlayerCL;
-		}
-		break;
-
-	case CEntitySheet::FAUNA:
-	{
-		CCharacterSheet *sheet = NLMISC::safe_cast<CCharacterSheet *>(entitySheet);
-		if (!sheet->R2Npc) _Entities[slot] = new CCharacterCL;
-		else _Entities[slot] = new CPlayerR2CL;
-	}
-	break;
-	case CEntitySheet::FLORA:
-		_Entities[slot] = new CCharacterCL;
-		break;
-
-	case CEntitySheet::FX:
-		_Entities[slot] = new CFxCL;
-		break;
-
-	case CEntitySheet::ITEM:
-		_Entities[slot] = new CItemCL;
-		break;
-
-	case CEntitySheet::FORAGE_SOURCE:
-		_Entities[slot] = new CForageSourceCL;
-		break;
-
-	default:
-		pushDebugStr(NLMISC::toString("Unknown Form Type '%d' -> entity not created.", entitySheet->type()));
-		break;
-	}
-
-	// If the entity has been right created.
+	_Entities[slot] = buildEntity(slot, form);
 	if(_Entities[slot])
-	{
-		// Set the sheet Id.
-		_Entities[slot]->sheetId((CSheetId)form);
-		// Set the slot.
-		_Entities[slot]->slot(slot);
-		// Set the DataSet Index. AFTER slot(), so bar manager is correctly init
-		_Entities[slot]->dataSetId(newEntityInfo.DataSetIndex);
-		// Set the Mission Giver Alias
-		_Entities[slot]->npcAlias(newEntityInfo.Alias);
-		// Build the entity from a sheet.
-		if(_Entities[slot]->build(entitySheet))
-		{
-			// Apply properties backuped;
-			applyBackupedProperties(slot);
-			// register to the ground fx manager
-			if(_Entities[slot]->supportGroundFX())
-			{
-				_EntityGroundFXHandle[slot] = _GroundFXManager.add(_Entities[slot]);
-			}
-		}
-		// Entity is not valid -> REMOVE IT
-		else
-		{
-			// Everyone except the User
-			if(slot != 0)
-			{
-				nlwarning("EM:%d: Cannot build the Entity -> REMOVE IT", slot);
-				delete _Entities[slot];
-				_Entities[slot] = 0;
-			}
-			// The User
-			else
-				nlerror("EM: Cannot build the User");
-		}
-	}
-	// Entity Not Allocated
-	else
-		pushDebugStr(NLMISC::toString("Cannot Allocated the Entity in the slot '%d'.", slot));
-	// Log problems about the entity creation.
-	flushDebugStack(NLMISC::toString("Create Entity in slot '%d' with Form '%s' :", slot, ((CSheetId)form).toString().c_str()));
+		finalizeEntityInSlot(slot, _Entities[slot], newEntityInfo);
+
 	// Return a pointer on the entity created.
 	return _Entities[slot];
 }// create //
+
+//-----------------------------------------------
+// changeEntitySheet :
+// Change the appearance (sheet) of the entity occupying 'slot' while
+// preserving its identity (slot number, and so any target/selection
+// pointing at it). The replacement entity is built off screen first; it is
+// only swapped in (see updatePendingSheetChanges()) once ready, so the
+// current entity keeps being shown and stays targetable in the meantime.
+// If the slot turns out to really be taken over by a different server
+// entity (different DataSetIndex), falls back to the normal remove+create
+// so observers are properly notified (slotRemoved(), etc.).
+//-----------------------------------------------
+void CEntityManager::changeEntitySheet(uint slot, uint32 form, const TNewEntityInfo& newEntityInfo)
+{
+	if(slot >= _NbMaxEntity || slot == 0 || _Entities[slot] == 0)
+	{
+		create(slot, form, newEntityInfo);
+		return;
+	}
+
+	if(newEntityInfo.DataSetIndex == CLFECOMMON::INVALID_CLIENT_DATASET_INDEX ||
+	   _Entities[slot]->dataSetId() != newEntityInfo.DataSetIndex)
+	{
+		// Not the same underlying entity: this slot is genuinely being
+		// reassigned, do the full teardown.
+		remove(slot, false);
+		create(slot, form, newEntityInfo);
+		return;
+	}
+
+	if(_Entities[slot]->sheetId() == (CSheetId)form)
+		return; // nothing actually changed
+
+	// Cancel any previous pending swap for this slot: it is now obsolete.
+	std::map<uint, std::pair<CEntityCL*, TNewEntityInfo> >::iterator it = _PendingSheetReplacement.find(slot);
+	if(it != _PendingSheetReplacement.end())
+	{
+		delete it->second.first;
+		_PendingSheetReplacement.erase(it);
+	}
+
+	CEntityCL *replacement = buildEntity(slot, form);
+	if(replacement == 0)
+	{
+		nlwarning("EM:changeEntitySheet: Cannot build replacement entity for slot '%u', keeping the current one.", slot);
+		return;
+	}
+
+	_PendingSheetReplacement[slot] = std::make_pair(replacement, newEntityInfo);
+}// changeEntitySheet //
+
+//-----------------------------------------------
+// updatePendingSheetChanges :
+// Swap in any replacement entity built by changeEntitySheet(). Must be
+// called once per frame, before the entities are used for anything else.
+//-----------------------------------------------
+void CEntityManager::updatePendingSheetChanges()
+{
+	if(_PendingSheetReplacement.empty())
+		return;
+
+	std::map<uint, std::pair<CEntityCL*, TNewEntityInfo> >::iterator it;
+	for(it = _PendingSheetReplacement.begin(); it != _PendingSheetReplacement.end(); ++it)
+	{
+		uint slot = it->first;
+		CEntityCL *newEntity = it->second.first;
+		const TNewEntityInfo &newEntityInfo = it->second.second;
+
+		if(slot >= _Entities.size())
+		{
+			delete newEntity;
+			continue;
+		}
+
+		// The old entity is not brand new: the server has no reason to
+		// resend its position/orientation just because its sheet changed
+		// (it may not move at all, e.g. a static decoration), so it won't
+		// arrive again for a while. Carry them over explicitly instead of
+		// leaving the replacement at the world origin until then.
+		CEntityCL *oldEntity = _Entities[slot];
+		NLMISC::CVectorD oldPos = oldEntity->pos();
+		NLMISC::CVector oldFront = oldEntity->front();
+		NLMISC::CVector oldDir = oldEntity->dir();
+
+		// Swap in one step: the slot is never left empty, and
+		// slotRemoved() is never called, so any target/selection on this
+		// slot survives the appearance change.
+		destroyEntityInSlot(slot);
+		_Entities[slot] = newEntity;
+		finalizeEntityInSlot(slot, newEntity, newEntityInfo);
+
+		newEntity->pos(oldPos);
+		newEntity->front(oldFront, true, false, true);
+		newEntity->dir(oldDir, true, false);
+
+		// Same issue as position: none of the other visual properties
+		// (equipment/colors, mode/isDead, contextual attackable/selectable
+		// bits, HP bars, target lists, guild, faction, pvp, mount/rider...)
+		// will be resent by the server just because the sheet changed, but
+		// their last known value is still sitting in the per-slot CDB, so
+		// re-apply all of them instead of waiting for a future resend that
+		// may never come (e.g. a static entity's HP bars).
+		for(uint prop = CLFECOMMON::PROPERTY_BEHAVIOUR; prop < CLFECOMMON::NB_VISUAL_PROPERTIES; ++prop)
+			newEntity->updateVisualProperty(0, prop);
+	}
+	_PendingSheetReplacement.clear();
+}// updatePendingSheetChanges //
 
 //-----------------------------------------------
 // remove :
@@ -1860,6 +2018,10 @@ void CEntityManager::changeContinent()
 void CEntityManager::updatePreCamera()
 {
 	H_AUTO ( RZ_Client_Entity_Mngr_Update_Pre_Cam )
+
+	// Swap in entities whose sheet/appearance changed (see changeEntitySheet()).
+	updatePendingSheetChanges();
+
 	uint i;
 	// Build an entity list..
 	_ActiveEntities.reserve (_Entities.size ());

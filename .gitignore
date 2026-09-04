@@ -19,6 +19,9 @@ Temp
 # NeL cache
 *.packed_sheets
 
+# Python venvs
+.venv
+
 # Ryzom save
 save_shard
 last_loaded_char.bin
@@ -137,6 +140,8 @@ aes_state.txt
 # Python cache
 *.pyd
 *.pyc
+__pycache__/
+*.egg-info/
 
 # Qt compiler
 moc_*.cpp
@@ -276,15 +281,19 @@ nel/tools/build_gamedata/processes/pz/build_world_packed_col.cfg
 nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
 
 # Configs
-ryzom/server/www/config.php
-ryzom/server/tools/config.sh
+ryzom/server/www/login/vendor/
+ryzom/server/www/login/server_open_status
 setup.ini
 
-server_open_status
 
 # Temp
 *.tmp
 *.out
 
-setup.ini
-ryzom/server/www/login/server_open_status
+.claude/
+.agentcom/
+
+# Dear ImGui runtime layout
+imgui.ini
+
+

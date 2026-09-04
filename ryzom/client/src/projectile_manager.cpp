@@ -68,7 +68,7 @@ CProjectileManager &CProjectileManager::getInstance()
 // *****************************************************************************************
 const float *CProjectileManager::getProjectileFXUserParams(uint power)
 {
-	if (power < 1 || power > MAGICFX::NUM_SPELL_POWER) return NULL;
+	if (power < 1 || power > (int)MAGICFX::NUM_SPELL_POWER) return NULL;
 	return &ProjectileUserParams[power - 1][0];
 }
 
@@ -130,7 +130,7 @@ void CProjectileManager::addProjectile(const CProjectileBuild &pb)
 	{
 		if (pb.ProjectileAspect)
 		{
-			if (pb.AttackInfo.Intensity >= 1 && pb.AttackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+			if (pb.AttackInfo.Intensity >= 1 && pb.AttackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 			{
 				const CAnimationFXSet &projectile = *(pb.ProjectileAspect);
 				for(uint k = 0; k < projectile.FX.size(); ++k)
@@ -294,7 +294,7 @@ void CProjectileManager::update()
 				CCharacterCL *ccl = dynamic_cast<CCharacterCL *>(target);
 				if (ccl)
 				{
-					if (proj.AttackInfo.Intensity >= 1 && proj.AttackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+					if (proj.AttackInfo.Intensity >= 1 && proj.AttackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 					{
 						if (!proj.MagicResist)
 						{
@@ -371,7 +371,7 @@ void CProjectileManager::update()
 			}
 			else
 			{
-				if (proj.AttackInfo.Intensity >= 1 && proj.AttackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+				if (proj.AttackInfo.Intensity >= 1 && proj.AttackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 				{
 					if (!proj.MagicResist)
 					{
@@ -762,13 +762,13 @@ const CAnimationFX *CProjectileManager::getResistFX(uint level)
 
 	if (!init)
 	{
-		for(uint k = 0; k < MAGICFX::NUM_SPELL_POWER; ++k)
+		for(uint k = 0; k < (int)MAGICFX::NUM_SPELL_POWER; ++k)
 		{
 			impactResistFX[k].init(&impactResistSheet[k], NULL);
 		}
 		init = true;
 	}
-	if (level >= 1 && level <= MAGICFX::NUM_SPELL_POWER)
+	if (level >= 1 && level <= (int)MAGICFX::NUM_SPELL_POWER)
 	{
 		return &impactResistFX[level - 1];
 	}
