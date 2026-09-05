@@ -30,8 +30,8 @@ from ryzom_forgery import panoply
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
-	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_vertex_data, _is_shape_skinned,
-	_SHADOW_SKIN_GROUND_OFFSET, _SHADOW_SKIN_GROUND_Z,
+	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_skeleton_lines_geom,
+	_build_vertex_data, _is_shape_skinned, _SHADOW_SKIN_GROUND_OFFSET, _SHADOW_SKIN_GROUND_Z,
 )
 from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_build_mesh_skin_state, _build_mrm_skin_state, _build_skin_state, _MeshSkinState, _MrmSkinState,
@@ -114,6 +114,13 @@ class CreatureBindMixin:
 		if self.shape_file is not None:
 			self._rebuild_geometry()
 
+	def _toggle_skeleton_lines(self):
+		"""Skinning preview's bone-icon toggle -- see _update_skeleton_lines(),
+		which actually (re)builds/tears down the overlay every frame based on
+		this flag (no .show()/.hide() here: unlike the other viewport gizmos,
+		the geometry itself is rebuilt every frame, not just posed)."""
+		self._skeleton_lines_visible = not self._skeleton_lines_visible
+
 	def _on_load_animation_command(self, items):
 		if not items:
 			return
@@ -176,16 +183,53 @@ class CreatureBindMixin:
 		otherwise, same pattern as _update_wind()/_update_skin_preview_time().
 		The actual blend math lives in the module-level _reskin_state()/
 		_reskin_mesh_state(), the same dispatch-by-type idea as
-		_update_assembled_creature_skin()'s own per-body-part re-skin."""
+		_update_assembled_creature_skin()'s own per-body-part re-skin. Also
+		drives the skeleton-lines overlay (_update_skeleton_lines()) every
+		frame, independent of whether the shape itself is skinned -- useful
+		to see the bones even without an animation loaded, when a skinned
+		mesh in bind pose looks identical to a rigid one."""
 		state = self._skin_state
-		if state is None or state.vdata is None:
-			return task.cont
-		bone_world_matrices = self._bone_world_matrices_for(state.bone_names)
-		if isinstance(state, _MeshSkinState):
-			_reskin_mesh_state(state, bone_world_matrices)
-		else:
-			_reskin_state(state, bone_world_matrices)
+		if state is not None and state.vdata is not None:
+			bone_world_matrices = self._bone_world_matrices_for(state.bone_names)
+			if isinstance(state, _MeshSkinState):
+				_reskin_mesh_state(state, bone_world_matrices)
+			else:
+				_reskin_state(state, bone_world_matrices)
+		self._update_skeleton_lines()
 		return task.cont
+
+	def _update_skeleton_lines(self):
+		"""Per-frame: (re)builds the Skinning preview's skeleton-lines overlay
+		(see _build_skeleton_lines_geom()) directly under self.model_root --
+		the same local space as the loaded shape's own vertices, unlike the
+		other viewport gizmos (grid/world axes) which sit under self.render.
+		Rebuilt every frame rather than just posed in place (unlike the
+		attach-point axes' single _build_axes_geom(), a fixed shape whose
+		NodePath transform alone can move it) since the whole line SET
+		changes shape as bones move relative to each other, not just as a
+		rigid whole. Torn down (not just hidden) when unwanted, since a
+		hidden-but-still-attached one would otherwise linger stale under a
+		model_root that gets replaced wholesale on the next _rebuild_geometry()
+		anyway."""
+		skeleton = self._bone_preview_skeleton
+		if self._skeleton_lines_visible and skeleton is not None:
+			bone_world_matrices = self._bone_world_matrices_for(skeleton.bone_map.keys())
+			if self._skeleton_lines_np is not None:
+				self._skeleton_lines_np.remove_node()
+			self._skeleton_lines_np = self.model_root.attach_new_node(
+				_build_skeleton_lines_geom(skeleton, bone_world_matrices))
+			self._skeleton_lines_np.set_light_off()
+			# Overrides model_root's own set_color_scale(1,1,1,_OBJECT_TRANSPARENCY_ALPHA)
+			# (see viewport_transform.py's object-transparency toggle) -- that scale
+			# would otherwise cascade down onto this overlay too, fading the skeleton
+			# out along with the mesh (found 2026-09-05, Nuno: "IL devrait rester
+			# opaque a 100% le skel"). A higher priority than the ancestor's default
+			# (0) makes Panda3D use this node's own color scale outright instead of
+			# composing it with the inherited one.
+			self._skeleton_lines_np.set_color_scale(1, 1, 1, 1, 1)
+		elif self._skeleton_lines_np is not None:
+			self._skeleton_lines_np.remove_node()
+			self._skeleton_lines_np = None
 
 	def _update_shadow_skin_preview(self, task):
 		"""Per-frame: re-poses and ground-projects the CShadowSkin shadow
@@ -426,6 +470,10 @@ class CreatureBindMixin:
 					fa_icons.ICON_FA_ARROWS_ROTATE, "Rescan the configured search paths",
 					disabled=self.search_paths_dialog.scanning):
 				self.search_paths_dialog.reload()
+			imgui.same_line()
+			if _icon_button(
+					fa_icons.ICON_FA_BONE, "Show/hide the skeleton overlay", active=self._skeleton_lines_visible):
+				self._toggle_skeleton_lines()
 			if self.search_paths_dialog.scanning:
 				imgui.text_disabled("Scanning search paths...")
 

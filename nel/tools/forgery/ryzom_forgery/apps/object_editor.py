@@ -238,6 +238,13 @@ class ObjectEditorApp(
 		# _apply_light_settings()) -- placeholder for the same
 		# remove_node()-on-rebuild reason as the 3 above.
 		self._sun_gizmo_np = self.render.attach_new_node("sun-gizmo-placeholder")
+		# Skinning preview's skeleton-lines overlay (see
+		# creature_bind.py::_update_skeleton_lines()) -- None rather than an
+		# immediate placeholder, since it's built directly under
+		# self.model_root (not self.render, see _build_skeleton_lines_geom()'s
+		# own docstring on why), which only exists once a shape is loaded.
+		self._skeleton_lines_np = None
+		self._skeleton_lines_visible = True
 		# Open/closed state for every floating viewport panel (Wind,
 		# Skinning preview, Bind preview, Lighting), toggled from the
 		# right-edge icon taskbar (_draw_panel_taskbar()) -- default True to

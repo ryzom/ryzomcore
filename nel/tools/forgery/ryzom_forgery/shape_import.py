@@ -444,6 +444,33 @@ def _mat_mul_mat(a, b):
 	return tuple(tuple(sum(a[i][k] * b[k][j] for k in range(4)) for j in range(4)) for i in range(4))
 
 
+def _invert_matrix(m):
+	"""General 4x4 inverse via Gauss-Jordan elimination with partial pivoting
+	-- unlike _mat_mul_dir()'s own rotation/uniform-scale-only shortcut, a
+	bone's assimp offset_matrix can carry arbitrary scale (confirmed real,
+	see extract_skeleton()'s own docstring on the Spider_Armature case), so
+	nothing less than a real inverse is correct here. Raises ShapeImportError
+	for a singular matrix (shouldn't happen for a real bone offset matrix,
+	which is always invertible by construction)."""
+	a = [list(row) for row in m]
+	inv = [[1.0 if i == j else 0.0 for j in range(4)] for i in range(4)]
+	for col in range(4):
+		pivot_row = max(range(col, 4), key=lambda r: abs(a[r][col]))
+		if abs(a[pivot_row][col]) < 1e-12:
+			raise ShapeImportError("cannot invert a singular bone offset matrix")
+		a[col], a[pivot_row] = a[pivot_row], a[col]
+		inv[col], inv[pivot_row] = inv[pivot_row], inv[col]
+		pivot = a[col][col]
+		a[col] = [v / pivot for v in a[col]]
+		inv[col] = [v / pivot for v in inv[col]]
+		for row in range(4):
+			if row != col:
+				factor = a[row][col]
+				a[row] = [av - factor * cv for av, cv in zip(a[row], a[col])]
+				inv[row] = [iv - factor * cv for iv, cv in zip(inv[row], inv[col])]
+	return tuple(tuple(row) for row in inv)
+
+
 def _mat_mul_point(m, p):
 	x, y, z = p
 	return (
@@ -824,8 +851,6 @@ def _import_via_assimp(path: Path) -> Mesh:
 # auto-exports, when there's a bind pose worth starting from (see
 # project-todos/forgery/skel_export.md for the design/decisions behind this).
 
-_IDENTITY_MATRIX = ((1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0))
-
 # NLMISC::CMatrix's own StateBit flags (matrix.cpp: MAT_TRANS=1, MAT_ROT=2,
 # MAT_SCALEUNI=4, MAT_SCALEANY=8, MAT_PROJ=16) -- MAT_TRANS|MAT_ROT|MAT_SCALEANY
 # is exactly what CMatrix::setRot(m33[9]) itself sets (matrix.cpp) for a
@@ -882,45 +907,44 @@ def _subtree_has_name(node, names) -> bool:
 	return any(_subtree_has_name(child, names) for child in node.children)
 
 
-def _find_armature_root(node, file_stem_lower: str, bone_names, parent_transform):
+def _find_armature_root(node, file_stem_lower: str, bone_names):
 	"""Depth-first, pre-order search for the first node (see skel_export.md's
 	own selection rule) whose name contains `file_stem_lower` (case-
 	insensitive) but not "__skip__", and whose subtree contains at least one
-	real bone name -- returns (node, world_transform) for it, or None."""
-	transform = _mat_mul_mat(parent_transform, node.transformation)
+	real bone name -- returns that node, or None. No transform tracking here
+	(unlike an earlier version of this function): the node hierarchy is only
+	ever used to find bone names/parentage now, never for transform math --
+	see extract_skeleton()'s own docstring on why."""
 	name_lower = node.name.lower()
 	if file_stem_lower in name_lower and "__skip__" not in name_lower and _subtree_has_name(node, bone_names):
-		return node, transform
+		return node
 	for child in node.children:
-		found = _find_armature_root(child, file_stem_lower, bone_names, transform)
+		found = _find_armature_root(child, file_stem_lower, bone_names)
 		if found is not None:
 			return found
 	return None
 
 
-def _walk_bones(node, bone_names, parent_bone_id: int, parent_transform, bone_offsets, bones, bone_index) -> None:
-	"""Recursively collects `bones` (in depth-first order, so a bone's
-	`father_id` always refers to an earlier index) from `node`'s subtree.
-	`parent_transform` accumulates through any node that is NOT itself a real
-	bone (see skel_export.md's "nœuds non-os ignorés") -- a bone's own
-	default_pos/rot/scale is decomposed from its transform accumulated since
-	its nearest bone ancestor, not just its immediate parent node, so a
-	non-bone helper node in between doesn't shift its rest pose."""
-	transform = _mat_mul_mat(parent_transform, node.transformation)
+def _collect_bone_hierarchy(node, bone_names, parent_bone_id: int, names, father_ids, bone_index) -> None:
+	"""Recursively collects `names`/`father_ids` (parallel lists, depth-first
+	order, so a bone's `father_id` always refers to an earlier index) from
+	`node`'s subtree -- topology only (which node is a bone, and its nearest
+	bone ancestor), no transform math at all: a bone's actual rest-pose
+	transform is derived from its own assimp offset_matrix instead (see
+	extract_skeleton()), not from this node's own local transform, so there's
+	nothing to accumulate here. A node that is NOT itself a real bone (see
+	skel_export.md's "nœuds non-os ignorés") is still traversed, but doesn't
+	become a Bone -- its own children still get the nearest real bone
+	ancestor as their father."""
 	if node.name in bone_names and node.name not in bone_index:
-		pos, rot_quat, scale = _decompose_matrix(transform)
-		bone_index[node.name] = len(bones)
-		bones.append(Bone(
-			name=node.name, inv_bind_pos=_pynel_matrix_from_4x4(bone_offsets[node.name]),
-			father_id=parent_bone_id, unherit_scale=False, lod_disable_distance=0.0,
-			default_pos=pos, default_rot_euler=Vector3(0.0, 0.0, 0.0), default_rot_quat=rot_quat,
-			default_scale=scale, default_pivot=Vector3(0.0, 0.0, 0.0), skin_scale=Vector3(1.0, 1.0, 1.0),
-		))
-		next_parent_bone_id, next_transform = bone_index[node.name], _IDENTITY_MATRIX
+		bone_index[node.name] = len(names)
+		names.append(node.name)
+		father_ids.append(parent_bone_id)
+		next_parent_bone_id = bone_index[node.name]
 	else:
-		next_parent_bone_id, next_transform = parent_bone_id, transform
+		next_parent_bone_id = parent_bone_id
 	for child in node.children:
-		_walk_bones(child, bone_names, next_parent_bone_id, next_transform, bone_offsets, bones, bone_index)
+		_collect_bone_hierarchy(child, bone_names, next_parent_bone_id, names, father_ids, bone_index)
 
 
 def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
@@ -932,7 +956,59 @@ def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
 	selection rule -- a node whose name matches `path`'s own stem, isn't
 	`__skip__`-excluded, and whose subtree actually uses a real bone name).
 	Reparses `path` independently of _import_via_assimp() (accepted, simple,
-	if wasteful for now -- see skel_export.md's transparency note)."""
+	if wasteful for now -- see skel_export.md's transparency note).
+
+	Each bone's rest-pose transform (default_pos/rot_quat/scale) is derived
+	from its own `mesh.bones[i].offset_matrix` (mesh-space-to-bone-space at
+	bind time) combined with the owning mesh INSTANCE's own node-to-root
+	transform (the same `transform` _iter_mesh_instances() computes for that
+	mesh's vertices) -- NOT by walking the raw scene-graph node hierarchy
+	*starting from the armature's own node* as two earlier, both broken,
+	versions of this function did. Found broken 2026-09-05 on a real file
+	(`tests/spider.dae`), confirmed with `(IA_AGENT_DEBUG)` prints against
+	real assimp-py output before fixing (Nuno: "le squelette est enorme...
+	l'araigné n'est pas du tout alignée", then, after the first fix, "le skel
+	n'est plus dans la bonne direction (rotation de 90°)" + "l'echelle n'est
+	toujours pas bonne"):
+
+	- The armature's own wrapper node (`Spider_Armature`) carries its own
+	  arbitrary object-level transform (there: translate (0, 0.24, 41), scale
+	  20x) that the MESH's own nodes (siblings of the armature, not its
+	  children) never go through at all -- walking down from the armature
+	  node baked that unrelated transform into every bone's rest pose
+	  (1st fix attempt: switched to `offset_matrix`-based math instead, which
+	  fixed the *shape* of the skeleton but not its overall scale/rotation).
+	- `offset_matrix` alone is expressed in the mesh's own *raw, unconverted*
+	  local space (the file's native units -- centimeters for this file,
+	  confirmed via its `<unit meter="0.01">`, confirmed too via
+	  `(IA_AGENT_DEBUG)`: raw `mesh.vertices` come back in the 1-3 range, cm-
+	  scale, while the final *exported* `.shape` positions are ~0.01-0.05,
+	  meter-scale) -- assimp-py's Process_GlobalScale (cm -> m) and the
+	  Y-up -> Z-up axis normalization are NOT baked into `offset_matrix`
+	  itself; both only get applied when a mesh INSTANCE's own node-to-root
+	  transform chain is composed (exactly what `_iter_mesh_instances()`,
+	  seeded with `_YUP_TO_ZUP_MATRIX` at `scene.root_node`, already does
+	  correctly for mesh vertices -- confirmed via `(IA_AGENT_DEBUG)`:
+	  `Process_GlobalScale` leaves its factor sitting on `scene.root_node`'s
+	  own scale rather than rewriting `mesh.vertices` directly, so it's only
+	  ever applied correctly by composing the *whole* node chain from the
+	  scene root, same story as the up-axis conversion). That "2nd fix
+	  attempt" bug (rotation off by 90°, scale still wrong) is what this
+	  version actually fixes.
+
+	The correct, general formula (derived from Assimp's own documented
+	meaning of `aiBone::mOffsetMatrix`, "mesh space to bone space in bind
+	pose", not guessed): a bone's absolute bind-pose transform in Ryzom's own
+	(Z-up, meters) space is `mesh_instance_transform @
+	inverse(bone.offset_matrix)`, where `mesh_instance_transform` is the
+	*owning* mesh instance's own `_iter_mesh_instances()` transform (the
+	exact same one used to place that mesh's vertices) -- this already
+	includes both the axis conversion and the global scale, so no separate
+	correction is needed. A bone's LOCAL (parent-relative) transform is then
+	`inverse(parent_bone_world) @ bone_world`, or `bone_world` directly for a
+	root bone (no parent). `inv_bind_pos` (meant to transform the *exported*,
+	already-converted mesh vertices into bone space) is corrected the same
+	way: `bone.offset_matrix @ inverse(mesh_instance_transform)`."""
 	path = Path(path)
 	if path.suffix.lower() == ".obj":
 		return None
@@ -946,23 +1022,58 @@ def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
 	if not bone_names:
 		return None
 
-	found = _find_armature_root(scene.root_node, path.stem.lower(), bone_names, _YUP_TO_ZUP_MATRIX)
-	if found is None:
+	armature_node = _find_armature_root(scene.root_node, path.stem.lower(), bone_names)
+	if armature_node is None:
 		return None
-	armature_node, armature_transform = found
+
+	# The transform that places each mesh INSTANCE's own vertices into
+	# Ryzom's Z-up, meters space -- see this function's own docstring for why
+	# a bone's offset_matrix needs the same one composed in. Only the first
+	# instance of a given mesh index is kept (a skinned mesh instanced more
+	# than once has no single well-defined bind pose anyway; same "first-seen
+	# wins" simplification used elsewhere in this module).
+	mesh_transforms: Dict[int, Tuple[Tuple[float, ...], ...]] = {}
+	for mesh_index, transform in _iter_mesh_instances(scene.root_node, _YUP_TO_ZUP_MATRIX):
+		mesh_transforms.setdefault(mesh_index, transform)
 
 	bone_offsets: Dict[str, Tuple[Tuple[float, ...], ...]] = {}
-	for mesh in scene.meshes:
+	bone_mesh_transform: Dict[str, Tuple[Tuple[float, ...], ...]] = {}
+	for mesh_index, mesh in enumerate(scene.meshes):
 		if mesh.bones:
+			mesh_transform = mesh_transforms.get(mesh_index, _YUP_TO_ZUP_MATRIX)
 			for bone in mesh.bones:
-				bone_offsets.setdefault(bone.name, bone.offset_matrix)
+				if bone.name not in bone_offsets:
+					bone_offsets[bone.name] = bone.offset_matrix
+					bone_mesh_transform[bone.name] = mesh_transform
 
-	bones: List[Bone] = []
+	names: List[str] = []
+	father_ids: List[int] = []
 	bone_index: Dict[str, int] = {}
 	for child in armature_node.children:
-		_walk_bones(child, bone_names, -1, armature_transform, bone_offsets, bones, bone_index)
-	if not bones:
+		_collect_bone_hierarchy(child, bone_names, -1, names, father_ids, bone_index)
+	if not names:
 		return None
+
+	bones: List[Bone] = []
+	for i, name in enumerate(names):
+		offset = bone_offsets[name]
+		mesh_transform = bone_mesh_transform[name]
+		inv_bind_pos = _pynel_matrix_from_4x4(_mat_mul_mat(offset, _invert_matrix(mesh_transform)))
+		bone_world = _mat_mul_mat(mesh_transform, _invert_matrix(offset))
+		father_id = father_ids[i]
+		if father_id < 0:
+			local_transform = bone_world
+		else:
+			parent_name = names[father_id]
+			parent_world = _mat_mul_mat(bone_mesh_transform[parent_name], _invert_matrix(bone_offsets[parent_name]))
+			local_transform = _mat_mul_mat(_invert_matrix(parent_world), bone_world)
+		pos, rot_quat, scale = _decompose_matrix(local_transform)
+		bones.append(Bone(
+			name=name, inv_bind_pos=inv_bind_pos, father_id=father_id, unherit_scale=False,
+			lod_disable_distance=0.0, default_pos=pos, default_rot_euler=Vector3(0.0, 0.0, 0.0),
+			default_rot_quat=rot_quat, default_scale=scale, default_pivot=Vector3(0.0, 0.0, 0.0),
+			skin_scale=Vector3(1.0, 1.0, 1.0),
+		))
 
 	lods = [SkeletonLod(distance=0.0, active_bones=[0xFF] * len(bones))]
 	return armature_node.name, SkeletonShape(bones=bones, bone_map=dict(bone_index), lods=lods)

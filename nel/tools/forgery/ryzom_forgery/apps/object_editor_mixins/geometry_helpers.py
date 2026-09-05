@@ -63,6 +63,43 @@ def _build_axes_geom(colors, length):
 	return lines.create()
 
 
+# Orange -- distinct from every other gizmo palette above (grid gray, world
+# axes red/green/blue, pivot axes magenta/yellow/cyan, sun gold, shadow skin
+# black).
+_SKELETON_LINES_COLOR = (1.0, 0.5, 0.0, 1.0)
+
+
+def _build_skeleton_lines_geom(skeleton, bone_world_matrices):
+	"""LineSegs stick-figure skeleton: one segment per non-root bone, from its
+	own world-space position to its father's -- lets Nuno see where the bones
+	actually sit relative to the mesh in the Skinning preview panel, useful
+	even in bind pose with no animation loaded ("[...] sans anim c'est pas
+	simple à voir", 2026-09-05). `bone_world_matrices` (see
+	_bone_world_matrices_for()) is expected in the same local space as the
+	loaded shape's own vertices (see _build_skeleton_lines_geom()'s own
+	caller in creature_bind.py for why it's parented under model_root, not
+	render). Position = a matrix's own translation column (m[0][3], m[1][3],
+	m[2][3]), the same row-major convention used throughout shape_import.py/
+	this module. A bone missing from `bone_world_matrices` (shouldn't happen
+	for a fully loaded skeleton) just skips that one segment. None if
+	`skeleton` is None or `bone_world_matrices` is empty."""
+	if skeleton is None or not bone_world_matrices:
+		return None
+	lines = LineSegs("skeleton-lines")
+	lines.set_color(*_SKELETON_LINES_COLOR)
+	for bone in skeleton.bones:
+		if bone.father_id < 0:
+			continue
+		father_name = skeleton.bones[bone.father_id].name
+		bone_matrix = bone_world_matrices.get(bone.name)
+		father_matrix = bone_world_matrices.get(father_name)
+		if bone_matrix is None or father_matrix is None:
+			continue
+		lines.move_to(father_matrix[0][3], father_matrix[1][3], father_matrix[2][3])
+		lines.draw_to(bone_matrix[0][3], bone_matrix[1][3], bone_matrix[2][3])
+	return lines.create()
+
+
 # Warm yellow/gold, evokes "sun" -- distinct from every other gizmo palette
 # above so it's never mistaken for one of them.
 _SUN_GIZMO_COLOR = (1.0, 0.85, 0.2, 1.0)

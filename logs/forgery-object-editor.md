@@ -1,5 +1,48 @@
 # Changelog
 
+## 2026-09-05 — ✨ Skeleton-lines overlay in Skinning preview + extract_skeleton() rest-pose fixes, Forgery 3.1.8
+
+Two chantiers (`project-todos/forgery/skeleton_lines_preview.md`, now closed) plus two
+bugfix rounds on `shape_import.py::extract_skeleton()` (`project-todos/forgery/skel_export.md`,
+now closed) that all came out of the same debugging session on `tests/spider.dae`.
+
+**Skeleton-lines overlay** (`geometry_helpers.py::_build_skeleton_lines_geom()`,
+`creature_bind.py::_update_skeleton_lines()`): a bind-pose mesh looks identical whether it's
+correctly skinned or not, so there was no way to visually confirm a generated `.skel` actually
+lines up with its mesh without loading an animation first. Added an orange stick-figure overlay
+(one line per bone to its parent) in the Skinning preview panel, toggled via a new bone-icon
+button, rebuilt every frame under `self.model_root` (the same local space the loaded shape's own
+vertices live in -- parenting it under `self.render` instead, like the other viewport gizmos, would
+have left it misaligned the moment the object is moved/rotated via the transform panel). Also
+found and fixed: the overlay inherited `model_root`'s own transparency `set_color_scale` (the
+"50% see-through" object toggle), fading out along with the mesh -- given a higher render-attrib
+priority (1) than the inherited one so it stays fully opaque regardless.
+
+**`extract_skeleton()` rest-pose bugs** -- three iterations, each one only fully exposed once the
+skeleton-lines overlay above made it visible:
+
+1. First version derived a bone's rest pose by walking the raw scene-graph node hierarchy
+   starting at the *armature's own wrapper node*. On `spider.dae` that node carries its own
+   arbitrary object-level transform (translate (0, 0.24, 41), scale 20x) that the mesh's own
+   nodes (siblings of the armature, not children) never go through at all -- produced a
+   comically oversized, offset skeleton.
+2. Switched to deriving each bone from its own `mesh.bones[i].offset_matrix` instead (already
+   expressed consistently with the mesh, by definition, for skinning) -- fixed the skeleton's
+   *shape*, but it still came out rotated 90 degrees and at the wrong overall scale.
+3. Root cause of that remaining pair: `offset_matrix` is expressed in the file's own raw,
+   unconverted units (centimeters here, confirmed via debug prints of real assimp-py output --
+   `<unit meter="0.01">` in the source `.dae`) and axis convention (assimp's canonical Y-up) --
+   neither `Process_GlobalScale`'s cm->m factor nor the Y-up->Z-up conversion are ever baked into
+   `offset_matrix` itself; both only apply once a mesh *instance*'s full node-to-root transform
+   chain is composed, exactly what `_iter_mesh_instances()` already does correctly for mesh
+   vertices. Final, correct formula, reusing that same already-proven transform: a bone's
+   absolute bind-pose transform is `mesh_instance_transform @ inverse(bone.offset_matrix)`; its
+   local (parent-relative) transform is `inverse(parent_world) @ bone_world`; `inv_bind_pos` is
+   corrected the same way (`offset_matrix @ inverse(mesh_instance_transform)`), since it must
+   transform the *exported* (already-converted) mesh vertices, not assimp's raw ones. Added
+   `_invert_matrix()` (general 4x4 Gauss-Jordan inverse, needed since a bone's offset matrix can
+   carry arbitrary scale) to make this possible.
+
 ## 2026-09-05 — 🐛 Report reconcile() failures per-source instead of crashing the batch, Forgery 3.1.7
 
 Found on real content: `ImportWatcher._reconcile_worker()` called `self._process(source_path)` in a
