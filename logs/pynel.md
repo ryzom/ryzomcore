@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-09-05 — ✨ Write support for CSkeletonShape, pynel 0.9.4
+
+`ryzom_shape.py` could previously only read a `CSkeletonShape` (`.skel`) -- `dumps()`
+explicitly documented it as read-only, alongside `CFlareShape`/`CWaterShape`/etc. Added
+`_write_bone`/`_write_skeleton_lod`/`_write_skeleton_shape`, wired into `dumps()`'s own
+dispatch (`_SHAPE_CLASS_NAMES["SkeletonShape"] = "CSkeletonShape"`), so a `SkeletonShape`
+built from scratch (not just one already parsed from a real file) can now be serialized.
+
+First consumer: `nel/tools/forgery`'s `shape_import.py::extract_skeleton()`, generating a
+brand new `.skel` from a `.dae`/`.fbx`/`.gltf`'s own bone hierarchy at import time (see
+`project-todos/forgery/skel_export.md`).
+
+Validated by a round-trip test against a real production `.skel`
+(`ryzom-data/assets_src/mounts/tr_mo_capryni_mount.skel`, 85 bones): parse -> dumps() ->
+re-parse produced identical `bones`/`bone_map`/`lods` to the original.
+
+Two encoding details confirmed against the real engine (`nel/src/misc/matrix.cpp`,
+`nel/src/3d/skeleton_shape.cpp`), not guessed, since a `.dae`/`.fbx` source can't supply
+them: `Bone.inv_bind_pos` uses `CMatrix`'s own sparse encoding (`state_bit`/`scale`/`rot`/
+`trans`/`proj`) rather than a plain 4x4 -- a general (possibly non-uniformly-scaled)
+rotation+translation matrix needs `state_bit = MAT_TRANS|MAT_ROT|MAT_SCALEANY = 11`; and
+`SkeletonShape.lods` must never be empty -- the real engine's `getLodForDistance()` does an
+unchecked binary search that reads out of bounds on an empty list, so a skeleton built from a
+source with no native LOD concept still needs exactly one trivial `SkeletonLod(distance=0,
+active_bones=[0xFF]*n)`.
+
 ## 2026-09-04 — 🐛 Fix CMatStage field width (u8, not u32), pynel 0.9.3
 
 The real fix for the bulk of the remaining live_data parse failures the previous two

@@ -26,7 +26,7 @@ polymorphic-pointer node -- a class-name string followed by that class's own
 | `CMeshMRM` | `mesh_mrm.cpp` | yes | materials only, geometry copied back byte-for-byte |
 | `CMeshMRMSkinned` | `mesh_mrm_skinned.cpp` | yes | yes, fully editable (see §4) |
 | `CMeshMultiLod` | `mesh_multi_lod.cpp` | yes | materials only, geometry copied back byte-for-byte |
-| `CSkeletonShape` | `skeleton_shape.cpp`, `bone.cpp` | yes | read-only |
+| `CSkeletonShape` | `skeleton_shape.cpp`, `bone.cpp` | yes | yes, fully editable (2026-09-04) |
 | `CFlareShape` | `flare_shape.cpp` | yes* | read-only |
 | `CWaterShape` | `water_shape.cpp` | yes | read-only |
 | `CWaveMakerShape` | `water_shape.cpp` | yes | read-only |
@@ -169,6 +169,33 @@ attribute) plus per-material-block, per-matrix-block render passes with
 geometry is freely editable -- this is the format `nel/tools/forgery`'s
 `shape_import.py`/`shape_export.py` target when producing new shapes (e.g.
 importing a `.dae`/`.fbx`), rather than `CMeshMRMSkinned`.
+
+## 5b. `CSkeletonShape` -- writing a new skeleton (2026-09-04)
+
+`dumps()` can now build a brand new `CSkeletonShape` from scratch (`_write_bone`/
+`_write_skeleton_lod`/`_write_skeleton_shape`), not just re-emit an already-parsed
+one -- used by `nel/tools/forgery`'s `shape_import.py::extract_skeleton()` to turn a
+`.dae`/`.fbx`/`.gltf` bone hierarchy into a fresh `.skel` at import time (see
+`project-todos/forgery/skel_export.md`).
+
+Two things a caller building a `SkeletonShape`/`Bone` by hand must get right, both
+confirmed against real engine code (not just the parser):
+
+- `Bone.inv_bind_pos` uses `CMatrix`'s own sparse encoding (`Matrix` dataclass:
+  `state_bit`/`scale`/`rot`/`trans`/`proj`), not a plain 4x4 -- a general
+  (possibly non-uniformly-scaled) 3x3 + translation should use
+  `state_bit = MAT_TRANS|MAT_ROT|MAT_SCALEANY = 1|2|8 = 11`, `scale = 1.0`
+  (ignored outside `hasScaleUniform()`, `matrix.cpp`), `rot` = the row-major
+  9 floats of the 3x3, `proj = None`. This matches real production `.skel`
+  files' own encoding (checked against `tr_mo_capryni_mount.skel`).
+- `SkeletonShape.lods` is **not optional**: `CSkeletonShape::build()`
+  (`skeleton_shape.cpp`) always writes at least one LOD, and
+  `getLodForDistance()` does an unchecked binary search that underflows (and
+  reads out of bounds) on an empty list -- a `.skel` with zero LODs crashes
+  the real engine at load/update time. A skeleton with no real per-bone LOD
+  data (e.g. one built from a generic `.dae`/`.fbx`, which has no such
+  concept at all) must still write exactly one trivial LOD:
+  `SkeletonLod(distance=0.0, active_bones=[0xFF] * len(bones))`.
 
 ## 6. MRM vs `CMeshMultiLod` -- two different LOD mechanisms
 

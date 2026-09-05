@@ -2535,6 +2535,43 @@ def _parse_skeleton_shape(f: _Reader) -> SkeletonShape:
 _CLASS_PARSERS["CSkeletonShape"] = _parse_skeleton_shape
 
 
+def _write_bone(f: _Writer, bone: Bone) -> None:
+	"""Always writes the latest CBone format (version 2)."""
+	f.version(2)
+	f.string(bone.name)
+	f.matrix(bone.inv_bind_pos)
+	f.s32(bone.father_id)
+	f.boolean(bone.unherit_scale)
+	f.f32(bone.lod_disable_distance)
+	f.track_default_vector(bone.default_pos)
+	f.track_default_vector(bone.default_rot_euler)
+	f.track_default_quat(bone.default_rot_quat)
+	f.track_default_vector(bone.default_scale)
+	f.track_default_vector(bone.default_pivot)
+	f.vector3(bone.skin_scale)
+
+
+def _write_skeleton_lod(f: _Writer, lod: SkeletonLod) -> None:
+	f.version(0)
+	f.f32(lod.distance)
+	f.cont_uint_vector(lod.active_bones, 1, "B")
+
+
+def _write_skeleton_shape(f: _Writer, skeleton: SkeletonShape) -> None:
+	"""Always writes the latest CSkeletonShape format (version 1)."""
+	f.version(1)
+	f.cont_len(len(skeleton.bones))
+	for bone in skeleton.bones:
+		_write_bone(f, bone)
+	f.cont_len(len(skeleton.bone_map))
+	for key, value in skeleton.bone_map.items():
+		f.string(key)
+		f.u32(value)
+	f.cont_len(len(skeleton.lods))
+	for lod in skeleton.lods:
+		_write_skeleton_lod(f, lod)
+
+
 # ---------------------------------------------------------------------------
 # CFlareShape
 # ---------------------------------------------------------------------------
@@ -2879,15 +2916,16 @@ _SHAPE_CLASS_NAMES = {
 	"MeshMRM": "CMeshMRM",
 	"MeshMRMSkinned": "CMeshMRMSkinned",
 	"MeshMultiLod": "CMeshMultiLod",
+	"SkeletonShape": "CSkeletonShape",
 }
 
 
 def dumps(shape_file: ShapeFile) -> bytes:
 	"""Serialize a ShapeFile back to the .shape binary format.
 
-	Only Mesh, MeshMRM, MeshMRMSkinned and MeshMultiLod can be written
-	(CSkeletonShape, CFlareShape, CWaterShape, CWaveMakerShape,
-	CSegRemanenceShape and CParticleSystemShape are read-only).
+	Only Mesh, MeshMRM, MeshMRMSkinned, MeshMultiLod and SkeletonShape can be
+	written (CFlareShape, CWaterShape, CWaveMakerShape, CSegRemanenceShape and
+	CParticleSystemShape are read-only).
 
 	CMesh and CMeshMRMSkinned are rewritten field-by-field, so their geometry
 	(vertices, triangles, materials -- plus, for CMeshMRMSkinned,
@@ -2913,6 +2951,8 @@ def dumps(shape_file: ShapeFile) -> bytes:
 		_write_mesh(f, value)
 	elif type_name == "MeshMRMSkinned":
 		_write_mesh_mrm_skinned(f, value)
+	elif type_name == "SkeletonShape":
+		_write_skeleton_shape(f, value)
 	else:
 		# MeshMRM / MeshMultiLod: editable materials, opaque geometry.
 		f.version(value._version)
