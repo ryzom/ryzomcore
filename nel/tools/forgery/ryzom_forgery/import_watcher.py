@@ -29,7 +29,7 @@ from pathlib import Path
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.duplicate_name_guard import DuplicateNameGuard
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT
-from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, find_importer
+from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, extract_skeleton, find_importer
 from ryzom_forgery.virtual_categories import iter_included_files
 
 from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
@@ -245,9 +245,23 @@ class ImportWatcher:
 			return
 		safe_sources = self._guard.scan(self._import_sources())
 		for source_path in safe_sources:
-			target_path = target_shape_path(workspace_dir, source_path)
-			if not target_path.exists() or source_path.stat().st_mtime > target_path.stat().st_mtime:
-				self._process(source_path)
+			try:
+				target_path = target_shape_path(workspace_dir, source_path)
+				if not target_path.exists() or source_path.stat().st_mtime > target_path.stat().st_mtime:
+					self._process(source_path)
+				else:
+					# The .shape itself is already up to date, so _process()
+					# (and the _maybe_export_skeleton() it triggers on success)
+					# won't run for it -- but a .skel introduced after this
+					# source was last (re-)exported still deserves a catch-up
+					# attempt here. _maybe_export_skeleton() is itself a no-op
+					# once a .skel exists, so this is safe to call unconditionally.
+					self._maybe_export_skeleton(source_path)
+			except Exception as exc:  # noqa: BLE001 -- one broken source must not block reconciliation of
+				# the rest of the batch (found 2026-09-05: an assimp import failure here used to kill the
+				# whole background thread, same "one bad file must not affect the others" reasoning as
+				# workspace_watch.py's own callback dispatch, which already guards handle_settled() this way).
+				self._report(f"reconcile of {source_path.name} failed: {exc}", is_error=True)
 
 	def handle_settled(self, source_path):
 		"""Registered onto a shared WorkspaceWatcher via register_extension()
@@ -287,6 +301,7 @@ class ImportWatcher:
 				self._report(f"auto-export of {source_path.name} failed: {exc}", is_error=True)
 			else:
 				self._report(f"auto-exported {source_path.name} -> {target_path.name}")
+				self._maybe_export_skeleton(source_path)
 			return
 
 		if self._is_shape_open is not None and self._is_shape_open(target_path):
@@ -320,7 +335,37 @@ class ImportWatcher:
 			return False
 		else:
 			self._report(f"auto-updated {target_path.name} from {source_path.name}")
+			self._maybe_export_skeleton(source_path)
 			return True
+
+	def _maybe_export_skeleton(self, source_path):
+		"""Opportunistically writes a brand new `.skel` alongside a `.shape`
+		that was just (re-)exported, when `source_path`'s own bone hierarchy
+		yields one (see shape_import.extract_skeleton()) -- called after every
+		successful `.shape` write, new or updated. Never overwrites an
+		existing `.skel` (see skel_export.md: a skeleton is potentially shared
+		by several shapes, unlike the `.shape` itself)."""
+		workspace_dir = self._workspace_dir
+		if workspace_dir is None:
+			return
+		try:
+			extracted = extract_skeleton(source_path)
+		except Exception as exc:  # noqa: BLE001 -- a skeleton extraction failure must not undo the .shape export that already succeeded
+			self._report(f"skeleton extraction from {source_path.name} failed: {exc}", is_error=True)
+			return
+		if extracted is None:
+			return
+		armature_name, skeleton = extracted
+		skel_target = workspace_dir / "skels" / f"{sanitize_shape_name(armature_name)}.skel"
+		if skel_target.exists():
+			return
+		try:
+			skel_target.parent.mkdir(parents=True, exist_ok=True)
+			save_shape(skel_target, ShapeFile(type_name="SkeletonShape", value=skeleton))
+		except (OSError, ShapeWriteError) as exc:
+			self._report(f"auto-export of skeleton {skel_target.name} failed: {exc}", is_error=True)
+		else:
+			self._report(f"auto-exported skeleton -> {skel_target.name}")
 
 	def _backup_and_reexport(self, source_path, target_path):
 		"""Material-count mismatch fallback: rather than an interactive
@@ -341,4 +386,5 @@ class ImportWatcher:
 		else:
 			self._report(f"backed up {target_path.name} -> {backup_path.name}, "
 			             f"re-exported from {source_path.name}")
+			self._maybe_export_skeleton(source_path)
 			return True

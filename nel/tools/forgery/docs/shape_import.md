@@ -1,6 +1,6 @@
 # shape_import
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/shape_import.py` (~617 lignes)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/shape_import.py` (~828 lignes)
 
 ## Rôle
 
@@ -8,7 +8,9 @@ Ce module fait l'opération inverse de `shape_export.py` : il lit un fichier `.o
 
 Limitation structurelle documentée en tête de fichier (`shape_import.py`) : seul `CMesh` peut être construit "from scratch" par pynel — `CMeshMRM` (avec LOD progressifs) nécessite `CMRMBuilder`, une classe C++ sans binding Python, donc hors de portée ici. Un shape importé n'a donc jamais de LOD.
 
-Deuxième choix documenté : `.obj`/`.mtl` sont parsés à la main (formats texte simples) ; `.dae` et `.fbx` passent par `assimp-py`, une bibliothèque tierce déjà nécessaire pour `.fbx`.
+Deuxième choix documenté : `.obj`/`.mtl` sont parsés à la main (formats texte simples) ; `.dae`, `.fbx` et `.gltf`/`.glb` passent par `assimp-py`, une bibliothèque tierce déjà nécessaire pour `.fbx`.
+
+Import skinné (`.dae`/`.fbx`/`.gltf`) : un mesh avec des poids d'os par sommet (`mesh.bones` côté assimp-py) est importé en `CMesh` skinné (`skinned=True`, `bones_name`, canaux `VertexBuffer` `Weight`/`PaletteSkin`). Ce module peut aussi générer, séparément, un tout nouveau `.skel` depuis la hiérarchie d'os du fichier source (`extract_skeleton()`, voir plus bas et `project-todos/forgery/skel_export.md`) -- ce n'est **pas** le mesh importé qui l'exige : un mesh skinné peut tout à fait être apparié à un `.skel` déjà existant à la place (mêmes noms d'os).
 
 ## API principale
 
@@ -21,7 +23,7 @@ Deuxième choix documenté : `.obj`/`.mtl` sont parsés à la main (formats text
 ### Construction du Mesh pynel
 - `_texture_base_name(texture_name, base_dir)` (`shape_import.py`) — résout une référence de texture relative au dossier du fichier importé ; si le fichier résolu existe réellement sur disque *au moment de l'import*, garde le chemin absolu complet (permet un rendu immédiat sans que l'utilisateur ait à relier la texture) ; sinon retombe sur le simple nom de fichier.
 - `_build_material(texture_name, double_sided, base_dir)` (`shape_import.py`) — construit un matériau NeL "vierge" avec des valeurs fixes calquées sur le défaut du plugin exporteur 3ds Max (`_NEL_DEFAULT_GRAY`, etc., voir Points notables). Seule la texture diffuse et le flag `double_sided` proviennent réellement du fichier source.
-- `_assemble_mesh(positions, normals, texcoords, materials, rdr_passes)` (`shape_import.py`) — assemblage final commun à tous les importeurs : un `Mesh` mono-matrix-block, non skinné, avec bbox recalculée à partir des positions.
+- `_assemble_mesh(positions, normals, texcoords, materials, rdr_passes=None, matrix_blocks=None, bones_name=None, skin_weights=None)` (`shape_import.py`) — assemblage final commun à tous les importeurs, avec bbox recalculée à partir des positions : un `Mesh` mono-matrix-block non skinné par défaut (`rdr_passes`), ou un `Mesh` skinné à partir de `matrix_blocks`/`bones_name`/`skin_weights` déjà construits (voir `_build_skinned_matrix_blocks`).
 - `build_mesh(obj_mesh, mtl_materials, base_dir)` (`shape_import.py`) — convertit un `ObjMesh` en `Mesh` pynel : dédoublonnage des sommets combinés `(pos, uv, normal)` (`combined_vertex_id`), regroupement des faces par matériau en `RdrPass`.
 - `import_obj(path)` (`shape_import.py`) — point d'entrée .obj : parse le `.obj` puis le(s) `.mtl` référencé(s) par `mtllib`, appelle `build_mesh`.
 
@@ -30,10 +32,21 @@ Deuxième choix documenté : `.obj`/`.mtl` sont parsés à la main (formats text
 - `_mat_mul_mat`, `_mat_mul_point`, `_mat_mul_dir`, `_normalize` (`shape_import.py`) — petites primitives matricielles maison (pas de dépendance type numpy pour ça). `_mat_mul_dir` utilise la sous-matrice 3x3 sans inverse-transpose, correct seulement pour rotation/scale uniforme (limite assumée, `shape_import.py`).
 - `_iter_mesh_instances(node, parent_transform)` (`shape_import.py`) — parcourt récursivement le graphe de scène Assimp, produit `(mesh_index, world_transform)` pour chaque instance de mesh (un mesh peut être référencé par plusieurs nœuds).
 - `_mesh_positions/_mesh_normals/_mesh_texcoords(mesh)` (`shape_import.py`) — extraction des canaux bruts d'un mesh Assimp (gèrent l'absence de canal, qui revient à `None` chez assimp-py plutôt qu'une liste vide).
+- `_mesh_bones(mesh)` (`shape_import.py`) — regroupe `mesh.bones` (assimp-py, une entrée par os avec ses propres `vertex_ids`/`weights`) en une liste indexée par sommet de `(bone_name, weight)`, l'inverse du layout d'assimp ; `None` si le mesh n'a aucun os.
+- `_normalize_skin_weights(per_vertex_bones)` (`shape_import.py`) — réduit chaque sommet aux 4 poids les plus lourds (`_MAX_SKIN_MATRICES`, `NL3D_MESH_SKINNING_MAX_MATRIX`), normalisés à somme 1, et construit la liste `bones_name` partagée (première apparition). Un sommet sans influence est rigidement lié à l'os 0 (poids 1.0) plutôt que laissé à un `CSkinWeight` tout à zéro (interdit, la somme des poids doit valoir 1).
+- `_build_skinned_matrix_blocks(pass_indices, vertex_matrix_ids, vertex_weights)` (`shape_import.py`) — regroupe les triangles en `MatrixBlock`s d'au plus 16 os distincts chacun (`_MAX_MATRICES_PER_BLOCK`, `IDriver::MaxModelMatrix`), à la manière de `CMeshGeom::buildSkin` (mesh.cpp), sans son étape 4 (réordonnancement des os, une pure optimisation de rendu, pas nécessaire ici). Duplique un sommet une fois par bloc supplémentaire l'utilisant, puisque `PaletteSkin` est un indice local au bloc (pas un id d'os global).
 - `_build_material_from_assimp_material(material, base_dir)` (`shape_import.py`) — comme `_build_material` mais depuis un dict de propriétés assimp-py ; ne lit que la texture diffuse et `TWOSIDED`.
-- `_import_via_assimp(path)` (`shape_import.py`) — cœur de l'import .dae/.fbx : lance `assimp_py.import_file` avec les flags `Process_Triangulate | Process_JoinIdenticalVertices | Process_GenNormals | Process_GlobalScale`, bake les transforms de nœud dans les sommets, applique la conversion Y-up→Z-up, renormalise les normales générées. Lève `ShapeImportError` si aucun mesh/sommet.
-- `import_dae(path)` / `import_fbx(path)` (`shape_import.py`) — wrappers triviaux autour de `_import_via_assimp`.
-- `IMPORTERS` (`shape_import.py`) — dict `{"obj": import_obj, "dae": import_dae, "fbx": import_fbx}`, source unique partagée par `import_dialog.py`, `apps/shape_importer.py`, `import_watcher.py`.
+- `_import_via_assimp(path)` (`shape_import.py`) — cœur de l'import .dae/.fbx/.gltf/.glb : lance `assimp_py.import_file` avec les flags `Process_Triangulate | Process_JoinIdenticalVertices | Process_GenNormals | Process_GlobalScale`, bake les transforms de nœud dans les sommets, applique la conversion Y-up→Z-up, renormalise les normales générées, et construit le skin (`_mesh_bones`/`_normalize_skin_weights`/`_build_skinned_matrix_blocks`) si le mesh en a. Lève `ShapeImportError` si aucun mesh/sommet.
+- `import_dae(path)` / `import_fbx(path)` / `import_gltf(path)` (`shape_import.py`) — wrappers triviaux autour de `_import_via_assimp`.
+
+### Extraction de squelette (.dae / .fbx / .gltf), ajouté 2026-09-04
+- `_pynel_matrix_from_4x4(m)` (`shape_import.py`) — convertit un 4x4 row-major (assimp) vers l'encodage creux `pynel.ryzom_shape.Matrix` (`state_bit`/`scale`/`rot`/`trans`/`proj`) ; utilise toujours `MAT_TRANS|MAT_ROT|MAT_SCALEANY` (rotation générale, sans mode "scale uniforme"), sans perte pour n'importe quel 4x4 affine.
+- `_matrix_to_quat(r)` (`shape_import.py`) — conversion matrice de rotation 3x3 → quaternion par la méthode de Shepperd (trace de la matrice).
+- `_decompose_matrix(m)` (`shape_import.py`) — décompose un 4x4 row-major en `(Vector3 position, Quaternion rotation, Vector3 scale)`, en supposant l'absence de cisaillement (vrai pour un transform de nœud 3D standard).
+- `_subtree_has_name(node, names)`, `_find_armature_root(node, file_stem_lower, bone_names, parent_transform)` (`shape_import.py`) — cherche, par parcours en profondeur, le premier nœud dont le nom contient le stem du fichier source (insensible à la casse), ne contient pas `__skip__`, et dont le sous-arbre référence au moins un vrai nom d'os (`mesh.bones`).
+- `_walk_bones(node, bone_names, parent_bone_id, parent_transform, bone_offsets, bones, bone_index)` (`shape_import.py`) — construit récursivement la liste `Bone` en ordre profondeur-d'abord ; un nœud qui n'est pas un os connu est traversé (son transform continue de s'accumuler pour ses descendants) sans devenir un `Bone` -- `father_id` remonte au premier ancêtre qui EN est un.
+- `extract_skeleton(path)` (`shape_import.py`) — point d'entrée : construit un tout nouveau `SkeletonShape` (jamais un remplacement d'un `.skel` déjà apparié) depuis la hiérarchie d'os de `path`, ou `None` si `.obj`, aucun os, ou aucun nœud armature candidat. Valeurs par défaut des champs `Bone` qu'un `.dae`/`.fbx` ne peut pas fournir (`unherit_scale=False`, `lod_disable_distance=0.0`, `default_pivot=(0,0,0)`, `skin_scale=(1,1,1)`, `default_rot_euler=(0,0,0)`) vérifiées contre le vrai exporteur 3ds Max (`nel/tools/3d/plugin_max/nel_mesh_lib/export_skinning.cpp`) -- voir `project-todos/forgery/skel_export.md`. Le squelette retourné a toujours exactement un LOD (`distance=0`, tous les os actifs) : `CSkeletonShape` n'en tolère jamais zéro (crash moteur, voir `pynel`'s `docs/shape_format.md` §5b).
+- `IMPORTERS` (`shape_import.py`) — dict `{"obj": import_obj, "dae": import_dae, "fbx": import_fbx, "gltf": import_gltf, "glb": import_gltf}`, source unique partagée par `import_dialog.py`, `apps/shape_importer.py`, `import_watcher.py`.
 - `find_importer(path)` (`shape_import.py`) — retourne l'importeur pour l'extension de `path`, ou `None`.
 - `texture_search_dirs_for(path)` (`shape_import.py`) — dossiers de recherche de textures additionnels pour un fichier importé : son propre dossier, plus `<nom>.fbm` si `.fbx` (convention 3ds Max/FBX SDK).
 
@@ -55,3 +68,6 @@ Deuxième choix documenté : `.obj`/`.mtl` sont parsés à la main (formats text
 - `Process_GlobalScale` est nécessaire pour éviter un mesh 100x trop grand sur un fichier FBX authored en centimètres (défaut Blender) — sans lui, Assimp laisse le facteur d'échelle sur le nœud racine au lieu de l'appliquer (`shape_import.py`).
 - Les normales générées par Assimp (`Process_GenNormals`) ne sont pas de longueur unitaire dans les unités d'origine du fichier — `_normalize` est nécessaire après tout transform de nœud, systématiquement (`shape_import.py`).
 - `.obj` seul gère un matériau par défaut nommé `_DEFAULT_MATERIAL_NAME = "__default__"` pour les faces sans `usemtl` (`shape_import.py`, `355`).
+- Skin (`shape_import.py`) : `CVertexBuffer::PaletteSkin` est un indice **local au `MatrixBlock`** (pas un id d'os global), et un `MatrixBlock.matrix_id` est limité à 16 entrées (`IDriver::MaxModelMatrix`) -- un mesh utilisant plus de 16 os au total (courant sur un personnage) est donc réparti sur plusieurs `MatrixBlock`s par `_build_skinned_matrix_blocks`, avec duplication des sommets partagés entre blocs.
+- Exclusion `__skip__` (`shape_import.py`, `_import_via_assimp`) : tout sous-mesh de la scène dont le nom contient `__skip__` (insensible à la casse) est totalement exclu de la fusion (mesh, matériau, skin) -- même convention côté `extract_skeleton()` pour un nœud armature candidat.
+- `extract_skeleton()` ne remplace jamais un `.skel` déjà apparié à un mesh skinné (voir la note en tête de fichier) -- c'est `import_watcher.py::_maybe_export_skeleton()` qui décide de ne jamais écraser un `.skel` déjà présent sur disque, pas cette fonction elle-même (qui, elle, construit juste le `SkeletonShape` sans se soucier du disque).

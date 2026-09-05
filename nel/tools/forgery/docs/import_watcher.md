@@ -34,6 +34,12 @@ pour le watcher lui-même).
 - `_backup_and_reexport` — en cas de `MaterialCountMismatch` : renomme la
  cible en `<stem>_backup_<YYYYMMDD_HHMMSS><suffix>` puis ré-exporte le nouveau mesh sous
  le nom cible d'origine (flux 100% automatique, sans popup de conflit).
+- `_maybe_export_skeleton(source_path)` — ajouté 2026-09-04 (chantier `skel_export`,
+ `project-todos/forgery/`) : appelé après chaque écriture réussie d'un `.shape` (nouvel
+ export, mise à jour, ou backup-and-reexport). Appelle `shape_import.extract_skeleton()` ;
+ si un squelette en ressort, l'écrit dans `<workspace>/skels/<nom d'armature sanitizé>.skel`
+ -- mais **jamais** si un fichier existe déjà à ce chemin (contrairement au `.shape`, un
+ `.skel` peut être partagé par plusieurs shapes, donc jamais réécrit automatiquement).
 - `class ImportWatcher` — orchestre le tout, avec hooks `is_shape_open`,
  `on_open_shape_conflict`, `on_status`, `on_name_conflict` (docstrings détaillées) pour
  gérer le cas où la shape cible est actuellement ouverte dans le viewport de Patina, et

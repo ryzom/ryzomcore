@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from pynel.ryzom_shape import (
-	AABBox, Material, MatrixBlock, Mesh, MeshBase, MeshGeom, Quaternion, RdrPass, Rgba, Texture, TexEnv, Vector3,
-	VertexBuffer,
+	AABBox, Bone, Material, Matrix, MatrixBlock, Mesh, MeshBase, MeshGeom, Quaternion, RdrPass, Rgba, SkeletonLod,
+	SkeletonShape, Texture, TexEnv, Vector3, VertexBuffer,
 )
 
 # CMaterial's own documented default-construction values (nel/include/nel/3d/material.h:273):
@@ -266,15 +266,27 @@ def _build_material(texture_name: Optional[str] = None, double_sided: bool = Fal
 
 def _assemble_mesh(
 		positions: List[Tuple[float, float, float]], normals: List[Tuple[float, float, float]],
-		texcoords: List[Tuple[float, float]], materials: List[Material], rdr_passes: List[RdrPass]) -> Mesh:
-	"""Shared final assembly step for every importer: a single-matrix-block,
-	unskinned CMesh from already-deduplicated vertex channels."""
+		texcoords: List[Tuple[float, float]], materials: List[Material], rdr_passes: Optional[List[RdrPass]] = None,
+		matrix_blocks: Optional[List[MatrixBlock]] = None, bones_name: Optional[List[str]] = None,
+		skin_weights: Optional[Tuple[
+			List[Tuple[float, float, float, float]], List[Tuple[int, int, int, int]]]] = None) -> Mesh:
+	"""Shared final assembly step for every importer, from already-built
+	vertex channels: an unskinned, single-matrix-block CMesh by default
+	(`rdr_passes`), or -- when `matrix_blocks`/`bones_name`/`skin_weights` are
+	given instead (see _build_skinned_matrix_blocks()) -- a skinned CMesh
+	using those pre-built, possibly multiple, matrix blocks."""
 	channels = {"Position": positions}
 	types = [0] * 16
 	types[0] = 7  # Position: float3
 	if normals:
 		channels["Normal"] = normals
 		types[1] = 7  # Normal: float3
+	if skin_weights is not None:
+		weight_channel, palette_channel = skin_weights
+		channels["Weight"] = weight_channel
+		types[12] = 10  # Weight: float4 (CVertexBuffer::Weight/Float4, mesh.cpp)
+		channels["PaletteSkin"] = palette_channel
+		types[13] = 12  # PaletteSkin: uint8x4 (CVertexBuffer::PaletteSkin/UChar4, mesh.cpp)
 	if texcoords:
 		# .obj/.dae/.fbx (hand-parsed or via assimp-py) all use the format's
 		# own native V-origin convention (0 at the bottom, matching OpenGL --
@@ -293,7 +305,8 @@ def _assemble_mesh(
 
 	vertex_buffer = VertexBuffer(
 		name="", num_verts=len(positions), vertex_color_format=0, channels=channels, types=types)
-	matrix_block = MatrixBlock(matrix_id=[0] * 16, num_matrix=0, rdr_passes=rdr_passes)
+	if matrix_blocks is None:
+		matrix_blocks = [MatrixBlock(matrix_id=[0] * 16, num_matrix=0, rdr_passes=rdr_passes)]
 
 	xs, ys, zs = [p[0] for p in positions], [p[1] for p in positions], [p[2] for p in positions]
 	min_v, max_v = (min(xs), min(ys), min(zs)), (max(xs), max(ys), max(zs))
@@ -312,8 +325,8 @@ def _assemble_mesh(
 		dist_max=_NEL_DEFAULT_DIST_MAX,
 	)
 	geom = MeshGeom(
-		bones_name=[], mesh_morpher=None, vertex_buffer=vertex_buffer,
-		matrix_blocks=[matrix_block], bbox=bbox, skinned=False,
+		bones_name=bones_name or [], mesh_morpher=None, vertex_buffer=vertex_buffer,
+		matrix_blocks=matrix_blocks, bbox=bbox, skinned=skin_weights is not None,
 	)
 	return Mesh(base=base, geom=geom)
 
@@ -499,6 +512,169 @@ def _mesh_texcoords(mesh):
 	return [tuple(data[i:i + 2]) for i in range(0, len(data), stride)]
 
 
+def _mesh_bones(mesh) -> Optional[List[List[Tuple[str, float]]]]:
+	"""Regroups assimp's per-bone vertex weight lists (`mesh.bones`, one
+	entry per bone with its own `vertex_ids`/`weights` memoryviews -- see
+	assimp_py's Bone type) into a per-vertex list of (bone_name, weight)
+	pairs, indexed like `mesh.vertices`/_mesh_positions() -- the layout
+	`CSkinWeight` needs (per vertex), the opposite of assimp's own
+	per-bone one (mirroring Assimp's own aiBone/aiVertexWeight).
+
+	No extra remapping needed for JoinIdenticalVertices: Assimp's own
+	JoinVerticesProcess (already applied, see _import_via_assimp()'s
+	flags) remaps every bone's vertex_ids to the final deduplicated
+	vertex indices itself (see JoinVerticesProcess.cpp's "adjust bone
+	vertex weights" step) -- mesh.bones is already aligned with
+	mesh.vertices as returned here, same as mesh.indices already is.
+
+	Returns None if the mesh has no bones at all (same convention as
+	_mesh_normals()/_mesh_texcoords() for an absent channel)."""
+	if not mesh.bones:
+		return None
+	num_vertices = len(mesh.vertices) // 3
+	per_vertex: List[List[Tuple[str, float]]] = [[] for _ in range(num_vertices)]
+	for bone in mesh.bones:
+		for vertex_id, weight in zip(bone.vertex_ids, bone.weights):
+			per_vertex[vertex_id].append((bone.name, weight))
+	return per_vertex
+
+
+# CMesh::CSkinWeight only ever keeps this many (MatrixId, Weight) slots per
+# vertex (NL3D_MESH_SKINNING_MAX_MATRIX, mesh.h) -- extra assimp bone
+# influences beyond the 4 heaviest are dropped, matching every real NeL
+# content exporter (3ds Max plugin included).
+_MAX_SKIN_MATRICES = 4
+
+# IDriver::MaxModelMatrix (driver.h): a CMatrixBlock's own `matrix_id` is a
+# fixed uint32[16], and CVertexBuffer::PaletteSkin values are indices *into
+# that array* (block-local), not global bone ids -- see
+# _build_skinned_matrix_blocks().
+_MAX_MATRICES_PER_BLOCK = 16
+
+
+def _normalize_skin_weights(
+		per_vertex_bones: List[List[Tuple[str, float]]],
+) -> Tuple[List[str], List[Tuple[float, float, float, float]], List[Tuple[int, int, int, int]]]:
+	"""Reduces each vertex's (bone_name, weight) list (from _mesh_bones(),
+	already merged across every mesh instance) to the top `_MAX_SKIN_MATRICES`
+	weights, normalized to sum to 1, and turns bone names into indices into a
+	shared `bones_name` list (first-seen order) -- CSkinWeight's own MatrixId
+	indexes that array (mesh.h: "Each matrix id used in SkinWeights must have
+	a corresponding string in the bone name array"). An unused slot (fewer
+	than 4 influences) is padded with the vertex's own heaviest bone id at
+	weight 0, mirroring CMeshGeom::buildSkin's own step 0 normalization
+	(mesh.cpp) -- needed so a padding slot never pulls in an extra, otherwise
+	unused bone once _build_skinned_matrix_blocks() groups faces by bone use.
+	A vertex with no bone influence at all (an unweighted vertex in the
+	source file, or a whole unskinned mesh instanced alongside skinned ones)
+	is rigidly bound to bone 0 at full weight instead, since CSkinWeight's
+	own weights-must-sum-to-1 contract allows no true all-zero entry."""
+	bones_name: List[str] = []
+	bone_index: Dict[str, int] = {}
+	for vertex_bones in per_vertex_bones:
+		for name, _ in vertex_bones:
+			if name not in bone_index:
+				bone_index[name] = len(bones_name)
+				bones_name.append(name)
+
+	weights: List[Tuple[float, float, float, float]] = []
+	matrix_ids: List[Tuple[int, int, int, int]] = []
+	for vertex_bones in per_vertex_bones:
+		top = sorted(vertex_bones, key=lambda name_weight: name_weight[1], reverse=True)[:_MAX_SKIN_MATRICES]
+		total = sum(weight for _, weight in top)
+		if total <= 0.0:
+			top = [(bones_name[0], 1.0)]
+			total = 1.0
+		pad = _MAX_SKIN_MATRICES - len(top)
+		matrix_ids.append(tuple(bone_index[name] for name, _ in top) + (bone_index[top[0][0]],) * pad)
+		weights.append(tuple(weight / total for _, weight in top) + (0.0,) * pad)
+	return bones_name, weights, matrix_ids
+
+
+def _build_skinned_matrix_blocks(
+		pass_indices: Dict[int, List[int]], vertex_matrix_ids: List[Tuple[int, int, int, int]],
+		vertex_weights: List[Tuple[float, float, float, float]],
+) -> Tuple[List[MatrixBlock], List[Tuple[float, float, float, float]], List[Tuple[int, int, int, int]], List[int]]:
+	"""Greedily packs every triangle from `pass_indices` (material_id ->
+	flat corner-index list, indices into the shared vertex channels) into
+	`MatrixBlock`s of at most `_MAX_MATRICES_PER_BLOCK` distinct bones each --
+	mirrors CMeshGeom::buildSkin (mesh.cpp), minus its step 4 bone-reordering
+	pass (a pure render-time matrix-change-minimization optimization, not
+	needed for a correct file, so skipped here for simplicity). A single
+	triangle can use at most 3*_MAX_SKIN_MATRICES == 12 distinct bones,
+	always <= _MAX_MATRICES_PER_BLOCK, so it always fits in a fresh block.
+
+	A vertex referenced by triangles landing in more than one matrix block is
+	duplicated once per extra block, since its PaletteSkin value is
+	block-local (an index into that block's own `matrix_id` array, not a
+	global bone id -- see mesh.h's CVertexBuffer::PaletteSkin doc) and a
+	vertex can only carry one PaletteSkin value.
+
+	Returns (matrix_blocks, weight_channel, palette_channel,
+	extra_vertex_sources): the first three are already the final,
+	block-local per-vertex VertexBuffer channel values, ordered
+	[one entry per original vertex][one entry per duplicate, in
+	`extra_vertex_sources` order -- extra_vertex_sources[i] names the
+	original vertex index duplicate `i` was copied from, for the caller to
+	also duplicate Position/Normal/TexCoord0 the same way]."""
+	triangles: List[Tuple[int, int, int, int]] = []  # (material_id, v0, v1, v2)
+	for material_id, indices in pass_indices.items():
+		for i in range(0, len(indices), 3):
+			triangles.append((material_id, indices[i], indices[i + 1], indices[i + 2]))
+
+	num_original = len(vertex_matrix_ids)
+	weight_channel: List[Tuple[float, float, float, float]] = list(vertex_weights)
+	palette_channel: List[Tuple[int, int, int, int]] = [(0, 0, 0, 0)] * num_original
+	extra_vertex_sources: List[int] = []
+	used_in_any_block: set = set()
+	vertex_dup_for_block: Dict[Tuple[int, int], int] = {}
+
+	def vertex_for_block(v: int, block_index: int, local_ids: Dict[int, int]) -> int:
+		key = (v, block_index)
+		real_v = vertex_dup_for_block.get(key)
+		if real_v is not None:
+			return real_v
+		if v not in used_in_any_block:
+			real_v = v
+			used_in_any_block.add(v)
+		else:
+			real_v = num_original + len(extra_vertex_sources)
+			extra_vertex_sources.append(v)
+			weight_channel.append(vertex_weights[v])
+			palette_channel.append((0, 0, 0, 0))
+		vertex_dup_for_block[key] = real_v
+		palette_channel[real_v] = tuple(local_ids[bone_id] for bone_id in vertex_matrix_ids[v])
+		return real_v
+
+	blocks: List[MatrixBlock] = []
+	current_bones: List[int] = []
+	current_bone_pos: Dict[int, int] = {}
+	current_block_passes: Dict[int, List[int]] = {}
+
+	def flush_block():
+		nonlocal current_bones, current_bone_pos, current_block_passes
+		if current_bones:
+			rdr_passes = [RdrPass(material_id=mid, indices=idx) for mid, idx in current_block_passes.items()]
+			blocks.append(MatrixBlock(matrix_id=current_bones[:], num_matrix=len(current_bones), rdr_passes=rdr_passes))
+		current_bones, current_bone_pos, current_block_passes = [], {}, {}
+
+	for material_id, v0, v1, v2 in triangles:
+		face_bones = sorted({bone_id for v in (v0, v1, v2) for bone_id in vertex_matrix_ids[v]})
+		new_bones = [bone_id for bone_id in face_bones if bone_id not in current_bone_pos]
+		if len(current_bones) + len(new_bones) > _MAX_MATRICES_PER_BLOCK:
+			flush_block()
+			new_bones = face_bones
+		for bone_id in new_bones:
+			current_bone_pos[bone_id] = len(current_bones)
+			current_bones.append(bone_id)
+		block_index = len(blocks)  # the block currently being filled
+		corners = [vertex_for_block(v, block_index, current_bone_pos) for v in (v0, v1, v2)]
+		current_block_passes.setdefault(material_id, []).extend(corners)
+
+	flush_block()
+	return blocks, weight_channel, palette_channel, extra_vertex_sources
+
+
 def _build_material_from_assimp_material(material: dict, base_dir: Optional[Path] = None) -> Material:
 	"""`material` is one of assimp_py.Scene.materials' plain dicts (property
 	name -> value, see assimp-py's own docs) -- only its diffuse texture and
@@ -519,6 +695,24 @@ def _build_material_from_assimp_material(material: dict, base_dir: Optional[Path
 	)
 
 
+def _assimp_import_file(assimp_py, path: Path, flags: int):
+	"""assimp_py.import_file(), with every native exception it can raise
+	(RuntimeError for an assimp-side load failure, ValueError for a
+	structural issue like a face assimp's own Process_Triangulate couldn't
+	fully triangulate, FileNotFoundError, ...) turned into ShapeImportError --
+	the one exception type every caller (_process() in import_watcher.py,
+	both directly and via its reconcile()/handle_settled() paths) already
+	knows how to report as a normal, non-crashing auto-export failure.
+	Found 2026-09-05 on real content: an unhandled RuntimeError/ValueError
+	from this call used to either crash a background thread outright
+	(ImportWatcher.reconcile()) or surface with a poor, hard-to-read message
+	(the bare native exception's own str())."""
+	try:
+		return assimp_py.import_file(str(path), flags)
+	except Exception as exc:  # noqa: BLE001 -- see docstring: any native exception here means "assimp couldn't import this file", same as ShapeImportError
+		raise ShapeImportError(f"assimp failed to import {path}: {exc}") from exc
+
+
 def _import_via_assimp(path: Path) -> Mesh:
 	"""Parses `path` (.dae or .fbx) via assimp-py, returning a ready-to-save
 	Mesh. Unlike the hand-parsed .obj path, both formats carry their own node
@@ -536,30 +730,43 @@ def _import_via_assimp(path: Path) -> Mesh:
 	# sitting on the root node's scale instead of applying it.
 	flags = (assimp_py.Process_Triangulate | assimp_py.Process_JoinIdenticalVertices
 	         | assimp_py.Process_GenNormals | assimp_py.Process_GlobalScale)
-	scene = assimp_py.import_file(str(path), flags)
+	scene = _assimp_import_file(assimp_py, path, flags)
 
 	if scene.num_meshes == 0:
 		raise ShapeImportError(f"no meshes found in {path}")
 
+	# A mesh named with "__skip__" (case-insensitive) is a technical/helper
+	# mesh the artist never wants merged into the shape (collision proxy,
+	# reference geometry...) -- excluded from every channel-presence check
+	# and from the main fusion loop below, same convention as the armature
+	# and animation-clip exclusion (see extract_skeleton()).
+	included_mesh_indices = {
+		i for i in range(scene.num_meshes) if "__skip__" not in scene.meshes[i].name.lower()}
+
 	# assimp-py returns None (not an empty list/memoryview) for a channel a
 	# mesh has none of at all -- e.g. .texcoords itself for a UV-less mesh --
 	# so every len() here needs an `x and` guard first.
-	has_normals = any(scene.meshes[i].normals and len(scene.meshes[i].normals) for i in range(scene.num_meshes))
+	has_normals = any(scene.meshes[i].normals and len(scene.meshes[i].normals) for i in included_mesh_indices)
 	has_uvs = any(
 		scene.meshes[i].texcoords and scene.meshes[i].texcoords[0] and len(scene.meshes[i].texcoords[0])
-		for i in range(scene.num_meshes))
+		for i in included_mesh_indices)
+	has_bones = any(scene.meshes[i].bones and len(scene.meshes[i].bones) for i in included_mesh_indices)
 
 	positions: List[Tuple[float, float, float]] = []
 	normals: List[Tuple[float, float, float]] = []
 	texcoords: List[Tuple[float, float]] = []
+	bone_weights: List[List[Tuple[str, float]]] = []
 	material_order: List[int] = []  # first-seen order of assimp material indices, becomes RdrPass material_id order
 	pass_indices: Dict[int, List[int]] = {}
 
 	for mesh_index, transform in _iter_mesh_instances(scene.root_node, _YUP_TO_ZUP_MATRIX):
+		if mesh_index not in included_mesh_indices:
+			continue
 		mesh = scene.meshes[mesh_index]
 		mesh_positions = _mesh_positions(mesh)
 		mesh_normals = _mesh_normals(mesh)
 		mesh_texcoords = _mesh_texcoords(mesh)
+		mesh_bones = _mesh_bones(mesh) if has_bones else None
 		base_index = len(positions)
 
 		for i, position in enumerate(mesh_positions):
@@ -569,6 +776,12 @@ def _import_via_assimp(path: Path) -> Mesh:
 				normals.append(_normalize(_mat_mul_dir(transform, normal)))
 			if has_uvs:
 				texcoords.append(mesh_texcoords[i] if mesh_texcoords else (0.0, 0.0))
+			if has_bones:
+				# A mesh instanced alongside skinned ones but with no bones of
+				# its own (mesh_bones is None) contributes unweighted
+				# vertices, not a hard error -- see
+				# _normalize_skin_weights()'s own no-influence fallback.
+				bone_weights.append(mesh_bones[i] if mesh_bones else [])
 
 		if mesh.material_index not in pass_indices:
 			material_order.append(mesh.material_index)
@@ -579,8 +792,180 @@ def _import_via_assimp(path: Path) -> Mesh:
 		raise ShapeImportError(f"no vertices found in {path}")
 
 	materials = [_build_material_from_assimp_material(scene.materials[mid], path.parent) for mid in material_order]
+
+	if has_bones:
+		bones_name, weights, matrix_ids = _normalize_skin_weights(bone_weights)
+		final_pass_indices = {i: pass_indices[mid] for i, mid in enumerate(material_order)}
+		matrix_blocks, weight_channel, palette_channel, extra_vertex_sources = _build_skinned_matrix_blocks(
+			final_pass_indices, matrix_ids, weights)
+		for v in extra_vertex_sources:
+			positions.append(positions[v])
+			if has_normals:
+				normals.append(normals[v])
+			if has_uvs:
+				texcoords.append(texcoords[v])
+		return _assemble_mesh(
+			positions, normals, texcoords, materials, matrix_blocks=matrix_blocks,
+			bones_name=bones_name, skin_weights=(weight_channel, palette_channel))
+
 	rdr_passes = [RdrPass(material_id=i, indices=pass_indices[mid]) for i, mid in enumerate(material_order)]
 	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes)
+
+
+# ---------------------------------------------------------------------------
+# Skeleton extraction (.dae / .fbx / .gltf, via assimp-py)
+# ---------------------------------------------------------------------------
+#
+# A skinned mesh import (above) never generates a .skel of its own -- it must
+# be paired with one that already exists (see this module's own docstring and
+# skinned_mesh_import.md). extract_skeleton() below is the one thing that
+# *does* build a brand new CSkeletonShape from a source file's own bone
+# hierarchy, for import_watcher.py to write alongside the .shape it already
+# auto-exports, when there's a bind pose worth starting from (see
+# project-todos/forgery/skel_export.md for the design/decisions behind this).
+
+_IDENTITY_MATRIX = ((1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+
+# NLMISC::CMatrix's own StateBit flags (matrix.cpp: MAT_TRANS=1, MAT_ROT=2,
+# MAT_SCALEUNI=4, MAT_SCALEANY=8, MAT_PROJ=16) -- MAT_TRANS|MAT_ROT|MAT_SCALEANY
+# is exactly what CMatrix::setRot(m33[9]) itself sets (matrix.cpp) for a
+# general (possibly non-uniform-scaled) 3x3 with no special-cased uniform
+# scale, the safest lossless choice for an arbitrary bind-pose matrix -- and
+# matches real production `.skel` files' own bone inv_bind_pos encoding
+# (confirmed against ryzom-data/assets_src/mounts/tr_mo_capryni_mount.skel).
+_MAT_STATE_TRANS_ROT_SCALEANY = 1 | 2 | 8
+
+
+def _pynel_matrix_from_4x4(m) -> Matrix:
+	"""Converts a plain row-major 4x4 (assimp's own convention, see this
+	module's docstring) into pynel's own sparse `Matrix` encoding, losslessly
+	(any affine 4x4 -- rotation, non-uniform scale, shear -- fits in the
+	general-rotation state, see _MAT_STATE_TRANS_ROT_SCALEANY above)."""
+	rot = (m[0][0], m[0][1], m[0][2], m[1][0], m[1][1], m[1][2], m[2][0], m[2][1], m[2][2])
+	trans = (m[0][3], m[1][3], m[2][3])
+	return Matrix(state_bit=_MAT_STATE_TRANS_ROT_SCALEANY, scale=1.0, rot=rot, trans=trans, proj=None)
+
+
+def _matrix_to_quat(r) -> Quaternion:
+	"""Standard trace-based rotation-matrix-to-quaternion conversion (Shepperd's
+	method) -- `r` is a plain 3x3 (list of 3 rows of 3 floats), already
+	normalized (no scale baked in, see _decompose_matrix())."""
+	trace = r[0][0] + r[1][1] + r[2][2]
+	if trace > 0:
+		s = 0.5 / (trace + 1.0) ** 0.5
+		return Quaternion((r[2][1] - r[1][2]) * s, (r[0][2] - r[2][0]) * s, (r[1][0] - r[0][1]) * s, 0.25 / s)
+	if r[0][0] > r[1][1] and r[0][0] > r[2][2]:
+		s = 2.0 * (1.0 + r[0][0] - r[1][1] - r[2][2]) ** 0.5
+		return Quaternion(0.25 * s, (r[0][1] + r[1][0]) / s, (r[0][2] + r[2][0]) / s, (r[2][1] - r[1][2]) / s)
+	if r[1][1] > r[2][2]:
+		s = 2.0 * (1.0 + r[1][1] - r[0][0] - r[2][2]) ** 0.5
+		return Quaternion((r[0][1] + r[1][0]) / s, 0.25 * s, (r[1][2] + r[2][1]) / s, (r[0][2] - r[2][0]) / s)
+	s = 2.0 * (1.0 + r[2][2] - r[0][0] - r[1][1]) ** 0.5
+	return Quaternion((r[0][2] + r[2][0]) / s, (r[1][2] + r[2][1]) / s, 0.25 * s, (r[1][0] - r[0][1]) / s)
+
+
+def _decompose_matrix(m) -> Tuple[Vector3, Quaternion, Vector3]:
+	"""Decomposes a row-major 4x4 (assimp's own convention) into a
+	translation/rotation/scale triple, assuming no shear -- true for every
+	node this is used on (extract_skeleton()'s own bone rest-pose transforms),
+	an ordinary T*R*S authored in a 3D content tool."""
+	translation = Vector3(m[0][3], m[1][3], m[2][3])
+	columns = [(m[0][c], m[1][c], m[2][c]) for c in range(3)]
+	scales = [(sum(v * v for v in col)) ** 0.5 for col in columns]
+	rot = [[(columns[c][row] / scales[c] if scales[c] > 1e-12 else 0.0) for c in range(3)] for row in range(3)]
+	return translation, _matrix_to_quat(rot), Vector3(*scales)
+
+
+def _subtree_has_name(node, names) -> bool:
+	if node.name in names:
+		return True
+	return any(_subtree_has_name(child, names) for child in node.children)
+
+
+def _find_armature_root(node, file_stem_lower: str, bone_names, parent_transform):
+	"""Depth-first, pre-order search for the first node (see skel_export.md's
+	own selection rule) whose name contains `file_stem_lower` (case-
+	insensitive) but not "__skip__", and whose subtree contains at least one
+	real bone name -- returns (node, world_transform) for it, or None."""
+	transform = _mat_mul_mat(parent_transform, node.transformation)
+	name_lower = node.name.lower()
+	if file_stem_lower in name_lower and "__skip__" not in name_lower and _subtree_has_name(node, bone_names):
+		return node, transform
+	for child in node.children:
+		found = _find_armature_root(child, file_stem_lower, bone_names, transform)
+		if found is not None:
+			return found
+	return None
+
+
+def _walk_bones(node, bone_names, parent_bone_id: int, parent_transform, bone_offsets, bones, bone_index) -> None:
+	"""Recursively collects `bones` (in depth-first order, so a bone's
+	`father_id` always refers to an earlier index) from `node`'s subtree.
+	`parent_transform` accumulates through any node that is NOT itself a real
+	bone (see skel_export.md's "nœuds non-os ignorés") -- a bone's own
+	default_pos/rot/scale is decomposed from its transform accumulated since
+	its nearest bone ancestor, not just its immediate parent node, so a
+	non-bone helper node in between doesn't shift its rest pose."""
+	transform = _mat_mul_mat(parent_transform, node.transformation)
+	if node.name in bone_names and node.name not in bone_index:
+		pos, rot_quat, scale = _decompose_matrix(transform)
+		bone_index[node.name] = len(bones)
+		bones.append(Bone(
+			name=node.name, inv_bind_pos=_pynel_matrix_from_4x4(bone_offsets[node.name]),
+			father_id=parent_bone_id, unherit_scale=False, lod_disable_distance=0.0,
+			default_pos=pos, default_rot_euler=Vector3(0.0, 0.0, 0.0), default_rot_quat=rot_quat,
+			default_scale=scale, default_pivot=Vector3(0.0, 0.0, 0.0), skin_scale=Vector3(1.0, 1.0, 1.0),
+		))
+		next_parent_bone_id, next_transform = bone_index[node.name], _IDENTITY_MATRIX
+	else:
+		next_parent_bone_id, next_transform = parent_bone_id, transform
+	for child in node.children:
+		_walk_bones(child, bone_names, next_parent_bone_id, next_transform, bone_offsets, bones, bone_index)
+
+
+def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
+	"""Builds a brand new `SkeletonShape` from `path`'s own bone hierarchy (a
+	fresh starter skeleton, not a replacement for one already paired to this
+	kind of asset -- see this module's docstring), or `None` when there's
+	nothing to build one from: `.obj` (no bones concept at all), no bones in
+	any mesh, or no armature-root candidate found (see skel_export.md's
+	selection rule -- a node whose name matches `path`'s own stem, isn't
+	`__skip__`-excluded, and whose subtree actually uses a real bone name).
+	Reparses `path` independently of _import_via_assimp() (accepted, simple,
+	if wasteful for now -- see skel_export.md's transparency note)."""
+	path = Path(path)
+	if path.suffix.lower() == ".obj":
+		return None
+	import assimp_py
+
+	flags = (assimp_py.Process_Triangulate | assimp_py.Process_JoinIdenticalVertices
+	         | assimp_py.Process_GenNormals | assimp_py.Process_GlobalScale)
+	scene = _assimp_import_file(assimp_py, path, flags)
+
+	bone_names = {bone.name for mesh in scene.meshes if mesh.bones for bone in mesh.bones}
+	if not bone_names:
+		return None
+
+	found = _find_armature_root(scene.root_node, path.stem.lower(), bone_names, _YUP_TO_ZUP_MATRIX)
+	if found is None:
+		return None
+	armature_node, armature_transform = found
+
+	bone_offsets: Dict[str, Tuple[Tuple[float, ...], ...]] = {}
+	for mesh in scene.meshes:
+		if mesh.bones:
+			for bone in mesh.bones:
+				bone_offsets.setdefault(bone.name, bone.offset_matrix)
+
+	bones: List[Bone] = []
+	bone_index: Dict[str, int] = {}
+	for child in armature_node.children:
+		_walk_bones(child, bone_names, -1, armature_transform, bone_offsets, bones, bone_index)
+	if not bones:
+		return None
+
+	lods = [SkeletonLod(distance=0.0, active_bones=[0xFF] * len(bones))]
+	return armature_node.name, SkeletonShape(bones=bones, bone_map=dict(bone_index), lods=lods)
 
 
 def import_dae(path: Path) -> Mesh:

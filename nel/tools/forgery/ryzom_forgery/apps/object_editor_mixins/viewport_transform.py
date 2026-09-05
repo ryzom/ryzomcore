@@ -17,7 +17,7 @@ import numpy
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 from panda3d.core import ClockObject, GeomNode, InternalName, NodePath, Point3, Quat, TransparencyAttrib, Vec3
 
-from pynel.ryzom_shape import MeshMRMSkinned, WindTreeParams
+from pynel.ryzom_shape import Mesh, MeshMRMSkinned, WindTreeParams
 
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
@@ -27,7 +27,7 @@ from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 	_SHADOW_SKIN_COLOR, _SHADOW_SKIN_GROUND_OFFSET, _SHADOW_SKIN_GROUND_Z, _uvs_need_repeat, _WORLD_AXIS_COLORS,
 )
 from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
-	_build_shadow_skin_preview_state, _build_skin_state, _build_wind_state,
+	_build_mesh_skin_state, _build_shadow_skin_preview_state, _build_skin_state, _build_wind_state,
 )
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 	_icon_button, _OBJECT_TRANSPARENCY_ALPHA, _VIEWPORT_TOGGLE_MARGIN_PX,
@@ -765,15 +765,18 @@ class ViewportTransformMixin:
 		is_skinned = _is_shape_skinned(self.shape_file.value)
 		skeleton = self._bone_preview_skeleton if is_skinned else None
 		bone_world_matrices = self._bone_world_matrices_for(geom_value.bones_name) if skeleton is not None else None
-		# Live per-frame re-skin (_update_skin_preview()) only supports the
-		# CMeshMRMSkinned packed-vertex format (_build_skin_state() assumes
-		# geom.packed_vertices/decompact_scale) -- a plain skinned CMeshMRM
+		# Live per-frame re-skin (_update_skin_preview()) supports
+		# CMeshMRMSkinned's own packed-vertex format (_build_skin_state()) and
+		# a plain skinned CMesh (_build_mesh_skin_state(), see the
+		# "mesh_skinning_preview" chantier) -- a plain skinned CMeshMRM
 		# (geom.skinned, see _is_shape_skinned()) still renders skinned below
 		# via iter_render_passes(), just statically at the current pose
 		# rather than re-skinned live every frame if the animation/time
 		# changes. Extending the live path to that format too is future work.
 		if isinstance(self.shape_file.value, MeshMRMSkinned) and skeleton is not None:
 			self._skin_state = _build_skin_state(geom_value, skeleton)
+		elif isinstance(self.shape_file.value, Mesh) and geom_value.skinned and skeleton is not None:
+			self._skin_state = _build_mesh_skin_state(geom_value, skeleton)
 
 		# CShadowSkin ground-shadow preview (opt-in, see
 		# _toggle_shadow_skin_preview()) -- unlike self._skin_state above,

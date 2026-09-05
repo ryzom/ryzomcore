@@ -1,6 +1,67 @@
 # Changelog
 
-## 2026-09-04 — 🐛 Auto-reconcile export/sync on workspace open, Forgery 3.1.5
+## 2026-09-05 — 🐛 Report reconcile() failures per-source instead of crashing the batch, Forgery 3.1.7
+
+Found on real content: `ImportWatcher._reconcile_worker()` called `self._process(source_path)` in a
+plain loop with no exception guard, unlike `handle_settled()` (protected by
+`workspace_watch.py`'s own broad callback-dispatch `except Exception`). A native assimp
+exception (`RuntimeError`/`ValueError` -- not `ShapeImportError`, so `_process()`'s own
+narrower `except` didn't catch it either) from any one source killed the whole background
+thread, silently skipping every remaining source in that reconcile pass.
+
+Added a `try/except Exception` per source inside `_reconcile_worker()`'s loop, reporting the
+failure the same way `_process()` already reports its own (`self._report(..., is_error=True)`)
+instead of letting it propagate.
+
+Also added `shape_import._assimp_import_file()`, wrapping `assimp_py.import_file()` and turning
+any native exception it raises (`RuntimeError` for an assimp-side load failure, `ValueError` for
+a structural issue such as a face `Process_Triangulate` couldn't fully triangulate,
+`FileNotFoundError`...) into `ShapeImportError` -- the one type every caller already knows how
+to report cleanly. Used by both `_import_via_assimp()` and `extract_skeleton()`.
+
+## 2026-09-05 — ✨ Skinned CMesh import (.dae/.fbx/.gltf), .skel export, and Skinning preview support, Forgery 3.1.6/3.1.7
+
+Three chantiers landed together (`project-todos/forgery/skinned_mesh_import.md`,
+`skel_export.md`, `mesh_skinning_preview.md`):
+
+**Skinned mesh import** (`shape_import.py`): `.dae`/`.fbx`/`.gltf` meshes with per-vertex bone
+weights (`mesh.bones`, assimp-py) are now imported as a skinned `CMesh` (`skinned=True`,
+`bones_name`, `VertexBuffer` `Weight`/`PaletteSkin` channels) instead of always rigid. Since
+`CVertexBuffer::PaletteSkin` is an index local to whichever `MatrixBlock` renders a given vertex
+(not a global bone id) and a `MatrixBlock` holds at most 16 distinct bones
+(`IDriver::MaxModelMatrix`), `_build_skinned_matrix_blocks()` ports `CMeshGeom::buildSkin`'s own
+face-to-block bin-packing algorithm (mesh.cpp), duplicating a vertex once per extra block it's
+used in. Top-4 bone weights per vertex, normalized, via `_normalize_skin_weights()`. A source
+mesh named with `__skip__` (case-insensitive) is now excluded from the fusion entirely
+(collision proxies, reference geometry).
+
+**`.skel` export at import time** (`shape_import.py::extract_skeleton()`, `pynel.ryzom_shape`):
+`pynel` could previously only read a `CSkeletonShape`, never write one -- added
+`_write_bone`/`_write_skeleton_lod`/`_write_skeleton_shape`, wired into `dumps()`. Bone default
+values a `.dae`/`.fbx` can't supply (`unherit_scale`, `lod_disable_distance`, `default_pivot`,
+`skin_scale`) were checked against the real 3ds Max exporter
+(`nel/tools/3d/plugin_max/nel_mesh_lib/export_skinning.cpp`) rather than guessed. A
+`CSkeletonShape` always needs at least one `SkeletonLod` (the real engine's `getLodForDistance()`
+does an unchecked, out-of-bounds binary search on an empty list) -- a generated skeleton always
+gets exactly one trivial LOD with every bone active. The armature root node is picked by name
+match against the source file's own stem (falls back to `None` -- no `.skel` generated -- if
+none matches), and the resulting `.skel` is named after the *armature*, not the source file, so
+re-importing the same rig targets the same file; `import_watcher.py` never overwrites an
+already-existing `.skel` (a skeleton can be shared by several shapes, unlike the `.shape` itself).
+
+**Skinning preview for a skinned CMesh** (`geometry_helpers.py`, `shape_geometry.py`,
+`skin_state_helpers.py`, `viewport_transform.py`, `creature_bind.py`): Patina's "Skinning
+preview" panel only ever recognized `MeshMRM`/`MeshMRMSkinned` as skinned
+(`_is_shape_skinned()`) -- a skinned `CMesh` (the only kind `shape_import.py` can produce, no
+`CMRMBuilder` binding) silently never activated the panel at all. Extended the predicate, and
+added a `_MeshSkinState`/`_build_mesh_skin_state()`/`_reskin_mesh_state()` triplet (mirrors the
+existing `_MrmSkinState` used for a skinned `CMeshMRM`, minus its LOD/geomorph step -- `CMesh`
+has neither) plus a `PaletteSkin`-to-global-bone-index remap (`_mesh_global_matrix_ids()`, since
+that channel is block-local, see above) so `_passes_from_mesh_geom()`/`iter_render_passes()` can
+actually deform a skinned `CMesh`'s vertices from a loaded skeleton, live, the same CPU/numpy
+re-skinning approach already used for the other two mesh types. Scoped to the single-shape
+Skinning preview panel only -- the assembled-creature Bind preview path is a separate,
+not-yet-done extension.
 
 Fixed two workspace-switch gaps: neither `ImportWatcher` nor `WorkspaceSyncWatcher`
 caught up on anything that changed while Patina wasn't watching (a previous session,

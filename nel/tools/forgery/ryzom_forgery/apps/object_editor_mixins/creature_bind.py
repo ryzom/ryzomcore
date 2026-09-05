@@ -34,8 +34,8 @@ from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 	_SHADOW_SKIN_GROUND_OFFSET, _SHADOW_SKIN_GROUND_Z,
 )
 from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
-	_build_mrm_skin_state, _build_skin_state, _MrmSkinState, _reskin_mrm_state, _reskin_shadow_skin_state,
-	_reskin_state,
+	_build_mesh_skin_state, _build_mrm_skin_state, _build_skin_state, _MeshSkinState, _MrmSkinState,
+	_reskin_mesh_state, _reskin_mrm_state, _reskin_shadow_skin_state, _reskin_state,
 )
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button, _VIEWPORT_TOGGLE_MARGIN_PX
 
@@ -167,19 +167,24 @@ class CreatureBindMixin:
 
 	def _update_skin_preview(self, task):
 		"""Per-frame: re-skins the loaded shape's geometry in place (see
-		_build_skin_state()) whenever it's a CMeshMRMSkinned with a skeleton
-		loaded -- vectorized (numpy), unlike pynel.ryzom_skin's plain-Python
+		_build_skin_state()/_build_mesh_skin_state()) whenever it's a
+		CMeshMRMSkinned or a plain skinned CMesh with a skeleton loaded --
+		vectorized (numpy), unlike pynel.ryzom_skin's plain-Python
 		skin_vertex()/skin_mesh() (fine for one-off/CLI use, far too slow
 		called per-vertex every frame for a real character mesh -- see
 		_update_wind()'s own note on exactly this same tradeoff). No-op
 		otherwise, same pattern as _update_wind()/_update_skin_preview_time().
-		The actual blend math lives in the module-level _reskin_state(), shared
-		with _update_assembled_creature_skin()'s own per-body-part re-skin."""
+		The actual blend math lives in the module-level _reskin_state()/
+		_reskin_mesh_state(), the same dispatch-by-type idea as
+		_update_assembled_creature_skin()'s own per-body-part re-skin."""
 		state = self._skin_state
 		if state is None or state.vdata is None:
 			return task.cont
 		bone_world_matrices = self._bone_world_matrices_for(state.bone_names)
-		_reskin_state(state, bone_world_matrices)
+		if isinstance(state, _MeshSkinState):
+			_reskin_mesh_state(state, bone_world_matrices)
+		else:
+			_reskin_state(state, bone_world_matrices)
 		return task.cont
 
 	def _update_shadow_skin_preview(self, task):

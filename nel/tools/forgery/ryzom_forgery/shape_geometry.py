@@ -64,10 +64,56 @@ def rotate_mesh_geom(geom: MeshGeom, quat: Quaternion) -> None:
 		channels["Normal"] = [rotate_vector_by_quat(n, quat) for n in normals]
 
 
-def _passes_from_mesh_geom(geom: MeshGeom):
+def _mesh_global_matrix_ids(geom: MeshGeom):
+	"""A CMesh's own VertexBuffer "PaletteSkin" channel holds, per vertex,
+	indices *local to whichever MatrixBlock renders that vertex* (up to 16
+	distinct bones per block, IDriver::MaxModelMatrix -- see
+	shape_import.py's _build_skinned_matrix_blocks()), not global indices into
+	geom.bones_name like CMeshMRM's skin_weights/CMeshMRMSkinned's
+	packed_vertices are -- confirmed against CMeshGeom::buildSkin's own
+	`face.Corner[j].Palette.MatrixId[k] = bone.MatrixIdInMB` (mesh.cpp): each
+	MatrixBlock.matrix_id[] maps its own local slot back to a real bone index.
+	Resolves that once into a flat list of global (matrix_id0..3) 4-tuples,
+	one per vertex -- every vertex is rendered by exactly one MatrixBlock (see
+	_build_skinned_matrix_blocks()'s own per-block vertex duplication), so
+	there's no ambiguity writing this in a single pass over every block.
+	A vertex referenced by no block's rdr_passes at all (never rendered)
+	keeps the (0, 0, 0, 0) default -- never read since it's never rendered
+	either."""
+	palette = geom.vertex_buffer.channels.get("PaletteSkin", [])
+	global_ids = [(0, 0, 0, 0)] * len(palette)
 	for matrix_block in geom.matrix_blocks:
 		for rdr_pass in matrix_block.rdr_passes:
-			yield geom.vertex_buffer, rdr_pass.material_id, rdr_pass.indices
+			for idx in rdr_pass.indices:
+				global_ids[idx] = tuple(matrix_block.matrix_id[p] for p in palette[idx])
+	return global_ids
+
+
+def _passes_from_mesh_geom(geom: MeshGeom, skeleton=None, bone_world_matrices=None):
+	# A CMesh built skinned by shape_import.py's own .dae/.fbx/.gltf import
+	# (geom.skinned, VertexBuffer Weight/PaletteSkin channels) -- see
+	# _mesh_global_matrix_ids() for why PaletteSkin needs remapping first,
+	# unlike CMeshMRM's skin_weights (_passes_from_mrm_geom()). CMesh has no
+	# LOD/geomorph concept at all, unlike CMeshMRM -- nothing to resolve here.
+	if geom.skinned and skeleton is not None and bone_world_matrices is not None:
+		bone_skin_matrices = numpy.array(bone_skin_matrices_for_mesh(geom, skeleton, bone_world_matrices), dtype=numpy.float32)
+		local_positions = numpy.array(geom.vertex_buffer.channels.get("Position", []), dtype=numpy.float32)
+		local_normals = numpy.array(geom.vertex_buffer.channels.get("Normal", []), dtype=numpy.float32)
+		matrix_ids = numpy.array(_mesh_global_matrix_ids(geom), dtype=numpy.int64)
+		weights = numpy.array(geom.vertex_buffer.channels.get("Weight", []), dtype=numpy.float32)
+
+		positions, normals = _numpy_skin_batch(local_positions, local_normals, matrix_ids, weights, bone_skin_matrices)
+		vertex_buffer = dataclasses.replace(geom.vertex_buffer, channels={
+			**geom.vertex_buffer.channels,
+			"Position": [tuple(p) for p in positions],
+			"Normal": [tuple(n) for n in normals],
+		})
+	else:
+		vertex_buffer = geom.vertex_buffer
+
+	for matrix_block in geom.matrix_blocks:
+		for rdr_pass in matrix_block.rdr_passes:
+			yield vertex_buffer, rdr_pass.material_id, rdr_pass.indices
 
 
 def _resolve_lod_geomorphs(vertex_buffer, lod):
@@ -301,13 +347,14 @@ def iter_render_passes(shape_value, skeleton=None, bone_world_matrices=None):
 	"""Yields (vertex_buffer, material_id, indices) for the renderable
 	geometry of a CMesh/CMeshMRM/CMeshMultiLod(slot 0)/CMeshMRMSkinned shape
 	value. `skeleton`/`bone_world_matrices` drive skinning for CMeshMRMSkinned
-	(_passes_from_mrm_skinned_geom()) and, when a CMeshMRM's own geom.skinned
-	is True, for that classic format's own skin data too (_passes_from_mrm_geom(),
-	see pynel.ryzom_skin.skin_mesh_mrm_geom()) -- without them (no skeleton
-	loaded yet by the caller), either kind still renders, at its raw bind-pose
-	local vertices."""
+	(_passes_from_mrm_skinned_geom()), for a CMeshMRM whose own geom.skinned is
+	True (_passes_from_mrm_geom(), see pynel.ryzom_skin.skin_mesh_mrm_geom()),
+	and for a plain CMesh whose own geom.skinned is True (_passes_from_mesh_geom(),
+	shape_import.py's own .dae/.fbx/.gltf skin import) -- without them (no
+	skeleton loaded yet by the caller), any of these still renders, at its raw
+	bind-pose local vertices."""
 	if isinstance(shape_value, Mesh):
-		yield from _passes_from_mesh_geom(shape_value.geom)
+		yield from _passes_from_mesh_geom(shape_value.geom, skeleton, bone_world_matrices)
 	elif isinstance(shape_value, MeshMRM):
 		yield from _passes_from_mrm_geom(shape_value.geom, skeleton, bone_world_matrices)
 	elif isinstance(shape_value, MeshMultiLod) and shape_value.slots:

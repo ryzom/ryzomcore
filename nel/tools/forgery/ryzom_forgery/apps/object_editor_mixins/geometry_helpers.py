@@ -11,7 +11,7 @@ from math import cos, pi, sin
 
 from panda3d.core import Geom, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat, GeomVertexWriter, LineSegs
 
-from pynel.ryzom_shape import MeshMRM, MeshMRMSkinned
+from pynel.ryzom_shape import Mesh, MeshMRM, MeshMRMSkinned
 
 # Viewport helper toggles (floor grid, world/pivot axes) drawn bottom-left of
 # the 3D viewport -- see ObjectEditorApp._draw_viewport_toggles(). Grid squares
@@ -150,17 +150,20 @@ def _uvs_need_repeat(texcoords):
 
 def _is_shape_skinned(shape_value):
 	"""True if `shape_value` has real skin data to drive from a skeleton --
-	either a CMeshMRMSkinned (always skinned) or a plain CMeshMRM that
-	happens to carry its own skin data too (geom.skinned, a separate,
-	older on-disk format -- confirmed real, 2026-08-30, e.g. Ryzom's
-	*_visage.shape face pieces are plain CMeshMRM, not CMeshMRMSkinned, yet
-	are skinned -- see shape_geometry.py's _passes_from_mrm_geom() and
-	pynel.ryzom_skin.skin_mesh_mrm_geom()). Use this everywhere instead of
+	either a CMeshMRMSkinned (always skinned), a plain CMeshMRM that happens
+	to carry its own skin data too (geom.skinned, a separate, older on-disk
+	format -- confirmed real, 2026-08-30, e.g. Ryzom's *_visage.shape face
+	pieces are plain CMeshMRM, not CMeshMRMSkinned, yet are skinned -- see
+	shape_geometry.py's _passes_from_mrm_geom() and
+	pynel.ryzom_skin.skin_mesh_mrm_geom()), or a plain CMesh built skinned by
+	shape_import.py's own .dae/.fbx/.gltf import (geom.skinned, VertexBuffer
+	Weight/PaletteSkin channels -- see shape_geometry.py's
+	_passes_from_mesh_geom()). Use this everywhere instead of
 	`isinstance(shape_value, MeshMRMSkinned)` alone -- that check alone
-	silently treats a skinned CMeshMRM as rigid."""
+	silently treats a skinned CMeshMRM/CMesh as rigid."""
 	if isinstance(shape_value, MeshMRMSkinned):
 		return True
-	if isinstance(shape_value, MeshMRM):
+	if isinstance(shape_value, (MeshMRM, Mesh)):
 		return bool(shape_value.geom.skinned)
 	return False
 

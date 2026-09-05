@@ -13,7 +13,7 @@ import numpy
 from panda3d.core import InternalName
 
 from pynel.ryzom_skin import _matrix_field_to_dense
-from ryzom_forgery.shape_geometry import _numpy_skin_batch, finest_skinned_lod
+from ryzom_forgery.shape_geometry import _mesh_global_matrix_ids, _numpy_skin_batch, finest_skinned_lod
 
 
 class _WindState:
@@ -374,6 +374,67 @@ def _reskin_mrm_state(state, bone_world_matrices):
 	if len(state.geomorph_dst):
 		positions[state.geomorph_dst] = positions[state.geomorph_src]
 		normals[state.geomorph_dst] = normals[state.geomorph_src]
+
+	array_data = state.vdata.modify_array(0)
+	if state.vertex_pos_offset is None:
+		array_format = array_data.get_array_format()
+		state.vertex_stride = array_format.get_stride() // 4
+		state.vertex_pos_offset = array_format.get_column(InternalName.get_vertex()).get_start() // 4
+		state.vertex_normal_offset = array_format.get_column(InternalName.get_normal()).get_start() // 4
+
+	view = numpy.frombuffer(array_data, dtype=numpy.float32).reshape(-1, state.vertex_stride)
+	view[:, state.vertex_pos_offset:state.vertex_pos_offset + 3] = positions
+	view[:, state.vertex_normal_offset:state.vertex_normal_offset + 3] = normals
+
+
+class _MeshSkinState:
+	"""Per-loaded-shape data for live re-skin of a plain skinned CMesh (a
+	shape_import.py .dae/.fbx/.gltf import, see the "skinned_mesh_import"
+	chantier) -- same idea as _MrmSkinState, minus the LOD/geomorph step
+	(CMesh/MeshGeom has neither), with its own per-vertex skin-weight layout:
+	VertexBuffer "Weight"/"PaletteSkin" channels, the latter block-local to
+	whichever MatrixBlock renders a given vertex rather than a global bone
+	index -- resolved once here via shape_geometry._mesh_global_matrix_ids()
+	(see that function's own docstring)."""
+
+	def __init__(self, geom, skeleton, bone_names, local_positions, local_normals, matrix_ids, weights):
+		self.geom = geom
+		self.skeleton = skeleton
+		self.bone_names = bone_names
+		self.local_positions = local_positions  # (N,3) float32
+		self.local_normals = local_normals  # (N,3) float32
+		self.matrix_ids = matrix_ids  # (N,4) int64, already resolved to global bone indices
+		self.weights = weights  # (N,4) float32, already normalized
+		self.inv_bind_matrices = _bone_inv_bind_matrices(bone_names, skeleton)  # (B,4,4), see _bone_inv_bind_matrices()
+		self.vdata = None
+		self.vertex_stride = None
+		self.vertex_pos_offset = None
+		self.vertex_normal_offset = None
+
+
+def _build_mesh_skin_state(geom, skeleton):
+	"""Precomputes the static per-vertex tables _reskin_mesh_state() blends
+	every frame -- None if geom isn't actually skinned or has no vertices."""
+	if not geom.skinned:
+		return None
+	local_positions = numpy.array(geom.vertex_buffer.channels.get("Position", []), dtype=numpy.float32)
+	if len(local_positions) == 0:
+		return None
+	local_normals = numpy.array(geom.vertex_buffer.channels.get("Normal", []), dtype=numpy.float32)
+	matrix_ids = numpy.array(_mesh_global_matrix_ids(geom), dtype=numpy.int64)
+	weights = numpy.array(geom.vertex_buffer.channels.get("Weight", []), dtype=numpy.float32)
+
+	return _MeshSkinState(geom, skeleton, list(geom.bones_name), local_positions, local_normals, matrix_ids, weights)
+
+
+def _reskin_mesh_state(state, bone_world_matrices):
+	"""Live per-frame equivalent of shape_geometry._passes_from_mesh_geom()'s
+	skin step, for a plain skinned CMesh -- see _MeshSkinState's own
+	docstring. No-op if state.vdata isn't built yet."""
+	if state.vdata is None:
+		return
+	bone_skin_matrices = _bone_skin_matrices_numpy(state.bone_names, state.inv_bind_matrices, bone_world_matrices)
+	positions, normals = _numpy_skin_batch(state.local_positions, state.local_normals, state.matrix_ids, state.weights, bone_skin_matrices)
 
 	array_data = state.vdata.modify_array(0)
 	if state.vertex_pos_offset is None:
