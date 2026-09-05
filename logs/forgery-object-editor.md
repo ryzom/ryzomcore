@@ -1,6 +1,12 @@
 # Changelog
 
-## 2026-09-05 — ✨ Mesh export with skin/bones (.dae/.fbx/.gltf/.glb) + PNJ export + multi-select export popup, Forgery 3.4.0
+## 2026-09-05 — ✨ Add a uniform-scale link toggle to the Transform panel's Scale row, Forgery 3.4.1
+
+`project-todos/forgery/transform_panel_scale_link.md`, closed.
+
+The Position/Rotation/Scale panel's Scale row (`apps/object_editor_mixins/viewport_transform.py::_draw_transform_row()`) gets a link icon toggle (`ICON_FA_LINK`/`ICON_FA_LINK_SLASH`) next to its X/Y/Z fields, backed by a new `self._scale_axes_linked` flag (`apps/object_editor.py`, transitory, never persisted, same as the existing per-axis locks). While active, editing any one of the three scale fields (`_set_transform_axis()`) also sets the other two to the same value, skipping any axis individually locked via the row's own X/Y/Z lock icons. Toggling the link on its own never touches the current values, even if X/Y/Z already differ -- alignment only happens on the next edited axis.
+
+This is separate from the 3D gizmo's own Ctrl+drag scale (`camera.py::ObjectManipulator._scale()`), which was already uniform by construction (a single exponential factor applied to every unlocked axis) -- the gap was specifically the panel's independent per-axis text/drag fields.
 
 Closes `project-todos/forgery/mesh_skin_export.md` and the item 5/6/7 chantier of
 `project-todos/forgery/mesh_skel_anim_io.md` (the umbrella project tracking full round-trip

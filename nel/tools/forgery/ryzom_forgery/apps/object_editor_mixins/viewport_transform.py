@@ -570,7 +570,11 @@ class ViewportTransformMixin:
 		"""Sets one axis (0=X, 1=Y, 2=Z) of `prop` to `value`, on whichever
 		node _transform_node() currently owns it -- a no-op if that axis is
 		locked (see _draw_transform_panel()); ObjectManipulator (camera.py)
-		enforces the same lock for Ctrl+drag."""
+		enforces the same lock for Ctrl+drag. For `prop == "scale"` with the
+		Scale row's link toggle active (`self._scale_axes_linked`, see
+		_draw_transform_row()), the other two (unlocked) scale axes are set
+		to the same `value` too -- whichever axis is edited drives the other
+		two, see project-todos/forgery/transform_panel_scale_link.md."""
 		if self.transform_locks[prop]["xyz"[axis_index]]:
 			return
 		node = self._transform_node(prop)
@@ -587,6 +591,11 @@ class ViewportTransformMixin:
 		else:
 			values = list(node.get_scale())
 			values[axis_index] = value
+			if self._scale_axes_linked:
+				locks = self.transform_locks["scale"]
+				for other_index, axis_name in enumerate("xyz"):
+					if other_index != axis_index and not locks[axis_name]:
+						values[other_index] = value
 			node.set_scale(*values)
 
 	def _reset_transform(self, prop):
@@ -721,6 +730,20 @@ class ViewportTransformMixin:
 			imgui.end_disabled()
 			if changed:
 				self._set_transform_axis(prop, axis_index, new_value)
+
+		if prop == "scale":
+			imgui.same_line()
+			linked = self._scale_axes_linked
+			# Icon-only toggle, matching the pivot/axis lock buttons above --
+			# see object_editor.py's own _scale_axes_linked docstring for what
+			# it changes in _set_transform_axis(). Toggling it never touches
+			# the current X/Y/Z values by itself, even if they already differ
+			# (project-todos/forgery/transform_panel_scale_link.md's own
+			# decision) -- alignment only happens on the next edited axis.
+			icon = fa_icons.ICON_FA_LINK if linked else fa_icons.ICON_FA_LINK_SLASH
+			if _icon_button(icon, "Link X/Y/Z: editing one axis sets the other two (unlocked) axes to match",
+			                linked, square=True, active_color=_LOCKED_COLOR):
+				self._scale_axes_linked = not linked
 
 		imgui.same_line()
 		if _icon_button(fa_icons.ICON_FA_ARROW_ROTATE_LEFT, f"Reset {label.lower()} (current reference frame only)", square=True):

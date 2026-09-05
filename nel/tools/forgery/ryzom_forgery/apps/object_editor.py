@@ -415,6 +415,13 @@ class ObjectEditorApp(
 			for prop in ("position", "rotation", "scale")
 		}
 
+		# Toggle on the Scale row's link icon (see _draw_transform_row()) --
+		# while active, editing one (unlocked) scale axis also sets the other
+		# two (unless individually locked via transform_locks["scale"]) to
+		# the same value, in _set_transform_axis(). Transitory UI state, not
+		# persisted (like transform_locks above).
+		self._scale_axes_linked = False
+
 		self.orbit_camera = OrbitCamera(self, distance=10.0)
 		self.object_manipulator = ObjectManipulator(self, self._object_pivot, self.orbit_camera)
 		self.nav_cube = NavigationCube(self, self.orbit_camera, self._object_pivot)
