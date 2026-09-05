@@ -17,6 +17,7 @@ from panda3d.core import Quat
 from pynel.ryzom_shape import Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
 
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery.settings import PanelState
 from ryzom_forgery import virtual_categories
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.popup_utils import center_next_popup
@@ -477,9 +478,27 @@ class ShapeIOMixin:
 			fresh.last_shape_path = str(shape_path) if shape_path is not None else None
 			fresh.last_shape_bnp = str(self._shape_source_bnp_path) if self._shape_source_bnp_path is not None else None
 			fresh.last_shape_name = self._shape_source_name
+			fresh.panel_states = self._collect_panel_states()
 			app_settings.save(fresh)
 		except OSError as exc:
 			print(f"[object_editor] could not save session state: {exc}")
+
+	def _collect_panel_states(self):
+		"""Current open/closed + position of every floating panel (see
+		settings.py's own PanelState, panel_improvements.md) -- a panel
+		never actually drawn yet this session (position still None, e.g.
+		never opened) is omitted rather than saved with a bogus (0, 0)."""
+		panels = {
+			"wind": (self._wind_panel_open, self._wind_panel_pos),
+			"bone_preview": (self._bone_preview_panel_open, self._bone_preview_panel_pos),
+			"bind": (self._bind_panel_open, self._bind_panel_pos),
+			"light": (self._light_panel_open, self._light_panel_pos),
+			"info": (self._info_panel_open, self._info_panel_pos),
+		}
+		return {
+			name: PanelState(open=open_, x=pos[0], y=pos[1])
+			for name, (open_, pos) in panels.items() if pos is not None
+		}
 
 	def _restore_session_state(self):
 		"""Reopens whatever folder the Explorer was browsing at the end of
@@ -494,6 +513,19 @@ class ShapeIOMixin:
 		_draw_reopen_shape_popup()/_load_pending_reopen_shape()), asked
 		once the first frame is up."""
 		settings = app_settings.load()
+		panel_attrs = {
+			"wind": "_wind_panel",
+			"bone_preview": "_bone_preview_panel",
+			"bind": "_bind_panel",
+			"light": "_light_panel",
+			"info": "_info_panel",
+		}
+		for name, attr_prefix in panel_attrs.items():
+			state = settings.panel_states.get(name)
+			if state is not None:
+				setattr(self, f"{attr_prefix}_open", state.open)
+				setattr(self, f"{attr_prefix}_pos", (state.x, state.y))
+
 		if settings.last_folder and Path(settings.last_folder).is_dir():
 			self.explorer._navigate_to(Path(settings.last_folder))
 			if settings.last_bnp and Path(settings.last_bnp).is_file():
@@ -590,6 +622,7 @@ class ShapeIOMixin:
 				# name as "not found" forever, so _reapply_all_materials()
 				# alone would just keep re-serving those same stale misses.
 				self._texture_cache.clear()
+				self._resolved_texture_ref_cache.clear()
 				self._reapply_all_materials()
 				imgui.close_current_popup()
 				self._restore_scan_popup_open = False
@@ -628,6 +661,7 @@ class ShapeIOMixin:
 		self._cube_texture_cache = {}
 		self._texture_freshness_mtimes = {}
 		self._preview_texture_refs = {}
+		self._resolved_texture_ref_cache = {}
 		# Same reasoning as _texture_cache just above -- also keyed by
 		# resolved texture name only.
 		self._panoply_texture_sources = {}

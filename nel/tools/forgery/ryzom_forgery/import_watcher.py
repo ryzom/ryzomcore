@@ -30,7 +30,7 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.duplicate_name_guard import DuplicateNameGuard
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT
 from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, extract_skeleton, find_importer
-from ryzom_forgery.virtual_categories import iter_included_files
+from ryzom_forgery.virtual_categories import find_existing_file, iter_included_files
 
 from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
 
@@ -60,9 +60,15 @@ def sanitize_shape_name(stem: str) -> str:
 
 
 def target_shape_path(workspace_dir: Path, source_path: Path) -> Path:
-	"""Where a source mesh sitting in `<workspace_dir>/imports/` auto-exports
-	to: `<workspace_dir>/shapes/<sanitized name>.shape`."""
-	return workspace_dir / "shapes" / f"{sanitize_shape_name(source_path.stem)}.shape"
+	"""Where a source mesh auto-exports to: wherever a `.shape` of that same
+	name already lives anywhere in the workspace (free placement, see
+	project-todos/forgery/free_placement_migration.md and shape_io.py's own
+	_workspace_shape_save_path(), the same pattern replicated here), or
+	`<workspace_dir>/shapes/<sanitized name>.shape` for a genuinely new one."""
+	name = f"{sanitize_shape_name(source_path.stem)}.shape"
+	exclusion_rules = app_settings.load().exclusion_rules
+	existing = find_existing_file(workspace_dir, name, exclusion_rules)
+	return existing if existing is not None else workspace_dir / "shapes" / name
 
 
 def export_new_shape(source_path: Path, target_path: Path) -> None:
@@ -356,16 +362,19 @@ class ImportWatcher:
 		if extracted is None:
 			return
 		armature_name, skeleton = extracted
-		skel_target = workspace_dir / "skels" / f"{sanitize_shape_name(armature_name)}.skel"
-		if skel_target.exists():
-			return
-		try:
-			skel_target.parent.mkdir(parents=True, exist_ok=True)
-			save_shape(skel_target, ShapeFile(type_name="SkeletonShape", value=skeleton))
-		except (OSError, ShapeWriteError) as exc:
-			self._report(f"auto-export of skeleton {skel_target.name} failed: {exc}", is_error=True)
-		else:
-			self._report(f"auto-exported skeleton -> {skel_target.name}")
+		skel_name = f"{sanitize_shape_name(armature_name)}.skel"
+		exclusion_rules = app_settings.load().exclusion_rules
+		skel_target = find_existing_file(workspace_dir, skel_name, exclusion_rules)
+		if skel_target is None:
+			skel_target = workspace_dir / "skels" / skel_name
+		if not skel_target.exists():
+			try:
+				skel_target.parent.mkdir(parents=True, exist_ok=True)
+				save_shape(skel_target, ShapeFile(type_name="SkeletonShape", value=skeleton))
+			except (OSError, ShapeWriteError) as exc:
+				self._report(f"auto-export of skeleton {skel_target.name} failed: {exc}", is_error=True)
+			else:
+				self._report(f"auto-exported skeleton -> {skel_target.name}")
 
 	def _backup_and_reexport(self, source_path, target_path):
 		"""Material-count mismatch fallback: rather than an interactive

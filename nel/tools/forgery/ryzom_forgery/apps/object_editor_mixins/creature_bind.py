@@ -37,7 +37,9 @@ from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_build_mesh_skin_state, _build_mrm_skin_state, _build_skin_state, _MeshSkinState, _MrmSkinState,
 	_reskin_mesh_state, _reskin_mrm_state, _reskin_shadow_skin_state, _reskin_state,
 )
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button, _VIEWPORT_TOGGLE_MARGIN_PX
+from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+	_capture_panel_pos, _icon_button, _set_panel_pos, _VIEWPORT_TOGGLE_MARGIN_PX,
+)
 
 _COMPATIBLE_COLOR = (0.35, 0.85, 0.35, 1.0)  # green -- "this .skel matches the loaded shape's bones"
 
@@ -407,7 +409,7 @@ class CreatureBindMixin:
 		win_w, win_h = self._bone_preview_panel_size
 		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
 		y = _VIEWPORT_TOGGLE_MARGIN_PX + 60.0
-		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		_set_panel_pos(self._bone_preview_panel_pos, x, y)
 		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Skinning preview", flags=flags):
 			# Real data first: if the loaded shape's own file name is
@@ -559,6 +561,7 @@ class CreatureBindMixin:
 			if _icon_button(fa_icons.ICON_FA_XMARK, "Unload skeleton/animation, stop preview"):
 				self._unload_bone_preview()
 			self._bone_preview_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+			self._bone_preview_panel_pos = _capture_panel_pos()
 
 	def _ensure_bind_creatures(self):
 		"""Lazily loads the curated creature list + its distilled cache (see
@@ -1216,7 +1219,7 @@ class CreatureBindMixin:
 		win_w, win_h = self._bind_panel_size
 		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
 		y = _VIEWPORT_TOGGLE_MARGIN_PX + 120.0
-		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		_set_panel_pos(self._bind_panel_pos, x, y)
 		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Bind preview", flags=flags):
 			if self._bind_cache_rebuild is not None and not self._bind_cache_rebuild["done"]:
@@ -1339,3 +1342,4 @@ class CreatureBindMixin:
 				self._rebuild_assembled_creature()
 
 			self._bind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+			self._bind_panel_pos = _capture_panel_pos()

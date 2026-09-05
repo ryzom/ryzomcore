@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-09-05 — ✨ Free workspace placement for textures/skel/anim + panel state/Info panel + settings.toml load cache, Forgery 3.1.9
+
+Two chantiers closed together (`project-todos/forgery/free_placement_migration.md` and
+`project-todos/forgery/panel_improvements.md`), plus a performance fix found while
+testing the first one.
+
+**Free placement migration**: Patina's workspace model moved some time ago from fixed
+subfolders (`tex/`, `shapes/`, `skels/`, `anims/`) to a free-placement model where a file
+can live anywhere in the workspace, classified by extension/name (`virtual_categories.py`).
+That migration was never finished for textures or `.shape`/`.skel`/`.anim` auto-export
+targets -- several places still assumed a file of a given type had to live in its
+canonical folder. Found 2026-09-05: a texture placed outside `tex/` showed up in the
+Explorer but wasn't recognized as "in the workspace" and couldn't be assigned to a
+material. Fixed by reusing the pattern `shape_io.py::_workspace_shape_save_path()`
+(the Save button) already used -- `virtual_categories.find_existing_file()`, searching
+the whole workspace by name before falling back to the canonical subfolder for a
+genuinely new file -- in `texture_widgets.py` (`_workspace_texture_names()`,
+`_is_texture_in_workspace()`) and `import_watcher.py` (`target_shape_path()`,
+`_maybe_export_skeleton()`'s `.skel` target). Panoply masks deliberately stay
+fixed-folder (`masks/`), out of scope for this migration -- their bake pipeline has a
+stricter structural reason to keep a dedicated folder.
+
+**Panel state + Info panel** (`settings.py`'s new `PanelState`/`Settings.panel_states`):
+every floating viewport panel (Wind, Skinning preview, Bind preview, Lighting) now
+remembers its open/closed state and on-screen position across launches
+(`ui_helpers.py::_set_panel_pos()`/`_capture_panel_pos()`, wired into each panel's own
+draw function, saved/restored in `shape_io.py`). Also added a new "Shape info" floating
+panel (`viewport_transform.py::_draw_info_panel()`, `shape_geometry.py::shape_stats()`)
+showing triangle/vertex/bone/material/texture counts, bbox size, and file size for the
+loaded shape, toggled from the panel taskbar.
+
+**Performance fix**: testing the free-placement migration surfaced a 60->30fps drop just
+from opening the Materials/Textures tab, scaling with the number of textured materials.
+Root cause: `settings.py::load()` re-parsed the whole `settings.toml` file with
+`tomlkit` (needed to preserve comments/formatting) on every single call, uncached --
+and `texture_widgets.py::_draw_texture_edit_button()` (shown once a texture is
+recognized as already in the workspace, made more common by the migration fix above)
+calls it unconditionally every frame, per material row. Fixed with an mtime-based
+cache in `load()` (kept in sync by `save()` via write-through), returning a deepcopy
+each time so callers that mutate their own result without saving can't leak that
+mutation into other callers sharing the cache. Also added a small per-shape cache
+(`_resolved_texture_ref_cache`) around `texture_widgets.py::_resolve_texture()`
+itself, which was doing a fresh directory scan per call from several UI call sites not
+gated behind a combo/popup.
+
 ## 2026-09-05 — ✨ Skeleton-lines overlay in Skinning preview + extract_skeleton() rest-pose fixes, Forgery 3.1.8
 
 Two chantiers (`project-todos/forgery/skeleton_lines_preview.md`, now closed) plus two

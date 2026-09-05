@@ -753,6 +753,7 @@ class MaterialsMixin:
 			# wrap/filter (see its own docstring) -- only a fresh decode
 			# picks up the new value, so the cache must be dropped first.
 			self._texture_cache.clear()
+			self._resolved_texture_ref_cache.clear()
 			self._reapply_material(material_id)
 
 		imgui.set_next_item_width(180)

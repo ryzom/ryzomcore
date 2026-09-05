@@ -199,6 +199,7 @@ class ObjectEditorApp(
 		# self._panoply_texture_signatures -- see _update_texture_freshness().
 		self._texture_freshness_mtimes = {}
 		self._preview_texture_refs = {}  # texture name -> imgui.ImTextureRef, for thumbnail/tooltip previews in the UI
+		self._resolved_texture_ref_cache = {}  # texture name -> resolve_texture_ref() result, see TextureWidgetsMixin._resolve_texture()
 		self._color_texture_refs = {}  # (r,g,b,a) rounded -> imgui.ImTextureRef, for plain-color material swatches
 
 		# Ctrl+drag (ObjectManipulator) rotates/moves this pivot instead of
@@ -259,6 +260,18 @@ class ObjectEditorApp(
 		self._bone_preview_panel_open = True
 		self._bind_panel_open = True
 		self._light_panel_open = True
+		self._info_panel_open = False
+		# Remembered on-screen position per panel (see settings.py's own
+		# PanelState, panel_improvements.md) -- None until either restored
+		# from a previous session (_restore_session_state()) or captured
+		# once the panel is drawn for the first time this session (each
+		# panel's own _draw_..._controls()).
+		self._wind_panel_pos = None
+		self._bone_preview_panel_pos = None
+		self._bind_panel_pos = None
+		self._light_panel_pos = None
+		self._info_panel_pos = None
+		self._info_panel_size = (10.0, 10.0)
 		self._panel_taskbar_size = (10.0, 10.0)
 		self._rebuild_viewport_helpers(None)
 
@@ -742,6 +755,7 @@ class ObjectEditorApp(
 		self._draw_bone_preview_controls()
 		self._draw_light_controls()
 		self._draw_bind_controls()
+		self._draw_info_panel()
 		self._draw_reference_shapes_toggles()
 		self.export_dialog.draw()
 		self.import_dialog.draw()

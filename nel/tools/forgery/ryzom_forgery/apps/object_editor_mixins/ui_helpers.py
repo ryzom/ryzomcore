@@ -116,6 +116,25 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 	return clicked
 
 
+def _set_panel_pos(saved_pos, default_x, default_y):
+	"""Positions the NEXT floating panel window -- restored `saved_pos`
+	(an (x, y) tuple, see settings.py's PanelState/panel_improvements.md)
+	if there is one, else `(default_x, default_y)`. Always `Cond_.once`
+	(not `Cond_.always`) either way, so a drag mid-session still sticks
+	for the rest of that session, same as before this restore existed."""
+	x, y = saved_pos if saved_pos is not None else (default_x, default_y)
+	imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+
+
+def _capture_panel_pos():
+	"""Reads the CURRENT floating panel's on-screen position -- call once
+	per frame it's drawn, right before imgui_ctx.begin()'s `with` block
+	ends, and stash the result (e.g. self._wind_panel_pos = ...) so
+	_save_session_state() can persist it (see _set_panel_pos())."""
+	pos = imgui.get_window_pos()
+	return (pos.x, pos.y)
+
+
 def _colored_button(label, color):
 	"""A plain text button (unlike _icon_button above) tinted `color`, with
 	lighter/darker hover/active variants derived from it -- see

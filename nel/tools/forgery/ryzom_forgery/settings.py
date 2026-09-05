@@ -12,6 +12,7 @@ from (shapes' textures, .skel/.anim compatibility, panoply) -- see
 search_paths_dialog.py.
 """
 
+import copy
 from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional
 
@@ -61,6 +62,18 @@ def _default_exclusion_rules() -> List[ExclusionRule]:
 		ExclusionRule(pattern="exports", kind=EXCLUSION_KIND_FOLDER),
 		ExclusionRule(pattern="build", kind=EXCLUSION_KIND_FOLDER),
 	]
+
+
+@dataclass
+class PanelState:
+	"""One floating ImGui panel's remembered state (see
+	object_editor_mixins/viewport_transform.py's own panel taskbar, and
+	panel_improvements.md) -- open/closed plus its last on-screen position,
+	restored at the next launch instead of always resetting to that
+	panel's own hardcoded default spot."""
+	open: bool
+	x: float
+	y: float
 
 
 @dataclass
@@ -147,14 +160,47 @@ class Settings:
 	# when possible -- see live_data_setup_dialog.py -- None until then or
 	# until the user sets/confirms it.
 	live_data_path: Optional[str] = None
+	# Remembered open/closed + on-screen position of each floating panel
+	# (see PanelState's own docstring, panel_improvements.md) -- keyed by a
+	# short panel id ("wind"/"bone_preview"/"bind"/"light"/"info"). A panel
+	# absent from this dict just uses its own hardcoded first-launch default
+	# spot, same as before this field existed.
+	panel_states: Dict[str, PanelState] = field(default_factory=dict)
+
+
+_load_cache: Optional[Settings] = None
+_load_cache_mtime: Optional[float] = None
 
 
 def load() -> Settings:
+	"""Cached by the settings file's own mtime (checked via a cheap stat()
+	call) -- tomlkit.parse() (needed to preserve comments/formatting for
+	hand-editing, see this module's docstring) is slow enough that calling
+	this uncached from a hot per-frame UI path (e.g. a texture row's Edit
+	button, drawn once per material every frame) measurably cost several
+	ms per call, per texture, found 2026-09-05 chasing a 60->30fps drop on
+	the Textures/Materials tabs. save() below keeps this cache in sync
+	directly (write-through) instead of relying on the stat() mtime alone,
+	since two saves within the same filesystem mtime tick would otherwise
+	serve the first save's stale content back. Returns a deepcopy of the
+	cached instance either way (cache hit or miss) -- callers that mutate
+	their own `load()` result without calling save() (there are some,
+	e.g. one-off in-memory tweaks) must not see that mutation leak into
+	every other caller sharing the same cached object."""
+	global _load_cache, _load_cache_mtime
 	path = config_dir() / _SETTINGS_FILE_NAME
+	try:
+		mtime = path.stat().st_mtime
+	except OSError:
+		mtime = None
+	if _load_cache is not None and mtime == _load_cache_mtime:
+		return copy.deepcopy(_load_cache)
 	try:
 		data = tomlkit.parse(path.read_text())
 	except (OSError, tomlkit.exceptions.TOMLKitError):
-		return Settings()
+		_load_cache = Settings()
+		_load_cache_mtime = mtime
+		return _load_cache
 
 	settings = Settings()
 	settings.explorer_favorites = list(data.get("explorer_favorites", []))
@@ -176,6 +222,10 @@ def load() -> Settings:
 	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
 	settings.dpi_scale = data.get("dpi_scale") or settings.dpi_scale
 	settings.live_data_path = data.get("live_data_path") or None
+	settings.panel_states = {
+		str(name): PanelState(open=bool(entry.get("open", False)), x=float(entry.get("x", 0.0)), y=float(entry.get("y", 0.0)))
+		for name, entry in data.get("panel_states", {}).items() if isinstance(entry, dict)
+	}
 
 	settings.search_paths = [
 		SearchPathDir(path=entry["path"], recursive=bool(entry.get("recursive", False)))
@@ -195,7 +245,9 @@ def load() -> Settings:
 	# holds _default_exclusion_rules() from the Settings() constructor
 	# above, nothing to do.
 
-	return settings
+	_load_cache = settings
+	_load_cache_mtime = mtime
+	return copy.deepcopy(settings)
 
 
 def save(settings: Settings) -> None:
@@ -232,10 +284,19 @@ def save(settings: Settings) -> None:
 	doc["dpi_scale"] = settings.dpi_scale
 	if settings.live_data_path is not None:
 		doc["live_data_path"] = settings.live_data_path
+	doc["panel_states"] = {name: asdict(state) for name, state in settings.panel_states.items()}
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]
 
 	directory = config_dir()
 	directory.mkdir(parents=True, exist_ok=True)
-	(directory / _SETTINGS_FILE_NAME).write_text(tomlkit.dumps(doc))
+	dest = directory / _SETTINGS_FILE_NAME
+	dest.write_text(tomlkit.dumps(doc))
+
+	global _load_cache, _load_cache_mtime
+	_load_cache = copy.deepcopy(settings)
+	try:
+		_load_cache_mtime = dest.stat().st_mtime
+	except OSError:
+		_load_cache_mtime = None

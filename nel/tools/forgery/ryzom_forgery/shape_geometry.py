@@ -392,6 +392,69 @@ def shape_bbox(shape_value):
 	return None
 
 
+def shape_stats(shape_value, materials=None, source_path=None) -> dict:
+	"""Summary numbers for the Info panel (panel_improvements.md) -- a plain
+	dict rather than a dataclass, since this is display-only, never fed
+	back into anything else. `materials`/`source_path` are optional (the
+	caller's own `shape_file.materials`/on-disk path, when known) -- their
+	corresponding keys are omitted rather than guessed when not given.
+
+	Triangle/vertex counts are deduplicated by `id(vertex_buffer)`, same
+	technique `shape_export.py::_export_obj()` already uses for a shape
+	whose passes share the same underlying buffer (a Mesh's matrix blocks,
+	a MeshMRM's finest LOD) -- otherwise a shared buffer's own vertices
+	would be counted once per pass that renders from it."""
+	stats: dict = {"type": type(shape_value).__name__}
+
+	geom = shape_geom(shape_value)
+	if isinstance(shape_value, MeshMultiLod):
+		stats["lods"] = len(shape_value.slots)
+	elif geom is not None and hasattr(geom, "lods"):
+		stats["lods"] = len(geom.lods)
+	else:
+		stats["lods"] = 1
+	if geom is not None:
+		stats["bones"] = len(geom.bones_name)
+
+	triangle_count = 0
+	seen_buffers: dict = {}
+	material_ids_used = set()
+	for vertex_buffer, material_id, indices in iter_render_passes(shape_value):
+		if not indices:
+			continue
+		triangle_count += len(indices) // 3
+		material_ids_used.add(material_id)
+		key = id(vertex_buffer)
+		if key not in seen_buffers:
+			positions = vertex_buffer.channels.get("Position")
+			seen_buffers[key] = len(positions) if positions else 0
+	stats["triangles"] = triangle_count
+	stats["vertices"] = sum(seen_buffers.values())
+	stats["materials"] = len(material_ids_used)
+
+	if materials:
+		texture_names = set()
+		for material_id in material_ids_used:
+			if material_id >= len(materials):
+				continue
+			material = materials[material_id]
+			if material.textures and material.textures[0] and material.textures[0].file_name:
+				texture_names.add(material.textures[0].file_name)
+		stats["textures"] = len(texture_names)
+
+	bbox = shape_bbox(shape_value)
+	if bbox is not None:
+		stats["bbox_size"] = (bbox.half_size.x * 2.0, bbox.half_size.y * 2.0, bbox.half_size.z * 2.0)
+
+	if source_path is not None:
+		try:
+			stats["file_size_bytes"] = Path(source_path).stat().st_size
+		except OSError:
+			pass
+
+	return stats
+
+
 def boundary_edges(indices):
 	"""Edges belonging to exactly one triangle in `indices` -- the open border
 	of the mesh those triangles form."""

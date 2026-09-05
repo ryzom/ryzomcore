@@ -19,7 +19,7 @@ from panda3d.core import ClockObject, GeomNode, InternalName, NodePath, Point3, 
 
 from pynel.ryzom_shape import Mesh, MeshMRMSkinned, WindTreeParams
 
-from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
+from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom, shape_stats
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_grid_geom,
 	_build_shadow_skin_ground_node, _build_shadow_skin_vdata, _build_sun_globe_geom, _build_vertex_data,
@@ -30,7 +30,7 @@ from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_build_mesh_skin_state, _build_shadow_skin_preview_state, _build_skin_state, _build_wind_state,
 )
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
-	_icon_button, _OBJECT_TRANSPARENCY_ALPHA, _VIEWPORT_TOGGLE_MARGIN_PX,
+	_capture_panel_pos, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _set_panel_pos, _VIEWPORT_TOGGLE_MARGIN_PX,
 )
 
 _LOCKED_COLOR = (0.45, 0.45, 0.45, 0.8)  # grey -- "on" highlight for a lock toggle specifically
@@ -258,7 +258,7 @@ class ViewportTransformMixin:
 		win_w, win_h = self._wind_panel_size
 		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
 		y = _VIEWPORT_TOGGLE_MARGIN_PX
-		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		_set_panel_pos(self._wind_panel_pos, x, y)
 		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Wind preview", flags=flags):
 			_, self._wind_animate = imgui.checkbox("Animate", self._wind_animate)
@@ -267,6 +267,7 @@ class ViewportTransformMixin:
 			imgui.set_next_item_width(160)
 			_, self._wind_direction_deg = imgui.slider_float("Direction", self._wind_direction_deg, 0.0, 360.0, "%.0f deg")
 			self._wind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+			self._wind_panel_pos = _capture_panel_pos()
 
 	def _apply_light_settings(self):
 		"""Pushes the current Ambient/Sun settings (see
@@ -336,7 +337,7 @@ class ViewportTransformMixin:
 		win_w, win_h = self._light_panel_size
 		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
 		y = _VIEWPORT_TOGGLE_MARGIN_PX + 220.0
-		imgui.set_next_window_pos((x, y), imgui.Cond_.once.value)
+		_set_panel_pos(self._light_panel_pos, x, y)
 		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
 		with imgui_ctx.begin("Lighting", flags=flags):
 			imgui.text("Ambient")
@@ -367,6 +368,49 @@ class ViewportTransformMixin:
 			if changed_a or changed_b or changed_c or changed_d or changed_e or changed_f:
 				self._apply_light_settings()
 			self._light_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+			self._light_panel_pos = _capture_panel_pos()
+
+	def _draw_info_panel(self):
+		"""Floating "Shape info" panel (panel_improvements.md) -- read-only
+		summary stats (shape_geometry.shape_stats()) about the currently
+		loaded shape, recomputed fresh every frame it's open (no caching --
+		a loaded shape doesn't change often enough for this to matter).
+		Toggled from the taskbar (see _draw_panel_taskbar()), force-closed
+		the moment no shape is loaded, same "applicable or not" convention
+		as the other floating panels."""
+		if self.shape_file is None:
+			self._info_panel_open = False
+			return
+		if not self._info_panel_open:
+			return
+
+		materials = getattr(self.shape_file.value, "materials", None)
+		source_path = self._shape_source_path if self._shape_source_path is not None else None
+		stats = shape_stats(self.shape_file.value, materials, source_path)
+
+		display_width = imgui.get_io().display_size.x
+		taskbar_w = self._panel_taskbar_size[0]
+		win_w, win_h = self._info_panel_size
+		x = display_width - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX * 2 - taskbar_w - win_w
+		y = _VIEWPORT_TOGGLE_MARGIN_PX + 280.0
+		_set_panel_pos(self._info_panel_pos, x, y)
+		flags = imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.always_auto_resize.value
+		with imgui_ctx.begin("Shape info", flags=flags):
+			imgui.text(f"Type: {stats['type']}")
+			imgui.text(f"Triangles: {stats['triangles']}")
+			imgui.text(f"Vertices: {stats['vertices']}")
+			imgui.text(f"LODs: {stats['lods']}")
+			imgui.text(f"Bones: {stats.get('bones', 0)}")
+			imgui.text(f"Materials: {stats['materials']}")
+			if "textures" in stats:
+				imgui.text(f"Textures: {stats['textures']}")
+			if "bbox_size" in stats:
+				sx, sy, sz = stats["bbox_size"]
+				imgui.text(f"Bbox size: {sx:.2f} x {sy:.2f} x {sz:.2f} m")
+			if "file_size_bytes" in stats:
+				imgui.text(f"File size: {stats['file_size_bytes'] / 1024:.1f} KB")
+			self._info_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+			self._info_panel_pos = _capture_panel_pos()
 
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport (same
@@ -454,6 +498,9 @@ class ViewportTransformMixin:
 			if _icon_button(fa_icons.ICON_FA_SUN, "Lighting", self._light_panel_open,
 			                square=True, large_font=large_font):
 				self._light_panel_open = not self._light_panel_open
+			if _icon_button(fa_icons.ICON_FA_CIRCLE_INFO, "Shape info", self._info_panel_open,
+			                square=True, large_font=large_font, disabled=self.shape_file is None):
+				self._info_panel_open = not self._info_panel_open
 			self._panel_taskbar_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _transform_node(self, prop):

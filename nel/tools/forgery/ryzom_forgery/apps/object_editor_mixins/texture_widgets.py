@@ -20,6 +20,7 @@ from panda3d.core import PNMImage, Texture as PandaTexture
 from pynel.ryzom_shape import Rgba
 
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery import virtual_categories
 from ryzom_forgery.shape_geometry import (
 	load_panda_texture, resolve_texture_ref, rgba_to_color, solid_color_texture, texture_to_pnm_image,
 )
@@ -564,25 +565,51 @@ class TextureWidgetsMixin:
 	def _resolve_texture(self, file_name):
 		"""resolve_texture_ref(), pre-bound to this shape's own
 		_texture_search_dirs/finder -- the same lookup the viewport itself
-		uses to display a texture."""
+		uses to display a texture. Cached by name (self._resolved_texture_ref_cache,
+		cleared alongside self._texture_cache -- see its own call sites):
+		this is called several times per texture per UI frame (preview
+		button, workspace-border check, reveal-in-file-manager, tooltip
+		path) by widgets that aren't gated behind a combo/popup, and
+		resolve_texture_ref()'s own local-folder fallback does a fresh
+		Path.iterdir() disk scan on every call otherwise -- with it
+		uncached, a shape with just 1-2 textures set was measurably
+		costing 15-20fps just from having its Materials/Textures tab open."""
 		if not file_name:
 			return None
-		return resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+		if file_name in self._resolved_texture_ref_cache:
+			return self._resolved_texture_ref_cache[file_name]
+		ref = resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+		self._resolved_texture_ref_cache[file_name] = ref
+		return ref
 
 	def _workspace_texture_names(self, subdir="tex"):
-		"""Sorted list of texture file names sitting in the active
-		workspace's `subdir` folder (default "tex") -- rescanned fresh on
-		every call (a single Path.iterdir(), cheap enough to just always
-		redo rather than cache/invalidate) so _draw_texture_name_combo()
-		always shows what's actually on disk the moment its dropdown opens."""
+		"""Sorted list of texture file names available in the active
+		workspace -- for `subdir="tex"` (real material textures), this is
+		now every texture ANYWHERE in the workspace (free-placement model,
+		see virtual_categories.py and project-todos/forgery/
+		free_placement_migration.md), not just its `tex/` folder specifically
+		-- a texture the user organized into some other subfolder is still
+		pickable. `subdir="masks"` (Panoply) deliberately keeps the OLD
+		fixed-folder behavior instead (masks stay out of this migration,
+		Nuno 2026-09-05: "non, masks/ reste fixe" -- its bake pipeline has a
+		stricter structural reason to keep a dedicated folder).
+
+		Rescanned fresh on every call (cheap enough to just always redo
+		rather than cache/invalidate) so _draw_texture_name_combo() always
+		shows what's actually on disk the moment its dropdown opens."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		if workspace_dir is None:
 			return []
-		try:
-			entries = list((workspace_dir / subdir).iterdir())
-		except OSError:
-			return []
-		return sorted(entry.name for entry in entries if entry.suffix.lower() in _WORKSPACE_TEXTURE_EXTENSIONS)
+		if subdir != "tex":
+			try:
+				entries = list((workspace_dir / subdir).iterdir())
+			except OSError:
+				return []
+			return sorted(entry.name for entry in entries if entry.suffix.lower() in _WORKSPACE_TEXTURE_EXTENSIONS)
+
+		exclusion_rules = app_settings.load().exclusion_rules
+		buckets = virtual_categories.scan_workspace(workspace_dir, exclusion_rules)
+		return sorted({path.name for path in buckets[virtual_categories.CATEGORY_TEXTURES]})
 
 	def _draw_texture_name_combo(self, imgui_id, current_value):
 		"""Combo box listing the active workspace's tex/ textures (see
@@ -632,13 +659,26 @@ class TextureWidgetsMixin:
 
 	def _is_texture_in_workspace(self, file_name, subdir="tex"):
 		"""True if `file_name` currently resolves to a file already sitting
-		in the active workspace's own `subdir` folder -- used to color-code
-		texture references in the UI (see _draw_texture_copy_button())."""
+		somewhere in the active workspace -- used to color-code texture
+		references in the UI (see _draw_texture_copy_button()). For
+		`subdir="tex"`, "somewhere" means ANYWHERE in the workspace (free
+		placement, see _workspace_texture_names()'s own docstring) -- for
+		`subdir="masks"` it's still specifically `workspace_dir/masks/`
+		(unchanged, masks stay fixed-folder)."""
 		ref = self._resolve_texture(file_name)
 		if ref is None or ref.fs_path is None:
 			return False
-		dest = self._texture_copy_destination(ref, subdir)
-		return dest is not None and ref.fs_path.resolve() == dest.resolve()
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return False
+		if subdir != "tex":
+			dest = self._texture_copy_destination(ref, subdir)
+			return dest is not None and ref.fs_path.resolve() == dest.resolve()
+		try:
+			ref.fs_path.resolve().relative_to(workspace_dir)
+		except ValueError:
+			return False
+		return True
 
 	def _copy_texture_to_workspace(self, file_name, subdir="tex"):
 		"""Resolves `file_name` (absolute path or bare name alike) and
