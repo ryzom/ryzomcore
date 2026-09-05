@@ -50,7 +50,12 @@ dans `others`.
  parcourus) ; `None` si aucun, le plus récemment modifié en cas de vrais
  doublons. Utilisé par `apps/object_editor.py`'s
  `_workspace_shape_save_path()` pour cibler l'écrasement où que vive
- déjà le fichier, plutôt que toujours `shapes/<nom>`.
+ déjà le fichier, plutôt que toujours `shapes/<nom>`. **Robuste à un
+ fichier qui disparaît entre le scan et le `stat()`** (trouvé 2026-09-05 :
+ supprimer le shape actuellement chargé faisait planter `_draw_bottom_bar()`
+ en boucle, `FileNotFoundError` sur un candidat déjà retiré du disque) --
+ un candidat dont le `stat()` échoue est simplement ignoré, pas traité
+ comme une erreur.
 - `_iter_included_files(workspace_root, exclusion_rules)`
  (`virtual_categories.py`) — le générateur `os.walk`-based partagé par
  `scan_workspace`/`find_existing_file`, seul endroit qui élague

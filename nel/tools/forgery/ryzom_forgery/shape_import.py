@@ -16,6 +16,7 @@ enough formats that hand-parsing isn't worth it once a real importer library
 is already a dependency.
 """
 
+import bisect
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -269,12 +270,14 @@ def _assemble_mesh(
 		texcoords: List[Tuple[float, float]], materials: List[Material], rdr_passes: Optional[List[RdrPass]] = None,
 		matrix_blocks: Optional[List[MatrixBlock]] = None, bones_name: Optional[List[str]] = None,
 		skin_weights: Optional[Tuple[
-			List[Tuple[float, float, float, float]], List[Tuple[int, int, int, int]]]] = None) -> Mesh:
+			List[Tuple[float, float, float, float]], List[Tuple[int, int, int, int]]]] = None,
+		flip_v: bool = True) -> Mesh:
 	"""Shared final assembly step for every importer, from already-built
 	vertex channels: an unskinned, single-matrix-block CMesh by default
 	(`rdr_passes`), or -- when `matrix_blocks`/`bones_name`/`skin_weights` are
 	given instead (see _build_skinned_matrix_blocks()) -- a skinned CMesh
-	using those pre-built, possibly multiple, matrix blocks."""
+	using those pre-built, possibly multiple, matrix blocks. `flip_v`: see
+	the TexCoord0 block below -- False for glTF/glb specifically."""
 	channels = {"Position": positions}
 	types = [0] * 16
 	types[0] = 7  # Position: float3
@@ -300,7 +303,16 @@ def _assemble_mesh(
 		# this mesh came from an import; wrong once reloaded as a plain
 		# .shape, and wrong in the real engine too, which has no such
 		# per-file memory).
-		channels["TexCoord0"] = [(u, 1.0 - v) for u, v in texcoords]
+		#
+		# glTF is the one exception (`flip_v=False`, see _import_via_assimp()):
+		# its spec mandates V=0 at the TOP (matching NeL's own convention
+		# already, unlike every other format here) -- assimp-py's own glTF
+		# reader returns it as-is, unflipped, verified 2026-09-05 by
+		# comparing a .dae/.fbx/.glb export of the same shape reimported
+		# back: dae/fbx agreed on V, glb's V was their exact `1-v` mirror
+		# until this exception was added (Nuno: "les textures sont de
+		# nouveau en miroir horizontal" reimporting a Forgery-exported .glb).
+		channels["TexCoord0"] = [(u, 1.0 - v if flip_v else v) for u, v in texcoords]
 		types[2] = 4  # TexCoord0: float2
 
 	vertex_buffer = VertexBuffer(
@@ -376,6 +388,9 @@ def build_mesh(obj_mesh: ObjMesh, mtl_materials: Dict[str, MtlMaterial], base_di
 	materials = [material_for(name) for name in material_order]
 	rdr_passes = [RdrPass(material_id=material_ids[name], indices=pass_indices[material_ids[name]])
 	              for name in material_order]
+	positions = [_yup_to_zup(p) for p in positions]
+	if normals:
+		normals = [_yup_to_zup(n) for n in normals]
 	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes)
 
 
@@ -438,6 +453,19 @@ def import_obj(path: Path) -> Mesh:
 # mirrors it verbatim) -- this is used as _iter_mesh_instances()'s starting
 # "parent" transform, so it composes through the whole node walk for free.
 _YUP_TO_ZUP_MATRIX = ((1.0, 0.0, 0.0, 0.0), (0.0, 0.0, -1.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+
+
+def _yup_to_zup(v):
+	"""Same conversion as _YUP_TO_ZUP_MATRIX above, applied directly to a
+	plain (x, y, z) vector -- for import_obj()/build_mesh(), which has no
+	node hierarchy to seed a matrix walk with (unlike _iter_mesh_instances(),
+	used for .dae/.fbx/.gltf): .obj has no up-axis metadata at all, same
+	de facto Y-up convention as every format here (see shape_export.py's own
+	_zup_to_yup(), this function's exact inverse) -- never converted on
+	import before (found 2026-09-05, Nuno: "obj -> shape : pas bon, Y-Up",
+	once _export_obj() started correctly writing real Y-up .obj files)."""
+	x, y, z = v
+	return (x, -z, y)
 
 
 def _mat_mul_mat(a, b):
@@ -561,6 +589,13 @@ def _mesh_bones(mesh) -> Optional[List[List[Tuple[str, float]]]]:
 	num_vertices = len(mesh.vertices) // 3
 	per_vertex: List[List[Tuple[str, float]]] = [[] for _ in range(num_vertices)]
 	for bone in mesh.bones:
+		if not bone.vertex_ids or not bone.weights:
+			# A bone listed in the skeleton/deformer with zero actual vertex
+			# influence -- assimp_py.Bone.vertex_ids/weights come back None
+			# for one instead of empty memoryviews (found 2026-09-05
+			# reimporting a shape_export.py-produced .fbx, see
+			# mesh_skel_anim_io.md). Nothing to add for it.
+			continue
 		for vertex_id, weight in zip(bone.vertex_ids, bone.weights):
 			per_vertex[vertex_id].append((bone.name, weight))
 	return per_vertex
@@ -819,6 +854,7 @@ def _import_via_assimp(path: Path) -> Mesh:
 		raise ShapeImportError(f"no vertices found in {path}")
 
 	materials = [_build_material_from_assimp_material(scene.materials[mid], path.parent) for mid in material_order]
+	flip_v = path.suffix.lower() not in (".gltf", ".glb")
 
 	if has_bones:
 		bones_name, weights, matrix_ids = _normalize_skin_weights(bone_weights)
@@ -833,10 +869,10 @@ def _import_via_assimp(path: Path) -> Mesh:
 				texcoords.append(texcoords[v])
 		return _assemble_mesh(
 			positions, normals, texcoords, materials, matrix_blocks=matrix_blocks,
-			bones_name=bones_name, skin_weights=(weight_channel, palette_channel))
+			bones_name=bones_name, skin_weights=(weight_channel, palette_channel), flip_v=flip_v)
 
 	rdr_passes = [RdrPass(material_id=i, indices=pass_indices[mid]) for i, mid in enumerate(material_order)]
-	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes)
+	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes, flip_v=flip_v)
 
 
 # ---------------------------------------------------------------------------
@@ -901,25 +937,27 @@ def _decompose_matrix(m) -> Tuple[Vector3, Quaternion, Vector3]:
 	return translation, _matrix_to_quat(rot), Vector3(*scales)
 
 
-def _subtree_has_name(node, names) -> bool:
-	if node.name in names:
-		return True
-	return any(_subtree_has_name(child, names) for child in node.children)
+def _find_armature_root(node, bone_names, parent=None):
+	"""Depth-first, pre-order search for the armature root -- the PARENT of
+	the first real bone node encountered (bone identity comes from
+	`bone_names`, itself derived from `mesh.bones`, so this is accurate
+	regardless of what any node in the hierarchy happens to be named).
 
-
-def _find_armature_root(node, file_stem_lower: str, bone_names):
-	"""Depth-first, pre-order search for the first node (see skel_export.md's
-	own selection rule) whose name contains `file_stem_lower` (case-
-	insensitive) but not "__skip__", and whose subtree contains at least one
-	real bone name -- returns that node, or None. No transform tracking here
-	(unlike an earlier version of this function): the node hierarchy is only
-	ever used to find bone names/parentage now, never for transform math --
-	see extract_skeleton()'s own docstring on why."""
-	name_lower = node.name.lower()
-	if file_stem_lower in name_lower and "__skip__" not in name_lower and _subtree_has_name(node, bone_names):
-		return node
+	Replaces an earlier version that instead required the wrapper node's own
+	name to *contain the source file's name* -- worked for an authored file
+	whose armature happens to be named after the character (e.g.
+	"Spider_Armature" in `spider.dae`), but broke silently reimporting
+	Forgery's own exports: `shape_export.py`'s own exporter always names
+	that wrapper node literally "Armature", which never contains the file's
+	name (found 2026-09-05, Nuno: "l'armature peut avoir n'importe quel nom,
+	nan?" -- correct, there is no naming convention to rely on at all, from
+	any tool). No transform tracking here: the node hierarchy is only ever
+	used to find bone names/parentage, never for transform math -- see
+	extract_skeleton()'s own docstring on why."""
+	if node.name in bone_names:
+		return parent
 	for child in node.children:
-		found = _find_armature_root(child, file_stem_lower, bone_names)
+		found = _find_armature_root(child, bone_names, node)
 		if found is not None:
 			return found
 	return None
@@ -951,10 +989,9 @@ def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
 	"""Builds a brand new `SkeletonShape` from `path`'s own bone hierarchy (a
 	fresh starter skeleton, not a replacement for one already paired to this
 	kind of asset -- see this module's docstring), or `None` when there's
-	nothing to build one from: `.obj` (no bones concept at all), no bones in
-	any mesh, or no armature-root candidate found (see skel_export.md's
-	selection rule -- a node whose name matches `path`'s own stem, isn't
-	`__skip__`-excluded, and whose subtree actually uses a real bone name).
+	nothing to build one from: `.obj` (no bones concept at all), or no bones
+	in any mesh (see `_find_armature_root()` for how the armature wrapper
+	node is found -- purely structural, no naming convention assumed).
 	Reparses `path` independently of _import_via_assimp() (accepted, simple,
 	if wasteful for now -- see skel_export.md's transparency note).
 
@@ -1022,7 +1059,7 @@ def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
 	if not bone_names:
 		return None
 
-	armature_node = _find_armature_root(scene.root_node, path.stem.lower(), bone_names)
+	armature_node = _find_armature_root(scene.root_node, bone_names)
 	if armature_node is None:
 		return None
 
@@ -1077,6 +1114,254 @@ def extract_skeleton(path: Path) -> Optional[Tuple[str, SkeletonShape]]:
 
 	lods = [SkeletonLod(distance=0.0, active_bones=[0xFF] * len(bones))]
 	return armature_node.name, SkeletonShape(bones=bones, bone_map=dict(bone_index), lods=lods)
+
+
+# ---------------------------------------------------------------------------
+# .anim extraction (see project-todos/pynel/anim_write.md and
+# project-todos/forgery/mesh_skel_anim_io.md's item 4/5)
+# ---------------------------------------------------------------------------
+
+_ANIM_SAMPLE_RATE = 30.0  # matches anim_write.md's own CAnimationOptimizer-derived constant
+
+
+def _sample_flat_channel(times, values, num_components: int, t: float):
+	"""Linearly interpolates a flat, `num_components`-wide channel (assimp's
+	own NodeAnimTrack position_keys/scaling_keys layout) at tick time `t`.
+	Clamps to the first/last key outside the track's own range. None if the
+	channel is empty."""
+	n = len(times)
+	if n == 0:
+		return None
+	if n == 1 or t <= times[0]:
+		return values[0:num_components]
+	if t >= times[-1]:
+		return values[(n - 1) * num_components:n * num_components]
+	idx = bisect.bisect_right(times, t) - 1
+	idx = max(0, min(idx, n - 2))
+	t0, t1 = times[idx], times[idx + 1]
+	frac = 0.0 if t1 <= t0 else (t - t0) / (t1 - t0)
+	a = values[idx * num_components:(idx + 1) * num_components]
+	b = values[(idx + 1) * num_components:(idx + 2) * num_components]
+	return [a[i] + (b[i] - a[i]) * frac for i in range(num_components)]
+
+
+def _sample_quat_channel(times, values, t: float):
+	"""Same idea as _sample_flat_channel() for a 4-wide (w,x,y,z, assimp's
+	own NodeAnimTrack.rotation_keys convention) quaternion channel --
+	component-wise lerp + renormalize ("nlerp") rather than a full slerp:
+	a documented simplification, acceptable for the animation-authoring
+	rates real content uses (adjacent keys close in angle) -- true slerp
+	would also need the same hemisphere-continuity care pynel.
+	ryzom_animation._sample_track() applies on the write side (see
+	project-todos/pynel/anim_write.md) if this ever needs upgrading."""
+	sample = _sample_flat_channel(times, values, 4, t)
+	if sample is None:
+		return None
+	w, x, y, z = sample
+	length = (w * w + x * x + y * y + z * z) ** 0.5
+	if length <= 0:
+		return (1.0, 0.0, 0.0, 0.0)
+	return (w / length, x / length, y / length, z / length)
+
+
+def _compose_trs(pos: Vector3, quat: Quaternion, scale: Vector3):
+	"""Inverse of _decompose_matrix(): a row-major 4x4 (translation in the
+	last column, each rotation column pre-scaled) -- same convention
+	_decompose_matrix() itself expects, so a round-trip is exact modulo
+	floating point. Reuses pynel.ryzom_animation._mat_rotate() (already
+	proven, see evaluate_all_bone_world_matrices()) for the quaternion ->
+	rotation-matrix step rather than re-deriving those formulas."""
+	from pynel.ryzom_animation import _mat_rotate
+	rot = _mat_rotate(quat)
+	return (
+		(rot[0][0] * scale.x, rot[0][1] * scale.y, rot[0][2] * scale.z, pos.x),
+		(rot[1][0] * scale.x, rot[1][1] * scale.y, rot[1][2] * scale.z, pos.y),
+		(rot[2][0] * scale.x, rot[2][1] * scale.y, rot[2][2] * scale.z, pos.z),
+		(0.0, 0.0, 0.0, 1.0),
+	)
+
+
+def _node_local_matrix_at(node, track, time_ticks: float):
+	"""The local (parent-relative) transform of `node` at `time_ticks` --
+	`node.transformation` (its static/bind transform) unless `track` (an
+	assimp_py.NodeAnimTrack, or None) has a channel for a given component,
+	in which case that channel is sampled instead. A channel `track` doesn't
+	carry at all (e.g. a track with only rotation keys) falls back to that
+	same component of the node's own static transform, decomposed --
+	matches how a partially-animated node behaves in the source tool (only
+	the animated channels move)."""
+	if track is None:
+		return node.transformation
+	pos = _sample_flat_channel(list(track.position_times), list(track.position_keys), 3, time_ticks) if track.position_times else None
+	rot = _sample_quat_channel(list(track.rotation_times), list(track.rotation_keys), time_ticks) if track.rotation_times else None
+	scale = _sample_flat_channel(list(track.scaling_times), list(track.scaling_keys), 3, time_ticks) if track.scaling_times else None
+	if pos is None or rot is None or scale is None:
+		base_pos, base_rot, base_scale = _decompose_matrix(node.transformation)
+		if pos is None:
+			pos = (base_pos.x, base_pos.y, base_pos.z)
+		if rot is None:
+			rot = (base_rot.w, base_rot.x, base_rot.y, base_rot.z)
+		if scale is None:
+			scale = (base_scale.x, base_scale.y, base_scale.z)
+	quat = Quaternion(rot[1], rot[2], rot[3], rot[0])  # (w,x,y,z) -> Quaternion(x,y,z,w)
+	return _compose_trs(Vector3(*pos), quat, Vector3(*scale))
+
+
+_IDENTITY_MATRIX4 = ((1.0, 0.0, 0.0, 0.0), (0.0, 1.0, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+
+
+def _walk_bone_local_transforms(node, accumulated, bone_names, tracks_by_name, time_ticks: float, result: Dict[str, Tuple]) -> None:
+	"""Accumulates NODE-LOCAL transforms (see _node_local_matrix_at(), static
+	or animated depending on `tracks_by_name`) starting from an armature
+	root's own child, resetting the accumulator to identity every time a
+	real bone is reached -- so `result[bone_name]` ends up being that
+	bone's own local transform relative to its NEAREST BONE ANCESTOR (or
+	the armature root itself, for a top-level bone), composing through any
+	non-bone helper node's own transform along the way exactly like
+	_collect_bone_hierarchy() already does for topology (same
+	bone_names/traversal shape, deliberately).
+
+	Unlike _iter_mesh_instances()/the old world-space walk this replaces,
+	this one is NOT seeded with anything at the armature boundary (identity)
+	-- it never needs to be: composing `inverse(parent_bone_local) @
+	child_bone_local` (see extract_animation()'s own use) cancels out
+	whatever the armature's own arbitrary transform was, since both sides
+	share that same ancestor, for every bone EXCEPT the top-level one(s)
+	(no NeL parent to cancel against) -- see extract_animation()'s own
+	docstring for how those are handled instead."""
+	local = _node_local_matrix_at(node, tracks_by_name.get(node.name), time_ticks)
+	accumulated = _mat_mul_mat(accumulated, local)
+	if node.name in bone_names:
+		result[node.name] = accumulated
+		next_accumulated = _IDENTITY_MATRIX4
+	else:
+		next_accumulated = accumulated
+	for child in node.children:
+		_walk_bone_local_transforms(child, next_accumulated, bone_names, tracks_by_name, time_ticks, result)
+
+
+def extract_animation(path: Path, skeleton: SkeletonShape) -> List[Tuple[str, "Animation"]]:
+	"""Builds a pynel `Animation` (`pynel.ryzom_animation.Animation`, via
+	`build_animation()`) per animation clip found in `path`'s own assimp
+	scene, matching `skeleton`'s own bones by name (typically the one
+	`extract_skeleton()` just built from the same file) -- one (clip_name,
+	Animation) pair per `scene.animations` entry, ALL of them (see
+	mesh_skel_anim_io.md's own decision: unlike `.skel`'s single "the right
+	armature" pick, there's no by-name "the right clip" convention for
+	animations -- a .dae/.fbx/.gltf with several clips has no reason to name
+	any of them after the source file). A clip whose own name contains
+	`__skip__` (case-insensitive) is excluded, same convention as
+	sub-meshes/the armature (see skel_export.md). `[]` if `path` has no
+	animation at all, or is `.obj` (no animation concept in that format).
+
+	Each bone's LOCAL (parent-relative) transform is sampled at a fixed 30Hz
+	rate (see anim_write.md's own reasoning) via _walk_bone_local_transforms()
+	(node-local composition, reset at each bone boundary) rather than a
+	world-space walk from scene.root_node -- an EARLIER version of this
+	function did exactly that (mirroring _iter_mesh_instances()), which
+	worked for the SKELETON (father_id>=0 bones cancel the shared ancestor
+	via inverse(parent_world)@world, see below) but baked the armature
+	node's own arbitrary object-level transform (the same one
+	extract_skeleton() had to avoid for its OWN bind-pose math, see its
+	docstring) into every TOP-LEVEL bone's animated samples with nothing to
+	cancel it against -- found 2026-09-05, Nuno: "quand j'applique une
+	animation l'araignée devient super grande", the exact same class of bug
+	extract_skeleton() itself needed 3 iterations to fix.
+
+	For a non-root bone (father_id>=0), `_walk_bone_local_transforms()`'s
+	own reset-at-bone-boundary result IS already the correct final local
+	sample -- no further correction needed (composing
+	`inverse(parent_bone_world) @ bone_world` in the old world-space walk
+	provably cancels any shared ancestor transform above the parent bone
+	regardless of what it is, which is exactly what this accumulator
+	computes directly). For a TOP-LEVEL bone (no NeL parent to cancel
+	against), the accumulator's raw result is instead relative to the
+	armature node -- corrected here by anchoring it to `skeleton`'s own
+	already-trusted bind-pose world matrix (`evaluate_all_bone_world_matrices()`,
+	the same value extract_skeleton()'s own bind pose derivation produces):
+	`world(t) = bind_world[bone] @ inverse(bind_local_raw[bone]) @
+	local_raw(t)`, where `bind_local_raw` is the same accumulator evaluated
+	with no animation applied (`tracks_by_name={}`) -- the animated DELTA
+	relative to this bone's own bind pose, composed on top of the already-
+	correct absolute bind placement, instead of trusting the armature's raw
+	transform at all."""
+	path = Path(path)
+	if path.suffix.lower() == ".obj":
+		return []
+	import assimp_py
+	from pynel.ryzom_animation import (
+		Quaternion as AnimQuaternion, Vector3 as AnimVector3, build_animation, evaluate_all_bone_world_matrices,
+	)
+
+	flags = (assimp_py.Process_Triangulate | assimp_py.Process_JoinIdenticalVertices
+	         | assimp_py.Process_GenNormals | assimp_py.Process_GlobalScale)
+	scene = _assimp_import_file(assimp_py, path, flags)
+	if not scene.animations:
+		return []
+
+	bone_names = set(skeleton.bone_map)
+	armature_node = _find_armature_root(scene.root_node, bone_names)
+	if armature_node is None:
+		return []
+	bind_world = evaluate_all_bone_world_matrices(skeleton)
+	bind_local_raw: Dict[str, Tuple] = {}
+	for child in armature_node.children:
+		_walk_bone_local_transforms(child, _IDENTITY_MATRIX4, bone_names, {}, 0.0, bind_local_raw)
+
+	results = []
+	for clip in scene.animations:
+		if "__skip__" in (clip.name or "").lower():
+			continue
+		ticks_per_second = clip.ticks_per_second or 25.0  # Assimp's own documented default
+		tracks_by_name = {c.node_name: c for c in (clip.channels or [])}
+		duration_seconds = clip.duration / ticks_per_second
+
+		num_samples = max(2, round(duration_seconds * _ANIM_SAMPLE_RATE) + 1)
+		sample_times_sec = [i / _ANIM_SAMPLE_RATE for i in range(num_samples)]
+
+		local_raw_by_sample = []
+		for t_sec in sample_times_sec:
+			t_ticks = t_sec * ticks_per_second
+			local_raw: Dict[str, Tuple] = {}
+			for child in armature_node.children:
+				_walk_bone_local_transforms(child, _IDENTITY_MATRIX4, bone_names, tracks_by_name, t_ticks, local_raw)
+			local_raw_by_sample.append(local_raw)
+
+		node_tracks = {}
+		for bone in skeleton.bones:
+			if any(bone.name not in lr for lr in local_raw_by_sample):
+				continue  # bone not present in this scene graph (shouldn't happen for a matching skeleton)
+			if bone.father_id < 0:
+				bind_correction = _mat_mul_mat(bind_world[bone.name], _invert_matrix(bind_local_raw[bone.name]))
+				local_samples = [_mat_mul_mat(bind_correction, lr[bone.name]) for lr in local_raw_by_sample]
+			else:
+				local_samples = [lr[bone.name] for lr in local_raw_by_sample]
+			positions, rotations, scales = [], [], []
+			for m in local_samples:
+				pos, rot, scale = _decompose_matrix(m)
+				# _decompose_matrix() returns pynel.ryzom_shape's own Vector3/
+				# Quaternion (right for extract_skeleton()'s Bone fields) --
+				# pynel.ryzom_animation.build_animation() needs its OWN,
+				# separate Vector3/Quaternion dataclasses instead (same
+				# shape, different identity -- _lerp_value()'s isinstance()
+				# check silently fails on the wrong one and falls through to
+				# its plain-float branch, TypeError on Vector3-Vector3,
+				# found 2026-09-05 testing against tests/spider.dae).
+				positions.append(AnimVector3(pos.x, pos.y, pos.z))
+				rotations.append(AnimQuaternion(rot.x, rot.y, rot.z, rot.w))
+				scales.append(AnimVector3(scale.x, scale.y, scale.z))
+			node_tracks[bone.name] = {
+				"pos": (sample_times_sec, positions),
+				"rotquat": (sample_times_sec, rotations),
+				"scale": (sample_times_sec, scales),
+			}
+
+		if not node_tracks:
+			continue
+		clip_name = clip.name or path.stem
+		results.append((clip_name, build_animation(clip_name, node_tracks, track_format="sampled")))
+
+	return results
 
 
 def import_dae(path: Path) -> Mesh:

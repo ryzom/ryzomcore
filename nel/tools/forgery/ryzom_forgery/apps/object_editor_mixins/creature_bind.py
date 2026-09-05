@@ -22,12 +22,13 @@ from panda3d.core import ClockObject, GeomNode, Mat4, Quat, Vec3
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
 )
-from pynel.ryzom_shape import MeshMRMSkinned, ShapeParseError, SkeletonShape, parse_shape
+from pynel.ryzom_shape import Mesh, MeshMRMSkinned, ShapeParseError, SkeletonShape, parse_shape
 
 from ryzom_forgery import creature_full_index
 from ryzom_forgery import creature_ref
 from ryzom_forgery import panoply
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox, shape_geom
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 	_AXIS_LENGTH, _AXIS_MARGIN_FACTOR, _build_axes_geom, _build_geom, _build_skeleton_lines_geom,
@@ -323,9 +324,12 @@ class CreatureBindMixin:
 		"""Per-frame: re-skins every live-capable body-part shape of the
 		assembled Bind-preview creature (_assembled_creature_skin_states,
 		built by _build_assembled_shape_geometry() for each skinned slot --
-		either a _SkinState, for CMeshMRMSkinned's packed-vertex format, or a
-		_MrmSkinState, for a plain skinned CMeshMRM's own geom.skin_weights
-		layout, e.g. *_visage.shape face pieces), plus the loaded shape's own
+		a _SkinState for CMeshMRMSkinned's packed-vertex format, a
+		_MrmSkinState for a plain skinned CMeshMRM's own geom.skin_weights
+		layout (e.g. *_visage.shape face pieces), or a _MeshSkinState for a
+		plain skinned CMesh (skinned_mesh_import.md's own import output --
+		dispatch fixed 2026-09-05, previously crashed here, see
+		_build_assembled_shape_geometry()'s own note)), plus the loaded shape's own
 		skinned-override placement if any
 		(_assembled_creature_loaded_shape_skin_state), plus the loaded
 		shape's own rigid attach-point placement if any (weapons don't have a
@@ -351,12 +355,16 @@ class CreatureBindMixin:
 		for state in self._assembled_creature_skin_states.values():
 			if isinstance(state, _MrmSkinState):
 				_reskin_mrm_state(state, bone_world_matrices)
+			elif isinstance(state, _MeshSkinState):
+				_reskin_mesh_state(state, bone_world_matrices)
 			else:
 				_reskin_state(state, bone_world_matrices)
 		loaded_state = self._assembled_creature_loaded_shape_skin_state
 		if loaded_state is not None:
 			if isinstance(loaded_state, _MrmSkinState):
 				_reskin_mrm_state(loaded_state, bone_world_matrices)
+			elif isinstance(loaded_state, _MeshSkinState):
+				_reskin_mesh_state(loaded_state, bone_world_matrices)
 			else:
 				_reskin_state(loaded_state, bone_world_matrices)
 		if (not self._bind_slot_override and self._bind_attach_point
@@ -873,6 +881,7 @@ class CreatureBindMixin:
 		self._assembled_creature_root = self.render.attach_new_node("assembled-creature-root")
 		self._assembled_creature_base_nodes = {}
 		self._assembled_creature_skin_states = {}
+		self._assembled_creature_shape_values = {}  # slot_name -> parsed shape_value, see export_assembled_creature()
 		self._assembled_creature_loaded_shape_node = None
 		self._assembled_creature_loaded_shape_content_root = None
 		# Carries the whole creature's pivot offset ONCE, so every child shape
@@ -958,6 +967,7 @@ class CreatureBindMixin:
 			self._assembled_creature_base_nodes[slot_name] = node_path
 			if skin_state is not None:
 				self._assembled_creature_skin_states[slot_name] = skin_state
+			self._assembled_creature_shape_values[slot_name] = shape_file.value
 			built_count += 1
 		t_total_end = time.perf_counter()
 		self._apply_loaded_shape_to_creature()
@@ -1151,6 +1161,17 @@ class CreatureBindMixin:
 			geom_value = shape_geom(shape_value)
 			if isinstance(shape_value, MeshMRMSkinned):
 				skin_state = _build_skin_state(geom_value, skeleton)
+			elif isinstance(shape_value, Mesh):
+				# A plain skinned CMesh (skinned_mesh_import.md's own import
+				# output, e.g. rp_fyros_hof_contest_2022_a.shape) has neither
+				# MeshMRMSkinned's packed-vertex format nor MeshMRMGeom's own
+				# `lods` -- _build_mrm_skin_state() crashed on it
+				# (AttributeError: 'MeshGeom' object has no attribute
+				# 'lods'), found 2026-09-05 selecting this shape in the Bind
+				# preview. mesh_skinning_preview.md added _build_mesh_skin_state()
+				# for the standalone Skinning preview panel but this
+				# assembled-creature dispatch was never updated to match.
+				skin_state = _build_mesh_skin_state(geom_value, skeleton)
 			else:
 				skin_state = _build_mrm_skin_state(geom_value, skeleton)
 		vdata = None
@@ -1340,6 +1361,35 @@ class CreatureBindMixin:
 					self._show_assembled_creature, disabled=not self._bind_creature_name):
 				self._show_assembled_creature = not self._show_assembled_creature
 				self._rebuild_assembled_creature()
+
+			# "Export PNJ" (mesh_skel_anim_io.md item 7) -- only meaningful
+			# once the assembled creature is actually shown AND something is
+			# bound into it (a slot override or an attach-point weapon),
+			# otherwise there's nothing of the LOADED shape reflected in the
+			# export beyond the creature's own defaults.
+			can_export_pnj = self._show_assembled_creature and bool(self._bind_slot_override or self._bind_attach_point)
+			imgui.same_line()
+			if _icon_button(
+					fa_icons.ICON_FA_DOWNLOAD, "Export this assembled creature (mesh+skeleton+animation, masked "
+					"parts excluded) -- named __skip__* so it's never re-imported",
+					False, disabled=not can_export_pnj):
+				imgui.open_popup("##pnj-export-format-popup")
+			if imgui.begin_popup("##pnj-export-format-popup"):
+				for export_format in EXPORT_FORMATS:
+					if export_format.extension not in ("dae", "fbx", "gltf", "glb"):
+						continue  # skin-capable formats only, see export_dialog.py's own _SKIN_CAPABLE_EXTENSIONS
+					clicked, _ = imgui.selectable(f"{export_format.label} (.{export_format.extension})", False)
+					if clicked:
+						weapon_shape_value = None
+						weapon_bone_name = None
+						if self._bind_attach_point:
+							weapon_shape_value = self.shape_file.value
+							weapon_bone_name = self._bind_attach_point
+						self.export_dialog.export_assembled_creature(
+							dict(self._assembled_creature_shape_values), self._bind_skeleton, self._bind_animation,
+							self._bind_creature_name or "creature", export_format, self.search_paths_dialog.find_texture,
+							weapon_shape_value=weapon_shape_value, weapon_bone_name=weapon_bone_name)
+				imgui.end_popup()
 
 			self._bind_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 			self._bind_panel_pos = _capture_panel_pos()

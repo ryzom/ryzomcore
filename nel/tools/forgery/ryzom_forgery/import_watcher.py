@@ -29,9 +29,10 @@ from pathlib import Path
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.duplicate_name_guard import DuplicateNameGuard
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT
-from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, extract_skeleton, find_importer
+from ryzom_forgery.shape_import import IMPORTERS, ShapeImportError, extract_animation, extract_skeleton, find_importer
 from ryzom_forgery.virtual_categories import find_existing_file, iter_included_files
 
+from pynel.ryzom_animation import AnimationWriteError, save_animation
 from pynel.ryzom_shape import ShapeFile, ShapeParseError, ShapeWriteError, Texture, parse_shape, save_shape
 
 IMPORT_EXTENSIONS = {f".{ext}" for ext in IMPORTERS}
@@ -228,7 +229,7 @@ class ImportWatcher:
 		exclusion_rules = app_settings.load().exclusion_rules
 		return (
 			path for path in iter_included_files(self._workspace_dir, exclusion_rules)
-			if path.suffix.lower() in IMPORT_EXTENSIONS)
+			if path.suffix.lower() in IMPORT_EXTENSIONS and "__skip__" not in path.name.lower())
 
 	def _rebuild_index(self):
 		if self._workspace_dir is not None:
@@ -278,6 +279,11 @@ class ImportWatcher:
 		(it was held back the whole time the conflict stood)."""
 		workspace_dir = self._workspace_dir
 		if workspace_dir is None:
+			return
+		if "__skip__" in source_path.name.lower():
+			# Artifact of Patina's own "export PNJ" (see mesh_skel_anim_io.md
+			# item 7) -- named this way specifically so the watcher never
+			# re-imports it as if it were new content.
 			return
 		if not source_path.is_file():
 			survivor = self._guard.remove(source_path)
@@ -344,13 +350,43 @@ class ImportWatcher:
 			self._maybe_export_skeleton(source_path)
 			return True
 
+	def _write_skeleton_pointer(self, source_path, skel_name):
+		"""Writes `workspace_dir/build/<source name>.skeleton`, a tiny
+		Forgery-only text file (never read by the real Ryzom client -- no
+		`.skeleton` extension exists anywhere in ryzom-core, confirmed
+		2026-09-05) whose sole content is `skel_name`, the shared `.skel`
+		this source's own skeleton resolves to. Always (over)written, one per
+		source file, regardless of whether this source is that `.skel`'s
+		owner (see _maybe_export_skeleton()) -- lets a future reader map a
+		non-owner source straight to the shared skeleton it actually uses,
+		without re-deriving the armature's name itself. Lives in `build/`
+		like Panoply's own baked artifacts: generated, never hand-edited."""
+		workspace_dir = self._workspace_dir
+		if workspace_dir is None:
+			return
+		pointer_path = workspace_dir / "build" / f"{sanitize_shape_name(source_path.stem)}.skeleton"
+		try:
+			pointer_path.parent.mkdir(parents=True, exist_ok=True)
+			pointer_path.write_text(skel_name)
+		except OSError as exc:
+			self._report(f"could not write {pointer_path.name}: {exc}", is_error=True)
+
 	def _maybe_export_skeleton(self, source_path):
-		"""Opportunistically writes a brand new `.skel` alongside a `.shape`
-		that was just (re-)exported, when `source_path`'s own bone hierarchy
-		yields one (see shape_import.extract_skeleton()) -- called after every
-		successful `.shape` write, new or updated. Never overwrites an
-		existing `.skel` (see skel_export.md: a skeleton is potentially shared
-		by several shapes, unlike the `.shape` itself)."""
+		"""Opportunistically writes/updates a `.skel` when `source_path`'s own
+		bone hierarchy yields one (see shape_import.extract_skeleton()) --
+		called after every successful `.shape` write, new or updated. A
+		`.skel` can be SHARED by several different source files (several
+		pieces of one rig, e.g. `spider_body.fbx`/`spider_legs.fbx` both
+		skinned against the same armature) -- named after that armature's own
+		node name (lowercased: see mesh_skel_anim_io.md, 2026-09-05, "il faut
+		toujours lowercase les exports/builds"), not after `source_path`.
+		Once it exists, only the ONE source file whose own (sanitized,
+		lowercased) name matches the armature's is allowed to overwrite it --
+		any other source just gets its own `.skeleton` pointer file (always
+		rewritten, see _write_skeleton_pointer()) recording which shared
+		`.skel` it actually uses, without ever touching it. A brand new
+		`.skel` (nowhere in the workspace yet) can be created by ANY source --
+		the ownership restriction only ever blocks a later overwrite."""
 		workspace_dir = self._workspace_dir
 		if workspace_dir is None:
 			return
@@ -362,19 +398,63 @@ class ImportWatcher:
 		if extracted is None:
 			return
 		armature_name, skeleton = extracted
-		skel_name = f"{sanitize_shape_name(armature_name)}.skel"
 		exclusion_rules = app_settings.load().exclusion_rules
+		armature_key = sanitize_shape_name(armature_name).lower()
+		source_key = sanitize_shape_name(source_path.stem).lower()
+		skel_name = f"{armature_key}.skel"
+		self._write_skeleton_pointer(source_path, skel_name)
 		skel_target = find_existing_file(workspace_dir, skel_name, exclusion_rules)
+		already_exists = skel_target is not None and skel_target.exists()
 		if skel_target is None:
 			skel_target = workspace_dir / "skels" / skel_name
-		if not skel_target.exists():
+		if already_exists and source_key != armature_key:
+			# A shared .skel already exists and this source isn't its owner
+			# (the one file named after the armature itself) -- its own
+			# .skeleton pointer above is enough, never touch the shared file.
+			return
+		try:
+			skel_target.parent.mkdir(parents=True, exist_ok=True)
+			save_shape(skel_target, ShapeFile(type_name="SkeletonShape", value=skeleton))
+		except (OSError, ShapeWriteError) as exc:
+			self._report(f"auto-export of skeleton {skel_target.name} failed: {exc}", is_error=True)
+		else:
+			self._report(f"auto-exported skeleton -> {skel_target.name}")
+
+		self._maybe_export_animations(source_path, skeleton)
+
+	def _maybe_export_animations(self, source_path, skeleton):
+		"""Opportunistically writes a `.anim` per animation clip found in
+		`source_path` (see shape_import.extract_animation()), matched against
+		`skeleton` (the same one just extracted/paired for the `.shape` this
+		import produced) -- called after every successful `.shape` write, new
+		or updated. Unlike `.skel`, a generated `.anim` is ALWAYS overwritten
+		on re-import (see anim_write.md: not shared across shapes the way a
+		skeleton can be, so no risk of clobbering something else's data) --
+		named after its own clip, not the source file (see extract_animation()'s
+		own docstring: no "the right clip" naming convention like `.skel`'s
+		armature-name match, a source file with several clips has no reason
+		to name any of them after itself)."""
+		workspace_dir = self._workspace_dir
+		if workspace_dir is None:
+			return
+		try:
+			clips = extract_animation(source_path, skeleton)
+		except Exception as exc:  # noqa: BLE001 -- an animation extraction failure must not undo the .shape/.skel export that already succeeded
+			self._report(f"animation extraction from {source_path.name} failed: {exc}", is_error=True)
+			return
+		exclusion_rules = app_settings.load().exclusion_rules
+		for clip_name, animation in clips:
+			anim_name = f"{sanitize_shape_name(clip_name)}.anim"
+			anim_target = find_existing_file(workspace_dir, anim_name, exclusion_rules)
+			if anim_target is None:
+				anim_target = workspace_dir / "anims" / anim_name
 			try:
-				skel_target.parent.mkdir(parents=True, exist_ok=True)
-				save_shape(skel_target, ShapeFile(type_name="SkeletonShape", value=skeleton))
-			except (OSError, ShapeWriteError) as exc:
-				self._report(f"auto-export of skeleton {skel_target.name} failed: {exc}", is_error=True)
+				anim_target.parent.mkdir(parents=True, exist_ok=True)
+				save_animation(anim_target, animation)
+			except (OSError, AnimationWriteError) as exc:
+				self._report(f"auto-export of animation {anim_target.name} failed: {exc}", is_error=True)
 			else:
-				self._report(f"auto-exported skeleton -> {skel_target.name}")
+				self._report(f"auto-exported animation -> {anim_target.name}")
 
 	def _backup_and_reexport(self, source_path, target_path):
 		"""Material-count mismatch fallback: rather than an interactive

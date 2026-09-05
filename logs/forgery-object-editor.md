@@ -1,5 +1,72 @@
 # Changelog
 
+## 2026-09-05 — ✨ Mesh export with skin/bones (.dae/.fbx/.gltf/.glb) + PNJ export + multi-select export popup, Forgery 3.4.0
+
+Closes `project-todos/forgery/mesh_skin_export.md` and the item 5/6/7 chantier of
+`project-todos/forgery/mesh_skel_anim_io.md` (the umbrella project tracking full round-trip
+mesh+skeleton+animation import/export via `assimp_py`).
+
+**Mesh+skin export** (`shape_export.py`): `pycollada`/`pygltflib` fully replaced by
+`assimp_py.export_file()` for `.dae`/`.fbx`/`.gltf`/`.glb` (rigid and skinned alike) --
+`.fbx` gains export support for the first time. `export_mesh_with_skin()` is the new public
+entry point, embedding a skeleton (`_assimp_skeleton_root_node()`) and an animation
+(`_assimp_animation_from_pynel()`, sampled at 30Hz) alongside the mesh.
+
+**Export "PNJ"** (`shape_export.py::export_assembled_creature()`, `creature_bind.py`): exports
+the Bind preview's fully assembled creature (every body-part slot's own shape, skeleton, and
+resolved animation) as one combined file, masked parts excluded (Ryzom's existing item-masking
+system, already resolved by the slot cache) -- weapons/shields attached as a rigid child of
+their attach-point bone's own `Node` so they inherit its animated transform instead of staying
+frozen at the bind pose. Output is prefixed `__skip__` so `import_watcher.py` never treats it
+as a new source to reimport.
+
+**Export popup** (`export_dialog.py::_draw_skel_anim_popup()`): when a skin-capable format is
+picked and a skeleton is loaded (Skinning preview), Patina now asks which of Mesh/Skel/Anim to
+include and whether to write one combined file or three separate ones, instead of always
+exporting mesh-only.
+
+**Shared skeleton detection, reworked** (`shape_import.py::_find_armature_root()`): dropped the
+previous "node name contains the source file's name" heuristic entirely -- it broke silently
+reimporting Forgery's own FBX exports (`shape_export.py` always names the armature wrapper
+node literally "Armature", which never contains the source file's own name). The armature root
+is now found purely structurally: the parent of the first real bone node encountered (bone
+identity from `mesh.bones`, always reliable, independent of any node naming convention). A
+`.skel` can still be shared across multiple source files rigged to the same armature; the file
+whose own name matches the armature's is the only one allowed to overwrite it once it exists
+(anyone can create it the first time) -- every source additionally gets its own
+`<name>.skeleton` pointer file (`import_watcher.py::_write_skeleton_pointer()`, always
+rewritten, lives in `build/`) recording which shared `.skel` it actually uses.
+
+**UV mirror, two fixes**: `.shape` stores UV with NeL's own V=0-at-top convention, the opposite
+of the "OpenGL" V=0-at-bottom convention `.obj`/`.dae`/`.fbx` use -- `_export_obj()`'s
+orientation-only fix (see previous entry's session) had missed converting UV back on write.
+Separately, glTF's own spec mandates V=0-at-top (same as NeL, the one exception among these
+four formats) -- `assimp_py`'s glTF reader returns it unflipped, so unconditionally applying
+the same `1-v` flip used for `.dae`/`.fbx`/`.obj` mirrored every reimported `.glb`/`.gltf`
+texture; `shape_import.py::_assemble_mesh()` gained a `flip_v` parameter, off for `.gltf`/`.glb`
+only. Both found and fixed via a real export/reimport round-trip cross-checked numerically
+across all four formats.
+
+**OBJ axis conversion, both directions**: `.obj` has no up-axis metadata at all, same de facto
+Y-up convention as every other format here -- `_export_obj()` was fixed for orientation in the
+previous session's entry, but `import_obj()`/`build_mesh()` (hand-parsed, no node hierarchy to
+seed `_iter_mesh_instances()`'s Y-up-to-Z-up matrix walk with) was never converting on read at
+all. Added `shape_import.py::_yup_to_zup()`, applied directly to positions/normals.
+
+**FBX unit scale**: a real `assimp_py` bug (fixed upstream in that fork, see its own changelog)
+-- `FBXExporter.cpp` always declared `UnitScaleFactor=1.0` (FBX's own convention for "these are
+centimeters") for any `Scene` built without explicit metadata, even though our data is
+Ryzom-native meters; reimporting such a file (`Process_GlobalScale`) then divided everything by
+100, and the object came back tiny and far from the camera. `assimp_py.Scene` now accepts a
+`metadata` dict; `shape_export.py` passes `metadata={"UnitScaleFactor": 100.0}` for `.fbx`
+exports specifically (`.dae`/`.gltf` have no such per-file scale ambiguity).
+
+**`find_existing_file()` crash fix** (`virtual_categories.py`): deleting the currently loaded
+shape crashed every subsequent frame -- `_draw_bottom_bar()` calls `find_existing_file()` every
+frame to preview the Save target, and a file that vanishes between `os.walk()`'s listing and
+this function's own `stat()` call (e.g. the user deleting it) raised an unhandled
+`FileNotFoundError` instead of just being treated as "not found".
+
 ## 2026-09-05 — ✨ Free workspace placement for textures/skel/anim + panel state/Info panel + settings.toml load cache, Forgery 3.1.9
 
 Two chantiers closed together (`project-todos/forgery/free_placement_migration.md` and

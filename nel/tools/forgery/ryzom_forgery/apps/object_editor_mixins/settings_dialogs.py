@@ -339,7 +339,8 @@ class SettingsDialogsMixin:
 							exports_dir.mkdir(parents=True, exist_ok=True)
 							self.export_dialog.quick_export(
 								self.shape_file.value, self._shape_source_name or "shape", export_format,
-								self.search_paths_dialog.find_texture, exports_dir)
+								self.search_paths_dialog.find_texture, exports_dir,
+								skeleton=self._bone_preview_skeleton, animation=self._bone_preview_animation)
 					imgui.separator()
 					bnp_clicked, _ = imgui.selectable(f"Full workspace ({workspace_dir.name}.bnp)", False)
 					if bnp_clicked:
@@ -359,7 +360,8 @@ class SettingsDialogsMixin:
 							self._shape_source_path.parent if self._shape_source_path is not None else None)
 						self.export_dialog.export(
 							self.shape_file.value, self._shape_source_name or "shape", export_format,
-							self.search_paths_dialog.find_texture, source_folder=source_folder)
+							self.search_paths_dialog.find_texture, source_folder=source_folder,
+							skeleton=self._bone_preview_skeleton, animation=self._bone_preview_animation)
 				if workspace_dir is not None:
 					imgui.separator()
 					bnp_clicked, _ = imgui.selectable(f"Full workspace ({workspace_dir.name}.bnp)", False)

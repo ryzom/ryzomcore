@@ -165,8 +165,25 @@ def find_existing_file(workspace_root: Path, filename: str, exclusion_rules) -> 
 	canonical subfolder for that category in that case). If more than
 	one real match exists (an actual duplicate name in two different
 	real subfolders), the most recently modified one wins -- picked as
-	the one more likely still in active use."""
+	the one more likely still in active use.
+
+	`os.walk()`'s own directory listing can go stale between being read
+	and this function's own `stat()` call on one of its entries -- e.g. the
+	caller's own delete-loaded-shape action removing the exact file this
+	function is about to stat, in the very next frame's redraw (found
+	2026-09-05, `_draw_bottom_bar()` calling this every frame via
+	`_workspace_shape_save_path()`, `FileNotFoundError` crashing the whole
+	app). A candidate that's vanished by the time it's stat'ed is simply
+	dropped, same as if `_iter_included_files()` had never listed it."""
 	matches = [path for path in _iter_included_files(workspace_root, exclusion_rules) if path.name == filename]
 	if not matches:
 		return None
-	return max(matches, key=lambda path: path.stat().st_mtime)
+	stats = []
+	for path in matches:
+		try:
+			stats.append((path, path.stat().st_mtime))
+		except OSError:
+			continue
+	if not stats:
+		return None
+	return max(stats, key=lambda entry: entry[1])[0]

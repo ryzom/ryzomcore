@@ -28,6 +28,13 @@ UI ImGui du flux d'export `.shape` → `.obj`/`.dae`/`.stl`/`.gltf`/`.glb` dans 
 - Dépend de `shape_export.export_shape` (voir `shape_export.md`) et de `ryzom_forgery.settings` (`TEXTURE_MODE_COPY_PNG`, `TEXTURE_MODE_REFERENCE_ONLY`, section `export` du fichier de settings : `output_folder`, `remember_output_folder`, `texture_mode`, `remember_texture_mode`).
 - `workspace_setup_dialog.py,99,239` référence explicitement ce module comme modèle du pattern "dialogue non-bloquant + `_save` qui ne réécrit que sa propre section".
 
+## Export skin/bones (mesh_skel_anim_io.md, item 6/7)
+
+- `ExportDialog.export`/`quick_export` acceptent maintenant `skeleton=None, animation=None` en plus des paramètres existants -- passés par `settings_dialogs.py::_draw_bottom_bar()` depuis `self._bone_preview_skeleton`/`self._bone_preview_animation` (Skinning preview du shape courant, pas le PNJ assemblé).
+- `_draw_skel_anim_popup()` -- déclenchée dans `_start_export()` uniquement quand le format choisi supporte le skin (`.dae`/`.fbx`/`.gltf`/`.glb`, `_SKIN_CAPABLE_EXTENSIONS`) ET qu'un squelette est fourni. Cases Mesh (toujours cochée, grisée), Skel, Anim (grisée si aucune anim chargée), radio Séparé/Combiné.
+- `_run_skel_anim_export()` -- "Combiné" : un seul `shape_export.export_mesh_with_skin()`. "Séparé" : le mesh est réexporté dans chacun des 3 fichiers cochés (pas de mesh sans skel/anim autrement), seule la présence skel/anim change par fichier -- une animation ciblant forcément des os, un fichier "Anim" embarque toujours le squelette avec elle.
+- `export_assembled_creature(shape_values, skeleton, animation, name, export_format, texture_finder, weapon_shape_value=None, weapon_bone_name=None, source_folder=None)` -- point d'entrée pour l'export "PNJ" (bind pose assemblée, bouton dans `creature_bind.py::_draw_bind_controls()`), toujours combiné (rien à choisir, le masquage par slot est déjà résolu en amont). Préfixe le nom de fichier de sortie par `__skip__` pour que `import_watcher.py` ne le réimporte jamais comme une nouvelle source.
+
 ## Points notables / pièges
 
 - L'échec d'un export n'est jamais levé à l'appelant : `_run_export` capture toute `Exception` et se contente de mettre à jour `self._status` (`export_dialog.py`) — l'appelant (`object_editor.py`) ne peut pas réagir programmatiquement à un échec, seulement l'utilisateur voit le message dans l'UI.

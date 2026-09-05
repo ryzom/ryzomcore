@@ -22,7 +22,7 @@ pour le watcher lui-même).
 - `IMPORT_EXTENSIONS` — `{".obj", ".dae", ".fbx", ".gltf", ".glb"}`, dérivé de
  `shape_import.IMPORTERS`.
 - `_INVALID_NAME_CHARS = re.compile(r"[^A-Za-z0-9_-]")`, `sanitize_shape_name`, `target_shape_path` — dérivent le nom de fichier `.shape`
- cible (`<workspace>/shapes/<nom_sanitizé>.shape`) à partir du fichier importé.
+ cible à partir du fichier importé. Placement libre (`project-todos/forgery/free_placement_migration.md`) : `target_shape_path()` cherche d'abord ce nom n'importe où dans le workspace (`virtual_categories.find_existing_file()`), et ne retombe sur `<workspace>/shapes/<nom_sanitizé>.shape` que si le fichier n'existe nulle part encore.
 - `export_new_shape` — cible absente : import complet headless via
  `find_importer` (même chemin que `apps/shape_importer.py`).
 - `update_existing_shape` — cible présente : remplace uniquement la
@@ -34,12 +34,26 @@ pour le watcher lui-même).
 - `_backup_and_reexport` — en cas de `MaterialCountMismatch` : renomme la
  cible en `<stem>_backup_<YYYYMMDD_HHMMSS><suffix>` puis ré-exporte le nouveau mesh sous
  le nom cible d'origine (flux 100% automatique, sans popup de conflit).
-- `_maybe_export_skeleton(source_path)` — ajouté 2026-09-04 (chantier `skel_export`,
- `project-todos/forgery/`) : appelé après chaque écriture réussie d'un `.shape` (nouvel
- export, mise à jour, ou backup-and-reexport). Appelle `shape_import.extract_skeleton()` ;
- si un squelette en ressort, l'écrit dans `<workspace>/skels/<nom d'armature sanitizé>.skel`
- -- mais **jamais** si un fichier existe déjà à ce chemin (contrairement au `.shape`, un
- `.skel` peut être partagé par plusieurs shapes, donc jamais réécrit automatiquement).
+- `_maybe_export_skeleton(source_path)` — appelé après chaque écriture réussie d'un `.shape`
+ (nouvel export, mise à jour, ou backup-and-reexport). Appelle `shape_import.extract_skeleton()` ;
+ si un squelette en ressort, l'écrit sous `<nom d'armature sanitizé, en minuscule>.skel`,
+ trouvé n'importe où dans le workspace (`find_existing_file`) ou à défaut dans
+ `<workspace>/skels/`. **Squelette partagé, revu 2026-09-05** (`project-todos/forgery/
+ mesh_skel_anim_io.md`) : ce `.skel` peut être utilisé par plusieurs fichiers sources
+ différents (plusieurs pièces d'un même rig) -- une fois qu'il existe, seul le fichier
+ source dont le nom (sanitizé, minuscule) correspond exactement au nom de l'armature est
+ autorisé à le réécrire (n'importe quelle source peut le CRÉER la première fois). Chaque
+ source, propriétaire ou non, obtient en plus son propre `<nom source>.skeleton` (voir
+ `_write_skeleton_pointer()`) pointant vers le `.skel` réellement utilisé.
+- `_write_skeleton_pointer(source_path, skel_name)` — écrit `<workspace>/build/<nom
+ source sanitizé>.skeleton`, toujours réécrit (comme le `.anim`), contenu = juste le nom
+ du `.skel` partagé (ex. `armature.skel`). Convention interne Forgery, jamais lue par le
+ vrai client Ryzom (aucune extension `.skeleton` dans `ryzom-core`).
+- `_maybe_export_animations(source_path, skeleton)` — appelé par `_maybe_export_skeleton()`
+ juste après le traitement du `.skel`. Appelle `shape_import.extract_animation()` ; un
+ `.anim` par clip trouvé, nommé d'après le clip (pas la source), **toujours réécrit**
+ (contrairement au `.skel` -- une anim n'est pas partagée entre shapes comme peut l'être
+ un squelette).
 - `class ImportWatcher` — orchestre le tout, avec hooks `is_shape_open`,
  `on_open_shape_conflict`, `on_status`, `on_name_conflict` (docstrings détaillées) pour
  gérer le cas où la shape cible est actuellement ouverte dans le viewport de Patina, et
