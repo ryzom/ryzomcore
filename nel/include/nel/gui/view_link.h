@@ -56,12 +56,10 @@ namespace NLGUI
 		void setActionOnLeftClick(const std::string &actionHandler) { _AHOnLeftClick = actionHandler; };
 		void setParamsOnLeftClick(const std::string &actionParams) { _AHOnLeftClickParams = actionParams; };
 		void setActionOnContextHelp(const std::string &actionHandler) { _AHOnContextHelp = actionHandler; };
-		void setLinkContextHelp(const std::string &contextHelp) { _ContextHelp = contextHelp; };
 
 		const std::string &getActionOnLeftClick() const { return _AHOnLeftClick; }
 		const std::string &getParamsOnLeftClick() const { return _AHOnLeftClickParams; }
 		const std::string &getActionOnContextHelp() const { return _AHOnContextHelp; }
-		const std::string &getLinkContextHelp() const { return _ContextHelp; }
 	protected:
 
 		// The main HTML group
@@ -72,7 +70,6 @@ namespace NLGUI
 		std::string		_AHOnLeftClick;
 		std::string		_AHOnLeftClickParams;
 		std::string		_AHOnContextHelp;
-		std::string		_ContextHelp;
 
 	};
 

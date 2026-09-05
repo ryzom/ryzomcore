@@ -582,8 +582,6 @@ public:
 
 	// Get the Actual item name. Localized version of SheetId, or given by server through NAMEID.
 	std::string getItemActualName() const;
-	// Override the item name for a chat link.
-	void setItemActualNameOverride(const std::string &name) { _ItemActualNameOverride = name; }
 	// setup icon from phrases
 	void setupDisplayAsPhrase(const std::vector<NLMISC::CSheetId> &bricks, const std::string &phraseName, uint8 phraseIconIndex = std::numeric_limits<uint8>::max());
 
@@ -843,7 +841,6 @@ protected:
 	sint64		_NotifyAnimEndTime;
 
 	mutable CControlSheetInfoWaiter _ItemInfoWaiter;
-	std::string _ItemActualNameOverride;
 private:
 	mutable TSheetType			_ActualType;
 

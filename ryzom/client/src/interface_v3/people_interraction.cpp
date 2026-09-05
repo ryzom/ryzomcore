@@ -28,6 +28,7 @@
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "action_handler_misc.h"
+#include "chat_link_ui.h"
 #include "chat_window.h"
 #include "../entity_animation_manager.h"
 #include "nel/gui/group_editbox.h"
@@ -93,6 +94,20 @@ static const sint PARTY_CHAT_SPAWN_DELTA = 20; // to avoid that all party chat a
  */
 static void displayVisibleSystemMsg(const std::string &msg, const string &cat = "CHK");
 
+static void sendChatEntry(const string &msg, CChatWindow *chatWindow, bool isChatTeam = false)
+{
+	CChatMessageRequest request;
+	const bool hasAttachments = !chatWindow->getEditBox()->getTextTags().empty();
+	if (hasAttachments)
+	{
+		if (!CHAT_SHARE::buildRequest(chatWindow->getEditBox(), request))
+			return;
+		ChatMngr.chat(request, isChatTeam);
+	}
+	else
+		ChatMngr.chat(msg, isChatTeam);
+}
+
 
 //////////////////////////////
 // HANDLER FOR CHAT WINDOWS //
@@ -129,8 +144,8 @@ struct CAroundMeEntryHandler : public IChatWindowListener
 		else
 		{
 			// process msg as usual
-			ChatMngr.setChatMode(CChatGroup::arround);
-			ChatMngr.chat(msg);
+			ChatMngr.setChatMode(CChatGroup::say);
+			sendChatEntry(msg, chatWindow);
 		}
 	}
 };
@@ -148,7 +163,7 @@ struct CRegionEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::region);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg, chatWindow);
 		}
 	}
 };
@@ -166,7 +181,7 @@ struct CUniverseEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::universe);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg, chatWindow);
 		}
 	}
 };
@@ -183,7 +198,7 @@ struct CGuildChatEntryHandler : public IChatWindowListener
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::guild);
-			ChatMngr.chat(msg);
+			sendChatEntry(msg, chatWindow);
 		}
 	}
 };
@@ -200,7 +215,7 @@ struct CTeamChatEntryHandler : public IChatWindowListener
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::team);
-			ChatMngr.chat(msg, true);
+			sendChatEntry(msg, chatWindow, true);
 		}
 	}
 };
@@ -250,7 +265,7 @@ public:
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::dyn_chat, ChatMngr.getDynamicChannelIdFromDbIndex(DbIndex));
-			ChatMngr.chat(msg);
+			sendChatEntry(msg, chatWindow);
 		}
 	}
 };
@@ -941,7 +956,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					if (title.empty())
 					{
 						// Dyn channel not available yet, so set to around
-						PeopleInterraction.TheUserChat.Filter.setTargetGroup(CChatGroup::arround);
+						PeopleInterraction.TheUserChat.Filter.setTargetGroup(CChatGroup::say);
 						pUserBut->setHardText("uiFilterAround");
 					}
 					else

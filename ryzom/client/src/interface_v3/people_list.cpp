@@ -29,6 +29,7 @@
 #include "nel/gui/action_handler.h"
 #include "nel/gui/group_editbox.h"
 #include "../client_chat_manager.h"
+#include "chat_link_ui.h"
 #include "chat_text_manager.h"
 #include "people_interraction.h"
 #include "../user_entity.h"
@@ -725,7 +726,7 @@ void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, con
 
 
 //==================================================================
-void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA col, uint /* numBlinks */ /*= 0*/)
+void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA col, uint /* numBlinks */ /*= 0*/, const CChatMessage *sharedMessage)
 {
 	if (_ContactType == CPeopleListDesc::Ignore)
 	{
@@ -768,7 +769,8 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 		nlwarning("<CPeopleList::displayMessage> can't get text_list.");
 		return;
 	}
-	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	CViewBase *child = sharedMessage ? getChatTextMngr().createMsgText(msg, *sharedMessage, col) :
+		getChatTextMngr().createMsgText(msg, col);
 	if (child)
 		gl->addChild(child);
 }
@@ -1117,7 +1119,20 @@ class CHandlerContactEntry : public IActionHandler
 			return;
 
 		// Parse any tokens in the text
-		if ( ! CInterfaceManager::parseTokens(text))
+		CChatMessageRequest request;
+		const bool hasAttachments = !pEB->getTextTags().empty();
+		bool sharedMessage = false;
+		bool tokensParsed = false;
+		if (!hasAttachments)
+			tokensParsed = CInterfaceManager::parseTokens(text);
+		else
+		{
+			sharedMessage = CHAT_SHARE::buildRequest(pEB, request);
+			tokensParsed = sharedMessage;
+			if (tokensParsed)
+				text = request.Text.toUtf8();
+		}
+		if (!tokensParsed)
 		{
 			pEB->setInputString (std::string());
 			return;
@@ -1128,6 +1143,7 @@ class CHandlerContactEntry : public IActionHandler
 		{
 			CChatWindow::_ChatWindowLaunchingCommand = NULL; // no CChatWindow instance there ..
 			std::string str = text.substr(1);
+			CHAT_SHARE::CRequestScope requestScope(sharedMessage ? &request : NULL);
 			NLMISC::ICommand::execute( str, g_log );
 			pEB->setInputString (std::string());
 			return;
@@ -1141,7 +1157,10 @@ class CHandlerContactEntry : public IActionHandler
 		string playerName = gc->getTitle();
 
 		// Simply do a tell on the player
-		ChatMngr.tell(playerName, text);
+		if (sharedMessage)
+			ChatMngr.tell(playerName, request);
+		else
+			ChatMngr.tell(playerName, text);
 		pEB->setInputString (std::string());
 		if (gc)
 		{
@@ -1150,6 +1169,8 @@ class CHandlerContactEntry : public IActionHandler
 			{
 				gc->restorePosition();
 			}
+			if (sharedMessage)
+				return;
 
 			// Retrieve name of the container in the list
 			string ui_interface_free_chat = "ui:interface:free_chat";

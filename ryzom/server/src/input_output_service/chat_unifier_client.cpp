@@ -15,6 +15,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "stdpch.h"
+#include "game_share/chat_message.h"
 #include "nel/misc/types_nl.h"
 #include "nel/net/module.h"
 #include "nel/net/module_builder_parts.h"
@@ -115,9 +116,23 @@ public:
 		cuc.sendFarTell(this, senderCharId, havePrivilege, destName, text);
 	}
 
+	void sendFarTellShared(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
+	{
+		if (_ChatUnifierServer == NULL)
+			return;
+
+		CChatUnifierProxy cuc(_ChatUnifierServer);
+		cuc.sendFarTellShared(this, senderCharId, havePrivilege, destName, message);
+	}
+
 	void sendFarGuildChat(const ucstring &senderName, uint32 guildId, const ucstring &text)
 	{
 		CChatUnifierClientProxy::broadcast_farGuildChat(_Peers.begin(), _Peers.end(), this, senderName, guildId, text);
+	}
+
+	void sendFarGuildChatShared(const ucstring &senderName, uint32 guildId, const CChatMessage &message)
+	{
+		CChatUnifierClientProxy::broadcast_farGuildChatShared(_Peers.begin(), _Peers.end(), this, senderName, guildId, message);
 	}
 
 	void sendFarGuildChat2(const ucstring &senderName, uint32 guildId, const std::string &phraseName)
@@ -145,12 +160,29 @@ public:
 		}
 	}
 
+	void sendUniverseChatShared(const ucstring &senderName, uint32 homeSessionId, const CChatMessage &message)
+	{
+		CChatUnifierClientProxy::broadcast_universeBroadcastShared(_Peers.begin(), _Peers.end(), this, senderName, homeSessionId, message);
+
+		if (ForceFarChat)
+		{
+			CChatManager &cm = IOS->getChatManager();
+			TGroupId grpId(RYZOMID::chatGroup,0);
+			cm.farChatInGroupShared(grpId, homeSessionId, message, senderName);
+		}
+	}
+
 	void sendUnifiedDynChat(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const ucstring &text)
 	{
 #ifdef NL_OS_WINDOWS
 #	pragma message (NL_LOC_WRN "Add the message in the interface")
 #endif
 		CChatUnifierClientProxy::broadcast_dynChanBroadcast(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, text);
+	}
+
+	void sendUnifiedDynChatShared(const NLMISC::CEntityId &dynCharId, const ucstring &senderName, const CChatMessage &message)
+	{
+		CChatUnifierClientProxy::broadcast_dynChanBroadcastShared(_Peers.begin(), _Peers.end(), this, dynCharId, senderName, message);
 	}
 
 
@@ -210,6 +242,13 @@ public:
 		cm.farTell(senderCharId, senderName, havePrivilege, destName, text);
 	}
 
+	void recvFarTellShared(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
+	{
+		nldebug("IOSCU: recvFarTellShared : receiving a far tell from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
+		CChatManager &cm = IOS->getChatManager();
+		cm.farTellShared(senderCharId, senderName, havePrivilege, destName, message);
+	}
+
 	// SU forward a guild chat message to the IOS
 	void farGuildChat(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const ucstring &text)
 	{
@@ -218,6 +257,13 @@ public:
 		// rebuild a group ID and fake the creator and dynamic id
 		TGroupId grpId(RYZOMID::chatGroup, guildId, 0, 0);
 		cm.farChatInGroup(grpId, 0, text, senderName);
+	}
+
+	void farGuildChatShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 guildId, const CChatMessage &message)
+	{
+		CChatManager &cm = IOS->getChatManager();
+		TGroupId grpId(RYZOMID::chatGroup, guildId, 0, 0);
+		cm.farChatInGroupShared(grpId, 0, message, senderName);
 	}
 
 	// SU forward a guild chat message to the IOS
@@ -246,6 +292,13 @@ public:
 		cm.farChatInGroup(grpId, senderHomeSession, text, senderName);
 	}
 
+	virtual void universeBroadcastShared(NLNET::IModuleProxy *sender, const ucstring &senderName, uint32 senderHomeSession, const CChatMessage &message)
+	{
+		CChatManager &cm = IOS->getChatManager();
+		TGroupId grpId(RYZOMID::chatGroup,0);
+		cm.farChatInGroupShared(grpId, senderHomeSession, message, senderName);
+	}
+
 	// IOS forward a dyn chat chat message to the IOSs
 	virtual void dynChanBroadcast(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const ucstring &text)
 	{
@@ -267,6 +320,11 @@ public:
 			cm.sendChat(CChatGroup::dyn_chat, dcc->getClient()->getID(), text, TDataSetRow(), chanId, senderName);
 			dcc = dcc->getNextChannelSession(); // next session in this channel
 		}						
+	}
+
+	virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &message)
+	{
+		IOS->getChatManager().farDynChatShared(chanId, senderName, message);
 	}
 
 	// SU send a broadcast message to the IOS

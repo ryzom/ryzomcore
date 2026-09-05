@@ -391,7 +391,11 @@
         </action>
         <!--<action id="drop"           name="uimDrop"          handler="proc"  params="drop_item_proc" />-->
         <action id="equip" name="uimEquip" handler="inv_auto_equip" icon="filter_armor.tga"/>
-        <action id="item_chat_link" name="uiChatLinkMenuItem" handler="link_item_in_chat" icon="ico_range.tga"/>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <action id="item_text_edition" name="uimItemTextEdit" handler="item_text_edition" params="ui:interface:edit_custom" icon="r2ed_tool_scenario_window.tga" />
@@ -402,6 +406,14 @@
         <!-- Will be activated and populated in code -->
         <group type="menu" id="item_group_menu" extends="base_menu"></group>
     </group>
+    <group type="menu" id="item_menu_in_trade" extends="base_menu">
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
+        <action id="infos" name="uimBoldInfo" handler="open_help_auto" icon="brick_default.tga"/>
+    </group>
     <!-- MAX_INVENTORY_ANIMAL -->
     <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')" target="ui:interface:item_menu_in_bag:move:pa0:hardtext" />
     <link expr="switch(@%pa_beast1:TYPE, 'uimMtPaMount1', 'uimMtPaMount1', 'uimMtPaPacker1', 'uimMtPaDemon1')" target="ui:interface:item_menu_in_bag:move:pa1:hardtext" />
@@ -410,7 +422,11 @@
     <!-- item menu when we are in self -->
     <group type="menu" id="item_menu_in_self" extends="base_menu" on_active="item_menu_base_check">
         <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
-        <action id="item_chat_link" name="uiChatLinkMenuItem" handler="link_item_in_chat" icon="ico_range.tga"/>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <separator />
@@ -426,7 +442,11 @@
         <action id="xp_catalyser_use" name="uimXpCatalyserUse" handler="xp_catalyser_use" icon="ico_cataliseur_xp.tga"/>
         <action id="item_text_display" name="uiOpen" handler="item_text_display" params="ui:interface:edit_custom" icon="r2ed_tool_scenario_window.tga"/>
         <separator />
-        <action id="item_chat_link" name="uiChatLinkMenuItem" handler="link_item_in_chat" icon="ico_range.tga"/>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <separator />
         <action id="destroy" name="uimDestroy" handler="proc" params="destroy_item_proc" icon="r2_toolbar_kill_small.tga" />
@@ -437,7 +457,11 @@
         <action id="move" name="uimMoveTo" icon="curs_can_pan.tga">
             <!--<action id="bag"    name="uimMtBag"         handler="proc" params="move_to_bag" /> -->
         </action>
-        <action id="item_chat_link" name="uiChatLinkMenuItem" handler="link_item_in_chat" icon="ico_range.tga"/>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <separator />

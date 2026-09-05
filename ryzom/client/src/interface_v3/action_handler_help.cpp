@@ -213,7 +213,7 @@ void	CInterfaceHelp::release()
 		_InfoWindows.clear();
 	}
 	LinkedPhraseByHelpControl.clear();
-	CHAT_LINK::releasePreviewSheets();
+	CHAT_SHARE::releasePreviewSheets();
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// add observers for the update of phrase help texts (depends of weight of equipped weapons)
 	for (uint i = 0; i < MAX_HANDINV_ENTRIES; ++i)
@@ -271,6 +271,8 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		CDBCtrlSheet		*ctrlDst= dynamic_cast<CDBCtrlSheet*>(group->getCtrl(":ctrl_slot"));
 		if(ctrlDst && ctrlSrc)
 		{
+			if (LinkedPhraseByHelpControl.find(ctrlDst) != LinkedPhraseByHelpControl.end())
+				continue;
 			// if same Aspect
 			if( ctrlSrc->sameAspect(ctrlDst) )
 			{
@@ -587,7 +589,7 @@ void			CInterfaceHelp::updateWindowSPhraseTexts()
 		uint	index= _ActiveWindows[i];
 		CDBCtrlSheet	*ctrl= _InfoWindows[index].CtrlSheet;
 		CInterfaceGroup	*group= _InfoWindows[index].Window;
-		if(group && ctrl && (ctrl->isSPhraseId() || ctrl->isSPhrase()) )
+		if(group && ctrl)
 		{
 			CSheetHelpSetup setup;
 			setup.setupDefaultIDs();
@@ -595,7 +597,13 @@ void			CInterfaceHelp::updateWindowSPhraseTexts()
 			setup.SrcSheet = ctrl;
 			setup.DestSheet = dynamic_cast<CDBCtrlSheet*>(group->getCtrl("ctrl_slot"));
 
-			if(ctrl->isSPhraseId())
+			std::map<CDBCtrlSheet*, CSPhraseCom>::const_iterator linked =
+				LinkedPhraseByHelpControl.find(setup.DestSheet);
+			if (linked != LinkedPhraseByHelpControl.end())
+			{
+				setupSabrinaPhraseHelp(setup, linked->second, 0);
+			}
+			else if(ctrl->isSPhraseId())
 			{
 				// reset up the complete window
 				setupSabrinaPhraseHelp(setup, pPM->getPhrase(ctrl->getSPhraseId()), 0);

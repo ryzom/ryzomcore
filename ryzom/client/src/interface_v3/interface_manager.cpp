@@ -1370,7 +1370,6 @@ void CInterfaceManager::uninitInGame1 ()
 	}
 
 	// Release interface help before inventory manager
-	cancelPendingItemChatLink();
 	CInterfaceHelp::release();
 
 	// Release inventory manager

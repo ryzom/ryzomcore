@@ -23,13 +23,15 @@
 
 #include "stdpch.h"
 // client
+#include "game_share/chat_message.h"
 #include "chat_text_manager.h"
-#include "chat_link_codec.h"
 #include "chat_link_ui.h"
+#include "nel/gui/group_menu.h"
+#include "nel/gui/view_link.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/group_paragraph.h"
-#include "nel/misc/i18n.h"
 #include "interface_manager.h"
+#include "../connection.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -38,6 +40,7 @@ CChatTextManager* CChatTextManager::_Instance = NULL;
 
 // last selected chat from 'copy_chat_popup' action handler
 static std::string LastSelectedChat;
+static CSheetId LastSelectedChatSheetId = CSheetId::Unknown;
 
 //=================================================================================
 CChatTextManager::CChatTextManager() :
@@ -161,8 +164,8 @@ static CInterfaceGroup *buildLineWithCommand(CInterfaceGroup *commandGroup, CVie
 
 static inline bool	isUrlTag(const string &s, string::size_type index, string::size_type textSize)
 {
-	// Format http://, https:// or ryzom://
-	// or markdown style (title)[url]
+	// Format http://, https://
+	// or markdown style (title)[http://..]
 	if(textSize > index+7)
 	{
 		bool markdown = false;
@@ -170,7 +173,7 @@ static inline bool	isUrlTag(const string &s, string::size_type index, string::si
 		// advance index to url section if markdown style link is detected
 		if (s[i] == '(')
 		{
-			// scan for ')['
+			// scan for ')[http://'
 			while(i < textSize-9)
 			{
 				if (s[i] == ')' && s[i+1] == '[')
@@ -191,10 +194,7 @@ static inline bool	isUrlTag(const string &s, string::size_type index, string::si
 
 		if (textSize > i + 7)
 		{
-			bool isUrl = (toLowerAscii(s.substr(i, 7)) == "http://" ||
-				toLowerAscii(s.substr(i, 8)) == "https://" ||
-				s.compare(i, strlen(CHAT_LINK::ItemPrefix), CHAT_LINK::ItemPrefix) == 0 ||
-				s.compare(i, strlen(CHAT_LINK::PhrasePrefix), CHAT_LINK::PhrasePrefix) == 0);
+			bool isUrl = (toLowerAscii(s.substr(i, 7)) == "http://" || toLowerAscii(s.substr(i, 8)) == "https://");
 			// match "text http://" and not "texthttp://"
 			if (isUrl && i > 0 && !markdown)
 			{
@@ -368,6 +368,41 @@ CViewBase *CChatTextManager::createMsgText(const string &cstMsg, NLMISC::CRGBA c
 	return createMsgTextComplex(msg, col, justified, plaintext, commandGroup);
 }
 
+CViewBase *CChatTextManager::createMsgText(const string &cstPrefix, const CChatMessage &message,
+	NLMISC::CRGBA col, bool justified)
+{
+	string prefix = cstPrefix;
+	if (showTimestamps())
+		prependTimestamp(prefix);
+
+	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
+	para->setId("line");
+	para->setSizeRef("w");
+	para->setResizeFromChildH(true);
+
+	string copyText = prefix;
+	if (!prefix.empty())
+		addMsgText(para, prefix, col, justified, 0, prefix.size());
+	for (std::vector<CChatMessagePart>::const_iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+	{
+		if (it->Type == CChatMessagePart::Text)
+		{
+			const string text = it->TextValue.toUtf8();
+			addMsgText(para, text, col, justified, 0, text.size());
+			copyText += text;
+		}
+		else
+		{
+			CViewLink *view = CHAT_SHARE::createAttachmentView(*it, justified);
+			para->addChildLink(view);
+			copyText += view->LinkTitle;
+		}
+	}
+	para->setRightClickHandler("copy_chat_popup");
+	para->setRightClickHandlerParams(copyText);
+	return para;
+}
+
 //=================================================================================
 CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGBA col, bool justified, CInterfaceGroup *commandGroup)
 {
@@ -401,6 +436,93 @@ CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGB
 	else
 	{
 		return buildLineWithCommand(commandGroup, vt);
+	}
+}
+
+//=================================================================================
+void CChatTextManager::addMsgText(CGroupParagraph *para, const string &msg, NLMISC::CRGBA col,
+	bool justified, string::size_type pos, string::size_type textSize)
+{
+	// quickly check if text has links or not
+	bool hasUrl;
+	{
+		string s = toLowerAscii(msg);
+		hasUrl = (s.find("http://") || s.find("https://"));
+	}
+
+	for (string::size_type i = pos; i< textSize;)
+	{
+		if (hasUrl && isUrlTag(msg, i, textSize))
+		{
+			if (pos != i)
+			{
+				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, NULL);
+				para->addChild(vt);
+			}
+
+			string url;
+			string title;
+			getUrlTag(msg, i, url, title);
+			if (url.size() > 0)
+			{
+				CViewLink *vt = new CViewLink(CViewBase::TCtorParam());
+				vt->setId("link");
+				vt->setUnderlined(true);
+				vt->setShadow(isTextShadowed());
+				vt->setShadowOutline(false);
+				vt->setFontSize(getTextFontSize());
+				vt->setMultiLine(true);
+				vt->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);
+				vt->setMultiLineSpace(getTextMultiLineSpace());
+				vt->setModulateGlobalColor(false);
+
+				//NLMISC::CRGBA color;
+				//color.blendFromui(col, CRGBA(255, 153, 0, 255), 100);
+				//vt->setColor(color);
+				vt->setColor(col);
+
+				if (title.size() > 0)
+				{
+					vt->LinkTitle = title;
+					vt->setText(vt->LinkTitle);
+				}
+				else
+				{
+					vt->LinkTitle = url;
+					vt->setText(vt->LinkTitle);
+				}
+
+				if (url.find_first_of('\'') != string::npos)
+				{
+					string clean;
+					for(string::size_type i = 0; i< url.size(); ++i)
+					{
+						if (url[i] == '\'')
+							clean += "%27";
+						else
+							clean += url[i];
+					}
+					url = clean;
+				}
+				vt->setActionOnLeftClick("lua");
+				vt->setParamsOnLeftClick("game:chatUrl('" + url + "')");
+
+				para->addChildLink(vt);
+
+				pos = i;
+			}
+		}
+		else
+		{
+			++i;
+		}
+	}
+
+	if (pos < textSize)
+	{
+		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, NULL);
+		vt->setId("text");
+		para->addChild(vt);
 	}
 }
 
@@ -445,7 +567,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		CCDBNodeLeaf *nodeHideFlag = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":HIDE_FLAG", false);
 		if (nodeHideFlag)
 			hideFlag = nodeHideFlag->getValueBool();
-		
+
 		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
 		para->addChild(vt);
 
@@ -475,139 +597,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		}
 	}
 
-	// quickly check if text has links or not
-	bool hasUrl;
-	{
-		string s = toLowerAscii(msg);
-		hasUrl = (s.find("http://") != string::npos ||
-			s.find("https://") != string::npos ||
-			s.find(CHAT_LINK::ItemPrefix) != string::npos ||
-			s.find(CHAT_LINK::PhrasePrefix) != string::npos);
-	}
-
-	for (string::size_type i = pos; i< textSize;)
-	{
-		if (hasUrl && isUrlTag(msg, i, textSize))
-		{
-			if (pos != i)
-			{
-				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, NULL);
-				para->addChild(vt);
-			}
-
-			string url;
-			string title;
-			getUrlTag(msg, i, url, title);
-			if (url.size() > 0)
-			{
-				CViewLink *vt = new CViewLink(CViewBase::TCtorParam());
-				vt->setId("link");
-				vt->setUnderlined(true);
-				vt->setShadow(isTextShadowed());
-				vt->setShadowOutline(false);
-				vt->setFontSize(getTextFontSize());
-				vt->setMultiLine(true);
-				vt->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);
-				vt->setMultiLineSpace(getTextMultiLineSpace());
-				vt->setModulateGlobalColor(false);
-
-				//NLMISC::CRGBA color;
-				//color.blendFromui(col, CRGBA(255, 153, 0, 255), 100);
-				//vt->setColor(color);
-				vt->setColor(col);
-
-				const bool itemLink = CHAT_LINK::isItemUrl(url);
-				const bool phraseLink = CHAT_LINK::isPhraseUrl(url);
-				CHAT_LINK::CItemSnapshot itemSnapshot;
-				CSPhraseCom phrase;
-				const bool validItemLink = itemLink && CHAT_LINK::decodeItemSnapshot(url, itemSnapshot);
-				const bool validPhraseLink = phraseLink && CHAT_LINK::decodePhrase(url, phrase);
-				if (validItemLink)
-					itemSnapshot.Name = title.empty() ? CI18N::get("uiChatLinkDefaultItemName") : title;
-				if (validPhraseLink)
-					phrase.Name.fromUtf8(title.empty() ? CI18N::get("uiAction") : title);
-				if (itemLink)
-					vt->setColor(NLMISC::CRGBA(255, 205, 80, 255));
-				else if (phraseLink)
-					vt->setColor(NLMISC::CRGBA(110, 205, 255, 255));
-
-				if (title.size() > 0)
-				{
-					vt->LinkTitle = title;
-					vt->setText(vt->LinkTitle);
-				}
-				else if (validItemLink)
-				{
-					vt->LinkTitle = itemSnapshot.Name;
-					vt->setText(vt->LinkTitle);
-				}
-				else if (validPhraseLink)
-				{
-					vt->LinkTitle = phrase.Name.toUtf8();
-					vt->setText(vt->LinkTitle);
-				}
-				else
-				{
-					vt->LinkTitle = url;
-					vt->setText(vt->LinkTitle);
-				}
-
-				if (url.find_first_of('\'') != string::npos)
-				{
-					string clean;
-					for(string::size_type i = 0; i< url.size(); ++i)
-					{
-						if (url[i] == '\'')
-							clean += "%27";
-						else
-							clean += url[i];
-					}
-					url = clean;
-				}
-				vt->setActionOnLeftClick("lua");
-				vt->setParamsOnLeftClick("game:chatUrl('" + url + "')");
-				if (itemLink)
-				{
-					if (validItemLink)
-					{
-						vt->setLinkContextHelp(itemSnapshot.Name);
-						vt->setActionOnContextHelp("item_chat_link_tooltip");
-					}
-					else
-						vt->setLinkContextHelp(CI18N::get("uiChatLinkInvalid"));
-					vt->setActionOnLeftClick("open_item_chat_link");
-					vt->setParamsOnLeftClick(url + "\n" + (validItemLink ? itemSnapshot.Name : title));
-				}
-				else if (phraseLink)
-				{
-					if (validPhraseLink)
-					{
-						vt->setLinkContextHelp(phrase.Name.toUtf8());
-						vt->setActionOnContextHelp("phrase_chat_link_tooltip");
-					}
-					else
-						vt->setLinkContextHelp(CI18N::get("uiChatLinkInvalid"));
-					vt->setActionOnLeftClick("open_phrase_chat_link");
-					vt->setParamsOnLeftClick(url + "\n" + (validPhraseLink ? phrase.Name.toUtf8() : title));
-				}
-
-				para->addChildLink(vt);
-
-				pos = i;
-			}
-		}
-		else
-		{
-			++i;
-		}
-	}
-
-	if (pos < textSize)
-	{
-		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, NULL);
-		vt->setId("text");
-		para->addChild(vt);
-	}
+	addMsgText(para, msg, col, justified, pos, textSize);
 
 	return para;
 }
@@ -647,9 +637,24 @@ public:
 		if (pCaller == NULL) return;
 
 		LastSelectedChat = params;
+		LastSelectedChatSheetId = CSheetId::Unknown;
 
 		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
 		if (pGP) pGP->enableTempOver();
+		if (pGP && !UserPrivileges.empty())
+		{
+			CCtrlBase *ctrl = CWidgetManager::getInstance()->getCapturePointerRight();
+			if (ctrl && ctrl->getParent() == pGP)
+				CHAT_SHARE::getAttachmentSheetId(ctrl, LastSelectedChatSheetId);
+		}
+
+		CGroupMenu *menu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:chat_copy_action_menu"));
+		if (menu && menu->getRootMenu())
+		{
+			const sint line = menu->getRootMenu()->getLineFromId("copy_sheet_id");
+			if (line >= 0)
+				menu->getRootMenu()->setHiddenLine(line, LastSelectedChatSheetId == CSheetId::Unknown);
+		}
 
 		CWidgetManager::getInstance()->enableModalWindow (pCaller, "ui:interface:chat_copy_action_menu");
 	}
@@ -673,4 +678,24 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCopyChat, "copy_chat");
+
+// ***************************************************************************
+// Called when we right click on an attachment and choose 'copy sheet id' from context menu
+class CHandlerCopyChatSheetId: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* params */)
+	{
+		if (pCaller == NULL) return;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->disableTempOver();
+
+		if (!UserPrivileges.empty() && LastSelectedChatSheetId != CSheetId::Unknown)
+			CAHManager::getInstance()->runActionHandler("copy_to_clipboard", NULL, LastSelectedChatSheetId.toString());
+		LastSelectedChatSheetId = CSheetId::Unknown;
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCopyChatSheetId, "copy_chat_sheet_id");
 

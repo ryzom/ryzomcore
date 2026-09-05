@@ -1581,19 +1581,12 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseUpdateAllMemoryRegenTickRange, "phrase_upd
 
 
 // ***************************************************************************
-static void insertPhraseLinkIntoChat(const CSPhraseCom &phrase)
+static void sharePhrase(const CSPhraseCom &phrase, CChatMessageReference::TType type, uint32 value,
+	const std::string &destination)
 {
-	std::string marker = CHAT_LINK::createPhraseMarker(phrase);
-	if (marker.empty())
-	{
-		CInterfaceManager::getInstance()->displaySystemInfo(
-			CI18N::get("uiChatLinkDoesNotFit"));
-		return;
-	}
-	CHAT_LINK::TInsertResult result = CHAT_LINK::insertIntoChat(marker);
-	if (result == CHAT_LINK::InsertNoChat)
-		return;
-	if (result == CHAT_LINK::InsertInputFull)
+	CHAT_SHARE::TShareResult result = CHAT_SHARE::share(phrase.Name.toUtf8(), type, value,
+		CHAT_SHARE::phraseColor(), destination);
+	if (result == CHAT_SHARE::ShareInputFull)
 		CInterfaceManager::getInstance()->displaySystemInfo(
 			CI18N::get("uiChatLinkDoesNotFit"));
 }
@@ -1601,26 +1594,38 @@ static void insertPhraseLinkIntoChat(const CSPhraseCom &phrase)
 class CHandlerLinkPhraseInChat : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string & /* params */)
+	virtual void execute(CCtrlBase * /* pCaller */, const string &params)
 	{
 		CDBCtrlSheet *ctrl = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (!ctrl)
 			return;
 
 		CSPhraseCom phrase;
+		CChatMessageReference::TType type;
+		uint32 value;
 		if (ctrl->isSPhraseId())
+		{
 			phrase = CSPhraseManager::getInstance()->getPhrase(ctrl->getSPhraseId());
+			type = CChatMessageReference::KnownPhrase;
+			value = ctrl->getSPhraseId();
+		}
 		else if (ctrl->isSPhrase())
+		{
 			CSPhraseManager::getInstance()->buildPhraseFromSheet(phrase, ctrl->getSheetId());
+			type = CChatMessageReference::PhraseSheet;
+			value = ctrl->getSheetId();
+		}
+		else
+			return;
 		if (!phrase.empty())
-			insertPhraseLinkIntoChat(phrase);
+			sharePhrase(phrase, type, value, getParam(params, "destination"));
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerLinkPhraseInChat, "link_phrase_in_chat");
 
 // ***************************************************************************
-/// Called when we right click on a brick in the memories
-class CHandlerPhraseCheckCanCristalize: public IActionHandler
+/// Called when opening the phrase context menu
+class CHandlerPhraseMenuCheck: public IActionHandler
 {
 public:
 	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
@@ -1643,7 +1648,7 @@ public:
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == NULL) return;
 		bool memoryPhrase = pCS->isSPhraseIdMemory();
-		if (pPhraseChatLink)
+		if (phraseMenu)
 		{
 			const char *memoryOnlyIds[] = { "for", "edi", "cut", "copy" };
 			for (uint i = 0; i < sizeof(memoryOnlyIds) / sizeof(memoryOnlyIds[0]); ++i)
@@ -1688,7 +1693,7 @@ public:
 		}
 	}
 };
-REGISTER_ACTION_HANDLER(CHandlerPhraseCheckCanCristalize, "phrase_check_can_cristalize");
+REGISTER_ACTION_HANDLER(CHandlerPhraseMenuCheck, "phrase_check_can_cristalize");
 
 // ***************************************************************************
 /// Called after the cm_memory_phrase menu has been opened on a magic phrase

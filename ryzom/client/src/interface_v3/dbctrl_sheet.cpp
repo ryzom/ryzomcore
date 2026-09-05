@@ -963,6 +963,10 @@ uint CDBCtrlSheet::getInventorySlot( const string &dbBranchId )
 		if( !strncmp( "GUILD:INVENTORY", szName, 15 ) )
 			return INVENTORIES::guild;
 		break;
+	case 'T':
+		if( !strncmp( "TRADING", szName, 7 ) )
+			return INVENTORIES::trading;
+		break;
 	case 'I':
 		if( strncmp( "INVENTORY:", szName, 10 ) )
 			break;
@@ -4732,9 +4736,6 @@ void CDBCtrlSheet::initArmourColors()
 // ***************************************************************************
 string CDBCtrlSheet::getItemActualName() const
 {
-	if (!_ItemActualNameOverride.empty())
-		return _ItemActualNameOverride;
-
 	const CItemSheet *pIS= asItemSheet();
 	if(!pIS)
 		return string();

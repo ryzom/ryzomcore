@@ -37,6 +37,7 @@
 #include "game_share/base_types.h"
 #include "game_share/string_manager_sender.h"
 #include "game_share/dyn_chat.h"
+#include "game_share/chat_message.h"
 
 
 // std
@@ -166,6 +167,7 @@ public :
 	 * \param str is the chat content
 	 */
 	void chat( const TDataSetRow& sender, const ucstring& ucstr );
+	void chatShared(const TDataSetRow &sender, const CChatMessage &message);
 
 	/**
 	 * Transmit a chat message to a group
@@ -180,6 +182,8 @@ public :
 	 * Transmit a far chat message to a group
 	 */
 	void farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName, uint32 senderCid = 0);
+	void farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, const CChatMessage &message, const ucstring &senderName, uint32 senderCid = 0);
+	void farDynChatShared(TChanID chanId, const ucstring &senderName, const CChatMessage &message);
 
 	/**
 	 * Transmit a chat message to the receiver
@@ -188,10 +192,13 @@ public :
 	 * \param str is the chat content
 	 */
 	void tell( const TDataSetRow& sender, const std::string& receiver, const ucstring& ucstr );
+	void tellShared(const TDataSetRow &sender, const std::string &receiver, const CChatMessage &message);
 	/**
 	 * Transmit a chat message to the receiver
 	 */
 	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr);
+	void farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &receiver, const CChatMessage &message);
+	void echoTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &receiver, const CChatMessage &message);
 	/**
 	 * Transmit a chat message to the receiver
 	 * \param sender is the id of the speaking char
@@ -326,7 +333,7 @@ public :
 	ucstring filterClientInputColorCode(ucstring &text);
 
 	/// Filter text send from client for removing any forbiden or harming content
-	ucstring filterClientInput(ucstring &text);
+	ucstring filterClientInput(ucstring &text, bool trimBeginning = true, bool trimEnd = true);
 
 	/// Subscribe special ring users in the ring universe chat
 	void subscribeCharacterInRingUniverse(const NLMISC::CEntityId &charEId);
@@ -369,6 +376,7 @@ private :
 	std::list<NLMISC::CEntityId>	_DestUsers;
 
 	CDynChat _DynChat;
+	const CChatMessage *_SharedMessage;
 
 
 protected:

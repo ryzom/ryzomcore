@@ -3343,6 +3343,10 @@
         name="uiCopy"
         handler="copy_chat"
         params="from_modal" />
+    <action id="copy_sheet_id"
+        name="uiCopySheetId"
+        handler="copy_chat_sheet_id"
+        params="from_modal" />
   </group>
 
 

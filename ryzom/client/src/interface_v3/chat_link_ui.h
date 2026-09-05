@@ -17,30 +17,48 @@
 #ifndef CL_CHAT_LINK_UI_H
 #define CL_CHAT_LINK_UI_H
 
-#include "chat_link_codec.h"
+#include "game_share/chat_message.h"
 
-#include "nel/misc/types_nl.h"
-
-#include <string>
-
-class CDBCtrlSheet;
-
-namespace CHAT_LINK
+namespace NLGUI
 {
-	enum TInsertResult
+	class CCtrlBase;
+	class CGroupEditBox;
+	class CViewLink;
+}
+
+namespace CHAT_SHARE
+{
+	class CRequestScope
 	{
-		InsertOk,
-		InsertNoChat,
-		InsertInputFull
+	public:
+		CRequestScope(const CChatMessageRequest *request);
+		~CRequestScope();
+
+	private:
+		CRequestScope(const CRequestScope &);
+		CRequestScope &operator=(const CRequestScope &);
+		const CChatMessageRequest *_Previous;
 	};
 
-	// Insert in the current or last chat input, then fall back to main chat.
-	// The message limit is counted in Unicode characters.
-	TInsertResult insertIntoChat(const std::string &marker);
+	enum TShareResult
+	{
+		ShareOk,
+		ShareUnavailable,
+		ShareInputFull
+	};
 
-	bool captureItemSnapshot(CDBCtrlSheet *item, uint32 slotId, CItemSnapshot &snapshot);
-	std::string createItemMarker(CItemSnapshot snapshot, bool *customTextOmitted=NULL);
-	std::string createPhraseMarker(const CSPhraseCom &phrase);
+	TShareResult share(const std::string &name, CChatMessageReference::TType type,
+		uint32 value, NLMISC::CRGBA color, const std::string &destination);
+	NLMISC::CRGBA itemColor();
+	NLMISC::CRGBA phraseColor();
+	bool isChatInput(NLGUI::CGroupEditBox *editBox);
+	bool hasCurrentRequest();
+	bool buildRequest(const NLGUI::CGroupEditBox *editBox, CChatMessageRequest &request);
+	bool buildCommandRequest(const NLGUI::CGroupEditBox *editBox, uint32 argumentsBeforeText,
+		CChatMessageRequest &request);
+	std::string getPartName(const CChatMessagePart &part);
+	NLGUI::CViewLink *createAttachmentView(const CChatMessagePart &part, bool justified);
+	bool getAttachmentSheetId(NLGUI::CCtrlBase *caller, NLMISC::CSheetId &sheetId);
 	void releasePreviewSheets();
 }
 

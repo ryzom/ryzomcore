@@ -1825,8 +1825,20 @@
             name="uimEquip"
             handler="inv_auto_equip" />
     <action id="item_chat_link"
-            name="uiChatLinkMenuItem"
-            handler="link_item_in_chat" />
+            name="uiChatLinkMenuItem">
+      <action id="main"
+              name="uiMainChat"
+              handler="link_item_in_chat"
+              params="destination=main" />
+      <action id="last"
+              name="uiChatLinkLastChat"
+              handler="link_item_in_chat"
+              params="destination=last" />
+      <action id="clipboard"
+              name="uiChatLinkClipboard"
+              handler="link_item_in_chat"
+              params="destination=clipboard" />
+    </action>
     <action id="infos"
             name="uimBoldInfo"
             handler="open_item_help" />
@@ -1837,6 +1849,28 @@
             name="uimItemTextEdit"
             handler="item_text_edition"
             params="ui:interface:edit_custom" />
+  </group>
+  <group type="menu"
+         id="item_menu_in_trade"
+         extends="base_menu">
+    <action id="item_chat_link"
+            name="uiChatLinkMenuItem">
+      <action id="main"
+              name="uiMainChat"
+              handler="link_item_in_chat"
+              params="destination=main" />
+      <action id="last"
+              name="uiChatLinkLastChat"
+              handler="link_item_in_chat"
+              params="destination=last" />
+      <action id="clipboard"
+              name="uiChatLinkClipboard"
+              handler="link_item_in_chat"
+              params="destination=clipboard" />
+    </action>
+    <action id="infos"
+            name="uimBoldInfo"
+            handler="open_help_auto" />
   </group>
   <!-- MAX_INVENTORY_ANIMAL -->
   <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')"
@@ -1854,8 +1888,20 @@
          on_active="item_menu_base_check" >
     <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
     <action id="item_chat_link"
-            name="uiChatLinkMenuItem"
-            handler="link_item_in_chat" />
+            name="uiChatLinkMenuItem">
+      <action id="main"
+              name="uiMainChat"
+              handler="link_item_in_chat"
+              params="destination=main" />
+      <action id="last"
+              name="uiChatLinkLastChat"
+              handler="link_item_in_chat"
+              params="destination=last" />
+      <action id="clipboard"
+              name="uiChatLinkClipboard"
+              handler="link_item_in_chat"
+              params="destination=clipboard" />
+    </action>
     <action id="destroy"
             name="uimDestroy"
             handler="proc"
@@ -1883,8 +1929,20 @@
       <!--<action id="bag"    name="uimMtBag"         handler="proc" params="move_to_bag" /> -->
     </action>
     <action id="item_chat_link"
-            name="uiChatLinkMenuItem"
-            handler="link_item_in_chat" />
+            name="uiChatLinkMenuItem">
+      <action id="main"
+              name="uiMainChat"
+              handler="link_item_in_chat"
+              params="destination=main" />
+      <action id="last"
+              name="uiChatLinkLastChat"
+              handler="link_item_in_chat"
+              params="destination=last" />
+      <action id="clipboard"
+              name="uiChatLinkClipboard"
+              handler="link_item_in_chat"
+              params="destination=clipboard" />
+    </action>
     <action id="infos"
             name="uimBoldInfo"
             handler="open_item_help"

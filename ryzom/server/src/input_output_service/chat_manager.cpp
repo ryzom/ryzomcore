@@ -69,8 +69,103 @@ CVariable<bool>			EnableDeepL("ios","EnableDeepL", "Enable DeepL auto-translatio
 typedef NLMISC::CTwinMap<TChanID, string> TChanTwinMap;
 TChanTwinMap 	_ChanNames;
 
+namespace
+{
+	class CSharedMessageScope
+	{
+	public:
+		CSharedMessageScope(const CChatMessage *&target, const CChatMessage &message)
+		: _Target(target), _Previous(target)
+		{
+			_Target = &message;
+		}
 
-CChatManager::CChatManager () : _Log(CLog::LOG_INFO)
+		~CSharedMessageScope()
+		{
+			_Target = _Previous;
+		}
+
+	private:
+		const CChatMessage *&_Target;
+		const CChatMessage *_Previous;
+	};
+
+	void prepareSharedMessage(CChatMessage &message, const TDataSetRow &receiver)
+	{
+		for (std::vector<CChatMessagePart>::iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+		{
+			if (it->Type != CChatMessagePart::Item)
+				continue;
+
+			if (!it->ItemValue.NamePhraseId.empty())
+			{
+				it->ItemValue.NameId = STRING_MANAGER::sendStringToClient(receiver,
+					it->ItemValue.NamePhraseId, TVectorParamCheck(), &IosLocalSender);
+			}
+			else if (!it->ItemValue.Name.empty())
+			{
+				SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
+				params[0].Literal = it->ItemValue.Name;
+				it->ItemValue.NameId = STRING_MANAGER::sendStringToClient(receiver, "LITERAL", params, &IosLocalSender);
+			}
+			if (!it->ItemValue.CreatorName.empty())
+				it->ItemValue.Info.CreatorName = SM->storeString(it->ItemValue.CreatorName);
+			it->ItemValue.NamePhraseId.clear();
+			it->ItemValue.Name.clear();
+			it->ItemValue.CreatorName.clear();
+		}
+	}
+
+	void serialSharedMessage(CBitMemStream &stream, TDataSetIndex compressedIndex, ucstring displayName,
+		CChatGroup::TGroupType chatMode, TChanID channelId, bool ownTell, ucstring tellTarget,
+		const CChatMessage &source, const TDataSetRow &receiver, bool noBubble = false)
+	{
+		GenericXmlMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", stream);
+		stream.serial(compressedIndex);
+		stream.serial(displayName);
+		stream.serialEnum(chatMode);
+		stream.serial(channelId);
+		stream.serial(ownTell);
+		stream.serial(tellTarget);
+		CChatMessage message = source;
+		message.NoBubble = noBubble;
+		prepareSharedMessage(message, receiver);
+		stream.serial(message);
+	}
+
+	ucstring sharedMessageLogText(const CChatMessage &message)
+	{
+		ucstring text;
+		for (std::vector<CChatMessagePart>::const_iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+		{
+			if (it->Type == CChatMessagePart::Text)
+			{
+				text += it->TextValue;
+			}
+			else if (it->Type == CChatMessagePart::Item)
+			{
+				if (!it->ItemValue.Name.empty())
+					text += it->ItemValue.Name;
+				else
+				{
+					const std::string name = it->ItemValue.NamePhraseId.empty() ?
+						it->ItemValue.SheetId.toString() : it->ItemValue.NamePhraseId;
+					text += ucstring::makeFromUtf8("[item:" + name + "]");
+				}
+			}
+			else
+			{
+				if (!it->PhraseValue.Phrase.Name.empty())
+					text += it->PhraseValue.Phrase.Name;
+				else
+					text += ucstring::makeFromUtf8("[action:" + it->PhraseValue.SheetId.toString() + "]");
+			}
+		}
+		return text;
+	}
+}
+
+CChatManager::CChatManager () : _Log(CLog::LOG_INFO), _SharedMessage(NULL)
 {
 	_Log.addDisplayer(&_Displayer);
 }
@@ -933,6 +1028,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 						_Log.displayNL("guild:%s|%s|%s|%s|%s", grpId.toString().c_str(), fullName.c_str(), senderLang.c_str(), langs.c_str(), ucstr.toUtf8().c_str() );
 					}
 				}
+				else
+					chatInGroup( grpId, ucstr, sender );
 			}
 			break;
 
@@ -1061,7 +1158,13 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 						{
 							// add msg to the historic
 							CDynChatChan::CHistoricEntry entry;
-							entry.String = ucstr;
+							if (_SharedMessage)
+							{
+								entry.Shared = true;
+								entry.Message = *_SharedMessage;
+							}
+							else
+								entry.String = ucstr;
 							if (ci != NULL)
 								entry.SenderString = ci->Name;
 							else
@@ -1138,7 +1241,12 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 						{
 							// send the text to other shards
 							if (IChatUnifierClient::getInstance())
-								IChatUnifierClient::getInstance()->sendUnifiedDynChat(session->getChan()->getID(), senderName, ucstr);
+							{
+								if (_SharedMessage)
+									IChatUnifierClient::getInstance()->sendUnifiedDynChatShared(session->getChan()->getID(), senderName, *_SharedMessage);
+								else
+									IChatUnifierClient::getInstance()->sendUnifiedDynChat(session->getChan()->getID(), senderName, ucstr);
+							}
 						}
 					}
 				}
@@ -1169,6 +1277,17 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 	}
 
 } // chat //
+
+void CChatManager::chatShared(const TDataSetRow &sender, const CChatMessage &message)
+{
+	CSharedMessageScope scope(_SharedMessage, message);
+	ucstring text;
+	// Keep structured messages out of the flat-text translation path.
+	if (EnableDeepL)
+		text = "> ";
+	text += sharedMessageLogText(message);
+	chat(sender, text);
+}
 
 
 //-----------------------------------------------
@@ -1261,7 +1380,10 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 				// forward to chat unifier to dispatch to other shards
 				if (IChatUnifierClient::getInstance())
 				{
-					IChatUnifierClient::getInstance()->sendFarGuildChat(charInfos->Name, uint32(grpId.getShortId()), ucstr.substr(startPos));
+					if (_SharedMessage)
+						IChatUnifierClient::getInstance()->sendFarGuildChatShared(charInfos->Name, uint32(grpId.getShortId()), *_SharedMessage);
+					else
+						IChatUnifierClient::getInstance()->sendFarGuildChat(charInfos->Name, uint32(grpId.getShortId()), ucstr.substr(startPos));
 				}
 			}
 		}
@@ -1276,7 +1398,10 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 				{
 					// determine the session id as the home session id for normal players and the current session id for GMs
 					uint32 sessionId= (charInfos->HavePrivilege && !IsRingShard)? IService::getInstance()->getShardId(): (uint32)charInfos->HomeSessionId;
-					IChatUnifierClient::getInstance()->sendUniverseChat(charInfos->Name, sessionId, ucstr.substr(startPos));
+					if (_SharedMessage)
+						IChatUnifierClient::getInstance()->sendUniverseChatShared(charInfos->Name, sessionId, *_SharedMessage);
+					else
+						IChatUnifierClient::getInstance()->sendUniverseChat(charInfos->Name, sessionId, ucstr.substr(startPos));
 				}
 			}
 		}
@@ -1330,6 +1455,30 @@ void CChatManager::farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const u
 	else
 	{
 		nlwarning("<CChatManager::chatInGroup> The group %s is unknown",grpId.toString().c_str());
+	}
+}
+
+void CChatManager::farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, const CChatMessage &message, const ucstring &senderName, uint32 senderCid)
+{
+	CSharedMessageScope scope(_SharedMessage, message);
+	farChatInGroup(grpId, homeSessionId, ucstring(), senderName, senderCid);
+}
+
+void CChatManager::farDynChatShared(TChanID chanId, const ucstring &senderName, const CChatMessage &message)
+{
+	CDynChatChan *chan = _DynChat.getChan(chanId);
+	if (chan == NULL)
+	{
+		nldebug("IOSCU : dynChanBroadcastShared : cannot find dynamic channel %s to broadcast chat", chanId.toString().c_str());
+		return;
+	}
+
+	CSharedMessageScope scope(_SharedMessage, message);
+	CDynChatSession *dcc = chan->getFirstSession();
+	while (dcc)
+	{
+		sendChat(CChatGroup::dyn_chat, dcc->getClient()->getID(), ucstring(), TDataSetRow(), chanId, senderName);
+		dcc = dcc->getNextChannelSession();
 	}
 }
 
@@ -1920,25 +2069,6 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 						return;
 					}
 
-					uint32 senderNameIndex;
-					// if the sender exists
-					if( charInfos )
-					{
-						senderNameIndex = charInfos->NameIndex;
-					}
-					else
-					{
-						// if no sender, we use a special name
-						ucstring senderName("<BROADCAST MESSAGE>");
-						senderNameIndex = SM->storeString( senderName );
-					}
-
-					if (!senderName.empty())
-					{
-						// the sender overloaded the name
-						senderNameIndex = SM->storeString( senderName );
-					}
-
 					// send the string to FE
 					CMessage msgout( "IMPULS_CH_ID" );
 //					CEntityId& destId = receiver;
@@ -1947,18 +2077,47 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 					msgout.serial( eid );
 					msgout.serial( channel );
 					CBitMemStream bms;
-					GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
-
-					CChatMsg chatMsg;
-					chatMsg.CompressedIndex = sender.getCompressedIndex();
-					chatMsg.SenderNameId = senderNameIndex;
-					chatMsg.ChatMode = (uint8) senderChatMode;
-					if (senderChatMode == CChatGroup::dyn_chat)
+					if (_SharedMessage)
 					{
-						chatMsg.DynChatChanID = chanID;
+						ucstring displayName = senderName.empty() && charInfos ? charInfos->Name : senderName;
+						CDynChatChan *channel = senderChatMode == CChatGroup::dyn_chat ? _DynChat.getChan(chanID) : NULL;
+						serialSharedMessage(bms, sender.getCompressedIndex(), displayName, senderChatMode,
+							chanID, false, ucstring(), *_SharedMessage, receiver, channel && channel->HideBubble);
 					}
-					chatMsg.Content = ucstr;
-					bms.serial( chatMsg );
+					else
+					{
+						uint32 senderNameIndex;
+						// if the sender exists
+						if( charInfos )
+						{
+							senderNameIndex = charInfos->NameIndex;
+						}
+						else
+						{
+							// if no sender, we use a special name
+							ucstring senderName("<BROADCAST MESSAGE>");
+							senderNameIndex = SM->storeString( senderName );
+						}
+
+						if (!senderName.empty())
+						{
+							// the sender overloaded the name
+							senderNameIndex = SM->storeString( senderName );
+						}
+
+						GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
+
+						CChatMsg chatMsg;
+						chatMsg.CompressedIndex = sender.getCompressedIndex();
+						chatMsg.SenderNameId = senderNameIndex;
+						chatMsg.ChatMode = (uint8) senderChatMode;
+						if (senderChatMode == CChatGroup::dyn_chat)
+						{
+							chatMsg.DynChatChanID = chanID;
+						}
+						chatMsg.Content = ucstr;
+						bms.serial( chatMsg );
+					}
 
 	/*				nldebug("<CChatManager::sendChat> Sending dynamic chat '%s' from client %d to client %s with chat mode %d",
 						chatMsg.Content.toString().c_str(),
@@ -2045,8 +2204,6 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 				if (senderCid > 0 && itCl->second->isInIgnoreList(senderCid))
 					return;
 
-				uint32 senderNameIndex = SM->storeString( senderName );
-
 				// send the string to FE
 				CMessage msgout( "IMPULS_CH_ID" );
 //					CEntityId& destId = receiver;
@@ -2055,18 +2212,28 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 				msgout.serial( eid );
 				msgout.serial( channel );
 				CBitMemStream bms;
-				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
-
-				CChatMsg chatMsg;
-				chatMsg.CompressedIndex = 0xFFFFF;
-				chatMsg.SenderNameId = senderNameIndex;
-				chatMsg.ChatMode = (uint8) senderChatMode;
-				if (senderChatMode == CChatGroup::dyn_chat)
+				if (_SharedMessage)
 				{
-					chatMsg.DynChatChanID = chanID;
+					TDataSetIndex compressedIndex = 0xFFFFF;
+					CDynChatChan *channel = senderChatMode == CChatGroup::dyn_chat ? _DynChat.getChan(chanID) : NULL;
+					serialSharedMessage(bms, compressedIndex, senderName, senderChatMode, chanID,
+						false, ucstring(), *_SharedMessage, receiver, channel && channel->HideBubble);
 				}
-				chatMsg.Content = ucstr;
-				bms.serial( chatMsg );
+				else
+				{
+					GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:CHAT", bms );
+
+					CChatMsg chatMsg;
+					chatMsg.CompressedIndex = 0xFFFFF;
+					chatMsg.SenderNameId = SM->storeString( senderName );
+					chatMsg.ChatMode = (uint8) senderChatMode;
+					if (senderChatMode == CChatGroup::dyn_chat)
+					{
+						chatMsg.DynChatChanID = chanID;
+					}
+					chatMsg.Content = ucstr;
+					bms.serial( chatMsg );
+				}
 
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
@@ -2456,15 +2623,27 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				msgout.serial( receiverInfos->EntityId );
 				msgout.serial( channel );
 				CBitMemStream bms;
-				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:TELL", bms);
+				if (_SharedMessage)
+				{
+					TDataSetIndex dsi = senderInfos->DataSetIndex.getCompressedIndex();
+					serialSharedMessage(bms, dsi, senderInfos->Name, CChatGroup::tell,
+						CEntityId::Unknown, false, ucstring(), *_SharedMessage, receiverInfos->DataSetIndex);
+				}
+				else
+				{
+					GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:TELL", bms);
 
-				TDataSetIndex dsi = senderInfos->DataSetIndex.getCompressedIndex();
-				bms.serial( dsi );
-				bms.serial( senderInfos->NameIndex );
-				bms.serial( const_cast<ucstring&>(ucstr) );
+					TDataSetIndex dsi = senderInfos->DataSetIndex.getCompressedIndex();
+					bms.serial( dsi );
+					bms.serial( senderInfos->NameIndex );
+					bms.serial( const_cast<ucstring&>(ucstr) );
+				}
 
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
+
+				if (_SharedMessage)
+					echoTellShared(senderInfos->EntityId, receiverInfos->Name, *_SharedMessage);
 
 				// log tell to PDS
 //				IOSPD::logTell(ucstr, senderInfos->EntityId, receiverInfos->EntityId);
@@ -2532,7 +2711,13 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 			if (p0 != string::npos)
 				senderName = senderName.substr(0, p0);
 
-			_Log.displayNL("tell:%s|%s|%d|%s|%s", receiverIn.c_str(), senderName.c_str(), 1, "*", ucstr.toUtf8().c_str() );
+			if (_SharedMessage)
+			{
+				echoTellShared(senderInfos->EntityId, ucstring(receiver), *_SharedMessage);
+				IChatUnifierClient::getInstance()->sendFarTellShared(senderInfos->EntityId, senderInfos->HavePrivilege, ucstring(receiver), *_SharedMessage);
+			}
+			else
+				_Log.displayNL("tell:%s|%s|%d|%s|%s", receiverIn.c_str(), senderName.c_str(), 1, "*", ucstr.toUtf8().c_str() );
 		}
 		else
 		{
@@ -2543,6 +2728,30 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 		}
 	}
 } // tell //
+
+void CChatManager::tellShared(const TDataSetRow &sender, const std::string &receiver, const CChatMessage &message)
+{
+	CSharedMessageScope scope(_SharedMessage, message);
+	tell(sender, receiver, sharedMessageLogText(message));
+}
+
+void CChatManager::echoTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &receiver, const CChatMessage &message)
+{
+	CCharacterInfos *senderInfos = IOS->getCharInfos(senderCharId);
+	if (senderInfos == NULL)
+		return;
+
+	CMessage echo("IMPULS_CH_ID");
+	uint8 channel = 1;
+	echo.serial(senderInfos->EntityId);
+	echo.serial(channel);
+	CBitMemStream stream;
+	TDataSetIndex compressedIndex = senderInfos->DataSetIndex.getCompressedIndex();
+	serialSharedMessage(stream, compressedIndex, receiver, CChatGroup::tell, CEntityId::Unknown,
+		true, receiver, message, senderInfos->DataSetIndex);
+	echo.serialBufferWithSize((uint8*)stream.buffer(), stream.length());
+	sendMessageViaMirror(TServiceId(senderInfos->EntityId.getDynamicId()), echo);
+}
 
 
 void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr  )
@@ -2579,12 +2788,21 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 				msgout.serial( receiverInfos->EntityId );
 				msgout.serial( channel );
 				CBitMemStream bms;
-				GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:FAR_TELL", bms);
+				if (_SharedMessage)
+				{
+					TDataSetIndex compressedIndex = 0xFFFFF;
+					serialSharedMessage(bms, compressedIndex, senderName, CChatGroup::tell,
+						CEntityId::Unknown, false, ucstring(), *_SharedMessage, receiverInfos->DataSetIndex);
+				}
+				else
+				{
+					GenericXmlMsgHeaderMngr.pushNameToStream( "STRING:FAR_TELL", bms);
 
-				CFarTellMsg ftm;
-				ftm.SenderName = senderName;
-				ftm.Text = ucstr;
-				ftm.serial(bms);
+					CFarTellMsg ftm;
+					ftm.SenderName = senderName;
+					ftm.Text = ucstr;
+					ftm.serial(bms);
+				}
 
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
@@ -2603,6 +2821,12 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 		}
 	}
 } // tell //
+
+void CChatManager::farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &receiver, const CChatMessage &message)
+{
+	CSharedMessageScope scope(_SharedMessage, message);
+	farTell(senderCharId, senderName, havePrivilege, receiver, sharedMessageLogText(message));
+}
 
 /*
  * Display the list of clients
@@ -2773,7 +2997,13 @@ void CChatManager::sendHistoric(const TDataSetRow &receiver, TChanID chanID)
 	for(uint k = 0; k < chan->Historic.getSize(); ++k)
 	{
 //		sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, chan->Historic[k].Sender, chanID);
-		sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, TDataSetRow(), chanID, chan->Historic[k].SenderString);
+		if (chan->Historic[k].Shared)
+		{
+			CSharedMessageScope scope(_SharedMessage, chan->Historic[k].Message);
+			sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, TDataSetRow(), chanID, chan->Historic[k].SenderString);
+		}
+		else
+			sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, TDataSetRow(), chanID, chan->Historic[k].SenderString);
 	}
 }
 
@@ -2802,7 +3032,7 @@ ucstring CChatManager::filterClientInputColorCode(ucstring &text)
 	return result;
 }
 
-ucstring CChatManager::filterClientInput(ucstring &text)
+ucstring CChatManager::filterClientInput(ucstring &text, bool trimBeginning, bool trimEnd)
 {
 	ucstring result;
 	result.reserve(text.size());
@@ -2810,17 +3040,17 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 	ucstring::size_type pos = 0;
 
 	// skip begin white spaces or : (used by deepl)
-	while (pos < text.size() && (text[pos] == ' ' || text[pos] == '\t'))
+	while (trimBeginning && pos < text.size() && (text[pos] == ' ' || text[pos] == '\t'))
 		++pos;
 
 	// remove ending white space
-	while (text.size() > 0 && (*(text.rbegin()) == ' ' || *(text.rbegin()) == '\t'))
+	while (trimEnd && text.size() > 0 && (*(text.rbegin()) == ' ' || *(text.rbegin()) == '\t'))
 		text.resize(text.size()-1);
 
-	if (pos+3 < text.size() && text[pos] == ':' && text[pos+3] == ':')
+	if (trimBeginning && pos+3 < text.size() && text[pos] == ':' && text[pos+3] == ':')
 		++pos;
 
-	if (pos+1 < text.size() && text[pos] == '>' && text[pos+1] == ':')
+	if (trimBeginning && pos+1 < text.size() && text[pos] == '>' && text[pos+1] == ':')
 		pos += 2;
 
 	// copy string, removing multi white space between words
@@ -2843,7 +3073,7 @@ ucstring CChatManager::filterClientInput(ucstring &text)
 				}
 				// Filter out '&' at the first non-whitespace position to remove
 				// system color code (like '&SYS&' )
-				bool disallowAmpersand = (result.size() == 0) || hasBrackets;
+				bool disallowAmpersand = (trimBeginning && result.empty()) || hasBrackets;
 				if (disallowAmpersand)
 				{
 					result += '.';

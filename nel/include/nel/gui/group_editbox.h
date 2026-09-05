@@ -38,6 +38,15 @@ namespace NLGUI
 	public:
         DECLARE_UI_CLASS( CGroupEditBox )
 
+		struct CTextTag
+		{
+			uint32 Start;
+			uint32 Length;
+			uint32 Type;
+			uint32 Value;
+			NLMISC::CRGBA Color;
+		};
+
 		class IComboKeyHandler
 		{
 		public:
@@ -75,6 +84,8 @@ namespace NLGUI
 		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
 		void		setInputStringRef(const ::u32string &str);
+		void		addTextTag(uint32 start, uint32 length, uint32 type, uint32 value, NLMISC::CRGBA color);
+		const std::vector<CTextTag> &getTextTags() const { return _TextTags; }
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
@@ -140,8 +151,11 @@ namespace NLGUI
 
 		// Copy the selection into buffer
 		void		copy();
+		bool		copySelectionToClipboard();
+		static bool	copyToClipboard(const ::u32string &text, const std::vector<CTextTag> &textTags);
 		// Paste the selection into buffer
 		void		paste();
+		void		paste(uint32 maxTextTags);
 		// Write the string into buffer
 		void		writeString(const std::string &str, bool replace = true, bool atEnd = true);
 
@@ -239,10 +253,13 @@ namespace NLGUI
 		::u32string	_Prompt;
 		::u32string	_InputString;
 		CViewText	*_ViewText;
+		std::vector<CTextTag> _TextTags;
 
 		// undo / redo
 		::u32string	_StartInputString;  // value of the input string when focus was acuired first
 		::u32string	_ModifiedInputString;
+		std::vector<CTextTag> _StartTextTags;
+		std::vector<CTextTag> _ModifiedTextTags;
 
 
 		// Historic info
@@ -301,12 +318,14 @@ namespace NLGUI
 
 	private:
 		void setupDisplayText();
+		void updateTextTags(uint32 start, uint32 oldLength, uint32 newLength);
 		void makeTopWindow();
 		void handleEventChar(const NLGUI::CEventDescriptorKey &event);
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
-		void appendStringFromClipboard(const std::string &str);
+		void appendStringFromClipboard(const std::string &str, const std::vector<CTextTag> *textTags,
+			uint32 maxTextTags);
 
 		std::string	getSelection();
 

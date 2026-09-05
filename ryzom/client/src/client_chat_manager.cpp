@@ -29,6 +29,7 @@
 #include "client_chat_manager.h"
 #include "net_manager.h"
 #include "nel/gui/group_list.h"
+#include "interface_v3/chat_link_ui.h"
 #include "interface_v3/interface_manager.h"
 #include "interface_v3/people_interraction.h"
 #include "string_manager_client.h"
@@ -316,6 +317,38 @@ void CClientChatManager::chat( const string& strIn, bool isChatTeam )
 
 } // chat //
 
+void CClientChatManager::chat(const CChatMessageRequest &request, bool isChatTeam)
+{
+	if (!request.isValid())
+		return;
+	if (isChatTeam && !NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GROUP:0:PRESENT")->getValueBool())
+		return;
+
+	CChatGroup::TGroupType group = isChatTeam ? CChatGroup::team :
+		static_cast<CChatGroup::TGroupType>(_ChatMode);
+	TChanID dynamicChannelId = group == CChatGroup::dyn_chat ?
+		_ChatDynamicChannelId : NLMISC::CEntityId::Unknown;
+	std::string receiver;
+	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
+		return;
+
+	CBitMemStream bms;
+	if (GenericMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", bms))
+	{
+		uint8 targetGroup = (uint8)group;
+		bms.serial(targetGroup);
+		bms.serial(dynamicChannelId);
+		bms.serial(receiver);
+		CChatMessageRequest message = request;
+		bms.serial(message);
+		NetMngr.push(bms);
+	}
+	else
+		nlwarning("<CClientChatManager::chat> unknown message name: STRING:CHAT_SHARE");
+
+	if (UserEntity != NULL) UserEntity->setAFK(false);
+}
+
 
 //-----------------------------------------------
 //	tell
@@ -343,6 +376,42 @@ void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 	}
 
 
+	updateTellList(receiver);
+
+	// tell => the user is no more AFK.
+	if (UserEntity != NULL) UserEntity->setAFK(false);
+
+} // tell //
+
+void CClientChatManager::tell(const string &receiverIn, const CChatMessageRequest &request)
+{
+	if (!request.isValid())
+		return;
+	string receiver = receiverIn.substr(0, CHAT_MESSAGE::MaxReceiverLength);
+	CChatGroup::TGroupType group = CChatGroup::tell;
+	TChanID dynamicChannelId = NLMISC::CEntityId::Unknown;
+	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
+		return;
+	CBitMemStream bms;
+	if (GenericMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", bms))
+	{
+		uint8 targetGroup = (uint8)group;
+		bms.serial(targetGroup);
+		bms.serial(dynamicChannelId);
+		bms.serial(receiver);
+		CChatMessageRequest message = request;
+		bms.serial(message);
+		NetMngr.push(bms);
+	}
+	else
+		nlwarning("<CClientChatManager::tell> unknown message name: STRING:CHAT_SHARE");
+
+	updateTellList(receiver);
+	if (UserEntity != NULL) UserEntity->setAFK(false);
+}
+
+void CClientChatManager::updateTellList(const string &receiver)
+{
 	// *** manage list of last telled people
 	// remove the telled people from list (if present)
 	std::list<string>::iterator it = _TellPeople.begin();
@@ -371,10 +440,7 @@ void CClientChatManager::tell( const string& receiverIn, const string& strIn )
 		_TellPeople.pop_front();
 	}
 
-	// tell => the user is no more AFK.
-	if (UserEntity != NULL) UserEntity->setAFK(false);
-
-} // tell //
+}
 
 
 
@@ -533,6 +599,93 @@ void	CClientChatManager::processChatString( NLMISC::CBitMemStream& bms, IChatDis
 	chatDisplayer.displayChat(chatMsg.CompressedIndex, ucstr, chatMsg.Content.toUtf8(), type, chatMsg.DynChatChanID, senderStr);
 }
 
+void CClientChatManager::processChatMessage(NLMISC::CBitMemStream &bms, IChatDisplayer &chatDisplayer)
+{
+	updateDynamicChatChannels(chatDisplayer);
+
+	TDataSetIndex compressedSenderIndex;
+	ucstring senderName;
+	CChatGroup::TGroupType type;
+	TChanID dynChatId;
+	bool ownTell;
+	ucstring tellTarget;
+	CChatMessage message;
+	bms.serial(compressedSenderIndex);
+	bms.serial(senderName);
+	bms.serialEnum(type);
+	bms.serial(dynChatId);
+	bms.serial(ownTell);
+	bms.serial(tellTarget);
+	bms.serial(message);
+
+	if (PermanentlyBanned || type >= CChatGroup::nbChatMode || !message.isValid())
+		return;
+
+	const std::string sender = senderName.toUtf8();
+	const std::string target = tellTarget.toUtf8();
+	const bool validWire = type == CChatGroup::tell ?
+		(ownTell ? !target.empty() : target.empty()) : (!ownTell && target.empty());
+	const std::string receiver = type == CChatGroup::tell ? (ownTell ? target : sender) : std::string();
+	if (!validWire || !CHAT_MESSAGE::isValidTarget(type, dynChatId, receiver))
+		return;
+
+	CChatMsgNode chatMessage(compressedSenderIndex, sender, type, dynChatId, ownTell, target, message);
+	if (!isChatMessageReady(chatMessage))
+	{
+		_ChatBuffer.push_back(chatMessage);
+		return;
+	}
+	displayChatMessage(chatMessage, chatDisplayer);
+}
+
+bool CClientChatManager::isChatMessageReady(const CChatMsgNode &chatMessage)
+{
+	if (chatMessage.ChatMode == CChatGroup::dyn_chat &&
+		getDynamicChannelDbIndexFromId(chatMessage.DynChatChanID) < 0)
+		return false;
+
+	STRING_MANAGER::CStringManagerClient *stringManager = STRING_MANAGER::CStringManagerClient::instance();
+	std::string value;
+	for (std::vector<CChatMessagePart>::const_iterator it = chatMessage.SharedMessage.Parts.begin();
+		it != chatMessage.SharedMessage.Parts.end(); ++it)
+	{
+		if (it->Type == CChatMessagePart::Item)
+		{
+			if (it->ItemValue.NameId != 0 && !stringManager->getDynString(it->ItemValue.NameId, value))
+				return false;
+			if (it->ItemValue.Info.CreatorName != 0 &&
+				!stringManager->getString(it->ItemValue.Info.CreatorName, value))
+				return false;
+		}
+	}
+	return true;
+}
+
+void CClientChatManager::displayChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer)
+{
+	const CChatGroup::TGroupType chatMode = (CChatGroup::TGroupType)chatMessage.ChatMode;
+	std::string prefix;
+	if (chatMode == CChatGroup::tell)
+	{
+		if (chatMessage.OwnTell)
+		{
+			prefix = CI18N::get("youTellPlayer");
+			strFindReplace(prefix, "%name", CEntityCL::removeTitleAndShardFromName(chatMessage.TellTarget));
+			prefix += ": ";
+		}
+		else
+			buildTellSentence(chatMessage.Sender, std::string(), prefix);
+		chatDisplayer.displayTellMessage(prefix, chatMessage.SharedMessage, chatMessage.Sender, chatMessage.OwnTell);
+	}
+	else
+	{
+		buildChatSentence(chatMessage.CompressedIndex, chatMessage.Sender, std::string(), chatMode, prefix);
+		std::string sender = chatMessage.Sender;
+		chatDisplayer.displayChatMessage(chatMessage.CompressedIndex, prefix, chatMessage.SharedMessage,
+			chatMode, chatMessage.DynChatChanID, sender);
+	}
+}
+
 
 // ***************************************************************************
 void CClientChatManager::processTellString2(NLMISC::CBitMemStream& bms, IChatDisplayer &chatDisplayer)
@@ -642,6 +795,19 @@ void CClientChatManager::flushBuffer(IChatDisplayer &chatDisplayer)
 		list<CChatMsgNode>::iterator itMsg;
 		for( itMsg = _ChatBuffer.begin(); itMsg != _ChatBuffer.end(); )
 		{
+			if (itMsg->UseSharedMessage)
+			{
+				if (!isChatMessageReady(*itMsg))
+				{
+					++itMsg;
+					continue;
+				}
+				displayChatMessage(*itMsg, chatDisplayer);
+				list<CChatMsgNode>::iterator itTmp = itMsg++;
+				_ChatBuffer.erase(itTmp);
+				continue;
+			}
+
 			CChatGroup::TGroupType	type = static_cast<CChatGroup::TGroupType>(itMsg->ChatMode);
 			string sender, content;
 
@@ -1168,6 +1334,17 @@ void	CClientChatManager::updateDynamicChatChannels(IChatDisplayer &chatDisplayer
 }
 
 
+static CGroupEditBox *getChatCommandEditBox(CCtrlBase *caller)
+{
+	CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(caller);
+	if (!editBox && !caller)
+	{
+		CChatWindow *chatWindow = CChatWindow::getChatWindowLaunchingCommand();
+		if (chatWindow)
+			editBox = chatWindow->getEditBox();
+	}
+	return editBox;
+}
 
 // ***************************************************************************
 
@@ -1179,17 +1356,26 @@ class CHandlerTell : public IActionHandler
 		string message;
 		message = getParam (sParams, "text");
 
-		if (receiver.empty() || message.empty())
+		if (receiver.empty())
 			return;
 
-		// Get the chat window (if any)
-		CChatWindow *cw = NULL;
-		CGroupEditBox *eb = pCaller?dynamic_cast<CGroupEditBox *>(pCaller):NULL;
-		if (eb)
-			cw = getChatWndMgr().getChatWindowFromCaller(eb);
+		CGroupEditBox *editBox = getChatCommandEditBox(pCaller);
+		CChatMessageRequest request;
+		const bool hasAttachments = CHAT_SHARE::hasCurrentRequest() ||
+			(editBox && !editBox->getTextTags().empty());
+		const bool sharedMessage = hasAttachments && CHAT_SHARE::buildCommandRequest(editBox, 2, request);
+		if (hasAttachments && !sharedMessage)
+			return;
+		if (!sharedMessage && message.empty())
+			return;
 
 		// Send the message.
-		ChatMngr.tell(receiver, message);
+		if (sharedMessage)
+			ChatMngr.tell(receiver, request);
+		else
+			ChatMngr.tell(receiver, message);
+		if (sharedMessage)
+			return;
 
 		// display in the good window
 		CInterfaceProperty prop;
@@ -1336,15 +1522,24 @@ void CClientChatManager::updateChatModeAndButton(uint mode, uint32 dynamicChanne
 
 class CHandlerTalk : public IActionHandler
 {
-	void execute (CCtrlBase * /* pCaller */, const string &sParams)
+	void execute (CCtrlBase *pCaller, const string &sParams)
 	{
 		// Param
 		uint mode;
 		fromString(getParam (sParams, "mode"), mode);
 		string text = getParam (sParams, "text");
+		CGroupEditBox *editBox = getChatCommandEditBox(pCaller);
+		const bool hasAttachments = CHAT_SHARE::hasCurrentRequest() ||
+			(editBox && !editBox->getTextTags().empty());
+		CChatMessageRequest request;
+		const bool sharedMessage = hasAttachments && CHAT_SHARE::buildCommandRequest(editBox, 1, request);
+		if (hasAttachments && !sharedMessage)
+			return;
+		if (sharedMessage)
+			text = request.Text.toUtf8();
 
 		// Parse any tokens in the text
-		if ( ! CInterfaceManager::parseTokens(text))
+		if (!hasAttachments && !CInterfaceManager::parseTokens(text))
 		{
 			return;
 		}
@@ -1370,6 +1565,7 @@ class CHandlerTalk : public IActionHandler
 
 				if ( NLMISC::ICommand::exists( cmd ) )
 				{
+					CHAT_SHARE::CRequestScope requestScope(sharedMessage ? &request : NULL);
 					NLMISC::ICommand::execute( cmdWithArgs, g_log );
 				} 
 				else
@@ -1386,7 +1582,14 @@ class CHandlerTalk : public IActionHandler
 					fromString(getParam (sParams, "channel"), channel);
 					if (channel < CChatGroup::MaxDynChanPerPlayer)
 					{
-						PeopleInterraction.talkInDynamicChannel(channel, text);
+						if (sharedMessage)
+						{
+							ChatMngr.setChatMode(CChatGroup::dyn_chat,
+								ChatMngr.getDynamicChannelIdFromDbIndex(channel));
+							ChatMngr.chat(request);
+						}
+						else
+							PeopleInterraction.talkInDynamicChannel(channel, text);
 					}
 					else
 					{
@@ -1396,7 +1599,10 @@ class CHandlerTalk : public IActionHandler
 				else
 				{
 					ChatMngr.setChatMode((CChatGroup::TGroupType)mode);
-					ChatMngr.chat(text, mode == CChatGroup::team);
+					if (sharedMessage)
+						ChatMngr.chat(request, mode == CChatGroup::team);
+					else
+						ChatMngr.chat(text, mode == CChatGroup::team);
 				}
 			}
 		}

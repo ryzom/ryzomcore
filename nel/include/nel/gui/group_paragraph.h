@@ -37,7 +37,7 @@ namespace NLGUI
 	public:
         DECLARE_UI_CLASS( CCtrlLink )
 
-		CCtrlLink (const TCtorParam &param) : CCtrlButton(param)
+		CCtrlLink (const TCtorParam &param) : CCtrlButton(param), _LinkView(NULL)
 		{}
 
 		void setContextHelpWindowName(const std::string &name) { _ContextHelpWindowName = name; }
@@ -45,9 +45,12 @@ namespace NLGUI
 		{
 			return _ContextHelpWindowName.empty() ? CCtrlButton::getContextHelpWindowName() : _ContextHelpWindowName;
 		}
+		void setLinkView(CViewLink *view) { _LinkView = view; }
+		CViewLink *getLinkView() const { return _LinkView; }
 
 	private:
 		std::string _ContextHelpWindowName;
+		CViewLink *_LinkView;
 	};
 
 	// ----------------------------------------------------------------------------

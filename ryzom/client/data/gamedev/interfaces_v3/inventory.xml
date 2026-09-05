@@ -1650,8 +1650,20 @@
             icon="brick_default.tga" />
     <action id="phrase_chat_link"
             name="uiChatLinkMenuAction"
-            handler="link_phrase_in_chat"
-            icon="ico_range.tga" />
+            icon="ico_range.tga">
+      <action id="main"
+              name="uiMainChat"
+              handler="link_phrase_in_chat"
+              params="destination=main" />
+      <action id="last"
+              name="uiChatLinkLastChat"
+              handler="link_phrase_in_chat"
+              params="destination=last" />
+      <action id="clipboard"
+              name="uiChatLinkClipboard"
+              handler="link_phrase_in_chat"
+              params="destination=clipboard" />
+    </action>
     <action id="cut"
             name="uiEditCut"
             handler="phrase_memory_copy"
