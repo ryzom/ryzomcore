@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-09-06 — ✨ Add .zone/.zonew/.zonel + .land read/write and native tool orchestration, pynel 0.13.0
+
+`project-todos/pynel/zone_read_write.md` closed. Added `ryzom_zone.py`
+(`load_zone`/`save_zone`, round-trip binary `CZone` reader/writer covering
+`.zone`/`.zonew`/`.zonel` -- same format at three landscape-build pipeline
+stages: raw exported geometry, welded with neighbors, and lit with baked
+lumels/point lights) and `ryzom_zone_tools.py` (`run_zone_welder`/
+`run_zone_lighter`, thin subprocess wrappers driving the existing native
+`zone_welder`/`zone_lighter` tools rather than reimplementing their
+geometric processing in Python). Also added `ryzom_land.py` (`load_land`/
+`save_land`, round-trip XML reader/writer for `.land`/`CZoneRegion`, the
+top-level landscape composition grid) and `ryzom_land_tools.py`
+(`run_land_export` + `.cfg` generation from a dataclass, driving
+`land_export`). Format/CLI references in `docs/zone_format.md`,
+`docs/land_format.md`, `docs/zone_tools.md`.
+
+Validated end-to-end against real `ryzom-data`: `land_export` on the real
+`nexus.land` (jungle ecosystem) produces 151 `.zonenh`, all re-parsed
+successfully; `zone_welder` + `zone_lighter` on a real `.zone` produce a
+valid `.zonew` then `.zonel`, both re-parsed successfully with
+`load_zone()`.
+
+Found and fixed three native bugs blocking this work, all in `ryzom-core`
+(not pynel):
+- `ryzom/tools/leveldesign/CMakeLists.txt`: the whole `world_editor`
+  subdirectory (so `land_export`/`land_export_lib`, which have no
+  Windows/MFC dependency) was gated behind `IF(WIN32)`, preventing any
+  Linux build. Ungated (the real `world_editor` GUI app stays correctly
+  gated by its own `IF(WITH_MFC)`).
+- `land_export_lib/export.cpp` (`CExport::treatPattern`, 8 occurrences):
+  hardcoded Windows `\` path separators instead of `/`, preventing
+  `land_export` from finding any source zone on Linux.
+- `nel/src/misc/p_thread.cpp`: a stack corruption in `CPThread`/
+  `CPProcess::{get,set}CPUMask()` (wrong `cpu_set_t` buffer size passed to
+  glibc) plus an uninitialized `CPThread::_ThreadHandle` on the main-thread
+  wrapper, both making `zone_lighter` crash on every invocation. See
+  `logs/ryzom-core.md` in the `ryzom-core` repo for the full writeup.
+
 ## 2026-09-06 — ✨ Read world.packed_sheets/continent.packed_sheets, pynel 0.12.0
 
 `project-todos/pynel/packed_sheets_world_continent.md` closed. Added
