@@ -9,10 +9,16 @@ ENDIF()
 ADD_SUBDIRECTORY(mp_generator)
 ADD_SUBDIRECTORY(named_items_2_csv)
 
+IF(WITH_LIGO)
+  # world_editor's own CMakeLists.txt already gates its actual Windows/MFC-only
+  # subdirectories behind IF(WITH_MFC) -- land_export/land_export_lib in there
+  # have no such dependency and build fine cross-platform.
+  ADD_SUBDIRECTORY(world_editor)
+ENDIF()
+
 IF(WIN32)
   IF(WITH_LIGO)
     ADD_SUBDIRECTORY(export)
-    ADD_SUBDIRECTORY(world_editor)
   ENDIF()
   IF(WITH_MFC)
     IF(WITH_LIGO)
