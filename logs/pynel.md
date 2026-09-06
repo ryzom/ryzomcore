@@ -1,5 +1,46 @@
 # Changelog
 
+## 2026-09-06 — ✨ Read world.packed_sheets/continent.packed_sheets, pynel 0.12.0
+
+`project-todos/pynel/packed_sheets_world_continent.md` closed. Added
+`parse_world_packed_sheets()`/`load_world_packed_sheets()` for `CWorldSheet`
+(`world.packed_sheets`, extension version 1, `CEntitySheet::WORLD`) and
+`parse_continent_packed_sheets()`/`load_continent_packed_sheets()` for
+`CContinentSheet` (`continent.packed_sheets`, extension version 12,
+`CEntitySheet::CONTINENT`) in `ryzom_packed_sheets.py`, following the same
+header/`CSheetManagerEntry`/`_Reader` pattern as the existing `creature`/
+`item`/`animset_list` parsers. `CWorldSheet` decodes continent locations
+(`ContLocs`: selectable name, `.continent` sheet name, world-space bounds)
+and the in-game map hierarchy (`Maps`/`SMap.SChild`). `CContinentSheet`
+decodes `CContinentParameters` (PACS/decor/sky/lighting per time-of-day,
+fog, zone-constructible list, per-season tile coloring), `CVillageSheet`
+list, and the 4 fixed `CWeatherFunctionSheet` entries (one per
+`EGSPD::CSeason` value). Both wired into the `dump` CLI subcommand
+(`--kind world`/`continent`, filename auto-detection).
+
+Also added `zone_name_to_world_pos()`, a port of `getPosFromZoneName()`
+(`ryzom/client/src/zone_util.cpp:33`) that decodes a zone name (e.g.
+`"160_ab"`) into its origin-corner world position -- needed because
+`ContinentParameters.ZoneMin`/`ZoneMax`/`VillageSheet.Zone` are zone
+*names*, not raw coordinates. Each zone tile is 160x160 units and its name
+gives its origin corner, not its extent; callers wanting a true bounding
+box (reproducing `CContinent::getCorners()`) must add 160 to both axes of
+the decoded max corner themselves -- deliberately not folded into the
+function itself, since that offset only makes sense for a max corner.
+
+Validated against the real files
+(`~/.local/share/Ryzom/ryzom_live/data/{world,continent}.packed_sheets`):
+`world.packed_sheets` parses to 1 entry (`ryzom.world`, 28 continents, 49
+maps), `continent.packed_sheets` to 29 entries, both with no trailing bytes
+and no exception. `zone_name_to_world_pos()` cross-checked against every
+continent's `ZoneMin`/`ZoneMax` except `lesilesvivantes.continent`, whose
+zone fields are legitimately empty -- the function correctly raises
+`PackedSheetsParseError` on that input, by design.
+
+This unblocks step 1 of Forgery's
+`project-todos/forgery/landscape_editor__continent-selector.md` sub-chantier
+(continent selector + region bounds for the Landscape Editor).
+
 ## 2026-09-06 — ✨ Read Const/Bezier/TCB anim tracks and write CAnimation, pynel 0.11.0
 
 Two chantiers landed together (`project-todos/pynel/anim_read_extra_tracks.md` and

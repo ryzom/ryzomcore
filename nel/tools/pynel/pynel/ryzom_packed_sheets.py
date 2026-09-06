@@ -24,11 +24,14 @@ ryzom/client/src/client_sheets/character_sheet.cpp (CCharacterSheet::serial) —
 nel/tools/pynel/docs/packed_sheets.md for the full writeup.
 
 Supports `creature.packed_sheets` (CEntitySheet::FAUNA / CCharacterSheet),
-`item.packed_sheets`/`sitem.packed_sheets` (CEntitySheet::ITEM / CItemSheet), and
+`item.packed_sheets`/`sitem.packed_sheets` (CEntitySheet::ITEM / CItemSheet),
 `animset_list.packed_sheets` (CEntitySheet::ANIMATION_SET_LIST / CAnimationSetListSheet
 -- the Mode/Behaviour -> real .anim filename mapping, see mode2Anim()/computeAnimSet()
 in ryzom/client/src/misc.cpp for how a name like "fyhc1_NORMAL__.animation_set" gets
-composed and looked up against AnimationSetSheet.name).
+composed and looked up against AnimationSetSheet.name), `world.packed_sheets`
+(CEntitySheet::WORLD / CWorldSheet -- continent locations and the in-game map
+hierarchy) and `continent.packed_sheets` (CEntitySheet::CONTINENT / CContinentSheet
+-- per-continent PACS/decor/lighting/weather/villages).
 Other sheet types (sbrick, mission, ...) raise PackedSheetsParseError.
 
 Read-only: the client always regenerates this cache from the source Georges sheets,
@@ -66,6 +69,8 @@ ENTITY_SHEET_TYPES = [
 FAUNA_TYPE = ENTITY_SHEET_TYPES.index("FAUNA")
 ITEM_TYPE = ENTITY_SHEET_TYPES.index("ITEM")
 ANIMATION_SET_LIST_TYPE = ENTITY_SHEET_TYPES.index("ANIMATION_SET_LIST")
+WORLD_TYPE = ENTITY_SHEET_TYPES.index("WORLD")
+CONTINENT_TYPE = ENTITY_SHEET_TYPES.index("CONTINENT")
 
 # TypeVersion[] entry for "creature" in ryzom/client/src/sheet_manager.cpp
 CREATURE_SHEET_VERSION = 17
@@ -73,6 +78,10 @@ CREATURE_SHEET_VERSION = 17
 ITEM_SHEET_VERSION = 44
 # TypeVersion[] entry for "animset_list" (CAnimationSetListSheet)
 ANIMATION_SET_LIST_SHEET_VERSION = 25
+# TypeVersion[] entry for "world" (CWorldSheet)
+WORLD_SHEET_VERSION = 1
+# TypeVersion[] entry for "continent" (CContinentSheet)
+CONTINENT_SHEET_VERSION = 12
 
 # CAnimationStateSheet::TAnimStateSheetId (ryzom/client/src/client_sheets/
 # animation_set_list_sheet.h) -- order is the wire encoding (CAnimationStateSheet.state
@@ -164,6 +173,12 @@ class Vector3:
 	x: float
 	y: float
 	z: float
+
+
+@dataclass
+class Vector2:
+	x: float
+	y: float
 
 
 @dataclass
@@ -516,6 +531,173 @@ class ItemSheet:
 	family_data: object  # one of Cosmetic/Armor/MeleeWeapon/.../Consumable, or None
 
 
+@dataclass
+class ContLoc:
+	"""CWorldSheet::SContLoc (world_sheet.cpp), element of WorldSheet.cont_locs."""
+	selection_name: str
+	continent_name: str
+	min_x: float
+	min_y: float
+	max_x: float
+	max_y: float
+
+
+@dataclass
+class MapChild:
+	"""CWorldSheet::SMap::SChild (world_sheet.cpp), element of Map.children."""
+	name: str
+	zone_name: str  # click zone, resolved against a region_*.primitive
+
+
+@dataclass
+class Map:
+	"""CWorldSheet::SMap (world_sheet.cpp), element of WorldSheet.maps."""
+	name: str
+	continent_name: str  # empty if this map is the world map itself
+	bitmap_name: str
+	min_x: float
+	min_y: float
+	max_x: float
+	max_y: float
+	children: List[MapChild]
+
+
+@dataclass
+class WorldSheet:
+	"""CWorldSheet (ryzom/client/src/client_sheets/world_sheet.cpp), the
+	CEntitySheet::WORLD payload of a world.packed_sheets entry -- in practice there
+	is only ever one real entry, keyed by sheet name "ryzom.world"."""
+	sheet_id: int
+	name: str
+	cont_locs: List[ContLoc]
+	maps: List[Map]
+
+
+@dataclass
+class DirLightSetup:
+	"""CDirLightSetup (dir_light_setup.h)."""
+	ambiant: Rgba
+	diffuse: Rgba
+	specular: Rgba
+	direction: Vector3
+
+
+@dataclass
+class FogMapBuild:
+	"""CFogMapBuild (fog_map_build.cpp)."""
+	map: List[str]  # 6 entries, TMapType::NumMap (Day, Night, Dusk, Distance, Depth, NoPrecipitation)
+	zone_min: str
+	zone_max: str
+
+
+@dataclass
+class Zc:
+	"""CContinentParameters::CZC (continent_sheet.cpp) -- a "zone constructible" entry."""
+	name: str
+	force_load_dist: float
+	load_dist: float
+	unload_dist: float
+	enable_ruins: bool
+
+
+@dataclass
+class VillageIG:
+	"""CVillageSheet::CVillageIG (village_sheet.h)."""
+	ig_name: str
+	parent_name: str
+
+
+@dataclass
+class VillageSheet:
+	"""CVillageSheet (village_sheet.cpp), element of ContinentSheet.villages."""
+	zone: str  # zone name, same convention as ContinentParameters.zone_min/zone_max
+	altitude: float
+	force_load_dist: float
+	load_dist: float
+	unload_dist: float
+	center_x: float
+	center_y: float
+	width: int
+	height: int
+	rotation: float
+	name: str
+	igs: List[VillageIG]
+
+
+@dataclass
+class WeatherFunctionSheet:
+	"""CWeatherFunctionSheet (weather_function_sheet.cpp), one per EGSPD::CSeason
+	value (Spring=0, Summer, Autumn, Winter) on ContinentSheet.weather_function."""
+	vegetable_min_bend_intensity: float
+	vegetable_max_bend_intensity: float
+	vegetable_min_wind_frequency: float
+	vegetable_max_wind_frequency: float
+	vegetable_max_bend_offset: float
+	vegetable_wind_intensity_that_start_bend_offset: float
+	tree_min_wind_intensity: float
+	tree_max_wind_intensity: float
+	setup_names: List[str]
+	setup_weights: List[int]
+
+
+@dataclass
+class ContinentParameters:
+	"""CContinentParameters (continent_sheet.cpp), the ContinentSheet.continent field."""
+	name: str
+	pacs_r_bank: str
+	pacs_gr: str
+	landscape_ig: str
+	sky_day: str
+	sky_night: str
+	sky_fog_part_name: str
+	background_ig_name: str
+	canopy_ig_file_name: List[str]  # 4 entries, one per season (EGSPD::CSeason::Invalid)
+	micro_veget: str
+	small_bank: str
+	far_bank: str
+	coarse_mesh_map: str
+	entity_sun_contribution_power: float
+	entity_sun_contribution_max_threshold: float
+	landscape_light_day: DirLightSetup
+	landscape_light_dusk: DirLightSetup
+	landscape_light_night: DirLightSetup
+	landscape_point_light_material: Rgba
+	entity_light_day: DirLightSetup
+	entity_light_dusk: DirLightSetup
+	entity_light_night: DirLightSetup
+	root_light_day: DirLightSetup
+	root_light_dusk: DirLightSetup
+	root_light_night: DirLightSetup
+	zc_list: List[Zc]
+	fog_map_build: FogMapBuild
+	fog_start: float
+	fog_end: float
+	root_fog_start: float
+	root_fog_end: float
+	indoor: bool
+	world_map: str
+	localized_name: str
+	micro_life_zones: List[str]
+	zone_min: str  # a zone NAME, not raw coordinates -- see zone_name_to_world_pos()
+	zone_max: str
+	tile_color_mono: List[bool]  # 4 entries, one per season
+	tile_color_factor: List[float]  # 4 entries, one per season
+	static_lighting_factor: List[float]  # 4 entries, one per season
+	sky_sheet: List[str]  # 4 entries, one per season
+	force_displayed_season: List[int]  # 4 entries, EGSPD::CSeason::TSeason, kept raw
+
+
+@dataclass
+class ContinentSheet:
+	"""CContinentSheet (ryzom/client/src/client_sheets/continent_sheet.cpp), the
+	CEntitySheet::CONTINENT payload of a continent.packed_sheets entry -- one per
+	continent (Fyros, Matis, Tryker, Zorai, ...)."""
+	sheet_id: int
+	continent: ContinentParameters
+	villages: List[VillageSheet]
+	weather_function: List[WeatherFunctionSheet]  # 4 entries, one per EGSPD::CSeason value
+
+
 class _Reader:
 	"""Minimal binary reader matching NeL's CIFile little-endian encoding."""
 
@@ -641,6 +823,34 @@ def load_mode2animset_string_array(path: Union[str, Path, BinaryIO]) -> Dict[str
 	else:
 		data = Path(path).read_bytes()
 	return parse_mode2animset_string_array(data)
+
+
+def zone_name_to_world_pos(name: str) -> Vector2:
+	"""Decodes a zone name (e.g. "160_ab") into its origin-corner world position,
+	port of getPosFromZoneName() (ryzom/client/src/zone_util.cpp:33). Each zone tile
+	is 160x160 units and its name gives its origin corner, not its extent -- for a
+	true bounding box, callers must add 160 to both axes of the decoded max corner
+	themselves (reproduces CContinent::getCorners(), continent.cpp:845-867; contrast
+	CContinent::dumpVillagesLoadingZones(), continent.cpp:1202, a debug/screenshot
+	helper that skips this +160 correction). Raises PackedSheetsParseError if name
+	isn't a valid zone name (the C++ instead just returns false)."""
+	stem = name.rsplit(".", 1)[0] if "." in name else name
+
+	if "_" not in stem:
+		raise PackedSheetsParseError(f"invalid zone name {name!r}: no '_' separator")
+	row_str, x_str = stem.split("_", 1)
+
+	if not row_str.isdigit():
+		raise PackedSheetsParseError(f"invalid zone name {name!r}: {row_str!r} is not all digits")
+	row = int(row_str)
+
+	x_str = x_str.upper()
+	if len(x_str) != 2 or not x_str.isalpha():
+		raise PackedSheetsParseError(f"invalid zone name {name!r}: {x_str!r} is not exactly 2 letters")
+
+	x = 160.0 * ((ord(x_str[0]) - ord("A")) * 26 + (ord(x_str[1]) - ord("A")))
+	y = 160.0 * (-row)
+	return Vector2(x, y)
 
 
 def _parse_equipment(f: _Reader) -> Equipment:
@@ -943,6 +1153,199 @@ def _parse_item_sheet(f: _Reader, sheet_id: int) -> ItemSheet:
 	)
 
 
+def _parse_cont_loc(f: _Reader) -> ContLoc:
+	selection_name = f.string()
+	continent_name = f.string()
+	min_x, min_y, max_x, max_y = f.f32(), f.f32(), f.f32(), f.f32()  # single multi-arg serial call in C++
+	return ContLoc(
+		selection_name=selection_name, continent_name=continent_name,
+		min_x=min_x, min_y=min_y, max_x=max_x, max_y=max_y,
+	)
+
+
+def _parse_map_child(f: _Reader) -> MapChild:
+	return MapChild(name=f.string(), zone_name=f.string())
+
+
+def _parse_map(f: _Reader) -> Map:
+	name = f.string()
+	continent_name = f.string()
+	bitmap_name = f.string()
+	min_x = f.f32()
+	min_y = f.f32()
+	max_x = f.f32()
+	max_y = f.f32()
+	n_children = f.cont_len()
+	children = [_parse_map_child(f) for _ in range(n_children)]
+	return Map(
+		name=name, continent_name=continent_name, bitmap_name=bitmap_name,
+		min_x=min_x, min_y=min_y, max_x=max_x, max_y=max_y, children=children,
+	)
+
+
+def _parse_world_sheet(f: _Reader, sheet_id: int) -> WorldSheet:
+	name = f.string()
+	n_cont_locs = f.cont_len()
+	cont_locs = [_parse_cont_loc(f) for _ in range(n_cont_locs)]
+	n_maps = f.cont_len()
+	maps = [_parse_map(f) for _ in range(n_maps)]
+	return WorldSheet(sheet_id=sheet_id, name=name, cont_locs=cont_locs, maps=maps)
+
+
+def _parse_dir_light_setup(f: _Reader) -> DirLightSetup:
+	return DirLightSetup(
+		ambiant=f.rgba(), diffuse=f.rgba(), specular=f.rgba(), direction=_parse_vector3(f),
+	)
+
+
+def _parse_fog_map_build(f: _Reader) -> FogMapBuild:
+	map_ = [f.string() for _ in range(6)]  # TMapType::NumMap
+	zone_min = f.string()
+	zone_max = f.string()
+	return FogMapBuild(map=map_, zone_min=zone_min, zone_max=zone_max)
+
+
+def _parse_zc(f: _Reader) -> Zc:
+	return Zc(
+		name=f.string(), force_load_dist=f.f32(), load_dist=f.f32(),
+		unload_dist=f.f32(), enable_ruins=f.boolean(),
+	)
+
+
+def _parse_village_ig(f: _Reader) -> VillageIG:
+	return VillageIG(ig_name=f.string(), parent_name=f.string())
+
+
+def _parse_village_sheet(f: _Reader) -> VillageSheet:
+	zone = f.string()
+	altitude = f.f32()
+	force_load_dist = f.f32()
+	load_dist = f.f32()
+	unload_dist = f.f32()
+	center_x = f.f32()
+	center_y = f.f32()
+	width = f.u32()
+	height = f.u32()
+	rotation = f.f32()
+	name = f.string()
+	n_igs = f.cont_len()
+	igs = [_parse_village_ig(f) for _ in range(n_igs)]
+	return VillageSheet(
+		zone=zone, altitude=altitude, force_load_dist=force_load_dist, load_dist=load_dist,
+		unload_dist=unload_dist, center_x=center_x, center_y=center_y, width=width,
+		height=height, rotation=rotation, name=name, igs=igs,
+	)
+
+
+def _parse_weather_function_sheet(f: _Reader) -> WeatherFunctionSheet:
+	vegetable_min_bend_intensity = f.f32()
+	vegetable_max_bend_intensity = f.f32()
+	vegetable_min_wind_frequency = f.f32()
+	vegetable_max_wind_frequency = f.f32()
+	vegetable_max_bend_offset = f.f32()
+	vegetable_wind_intensity_that_start_bend_offset = f.f32()
+	tree_min_wind_intensity = f.f32()
+	tree_max_wind_intensity = f.f32()
+	n_setup_names = f.cont_len()
+	setup_names = [f.string() for _ in range(n_setup_names)]
+	n_setup_weights = f.cont_len()
+	setup_weights = [f.u32() for _ in range(n_setup_weights)]
+	return WeatherFunctionSheet(
+		vegetable_min_bend_intensity=vegetable_min_bend_intensity,
+		vegetable_max_bend_intensity=vegetable_max_bend_intensity,
+		vegetable_min_wind_frequency=vegetable_min_wind_frequency,
+		vegetable_max_wind_frequency=vegetable_max_wind_frequency,
+		vegetable_max_bend_offset=vegetable_max_bend_offset,
+		vegetable_wind_intensity_that_start_bend_offset=vegetable_wind_intensity_that_start_bend_offset,
+		tree_min_wind_intensity=tree_min_wind_intensity, tree_max_wind_intensity=tree_max_wind_intensity,
+		setup_names=setup_names, setup_weights=setup_weights,
+	)
+
+
+def _parse_continent_parameters(f: _Reader) -> ContinentParameters:
+	name = f.string()
+	pacs_r_bank = f.string()
+	pacs_gr = f.string()
+	landscape_ig = f.string()
+	sky_day = f.string()
+	sky_night = f.string()
+	sky_fog_part_name = f.string()
+	background_ig_name = f.string()
+	canopy_ig_file_name = [f.string() for _ in range(4)]  # EGSPD::CSeason::Invalid, fixed loop
+	micro_veget = f.string()
+	small_bank = f.string()
+	far_bank = f.string()
+	coarse_mesh_map = f.string()
+	entity_sun_contribution_power = f.f32()
+	entity_sun_contribution_max_threshold = f.f32()
+	landscape_light_day = _parse_dir_light_setup(f)
+	landscape_light_dusk = _parse_dir_light_setup(f)
+	landscape_light_night = _parse_dir_light_setup(f)
+	landscape_point_light_material = f.rgba()
+	entity_light_day = _parse_dir_light_setup(f)
+	entity_light_dusk = _parse_dir_light_setup(f)
+	entity_light_night = _parse_dir_light_setup(f)
+	root_light_day = _parse_dir_light_setup(f)
+	root_light_dusk = _parse_dir_light_setup(f)
+	root_light_night = _parse_dir_light_setup(f)
+	n_zc = f.cont_len()
+	zc_list = [_parse_zc(f) for _ in range(n_zc)]
+	fog_map_build = _parse_fog_map_build(f)
+	fog_start = f.f32()
+	fog_end = f.f32()
+	root_fog_start = f.f32()
+	root_fog_end = f.f32()
+	indoor = f.boolean()
+	world_map = f.string()
+	localized_name = f.string()
+	n_micro_life_zones = f.cont_len()
+	micro_life_zones = [f.string() for _ in range(n_micro_life_zones)]
+	zone_min = f.string()
+	zone_max = f.string()
+
+	tile_color_mono: List[bool] = []
+	tile_color_factor: List[float] = []
+	static_lighting_factor: List[float] = []
+	sky_sheet: List[str] = []
+	force_displayed_season: List[int] = []
+	for _ in range(4):  # EGSPD::CSeason::Invalid, fixed loop, fields interleaved per iteration
+		tile_color_mono.append(f.boolean())
+		tile_color_factor.append(f.f32())
+		static_lighting_factor.append(f.f32())
+		sky_sheet.append(f.string())
+		force_displayed_season.append(f.s32())  # serialEnum
+
+	return ContinentParameters(
+		name=name, pacs_r_bank=pacs_r_bank, pacs_gr=pacs_gr, landscape_ig=landscape_ig,
+		sky_day=sky_day, sky_night=sky_night, sky_fog_part_name=sky_fog_part_name,
+		background_ig_name=background_ig_name, canopy_ig_file_name=canopy_ig_file_name,
+		micro_veget=micro_veget, small_bank=small_bank, far_bank=far_bank,
+		coarse_mesh_map=coarse_mesh_map, entity_sun_contribution_power=entity_sun_contribution_power,
+		entity_sun_contribution_max_threshold=entity_sun_contribution_max_threshold,
+		landscape_light_day=landscape_light_day, landscape_light_dusk=landscape_light_dusk,
+		landscape_light_night=landscape_light_night, landscape_point_light_material=landscape_point_light_material,
+		entity_light_day=entity_light_day, entity_light_dusk=entity_light_dusk,
+		entity_light_night=entity_light_night, root_light_day=root_light_day,
+		root_light_dusk=root_light_dusk, root_light_night=root_light_night,
+		zc_list=zc_list, fog_map_build=fog_map_build, fog_start=fog_start, fog_end=fog_end,
+		root_fog_start=root_fog_start, root_fog_end=root_fog_end, indoor=indoor,
+		world_map=world_map, localized_name=localized_name, micro_life_zones=micro_life_zones,
+		zone_min=zone_min, zone_max=zone_max, tile_color_mono=tile_color_mono,
+		tile_color_factor=tile_color_factor, static_lighting_factor=static_lighting_factor,
+		sky_sheet=sky_sheet, force_displayed_season=force_displayed_season,
+	)
+
+
+def _parse_continent_sheet(f: _Reader, sheet_id: int) -> ContinentSheet:
+	continent = _parse_continent_parameters(f)
+	n_villages = f.cont_len()
+	villages = [_parse_village_sheet(f) for _ in range(n_villages)]
+	weather_function = [_parse_weather_function_sheet(f) for _ in range(4)]  # EGSPD::CSeason::Invalid, fixed loop
+	return ContinentSheet(
+		sheet_id=sheet_id, continent=continent, villages=villages, weather_function=weather_function,
+	)
+
+
 def _parse_fx_stick_mode(f: _Reader) -> AnimationFXStickMode:
 	mode = f.s32()  # serialEnum
 	user_bone_name = f.string()  # CStringMapper::localSerialString -- plain string on disk
@@ -1129,6 +1532,28 @@ def parse_animation_set_list_packed_sheets(data: bytes) -> PackedSheets:
 	return PackedSheets(dictionary=dictionary, entries=entries)
 
 
+def parse_world_packed_sheets(data: bytes) -> PackedSheets:
+	f = _Reader(data)
+	dictionary, n_map = _parse_packed_sheets_header(f, WORLD_SHEET_VERSION, "world sheet class version")
+	entries = _parse_entity_map(f, n_map, WORLD_TYPE, _parse_world_sheet, "WORLD/CWorldSheet")
+
+	if not f.eof():
+		raise PackedSheetsParseError(f"{f.remaining} trailing bytes after parsing .packed_sheets content")
+
+	return PackedSheets(dictionary=dictionary, entries=entries)
+
+
+def parse_continent_packed_sheets(data: bytes) -> PackedSheets:
+	f = _Reader(data)
+	dictionary, n_map = _parse_packed_sheets_header(f, CONTINENT_SHEET_VERSION, "continent sheet class version")
+	entries = _parse_entity_map(f, n_map, CONTINENT_TYPE, _parse_continent_sheet, "CONTINENT/CContinentSheet")
+
+	if not f.eof():
+		raise PackedSheetsParseError(f"{f.remaining} trailing bytes after parsing .packed_sheets content")
+
+	return PackedSheets(dictionary=dictionary, entries=entries)
+
+
 def load_creature_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
 	if hasattr(path, "read"):
 		data = path.read()
@@ -1153,6 +1578,22 @@ def load_animation_set_list_packed_sheets(path: Union[str, Path, BinaryIO]) -> P
 	return parse_animation_set_list_packed_sheets(data)
 
 
+def load_world_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
+	if hasattr(path, "read"):
+		data = path.read()
+	else:
+		data = Path(path).read_bytes()
+	return parse_world_packed_sheets(data)
+
+
+def load_continent_packed_sheets(path: Union[str, Path, BinaryIO]) -> PackedSheets:
+	if hasattr(path, "read"):
+		data = path.read()
+	else:
+		data = Path(path).read_bytes()
+	return parse_continent_packed_sheets(data)
+
+
 def load_sheet_id_bin(path: Union[str, Path, BinaryIO]) -> Dict[int, str]:
 	if hasattr(path, "read"):
 		data = path.read()
@@ -1169,6 +1610,10 @@ def _guess_kind(path: Path) -> str:
 		return "item"
 	if stem.startswith("animset_list"):
 		return "animset_list"
+	if stem.startswith("world"):
+		return "world"
+	if stem.startswith("continent"):
+		return "continent"
 	raise PackedSheetsParseError(
 		f"cannot guess sheet kind from filename {path.name!r}, pass --kind explicitly"
 	)
@@ -1206,14 +1651,37 @@ def _dump_animset_list(packed: PackedSheets, names: Dict[int, str]) -> None:
 			print(f"    {anim_set.name!r}  states=[{states}]")
 
 
+def _dump_world(packed: PackedSheets, names: Dict[int, str]) -> None:
+	print(f"dictionary: {len(packed.dictionary)} source .world files")
+	print(f"entries: {len(packed.entries)}")
+	for sheet_id, sheet in sorted(packed.entries.items(), key=lambda kv: names.get(kv[0], "")):
+		name = names.get(sheet_id, f"#{sheet_id}")
+		print(f"  {name}  continents={len(sheet.cont_locs)} maps={len(sheet.maps)}")
+		for cont_loc in sheet.cont_locs:
+			print(f"    {cont_loc.selection_name!r} -> {cont_loc.continent_name!r} "
+				f"bounds=({cont_loc.min_x:.1f},{cont_loc.min_y:.1f})-({cont_loc.max_x:.1f},{cont_loc.max_y:.1f})")
+
+
+def _dump_continent(packed: PackedSheets, names: Dict[int, str]) -> None:
+	print(f"dictionary: {len(packed.dictionary)} source .continent files")
+	print(f"entries: {len(packed.entries)}")
+	for sheet_id, sheet in sorted(packed.entries.items(), key=lambda kv: names.get(kv[0], "")):
+		name = names.get(sheet_id, f"#{sheet_id}")
+		c = sheet.continent
+		print(f"  {name}  villages={len(sheet.villages)} indoor={c.indoor} "
+			f"zone_min={c.zone_min!r} zone_max={c.zone_max!r}")
+
+
 def _build_arg_parser() -> argparse.ArgumentParser:
-	parser = argparse.ArgumentParser(description="Read Ryzom .packed_sheets files (creature, item, sitem, animset_list)")
+	parser = argparse.ArgumentParser(
+		description="Read Ryzom .packed_sheets files (creature, item, sitem, animset_list, world, continent)")
 	sub = parser.add_subparsers(dest="command", required=True)
 
 	p_dump = sub.add_parser("dump", help="print a summary of a .packed_sheets file")
 	p_dump.add_argument("path", type=Path)
-	p_dump.add_argument("--kind", choices=("creature", "item", "animset_list"), default=None,
-		help="sheet kind; guessed from the filename (creature*/item*/sitem*/animset_list*) if omitted")
+	p_dump.add_argument("--kind", choices=("creature", "item", "animset_list", "world", "continent"), default=None,
+		help="sheet kind; guessed from the filename "
+			"(creature*/item*/sitem*/animset_list*/world*/continent*) if omitted")
 	p_dump.add_argument("--sheet-id-bin", type=Path, default=None,
 		help="loose sheet_id.bin path, to resolve CSheetId to readable names")
 	p_dump.add_argument("--bnp", type=Path, default=None,
@@ -1239,6 +1707,10 @@ def _main() -> None:
 			_dump_creature(load_creature_packed_sheets(args.path), names)
 		elif kind == "animset_list":
 			_dump_animset_list(load_animation_set_list_packed_sheets(args.path), names)
+		elif kind == "world":
+			_dump_world(load_world_packed_sheets(args.path), names)
+		elif kind == "continent":
+			_dump_continent(load_continent_packed_sheets(args.path), names)
 		else:
 			_dump_item(load_item_packed_sheets(args.path), names)
 

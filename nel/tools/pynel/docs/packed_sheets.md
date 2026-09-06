@@ -18,6 +18,29 @@ Bind preview Mode picker ("pick an NPC's animation by its real game meaning
 instead of a flat file list") -- see `nel/tools/forgery/docs/apps/object_editor.md`'s
 own "Mode/animation" section.
 
+`world.packed_sheets`/`continent.packed_sheets`: **implemented** (2026-09-06,
+see their dedicated sections below) for Forgery's Landscape Editor project
+(`project-todos/forgery/landscape_editor.md`'s continent selector) --
+`parse_world_packed_sheets()`/`parse_continent_packed_sheets()` in
+`ryzom_packed_sheets.py`, plus `zone_name_to_world_pos()` for decoding
+`ZoneMin`/`ZoneMax`/village zone names. Validated against the real files:
+`world.packed_sheets` (1 entry, `ryzom.world`, 28 continents/49 maps) and
+`continent.packed_sheets` (29 entries), both consumed with no trailing bytes
+and no exception; `zone_name_to_world_pos()` cross-checked against every
+continent's `ZoneMin`/`ZoneMax` except `lesilesvivantes.continent`, whose
+zone fields are legitimately empty (`zone_name_to_world_pos()` correctly
+raises on that, by design -- callers must guard for it).
+
+`building.packed_sheets` (`CBuildingSheet`) was also investigated
+(2026-09-05) but deliberately **not implemented**: its one real field,
+`BuildedIg`, is dead code -- its only caller (`CVillage::updateBuilding()`,
+`village.cpp:229`) is only ever invoked from `CVillage::initOutpost()` with
+a hardcoded `"ruins.building"` (`village.cpp:207`), never with any other
+sheet. The real outpost-building system (upgrades, cost, driller) lives in
+the separate `.outpost_building` extension (`COutpostBuildingSheet`),
+actively used server- and client-side -- not `CBuildingSheet`. Not worth a
+parser.
+
 ## Where the actual `.shape` comes from (NOT in `.creature`)
 
 Investigated while dumping real entries (2026-08-30) — worth recording since
@@ -550,17 +573,197 @@ of the raw `.string_array` file's on-disk shape (likely a simple
 UTF-8/XML-ish Georges form, not NeL binary-serialized like everything else
 in this doc) before it can be parsed.
 
-## Other sheet types (deliberately out of scope beyond `.creature`/`.item`/`.sitem`/`.animset_list`)
+## `CWorldSheet::serial` (`ryzom/client/src/client_sheets/world_sheet.cpp:87`), for `world.packed_sheets`
+
+Extension `world` -> `TypeVersion[]` entry **1** (`sheet_manager.cpp`),
+`CEntitySheet::TType` value `WORLD` (=14 in the enum list above). In
+practice there is only ever **one** real entry, keyed by sheet name
+`ryzom.world` -- the client loads it by that hardcoded name
+(`SheetMngr.get(CSheetId("ryzom.world"))`, `continent_manager.cpp:184`,
+`group_map.cpp:428`), never iterates the map. This is the top-level file
+describing world geography: which continents exist and where
+(`ContLocs`, consumed by `CContinentManager` to pick which `.continent` to
+load from the player's world position), and the map hierarchy shown in the
+in-game map UI (`Maps`, consumed by `group_map.cpp`).
+
+Flat, no version branches:
+
+```
+Name        string
+ContLocs    cont<SContLoc>
+Maps        cont<SMap>
+```
+
+```
+SContLoc (world_sheet.cpp:115):
+    SelectionName   string   -- displayable continent name
+    ContinentName   string   -- .continent sheet name, e.g. "matis.continent"
+    MinX, MinY, MaxX, MaxY   4×f32   -- one f.serial(a,b,c,d) call, same wire shape as 4 separate f32s
+
+SMap (world_sheet.cpp:159):
+    Name            string
+    ContinentName   string   -- empty if this map is the world map itself
+    BitmapName      string
+    MinX            f32
+    MinY            f32
+    MaxX            f32
+    MaxY            f32
+    Children        cont<SMap::SChild>
+
+SMap::SChild (world_sheet.cpp:179):
+    Name       string
+    ZoneName   string   -- click zone, resolved against a region_*.primitive
+```
+
+## `CContinentSheet::serial` (`ryzom/client/src/client_sheets/continent_sheet.cpp:459`), for `continent.packed_sheets`
+
+Extension `continent` -> `TypeVersion[]` entry **12**, `CEntitySheet::TType`
+value `CONTINENT` (=13). One entry per continent (Fyros, Matis, Tryker,
+Zoraï, Pyr, Sources, ...), keyed by `CSheetId` and resolved via
+`sheet_id.bin` like any other format here -- the resolved name matches
+`SContLoc.ContinentName` above exactly, no extra lookup needed. Drives
+terrain/decor loading, lighting, fog, villages/outposts and weather per
+continent (`continent.cpp`, `continent_manager.cpp`).
+
+```
+Continent        CContinentParameters
+Villages         cont<CVillageSheet>
+WeatherFunction  4× CWeatherFunctionSheet   -- fixed loop over EGSPD::CSeason::Invalid=4, NOT a cont<>
+```
+
+```
+CContinentParameters::serial (continent_sheet.cpp:337), flat, exact order:
+    Name                              string
+    PacsRBank                         string   -- PACS collision RBank filename
+    PacsGR                            string   -- PACS collision GR filename
+    LandscapeIG                       string   -- decor instance group list
+    SkyDay                            string
+    SkyNight                          string
+    SkyFogPartName                    string
+    BackgroundIGName                  string
+    CanopyIGfileName[4]               4× string   -- fixed loop, per-season
+    MicroVeget                        string
+    SmallBank                         string
+    FarBank                           string
+    CoarseMeshMap                     string
+    EntitySunContributionPower        f32
+    EntitySunContributionMaxThreshold f32
+    LandscapeLightDay                 CDirLightSetup
+    LandscapeLightDusk                CDirLightSetup
+    LandscapeLightNight               CDirLightSetup
+    LandscapePointLightMaterial       rgba
+    EntityLightDay                    CDirLightSetup
+    EntityLightDusk                   CDirLightSetup
+    EntityLightNight                  CDirLightSetup
+    RootLightDay                      CDirLightSetup
+    RootLightDusk                     CDirLightSetup
+    RootLightNight                    CDirLightSetup
+    ZCList                            cont<CZC>
+    FogMapBuild                       CFogMapBuild
+    FogStart                          f32
+    FogEnd                            f32
+    RootFogStart                      f32
+    RootFogEnd                        f32
+    Indoor                            bool (u8)   -- marks underground/indoor continents (caves, cities)
+    WorldMap                          string
+    LocalizedName                     string
+    MicroLifeZones                    cont<string>
+    ZoneMin                           string   -- a ZONE NAME (e.g. "160_ab"), not raw coordinates -- see
+    ZoneMax                           string      zone_name_to_world_pos() in ryzom_packed_sheets.py
+    (fixed loop, 4× EGSPD::CSeason::Invalid, per iteration k, in this order):
+        TileColorMono[k]              bool
+        TileColorFactor[k]            f32
+        StaticLightingFactor[k]       f32
+        SkySheet[k]                   string
+        ForceDisplayedSeason[k]       sint32 (serialEnum, EGSPD::CSeason::TSeason -- Spring=0, Summer=1, Autumn=2, Winter=3, Invalid=4)
+
+CDirLightSetup::serial (dir_light_setup.h:59), one multi-arg call (same wire shape as separate fields):
+    Ambiant     rgba
+    Diffuse     rgba
+    Specular    rgba
+    Direction   vector3
+
+CFogMapBuild::serial (fog_map_build.cpp), TMapType has 6 values (Day=0, Night, Dusk, Distance, Depth, NoPrecipitation=5=NumMap):
+    Map[6]      6× string   -- loop over NumMap
+    ZoneMin     string
+    ZoneMax     string
+
+CContinentParameters::CZC::serial (continent_sheet.cpp:400) -- "zone constructible" entries:
+    Name            string
+    ForceLoadDist   f32
+    LoadDist        f32
+    UnloadDist      f32
+    EnableRuins     bool
+
+CVillageSheet::serial (village_sheet.cpp), flat:
+    Zone            string   -- a zone name, same convention as ZoneMin/ZoneMax above
+    Altitude        f32
+    ForceLoadDist   f32
+    LoadDist        f32
+    UnloadDist      f32
+    CenterX         f32
+    CenterY         f32
+    Width           u32
+    Height          u32
+    Rotation        f32
+    Name            string
+    IGs             cont<CVillageIG>
+
+CVillageIG::serial (village_sheet.h):
+    IgName       string
+    ParentName   string
+
+CWeatherFunctionSheet::serial (weather_function_sheet.cpp) -- inherits CWeatherFunctionParameters,
+no fields of its own beyond those, all serialized directly by the subclass:
+    VegetableMinBendIntensity                    f32
+    VegetableMaxBendIntensity                    f32
+    VegetableMinWindFrequency                    f32
+    VegetableMaxWindFrequency                    f32
+    VegetableMaxBendOffset                       f32
+    VegetableWindIntensityThatStartBendOffset    f32
+    TreeMinWindIntensity                         f32
+    TreeMaxWindIntensity                         f32
+    SetupNames                                   cont<string>
+    SetupWeights                                 cont<u32>
+```
+
+### `zone_name_to_world_pos()` -- decoding zone-name strings (`ZoneMin`/`ZoneMax`/`CVillageSheet.Zone`)
+
+Zone names (e.g. `"160_ab"`) are NOT filenames to resolve via `sheet_id.bin`
+-- they encode a grid position directly, per `getPosFromZoneName()`
+(`ryzom/client/src/zone_util.cpp:33`):
+
+```
+strip any extension from the name
+row = digits before the first '_'                    (all must be ASCII digits, else invalid)
+xStr = characters after '_', uppercased               (must be exactly 2 letters, else invalid)
+x = 160.0 * ((xStr[0] - 'A') * 26 + (xStr[1] - 'A'))
+y = 160.0 * (-row)
+```
+
+Each zone tile is 160×160 units and its name gives its **origin corner**,
+not its extent -- for a true bounding box, the max corner needs `+160` on
+both axes once decoded (reproduces `CContinent::getCorners()`,
+`continent.cpp:845-867`, used for the real playable-area bounds; contrast
+`CContinent::dumpVillagesLoadingZones()`, `continent.cpp:1202`, a
+debug/screenshot helper that skips this `+160` correction and is not the
+formula to reuse for real bounding boxes). The `+160` step is **not**
+folded into `zone_name_to_world_pos()` itself -- callers (e.g. Forgery's
+continent bounding-box computation) must apply it explicitly, since it only
+makes sense for a max corner, not for every zone-name lookup.
+
+## Other sheet types (deliberately out of scope beyond `.creature`/`.item`/`.sitem`/`.animset_list`/`.world`/`.continent`)
 
 `CSheetManagerEntry::serial` (sheet_manager.cpp:290) is a big switch over
-~25 `CEntitySheet` subclasses (`CBuildingSheet`, `CSBrickSheet`, ...), each
+~25 `CEntitySheet` subclasses (`CSBrickSheet`, ...), each
 its own class with its own `serial()` (`ryzom/client/src/client_sheets/*.cpp`)
 and its own version number in `TypeVersion[]`. Each one is a separate,
 similarly-sized investigation — not attempted here. When picking up another
 `.packed_sheets` extension later, the pattern to follow is exactly this doc:
 find the class in `sheet_manager.cpp`'s `readGeorges`/`serial` switch, read
 its `serial()` top to bottom, note its `TypeVersion[]` entry, write it up
-before coding.
+before coding. `CBuildingSheet`/`building.packed_sheets` was investigated
+and deliberately excluded -- see the status note at the top of this doc.
 
 ## Suggested plan for implementation
 
