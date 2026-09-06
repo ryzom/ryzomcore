@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-06 — 🐛 Fix version-check race between pyproject.toml and the published wheel
+
+Closes `project-todos/ryztart/forgery_integration__version-race-fix.md`.
+
+`ryztart`'s `_checkUpdate()` (`app/modules/ryzom_forgery_launcher/launcher.py`) compared the installed
+package against `pyproject.toml`'s raw content on `ryzom/forgery`, fetched live via the GitLab API --
+that content updates the instant a commit is pushed, while the wheel at its fixed URL only gets
+overwritten once the `build_forgery_wheel`/`upload_forgery_wheel` CI stages actually finish. A client
+could see a newer version announced before it was really published, trigger an unnecessary
+reinstall, and still end up on the stale wheel -- persisting the mismatch until CI completes.
+
+Fix: `upload_forgery_wheel` (`.gitlab-ci.yml`) now also uploads a small marker file
+(`ryzom_forgery-version.txt`, plain text, just the version) to the same generic package registry
+path as the wheel, written only once the wheel itself is actually published. `launcher.py` reads
+this marker instead of parsing `pyproject.toml`, dropping `_PYPROJECT_URL`/`_VERSION_RE` entirely.
+
+Manually tested and validated by Nuno: no spurious mismatch/reinstall before CI finishes, and a
+correct reinstall triggers once the marker and wheel are both published.
+
 ## 2026-08-26 — 📦 Bundle Forgery's icon/splash/panoply data in the wheel
 
 `forgery.png`/`splashscreen.png` (used by `app.py`'s window icon/splash, referenced via
