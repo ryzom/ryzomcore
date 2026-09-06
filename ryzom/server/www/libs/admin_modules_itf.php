@@ -319,7 +319,7 @@ $message->serialString($serviceAlias);
 
 		reset($data);
 		$data = str_replace('\\\'', '', $data);
-	
+
 		foreach($data as $server_data)
 		{
 			$data_ary = explode("\n",$server_data);
@@ -499,10 +499,5 @@ $message->serialString($serviceAlias);
 
 	function queryShard($service_name, $fullcmd, $cmd='', $waitCallback=true, $is_control=false)
 	{
-		return querySelectedShard('arma.ryzom.com', $service_name, $fullcmd, $cmd, $waitCallback, $is_control);
-	}
-
-	function queryYuboShard($service_name, $fullcmd, $cmd='', $waitCallback=true, $is_control=false)
-	{
-		return querySelectedShard('yubo.ryzom.com', $service_name, $fullcmd, $cmd, $waitCallback, $is_control);
+		return querySelectedShard('localhost', $service_name, $fullcmd, $cmd, $waitCallback, $is_control);
 	}
