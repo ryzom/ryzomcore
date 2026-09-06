@@ -35,6 +35,43 @@ for pynel itself** — it'll happen as part of a separate, bigger project later,
 not here. Don't start building a viewer inside `pynel` unless that's revisited.
 See "Ryzom Forgery" below for where step 3 actually lives.
 
+## Done — `.zone`/`.zonew`/`.zonel` + `.land` read/write, native tool orchestration
+
+`nel/tools/pynel/pynel/ryzom_zone.py` reads and writes `CZone`
+(`.zone`/`.zonew`/`.zonel` -- same binary format at three different pipeline
+stages, see `docs/zone_format.md`) round-trip. `ryzom_land.py` does the same
+for `.land` (`CZoneRegion`, XML on disk -- see `docs/land_format.md`).
+
+Since welding (`.zone`→`.zonew`) and lighting (`.zonew`→`.zonel`) are real
+geometric processing (tangent smoothing between neighbor zones, lumel/point
+light baking) already implemented in C++, pynel doesn't reimplement them --
+it drives the existing native tools (`zone_welder`, `zone_lighter`,
+`land_export`) as subprocesses instead. `ryzom_zone_tools.py`
+(`run_zone_welder`/`run_zone_lighter`) and `ryzom_land_tools.py`
+(`run_land_export` + `.cfg` generation from a dataclass) are thin wrappers
+around this -- no automatic binary discovery, no parsing of the (mostly
+free-text) tool output; the caller validates the result via
+`ryzom_zone.load_zone()`/`ryzom_land.load_land()`. Full CLI contracts (args,
+exit-code quirks, `.cfg`/`.depend` file formats) documented in
+`docs/zone_tools.md`.
+
+Validated end-to-end against real `ryzom-data`: `land_export` on the real
+`nexus.land` (jungle ecosystem) produces 151 `.zonenh`, all re-parsed
+successfully; `zone_welder` + `zone_lighter` on a real `.zone` produce a
+valid `.zonew` then `.zonel`, both re-parsed successfully. Two native Linux
+bugs were found and fixed along the way (hardcoded `\` path separators and
+`world_editor` being Windows-gated in `land_export`'s CMake; a stack
+corruption + an uninitialized main-thread handle in `zone_lighter`'s CPU
+affinity code) -- see `logs/ryzom-core.md` in `ryzom-core` for the second
+one, both fixes are in `ryzom-core` itself, not in pynel.
+
+Zone welding is single-pass per the real pipeline's own convention (one
+alphabetical pass over `zone_exported/*.zone`, writing into the same output
+directory each call) -- orchestrating a full-grid, multi-zone build (calling
+`zone_welder`/`zone_lighter` in the right order across many zones, plus
+`zone_elevation`/`zone_dependencies`/`zone_ig_lighter`) is tracked
+separately in `project-todos/pynel/land_pipeline.md`, not done here.
+
 ## Ryzom Forgery — the step-3 viewer/tool suite (design settled, not started)
 
 **Goal**: cover step 3 above (and future editor-style tooling beyond just
