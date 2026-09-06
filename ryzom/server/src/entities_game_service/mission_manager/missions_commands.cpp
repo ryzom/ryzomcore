@@ -3647,7 +3647,7 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 	}
 
 
-	if (args.size() >= 5 && args[4] != '*')
+	if (args.size() >= 5 && args[4] != "*")
 	{
 		fromString(args[4], msg.Cell);
 	}
@@ -3658,7 +3658,7 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 	}
 
 	// Replace an existing entity (e.g. a NPC group) instead of spawning near a point
-	if (args.size() >= 6 && args[5] != '*')
+	if (args.size() >= 6 && args[5] != "*")
 	{
 		CEntityId targetEntityId(args[5]);
 		if (targetEntityId == CEntityId::Unknown)
