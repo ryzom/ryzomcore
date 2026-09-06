@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-09-06 — ✨ Read Const/Bezier/TCB anim tracks and write CAnimation, pynel 0.11.0
+
+Two chantiers landed together (`project-todos/pynel/anim_read_extra_tracks.md` and
+`anim_write.md`, both closed): `ryzom_animation.py` previously only read
+`CTrackDefaultVector/Quat`, `CTrackSampledVector/Quat`, and
+`CTrackKeyFramerLinearVector/Quat/Float`, and had no write support at all.
+
+**Reading**: added parsing and evaluation for the 6 remaining `ITrack` classes found in
+real `ryzom-data` `.anim` files (65/183 previously failed with `AnimationParseError`) --
+`CTrackKeyFramerConstBool/String` (held, never interpolated), `CTrackKeyFramerBezierVector/
+Float` (cubic Bezier from stored tangents), and `CTrackKeyFramerTCBVector/Quat`
+(Kochanek-Bartels, tangents/ease factors precomputed once per track via
+`_compile_tcb_track()`/`_compile_tcb_quat_track()` rather than recomputed on every
+`evaluate_track()` call). `CTrackKeyFramerTCBQuat`'s own on-disk key is a per-key angle-axis
+delta relative to the previous key, not an absolute quaternion -- reconstructed the same way
+the engine's `CTrackKeyFramerTCB<CKeyTCBQuat,...>::compile()` does, needing quaternion
+log/exp/lnDif/squad/squadrev helpers added as pure functions (`_quat_log`, `_quat_exp`,
+`_quat_squadrev`, etc.). `CTrackKeyFramerBezierQuat`/`TCBFloat`/`TCBInt`/`TCBRGBA` and any
+other unlisted `ITrack` subclass still fail with `AnimationParseError` rather than silently
+producing wrong data -- none appear anywhere in the real corpus this was checked against.
+
+**Writing**: `build_animation()`/`dumps_animation()`/`save_animation()`, symmetric to
+`ryzom_shape.py`'s existing `dumps()`/`save_shape()`. Only ever produces
+`CTrackSampledVector/Quat`, `CTrackDefaultVector/Quat`, or `CTrackKeyFramerLinearVector/
+Quat/Float` (`track_format="sampled"` or `"keyframer_linear"`) -- `"sampled"` mirrors
+`NL3D::CAnimationOptimizer` (fixed 30Hz resampling, quaternion hemisphere continuity,
+constant-track fallback, greedy key reduction, `CTimeBlock` construction for an
+arbitrary/sparse `time_list`), `"keyframer_linear"` mirrors what the real 3dsMax exporter
+actually writes (irregular source key times preserved as-is, no resampling). Track format
+choice was settled empirically (2026-09-05, via the `.agentcom` bridge): every loose
+`ryzom-data` `.anim` source file is `KeyFramerLinear*`, but the real packed/shipped `.bnp`
+content is overwhelmingly `Sampled*`/`Default*` -- confirming `CAnimationOptimizer` genuinely
+runs in the real packaging pipeline, so `"sampled"` is the right default for a
+Forgery-generated `.anim` meant to be played in-game as-is.
+
+Validated: reparsing the 65 previously-failing real `.anim` files now succeeds, with
+`evaluate_track()` producing continuous, non-NaN values across each track; a synthetic
+build -> dump -> reparse -> evaluate round-trip for both write formats; and a real
+`ryzom-data` `.anim` file round-tripped the same way, comparing track classes and evaluated
+values rather than exact binary equality (poly-ptr node ids and `id_by_name` order aren't
+guaranteed to match the original).
+
 ## 2026-09-05 — ✨ Write support for CSkeletonShape, pynel 0.9.4
 
 `ryzom_shape.py` could previously only read a `CSkeletonShape` (`.skel`) -- `dumps()`
