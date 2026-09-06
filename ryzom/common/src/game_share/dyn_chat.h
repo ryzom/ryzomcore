@@ -21,6 +21,7 @@
 #include "nel/misc/entity_id.h"
 #include "nel/misc/historic.h"
 #include "base_types.h"
+#include "chat_message.h"
 
 // forward declarations
 class CDynChatClient;
@@ -122,9 +123,13 @@ class CDynChatChan
 public:
 	struct CHistoricEntry
 	{
+		CHistoricEntry() : Shared(false) {}
+
 		ucstring	String;
 //		TDataSetRow Sender;
 		ucstring	SenderString;
+		bool		Shared;
+		CChatMessage Message;
 	};
 	NLMISC::CHistoric<CHistoricEntry>		Historic;		// historic of messages for IOS
 	uint									HistoricSize;   // Historic size for EGS

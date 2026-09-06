@@ -26,7 +26,9 @@
 
 #include "inventory_manager.h"
 #include "bot_chat_manager.h"
+#include "interface_pointer.h"
 
+class CSPhraseCom;
 
 // Struct that tells how to setup a help window
 class CSheetHelpSetup
@@ -63,6 +65,10 @@ void resetSheetHelp(CSheetHelpSetup &setup);
 // Setup help for a sheet in a window. Type is deduced from the sheet
 void setupSheetHelp(CSheetHelpSetup &setup);
 
+// Open phrase help for a linked phrase.
+void openSabrinaPhraseHelp(CDBCtrlSheet *sourceSheet, const CSPhraseCom &phrase);
+bool getLinkedSabrinaPhrase(CDBCtrlSheet *helpCtrlSheet, CSPhraseCom &phrase);
+
 // Refresh help for an item
 void refreshItemHelp(CSheetHelpSetup &setup);
 // refresh help for a mission
@@ -86,12 +92,14 @@ class	CInterfaceHelp
 {
 public:
 	// Open and set the group next to the element
-	static CInterfaceGroup	*activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow=-1);
+	static CInterfaceGroup	*activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow=-1,
+		bool reuseSameAspect=true, bool preferNewWindow=false);
 
 	// Close all the Help Windows
 	static	void			closeAll();
 
-	// remove waiter for ItemInfo
+	// Remove data associated with a help window.
+	static	void			removeLinkedPhrase(uint i);
 	static	void			removeWaiterItemInfo(uint i);
 	static	void			removeWaiterMissionInfo(uint i);
 

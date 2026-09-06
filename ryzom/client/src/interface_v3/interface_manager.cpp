@@ -1369,6 +1369,9 @@ void CInterfaceManager::uninitInGame1 ()
 		ChatDisplayer = NULL;
 	}
 
+	// Release interface help before inventory manager
+	CInterfaceHelp::release();
+
 	// Release inventory manager
 	CInventoryManager::releaseInstance();
 	// Same for temp inventory manager
@@ -1443,9 +1446,6 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Uninit macro manager
 	CMacroCmdManager::getInstance()->uninitInGame();
-
-	// Release interface help
-	CInterfaceHelp::release();
 
 	// Release guild manager
 	CGuildManager::release();

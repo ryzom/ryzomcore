@@ -29,6 +29,7 @@
 // game share
 //#include "game_share/chat_static_database.h"
 #include "game_share/chat_group.h"
+#include "game_share/chat_message.h"
 #include "game_share/dyn_chat.h"
 
 
@@ -139,10 +140,12 @@ public:
 		 *	\param dynChatId is valid only if mode==dyn_chat. This the Id of channel (not the index in DB!)
 		 */
 		virtual void	displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0) =0;
+		virtual void	displayChatMessage(TDataSetIndex compressedSenderIndex, const std::string &prefix, const CChatMessage &message, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName) =0;
 		/**
 		 *	display a player tell message
 		 */
 		virtual void	displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName) =0;
+		virtual void	displayTellMessage(const std::string &prefix, const CChatMessage &message, const std::string &senderName, bool ownTell) =0;
 		/**
 		 *	Clear a channel.
 		 *	\param dynChatDbIndex is valid only if mode==dyn_chat. Contrary to displayChat, this is the Db Index (0..MaxDynChanPerPlayer)
@@ -179,6 +182,7 @@ public :
 	 * \param isChatTeam special case for Chat TEAM
 	 */
 	void chat( const std::string& str, bool isChatTeam = false );
+	void chat(const CChatMessageRequest &request, bool isChatTeam = false);
 
 	/**
 	 * Transmit a chat message to the receiver
@@ -186,6 +190,7 @@ public :
 	 * \param str is the chat content (truncated to 255 char max)
 	 */
 	void tell( const std::string& receiver, const std::string& str );
+	void tell(const std::string &receiver, const CChatMessageRequest &request);
 
 	/** Get the last name of the people with which a 'tell' has been done, then move that name at the start of the list
 	  */
@@ -232,6 +237,7 @@ public :
 	 * Extract and decode the chat string from the stream. display now if ready or delay in flushBuffer()
 	 */
 	void processChatString( NLMISC::CBitMemStream& bms, IChatDisplayer &chatDisplayer);
+	void processChatMessage(NLMISC::CBitMemStream &bms, IChatDisplayer &chatDisplayer);
 
 	/**
 	 * Extract and decode the chat string from the stream. display now if ready or delay in flushBuffer()
@@ -286,6 +292,7 @@ public :
 
 
 private :
+	void updateTellList(const std::string &receiver);
 
 	uint8				_ChatMode;
 
@@ -312,6 +319,11 @@ private :
 		bool			UsePhraseId;
 		// displayTell() or displayChat()
 		bool			DisplayAsTell;
+		bool			UseSharedMessage;
+		std::string		Sender;
+		bool			OwnTell;
+		std::string		TellTarget;
+		CChatMessage		SharedMessage;
 
 		CChatMsgNode(const CChatMsg &chatMsg, bool displayAsTell)
 		{
@@ -323,6 +335,8 @@ private :
 			PhraseId= 0;
 			UsePhraseId= false;
 			DisplayAsTell= displayAsTell;
+			UseSharedMessage= false;
+			OwnTell= false;
 		}
 
 		CChatMsgNode(const CChatMsg2 &chatMsg, bool displayAsTell)
@@ -334,9 +348,31 @@ private :
 			PhraseId= chatMsg.PhraseId;
 			UsePhraseId= true;
 			DisplayAsTell= displayAsTell;
+			UseSharedMessage= false;
+			OwnTell= false;
+		}
+
+		CChatMsgNode(TDataSetIndex compressedIndex, const std::string &sender,
+			CChatGroup::TGroupType chatMode, const NLMISC::CEntityId &dynChatChanId,
+			bool ownTell, const std::string &tellTarget, const CChatMessage &message)
+		{
+			CompressedIndex= compressedIndex;
+			SenderNameId= 0;
+			ChatMode= (uint8)chatMode;
+			DynChatChanID= dynChatChanId;
+			PhraseId= 0;
+			UsePhraseId= false;
+			DisplayAsTell= chatMode == CChatGroup::tell;
+			UseSharedMessage= true;
+			Sender= sender;
+			OwnTell= ownTell;
+			TellTarget= tellTarget;
+			SharedMessage= message;
 		}
 	};
 	std::list<CChatMsgNode>		_ChatBuffer;
+	bool isChatMessageReady(const CChatMsgNode &chatMessage);
+	void displayChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer);
 
 	// peoples
 	std::list<std::string> _TellPeople; // the last people on which tells ha been done

@@ -54,6 +54,13 @@ namespace NLGUI
 	CGroupEditBox *CGroupEditBox::_MenuFather = NULL;
 	CGroupEditBox::IComboKeyHandler* CGroupEditBox::comboKeyHandler = NULL;
 
+	struct CTextClipboard
+	{
+		::u32string Text;
+		std::vector<CGroupEditBox::CTextTag> TextTags;
+	};
+	static CTextClipboard TextClipboard;
+
 	// For now, just trim unsupported codepoints to make emoji fallback to text form
 	static u32char supportedCodepoint(u32char c)
 	{
@@ -88,6 +95,17 @@ namespace NLGUI
 				res.push_back(c);
 		}
 		return res;
+	}
+
+	static void appendEscapedTaggedText(::u32string &dest, const ::u32string &src,
+		const ::u32string &colorTag)
+	{
+		for (::u32string::const_iterator it = src.begin(); it != src.end(); ++it)
+		{
+			dest += *it;
+			if (*it == '@')
+				dest += colorTag;
+		}
 	}
 
 	// ----------------------------------------------------------------------------
@@ -834,47 +852,132 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
+	bool CGroupEditBox::copyToClipboard(const ::u32string &text, const std::vector<CTextTag> &textTags)
+	{
+		size_t previousEnd = 0;
+		for (std::vector<CTextTag>::const_iterator it = textTags.begin(); it != textTags.end(); ++it)
+		{
+			if (it->Length == 0 || it->Start < previousEnd || it->Start > text.size() ||
+				it->Length > text.size() - it->Start)
+				return false;
+			previousEnd = it->Start + it->Length;
+		}
+
+		if (!CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(CUtfStringView(text).toUtf8()))
+			return false;
+		TextClipboard.Text = text;
+		TextClipboard.TextTags = textTags;
+		return true;
+	}
+
+	// ----------------------------------------------------------------------------
 	void CGroupEditBox::copy()
+	{
+		copySelectionToClipboard();
+	}
+
+	// ----------------------------------------------------------------------------
+	bool CGroupEditBox::copySelectionToClipboard()
 	{
 		if (_CurrSelection != this)
 		{
 			nlwarning("Selection can only be on focus");
+			return false;
 		}
 		stopParentBlink();
 
-		// get the selection and copy it
-		if (CViewRenderer::getInstance()->getDriver()->copyTextToClipboard(getSelection()))
+		const uint32 minPos = (uint32)min(_CursorPos, _SelectCursorPos);
+		const uint32 maxPos = (uint32)max(_CursorPos, _SelectCursorPos);
+		std::vector<CTextTag> textTags;
+		for (std::vector<CTextTag>::const_iterator it = _TextTags.begin(); it != _TextTags.end(); ++it)
+		{
+			if (it->Start >= minPos && it->Start <= maxPos && it->Length <= maxPos - it->Start)
+			{
+				CTextTag tag = *it;
+				tag.Start -= minPos;
+				textTags.push_back(tag);
+			}
+		}
+		if (copyToClipboard(CUtfStringView(getSelection()).toUtf32(), textTags))
+		{
 			nlinfo ("Chat input was copied in the clipboard");
+			return true;
+		}
+		return false;
 	}
 
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::paste()
 	{
-		if(_CurrSelection != NULL)
-		{
-			if (_CurrSelection != this)
-			{
-				nlwarning("Selection can only be on focus");
-			}
-			cutSelection();
-		}
+		paste(0);
+	}
 
+	// ----------------------------------------------------------------------------
+	void CGroupEditBox::paste(uint32 maxTextTags)
+	{
 		string sString;
 
 		if (CViewRenderer::getInstance()->getDriver()->pasteTextFromClipboard(sString))
 		{
-			// append string now
-			appendStringFromClipboard(sString);
+			const ::u32string text = CUtfStringView(sString).toUtf32();
+			const std::vector<CTextTag> *textTags = NULL;
+			if (text == TextClipboard.Text)
+				textTags = &TextClipboard.TextTags;
+			else
+			{
+				TextClipboard.Text.clear();
+				TextClipboard.TextTags.clear();
+			}
+			appendStringFromClipboard(sString, textTags, maxTextTags);
 		}
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::appendStringFromClipboard(const std::string &str)
+	void CGroupEditBox::appendStringFromClipboard(const std::string &str,
+		const std::vector<CTextTag> *textTags, uint32 maxTextTags)
 	{
 		stopParentBlink();
 		makeTopWindow();
 
+		if (_CurrSelection != NULL && _CurrSelection != this)
+			nlwarning("Selection can only be on focus");
+		const sint32 insertionStart = _CurrSelection == this ?
+			min(_CursorPos, _SelectCursorPos) : _CursorPos;
 		writeString(str, true, false);
+		_CurrSelection = NULL;
+		_SelectCursorPos = _CursorPos;
+
+		if (textTags && !textTags->empty())
+		{
+			const ::u32string source = CUtfStringView(str).toUtf32();
+			const uint32 insertedLength = (uint32)(_CursorPos - insertionStart);
+			const ::u32string inserted = _InputString.substr(insertionStart, insertedLength);
+			uint32 matchingLength = 0;
+			while (matchingLength < source.size() && matchingLength < inserted.size() &&
+				source[matchingLength] == inserted[matchingLength])
+				++matchingLength;
+
+			std::vector<CTextTag> insertedTags;
+			for (std::vector<CTextTag>::const_iterator it = textTags->begin(); it != textTags->end(); ++it)
+			{
+				if (it->Start <= matchingLength && it->Length <= matchingLength - it->Start)
+				{
+					CTextTag tag = *it;
+					tag.Start += insertionStart;
+					insertedTags.push_back(tag);
+				}
+			}
+			if (!insertedTags.empty() && _TextTags.size() <= maxTextTags &&
+				insertedTags.size() <= maxTextTags - _TextTags.size())
+			{
+				std::vector<CTextTag>::iterator position = _TextTags.begin();
+				while (position != _TextTags.end() && position->Start < insertedTags[0].Start)
+					++position;
+				_TextTags.insert(position, insertedTags.begin(), insertedTags.end());
+				setupDisplayText();
+				invalidateCoords();
+			}
+		}
 		nlinfo ("Chat input was pasted from the clipboard");
 
 		triggerOnChangeAH();
@@ -1018,24 +1121,8 @@ namespace NLGUI
 			}
 		}
 		length = (sint)toAppend.size();
-		if ((uint) (_InputString.length() + length) > _MaxNumChar)
-		{
-			length = _MaxNumChar - (sint)_InputString.length();
-		}
-		::u32string toAdd = toAppend.substr(0, length);
-		if (_MaxNumBytes && length)
-		{
-			sint baseBytes = CUtfStringView(_InputString).toUtf8().length();
-			sint bytes = baseBytes + CUtfStringView(toAdd).toUtf8().length();
-			while (bytes > _MaxNumBytes)
-			{
-				length -= std::max((int)(bytes - _MaxNumBytes) >> 2, 1);
-				toAdd = toAdd.substr(0, length);
-				bytes = baseBytes + CUtfStringView(toAdd).toUtf8().length();
-			}
-		}
-		sint32	minPos;
-		sint32	maxPos;
+		sint32 minPos;
+		sint32 maxPos;
 		if (_CurrSelection == this)
 		{
 			minPos = min(_CursorPos, _SelectCursorPos);
@@ -1047,8 +1134,32 @@ namespace NLGUI
 			maxPos = _CursorPos;
 		}
 
+		const uint32 replacedLength = replace ? (uint32)(maxPos - minPos) : 0;
+		const uint32 keptLength = (uint32)_InputString.length() - replacedLength;
+		if (keptLength >= _MaxNumChar)
+			length = 0;
+		else if ((uint32)length > _MaxNumChar - keptLength)
+			length = (sint)(_MaxNumChar - keptLength);
+		::u32string toAdd = toAppend.substr(0, length);
+		if (_MaxNumBytes && length)
+		{
+			sint baseBytes = CUtfStringView(_InputString).toUtf8().length();
+			if (replacedLength)
+				baseBytes -= CUtfStringView(_InputString.substr(minPos, replacedLength)).toUtf8().length();
+			sint bytes = baseBytes + CUtfStringView(toAdd).toUtf8().length();
+			while (length > 0 && bytes > _MaxNumBytes)
+			{
+				length -= std::max((int)(bytes - _MaxNumBytes) >> 2, 1);
+				if (length < 0)
+					length = 0;
+				toAdd = toAdd.substr(0, length);
+				bytes = baseBytes + CUtfStringView(toAdd).toUtf8().length();
+			}
+		}
+
 		if (replace)
 		{
+			updateTextTags(minPos, maxPos - minPos, (uint32)toAdd.length());
 			_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(maxPos);
 			_CursorPos = minPos+(sint32)toAdd.length();
 		}
@@ -1056,6 +1167,7 @@ namespace NLGUI
 		{
 			if (atEnd)
 			{
+				updateTextTags(maxPos, 0, (uint32)toAdd.length());
 				_InputString = _InputString.substr(0, maxPos) + toAdd + _InputString.substr(maxPos);
 				_CursorPos = maxPos;
 				_SelectCursorPos = _CursorPos;
@@ -1063,6 +1175,7 @@ namespace NLGUI
 			}
 			else
 			{
+				updateTextTags(minPos, 0, (uint32)toAdd.length());
 				_InputString = _InputString.substr(0, minPos) + toAdd + _InputString.substr(minPos);
 				_CursorPos = minPos+(sint32)toAdd.length();
 				_SelectCursorPos = maxPos+(sint32)toAdd.length();
@@ -1223,6 +1336,7 @@ namespace NLGUI
 							if (!_MaxNumBytes || CUtfStringView(_InputString + c).toUtf8().size() <= _MaxNumBytes)
 							{
 								makeTopWindow();
+								updateTextTags(_CursorPos, 0, 1);
 								::u32string::iterator it = _InputString.begin() + _CursorPos;
 								_InputString.insert(it, c);
 								++_CursorPos;
@@ -1243,7 +1357,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::handleEventString(const NLGUI::CEventDescriptorKey &rEDK)
 	{
-		appendStringFromClipboard(rEDK.getString());
+		appendStringFromClipboard(rEDK.getString(), NULL, 0);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -1252,7 +1366,10 @@ namespace NLGUI
 		if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 		if (!_CanUndo) return false;
 		_ModifiedInputString = _InputString;
+		_ModifiedTextTags = _TextTags;
 		setInputStringRef(_StartInputString);
+		_TextTags = _StartTextTags;
+		setupDisplayText();
 		_CanUndo = false;
 		_CanRedo = true;
 		setCursorPos((sint32)_InputString.length());
@@ -1266,6 +1383,8 @@ namespace NLGUI
 		if (CWidgetManager::getInstance()->getCaptureKeyboard() != this) return false;
 		if (!_CanRedo) return false;
 		setInputStringRef(_ModifiedInputString);
+		_TextTags = _ModifiedTextTags;
+		setupDisplayText();
 		_CanUndo = true;
 		_CanRedo = false;
 		setCursorPos((sint32)_InputString.length());
@@ -1336,6 +1455,7 @@ namespace NLGUI
 		// else delete last character
 		else if(_InputString.size () > 0 && _CursorPos != 0)
 		{
+			updateTextTags(_CursorPos - 1, 1, 0);
 			::u32string::iterator it = _InputString.begin() + (_CursorPos - 1);
 			_InputString.erase(it);
 			-- _CursorPos;
@@ -1513,9 +1633,42 @@ namespace NLGUI
 			}
 			else
 			{
-				usTmp = CUtfStringView(_Prompt + _InputString).toUtf8();
+				if (_TextTags.empty())
+				{
+					usTmp = CUtfStringView(_Prompt + _InputString).toUtf8();
+				}
+				else
+				{
+					static const char ConvTable[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+						'8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'F'};
+					const NLMISC::CRGBA baseColor = _ViewText->getColor();
+					const std::string baseColorTag = NLMISC::toString("@{%c%c%c%c}",
+						ConvTable[(uint(baseColor.R) + 7) >> 4], ConvTable[(uint(baseColor.G) + 7) >> 4],
+						ConvTable[(uint(baseColor.B) + 7) >> 4], ConvTable[(uint(baseColor.A) + 7) >> 4]);
+					const ::u32string baseColorTag32 = CUtfStringView(baseColorTag).toUtf32();
+					::u32string text;
+					appendEscapedTaggedText(text, _Prompt, baseColorTag32);
+					uint32 pos = 0;
+					for (std::vector<CTextTag>::const_iterator it = _TextTags.begin(); it != _TextTags.end(); ++it)
+					{
+						appendEscapedTaggedText(text, _InputString.substr(pos, it->Start - pos), baseColorTag32);
+						const std::string colorTag = NLMISC::toString("@{%c%c%c%c}",
+							ConvTable[(uint(it->Color.R) + 7) >> 4], ConvTable[(uint(it->Color.G) + 7) >> 4],
+							ConvTable[(uint(it->Color.B) + 7) >> 4], ConvTable[(uint(it->Color.A) + 7) >> 4]);
+						const ::u32string colorTag32 = CUtfStringView(colorTag).toUtf32();
+						text += colorTag32;
+						appendEscapedTaggedText(text, _InputString.substr(it->Start, it->Length), colorTag32);
+						text += baseColorTag32;
+						pos = it->Start + it->Length;
+					}
+					appendEscapedTaggedText(text, _InputString.substr(pos), baseColorTag32);
+					usTmp = CUtfStringView(text).toUtf8();
+				}
 			}
-			_ViewText->setText (usTmp);
+			if (_TextTags.empty() || _EntryType == Password)
+				_ViewText->setText(usTmp);
+			else
+				_ViewText->setSingleLineTextFormatTaged(usTmp);
 		}
 	}
 
@@ -1546,6 +1699,7 @@ namespace NLGUI
 			while (_ViewText->getWReal() > _MaxCharsSize)
 			{
 				// Suppr last char
+				updateTextTags((uint32)_InputString.size() - 1, 1, 0);
 				_InputString = _InputString.substr(0, _InputString.size()-1);
 
 				setupDisplayText();
@@ -1705,10 +1859,13 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::setInputString(const std::string &str)
 	{
+		_TextTags.clear();
 		setInputStringRef(CUtfStringView(str).toUtf32());
 	}
 	void CGroupEditBox::setInputStringRef(const ::u32string &str)
 	{
+		if (str != _InputString)
+			_TextTags.clear();
 		_InputString = str;
 		if (_CursorPos > (sint32) str.length())
 		{
@@ -1719,6 +1876,48 @@ namespace NLGUI
 		setupDisplayText();
 
 		invalidateCoords();
+	}
+
+	void CGroupEditBox::addTextTag(uint32 start, uint32 length, uint32 type, uint32 value, NLMISC::CRGBA color)
+	{
+		if (length == 0 || start > _InputString.size() || length > _InputString.size() - start)
+			return;
+		CTextTag tag;
+		tag.Start = start;
+		tag.Length = length;
+		tag.Type = type;
+		tag.Value = value;
+		tag.Color = color;
+		std::vector<CTextTag>::iterator it = _TextTags.begin();
+		while (it != _TextTags.end() && it->Start < start)
+			++it;
+		if ((it != _TextTags.begin() && (it - 1)->Start + (it - 1)->Length > start) ||
+			(it != _TextTags.end() && start + length > it->Start))
+			return;
+		_TextTags.insert(it, tag);
+		setupDisplayText();
+		invalidateCoords();
+		triggerOnChangeAH();
+	}
+
+	void CGroupEditBox::updateTextTags(uint32 start, uint32 oldLength, uint32 newLength)
+	{
+		const uint32 oldEnd = start + oldLength;
+		const sint32 delta = (sint32)newLength - (sint32)oldLength;
+		for (std::vector<CTextTag>::iterator it = _TextTags.begin(); it != _TextTags.end();)
+		{
+			const uint32 tagEnd = it->Start + it->Length;
+			const bool insertionInside = oldLength == 0 && start > it->Start && start < tagEnd;
+			const bool intersects = oldLength != 0 && start < tagEnd && oldEnd > it->Start;
+			if (insertionInside || intersects)
+			{
+				it = _TextTags.erase(it);
+				continue;
+			}
+			if (it->Start >= oldEnd)
+				it->Start = (uint32)((sint32)it->Start + delta);
+			++it;
+		}
 	}
 
 
@@ -1780,6 +1979,7 @@ namespace NLGUI
 		// cut the selection
 		if(!_InputString.empty())
 		{
+			updateTextTags((uint32)minPos, (uint32)(maxPos - minPos), 0);
 			_InputString= _InputString.substr(0, minPos) + _InputString.substr(maxPos);
 		}
 		_CurrSelection = NULL;
@@ -1880,6 +2080,7 @@ namespace NLGUI
 	void CGroupEditBox::clearAllEditBox()
 	{
 		_InputString.clear();
+		_TextTags.clear();
 		_CursorPos = 0;
 		_CursorAtPreviousLineEnd = false;
 		if (!_ViewText) return;
@@ -1913,6 +2114,7 @@ namespace NLGUI
 		{
 			_DefaultInputString= false;
 			_InputString.clear();
+			_TextTags.clear();
 		}
 		if (version < 1)
 		{
@@ -1936,6 +2138,7 @@ namespace NLGUI
 		f.serial(_PrevNumLine);
 		if (f.isReading())
 		{
+			_TextTags.clear();
 			setInputStringRef(_InputString);
 
 		}
@@ -1981,6 +2184,7 @@ namespace NLGUI
 			_CanRedo = false;
 			_CanUndo = false;
 			_StartInputString = _ModifiedInputString = _InputString;
+			_StartTextTags = _ModifiedTextTags = _TextTags;
 		}
 		CInterfaceGroup::elementCaptured(capturedElement);
 	}

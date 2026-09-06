@@ -2502,7 +2502,9 @@
   <template name="temp_list_buy"
             id=""
             use_quantity=""
-            filter_seller_type="none">
+            filter_seller_type="none"
+            onclick_r="open_help_auto"
+            menu_r="">
     <!-- VENDOR NAME -->
     <!--
         <view type="text_formated" id="vendor_name" posref="TL TL" x="4" y="-8" color="255 255 255 255" fontsize="14" shadow="true" format="$b"/>
@@ -2532,7 +2534,8 @@
            use_slot_type_db_entry="false"
            nature="auto"
            onclick_l="buy_item"
-           onclick_r="open_help_auto"
+           onclick_r="#onclick_r"
+           menu_r="#menu_r"
            over_color="%bot_chat_sheet_selection_normal"
            over_col_pushed="%bot_chat_sheet_selection_pushed"
            over_col_over="%bot_chat_sheet_selection_over"
@@ -3350,15 +3353,21 @@
           <instance template="temp_list_buy"
                     id="general_buy"
                     use_quantity="true"
-                    filter_seller_type="npc" />
+                    filter_seller_type="npc"
+                    onclick_r=""
+                    menu_r="ui:interface:item_menu_in_trade" />
           <instance template="temp_list_buy"
                     id="resale_buy"
                     use_quantity="true"
-                    filter_seller_type="resale" />
+                    filter_seller_type="resale"
+                    onclick_r=""
+                    menu_r="ui:interface:item_menu_in_trade" />
           <instance template="temp_list_buy"
                     id="player_buy"
                     use_quantity="true"
-                    filter_seller_type="user" />
+                    filter_seller_type="user"
+                    onclick_r=""
+                    menu_r="ui:interface:item_menu_in_trade" />
         </group>
         <!-- **** MISC **** -->
         <!-- CURRENT MONEY OF PLAYER -->

@@ -34,6 +34,7 @@
 #include "game_share/brick_types.h"
 #include "game_share/loot_harvest_state.h"*/
 #include "game_share/generic_xml_msg_mngr.h"
+#include "game_share/chat_message.h"
 
 /*#include <nel/misc/command.h>*/
 
@@ -197,6 +198,78 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 		nlwarning("<impulsionChatTeam> %s",e.what());
 	}
 } // impulsionChatTeam //
+
+void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceId)
+{
+	if (msgin.length() > CHAT_MESSAGE::MaxSerializedSize)
+		return;
+
+	CEntityId sender;
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	string receiver;
+	CChatMessage message;
+	try
+	{
+		msgin.serial(sender);
+		msgin.serial(chatMode);
+		msgin.serial(dynamicChannelId);
+		msgin.serial(receiver);
+		msgin.serial(message);
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbChatShare> %s", e.what());
+		return;
+	}
+	if (chatMode >= CChatGroup::nbChatMode)
+		return;
+	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
+	if (!message.isValid() || !CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
+		return;
+
+	for (std::vector<CChatMessagePart>::iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+	{
+		if (it->Type == CChatMessagePart::Text)
+			it->TextValue = IOS->getChatManager().filterClientInput(it->TextValue,
+				it == message.Parts.begin(), it + 1 == message.Parts.end());
+	}
+	if (!message.isValid())
+		return;
+
+	try
+	{
+		TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
+		if (group == CChatGroup::tell)
+		{
+			IOS->getChatManager().tellShared(senderRow, receiver, message);
+		}
+		else
+		{
+			CChatClient &client = IOS->getChatManager().getClient(senderRow);
+			const CChatGroup::TGroupType previousMode = client.getChatMode();
+			const TChanID previousChannelId = client.getDynChatChan();
+			try
+			{
+				client.setChatMode(group, dynamicChannelId);
+				client.updateAudience();
+				IOS->getChatManager().chatShared(senderRow, message);
+			}
+			catch (...)
+			{
+				client.setChatMode(previousMode, previousChannelId);
+				client.updateAudience();
+				throw;
+			}
+			client.setChatMode(previousMode, previousChannelId);
+			client.updateAudience();
+		}
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbChatShare> %s", e.what());
+	}
+}
 
 
 //-----------------------------------------------
@@ -2100,6 +2173,7 @@ TUnifiedCallbackItem CbIOSArray[]=
 	// Received from clients (via FS)
 //	{ "READY_STRING", cbImpulsionReadyString },
 	{ "CLIENT:STRING:CHAT", cbImpulsionChat },
+	{ "CHAT_SHARE", cbChatShare },
 	{ "CLIENT:STRING:CHAT_TEAM", cbImpulsionChatTeam },
 	{ "CLIENT:STRING:TELL", cbImpulsionTell },
 	{ "CLIENT:STRING:FILTER", cbImpulsionFilter },

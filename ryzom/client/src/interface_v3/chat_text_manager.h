@@ -25,10 +25,13 @@
 
 #include "nel/misc/rgba.h"
 
+class CChatMessage;
+
 namespace NLGUI
 {
 	class CViewBase;
 	class CInterfaceGroup;
+	class CGroupParagraph;
 }
 
 namespace NLMISC{
@@ -56,6 +59,7 @@ public:
 	  * \param plaintext Text will not be parsed for uri markup links
 	  */
 	NLGUI::CViewBase *createMsgText(const std::string &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
+	NLGUI::CViewBase *createMsgText(const std::string &prefix, const CChatMessage &message, NLMISC::CRGBA col, bool justified = false);
 	// Singleton access
 	static CChatTextManager &getInstance();
 
@@ -81,6 +85,8 @@ private:
 
 	NLGUI::CViewBase *createMsgTextSimple(const std::string &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
 	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
+	void addMsgText(NLGUI::CGroupParagraph *paragraph, const std::string &msg, NLMISC::CRGBA col,
+		bool justified, std::string::size_type pos, std::string::size_type textSize);
 };
 
 // shortcut to get text manager instance

@@ -20,6 +20,7 @@
 
 #include "id_impulsions.h"
 #include "uid_impulsions.h"
+#include "game_share/chat_message.h"
 #include "game_share/generic_xml_msg_mngr.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/synchronised_message.h"
@@ -159,6 +160,37 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 //	CUnifiedNetwork::getInstance()->send("IOS", msgout);
 //
 //}
+
+//-----------------------------------------------
+//	impulsionChatShare
+//-----------------------------------------------
+void impulsionChatShare( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId )
+{
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	string receiver;
+	CChatMessageRequest request;
+	try
+	{
+		bms.serial( chatMode );
+		bms.serial( dynamicChannelId );
+		bms.serial( receiver );
+		bms.serial( request );
+	}
+	catch(const Exception &e)
+	{
+		nlwarning("<impulsionChatShare> %s", e.what());
+		return;
+	}
+
+	CMessage msgout("CLIENT:STRING:CHAT_SHARE");
+	msgout.serial( sender );
+	msgout.serial( chatMode );
+	msgout.serial( dynamicChannelId );
+	msgout.serial( receiver );
+	msgout.serial( request );
+	CUnifiedNetwork::getInstance()->send("EGS", msgout);
+}
 
 //-----------------------------------------------
 //	impulsionPhraseLearn : learn a phrase
@@ -521,6 +553,7 @@ void	initImpulsionId()
 	GenericXmlMsgHeaderMngr.setUserData("DEBUG:CMD",					(uint64)impulsionCmd, 0);
 //	GenericXmlMsgHeaderMngr.setUserData("COMMAND:ADMIN",				(uint64)impulsionAdmin, 0);
 //	GenericXmlMsgHeaderMngr.setUserData("STRING_MANAGER:STRING_RQ",		(uint64)impulsionStringRequestId, 0);
+	GenericXmlMsgHeaderMngr.setUserData("STRING:CHAT_SHARE",			(uint64)impulsionChatShare, 0);
 	GenericXmlMsgHeaderMngr.setUserData("PHRASE:LEARN",					(uint64)impulsionPhraseLearn, 0);
 	GenericXmlMsgHeaderMngr.setUserData("PHRASE:MEMORIZE",				(uint64)impulsionPhraseMemorize, 0);	
 	GenericXmlMsgHeaderMngr.setUserData("PHRASE:EXECUTE_FABER",			(uint64)impulsionExecuteFaber, 0);	
