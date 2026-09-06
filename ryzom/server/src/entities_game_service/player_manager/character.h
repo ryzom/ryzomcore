@@ -2096,6 +2096,9 @@ public:
 
 	// @{
 
+	/// Check capacity and notify the player if the friend list is full.
+	bool checkFriendListCapacity() const;
+
 	/// add a player to friend list by name
 	void addPlayerToFriendList(const ucstring &name);
 
