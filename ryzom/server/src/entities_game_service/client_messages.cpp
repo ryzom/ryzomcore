@@ -28,6 +28,7 @@
 #include "nel/misc/common.h"
 //game_share
 #include "game_share/generic_xml_msg_mngr.h"
+#include "game_share/chat_message.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/security_check.h"
 #include "server_share/log_item_gen.h"
@@ -67,6 +68,130 @@ using namespace std;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 CVariable<bool> BuildSpireActive( "egs", "BuildSpireActive", "Activate build spire", true, 0, true );
+
+namespace
+{
+	bool buildSharedMessage(CCharacter *character, const CChatMessageRequest &request, CChatMessage &message)
+	{
+		if (!character || !request.isValid())
+			return false;
+
+		uint32 textPosition = 0;
+		for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
+			it != request.References.end(); ++it)
+		{
+			if (it->Start > textPosition)
+			{
+				CChatMessagePart text;
+				text.TextValue = request.Text.substr(textPosition, it->Start - textPosition);
+				message.Parts.push_back(text);
+			}
+
+			CChatMessagePart part;
+			if (it->Type == CChatMessageReference::Item)
+			{
+				part.Type = CChatMessagePart::Item;
+				if (!character->buildChatItem(it->Value, part.ItemValue))
+					return false;
+			}
+			else if (it->Type == CChatMessageReference::KnownPhrase)
+			{
+				const std::vector<CKnownPhrase> &knownPhrases = character->getKnownPhrases();
+				if (it->Value >= knownPhrases.size() || knownPhrases[it->Value].empty())
+					return false;
+				const CKnownPhrase &knownPhrase = knownPhrases[it->Value];
+				part.Type = CChatMessagePart::Phrase;
+				part.PhraseValue.SheetId = knownPhrase.PhraseSheetId;
+				if (part.PhraseValue.SheetId == CSheetId::Unknown)
+				{
+					const std::set<CSheetId> &knownBricks = character->getKnownBricks();
+					for (std::vector<CSheetId>::const_iterator brick = knownPhrase.PhraseDesc.Bricks.begin();
+						brick != knownPhrase.PhraseDesc.Bricks.end(); ++brick)
+					{
+						if (knownBricks.find(*brick) == knownBricks.end())
+							return false;
+					}
+					if (!CPhraseManager::getInstance().checkPhraseValidity(knownPhrase.PhraseDesc.Bricks))
+						return false;
+					part.PhraseValue.Phrase = knownPhrase.PhraseDesc;
+				}
+			}
+			else if (it->Type == CChatMessageReference::PhraseSheet)
+			{
+				const CSheetId sheetId(it->Value);
+				const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
+				CAllRolemasterPhrases::const_iterator phrase = phrases.find(sheetId);
+				if (phrase == phrases.end() || !phrase->second.IsRolemasterPhrase ||
+					sheetId.toString().find("saiphrase") != std::string::npos)
+					return false;
+				part.Type = CChatMessagePart::Phrase;
+				part.PhraseValue.SheetId = sheetId;
+			}
+			else
+				return false;
+
+			message.Parts.push_back(part);
+			textPosition = it->Start + it->Length;
+		}
+
+		if (textPosition < request.Text.size())
+		{
+			CChatMessagePart text;
+			text.TextValue = request.Text.substr(textPosition);
+			message.Parts.push_back(text);
+		}
+		return true;
+	}
+}
+
+void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	CEntityId sender;
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	std::string receiver;
+	CChatMessageRequest request;
+	try
+	{
+		msgin.serial(sender);
+		msgin.serial(chatMode);
+		msgin.serial(dynamicChannelId);
+		msgin.serial(receiver);
+		msgin.serial(request);
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbClientChatShare> Bad message: %s", e.what());
+		return;
+	}
+
+	CCharacter *character = PlayerManager.getChar(sender);
+	if (!character || !character->getEnterFlag())
+		return;
+	if (chatMode >= CChatGroup::nbChatMode)
+		return;
+	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
+	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
+		return;
+
+	CChatMessage message;
+	if (!buildSharedMessage(character, request, message))
+		return;
+
+	character->setAfkState(false);
+	CMessage msgout("CHAT_SHARE");
+	msgout.serial(sender);
+	msgout.serial(chatMode);
+	msgout.serial(dynamicChannelId);
+	msgout.serial(receiver);
+	msgout.serial(message);
+	if (msgout.length() > CHAT_MESSAGE::MaxSerializedSize)
+	{
+		nlwarning("<cbClientChatShare> Shared message is too large");
+		return;
+	}
+	CUnifiedNetwork::getInstance()->send("IOS", msgout);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3566,6 +3691,7 @@ void cbGetNpcIconDesc( NLNET::CMessage& msgin, const std::string & serviceName, 
 //----------------------------
 TUnifiedCallbackItem CbClientArray[]=
 {
+	{ "CLIENT:STRING:CHAT_SHARE",			cbClientChatShare },
 	{ "CLIENT:CONNECTION:CLIENT_QUIT_REQUEST",	cbClientQuitGameRequest },
 	{ "RET_MAINLAND",							cbClientReturnToMainland },
 

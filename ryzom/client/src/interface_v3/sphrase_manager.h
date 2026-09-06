@@ -71,6 +71,7 @@ class CSPhraseComAdpater : public CReflectableRefPtrTarget
 {
 public:
 	CSPhraseCom		Phrase;
+	std::string updateTooltip();
 	REFLECT_EXPORT_START(CSPhraseComAdpater, CInterfaceElement)
 		REFLECT_LUA_METHOD("getCastTime",	luaGetCastTime)
 		REFLECT_LUA_METHOD("getCastRange",  luaGetCastRange)
