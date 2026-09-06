@@ -15,18 +15,49 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "tools.h"
-#include <windows.h>
 
 #include "nel/misc/common.h"
+
+#ifdef NL_OS_WINDOWS
+#	include <windows.h>
+#else
+#	include <cerrno>
+#	include <cstring>
+#	include "nel/misc/path.h"
+#	include "nel/misc/debug.h"
+#endif
 
 // ---------------------------------------------------------------------------
 
 using namespace std;
 using namespace NLMISC;
 
+#ifndef NL_OS_WINDOWS
+namespace
+{
+	// Matches name against a pattern containing at most one '*' wildcard
+	// (the only kind of pattern used by every CTools::dir/dirSub caller).
+	bool matchWildcard (const std::string &name, const std::string &pattern)
+	{
+		string::size_type star = pattern.find ('*');
+		if (star == string::npos)
+			return nlstricmp (name, pattern) == 0;
+
+		string prefix = pattern.substr (0, star);
+		string suffix = pattern.substr (star + 1);
+		if (name.size () < prefix.size () + suffix.size ())
+			return false;
+
+		return nlstricmp (name.substr (0, prefix.size ()), prefix) == 0 &&
+			nlstricmp (name.substr (name.size () - suffix.size ()), suffix) == 0;
+	}
+}
+#endif // NL_OS_WINDOWS
+
 // ---------------------------------------------------------------------------
 void CTools::mkdir (const string &dirName)
 {
+#ifdef NL_OS_WINDOWS
 	if (dirName.empty())
 		return;
 	// Does the directory exist ?
@@ -49,18 +80,30 @@ void CTools::mkdir (const string &dirName)
 	// Create Directory
 	if (!CreateDirectory(dirName.c_str(),NULL))
 		throw Exception(string("Cannot create directory ")+dirName);
+#else
+	if (dirName.empty())
+		return;
+	if (!CFile::createDirectoryTree (dirName))
+		throw Exception (string ("Cannot create directory ") + dirName);
+#endif
 }
 
 // ---------------------------------------------------------------------------
 void CTools::chdir (const std::string &newDir)
 {
+#ifdef NL_OS_WINDOWS
 	if (!SetCurrentDirectory (newDir.c_str()))
 		throwError ((newDir+" : ").c_str ());
+#else
+	if (!CPath::setCurrentPath (newDir))
+		throwError ((newDir + " : ").c_str ());
+#endif
 }
 
 // ---------------------------------------------------------------------------
 std::string CTools::pwd ()
 {
+#ifdef NL_OS_WINDOWS
 	char sTmp[512];
 	if (GetCurrentDirectory (512, sTmp) == 0)
 	{
@@ -68,36 +111,53 @@ std::string CTools::pwd ()
 	}
 	string sTmp2 = sTmp;
 	return sTmp2;
+#else
+	return CPath::getCurrentPath ();
+#endif
 }
 
 // ---------------------------------------------------------------------------
 std::string CTools::normalizePath (const std::string &path)
 {
+#ifdef NL_OS_WINDOWS
 	// Convert slash to anti-slash
 	string retPath = path;
 	for (uint32 i = 0; i < retPath.size(); ++i)
 		if (retPath[i] == '/')
 			retPath[i] = '\\';
 	return retPath;
+#else
+	// Convert anti-slash to slash
+	string retPath = path;
+	for (uint32 i = 0; i < retPath.size (); ++i)
+		if (retPath[i] == '\\')
+			retPath[i] = '/';
+	return retPath;
+#endif
 }
 
 // ---------------------------------------------------------------------------
 bool CTools::fileExist (const std::string &sFileName)
 {
-	HANDLE hFile = CreateFile (sFileName.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
+#ifdef NL_OS_WINDOWS
+	HANDLE hFile = CreateFile (sFileName.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 		return false;
 	CloseHandle (hFile);
 	return true;
+#else
+	return CFile::fileExists (sFileName);
+#endif
 }
 
 // ---------------------------------------------------------------------------
 int CTools::fileDateCmp (const std::string &file1, const std::string &file2)
 {
-	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
+#ifdef NL_OS_WINDOWS
+	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	HANDLE hFile2 = CreateFile (file2.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
+	HANDLE hFile2 = CreateFile (file2.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if ((hFile1 == INVALID_HANDLE_VALUE) && (hFile2 == INVALID_HANDLE_VALUE))
 		return 0;
@@ -123,12 +183,31 @@ int CTools::fileDateCmp (const std::string &file1, const std::string &file2)
 	CloseHandle(hFile2);
 
 	return nRet;
+#else
+	bool exist1 = CFile::fileExists (file1);
+	bool exist2 = CFile::fileExists (file2);
+	if (!exist1 && !exist2)
+		return 0;
+	if (!exist1)
+		return -1;
+	if (!exist2)
+		return 1;
+
+	uint32 date1 = CFile::getFileModificationDate (file1);
+	uint32 date2 = CFile::getFileModificationDate (file2);
+	if (date1 < date2)
+		return -1;
+	if (date1 > date2)
+		return 1;
+	return 0;
+#endif
 }
 
 // ---------------------------------------------------------------------------
 int CTools::fileDateCmp (const std::string &file1, uint32 nDateLow, uint32 nDateHigh)
 {
-	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL, 
+#ifdef NL_OS_WINDOWS
+	HANDLE hFile1 = CreateFile (file1.c_str(), GENERIC_READ, FILE_SHARE_READ|FILE_SHARE_WRITE, NULL,
 				OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile1 == INVALID_HANDLE_VALUE)
 	{
@@ -143,17 +222,36 @@ int CTools::fileDateCmp (const std::string &file1, uint32 nDateLow, uint32 nDate
 
 	CloseHandle(hFile1);
 	return nRet;
+#else
+	if (!CFile::fileExists (file1))
+		return -1;
+
+	// Convert the Windows FILETIME (100ns intervals since 1601-01-01) into
+	// a Unix epoch (seconds since 1970-01-01) to compare against
+	// getFileModificationDate(), since this method only ever receives raw
+	// FILETIME components read back from persisted zone-region data.
+	uint64 fileTime = ((uint64) nDateHigh << 32) | (uint64) nDateLow;
+	uint32 date2 = (uint32) ((fileTime - 116444736000000000ULL) / 10000000ULL);
+	uint32 date1 = CFile::getFileModificationDate (file1);
+
+	if (date1 < date2)
+		return -1;
+	if (date1 > date2)
+		return 1;
+	return 0;
+#endif
 }
 
 // ---------------------------------------------------------------------------
 void CTools::dir (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool bFullPath)
 {
+#ifdef NL_OS_WINDOWS
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
 	char sCurDir[MAX_PATH];
 	sAllFiles.clear ();
 	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile (sFilter.c_str(), &findData);	
+	hFind = FindFirstFile (sFilter.c_str(), &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		if (!(GetFileAttributes(findData.cFileName)&FILE_ATTRIBUTE_DIRECTORY))
@@ -167,26 +265,58 @@ void CTools::dir (const std::string &sFilter, std::vector<std::string> &sAllFile
 			break;
 	}
 	FindClose (hFind);
+#else
+	sAllFiles.clear ();
+	string curDir = CPath::getCurrentPath ();
+	vector<string> content;
+	CPath::getPathContent (curDir, false, false, true, content);
+	for (uint i = 0; i < content.size (); ++i)
+	{
+		string name = CFile::getFilename (content[i]);
+		if (matchWildcard (name, sFilter))
+			sAllFiles.push_back (bFullPath ? content[i] : name);
+	}
+#endif
 }
 
 // ---------------------------------------------------------------------------
 void CTools::dirSub (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool bFullPath)
 {
+#ifdef NL_OS_WINDOWS
 	sAllFiles.clear();
 	string sTmp;
 	for (uint32 i = 0; i < sFilter.size(); ++i)
 	if (sFilter[i] != '*')
 		sTmp += sFilter[i];
 	dirSubRecurse (sTmp, sAllFiles, bFullPath);
+#else
+	sAllFiles.clear ();
+	string curDir = CPath::getCurrentPath ();
+	vector<string> content;
+	CPath::getPathContent (curDir, true, false, true, content);
+	for (uint i = 0; i < content.size (); ++i)
+	{
+		string name = CFile::getFilename (content[i]);
+		if (matchWildcard (name, sFilter))
+			sAllFiles.push_back (bFullPath ? content[i] : name);
+	}
+#endif
 }
 
 // ---------------------------------------------------------------------------
 void CTools::copy (const std::string &DstFile, const std::string &SrcFile)
 {
+#ifdef NL_OS_WINDOWS
 	if (!CopyFile (SrcFile.c_str(), DstFile.c_str(), false))
 	{
 		throw Exception(string("Cannot copy ")+SrcFile+" to "+DstFile);
 	}
+#else
+	if (!CFile::copyFile (DstFile, SrcFile))
+	{
+		throw Exception (string ("Cannot copy ") + SrcFile + " to " + DstFile);
+	}
+#endif
 }
 
 // *******
@@ -196,9 +326,10 @@ void CTools::copy (const std::string &DstFile, const std::string &SrcFile)
 // ---------------------------------------------------------------------------
 void CTools::throwError (const char *message)
 {
+#ifdef NL_OS_WINDOWS
 	LPVOID lpMsgBuf;
 	FormatMessage (	FORMAT_MESSAGE_ALLOCATE_BUFFER |
-					FORMAT_MESSAGE_FROM_SYSTEM | 
+					FORMAT_MESSAGE_FROM_SYSTEM |
 					FORMAT_MESSAGE_IGNORE_INSERTS,
 					NULL,
 					GetLastError(),
@@ -210,17 +341,22 @@ void CTools::throwError (const char *message)
 	sTmp = message + sTmp;
 	LocalFree (lpMsgBuf);
 	throw Exception (sTmp);
+#else
+	string sTmp = message + string (strerror (errno));
+	throw Exception (sTmp);
+#endif
 }
 
 // ---------------------------------------------------------------------------
 void CTools::dirSubRecurse (const std::string &sFilter, std::vector<std::string> &sAllFiles, bool bFullPath)
 {
+#ifdef NL_OS_WINDOWS
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
 	char sCurDir[MAX_PATH];
 
 	GetCurrentDirectory (MAX_PATH, sCurDir);
-	hFind = FindFirstFile ("*.*", &findData);	
+	hFind = FindFirstFile ("*.*", &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
 		if (!(GetFileAttributes(findData.cFileName)&FILE_ATTRIBUTE_DIRECTORY))
@@ -245,5 +381,9 @@ void CTools::dirSubRecurse (const std::string &sFilter, std::vector<std::string>
 			break;
 	}
 	FindClose (hFind);
+#else
+	// Unused on non-Windows: dirSub() implements its own recursion directly
+	// via CPath::getPathContent(recurse=true) instead of calling this helper.
+	nlwarning ("CTools::dirSubRecurse is a Windows-only implementation detail, not implemented on this platform");
+#endif
 }
-

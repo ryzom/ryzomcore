@@ -1,6 +1,15 @@
 FILE(GLOB SRC *.cpp )
 FILE(GLOB PRIV_H *.h)
 
+# CExport::newExport() reads continent.cfg through SContinentCfg (export.cpp
+# includes "../master/ContinentCfg.h"), whose implementation lives in the
+# master/ folder (an MFC app not otherwise built by CMake). Both files are
+# platform-independent (their #include "stdafx.h" is guarded behind
+# NL_OS_WINDOWS), so compile them directly into ryzom_export instead of
+# pulling in all of master/.
+LIST(APPEND SRC ${CMAKE_CURRENT_SOURCE_DIR}/../master/easy_cfg.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../master/ContinentCfg.cpp)
+LIST(APPEND PRIV_H ${CMAKE_CURRENT_SOURCE_DIR}/../master/easy_cfg.h ${CMAKE_CURRENT_SOURCE_DIR}/../master/ContinentCfg.h)
+
 NL_TARGET_LIB(ryzom_export ${PRIV_H} ${SRC})
 
 TARGET_LINK_LIBRARIES(ryzom_export nelmisc nelligo nelgeorges nel3d nelpacs)
