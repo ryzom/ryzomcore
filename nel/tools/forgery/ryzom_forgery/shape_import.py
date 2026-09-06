@@ -37,17 +37,22 @@ _DEFAULT_MATERIAL_FLAGS = _MAT_FLAG_ZWRITE | _MAT_FLAG_LIGHTING
 
 _DEFAULT_MATERIAL_NAME = "__default__"  # faces with no `usemtl` in effect
 
-# _build_material()'s fixed defaults, deliberately NOT read from the source
-# .obj/.dae/.fbx's own diffuse/ambient/specular/opacity/shininess -- these
-# match the real Ryzom content pipeline instead: the 3ds Max NeL exporter
-# (nel/tools/3d/plugin_max/nel_mesh_lib/export_material.cpp) reads every one
-# of these off the NeL-material-plugin instance the artist assigns in 3ds Max
-# itself, which is unrelated to whatever the imported source file's own
-# material data says -- an artist who leaves that plugin's fields untouched
-# (typical for a simple textured prop) gets exactly these values, confirmed
-# by comparing an artist's real Cinema4D->.fbx->3dsMax->.shape export against
-# the same .fbx imported directly through here (see logs/forgery-object-editor.md). Only the
-# diffuse texture reference carries over from the source file.
+# _build_material()'s fallback values, used only when the source .obj/.dae/
+# .fbx/.gltf doesn't specify a given property itself (an untextured/plain
+# `usemtl` face, or a source file with no material data at all). Until
+# 2026-09-06 these were used UNCONDITIONALLY, deliberately ignoring the
+# source file's own diffuse/ambient/specular/emissive/opacity/shininess --
+# matching the real Ryzom content pipeline instead (the 3ds Max NeL exporter,
+# nel/tools/3d/plugin_max/nel_mesh_lib/export_material.cpp, reads every one
+# of these off the NeL-material-plugin instance the artist assigns in 3ds Max,
+# unrelated to the imported source file's own data -- confirmed by comparing
+# a real Cinema4D->.fbx->3dsMax->.shape export against the same .fbx imported
+# directly through here). That call was reversed 2026-09-06 (Nuno): it broke
+# Forgery's own export->reimport round-trip validation (mesh_skel_anim_io.md)
+# by always discarding the very material colors the export step had just
+# written, and there's no way to tell "genuine 3ds Max import" from "Forgery's
+# own round-trip" apart to keep the old behavior for only one of them.
+_NEL_DEFAULT_GRAY = Rgba(150, 150, 150, 255)  # 3ds Max's own "Standard material" default diffuse/ambient swatch
 _NEL_DEFAULT_GRAY = Rgba(150, 150, 150, 255)  # 3ds Max's own "Standard material" default diffuse/ambient swatch
 _NEL_DEFAULT_SPECULAR = Rgba(0, 0, 0, 0)
 _NEL_DEFAULT_SHININESS = 8.0  # 2^(glossiness*10)*4 at 3ds Max's default 10% Glossiness
@@ -154,6 +159,7 @@ class MtlMaterial:
 	diffuse: Tuple[float, float, float] = (0.8, 0.8, 0.8)
 	ambient: Tuple[float, float, float] = (0.2, 0.2, 0.2)
 	specular: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+	emissive: Tuple[float, float, float] = (0.0, 0.0, 0.0)
 	shininess: float = 0.0
 	opacity: float = 1.0
 	diffuse_texture: Optional[str] = None
@@ -181,6 +187,8 @@ def parse_mtl(path: Path) -> Dict[str, MtlMaterial]:
 			current.ambient = (float(parts[1]), float(parts[2]), float(parts[3]))
 		elif keyword == "Ks":
 			current.specular = (float(parts[1]), float(parts[2]), float(parts[3]))
+		elif keyword == "Ke":
+			current.emissive = (float(parts[1]), float(parts[2]), float(parts[3]))
 		elif keyword == "Ns":
 			current.shininess = float(parts[1])
 		elif keyword == "d":
@@ -223,16 +231,32 @@ def _texture_base_name(texture_name: str, base_dir: Optional[Path] = None) -> st
 	return Path(normalized).name
 
 
+def _rgba_from_floats(rgb: Optional[Tuple[float, float, float]], alpha: float = 1.0) -> Optional[Rgba]:
+	"""Inverse of shape_geometry.rgba_to_color(): a 0-1 float (r, g, b) triple
+	(+ separate 0-1 alpha) back into a NeL Rgba (0-255 per channel), or None
+	if `rgb` itself is None (caller falls back to its own default then)."""
+	if rgb is None:
+		return None
+	r, g, b = rgb
+	return Rgba(round(r * 255), round(g * 255), round(b * 255), round(alpha * 255))
+
+
 def _build_material(texture_name: Optional[str] = None, double_sided: bool = False,
-                     base_dir: Optional[Path] = None) -> Material:
-	"""Builds a "blank NeL material" (see _NEL_DEFAULT_GRAY et al above) with
-	just a diffuse texture reference -- the only thing that reliably carries
-	over from an imported .obj/.dae/.fbx's own material data (see the module
-	comment there for why the rest deliberately doesn't). `double_sided` is
-	the one exception: unlike color/shininess/etc (an artistic choice that
-	gets manually redone in 3ds Max anyway), it's a real geometric necessity
-	(thin panels/foliage with no back faces) that the source file's own
-	material setting is worth honoring."""
+                     base_dir: Optional[Path] = None,
+                     diffuse: Optional[Tuple[float, float, float]] = None,
+                     ambient: Optional[Tuple[float, float, float]] = None,
+                     specular: Optional[Tuple[float, float, float]] = None,
+                     emissive: Optional[Tuple[float, float, float]] = None,
+                     shininess: Optional[float] = None,
+                     opacity: Optional[float] = None) -> Material:
+	"""Builds a NeL material from an imported .obj/.dae/.fbx/.gltf source's
+	own material data -- `diffuse`/`ambient`/`specular`/`emissive` (0-1 float
+	RGB triples, matching shape_export.py's own COLOR_DIFFUSE/COLOR_AMBIENT/
+	COLOR_SPECULAR/COLOR_EMISSIVE), `shininess` and `opacity` (0-1), each
+	falling back to _NEL_DEFAULT_GRAY et al above when the source file didn't
+	specify that property itself (an untextured plain `usemtl`, or no
+	material data at all). `double_sided` is a real geometric necessity
+	(thin panels/foliage with no back faces), always honored regardless."""
 	textures: List[Optional[Texture]] = []
 	tex_envs: List[Optional[TexEnv]] = []
 	if texture_name:
@@ -245,6 +269,7 @@ def _build_material(texture_name: Optional[str] = None, double_sided: bool = Fal
 		tex_envs = [_MODULATE_TEX_ENV]
 
 	flags = _DEFAULT_MATERIAL_FLAGS | (_MAT_FLAG_DOUBLE_SIDED if double_sided else 0)
+	diffuse_rgba = _rgba_from_floats(diffuse, opacity if opacity is not None else 1.0) or _NEL_DEFAULT_GRAY
 	return Material(
 		shader_type=_SHADER_NORMAL,
 		flags=flags,
@@ -253,11 +278,11 @@ def _build_material(texture_name: Optional[str] = None, double_sided: bool = Fal
 		z_function=_ZFUNC_LESSEQUAL,
 		z_bias=0.0,
 		color=Rgba(255, 255, 255, 255),
-		emissive=Rgba(0, 0, 0, 255),
-		ambient=_NEL_DEFAULT_GRAY,
-		diffuse=_NEL_DEFAULT_GRAY,
-		specular=_NEL_DEFAULT_SPECULAR,
-		shininess=_NEL_DEFAULT_SHININESS,
+		emissive=_rgba_from_floats(emissive) or Rgba(0, 0, 0, 255),
+		ambient=_rgba_from_floats(ambient) or _NEL_DEFAULT_GRAY,
+		diffuse=diffuse_rgba,
+		specular=_rgba_from_floats(specular) or _NEL_DEFAULT_SPECULAR,
+		shininess=shininess if shininess is not None else _NEL_DEFAULT_SHININESS,
 		alpha_test_threshold=0.5,
 		tex_coord_gen_mode=0,
 		textures=textures,
@@ -383,7 +408,13 @@ def build_mesh(obj_mesh: ObjMesh, mtl_materials: Dict[str, MtlMaterial], base_di
 
 	def material_for(name: str) -> Material:
 		mtl = mtl_materials.get(name)
-		return _build_material(texture_name=mtl.diffuse_texture if mtl is not None else None, base_dir=base_dir)
+		if mtl is None:
+			return _build_material(base_dir=base_dir)
+		return _build_material(
+			texture_name=mtl.diffuse_texture, base_dir=base_dir,
+			diffuse=mtl.diffuse, ambient=mtl.ambient, specular=mtl.specular, emissive=mtl.emissive,
+			shininess=mtl.shininess, opacity=mtl.opacity,
+		)
 
 	materials = [material_for(name) for name in material_order]
 	rdr_passes = [RdrPass(material_id=material_ids[name], indices=pass_indices[material_ids[name]])
@@ -739,21 +770,31 @@ def _build_skinned_matrix_blocks(
 
 def _build_material_from_assimp_material(material: dict, base_dir: Optional[Path] = None) -> Material:
 	"""`material` is one of assimp_py.Scene.materials' plain dicts (property
-	name -> value, see assimp-py's own docs) -- only its diffuse texture and
-	double-sided flag (if any) are used, see _build_material()'s own
-	docstring for why the rest of the source material's own
-	COLOR_*/SHININESS/OPACITY is deliberately ignored. TWOSIDED (Assimp's
-	own name for AI_MATKEY_TWOSIDED) is only present in the dict at all when
-	the source file set it explicitly -- absent means "use the format's own
-	default", which for every format Forgery imports is single-sided."""
+	name -> value, see assimp-py's own docs). COLOR_DIFFUSE/COLOR_AMBIENT/
+	COLOR_SPECULAR/COLOR_EMISSIVE/SHININESS/OPACITY, when present, are passed
+	through to _build_material() (see its own docstring) -- absent for a
+	.gltf material (COLOR_AMBIENT/COLOR_SPECULAR have no PBR equivalent, see
+	_assimp_material_dict()'s own comment) falls back to _build_material()'s
+	defaults for just that property, same as an untextured `usemtl` in .obj.
+	TWOSIDED (Assimp's own name for AI_MATKEY_TWOSIDED) is only present in
+	the dict at all when the source file set it explicitly -- absent means
+	"use the format's own default", which for every format Forgery imports
+	is single-sided."""
 	import assimp_py
 
 	textures = material.get("TEXTURES", {})
 	diffuse_paths = textures.get(assimp_py.TextureType_DIFFUSE)
+	diffuse = material.get("COLOR_DIFFUSE")
 	return _build_material(
 		texture_name=diffuse_paths[0] if diffuse_paths else None,
 		double_sided=bool(material.get("TWOSIDED", False)),
 		base_dir=base_dir,
+		diffuse=tuple(diffuse) if diffuse is not None else None,
+		ambient=tuple(material["COLOR_AMBIENT"]) if "COLOR_AMBIENT" in material else None,
+		specular=tuple(material["COLOR_SPECULAR"]) if "COLOR_SPECULAR" in material else None,
+		emissive=tuple(material["COLOR_EMISSIVE"]) if "COLOR_EMISSIVE" in material else None,
+		shininess=material.get("SHININESS"),
+		opacity=material.get("OPACITY"),
 	)
 
 

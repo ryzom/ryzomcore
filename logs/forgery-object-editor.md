@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-06 — 🐛 Fix .obj export, default-transform round trip, and reimported material colors, Forgery 3.4.2
+
+Closes `project-todos/forgery/mesh_skin_export.md`'s "migrer `_export_obj`" chantier, plus two bugs found while validating it.
+
+**`.obj` export migrated to `assimp_py`** (`shape_export.py`): `_export_obj()` now delegates to `_export_via_assimp()` like `.dae`/`.fbx`/`.gltf`/`.glb`, instead of the old hand-written `.obj`+`.mtl` writer (removed, ~100 lines) -- same axis/UV handling as the other formats, one less place for that class of bug to be fixed twice. `_export_via_assimp()` now also adds the sibling `.mtl` assimp writes to the returned file list (previously untracked, so the zip-export path silently dropped it). Required two fixes in `assimp_py` itself (see its own `logs/assimp_py.md`, 2026-09-05): the OBJ exporter wasn't even compiled into the wheel, and export failures always reported an empty error message regardless of the real cause (`aiGetErrorString()` only ever covers imports).
+
+**`default_pos`/`default_pivot`/`default_scale` now baked at export, not just rotation** (`shape_geometry.py::bake_default_transform_into_geom()`, replacing the rotation-only `rotate_mesh_geom()`): found by Nuno testing a shape with a non-null `default_pos` -- it always came back at the world origin after an export/reimport round trip, because `export_shape()` only ever baked `default_rot_quat` into the exported vertices, silently dropping position and scale. Fixed by baking the full transform (`v' = pos + pivot + rot*(scale*(v - pivot))`, matching `ITransformable::updateMatrix()`), same as rotation already was. Known limitation carried over from the rotation-only version: normals are only rotated, never scaled -- correct for the uniform scale every known shape uses, wrong for a hypothetical non-uniform `default_scale`.
+
+**Reimported material colors no longer forced to fixed defaults** (`shape_import.py::_build_material()`/`_build_material_from_assimp_material()`/`build_mesh()`'s `material_for()`): found by Nuno noticing a reimported shape looked much less lit than the original. Root cause: every import path (`.obj`/`.dae`/`.fbx`/`.gltf`) always discarded the source file's own diffuse/ambient/specular/emissive/shininess/opacity, replacing them with fixed values matching 3ds Max's own NeL-exporter defaults -- deliberate up to now (an artist re-does materials by hand anyway for a genuine 3ds Max import), but incompatible with Forgery's own export->reimport round-trip validation, which this whole changelog entry is part of: the export step already wrote real colors, the reimport step then threw them away regardless. Now these properties are read from the source file when present (`COLOR_DIFFUSE`/`COLOR_AMBIENT`/`COLOR_SPECULAR`/`COLOR_EMISSIVE`/`SHININESS`/`OPACITY` for assimp-based imports, `Kd`/`Ka`/`Ks`/`Ke`/`Ns`/`d`/`Tr` for `.obj`'s own `.mtl`, `Ke` parsing added to `parse_mtl()` since it was missing entirely), falling back to the old fixed defaults only for whichever property the source file didn't specify. No file format can tell "genuine 3ds Max import" and "Forgery's own round trip" apart, so this now applies to both.
+
+Verified by Nuno: `.obj` export succeeds and reimports at the correct position; a reimported shape's material now matches the original's brightness.
+
 ## 2026-09-05 — ✨ Add a uniform-scale link toggle to the Transform panel's Scale row, Forgery 3.4.1
 
 `project-todos/forgery/transform_panel_scale_link.md`, closed.

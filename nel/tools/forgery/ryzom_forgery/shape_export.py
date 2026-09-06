@@ -1,19 +1,21 @@
 """Exports a parsed .shape (CMesh/CMeshMRM/CMeshMultiLod) to plain
 interchange formats.
 
-.obj+.mtl and .stl are hand-written directly from the parsed vertex
-buffers/indices -- both are simple enough text formats that a small
-dependency-free writer beats pulling in a mesh library. .stl has no
-material/texture support at all (it's geometry only), unlike .obj and .dae.
+.stl is hand-written directly from the parsed vertex buffers/indices --
+simple enough a text format that a small dependency-free writer beats
+pulling in a mesh library, and it has no material/texture support at all
+(it's geometry only), so there's nothing `assimp_py` would add over the
+hand-written path.
 
-.dae (COLLADA), .fbx and .gltf/.glb all go through `assimp_py`'s own writer
-(`export_file()`, see project-todos/assimp_py/bones_animations.md, chantier
-closed 2026-09-04) instead of `pycollada`/`pygltflib` -- a single Scene/Mesh/
-Bone/Node model shared with the read side, letting a skinned shape's
-skeleton/bone weights be embedded directly (see
-project-todos/forgery/mesh_skin_export.md), which pycollada/pygltflib had no
-way to express. `pycollada`/`pygltflib` are no longer a dependency of this
-module.
+.obj, .dae (COLLADA), .fbx and .gltf/.glb all go through `assimp_py`'s own
+writer (`export_file()`, see project-todos/assimp_py/bones_animations.md,
+chantier closed 2026-09-04) instead of `pycollada`/`pygltflib`/a hand-written
+.obj+.mtl writer -- a single Scene/Mesh/Bone/Node model shared with the read
+side, letting a skinned shape's skeleton/bone weights be embedded directly
+(see project-todos/forgery/mesh_skin_export.md), which pycollada/pygltflib
+had no way to express, and avoiding axis/UV convention bugs having to be
+fixed twice (see mesh_skin_export.md's "migrer _export_obj" chantier).
+`pycollada`/`pygltflib` are no longer a dependency of this module.
 """
 
 import collections
@@ -24,8 +26,8 @@ from typing import Callable, Dict, List, Optional
 
 from ryzom_forgery.settings import TEXTURE_MODE_COPY_PNG
 from ryzom_forgery.shape_geometry import (
-	IDENTITY_QUAT, iter_render_passes, load_panda_texture, rgba_to_color, rotate_mesh_geom, shape_default_rot_quat,
-	shape_geom, texture_to_pnm_image,
+	IDENTITY_QUAT, UNIT_VECTOR, ZERO_VECTOR, bake_default_transform_into_geom, iter_render_passes,
+	load_panda_texture, rgba_to_color, shape_default_transform, shape_geom, texture_to_pnm_image,
 )
 
 
@@ -64,111 +66,6 @@ def _resolve_material_texture(texture_finder, material, output_dir: Path, textur
 	image.write(str(output_dir / png_name))
 	texture_cache[png_name] = True
 	return png_name
-
-
-def _export_obj(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
-	output_dir = output_path.parent
-	mtl_path = output_path.with_suffix(".mtl")
-
-	obj_lines = ["# Exported by Ryzom Forgery\n", f"mtllib {mtl_path.name}\n"]
-	# OBJ's v/vn/vt indices are global to the whole file, and passes that
-	# share the same underlying vertex buffer (very common -- a Mesh's
-	# matrix block or a MeshMRM's finest LOD hands the exact same buffer to
-	# every one of its render passes, only the index/material differ) must
-	# only get their v/vn/vt lines written once, not duplicated per pass.
-	v_count = vn_count = vt_count = 0
-	buffer_offsets = {}
-	used_material_ids = []
-
-	for vertex_buffer, material_id, indices in iter_render_passes(shape_value):
-		if not indices:
-			continue
-		positions = vertex_buffer.channels.get("Position")
-		if not positions:
-			continue
-		normals = vertex_buffer.channels.get("Normal")
-		texcoords = vertex_buffer.channels.get("TexCoord0")
-		# .obj has no up-axis metadata at all -- Y-up is the de facto
-		# convention every viewer/tool assumes for it regardless (same
-		# target axis _zup_to_yup() already converts .dae/.fbx/.gltf to),
-		# never applied here before (found 2026-09-05, Nuno: "obj : -Y up").
-		positions = [_zup_to_yup(p) for p in positions]
-		if normals:
-			normals = [_zup_to_yup(n) for n in normals]
-
-		key = id(vertex_buffer)
-		if key not in buffer_offsets:
-			v_base = v_count
-			for p in positions:
-				obj_lines.append(f"v {p[0]} {p[1]} {p[2]}\n")
-			v_count += len(positions)
-
-			vn_base: Optional[int] = None
-			if normals:
-				vn_base = vn_count
-				for n in normals:
-					obj_lines.append(f"vn {n[0]} {n[1]} {n[2]}\n")
-				vn_count += len(normals)
-
-			vt_base: Optional[int] = None
-			if texcoords:
-				vt_base = vt_count
-				# Same inverse flip as _assimp_mesh_from_geometry() (see its
-				# own comment): a real .shape's TexCoord0 is V=0-at-top
-				# (NeL), .obj is V=0-at-bottom (OpenGL) like every other
-				# format here -- missed on this hand-written writer when the
-				# orientation-only fix went in, found 2026-09-05 (Nuno:
-				# "obj... mirroir uv").
-				for u, v in texcoords:
-					obj_lines.append(f"vt {u} {1.0 - v}\n")
-				vt_count += len(texcoords)
-
-			buffer_offsets[key] = (v_base, vn_base, vt_base)
-
-		v_base, vn_base, vt_base = buffer_offsets[key]
-
-		if material_id not in used_material_ids:
-			used_material_ids.append(material_id)
-		obj_lines.append(f"usemtl material_{material_id}\n")
-
-		for i in range(0, len(indices), 3):
-			face_tokens = []
-			for k in range(3):
-				local_idx = indices[i + k]
-				v_idx = local_idx + v_base + 1
-				if vt_base is not None and vn_base is not None:
-					token = f"{v_idx}/{local_idx + vt_base + 1}/{local_idx + vn_base + 1}"
-				elif vt_base is not None:
-					token = f"{v_idx}/{local_idx + vt_base + 1}"
-				elif vn_base is not None:
-					token = f"{v_idx}//{local_idx + vn_base + 1}"
-				else:
-					token = f"{v_idx}"
-				face_tokens.append(token)
-			obj_lines.append(f"f {' '.join(face_tokens)}\n")
-
-	if v_count == 0:
-		raise ValueError("No renderable geometry to export")
-
-	written = [output_path, mtl_path]
-	texture_cache: dict = {}
-	mtl_lines = []
-	for material_id in used_material_ids:
-		material = materials[material_id] if materials and material_id < len(materials) else None
-		mtl_lines.append(f"newmtl material_{material_id}\n")
-		if material is not None:
-			diffuse = rgba_to_color(material.diffuse)
-			mtl_lines.append(f"Kd {diffuse[0]} {diffuse[1]} {diffuse[2]}\n")
-			mtl_lines.append(f"d {diffuse[3]}\n")
-			texture_name = _resolve_material_texture(texture_finder, material, output_dir, texture_mode, texture_cache)
-			if texture_name:
-				mtl_lines.append(f"map_Kd {texture_name}\n")
-				written.append(output_dir / texture_name)
-		mtl_lines.append("\n")
-
-	output_path.write_text("".join(obj_lines))
-	mtl_path.write_text("".join(mtl_lines))
-	return written
 
 
 def _triangle_normal(a, b, c):
@@ -556,7 +453,7 @@ def _assimp_scene_from_shape(
 	return assimp_py.Scene(root_node, meshes, material_dicts, animations, metadata=metadata)
 
 
-_ASSIMP_FORMAT_IDS = {".dae": "collada", ".fbx": "fbx", ".gltf": "gltf2", ".glb": "glb2"}
+_ASSIMP_FORMAT_IDS = {".obj": "obj", ".dae": "collada", ".fbx": "fbx", ".gltf": "gltf2", ".glb": "glb2"}
 
 
 def _export_via_assimp(
@@ -569,6 +466,13 @@ def _export_via_assimp(
 	assimp_py.export_file(scene, str(output_path), format_id)
 
 	written = [output_path]
+	if format_id == "obj":
+		# assimp's ObjExporter always writes a sibling .mtl next to the .obj
+		# (unlike collada/fbx/gltf2, which embed materials in the one file)
+		# -- not reflected anywhere in `scene`, so it has to be added here by
+		# hand or callers relying on the full written-files list (the zip
+		# export path, export_dialog.py::_zip_written()) would silently drop it.
+		written.append(output_path.with_suffix(".mtl"))
 	texture_cache_names = set()
 	for material_dict in scene.materials:
 		textures = material_dict.get("TEXTURES") or {}
@@ -576,6 +480,10 @@ def _export_via_assimp(
 			texture_cache_names.update(names)
 	written.extend(output_path.parent / name for name in texture_cache_names)
 	return written
+
+
+def _export_obj(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
+	return _export_via_assimp(shape_value, materials, output_path, texture_mode, texture_finder)
 
 
 def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
@@ -610,16 +518,20 @@ def export_shape(
 	Raises `ValueError` (unsupported shape type / no renderable geometry) on
 	failure.
 
-	Bakes the shape's own `default_rot_quat` (the rotation the engine
-	actually applies at instance creation, see shape_geometry.py) into the
-	exported vertices on a *copy* of the geometry -- the live shape open in
-	the editor is never mutated -- so the exported file shows the shape's
-	real in-game orientation, not its raw pre-rotation storage pose. A
-	no-op when default_rot_quat is identity."""
-	quat = shape_default_rot_quat(shape_value)
-	if quat != IDENTITY_QUAT:
+	Bakes the shape's own `default_pos`/`default_pivot`/`default_rot_quat`/
+	`default_scale` (the transform the engine actually applies at instance
+	creation, see shape_geometry.py) into the exported vertices on a *copy*
+	of the geometry -- the live shape open in the editor is never mutated --
+	so the exported file shows the shape's real in-game placement, not its
+	raw pre-transform storage pose. A no-op when the transform is identity.
+	Found 2026-09-05 (Nuno: a shape with a non-null default_pos comes back
+	at the origin after an export/reimport round trip) -- only rotation used
+	to be baked, position/scale were silently dropped."""
+	pos, pivot, quat, scale = shape_default_transform(shape_value)
+	is_identity = pos == ZERO_VECTOR and pivot == ZERO_VECTOR and quat == IDENTITY_QUAT and scale == UNIT_VECTOR
+	if not is_identity:
 		shape_value = copy.deepcopy(shape_value)
-		rotate_mesh_geom(shape_value.geom, quat)
+		bake_default_transform_into_geom(shape_value.geom, pos, pivot, quat, scale)
 	materials = getattr(shape_value, "materials", None)
 	stem = Path(name).stem
 	output_path = Path(output_dir) / f"{stem}.{export_format.extension}"

@@ -28,14 +28,17 @@ from .search_paths import FoundEntry, TEXTURE_FALLBACK_EXTENSIONS
 _LOCAL_TEXTURE_SUBDIRS = ("", "tex", "textures", "data")
 
 IDENTITY_QUAT = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
+ZERO_VECTOR = Vector3(x=0.0, y=0.0, z=0.0)
+UNIT_VECTOR = Vector3(x=1.0, y=1.0, z=1.0)
 
 
-def shape_default_rot_quat(shape_value):
-	"""shape_value.base.default_rot_quat, or identity if shape_value has no base."""
+def shape_default_transform(shape_value):
+	"""(default_pos, default_pivot, default_rot_quat, default_scale) from
+	shape_value.base, or the identity transform if shape_value has no base."""
 	base = getattr(shape_value, "base", None)
 	if base is None:
-		return IDENTITY_QUAT
-	return base.default_rot_quat
+		return ZERO_VECTOR, ZERO_VECTOR, IDENTITY_QUAT, UNIT_VECTOR
+	return base.default_pos, base.default_pivot, base.default_rot_quat, base.default_scale
 
 
 def rotate_vector_by_quat(v, quat: Quaternion):
@@ -51,16 +54,33 @@ def rotate_vector_by_quat(v, quat: Quaternion):
 	return (vx + 2.0 * (qw * uvx + uuvx), vy + 2.0 * (qw * uvy + uuvy), vz + 2.0 * (qw * uvz + uuvz))
 
 
-def rotate_mesh_geom(geom: MeshGeom, quat: Quaternion) -> None:
-	"""Rotates every Position/Normal in geom.vertex_buffer in place by quat. No-op if quat is identity."""
-	if quat == IDENTITY_QUAT:
+def bake_default_transform_into_geom(geom: MeshGeom, pos: Vector3, pivot: Vector3, quat: Quaternion, scale: Vector3) -> None:
+	"""Bakes the shape's own base.default_pos/default_pivot/default_rot_quat/
+	default_scale into every Position/Normal in geom.vertex_buffer in place --
+	the same composition ITransformable::updateMatrix() uses at instance
+	creation (transformable.cpp: `T(pos+pivot) * R * S * T(-pivot)`, i.e.
+	`v' = pos + pivot + rot*(scale*(v - pivot))`), so an exported file shows
+	the shape's real in-game placement rather than its raw pre-transform
+	storage pose. No-op if the whole transform is identity.
+
+	Normals are only ever rotated, never scaled: correct for the uniform
+	scale every shape in practice uses (a non-uniform default_scale would
+	need an inverse-transpose to keep normals correct, not implemented
+	here -- no known shape relies on that)."""
+	if pos == ZERO_VECTOR and pivot == ZERO_VECTOR and quat == IDENTITY_QUAT and scale == UNIT_VECTOR:
 		return
 	channels = geom.vertex_buffer.channels
 	positions = channels.get("Position")
 	if positions:
-		channels["Position"] = [rotate_vector_by_quat(p, quat) for p in positions]
+		new_positions = []
+		for x, y, z in positions:
+			v = (x - pivot.x, y - pivot.y, z - pivot.z)
+			v = (v[0] * scale.x, v[1] * scale.y, v[2] * scale.z)
+			v = rotate_vector_by_quat(v, quat)
+			new_positions.append((v[0] + pos.x + pivot.x, v[1] + pos.y + pivot.y, v[2] + pos.z + pivot.z))
+		channels["Position"] = new_positions
 	normals = channels.get("Normal")
-	if normals:
+	if normals and quat != IDENTITY_QUAT:
 		channels["Normal"] = [rotate_vector_by_quat(n, quat) for n in normals]
 
 
@@ -399,11 +419,10 @@ def shape_stats(shape_value, materials=None, source_path=None) -> dict:
 	caller's own `shape_file.materials`/on-disk path, when known) -- their
 	corresponding keys are omitted rather than guessed when not given.
 
-	Triangle/vertex counts are deduplicated by `id(vertex_buffer)`, same
-	technique `shape_export.py::_export_obj()` already uses for a shape
-	whose passes share the same underlying buffer (a Mesh's matrix blocks,
-	a MeshMRM's finest LOD) -- otherwise a shared buffer's own vertices
-	would be counted once per pass that renders from it."""
+	Triangle/vertex counts are deduplicated by `id(vertex_buffer)` for a
+	shape whose passes share the same underlying buffer (a Mesh's matrix
+	blocks, a MeshMRM's finest LOD) -- otherwise a shared buffer's own
+	vertices would be counted once per pass that renders from it."""
 	stats: dict = {"type": type(shape_value).__name__}
 
 	geom = shape_geom(shape_value)
