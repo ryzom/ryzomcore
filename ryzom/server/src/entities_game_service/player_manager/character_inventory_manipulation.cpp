@@ -90,6 +90,7 @@ using namespace NLNET;
 ////////////
 // EXTERN //
 ////////////
+extern CVariable<bool> ChatLinkDiagnostics;
 extern CGenericXmlMsgHeaderManager GenericMsgManager;
 extern float MaxHarvestDistance;
 extern SKILLS::ESkills BarehandCombatSkill;
@@ -2484,6 +2485,8 @@ bool CCharacter::buildChatItem(uint32 slotId, CChatMessageItem &chatItem)
 // ****************************************************************************
 bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool sendToClient)
 {
+	if (ChatLinkDiagnostics && (!sendToClient))
+		nlinfo("CHATLINK_DIAG EGS ITEM_BEGIN sender=%s slotId=%u inventory=%u slot=%u", _Id.toString().c_str(), slotId, slotId >> CItemInfos::SlotIdIndexBitSize, slotId & CItemInfos::SlotIdIndexBitMask);
 	TLogNoContext_Item noContext;
 
 	try
@@ -2504,6 +2507,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries slot %u count is %u", _Id.toString().c_str(), slot,
 						  CExchangeView::NbExchangeSlots);
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=exchange_slot_range", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2511,6 +2516,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries to access exchange view, but no exchange pending",
 						  _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=no_exchange", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2519,6 +2526,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			if (item == NULL)
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries slot %u. Slot is empty", _Id.toString().c_str(), slot);
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=exchange_empty", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2535,6 +2544,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<sendItemInfos>%s tries exchange inventory but has no trader exchange view",
 					_Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=no_trader_exchange", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2542,6 +2553,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<sendItemInfos>for exchange %s tries slot %u count is %u", _Id.toString().c_str(), slot,
 						  CExchangeView::NbExchangeSlots);
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=trader_slot_range", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2551,6 +2564,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<sendItemInfos>for exchange_proposition %s tries slot %u. Slot is empty",
 						  _Id.toString().c_str(), slot);
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=trader_slot_empty", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2585,6 +2600,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			if (_GuildId == 0)
 			{
 				nlwarning("<sendItemInfos> user %s not in guild !", _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=no_guild", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2594,23 +2611,37 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				//nlwarning("<sendItemInfos> user %s cellId %d is not a guild room !", _Id.toString().c_str(), cell);
 				nlwarning("<sendItemInfos> user %s guild %d unknown !", _Id.toString().c_str(), toString(_GuildId).c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=unknown_guild", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
 			item = guild->getItem(slot);
 			if (item == NULL)
+			{
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=guild_slot_empty", _Id.toString().c_str(), slotId);
 				return false;
+			}
 			infos.versionInfo = sendToClient ? guild->getAndSyncItemInfoVersion(slot, getId()) : 0;
 		}
 		else if (inventory == INVENTORIES::player_room)
 		{
 			CInventoryPtr roomInventory = _PlayerRoom == NULL ? NULL : _PlayerRoom->getInventory();
 			if (roomInventory == NULL || slot >= roomInventory->getSlotCount())
+			{
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=room_unavailable_or_slot_range", _Id.toString().c_str(), slotId);
 				return false;
+			}
 			item = roomInventory->getItem(slot);
 
 			if (item == NULL)
+			{
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=room_slot_empty", _Id.toString().c_str(), slotId);
 				return false;
+			}
 
 			infos.versionInfo = (uint16)_InventoryUpdater.getInfoVersion((INVENTORIES::TInventory)inventory, slot);
 		}
@@ -2637,6 +2668,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 						{
 							nlwarning("<CCharacter sendItemInfos> invalid trading slot %u for user %s", slot,
 									  _Id.toString().c_str());
+							if (ChatLinkDiagnostics && (!sendToClient))
+								nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=invalid_trade_item", _Id.toString().c_str(), slotId);
 							return false;
 						}
 					}
@@ -2657,6 +2690,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			}
 			else
 			{
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=no_shopping_list", _Id.toString().c_str(), slotId);
 				return false;
 			}
 		}
@@ -2667,12 +2702,16 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			if (!team)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid team for user '%s'", _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=no_team", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
 			if (!team->getReward())
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid team reward for user '%s'", _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=no_team_reward", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2681,6 +2720,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			if (item == NULL)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid item for user '%s'", _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=reward_slot_empty", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2695,12 +2736,16 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid inventory %u : there are %u inventory, for user %s",
 						  inventory, INVENTORIES::NUM_INVENTORY, _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=invalid_inventory", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
 			if (_Inventory[inventory] == NULL)
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid inventory %u: NULL", inventory);
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=inventory_unavailable", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
@@ -2708,13 +2753,19 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			{
 				nlwarning("<CCharacter sendItemInfos> invalid slot %u for inventory %u: only %u slots for user %s",
 						  slot, inventory, _Inventory[inventory]->getSlotCount(), _Id.toString().c_str());
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=slot_range", _Id.toString().c_str(), slotId);
 				return false;
 			}
 
 			item = _Inventory[inventory]->getItem(slot);
 
 			if (item == NULL)
+			{
+				if (ChatLinkDiagnostics && (!sendToClient))
+					nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=slot_empty", _Id.toString().c_str(), slotId);
 				return false;
+			}
 
 			infos.versionInfo = (uint16)_InventoryUpdater.getInfoVersion((INVENTORIES::TInventory)inventory, slot);
 		}
@@ -2723,6 +2774,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 		{
 			nlwarning("<CCharacter sendItemInfos> invalid slot %u for inventory %u: NULL, for user %s", slot, inventory,
 					  _Id.toString().c_str());
+			if (ChatLinkDiagnostics && (!sendToClient))
+				nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=item_null", _Id.toString().c_str(), slotId);
 			return false;
 		}
 
@@ -2869,6 +2922,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			chatItem.RMClassType = item->getItemClass();
 			chatItem.RMFaberStatType = item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown :
 				item->getCraftParameters()->getBestItemStat();
+			if (ChatLinkDiagnostics)
+				nlinfo("CHATLINK_DIAG EGS ITEM_READY sender=%s slotId=%u sheet=%s", _Id.toString().c_str(), slotId, chatItem.SheetId.toString().c_str());
 			return true;
 		}
 
@@ -2900,6 +2955,8 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 	catch (const NLMISC::Exception &e)
 	{
 		nlwarning("<ITEM_INFOS> exception : '%s'", e.what());
+		if (ChatLinkDiagnostics && (!sendToClient))
+			nlinfo("CHATLINK_DIAG EGS ITEM_REJECT sender=%s slotId=%u reason=exception", _Id.toString().c_str(), slotId);
 		return false;
 	}
 }

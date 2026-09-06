@@ -1490,6 +1490,12 @@ namespace NLGUI
 	// ***************************************************************************
     void CViewText::setText(const std::string &text)
     {
+		if (_LetterColors != NULL)
+		{
+			delete _LetterColors;
+			_LetterColors = NULL;
+			invalidateContent();
+		}
 	    // common case: no special format, no case mode => easy cache test
 	    if (_FormatTags.empty() && _CaseMode == CaseNormal)
 	    {
