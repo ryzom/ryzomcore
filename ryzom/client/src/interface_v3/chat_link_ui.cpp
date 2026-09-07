@@ -44,10 +44,13 @@ namespace CHAT_SHARE
 {
 	namespace
 	{
+		uint64 NextAttachmentId = 0;
+
 		class CAttachmentView : public CViewLink
 		{
 		public:
-			CAttachmentView(const TCtorParam &param) : CViewLink(param) {}
+			CAttachmentView(const TCtorParam &param) : CViewLink(param), AttachmentId(++NextAttachmentId) {}
+			const uint64 AttachmentId;
 			CChatMessagePart Part;
 		};
 
@@ -365,10 +368,12 @@ namespace CHAT_SHARE
 				{
 					if (!canShareItem(view->Part.ItemValue.SheetId))
 						return;
+					if (CInterfaceHelp::activateChatItemWindow(view->AttachmentId))
+						return;
 					CDBCtrlSheet *sheet = prepareItem(view->Part.ItemValue);
 					if (sheet && sheet->asItemSheet())
 						CAHManager::getInstance()->runActionHandler("open_item_help", sheet,
-							"force_keep=0|reuse_same_aspect=0|prefer_new=1");
+							"force_keep=0|reuse_same_aspect=0|prefer_new=1|chat_link_id=" + toString(view->AttachmentId));
 					else if (sheet)
 						getInventory().removeItemLinkInfo(getInventory().getItemSlotId(sheet));
 				}
