@@ -1997,12 +1997,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 			{
 				if (pCS->getInventoryIndex()==INVENTORIES::bag && pIS->Scroll.Label.empty())
 					pItemTextDisplay->setActive(true);
-				pItemInfos->setActive(false);
 			}
-			else
-			{
-				pItemInfos->setActive(true);
-			}
+			pItemInfos->setActive(true);
 			// item has a label?
 			if (!pIS->Scroll.Label.empty())
 			{
