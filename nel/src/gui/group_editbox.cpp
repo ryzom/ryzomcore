@@ -1831,6 +1831,48 @@ namespace NLGUI
 		return NLMISC::CUtfStringView(_InputString).toUtf8();
 	}
 
+	// ***************************************************************************
+	sint32 CGroupEditBox::getCursorPosUtf8() const
+	{
+		sint32 pos = _CursorPos;
+		if (pos <= 0)
+			return 0;
+		if (pos > (sint32)_InputString.length())
+			pos = (sint32)_InputString.length();
+		// Length in bytes of the UTF-8 encoding of everything left of the cursor.
+		return (sint32)NLMISC::CUtfStringView(_InputString.substr(0, pos)).toUtf8().length();
+	}
+
+	// ***************************************************************************
+	void CGroupEditBox::setCursorPosUtf8(sint32 pos)
+	{
+		if (pos <= 0)
+		{
+			_CursorPos = 0;
+		}
+		else
+		{
+			std::string utf8 = NLMISC::CUtfStringView(_InputString).toUtf8();
+			if (pos >= (sint32)utf8.length())
+			{
+				_CursorPos = (sint32)_InputString.length();
+			}
+			else
+			{
+				// A caller may hand us an offset that lands inside a multi-byte
+				// sequence; snap back to the start of that character so the
+				// prefix stays decodable.
+				while (pos > 0 && ((unsigned char)utf8[pos] & 0xC0) == 0x80)
+					--pos;
+				_CursorPos = (sint32)NLMISC::CUtfStringView(utf8.substr(0, pos)).toUtf32().length();
+			}
+		}
+		// Collapse the selection, otherwise the span between the old anchor and
+		// the caret we just moved would stay highlighted.
+		_SelectCursorPos = _CursorPos;
+		_CursorAtPreviousLineEnd = false;
+	}
+
 #ifdef RYZOM_LUA_UCSTRING
 	// ***************************************************************************
 	void	CGroupEditBox::setInputStringAsUtf16(const ucstring &str)

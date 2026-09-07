@@ -13,7 +13,8 @@ if not SearchCommand then
 		player_list_already_filled = 0,
 		player_name_local = "",
 		player_gender_local = 9,
-		ryzom_emotes_text_list = {}
+		ryzom_emotes_text_list = {},
+		command_token_list = {}
 	}
 end
 
@@ -356,6 +357,70 @@ function SearchCommand:search_string(input, tabelle)
     end
     
     return results
+end
+
+--Read the caret offset of an edit box as a number of bytes to the left of the
+--caret, so it lines up with string.sub(). Clients built before cursor_pos was
+--exported do not have the property; fall back to the end of the line, which is
+--what this file assumed before it learned about the caret.
+function SearchCommand:get_input_cursor(uiId)
+	local input_box = getUI(uiId)
+	local input_length = string.len(input_box.input_string)
+	local cursor_pos = input_box.cursor_pos
+	
+	if(cursor_pos == nil)then
+		return input_length
+	end
+	if(cursor_pos < 0)then
+		return 0
+	end
+	if(cursor_pos > input_length)then
+		return input_length
+	end
+	return cursor_pos
+end
+
+--Split the input into tokens and remember where each one starts and ends, so the
+--caret can be mapped back onto the token it sits in. Offsets are 1-based and
+--inclusive, the same convention string.sub() uses. Scanning starts at 2 to skip
+--the leading "/".
+function SearchCommand:tokenize_input(input_text)
+	local tokens = {}
+	local pos = 2
+	
+	while true do
+		local first, last = string.find(input_text, "%S+", pos)
+		if(first == nil)then
+			break
+		end
+		table.insert(tokens, {text = string.sub(input_text, first, last), first = first, last = last})
+		pos = last + 1
+	end
+	
+	return tokens
+end
+
+--Work out which token the caret sits in. cursor_pos counts the bytes left of the
+--caret, so the caret touches a token from just before its first character up to
+--just past its last one. Returns the token index plus a flag that is true when
+--the caret is in whitespace, meaning the player has opened a new and still empty
+--token instead of editing an existing one.
+function SearchCommand:get_cursor_token(tokens, cursor_pos)
+	for t = 1, #tokens do
+		if(cursor_pos >= tokens[t].first - 1 and cursor_pos <= tokens[t].last)then
+			return t, false
+		end
+	end
+	
+	--in whitespace: the new token belongs after every token we have passed
+	local slot = 0
+	for t = 1, #tokens do
+		if(tokens[t].last < cursor_pos)then
+			slot = t
+		end
+	end
+	
+	return slot + 1, true
 end
 
 function SearchCommand:pars_all_emotes()
@@ -1013,6 +1078,7 @@ function SearchCommand:search(uiId)
 		
 		--reset command_parameter_list for fresh input
 		self.command_parameter_list = {}
+		self.command_token_list = {}
 		--END reset command_parameter_list for fresh input
 		
 		local max_string_count = string.len(input_text)
@@ -1026,31 +1092,38 @@ function SearchCommand:search(uiId)
 		else
 			SearchCommand:close_modal(uiId)
 			
-			--if we found 2 space cancel all action
-			if(string.find(string.lower(input_text), "  "))then
-				--debug("found_two_spaces")
+			--split text to commands, keeping the byte range of every token so the
+			--caret can be located inside them. Runs of spaces no longer matter here:
+			--the ranges stay correct however many there are.
+			self.command_token_list = SearchCommand:tokenize_input(input_text)
+			for t = 1, #self.command_token_list do
+				table.insert(self.command_parameter_list, self.command_token_list[t].text)
+			end
+			
+			--nothing but the identifier and blanks, so there is nothing to look up
+			if(#self.command_parameter_list == 0)then
 				SearchCommand:write_command_help_clear(uiId)
 				return 0
 			end
 			
-			local command_first = string.sub(input_text, 2, max_string_count)
-			--split text to commands
-			for substring in command_first:gmatch("%S+") do
-				table.insert(self.command_parameter_list, substring)
-			end
-			
 			self.command_self=self.command_parameter_list[1]
 			
+			--the token being completed is the one under the caret, which is not
+			--necessarily the last one: the player may have gone back to edit an
+			--earlier word
+			local cursor_pos = SearchCommand:get_input_cursor(uiId)
+			local cursor_token, on_new_token = SearchCommand:get_cursor_token(self.command_token_list, cursor_pos)
+			
 			--update process_status
-			SearchCommand:update_process_list(uiId,#self.command_parameter_list)
+			SearchCommand:update_process_list(uiId,cursor_token)
 			
 			--go and search we found a mathing command
 			SearchCommand:write_command_help_clear(uiId)
 			SearchCommand:build_command_helper(uiId)
 			
-			--check last string is a space
-			local last_string = string.sub(input_text, -1, -1)
-			if(last_string == " ")then
+			--the caret sits in whitespace, so there is no word to complete yet. The
+			--argument help stays on screen but the suggestion list is hidden.
+			if(on_new_token)then
 				SearchCommand:close_modal(uiId)
 			end
 		end
@@ -1610,6 +1683,9 @@ function SearchCommand:build_command_helper(uiId)
 		self.player_list_already_filled=0
 	else
 		--debug("process_args")
+		--the caret can sit on a new and still empty token, so there is no text to
+		--match on yet
+		local cursor_text = self.command_parameter_list[process_status] or ""
 		argu_name = SearchCommand:find_argument(self.command_self,uiId)
 		--debug("argu_name: "..argu_name)
 		
@@ -1617,7 +1693,7 @@ function SearchCommand:build_command_helper(uiId)
 		--check if argument can be a command or a playername
 		if(string.find(string.lower(argu_name), string.lower("<Command>")))then
 			--debug("parm is a command")
-			SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
+			SearchCommand:search_build_command_list(uiId,cursor_text,false)
 		elseif(string.find(string.lower(argu_name), string.lower("<PlayerName>")) or string.find(string.lower(argu_name), string.lower("<TargetName>")))then 
 			
 				--player_priv=False
@@ -1645,9 +1721,9 @@ function SearchCommand:build_command_helper(uiId)
 					add_targetname_prefix=1
 				end
 				
-				SearchCommand:search_build_player_list(uiId,self.command_parameter_list[process_status],add_targetname_prefix)
+				SearchCommand:search_build_player_list(uiId,cursor_text,add_targetname_prefix)
 		elseif(string.find(string.lower(argu_name), string.lower("<ScriptCommand>")))then
-			SearchCommand:search_build_command_list(uiId,self.command_parameter_list[process_status],false)
+			SearchCommand:search_build_command_list(uiId,cursor_text,false)
 		else
 			SearchCommand:search_build_argument_list(uiId,self.command_self)
 		end
@@ -1858,35 +1934,49 @@ end
 function SearchCommand:finish_commands(command_name,uiId)
 	local process_status = SearchCommand:read_process_status(uiId)
 	local input_search_string = getUI(uiId)
-	local final_command = ""
-	local new_command_par = ""
+	local input_text = input_search_string.input_string
 	local argument_count = 0
 	local max_aruments = 0
 	
+	--Re-read the tokens from what is in the box right now. A completion can be
+	--triggered by a keystroke that has already landed in the text (typing the
+	--number of an entry), so the ranges cached by the last search() would be one
+	--edit behind and the splice would land in the wrong place.
+	self.command_token_list = SearchCommand:tokenize_input(input_text)
+	self.command_parameter_list = {}
+	for t = 1, #self.command_token_list do
+		self.command_parameter_list[t] = self.command_token_list[t].text
+	end
+	local target_token = self.command_token_list[process_status]
+	
 	--debug("process_status: "..process_status)
 	
-	for fc = 1, process_status do
-		if(fc == process_status)then
-			self.command_parameter_list[fc] = command_name
-		end
+	--eScript commands carry their parameter placeholders in the name, so expand
+	--them for the token we are about to write out
+	local insert_text = command_name
+	if(SearchCommand:get_command_type(command_name) == "eScript")then
+		insert_text = "()"..SearchCommand:replace_escript_param(command_name)
 	end
 	
-	for pc = 1, #self.command_parameter_list do
-		local add_escript_prefix=""
-		if(SearchCommand:get_command_type(self.command_parameter_list[pc]) == "eScript")then
-			add_escript_prefix="()"
-			new_command_par = SearchCommand:replace_escript_param(self.command_parameter_list[pc])
-			self.command_parameter_list[pc] = new_command_par
-		end
-		
-		if(final_command == "")then
-			final_command = add_escript_prefix..""..self.command_parameter_list[pc]
-		else
-			final_command = final_command.." "..add_escript_prefix..""..self.command_parameter_list[pc]
-		end
+	--Splice the completion over the token under the caret and leave everything
+	--around it untouched. Rebuilding the whole line from the token list, as this
+	--used to do, threw away the player's own spacing and always dumped the caret
+	--at the end, which made editing an earlier word impossible.
+	local head = ""
+	local tail = ""
+	if(target_token ~= nil)then
+		head = string.sub(input_text, 1, target_token.first - 1)
+		tail = string.sub(input_text, target_token.last + 1)
+	else
+		--completing a new token that has no text yet, so insert at the caret
+		local cursor_pos = SearchCommand:get_input_cursor(uiId)
+		head = string.sub(input_text, 1, cursor_pos)
+		tail = string.sub(input_text, cursor_pos + 1)
 	end
 	
-	--debug("/"..final_command)
+	--keep the parameter list in step with what we just inserted, the argument
+	--count below is derived from it
+	self.command_parameter_list[process_status] = insert_text
 	
 	if(self.command_parameter_list[1] == "a" and process_status > 1)then
 		max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
@@ -1902,17 +1992,22 @@ function SearchCommand:finish_commands(command_name,uiId)
 		argument_count = #self.command_parameter_list - 1
 	end
 	
-	--debug("process_status"..process_status)
-	--debug("argument_count: "..argument_count)
-	--debug("name:"..self.command_parameter_list[1].." max:"..max_aruments)
+	--debug("argument_count: "..argument_count.." max:"..max_aruments)
 	
-	if(argument_count < max_aruments)then
-		input_search_string.input_string = "/"..final_command.." "
-	else
-		input_search_string.input_string = "/"..final_command
+	--only offer the trailing space when the caret is at the end of the line and
+	--the command still takes another argument, otherwise it would be inserted in
+	--the middle of text the player already typed
+	local trailing = ""
+	if(argument_count < max_aruments and tail == "")then
+		trailing = " "
 	end
 	
+	local completed = head..insert_text..trailing
+	input_search_string.input_string = completed..tail
+	--setFocusOnText() drops the caret at the end of the line, so put it back
+	--behind what we inserted afterwards, never before
 	input_search_string:setFocusOnText()
+	input_search_string.cursor_pos = string.len(completed)
 	SearchCommand:close_modal(uiId)
 	SearchCommand:search(uiId)
 end
@@ -1922,4 +2017,4 @@ SearchCommand:pars_all_emotes()
 --##############END Pars now all Emotes and add it to command table
 
 -- VERSION --
-FILE_SEARCH_COMMAND_VERSION = 122
+FILE_SEARCH_COMMAND_VERSION = 123

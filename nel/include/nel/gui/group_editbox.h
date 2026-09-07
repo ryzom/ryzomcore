@@ -110,6 +110,12 @@ namespace NLGUI
 		sint32		getCursorPos () const {return _CursorPos;}
 		void		setCursorPos (sint32 pos) {_CursorPos=pos;}
 
+		// Get / set cursor position as a byte offset into the UTF-8 string
+		// returned by getInputString(). Lua strings are byte arrays, so this is
+		// the form scripts can feed straight into string.sub().
+		sint32		getCursorPosUtf8 () const;
+		void		setCursorPosUtf8 (sint32 pos);
+
 		// Get / set cursor at previous line end
 		bool		isCursorAtPreviousLineEnd () const {return _CursorAtPreviousLineEnd;}
 		void		setCursorAtPreviousLineEnd (bool setCursor) {_CursorAtPreviousLineEnd=setCursor;}
@@ -195,6 +201,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
 			REFLECT_STRING("input_string", getInputString, setInputString);
 			REFLECT_STRING("prompt", getPrompt, setPrompt);
+			REFLECT_SINT32("cursor_pos", getCursorPosUtf8, setCursorPosUtf8);
 #ifdef RYZOM_LUA_UCSTRING
 			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16); // Compatibility
 #endif
