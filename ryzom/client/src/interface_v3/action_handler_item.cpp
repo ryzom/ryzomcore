@@ -1778,6 +1778,8 @@ static bool resolveItemForChatLink(CDBCtrlSheet *item, uint32 &slotId)
 {
 	if (!item || item->getType() != CCtrlSheetInfo::SheetType_Item || item->getSheetId() == 0 || item->getQuantity() == 0)
 		return false;
+	if (!CHAT_SHARE::canShareItem(CSheetId(item->getSheetId())))
+		return false;
 
 	INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)item->getInventoryIndex();
 	if (inventory == INVENTORIES::handling || inventory == INVENTORIES::equipment)
