@@ -190,6 +190,7 @@ public:
 	void setAnim (sint32 anim);
 
 	CCharacter3D * getCharacter3D() { return _Char3D; }
+	const std::string &getDBLink() const { return _DBLink; }
 
 	void			setPeople(const std::string & people);
 	std::string		getPeople() const;

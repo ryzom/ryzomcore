@@ -2909,6 +2909,9 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 
 		if (!sendToClient)
 		{
+			// Share scroll properties without exposing their private text or commands.
+			if (form->Family == ITEMFAMILY::SCROLL)
+				infos.CustomText.clear();
 			infos.slotId = 0;
 			infos.versionInfo = 0;
 			chatItem.SheetId = item->getSheetId();

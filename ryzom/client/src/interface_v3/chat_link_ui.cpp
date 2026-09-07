@@ -464,8 +464,7 @@ namespace CHAT_SHARE
 	bool canShareItem(const CSheetId &sheetId)
 	{
 		const CItemSheet *item = dynamic_cast<const CItemSheet*>(SheetMngr.get(sheetId));
-		// Scrolls use the text/action menu instead of normal item help.
-		return item && item->Family != ITEMFAMILY::SCROLL;
+		return item != NULL;
 	}
 
 	bool hasCurrentRequest()
