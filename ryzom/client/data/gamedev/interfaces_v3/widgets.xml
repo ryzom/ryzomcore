@@ -1414,7 +1414,7 @@
                         <!-- Item preview 3D window -->
                         <group id="item_preview" posref="TL TL" sizeref="w" w="200" h="300" x="0" y="-60">
                             <scene3d id="scene_item_preview" sizeref="wh" w="-2" h="-2" posref="TL TL" x="1" curcam="cam_item_preview" user_interaction="true" ambient="128 96 64" sun_ambient="70 70 70" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" rotz_factor="0.017" roty_factor="0.005" dist_factor="0.2" camz="10" dist_limit_min="20.0" dist_limit_max="80.0">
-                                <character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0.0 0.0 -1.8" rot="0.0 0.0 -60.0" anim="1" />
+                                <character3d id="char" dblink="UI:TEMP:ITEM_PREVIEW:#index" pos="0.0 0.0 -1.8" rot="0.0 0.0 -60.0" anim="1" />
                                 <camera id="cam_item_preview" fov="5" pos="0.0 -40.0 0.0" target="0.0 0.0 -0.85" roll="0" />
                                 <light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
                                 <light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="1.0" far="4.0" />
