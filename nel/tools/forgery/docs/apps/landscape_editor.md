@@ -64,27 +64,36 @@ panel si ce chemin n'est pas configuré ou invalide. L'Explorer démarre
 directement dans ce dossier si configuré (sinon un `search_path` classique,
 sinon le home).
 
-## Étape 3 -- rendu low-poly + vue 2D
+## Étapes 3-4 -- rendu terrain (low-poly puis tessellation Bézier)
 
 Sélectionner un `.zone`/`.zonew`/`.zonel` dans l'Explorer (y compris à
 l'intérieur d'un `.bnp`, ex. `nexus_zones.bnp`) parse la zone via
 `pynel.ryzom_zone.parse_zone()` et construit un maillage via
-`ryzom_forgery/zone_geometry.py` (`build_zone_low_poly_geom()`) : un quad par
-patch, ses 4 coins bruts uniquement (`patch.vertices`, **sans** évaluation
-Bézier -- vient à l'étape 4), dans l'ordre `[V0, V3, V2, V1]` (pas l'ordre
-brut sur disque) pour suivre le vrai contour du patch d'après
-`CBezierPatch::eval()` (`bezier_patch.cpp:98-133`).
+`ryzom_forgery/zone_geometry.py`.
+
+**Étape 4 (actuelle)** : `build_zone_tessellated_geom()` -- chaque patch est
+tessellé sur une grille `(order_s+1)×(order_t+1)` (repli 1×1 si
+`order_s`/`order_t` == 0, patch version < 2), évaluée via la vraie surface
+Bézier (`_eval_bezier_patch()`). La grille de contrôle 4×4 canonique
+(`_bezier_control_grid()`) est reconstruite depuis l'indexation propre à NeL
+(`Vertices`/`Tangents`/`Interiors`) en inspectant quel terme de
+`CBezierPatch::eval()` (`bezier_patch.cpp:98-133`) contribue à quel coin
+`(s,t)` -- une fois arrangée en grille standard, une évaluation
+tensor-product classique (base de Bernstein cubique) reproduit `eval()`
+exactement, sans lister les 16 termes à plat. Vérifié : les 4 coins évalués
+correspondent exactement aux sommets bruts (`patch.vertices`).
+
+**Étape 3 (historique, remplacée)** : `build_zone_low_poly_geom()` (retirée
+du module) ne traçait qu'un quad par patch avec ses 4 coins bruts, sans
+Bézier -- sur un relief très courbé (dôme, colline), le quad plat coupait à
+travers la vraie surface bombée, visible comme des creux/"trous" en diamant
+à l'écran. Corrigé par la tessellation de l'étape 4.
 
 Coloration par élévation (dégradé vert foncé -> jaune-vert clair, interpolé
-par sommet) plutôt que par `CTileColor` -- anticipe l'étape 5 ("Rendu par
-élévation") pour un rendu plus lisible dès l'étape 3, décision Nuno
-2026-09-07.
-
-**Limite connue** (attendue, corrigée à l'étape 4) : sur un relief très
-courbé (dôme, colline), le quad plat coupe à travers la vraie surface
-bombée -- visible comme des creux/"trous" en diamant à l'écran. Pas une
-perte de géométrie réelle, juste la conséquence de n'utiliser que les 4
-coins sans les tangentes/points intérieurs Bézier.
+par sommet, `_elevation_color()`) plutôt que par `CTileColor` -- anticipe
+l'étape 5 ("Rendu par élévation") pour un rendu plus lisible, décision Nuno
+2026-09-07 ; tourne maintenant sur la vraie surface évaluée, pas seulement
+les 4 coins.
 
 **Explorer** : filtre par défaut `"*"` (pas `"*.land"`) -- un `.bnp` qui ne
 contient aucun fichier correspondant au filtre actif est entièrement caché

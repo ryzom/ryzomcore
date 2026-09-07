@@ -3,8 +3,8 @@ same naming convention as object_editor.py/"Patina"): 3D landscape
 composition/build tool, replacing the current 2D bitmap-tile Ligo editor.
 
 See project-todos/forgery/landscape_editor.md for the planned progressive
-rendering steps -- step 3 (low-poly zone rendering) is the first one that
-actually shows any terrain.
+rendering steps -- step 4 (Bezier-tessellated zone rendering) is the current
+one.
 """
 
 from pathlib import Path
@@ -19,7 +19,7 @@ from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import live_data
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.zone_geometry import build_zone_low_poly_geom
+from ryzom_forgery.zone_geometry import build_zone_tessellated_geom
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
 # extension_presets). Default filter is "*" (unfiltered), NOT "*.land": a
@@ -85,8 +85,8 @@ class LandscapeEditorApp(ForgeryApp):
 		self._bounds_error = None
 
 		# Loaded-zone state (project-todos/forgery/landscape_editor.md step 3
-		# -- low-poly rendering, no Bezier tessellation yet, see step 4).
-		# zone_node is the currently attached GeomNode NodePath (torn down and
+		# -- Bezier-tessellated rendering, see zone_geometry.py). zone_node is
+		# the currently attached GeomNode NodePath (torn down and
 		# rebuilt on every new zone load, None before the first one), zone is
 		# the parsed pynel.ryzom_zone.Zone it was built from.
 		self.zone = None
@@ -108,11 +108,11 @@ class LandscapeEditorApp(ForgeryApp):
 			return
 
 		self._clear_zone_geometry()
-		node = build_zone_low_poly_geom(self.zone)
+		node = build_zone_tessellated_geom(self.zone)
 		self.zone_node = self._zone_root.attach_new_node(node)
-		# Winding of the low-poly quads (zone_geometry.py) follows
-		# CBezierPatch's own corner convention, not necessarily Panda3D's
-		# expected front-face direction -- two-sided so every patch is
+		# Winding isn't guaranteed to match Panda3D's expected front-face
+		# direction (zone_geometry.py's grid triangulation follows NeL's own
+		# Bezier control-point convention) -- two-sided so every patch is
 		# visible regardless, rather than risking half the terrain silently
 		# backface-culled.
 		self.zone_node.set_two_sided(True)
