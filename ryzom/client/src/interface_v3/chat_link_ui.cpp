@@ -25,6 +25,7 @@
 #include "inventory_manager.h"
 #include "people_interraction.h"
 #include "sphrase_manager.h"
+#include "../sheet_manager.h"
 #include "../string_manager_client.h"
 
 #include "nel/gui/db_manager.h"
@@ -54,6 +55,7 @@ namespace CHAT_SHARE
 		// Help windows store raw sheet pointers, keep previews alive until interface release.
 		std::map<uint, CDBCtrlSheet*> LinkedItemSheets;
 		CDBCtrlSheet *LinkedPhraseSheet = NULL;
+		CSmartPtr<CSPhraseComAdpater> LinkedPhraseTooltip;
 		const CChatMessageRequest *CurrentRequest = NULL;
 
 		enum TParseResult
@@ -361,6 +363,8 @@ namespace CHAT_SHARE
 					return;
 				if (view->Part.Type == CChatMessagePart::Item)
 				{
+					if (!canShareItem(view->Part.ItemValue.SheetId))
+						return;
 					CDBCtrlSheet *sheet = prepareItem(view->Part.ItemValue);
 					if (sheet && sheet->asItemSheet())
 						CAHManager::getInstance()->runActionHandler("open_item_help", sheet,
@@ -397,18 +401,27 @@ namespace CHAT_SHARE
 						return;
 					}
 					const uint32 slotId = getInventory().getItemSlotId(sheet);
-					std::string tooltip;
-					sheet->getContextHelpToolTip(tooltip);
-					if (tooltip.empty())
-						tooltip = sheet->getItemActualName();
-					updateLinkTooltip(caller, sheet->getContextHelpWindowName(), tooltip);
+					const std::string windowName = sheet->getContextHelpWindowName();
+					std::string tooltip = sheet->getItemActualName();
+					if (windowName == "buff_item_context_help" || windowName == "crystallized_spell_context_help")
+					{
+						// Linked items already carry their info and have no inventory cache identity.
+						CControlSheetInfoWaiter waiter;
+						waiter.CtrlSheet = sheet;
+						waiter.LuaMethodName = windowName == "buff_item_context_help" ?
+							"updateBuffItemTooltip" : "updateCrystallizedSpellTooltip";
+						tooltip = waiter.infoValidated();
+					}
+					updateLinkTooltip(caller, windowName, tooltip);
 					getInventory().removeItemLinkInfo(slotId);
 				}
 				else if (view->Part.Type == CChatMessagePart::Phrase)
 				{
-					CSmartPtr<CSPhraseComAdpater> adapter = new CSPhraseComAdpater;
-					adapter->Phrase = localizedPhrase(view->Part.PhraseValue);
-					updateLinkTooltip(caller, "action_context_help", adapter->updateTooltip());
+					// Lua retains LastTooltipPhrase for the per-frame cooldown update.
+					if (!LinkedPhraseTooltip)
+						LinkedPhraseTooltip = new CSPhraseComAdpater;
+					LinkedPhraseTooltip->Phrase = localizedPhrase(view->Part.PhraseValue);
+					updateLinkTooltip(caller, "action_context_help", LinkedPhraseTooltip->updateTooltip());
 				}
 			}
 		};
@@ -446,6 +459,13 @@ namespace CHAT_SHARE
 		CChatWindow *chatWindow = handler == "chat_box_entry" ?
 			getChatWndMgr().getChatWindowFromCaller(editBox) : NULL;
 		return chatWindow && chatWindow->getEditBox() == editBox;
+	}
+
+	bool canShareItem(const CSheetId &sheetId)
+	{
+		const CItemSheet *item = dynamic_cast<const CItemSheet*>(SheetMngr.get(sheetId));
+		// Scrolls use the text/action menu instead of normal item help.
+		return item && item->Family != ITEMFAMILY::SCROLL;
 	}
 
 	bool hasCurrentRequest()
@@ -563,7 +583,8 @@ namespace CHAT_SHARE
 		CAttachmentView *view = new CAttachmentView(CViewBase::TCtorParam());
 		view->Part = part;
 		view->setId("attachment");
-		view->setUnderlined(true);
+		const bool canOpen = part.Type != CChatMessagePart::Item || canShareItem(part.ItemValue.SheetId);
+		view->setUnderlined(canOpen);
 		view->setShadow(getChatTextMngr().isTextShadowed());
 		view->setShadowOutline(false);
 		view->setFontSize(getChatTextMngr().getTextFontSize());
@@ -574,7 +595,8 @@ namespace CHAT_SHARE
 		view->setColor(part.Type == CChatMessagePart::Item ? itemColor() : phraseColor());
 		view->LinkTitle = getPartName(part);
 		view->setText(view->LinkTitle);
-		view->setActionOnLeftClick("open_chat_attachment");
+		if (canOpen)
+			view->setActionOnLeftClick("open_chat_attachment");
 		view->setActionOnContextHelp("chat_attachment_tooltip");
 		return view;
 	}
@@ -604,5 +626,6 @@ namespace CHAT_SHARE
 		LinkedItemSheets.clear();
 		delete LinkedPhraseSheet;
 		LinkedPhraseSheet = NULL;
+		LinkedPhraseTooltip = NULL;
 	}
 }

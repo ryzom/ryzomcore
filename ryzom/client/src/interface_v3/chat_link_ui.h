@@ -51,6 +51,7 @@ namespace CHAT_SHARE
 		uint32 value, NLMISC::CRGBA color, const std::string &destination);
 	NLMISC::CRGBA itemColor();
 	NLMISC::CRGBA phraseColor();
+	bool canShareItem(const NLMISC::CSheetId &sheetId);
 	bool isChatInput(NLGUI::CGroupEditBox *editBox);
 	bool hasCurrentRequest();
 	bool buildRequest(const NLGUI::CGroupEditBox *editBox, CChatMessageRequest &request);
