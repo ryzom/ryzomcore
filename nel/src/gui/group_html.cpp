@@ -297,6 +297,18 @@ namespace NLGUI
 		}
 	}
 
+	void CGroupHTML::ImageDownloadCB::abortDownload()
+	{
+		// clear back-references so CViewBitmap does not keep a dangling pointer to this download once it is deleted
+		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
+		{
+			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(it->Image);
+			if (bitmap)
+				bitmap->resetHtmlDownload();
+		}
+		Images.clear();
+	}
+
 	void CGroupHTML::ImageDownloadCB::finish()
 	{
 		// Image setTexture will remove itself from Images while iterating over it.
@@ -1088,6 +1100,8 @@ namespace NLGUI
 					}
 				}
 			}
+			// clear back-references held by pending images (e.g. CViewBitmap::_HtmlDownload) before deleting
+			dl.abortDownload();
 			// release CDataDownload
 			delete *it;
 		}

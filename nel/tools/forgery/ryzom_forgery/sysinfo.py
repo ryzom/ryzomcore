@@ -1,4 +1,14 @@
+import importlib.metadata
+
 from imgui_bundle import imgui
+
+
+def _version_label():
+	try:
+		version = importlib.metadata.version("ryzom_forgery")
+	except importlib.metadata.PackageNotFoundError:
+		version = "dev"
+	return f"Ryzom Forgery v{version} -- Ulukyn, Claude@anthropic"
 
 
 class SysInfoBar:
@@ -13,6 +23,9 @@ class SysInfoBar:
 	def __init__(self):
 		self.status = ""
 		self.status_color = None  # (r, g, b, a) or None for the default text color
+		# Computed once -- importlib.metadata.version() reads install
+		# metadata off disk, and the running version can't change mid-session.
+		self._version_label = _version_label()
 
 	def set_status(self, text: str, color=None):
 		self.status = text
@@ -29,3 +42,7 @@ class SysInfoBar:
 				imgui.text_colored(self.status_color, self.status)
 			else:
 				imgui.text(self.status)
+
+		label_width = imgui.calc_text_size(self._version_label).x
+		imgui.same_line(imgui.get_window_width() - label_width - imgui.get_style().item_spacing.x)
+		imgui.text_disabled(self._version_label)

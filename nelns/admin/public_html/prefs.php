@@ -21,7 +21,7 @@
 
 	if (isset($chCookieState))
 	{
-		sqlquery("UPDATE user SET useCookie='$chCookieState' WHERE uid='$uid'");
+		sqlquery("UPDATE user SET useCookie='".sqlescape($chCookieState)."' WHERE uid='".intval($uid)."'");
 		$useCookie = $chCookieState;
 	}
 

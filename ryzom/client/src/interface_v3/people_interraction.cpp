@@ -48,6 +48,7 @@
 #include "guild_manager.h"
 // Game share
 #include "game_share/entity_types.h"
+#include "game_share/constants.h"
 // NeL
 #include <nel/misc/command.h>
 #include <nel/misc/rgba.h>
@@ -1133,6 +1134,12 @@ void CPeopleInterraction::askAddContact(const string &contactName, CPeopleList *
 		return;
 	}
 
+	if (pl == &FriendList && pl->getNumPeople() >= MaxFriendListSize)
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiFriendListFull"));
+		return;
+	}
+
 	// add into server (NB: will be added by the server response later)
 	const char *sMsg = "TEAM:CONTACT_ADD";
 	CBitMemStream out;
@@ -1189,6 +1196,12 @@ void CPeopleInterraction::askMoveContact(uint peopleIndexInSrc, CPeopleList *plS
 	// check that index is already in people list
 	if (peopleIndexInSrc >= plSRC->getNumPeople()) return;
 
+
+	if (plDST == &FriendList && plDST->getNumPeople() >= MaxFriendListSize)
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiFriendListFull"));
+		return;
+	}
 
 	// Send message to server
 	uint32	contactId= plSRC->getContactId(peopleIndexInSrc);

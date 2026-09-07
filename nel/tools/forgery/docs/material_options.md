@@ -409,6 +409,64 @@ un calage fixe.
 
 ---
 
+### Filtrage et répétition des textures {#texture-filtering}
+
+**Résumé :** Comment une texture se comporte hors de son image de base
+(répétition ou non) et comment elle est lissée à l'écran (net/pixellisé ou
+doux) selon qu'on est proche ou loin de l'objet.
+
+Ces réglages ne concernent pas le matériau dans son ensemble, mais chaque
+image (texture) individuellement — chacune des 4 textures d'un matériau a
+les siens.
+
+- **Répétition horizontale / verticale (Wrap S / Wrap T)** : que fait la
+  texture quand ses coordonnées de calage (UV) dépassent le cadre de
+  l'image, séparément dans le sens horizontal et vertical. Par défaut, la
+  texture se répète en tuile (utile pour un sol, un mur, un tissu qui
+  couvre une grande surface avec une petite image) ; on peut aussi la
+  figer sur son dernier pixel de bord plutôt que de la répéter, pour éviter
+  une couture visible sur une texture qui ne boucle pas proprement.
+- **Filtrage de grossissement (Mag Filter)** : comment la texture est
+  lissée quand on est **proche** de l'objet (l'image est agrandie à
+  l'écran) — soit nette/pixellisée (chaque pixel de la texture reste un
+  petit carré net), soit adoucie (les pixels voisins sont mélangés pour un
+  rendu plus doux). Le réglage normal du moteur est le rendu adouci.
+- **Filtrage de rapetissement (Min Filter)** : la même idée mais pour
+  quand on est **loin** de l'objet (l'image est réduite à l'écran) — avec
+  en plus la question de l'utilisation ou non des "mipmaps" (des copies
+  pré-réduites de la texture, préparées à l'avance pour éviter le
+  scintillement/moiré des petits détails vus de loin). Le réglage normal
+  du moteur combine lissage doux et mipmaps pour le rendu le plus propre
+  possible à toutes les distances.
+
+*Note technique : sans ces deux derniers réglages remis à leur valeur
+normale (lissage + mipmaps), une texture prend un aspect "strié"/pixellisé
+inhabituel même si son image et son matériau sont par ailleurs corrects —
+voir le bug corrigé dans `pynel` (2026-08) où ces valeurs, lues mais
+jamais mémorisées, étaient remises à "aucun lissage" à chaque sauvegarde
+d'un `.shape`.*
+
+Deux réglages supplémentaires, plus rarement utiles :
+
+- **Image en niveaux de gris utilisée comme transparence
+  (LoadGrayscaleAsAlpha)** : normalement, une image apporte de la couleur
+  (rouge/vert/bleu) et, séparément, un canal de transparence (alpha). Ce
+  réglage dit au jeu : "cette image n'a qu'un seul canal en noir et blanc
+  — au lieu de l'utiliser comme une couleur grise, utilise-le comme la
+  transparence d'un autre canal". C'est une astuce pour économiser de la
+  mémoire quand une image ne sert qu'à définir *où* quelque chose est
+  visible/transparent (un masque), sans avoir besoin d'y stocker de vraie
+  couleur — par exemple pour un motif découpé (grillage, feuillage,
+  dentelle) où seule la silhouette compte, la couleur venant d'ailleurs.
+- **Format d'envoi à la carte graphique (UploadFormat)** : réglage
+  technique bas niveau qui précise dans quel format de couleur la texture
+  doit être envoyée à la carte graphique (compressée, pleine qualité...).
+  En pratique, presque toujours laissé sur "Auto" (le jeu choisit tout
+  seul le format le plus adapté) — il n'y a normalement pas besoin d'y
+  toucher.
+
+---
+
 ## Combinaison des textures (multi-texturing) {#multitexture}
 
 **Résumé :** Quand plusieurs textures sont actives sur le même matériau,
@@ -488,3 +546,13 @@ réglé sur "Couleur utilisateur" — voir ce mode plus haut.
 **Résumé :** Réglage avancé qui permet d'animer ou déformer une texture
 (la faire glisser, tourner, s'étirer) indépendamment de l'objet lui-même,
 par exemple pour un tapis roulant ou une texture d'eau qui défile.
+
+*Note technique : Rotation et Répétition (Scale) ne peuvent pas être
+combinées sur le même canal de texture — les remettre à zéro/un l'une pour
+éditer l'autre. Ce n'est pas une limite de Patina mais du matériel
+graphique lui-même : une texture répétée (wrap) puis tournée ne s'aligne
+plus proprement sur les bords de l'objet, faisant apparaître des tuiles en
+trop ou en moins selon l'angle — un artefact qui se produirait de la même
+façon avec n'importe quel outil ayant généré cette matrice. Vérifié
+(2026-08-28) : aucun shape du jeu ne combine les deux, ce n'est donc pas
+une perte réelle.*

@@ -51,6 +51,20 @@ extern CClientChatManager   ChatMngr;
 /////////////////////
 
 //==================================================================
+static void attachPeopleContainer(CGroupContainer *parent, CGroupContainer *child)
+{
+	CGroupList *list = parent->getList();
+	if (list != NULL)
+	{
+		// Contacts and group headers must not evict existing entries from the list.
+		const uint needed = list->getNumChildren() + 1;
+		if (needed > list->getMaxElements())
+			list->setProperty("maxelements", toString(needed));
+	}
+	parent->attachContainer(child);
+}
+
+//==================================================================
 CPeopleList::CPeopleList() : _ChatWindow(NULL),
 			     _ContactType(CPeopleListDesc::Unknown),
 			     _CurrPeopleID(0),
@@ -201,7 +215,8 @@ bool CPeopleList::sortExByContactId(const CPeople& a, const CPeople& b)
 //==================================================================
 bool CPeopleList::sortExByName(const CPeople& a, const CPeople& b)
 {
-	return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
+	// Compare folded strings because compareCaseInsensitive mishandles name prefixes.
+	return NLMISC::toCaseInsensitive(a.getName()) < NLMISC::toCaseInsensitive(b.getName()); // FIXME: Locale-dependent sort
 }
 
 //==================================================================
@@ -210,7 +225,7 @@ bool CPeopleList::sortExByOnline(const CPeople& a, const CPeople& b)
 	// We want order: online/alpha, offworld/alpha, offline/alpha
 	if (a.Online == b.Online)
 	{
-		return NLMISC::compareCaseInsensitive(a.getName(), b.getName()) < 0; // FIXME: Locale-dependent sort
+		return sortExByName(a, b);
 	}
 	else
 	{
@@ -244,7 +259,8 @@ void CPeopleList::sortEx(TSortOrder order)
 	for(k = 0; k < _Peoples.size(); ++k)
 	{
 		CGroupContainer *parentContainer = _Peoples[k].Container->getProprietaryContainer();
-		parentContainer->detachContainer(_Peoples[k].Container);
+		if (parentContainer != NULL)
+			parentContainer->detachContainer(_Peoples[k].Container);
 	}
 	// Destroy group containers
 	for (k = 0; k < _GroupContainers.size(); ++k)
@@ -283,7 +299,7 @@ void CPeopleList::sortEx(TSortOrder order)
 		for(cptContainers = 0; cptContainers < _GroupContainers.size(); ++cptContainers)
 		{
 			group = _GroupContainers[cptContainers].second;
-			_BaseContainer->attachContainer(group);
+			attachPeopleContainer(_BaseContainer, group);
 		}
 	}
 	
@@ -303,7 +319,7 @@ void CPeopleList::sortEx(TSortOrder order)
 			}
 		}
 		
-		group->attachContainer(_Peoples[k].Container);
+		attachPeopleContainer(group, _Peoples[k].Container);
 	}
 }
 
@@ -320,7 +336,7 @@ void CPeopleList::sort()
 	std::sort(_Peoples.begin(), _Peoples.end());
 	for(k = 0; k < _Peoples.size(); ++k)
 	{
-		_BaseContainer->attachContainer(_Peoples[k].Container);
+		attachPeopleContainer(_BaseContainer, _Peoples[k].Container);
 	}
 }
 
@@ -420,7 +436,7 @@ sint CPeopleList::addPeople(const string &name, uint teamMateIndex /*= 0*/)
 	  }
 	  else*/
 	{
-		_BaseContainer->attachContainer(gc);
+		attachPeopleContainer(_BaseContainer, gc);
 	}
 
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
@@ -538,7 +554,7 @@ void CPeopleList::changeGroup(uint index, const std::string &groupName)
 
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
-	_BaseContainer->attachContainer(gc);
+	attachPeopleContainer(_BaseContainer, gc);
 	
 	_GroupContainers.push_back(make_pair(group, gc));
 	
@@ -562,7 +578,7 @@ void CPeopleList::readContactGroups()
 	
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	pRoot->addGroup (gc);
-	_BaseContainer->attachContainer(gc);
+	attachPeopleContainer(_BaseContainer, gc);
 	
 	_GroupContainers.push_back(make_pair("", gc));
 	
@@ -620,7 +636,7 @@ void CPeopleList::readContactGroups()
 
 							CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 							pRoot->addGroup (gc);
-							_BaseContainer->attachContainer(gc);
+							attachPeopleContainer(_BaseContainer, gc);
 
 							_GroupContainers.push_back(make_pair(propGroup, gc));
 						}
