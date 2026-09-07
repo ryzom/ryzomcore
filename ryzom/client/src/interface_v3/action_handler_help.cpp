@@ -235,7 +235,7 @@ void CInterfaceHelp::CFittedWeaponWeightObserver::update(ICDBNode* node)
 
 // ***************************************************************************
 CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow,
-	bool reuseSameAspect, bool preferNewWindow)
+	bool reuseSameAspect, bool preferNewWindow, uint64 chatLinkId)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -392,6 +392,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	group->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(group);
 	_InfoWindows[newIndexWindow].CtrlSheet= elt;
+	_InfoWindows[newIndexWindow].ChatLinkId = chatLinkId;
 	// insert in list
 	if(mustAddToActiveWindows)
 		_ActiveWindows.push_back(newIndexWindow);
@@ -435,6 +436,23 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 
 // ***************************************************************************
+bool CInterfaceHelp::activateChatItemWindow(uint64 chatLinkId)
+{
+	if (chatLinkId == 0)
+		return false;
+	for (uint i = 0; i < _InfoWindows.size(); ++i)
+	{
+		CInterfaceGroup *group = _InfoWindows[i].Window;
+		if (_InfoWindows[i].ChatLinkId == chatLinkId && group && group->getActive())
+		{
+			CWidgetManager::getInstance()->setTopWindow(group);
+			return true;
+		}
+	}
+	return false;
+}
+
+// ***************************************************************************
 void			CInterfaceHelp::removeWaiterItemInfo(uint i)
 {
 	if(i<_InfoWindows.size())
@@ -443,6 +461,7 @@ void			CInterfaceHelp::removeWaiterItemInfo(uint i)
 		getInventory().removeItemLinkInfo(_InfoWindows[i].ItemSlotId);
 		_InfoWindows[i].ItemSlotId = 0;
 		_InfoWindows[i].ItemSheet = 0;
+		_InfoWindows[i].ChatLinkId = 0;
 	}
 }
 
@@ -655,10 +674,14 @@ class CHandlerOpenItemHelp : public IActionHandler
 			string preferNewWindowStr = getParam(sParams, "prefer_new");
 			if (!preferNewWindowStr.empty())
 				fromString(preferNewWindowStr, preferNewWindow);
+			uint64 chatLinkId = 0;
+			string chatLinkIdStr = getParam(sParams, "chat_link_id");
+			if (!chatLinkIdStr.empty())
+				fromString(chatLinkIdStr, chatLinkId);
 
 			// open the next window
 			CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(cs, forceKeepWindow,
-				reuseSameAspect, preferNewWindow);
+				reuseSameAspect, preferNewWindow, chatLinkId);
 			if (!group)
 			{
 				uint32 slotId = getInventory().getItemSlotId(cs);
