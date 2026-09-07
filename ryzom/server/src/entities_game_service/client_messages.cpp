@@ -1422,6 +1422,9 @@ void cbClientMoveInContactLists( NLNET::CMessage& msgin, const std::string &serv
 			// allows the whole operation or nothing if player is not present
 			if(eid != CEntityId::Unknown)
 			{
+				if (!c->checkFriendListCapacity())
+					return;
+
 				c->removePlayerFromIgnoreListByEntityId(eid);
 				c->addPlayerToFriendList(eid);
 			}

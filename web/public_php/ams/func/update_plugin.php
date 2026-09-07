@@ -15,16 +15,16 @@ function update_plugin() {
         if ( isset( $_GET['id'] ) )
              {
             // id of plugin to update
-            $id = filter_var( $_GET['id'], FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+            $id = intval( $_GET['id'] );
              $db = new DBLayer( 'lib' );
-             $sth = $db -> executeWithoutParams( "SELECT * FROM plugins INNER JOIN updates ON plugins.Id=updates.PluginId Where plugins.Id=$id" );
+             $sth = $db -> execute( "SELECT * FROM plugins INNER JOIN updates ON plugins.Id=updates.PluginId Where plugins.Id=:id", array('id' => $id) );
              $row = $sth -> fetch();
 
              // replacing update in the  database
             Plugincache :: rrmdir( $row['FileName'] );
              Plugincache :: zipExtraction( $row['UpdatePath'], rtrim( $row['FileName'], strtolower( $row['Name'] ) ) );
 
-             $db -> update( "plugins", array( 'Info' => $row['UpdateInfo'] ), "Id=$row[Id]" );
+             $db -> execute( "UPDATE `plugins` SET `Info`=:info WHERE Id=:id", array('info' => $row['UpdateInfo'], 'id' => $row['Id']) );
 
              // deleting the previous update
             $db -> delete( "updates", array( 'id' => $row['s.no'] ), "s.no=:id" );

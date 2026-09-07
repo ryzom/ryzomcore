@@ -937,8 +937,9 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	std::string botsName;
 	std::string look;
 	sint32 cell;
+	CEntityId targetEntityId;
 	msgin.serial(messageVersion);
-	nlassert(messageVersion==1);
+	nlassert(messageVersion==1 || messageVersion==2);
 	msgin.serial(instanceNumber);
 	msgin.serial(playerId);
 	msgin.serial(x);
@@ -952,6 +953,37 @@ void cbEventCreateNpcGroup( NLNET::CMessage& msgin, const std::string &serviceNa
 	msgin.serial(botsName);
 	msgin.serial(look);
 	msgin.serial(cell);
+	nlinfo("cbEventCreateNpcGroup: message v%u", messageVersion);
+	if (messageVersion>=2)
+		msgin.serial(targetEntityId);
+
+	// REPLACE_ENTITY: despawn the targeted bot synchronously and spawn the NPC group at its position/heading
+	if (!targetEntityId.isUnknownId())
+	{
+		nlinfo("REPLACE_ENTITY: targetEntity = %s", targetEntityId.toString().c_str());
+		CAIEntityPhysical* const targetPhys = CAIS::instance().getEntityPhysical(CMirrors::DataSet->getDataSetRow(targetEntityId));
+		CSpawnBot* const targetSpawn = NLMISC::type_cast<CSpawnBot*>(targetPhys);
+		if (targetSpawn)
+		{
+			nlinfo("REPLACE_ENTITY: targetSpawn");
+			CAIPos const targetPos = targetSpawn->aipos();
+			x = (sint32)(targetPos.x().asDouble()*1000.0);
+			y = (sint32)(targetPos.y().asDouble()*1000.0);
+			z = targetPos.h()*1000;
+			orientation = (sint32)(targetPos.theta().asRadians()*1000.0);
+
+			CBot& targetBot = targetSpawn->getPersistent();
+			CGroup& targetGroup = targetBot.getGroup();
+			uint32 const targetChildIndex = targetBot.getChildIndex();
+			targetBot.despawnBot();
+			targetGroup.bots().removeChildByIndex(targetChildIndex);
+		}
+		else
+		{
+			nlwarning("EVENT_CREATE_NPC_GROUP: target entity to replace not found.");
+		}
+	}
+
 	CAIInstance* instance = CAIS::instance().getAIInstance(instanceNumber);
 	if (instance)
 	{

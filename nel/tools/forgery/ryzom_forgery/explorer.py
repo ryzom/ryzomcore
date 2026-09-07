@@ -1,9 +1,10 @@
 import fnmatch
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from panda3d.core import KeyboardButton
+from panda3d.core import KeyboardButton, PNMImage, Texture as PandaTexture
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx
 
@@ -29,6 +30,18 @@ _LEAF_ICONS = {
 	".anim": fa_icons.ICON_FA_FILM,
 }
 _DEFAULT_LEAF_ICON = fa_icons.ICON_FA_FILE
+# Formats load_panda_texture() can actually decode (see shape_geometry.py) --
+# a real thumbnail replaces the generic file icon for these in the Wexplorer
+# (see _draw_leaf()'s show_thumbnail param).
+_TEXTURE_EXTENSIONS = {".tga", ".dds", ".png", ".jpg", ".jpeg", ".bmp"}
+_THUMBNAIL_SIZE = 16  # inline with the row's own text, not a separate big preview
+# Downscaled to this before ever reaching the GPU -- a source texture can be
+# up to 4096x4096 (a real one seen in testing took over a second to decode
+# and 100+ms just to upload at full size, for a 16px inline icon); this many
+# concurrent background decode threads at once, so expanding a folder with
+# hundreds of files doesn't spawn hundreds of threads together.
+_THUMBNAIL_DECODE_SIZE = 32
+_MAX_CONCURRENT_THUMBNAIL_DECODES = 4
 _MAX_VISIBLE_PATH_SUGGESTIONS = 8  # box scrolls instead of growing past this many rows
 _FAVORITE_STAR_COLOR = (1.0, 0.8, 0.0, 1.0)
 _NON_FAVORITE_STAR_COLOR = (0.5, 0.5, 0.5, 1.0)
@@ -110,9 +123,32 @@ class Explorer:
 		# in a folder full of .bnp archives. Cached per (bnp, filter state),
 		# cleared whenever search/extension_filter actually change.
 		self._bnp_visible_cache: dict = {}
+		# Wexplorer texture thumbnails (see _get_thumbnail_ref()) -- own
+		# state, separate from any shape-editing app's own texture state
+		# (e.g. object_editor.py's _texture_cache, which is shape-load-
+		# lifecycle-scoped), keyed by absolute file path. Never cleared: a
+		# workspace's own tex/ folder isn't expected to grow into the
+		# thousands the way a full Ryzom data tree might. Decoding a real
+		# texture file (some Ryzom textures are 4096x4096) can take over a
+		# second synchronously -- _decode_thumbnail_worker() does the actual
+		# file read + decode + downscale off the main/render thread (own
+		# background thread per texture, same reasoning as
+		# search_paths_dialog.py's own _reload_worker()); _thumbnail_lock
+		# guards the two dicts below since both threads touch them.
+		self._thumbnail_lock = threading.Lock()
+		self._thumbnail_pending: set = set()  # paths currently being decoded in the background
+		self._thumbnail_ready: dict = {}  # path -> decoded (already downscaled) PNMImage, or None if decode failed -- consumed (popped) by _get_thumbnail_ref() on the main thread, which does the actual (cheap, small-image) GPU upload
+		self._thumbnail_tex_refs: dict = {}  # path -> uploaded ImTextureRef, main-thread-only
 
 		self.on_selection_changed = None  # optional callback(list[ExplorerItem])
+		self.extra_header = None  # optional callback(), drawn first, above the Wexplorer (see draw())
 		self.extra_toolbar = None  # optional callback(), draws extra icon buttons next to Refresh
+		# [(label, Path), ...] -- each drawn as its own expandable tree section
+		# above Favorites, always reachable regardless of where the Explorer is
+		# currently browsing (e.g. object_editor.py's active-workspace
+		# folders). Unlike the main flat/click-to-navigate view
+		# (_draw_dir_contents()), sub-folders expand in place here.
+		self.pinned_folders = []
 
 	def selected_items(self) -> list:
 		return list(self._selection.values())
@@ -256,6 +292,54 @@ class Explorer:
 		imgui.pop_style_color()
 		return interacted
 
+	def _draw_pinned_folders(self):
+		for label, path in self.pinned_folders:
+			if not path.is_dir():
+				continue
+			visible_count = sum(1 for entry in self._list_dir(path) if not self._is_hidden(entry.name))
+			imgui.push_id(str(path))
+			opened = imgui.tree_node_ex(
+				"##pinned-root", imgui.TreeNodeFlags_.open_on_arrow.value,
+				f"{fa_icons.ICON_FA_FOLDER_OPEN} {label} ({visible_count})")
+			if opened:
+				self._draw_tree_children(path)
+				imgui.tree_pop()
+			imgui.pop_id()
+
+	def _draw_tree_children(self, dir_path: Path):
+		"""Recursive, expand-in-place listing of `dir_path`'s own entries --
+		unlike _draw_dir_contents() (the main view: flat, click-to-navigate,
+		affected by the shared search/extension_filter), the Wexplorer is a
+		persistent browse-everything pane: every file shows regardless of
+		extension/search (not filtered by the main arborescence's own search
+		box), each with its own icon (_draw_leaf()'s _LEAF_ICONS, extended
+		with a real thumbnail for texture files -- see
+		_draw_leaf()'s show_thumbnail param / _get_thumbnail_ref()).
+		Otherwise reuses _draw_leaf() as-is, so selecting/double-click-to-
+		load/the right-click command menu all behave exactly like the main
+		view."""
+		for entry in self._list_dir(dir_path):
+			if self._is_hidden(entry.name):
+				continue
+			if entry.is_dir():
+				visible_count = sum(1 for child in self._list_dir(entry) if not self._is_hidden(child.name))
+				opened = imgui.tree_node_ex(
+					str(entry), imgui.TreeNodeFlags_.open_on_arrow.value,
+					f"{fa_icons.ICON_FA_FOLDER} {entry.name} ({visible_count})")
+				if opened:
+					self._draw_tree_children(entry)
+					imgui.tree_pop()
+			elif entry.suffix.lower() in BNP_EXTENSIONS:
+				opened = imgui.tree_node_ex(
+					str(entry), imgui.TreeNodeFlags_.open_on_arrow.value, f"{fa_icons.ICON_FA_ARCHIVE} {entry.name}")
+				if opened:
+					for bnp_entry in self._bnp_entries(entry):
+						self._draw_leaf(
+							ExplorerItem(path=entry, name=bnp_entry.name, bnp_path=entry), show_thumbnail=True)
+					imgui.tree_pop()
+			else:
+				self._draw_leaf(ExplorerItem(path=entry, name=entry.name), show_thumbnail=True)
+
 	def _draw_favorites(self):
 		is_favorite = str(self.root) in self._favorites
 		imgui.push_style_color(imgui.Col_.text.value, _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR)
@@ -270,11 +354,6 @@ class Explorer:
 				imgui.text_disabled("(none yet -- click the star to add the current folder)")
 			for favorite in list(self._favorites):
 				imgui.push_id(favorite)
-				imgui.push_style_color(imgui.Col_.text.value, _FAVORITE_STAR_COLOR)
-				if _icon_button(fa_icons.ICON_FA_STAR, "Remove from favorites"):
-					self._toggle_favorite(favorite)
-				imgui.pop_style_color()
-				imgui.same_line()
 				clicked, _ = imgui.selectable(Path(favorite).name or favorite, False)
 				if imgui.is_item_hovered():
 					imgui.set_tooltip(favorite)
@@ -297,11 +376,24 @@ class Explorer:
 		app_settings.save(fresh)
 
 	def draw(self):
+		# Top-to-bottom order: host app's own header (e.g. object_editor.py's
+		# active-workspace row), the Wexplorer (pinned folders, always fully
+		# reachable), the Refresh/Import toolbar, then everything that
+		# filters/navigates the main flat arborescence below (search+filter,
+		# path bar, Favorites).
+		if self.extra_header is not None:
+			self.extra_header()
+			imgui.separator()
+
+		self._draw_pinned_folders()
+		imgui.separator()
+
 		if _icon_button(fa_icons.ICON_FA_SYNC, "Refresh"):
 			self.refresh()
 		if self.extra_toolbar is not None:
 			imgui.same_line()
 			self.extra_toolbar()
+		imgui.separator()
 
 		previous_search = self.search
 		previous_filter = self.extension_filter
@@ -359,14 +451,10 @@ class Explorer:
 			return False
 		return True
 
-	def _draw_dir_contents(self, dir_path: Path):
-		"""Flat, single-click listing of `dir_path`'s own entries only --
-		clicking a sub-folder or `.bnp` navigates into it (no tree/expand)."""
-		if dir_path.parent != dir_path:
-			clicked, _ = imgui.selectable("..", False)
-			if clicked:
-				self._navigate_to(dir_path.parent)
-
+	def _list_dir(self, dir_path: Path) -> list:
+		"""dir_path's own entries, sorted (folders/.bnp first, alphabetical) --
+		cached (see __init__'s _dir_cache comment: draw() runs every ImGui
+		frame, real disk I/O isn't free at that rate), cleared by refresh()."""
 		key = str(dir_path)
 		entries = self._dir_cache.get(key)
 		if entries is None:
@@ -375,8 +463,17 @@ class Explorer:
 			except OSError:
 				entries = []
 			self._dir_cache[key] = entries
+		return entries
 
-		for entry in entries:
+	def _draw_dir_contents(self, dir_path: Path):
+		"""Flat, single-click listing of `dir_path`'s own entries only --
+		clicking a sub-folder or `.bnp` navigates into it (no tree/expand)."""
+		if dir_path.parent != dir_path:
+			clicked, _ = imgui.selectable("..", False)
+			if clicked:
+				self._navigate_to(dir_path.parent)
+
+		for entry in self._list_dir(dir_path):
 			if self._is_hidden(entry.name):
 				continue
 			if entry.is_dir():
@@ -392,10 +489,9 @@ class Explorer:
 			elif self._matches_filters(entry.name):
 				self._draw_leaf(ExplorerItem(path=entry, name=entry.name))
 
-	def _bnp_has_visible_entries(self, bnp_path: Path) -> bool:
-		return bool(self._bnp_visible_entries(bnp_path))
-
-	def _bnp_visible_entries(self, bnp_path: Path) -> list:
+	def _bnp_entries(self, bnp_path: Path) -> list:
+		"""Every entry in `bnp_path`, unfiltered -- cached (a .bnp's own
+		header table is real disk I/O, see __init__'s _bnp_cache comment)."""
 		key = str(bnp_path)
 		entries = self._bnp_cache.get(key)
 		if entries is None:
@@ -404,10 +500,16 @@ class Explorer:
 			except BnpError:
 				entries = []
 			self._bnp_cache[key] = entries
+		return entries
 
+	def _bnp_has_visible_entries(self, bnp_path: Path) -> bool:
+		return bool(self._bnp_visible_entries(bnp_path))
+
+	def _bnp_visible_entries(self, bnp_path: Path) -> list:
+		key = str(bnp_path)
 		visible_entries = self._bnp_visible_cache.get(key)
 		if visible_entries is None:
-			visible_entries = [e for e in entries if self._matches_filters(e.name)]
+			visible_entries = [e for e in self._bnp_entries(bnp_path) if self._matches_filters(e.name)]
 			self._bnp_visible_cache[key] = visible_entries
 		return visible_entries
 
@@ -429,14 +531,96 @@ class Explorer:
 				entry = visible_entries[i]
 				self._draw_leaf(ExplorerItem(path=bnp_path, name=entry.name, bnp_path=bnp_path))
 
-	def _draw_leaf(self, item: ExplorerItem):
+	def _get_thumbnail_ref(self, path: Path):
+		"""Resolves+decodes+caches an ImTextureRef thumbnail for the image
+		file at `path`. Decoding is kicked off on a background thread the
+		first time a path is requested (see _decode_thumbnail_worker()) --
+		some real Ryzom textures are 4096x4096, over a second to decode
+		synchronously, which stalled the whole frame the first time a folder
+		full of them was expanded. Returns None (falls back to the generic
+		file icon) while the decode is still pending or failed; once ready,
+		the main thread does the actual GPU upload here (cheap: the
+		decoded image is already downscaled, see _THUMBNAIL_DECODE_SIZE)."""
+		key = str(path)
+		tex_ref = self._thumbnail_tex_refs.get(key)
+		if tex_ref is not None:
+			return tex_ref
+
+		with self._thumbnail_lock:
+			if key in self._thumbnail_ready:
+				pnm_image = self._thumbnail_ready.pop(key)
+			elif key in self._thumbnail_pending:
+				return None
+			elif len(self._thumbnail_pending) >= _MAX_CONCURRENT_THUMBNAIL_DECODES:
+				return None  # retried next frame once a decode slot frees up
+			else:
+				self._thumbnail_pending.add(key)
+				threading.Thread(target=self._decode_thumbnail_worker, args=(key,), daemon=True).start()
+				return None
+
+		if pnm_image is None:
+			return None
+		texture = PandaTexture()
+		texture.load(pnm_image)
+		# loadTexture() flips the given Texture in-place (see
+		# object_editor.py's _get_preview_texture_ref() for the same note) --
+		# harmless here since this Texture is never used for anything besides
+		# this one imgui thumbnail (own dedicated cache, not shared with any
+		# live 3D material).
+		tex_ref = self.app.imgui.loadTexture(texture)
+		self._thumbnail_tex_refs[key] = tex_ref
+		return tex_ref
+
+	def _decode_thumbnail_worker(self, key: str):
+		"""Runs off the main/render thread (own thread per texture, see
+		_get_thumbnail_ref()): resolves+decodes the image at `key` via
+		shape_geometry.load_panda_texture() (an absolute path short-circuits
+		its usual by-name search-dir resolution, see resolve_texture_ref()),
+		then downscales it to _THUMBNAIL_DECODE_SIZE (a 16px inline icon
+		never needs the source's full resolution) before handing it back --
+		the GPU upload itself still has to happen on the main thread (Panda3D
+		graphics calls aren't thread-safe), but is fast once the image is
+		this small. Imported locally, not at module level: shape_geometry.py
+		-> search_paths.py -> explorer.py (for BNP_EXTENSIONS) is already a
+		cycle, which a top-level import here would turn into an unimportable
+		one (explorer.py wouldn't have defined BNP_EXTENSIONS yet by the
+		time search_paths.py needs it)."""
+		from .shape_geometry import load_panda_texture
+
+		panda_texture = load_panda_texture(key)
+		pnm_image = None
+		if panda_texture is not None:
+			pnm_image = PNMImage()
+			panda_texture.store(pnm_image)
+			if pnm_image.get_x_size() > _THUMBNAIL_DECODE_SIZE or pnm_image.get_y_size() > _THUMBNAIL_DECODE_SIZE:
+				downscaled = PNMImage(_THUMBNAIL_DECODE_SIZE, _THUMBNAIL_DECODE_SIZE, pnm_image.get_num_channels())
+				downscaled.quick_filter_from(pnm_image)
+				pnm_image = downscaled
+
+		with self._thumbnail_lock:
+			self._thumbnail_pending.discard(key)
+			self._thumbnail_ready[key] = pnm_image
+
+	def _draw_leaf(self, item: ExplorerItem, show_thumbnail: bool = False):
 		key = self._item_key(item)
 		flags = imgui.TreeNodeFlags_.leaf.value | imgui.TreeNodeFlags_.no_tree_push_on_open.value
 		if key in self._selection:
 			flags |= imgui.TreeNodeFlags_.selected.value
 
-		icon = _LEAF_ICONS.get(item.suffix.lower(), _DEFAULT_LEAF_ICON)
-		imgui.tree_node_ex(key, flags, f"{icon} {item.name}")
+		# Thumbnails aren't available for a file living inside a .bnp (no
+		# standalone path on disk to decode -- item.path is the archive's own
+		# path, not the entry's).
+		thumbnail_ref = None
+		if show_thumbnail and item.bnp_path is None and item.suffix.lower() in _TEXTURE_EXTENSIONS:
+			thumbnail_ref = self._get_thumbnail_ref(item.path)
+
+		if thumbnail_ref is not None:
+			imgui.image(thumbnail_ref, (_THUMBNAIL_SIZE, _THUMBNAIL_SIZE))
+			imgui.same_line()
+			imgui.tree_node_ex(key, flags, item.name)
+		else:
+			icon = _LEAF_ICONS.get(item.suffix.lower(), _DEFAULT_LEAF_ICON)
+			imgui.tree_node_ex(key, flags, f"{icon} {item.name}")
 
 		if imgui.is_item_clicked():
 			additive = self.app.mouseWatcherNode.isButtonDown(KeyboardButton.control())

@@ -652,7 +652,7 @@ namespace RSMGR
 			userAccessPriv.clear();
 			CSString query;
 			query << "SELECT AccessPrivilege FROM permission";
-			query << " WHERE UId = " << userId << " AND permission.ClientApplication = '" << DomainName << "'";
+			query << " WHERE UId = " << userId << " AND permission.ClientApplication = '" << MSW::escapeString(DomainName, _NelDb) << "'";
 
 			if (!_NelDb.query(query))
 			{
@@ -1010,7 +1010,7 @@ restartLoop:
 			// try to load an existing scenario record
 			CScenarioPtr scenario;
 			CSString query;
-			query << "SELECT id FROM scenario WHERE md5 = '"<<scenarioInfo.getScenarioKey().toString()<<"'";
+			query << "SELECT id FROM scenario WHERE md5 = '"<<MSW::escapeString(scenarioInfo.getScenarioKey().toString(), _RingDb)<<"'";
 			BOMB_IF(!_RingDb.query(query), "Failed to request in ring database", return);
 			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
 			if (result->getNumRows() != 0)
@@ -1141,7 +1141,7 @@ restartLoop:
 			// try to load an existing scenario record
 			CScenarioPtr scenario;
 			CSString query;
-			query << "SELECT id FROM scenario WHERE md5 = '"<<scenarioInfo.getScenarioKey().toString()<<"'";
+			query << "SELECT id FROM scenario WHERE md5 = '"<<MSW::escapeString(scenarioInfo.getScenarioKey().toString(), _RingDb)<<"'";
 			BOMB_IF(!_RingDb.query(query), "Failed to request in ring database", return);
 			CUniquePtr<CStoreResult> result(_RingDb.storeResult());
 			if (result->getNumRows() != 0)

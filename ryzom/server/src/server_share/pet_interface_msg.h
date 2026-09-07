@@ -38,7 +38,7 @@
 class CPetSpawnMsg : public CMirrorTransportClass
 {
 public:
-	enum TSpawnMode { NEAR_PLAYER = 0, NEAR_POINT };
+	enum TSpawnMode { NEAR_PLAYER = 0, NEAR_POINT, REPLACE_ENTITY };
 	uint32				AIInstanceId;
 	uint16				SpawnMode;
 	TDataSetRow			CharacterMirrorRow;
@@ -48,6 +48,7 @@ public:
 	sint32				Cell;
 	float				Heading; //For NEAR_POINT mode
 	ucstring			CustomName;
+	TDataSetRow			TargetMirrorRow; //For REPLACE_ENTITY mode: entity to despawn, spawn pet at its position/heading
 
 	virtual void description ()
 	{
@@ -63,6 +64,7 @@ public:
 		property ("Cell", PropSInt32, (sint32)0, Cell);
 		property ("Heading", PropFloat, 0.0f, Heading);
 		property ("CustomName", PropUCString, ucstring(""), CustomName);
+		property ("TargetMirrorRow", PropDataSetRow, TDataSetRow(), TargetMirrorRow);
 	}
 
 	virtual void callback (const std::string &/* name */, NLNET::TServiceId /* id */) {}

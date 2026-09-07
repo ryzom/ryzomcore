@@ -489,28 +489,49 @@ class Texture:
 	file_names: Optional[List[str]] = None  # CTextureMultiFile: all candidate files
 	selected_index: Optional[int] = None  # CTextureMultiFile: _CurrSelectedTexture
 	sub_textures: Optional[List[Optional["Texture"]]] = None  # CTextureCube: 6 faces
+	# ITexture's own GPU sampling params -- see texture.h's TMagFilter/TMinFilter:
+	# the engine's own defaults (Linear/LinearMipMapLinear) give smooth
+	# trilinear filtering, but 0 for either is Nearest/NearestMipMapOff (no
+	# filtering at all). Round-tripping these unchanged matters: silently
+	# writing 0 here previously turned a smooth-looking texture into a
+	# blocky/aliased one on every save. None means "no real value captured"
+	# (e.g. a Texture built by hand for a freshly imported mesh, which has
+	# no wrap/filter data of its own) -- callers can tell that apart from a
+	# real file's own explicit choice, which is never None (see
+	# _parse_itexture_base()); the writer substitutes the engine's own
+	# defaults for None.
+	upload_format: Optional[int] = None
+	wrap_s: Optional[int] = None
+	wrap_t: Optional[int] = None
+	min_filter: Optional[int] = None
+	mag_filter: Optional[int] = None
+	load_grayscale_as_alpha: Optional[bool] = None
 
 
-def _parse_itexture_base(f: _Reader) -> None:
+def _parse_itexture_base(f: _Reader) -> Dict[str, Any]:
 	ver = f.version()
-	f.s32()  # _UploadFormat (serialEnum)
-	f.s32()  # _WrapS
-	f.s32()  # _WrapT
-	f.s32()  # _MinFilter
-	f.s32()  # _MagFilter
-	if ver >= 1:
-		f.boolean()  # _LoadGrayscaleAsAlpha
+	upload_format = f.s32()  # _UploadFormat (serialEnum)
+	wrap_s = f.s32()
+	wrap_t = f.s32()
+	min_filter = f.s32()
+	mag_filter = f.s32()
+	load_grayscale_as_alpha = f.boolean() if ver >= 1 else False
+	return dict(
+		upload_format=upload_format, wrap_s=wrap_s, wrap_t=wrap_t,
+		min_filter=min_filter, mag_filter=mag_filter,
+		load_grayscale_as_alpha=load_grayscale_as_alpha,
+	)
 
 
 def _parse_texture_file(f: _Reader) -> Texture:
 	ver = f.version()
-	_parse_itexture_base(f)
+	base = _parse_itexture_base(f)
 	# Texture names aren't case-sensitive; normalized to lowercase here so
 	# every consumer sees a consistent casing regardless of what's on disk
 	# (real data is a mix, e.g. "ZO-toit2.tga" vs "ZO_flag_AS.TGA").
 	file_name = f.string().lower()
 	allow_degradation = f.boolean() if ver >= 1 else None
-	return Texture(class_name="CTextureFile", file_name=file_name, allow_degradation=allow_degradation)
+	return Texture(class_name="CTextureFile", file_name=file_name, allow_degradation=allow_degradation, **base)
 
 
 _CLASS_PARSERS["CTextureFile"] = _parse_texture_file
@@ -518,14 +539,14 @@ _CLASS_PARSERS["CTextureFile"] = _parse_texture_file
 
 def _parse_texture_multi_file(f: _Reader) -> Texture:
 	f.version()
-	_parse_itexture_base(f)
+	base = _parse_itexture_base(f)
 	n = f.cont_len()
 	file_names = [f.string().lower() for _ in range(n)]  # see _parse_texture_file's lower() note
 	curr_selected = f.u32()
 	selected_name = file_names[curr_selected] if 0 <= curr_selected < len(file_names) else None
 	return Texture(
 		class_name="CTextureMultiFile", file_name=selected_name,
-		file_names=file_names, selected_index=curr_selected,
+		file_names=file_names, selected_index=curr_selected, **base,
 	)
 
 
@@ -534,11 +555,11 @@ _CLASS_PARSERS["CTextureMultiFile"] = _parse_texture_multi_file
 
 def _parse_texture_cube(f: _Reader) -> Texture:
 	ver = f.version()
-	_parse_itexture_base(f)
+	base = _parse_itexture_base(f)
 	sub_textures = [_read_poly_ptr(f) for _ in range(6)]
 	if ver == 1:
 		f.boolean()  # legacy, unused
-	return Texture(class_name="CTextureCube", sub_textures=sub_textures)
+	return Texture(class_name="CTextureCube", sub_textures=sub_textures, **base)
 
 
 _CLASS_PARSERS["CTextureCube"] = _parse_texture_cube
@@ -548,19 +569,23 @@ def _read_texture_ptr(f: _Reader) -> Optional[Texture]:
 	return _read_poly_ptr(f)
 
 
-def _write_itexture_base(f: _Writer) -> None:
+def _write_itexture_base(f: _Writer, tex: Texture) -> None:
+	"""None on any of these means the Texture was built by hand (no real
+	value captured, e.g. a freshly imported mesh) -- substitutes the
+	engine's own construction defaults (texture.h: WrapS/WrapT==Repeat,
+	MagFilter==Linear, MinFilter==LinearMipMapLinear, UploadFormat==Auto)."""
 	f.version(1)
-	f.s32(0)  # _UploadFormat
-	f.s32(0)  # _WrapS
-	f.s32(0)  # _WrapT
-	f.s32(0)  # _MinFilter
-	f.s32(0)  # _MagFilter
-	f.boolean(False)  # _LoadGrayscaleAsAlpha
+	f.s32(tex.upload_format if tex.upload_format is not None else 0)
+	f.s32(tex.wrap_s if tex.wrap_s is not None else 0)
+	f.s32(tex.wrap_t if tex.wrap_t is not None else 0)
+	f.s32(tex.min_filter if tex.min_filter is not None else 5)
+	f.s32(tex.mag_filter if tex.mag_filter is not None else 1)
+	f.boolean(bool(tex.load_grayscale_as_alpha))
 
 
 def _write_texture_file(f: _Writer, tex: Texture) -> None:
 	f.version(1)
-	_write_itexture_base(f)
+	_write_itexture_base(f, tex)
 	# See _parse_texture_file's note: lower-cased on write too, in case a
 	# Texture was built by hand rather than round-tripped through the reader.
 	f.string((tex.file_name or "").lower())
@@ -569,7 +594,7 @@ def _write_texture_file(f: _Writer, tex: Texture) -> None:
 
 def _write_texture_multi_file(f: _Writer, tex: Texture) -> None:
 	f.version(0)
-	_write_itexture_base(f)
+	_write_itexture_base(f, tex)
 	file_names = [name.lower() for name in (tex.file_names or [])]
 	f.string_vector(file_names)
 	selected = tex.selected_index
@@ -586,7 +611,7 @@ def _write_texture_multi_file(f: _Writer, tex: Texture) -> None:
 
 def _write_texture_cube(f: _Writer, tex: Texture) -> None:
 	f.version(2)
-	_write_itexture_base(f)
+	_write_itexture_base(f, tex)
 	sub_textures = tex.sub_textures or [None] * 6
 	for i in range(6):
 		_write_texture_ptr(f, sub_textures[i] if i < len(sub_textures) else None)
