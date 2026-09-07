@@ -14,7 +14,8 @@ if not SearchCommand then
 		player_name_local = "",
 		player_gender_local = 9,
 		ryzom_emotes_text_list = {},
-		command_token_list = {}
+		command_token_list = {},
+		cursor_on_empty_slot = false
 	}
 end
 
@@ -931,13 +932,20 @@ function SearchCommand:check_autocomplet_number(uiId)
 	local text_from_input = getUI(uiId)
 	local input_text = text_from_input.input_string
 	
-	local max_string_count = string.len(input_text)
-		
-	local get_last_char_from_input = tonumber(string.sub(input_text, (max_string_count), -1))
+	--The digit just typed sits directly left of the caret. Reading the end of the
+	--line instead only agrees with that while the player types at the end, so
+	--picking an entry by number did nothing once they went back into the line.
+	local cursor_pos = SearchCommand:get_input_cursor(uiId)
+	if(cursor_pos < 1)then
+		do return end
+	end
+	
+	local get_last_char_from_input = tonumber(string.sub(input_text, cursor_pos, cursor_pos))
 	if(type(get_last_char_from_input) == "number")then
 		--debug("last_input_is_a_Number: "..get_last_char_from_input)
 		
-		if(get_last_char_from_input <= #self.valid_commands_list)then
+		--entry 0 does not exist; without the lower bound it reached finish_commands as nil
+		if(get_last_char_from_input >= 1 and get_last_char_from_input <= #self.valid_commands_list)then
 			if (menu.active) then
 				--debug("try_autocomplte: "..uiId.." modal_open_list: "..modal_open_list)
 				if(modal_open_list == 1)then
@@ -1112,7 +1120,8 @@ function SearchCommand:search(uiId)
 			--necessarily the last one: the player may have gone back to edit an
 			--earlier word
 			local cursor_pos = SearchCommand:get_input_cursor(uiId)
-			local cursor_token, on_new_token = SearchCommand:get_cursor_token(self.command_token_list, cursor_pos)
+			local cursor_token, on_empty_slot = SearchCommand:get_cursor_token(self.command_token_list, cursor_pos)
+			self.cursor_on_empty_slot = on_empty_slot
 			
 			--update process_status
 			SearchCommand:update_process_list(uiId,cursor_token)
@@ -1121,11 +1130,9 @@ function SearchCommand:search(uiId)
 			SearchCommand:write_command_help_clear(uiId)
 			SearchCommand:build_command_helper(uiId)
 			
-			--the caret sits in whitespace, so there is no word to complete yet. The
-			--argument help stays on screen but the suggestion list is hidden.
-			if(on_new_token)then
-				SearchCommand:close_modal(uiId)
-			end
+			--No close here when the caret sits in whitespace: an empty slot is
+			--exactly where the player wants to see what may go in it. When there is
+			--nothing to offer, build_valid_command_list closes the popup itself.
 		end
 	else
 		--check if we found the identifier
@@ -1169,6 +1176,9 @@ end
 
 function SearchCommand:build_valid_command_list(command_input,uiId)
 	self.valid_commands_list = {}
+	--Which slot is being completed. Slot 1 is the command itself, anything above
+	--is what follows a shard prefix like /a.
+	local caret_slot = SearchCommand:read_process_status(uiId)
 	local count_found=0
 	local found_command=0
 	local input_lengh=0
@@ -1179,7 +1189,7 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
 		local command_are_allowed = 0
 		local command_display = 0
 		
-		if(#self.command_parameter_list <= 1)then
+		if(caret_slot <= 1)then
 			if(command_input == "a" or command_input == "b" or command_input == "c")then
 				if(self.commands_list[c][1] == "client" or self.commands_list[c][1] == "emotes" or self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
 					command_display = 1
@@ -1247,7 +1257,7 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
 		
 		--debug("self.commands_list[c][4]: "..self.commands_list[c][4].." self.command_self: '"..self.command_self.."' command_input: '"..command_input.."' #self.command_parameter_list: "..#self.command_parameter_list)
 		
-		if(#self.command_parameter_list >= 2)then
+		if(caret_slot >= 2)then
 			if(self.command_self == "a" or self.command_self == "b" or self.command_self == "c")then
 				if(string.lower(command_input) == "a" or string.lower(command_input) == "b" or string.lower(command_input) == "c")then
 					if(self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
@@ -1260,7 +1270,13 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
 		--debug("command_are_allowed: "..command_are_allowed.." command_display: "..command_display)
 		
 		if(command_are_allowed == 1 and command_display == 1)then
-			if(command_input ~= "")then
+			if(command_input == "")then
+				--The caret sits on a slot with nothing typed in it yet, so there is no
+				--prefix to match: every command allowed here is a candidate. Without
+				--this the list stayed empty and the popup was closed again below.
+				table.insert(self.valid_commands_list,self.commands_list[c][4])
+				count_found=count_found+1
+			else
 				if(string.lower(self.commands_list[c][4]) == string.lower(command_input))then
 					found_command=c
 					found_command_name=self.commands_list[c][4]
@@ -1437,22 +1453,26 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 	
 	command_to_show_argument_new = command_to_show_argument
 	
+	--Same caret rule as find_argument: only look past the prefix once the caret
+	--has actually moved past the sub-command slot.
+	local caret_slot = SearchCommand:read_process_status(uiId)
+	
 	if(command_to_show_argument == "a")then
-		if(#self.command_parameter_list >= 2)then
+		if(caret_slot > 2)then
 			command_to_show_argument_new=self.command_parameter_list[2]
 			special_offset=1
 		end
 	end
 	
 	if(command_to_show_argument == "b")then
-		if(#self.command_parameter_list >= 2)then
+		if(caret_slot > 2)then
 			command_to_show_argument_new=self.command_parameter_list[2]
 			special_offset=1
 		end
 	end
 	
 	if(command_to_show_argument == "c")then
-		if(#self.command_parameter_list >= 3)then
+		if(caret_slot > 3)then
 			command_to_show_argument_new=self.command_parameter_list[3]
 			special_offset=2
 		end
@@ -1516,6 +1536,17 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 			current_args=max_args - 1
 		end
 		
+		--On an empty slot the token count is misleading: the tokens to the right of
+		--the caret would be counted as arguments already given, and their values
+		--echoed in place of the placeholder for the slot being filled. Count only
+		--the slots the caret has passed.
+		if(self.cursor_on_empty_slot)then
+			current_args = caret_slot - 2 - special_offset
+			if(current_args < 0)then
+				current_args = 0
+			end
+		end
+		
 		for ac = 1, max_arguments do
 			if(ac > current_args)then
 				for pc = 1, #self.commands_list[command_index][5+ac] do
@@ -1528,7 +1559,10 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 					end
 				end
 			else
-				argument_help=argument_help.." "..self.command_parameter_list[ac+1+special_offset]
+				local given = self.command_parameter_list[ac+1+special_offset]
+				if(given ~= nil)then
+					argument_help=argument_help.." "..given
+				end
 			end
 			
 		end
@@ -1537,24 +1571,26 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 			diff=current_args-max_arguments
 			
 			for ma = 1, diff do
-				if(self.command_self == "a")then
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+2+ma]
-				elseif(self.command_self == "b")then
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+2+ma]
-				elseif(self.command_self == "c")then
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+3+ma]
-				else
-					argument_help=argument_help.." "..self.command_parameter_list[max_arguments+1+ma]
+				--Surplus values live in the slots right after the last documented
+				--argument, same formula as the loop above. The nil guard matters
+				--because current_args follows the caret while the list does not:
+				--the caret can sit on an early slot with fewer tokens behind it.
+				local surplus = self.command_parameter_list[max_arguments + ma + 1 + special_offset]
+				if(surplus ~= nil)then
+					argument_help=argument_help.." "..surplus
 				end
 			end
 			argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
 		end
 		
-		if(self.command_self == "a" and #self.command_parameter_list >= 2)then
+		--Echo only the prefix the caret has actually moved past. Keyed on the
+		--caret slot, not the token count, so an empty slot does not echo the token
+		--that follows it.
+		if(self.command_self == "a" and caret_slot > 2)then
 			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
-		elseif(self.command_self == "b" and #self.command_parameter_list >= 2)then
+		elseif(self.command_self == "b" and caret_slot > 2)then
 			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
-		elseif(self.command_self == "c" and #self.command_parameter_list >= 3)then
+		elseif(self.command_self == "c" and caret_slot > 3)then
 			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2].." "..self.command_parameter_list[3]..""..argument_help)
 		else
 			SearchCommand:write_command_help(uiId,"/"..self.commands_list[command_index][4]..""..argument_help)
@@ -1569,22 +1605,28 @@ function SearchCommand:find_argument(command,uiId)
 	local current_parm = 0
 	local max_command_args = 0
 	
+	--The a/b/c prefixes carry the real command in the next token. Decide by where
+	--the caret is, not by how many tokens exist: when the caret sits on the
+	--sub-command slot itself, that slot is what we are completing, and a token
+	--further right must not be mistaken for it.
+	local caret_slot = SearchCommand:read_process_status(uiId)
+	
 	if(command == "a")then
-		if(#self.command_parameter_list > 2)then
+		if(caret_slot > 2)then
 			command=self.command_parameter_list[2]
 			special_offset=2
 		end
 	end
 	
 	if(command == "b")then
-		if(#self.command_parameter_list > 2)then
+		if(caret_slot > 2)then
 			command=self.command_parameter_list[2]
 			special_offset=2
 		end
 	end
 	
 	if(command == "c")then
-		if(#self.command_parameter_list > 3)then
+		if(caret_slot > 3)then
 			command=self.command_parameter_list[3]
 			special_offset=3
 		end
@@ -1683,9 +1725,13 @@ function SearchCommand:build_command_helper(uiId)
 		self.player_list_already_filled=0
 	else
 		--debug("process_args")
-		--the caret can sit on a new and still empty token, so there is no text to
-		--match on yet
-		local cursor_text = self.command_parameter_list[process_status] or ""
+		--On an empty slot there is no text to match on. Reading the list by index
+		--would pick up the NEXT token instead, because an empty slot has no entry
+		--of its own in it.
+		local cursor_text = ""
+		if(not self.cursor_on_empty_slot)then
+			cursor_text = self.command_parameter_list[process_status] or ""
+		end
 		argu_name = SearchCommand:find_argument(self.command_self,uiId)
 		--debug("argu_name: "..argu_name)
 		
@@ -1947,7 +1993,18 @@ function SearchCommand:finish_commands(command_name,uiId)
 	for t = 1, #self.command_token_list do
 		self.command_parameter_list[t] = self.command_token_list[t].text
 	end
-	local target_token = self.command_token_list[process_status]
+	
+	--Resolve the caret against those fresh tokens. An empty slot owns no entry in
+	--the list, so indexing it by slot would hand back the token that follows and
+	--we would overwrite that instead of filling the gap.
+	local caret_pos = SearchCommand:get_input_cursor(uiId)
+	local caret_slot, on_empty_slot = SearchCommand:get_cursor_token(self.command_token_list, caret_pos)
+	process_status = caret_slot
+	
+	local target_token = nil
+	if(not on_empty_slot)then
+		target_token = self.command_token_list[caret_slot]
+	end
 	
 	--debug("process_status: "..process_status)
 	
@@ -1968,15 +2025,18 @@ function SearchCommand:finish_commands(command_name,uiId)
 		head = string.sub(input_text, 1, target_token.first - 1)
 		tail = string.sub(input_text, target_token.last + 1)
 	else
-		--completing a new token that has no text yet, so insert at the caret
-		local cursor_pos = SearchCommand:get_input_cursor(uiId)
-		head = string.sub(input_text, 1, cursor_pos)
-		tail = string.sub(input_text, cursor_pos + 1)
+		--filling an empty slot: splice in at the caret, leaving both sides alone
+		head = string.sub(input_text, 1, caret_pos)
+		tail = string.sub(input_text, caret_pos + 1)
 	end
 	
 	--keep the parameter list in step with what we just inserted, the argument
 	--count below is derived from it
-	self.command_parameter_list[process_status] = insert_text
+	if(on_empty_slot)then
+		table.insert(self.command_parameter_list, process_status, insert_text)
+	else
+		self.command_parameter_list[process_status] = insert_text
+	end
 	
 	if(self.command_parameter_list[1] == "a" and process_status > 1)then
 		max_aruments = SearchCommand:get_command_argument_count(self.command_parameter_list[2])
@@ -2017,4 +2077,4 @@ SearchCommand:pars_all_emotes()
 --##############END Pars now all Emotes and add it to command table
 
 -- VERSION --
-FILE_SEARCH_COMMAND_VERSION = 123
+FILE_SEARCH_COMMAND_VERSION = 125
