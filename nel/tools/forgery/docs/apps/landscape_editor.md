@@ -128,7 +128,7 @@ derniers sont tous dérivables à coût quasi nul depuis les seules positions
 arithmétique sur `n_s`/`n_t` ; une future normale : différence de positions
 voisines ; un futur UV de texturage : `i/n_s`, `j/n_t`). En ne bakant que la
 seule partie réellement coûteuse à produire, aucune évolution du rendu
-(lighting étape 9, texturage étape 11) n'invalidera jamais ce cache.
+(lighting étape 10, texturage étape 12) n'invalidera jamais ce cache.
 
 - `zone_cache.write_zone_cache(zone_name, source_path, data)` /
   `read_zone_cache(zone_name, source_path)` : un fichier pickle par zone sous
@@ -207,10 +207,22 @@ Trois ajustements demandés par Nuno en testant un continent entier réel :
 
 **Zoom caméra** : `OrbitCamera.max_distance` (2000.0 par défaut, partagé
 avec Patina) ne permettait pas de reculer assez pour voir un continent
-entier -- multiplié par 3 (`self.orbit_camera.max_distance *= 3.0`) dans
-`LandscapeEditorApp.__init__`, spécifique à Atyscape (ne touche pas
-`camera.py` ni Patina). Ça débloque aussi l'auto-cadrage après chargement
-d'un continent (`frame()` clampait déjà à `max_distance`).
+entier -- multiplié par 3 puis par 6 (`self.orbit_camera.max_distance *=
+6.0`, 12000.0, 3x ayant à son tour été jugé encore insuffisant le
+2026-09-08) dans `LandscapeEditorApp.__init__`, spécifique à Atyscape (ne
+touche pas `camera.py` ni Patina). Ça débloque aussi l'auto-cadrage après
+chargement d'un continent (`frame()` clampait déjà à `max_distance`).
+
+**Near/far du lens** : `ForgeryApp.__init__` (`app.py`) fixe un near/far de
+`(0.02, 20000.0)`, un ratio 1 000 000:1 pensé pour l'inspection rapprochée
+de détails de shape par Patina -- Atyscape ne s'approche jamais autant
+(zones de 160 unités, orbite démarrant à 200). Ce ratio coûtait de la
+précision de depth buffer : la géométrie plate à Z=0 (le quadrillage de
+zone) subissait du z-fighting contre le terrain traversant Z=0, avec un
+rendu différent selon la distance caméra (trouvé par Nuno 2026-09-08, un
+palier de zoom suffisait à changer le résultat). Réglé en resserrant à
+`self.camLens.set_near_far(1.0, 20000.0)` (ratio 20 000:1), confirmé par
+Nuno.
 
 **Dégradé d'élévation ancré à Z=0** (`zone_geometry._elevation_colors_uint8()`) :
 la première version (un dégradé marron->vert normalisé sur le min/max Z de
@@ -230,8 +242,23 @@ la même plage de marron/vert clairs.
 -- `region_loader.py` l'importe maintenant depuis `zone_geometry`), bornes
 calées au multiple de 160 le plus proche (floor/ceil) pour que chaque zone
 affichée ait son contour complet. Rebâti dans `_set_loaded_zones()` à chaque
-changement de zones chargées ; checkbox "Show zone grid" dans le panel
-(visible par défaut). Toujours affiché par-dessus le terrain quel que soit
-son relief : `set_depth_test(False)`/`set_depth_write(False)` +
-`set_bin("fixed", 100)`, plat à Z=0 -- une grille de repère, pas un vrai
-maillage à suivre le terrain.
+changement de zones chargées ; toggle icône dans la barre flottante
+bas-gauche de la vue 3D (`_draw_viewport_toggles()`, visible par défaut --
+migré depuis une checkbox du panel le 2026-09-08, même pattern que
+`object_editor.py`/Patina : `_icon_button()` réutilisé tel quel depuis
+`object_editor_mixins/ui_helpers.py`, et le même mécanisme
+`_viewport_toggle_size` de mesure sur la frame précédente pour positionner
+la barre exactement, `large_icon_font` inclus). Toujours affiché par-dessus
+le terrain quel que soit son relief : `set_depth_test(False)`/
+`set_depth_write(False)` + `set_bin("fixed", 100)`, plat à Z=0 -- une grille
+de repère, pas un vrai maillage à suivre le terrain.
+
+**Tentative abandonnée -- plan d'eau approximatif** : une surface bleue
+semi-transparente à Z=0 (un quad par zone) a été essayée le 2026-09-08 comme
+raccourci visuel en attendant la vraie détection d'eau via `.ig`/
+`CWaterShape` (étape 9). Abandonnée : elle lisait comme "eau" tout relief
+simplement sous le niveau de la mer, pas seulement les vrais lacs, couvrant
+en bleu la majorité d'un continent réel. Retirée entièrement
+(`build_water_plane_geom()`/`_WATER_PLANE_COLOR` dans `zone_geometry.py`,
+état/toggle dans `landscape_editor.py`) ; seule la détection réelle par
+`.ig` reste au programme.
