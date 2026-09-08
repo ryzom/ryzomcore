@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-08 — 🐛 Fix crash from uncommitted repository clone-button code, Forgery 4.0.2
+
+`11724de87` ("Add viewport background color swatches, Forgery 4.0.0") pushed
+`object_editor.py`'s `draw_panel()` calling `self._poll_clone_target_dialog()`
+(and the matching `_clone_target_dialog`/`_repository_paths_dialog_repo`
+field init in `__init__`), but the method itself -- part of a "Clone repo"
+button added to Settings > Paths next to each `pynel.repository_paths` entry
+(`_poll_clone_target_dialog`/`_draw_clone_status` in `settings_dialogs.py`,
+dated 2026-09-07 in `docs/apps/object_editor.md`) -- had only ever existed
+uncommitted in a local working tree, never actually committed by whichever
+session wrote it. The published wheel therefore crashed Patina on launch
+(`AttributeError: 'ObjectEditorApp' object has no attribute
+'_poll_clone_target_dialog'`) for anyone installing via ryztart. Fixed by
+committing the already-written, self-consistent method definitions
+(`_poll_clone_target_dialog`, `_draw_clone_status`, plus the Clone icon
+button in `_draw_repository_paths_settings` -- disabled once the repo folder
+already exists) that the call site expected all along.
+
 ## 2026-09-08 — 🙈 Hide Atyscape from ryztart, Forgery 4.0.1
 
 `landscape_editor.py`'s `APP_INFO` renamed to `_APP_INFO_HIDDEN` so
