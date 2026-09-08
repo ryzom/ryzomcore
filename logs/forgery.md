@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-09-08 — 🐛 Fix viewport toggle alignment and zoom z-fighting, Forgery 3.8.4
+
+`project-todos/forgery/landscape_editor.md` -- an approximate water-plane
+overlay (flat blue quad per zone at Z=0, meant as a placeholder for real
+`.ig`/`CWaterShape` water detection) was tried and abandoned same-day: it
+read as "water" over any terrain merely dipping below sea level, not just
+real lakes, covering most of a real continent in blue. Removed entirely
+(`zone_geometry.py`'s `build_water_plane_geom()`/`_WATER_PLANE_COLOR`,
+`landscape_editor.py`'s water state/toggle) -- the corresponding chantier
+step was dropped and the following steps renumbered back down.
+
+Two real fixes came out of that detour and were kept:
+
+- The "Show zone grid" toggle moved from a panel checkbox to a floating
+  icon-button bar bottom-left of the 3D viewport (`_draw_viewport_toggles()`
+  in `landscape_editor.py`), reusing `object_editor.py`'s own `_icon_button()`
+  (`ui_helpers.py`, already designed with zero dependency on
+  `object_editor.py` itself for exactly this kind of cross-app reuse). First
+  attempt used `imgui.get_frame_height()` for vertical positioning and came
+  out misaligned; matched byte-for-byte against `object_editor.py`'s own
+  `_draw_viewport_toggles()` instead -- same `_viewport_toggle_size`
+  self-measurement trick (true bar size only known after the window draws,
+  so each frame positions off the previous frame's captured size) and same
+  `large_icon_font`.
+- `LandscapeEditorApp.__init__` now overrides `ForgeryApp`'s shared
+  `camLens.set_near_far(0.02, 20000.0)` (a 1,000,000:1 ratio meant for
+  Patina's own close-up shape inspection) to `(1.0, 20000.0)`: flat Z=0
+  overlay geometry (the zone grid, and the water plane while it existed)
+  was z-fighting against terrain crossing Z=0, rendering differently
+  depending on camera distance -- the near/far ratio was destroying depth
+  buffer precision at range. Confirmed fixed by Nuno.
+
+Also bumped `OrbitCamera.max_distance`'s multiplier from 3x to 6x (12000.0,
+still under the 20000.0 far clip) -- 3x still weren't enough to zoom out
+comfortably on a whole continent.
+
 ## 2026-09-07 — ✨ Add landscape_editor app scaffolding, Forgery 3.5.0
 
 New Forgery tool app, `ryzom_forgery/apps/landscape_editor.py`

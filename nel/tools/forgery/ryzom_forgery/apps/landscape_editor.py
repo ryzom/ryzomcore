@@ -3,7 +3,7 @@ same naming convention as object_editor.py/"Patina"): 3D landscape
 composition/build tool, replacing the current 2D bitmap-tile Ligo editor.
 
 See project-todos/forgery/landscape_editor.md for the planned progressive
-rendering steps -- step 7 (detecting which of .zone/.zonew/.zonel already
+rendering steps -- step 9 (detecting which of .zone/.zonew/.zonel already
 exist for a given zone, generating the missing ones on demand) is the
 current one.
 """
@@ -11,12 +11,13 @@ current one.
 import threading
 from pathlib import Path
 
-from imgui_bundle import imgui
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 
 from pynel.ryzom_bnp import BnpError
 from pynel.ryzom_zone import parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
+from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button, _VIEWPORT_TOGGLE_MARGIN_PX
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import live_data
@@ -75,8 +76,21 @@ class LandscapeEditorApp(ForgeryApp):
 		# OrbitCamera's own default max_distance (2000.0) doesn't reach a
 		# whole continent (dozens of 160-unit zones across) -- both manual
 		# zoom-out and the auto-frame after a continent load (frame() clamps
-		# to max_distance) need much more room. 3x per Nuno, 2026-09-08.
-		self.orbit_camera.max_distance *= 3.0
+		# to max_distance) need much more room. 3x wasn't enough either
+		# (Nuno, 2026-09-08 -- "recule encore le zoom"), raised to 6x
+		# (12000.0), still comfortably under the 20000.0 far clip below.
+		self.orbit_camera.max_distance *= 6.0
+
+		# ForgeryApp.__init__ (app.py) sets a near/far of (0.02, 20000.0) --
+		# a 1,000,000:1 ratio meant for Patina's own close-up inspection of
+		# tiny shape details. Atyscape never gets that close (zones are 160
+		# units wide, orbit starts at 200), so that ratio only cost depth-
+		# buffer precision here: flat Z=0 overlay geometry (e.g. the zone
+		# grid) z-fought against terrain crossing Z=0, differently depending
+		# on camera distance -- found by Nuno 2026-09-08 (rendering changed
+		# one zoom level apart), confirmed fixed by raising near to 1.0
+		# (keeping the same far), which drops the ratio to 20,000:1.
+		self.camLens.set_near_far(1.0, 20000.0)
 
 		# Continent selector state (project-todos/forgery/
 		# landscape_editor__continent-selector.md steps 3-4). cont_locs/
@@ -111,9 +125,16 @@ class LandscapeEditorApp(ForgeryApp):
 		# landscape_editor.md step 7) -- rebuilt in _set_loaded_zones()
 		# alongside the terrain itself, shown/hidden per self._grid_visible
 		# (same show()/hide() pattern as object_editor.py's own floor grid
-		# toggle). Visible by default.
+		# toggle). Visible by default. Toggled from the viewport icon bar
+		# (_draw_viewport_toggles()), not a panel checkbox.
 		self._grid_np = self.render.attach_new_node("zone-grid-placeholder")
 		self._grid_visible = True
+		# Same size-tracking trick as object_editor.py's own
+		# _viewport_toggle_size -- the bar's true size isn't known until
+		# after the first imgui_ctx.begin() below, so _draw_viewport_toggles()
+		# positions itself off of last frame's captured size, seeded here
+		# with a small placeholder for the very first frame.
+		self._viewport_toggle_size = (10.0, 10.0)
 
 		# Whole-continent loading state (project-todos/forgery/
 		# landscape_editor__zone_disk_cache.md steps 5-6) -- None while idle,
@@ -305,10 +326,44 @@ class LandscapeEditorApp(ForgeryApp):
 			return
 		self._load_continent()
 
+	def _toggle_grid(self):
+		self._grid_visible = not self._grid_visible
+		(self._grid_np.show if self._grid_visible else self._grid_np.hide)()
+
+	def _draw_viewport_toggles(self):
+		"""Small floating icon-button bar bottom-left of the 3D viewport
+		(zone grid) -- EXACT same positioning/sizing as object_editor.py's
+		own _draw_viewport_toggles() (viewport_transform.py): same
+		explorer_width/sysinfo_height/_VIEWPORT_TOGGLE_MARGIN_PX-based
+		position, same _viewport_toggle_size self-measurement trick (true
+		size only known after the window is drawn, so this frame positions
+		off last frame's captured size), same large_icon_font. Found
+		misaligned when it computed y off imgui.get_frame_height() instead
+		of the real captured window height -- Nuno 2026-09-08."""
+		display_size = imgui.get_io().display_size
+		win_h = display_size.y
+		if win_h <= 0:
+			return
+
+		width, height = self._viewport_toggle_size
+		x = self.explorer_width + _VIEWPORT_TOGGLE_MARGIN_PX
+		y = win_h - self.sysinfo_height - _VIEWPORT_TOGGLE_MARGIN_PX - height
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		large_font = (self.large_icon_font, self.large_icon_font_size) if self.large_icon_font is not None else None
+		with imgui_ctx.begin("##viewport-toggles", flags=flags):
+			if _icon_button(fa_icons.ICON_FA_TABLE, "Show zone grid", self._grid_visible, square=True,
+			                large_font=large_font):
+				self._toggle_grid()
+			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
 	def panel_title(self):
 		return "Landscape Editor"
 
 	def draw_panel(self):
+		self._draw_viewport_toggles()
 		self._ensure_continent_locations_loaded()
 
 		if self._cont_locs_error is not None:
@@ -359,10 +414,6 @@ class LandscapeEditorApp(ForgeryApp):
 				fraction = processed / total if total else 0.0
 				overlay = f"{processed}/{total} zones" if total else "Scanning..."
 				imgui.progress_bar(fraction, overlay=overlay)
-
-		changed, self._grid_visible = imgui.checkbox("Show zone grid", self._grid_visible)
-		if changed:
-			(self._grid_np.show if self._grid_visible else self._grid_np.hide)()
 
 		if self._zone_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
