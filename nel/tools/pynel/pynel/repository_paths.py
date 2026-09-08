@@ -35,6 +35,7 @@ Usage:
 
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import Dict, Optional
@@ -106,3 +107,75 @@ def is_valid(repo_name: str) -> bool:
 	enough to not just trust a configured string blindly)."""
 	path = get(repo_name)
 	return path is not None and path.is_dir()
+
+
+# Official GitLab HTTPS URLs for Ryzom repositories
+_REPO_URLS = {
+	"ryzom-core": "https://gitlab.com/ryzom/ryzom-core.git",
+	"ryzom-data": "https://gitlab.com/ryzom/ryzom-data.git",
+	"ryzom-private-data": "https://gitlab.com/ryzom/ryzom-private-data.git",
+	"ryzom-docker": "https://gitlab.com/ryzom/ryzom-docker.git",
+}
+
+
+def get_repo_url(repo_name: str) -> Optional[str]:
+	"""Returns the official Git URL for a repository, or None if unknown."""
+	return _REPO_URLS.get(repo_name)
+
+
+def is_git_available() -> bool:
+	"""Checks if git executable is available in PATH."""
+	try:
+		subprocess.run(["git", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+		return True
+	except (subprocess.CalledProcessError, FileNotFoundError):
+		return False
+
+
+def clone_repo(repo_name: str, target_path: str) -> str:
+	"""Clone a Ryzom repository to the specified target path.
+	
+	Args:
+		repo_name: One of REPOSITORIES (ryzom-core, ryzom-data, etc.)
+		target_path: Full path to the target directory (will be created)
+	
+	Returns:
+		A status message: "success" on success, or an error string on failure.
+	
+	Raises:
+		ValueError: If repo_name is not in REPOSITORIES.
+		RuntimeError: If git is not available.
+	"""
+	if repo_name not in REPOSITORIES:
+		raise ValueError(f"unknown repository {repo_name!r}, expected one of {REPOSITORIES}")
+	
+	if not is_git_available():
+		return "error: Git is not installed or not available in PATH"
+	
+	target = Path(target_path)
+	
+	# Check if target already exists
+	if target.exists():
+		return f"error: Target directory already exists: {target_path}"
+	
+	# Get the repository URL
+	url = get_repo_url(repo_name)
+	if url is None:
+		return f"error: Unknown repository: {repo_name}"
+	
+	# Clone the repository
+	try:
+		process = subprocess.run(
+			["git", "clone", "--recursive", url, target_path],
+			stdout=subprocess.PIPE,
+			stderr=subprocess.PIPE,
+			text=True
+		)
+		if process.returncode == 0:
+			set_path(repo_name, target_path)
+			return "success"
+		else:
+			error_msg = process.stderr or "Unknown error"
+			return f"error: Clone failed: {error_msg}"
+	except Exception as e:
+		return f"error: Clone error: {str(e)}"

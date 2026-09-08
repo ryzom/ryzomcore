@@ -702,3 +702,23 @@ dedicated doc despite being the most complex parser in the project (every other
 format module has one, e.g. `pacs_format.md`, `packed_sheets.md`); this covers the
 container structure, per-class read/write coverage, the `CMeshMRMSkinned` compacted
 vertex format, and the `CShadowSkin` explanation above in one place.
+
+## 2026-09-07 — ✨ Add clone_repo() for repository checkout
+
+Added `clone_repo(repo_name, target_path)` to `pynel.repository_paths` to allow
+cloning Ryzom repositories (ryzom-core, ryzom-data, ryzom-private-data, ryzom-docker)
+directly from code. Returns a status string ("success" or "error: <reason>") and
+auto-configures the path in `repository_paths.json` on success.
+
+New functions:
+- `get_repo_url(repo_name)`: returns the official GitLab HTTPS URL for a repo
+- `is_git_available()`: checks if git is installed and in PATH
+- `clone_repo(repo_name, target_path)`: clones the repo, returns status string
+
+Uses hardcoded GitLab HTTPS URLs:
+- ryzom-core: https://gitlab.com/ryzom/ryzom-core.git
+- ryzom-data: https://gitlab.com/ryzom/ryzom-data.git
+- ryzom-private-data: https://gitlab.com/ryzom/ryzom-private-data.git
+- ryzom-docker: https://gitlab.com/ryzom/ryzom-docker.git
+
+Used by Forgery's Settings > Paths tab (see `forgery-object-editor.md` 2026-09-07).
