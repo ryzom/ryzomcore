@@ -120,3 +120,42 @@ delegates to the same function, so it benefits too with no separate code.
 Validated by Nuno on a real Ryzom Live install: a 282-zone continent loads
 in ~2.2s total once its cache is warm ("c'est bcp plus rapide"), down from
 what would have been well over 20s at the pre-cache per-zone cost.
+
+## 2026-09-08 — ✨ Fix camera zoom range, anchor elevation gradient at sea level, add zone grid overlay, Forgery 3.8.3
+
+`landscape_editor.md` step 7 closed. Three fixes found by Nuno testing a
+whole real continent for the first time (previous step's work).
+
+**Camera zoom**: `OrbitCamera.max_distance` (2000.0, the shared default used
+by every Forgery app) didn't reach far enough to see a whole continent.
+Multiplied by 3 in `LandscapeEditorApp.__init__` only -- doesn't touch
+`camera.py`'s shared default, so Patina/object_editor is unaffected. Also
+fixes auto-framing after a continent load, which was silently clamped to
+the same `max_distance` by `OrbitCamera.frame()`.
+
+**Elevation gradient anchored at sea level**: the first version (single
+min-max-normalized brown->green gradient over the whole loaded set's Z
+range) washed out badly on a real continent -- a handful of very deep zones
+(underwater/caves) dragged the range's minimum way down, so all
+normal-depth terrain ended up reading as nearly the same shade near the
+"high" end. Nuno's fix: anchor the gradient at world Z=0 (where the water
+plane sits) instead of at the loaded set's own min/max. `zone_geometry.
+_elevation_colors_uint8()` now blends two independent segments: dark red at
+the lowest loaded point -> brown at Z=0 -> green at the highest loaded
+point (`_DEEP_COLOR`/`_SEA_LEVEL_COLOR`/`_PEAK_COLOR`). Depth of the deepest
+zone no longer affects how normal-depth terrain reads.
+
+**Zone grid overlay**: `zone_geometry.build_zone_grid_geom()` draws a
+`LineSegs` wireframe on the 160-unit (`ZONE_CELL_SIZE`) zone-cell
+boundaries covering whatever's loaded, snapped outward to the nearest real
+cell boundary so every zone gets its full outline. `ZONE_CELL_SIZE` moved
+from `region_loader.py` to `zone_geometry.py` (the lower-level, dependency-free
+module) to avoid a circular import -- `region_loader.py` now imports it from
+there. Rebuilt in `_set_loaded_zones()` alongside the terrain itself, a
+"Show zone grid" checkbox in the panel (on by default). Drawn with
+`set_depth_test(False)`/`set_depth_write(False)` and forced into the
+`"fixed"` render bin so it always shows on top of the terrain regardless of
+relief -- it's a flat reference overlay at Z=0, not real geometry meant to
+be occluded.
+
+Validated by Nuno on a real continent.

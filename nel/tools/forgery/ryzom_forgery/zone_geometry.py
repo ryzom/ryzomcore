@@ -6,12 +6,20 @@ Like apps/object_editor_mixins/geometry_helpers.py, has ZERO dependency on
 any app module.
 """
 
+from math import ceil, floor
+
 import numpy as np
-from panda3d.core import Geom, GeomEnums, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat
+from panda3d.core import Geom, GeomEnums, GeomNode, GeomTriangles, GeomVertexData, GeomVertexFormat, LineSegs
 
 from pynel.ryzom_zone import unpack_vertex
 
 from .zone_cache import PatchPositions, ZoneCacheData
+
+# World-unit width/depth of one zone cell (region_loader.py's own zone-name
+# grid decoding depends on this too, imports it from here rather than
+# redefining it -- avoids a circular import, since region_loader.py already
+# imports zone_to_cache_data() from this module).
+ZONE_CELL_SIZE = 160.0
 
 # Above this many vertices in a single zone, a uint16 triangle index would
 # overflow -- switch to uint32 (see build_zone_geom_from_cache()). Real zones
@@ -20,13 +28,20 @@ from .zone_cache import PatchPositions, ZoneCacheData
 # it's checked rather than assumed.
 _MAX_UINT16_VERTICES = 65535
 
-# Elevation gradient (low -> high): dark green -> pale yellow-green, a single
-# hue so relief reads clearly at a glance (real tile texturing/lighting is
-# out of scope until later steps -- project-todos/forgery/landscape_editor.md
-# step 5 is the dedicated "Rendu par élévation" step this pre-empts for a
-# nicer-looking view, per Nuno, 2026-09-07).
-_LOW_COLOR = (0.05, 0.2, 0.05, 1.0)
-_HIGH_COLOR = (0.85, 0.95, 0.35, 1.0)
+# Elevation gradient, anchored at Z=0 (world-space sea level, real tile
+# texturing/lighting out of scope until later steps -- project-todos/
+# forgery/landscape_editor.md step 5 is the dedicated "Rendu par élévation"
+# step this pre-empts for a nicer-looking view): dark red at the lowest
+# point loaded -> brown at sea level -> green at the highest point loaded.
+# A single min-max-normalized gradient (brown->green only, tried first) got
+# washed out by a handful of very deep zones (underwater/caves) dragging the
+# whole range down -- normal-depth terrain then all read as one flat shade
+# near the "high" end. Anchoring the brown midpoint at the real Z=0 (per
+# Nuno: that's where the water plane sits) fixes that regardless of how deep
+# the deepest loaded zone is. Found/decided 2026-09-08, Nuno.
+_DEEP_COLOR = (0.45, 0.08, 0.08, 1.0)
+_SEA_LEVEL_COLOR = (0.36, 0.25, 0.13, 1.0)
+_PEAK_COLOR = (0.15, 0.55, 0.15, 1.0)
 
 # "grille alignée sur OrderS x OrderT (max 16x16 tuiles/patch)" (project-todos/
 # forgery/landscape_editor.md's scope decision) -- OrderS/OrderT themselves
@@ -38,21 +53,28 @@ _MIN_GRID_SEGMENTS = 1
 
 
 def _elevation_colors_uint8(z, min_z, max_z):
-	"""Elevation gradient (green, low -> high), vectorized: `z` is a numpy
-	array (one zone's worth of vertex Z's), returns an (N, 4) uint8 array
-	ready to write
-	straight into a v3c4 GeomVertexData's "color" column. Truncates (not
-	rounds) `component * 255.0`, matching GeomVertexWriter.add_data4()'s own
-	float->uint8 packing exactly (verified byte-for-bit, see
-	build_zone_geom_from_cache())."""
-	span = max_z - min_z
-	if span <= 0.0:
-		t = np.full_like(z, 0.5)
-	else:
-		t = np.clip((z - min_z) / span, 0.0, 1.0)
-	low = np.array(_LOW_COLOR)
-	high = np.array(_HIGH_COLOR)
-	colors = low + (high - low) * t[:, None]
+	"""Elevation gradient anchored at Z=0 (see the module-level comment above
+	_DEEP_COLOR), vectorized: `z` is a numpy array (one zone's -- or one
+	whole loaded set's -- worth of vertex Z's), `min_z`/`max_z` the lowest/
+	highest Z across whatever's being colored together. Returns an (N, 4)
+	uint8 array ready to write straight into a v3c4 GeomVertexData's "color"
+	column. Truncates (not rounds) `component * 255.0`, matching
+	GeomVertexWriter.add_data4()'s own float->uint8 packing exactly (verified
+	byte-for-bit, see build_zone_geom_from_cache())."""
+	z = np.asarray(z, dtype=np.float64)
+	deep = np.array(_DEEP_COLOR)
+	sea_level = np.array(_SEA_LEVEL_COLOR)
+	peak = np.array(_PEAK_COLOR)
+
+	# z >= 0: sea_level -> peak, t=0 at Z=0, t=1 at max_z (or beyond, clamped).
+	t_above = np.clip(z / max_z, 0.0, 1.0) if max_z > 0.0 else np.zeros_like(z)
+	above_colors = sea_level + (peak - sea_level) * t_above[:, None]
+
+	# z < 0: deep -> sea_level, t=0 at min_z (the deepest point), t=1 at Z=0.
+	t_below = np.clip((z - min_z) / -min_z, 0.0, 1.0) if min_z < 0.0 else np.ones_like(z)
+	below_colors = deep + (sea_level - deep) * t_below[:, None]
+
+	colors = np.where((z >= 0.0)[:, None], above_colors, below_colors)
 	return (colors * 255.0).astype(np.uint8)
 
 
@@ -165,8 +187,8 @@ def build_zone_tessellated_geom(zone) -> GeomNode:
 	follows the true curved surface, fixing the "sunken quad" gaps a flat
 	4-corner approximation showed on steep relief.
 
-	Colored per vertex by elevation (green gradient, see
-	_elevation_colors_uint8()) -- see build_zone_tessellated_geom's callers for the
+	Colored per vertex by elevation (red -> brown -> green gradient anchored
+	at Z=0, see _elevation_colors_uint8()) -- see build_zone_tessellated_geom's callers for the
 	"2D projected" top-down view, which reuses this exact mesh. Just wraps
 	zone_to_cache_data() and delegates the actual GeomNode construction to
 	build_zone_geom_from_cache(), so a freshly-computed zone and one rebuilt
@@ -174,7 +196,7 @@ def build_zone_tessellated_geom(zone) -> GeomNode:
 	return build_zone_geom_from_cache(zone_to_cache_data(zone))
 
 
-def build_zone_geom_from_cache(cache_data: ZoneCacheData) -> GeomNode:
+def build_zone_geom_from_cache(cache_data: ZoneCacheData, min_z: float = None, max_z: float = None) -> GeomNode:
 	"""Same output as build_zone_tessellated_geom() (color by elevation,
 	same triangle winding) but rebuilt straight from already-tessellated
 	positions (zone_cache.py, project-todos/forgery/
@@ -184,6 +206,15 @@ def build_zone_geom_from_cache(cache_data: ZoneCacheData) -> GeomNode:
 	rendering changes (normals for lighting, UV for texturing) never
 	invalidate the disk cache.
 
+	`min_z`/`max_z` set the elevation gradient's Z range -- default to this
+	one zone's own bounding box (single-zone Explorer selection, no wider
+	context to compare against), but a whole-continent load passes the same
+	continent-wide range to every zone (landscape_editor.py's
+	_set_loaded_zones()) so the color reads as one continuous landscape
+	instead of every zone re-normalizing its own tiny patch of relief to the
+	same green range -- a "patchwork" look at zone boundaries, found by Nuno
+	2026-09-08 testing a real continent.
+
 	Writes vertex and index data in bulk (numpy, one `set_data()` call per
 	array) instead of one GeomVertexWriter/GeomPrimitive call per vertex/
 	triangle -- found 2026-09-08 (Nuno) that those per-call Python/C++
@@ -191,8 +222,10 @@ def build_zone_geom_from_cache(cache_data: ZoneCacheData) -> GeomNode:
 	remaining bottleneck once the disk cache removed bnp read/parsing/Bezier
 	eval (project-todos/forgery/landscape_editor__zone_disk_cache.md step
 	7)."""
-	min_z = cache_data.bb_center[2] - cache_data.bb_half_size[2]
-	max_z = cache_data.bb_center[2] + cache_data.bb_half_size[2]
+	if min_z is None:
+		min_z = cache_data.bb_center[2] - cache_data.bb_half_size[2]
+	if max_z is None:
+		max_z = cache_data.bb_center[2] + cache_data.bb_half_size[2]
 
 	total_vertices = sum((patch.n_s + 1) * (patch.n_t + 1) for patch in cache_data.patches)
 
@@ -252,3 +285,35 @@ def build_zone_geom_from_cache(cache_data: ZoneCacheData) -> GeomNode:
 	node = GeomNode("zone-tessellated")
 	node.add_geom(geom)
 	return node
+
+
+_ZONE_GRID_COLOR = (0.8, 0.8, 0.8, 1.0)
+
+
+def build_zone_grid_geom(min_x: float, min_y: float, max_x: float, max_y: float, z: float = 0.0) -> GeomNode:
+	"""LineSegs wireframe overlay of ZONE_CELL_SIZE-wide cell boundaries
+	covering [min_x, max_x] x [min_y, max_y] (project-todos/forgery/
+	landscape_editor.md step 7) -- snapped outward to the nearest real zone
+	boundary (floor/ceil to a ZONE_CELL_SIZE multiple) so every zone in the
+	loaded set gets its full cell outlined, not just a partial edge cut off
+	mid-cell. Flat at world Z=`z` (0.0 by default, matching the elevation
+	gradient's own Z=0 sea-level anchor, see _elevation_colors_uint8()) --
+	a navigational reference grid, not a terrain-hugging overlay."""
+	grid_min_x = floor(min_x / ZONE_CELL_SIZE) * ZONE_CELL_SIZE
+	grid_max_x = ceil(max_x / ZONE_CELL_SIZE) * ZONE_CELL_SIZE
+	grid_min_y = floor(min_y / ZONE_CELL_SIZE) * ZONE_CELL_SIZE
+	grid_max_y = ceil(max_y / ZONE_CELL_SIZE) * ZONE_CELL_SIZE
+
+	lines = LineSegs("zone-grid")
+	lines.set_color(*_ZONE_GRID_COLOR)
+	num_x = round((grid_max_x - grid_min_x) / ZONE_CELL_SIZE)
+	for i in range(num_x + 1):
+		x = grid_min_x + i * ZONE_CELL_SIZE
+		lines.move_to(x, grid_min_y, z)
+		lines.draw_to(x, grid_max_y, z)
+	num_y = round((grid_max_y - grid_min_y) / ZONE_CELL_SIZE)
+	for i in range(num_y + 1):
+		y = grid_min_y + i * ZONE_CELL_SIZE
+		lines.move_to(grid_min_x, y, z)
+		lines.draw_to(grid_max_x, y, z)
+	return lines.create()

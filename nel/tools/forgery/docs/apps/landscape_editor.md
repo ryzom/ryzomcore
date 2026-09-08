@@ -200,3 +200,38 @@ Gain mesuré sur données synthétiques (5555 sommets/zone, 53 zones) : 17.4 ->
 `build_zone_tessellated_geom()` (chemin direct depuis une zone fraîchement
 parsée) délègue toujours à `build_zone_geom_from_cache()`, donc bénéficie du
 même gain sans code séparé à maintenir.
+
+## Étape 7 -- caméra, dégradé d'élévation ancré à Z=0, quadrillage de zone
+
+Trois ajustements demandés par Nuno en testant un continent entier réel :
+
+**Zoom caméra** : `OrbitCamera.max_distance` (2000.0 par défaut, partagé
+avec Patina) ne permettait pas de reculer assez pour voir un continent
+entier -- multiplié par 3 (`self.orbit_camera.max_distance *= 3.0`) dans
+`LandscapeEditorApp.__init__`, spécifique à Atyscape (ne touche pas
+`camera.py` ni Patina). Ça débloque aussi l'auto-cadrage après chargement
+d'un continent (`frame()` clampait déjà à `max_distance`).
+
+**Dégradé d'élévation ancré à Z=0** (`zone_geometry._elevation_colors_uint8()`) :
+la première version (un dégradé marron->vert normalisé sur le min/max Z de
+l'ensemble chargé) était lissée/washed-out par quelques zones très
+profondes (sous-marines/grottes) qui tiraient le minimum très bas -- le
+terrain normal se retrouvait alors tout au même ton près du "haut" de la
+plage. Remplacé par un dégradé en deux segments ancré sur Z=0 (le niveau de
+l'eau, d'après Nuno) : rouge foncé au point le plus profond -> marron à
+Z=0 -> vert au point le plus haut, chaque moitié interpolée indépendamment
+(`_DEEP_COLOR`/`_SEA_LEVEL_COLOR`/`_PEAK_COLOR`). Insensible à la profondeur
+du point le plus bas : le terrain proche de la surface reste toujours dans
+la même plage de marron/vert clairs.
+
+**Quadrillage de zone** (`zone_geometry.build_zone_grid_geom()`) : overlay
+`LineSegs` des limites de cellules `ZONE_CELL_SIZE` (160 unités, déplacé de
+`region_loader.py` vers `zone_geometry.py` pour éviter un import circulaire
+-- `region_loader.py` l'importe maintenant depuis `zone_geometry`), bornes
+calées au multiple de 160 le plus proche (floor/ceil) pour que chaque zone
+affichée ait son contour complet. Rebâti dans `_set_loaded_zones()` à chaque
+changement de zones chargées ; checkbox "Show zone grid" dans le panel
+(visible par défaut). Toujours affiché par-dessus le terrain quel que soit
+son relief : `set_depth_test(False)`/`set_depth_write(False)` +
+`set_bin("fixed", 100)`, plat à Z=0 -- une grille de repère, pas un vrai
+maillage à suivre le terrain.

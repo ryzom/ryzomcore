@@ -35,9 +35,8 @@ from pynel.ryzom_packed_sheets import PackedSheetsParseError, zone_name_to_world
 from pynel.ryzom_zone import parse_zone, Zone, ZoneParseError
 
 from .zone_cache import read_zone_cache, write_zone_cache, ZoneCacheData
-from .zone_geometry import zone_to_cache_data
+from .zone_geometry import zone_to_cache_data, ZONE_CELL_SIZE
 
-ZONE_CELL_SIZE = 160.0
 _ZONE_NAME_RE = re.compile(r"^\d+_[A-Za-z]{2}$")
 # Preference order when the same zone name exists under more than one
 # extension (e.g. both a loose .zone and a packed .zonel) -- most-finished

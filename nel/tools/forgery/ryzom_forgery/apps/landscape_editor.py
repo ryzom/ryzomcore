@@ -22,7 +22,7 @@ from ryzom_forgery import continent_selector
 from ryzom_forgery import live_data
 from ryzom_forgery.region_loader import find_zones_in_region, load_zone_cache_data, RegionLoadError
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, zone_to_cache_data
+from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, zone_to_cache_data
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
 # extension_presets). Default filter is "*" (unfiltered), NOT "*.land": a
@@ -72,6 +72,11 @@ class LandscapeEditorApp(ForgeryApp):
 		# object_editor's single-shape inspection, so this starts zoomed out
 		# much further than that app's own OrbitCamera default.
 		self.orbit_camera = OrbitCamera(self, distance=200.0)
+		# OrbitCamera's own default max_distance (2000.0) doesn't reach a
+		# whole continent (dozens of 160-unit zones across) -- both manual
+		# zoom-out and the auto-frame after a continent load (frame() clamps
+		# to max_distance) need much more room. 3x per Nuno, 2026-09-08.
+		self.orbit_camera.max_distance *= 3.0
 
 		# Continent selector state (project-todos/forgery/
 		# landscape_editor__continent-selector.md steps 3-4). cont_locs/
@@ -101,6 +106,14 @@ class LandscapeEditorApp(ForgeryApp):
 		self._zone_nodes = {}
 		self._zone_error = None
 		self._zone_root = self.render.attach_new_node("zone-root")
+
+		# Zone-boundary grid overlay (project-todos/forgery/
+		# landscape_editor.md step 7) -- rebuilt in _set_loaded_zones()
+		# alongside the terrain itself, shown/hidden per self._grid_visible
+		# (same show()/hide() pattern as object_editor.py's own floor grid
+		# toggle). Visible by default.
+		self._grid_np = self.render.attach_new_node("zone-grid-placeholder")
+		self._grid_visible = True
 
 		# Whole-continent loading state (project-todos/forgery/
 		# landscape_editor__zone_disk_cache.md steps 5-6) -- None while idle,
@@ -190,8 +203,10 @@ class LandscapeEditorApp(ForgeryApp):
 
 	def _set_loaded_zones(self, zones):
 		"""Tears down whatever geometry was attached before and builds fresh
-		geometry for `zones` (name -> zone_cache.ZoneCacheData), then
-		reframes the camera on their combined bounding box. Shared by
+		geometry for `zones` (name -> zone_cache.ZoneCacheData) -- colored by
+		elevation over the combined Z range of every zone in `zones`, not
+		each zone's own (see build_zone_geom_from_cache()'s own docstring)
+		-- then reframes the camera on their combined bounding box. Shared by
 		on_selection_changed() (a single zone) and _load_continent()
 		(a whole continent)."""
 		for node in self._zone_nodes.values():
@@ -199,8 +214,38 @@ class LandscapeEditorApp(ForgeryApp):
 		self._zone_nodes = {}
 		self.zones = zones
 
+		# Elevation color spans the whole set of loaded zones, not each
+		# zone's own tiny Z range -- every zone re-normalizing to the same
+		# green gradient on its own relief made a whole continent look like
+		# a patchwork of disconnected tiles at zone boundaries (found by
+		# Nuno 2026-09-08 testing a real continent).
+		self._grid_np.remove_node()
+		if zones:
+			min_x = min(cache_data.bb_center[0] - cache_data.bb_half_size[0] for cache_data in zones.values())
+			min_y = min(cache_data.bb_center[1] - cache_data.bb_half_size[1] for cache_data in zones.values())
+			min_z = min(cache_data.bb_center[2] - cache_data.bb_half_size[2] for cache_data in zones.values())
+			max_x = max(cache_data.bb_center[0] + cache_data.bb_half_size[0] for cache_data in zones.values())
+			max_y = max(cache_data.bb_center[1] + cache_data.bb_half_size[1] for cache_data in zones.values())
+			max_z = max(cache_data.bb_center[2] + cache_data.bb_half_size[2] for cache_data in zones.values())
+			self._grid_np = self.render.attach_new_node(build_zone_grid_geom(min_x, min_y, max_x, max_y))
+			self._grid_np.set_light_off()
+			# Always drawn on top, regardless of terrain depth -- flat at
+			# Z=0 (sea level), it would otherwise be buried under any
+			# terrain above sea level or invisible behind terrain below it.
+			# It's a navigational reference overlay, not real geometry, so
+			# skipping the depth test/write (and forcing it into a bin
+			# rendered after everything else) is the right call here, per
+			# Nuno 2026-09-08.
+			self._grid_np.set_depth_test(False)
+			self._grid_np.set_depth_write(False)
+			self._grid_np.set_bin("fixed", 100)
+			if not self._grid_visible:
+				self._grid_np.hide()
+		else:
+			self._grid_np = self.render.attach_new_node("zone-grid-placeholder")
+
 		for name, cache_data in zones.items():
-			node = build_zone_geom_from_cache(cache_data)
+			node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z)
 			node_path = self._zone_root.attach_new_node(node)
 			# Winding isn't guaranteed to match Panda3D's expected front-face
 			# direction (zone_geometry.py's grid triangulation follows NeL's
@@ -314,6 +359,10 @@ class LandscapeEditorApp(ForgeryApp):
 				fraction = processed / total if total else 0.0
 				overlay = f"{processed}/{total} zones" if total else "Scanning..."
 				imgui.progress_bar(fraction, overlay=overlay)
+
+		changed, self._grid_visible = imgui.checkbox("Show zone grid", self._grid_visible)
+		if changed:
+			(self._grid_np.show if self._grid_visible else self._grid_np.hide)()
 
 		if self._zone_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
