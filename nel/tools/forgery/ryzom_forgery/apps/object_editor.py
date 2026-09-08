@@ -221,6 +221,21 @@ class ObjectEditorApp(
 		self._viewport_toggle_size = (10.0, 10.0)
 		self._transform_panel_size = (10.0, 10.0)
 
+		# Viewport background color swatches (_draw_background_color_bar()) --
+		# black, grey, chroma-key green, then 2 free slots the user can
+		# recolor via right-click (defaults are just starting points). None
+		# is forced at startup, so the engine's own default clear color is
+		# left untouched until the user actually picks one.
+		self._viewport_bg_colors = [
+			(0.0, 0.0, 0.0, 1.0),
+			(0.41, 0.41, 0.41, 1.0),  # Panda3D's own default clear color
+			(0.0, 0.69, 0.25, 1.0),
+			(1.0, 1.0, 1.0, 1.0),
+			(0.2, 0.4, 0.8, 1.0),
+		]
+		self._viewport_bg_active = None
+		self._background_color_bar_size = (10.0, 10.0)
+
 		# Real geometry (sized to the loaded shape's bbox) is built by
 		# _rebuild_viewport_helpers(), called below and again from
 		# _rebuild_geometry() -- these placeholders just give it something to
@@ -497,6 +512,9 @@ class ObjectEditorApp(
 		self._workspace_sync_folder_dialog = None  # active portable_file_dialogs.select_folder, or None
 		self._repository_paths_dialog = None  # active portable_file_dialogs.select_folder, or None
 		self._repository_paths_dialog_repo = None  # which pynel.repository_paths.REPOSITORIES entry _repository_paths_dialog is for
+		self._clone_target_dialog = None  # active portable_file_dialogs.select_folder for clone target, or None
+		self._clone_dialog_repo = None  # which repo the clone dialog is for
+		self._clone_status_message = None  # status message from clone_repo() for display
 		# Set from ImportWatcher's own background thread (see
 		# _on_open_shape_conflict()); drawn once per frame from draw_panel()
 		# (_draw_import_conflict_popup()) since it needs imgui -- main-thread-only.
@@ -756,6 +774,7 @@ class ObjectEditorApp(
 	def draw_panel(self):
 		self.nav_cube.draw_controls()
 		self._draw_transform_panel()
+		self._draw_background_color_bar()
 		self._draw_viewport_toggles()
 		self._draw_panel_taskbar()
 		self._draw_wind_controls()
@@ -773,6 +792,7 @@ class ObjectEditorApp(
 		self._poll_text_editor_dialog()
 		self._poll_workspace_sync_folder_dialog()
 		self._poll_repository_paths_dialog()
+		self._poll_clone_target_dialog()
 		self._draw_replace_match_popup()
 		self._draw_reopen_shape_popup()
 		self._draw_load_shape_unsaved_popup()

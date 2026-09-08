@@ -30,7 +30,8 @@ from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_build_mesh_skin_state, _build_shadow_skin_preview_state, _build_skin_state, _build_wind_state,
 )
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
-	_capture_panel_pos, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _set_panel_pos, _VIEWPORT_TOGGLE_MARGIN_PX,
+	_ACTIVE_COLOR, _capture_panel_pos, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _set_panel_pos,
+	_VIEWPORT_TOGGLE_MARGIN_PX,
 )
 
 _LOCKED_COLOR = (0.45, 0.45, 0.45, 0.8)  # grey -- "on" highlight for a lock toggle specifically
@@ -411,6 +412,62 @@ class ViewportTransformMixin:
 				imgui.text(f"File size: {stats['file_size_bytes'] / 1024:.1f} KB")
 			self._info_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 			self._info_panel_pos = _capture_panel_pos()
+
+	def _set_viewport_background_color(self, index):
+		color = self._viewport_bg_colors[index]
+		self.setBackgroundColor(*color)
+		self._viewport_bg_active = index
+
+	def _draw_background_color_bar(self):
+		"""Small floating vertical swatch-button bar bottom-left of the 3D
+		viewport, stacked directly above _draw_viewport_toggles()'s own bar
+		(same x, same self-measurement trick for the y offset): black, grey,
+		chroma-key green, then 2 free slots -- right-click any swatch to
+		recolor it via a small color-picker popup, left-click to apply it as
+		the viewport's background."""
+		display_size = imgui.get_io().display_size
+		win_h = display_size.y
+		if win_h <= 0:
+			return
+
+		toggle_width, toggle_height = self._viewport_toggle_size
+		width, height = self._background_color_bar_size
+		x = self.explorer_width + _VIEWPORT_TOGGLE_MARGIN_PX
+		y = win_h - self.sysinfo_height - _VIEWPORT_TOGGLE_MARGIN_PX - toggle_height - _VIEWPORT_TOGGLE_MARGIN_PX - height
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.always_auto_resize.value)
+		labels = ["Black", "Grey", "Green screen", "Custom 1 (right-click to change)", "Custom 2 (right-click to change)"]
+		size = (imgui.get_frame_height(), imgui.get_frame_height())
+		with imgui_ctx.begin("##background-color-bar", flags=flags):
+			for i, color in enumerate(self._viewport_bg_colors):
+				imgui.push_style_color(imgui.Col_.button.value, color)
+				r, g, b, a = color
+				imgui.push_style_color(imgui.Col_.button_hovered.value,
+				                        (min(r + 0.1, 1.0), min(g + 0.1, 1.0), min(b + 0.1, 1.0), a))
+				imgui.push_style_color(imgui.Col_.button_active.value,
+				                        (max(r - 0.1, 0.0), max(g - 0.1, 0.0), max(b - 0.1, 0.0), a))
+				if self._viewport_bg_active == i:
+					imgui.push_style_color(imgui.Col_.border.value, _ACTIVE_COLOR)
+					imgui.push_style_var(imgui.StyleVar_.frame_border_size.value, 2.0)
+				clicked = imgui.button(f"##bg-color-{i}", size)
+				if self._viewport_bg_active == i:
+					imgui.pop_style_var()
+					imgui.pop_style_color()
+				imgui.pop_style_color(3)
+				if clicked:
+					self._set_viewport_background_color(i)
+				if imgui.is_item_hovered():
+					imgui.set_tooltip(labels[i])
+				if i >= 3 and imgui.begin_popup_context_item(f"##bg-color-{i}-picker"):
+					changed, new_color = imgui.color_edit3(f"##bg-color-{i}-edit", color[:3])
+					if changed:
+						self._viewport_bg_colors[i] = (new_color[0], new_color[1], new_color[2], 1.0)
+						if self._viewport_bg_active == i:
+							self.setBackgroundColor(*self._viewport_bg_colors[i])
+					imgui.end_popup()
+			self._background_color_bar_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport (same

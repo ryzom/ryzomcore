@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-09-08 — ✨ Add viewport background color swatches, Forgery 4.0.0
+
+Adds a vertical bar of 5 background-color swatch buttons in Patina's 3D viewport, stacked directly above the existing floor-grid/axes toggle bar (`_draw_background_color_bar`, `viewport_transform.py`): black, grey (`(0.41, 0.41, 0.41)`, matching Panda3D's own default clear color), chroma-key green, and 2 free slots. Left-click applies a swatch's color via `ShowBase.setBackgroundColor` (`_set_viewport_background_color`); right-clicking either of the 2 free slots opens a small `imgui.color_edit3` popup to recolor it, live-applied immediately if that slot is the currently active one. State (`self._viewport_bg_colors`, `self._viewport_bg_active`) lives in `object_editor.py`, session-only (not persisted) -- no color is forced at startup, so the engine's own default is left untouched until the user picks one.
+
 ## 2026-09-06 — 🐛 Fix .obj export, default-transform round trip, and reimported material colors, Forgery 3.4.2
 
 Closes `project-todos/forgery/mesh_skin_export.md`'s "migrer `_export_obj`" chantier, plus two bugs found while validating it.
@@ -3656,3 +3660,29 @@ length-prefixed sections (lines, triangles, quads), each a `(count, capacity)` h
 followed by its index vector. Only the triangle section carries renderable indices
 (`_NbIndexes = triangle_count * 3`); the line and quad sections are read and discarded
 to stay positioned correctly in the stream.
+
+## 2026-09-07 — ✨ Add Clone button for Ryzom repositories in Settings > Paths
+
+Added a **Clone** button (download icon) next to each Ryzom repository path field
+(ryzom-core, ryzom-data, ryzom-private-data, ryzom-docker) in the Settings > Paths tab
+(`apps/object_editor_mixins/settings_dialogs.py`). Uses the **mutualized** `clone_repo()`
+function from `pynel.repository_paths` (see `logs/pynel.md` entry below).
+
+When clicked, opens a folder picker to select the **parent directory** where the repository
+will be cloned (the repository itself will be created as a subdirectory with its name,
+e.g., choosing `/home/user/repos/` and cloning ryzom-core creates
+`/home/user/repos/ryzom-core/`). Cloning runs in a background thread (via
+`settings_dialogs.py::_poll_clone_target_dialog`), with status messages displayed upon
+completion (success/error with details).
+
+The Clone button is **disabled** if the repository is already configured and the path
+exists, with a tooltip explaining the current configuration.
+
+New state variables added to `apps/object_editor.py`:
+- `_clone_target_dialog`: active folder picker for clone target selection
+- `_clone_dialog_repo`: which repository the clone dialog is for
+- `_clone_status_message`: status message from `clone_repo()` for display
+
+New/updated methods in `SettingsDialogsMixin` (`settings_dialogs.py`):
+- `_poll_clone_target_dialog()`: handles folder selection and triggers `clone_repo()`
+- `_draw_clone_status()`: renders success/error messages
