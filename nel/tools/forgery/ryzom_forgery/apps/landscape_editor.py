@@ -3,10 +3,12 @@ same naming convention as object_editor.py/"Patina"): 3D landscape
 composition/build tool, replacing the current 2D bitmap-tile Ligo editor.
 
 See project-todos/forgery/landscape_editor.md for the planned progressive
-rendering steps -- step 4 (Bezier-tessellated zone rendering) is the current
-one.
+rendering steps -- step 7 (detecting which of .zone/.zonew/.zonel already
+exist for a given zone, generating the missing ones on demand) is the
+current one.
 """
 
+import threading
 from pathlib import Path
 
 from imgui_bundle import imgui
@@ -18,8 +20,9 @@ from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import live_data
+from ryzom_forgery.region_loader import find_zones_in_region, load_zone_cache_data, RegionLoadError
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.zone_geometry import build_zone_tessellated_geom
+from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, zone_to_cache_data
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
 # extension_presets). Default filter is "*" (unfiltered), NOT "*.land": a
@@ -84,15 +87,27 @@ class LandscapeEditorApp(ForgeryApp):
 		self.continent_bounds = None
 		self._bounds_error = None
 
-		# Loaded-zone state (project-todos/forgery/landscape_editor.md step 3
-		# -- Bezier-tessellated rendering, see zone_geometry.py). zone_node is
-		# the currently attached GeomNode NodePath (torn down and
-		# rebuilt on every new zone load, None before the first one), zone is
-		# the parsed pynel.ryzom_zone.Zone it was built from.
-		self.zone = None
-		self.zone_node = None
+		# Loaded-zone state (project-todos/forgery/landscape_editor.md steps
+		# 3-6 -- Bezier-tessellated rendering, see zone_geometry.py). zones/
+		# zone_nodes are keyed by bare zone name (e.g. "55_CC") so a whole-
+		# continent load (step 6) and a single Explorer selection (step 3)
+		# share the same rendering path -- both just populate these dicts
+		# differently, see _set_loaded_zones(). self.zones values are always
+		# zone_cache.ZoneCacheData (never a raw pynel Zone), converted via
+		# zone_to_cache_data() as soon as a zone is parsed, so
+		# _set_loaded_zones()/_frame_on_loaded_zones() only ever handle one
+		# shape of data regardless of where it came from.
+		self.zones = {}
+		self._zone_nodes = {}
 		self._zone_error = None
 		self._zone_root = self.render.attach_new_node("zone-root")
+
+		# Whole-continent loading state (project-todos/forgery/
+		# landscape_editor__zone_disk_cache.md steps 5-6) -- None while idle,
+		# else the dict a background thread (started by _load_continent())
+		# is writing into, see _run_load_continent()/draw_panel()'s own
+		# polling of it.
+		self._continent_load_progress = None
 
 	def on_selection_changed(self, items):
 		if len(items) != 1 or items[0].suffix.lower() not in _ZONE_EXTENSIONS:
@@ -100,31 +115,115 @@ class LandscapeEditorApp(ForgeryApp):
 		item = items[0]
 		self._zone_error = None
 		try:
-			self.zone = parse_zone(item.read_bytes())
+			zone = parse_zone(item.read_bytes())
 		except (OSError, BnpError, ZoneParseError) as exc:
-			self.zone = None
 			self._zone_error = f"Failed to load {item.name}: {exc}"
-			self._clear_zone_geometry()
+			self._set_loaded_zones({})
+			return
+		self._set_loaded_zones({Path(item.name).stem: zone_to_cache_data(zone)})
+
+	def _load_continent(self):
+		"""Starts a background load of every real zone in the selected
+		continent's bounds (project-todos/forgery/
+		landscape_editor__zone_disk_cache.md steps 5-6) -- cache-first
+		(region_loader.load_zone_cache_data()), replaces whatever was loaded
+		before (single zone or a previous continent) once done, same as
+		on_selection_changed(). Runs off the main thread (region_loader.py's
+		zone index build scans every .bnp's header table under
+		live_data_path the first time it's needed, real disk I/O that
+		stalled the whole UI when run synchronously -- found 2026-09-07,
+		Nuno). A second call while one is already running is ignored.
+		Triggered automatically once a continent is selected
+		(_select_continent()) and by the explicit "Build cache for this
+		continent" button -- both do the exact same thing, per Nuno
+		2026-09-08."""
+		if self._continent_load_progress is not None and not self._continent_load_progress["done"]:
+			return
+		if self.continent_bounds is None:
+			return
+		self._zone_error = None
+		live_data_path = app_settings.load().live_data_path
+		if not live_data.is_valid_live_data_path(live_data_path):
+			self._zone_error = "Ryzom Live data path not configured -- set it in Patina's Settings tab (Paths)."
 			return
 
-		self._clear_zone_geometry()
-		node = build_zone_tessellated_geom(self.zone)
-		self.zone_node = self._zone_root.attach_new_node(node)
-		# Winding isn't guaranteed to match Panda3D's expected front-face
-		# direction (zone_geometry.py's grid triangulation follows NeL's own
-		# Bezier control-point convention) -- two-sided so every patch is
-		# visible regardless, rather than risking half the terrain silently
-		# backface-culled.
-		self.zone_node.set_two_sided(True)
+		progress = {"done": False, "error": None, "zones": {}, "total": 0, "processed": 0}
+		self._continent_load_progress = progress
+		thread = threading.Thread(
+			target=self._run_load_continent, args=(live_data_path, self.continent_bounds, progress), daemon=True,
+		)
+		thread.start()
 
-		bb = self.zone.zone_bb
-		frame_distance = max(bb.half_size.x, bb.half_size.y, bb.half_size.z, 10.0) * 2.5
-		self.orbit_camera.frame((bb.center.x, bb.center.y, bb.center.z), frame_distance)
+	def _run_load_continent(self, live_data_path, bounds, progress):
+		"""Background-thread body for _load_continent() -- pure file I/O/
+		pickle (region_loader.py/zone_cache.py), never touches Panda3D
+		(load_zone_cache_data() only ever builds a ZoneCacheData, plain
+		data -- the actual GeomNode is built on the main thread, see
+		draw_panel()'s own polling of `progress`). Writes only to `progress`
+		(plain dict field writes, safe under the GIL, same reasoning as
+		object_editor.py's creature-cache-rebuild background thread);
+		`processed` is updated per zone so draw_panel() can show a progress
+		bar across what may be several hundred zones for a whole
+		continent."""
+		try:
+			min_x, min_y, max_x, max_y = bounds
+			refs = find_zones_in_region(live_data_path, min_x, min_y, max_x, max_y)
+			if not refs:
+				progress["error"] = "No real zone found for this continent."
+				return
+			progress["total"] = len(refs)
+			zones = {}
+			failed = []
+			for ref in refs:
+				try:
+					zones[ref.name] = load_zone_cache_data(ref)
+				except RegionLoadError as exc:
+					failed.append(str(exc))
+				progress["processed"] += 1
+			progress["zones"] = zones
+			if failed:
+				progress["error"] = f"{len(failed)}/{len(refs)} zone(s) failed to load: {'; '.join(failed[:3])}"
+		except OSError as exc:
+			progress["error"] = str(exc)
+		finally:
+			progress["done"] = True
 
-	def _clear_zone_geometry(self):
-		if self.zone_node is not None:
-			self.zone_node.remove_node()
-			self.zone_node = None
+	def _set_loaded_zones(self, zones):
+		"""Tears down whatever geometry was attached before and builds fresh
+		geometry for `zones` (name -> zone_cache.ZoneCacheData), then
+		reframes the camera on their combined bounding box. Shared by
+		on_selection_changed() (a single zone) and _load_continent()
+		(a whole continent)."""
+		for node in self._zone_nodes.values():
+			node.remove_node()
+		self._zone_nodes = {}
+		self.zones = zones
+
+		for name, cache_data in zones.items():
+			node = build_zone_geom_from_cache(cache_data)
+			node_path = self._zone_root.attach_new_node(node)
+			# Winding isn't guaranteed to match Panda3D's expected front-face
+			# direction (zone_geometry.py's grid triangulation follows NeL's
+			# own Bezier control-point convention) -- two-sided so every
+			# patch is visible regardless, rather than risking half the
+			# terrain silently backface-culled.
+			node_path.set_two_sided(True)
+			self._zone_nodes[name] = node_path
+
+		if zones:
+			self._frame_on_loaded_zones()
+
+	def _frame_on_loaded_zones(self):
+		bbs = [(cache_data.bb_center, cache_data.bb_half_size) for cache_data in self.zones.values()]
+		min_x = min(center[0] - half[0] for center, half in bbs)
+		min_y = min(center[1] - half[1] for center, half in bbs)
+		min_z = min(center[2] - half[2] for center, half in bbs)
+		max_x = max(center[0] + half[0] for center, half in bbs)
+		max_y = max(center[1] + half[1] for center, half in bbs)
+		max_z = max(center[2] + half[2] for center, half in bbs)
+		center = ((min_x + max_x) / 2.0, (min_y + max_y) / 2.0, (min_z + max_z) / 2.0)
+		frame_distance = max(max_x - min_x, max_y - min_y, max_z - min_z, 10.0) * 1.5
+		self.orbit_camera.frame(center, frame_distance)
 
 	def _ensure_continent_locations_loaded(self):
 		if self._cont_locs is not None or self._cont_locs_error is not None:
@@ -145,7 +244,11 @@ class LandscapeEditorApp(ForgeryApp):
 		"""Resolves and caches continent_bounds for `continent_name` -- called
 		only when the combo selection actually changes, not every frame (both
 		files this reads are full-parse, no random access, see
-		nel/tools/pynel/docs/packed_sheets.md)."""
+		nel/tools/pynel/docs/packed_sheets.md). Immediately starts loading
+		the whole continent (project-todos/forgery/
+		landscape_editor__zone_disk_cache.md step 6, per Nuno 2026-09-08:
+		never stream by region around the camera, load a continent whole as
+		soon as it's selected)."""
 		self.selected_continent_name = continent_name
 		self.continent_bounds = None
 		self._bounds_error = None
@@ -154,6 +257,8 @@ class LandscapeEditorApp(ForgeryApp):
 			self.continent_bounds = continent_selector.resolve_continent_bounds(live_data_path, continent_name)
 		except (OSError, continent_selector.ContinentSelectorError) as exc:
 			self._bounds_error = f"Failed to resolve bounds: {exc}"
+			return
+		self._load_continent()
 
 	def panel_title(self):
 		return "Landscape Editor"
@@ -187,13 +292,34 @@ class LandscapeEditorApp(ForgeryApp):
 		elif self.continent_bounds is not None:
 			min_x, min_y, max_x, max_y = self.continent_bounds
 			imgui.text(f"Bounds: X [{min_x:.0f} .. {max_x:.0f}]  Y [{min_y:.0f} .. {max_y:.0f}]")
+			if imgui.button("Center camera here"):
+				center = ((min_x + max_x) / 2.0, (min_y + max_y) / 2.0, 0.0)
+				self.orbit_camera.frame(center, max(max_x - min_x, max_y - min_y) * 0.75)
 
 		imgui.separator()
-		imgui.text("Zone (select a .zone/.zonew/.zonel in the Explorer)")
+		imgui.text("Zone (select a .zone/.zonew/.zonel in the Explorer,")
+		imgui.text("or pick a continent above to load it whole)")
+		if imgui.button("Build cache for this continent"):
+			self._load_continent()
+
+		if self._continent_load_progress is not None:
+			progress = self._continent_load_progress
+			if progress["done"]:
+				self._continent_load_progress = None
+				self._zone_error = progress["error"]
+				self._set_loaded_zones(progress["zones"])
+			else:
+				total = progress["total"]
+				processed = progress["processed"]
+				fraction = processed / total if total else 0.0
+				overlay = f"{processed}/{total} zones" if total else "Scanning..."
+				imgui.progress_bar(fraction, overlay=overlay)
+
 		if self._zone_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
-		elif self.zone is not None:
-			imgui.text(f"Zone {self.zone.zone_id} -- {len(self.zone.patchs)} patches")
+		if self.zones:
+			total_patches = sum(len(cache_data.patches) for cache_data in self.zones.values())
+			imgui.text(f"{len(self.zones)} zone(s) loaded -- {total_patches} patches total")
 			if imgui.button("Top view (2D)"):
 				self.orbit_camera.snap_to_axis("+z")
 

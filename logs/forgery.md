@@ -56,3 +56,67 @@ wrong on both):
 
 Validated against a real Ryzom Live install: all 28 real continents resolve
 bounds without error.
+
+## 2026-09-08 — ✨ Add disk cache of tessellated zones, whole-continent loading, Forgery 3.8.2
+
+`project-todos/forgery/landscape_editor__zone_disk_cache.md` closed
+(`landscape_editor.md` step 6). Replaces region-around-the-camera streaming
+(never implemented beyond a first draft) with loading an entire selected
+continent at once, backed by a per-zone disk cache of tessellated positions.
+
+**Why**: measured (194 zones, 400-unit radius around the camera) that
+listing (`.bnp` header scan, cached once) and raw bnp reads are negligible,
+but `parse_zone()` (11.221s, ~57.8 ms/zone) and tessellation (14.506s,
+~74.8 ms/zone, a pure-Python loop in `zone_geometry._eval_bezier_patch()`)
+dominate and are linear in zone count regardless of streaming strategy --
+so the fix is to pay that cost once per zone and cache it to disk, not to
+change how much of the world is requested at once.
+
+**Cache design** (`ryzom_forgery/zone_cache.py`): stores only the
+tessellated positions per patch (`n_s`/`n_t` + a flat float tuple) and the
+zone's bounding box -- never color, triangle indices, or future normals/UV,
+which stay derived at load time from positions alone (cheap: color is a
+lookup on Z, indices are arithmetic on `n_s`/`n_t`). This means no future
+rendering change (lighting, texturing) can ever invalidate the cache. One
+pickle file per zone under `config_dir()/"zone_cache"`, written atomically
+(temp file + rename), stamped with the source file's mtime/size (the whole
+`.bnp` if the zone is packed, since an archive entry can't be dated on its
+own) for staleness detection.
+
+`zone_geometry.compute_zone_patch_positions()` isolates the expensive Bezier
+evaluation, shared by the disk-cache writer (`region_loader.
+load_zone_cache_data()`, cache-first: reads the disk cache if fresh, else
+parses+tessellates+writes) and the direct-from-zone path
+(`zone_to_cache_data()`, used by `build_zone_tessellated_geom()` and by
+`on_selection_changed()`'s single-zone Explorer selection) -- one place
+computes Bezier positions, so cached and freshly-computed zones can never
+drift apart. `landscape_editor.py`'s `self.zones` is now always
+`ZoneCacheData` regardless of where it came from.
+
+Continent selection (`_select_continent()`) now triggers loading the whole
+continent automatically; a "Build cache for this continent" button does the
+same thing manually. A progress bar (zones processed/total) covers what can
+be several hundred zones, computed on a background thread (pure data, no
+Panda3D calls -- `load_zone_cache_data()` never touches it).
+
+**Second bottleneck found after the cache worked** (Nuno, real testing):
+with the cache warm, 53 zones loaded in 0.195s, but rebuilding their
+`GeomNode` (`_set_loaded_zones`) still took 3.365s (~63.5 ms/zone) -- barely
+better than the pre-cache 74.8 ms/zone. Removing bnp read/parsing/Bezier
+eval only saved ~11 ms/zone: the actual bottleneck was the sheer number of
+individual `GeomVertexWriter.add_data3()`/`add_data4()`/
+`GeomTriangles.add_vertices()` Python/C++ binding calls, not the color/index
+math itself. Fixed by having `build_zone_geom_from_cache()` build a `numpy`
+structured buffer (`[('vertex','<f4',3),('color','u1',4)]`, matching
+`GeomVertexFormat.get_v3c4()`'s real layout, asserted at runtime) and write
+it in one `set_data()` call, with elevation color computed vectorized and
+truncated (not rounded) to uint8 -- verified bit-for-bit identical to the
+old per-vertex writer output. Triangle indices built the same way (flat
+`numpy` array, `uint16`/`uint32` chosen by vertex count) instead of one
+`add_vertices()` call per triangle. ~5.4x faster on synthetic data matching
+real zone sizes; `build_zone_tessellated_geom()` (the direct-from-zone path)
+delegates to the same function, so it benefits too with no separate code.
+
+Validated by Nuno on a real Ryzom Live install: a 282-zone continent loads
+in ~2.2s total once its cache is warm ("c'est bcp plus rapide"), down from
+what would have been well over 20s at the pre-cache per-zone cost.
