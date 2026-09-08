@@ -17,11 +17,15 @@ from pynel.ryzom_bnp import BnpError
 from pynel.ryzom_zone import parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button, _VIEWPORT_TOGGLE_MARGIN_PX
+from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+	_begin_tab_item_with_icon, _icon_button, _pop_tab_color, _push_tab_color, _VIEWPORT_TOGGLE_MARGIN_PX,
+)
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import live_data
+from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
 from ryzom_forgery.region_loader import find_zones_in_region, load_zone_cache_data, RegionLoadError
+from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, zone_to_cache_data
 
@@ -35,6 +39,12 @@ from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_g
 # 2026-09-07, Nuno couldn't navigate into any .bnp at all).
 _EXPLORER_FILTER_PRESETS = ["*", "*.land", "*.zone", "*.zonew", "*.zonel"]
 _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
+
+# draw_panel()'s tab bar (_push_tab_color()) -- same idea as
+# object_editor.py's own _TAB_COLOR_* constants, one per tab so each reads
+# as visually distinct at a glance.
+_TAB_COLOR_LANDSCAPE = (0.729, 0.867, 0.635, 1.0)  # light olive green -- terrain
+_TAB_COLOR_SETTINGS = (0.8, 0.75, 0.15, 1.0)  # yellow, same as object_editor.py's own Settings tab
 
 # Renamed from APP_INFO to hide Atyscape from ryztart's app list while it's
 # still being built (see project-todos/forgery/landscape_editor.md) --
@@ -96,6 +106,19 @@ class LandscapeEditorApp(ForgeryApp):
 		# one zoom level apart), confirmed fixed by raising near to 1.0
 		# (keeping the same far), which drops the ratio to 20,000:1.
 		self.camLens.set_near_far(1.0, 20000.0)
+
+		# Settings tab state (project-todos/forgery/
+		# landscape_editor__zone_render_modes__ryzom_paths_ui.md) --
+		# RyzomPathsSection is a standalone module (not object_editor_mixins.
+		# settings_dialogs' Patina-only mixin) precisely so it can be drawn
+		# here too: Patina and Atyscape are independent apps with disjoint
+		# audiences, each edits the settings it consumes itself, but
+		# live_data_path/repository paths/ryzom_tools_path are generic
+		# suite-wide settings, exposed in both. Own LiveDataSetupDialog
+		# instance (not object_editor.py's) -- Atyscape never draws its
+		# mandatory first-launch popup (only object_editor.py's draw_ui()
+		# does that), just the Settings-tab folder picker.
+		self.ryzom_paths_section = RyzomPathsSection(LiveDataSetupDialog())
 
 		# Continent selector state (project-todos/forgery/
 		# landscape_editor__continent-selector.md steps 3-4). cont_locs/
@@ -368,7 +391,27 @@ class LandscapeEditorApp(ForgeryApp):
 		return "Landscape Editor"
 
 	def draw_panel(self):
+		# _draw_viewport_toggles() opens its own separate floating imgui
+		# window, independent of the tab bar below -- always drawn
+		# regardless of which tab is active, never hidden by switching to
+		# Settings (project-todos/forgery/
+		# landscape_editor__zone_render_modes__ryzom_paths_ui.md step 5).
 		self._draw_viewport_toggles()
+
+		if imgui.begin_tab_bar("##panel-tabs"):
+			_push_tab_color(_TAB_COLOR_LANDSCAPE)
+			if _begin_tab_item_with_icon(fa_icons.ICON_FA_MOUNTAIN, "Landscape"):
+				self._draw_landscape_tab()
+				imgui.end_tab_item()
+			_pop_tab_color()
+			_push_tab_color(_TAB_COLOR_SETTINGS)
+			if _begin_tab_item_with_icon(fa_icons.ICON_FA_GEAR, "Settings"):
+				self.ryzom_paths_section.draw(self)
+				imgui.end_tab_item()
+			_pop_tab_color()
+			imgui.end_tab_bar()
+
+	def _draw_landscape_tab(self):
 		self._ensure_continent_locations_loaded()
 
 		if self._cont_locs_error is not None:

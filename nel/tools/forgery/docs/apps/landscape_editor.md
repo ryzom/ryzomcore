@@ -57,12 +57,37 @@ attendant.
 
 **Chemin des données** : `world.packed_sheets`/`continent.packed_sheets`/
 `sheet_id.bin` sont lus depuis `settings.live_data_path`, un réglage global
-partagé avec Patina (`object_editor.py`) -- configurable dans son onglet
-Settings (Paths). `landscape_editor.py` n'a pas encore son propre onglet
-Settings (scaffolding minimal, étape 1) ; message d'erreur explicite dans le
-panel si ce chemin n'est pas configuré ou invalide. L'Explorer démarre
-directement dans ce dossier si configuré (sinon un `search_path` classique,
-sinon le home).
+partagé avec Patina (`object_editor.py`) -- configurable dans l'onglet
+Settings d'Atyscape (voir "Onglets" ci-dessous) comme dans celui de Patina.
+Message d'erreur explicite dans le panel si ce chemin n'est pas configuré ou
+invalide. L'Explorer démarre directement dans ce dossier si configuré
+(sinon un `search_path` classique, sinon le home).
+
+## Onglets (Landscape / Settings)
+
+`draw_panel()` (project-todos/forgery/
+landscape_editor__zone_render_modes__ryzom_paths_ui.md) utilise une barre
+d'onglets (`imgui.begin_tab_bar`, mêmes helpers `_begin_tab_item_with_icon`/
+`_push_tab_color`/`_pop_tab_color` que `object_editor.py`, déplacés dans
+`object_editor_mixins/ui_helpers.py` pour être réutilisables par toute app
+Forgery) :
+
+- **Landscape** (`_draw_landscape_tab()`) : le contenu historique du panel --
+  sélecteur de continent, chargement/statut de zone, bouton "Top view (2D)".
+- **Settings** : `self.ryzom_paths_section.draw(self)` -- voir
+  `ryzom_forgery/ryzom_paths_section.py`. Regroupe `live_data_path`, les
+  chemins de dépôts (`pynel.repository_paths`) et `settings.ryzom_tools_path`
+  sous un header "Ryzom Paths" unique, réutilisé tel quel par l'onglet
+  Settings de Patina : ce sont des réglages génériques de toute la suite
+  Forgery, pas propres à une seule app, donc éditables depuis n'importe
+  laquelle -- Patina (graphistes) et Atyscape (level designers) ont des
+  publics disjoints, un utilisateur d'Atyscape ne doit jamais avoir à ouvrir
+  Patina pour configurer un réglage dont lui seul a besoin (décision Nuno
+  2026-09-08).
+
+`_draw_viewport_toggles()` (quadrillage de zone) reste appelé hors de la
+barre d'onglets -- fenêtre flottante indépendante, jamais masquée par un
+changement d'onglet.
 
 ## Étapes 3-4 -- rendu terrain (low-poly puis tessellation Bézier)
 

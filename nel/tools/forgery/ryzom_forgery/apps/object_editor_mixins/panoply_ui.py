@@ -560,7 +560,7 @@ class PanoplyUIMixin:
 		if workspace_dir is None:
 			return
 		if not repository_paths.is_valid("ryzom-data"):
-			self.request_settings_attention("Paths", "ryzom-data")
+			self.request_settings_attention("Ryzom Paths", "ryzom-data")
 			return
 		if not texture_names:
 			return

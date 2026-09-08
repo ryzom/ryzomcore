@@ -1,5 +1,48 @@
 # Changelog
 
+## 2026-09-08 — ✨ Shared "Ryzom Paths" Settings section + Atyscape tab bar, Forgery 4.1.0
+
+`project-todos/forgery/landscape_editor__zone_render_modes__ryzom_paths_ui.md`
+-- fixed a design flaw found while adding `settings.ryzom_tools_path`:
+generic suite-wide settings (`live_data_path`, the `pynel.repository_paths`
+checkouts) were only editable from Patina's own Settings tab, even though
+Patina and Atyscape are independent apps with disjoint audiences (graphic
+artists vs level designers). A level designer using Atyscape should never
+have to open Patina to configure a setting only Atyscape needs -- Nuno's
+litmus test: publishing Atyscape with Patina disabled would leave those
+settings permanently unconfigurable.
+
+- `_push_tab_color`/`_pop_tab_color`/`_begin_tab_item_with_icon` moved from
+  `object_editor.py` to `object_editor_mixins/ui_helpers.py` (pure
+  functions, no `self` dependency) so any Forgery app's tab bar can reuse
+  them, not just Patina's.
+- New `repository_paths_dialog.py`: `RepositoryPathsDialog`, extracted from
+  `settings_dialogs.py`'s `_draw_repository_paths_settings`/
+  `_poll_repository_paths_dialog`/`_poll_clone_target_dialog`/
+  `_draw_clone_status` (previously Patina-only mixin methods) into a
+  standalone class with a `draw(app)` method -- takes the host app for
+  `app._begin_attention_flash()`/`app._end_attention_flash()` (already
+  defined on `ForgeryApp`, shared by every app, not Patina-specific).
+- New `ryzom_paths_section.py`: `RyzomPathsSection`, composing
+  `LiveDataSetupDialog` + `RepositoryPathsDialog` + `RyzomToolsSetupDialog`
+  under one "Ryzom Paths" header. Takes an existing `LiveDataSetupDialog`
+  instance rather than owning one, since Patina needs that instance for
+  more than this section (its own mandatory first-launch popup +
+  `live_data_dir`).
+- `object_editor.py`: Settings tab reorganized -- "Paths" keeps only
+  workspace root/exclusion rules/search paths; new "Ryzom Paths" section
+  calls `self.ryzom_paths_section.draw(self)`; "Tools" keeps only image/text
+  editor pickers + workspace sync. `panoply_ui.py`'s
+  `request_settings_attention("Paths", "ryzom-data")` updated to
+  `"Ryzom Paths"` to match.
+- `landscape_editor.py` (Atyscape): `draw_panel()` now uses a tab bar
+  (`Landscape`/`Settings`) instead of one flat panel, so future features get
+  their own tab too. `_draw_viewport_toggles()` (zone grid) stays outside
+  the tab bar -- its own floating window, never hidden by switching tabs.
+  "Settings" draws the same `RyzomPathsSection` as Patina, with its own
+  `LiveDataSetupDialog` instance (no mandatory popup needed here, just the
+  Settings-tab folder picker).
+
 ## 2026-09-08 — 🐛 Fix crash from uncommitted repository clone-button code, Forgery 4.0.2
 
 `11724de87` ("Add viewport background color swatches, Forgery 4.0.0") pushed

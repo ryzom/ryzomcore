@@ -135,6 +135,45 @@ def _capture_panel_pos():
 	return (pos.x, pos.y)
 
 
+def _push_tab_color(color):
+	"""Tints one panel tab (Textures/Materials/All Properties/Settings --
+	see object_editor.py's/landscape_editor.py's own draw_panel()) so each is
+	visually distinct at a glance instead of every tab looking alike. Same
+	lighter/darker-variant idea as _colored_button() below, just for Col_.tab*
+	instead of Col_.button*: the unselected tab itself a bit darker than
+	`color`, hover a bit lighter, the selected/active tab exactly `color`."""
+	r, g, b, a = color
+	imgui.push_style_color(imgui.Col_.tab.value, (max(r - 0.15, 0.0), max(g - 0.15, 0.0), max(b - 0.15, 0.0), a))
+	imgui.push_style_color(imgui.Col_.tab_hovered.value, (min(r + 0.1, 1.0), min(g + 0.1, 1.0), min(b + 0.1, 1.0), a))
+	imgui.push_style_color(imgui.Col_.tab_selected.value, color)
+
+
+def _pop_tab_color():
+	imgui.pop_style_color(3)
+
+
+def _begin_tab_item_with_icon(icon, label, flags=0):
+	"""Same as imgui.begin_tab_item_simple(label), just icon-only (no
+	visible text -- `label` only lives in the hidden ##id part and a hover
+	tooltip) with the icon glyph itself forced black, readable against the
+	light background colors _push_tab_color() gives each tab (see
+	draw_panel()'s tab bar). The black text push/pop is scoped to only the
+	begin_tab_item_simple call itself (the tab header, drawn immediately
+	regardless of whether it's the active tab) -- popped before the
+	tooltip, so that stays whatever color tooltips normally are, and before
+	a tab's own content too, so that isn't forced black along with it.
+
+	`flags` forwards to begin_tab_item_simple as-is -- needed so e.g.
+	ObjectEditorApp._consume_settings_tab_flags() can force the Settings tab
+	selected for a pending request_settings_attention()."""
+	imgui.push_style_color(imgui.Col_.text.value, (0.0, 0.0, 0.0, 1.0))
+	opened = imgui.begin_tab_item_simple(f"{icon}##{label}", flags)
+	imgui.pop_style_color()
+	if imgui.is_item_hovered():
+		imgui.set_tooltip(label)
+	return opened
+
+
 def _colored_button(label, color):
 	"""A plain text button (unlike _icon_button above) tinted `color`, with
 	lighter/darker hover/active variants derived from it -- see

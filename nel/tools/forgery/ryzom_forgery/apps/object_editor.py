@@ -33,6 +33,7 @@ from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher, TEX_EXTENSIONS
 from ryzom_forgery import virtual_categories
 from ryzom_forgery.live_data_index_dialog import LiveDataIndexDialog
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
+from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog, _truncate_path_to_width
 from ryzom_forgery.workspace_sync import WorkspaceSyncWatcher, SYNCED_EXTENSIONS
 from ryzom_forgery.workspace_watch import WorkspaceWatcher
@@ -46,6 +47,7 @@ from ryzom_forgery.apps.object_editor_mixins.reference_shapes import ReferenceSh
 from ryzom_forgery.apps.object_editor_mixins.settings_dialogs import SettingsDialogsMixin
 from ryzom_forgery.apps.object_editor_mixins.shape_io import ShapeIOMixin
 from ryzom_forgery.apps.object_editor_mixins.texture_widgets import TextureWidgetsMixin
+from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _begin_tab_item_with_icon, _push_tab_color, _pop_tab_color
 from ryzom_forgery.apps.object_editor_mixins.viewport_transform import ViewportTransformMixin
 
 # See _scan_active_workspace_virtual_categories().
@@ -117,45 +119,6 @@ void main() {
 	p3d_FragColor = vec4(specular_color * diffuse_alpha, 1.0);
 }
 """
-
-def _push_tab_color(color):
-	"""Tints one panel tab (Textures/Materials/All Properties/Settings --
-	see draw_panel()) so each is visually distinct at a glance instead of
-	every tab looking alike. Same lighter/darker-variant idea as
-	object_editor_mixins.ui_helpers._colored_button(), just for Col_.tab* instead of Col_.button*: the
-	unselected tab itself a bit darker than `color`, hover a bit lighter,
-	the selected/active tab exactly `color`."""
-	r, g, b, a = color
-	imgui.push_style_color(imgui.Col_.tab.value, (max(r - 0.15, 0.0), max(g - 0.15, 0.0), max(b - 0.15, 0.0), a))
-	imgui.push_style_color(imgui.Col_.tab_hovered.value, (min(r + 0.1, 1.0), min(g + 0.1, 1.0), min(b + 0.1, 1.0), a))
-	imgui.push_style_color(imgui.Col_.tab_selected.value, color)
-
-
-def _pop_tab_color():
-	imgui.pop_style_color(3)
-
-
-def _begin_tab_item_with_icon(icon, label, flags=0):
-	"""Same as imgui.begin_tab_item_simple(label), just icon-only (no
-	visible text -- `label` only lives in the hidden ##id part and a hover
-	tooltip) with the icon glyph itself forced black, readable against the
-	light background colors _push_tab_color() gives each tab (see
-	draw_panel()'s tab bar). The black text push/pop is scoped to only the
-	begin_tab_item_simple call itself (the tab header, drawn immediately
-	regardless of whether it's the active tab) -- popped before the
-	tooltip, so that stays whatever color tooltips normally are, and before
-	a tab's own content too, so that isn't forced black along with it.
-
-	`flags` (added 2026-08-29) forwards to begin_tab_item_simple as-is --
-	needed so ObjectEditorApp._consume_settings_tab_flags() can force the
-	Settings tab selected for a pending request_settings_attention()."""
-	imgui.push_style_color(imgui.Col_.text.value, (0.0, 0.0, 0.0, 1.0))
-	opened = imgui.begin_tab_item_simple(f"{icon}##{label}", flags)
-	imgui.pop_style_color()
-	if imgui.is_item_hovered():
-		imgui.set_tooltip(label)
-	return opened
-
 
 APP_INFO = {
 	"id": "object_editor",
@@ -487,6 +450,7 @@ class ObjectEditorApp(
 		# workspace_setup_dialog above, since other Forgery apps have no use
 		# for it and shouldn't be blocked by its popup.
 		self.live_data_dialog = LiveDataSetupDialog()
+		self.ryzom_paths_section = RyzomPathsSection(self.live_data_dialog)
 		self.live_data_index_dialog = LiveDataIndexDialog()
 		self.live_data_dialog.on_refresh_requested = self._force_rebuild_live_data_index
 		# import_watcher/workspace_sync/tex_dds_sync each keep their own
@@ -510,11 +474,6 @@ class ObjectEditorApp(
 		self.workspace_watch.register_exact("panoply.cfg", self._on_panoply_cfg_settled)
 		self.workspace_watch.register_extension(SYNCED_EXTENSIONS, self.workspace_sync.handle_settled)
 		self._workspace_sync_folder_dialog = None  # active portable_file_dialogs.select_folder, or None
-		self._repository_paths_dialog = None  # active portable_file_dialogs.select_folder, or None
-		self._repository_paths_dialog_repo = None  # which pynel.repository_paths.REPOSITORIES entry _repository_paths_dialog is for
-		self._clone_target_dialog = None  # active portable_file_dialogs.select_folder for clone target, or None
-		self._clone_dialog_repo = None  # which repo the clone dialog is for
-		self._clone_status_message = None  # status message from clone_repo() for display
 		# Set from ImportWatcher's own background thread (see
 		# _on_open_shape_conflict()); drawn once per frame from draw_panel()
 		# (_draw_import_conflict_popup()) since it needs imgui -- main-thread-only.
@@ -791,8 +750,6 @@ class ObjectEditorApp(
 		self._poll_image_editor_dialog()
 		self._poll_text_editor_dialog()
 		self._poll_workspace_sync_folder_dialog()
-		self._poll_repository_paths_dialog()
-		self._poll_clone_target_dialog()
 		self._draw_replace_match_popup()
 		self._draw_reopen_shape_popup()
 		self._draw_load_shape_unsaved_popup()
@@ -841,13 +798,10 @@ class ObjectEditorApp(
 				if imgui.collapsing_header(f"{fa_icons.ICON_FA_SIGNS_POST} Paths"):
 					self.workspace_setup_dialog.draw_settings_content()
 					imgui.separator()
-					self.live_data_dialog.draw_settings_content()
-					imgui.separator()
 					self._draw_exclusion_rules_settings()
 					imgui.separator()
 					self.search_paths_dialog.draw_settings_content()
-					imgui.separator()
-					self._draw_repository_paths_settings()
+				self.ryzom_paths_section.draw(self)
 				self._consume_settings_section_open("Tools")
 				if imgui.collapsing_header(f"{fa_icons.ICON_FA_WRENCH} Tools"):
 					self._draw_image_editor_settings()

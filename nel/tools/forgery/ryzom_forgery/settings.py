@@ -133,6 +133,16 @@ class Settings:
 	# workspace panoply.cfg already exists (see object_editor.py's
 	# _draw_global_panoply_section()).
 	text_editor_path: Optional[str] = None
+	# Folder containing the native Ryzom pipeline tool executables -- e.g.
+	# zone_welder (never a Python port -- too slow, decision Nuno 2026-09-08),
+	# used by Atyscape's [WELD] render mode (see landscape_editor.py's
+	# zone_tools.run_zone_welder()) to generate a missing .zonew on demand,
+	# and future tools (e.g. zone_dependencies) resolved by name from the
+	# same folder without a settings field of their own. Generic, suite-wide
+	# path like live_data_path/repository_paths -- editable from every
+	# Forgery app's own Settings, not just the one(s) that happen to consume
+	# it today (see ryzom_tools_setup_dialog.py).
+	ryzom_tools_path: Optional[str] = None
 	# UI text font -- key into app.py's _AVAILABLE_FONTS, and its size in
 	# points. Applied once at startup (ForgeryApp.__init__ builds the font
 	# atlas before the first frame) -- a change here only takes effect after
@@ -218,6 +228,7 @@ def load() -> Settings:
 	settings.last_shape_name = data.get("last_shape_name") or None
 	settings.image_editor_path = data.get("image_editor_path") or None
 	settings.text_editor_path = data.get("text_editor_path") or None
+	settings.ryzom_tools_path = data.get("ryzom_tools_path") or None
 	settings.ui_font_name = data.get("ui_font_name") or settings.ui_font_name
 	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
 	settings.dpi_scale = data.get("dpi_scale") or settings.dpi_scale
@@ -279,6 +290,8 @@ def save(settings: Settings) -> None:
 		doc["image_editor_path"] = settings.image_editor_path
 	if settings.text_editor_path is not None:
 		doc["text_editor_path"] = settings.text_editor_path
+	if settings.ryzom_tools_path is not None:
+		doc["ryzom_tools_path"] = settings.ryzom_tools_path
 	doc["ui_font_name"] = settings.ui_font_name
 	doc["ui_font_size"] = settings.ui_font_size
 	doc["dpi_scale"] = settings.dpi_scale
