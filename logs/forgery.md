@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-08 — 🙈 Hide Atyscape from ryztart, Forgery 4.0.1
+
+`landscape_editor.py`'s `APP_INFO` renamed to `_APP_INFO_HIDDEN` so
+`ryzom_forgery.list_apps()`/`launch_app()` (`ryzom_forgery/__init__.py`,
+used by `ryztart`'s Forgery launcher module) no longer discover it, while
+it's still being built (`project-todos/forgery/landscape_editor.md`).
+`dev.sh` (direct launch by file path) is unaffected. Rename back to
+`APP_INFO` once ready to ship.
+
 ## 2026-09-08 — 🐛 Fix viewport toggle alignment and zoom z-fighting, Forgery 3.8.4
 
 `project-todos/forgery/landscape_editor.md` -- an approximate water-plane

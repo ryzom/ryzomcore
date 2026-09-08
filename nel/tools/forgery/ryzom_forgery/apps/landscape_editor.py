@@ -36,7 +36,12 @@ from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_g
 _EXPLORER_FILTER_PRESETS = ["*", "*.land", "*.zone", "*.zonew", "*.zonel"]
 _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
 
-APP_INFO = {
+# Renamed from APP_INFO to hide Atyscape from ryztart's app list while it's
+# still being built (see project-todos/forgery/landscape_editor.md) --
+# list_apps()/launch_app() (ryzom_forgery/__init__.py) only pick up a module
+# whose APP_INFO is named exactly that. dev.sh (direct launch by file path)
+# is unaffected. Rename back to APP_INFO once ready to ship.
+_APP_INFO_HIDDEN = {
 	"id": "landscape_editor",
 	"name": "Atyscape",
 	"subtitle": "Landscape Editor",
