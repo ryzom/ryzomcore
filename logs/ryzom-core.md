@@ -1,15 +1,12 @@
 # ryzom-core
 
-## 2026-09-06 — 🐛 Fix Linux CPU affinity stack corruption and uninitialized main thread handle
+## 2026-09-09 — 🐛 Fix ryzom_export dragging in MFC on Windows
 
-While validating `zone_lighter`/`zone_welder` orchestration from pynel (`project-todos/pynel/zone_read_write.md` step 4), `zone_lighter` crashed on every invocation, right at its first line of `light()` (`nel/src/3d/zone_lighter.cpp:929`, `currentThread->getCPUMask()`), before reaching any lighting logic.
+Building the NeL/Ryzom tools for Windows (`ryzom-docker`'s new `tools_win64` target) failed on `ryzom_export` with `fatal error C1083: Cannot open include file: 'afxwin.h'`. Its `master/easy_cfg.cpp`/`ContinentCfg.cpp` sources (added to the target by the previous `land_export` port above) are genuinely platform-independent, but on Windows they still `#include "stdafx.h"`, which resolves to `master/StdAfx.h` — the 3ds Max plugin's own precompiled header, which unconditionally pulls in `afxwin.h`/`afxext.h`/etc. unless `_CONSOLE` is defined (the standard MFC escape hatch for non-MFC targets sharing that file). `ryzom_export` never defined it.
 
-Two distinct bugs in `nel/src/misc/p_thread.cpp`, both Linux-only (the Windows equivalents in `win_thread.cpp` were never affected):
+Fixed in `ryzom/tools/leveldesign/export/CMakeLists.txt` by adding `TARGET_COMPILE_DEFINITIONS(ryzom_export PRIVATE _CONSOLE)`. `ryzom_export` isn't an MFC application and neither `easy_cfg.cpp` nor `ContinentCfg.cpp` actually use MFC, so this has no effect beyond skipping that unconditional include block — no need to install the optional MFC Visual Studio component in any build toolchain.
 
-1. **Stack corruption in the CPU-affinity functions.** `CPThread::getCPUMask()`/`setCPUMask()` and `CPProcess::getCPUMask()`/`setCPUMask()` all called glibc's `pthread_getaffinity_np`/`pthread_setaffinity_np`/`sched_getaffinity`/`sched_setaffinity` with `sizeof(uint64)` (8 bytes) as the `cpu_set_t` size, while reinterpreting a local `uint64` as a `cpu_set_t*`. A real `cpu_set_t` on this system is 128 bytes (`CPU_SETSIZE` = 1024 bits) — glibc read/wrote past the 8-byte stack buffer believing it had a full `cpu_set_t`, corrupting the caller's stack. `CPThread::getCPUMask()`/`setCPUMask()` even carried a `nlwarning("This code does not work. May cause a segmentation fault...")` acknowledging the bug without ever fixing it. Fixed all four functions to use a real `cpu_set_t` (`CPU_ZERO`/`CPU_SET`/`CPU_ISSET`), converting to/from the existing `uint64` bitmask API for the first 64 CPUs.
-2. **`CPThread::_ThreadHandle` never initialized.** Fixing bug 1 alone didn't stop the crash: the minidump still pointed inside `pthread_getaffinity_np` itself. `CPThread`'s constructor never sets `_ThreadHandle`, and `CPMainThread` (the static global wrapper representing the main thread, `p_thread.cpp:44`) is zero-initialized before its constructor runs — so `_ThreadHandle` was `0`, an invalid `pthread_t`, for every call made from the main thread. Fixed by explicitly setting `_ThreadHandle = pthread_self();` in `CPMainThread`'s constructor.
-
-Validated end-to-end: rebuilt `zone_welder`/`zone_lighter` via `ryzom-docker`'s tools build, ran the full pipeline on a real `.zone` (welded, then lighted) — no crash, `Number of CPU used: 1` logged correctly, and the resulting `.zonel` parses successfully with `pynel.ryzom_zone.load_zone()`.
+Validated end-to-end via `ryzom-docker`'s `tools_win64` target: the full NeL/Ryzom tools set (including `ryzom_export`, `land_export`, `zviewer`, and everything else) now builds successfully for Windows.
 
 ## 2026-09-06 — 🐧 Port land_export/ryzom_export to Linux
 
@@ -25,10 +22,13 @@ Discovered mid-port that `CExport::newExport` depends on `SContinentCfg`/`IEasyC
 
 Validated end-to-end: `ryzom_export`, `ryzom_landexport` and `land_export` all build and link successfully via `ryzom-docker`'s tools build, and Nuno confirmed `land_export` runs correctly against real data.
 
-## 2026-09-09 — 🐛 Fix ryzom_export dragging in MFC on Windows
+## 2026-09-06 — 🐛 Fix Linux CPU affinity stack corruption and uninitialized main thread handle
 
-Building the NeL/Ryzom tools for Windows (`ryzom-docker`'s new `tools_win64` target) failed on `ryzom_export` with `fatal error C1083: Cannot open include file: 'afxwin.h'`. Its `master/easy_cfg.cpp`/`ContinentCfg.cpp` sources (added to the target by the previous `land_export` port above) are genuinely platform-independent, but on Windows they still `#include "stdafx.h"`, which resolves to `master/StdAfx.h` — the 3ds Max plugin's own precompiled header, which unconditionally pulls in `afxwin.h`/`afxext.h`/etc. unless `_CONSOLE` is defined (the standard MFC escape hatch for non-MFC targets sharing that file). `ryzom_export` never defined it.
+While validating `zone_lighter`/`zone_welder` orchestration from pynel (`project-todos/pynel/zone_read_write.md` step 4), `zone_lighter` crashed on every invocation, right at its first line of `light()` (`nel/src/3d/zone_lighter.cpp:929`, `currentThread->getCPUMask()`), before reaching any lighting logic.
 
-Fixed in `ryzom/tools/leveldesign/export/CMakeLists.txt` by adding `TARGET_COMPILE_DEFINITIONS(ryzom_export PRIVATE _CONSOLE)`. `ryzom_export` isn't an MFC application and neither `easy_cfg.cpp` nor `ContinentCfg.cpp` actually use MFC, so this has no effect beyond skipping that unconditional include block — no need to install the optional MFC Visual Studio component in any build toolchain.
+Two distinct bugs in `nel/src/misc/p_thread.cpp`, both Linux-only (the Windows equivalents in `win_thread.cpp` were never affected):
 
-Validated end-to-end via `ryzom-docker`'s `tools_win64` target: the full NeL/Ryzom tools set (including `ryzom_export`, `land_export`, `zviewer`, and everything else) now builds successfully for Windows.
+1. **Stack corruption in the CPU-affinity functions.** `CPThread::getCPUMask()`/`setCPUMask()` and `CPProcess::getCPUMask()`/`setCPUMask()` all called glibc's `pthread_getaffinity_np`/`pthread_setaffinity_np`/`sched_getaffinity`/`sched_setaffinity` with `sizeof(uint64)` (8 bytes) as the `cpu_set_t` size, while reinterpreting a local `uint64` as a `cpu_set_t*`. A real `cpu_set_t` on this system is 128 bytes (`CPU_SETSIZE` = 1024 bits) — glibc read/wrote past the 8-byte stack buffer believing it had a full `cpu_set_t`, corrupting the caller's stack. `CPThread::getCPUMask()`/`setCPUMask()` even carried a `nlwarning("This code does not work. May cause a segmentation fault...")` acknowledging the bug without ever fixing it. Fixed all four functions to use a real `cpu_set_t` (`CPU_ZERO`/`CPU_SET`/`CPU_ISSET`), converting to/from the existing `uint64` bitmask API for the first 64 CPUs.
+2. **`CPThread::_ThreadHandle` never initialized.** Fixing bug 1 alone didn't stop the crash: the minidump still pointed inside `pthread_getaffinity_np` itself. `CPThread`'s constructor never sets `_ThreadHandle`, and `CPMainThread` (the static global wrapper representing the main thread, `p_thread.cpp:44`) is zero-initialized before its constructor runs — so `_ThreadHandle` was `0`, an invalid `pthread_t`, for every call made from the main thread. Fixed by explicitly setting `_ThreadHandle = pthread_self();` in `CPMainThread`'s constructor.
+
+Validated end-to-end: rebuilt `zone_welder`/`zone_lighter` via `ryzom-docker`'s tools build, ran the full pipeline on a real `.zone` (welded, then lighted) — no crash, `Number of CPU used: 1` logged correctly, and the resulting `.zonel` parses successfully with `pynel.ryzom_zone.load_zone()`.
