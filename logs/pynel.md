@@ -1,5 +1,51 @@
 # Changelog
 
+## 2026-09-09 — ✨ Ajoute le parseur Georges FORM (.continent, ryzom.world)
+
+`project-todos/pynel/georges_form.md` closed. Added `ryzom_georges_form.py`
+(generic recursive reader/writer for NeL's "Georges FORM" XML format --
+`<FORM Revision=".." State="..">`/`<PARENT Filename="..">`/`<STRUCT>`/
+`<ARRAY>`/`<ATOM Name=".." Value="..">` -- distinct from the LIGO
+`.primitive` tree `ryzom_primitive.py` already handles), plus two thin
+typed wrappers: `ryzom_continent.py` (`.continent` files, exposing `name`/
+`pacs_rbank`/`ecosystem`) and `ryzom_world.py` (`ryzom.world`, exposing the
+per-continent entries of its "continents list"). All three support both
+read and write (round-trip), following pynel's standing convention.
+
+Motivated by `forgery/landscape_editor__zone_render_modes__pipeline_data_installer.md`,
+which needed a reliable continent -> ecosystem mapping. Found and documented
+a naming trap in `ryzom-data/leveldesign/world/`: neither a `.continent`
+file's own filename nor the directory it lives in is a reliable runtime
+continent identifier (e.g. `lecarrefour.continent`, folder `lecarrefour/`,
+is actually the continent **nexus**; `lesfalaises(matis)/lesfalaises.continent`
+is actually **matis**). The only reliable field is the `PacsRBank` ATOM
+(e.g. `Value="nexus.rbank"` -> `nexus`), cross-validated against an
+independent source (`leveldesign/workspace/continents/<name>/directories.py`'s
+`ContinentName`/`EcosystemName`, used by the legacy `build_gamedata`
+pipeline). `ryzom.world`'s own `continent_name` field is also sometimes
+wrong for the same reason (e.g. the `matis` entry has `continent_name=
+"lesfalaises"`).
+
+Validated with an independent automated cross-check (a regex extraction
+over the raw XML, not reusing the new parser) rather than manual eyeballing:
+all 28 continent entries in a real `ryzom.world` match on every field
+(`selection_name`/`continent_name`/`minx`/`miny`/`maxx`/`maxy`/`prim_file`).
+Also validated `ryzom_continent.py` against real `.continent` files for all
+4 mainland ecosystems (nexus/matis -> jungle, fyros -> desert,
+tryker -> lacustre) and a Ring continent (`ecosystem is None`, as expected).
+
+Format/trap documented in `docs/georges_form.md`. Also updated
+`docs/georges_sheets.md` (an older, unimplemented scoping doc for a future
+`ryzom_georges.py` handling sheet `PARENT`-chain inheritance/provenance) to
+note that its groundwork -- the generic FORM tree parser -- is now done and
+should be reused, not re-derived.
+
+Deliberately does not resolve `<PARENT Filename="..">` inheritance (not
+needed for `.continent`/`ryzom.world`), does not derive field write-order
+from a `.dfn` file (round-trips the order read instead -- correct for
+editing existing fields, not for inserting brand new ones), and does not
+handle newline-containing ATOM values (not encountered in these two formats).
+
 ## 2026-09-06 — ✨ Add .zone/.zonew/.zonel + .land read/write and native tool orchestration, pynel 0.13.0
 
 `project-todos/pynel/zone_read_write.md` closed. Added `ryzom_zone.py`

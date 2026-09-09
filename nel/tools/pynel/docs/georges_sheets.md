@@ -4,6 +4,16 @@ Status: **not implemented**. This is a scoping/investigation doc, written
 ahead of a dedicated session to add `ryzom_georges.py` to pynel — read this
 first before starting that work, don't re-derive it from scratch.
 
+**Update 2026-09-09**: the generic FORM/STRUCT/ARRAY/ATOM tree parser this
+doc describes (see "Format overview" below) has since been implemented as
+`ryzom_georges_form.py` (read + write, see `docs/georges_form.md`), driven
+by a different need (`.continent`/`ryzom.world`, no `PARENT`-chain
+resolution needed there). A future `ryzom_georges.py` for sheet provenance
+should **build on top of `ryzom_georges_form.GeorgesForm`/`GeorgesStruct`**
+for the raw per-file tree, rather than re-deriving that parsing layer --
+only the parent-chain merge/provenance logic (this doc's actual scope,
+`form_elm.cpp`'s resolution algorithm) is still net-new work.
+
 ## Why this doc exists
 
 Sheets in `ryzom-private-data/game_element/` (creature, items, brick,
