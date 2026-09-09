@@ -23,8 +23,11 @@ from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 )
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
+from ryzom_forgery import continent_ecosystem
 from ryzom_forgery import live_data
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
+from ryzom_forgery import pipeline_data_installer
+from ryzom_forgery.pipeline_data_install_dialog import PipelineDataInstallDialog
 from ryzom_forgery.region_loader import (
 	find_zones_in_region, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data, RegionLoadError,
 )
@@ -229,6 +232,14 @@ class LandscapeEditorApp(ForgeryApp):
 		# polling of it.
 		self._continent_load_progress = None
 
+		# Proposes downloading missing pipeline data (project-todos/forgery/
+		# landscape_editor__zone_render_modes__pipeline_data_installer.md)
+		# for the continent about to load, see _load_continent(). Actually
+		# opened from draw_panel(), not _load_continent() itself -- see the
+		# comment at its only assignment for why.
+		self._pipeline_data_install_dialog = PipelineDataInstallDialog()
+		self._pipeline_data_install_pending = None
+
 	def on_selection_changed(self, items):
 		"""A single .zone*/.bnp-contained zone picked in the Explorer -- loads
 		exactly the clicked file, unaffected by self.render_mode. Not a real
@@ -274,6 +285,40 @@ class LandscapeEditorApp(ForgeryApp):
 		live_data_path = app_settings.load().live_data_path
 		ryzom_data_path = repository_paths.get("ryzom-data")
 		pipeline_continent_name = self._selected_continent_pipeline_name
+
+		# Propose downloading whatever pipeline data is missing for this
+		# continent (never blocking -- the load below proceeds regardless,
+		# project-todos/forgery/landscape_editor__zone_render_modes__
+		# pipeline_data_installer.md step 5). Always the continent, its
+		# ecosystem's export AND its ecosystem's raw landscape zones
+		# together when missing: `landscape/<eco>/zones/` (raw .zone bricks
+		# + .zoneligo) is the only starting material to compose a continent
+		# from its .land when no continent-specific .zone has been
+		# generated yet (land_export, not wired here -- land_composition
+		# chantier) -- one is as useless as the others without it in
+		# practice (Nuno 2026-09-09).
+		if pipeline_continent_name:
+			missing = []
+			if not pipeline_data_installer.is_installed("pipeline_continents", pipeline_continent_name):
+				missing.append(("pipeline_continents", pipeline_continent_name))
+			ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(pipeline_continent_name)
+			if ecosystem_name:
+				if not pipeline_data_installer.is_installed("pipeline_ecosystems", ecosystem_name):
+					missing.append(("pipeline_ecosystems", ecosystem_name))
+				if not pipeline_data_installer.is_installed("landscape", ecosystem_name):
+					missing.append(("landscape", ecosystem_name))
+			if missing:
+				# Deferred to the next draw_panel() (outside any
+				# begin_combo()/end_combo() block) rather than opened here --
+				# _load_continent() runs from inside the continent combo's
+				# own popup (see _select_continent()'s call site), and
+				# calling imgui.open_popup() for a different popup while
+				# still inside another popup's Begin/End is a classic ImGui
+				# trap: the new popup's open request is silently lost when
+				# the combo closes (found 2026-09-09, Nuno: no popup ever
+				# appeared despite `missing` being correctly non-empty).
+				self._pipeline_data_install_pending = missing
+
 		# A continent with a real pipeline export (region_loader.py's
 		# has_pipeline_export()) never reads live_data_path at all, so it's
 		# never required to be configured for that continent (project-todos/
@@ -556,6 +601,10 @@ class LandscapeEditorApp(ForgeryApp):
 		# Settings (project-todos/forgery/
 		# landscape_editor__zone_render_modes__ryzom_paths_ui.md step 5).
 		self._draw_viewport_toggles()
+		if self._pipeline_data_install_pending is not None:
+			self._pipeline_data_install_dialog.open(self._pipeline_data_install_pending)
+			self._pipeline_data_install_pending = None
+		self._pipeline_data_install_dialog.draw()
 
 		if imgui.begin_tab_bar("##panel-tabs"):
 			_push_tab_color(_TAB_COLOR_LANDSCAPE)

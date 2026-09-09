@@ -1,5 +1,55 @@
 # Changelog
 
+## 2026-09-09 — ✨ Add pipeline data download/install, Forgery 4.3.0
+
+`landscape_editor__zone_render_modes__pipeline_data_installer.md` closed.
+
+**`pipeline_data_installer.py`**: downloads and installs the `.zip`
+archives Nuno publishes for the `build_gamedata` pipeline data (too large
+to version in `ryzom-data`) into `<ryzom-data>/pipeline/`. Three
+categories, each with a base URL and target subdirectory: `landscape`
+(`download.ryzom.com/tools/landscape/<ecosystem>.zip` ->
+`pipeline/landscape/<ecosystem>/`), `pipeline_ecosystems`
+(`.../tools/pipeline/<ecosystem>.zip` -> `pipeline/export/ecosystems/
+<ecosystem>/`), `pipeline_continents` (same base, `<continent>.zip` ->
+`pipeline/export/continents/<continent>/`). `is_installed()`/
+`download_and_install()` -- streamed download via stdlib `urllib.request`,
+extraction via stdlib `zipfile` (reads DEFLATE and LZMA transparently, so a
+`.zip` written with `7z a -tzip -mm=LZMA` for a much better compression
+ratio than plain `zip` needs no code change to read). No new dependency.
+
+**`continent_ecosystem.py`**: `get_ecosystem_for_continent()` maps a
+continent's real runtime name to its ecosystem, primarily from
+`<ryzom-data>/leveldesign/workspace/continents/<name>/directories.py`'s
+`EcosystemName` (regex-extracted) -- more reliable than each
+`.continent`'s own `Ecosystem` field, which can be entirely absent even
+when the ecosystem is real (found for every `r2_*` Ring continent) and can
+spell the name differently (`primes_roots` vs the `primes_racines`
+convention the download categories and `directories.py` actually use).
+Falls back to the `.continent` file itself only for continents absent from
+`workspace/` (just `testroom`).
+
+**`pipeline_data_install_dialog.py`** (`PipelineDataInstallDialog`):
+proposes downloading whatever's missing (continent + its ecosystem's
+export + its ecosystem's raw landscape zones -- `landscape` turned out to
+be a hard requirement, not optional, since it's the only starting material
+to compose a continent from its `.land` before any per-continent `.zone`
+has been generated) as one popup, then runs the downloads sequentially in
+a background thread with a shared progress bar. A declined set is
+remembered in memory for the session (never persisted).
+
+Wired into `landscape_editor.py`'s continent combo (`_load_continent`).
+Found and fixed two real bugs during Nuno's testing: (1) the popup never
+appeared at all -- `_load_continent()` runs from inside the continent
+combo's own `begin_combo()`/`end_combo()` block, and calling
+`imgui.open_popup()` for a different popup while still inside another
+popup's Begin/End silently loses the open request when the combo closes;
+fixed by deferring the open to the next `draw_panel()`, outside any combo,
+via a pending-list field. (2) the popup rendered squashed to a tiny width
+-- it has no other wide content to anchor `always_auto_resize`'s width
+calculation, so plain `text_wrapped()` collapsed to a minimal column;
+fixed with an explicit `push_text_wrap_pos()`.
+
 ## 2026-09-09 — ✨ Add [2D][POLY][WELD][LIGHT] render modes + pipeline-export zone source, Forgery 4.2.0
 
 `landscape_editor__zone_render_modes.md` step 6 closed.
