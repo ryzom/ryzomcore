@@ -12,6 +12,13 @@ LIST(APPEND PRIV_H ${CMAKE_CURRENT_SOURCE_DIR}/../master/easy_cfg.h ${CMAKE_CURR
 
 NL_TARGET_LIB(ryzom_export ${PRIV_H} ${SRC})
 
+# _CONSOLE makes master/StdAfx.h (pulled in transitively by easy_cfg.cpp/
+# ContinentCfg.cpp on Windows) skip its #ifndef _CONSOLE block of MFC
+# includes -- neither file actually uses MFC, and ryzom_export isn't an MFC
+# app, so there's nothing to build without it besides an optional Visual
+# Studio component.
+TARGET_COMPILE_DEFINITIONS(ryzom_export PRIVATE _CONSOLE)
+
 TARGET_LINK_LIBRARIES(ryzom_export nelmisc nelligo nelgeorges nel3d nelpacs)
 NL_DEFAULT_PROPS(ryzom_export "Ryzom, Library, World: Export Tools")
 NL_ADD_RUNTIME_FLAGS(ryzom_export)
