@@ -287,3 +287,76 @@ en bleu la majorité d'un continent réel. Retirée entièrement
 (`build_water_plane_geom()`/`_WATER_PLANE_COLOR` dans `zone_geometry.py`,
 état/toggle dans `landscape_editor.py`) ; seule la détection réelle par
 `.ig` reste au programme.
+
+## Modes de rendu [2D][POLY][WELD][LIGHT] (`landscape_editor__zone_render_modes.md`)
+
+Barre de 4 boutons (`_draw_render_mode_bar()`) contrôlant `self.render_mode`
+(`"2D"/"POLY"/"WELD"/"LIGHT"`, défaut `"POLY"`). `[2D]` ne fait que la bascule
+caméra existante (`snap_to_axis("+z")`) ; `[POLY]`/`[WELD]`/`[LIGHT]`
+re-résolvent, pour chaque zone du continent chargé (`self._loaded_refs`/
+`self._loaded_extensions`, name -> ZoneRef / name -> {ext: ZoneRef}), quelle
+extension réelle afficher via `_resolve_zone_for_mode()` :
+
+- `[WELD]` accepte `.zonew` OU `.zonel` comme "réellement weldé" (un `.zonel`
+  livré implique que le weld a eu lieu, même si le `.zonew` intermédiaire n'a
+  pas été conservé -- un vrai `live_data` shippé ne garde souvent que l'étape
+  finale). Repli sur `.zone` sinon.
+- `[LIGHT]` n'accepte que `.zonel`. Repli sur `.zonew` puis `.zone`.
+- Une zone affichée via repli (pas la bonne extension pour le mode actif) est
+  rendue avec un dégradé violet -> rose (`_FALLBACK_LOW`/`_FALLBACK_HIGH`,
+  `build_zone_geom_from_cache(..., fallback=True)`) plutôt qu'en dégradé
+  d'élévation. Une première version en dégradé de gris (quasi-noir -> gris
+  clair) s'est révélée indiscernable du fond gris du viewport -- une zone en
+  repli à basse élévation ressemblait à un vrai trou dans le terrain plutôt
+  qu'à une zone grisée (trouvé le 2026-09-09, Nuno). Violet/rose n'apparaît
+  jamais dans le dégradé d'élévation réel (rouge/marron/vert), donc se
+  distingue sans ambiguïté à la fois du terrain et du fond.
+
+Le rendu Explorer (`on_selection_changed()`, sélection d'un fichier unique)
+n'est **jamais** passé par cette logique de mode -- charge toujours
+exactement le fichier cliqué. Ce chemin n'est de toute façon jamais utilisé
+en pratique (Nuno 2026-09-09) : le workflow réel charge toujours un continent
+entier via le combo.
+
+### Source de zones par continent -- `live_data_path` vs export pipeline réel
+
+`region_loader.find_zones_in_region()`/`get_zone_index()`/
+`get_zone_extensions_index()` prennent un `continent_name` + `ryzom_data_path`
+optionnels. Si `<ryzom_data_path>/pipeline/export/continents/<continent_name>/`
+existe (un vrai export du pipeline `build_gamedata`, avec ses sous-dossiers
+`zone`/`zone_weld`/`zone_lighted` parmi bien d'autres -- seuls ces trois sont
+scannés), ces zones **remplacent entièrement** `live_data_path` pour ce
+continent (jamais fusionné) -- `live_data_path` n'a alors même plus besoin
+d'être configuré. Cette source n'est **jamais mise en cache** (contrairement
+à `live_data_path`) : elle sert à tester le pipeline avec de vraies données à
+plusieurs étapes (contrairement à `live_data_path` qui ne livre que l'étape
+finale), y compris en supprimant manuellement un fichier pendant une session
+pour vérifier un cas de repli -- un cache figé casserait ce test.
+
+`ryzom_data_path` est résolu via `pynel.repository_paths.get("ryzom-data")`
+(le sélecteur déjà existant dans Settings > Ryzom Paths, `RepositoryPathsDialog`)
+-- **jamais** un réglage dédié en plus (une première version avait
+introduit `Settings.ryzom_data_path`, doublon corrigé le 2026-09-09).
+
+**Piège découvert le 2026-09-09** : le nom affiché dans le combo continent
+(`ContLoc.selection_name`, ex. `"nexus"`) peut être **différent** du nom
+interne (`ContLoc.continent_name`, ex. `"lecarrefour"`) utilisé pour résoudre
+les bornes (`continent_selector.resolve_continent_bounds`). `continent_name`
+ne nomme que les fichiers projet sous
+`ryzom-data/leveldesign/world/<continent_name>/` (`.continent`, `.region`,
+`continent.cfg`) -- un vrai dossier d'export pipeline sous
+`ryzom-data/pipeline/export/continents/` est nommé d'après `selection_name`,
+pas `continent_name`. `landscape_editor.py` garde donc les deux séparément :
+`self.selected_continent_name` (résolution des bornes) et
+`self._selected_continent_pipeline_name` (recherche de l'export pipeline,
+issu de `cont_loc.selection_name`).
+
+**Chemins `ryzom-data` -- lequel est le bon** (2026-09-09) : les vrais
+`.land`/briques de leveldesign vivent sous `leveldesign/landscape/`
+(actuel, maintenu -- ex. `leveldesign/landscape/desert/fyros.land`, daté
+2025). `graphics/landscape/ligo/` contient de **vieilles données obsolètes**
+(un même nom de fichier peut y être un format binaire legacy daté de 2020,
+voire absent) -- confirmé par comparaison octet-à-octet sur les 27 `.land`
+existants (19 identiques, 7 différents dont au moins un format binaire
+périmé, 1 manquant). Ne jamais lire `graphics/landscape/ligo/` pour du
+leveldesign actif.

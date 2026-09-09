@@ -78,6 +78,36 @@ def _elevation_colors_uint8(z, min_z, max_z):
 	return (colors * 255.0).astype(np.uint8)
 
 
+# Fallback gradient (landscape_editor.py's [WELD]/[LIGHT] render modes,
+# project-todos/forgery/landscape_editor__zone_render_modes.md step 6) --
+# purple at the lowest point loaded, pink at the highest, a plain single
+# min-max lerp (unlike _elevation_colors_uint8()'s sea-level anchor -- this
+# is a "not really welded/lit" marker, not a real elevation read, so it
+# doesn't need that nuance). A first grayscale version (near-black -> light
+# gray) turned out indistinguishable from the viewport's own gray background
+# -- a fully fallback-colored zone at low elevation looked like a hole in
+# the terrain rather than a grayed-out zone (found 2026-09-09, Nuno).
+# Purple/pink never occurs in the real elevation gradient (_DEEP_COLOR/
+# _SEA_LEVEL_COLOR/_PEAK_COLOR are all red/brown/green), so it reads
+# unambiguously as "fallback" against both the terrain and the background.
+_FALLBACK_LOW = (0.45, 0.15, 0.55, 1.0)
+_FALLBACK_HIGH = (0.95, 0.55, 0.80, 1.0)
+
+
+def _fallback_colors_uint8(z, min_z, max_z):
+	"""Same shape/contract as _elevation_colors_uint8() (vectorized numpy in,
+	(N, 4) uint8 out, truncation not rounding) but a single purple -> pink
+	lerp over [min_z, max_z], for the fallback/not-up-to-date zone
+	coloring."""
+	z = np.asarray(z, dtype=np.float64)
+	low = np.array(_FALLBACK_LOW)
+	high = np.array(_FALLBACK_HIGH)
+	span = max_z - min_z
+	t = np.clip((z - min_z) / span, 0.0, 1.0) if span > 0.0 else np.zeros_like(z)
+	colors = low + (high - low) * t[:, None]
+	return (colors * 255.0).astype(np.uint8)
+
+
 def _cubic_bernstein(t):
 	"""The 4 cubic Bernstein basis values at `t` -- B0=(1-t)^3, B1=3t(1-t)^2,
 	B2=3t^2(1-t), B3=t^3. Matches CBezierPatch::eval()'s own s0/s1/s2/s3 (and
@@ -196,7 +226,9 @@ def build_zone_tessellated_geom(zone) -> GeomNode:
 	return build_zone_geom_from_cache(zone_to_cache_data(zone))
 
 
-def build_zone_geom_from_cache(cache_data: ZoneCacheData, min_z: float = None, max_z: float = None) -> GeomNode:
+def build_zone_geom_from_cache(
+	cache_data: ZoneCacheData, min_z: float = None, max_z: float = None, fallback: bool = False,
+) -> GeomNode:
 	"""Same output as build_zone_tessellated_geom() (color by elevation,
 	same triangle winding) but rebuilt straight from already-tessellated
 	positions (zone_cache.py, project-todos/forgery/
@@ -214,6 +246,15 @@ def build_zone_geom_from_cache(cache_data: ZoneCacheData, min_z: float = None, m
 	instead of every zone re-normalizing its own tiny patch of relief to the
 	same green range -- a "patchwork" look at zone boundaries, found by Nuno
 	2026-09-08 testing a real continent.
+
+	`fallback`, if true, replaces the elevation-colored gradient with the
+	purple->pink one (_fallback_colors_uint8()) -- used by landscape_editor.py's
+	[WELD]/[LIGHT] render modes for a zone that's only shown via a fallback
+	extension (project-todos/forgery/landscape_editor__zone_render_modes.md
+	step 6), so it reads as visibly not-actually-welded/lit rather than
+	blending into the real gradient (or, with an earlier grayscale attempt,
+	into the viewport's own gray background -- see _FALLBACK_LOW/
+	_FALLBACK_HIGH's own comment).
 
 	Writes vertex and index data in bulk (numpy, one `set_data()` call per
 	array) instead of one GeomVertexWriter/GeomPrimitive call per vertex/
@@ -243,6 +284,8 @@ def build_zone_geom_from_cache(cache_data: ZoneCacheData, min_z: float = None, m
 	assert vertex_column.get_start() == 0 and vertex_column.get_num_components() == 3
 	assert color_column.get_start() == 12 and color_column.get_num_components() == 4
 
+	color_fn = _fallback_colors_uint8 if fallback else _elevation_colors_uint8
+
 	vertex_buf = np.empty(total_vertices, dtype=[("vertex", "<f4", 3), ("color", "u1", 4)])
 	patch_index_arrays = []
 	base = 0
@@ -251,7 +294,7 @@ def build_zone_geom_from_cache(cache_data: ZoneCacheData, min_z: float = None, m
 		n = (patch.n_s + 1) * stride
 		positions = np.array(patch.positions, dtype="<f4").reshape(n, 3)
 		vertex_buf["vertex"][base:base + n] = positions
-		vertex_buf["color"][base:base + n] = _elevation_colors_uint8(positions[:, 2], min_z, max_z)
+		vertex_buf["color"][base:base + n] = color_fn(positions[:, 2], min_z, max_z)
 
 		i_idx, j_idx = np.meshgrid(np.arange(patch.n_s), np.arange(patch.n_t), indexing="ij")
 		i0 = base + i_idx * stride + j_idx

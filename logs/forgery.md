@@ -1,5 +1,65 @@
 # Changelog
 
+## 2026-09-09 — ✨ Add [2D][POLY][WELD][LIGHT] render modes + pipeline-export zone source, Forgery 4.2.0
+
+`landscape_editor__zone_render_modes.md` step 6 closed.
+
+**Render mode bar** (`landscape_editor.py`, `_draw_render_mode_bar()`):
+`self.render_mode` (`"2D"/"POLY"/"WELD"/"LIGHT"`, default `"POLY"`) drives,
+for every zone of the loaded continent, which real extension to actually
+display (`_resolve_zone_for_mode()`). `[WELD]` accepts either `.zonew` OR
+`.zonel` as "really welded" -- a shipped `.zonel` necessarily went through
+welding already, even when the intermediate `.zonew` was never kept (a real
+`live_data` install only ships the final pipeline stage). `[LIGHT]` only
+accepts `.zonel`. Either mode falls back to an earlier stage when its own
+extension is missing, rendering that zone with a distinct fallback gradient
+(`zone_geometry.build_zone_geom_from_cache(..., fallback=True)`) instead of
+the real elevation-colored one -- purple at the lowest point loaded, pink at
+the highest. A first grayscale attempt (near-black -> light gray) turned
+out indistinguishable from the viewport's own gray background: a fully
+fallback-colored zone at low elevation looked exactly like a hole in the
+terrain rather than a grayed-out zone. `[2D]` only triggers the existing
+top-view camera snap. The Explorer single-file-selection path
+(`on_selection_changed()`) is deliberately NOT routed through this logic --
+it's never used in practice, the real workflow always loads a whole
+continent via the combo.
+
+**Zone source per continent -- `live_data_path` vs a real pipeline export**
+(`region_loader.py`): `find_zones_in_region()`/`get_zone_index()`/
+`get_zone_extensions_index()` now take an optional `continent_name` +
+`ryzom_data_path`. If `<ryzom_data_path>/pipeline/export/continents/<continent_name>/`
+exists (a real `build_gamedata` pipeline export, scanning only its `zone`/
+`zone_weld`/`zone_lighted` subdirectories), it entirely replaces
+`live_data_path` as that continent's zone source -- never merged with it,
+and `live_data_path` doesn't even need to be configured for such a
+continent. This source is intentionally never cached (unlike
+`live_data_path`), since real multi-stage test data can change between
+calls (e.g. deleting a `.zonew` mid-session to exercise a WELD fallback).
+`ryzom_data_path` is resolved via the already-existing
+`pynel.repository_paths.get("ryzom-data")` (Settings > Ryzom Paths) -- a
+first version introduced a second, redundant `Settings.ryzom_data_path`
+field, caught and removed.
+
+**Gotcha found while wiring this up**: a continent's displayed combo label
+(`ContLoc.selection_name`, e.g. `"nexus"`) can differ from its internal sheet
+stem (`ContLoc.continent_name`, e.g. `"lecarrefour"`, used to resolve
+bounds) -- a real pipeline export directory is named after
+`selection_name`, not `continent_name`. `landscape_editor.py` now tracks
+both (`self.selected_continent_name` for bounds, `self._selected_continent_pipeline_name`
+for the pipeline export lookup) -- conflating them silently made the
+pipeline-export source never match and fall through to `live_data_path`
+without any error.
+
+Also confirmed (comparing 27 real `.land` files byte-for-byte):
+`ryzom-data/leveldesign/landscape/` is the current/maintained source
+(2025-dated, all XML); `ryzom-data/graphics/landscape/ligo/` holds stale
+data (2020-dated, at least one file in an obsolete binary format, one file
+missing entirely) -- never read the latter for active leveldesign.
+
+Validated by Nuno on a real continent (`nexus`), including deleting a real
+`.zonew`/`.zonel` mid-session to confirm the fallback/gradient triggers
+correctly.
+
 ## 2026-09-08 — ✨ Shared "Ryzom Paths" Settings section + Atyscape tab bar, Forgery 4.1.0
 
 `project-todos/forgery/landscape_editor__zone_render_modes__ryzom_paths_ui.md`

@@ -50,16 +50,22 @@ class _CacheEnvelope(NamedTuple):
 	data: ZoneCacheData
 
 
-def _cache_path(zone_name: str) -> Path:
-	return config_dir() / _CACHE_DIR_NAME / f"{zone_name}.zonecache"
+def _cache_path(zone_name: str, extension: str) -> Path:
+	# extension includes its leading "." (e.g. ".zonew") -- stripped here so
+	# the cache file name stays a single clean "<name>__<ext>.zonecache"
+	# rather than doubling up dots.
+	return config_dir() / _CACHE_DIR_NAME / f"{zone_name}__{extension.lstrip('.')}.zonecache"
 
 
-def write_zone_cache(zone_name: str, source_path: Path, data: ZoneCacheData) -> None:
-	"""Writes/overwrites the disk cache for `zone_name`, stamped with
-	`source_path`'s current mtime/size -- its `.zone`/`.zonew`/`.zonel` file
-	if loose, or the whole `.bnp`/`.bnpe` if the zone is packed (a single
-	entry inside an archive can't be dated on its own, see the
-	sub-chantier's scope decisions)."""
+def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: ZoneCacheData) -> None:
+	"""Writes/overwrites the disk cache for `zone_name`'s `extension` (e.g.
+	".zonew"), stamped with `source_path`'s current mtime/size -- its
+	`.zone`/`.zonew`/`.zonel` file if loose, or the whole `.bnp`/`.bnpe` if
+	the zone is packed (a single entry inside an archive can't be dated on
+	its own, see the sub-chantier's scope decisions). `extension` is part of
+	the cache key (region_loader.zone_ref_extension()) so switching a zone's
+	render mode between raw/welded/lit never serves a stale geometry from
+	another mode's cache entry."""
 	stat = source_path.stat()
 	envelope = _CacheEnvelope(
 		format_version=_CACHE_FORMAT_VERSION,
@@ -67,7 +73,7 @@ def write_zone_cache(zone_name: str, source_path: Path, data: ZoneCacheData) -> 
 		source_size=stat.st_size,
 		data=data,
 	)
-	path = _cache_path(zone_name)
+	path = _cache_path(zone_name, extension)
 	path.parent.mkdir(parents=True, exist_ok=True)
 	# Written to a temp file then renamed into place -- an interrupted write
 	# (crash, kill) must never leave a half-written file that
@@ -78,13 +84,13 @@ def write_zone_cache(zone_name: str, source_path: Path, data: ZoneCacheData) -> 
 	tmp_path.replace(path)
 
 
-def read_zone_cache(zone_name: str, source_path: Path) -> Optional[ZoneCacheData]:
-	"""Returns the cached ZoneCacheData for `zone_name` if a cache file
-	exists AND `source_path`'s current mtime/size still match what was
-	stamped at write_zone_cache() time -- None otherwise (missing, stale
+def read_zone_cache(zone_name: str, extension: str, source_path: Path) -> Optional[ZoneCacheData]:
+	"""Returns the cached ZoneCacheData for `zone_name`'s `extension` if a
+	cache file exists AND `source_path`'s current mtime/size still match what
+	was stamped at write_zone_cache() time -- None otherwise (missing, stale
 	format/source, or unreadable), meaning the caller must rebuild it from
 	the real source and call write_zone_cache() again."""
-	path = _cache_path(zone_name)
+	path = _cache_path(zone_name, extension)
 	try:
 		with open(path, "rb") as f:
 			envelope = pickle.load(f)

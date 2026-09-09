@@ -13,6 +13,7 @@ from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 
+from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
 from pynel.ryzom_zone import parse_zone, ZoneParseError
 
@@ -24,7 +25,9 @@ from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import live_data
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
-from ryzom_forgery.region_loader import find_zones_in_region, load_zone_cache_data, RegionLoadError
+from ryzom_forgery.region_loader import (
+	find_zones_in_region, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data, RegionLoadError,
+)
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, zone_to_cache_data
@@ -39,6 +42,41 @@ from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_g
 # 2026-09-07, Nuno couldn't navigate into any .bnp at all).
 _EXPLORER_FILTER_PRESETS = ["*", "*.land", "*.zone", "*.zonew", "*.zonel"]
 _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
+
+# Render mode bar (project-todos/forgery/landscape_editor__zone_render_modes.md
+# step 6) -- WELD/LIGHT each accept one or more "real" extensions (a zone
+# doesn't need its own standalone .zonew to count as welded for [WELD]: a
+# shipped .zonel necessarily went through welding already, even when the
+# intermediate .zonew was never kept -- real shipped live_data installs only
+# ship the final pipeline stage, confirmed 2026-09-09, Nuno), falling back
+# (see _resolve_zone_for_mode()) to a genuinely earlier stage, rendered as a
+# purple->pink gradient (zone_geometry.build_zone_geom_from_cache(fallback=True) --
+# a first grayscale attempt was indistinguishable from the viewport's own
+# gray background, Nuno 2026-09-09) rather than the real elevation-colored
+# one. POLY/2D have no entry in
+# _MODE_REAL_EXTENSIONS -- they always show each zone's own default (highest-
+# priority, region_loader.py's own .zonel > .zonew > .zone) ZoneRef, exactly
+# the pre-chantier behavior.
+_RENDER_MODES = ("2D", "POLY", "WELD", "LIGHT")
+_MODE_REAL_EXTENSIONS = {"WELD": (".zonew", ".zonel"), "LIGHT": (".zonel",)}
+_MODE_FALLBACK_EXTENSIONS = {"WELD": (".zone",), "LIGHT": (".zonew", ".zone")}
+
+
+def _resolve_zone_for_mode(default_ref, ext_map, mode):
+	"""Which ZoneRef to actually load for `mode`, and whether it's a real
+	match (True) or a fallback (False, caller should render it gray) -- see
+	_MODE_REAL_EXTENSIONS/_MODE_FALLBACK_EXTENSIONS module comment. POLY/2D
+	(no real-extensions entry) always return `default_ref` unchanged."""
+	real_exts = _MODE_REAL_EXTENSIONS.get(mode)
+	if real_exts is None:
+		return default_ref, True
+	for ext in real_exts:
+		if ext in ext_map:
+			return ext_map[ext], True
+	for fallback_ext in _MODE_FALLBACK_EXTENSIONS[mode]:
+		if fallback_ext in ext_map:
+			return ext_map[fallback_ext], False
+	return None, False
 
 # draw_panel()'s tab bar (_push_tab_color()) -- same idea as
 # object_editor.py's own _TAB_COLOR_* constants, one per tab so each reads
@@ -131,6 +169,10 @@ class LandscapeEditorApp(ForgeryApp):
 		self._cont_locs = None
 		self._cont_locs_error = None
 		self.selected_continent_name = None
+		# ContLoc.selection_name for the current selection -- see
+		# _select_continent()'s own docstring for why this differs from
+		# selected_continent_name and what it's used for.
+		self._selected_continent_pipeline_name = None
 		self.continent_bounds = None
 		self._bounds_error = None
 
@@ -148,6 +190,22 @@ class LandscapeEditorApp(ForgeryApp):
 		self._zone_nodes = {}
 		self._zone_error = None
 		self._zone_root = self.render.attach_new_node("zone-root")
+
+		# Render mode state (project-todos/forgery/
+		# landscape_editor__zone_render_modes.md step 6). _loaded_refs (name ->
+		# default/POLY ZoneRef) and _loaded_extensions (name -> {ext: ZoneRef})
+		# describe the currently loaded zone set (single Explorer selection or
+		# a whole continent) independently of which extension is actually
+		# displayed -- _apply_render_mode() re-resolves and reloads from these
+		# every time self.render_mode changes, without re-scanning the disk
+		# index. _gray_zones/_missing_for_mode are recomputed by the same
+		# call, for _draw_render_mode_bar()'s own display.
+		self.render_mode = "POLY"
+		self._loaded_refs = {}
+		self._loaded_extensions = {}
+		self._gray_zones = set()
+		self._missing_for_mode = 0
+		self._mode_reload_progress = None
 
 		# Zone-boundary grid overlay (project-todos/forgery/
 		# landscape_editor.md step 7) -- rebuilt in _set_loaded_zones()
@@ -172,9 +230,16 @@ class LandscapeEditorApp(ForgeryApp):
 		self._continent_load_progress = None
 
 	def on_selection_changed(self, items):
+		"""A single .zone*/.bnp-contained zone picked in the Explorer -- loads
+		exactly the clicked file, unaffected by self.render_mode. Not a real
+		usage pattern (Nuno always loads a whole continent via the combo,
+		never browses the Explorer for this, 2026-09-09) -- kept simple/
+		direct rather than routed through _apply_render_mode()'s mode
+		resolution, which only matters for continent loads."""
 		if len(items) != 1 or items[0].suffix.lower() not in _ZONE_EXTENSIONS:
 			return
 		item = items[0]
+		name = item.stem
 		self._zone_error = None
 		try:
 			zone = parse_zone(item.read_bytes())
@@ -182,7 +247,9 @@ class LandscapeEditorApp(ForgeryApp):
 			self._zone_error = f"Failed to load {item.name}: {exc}"
 			self._set_loaded_zones({})
 			return
-		self._set_loaded_zones({Path(item.name).stem: zone_to_cache_data(zone)})
+		self._loaded_refs = {}
+		self._loaded_extensions = {}
+		self._set_loaded_zones({name: zone_to_cache_data(zone)})
 
 	def _load_continent(self):
 		"""Starts a background load of every real zone in the selected
@@ -205,40 +272,114 @@ class LandscapeEditorApp(ForgeryApp):
 			return
 		self._zone_error = None
 		live_data_path = app_settings.load().live_data_path
-		if not live_data.is_valid_live_data_path(live_data_path):
-			self._zone_error = "Ryzom Live data path not configured -- set it in Patina's Settings tab (Paths)."
-			return
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		pipeline_continent_name = self._selected_continent_pipeline_name
+		# A continent with a real pipeline export (region_loader.py's
+		# has_pipeline_export()) never reads live_data_path at all, so it's
+		# never required to be configured for that continent (project-todos/
+		# forgery/landscape_editor__zone_render_modes.md step 6).
+		if not has_pipeline_export(ryzom_data_path, pipeline_continent_name):
+			if not live_data.is_valid_live_data_path(live_data_path):
+				self._zone_error = "Ryzom Live data path not configured -- set it in Patina's Settings tab (Paths)."
+				return
 
-		progress = {"done": False, "error": None, "zones": {}, "total": 0, "processed": 0}
+		progress = {"done": False, "error": None, "default_refs": {}, "extensions": {}}
 		self._continent_load_progress = progress
 		thread = threading.Thread(
-			target=self._run_load_continent, args=(live_data_path, self.continent_bounds, progress), daemon=True,
+			target=self._run_load_continent,
+			args=(live_data_path, ryzom_data_path, pipeline_continent_name, self.continent_bounds, progress),
+			daemon=True,
 		)
 		thread.start()
 
-	def _run_load_continent(self, live_data_path, bounds, progress):
-		"""Background-thread body for _load_continent() -- pure file I/O/
-		pickle (region_loader.py/zone_cache.py), never touches Panda3D
-		(load_zone_cache_data() only ever builds a ZoneCacheData, plain
-		data -- the actual GeomNode is built on the main thread, see
-		draw_panel()'s own polling of `progress`). Writes only to `progress`
-		(plain dict field writes, safe under the GIL, same reasoning as
-		object_editor.py's creature-cache-rebuild background thread);
-		`processed` is updated per zone so draw_panel() can show a progress
-		bar across what may be several hundred zones for a whole
-		continent."""
+	def _run_load_continent(self, live_data_path, ryzom_data_path, pipeline_continent_name, bounds, progress):
+		"""Background-thread body for _load_continent() -- just the disk-index
+		lookups (region_loader.py's own cached zone index/extensions index,
+		real disk I/O the first time it's needed for `live_data_path`, or a
+		fresh uncached scan of `ryzom_data_path`'s pipeline export if
+		`continent_name` has one -- see region_loader.get_zone_index()'s own
+		docstring), never the actual per-zone tessellation -- draw_panel()'s
+		polling of `progress` hands the result to _apply_render_mode()
+		(project-todos/forgery/landscape_editor__zone_render_modes.md step 6),
+		which does the expensive per-zone load itself, in its own background
+		pass, for whichever extension self.render_mode currently wants.
+		Writes only to `progress` (plain dict field writes, safe under the
+		GIL, same reasoning as object_editor.py's creature-cache-rebuild
+		background thread)."""
 		try:
 			min_x, min_y, max_x, max_y = bounds
-			refs = find_zones_in_region(live_data_path, min_x, min_y, max_x, max_y)
+			refs = find_zones_in_region(
+				live_data_path, min_x, min_y, max_x, max_y, pipeline_continent_name, ryzom_data_path,
+			)
 			if not refs:
 				progress["error"] = "No real zone found for this continent."
 				return
-			progress["total"] = len(refs)
+			progress["default_refs"] = {ref.name: ref for ref in refs}
+			full_extensions_index = get_zone_extensions_index(live_data_path, pipeline_continent_name, ryzom_data_path)
+			progress["extensions"] = {ref.name: full_extensions_index.get(ref.name, {}) for ref in refs}
+		except OSError as exc:
+			progress["error"] = str(exc)
+		finally:
+			progress["done"] = True
+
+	def _apply_render_mode(self):
+		"""Re-resolves the currently loaded zone set (self._loaded_refs/
+		self._loaded_extensions, populated by on_selection_changed()/
+		_load_continent()) for self.render_mode and reloads it in a
+		background thread (project-todos/forgery/
+		landscape_editor__zone_render_modes.md step 6) -- POLY/2D always
+		resolve to each zone's own default ref (_resolve_zone_for_mode()),
+		WELD/LIGHT their own extension or a gray fallback. A second call
+		while one reload is already running is ignored (the caller will get
+		another chance once it's done, since render_mode/loaded_refs/
+		loaded_extensions are read fresh here, not snapshotted)."""
+		if not self._loaded_refs:
+			self._gray_zones = set()
+			self._missing_for_mode = 0
+			return
+		if self._mode_reload_progress is not None and not self._mode_reload_progress["done"]:
+			return
+
+		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
+		if real_exts is not None:
+			self._missing_for_mode = sum(
+				1 for name, ext_map in self._loaded_extensions.items()
+				if not any(ext in ext_map for ext in real_exts)
+			)
+		else:
+			self._missing_for_mode = 0
+
+		refs = {}
+		gray = set()
+		for name, default_ref in self._loaded_refs.items():
+			ext_map = self._loaded_extensions.get(name, {})
+			ref, up_to_date = _resolve_zone_for_mode(default_ref, ext_map, self.render_mode)
+			if ref is None:
+				continue
+			refs[name] = ref
+			if not up_to_date:
+				gray.add(name)
+
+		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_apply_render_mode) mode={self.render_mode} loaded={len(self._loaded_refs)} resolved={len(refs)} gray={sorted(gray)} missing_for_mode={self._missing_for_mode}")
+
+		self._zone_error = None
+		progress = {"done": False, "error": None, "zones": {}, "gray": gray, "total": len(refs), "processed": 0}
+		self._mode_reload_progress = progress
+		thread = threading.Thread(target=self._run_load_refs, args=(refs, progress), daemon=True)
+		thread.start()
+
+	def _run_load_refs(self, refs, progress):
+		"""Background-thread body for _apply_render_mode() -- pure file I/O/
+		pickle (region_loader.py/zone_cache.py load_zone_cache_data(), same
+		cache-first behavior as the old _run_load_continent()), never touches
+		Panda3D. Writes only to `progress`, see _run_load_continent()'s own
+		docstring for why."""
+		try:
 			zones = {}
 			failed = []
-			for ref in refs:
+			for name, ref in refs.items():
 				try:
-					zones[ref.name] = load_zone_cache_data(ref)
+					zones[name] = load_zone_cache_data(ref)
 				except RegionLoadError as exc:
 					failed.append(str(exc))
 				progress["processed"] += 1
@@ -250,14 +391,20 @@ class LandscapeEditorApp(ForgeryApp):
 		finally:
 			progress["done"] = True
 
-	def _set_loaded_zones(self, zones):
+	def _set_loaded_zones(self, zones, gray=None):
 		"""Tears down whatever geometry was attached before and builds fresh
 		geometry for `zones` (name -> zone_cache.ZoneCacheData) -- colored by
 		elevation over the combined Z range of every zone in `zones`, not
 		each zone's own (see build_zone_geom_from_cache()'s own docstring)
 		-- then reframes the camera on their combined bounding box. Shared by
 		on_selection_changed() (a single zone) and _load_continent()
-		(a whole continent)."""
+		(a whole continent), both via _apply_render_mode()/_run_load_refs().
+
+		`gray` (zone names, project-todos/forgery/
+		landscape_editor__zone_render_modes.md step 6) are rendered flat gray
+		instead of the elevation gradient -- WELD/LIGHT zones shown via a
+		fallback extension, not actually welded/lit."""
+		self._gray_zones = gray or set()
 		for node in self._zone_nodes.values():
 			node.remove_node()
 		self._zone_nodes = {}
@@ -294,7 +441,7 @@ class LandscapeEditorApp(ForgeryApp):
 			self._grid_np = self.render.attach_new_node("zone-grid-placeholder")
 
 		for name, cache_data in zones.items():
-			node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z)
+			node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, fallback=name in self._gray_zones)
 			node_path = self._zone_root.attach_new_node(node)
 			# Winding isn't guaranteed to match Panda3D's expected front-face
 			# direction (zone_geometry.py's grid triangulation follows NeL's
@@ -334,7 +481,7 @@ class LandscapeEditorApp(ForgeryApp):
 		except (OSError, continent_selector.ContinentSelectorError) as exc:
 			self._cont_locs_error = f"Failed to load continent list: {exc}"
 
-	def _select_continent(self, continent_name):
+	def _select_continent(self, continent_name, selection_name):
 		"""Resolves and caches continent_bounds for `continent_name` -- called
 		only when the combo selection actually changes, not every frame (both
 		files this reads are full-parse, no random access, see
@@ -342,8 +489,20 @@ class LandscapeEditorApp(ForgeryApp):
 		the whole continent (project-todos/forgery/
 		landscape_editor__zone_disk_cache.md step 6, per Nuno 2026-09-08:
 		never stream by region around the camera, load a continent whole as
-		soon as it's selected)."""
+		soon as it's selected).
+
+		`continent_name` (ContLoc's own internal sheet stem, e.g.
+		"lecarrefour") and `selection_name` (the combo's displayed label,
+		e.g. "nexus") can genuinely differ -- confirmed 2026-09-09, Nuno:
+		`continent_name` only names the leveldesign/world/<continent_name>
+		project files, while a real build_gamedata pipeline export directory
+		under ryzom-data/pipeline/export/continents/ is named after
+		`selection_name` instead. self.selected_continent_name (bounds
+		resolution) keeps the former; self._selected_continent_pipeline_name
+		(region_loader.py's pipeline-export lookup, step 6) uses the
+		latter."""
 		self.selected_continent_name = continent_name
+		self._selected_continent_pipeline_name = selection_name
 		self.continent_bounds = None
 		self._bounds_error = None
 		live_data_path = app_settings.load().live_data_path
@@ -430,7 +589,7 @@ class LandscapeEditorApp(ForgeryApp):
 				selected = cont_loc.continent_name == self.selected_continent_name
 				clicked, _ = imgui.selectable(cont_loc.selection_name, selected)
 				if clicked:
-					self._select_continent(cont_loc.continent_name)
+					self._select_continent(cont_loc.continent_name, cont_loc.selection_name)
 				if selected:
 					imgui.set_item_default_focus()
 			imgui.end_combo()
@@ -454,22 +613,68 @@ class LandscapeEditorApp(ForgeryApp):
 			progress = self._continent_load_progress
 			if progress["done"]:
 				self._continent_load_progress = None
-				self._zone_error = progress["error"]
-				self._set_loaded_zones(progress["zones"])
+				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:draw_panel) continent scan done, error={progress['error']!r} zones={len(progress['default_refs'])}")
+				if progress["error"]:
+					self._zone_error = progress["error"]
+				else:
+					self._loaded_refs = progress["default_refs"]
+					self._loaded_extensions = progress["extensions"]
+					self._apply_render_mode()
+			else:
+				imgui.text("Scanning zone index...")
+
+		if self._mode_reload_progress is not None:
+			progress = self._mode_reload_progress
+			if progress["done"]:
+				self._mode_reload_progress = None
+				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:draw_panel) mode reload done, error={progress['error']!r} zones={len(progress['zones'])} gray={sorted(progress['gray'])}")
+				if progress["error"]:
+					self._zone_error = progress["error"]
+				self._set_loaded_zones(progress["zones"], gray=progress["gray"])
 			else:
 				total = progress["total"]
 				processed = progress["processed"]
 				fraction = processed / total if total else 0.0
-				overlay = f"{processed}/{total} zones" if total else "Scanning..."
+				overlay = f"{processed}/{total} zones" if total else "Loading..."
 				imgui.progress_bar(fraction, overlay=overlay)
 
 		if self._zone_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
+
+		imgui.separator()
+		self._draw_render_mode_bar()
+
 		if self.zones:
 			total_patches = sum(len(cache_data.patches) for cache_data in self.zones.values())
 			imgui.text(f"{len(self.zones)} zone(s) loaded -- {total_patches} patches total")
-			if imgui.button("Top view (2D)"):
-				self.orbit_camera.snap_to_axis("+z")
+
+	def _select_render_mode(self, mode):
+		self.render_mode = mode
+		if mode == "2D":
+			self.orbit_camera.snap_to_axis("+z")
+		self._apply_render_mode()
+
+	def _draw_render_mode_bar(self):
+		"""[2D][POLY][WELD][LIGHT] button row (project-todos/forgery/
+		landscape_editor__zone_render_modes.md step 6) -- the active mode is
+		highlighted; WELD/LIGHT additionally show how many of the currently
+		loaded zones are missing their own extension (rendered gray, see
+		_resolve_zone_for_mode())."""
+		for i, mode in enumerate(_RENDER_MODES):
+			if i > 0:
+				imgui.same_line()
+			active = self.render_mode == mode
+			if active:
+				imgui.push_style_color(imgui.Col_.button.value, (0.35, 0.55, 0.35, 1.0))
+			clicked = imgui.button(mode)
+			if active:
+				imgui.pop_style_color()
+			if clicked and not active:
+				self._select_render_mode(mode)
+
+		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
+		if real_exts is not None and self._loaded_refs:
+			imgui.text(f"{self._missing_for_mode} zone(s) not {self.render_mode.lower()}ed ({'/'.join(real_exts)} missing)")
 
 
 def main(argv=None):
