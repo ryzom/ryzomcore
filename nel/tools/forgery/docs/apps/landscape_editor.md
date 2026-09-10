@@ -370,7 +370,26 @@ changement) : `"edition"` dès que `ryzom-data` est configuré et pointe vers un
 dossier existant, `"visualisation"` sinon -- indépendamment du contenu réel de
 ce `ryzom-data` (un `.land` manquant pour tel ou tel continent est géré par le
 filtrage du combo, pas par ce switch global). Un badge coloré affiche le mode
-actif en haut du panel. Étapes suivantes du chantier : séparation en mixins
-dédiés par mode, filtrage du combo continent en édition, et fallback
-`.land`+brique pour `[POLY]`/`[2D]` sur les zones pas encore exportées par le
-pipeline.
+actif en haut du panel.
+
+**Liste des continents par mode** : `_ensure_continent_locations_loaded()`
+délègue à `_load_visualisation_continent_locations()` (inchangé -- `world.
+packed_sheets` via `live_data_path`) ou `_load_edition_continent_locations()`
+selon `self._app_mode`, invalidé (`self._cont_locs = None`) dès que le mode
+change en cours de session. En édition, la liste vient directement de
+`<ryzom-data>/leveldesign/world/ryzom.world` (`pynel.ryzom_world.load_world()`,
+jamais `live_data_path`/`world.packed_sheets`) via la nouvelle fonction
+`continent_selector.load_continent_locations_from_world_file()` -- utilise
+`WorldContinentEntry.struct_name` comme identifiant de continent (pas
+`.continent_name`, documenté par `pynel` comme non fiable, ex. l'entrée
+`"matis"` a `continent_name="lesfalaises"`), puis filtrée par
+`land_loader.find_land_files()` (nouveau module, scan récursif de
+`<ryzom-data>/leveldesign/landscape/`, indexé par stem de fichier -- confirmé
+2026-09-10 que le stem d'un `.land` réel correspond toujours au `PacsRBank`,
+ex. `fyros.land`/`matis.land`/`nexus.land`, jamais à un nom de dossier) : un
+continent listé dans `ryzom.world` mais sans `.land` correspondant
+n'apparaît pas du tout dans le combo en édition.
+
+Étapes suivantes du chantier : fallback `.land`+brique pour `[POLY]`/`[2D]`
+sur les zones pas encore exportées par le pipeline, puis extraction en
+mixins dédiés par mode une fois cette logique édition bien distincte.

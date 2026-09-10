@@ -24,6 +24,7 @@ from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_ecosystem
+from ryzom_forgery import land_loader
 from ryzom_forgery import live_data
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
 from ryzom_forgery import pipeline_data_installer
@@ -541,6 +542,12 @@ class LandscapeEditorApp(ForgeryApp):
 	def _ensure_continent_locations_loaded(self):
 		if self._cont_locs is not None or self._cont_locs_error is not None:
 			return
+		if self._app_mode == _MODE_EDITION:
+			self._load_edition_continent_locations()
+		else:
+			self._load_visualisation_continent_locations()
+
+	def _load_visualisation_continent_locations(self):
 		live_data_path = app_settings.load().live_data_path
 		if not live_data.is_valid_live_data_path(live_data_path):
 			self._cont_locs_error = (
@@ -552,6 +559,24 @@ class LandscapeEditorApp(ForgeryApp):
 			self._cont_locs = continent_selector.load_continent_locations(live_data_path)
 		except (OSError, continent_selector.ContinentSelectorError) as exc:
 			self._cont_locs_error = f"Failed to load continent list: {exc}"
+
+	def _load_edition_continent_locations(self):
+		"""Edition mode (project-todos/forgery/landscape_editor__land_preview.md
+		step 2): continent list read directly from ryzom-data's own
+		ryzom.world (never live_data_path/world.packed_sheets), filtered down
+		to continents that actually have a `.land` under
+		<ryzom-data>/leveldesign/landscape/ -- a continent listed in
+		ryzom.world but missing its `.land` doesn't appear at all in Edition
+		mode."""
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		world_file_path = Path(ryzom_data_path) / "leveldesign" / "world" / "ryzom.world"
+		try:
+			all_locs = continent_selector.load_continent_locations_from_world_file(world_file_path)
+		except (OSError, continent_selector.ContinentSelectorError) as exc:
+			self._cont_locs_error = f"Failed to load continent list from ryzom-data: {exc}"
+			return
+		land_files = land_loader.find_land_files(ryzom_data_path)
+		self._cont_locs = [loc for loc in all_locs if loc.continent_name in land_files]
 
 	def _select_continent(self, continent_name, selection_name):
 		"""Resolves and caches continent_bounds for `continent_name` -- called
@@ -623,7 +648,13 @@ class LandscapeEditorApp(ForgeryApp):
 
 	def draw_panel(self):
 		mode = _detect_app_mode()
-		self._app_mode = mode
+		if mode != self._app_mode:
+			# Continent list source depends on the mode (step 3 below) --
+			# force a reload rather than keep showing a stale list from the
+			# mode we just left.
+			self._app_mode = mode
+			self._cont_locs = None
+			self._cont_locs_error = None
 		imgui.text("Mode:")
 		imgui.same_line()
 		imgui.text_colored(_MODE_BADGE_COLOR[mode], _MODE_BADGE_LABEL[mode])

@@ -17,7 +17,9 @@ from pathlib import Path
 from typing import List, Tuple, Union
 
 from pynel import ryzom_packed_sheets as ps
+from pynel import ryzom_world
 from pynel.ryzom_bnp import BnpError, BnpReader
+from pynel.ryzom_georges_form import GeorgesFormParseError
 
 from ryzom_forgery import creature_ref
 
@@ -53,6 +55,34 @@ def load_continent_locations(live_data_path: Union[str, Path]) -> List[ps.ContLo
 		raise ContinentSelectorError("world.packed_sheets has no entries")
 	world = next(iter(world_sheets.entries.values()))
 	return sorted(world.cont_locs, key=lambda c: c.selection_name)
+
+
+def load_continent_locations_from_world_file(world_file_path: Union[str, Path]) -> List[ps.ContLoc]:
+	"""ContLocs read directly from a `ryzom.world` file under a `ryzom-data`
+	checkout (Edition mode, project-todos/forgery/
+	landscape_editor__land_preview.md step 2) -- no live_data_path/
+	world.packed_sheets involved. Uses `WorldContinentEntry.struct_name` as
+	the continent identifier (same semantics as ContLoc.continent_name, e.g.
+	"matis") -- deliberately NOT `WorldContinentEntry.continent_name`, which
+	`ryzom_world.py` documents as unreliable (e.g. the "matis" entry's own
+	`continent_name` field reads "lesfalaises")."""
+	try:
+		world_file = ryzom_world.load_world(world_file_path)
+	except (OSError, GeorgesFormParseError) as exc:
+		raise ContinentSelectorError(f"Failed to load {world_file_path}: {exc}")
+	locs = [
+		ps.ContLoc(
+			selection_name=entry.selection_name or entry.struct_name,
+			continent_name=entry.struct_name,
+			min_x=float(entry.minx or 0),
+			min_y=float(entry.miny or 0),
+			max_x=float(entry.maxx or 0),
+			max_y=float(entry.maxy or 0),
+		)
+		for entry in world_file.continents
+		if entry.struct_name is not None
+	]
+	return sorted(locs, key=lambda c: c.selection_name)
 
 
 def resolve_continent_bounds(live_data_path: Union[str, Path], continent_name: str) -> Tuple[float, float, float, float]:
