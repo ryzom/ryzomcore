@@ -55,6 +55,23 @@ packed = ryzom_packed_sheets.load_creature_packed_sheets("creature.packed_sheets
 names = ryzom_packed_sheets.parse_sheet_id_bin(bnp.read_file("sheet_id.bin"))  # sheet_id.bin ships inside leveldesign.bnp
 ```
 
+### `.zone`/`.zonew`/`.zonel`/`.land` and Georges FORM (`.continent`, `ryzom.world`)
+
+`ryzom_zone`/`ryzom_zone_tools` (zones + native `zone_welder`/`zone_lighter`
+wrappers) and `ryzom_land`/`ryzom_land_tools` (`.land` + native `land_export`
+wrapper) round-trip the landscape pipeline's own file formats -- see
+[`docs/zone_format.md`](docs/zone_format.md),
+[`docs/land_format.md`](docs/land_format.md) and
+[`docs/zone_tools.md`](docs/zone_tools.md). `ryzom_georges_form` reads/writes
+the generic Georges FORM XML tree (`<FORM><STRUCT>...`), with typed
+`ryzom_continent`/`ryzom_world` wrappers for `.continent` and `ryzom.world`
+specifically -- see [`docs/georges_form.md`](docs/georges_form.md). None of
+these have a dedicated console script (library-only, no `[project.scripts]`
+entry). **Not to be confused** with "Georges sheets" below (`.creature`,
+`.item`, ...) -- a different, unrelated format despite the near-identical
+name; Georges FORM (this section) is implemented, Georges sheets (below) is
+not.
+
 ### Locating a user's Ryzom repository checkouts
 
 `repository_paths` is a small per-user JSON settings file shared across
@@ -84,6 +101,9 @@ for line in LogFollower("/var/log/foo.log"):
 
 ## Planned: Georges sheets (`.creature`, `.item`, ...)
 
-Not implemented yet. See [`docs/georges_sheets.md`](docs/georges_sheets.md)
+Not implemented yet -- **not** the Georges FORM XML tree format (`.continent`,
+`ryzom.world`), which is already done, see "Georges FORM" above. "Georges
+sheets" here is the separate `PARENT`-chain sheet provenance/binary-cache
+system for gameplay sheets. See [`docs/georges_sheets.md`](docs/georges_sheets.md)
 for investigation notes (format overview, why it's a bigger job than
 `.primitive`, and the plan) — read that before starting the work.
