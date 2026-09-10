@@ -81,6 +81,25 @@ def _resolve_zone_for_mode(default_ref, ext_map, mode):
 			return ext_map[fallback_ext], False
 	return None, False
 
+# Global Visualisation/Edition mode (project-todos/forgery/
+# landscape_editor__land_preview.md step 1) -- a single automatic switch for
+# the whole app, not a per-continent/per-button choice like
+# _resolve_zone_for_mode() above. "edition" whenever ryzom-data is configured
+# and points at an existing directory (pynel.repository_paths.is_valid()),
+# "visualisation" otherwise -- deliberately ignores whether that ryzom-data
+# checkout actually has any .land in it (later steps filter the continent
+# combo for that; an unconfigured/missing ryzom-data is the only thing that
+# forces visualisation mode).
+_MODE_VISUALISATION = "visualisation"
+_MODE_EDITION = "edition"
+_MODE_BADGE_COLOR = {_MODE_VISUALISATION: (0.4, 0.7, 1.0, 1.0), _MODE_EDITION: (0.4, 1.0, 0.4, 1.0)}
+_MODE_BADGE_LABEL = {_MODE_VISUALISATION: "Visualisation", _MODE_EDITION: "Edition"}
+
+
+def _detect_app_mode():
+	return _MODE_EDITION if repository_paths.is_valid("ryzom-data") else _MODE_VISUALISATION
+
+
 # draw_panel()'s tab bar (_push_tab_color()) -- same idea as
 # object_editor.py's own _TAB_COLOR_* constants, one per tab so each reads
 # as visually distinct at a glance.
@@ -160,6 +179,14 @@ class LandscapeEditorApp(ForgeryApp):
 		# mandatory first-launch popup (only object_editor.py's draw_ui()
 		# does that), just the Settings-tab folder picker.
 		self.ryzom_paths_section = RyzomPathsSection(LiveDataSetupDialog())
+
+		# Global Visualisation/Edition mode (project-todos/forgery/
+		# landscape_editor__land_preview.md step 1) -- recomputed every
+		# draw_panel() call (repository_paths.is_valid() is a cheap JSON
+		# read, no change-notification mechanism exists on that module),
+		# cached here only to log on an actual transition rather than
+		# every frame.
+		self._app_mode = None
 
 		# Continent selector state (project-todos/forgery/
 		# landscape_editor__continent-selector.md steps 3-4). cont_locs/
@@ -595,6 +622,13 @@ class LandscapeEditorApp(ForgeryApp):
 		return "Landscape Editor"
 
 	def draw_panel(self):
+		mode = _detect_app_mode()
+		self._app_mode = mode
+		imgui.text("Mode:")
+		imgui.same_line()
+		imgui.text_colored(_MODE_BADGE_COLOR[mode], _MODE_BADGE_LABEL[mode])
+		imgui.separator()
+
 		# _draw_viewport_toggles() opens its own separate floating imgui
 		# window, independent of the tab bar below -- always drawn
 		# regardless of which tab is active, never hidden by switching to

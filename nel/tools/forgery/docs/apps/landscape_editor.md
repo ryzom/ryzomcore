@@ -360,3 +360,17 @@ voire absent) -- confirmé par comparaison octet-à-octet sur les 27 `.land`
 existants (19 identiques, 7 différents dont au moins un format binaire
 périmé, 1 manquant). Ne jamais lire `graphics/landscape/ligo/` pour du
 leveldesign actif.
+
+## Mode global Visualisation / Édition (`landscape_editor__land_preview.md`)
+
+`_detect_app_mode()` détermine un mode unique pour toute l'app, recalculé à
+chaque frame de `draw_panel()` (`pynel.repository_paths.is_valid("ryzom-data")`
+est une simple lecture JSON, pas besoin de mécanisme de notification de
+changement) : `"edition"` dès que `ryzom-data` est configuré et pointe vers un
+dossier existant, `"visualisation"` sinon -- indépendamment du contenu réel de
+ce `ryzom-data` (un `.land` manquant pour tel ou tel continent est géré par le
+filtrage du combo, pas par ce switch global). Un badge coloré affiche le mode
+actif en haut du panel. Étapes suivantes du chantier : séparation en mixins
+dédiés par mode, filtrage du combo continent en édition, et fallback
+`.land`+brique pour `[POLY]`/`[2D]` sur les zones pas encore exportées par le
+pipeline.
