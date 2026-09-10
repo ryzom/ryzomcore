@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-10 — ✨ Add world_pos_to_zone_name(), pynel 0.13.2
+
+`project-todos/pynel/zone_name_from_pos.md` closed. Added
+`world_pos_to_zone_name(x, y)` to `ryzom_packed_sheets.py`, the inverse of
+`zone_name_to_world_pos()` -- given a raw world position, returns the name
+of the 160x160 zone tile containing it, or `None` if outside the valid
+`[0, 255]` grid on either axis. Ported from `CExport::getZoneNameFromXY()`
+(`ryzom-core/ryzom/tools/leveldesign/world_editor/land_export_lib/
+export.cpp:2357`, 3 other byte-identical copies across the leveldesign
+tools) rather than derived from `zone_name_to_world_pos()` alone, since no
+client-side equivalent exists (`zone_util.cpp` only has the name->pos
+direction). Round-trip-verified against `zone_name_to_world_pos()`,
+fuzz-tested over 2000 random positions inside every valid zone tile.
+
+Motivated by Forgery's `landscape_editor__cursor_zone_status.md` (displaying
+the zone name under the mouse cursor in Atyscape's status bar).
+
 ## 2026-09-09 — ✨ Ajoute le parseur Georges FORM (.continent, ryzom.world)
 
 `project-todos/pynel/georges_form.md` closed. Added `ryzom_georges_form.py`

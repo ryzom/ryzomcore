@@ -752,6 +752,25 @@ folded into `zone_name_to_world_pos()` itself -- callers (e.g. Forgery's
 continent bounding-box computation) must apply it explicitly, since it only
 makes sense for a max corner, not for every zone-name lookup.
 
+### `world_pos_to_zone_name()` -- the inverse (2026-09-10)
+
+Given a raw world position `(x, y)`, finds which 160×160 zone tile contains
+it. No client-side equivalent exists (`zone_util.cpp` only has the name->pos
+direction) -- ported instead from `CExport::getZoneNameFromXY()`
+(`ryzom-core/ryzom/tools/leveldesign/world_editor/land_export_lib/
+export.cpp:2357`, 3 other byte-identical copies across the leveldesign
+tools):
+
+```
+col = floor(x / 160.0)
+row = floor(-y / 160.0)
+if col not in [0, 255] or row not in [0, 255]: return None   # C++ returns "NOT VALID" instead
+zone_name = f"{row}_{chr(65 + col // 26)}{chr(65 + col % 26)}"
+```
+
+Round-trip-verified against `zone_name_to_world_pos()` (fuzz-tested over
+2000 random positions inside every valid zone tile, 2026-09-10).
+
 ## Other sheet types (deliberately out of scope beyond `.creature`/`.item`/`.sitem`/`.animset_list`/`.world`/`.continent`)
 
 `CSheetManagerEntry::serial` (sheet_manager.cpp:290) is a big switch over

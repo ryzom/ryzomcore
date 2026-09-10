@@ -46,10 +46,11 @@ Usage:
 """
 
 import argparse
+import math
 import struct
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import BinaryIO, Dict, List, Union
+from typing import BinaryIO, Dict, List, Optional, Union
 
 MAGIC = b"HSKP"  # on-disk bytes for NELID("PKSH") (PACKED_SHEET_HEADER) on a little-endian machine
 PACKED_SHEET_VERSION = 5
@@ -851,6 +852,21 @@ def zone_name_to_world_pos(name: str) -> Vector2:
 	x = 160.0 * ((ord(x_str[0]) - ord("A")) * 26 + (ord(x_str[1]) - ord("A")))
 	y = 160.0 * (-row)
 	return Vector2(x, y)
+
+
+def world_pos_to_zone_name(x: float, y: float) -> Optional[str]:
+	"""Inverse of zone_name_to_world_pos(): the name of the 160x160 zone tile
+	containing world position (x, y), or None if outside the valid zone grid
+	([0, 255] on each axis, e.g. y must be in [-40800, 0]). Port of
+	CExport::getZoneNameFromXY() (ryzom-core's
+	ryzom/tools/leveldesign/world_editor/land_export_lib/export.cpp:2357,
+	3 other byte-identical copies -- there is no equivalent in the client,
+	which only has the name->pos direction, zone_util.cpp:33)."""
+	col = math.floor(x / 160.0)
+	row = math.floor(-y / 160.0)
+	if not (0 <= col <= 255) or not (0 <= row <= 255):
+		return None
+	return f"{row}_{chr(ord('A') + col // 26)}{chr(ord('A') + col % 26)}"
 
 
 def _parse_equipment(f: _Reader) -> Equipment:
