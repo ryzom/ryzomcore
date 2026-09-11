@@ -36,6 +36,19 @@ from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 
 _LOCKED_COLOR = (0.45, 0.45, 0.45, 0.8)  # grey -- "on" highlight for a lock toggle specifically
 
+# Shading mode cycling button (project-todos/forgery/
+# object_editor__shading_modes.md) -- icon/label per state, in cycle order.
+_SHADING_MODE_ICONS = {
+	"shading": fa_icons.ICON_FA_SUN,
+	"constant": fa_icons.ICON_FA_LIGHTBULB,
+	"unshaded": fa_icons.ICON_FA_MASK,
+}
+_SHADING_MODE_LABELS = {
+	"shading": "Shading",
+	"constant": "Constant Shading",
+	"unshaded": "Unshaded",
+}
+
 # _update_sun_light()'s Play rotation rate -- a full 360deg cycle every 12s,
 # fast enough to actually watch a specular highlight sweep across a shape
 # without feeling like a slideshow, slow enough to still land on a precise
@@ -148,6 +161,83 @@ class ViewportTransformMixin:
 	def _toggle_object_transparency(self):
 		self._object_transparent = not self._object_transparent
 		self._apply_object_transparency()
+
+	def _apply_object_wireframe(self):
+		if self._object_wireframe:
+			# filled_wireframe, not plain wireframe -- the wireframe overlays
+			# the normal shaded/textured render, it never replaces it (Nuno
+			# 2026-09-11, project-todos/forgery/object_editor__wireframe_overlay.md).
+			self.model_root.set_render_mode_filled_wireframe((0, 0, 0, 1), 1)
+		else:
+			self.model_root.clear_render_mode()
+
+	def _toggle_object_wireframe(self):
+		"""Independent of _toggle_object_transparency() -- both can be on at
+		once (project-todos/forgery/object_editor__wireframe.md)."""
+		self._object_wireframe = not self._object_wireframe
+		self._apply_object_wireframe()
+
+	def _apply_shading_mode(self):
+		"""Applies self._shading_mode to model_root (project-todos/forgery/
+		object_editor__shading_modes.md) -- independent of transparency/
+		wireframe above, all combinable:
+		- "shading" (normal): no override, inherits the scene's own ambient +
+		  self.sun_light_np exactly like every other Forgery app.
+		- "constant": self.sun_light_np specifically turned off on model_root
+		  (the single-light overload of set_light_off(), not the all-lights
+		  one) -- the globally-set ambient light (self.ambient_light_np, set
+		  on self.render in app.py) still lights it, just with no
+		  directional light/shadowing.
+		- "unshaded": all lighting off, all textures off, flat
+		  self._unshaded_color painted over the whole model instead."""
+		if self._shading_mode == "shading":
+			self.model_root.clear_light()
+			self.model_root.clear_texture()
+			self.model_root.clear_color()
+		elif self._shading_mode == "constant":
+			self.model_root.clear_light()
+			self.model_root.set_light_off(self.sun_light_np, 1)
+			self.model_root.clear_texture()
+			self.model_root.clear_color()
+		else:  # "unshaded"
+			self.model_root.set_light_off(1)
+			self.model_root.set_texture_off(1)
+			r, g, b = self._unshaded_color
+			self.model_root.set_color(r, g, b, 1.0, 1)
+
+	def _transition_shading_mode(self, new_mode):
+		"""Actually changes self._shading_mode to `new_mode`, boosting/
+		restoring the ambient light intensity around the edges of "constant"
+		(project-todos/forgery/object_editor__shading_modes.md, Nuno
+		2026-09-11) -- entering "constant" from anywhere else saves the
+		current self._ambient_light_intensity and maxes it out
+		(_LIGHT_INTENSITY_MAX), leaving "constant" for anywhere else restores
+		it. Deliberately only in the actual mode-change entry points
+		(_cycle_shading_mode()/this), never in _apply_shading_mode() itself,
+		which only ever re-applies the CURRENT mode after _rebuild_geometry()
+		and must never re-trigger a save/boost while already in "constant"."""
+		old_mode = self._shading_mode
+		if old_mode != "constant" and new_mode == "constant":
+			self._saved_ambient_light_intensity = self._ambient_light_intensity
+			self._ambient_light_intensity = _LIGHT_INTENSITY_MAX
+			self._apply_light_settings()
+		elif old_mode == "constant" and new_mode != "constant":
+			self._ambient_light_intensity = self._saved_ambient_light_intensity
+			self._apply_light_settings()
+		self._shading_mode = new_mode
+		self._apply_shading_mode()
+
+	def _cycle_shading_mode(self):
+		"""Left-click behavior for the shading mode button -- advances to the
+		next state (project-todos/forgery/object_editor__shading_modes.md,
+		Nuno 2026-09-11's general cycling-button convention: right-click
+		instead jumps straight to a chosen state, see _draw_viewport_toggles()'s
+		own popup)."""
+		next_mode = {"shading": "constant", "constant": "unshaded", "unshaded": "shading"}
+		self._transition_shading_mode(next_mode[self._shading_mode])
+
+	def _set_shading_mode(self, mode):
+		self._transition_shading_mode(mode)
 
 	def _update_wind(self, task):
 		"""Per-frame wind animation, ported from nel/src/3d/meshvp_wind_tree.cpp
@@ -502,6 +592,34 @@ class ViewportTransformMixin:
 			if _icon_button(fa_icons.ICON_FA_CIRCLE_HALF_STROKE, "50% object transparency",
 			                self._object_transparent, square=True, large_font=large_font):
 				self._toggle_object_transparency()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_DRAW_POLYGON, "Wireframe",
+			                self._object_wireframe, square=True, large_font=large_font):
+				self._toggle_object_wireframe()
+			imgui.same_line()
+			# Cycling button (project-todos/forgery/
+			# object_editor__shading_modes.md, Nuno 2026-09-11's general
+			# convention for every cycling button in Forgery): left-click
+			# advances to the next state, right-click opens a popup to jump
+			# straight to any state.
+			shading_tooltip = f"{_SHADING_MODE_LABELS[self._shading_mode]} (right-click to choose)"
+			if _icon_button(_SHADING_MODE_ICONS[self._shading_mode], shading_tooltip, self._shading_mode != "shading",
+			                square=True, large_font=large_font):
+				self._cycle_shading_mode()
+			if imgui.begin_popup_context_item("##shading-mode-popup"):
+				for mode in ("shading", "constant", "unshaded"):
+					clicked, _ = imgui.selectable(_SHADING_MODE_LABELS[mode], self._shading_mode == mode)
+					if clicked:
+						self._set_shading_mode(mode)
+				imgui.end_popup()
+			if self._shading_mode == "unshaded":
+				imgui.same_line()
+				imgui.set_next_item_width(imgui.get_frame_height() * 2)
+				changed, new_color = imgui.color_edit3("##unshaded-color", self._unshaded_color,
+				                                        imgui.ColorEditFlags_.no_inputs.value)
+				if changed:
+					self._unshaded_color = tuple(new_color)
+					self._apply_shading_mode()
 			if self._shadow_skin_np is not None or self._shadow_skin_visible:
 				imgui.same_line()
 				shadow_animated = self._shadow_skin_state is not None and self._shadow_skin_state.bone_names is not None
@@ -863,6 +981,8 @@ class ViewportTransformMixin:
 		self.model_root.remove_node()
 		self.model_root = self._object_pivot.attach_new_node("shape-root")
 		self._apply_object_transparency()
+		self._apply_object_wireframe()
+		self._apply_shading_mode()
 		self.shape_error = None
 		self._material_node_paths = {}
 		self._wind_state = None

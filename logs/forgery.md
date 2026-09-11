@@ -1,5 +1,99 @@
 # Changelog
 
+## 2026-09-11 — ✨ Génération .zonew, cache continent .bam, 2D/3D, wireframe/shading Patina, Forgery 4.6.0
+
+`landscape_editor__zone_render_modes.md` (validation finale, étape 8 du
+`landscape_editor.md` clôturée), `geomnode_continent_cache.md`,
+`landscape_editor__2d_3d_toggle.md`, `landscape_editor__transparency_wireframe.md`,
+`object_editor__wireframe_overlay.md` and `object_editor__shading_modes.md`
+closed.
+
+**WELD zone generation button (Atyscape)**: "Generate N missing .zonew" on
+`[WELD]` runs the native `zone_welder` on every zone missing one, one at a
+time in a background thread, writing straight to
+`<ryzom-data>/pipeline/export/continents/<continent>/zone_weld/`. Live,
+per-zone display -- each zone flips from the gray/pink fallback gradient to
+the real elevation gradient the moment its own `.zonew` lands, without
+waiting for the whole batch. `.land` cells with no real `.zone` at all now
+also show up in `[WELD]` (same fallback gradient) and count toward "N
+missing", but are never attempted -- each gets an explicit per-cell error
+("finish land_composition/land_export first") instead, without blocking the
+zones that actually can be welded.
+
+**Land-fallback brick performance**: `build_land_piece_cache_data()` was
+redoing a full parse + Bezier tessellation for every `.land` fallback brick
+on every continent load. Split into two disk caches (`zone_cache.py`, same
+mechanism as the existing per-zone cache): the brick's raw untransformed
+geometry (shared across every placement/rotation of the same brick) and the
+final transformed piece per placement. `land_geometry.transform_zone_cache_data()`
+(new, extracted from the old `build_land_piece_cache_data()`, now a thin
+wrapper around it) applies position/rotation/flip to an already-tessellated
+`ZoneCacheData` without ever re-evaluating Bezier. Measured on nexus (17
+fallback cells): 2.135s -> 0.134s (~16x).
+
+**Continent-wide `.bam` geometry cache**: even with every zone's tessellated
+positions cached, building the actual Panda3D `GeomNode`s (color, indices,
+`attach_new_node`) still cost 1.349s for 151 zones (~8.9ms/zone), entirely
+on the main thread. New module `ryzom_forgery/continent_geom_cache.py`
+serializes the whole built `NodePath` via Panda3D's native `.bam` format
+(`write_bam_file()`/`load_model(..., noCache=True)`) instead -- since a zone
+only ever belongs to one continent, a `.bam` + manifest bundle per
+`(continent, render mode)` can be reloaded wholesale as long as nothing in
+it is stale (per-zone extension + source mtime/size, plus the global
+elevation range the color gradient was baked against). A cache hit skips
+`GeomNode` construction entirely; a miss falls back to today's full rebuild
+(never worse) and saves a fresh bundle for next time. Confirmed by Nuno on a
+repeated continent reload.
+
+**2D/3D viewport toggle (Atyscape)**: `[2D]` removed from the render-mode
+bar (`[POLY]`/`[WELD]`/`[LIGHT]` only now, `[2D]` and `[POLY]` resolved
+identical geometry anyway) and replaced by a dedicated camera-only toggle
+next to the grid icon. `OrbitCamera.lock_rotation` (`camera.py`, new flag,
+shared with Patina but inert until an app touches it) disables left-drag
+orbit while pan/zoom keep working. 2D is now the default view at launch;
+leaving it for 3D restores whichever 3D orientation was last left (or a
+default angled view the first time), animated via the new
+`OrbitCamera.animate_to_orientation()` (which `snap_to_axis()` now also
+delegates to) rather than jumping instantly.
+
+**Terrain transparency/wireframe (Atyscape)**: two independent, combinable
+toggle buttons next to the 2D/3D one, same mechanism as Patina's own
+(`self._zone_root` instead of `model_root`).
+
+**Wireframe overlay, not replacement (Patina + Atyscape)**: both apps'
+wireframe toggle switched from `set_render_mode_wireframe()` to
+`set_render_mode_filled_wireframe((0, 0, 0, 1), 1)` -- the wireframe now
+draws on top of the normal shaded/textured render instead of replacing it.
+
+**Shading mode cycling button (Patina)**: new button next to Patina's
+wireframe toggle, cycling `model_root` through Shading (normal, untouched)
+/ Constant Shading (directional sun light off, ambient-only, still
+textured) / Unshaded (all lighting and textures off, flat user-chosen
+color instead). Left-click cycles; right-click opens a popup to jump
+straight to any state -- a general convention for every future
+Forgery cycling button, not just this one. Constant Shading also boosts the
+scene's ambient light intensity to its max while active, restoring the
+previous value on leaving it (never in Shading or Unshaded themselves).
+
+All confirmed working by Nuno.
+
+## 2026-09-11 — ✨ Add wireframe toggle to Patina, Forgery 4.5.0
+
+`object_editor__wireframe.md` closed.
+
+Patina already had a 50% object transparency toggle
+(`_object_transparent`/`_toggle_object_transparency`/
+`_apply_object_transparency`, `viewport_transform.py`, applied to
+`model_root`, re-applied after every `_rebuild_geometry()` since
+`model_root` is destroyed/recreated on every shape load/replace). Added the
+same mechanism for a wireframe toggle (`_object_wireframe`/
+`_toggle_object_wireframe`/`_apply_object_wireframe`, `set_render_mode_
+wireframe()`/`clear_render_mode()`) -- independent of transparency, both
+combinable, both survive a shape reload/replace. New button next to the
+transparency one in the viewport toggle bar (`ICON_FA_DRAW_POLYGON`).
+
+Validated by Nuno.
+
 ## 2026-09-11 — ✨ Add .land fallback + multi-cell piece support, Release/Dev toggle, stderr errors, cursor status, Forgery 4.4.0
 
 `landscape_editor__land_preview.md` steps 3-4 and

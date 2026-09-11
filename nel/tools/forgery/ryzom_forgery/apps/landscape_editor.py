@@ -13,6 +13,7 @@ import threading
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
+from panda3d.core import NodePath, TransparencyAttrib
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
@@ -22,24 +23,32 @@ from pynel.ryzom_zone import load_zone, parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
-	_begin_tab_item_with_icon, _icon_button, _pop_tab_color, _push_tab_color, _VIEWPORT_TOGGLE_MARGIN_PX,
+	_begin_tab_item_with_icon, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _pop_tab_color, _push_tab_color,
+	_VIEWPORT_TOGGLE_MARGIN_PX,
 )
-from ryzom_forgery.camera import OrbitCamera
+from ryzom_forgery.camera import AXIS_VIEWS, OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_ecosystem
 from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_loader
-from ryzom_forgery.land_geometry import brick_size_in_cells, build_land_piece_cache_data, find_missing_land_cells, piece_origin
+from ryzom_forgery.land_geometry import (
+	brick_size_in_cells_from_half_size, find_missing_land_cells, piece_origin, transform_zone_cache_data,
+)
 from ryzom_forgery import live_data
 from ryzom_forgery.mouse_picking import mouse_ground_position
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
 from ryzom_forgery import pipeline_data_installer
 from ryzom_forgery.pipeline_data_install_dialog import PipelineDataInstallDialog
 from ryzom_forgery.region_loader import (
-	find_zones_in_region, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data, RegionLoadError,
+	find_zones_in_region, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data, RegionLoadError, ZoneRef,
+	zone_ref_extension,
 )
+from ryzom_forgery import continent_geom_cache
+from ryzom_forgery.continent_geom_cache import ContinentManifest, ZoneManifestEntry
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery import zone_tools
+from ryzom_forgery.zone_cache import read_zone_cache, write_zone_cache
 from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, ZONE_CELL_SIZE, zone_to_cache_data
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
@@ -67,7 +76,7 @@ _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
 # _MODE_REAL_EXTENSIONS -- they always show each zone's own default (highest-
 # priority, region_loader.py's own .zonel > .zonew > .zone) ZoneRef, exactly
 # the pre-chantier behavior.
-_RENDER_MODES = ("2D", "POLY", "WELD", "LIGHT")
+_RENDER_MODES = ("POLY", "WELD", "LIGHT")
 _MODE_REAL_EXTENSIONS = {"WELD": (".zonew", ".zonel"), "LIGHT": (".zonel",)}
 _MODE_FALLBACK_EXTENSIONS = {"WELD": (".zone",), "LIGHT": (".zonew", ".zone")}
 
@@ -163,7 +172,25 @@ class LandscapeEditorApp(ForgeryApp):
 		# Landscape zones are 160 world units wide -- a much larger scale than
 		# object_editor's single-shape inspection, so this starts zoomed out
 		# much further than that app's own OrbitCamera default.
-		self.orbit_camera = OrbitCamera(self, distance=200.0)
+		# 2D (top-down, no rotation) is the default view at launch
+		# (project-todos/forgery/landscape_editor__2d_3d_toggle.md, Nuno
+		# 2026-09-11) -- built directly with the "+z" heading/pitch rather
+		# than the controller's own (0, 0) default + an animated
+		# snap_to_axis() call, since there's nothing to animate FROM yet.
+		top_down_heading, top_down_pitch = AXIS_VIEWS["+z"]
+		self.orbit_camera = OrbitCamera(self, distance=200.0, heading=top_down_heading, pitch=top_down_pitch)
+		self.orbit_camera.lock_rotation = True
+		self._top_down_locked = True
+		# Terrain display toggles (project-todos/forgery/
+		# landscape_editor__transparency_wireframe.md) -- independent of
+		# self.render_mode and of each other, applied straight to
+		# self._zone_root so they cover whatever is currently loaded there.
+		self._zone_transparent = False
+		self._zone_wireframe = False
+		# The 3D orientation to restore when leaving 2D for the first time
+		# since launch (no real 3D view has existed yet to remember) -- an
+		# angled overview rather than another top-down look.
+		self._saved_3d_heading_pitch = (0.0, 45.0)
 		# OrbitCamera's own default max_distance (2000.0) doesn't reach a
 		# whole continent (dozens of 160-unit zones across) -- both manual
 		# zoom-out and the auto-frame after a continent load (frame() clamps
@@ -253,6 +280,12 @@ class LandscapeEditorApp(ForgeryApp):
 		self._gray_zones = set()
 		self._missing_for_mode = 0
 		self._mode_reload_progress = None
+		self._land_missing_cells = set()
+		# "Generate missing .zonew" button state (project-todos/forgery/
+		# landscape_editor__zone_render_modes.md step 9) -- None while idle,
+		# else the dict a background thread (_generate_missing_zonew()) is
+		# writing into, polled the same way as _continent_load_progress.
+		self._weld_generate_progress = None
 		# (pos_x, pos_y) -> ZoneUnit.zone_name (the brick the .land itself
 		# assigns to that cell), for the cursor status line -- always the
 		# .land's own brick reference, regardless of which pipeline stage
@@ -314,6 +347,7 @@ class LandscapeEditorApp(ForgeryApp):
 			return
 		self._loaded_refs = {}
 		self._loaded_extensions = {}
+		self._land_missing_cells = set()
 		self._set_loaded_zones({name: zone_to_cache_data(zone)})
 
 	def _load_continent(self):
@@ -455,18 +489,12 @@ class LandscapeEditorApp(ForgeryApp):
 		if not self._loaded_refs:
 			self._gray_zones = set()
 			self._missing_for_mode = 0
+			self._land_missing_cells = set()
 			return
 		if self._mode_reload_progress is not None and not self._mode_reload_progress["done"]:
 			return
 
-		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
-		if real_exts is not None:
-			self._missing_for_mode = sum(
-				1 for name, ext_map in self._loaded_extensions.items()
-				if not any(ext in ext_map for ext in real_exts)
-			)
-		else:
-			self._missing_for_mode = 0
+		self._recompute_missing_for_mode()
 
 		refs = {}
 		gray = set()
@@ -493,7 +521,13 @@ class LandscapeEditorApp(ForgeryApp):
 		# actual missing-cell computation + brick loading happens in the
 		# background thread below, same as the real refs.
 		land_fallback = None
-		if self._app_mode == _MODE_EDITION and self.render_mode in ("2D", "POLY") and self.selected_continent_name:
+		# [WELD] also gets the .land fallback (project-todos/forgery/
+		# landscape_editor__zone_render_modes.md step 9, Nuno 2026-09-11):
+		# a .land cell with no real zone file at all used to be simply
+		# invisible in [WELD] -- "Generate missing .zonew" had no way to
+		# even report it as blocked. [LIGHT] stays out of it (no generation
+		# button for it, see the chantier's own "Hors scope explicite").
+		if self._app_mode == _MODE_EDITION and self.render_mode in ("POLY", "WELD") and self.selected_continent_name:
 			ryzom_data_path = repository_paths.get("ryzom-data")
 			land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
 			ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(
@@ -503,7 +537,10 @@ class LandscapeEditorApp(ForgeryApp):
 				land_fallback = (land_path, Path(ryzom_data_path) / "pipeline" / "landscape" / ecosystem_name / "zones")
 
 		self._zone_error = None
-		progress = {"done": False, "error": None, "zones": {}, "gray": gray, "total": len(refs), "processed": 0}
+		progress = {
+			"done": False, "error": None, "zones": {}, "manifest_zones": {},
+			"gray": gray, "total": len(refs), "processed": 0,
+		}
 		self._mode_reload_progress = progress
 		thread = threading.Thread(target=self._run_load_refs, args=(refs, progress, land_fallback), daemon=True)
 		thread.start()
@@ -519,16 +556,33 @@ class LandscapeEditorApp(ForgeryApp):
 		try:
 			zones = {}
 			failed = []
+			# Per-zone staleness stamp (project-todos/forgery/
+			# geomnode_continent_cache.md step 2) -- lets _set_loaded_zones()
+			# decide whether a saved continent .bam bundle still matches
+			# exactly what would be built fresh, without ever loading the
+			# bundle's actual geometry just to check.
+			manifest_zones = {}
 			for name, ref in refs.items():
 				try:
+					stat = ref.source_path.stat()
 					zones[name] = load_zone_cache_data(ref)
-				except RegionLoadError as exc:
+					manifest_zones[name] = ZoneManifestEntry(zone_ref_extension(ref), stat.st_mtime, stat.st_size)
+				except (RegionLoadError, OSError) as exc:
 					failed.append(str(exc))
 				progress["processed"] += 1
 			if land_fallback is not None:
 				land_path, brick_zones_dir = land_fallback
 				try:
 					land = load_land(land_path)
+					# The `.land` file's own layout (which cell uses which
+					# brick/rotation/flip) can change without any individual
+					# brick's own file changing -- a single whole-file stamp
+					# here invalidates every "land:x:y" manifest entry at once
+					# whenever that happens, rather than trying to detect a
+					# reassigned rotation/brick per cell (project-todos/
+					# forgery/geomnode_continent_cache.md step 2).
+					land_stat = land_path.stat()
+					manifest_zones["__land_file__"] = ZoneManifestEntry(".land_file", land_stat.st_mtime, land_stat.st_size)
 					used_cells = sum(1 for unit in land.zones if unit.zone_name != STRING_UNUSED)
 					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_refs) "
 					      f"land loaded: {land_path} used_cells={used_cells} exported_zones={len(zones)}")
@@ -552,30 +606,68 @@ class LandscapeEditorApp(ForgeryApp):
 					loaded_bricks = {}
 					rendered_pieces = set()
 					for (pos_x, pos_y), unit in find_missing_land_cells(land, existing_cells).items():
+						brick_path = brick_zones_dir / f"{unit.zone_name}.zone"
 						if unit.zone_name not in loaded_bricks:
-							brick_path = brick_zones_dir / f"{unit.zone_name}.zone"
-							try:
-								loaded_bricks[unit.zone_name] = load_zone(brick_path)
-							except (OSError, ZoneParseError) as exc:
-								loaded_bricks[unit.zone_name] = None
-								failed.append(f"{unit.zone_name}.zone: {exc}")
-						brick_zone = loaded_bricks[unit.zone_name]
-						if brick_zone is None:
+							# Cached raw (untransformed) geometry (project-todos/
+							# forgery/landscape_editor__zone_render_modes.md,
+							# Nuno 2026-09-11 perf follow-up) -- keyed on the
+							# brick file alone (never the placement), shared by
+							# every cell/rotation that references this brick.
+							# On a hit, `load_zone(brick_path)` never runs at
+							# all: bb_half_size (for brick_size_in_cells_from_
+							# half_size(), needed just below to even compute
+							# origin_x/origin_y) comes straight from the cached
+							# ZoneCacheData.
+							raw_cache_name = f"land_brick_{unit.zone_name}"
+							raw_data = read_zone_cache(raw_cache_name, ".zone", brick_path)
+							if raw_data is None:
+								try:
+									brick_zone = load_zone(brick_path)
+									raw_data = zone_to_cache_data(brick_zone)
+									write_zone_cache(raw_cache_name, ".zone", brick_path, raw_data)
+								except (OSError, ZoneParseError) as exc:
+									raw_data = None
+									failed.append(f"{unit.zone_name}.zone: {exc}")
+							loaded_bricks[unit.zone_name] = raw_data
+						raw_data = loaded_bricks[unit.zone_name]
+						if raw_data is None:
 							continue
-						size_x, size_y = brick_size_in_cells(brick_zone)
+						size_x, size_y = brick_size_in_cells_from_half_size(*raw_data.bb_half_size[:2])
 						origin_x, origin_y = piece_origin(pos_x, pos_y, unit, size_x, size_y)
 						piece_key = (unit.zone_name, origin_x, origin_y, unit.rot, unit.flip)
 						if piece_key in rendered_pieces:
 							continue
 						rendered_pieces.add(piece_key)
 						cell_name = f"land:{origin_x}:{origin_y}"
-						zones[cell_name] = build_land_piece_cache_data(brick_zone, origin_x, origin_y, unit.rot, unit.flip)
+						# Cache key includes the piece's placement (origin/rot/
+						# flip), not just the brick name -- the SAME brick can
+						# appear rotated/flipped at several origins, each
+						# needing its own transformed geometry.
+						piece_cache_name = f"land_piece_{unit.zone_name}_{origin_x}_{origin_y}_{unit.rot}_{unit.flip}"
+						piece_data = read_zone_cache(piece_cache_name, ".zone", brick_path)
+						if piece_data is None:
+							piece_data = transform_zone_cache_data(raw_data, origin_x, origin_y, unit.rot, unit.flip)
+							try:
+								write_zone_cache(piece_cache_name, ".zone", brick_path, piece_data)
+							except OSError:
+								pass
+						zones[cell_name] = piece_data
 						progress["gray"].add(cell_name)
+						# ".land" is never a real zone extension (.zone/.zonew/
+						# .zonel) -- unambiguous marker that this manifest entry
+						# is a placed brick, not an exported zone, and its
+						# staleness stamp is the brick file's, not a ZoneRef's.
+						try:
+							brick_stat = brick_path.stat()
+							manifest_zones[cell_name] = ZoneManifestEntry(".land", brick_stat.st_mtime, brick_stat.st_size)
+						except OSError:
+							pass
 					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_refs) "
 					      f"land fallback: existing_cells={len(existing_cells)} added={sorted(n for n in zones if n.startswith('land:'))}")
 				except (OSError, LandParseError) as exc:
 					failed.append(f"{land_path}: {exc}")
 			progress["zones"] = zones
+			progress["manifest_zones"] = manifest_zones
 			if failed:
 				progress["error"] = f"{len(failed)}/{len(refs)} zone(s) failed to load: {'; '.join(failed[:3])}"
 				report_error(progress["error"])
@@ -585,7 +677,135 @@ class LandscapeEditorApp(ForgeryApp):
 		finally:
 			progress["done"] = True
 
-	def _set_loaded_zones(self, zones, gray=None):
+	def _recompute_missing_for_mode(self):
+		"""Recomputes self._missing_for_mode from self._loaded_extensions for
+		self.render_mode -- shared by _apply_render_mode() (full mode switch)
+		and the live per-zone updates applied while "Generate missing
+		.zonew" (project-todos/forgery/landscape_editor__zone_render_modes.md
+		step 9) is running, so the counter stays correct without a full
+		reload."""
+		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
+		if real_exts is None:
+			self._missing_for_mode = 0
+			return
+		self._missing_for_mode = sum(
+			1 for name, ext_map in self._loaded_extensions.items()
+			if not any(ext in ext_map for ext in real_exts)
+		)
+		if self.render_mode == "WELD":
+			self._missing_for_mode += len(self._land_missing_cells)
+
+	def _rebuild_zone_node(self, name, cache_data):
+		"""Replaces the single geometry node for zone `name` with one built
+		from `cache_data`, keeping the elevation gradient consistent with
+		every other currently loaded zone (step 9's live update -- see
+		_set_loaded_zones()'s own docstring for why the gradient spans the
+		whole loaded set, not each zone's own range). Does not touch the
+		grid overlay or camera framing -- the loaded set's bounds don't
+		change when a zone goes from gray fallback to real geometry."""
+		old_node = self._zone_nodes.get(name)
+		if old_node is not None:
+			old_node.remove_node()
+		if not self.zones:
+			return
+		min_z = min(cd.bb_center[2] - cd.bb_half_size[2] for cd in self.zones.values())
+		max_z = max(cd.bb_center[2] + cd.bb_half_size[2] for cd in self.zones.values())
+		node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, fallback=name in self._gray_zones)
+		node_path = self._zone_root.attach_new_node(node)
+		node_path.set_two_sided(True)
+		self._zone_nodes[name] = node_path
+
+	def _generate_missing_zonew(self):
+		"""Starts a background weld pass (project-todos/forgery/
+		landscape_editor__zone_render_modes.md step 9) over every currently
+		loaded zone missing a `.zonew`/`.zonel` -- one native `zone_welder`
+		call per zone (zone_tools.run_zone_welder()), each result persisted
+		straight to `<ryzom-data>/pipeline/export/continents/<continent>/
+		zone_weld/<name>.zonew` (zone_tools.missing_zonew_dest()). Each
+		welded zone is queued on `progress["ready"]` as it completes so
+		draw_panel() can display it immediately (live, one zone at a time)
+		instead of waiting for the whole batch. A second call while one is
+		already running is ignored, same as _load_continent()."""
+		if self._weld_generate_progress is not None and not self._weld_generate_progress["done"]:
+			return
+		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
+		if real_exts is None:
+			return
+		missing_refs = [
+			self._loaded_refs[name] for name, ext_map in self._loaded_extensions.items()
+			if name in self._loaded_refs and not any(ext in ext_map for ext in real_exts)
+		]
+		# Cells with no real .zone at all (project-todos/forgery/
+		# landscape_editor__zone_render_modes.md step 9, Nuno 2026-09-11) --
+		# nothing zone_welder can work on, always reported as blocked rather
+		# than attempted (land_export/land_composition territory, see
+		# _run_generate_missing_zonew()'s own docstring).
+		land_missing_names = sorted(self._land_missing_cells)
+		if not missing_refs and not land_missing_names:
+			return
+		self._zone_error = None
+		live_data_path = app_settings.load().live_data_path
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		pipeline_continent_name = self._selected_continent_pipeline_name
+		if missing_refs and not pipeline_continent_name:
+			self._zone_error = "No pipeline continent selected -- cannot place generated .zonew files."
+			report_error(self._zone_error)
+			return
+		progress = {
+			"done": False, "error": None,
+			"total": len(missing_refs) + len(land_missing_names), "processed": 0, "ready": [],
+		}
+		self._weld_generate_progress = progress
+		thread = threading.Thread(
+			target=self._run_generate_missing_zonew,
+			args=(missing_refs, land_missing_names, live_data_path, ryzom_data_path, pipeline_continent_name, progress),
+			daemon=True,
+		)
+		thread.start()
+
+	def _run_generate_missing_zonew(
+		self, refs, land_missing_names, live_data_path, ryzom_data_path, pipeline_continent_name, progress,
+	):
+		"""Background-thread body for _generate_missing_zonew() -- calls the
+		native `zone_welder` once per zone in `refs` and persists each result
+		(see zone_tools.run_zone_welder()'s own `persist_to` docstring),
+		appending `(name, ZoneCacheData, new_ref)` to `progress["ready"]` for
+		each success so draw_panel() can pick it up on its next frame --
+		`new_ref` is a loose-file ZoneRef pointing at the just-written
+		`.zonew`, for draw_panel() to merge into self._loaded_extensions.
+
+		`land_missing_names` (this chantier's step 9, Nuno 2026-09-11) are
+		"land:x:y" cells with no real .zone anywhere -- producing one is
+		`land_export`, tracked separately as
+		project-todos/forgery/landscape_editor__land_composition.md step 4,
+		itself blocked on project-todos/pynel/land_pipeline.md step 1. Never
+		attempted here: each is reported as a clear, individual failure
+		instead, without holding up the zones that CAN actually be welded.
+
+		Writes only to `progress` (list.append()/dict field writes, safe
+		under the GIL, same reasoning as _run_load_continent())."""
+		failed = []
+		for ref in refs:
+			try:
+				dest = zone_tools.missing_zonew_dest(ryzom_data_path, pipeline_continent_name, ref.name)
+				zone = zone_tools.run_zone_welder(ref, live_data_path, persist_to=dest)
+				new_ref = ZoneRef(name=ref.name, x=ref.x, y=ref.y, source_path=dest, bnp_entry=None)
+				progress["ready"].append((ref.name, zone_to_cache_data(zone), new_ref))
+			except zone_tools.ZoneToolError as exc:
+				failed.append(str(exc))
+			progress["processed"] += 1
+		for cell_name in land_missing_names:
+			_, pos_x, pos_y = cell_name.split(":")
+			failed.append(
+				f"cell ({pos_x}, {pos_y}): no .zone exported yet -- finish land_composition (land_export) first"
+			)
+			progress["processed"] += 1
+		if failed:
+			progress["error"] = f"{len(failed)}/{progress['total']} zone(s) failed to weld: {'; '.join(failed[:3])}"
+			report_error(progress["error"])
+		progress["done"] = True
+
+	def _set_loaded_zones(self, zones, gray=None, manifest_zones=None, continent=None, mode=None):
 		"""Tears down whatever geometry was attached before and builds fresh
 		geometry for `zones` (name -> zone_cache.ZoneCacheData) -- colored by
 		elevation over the combined Z range of every zone in `zones`, not
@@ -597,56 +817,111 @@ class LandscapeEditorApp(ForgeryApp):
 		`gray` (zone names, project-todos/forgery/
 		landscape_editor__zone_render_modes.md step 6) are rendered flat gray
 		instead of the elevation gradient -- WELD/LIGHT zones shown via a
-		fallback extension, not actually welded/lit."""
+		fallback extension, not actually welded/lit.
+
+		`manifest_zones`/`continent`/`mode` (project-todos/forgery/
+		geomnode_continent_cache.md step 2), when all given (continent loads
+		only -- on_selection_changed()'s single-zone path never passes them),
+		enable the whole-continent `.bam` cache: a saved bundle for
+		`(continent, mode)` is reused as-is if its manifest matches exactly
+		what would be built fresh (same zones, same per-zone staleness
+		stamps, same global elevation range), skipping GeomNode construction
+		entirely; otherwise a full rebuild runs as before and the fresh
+		result is saved for next time."""
 		self._gray_zones = gray or set()
-		for node in self._zone_nodes.values():
-			node.remove_node()
-		self._zone_nodes = {}
 		self.zones = zones
+
+		if not zones:
+			for node in self._zone_nodes.values():
+				node.remove_node()
+			self._zone_nodes = {}
+			self._grid_np.remove_node()
+			self._grid_np = self.render.attach_new_node("zone-grid-placeholder")
+			return
 
 		# Elevation color spans the whole set of loaded zones, not each
 		# zone's own tiny Z range -- every zone re-normalizing to the same
 		# green gradient on its own relief made a whole continent look like
 		# a patchwork of disconnected tiles at zone boundaries (found by
 		# Nuno 2026-09-08 testing a real continent).
+		min_x = min(cache_data.bb_center[0] - cache_data.bb_half_size[0] for cache_data in zones.values())
+		min_y = min(cache_data.bb_center[1] - cache_data.bb_half_size[1] for cache_data in zones.values())
+		min_z = min(cache_data.bb_center[2] - cache_data.bb_half_size[2] for cache_data in zones.values())
+		max_x = max(cache_data.bb_center[0] + cache_data.bb_half_size[0] for cache_data in zones.values())
+		max_y = max(cache_data.bb_center[1] + cache_data.bb_half_size[1] for cache_data in zones.values())
+		max_z = max(cache_data.bb_center[2] + cache_data.bb_half_size[2] for cache_data in zones.values())
+
 		self._grid_np.remove_node()
-		if zones:
-			min_x = min(cache_data.bb_center[0] - cache_data.bb_half_size[0] for cache_data in zones.values())
-			min_y = min(cache_data.bb_center[1] - cache_data.bb_half_size[1] for cache_data in zones.values())
-			min_z = min(cache_data.bb_center[2] - cache_data.bb_half_size[2] for cache_data in zones.values())
-			max_x = max(cache_data.bb_center[0] + cache_data.bb_half_size[0] for cache_data in zones.values())
-			max_y = max(cache_data.bb_center[1] + cache_data.bb_half_size[1] for cache_data in zones.values())
-			max_z = max(cache_data.bb_center[2] + cache_data.bb_half_size[2] for cache_data in zones.values())
-			self._grid_np = self.render.attach_new_node(build_zone_grid_geom(min_x, min_y, max_x, max_y))
-			self._grid_np.set_light_off()
-			# Always drawn on top, regardless of terrain depth -- flat at
-			# Z=0 (sea level), it would otherwise be buried under any
-			# terrain above sea level or invisible behind terrain below it.
-			# It's a navigational reference overlay, not real geometry, so
-			# skipping the depth test/write (and forcing it into a bin
-			# rendered after everything else) is the right call here, per
-			# Nuno 2026-09-08.
-			self._grid_np.set_depth_test(False)
-			self._grid_np.set_depth_write(False)
-			self._grid_np.set_bin("fixed", 100)
-			if not self._grid_visible:
-				self._grid_np.hide()
-		else:
-			self._grid_np = self.render.attach_new_node("zone-grid-placeholder")
+		self._grid_np = self.render.attach_new_node(build_zone_grid_geom(min_x, min_y, max_x, max_y))
+		self._grid_np.set_light_off()
+		# Always drawn on top, regardless of terrain depth -- flat at
+		# Z=0 (sea level), it would otherwise be buried under any
+		# terrain above sea level or invisible behind terrain below it.
+		# It's a navigational reference overlay, not real geometry, so
+		# skipping the depth test/write (and forcing it into a bin
+		# rendered after everything else) is the right call here, per
+		# Nuno 2026-09-08.
+		self._grid_np.set_depth_test(False)
+		self._grid_np.set_depth_write(False)
+		self._grid_np.set_bin("fixed", 100)
+		if not self._grid_visible:
+			self._grid_np.hide()
 
-		for name, cache_data in zones.items():
-			node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, fallback=name in self._gray_zones)
-			node_path = self._zone_root.attach_new_node(node)
-			# Winding isn't guaranteed to match Panda3D's expected front-face
-			# direction (zone_geometry.py's grid triangulation follows NeL's
-			# own Bezier control-point convention) -- two-sided so every
-			# patch is visible regardless, rather than risking half the
-			# terrain silently backface-culled.
-			node_path.set_two_sided(True)
-			self._zone_nodes[name] = node_path
+		cache_enabled = manifest_zones is not None and continent is not None and mode is not None
+		new_manifest = None
+		bundle_hit = False
+		if cache_enabled:
+			new_manifest = ContinentManifest(
+				format_version=1, zones=dict(manifest_zones), min_z=min_z, max_z=max_z,
+			)
+			cached = continent_geom_cache.read_continent_bundle(continent, mode, self.loader)
+			if cached is not None:
+				cached_root, cached_manifest = cached
+				if cached_manifest == new_manifest:
+					for node in self._zone_nodes.values():
+						node.remove_node()
+					self._zone_nodes = {}
+					# Reparent each zone child directly under `_zone_root`
+					# (matching the flat structure the "rebuild" path below
+					# produces) rather than keeping `cached_root` itself as an
+					# extra wrapper node in the live scene.
+					for child in list(cached_root.get_children()):
+						child.reparent_to(self._zone_root)
+						self._zone_nodes[child.get_name()] = child
+					cached_root.remove_node()
+					bundle_hit = True
+				else:
+					cached_root.remove_node()
 
-		if zones:
-			self._frame_on_loaded_zones()
+		if not bundle_hit:
+			for node in self._zone_nodes.values():
+				node.remove_node()
+			self._zone_nodes = {}
+			for name, cache_data in zones.items():
+				node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, fallback=name in self._gray_zones)
+				node_path = self._zone_root.attach_new_node(node)
+				# Winding isn't guaranteed to match Panda3D's expected front-face
+				# direction (zone_geometry.py's grid triangulation follows NeL's
+				# own Bezier control-point convention) -- two-sided so every
+				# patch is visible regardless, rather than risking half the
+				# terrain silently backface-culled.
+				node_path.set_two_sided(True)
+				# Named after the zone (project-todos/forgery/
+				# geomnode_continent_cache.md step 2) -- build_zone_geom_from_
+				# cache()'s own GeomNode is always named "zone-tessellated",
+				# so without this every child of a saved .bam bundle would
+				# come back with the same name, making them impossible to
+				# tell apart on reload.
+				node_path.set_name(name)
+				self._zone_nodes[name] = node_path
+			if cache_enabled:
+				bundle_root = NodePath("continent-bundle")
+				for name, node_path in self._zone_nodes.items():
+					node_path.instance_to(bundle_root)
+				continent_geom_cache.write_continent_bundle(continent, mode, bundle_root, new_manifest)
+				bundle_root.remove_node()
+
+		self._frame_on_loaded_zones()
 
 	def _frame_on_loaded_zones(self):
 		bbs = [(cache_data.bb_center, cache_data.bb_half_size) for cache_data in self.zones.values()]
@@ -761,6 +1036,51 @@ class LandscapeEditorApp(ForgeryApp):
 		self._grid_visible = not self._grid_visible
 		(self._grid_np.show if self._grid_visible else self._grid_np.hide)()
 
+	def _toggle_top_down(self):
+		"""2D/3D viewport toggle (project-todos/forgery/
+		landscape_editor__2d_3d_toggle.md) -- purely a camera behavior switch,
+		independent of self.render_mode ([POLY]/[WELD]/[LIGHT] keep resolving
+		geometry exactly the same either way). Leaving 3D for 2D remembers the
+		orientation being left, so coming back to 3D restores it instead of
+		leaving the view stuck on the top-down look."""
+		self._top_down_locked = not self._top_down_locked
+		if self._top_down_locked:
+			self._saved_3d_heading_pitch = (self.orbit_camera.heading, self.orbit_camera.pitch)
+			self.orbit_camera.lock_rotation = True
+			self.orbit_camera.snap_to_axis("+z")
+		else:
+			self.orbit_camera.lock_rotation = False
+			self.orbit_camera.animate_to_orientation(*self._saved_3d_heading_pitch)
+
+	def _toggle_zone_transparency(self):
+		"""50% terrain transparency (project-todos/forgery/
+		landscape_editor__transparency_wireframe.md) -- same mechanism as
+		Patina's own object transparency toggle (object_editor_mixins/
+		viewport_transform.py's _apply_object_transparency()), applied to
+		self._zone_root instead of a single object's model_root, so it
+		covers every zone currently loaded regardless of self.render_mode.
+		Independent of _toggle_zone_wireframe() -- both can be on at once."""
+		self._zone_transparent = not self._zone_transparent
+		if self._zone_transparent:
+			self._zone_root.set_transparency(TransparencyAttrib.M_alpha)
+			self._zone_root.set_color_scale(1, 1, 1, _OBJECT_TRANSPARENCY_ALPHA)
+		else:
+			self._zone_root.clear_transparency()
+			self._zone_root.clear_color_scale()
+
+	def _toggle_zone_wireframe(self):
+		"""Wireframe terrain display (project-todos/forgery/
+		landscape_editor__transparency_wireframe.md) -- independent of
+		_toggle_zone_transparency() -- both can be on at once."""
+		self._zone_wireframe = not self._zone_wireframe
+		if self._zone_wireframe:
+			# filled_wireframe, not plain wireframe -- the wireframe overlays
+			# the normal shaded/textured render, it never replaces it (Nuno
+			# 2026-09-11, project-todos/forgery/object_editor__wireframe_overlay.md).
+			self._zone_root.set_render_mode_filled_wireframe((0, 0, 0, 1), 1)
+		else:
+			self._zone_root.clear_render_mode()
+
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport
 		(zone grid) -- EXACT same positioning/sizing as object_editor.py's
@@ -788,6 +1108,19 @@ class LandscapeEditorApp(ForgeryApp):
 			if _icon_button(fa_icons.ICON_FA_TABLE, "Show zone grid", self._grid_visible, square=True,
 			                large_font=large_font):
 				self._toggle_grid()
+			imgui.same_line()
+			top_down_tooltip = "Switch to 3D view" if self._top_down_locked else "Switch to 2D view (top-down, no rotation)"
+			if _icon_button(fa_icons.ICON_FA_CUBE, top_down_tooltip, not self._top_down_locked, square=True,
+			                large_font=large_font):
+				self._toggle_top_down()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_CIRCLE_HALF_STROKE, "50% zone transparency",
+			                self._zone_transparent, square=True, large_font=large_font):
+				self._toggle_zone_transparency()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_DRAW_POLYGON, "Wireframe",
+			                self._zone_wireframe, square=True, large_font=large_font):
+				self._toggle_zone_wireframe()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def panel_title(self):
@@ -1020,13 +1353,46 @@ class LandscapeEditorApp(ForgeryApp):
 				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:draw_panel) mode reload done, error={progress['error']!r} zones={len(progress['zones'])} gray={sorted(progress['gray'])}")
 				if progress["error"]:
 					self._zone_error = progress["error"]
-				self._set_loaded_zones(progress["zones"], gray=progress["gray"])
+				self._set_loaded_zones(
+					progress["zones"], gray=progress["gray"], manifest_zones=progress["manifest_zones"],
+					continent=self.selected_continent_name, mode=self.render_mode,
+				)
+				# Cells with no real zone file at all show up as synthesized
+				# "land:x:y" pseudo-names (see _run_load_refs()'s land
+				# fallback) -- tracked separately from self._loaded_extensions
+				# (which only ever knows about real, positioned zones) so
+				# [WELD]'s "Generate missing .zonew" can report them as
+				# blocked instead of silently ignoring them (step 9,
+				# Nuno 2026-09-11).
+				self._land_missing_cells = {name for name in progress["gray"] if name.startswith("land:")}
+				self._recompute_missing_for_mode()
 			else:
 				total = progress["total"]
 				processed = progress["processed"]
 				fraction = processed / total if total else 0.0
 				overlay = f"{processed}/{total} zones" if total else "Loading..."
 				imgui.progress_bar(fraction, overlay=overlay)
+
+		if self._weld_generate_progress is not None:
+			progress = self._weld_generate_progress
+			# Live, one zone at a time (Nuno 2026-09-11: waiting for the
+			# whole batch before showing anything was worse than necessary)
+			# -- each ready zone goes from gray fallback to real welded
+			# geometry the moment its own .zonew is written, without
+			# touching any zone still pending.
+			ready = progress["ready"]
+			while ready:
+				name, cache_data, new_ref = ready.pop(0)
+				self._loaded_extensions.setdefault(name, {})[".zonew"] = new_ref
+				if self.render_mode == "WELD":
+					self.zones[name] = cache_data
+					self._gray_zones.discard(name)
+					self._rebuild_zone_node(name, cache_data)
+			self._recompute_missing_for_mode()
+			if progress["done"]:
+				self._weld_generate_progress = None
+				if progress["error"]:
+					self._zone_error = progress["error"]
 
 		if self._zone_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
@@ -1040,8 +1406,6 @@ class LandscapeEditorApp(ForgeryApp):
 
 	def _select_render_mode(self, mode):
 		self.render_mode = mode
-		if mode == "2D":
-			self.orbit_camera.snap_to_axis("+z")
 		self._apply_render_mode()
 
 	def _draw_render_mode_bar(self):
@@ -1065,6 +1429,20 @@ class LandscapeEditorApp(ForgeryApp):
 		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
 		if real_exts is not None and self._loaded_refs:
 			imgui.text(f"{self._missing_for_mode} zone(s) not {self.render_mode.lower()}ed ({'/'.join(real_exts)} missing)")
+			# Generation is only wired for [WELD] (project-todos/forgery/
+			# landscape_editor__zone_render_modes.md step 9's own scope --
+			# [LIGHT] never gets a generation button, see the chantier's
+			# "Hors scope explicite").
+			if self.render_mode == "WELD" and self._missing_for_mode > 0:
+				generating = self._weld_generate_progress is not None and not self._weld_generate_progress["done"]
+				if generating:
+					progress = self._weld_generate_progress
+					total = progress["total"]
+					processed = progress["processed"]
+					fraction = processed / total if total else 0.0
+					imgui.progress_bar(fraction, overlay=f"{processed}/{total} zone(s) welded")
+				elif imgui.button(f"Generate {self._missing_for_mode} missing .zonew"):
+					self._generate_missing_zonew()
 
 
 def main(argv=None):

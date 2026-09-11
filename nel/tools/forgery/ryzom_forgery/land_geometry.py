@@ -78,7 +78,7 @@ from typing import Dict, Tuple
 from pynel.ryzom_land import STRING_UNUSED, ZoneRegion, ZoneUnit
 
 from .zone_cache import PatchPositions, ZoneCacheData
-from .zone_geometry import ZONE_CELL_SIZE, compute_zone_patch_positions
+from .zone_geometry import ZONE_CELL_SIZE, zone_to_cache_data
 
 
 def _piece_deltas(pos_x: int, pos_y: int, rot: int, flip: int, size_x: int, size_y: int) -> Tuple[int, int]:
@@ -116,14 +116,21 @@ def piece_origin(grid_x: int, grid_y: int, unit: ZoneUnit, size_x: int, size_y: 
 	return grid_x + delta_x, grid_y + delta_y
 
 
+def brick_size_in_cells_from_half_size(half_x: float, half_y: float) -> Tuple[int, int]:
+	"""Same formula as brick_size_in_cells(), from an already-known bounding
+	box half-size (e.g. a cached ZoneCacheData.bb_half_size, project-todos/
+	forgery/landscape_editor__zone_render_modes.md, Nuno 2026-09-11 perf
+	follow-up) -- lets the caller skip parsing the brick's `.zone` entirely
+	on a cache hit, at least 1x1 even if the mesh's own bounds fall slightly
+	short of a full cell."""
+	return max(1, round((half_x * 2) / ZONE_CELL_SIZE)), max(1, round((half_y * 2) / ZONE_CELL_SIZE))
+
+
 def brick_size_in_cells(brick_zone) -> Tuple[int, int]:
 	"""(size_x, size_y) in whole cells, derived from the brick's own real
-	bounding box (never a ZoneBank lookup, see module docstring) -- at least
-	1x1 even if the mesh's own bounds fall slightly short of a full cell."""
+	bounding box (never a ZoneBank lookup, see module docstring)."""
 	bb = brick_zone.zone_bb
-	size_x = max(1, round((bb.half_size.x * 2) / ZONE_CELL_SIZE))
-	size_y = max(1, round((bb.half_size.y * 2) / ZONE_CELL_SIZE))
-	return size_x, size_y
+	return brick_size_in_cells_from_half_size(bb.half_size.x, bb.half_size.y)
 
 
 def _transform_point(
@@ -141,15 +148,17 @@ def _transform_point(
 	return x + origin_x * ZONE_CELL_SIZE, y + origin_y * ZONE_CELL_SIZE, z
 
 
-def build_land_piece_cache_data(brick_zone, origin_x: int, origin_y: int, rot: int, flip: int) -> ZoneCacheData:
-	"""ZoneCacheData for one whole `.land` piece (a single cell is just the
-	size_x == size_y == 1 case), positioned at `origin_x`/`origin_y` (its own
-	grid origin -- see `piece_origin()`) exactly like `CExport::
-	transformZone()`/`treatPattern()` would -- see module docstring.
-	`brick_zone` itself is never mutated."""
-	bb = brick_zone.zone_bb
-	width = bb.half_size.x * 2
-	height = bb.half_size.y * 2
+def transform_zone_cache_data(cache_data: ZoneCacheData, origin_x: int, origin_y: int, rot: int, flip: int) -> ZoneCacheData:
+	"""Places an already-tessellated brick (a ZoneCacheData -- typically one
+	already read from disk cache, project-todos/forgery/
+	landscape_editor__zone_render_modes.md, Nuno 2026-09-11 perf follow-up)
+	at `origin_x`/`origin_y`, exactly like `CExport::transformZone()`/
+	`treatPattern()` would -- see module docstring. Pure coordinate
+	arithmetic on already-computed positions, no Bezier re-evaluation, so a
+	brick already cached via `zone_geometry.zone_to_cache_data()` never needs
+	re-parsing/re-tessellating just to be placed at a new position/rotation."""
+	width = cache_data.bb_half_size[0] * 2
+	height = cache_data.bb_half_size[1] * 2
 	patches = tuple(
 		PatchPositions(
 			n_s=patch.n_s,
@@ -160,13 +169,22 @@ def build_land_piece_cache_data(brick_zone, origin_x: int, origin_y: int, rot: i
 				for coord in _transform_point(*patch.positions[i:i + 3], origin_x, origin_y, rot, flip, width, height)
 			),
 		)
-		for patch in compute_zone_patch_positions(brick_zone)
+		for patch in cache_data.patches
 	)
-	cx, cy, cz = _transform_point(bb.center.x, bb.center.y, bb.center.z, origin_x, origin_y, rot, flip, width, height)
-	hx, hy, hz = bb.half_size.x, bb.half_size.y, bb.half_size.z
+	cx, cy, cz = _transform_point(*cache_data.bb_center, origin_x, origin_y, rot, flip, width, height)
+	hx, hy, hz = cache_data.bb_half_size
 	if rot % 2 == 1:
 		hx, hy = hy, hx
 	return ZoneCacheData(patches=patches, bb_center=(cx, cy, cz), bb_half_size=(hx, hy, hz))
+
+
+def build_land_piece_cache_data(brick_zone, origin_x: int, origin_y: int, rot: int, flip: int) -> ZoneCacheData:
+	"""ZoneCacheData for one whole `.land` piece (a single cell is just the
+	size_x == size_y == 1 case), positioned at `origin_x`/`origin_y` (its own
+	grid origin -- see `piece_origin()`). `brick_zone` itself is never
+	mutated. Thin wrapper over `transform_zone_cache_data()` for a caller
+	that only has the raw parsed Zone, not an already-cached ZoneCacheData."""
+	return transform_zone_cache_data(zone_to_cache_data(brick_zone), origin_x, origin_y, rot, flip)
 
 
 def find_missing_land_cells(land: ZoneRegion, existing_cells: set) -> Dict[Tuple[int, int], ZoneUnit]:

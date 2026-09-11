@@ -288,14 +288,19 @@ en bleu la majorité d'un continent réel. Retirée entièrement
 état/toggle dans `landscape_editor.py`) ; seule la détection réelle par
 `.ig` reste au programme.
 
-## Modes de rendu [2D][POLY][WELD][LIGHT] (`landscape_editor__zone_render_modes.md`)
+## Modes de rendu [POLY][WELD][LIGHT] (`landscape_editor__zone_render_modes.md`)
 
-Barre de 4 boutons (`_draw_render_mode_bar()`) contrôlant `self.render_mode`
-(`"2D"/"POLY"/"WELD"/"LIGHT"`, défaut `"POLY"`). `[2D]` ne fait que la bascule
-caméra existante (`snap_to_axis("+z")`) ; `[POLY]`/`[WELD]`/`[LIGHT]`
-re-résolvent, pour chaque zone du continent chargé (`self._loaded_refs`/
-`self._loaded_extensions`, name -> ZoneRef / name -> {ext: ZoneRef}), quelle
-extension réelle afficher via `_resolve_zone_for_mode()` :
+Barre de 3 boutons (`_draw_render_mode_bar()`) contrôlant `self.render_mode`
+(`"POLY"/"WELD"/"LIGHT"`, défaut `"POLY"`) -- re-résolvent, pour chaque zone
+du continent chargé (`self._loaded_refs`/`self._loaded_extensions`, name ->
+ZoneRef / name -> {ext: ZoneRef}), quelle extension réelle afficher via
+`_resolve_zone_for_mode()` :
+
+**Un 4ᵉ mode `[2D]` a existé puis a été retiré** (`landscape_editor__2d_3d_toggle.md`,
+Nuno 2026-09-11 : "2D/POLY c'est le même mode en fait" -- il résolvait
+exactement la même géométrie que `[POLY]`, seule la caméra changeait). Voir
+plus bas "Bascule caméra 2D/3D" : ce comportement vit maintenant entièrement
+côté caméra, indépendant de `self.render_mode`.
 
 - `[WELD]` accepte `.zonew` OU `.zonel` comme "réellement weldé" (un `.zonel`
   livré implique que le weld a eu lieu, même si le `.zonew` intermédiaire n'a
@@ -361,6 +366,68 @@ existants (19 identiques, 7 différents dont au moins un format binaire
 périmé, 1 manquant). Ne jamais lire `graphics/landscape/ligo/` pour du
 leveldesign actif.
 
+### Installation automatique des données pipeline (`landscape_editor__zone_render_modes__pipeline_data_installer.md`)
+
+Au chargement d'un continent en mode édition, `_load_continent()` vérifie si
+les données `build_gamedata` nécessaires sont déjà installées sous
+`<ryzom-data>/pipeline/` (`pipeline_data_installer.is_installed(category,
+name)`) : le continent lui-même (`pipeline_continents`), l'export de son
+écosystème (`pipeline_ecosystems`) et les bricks `.zone` brutes de son
+écosystème (`landscape`, jamais optionnelle -- seul point de départ pour
+composer un continent depuis son `.land` tant qu'aucun `.zone` par continent
+n'a été généré via `land_export`). Si l'une manque, une proposition de
+téléchargement/extraction (archives `.zip` publiées par Nuno,
+`PipelineDataInstallDialog`) est ouverte au prochain `draw_panel()` -- jamais
+depuis l'intérieur du popup du combo continent lui-même (piège ImGui : un
+`imgui.open_popup()` pour un popup différent pendant qu'un autre est encore
+ouvert est silencieusement perdu, trouvé 2026-09-09).
+
+### Réglage `ryzom_tools_path` et génération de `.zonew` manquants (`[WELD]`)
+
+`Settings.ryzom_tools_path` (onglet Settings, section "Ryzom Paths") pointe
+vers un **dossier** contenant les exécutables natifs du pipeline (`zone_welder`
+pour l'instant, d'autres à venir sans réglage supplémentaire) -- sélecteur de
+dossier, persistant, partagé entre Patina et Atyscape.
+
+`ryzom_forgery/zone_tools.py` (`run_zone_welder(ref, live_data_path,
+persist_to=None)`) résout `zone_welder`/`zone_welder.exe` dans ce dossier,
+rassemble la zone cible et ses voisines de grille déjà weldées
+(`.zonew`/`.zonel`, une zone voisine encore `.zone` brute est simplement
+exclue de l'appel plutôt que weldée en cascade) dans un dossier temporaire,
+appelle le binaire et relit le `.zonew` produit. `ZoneToolError` dédiée si
+`ryzom_tools_path` n'est pas configuré, si le binaire est absent, ou si
+l'appel échoue/ne produit rien.
+
+Le bouton "Generate N missing .zonew" (`_draw_render_mode_bar()`, visible
+uniquement en `[WELD]` avec des zones manquantes) lance
+`_generate_missing_zonew()` en tâche de fond, une zone à la fois. Chaque
+`.zonew` produit est écrit directement sur disque via `persist_to`
+(`zone_tools.missing_zonew_dest()`) sous
+`<ryzom-data>/pipeline/export/continents/<continent>/zone_weld/<nom>.zonew`
+(même racine `ryzom-data` déjà utilisée en lecture, jamais un second
+réglage) -- persistant, redétecté sans regénération après relance puisque
+cette source n'est jamais mise en cache (voir plus haut).
+
+**Affichage live** (Nuno 2026-09-11) : plutôt que d'attendre la fin du lot,
+chaque zone weldée passe du dégradé violet/rose au dégradé d'élévation dès
+que son propre `.zonew` est écrit (`progress["ready"]`, vidée à chaque frame
+par `draw_panel()`), sans toucher aux zones encore en attente ; le compteur
+"N manquantes" décroît au fur et à mesure (`_recompute_missing_for_mode()`).
+
+**Cellules `.land` sans aucun `.zone`** (Nuno 2026-09-11) : le repli `.land`+
+brique (voir plus bas, historiquement réservé à `[POLY]`, `[2D]` n'étant
+alors qu'une bascule caméra sur le même mode -- voir "Bascule caméra 2D/3D"
+plus bas) s'applique aussi à `[WELD]`, pour que ces cellules deviennent visibles (dégradé violet/
+rose) et comptées dans "N manquantes" au lieu d'être simplement invisibles.
+`zone_welder` n'a rien à souder pour elles (aucun `.zone` réel n'existe) :
+produire ce `.zone` est le rôle de `land_export`, tracé séparément comme
+`landscape_editor__land_composition.md` étape 4, elle-même bloquée par
+`project-todos/pynel/land_pipeline.md` étape 1. Le bouton "Generate" ne tente
+donc jamais de les souder -- il rapporte une erreur explicite par cellule
+("no .zone exported yet -- finish land_composition (land_export) first")
+sans jamais bloquer la génération des zones qui, elles, peuvent réellement
+être weldées.
+
 ## Mode global Visualisation / Édition (`landscape_editor__land_preview.md`)
 
 `_detect_app_mode()` détermine le mode par défaut, uniquement la toute
@@ -402,9 +469,10 @@ ex. `fyros.land`/`matis.land`/`nexus.land`, jamais à un nom de dossier) : un
 continent listé dans `ryzom.world` mais sans `.land` correspondant
 n'apparaît pas du tout dans le combo en édition.
 
-**Fallback `.land`+brique pour `[POLY]`/`[2D]`** (`land_geometry.py`, nouveau
-module) : en édition, quand `self.render_mode` est `"2D"` ou `"POLY"`,
-`_apply_render_mode()` résout `(land_path, brick_zones_dir)` pour le continent
+**Fallback `.land`+brique pour `[POLY]`/`[WELD]`** (`land_geometry.py`, nouveau
+module ; étendu à `[WELD]` le 2026-09-11, voir plus haut "Cellules `.land`
+sans aucun `.zone`") : en édition, quand `self.render_mode` est `"POLY"` ou
+`"WELD"`, `_apply_render_mode()` résout `(land_path, brick_zones_dir)` pour le continent
 sélectionné (`land_loader.find_land_files()` + `continent_ecosystem.
 get_ecosystem_for_continent()` pour situer `<ryzom-data>/pipeline/landscape/
 <eco>/zones/`), et `_run_load_refs()` (thread d'arrière-plan) charge le
@@ -463,6 +531,31 @@ restantes à moins de 28 unités (mesh légèrement irrégulier, pas un bug
 systématique identifié) -- les anciennes erreurs de 100 à 200+ unités et le
 chevauchement des pièces multi-cellules ont disparu.
 
+**Cache disque des bricks de repli** (perf, Nuno 2026-09-11 : mesuré sur
+`nexus`, 17 cellules de repli, 2.135s -> 0.134s, ~16x) : `build_land_piece_cache_data()`
+refaisait un parse + une vraie tessellation Bézier (`compute_zone_patch_positions()`)
+à chaque chargement, pour rien -- le fichier brique ne change jamais entre deux
+chargements. Découpé en deux caches disque distincts, tous deux via
+`zone_cache.py` (même mécanisme que le cache par zone de l'étape 6) :
+- **Cache de la géométrie brute** (`"land_brick_<nom>"`, non transformée) --
+  `zone_geometry.zone_to_cache_data()` du brick parsé une seule fois, réutilisé
+  pour tous ses placements (rotations/positions) ; sur un hit, `load_zone()`
+  ne tourne même plus (sa bounding box vient directement du cache, via la
+  nouvelle `land_geometry.brick_size_in_cells_from_half_size()`).
+- **Cache de la pièce transformée** (`"land_piece_<nom>_<origin_x>_<origin_y>_<rot>_<flip>"`)
+  -- la nouvelle `land_geometry.transform_zone_cache_data()` (extraite de
+  l'ancienne `build_land_piece_cache_data()`, qui n'est plus qu'un fin wrapper
+  autour d'elle) applique la transformation position/rotation/flip à une
+  `ZoneCacheData` déjà tessellée (brute ou déjà en cache), sans jamais
+  ré-évaluer Bézier.
+
+Invalidation : la clé de cache par brick inclut le fichier `.zone` source
+(mtime/taille, comme d'habitude) ; en plus, un stamp unique sur le fichier
+`.land` lui-même (`"__land_file__"`, utilisé par le cache de continent
+complet ci-dessous) invalide tout repli d'un coup si le `.land` change de
+disposition (brique/rotation réassignée à une cellule) sans que le fichier
+brique référencé change.
+
 Appliqué directement aux positions déjà évaluées de la surface Bézier
 (`zone_geometry.compute_zone_patch_positions()`, réutilisé tel quel) plutôt
 qu'aux points de contrôle bruts : une surface de Bézier est une combinaison
@@ -503,3 +596,86 @@ vidé hors mode édition ou sans continent sélectionné.
 
 Étape suivante du chantier land_preview : extraction en mixins dédiés par
 mode une fois cette logique édition bien distincte.
+
+## Cache disque du `NodePath` entier d'un continent (`geomnode_continent_cache.md`)
+
+Même une fois le cache par zone (étape 6) et celui des bricks de repli
+(ci-dessus) chauds, il restait un coût mesuré à 1.349s pour 151 zones
+(~8.9ms/zone, nexus) : la construction des `GeomNode` Panda3D elle-même
+(couleur + indices + `attach_new_node`, `_set_loaded_zones()`), entièrement
+sur le thread principal. Objectif de Nuno (2026-09-11) : repasser sous 1s de
+temps total de rechargement, quitte à geler l'UI le temps de la
+(re)construction -- le gel n'est pas un problème tant que le total est
+rapide.
+
+**`ryzom_forgery/continent_geom_cache.py`** (nouveau module) sérialise le
+`NodePath` déjà construit via le format natif Panda3D (`.bam`,
+`NodePath.write_bam_file()`/`Loader.load_model(..., noCache=True)`), plutôt
+que de refaire tourner `GeomVertexWriter`/numpy à chaque chargement. Une
+zone n'appartenant jamais qu'à un seul continent, un bundle `.bam` +
+manifeste (`ContinentManifest`, pickle) par `(continent, mode de rendu)` sous
+`config_dir() / "continent_geom_cache"` peut être rechargé tel quel tant que
+rien n'a changé.
+
+**Le manifeste** (`ZoneManifestEntry` par zone : extension résolue +
+mtime/taille du fichier source, plus `min_z`/`max_z` global -- le dégradé
+d'élévation dépend de toute la plage chargée, pas de la zone seule, voir
+l'étape 7 plus haut) est comparé au manifeste fraîchement recalculé
+(`_run_load_refs()` le construit à la volée pendant le chargement normal des
+zones et des bricks de repli, `progress["manifest_zones"]`) **avant** de
+toucher au `.bam` : identique -> chargement direct du bundle, ses enfants
+étant renommés par zone (`node_path.set_name(name)`, le `GeomNode` de
+`build_zone_geom_from_cache()` s'appelant toujours `"zone-tessellated"`, sans
+quoi tous les enfants d'un bundle rechargé seraient indiscernables) puis
+reparentés directement sous `self._zone_root` (pas de wrapper intermédiaire
+dans la scène). Différent (zone ajoutée/retirée/modifiée, ou plage globale
+changée) -> reconstruction complète comme avant (jamais pire que l'existant),
+puis sauvegarde du nouveau bundle pour la prochaine fois. Pas de
+reconstruction partielle zone par zone dans cette première version -- gardé
+simple.
+
+Un cache hit se lit en quelques dizaines de ms (chargement `.bam` seul, testé
+en isolation headless) contre plus d'une seconde de reconstruction --
+confirmé fonctionnel par Nuno sur un rechargement répété du même continent.
+
+## Bascule caméra 2D/3D (`landscape_editor__2d_3d_toggle.md`)
+
+`[2D]` a été retiré de la barre de modes de rendu (voir plus haut) et
+remplacé par un bouton icône dédié (`ICON_FA_CUBE`) dans
+`_draw_viewport_toggles()`, à côté de celui de la grille -- purement un
+comportement caméra, indépendant de `self.render_mode`.
+
+- **2D par défaut au lancement** : `self._top_down_locked = True` dès
+  `__init__`, `OrbitCamera` construite directement avec l'orientation
+  `AXIS_VIEWS["+z"]` (vue du dessus) plutôt qu'un `snap_to_axis()` animé
+  depuis le défaut (0, 0) -- rien à animer au tout premier affichage.
+- **`OrbitCamera.lock_rotation`** (`camera.py`, nouveau flag, `False` par
+  défaut -- partagé avec Patina mais inoffensif tant qu'aucune app ne le
+  touche) : quand actif, `_update()` ignore le drag de rotation (bouton
+  gauche) ; pan (bouton milieu) et zoom (bouton droit/molette) continuent de
+  fonctionner normalement.
+- **`_toggle_top_down()`** : en passant en 2D, sauvegarde l'orientation 3D
+  courante (`self._saved_3d_heading_pitch`) puis `lock_rotation = True` +
+  `snap_to_axis("+z")` (animé). En repassant en 3D, `lock_rotation = False`
+  puis `OrbitCamera.animate_to_orientation(heading, pitch)` (nouvelle
+  méthode, animée comme `snap_to_axis()` -- qui délègue maintenant à elle --
+  plutôt qu'un saut instantané : Nuno 2026-09-11, la transition 3D->2D
+  animait déjà bien via `snap_to_axis()`, 2D->3D doit se sentir pareil)
+  restaure cette orientation, ou `(heading=0°, pitch=45°)` par défaut si
+  aucune bascule 2D n'a encore eu lieu depuis le lancement.
+
+## Transparence 50% et wireframe sur le terrain (`landscape_editor__transparency_wireframe.md`)
+
+Deux boutons icône indépendants et combinables dans `_draw_viewport_toggles()`,
+à côté de celui du 2D/3D -- même mécanisme que Patina (`_toggle_object_transparency()`/
+`_toggle_object_wireframe()`, `object_editor_mixins/viewport_transform.py`),
+appliqués à `self._zone_root` (donc à toutes les zones chargées, quel que
+soit `self.render_mode` ou l'état 2D/3D) :
+
+- **Transparence** (`self._zone_transparent`, `ICON_FA_CIRCLE_HALF_STROKE`) :
+  `TransparencyAttrib.M_alpha` + `set_color_scale(1, 1, 1, alpha)`.
+- **Wireframe** (`self._zone_wireframe`, `ICON_FA_DRAW_POLYGON`) --
+  `set_render_mode_filled_wireframe((0, 0, 0, 1), 1)`, **pas**
+  `set_render_mode_wireframe()` : le filaire s'ajoute par-dessus le rendu
+  texturé/ombré normal, il ne le remplace jamais (Nuno 2026-09-11, même
+  correctif appliqué côté Patina, `object_editor__wireframe_overlay.md`).

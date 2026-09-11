@@ -52,12 +52,29 @@ def _resolve_zone_welder_binary() -> Path:
 	return binary_path
 
 
-def run_zone_welder(ref: ZoneRef, live_data_path) -> Zone:
+def missing_zonew_dest(ryzom_data_path, pipeline_continent_name: str, zone_name: str) -> Path:
+	"""Path a generated `.zonew` must be written to for `zone_name`
+	(project-todos/forgery/landscape_editor__zone_render_modes.md step 9) --
+	always `<ryzom-data>/pipeline/export/continents/<continent>/zone_weld/
+	<zone_name>.zonew`, the same pipeline export root already used for
+	reading (step 6), never a second `ryzom_tools_path`-style setting.
+	Raises ZoneToolError if `ryzom_data_path` is falsy (not configured)."""
+	if not ryzom_data_path:
+		raise ZoneToolError("Ryzom data path is not configured (Settings > Ryzom Paths).")
+	return Path(ryzom_data_path) / "pipeline" / "export" / "continents" / pipeline_continent_name / "zone_weld" / f"{zone_name}.zonew"
+
+
+def run_zone_welder(ref: ZoneRef, live_data_path, persist_to: Path = None) -> Zone:
 	"""Produces (or re-derives, cache-free) the `.zonew` for the single zone
 	`ref` points to, by calling the native `zone_welder` on it together with
 	whichever of its 8 grid neighbors already have a real `.zonew`/`.zonel`
 	on disk (see module docstring for why neighbors lacking one are simply
-	skipped rather than welded first)."""
+	skipped rather than welded first). `persist_to`, when given (step 9's
+	"Generate missing .zonew" button, see `missing_zonew_dest()`), writes the
+	produced `.zonew` there (creating parent directories as needed) before
+	parsing it -- the on-disk file becomes the persistent result, the
+	returned `Zone` just lets the caller refresh its own display without a
+	second disk read."""
 	binary_path = _resolve_zone_welder_binary()
 
 	try:
@@ -92,7 +109,12 @@ def run_zone_welder(ref: ZoneRef, live_data_path) -> Zone:
 			details = (result.stderr or result.stdout or "no output produced").strip()
 			raise ZoneToolError(f"zone_welder failed to produce {ref.name}.zonew: {details}")
 
+		output_bytes = output_path.read_bytes()
+		if persist_to is not None:
+			persist_to.parent.mkdir(parents=True, exist_ok=True)
+			persist_to.write_bytes(output_bytes)
+
 		try:
-			return parse_zone(output_path.read_bytes())
+			return parse_zone(output_bytes)
 		except ZoneParseError as exc:
 			raise ZoneToolError(f"{ref.name}: produced .zonew failed to parse: {exc}")

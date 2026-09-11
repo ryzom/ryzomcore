@@ -180,6 +180,13 @@ class ObjectEditorApp(
 		self._world_axes_visible = False
 		self._pivot_axes_visible = False
 		self._object_transparent = False
+		self._object_wireframe = False
+		# Cycled Shading/Constant Shading/Unshaded button (project-todos/
+		# forgery/object_editor__shading_modes.md) -- independent of
+		# transparency/wireframe above, all combinable.
+		self._shading_mode = "shading"
+		self._unshaded_color = (1.0, 1.0, 1.0)
+		self._saved_ambient_light_intensity = None
 		self._shadow_skin_visible = False
 		self._viewport_toggle_size = (10.0, 10.0)
 		self._transform_panel_size = (10.0, 10.0)

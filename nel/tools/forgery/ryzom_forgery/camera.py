@@ -63,6 +63,12 @@ class OrbitCamera:
 		self.max_distance = 2000.0
 		self.min_pitch = -89.0
 		self.max_pitch = 89.0
+		# Set by a caller (e.g. landscape_editor.py's 2D/3D viewport toggle,
+		# project-todos/forgery/landscape_editor__2d_3d_toggle.md) to disable
+		# the left-drag orbit entirely -- pan/zoom keep working normally.
+		# False (free rotation) by default, so this is a no-op for any app
+		# that never touches it (Patina included).
+		self.lock_rotation = False
 
 		self.orbit_speed = 200.0  # degrees per full mouse-width drag
 		self.zoom_speed = 0.9  # multiplier applied to distance per wheel notch
@@ -233,6 +239,9 @@ class OrbitCamera:
 			pan_down = pan_down or forced == "move"
 			zoom_down = zoom_down or forced == "scale"
 
+		if self.lock_rotation:
+			orbit_down = False
+
 		dragging = orbit_down or pan_down or zoom_down
 
 		if dragging:
@@ -291,12 +300,22 @@ class OrbitCamera:
 		self.up_hint = Vec3(0, 0, 1)
 		self._update_camera_pos()
 
+	def animate_to_orientation(self, heading, pitch):
+		"""Smooth, animated transition to an arbitrary `heading`/`pitch`
+		(degrees), world +Z as up -- same mechanism as snap_to_axis() (which
+		is just this with one of the 6 AXIS_VIEWS), for retargeting to a
+		remembered orientation instead (e.g. restoring the 3D view left
+		behind by a 2D/3D viewport toggle, project-todos/forgery/
+		landscape_editor__2d_3d_toggle.md -- Nuno 2026-09-11: the 3D->2D
+		snap already animates nicely via snap_to_axis(), 2D->3D should feel
+		the same way instead of jumping instantly)."""
+		self._start_anim(heading, pitch, Vec3(0, 0, 1))
+
 	def snap_to_axis(self, axis):
 		"""Snap the view to look straight along one of the 6 world axes
 		(+x/-x/+y/-y/+z/-z), keeping the current target/distance. Animated,
 		like step_to_face()/roll_step() (see _start_anim())."""
-		heading, pitch = AXIS_VIEWS[axis]
-		self._start_anim(heading, pitch, Vec3(0, 0, 1))
+		self.animate_to_orientation(*AXIS_VIEWS[axis])
 
 	def step_to_face(self, direction):
 		"""Steps the view by 90 degrees in the given screen direction
