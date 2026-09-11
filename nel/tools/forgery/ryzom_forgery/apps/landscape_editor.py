@@ -17,11 +17,11 @@ import threading
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
-from panda3d.core import NodePath, TransparencyAttrib
+from panda3d.core import NodePath, Point3, TransparencyAttrib
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
-from pynel.ryzom_packed_sheets import world_pos_to_zone_name
+from pynel.ryzom_packed_sheets import world_pos_to_zone_name, zone_name_to_world_pos
 from pynel.ryzom_zone import parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
@@ -52,7 +52,10 @@ from ryzom_forgery import continent_geom_cache
 from ryzom_forgery.continent_geom_cache import ContinentManifest, ZoneManifestEntry
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, ZONE_CELL_SIZE, zone_to_cache_data
+from ryzom_forgery.zone_geometry import (
+	build_zone_geom_from_cache, build_zone_grid_geom, build_zone_selection_border_geom, ZONE_CELL_SIZE,
+	zone_to_cache_data,
+)
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
 # extension_presets). Default filter is "*" (unfiltered), NOT "*.land": a
@@ -64,6 +67,14 @@ from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_g
 # 2026-09-07, Nuno couldn't navigate into any .bnp at all).
 _EXPLORER_FILTER_PRESETS = ["*", "*.land", "*.zone", "*.zonew", "*.zonel"]
 _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
+
+# Zone selection (project-todos/forgery/landscape_editor.md, Nuno
+# 2026-09-11) -- max normalized mouse-coordinate movement (range [-1, 1]
+# across the window) between mouse1-down and mouse1-up still counted as a
+# "click" (selects the zone under the cursor) rather than a drag (left
+# handled by OrbitCamera's own orbit instead) -- generous enough to absorb
+# real hand jitter on a click without ever mistaking a real orbit drag for one.
+_ZONE_CLICK_MAX_DRAG = 0.015
 
 # Wireframe cycling button (project-todos/forgery/wireframe_cycle_states.md)
 # -- same icon in all 3 states (only the tooltip/active highlight change).
@@ -277,6 +288,99 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# comment at its only assignment for why.
 		self._pipeline_data_install_dialog = PipelineDataInstallDialog()
 		self._pipeline_data_install_pending = None
+
+		# Zone selection (project-todos/forgery/landscape_editor.md, Nuno
+		# 2026-09-11): a plain left-click (no drag -- see
+		# _on_zone_click_up()'s own threshold, so it never fires alongside
+		# OrbitCamera's own left-drag orbit) on a loaded zone highlights its
+		# border and makes it the rotation pivot. Bound via accept() (event-
+		# based down/up), independent of OrbitCamera._update()'s own
+		# per-frame polling of the same button -- both coexist fine, a real
+		# drag just never leaves _zone_click_down_pos close enough to its
+		# start for _on_zone_click_up() to treat it as a click.
+		self._selected_zone_name = None
+		self._zone_click_down_pos = None
+		self._zone_selection_np = self.render.attach_new_node("zone-selection-border-placeholder")
+		self.accept("mouse1", self._on_zone_click_down)
+		self.accept("mouse1-up", self._on_zone_click_up)
+
+	def _on_zone_click_down(self):
+		mw = self.mouseWatcherNode
+		if self.imgui.isMouseCaptured() or not mw.hasMouse():
+			self._zone_click_down_pos = None
+			return
+		mouse = mw.getMouse()
+		self._zone_click_down_pos = (mouse.getX(), mouse.getY())
+
+	def _on_zone_click_up(self):
+		down_pos = self._zone_click_down_pos
+		self._zone_click_down_pos = None
+		mw = self.mouseWatcherNode
+		if down_pos is None or self.imgui.isMouseCaptured() or not mw.hasMouse():
+			return
+		mouse = mw.getMouse()
+		dx, dy = mouse.getX() - down_pos[0], mouse.getY() - down_pos[1]
+		if (dx * dx + dy * dy) ** 0.5 > _ZONE_CLICK_MAX_DRAG:
+			return  # a real drag (orbit/pan/zoom), not a click
+		self._select_zone_at_cursor()
+
+	def _select_zone_at_cursor(self):
+		"""Selects the zone under the mouse cursor, or clears the selection
+		if the cursor is over no zone (off the edge of the valid grid) --
+		same ground-plane math as _update_cursor_status()."""
+		ground_pos = mouse_ground_position(self)
+		zone_name = world_pos_to_zone_name(*ground_pos) if ground_pos is not None else None
+		if zone_name is None:
+			self._clear_zone_selection()
+			return
+		self._select_zone(zone_name)
+
+	def _select_zone(self, zone_name):
+		"""Highlights `zone_name`'s border (orange, double the grid's own
+		default thickness) and makes its center -- at world Z=0, matching
+		the terrain's own sea-level anchor (zone_geometry.py's
+		_elevation_colors_uint8()), the OrbitCamera's rotation pivot --
+		distance is left untouched (Nuno 2026-09-11: no automatic zoom on
+		selection)."""
+		origin = zone_name_to_world_pos(zone_name)
+		# zone_name_to_world_pos() decodes the NORTH edge on Y (row R's
+		# range is (origin.y - 160, origin.y], row increasing southward --
+		# confirmed 2026-09-11 against world_pos_to_zone_name() itself,
+		# e.g. zone_name_to_world_pos("62_AG").y == -9920.0 and
+		# world_pos_to_zone_name(x, -9920.0) == "62_AG" but
+		# world_pos_to_zone_name(x, -9919.0) == "61_AG"), unlike X (west
+		# edge, unambiguous). Using origin.y as min_y (as if it were the
+		# west-like/min edge) drew the border one row further north than
+		# the actually-selected zone -- Nuno 2026-09-11: "je clique sur
+		# 62_AG il me selectionne 61_AG" (a rendering bug only, the
+		# selected NAME itself was always correct).
+		min_x, max_y = origin.x, origin.y
+		max_x, min_y = min_x + ZONE_CELL_SIZE, max_y - ZONE_CELL_SIZE
+		center_x, center_y = (min_x + max_x) / 2.0, (min_y + max_y) / 2.0
+
+		self._selected_zone_name = zone_name
+		self._zone_selection_np.remove_node()
+		self._zone_selection_np = self.render.attach_new_node(
+			build_zone_selection_border_geom(min_x, min_y, max_x, max_y)
+		)
+		# Same "always on top, flat at sea level" treatment as self._grid_np
+		# (Nuno 2026-09-08's own reasoning applies identically here) --
+		# bin order 101 (one above the grid's 100) so the orange selection
+		# border draws over the plain grid line it overlaps, not the other
+		# way around (Nuno 2026-09-11: "la bordure se voit mal").
+		self._zone_selection_np.set_light_off()
+		self._zone_selection_np.set_depth_test(False)
+		self._zone_selection_np.set_depth_write(False)
+		self._zone_selection_np.set_bin("fixed", 101)
+
+		self.orbit_camera.retarget(Point3(center_x, center_y, 0.0))
+
+	def _clear_zone_selection(self):
+		if self._selected_zone_name is None:
+			return
+		self._selected_zone_name = None
+		self._zone_selection_np.remove_node()
+		self._zone_selection_np = self.render.attach_new_node("zone-selection-border-placeholder")
 
 	def on_selection_changed(self, items):
 		"""A single .zone*/.bnp-contained zone picked in the Explorer -- loads

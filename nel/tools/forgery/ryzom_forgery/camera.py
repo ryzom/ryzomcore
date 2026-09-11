@@ -289,6 +289,15 @@ class OrbitCamera:
 		self._default_distance = self.distance
 		self._update_camera_pos()
 
+	def retarget(self, target):
+		"""Like frame(), but leaves distance (and heading/pitch) untouched --
+		moves the orbit pivot without zooming (landscape_editor.py's zone
+		selection, project-todos/forgery/landscape_editor.md, Nuno
+		2026-09-11: no automatic zoom on selection)."""
+		self.target = Point3(target)
+		self._default_target = Point3(self.target)
+		self._update_camera_pos()
+
 	def reset(self):
 		"""Restore the last frame()-set framing (target/distance), looking
 		from a level front view -- i.e. how a Ryzom object is conventionally

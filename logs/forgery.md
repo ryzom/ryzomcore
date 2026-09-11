@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-09-11 — ✨ Add clickable zone selection with orange border as rotation pivot, Forgery 4.8.0
+
+Left-click (no drag) on a zone in Atyscape now selects it: `_select_zone_at_cursor()`/
+`_select_zone()`/`_clear_zone_selection()` (`landscape_editor.py`), bound via
+`mouse1`/`mouse1-up` accept() events (distinguishing a click from
+OrbitCamera's own left-drag orbit via a small mouse-movement threshold,
+`_ZONE_CLICK_MAX_DRAG`). The selected zone's border is drawn in orange at
+double the grid's line thickness (`build_zone_selection_border_geom()`,
+`zone_geometry.py`), always rendered on top of the terrain (same
+depth-test/write-off + fixed bin treatment as the existing zone grid
+overlay). Its center (world Z=0) becomes the OrbitCamera's rotation pivot
+via a new `retarget()` method (`camera.py` -- like `frame()` but leaves
+distance untouched, since Nuno explicitly didn't want an automatic zoom on
+selection). Clicking outside any valid zone clears the selection.
+
+Fixed during testing: the border was drawn one row north of the actually
+selected zone (clicking "62_AG" visually highlighted "61_AG"'s cell) --
+`zone_name_to_world_pos()` decodes a zone's NORTH edge on Y (not its min
+edge, unlike X), confirmed by checking `world_pos_to_zone_name()`'s own
+boundary behavior; the selection code treated it as the min edge, off by
+exactly one zone height. The selected zone *name* itself was always
+correct, only the rendered border was misplaced. Also fixed: the border
+was barely visible against the terrain before the always-on-top treatment
+was applied.
+
 ## 2026-09-11 — ✨ Split Atyscape into Edit/View mode mixins, 3-state wireframe cycle, Forgery 4.7.0
 
 `landscape_editor__land_preview.md` (steps 5-7, closing `landscape_editor.md`

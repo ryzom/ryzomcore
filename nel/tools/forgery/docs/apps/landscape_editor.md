@@ -722,3 +722,34 @@ soit `self.render_mode` ou l'état 2D/3D) :
 ici aussi puis retiré après test par Nuno -- seul le mode Shading normal
 (déjà le comportement par défaut, sans bouton) s'est révélé utile sur le
 terrain (`logs/forgery.md`, 2026-09-11).
+
+## Sélection de zone (pivot de rotation) -- Nuno 2026-09-11
+
+Clic gauche sans glisser (`_on_zone_click_down`/`_on_zone_click_up`, seuil
+`_ZONE_CLICK_MAX_DRAG` en coordonnées souris normalisées -- distingue un
+simple clic d'un drag d'orbite `OrbitCamera`, tous deux liés au même bouton
+`mouse1`) sur une zone (`_select_zone_at_cursor()`, même calcul
+position-sous-le-curseur -> `world_pos_to_zone_name()` que la barre de
+statut du curseur) :
+
+- Dessine sa bordure en orange, épaisseur double de celle de la grille
+  (`build_zone_selection_border_geom()`, `zone_geometry.py`), avec le même
+  traitement "toujours visible par-dessus le terrain" que `self._grid_np`
+  (`set_light_off`/`set_depth_test(False)`/`set_depth_write(False)`,
+  `set_bin("fixed", 101)` -- un cran au-dessus des 100 de la grille pour
+  passer devant elle, Nuno : "la bordure se voit mal").
+- Fait du centre de la zone (Z=0, même ancrage niveau-de-la-mer que le
+  dégradé d'élévation) le nouveau pivot de rotation de la caméra, via
+  `OrbitCamera.retarget()` (`camera.py`, nouveau -- comme `frame()` mais ne
+  touche pas à la distance : Nuno ne voulait pas de zoom automatique à la
+  sélection).
+- Un clic hors de toute zone valide désélectionne (bordure retirée).
+
+`zone_name_to_world_pos()` décode le bord **nord** (Y max) d'une zone, pas
+son bord min (vérifié empiriquement : `zone_name_to_world_pos("62_AG").y ==
+-9920.0`, et `world_pos_to_zone_name(x, -9920.0) == "62_AG"` mais
+`world_pos_to_zone_name(x, -9919.0) == "61_AG"`) -- contrairement à X (bord
+ouest, sans ambiguïté). Un premier essai traitait à tort `origin.y` comme le
+bord min, décalant la bordure d'une rangée vers le nord (Nuno : "je clique
+sur 62_AG il me sélectionne 61_AG" -- en réalité seul l'affichage de la
+bordure était décalé, le nom réellement sélectionné était déjà correct).

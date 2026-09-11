@@ -370,3 +370,25 @@ def build_zone_grid_geom(min_x: float, min_y: float, max_x: float, max_y: float,
 		lines.move_to(grid_min_x, y, z)
 		lines.draw_to(grid_max_x, y, z)
 	return lines.create()
+
+
+# Orange, double build_zone_grid_geom()'s own implicit default thickness
+# (1.0, never set explicitly there) -- landscape_editor.py's zone selection
+# (project-todos/forgery/landscape_editor.md, Nuno 2026-09-11).
+_ZONE_SELECTION_COLOR = (1.0, 0.55, 0.0, 1.0)
+_ZONE_SELECTION_THICKNESS = 2.0
+
+
+def build_zone_selection_border_geom(min_x: float, min_y: float, max_x: float, max_y: float, z: float = 0.0) -> GeomNode:
+	"""Single-rectangle LineSegs outline of one selected zone's bounds, flat
+	at world Z=`z` (0.0 by default, same sea-level anchor as
+	build_zone_grid_geom()) -- landscape_editor.py's _select_zone()."""
+	lines = LineSegs("zone-selection-border")
+	lines.set_color(*_ZONE_SELECTION_COLOR)
+	lines.set_thickness(_ZONE_SELECTION_THICKNESS)
+	lines.move_to(min_x, min_y, z)
+	lines.draw_to(max_x, min_y, z)
+	lines.draw_to(max_x, max_y, z)
+	lines.draw_to(min_x, max_y, z)
+	lines.draw_to(min_x, min_y, z)
+	return lines.create()
