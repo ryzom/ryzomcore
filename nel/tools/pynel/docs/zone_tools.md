@@ -158,6 +158,28 @@ The zone's own `.ig` (`<input zone name>.ig`) is looked up automatically
 via `CPath::lookup` (must be reachable via `search_pathes` or the working
 directory) -- absent is only a warning, not fatal. Same for `bank_name`.
 
+**Tile-noise (displacement bump-map) lookup is broken on Linux, found
+2026-09-11**: loading the tile bank (`bank_name`'s `.smallbank`, or more
+precisely the underlying `.bank` referenced by `tile_bank_file`) can trigger
+`CTileBank::getTileNoiseMap()` (`nel/src/3d/tile_bank.cpp:475`), which
+builds its file path as `getAbsPath() + tileNoise._FileName` -- **both of
+these strings are read verbatim from inside the `.bank` binary itself**
+(`f.serial(_AbsPath)`/`f.serial(_FileName)`, not derived from
+`properties.cfg` or any tool config), baked in from whatever Windows
+machine originally authored the bank (e.g. `_AbsPath =
+"R:/graphics/landscape/_texture_tiles/jungle/"`, `_FileName =
+"displace\j_crevasse1.png"`). `CPath::lookup()` strips everything before the
+last `/` to get a bare filename to search for, but since the embedded
+relative name uses `\` (not `/`), that backslash stays glued to
+`"displace\j_crevasse1.png"` as one opaque token, which never matches a
+real registered file on Linux even when it exists on disk. Not yet fixed
+(would need a code change in `tile_bank.cpp` to fall back to a `/`-and-`\`
+-aware basename lookup via `search_pathes` when the literal legacy path
+fails) -- and per Nuno's own rule (2026-09-11), any such fallback must
+route through `pipeline/`, never `graphics/` (`docs/pipeline_directories.md`),
+so `search_pathes` now includes `pipeline/export/ecosystems/<eco>/displace`
+(§9) ready for whenever this fix lands.
+
 ### `dependency_file` (only loaded if `shadow=1`)
 
 One var: `dependencies = { "zoneA", "zoneB", ... };` -- names resolved as
@@ -208,6 +230,17 @@ in this doc.
   matching flag is omitted): `--zfactor`/`--zfactor2` = `1.0`, `--cellsize`
   = `160.0`, `--extendcoords` = off.
 
+**Real bug found and fixed in `ryzom-core`, 2026-09-11** (`fixes` branch):
+the tool crashed with a SIGSEGV on every invocation, even with zero CLI args
+-- confirmed via `gdb` backtrace, the crash happened inside
+`std::string::assign()` called from `NLLIGO::CZoneRegion::CZoneRegion()`,
+itself called during static initialization (before `main()`), because
+`zone_elevation.cpp` declared its `CZoneRegion s_Land;` as a plain **global**
+(so it gets constructed at static-init time) instead of a local/heap-allocated
+instance the way `land_export` does. Fixed by making it
+`CZoneRegion *s_Land = NULL;`, allocated with `new` inside `loadLand()` --
+same pattern this file already used for `s_HeightMap`/`s_HeightMap2`.
+
 ## 4. `zone_dependencies`
 
 Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
@@ -252,6 +285,29 @@ zone_dependencies <properties.cfg> <firstZone.zone> <lastZone.zone> <output.depe
     actual current layout nests it one level deeper
     (`leveldesign/world/continents/<name>.continent`, see §9), **as long as
     `continent_name` matches the real file's own basename**.
+
+**Two real bugs found running this tool over a whole continent (nexus, 151
+zones), 2026-09-11**:
+
+- **The coordinate decoder is NOT the same as `zone_elevation`'s own.**
+  `zone_dependencies` decodes `firstZone`/`lastZone` names via the SHARED
+  `getZoneCoordByName()` (`nel/tools/3d/zone_lib/zone_utility.cpp`), which
+  does **not** negate the row into Y (`y = row` directly) -- unlike
+  `zone_elevation.cpp`'s own LOCAL `getXYFromZoneName()`, which does `y =
+  -row`. These are two genuinely different functions despite decoding the
+  same `row_XY` name format; a caller must never assume one tool's sign
+  convention applies to the other.
+- **The min/max swap is broken.** `zone_dependencies.cpp`'s own range-fixup
+  (`if (lastX<firstX) { tmp=firstX; firstX=lastX; lastX=firstX; }`) has a
+  copy-paste bug: the second assignment overwrites `lastX` with the
+  already-mutated `firstX`, so instead of swapping, BOTH end up equal to the
+  smaller value -- collapsing that axis's range to a single row/column
+  instead of covering the intended span. Confirmed by constructing
+  `firstZone`/`lastZone` names that require a swap and observing the
+  resulting `.depend` count collapse from ~151 to 6. **Workaround (not a
+  fix)**: always pass `firstZone`/`lastZone` names already in ascending
+  row/col order (using `getZoneCoordByName()`'s own non-negated convention
+  above), so the swap path is never triggered at all.
 
 ## 5. `zone_ig_lighter`
 
@@ -419,10 +475,41 @@ genuinely `MISSING` for every desert/lacustre-ecosystem continent (real,
 confirmed-not-downloaded assets, not a path-construction bug -- do not
 "fix" these by changing the path formula).
 
+### `workspace/` and `graphics/` are now permanently off-limits (Nuno, 2026-09-11)
+
+The `directories.py`-based build described above was a **one-time**
+extraction, not a standing dependency. Nuno drew a hard line right after:
+"on ne touche a aucun fichier de workspace/ on modife notre .csv. Legacy
+pipeline = workspace. Forgery pipeline = csv. Workspace ne dois surtout pas
+etre utilisé non plus. On utilise que pipeline/ et world/" -- `leveldesign/
+workspace/` (where `directories.py` lives) belongs entirely to the
+**legacy** build_gamedata pipeline; Forgery/pynel must never read OR modify
+anything under it again. `graphics/` is off-limits too, separately -- no
+Forgery-facing tool may ever read from it, it is not a validated data
+source. The only two valid data roots for the Forgery-side pipeline from
+now on are `pipeline/` and `world/` (i.e. `leveldesign/world/`).
+
+Concretely: `continent_pipeline_reference.csv` is now THE one Forgery-side
+source of truth, on its own -- never rebuilt from `directories.py` again. Any
+addition or correction (a missing search path, a corrected field) is made
+by **editing the CSV directly**, using its own already-present columns
+(e.g. `ecosystem`) to derive new values, never by going back to
+`workspace/`.
+
+**First real case of this, 2026-09-11**: `zone_lighter`'s tile-noise
+(displacement bump-map) texture lookup needs
+`pipeline/export/ecosystems/<eco>/displace` in `search_pathes` -- a path the
+legacy `directories.py`/`PropertiesExportBuildSearchPaths` never included
+(that legacy convention pointed at a `graphics/`-rooted location instead,
+now permanently out of scope). Nuno added the real `displace/` folders
+under `pipeline/export/ecosystems/<eco>/` himself (all 4 ecosystems:
+jungle, desert, lacustre, primes_racines); the CSV's `search_pathes` /
+`search_pathes_status` columns were updated directly (all 25 rows, `OK`)
+to include it, with no `directories.py` involved.
+
 ### Regenerating
 
-There's no committed CLI for this yet (still a one-off script in this
-session's scratchpad) -- if the CSV needs a refresh, rebuild the same logic
-(read every `directories.py`, resolve columns exactly as listed above,
-recompute `*_status` against the live `ryzom-data` checkout) rather than
-hand-editing the CSV.
+There's no committed CLI for building this CSV from scratch (it was a
+one-off script, since superseded by the direct-edit rule above) -- going
+forward, the CSV is only ever hand-edited in place, never regenerated from
+`directories.py`.

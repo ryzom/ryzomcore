@@ -1,5 +1,67 @@
 # Changelog
 
+## 2026-09-11 — ✨ Orchestrate zone_elevation/zone_dependencies/zone_ig_lighter, pynel 0.14.0
+
+`project-todos/pynel/land_pipeline.md` step 4 (orchestration) and step 5
+(real-data validation) done. Added to `ryzom_land_tools.py`:
+`ElevationConfig`/`run_zone_elevation()` (validates exactly one of
+`land_file` or `zone_min`+`zone_max` is given, raises on the real
+`EXIT_SUCCESS`/`EXIT_FAILURE` exit code `zone_elevation` uses, unlike every
+other tool here); `PropertiesConfig`/`build_properties_cfg()` (generates
+`properties.cfg`, the file `zone_lighter`/`zone_dependencies`/
+`zone_ig_lighter` all share -- closing a gap from `zone_read_write.md` where
+`zone_lighter` was already orchestrated but had no generator); plain
+subprocess wrappers `run_zone_dependencies()`/`run_zone_ig_lighter()`
+(both tools always exit 0 regardless of outcome, same non-standard
+convention as `zone_lighter`).
+
+Validated end-to-end against real `ryzom-data`: ran the full chain
+(`land_export` -> `zone_welder` -> `zone_elevation` -> `zone_welder` ->
+`zone_dependencies` -> `zone_lighter` -> `zone_ig_lighter`) over all 151
+real zones of nexus (jungle ecosystem) -- every zone's final `.zonel`
+matches the real production file from `live_data/nexus_zones.bnp`
+(`zone_id` + patch count identical, 151/151).
+
+Found three real native bugs along the way, all in `ryzom-core`:
+- `zone_elevation` crashed with a SIGSEGV on every invocation (even with no
+  args): its `CZoneRegion s_Land` was a plain global, constructed during
+  static initialization before `main()`, unlike `land_export`'s own
+  heap-allocated equivalent. Fixed and committed by Nuno directly in
+  `ryzom-core` (`d7c04f6774`).
+- `zone_dependencies`'s min/max range swap (`if (lastX<firstX) {
+  tmp=firstX; firstX=lastX; lastX=firstX; }`) is a copy-paste bug that
+  collapses the range to a single value instead of swapping -- worked
+  around (not fixed) by always constructing `firstZone`/`lastZone` names
+  already in ascending order, using the (confirmed different from
+  `zone_elevation`'s own) non-negated Y convention of the shared
+  `getZoneCoordByName()`.
+- `zone_lighter`'s tile-noise (displacement bump-map) lookup
+  (`CTileBank::getTileNoiseMap()`) builds its path from data embedded in
+  the `.bank` file itself (`_AbsPath`/`_FileName`), baked in from a Windows
+  authoring machine (`R:/graphics/...`, `displace\foo.png`) -- the
+  backslash in the relative name is never recognized as a path separator
+  on Linux, so the lookup fails even when the real file exists. Not fixed
+  yet (would need a `tile_bank.cpp` basename-fallback via `search_pathes`).
+
+Also: `docs/zone_tools.md` gained full `zone_elevation`/`zone_dependencies`/
+`zone_ig_lighter` reference sections (§3-5) plus the 3 bugs above, and a new
+`docs/pipeline_directories.md` maps every `pipeline/`-rooted directory this
+project's 6 tools actually read/write, for cleaning up unused folders from
+the pipeline-data `.zip` Atyscape downloads.
+
+Nuno drew two hard architectural lines while investigating the displacement-
+texture bug: no Forgery-facing tool may ever read from `graphics/` (not a
+validated data source), and `leveldesign/workspace/` (where `directories.py`
+lives) belongs entirely to the legacy build_gamedata pipeline -- Forgery/
+pynel must never read or modify it again. `continent_pipeline_reference.csv`
+(in `ryzom-data`, `leveldesign/world/`) is now the one Forgery-side source of
+truth, hand-edited going forward, never regenerated from `directories.py`.
+Updated it directly: added `pipeline/export/ecosystems/<eco>/displace` to
+`search_pathes` (all 25 continents), and moved `tile_bank_file` to
+`pipeline/landscape/<eco>/<eco>.bank` (raw/authored data, not tool-generated,
+so it belongs under `pipeline/landscape/` rather than `pipeline/export/`) --
+both added by Nuno directly on disk.
+
 ## 2026-09-10 — ✨ Add world_pos_to_zone_name(), pynel 0.13.2
 
 `project-todos/pynel/zone_name_from_pos.md` closed. Added
