@@ -8,6 +8,7 @@ exist for a given zone, generating the missing ones on demand) is the
 current one.
 """
 
+import math
 import threading
 from pathlib import Path
 
@@ -15,7 +16,9 @@ from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
-from pynel.ryzom_zone import parse_zone, ZoneParseError
+from pynel.ryzom_land import load_land, LandParseError, STRING_UNUSED
+from pynel.ryzom_packed_sheets import world_pos_to_zone_name
+from pynel.ryzom_zone import load_zone, parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
@@ -24,8 +27,11 @@ from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 from ryzom_forgery.camera import OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_ecosystem
+from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_loader
+from ryzom_forgery.land_geometry import brick_size_in_cells, build_land_piece_cache_data, find_missing_land_cells, piece_origin
 from ryzom_forgery import live_data
+from ryzom_forgery.mouse_picking import mouse_ground_position
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
 from ryzom_forgery import pipeline_data_installer
 from ryzom_forgery.pipeline_data_install_dialog import PipelineDataInstallDialog
@@ -34,7 +40,7 @@ from ryzom_forgery.region_loader import (
 )
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, zone_to_cache_data
+from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, ZONE_CELL_SIZE, zone_to_cache_data
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
 # extension_presets). Default filter is "*" (unfiltered), NOT "*.land": a
@@ -94,10 +100,19 @@ def _resolve_zone_for_mode(default_ref, ext_map, mode):
 _MODE_VISUALISATION = "visualisation"
 _MODE_EDITION = "edition"
 _MODE_BADGE_COLOR = {_MODE_VISUALISATION: (0.4, 0.7, 1.0, 1.0), _MODE_EDITION: (0.4, 1.0, 0.4, 1.0)}
-_MODE_BADGE_LABEL = {_MODE_VISUALISATION: "Visualisation", _MODE_EDITION: "Edition"}
+# "Release"/"Dev" (Nuno 2026-09-10) -- not "Visualisation"/"Édition" as
+# originally named (step 1): those stay the internal mode identifiers
+# (_MODE_VISUALISATION/_MODE_EDITION, and Settings.landscape_editor_mode's
+# own stored values), only the UI label changed.
+_MODE_BADGE_LABEL = {_MODE_VISUALISATION: "Release", _MODE_EDITION: "Dev"}
+_OTHER_MODE = {_MODE_VISUALISATION: _MODE_EDITION, _MODE_EDITION: _MODE_VISUALISATION}
 
 
 def _detect_app_mode():
+	"""Pure auto-detection from ryzom-data's own configuration -- only ever
+	used as the default the very first time (Settings.landscape_editor_mode
+	still unset), see _resolve_app_mode()'s own docstring for the manual
+	Release/Dev toggle (step 4) that normally takes over from here."""
 	return _MODE_EDITION if repository_paths.is_valid("ryzom-data") else _MODE_VISUALISATION
 
 
@@ -188,6 +203,7 @@ class LandscapeEditorApp(ForgeryApp):
 		# cached here only to log on an actual transition rather than
 		# every frame.
 		self._app_mode = None
+		self._pending_continent_reload = False
 
 		# Continent selector state (project-todos/forgery/
 		# landscape_editor__continent-selector.md steps 3-4). cont_locs/
@@ -237,6 +253,15 @@ class LandscapeEditorApp(ForgeryApp):
 		self._gray_zones = set()
 		self._missing_for_mode = 0
 		self._mode_reload_progress = None
+		# (pos_x, pos_y) -> ZoneUnit.zone_name (the brick the .land itself
+		# assigns to that cell), for the cursor status line -- always the
+		# .land's own brick reference, regardless of which pipeline stage
+		# (.zone/.zonew/.zonel) actually renders there (Nuno 2026-09-10:
+		# "je veux le nom du fichier DANS le .land", every case, not just
+		# fallback cells). Cached per continent, see
+		# _ensure_land_cell_names_loaded().
+		self._land_cell_names = {}
+		self._land_cell_names_continent = None
 
 		# Zone-boundary grid overlay (project-todos/forgery/
 		# landscape_editor.md step 7) -- rebuilt in _set_loaded_zones()
@@ -284,6 +309,7 @@ class LandscapeEditorApp(ForgeryApp):
 			zone = parse_zone(item.read_bytes())
 		except (OSError, BnpError, ZoneParseError) as exc:
 			self._zone_error = f"Failed to load {item.name}: {exc}"
+			report_error(self._zone_error)
 			self._set_loaded_zones({})
 			return
 		self._loaded_refs = {}
@@ -311,7 +337,18 @@ class LandscapeEditorApp(ForgeryApp):
 			return
 		self._zone_error = None
 		live_data_path = app_settings.load().live_data_path
-		ryzom_data_path = repository_paths.get("ryzom-data")
+		# Release (visualisation) must read live_data_path exclusively (per
+		# project-todos/forgery/landscape_editor__land_preview.md's own
+		# design) -- forcing ryzom_data_path to None here, rather than
+		# passing whatever repository_paths.get() returns unconditionally,
+		# is what actually enforces that: find_zones_in_region()/
+		# get_zone_extensions_index()/has_pipeline_export() below would
+		# otherwise silently prefer ryzom-data's pipeline export over
+		# live_data_path whenever one exists for the selected continent,
+		# regardless of mode (found 2026-09-10, Nuno: nexus showed 134
+		# zones instead of the real live count once ryzom-data was
+		# configured for Dev-mode testing).
+		ryzom_data_path = repository_paths.get("ryzom-data") if self._app_mode == _MODE_EDITION else None
 		pipeline_continent_name = self._selected_continent_pipeline_name
 
 		# Propose downloading whatever pipeline data is missing for this
@@ -354,6 +391,7 @@ class LandscapeEditorApp(ForgeryApp):
 		if not has_pipeline_export(ryzom_data_path, pipeline_continent_name):
 			if not live_data.is_valid_live_data_path(live_data_path):
 				self._zone_error = "Ryzom Live data path not configured -- set it in Patina's Settings tab (Paths)."
+				report_error(self._zone_error)
 				return
 
 		progress = {"done": False, "error": None, "default_refs": {}, "extensions": {}}
@@ -381,17 +419,25 @@ class LandscapeEditorApp(ForgeryApp):
 		background thread)."""
 		try:
 			min_x, min_y, max_x, max_y = bounds
+			uses_pipeline_export = has_pipeline_export(ryzom_data_path, pipeline_continent_name)
+			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_continent) "
+			      f"mode={self._app_mode} continent={pipeline_continent_name!r} live_data_path={live_data_path!r} "
+			      f"ryzom_data_path={ryzom_data_path!r} uses_pipeline_export={uses_pipeline_export} bounds={bounds}")
 			refs = find_zones_in_region(
 				live_data_path, min_x, min_y, max_x, max_y, pipeline_continent_name, ryzom_data_path,
 			)
+			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_continent) "
+			      f"zones found for {pipeline_continent_name!r}: {len(refs)}")
 			if not refs:
 				progress["error"] = "No real zone found for this continent."
+				report_error(progress["error"])
 				return
 			progress["default_refs"] = {ref.name: ref for ref in refs}
 			full_extensions_index = get_zone_extensions_index(live_data_path, pipeline_continent_name, ryzom_data_path)
 			progress["extensions"] = {ref.name: full_extensions_index.get(ref.name, {}) for ref in refs}
 		except OSError as exc:
 			progress["error"] = str(exc)
+			report_error(progress["error"])
 		finally:
 			progress["done"] = True
 
@@ -435,18 +481,41 @@ class LandscapeEditorApp(ForgeryApp):
 
 		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_apply_render_mode) mode={self.render_mode} loaded={len(self._loaded_refs)} resolved={len(refs)} gray={sorted(gray)} missing_for_mode={self._missing_for_mode}")
 
+		# Edition mode's [POLY]/[2D] fallback (project-todos/forgery/
+		# landscape_editor__land_preview.md step 3): a .land cell can exist
+		# with no exported .zone anywhere yet (a brick just placed locally,
+		# never run through land_export) -- find_missing_land_cells() needs
+		# the .land itself plus which (pos_x, pos_y) cells are ALREADY
+		# covered by `refs`, which only _run_load_refs() can know once it's
+		# actually loaded them (bb_center). So land_fallback here is just
+		# the static info (land path + brick zones dir), resolved eagerly on
+		# the main thread since it's cheap (one dict lookup each), and the
+		# actual missing-cell computation + brick loading happens in the
+		# background thread below, same as the real refs.
+		land_fallback = None
+		if self._app_mode == _MODE_EDITION and self.render_mode in ("2D", "POLY") and self.selected_continent_name:
+			ryzom_data_path = repository_paths.get("ryzom-data")
+			land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
+			ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(
+				self._selected_continent_pipeline_name or self.selected_continent_name
+			)
+			if land_path is not None and ecosystem_name:
+				land_fallback = (land_path, Path(ryzom_data_path) / "pipeline" / "landscape" / ecosystem_name / "zones")
+
 		self._zone_error = None
 		progress = {"done": False, "error": None, "zones": {}, "gray": gray, "total": len(refs), "processed": 0}
 		self._mode_reload_progress = progress
-		thread = threading.Thread(target=self._run_load_refs, args=(refs, progress), daemon=True)
+		thread = threading.Thread(target=self._run_load_refs, args=(refs, progress, land_fallback), daemon=True)
 		thread.start()
 
-	def _run_load_refs(self, refs, progress):
+	def _run_load_refs(self, refs, progress, land_fallback=None):
 		"""Background-thread body for _apply_render_mode() -- pure file I/O/
 		pickle (region_loader.py/zone_cache.py load_zone_cache_data(), same
 		cache-first behavior as the old _run_load_continent()), never touches
 		Panda3D. Writes only to `progress`, see _run_load_continent()'s own
-		docstring for why."""
+		docstring for why. `land_fallback`, when given, is
+		`(land_path, brick_zones_dir)` -- see _apply_render_mode()'s own
+		docstring for why it's resolved there but consumed here."""
 		try:
 			zones = {}
 			failed = []
@@ -456,11 +525,63 @@ class LandscapeEditorApp(ForgeryApp):
 				except RegionLoadError as exc:
 					failed.append(str(exc))
 				progress["processed"] += 1
+			if land_fallback is not None:
+				land_path, brick_zones_dir = land_fallback
+				try:
+					land = load_land(land_path)
+					used_cells = sum(1 for unit in land.zones if unit.zone_name != STRING_UNUSED)
+					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_refs) "
+					      f"land loaded: {land_path} used_cells={used_cells} exported_zones={len(zones)}")
+					# floor(), not round(): a cell's bb_center sits at exactly
+					# (pos+0.5)*ZONE_CELL_SIZE, and round()'s round-half-to-even
+					# would map that .5 inconsistently depending on pos's
+					# parity -- floor(pos+0.5) always recovers pos exactly.
+					existing_cells = {
+						(math.floor(cache_data.bb_center[0] / ZONE_CELL_SIZE), math.floor(cache_data.bb_center[1] / ZONE_CELL_SIZE))
+						for cache_data in zones.values()
+					}
+					# A brick can be a multi-cell "large piece" (e.g. 320x160)
+					# referenced by several cells at once (each storing its
+					# own sub-position within the piece, ZoneUnit.pos_x/
+					# pos_y -- see land_geometry.py's own docstring) --
+					# loaded_bricks avoids re-parsing the same file per cell,
+					# rendered_pieces dedupes so a multi-cell piece is
+					# rendered exactly once (found 2026-09-10, Nuno: without
+					# this, the same piece was drawn once per cell it spans,
+					# overlapping itself).
+					loaded_bricks = {}
+					rendered_pieces = set()
+					for (pos_x, pos_y), unit in find_missing_land_cells(land, existing_cells).items():
+						if unit.zone_name not in loaded_bricks:
+							brick_path = brick_zones_dir / f"{unit.zone_name}.zone"
+							try:
+								loaded_bricks[unit.zone_name] = load_zone(brick_path)
+							except (OSError, ZoneParseError) as exc:
+								loaded_bricks[unit.zone_name] = None
+								failed.append(f"{unit.zone_name}.zone: {exc}")
+						brick_zone = loaded_bricks[unit.zone_name]
+						if brick_zone is None:
+							continue
+						size_x, size_y = brick_size_in_cells(brick_zone)
+						origin_x, origin_y = piece_origin(pos_x, pos_y, unit, size_x, size_y)
+						piece_key = (unit.zone_name, origin_x, origin_y, unit.rot, unit.flip)
+						if piece_key in rendered_pieces:
+							continue
+						rendered_pieces.add(piece_key)
+						cell_name = f"land:{origin_x}:{origin_y}"
+						zones[cell_name] = build_land_piece_cache_data(brick_zone, origin_x, origin_y, unit.rot, unit.flip)
+						progress["gray"].add(cell_name)
+					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_refs) "
+					      f"land fallback: existing_cells={len(existing_cells)} added={sorted(n for n in zones if n.startswith('land:'))}")
+				except (OSError, LandParseError) as exc:
+					failed.append(f"{land_path}: {exc}")
 			progress["zones"] = zones
 			if failed:
 				progress["error"] = f"{len(failed)}/{len(refs)} zone(s) failed to load: {'; '.join(failed[:3])}"
+				report_error(progress["error"])
 		except OSError as exc:
 			progress["error"] = str(exc)
+			report_error(progress["error"])
 		finally:
 			progress["done"] = True
 
@@ -554,11 +675,16 @@ class LandscapeEditorApp(ForgeryApp):
 				"Ryzom Live data path not configured -- set it in Patina's "
 				"Settings tab (Paths), it's a shared setting."
 			)
+			report_error(self._cont_locs_error)
 			return
+		world_packed_sheets_path = Path(live_data_path) / "world.packed_sheets"
+		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_load_visualisation_continent_locations) "
+		      f"reading {world_packed_sheets_path}")
 		try:
 			self._cont_locs = continent_selector.load_continent_locations(live_data_path)
 		except (OSError, continent_selector.ContinentSelectorError) as exc:
 			self._cont_locs_error = f"Failed to load continent list: {exc}"
+			report_error(self._cont_locs_error)
 
 	def _load_edition_continent_locations(self):
 		"""Edition mode (project-todos/forgery/landscape_editor__land_preview.md
@@ -574,6 +700,7 @@ class LandscapeEditorApp(ForgeryApp):
 			all_locs = continent_selector.load_continent_locations_from_world_file(world_file_path)
 		except (OSError, continent_selector.ContinentSelectorError) as exc:
 			self._cont_locs_error = f"Failed to load continent list from ryzom-data: {exc}"
+			report_error(self._cont_locs_error)
 			return
 		land_files = land_loader.find_land_files(ryzom_data_path)
 		self._cont_locs = [loc for loc in all_locs if loc.continent_name in land_files]
@@ -602,12 +729,32 @@ class LandscapeEditorApp(ForgeryApp):
 		self._selected_continent_pipeline_name = selection_name
 		self.continent_bounds = None
 		self._bounds_error = None
-		live_data_path = app_settings.load().live_data_path
-		try:
-			self.continent_bounds = continent_selector.resolve_continent_bounds(live_data_path, continent_name)
-		except (OSError, continent_selector.ContinentSelectorError) as exc:
-			self._bounds_error = f"Failed to resolve bounds: {exc}"
-			return
+		if self._app_mode == _MODE_EDITION:
+			# Edition mode never reads live_data_path/sheet_id.bin (see
+			# _load_edition_continent_locations()) -- continent_name here is
+			# ryzom.world's own struct_name (e.g. "nexus"), which sheet_id.bin
+			# doesn't know at all (it keys by the raw .continent filename
+			# stem, e.g. "lecarrefour.continent" for that same continent --
+			# the exact trap pynel's ryzom_world.py already documents).
+			# Bounds come from the same ryzom.world entry instead (minx/miny/
+			# maxx/maxy, already read into ContLoc by
+			# load_continent_locations_from_world_file()) -- no extra file.
+			cont_loc = next((loc for loc in self._cont_locs or () if loc.continent_name == continent_name), None)
+			if cont_loc is None:
+				self._bounds_error = f"Failed to resolve bounds: {continent_name!r} not found in the loaded continent list."
+				report_error(self._bounds_error)
+				return
+			self.continent_bounds = (cont_loc.min_x, cont_loc.min_y, cont_loc.max_x, cont_loc.max_y)
+			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_select_continent) "
+			      f"edition bounds for {continent_name!r} from ryzom.world: {self.continent_bounds}")
+		else:
+			live_data_path = app_settings.load().live_data_path
+			try:
+				self.continent_bounds = continent_selector.resolve_continent_bounds(live_data_path, continent_name)
+			except (OSError, continent_selector.ContinentSelectorError) as exc:
+				self._bounds_error = f"Failed to resolve bounds: {exc}"
+				report_error(self._bounds_error)
+				return
 		self._load_continent()
 
 	def _toggle_grid(self):
@@ -646,18 +793,113 @@ class LandscapeEditorApp(ForgeryApp):
 	def panel_title(self):
 		return "Landscape Editor"
 
+	def _resolve_app_mode(self):
+		"""Release/Dev is normally a user choice, persisted in
+		Settings.landscape_editor_mode (project-todos/forgery/
+		landscape_editor__land_preview.md step 4) -- _detect_app_mode()'s
+		auto-detection from ryzom-data only ever applies the very first time
+		(no saved choice yet). A saved "Dev" choice is force-reverted to
+		"Release" whenever ryzom-data is no longer configured/valid (Dev has
+		no meaning without it) -- the saved preference itself is left
+		untouched on disk, so it takes over again as soon as ryzom-data is
+		reconfigured."""
+		ryzom_data_valid = repository_paths.is_valid("ryzom-data")
+		saved_mode = app_settings.load().landscape_editor_mode
+		if saved_mode is None:
+			return _detect_app_mode()
+		if saved_mode == _MODE_EDITION and not ryzom_data_valid:
+			return _MODE_VISUALISATION
+		return saved_mode
+
+	def _set_app_mode(self, mode):
+		settings = app_settings.load()
+		settings.landscape_editor_mode = mode
+		app_settings.save(settings)
+
+	def _ensure_land_cell_names_loaded(self):
+		"""(pos_x, pos_y) -> ZoneUnit.zone_name (the brick the .land itself
+		assigns to that cell), for _update_cursor_status() -- always the
+		.land's own reference, whatever pipeline stage actually ends up
+		rendered there (Nuno 2026-09-10). Cached per continent (re-read only
+		when the selection changes), cleared outside Edition mode or when no
+		continent is selected."""
+		if self._app_mode != _MODE_EDITION or self.selected_continent_name is None:
+			self._land_cell_names = {}
+			self._land_cell_names_continent = None
+			return
+		if self._land_cell_names_continent == self.selected_continent_name:
+			return
+		self._land_cell_names_continent = self.selected_continent_name
+		self._land_cell_names = {}
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
+		if land_path is None:
+			return
+		try:
+			land = load_land(land_path)
+		except (OSError, LandParseError):
+			return
+		width = land.max_x - land.min_x + 1
+		self._land_cell_names = {
+			(land.min_x + (i % width), land.min_y + (i // width)): unit.zone_name
+			for i, unit in enumerate(land.zones) if unit.zone_name != STRING_UNUSED
+		}
+
+	def _update_cursor_status(self):
+		"""Zone name + world position under the mouse cursor, in the shared
+		SysInfoBar next to the FPS counter (project-todos/forgery/
+		landscape_editor__cursor_zone_status.md step 3) -- cleared whenever
+		the cursor isn't over the 3D viewport (captured by an ImGui window
+		instead, same check camera.py's OrbitCamera uses) or is outside the
+		valid zone grid (e.g. looking at the sky, or off the edge of the
+		world)."""
+		if self.imgui.isMouseCaptured():
+			self.sysinfo.set_cursor_info("")
+			return
+		ground_pos = mouse_ground_position(self)
+		if ground_pos is None:
+			self.sysinfo.set_cursor_info("")
+			return
+		x, y = ground_pos
+		zone_name = world_pos_to_zone_name(x, y)
+		if zone_name is None:
+			self.sysinfo.set_cursor_info("")
+			return
+		self._ensure_land_cell_names_loaded()
+		cell = (math.floor(x / ZONE_CELL_SIZE), math.floor(y / ZONE_CELL_SIZE))
+		brick_name = self._land_cell_names.get(cell)
+		brick_suffix = f" -- {brick_name}" if brick_name is not None else ""
+		self.sysinfo.set_cursor_info(f"{zone_name} ({x:.0f}, {y:.0f}){brick_suffix}")
+
 	def draw_panel(self):
-		mode = _detect_app_mode()
+		self._update_cursor_status()
+		mode = self._resolve_app_mode()
 		if mode != self._app_mode:
 			# Continent list source depends on the mode (step 3 below) --
 			# force a reload rather than keep showing a stale list from the
-			# mode we just left.
+			# mode we just left. The actually-loaded zones (self._loaded_refs/
+			# self.zones) come from that same stale source too (found
+			# 2026-09-10, Nuno: switching mode kept showing the old mode's
+			# zones) -- _pending_continent_reload re-selects the current
+			# continent from _draw_landscape_tab(), once _cont_locs has been
+			# refreshed for the new mode (needed for Edition's bounds
+			# lookup), which re-triggers _load_continent() end to end.
 			self._app_mode = mode
 			self._cont_locs = None
 			self._cont_locs_error = None
+			self._pending_continent_reload = True
 		imgui.text("Mode:")
 		imgui.same_line()
 		imgui.text_colored(_MODE_BADGE_COLOR[mode], _MODE_BADGE_LABEL[mode])
+		imgui.same_line()
+		other_mode = _OTHER_MODE[mode]
+		ryzom_data_valid = repository_paths.is_valid("ryzom-data")
+		imgui.begin_disabled(not ryzom_data_valid)
+		if imgui.button(f"Switch to {_MODE_BADGE_LABEL[other_mode]}"):
+			self._set_app_mode(other_mode)
+		imgui.end_disabled()
+		if not ryzom_data_valid and imgui.is_item_hovered():
+			imgui.set_tooltip("Configure ryzom-data in Settings > Ryzom Paths to enable Dev mode.")
 		imgui.separator()
 
 		# _draw_viewport_toggles() opens its own separate floating imgui
@@ -686,6 +928,40 @@ class LandscapeEditorApp(ForgeryApp):
 
 	def _draw_landscape_tab(self):
 		self._ensure_continent_locations_loaded()
+
+		if self._pending_continent_reload:
+			# Deferred from draw_panel()'s mode-change handling to here,
+			# AFTER _ensure_continent_locations_loaded() above -- Edition
+			# mode's bounds resolution (_select_continent()) looks up the
+			# selection in self._cont_locs, which must already reflect the
+			# new mode's own continent list by the time this runs.
+			#
+			# ContLoc.continent_name is NOT a stable cross-mode identifier
+			# (found 2026-09-10, Nuno): in Release it's the packed_sheets/
+			# sheet_id.bin identifier (e.g. "lecarrefour" for nexus), in
+			# Edition it's ryzom.world's struct_name (the reliable
+			# PacsRBank-style "nexus") -- re-selecting by the OLD mode's
+			# continent_name would look up the wrong/nonexistent continent
+			# in the new mode. selection_name (the displayed label, e.g.
+			# "nexus" either way) is the one field both sources agree on --
+			# already kept in self._selected_continent_pipeline_name.
+			self._pending_continent_reload = False
+			previous_selection_name = self._selected_continent_pipeline_name
+			cont_loc = next((loc for loc in self._cont_locs or () if loc.selection_name == previous_selection_name), None)
+			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_draw_landscape_tab) "
+			      f"mode switch reload: selection_name={previous_selection_name!r} found={cont_loc}")
+			if cont_loc is not None:
+				self._select_continent(cont_loc.continent_name, cont_loc.selection_name)
+			elif previous_selection_name is not None:
+				# Not available under the new mode (e.g. no .land for it in
+				# Edition) -- clear the stale selection/geometry rather than
+				# keep showing the old mode's zones under a now-invalid name.
+				self.selected_continent_name = None
+				self._selected_continent_pipeline_name = None
+				self.continent_bounds = None
+				self._loaded_refs = {}
+				self._loaded_extensions = {}
+				self._set_loaded_zones({})
 
 		if self._cont_locs_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._cont_locs_error)

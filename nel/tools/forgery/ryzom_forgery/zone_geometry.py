@@ -90,7 +90,7 @@ def _elevation_colors_uint8(z, min_z, max_z):
 # Purple/pink never occurs in the real elevation gradient (_DEEP_COLOR/
 # _SEA_LEVEL_COLOR/_PEAK_COLOR are all red/brown/green), so it reads
 # unambiguously as "fallback" against both the terrain and the background.
-_FALLBACK_LOW = (0.45, 0.15, 0.55, 1.0)
+_FALLBACK_LOW = (0.22, 0.05, 0.30, 1.0)  # darker at the low end (Nuno 2026-09-10)
 _FALLBACK_HIGH = (0.95, 0.55, 0.80, 1.0)
 
 
@@ -263,10 +263,20 @@ def build_zone_geom_from_cache(
 	remaining bottleneck once the disk cache removed bnp read/parsing/Bezier
 	eval (project-todos/forgery/landscape_editor__zone_disk_cache.md step
 	7)."""
+	own_min_z = cache_data.bb_center[2] - cache_data.bb_half_size[2]
+	own_max_z = cache_data.bb_center[2] + cache_data.bb_half_size[2]
 	if min_z is None:
-		min_z = cache_data.bb_center[2] - cache_data.bb_half_size[2]
+		min_z = own_min_z
 	if max_z is None:
-		max_z = cache_data.bb_center[2] + cache_data.bb_half_size[2]
+		max_z = own_max_z
+	# Fallback zones (project-todos/forgery/landscape_editor__land_preview.md
+	# step 3) never join seamlessly with their neighbors anyway (they're not
+	# actually welded/lit, or computed standalone from a .land brick) -- a
+	# gradient normalized over the whole loaded set (like the real elevation
+	# gradient) would make most of them read as a near-uniform purple/pink,
+	# since one fallback zone's own relief is usually a small slice of the
+	# full loaded range. Always per-zone for these instead (Nuno 2026-09-10).
+	color_min_z, color_max_z = (own_min_z, own_max_z) if fallback else (min_z, max_z)
 
 	total_vertices = sum((patch.n_s + 1) * (patch.n_t + 1) for patch in cache_data.patches)
 
@@ -294,7 +304,7 @@ def build_zone_geom_from_cache(
 		n = (patch.n_s + 1) * stride
 		positions = np.array(patch.positions, dtype="<f4").reshape(n, 3)
 		vertex_buf["vertex"][base:base + n] = positions
-		vertex_buf["color"][base:base + n] = color_fn(positions[:, 2], min_z, max_z)
+		vertex_buf["color"][base:base + n] = color_fn(positions[:, 2], color_min_z, color_max_z)
 
 		i_idx, j_idx = np.meshgrid(np.arange(patch.n_s), np.arange(patch.n_t), indexing="ij")
 		i0 = base + i_idx * stride + j_idx

@@ -23,6 +23,13 @@ class SysInfoBar:
 	def __init__(self):
 		self.status = ""
 		self.status_color = None  # (r, g, b, a) or None for the default text color
+		# Separate from `status` (project-todos/forgery/
+		# landscape_editor__cursor_zone_status.md step 3) -- `status` is
+		# already used by ForgeryApp's own Explorer selection display
+		# (app.py, "N selected"/hovered path), so reusing it for a per-frame
+		# cursor readout would fight with that instead of coexisting with
+		# it. Drawn right after FPS, `status` (if any) drawn after this.
+		self.cursor_info = ""
 		# Computed once -- importlib.metadata.version() reads install
 		# metadata off disk, and the running version can't change mid-session.
 		self._version_label = _version_label()
@@ -31,10 +38,17 @@ class SysInfoBar:
 		self.status = text
 		self.status_color = color
 
+	def set_cursor_info(self, text: str):
+		self.cursor_info = text
+
 	def draw(self):
 		framerate = imgui.get_io().framerate
 		frame_ms = (1000.0 / framerate) if framerate > 0 else 0.0
 		imgui.text(f"{framerate:.1f} FPS ({frame_ms:.2f} ms)")
+
+		if self.cursor_info:
+			imgui.same_line(spacing=20)
+			imgui.text(self.cursor_info)
 
 		if self.status:
 			imgui.same_line(spacing=20)

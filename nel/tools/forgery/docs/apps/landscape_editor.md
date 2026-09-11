@@ -363,14 +363,26 @@ leveldesign actif.
 
 ## Mode global Visualisation / Édition (`landscape_editor__land_preview.md`)
 
-`_detect_app_mode()` détermine un mode unique pour toute l'app, recalculé à
-chaque frame de `draw_panel()` (`pynel.repository_paths.is_valid("ryzom-data")`
-est une simple lecture JSON, pas besoin de mécanisme de notification de
-changement) : `"edition"` dès que `ryzom-data` est configuré et pointe vers un
-dossier existant, `"visualisation"` sinon -- indépendamment du contenu réel de
-ce `ryzom-data` (un `.land` manquant pour tel ou tel continent est géré par le
-filtrage du combo, pas par ce switch global). Un badge coloré affiche le mode
-actif en haut du panel.
+`_detect_app_mode()` détermine le mode par défaut, uniquement la toute
+première fois (`pynel.repository_paths.is_valid("ryzom-data")` -- `"edition"`
+si `ryzom-data` est configuré et pointe vers un dossier existant,
+`"visualisation"` sinon), indépendamment du contenu réel de ce `ryzom-data`
+(un `.land` manquant pour tel ou tel continent est géré par le filtrage du
+combo, pas par ce switch global).
+
+**Bascule manuelle "Release"/"Dev"** (`landscape_editor__land_preview.md`
+étape 4, 2026-09-10) : `_resolve_app_mode()` lit `Settings.
+landscape_editor_mode` (persistant, `None` tant que l'utilisateur n'a jamais
+touché au bouton) -- si `None`, `_detect_app_mode()` sert de valeur par
+défaut ; si `"edition"` mais `ryzom-data` n'est plus valide, repli forcé sur
+`"visualisation"` **sans modifier** le choix sauvegardé (reprend son effet
+dès que `ryzom-data` est reconfiguré). Bouton "Switch to Release"/"Switch to
+Dev" à côté du badge (`_set_app_mode()`, sauvegarde immédiate), désactivé
+(grisé, tooltip) tant que `ryzom-data` n'est pas configuré/valide -- Dev
+n'a aucun sens sans lui. `_MODE_BADGE_LABEL` affiche "Release"/"Dev" dans
+l'UI ; les identifiants internes (`_MODE_VISUALISATION`/`_MODE_EDITION`,
+valeurs stockées dans `Settings.landscape_editor_mode`) restent
+`"visualisation"`/`"edition"`, seul le libellé UI a changé.
 
 **Liste des continents par mode** : `_ensure_continent_locations_loaded()`
 délègue à `_load_visualisation_continent_locations()` (inchangé -- `world.
@@ -390,6 +402,104 @@ ex. `fyros.land`/`matis.land`/`nexus.land`, jamais à un nom de dossier) : un
 continent listé dans `ryzom.world` mais sans `.land` correspondant
 n'apparaît pas du tout dans le combo en édition.
 
-Étapes suivantes du chantier : fallback `.land`+brique pour `[POLY]`/`[2D]`
-sur les zones pas encore exportées par le pipeline, puis extraction en
-mixins dédiés par mode une fois cette logique édition bien distincte.
+**Fallback `.land`+brique pour `[POLY]`/`[2D]`** (`land_geometry.py`, nouveau
+module) : en édition, quand `self.render_mode` est `"2D"` ou `"POLY"`,
+`_apply_render_mode()` résout `(land_path, brick_zones_dir)` pour le continent
+sélectionné (`land_loader.find_land_files()` + `continent_ecosystem.
+get_ecosystem_for_continent()` pour situer `<ryzom-data>/pipeline/landscape/
+<eco>/zones/`), et `_run_load_refs()` (thread d'arrière-plan) charge le
+`.land` (`pynel.ryzom_land.load_land()`), calcule les cellules déjà couvertes
+par un vrai `.zone` exporté (`bb_center` des zones déjà chargées, `floor()`
+et non `round()` -- une valeur exactement `.5` romprait sur la parité avec
+`round()`), et pour chaque cellule utilisée du `.land` (`zone_name !=
+STRING_UNUSED`) qui n'a AUCUN `.zone` exporté correspondant, charge la
+brique référencée (`<eco>/zones/<zone_name>.zone`) et calcule sa géométrie
+positionnée via `land_geometry.build_land_piece_cache_data()`, ajoutée à
+`self.zones` sous la clé `"land:<origin_x>:<origin_y>"` et marquée dans le
+même ensemble `gray` que `[WELD]`/`[LIGHT]` -- rendue avec le dégradé violet
+-> rose de repli habituel (`build_zone_geom_from_cache(..., fallback=True)`),
+jamais le dégradé d'élévation normal (Nuno 2026-09-10).
+
+**Pièces multi-cellules** (Nuno 2026-09-10 : "certains .zone ne font pas
+160x160 mais peuvent être plus grandes 320x160 voire 320x320") : une brique
+peut être une "large piece" ligo référencée par plusieurs cellules du
+`.land` à la fois, chacune stockant son propre `ZoneUnit.pos_x`/`pos_y` --
+un nom trompeur ("position in a large piece", `zone_region.h`), pas une
+position de grille, mais la sous-position de cette cellule dans la pièce.
+Un premier essai traitait chaque cellule référençant la brique comme un
+placement 160x160 indépendant, dupliquant/chevauchant la pièce sur chaque
+cellule qu'elle occupe réellement (trouvé 2026-09-10, Nuno, sur `49_CL`/
+`49_CM` de `nexus`). Corrigé : `land_geometry.piece_origin()` reproduit
+`CExport::treatPattern()`'s `deltaX`/`deltaY` (export.cpp:479-498) pour
+retrouver l'origine de grille propre à la pièce depuis UNE cellule
+référençante + sa taille en cellules -- taille dérivée directement de la
+bounding box réelle de la brique déjà chargée (`land_geometry.
+brick_size_in_cells()`, Nuno 2026-09-10 : "quand tu charges un .zone tu dois
+bien avoir les dimensions"), jamais d'une base "ZoneBank" ligo (hors scope,
+non parsée par pynel). Toutes les cellules d'une même pièce résolvent vers
+la même origine -- `_run_load_refs()` déduplique dessus (`rendered_pieces`,
+clé `(zone_name, origin_x, origin_y, rot, flip)`) pour ne rendre la pièce
+qu'une seule fois.
+
+`build_land_piece_cache_data()` positionne la pièce (une cellule simple
+n'étant que le cas `size_x == size_y == 1`) en tournant/retournant **autour
+du centre de sa propre bounding box réelle** (`x`/`y` dans `[0, width]`/
+`[0, height]`, pas un `ZONE_CELL_SIZE` fixe -- mirror d'abord si `flip` :
+`x = width - x`, puis rotation par `rot * 90°` via `rot=1: (height-y, x)` /
+`rot=2: (width-x, height-y)` / `rot=3: (y, width-x)`), puis translation de
+`(origin_x, origin_y) * ZONE_CELL_SIZE`. Une première version tournait/
+retournait autour du coin local (0,0) en lisant littéralement la
+construction `CMatrix` de `CExport::transformZone()` -- position
+complètement fausse en pratique (trouvé et corrigé 2026-09-10, Nuno) ; une
+deuxième version centrait bien la rotation mais sur un `ZONE_CELL_SIZE` fixe
+plutôt que la vraie taille de la pièce -- correcte pour une brique simple,
+fausse dès qu'une pièce multi-cellules était tournée. Vérifié empiriquement
+(pas juste relu) contre les vraies zones exportées de `bagne`
+(`ryzom-data/pipeline/export/continents/bagne/`, présentes en local),
+pièces multi-cellules tournées incluses (`solprimer-mz_monticulea`/
+`solprimer-mz_coulea`) : 45 des 53 cellules utilisées de `bagne.land`
+tombent à moins de 2 unités du centre réel (bruit flottant/mesh), les 5
+restantes à moins de 28 unités (mesh légèrement irrégulier, pas un bug
+systématique identifié) -- les anciennes erreurs de 100 à 200+ unités et le
+chevauchement des pièces multi-cellules ont disparu.
+
+Appliqué directement aux positions déjà évaluées de la surface Bézier
+(`zone_geometry.compute_zone_patch_positions()`, réutilisé tel quel) plutôt
+qu'aux points de contrôle bruts : une surface de Bézier est une combinaison
+affine de ses points de contrôle (base de Bernstein de somme 1), donc une
+transformation affine commute avec l'évaluation.
+
+## Nom de zone + position sous le curseur (`landscape_editor__cursor_zone_status.md`)
+
+`_update_cursor_status()` (appelé en tête de `draw_panel()`) affiche, dans
+la barre de statut partagée (`SysInfoBar`, à droite des FPS, séparé par le
+même mécanisme que le statut Explorer), le nom de la zone 160x160 sous le
+curseur et sa position monde entre parenthèses -- ex. `27_AG (2541, -4848)`.
+`mouse_picking.mouse_ground_position()` (nouveau module, zéro dépendance
+app) unprojette la souris via `camLens.extrude()` et intersecte le rayon
+avec le plan `Z=0` (pas un vrai raycast contre le terrain tessellé -- juste
+`(x, y)`, pas d'altitude réelle, hors scope). `pynel.ryzom_packed_sheets.
+world_pos_to_zone_name()` (nouveau, inverse de `zone_name_to_world_pos()`,
+porté de `CExport::getZoneNameFromXY()`) convertit la position en nom de
+zone, `None` hors de la grille valide `[0, 255]`. `SysInfoBar.cursor_info`
+est un champ dédié, séparé de `SysInfoBar.status` (déjà utilisé par
+l'affichage de sélection Explorer partagé, `app.py`) pour ne pas entrer en
+conflit avec lui.
+
+**Nom de la brique `.land`** (Nuno 2026-09-10) : en mode édition, la ligne
+affiche en plus le nom que le `.land` assigne lui-même à cette cellule --
+toujours ce nom-là, quel que soit le fichier réellement utilisé pour le
+rendu (`.zone`/`.zonew`/`.zonel` exporté, ou brique de fallback) : ex.
+`27_AG (2541, -4848) -- solprimer-mz_coulea`. Deux essais précédents
+montraient plutôt le fichier réellement chargé (`ZoneRef.source_path`, ou la
+brique de fallback) -- rejetés par Nuno, le premier car redondant avec le
+nom de zone déjà affiché juste avant (`"49_CK -- 49_CK"`, les fichiers
+exportés étant nommés d'après leur position), le second parce que ce n'est
+pas l'info voulue : le nom de brique du `.land`, pas le fichier de sortie du
+pipeline. `_ensure_land_cell_names_loaded()` lit le `.land` du continent
+sélectionné une fois par changement de continent (`self._land_cell_names`,
+`(pos_x, pos_y) -> ZoneUnit.zone_name`, cellules `< UNUSED >` exclues),
+vidé hors mode édition ou sans continent sélectionné.
+
+Étape suivante du chantier land_preview : extraction en mixins dédiés par
+mode une fois cette logique édition bien distincte.

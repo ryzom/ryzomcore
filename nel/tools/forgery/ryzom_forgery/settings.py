@@ -170,6 +170,12 @@ class Settings:
 	# when possible -- see live_data_setup_dialog.py -- None until then or
 	# until the user sets/confirms it.
 	live_data_path: Optional[str] = None
+	# Atyscape's Release/Dev toggle (project-todos/forgery/
+	# landscape_editor__land_preview.md step 4) -- "visualisation" or
+	# "edition", or None if the user has never touched the button yet (auto-
+	# detected from ryzom-data's own configuration in that case, see
+	# _detect_app_mode() in landscape_editor.py).
+	landscape_editor_mode: Optional[str] = None
 	# Remembered open/closed + on-screen position of each floating panel
 	# (see PanelState's own docstring, panel_improvements.md) -- keyed by a
 	# short panel id ("wind"/"bone_preview"/"bind"/"light"/"info"). A panel
@@ -233,6 +239,7 @@ def load() -> Settings:
 	settings.ui_font_size = data.get("ui_font_size") or settings.ui_font_size
 	settings.dpi_scale = data.get("dpi_scale") or settings.dpi_scale
 	settings.live_data_path = data.get("live_data_path") or None
+	settings.landscape_editor_mode = data.get("landscape_editor_mode") or None
 	settings.panel_states = {
 		str(name): PanelState(open=bool(entry.get("open", False)), x=float(entry.get("x", 0.0)), y=float(entry.get("y", 0.0)))
 		for name, entry in data.get("panel_states", {}).items() if isinstance(entry, dict)
@@ -297,6 +304,8 @@ def save(settings: Settings) -> None:
 	doc["dpi_scale"] = settings.dpi_scale
 	if settings.live_data_path is not None:
 		doc["live_data_path"] = settings.live_data_path
+	if settings.landscape_editor_mode is not None:
+		doc["landscape_editor_mode"] = settings.landscape_editor_mode
 	doc["panel_states"] = {name: asdict(state) for name, state in settings.panel_states.items()}
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]

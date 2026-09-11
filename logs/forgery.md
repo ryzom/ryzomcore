@@ -1,5 +1,104 @@
 # Changelog
 
+## 2026-09-11 — ✨ Add .land fallback + multi-cell piece support, Release/Dev toggle, stderr errors, cursor status, Forgery 4.4.0
+
+`landscape_editor__land_preview.md` steps 3-4 and
+`landscape_editor__cursor_zone_status.md` closed.
+
+**`.land`+brick fallback for `[POLY]`/`[2D]` in Edition mode**: when a `.land`
+cell has no exported `.zone` yet (a brick just placed locally, never run
+through `land_export`), `land_geometry.py` computes its geometry directly
+from the `.land` + the referenced brick file, rendered with the existing
+violet->pink fallback gradient rather than counted as simply missing.
+Positioning went through two wrong iterations before landing on the correct
+one, each found by comparing computed positions against every real exported
+zone of `ryzom-data/pipeline/export/continents/bagne/` (kept locally for
+exactly this kind of check): rotating/mirroring about the brick's local
+(0,0) corner (a literal reading of `CExport::transformZone()`'s `CMatrix`
+construction) was off by up to a full cell; centering the rotation on a
+fixed 160x160 square fixed single-cell bricks but still mispositioned
+multi-cell "large pieces" (some real bricks are 320x160 or 320x320, not
+160x160). The final fix derives each piece's real size directly from its
+own loaded bounding box (no ZoneBank file needed) and ports
+`CExport::treatPattern()`'s deltaX/deltaY resolution to recover a multi-cell
+piece's shared grid origin from any one of its referencing cells --
+`landscape_editor.py` now also deduplicates so a piece spanning several
+`.land` cells (each storing its own "position in the piece",
+`ZoneUnit.pos_x`/`pos_y`, a different field than the grid position despite
+the name) renders exactly once instead of once per cell it overlaps
+(previously visible as duplicated, overlapping geometry, e.g. nexus's
+`49_CL`/`49_CM`). Verified against `bagne.land`'s two real multi-cell
+pieces: computed and real bounding-box centers now agree within ~2 units.
+The fallback's own violet->pink gradient is now computed per zone (its own
+Z range) instead of over the whole loaded continent's range -- these zones
+never join seamlessly with neighbors anyway, and a global range made most
+of them read as a near-uniform color. Its low end was also darkened.
+
+**Release/Dev manual toggle**: the Visualisation/Edition mode (Forgery
+4.3.1) is no longer purely automatic -- a button next to the mode badge
+("Release"/"Dev", the UI labels; `_MODE_VISUALISATION`/`_MODE_EDITION` stay
+the internal identifiers) lets the user switch manually, persisted in
+`Settings.landscape_editor_mode`, disabled while `ryzom-data` isn't
+configured (Dev has no meaning without it). Two bugs found while testing
+this: switching mode didn't reload the currently loaded zones (they kept
+showing whatever was loaded under the previous mode) -- fixed by
+re-triggering `_select_continent()`/`_load_continent()` on a mode change,
+matching the continent by `selection_name` rather than `continent_name`
+(the latter is packed_sheets's raw identifier in Release, e.g.
+`"lecarrefour"`, but `ryzom.world`'s own reliable `struct_name` in Edition,
+e.g. `"nexus"`, for the very same continent). And Release mode was still
+silently reading `ryzom-data`'s pipeline export whenever one existed for the
+selected continent (the older, still-present per-continent
+`has_pipeline_export()` mechanism from `zone_render_modes.md` never checked
+which mode was active) -- fixed by forcing `ryzom_data_path` to `None` in
+`_load_continent()` outside Edition mode.
+
+**Every Forgery UI error also on stderr**: `error_log.report_error()`
+(`print(..., file=sys.stderr)`) is now called alongside every existing
+`self._x_error = ...`/progress-dict-error assignment in `landscape_editor.py`
+-- these were previously only ever visible in whichever tab/panel happened
+to be showing the error string, easy to miss (`error_stderr_logging.md`,
+Atyscape done first; the rest of Forgery's apps/dialogs are separate,
+not-yet-done steps of that same chantier).
+
+**Zone name + position under the cursor**: the shared bottom status bar
+(`SysInfoBar`, next to the FPS counter, new `cursor_info` field distinct
+from the existing Explorer-selection `status` field) now shows the 160x160
+zone under the mouse cursor and its world position, e.g.
+`27_AG (2541, -4848)` -- `mouse_picking.mouse_ground_position()` (new,
+zero-dependency module) unprojects the cursor via `camLens.extrude()` and
+intersects the Z=0 plane (no real terrain raycast, no altitude), converted
+to a zone name via pynel's new `world_pos_to_zone_name()`. In Edition mode
+the line also shows the brick name the `.land` itself assigns to that cell
+(`ZoneUnit.zone_name`, read once per continent selection and cached) --
+always that name, regardless of which pipeline stage actually renders
+there; two earlier attempts (the real loaded file's own name, then that
+name with its extension) were rejected as either redundant with the
+already-shown zone name or simply not the requested information.
+
+## 2026-09-10 — ✨ Filter continent combo by .land in Edition mode, Forgery 4.3.2
+
+`landscape_editor__land_preview.md` step 2 done. In Edition mode, the
+continent combo now reads `ryzom.world` directly from `ryzom-data`
+(`continent_selector.load_continent_locations_from_world_file()`, new,
+never `live_data_path`/`world.packed_sheets`) and only lists continents that
+actually have a `.land` under `<ryzom-data>/leveldesign/landscape/`
+(`land_loader.find_land_files()`, new, indexed by filename stem -- confirmed
+a real `.land`'s stem always matches its `PacsRBank`, never a folder name).
+Uses `WorldContinentEntry.struct_name` as the continent identifier, not
+`.continent_name` (documented by pynel as unreliable). Visualisation mode
+unchanged. `_cont_locs` cache invalidated on every mode change.
+
+## 2026-09-10 — ✨ Add Visualisation/Edition mode detection + badge, Forgery 4.3.1
+
+`landscape_editor__land_preview.md` step 1 done -- first step of a chantier
+redesigning the previous per-continent/per-button live_data-vs-ryzom-data
+bascule (`landscape_editor__zone_render_modes.md` step 6) into a single
+global app mode, later made user-toggleable (see 4.4.0 above). `_detect_app_mode()`
+switches between "visualisation" and "edition" based on whether
+`pynel.repository_paths.is_valid("ryzom-data")`, recomputed every
+`draw_panel()` frame; a colored badge shows the active mode in the panel.
+
 ## 2026-09-09 — ✨ Add pipeline data download/install, Forgery 4.3.0
 
 `landscape_editor__zone_render_modes__pipeline_data_installer.md` closed.
