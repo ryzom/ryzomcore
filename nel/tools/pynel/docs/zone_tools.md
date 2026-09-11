@@ -175,7 +175,125 @@ Out of this chantier's explicit scope (only welder/lighter); an empty
 `dependencies = {};` is a legitimate substitute when no cross-zone shadow
 analysis is needed.
 
-## 3. `CConfigFile` syntax (`nel/include/nel/misc/config_file.h:32-100`)
+## 3. `zone_elevation`
+
+Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
+Source: `nel/tools/3d/zone_elevation/zone_elevation.cpp`. Applies a heightmap
+to a zone freshly produced by `land_export` (a `.zonenhw` -- "no height,
+welded" -- becomes a `.zonew` with real Z positions).
+
+```
+zone_elevation <input.zonenhw> <output.zonew> --land <file.land> [options]
+zone_elevation <input.zonenhw> <output.zonew> --zonemin <name> --zonemax <name> [options]
+```
+
+Unlike every other tool in this doc, `zone_elevation` uses `NLMISC::CCmdArgs`
+(a real, modern argument parser: `--flag value` or `--flag=value`, both
+accepted) and a **real exit code convention**: `EXIT_SUCCESS`/`EXIT_FAILURE`
+(`main.cpp:498,607,612`) -- not the always-0 convention of the other tools
+in this doc.
+
+- **Required**: the two positional args (input/output), and either `--land`
+  (a real `.land` file, loaded to derive the zone grid's min/max bounds) or
+  both `--zonemin`/`--zonemax` (zone **names**, not files -- decoded via
+  `getXYFromZoneName`, no file needed for this alternative).
+- **Optional, never fatal**: `--heightmap`/`--heightmap2` -- every use of
+  the loaded bitmap is guarded by `if (s_HeightMap != NULL)`
+  (`zone_elevation.cpp:126,174`); a missing flag, a missing file, or a
+  load exception all just leave it `NULL` and processing continues with no
+  elevation applied from that source (logged via `nldebug`, not
+  `nlwarning` -- see the log-routing note in §7 below for why that still
+  reaches `log.log`).
+- **Defaults** (real values in `zone_elevation.cpp`, used whenever the
+  matching flag is omitted): `--zfactor`/`--zfactor2` = `1.0`, `--cellsize`
+  = `160.0`, `--extendcoords` = off.
+
+## 4. `zone_dependencies`
+
+Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
+Source: `nel/tools/3d/zone_dependencies/zone_dependencies.cpp`. Computes
+cross-zone shadow/lighting dependencies by bounding-box analysis, writing
+the `.depend` file `zone_lighter` (§2) and `zone_ig_lighter` (§5) both
+consume.
+
+```
+zone_dependencies <properties.cfg> <firstZone.zone> <lastZone.zone> <output.depend>
+```
+
+- **Required**: `properties.cfg` itself, with (no `try/catch`, so genuinely
+  required) `sun_direction`, `search_pathes`, `compute_dependencies_with_igs`.
+- **`firstZone.zone`/`lastZone.zone` are never actually opened as files** --
+  only their **names** are decoded (`getZoneCoordByName`) to derive a
+  rectangular `[minX..maxX] x [minY..maxY]` coordinate range, and their
+  shared directory/extension (`getDir`/`getExt` on `argv[2]`) to reconstruct
+  every real zone's path inside that range. Neither file needs to exist on
+  disk for the tool to run.
+- Every zone coordinate in that rectangle is tried (`<dir>/<computed name>
+  <ext>`) -- a coordinate with no corresponding file is silently skipped
+  (a normal, expected case: not every grid cell has a zone).
+- **`compute_dependencies_with_igs=1`** (true for every real continent
+  checked, 2026-09-11) additionally tries, per loaded zone:
+  - `<zone>.ig` via `CPath::lookup` -- **the `nlwarning` for this case is
+    commented out in the source** (`zone_dependencies.cpp`, in
+    `computeZoneIGBBox`): a missing `.ig` produces **zero trace anywhere**,
+    not even in `log.log`. Confirmed by reading the code, not inferred --
+    see §7 for what this means for pynel's own validation.
+  - Every `.shape` referenced by that `.ig`'s instances, via `CPath::lookup`
+    -- optional, a real `nlwarning` on failure (`"Unable to find shape
+    '%s'"`).
+  - The continent's own `.continent` form (`computeIGBBoxFromContinent()`),
+    built from `level_design_world_directory`/`continent_name` -- wrapped in
+    `try/catch(EUnknownVar)`, fully optional. Its path is constructed as a
+    flat `<level_design_world_directory>/<continent_name>.continent`, but
+    resolved via `CFormLoader::loadForm()` -> `CPath::lookup()` first (which
+    matches by filename anywhere under whatever was registered with
+    `addSearchPath(level_design_world_directory, recurse=true, ...)` just
+    before) -- so this still finds the real file even though `ryzom-data`'s
+    actual current layout nests it one level deeper
+    (`leveldesign/world/continents/<name>.continent`, see §9), **as long as
+    `continent_name` matches the real file's own basename**.
+
+## 5. `zone_ig_lighter`
+
+Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
+Source: `nel/tools/3d/zone_ig_lighter/zone_ig_lighter.cpp`. Lights the
+instances (`.ig`) placed in an already-lit zone (`.zonel`), using the same
+`properties.cfg`/`.depend` convention as `zone_lighter` (§2) plus its own
+`ig_oversampling`.
+
+```
+zone_ig_lighter <input.zonel> <output.ig> <properties.cfg> <dependency.depend>
+```
+
+- **Required, and genuinely blocking unlike every other file in this doc**:
+  `<input.zonel>`, `properties.cfg`, `<dependency.depend>` (loaded with no
+  `try/catch` around `dependency.load()` -- must exist and parse, an empty
+  `dependencies = {};` is fine per §2's own note) -- **and the zone's own
+  `<name>.ig`**, auto-looked-up (`<name>.ig`, `CPath::lookup`, same
+  `search_pathes`-registered dirs as everything else). If that specific
+  lookup fails: `zoneIgLoaded = false` -> **immediate `return 0`, the whole
+  process exits having produced nothing**, with only a single
+  `fprintf(stderr, "Warning: can't load instance group %s\n", ...)` (not
+  even `nlwarning`, so it never reaches `log.log` either -- stderr only).
+- `properties.cfg` fields read (no `try/catch`, so all required, matching
+  the base list in §2 plus): `sun_direction`, `quad_grid_size`,
+  `quad_grid_cell_size`, `shadow`, `ig_oversampling`, `search_pathes`,
+  `bank_name`, `load_ig`.
+- **Optional, warning-only**: `bank_name`'s actual tile bank file (continues
+  without tile info if missing); every zone/`.ig` listed in the
+  `dependencies = {...}` of the `.depend` file (each tried independently,
+  `nlwarning` + `continue` on failure); every `.shape` referenced by any
+  loaded `.ig` (center, dependency, or `additionnal_ig`), `nlwarning` on
+  failure, same pattern as §4.
+- **Exception**: if `additionnal_ig` (properties.cfg) is non-empty and ANY
+  listed file fails to open, `continu=false` is set and the actual lighting
+  is skipped -- but every real continent checked 2026-09-11 has this list
+  empty, so this path is not currently exercised in practice.
+- Always returns `0`, whether it produced real output or not -- same
+  non-standard convention as `zone_lighter` (§2): the caller must check the
+  output file itself, never the exit code.
+
+## 6. `CConfigFile` syntax (`nel/include/nel/misc/config_file.h:32-100`)
 
 ```
 // single-line comment
@@ -198,7 +316,7 @@ var6 = { "a", "b" };        // array of string
 - `getVar()` raises `NLMISC::EUnknownVar` for a missing variable (matches
   every `try/catch(EUnknownVar)` seen in `zone_lighter.cpp`).
 
-## 4. Real pipeline scripts (confirmed, not guessed)
+## 7. Real pipeline scripts (confirmed, not guessed)
 
 `nel/tools/3d/build_gamedata/processes/zone/sh/build.sh` (weld step):
 ```bash
@@ -218,7 +336,7 @@ examples in the repo: `nel/tools/3d/build_gamedata/cfg/properties_final.cfg`/
 dynamically by the script). `.depend` files are generated by
 `zone_dependencies` (see above), one per zone.
 
-## 5. pynel orchestration (`pynel.ryzom_zone_tools`)
+## 8. pynel orchestration (`pynel.ryzom_zone_tools`)
 
 Thin subprocess wrappers only -- no automatic binary discovery (the caller
 passes an explicit path to each binary; pynel stays decoupled from where
@@ -230,3 +348,81 @@ above), callers must validate the produced file (e.g. `load_zone()`
 succeeding) rather than trust the return code alone.
 
 See `ryzom_zone_tools.py` docstrings for the exact function signatures.
+
+## 9. `continent_pipeline_reference.csv` -- per-continent path/properties reference
+
+Built 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4, at
+Nuno's explicit request for **one single** reference table (not split by
+source file) of every path and `properties.cfg` field the three tools in
+§3-5 need, for **all 25 continents**. Lives at
+`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (25 rows,
+one per continent found under
+`leveldesign/workspace/continents/*/directories.py`).
+
+### Source of truth: `directories.py`, not the old generated `.cfg` files
+
+The first version of this CSV was built from each continent's real
+`generated/properties.cfg`/`generated/land_exporter.cfg`. Both turned out to
+be **stale**, still pointing at two conventions abandoned by
+`ryzom-data/world_continents_flatten.md`'s reorganization and never
+regenerated since:
+- the pre-flatten `leveldesign/world/<old_internal_name>/<old_internal_name>.continent`
+  layout (e.g. nexus's old internal name was `lecarrefour`;
+  `leveldesign/world/lecarrefour/` no longer exists at all);
+- the obsolete `.land` location `graphics/landscape/ligo/<eco>/<name>.land`,
+  superseded by `leveldesign/landscape/<eco>/<name>.land`.
+
+Nuno's explicit correction after this was caught: the CSV must be a
+reference of what **currently, actually exists**, "comme si les anciens
+dossiers n'avaient jamais existe" -- never a faithful copy of a stale
+config just because that's what the old file says. So the CSV is rebuilt
+entirely from `leveldesign/workspace/continents/<continent>/directories.py`
+-- present for all 25 continents, plain declarative Python (string
+concatenation only), already the trusted source `ryzom_forgery.continent_ecosystem`
+uses in Forgery. `directories.py` defines (relative to `pipeline/export/`,
+except `TileRootSourceDirectory` which is relative to `graphics/`):
+`EcosystemName`, `ContinentName`, `PropertiesExportBuildSearchPaths` (the
+exact `search_pathes` list), `SmallbankExportDirectory`,
+`FarbankBuildDirectory`, `RbankOutputBuildDirectory`,
+`LigoEcosystemZoneExportDirectory`/`LigoEcosystemIgExportDirectory`/
+`LigoEcosystemZoneLigoExportDirectory`,
+`LigoZoneBuildDirectory`/`LigoIgLandBuildDirectory`/`LigoIgOtherBuildDirectory`,
+`TileRootSourceDirectory`.
+
+The builder script (`build_reference_csv.py`, kept as reference in this
+doc's git history / re-derivable from `directories.py` at any time) `exec()`s
+each continent's `directories.py` in an isolated namespace -- safe since the
+file has no imports or side effects, just string concatenation -- and
+derives every column from it. Confirmed correct against disk: every
+`continent_file`/`zone_region_file` entry moved from mostly-broken (stale
+paths) to 100% `OK` after the switch to `directories.py`.
+
+### Columns still sourced from the real generated `properties.cfg`
+
+A handful of `properties.cfg` fields are genuine per-continent artistic/
+tuning values with **no equivalent in `directories.py`** (which only knows
+about paths, not scene-lighting parameters) -- these are still read from
+each continent's real `generated/properties.cfg`, the only current source
+for them: `sun_direction`, `sun_center`, `sky_intensity`, `quad_grid_size`,
+`quad_grid_cell_size`, `additionnal_ig`. Verified 2026-09-11 across 6 real
+continents (nexus, bagne, fyros, matis, tryker, terre) that every other
+`properties.cfg` field is identical across all continents (see §3-5's field
+lists) -- those are stored once in the CSV-builder's `GLOBAL_PROPERTIES`
+dict, not duplicated 25 times as a column.
+
+### `*_status` columns
+
+Every path-like column has a matching `<field>_status` column
+(`OK`/`EMPTY`/`MISSING`/`ERROR`), computed by actually checking the real
+`ryzom-data` checkout on disk at build time -- e.g. `bank_name_status` is
+genuinely `MISSING` for every desert/lacustre-ecosystem continent (real,
+confirmed-not-downloaded assets, not a path-construction bug -- do not
+"fix" these by changing the path formula).
+
+### Regenerating
+
+There's no committed CLI for this yet (still a one-off script in this
+session's scratchpad) -- if the CSV needs a refresh, rebuild the same logic
+(read every `directories.py`, resolve columns exactly as listed above,
+recompute `*_status` against the live `ryzom-data` checkout) rather than
+hand-editing the CSV.
