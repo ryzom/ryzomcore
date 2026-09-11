@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-11 — 🐛 Fix .gitignore swallowing ryzom_tools_setup_dialog.py, Forgery 4.6.1
+
+`.gitignore`'s `nel_tools*`/`ryzom_tools*` patterns (meant for old repo-root
+tool directories, none of which exist anymore) were unanchored, so they
+matched at any depth -- silently excluding
+`ryzom_forgery/ryzom_tools_setup_dialog.py` from every commit since it was
+first written. The file existed and worked in every worktree that happened
+to have it locally, but never made it into git or any built package, hence
+`No module named 'ryzom_forgery.ryzom_tools_setup_dialog'` on a real
+install (`ryzom_paths_section.py` imports it unconditionally). Fixed by
+anchoring both patterns to the repo root (`/nel_tools*`/`/ryzom_tools*`) and
+committing the rescued file.
+
 ## 2026-09-11 — ✨ Génération .zonew, cache continent .bam, 2D/3D, wireframe/shading Patina, Forgery 4.6.0
 
 `landscape_editor__zone_render_modes.md` (validation finale, étape 8 du
