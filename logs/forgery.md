@@ -1,5 +1,52 @@
 # Changelog
 
+## 2026-09-11 — ✨ Split Atyscape into Edit/View mode mixins, 3-state wireframe cycle, Forgery 4.7.0
+
+`landscape_editor__land_preview.md` (steps 5-7, closing `landscape_editor.md`
+step 9) and `wireframe_cycle_states.md` closed.
+
+**Edit/View mode mixin split**: `landscape_editor.py`'s Edition-only logic
+(continent list from `ryzom.world`, the `.land`+brick fallback resolution,
+the cursor status's brick name, the "Generate missing .zonew" button --
+meaningless in Visualisation since `ryzom_data_path` is always `None`
+there) moved to a new `EditModeMixin` (`landscape_editor_edit_mode.py`).
+Visualisation's own (much thinner) logic moved to `ViewModeMixin`
+(`landscape_editor_view_mode.py`). Shared render-mode constants/helpers
+(`_RENDER_MODES`, `_resolve_zone_for_mode()`, `_detect_app_mode()`...)
+extracted to `landscape_editor_modes.py` so both mixins can import them
+without ever importing back from `landscape_editor.py` (circular import) --
+same reasoning as Patina's own `object_editor_mixins/ui_helpers.py`. The
+shared rendering pipeline itself (`_apply_render_mode()`/`_run_load_refs()`/
+`_set_loaded_zones()`) stays in the base class, never duplicated. Validated
+by Nuno: no regression in either mode on a real continent.
+
+**Wireframe cycling button, 3 states (Patina + Atyscape)**: the wireframe
+toggle (On/Off, drawing on top of the shaded/textured render) became a
+3-state cycle on the same button/icon -- "Off" (no override), "Overlay"
+(the previous behavior, `set_render_mode_filled_wireframe()`), and "Pure"
+(new: `set_render_mode_wireframe()` + `set_texture_off()`, true wireframe
+with no texture or fill at all). Left-click cycles, right-click opens a
+popup to jump straight to any state.
+
+**Also fixed along the way**: `.gitignore`'s `nel_tools*`/`ryzom_tools*`
+patterns were unanchored, silently excluding
+`ryzom_forgery/ryzom_tools_setup_dialog.py` from every commit since it was
+written -- anchored to the repo root and the file committed (see its own
+entry below, 4.6.1).
+
+## 2026-09-11 — Reverted: Shading/Constant Shading/Unshaded cycling button on Atyscape's terrain
+
+`landscape_editor__shading_modes.md` abandoned, never committed to code
+history. Ported from Patina's own shading mode button (same 3 states,
+applied to `self._zone_root` instead of `model_root`) but reverted after
+Nuno tested it in Atyscape: only plain "Shading" (the normal, already
+always-on rendering) turned out useful for terrain -- "Constant Shading"
+(sun light off, ambient only) and "Unshaded" (flat color, no texture) added
+no value there, unlike on a single inspected object in Patina. State,
+methods (`_apply_shading_mode`/`_transition_shading_mode`/
+`_cycle_shading_mode`/`_set_shading_mode`) and the viewport button were all
+removed again before ever reaching a real commit.
+
 ## 2026-09-11 — 🐛 Fix .gitignore swallowing ryzom_tools_setup_dialog.py, Forgery 4.6.1
 
 `.gitignore`'s `nel_tools*`/`ryzom_tools*` patterns (meant for old repo-root

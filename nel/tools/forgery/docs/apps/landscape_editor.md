@@ -594,8 +594,36 @@ sélectionné une fois par changement de continent (`self._land_cell_names`,
 `(pos_x, pos_y) -> ZoneUnit.zone_name`, cellules `< UNUSED >` exclues),
 vidé hors mode édition ou sans continent sélectionné.
 
-Étape suivante du chantier land_preview : extraction en mixins dédiés par
-mode une fois cette logique édition bien distincte.
+### Extraction en mixins (`landscape_editor__land_preview.md` étape 5)
+
+`landscape_editor.py` (`LandscapeEditorApp(EditModeMixin, ViewModeMixin,
+ForgeryApp)`) délègue maintenant la logique propre à chaque mode à deux
+mixins dédiés, même pattern que Patina (`object_editor_mixins/`) :
+
+- **`landscape_editor_edit_mode.py`** (`EditModeMixin`) : `_load_edition_continent_locations()`,
+  `_ensure_land_cell_names_loaded()`, `_resolve_land_fallback_paths()`/
+  `_load_land_fallback_pieces()` (le fallback `.land`+brique, extrait de
+  `_apply_render_mode()`/`_run_load_refs()`), `_generate_missing_zonew()`/
+  `_run_generate_missing_zonew()` (bouton `[WELD]`, sans objet hors édition
+  puisque `ryzom_data_path` y est toujours `None`).
+- **`landscape_editor_view_mode.py`** (`ViewModeMixin`) : `_load_visualisation_continent_locations()`
+  -- aussi mince que ça, la Visualisation n'a aucune logique propre au-delà
+  de la lecture de `live_data_path`.
+- **`landscape_editor_modes.py`** : constantes/helpers partagés entre le
+  fichier principal et les deux mixins (`_RENDER_MODES`, `_MODE_REAL_EXTENSIONS`,
+  `_resolve_zone_for_mode()`, `_MODE_VISUALISATION`/`_MODE_EDITION`,
+  `_detect_app_mode()`...) -- un module séparé plutôt que de les laisser dans
+  `landscape_editor.py`, pour que les deux mixins puissent les importer sans
+  jamais importer `landscape_editor.py` lui-même (import circulaire), même
+  raisonnement que `object_editor_mixins/ui_helpers.py`.
+
+Le pipeline de rendu partagé (`zone_geometry.py`/`zone_cache.py`/
+`continent_geom_cache.py`, `_apply_render_mode()`/`_run_load_refs()`/
+`_set_loaded_zones()`) reste dans `landscape_editor.py` -- il n'est jamais
+dupliqué entre les mixins, seuls les points d'extension propres à un mode
+(résolution du fallback `.land`, génération `.zonew`, source de la liste de
+continents) sont délégués. Non-régression des deux modes validée par Nuno
+sur un continent réel.
 
 ## Cache disque du `NodePath` entier d'un continent (`geomnode_continent_cache.md`)
 
@@ -668,14 +696,29 @@ comportement caméra, indépendant de `self.render_mode`.
 
 Deux boutons icône indépendants et combinables dans `_draw_viewport_toggles()`,
 à côté de celui du 2D/3D -- même mécanisme que Patina (`_toggle_object_transparency()`/
-`_toggle_object_wireframe()`, `object_editor_mixins/viewport_transform.py`),
+`_apply_object_wireframe()`, `object_editor_mixins/viewport_transform.py`),
 appliqués à `self._zone_root` (donc à toutes les zones chargées, quel que
 soit `self.render_mode` ou l'état 2D/3D) :
 
 - **Transparence** (`self._zone_transparent`, `ICON_FA_CIRCLE_HALF_STROKE`) :
   `TransparencyAttrib.M_alpha` + `set_color_scale(1, 1, 1, alpha)`.
-- **Wireframe** (`self._zone_wireframe`, `ICON_FA_DRAW_POLYGON`) --
-  `set_render_mode_filled_wireframe((0, 0, 0, 1), 1)`, **pas**
-  `set_render_mode_wireframe()` : le filaire s'ajoute par-dessus le rendu
-  texturé/ombré normal, il ne le remplace jamais (Nuno 2026-09-11, même
-  correctif appliqué côté Patina, `object_editor__wireframe_overlay.md`).
+- **Wireframe à 3 états** (`self._wireframe_mode`, `"off"`/`"overlay"`/`"pure"`,
+  `_apply_zone_wireframe`/`_cycle_zone_wireframe`/`_set_zone_wireframe_mode`,
+  `ICON_FA_DRAW_POLYGON`, project-todos/forgery/`wireframe_cycle_states.md`,
+  **2026-09-11** -- remplace l'ancien booléen on/off) : `"off"` aucune
+  surcharge ; `"overlay"` (ancien comportement) `set_render_mode_filled_wireframe((0, 0, 0, 1), 1)`
+  -- arêtes noires par-dessus le rendu texturé/ombré normal, ne le remplace
+  jamais (`object_editor__wireframe_overlay.md`) ; `"pure"` (nouveau)
+  `set_render_mode_wireframe(1)` + `set_texture_off(1)` -- filaire seul, sans
+  texture ni remplissage. Même bouton/icône dans les 3 états (actif dès que
+  l'état n'est pas `"off"`), clic gauche cycle, clic droit ouvre un popup
+  listant les 3 états pour y sauter directement (convention générale des
+  boutons à cycle Forgery). `self._zone_root` n'étant jamais détruit/recréé
+  (contrairement à `model_root` de Patina), l'état n'a jamais besoin d'être
+  ré-appliqué après un rechargement de continent.
+
+**Chantier abandonné** : un bouton cyclique Shading/Constant Shading/Unshaded
+(portage de celui de Patina, `docs/apps/object_editor.md`) avait été ajouté
+ici aussi puis retiré après test par Nuno -- seul le mode Shading normal
+(déjà le comportement par défaut, sans bouton) s'est révélé utile sur le
+terrain (`logs/forgery.md`, 2026-09-11).

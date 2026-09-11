@@ -49,6 +49,15 @@ _SHADING_MODE_LABELS = {
 	"unshaded": "Unshaded",
 }
 
+# Wireframe cycling button (project-todos/forgery/wireframe_cycle_states.md)
+# -- same icon in all 3 states (only the tooltip/active highlight change),
+# unlike the shading mode button above.
+_WIREFRAME_MODE_LABELS = {
+	"off": "Wireframe off",
+	"overlay": "Wireframe (overlay on shaded render)",
+	"pure": "Wireframe (pure, no texture)",
+}
+
 # _update_sun_light()'s Play rotation rate -- a full 360deg cycle every 12s,
 # fast enough to actually watch a specular highlight sweep across a shape
 # without feeling like a slideshow, slow enough to still land on a precise
@@ -163,19 +172,37 @@ class ViewportTransformMixin:
 		self._apply_object_transparency()
 
 	def _apply_object_wireframe(self):
-		if self._object_wireframe:
-			# filled_wireframe, not plain wireframe -- the wireframe overlays
-			# the normal shaded/textured render, it never replaces it (Nuno
-			# 2026-09-11, project-todos/forgery/object_editor__wireframe_overlay.md).
-			self.model_root.set_render_mode_filled_wireframe((0, 0, 0, 1), 1)
-		else:
+		"""Applies self._wireframe_mode to model_root (project-todos/forgery/
+		wireframe_cycle_states.md) -- independent of transparency/shading,
+		all combinable:
+		- "off": no override.
+		- "overlay": set_render_mode_filled_wireframe() -- wireframe drawn on
+		  top of the normal shaded/textured render, never replacing it
+		  (project-todos/forgery/object_editor__wireframe_overlay.md).
+		- "pure": set_render_mode_wireframe() + set_texture_off() -- wireframe
+		  only, no texture, no fill."""
+		if self._wireframe_mode == "off":
 			self.model_root.clear_render_mode()
+			self.model_root.clear_texture()
+		elif self._wireframe_mode == "overlay":
+			self.model_root.clear_texture()
+			self.model_root.set_render_mode_filled_wireframe((0, 0, 0, 1), 1)
+		else:  # "pure"
+			self.model_root.set_render_mode_wireframe(1)
+			self.model_root.set_texture_off(1)
 
-	def _toggle_object_wireframe(self):
-		"""Independent of _toggle_object_transparency() -- both can be on at
-		once (project-todos/forgery/object_editor__wireframe.md)."""
-		self._object_wireframe = not self._object_wireframe
+	def _set_object_wireframe_mode(self, mode):
+		self._wireframe_mode = mode
 		self._apply_object_wireframe()
+
+	def _cycle_object_wireframe(self):
+		"""Left-click behavior for the wireframe button -- advances to the
+		next state (project-todos/forgery/wireframe_cycle_states.md, general
+		cycling-button convention: right-click instead jumps straight to a
+		chosen state, see _draw_viewport_toggles()'s own popup). Independent
+		of transparency/shading -- all combinable."""
+		next_mode = {"off": "overlay", "overlay": "pure", "pure": "off"}
+		self._set_object_wireframe_mode(next_mode[self._wireframe_mode])
 
 	def _apply_shading_mode(self):
 		"""Applies self._shading_mode to model_root (project-todos/forgery/
@@ -593,9 +620,16 @@ class ViewportTransformMixin:
 			                self._object_transparent, square=True, large_font=large_font):
 				self._toggle_object_transparency()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_DRAW_POLYGON, "Wireframe",
-			                self._object_wireframe, square=True, large_font=large_font):
-				self._toggle_object_wireframe()
+			wireframe_tooltip = f"{_WIREFRAME_MODE_LABELS[self._wireframe_mode]} (right-click to choose)"
+			if _icon_button(fa_icons.ICON_FA_DRAW_POLYGON, wireframe_tooltip,
+			                self._wireframe_mode != "off", square=True, large_font=large_font):
+				self._cycle_object_wireframe()
+			if imgui.begin_popup_context_item("##wireframe-mode-popup"):
+				for mode in ("off", "overlay", "pure"):
+					clicked, _ = imgui.selectable(_WIREFRAME_MODE_LABELS[mode], self._wireframe_mode == mode)
+					if clicked:
+						self._set_object_wireframe_mode(mode)
+				imgui.end_popup()
 			imgui.same_line()
 			# Cycling button (project-todos/forgery/
 			# object_editor__shading_modes.md, Nuno 2026-09-11's general

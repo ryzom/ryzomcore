@@ -180,7 +180,11 @@ class ObjectEditorApp(
 		self._world_axes_visible = False
 		self._pivot_axes_visible = False
 		self._object_transparent = False
-		self._object_wireframe = False
+		# "off"/"overlay"/"pure" (project-todos/forgery/wireframe_cycle_states.md,
+		# Nuno 2026-09-11 -- was a plain bool) -- "overlay" draws wireframe on
+		# top of the normal shaded/textured render, "pure" is wireframe only
+		# (no texture, no fill).
+		self._wireframe_mode = "off"
 		# Cycled Shading/Constant Shading/Unshaded button (project-todos/
 		# forgery/object_editor__shading_modes.md) -- independent of
 		# transparency/wireframe above, all combinable.

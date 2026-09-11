@@ -3,9 +3,13 @@ same naming convention as object_editor.py/"Patina"): 3D landscape
 composition/build tool, replacing the current 2D bitmap-tile Ligo editor.
 
 See project-todos/forgery/landscape_editor.md for the planned progressive
-rendering steps -- step 9 (detecting which of .zone/.zonew/.zonel already
-exist for a given zone, generating the missing ones on demand) is the
-current one.
+rendering steps. Visualisation/Edition mode-specific logic lives in the two
+mixins this class inherits from (project-todos/forgery/
+landscape_editor__land_preview.md step 5): `landscape_editor_edit_mode.py`
+(EditModeMixin) and `landscape_editor_view_mode.py` (ViewModeMixin) --
+shared rendering (zone_geometry.py/zone_cache.py/continent_geom_cache.py,
+_apply_render_mode()/_resolve_zone_for_mode()) stays here, in the base
+class.
 """
 
 import math
@@ -17,11 +21,16 @@ from panda3d.core import NodePath, TransparencyAttrib
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
-from pynel.ryzom_land import load_land, LandParseError, STRING_UNUSED
 from pynel.ryzom_packed_sheets import world_pos_to_zone_name
-from pynel.ryzom_zone import load_zone, parse_zone, ZoneParseError
+from pynel.ryzom_zone import parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
+from ryzom_forgery.apps.landscape_editor_edit_mode import EditModeMixin
+from ryzom_forgery.apps.landscape_editor_modes import (
+	_detect_app_mode, _MODE_BADGE_COLOR, _MODE_BADGE_LABEL, _MODE_EDITION, _MODE_REAL_EXTENSIONS, _MODE_VISUALISATION,
+	_OTHER_MODE, _RENDER_MODES, _resolve_zone_for_mode,
+)
+from ryzom_forgery.apps.landscape_editor_view_mode import ViewModeMixin
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 	_begin_tab_item_with_icon, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _pop_tab_color, _push_tab_color,
 	_VIEWPORT_TOGGLE_MARGIN_PX,
@@ -30,25 +39,19 @@ from ryzom_forgery.camera import AXIS_VIEWS, OrbitCamera
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_ecosystem
 from ryzom_forgery.error_log import report_error
-from ryzom_forgery import land_loader
-from ryzom_forgery.land_geometry import (
-	brick_size_in_cells_from_half_size, find_missing_land_cells, piece_origin, transform_zone_cache_data,
-)
 from ryzom_forgery import live_data
 from ryzom_forgery.mouse_picking import mouse_ground_position
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
 from ryzom_forgery import pipeline_data_installer
 from ryzom_forgery.pipeline_data_install_dialog import PipelineDataInstallDialog
 from ryzom_forgery.region_loader import (
-	find_zones_in_region, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data, RegionLoadError, ZoneRef,
+	find_zones_in_region, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data, RegionLoadError,
 	zone_ref_extension,
 )
 from ryzom_forgery import continent_geom_cache
 from ryzom_forgery.continent_geom_cache import ContinentManifest, ZoneManifestEntry
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery import zone_tools
-from ryzom_forgery.zone_cache import read_zone_cache, write_zone_cache
 from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_grid_geom, ZONE_CELL_SIZE, zone_to_cache_data
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
@@ -62,68 +65,13 @@ from ryzom_forgery.zone_geometry import build_zone_geom_from_cache, build_zone_g
 _EXPLORER_FILTER_PRESETS = ["*", "*.land", "*.zone", "*.zonew", "*.zonel"]
 _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
 
-# Render mode bar (project-todos/forgery/landscape_editor__zone_render_modes.md
-# step 6) -- WELD/LIGHT each accept one or more "real" extensions (a zone
-# doesn't need its own standalone .zonew to count as welded for [WELD]: a
-# shipped .zonel necessarily went through welding already, even when the
-# intermediate .zonew was never kept -- real shipped live_data installs only
-# ship the final pipeline stage, confirmed 2026-09-09, Nuno), falling back
-# (see _resolve_zone_for_mode()) to a genuinely earlier stage, rendered as a
-# purple->pink gradient (zone_geometry.build_zone_geom_from_cache(fallback=True) --
-# a first grayscale attempt was indistinguishable from the viewport's own
-# gray background, Nuno 2026-09-09) rather than the real elevation-colored
-# one. POLY/2D have no entry in
-# _MODE_REAL_EXTENSIONS -- they always show each zone's own default (highest-
-# priority, region_loader.py's own .zonel > .zonew > .zone) ZoneRef, exactly
-# the pre-chantier behavior.
-_RENDER_MODES = ("POLY", "WELD", "LIGHT")
-_MODE_REAL_EXTENSIONS = {"WELD": (".zonew", ".zonel"), "LIGHT": (".zonel",)}
-_MODE_FALLBACK_EXTENSIONS = {"WELD": (".zone",), "LIGHT": (".zonew", ".zone")}
-
-
-def _resolve_zone_for_mode(default_ref, ext_map, mode):
-	"""Which ZoneRef to actually load for `mode`, and whether it's a real
-	match (True) or a fallback (False, caller should render it gray) -- see
-	_MODE_REAL_EXTENSIONS/_MODE_FALLBACK_EXTENSIONS module comment. POLY/2D
-	(no real-extensions entry) always return `default_ref` unchanged."""
-	real_exts = _MODE_REAL_EXTENSIONS.get(mode)
-	if real_exts is None:
-		return default_ref, True
-	for ext in real_exts:
-		if ext in ext_map:
-			return ext_map[ext], True
-	for fallback_ext in _MODE_FALLBACK_EXTENSIONS[mode]:
-		if fallback_ext in ext_map:
-			return ext_map[fallback_ext], False
-	return None, False
-
-# Global Visualisation/Edition mode (project-todos/forgery/
-# landscape_editor__land_preview.md step 1) -- a single automatic switch for
-# the whole app, not a per-continent/per-button choice like
-# _resolve_zone_for_mode() above. "edition" whenever ryzom-data is configured
-# and points at an existing directory (pynel.repository_paths.is_valid()),
-# "visualisation" otherwise -- deliberately ignores whether that ryzom-data
-# checkout actually has any .land in it (later steps filter the continent
-# combo for that; an unconfigured/missing ryzom-data is the only thing that
-# forces visualisation mode).
-_MODE_VISUALISATION = "visualisation"
-_MODE_EDITION = "edition"
-_MODE_BADGE_COLOR = {_MODE_VISUALISATION: (0.4, 0.7, 1.0, 1.0), _MODE_EDITION: (0.4, 1.0, 0.4, 1.0)}
-# "Release"/"Dev" (Nuno 2026-09-10) -- not "Visualisation"/"Édition" as
-# originally named (step 1): those stay the internal mode identifiers
-# (_MODE_VISUALISATION/_MODE_EDITION, and Settings.landscape_editor_mode's
-# own stored values), only the UI label changed.
-_MODE_BADGE_LABEL = {_MODE_VISUALISATION: "Release", _MODE_EDITION: "Dev"}
-_OTHER_MODE = {_MODE_VISUALISATION: _MODE_EDITION, _MODE_EDITION: _MODE_VISUALISATION}
-
-
-def _detect_app_mode():
-	"""Pure auto-detection from ryzom-data's own configuration -- only ever
-	used as the default the very first time (Settings.landscape_editor_mode
-	still unset), see _resolve_app_mode()'s own docstring for the manual
-	Release/Dev toggle (step 4) that normally takes over from here."""
-	return _MODE_EDITION if repository_paths.is_valid("ryzom-data") else _MODE_VISUALISATION
-
+# Wireframe cycling button (project-todos/forgery/wireframe_cycle_states.md)
+# -- same icon in all 3 states (only the tooltip/active highlight change).
+_WIREFRAME_MODE_LABELS = {
+	"off": "Wireframe off",
+	"overlay": "Wireframe (overlay on shaded render)",
+	"pure": "Wireframe (pure, no texture)",
+}
 
 # draw_panel()'s tab bar (_push_tab_color()) -- same idea as
 # object_editor.py's own _TAB_COLOR_* constants, one per tab so each reads
@@ -144,7 +92,7 @@ _APP_INFO_HIDDEN = {
 }
 
 
-class LandscapeEditorApp(ForgeryApp):
+class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 	def __init__(self):
 		settings = app_settings.load()
 		# The real *_zones.bnp archives (.zone/.zonew/.zonel) and world/
@@ -186,7 +134,11 @@ class LandscapeEditorApp(ForgeryApp):
 		# self.render_mode and of each other, applied straight to
 		# self._zone_root so they cover whatever is currently loaded there.
 		self._zone_transparent = False
-		self._zone_wireframe = False
+		# "off"/"overlay"/"pure" (project-todos/forgery/wireframe_cycle_states.md,
+		# Nuno 2026-09-11 -- was a plain bool) -- "overlay" draws wireframe on
+		# top of the normal shaded/textured render, "pure" is wireframe only
+		# (no texture, no fill).
+		self._wireframe_mode = "off"
 		# The 3D orientation to restore when leaving 2D for the first time
 		# since launch (no real 3D view has existed yet to remember) -- an
 		# angled overview rather than another top-down look.
@@ -528,13 +480,7 @@ class LandscapeEditorApp(ForgeryApp):
 		# even report it as blocked. [LIGHT] stays out of it (no generation
 		# button for it, see the chantier's own "Hors scope explicite").
 		if self._app_mode == _MODE_EDITION and self.render_mode in ("POLY", "WELD") and self.selected_continent_name:
-			ryzom_data_path = repository_paths.get("ryzom-data")
-			land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
-			ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(
-				self._selected_continent_pipeline_name or self.selected_continent_name
-			)
-			if land_path is not None and ecosystem_name:
-				land_fallback = (land_path, Path(ryzom_data_path) / "pipeline" / "landscape" / ecosystem_name / "zones")
+			land_fallback = self._resolve_land_fallback_paths()
 
 		self._zone_error = None
 		progress = {
@@ -572,100 +518,7 @@ class LandscapeEditorApp(ForgeryApp):
 				progress["processed"] += 1
 			if land_fallback is not None:
 				land_path, brick_zones_dir = land_fallback
-				try:
-					land = load_land(land_path)
-					# The `.land` file's own layout (which cell uses which
-					# brick/rotation/flip) can change without any individual
-					# brick's own file changing -- a single whole-file stamp
-					# here invalidates every "land:x:y" manifest entry at once
-					# whenever that happens, rather than trying to detect a
-					# reassigned rotation/brick per cell (project-todos/
-					# forgery/geomnode_continent_cache.md step 2).
-					land_stat = land_path.stat()
-					manifest_zones["__land_file__"] = ZoneManifestEntry(".land_file", land_stat.st_mtime, land_stat.st_size)
-					used_cells = sum(1 for unit in land.zones if unit.zone_name != STRING_UNUSED)
-					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_refs) "
-					      f"land loaded: {land_path} used_cells={used_cells} exported_zones={len(zones)}")
-					# floor(), not round(): a cell's bb_center sits at exactly
-					# (pos+0.5)*ZONE_CELL_SIZE, and round()'s round-half-to-even
-					# would map that .5 inconsistently depending on pos's
-					# parity -- floor(pos+0.5) always recovers pos exactly.
-					existing_cells = {
-						(math.floor(cache_data.bb_center[0] / ZONE_CELL_SIZE), math.floor(cache_data.bb_center[1] / ZONE_CELL_SIZE))
-						for cache_data in zones.values()
-					}
-					# A brick can be a multi-cell "large piece" (e.g. 320x160)
-					# referenced by several cells at once (each storing its
-					# own sub-position within the piece, ZoneUnit.pos_x/
-					# pos_y -- see land_geometry.py's own docstring) --
-					# loaded_bricks avoids re-parsing the same file per cell,
-					# rendered_pieces dedupes so a multi-cell piece is
-					# rendered exactly once (found 2026-09-10, Nuno: without
-					# this, the same piece was drawn once per cell it spans,
-					# overlapping itself).
-					loaded_bricks = {}
-					rendered_pieces = set()
-					for (pos_x, pos_y), unit in find_missing_land_cells(land, existing_cells).items():
-						brick_path = brick_zones_dir / f"{unit.zone_name}.zone"
-						if unit.zone_name not in loaded_bricks:
-							# Cached raw (untransformed) geometry (project-todos/
-							# forgery/landscape_editor__zone_render_modes.md,
-							# Nuno 2026-09-11 perf follow-up) -- keyed on the
-							# brick file alone (never the placement), shared by
-							# every cell/rotation that references this brick.
-							# On a hit, `load_zone(brick_path)` never runs at
-							# all: bb_half_size (for brick_size_in_cells_from_
-							# half_size(), needed just below to even compute
-							# origin_x/origin_y) comes straight from the cached
-							# ZoneCacheData.
-							raw_cache_name = f"land_brick_{unit.zone_name}"
-							raw_data = read_zone_cache(raw_cache_name, ".zone", brick_path)
-							if raw_data is None:
-								try:
-									brick_zone = load_zone(brick_path)
-									raw_data = zone_to_cache_data(brick_zone)
-									write_zone_cache(raw_cache_name, ".zone", brick_path, raw_data)
-								except (OSError, ZoneParseError) as exc:
-									raw_data = None
-									failed.append(f"{unit.zone_name}.zone: {exc}")
-							loaded_bricks[unit.zone_name] = raw_data
-						raw_data = loaded_bricks[unit.zone_name]
-						if raw_data is None:
-							continue
-						size_x, size_y = brick_size_in_cells_from_half_size(*raw_data.bb_half_size[:2])
-						origin_x, origin_y = piece_origin(pos_x, pos_y, unit, size_x, size_y)
-						piece_key = (unit.zone_name, origin_x, origin_y, unit.rot, unit.flip)
-						if piece_key in rendered_pieces:
-							continue
-						rendered_pieces.add(piece_key)
-						cell_name = f"land:{origin_x}:{origin_y}"
-						# Cache key includes the piece's placement (origin/rot/
-						# flip), not just the brick name -- the SAME brick can
-						# appear rotated/flipped at several origins, each
-						# needing its own transformed geometry.
-						piece_cache_name = f"land_piece_{unit.zone_name}_{origin_x}_{origin_y}_{unit.rot}_{unit.flip}"
-						piece_data = read_zone_cache(piece_cache_name, ".zone", brick_path)
-						if piece_data is None:
-							piece_data = transform_zone_cache_data(raw_data, origin_x, origin_y, unit.rot, unit.flip)
-							try:
-								write_zone_cache(piece_cache_name, ".zone", brick_path, piece_data)
-							except OSError:
-								pass
-						zones[cell_name] = piece_data
-						progress["gray"].add(cell_name)
-						# ".land" is never a real zone extension (.zone/.zonew/
-						# .zonel) -- unambiguous marker that this manifest entry
-						# is a placed brick, not an exported zone, and its
-						# staleness stamp is the brick file's, not a ZoneRef's.
-						try:
-							brick_stat = brick_path.stat()
-							manifest_zones[cell_name] = ZoneManifestEntry(".land", brick_stat.st_mtime, brick_stat.st_size)
-						except OSError:
-							pass
-					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_refs) "
-					      f"land fallback: existing_cells={len(existing_cells)} added={sorted(n for n in zones if n.startswith('land:'))}")
-				except (OSError, LandParseError) as exc:
-					failed.append(f"{land_path}: {exc}")
+				self._load_land_fallback_pieces(land_path, brick_zones_dir, zones, manifest_zones, progress, failed)
 			progress["zones"] = zones
 			progress["manifest_zones"] = manifest_zones
 			if failed:
@@ -715,95 +568,6 @@ class LandscapeEditorApp(ForgeryApp):
 		node_path.set_two_sided(True)
 		self._zone_nodes[name] = node_path
 
-	def _generate_missing_zonew(self):
-		"""Starts a background weld pass (project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 9) over every currently
-		loaded zone missing a `.zonew`/`.zonel` -- one native `zone_welder`
-		call per zone (zone_tools.run_zone_welder()), each result persisted
-		straight to `<ryzom-data>/pipeline/export/continents/<continent>/
-		zone_weld/<name>.zonew` (zone_tools.missing_zonew_dest()). Each
-		welded zone is queued on `progress["ready"]` as it completes so
-		draw_panel() can display it immediately (live, one zone at a time)
-		instead of waiting for the whole batch. A second call while one is
-		already running is ignored, same as _load_continent()."""
-		if self._weld_generate_progress is not None and not self._weld_generate_progress["done"]:
-			return
-		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
-		if real_exts is None:
-			return
-		missing_refs = [
-			self._loaded_refs[name] for name, ext_map in self._loaded_extensions.items()
-			if name in self._loaded_refs and not any(ext in ext_map for ext in real_exts)
-		]
-		# Cells with no real .zone at all (project-todos/forgery/
-		# landscape_editor__zone_render_modes.md step 9, Nuno 2026-09-11) --
-		# nothing zone_welder can work on, always reported as blocked rather
-		# than attempted (land_export/land_composition territory, see
-		# _run_generate_missing_zonew()'s own docstring).
-		land_missing_names = sorted(self._land_missing_cells)
-		if not missing_refs and not land_missing_names:
-			return
-		self._zone_error = None
-		live_data_path = app_settings.load().live_data_path
-		ryzom_data_path = repository_paths.get("ryzom-data")
-		pipeline_continent_name = self._selected_continent_pipeline_name
-		if missing_refs and not pipeline_continent_name:
-			self._zone_error = "No pipeline continent selected -- cannot place generated .zonew files."
-			report_error(self._zone_error)
-			return
-		progress = {
-			"done": False, "error": None,
-			"total": len(missing_refs) + len(land_missing_names), "processed": 0, "ready": [],
-		}
-		self._weld_generate_progress = progress
-		thread = threading.Thread(
-			target=self._run_generate_missing_zonew,
-			args=(missing_refs, land_missing_names, live_data_path, ryzom_data_path, pipeline_continent_name, progress),
-			daemon=True,
-		)
-		thread.start()
-
-	def _run_generate_missing_zonew(
-		self, refs, land_missing_names, live_data_path, ryzom_data_path, pipeline_continent_name, progress,
-	):
-		"""Background-thread body for _generate_missing_zonew() -- calls the
-		native `zone_welder` once per zone in `refs` and persists each result
-		(see zone_tools.run_zone_welder()'s own `persist_to` docstring),
-		appending `(name, ZoneCacheData, new_ref)` to `progress["ready"]` for
-		each success so draw_panel() can pick it up on its next frame --
-		`new_ref` is a loose-file ZoneRef pointing at the just-written
-		`.zonew`, for draw_panel() to merge into self._loaded_extensions.
-
-		`land_missing_names` (this chantier's step 9, Nuno 2026-09-11) are
-		"land:x:y" cells with no real .zone anywhere -- producing one is
-		`land_export`, tracked separately as
-		project-todos/forgery/landscape_editor__land_composition.md step 4,
-		itself blocked on project-todos/pynel/land_pipeline.md step 1. Never
-		attempted here: each is reported as a clear, individual failure
-		instead, without holding up the zones that CAN actually be welded.
-
-		Writes only to `progress` (list.append()/dict field writes, safe
-		under the GIL, same reasoning as _run_load_continent())."""
-		failed = []
-		for ref in refs:
-			try:
-				dest = zone_tools.missing_zonew_dest(ryzom_data_path, pipeline_continent_name, ref.name)
-				zone = zone_tools.run_zone_welder(ref, live_data_path, persist_to=dest)
-				new_ref = ZoneRef(name=ref.name, x=ref.x, y=ref.y, source_path=dest, bnp_entry=None)
-				progress["ready"].append((ref.name, zone_to_cache_data(zone), new_ref))
-			except zone_tools.ZoneToolError as exc:
-				failed.append(str(exc))
-			progress["processed"] += 1
-		for cell_name in land_missing_names:
-			_, pos_x, pos_y = cell_name.split(":")
-			failed.append(
-				f"cell ({pos_x}, {pos_y}): no .zone exported yet -- finish land_composition (land_export) first"
-			)
-			progress["processed"] += 1
-		if failed:
-			progress["error"] = f"{len(failed)}/{progress['total']} zone(s) failed to weld: {'; '.join(failed[:3])}"
-			report_error(progress["error"])
-		progress["done"] = True
 
 	def _set_loaded_zones(self, zones, gray=None, manifest_zones=None, continent=None, mode=None):
 		"""Tears down whatever geometry was attached before and builds fresh
@@ -943,42 +707,6 @@ class LandscapeEditorApp(ForgeryApp):
 		else:
 			self._load_visualisation_continent_locations()
 
-	def _load_visualisation_continent_locations(self):
-		live_data_path = app_settings.load().live_data_path
-		if not live_data.is_valid_live_data_path(live_data_path):
-			self._cont_locs_error = (
-				"Ryzom Live data path not configured -- set it in Patina's "
-				"Settings tab (Paths), it's a shared setting."
-			)
-			report_error(self._cont_locs_error)
-			return
-		world_packed_sheets_path = Path(live_data_path) / "world.packed_sheets"
-		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_load_visualisation_continent_locations) "
-		      f"reading {world_packed_sheets_path}")
-		try:
-			self._cont_locs = continent_selector.load_continent_locations(live_data_path)
-		except (OSError, continent_selector.ContinentSelectorError) as exc:
-			self._cont_locs_error = f"Failed to load continent list: {exc}"
-			report_error(self._cont_locs_error)
-
-	def _load_edition_continent_locations(self):
-		"""Edition mode (project-todos/forgery/landscape_editor__land_preview.md
-		step 2): continent list read directly from ryzom-data's own
-		ryzom.world (never live_data_path/world.packed_sheets), filtered down
-		to continents that actually have a `.land` under
-		<ryzom-data>/leveldesign/landscape/ -- a continent listed in
-		ryzom.world but missing its `.land` doesn't appear at all in Edition
-		mode."""
-		ryzom_data_path = repository_paths.get("ryzom-data")
-		world_file_path = Path(ryzom_data_path) / "leveldesign" / "world" / "ryzom.world"
-		try:
-			all_locs = continent_selector.load_continent_locations_from_world_file(world_file_path)
-		except (OSError, continent_selector.ContinentSelectorError) as exc:
-			self._cont_locs_error = f"Failed to load continent list from ryzom-data: {exc}"
-			report_error(self._cont_locs_error)
-			return
-		land_files = land_loader.find_land_files(ryzom_data_path)
-		self._cont_locs = [loc for loc in all_locs if loc.continent_name in land_files]
 
 	def _select_continent(self, continent_name, selection_name):
 		"""Resolves and caches continent_bounds for `continent_name` -- called
@@ -1059,7 +787,7 @@ class LandscapeEditorApp(ForgeryApp):
 		viewport_transform.py's _apply_object_transparency()), applied to
 		self._zone_root instead of a single object's model_root, so it
 		covers every zone currently loaded regardless of self.render_mode.
-		Independent of _toggle_zone_wireframe() -- both can be on at once."""
+		Independent of _cycle_zone_wireframe() -- both can be on at once."""
 		self._zone_transparent = not self._zone_transparent
 		if self._zone_transparent:
 			self._zone_root.set_transparency(TransparencyAttrib.M_alpha)
@@ -1068,18 +796,37 @@ class LandscapeEditorApp(ForgeryApp):
 			self._zone_root.clear_transparency()
 			self._zone_root.clear_color_scale()
 
-	def _toggle_zone_wireframe(self):
-		"""Wireframe terrain display (project-todos/forgery/
-		landscape_editor__transparency_wireframe.md) -- independent of
-		_toggle_zone_transparency() -- both can be on at once."""
-		self._zone_wireframe = not self._zone_wireframe
-		if self._zone_wireframe:
-			# filled_wireframe, not plain wireframe -- the wireframe overlays
-			# the normal shaded/textured render, it never replaces it (Nuno
-			# 2026-09-11, project-todos/forgery/object_editor__wireframe_overlay.md).
-			self._zone_root.set_render_mode_filled_wireframe((0, 0, 0, 1), 1)
-		else:
+	def _apply_zone_wireframe(self):
+		"""Applies self._wireframe_mode to self._zone_root (project-todos/
+		forgery/wireframe_cycle_states.md) -- independent of
+		_toggle_zone_transparency()/shading mode, all combinable:
+		- "off": no override.
+		- "overlay": set_render_mode_filled_wireframe() -- wireframe drawn on
+		  top of the normal shaded/textured render, never replacing it
+		  (project-todos/forgery/object_editor__wireframe_overlay.md).
+		- "pure": set_render_mode_wireframe() + set_texture_off() -- wireframe
+		  only, no texture, no fill."""
+		if self._wireframe_mode == "off":
 			self._zone_root.clear_render_mode()
+			self._zone_root.clear_texture()
+		elif self._wireframe_mode == "overlay":
+			self._zone_root.clear_texture()
+			self._zone_root.set_render_mode_filled_wireframe((0, 0, 0, 1), 1)
+		else:  # "pure"
+			self._zone_root.set_render_mode_wireframe(1)
+			self._zone_root.set_texture_off(1)
+
+	def _set_zone_wireframe_mode(self, mode):
+		self._wireframe_mode = mode
+		self._apply_zone_wireframe()
+
+	def _cycle_zone_wireframe(self):
+		"""Left-click behavior for the wireframe button -- advances to the
+		next state (project-todos/forgery/wireframe_cycle_states.md, general
+		cycling-button convention: right-click instead jumps straight to a
+		chosen state, see _draw_viewport_toggles()'s own popup)."""
+		next_mode = {"off": "overlay", "overlay": "pure", "pure": "off"}
+		self._set_zone_wireframe_mode(next_mode[self._wireframe_mode])
 
 	def _draw_viewport_toggles(self):
 		"""Small floating icon-button bar bottom-left of the 3D viewport
@@ -1118,9 +865,16 @@ class LandscapeEditorApp(ForgeryApp):
 			                self._zone_transparent, square=True, large_font=large_font):
 				self._toggle_zone_transparency()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_DRAW_POLYGON, "Wireframe",
-			                self._zone_wireframe, square=True, large_font=large_font):
-				self._toggle_zone_wireframe()
+			wireframe_tooltip = f"{_WIREFRAME_MODE_LABELS[self._wireframe_mode]} (right-click to choose)"
+			if _icon_button(fa_icons.ICON_FA_DRAW_POLYGON, wireframe_tooltip,
+			                self._wireframe_mode != "off", square=True, large_font=large_font):
+				self._cycle_zone_wireframe()
+			if imgui.begin_popup_context_item("##wireframe-mode-popup"):
+				for mode in ("off", "overlay", "pure"):
+					clicked, _ = imgui.selectable(_WIREFRAME_MODE_LABELS[mode], self._wireframe_mode == mode)
+					if clicked:
+						self._set_zone_wireframe_mode(mode)
+				imgui.end_popup()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def panel_title(self):
@@ -1149,35 +903,6 @@ class LandscapeEditorApp(ForgeryApp):
 		settings.landscape_editor_mode = mode
 		app_settings.save(settings)
 
-	def _ensure_land_cell_names_loaded(self):
-		"""(pos_x, pos_y) -> ZoneUnit.zone_name (the brick the .land itself
-		assigns to that cell), for _update_cursor_status() -- always the
-		.land's own reference, whatever pipeline stage actually ends up
-		rendered there (Nuno 2026-09-10). Cached per continent (re-read only
-		when the selection changes), cleared outside Edition mode or when no
-		continent is selected."""
-		if self._app_mode != _MODE_EDITION or self.selected_continent_name is None:
-			self._land_cell_names = {}
-			self._land_cell_names_continent = None
-			return
-		if self._land_cell_names_continent == self.selected_continent_name:
-			return
-		self._land_cell_names_continent = self.selected_continent_name
-		self._land_cell_names = {}
-		ryzom_data_path = repository_paths.get("ryzom-data")
-		land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
-		if land_path is None:
-			return
-		try:
-			land = load_land(land_path)
-		except (OSError, LandParseError):
-			return
-		width = land.max_x - land.min_x + 1
-		self._land_cell_names = {
-			(land.min_x + (i % width), land.min_y + (i // width)): unit.zone_name
-			for i, unit in enumerate(land.zones) if unit.zone_name != STRING_UNUSED
-		}
-
 	def _update_cursor_status(self):
 		"""Zone name + world position under the mouse cursor, in the shared
 		SysInfoBar next to the FPS counter (project-todos/forgery/
@@ -1198,7 +923,14 @@ class LandscapeEditorApp(ForgeryApp):
 		if zone_name is None:
 			self.sysinfo.set_cursor_info("")
 			return
-		self._ensure_land_cell_names_loaded()
+		# _ensure_land_cell_names_loaded() (EditModeMixin, landscape_editor_
+		# edit_mode.py) has no meaning outside Edition mode -- ryzom-data
+		# (its only source) is never read in Visualisation.
+		if self._app_mode == _MODE_EDITION:
+			self._ensure_land_cell_names_loaded()
+		else:
+			self._land_cell_names = {}
+			self._land_cell_names_continent = None
 		cell = (math.floor(x / ZONE_CELL_SIZE), math.floor(y / ZONE_CELL_SIZE))
 		brick_name = self._land_cell_names.get(cell)
 		brick_suffix = f" -- {brick_name}" if brick_name is not None else ""
