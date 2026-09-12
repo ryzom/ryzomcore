@@ -41,7 +41,7 @@ import pickle
 from pathlib import Path
 from typing import Dict, NamedTuple, Optional, Tuple
 
-from .config_dir import config_dir
+from .config_dir import cache_dir
 
 _CACHE_DIR_NAME = "continent_geom_cache"
 # Bumped whenever ContinentManifest's own shape changes -- any manifest
@@ -79,11 +79,11 @@ def _bundle_key(continent: str, mode: str) -> str:
 
 
 def _bam_path(continent: str, mode: str) -> Path:
-	return config_dir() / _CACHE_DIR_NAME / f"{_bundle_key(continent, mode)}.bam"
+	return cache_dir() / _CACHE_DIR_NAME / f"{_bundle_key(continent, mode)}.bam"
 
 
 def _manifest_path(continent: str, mode: str) -> Path:
-	return config_dir() / _CACHE_DIR_NAME / f"{_bundle_key(continent, mode)}.manifest"
+	return cache_dir() / _CACHE_DIR_NAME / f"{_bundle_key(continent, mode)}.manifest"
 
 
 def write_continent_bundle(continent: str, mode: str, node_path, manifest: ContinentManifest) -> None:
@@ -94,8 +94,8 @@ def write_continent_bundle(continent: str, mode: str, node_path, manifest: Conti
 	reasoning as zone_cache.py's write_zone_cache(): a crash mid-write must
 	never leave a half-written file for read_continent_bundle() to choke on
 	next run."""
-	cache_dir = config_dir() / _CACHE_DIR_NAME
-	cache_dir.mkdir(parents=True, exist_ok=True)
+	cache_root = cache_dir() / _CACHE_DIR_NAME
+	cache_root.mkdir(parents=True, exist_ok=True)
 
 	bam_path = _bam_path(continent, mode)
 	bam_tmp_path = bam_path.with_suffix(bam_path.suffix + ".tmp")

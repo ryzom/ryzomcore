@@ -28,21 +28,6 @@ ZONE_CELL_SIZE = 160.0
 # it's checked rather than assumed.
 _MAX_UINT16_VERTICES = 65535
 
-# Elevation gradient, anchored at Z=0 (world-space sea level, real tile
-# texturing/lighting out of scope until later steps -- project-todos/
-# forgery/landscape_editor.md step 5 is the dedicated "Rendu par élévation"
-# step this pre-empts for a nicer-looking view): dark red at the lowest
-# point loaded -> brown at sea level -> green at the highest point loaded.
-# A single min-max-normalized gradient (brown->green only, tried first) got
-# washed out by a handful of very deep zones (underwater/caves) dragging the
-# whole range down -- normal-depth terrain then all read as one flat shade
-# near the "high" end. Anchoring the brown midpoint at the real Z=0 (per
-# Nuno: that's where the water plane sits) fixes that regardless of how deep
-# the deepest loaded zone is. Found/decided 2026-09-08, Nuno.
-_DEEP_COLOR = (0.45, 0.08, 0.08, 1.0)
-_SEA_LEVEL_COLOR = (0.36, 0.25, 0.13, 1.0)
-_PEAK_COLOR = (0.15, 0.55, 0.15, 1.0)
-
 # "grille alignée sur OrderS x OrderT (max 16x16 tuiles/patch)" (project-todos/
 # forgery/landscape_editor.md's scope decision) -- OrderS/OrderT themselves
 # are already at most 16 on real data (tile bank's own patch subdivision
@@ -52,56 +37,88 @@ _PEAK_COLOR = (0.15, 0.55, 0.15, 1.0)
 _MIN_GRID_SEGMENTS = 1
 
 
-def _elevation_colors_uint8(z, min_z, max_z):
-	"""Elevation gradient anchored at Z=0 (see the module-level comment above
-	_DEEP_COLOR), vectorized: `z` is a numpy array (one zone's -- or one
-	whole loaded set's -- worth of vertex Z's), `min_z`/`max_z` the lowest/
-	highest Z across whatever's being colored together. Returns an (N, 4)
-	uint8 array ready to write straight into a v3c4 GeomVertexData's "color"
-	column. Truncates (not rounds) `component * 255.0`, matching
-	GeomVertexWriter.add_data4()'s own float->uint8 packing exactly (verified
-	byte-for-bit, see build_zone_geom_from_cache())."""
+# Build-stage color bands (project-todos/forgery/landscape_editor__land_
+# composition.md step 4's own follow-up, Nuno 2026-09-12) -- replaces the
+# old binary real/fallback (green elevation gradient vs a single purple-pink
+# one) with 4 discrete dark->light bands, one per real pipeline stage a zone
+# has actually reached ON DISK, independent of the currently selected
+# render mode (LAND/WELD/LIGHT): a zone with only a `.zonew` still reads as
+# "stage 2 / yellow" even while viewing LIGHT, rather than however LIGHT's
+# own fallback used to render it. Stage 3 (the fully-built `.zonel` case)
+# is the only one still normalized over the whole loaded set's Z range (like
+# the old real elevation gradient) so a finished continent still reads as
+# one continuous landscape rather than a patchwork -- stages 0-2 stay
+# per-zone (their own tiny slice of relief would otherwise look near-uniform
+# against a whole-continent range, same reasoning as the old fallback
+# gradient it replaces).
+def hex_to_rgb(hex_color: str):
+	""""#RRGGBB" -> (r, g, b) floats in [0, 1] -- shared by _STAGE_COLORS'
+	own defaults below and settings.py's persisted overrides (project-todos/
+	forgery/landscape_editor__land_composition.md step 4's live color-tuning
+	UI, Nuno 2026-09-12), so both read the exact same hex values a user
+	would type/see in a color picker."""
+	hex_color = hex_color.lstrip("#")
+	return tuple(int(hex_color[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
+
+
+def rgb_to_hex(rgb) -> str:
+	"""Inverse of hex_to_rgb() -- (r, g, b) floats in [0, 1] -> "#RRGGBB"."""
+	return "#" + "".join(f"{round(max(0.0, min(1.0, c)) * 255):02X}" for c in rgb[:3])
+
+
+# Build-stage colors, defaults confirmed with Nuno 2026-09-12 against the
+# live-tuning UI (values below are his own picks, converted from the hex he
+# gave).
+_STAGE_COLORS = {
+	0: (hex_to_rgb("#523101") + (1.0,), hex_to_rgb("#FAF8F4") + (1.0,)),  # no .zone at all (raw .land brick)
+	1: (hex_to_rgb("#754501") + (1.0,), hex_to_rgb("#FCF8AD") + (1.0,)),  # .zone only
+	2: (hex_to_rgb("#593400") + (1.0,), hex_to_rgb("#FCA52B") + (1.0,)),  # .zone + .zonew
+	3: (hex_to_rgb("#320202") + (1.0,), hex_to_rgb("#9BFD83") + (1.0,)),  # .zone + .zonew + .zonel
+}
+
+
+def get_stage_colors(stage: int):
+	"""(low, high) RGBA tuples currently in effect for `stage` -- accessor
+	for the live color-tuning UI (project-todos/forgery/landscape_editor__
+	land_composition.md step 4's follow-up, Nuno 2026-09-12), so a caller
+	never reaches into the module-private _STAGE_COLORS dict directly."""
+	return _STAGE_COLORS[stage]
+
+
+def set_stage_colors(stage: int, low, high) -> None:
+	"""Overwrites `stage`'s (low, high) colors in place -- `low`/`high` may
+	be RGB or RGBA, alpha always forced to 1.0 (this gradient is never
+	transparent). Takes effect for every zone rebuilt after this call
+	(existing GeomNodes already built keep their baked-in vertex colors
+	until explicitly rebuilt, see the live-tuning UI's own rebuild-all
+	call)."""
+	_STAGE_COLORS[stage] = ((low[0], low[1], low[2], 1.0), (high[0], high[1], high[2], 1.0))
+
+
+def zone_build_stage(ext_map) -> int:
+	"""0-3, the furthest real pipeline stage `ext_map` (a zone's `{extension:
+	ZoneRef}` map, e.g. `self._loaded_extensions[name]`, landscape_editor.py)
+	actually reaches -- 3 (`.zonel`) down to 0 (no real file at all, a
+	`.land` brick fallback piece). Checked independently, most-advanced-wins
+	(not cumulative): a real shipped `*_zones.bnp` only ever contains
+	`.zonel` with no `.zone`/`.zonew` alongside it (confirmed empirically
+	2026-09-12 against a real `nexus_zones.bnp`), so requiring every earlier
+	extension to also be present would wrongly read those as stage 0."""
+	if ".zonel" in ext_map:
+		return 3
+	if ".zonew" in ext_map:
+		return 2
+	if ".zone" in ext_map:
+		return 1
+	return 0
+
+
+def _stage_colors_uint8(stage, z, min_z, max_z):
+	"""Vectorized (numpy in, (N, 4) uint8 out, truncation not rounding) --
+	`z` is a numpy array of vertex Z's, a single low -> high lerp over
+	[min_z, max_z] using `_STAGE_COLORS[stage]`."""
 	z = np.asarray(z, dtype=np.float64)
-	deep = np.array(_DEEP_COLOR)
-	sea_level = np.array(_SEA_LEVEL_COLOR)
-	peak = np.array(_PEAK_COLOR)
-
-	# z >= 0: sea_level -> peak, t=0 at Z=0, t=1 at max_z (or beyond, clamped).
-	t_above = np.clip(z / max_z, 0.0, 1.0) if max_z > 0.0 else np.zeros_like(z)
-	above_colors = sea_level + (peak - sea_level) * t_above[:, None]
-
-	# z < 0: deep -> sea_level, t=0 at min_z (the deepest point), t=1 at Z=0.
-	t_below = np.clip((z - min_z) / -min_z, 0.0, 1.0) if min_z < 0.0 else np.ones_like(z)
-	below_colors = deep + (sea_level - deep) * t_below[:, None]
-
-	colors = np.where((z >= 0.0)[:, None], above_colors, below_colors)
-	return (colors * 255.0).astype(np.uint8)
-
-
-# Fallback gradient (landscape_editor.py's [WELD]/[LIGHT] render modes,
-# project-todos/forgery/landscape_editor__zone_render_modes.md step 6) --
-# purple at the lowest point loaded, pink at the highest, a plain single
-# min-max lerp (unlike _elevation_colors_uint8()'s sea-level anchor -- this
-# is a "not really welded/lit" marker, not a real elevation read, so it
-# doesn't need that nuance). A first grayscale version (near-black -> light
-# gray) turned out indistinguishable from the viewport's own gray background
-# -- a fully fallback-colored zone at low elevation looked like a hole in
-# the terrain rather than a grayed-out zone (found 2026-09-09, Nuno).
-# Purple/pink never occurs in the real elevation gradient (_DEEP_COLOR/
-# _SEA_LEVEL_COLOR/_PEAK_COLOR are all red/brown/green), so it reads
-# unambiguously as "fallback" against both the terrain and the background.
-_FALLBACK_LOW = (0.22, 0.05, 0.30, 1.0)  # darker at the low end (Nuno 2026-09-10)
-_FALLBACK_HIGH = (0.95, 0.55, 0.80, 1.0)
-
-
-def _fallback_colors_uint8(z, min_z, max_z):
-	"""Same shape/contract as _elevation_colors_uint8() (vectorized numpy in,
-	(N, 4) uint8 out, truncation not rounding) but a single purple -> pink
-	lerp over [min_z, max_z], for the fallback/not-up-to-date zone
-	coloring."""
-	z = np.asarray(z, dtype=np.float64)
-	low = np.array(_FALLBACK_LOW)
-	high = np.array(_FALLBACK_HIGH)
+	low, high = (np.array(c) for c in _STAGE_COLORS[stage])
 	span = max_z - min_z
 	t = np.clip((z - min_z) / span, 0.0, 1.0) if span > 0.0 else np.zeros_like(z)
 	colors = low + (high - low) * t[:, None]
@@ -217,8 +234,8 @@ def build_zone_tessellated_geom(zone) -> GeomNode:
 	follows the true curved surface, fixing the "sunken quad" gaps a flat
 	4-corner approximation showed on steep relief.
 
-	Colored per vertex by elevation (red -> brown -> green gradient anchored
-	at Z=0, see _elevation_colors_uint8()) -- see build_zone_tessellated_geom's callers for the
+	Colored per vertex by build stage (dark -> light gradient, see
+	zone_build_stage()/_stage_colors_uint8()) -- see build_zone_tessellated_geom's callers for the
 	"2D projected" top-down view, which reuses this exact mesh. Just wraps
 	zone_to_cache_data() and delegates the actual GeomNode construction to
 	build_zone_geom_from_cache(), so a freshly-computed zone and one rebuilt
@@ -227,9 +244,9 @@ def build_zone_tessellated_geom(zone) -> GeomNode:
 
 
 def build_zone_geom_from_cache(
-	cache_data: ZoneCacheData, min_z: float = None, max_z: float = None, fallback: bool = False,
+	cache_data: ZoneCacheData, min_z: float = None, max_z: float = None, stage: int = 3,
 ) -> GeomNode:
-	"""Same output as build_zone_tessellated_geom() (color by elevation,
+	"""Same output as build_zone_tessellated_geom() (color by build stage,
 	same triangle winding) but rebuilt straight from already-tessellated
 	positions (zone_cache.py, project-todos/forgery/
 	landscape_editor__zone_disk_cache.md step 2) -- never touches the source
@@ -238,23 +255,25 @@ def build_zone_geom_from_cache(
 	rendering changes (normals for lighting, UV for texturing) never
 	invalidate the disk cache.
 
-	`min_z`/`max_z` set the elevation gradient's Z range -- default to this
-	one zone's own bounding box (single-zone Explorer selection, no wider
-	context to compare against), but a whole-continent load passes the same
-	continent-wide range to every zone (landscape_editor.py's
-	_set_loaded_zones()) so the color reads as one continuous landscape
-	instead of every zone re-normalizing its own tiny patch of relief to the
-	same green range -- a "patchwork" look at zone boundaries, found by Nuno
-	2026-09-08 testing a real continent.
+	`min_z`/`max_z` set the gradient's Z range for `stage == 3` (see below)
+	-- default to this one zone's own bounding box (single-zone Explorer
+	selection, no wider context to compare against), but a whole-continent
+	load passes the same continent-wide range to every zone (landscape_
+	editor.py's _set_loaded_zones()) so the color reads as one continuous
+	landscape instead of every zone re-normalizing its own tiny patch of
+	relief to the same range -- a "patchwork" look at zone boundaries, found
+	by Nuno 2026-09-08 testing a real continent.
 
-	`fallback`, if true, replaces the elevation-colored gradient with the
-	purple->pink one (_fallback_colors_uint8()) -- used by landscape_editor.py's
-	[WELD]/[LIGHT] render modes for a zone that's only shown via a fallback
-	extension (project-todos/forgery/landscape_editor__zone_render_modes.md
-	step 6), so it reads as visibly not-actually-welded/lit rather than
-	blending into the real gradient (or, with an earlier grayscale attempt,
-	into the viewport's own gray background -- see _FALLBACK_LOW/
-	_FALLBACK_HIGH's own comment).
+	`stage` (0-3, see zone_build_stage()) picks which of the 4 dark->light
+	color bands (_STAGE_COLORS) to use -- project-todos/forgery/
+	landscape_editor__land_composition.md step 4's own follow-up, Nuno
+	2026-09-12, replacing the old binary real/fallback (green elevation
+	gradient vs a single purple-pink one): stages 0-2 stay normalized over
+	this zone's OWN Z range regardless of `min_z`/`max_z` (a zone that far
+	along never joins seamlessly with its neighbors anyway, a whole-set
+	range would read as near-uniform against its own tiny slice of relief,
+	same reasoning the old fallback gradient used) -- only stage 3 (fully
+	built) uses the passed-in `min_z`/`max_z`.
 
 	Writes vertex and index data in bulk (numpy, one `set_data()` call per
 	array) instead of one GeomVertexWriter/GeomPrimitive call per vertex/
@@ -269,14 +288,7 @@ def build_zone_geom_from_cache(
 		min_z = own_min_z
 	if max_z is None:
 		max_z = own_max_z
-	# Fallback zones (project-todos/forgery/landscape_editor__land_preview.md
-	# step 3) never join seamlessly with their neighbors anyway (they're not
-	# actually welded/lit, or computed standalone from a .land brick) -- a
-	# gradient normalized over the whole loaded set (like the real elevation
-	# gradient) would make most of them read as a near-uniform purple/pink,
-	# since one fallback zone's own relief is usually a small slice of the
-	# full loaded range. Always per-zone for these instead (Nuno 2026-09-10).
-	color_min_z, color_max_z = (own_min_z, own_max_z) if fallback else (min_z, max_z)
+	color_min_z, color_max_z = (min_z, max_z) if stage == 3 else (own_min_z, own_max_z)
 
 	total_vertices = sum((patch.n_s + 1) * (patch.n_t + 1) for patch in cache_data.patches)
 
@@ -294,7 +306,8 @@ def build_zone_geom_from_cache(
 	assert vertex_column.get_start() == 0 and vertex_column.get_num_components() == 3
 	assert color_column.get_start() == 12 and color_column.get_num_components() == 4
 
-	color_fn = _fallback_colors_uint8 if fallback else _elevation_colors_uint8
+	def color_fn(z, lo, hi):
+		return _stage_colors_uint8(stage, z, lo, hi)
 
 	vertex_buf = np.empty(total_vertices, dtype=[("vertex", "<f4", 3), ("color", "u1", 4)])
 	patch_index_arrays = []
@@ -349,9 +362,9 @@ def build_zone_grid_geom(min_x: float, min_y: float, max_x: float, max_y: float,
 	landscape_editor.md step 7) -- snapped outward to the nearest real zone
 	boundary (floor/ceil to a ZONE_CELL_SIZE multiple) so every zone in the
 	loaded set gets its full cell outlined, not just a partial edge cut off
-	mid-cell. Flat at world Z=`z` (0.0 by default, matching the elevation
-	gradient's own Z=0 sea-level anchor, see _elevation_colors_uint8()) --
-	a navigational reference grid, not a terrain-hugging overlay."""
+	mid-cell. Flat at world Z=`z` (0.0 by default, matching sea level, where
+	the water plane sits) -- a navigational reference grid, not a
+	terrain-hugging overlay."""
 	grid_min_x = floor(min_x / ZONE_CELL_SIZE) * ZONE_CELL_SIZE
 	grid_max_x = ceil(max_x / ZONE_CELL_SIZE) * ZONE_CELL_SIZE
 	grid_min_y = floor(min_y / ZONE_CELL_SIZE) * ZONE_CELL_SIZE

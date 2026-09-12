@@ -21,7 +21,6 @@ from panda3d.core import NodePath, Point3, TransparencyAttrib
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
-from pynel.ryzom_packed_sheets import world_pos_to_zone_name, zone_name_to_world_pos
 from pynel.ryzom_zone import parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
@@ -36,6 +35,7 @@ from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 	_VIEWPORT_TOGGLE_MARGIN_PX,
 )
 from ryzom_forgery.camera import AXIS_VIEWS, OrbitCamera
+from ryzom_forgery.land_geometry import expected_zone_name
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_ecosystem
 from ryzom_forgery.error_log import report_error
@@ -53,8 +53,8 @@ from ryzom_forgery.continent_geom_cache import ContinentManifest, ZoneManifestEn
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.zone_geometry import (
-	build_zone_geom_from_cache, build_zone_grid_geom, build_zone_selection_border_geom, ZONE_CELL_SIZE,
-	zone_to_cache_data,
+	build_zone_geom_from_cache, build_zone_grid_geom, build_zone_selection_border_geom, get_stage_colors, hex_to_rgb,
+	rgb_to_hex, set_stage_colors, ZONE_CELL_SIZE, zone_build_stage, zone_to_cache_data,
 )
 
 # Explorer's own filter combo (see explorer.py's extension_filter/
@@ -120,6 +120,17 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			explorer_root = Path.home()
 		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Atyscape")
 		self.explorer.extension_presets = _EXPLORER_FILTER_PRESETS
+
+		# Per-build-stage zone color overrides (project-todos/forgery/
+		# landscape_editor__land_composition.md step 4's Colors settings
+		# section, Nuno 2026-09-12) -- applied once at launch; zone_geometry's
+		# own _STAGE_COLORS already hold sensible built-in defaults, a saved
+		# override here only replaces the ones the user actually changed.
+		for stage_str, hex_pair in settings.landscape_zone_stage_colors.items():
+			try:
+				set_stage_colors(int(stage_str), hex_to_rgb(hex_pair[0]), hex_to_rgb(hex_pair[1]))
+			except (ValueError, IndexError):
+				pass
 
 		# OrbitCamera._update() (camera.py) reads both of these every frame --
 		# there's no ObjectManipulator/target object here (unlike
@@ -259,6 +270,32 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._land_cell_names = {}
 		self._land_cell_names_continent = None
 
+		# Grid-cell selection for the composition editor (project-todos/
+		# forgery/landscape_editor__land_composition.md step 6) -- (pos_x,
+		# pos_y) in the `.land`'s own coordinate space, captured alongside the
+		# existing zone-name selection (_select_zone_at_cursor()) but kept
+		# separate: it's derived directly from the cursor's world position
+		# (floor(x/CELL), floor(y/CELL)), never through a real zone name (see
+		# _build_land_driven_refs()'s own docstring, landscape_editor_edit_
+		# mode.py, for why world_pos_to_zone_name() is NOT a safe way to get
+		# a `.land` grid position from an arbitrary interior point). `None`
+		# when the cursor is outside the valid grid or not in Edition mode.
+		# `_land_region`/`_land_region_path` cache the loaded `.land` for the
+		# editor UI itself (EditModeMixin), invalidated whenever the
+		# continent selection changes.
+		self._land_selected_cell = None
+		self._land_region = None
+		self._land_region_path = None
+		self._land_available_bricks = None
+		self._land_available_bricks_dir = None
+		self._land_edit_error = None
+		# "Build" button state (project-todos/forgery/
+		# landscape_editor__land_composition.md step 7) -- None while idle,
+		# else the dict a background thread (_run_land_build(),
+		# landscape_editor_edit_mode.py) is writing into, polled the same way
+		# as self._weld_generate_progress.
+		self._land_build_progress = None
+
 		# Zone-boundary grid overlay (project-todos/forgery/
 		# landscape_editor.md step 7) -- rebuilt in _set_loaded_zones()
 		# alongside the terrain itself, shown/hidden per self._grid_visible
@@ -326,37 +363,61 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 
 	def _select_zone_at_cursor(self):
 		"""Selects the zone under the mouse cursor, or clears the selection
-		if the cursor is over no zone (off the edge of the valid grid) --
-		same ground-plane math as _update_cursor_status()."""
+		if the cursor is over no zone (off the edge of the valid grid, or no
+		zone actually loaded there) -- same ground-plane math as
+		_update_cursor_status(). In Edition mode, also captures the `.land`
+		grid cell under the cursor (project-todos/forgery/
+		landscape_editor__land_composition.md step 6) -- a direct floor() of
+		the world position, independent of whether a loaded zone covers it."""
 		ground_pos = mouse_ground_position(self)
-		zone_name = world_pos_to_zone_name(*ground_pos) if ground_pos is not None else None
-		if zone_name is None:
+		if ground_pos is None:
+			self._land_selected_cell = None
 			self._clear_zone_selection()
 			return
-		self._select_zone(zone_name)
+		x, y = ground_pos
+		self._land_selected_cell = (math.floor(x / ZONE_CELL_SIZE), math.floor(y / ZONE_CELL_SIZE)) if self._app_mode == _MODE_EDITION else None
+		name = self._find_loaded_zone_at(x, y)
+		if name is None:
+			self._clear_zone_selection()
+			return
+		self._select_zone(name)
+
+	def _find_loaded_zone_at(self, x, y):
+		"""The name of whichever currently loaded zone/piece (self.zones --
+		real single-cell zones and multi-cell `.land` fallback pieces alike)
+		actually covers world position `(x, y)`, by its own real bounding
+		box -- not derived from a fixed 160-unit name-based grid cell at all
+		(unlike the old world_pos_to_zone_name()-based lookup this replaces),
+		so a multi-cell fallback piece's WHOLE real footprint is found and
+		selected as one match (Nuno 2026-09-12: "si la zone est sur
+		plusieurs zones... ca selectionne TOUT"), never just the 160x160
+		slice its clicked corner would nominally belong to."""
+		for name, cache_data in self.zones.items():
+			half_x, half_y = cache_data.bb_half_size[0], cache_data.bb_half_size[1]
+			center_x, center_y = cache_data.bb_center[0], cache_data.bb_center[1]
+			if center_x - half_x <= x <= center_x + half_x and center_y - half_y <= y <= center_y + half_y:
+				return name
+		return None
 
 	def _select_zone(self, zone_name):
 		"""Highlights `zone_name`'s border (orange, double the grid's own
-		default thickness) and makes its center -- at world Z=0, matching
-		the terrain's own sea-level anchor (zone_geometry.py's
-		_elevation_colors_uint8()), the OrbitCamera's rotation pivot --
-		distance is left untouched (Nuno 2026-09-11: no automatic zoom on
-		selection)."""
-		origin = zone_name_to_world_pos(zone_name)
-		# zone_name_to_world_pos() decodes the NORTH edge on Y (row R's
-		# range is (origin.y - 160, origin.y], row increasing southward --
-		# confirmed 2026-09-11 against world_pos_to_zone_name() itself,
-		# e.g. zone_name_to_world_pos("62_AG").y == -9920.0 and
-		# world_pos_to_zone_name(x, -9920.0) == "62_AG" but
-		# world_pos_to_zone_name(x, -9919.0) == "61_AG"), unlike X (west
-		# edge, unambiguous). Using origin.y as min_y (as if it were the
-		# west-like/min edge) drew the border one row further north than
-		# the actually-selected zone -- Nuno 2026-09-11: "je clique sur
-		# 62_AG il me selectionne 61_AG" (a rendering bug only, the
-		# selected NAME itself was always correct).
-		min_x, max_y = origin.x, origin.y
-		max_x, min_y = min_x + ZONE_CELL_SIZE, max_y - ZONE_CELL_SIZE
-		center_x, center_y = (min_x + max_x) / 2.0, (min_y + max_y) / 2.0
+		default thickness) and, in 3D only, makes its center -- at world
+		Z=0, matching the terrain's own sea-level anchor -- the OrbitCamera's
+		rotation pivot -- distance is left untouched (Nuno 2026-09-11: no
+		automatic zoom on selection). In 2D (self._top_down_locked), the
+		camera never moves/retargets at all (Nuno 2026-09-12: "en vue 2D la
+		camera ne bouge pas, pas de pivot a gerer" -- 2D has no orbit
+		rotation to pivot in the first place, lock_rotation is already on).
+		The border always matches `zone_name`'s own REAL bounding box
+		(self.zones), correctly covering a multi-cell `.land` fallback
+		piece's whole footprint, not a fixed single 160x160 cell."""
+		cache_data = self.zones.get(zone_name)
+		if cache_data is None:
+			return
+		half_x, half_y = cache_data.bb_half_size[0], cache_data.bb_half_size[1]
+		center_x, center_y = cache_data.bb_center[0], cache_data.bb_center[1]
+		min_x, max_x = center_x - half_x, center_x + half_x
+		min_y, max_y = center_y - half_y, center_y + half_y
 
 		self._selected_zone_name = zone_name
 		self._zone_selection_np.remove_node()
@@ -373,7 +434,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._zone_selection_np.set_depth_write(False)
 		self._zone_selection_np.set_bin("fixed", 101)
 
-		self.orbit_camera.retarget(Point3(center_x, center_y, 0.0))
+		if not self._top_down_locked:
+			self.orbit_camera.retarget(Point3(center_x, center_y, 0.0))
 
 	def _clear_zone_selection(self):
 		if self._selected_zone_name is None:
@@ -402,7 +464,11 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			self._set_loaded_zones({})
 			return
 		self._loaded_refs = {}
-		self._loaded_extensions = {}
+		# Only the clicked file's own extension is actually known here (no
+		# disk scan for its siblings) -- enough for zone_build_stage() to
+		# still color it correctly (e.g. a directly-picked .zonel reads as
+		# stage 3, not the stage-0 default an empty ext_map would give).
+		self._loaded_extensions = {name: {item.suffix.lower(): None}}
 		self._land_missing_cells = set()
 		self._set_loaded_zones({name: zone_to_cache_data(zone)})
 
@@ -513,18 +579,31 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_continent) "
 			      f"mode={self._app_mode} continent={pipeline_continent_name!r} live_data_path={live_data_path!r} "
 			      f"ryzom_data_path={ryzom_data_path!r} uses_pipeline_export={uses_pipeline_export} bounds={bounds}")
-			refs = find_zones_in_region(
-				live_data_path, min_x, min_y, max_x, max_y, pipeline_continent_name, ryzom_data_path,
-			)
+			if self._app_mode == _MODE_EDITION:
+				# Land-driven enumeration (project-todos/forgery/
+				# landscape_editor__land_composition.md step 3) -- a
+				# freshly-authored composition with zero real exports yet is
+				# NOT an error here (unlike Visualisation below): the `.land`+
+				# brick fallback (_apply_render_mode()) covers that case
+				# entirely on its own.
+				default_refs, extensions = self._build_land_driven_refs(
+					live_data_path, ryzom_data_path, pipeline_continent_name,
+				)
+			else:
+				refs = find_zones_in_region(
+					live_data_path, min_x, min_y, max_x, max_y, pipeline_continent_name, ryzom_data_path,
+				)
+				if not refs:
+					progress["error"] = "No real zone found for this continent."
+					report_error(progress["error"])
+					return
+				default_refs = {ref.name: ref for ref in refs}
+				full_extensions_index = get_zone_extensions_index(live_data_path, pipeline_continent_name, ryzom_data_path)
+				extensions = {ref.name: full_extensions_index.get(ref.name, {}) for ref in refs}
 			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_continent) "
-			      f"zones found for {pipeline_continent_name!r}: {len(refs)}")
-			if not refs:
-				progress["error"] = "No real zone found for this continent."
-				report_error(progress["error"])
-				return
-			progress["default_refs"] = {ref.name: ref for ref in refs}
-			full_extensions_index = get_zone_extensions_index(live_data_path, pipeline_continent_name, ryzom_data_path)
-			progress["extensions"] = {ref.name: full_extensions_index.get(ref.name, {}) for ref in refs}
+			      f"zones found for {pipeline_continent_name!r}: {len(default_refs)}")
+			progress["default_refs"] = default_refs
+			progress["extensions"] = extensions
 		except OSError as exc:
 			progress["error"] = str(exc)
 			report_error(progress["error"])
@@ -542,7 +621,18 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		while one reload is already running is ignored (the caller will get
 		another chance once it's done, since render_mode/loaded_refs/
 		loaded_extensions are read fresh here, not snapshotted)."""
-		if not self._loaded_refs:
+		# Resolved before the early-return below (project-todos/forgery/
+		# landscape_editor__land_composition.md step 4): a freshly-authored
+		# composition can have ZERO real exports yet (self._loaded_refs
+		# empty) and still have a full `.land` fallback to render -- the old
+		# `not self._loaded_refs` guard alone would have skipped straight to
+		# "nothing to show" and never reached _resolve_land_fallback_paths()
+		# at all in that case.
+		land_fallback = None
+		if self._app_mode == _MODE_EDITION and self.selected_continent_name:
+			land_fallback = self._resolve_land_fallback_paths()
+
+		if not self._loaded_refs and land_fallback is None:
 			self._gray_zones = set()
 			self._missing_for_mode = 0
 			self._land_missing_cells = set()
@@ -565,26 +655,15 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 
 		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_apply_render_mode) mode={self.render_mode} loaded={len(self._loaded_refs)} resolved={len(refs)} gray={sorted(gray)} missing_for_mode={self._missing_for_mode}")
 
-		# Edition mode's [POLY]/[2D] fallback (project-todos/forgery/
-		# landscape_editor__land_preview.md step 3): a .land cell can exist
-		# with no exported .zone anywhere yet (a brick just placed locally,
-		# never run through land_export) -- find_missing_land_cells() needs
-		# the .land itself plus which (pos_x, pos_y) cells are ALREADY
-		# covered by `refs`, which only _run_load_refs() can know once it's
-		# actually loaded them (bb_center). So land_fallback here is just
-		# the static info (land path + brick zones dir), resolved eagerly on
-		# the main thread since it's cheap (one dict lookup each), and the
-		# actual missing-cell computation + brick loading happens in the
-		# background thread below, same as the real refs.
-		land_fallback = None
-		# [WELD] also gets the .land fallback (project-todos/forgery/
-		# landscape_editor__zone_render_modes.md step 9, Nuno 2026-09-11):
-		# a .land cell with no real zone file at all used to be simply
-		# invisible in [WELD] -- "Generate missing .zonew" had no way to
-		# even report it as blocked. [LIGHT] stays out of it (no generation
-		# button for it, see the chantier's own "Hors scope explicite").
-		if self._app_mode == _MODE_EDITION and self.render_mode in ("POLY", "WELD") and self.selected_continent_name:
-			land_fallback = self._resolve_land_fallback_paths()
+		# `land_fallback` itself was already resolved above (before the
+		# early-return) -- the .land cell's own (pos_x, pos_y) plus which
+		# ones are ALREADY covered by `refs` (known only once _run_load_refs()
+		# has actually loaded them, bb_center) still need the background
+		# thread below, same as the real refs. All 3 render modes get this
+		# fallback now (project-todos/forgery/landscape_editor__land_
+		# composition.md step 4): a .land cell with no matching real file for
+		# the current mode's stage is rendered as the raw brick instead of
+		# staying invisible, whichever mode is active.
 
 		self._zone_error = None
 		progress = {
@@ -654,12 +733,12 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 
 	def _rebuild_zone_node(self, name, cache_data):
 		"""Replaces the single geometry node for zone `name` with one built
-		from `cache_data`, keeping the elevation gradient consistent with
-		every other currently loaded zone (step 9's live update -- see
-		_set_loaded_zones()'s own docstring for why the gradient spans the
+		from `cache_data`, keeping the stage-3 gradient consistent with every
+		other currently loaded fully-built zone (step 9's live update -- see
+		_set_loaded_zones()'s own docstring for why that gradient spans the
 		whole loaded set, not each zone's own range). Does not touch the
 		grid overlay or camera framing -- the loaded set's bounds don't
-		change when a zone goes from gray fallback to real geometry."""
+		change when a zone advances a build stage."""
 		old_node = self._zone_nodes.get(name)
 		if old_node is not None:
 			old_node.remove_node()
@@ -667,10 +746,22 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			return
 		min_z = min(cd.bb_center[2] - cd.bb_half_size[2] for cd in self.zones.values())
 		max_z = max(cd.bb_center[2] + cd.bb_half_size[2] for cd in self.zones.values())
-		node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, fallback=name in self._gray_zones)
+		stage = zone_build_stage(self._loaded_extensions.get(name, {}))
+		node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, stage=stage)
 		node_path = self._zone_root.attach_new_node(node)
 		node_path.set_two_sided(True)
 		self._zone_nodes[name] = node_path
+
+	def _rebuild_all_zone_nodes(self):
+		"""Rebuilds every currently loaded zone's GeomNode in place (project-
+		todos/forgery/landscape_editor__land_composition.md step 4's live
+		color-tuning UI, Nuno 2026-09-12) -- a stage color picker edit only
+		affects zones built AFTER the change (zone_geometry.set_stage_colors()'s
+		own docstring), so seeing the new color on what's already on screen
+		needs an explicit rebuild pass, same GeomNode-per-zone cost as any
+		other full reload."""
+		for name, cache_data in self.zones.items():
+			self._rebuild_zone_node(name, cache_data)
 
 
 	def _set_loaded_zones(self, zones, gray=None, manifest_zones=None, continent=None, mode=None):
@@ -683,9 +774,12 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		(a whole continent), both via _apply_render_mode()/_run_load_refs().
 
 		`gray` (zone names, project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 6) are rendered flat gray
-		instead of the elevation gradient -- WELD/LIGHT zones shown via a
-		fallback extension, not actually welded/lit.
+		landscape_editor__zone_render_modes.md step 6) no longer changes the
+		coloring itself (superseded by the per-zone build-stage gradient,
+		project-todos/forgery/landscape_editor__land_composition.md step 4,
+		zone_geometry.zone_build_stage()) -- kept only for _missing_for_mode's
+		own "N zone(s) not welded/lit" count, a genuinely mode-dependent
+		metric distinct from a zone's real, mode-independent build stage.
 
 		`manifest_zones`/`continent`/`mode` (project-todos/forgery/
 		geomnode_continent_cache.md step 2), when all given (continent loads
@@ -745,7 +839,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			cached = continent_geom_cache.read_continent_bundle(continent, mode, self.loader)
 			if cached is not None:
 				cached_root, cached_manifest = cached
-				if cached_manifest == new_manifest:
+				manifests_match = cached_manifest == new_manifest
+				if manifests_match:
 					for node in self._zone_nodes.values():
 						node.remove_node()
 					self._zone_nodes = {}
@@ -766,7 +861,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				node.remove_node()
 			self._zone_nodes = {}
 			for name, cache_data in zones.items():
-				node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, fallback=name in self._gray_zones)
+				stage = zone_build_stage(self._loaded_extensions.get(name, {}))
+				node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, stage=stage)
 				node_path = self._zone_root.attach_new_node(node)
 				# Winding isn't guaranteed to match Panda3D's expected front-face
 				# direction (zone_geometry.py's grid triangulation follows NeL's
@@ -836,6 +932,17 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._selected_continent_pipeline_name = selection_name
 		self.continent_bounds = None
 		self._bounds_error = None
+		# Grid editor state (project-todos/forgery/
+		# landscape_editor__land_composition.md step 6) is per-continent --
+		# stale otherwise (a cached ZoneRegion/brick list from the previous
+		# continent, or a selected cell that no longer means anything).
+		self._land_selected_cell = None
+		self._land_region = None
+		self._land_region_path = None
+		self._land_available_bricks = None
+		self._land_available_bricks_dir = None
+		self._land_edit_error = None
+		self._land_build_progress = None
 		if self._app_mode == _MODE_EDITION:
 			# Edition mode never reads live_data_path/sheet_id.bin (see
 			# _load_edition_continent_locations()) -- continent_name here is
@@ -1023,7 +1130,21 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			self.sysinfo.set_cursor_info("")
 			return
 		x, y = ground_pos
-		zone_name = world_pos_to_zone_name(x, y)
+		# expected_zone_name() (land_geometry.py), NOT a direct
+		# world_pos_to_zone_name(x, y) call on the raw interior cursor
+		# position -- found 2026-09-12 (Nuno: "impossible de generer la
+		# zone 45_BZ" -- turned out to be a display bug, not a build one)
+		# that world_pos_to_zone_name() is off by one row from the real
+		# pipeline zone name for any point strictly inside a cell (only its
+		# EXACT corner lands correctly, see expected_zone_name()'s own
+		# docstring) -- confirmed again here against nexus's real exported
+		# 44_BZ.zone/45_BZ.zone (their own bb_center floors to (51,-44)/
+		# (51,-45) respectively): a cursor centered in land cell (51,-45)
+		# showed "44_BZ" from the old call, one row off from the name the
+		# `.land`-driven Build system (and the real exported file itself)
+		# actually uses for that position.
+		cell = (math.floor(x / ZONE_CELL_SIZE), math.floor(y / ZONE_CELL_SIZE))
+		zone_name = expected_zone_name(*cell)
 		if zone_name is None:
 			self.sysinfo.set_cursor_info("")
 			return
@@ -1035,7 +1156,6 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		else:
 			self._land_cell_names = {}
 			self._land_cell_names_continent = None
-		cell = (math.floor(x / ZONE_CELL_SIZE), math.floor(y / ZONE_CELL_SIZE))
 		brick_name = self._land_cell_names.get(cell)
 		brick_suffix = f" -- {brick_name}" if brick_name is not None else ""
 		self.sysinfo.set_cursor_info(f"{zone_name} ({x:.0f}, {y:.0f}){brick_suffix}")
@@ -1091,9 +1211,45 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			_push_tab_color(_TAB_COLOR_SETTINGS)
 			if _begin_tab_item_with_icon(fa_icons.ICON_FA_GEAR, "Settings"):
 				self.ryzom_paths_section.draw(self)
+				self._draw_zone_colors_settings()
 				imgui.end_tab_item()
 			_pop_tab_color()
 			imgui.end_tab_bar()
+
+	def _draw_zone_colors_settings(self):
+		"""Atyscape's own "Colors" settings section (project-todos/forgery/
+		landscape_editor__land_composition.md step 4, Nuno 2026-09-12) --
+		each build-stage color (zone_geometry.zone_build_stage()) gets a
+		low/high hex color pair here, persisted (Settings.
+		landscape_zone_stage_colors) so a choice survives across relaunches --
+		unlike the app's own Settings tab for Paths (RyzomPathsSection,
+		shared with Patina), this stays local to landscape_editor.py since
+		it's purely an Atyscape display concern (feedback-forgery-apps-own-
+		settings: each app edits its own settings itself)."""
+		imgui.separator()
+		with imgui_ctx.begin_group():
+			imgui.text_colored(_TAB_COLOR_SETTINGS, fa_icons.ICON_FA_PALETTE)
+			imgui.same_line()
+			imgui.text("Colors")
+		stage_labels = {
+			3: "✅ .zonel", 2: "✅ .zonew", 1: "✅ .zone", 0: "❌ none built yet",
+		}
+		settings = app_settings.load()
+		color_flags = imgui.ColorEditFlags_.no_inputs.value
+		for stage in (3, 2, 1, 0):
+			imgui.text(stage_labels[stage])
+			imgui.same_line()
+			low, high = get_stage_colors(stage)
+			changed_low, new_low = imgui.color_edit3(f"##settings-stage{stage}-low", low[:3], flags=color_flags)
+			imgui.same_line()
+			changed_high, new_high = imgui.color_edit3(f"##settings-stage{stage}-high", high[:3], flags=color_flags)
+			if changed_low or changed_high:
+				final_low = new_low if changed_low else low[:3]
+				final_high = new_high if changed_high else high[:3]
+				set_stage_colors(stage, final_low, final_high)
+				self._rebuild_all_zone_nodes()
+				settings.landscape_zone_stage_colors[str(stage)] = [rgb_to_hex(final_low), rgb_to_hex(final_high)]
+				app_settings.save(settings)
 
 	def _draw_landscape_tab(self):
 		self._ensure_continent_locations_loaded()
@@ -1189,9 +1345,24 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:draw_panel) mode reload done, error={progress['error']!r} zones={len(progress['zones'])} gray={sorted(progress['gray'])}")
 				if progress["error"]:
 					self._zone_error = progress["error"]
+				# The .bam continent-geometry cache (continent_geom_cache.py)
+				# is only ever safe for Visualisation's static shipped data --
+				# Edition mode's whole point is a composition that changes
+				# live as you edit/Build it, and a whole-continent bundle
+				# cache is the wrong tool for content that's expected to
+				# change underfoot (found 2026-09-12, Nuno: an unexpected
+				# `.bam` cache hit after deleting a built zone -- see
+				# project-todos/forgery/landscape_editor__land_composition.md
+				# step 7's own decisions). Passing continent=None/mode=None
+				# disables the cache outright (_set_loaded_zones()'s own
+				# cache_enabled check), rather than trying to keep the
+				# manifest comparison perfectly airtight for a fast-changing
+				# editing session.
+				cache_continent = self.selected_continent_name if self._app_mode != _MODE_EDITION else None
+				cache_mode = self.render_mode if self._app_mode != _MODE_EDITION else None
 				self._set_loaded_zones(
 					progress["zones"], gray=progress["gray"], manifest_zones=progress["manifest_zones"],
-					continent=self.selected_continent_name, mode=self.render_mode,
+					continent=cache_continent, mode=cache_mode,
 				)
 				# Cells with no real zone file at all show up as synthesized
 				# "land:x:y" pseudo-names (see _run_load_refs()'s land
@@ -1240,23 +1411,47 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			total_patches = sum(len(cache_data.patches) for cache_data in self.zones.values())
 			imgui.text(f"{len(self.zones)} zone(s) loaded -- {total_patches} patches total")
 
+		self._draw_land_composition_editor()
+		self._draw_land_build_button()
+
 	def _select_render_mode(self, mode):
 		self.render_mode = mode
 		self._apply_render_mode()
 
 	def _draw_render_mode_bar(self):
-		"""[2D][POLY][WELD][LIGHT] button row (project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 6) -- the active mode is
-		highlighted; WELD/LIGHT additionally show how many of the currently
-		loaded zones are missing their own extension (rendered gray, see
-		_resolve_zone_for_mode())."""
+		"""[LAND/POLY][WELD][LIGHT] button row (project-todos/forgery/
+		landscape_editor__zone_render_modes.md step 6, renamed
+		project-todos/forgery/landscape_editor__land_composition.md step 4) --
+		the active mode is highlighted; WELD/LIGHT additionally show how many
+		of the currently loaded zones are missing their own extension
+		(rendered gray, see _resolve_zone_for_mode()). The internal "POLY"
+		identifier (self.render_mode/_RENDER_MODES) is unchanged -- only Dev
+		(Edition)'s displayed label becomes "LAND" (Release/Visualisation has
+		no `.land` access at all, so it keeps showing "POLY" -- Nuno
+		2026-09-12: LAND replaces POLY only where the `.land` actually drives
+		the render).
+
+		Release/Visualisation never shows this button row at all (Nuno
+		2026-09-12): a real shipped `*_zones.bnp` only ever contains `.zonel`
+		(confirmed empirically against `nexus_zones.bnp`, 155/155 entries
+		`.zonel`, zero `.zone`/`.zonew`), so POLY/WELD/LIGHT would all
+		resolve to the exact same file there -- three buttons producing an
+		identical result, pure UI noise. `self.render_mode` itself is left
+		untouched (still whatever it was, POLY by default) since it already
+		resolves correctly either way; only the picker disappears, replaced
+		by a plain "LIGHT" label (the semantically accurate name for
+		finished, shipped data)."""
+		if self._app_mode != _MODE_EDITION:
+			imgui.text("Render mode: LIGHT")
+			return
 		for i, mode in enumerate(_RENDER_MODES):
 			if i > 0:
 				imgui.same_line()
 			active = self.render_mode == mode
+			label = "LAND" if (mode == "POLY" and self._app_mode == _MODE_EDITION) else mode
 			if active:
 				imgui.push_style_color(imgui.Col_.button.value, (0.35, 0.55, 0.35, 1.0))
-			clicked = imgui.button(mode)
+			clicked = imgui.button(label)
 			if active:
 				imgui.pop_style_color()
 			if clicked and not active:

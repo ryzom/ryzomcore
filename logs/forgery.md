@@ -653,3 +653,91 @@ relief -- it's a flat reference overlay at Z=0, not real geometry meant to
 be occluded.
 
 Validated by Nuno on a real continent.
+
+## 2026-09-12 — ✨ Composition `.land` en 3D + build complet du pipeline paysage, Forgery 4.9.0
+
+Closes `landscape_editor.md` step 10 (`landscape_editor__land_composition.md`).
+Replaces the legacy 2D Ligo composition tool with a real 3D `.land` editor
+in Atyscape, plus a "Build" button running the whole native pipeline.
+Validated by Nuno on a real composition (`bagne`).
+
+**Build-stage color gradient** (replaces the old binary real/fallback
+coloring): `zone_geometry.zone_build_stage(ext_map)` returns 0-3 for the
+furthest real pipeline extension a zone actually has on disk (`.zonel`=3
+down to no file at all=0, a raw `.land` brick fallback). Each stage gets its
+own dark->light color band (`_STAGE_COLORS`), editable live from a new
+"Colors" section in Atyscape's own Settings tab and persisted
+(`Settings.landscape_zone_stage_colors`). Only stage 3 (fully built)
+normalizes over the whole loaded continent's Z range like the old elevation
+gradient did; stages 0-2 stay normalized over their own per-zone range
+(otherwise their tiny slice of relief would read as near-uniform against a
+whole-continent span).
+
+**`[POLY]` renamed `[LAND]` in Edition only**: the internal `render_mode`
+identifier is unchanged, only the displayed label switches to "LAND" in Dev
+(Release never has `.land` access). Release/Visualisation no longer shows
+the render-mode picker at all -- a real shipped `*_zones.bnp` only ever
+contains `.zonel` (confirmed 155/155 entries on a real `nexus_zones.bnp`),
+so the three buttons would always resolve identically there; replaced by a
+plain "Render mode: LIGHT" label.
+
+**Land-driven zone enumeration in Edition** (anti-staleness): Edition mode
+no longer scans disk by region for its zone list -- it enumerates exactly
+the cells the `.land` *currently* references (`land_geometry.
+used_land_cells()`), so a `.zone`/`.zonew`/`.zonel` left on disk at a
+position the `.land` no longer references (composition edited since that
+export) is silently ignored in all 3 render modes rather than shown as
+still current. Found and fixed a real off-by-one-row bug in the position ->
+zone-name resolution while building this: `world_pos_to_zone_name()` must
+always be called on a cell's exact corner, never an interior point (verified
+against `world_pos_to_zone_name(880, -9840)`, `62_AF.zone`'s own bb_center,
+wrongly returning `"61_AF"`) -- the same bug also affected the zone name
+shown under the cursor, fixed the same way (`land_geometry.
+expected_zone_name()`).
+
+**Grid editor**: a new panel lets Nuno select a `.land` grid cell, see a
+✅/❌ checklist of its real `.zone`/`.zonew`/`.zonel` presence, pick a brick
+by name from the ecosystem's brick folder, rotate/flip it, or clear the
+cell. Each edit rewrites the whole `.land` (small XML, cheap) and refreshes
+only the edited cell's own display (`_apply_lightweight_cell_update()`),
+never a full continent reload. Editing a cell also invalidates already-built
+files: the edited cell loses its own stale `.zone`/`.zonew`/`.zonel`/`.ig`/
+`.depend`, and its 8 neighbors lose everything except `.zone` (a neighbor's
+raw elevation never depends on this cell's composition, but its own
+weld/lighting can).
+
+**"Build" button** (`land_build.py`, new module): orchestrates the full
+native chain (`land_export` -> `zone_welder` -> `zone_elevation` ->
+`zone_welder` -> `zone_dependencies` -> `zone_lighter` -> `zone_ig_lighter`)
+for the whole selected continent, reading its config from
+`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (new module
+`continent_pipeline_reference.py`, the one Forgery-side pipeline reference
+going forward -- never the legacy `leveldesign/workspace/`). Rebuilds are
+incremental per real stage (not just "has `.zonel`"): a zone already welded
+is never re-welded just because it lacks lighting yet, and a zone with a
+real `.zonel` but no `.zonew` next to it (found on real pre-existing data)
+still gets correctly re-welded. Worked around two real native
+`zone_dependencies` bugs (broken min/max axis swap, one `.depend` file per
+zone rather than a single file) already documented for pynel's own land
+pipeline work. `zone_lighter` runs are parallelized across zones (one
+process per zone, thread pool sized to `os.cpu_count()`) since each zone's
+own lighting pass dominates the whole build's time; `zone_lighter`'s
+internal thread count is deliberately kept at 1 to avoid oversubscribing
+both process- and thread-level concurrency at once. Newly-lit zones appear
+in the live 3D view immediately as they finish, with one full reload at the
+end of a Build to drop any leftover stale fallback pieces.
+
+`PropertiesConfig.cpu_num` is never read from the CSV despite a leftover
+column for it: baking one machine's own core count into a config file every
+Forgery user's `ryzom-data` shares would ship Nuno's own CPU count to
+everyone else -- `os.cpu_count()` is read fresh on whichever machine
+actually runs the Build instead.
+
+**Other fixes along the way**: zone/piece selection under the cursor now
+matches a loaded zone's real bounding box instead of a fixed 160-unit
+name-based cell, so a multi-cell `.land` piece selects its whole real
+footprint instead of just the clicked 160x160 slice; the camera no longer
+retargets on zone selection while in the locked 2D top-down view (no pivot
+to manage there); and `zone_cache.py`/`continent_geom_cache.py` moved from
+the OS config directory to a proper OS cache directory (new
+`config_dir.cache_dir()`).

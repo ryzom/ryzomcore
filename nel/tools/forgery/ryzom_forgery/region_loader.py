@@ -28,7 +28,7 @@ never re-pay the full scan.
 
 import re
 from pathlib import Path
-from typing import Dict, List, NamedTuple, Optional
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 from pynel.ryzom_bnp import BnpError, BnpReader
 from pynel.ryzom_packed_sheets import PackedSheetsParseError, zone_name_to_world_pos
@@ -89,6 +89,17 @@ _zone_cache: Dict["ZoneRef", Zone] = {}
 _bnp_reader_cache: Dict[str, BnpReader] = {}
 
 
+def continent_zone_dirs(ryzom_data_path, continent_name: str) -> Tuple[Path, Path, Path]:
+	"""`(zone_dir, zone_weld_dir, zone_lighted_dir)` for `continent_name` --
+	the same 3 real subdirectories `_pipeline_export_zone_dirs()` scans,
+	exposed for callers that need to WRITE there directly (project-todos/
+	forgery/landscape_editor__land_composition.md step 7's Build button,
+	and its own edit-time invalidation of stale built files) rather than
+	just read the disk index."""
+	continent_dir = Path(ryzom_data_path) / _PIPELINE_EXPORT_CONTINENTS_SUBPATH / continent_name
+	return tuple(continent_dir / name for name in _PIPELINE_EXPORT_ZONE_SUBDIRS)
+
+
 def _get_bnp_reader(bnp_path: Path) -> BnpReader:
 	key = str(bnp_path)
 	reader = _bnp_reader_cache.get(key)
@@ -128,6 +139,20 @@ def _consider(
 	existing = best.get(name)
 	if existing is None or priority < existing[0]:
 		best[name] = (priority, ref)
+
+
+def best_ref_for_extensions(ext_map: Dict[str, "ZoneRef"]) -> Optional["ZoneRef"]:
+	"""The single ZoneRef `get_zone_index()` would have picked as the default
+	for a zone whose extensions are `ext_map` -- same priority order as
+	`_consider()` (`.zonel` > `.zonew` > `.zone`). Public so a caller with
+	only a `get_zone_extensions_index()` result (name -> ext -> ZoneRef), not
+	a full zone index, can still resolve a name's default ref itself
+	(project-todos/forgery/landscape_editor__land_composition.md step 3)."""
+	for ext in _ZONE_EXTENSIONS_BY_PRIORITY:
+		ref = ext_map.get(ext)
+		if ref is not None:
+			return ref
+	return None
 
 
 def _build_zone_index(live_data_path: Path) -> tuple:

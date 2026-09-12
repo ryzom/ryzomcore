@@ -182,6 +182,13 @@ class Settings:
 	# absent from this dict just uses its own hardcoded first-launch default
 	# spot, same as before this field existed.
 	panel_states: Dict[str, PanelState] = field(default_factory=dict)
+	# Atyscape's per-build-stage zone color overrides (project-todos/forgery/
+	# landscape_editor__land_composition.md step 4's live color-tuning UI,
+	# Nuno 2026-09-12) -- keyed by stage ("0".."3", zone_geometry.
+	# zone_build_stage()'s own scale), each a ["#RRGGBB", "#RRGGBB"] low/high
+	# pair (hex, hand-editable). A stage absent from this dict just uses
+	# zone_geometry._STAGE_COLORS' own built-in default for it.
+	landscape_zone_stage_colors: Dict[str, List[str]] = field(default_factory=dict)
 
 
 _load_cache: Optional[Settings] = None
@@ -243,6 +250,11 @@ def load() -> Settings:
 	settings.panel_states = {
 		str(name): PanelState(open=bool(entry.get("open", False)), x=float(entry.get("x", 0.0)), y=float(entry.get("y", 0.0)))
 		for name, entry in data.get("panel_states", {}).items() if isinstance(entry, dict)
+	}
+	settings.landscape_zone_stage_colors = {
+		str(stage): [str(c) for c in pair]
+		for stage, pair in data.get("landscape_zone_stage_colors", {}).items()
+		if isinstance(pair, list) and len(pair) == 2
 	}
 
 	settings.search_paths = [
@@ -307,6 +319,7 @@ def save(settings: Settings) -> None:
 	if settings.landscape_editor_mode is not None:
 		doc["landscape_editor_mode"] = settings.landscape_editor_mode
 	doc["panel_states"] = {name: asdict(state) for name, state in settings.panel_states.items()}
+	doc["landscape_zone_stage_colors"] = dict(settings.landscape_zone_stage_colors)
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]

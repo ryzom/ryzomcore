@@ -73,12 +73,53 @@ transform commutes with evaluation --
 `zone_geometry.compute_zone_patch_positions()` be reused as-is.
 """
 
-from typing import Dict, Tuple
+import re
+from typing import Dict, Optional, Tuple
 
 from pynel.ryzom_land import STRING_UNUSED, ZoneRegion, ZoneUnit
+from pynel.ryzom_packed_sheets import world_pos_to_zone_name
 
 from .zone_cache import PatchPositions, ZoneCacheData
 from .zone_geometry import ZONE_CELL_SIZE, zone_to_cache_data
+
+
+def expected_zone_name(pos_x: int, pos_y: int) -> Optional[str]:
+	"""The real pipeline zone name for `.land` grid cell `(pos_x, pos_y)`
+	(project-todos/forgery/landscape_editor__land_composition.md steps 3/7)
+	-- `world_pos_to_zone_name()` must be called with the cell's EXACT
+	corner (`pos * ZONE_CELL_SIZE`, no interior offset): confirmed 2026-09-12
+	against `ryzom-data`'s real `bagne` continent (53/53 used `.land` cells
+	matching their real exported `.zone` file name) that `world_pos_to_zone_
+	name()`'s row formula is off by one row from `zone_name_to_world_pos()`'s
+	own inverse for any Y strictly inside a cell -- only the exact corner
+	itself lands on the correct row in both directions. `None` outside the
+	valid [0, 255] grid on either axis."""
+	return world_pos_to_zone_name(pos_x * ZONE_CELL_SIZE, pos_y * ZONE_CELL_SIZE)
+
+
+_ZONE_NAME_RE = re.compile(r"^(\d+)_([A-Za-z]{2})$")
+
+
+def land_cell_for_zone_name(name: str) -> Optional[Tuple[int, int]]:
+	"""Inverse of expected_zone_name() -- the `.land` grid cell a real zone
+	`name` (e.g. "67_AG") corresponds to, or None if `name` isn't a valid
+	`<row>_<letters>` zone name. Used (project-todos/forgery/
+	landscape_editor__land_composition.md step 7) to compute "which land
+	cells already have a real zone" purely from the loaded REAL NAMES
+	themselves, the same way _build_land_driven_refs() resolves them --
+	found 2026-09-12, Nuno: computing this instead from a loaded zone's own
+	geometric bb_center (the older convention) can disagree with the name-
+	based resolution for a real zone whose actual bounding-box center
+	doesn't sit exactly inside its own nominal cell, producing a spurious
+	extra `.land` brick fallback rendered at the same position as the real
+	zone -- two zones, two colors, same spot."""
+	match = _ZONE_NAME_RE.match(name)
+	if match is None:
+		return None
+	row = int(match.group(1))
+	letters = match.group(2).upper()
+	col = (ord(letters[0]) - ord("A")) * 26 + (ord(letters[1]) - ord("A"))
+	return col, -row
 
 
 def _piece_deltas(pos_x: int, pos_y: int, rot: int, flip: int, size_x: int, size_y: int) -> Tuple[int, int]:
@@ -187,26 +228,48 @@ def build_land_piece_cache_data(brick_zone, origin_x: int, origin_y: int, rot: i
 	return transform_zone_cache_data(zone_to_cache_data(brick_zone), origin_x, origin_y, rot, flip)
 
 
-def find_missing_land_cells(land: ZoneRegion, existing_cells: set) -> Dict[Tuple[int, int], ZoneUnit]:
-	"""{(pos_x, pos_y) -> ZoneUnit} for every used cell of `land`
-	(`zone_name != STRING_UNUSED`) whose grid position isn't in
-	`existing_cells` (the (pos_x, pos_y) of every zone already loaded from a
-	real pipeline export, see its caller) -- these are the cells with no
-	real exported `.zone` yet, the only genuine fallback case (Nuno
-	2026-09-10: "de base donc, TOUT existe" once data is downloaded -- a
-	brick just placed locally in a `.land` is the one case that never has an
-	export). Multiple entries here can belong to the same multi-cell piece
-	(same `ZoneUnit.zone_name`, different `pos_x`/`pos_y` "position in the
-	piece") -- deduplicating those into a single render is the caller's job
+def land_cell_index(land: ZoneRegion, pos_x: int, pos_y: int) -> Optional[int]:
+	"""Flat `land.zones` index for grid cell `(pos_x, pos_y)`, or `None` if
+	outside `land`'s own `[min_x..max_x] x [min_y..max_y]` extent
+	(project-todos/forgery/landscape_editor__land_composition.md step 6 --
+	the grid editor only ever edits cells already within the `.land`'s
+	current bounds; growing/shrinking the grid itself is out of scope)."""
+	if not (land.min_x <= pos_x <= land.max_x and land.min_y <= pos_y <= land.max_y):
+		return None
+	width = land.max_x - land.min_x + 1
+	return (pos_x - land.min_x) + (pos_y - land.min_y) * width
+
+
+def used_land_cells(land: ZoneRegion) -> Dict[Tuple[int, int], ZoneUnit]:
+	"""{(pos_x, pos_y) -> ZoneUnit} for EVERY used cell of `land`
+	(`zone_name != STRING_UNUSED`), regardless of whether a real exported
+	`.zone` already exists for it -- the full grid as the `.land` currently
+	describes it (project-todos/forgery/landscape_editor__land_composition.md
+	step 2, generalized out of the missing-cells-only find_missing_land_cells()
+	below so both the land-driven zone enumeration -- step 3 -- and the
+	brick fallback -- unchanged -- share the same grid decoding). Multiple
+	entries here can belong to the same multi-cell piece (same
+	`ZoneUnit.zone_name`, different `pos_x`/`pos_y` "position in the piece")
+	-- deduplicating those into a single render is the caller's job
 	(`piece_origin()`/`build_land_piece_cache_data()` above), not this
 	function's, since it doesn't load any brick file itself."""
 	width = land.max_x - land.min_x + 1
-	missing = {}
+	cells = {}
 	for index, unit in enumerate(land.zones):
 		if unit.zone_name == STRING_UNUSED:
 			continue
 		pos_x = land.min_x + (index % width)
 		pos_y = land.min_y + (index // width)
-		if (pos_x, pos_y) not in existing_cells:
-			missing[(pos_x, pos_y)] = unit
-	return missing
+		cells[(pos_x, pos_y)] = unit
+	return cells
+
+
+def find_missing_land_cells(land: ZoneRegion, existing_cells: set) -> Dict[Tuple[int, int], ZoneUnit]:
+	"""Same as used_land_cells(), filtered down to cells whose grid position
+	isn't in `existing_cells` (the (pos_x, pos_y) of every zone already
+	loaded from a real pipeline export, see its caller) -- these are the
+	cells with no real exported `.zone` yet, the only genuine fallback case
+	(Nuno 2026-09-10: "de base donc, TOUT existe" once data is downloaded --
+	a brick just placed locally in a `.land` is the one case that never has
+	an export)."""
+	return {pos: unit for pos, unit in used_land_cells(land).items() if pos not in existing_cells}

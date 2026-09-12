@@ -293,7 +293,15 @@ class OrbitCamera:
 		"""Like frame(), but leaves distance (and heading/pitch) untouched --
 		moves the orbit pivot without zooming (landscape_editor.py's zone
 		selection, project-todos/forgery/landscape_editor.md, Nuno
-		2026-09-11: no automatic zoom on selection)."""
+		2026-09-11: no automatic zoom on selection). Nuno 2026-09-12: a
+		heading/pitch-preserving recompute was tried instead (keep the
+		camera's own world position exactly fixed, only change what future
+		orbiting pivots around) but broke 2D's locked top-down view (heading/
+		pitch got recomputed from geometry even though `lock_rotation`
+		should keep them fixed) and still visibly moved the camera in 3D --
+		reverted. The 2D/3D distinction is the caller's job now (landscape_
+		editor.py's _select_zone(): skip calling this at all in 2D, since
+		Nuno wants zero camera movement there, no pivot to manage)."""
 		self.target = Point3(target)
 		self._default_target = Point3(self.target)
 		self._update_camera_pos()

@@ -12,7 +12,7 @@ import pickle
 from pathlib import Path
 from typing import NamedTuple, Optional, Tuple
 
-from .config_dir import config_dir
+from .config_dir import cache_dir
 
 _CACHE_DIR_NAME = "zone_cache"
 # Bumped whenever ZoneCacheData's own shape changes (not for rendering
@@ -54,7 +54,7 @@ def _cache_path(zone_name: str, extension: str) -> Path:
 	# extension includes its leading "." (e.g. ".zonew") -- stripped here so
 	# the cache file name stays a single clean "<name>__<ext>.zonecache"
 	# rather than doubling up dots.
-	return config_dir() / _CACHE_DIR_NAME / f"{zone_name}__{extension.lstrip('.')}.zonecache"
+	return cache_dir() / _CACHE_DIR_NAME / f"{zone_name}__{extension.lstrip('.')}.zonecache"
 
 
 def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: ZoneCacheData) -> None:

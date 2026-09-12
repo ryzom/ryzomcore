@@ -753,3 +753,188 @@ ouest, sans ambiguïté). Un premier essai traitait à tort `origin.y` comme le
 bord min, décalant la bordure d'une rangée vers le nord (Nuno : "je clique
 sur 62_AG il me sélectionne 61_AG" -- en réalité seul l'affichage de la
 bordure était décalé, le nom réellement sélectionné était déjà correct).
+
+**Sélection par bounding box réelle, pas par nom de zone 160×160** (Nuno
+2026-09-12) : `_select_zone_at_cursor()` ne convertit plus la position
+curseur en nom via `world_pos_to_zone_name()` -- `_find_loaded_zone_at(x, y)`
+cherche directement dans `self.zones` laquelle des zones/pièces réellement
+chargées couvre `(x, y)` par sa propre bounding box (`bb_center`/
+`bb_half_size`). Une pièce `.land` multi-cellules (320×160, etc.) sélectionne
+alors tout son vrai contour d'un coup, plutôt que la seule tranche 160×160
+sur laquelle le clic est tombé (Nuno : "si la zone est sur plusieurs
+zones... ça sélectionne TOUT"). `_select_zone()` dessine la bordure sur cette
+même vraie bounding box, et ne retargete plus la caméra en vue 2D
+(`self._top_down_locked`) -- la vue du dessus n'a pas de pivot d'orbite à
+gérer, Nuno : "en vue 2D la caméra ne bouge pas".
+
+## Composition `.land` en 3D + bouton Build (`landscape_editor__land_composition.md`)
+
+Remplace l'outil de composition Ligo 2D historique par une vraie édition 3D
+du `.land` : chaque brick est affichée à sa vraie position/rotation/flip
+avec son vrai relief, une cellule de la grille se choisit/s'édite
+directement, et un bouton "Build" déclenche le pipeline natif complet.
+Validé par Nuno le 2026-09-12 sur une vraie composition (`bagne`).
+
+### Rendu par étape de build (remplace le dégradé binaire réel/repli)
+
+`zone_geometry.zone_build_stage(ext_map)` renvoie 0-3 selon l'extension réelle
+la plus avancée présente sur disque pour une zone (`.zonel`=3, `.zonew`=2,
+`.zone`=1, rien=0 -- un `.land` brut affiché en repli). Chaque étage a son
+propre dégradé sombre->clair (`zone_geometry._STAGE_COLORS`, éditable en live
+depuis l'onglet Settings d'Atyscape, section "Colors", `_draw_zone_colors_
+settings()` -- persistant via `Settings.landscape_zone_stage_colors`) : seul
+l'étage 3 (entièrement construit) se normalise sur la plage Z de tout
+l'ensemble chargé (comme l'ancien dégradé d'élévation, pour lire un
+continent fini comme un seul paysage continu) ; les étages 0-2 restent
+normalisés sur leur propre plage Z (leur relief, souvent une infime tranche
+du continent, paraîtrait uniforme sinon). `build_zone_geom_from_cache()`
+prend désormais un paramètre `stage` (plus `fallback: bool`), et
+`_rebuild_all_zone_nodes()` reconstruit tous les `GeomNode` en place quand
+une couleur d'étage change (un changement de couleur n'affecte que les zones
+construites APRÈS l'appel à `set_stage_colors()`).
+
+### Renommage `[LAND]`/masquage en Visualisation
+
+L'identifiant interne `self.render_mode`/`_RENDER_MODES` reste `"POLY"` --
+seul le libellé affiché change en `"LAND"`, et uniquement en mode Édition
+(Dev) : Visualisation (Release) n'a jamais accès au `.land`, donc y garde
+`"POLY"` -- en pratique Visualisation n'affiche même plus la barre de
+sélection de mode du tout (`_draw_render_mode_bar()`) : un vrai
+`*_zones.bnp` shippé ne contient que des `.zonel` (confirmé 155/155 entrées
+sur `nexus_zones.bnp`), donc les 3 boutons résoudraient tous vers le même
+fichier -- remplacés par un simple libellé "Render mode: LIGHT".
+
+### Énumération pilotée par le `.land` en Édition (anti-péremption)
+
+`EditModeMixin._build_land_driven_refs()` remplace, en Édition uniquement,
+le scan disque `region_loader.find_zones_in_region()` par une énumération
+qui ne considère QUE les cellules que le `.land` référence *actuellement*
+(`land_geometry.used_land_cells()`) : un `.zone`/`.zonew`/`.zonel` périmé sur
+le disque (position retirée/modifiée dans le `.land` depuis son export) est
+purement ignoré dans les 3 modes, jamais affiché comme s'il était encore
+d'actualité. La résolution position -> nom de zone réel passe par
+`land_geometry.expected_zone_name(pos_x, pos_y)` (= `world_pos_to_zone_name(pos_x
+* ZONE_CELL_SIZE, pos_y * ZONE_CELL_SIZE)`) -- **toujours appelée sur le
+coin EXACT de la cellule**, jamais un point intérieur : confirmé 2026-09-12
+que `world_pos_to_zone_name()` décale d'une rangée pour tout point
+strictement à l'intérieur d'une cellule (`world_pos_to_zone_name(880,
+-9840)`, le vrai `bb_center` de `62_AF.zone`, renvoie `"61_AF"`, pas
+`"62_AF"`) -- ce même bug affectait aussi le nom de zone affiché sous le
+curseur (`_update_cursor_status()`), corrigé par le même appel via
+`expected_zone_name()`.
+
+Le repli `.land`+brique (`_load_land_fallback_pieces()`) résout maintenant
+les cellules déjà couvertes par une vraie zone **par nom**
+(`land_geometry.land_cell_for_zone_name()`, l'inverse exact d'
+`expected_zone_name()`), plus par le `bb_center` géométrique de la zone
+chargée -- la bounding box réelle d'une zone ne tombe pas toujours pile au
+centre de sa cellule nominale, ce qui pouvait faire apparaître à la fois une
+vraie zone ET une brique de repli au même endroit (Nuno : "on se retrouve
+avec 2 zones de 2 couleurs au même endroit").
+
+### Édition de la grille (choisir/placer une brique)
+
+`land_geometry.land_cell_index()` retrouve l'index plat `.land` d'une
+cellule `(pos_x, pos_y)` (`None` hors de l'étendue courante -- agrandir la
+grille elle-même est hors scope). `_draw_land_composition_editor()`
+(panneau au bas de l'onglet Landscape, visible seulement en Édition, mode
+`[LAND]`, avec une cellule sélectionnée) affiche la brique courante, une
+checklist ✅/❌ `.zone`/`.zonew`/`.zonel` pour cette cellule (lue directement
+dans `self._loaded_extensions`, jamais recalculée depuis `self.render_mode`),
+un sélecteur de brique parmi celles du dossier écosystème
+(`_available_land_bricks()`, mis en cache par dossier), rotation (par pas de
+90°) et flip, et "Clear cell". Chaque édition
+(`_apply_land_cell_edit()`/`_clear_land_cell()`) : invalide les fichiers déjà
+construits pour cette cellule (voir plus bas), réécrit le `.land` en entier
+(`_save_land_region()`, XML léger, pas de batching), puis ne rafraîchit QUE
+la cellule éditée (`_apply_lightweight_cell_update()`, jamais un
+`_load_continent()` complet -- Nuno : "ça ne devrait que modifier UNE seule
+zone").
+
+**Invalidation incrémentale** (`_invalidate_built_zone_files()`) : une
+édition supprime `.zonew`/`.zonel`/`.depend`/`.ig` de la cellule éditée ET de
+ses 8 voisines (un weld/lighting voisin peut dépendre du bord qui vient de
+changer -- Nuno : "le zone_lighter se fait sur toutes les zones... même
+celles qui ont déjà un .zonel"), mais seule la cellule éditée elle-même perd
+en plus son `.zone` (sa géométrie d'élévation brute correspond à l'ancienne
+brique, devenue franchement fausse plutôt que simplement "en attente d'un
+rebuild") -- les `.zone` voisins ne sont jamais supprimés, leur élévation ne
+dépend que de la carte de hauteur globale du continent, jamais de la
+composition locale (Nuno : "les .zone voisines... je ne vois pas
+l'intérêt").
+
+### Bouton "Build" (`land_build.py`, `continent_pipeline_reference.py`)
+
+`ryzom_forgery/land_build.py` (nouveau module) orchestre la chaîne complète
+`land_export` -> `zone_welder` (passe 1, sans relief) -> `zone_elevation` ->
+`zone_welder` (passe 2, avec relief) -> `zone_dependencies` -> `zone_lighter`
+-> `zone_ig_lighter` sur TOUT le continent courant, à partir de
+`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (nouveau
+module `continent_pipeline_reference.py` -- seule source de vérité
+pipeline Forgery, voir `project_forgery_pipeline_vs_legacy_workspace`,
+jamais `leveldesign/workspace/`). Chaque étape écrit directement dans les
+vrais sous-dossiers d'export (`zone`/`zone_weld`/`zone_lighted`,
+`region_loader.continent_zone_dirs()`) plutôt que dans le dossier de
+transit `land_export`, pour que le résultat soit immédiatement visible par
+le scan disque d'Atyscape sans étape d'installation séparée.
+
+**Reconstruction incrémentale, par étage réel indépendant** (pas juste "a un
+`.zonel`" -- deux bugs trouvés 2026-09-12 sur de vraies données `bagne`) :
+une zone déjà weldée (`.zonew` présent) n'est jamais re-weldée/re-élevée
+juste parce qu'elle n'a pas encore de `.zonel` ; et une zone peut avoir un
+`.zonel` réel sur disque sans `.zonew` à côté (données préexistantes) --
+avoir besoin d'un weld/élévation et avoir besoin d'un lighting sont deux
+vérifications séparées.
+
+**Deux bugs natifs de `zone_dependencies`**, contournés dans `land_build.py`
+(mêmes bugs déjà documentés dans `nel/tools/pynel/docs/zone_tools.md` §4) :
+l'échange min/max de `firstZone`/`lastZone` casse un axe si on lui passe les
+deux zones réelles aux coins extrêmes -- deux noms synthétiques
+`<minRow>_<minCol>`/`<maxRow>_<maxCol>` (jamais ouverts comme fichiers,
+juste décodés) garantissent un ordre croissant sur les deux axes à la fois ;
+et l'outil écrit un `.depend` par zone (toujours en minuscules), jamais un
+fichier unique nommé d'après `argv[4]`.
+
+**Parallélisation** (`zone_lighter`, Nuno 2026-09-11/12) : chaque zone est
+lancée dans son propre process natif via un `ThreadPoolExecutor`
+(`os.cpu_count()` workers) -- le vrai coût dominant du build (~2s/zone). Le
+multi-threading INTERNE de `zone_lighter` (`PropertiesConfig.cpu_num`) reste
+fixé à 1 : cumuler concurrence process ET thread ferait juste concurrencer
+l'ordonnanceur OS pour rien.
+
+**`continent_pipeline_reference.csv`, transposé** (une ligne par champ, une
+colonne par continent) : tous les chemins qu'il contient sont relatifs à
+`ryzom_data_path`. Une poignée de champs de `LandExportConfig`
+(`z_factor_1`/`z_factor_2`/`zone_light`/`export_collisions`/
+`export_additionnal_igs`/`cell_size`/`threshold`) sont identiques sur les 24
+`land_exporter.cfg` réels et donc codés en dur plutôt que lus du CSV.
+**`PropertiesConfig.cpu_num` n'est jamais lu du CSV** malgré une colonne
+`cpu_num` existante (résidu de l'extraction initiale) : ce serait une
+caractéristique de la MACHINE qui build, pas du continent -- y figer le
+nombre de cœurs de Nuno enverrait cette valeur à tous les autres
+utilisateurs de Forgery (même classe d'erreur que supposer que tout le monde
+a le `workspace/`/`graphics/` de Nuno, voir `feedback-forgery-multi-user-no-
+personal-disk`) ; `os.cpu_count()` est lu à chaque exécution, sur la machine
+qui build réellement.
+
+**Affichage live pendant le Build** : chaque zone tout juste éclairée
+apparaît immédiatement dans la vue 3D (`progress["ready"]`, même convention
+que "Generate missing .zonew"), avec un rechargement complet
+(`_load_continent()`) une seule fois à la fin pour faire disparaître les
+anciennes pièces de repli devenues obsolètes (Nuno : "tu ajoutes des zones
+sans retirer les existantes"). Le cache disque `.bam` de continent
+(`continent_geom_cache.py`) est désactivé en Édition (`continent=None,
+mode=None` passés à `_set_loaded_zones()`) -- une composition qui change en
+direct sous l'utilisateur n'est jamais un bon candidat pour ce cache
+(trouvé 2026-09-12 : un hit `.bam` inattendu après suppression d'une zone
+construite).
+
+### `cache_dir()` séparé de `config_dir()`
+
+`config_dir.py` expose maintenant `cache_dir()` en plus de `config_dir()` --
+mêmes conventions par OS, mais pointant vers le vrai dossier de cache
+(`~/.cache/ryzom_forgery` sur Linux, etc.) plutôt que dans le dossier de
+config (Nuno 2026-09-12 : "c'est très moche... un dossier de cache dans le
+dossier de config"). `zone_cache.py`/`continent_geom_cache.py` (données
+purement jetables/régénérables) migrent vers `cache_dir()` ; `config_dir()`
+reste réservé aux vraies préférences utilisateur.
