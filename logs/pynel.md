@@ -847,3 +847,40 @@ Uses hardcoded GitLab HTTPS URLs:
 - ryzom-docker: https://gitlab.com/ryzom/ryzom-docker.git
 
 Used by Forgery's Settings > Paths tab (see `forgery-object-editor.md` 2026-09-07).
+
+## 2026-09-12 — ✨ Orchestre zone_elevation/zone_dependencies/zone_ig_lighter, pynel 0.14.0
+
+Completed pynel's support for the `.land` format (`CZoneRegion`, Ligo brick-grid
+composition -- each brick a regular `.zone` already supported by `ryzom_zone.py`)
+and orchestration of the remaining native landscape pipeline tools, in `ryzom_land.py`
+and `ryzom_land_tools.py`.
+
+- `ryzom_land.py`: dataclasses `ZoneRegion`/`ZoneUnit`, XML parser/writer
+  (`xml.etree.ElementTree`) handling both v0 (legacy, no dates) and v1 (current)
+  `.land` encodings; empty cells detected via the `< UNUSED >` sentinel string, not
+  an empty string. Binary-encoded `.land` files exist but are unused test/dev-only
+  data on real continents, so left unsupported.
+- `ryzom_land_tools.py`: subprocess wrappers for `land_export`, `zone_elevation`,
+  `zone_dependencies`, and `zone_ig_lighter`, plus config-file generators (`.cfg`
+  text for `land_export`, `properties.cfg` for the other three and for the
+  already-orchestrated `zone_lighter`) so callers build config from Python
+  dataclasses instead of hand-writing the `CConfigFile` text format.
+- Validated end-to-end against real production data (continent nexus, jungle
+  ecosystem): full pipeline order `land_export -> zone_welder -> zone_elevation ->
+  zone_welder -> zone_dependencies -> zone_lighter -> zone_ig_lighter` executed for
+  real (via `agentcom` on Nuno's machine) and every output re-parsed successfully
+  with pynel.
+- Found and fixed two native Linux-portability bugs in `ryzom-core`
+  (`ryzom/ark-features` branch, not yet committed): `world_editor`'s CMake target
+  (holding `land_export`) was locked behind `IF(WIN32)` even though it has no
+  Windows/MFC dependency; and `land_export_lib/export.cpp`'s `treatPattern` built
+  paths with a hardcoded `\` separator, breaking zone lookup on Linux.
+- Found and fixed a third native bug during full end-to-end validation:
+  `zone_elevation.cpp` crashed at static-initialization time (before `main()`) due
+  to a global `CZoneRegion` object -- fixed with lazy pointer allocation, same
+  pattern already used in `land_export`.
+- Documentation: new `nel/tools/pynel/docs/land_format.md`; `docs/zone_tools.md`
+  completed with `zone_elevation`/`zone_dependencies`/`zone_ig_lighter` and all
+  three native bugs found; new `docs/pipeline_directories.md` (per-tool `pipeline/`
+  directory usage, for Atyscape's archive cleanup); the `workspace/`/`graphics/`
+  forbidden-data-root rule documented in `docs/zone_tools.md` §9.
