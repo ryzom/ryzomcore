@@ -618,17 +618,17 @@ mixins dédiés, même pattern que Patina (`object_editor_mixins/`) :
   raisonnement que `object_editor_mixins/ui_helpers.py`.
 
 Le pipeline de rendu partagé (`zone_geometry.py`/`zone_cache.py`/
-`continent_geom_cache.py`, `_apply_render_mode()`/`_run_load_refs()`/
+`zone_geom_cache.py`, `_apply_render_mode()`/`_run_load_refs()`/
 `_set_loaded_zones()`) reste dans `landscape_editor.py` -- il n'est jamais
 dupliqué entre les mixins, seuls les points d'extension propres à un mode
 (résolution du fallback `.land`, génération `.zonew`, source de la liste de
 continents) sont délégués. Non-régression des deux modes validée par Nuno
 sur un continent réel.
 
-## Cache disque du `NodePath` entier d'un continent (`geomnode_continent_cache.md`)
+## Cache disque du `NodePath` d'une zone (`landscape_editor__region_management__zone_bam_cache.md`)
 
-Même une fois le cache par zone (étape 6) et celui des bricks de repli
-(ci-dessus) chauds, il restait un coût mesuré à 1.349s pour 151 zones
+Même une fois le cache par zone tessellée (étape 6) et celui des bricks de
+repli (ci-dessus) chauds, il restait un coût mesuré à 1.349s pour 151 zones
 (~8.9ms/zone, nexus) : la construction des `GeomNode` Panda3D elle-même
 (couleur + indices + `attach_new_node`, `_set_loaded_zones()`), entièrement
 sur le thread principal. Objectif de Nuno (2026-09-11) : repasser sous 1s de
@@ -636,35 +636,54 @@ temps total de rechargement, quitte à geler l'UI le temps de la
 (re)construction -- le gel n'est pas un problème tant que le total est
 rapide.
 
-**`ryzom_forgery/continent_geom_cache.py`** (nouveau module) sérialise le
-`NodePath` déjà construit via le format natif Panda3D (`.bam`,
-`NodePath.write_bam_file()`/`Loader.load_model(..., noCache=True)`), plutôt
-que de refaire tourner `GeomVertexWriter`/numpy à chaque chargement. Une
-zone n'appartenant jamais qu'à un seul continent, un bundle `.bam` +
-manifeste (`ContinentManifest`, pickle) par `(continent, mode de rendu)` sous
-`config_dir() / "continent_geom_cache"` peut être rechargé tel quel tant que
-rien n'a changé.
+**`ryzom_forgery/zone_geom_cache.py`** sérialise le `NodePath` déjà construit
+via le format natif Panda3D (`.bam`, `NodePath.write_bam_file()`/
+`Loader.load_model(..., noCache=True)`), plutôt que de refaire tourner
+`GeomVertexWriter`/numpy à chaque chargement. **Un bundle par ZONE** (pas par
+continent) -- remplace un module antérieur (`continent_geom_cache.py`, un
+seul bundle `.bam` par `(continent, mode)`) qui ne payait plus une fois le
+chargement paresseux par région (`landscape_editor__region_management.md`)
+en place : ce bundle unique était réécrit à chaque bascule de région (le jeu
+de zones chargées change), donc plus jamais réutilisé d'une bascule à
+l'autre. Un bundle par zone, sous `cache_dir() / "zone_geom_cache"`, reste
+valide peu importe quelles AUTRES zones sont chargées à côté.
 
-**Le manifeste** (`ZoneManifestEntry` par zone : extension résolue +
-mtime/taille du fichier source, plus `min_z`/`max_z` global -- le dégradé
-d'élévation dépend de toute la plage chargée, pas de la zone seule, voir
-l'étape 7 plus haut) est comparé au manifeste fraîchement recalculé
-(`_run_load_refs()` le construit à la volée pendant le chargement normal des
-zones et des bricks de repli, `progress["manifest_zones"]`) **avant** de
-toucher au `.bam` : identique -> chargement direct du bundle, ses enfants
-étant renommés par zone (`node_path.set_name(name)`, le `GeomNode` de
+**Le manifeste** (`ZoneManifestEntry` par zone/pièce `.land` : extension
+résolue + mtime/taille du fichier source, `rot`/`flip` -- une brique
+retournée/pivotée EN PLACE, même fichier/mtime/taille, a sinon une signature
+de cache identique à sa version non tournée -- plus `min_z`/`max_z`, voir
+ci-dessous) est comparé au manifeste fraîchement recalculé (`_run_load_refs()`
+le construit à la volée, `progress["manifest_zones"]`) **avant** de toucher
+au `.bam` de cette zone : identique -> chargement direct du bundle, renommé
+par zone (`node_path.set_name(name)`, le `GeomNode` de
 `build_zone_geom_from_cache()` s'appelant toujours `"zone-tessellated"`, sans
-quoi tous les enfants d'un bundle rechargé seraient indiscernables) puis
-reparentés directement sous `self._zone_root` (pas de wrapper intermédiaire
-dans la scène). Différent (zone ajoutée/retirée/modifiée, ou plage globale
-changée) -> reconstruction complète comme avant (jamais pire que l'existant),
-puis sauvegarde du nouveau bundle pour la prochaine fois. Pas de
-reconstruction partielle zone par zone dans cette première version -- gardé
-simple.
+quoi deux bundles rechargés seraient indiscernables) puis reparenté
+directement sous `self._zone_root`. Différent -> reconstruction de CETTE
+zone seule (jamais pire que l'existant, et jamais un miss d'une zone ne
+force la reconstruction d'une autre), puis sauvegarde du nouveau bundle.
+
+**`min_z`/`max_z` -- référence sur TOUT le continent, pas le sous-ensemble
+chargé** : le dégradé d'élévation dépend de la plage globale de tout ce qui
+est affiché (voir l'étape 7 plus haut), qui changerait à chaque bascule de
+région si elle était recalculée sur le seul sous-ensemble coché -- invalidant
+le cache de TOUTE zone à chaque coche/décoche. `region_loader.
+get_continent_z_range()` calcule donc cette plage une seule fois par
+chargement de continent, sur TOUTES ses zones réelles (`self.
+_all_continent_refs`), via `pynel.ryzom_zone.parse_zone_header()` (lecture
+d'en-tête seule, `zone_bb` uniquement -- **jamais** `parse_zone()` complet :
+bug de perf réel trouvé en testant, `parse_zone()` sur un `.zonel` de 423 Ko
+prend 268ms + 14,3 Mo retenus par zone, contre 0,02-0,05ms pour l'en-tête
+seule, ~5000x plus rapide -- voir `project-todos/pynel/
+zone_header_reader.md`). Effet de bord accepté par Nuno : une petite région
+isolée a le même étalonnage de couleur que si tout le continent était
+chargé, au lieu d'être renormalisée sur elle-même seule.
 
 Un cache hit se lit en quelques dizaines de ms (chargement `.bam` seul, testé
 en isolation headless) contre plus d'une seconde de reconstruction --
-confirmé fonctionnel par Nuno sur un rechargement répété du même continent.
+confirmé fonctionnel par Nuno sur un rechargement répété du même continent,
+actif en Visualisation ET en Édition (la désactivation spéciale en Édition
+qui existait pour l'ancien cache par continent n'a plus lieu d'être, voir
+plus bas).
 
 ## Bascule caméra 2D/3D (`landscape_editor__2d_3d_toggle.md`)
 
@@ -922,12 +941,15 @@ apparaît immédiatement dans la vue 3D (`progress["ready"]`, même convention
 que "Generate missing .zonew"), avec un rechargement complet
 (`_load_continent()`) une seule fois à la fin pour faire disparaître les
 anciennes pièces de repli devenues obsolètes (Nuno : "tu ajoutes des zones
-sans retirer les existantes"). Le cache disque `.bam` de continent
-(`continent_geom_cache.py`) est désactivé en Édition (`continent=None,
-mode=None` passés à `_set_loaded_zones()`) -- une composition qui change en
-direct sous l'utilisateur n'est jamais un bon candidat pour ce cache
-(trouvé 2026-09-12 : un hit `.bam` inattendu après suppression d'une zone
-construite).
+sans retirer les existantes"). Le cache disque `.bam` de continent entier
+(`continent_geom_cache.py`, retiré depuis, voir plus haut) était désactivé en
+Édition (`continent=None, mode=None` passés à `_set_loaded_zones()`) -- un
+hit inattendu avait été trouvé après suppression d'une zone construite
+(2026-09-12), et une composition qui change en direct sous l'utilisateur
+n'est jamais un bon candidat pour un cache À L'ÉCHELLE DU CONTINENT. Le
+cache par zone qui l'a remplacé (`zone_geom_cache.py`) n'a plus ce problème
+-- chaque zone/pièce s'invalide sur sa PROPRE fraîcheur (mtime/taille/
+rot/flip), jamais sur celle d'une autre -- donc actif dans les deux modes.
 
 ### `cache_dir()` séparé de `config_dir()`
 
@@ -935,6 +957,140 @@ construite).
 mêmes conventions par OS, mais pointant vers le vrai dossier de cache
 (`~/.cache/ryzom_forgery` sur Linux, etc.) plutôt que dans le dossier de
 config (Nuno 2026-09-12 : "c'est très moche... un dossier de cache dans le
-dossier de config"). `zone_cache.py`/`continent_geom_cache.py` (données
+dossier de config"). `zone_cache.py`/`zone_geom_cache.py` (données
 purement jetables/régénérables) migrent vers `cache_dir()` ; `config_dir()`
 reste réservé aux vraies préférences utilisateur.
+
+## Chargement paresseux par région (`landscape_editor__region_management.md`)
+
+Charger un continent entier d'un coup (étape 6) reste rapide une fois en
+cache, mais un premier chargement (ou un continent jamais visité) reste
+lourd pour rien si Nuno ne veut regarder qu'une petite portion. Ce chantier
+introduit un chargement par RÉGION (au sens `world.lua`/`world.json` : la
+hiérarchie continent -> région -> lieu, pas les "régions" de `region_loader.py`
+qui désignent un rayon géographique quelconque autour de la caméra, concept
+indépendant) : à la sélection d'un continent, plus aucune zone n'est chargée
+en géométrie réelle automatiquement -- chaque zone/cellule du continent
+s'affiche comme un simple carré violet plein (footprint 160×160,
+`zone_geometry.build_zone_placeholders_geom()`), et un panneau liste les
+régions du continent sous forme de cases à cocher : cocher une région charge
+la géométrie réelle de ses zones (remplaçant leur carré violet) ; décocher
+décharge et remet le carré violet.
+
+**Source de la hiérarchie -- une par mode, jamais l'une à la place de
+l'autre** (`ryzom_forgery/region_hierarchy.py`) :
+- Visualisation : `world.lua`, embarqué dans `gamedev.bnp`
+  (`live_data_path`), lu via `pynel.ryzom_bnp.BnpReader` +
+  `pynel.region_export.parse_world_lua`.
+- Édition : `ryzom-data/leveldesign/world/world.json` directement
+  (`json.loads`) -- même structure `{nom: [visible, points, enfants]}` que
+  `world.lua`, juste sérialisée en JSON plutôt qu'en Lua.
+- Résolution de la clé continent : `f"continent_{pipeline_continent_name}"`
+  (ex. `"nexus"` -> `"continent_nexus"`), sauf `newbieland` dont la clé est
+  le nom nu -- essayer le préfixe puis, si absent, le nom nu tel quel.
+- Un continent sans entrée, ou dont l'entrée n'a aucun enfant de niveau
+  région (`continent_indoors`, childless), retombe sur le comportement
+  d'avant ce chantier : chargement complet immédiat, pas de carrés violets
+  ni de panneau.
+- Les entrées `pvp_zone_*` (ex. `pvp_zone_ichor`, `pvp_zone_nexus`) sont
+  filtrées : au même niveau hiérarchique qu'une vraie région dans
+  `world.lua`/`world.json`, ce sont des zones PvP, pas des régions
+  géographiques (Nuno 2026-09-13, confirmé sur tous les continents réels :
+  chaque vraie région est systématiquement `region_*`, sans exception).
+
+**Assignation zone -> région** (`region_hierarchy.assign_zones_to_regions()`) :
+test point-dans-polygone (ray-casting) du centre du footprint 160×160 de
+chaque zone contre le polygone de chaque région (déjà en coordonnées monde).
+Une zone hors de tout polygone de région reste en permanence carré violet,
+jamais assignable à aucune case à cocher. Une seule région sur le continent
+-> cochée automatiquement par défaut ; plusieurs -> rien coché par défaut.
+
+**Mode Édition -- le repli `.land`+brique est LUI AUSSI filtré par région**
+(pas seulement les zones à export réel) : chaque cellule `.land` utilisée
+(export réel ou non) est assignée à une région via le centre de sa cellule
+(`self._land_cell_region_map`, même test point-dans-polygone). Sans ce
+filtrage, le repli existant (`_load_land_fallback_pieces()`) chargeait une
+vraie brique -- coût identique à une vraie zone -- pour TOUTE cellule
+absente de `self._loaded_refs`, quelle que soit la région cochée, annulant
+tout le bénéfice du chargement paresseux (bug trouvé en testant, Nuno
+2026-09-13, continent `bagne` sans export réel : les 53 cellules se
+rechargeaient à chaque bascule). `_apply_render_mode()` calcule
+`allowed_land_cells` (cellules des régions cochées) et le passe à
+`_load_land_fallback_pieces(..., allowed_cells=...)` -- une cellule hors de
+ce set reste carré violet au lieu de charger sa brique.
+`_rebuild_region_placeholders()` construit donc les carrés violets
+différemment par mode : en Visualisation, une zone absente de
+`self._loaded_refs` ; en Édition, une cellule `.land` dont la région n'est
+PAS cochée (le repli s'occupe déjà des cellules d'une région cochée sans
+export réel -- pas de double géométrie au même endroit).
+
+**Caméra figée sur le continent entier** (Nuno 2026-09-13 : "le centrage
+automatique en vue 2D c'est vraiment horrible") : la caméra ne se
+recentre/zoome plus QUE lors de la sélection du continent
+(`_select_continent()`), jamais lors d'une bascule de région -- nouveau
+paramètre `frame_camera=False` passé par le consommateur de chargement de
+continent à `_set_loaded_zones()` (`True` par défaut, préserve le
+comportement pour la sélection d'une zone unique via l'Explorer).
+`OrbitCamera.frame_bounds()` (`camera.py`, nouvelle méthode) remplace
+l'ancien calcul `distance = max(largeur, hauteur) * 0.75` (sous-cadrait) par
+un calcul basé sur le vrai FOV de la lentille (`distance * tan(fov/2)` =
+demi-étendue monde visible à cette distance, même relation que `_pan()`), en
+projetant la bbox sur les axes écran RÉELS de la caméra
+(`getQuat(render).getRight()/.getUp()`, jamais supposés alignés sur X/Y
+monde -- `up_hint` n'est jamais réinitialisé à un axe fixe, voir
+`step_to_face()`), et en tenant compte de `self.app.explorer_width`/
+`.panel_width` : les panneaux Explorer/outil se posent PAR-DESSUS la vue 3D
+sans rétrécir le `DisplayRegion`/lens (qui reste calé sur toute la fenêtre),
+donc masquent visuellement les bords sans que le FOV le sache -- cause
+réelle du rognage constaté sur `nexus`/`tryker` (le plus large des deux
+panneaux fait foi, le frustum étant centré sur toute la fenêtre). Une marge
+d'une case (`ZONE_CELL_SIZE`) est ajoutée de chaque côté pour laisser de
+l'air.
+
+**Chargement `.ig` manuel** (Nuno 2026-09-13 : "c'est le bouton de la vue 3D
+qui doit déclencher le chargement", pas un bouton séparé du panneau) :
+l'icône arbre existante dans la barre d'outils de la vue 3D
+(`_toggle_ig_visibility()`) déclenche désormais le chargement en plus de la
+visibilité -- l'activer (re)charge `.ig` pour `self._loaded_refs` (le jeu de
+zones actuellement chargé, donc PAR RÉGION cochée, pas tout le continent),
+remplaçant l'affichage précédent ; la désactiver masque seulement (pas de
+déchargement). Aucun rechargement automatique si les zones changent
+entre-temps -- seul un nouveau clic recharge, et il recharge TOUT
+`self._loaded_refs` depuis zéro (pas de diff incrémental avec ce qui était
+déjà affiché). Raison du passage en manuel : le coût CPU du parsing `.ig`/
+`.shape` (Python pur, lié au GIL même en tâche de fond) faisait geler
+l'appli à chaque bascule de région automatique -- inacceptable une fois
+répété à chaque coche/décoche, alors qu'il n'était payé qu'une fois par
+continent avant ce chantier.
+
+**Eau en `two_sided`** (Nuno 2026-09-13 : "sinon il ne sont pas toujours
+visibles") : les meshes d'eau (`resolved.kind` `"water_polygon"`/
+`"water_point"`, `ig_geometry.py`) sont maintenant en `set_two_sided(True)`
+comme le terrain -- un plan d'eau est une unique face plate, invisible de
+l'autre côté par défaut (backface culling), donc invisible dès que la
+caméra passait sous son niveau ou que son winding ne faisait pas face à la
+vue initiale.
+
+**`out_ig_dir` du CSV pipeline -- bug de données trouvé en testant** (Nuno
+2026-09-13) : `continent_pipeline_reference.csv` pointait `out_ig_dir` vers
+`ligo_ig_land` (le brouillon LIGO brut, édition en cours, potentiellement
+très incomplet -- un seul instance pour `46_BZ`/nexus contre 56 dans la
+vraie donnée) au lieu de `zone_lighted_ig_land` (le vrai résultat final de
+`zone_ig_lighter`, cohérent avec la convention déjà en place pour le
+terrain `zone_lighted`). Corrigé dans le CSV (`ryzom-data`) pour les 25
+continents -- ce n'est pas un bug de code Forgery, juste une mauvaise valeur
+dans le fichier de référence.
+
+**⚠️ Important -- tenir `world.json` synchronisé avec les `.primitive`** :
+Atyscape ne charge/n'édite aucun `region_***.primitive` à ce stade (portée
+explicitement hors scope de ce chantier) -- il lit uniquement `world.lua`
+(Visualisation) et `world.json` (Édition), deux fichiers déjà générés en
+amont par `pynel.region_export` à partir des `region_*.primitive` de
+`ryzom-private-data`. **Toute future modification ou ajout d'un
+`region_***.primitive` devra impérativement régénérer `world.json`**
+(`python -m pynel.region_export --format json`, voir
+`project-todos/pynel/region_places_export.md`) -- sans quoi ce mécanisme de
+régions affichera une hiérarchie/des polygones désynchronisés de la réalité,
+silencieusement (aucune erreur, juste des données obsolètes). Cette règle
+s'applique dès maintenant, même si ce chantier ne touche jamais lui-même aux
+`.primitive`.

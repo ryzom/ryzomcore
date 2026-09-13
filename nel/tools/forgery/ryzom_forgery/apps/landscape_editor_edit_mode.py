@@ -23,7 +23,7 @@ from pynel.ryzom_zone import load_zone, ZoneParseError
 from ryzom_forgery import continent_ecosystem
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_pipeline_reference as cpr
-from ryzom_forgery.continent_geom_cache import ZoneManifestEntry
+from ryzom_forgery.zone_geom_cache import ZoneManifestEntry
 from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_build
 from ryzom_forgery import land_loader
@@ -91,12 +91,17 @@ class EditModeMixin:
 		position the `.land` no longer references (composition edited since
 		that export) is silently ignored in every render mode, rather than
 		shown as if still current (Nuno 2026-09-12: "Oui, filtrer dès l'étape
-		2"). Returns `(default_refs, extensions)` in the exact shape
-		`_run_load_continent()` (landscape_editor.py) already builds from
-		`find_zones_in_region()`, so it's a drop-in replacement for that half
-		of Edition mode's continent load -- cells with no matching real file
-		here simply aren't included, left entirely to the unchanged `.land`+
-		brick fallback (`_load_land_fallback_pieces()`) to render.
+		2"). Returns `(default_refs, extensions, all_used_cells)` -- the first
+		two in the exact shape `_run_load_continent()` (landscape_editor.py)
+		already builds from `find_zones_in_region()`, so it's a drop-in
+		replacement for that half of Edition mode's continent load -- cells
+		with no matching real file here simply aren't included, left
+		entirely to the `.land`+brick fallback (`_load_land_fallback_pieces()`)
+		to render. `all_used_cells` (`{(pos_x, pos_y): ZoneUnit}`, EVERY used
+		cell regardless of whether it got a `default_refs` entry) is for the
+		region assignment (project-todos/forgery/landscape_editor__region_
+		management.md step 5): a cell with no real export yet still has a
+		world position and can still belong to a region.
 
 		A brick spans one or more grid cells (see module docstring), but
 		`land_export` always produces one real zone file per grid cell
@@ -119,15 +124,16 @@ class EditModeMixin:
 		corner itself lands on the correct row in both directions."""
 		land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
 		if land_path is None:
-			return {}, {}
+			return {}, {}, {}
 		try:
 			land = load_land(land_path)
 		except (OSError, LandParseError):
-			return {}, {}
+			return {}, {}, {}
 		full_extensions_index = get_zone_extensions_index(live_data_path, pipeline_continent_name, ryzom_data_path)
+		all_used_cells = used_land_cells(land)
 		default_refs = {}
 		extensions = {}
-		for pos_x, pos_y in used_land_cells(land):
+		for pos_x, pos_y in all_used_cells:
 			name = expected_zone_name(pos_x, pos_y)
 			if name is None:
 				continue
@@ -139,27 +145,28 @@ class EditModeMixin:
 				continue
 			default_refs[name] = default_ref
 			extensions[name] = ext_map
-		return default_refs, extensions
+		return default_refs, extensions, all_used_cells
 
-	def _load_land_fallback_pieces(self, land_path, brick_zones_dir, zones, manifest_zones, progress, failed):
+	def _load_land_fallback_pieces(
+		self, land_path, brick_zones_dir, zones, manifest_zones, progress, failed, allowed_cells=None,
+	):
 		"""Background-thread body for the `.land`+brick fallback (called from
 		`_run_load_refs()`, landscape_editor.py, only when `land_fallback` is
 		not None -- i.e. always from Edition mode). Mutates `zones`/
 		`manifest_zones` (dicts) and `failed` (list) in place, and adds to
 		`progress["gray"]` -- same reasoning as `_run_load_continent()`'s own
 		docstring for why background-thread code only ever writes to shared
-		mutable structures, never touches Panda3D."""
+		mutable structures, never touches Panda3D.
+
+		`allowed_cells` (project-todos/forgery/landscape_editor__region_
+		management.md step 5 fix), when given, restricts which missing
+		cells actually get a brick loaded to this set of `(pos_x, pos_y)` --
+		everything else stays out of `zones` entirely (a purple square via
+		_rebuild_region_placeholders(), not a loaded brick). `None` means
+		unrestricted, the pre-region_management behaviour (every missing
+		cell gets its brick, regardless of region)."""
 		try:
 			land = load_land(land_path)
-			# The `.land` file's own layout (which cell uses which
-			# brick/rotation/flip) can change without any individual
-			# brick's own file changing -- a single whole-file stamp
-			# here invalidates every "land:x:y" manifest entry at once
-			# whenever that happens, rather than trying to detect a
-			# reassigned rotation/brick per cell (project-todos/
-			# forgery/geomnode_continent_cache.md step 2).
-			land_stat = land_path.stat()
-			manifest_zones["__land_file__"] = ZoneManifestEntry(".land_file", land_stat.st_mtime, land_stat.st_size)
 			used_cells = sum(1 for unit in land.zones if unit.zone_name != STRING_UNUSED)
 			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor_edit_mode.py:_load_land_fallback_pieces) "
 			      f"land loaded: {land_path} used_cells={used_cells} exported_zones={len(zones)}")
@@ -188,6 +195,8 @@ class EditModeMixin:
 			loaded_bricks = {}
 			rendered_pieces = set()
 			for (pos_x, pos_y), unit in find_missing_land_cells(land, existing_cells).items():
+				if allowed_cells is not None and (pos_x, pos_y) not in allowed_cells:
+					continue
 				brick_path = brick_zones_dir / f"{unit.zone_name}.zone"
 				if unit.zone_name not in loaded_bricks:
 					# Cached raw (untransformed) geometry (project-todos/
@@ -241,7 +250,15 @@ class EditModeMixin:
 				# staleness stamp is the brick file's, not a ZoneRef's.
 				try:
 					brick_stat = brick_path.stat()
-					manifest_zones[cell_name] = ZoneManifestEntry(".land", brick_stat.st_mtime, brick_stat.st_size)
+					# rot/flip (project-todos/forgery/landscape_editor__
+					# region_management__zone_bam_cache.md step 3): the same
+					# brick file re-rotated/re-flipped in place at this cell
+					# has an identical extension/mtime/size, so without
+					# these two fields a per-zone `.bam` cache would wrongly
+					# keep serving the old orientation.
+					manifest_zones[cell_name] = ZoneManifestEntry(
+						".land", brick_stat.st_mtime, brick_stat.st_size, rot=unit.rot, flip=unit.flip,
+					)
 				except OSError:
 					pass
 			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor_edit_mode.py:_load_land_fallback_pieces) "

@@ -2,7 +2,7 @@
 shared by every module that persists something there, so they all land next
 to each other (config_dir() for user preferences as JSON -- export settings,
 explorer favorites... -- cache_dir() for disposable, regenerable data --
-zone_cache.py/continent_geom_cache.py).
+zone_cache.py/zone_geom_cache.py).
 """
 
 import os

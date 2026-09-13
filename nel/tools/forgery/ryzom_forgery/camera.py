@@ -289,6 +289,69 @@ class OrbitCamera:
 		self._default_distance = self.distance
 		self._update_camera_pos()
 
+	def frame_bounds(self, min_x, min_y, max_x, max_y, z=0.0, margin=0.0):
+		"""frame() at whatever distance actually makes [min_x, max_x] x
+		[min_y, max_y] (at world Z=`z`) fully fit the viewport, using the
+		real lens FOV -- same `distance * tan(fov / 2)` relationship
+		_pan()/viewport_transform.py's `_move()` already use for the
+		world-span visible at a given distance (project-todos/forgery/
+		landscape_editor__region_management.md step 8 follow-up, Nuno
+		2026-09-13: a flat `* 0.75` guess under-framed a whole continent --
+		"il faut reculer la caméra... TOUT le quadrillage doit être inclus
+		dans la vue 3D"). Correct for any bounds size/aspect ratio, unlike a
+		fixed multiplier.
+
+		`margin` (world units, added on EACH side, so it widens both `min_x`/
+		`max_x` and `min_y`/`max_y` by that much) leaves breathing room
+		around the bounds instead of framing them flush against the
+		viewport edges (same follow-up, Nuno: "il faudrait que tu ajoute 1/2
+		lignes/colonnes de zones virtuelles pour que ça laisse de l'air
+		entre le continent et les bords de la vue 3D").
+
+		Projects the box's half-extents onto the CAMERA's own current
+		right/up axes (same `getQuat(render).getRight()/.getUp()` convention
+		as `_pan()`/`viewport_transform.py`'s `_move()`) rather than
+		assuming they line up with world X/Y -- more robust than a plain
+		world-X/Y assumption if some other view ever leaves a residual roll
+		(`up_hint`, this class's own "screen up" axis at the +z/-z poles, is
+		deliberately never reset to a fixed world axis -- step_to_face()'s
+		own docstring, "a step never forces the view back to Z is up").
+
+		Also accounts for `self.app.explorer_width`/`.panel_width` (project-
+		todos/forgery/landscape_editor__region_management.md step 8 2nd
+		follow-up, Nuno 2026-09-13: "tu tiens bien compte de la taille des
+		panneaux de gauche et de droite?" -- root cause of the actual
+		clipping, confirmed by testing: nexus/tryker's math checked out
+		exactly against the FULL window, they just don't have that much
+		width to themselves -- the docked Explorer/tool panels sit ON TOP of
+		the 3D view rather than shrinking its own DisplayRegion, so
+		`camLens`'s own FOV/aspect always spans the whole window while the
+		panels visually cover its left/right edges). The frustum is centred
+		on the whole window, so whichever side has the WIDER panel is the
+		binding constraint -- fitting the tighter of the two available
+		half-widths guarantees nothing hides behind either panel, at the
+		cost of some unused space on the narrower-panel side."""
+		half_x = (max_x - min_x) / 2.0 + margin
+		half_y = (max_y - min_y) / 2.0 + margin
+		center = Point3((min_x + max_x) / 2.0, (min_y + max_y) / 2.0, z)
+		quat = self.app.camera.getQuat(self.app.render)
+		right = quat.getRight()
+		up = quat.getUp()
+		screen_half_x = abs(right.x) * half_x + abs(right.y) * half_y
+		screen_half_y = abs(up.x) * half_x + abs(up.y) * half_y
+		fov = self.app.camLens.getFov()
+		distance_x = screen_half_x / tan(radians(fov.x / 2))
+		distance_y = screen_half_y / tan(radians(fov.y / 2))
+
+		win_width = self.app.win.get_x_size()
+		explorer_width = getattr(self.app, "explorer_width", 0.0)
+		panel_width = getattr(self.app, "panel_width", 0.0)
+		usable_half_x_px = win_width / 2.0 - max(explorer_width, panel_width)
+		if usable_half_x_px > 0:
+			distance_x *= (win_width / 2.0) / usable_half_x_px
+
+		self.frame(center, max(distance_x, distance_y, 10.0))
+
 	def retarget(self, target):
 		"""Like frame(), but leaves distance (and heading/pitch) untouched --
 		moves the orbit pivot without zooming (landscape_editor.py's zone

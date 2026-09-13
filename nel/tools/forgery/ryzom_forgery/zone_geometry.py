@@ -405,3 +405,52 @@ def build_zone_selection_border_geom(min_x: float, min_y: float, max_x: float, m
 	lines.draw_to(min_x, max_y, z)
 	lines.draw_to(min_x, min_y, z)
 	return lines.create()
+
+
+_ZONE_PLACEHOLDER_COLOR = (0.55, 0.0, 0.85, 1.0)
+
+
+def build_zone_placeholders_geom(positions, z: float = 0.0) -> GeomNode:
+	"""One flat ZONE_CELL_SIZE x ZONE_CELL_SIZE purple quad per `(origin_x,
+	origin_y)` in `positions` (region_loader.ZoneRef.x/.y, a zone's own
+	origin corner) -- the "not yet loaded, waiting on its region's checkbox"
+	placeholder (project-todos/forgery/landscape_editor__region_management.md
+	step 3), batched into a single GeomNode the same way
+	build_zone_geom_from_cache() batches every patch of a real zone, since a
+	continent routinely has hundreds of these at once."""
+	positions = list(positions)
+	n = len(positions)
+	vdata = GeomVertexData("zone-placeholders", GeomVertexFormat.get_v3c4(), Geom.UH_static)
+	vdata.set_num_rows(n * 4)
+	vertex_array = vdata.modify_array(0)
+
+	vertex_buf = np.empty(n * 4, dtype=[("vertex", "<f4", 3), ("color", "u1", 4)])
+	color_u8 = tuple(round(c * 255) for c in _ZONE_PLACEHOLDER_COLOR)
+	for i, (origin_x, origin_y) in enumerate(positions):
+		base = i * 4
+		vertex_buf["vertex"][base + 0] = (origin_x, origin_y, z)
+		vertex_buf["vertex"][base + 1] = (origin_x + ZONE_CELL_SIZE, origin_y, z)
+		vertex_buf["vertex"][base + 2] = (origin_x + ZONE_CELL_SIZE, origin_y + ZONE_CELL_SIZE, z)
+		vertex_buf["vertex"][base + 3] = (origin_x, origin_y + ZONE_CELL_SIZE, z)
+		vertex_buf["color"][base:base + 4] = color_u8
+	vertex_array.modify_handle().set_data(vertex_buf.tobytes())
+
+	index_dtype = "<u2" if n * 4 <= _MAX_UINT16_VERTICES else "<u4"
+	index_type = GeomEnums.NT_uint16 if n * 4 <= _MAX_UINT16_VERTICES else GeomEnums.NT_uint32
+	quad_indices = np.arange(n).reshape(-1, 1) * 4
+	tri1 = quad_indices + np.array([0, 1, 2])
+	tri2 = quad_indices + np.array([0, 2, 3])
+	flat_indices = np.stack([tri1, tri2], axis=1).reshape(-1).astype(index_dtype)
+
+	triangles = GeomTriangles(Geom.UH_static)
+	triangles.set_index_type(index_type)
+	index_array = triangles.modify_vertices()
+	index_array.set_num_rows(len(flat_indices))
+	index_array.modify_handle().set_data(flat_indices.tobytes())
+	triangles.close_primitive()
+
+	geom = Geom(vdata)
+	geom.add_primitive(triangles)
+	node = GeomNode("zone-placeholders")
+	node.add_geom(geom)
+	return node

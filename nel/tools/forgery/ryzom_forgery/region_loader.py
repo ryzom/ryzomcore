@@ -32,7 +32,7 @@ from typing import Dict, List, NamedTuple, Optional, Tuple
 
 from pynel.ryzom_bnp import BnpError, BnpReader
 from pynel.ryzom_packed_sheets import PackedSheetsParseError, zone_name_to_world_pos
-from pynel.ryzom_zone import parse_zone, Zone, ZoneParseError
+from pynel.ryzom_zone import parse_zone, parse_zone_header, Zone, ZoneParseError
 
 from .zone_cache import read_zone_cache, write_zone_cache, ZoneCacheData
 from .zone_geometry import zone_to_cache_data, ZONE_CELL_SIZE
@@ -87,6 +87,71 @@ _zone_cache: Dict["ZoneRef", Zone] = {}
 # scratch (BnpReader.__init__), on top of the index build already having
 # read it once.
 _bnp_reader_cache: Dict[str, BnpReader] = {}
+
+# str(live_data_path) -> {zone name -> IgRef} -- every real .ig found under
+# live_data_path (Visualisation mode only -- Edition mode resolves its own
+# .ig directly from continent_pipeline_reference's out_ig_dir, one flat
+# directory per continent, no index needed there), keyed by its own bare
+# name: confirmed 2026-09-13 against real data that a real .ig's name always
+# matches its zone's exactly ("62_af.ig" inside bagne_ig.bnp for zone
+# "62_af"), same one-file-per-zone convention as .zone/.zonew/.zonel.
+# Process-wide cache, same reasoning as _index_cache above.
+_ig_index_cache: Dict[str, Dict[str, "IgRef"]] = {}
+
+
+class IgRef(NamedTuple):
+	"""Where one real .ig file actually lives -- enough to load it on demand
+	(read_ig_ref_bytes()) without holding its data."""
+	name: str  # bare zone name, e.g. "62_af"
+	source_path: Path  # a loose .ig file or a .bnp path
+	bnp_entry: Optional[str]  # entry name inside source_path if packed, else None (loose file)
+
+
+def _build_ig_index(live_data_path: Path) -> Dict[str, "IgRef"]:
+	index: Dict[str, IgRef] = {}
+	for entry in live_data_path.iterdir():
+		if not entry.is_file():
+			continue
+		suffix = entry.suffix.lower()
+		if suffix == ".ig":
+			index[entry.stem] = IgRef(name=entry.stem, source_path=entry, bnp_entry=None)
+		elif suffix in (".bnp", ".bnpe"):
+			try:
+				bnp_entries = _get_bnp_reader(entry).list()
+			except BnpError:
+				continue
+			for bnp_entry in bnp_entries:
+				entry_path = Path(bnp_entry.name)
+				if entry_path.suffix.lower() == ".ig":
+					index[entry_path.stem] = IgRef(name=entry_path.stem, source_path=entry, bnp_entry=bnp_entry.name)
+	return index
+
+
+def get_ig_index(live_data_path) -> Dict[str, "IgRef"]:
+	"""Every real .ig found under `live_data_path`, keyed by bare zone name --
+	scans every loose file and every .bnp's header table once per process,
+	same caching as get_zone_index() (never invalidated: real shipped game
+	data doesn't change under a running app)."""
+	key = str(live_data_path)
+	index = _ig_index_cache.get(key)
+	if index is None:
+		index = _build_ig_index(Path(live_data_path))
+		_ig_index_cache[key] = index
+	return index
+
+
+def read_ig_ref_bytes(ref: "IgRef") -> bytes:
+	"""Raw bytes for whichever real file `ref` points to (loose file or
+	packed `.bnp` entry) -- same shape as read_zone_ref_bytes()."""
+	if ref.bnp_entry is not None:
+		try:
+			return _get_bnp_reader(ref.source_path).read_file(ref.bnp_entry)
+		except BnpError as exc:
+			raise RegionLoadError(f"{ref.name}: {exc}")
+	try:
+		return ref.source_path.read_bytes()
+	except OSError as exc:
+		raise RegionLoadError(f"{ref.name}: {exc}")
 
 
 def continent_zone_dirs(ryzom_data_path, continent_name: str) -> Tuple[Path, Path, Path]:
@@ -343,3 +408,47 @@ def load_zone_cache_data(ref: ZoneRef) -> ZoneCacheData:
 		# zone with what was just computed.
 		pass
 	return cache_data
+
+
+def get_continent_z_range(refs: Dict[str, ZoneRef]) -> Optional[Tuple[float, float]]:
+	"""Combined (min_z, max_z) across every zone in `refs` -- the WHOLE
+	continent's real zones (project-todos/forgery/landscape_editor__region_
+	management__zone_bam_cache.md step 1), not just whichever region is
+	currently checked, so the elevation-color gradient stays stable no
+	matter which regions get toggled on/off (a per-zone `.bam` cache
+	keyed partly on this range would otherwise miss on every single
+	toggle, since the checked-subset's own range changes every time).
+
+	Reads each zone's own `zone_bb` (`pynel.ryzom_zone.Zone.zone_bb`, an
+	`AABBox` stored directly in the file header) via `parse_zone_header()`
+	-- a real perf bug was found and fixed here 2026-09-13: this used to go
+	through `load_zone_ref()`/`parse_zone()` (a FULL parse -- patches,
+	borders, point lights, everything), and region_loader.py's own
+	extension-priority order always prefers the heaviest available build
+	stage (`.zonel`, fully lit) when one exists. Measured on a real 423 KB
+	`.zonel`: 268 ms + 14.3 MB retained (in `_zone_cache`, forever) PER
+	ZONE -- 53 zones (a small continent) already meant ~14s and ~750 MB,
+	freezing the app before the purple placeholder squares could even show.
+	`parse_zone_header()` (pynel, project-todos/pynel/
+	zone_header_reader.md) reads the exact same `zone_bb` without ever
+	touching a patch, verified byte-identical across `.zone`/`.zonew`/
+	`.zonel` of the same zone -- measured at 0.02-0.05 ms regardless of
+	file size/extension (~5000x faster), and nothing is cached long-term
+	here (no `_zone_cache` entry created). `None` if every zone failed to
+	parse (never raises -- a best-effort computation, same reasoning as
+	`load_zone_cache_data()`'s own cache-write path)."""
+	min_z = None
+	max_z = None
+	for ref in refs.values():
+		try:
+			data = read_zone_ref_bytes(ref)
+			header = parse_zone_header(data)
+		except (RegionLoadError, ZoneParseError):
+			continue
+		zone_min_z = header.zone_bb.center.z - header.zone_bb.half_size.z
+		zone_max_z = header.zone_bb.center.z + header.zone_bb.half_size.z
+		min_z = zone_min_z if min_z is None else min(min_z, zone_min_z)
+		max_z = zone_max_z if max_z is None else max(max_z, zone_max_z)
+	if min_z is None or max_z is None:
+		return None
+	return min_z, max_z

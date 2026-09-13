@@ -741,3 +741,109 @@ retargets on zone selection while in the locked 2D top-down view (no pivot
 to manage there); and `zone_cache.py`/`continent_geom_cache.py` moved from
 the OS config directory to a proper OS cache directory (new
 `config_dir.cache_dir()`).
+
+## 2026-09-13 — ✨ Chargement paresseux par région + affichage .ig dans Atyscape, Forgery 4.10.0
+
+Closes `landscape_editor.md` step 11 (`landscape_editor__region_management.md`
+and its own sub-chantier `landscape_editor__region_management__zone_bam_cache.md`).
+
+**Lazy-by-region zone loading**: selecting a continent no longer loads every
+zone's real geometry immediately -- each zone/cell renders as a flat purple
+placeholder square (`zone_geometry.build_zone_placeholders_geom()`) until its
+own region is checked in a new checkbox panel, driven by the `continent ->
+region -> place` hierarchy in `world.lua` (Visualisation, embedded in
+`gamedev.bnp`, `pynel.ryzom_bnp.BnpReader`+`pynel.region_export.parse_world_lua`)
+or `world.json` (Édition, `ryzom-data/leveldesign/world/`, read directly) --
+new module `ryzom_forgery/region_hierarchy.py`. Zone -> region assignment is a
+ray-casting point-in-polygon test on each zone's footprint center
+(`assign_zones_to_regions()`); a zone outside every region polygon stays a
+permanent placeholder. `pvp_zone_*` entries (same hierarchy level as a real
+region in `world.lua`/`world.json`, e.g. `pvp_zone_ichor`) are filtered out --
+confirmed against every continent that a real region is always `region_*`,
+without exception. A continent with no `world.lua`/`world.json` region entries
+falls back to the pre-chantier behaviour (load everything immediately). In
+Édition, the existing `.land`+brick fallback is now ALSO gated by region
+(`self._land_cell_region_map`, same point-in-polygon test on each `.land`
+cell's own center) -- without this, the fallback loaded a real brick (same
+cost as a real zone) for every missing cell regardless of which region was
+checked, defeating the whole point (found testing `bagne`, 0 real exports:
+all 53 cells reloaded on every toggle).
+
+**Camera framing fix**: the camera only frames the WHOLE continent once, at
+`_select_continent()`, never again on a region toggle (`_set_loaded_zones()`'s
+new `frame_camera=False` for continent (re)loads, `True` still the default for
+a single-zone Explorer pick). New `OrbitCamera.frame_bounds()` (`camera.py`)
+computes the needed distance from the lens's real FOV
+(`distance * tan(fov/2)`, same relation `_pan()` already used) instead of a
+flat `distance = max(width, height) * 0.75` guess that under-framed a whole
+continent, projecting the bbox onto the camera's ACTUAL screen right/up axes
+(`getQuat(render).getRight()/.getUp()`, never assumed aligned to world X/Y --
+`up_hint` is deliberately never reset to a fixed axis, see `step_to_face()`),
+and accounting for `self.app.explorer_width`/`.panel_width`: the docked side
+panels sit ON TOP of the 3D view without shrinking its own lens/`DisplayRegion`
+(which stays sized to the whole window), so they visually cover the edges
+without the FOV calculation knowing -- the actual cause of the clipping seen
+on `nexus`/`tryker` (the wider of the two panels is the binding constraint,
+since the frustum is centred on the whole window). One zone-cell of margin
+added on every side.
+
+**Per-zone `.bam` geometry cache** (new `zone_geom_cache.py`, replaces
+`continent_geom_cache.py`, retired): the old cache kept ONE bundle per
+`(continent, render mode)`, containing every currently-loaded zone fused into
+one `NodePath` -- with lazy-by-region loading, that single bundle got
+overwritten on every region toggle, so it never paid off across toggles
+anymore. A bundle per ZONE stays valid no matter which other zones are loaded
+alongside it; each zone/`.land` piece invalidates independently on its own
+manifest (`ZoneManifestEntry`: resolved extension, source mtime/size, plus
+`rot`/`flip` -- found needed while designing this: a brick re-rotated/flipped
+IN PLACE, same file/mtime/size, would otherwise read as an identical cache
+key). The elevation-color gradient's `min_z`/`max_z` (previously recomputed
+from whichever subset was loaded, which would invalidate every zone's cache
+entry on every single region toggle) is now computed ONCE per continent load,
+across every real zone (`region_loader.get_continent_z_range()`), regardless
+of which regions end up checked. Side effect accepted by Nuno: an isolated
+small region gets the same color scale as if the whole continent were loaded,
+rather than being renormalized on itself alone. As a result, the old
+Édition-only cache disable (found 2026-09-12: a stale whole-continent `.bam`
+hit after deleting a built `.zonew`) no longer applies -- each zone's own
+freshness stamp is now what protects against exactly that.
+
+**Real perf bug found and fixed cross-repo**: `get_continent_z_range()`
+initially read each zone's bounding box via a FULL `pynel.ryzom_zone.
+parse_zone()` -- and `region_loader.py` always prefers the most-built
+extension available (`.zonel`, fully lit, the heaviest of the three stages).
+Measured on a real 423 KB `.zonel`: 268ms parse + 14.3 MB retained PER ZONE,
+forever, in `region_loader.py`'s own in-process `_zone_cache` -- for a small
+53-zone continent (`bagne`), that meant a ~14s freeze and ~750 MB of RAM on
+every continent load, before the purple placeholders could even show. Fixed
+by adding `pynel.ryzom_zone.parse_zone_header()` (pynel 0.15.0, see
+`logs/pynel.md`) -- a true header-only read (`zone_id`/`zone_bb`/
+`patch_bias`/`patch_scale`, nothing else), measured at 0.02-0.05ms regardless
+of file size/extension (~5000x faster), verified byte-identical `zone_bb`
+across `.zone`/`.zonew`/`.zonel` of the same zone.
+
+**`.ig` (instance group) visualisation**, from an earlier uncommitted pass
+(new `ig_geometry.py`): resolves and renders `.ig` instances (mesh/water
+polygon/water point) for the currently-loaded zone set. Loading is manual
+only -- the viewport toolbar's existing tree icon (`_toggle_ig_visibility()`)
+now also triggers a load when turned on (for `self._loaded_refs`'s current
+zone set, i.e. by checked region, not the whole continent), replacing
+whatever was shown before; turning it off only hides (no unload). Made
+manual because the per-zone `.ig`/`.shape` parsing cost (pure Python,
+GIL-bound even off the main thread) stuttered the whole app when it used to
+auto-trigger on every single region toggle. Water meshes (`water_polygon`/
+`water_point`) are now `set_two_sided(True)`, like the terrain -- a flat
+single-sided water plane was invisible from below/behind depending on camera
+angle and winding.
+
+**Data bug found while testing, fixed in `ryzom-data`, not a Forgery bug**:
+`continent_pipeline_reference.csv`'s `out_ig_dir` pointed at `ligo_ig_land`
+(the raw, work-in-progress LIGO draft) for all 25 continents instead of
+`zone_lighted_ig_land` (the real final output of `zone_ig_lighter`, matching
+the naming convention already used for the terrain's own `zone_lighted`) --
+confirmed on `nexus`/`46_BZ`: `ligo_ig_land` had only 1 instance (Nuno's
+in-progress edit) vs. 56 in `zone_lighted_ig_land`/`ig_land` (identical to
+each other, real production data). Fixed directly in the CSV.
+
+Documentation: new "Chargement paresseux par région" section and rewritten
+"Cache disque du `NodePath`" section in `docs/apps/landscape_editor.md`.
