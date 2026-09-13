@@ -24,10 +24,15 @@ confirm first whether some other part of Forgery (or a future chantier)
 needs it before deleting anything real.
 
 Per the rules in `docs/zone_tools.md` §9: `pipeline/export/` holds NeL-
-tool-generated output, `pipeline/landscape/` holds raw/authored source
-data -- `graphics/` and `leveldesign/workspace/` are never valid sources
-for any of this (see `continent_pipeline_reference.csv`'s own methodology
-notes).
+tool-generated output -- `graphics/` and `leveldesign/workspace/` are
+never valid sources for any of this (see `continent_pipeline_reference.csv`'s
+own methodology notes). Raw/authored source data that isn't tool-generated
+output (heightmaps, tile banks, `.land`/`.continent` files) lives under
+`leveldesign/<subfolder>/<eco or continent>/` instead -- `pipeline/landscape/`
+briefly held the tile bank file and, even more briefly, the heightmaps (see
+the "Outside `pipeline/` entirely" table below) but Nuno moved both for real
+2026-09-12, so `pipeline/landscape/` is unused by this project's tools as of
+that date.
 
 ## Per-ecosystem (`pipeline/export/ecosystems/<eco>/`)
 
@@ -67,7 +72,6 @@ notes).
 | Path | Role | Used by |
 |---|---|---|
 | `pipeline/export/continents/<name>/rbank_output/...` | see above | out of scope |
-| `pipeline/landscape/<eco>/<eco>.bank` (Nuno added it here 2026-09-11, all 4 ecosystems -- raw/authored data, per the `export/` vs `landscape/` split above) | `tile_bank_file` | `land_export`, `zone_lighter` (tile-noise displacement lookup, `docs/zone_tools.md` §2) |
 
 ## Outside `pipeline/` entirely (still valid, per `docs/zone_tools.md` §9)
 
@@ -75,5 +79,9 @@ notes).
 |---|---|---|
 | `leveldesign/world/continents/<name>.continent` | `continent_file` | `land_export`; optionally `zone_dependencies` (`computeIGBBoxFromContinent`) |
 | `leveldesign/landscape/<eco>/<name>.land` | `zone_region_file` | `land_export`, `zone_elevation` (`--land`) |
+| `leveldesign/landscape/<eco>/big_<continent>.tga` | `heightmap_file1` | `land_export` (main heightmap) |
+| `leveldesign/landscape/<eco>/noise_<continent>.tga` | `heightmap_file2` | `land_export` (detail/noise heightmap) |
+| `leveldesign/landscape/<eco>/colormap_<continent>.tga` | `colormap_file` | `land_export` (optional per-vertex tile color tint, `CExport::addColorMap()`, `export.cpp:1170` -- missed in the original field survey, found 2026-09-12; `land_export` runs fine without it) |
+| `leveldesign/ecosystems/<eco>/<eco>.bank` (moved here from `pipeline/landscape/` by Nuno 2026-09-12 -- note the one folder-name exception: `primes_racines`'s `.bank` lives under a folder literally named `primes_roots`, every other ecosystem's folder matches its own identifier) | `tile_bank_file` | `land_export`, `zone_lighter` (tile-noise displacement lookup, `docs/zone_tools.md` §2) |
 | `leveldesign/DFN` | `level_design_dfn_directory` / `dfn_dir` | `land_export`; optionally `zone_dependencies` |
 | `leveldesign/world` | `level_design_world_directory` / `continents_dir` | `land_export`; optionally `zone_dependencies` |

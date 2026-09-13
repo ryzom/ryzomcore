@@ -68,8 +68,14 @@ class LandExportError(Exception):
 class LandExportConfig:
 	"""land_export's .cfg fields (SOptions::loadFromCfg, land_export/main.cpp:155-201),
 	confirmed exhaustive against a real .cfg (nexus/generated/land_exporter.cfg).
-	ColorMapFile appears in that real file but is never actually read by
-	loadFromCfg -- a dead field, intentionally omitted here."""
+
+	`color_map_file` (optional, empty string if unused) IS actually read and
+	applied -- corrected 2026-09-12: an earlier version of this docstring
+	claimed it was a dead field never read by `loadFromCfg`, contradicted by
+	`main.cpp:174` (`this->ColorMapFile = getStr("ColorMapFile")`) and its
+	real use in `CExport::addColorMap()`/`getColor()` (`export.cpp:1170,2225`)
+	to tint every patch vertex from the image, a per-continent optional
+	color layer on top of the tile textures."""
 	out_zone_dir: str
 	ref_zone_dir: str
 	ref_ig_dir: str
@@ -94,6 +100,7 @@ class LandExportConfig:
 	dfn_dir: str
 	continent_file: str
 	continents_dir: str
+	color_map_file: str = ""
 
 
 def _cfg_string(value: str) -> str:
@@ -132,6 +139,8 @@ def build_land_export_cfg(config: LandExportConfig) -> str:
 		f"ContinentFile = {_cfg_string(config.continent_file)};",
 		f"ContinentsDir = {_cfg_string(config.continents_dir)};",
 	]
+	if config.color_map_file:
+		lines.append(f"ColorMapFile = {_cfg_string(config.color_map_file)};")
 	# A file ending in a comment with no trailing newline throws on load
 	# (config_file.h quirk) -- always end with a blank line.
 	return "\n".join(lines) + "\n\n"

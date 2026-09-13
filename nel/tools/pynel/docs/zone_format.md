@@ -214,3 +214,23 @@ Remaining open point: the lumel-compression block layout
 treats it as an opaque blob (see policy note above), read back and
 rewritten byte-for-byte. Only relevant if Forgery ever needs to visualize/
 edit lumels directly, out of scope for this chantier.
+
+## Header-only reading: `parse_zone_header()` (2026-09-13)
+
+For a caller that only needs `zone_bb` (e.g. Forgery computing a whole
+continent's elevation-color range across every zone, project-todos/forgery/
+landscape_editor__region_management__zone_bam_cache.md), `parse_zone()`
+is the wrong tool: it always builds the full `Zone` object, patches and all
+-- for a `.zonel` (the lit, heaviest build stage, baked lumels included)
+this measured at 268 ms + 14.3 MB retained for a single 423 KB file.
+
+`pynel.ryzom_zone.parse_zone_header()` reads only `zone_id`/`zone_bb`/
+`patch_bias`/`patch_scale` (the same leading bytes `parse_zone()` itself
+reads first) and stops, never touching `border_vertices`/`patchs`/
+`patch_connects`/`point_lights`. Verified 2026-09-13 against real `.zone`/
+`.zonew`/`.zonel` files of the same zone: `zone_bb` is byte-identical
+across all three build stages (elevation/geometry never changes, only
+lighting data is added) -- confirming a header-only read is always a
+safe substitute for `parse_zone().zone_bb`. Measured cost: 0.02-0.05 ms
+regardless of file size/extension (~5000x faster than a full parse for a
+`.zonel`).

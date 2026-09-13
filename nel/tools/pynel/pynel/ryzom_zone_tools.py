@@ -55,7 +55,7 @@ Usage:
 
 import subprocess
 from pathlib import Path
-from typing import Union
+from typing import Dict, Optional, Union
 
 
 def run_zone_welder(
@@ -63,15 +63,24 @@ def run_zone_welder(
 	input_path: Union[str, Path],
 	output_path: Union[str, Path],
 	weld_threshold: float = 1.1,
+	env: Optional[Dict[str, str]] = None,
 ) -> subprocess.CompletedProcess:
 	"""Runs `zone_welder <input_path> <output_path> <weld_threshold>`.
 	Neighbor zones for `input_path` (see getAdjacentZonesName() naming
 	convention, docs/zone_tools.md §1) are loaded from -- and, if modified,
-	rewritten to -- the directory of `output_path`, not `input_path`."""
+	rewritten to -- the directory of `output_path`, not `input_path`.
+
+	`env`, if given, replaces the subprocess's environment entirely (same
+	as `subprocess.run`'s own `env` -- the caller is responsible for
+	starting from a copy of `os.environ` if it only wants to add/override a
+	variable, e.g. a caller-provided binary that needs its own bundled
+	`LD_LIBRARY_PATH`); `None` (the default) inherits this process's
+	environment unchanged."""
 	return subprocess.run(
 		[str(binary_path), str(input_path), str(output_path), str(weld_threshold)],
 		capture_output=True,
 		text=True,
+		env=env,
 	)
 
 

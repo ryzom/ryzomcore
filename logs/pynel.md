@@ -925,3 +925,34 @@ first).
   added/removed) since `ryzom-private-data` HEAD is the intended up-to-date
   source, not a frozen reproduction of the old reference files.
 - Documentation: new `nel/tools/pynel/docs/region_export.md`.
+
+## 2026-09-13 — ✨ parse_zone_header() (lecture d'en-tête légère .zone), pynel 0.15.0
+
+Closes `project-todos/pynel/zone_header_reader.md`, a dependency of Forgery's
+`landscape_editor__region_management__zone_bam_cache.md` (see `logs/forgery.md`).
+
+**`parse_zone_header()`** (new, `ryzom_zone.py`): reads only `zone_id`/
+`zone_bb`/`patch_bias`/`patch_scale` -- the exact leading bytes `parse_zone()`
+itself reads first -- then stops, never touching `num_vertices`/
+`border_vertices`/`patchs`/`patch_connects`/`point_lights` (the bulk of a real
+file). Motivated by a real perf bug found in Forgery: computing a whole
+continent's elevation range via a full `parse_zone()` cost 268ms + 14.3 MB
+retained per zone for a real 423 KB `.zonel` (the heaviest of the 3 build
+stages, and the one `region_loader.py` always prefers when available) -- for
+just 53 zones, ~14s and ~750 MB of RAM. The new header-only read measured at
+0.02-0.05ms regardless of file size/extension (~5000x faster), and verified
+byte-identical `zone_bb` across real `.zone`/`.zonew`/`.zonel` files of the
+same zone (elevation/geometry never changes across build stages, only
+lighting data is added) -- confirming it's always a safe substitute for
+`parse_zone().zone_bb`.
+
+Also bundled two small pre-existing fixes: `LandExportConfig.color_map_file`
+(`ryzom_land_tools.py`) -- `ColorMapFile` was wrongly documented as a dead
+field never read by `loadFromCfg`, contradicted by `main.cpp:174`'s real use
+tinting patch vertices from an optional per-continent color layer; and an
+`env` parameter on `run_zone_welder()` (`ryzom_zone_tools.py`) to let a
+caller override the subprocess environment entirely (e.g. a bundled binary
+needing its own `LD_LIBRARY_PATH`).
+
+Documentation: `docs/zone_format.md` (new "Header-only reading" section),
+`docs/pipeline_directories.md`.

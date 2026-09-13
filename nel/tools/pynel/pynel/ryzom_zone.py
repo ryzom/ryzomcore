@@ -188,6 +188,23 @@ class PointLightGroup:
 
 
 @dataclass
+class ZoneHeader:
+	"""The leading fields of a CZone payload (zone.h/.cpp) -- `zone_id`
+	through `patch_scale`, everything parse_zone_header() reads before
+	stopping. Same values `Zone` itself would carry for these fields, just
+	without ever touching `num_vertices`/`border_vertices`/`patchs`/
+	`patch_connects`/`point_lights` (project-todos/pynel/
+	zone_header_reader.md): a caller that only wants `zone_bb` (e.g.
+	Forgery's landscape_editor__region_management__zone_bam_cache.md,
+	computing a whole continent's elevation range) has no reason to pay for
+	parsing every patch's geometry and a `.zonel`'s baked lumel data."""
+	zone_id: int
+	zone_bb: AABBox
+	patch_bias: Vector3
+	patch_scale: float
+
+
+@dataclass
 class Zone:
 	"""CZone (zone.h/.cpp), the top-level .zone/.zonew/.zonel payload."""
 	zone_id: int
@@ -487,6 +504,34 @@ def _parse_point_light_array(f: _Reader) -> Tuple[List[PointLightNamed], List[Po
 			groups.append(PointLightGroup(name, 0, start_id, end_id))
 
 	return point_lights, groups
+
+
+def parse_zone_header(data: bytes) -> ZoneHeader:
+	"""Reads just `zone_id`/`zone_bb`/`patch_bias`/`patch_scale` -- the exact
+	same leading bytes parse_zone() itself reads first -- then stops,
+	never touching `num_vertices`/`border_vertices`/`patchs`/
+	`patch_connects`/`point_lights` (project-todos/pynel/
+	zone_header_reader.md). `zone_bb` is identical across a zone's
+	`.zone`/`.zonew`/`.zonel` build stages (elevation/geometry never
+	changes, only lighting data is added) -- verified 2026-09-13 against
+	real data, see this chantier's own step 2. Raises ZoneParseError on the
+	same conditions parse_zone() would (unsupported version, bad magic,
+	truncated data) -- deliberately does NOT check for trailing bytes after
+	patch_scale, unlike parse_zone(): stopping early is the entire point."""
+	f = _Reader(data)
+
+	version = f.version()
+	if version < 3:
+		raise ZoneParseError(f"unsupported .zone version {version} (< 3 not supported by NeL itself)")
+
+	f.check_magic(MAGIC)
+
+	zone_id = f.u16()
+	zone_bb = _parse_aabbox(f)
+	patch_bias = f.vector3()
+	patch_scale = f.f32()
+
+	return ZoneHeader(zone_id=zone_id, zone_bb=zone_bb, patch_bias=patch_bias, patch_scale=patch_scale)
 
 
 def parse_zone(data: bytes) -> Zone:
