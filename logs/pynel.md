@@ -884,3 +884,44 @@ and `ryzom_land_tools.py`.
   three native bugs found; new `docs/pipeline_directories.md` (per-tool `pipeline/`
   directory usage, for Atyscape's archive cleanup); the `workspace/`/`graphics/`
   forbidden-data-root rule documented in `docs/zone_tools.md` §9.
+
+## 2026-09-13 — ✨ Add region_export: continent/region/place export to world.json/world.lua
+
+New module `pynel/region_export.py` (project-todos/pynel/region_places_export.md,
+now closed): reads Ryzom's named lore regions and places (e.g. Tryker mainland's
+`lagoonsofloria`, `windsofmuse`...) from `region_<continent>.primitive` files (LIGO
+primitive tree, `pynel.ryzom_primitive`) in the private `ryzom-private-data`
+leveldesign repository -- the only real source, since neither `live_data_path`'s
+`packed_sheets` nor `ryzom.world` carry these (both were investigated and ruled out
+first).
+
+- `primzone_to_json(prim)`/`build_world_regions(path)`: converts the `.primitive`
+  tree to `{name: [visible, points, children_or_type]}`, matching the exact
+  structure the real Ryzom Live client itself ships as `gamedev/world.lua`. A
+  single `.primitive` file can hold several sibling top-level continents (e.g.
+  `region_fyros.primitive` has `continent_fyros`/`continent_fyros_newbie`/
+  `continent_fyros_islands` side by side) -- all of them are collected, not just
+  the first. Coordinates are truncated toward zero (`int()`, a C++-style cast),
+  not rounded to the nearest integer. The leaf/branch distinction is the node's
+  own `class` property ("place" = leaf) -- a childless continent/region still
+  produces an empty list `[]`, never mistaken for a leaf.
+- `to_lua(regions)`/`parse_world_lua(text)`: a dedicated tokenizer + recursive-
+  descent parser (not a general Lua engine) for the real `world.lua`'s exact
+  grammar, including its `["name"] = {...}` bracketed-key form for names that
+  aren't valid bare Lua identifiers (real examples: `"Karavan Embassy"`,
+  `"endroit_résidu_oeuf"`). Round-trip exact
+  (`parse_world_lua(to_lua(regions)) == regions`). The real file's trailing
+  `FILE_WORLD_VERSION` client-build-version footer is deliberately never
+  written or read (a regeneration has no way to know that number).
+- CLI: `python -m pynel.region_export [--format {json,lua}] [--output-dir <folder>]`,
+  one format per run, writing `world.<format>` into the destination folder
+  (`ryzom-data` by default). Source is always
+  `pynel.repository_paths.get("ryzom-private-data")`, already exposed as a
+  folder-picker setting in both Patina and Atyscape.
+- Validated against real data throughout: exact byte-for-byte match against
+  Nuno's own `world.json`/the real client's `world.lua` wherever the underlying
+  leveldesign data hasn't changed since; real content drift found and confirmed
+  expected elsewhere (polygons nudged, some `place_type`s changed, some places
+  added/removed) since `ryzom-private-data` HEAD is the intended up-to-date
+  source, not a frozen reproduction of the old reference files.
+- Documentation: new `nel/tools/pynel/docs/region_export.md`.
