@@ -857,13 +857,29 @@ def zone_name_to_world_pos(name: str) -> Vector2:
 def world_pos_to_zone_name(x: float, y: float) -> Optional[str]:
 	"""Inverse of zone_name_to_world_pos(): the name of the 160x160 zone tile
 	containing world position (x, y), or None if outside the valid zone grid
-	([0, 255] on each axis, e.g. y must be in [-40800, 0]). Port of
-	CExport::getZoneNameFromXY() (ryzom-core's
-	ryzom/tools/leveldesign/world_editor/land_export_lib/export.cpp:2357,
-	3 other byte-identical copies -- there is no equivalent in the client,
-	which only has the name->pos direction, zone_util.cpp:33)."""
+	([0, 255] on each axis, e.g. y must be in [-40800, 0]).
+
+	`getZoneNameFromXY()` itself (ryzom-core's
+	ryzom/tools/leveldesign/world_editor/land_export_lib/export.cpp:2357, 3
+	other byte-identical copies) only stringifies an already-computed
+	integer (col, row) pair -- the real world-position -> (col, row) math
+	lives in ITS OWN CALLERS instead (world_editor's main_frm.cpp:750-755,
+	display.cpp:3531-3532, generate_primitive.cpp:618-621), all three
+	byte-identical: `col = floor(x / 160)`, `row = -floor(y / 160)` (`y`
+	itself negative in the playable area, so `row` comes out positive) --
+	confirmed against zone_util.cpp's own inverse (`getPosFromZoneName()`,
+	:33-67/:69-102, `y = -160 * row`), which only round-trips correctly
+	with `row = -floor(y / 160)`.
+
+	CORRECTED 2026-09-14 (Nuno, after a real Tryker zone's own center
+	round-tripped to the WRONG name): this used to compute
+	`row = floor(-y / 160.0)` -- NOT equivalent to `-floor(y / 160.0)`
+	unless `y` is an exact multiple of 160 (`floor(-a) = -floor(a) - 1`
+	whenever `a` isn't already an integer), so every position not sitting
+	exactly on a grid line -- i.e. almost every real position -- landed one
+	zone off from the real one."""
 	col = math.floor(x / 160.0)
-	row = math.floor(-y / 160.0)
+	row = -math.floor(y / 160.0)
 	if not (0 <= col <= 255) or not (0 <= row <= 255):
 		return None
 	return f"{row}_{chr(ord('A') + col // 26)}{chr(ord('A') + col % 26)}"

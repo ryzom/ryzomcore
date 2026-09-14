@@ -101,6 +101,19 @@ class LandExportConfig:
 	continent_file: str
 	continents_dir: str
 	color_map_file: str = ""
+	# Not read/written by land_export/zone_ig_lighter's own .cfg (see
+	# _land_export_cfg_lines() below, which never references it) -- a
+	# Forgery-only lookup path (ig_full_load.list_continent_ig_refs_edition()'s
+	# own Édition-mode resolution) for "other" `.ig`s (villages, water, sky)
+	# ALREADY lit by the legacy build_gamedata pipeline, sibling of
+	# `out_ig_dir` (e.g. `.../tryker/ig_other_lighted` next to
+	# `.../tryker/zone_lighted_ig_land`) -- confirmed 2026-09-13 present
+	# with this exact name across every continent Nuno has actually built
+	# (bagne/fyros/nexus/tryker/...). `land_build.py`'s own Build never
+	# produces this directory's contents (only zone_ig_lighter's per-zone
+	# `out_ig_dir`), so it stays empty/stale for a continent nobody has run
+	# the legacy pipeline for -- default "" for callers that never set it.
+	ig_other_lighted_dir: str = ""
 
 
 def _cfg_string(value: str) -> str:

@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-14 — 🐛 Fix world_pos_to_zone_name() row formula, pynel 0.15.1
+
+`ryzom_packed_sheets.world_pos_to_zone_name()` computed
+`row = floor(-y / 160)` instead of `row = -floor(y / 160)` -- the same
+value for most positions, but off by one zone near a row boundary
+(`floor(-y)` and `-floor(y)` only agree when `y` is an exact multiple of
+160). Found while debugging an invisible-water issue in Atyscape (Forgery):
+manual position checks made against the buggy formula kept pointing at the
+wrong neighboring zone. Fixed against the real C++ formula
+(`getZoneNameFromXY`/`getPosFromZoneName`, confirmed across 4 ryzom-core
+call sites) and re-verified: a real zone's own center now round-trips
+correctly (was off by one row before), 888/888 fuzzed positions round-trip.
+
+Also added `LandExportConfig.ig_other_lighted_dir` (Forgery-only lookup
+path for the legacy build_gamedata pipeline's already-lit "other" `.ig`s --
+villages/water/sky -- sibling of `out_ig_dir`; never read/written by
+`land_export`/`zone_ig_lighter`'s own `.cfg`).
+
 ## 2026-09-11 — ✨ Orchestrate zone_elevation/zone_dependencies/zone_ig_lighter, pynel 0.14.0
 
 `project-todos/pynel/land_pipeline.md` step 4 (orchestration) and step 5

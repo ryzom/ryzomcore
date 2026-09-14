@@ -752,24 +752,40 @@ folded into `zone_name_to_world_pos()` itself -- callers (e.g. Forgery's
 continent bounding-box computation) must apply it explicitly, since it only
 makes sense for a max corner, not for every zone-name lookup.
 
-### `world_pos_to_zone_name()` -- the inverse (2026-09-10)
+### `world_pos_to_zone_name()` -- the inverse (2026-09-10, formula corrected 2026-09-14)
 
 Given a raw world position `(x, y)`, finds which 160×160 zone tile contains
-it. No client-side equivalent exists (`zone_util.cpp` only has the name->pos
-direction) -- ported instead from `CExport::getZoneNameFromXY()`
-(`ryzom-core/ryzom/tools/leveldesign/world_editor/land_export_lib/
-export.cpp:2357`, 3 other byte-identical copies across the leveldesign
-tools):
+it. `getZoneNameFromXY()` itself (`ryzom-core/ryzom/tools/leveldesign/
+world_editor/land_export_lib/export.cpp:2357`, 3 other byte-identical
+copies) only stringifies an already-computed integer `(col, row)` pair --
+the real world-position -> `(col, row)` math lives in ITS OWN CALLERS
+instead (world_editor's `main_frm.cpp:750-755`, `display.cpp:3531-3532`,
+`generate_primitive.cpp:618-621`, all three byte-identical), confirmed
+against `zone_util.cpp`'s own inverse (`getPosFromZoneName()`, `y = -160 *
+row`), which only round-trips with `row = -floor(y / 160)`:
 
 ```
 col = floor(x / 160.0)
-row = floor(-y / 160.0)
+row = -floor(y / 160.0)
 if col not in [0, 255] or row not in [0, 255]: return None   # C++ returns "NOT VALID" instead
 zone_name = f"{row}_{chr(65 + col // 26)}{chr(65 + col % 26)}"
 ```
 
-Round-trip-verified against `zone_name_to_world_pos()` (fuzz-tested over
-2000 random positions inside every valid zone tile, 2026-09-10).
+**Bug found and fixed 2026-09-14** (Nuno, chasing a Forgery `.ig` positioning
+mystery that turned out to be this): the code here originally computed
+`row = floor(-y / 160.0)` instead -- NOT equivalent to `-floor(y / 160.0)`
+unless `y` is an exact multiple of 160 (`floor(-a) = -floor(a) - 1`
+whenever `a` isn't already an integer), so almost every real position (only
+ones sitting exactly on a grid line were spared) resolved one zone off from
+the real one. The "fuzz-tested over 2000 random positions" round-trip claim
+below turned out not to have caught this -- reverified after the fix, this
+time checked against a real zone's own true bounding box (not just
+`zone_name_to_world_pos()`'s own origin corner).
+
+Round-trip-verified against `zone_name_to_world_pos()` (2026-09-14: 888
+positions spread across the whole valid grid, each 80 units in from a
+cell's own origin corner -- i.e. a real interior point, not the corner
+itself).
 
 ## Other sheet types (deliberately out of scope beyond `.creature`/`.item`/`.sitem`/`.animset_list`/`.world`/`.continent`)
 
