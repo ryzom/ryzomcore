@@ -1,10 +1,8 @@
 """LandscapeEditorApp mixin: everything specific to Edition mode (project-todos/
 forgery/landscape_editor__land_preview.md step 5) -- continent list read
 straight from `ryzom-data`'s own `ryzom.world`, the `.land`+brick fallback
-for zones/cells never yet exported by the pipeline, the cursor status's
-`.land`-assigned brick name, and the "Generate missing .zonew" button
-(`[WELD]`, meaningless in Visualisation mode since `ryzom_data_path` is
-always `None` there -- see `_load_continent()`, `landscape_editor.py`).
+for zones/cells never yet exported by the pipeline, and the cursor status's
+`.land`-assigned brick name.
 
 Imports from `landscape_editor_modes.py`, NOT from `landscape_editor.py`
 itself -- see that module's own docstring for why (circular import).
@@ -13,7 +11,7 @@ itself -- see that module's own docstring for why (circular import).
 import threading
 from pathlib import Path
 
-from imgui_bundle import imgui
+from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 
 from pynel import repository_paths
 from pynel.ryzom_land import load_land, save_land, LandParseError, STRING_UNUSED, ZoneUnit
@@ -23,6 +21,7 @@ from pynel.ryzom_zone import load_zone, ZoneParseError
 from ryzom_forgery import continent_ecosystem
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_pipeline_reference as cpr
+from ryzom_forgery.icon_colors import pastel_color_for
 from ryzom_forgery.zone_geom_cache import ZoneManifestEntry
 from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_build
@@ -31,14 +30,21 @@ from ryzom_forgery.land_geometry import (
 	brick_size_in_cells_from_half_size, expected_zone_name, find_missing_land_cells, land_cell_for_zone_name,
 	land_cell_index, piece_origin, transform_zone_cache_data, used_land_cells,
 )
-from ryzom_forgery.apps.landscape_editor_modes import _MODE_EDITION, _MODE_REAL_EXTENSIONS
-from ryzom_forgery import settings as app_settings
-from ryzom_forgery import zone_tools
+from ryzom_forgery.apps.landscape_editor_modes import _MODE_EDITION
+from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button
 from ryzom_forgery.region_loader import (
-	best_ref_for_extensions, continent_zone_dirs, get_zone_extensions_index, ZoneRef,
+	best_ref_for_extensions, continent_zone_dirs, get_zone_extensions_index, load_zone_cache_data,
+	RegionLoadError, ZoneRef,
 )
 from ryzom_forgery.zone_cache import read_zone_cache, write_zone_cache
 from ryzom_forgery.zone_geometry import ZONE_CELL_SIZE, zone_to_cache_data
+
+# "Comme Patina" (Nuno 2026-09-14) -- names/values called out in a section
+# otherwise plain white, same idea as landscape_editor.py's own
+# _STATS_HEADER_COLOR/_STATS_VALUE_COLOR (orange for an identifier, green
+# for a coordinate/measured value).
+_NAME_COLOR = (1.0, 0.75, 0.3, 1.0)
+_VALUE_COLOR = (0.6, 0.9, 0.5, 1.0)
 
 
 class EditModeMixin:
@@ -65,13 +71,12 @@ class EditModeMixin:
 		"""`(land_path, brick_zones_dir)` for the currently selected continent,
 		or `None` if either can't be resolved -- the static part of the
 		`.land`+brick fallback (project-todos/forgery/
-		landscape_editor__land_preview.md step 3, extended to `[WELD]` by
-		landscape_editor__zone_render_modes.md step 9), cheap enough to
-		resolve eagerly on the main thread. Only ever called from
+		landscape_editor__land_preview.md step 3), cheap enough to resolve
+		eagerly on the main thread. Only ever called from
 		`_apply_render_mode()` (landscape_editor.py) once already gated on
-		Edition mode + a compatible render mode + a selected continent -- see
-		its own docstring for why the actual missing-cell computation happens
-		later, in the background thread."""
+		Edition mode + a selected continent -- see its own docstring for why
+		the actual missing-cell computation happens later, in the background
+		thread."""
 		ryzom_data_path = repository_paths.get("ryzom-data")
 		land_path = land_loader.find_land_files(ryzom_data_path).get(self.selected_continent_name)
 		ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(
@@ -147,16 +152,45 @@ class EditModeMixin:
 			extensions[name] = ext_map
 		return default_refs, extensions, all_used_cells
 
+	def _load_land_cached(self, land_path):
+		"""Reuses the last parsed `.land` for `land_path` if the file hasn't
+		changed since (mtime check), instead of re-parsing it from scratch
+		(project-todos/forgery/landscape_editor__render_modes_removal.md,
+		Nuno 2026-09-14: "j'ai toujours la barre de progression... meme
+		apres 3 lancement" -- traced via (IA_AGENT_DEBUG) logs to THIS
+		exact call, `load_land()`, re-parsing tryker's own 1055-cell `.land`
+		file from scratch on every single region checkbox toggle, since
+		_toggle_region() reloads the WHOLE checked-region union through
+		_apply_render_mode() -> _run_load_refs() -> here on every single
+		toggle -- the per-zone `.bam`/position caches were never the
+		bottleneck, confirmed 0 misses in Nuno's own logs).
+
+		Only ever called from _load_land_fallback_pieces(), itself only
+		ever running on the single background thread _apply_render_mode()
+		allows in flight at once (its own `self._mode_reload_progress`
+		single-flight guard) -- safe to cache on `self` without a lock,
+		nothing else ever touches `self._land_fallback_cache`."""
+		try:
+			mtime = land_path.stat().st_mtime
+		except OSError:
+			mtime = None
+		cached = self._land_fallback_cache
+		if cached is not None and cached[0] == land_path and cached[1] == mtime:
+			return cached[2]
+		land = load_land(land_path)
+		self._land_fallback_cache = (land_path, mtime, land)
+		return land
+
 	def _load_land_fallback_pieces(
 		self, land_path, brick_zones_dir, zones, manifest_zones, progress, failed, allowed_cells=None,
 	):
 		"""Background-thread body for the `.land`+brick fallback (called from
 		`_run_load_refs()`, landscape_editor.py, only when `land_fallback` is
 		not None -- i.e. always from Edition mode). Mutates `zones`/
-		`manifest_zones` (dicts) and `failed` (list) in place, and adds to
-		`progress["gray"]` -- same reasoning as `_run_load_continent()`'s own
-		docstring for why background-thread code only ever writes to shared
-		mutable structures, never touches Panda3D.
+		`manifest_zones` (dicts) and `failed` (list) in place -- same
+		reasoning as `_run_load_continent()`'s own docstring for why
+		background-thread code only ever writes to shared mutable
+		structures, never touches Panda3D.
 
 		`allowed_cells` (project-todos/forgery/landscape_editor__region_
 		management.md step 5 fix), when given, restricts which missing
@@ -166,7 +200,7 @@ class EditModeMixin:
 		unrestricted, the pre-region_management behaviour (every missing
 		cell gets its brick, regardless of region)."""
 		try:
-			land = load_land(land_path)
+			land = self._load_land_cached(land_path)
 			used_cells = sum(1 for unit in land.zones if unit.zone_name != STRING_UNUSED)
 			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor_edit_mode.py:_load_land_fallback_pieces) "
 			      f"land loaded: {land_path} used_cells={used_cells} exported_zones={len(zones)}")
@@ -194,7 +228,8 @@ class EditModeMixin:
 			# overlapping itself).
 			loaded_bricks = {}
 			rendered_pieces = set()
-			for (pos_x, pos_y), unit in find_missing_land_cells(land, existing_cells).items():
+			missing_cells = find_missing_land_cells(land, existing_cells)
+			for (pos_x, pos_y), unit in missing_cells.items():
 				if allowed_cells is not None and (pos_x, pos_y) not in allowed_cells:
 					continue
 				brick_path = brick_zones_dir / f"{unit.zone_name}.zone"
@@ -243,7 +278,6 @@ class EditModeMixin:
 					except OSError:
 						pass
 				zones[cell_name] = piece_data
-				progress["gray"].add(cell_name)
 				# ".land" is never a real zone extension (.zone/.zonew/
 				# .zonel) -- unambiguous marker that this manifest entry
 				# is a placed brick, not an exported zone, and its
@@ -295,96 +329,6 @@ class EditModeMixin:
 			(land.min_x + (i % width), land.min_y + (i // width)): unit.zone_name
 			for i, unit in enumerate(land.zones) if unit.zone_name != STRING_UNUSED
 		}
-
-	def _generate_missing_zonew(self):
-		"""Starts a background weld pass (project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 9) over every currently
-		loaded zone missing a `.zonew`/`.zonel` -- one native `zone_welder`
-		call per zone (zone_tools.run_zone_welder()), each result persisted
-		straight to `<ryzom-data>/pipeline/export/continents/<continent>/
-		zone_weld/<name>.zonew` (zone_tools.missing_zonew_dest()). Each
-		welded zone is queued on `progress["ready"]` as it completes so
-		draw_panel() can display it immediately (live, one zone at a time)
-		instead of waiting for the whole batch. A second call while one is
-		already running is ignored, same as _load_continent()."""
-		if self._weld_generate_progress is not None and not self._weld_generate_progress["done"]:
-			return
-		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
-		if real_exts is None:
-			return
-		missing_refs = [
-			self._loaded_refs[name] for name, ext_map in self._loaded_extensions.items()
-			if name in self._loaded_refs and not any(ext in ext_map for ext in real_exts)
-		]
-		# Cells with no real .zone at all (project-todos/forgery/
-		# landscape_editor__zone_render_modes.md step 9, Nuno 2026-09-11) --
-		# nothing zone_welder can work on, always reported as blocked rather
-		# than attempted (land_export/land_composition territory, see
-		# _run_generate_missing_zonew()'s own docstring).
-		land_missing_names = sorted(self._land_missing_cells)
-		if not missing_refs and not land_missing_names:
-			return
-		self._zone_error = None
-		live_data_path = app_settings.load().live_data_path
-		ryzom_data_path = repository_paths.get("ryzom-data")
-		pipeline_continent_name = self._selected_continent_pipeline_name
-		if missing_refs and not pipeline_continent_name:
-			self._zone_error = "No pipeline continent selected -- cannot place generated .zonew files."
-			report_error(self._zone_error)
-			return
-		progress = {
-			"done": False, "error": None,
-			"total": len(missing_refs) + len(land_missing_names), "processed": 0, "ready": [],
-		}
-		self._weld_generate_progress = progress
-		thread = threading.Thread(
-			target=self._run_generate_missing_zonew,
-			args=(missing_refs, land_missing_names, live_data_path, ryzom_data_path, pipeline_continent_name, progress),
-			daemon=True,
-		)
-		thread.start()
-
-	def _run_generate_missing_zonew(
-		self, refs, land_missing_names, live_data_path, ryzom_data_path, pipeline_continent_name, progress,
-	):
-		"""Background-thread body for _generate_missing_zonew() -- calls the
-		native `zone_welder` once per zone in `refs` and persists each result
-		(see zone_tools.run_zone_welder()'s own `persist_to` docstring),
-		appending `(name, ZoneCacheData, new_ref)` to `progress["ready"]` for
-		each success so draw_panel() can pick it up on its next frame --
-		`new_ref` is a loose-file ZoneRef pointing at the just-written
-		`.zonew`, for draw_panel() to merge into self._loaded_extensions.
-
-		`land_missing_names` (this chantier's step 9, Nuno 2026-09-11) are
-		"land:x:y" cells with no real .zone anywhere -- producing one is
-		`land_export`, tracked separately as
-		project-todos/forgery/landscape_editor__land_composition.md step 4,
-		itself blocked on project-todos/pynel/land_pipeline.md step 1. Never
-		attempted here: each is reported as a clear, individual failure
-		instead, without holding up the zones that CAN actually be welded.
-
-		Writes only to `progress` (list.append()/dict field writes, safe
-		under the GIL, same reasoning as _run_load_continent())."""
-		failed = []
-		for ref in refs:
-			try:
-				dest = zone_tools.missing_zonew_dest(ryzom_data_path, pipeline_continent_name, ref.name)
-				zone = zone_tools.run_zone_welder(ref, live_data_path, persist_to=dest)
-				new_ref = ZoneRef(name=ref.name, x=ref.x, y=ref.y, source_path=dest, bnp_entry=None)
-				progress["ready"].append((ref.name, zone_to_cache_data(zone), new_ref))
-			except zone_tools.ZoneToolError as exc:
-				failed.append(str(exc))
-			progress["processed"] += 1
-		for cell_name in land_missing_names:
-			_, pos_x, pos_y = cell_name.split(":")
-			failed.append(
-				f"cell ({pos_x}, {pos_y}): no .zone exported yet -- finish land_composition (land_export) first"
-			)
-			progress["processed"] += 1
-		if failed:
-			progress["error"] = f"{len(failed)}/{progress['total']} zone(s) failed to weld: {'; '.join(failed[:3])}"
-			report_error(progress["error"])
-		progress["done"] = True
 
 	def _ensure_land_region_loaded(self):
 		"""Loads (once per continent selection, project-todos/forgery/
@@ -485,7 +429,6 @@ class EditModeMixin:
 			self.zones.pop(stale_name, None)
 			self._loaded_refs.pop(stale_name, None)
 			self._loaded_extensions.pop(stale_name, None)
-			self._gray_zones.discard(stale_name)
 
 		land_fallback = self._resolve_land_fallback_paths()
 		if land_fallback is None or self._land_region is None:
@@ -515,7 +458,6 @@ class EditModeMixin:
 				pass
 		piece_data = transform_zone_cache_data(raw_data, pos_x, pos_y, unit.rot, unit.flip)
 		self.zones[fallback_name] = piece_data
-		self._gray_zones.add(fallback_name)
 		self._rebuild_zone_node(fallback_name, piece_data)
 
 	def _invalidate_built_zone_files(self, pos_x, pos_y):
@@ -610,12 +552,16 @@ class EditModeMixin:
 
 	def _draw_land_composition_editor(self):
 		"""Grid editing panel (step 6) -- only meaningful in Edition mode,
-		[LAND] render mode (the raw `.land` composition, not a pipeline
-		stage), with a continent selected and a grid cell picked (project-
-		todos/forgery/landscape_editor__land_composition.md's own decisions:
-		LAND replaces POLY in Dev). Shown at the bottom of the Landscape tab
-		(`_draw_landscape_tab()`, landscape_editor.py)."""
-		if self._app_mode != _MODE_EDITION or self.render_mode != "POLY" or not self.selected_continent_name:
+		with a continent selected and a grid cell picked (project-todos/
+		forgery/landscape_editor__render_modes_removal.md: shown unconditionally
+		in Edition once those two are true, no render-mode gate anymore since
+		the render mode picker itself was removed). Shown at the bottom of
+		the Landscape tab (`_draw_landscape_tab()`, landscape_editor.py).
+		Colored icon header + orange current-brick name (Nuno 2026-09-14:
+		"comme Patina") -- the cell coordinates used to be in the title too,
+		dropped as redundant noise (Nuno: "vire le -- cell, sert à rien"),
+		the cursor status bar already shows them."""
+		if self._app_mode != _MODE_EDITION or not self.selected_continent_name:
 			return
 		if self._land_selected_cell is None:
 			return
@@ -630,7 +576,9 @@ class EditModeMixin:
 		index = land_cell_index(self._land_region, pos_x, pos_y)
 
 		imgui.separator()
-		imgui.text(f"Composition editor -- cell ({pos_x}, {pos_y})")
+		imgui.push_style_color(imgui.Col_.text.value, pastel_color_for(fa_icons.ICON_FA_LAYER_GROUP))
+		imgui.text(f"{fa_icons.ICON_FA_LAYER_GROUP} Composition editor")
+		imgui.pop_style_color()
 		if index is None:
 			imgui.text_colored((1.0, 0.7, 0.3, 1.0), "Outside the .land grid -- growing the grid isn't supported.")
 			return
@@ -638,19 +586,36 @@ class EditModeMixin:
 		unit = self._land_region.zones[index]
 		current_brick = "" if unit.zone_name == STRING_UNUSED else unit.zone_name
 		bricks = self._available_land_bricks(brick_zones_dir)
-		imgui.text(f"Current brick: {current_brick or '(empty)'}")
+		imgui.text("Current brick:")
+		imgui.same_line()
+		imgui.text_colored(_NAME_COLOR, current_brick or "(empty)")
 
 		# Build-status checklist (Nuno 2026-09-12) -- real per-extension
 		# presence for this cell's own real zone name, straight from
 		# self._loaded_extensions (already the FULL {ext: ZoneRef} map for
-		# this name, see _build_land_driven_refs()'s own docstring), not
-		# derived from self.render_mode's resolution -- same real-disk-state
-		# philosophy as zone_geometry.zone_build_stage()'s coloring.
+		# this name, see _build_land_driven_refs()'s own docstring), same
+		# real-disk-state philosophy as zone_geometry.zone_build_stage()'s
+		# coloring. A present stage's own file can be deleted (trash icon,
+		# Nuno 2026-09-14: "quand on decoche => supprime le fichier .zone" --
+		# a plain checkbox can't offer a one-way, check-only-to-uncheck
+		# interaction in ImGui, so a delete button is the direct equivalent)
+		# -- only for a loose file (never packed inside a `.bnp`, not a
+		# real case in Édition but guarded anyway), and never for a missing
+		# stage (nothing to delete, and a checkbox can't single-handedly
+		# GENERATE a pipeline stage -- that's what [Build] is for).
 		real_name = expected_zone_name(pos_x, pos_y)
 		ext_map = self._loaded_extensions.get(real_name, {}) if real_name is not None else {}
 		for ext in (".zone", ".zonew", ".zonel"):
-			mark = "✅" if ext in ext_map else "❌"
+			ref = ext_map.get(ext)
+			present = ref is not None
+			mark = "✅" if present else "❌"
 			imgui.text(f"{mark} {ext}")
+			if present and ref.bnp_entry is None:
+				imgui.same_line()
+				imgui.push_id(ext)
+				if _icon_button(fa_icons.ICON_FA_TRASH, f"Delete {ext}", square=True):
+					self._delete_zone_stage_file(pos_x, pos_y, ext)
+				imgui.pop_id()
 
 		if imgui.begin_combo("##land-brick-picker", current_brick or "(choose a brick)"):
 			for brick_name in bricks:
@@ -676,6 +641,57 @@ class EditModeMixin:
 		if self._land_edit_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._land_edit_error)
 
+	def _delete_zone_stage_file(self, pos_x, pos_y, ext):
+		"""Deletes cell `(pos_x, pos_y)`'s own `ext` pipeline file on disk
+		(project-todos/forgery/landscape_editor__render_modes_removal.md,
+		the composition editor's per-stage trash icon) and updates the live
+		display in place -- these are pure BUILD OUTPUTS (`.zone`/`.zonew`/
+		`.zonel`), always regenerable from the `.land` composition via
+		[Build], never the composition itself, so deleting one is safe,
+		forced-rebuild territory, not data loss. Re-resolves to whatever
+		stage remains (`best_ref_for_extensions()`) rather than blindly
+		falling back to the raw `.land` brick -- deleting only the newest
+		stage (e.g. `.zonel`) still shows the next one down (`.zonew`) if
+		it's still on disk, not a full regression to stage 0."""
+		real_name = expected_zone_name(pos_x, pos_y)
+		if real_name is None:
+			return
+		ext_map = dict(self._loaded_extensions.get(real_name, {}))
+		ref = ext_map.get(ext)
+		if ref is None or ref.bnp_entry is not None:
+			return
+		try:
+			ref.source_path.unlink()
+		except OSError as exc:
+			self._land_edit_error = f"Failed to delete {ref.source_path}: {exc}"
+			report_error(self._land_edit_error)
+			return
+		self._land_edit_error = None
+		del ext_map[ext]
+		self._loaded_extensions[real_name] = ext_map
+		new_ref = best_ref_for_extensions(ext_map)
+		if new_ref is None:
+			# Nothing real left at all -- drop it from the loaded set and
+			# fall back to the raw `.land` brick, same as any other
+			# never-built cell (_apply_lightweight_cell_update()'s own
+			# normal case).
+			self._loaded_refs.pop(real_name, None)
+			old_node = self._zone_nodes.pop(real_name, None)
+			if old_node is not None:
+				old_node.remove_node()
+			self.zones.pop(real_name, None)
+			self._apply_lightweight_cell_update(pos_x, pos_y)
+			return
+		self._loaded_refs[real_name] = new_ref
+		try:
+			cache_data = load_zone_cache_data(new_ref)
+		except (RegionLoadError, OSError) as exc:
+			self._land_edit_error = f"Failed to reload {real_name}: {exc}"
+			report_error(self._land_edit_error)
+			return
+		self.zones[real_name] = cache_data
+		self._rebuild_zone_node(real_name, cache_data)
+
 	def _start_land_build(self):
 		"""Starts the full native pipeline (project-todos/forgery/
 		landscape_editor__land_composition.md step 7) for the currently
@@ -700,8 +716,7 @@ class EditModeMixin:
 		`progress` (dict field writes/list.append(), safe under the GIL, same
 		reasoning as _run_load_continent()'s own docstring). `progress["ready"]`
 		is drained by _draw_land_build_button() for the live 3D viewport
-		update, same convention as _run_generate_missing_zonew()'s own
-		`progress["ready"]`."""
+		update."""
 		try:
 			zonel_files = land_build.run_full_build(
 				ryzom_data_path, continent,
@@ -734,9 +749,7 @@ class EditModeMixin:
 		if progress is not None:
 			# Live viewport update (Nuno 2026-09-12): each zone lit by
 			# land_build.run_full_build() during this Build run appears in
-			# the 3D view immediately, same one-zone-at-a-time convention as
-			# _run_generate_missing_zonew()'s own progress["ready"] drain
-			# (draw_panel(), landscape_editor.py) -- a brand new zone (never
+			# the 3D view immediately, one zone at a time -- a brand new zone (never
 			# loaded before, e.g. a newly-added cell) is added to
 			# self.zones/self._loaded_refs/self._loaded_extensions here too,
 			# not just refreshed, since _rebuild_zone_node() alone only
@@ -759,7 +772,6 @@ class EditModeMixin:
 				else:
 					self._loaded_extensions.setdefault(name, {})[".zonel"] = self._loaded_refs.get(name)
 				self.zones[name] = cache_data
-				self._gray_zones.discard(name)
 				self._rebuild_zone_node(name, cache_data)
 			imgui.same_line()
 			imgui.text(progress["message"])

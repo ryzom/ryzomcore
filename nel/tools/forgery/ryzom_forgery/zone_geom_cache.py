@@ -51,8 +51,10 @@ from .config_dir import cache_dir
 _CACHE_DIR_NAME = "zone_geom_cache"
 # Bumped whenever ZoneGeomManifest's own shape changes -- any manifest
 # written under an older version is treated as absent (forces a full rebuild
-# + re-save, same as a first-ever load).
-_MANIFEST_FORMAT_VERSION = 1
+# + re-save, same as a first-ever load). Bumped to 2 (project-todos/forgery/
+# landscape_editor__render_modes_removal.md perf fix, Nuno 2026-09-14) when
+# bb_center/bb_half_size were added to ZoneGeomManifest.
+_MANIFEST_FORMAT_VERSION = 2
 
 
 class ZoneManifestEntry(NamedTuple):
@@ -81,11 +83,24 @@ class ZoneManifestEntry(NamedTuple):
 class ZoneGeomManifest(NamedTuple):
 	"""Everything needed to tell whether a saved `.bam` for one zone is still
 	an exact match for what `_set_loaded_zones()` would build fresh right
-	now -- compared field-by-field, never partially trusted."""
+	now -- compared field-by-field, never partially trusted.
+
+	`bb_center`/`bb_half_size` (project-todos/forgery/landscape_editor__
+	render_modes_removal.md perf fix, Nuno 2026-09-14) are NOT part of the
+	staleness comparison itself (deterministic given the same `entry` --
+	same source file content always tessellates to the same bounds) --
+	they're carried here purely so a caller can read a zone's bounds
+	straight off this cheap manifest (no `.bam` touched) when it already
+	knows the geometry cache will hit, skipping the far more expensive
+	`zone_cache.py` position-cache load (~3ms/zone measured, mostly pickle
+	unpacking thousands of individual Python floats) entirely for that
+	zone -- see `_run_load_refs()`'s own early-skip, `landscape_editor.py`."""
 	format_version: int
 	entry: ZoneManifestEntry
 	min_z: float
 	max_z: float
+	bb_center: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+	bb_half_size: Tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
 def _bundle_key(zone_name: str, mode: str) -> str:

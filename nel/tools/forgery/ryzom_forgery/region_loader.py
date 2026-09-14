@@ -318,7 +318,7 @@ def load_zone_ref(ref: ZoneRef) -> Zone:
 	return zone
 
 
-def load_zone_cache_data(ref: ZoneRef) -> ZoneCacheData:
+def load_zone_cache_data(ref: ZoneRef, force: bool = False, low_poly: bool = False) -> ZoneCacheData:
 	"""Cache-first replacement for load_zone_ref() + compute_zone_patch_positions()
 	(project-todos/forgery/landscape_editor__zone_disk_cache.md step 4) --
 	pure data, safe to call from a background thread like load_zone_ref()
@@ -326,16 +326,26 @@ def load_zone_cache_data(ref: ZoneRef) -> ZoneCacheData:
 	result is the caller's job, build_zone_geom_from_cache() in
 	zone_geometry.py, step 2). Reads the disk cache if present and still
 	fresh against ref.source_path (zone_cache.py), else parses+tessellates
-	the real zone once and writes the cache for next time."""
+	the real zone once and writes the cache for next time. `force`
+	(project-todos/forgery/landscape_editor__render_modes_removal.md
+	"reload cache" buttons, Nuno 2026-09-14: "invalider les 2 caches")
+	skips the disk-cache read, always re-parsing+re-tessellating -- the
+	write below still overwrites the stale entry either way. `low_poly`
+	(project-todos/forgery/landscape_editor__low_poly_mode.md) selects the
+	`variant="_low"` cache slot (zone_cache.py's own docstring) -- same
+	cache file layout, just a different, independent entry alongside the
+	normal-quality one for the exact same zone, never a second cache."""
 	extension = zone_ref_extension(ref)
-	cache_data = read_zone_cache(ref.name, extension, ref.source_path)
-	if cache_data is not None:
-		return cache_data
+	variant = "_low" if low_poly else ""
+	if not force:
+		cache_data = read_zone_cache(ref.name, extension, ref.source_path, variant=variant)
+		if cache_data is not None:
+			return cache_data
 
 	zone = load_zone_ref(ref)
-	cache_data = zone_to_cache_data(zone)
+	cache_data = zone_to_cache_data(zone, low_poly=low_poly)
 	try:
-		write_zone_cache(ref.name, extension, ref.source_path, cache_data)
+		write_zone_cache(ref.name, extension, ref.source_path, cache_data, variant=variant)
 	except OSError:
 		# Best-effort: the cache is a pure perf optimization, a write
 		# failure (disk full, permissions) must not block rendering the

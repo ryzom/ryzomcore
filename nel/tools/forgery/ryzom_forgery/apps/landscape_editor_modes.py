@@ -9,41 +9,6 @@ ui_helpers.py's own module docstring.
 
 from pynel import repository_paths
 
-# Render mode bar (project-todos/forgery/landscape_editor__zone_render_modes.md
-# step 6) -- WELD/LIGHT each accept one or more "real" extensions (a zone
-# doesn't need its own standalone .zonew to count as welded for [WELD]: a
-# shipped .zonel necessarily went through welding already, even when the
-# intermediate .zonew was never kept -- real shipped live_data installs only
-# ship the final pipeline stage, confirmed 2026-09-09, Nuno), falling back
-# (see _resolve_zone_for_mode()) to a genuinely earlier stage, rendered as a
-# purple->pink gradient (zone_geometry.build_zone_geom_from_cache(fallback=True) --
-# a first grayscale attempt was indistinguishable from the viewport's own
-# gray background, Nuno 2026-09-09) rather than the real elevation-colored
-# one. POLY has no entry in _MODE_REAL_EXTENSIONS -- it always shows each
-# zone's own default (highest-priority, region_loader.py's own
-# .zonel > .zonew > .zone) ZoneRef, exactly the pre-chantier behavior.
-_RENDER_MODES = ("POLY", "WELD", "LIGHT")
-_MODE_REAL_EXTENSIONS = {"WELD": (".zonew", ".zonel"), "LIGHT": (".zonel",)}
-_MODE_FALLBACK_EXTENSIONS = {"WELD": (".zone",), "LIGHT": (".zonew", ".zone")}
-
-
-def _resolve_zone_for_mode(default_ref, ext_map, mode):
-	"""Which ZoneRef to actually load for `mode`, and whether it's a real
-	match (True) or a fallback (False, caller should render it gray) -- see
-	_MODE_REAL_EXTENSIONS/_MODE_FALLBACK_EXTENSIONS module comment. POLY
-	(no real-extensions entry) always returns `default_ref` unchanged."""
-	real_exts = _MODE_REAL_EXTENSIONS.get(mode)
-	if real_exts is None:
-		return default_ref, True
-	for ext in real_exts:
-		if ext in ext_map:
-			return ext_map[ext], True
-	for fallback_ext in _MODE_FALLBACK_EXTENSIONS[mode]:
-		if fallback_ext in ext_map:
-			return ext_map[fallback_ext], False
-	return None, False
-
-
 # Global Visualisation/Edition mode (project-todos/forgery/
 # landscape_editor__land_preview.md step 1) -- a single automatic switch for
 # the whole app, not a per-continent/per-button choice like

@@ -102,16 +102,20 @@ def _regions_from_world(world: Dict[str, JsonNode], pipeline_continent_name: str
 	children = node[2]
 	if not isinstance(children, dict) or not children:
 		return []
-	# "pvp_zone_*" entries (e.g. "pvp_zone_ichor", "pvp_zone_nexus") sit at
-	# the exact same hierarchy level as real regions but aren't one --
-	# they're a PvP-flagged overlay, typically covering the same ground as
-	# a real region rather than a distinct place of its own (found 2026-09-13,
-	# Nuno: "dans bagne, pvp_zone_ichor n'est pas une région" -- confirmed
-	# against every continent's own world.lua: every genuine region is
-	# "region_*", with no exception, across all 24 continents checked).
+	# Only "region_*" entries are real regions -- confirmed against every
+	# continent's own world.lua: every genuine region is "region_*", with
+	# no exception, across all 24 continents checked. Other entries at the
+	# exact same hierarchy level (e.g. "pvp_zone_ichor"/"pvp_zone_nexus", a
+	# PvP-flagged overlay typically covering the same ground as a real
+	# region rather than a distinct place of its own -- found 2026-09-13,
+	# Nuno: "dans bagne, pvp_zone_ichor n'est pas une région" -- and other
+	# non-region place types) are never real regions, whatever their own
+	# prefix -- an allowlist on "region_" catches all of them, not just
+	# "pvp_zone_" (found 2026-09-14, Nuno: some continents showed entries
+	# in the region checkbox list that clearly weren't regions).
 	return [
 		Region(name=name, points=child[1]) for name, child in children.items()
-		if not name.startswith("pvp_zone_")
+		if name.startswith("region_")
 	]
 
 

@@ -288,7 +288,15 @@ en bleu la majorité d'un continent réel. Retirée entièrement
 état/toggle dans `landscape_editor.py`) ; seule la détection réelle par
 `.ig` reste au programme.
 
-## Modes de rendu [POLY][WELD][LIGHT] (`landscape_editor__zone_render_modes.md`)
+## Modes de rendu [POLY][WELD][LIGHT] -- retiré (`landscape_editor__zone_render_modes.md`, historique)
+
+**Retiré entièrement le 2026-09-14** (`landscape_editor__render_modes_removal.md`,
+Nuno : "ça ne sert à rien finalement") -- voir "Suppression des modes de
+rendu + nettoyage de l'interface (2026-09-14)" tout en bas de ce document
+pour le comportement actuel (résolution automatique et unique
+`.zonel > .zonew > .zone`, plus aucun bouton). Section ci-dessous gardée
+telle quelle pour mémoire historique -- `self.render_mode`/`_RENDER_MODES`/
+`_resolve_zone_for_mode()`/`_draw_render_mode_bar()` n'existent plus.
 
 Barre de 3 boutons (`_draw_render_mode_bar()`) contrôlant `self.render_mode`
 (`"POLY"/"WELD"/"LIGHT"`, défaut `"POLY"`) -- re-résolvent, pour chaque zone
@@ -812,7 +820,11 @@ prend désormais un paramètre `stage` (plus `fallback: bool`), et
 une couleur d'étage change (un changement de couleur n'affecte que les zones
 construites APRÈS l'appel à `set_stage_colors()`).
 
-### Renommage `[LAND]`/masquage en Visualisation
+### Renommage `[LAND]`/masquage en Visualisation -- retiré (historique)
+
+**Retiré le 2026-09-14** avec le reste de la barre de modes de rendu (voir
+plus haut) -- `self.render_mode`/`_RENDER_MODES` n'existent plus, il n'y a
+plus de libellé à renommer.
 
 L'identifiant interne `self.render_mode`/`_RENDER_MODES` reste `"POLY"` --
 seul le libellé affiché change en `"LAND"`, et uniquement en mode Édition
@@ -1219,3 +1231,157 @@ rotation), le nom de la zone actuellement sélectionnée et ses bornes monde
 `_select_zone()`/remis à `None` dans `_clear_zone_selection()`) -- utile pour
 vérifier visuellement qu'une géométrie (eau, bâtiment) tombe bien dans la
 zone attendue, sans calcul manuel.
+
+## Suppression des modes de rendu + nettoyage de l'interface (2026-09-14)
+
+(`landscape_editor__render_modes_removal.md`) Les 3 boutons de rendu
+[POLY/LAND]/[WELD]/[LIGHT] (voir plus haut, sections marquées historiques)
+ont été retirés entièrement -- Nuno : "ça ne sert à rien finalement, on va
+faire comme en Visualisation, juste un mode". Résolution désormais
+**toujours** `.zonel > .zonew > .zone` (la priorité déjà utilisée par
+`region_loader.py`), identique en Visualisation et Édition, sans notion de
+"fallback gris" (`_resolve_zone_for_mode()`/le paramètre `gray` de
+`_set_loaded_zones()` ont disparu). La colorisation par étage de build
+(`zone_build_stage()`, voir plus haut) reste inchangée -- elle était déjà
+indépendante du mode. Le bouton "Generate N missing .zonew" a disparu avec
+le mode `[WELD]` -- le bouton "Build" (pipeline complet) suffit à tout
+générer.
+
+### Panneau gauche : continent + régions (remplace le panneau droit historique)
+
+`draw_left_panel_content()` (qui affichait déjà l'arbre IG Zones/Others,
+voir plus haut) affiche maintenant AU-DESSUS le sélecteur de continent et la
+liste des régions à cocher -- déplacés depuis l'onglet Landscape du panneau
+droit. Chaque ligne (continent ou région) a deux icônes : centrer la caméra
+dessus (`ICON_FA_CROSSHAIRS`, `self._region_bounds` -- bornes des polygones
+de région, calculées une fois au scan du continent, jamais recalculées
+depuis les zones réellement chargées) et recharger son cache
+(`ICON_FA_ROTATE`, voir "Rechargement forcé du cache" plus bas). Le texte
+"Bounds: X[...] Y[...]"/"Regions (check to load...)" a disparu -- les
+icônes remplacent l'info textuelle. Les libellés de région affichent le nom
+sans le préfixe `region_` (`region_hierarchy._regions_from_world()` filtre
+aussi désormais en liste blanche `"region_"` plutôt qu'en liste noire
+`"pvp_zone_"` -- corrige des entrées non-région qui apparaissaient à tort
+sur certains continents).
+
+### Panneau droit : sections repensées
+
+`_draw_landscape_tab()` ne garde que le strict nécessaire :
+
+- **"Selected Zone"** (repliable, désactivée si rien n'est sélectionné) :
+  regroupe le nom+bornes de la zone sélectionnée et l'éditeur de composition
+  `.land` (`_draw_land_composition_editor()`, plus gaté sur un mode de rendu
+  -- juste "Édition + continent sélectionné"). Icône colorée dans le titre,
+  nom de zone en orange, bornes en vert (Nuno : "comme Patina" --
+  `pastel_color_for()`, `icon_colors.py`, déjà utilisé par les icônes du
+  reste de la suite). Le texte "-- cell (x, y)" de l'éditeur de composition a
+  été retiré (redondant avec la barre de statut curseur). Chaque statut
+  ✅/❌ `.zone`/`.zonew`/`.zonel` de la cellule a maintenant une icône
+  corbeille à côté quand le fichier existe (loose, jamais dans un `.bnp`) --
+  clic : supprime le fichier réel puis retombe sur le meilleur étage encore
+  présent (`best_ref_for_extensions()`), jamais un simple retour à la brique
+  brute si un étage intermédiaire existe encore (Nuno : "quand on décoche ça
+  supprime le fichier -- si trop compliqué un bouton delete").
+- **"Continent status"** (toujours affichée en Édition) : 4 compteurs
+  (Zones/Raw/Welded/Lighted, calculés depuis `self._loaded_extensions`) en
+  vert. Le bouton [Build] ne s'affiche plus que si quelque chose manque
+  (`lighted < total`) ou qu'un build est en cours -- remplace l'ancien
+  bouton toujours visible en bas de panneau.
+- **"Stats"** (repliable, replié par défaut) : un vrai tableau ImGui
+  (bordures, lignes alternées, colonnes numériques alignées) -- région par
+  région (zones/patches/instances `.ig`), plus IG Others et un total. Nuno,
+  première version en texte brut : "illisible... il faut de la couleur, des
+  sauts de lignes, un mode tableau".
+- Le bloc "Instances (.ig)" (bouton manuel "Load remaining .ig instances" +
+  barres de progression) a disparu -- `_load_ig_rest()` reste appelé
+  automatiquement au chargement d'un continent (déjà le cas depuis l'étape
+  12 du chantier principal), seul le déclenchement manuel a disparu.
+
+### Chargement incrémental par région (perf)
+
+**Bug trouvé via `(IA_AGENT_DEBUG)` chronométré, pas deviné** (Nuno : "c'est
+tres tordu, si je charge une seule region pas de progression, si j'en
+charge une 2eme progression...") : `_toggle_region()` recalculait
+`self._loaded_refs` comme l'union de TOUTES les régions cochées puis
+rechargeait tout depuis zéro à chaque coche (`_apply_render_mode()`) --
+cocher une Nᵉ région retraitait aussi les N-1 précédentes, un coût
+quadratique sur une séquence de coches. `_toggle_region()` est maintenant
+incrémental : `_load_region_incremental()` ne charge que la région qu'on
+vient de cocher (ses vraies zones + son propre repli `.land`, restreint à
+ses cellules via `allowed_cells`) et la fusionne dans ce qui est déjà
+affiché (`_rebuild_zone_node()` par zone, jamais un rechargement complet) ;
+`_unload_region_incremental()` retire juste les zones de la région qu'on
+décoche, sans rien recharger. Une région cochée pendant qu'une autre charge
+déjà est mise en file (`self._region_incremental_queue`), pas perdue.
+
+**Cache du `.land` parsé** (`EditModeMixin._load_land_cached()`) : le
+fichier `.land` entier (jusqu'à 1000+ cellules) était reparsé
+(`load_land()`) à chaque appel de `_load_land_fallback_pieces()`, donc à
+chaque coche de région -- jamais mis en cache. Un cache mémoire simple
+(`self._land_fallback_cache`, invalidé par mtime) élimine ce reparsing
+redondant.
+
+**Saut du chargement des positions quand le `.bam` va de toute façon hit**
+(`_run_load_refs()`) : le chargement des positions tessellées
+(`zone_cache.py`, ~3ms/zone -- coût de désérialisation `pickle` de milliers
+de `float` Python individuels, pas de l'I/O disque) tournait
+systématiquement AVANT même de savoir si le cache géométrie `.bam`
+(`zone_geom_cache.py`) allait de toute façon être réutilisé -- ce qui est le
+cas la quasi-totalité du temps. `ZoneGeomManifest` porte maintenant aussi
+`bb_center`/`bb_half_size` (format bumpé à la version 2) : un simple
+manifeste (petit fichier pickle, jamais le `.bam` lui-même) suffit à savoir
+si le cache va hit, et si oui les bornes s'y trouvent déjà -- le chargement
+des positions est alors sauté entièrement (`ZoneCacheData(patches=(), ...)`
+comme "coquille"). `_rebuild_zone_node()` a dû apprendre à vérifier lui
+aussi le cache `.bam` (il ne le faisait pas avant, d'où un premier bug :
+zone invisible la 2ᵉ fois qu'une région skip-optimisée était rechargée) et,
+en dernier recours si la coquille arrive jusqu'à lui sans `.bam` valide, à
+recharger les vraies positions à la demande plutôt que de construire un
+maillage vide.
+
+**Boutons "recharger le cache"** (icône rotation, panneau gauche, par
+région ou pour tout le continent) : invalident réellement les DEUX caches
+(`force=True` propagé jusqu'à `load_zone_cache_data()`, qui saute alors sa
+propre lecture de `zone_cache.py`, ET jusqu'à `_rebuild_zone_node()`, qui
+saute alors sa vérification `.bam` -- même mécanisme de cache que
+d'habitude, jamais un second cache à côté). Le bouton continent traite
+CHAQUE région l'une après l'autre (`self._continent_cache_reload_queue`) --
+une région cochée voit son affichage rafraîchi en direct, une région non
+cochée voit juste son fichier de cache disque régénéré en silence.
+
+### Boussole nord + reset caméra
+
+Petite fenêtre flottante en bas à droite de la vue 3D avec une flèche
+dessinée à la main (`imgui.get_window_draw_list()` -- ImGui n'a pas de
+rotation de glyphe/texte native) pointant le vrai nord, recalculée chaque
+frame depuis la transformation réelle de la caméra
+(`self.camera.get_mat(self.render)`, lignes 0/2 = right/up monde, pas une
+approximation à partir du seul heading -- correcte même en 3D inclinée).
+Clic : réinitialise le cap à 0° via `OrbitCamera.animate_to_orientation()`
+-- **pas** une simple assignation `self.orbit_camera.heading = 0.0`, qui ne
+bouge rien visuellement (`OrbitCamera._update()` ne recalcule la position
+réelle que sur un drag souris ou une animation en cours, jamais sur une
+simple modification de champ -- bug trouvé en traçant `camera.py` après que
+Nuno a signalé "le reset ne fonctionne pas").
+
+## Mode "Low Poly" pour le terrain (2026-09-14, `landscape_editor__low_poly_mode.md`)
+
+Bouton icône (`ICON_FA_GAUGE_SIMPLE`, barre flottante de la vue 3D) pour les
+PC faibles -- divise `order_s`/`order_t` par 4 avant tessellation
+(`zone_geometry.compute_zone_patch_positions(zone, low_poly=True)`, même
+plancher `_MIN_GRID_SEGMENTS` qu'en qualité normale) : ~16x moins de faces
+par patch (une grille 2D, diviser les deux axes par 4 divise le nombre de
+faces par ~16). Réglage révisé de /2 à /4 après un premier essai (Nuno).
+
+**Même cache que d'habitude, jamais un second** (Nuno : "ne va pas me créer
+un 2ᵉ cache à côté") -- `zone_cache.py` gagne un paramètre `variant` (vide en
+qualité normale, `"_low"` en low poly, inséré dans le nom de fichier) et
+`zone_geom_cache.py` réutilise sa propre notion de `mode` (déjà stabilisée à
+`"zone"` par la suppression des modes de rendu ci-dessus) avec une seconde
+valeur `"zone_low"` -- toujours le même module/dossier de cache, juste une
+clé différente selon la qualité active. Persisté (`Settings.
+landscape_low_poly`, même mécanisme que `landscape_editor_mode`) ; basculer
+recharge tout ce qui est actuellement affiché (`_apply_render_mode()`, une
+bascule de qualité touche l'ensemble de l'affichage d'un coup, contrairement
+à une coche de région). Hors scope pour l'instant : le LOD des shapes/`.ig`
+(bâtiments/props), un chantier séparé à traiter plus tard.

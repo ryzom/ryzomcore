@@ -104,13 +104,12 @@ def run_full_build(
 	"""Runs every stage for `continent`, returns the final `.zonel` paths
 	produced. `on_progress(message)`, if given, is called with a short
 	human-readable status after each stage -- the caller runs this on a
-	background thread and polls for the latest message the same way
-	`_run_generate_missing_zonew()` already does for its own progress.
+	background thread and polls for the latest message, same convention as
+	every other background progress dict in `landscape_editor.py`.
 	`on_zone_ready(name, cache_data)`, if given, is called once per zone
 	right after `zone_lighter` produces its final `.zonel` (`cache_data` a
-	`zone_cache.ZoneCacheData`, ready to hand straight to `_rebuild_zone_node()`
-	-- same live, one-zone-at-a-time convention as `_run_generate_missing_
-	zonew()`'s own `progress["ready"]`, Nuno 2026-09-12)."""
+	`zone_cache.ZoneCacheData`, ready to hand straight to
+	`_rebuild_zone_node()` -- live, one-zone-at-a-time, Nuno 2026-09-12)."""
 	def progress(message: str) -> None:
 		if on_progress is not None:
 			on_progress(message)

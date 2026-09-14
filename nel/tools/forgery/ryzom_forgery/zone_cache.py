@@ -50,14 +50,20 @@ class _CacheEnvelope(NamedTuple):
 	data: ZoneCacheData
 
 
-def _cache_path(zone_name: str, extension: str) -> Path:
+def _cache_path(zone_name: str, extension: str, variant: str = "") -> Path:
 	# extension includes its leading "." (e.g. ".zonew") -- stripped here so
 	# the cache file name stays a single clean "<name>__<ext>.zonecache"
-	# rather than doubling up dots.
-	return cache_dir() / _CACHE_DIR_NAME / f"{zone_name}__{extension.lstrip('.')}.zonecache"
+	# rather than doubling up dots. `variant` (project-todos/forgery/
+	# landscape_editor__low_poly_mode.md, Nuno 2026-09-14: "meme cache, ne
+	# va pas me creer un 2eme cache a cote") -- empty by default so every
+	# cache entry already on disk (normal quality) keeps resolving to the
+	# exact same path/no reinvalidation; "_low" for the low-poly variant,
+	# same cache dir/module, just a different filename, never a second
+	# cache system.
+	return cache_dir() / _CACHE_DIR_NAME / f"{zone_name}__{extension.lstrip('.')}{variant}.zonecache"
 
 
-def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: ZoneCacheData) -> None:
+def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: ZoneCacheData, variant: str = "") -> None:
 	"""Writes/overwrites the disk cache for `zone_name`'s `extension` (e.g.
 	".zonew"), stamped with `source_path`'s current mtime/size -- its
 	`.zone`/`.zonew`/`.zonel` file if loose, or the whole `.bnp`/`.bnpe` if
@@ -65,7 +71,8 @@ def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: Zo
 	its own, see the sub-chantier's scope decisions). `extension` is part of
 	the cache key (region_loader.zone_ref_extension()) so switching a zone's
 	render mode between raw/welded/lit never serves a stale geometry from
-	another mode's cache entry."""
+	another mode's cache entry. `variant`, see _cache_path()'s own
+	docstring."""
 	stat = source_path.stat()
 	envelope = _CacheEnvelope(
 		format_version=_CACHE_FORMAT_VERSION,
@@ -73,7 +80,7 @@ def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: Zo
 		source_size=stat.st_size,
 		data=data,
 	)
-	path = _cache_path(zone_name, extension)
+	path = _cache_path(zone_name, extension, variant)
 	path.parent.mkdir(parents=True, exist_ok=True)
 	# Written to a temp file then renamed into place -- an interrupted write
 	# (crash, kill) must never leave a half-written file that
@@ -84,13 +91,14 @@ def write_zone_cache(zone_name: str, extension: str, source_path: Path, data: Zo
 	tmp_path.replace(path)
 
 
-def read_zone_cache(zone_name: str, extension: str, source_path: Path) -> Optional[ZoneCacheData]:
+def read_zone_cache(zone_name: str, extension: str, source_path: Path, variant: str = "") -> Optional[ZoneCacheData]:
 	"""Returns the cached ZoneCacheData for `zone_name`'s `extension` if a
 	cache file exists AND `source_path`'s current mtime/size still match what
 	was stamped at write_zone_cache() time -- None otherwise (missing, stale
 	format/source, or unreadable), meaning the caller must rebuild it from
-	the real source and call write_zone_cache() again."""
-	path = _cache_path(zone_name, extension)
+	the real source and call write_zone_cache() again. `variant`, see
+	_cache_path()'s own docstring."""
+	path = _cache_path(zone_name, extension, variant)
 	try:
 		with open(path, "rb") as f:
 			envelope = pickle.load(f)

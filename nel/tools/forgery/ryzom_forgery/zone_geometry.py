@@ -176,7 +176,7 @@ def _eval_bezier_patch(grid, s, t):
 	return x, y, z
 
 
-def compute_zone_patch_positions(zone) -> tuple:
+def compute_zone_patch_positions(zone, low_poly=False) -> tuple:
 	"""The expensive part of rendering a zone -- Bezier-evaluated positions
 	only (`_eval_bezier_patch()`), no color/triangle indices (those stay
 	derived at GeomNode-build time, see build_zone_geom_from_cache()'s own
@@ -187,6 +187,14 @@ def compute_zone_patch_positions(zone) -> tuple:
 	coarser), positions flattened row-major (i in range(n_s+1): j in
 	range(n_t+1)) to match zone_cache.PatchPositions's own layout.
 
+	`low_poly` (project-todos/forgery/landscape_editor__low_poly_mode.md,
+	Nuno 2026-09-14, for weak GPUs) divides order_s/order_t by 4 BEFORE the
+	`_MIN_GRID_SEGMENTS` floor below -- ~16x fewer faces per patch (a 2D
+	grid, so dividing both axes by 4 divides the face count by ~16, same
+	reasoning as the ~4x/halving case Nuno first asked about), still the
+	real per-patch order from the `.zone` file, just coarser, never a
+	fixed value picked independently of what the file actually stores.
+
 	Shared by build_zone_tessellated_geom() (wraps this straight into
 	build_zone_geom_from_cache()) and the disk-cache writer
 	(project-todos/forgery/landscape_editor__zone_disk_cache.md step 4) --
@@ -194,8 +202,11 @@ def compute_zone_patch_positions(zone) -> tuple:
 	path and what gets cached to disk can never drift apart."""
 	patches = []
 	for patch in zone.patchs:
-		n_s = max(patch.order_s, _MIN_GRID_SEGMENTS)
-		n_t = max(patch.order_t, _MIN_GRID_SEGMENTS)
+		order_s, order_t = patch.order_s, patch.order_t
+		if low_poly:
+			order_s, order_t = order_s // 4, order_t // 4
+		n_s = max(order_s, _MIN_GRID_SEGMENTS)
+		n_t = max(order_t, _MIN_GRID_SEGMENTS)
 		grid = _bezier_control_grid(patch, zone.patch_bias, zone.patch_scale)
 		positions = []
 		for i in range(n_s + 1):
@@ -210,17 +221,19 @@ def compute_zone_patch_positions(zone) -> tuple:
 	return tuple(patches)
 
 
-def zone_to_cache_data(zone) -> ZoneCacheData:
+def zone_to_cache_data(zone, low_poly=False) -> ZoneCacheData:
 	"""Converts a parsed pynel Zone into the same ZoneCacheData shape used by
 	the disk cache (zone_cache.py) -- positions via
 	compute_zone_patch_positions(), bb straight from zone.zone_bb. Shared by
 	build_zone_tessellated_geom() (render path) and the disk-cache writer
 	(region_loader.load_zone_cache_data(), project-todos/forgery/
 	landscape_editor__zone_disk_cache.md step 4), so both ways of getting a
-	ZoneCacheData from a real zone agree by construction."""
+	ZoneCacheData from a real zone agree by construction. `low_poly`
+	(project-todos/forgery/landscape_editor__low_poly_mode.md) is forwarded
+	as-is to compute_zone_patch_positions()."""
 	bb = zone.zone_bb
 	return ZoneCacheData(
-		patches=compute_zone_patch_positions(zone),
+		patches=compute_zone_patch_positions(zone, low_poly=low_poly),
 		bb_center=(bb.center.x, bb.center.y, bb.center.z),
 		bb_half_size=(bb.half_size.x, bb.half_size.y, bb.half_size.z),
 	)

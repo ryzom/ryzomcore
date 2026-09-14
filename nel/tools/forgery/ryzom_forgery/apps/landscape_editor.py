@@ -8,8 +8,7 @@ mixins this class inherits from (project-todos/forgery/
 landscape_editor__land_preview.md step 5): `landscape_editor_edit_mode.py`
 (EditModeMixin) and `landscape_editor_view_mode.py` (ViewModeMixin) --
 shared rendering (zone_geometry.py/zone_cache.py/zone_geom_cache.py,
-_apply_render_mode()/_resolve_zone_for_mode()) stays here, in the base
-class.
+_apply_render_mode()) stays here, in the base class.
 """
 
 import math
@@ -17,7 +16,7 @@ import threading
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
-from panda3d.core import NodePath, Point3, Quat, TransparencyAttrib
+from panda3d.core import NodePath, Point3, Quat, TransparencyAttrib, Vec3
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
@@ -27,8 +26,7 @@ from pynel.ryzom_zone import parse_zone, ZoneParseError
 from ryzom_forgery.app import ForgeryApp
 from ryzom_forgery.apps.landscape_editor_edit_mode import EditModeMixin
 from ryzom_forgery.apps.landscape_editor_modes import (
-	_detect_app_mode, _MODE_BADGE_COLOR, _MODE_BADGE_LABEL, _MODE_EDITION, _MODE_REAL_EXTENSIONS, _MODE_VISUALISATION,
-	_OTHER_MODE, _RENDER_MODES, _resolve_zone_for_mode,
+	_detect_app_mode, _MODE_BADGE_COLOR, _MODE_BADGE_LABEL, _MODE_EDITION, _MODE_VISUALISATION, _OTHER_MODE,
 )
 from ryzom_forgery.apps.landscape_editor_view_mode import ViewModeMixin
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
@@ -52,12 +50,14 @@ from ryzom_forgery.region_loader import (
 )
 from ryzom_forgery import continent_pipeline_reference as cpr
 from ryzom_forgery import ig_full_geom_cache
+from ryzom_forgery.icon_colors import pastel_color_for
 from ryzom_forgery import ig_full_load
 from ryzom_forgery import ig_geometry
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery import zone_geom_cache
+from ryzom_forgery.zone_cache import ZoneCacheData
 from ryzom_forgery.zone_geom_cache import ZoneGeomManifest, ZoneManifestEntry
 from ryzom_forgery.zone_geometry import (
 	build_zone_geom_from_cache, build_zone_grid_geom, build_zone_placeholders_geom, build_zone_selection_border_geom,
@@ -104,6 +104,21 @@ _WIREFRAME_MODE_LABELS = {
 _TAB_COLOR_LANDSCAPE = (0.729, 0.867, 0.635, 1.0)  # light olive green -- terrain
 _TAB_COLOR_SETTINGS = (0.8, 0.75, 0.15, 1.0)  # yellow, same as object_editor.py's own Settings tab
 
+# "Stats" section (project-todos/forgery/landscape_editor__render_modes_
+# removal.md, Nuno 2026-09-14: "illisible... il faut de la couleur") --
+# header/total lines in a warm amber, table values in a cool cyan, so both
+# stand out against the plain white body text around them.
+_STATS_HEADER_COLOR = (1.0, 0.8, 0.4, 1.0)
+_STATS_VALUE_COLOR = (0.55, 0.85, 1.0, 1.0)
+
+# "Comme Patina" (Nuno 2026-09-14) -- an identifier (zone/brick name) in
+# orange, a coordinate/measured value in green, same convention as
+# landscape_editor_edit_mode.py's own _NAME_COLOR/_VALUE_COLOR (kept as a
+# separate copy there to avoid a cross-mixin import, same reasoning as
+# this module's own docstring on landscape_editor_modes.py).
+_NAME_COLOR = (1.0, 0.75, 0.3, 1.0)
+_VALUE_COLOR = (0.6, 0.9, 0.5, 1.0)
+
 # Renamed from APP_INFO to hide Atyscape from ryztart's app list while it's
 # still being built (see project-todos/forgery/landscape_editor.md) --
 # list_apps()/launch_app() (ryzom_forgery/__init__.py) only pick up a module
@@ -145,6 +160,10 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				set_stage_colors(int(stage_str), hex_to_rgb(hex_pair[0]), hex_to_rgb(hex_pair[1]))
 			except (ValueError, IndexError):
 				pass
+		# "Low Poly" terrain toggle (project-todos/forgery/landscape_editor__
+		# low_poly_mode.md, Nuno 2026-09-14, for weak GPUs) -- halves each
+		# patch's tessellation grid; persisted like landscape_editor_mode.
+		self._low_poly = settings.landscape_low_poly
 
 		# OrbitCamera._update() (camera.py) reads both of these every frame --
 		# there's no ObjectManipulator/target object here (unlike
@@ -166,9 +185,9 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self.orbit_camera.lock_rotation = True
 		self._top_down_locked = True
 		# Terrain display toggles (project-todos/forgery/
-		# landscape_editor__transparency_wireframe.md) -- independent of
-		# self.render_mode and of each other, applied straight to
-		# self._zone_root so they cover whatever is currently loaded there.
+		# landscape_editor__transparency_wireframe.md) -- independent of each
+		# other, applied straight to self._zone_root so they cover whatever
+		# is currently loaded there.
 		self._zone_transparent = False
 		# "off"/"overlay"/"pure" (project-todos/forgery/wireframe_cycle_states.md,
 		# Nuno 2026-09-11 -- was a plain bool) -- "overlay" draws wireframe on
@@ -271,8 +290,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# zone-owned `.ig`s (e.g. "215_ed.ig") follow the existing per-region
 		# checkboxes (one `.bam` per region, loaded automatically when its
 		# region is checked), everything else (villages/water/..., never
-		# sky/canopy) is one continent-wide `.bam` built by the panel's
-		# "Load remaining .ig instances" button. Never the per-visible-zone
+		# sky/canopy) is one continent-wide `.bam`, built automatically
+		# whenever a continent loads (_load_ig_rest()). Never the per-visible-zone
 		# incremental resolution the original mechanism used (deleted this
 		# same chantier, step 1). Resolves each instance's `.shape`/textures
 		# by name via search_paths_dialog (same generic,
@@ -315,27 +334,36 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._ig_rest_root.hide()
 		self._ig_error = None
 
-		# Render mode state (project-todos/forgery/
-		# landscape_editor__zone_render_modes.md step 6). _loaded_refs (name ->
-		# default/POLY ZoneRef) and _loaded_extensions (name -> {ext: ZoneRef})
-		# describe the currently loaded zone set (single Explorer selection or
-		# a whole continent) independently of which extension is actually
-		# displayed -- _apply_render_mode() re-resolves and reloads from these
-		# every time self.render_mode changes, without re-scanning the disk
-		# index. _gray_zones/_missing_for_mode are recomputed by the same
-		# call, for _draw_render_mode_bar()'s own display.
-		self.render_mode = "POLY"
+		# Loaded zone set state. _loaded_refs (name -> default ZoneRef, the
+		# region_loader.py .zonel > .zonew > .zone priority) and
+		# _loaded_extensions (name -> {ext: ZoneRef}) describe the currently
+		# loaded zone set (single Explorer selection or a whole continent) --
+		# _apply_render_mode() reloads the actual geometry from these
+		# whenever the set changes, without re-scanning the disk index.
 		self._loaded_refs = {}
 		self._loaded_extensions = {}
-		self._gray_zones = set()
-		self._missing_for_mode = 0
 		self._mode_reload_progress = None
-		self._land_missing_cells = set()
-		# "Generate missing .zonew" button state (project-todos/forgery/
-		# landscape_editor__zone_render_modes.md step 9) -- None while idle,
-		# else the dict a background thread (_generate_missing_zonew()) is
-		# writing into, polled the same way as _continent_load_progress.
-		self._weld_generate_progress = None
+		# "Reload cache" buttons (project-todos/forgery/landscape_editor__
+		# render_modes_removal.md, left panel) -- self._region_cache_reload_
+		# progress is the single-region background reload in flight (None
+		# while idle, polled in _draw_continent_and_regions());
+		# self._continent_cache_reload_queue holds the region names still
+		# left to process for a whole-continent reload ("region par
+		# région"), drained one at a time via that same single-region
+		# mechanism -- empty means no continent-wide reload is running.
+		self._region_cache_reload_progress = None
+		self._continent_cache_reload_queue = []
+		# Incremental region check/uncheck (project-todos/forgery/
+		# landscape_editor__render_modes_removal.md perf fix, Nuno
+		# 2026-09-14) -- self._region_incremental_progress is the single
+		# region-check background load in flight (None while idle, polled
+		# in _draw_continent_and_regions()); self._region_incremental_queue
+		# holds region names checked again while one was already loading,
+		# drained one at a time once the current one finishes. Unchecking
+		# never needs either (pure local teardown, see
+		# _unload_region_incremental()).
+		self._region_incremental_progress = None
+		self._region_incremental_queue = []
 
 		# Region-based lazy loading (project-todos/forgery/
 		# landscape_editor__region_management.md) -- Visualisation mode only
@@ -355,6 +383,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._all_continent_refs = {}
 		self._all_continent_extensions = {}
 		self._region_names = []
+		self._region_bounds = {}  # region name -> (min_x, min_y, max_x, max_y), for the "center camera" button
 		self._region_zone_map = {}  # zone name -> region name
 		self._region_checked = {}  # region name -> bool
 		# Édition mode only (step 5 fix): {(pos_x, pos_y): region name} for
@@ -368,6 +397,11 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# regardless of which region is checked; None until a continent
 		# with at least one successfully-parsed real zone has loaded.
 		self._continent_z_range = None
+		# Total `.land` cell count for the loaded continent (Édition only,
+		# project-todos/forgery/landscape_editor__render_modes_removal.md
+		# "Continent status" section) -- None outside Édition/before a
+		# continent has loaded.
+		self._continent_total_used_cells = None
 		self._region_placeholder_np = self.render.attach_new_node("zone-region-placeholder")
 		# (pos_x, pos_y) -> ZoneUnit.zone_name (the brick the .land itself
 		# assigns to that cell), for the cursor status line -- always the
@@ -378,6 +412,11 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# _ensure_land_cell_names_loaded().
 		self._land_cell_names = {}
 		self._land_cell_names_continent = None
+		# Last parsed `.land` for the fallback-piece background loader
+		# (project-todos/forgery/landscape_editor__render_modes_removal.md,
+		# Nuno 2026-09-14 perf fix) -- (land_path, mtime, Land) or None, see
+		# EditModeMixin._load_land_cached()'s own docstring.
+		self._land_fallback_cache = None
 
 		# Grid-cell selection for the composition editor (project-todos/
 		# forgery/landscape_editor__land_composition.md step 6) -- (pos_x,
@@ -402,7 +441,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# landscape_editor__land_composition.md step 7) -- None while idle,
 		# else the dict a background thread (_run_land_build(),
 		# landscape_editor_edit_mode.py) is writing into, polled the same way
-		# as self._weld_generate_progress.
+		# as self._mode_reload_progress.
 		self._land_build_progress = None
 
 		# Zone-boundary grid overlay (project-todos/forgery/
@@ -419,6 +458,10 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# positions itself off of last frame's captured size, seeded here
 		# with a small placeholder for the very first frame.
 		self._viewport_toggle_size = (10.0, 10.0)
+		# Same self-measurement trick as self._viewport_toggle_size, for the
+		# north compass (project-todos/forgery/landscape_editor__render_
+		# modes_removal.md, bottom-right of the 3D viewport).
+		self._compass_size = (10.0, 10.0)
 
 		# Whole-continent loading state (project-todos/forgery/
 		# landscape_editor__zone_disk_cache.md steps 5-6) -- None while idle,
@@ -558,11 +601,11 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 
 	def on_selection_changed(self, items):
 		"""A single .zone*/.bnp-contained zone picked in the Explorer -- loads
-		exactly the clicked file, unaffected by self.render_mode. Not a real
-		usage pattern (Nuno always loads a whole continent via the combo,
-		never browses the Explorer for this, 2026-09-09) -- kept simple/
-		direct rather than routed through _apply_render_mode()'s mode
-		resolution, which only matters for continent loads."""
+		exactly the clicked file. Not a real usage pattern (Nuno always loads
+		a whole continent via the combo, never browses the Explorer for
+		this, 2026-09-09) -- kept simple/direct rather than routed through
+		_apply_render_mode()'s resolution, which only matters for continent
+		loads."""
 		if len(items) != 1 or items[0].suffix.lower() not in _ZONE_EXTENSIONS:
 			return
 		item = items[0]
@@ -581,17 +624,18 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# still color it correctly (e.g. a directly-picked .zonel reads as
 		# stage 3, not the stage-0 default an empty ext_map would give).
 		self._loaded_extensions = {name: {item.suffix.lower(): None}}
-		self._land_missing_cells = set()
 		# A single-zone selection isn't continent-based -- no region
 		# checkboxes/purple squares apply to it (project-todos/forgery/
 		# landscape_editor__region_management.md).
 		self._all_continent_refs = {}
 		self._all_continent_extensions = {}
 		self._region_names = []
+		self._region_bounds = {}
 		self._region_zone_map = {}
 		self._region_checked = {}
 		self._land_cell_region_map = {}
 		self._continent_z_range = None
+		self._continent_total_used_cells = None
 		self._continent_loaded_grid_bounds = None
 		self._rebuild_region_placeholders()
 		self._set_loaded_zones({name: zone_to_cache_data(zone)})
@@ -690,10 +734,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		fresh uncached scan of `ryzom_data_path`'s pipeline export if
 		`continent_name` has one -- see region_loader.get_zone_index()'s own
 		docstring), never the actual per-zone tessellation -- draw_panel()'s
-		polling of `progress` hands the result to _apply_render_mode()
-		(project-todos/forgery/landscape_editor__zone_render_modes.md step 6),
-		which does the expensive per-zone load itself, in its own background
-		pass, for whichever extension self.render_mode currently wants.
+		polling of `progress` hands the result to _apply_render_mode(), which
+		does the expensive per-zone load itself, in its own background pass.
 		Writes only to `progress` (plain dict field writes, safe under the
 		GIL, same reasoning as object_editor.py's creature-cache-rebuild
 		background thread)."""
@@ -704,6 +746,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			      f"mode={self._app_mode} continent={pipeline_continent_name!r} live_data_path={live_data_path!r} "
 			      f"ryzom_data_path={ryzom_data_path!r} uses_pipeline_export={uses_pipeline_export} bounds={bounds}")
 			land_cell_region_map = {}
+			total_used_cells = None
 			if self._app_mode == _MODE_EDITION:
 				# Land-driven enumeration (project-todos/forgery/
 				# landscape_editor__land_composition.md step 3) -- a
@@ -724,6 +767,13 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				regions = get_regions_for_continent_edition(ryzom_data_path, pipeline_continent_name)
 				cell_positions = {cell: (cell[0] * ZONE_CELL_SIZE, cell[1] * ZONE_CELL_SIZE) for cell in all_used_cells}
 				land_cell_region_map = assign_zones_to_regions(cell_positions, regions)
+				# Total `.land` cell count (project-todos/forgery/
+				# landscape_editor__render_modes_removal.md "Statut du
+				# continent" section) -- unlike land_cell_region_map (only
+				# cells that fall inside a real region polygon), this counts
+				# EVERY used cell regardless of region, correct even for a
+				# continent with no region_hierarchy entries at all.
+				total_used_cells = len(all_used_cells)
 			else:
 				refs = find_zones_in_region(
 					live_data_path, min_x, min_y, max_x, max_y, pipeline_continent_name, ryzom_data_path,
@@ -746,12 +796,27 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			# default_refs in self._loaded_refs in that case.
 			zone_positions = {name: (ref.x, ref.y) for name, ref in default_refs.items()}
 			progress["regions"] = [r.name for r in regions]
+			# Region polygon bounds (already in world units, same space as
+			# zone bb_center -- see assign_zones_to_regions()'s own
+			# docstring), for the left panel's "center camera on this
+			# region" button -- computed once here since `regions` (with
+			# its own `.points`) is only ever available on this background
+			# thread, never kept around after progress["regions"] discards
+			# everything but the bare name.
+			progress["region_bounds"] = {
+				r.name: (
+					min(p[0] for p in r.points), min(p[1] for p in r.points),
+					max(p[0] for p in r.points), max(p[1] for p in r.points),
+				)
+				for r in regions if r.points
+			}
 			progress["zone_region_map"] = assign_zones_to_regions(zone_positions, regions)
 			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_continent) "
 			      f"zones found for {pipeline_continent_name!r}: {len(default_refs)}")
 			progress["default_refs"] = default_refs
 			progress["extensions"] = extensions
 			progress["land_cell_region_map"] = land_cell_region_map
+			progress["total_used_cells"] = total_used_cells
 			# Whole-continent elevation-color reference (project-todos/
 			# forgery/landscape_editor__region_management__zone_bam_cache.md
 			# step 1) -- computed once here from every real zone of the
@@ -808,40 +873,181 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 
 	def _toggle_region(self, region_name):
 		"""Flips `region_name`'s checkbox (project-todos/forgery/
-		landscape_editor__region_management.md step 4): recomputes
-		self._loaded_refs/_loaded_extensions as the union of every checked
-		region's own zones (self._region_zone_map), then reloads that whole
-		subset via the existing _apply_render_mode() background pipeline
-		(same full-reload behaviour as a render-mode switch, just over a
-		different zone subset) and refreshes the purple-square overlay for
-		whatever is left unchecked. Also loads/unloads that region's own
-		zone-`.ig` bundle (project-todos/forgery/
-		landscape_editor__ig_full_load.md step 5) -- independent of the zone
-		geometry reload above, its own background build/cache."""
-		self._region_checked[region_name] = not self._region_checked.get(region_name, False)
-		active_names = {
-			name for name, region in self._region_zone_map.items() if self._region_checked.get(region, False)
-		}
-		self._loaded_refs = {name: self._all_continent_refs[name] for name in active_names}
-		self._loaded_extensions = {name: self._all_continent_extensions.get(name, {}) for name in active_names}
-		self._apply_render_mode()
+		landscape_editor__region_management.md step 4) -- INCREMENTAL since
+		project-todos/forgery/landscape_editor__render_modes_removal.md's
+		perf fix (Nuno 2026-09-14: checking a 2nd/3rd/... region used to
+		reprocess every previously-checked region's zones all over again
+		through _apply_render_mode()'s full-union reload, an O(n^2) cost
+		across a sequence of checks -- measured 347 zones taking ~1.2s total
+		via (IA_AGENT_DEBUG) timing, most of it re-doing work for zones
+		already on screen). Checking now only loads THIS region's own zones
+		in the background (_load_region_incremental()) and merges them in;
+		unchecking only tears down THIS region's own zones
+		(_unload_region_incremental()) -- neither ever touches any other
+		region's already-loaded geometry. Also loads/unloads that region's
+		own zone-`.ig` bundle (project-todos/forgery/
+		landscape_editor__ig_full_load.md step 5) -- independent of the
+		zone geometry above, its own background build/cache."""
+		checking = not self._region_checked.get(region_name, False)
+		self._region_checked[region_name] = checking
 		self._rebuild_region_placeholders()
-		if self._region_checked[region_name]:
+		if checking:
 			self._load_region_ig(region_name)
+			self._load_region_incremental(region_name)
 		else:
 			self._hide_ig_region(region_name)
+			self._unload_region_incremental(region_name)
 
-	def _apply_render_mode(self):
+	def _load_region_incremental(self, region_name):
+		"""Background-loads exactly `region_name`'s own zones -- its real
+		refs (self._region_zone_map) AND its own `.land` fallback pieces
+		(allowed_cells restricted to this region alone, same mechanism
+		_apply_render_mode() used for the whole checked set) -- merging the
+		result into whatever's already displayed once done, in
+		_draw_continent_and_regions()'s own polling. A load already running
+		queues this region (self._region_incremental_queue) instead of
+		starting a second one; drained one at a time from that same
+		polling once the current load finishes."""
+		if self._region_incremental_progress is not None and not self._region_incremental_progress["done"]:
+			if region_name not in self._region_incremental_queue:
+				self._region_incremental_queue.append(region_name)
+			return
+		new_names = {name for name, r in self._region_zone_map.items() if r == region_name}
+		refs = {name: self._all_continent_refs[name] for name in new_names}
+		self._loaded_refs.update(refs)
+		self._loaded_extensions.update({name: self._all_continent_extensions.get(name, {}) for name in new_names})
+		land_fallback = None
+		allowed_cells = None
+		if self._app_mode == _MODE_EDITION and self.selected_continent_name:
+			land_fallback = self._resolve_land_fallback_paths()
+			if land_fallback is not None:
+				allowed_cells = {cell for cell, r in self._land_cell_region_map.items() if r == region_name}
+		progress = {
+			"done": False, "error": None, "zones": {}, "manifest_zones": {},
+			"total": len(refs), "processed": 0, "region": region_name,
+		}
+		self._region_incremental_progress = progress
+		thread = threading.Thread(
+			target=self._run_load_refs, args=(refs, progress, land_fallback, allowed_cells), daemon=True,
+		)
+		thread.start()
+
+	def _unload_region_incremental(self, region_name):
+		"""Tears down exactly `region_name`'s own currently-displayed zones
+		-- its real zones (self._region_zone_map) plus any `.land` fallback
+		pieces whose own origin cell belongs to it (self._land_cell_region_
+		map) -- without touching any other region's zones. Purely local
+		state/NodePath teardown, no background thread needed."""
+		real_names = {name for name, r in self._region_zone_map.items() if r == region_name}
+		land_names = set()
+		for name in self.zones:
+			if not name.startswith("land:"):
+				continue
+			_, ox, oy = name.split(":")
+			if self._land_cell_region_map.get((int(ox), int(oy))) == region_name:
+				land_names.add(name)
+		for name in real_names | land_names:
+			self._loaded_refs.pop(name, None)
+			self._loaded_extensions.pop(name, None)
+			node = self._zone_nodes.pop(name, None)
+			if node is not None:
+				node.remove_node()
+			self.zones.pop(name, None)
+
+	def _zone_refs_for_region(self, region_name):
+		"""Every real zone `ZoneRef` belonging to `region_name`, whether that
+		region is currently checked or not (project-todos/forgery/
+		landscape_editor__render_modes_removal.md "reload cache" buttons) --
+		unlike `self._loaded_refs` (only the checked subset), reads straight
+		from `self._all_continent_refs`/`self._region_zone_map`, populated
+		once for the WHOLE continent at scan time."""
+		return {
+			name: ref for name, ref in self._all_continent_refs.items()
+			if self._region_zone_map.get(name) == region_name
+		}
+
+	def _reload_region_cache(self, region_name):
+		"""Forces a fresh rebuild + re-save of `region_name`'s own per-zone
+		caches -- BOTH of them (project-todos/forgery/landscape_editor__
+		render_modes_removal.md, Nuno 2026-09-14: "invalider les 2 caches"):
+		the position cache (`zone_cache.py`, bypassed via `force=True` on
+		`load_zone_cache_data()`) AND the built-geometry `.bam` cache
+		(`zone_geom_cache.py`, bypassed by never even attempting the
+		manifest check that would otherwise skip the position reload --
+		see `_run_load_refs()`'s own early-skip -- and by never trying
+		`_rebuild_zone_node()`'s own `.bam` read either, see its
+		consumer's own comment) -- without touching any other region's own
+		caches or display. If `region_name` is currently checked, its live
+		geometry is also patched in place (`_rebuild_zone_node()`, the same
+		incremental-update primitive the Build progress drain already
+		uses) as soon as the background load is done; if unchecked, only
+		the on-disk caches are refreshed -- the region stays a purple
+		placeholder, nothing changes on screen. A second call while one
+		region reload is already running is ignored (same convention as
+		every other background op in this file)."""
+		if self._region_cache_reload_progress is not None and not self._region_cache_reload_progress["done"]:
+			return
+		refs = self._zone_refs_for_region(region_name)
+		if not refs:
+			return
+		progress = {
+			"done": False, "error": None, "zones": {}, "manifest_zones": {},
+			"total": len(refs), "processed": 0, "region": region_name, "force": True,
+		}
+		self._region_cache_reload_progress = progress
+		thread = threading.Thread(target=self._run_load_refs, args=(refs, progress), daemon=True)
+		thread.start()
+
+	def _reload_continent_cache(self):
+		"""Forces a fresh rebuild + re-save of EVERY region's own per-zone
+		`.bam` cache for the currently selected continent, one region at a
+		time (project-todos/forgery/landscape_editor__render_modes_removal.md
+		"reload cache" button, Nuno 2026-09-14: "il recharge TOUT le
+		continent, région par région") -- queues every name in
+		self._region_names and drains it through _reload_region_cache()
+		itself, one region per completed background load (see
+		_draw_continent_and_regions()'s own polling, which advances the
+		queue). A region that's currently unchecked still gets its cache
+		regenerated on disk (see _reload_region_cache()'s own docstring),
+		it just never appears on screen. A second call while one is already
+		queued/running is ignored."""
+		if self._continent_cache_reload_queue:
+			return
+		if self._region_cache_reload_progress is not None and not self._region_cache_reload_progress["done"]:
+			return
+		if not self._region_names:
+			return
+		self._continent_cache_reload_queue = list(self._region_names)
+		self._advance_continent_cache_reload()
+
+	def _advance_continent_cache_reload(self):
+		"""Pops the next region off self._continent_cache_reload_queue and
+		starts its own reload -- called once up front by
+		_reload_continent_cache() and again by _draw_continent_and_regions()
+		every time a queued region's own reload finishes, until the queue
+		is empty."""
+		if not self._continent_cache_reload_queue:
+			return
+		region_name = self._continent_cache_reload_queue.pop(0)
+		self._reload_region_cache(region_name)
+
+	def _apply_render_mode(self, force=False):
 		"""Re-resolves the currently loaded zone set (self._loaded_refs/
 		self._loaded_extensions, populated by on_selection_changed()/
-		_load_continent()) for self.render_mode and reloads it in a
-		background thread (project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 6) -- POLY/2D always
-		resolve to each zone's own default ref (_resolve_zone_for_mode()),
-		WELD/LIGHT their own extension or a gray fallback. A second call
-		while one reload is already running is ignored (the caller will get
-		another chance once it's done, since render_mode/loaded_refs/
-		loaded_extensions are read fresh here, not snapshotted)."""
+		_load_continent()) and reloads it in a background thread -- always
+		each zone's own default ref (region_loader.py's own
+		.zonel > .zonew > .zone priority, already baked into
+		self._loaded_refs), a `.land`+brick fallback filling in anything
+		still missing entirely (project-todos/forgery/
+		landscape_editor__render_modes_removal.md: replaces the old per-mode
+		POLY/WELD/LIGHT resolution -- a single always-on mode now, same
+		behaviour POLY already had). A second call while one reload is
+		already running is ignored (the caller will get another chance once
+		it's done, since loaded_refs/loaded_extensions are read fresh here,
+		not snapshotted). `force` is forwarded to _set_loaded_zones() once
+		the background load is done (see `progress["force"]` below) -- the
+		left panel's "reload cache" buttons (same chantier) use it to bypass
+		the per-zone `.bam` cache and force a fresh rebuild+re-save."""
 		# Resolved before the early-return below (project-todos/forgery/
 		# landscape_editor__land_composition.md step 4): a freshly-authored
 		# composition can have ZERO real exports yet (self._loaded_refs
@@ -865,9 +1071,6 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			}
 
 		if not self._loaded_refs and land_fallback is None:
-			self._gray_zones = set()
-			self._missing_for_mode = 0
-			self._land_missing_cells = set()
 			# Actually tears down whatever real zone geometry was displayed
 			# before (project-todos/forgery/landscape_editor__region_
 			# management.md step 4 bug fix, Nuno 2026-09-13: unchecking the
@@ -883,35 +1086,20 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		if self._mode_reload_progress is not None and not self._mode_reload_progress["done"]:
 			return
 
-		self._recompute_missing_for_mode()
-
-		refs = {}
-		gray = set()
-		for name, default_ref in self._loaded_refs.items():
-			ext_map = self._loaded_extensions.get(name, {})
-			ref, up_to_date = _resolve_zone_for_mode(default_ref, ext_map, self.render_mode)
-			if ref is None:
-				continue
-			refs[name] = ref
-			if not up_to_date:
-				gray.add(name)
-
-		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_apply_render_mode) mode={self.render_mode} loaded={len(self._loaded_refs)} resolved={len(refs)} gray={sorted(gray)} missing_for_mode={self._missing_for_mode}")
+		refs = dict(self._loaded_refs)
 
 		# `land_fallback` itself was already resolved above (before the
 		# early-return) -- the .land cell's own (pos_x, pos_y) plus which
 		# ones are ALREADY covered by `refs` (known only once _run_load_refs()
 		# has actually loaded them, bb_center) still need the background
-		# thread below, same as the real refs. All 3 render modes get this
-		# fallback now (project-todos/forgery/landscape_editor__land_
-		# composition.md step 4): a .land cell with no matching real file for
-		# the current mode's stage is rendered as the raw brick instead of
-		# staying invisible, whichever mode is active.
+		# thread below, same as the real refs -- a .land cell with no
+		# matching real file is rendered as the raw brick instead of staying
+		# invisible.
 
 		self._zone_error = None
 		progress = {
 			"done": False, "error": None, "zones": {}, "manifest_zones": {},
-			"gray": gray, "total": len(refs), "processed": 0,
+			"total": len(refs), "processed": 0, "force": force,
 		}
 		self._mode_reload_progress = progress
 		thread = threading.Thread(
@@ -936,11 +1124,43 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			# exactly what would be built fresh, without ever loading the
 			# bundle's actual geometry just to check.
 			manifest_zones = {}
+			force = progress.get("force", False)
+			continent_z_range = self._continent_z_range
 			for name, ref in refs.items():
 				try:
 					stat = ref.source_path.stat()
-					zones[name] = load_zone_cache_data(ref)
-					manifest_zones[name] = ZoneManifestEntry(zone_ref_extension(ref), stat.st_mtime, stat.st_size)
+					entry = ZoneManifestEntry(zone_ref_extension(ref), stat.st_mtime, stat.st_size)
+					manifest_zones[name] = entry
+					cache_data = None
+					if not force and continent_z_range is not None:
+						min_z, max_z = continent_z_range
+						# Cheap manifest-only read (no `.bam` payload
+						# touched) -- if it already matches what
+						# _set_loaded_zones() will want a moment later on
+						# the main thread, the `.bam` geometry cache is
+						# confirmed to hit, so the far more expensive
+						# zone_cache.py position-cache load below (~3ms/
+						# zone measured, mostly pickle unpacking thousands
+						# of individual Python floats) is skipped entirely
+						# -- only bb_center/bb_half_size (carried on the
+						# manifest itself, see ZoneGeomManifest's own
+						# docstring) are needed from here on for a
+						# confirmed hit; `patches` stays empty, never
+						# touched unless _set_loaded_zones()'s own
+						# (identical) check somehow disagrees moments
+						# later -- an unrealistic race, nothing plausible
+						# changes a zone's `.bam`/the whole continent's
+						# elevation range mid-operation.
+						cached_manifest = zone_geom_cache.read_manifest(name, self._zone_cache_mode())
+						if (cached_manifest is not None and cached_manifest.entry == entry
+						        and cached_manifest.min_z == min_z and cached_manifest.max_z == max_z):
+							cache_data = ZoneCacheData(
+								patches=(), bb_center=cached_manifest.bb_center,
+								bb_half_size=cached_manifest.bb_half_size,
+							)
+					if cache_data is None:
+						cache_data = load_zone_cache_data(ref, force=force, low_poly=self._low_poly)
+					zones[name] = cache_data
 				except (RegionLoadError, OSError) as exc:
 					failed.append(str(exc))
 				progress["processed"] += 1
@@ -1083,16 +1303,21 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			report_error(progress["error"])
 		return root, total_instances
 
-	def _load_ig_rest(self):
-		"""Panel button "Load remaining .ig instances" (project-todos/
-		forgery/landscape_editor__ig_full_load.md step 6) -- kicks off a
-		background build of every real `.ig` belonging to the current
-		continent that is NEITHER zone-owned NOR sky/canopy (villages,
-		water, ...): ig_full_load.split_refs()'s own `rest_refs`. Zone-owned
-		`.ig`s load per-region instead (_load_region_ig(), triggered by
-		_toggle_region()). Manual only; a build already running is left to
-		finish, a fresh call while one is in flight is a no-op (this
-		function's own guard)."""
+	def _load_ig_rest(self, force=False):
+		"""Kicks off a background build of every real `.ig` belonging to the
+		current continent that is NEITHER zone-owned NOR sky/canopy
+		(villages, water, ...): ig_full_load.split_refs()'s own `rest_refs`
+		(project-todos/forgery/landscape_editor__ig_full_load.md step 6).
+		Zone-owned `.ig`s load per-region instead (_load_region_ig(),
+		triggered by _toggle_region()). Called automatically whenever a
+		continent loads (project-todos/forgery/landscape_editor__render_
+		modes_removal.md removed the panel's own manual trigger button, this
+		auto-call was already in place before that); a build already
+		running is left to finish, a fresh call while one is in flight is a
+		no-op (this function's own guard). `force` (same chantier, viewport
+		toolbar right-click "Regenerate cache") skips the cache read below,
+		forcing a fresh rebuild -- write_ig_bundle() still overwrites the
+		on-disk `.bam` with the fresh result either way."""
 		continent = self._selected_continent_pipeline_name
 		if not continent:
 			return
@@ -1103,7 +1328,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# it back: every click rebuilt from scratch instead of reusing a
 		# `.bam` from an earlier session/click, unlike _load_region_ig(),
 		# which already checked its own cache first.
-		cached = ig_full_geom_cache.read_ig_bundle(continent, app_mode, None, self.loader)
+		cached = None if force else ig_full_geom_cache.read_ig_bundle(continent, app_mode, None, self.loader)
 		if cached is not None:
 			self._show_ig_rest(cached)
 			return
@@ -1140,21 +1365,34 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		finally:
 			progress["done"] = True
 
-	def _load_region_ig(self, region_name):
+	def _regenerate_region_ig_caches(self):
+		"""Viewport toolbar tree icon's right-click "Regenerate cache"
+		(project-todos/forgery/landscape_editor__render_modes_removal.md) --
+		force-reloads every currently CHECKED region's own zone-`.ig` bundle
+		(_load_region_ig(force=True)); unchecked regions have nothing
+		displayed to refresh, so they're skipped."""
+		for region_name, checked in self._region_checked.items():
+			if checked:
+				self._load_region_ig(region_name, force=True)
+
+	def _load_region_ig(self, region_name, force=False):
 		"""Loads `region_name`'s own zone-owned `.ig` bundle -- called from
 		_toggle_region() right after that region gets CHECKED (project-todos/
 		forgery/landscape_editor__ig_full_load.md step 5). Tries
 		ig_full_geom_cache.read_ig_bundle() first (a `.bam` from an earlier
 		session/region-check); builds fresh in the background only if none
 		exists yet. A build already running for this region is left to
-		finish, a fresh call while one is in flight is a no-op."""
+		finish, a fresh call while one is in flight is a no-op. `force`
+		(project-todos/forgery/landscape_editor__render_modes_removal.md,
+		viewport toolbar right-click "Regenerate cache") skips the cache
+		read below, same as _load_ig_rest()'s own `force`."""
 		continent = self._selected_continent_pipeline_name
 		if not continent:
 			return
 		app_mode = self._app_mode
 		live_data_path = app_settings.load().live_data_path
 		ryzom_data_path = repository_paths.get("ryzom-data")
-		cached = ig_full_geom_cache.read_ig_bundle(continent, app_mode, region_name, self.loader)
+		cached = None if force else ig_full_geom_cache.read_ig_bundle(continent, app_mode, region_name, self.loader)
 		if cached is not None:
 			self._show_ig_region(region_name, cached)
 			return
@@ -1426,8 +1664,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		toggles visibility of self._ig_rest_root ONLY (the continent-wide
 		"rest" bundle: villages/water/..., never zone-owned buildings/props,
 		see _toggle_ig_visibility()'s own docstring for why these are two
-		independent toggles). Never itself triggers a build: that's the
-		panel's own "Load remaining .ig instances" button (_load_ig_rest())."""
+		independent toggles). Never itself triggers a build: that's
+		_load_ig_rest(), called automatically whenever a continent loads."""
 		self._ig_rest_visible = not self._ig_rest_visible
 		if self._ig_rest_visible:
 			self._ig_rest_root.show()
@@ -1448,32 +1686,28 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		max_z = max(cd.bb_center[2] + cd.bb_half_size[2] for cd in zones.values())
 		return min_z, max_z
 
-	def _recompute_missing_for_mode(self):
-		"""Recomputes self._missing_for_mode from self._loaded_extensions for
-		self.render_mode -- shared by _apply_render_mode() (full mode switch)
-		and the live per-zone updates applied while "Generate missing
-		.zonew" (project-todos/forgery/landscape_editor__zone_render_modes.md
-		step 9) is running, so the counter stays correct without a full
-		reload."""
-		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
-		if real_exts is None:
-			self._missing_for_mode = 0
-			return
-		self._missing_for_mode = sum(
-			1 for name, ext_map in self._loaded_extensions.items()
-			if not any(ext in ext_map for ext in real_exts)
-		)
-		if self.render_mode == "WELD":
-			self._missing_for_mode += len(self._land_missing_cells)
-
-	def _rebuild_zone_node(self, name, cache_data):
+	def _rebuild_zone_node(self, name, cache_data, manifest_entry=None):
 		"""Replaces the single geometry node for zone `name` with one built
 		from `cache_data`, keeping the stage-3 gradient consistent with every
 		other currently loaded fully-built zone (step 9's live update -- see
 		_set_loaded_zones()'s own docstring for why that gradient spans the
 		whole loaded set, not each zone's own range). Does not touch the
 		grid overlay or camera framing -- the loaded set's bounds don't
-		change when a zone advances a build stage."""
+		change when a zone advances a build stage.
+
+		`manifest_entry` (project-todos/forgery/landscape_editor__render_
+		modes_removal.md perf fix, Nuno 2026-09-14), when given, is checked
+		against the per-zone `.bam` cache first (same comparison
+		_set_loaded_zones() does) -- this is what actually makes
+		_run_load_refs()'s "skip the expensive position load, `cache_data.
+		patches` stays empty" optimization safe to call THIS with: unlike
+		before, this method now fetches the real cached `.bam` NodePath
+		instead of trying (and silently failing, "rien ne s'affiche",
+		Nuno 2026-09-14) to tessellate geometry from empty patches. If
+		`manifest_entry` is omitted, or given but the `.bam` cache doesn't
+		actually hit (stale), and `cache_data.patches` is empty, the real
+		position data is loaded on demand as a last resort, so this never
+		silently produces a blank zone."""
 		old_node = self._zone_nodes.get(name)
 		if old_node is not None:
 			old_node.remove_node()
@@ -1481,9 +1715,33 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			return
 		min_z, max_z = self._elevation_z_range(self.zones)
 		stage = zone_build_stage(self._loaded_extensions.get(name, {}))
-		node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, stage=stage)
-		node_path = self._zone_root.attach_new_node(node)
-		node_path.set_two_sided(True)
+		node_path = None
+		if manifest_entry is not None:
+			wanted_manifest = ZoneGeomManifest(
+				format_version=2, entry=manifest_entry, min_z=min_z, max_z=max_z,
+				bb_center=cache_data.bb_center, bb_half_size=cache_data.bb_half_size,
+			)
+			cached = zone_geom_cache.read_zone_bundle(name, self._zone_cache_mode(), self.loader)
+			if cached is not None:
+				cached_node_path, cached_manifest = cached
+				if cached_manifest == wanted_manifest:
+					cached_node_path.set_name(name)
+					cached_node_path.reparent_to(self._zone_root)
+					node_path = cached_node_path
+				else:
+					cached_node_path.remove_node()
+		if node_path is None:
+			if not cache_data.patches:
+				ref = self._loaded_refs.get(name)
+				if ref is None:
+					return
+				try:
+					cache_data = load_zone_cache_data(ref, low_poly=self._low_poly)
+				except (RegionLoadError, OSError):
+					return
+			node = build_zone_geom_from_cache(cache_data, min_z=min_z, max_z=max_z, stage=stage)
+			node_path = self._zone_root.attach_new_node(node)
+			node_path.set_two_sided(True)
 		self._zone_nodes[name] = node_path
 
 	def _rebuild_all_zone_nodes(self):
@@ -1498,7 +1756,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			self._rebuild_zone_node(name, cache_data)
 
 
-	def _set_loaded_zones(self, zones, gray=None, manifest_zones=None, mode=None, grid_bounds=None, frame_camera=True):
+	def _set_loaded_zones(self, zones, manifest_zones=None, mode=None, grid_bounds=None, frame_camera=True, force=False):
 		"""Tears down whatever geometry was attached before and builds fresh
 		geometry for `zones` (name -> zone_cache.ZoneCacheData) -- colored by
 		elevation over the combined Z range of every zone in `zones`, not
@@ -1516,14 +1774,6 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		for real right now (self._loaded_refs, a region-checkbox-filtered
 		subset). `None` (every other caller) keeps the old behaviour: the
 		grid spans exactly `zones`' own combined bounds.
-
-		`gray` (zone names, project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 6) no longer changes the
-		coloring itself (superseded by the per-zone build-stage gradient,
-		project-todos/forgery/landscape_editor__land_composition.md step 4,
-		zone_geometry.zone_build_stage()) -- kept only for _missing_for_mode's
-		own "N zone(s) not welded/lit" count, a genuinely mode-dependent
-		metric distinct from a zone's real, mode-independent build stage.
 
 		`manifest_zones`/`mode` (project-todos/forgery/landscape_editor__
 		region_management__zone_bam_cache.md), when both given (continent
@@ -1548,7 +1798,6 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		single checkbox click). Single-zone selection (on_selection_
 		changed()) keeps the default True -- framing on that one zone is
 		exactly what picking it in the Explorer is for."""
-		self._gray_zones = gray or set()
 		self.zones = zones
 
 		if not zones:
@@ -1614,9 +1863,16 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			wanted_manifest = None
 			if cache_enabled and name in manifest_zones:
 				wanted_manifest = ZoneGeomManifest(
-					format_version=1, entry=manifest_zones[name], min_z=min_z, max_z=max_z,
+					format_version=2, entry=manifest_zones[name], min_z=min_z, max_z=max_z,
+					bb_center=cache_data.bb_center, bb_half_size=cache_data.bb_half_size,
 				)
-				cached = zone_geom_cache.read_zone_bundle(name, mode, self.loader)
+				# `force` (project-todos/forgery/landscape_editor__render_
+				# modes_removal.md "reload cache" buttons) skips the read
+				# entirely -- treated as a cache miss below, so the fresh
+				# rebuild's write_zone_bundle() call further down still
+				# overwrites the on-disk `.bam`/manifest with today's data,
+				# even when the old one was already up to date.
+				cached = None if force else zone_geom_cache.read_zone_bundle(name, mode, self.loader)
 				if cached is not None:
 					cached_node_path, cached_manifest = cached
 					if cached_manifest == wanted_manifest:
@@ -1738,7 +1994,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				report_error(self._bounds_error)
 				return
 		# Frames the camera on the WHOLE continent immediately, same
-		# frame_bounds() as the "Center camera here" button below --
+		# frame_bounds() as the left panel's own "center camera" icon --
 		# previously this only ever happened once real zone geometry
 		# finished loading (_frame_on_loaded_zones(), called from
 		# _set_loaded_zones()), which a continent with regions (project-
@@ -1758,10 +2014,9 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 	def _toggle_top_down(self):
 		"""2D/3D viewport toggle (project-todos/forgery/
 		landscape_editor__2d_3d_toggle.md) -- purely a camera behavior switch,
-		independent of self.render_mode ([POLY]/[WELD]/[LIGHT] keep resolving
-		geometry exactly the same either way). Leaving 3D for 2D remembers the
-		orientation being left, so coming back to 3D restores it instead of
-		leaving the view stuck on the top-down look."""
+		independent of the zone geometry itself. Leaving 3D for 2D remembers
+		the orientation being left, so coming back to 3D restores it instead
+		of leaving the view stuck on the top-down look."""
 		self._top_down_locked = not self._top_down_locked
 		if self._top_down_locked:
 			self._saved_3d_heading_pitch = (self.orbit_camera.heading, self.orbit_camera.pitch)
@@ -1777,8 +2032,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		Patina's own object transparency toggle (object_editor_mixins/
 		viewport_transform.py's _apply_object_transparency()), applied to
 		self._zone_root instead of a single object's model_root, so it
-		covers every zone currently loaded regardless of self.render_mode.
-		Independent of _cycle_zone_wireframe() -- both can be on at once."""
+		covers every zone currently loaded. Independent of
+		_cycle_zone_wireframe() -- both can be on at once."""
 		self._zone_transparent = not self._zone_transparent
 		if self._zone_transparent:
 			self._zone_root.set_transparency(TransparencyAttrib.M_alpha)
@@ -1867,28 +2122,463 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 						self._set_zone_wireframe_mode(mode)
 				imgui.end_popup()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_TREE, "Show zone .ig instances (buildings/props, per region)",
+			if _icon_button(fa_icons.ICON_FA_TREE,
+			                "Show zone .ig instances (buildings/props, per region) (right-click to regenerate cache)",
 			                self._ig_region_visible, square=True, large_font=large_font):
 				self._toggle_ig_visibility()
+			if imgui.begin_popup_context_item("##ig-zone-cache-popup"):
+				clicked, _ = imgui.selectable("Regenerate cache", False)
+				if clicked:
+					self._regenerate_region_ig_caches()
+				imgui.end_popup()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_HOUSE_CHIMNEY, "Show remaining .ig instances (villages/water)",
+			if _icon_button(fa_icons.ICON_FA_HOUSE_CHIMNEY,
+			                "Show remaining .ig instances (villages/water) (right-click to regenerate cache)",
 			                self._ig_rest_visible, square=True, large_font=large_font):
 				self._toggle_ig_rest_visibility()
+			if imgui.begin_popup_context_item("##ig-rest-cache-popup"):
+				clicked, _ = imgui.selectable("Regenerate cache", False)
+				if clicked:
+					self._load_ig_rest(force=True)
+				imgui.end_popup()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_GAUGE_SIMPLE, "Low poly terrain (for weak GPUs)",
+			                self._low_poly, square=True, large_font=large_font):
+				self._toggle_low_poly()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+
+	def _compass_north_angle(self):
+		"""Clockwise angle (radians, 0 = straight up on screen) world north
+		(+Y, see camera.py's own AXIS_VIEWS docstring: heading=0 looks from
+		-Y towards +Y) currently points at -- read straight from the real
+		camera transform (self.camera.get_mat(self.render), Panda3D's own
+		CS_zup_right row layout: row 0 = local +X/right, row 2 = local
+		+Z/up, both already in world space for an unscaled node), not
+		re-derived from self.orbit_camera.heading/pitch by hand -- correct
+		regardless of pitch/roll, unlike a heading-only approximation."""
+		mat = self.camera.get_mat(self.render)
+		screen_right = mat.get_row3(0)
+		screen_up = mat.get_row3(2)
+		north = Vec3(0, 1, 0)
+		return math.atan2(north.dot(screen_right), north.dot(screen_up))
+
+	def _draw_north_compass(self):
+		"""Small floating compass bottom-right of the 3D viewport (project-
+		todos/forgery/landscape_editor__render_modes_removal.md) -- same
+		floating-window mechanism as _draw_viewport_toggles() (self-measured
+		size, positioned off last frame's own captured size), just anchored
+		to the right panel's own width instead of the left Explorer's. A
+		hand-drawn arrow (ImGui has no built-in glyph/text rotation) always
+		points at real world north, computed fresh every frame
+		(_compass_north_angle()) -- Nuno 2026-09-14: a static, non-rotating
+		icon here before wasn't actually indicating a direction at all. A
+		click resets the camera's heading to due north (_reset_camera_
+		heading()), leaving pitch/distance/target and the 2D/3D mode
+		untouched."""
+		display_size = imgui.get_io().display_size
+		win_w, win_h = display_size.x, display_size.y
+		if win_h <= 0:
+			return
+
+		radius = 22.0
+		size = radius * 2.0
+		x = win_w - self.panel_width - _VIEWPORT_TOGGLE_MARGIN_PX - size
+		y = win_h - self.sysinfo_height - _VIEWPORT_TOGGLE_MARGIN_PX - size
+		imgui.set_next_window_pos((x, y))
+		flags = (imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_resize.value
+		         | imgui.WindowFlags_.no_collapse.value | imgui.WindowFlags_.no_title_bar.value
+		         | imgui.WindowFlags_.no_background.value | imgui.WindowFlags_.always_auto_resize.value)
+		with imgui_ctx.begin("##north-compass", flags=flags):
+			imgui.invisible_button("##compass-reset", (size, size))
+			clicked = imgui.is_item_clicked()
+			if imgui.is_item_hovered():
+				imgui.set_tooltip("Reset camera heading to north")
+			pos = imgui.get_item_rect_min()
+			center = (pos.x + radius, pos.y + radius)
+			draw_list = imgui.get_window_draw_list()
+			draw_list.add_circle_filled(center, radius, imgui.get_color_u32((0.12, 0.12, 0.15, 0.85)), num_segments=32)
+			draw_list.add_circle(center, radius, imgui.get_color_u32((0.6, 0.6, 0.65, 1.0)), num_segments=32, thickness=1.5)
+			angle = self._compass_north_angle()
+			tip = (center[0] + radius * 0.8 * math.sin(angle), center[1] - radius * 0.8 * math.cos(angle))
+			tail = (center[0] - radius * 0.4 * math.sin(angle), center[1] + radius * 0.4 * math.cos(angle))
+			arrow_color = imgui.get_color_u32((0.9, 0.25, 0.25, 1.0))
+			draw_list.add_line(tail, tip, arrow_color, thickness=2.5)
+			head_left = (tip[0] + 7.0 * math.sin(angle + 2.5), tip[1] - 7.0 * math.cos(angle + 2.5))
+			head_right = (tip[0] + 7.0 * math.sin(angle - 2.5), tip[1] - 7.0 * math.cos(angle - 2.5))
+			draw_list.add_triangle_filled(tip, head_left, head_right, arrow_color)
+			self._compass_size = (imgui.get_window_size().x, imgui.get_window_size().y)
+			if clicked:
+				self._reset_camera_heading()
+
+	def _reset_camera_heading(self):
+		"""Resets the camera's heading to due north (0.0), keeping pitch/
+		distance/target untouched -- setting self.orbit_camera.heading
+		alone would NOT move the real camera at all (camera.py's own
+		OrbitCamera._update() only ever recomputes the actual position on a
+		mouse drag or a running animation, see _update_camera_pos()'s own
+		callers): animate_to_orientation() is the one already-public entry
+		point that both updates self.heading correctly AND drives the
+		camera to match, every frame, via its own animation (same mechanism
+		as _toggle_top_down()'s "restore the saved 3D view" call, Nuno
+		2026-09-14: "le reset ne fonctionne pas" -- found tracing camera.py,
+		a plain assignment silently did nothing visible)."""
+		self.orbit_camera.animate_to_orientation(0.0, self.orbit_camera.pitch)
+
+	def _zone_cache_mode(self):
+		"""The `mode` key used everywhere a zone's per-zone `.bam` geometry
+		cache (`zone_geom_cache.py`) is read or written -- project-todos/
+		forgery/landscape_editor__render_modes_removal.md already made this
+		a stable constant ("zone") once the old per-render-mode variants
+		(POLY/WELD/LIGHT) were removed; project-todos/forgery/
+		landscape_editor__low_poly_mode.md revives exactly one variant axis
+		on it -- quality -- so a low-poly zone's `.bam` never collides with
+		its normal-quality one, same cache module, no new cache."""
+		return "zone_low" if self._low_poly else "zone"
+
+	def _toggle_low_poly(self):
+		"""Flips the "Low Poly" terrain toggle (project-todos/forgery/
+		landscape_editor__low_poly_mode.md, Nuno 2026-09-14, for weak GPUs),
+		persists it, then forces a full reload of everything currently
+		loaded (_apply_render_mode(), unlike a single region check/uncheck:
+		a quality change legitimately affects every zone on screen at once,
+		not just one region -- the same reasoning _apply_render_mode()'s
+		own full-union reload existed for before the per-region incremental
+		path replaced it for region toggles specifically)."""
+		self._low_poly = not self._low_poly
+		settings = app_settings.load()
+		settings.landscape_low_poly = self._low_poly
+		app_settings.save(settings)
+		self._apply_render_mode()
 
 	def panel_title(self):
 		return "Landscape Editor"
+
+	def _draw_continent_and_regions(self):
+		"""Continent combo + region checkboxes (project-todos/forgery/
+		landscape_editor__render_modes_removal.md, moved here from the right
+		panel) -- also owns every background-progress polling that feeds
+		this state (continent scan, zone-geometry reload, region/rest `.ig`
+		builds, region cache reloads) so it keeps working while the
+		Settings tab is active on the right (the right panel's own
+		`_draw_landscape_tab()` is only ever drawn for its "Landscape" tab,
+		this method isn't)."""
+		if self._cont_locs_error is not None:
+			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._cont_locs_error)
+			return
+
+		imgui.text("Continent")
+		current_label = "(none selected)"
+		if self.selected_continent_name is not None:
+			for cont_loc in self._cont_locs:
+				if cont_loc.continent_name == self.selected_continent_name:
+					current_label = cont_loc.selection_name
+					break
+		if imgui.begin_combo("##continent_selector", current_label):
+			for cont_loc in self._cont_locs:
+				selected = cont_loc.continent_name == self.selected_continent_name
+				clicked, _ = imgui.selectable(cont_loc.selection_name, selected)
+				if clicked:
+					self._select_continent(cont_loc.continent_name, cont_loc.selection_name)
+				if selected:
+					imgui.set_item_default_focus()
+			imgui.end_combo()
+		imgui.same_line()
+		if _icon_button(fa_icons.ICON_FA_CROSSHAIRS, "Center camera on continent", square=True,
+		                disabled=self.continent_bounds is None):
+			min_x, min_y, max_x, max_y = self.continent_bounds
+			self.orbit_camera.frame_bounds(min_x, min_y, max_x, max_y, margin=ZONE_CELL_SIZE)
+		imgui.same_line()
+		continent_reloading = bool(self._continent_cache_reload_queue) or (
+			self._region_cache_reload_progress is not None and not self._region_cache_reload_progress["done"]
+		)
+		if _icon_button(fa_icons.ICON_FA_ROTATE, "Reload cache for the whole continent, region by region",
+		                square=True, disabled=self.selected_continent_name is None or continent_reloading):
+			self._reload_continent_cache()
+
+		if self._bounds_error is not None:
+			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._bounds_error)
+
+		if self._region_names:
+			imgui.separator()
+			for region_name in self._region_names:
+				imgui.push_id(region_name)
+				checked = self._region_checked.get(region_name, False)
+				label = region_name[len("region_"):] if region_name.startswith("region_") else region_name
+				changed, new_value = imgui.checkbox(label, checked)
+				if changed and new_value != checked:
+					self._toggle_region(region_name)
+				imgui.same_line()
+				if _icon_button(fa_icons.ICON_FA_CROSSHAIRS, f"Center camera on {label}", square=True,
+				                disabled=region_name not in self._region_bounds):
+					min_x, min_y, max_x, max_y = self._region_bounds[region_name]
+					self.orbit_camera.frame_bounds(min_x, min_y, max_x, max_y, margin=ZONE_CELL_SIZE)
+				imgui.same_line()
+				region_reloading = (
+					self._region_cache_reload_progress is not None
+					and not self._region_cache_reload_progress["done"]
+					and self._region_cache_reload_progress["region"] == region_name
+				)
+				if _icon_button(fa_icons.ICON_FA_ROTATE, f"Reload cache for {label}", square=True,
+				                disabled=not checked or region_reloading):
+					self._reload_region_cache(region_name)
+				imgui.pop_id()
+
+		if self._continent_load_progress is not None:
+			progress = self._continent_load_progress
+			if progress["done"]:
+				self._continent_load_progress = None
+				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_draw_continent_and_regions) "
+				      f"continent scan done, error={progress['error']!r} zones={len(progress['default_refs'])}")
+				if progress["error"]:
+					self._zone_error = progress["error"]
+				else:
+					self._all_continent_refs = progress["default_refs"]
+					self._all_continent_extensions = progress["extensions"]
+					self._land_cell_region_map = progress.get("land_cell_region_map", {})
+					self._continent_z_range = progress.get("continent_z_range")
+					self._continent_total_used_cells = progress.get("total_used_cells")
+					regions = progress.get("regions", [])
+					self._continent_loaded_grid_bounds = self.continent_bounds
+					if regions:
+						# Lazy-by-region loading (project-todos/forgery/
+						# landscape_editor__region_management.md step 3) --
+						# nothing checked yet, so nothing loaded for real:
+						# every zone starts as a purple placeholder square,
+						# see _rebuild_region_placeholders() below. Exactly
+						# one region on the continent is auto-checked (Nuno
+						# 2026-09-13: "si le continent ne possède qu'une seule
+						# région, il faut l'activer par défaut. Mais si le
+						# continent a plus d'une région, on n'active rien
+						# par défaut") -- more than one region, or none,
+						# leaves every checkbox unchecked.
+						self._region_names = regions
+						self._region_bounds = progress.get("region_bounds", {})
+						self._region_zone_map = progress.get("zone_region_map", {})
+						self._region_checked = {name: False for name in regions}
+						if len(regions) == 1:
+							self._region_checked[regions[0]] = True
+							# _toggle_region() itself isn't called for this
+							# auto-check (it also flips a checkbox that's
+							# already False here), so its own _load_region_ig()
+							# call must be repeated here.
+							self._load_region_ig(regions[0])
+						active_names = {
+							name for name, region in self._region_zone_map.items()
+							if self._region_checked.get(region, False)
+						}
+						self._loaded_refs = {name: self._all_continent_refs[name] for name in active_names}
+						self._loaded_extensions = {
+							name: self._all_continent_extensions.get(name, {}) for name in active_names
+						}
+					else:
+						# No region_hierarchy entries for this continent --
+						# pre-region_management behaviour, unchanged: every
+						# zone loads immediately, no checkbox panel at all.
+						self._region_names = []
+						self._region_bounds = {}
+						self._region_zone_map = {}
+						self._region_checked = {}
+						self._loaded_refs = self._all_continent_refs
+						self._loaded_extensions = self._all_continent_extensions
+					self._apply_render_mode()
+					self._rebuild_region_placeholders()
+					# The "rest" bundle (villages/water/...) isn't tied to
+					# any region, so it always loads here regardless of the
+					# continent's own region_hierarchy shape -- from cache
+					# if the continent was already built before (near
+					# instant), built fresh otherwise (Nuno 2026-09-13: "il
+					# faut charger ces .ig au chargement du continent").
+					self._load_ig_rest()
+			else:
+				imgui.text("Scanning zone index...")
+
+		if self._mode_reload_progress is not None:
+			progress = self._mode_reload_progress
+			if progress["done"]:
+				self._mode_reload_progress = None
+				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_draw_continent_and_regions) "
+				      f"mode reload done, error={progress['error']!r} zones={len(progress['zones'])}")
+				if progress["error"]:
+					self._zone_error = progress["error"]
+				# The old whole-continent `.bam` cache used to be disabled
+				# outright in Édition (found 2026-09-12, Nuno: an unexpected
+				# stale cache hit after deleting a built zone -- see
+				# project-todos/forgery/landscape_editor__land_composition.md
+				# step 7's own decisions) -- the per-zone cache
+				# (project-todos/forgery/landscape_editor__region_
+				# management__zone_bam_cache.md step 5) replaces it in both
+				# modes: each zone/land-piece invalidates on its OWN
+				# mtime/size/rot/flip, so a deleted/changed file can never
+				# make a DIFFERENT zone's cache entry look stale (or the
+				# reverse), unlike the old single whole-continent bundle.
+				self._set_loaded_zones(
+					progress["zones"], manifest_zones=progress["manifest_zones"],
+					mode=self._zone_cache_mode(), grid_bounds=self._continent_loaded_grid_bounds, frame_camera=False,
+					force=progress["force"],
+				)
+			else:
+				total = progress["total"]
+				processed = progress["processed"]
+				fraction = processed / total if total else 0.0
+				overlay = f"{processed}/{total} zones" if total else "Loading..."
+				imgui.progress_bar(fraction, overlay=overlay)
+
+		if self._region_cache_reload_progress is not None:
+			progress = self._region_cache_reload_progress
+			if progress["done"]:
+				self._region_cache_reload_progress = None
+				if progress["error"]:
+					self._zone_error = progress["error"]
+				else:
+					# NOT `... if self.zones else (0.0, 1.0)` (found 2026-09-14,
+					# Nuno: "0 skipped via .bam manifest" even on an exact
+					# repeat load) -- _elevation_z_range() ALREADY prefers
+					# self._continent_z_range over `zones` on its own; that
+					# extra guard bypassed it whenever self.zones was still
+					# empty (e.g. the very first region loaded for a fresh
+					# continent selection), silently writing every manifest
+					# with the placeholder (0.0, 1.0) instead of the real
+					# whole-continent range -- permanently mismatching every
+					# later _run_load_refs() comparison against the real
+					# self._continent_z_range, so the skip-path never fired.
+					min_z, max_z = self._elevation_z_range(self.zones)
+					region_checked = self._region_checked.get(progress["region"], False)
+					for name, cache_data in progress["zones"].items():
+						manifest_entry = progress["manifest_zones"].get(name)
+						if region_checked:
+							# Live in-place patch (same primitive as the Build
+							# progress drain) -- this region's own display
+							# stays untouched apart from these zones. NOT
+							# passing manifest_entry here (unlike the
+							# incremental check/uncheck consumer below) --
+							# this whole reload IS the "force, always
+							# rebuild" path (project-todos/forgery/
+							# landscape_editor__render_modes_removal.md,
+							# Nuno 2026-09-14: "invalider les 2 caches"), so
+							# _rebuild_zone_node() must never take its own
+							# `.bam`-cache shortcut here either.
+							self.zones[name] = cache_data
+							self._rebuild_zone_node(name, cache_data)
+						if manifest_entry is not None:
+							node_path = self._zone_nodes.get(name)
+							if node_path is not None:
+								manifest = ZoneGeomManifest(
+									format_version=2, entry=manifest_entry, min_z=min_z, max_z=max_z,
+									bb_center=cache_data.bb_center, bb_half_size=cache_data.bb_half_size,
+								)
+								zone_geom_cache.write_zone_bundle(name, self._zone_cache_mode(), node_path, manifest)
+				# Continent-wide reload (project-todos/forgery/
+				# landscape_editor__render_modes_removal.md) -- advance to
+				# the next queued region, if any.
+				self._advance_continent_cache_reload()
+			else:
+				total = progress["total"]
+				processed = progress["processed"]
+				fraction = processed / total if total else 0.0
+				overlay = f"{progress['region']}: {processed}/{total} zone(s)"
+				imgui.progress_bar(fraction, overlay=overlay)
+
+		if self._region_incremental_progress is not None:
+			progress = self._region_incremental_progress
+			if progress["done"]:
+				self._region_incremental_progress = None
+				if progress["error"]:
+					self._zone_error = progress["error"]
+				else:
+					# Only actually shown if the region is STILL checked --
+					# a rapid check-then-uncheck of the SAME region while
+					# this background load was in flight already tore its
+					# zones down synchronously (_unload_region_incremental()),
+					# this stale result must not bring them back.
+					if self._region_checked.get(progress["region"], False):
+						# NOT `... if self.zones else (0.0, 1.0)` (found 2026-09-14,
+						# Nuno: "0 skipped via .bam manifest" even on an exact
+						# repeat load) -- _elevation_z_range() ALREADY prefers
+						# self._continent_z_range over `zones` on its own; that
+						# extra guard bypassed it whenever self.zones was still
+						# empty (e.g. the very first region loaded for a fresh
+						# continent selection), silently writing every manifest
+						# with the placeholder (0.0, 1.0) instead of the real
+						# whole-continent range -- permanently mismatching every
+						# later _run_load_refs() comparison against the real
+						# self._continent_z_range, so the skip-path never fired.
+						min_z, max_z = self._elevation_z_range(self.zones)
+						for name, cache_data in progress["zones"].items():
+							manifest_entry = progress["manifest_zones"].get(name)
+							self.zones[name] = cache_data
+							self._rebuild_zone_node(name, cache_data, manifest_entry=manifest_entry)
+							if manifest_entry is not None:
+								node_path = self._zone_nodes.get(name)
+								if node_path is not None:
+									manifest = ZoneGeomManifest(
+										format_version=2, entry=manifest_entry, min_z=min_z, max_z=max_z,
+										bb_center=cache_data.bb_center, bb_half_size=cache_data.bb_half_size,
+									)
+									zone_geom_cache.write_zone_bundle(name, self._zone_cache_mode(), node_path, manifest)
+				# Drain the next region queued while this one was loading
+				# (Nuno checked several in a row before this one finished).
+				if self._region_incremental_queue:
+					next_region = self._region_incremental_queue.pop(0)
+					if self._region_checked.get(next_region, False):
+						self._load_region_incremental(next_region)
+			else:
+				total = progress["total"]
+				processed = progress["processed"]
+				fraction = processed / total if total else 0.0
+				overlay = f"{progress['region']}: {processed}/{total} zone(s)"
+				imgui.progress_bar(fraction, overlay=overlay)
+
+		if self._ig_rest_progress is not None and self._ig_rest_progress["done"]:
+			progress = self._ig_rest_progress
+			self._ig_rest_progress = None
+			# Discarded (geometry never attached) if the continent/mode was
+			# switched away from while this build was still running --
+			# _hide_all_ig() already cleared self._ig_root for the new
+			# selection, this stale bundle must not repopulate it.
+			still_current = (progress["continent"], progress["mode"]) == (
+				self._selected_continent_pipeline_name, self._app_mode,
+			)
+			if progress["error"]:
+				self._ig_error = progress["error"]
+			elif progress["node_path"] is not None and still_current:
+				self._ig_error = None
+				self._show_ig_rest(progress["node_path"])
+
+		for region_name in list(self._ig_region_progress.keys()):
+			progress = self._ig_region_progress[region_name]
+			if not progress["done"]:
+				continue
+			del self._ig_region_progress[region_name]
+			# Same staleness guard as the "rest" bundle above, plus: the
+			# region must still be CHECKED (unchecking it while its build
+			# was running already called _hide_ig_region(), which popped
+			# this same progress entry -- so this loop only ever sees a
+			# region that's still both current and checked).
+			still_current = (progress["continent"], progress["mode"]) == (
+				self._selected_continent_pipeline_name, self._app_mode,
+			)
+			if progress["error"]:
+				self._ig_error = progress["error"]
+			elif progress["node_path"] is not None and still_current:
+				self._ig_error = None
+				self._show_ig_region(region_name, progress["node_path"])
 
 	def draw_left_panel_content(self):
 		"""Overrides ForgeryApp.draw_left_panel_content() (project-todos/
 		forgery/landscape_editor__ig_inspector_tree.md, Nuno 2026-09-14:
 		"vire l'explorer de gauche qui ne sert strictement à rien") -- the
-		real-file Explorer is replaced entirely here by a checkbox tree of
-		what's actually loaded: IG Zones (self._ig_tree_state_zones, grouped
-		by region) and IG Others (self._ig_tree_state_others, flat, the
-		"rest" bundle). Losing the Explorer also loses its one other use in
-		this app (selecting a single `.zone`/`.zonew`/`.zonel` file directly)
-		-- Nuno confirmed not using that."""
+		real-file Explorer is replaced entirely here by continent/region
+		selection (project-todos/forgery/landscape_editor__render_modes_
+		removal.md, moved from the right panel the same day) followed by a
+		checkbox tree of what's actually loaded: IG Zones
+		(self._ig_tree_state_zones, grouped by region) and IG Others
+		(self._ig_tree_state_others, flat, the "rest" bundle). Losing the
+		Explorer also loses its one other use in this app (selecting a
+		single `.zone`/`.zonew`/`.zonel` file directly) -- Nuno confirmed not
+		using that."""
+		self._ensure_continent_locations_loaded()
+		self._draw_continent_and_regions()
+		imgui.separator()
 		if imgui.tree_node_ex("##ig-zones-root", imgui.TreeNodeFlags_.default_open.value, "IG Zones"):
 			for region_name in sorted(self._ig_tree_state_zones.keys()):
 				imgui.push_id(region_name)
@@ -2040,6 +2730,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# Settings (project-todos/forgery/
 		# landscape_editor__zone_render_modes__ryzom_paths_ui.md step 5).
 		self._draw_viewport_toggles()
+		self._draw_north_compass()
 		if self._pipeline_data_install_pending is not None:
 			self._pipeline_data_install_dialog.open(self._pipeline_data_install_pending)
 			self._pipeline_data_install_pending = None
@@ -2095,8 +2786,6 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				app_settings.save(settings)
 
 	def _draw_landscape_tab(self):
-		self._ensure_continent_locations_loaded()
-
 		if self._pending_continent_reload:
 			# Deferred from draw_panel()'s mode-change handling to here,
 			# AFTER _ensure_continent_locations_loaded() above -- Edition
@@ -2132,328 +2821,151 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				self._all_continent_refs = {}
 				self._all_continent_extensions = {}
 				self._region_names = []
+				self._region_bounds = {}
 				self._region_zone_map = {}
 				self._region_checked = {}
 				self._land_cell_region_map = {}
 				self._continent_z_range = None
+				self._continent_total_used_cells = None
 				self._continent_loaded_grid_bounds = None
 				self._rebuild_region_placeholders()
 				self._set_loaded_zones({})
 
-		if self._cont_locs_error is not None:
-			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._cont_locs_error)
-			return
-
-		imgui.text("Continent")
-		current_label = "(none selected)"
-		if self.selected_continent_name is not None:
-			for cont_loc in self._cont_locs:
-				if cont_loc.continent_name == self.selected_continent_name:
-					current_label = cont_loc.selection_name
-					break
-		if imgui.begin_combo("##continent_selector", current_label):
-			for cont_loc in self._cont_locs:
-				selected = cont_loc.continent_name == self.selected_continent_name
-				clicked, _ = imgui.selectable(cont_loc.selection_name, selected)
-				if clicked:
-					self._select_continent(cont_loc.continent_name, cont_loc.selection_name)
-				if selected:
-					imgui.set_item_default_focus()
-			imgui.end_combo()
-
-		if self._bounds_error is not None:
-			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._bounds_error)
-		elif self.continent_bounds is not None:
-			min_x, min_y, max_x, max_y = self.continent_bounds
-			imgui.text(f"Bounds: X [{min_x:.0f} .. {max_x:.0f}]  Y [{min_y:.0f} .. {max_y:.0f}]")
-			if imgui.button("Center camera here"):
-				self.orbit_camera.frame_bounds(min_x, min_y, max_x, max_y, margin=ZONE_CELL_SIZE)
-
-		if self._region_names:
-			imgui.separator()
-			imgui.text("Regions (check to load, uncheck to unload)")
-			for region_name in self._region_names:
-				checked = self._region_checked.get(region_name, False)
-				changed, new_value = imgui.checkbox(region_name, checked)
-				if changed and new_value != checked:
-					self._toggle_region(region_name)
-
-		imgui.separator()
-		if self._selected_zone_name is not None and self._selected_zone_bounds is not None:
-			min_x, min_y, max_x, max_y = self._selected_zone_bounds
-			imgui.text(f"Selected zone: {self._selected_zone_name}")
-			imgui.text(f"  min=({min_x:.1f}, {min_y:.1f})  max=({max_x:.1f}, {max_y:.1f})")
-
-		imgui.separator()
-		imgui.text("Zone (select a .zone/.zonew/.zonel in the Explorer,")
-		imgui.text("or pick a continent above to load it whole)")
-		if imgui.button("Build cache for this continent"):
-			self._load_continent()
-
-		if self._continent_load_progress is not None:
-			progress = self._continent_load_progress
-			if progress["done"]:
-				self._continent_load_progress = None
-				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:draw_panel) continent scan done, error={progress['error']!r} zones={len(progress['default_refs'])}")
-				if progress["error"]:
-					self._zone_error = progress["error"]
-				else:
-					self._all_continent_refs = progress["default_refs"]
-					self._all_continent_extensions = progress["extensions"]
-					self._land_cell_region_map = progress.get("land_cell_region_map", {})
-					self._continent_z_range = progress.get("continent_z_range")
-					regions = progress.get("regions", [])
-					self._continent_loaded_grid_bounds = self.continent_bounds
-					if regions:
-						# Lazy-by-region loading (project-todos/forgery/
-						# landscape_editor__region_management.md step 3) --
-						# nothing checked yet, so nothing loaded for real:
-						# every zone starts as a purple placeholder square,
-						# see _rebuild_region_placeholders() below. Exactly
-						# one region on the continent is auto-checked (Nuno
-						# 2026-09-13: "si le continent ne possède qu'une seule
-						# région, il faut l'activer par défaut. Mais si le
-						# continent a plus d'une région, on n'active rien
-						# par défaut") -- more than one region, or none,
-						# leaves every checkbox unchecked.
-						self._region_names = regions
-						self._region_zone_map = progress.get("zone_region_map", {})
-						self._region_checked = {name: False for name in regions}
-						if len(regions) == 1:
-							self._region_checked[regions[0]] = True
-							# _toggle_region() itself isn't called for this
-							# auto-check (it also flips a checkbox that's
-							# already False here), so its own _load_region_ig()
-							# call must be repeated here.
-							self._load_region_ig(regions[0])
-						active_names = {
-							name for name, region in self._region_zone_map.items()
-							if self._region_checked.get(region, False)
-						}
-						self._loaded_refs = {name: self._all_continent_refs[name] for name in active_names}
-						self._loaded_extensions = {
-							name: self._all_continent_extensions.get(name, {}) for name in active_names
-						}
-					else:
-						# No region_hierarchy entries for this continent --
-						# pre-region_management behaviour, unchanged: every
-						# zone loads immediately, no checkbox panel at all.
-						self._region_names = []
-						self._region_zone_map = {}
-						self._region_checked = {}
-						self._loaded_refs = self._all_continent_refs
-						self._loaded_extensions = self._all_continent_extensions
-					self._apply_render_mode()
-					self._rebuild_region_placeholders()
-					# The "rest" bundle (villages/water/...) isn't tied to
-					# any region, so it always loads here regardless of the
-					# continent's own region_hierarchy shape -- from cache
-					# if the continent was already built before (near
-					# instant), built fresh otherwise (Nuno 2026-09-13: "il
-					# faut charger ces .ig au chargement du continent").
-					self._load_ig_rest()
-			else:
-				imgui.text("Scanning zone index...")
-
-		if self._mode_reload_progress is not None:
-			progress = self._mode_reload_progress
-			if progress["done"]:
-				self._mode_reload_progress = None
-				print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:draw_panel) mode reload done, error={progress['error']!r} zones={len(progress['zones'])} gray={sorted(progress['gray'])}")
-				if progress["error"]:
-					self._zone_error = progress["error"]
-				# The old whole-continent `.bam` cache used to be disabled
-				# outright in Édition (found 2026-09-12, Nuno: an unexpected
-				# stale cache hit after deleting a built zone -- see
-				# project-todos/forgery/landscape_editor__land_composition.md
-				# step 7's own decisions) -- the per-zone cache
-				# (project-todos/forgery/landscape_editor__region_
-				# management__zone_bam_cache.md step 5) replaces it in both
-				# modes: each zone/land-piece invalidates on its OWN
-				# mtime/size/rot/flip, so a deleted/changed file can never
-				# make a DIFFERENT zone's cache entry look stale (or the
-				# reverse), unlike the old single whole-continent bundle.
-				self._set_loaded_zones(
-					progress["zones"], gray=progress["gray"], manifest_zones=progress["manifest_zones"],
-					mode=self.render_mode, grid_bounds=self._continent_loaded_grid_bounds, frame_camera=False,
-				)
-				# Cells with no real zone file at all show up as synthesized
-				# "land:x:y" pseudo-names (see _run_load_refs()'s land
-				# fallback) -- tracked separately from self._loaded_extensions
-				# (which only ever knows about real, positioned zones) so
-				# [WELD]'s "Generate missing .zonew" can report them as
-				# blocked instead of silently ignoring them (step 9,
-				# Nuno 2026-09-11).
-				self._land_missing_cells = {name for name in progress["gray"] if name.startswith("land:")}
-				self._recompute_missing_for_mode()
-			else:
-				total = progress["total"]
-				processed = progress["processed"]
-				fraction = processed / total if total else 0.0
-				overlay = f"{processed}/{total} zones" if total else "Loading..."
-				imgui.progress_bar(fraction, overlay=overlay)
-
-		if self._ig_rest_progress is not None and self._ig_rest_progress["done"]:
-			progress = self._ig_rest_progress
-			self._ig_rest_progress = None
-			# Discarded (geometry never attached) if the continent/mode was
-			# switched away from while this build was still running --
-			# _hide_all_ig() already cleared self._ig_root for the new
-			# selection, this stale bundle must not repopulate it.
-			still_current = (progress["continent"], progress["mode"]) == (
-				self._selected_continent_pipeline_name, self._app_mode,
-			)
-			if progress["error"]:
-				self._ig_error = progress["error"]
-			elif progress["node_path"] is not None and still_current:
-				self._ig_error = None
-				self._show_ig_rest(progress["node_path"])
-
-		for region_name in list(self._ig_region_progress.keys()):
-			progress = self._ig_region_progress[region_name]
-			if not progress["done"]:
-				continue
-			del self._ig_region_progress[region_name]
-			# Same staleness guard as the "rest" bundle above, plus: the
-			# region must still be CHECKED (unchecking it while its build
-			# was running already called _hide_ig_region(), which popped
-			# this same progress entry -- so this loop only ever sees a
-			# region that's still both current and checked).
-			still_current = (progress["continent"], progress["mode"]) == (
-				self._selected_continent_pipeline_name, self._app_mode,
-			)
-			if progress["error"]:
-				self._ig_error = progress["error"]
-			elif progress["node_path"] is not None and still_current:
-				self._ig_error = None
-				self._show_ig_region(region_name, progress["node_path"])
-
-		if self._weld_generate_progress is not None:
-			progress = self._weld_generate_progress
-			# Live, one zone at a time (Nuno 2026-09-11: waiting for the
-			# whole batch before showing anything was worse than necessary)
-			# -- each ready zone goes from gray fallback to real welded
-			# geometry the moment its own .zonew is written, without
-			# touching any zone still pending.
-			ready = progress["ready"]
-			while ready:
-				name, cache_data, new_ref = ready.pop(0)
-				self._loaded_extensions.setdefault(name, {})[".zonew"] = new_ref
-				if self.render_mode == "WELD":
-					self.zones[name] = cache_data
-					self._gray_zones.discard(name)
-					self._rebuild_zone_node(name, cache_data)
-			self._recompute_missing_for_mode()
-			if progress["done"]:
-				self._weld_generate_progress = None
-				if progress["error"]:
-					self._zone_error = progress["error"]
-
 		if self._zone_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
-
-		# `.ig` instance loading (project-todos/forgery/
-		# landscape_editor__ig_full_load.md) -- zone-owned `.ig`s (buildings/
-		# props tied to a specific zone) load automatically per region,
-		# right alongside that region's own zone geometry (_toggle_region()
-		# -> _load_region_ig()); this button only ever builds the
-		# continent-wide "rest" (villages/water/..., never sky/canopy). The
-		# viewport toolbar's tree icon (_toggle_ig_visibility()) only ever
-		# shows/hides whatever's already loaded/cached (regions + rest), it
-		# never triggers a build itself.
-		imgui.separator()
-		imgui.text("Instances (.ig): villages/water/... for this continent (excl. sky)")
-		ig_rest_loading = self._ig_rest_progress is not None and not self._ig_rest_progress["done"]
-		imgui.begin_disabled(ig_rest_loading or not self._selected_continent_pipeline_name)
-		if imgui.button("Load remaining .ig instances"):
-			self._load_ig_rest()
-		imgui.end_disabled()
-		if ig_rest_loading:
-			progress = self._ig_rest_progress
-			total = progress["total"]
-			loaded = progress["loaded"]
-			fraction = loaded / total if total else 0.0
-			overlay = f"{loaded}/{total} .ig ({progress['instances']} instances)" if total else "Listing .ig files..."
-			imgui.progress_bar(fraction, overlay=overlay)
-		for region_name, progress in self._ig_region_progress.items():
-			total = progress["total"]
-			loaded = progress["loaded"]
-			fraction = loaded / total if total else 0.0
-			overlay = f"{region_name}: {loaded}/{total} .ig ({progress['instances']} instances)" if total else f"{region_name}: listing .ig files..."
-			imgui.progress_bar(fraction, overlay=overlay)
 		if self._ig_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._ig_error)
 
-		imgui.separator()
-		self._draw_render_mode_bar()
+		self._draw_selected_zone_section()
+		self._draw_continent_status_section()
+		self._draw_continent_stats_section()
 
-		if self.zones:
-			total_patches = sum(len(cache_data.patches) for cache_data in self.zones.values())
-			imgui.text(f"{len(self.zones)} zone(s) loaded -- {total_patches} patches total")
-
-		self._draw_land_composition_editor()
-		self._draw_land_build_button()
-
-	def _select_render_mode(self, mode):
-		self.render_mode = mode
-		self._apply_render_mode()
-
-	def _draw_render_mode_bar(self):
-		"""[LAND/POLY][WELD][LIGHT] button row (project-todos/forgery/
-		landscape_editor__zone_render_modes.md step 6, renamed
-		project-todos/forgery/landscape_editor__land_composition.md step 4) --
-		the active mode is highlighted; WELD/LIGHT additionally show how many
-		of the currently loaded zones are missing their own extension
-		(rendered gray, see _resolve_zone_for_mode()). The internal "POLY"
-		identifier (self.render_mode/_RENDER_MODES) is unchanged -- only Dev
-		(Edition)'s displayed label becomes "LAND" (Release/Visualisation has
-		no `.land` access at all, so it keeps showing "POLY" -- Nuno
-		2026-09-12: LAND replaces POLY only where the `.land` actually drives
-		the render).
-
-		Release/Visualisation never shows this button row at all (Nuno
-		2026-09-12): a real shipped `*_zones.bnp` only ever contains `.zonel`
-		(confirmed empirically against `nexus_zones.bnp`, 155/155 entries
-		`.zonel`, zero `.zone`/`.zonew`), so POLY/WELD/LIGHT would all
-		resolve to the exact same file there -- three buttons producing an
-		identical result, pure UI noise. `self.render_mode` itself is left
-		untouched (still whatever it was, POLY by default) since it already
-		resolves correctly either way; only the picker disappears, replaced
-		by a plain "LIGHT" label (the semantically accurate name for
-		finished, shipped data)."""
-		if self._app_mode != _MODE_EDITION:
-			imgui.text("Render mode: LIGHT")
+	def _draw_selected_zone_section(self):
+		"""Repliable "Selected Zone" section (project-todos/forgery/
+		landscape_editor__render_modes_removal.md) -- regroups the name+
+		bounds text and the `.land` composition editor (`_draw_land_
+		composition_editor()`, EditModeMixin) that used to sit as two
+		separate always-visible blocks; disabled/grayed out entirely when
+		nothing is selected. Colored icon header, zone name in orange,
+		bounds in green (Nuno 2026-09-14: "comme Patina" -- same
+		pastel_color_for(icon) tinting Patina/Explorer already use for
+		icon-buttons app-wide, icon_colors.py)."""
+		has_selection = self._selected_zone_name is not None and self._selected_zone_bounds is not None
+		imgui.begin_disabled(not has_selection)
+		imgui.push_style_color(imgui.Col_.text.value, pastel_color_for(fa_icons.ICON_FA_LOCATION_CROSSHAIRS))
+		expanded = imgui.collapsing_header(
+			f"{fa_icons.ICON_FA_LOCATION_CROSSHAIRS} Selected Zone", flags=imgui.TreeNodeFlags_.default_open.value,
+		)
+		imgui.pop_style_color()
+		imgui.end_disabled()
+		if not has_selection or not expanded:
 			return
-		for i, mode in enumerate(_RENDER_MODES):
-			if i > 0:
-				imgui.same_line()
-			active = self.render_mode == mode
-			label = "LAND" if (mode == "POLY" and self._app_mode == _MODE_EDITION) else mode
-			if active:
-				imgui.push_style_color(imgui.Col_.button.value, (0.35, 0.55, 0.35, 1.0))
-			clicked = imgui.button(label)
-			if active:
-				imgui.pop_style_color()
-			if clicked and not active:
-				self._select_render_mode(mode)
+		min_x, min_y, max_x, max_y = self._selected_zone_bounds
+		imgui.text("Selected zone:")
+		imgui.same_line()
+		imgui.text_colored(_NAME_COLOR, self._selected_zone_name)
+		imgui.text("  Min:")
+		imgui.same_line()
+		imgui.text_colored(_VALUE_COLOR, f"({min_x:.1f}, {min_y:.1f})")
+		imgui.text("  Max:")
+		imgui.same_line()
+		imgui.text_colored(_VALUE_COLOR, f"({max_x:.1f}, {max_y:.1f})")
+		self._draw_land_composition_editor()
 
-		real_exts = _MODE_REAL_EXTENSIONS.get(self.render_mode)
-		if real_exts is not None and self._loaded_refs:
-			imgui.text(f"{self._missing_for_mode} zone(s) not {self.render_mode.lower()}ed ({'/'.join(real_exts)} missing)")
-			# Generation is only wired for [WELD] (project-todos/forgery/
-			# landscape_editor__zone_render_modes.md step 9's own scope --
-			# [LIGHT] never gets a generation button, see the chantier's
-			# "Hors scope explicite").
-			if self.render_mode == "WELD" and self._missing_for_mode > 0:
-				generating = self._weld_generate_progress is not None and not self._weld_generate_progress["done"]
-				if generating:
-					progress = self._weld_generate_progress
-					total = progress["total"]
-					processed = progress["processed"]
-					fraction = processed / total if total else 0.0
-					imgui.progress_bar(fraction, overlay=f"{processed}/{total} zone(s) welded")
-				elif imgui.button(f"Generate {self._missing_for_mode} missing .zonew"):
-					self._generate_missing_zonew()
+	def _draw_continent_status_section(self):
+		"""Always-visible "Continent Status" section (Édition only,
+		project-todos/forgery/landscape_editor__render_modes_removal.md) --
+		how many of the continent's `.land` cells have reached each real
+		pipeline stage on disk, straight from self._loaded_extensions (same
+		real-disk-state source as zone_geometry.zone_build_stage()'s own
+		coloring, not derived from a per-mode resolution). The [Build]
+		button (`_draw_land_build_button()`, EditModeMixin) now only shows
+		up here, and only while something's actually missing or a build is
+		already running -- replaces the old unconditional bottom-of-panel
+		button. Colored icon header, counts in green (Nuno 2026-09-14:
+		"comme Patina")."""
+		if self._app_mode != _MODE_EDITION or not self.selected_continent_name:
+			return
+		total = self._continent_total_used_cells if self._continent_total_used_cells is not None else len(self.zones)
+		raw = sum(1 for ext_map in self._loaded_extensions.values() if ".zone" in ext_map)
+		welded = sum(1 for ext_map in self._loaded_extensions.values() if ".zonew" in ext_map)
+		lighted = sum(1 for ext_map in self._loaded_extensions.values() if ".zonel" in ext_map)
+		imgui.separator()
+		imgui.push_style_color(imgui.Col_.text.value, pastel_color_for(fa_icons.ICON_FA_CIRCLE_INFO))
+		imgui.text(f"{fa_icons.ICON_FA_CIRCLE_INFO} Continent status")
+		imgui.pop_style_color()
+		for label, value in (
+			("Zones:", total), ("Raw (.zone):", raw), ("Welded (.zonew):", welded), ("Lighted (.zonel):", lighted),
+		):
+			imgui.text(label)
+			imgui.same_line()
+			imgui.text_colored(_VALUE_COLOR, str(value))
+		building = self._land_build_progress is not None and not self._land_build_progress["done"]
+		if lighted < total or building:
+			self._draw_land_build_button()
+
+	def _draw_continent_stats_section(self):
+		"""Repliable "Stats" section (project-todos/forgery/landscape_editor__
+		render_modes_removal.md) -- real counts, computed on demand from
+		already-loaded state (self._region_zone_map/self.zones for zones+
+		patches, self._ig_tree_state_zones/_others' own `shape_nodes` --
+		each shape group's NodePath children ARE its individual instances,
+		regardless of whether their own checkbox is currently checked/
+		visible -- for instance counts). Folded by default. A real ImGui
+		table (Nuno 2026-09-14: "illisible... il faut de la couleur, des
+		sauts de lignes, un mode tableau") -- striped row backgrounds,
+		right-aligned numeric columns, borders; an unchecked/never-loaded
+		region legitimately shows 0 everywhere (its zones/`.ig` were never
+		actually loaded, nothing to count yet)."""
+		if not self.zones:
+			return
+		if not imgui.collapsing_header("Stats"):
+			return
+		imgui.text_colored(_STATS_HEADER_COLOR, f"Regions: {len(self._region_names)}")
+		table_flags = (
+			imgui.TableFlags_.borders.value | imgui.TableFlags_.row_bg.value
+			| imgui.TableFlags_.sizing_stretch_prop.value | imgui.TableFlags_.resizable.value
+		)
+		total_region_instances = 0
+		if imgui.begin_table("##stats-regions", 4, table_flags):
+			imgui.table_setup_column("Region")
+			imgui.table_setup_column("Zones", flags=imgui.TableColumnFlags_.width_fixed.value)
+			imgui.table_setup_column("Patches", flags=imgui.TableColumnFlags_.width_fixed.value)
+			imgui.table_setup_column("IG instances", flags=imgui.TableColumnFlags_.width_fixed.value)
+			imgui.table_headers_row()
+			for region_name in self._region_names:
+				zone_names = [name for name, r in self._region_zone_map.items() if r == region_name]
+				patches = sum(len(self.zones[name].patches) for name in zone_names if name in self.zones)
+				instances = sum(
+					len(shape_np.get_children())
+					for entry in self._ig_tree_state_zones.get(region_name, {}).values()
+					for shape_np in entry["shape_nodes"].values()
+				)
+				total_region_instances += instances
+				label = region_name[len("region_"):] if region_name.startswith("region_") else region_name
+				imgui.table_next_row()
+				imgui.table_next_column()
+				imgui.text(label)
+				imgui.table_next_column()
+				imgui.text_colored(_STATS_VALUE_COLOR, str(len(zone_names)))
+				imgui.table_next_column()
+				imgui.text_colored(_STATS_VALUE_COLOR, str(patches))
+				imgui.table_next_column()
+				imgui.text_colored(_STATS_VALUE_COLOR, str(instances))
+			imgui.end_table()
+
+		others_igs = len(self._ig_tree_state_others)
+		others_instances = sum(
+			len(shape_np.get_children())
+			for entry in self._ig_tree_state_others.values() for shape_np in entry["shape_nodes"].values()
+		)
+		imgui.text_colored(_STATS_VALUE_COLOR, f"IG Others: {others_igs} file(s), {others_instances} instance(s)")
+		total_patches = sum(len(cache_data.patches) for cache_data in self.zones.values())
+		imgui.text_colored(
+			_STATS_HEADER_COLOR,
+			f"Total: {len(self.zones)} zone(s), {total_patches} patch(es), "
+			f"{total_region_instances + others_instances} ig instance(s)",
+		)
 
 
 def main(argv=None):

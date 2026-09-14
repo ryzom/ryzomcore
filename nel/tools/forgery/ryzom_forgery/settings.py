@@ -135,10 +135,9 @@ class Settings:
 	text_editor_path: Optional[str] = None
 	# Folder containing the native Ryzom pipeline tool executables -- e.g.
 	# zone_welder (never a Python port -- too slow, decision Nuno 2026-09-08),
-	# used by Atyscape's [WELD] render mode (see landscape_editor.py's
-	# zone_tools.run_zone_welder()) to generate a missing .zonew on demand,
-	# and future tools (e.g. zone_dependencies) resolved by name from the
-	# same folder without a settings field of their own. Generic, suite-wide
+	# used by Atyscape's "Build" pipeline (land_build.py) and other tools
+	# (e.g. zone_dependencies) resolved by name from the same folder without
+	# a settings field of their own. Generic, suite-wide
 	# path like live_data_path/repository_paths -- editable from every
 	# Forgery app's own Settings, not just the one(s) that happen to consume
 	# it today (see ryzom_tools_setup_dialog.py).
@@ -189,6 +188,11 @@ class Settings:
 	# pair (hex, hand-editable). A stage absent from this dict just uses
 	# zone_geometry._STAGE_COLORS' own built-in default for it.
 	landscape_zone_stage_colors: Dict[str, List[str]] = field(default_factory=dict)
+	# Atyscape's "Low Poly" terrain toggle (project-todos/forgery/
+	# landscape_editor__low_poly_mode.md, Nuno 2026-09-14, for weak GPUs) --
+	# halves each patch's tessellation grid; False (normal quality) by
+	# default.
+	landscape_low_poly: bool = False
 
 
 _load_cache: Optional[Settings] = None
@@ -247,6 +251,7 @@ def load() -> Settings:
 	settings.dpi_scale = data.get("dpi_scale") or settings.dpi_scale
 	settings.live_data_path = data.get("live_data_path") or None
 	settings.landscape_editor_mode = data.get("landscape_editor_mode") or None
+	settings.landscape_low_poly = bool(data.get("landscape_low_poly", False))
 	settings.panel_states = {
 		str(name): PanelState(open=bool(entry.get("open", False)), x=float(entry.get("x", 0.0)), y=float(entry.get("y", 0.0)))
 		for name, entry in data.get("panel_states", {}).items() if isinstance(entry, dict)
@@ -320,6 +325,7 @@ def save(settings: Settings) -> None:
 		doc["landscape_editor_mode"] = settings.landscape_editor_mode
 	doc["panel_states"] = {name: asdict(state) for name, state in settings.panel_states.items()}
 	doc["landscape_zone_stage_colors"] = dict(settings.landscape_zone_stage_colors)
+	doc["landscape_low_poly"] = settings.landscape_low_poly
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]

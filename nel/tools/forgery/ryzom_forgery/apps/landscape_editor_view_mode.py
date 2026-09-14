@@ -1,9 +1,9 @@
 """LandscapeEditorApp mixin: everything specific to Visualisation mode
 (project-todos/forgery/landscape_editor__land_preview.md step 5) -- as thin
 as it is because Visualisation has no logic of its own beyond reading the
-continent list from `live_data_path` (no `.land` fallback, no WELD
-generation: `ryzom_data_path` is always `None` outside Edition mode, see
-`_load_continent()`, `landscape_editor.py`).
+continent list from `live_data_path` (no `.land` fallback: `ryzom_data_path`
+is always `None` outside Edition mode, see `_load_continent()`,
+`landscape_editor.py`).
 """
 
 from pathlib import Path
