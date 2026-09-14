@@ -196,6 +196,7 @@ def build_land_export_config(
 		continent_file=_resolve(ryzom_data_path, row["continent_file"]),
 		continents_dir=_resolve(ryzom_data_path, row["level_design_world_directory"]),
 		color_map_file=_resolve(ryzom_data_path, row["colormap_file"]),
+		ig_other_lighted_dir=_resolve(ryzom_data_path, row["ig_other_lighted"]),
 	)
 
 

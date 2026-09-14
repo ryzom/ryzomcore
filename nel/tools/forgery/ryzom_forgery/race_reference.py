@@ -30,7 +30,7 @@ from typing import Dict, Optional, Tuple
 from pynel.config_file import Document
 from pynel.ryzom_shape import parse_shape
 
-from .search_paths import find_texture
+from .search_paths import find_file
 from .shape_geometry import build_face_vertex_index, iter_render_passes, seam_ring_by_angle
 
 _BUNDLED_CFG_PATH = Path(__file__).parent / "race_reference.cfg"
@@ -121,10 +121,10 @@ def get_reference(race_key: str, entries_by_lower_name: dict) -> RaceReference:
 	face_name = doc.get_str(f"{race_key}_face")
 	hairstyle_name = doc.get_str(f"{race_key}_reference_hairstyle")
 
-	face_entry = find_texture(entries_by_lower_name, face_name)
+	face_entry = find_file(entries_by_lower_name, face_name)
 	if face_entry is None:
 		raise FileNotFoundError(f"{race_key}_face: {face_name!r} not found in the configured search paths")
-	hairstyle_entry = find_texture(entries_by_lower_name, hairstyle_name)
+	hairstyle_entry = find_file(entries_by_lower_name, hairstyle_name)
 	if hairstyle_entry is None:
 		raise FileNotFoundError(
 			f"{race_key}_reference_hairstyle: {hairstyle_name!r} not found in the configured search paths")

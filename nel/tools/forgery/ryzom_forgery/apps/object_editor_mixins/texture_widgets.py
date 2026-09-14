@@ -57,7 +57,7 @@ class TextureWidgetsMixin:
 			return tex_ref
 		panda_texture = load_panda_texture(
 			name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-			repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture)
+			repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_file)
 		if panda_texture is None:
 			return None
 		# p3dimgui's loadTexture() mutates whatever Texture it's given
@@ -578,7 +578,7 @@ class TextureWidgetsMixin:
 			return None
 		if file_name in self._resolved_texture_ref_cache:
 			return self._resolved_texture_ref_cache[file_name]
-		ref = resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+		ref = resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_file)
 		self._resolved_texture_ref_cache[file_name] = ref
 		return ref
 

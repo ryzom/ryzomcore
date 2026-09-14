@@ -393,6 +393,16 @@ class ForgeryApp(ShowBase):
 		"""Override in subclasses to draw the app-specific right panel content each frame."""
 		pass
 
+	def draw_left_panel_content(self):
+		"""Draws whatever goes inside the left "Explorer" window each frame --
+		override in a subclass to replace the real-file Explorer with
+		something else entirely (project-todos/forgery/
+		landscape_editor__ig_inspector_tree.md: Atyscape's own `.ig`/`.shape`
+		checkbox tree, Nuno 2026-09-14 -- "vire l'explorer de gauche qui ne
+		sert strictement à rien"). Default: the real-file Explorer every
+		other app still uses, unchanged."""
+		self.explorer.draw()
+
 	def panel_title(self):
 		"""Override in subclasses for a more useful right-panel window title
 		than the generic "Panel" (e.g. the name of whatever's currently
@@ -528,7 +538,7 @@ class ForgeryApp(ShowBase):
 			(_SIDE_PANEL_MIN_WIDTH, body_height), (_SIDE_PANEL_MAX_WIDTH, body_height))
 		with imgui_ctx.begin("Explorer", flags=_PINNED_FLAGS):
 			self.explorer_width = imgui.get_window_size().x
-			self.explorer.draw()
+			self.draw_left_panel_content()
 
 		imgui.set_next_window_pos((width - self.panel_width, 0))
 		imgui.set_next_window_size((self.panel_width, body_height), cond=once)

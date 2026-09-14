@@ -85,13 +85,12 @@ def load_continent_locations_from_world_file(world_file_path: Union[str, Path]) 
 	return sorted(locs, key=lambda c: c.selection_name)
 
 
-def resolve_continent_bounds(live_data_path: Union[str, Path], continent_name: str) -> Tuple[float, float, float, float]:
-	"""Real world-space bounding box (min_x, min_y, max_x, max_y) for
-	`continent_name` (ContLoc.continent_name, e.g. "matis" -- confirmed on
-	real data, 2026-09-07: this field is the bare sheet stem, no extension;
-	sheet_id.bin itself keys it with ".continent" appended, e.g.
-	"matis.continent") -- see module docstring for the zone-name-to-bbox
-	formula."""
+def load_continent_sheet(live_data_path: Union[str, Path], continent_name: str) -> ps.ContinentSheet:
+	"""The full `CContinentSheet` for `continent_name` (ContLoc.continent_name,
+	e.g. "matis") from `continent.packed_sheets` -- same sheet_id.bin
+	resolution as resolve_continent_bounds(), exposed separately for callers
+	that need more than just zone_min/zone_max (e.g. region_loader.py's
+	village `.ig` lookup, `ContinentSheet.villages`)."""
 	live_data_path = Path(live_data_path)
 	sheet_id_names = ps.parse_sheet_id_bin(_load_sheet_id_bytes(live_data_path))
 	name_to_id = creature_ref.build_name_to_id(sheet_id_names)
@@ -104,7 +103,17 @@ def resolve_continent_bounds(live_data_path: Union[str, Path], continent_name: s
 	sheet = continent_sheets.entries.get(sheet_id)
 	if sheet is None:
 		raise ContinentSelectorError(f"{full_name!r} (sheet_id {sheet_id}) not found in continent.packed_sheets")
+	return sheet
 
+
+def resolve_continent_bounds(live_data_path: Union[str, Path], continent_name: str) -> Tuple[float, float, float, float]:
+	"""Real world-space bounding box (min_x, min_y, max_x, max_y) for
+	`continent_name` (ContLoc.continent_name, e.g. "matis" -- confirmed on
+	real data, 2026-09-07: this field is the bare sheet stem, no extension;
+	sheet_id.bin itself keys it with ".continent" appended, e.g.
+	"matis.continent") -- see module docstring for the zone-name-to-bbox
+	formula."""
+	sheet = load_continent_sheet(live_data_path, continent_name)
 	zone_min = ps.zone_name_to_world_pos(sheet.continent.zone_min)
 	zone_max = ps.zone_name_to_world_pos(sheet.continent.zone_max)
 	min_x, max_x = sorted((zone_min.x, zone_max.x))

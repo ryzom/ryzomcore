@@ -84,7 +84,7 @@ class PanoplyUIMixin:
 		whether/how to (re)compute) and _update_texture_freshness() (decides
 		whether a previously-resolved combination needs re-checking) so
 		both always resolve names exactly the same way."""
-		finder = self.search_paths_dialog.find_texture
+		finder = self.search_paths_dialog.find_file
 		base_ref = resolve_texture_ref(base_name, self._texture_search_dirs, finder)
 		stem = Path(base_name).stem
 		mask_refs = {}
@@ -228,7 +228,7 @@ class PanoplyUIMixin:
 
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
 		if workspace_dir is not None:
-			finder = self.search_paths_dialog.find_texture
+			finder = self.search_paths_dialog.find_file
 			for name in list(self._texture_freshness_mtimes):
 				if name not in self._texture_cache or name in self._panoply_texture_sources:
 					self._texture_freshness_mtimes.pop(name, None)
@@ -448,7 +448,7 @@ class PanoplyUIMixin:
 			return
 		base_panda_texture = load_panda_texture(
 			base_texture_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-			finder=self.search_paths_dialog.find_texture)
+			finder=self.search_paths_dialog.find_file)
 		width = base_panda_texture.get_x_size() if base_panda_texture is not None else 256
 		height = base_panda_texture.get_y_size() if base_panda_texture is not None else 256
 		image = PNMImage(width, height)
@@ -489,7 +489,7 @@ class PanoplyUIMixin:
 		panoply_bake.bake_and_write() for live progress reporting. Returns
 		the list of written texture paths (empty if nothing was written)."""
 		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
-		entry = self.search_paths_dialog.find_texture(base_texture_name)
+		entry = self.search_paths_dialog.find_file(base_texture_name)
 		if entry is None or entry.fs_path is None:
 			self._save_status = f"Can't bake {base_texture_name}: not a plain file on disk"
 			print(f"[object_editor] {self._save_status}")
@@ -500,7 +500,7 @@ class PanoplyUIMixin:
 		axes = panoply_bake.axes_for_source(stem, race)
 
 		def _mask_loader(mask_ext):
-			mask_entry = self.search_paths_dialog.find_texture(f"{stem}_{mask_ext}.tga")
+			mask_entry = self.search_paths_dialog.find_file(f"{stem}_{mask_ext}.tga")
 			if mask_entry is None or mask_entry.fs_path is None:
 				return None
 			return panoply_bake.load_mask_luminance(mask_entry.fs_path)
@@ -527,7 +527,7 @@ class PanoplyUIMixin:
 		_draw_panoply_masks_for()'s own mask_names list -- shared by
 		_bake_panoply_real_all() below and that method's fire button."""
 		stem = Path(base_texture_name).stem
-		return any(self.search_paths_dialog.find_texture(f"{stem}_{axis}.tga") is not None for axis in panoply.AXES)
+		return any(self.search_paths_dialog.find_file(f"{stem}_{axis}.tga") is not None for axis in panoply.AXES)
 
 	def _bake_panoply_real_all(self):
 		"""Starts a background bake (see _start_panoply_bake()) of every
@@ -661,7 +661,7 @@ class PanoplyUIMixin:
 		missing_axes = []
 		for axis in panoply.AXES:
 			mask_name = f"{stem}_{axis}.tga"
-			if self.search_paths_dialog.find_texture(mask_name) is not None:
+			if self.search_paths_dialog.find_file(mask_name) is not None:
 				mask_names.append(mask_name)
 			else:
 				missing_axes.append(axis)
@@ -675,7 +675,7 @@ class PanoplyUIMixin:
 			# reference) -- a mask is only ever derived from the base
 			# texture's own name + axis, never stored anywhere editable, so
 			# on_copied is a no-op; the copy alone is enough for the next
-			# frame's find_texture() to resolve to it (the active
+			# frame's find_file() to resolve to it (the active
 			# workspace's own folders are already in the search paths).
 			self._draw_texture_copy_button(mask_name, lambda new_name: None, subdir="masks")
 			imgui.pop_id()

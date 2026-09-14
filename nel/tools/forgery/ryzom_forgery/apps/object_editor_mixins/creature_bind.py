@@ -614,11 +614,11 @@ class CreatureBindMixin:
 	def _resolve_data_bytes(self, name):
 		"""Resolves `name` (a plain file name, e.g. "creature.packed_sheets"
 		or "sheet_id.bin") against the same scanned search-path index
-		find_texture() already uses for .shape/.skel/texture names -- despite
+		find_file() already uses for .shape/.skel/texture names -- despite
 		the name, it indexes every file found (any extension, .bnp contents
 		included) across the user's configured search folders, so it works
 		unchanged for these too. None if not found by the last scan."""
-		entry = self.search_paths_dialog.find_texture(name)
+		entry = self.search_paths_dialog.find_file(name)
 		return entry.read_bytes() if entry is not None else None
 
 	def _start_bind_cache_rebuild(self, workspace_dir, entries):
@@ -920,7 +920,7 @@ class CreatureBindMixin:
 		if self._bind_mode:
 			anim_name = creature_ref.resolve_animation(record, self._bind_mode, "Idle")
 			if anim_name is not None:
-				entry = self.search_paths_dialog.find_texture(anim_name)
+				entry = self.search_paths_dialog.find_file(anim_name)
 				if entry is not None:
 					try:
 						self._bind_animation = parse_animation(entry.read_bytes())
@@ -940,7 +940,7 @@ class CreatureBindMixin:
 		t_total_start = time.perf_counter()
 		for slot_name, shape_name in shape_entries:
 			t0 = time.perf_counter()
-			entry = self.search_paths_dialog.find_texture(shape_name)
+			entry = self.search_paths_dialog.find_file(shape_name)
 			t1 = time.perf_counter()
 			if entry is None:
 				print(f"[object_editor] assembled creature: {shape_name!r} not found in scanned search paths")
@@ -1387,7 +1387,7 @@ class CreatureBindMixin:
 							weapon_bone_name = self._bind_attach_point
 						self.export_dialog.export_assembled_creature(
 							dict(self._assembled_creature_shape_values), self._bind_skeleton, self._bind_animation,
-							self._bind_creature_name or "creature", export_format, self.search_paths_dialog.find_texture,
+							self._bind_creature_name or "creature", export_format, self.search_paths_dialog.find_file,
 							weapon_shape_value=weapon_shape_value, weapon_bone_name=weapon_bone_name)
 				imgui.end_popup()
 

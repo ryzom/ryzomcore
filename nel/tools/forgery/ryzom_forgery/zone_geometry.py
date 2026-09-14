@@ -407,7 +407,7 @@ def build_zone_selection_border_geom(min_x: float, min_y: float, max_x: float, m
 	return lines.create()
 
 
-_ZONE_PLACEHOLDER_COLOR = (0.55, 0.0, 0.85, 1.0)
+_ZONE_PLACEHOLDER_COLOR = (0.55, 0.0, 0.85, 0.7)  # alpha 0.7 = 30% transparent (Nuno 2026-09-14)
 
 
 def build_zone_placeholders_geom(positions, z: float = 0.0) -> GeomNode:

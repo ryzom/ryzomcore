@@ -17,7 +17,7 @@ import threading
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, imgui_ctx
-from panda3d.core import Point3, Quat, TransparencyAttrib
+from panda3d.core import NodePath, Point3, Quat, TransparencyAttrib
 
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
@@ -47,10 +47,12 @@ from ryzom_forgery import pipeline_data_installer
 from ryzom_forgery.pipeline_data_install_dialog import PipelineDataInstallDialog
 from ryzom_forgery.region_hierarchy import assign_zones_to_regions, get_regions_for_continent, get_regions_for_continent_edition
 from ryzom_forgery.region_loader import (
-	find_zones_in_region, get_continent_z_range, get_ig_index, get_zone_extensions_index, has_pipeline_export,
-	load_zone_cache_data, read_ig_ref_bytes, RegionLoadError, zone_ref_extension,
+	find_zones_in_region, get_continent_z_range, get_zone_extensions_index, has_pipeline_export, load_zone_cache_data,
+	RegionLoadError, zone_ref_extension,
 )
 from ryzom_forgery import continent_pipeline_reference as cpr
+from ryzom_forgery import ig_full_geom_cache
+from ryzom_forgery import ig_full_load
 from ryzom_forgery import ig_geometry
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
@@ -72,6 +74,13 @@ from ryzom_forgery.zone_geometry import (
 # 2026-09-07, Nuno couldn't navigate into any .bnp at all).
 _EXPLORER_FILTER_PRESETS = ["*", "*.land", "*.zone", "*.zonew", "*.zonel"]
 _ZONE_EXTENSIONS = (".zone", ".zonew", ".zonel")
+
+# World-space Z nudge applied to every `.ig` water instance on top of its own
+# real position (project-todos/forgery/landscape_editor__ig_full_load.md,
+# Nuno 2026-09-14: water/terrain z-fighting, set_depth_offset() confirmed to
+# have no visible effect) -- see _attach_textured_ig_instance()'s own comment
+# for why a real position change, not a depth-buffer trick, is the fix here.
+_WATER_Z_LIFT = 0.15
 
 # Zone selection (project-todos/forgery/landscape_editor.md, Nuno
 # 2026-09-11) -- max normalized mouse-coordinate movement (range [-1, 1]
@@ -254,20 +263,56 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._zone_error = None
 		self._zone_root = self.render.attach_new_node("zone-root")
 
-		# `.ig` instance display (project-todos/forgery/landscape_editor.md
-		# step 11, visualisation only -- editing is step 12). Resolves each
-		# instance's `.shape` by name via search_paths_dialog (same generic,
+		# `.ig` instance display (project-todos/forgery/
+		# landscape_editor__ig_full_load.md) -- loads and shows/hides
+		# fully-textured `.bam` bundles, split in two (2026-09-13 revision,
+		# after a first "everything in one bam" version proved unusable --
+		# "y en a des tonnes, impossible de tout afficher en même temps"):
+		# zone-owned `.ig`s (e.g. "215_ed.ig") follow the existing per-region
+		# checkboxes (one `.bam` per region, loaded automatically when its
+		# region is checked), everything else (villages/water/..., never
+		# sky/canopy) is one continent-wide `.bam` built by the panel's
+		# "Load remaining .ig instances" button. Never the per-visible-zone
+		# incremental resolution the original mechanism used (deleted this
+		# same chantier, step 1). Resolves each instance's `.shape`/textures
+		# by name via search_paths_dialog (same generic,
 		# .bnp-aware index Patina already uses for textures/.skel/.anim, see
 		# search_paths_dialog.py's own module docstring), so a normal, unlit
 		# Settings surface isn't needed here -- it's the same search paths
 		# already configured for the whole suite (see explorer_root above).
 		self.search_paths_dialog = SearchPathsDialog()
+		# Two independent visibility roots (Nuno 2026-09-13: "il faudrait
+		# séparer l'affichage des 2 [...] 2 .bam différents, 2 boutons
+		# différents") -- zone-owned .ig (per-region bundles) and the
+		# continent-wide "rest" bundle (villages/water) are two genuinely
+		# different `.bam` sets, shown/hidden independently: the viewport
+		# toolbar's tree icon controls _ig_region_root only, a second icon
+		# right next to it controls _ig_rest_root only.
 		self._ig_root = self.render.attach_new_node("ig-root")
-		self._ig_nodes = {}  # zone name -> NodePath (parent of that zone's instance NodePaths)
-		self._ig_shape_templates = {}  # shape_name -> GeomNode or None (unresolvable/no mesh)
-		self._ig_load_progress = None
-		self._ig_loaded_zone_names = frozenset()
-		self._ig_visible = True
+		self._ig_region_root = self._ig_root.attach_new_node("ig-region-root")
+		self._ig_rest_root = self._ig_root.attach_new_node("ig-rest-root")
+		self._ig_region_nodes = {}  # region name -> NodePath (that region's own zone-.ig bundle)
+		self._ig_region_progress = {}  # region name -> progress dict, in-flight builds
+		self._ig_rest_np = None  # NodePath of the continent-wide "rest" bundle (villages/water/...), or None
+		self._ig_rest_progress = None
+		# Checkbox-tree state (project-todos/forgery/
+		# landscape_editor__ig_inspector_tree.md) -- region name -> {ig_name:
+		# entry}/{ig_name: entry} for IG Zones/IG Others respectively, each
+		# entry {"checked", "shapes": {shape_name: bool}, "shape_nodes":
+		# {shape_name: NodePath}}. Rebuilt from scratch (never persisted)
+		# every time a bundle is (re)shown -- see _build_ig_tree_entries().
+		self._ig_tree_state_zones = {}
+		self._ig_tree_state_others = {}
+		# Hidden by default (Nuno 2026-09-13: "il faut désactiver l'affichage
+		# des ig par défaut") -- now that both bundles auto-load on continent
+		# selection (see the "rest" one's own _load_ig_rest() call, and a
+		# single region's own auto-check, both in draw_panel()'s continent-
+		# scan completion handler), showing everything immediately by
+		# default would clutter the view before the user asks for it.
+		self._ig_region_visible = False
+		self._ig_rest_visible = False
+		self._ig_region_root.hide()
+		self._ig_rest_root.hide()
 		self._ig_error = None
 
 		# Render mode state (project-todos/forgery/
@@ -400,6 +445,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# drag just never leaves _zone_click_down_pos close enough to its
 		# start for _on_zone_click_up() to treat it as a click.
 		self._selected_zone_name = None
+		self._selected_zone_bounds = None  # (min_x, min_y, max_x, max_y), project-todos/forgery/landscape_editor__selected_zone_info.md
 		self._zone_click_down_pos = None
 		self._zone_selection_np = self.render.attach_new_node("zone-selection-border-placeholder")
 		self.accept("mouse1", self._on_zone_click_down)
@@ -484,6 +530,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		min_y, max_y = center_y - half_y, center_y + half_y
 
 		self._selected_zone_name = zone_name
+		self._selected_zone_bounds = (min_x, min_y, max_x, max_y)
 		self._zone_selection_np.remove_node()
 		self._zone_selection_np = self.render.attach_new_node(
 			build_zone_selection_border_geom(min_x, min_y, max_x, max_y)
@@ -505,6 +552,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		if self._selected_zone_name is None:
 			return
 		self._selected_zone_name = None
+		self._selected_zone_bounds = None
 		self._zone_selection_np.remove_node()
 		self._zone_selection_np = self.render.attach_new_node("zone-selection-border-placeholder")
 
@@ -746,6 +794,17 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			]
 		self._region_placeholder_np.remove_node()
 		self._region_placeholder_np = self.render.attach_new_node(build_zone_placeholders_geom(pending))
+		# 30% transparent (zone_geometry._ZONE_PLACEHOLDER_COLOR's own alpha)
+		# AND lowest possible render priority (Nuno 2026-09-14: "il faut
+		# qu'ils soit en priorité la plus basse possible, tout peux se
+		# superposer") -- "background" bin (Panda3D's own lowest-priority
+		# built-in bin, drawn before everything else) + no depth write, so
+		# real geometry loaded later (a region getting checked, an .ig
+		# bundle) never gets hidden behind a placeholder still sitting at
+		# the same spot.
+		self._region_placeholder_np.set_transparency(TransparencyAttrib.M_alpha)
+		self._region_placeholder_np.set_bin("background", 0)
+		self._region_placeholder_np.set_depth_write(False)
 
 	def _toggle_region(self, region_name):
 		"""Flips `region_name`'s checkbox (project-todos/forgery/
@@ -755,7 +814,10 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		subset via the existing _apply_render_mode() background pipeline
 		(same full-reload behaviour as a render-mode switch, just over a
 		different zone subset) and refreshes the purple-square overlay for
-		whatever is left unchecked."""
+		whatever is left unchecked. Also loads/unloads that region's own
+		zone-`.ig` bundle (project-todos/forgery/
+		landscape_editor__ig_full_load.md step 5) -- independent of the zone
+		geometry reload above, its own background build/cache."""
 		self._region_checked[region_name] = not self._region_checked.get(region_name, False)
 		active_names = {
 			name for name, region in self._region_zone_map.items() if self._region_checked.get(region, False)
@@ -764,6 +826,10 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._loaded_extensions = {name: self._all_continent_extensions.get(name, {}) for name in active_names}
 		self._apply_render_mode()
 		self._rebuild_region_placeholders()
+		if self._region_checked[region_name]:
+			self._load_region_ig(region_name)
+		else:
+			self._hide_ig_region(region_name)
 
 	def _apply_render_mode(self):
 		"""Re-resolves the currently loaded zone set (self._loaded_refs/
@@ -895,38 +961,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		finally:
 			progress["done"] = True
 
-	def _ig_bytes_for_zone(self, name, live_data_path, ryzom_data_path, app_mode, continent):
-		"""Raw bytes of zone `name`'s own `.ig` (project-todos/forgery/
-		landscape_editor.md step 11), or None if there is none -- confirmed
-		2026-09-13 against real data that a real `.ig` always shares its
-		zone's exact name (one file per zone, same convention as
-		.zone/.zonew/.zonel): Visualisation resolves it via
-		region_loader.get_ig_index() (live_data_path's own `.bnp`s, e.g.
-		bagne_ig.bnp), Edition via continent_pipeline_reference's own
-		out_ig_dir (zone_ig_lighter's real output, same directory
-		_invalidate_built_zone_files() already deletes stale `.ig` from --
-		landscape_editor_edit_mode.py). Pure I/O, safe on a background
-		thread."""
-		if app_mode == _MODE_EDITION:
-			if not ryzom_data_path or not continent:
-				return None
-			try:
-				out_ig_dir = Path(cpr.build_land_export_config(ryzom_data_path, continent).out_ig_dir)
-			except cpr.ContinentPipelineReferenceError:
-				return None
-			try:
-				return (out_ig_dir / f"{name}.ig").read_bytes()
-			except OSError:
-				return None
-		ig_ref = get_ig_index(live_data_path).get(name)
-		if ig_ref is None:
-			return None
-		try:
-			return read_ig_ref_bytes(ig_ref)
-		except RegionLoadError:
-			return None
-
-	def _read_ig_shape_bytes(self, shape_name):
+	def _read_ig_shape_bytes(self, shape_name, priority_paths=None):
 		"""Resolves+reads one `.ig` instance's referenced `.shape` by bare
 		name (e.g. "pr_s3_amoeba_c.shape") via self.search_paths_dialog's own
 		generic, `.bnp`-aware name index (search_paths_dialog.py's own module
@@ -934,12 +969,21 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		same index Patina uses for textures/.skel/.anim, just looked up here
 		instead of drawn as a Settings tab (see search_paths_dialog's own
 		field comment in __init__). None if not found/unreadable. Called from
-		_run_load_ig()'s background thread -- find_texture()'s own index read
-		is a plain dict `.get()`, safe under the GIL even while
+		_build_ig_nodepath()'s background thread -- find_file()'s own
+		index read is a plain dict `.get()`, safe under the GIL even while
 		_advance_external_scan() (draw(), main thread) concurrently rebuilds
 		it (dict reassignment is atomic, see search_paths_dialog.py's own
-		_merge_and_publish())."""
-		found = self.search_paths_dialog.find_texture(shape_name)
+		_merge_and_publish()).
+
+		`priority_paths`, forwarded to find_file() as-is, is Atyscape's own
+		pipeline/export/continents/<continent> directory (Édition mode,
+		_shape_priority_paths()) -- found 2026-09-14, Nuno: a real `.ig`
+		instance's own `.shape` name collided with an unrelated, generic
+		shape of the same bare name reachable through the user's own shared
+		Search Paths, which silently won since it happened to be listed
+		first -- forcing the real per-continent pipeline directory first
+		removes that dependency on manual Search Paths ordering entirely."""
+		found = self.search_paths_dialog.find_file(shape_name, priority_paths)
 		if found is None:
 			return None
 		try:
@@ -947,150 +991,448 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		except (OSError, BnpError):
 			return None
 
-	def _load_ig_for_zones(self, zone_names):
-		"""Kicks off a background reload of `.ig` instance data for exactly
-		`zone_names` (project-todos/forgery/landscape_editor.md step 11) --
-		manual only (project-todos/forgery/landscape_editor__region_
-		management.md step 6, Nuno 2026-09-13): only the viewport toolbar's
-		tree icon, turning ON (_toggle_ig_visibility()), calls this, never a
-		zone-set change on its own (self._loaded_refs, NOT self.zones/
-		self._mode_reload_progress's own "land:x:y" fallback pseudo-names:
-		those have no real zone file, so no `.ig` either) -- the per-zone
-		`.ig`/`.shape` parsing cost is pure Python and GIL-bound even on this
-		background thread, so auto-triggering it on every single region
-		checkbox toggle stuttered the whole app. Independent of
-		self.render_mode (POLY/WELD/LIGHT): `.ig` instance placement doesn't
-		change across a zone's own build stages, only its lit-or-not
-		instances would (out of scope here -- lighting is step 13), so a
-		render-mode switch alone never triggers this either. A reload
-		already running is left to finish; a fresh call while one is in
-		flight is a no-op (this function's own guard, right below)."""
-		if self._ig_load_progress is not None and not self._ig_load_progress["done"]:
+	def _shape_priority_paths(self, ryzom_data_path, app_mode, continent):
+		"""The directories Atyscape's own `.ig` `.shape` lookups
+		(_read_ig_shape_bytes()) must always resolve from first, if any --
+		`pipeline/export/continents/<continent>/` AND
+		`pipeline/export/ecosystems/<ecosystem>/` (Édition mode only: the
+		real per-continent/per-ecosystem build output; Visualisation has no
+		such tree, live_data_path's own `.bnp`s are already continent-scoped
+		by archive name, no collision risk). Found 2026-09-14, Nuno: a real
+		`.ig` instance's own `.shape` (e.g. a `tr_villagea.ig` building,
+		`tr_agora_village_a.shape`) lives under the ECOSYSTEM export tree
+		(`pipeline/export/ecosystems/lacustre/shape_optimized/`, shared props
+		reused across continents of the same ecosystem), not the continent
+		one -- a continent-only priority path missed those entirely and fell
+		through to the shared, unordered index. `continent`'s own ecosystem
+		comes from `continent_pipeline_reference.csv`'s `ecosystem` row
+		(`cpr.load_reference_table()`) -- silently dropped (continent-only
+		priority) if the CSV can't be read. `[]` (no override -- find_file()
+		falls straight through to the normal shared index) if `ryzom_data_path`
+		or `continent` is unset."""
+		if app_mode != _MODE_EDITION or not ryzom_data_path or not continent:
+			return []
+		export_root = Path(ryzom_data_path) / "pipeline" / "export"
+		paths = [str(export_root / "continents" / continent)]
+		try:
+			ecosystem = cpr.load_reference_table(ryzom_data_path)[continent]["ecosystem"]
+		except (cpr.ContinentPipelineReferenceError, KeyError):
+			ecosystem = None
+		if ecosystem:
+			paths.append(str(export_root / "ecosystems" / ecosystem))
+		return paths
+
+	def _build_ig_nodepath(self, refs, progress, root_name, priority_paths=None):
+		"""Shared background-thread body for building a detached, textured
+		NodePath from `refs` (ig_full_load.FullIgRef list) -- parses each
+		`.ig` (ryzom_ig.parse_ig()/ig_geometry.resolve_ig_instances(), which
+		itself calls pynel.ryzom_shape.parse_shape() per unique referenced
+		`.shape`), and builds the actual textured Panda3D geometry
+		(ig_geometry.build_textured_instance_template(), which decodes real
+		texture bytes via shape_geometry.load_panda_texture()) -- unlike the
+		old per-zone mechanism this replaces (deleted this same chantier,
+		step 1), which deliberately kept Panda3D object creation on the main
+		thread. Safe here because every node built (`root` and everything
+		under it) stays a fully DETACHED subtree -- never part of the live,
+		currently-rendered scene graph -- until the caller's own poll
+		reparents the finished `root` under `self._ig_root` on the main
+		thread in one cheap call; nothing here ever touches `self._ig_root`
+		or any other node Panda3D might be traversing to render the current
+		frame. Updates `progress`'s "total"/"loaded"/"instances" fields as it
+		goes. Returns `(root, total_instances)` -- used for both a region's
+		own zone-`.ig` bundle (_run_load_region_ig()) and the continent-wide
+		"rest" bundle (_run_load_ig_rest())."""
+		progress["total"] = len(refs)
+		root = NodePath(root_name)
+		shape_templates = {}
+		texture_cache = {}
+		total_instances = 0
+		failed = []
+		read_shape_bytes = lambda name: self._read_ig_shape_bytes(name, priority_paths)
+		for i, ref in enumerate(refs):
+			progress["message"] = f"{ref.name}.ig"
+			try:
+				data = ig_full_load.read_ig_ref_bytes(ref)
+				ig = parse_ig(data)
+			except (OSError, BnpError, IgParseError) as exc:
+				failed.append(f"{ref.name}.ig: {exc}")
+				progress["loaded"] = i + 1
+				continue
+			resolved_list = ig_geometry.resolve_ig_instances(ig, read_shape_bytes)
+			if resolved_list:
+				ig_np = root.attach_new_node(f"ig-{ref.name}")
+				# One child NodePath per unique shape name under this .ig
+				# (project-todos/forgery/landscape_editor__ig_inspector_tree.md
+				# step 2) -- lets the future checkbox tree show/hide a single
+				# shape's instances (`.hide()`/`.show()` on its own shape_np)
+				# without touching the rest of the .ig. Scoped per-ref (reset
+				# for every `.ig`, unlike `shape_templates`/`texture_cache`
+				# above, which stay process-wide across every ref in this
+				# build): the SAME shape name can appear under several
+				# different `.ig` files, each needing its own group node.
+				shape_group_nodes = {}
+				for resolved in resolved_list:
+					if self._attach_textured_ig_instance(
+						ig_np, resolved, shape_templates, texture_cache, shape_group_nodes,
+					) is not None:
+						total_instances += 1
+			progress["loaded"] = i + 1
+			progress["instances"] = total_instances
+		if failed:
+			progress["error"] = f"{len(failed)}/{len(refs)} .ig failed to load: {'; '.join(failed[:3])}"
+			report_error(progress["error"])
+		return root, total_instances
+
+	def _load_ig_rest(self):
+		"""Panel button "Load remaining .ig instances" (project-todos/
+		forgery/landscape_editor__ig_full_load.md step 6) -- kicks off a
+		background build of every real `.ig` belonging to the current
+		continent that is NEITHER zone-owned NOR sky/canopy (villages,
+		water, ...): ig_full_load.split_refs()'s own `rest_refs`. Zone-owned
+		`.ig`s load per-region instead (_load_region_ig(), triggered by
+		_toggle_region()). Manual only; a build already running is left to
+		finish, a fresh call while one is in flight is a no-op (this
+		function's own guard)."""
+		continent = self._selected_continent_pipeline_name
+		if not continent:
 			return
-		if not zone_names:
-			self._ig_loaded_zone_names = frozenset()
-			self._set_loaded_ig({})
+		app_mode = self._app_mode
+		# Found 2026-09-13, Nuno: "je dois charger les .ig en plus (9) mais
+		# ils ne sont jamais mis dans le .bam" -- write_ig_bundle() WAS
+		# already called at the end of every build, but nothing ever read
+		# it back: every click rebuilt from scratch instead of reusing a
+		# `.bam` from an earlier session/click, unlike _load_region_ig(),
+		# which already checked its own cache first.
+		cached = ig_full_geom_cache.read_ig_bundle(continent, app_mode, None, self.loader)
+		if cached is not None:
+			self._show_ig_rest(cached)
+			return
+		if self._ig_rest_progress is not None and not self._ig_rest_progress["done"]:
 			return
 		live_data_path = app_settings.load().live_data_path
 		ryzom_data_path = repository_paths.get("ryzom-data")
-		progress = {"done": False, "error": None, "instances_by_zone": {}, "zone_names": frozenset(zone_names)}
-		self._ig_load_progress = progress
+		progress = {
+			"done": False, "error": None, "total": 0, "loaded": 0, "instances": 0,
+			"continent": continent, "mode": app_mode, "node_path": None,
+		}
+		self._ig_rest_progress = progress
 		thread = threading.Thread(
-			target=self._run_load_ig,
-			args=(frozenset(zone_names), live_data_path, ryzom_data_path, self._app_mode, self._selected_continent_pipeline_name, progress),
+			target=self._run_load_ig_rest,
+			args=(live_data_path, ryzom_data_path, self._app_mode, continent, progress),
 			daemon=True,
 		)
 		thread.start()
 
-	def _run_load_ig(self, zone_names, live_data_path, ryzom_data_path, app_mode, continent, progress):
-		"""Background-thread body for _load_ig_for_zones() -- pure file I/O +
-		pynel parsing (ryzom_ig.parse_ig()/ig_geometry.resolve_ig_instances(),
-		which itself calls pynel.ryzom_shape.parse_shape() per unique
-		referenced `.shape`), never touches Panda3D -- _set_loaded_ig()
-		builds the actual GeomNodes on the main thread, same split as
-		_run_load_refs()/_set_loaded_zones()."""
+	def _run_load_ig_rest(self, live_data_path, ryzom_data_path, app_mode, continent, progress):
+		"""Background-thread body for _load_ig_rest()."""
 		try:
-			instances_by_zone = {}
-			for name in sorted(zone_names):
-				data = self._ig_bytes_for_zone(name, live_data_path, ryzom_data_path, app_mode, continent)
-				if data is None:
-					continue
-				try:
-					ig = parse_ig(data)
-				except IgParseError as exc:
-					print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_ig) "
-					      f"{name}.ig parse failed: {exc}")
-					continue
-				instances_by_zone[name] = ig_geometry.resolve_ig_instances(ig, self._read_ig_shape_bytes)
-			total = sum(len(v) for v in instances_by_zone.values())
-			print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_run_load_ig) "
-			      f"zones_with_ig={len(instances_by_zone)}/{len(zone_names)} total_instances_resolved={total}")
-			progress["instances_by_zone"] = instances_by_zone
+			is_edition = app_mode == _MODE_EDITION
+			refs = ig_full_load.list_continent_ig_refs(live_data_path, ryzom_data_path, is_edition, continent)
+			sky_names = ig_full_load.sky_ig_names(live_data_path, ryzom_data_path, is_edition, continent)
+			_zone_refs, rest_refs = ig_full_load.split_refs(refs, sky_names)
+			priority_paths = self._shape_priority_paths(ryzom_data_path, app_mode, continent)
+			root, total_instances = self._build_ig_nodepath(rest_refs, progress, "ig-rest-root", priority_paths)
+			ig_full_geom_cache.write_ig_bundle(continent, app_mode, None, root)
+			progress["node_path"] = root
 		except OSError as exc:
 			progress["error"] = str(exc)
 			report_error(progress["error"])
 		finally:
 			progress["done"] = True
 
-	def _ig_geom_node_for(self, resolved):
-		"""The (cached) GeomNode to instance for `resolved` -- built once per
-		unique (kind, shape_name) and reused (a plain GeomNode can be
-		attached under any number of NodePaths in Panda3D, no explicit
-		instance_to() needed) across every placement of that shape, since a
-		real continent routinely places the same prop hundreds of times
-		(project-todos/forgery/landscape_editor.md step 11). None if the
-		shape has no renderable mesh (e.g. a FlareShape/ParticleSystemShape
-		instance)."""
-		if resolved.kind == "water_point":
-			key = ("water_point", None)
-		else:
-			key = (resolved.kind, resolved.shape_name)
-		if key not in self._ig_shape_templates:
-			if resolved.kind == "mesh":
-				node = ig_geometry.build_instance_mesh_geom(resolved.shape_value)
-			elif resolved.kind == "water_polygon":
-				node = ig_geometry.build_water_polygon_geom(resolved.water_polygon)
-			else:
-				node = ig_geometry.build_water_point_geom()
-			self._ig_shape_templates[key] = node
-		return self._ig_shape_templates[key]
+	def _load_region_ig(self, region_name):
+		"""Loads `region_name`'s own zone-owned `.ig` bundle -- called from
+		_toggle_region() right after that region gets CHECKED (project-todos/
+		forgery/landscape_editor__ig_full_load.md step 5). Tries
+		ig_full_geom_cache.read_ig_bundle() first (a `.bam` from an earlier
+		session/region-check); builds fresh in the background only if none
+		exists yet. A build already running for this region is left to
+		finish, a fresh call while one is in flight is a no-op."""
+		continent = self._selected_continent_pipeline_name
+		if not continent:
+			return
+		app_mode = self._app_mode
+		live_data_path = app_settings.load().live_data_path
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		cached = ig_full_geom_cache.read_ig_bundle(continent, app_mode, region_name, self.loader)
+		if cached is not None:
+			self._show_ig_region(region_name, cached)
+			return
+		existing = self._ig_region_progress.get(region_name)
+		if existing is not None and not existing["done"]:
+			return
+		progress = {
+			"done": False, "error": None, "total": 0, "loaded": 0, "instances": 0,
+			"continent": continent, "mode": app_mode, "region": region_name, "node_path": None,
+		}
+		self._ig_region_progress[region_name] = progress
+		thread = threading.Thread(
+			target=self._run_load_region_ig,
+			args=(live_data_path, ryzom_data_path, app_mode, continent, region_name, progress),
+			daemon=True,
+		)
+		thread.start()
 
-	def _set_loaded_ig(self, instances_by_zone):
-		"""Tears down whatever `.ig` geometry was attached before and builds
-		fresh geometry for `instances_by_zone` (zone name -> list of
-		ig_geometry.ResolvedInstance) -- mirrors _set_loaded_zones()'s own
-		tear-down/rebuild shape, one child NodePath per zone under
-		self._ig_root for easy per-zone bookkeeping, one grandchild NodePath
-		per instance carrying that instance's own pos/rot/scale."""
-		for node in self._ig_nodes.values():
-			node.remove_node()
-		self._ig_nodes = {}
-		self._ig_shape_templates = {}
-		total_instances = 0
-		for name, resolved_list in instances_by_zone.items():
-			zone_np = self._ig_root.attach_new_node(f"ig-zone-{name}")
-			for resolved in resolved_list:
-				geom_node = self._ig_geom_node_for(resolved)
-				if geom_node is None:
-					continue
-				instance_np = zone_np.attach_new_node(geom_node)
-				instance_np.set_pos(*resolved.pos)
-				instance_np.set_quat(Quat(*resolved.rot))
-				instance_np.set_scale(*resolved.scale)
-				# A water plane is a single flat polygon -- backface-culled
-				# by default, it's only visible from one side, so panning
-				# the camera under the water level (or a surface whose
-				# winding happens to face away from the initial view) made
-				# it disappear entirely (Nuno 2026-09-13: "il ne sont pas
-				# toujours visibles"). Two-sided, like the terrain mesh
-				# itself (_set_loaded_zones()), for the same reason.
-				if resolved.kind in ("water_polygon", "water_point"):
-					instance_np.set_two_sided(True)
-				total_instances += 1
-			self._ig_nodes[name] = zone_np
-		print(f"(IA_AGENT_DEBUG) (landscape_editor) (landscape_editor.py:_set_loaded_ig) "
-		      f"zones={len(instances_by_zone)} instances_placed={total_instances}")
-		if not self._ig_visible:
-			self._ig_root.hide()
+	def _run_load_region_ig(self, live_data_path, ryzom_data_path, app_mode, continent, region_name, progress):
+		"""Background-thread body for _load_region_ig() -- filters
+		ig_full_load's zone-owned refs down to `region_name`'s own zones via
+		self._region_zone_map (already computed for zone geometry loading,
+		project-todos/forgery/landscape_editor__region_management.md's own
+		zone -> region assignment)."""
+		try:
+			is_edition = app_mode == _MODE_EDITION
+			refs = ig_full_load.list_continent_ig_refs(live_data_path, ryzom_data_path, is_edition, continent)
+			sky_names = ig_full_load.sky_ig_names(live_data_path, ryzom_data_path, is_edition, continent)
+			zone_refs, _rest_refs = ig_full_load.split_refs(refs, sky_names)
+			region_refs = [ref for ref in zone_refs if self._region_zone_map.get(ref.name) == region_name]
+			priority_paths = self._shape_priority_paths(ryzom_data_path, app_mode, continent)
+			root, total_instances = self._build_ig_nodepath(
+				region_refs, progress, f"ig-region-{region_name}-root", priority_paths,
+			)
+			ig_full_geom_cache.write_ig_bundle(continent, app_mode, region_name, root)
+			progress["node_path"] = root
+		except OSError as exc:
+			progress["error"] = str(exc)
+			report_error(progress["error"])
+		finally:
+			progress["done"] = True
+
+	def _attach_textured_ig_instance(self, parent_np, resolved, shape_templates, texture_cache, shape_group_nodes):
+		"""Attaches one real `.ig` instance under `parent_np`, via an
+		intermediate per-`.shape`-name group NodePath (`shape_group_nodes`,
+		project-todos/forgery/landscape_editor__ig_inspector_tree.md step 2
+		-- one child of `parent_np` per unique `resolved.shape_name` under
+		this `.ig`, so a future checkbox tree can show/hide every instance
+		of one shape with a single `.hide()`/`.show()` on its own group
+		node), and reusing a per-(kind, shape_name) template instanced via
+		NodePath.instance_to() -- the same cheap-instancing idiom
+		object_editor_mixins.materials' own specular overlay already relies
+		on (_update_specular_overlay()), so the same shape placed thousands
+		of times (a real continent's own vegetation/buildings) shares one
+		copy of its Geom/Texture data. Mesh instances get real materials/
+		textures (ig_geometry.build_textured_instance_template()); water
+		instances keep their existing flat-cyan markers
+		(build_water_polygon_geom()/build_water_point_geom(), project-todos/
+		forgery/landscape_editor__ig_full_load.md's own scope decision -- no
+		real water texture yet). Returns the new instance NodePath, or None
+		if the shape has no renderable mesh at all (e.g. a FlareShape/
+		ParticleSystemShape instance) -- no group node is created for a
+		shape that never successfully attaches anything."""
+		two_sided = False
+		if resolved.kind == "mesh":
+			key = ("mesh", resolved.shape_name)
+			if key not in shape_templates:
+				shape_templates[key] = ig_geometry.build_textured_instance_template(
+					resolved.shape_value, self.search_paths_dialog.find_file, texture_cache,
+				)
+			template = shape_templates[key]
+			if template is None:
+				return None
+			shape_np = shape_group_nodes.setdefault(resolved.shape_name, parent_np.attach_new_node(resolved.shape_name))
+			instance_np = shape_np.attach_new_node("ig-instance")
+			template.instance_to(instance_np)
+		elif resolved.kind == "water_point":
+			# A WaveMakerShape marker is always the same little cross,
+			# genuinely shareable across every instance (unlike
+			# water_polygon just below).
+			key = ("water_point", None)
+			if key not in shape_templates:
+				shape_templates[key] = ig_geometry.build_water_point_geom()
+			geom_node = shape_templates[key]
+			shape_np = shape_group_nodes.setdefault(resolved.shape_name, parent_np.attach_new_node(resolved.shape_name))
+			instance_np = shape_np.attach_new_node(geom_node)
+			two_sided = True
 		else:
-			self._ig_root.show()
+			# water_polygon -- NEVER cached/shared: each instance has its
+			# own real footprint (a lake/pond's own shape), unlike a mesh
+			# .shape which always produces identical geometry. Found
+			# 2026-09-13, Nuno: "tr_water je ne le vois pas" -- caching this
+			# by (kind, None) meant the FIRST water_polygon instance built
+			# in a whole run (any .ig, not just tr_water.ig) silently
+			# decided every OTHER water_polygon's geometry too, including
+			# returning None forever for all of them the moment one single
+			# instance happened to have a degenerate (<3-point) footprint.
+			geom_node = ig_geometry.build_water_polygon_geom(resolved.water_polygon)
+			if geom_node is None:
+				return None
+			shape_np = shape_group_nodes.setdefault(resolved.shape_name, parent_np.attach_new_node(resolved.shape_name))
+			instance_np = shape_np.attach_new_node(geom_node)
+			two_sided = True
+
+		instance_np.set_pos(*resolved.pos)
+		instance_np.set_quat(Quat(*resolved.rot))
+		instance_np.set_scale(*resolved.scale)
+		if two_sided:
+			# A water plane is a single flat polygon -- backface-culled by
+			# default, it's only visible from one side, so panning the
+			# camera under the water level (or a surface whose winding
+			# happens to face away from the initial view) made it disappear
+			# entirely (Nuno 2026-09-13: "il ne sont pas toujours
+			# visibles"). Two-sided, like the terrain mesh itself
+			# (_set_loaded_zones()), for the same reason.
+			instance_np.set_two_sided(True)
+			# Semi-transparent (Nuno 2026-09-13) -- Panda3D ignores
+			# ig_geometry._WATER_COLOR's own alpha channel unless blending is
+			# explicitly enabled on the NodePath.
+			instance_np.set_transparency(TransparencyAttrib.M_alpha)
+			# Real Tryker data has several water polygons overlapping/very
+			# close together (adjoining lakes/lagoons) -- with depth WRITE
+			# left on (Panda3D's own default even once transparency is
+			# enabled), each one still fought the others for the depth
+			# buffer, a very visible flicker (Nuno 2026-09-13: "le z-fighting
+			# est vraiment tres tres moche"). Depth write off (test stays on,
+			# so water still hides correctly behind terrain/buildings) is
+			# the standard fix for overlapping transparent surfaces -- same
+			# idiom object_editor_mixins.materials' own specular overlay
+			# already relies on (_update_specular_overlay()).
+			instance_np.set_depth_write(False)
+			# Water/terrain z-fighting is a SEPARATE issue from the
+			# water/water one above (Nuno 2026-09-14: "entre l'eau et le
+			# terrain c'est encore moche") -- a lake's own polygon sits
+			# right at (or extremely close to) the real terrain surface
+			# below it, so depth-buffer precision alone can't reliably tell
+			# them apart. `set_depth_offset()` (Panda3D's usual polygon-offset
+			# tool for exactly this coplanar/decal case) was tried first and
+			# confirmed to make NO visible difference even freshly rebuilt
+			# (Nuno 2026-09-14) -- its glPolygonOffset-based bias is too
+			# small relative to the real depth-buffer precision this far from
+			# the camera to matter. A real, small world-space Z nudge (never
+			# just a depth-buffer trick) is the reliable fix instead: lift
+			# every water instance a little above wherever its own `.ig` data
+			# places it, same idea as most games' own flat water planes
+			# (deliberately floating a hair above the seabed/shoreline
+			# terrain, not perfectly coincident with it).
+			instance_np.set_z(instance_np.get_z() + _WATER_Z_LIFT)
+		return instance_np
+
+	def _build_ig_tree_entries(self, container_np):
+		"""One entry per `ig-<name>` child of `container_np`, each holding
+		every one of ITS OWN `.shape`-name group children (project-todos/
+		forgery/landscape_editor__ig_inspector_tree.md step 2/3) -- fresh
+		every time (never persisted): `{ig_name: {"checked": True, "shapes":
+		{shape_name: True, ...}, "shape_nodes": {shape_name: NodePath, ...}}}`,
+		everything starts checked/visible."""
+		entries = {}
+		for ig_np in container_np.get_children():
+			name = ig_np.get_name()
+			ig_name = name[3:] if name.startswith("ig-") else name
+			shapes = {}
+			shape_nodes = {}
+			for shape_np in ig_np.get_children():
+				shape_name = shape_np.get_name()
+				shapes[shape_name] = True
+				shape_nodes[shape_name] = shape_np
+			entries[ig_name] = {"checked": True, "shapes": shapes, "shape_nodes": shape_nodes}
+		return entries
+
+	def _set_ig_checked(self, entry, checked):
+		"""Cascades a `.ig` folder checkbox down to every one of its own
+		`.shape` checkboxes/NodePaths (project-todos/forgery/
+		landscape_editor__ig_inspector_tree.md step 3, Nuno: "Si je
+		desactive l'affichage d'un .ig alors ça decoche tous les .shapes")."""
+		entry["checked"] = checked
+		for shape_name, shape_np in entry["shape_nodes"].items():
+			entry["shapes"][shape_name] = checked
+			if checked:
+				shape_np.show()
+			else:
+				shape_np.hide()
+
+	def _set_shape_checked(self, entry, shape_name, checked):
+		"""Toggles a single `.shape` checkbox/NodePath -- checking ONE shape
+		re-checks its `.ig` folder without touching any other shape's own
+		state (Nuno: "Si je recoche un .shape alors ça réactive le .ig");
+		unchecking the last remaining checked shape reads the `.ig` folder
+		itself back to unchecked, for visual consistency."""
+		entry["shapes"][shape_name] = checked
+		shape_np = entry["shape_nodes"][shape_name]
+		if checked:
+			shape_np.show()
+			entry["checked"] = True
+		else:
+			shape_np.hide()
+			if not any(entry["shapes"].values()):
+				entry["checked"] = False
+
+	def _show_ig_region(self, region_name, node_path):
+		"""Reparents `node_path` (region_name's own finished/cached bundle)
+		under self._ig_region_root, replacing whatever was there before for
+		this region only -- other regions' own bundles, and the "rest"
+		bundle, are untouched. Rebuilds this region's own checkbox-tree
+		state from the fresh bundle (everything starts checked)."""
+		existing = self._ig_region_nodes.pop(region_name, None)
+		if existing is not None:
+			existing.remove_node()
+		node_path.reparent_to(self._ig_region_root)
+		self._ig_region_nodes[region_name] = node_path
+		self._ig_tree_state_zones[region_name] = self._build_ig_tree_entries(node_path)
+
+	def _hide_ig_region(self, region_name):
+		"""Detaches `region_name`'s own `.ig` bundle, if shown -- called from
+		_toggle_region() right after that region gets UNCHECKED (mirrors
+		zone geometry's own per-region teardown)."""
+		node = self._ig_region_nodes.pop(region_name, None)
+		if node is not None:
+			node.remove_node()
+		self._ig_region_progress.pop(region_name, None)
+		self._ig_tree_state_zones.pop(region_name, None)
+
+	def _show_ig_rest(self, node_path):
+		"""Reparents `node_path` (the continent-wide "rest" bundle) under
+		self._ig_rest_root, replacing whatever "rest" bundle was there
+		before -- region bundles are untouched. Rebuilds the "rest"
+		checkbox-tree state from the fresh bundle (everything starts
+		checked)."""
+		if self._ig_rest_np is not None:
+			self._ig_rest_np.remove_node()
+		node_path.reparent_to(self._ig_rest_root)
+		self._ig_rest_np = node_path
+		self._ig_tree_state_others = self._build_ig_tree_entries(node_path)
+
+	def _hide_all_ig(self):
+		"""Detaches every `.ig` bundle currently shown (every region's own,
+		plus the "rest" one), and forgets every in-flight build -- called
+		whenever the selected continent or mode changes (_select_continent()),
+		so a previous continent's buildings/props never linger in the view."""
+		for node in self._ig_region_nodes.values():
+			node.remove_node()
+		self._ig_region_nodes = {}
+		self._ig_region_progress = {}
+		self._ig_tree_state_zones = {}
+		if self._ig_rest_np is not None:
+			self._ig_rest_np.remove_node()
+			self._ig_rest_np = None
+		self._ig_rest_progress = None
+		self._ig_tree_state_others = {}
 
 	def _toggle_ig_visibility(self):
-		"""Viewport toolbar's tree icon (project-todos/forgery/
-		landscape_editor__region_management.md step 6, Nuno 2026-09-13: "le
-		bouton de la vue 3D doit déclencher le chargement" -- this existing
-		icon, not a separate panel button) -- turning it ON (re)loads `.ig`
-		for the CURRENT zone set (self._loaded_refs), replacing whatever was
-		shown before; turning it OFF just hides the already-built geometry,
-		no reload needed to turn back on unless the loaded zones changed
-		since (_load_ig_for_zones() itself no-ops while a load is already
-		in flight)."""
-		self._ig_visible = not self._ig_visible
-		if self._ig_visible:
-			self._ig_root.show()
-			self._load_ig_for_zones(frozenset(self._loaded_refs.keys()))
+		"""Viewport toolbar's tree icon -- toggles visibility of
+		self._ig_region_root ONLY (project-todos/forgery/
+		landscape_editor__ig_full_load.md's 2026-09-13 revision, Nuno: "il
+		faudrait juste séparer l'affichage des 2 [...] 2 .bam différents, 2
+		boutons différents" -- every checked region's own zone-`.ig` bundle,
+		never the continent-wide "rest" one (see _toggle_ig_rest_visibility()
+		for that, a separate icon). Never itself triggers any build/load: a
+		region's own `.ig` loads automatically when that region gets checked
+		(_toggle_region() -> _load_region_ig())."""
+		self._ig_region_visible = not self._ig_region_visible
+		if self._ig_region_visible:
+			self._ig_region_root.show()
 		else:
-			self._ig_root.hide()
+			self._ig_region_root.hide()
+
+	def _toggle_ig_rest_visibility(self):
+		"""Second viewport toolbar icon, right next to the tree one --
+		toggles visibility of self._ig_rest_root ONLY (the continent-wide
+		"rest" bundle: villages/water/..., never zone-owned buildings/props,
+		see _toggle_ig_visibility()'s own docstring for why these are two
+		independent toggles). Never itself triggers a build: that's the
+		panel's own "Load remaining .ig instances" button (_load_ig_rest())."""
+		self._ig_rest_visible = not self._ig_rest_visible
+		if self._ig_rest_visible:
+			self._ig_rest_root.show()
+		else:
+			self._ig_rest_root.hide()
 
 	def _elevation_z_range(self, zones):
 		"""(min_z, max_z) for the elevation-color gradient -- self.
@@ -1362,6 +1704,13 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._land_available_bricks_dir = None
 		self._land_edit_error = None
 		self._land_build_progress = None
+		# A previous continent/mode's `.ig` bundle (project-todos/forgery/
+		# landscape_editor__ig_full_load.md step 6) must never linger once
+		# the selection changes -- also covers a mode switch, which
+		# re-triggers this same method for the current continent (see
+		# draw_panel()'s own _pending_continent_reload comment).
+		self._hide_all_ig()
+		self._ig_error = None
 		if self._app_mode == _MODE_EDITION:
 			# Edition mode never reads live_data_path/sheet_id.bin (see
 			# _load_edition_continent_locations()) -- continent_name here is
@@ -1518,13 +1867,59 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 						self._set_zone_wireframe_mode(mode)
 				imgui.end_popup()
 			imgui.same_line()
-			if _icon_button(fa_icons.ICON_FA_TREE, "Show .ig instances (props/water)", self._ig_visible,
-			                square=True, large_font=large_font):
+			if _icon_button(fa_icons.ICON_FA_TREE, "Show zone .ig instances (buildings/props, per region)",
+			                self._ig_region_visible, square=True, large_font=large_font):
 				self._toggle_ig_visibility()
+			imgui.same_line()
+			if _icon_button(fa_icons.ICON_FA_HOUSE_CHIMNEY, "Show remaining .ig instances (villages/water)",
+			                self._ig_rest_visible, square=True, large_font=large_font):
+				self._toggle_ig_rest_visibility()
 			self._viewport_toggle_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def panel_title(self):
 		return "Landscape Editor"
+
+	def draw_left_panel_content(self):
+		"""Overrides ForgeryApp.draw_left_panel_content() (project-todos/
+		forgery/landscape_editor__ig_inspector_tree.md, Nuno 2026-09-14:
+		"vire l'explorer de gauche qui ne sert strictement à rien") -- the
+		real-file Explorer is replaced entirely here by a checkbox tree of
+		what's actually loaded: IG Zones (self._ig_tree_state_zones, grouped
+		by region) and IG Others (self._ig_tree_state_others, flat, the
+		"rest" bundle). Losing the Explorer also loses its one other use in
+		this app (selecting a single `.zone`/`.zonew`/`.zonel` file directly)
+		-- Nuno confirmed not using that."""
+		if imgui.tree_node_ex("##ig-zones-root", imgui.TreeNodeFlags_.default_open.value, "IG Zones"):
+			for region_name in sorted(self._ig_tree_state_zones.keys()):
+				imgui.push_id(region_name)
+				if imgui.tree_node_ex("##region-root", imgui.TreeNodeFlags_.open_on_arrow.value, region_name):
+					self._draw_ig_tree_entries(self._ig_tree_state_zones[region_name])
+					imgui.tree_pop()
+				imgui.pop_id()
+			imgui.tree_pop()
+		if imgui.tree_node_ex("##ig-others-root", imgui.TreeNodeFlags_.default_open.value, "IG Others"):
+			self._draw_ig_tree_entries(self._ig_tree_state_others)
+			imgui.tree_pop()
+
+	def _draw_ig_tree_entries(self, entries):
+		"""Draws one checkbox + expandable folder per `.ig` in `entries`
+		(_build_ig_tree_entries()), each expanding to one checkbox per
+		`.shape` it uses -- shared by both IG Zones (per-region) and IG
+		Others (draw_left_panel_content())."""
+		for ig_name in sorted(entries.keys()):
+			entry = entries[ig_name]
+			imgui.push_id(ig_name)
+			changed, new_value = imgui.checkbox("##ig-checked", entry["checked"])
+			if changed:
+				self._set_ig_checked(entry, new_value)
+			imgui.same_line()
+			if imgui.tree_node_ex("##ig-root", imgui.TreeNodeFlags_.open_on_arrow.value, f"{ig_name}.ig"):
+				for shape_name in sorted(entry["shapes"].keys()):
+					shape_changed, shape_value = imgui.checkbox(shape_name, entry["shapes"][shape_name])
+					if shape_changed:
+						self._set_shape_checked(entry, shape_name, shape_value)
+				imgui.tree_pop()
+			imgui.pop_id()
 
 	def _resolve_app_mode(self):
 		"""Release/Dev is normally a user choice, persisted in
@@ -1784,6 +2179,12 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 					self._toggle_region(region_name)
 
 		imgui.separator()
+		if self._selected_zone_name is not None and self._selected_zone_bounds is not None:
+			min_x, min_y, max_x, max_y = self._selected_zone_bounds
+			imgui.text(f"Selected zone: {self._selected_zone_name}")
+			imgui.text(f"  min=({min_x:.1f}, {min_y:.1f})  max=({max_x:.1f}, {max_y:.1f})")
+
+		imgui.separator()
 		imgui.text("Zone (select a .zone/.zonew/.zonel in the Explorer,")
 		imgui.text("or pick a continent above to load it whole)")
 		if imgui.button("Build cache for this continent"):
@@ -1820,6 +2221,11 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 						self._region_checked = {name: False for name in regions}
 						if len(regions) == 1:
 							self._region_checked[regions[0]] = True
+							# _toggle_region() itself isn't called for this
+							# auto-check (it also flips a checkbox that's
+							# already False here), so its own _load_region_ig()
+							# call must be repeated here.
+							self._load_region_ig(regions[0])
 						active_names = {
 							name for name, region in self._region_zone_map.items()
 							if self._region_checked.get(region, False)
@@ -1839,6 +2245,13 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 						self._loaded_extensions = self._all_continent_extensions
 					self._apply_render_mode()
 					self._rebuild_region_placeholders()
+					# The "rest" bundle (villages/water/...) isn't tied to
+					# any region, so it always loads here regardless of the
+					# continent's own region_hierarchy shape -- from cache
+					# if the continent was already built before (near
+					# instant), built fresh otherwise (Nuno 2026-09-13: "il
+					# faut charger ces .ig au chargement du continent").
+					self._load_ig_rest()
 			else:
 				imgui.text("Scanning zone index...")
 
@@ -1880,15 +2293,40 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				overlay = f"{processed}/{total} zones" if total else "Loading..."
 				imgui.progress_bar(fraction, overlay=overlay)
 
-		if self._ig_load_progress is not None and self._ig_load_progress["done"]:
-			progress = self._ig_load_progress
-			self._ig_load_progress = None
-			self._ig_loaded_zone_names = progress["zone_names"]
+		if self._ig_rest_progress is not None and self._ig_rest_progress["done"]:
+			progress = self._ig_rest_progress
+			self._ig_rest_progress = None
+			# Discarded (geometry never attached) if the continent/mode was
+			# switched away from while this build was still running --
+			# _hide_all_ig() already cleared self._ig_root for the new
+			# selection, this stale bundle must not repopulate it.
+			still_current = (progress["continent"], progress["mode"]) == (
+				self._selected_continent_pipeline_name, self._app_mode,
+			)
 			if progress["error"]:
 				self._ig_error = progress["error"]
-			else:
+			elif progress["node_path"] is not None and still_current:
 				self._ig_error = None
-				self._set_loaded_ig(progress["instances_by_zone"])
+				self._show_ig_rest(progress["node_path"])
+
+		for region_name in list(self._ig_region_progress.keys()):
+			progress = self._ig_region_progress[region_name]
+			if not progress["done"]:
+				continue
+			del self._ig_region_progress[region_name]
+			# Same staleness guard as the "rest" bundle above, plus: the
+			# region must still be CHECKED (unchecking it while its build
+			# was running already called _hide_ig_region(), which popped
+			# this same progress entry -- so this loop only ever sees a
+			# region that's still both current and checked).
+			still_current = (progress["continent"], progress["mode"]) == (
+				self._selected_continent_pipeline_name, self._app_mode,
+			)
+			if progress["error"]:
+				self._ig_error = progress["error"]
+			elif progress["node_path"] is not None and still_current:
+				self._ig_error = None
+				self._show_ig_region(region_name, progress["node_path"])
 
 		if self._weld_generate_progress is not None:
 			progress = self._weld_generate_progress
@@ -1915,15 +2353,34 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._zone_error)
 
 		# `.ig` instance loading (project-todos/forgery/
-		# landscape_editor__region_management.md step 6) -- manual only,
-		# triggered by the viewport toolbar's tree icon (_toggle_ig_
-		# visibility(), not a panel button), never automatically by a
-		# zone-set change (region checkbox, continent/zone selection): the
-		# CPU cost (pure-Python .ig/.shape parsing, GIL-bound even off the
-		# main thread) made it stutter the whole app on every single region
-		# toggle (Nuno 2026-09-13).
-		if self._ig_load_progress is not None and not self._ig_load_progress["done"]:
-			imgui.text("Loading .ig instances...")
+		# landscape_editor__ig_full_load.md) -- zone-owned `.ig`s (buildings/
+		# props tied to a specific zone) load automatically per region,
+		# right alongside that region's own zone geometry (_toggle_region()
+		# -> _load_region_ig()); this button only ever builds the
+		# continent-wide "rest" (villages/water/..., never sky/canopy). The
+		# viewport toolbar's tree icon (_toggle_ig_visibility()) only ever
+		# shows/hides whatever's already loaded/cached (regions + rest), it
+		# never triggers a build itself.
+		imgui.separator()
+		imgui.text("Instances (.ig): villages/water/... for this continent (excl. sky)")
+		ig_rest_loading = self._ig_rest_progress is not None and not self._ig_rest_progress["done"]
+		imgui.begin_disabled(ig_rest_loading or not self._selected_continent_pipeline_name)
+		if imgui.button("Load remaining .ig instances"):
+			self._load_ig_rest()
+		imgui.end_disabled()
+		if ig_rest_loading:
+			progress = self._ig_rest_progress
+			total = progress["total"]
+			loaded = progress["loaded"]
+			fraction = loaded / total if total else 0.0
+			overlay = f"{loaded}/{total} .ig ({progress['instances']} instances)" if total else "Listing .ig files..."
+			imgui.progress_bar(fraction, overlay=overlay)
+		for region_name, progress in self._ig_region_progress.items():
+			total = progress["total"]
+			loaded = progress["loaded"]
+			fraction = loaded / total if total else 0.0
+			overlay = f"{region_name}: {loaded}/{total} .ig ({progress['instances']} instances)" if total else f"{region_name}: listing .ig files..."
+			imgui.progress_bar(fraction, overlay=overlay)
 		if self._ig_error is not None:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._ig_error)
 

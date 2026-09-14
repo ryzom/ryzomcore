@@ -1094,3 +1094,128 @@ régions affichera une hiérarchie/des polygones désynchronisés de la réalit�
 silencieusement (aucune erreur, juste des données obsolètes). Cette règle
 s'applique dès maintenant, même si ce chantier ne touche jamais lui-même aux
 `.primitive`.
+
+## Chargement complet + texturé des `.ig`, par région (`landscape_editor__ig_full_load.md`)
+
+Remplace entièrement l'ancien chargement incrémental par zone visible
+(géométrie `.ig` grise plate, un bouton unique "sapin" rechargeant tout
+`self._loaded_refs` à chaque clic) par un chargement texturé (vraies
+textures diffuses+alpha, `ig_geometry.build_textured_instance_template()`,
+mêmes helpers déjà éprouvés que `shape_geometry.py`/
+`object_editor_mixins/materials.py`) réparti en DEUX granularités :
+
+- Les `.ig` propres à une zone (ex. `215_ED.ig`) suivent le découpage par
+  région déjà en place pour la géométrie de zone (`_load_region_ig()` /
+  `_run_load_region_ig()`) : cocher une région charge automatiquement ses
+  `.ig` de zone depuis un `.bam` par `(continent, région, mode)`
+  (`ig_full_geom_cache.py`, même schéma que `zone_geom_cache.py`), construit
+  au premier chargement puis relu ensuite ; décocher détache sans décharger
+  le cache disque.
+- Tout le reste (village/eau/autres, ex. `tr_villagea.ig`/`tr_water.ig` --
+  pas rattachables de façon fiable à une région précise) va dans un seul
+  `.bam` continent entier, via le bouton "Load remaining .ig instances" du
+  panneau de droite (`_load_ig_rest()`/`_run_load_ig_rest()`).
+- Les `.ig` de ciel/canopée (`SkyIg`/`Spring|Summer|Autumn|WinterCanopyIG`,
+  ex. `canope_tryker.ig`) ne sont JAMAIS chargés, dans aucun des deux cas
+  (`ig_full_load.sky_ig_names()`, lu depuis le `.continent` brut en Édition,
+  `continent.packed_sheets` en Visualisation).
+
+`ig_full_load.py` énumère les refs réelles d'un continent : Visualisation
+depuis `<continent>_ig.bnp`/`.bnpe` à la racine de `live_data_path` ;
+Édition depuis `out_ig_dir` (par zone) + `ig_other_lighted_dir` (village/
+eau/ciel/autres) de `continent_pipeline_reference.build_land_export_config()`
+réunis. Classification zone/ciel/reste : zone si le nom correspond au motif
+de grille (`^\d+_[A-Za-z]{2}$`), ciel si dans la liste des atomes ci-dessus,
+reste sinon. Deux icônes séparées dans la barre flottante du viewport
+pilotent l'affichage sans jamais déclencher elles-mêmes de chargement : sapin
+(`self._ig_region_root`, `.ig` de zone par région) et maison
+(`self._ig_rest_root`, bundle "reste") -- changer de continent/mode détache
+tout sans résidu, affichage désactivé par défaut.
+
+**Arborescence "IG Zones"/"IG Others" remplace l'Explorer dans le panneau de
+gauche** (`landscape_editor__ig_inspector_tree.md`, Nuno : "on va virer
+l'explorer de gauche qui ne sert strictement à rien... comme dans Patina des
+dossiers virtuels") : `ForgeryApp.draw_left_panel_content()` (nouveau point
+d'extension, `app.py` -- toute autre app garde l'Explorer réel via
+l'implémentation par défaut) est surchargé par `landscape_editor.py` pour
+dessiner deux dossiers virtuels à cocher construits en introspectant le
+scene graph déjà chargé (`_build_ig_tree_entries()`, sur
+`container_np.get_children()`) : "IG Zones" (groupé par région) et
+"IG Others" (plat), chacun listant les `.ig` réellement chargés puis, sous
+chacun, ses `.shape` réels. Cascade de cases à cocher exactement comme
+Patina : décocher un `.ig` décoche tous ses `.shape` (et masque le
+NodePath du `.ig` entier) ; recocher un `.shape` réactive automatiquement
+son `.ig` parent. Cet outil, construit pour l'inspection, s'est révélé
+déterminant pour isoler visuellement le bug d'eau invisible ci-dessous (un
+seul `.shape` désactivable à la fois, sans toucher au reste de l'`.ig`).
+
+**Corrections trouvées en testant réellement sur Tryker** :
+
+- Rendu tantôt tout noir : matériaux réels avec diffuse/spéculaire calculés
+  sans configuration d'éclairage de scène propre -- fixé en forçant
+  l'ambiant au maximum et en ignorant diffuse/spéculaire/émissif
+  (`ig_geometry._apply_ig_material()`).
+- Cache de géométrie `water_polygon` empoisonné : contrairement à
+  `water_point`, un `water_polygon` n'est JAMAIS mis en cache/partagé --
+  l'ancienne version partageait une clé de cache `(kind, None)` entre TOUTES
+  les instances `water_polygon`, donc un seul polygone dégénéré quelque part
+  rendait `None` pour tous les suivants, pour toujours.
+- Eau semi-transparente (alpha 0.5, `TransparencyAttrib.M_alpha`) plutôt
+  qu'opaque ; z-fighting eau/eau réglé par `set_depth_write(False)` ;
+  z-fighting eau/terrain réglé par un vrai décalage Z monde
+  (`_WATER_Z_LIFT`, `set_depth_offset()` s'étant révélé sans effet mesurable).
+- Cache du bundle "reste" jamais relu : `_load_ig_rest()` reconstruisait à
+  chaque clic au lieu de vérifier `ig_full_geom_cache.read_ig_bundle()`
+  d'abord, contrairement à `_load_region_ig()` qui le faisait déjà.
+- **Bug réel dans pynel** : deux instances d'eau bien réelles
+  (`Water14`/`Water10`, `tr_water.ig`) restaient invisibles sur leurs zones
+  malgré une résolution sans erreur -- la cause réelle était
+  `pynel.ryzom_packed_sheets.world_pos_to_zone_name()` (`row = floor(-y/160)`
+  au lieu de `row = -floor(y/160)`), qui décalait quasi toute position d'une
+  zone et faussait les vérifications manuelles pendant le débogage. Corrigé
+  contre la vraie formule C++ (`getZoneNameFromXY`/`getPosFromZoneName`).
+- **Collision de nom `.shape` via les Search Paths partagées** : le vrai
+  bug d'affichage restant après le fix pynel -- `water14.shape` existait
+  sous DEUX chemins atteints par les Search Paths (le bon export pipeline
+  Tryker ET un `.shape` générique sans rapport, même nom, ailleurs sur le
+  disque de l'utilisateur), le second gagnant silencieusement selon l'ordre
+  de scan. Résolu par un mécanisme générique et réutilisable plutôt qu'un
+  correctif ad hoc (voir section suivante).
+- `search_paths_dialog.find_texture()` renommée `find_file()`
+  (`_texture_entries`/`texture_entries` renommés `_file_entries`/
+  `file_entries` partout, y compris le cache disque JSON) : le nom laissait
+  croire à tort que seules des textures y transitaient, alors que `.shape`/
+  `.skel`/`.anim` y passent aussi.
+- `find_file(name, priority_paths=None)` : `priority_paths`, si fourni, est
+  essayé EN PREMIER (petit index dédié, mis en cache par tuple de chemins),
+  et ne retombe sur l'index partagé habituel que s'il n'y trouve rien.
+  Atyscape (`_shape_priority_paths()`) force ainsi `pipeline/export/
+  continents/<continent>/` PUIS `pipeline/export/ecosystems/<ecosystem>/`
+  (Édition uniquement -- Visualisation n'a pas cette collision, les `.bnp`
+  de `live_data_path` étant déjà scopés par continent) : les deux racines
+  sont nécessaires, les props de bâtiment partagés (ex.
+  `tr_agora_village_a.shape`, `tr_villagea.ig`) vivant sous l'arbre
+  écosystème et non sous l'arbre continent (trouvé après un premier fix
+  incomplet qui ne couvrait que le continent, faisant disparaître tous les
+  bâtiments de village). Résout la collision une fois pour toutes sans
+  toucher aux Search Paths partagées ni à la config personnelle de
+  l'utilisateur (aucune exclusion `graphics`/`workspace` en dur, aucun tri
+  de priorité côté recherche partagée).
+
+**Carrés violets "région non chargée" -- transparence + priorité de rendu la
+plus basse** (Nuno 2026-09-14) : `zone_geometry._ZONE_PLACEHOLDER_COLOR`
+passe à 30% transparent (alpha 0.7) et `_rebuild_region_placeholders()`
+place le NodePath dans le bin Panda3D `"background"` (priorité de rendu la
+plus basse, dessiné avant tout le reste) avec `set_depth_write(False)` --
+toute géométrie réelle chargée ensuite au même endroit (région cochée,
+bundle `.ig`) se superpose sans jamais être masquée par un placeholder
+résiduel.
+
+## Nom + bornes de la zone sélectionnée (`landscape_editor__selected_zone_info.md`)
+
+Le panneau de droite affiche, sous la sélection de zone existante (pivot de
+rotation), le nom de la zone actuellement sélectionnée et ses bornes monde
+`(min_x, min_y)`-`(max_x, max_y)` (`self._selected_zone_bounds`, calculé dans
+`_select_zone()`/remis à `None` dans `_clear_zone_selection()`) -- utile pour
+vérifier visuellement qu'une géométrie (eau, bâtiment) tombe bien dans la
+zone attendue, sans calcul manuel.

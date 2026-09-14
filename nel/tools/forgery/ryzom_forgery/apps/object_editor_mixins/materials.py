@@ -296,7 +296,7 @@ class MaterialsMixin:
 			# cached independently.
 			panda_texture = load_panda_texture(
 				resolved_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-				repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture,
+				repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_file,
 				wrap_s=texture.wrap_s, wrap_t=texture.wrap_t,
 				min_filter=texture.min_filter, mag_filter=texture.mag_filter,
 				load_grayscale_as_alpha=texture.load_grayscale_as_alpha)
@@ -308,7 +308,7 @@ class MaterialsMixin:
 				# change. Panoply-tracked names get their own signature from
 				# _ensure_live_panoply_texture() instead -- skip those here.
 				if resolved_name not in self._panoply_texture_sources and resolved_name not in self._texture_freshness_mtimes:
-					ref = resolve_texture_ref(resolved_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+					ref = resolve_texture_ref(resolved_name, self._texture_search_dirs, self.search_paths_dialog.find_file)
 					if ref is not None:
 						try:
 							self._texture_freshness_mtimes[resolved_name] = ref.cache_stat()[0]
@@ -325,12 +325,12 @@ class MaterialsMixin:
 				else:
 					specular_texture = load_panda_cube_texture(
 						stage1.sub_textures, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-						repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture)
+						repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_file)
 					self._cube_texture_cache[cube_key] = specular_texture
 			elif stage1 is not None and stage1.file_name:
 				specular_texture = load_panda_texture(
 					stage1.file_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-					repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture,
+					repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_file,
 					wrap_s=stage1.wrap_s, wrap_t=stage1.wrap_t,
 					min_filter=stage1.min_filter, mag_filter=stage1.mag_filter,
 					load_grayscale_as_alpha=stage1.load_grayscale_as_alpha)

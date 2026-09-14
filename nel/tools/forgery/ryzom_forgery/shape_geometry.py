@@ -768,7 +768,7 @@ def _find_local_texture_ref(name, search_dirs):
 	"""Fallback for load_panda_texture() when `finder` doesn't have `name`
 	either -- checks each of `search_dirs` (typically just the folder an
 	imported mesh file was loaded from) and their tex/textures/data
-	subfolders, same name-matching rules as search_paths.find_texture()
+	subfolders, same name-matching rules as search_paths.find_file()
 	(case-insensitive, also tries swapping the extension for another common
 	texture one)."""
 	candidates = [name.lower()]
@@ -795,7 +795,7 @@ def resolve_texture_ref(name, search_dirs=None, finder=None):
 	"""Resolves a texture reference by name, the same two-step order
 	load_panda_texture() uses internally: `search_dirs`
 	(_find_local_texture_ref(), typically just the loaded shape's own
-	folder) first, then `finder(name)` (e.g. SearchPathsDialog.find_texture).
+	folder) first, then `finder(name)` (e.g. SearchPathsDialog.find_file).
 	None if neither finds it. Exposed separately (not just inlined in
 	load_panda_texture()) for callers that need to resolve a specific
 	texture reference -- to inspect it (e.g. panoply_live.is_baked_stale())

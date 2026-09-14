@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-09-14 — ✨ Textured region/rest .ig loading + IG Zones/Others checkbox tree, Forgery 4.11.0
+
+`landscape_editor__ig_full_load.md`, `landscape_editor__ig_inspector_tree.md`
+and `landscape_editor__selected_zone_info.md` closed.
+
+Replaces the old flat, untextured per-visible-zone `.ig` loading with real
+textured instances (`ig_geometry.build_textured_instance_template()`) split
+into two granularities: zone-owned `.ig` follow the existing per-region
+loading (one `.bam` per `(continent, region, mode)`), everything else
+(villages, water, ...) loads as one continent-wide "rest" bundle via its own
+button; sky/canopy `.ig` are never loaded in either case.
+
+The left panel's real-file Explorer is replaced in Atyscape by two virtual,
+checkbox-driven folders (`ForgeryApp.draw_left_panel_content()`, a new
+override point every other app still defaults away from) mirroring what
+Patina already does: "IG Zones" (grouped by region) and "IG Others" list
+every currently loaded `.ig` and, under each, its real `.shape` names,
+introspected straight from the already-built scene graph. Unchecking an
+`.ig` hides it and unchecks all its shapes; rechecking a shape reactivates
+its parent `.ig`. Built for inspection, this tool turned out to be
+instrumental in isolating a stubborn invisible-water bug below.
+
+Fixed along the way, all confirmed against real Tryker data: all-black
+rendering (forced max ambient, ignore diffuse/specular/emissive); a
+`water_polygon` geometry cache poisoned by one degenerate polygon (never
+cached/shared now, unlike `water_point`); non-transparent water and z-fighting
+(water/water and water/terrain, the latter needing a real world-space Z lift,
+`set_depth_offset()` measured to have no effect); the "rest" `.bam` cache
+never being re-read (rebuilt from scratch on every click). A real bug in
+pynel's `world_pos_to_zone_name()` (`row = floor(-y/160)` instead of
+`row = -floor(y/160)`, confirmed against the real C++ formula) had shifted
+almost every manual position check made while debugging. The actual root
+cause of the invisible water was a `.shape` name collision across the
+user's shared Search Paths (a real per-continent pipeline `water14.shape`
+silently shadowed by an unrelated generic file of the same name) — fixed
+generically rather than ad hoc: `search_paths_dialog.find_texture()`
+renamed to `find_file()` (it was never texture-only), gaining an optional
+`priority_paths` parameter tried first before falling through to the shared
+index; Atyscape forces its own trusted `pipeline/export/continents/
+<continent>/` AND `pipeline/export/ecosystems/<ecosystem>/` directories
+first in Édition mode (both needed — shared building props like village
+shapes live under the ecosystem tree, not the continent one, found after an
+initial continent-only fix made every village building disappear) — no
+hardcoded exclusion, no change to the shared, user-configured Search Paths.
+
+Also: the "region not loaded yet" purple placeholder squares are now 30%
+transparent and rendered in Panda3D's lowest-priority `"background"` bin
+with depth-write off, so real geometry loaded afterwards at the same spot
+is never hidden behind a stale placeholder; and the right panel now shows
+the selected zone's name and world-space bounds.
+
 ## 2026-09-11 — ✨ Add clickable zone selection with orange border as rotation pivot, Forgery 4.8.0
 
 Left-click (no drag) on a zone in Atyscape now selects it: `_select_zone_at_cursor()`/

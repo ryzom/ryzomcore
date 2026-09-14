@@ -55,7 +55,7 @@ def main(argv=None):
 		# .bnp-aware scan the GUI's own "Paths" list uses, just a one-shot,
 		# uncached index (this is a short-lived CLI process).
 		entries = search_paths.build_texture_index([SearchPathDir(path=str(args.data_root), recursive=True)])
-		texture_finder = lambda name: search_paths.find_texture(entries, name)
+		texture_finder = lambda name: search_paths.find_file(entries, name)
 
 	try:
 		shape_file = parse_shape(args.input.read_bytes())

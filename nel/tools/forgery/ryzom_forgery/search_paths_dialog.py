@@ -191,7 +191,7 @@ class _ScanResult:
 	skeleton_bones: dict = field(default_factory=dict)
 	animation_entries: dict = field(default_factory=dict)
 	animation_bones: dict = field(default_factory=dict)
-	texture_entries: dict = field(default_factory=dict)
+	file_entries: dict = field(default_factory=dict)
 	panoply_variants: dict = field(default_factory=dict)
 	total: int = 0
 
@@ -221,7 +221,7 @@ def _serialize_scan_result(result: _ScanResult) -> dict:
 		"skeleton_bones": {name: sorted(bones) for name, bones in result.skeleton_bones.items()},
 		"animation_entries": {name: _serialize_found_entry(e) for name, e in result.animation_entries.items()},
 		"animation_bones": {name: sorted(bones) for name, bones in result.animation_bones.items()},
-		"texture_entries": {name: _serialize_found_entry(e) for name, e in result.texture_entries.items()},
+		"file_entries": {name: _serialize_found_entry(e) for name, e in result.file_entries.items()},
 		"panoply_variants": result.panoply_variants,
 		"total": result.total,
 	}
@@ -233,7 +233,7 @@ def _deserialize_scan_result(data: dict) -> _ScanResult:
 		skeleton_bones={name: frozenset(bones) for name, bones in data["skeleton_bones"].items()},
 		animation_entries={name: _deserialize_found_entry(e) for name, e in data["animation_entries"].items()},
 		animation_bones={name: frozenset(bones) for name, bones in data["animation_bones"].items()},
-		texture_entries={name: _deserialize_found_entry(e) for name, e in data["texture_entries"].items()},
+		file_entries={name: _deserialize_found_entry(e) for name, e in data["file_entries"].items()},
 		panoply_variants=data["panoply_variants"],
 		total=data["total"],
 	)
@@ -264,6 +264,12 @@ class SearchPathsDialog:
 	def __init__(self):
 		self._dirs = app_settings.load().search_paths
 		self._add_dir_dialog = None
+		# find_file()'s own `priority_paths` override -- {tuple(priority_paths):
+		# {name.lower(): FoundEntry}}, built once per distinct tuple and reused
+		# (callers, e.g. one app's own fixed priority directory, pass the same
+		# tuple every call) rather than rescanning on every single find_file()
+		# call.
+		self._priority_entries_cache = {}
 
 		# The active workspace's own folder, always searched first -- see
 		# set_workspace_dir(); kept separate from self._dirs (recursive,
@@ -300,7 +306,7 @@ class SearchPathsDialog:
 		self._skeleton_bones = {}  # {name: frozenset(bone names)} -- for compatible_for(), no full parse needed
 		self._animation_entries = {}  # {name: search_paths.FoundEntry}
 		self._animation_bones = {}  # {name: frozenset(bone names)} -- for compatible_animations_for()
-		self._texture_entries = {}  # {name.lower(): search_paths.FoundEntry}
+		self._file_entries = {}  # {name.lower(): search_paths.FoundEntry}
 		self._panoply_variants = {}  # {base texture stem: {race: [user color, ...]}}, see panoply.py
 		self._ryzom_data_panoply_variants = {}  # see _load_ryzom_data_panoply_variants()
 		self._ryzom_data_panoply_mtime = None
@@ -336,7 +342,7 @@ class SearchPathsDialog:
 		against yet even though a scan is `scanning`). Used by
 		object_editor.py's restore-scan popup to skip waiting on the
 		background refresh scan when cached data already covers it."""
-		return bool(self._texture_entries)
+		return bool(self._file_entries)
 
 	def draw(self):
 		"""Call once per ImGui frame, alongside the other always-polled
@@ -592,7 +598,7 @@ class SearchPathsDialog:
 		which have no exclusion-rules concept of their own."""
 		skeleton_entries, skeleton_bones = {}, {}
 		animation_entries, animation_bones = {}, {}
-		texture_entries = {}
+		file_entries = {}
 		panoply_variants = {}
 		total = 0
 
@@ -609,7 +615,7 @@ class SearchPathsDialog:
 
 			total += 1
 			lower_name = found.name.lower()
-			texture_entries.setdefault(lower_name, found)
+			file_entries.setdefault(lower_name, found)
 			if lower_name == _PANOPLY_FILE_NAME and not panoply_variants:
 				try:
 					panoply_variants = panoply.parse_panoply_files(found.read_bytes().decode("latin-1"))
@@ -667,7 +673,7 @@ class SearchPathsDialog:
 		return _ScanResult(
 			skeleton_entries=skeleton_entries, skeleton_bones=skeleton_bones,
 			animation_entries=animation_entries, animation_bones=animation_bones,
-			texture_entries=texture_entries, panoply_variants=panoply_variants, total=total)
+			file_entries=file_entries, panoply_variants=panoply_variants, total=total)
 
 	def _load_ryzom_data_panoply_variants(self):
 		"""panoply_files.txt straight from the configured ryzom-data
@@ -727,7 +733,7 @@ class SearchPathsDialog:
 		self._skeleton_bones = {**external.skeleton_bones, **workspace.skeleton_bones}
 		self._animation_entries = {**external.animation_entries, **workspace.animation_entries}
 		self._animation_bones = {**external.animation_bones, **workspace.animation_bones}
-		self._texture_entries = {**external.texture_entries, **workspace.texture_entries}
+		self._file_entries = {**external.file_entries, **workspace.file_entries}
 		self._panoply_variants = (
 			self._load_ryzom_data_panoply_variants() or workspace.panoply_variants or external.panoply_variants)
 
@@ -807,11 +813,42 @@ class SearchPathsDialog:
 		except (AnimationParseError, OSError):
 			return None
 
-	def find_texture(self, name):
-		"""Resolves `name` against this dialog's own scanned (.bnp-aware)
-		texture index -- see search_paths.find_texture() for the matching
-		rules (case-insensitive, extension fallback)."""
-		return search_paths.find_texture(self._texture_entries, name)
+	def find_file(self, name, priority_paths=None):
+		"""Resolves `name` (a `.shape`/.skel/.anim/texture bare or full file
+		name -- despite the field's own name, `self._file_entries` indexes
+		every one of these, not just textures) against this dialog's own
+		scanned (.bnp-aware) index -- see search_paths.find_file() for the
+		matching rules (case-insensitive, extension fallback). Renamed from
+		`find_texture()` 2026-09-14 (Nuno: "find_texture c'est pour trouver
+		une texture.. pas touts les fichiers") -- it never was texture-only.
+
+		`priority_paths`, if given (a list/tuple of directory paths), is
+		tried FIRST, own small index built once per distinct tuple and
+		reused (_priority_entries_for()) -- callers pass the SAME sequence
+		every call (e.g. one app's own single fixed directory), so this
+		never rescans on the hot path. Falls through to the normal shared,
+		user-configured index (`self._file_entries`) only if nothing matched
+		there. Added 2026-09-14 (Nuno) so one app can force its own trusted
+		directory to win a same-name collision without touching the shared
+		Search Paths list at all -- found the hard way: a `.ig` instance's
+		`.shape` existed both under the real per-continent pipeline export
+		AND, unrelated, under a generic same-named shape reachable through
+		one of the user's own OTHER configured search entries; whichever
+		happened to be listed first won, silently, no error."""
+		if priority_paths:
+			found = search_paths.find_file(self._priority_entries_for(tuple(priority_paths)), name)
+			if found is not None:
+				return found
+		return search_paths.find_file(self._file_entries, name)
+
+	def _priority_entries_for(self, priority_paths):
+		cached = self._priority_entries_cache.get(priority_paths)
+		if cached is not None:
+			return cached
+		dirs = [SearchPathDir(path=path, recursive=True) for path in priority_paths]
+		entries = search_paths.build_texture_index(dirs)
+		self._priority_entries_cache[priority_paths] = entries
+		return entries
 
 	def panoply_variants_for(self, base_texture_name):
 		"""{axis: [value, ...]} (panoply.AXES) of panoply variants
@@ -827,7 +864,7 @@ class SearchPathsDialog:
 		"""Embedded in object_editor.py's Settings tab, under its own
 		"Paths" section -- these are app-wide search folders, not tied to
 		any one shape. Order matters: the first folder that has a given
-		file wins (iter_all_entries()/find_texture() both just take the
+		file wins (iter_all_entries()/find_file() both just take the
 		first match, in list order) -- the up/down buttons let a folder be
 		promoted/demoted in priority instead of only add/remove."""
 		imgui.text("Folders searched (top = highest priority):")

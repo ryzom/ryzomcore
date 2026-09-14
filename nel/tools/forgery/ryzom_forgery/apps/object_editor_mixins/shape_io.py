@@ -553,7 +553,7 @@ class ShapeIOMixin:
 		self._load_shape(self._pending_reopen_shape_item)
 
 		# The shape displays right away, but its textures are resolved via
-		# self.search_paths_dialog.find_texture() -- backed by the index
+		# self.search_paths_dialog.find_file() -- backed by the index
 		# ensure_scanned() (called just before _restore_session_state() in
 		# __init__) built. has_scanned_data (not just scanning) is what
 		# actually matters here: a cache-hit startup already published a

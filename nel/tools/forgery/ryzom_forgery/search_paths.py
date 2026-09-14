@@ -142,7 +142,7 @@ def iter_all_entries(dirs: List, bnp_table_cache: Optional[dict] = None,
                       exclude: Optional[Callable[[FoundEntry], bool]] = None) -> Iterator[FoundEntry]:
 	"""Every file found (on disk or inside a .bnp) across every configured
 	folder (a list of `ryzom_forgery.settings.SearchPathDir`, in priority
-	order -- see find_texture()'s note on why that order matters) --
+	order -- see find_file()'s note on why that order matters) --
 	callers filter by suffix/name themselves (see SearchPathsDialog.reload(),
 	which builds both the .skel candidate list and the texture-name index
 	from a single pass over this). `bnp_table_cache`, if given, is read from
@@ -180,10 +180,10 @@ def build_texture_index(dirs: List) -> dict:
 	return entries
 
 
-def find_texture(entries_by_lower_name: dict, name: str) -> Optional[FoundEntry]:
+def find_file(entries_by_lower_name: dict, name: str) -> Optional[FoundEntry]:
 	"""Case-insensitive exact match first, then the same base name with each
 	of TEXTURE_FALLBACK_EXTENSIONS -- shared matching rule used by both
-	SearchPathsDialog.find_texture() (cached/background-scanned index) and
+	SearchPathsDialog.find_file() (cached/background-scanned index) and
 	one-shot callers indexing via build_texture_index()."""
 	candidates = [name.lower()]
 	stem = Path(name).stem.lower()
