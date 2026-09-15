@@ -1109,6 +1109,10 @@ s'applique dès maintenant, même si ce chantier ne touche jamais lui-même aux
 
 ## Chargement complet + texturé des `.ig`, par région (`landscape_editor__ig_full_load.md`)
 
+Pour comment le vrai client charge chaque type de `.ig` (par convention de
+nom pour le "land", par fiche Georges village/continent pour le "other")
+et d'où chacun est généré, voir `pynel/nel/tools/pynel/docs/ig_client_loading.md`.
+
 Remplace entièrement l'ancien chargement incrémental par zone visible
 (géométrie `.ig` grise plate, un bouton unique "sapin" rechargeant tout
 `self._loaded_refs` à chaque clic) par un chargement texturé (vraies
