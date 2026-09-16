@@ -1,3 +1,9 @@
+## 2026-09-06 — Validate PHP 8.2-FPM running alongside 7.4 on the www server
+
+Ops task, unrelated to the `www/libs/` reorg above: ran PHP 8.2-FPM as a second pool alongside the existing 7.4 one, on its own socket, to validate the upgrade path without touching the live 7.4 pool. Copied the 7.4 pool config, pointed it at a separate `php8.2-fpm-xxx.sock`, confirmed `mysqli` is enabled for 8.2, and repointed the relevant Apache vhost's `SetHandler` at the new socket after a config test (`php8.2-fpm -t`) and Apache reload.
+
+Manually tested and validated by Nuno.
+
 ## 2026-08-22 — 🐛 Fix duplicate config.php include causing redeclare fatal
 
 Follow-up fixes after deploying the `♻️ Reorganize www/ and harden login security` commit to `main/rendor-staging`.
