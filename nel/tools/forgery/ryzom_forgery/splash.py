@@ -1,64 +1,45 @@
-import threading
+import subprocess
+import sys
 import time
-import tkinter as tk
 
 
 class Splash:
 	"""A borderless splash window shown while a ForgeryApp is starting up.
 
-	Runs its own Tk mainloop on a dedicated thread so it keeps painting
-	while the caller's thread is busy doing the actual (blocking) Panda3D
-	startup work -- a plain PhotoImage shown once with no mainloop would
-	never repaint (e.g. after being covered by another window) and could
-	be flagged "not responding" by the OS.
+	Runs in a completely separate OS process (see _splash_process.py),
+	not a thread in this one -- Tk/Tcl isn't thread-safe (this used to run
+	as a background thread here instead, which crashed
+	("Tcl_AsyncDelete: async handler deleted by the wrong thread") once
+	this app started spawning more of its own background threads, e.g. the
+	workspace filesystem watcher, racing against the splash's own Tcl
+	teardown), and on macOS a GUI toolkit is additionally restricted to a
+	process's own *main* thread outright, which a background thread could
+	never satisfy regardless. A separate process sidesteps both
+	constraints entirely: this process's own threads can never interact
+	with whatever's going on inside the splash's own Tcl interpreter,
+	because there's no way for them to -- it's a different process.
+
+	close() is meant to be called once the real app is actually ready to be
+	seen (its first rendered frame, not just once __init__ has returned --
+	see app.py's own call site) -- min_duration is a floor under that real
+	elapsed time, not additional time tacked on top of it: on any launch
+	slow enough to already exceed min_duration on its own, close() doesn't
+	wait at all.
 	"""
 
 	def __init__(self, image_path, min_duration=1.2, subsample=1, center_on=None):
 		self._min_duration = min_duration
 		self._start = time.monotonic()
-		self._done = threading.Event()
-		ready = threading.Event()
-		self._thread = threading.Thread(target=self._run, args=(str(image_path), subsample, center_on, ready), daemon=True)
-		self._thread.start()
-		ready.wait()
-
-	def _run(self, image_path, subsample, center_on, ready):
-		root = tk.Tk()
-		root.overrideredirect(True)
-		root.attributes("-topmost", True)
-
-		image = tk.PhotoImage(file=image_path)
-		if subsample > 1:
-			image = image.subsample(subsample, subsample)
-		width, height = image.width(), image.height()
+		args = [sys.executable, "-m", "ryzom_forgery._splash_process", str(image_path), str(subsample)]
 		if center_on is not None:
-			target_x, target_y, target_width, target_height = center_on
-			pos_x = target_x + (target_width - width) // 2
-			pos_y = target_y + (target_height - height) // 2
-		else:
-			screen_width, screen_height = root.winfo_screenwidth(), root.winfo_screenheight()
-			pos_x, pos_y = (screen_width - width) // 2, (screen_height - height) // 2
-		root.geometry(f"{width}x{height}+{pos_x}+{pos_y}")
-
-		label = tk.Label(root, image=image, borderwidth=0)
-		label.image = image
-		label.pack()
-
-		def poll_done():
-			if self._done.is_set():
-				root.destroy()
-				return
-			root.after(50, poll_done)
-
-		root.after(50, poll_done)
-		ready.set()
-		root.mainloop()
+			args += [str(value) for value in center_on]
+		self._process = subprocess.Popen(args)
 
 	def close(self):
 		"""Blocks until min_duration has elapsed since construction, then
-		tears down the splash window."""
+		terminates the splash process."""
 		remaining = self._min_duration - (time.monotonic() - self._start)
 		if remaining > 0:
 			time.sleep(remaining)
-		self._done.set()
-		self._thread.join(timeout=2.0)
+		self._process.terminate()
+		self._process.wait()

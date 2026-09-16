@@ -45,6 +45,8 @@ struct CPMainThread : public CPThread
 {
 	CPMainThread() : CPThread(NULL, 0)
 	{
+		_ThreadHandle = pthread_self();
+
 		if(pthread_key_create(&threadSpecificKey, NULL) != 0)
 			throw EThread("cannot create thread specific storage key.");
 
@@ -235,9 +237,15 @@ bool CPThread::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
 
-	nlwarning("This code does not work. May cause a segmentation fault...");
+	cpu_set_t cpuSet;
+	CPU_ZERO(&cpuSet);
+	for (uint i = 0; i < 64 && i < CPU_SETSIZE; ++i)
+	{
+		if (cpuMask & ((uint64)1 << i))
+			CPU_SET(i, &cpuSet);
+	}
 
-	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(uint64), (const cpu_set_t*)&cpuMask);
+	sint res = pthread_setaffinity_np(_ThreadHandle, sizeof(cpu_set_t), &cpuSet);
 
 	if (res)
 	{
@@ -261,16 +269,22 @@ uint64 CPThread::getCPUMask()
 {
 #ifdef __USE_GNU
 
-	nlwarning("This code does not work. May cause a segmentation fault...");
+	cpu_set_t cpuSet;
+	CPU_ZERO(&cpuSet);
 
-	uint64 cpuMask = 0;
-
-	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(uint64), (cpu_set_t*)&cpuMask);
+	sint res = pthread_getaffinity_np(_ThreadHandle, sizeof(cpu_set_t), &cpuSet);
 
 	if (res)
 	{
 		nlwarning("pthread_getaffinity_np() returned %d", res);
 		return 0;
+	}
+
+	uint64 cpuMask = 0;
+	for (uint i = 0; i < 64 && i < CPU_SETSIZE; ++i)
+	{
+		if (CPU_ISSET(i, &cpuSet))
+			cpuMask |= ((uint64)1 << i);
 	}
 
 	return cpuMask;
@@ -342,13 +356,21 @@ uint64 CPProcess::getCPUMask()
 {
 #ifdef __USE_GNU
 
-	uint64 cpuMask = 0;
-	sint res = sched_getaffinity(getpid(), sizeof(uint64), (cpu_set_t*)&cpuMask);
+	cpu_set_t cpuSet;
+	CPU_ZERO(&cpuSet);
+	sint res = sched_getaffinity(getpid(), sizeof(cpu_set_t), &cpuSet);
 
 	if (res)
 	{
 		nlwarning("sched_getaffinity() returned %d, errno = %d: %s", res, errno, strerror(errno));
 		return 0;
+	}
+
+	uint64 cpuMask = 0;
+	for (uint i = 0; i < 64 && i < CPU_SETSIZE; ++i)
+	{
+		if (CPU_ISSET(i, &cpuSet))
+			cpuMask |= ((uint64)1 << i);
 	}
 
 	return cpuMask;
@@ -365,7 +387,15 @@ bool CPProcess::setCPUMask(uint64 cpuMask)
 {
 #ifdef __USE_GNU
 
-	sint res = sched_setaffinity(getpid(), sizeof(uint64), (const cpu_set_t*)&cpuMask);
+	cpu_set_t cpuSet;
+	CPU_ZERO(&cpuSet);
+	for (uint i = 0; i < 64 && i < CPU_SETSIZE; ++i)
+	{
+		if (cpuMask & ((uint64)1 << i))
+			CPU_SET(i, &cpuSet);
+	}
+
+	sint res = sched_setaffinity(getpid(), sizeof(cpu_set_t), &cpuSet);
 
 	if (res)
 	{

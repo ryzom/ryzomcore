@@ -633,7 +633,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 
 	sContinentDir = CTools::normalizePath (sContinentDir);
 	CTools::chdir (sContinentDir.c_str()); // Relative to absolute path
-	sContinentDir = CTools::pwd () + "\\";
+	sContinentDir = CTools::pwd () + "/";
 	CTools::chdir (_ExeDir);
 
 	// Read continent.cfg
@@ -691,7 +691,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 	CTools::mkdir (_OutIGDir);
 
 	CTools::chdir (_OutIGDir.c_str());
-	_OutIGDir = CTools::pwd () + "\\";
+	_OutIGDir = CTools::pwd () + "/";
 	CTools::chdir (_ExeDir);
 
 
@@ -702,10 +702,12 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 
 	// Get all regions
 	vector<string> vRegions;
+
+	CTools::chdir (sContinentDir);
+#ifdef NL_OS_WINDOWS
 	WIN32_FIND_DATA findData;
 	HANDLE hFind;
 
-	CTools::chdir (sContinentDir);
 	hFind = FindFirstFile ("*.*", &findData);
 	while (hFind != INVALID_HANDLE_VALUE)
 	{
@@ -728,6 +730,35 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 			break;
 	}
 	FindClose (hFind);
+#else
+	{
+		vector<string> content;
+		CPath::getPathContent (CTools::pwd (), false, true, false, content);
+		for (uint contentIdx = 0; contentIdx < content.size (); ++contentIdx)
+		{
+			// Directory entries carry a trailing slash: strip it before
+			// extracting the bare directory name (getFilename() on a
+			// trailing-slash path returns an empty string).
+			string dirPath = content[contentIdx];
+			if (!dirPath.empty () && (dirPath[dirPath.size () - 1] == '/' || dirPath[dirPath.size () - 1] == '\\'))
+				dirPath.resize (dirPath.size () - 1);
+			string name = CFile::getFilename (dirPath);
+
+			// Look if the name is a system directory
+			bool bFound = false;
+			for (i = 0; i < MAX_SYS_DIR; ++i)
+				if (nlstricmp (name, gExportSysDir[i]) == 0)
+				{
+					bFound = true;
+					break;
+				}
+			if (!bFound) // No, ok lets recurse it
+			{
+				vRegions.push_back (name);
+			}
+		}
+	}
+#endif // NL_OS_WINDOWS
 
 
 	// Process all regions
@@ -1242,8 +1273,7 @@ bool CExport::newExport (SExportOptions &opt, IExportCB *expCB)
 // ---------------------------------------------------------------------------
 bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPrimitive> *selection)
 {
-	char sTmp[MAX_PATH];
-	GetCurrentDirectory (MAX_PATH, sTmp);
+	string sTmp = CTools::pwd ();
 
 	_Options = &opt;
 	_ExportCB = expCB;
@@ -1293,9 +1323,9 @@ bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPri
 	if (_ExportCB)
 		_ExportCB->dispPass ("Generate Flora");
 	vector<string>	allFloraFiles;
-	SetCurrentDirectory (_Options->PrimFloraDir.c_str());
+	CTools::chdir (_Options->PrimFloraDir);
 	getAllFiles (".Flora", allFloraFiles);
-	SetCurrentDirectory (sTmp);
+	CTools::chdir (sTmp);
 	for (i = 0; i < allFloraFiles.size(); ++i)
 	{
 		generateIGFromFlora (allFloraFiles[i], selection);
@@ -1303,7 +1333,7 @@ bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPri
 
 	writeFloraIG (_LandFile, (selection != NULL)); // If selection != NULL then test for writing
 
-	SetCurrentDirectory (sTmp);
+	CTools::chdir (sTmp);
 	if (_ExportCB)
 		_ExportCB->dispPass ("Finished");
 
@@ -1311,6 +1341,7 @@ bool CExport::doExport (SExportOptions &opt, IExportCB *expCB, vector<SExportPri
 }
 
 // ---------------------------------------------------------------------------
+#ifdef NL_OS_WINDOWS
 void CExport::getAllFiles (const string &ext, vector<string> &files)
 {
 	char sCurDir[MAX_PATH];
@@ -1350,8 +1381,35 @@ void CExport::getAllFiles (const string &ext, vector<string> &files)
 
 	SetCurrentDirectory (sCurDir);
 }
+#else
+void CExport::getAllFiles (const string &ext, vector<string> &files)
+{
+	string curDir = CTools::pwd ();
+	vector<string> content;
+	CPath::getPathContent (curDir, false, true, true, content);
+	for (uint i = 0; i < content.size (); ++i)
+	{
+		string name = CFile::getFilename (content[i]);
+		if (name == "." || name == "..")
+			continue;
+
+		if (CFile::isDirectory (content[i]))
+		{
+			CTools::chdir (content[i]);
+			getAllFiles (ext, files);
+			CTools::chdir (curDir);
+		}
+		else if (name.size () > ext.size () &&
+			nlstricmp (name.substr (name.size () - ext.size ()), ext) == 0)
+		{
+			files.push_back (strlwr (content[i]));
+		}
+	}
+}
+#endif // NL_OS_WINDOWS
 
 // ---------------------------------------------------------------------------
+#ifdef NL_OS_WINDOWS
 bool CExport::searchFile (const std::string &plantName, std::string &dir)
 {
 	char sCurDir[MAX_PATH];
@@ -1396,6 +1454,36 @@ bool CExport::searchFile (const std::string &plantName, std::string &dir)
 	SetCurrentDirectory (sCurDir);
 	return bFound;
 }
+#else
+bool CExport::searchFile (const std::string &plantName, std::string &dir)
+{
+	string curDir = CTools::pwd ();
+	string lowerPlantName = strlwr (plantName);
+	vector<string> content;
+	CPath::getPathContent (curDir, false, true, true, content);
+	for (uint i = 0; i < content.size (); ++i)
+	{
+		string name = strlwr (CFile::getFilename (content[i]));
+		if (name == "." || name == "..")
+			continue;
+
+		if (CFile::isDirectory (content[i]))
+		{
+			CTools::chdir (content[i]);
+			bool found = searchFile (plantName, dir);
+			CTools::chdir (curDir);
+			if (found)
+				return true;
+		}
+		else if (name == lowerPlantName)
+		{
+			dir = curDir;
+			return true;
+		}
+	}
+	return false;
+}
+#endif // NL_OS_WINDOWS
 
 // ---------------------------------------------------------------------------
 bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExportPrimitive> *selection)
@@ -1409,11 +1497,10 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 	vector<CPrimRegion> allPrimRegion;
 	vector<string> allPrimFiles;
 	{
-		char sCurDir[MAX_PATH];
-		GetCurrentDirectory (MAX_PATH, sCurDir);
-		SetCurrentDirectory (_Options->PrimFloraDir.c_str());
+		string sCurDir = CTools::pwd ();
+		CTools::chdir (_Options->PrimFloraDir);
 		getAllFiles (".prim", allPrimFiles);
-		SetCurrentDirectory (sCurDir);
+		CTools::chdir (sCurDir);
 		for (i = 0; i < allPrimFiles.size(); ++i)
 		{
 			try
@@ -1466,17 +1553,16 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 				if (it != Plants.end()) // Already here ?!
 					continue; // Zap it
 
-				char sCurDir[MAX_PATH];
-				GetCurrentDirectory (MAX_PATH, sCurDir);
+				string sCurDir = CTools::pwd ();
 
 				try
 				{
-					SetCurrentDirectory (_GameElemDir.c_str());
+					CTools::chdir (_GameElemDir);
 					string dir;
 
 					if (searchFile (plantName, dir))
 					{
-						string tmpName = dir + string("\\") + plantName;
+						string tmpName = dir + string("/") + plantName;
 
 						CSmartPtr<UForm> form2 = loader->loadForm (tmpName.c_str());
 						if (form2)
@@ -1496,11 +1582,11 @@ bool CExport::generateIGFromFlora (const std::string &SrcFile, std::vector<SExpo
 						if (_ExportCB != NULL)
 							_ExportCB->dispWarning (string("Cant load ") + plantName);
 					}
-					SetCurrentDirectory (sCurDir);
+					CTools::chdir (sCurDir);
 				}
 				catch (const Exception &e)
 				{
-					SetCurrentDirectory (sCurDir);
+					CTools::chdir (sCurDir);
 					if (_ExportCB != NULL)
 						_ExportCB->dispWarning (string("Cant load ") + plantName + "(" + e.what() + ")" );
 				}
@@ -2063,7 +2149,7 @@ void CExport::writeFloraIG (const string &LandFile, bool bTestForWriting)
 		CInstanceGroup IG;
 		IG.build (vGlobalPos, Instances, Portals, Clusters);
 
-		ZoneName = _OutIGDir + "\\" + ZoneName;
+		ZoneName = _OutIGDir + "/" + ZoneName;
 		ZoneName += ".ig";
 
 		CIFile inFile; // If file already exists and we have selection...
@@ -2135,7 +2221,7 @@ void CExport::loadLandscape (const string &LandFile)
 
 		string ZoneName = getZoneNameFromXY (i, j);
 
-		ZoneName = _InLandscapeDir + string("\\") + ZoneName;
+		ZoneName = _InLandscapeDir + string("/") + ZoneName;
 
 		//if (_ExportCB != NULL)
 		//	_ExportCB->dispInfo (string("Loading ") + ZoneName);
