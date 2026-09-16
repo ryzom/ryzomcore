@@ -51,6 +51,7 @@ CMaterial::CMaterial()
 	_AlphaTestThreshold= 0.5f;
 	_TexCoordGenMode= 0;
 	_LightMapsMulx2= false;
+	_SmoothingAngle= -1.0f;
 }
 
 // ***************************************************************************
@@ -92,6 +93,7 @@ CMaterial		&CMaterial::operator=(const CMaterial &mat)
 	_Diffuse= mat._Diffuse;
 	_Specular= mat._Specular;
 	_Shininess= mat._Shininess;
+	_SmoothingAngle= mat._SmoothingAngle;
 	_AlphaTestThreshold= mat._AlphaTestThreshold;
 	_TexCoordGenMode= mat._TexCoordGenMode;
 
@@ -149,6 +151,8 @@ void		CMaterial::serial(NLMISC::IStream &f)
 	 * ***********************************************/
 
 	/*
+	Version 10:
+		- SmoothingAngle (tool metadata, not used by rendering)
 	Version 9:
 		- Added support for third operand (for Mad operator)
 	Version 8:
@@ -171,7 +175,7 @@ void		CMaterial::serial(NLMISC::IStream &f)
 		- base version.
 	*/
 
-	sint	ver= f.serialVersion(9);
+	sint	ver= f.serialVersion(10);
 	// For the version <=1:
 	nlassert(IDRV_MAT_MAXTEXTURES==4);
 
@@ -187,6 +191,12 @@ void		CMaterial::serial(NLMISC::IStream &f)
 	{
 		f.serial(_Shininess);
 	}
+	if(ver>=10)
+	{
+		f.serial(_SmoothingAngle);
+	}
+	else if(f.isReading())
+		_SmoothingAngle= -1.0f;
 	if(ver>=5)
 	{
 		f.serial(_AlphaTestThreshold);
