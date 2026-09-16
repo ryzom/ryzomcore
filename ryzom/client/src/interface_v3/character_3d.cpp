@@ -427,6 +427,10 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 {
 	TChar3DPart part = convert_VisualSlot_To_Char3DPart (s);
 	if (part == Char3DPart_INVALID) return;
+	Parts[part].AdvFx.clear();
+	Parts[part].StatFxNames.clear();
+	Parts[part].StatFxBones.clear();
+	Parts[part].StatFxOffss.clear();
 
 	CItemSheet *item = SheetMngr.getItem (s, model);
 	if (item != NULL)
@@ -538,7 +542,8 @@ void SCharacter3DSetup::setupFromCS_ModelCol (SLOTTYPE::EVisualSlot s, sint32 mo
 
 		// FX
 		{
-			Parts[part].AdvFx = item->FX.getAdvantageFX();
+			// Amplifiers use the static effects attached to the hands.
+			Parts[part].AdvFx = item->ItemType == ITEM_TYPE::MAGICIAN_STAFF ? "" : item->FX.getAdvantageFX();
 			Parts[part].StatFxNames.clear();
 			Parts[part].StatFxBones.clear();
 			Parts[part].StatFxOffss.clear();
@@ -847,7 +852,10 @@ void CCharacter3D::setup (const SCharacter3DSetup &c3ds)
 		bool bQualityRebuilt = false;
 
 		// Create Instance
-		if ((c3ds.Parts[i].Name != _CurrentSetup.Parts[i].Name) || (c3ds.Parts[i].AdvFx != _CurrentSetup.Parts[i].AdvFx))
+		if ((c3ds.Parts[i].Name != _CurrentSetup.Parts[i].Name) || (c3ds.Parts[i].AdvFx != _CurrentSetup.Parts[i].AdvFx) ||
+			(c3ds.Parts[i].StatFxNames != _CurrentSetup.Parts[i].StatFxNames) ||
+			(c3ds.Parts[i].StatFxBones != _CurrentSetup.Parts[i].StatFxBones) ||
+			(c3ds.Parts[i].StatFxOffss != _CurrentSetup.Parts[i].StatFxOffss))
 		{
 			// If face, unregister FacePlayList
 			if(i==Char3DPart_Face && _FacePlayList)
@@ -1299,6 +1307,15 @@ void CCharacter3D::createInstance (TChar3DPart i, const SCharacter3DSetup::SChar
 		return;
 	}
 
+	// Clear effects even when the replacement has no model.
+	if (!_InstancesFx[i].AdvantageFx.empty())
+		_Scene->deleteInstance (_InstancesFx[i].AdvantageFx);
+	uint32 fx;
+	for (fx = 0; fx < _InstancesFx[i].StaticFx.size(); ++fx)
+		if (!_InstancesFx[i].StaticFx[fx].empty())
+			_Scene->deleteInstance(_InstancesFx[i].StaticFx[fx]);
+	_InstancesFx[i].StaticFx.clear();
+
 	if (!_Instances[i].empty())
 		_Scene->deleteInstance (_Instances[i]);
 
@@ -1316,9 +1333,6 @@ void CCharacter3D::createInstance (TChar3DPart i, const SCharacter3DSetup::SChar
 	// FX Management
 
 	// Advantage Fx
-	if (!_InstancesFx[i].AdvantageFx.empty())
-		_Scene->deleteInstance (_InstancesFx[i].AdvantageFx);
-
 	if ((!part.AdvFx.empty()) && (part.AdvFx != "none.shape"))
 	{
 		_InstancesFx[i].AdvantageFx = _Scene->createInstance (part.AdvFx);
@@ -1338,12 +1352,6 @@ void CCharacter3D::createInstance (TChar3DPart i, const SCharacter3DSetup::SChar
 	}
 
 	// Static Fx
-	uint32 fx;
-	for (fx = 0; fx < _InstancesFx[i].StaticFx.size(); ++fx)
-		if (!_InstancesFx[i].StaticFx[fx].empty())
-			_Scene->deleteInstance(_InstancesFx[i].StaticFx[fx]);
-	_InstancesFx[i].StaticFx.clear();
-
 	for (fx = 0; fx < part.StatFxNames.size(); ++fx)
 		if ((!part.StatFxNames[fx].empty()) && (part.StatFxNames[fx] != "none.shape") &&
 			(!part.StatFxBones[fx].empty()) && (part.StatFxBones[fx] != "none.shape"))

@@ -93,7 +93,10 @@ class	CInterfaceHelp
 public:
 	// Open and set the group next to the element
 	static CInterfaceGroup	*activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow=-1,
-		bool reuseSameAspect=true, bool preferNewWindow=false);
+		bool reuseSameAspect=true, bool preferNewWindow=false, uint64 chatLinkId=0);
+
+	// Bring an existing item help window for this chat link to the front.
+	static bool				activateChatItemWindow(uint64 chatLinkId);
 
 	// Close all the Help Windows
 	static	void			closeAll();
@@ -142,12 +145,13 @@ private:
 		CInterfaceGroupPtr	Window;
 		// The item used to open this window
 		CDBCtrlSheet	*CtrlSheet;
+		uint64			ChatLinkId;
 		// KeepMode
 		bool			KeepMode;
 		// The button for KeepMode. Button state == KeepMode
 		CCtrlBaseButtonPtr	KeepButton;
 	public:
-		CInfoWindow() : CtrlSheet(NULL) {KeepMode= false;}
+		CInfoWindow() : CtrlSheet(NULL), ChatLinkId(0) {KeepMode= false;}
 		virtual void	infoReceived();
 		virtual void	missionInfoReceived(const CPrerequisitInfos &infos);
 	};

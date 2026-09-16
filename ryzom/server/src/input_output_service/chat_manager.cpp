@@ -61,6 +61,8 @@ void	logChatDirChanged(IVariable &var)
 	//IOS->getChatManager().resetChatLog();
 }
 
+CVariable<bool> ChatLinkDiagnostics("ios", "ChatLinkDiagnostics", "Log shared chat message diagnostics", false, 0, true);
+
 CVariable<bool>			VerboseChatManagement("ios","VerboseChatManagement", "Set verbosity for chat management", false, 0, true);
 CVariable<std::string>	LogChatDirectory("ios", "LogChatDirectory", "Log Chat directory (default, unset is SaveFiles service directory", "", 0, true, logChatDirChanged);
 CVariable<bool>			ForceFarChat("ios","ForceFarChat", "Force the use of SU to dispatch chat", false, 0, true);
@@ -110,6 +112,8 @@ namespace
 			}
 			if (!it->ItemValue.CreatorName.empty())
 				it->ItemValue.Info.CreatorName = SM->storeString(it->ItemValue.CreatorName);
+			if (ChatLinkDiagnostics)
+				nlinfo("CHATLINK_DIAG IOS ITEM_NAME receiverRow=%u nameId=%u", receiver.getIndex(), it->ItemValue.NameId);
 			it->ItemValue.NamePhraseId.clear();
 			it->ItemValue.Name.clear();
 			it->ItemValue.CreatorName.clear();
@@ -120,7 +124,11 @@ namespace
 		CChatGroup::TGroupType chatMode, TChanID channelId, bool ownTell, ucstring tellTarget,
 		const CChatMessage &source, const TDataSetRow &receiver, bool noBubble = false)
 	{
-		GenericXmlMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", stream);
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG IOS SERIALIZE receiverRow=%u senderIndex=%u group=%u ownTell=%u parts=%u", receiver.getIndex(), (uint)compressedIndex, (uint)chatMode, (uint)ownTell, (uint)source.Parts.size());
+		const bool headerFound = GenericXmlMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", stream);
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG IOS HEADER receiverRow=%u found=%u", receiver.getIndex(), (uint)headerFound);
 		stream.serial(compressedIndex);
 		stream.serial(displayName);
 		stream.serialEnum(chatMode);
@@ -131,6 +139,8 @@ namespace
 		message.NoBubble = noBubble;
 		prepareSharedMessage(message, receiver);
 		stream.serial(message);
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG IOS SERIALIZED receiverRow=%u bytes=%u", receiver.getIndex(), (uint)stream.length());
 	}
 
 	ucstring sharedMessageLogText(const CChatMessage &message)
@@ -649,6 +659,8 @@ void CChatManager::checkNeedDeeplize( const TDataSetRow& sender, const ucstring&
 	CChatGroup::TMemberCont::iterator itA;
 	CChatGroup::TMemberCont::iterator itEnd;
 
+	if (ChatLinkDiagnostics && (_SharedMessage))
+		nlinfo("CHATLINK_DIAG IOS AUDIENCE senderRow=%u groupId=%s", sender.getIndex(), grpId.toString().c_str());
 	nbrReceivers = 0;
 
 	if (grpId == CEntityId::Unknown)
@@ -736,6 +748,8 @@ void CChatManager::checkNeedDeeplize( const TDataSetRow& sender, const ucstring&
 			message = ucstr;
 		}
 
+		if (ChatLinkDiagnostics && (_SharedMessage && message.empty()))
+			nlinfo("CHATLINK_DIAG IOS AUDIENCE_SKIP senderRow=%u receiverRow=%u reason=translation_filter_or_deferred", sender.getIndex(), itA->getIndex());
 		if (!message.empty())
 		{
 			if (grpId == CEntityId::Unknown)
@@ -791,6 +805,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 			nldebug("IOSCM:  chat The player %s:%x is muted",
 				TheDataset.getEntityId(sender).toString().c_str(),
 				sender.getIndex());
+			if (ChatLinkDiagnostics && (_SharedMessage))
+				nlinfo("CHATLINK_DIAG IOS ROUTE_REJECT senderRow=%u reason=muted", sender.getIndex());
 			return;
 		}
 
@@ -837,6 +853,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 
 		string senderLang = SM->getLanguageCodeString(ci->Language);
 
+		if (ChatLinkDiagnostics && (_SharedMessage))
+			nlinfo("CHATLINK_DIAG IOS ROUTE senderRow=%u group=%u audience=%u deepl=%u", sender.getIndex(), (uint)itCl->second->getChatMode(), (uint)itCl->second->getAudience().Members.size(), (uint)(bool)EnableDeepL);
 		switch( itCl->second->getChatMode() )
 		{
 			// dynamic group
@@ -879,6 +897,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 					nldebug("IOSCM:  chat The player %s:%x is universe muted",
 						TheDataset.getEntityId(sender).toString().c_str(),
 						sender.getIndex());
+					if (ChatLinkDiagnostics && (_SharedMessage))
+						nlinfo("CHATLINK_DIAG IOS ROUTE_REJECT senderRow=%u reason=universe_muted", sender.getIndex());
 					return;
 				}
 
@@ -1040,6 +1060,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 			TChanID chanId = itCl->second->getDynChatChan();
 
 			CDynChatSession *session = _DynChat.getSession(chanId, sender);
+			if (ChatLinkDiagnostics && (_SharedMessage))
+				nlinfo("CHATLINK_DIAG IOS DYNAMIC senderRow=%u channel=%s session=%u writeRight=%u", sender.getIndex(), chanId.toString().c_str(), (uint)(session != NULL), (uint)(session && session->WriteRight));
 			if (session) // player must have a session in that channel
 			{
 				if (session->WriteRight) // player must have the right to speak in the channel
@@ -1052,6 +1074,8 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 							nldebug("IOSCM:  chat The player %s:%x is muted",
 								TheDataset.getEntityId(sender).toString().c_str(),
 								sender.getIndex());
+							if (ChatLinkDiagnostics && (_SharedMessage))
+								nlinfo("CHATLINK_DIAG IOS ROUTE_REJECT senderRow=%u reason=dynamic_muted", sender.getIndex());
 							return;
 						}
 					}
@@ -1243,7 +1267,11 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr)
 							if (IChatUnifierClient::getInstance())
 							{
 								if (_SharedMessage)
+								{
+									if (ChatLinkDiagnostics)
+										nlinfo("CHATLINK_DIAG IOS SEND_UNIFIER method=sendUnifiedDynChatShared");
 									IChatUnifierClient::getInstance()->sendUnifiedDynChatShared(session->getChan()->getID(), senderName, *_SharedMessage);
+								}
 								else
 									IChatUnifierClient::getInstance()->sendUnifiedDynChat(session->getChan()->getID(), senderName, ucstr);
 							}
@@ -1299,6 +1327,8 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 	CMirrorPropValueRO<uint32> senderInstanceId( TheDataset, sender, DSPropertyAI_INSTANCE );
 
 	map< TGroupId, CChatGroup >::iterator itGrp = _Groups.find( grpId );
+	if (ChatLinkDiagnostics && (_SharedMessage))
+		nlinfo("CHATLINK_DIAG IOS GROUP senderRow=%u groupId=%s found=%u members=%u", sender.getIndex(), grpId.toString().c_str(), (uint)(itGrp != _Groups.end()), itGrp == _Groups.end() ? 0U : (uint)itGrp->second.Members.size());
 	if( itGrp != _Groups.end() )
 	{
 		CChatGroup &chatGrp = itGrp->second;
@@ -1335,10 +1365,18 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 				if (client.dontReceiveTranslation(originLang))
 				{
 					if (!areOriginal)
+					{
+						if (ChatLinkDiagnostics && (_SharedMessage))
+							nlinfo("CHATLINK_DIAG IOS GROUP_SKIP senderRow=%u receiverRow=%u reason=translation_disabled", sender.getIndex(), itM->getIndex());
 						continue;
+					}
 				}
 				else if (co == NULL || usedlang != SM->getLanguageCodeString(co->Language))
+				{
+					if (ChatLinkDiagnostics && (_SharedMessage))
+						nlinfo("CHATLINK_DIAG IOS GROUP_SKIP senderRow=%u receiverRow=%u reason=language_or_character", sender.getIndex(), itM->getIndex());
 					continue;
+				}
 			}
 
 			// check the ai instance for region chat
@@ -1352,7 +1390,11 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					CCharacterInfos *receiverChar = IOS->getCharInfos(TheDataset.getEntityId(*itM));
 
 					if (senderChar == NULL || receiverChar == NULL)
+					{
+						if (ChatLinkDiagnostics && (_SharedMessage))
+							nlinfo("CHATLINK_DIAG IOS GROUP_SKIP senderRow=%u receiverRow=%u reason=unknown_character", sender.getIndex(), itM->getIndex());
 						continue;
+					}
 
 					// set GM mode if either speaker of listener is a GM
 					bool isGM= senderChar->HavePrivilege || receiverChar->HavePrivilege;
@@ -1360,6 +1402,8 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					// for normal players don't send chat to them if their home session id doesn't match the speaker's
 					if (!isGM && senderChar->HomeSessionId != receiverChar->HomeSessionId)
 					{
+						if (ChatLinkDiagnostics && (_SharedMessage))
+							nlinfo("CHATLINK_DIAG IOS GROUP_SKIP senderRow=%u receiverRow=%u reason=different_home_session", sender.getIndex(), itM->getIndex());
 						continue;
 					}
 				}
@@ -1381,7 +1425,11 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 				if (IChatUnifierClient::getInstance())
 				{
 					if (_SharedMessage)
+					{
+						if (ChatLinkDiagnostics)
+							nlinfo("CHATLINK_DIAG IOS SEND_UNIFIER method=sendFarGuildChatShared");
 						IChatUnifierClient::getInstance()->sendFarGuildChatShared(charInfos->Name, uint32(grpId.getShortId()), *_SharedMessage);
+					}
 					else
 						IChatUnifierClient::getInstance()->sendFarGuildChat(charInfos->Name, uint32(grpId.getShortId()), ucstr.substr(startPos));
 				}
@@ -1399,7 +1447,11 @@ void CChatManager::chatInGroup( TGroupId& grpId, const ucstring& ucstr, const TD
 					// determine the session id as the home session id for normal players and the current session id for GMs
 					uint32 sessionId= (charInfos->HavePrivilege && !IsRingShard)? IService::getInstance()->getShardId(): (uint32)charInfos->HomeSessionId;
 					if (_SharedMessage)
+					{
+						if (ChatLinkDiagnostics)
+							nlinfo("CHATLINK_DIAG IOS SEND_UNIFIER method=sendUniverseChatShared");
 						IChatUnifierClient::getInstance()->sendUniverseChatShared(charInfos->Name, sessionId, *_SharedMessage);
+					}
 					else
 						IChatUnifierClient::getInstance()->sendUniverseChat(charInfos->Name, sessionId, ucstr.substr(startPos));
 				}
@@ -2029,11 +2081,14 @@ void CChatManager::sendEmoteCustomTextToAll( const TDataSetRow& sender, const uc
 //-----------------------------------------------
 void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, const ucstring& ucstr, const TDataSetRow &sender, TChanID chanID, const ucstring &senderName)
 {
-
+	if (ChatLinkDiagnostics && (_SharedMessage))
+		nlinfo("CHATLINK_DIAG IOS SEND_ATTEMPT senderRow=%u receiverRow=%u group=%u", sender.getIndex(), receiver.getIndex(), (uint)senderChatMode);
 
 	if (senderChatMode == CChatGroup::arround)
 	{
 		sendChatCustomEmote(sender, receiver, ucstr );
+		if (ChatLinkDiagnostics && (_SharedMessage))
+			nlinfo("CHATLINK_DIAG IOS SEND_REJECT senderRow=%u receiverRow=%u reason=emote_route", sender.getIndex(), receiver.getIndex());
 		return;
 	}
 
@@ -2048,6 +2103,8 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 				nlwarning("<CChatManager::chat> The character %s:%x is unknown, no chat msg sent",
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex());
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS SEND_REJECT senderRow=%u receiverRow=%u reason=unknown_sender", sender.getIndex(), receiver.getIndex());
 				return;
 			}
 		}
@@ -2057,6 +2114,8 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 			TClientInfoCont::iterator itCl = _Clients.find( receiver );
 			if( itCl != _Clients.end() )
 			{
+				if (ChatLinkDiagnostics && (_SharedMessage && itCl->second->getId().getType() != RYZOMID::player))
+					nlinfo("CHATLINK_DIAG IOS SEND_REJECT receiverRow=%u reason=not_player", receiver.getIndex());
 				if (itCl->second->getId().getType() == RYZOMID::player)
 				{
 					bool havePriv = false;
@@ -2066,6 +2125,8 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 					}
 					if ( ! havePriv && itCl->second->isInIgnoreList(sender))
 					{
+						if (ChatLinkDiagnostics && (_SharedMessage))
+							nlinfo("CHATLINK_DIAG IOS SEND_REJECT senderRow=%u receiverRow=%u reason=ignored", sender.getIndex(), receiver.getIndex());
 						return;
 					}
 
@@ -2127,10 +2188,14 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 	*/
 					msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 					sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
+					if (ChatLinkDiagnostics && (_SharedMessage))
+						nlinfo("CHATLINK_DIAG IOS SEND_FE receiver=%s fe=%u bytes=%u", receiverInfos->EntityId.toString().c_str(), (uint)receiverInfos->EntityId.getDynamicId(), (uint)msgout.length());
 				}
 			}
 			else
 			{
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS SEND_REJECT receiverRow=%u reason=unknown_client", receiver.getIndex());
 				nlwarning("<CChatManager::sendChat> client %s:%x is unknown",
 					TheDataset.getEntityId(receiver).toString().c_str(),
 					receiver.getIndex());
@@ -2138,6 +2203,8 @@ void CChatManager::sendChat( CChatGroup::TGroupType senderChatMode, const TDataS
 		}
 		else
 		{
+			if (ChatLinkDiagnostics && (_SharedMessage))
+				nlinfo("CHATLINK_DIAG IOS SEND_REJECT receiverRow=%u reason=unknown_receiver", receiver.getIndex());
 			nlwarning("<CChatManager::chat> The character %s:%x is unknown, no chat msg sent",
 				TheDataset.getEntityId(receiver).toString().c_str(),
 				receiver.getIndex());
@@ -2237,6 +2304,8 @@ void CChatManager::sendFarChat( CChatGroup::TGroupType senderChatMode, const TDa
 
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS SEND_FE receiver=%s fe=%u bytes=%u", receiverInfos->EntityId.toString().c_str(), (uint)receiverInfos->EntityId.getDynamicId(), (uint)msgout.length());
 			}
 		}
 		else
@@ -2544,6 +2613,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 		nlwarning("<CChatManager::tell> client %s:%x is unknown",
 			TheDataset.getEntityId(sender).toString().c_str(),
 			sender.getIndex());
+		if (ChatLinkDiagnostics && (_SharedMessage))
+			nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=unknown_client", sender.getIndex());
 		return;
 	}
 	CCharacterInfos * senderInfos = IOS->getCharInfos( TheDataset.getEntityId(sender) );
@@ -2552,6 +2623,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 		nlwarning("<CChatManager::tell> The sender %s:%x is unknown, no tell message sent",
 			TheDataset.getEntityId(sender).toString().c_str(),
 			sender.getIndex());
+		if (ChatLinkDiagnostics && (_SharedMessage))
+			nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=unknown_sender", sender.getIndex());
 		return;
 	}
 //	bool senderMuted = itCl->second->isMuted();
@@ -2566,6 +2639,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 	receiver = CShardNames::getInstance().makeFullName(receiver, receiverSessionId);
 	CCharacterInfos * receiverInfos = IOS->getCharInfos( receiver );
 
+	if (ChatLinkDiagnostics && (_SharedMessage))
+		nlinfo("CHATLINK_DIAG IOS TELL_ROUTE senderRow=%u localReceiver=%u forceFar=%u unifier=%u", sender.getIndex(), (uint)(receiverInfos != NULL), (uint)(bool)ForceFarChat, (uint)(IChatUnifierClient::getInstance() != NULL));
 	if( receiverInfos && !ForceFarChat)
 	{
 		bool receiverMuted = _MutedUsers.find(TheDataset.getEntityId(receiverInfos->DataSetIndex)) != _MutedUsers.end();
@@ -2575,6 +2650,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				TheDataset.getEntityId(sender).toString().c_str(),
 				sender.getIndex(),
 				receiver.c_str());
+			if (ChatLinkDiagnostics && (_SharedMessage))
+				nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=sender_muted", sender.getIndex());
 			return;
 		}
 		itCl = _Clients.find( receiverInfos->DataSetIndex );
@@ -2586,9 +2663,13 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex(),
 					receiver.c_str());
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=receiver_muted", sender.getIndex());
 				return;
 			}
 
+			if (ChatLinkDiagnostics && (_SharedMessage && !senderInfos->HavePrivilege && itCl->second->isInIgnoreList(sender)))
+				nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u receiverRow=%u reason=ignored", sender.getIndex(), receiverInfos->DataSetIndex.getIndex());
 			// check if the sender is not in the ignore list of the receiver
 			if(senderInfos->HavePrivilege || !itCl->second->isInIgnoreList(sender) )
 			{
@@ -2612,6 +2693,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 						vect[0].Literal = ucstring( receiver );
 						uint32 phraseId = STRING_MANAGER::sendStringToClient( senderInfos->DataSetIndex, "TELL_PLAYER_UNKNOWN", vect, &IosLocalSender );
 						sendChat2Ex( CChatGroup::tell, senderInfos->DataSetIndex, phraseId );
+						if (ChatLinkDiagnostics && (_SharedMessage))
+							nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=receiver_blocks_tells", sender.getIndex());
 						return;
 					}
 				}
@@ -2641,6 +2724,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS SEND_FE receiver=%s fe=%u bytes=%u", receiverInfos->EntityId.toString().c_str(), (uint)receiverInfos->EntityId.getDynamicId(), (uint)msgout.length());
 
 				if (_SharedMessage)
 					echoTellShared(senderInfos->EntityId, receiverInfos->Name, *_SharedMessage);
@@ -2669,6 +2754,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 				nldebug("IOSCM: tell The player %s:%x is muted, can't tell a group chat",
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex());
+					if (ChatLinkDiagnostics && (_SharedMessage))
+						nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=group_sender_muted", sender.getIndex());
 					return;
 			}
 
@@ -2704,6 +2791,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 					TheDataset.getEntityId(sender).toString().c_str(),
 					sender.getIndex(),
 					receiver.c_str());
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS TELL_REJECT senderRow=%u reason=far_sender_muted", sender.getIndex());
 				return;
 			}
 			string senderName = senderInfos->Name.toString();
@@ -2714,6 +2803,8 @@ void CChatManager::tell( const TDataSetRow& sender, const string& receiverIn, co
 			if (_SharedMessage)
 			{
 				echoTellShared(senderInfos->EntityId, ucstring(receiver), *_SharedMessage);
+				if (ChatLinkDiagnostics)
+					nlinfo("CHATLINK_DIAG IOS SEND_UNIFIER method=sendFarTellShared");
 				IChatUnifierClient::getInstance()->sendFarTellShared(senderInfos->EntityId, senderInfos->HavePrivilege, ucstring(receiver), *_SharedMessage);
 			}
 			else
@@ -2739,7 +2830,11 @@ void CChatManager::echoTellShared(const NLMISC::CEntityId &senderCharId, const u
 {
 	CCharacterInfos *senderInfos = IOS->getCharInfos(senderCharId);
 	if (senderInfos == NULL)
+	{
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG IOS ECHO_REJECT sender=%s reason=unknown_sender", senderCharId.toString().c_str());
 		return;
+	}
 
 	CMessage echo("IMPULS_CH_ID");
 	uint8 channel = 1;
@@ -2751,6 +2846,8 @@ void CChatManager::echoTellShared(const NLMISC::CEntityId &senderCharId, const u
 		true, receiver, message, senderInfos->DataSetIndex);
 	echo.serialBufferWithSize((uint8*)stream.buffer(), stream.length());
 	sendMessageViaMirror(TServiceId(senderInfos->EntityId.getDynamicId()), echo);
+	if (ChatLinkDiagnostics)
+		nlinfo("CHATLINK_DIAG IOS ECHO_FE sender=%s fe=%u bytes=%u", senderCharId.toString().c_str(), (uint)senderInfos->EntityId.getDynamicId(), (uint)echo.length());
 }
 
 
@@ -2806,6 +2903,8 @@ void CChatManager::farTell( const NLMISC::CEntityId &senderCharId, const ucstrin
 
 				msgout.serialBufferWithSize((uint8*)bms.buffer(), bms.length());
 				sendMessageViaMirror(TServiceId(receiverInfos->EntityId.getDynamicId()), msgout);
+				if (ChatLinkDiagnostics && (_SharedMessage))
+					nlinfo("CHATLINK_DIAG IOS SEND_FE receiver=%s fe=%u bytes=%u", receiverInfos->EntityId.toString().c_str(), (uint)receiverInfos->EntityId.getDynamicId(), (uint)msgout.length());
 
 				// log tell to PDS
 //				IOSPD::logTell(ucstr, senderCharId, receiverInfos->EntityId);

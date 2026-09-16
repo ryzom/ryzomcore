@@ -326,6 +326,9 @@ void CClientChatManager::chat(const CChatMessageRequest &request, bool isChatTea
 
 	CChatGroup::TGroupType group = isChatTeam ? CChatGroup::team :
 		static_cast<CChatGroup::TGroupType>(_ChatMode);
+	// The Around tab can use the emote mode; shared messages use normal speech.
+	if (group == CChatGroup::arround)
+		group = CChatGroup::say;
 	TChanID dynamicChannelId = group == CChatGroup::dyn_chat ?
 		_ChatDynamicChannelId : NLMISC::CEntityId::Unknown;
 	std::string receiver;
