@@ -175,6 +175,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 	{
 	case NEAR_PLAYER:
 	case NEAR_POINT:
+	case REPLACE_ENTITY:
 		{
 			CAIInstance* const aiInstance = CAIS::instance().getAIInstance(AIInstanceId);	//	gets the AIInstance.
 			CEntityId const petOwnerId = CMirrors::getEntityId(CharacterMirrorRow);
@@ -187,6 +188,23 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 			nlwarning("Unknow player");
 #endif
 				return;
+			}
+
+			CAIPos replacePos;
+			if (SpawnMode==REPLACE_ENTITY)
+			{
+				CSpawnBot* const targetSpawn = NLMISC::type_cast<CSpawnBot*>(CAIS::instance().getEntityPhysical(TargetMirrorRow));
+				if (!targetSpawn)
+				{
+					confirmMsg.SpawnError = CPetSpawnConfirmationMsg::INTERNAL_ERROR;
+					confirmMsg.send("EGS");
+					nlwarning("REPLACE_ENTITY: target entity not found or not a NPC bot.");
+					return;
+				}
+
+				replacePos = targetSpawn->aipos();
+				//	despawn the targeted NPC group synchronously, before the pet is spawned at its position.
+				targetSpawn->getPersistent().getGroup().despawnGrp();
 			}
 
 			CGrpPet* petGrp = aiInstance->getPetMgr()->getPetGroup(petOwnerId);
@@ -262,6 +280,9 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 					}
 				case NEAR_POINT:
 					position = CAIPos(Coordinate_X*0.001f, Coordinate_Y*0.001f, (sint32)(Coordinate_H*0.001f), Heading);
+					break;
+				case REPLACE_ENTITY:
+					position = replacePos;
 					break;
 				}
 
