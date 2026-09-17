@@ -916,6 +916,43 @@ def _import_via_assimp(path: Path) -> Mesh:
 	return _assemble_mesh(positions, normals, texcoords, materials, rdr_passes, flip_v=flip_v)
 
 
+def import_rig_bone_weights(path: Path) -> List[List[Tuple[str, float]]]:
+	"""Parses `path` (.dae or .fbx) via assimp-py, returning only its
+	per-vertex (bone_name, weight) lists (see _mesh_bones()), concatenated
+	across every mesh instance in the same traversal order _import_via_assimp()
+	uses for positions -- for the Geometry tab's [Import rig], which pairs
+	this against an ALREADY-loaded shape's own existing vertex channels
+	(positions/normals/UVs untouched, only the skin data is replaced), unlike
+	_import_via_assimp() which builds a whole new Mesh from `path`'s own
+	geometry. Raises ShapeImportError if `path` has no meshes, or none of its
+	meshes carry any bone at all (nothing to import as a rig)."""
+	import assimp_py
+
+	path = Path(path)
+	flags = (assimp_py.Process_Triangulate | assimp_py.Process_JoinIdenticalVertices
+	         | assimp_py.Process_GenNormals | assimp_py.Process_GlobalScale)
+	scene = _assimp_import_file(assimp_py, path, flags)
+
+	if scene.num_meshes == 0:
+		raise ShapeImportError(f"no meshes found in {path}")
+
+	included_mesh_indices = {
+		i for i in range(scene.num_meshes) if "__skip__" not in scene.meshes[i].name.lower()}
+	has_bones = any(scene.meshes[i].bones and len(scene.meshes[i].bones) for i in included_mesh_indices)
+	if not has_bones:
+		raise ShapeImportError(f"{path} has no rig (no bone carries any vertex weight)")
+
+	bone_weights: List[List[Tuple[str, float]]] = []
+	for mesh_index, _transform in _iter_mesh_instances(scene.root_node, _YUP_TO_ZUP_MATRIX):
+		if mesh_index not in included_mesh_indices:
+			continue
+		mesh = scene.meshes[mesh_index]
+		mesh_bones = _mesh_bones(mesh)
+		num_vertices = len(mesh.vertices) // 3
+		bone_weights.extend(mesh_bones if mesh_bones is not None else [[] for _ in range(num_vertices)])
+	return bone_weights
+
+
 # ---------------------------------------------------------------------------
 # Skeleton extraction (.dae / .fbx / .gltf, via assimp-py)
 # ---------------------------------------------------------------------------

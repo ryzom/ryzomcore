@@ -108,6 +108,44 @@ Trois tâches Panda3D tournent en continu indépendamment du dessin ImGui :
 - Conversions de type de matériau : `_convert_to_multi_bitmap` (texture simple → `CTextureMultiFile` à un seul slot rempli), `_convert_multi_bitmap_to_simple` (seul le slot 0/Low Quality est rempli), `_convert_multi_bitmap_to_color` (aucun slot rempli) — object_editor.py.
 - Indices de bulles d'aide contextuelles tirées de `material_docs.py`/`docs/material_options.md`, affichées dans la barre de statut au survol (`_doc_hint_if_hovered`, object_editor.py ; mécanisme similaire pour le Multi Bitmap, object_editor.py).
 
+### Onglet Geometry
+
+Onglet `_draw_geometry_tab` (`geometry_ui.py`, `GeometryUIMixin`, icône `ICON_FA_CUBE`, 3e position
+après Materials, avant All Properties) : statut de skinning du shape chargé, et, pour un `CMesh`
+classique uniquement, les contrôles pour l'activer/désactiver, l'effacer, ou en importer un nouveau.
+
+- **Statut** (tout type de shape) : "Skinning: Yes/No" en tête. Si Yes : nombre d'os utilisés,
+  nombre de sommets réellement pondérés vs total (`_skinning_summary`), et le type de mesh réel
+  (`self.shape_file.type_name`). Chaque type stocke ses poids différemment : un `Mesh`/`MeshMRM`
+  via le canal `Weight` du `VertexBuffer`/la liste `skin_weights`, un `MeshMRMSkinned` via
+  `packed_vertices[i].weights` (quantifiés en uint8, non-zéro = pondéré).
+- **Case "Skinned"** (`CMesh` uniquement) : reflète directement `geom.skinned` — cocher/décocher
+  la modifie immédiatement en mémoire, persistant au prochain Save, sans confirmation (réservée à
+  [Clear Skinning] ci-dessous, qui efface des données). Grisée avec infobulle tant qu'aucune vraie
+  donnée de skin n'existe (`bones_name` vide ou canaux `Weight`/`PaletteSkin` absents), pour ne
+  jamais produire un fichier avec `skinned=True` sans poids réels derrière. `_draw_transform_panel`
+  (viewport_transform.py) lit déjà `_is_shape_skinned` en direct pour geler la transform globale
+  d'un shape skinné — aucun câblage supplémentaire nécessaire.
+- **[Clear Skinning]** (`_clear_skinning`, actif seulement si le `CMesh` a des données de skin) :
+  popup de confirmation (`_draw_clear_skinning_popup`, boutons "Clear"/"Cancel", mêmes couleurs
+  que les autres popups de confirmation de Patina — vert = action qui procède, rose = annuler).
+  Une fois confirmé : vide `bones_name`, retire les canaux `Weight`/`PaletteSkin`, fusionne tous
+  les `matrix_blocks` existants en un seul (plus besoin de la subdivision par groupe d'os une fois
+  non skinné), `skinned=False`. Les positions de sommets ne sont pas touchées.
+- **[Import rig]** (`_import_rig`, `CMesh` uniquement) : sélecteur de fichier natif filtré
+  `.dae`/`.fbx` (`portable_file_dialogs`, pollé par `_poll_import_rig_dialog` comme le Skinning
+  preview's "load a .skel/.anim"). `shape_import.import_rig_bone_weights(path)` parse le fichier
+  via assimp-py et ne retourne QUE les poids par sommet (pas sa géométrie, qui reste celle du
+  shape déjà chargé) — erreur explicite si le fichier n'a aucun os. Le nombre de sommets doit
+  correspondre EXACTEMENT à celui du shape chargé, sinon erreur explicite, aucun import partiel.
+  Réutilise `shape_import._normalize_skin_weights`/`_build_skinned_matrix_blocks` : les
+  `rdr_passes` de tous les `matrix_blocks` existants sont aplatis en un seul `pass_indices` avant
+  l'appel, pour couvrir aussi bien un mesh jamais skinné qu'un remplacement de skin existant.
+  Les sommets dupliqués qu'un skin multi-blocs peut nécessiter (un sommet utilisé dans plus d'un
+  bloc, `extra_vertex_sources`) sont répercutés sur `Position`/`Normal`/`TexCoord0`. Écrase le
+  skin existant s'il y en avait un, en construit un nouveau sinon ; `skinned=True` dans les deux
+  cas.
+
 ### Multi Bitmap
 
 - `_MULTI_BITMAP_SLOT_LABELS` (object_editor.py) : mapping index de slot → (qualité, écosystème, saison), les trois conventions Georges/moteur connues (elles ne sont pas mutuellement exclusives, toutes sont affichées).

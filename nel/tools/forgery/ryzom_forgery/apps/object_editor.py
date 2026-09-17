@@ -40,6 +40,7 @@ from ryzom_forgery.workspace_watch import WorkspaceWatcher
 from ryzom_forgery.workspaces import ensure_structure
 
 from ryzom_forgery.apps.object_editor_mixins.creature_bind import CreatureBindMixin
+from ryzom_forgery.apps.object_editor_mixins.geometry_ui import GeometryUIMixin
 from ryzom_forgery.apps.object_editor_mixins.materials import MaterialsMixin
 from ryzom_forgery.apps.object_editor_mixins.mesh_import import MeshImportMixin
 from ryzom_forgery.apps.object_editor_mixins.panoply_ui import PanoplyUIMixin
@@ -57,6 +58,7 @@ _VIRTUAL_CATEGORIES_RESCAN_INTERVAL = 1.0
 _TAB_COLOR_TEXTURES = (0.565, 0.933, 0.565, 1.0)  # lightgreen
 _TAB_COLOR_MATERIALS = (0.878, 1.0, 1.0, 1.0)  # lightcyan
 _TAB_COLOR_ALL_PROPERTIES = (0.5, 0.5, 0.5, 1.0)  # gray
+_TAB_COLOR_GEOMETRY = (1.0, 0.63, 0.48, 1.0)  # lightsalmon
 _TAB_COLOR_SETTINGS = (0.8, 0.75, 0.15, 1.0)  # yellow
 
 # Specular overlay pass (_update_specular_overlay(), materials.py): a tiny,
@@ -129,8 +131,8 @@ APP_INFO = {
 
 
 class ObjectEditorApp(
-		CreatureBindMixin, MaterialsMixin, MeshImportMixin, PanoplyUIMixin, ReferenceShapesMixin, SettingsDialogsMixin,
-		ShapeIOMixin, TextureWidgetsMixin, ViewportTransformMixin, ForgeryApp):
+		CreatureBindMixin, GeometryUIMixin, MaterialsMixin, MeshImportMixin, PanoplyUIMixin, ReferenceShapesMixin,
+		SettingsDialogsMixin, ShapeIOMixin, TextureWidgetsMixin, ViewportTransformMixin, ForgeryApp):
 	def __init__(self):
 		# The Explorer starts out wherever the highest-priority configured
 		# search path points (there's no separate "data root" concept --
@@ -533,6 +535,8 @@ class ObjectEditorApp(
 		self._bone_preview_panel_size = (10.0, 10.0)
 		self._skeleton_file_dialog = None  # in-flight portable_file_dialogs.open_file, for the Skinning preview's own "load a .skel" icon button
 		self._animation_file_dialog = None  # same, for its "load a .anim" icon button
+		self._import_rig_dialog = None  # same, for the Geometry tab's [Import rig] button
+		self._geometry_import_error = ""  # last [Import rig] failure, if any (geometry_ui.py)
 		# Bind preview (see _draw_bind_controls()): lets a non-skinned shape
 		# (e.g. a weapon) be bound to a chosen attach point (bone) of one of
 		# Patina's curated reference creatures, or (for a skinned shape) let
@@ -758,6 +762,7 @@ class ObjectEditorApp(
 		self.search_paths_dialog.draw()
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
+		self._poll_import_rig_dialog()
 		self._poll_image_editor_dialog()
 		self._poll_text_editor_dialog()
 		self._poll_workspace_sync_folder_dialog()
@@ -793,6 +798,11 @@ class ObjectEditorApp(
 				_push_tab_color(_TAB_COLOR_MATERIALS)
 				if _begin_tab_item_with_icon(fa_icons.ICON_FA_PAINTBRUSH, "Materials"):
 					self._draw_materials_tab()
+					imgui.end_tab_item()
+				_pop_tab_color()
+				_push_tab_color(_TAB_COLOR_GEOMETRY)
+				if _begin_tab_item_with_icon(fa_icons.ICON_FA_CUBE, "Geometry"):
+					self._draw_geometry_tab()
 					imgui.end_tab_item()
 				_pop_tab_color()
 				_push_tab_color(_TAB_COLOR_ALL_PROPERTIES)

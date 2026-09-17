@@ -1,5 +1,36 @@
 # Changelog
 
+## 2026-09-17 — ✨ Geometry tab: skinning status, Clear Skinning, Import rig, Forgery 4.17.0
+
+New "Geometry" tab in Patina (`geometry_ui.py`, `GeometryUIMixin`, 3rd position after Materials,
+before All Properties). Every shape type shows its skinning status (bone count, weighted/total
+vertex count, real mesh type). A plain `CMesh` additionally gets:
+
+- A "Skinned" checkbox reflecting `geom.skinned` directly, grayed out until real skin data
+  exists (`bones_name` plus both `Weight`/`PaletteSkin` VertexBuffer channels) so a file can
+  never end up `skinned=True` with no real weights behind it.
+- **[Clear Skinning]**, behind a confirmation popup: wipes `bones_name`, the `Weight`/
+  `PaletteSkin` channels, and merges every `matrix_blocks` entry back into one (no longer
+  needed once unskinned) — vertex positions are untouched.
+- **[Import rig]**: parses a `.dae`/`.fbx` file via assimp-py for its bone weights only (new
+  `shape_import.import_rig_bone_weights()` — the loaded shape's own geometry is never replaced,
+  only its skin data), requiring an EXACT vertex-count match with the loaded shape (explicit
+  error otherwise, no partial import). Reuses the existing `_normalize_skin_weights()`/
+  `_build_skinned_matrix_blocks()` importer helpers — the current shape's `rdr_passes` (across
+  every existing `matrix_blocks`, whether previously skinned or not) are flattened into one
+  `pass_indices` map first, so both a never-skinned mesh and a re-import over an existing rig go
+  through the same path. Any vertex a skin ends up needing in more than one matrix block gets
+  duplicated (`Position`/`Normal`/`TexCoord0` extended to match) — same constraint the main mesh
+  importer already has.
+
+Editing a `CMesh`'s skin data was previously entirely unsupported in Patina.
+
+Only `CMesh` supports any of this: pynel round-trips `CMeshMRM`/`CMeshMultiLod` geometry as
+opaque raw bytes (materials are the only editable part), and `CMeshMRMSkinned` has no togglable
+skin flag to begin with — the class itself is always skinned.
+
+Documentation: new "Onglet Geometry" section in `docs/apps/object_editor.md`.
+
 ## 2026-09-17 — 🐛 Fix pivot-locked edits lost on save/reload + Bind preview duplicate render, Forgery 4.16.0
 
 **Pivot-locked Position/Rotation/Scale edits didn't survive a save**, and got worse the more
