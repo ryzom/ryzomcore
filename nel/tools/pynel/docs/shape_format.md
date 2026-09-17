@@ -44,6 +44,12 @@ Shared building blocks (`CMaterial`, `CVertexBuffer`, `CIndexBuffer`,
 `material.cpp`, `vertex_buffer.cpp`, `index_buffer.cpp`, `matrix.cpp`,
 `track.h` and `texture_file.cpp`.
 
+`Material.smoothing_angle` (float, sentinel `-1.0` = never set) mirrors
+`CMaterial::_SmoothingAngle`, added engine-side at version 10
+(`material_smoothing_angle_field` chantier, 2026-09-16) purely as tool
+metadata for Ryzom Forgery's normal-smoothing feature -- never read by
+rendering. `_write_material()` now always writes version 10.
+
 Reading also covers `CTextureFile`/`CTextureMultiFile`/`CTextureCube`/
 `CTextureBlend`/`CTextureBump`, the `CMeshVPWindTree`/`CMeshVPPerPixelLight`
 vertex programs, and the optional `CLodCharacterTexture` field. `CVertexBuffer`

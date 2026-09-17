@@ -758,6 +758,9 @@ class Material:
 	light_maps_mulx2: Optional[bool] = None
 	tex_addr_mode: Optional[List[int]] = None
 	tex_user_mat: Dict[int, Matrix] = field(default_factory=dict)
+	# Smoothing angle (degrees, 0-180) baked by an external tool (Ryzom Forgery). -1.0 means
+	# never set by a tool -- not used by rendering (CMaterial::_SmoothingAngle, version >= 10).
+	smoothing_angle: float = -1.0
 
 
 def _parse_tex_env(f: _Reader, version: int) -> TexEnv:
@@ -814,6 +817,7 @@ def _parse_material(f: _Reader) -> Material:
 	specular = f.rgba()
 
 	shininess = f.f32() if ver >= 2 else 0.0
+	smoothing_angle = f.f32() if ver >= 10 else -1.0
 	alpha_test_threshold = f.f32() if ver >= 5 else 0.0
 	tex_coord_gen_mode = f.u16() if ver >= 8 else 0
 
@@ -877,6 +881,7 @@ def _parse_material(f: _Reader) -> Material:
 		diffuse=diffuse,
 		specular=specular,
 		shininess=shininess,
+		smoothing_angle=smoothing_angle,
 		alpha_test_threshold=alpha_test_threshold,
 		tex_coord_gen_mode=tex_coord_gen_mode,
 		textures=textures,
@@ -925,8 +930,8 @@ def _write_material_light_map(f: _Writer, lm: MaterialLightMap) -> None:
 
 
 def _write_material(f: _Writer, mat: Material) -> None:
-	"""Always writes the latest CMaterial format (version 9)."""
-	f.version(9)
+	"""Always writes the latest CMaterial format (version 10)."""
+	f.version(10)
 	f.s32(mat.shader_type)
 	f.u32(mat.flags)
 	f.s32(mat.src_blend)
@@ -939,6 +944,7 @@ def _write_material(f: _Writer, mat: Material) -> None:
 	f.rgba(mat.diffuse)
 	f.rgba(mat.specular)
 	f.f32(mat.shininess)
+	f.f32(mat.smoothing_angle)
 	f.f32(mat.alpha_test_threshold)
 	f.u16(mat.tex_coord_gen_mode)
 
