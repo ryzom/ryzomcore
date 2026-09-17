@@ -1,5 +1,41 @@
 # Changelog
 
+## 2026-09-17 — 🐛 Fix pivot-locked edits lost on save/reload + Bind preview duplicate render, Forgery 4.16.0
+
+**Pivot-locked Position/Rotation/Scale edits didn't survive a save**, and got worse the more
+the pivot lock was used: `_bake_transform_into_shape()` used to read `model_root`'s WORLD
+position/rotation/scale (pivot composed with whatever local offset a locked edit had put on
+`model_root`) into `base.default_pos`/`default_rot_quat`/`default_scale` — but the `.shape`
+format has no separate "pivot" concept, only that single combined value. Reloading the file
+always put the WHOLE value back onto `_object_pivot` (matching `_display_shape()`'s own
+seeding), discarding the split between pivot and locked offset — a pivot deliberately left at
+`(0, 0, 0)` would jump to wherever the last locked edit's world position ended up.
+
+Fixed by never letting a locked edit touch `_object_pivot`/`base.default_pos` at all:
+`_bake_transform_into_shape()` now reads `_object_pivot` only. At save time
+(`_bake_locked_edit_into_vertices()`, `shape_io.py`), `model_root`'s own local offset — the
+locked edit — is baked directly into the mesh's vertices instead (`Position`/`Normal` channels,
+translated/rotated/scaled around the local origin, `bbox` recomputed), then `model_root` is
+reset to identity. Only supported for a plain `CMesh` (the only type pynel can write vertex
+data for) — the pivot-lock toggle is now disabled for `MeshMRM`/`MeshMRMSkinned`/
+`MeshMultiLod`. Since baking into vertices doesn't touch the skin binding (`Weight`/
+`PaletteSkin`), a locked pivot stays editable on a skinned `CMesh` even though the rest of the
+Transform panel (editing `base.default_*`, which a skinned instance ignores in-game —
+`transform.cpp:946`) stays grayed out for it.
+
+Separately, `_rebuild_geometry()` recreating `model_root` (visible by default) on every rebuild
+— not just a fresh load — silently broke the Bind preview's "never show both the standalone
+`model_root` and the bone-anchored copy at once" invariant: `_apply_loaded_shape_to_creature()`
+(the only place enforcing it) was only ever called from Bind-preview-specific actions, never
+after a generic rebuild, so saving (or the Smoothing Apply button, the Geometry tab's Skinned
+checkbox, a Mesh Import replace) while a creature was shown made the standalone copy reappear
+duplicated/misplaced alongside the correctly bound one. Fixed by calling
+`_apply_loaded_shape_to_creature()` at the end of `_rebuild_geometry()` unconditionally — it
+already handles "no creature shown" itself by re-showing `model_root`.
+
+Documentation: `docs/apps/object_editor.md`'s Position/Rotation/Scale panel and Bind preview
+sections updated.
+
 ## 2026-09-14 — ✨ Textured region/rest .ig loading + IG Zones/Others checkbox tree, Forgery 4.11.0
 
 `landscape_editor__ig_full_load.md`, `landscape_editor__ig_inspector_tree.md`

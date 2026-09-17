@@ -12,11 +12,11 @@ from datetime import datetime
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
-from panda3d.core import Quat
+from panda3d.core import Quat, Vec3
 
 import dataclasses
 
-from pynel.ryzom_shape import Mesh, Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
+from pynel.ryzom_shape import AABBox, Mesh, Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
 
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import PanelState
@@ -673,6 +673,22 @@ class ShapeIOMixin:
 		# applies to a newly loaded one, manual or auto.
 		self._bind_slot_override = ""
 
+	def _seed_object_pivot_from_base(self):
+		"""Sets _object_pivot's own position/rotation/scale from the shape's
+		CMeshBase::DefaultPos/DefaultRotQuat/DefaultScale -- see
+		_display_shape()'s call for why these three fields matter beyond
+		editor cosmetics. A no-op if the shape has no `base` (nothing to
+		seed from)."""
+		base = getattr(self.shape_file.value, "base", None)
+		if base is None:
+			return
+		rot = base.default_rot_quat
+		self._object_pivot.set_quat(Quat(rot.w, rot.x, rot.y, rot.z))
+		pos = base.default_pos
+		self._object_pivot.set_pos(pos.x, pos.y, pos.z)
+		scale = base.default_scale
+		self._object_pivot.set_scale(scale.x, scale.y, scale.z)
+
 	def _display_shape(self, shape_file):
 		"""Renders an already-parsed/-built ShapeFile. Assumes
 		_reset_shape_state() was already called (separate so a
@@ -716,14 +732,7 @@ class ShapeIOMixin:
 		# which calls _rebuild_geometry() directly and never this method)
 		# deliberately does NOT re-seed -- it must preserve whatever the
 		# user already set up via Ctrl+drag/the Transform panel.
-		base = getattr(shape_file.value, "base", None)
-		if base is not None:
-			rot = base.default_rot_quat
-			self._object_pivot.set_quat(Quat(rot.w, rot.x, rot.y, rot.z))
-			pos = base.default_pos
-			self._object_pivot.set_pos(pos.x, pos.y, pos.z)
-			scale = base.default_scale
-			self._object_pivot.set_scale(scale.x, scale.y, scale.z)
+		self._seed_object_pivot_from_base()
 
 		# Baseline for the gizmo's Ctrl+Reset (see reset_object_rotation()) --
 		# whatever the object's rotation is right after loading, until a save
@@ -783,23 +792,26 @@ class ShapeIOMixin:
 		return existing if existing is not None else workspace_dir / "shapes" / self._shape_source_name
 
 	def _bake_transform_into_shape(self):
-		"""Whatever position/rotation/scale the object is currently at
+		"""Whatever position/rotation/scale _object_pivot is currently at
 		becomes the shape's own base.default_pos/default_rot_quat/
 		default_scale: this is meant to be an authoring tool for those
 		values, not just a live-viewer aid, so they must survive a
-		save/reload round trip rather than silently reverting. Shared by
-		_write_shape() (a real save) and _has_unsaved_changes_at() (which
-		needs the same baking before comparing, or a pending transform-only
-		edit reads as unsaved=False -- see the chantier discussion)."""
+		save/reload round trip rather than silently reverting. Reads
+		_object_pivot only, never model_root -- a pivot-locked edit lives on
+		model_root instead and gets baked into the mesh's own vertices by
+		_bake_locked_edit_into_vertices(), not here, precisely so the pivot
+		itself is never affected by a locked edit (base.default_pos always
+		equals the pivot, nothing else). Shared by _write_shape() (a real
+		save) and _has_unsaved_changes_at() (which needs the same baking
+		before comparing, or a pending pivot-unlocked edit reads as
+		unsaved=False -- see the chantier discussion)."""
 		base = getattr(self.shape_file.value, "base", None)
 		if base is None:
 			return
-		# Read model_root's WORLD rotation (not just _object_pivot's own) --
-		# _transform_node("rotation") lets the Rotation panel edit either
-		# node depending on that row's pivot lock, and model_root's world
-		# quat always reflects the total either way (it's pivot's rotation
-		# composed with model_root's own local one, identity when unlocked).
-		total_quat = self.model_root.get_quat(self.render)
+		# _object_pivot is parented directly to self.render at all times, so
+		# its own local pos/quat/scale already are the world values -- no
+		# get_pos(self.render)-style conversion needed.
+		pivot_quat = self._object_pivot.get_quat()
 		# Panda3D's LQuaternion stores (real, i, j, k) internally, and its
 		# inherited get_x/y/z/w() accessors read that raw slot order rather
 		# than remapping to (i, j, k, real) -- confirmed empirically (an
@@ -808,21 +820,72 @@ class ShapeIOMixin:
 		# via Quat(rot.w, rot.x, rot.y, rot.z) (real first, positionally)
 		# elsewhere in this file.
 		base.default_rot_quat = Quaternion(
-			x=total_quat.get_y(), y=total_quat.get_z(), z=total_quat.get_w(), w=total_quat.get_x())
-		# Same reasoning as rotation just above: position/scale edits can
-		# land on either _object_pivot or model_root depending on that row's
-		# pivot lock (_transform_node()), so the WORLD pos/scale relative to
-		# render is what actually reflects the total edit either way.
+			x=pivot_quat.get_y(), y=pivot_quat.get_z(), z=pivot_quat.get_w(), w=pivot_quat.get_x())
 		# Verified 2026-08-30 these fields are genuinely used by the real
 		# client for attach-point placement (entity_cl.cpp: the instance's
 		# Default* already applied at creation survive stickObject()
 		# unchanged) -- not editor-only, unlike DefaultPivot, which stays
 		# untouched here (rotation/scale CENTER, not the object's own
 		# placement -- see mesh_base.cpp:353's separate setPivot() call).
-		world_pos = self.model_root.get_pos(self.render)
-		base.default_pos = Vector3(x=world_pos.x, y=world_pos.y, z=world_pos.z)
-		world_scale = self.model_root.get_scale(self.render)
-		base.default_scale = Vector3(x=world_scale.x, y=world_scale.y, z=world_scale.z)
+		pivot_pos = self._object_pivot.get_pos()
+		base.default_pos = Vector3(x=pivot_pos.x, y=pivot_pos.y, z=pivot_pos.z)
+		pivot_scale = self._object_pivot.get_scale()
+		base.default_scale = Vector3(x=pivot_scale.x, y=pivot_scale.y, z=pivot_scale.z)
+
+	def _bake_locked_edit_into_vertices(self):
+		"""A pivot-locked Position/Rotation/Scale edit lives on model_root
+		(_transform_node()) -- since the .shape format has no separate
+		"pivot" concept, only a single base.default_pos/rot_quat/scale, that
+		offset can never be baked into base.* without base.* (and so the
+		pivot itself) changing depending on the edit, which breaks a
+		save/reload round trip (see pivot_lock_bake_into_vertices.md).
+		Instead, for a plain CMesh, model_root's own local transform gets
+		baked directly into the mesh's vertices here, then model_root is
+		reset to identity -- base.default_pos/etc (_bake_transform_into_shape(),
+		reading _object_pivot only) is never affected either way.
+
+		No-op for any other shape type (MeshMRM/MeshMultiLod: geometry is
+		opaque raw bytes, no vertex data pynel can write; MeshMRMSkinned: has
+		writable vertex data but out of scope here) -- model_root can never
+		carry an offset for them in the first place, since the pivot lock
+		toggle is disabled for anything but a plain CMesh."""
+		shape_value = self.shape_file.value
+		if not isinstance(shape_value, Mesh):
+			return
+		local_pos, local_quat, local_scale = (
+			self.model_root.get_pos(), self.model_root.get_quat(), self.model_root.get_scale())
+		if local_pos == Vec3(0, 0, 0) and local_quat == Quat() and local_scale == Vec3(1, 1, 1):
+			return
+		geom = shape_value.geom
+		channels = geom.vertex_buffer.channels
+		new_positions = []
+		for x, y, z in channels["Position"]:
+			scaled = Vec3(x * local_scale.x, y * local_scale.y, z * local_scale.z)
+			world = local_quat.xform(scaled) + local_pos
+			new_positions.append((world.x, world.y, world.z))
+		new_channels = dict(channels)
+		new_channels["Position"] = new_positions
+		if "Normal" in channels:
+			new_normals = []
+			for x, y, z in channels["Normal"]:
+				scaled = Vec3(x * local_scale.x, y * local_scale.y, z * local_scale.z)
+				rotated = local_quat.xform(scaled)
+				rotated.normalize()
+				new_normals.append((rotated.x, rotated.y, rotated.z))
+			new_channels["Normal"] = new_normals
+		geom.vertex_buffer = dataclasses.replace(geom.vertex_buffer, channels=new_channels)
+		min_x = min(p[0] for p in new_positions)
+		min_y = min(p[1] for p in new_positions)
+		min_z = min(p[2] for p in new_positions)
+		max_x = max(p[0] for p in new_positions)
+		max_y = max(p[1] for p in new_positions)
+		max_z = max(p[2] for p in new_positions)
+		geom.bbox = AABBox(
+			center=Vector3(x=(min_x + max_x) / 2, y=(min_y + max_y) / 2, z=(min_z + max_z) / 2),
+			half_size=Vector3(x=(max_x - min_x) / 2, y=(max_y - min_y) / 2, z=(max_z - min_z) / 2))
+		self.model_root.set_pos(0, 0, 0)
+		self.model_root.set_quat(Quat())
+		self.model_root.set_scale(1, 1, 1)
 
 	def _bake_smoothed_normals_into_shape(self):
 		"""Recomputes normals (see smooth_normals.md) for every material with
@@ -920,6 +983,12 @@ class ShapeIOMixin:
 		try:
 			self._bake_transform_into_shape()
 			self._bake_smoothed_normals_into_shape()
+			# After smoothing (which rebuilds geom.vertex_buffer from a
+			# pristine, load-time snapshot whenever a material has a
+			# smoothing angle set -- see its own docstring), never before:
+			# baking model_root's offset into vertices first would just get
+			# overwritten by that rebuild.
+			self._bake_locked_edit_into_vertices()
 			self._rebuild_geometry_preserving_camera()
 			path.parent.mkdir(parents=True, exist_ok=True)
 			save_shape(path, self.shape_file)

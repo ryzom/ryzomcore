@@ -887,40 +887,55 @@ class ViewportTransformMixin:
 			# the whole _WorldMatrix = parentWM * _LocalMatrix composition
 			# is skipped entirely when isSkinned() -- final vertex
 			# positions come purely from skin binding to whatever skeleton
-			# it's on). Editing/saving these here would silently do nothing
-			# in-game, so the panel is grayed out rather than left looking
-			# functional (2026-08-31, Nuno: "il faudrait alors que ce soit
-			# grisé ou alors virer la fenetre d'edition des axes" -- after
-			# confirming this the hard way on a skinned armor piece).
+			# it's on). Editing/saving base.default_* here would silently do
+			# nothing in-game -- but a LOCKED pivot on a plain CMesh bakes
+			# into the mesh's own vertices instead (_bake_locked_edit_into_
+			# vertices()), which does have a real effect even when skinned
+			# (moving the bind pose doesn't touch the skin binding itself).
+			# So only the pivot-UNLOCKED editing path is grayed out for a
+			# skinned shape, not the whole panel (2026-08-31, Nuno: "il
+			# faudrait alors que ce soit grisé ou alors virer la fenetre
+			# d'edition des axes" -- after confirming this the hard way on a
+			# skinned armor piece; refined once vertex-baking existed).
 			is_skinned = _is_shape_skinned(self.shape_file.value)
+			can_edit_locked = isinstance(self.shape_file.value, Mesh)
 			if is_skinned:
-				imgui.text_disabled("Skinned shape: position/rotation/scale")
-				imgui.text_disabled("have no effect in-game, editing disabled.")
-			imgui.begin_disabled(is_skinned)
-			self._draw_transform_row("position", "Pos", "%.3f")
-			self._draw_transform_row("rotation", "Rot", "%.2f")
-			self._draw_transform_row("scale", "Scl", "%.3f")
-			imgui.end_disabled()
+				if can_edit_locked:
+					imgui.text_disabled("Skinned shape: only a locked pivot has any effect")
+					imgui.text_disabled("in-game (moves the mesh itself, not the pivot).")
+				else:
+					imgui.text_disabled("Skinned shape: position/rotation/scale")
+					imgui.text_disabled("have no effect in-game, editing disabled.")
+			self._draw_transform_row("position", "Pos", "%.3f", is_skinned, can_edit_locked)
+			self._draw_transform_row("rotation", "Rot", "%.2f", is_skinned, can_edit_locked)
+			self._draw_transform_row("scale", "Scl", "%.3f", is_skinned, can_edit_locked)
 			self._transform_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
-	def _draw_transform_row(self, prop, label, value_format):
+	def _draw_transform_row(self, prop, label, value_format, is_skinned, can_edit_locked):
 		"""One _draw_transform_panel() row -- see its own docstring. `label`
 		is the row's own text label (not editable); `value_format` sets the
 		X/Y/Z fields' display precision (position/scale: float32 is good to
 		~7 significant digits, well past what's ever meaningful in meters or
 		a scale multiplier here -- 3 decimals; rotation: 2 decimals, since a
 		float32 quaternion's angular resolution is far finer than 0.01
-		degrees already)."""
+		degrees already). `is_skinned`/`can_edit_locked` -- see
+		_draw_transform_panel()."""
 		imgui.push_id(f"xform-{prop}")
 		locks = self.transform_locks[prop]
 
 		imgui.text(label)
 		imgui.same_line()
-		if _icon_button(fa_icons.ICON_FA_ANCHOR,
-		                "Lock pivot: edits move the object within a fixed pivot, instead of moving the pivot itself",
-		                locks["pivot"], square=True, active_color=_LOCKED_COLOR):
+		lock_tooltip = ("Lock pivot: edits move the object within a fixed pivot, instead of moving the pivot itself"
+		                if can_edit_locked else "Vertex editing not supported for this shape type")
+		if _icon_button(fa_icons.ICON_FA_ANCHOR, lock_tooltip, locks["pivot"], square=True,
+		                active_color=_LOCKED_COLOR, disabled=not can_edit_locked):
 			locks["pivot"] = not locks["pivot"]
 
+		# Pivot-unlocked edits land on base.default_* (_object_pivot), which
+		# a skinned shape ignores in-game -- see _draw_transform_panel().
+		# Locked edits bake into the mesh's own vertices instead (CMesh
+		# only), which stay meaningful regardless of skin state.
+		row_disabled = is_skinned and not (locks["pivot"] and can_edit_locked)
 		values = list(self._get_transform_values(prop))
 		for axis_index, axis_name in enumerate("XYZ"):
 			axis_locked = locks[axis_name.lower()]
@@ -931,7 +946,7 @@ class ViewportTransformMixin:
 
 			imgui.same_line()
 			imgui.set_next_item_width(70)
-			imgui.begin_disabled(axis_locked)
+			imgui.begin_disabled(axis_locked or row_disabled)
 			v_speed, v_min, v_max = _TRANSFORM_DRAG_PARAMS[prop]
 			changed, new_value = imgui.drag_float(
 				f"##{prop}-{axis_name}", values[axis_index], v_speed=v_speed, v_min=v_min, v_max=v_max,
@@ -1011,9 +1026,20 @@ class ViewportTransformMixin:
 		"""(Re)builds the 3D render passes + camera framing from
 		self.shape_file.value -- shared by _display_shape() and by replacing
 		a Mesh's geometry in place (which intentionally does NOT go through
-		_reset_shape_state(), so material edits survive it)."""
+		_reset_shape_state(), so material edits survive it).
+
+		Preserves model_root's own LOCAL pos/rot/scale across the rebuild --
+		a pivot-locked Position/Rotation/Scale edit (_transform_node()) lives
+		there, and _object_pivot must never be touched by a save/refresh
+		(that's the whole point of locking it: it stays put while the object
+		moves within it). _reset_shape_state() (a genuinely new shape load)
+		resets model_root to identity first, so this is a no-op there."""
+		old_pos, old_quat, old_scale = self.model_root.get_pos(), self.model_root.get_quat(), self.model_root.get_scale()
 		self.model_root.remove_node()
 		self.model_root = self._object_pivot.attach_new_node("shape-root")
+		self.model_root.set_pos(old_pos)
+		self.model_root.set_quat(old_quat)
+		self.model_root.set_scale(old_scale)
 		self._apply_object_transparency()
 		self._apply_object_wireframe()
 		self._apply_shading_mode()
@@ -1131,3 +1157,17 @@ class ViewportTransformMixin:
 		self._rebuild_viewport_helpers(bbox)
 
 		self._rebuild_reference_shapes()
+
+		# model_root was just recreated above, visible by default --
+		# _apply_loaded_shape_to_creature() (creature_bind.py) is the only
+		# place enforcing "never both model_root AND the Bind preview's
+		# bound copy visible at once" (hides model_root whenever a creature
+		# is shown), but it's only ever called from Bind-preview-specific
+		# actions, never automatically after a generic rebuild -- so any
+		# _rebuild_geometry() caller (Save, the Smoothing Apply button, the
+		# Geometry tab's skinned checkbox, Mesh Import's Replace) made
+		# model_root visible again even while a creature was shown, showing
+		# a duplicate/misplaced copy alongside the correctly bone-anchored
+		# one. Safe to call unconditionally -- it already re-shows
+		# model_root itself when no creature is displayed.
+		self._apply_loaded_shape_to_creature()
