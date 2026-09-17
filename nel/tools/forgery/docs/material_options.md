@@ -86,6 +86,25 @@ Deux réglages travaillent ensemble :
 
 ---
 
+## Lissage des normales (Smoothing) {#smoothing}
+
+**Résumé :** Fait apparaître un mesh anguleux/facetté comme une surface
+lisse et arrondie, sans changer sa géométrie — comme lisser une "boule
+cubique" en une vraie sphère à l'œil, juste en recalculant l'éclairage.
+
+Un angle de seuil (0-180°), par matériau : entre deux faces voisines dont
+l'angle est sous ce seuil, la transition est adoucie (lissée) ; au-dessus,
+l'arête reste dure/facettée. Une frontière entre deux matériaux différents
+est toujours une arête dure, quel que soit l'angle.
+
+Rien ne se recalcule tant que le bouton **Apply** n'est pas cliqué (ou que
+le fichier est sauvegardé/rouvert) — bouger juste le curseur ne change rien
+à l'affichage. Le résultat est écrit directement dans le mesh à
+l'application : rouvrir le fichier réapplique automatiquement le dernier
+angle réglé.
+
+---
+
 ## Auto-illumination {#self-illumination}
 
 **Résumé :** Rend une partie de l'objet lumineuse par elle-même, sans

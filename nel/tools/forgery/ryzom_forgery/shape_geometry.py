@@ -512,6 +512,168 @@ def boundary_loops(indices):
 	return loops
 
 
+def _xyz(point):
+	"""Position/Normal channel entries are `Vector3` for a shape freshly
+	parsed from a real `.shape` file, but plain `(x, y, z)` tuples for one
+	built by shape_import.py's importers (_assemble_mesh()) -- both forms
+	coexist depending on a shape's origin (confirmed 2026-09-15: the
+	Smoothing "Apply" button crashed with `AttributeError: 'tuple' object
+	has no attribute 'x'` on an imported mesh). Geometry helpers that need
+	raw coordinates normalize through this rather than assuming one or the
+	other."""
+	if isinstance(point, Vector3):
+		return point.x, point.y, point.z
+	return point
+
+
+def face_normal(p0, p1, p2) -> Vector3:
+	"""Face normal via cross product of two edges, normalized. Degenerate
+	(zero-area) faces return the zero vector."""
+	x0, y0, z0 = _xyz(p0)
+	x1, y1, z1 = _xyz(p1)
+	x2, y2, z2 = _xyz(p2)
+	ux, uy, uz = x1 - x0, y1 - y0, z1 - z0
+	vx, vy, vz = x2 - x0, y2 - y0, z2 - z0
+	nx = uy * vz - uz * vy
+	ny = uz * vx - ux * vz
+	nz = ux * vy - uy * vx
+	length = math.sqrt(nx * nx + ny * ny + nz * nz)
+	if length == 0.0:
+		return Vector3(x=0.0, y=0.0, z=0.0)
+	return Vector3(x=nx / length, y=ny / length, z=nz / length)
+
+
+def face_area(p0, p1, p2) -> float:
+	"""Triangle area -- half the magnitude of the (unnormalized) cross product."""
+	x0, y0, z0 = _xyz(p0)
+	x1, y1, z1 = _xyz(p1)
+	x2, y2, z2 = _xyz(p2)
+	ux, uy, uz = x1 - x0, y1 - y0, z1 - z0
+	vx, vy, vz = x2 - x0, y2 - y0, z2 - z0
+	nx = uy * vz - uz * vy
+	ny = uz * vx - ux * vz
+	nz = ux * vy - uy * vx
+	return 0.5 * math.sqrt(nx * nx + ny * ny + nz * nz)
+
+
+def smooth_normals_per_material(vertex_buffer: VertexBuffer, indices, angle_degrees: float):
+	"""Recomputes per-vertex normals for one render pass (iter_render_passes()
+	already separates a shape's faces by material, so a material boundary is
+	already a render-pass boundary -- nothing extra to do for it here).
+
+	Faces sharing an edge are grouped together (union-find) when the angle
+	between their face normals is under `angle_degrees` (0-180, like 3ds Max's
+	Auto Smooth); at or above it, the edge stays a hard/faceted split. Each
+	resulting group gets one normal, the area-weighted average of its faces'
+	normals. A vertex touching more than one group is duplicated -- a
+	VertexBuffer has one normal per vertex index -- with every other channel
+	(UV, skin weights, ...) copied unchanged onto the copies.
+
+	Returns a new (vertex_buffer, indices) pair; does not mutate the inputs."""
+	positions = vertex_buffer.channels["Position"]
+	faces = [(indices[i], indices[i + 1], indices[i + 2]) for i in range(0, len(indices), 3)]
+	if not faces:
+		return vertex_buffer, indices
+
+	face_normals = [face_normal(positions[a], positions[b], positions[c]) for a, b, c in faces]
+	face_areas = [face_area(positions[a], positions[b], positions[c]) for a, b, c in faces]
+
+	# Weld key: two vertex indices at (nearly) the same position are the same
+	# topological point for adjacency purposes, even when the buffer already
+	# stores them as separate entries -- the normal case for a flat-shaded
+	# export (one vertex per face corner, so no index is ever shared between
+	# adjacent faces at all, even though they're geometrically adjacent).
+	# Keying edge_faces by raw vertex index instead (as a mesh with genuinely
+	# shared/welded vertices would allow) would see every edge exactly once
+	# and never union anything, regardless of angle_degrees (confirmed
+	# 2026-09-16 against a generated flat-shaded test sphere: 0 and 180
+	# degrees produced byte-identical output).
+	def weld_key(vertex_index):
+		x, y, z = _xyz(positions[vertex_index])
+		return round(x, _FACE_WELD_PRECISION), round(y, _FACE_WELD_PRECISION), round(z, _FACE_WELD_PRECISION)
+
+	edge_faces = collections.defaultdict(list)
+	for face_idx, (a, b, c) in enumerate(faces):
+		for u, v in ((a, b), (b, c), (c, a)):
+			ku, kv = weld_key(u), weld_key(v)
+			key = (ku, kv) if ku < kv else (kv, ku)
+			edge_faces[key].append(face_idx)
+
+	parent = list(range(len(faces)))
+
+	def find(i):
+		while parent[i] != i:
+			parent[i] = parent[parent[i]]
+			i = parent[i]
+		return i
+
+	def union(i, j):
+		ri, rj = find(i), find(j)
+		if ri != rj:
+			parent[ri] = rj
+
+	threshold = math.radians(angle_degrees)
+	for face_list in edge_faces.values():
+		if len(face_list) != 2:
+			continue  # mesh boundary (1) or non-manifold (>2) edge -- left un-unioned
+		f1, f2 = face_list
+		n1, n2 = face_normals[f1], face_normals[f2]
+		dot = max(-1.0, min(1.0, n1.x * n2.x + n1.y * n2.y + n1.z * n2.z))
+		if math.acos(dot) < threshold:
+			union(f1, f2)
+
+	group_normal_sum = collections.defaultdict(lambda: [0.0, 0.0, 0.0])
+	for face_idx in range(len(faces)):
+		root = find(face_idx)
+		n, w = face_normals[face_idx], face_areas[face_idx]
+		acc = group_normal_sum[root]
+		acc[0] += n.x * w
+		acc[1] += n.y * w
+		acc[2] += n.z * w
+
+	group_normal = {}
+	for root, (sx, sy, sz) in group_normal_sum.items():
+		length = math.sqrt(sx * sx + sy * sy + sz * sz)
+		group_normal[root] = Vector3(x=sx / length, y=sy / length, z=sz / length) if length else Vector3(x=0.0, y=0.0, z=0.0)
+
+	# Match the existing Normal channel's representation (Vector3 for a shape
+	# parsed from a real .shape file, plain (x, y, z) tuples for one built by
+	# shape_import.py -- see _xyz()) rather than always writing Vector3,
+	# which would otherwise mix both forms in the same channel.
+	existing_normals = vertex_buffer.channels.get("Normal")
+	normal_is_vector3 = not existing_normals or isinstance(existing_normals[0], Vector3)
+
+	def _normal_value(root):
+		n = group_normal[root]
+		return n if normal_is_vector3 else (n.x, n.y, n.z)
+
+	new_vertex_index = {}  # (original_vertex_index, group_root) -> new_vertex_index
+	new_channels = {name: [] for name in vertex_buffer.channels}
+
+	def vertex_for(original_index, root):
+		key = (original_index, root)
+		new_index = new_vertex_index.get(key)
+		if new_index is None:
+			new_index = len(new_channels["Position"])
+			for name, values in vertex_buffer.channels.items():
+				new_channels[name].append(values[original_index])
+			new_channels["Normal"][new_index] = _normal_value(root)
+			new_vertex_index[key] = new_index
+		return new_index
+
+	new_indices = []
+	for face_idx, (a, b, c) in enumerate(faces):
+		root = find(face_idx)
+		new_indices.append(vertex_for(a, root))
+		new_indices.append(vertex_for(b, root))
+		new_indices.append(vertex_for(c, root))
+
+	new_vertex_buffer = dataclasses.replace(
+		vertex_buffer, channels=new_channels, num_verts=len(new_channels["Position"])
+	)
+	return new_vertex_buffer, new_indices
+
+
 _FACE_WELD_PRECISION = 4  # decimals -- matches the ~1e-4 exact-coincidence threshold used throughout
 
 

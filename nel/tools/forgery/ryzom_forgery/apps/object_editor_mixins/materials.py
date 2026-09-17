@@ -552,6 +552,10 @@ class MaterialsMixin:
 					material_id, "lighting", "Lighting", self._draw_material_lighting_section, material)
 				if section_hint:
 					hovered_hint = section_hint
+				section_hint = self._draw_material_section(
+					material_id, "smoothing", "Smoothing", self._draw_material_smoothing_section, material)
+				if section_hint:
+					hovered_hint = section_hint
 				if badge != "Color":
 					section_hint = self._draw_material_section(
 						material_id, "texture-filtering", "Texture filtering",
@@ -734,6 +738,38 @@ class MaterialsMixin:
 		if changed:
 			material.shininess = shininess
 			self._reapply_material(material_id)
+
+		return hint
+
+	def _draw_material_smoothing_section(self, material_id, material):
+		"""`material.smoothing_angle` (0-180, sentinel -1.0 = never set) --
+		see smooth_normals.md. Moving the slider only stores the value;
+		nothing recomputes until the "Apply" button (_apply_smoothed_normals(),
+		shape_io.py) is clicked, at save, or on the shape's next load -- always
+		recomputed from the pristine (never-smoothed) snapshot captured at
+		load, so raising/lowering the angle repeatedly stays fully
+		reversible before saving."""
+		hint = None
+		enabled = material.smoothing_angle != -1.0
+		changed, enabled = imgui.checkbox("Smooth normals", enabled)
+		hint = self._doc_hint_if_hovered("smoothing") or hint
+		if changed:
+			material.smoothing_angle = 60.0 if enabled else -1.0
+			print(f"(IA_AGENT_DEBUG) (smooth_normals) (materials.py:756) material_id={material_id} smoothing_angle set to {material.smoothing_angle}")
+
+		if material.smoothing_angle != -1.0:
+			imgui.set_next_item_width(180)
+			changed, angle = imgui.slider_float("Angle", material.smoothing_angle, 0.0, 180.0)
+			hint = self._doc_hint_if_hovered("smoothing") or hint
+			if changed:
+				material.smoothing_angle = angle
+				print(f"(IA_AGENT_DEBUG) (smooth_normals) (materials.py:766) material_id={material_id} smoothing_angle set to {angle} (not applied until Apply/save)")
+			imgui.same_line()
+			if imgui.button("Apply"):
+				print(f"(IA_AGENT_DEBUG) (smooth_normals) (materials.py:770) Apply clicked, material_id={material_id} angle={material.smoothing_angle}")
+				self._apply_smoothed_normals()
+		else:
+			imgui.text_disabled("Not set -- applied at the next save.")
 
 		return hint
 

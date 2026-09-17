@@ -14,14 +14,16 @@ from pathlib import Path
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 from panda3d.core import Quat
 
-from pynel.ryzom_shape import Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
+import dataclasses
+
+from pynel.ryzom_shape import Mesh, Quaternion, Vector3, ShapeParseError, ShapeWriteError, parse_shape, save_shape
 
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import PanelState
 from ryzom_forgery import virtual_categories
 from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.popup_utils import center_next_popup
-from ryzom_forgery.shape_geometry import IDENTITY_QUAT
+from ryzom_forgery.shape_geometry import IDENTITY_QUAT, smooth_normals_per_material
 from ryzom_forgery.workspaces import reveal_in_system_file_manager
 from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
 	_colored_button, _icon_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR, _MULTI_BITMAP_SLOT_LABELS,
@@ -678,6 +680,23 @@ class ShapeIOMixin:
 		meant to survive it, e.g. material overrides)."""
 		self.shape_file = shape_file
 
+		# Pristine (never-smoothed) snapshot for _bake_smoothed_normals_into_shape():
+		# captured once here, before that method ever runs on this shape, so every
+		# bake (Apply button, Save, this load's own auto-relissage just below)
+		# always recomputes from the ORIGINAL geometry rather than an already-baked
+		# one -- otherwise raising the angle back up after lowering it couldn't
+		# re-merge vertices a previous, tighter bake had already split (see
+		# smooth_normals.md).
+		self._pristine_mesh_vertex_buffer = None
+		self._pristine_rdr_pass_indices = {}
+		if isinstance(shape_file.value, Mesh):
+			geom = shape_file.value.geom
+			self._pristine_mesh_vertex_buffer = geom.vertex_buffer
+			self._pristine_rdr_pass_indices = {
+				id(rdr_pass): list(rdr_pass.indices)
+				for matrix_block in geom.matrix_blocks for rdr_pass in matrix_block.rdr_passes
+			}
+
 		# CMeshBase::DefaultPos/DefaultRotQuat/DefaultScale are what the
 		# engine actually places/rotates/scales the object by at instance
 		# creation (nel/src/3d/mesh_base.cpp:instanciateMeshBase(), verified
@@ -711,6 +730,7 @@ class ShapeIOMixin:
 		# makes the current Ctrl+drag rotation the new baseline instead.
 		self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
 
+		self._bake_smoothed_normals_into_shape()
 		self._rebuild_geometry()
 		self._auto_select_multi_bitmap_slot()
 		self._auto_detect_bind_slot()
@@ -804,9 +824,103 @@ class ShapeIOMixin:
 		world_scale = self.model_root.get_scale(self.render)
 		base.default_scale = Vector3(x=world_scale.x, y=world_scale.y, z=world_scale.z)
 
+	def _bake_smoothed_normals_into_shape(self):
+		"""Recomputes normals (see smooth_normals.md) for every material with
+		a smoothing_angle set (!= -1.0) -- called by the Smoothing section's
+		Apply button, before a real save (_write_shape()), and right after
+		loading a shape (_display_shape(), so a previously-baked angle
+		"sticks" across a save/reload round trip).
+
+		Always recomputes from the PRISTINE (never-smoothed) snapshot
+		captured once at load (_display_shape()'s
+		_pristine_mesh_vertex_buffer/_pristine_rdr_pass_indices), never from
+		whatever the current (possibly already-baked) geom.vertex_buffer
+		holds -- otherwise raising the angle back up after a previous, lower
+		bake had already split vertices at hard edges could never re-merge
+		them (those splits aren't visible as a shared edge to the algorithm
+		anymore). This also makes repeated Apply clicks with different
+		angles fully reversible.
+
+		Only CMesh is supported for now (geom.matrix_blocks/rdr_passes, a
+		single VertexBuffer shared by every pass): rebuilds that VertexBuffer
+		by re-appending, per pass, either the smoothed result
+		(smooth_normals_per_material()) or the pass's own vertices unchanged
+		(passed through so untouched materials keep their original normals),
+		remapping each pass's indices to the new layout. CMeshMRM/
+		CMeshMultiLod/CMeshMRMSkinned share one VertexBuffer across several
+		LODs with geomorphs on top -- a materially harder rebuild, deferred
+		as a follow-up (see smooth_normals.md) rather than guessed at here."""
+		shape_value = self.shape_file.value
+		pristine_vb = self._pristine_mesh_vertex_buffer
+		print(f"(IA_AGENT_DEBUG) (smooth_normals) (shape_io.py:827) shape_value type={type(shape_value).__name__}")
+		if not isinstance(shape_value, Mesh) or pristine_vb is None:
+			print("(IA_AGENT_DEBUG) (smooth_normals) (shape_io.py:828) not a plain CMesh, or no pristine snapshot -- bake skipped (unsupported shape type, see docstring)")
+			return
+		materials = getattr(self.shape_file.value, "materials", None) or []
+		geom = shape_value.geom
+
+		def material_angle(material_id):
+			if 0 <= material_id < len(materials):
+				return materials[material_id].smoothing_angle
+			return -1.0
+
+		angles_found = [
+			(rdr_pass.material_id, material_angle(rdr_pass.material_id))
+			for matrix_block in geom.matrix_blocks for rdr_pass in matrix_block.rdr_passes
+		]
+		print(f"(IA_AGENT_DEBUG) (smooth_normals) (shape_io.py:837) per-pass (material_id, smoothing_angle)={angles_found}")
+		if not any(angle != -1.0 for _, angle in angles_found):
+			print("(IA_AGENT_DEBUG) (smooth_normals) (shape_io.py:841) no material has smoothing_angle set -- bake skipped")
+			return
+
+		new_channels = {name: [] for name in pristine_vb.channels}
+		for matrix_block in geom.matrix_blocks:
+			for rdr_pass in matrix_block.rdr_passes:
+				angle = material_angle(rdr_pass.material_id)
+				original_indices = self._pristine_rdr_pass_indices.get(id(rdr_pass), rdr_pass.indices)
+				offset = len(new_channels["Position"])
+				if angle == -1.0:
+					used = sorted(set(original_indices))
+					remap = {old: offset + i for i, old in enumerate(used)}
+					for name, values in pristine_vb.channels.items():
+						for old in used:
+							new_channels[name].append(values[old])
+					rdr_pass.indices = [remap[old] for old in original_indices]
+				else:
+					sub_vb, sub_indices = smooth_normals_per_material(pristine_vb, original_indices, angle)
+					for name, values in sub_vb.channels.items():
+						new_channels[name].extend(values)
+					rdr_pass.indices = [offset + i for i in sub_indices]
+
+		geom.vertex_buffer = dataclasses.replace(
+			geom.vertex_buffer, channels=new_channels, num_verts=len(new_channels["Position"]))
+		print(f"(IA_AGENT_DEBUG) (smooth_normals) (shape_io.py:867) bake applied, new vertex count={geom.vertex_buffer.num_verts}")
+
+	def _rebuild_geometry_preserving_camera(self):
+		"""_rebuild_geometry() also reframes the camera every time
+		(_frame_camera(), see viewport_transform.py) -- fine for a fresh
+		shape load, but not for the Smoothing section's Apply button or a
+		post-save refresh: re-centering/re-zooming the view on every click
+		while inspecting a specific spot on the mesh is disorienting (Nuno,
+		2026-09-15). Saves/restores the orbit camera's own state around the
+		call instead of touching _rebuild_geometry() itself, which other
+		callers (a fresh shape load) still want reframing from."""
+		camera = self.orbit_camera
+		target, distance, heading, pitch = camera.target, camera.distance, camera.heading, camera.pitch
+		self._rebuild_geometry()
+		camera.target, camera.distance, camera.heading, camera.pitch = target, distance, heading, pitch
+
+	def _apply_smoothed_normals(self):
+		"""Smoothing section's Apply button (materials.py) -- recompute now
+		and refresh the viewport, without needing a save/reload round trip."""
+		self._bake_smoothed_normals_into_shape()
+		self._rebuild_geometry_preserving_camera()
+
 	def _write_shape(self, path):
 		try:
 			self._bake_transform_into_shape()
+			self._bake_smoothed_normals_into_shape()
+			self._rebuild_geometry_preserving_camera()
 			path.parent.mkdir(parents=True, exist_ok=True)
 			save_shape(path, self.shape_file)
 			self._save_bind_slot_override()
