@@ -1,0 +1,90 @@
+stages:
+  - build
+  - release
+
+# Builds the ryzom_forgery wheel and publishes it to this project's generic
+# package registry, under a fixed URL keyed by the branch (CI_COMMIT_REF_SLUG),
+# overwritten on every publish -- see /repos/project-todos/ryztart/forgery_integration.md
+build_forgery_wheel:
+  stage: build
+  image: python:3.12
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
+      changes:
+        - nel/tools/forgery/**/*
+        - .gitlab-ci.yml
+  before_script:
+    - python --version ; pip --version
+    - pip install --upgrade pip build
+  script:
+    - cd nel/tools/forgery
+    - python -m build --wheel --outdir ../../../build .
+  artifacts:
+    paths:
+      - build/ryzom_forgery-*-py3-none-any.whl
+    expire_in: 1 week
+
+upload_forgery_wheel:
+  stage: release
+  image: curlimages/curl:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
+      changes:
+        - nel/tools/forgery/**/*
+        - .gitlab-ci.yml
+  needs:
+    - job: build_forgery_wheel
+  script:
+    - |
+      wheel=$(ls build/ryzom_forgery-*-py3-none-any.whl)
+      # The registry path (version folder) can be any string, but the
+      # uploaded *filename*'s version field must be a valid PEP 440 version
+      # (pip parses it on install) -- CI_COMMIT_REF_SLUG (main-forgery-release)
+      # isn't one. Real version tracking happens separately, by comparing
+      # pyproject.toml's version (see ryztart's ryzom_forgery_launcher), not
+      # via this filename -- so a fixed, meaningless "0" is fine here.
+      curl --fail-with-body -sS \
+           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "$wheel" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/ryzom_forgery/$CI_COMMIT_REF_SLUG/ryzom_forgery-0-py3-none-any.whl"
+
+# ryzom_forgery depends on pynel at runtime (not on PyPI -- see
+# nel/tools/forgery/README.md), referenced from its own pyproject.toml as a
+# direct URL dependency pointing at this same wheel -- so `pip install` of
+# the forgery wheel alone pulls this one in too.
+build_pynel_wheel:
+  stage: build
+  image: python:3.12
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
+      changes:
+        - nel/tools/pynel/**/*
+        - .gitlab-ci.yml
+  before_script:
+    - python --version ; pip --version
+    - pip install --upgrade pip build
+  script:
+    - cd nel/tools/pynel
+    - python -m build --wheel --outdir ../../../build .
+  artifacts:
+    paths:
+      - build/pynel-*-py3-none-any.whl
+    expire_in: 1 week
+
+upload_pynel_wheel:
+  stage: release
+  image: curlimages/curl:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main/forgery-release"
+      changes:
+        - nel/tools/pynel/**/*
+        - .gitlab-ci.yml
+  needs:
+    - job: build_pynel_wheel
+  script:
+    - |
+      wheel=$(ls build/pynel-*-py3-none-any.whl)
+      curl --fail-with-body -sS \
+           --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+           --upload-file "$wheel" \
+           "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/generic/pynel/$CI_COMMIT_REF_SLUG/pynel-0-py3-none-any.whl"

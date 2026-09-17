@@ -182,7 +182,7 @@ public:
 	bool waitTicket(uint32 ms)
 	{
 		// call Steam method
-		_AuthSessionTicketHandle = s_SteamUser->GetAuthSessionTicket(_AuthSessionTicketData, sizeof(_AuthSessionTicketData), &_AuthSessionTicketSize);
+		_AuthSessionTicketHandle = s_SteamUser->GetAuthSessionTicket(_AuthSessionTicketData, sizeof(_AuthSessionTicketData), &_AuthSessionTicketSize, NULL);
 
 		nldebug("GetAuthSessionTicket returned %u bytes, handle %u", _AuthSessionTicketSize, _AuthSessionTicketHandle);
 
