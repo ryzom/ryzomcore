@@ -2,7 +2,7 @@
 
 **Fichier :** `nel/tools/forgery/ryzom_forgery/panoply_bake.py`
 
-Status : **cross-validé contre le vrai `panoply_maker.exe`** (2026-08-29, voir
+Status : **cross-validé contre le vrai `panoply_maker.exe`** (voir
 `docs/panoply_maker.md`) -- `bake_flat()` (le chemin exercé par la
 cross-validation) produit des `.tga` quasi byte-exacts contre le binaire réel.
 `bake_and_write()` (workflow `build/`) reste **écrit, pas encore validé** de
@@ -46,7 +46,7 @@ Panda3D) vs `panoply_colorize.py` (math pure).
   résolution. Renvoie `(HLSBankTextureInfo, [(name_suffix, result_rgba_u8), ...])`
   — `instances[i].name` est laissé vide, à remplir par l'appelant (il connaît
   seul le nom de fichier final : stem + suffixe + `output_format`). Aucun
-  I/O disque ici. `on_variant(suffix, index, total)` (2026-08-29), si fourni,
+  I/O disque ici. `on_variant(suffix, index, total)`, si fourni,
   est appelé juste après chaque variante calculée — `total` vient de
   `_total_combinations()` (produit du nombre de couleurs de chaque masque
   actif, calculé sans consommer le générateur) ; utilisé par Patina pour la
@@ -66,7 +66,7 @@ Panda3D) vs `panoply_colorize.py` (math pure).
   `apps/panoply_maker.py` en mode `.cfg` explicite (cross-validation
   byte-exacte contre le vrai binaire).
 - `bake_and_write(stem, base_rgba_u8, axes, mask_loader, output_dir, build_dir, hlsbank_source=None, panoply_files_source=None, low_def_shift=3, default_separator="_", output_format="tga", on_variant=None)`
-  — bout en bout, workflow "next patch" (2026-08-29, Nuno) : `build_active_masks`
+  — bout en bout, workflow "next patch" : `build_active_masks`
   + `bake_source` + `_write_variants` dans `output_dir`, puis écrit
   `build_dir/{stem}.hlsinfo`, `build_dir/panoply_files.txt` et
   `build_dir/characters.hlsbank` **sans jamais toucher `ryzom-data`** —

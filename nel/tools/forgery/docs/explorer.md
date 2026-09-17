@@ -17,7 +17,7 @@ navigateur permanent ("Wexplorer") qui reste accessible quel que soit
 l'endroit courant de l'arborescence principale, sous deux formes possibles :
 les dossiers épinglés (`pinned_folders`, réels) et/ou les catégories
 virtuelles (`virtual_categories_source`, voir plus bas —
-forgery-workspace-projects chantier, 2026-09) que l'app hôte peut fournir
+forgery-workspace-projects chantier) que l'app hôte peut fournir
 en plus ou à la place.
 
 ## API principale
@@ -72,8 +72,8 @@ en plus ou à la place.
  thread principal une fois l'image prête.
 - `_draw_leaf` (`explorer.py`) : dessine une ligne fichier (icône
  ou vignette, sélection, simple clic = première commande du menu
- contextuel (ex. charger un `.shape`, depuis 2026-09-01 — auparavant
- double-clic), clic droit = menu contextuel complet).
+ contextuel (ex. charger un `.shape` -- auparavant double-clic), clic
+ droit = menu contextuel complet).
 - `_select` / `_item_key` (`explorer.py`) : gestion de la
  sélection multiple, clé stable qui distingue un fichier réel d'une entrée
  `.bnp` (`f"{bnp_path}!{name}"`).
@@ -97,7 +97,7 @@ en plus ou à la place.
  `_decode_thumbnail_worker` importe `load_panda_texture` localement plutôt
  qu'en tête de module (`explorer.py`), pour éviter de transformer ce
  cycle en import impossible.
-- **Police d'icônes = FA6 Solid** (depuis le 2026-09-03, remplace FA4) :
+- **Police d'icônes = FA6 Solid** (remplace FA4) :
  `app.py` charge `Font_Awesome_6_Free-Solid-900.otf` (déjà présent dans
  `imgui_bundle`, pas de dépendance en plus), et tous les modules importent
  `icons_fontawesome_6`. `.skel` utilise `ICON_FA_PERSON`, `.anim`

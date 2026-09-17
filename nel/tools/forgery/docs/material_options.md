@@ -285,7 +285,7 @@ couleur diffuse du sommet (via l'opération "Remplacer" sur un stage
 suivant), auquel cas le test alpha ne dépend d'aucune texture du tout,
 même si le matériau en a plusieurs — tester la première texture seule dans
 ce cas donnerait un résultat que le vrai moteur n'utilise jamais. Bug réel
-trouvé et corrigé dans Patina le 2026-08-30 (voir
+trouvé et corrigé dans Patina (voir
 `docs/apps/object_editor.md`, `_material_alpha_from_texture`) : un visage
 de personnage entièrement invisible pour une race précise, à cause de
 cette confusion.*
@@ -474,7 +474,7 @@ les siens.
 *Note technique : sans ces deux derniers réglages remis à leur valeur
 normale (lissage + mipmaps), une texture prend un aspect "strié"/pixellisé
 inhabituel même si son image et son matériau sont par ailleurs corrects —
-voir le bug corrigé dans `pynel` (2026-08) où ces valeurs, lues mais
+voir le bug corrigé dans `pynel` où ces valeurs, lues mais
 jamais mémorisées, étaient remises à "aucun lissage" à chaque sauvegarde
 d'un `.shape`.*
 
@@ -585,6 +585,6 @@ combinées sur le même canal de texture — les remettre à zéro/un l'une pour
 graphique lui-même : une texture répétée (wrap) puis tournée ne s'aligne
 plus proprement sur les bords de l'objet, faisant apparaître des tuiles en
 trop ou en moins selon l'angle — un artefact qui se produirait de la même
-façon avec n'importe quel outil ayant généré cette matrice. Vérifié
-(2026-08-28) : aucun shape du jeu ne combine les deux, ce n'est donc pas
-une perte réelle.*
+façon avec n'importe quel outil ayant généré cette matrice. Vérifié :
+aucun shape du jeu ne combine les deux, ce n'est donc pas une perte
+réelle.*

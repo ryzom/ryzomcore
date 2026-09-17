@@ -1,6 +1,6 @@
 # ai_wmap_export (app CLI)
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/apps/ai_wmap_export.py` (créé le 2026-09-16)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/apps/ai_wmap_export.py`
 
 ## Rôle
 

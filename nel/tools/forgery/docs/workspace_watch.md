@@ -1,7 +1,6 @@
 # workspace_watch
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/workspace_watch.py` (créé le 2026-08-27,
-reworké le 2026-09-02)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/workspace_watch.py`
 
 ## Rôle
 
@@ -13,7 +12,7 @@ enregistrées **par extension** (n'importe quel dossier) ou pour **un chemin exa
 
 Remplace ce qui était auparavant un `Observer` dédié par fonctionnalité
 (`import_watcher.py`, `workspace_sync.py`, chacun dupliquant le même mécanisme de
-debounce par fichier). Consolidation demandée par l'utilisateur (2026-08-27) : avoir
+debounce par fichier). Cette consolidation part du constat qu'avoir
 plusieurs `Observer` n'apportait aucun bénéfice de fluidité/concurrence réel ici (un
 `Observer` en attente ne coûte quasi rien, et le travail de fond tournait déjà sur des
 threads dédiés indépendamment du nombre d'`Observer` ; le rendu Panda3D était déjà
@@ -22,7 +21,7 @@ duplication organique, pas un choix de perf délibéré. Un seul code partagé e
 facile à instrumenter/durcir (logs, isolation des erreurs par callback) que plusieurs
 quasi identiques.
 
-**Reworké 2026-09-02** (chantier "Workspace watcher: extension-based triggers anywhere +
+**Reworké** (chantier "Workspace watcher: extension-based triggers anywhere +
 duplicate-name guard", `project-todos/ryzom-core/forgery-object-editor.md`) : le dispatch
 routait auparavant par **sous-dossier de premier niveau** (`"imports"`, `"tex"`,
 `SYNCED_SUBDIRS`), incohérent avec le rework de l'affichage par catégorie virtuelle

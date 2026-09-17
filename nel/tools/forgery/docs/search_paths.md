@@ -54,7 +54,7 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  fichier déjà renvoyé par `readdir` et éviter un `stat` par enfant.
 - `iter_all_entries(dirs, bnp_table_cache=None, exclude=None)` (`search_paths.py`) :
  génère tous les `FoundEntry` de tous les dossiers configurés, dans l'ordre
- de priorité. `exclude` (forgery-workspace-projects chantier, 2026-09) est
+ de priorité. `exclude` (forgery-workspace-projects chantier) est
  un simple callable optionnel `FoundEntry -> bool` (jamais un type
  workspace-spécifique importé ici, pour garder ce module générique) --
  seul `_reload_workspace_only` (ci-dessous) en passe un réellement, jamais
@@ -93,7 +93,7 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  `_scan_dirs_incremental` -- c'est le seul endroit qui le fait, `reload()`
  (externe) n'a pas de notion d'exclusion.
 - `_make_workspace_exclude(workspace_root, exclusion_rules)`
- (`search_paths_dialog.py`, fonction module, 2026-09) : construit le
+ (`search_paths_dialog.py`, fonction module) : construit le
  prédicat ci-dessus -- calcule le dossier relatif de chaque `FoundEntry`
  (l'archive `.bnp` elle-même si l'entrée vit dedans, pas le nom interne)
  et délègue à `virtual_categories.is_path_excluded()` (voir
@@ -129,7 +129,7 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  texture contre l'index scanné.
 - `panoply_variants_for(base_texture_name)` (`search_paths_dialog.py`) :
  variantes panoply pour une texture de base donnée.
-- `_load_ryzom_data_panoply_variants` (`search_paths_dialog.py`, 2026-08-29) : lit
+- `_load_ryzom_data_panoply_variants` (`search_paths_dialog.py`) : lit
  `panoply_files.txt` directement depuis `<ryzom-data>/final_bnps/characters_maps_hr/`
  (via `pynel.repository_paths`, cache par mtime), **prioritaire** dans
  `_merge_and_publish` sur celui trouvé dans un `characters_maps_hr.bnp` shippé le long

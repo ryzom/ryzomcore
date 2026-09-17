@@ -9,14 +9,14 @@ Synchronise en direct (copie de fichiers) tout `.shape`/`.anim`/`.skel`/`.dds` t
 `Settings.exclusion_rules`) vers un dossier externe choisi par l'utilisateur (ex : le
 dossier de données du jeu), **flat** (nom de fichier seul, pas de sous-dossier), pour que
 les modifications faites dans Patina soient immédiatement visibles côté jeu sans étape
-manuelle. Fonctionnalité livrée dans le commit `d530bcb8c` (Patina 1.0.0).
+manuelle.
 
-**Reworké 2026-09-02** (chantier "Workspace watcher: extension-based triggers anywhere +
+**Reworké** (chantier "Workspace watcher: extension-based triggers anywhere +
 duplicate-name guard", `project-todos/ryzom-core/forgery-object-editor.md`) : déclenché
 sur un fichier n'importe où dans le workspace désormais, plus seulement les 4 anciens
 sous-dossiers fixes (`anims/`, `shapes/`, `skels/`, `dds/`) ; le miroir est **flat**
 (`<sync_folder>/forgery/<workspace>/<nom de fichier>`, plus de chemin relatif préservé)
-au lieu de refléter la structure du workspace — décision utilisateur : ça matche le
+au lieu de refléter la structure du workspace : ça matche le
 format `.bnp` (`pack_workspace_bnp()` flatten déjà les mêmes 4 extensions avant
 empaquetage), et une collision de nom surgirait de toute façon au moment du pack, donc
 le miroir ne doit pas prétendre l'éviter en gardant des sous-dossiers qu'il n'aura plus
@@ -29,7 +29,7 @@ une fois empaqueté.
  `exports/`, `imports/` (masques Panoply = entrées, pas assets livrés ; `exports/` =
  zone de sortie du dialogue d'export ; `imports/` = zone de staging dont la sortie
  atterrit déjà dans `shapes/`, lui-même synchronisé) — **ni `.tga`/`.png`** depuis le
- chantier `patina-tex-dds-autoexport` (2026-08-27) : c'est `.dds` (le miroir généré de
+ chantier `patina-tex-dds-autoexport` : c'est `.dds` (le miroir généré de
  `tex/`, voir `docs/tex_dds_sync.md`, lui-même flat dans `build/dds/`) qui est ce dont le
  client a réellement besoin.
 - `WorkspaceSyncWatcher(on_name_conflict=None)` :
@@ -42,7 +42,7 @@ une fois empaqueté.
   - `refresh_fully_synced` — simple test d'existence (pas de comparaison
  de contenu/mtime), sur l'ensemble actuellement sûr, pour afficher ou non le bouton
  "Sync now" côté UI.
-  - `reconcile()` / `_reconcile_worker()` — ajouté 2026-09-04 (chantier
+  - `reconcile()` / `_reconcile_worker()` — (chantier
  `workspace_switch_reconcile`, `project-todos/forgery/`) : appelé par
  `apps/object_editor.py::_on_active_workspace_changed()` juste après `set_workspace_dir`
  **et** `set_sync_folder` (dans cet ordre précis, voir Points notables), sur un thread de
@@ -94,7 +94,7 @@ workspace, est réel dans les deux cas).
  — c'est un simple test d'existence, donc ça peut afficher "tout synchronisé" alors
  qu'une version plus récente existe côté workspace sans avoir encore déclenché le
  watch.
-- **Race corrigée (2026-09-04, chantier `workspace_switch_reconcile`)** : `set_sync_folder`,
+- **Race corrigée (chantier `workspace_switch_reconcile`)** : `set_sync_folder`,
  appelé juste après `set_workspace_dir` dans `_on_active_workspace_changed()`, calculait
  `refresh_fully_synced()` alors que l'index anti-doublon (reconstruit en tâche de fond par
  `set_workspace_dir`) était encore vide — `is_fully_synced()` retombait donc à `True` à

@@ -4,7 +4,7 @@ Scanned 235 `.bnp` archives under `/home/ulukyn/.local/share/Ryzom/ryzom_live/da
 
 3998 classified by root type (3997 fully parsed, 1 type-only). 0 could not be classified at all.
 
-**Updated 2026-09-04**: after fixing pynel's `CTextureBlend`/`CTextureBump`/legacy `CVertexBuffer` gaps, a `CMaterial::CLightMap` version-0 field bug, and (the big one) a `CMatStage` field-width bug (`u32` read/written instead of the real `uint8`, which desynced any material with a non-empty lightmap stage list) -- see `nel/tools/pynel/docs/shape_format.md` and `logs/pynel.md`, pynel 0.9.1 through 0.9.3 -- live_data now parses **3997/3998** fully. The one remaining failure (`desert_shapes.bnp:city_part28.shape`) is documented in `shape_format.md` §3 (a pre-version-1 `CVertexBuffer` header, a narrower and different gap, not investigated).
+After fixing pynel's `CTextureBlend`/`CTextureBump`/legacy `CVertexBuffer` gaps, a `CMaterial::CLightMap` version-0 field bug, and (the big one) a `CMatStage` field-width bug (`u32` read/written instead of the real `uint8`, which desynced any material with a non-empty lightmap stage list) -- see `nel/tools/pynel/docs/shape_format.md` -- live_data now parses **3997/3998** fully. The one remaining failure (`desert_shapes.bnp:city_part28.shape`) is documented in `shape_format.md` §3 (a pre-version-1 `CVertexBuffer` header, a narrower and different gap, not investigated).
 
 ## Counts
 

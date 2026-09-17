@@ -5,7 +5,7 @@
 ## Rôle
 
 Classe les fichiers d'un workspace en catégories virtuelles fixes
-(forgery-workspace-projects chantier, 2026-09) : `shapes`, `textures`,
+(forgery-workspace-projects chantier) : `shapes`, `textures`,
 `3d files`, `masks`, `anims`, `skels`, `others` -- uniquement par nom
 (extension, ou suffixe `_<axis>` pour un masque Panoply), **peu importe
 le vrai sous-dossier où le fichier vit sur disque**. Rien n'est déplacé :
@@ -51,8 +51,8 @@ dans `others`.
  doublons. Utilisé par `apps/object_editor.py`'s
  `_workspace_shape_save_path()` pour cibler l'écrasement où que vive
  déjà le fichier, plutôt que toujours `shapes/<nom>`. **Robuste à un
- fichier qui disparaît entre le scan et le `stat()`** (trouvé 2026-09-05 :
- supprimer le shape actuellement chargé faisait planter `_draw_bottom_bar()`
+ fichier qui disparaît entre le scan et le `stat()`** (supprimer le shape
+ actuellement chargé faisait sinon planter `_draw_bottom_bar()`
  en boucle, `FileNotFoundError` sur un candidat déjà retiré du disque) --
  un candidat dont le `stat()` échoue est simplement ignoré, pas traité
  comme une erreur.
@@ -62,8 +62,8 @@ dans `others`.
  effectivement les dossiers exclus. N'élague que les dossiers -- une
  exclusion **fichier** laisse le fichier dans la sortie (voir
  `scan_workspace()` ci-dessus, qui applique cette distinction lui-même).
-- `iter_included_files(workspace_root, exclusion_rules)` (public, ajouté
- 2026-09-02) — même parcours, mais applique aussi les exclusions **fichier**
+- `iter_included_files(workspace_root, exclusion_rules)` (public) — même
+ parcours, mais applique aussi les exclusions **fichier**
  (`_is_file_excluded`), donc ne renvoie que des fichiers réellement inclus,
  dossier et fichier confondus. Pour un appelant qui doit **complètement**
  ignorer l'exclu, pas juste le recatégoriser (`scan_workspace()`) ou le

@@ -2,8 +2,8 @@
 
 **Fichier :** `nel/tools/forgery/ryzom_forgery/apps/panoply_maker.py`
 
-Status : **cross-validé contre le vrai `panoply_maker.exe`** (2026-08-29,
-mode `.cfg` explicite, voir `docs/panoply_maker.md`) -- tourne sans erreur,
+Status : **cross-validé contre le vrai `panoply_maker.exe`** (mode `.cfg`
+explicite, voir `docs/panoply_maker.md`) -- tourne sans erreur,
 `.tga` quasi byte-exacts contre le binaire réel (diff pixel max 1, moyenne
 0.00). Environ 8x plus lent que le binaire natif sur le même jeu de test
 (24 variantes : ~2,4s réel vs ~19s Python) -- attendu (numpy/Panda3D

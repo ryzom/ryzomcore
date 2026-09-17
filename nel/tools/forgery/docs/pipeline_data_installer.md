@@ -6,7 +6,7 @@
 ## Rôle
 
 Les données du pipeline `build_gamedata` (trop volumineuses pour être
-versionnées dans `ryzom-data`) sont publiées par Nuno sous forme d'archives
+versionnées dans `ryzom-data`) sont publiées sous forme d'archives
 `.zip` téléchargeables. Ce système propose de les installer automatiquement
 sous `<ryzom-data>/pipeline/` quand Atyscape en a besoin, plutôt que
 d'obliger à les installer/localiser à la main.
@@ -23,10 +23,9 @@ Trois catégories, chacune avec sa base URL et son sous-dossier cible sous
 | `pipeline_continents` | `https://download.ryzom.com/tools/pipeline/<name>.zip` | continent (ex. `nexus`) | `pipeline/export/continents/<name>/` |
 
 Chaque archive contient déjà le dossier `<name>/` à sa racine, avec un
-contenu déjà réduit à ce dont Atyscape a besoin — c'est Nuno qui fabrique
-ces archives (`.zip`, pas `.7z`, pour rester lisible par le module stdlib
-`zipfile` sans dépendance externe), donc `pipeline_data_installer.py` ne
-filtre/trie jamais leur contenu.
+contenu déjà réduit à ce dont Atyscape a besoin (`.zip`, pas `.7z`, pour
+rester lisible par le module stdlib `zipfile` sans dépendance externe),
+donc `pipeline_data_installer.py` ne filtre/trie jamais leur contenu.
 
 `landscape` n'est pas une catégorie secondaire : `landscape/<écosystème>/
 zones/` (bricks `.zone` bruts) et `zoneligos/` sont le seul point de départ
@@ -65,7 +64,7 @@ l'ordre :
 1. **Source principale** : `<ryzom-data>/leveldesign/workspace/continents/
    <nom>/directories.py`'s `EcosystemName` (régex sur le `.py`, sans
    l'exécuter). Confirmée présente pour les 24 continents actifs, **y
-   compris les `r2_*`** (Ring) — piège trouvé 2026-09-09 : le champ
+   compris les `r2_*`** (Ring) — piège : le champ
    `Ecosystem` d'un `.continent` peut être absent même quand l'écosystème
    existe bien (`r2_desert` → `"desert"` via `directories.py`, alors que
    son `.continent` n'a aucun champ `Ecosystem`). `directories.py` utilise
@@ -91,14 +90,14 @@ Résultat mis en cache mémoire pour la session (pas de persistance disque).
   `landscape_editor.py`'s `_load_continent`/`_apply_render_mode`). Largeur
   de wrap du texte fixée explicitement (`push_text_wrap_pos`) — cette
   popup n'a pas d'autre contenu large pour ancrer `always_auto_resize`,
-  sans quoi elle s'écrase sur la largeur (bug réel trouvé 2026-09-09).
+  sans quoi elle s'écrase sur la largeur (bug réel).
 
 **Piège ImGui important** : ne jamais appeler `dialog.open(...)` depuis
 l'intérieur d'un `imgui.begin_combo()`/`end_combo()` (ou toute autre popup)
 — `imgui.open_popup()` pour une popup différente est silencieusement perdu
 à la fermeture de la popup englobante. `landscape_editor.py` différait donc
 l'appel via `self._pipeline_data_install_pending`, consommé au
-`draw_panel()` suivant, hors de tout combo (bug réel trouvé 2026-09-09).
+`draw_panel()` suivant, hors de tout combo (bug réel).
 
 ## Intégration continents — `landscape_editor.py`
 

@@ -1339,7 +1339,16 @@ class CreatureBindMixin:
 					imgui.end_combo()
 			else:
 				imgui.set_next_item_width(220)
-				preview = self._bind_attach_point or "(none)"
+				# The combo's own value (self._bind_attach_point) is the
+				# resolved bone name (or a raw fallback, see below) -- never
+				# shown directly, only used to find which curated_name (and
+				# so which friendly label) is currently selected, matched
+				# case-insensitively like _resolve_bone_name() itself does.
+				preview = "(none)"
+				for curated_name in creature_ref.WEAPON_ATTACH_POINTS:
+					if self._bind_attach_point and curated_name.lower() == self._bind_attach_point.lower():
+						preview = creature_ref.WEAPON_ATTACH_POINT_LABELS.get(curated_name, curated_name)
+						break
 				if imgui.begin_combo("##bind-attach-point-combo", preview):
 					clicked, _ = imgui.selectable("(none)", self._bind_attach_point == "")
 					if clicked:
@@ -1347,7 +1356,9 @@ class CreatureBindMixin:
 						self._apply_loaded_shape_to_creature()
 					for curated_name in creature_ref.WEAPON_ATTACH_POINTS:
 						resolved_name = self._resolve_bone_name(self._bind_skeleton, curated_name)
-						clicked, _ = imgui.selectable(curated_name, curated_name == self._bind_attach_point)
+						label = creature_ref.WEAPON_ATTACH_POINT_LABELS.get(curated_name, curated_name)
+						is_selected = bool(self._bind_attach_point) and curated_name.lower() == self._bind_attach_point.lower()
+						clicked, _ = imgui.selectable(label, is_selected)
 						if clicked:
 							if resolved_name is None:
 								print(f"[object_editor] Bind preview: attach point {curated_name!r} not found in "

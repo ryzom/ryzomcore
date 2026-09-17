@@ -111,8 +111,8 @@ changer le dossier racine plus tard.
  `self.workspace_setup_dialog`, et appelle `.draw` (app.py) -- **une seule
  fois** par frame, depuis `draw_ui`, en dehors de toute fenêtre nommée.
  `apps/object_editor.py` appelait aussi `.draw()` une seconde fois depuis
- `draw_panel` (imbriqué dans la fenêtre du panneau) -- doublon retiré
- 2026-09-01, latent depuis longtemps (deux `begin_popup_modal`/mêmes IDs
+ `draw_panel` (imbriqué dans la fenêtre du panneau) -- doublon retiré,
+ latent depuis longtemps (deux `begin_popup_modal`/mêmes IDs
  de widgets soumis deux fois par frame).
 - `apps/object_editor.py` instancie **une seconde** `WorkspaceSetupDialog`
  séparée, et y câble `on_active_workspace_changed`, `on_dpi_preview_changed`,
@@ -140,7 +140,7 @@ changer le dossier racine plus tard.
  Appeler `imgui.open_popup()` directement depuis les lignes de combo
  calculerait donc un ID différent de celui attendu par `begin_popup_modal`
  -- le popup ne s'ouvrirait alors jamais (bug réel confirmé en test avant
- ce fix, 2026-09-01, sur le popup "New workspace" : `is_popup_open()`
+ ce fix, sur le popup "New workspace" : `is_popup_open()`
  retournait `True` juste après l'appel côté Explorer, mais restait `False`
  vu depuis le point d'appel de `begin_popup_modal`). D'où le motif
  "positionner un drapeau ici, ouvrir réellement dans `draw`" répété pour

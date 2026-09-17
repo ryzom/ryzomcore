@@ -2,7 +2,7 @@
 
 **Fichier :** `nel/tools/forgery/ryzom_forgery/apps/landscape_editor.py`
 
-Nommé "Atyscape" par Nuno (2026-09-07) -- même convention que `object_editor.py`/"Patina".
+Nommé "Atyscape" -- même convention que `object_editor.py`/"Patina".
 
 Status : scaffolding en cours, voir `project-todos/forgery/landscape_editor.md`
 pour l'état d'avancement complet (rendu terrain progressif, édition `.ig`,
@@ -82,8 +82,7 @@ Forgery) :
   Forgery, pas propres à une seule app, donc éditables depuis n'importe
   laquelle -- Patina (graphistes) et Atyscape (level designers) ont des
   publics disjoints, un utilisateur d'Atyscape ne doit jamais avoir à ouvrir
-  Patina pour configurer un réglage dont lui seul a besoin (décision Nuno
-  2026-09-08).
+  Patina pour configurer un réglage dont lui seul a besoin.
 
 `_draw_viewport_toggles()` (quadrillage de zone) reste appelé hors de la
 barre d'onglets -- fenêtre flottante indépendante, jamais masquée par un
@@ -116,15 +115,14 @@ travers la vraie surface bombée, visible comme des creux/"trous" en diamant
 
 Coloration par élévation (dégradé vert foncé -> jaune-vert clair, interpolé
 par sommet, `_elevation_color()`) plutôt que par `CTileColor` -- anticipe
-l'étape 5 ("Rendu par élévation") pour un rendu plus lisible, décision Nuno
-2026-09-07 ; tourne maintenant sur la vraie surface évaluée, pas seulement
+l'étape 5 ("Rendu par élévation") pour un rendu plus lisible ; tourne maintenant sur la vraie surface évaluée, pas seulement
 les 4 coins.
 
 **Explorer** : filtre par défaut `"*"` (pas `"*.land"`) -- un `.bnp` qui ne
 contient aucun fichier correspondant au filtre actif est entièrement caché
 par `explorer.py` (`_draw_dir_contents()`), et les vrais `*_zones.bnp` d'une
-installation Ryzom Live ne contiennent jamais de `.land` (trouvé le
-2026-09-07 : plus aucun `.bnp` n'apparaissait avec `"*.land"` par défaut).
+installation Ryzom Live ne contiennent jamais de `.land` (avec un filtre
+`"*.land"` par défaut, plus aucun `.bnp` n'apparaissait).
 
 Bouton "Top view (2D)" dans le panel : sert de "vue 2D projetée" en
 réutilisant `OrbitCamera.snap_to_axis("+z")` sur le même maillage, pas de
@@ -132,8 +130,8 @@ rendu 2D séparé.
 
 ## Étape 6 -- chargement d'un continent entier via cache disque
 
-Voir `project-todos/forgery/landscape_editor__zone_disk_cache.md`. Décision
-révisée le 2026-09-08 : le chargement par région autour de la caméra (étape 6
+Voir `project-todos/forgery/landscape_editor__zone_disk_cache.md`. Le
+chargement par région autour de la caméra (étape 6
 originale) est abandonné -- des mesures (194 zones, rayon 400) ont montré que
 le listing (0.656 s, une seule fois) et la lecture des `.bnp` (0.276 s) sont
 négligeables, mais que le parsing (`parse_zone`, 11.221 s) et la tessellation
@@ -183,7 +181,7 @@ seule partie réellement coûteuse à produire, aucune évolution du rendu
 **Déclenchement** : `_select_continent()` lance automatiquement
 `_load_continent()` dès qu'un continent est choisi dans le dropdown ; le
 bouton "Build cache for this continent" du panel déclenche exactement la
-même chose manuellement (les deux existent, décision Nuno 2026-09-08). Une
+même chose manuellement (les deux existent). Une
 barre de progression (`imgui.progress_bar`, "X/Y zones") s'affiche pendant le
 chargement (thread d'arrière-plan, `_run_load_continent()`), qui traite
 potentiellement plusieurs centaines de zones pour un continent entier.
@@ -197,7 +195,7 @@ que le chargement vienne de l'Explorer (une zone) ou d'un continent entier
 
 ## Écriture en bloc du `GeomNode` (`build_zone_geom_from_cache`)
 
-Mesuré le 2026-09-08 (53 zones, 100% cache hit) : le cache disque a bien
+Mesuré sur 53 zones (100% cache hit) : le cache disque a bien
 rendu le listing+chargement quasi gratuit (0.195 s total), mais la
 construction du `GeomNode` (couleur + indices + attach) a pris 3.365 s
 (~63.5 ms/zone) -- à peine mieux que les 74.8 ms/zone d'origine (bnp+parse+
@@ -228,13 +226,13 @@ même gain sans code séparé à maintenir.
 
 ## Étape 7 -- caméra, dégradé d'élévation ancré à Z=0, quadrillage de zone
 
-Trois ajustements demandés par Nuno en testant un continent entier réel :
+Trois ajustements faits en testant un continent entier réel :
 
 **Zoom caméra** : `OrbitCamera.max_distance` (2000.0 par défaut, partagé
 avec Patina) ne permettait pas de reculer assez pour voir un continent
 entier -- multiplié par 3 puis par 6 (`self.orbit_camera.max_distance *=
-6.0`, 12000.0, 3x ayant à son tour été jugé encore insuffisant le
-2026-09-08) dans `LandscapeEditorApp.__init__`, spécifique à Atyscape (ne
+6.0`, 12000.0, 3x ayant à son tour été jugé encore insuffisant)
+dans `LandscapeEditorApp.__init__`, spécifique à Atyscape (ne
 touche pas `camera.py` ni Patina). Ça débloque aussi l'auto-cadrage après
 chargement d'un continent (`frame()` clampait déjà à `max_distance`).
 
@@ -244,10 +242,9 @@ de détails de shape par Patina -- Atyscape ne s'approche jamais autant
 (zones de 160 unités, orbite démarrant à 200). Ce ratio coûtait de la
 précision de depth buffer : la géométrie plate à Z=0 (le quadrillage de
 zone) subissait du z-fighting contre le terrain traversant Z=0, avec un
-rendu différent selon la distance caméra (trouvé par Nuno 2026-09-08, un
-palier de zoom suffisait à changer le résultat). Réglé en resserrant à
-`self.camLens.set_near_far(1.0, 20000.0)` (ratio 20 000:1), confirmé par
-Nuno.
+rendu différent selon la distance caméra (un palier de zoom suffisait à
+changer le résultat). Réglé en resserrant à
+`self.camLens.set_near_far(1.0, 20000.0)` (ratio 20 000:1).
 
 **Dégradé d'élévation ancré à Z=0** (`zone_geometry._elevation_colors_uint8()`) :
 la première version (un dégradé marron->vert normalisé sur le min/max Z de
@@ -255,7 +252,7 @@ l'ensemble chargé) était lissée/washed-out par quelques zones très
 profondes (sous-marines/grottes) qui tiraient le minimum très bas -- le
 terrain normal se retrouvait alors tout au même ton près du "haut" de la
 plage. Remplacé par un dégradé en deux segments ancré sur Z=0 (le niveau de
-l'eau, d'après Nuno) : rouge foncé au point le plus profond -> marron à
+l'eau) : rouge foncé au point le plus profond -> marron à
 Z=0 -> vert au point le plus haut, chaque moitié interpolée indépendamment
 (`_DEEP_COLOR`/`_SEA_LEVEL_COLOR`/`_PEAK_COLOR`). Insensible à la profondeur
 du point le plus bas : le terrain proche de la surface reste toujours dans
@@ -269,7 +266,7 @@ calées au multiple de 160 le plus proche (floor/ceil) pour que chaque zone
 affichée ait son contour complet. Rebâti dans `_set_loaded_zones()` à chaque
 changement de zones chargées ; toggle icône dans la barre flottante
 bas-gauche de la vue 3D (`_draw_viewport_toggles()`, visible par défaut --
-migré depuis une checkbox du panel le 2026-09-08, même pattern que
+migré depuis une checkbox du panel, même pattern que
 `object_editor.py`/Patina : `_icon_button()` réutilisé tel quel depuis
 `object_editor_mixins/ui_helpers.py`, et le même mécanisme
 `_viewport_toggle_size` de mesure sur la frame précédente pour positionner
@@ -279,7 +276,7 @@ le terrain quel que soit son relief : `set_depth_test(False)`/
 de repère, pas un vrai maillage à suivre le terrain.
 
 **Tentative abandonnée -- plan d'eau approximatif** : une surface bleue
-semi-transparente à Z=0 (un quad par zone) a été essayée le 2026-09-08 comme
+semi-transparente à Z=0 (un quad par zone) a été essayée comme
 raccourci visuel en attendant la vraie détection d'eau via `.ig`/
 `CWaterShape` (étape 9). Abandonnée : elle lisait comme "eau" tout relief
 simplement sous le niveau de la mer, pas seulement les vrais lacs, couvrant
@@ -290,9 +287,8 @@ en bleu la majorité d'un continent réel. Retirée entièrement
 
 ## Modes de rendu [POLY][WELD][LIGHT] -- retiré (`landscape_editor__zone_render_modes.md`, historique)
 
-**Retiré entièrement le 2026-09-14** (`landscape_editor__render_modes_removal.md`,
-Nuno : "ça ne sert à rien finalement") -- voir "Suppression des modes de
-rendu + nettoyage de l'interface (2026-09-14)" tout en bas de ce document
+**Retiré entièrement** (`landscape_editor__render_modes_removal.md`)
+-- voir "Suppression des modes de rendu + nettoyage de l'interface" tout en bas de ce document
 pour le comportement actuel (résolution automatique et unique
 `.zonel > .zonew > .zone`, plus aucun bouton). Section ci-dessous gardée
 telle quelle pour mémoire historique -- `self.render_mode`/`_RENDER_MODES`/
@@ -304,9 +300,8 @@ du continent chargé (`self._loaded_refs`/`self._loaded_extensions`, name ->
 ZoneRef / name -> {ext: ZoneRef}), quelle extension réelle afficher via
 `_resolve_zone_for_mode()` :
 
-**Un 4ᵉ mode `[2D]` a existé puis a été retiré** (`landscape_editor__2d_3d_toggle.md`,
-Nuno 2026-09-11 : "2D/POLY c'est le même mode en fait" -- il résolvait
-exactement la même géométrie que `[POLY]`, seule la caméra changeait). Voir
+**Un 4ᵉ mode `[2D]` a existé puis a été retiré** (`landscape_editor__2d_3d_toggle.md`)
+-- il résolvait exactement la même géométrie que `[POLY]`, seule la caméra changeait. Voir
 plus bas "Bascule caméra 2D/3D" : ce comportement vit maintenant entièrement
 côté caméra, indépendant de `self.render_mode`.
 
@@ -321,14 +316,14 @@ côté caméra, indépendant de `self.render_mode`.
   d'élévation. Une première version en dégradé de gris (quasi-noir -> gris
   clair) s'est révélée indiscernable du fond gris du viewport -- une zone en
   repli à basse élévation ressemblait à un vrai trou dans le terrain plutôt
-  qu'à une zone grisée (trouvé le 2026-09-09, Nuno). Violet/rose n'apparaît
+  qu'à une zone grisée. Violet/rose n'apparaît
   jamais dans le dégradé d'élévation réel (rouge/marron/vert), donc se
   distingue sans ambiguïté à la fois du terrain et du fond.
 
 Le rendu Explorer (`on_selection_changed()`, sélection d'un fichier unique)
 n'est **jamais** passé par cette logique de mode -- charge toujours
 exactement le fichier cliqué. Ce chemin n'est de toute façon jamais utilisé
-en pratique (Nuno 2026-09-09) : le workflow réel charge toujours un continent
+en pratique : le workflow réel charge toujours un continent
 entier via le combo.
 
 ### Source de zones par continent -- `live_data_path` vs export pipeline réel
@@ -349,9 +344,9 @@ pour vérifier un cas de repli -- un cache figé casserait ce test.
 `ryzom_data_path` est résolu via `pynel.repository_paths.get("ryzom-data")`
 (le sélecteur déjà existant dans Settings > Ryzom Paths, `RepositoryPathsDialog`)
 -- **jamais** un réglage dédié en plus (une première version avait
-introduit `Settings.ryzom_data_path`, doublon corrigé le 2026-09-09).
+introduit `Settings.ryzom_data_path`, doublon corrigé depuis).
 
-**Piège découvert le 2026-09-09** : le nom affiché dans le combo continent
+**Piège** : le nom affiché dans le combo continent
 (`ContLoc.selection_name`, ex. `"nexus"`) peut être **différent** du nom
 interne (`ContLoc.continent_name`, ex. `"lecarrefour"`) utilisé pour résoudre
 les bornes (`continent_selector.resolve_continent_bounds`). `continent_name`
@@ -364,7 +359,7 @@ pas `continent_name`. `landscape_editor.py` garde donc les deux séparément :
 `self._selected_continent_pipeline_name` (recherche de l'export pipeline,
 issu de `cont_loc.selection_name`).
 
-**Chemins `ryzom-data` -- lequel est le bon** (2026-09-09) : les vrais
+**Chemins `ryzom-data` -- lequel est le bon** : les vrais
 `.land`/briques de leveldesign vivent sous `leveldesign/landscape/`
 (actuel, maintenu -- ex. `leveldesign/landscape/desert/fyros.land`, daté
 2025). `graphics/landscape/ligo/` contient de **vieilles données obsolètes**
@@ -384,11 +379,11 @@ name)`) : le continent lui-même (`pipeline_continents`), l'export de son
 écosystème (`landscape`, jamais optionnelle -- seul point de départ pour
 composer un continent depuis son `.land` tant qu'aucun `.zone` par continent
 n'a été généré via `land_export`). Si l'une manque, une proposition de
-téléchargement/extraction (archives `.zip` publiées par Nuno,
+téléchargement/extraction (archives `.zip`,
 `PipelineDataInstallDialog`) est ouverte au prochain `draw_panel()` -- jamais
 depuis l'intérieur du popup du combo continent lui-même (piège ImGui : un
 `imgui.open_popup()` pour un popup différent pendant qu'un autre est encore
-ouvert est silencieusement perdu, trouvé 2026-09-09).
+ouvert est silencieusement perdu).
 
 ### Réglage `ryzom_tools_path` et génération de `.zonew` manquants (`[WELD]`)
 
@@ -416,13 +411,13 @@ uniquement en `[WELD]` avec des zones manquantes) lance
 réglage) -- persistant, redétecté sans regénération après relance puisque
 cette source n'est jamais mise en cache (voir plus haut).
 
-**Affichage live** (Nuno 2026-09-11) : plutôt que d'attendre la fin du lot,
+**Affichage live** : plutôt que d'attendre la fin du lot,
 chaque zone weldée passe du dégradé violet/rose au dégradé d'élévation dès
 que son propre `.zonew` est écrit (`progress["ready"]`, vidée à chaque frame
 par `draw_panel()`), sans toucher aux zones encore en attente ; le compteur
 "N manquantes" décroît au fur et à mesure (`_recompute_missing_for_mode()`).
 
-**Cellules `.land` sans aucun `.zone`** (Nuno 2026-09-11) : le repli `.land`+
+**Cellules `.land` sans aucun `.zone`** : le repli `.land`+
 brique (voir plus bas, historiquement réservé à `[POLY]`, `[2D]` n'étant
 alors qu'une bascule caméra sur le même mode -- voir "Bascule caméra 2D/3D"
 plus bas) s'applique aussi à `[WELD]`, pour que ces cellules deviennent visibles (dégradé violet/
@@ -446,7 +441,7 @@ si `ryzom-data` est configuré et pointe vers un dossier existant,
 combo, pas par ce switch global).
 
 **Bascule manuelle "Release"/"Dev"** (`landscape_editor__land_preview.md`
-étape 4, 2026-09-10) : `_resolve_app_mode()` lit `Settings.
+étape 4) : `_resolve_app_mode()` lit `Settings.
 landscape_editor_mode` (persistant, `None` tant que l'utilisateur n'a jamais
 touché au bouton) -- si `None`, `_detect_app_mode()` sert de valeur par
 défaut ; si `"edition"` mais `ryzom-data` n'est plus valide, repli forcé sur
@@ -472,13 +467,13 @@ jamais `live_data_path`/`world.packed_sheets`) via la nouvelle fonction
 `"matis"` a `continent_name="lesfalaises"`), puis filtrée par
 `land_loader.find_land_files()` (nouveau module, scan récursif de
 `<ryzom-data>/leveldesign/landscape/`, indexé par stem de fichier -- confirmé
-2026-09-10 que le stem d'un `.land` réel correspond toujours au `PacsRBank`,
+que le stem d'un `.land` réel correspond toujours au `PacsRBank`,
 ex. `fyros.land`/`matis.land`/`nexus.land`, jamais à un nom de dossier) : un
 continent listé dans `ryzom.world` mais sans `.land` correspondant
 n'apparaît pas du tout dans le combo en édition.
 
 **Fallback `.land`+brique pour `[POLY]`/`[WELD]`** (`land_geometry.py`, nouveau
-module ; étendu à `[WELD]` le 2026-09-11, voir plus haut "Cellules `.land`
+module ; étendu à `[WELD]`, voir plus haut "Cellules `.land`
 sans aucun `.zone`") : en édition, quand `self.render_mode` est `"POLY"` ou
 `"WELD"`, `_apply_render_mode()` résout `(land_path, brick_zones_dir)` pour le continent
 sélectionné (`land_loader.find_land_files()` + `continent_ecosystem.
@@ -494,24 +489,23 @@ positionnée via `land_geometry.build_land_piece_cache_data()`, ajoutée à
 `self.zones` sous la clé `"land:<origin_x>:<origin_y>"` et marquée dans le
 même ensemble `gray` que `[WELD]`/`[LIGHT]` -- rendue avec le dégradé violet
 -> rose de repli habituel (`build_zone_geom_from_cache(..., fallback=True)`),
-jamais le dégradé d'élévation normal (Nuno 2026-09-10).
+jamais le dégradé d'élévation normal.
 
-**Pièces multi-cellules** (Nuno 2026-09-10 : "certains .zone ne font pas
-160x160 mais peuvent être plus grandes 320x160 voire 320x320") : une brique
+**Pièces multi-cellules** (certaines briques `.zone` ne font pas
+160x160 mais peuvent être plus grandes, 320x160 voire 320x320) : une brique
 peut être une "large piece" ligo référencée par plusieurs cellules du
 `.land` à la fois, chacune stockant son propre `ZoneUnit.pos_x`/`pos_y` --
 un nom trompeur ("position in a large piece", `zone_region.h`), pas une
 position de grille, mais la sous-position de cette cellule dans la pièce.
 Un premier essai traitait chaque cellule référençant la brique comme un
 placement 160x160 indépendant, dupliquant/chevauchant la pièce sur chaque
-cellule qu'elle occupe réellement (trouvé 2026-09-10, Nuno, sur `49_CL`/
+cellule qu'elle occupe réellement (trouvé sur `49_CL`/
 `49_CM` de `nexus`). Corrigé : `land_geometry.piece_origin()` reproduit
 `CExport::treatPattern()`'s `deltaX`/`deltaY` (export.cpp:479-498) pour
 retrouver l'origine de grille propre à la pièce depuis UNE cellule
 référençante + sa taille en cellules -- taille dérivée directement de la
 bounding box réelle de la brique déjà chargée (`land_geometry.
-brick_size_in_cells()`, Nuno 2026-09-10 : "quand tu charges un .zone tu dois
-bien avoir les dimensions"), jamais d'une base "ZoneBank" ligo (hors scope,
+brick_size_in_cells()`), jamais d'une base "ZoneBank" ligo (hors scope,
 non parsée par pynel). Toutes les cellules d'une même pièce résolvent vers
 la même origine -- `_run_load_refs()` déduplique dessus (`rendered_pieces`,
 clé `(zone_name, origin_x, origin_y, rot, flip)`) pour ne rendre la pièce
@@ -526,7 +520,7 @@ du centre de sa propre bounding box réelle** (`x`/`y` dans `[0, width]`/
 `(origin_x, origin_y) * ZONE_CELL_SIZE`. Une première version tournait/
 retournait autour du coin local (0,0) en lisant littéralement la
 construction `CMatrix` de `CExport::transformZone()` -- position
-complètement fausse en pratique (trouvé et corrigé 2026-09-10, Nuno) ; une
+complètement fausse en pratique (trouvé et corrigé) ; une
 deuxième version centrait bien la rotation mais sur un `ZONE_CELL_SIZE` fixe
 plutôt que la vraie taille de la pièce -- correcte pour une brique simple,
 fausse dès qu'une pièce multi-cellules était tournée. Vérifié empiriquement
@@ -539,7 +533,7 @@ restantes à moins de 28 unités (mesh légèrement irrégulier, pas un bug
 systématique identifié) -- les anciennes erreurs de 100 à 200+ unités et le
 chevauchement des pièces multi-cellules ont disparu.
 
-**Cache disque des bricks de repli** (perf, Nuno 2026-09-11 : mesuré sur
+**Cache disque des bricks de repli** (perf : mesuré sur
 `nexus`, 17 cellules de repli, 2.135s -> 0.134s, ~16x) : `build_land_piece_cache_data()`
 refaisait un parse + une vraie tessellation Bézier (`compute_zone_patch_positions()`)
 à chaque chargement, pour rien -- le fichier brique ne change jamais entre deux
@@ -587,13 +581,13 @@ est un champ dédié, séparé de `SysInfoBar.status` (déjà utilisé par
 l'affichage de sélection Explorer partagé, `app.py`) pour ne pas entrer en
 conflit avec lui.
 
-**Nom de la brique `.land`** (Nuno 2026-09-10) : en mode édition, la ligne
+**Nom de la brique `.land`** : en mode édition, la ligne
 affiche en plus le nom que le `.land` assigne lui-même à cette cellule --
 toujours ce nom-là, quel que soit le fichier réellement utilisé pour le
 rendu (`.zone`/`.zonew`/`.zonel` exporté, ou brique de fallback) : ex.
 `27_AG (2541, -4848) -- solprimer-mz_coulea`. Deux essais précédents
 montraient plutôt le fichier réellement chargé (`ZoneRef.source_path`, ou la
-brique de fallback) -- rejetés par Nuno, le premier car redondant avec le
+brique de fallback) -- rejetés, le premier car redondant avec le
 nom de zone déjà affiché juste avant (`"49_CK -- 49_CK"`, les fichiers
 exportés étant nommés d'après leur position), le second parce que ce n'est
 pas l'info voulue : le nom de brique du `.land`, pas le fichier de sortie du
@@ -630,7 +624,7 @@ Le pipeline de rendu partagé (`zone_geometry.py`/`zone_cache.py`/
 `_set_loaded_zones()`) reste dans `landscape_editor.py` -- il n'est jamais
 dupliqué entre les mixins, seuls les points d'extension propres à un mode
 (résolution du fallback `.land`, génération `.zonew`, source de la liste de
-continents) sont délégués. Non-régression des deux modes validée par Nuno
+continents) sont délégués. Non-régression des deux modes validée
 sur un continent réel.
 
 ## Cache disque du `NodePath` d'une zone (`landscape_editor__region_management__zone_bam_cache.md`)
@@ -639,7 +633,7 @@ Même une fois le cache par zone tessellée (étape 6) et celui des bricks de
 repli (ci-dessus) chauds, il restait un coût mesuré à 1.349s pour 151 zones
 (~8.9ms/zone, nexus) : la construction des `GeomNode` Panda3D elle-même
 (couleur + indices + `attach_new_node`, `_set_loaded_zones()`), entièrement
-sur le thread principal. Objectif de Nuno (2026-09-11) : repasser sous 1s de
+sur le thread principal. Objectif : repasser sous 1s de
 temps total de rechargement, quitte à geler l'UI le temps de la
 (re)construction -- le gel n'est pas un problème tant que le total est
 rapide.
@@ -682,13 +676,13 @@ d'en-tête seule, `zone_bb` uniquement -- **jamais** `parse_zone()` complet :
 bug de perf réel trouvé en testant, `parse_zone()` sur un `.zonel` de 423 Ko
 prend 268ms + 14,3 Mo retenus par zone, contre 0,02-0,05ms pour l'en-tête
 seule, ~5000x plus rapide -- voir `project-todos/pynel/
-zone_header_reader.md`). Effet de bord accepté par Nuno : une petite région
+zone_header_reader.md`). Effet de bord accepté : une petite région
 isolée a le même étalonnage de couleur que si tout le continent était
 chargé, au lieu d'être renormalisée sur elle-même seule.
 
 Un cache hit se lit en quelques dizaines de ms (chargement `.bam` seul, testé
 en isolation headless) contre plus d'une seconde de reconstruction --
-confirmé fonctionnel par Nuno sur un rechargement répété du même continent,
+confirmé fonctionnel sur un rechargement répété du même continent,
 actif en Visualisation ET en Édition (la désactivation spéciale en Édition
 qui existait pour l'ancien cache par continent n'a plus lieu d'être, voir
 plus bas).
@@ -714,7 +708,7 @@ comportement caméra, indépendant de `self.render_mode`.
   `snap_to_axis("+z")` (animé). En repassant en 3D, `lock_rotation = False`
   puis `OrbitCamera.animate_to_orientation(heading, pitch)` (nouvelle
   méthode, animée comme `snap_to_axis()` -- qui délègue maintenant à elle --
-  plutôt qu'un saut instantané : Nuno 2026-09-11, la transition 3D->2D
+  plutôt qu'un saut instantané : la transition 3D->2D
   animait déjà bien via `snap_to_axis()`, 2D->3D doit se sentir pareil)
   restaure cette orientation, ou `(heading=0°, pitch=45°)` par défaut si
   aucune bascule 2D n'a encore eu lieu depuis le lancement.
@@ -731,8 +725,8 @@ soit `self.render_mode` ou l'état 2D/3D) :
   `TransparencyAttrib.M_alpha` + `set_color_scale(1, 1, 1, alpha)`.
 - **Wireframe à 3 états** (`self._wireframe_mode`, `"off"`/`"overlay"`/`"pure"`,
   `_apply_zone_wireframe`/`_cycle_zone_wireframe`/`_set_zone_wireframe_mode`,
-  `ICON_FA_DRAW_POLYGON`, project-todos/forgery/`wireframe_cycle_states.md`,
-  **2026-09-11** -- remplace l'ancien booléen on/off) : `"off"` aucune
+  `ICON_FA_DRAW_POLYGON`, project-todos/forgery/`wireframe_cycle_states.md`
+  -- remplace l'ancien booléen on/off) : `"off"` aucune
   surcharge ; `"overlay"` (ancien comportement) `set_render_mode_filled_wireframe((0, 0, 0, 1), 1)`
   -- arêtes noires par-dessus le rendu texturé/ombré normal, ne le remplace
   jamais (`object_editor__wireframe_overlay.md`) ; `"pure"` (nouveau)
@@ -746,11 +740,11 @@ soit `self.render_mode` ou l'état 2D/3D) :
 
 **Chantier abandonné** : un bouton cyclique Shading/Constant Shading/Unshaded
 (portage de celui de Patina, `docs/apps/object_editor.md`) avait été ajouté
-ici aussi puis retiré après test par Nuno -- seul le mode Shading normal
+ici aussi puis retiré après test -- seul le mode Shading normal
 (déjà le comportement par défaut, sans bouton) s'est révélé utile sur le
-terrain (`logs/forgery.md`, 2026-09-11).
+terrain (`logs/forgery.md`).
 
-## Sélection de zone (pivot de rotation) -- Nuno 2026-09-11
+## Sélection de zone (pivot de rotation)
 
 Clic gauche sans glisser (`_on_zone_click_down`/`_on_zone_click_up`, seuil
 `_ZONE_CLICK_MAX_DRAG` en coordonnées souris normalisées -- distingue un
@@ -764,12 +758,11 @@ statut du curseur) :
   traitement "toujours visible par-dessus le terrain" que `self._grid_np`
   (`set_light_off`/`set_depth_test(False)`/`set_depth_write(False)`,
   `set_bin("fixed", 101)` -- un cran au-dessus des 100 de la grille pour
-  passer devant elle, Nuno : "la bordure se voit mal").
+  passer devant elle, la bordure sinon se voyant mal).
 - Fait du centre de la zone (Z=0, même ancrage niveau-de-la-mer que le
   dégradé d'élévation) le nouveau pivot de rotation de la caméra, via
   `OrbitCamera.retarget()` (`camera.py`, nouveau -- comme `frame()` mais ne
-  touche pas à la distance : Nuno ne voulait pas de zoom automatique à la
-  sélection).
+  touche pas à la distance, aucun zoom automatique voulu à la sélection).
 - Un clic hors de toute zone valide désélectionne (bordure retirée).
 
 `zone_name_to_world_pos()` décode le bord **nord** (Y max) d'une zone, pas
@@ -777,22 +770,23 @@ son bord min (vérifié empiriquement : `zone_name_to_world_pos("62_AG").y ==
 -9920.0`, et `world_pos_to_zone_name(x, -9920.0) == "62_AG"` mais
 `world_pos_to_zone_name(x, -9919.0) == "61_AG"`) -- contrairement à X (bord
 ouest, sans ambiguïté). Un premier essai traitait à tort `origin.y` comme le
-bord min, décalant la bordure d'une rangée vers le nord (Nuno : "je clique
-sur 62_AG il me sélectionne 61_AG" -- en réalité seul l'affichage de la
-bordure était décalé, le nom réellement sélectionné était déjà correct).
+bord min, décalant la bordure d'une rangée vers le nord -- en réalité seul
+l'affichage de la bordure était décalé, le nom réellement sélectionné était
+déjà correct.
 
-**Sélection par bounding box réelle, pas par nom de zone 160×160** (Nuno
-2026-09-12) : `_select_zone_at_cursor()` ne convertit plus la position
+**Sélection par bounding box réelle, pas par nom de zone 160×160** :
+`_select_zone_at_cursor()` ne convertit plus la position
 curseur en nom via `world_pos_to_zone_name()` -- `_find_loaded_zone_at(x, y)`
 cherche directement dans `self.zones` laquelle des zones/pièces réellement
 chargées couvre `(x, y)` par sa propre bounding box (`bb_center`/
 `bb_half_size`). Une pièce `.land` multi-cellules (320×160, etc.) sélectionne
 alors tout son vrai contour d'un coup, plutôt que la seule tranche 160×160
-sur laquelle le clic est tombé (Nuno : "si la zone est sur plusieurs
-zones... ça sélectionne TOUT"). `_select_zone()` dessine la bordure sur cette
+sur laquelle le clic est tombé -- une zone couvrant plusieurs cellules
+sélectionne donc désormais tout son contour, pas juste la tranche cliquée.
+`_select_zone()` dessine la bordure sur cette
 même vraie bounding box, et ne retargete plus la caméra en vue 2D
 (`self._top_down_locked`) -- la vue du dessus n'a pas de pivot d'orbite à
-gérer, Nuno : "en vue 2D la caméra ne bouge pas".
+gérer, la caméra ne bouge donc pas en vue 2D.
 
 ## Composition `.land` en 3D + bouton Build (`landscape_editor__land_composition.md`)
 
@@ -800,7 +794,7 @@ Remplace l'outil de composition Ligo 2D historique par une vraie édition 3D
 du `.land` : chaque brick est affichée à sa vraie position/rotation/flip
 avec son vrai relief, une cellule de la grille se choisit/s'édite
 directement, et un bouton "Build" déclenche le pipeline natif complet.
-Validé par Nuno le 2026-09-12 sur une vraie composition (`bagne`).
+Validé sur une vraie composition (`bagne`).
 
 ### Rendu par étape de build (remplace le dégradé binaire réel/repli)
 
@@ -822,7 +816,7 @@ construites APRÈS l'appel à `set_stage_colors()`).
 
 ### Renommage `[LAND]`/masquage en Visualisation -- retiré (historique)
 
-**Retiré le 2026-09-14** avec le reste de la barre de modes de rendu (voir
+**Retiré** avec le reste de la barre de modes de rendu (voir
 plus haut) -- `self.render_mode`/`_RENDER_MODES` n'existent plus, il n'y a
 plus de libellé à renommer.
 
@@ -846,7 +840,7 @@ purement ignoré dans les 3 modes, jamais affiché comme s'il était encore
 d'actualité. La résolution position -> nom de zone réel passe par
 `land_geometry.expected_zone_name(pos_x, pos_y)` (= `world_pos_to_zone_name(pos_x
 * ZONE_CELL_SIZE, pos_y * ZONE_CELL_SIZE)`) -- **toujours appelée sur le
-coin EXACT de la cellule**, jamais un point intérieur : confirmé 2026-09-12
+coin EXACT de la cellule**, jamais un point intérieur : confirmé
 que `world_pos_to_zone_name()` décale d'une rangée pour tout point
 strictement à l'intérieur d'une cellule (`world_pos_to_zone_name(880,
 -9840)`, le vrai `bb_center` de `62_AF.zone`, renvoie `"61_AF"`, pas
@@ -860,8 +854,8 @@ les cellules déjà couvertes par une vraie zone **par nom**
 `expected_zone_name()`), plus par le `bb_center` géométrique de la zone
 chargée -- la bounding box réelle d'une zone ne tombe pas toujours pile au
 centre de sa cellule nominale, ce qui pouvait faire apparaître à la fois une
-vraie zone ET une brique de repli au même endroit (Nuno : "on se retrouve
-avec 2 zones de 2 couleurs au même endroit").
+vraie zone ET une brique de repli au même endroit, avec chacune sa propre
+couleur.
 
 ### Édition de la grille (choisir/placer une brique)
 
@@ -879,20 +873,19 @@ un sélecteur de brique parmi celles du dossier écosystème
 construits pour cette cellule (voir plus bas), réécrit le `.land` en entier
 (`_save_land_region()`, XML léger, pas de batching), puis ne rafraîchit QUE
 la cellule éditée (`_apply_lightweight_cell_update()`, jamais un
-`_load_continent()` complet -- Nuno : "ça ne devrait que modifier UNE seule
-zone").
+`_load_continent()` complet -- une édition ne doit modifier qu'une seule
+zone).
 
 **Invalidation incrémentale** (`_invalidate_built_zone_files()`) : une
 édition supprime `.zonew`/`.zonel`/`.depend`/`.ig` de la cellule éditée ET de
 ses 8 voisines (un weld/lighting voisin peut dépendre du bord qui vient de
-changer -- Nuno : "le zone_lighter se fait sur toutes les zones... même
-celles qui ont déjà un .zonel"), mais seule la cellule éditée elle-même perd
+changer -- `zone_lighter` se relance sur toutes les zones concernées, y
+compris celles qui avaient déjà un `.zonel`), mais seule la cellule éditée elle-même perd
 en plus son `.zone` (sa géométrie d'élévation brute correspond à l'ancienne
 brique, devenue franchement fausse plutôt que simplement "en attente d'un
 rebuild") -- les `.zone` voisins ne sont jamais supprimés, leur élévation ne
 dépend que de la carte de hauteur globale du continent, jamais de la
-composition locale (Nuno : "les .zone voisines... je ne vois pas
-l'intérêt").
+composition locale.
 
 ### Bouton "Build" (`land_build.py`, `continent_pipeline_reference.py`)
 
@@ -910,7 +903,7 @@ transit `land_export`, pour que le résultat soit immédiatement visible par
 le scan disque d'Atyscape sans étape d'installation séparée.
 
 **Reconstruction incrémentale, par étage réel indépendant** (pas juste "a un
-`.zonel`" -- deux bugs trouvés 2026-09-12 sur de vraies données `bagne`) :
+`.zonel`" -- deux bugs trouvés sur de vraies données `bagne`) :
 une zone déjà weldée (`.zonew` présent) n'est jamais re-weldée/re-élevée
 juste parce qu'elle n'a pas encore de `.zonel` ; et une zone peut avoir un
 `.zonel` réel sur disque sans `.zonew` à côté (données préexistantes) --
@@ -926,7 +919,7 @@ juste décodés) garantissent un ordre croissant sur les deux axes à la fois ;
 et l'outil écrit un `.depend` par zone (toujours en minuscules), jamais un
 fichier unique nommé d'après `argv[4]`.
 
-**Parallélisation** (`zone_lighter`, Nuno 2026-09-11/12) : chaque zone est
+**Parallélisation** (`zone_lighter`) : chaque zone est
 lancée dans son propre process natif via un `ThreadPoolExecutor`
 (`os.cpu_count()` workers) -- le vrai coût dominant du build (~2s/zone). Le
 multi-threading INTERNE de `zone_lighter` (`PropertiesConfig.cpu_num`) reste
@@ -941,10 +934,10 @@ colonne par continent) : tous les chemins qu'il contient sont relatifs à
 `land_exporter.cfg` réels et donc codés en dur plutôt que lus du CSV.
 **`PropertiesConfig.cpu_num` n'est jamais lu du CSV** malgré une colonne
 `cpu_num` existante (résidu de l'extraction initiale) : ce serait une
-caractéristique de la MACHINE qui build, pas du continent -- y figer le
-nombre de cœurs de Nuno enverrait cette valeur à tous les autres
+caractéristique de la MACHINE qui build, pas du continent -- y figer un
+nombre de cœurs particulier enverrait cette valeur à tous les autres
 utilisateurs de Forgery (même classe d'erreur que supposer que tout le monde
-a le `workspace/`/`graphics/` de Nuno, voir `feedback-forgery-multi-user-no-
+a le même `workspace/`/`graphics/` personnel, voir `feedback-forgery-multi-user-no-
 personal-disk`) ; `os.cpu_count()` est lu à chaque exécution, sur la machine
 qui build réellement.
 
@@ -952,12 +945,13 @@ qui build réellement.
 apparaît immédiatement dans la vue 3D (`progress["ready"]`, même convention
 que "Generate missing .zonew"), avec un rechargement complet
 (`_load_continent()`) une seule fois à la fin pour faire disparaître les
-anciennes pièces de repli devenues obsolètes (Nuno : "tu ajoutes des zones
-sans retirer les existantes"). Le cache disque `.bam` de continent entier
+anciennes pièces de repli devenues obsolètes (ajouter des zones sans
+retirer les existantes n'aurait sinon jamais nettoyé les anciennes). Le
+cache disque `.bam` de continent entier
 (`continent_geom_cache.py`, retiré depuis, voir plus haut) était désactivé en
 Édition (`continent=None, mode=None` passés à `_set_loaded_zones()`) -- un
-hit inattendu avait été trouvé après suppression d'une zone construite
-(2026-09-12), et une composition qui change en direct sous l'utilisateur
+hit inattendu avait été trouvé après suppression d'une zone construite,
+et une composition qui change en direct sous l'utilisateur
 n'est jamais un bon candidat pour un cache À L'ÉCHELLE DU CONTINENT. Le
 cache par zone qui l'a remplacé (`zone_geom_cache.py`) n'a plus ce problème
 -- chaque zone/pièce s'invalide sur sa PROPRE fraîcheur (mtime/taille/
@@ -968,8 +962,8 @@ rot/flip), jamais sur celle d'une autre -- donc actif dans les deux modes.
 `config_dir.py` expose maintenant `cache_dir()` en plus de `config_dir()` --
 mêmes conventions par OS, mais pointant vers le vrai dossier de cache
 (`~/.cache/ryzom_forgery` sur Linux, etc.) plutôt que dans le dossier de
-config (Nuno 2026-09-12 : "c'est très moche... un dossier de cache dans le
-dossier de config"). `zone_cache.py`/`zone_geom_cache.py` (données
+config, un dossier de cache dans le dossier de config n'ayant pas sa place.
+`zone_cache.py`/`zone_geom_cache.py` (données
 purement jetables/régénérables) migrent vers `cache_dir()` ; `config_dir()`
 reste réservé aux vraies préférences utilisateur.
 
@@ -977,7 +971,7 @@ reste réservé aux vraies préférences utilisateur.
 
 Charger un continent entier d'un coup (étape 6) reste rapide une fois en
 cache, mais un premier chargement (ou un continent jamais visité) reste
-lourd pour rien si Nuno ne veut regarder qu'une petite portion. Ce chantier
+lourd pour rien si l'utilisateur ne veut regarder qu'une petite portion. Ce chantier
 introduit un chargement par RÉGION (au sens `world.lua`/`world.json` : la
 hiérarchie continent -> région -> lieu, pas les "régions" de `region_loader.py`
 qui désignent un rayon géographique quelconque autour de la caméra, concept
@@ -1007,8 +1001,8 @@ l'autre** (`ryzom_forgery/region_hierarchy.py`) :
 - Les entrées `pvp_zone_*` (ex. `pvp_zone_ichor`, `pvp_zone_nexus`) sont
   filtrées : au même niveau hiérarchique qu'une vraie région dans
   `world.lua`/`world.json`, ce sont des zones PvP, pas des régions
-  géographiques (Nuno 2026-09-13, confirmé sur tous les continents réels :
-  chaque vraie région est systématiquement `region_*`, sans exception).
+  géographiques (confirmé sur tous les continents réels : chaque vraie
+  région est systématiquement `region_*`, sans exception).
 
 **Assignation zone -> région** (`region_hierarchy.assign_zones_to_regions()`) :
 test point-dans-polygone (ray-casting) du centre du footprint 160×160 de
@@ -1024,8 +1018,8 @@ jamais assignable à aucune case à cocher. Une seule région sur le continent
 filtrage, le repli existant (`_load_land_fallback_pieces()`) chargeait une
 vraie brique -- coût identique à une vraie zone -- pour TOUTE cellule
 absente de `self._loaded_refs`, quelle que soit la région cochée, annulant
-tout le bénéfice du chargement paresseux (bug trouvé en testant, Nuno
-2026-09-13, continent `bagne` sans export réel : les 53 cellules se
+tout le bénéfice du chargement paresseux (bug trouvé en testant sur le
+continent `bagne` sans export réel : les 53 cellules se
 rechargeaient à chaque bascule). `_apply_render_mode()` calcule
 `allowed_land_cells` (cellules des régions cochées) et le passe à
 `_load_land_fallback_pieces(..., allowed_cells=...)` -- une cellule hors de
@@ -1036,8 +1030,7 @@ différemment par mode : en Visualisation, une zone absente de
 PAS cochée (le repli s'occupe déjà des cellules d'une région cochée sans
 export réel -- pas de double géométrie au même endroit).
 
-**Caméra figée sur le continent entier** (Nuno 2026-09-13 : "le centrage
-automatique en vue 2D c'est vraiment horrible") : la caméra ne se
+**Caméra figée sur le continent entier** : la caméra ne se
 recentre/zoome plus QUE lors de la sélection du continent
 (`_select_continent()`), jamais lors d'une bascule de région -- nouveau
 paramètre `frame_camera=False` passé par le consommateur de chargement de
@@ -1059,8 +1052,8 @@ panneaux fait foi, le frustum étant centré sur toute la fenêtre). Une marge
 d'une case (`ZONE_CELL_SIZE`) est ajoutée de chaque côté pour laisser de
 l'air.
 
-**Chargement `.ig` manuel** (Nuno 2026-09-13 : "c'est le bouton de la vue 3D
-qui doit déclencher le chargement", pas un bouton séparé du panneau) :
+**Chargement `.ig` manuel** (c'est le bouton de la vue 3D qui déclenche le
+chargement, pas un bouton séparé du panneau) :
 l'icône arbre existante dans la barre d'outils de la vue 3D
 (`_toggle_ig_visibility()`) déclenche désormais le chargement en plus de la
 visibilité -- l'activer (re)charge `.ig` pour `self._loaded_refs` (le jeu de
@@ -1075,16 +1068,15 @@ l'appli à chaque bascule de région automatique -- inacceptable une fois
 répété à chaque coche/décoche, alors qu'il n'était payé qu'une fois par
 continent avant ce chantier.
 
-**Eau en `two_sided`** (Nuno 2026-09-13 : "sinon il ne sont pas toujours
-visibles") : les meshes d'eau (`resolved.kind` `"water_polygon"`/
+**Eau en `two_sided`** : les meshes d'eau (`resolved.kind` `"water_polygon"`/
 `"water_point"`, `ig_geometry.py`) sont maintenant en `set_two_sided(True)`
 comme le terrain -- un plan d'eau est une unique face plate, invisible de
 l'autre côté par défaut (backface culling), donc invisible dès que la
 caméra passait sous son niveau ou que son winding ne faisait pas face à la
 vue initiale.
 
-**`out_ig_dir` du CSV pipeline -- bug de données trouvé en testant** (Nuno
-2026-09-13) : `continent_pipeline_reference.csv` pointait `out_ig_dir` vers
+**`out_ig_dir` du CSV pipeline -- bug de données trouvé en testant** :
+`continent_pipeline_reference.csv` pointait `out_ig_dir` vers
 `ligo_ig_land` (le brouillon LIGO brut, édition en cours, potentiellement
 très incomplet -- un seul instance pour `46_BZ`/nexus contre 56 dans la
 vraie donnée) au lieu de `zone_lighted_ig_land` (le vrai résultat final de
@@ -1149,9 +1141,8 @@ pilotent l'affichage sans jamais déclencher elles-mêmes de chargement : sapin
 tout sans résidu, affichage désactivé par défaut.
 
 **Arborescence "IG Zones"/"IG Others" remplace l'Explorer dans le panneau de
-gauche** (`landscape_editor__ig_inspector_tree.md`, Nuno : "on va virer
-l'explorer de gauche qui ne sert strictement à rien... comme dans Patina des
-dossiers virtuels") : `ForgeryApp.draw_left_panel_content()` (nouveau point
+gauche** (`landscape_editor__ig_inspector_tree.md`, même principe de dossiers
+virtuels que dans Patina) : `ForgeryApp.draw_left_panel_content()` (nouveau point
 d'extension, `app.py` -- toute autre app garde l'Explorer réel via
 l'implémentation par défaut) est surchargé par `landscape_editor.py` pour
 dessiner deux dossiers virtuels à cocher construits en introspectant le
@@ -1219,7 +1210,7 @@ seul `.shape` désactivable à la fois, sans toucher au reste de l'`.ig`).
   de priorité côté recherche partagée).
 
 **Carrés violets "région non chargée" -- transparence + priorité de rendu la
-plus basse** (Nuno 2026-09-14) : `zone_geometry._ZONE_PLACEHOLDER_COLOR`
+plus basse** : `zone_geometry._ZONE_PLACEHOLDER_COLOR`
 passe à 30% transparent (alpha 0.7) et `_rebuild_region_placeholders()`
 place le NodePath dans le bin Panda3D `"background"` (priorité de rendu la
 plus basse, dessiné avant tout le reste) avec `set_depth_write(False)` --
@@ -1236,12 +1227,12 @@ rotation), le nom de la zone actuellement sélectionnée et ses bornes monde
 vérifier visuellement qu'une géométrie (eau, bâtiment) tombe bien dans la
 zone attendue, sans calcul manuel.
 
-## Suppression des modes de rendu + nettoyage de l'interface (2026-09-14)
+## Suppression des modes de rendu + nettoyage de l'interface
 
 (`landscape_editor__render_modes_removal.md`) Les 3 boutons de rendu
 [POLY/LAND]/[WELD]/[LIGHT] (voir plus haut, sections marquées historiques)
-ont été retirés entièrement -- Nuno : "ça ne sert à rien finalement, on va
-faire comme en Visualisation, juste un mode". Résolution désormais
+ont été retirés entièrement, pour faire comme en Visualisation, avec un seul
+mode. Résolution désormais
 **toujours** `.zonel > .zonew > .zone` (la priorité déjà utilisée par
 `region_loader.py`), identique en Visualisation et Édition, sans notion de
 "fallback gris" (`_resolve_zone_for_mode()`/le paramètre `gray` de
@@ -1276,7 +1267,7 @@ sur certains continents).
   regroupe le nom+bornes de la zone sélectionnée et l'éditeur de composition
   `.land` (`_draw_land_composition_editor()`, plus gaté sur un mode de rendu
   -- juste "Édition + continent sélectionné"). Icône colorée dans le titre,
-  nom de zone en orange, bornes en vert (Nuno : "comme Patina" --
+  nom de zone en orange, bornes en vert (même convention que Patina --
   `pastel_color_for()`, `icon_colors.py`, déjà utilisé par les icônes du
   reste de la suite). Le texte "-- cell (x, y)" de l'éditeur de composition a
   été retiré (redondant avec la barre de statut curseur). Chaque statut
@@ -1284,8 +1275,8 @@ sur certains continents).
   corbeille à côté quand le fichier existe (loose, jamais dans un `.bnp`) --
   clic : supprime le fichier réel puis retombe sur le meilleur étage encore
   présent (`best_ref_for_extensions()`), jamais un simple retour à la brique
-  brute si un étage intermédiaire existe encore (Nuno : "quand on décoche ça
-  supprime le fichier -- si trop compliqué un bouton delete").
+  brute si un étage intermédiaire existe encore -- décocher supprime le
+  fichier, l'alternative étant un bouton delete dédié si trop compliqué.
 - **"Continent status"** (toujours affichée en Édition) : 4 compteurs
   (Zones/Raw/Welded/Lighted, calculés depuis `self._loaded_extensions`) en
   vert. Le bouton [Build] ne s'affiche plus que si quelque chose manque
@@ -1293,9 +1284,8 @@ sur certains continents).
   bouton toujours visible en bas de panneau.
 - **"Stats"** (repliable, replié par défaut) : un vrai tableau ImGui
   (bordures, lignes alternées, colonnes numériques alignées) -- région par
-  région (zones/patches/instances `.ig`), plus IG Others et un total. Nuno,
-  première version en texte brut : "illisible... il faut de la couleur, des
-  sauts de lignes, un mode tableau".
+  région (zones/patches/instances `.ig`), plus IG Others et un total, à la
+  place d'une première version en texte brut jugée peu lisible.
 - Le bloc "Instances (.ig)" (bouton manuel "Load remaining .ig instances" +
   barres de progression) a disparu -- `_load_ig_rest()` reste appelé
   automatiquement au chargement d'un continent (déjà le cas depuis l'étape
@@ -1303,9 +1293,9 @@ sur certains continents).
 
 ### Chargement incrémental par région (perf)
 
-**Bug trouvé via `(IA_AGENT_DEBUG)` chronométré, pas deviné** (Nuno : "c'est
-tres tordu, si je charge une seule region pas de progression, si j'en
-charge une 2eme progression...") : `_toggle_region()` recalculait
+**Bug trouvé via `(IA_AGENT_DEBUG)` chronométré, pas deviné** (le
+comportement observé était tordu : charger une seule région ne montrait
+aucune progression, en charger une deuxième en montrait) : `_toggle_region()` recalculait
 `self._loaded_refs` comme l'union de TOUTES les régions cochées puis
 rechargeait tout depuis zéro à chaque coche (`_apply_render_mode()`) --
 cocher une Nᵉ région retraitait aussi les N-1 précédentes, un coût
@@ -1365,20 +1355,19 @@ Clic : réinitialise le cap à 0° via `OrbitCamera.animate_to_orientation()`
 -- **pas** une simple assignation `self.orbit_camera.heading = 0.0`, qui ne
 bouge rien visuellement (`OrbitCamera._update()` ne recalcule la position
 réelle que sur un drag souris ou une animation en cours, jamais sur une
-simple modification de champ -- bug trouvé en traçant `camera.py` après que
-Nuno a signalé "le reset ne fonctionne pas").
+simple modification de champ -- bug trouvé en traçant `camera.py` après
+un signalement du bouton reset restant sans effet visuel).
 
-## Mode "Low Poly" pour le terrain (2026-09-14, `landscape_editor__low_poly_mode.md`)
+## Mode "Low Poly" pour le terrain (`landscape_editor__low_poly_mode.md`)
 
 Bouton icône (`ICON_FA_GAUGE_SIMPLE`, barre flottante de la vue 3D) pour les
 PC faibles -- divise `order_s`/`order_t` par 4 avant tessellation
 (`zone_geometry.compute_zone_patch_positions(zone, low_poly=True)`, même
 plancher `_MIN_GRID_SEGMENTS` qu'en qualité normale) : ~16x moins de faces
 par patch (une grille 2D, diviser les deux axes par 4 divise le nombre de
-faces par ~16). Réglage révisé de /2 à /4 après un premier essai (Nuno).
+faces par ~16). Réglage révisé de /2 à /4 après un premier essai.
 
-**Même cache que d'habitude, jamais un second** (Nuno : "ne va pas me créer
-un 2ᵉ cache à côté") -- `zone_cache.py` gagne un paramètre `variant` (vide en
+**Même cache que d'habitude, jamais un second** -- `zone_cache.py` gagne un paramètre `variant` (vide en
 qualité normale, `"_low"` en low poly, inséré dans le nom de fichier) et
 `zone_geom_cache.py` réutilise sa propre notion de `mode` (déjà stabilisée à
 `"zone"` par la suppression des modes de rendu ci-dessus) avec une seconde

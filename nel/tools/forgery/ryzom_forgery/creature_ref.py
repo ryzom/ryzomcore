@@ -51,15 +51,29 @@ _WORKSPACE_SLOT_OVERRIDES_RELATIVE_PATH = ("build", "bind_slot_overrides.json")
 BODY_SLOTS = ("body", "legs", "arms", "hands", "feet", "head", "face")
 
 # Bone names an item is stuck to (case 2, "bound to one attach point", see
-# forgery-object-editor.md) for right/left-hand equipment -- hardcoded in
-# ryzom/client/src/character_cl.cpp's buildEquipment() (magician staffs use
-# no offset, shields use Box_bouclier instead of box_arme_gauche), not data
-# in any sheet or .skel file, so this is copied here verbatim rather than
-# resolved from anything. Confirmed 2026-08-30 these are the ONLY real
-# single-point equipment attach points -- see the CreatureRecord.body_to_bone
-# field's own docstring for a correction of an earlier wrong assumption
-# about BodyToBone also being attach-point data (it isn't).
-WEAPON_ATTACH_POINTS = ("box_arme", "box_arme_gauche", "Box_bouclier")
+# forgery-object-editor.md) for the Bind preview's rigid attachments.
+# box_arme/box_arme_gauche/Box_bouclier are hardcoded in ryzom/client/src/
+# character_cl.cpp's buildEquipment() (magician staffs use no offset, shields
+# use Box_bouclier instead of box_arme_gauche), not data in any sheet or
+# .skel file, so those three are copied here verbatim rather than resolved
+# from anything -- see the CreatureRecord.body_to_bone field's own docstring
+# for a correction of an earlier wrong assumption about BodyToBone also being
+# attach-point data (it isn't). "Bip01 Head" is not one of those hardcoded
+# client boxes -- it's an ordinary skeleton bone, offered here purely as a
+# Patina-side convenience for previewing a hat/headdress prop rigidly stuck
+# to the head, independent of the real BODY_SLOTS "head" equipment slot
+# above.
+WEAPON_ATTACH_POINTS = ("box_arme", "box_arme_gauche", "Box_bouclier", "Bip01 Head")
+
+# Display labels for WEAPON_ATTACH_POINTS in the Bind preview's attach-point
+# combo (creature_bind.py) -- the raw bone/box names above are correct as
+# lookup keys but not meant for a player-facing dropdown.
+WEAPON_ATTACH_POINT_LABELS = {
+	"box_arme": "Right Weapon",
+	"box_arme_gauche": "Left Weapon",
+	"Box_bouclier": "Left Shield",
+	"Bip01 Head": "Hat",
+}
 
 # CItemSheet.slot_bf's bit index (SLOTTYPE::TSlotType, ryzom/common/src/
 # game_share/slot_types.h -- NOTE the enum starts at UNDEFINED=0, so every

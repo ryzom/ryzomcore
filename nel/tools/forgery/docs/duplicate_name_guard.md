@@ -1,7 +1,6 @@
 # duplicate_name_guard
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/duplicate_name_guard.py` (créé le
-2026-09-02)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/duplicate_name_guard.py`
 
 ## Rôle
 
@@ -59,8 +58,8 @@ diffèrent, renomme sur disque le(s) fichier(s) dont le champ a changé).
 - **Pas de scan périodique automatique** : la détection ne tourne qu'au démarrage
  (`set_workspace_dir`, thread de fond) et à chaque settle créé/renommé du watcher partagé
  -- suffisant puisque le garde-fou tourne systématiquement *avant* toute action
- (import/conversion/copie), jamais après (voir discussion 2026-09-02 avec Nuno : pas de
- fenêtre possible où une collision atteint la sortie sans passer par la popup).
+ (import/conversion/copie), jamais après : pas de fenêtre possible où une collision
+ atteint la sortie sans passer par la popup.
 - `remove()` ne renvoie le survivant que s'il existe encore sur disque au moment de
  l'appel -- un cas rare mais possible (les deux fichiers supprimés coup sur coup) ne
  redéclenche rien, ce qui est correct (plus rien à traiter).

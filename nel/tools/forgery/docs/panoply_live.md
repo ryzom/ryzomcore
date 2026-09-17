@@ -21,7 +21,7 @@ que le cache de scan de `search_paths.py`).
 - `LiveColorizeCache` — `panoply_live.py` : classe de mémoïsation.
   - `make_key(base_name, dims, base_ref, mask_refs)` (méthode statique, `panoply_live.py`) : construit une clé composée de `(base_name, axis_items triés, mtime de la base, mtimes triés de chaque masque)`. Clé sur les mtimes des sources plutôt que sur juste `base_name`+axes : un base texture ou un masque édité fait naturellement rater le cache au lieu de servir un résultat périmé, sans invalidation explicite nécessaire.
   - `get(key)` / `set(key, image)` (`panoply_live.py`) : accès simple dict, aucune éviction par entrée.
-  - `clear()` (`panoply_live.py`, ajouté 2026-08-29) : vide tout le cache d'un coup — nécessaire quand quelque chose d'**extérieur** à la clé change ce qu'une combinaison doit rendre, typiquement l'édition du `panoply.cfg` du workspace (les paramètres de couleur eux-mêmes ne font pas partie de `make_key()`) — voir `object_editor._on_panoply_cfg_settled()`.
+  - `clear()` (`panoply_live.py`) : vide tout le cache d'un coup — nécessaire quand quelque chose d'**extérieur** à la clé change ce qu'une combinaison doit rendre, typiquement l'édition du `panoply.cfg` du workspace (les paramètres de couleur eux-mêmes ne font pas partie de `make_key()`) — voir `object_editor._on_panoply_cfg_settled()`.
 
 ## Utilisation
 

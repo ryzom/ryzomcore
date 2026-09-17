@@ -1,6 +1,6 @@
 # ai_wmap_export
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/ai_wmap_export.py` (créé le 2026-09-16)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/ai_wmap_export.py`
 
 ## Rôle
 
@@ -10,8 +10,7 @@ utilisées par le pathfinding IA) en pilotant le binaire natif `ai_build_wmap` �
 
 Contrairement au reste du pipeline (`land_build.py`, via `pynel.ryzom_land_tools`/
 `ryzom_pacs_tools`), ce module **n'est pas wrappé par `pynel`** : `ai_wmap` n'est pas (encore)
-un stage de `land_build.py`, donc ses appels natifs restent locaux ici — décision Nuno,
-2026-09-16.
+un stage de `land_build.py`, donc ses appels natifs restent locaux ici.
 
 ## API principale
 
@@ -49,7 +48,7 @@ un stage de `land_build.py`, donc ses appels natifs restent locaux ici — déci
 - `ai_build_wmap.cfg` est écrit temporairement dans `rbank_output/` (répertoire de travail
   imposé par l'outil natif, même convention que le `run_dir` de `ryzom_pacs_tools`) puis
   supprimé après usage, comme les deux manifestes.
-- Validé 2026-09-16 sur `bagne` réel (via agentcom, le sandbox ne pouvant pas exécuter
+- Validé sur `bagne` réel (via agentcom, le sandbox ne pouvant pas exécuter
   `ai_build_wmap`) : `Loaded 53 IGs` / `Added 2646 primitive blocs`, écart pixel résiduel
   0.024-0.033% contre `bagne_ref/ai_wmap` (bruit de précision flottante inter-plateforme,
   accepté — cf. root cause #3 du chantier).

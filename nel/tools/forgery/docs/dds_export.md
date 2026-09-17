@@ -1,7 +1,6 @@
 # dds_export
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/dds_export.py` (~280 lignes, créé le
-2026-08-27)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/dds_export.py` (~280 lignes)
 
 ## Rôle
 

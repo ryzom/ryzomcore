@@ -9,7 +9,7 @@ HSL réels`, en lisant les constantes de production consolidées dans
 `panoply.cfg` (fichier bundlé avec Forgery, voir son en-tête pour la
 provenance et le schéma exact : fusion, avec préfixe `<race>_` pour les axes
 `hair`/`eyes`, des vrais `panoply_common.cfg`/`panoply_<race>.cfg` de
-`ryzom-data`, snapshot 2026-08-29). Ce module ne fait aucun I/O au-delà de la
+`ryzom-data`). Ce module ne fait aucun I/O au-delà de la
 lecture d'un unique fichier `.cfg` (`panoply_config.py`) résolu à chaque
 appel via `_resolve_cfg_path()` : le `panoply.cfg` à la racine du workspace
 Forgery actif s'il existe, sinon le fichier bundlé — de sorte que ni ce

@@ -232,7 +232,14 @@ skinné), soit collé à un point d'attache d'arme (objet rigide).
   (override), point d'attache rigide (`creature_ref.WEAPON_ATTACH_POINTS` :
   `box_arme`/`box_arme_gauche`/`Box_bouclier`, les seuls vrais points d'attache
   simple-bone — `CCharacterSheet.BodyToBone` est en fait de la donnée combat, pas de
-  l'attache), ou "undefined" (position identité de la racine du PNJ assemblé). Le shape
+  l'attache — plus `Bip01 Head`, un vrai nom d'os du squelette pour les chapeaux/coiffes,
+  résolu exactement comme les 3 autres), ou "undefined" (position identité de la racine
+  du PNJ assemblé). Le combo d'attache affiche un libellé lisible pour chacun
+  (`creature_ref.WEAPON_ATTACH_POINT_LABELS` : `box_arme` → "Right Weapon",
+  `box_arme_gauche` → "Left Weapon", `Box_bouclier` → "Left Shield", `Bip01 Head` →
+  "Hat") au lieu du nom d'os brut, aussi bien pour chaque entrée du combo ouvert que pour
+  l'aperçu du combo fermé — la valeur réellement stockée/comparée pour la résolution
+  (`self._bind_attach_point`) ne change pas, seul l'affichage change. Le shape
   autonome (`model_root`) est systématiquement caché dès qu'un PNJ est affiché, jamais
   les deux en même temps — invariant réappliqué à la fin de `_rebuild_geometry`
   (viewport_transform.py) lui-même, pas seulement depuis les actions du Bind preview :

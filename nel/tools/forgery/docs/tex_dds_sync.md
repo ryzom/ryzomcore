@@ -1,7 +1,6 @@
 # tex_dds_sync
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/tex_dds_sync.py` (créé le 2026-08-27,
-reworké le 2026-09-02)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/tex_dds_sync.py`
 
 ## Rôle
 
@@ -12,14 +11,14 @@ TGA/PNG trouvée n'importe où dans le workspace** (excluant les chemins exclus,
 supprimé à chaque suppression de la source — chantier `patina-tex-dds-autoexport`
 (`/repos/project-todos/ryzom-core/patina-tex-dds-autoexport.md`).
 
-**Reworké 2026-09-02** (chantier "Workspace watcher: extension-based triggers anywhere +
+**Reworké** (chantier "Workspace watcher: extension-based triggers anywhere +
 duplicate-name guard", `project-todos/ryzom-core/forgery-object-editor.md`) : déclenché
 sur une source n'importe où dans le workspace désormais, plus seulement `tex/`, et la
 sortie est **flat** dans `build/dds/` au lieu de miroiter le sous-chemin de la source sous
 un `dds/` de premier niveau. Corrige au passage un bug préexistant trouvé pendant ce
 chantier : ce module lisait/écrivait un `<workspace>/dds/` racine, alors que
 `workspaces.py` crée en réalité `build/dds/` (`_BUILD_SUBDIRS`, déplacé là lors du rework
-des workspaces du 2026-09-01) — les deux ne désignaient jamais le même dossier.
+des workspaces) — les deux ne désignaient jamais le même dossier.
 
 Les textures specular sont hors scope pour l'instant : Patina ne gère pas encore les
 rôles/slots de texture, donc une source n'est en pratique jamais identifiable comme
@@ -79,15 +78,14 @@ routé vers le popup partagé. `set_workspace_dir` appelé depuis
 
 ## Points notables / pièges
 
-- Décisions utilisateur (2026-08-27) : pas d'exclusion par nom de fichier pour le
- specular pour l'instant (à revoir si/quand Patina gère les slots de texture) ;
- rattrapage complet systématique à l'ouverture d'un workspace (comme
- `workspace_sync.sync_now`, mais génératif plutôt que copie).
+- Pas d'exclusion par nom de fichier pour le specular pour l'instant (à revoir si/quand
+ Patina gère les slots de texture) ; rattrapage complet systématique à l'ouverture d'un
+ workspace (comme `workspace_sync.sync_now`, mais génératif plutôt que copie).
 - La comparaison mtime dans `reconcile` est simple (pas de hash de contenu) — un
  fichier touché sans changement réel de contenu déclenchera quand même une
  regénération.
-- Décision utilisateur (2026-09-02) : la sortie flat dans `build/dds/` matche le format
- `.bnp` (`workspace_sync.pack_workspace_bnp` flatten déjà les mêmes 4 extensions avant
+- La sortie flat dans `build/dds/` matche le format `.bnp`
+ (`workspace_sync.pack_workspace_bnp` flatten déjà les mêmes 4 extensions avant
  empaquetage) — une collision de nom surgirait de toute façon au moment du pack, donc
  le miroir ne doit pas prétendre l'éviter en gardant des sous-dossiers qu'il n'aura plus
  une fois empaqueté.

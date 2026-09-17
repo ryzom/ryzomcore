@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-17 — ✨ Bind preview: Bip01 Head attach point + readable labels, Forgery 4.18.0
+
+`creature_ref.WEAPON_ATTACH_POINTS` gains a 4th entry, `"Bip01 Head"` (a real skeleton bone
+name, resolved exactly like the 3 existing ones), for hats/headwear -- alongside the new
+`WEAPON_ATTACH_POINT_LABELS` dict (`box_arme` → "Right Weapon", `box_arme_gauche` → "Left
+Weapon", `Box_bouclier` → "Left Shield", `Bip01 Head` → "Hat"). The Bind preview's attach-point
+combo (`creature_bind.py`) now shows these labels instead of raw bone names, both for each open
+combo entry and for the closed combo's own preview text. Incidentally fixed while touching this
+code: the open combo's "selected" row highlight used an exact string comparison against the
+resolved bone name, while the actual resolution (`_resolve_bone_name`) is case-insensitive --
+the highlight silently never lit up whenever the skeleton's real bone casing differed from the
+curated name (e.g. `"Box_Arme"` vs `"box_arme"`).
+
+Documentation: `docs/apps/object_editor.md`'s Bind preview section updated. All doc files under
+`nel/tools/forgery/docs/` (and the `nel/tools/pynel/docs/` equivalent, logged separately) also
+had embedded dates, verbatim quotes and decision-registry framing stripped out, per the
+Documentation rules in project-todos/Agents.md -- factual content only, previously done and
+validated but deferred on committing until now.
+
 ## 2026-09-17 — ✨ Geometry tab: skinning status, Clear Skinning, Import rig, Forgery 4.17.0
 
 New "Geometry" tab in Patina (`geometry_ui.py`, `GeometryUIMixin`, 3rd position after Materials,

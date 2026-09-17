@@ -11,7 +11,7 @@ import complet si la shape cible n'existe pas encore, mise à jour de la géomé
 diffuse si elle existe déjà. C'est le mécanisme "auto-export -> shapes/", chantier terminé
 (voir Points notables).
 
-**Reworké 2026-09-02** (chantier "Workspace watcher: extension-based triggers anywhere +
+**Reworké** (chantier "Workspace watcher: extension-based triggers anywhere +
 duplicate-name guard", `project-todos/ryzom-core/forgery-object-editor.md`) : déclenché
 sur une source n'importe où dans le workspace désormais, plus seulement `imports/` (ce
 dossier reste créé comme emplacement de dépôt suggéré par défaut, mais n'est plus spécial
@@ -38,7 +38,7 @@ pour le watcher lui-même).
  (nouvel export, mise à jour, ou backup-and-reexport). Appelle `shape_import.extract_skeleton()` ;
  si un squelette en ressort, l'écrit sous `<nom d'armature sanitizé, en minuscule>.skel`,
  trouvé n'importe où dans le workspace (`find_existing_file`) ou à défaut dans
- `<workspace>/skels/`. **Squelette partagé, revu 2026-09-05** (`project-todos/forgery/
+ `<workspace>/skels/`. **Squelette partagé** (`project-todos/forgery/
  mesh_skel_anim_io.md`) : ce `.skel` peut être utilisé par plusieurs fichiers sources
  différents (plusieurs pièces d'un même rig) -- une fois qu'il existe, seul le fichier
  source dont le nom (sanitizé, minuscule) correspond exactement au nom de l'armature est
@@ -64,7 +64,7 @@ pour le watcher lui-même).
  rien réimporter par lui-même). `handle_settled` est enregistrée par `apps/object_editor.py`
  sur un `workspace_watch.WorkspaceWatcher` partagé via `register_extension(IMPORT_EXTENSIONS,
  ...)`.
-- `reconcile()` / `_reconcile_worker()` — ajouté 2026-09-04 (chantier
+- `reconcile()` / `_reconcile_worker()` — (chantier
  `workspace_switch_reconcile`, `project-todos/forgery/`) : rattrapage automatique sur un
  thread de fond, appelé par `apps/object_editor.py::_on_active_workspace_changed()` à
  chaque ouverture/changement de workspace (lancement de Patina inclus). Scanne toutes les
@@ -106,9 +106,6 @@ disparaît (suppression, ou renommage du fichier), le survivant est traité auto
  conflit fournis à `ImportWatcher`.
 - Le design a changé en cours de route pour le cas `MaterialCountMismatch` : un popup de
  confirmation était initialement prévu, remplacé par le flux 100% automatique
- (backup + ré-export) — décision utilisateur, voir `_backup_and_reexport`.
-- Chantier "Auto-export imports/ -> shapes/" **terminé** (5/5 steps), retiré du suivi
- externe (`project-todos/ryzom-core/forgery-object-editor.md`, commit `2ab2f29` dans ce
- dépôt de suivi) — historique récupérable via
- `git show 2ab2f29~1:ryzom-core/forgery-object-editor.md` dans `project-todos`. Journal
- narratif détaillé : `logs/forgery-object-editor.md` (sections datées 2026-08-26/27).
+ (backup + ré-export), voir `_backup_and_reexport`.
+- Chantier "Auto-export imports/ -> shapes/" **terminé** (5/5 steps). Journal narratif
+ détaillé : `logs/forgery-object-editor.md`.

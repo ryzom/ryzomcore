@@ -1,7 +1,7 @@
 # `panoply_maker.py` — offline panoply generation port
 
-Status: **cross-validated against the real `panoply_maker.exe`** (2026-08-29,
-see "Cross-validation result" below). Python port of `nel/tools/3d/panoply_maker/panoply_maker.cpp`
+Status: **cross-validated against the real `panoply_maker.exe`**
+(see "Cross-validation result" below). Python port of `nel/tools/3d/panoply_maker/panoply_maker.cpp`
 -- the offline tool that bakes an item's colorized texture variants (and the
 `.hlsinfo` used to build `characters.hlsbank`, see pynel's
 `docs/hls_texture_bank.md`) from a base texture + per-axis masks + a
@@ -22,10 +22,10 @@ order-dependent running-mean-with-360°-unwrap correction.
 For offline generation, this divergence matters: only `DHue` is *measured*
 (`DLum`/`DSat` are copied straight from the config), so a diverging hue
 average changes the `.hlsinfo` this tool writes, breaking byte-exact
-cross-validation against the real `panoply_maker` binary. Confirmed with
-Nuno (2026-08-29): keep `panoply_colorize.py`'s fast approximation for the
-interactive live-preview path, and use this module's exact port for
-generation (runs once per item, speed doesn't matter).
+cross-validation against the real `panoply_maker` binary. `panoply_colorize.py`'s
+fast approximation stays the one used for the interactive live-preview path,
+while this module's exact port is used for generation (runs once per item,
+speed doesn't matter).
 
 ## What's ported so far
 
@@ -112,7 +112,7 @@ panoply.cfg + Patina integration" for why colors got split into two `.cfg`
 shapes (prefixed/unified for the bundled default vs. legacy/per-race for
 cross-validation) instead of one.
 
-## Cross-validation result (2026-08-29)
+## Cross-validation result
 
 Ran the real `panoply_maker.exe` (`ryzom-docker/studio/output/`,
 `LD_LIBRARY_PATH=.../lib panoply_maker <cfg>`) and the Python port
