@@ -1,5 +1,131 @@
 # Changelog
 
+## 2026-09-18 — ✨ Recursive Box/Panel layout system (Forgery 4.23.0)
+
+Added `ryzom_forgery/ui/box.py`: `Box(dock, h, v, margin, padding)`, a
+nestable, self-sizing rectangle -- the recursive hbox/vbox primitive
+Forgery's UI was missing (every existing panel was a flat, non-nested
+docking system). `h`/`v` per axis are a fixed pixel number, `STRETCH`
+(shares the remaining space equally with sibling `STRETCH` children docked
+to the same side), or `Percent(value)` (resolved against the parent's own
+extent). `dock` is `top`/`bottom`/`left`/`right`/`center`; a parent places
+its children one at a time, in declaration order, shrinking its own
+remaining rect by whatever each child just consumed. Deliberately kept free
+of any `imgui_bundle` import so its layout math stays testable in plain
+Python -- this caught a real bug (an equal-split computation that redivided
+an already-shrunk rect instead of the original budget) before ever opening
+a window.
+
+Added `ryzom_forgery/ui/box_panel.py`, the ImGui-facing half (kept out of
+`box.py` for the same reason): `Panel(Box)` opens a real ImGui window for
+itself (position/size/resize-constraints/flags/begin-end), typically added
+as a child of a screen-sized root `Box`; `Widget(Box)` draws real ImGui
+content into its own rect instead of laying out further `Box` children
+(`draw_content(w, h)` to override); `ButtonWidget`/`LabelWidget`/
+`TextInputWidget` are concrete `Widget`s. Along the way: a container that
+draws its own background fill must do so BEFORE laying out its children, or
+it paints over real widget content already drawn during that recursion; a
+`Panel`'s content area must be read via `get_cursor_screen_pos()`/
+`get_content_region_avail()` after `imgui.begin()`, not the outer window
+rect requested, since a visible title bar eats into the top of that; a
+`Panel`'s own `padding` (inherited from `Box`) is the only padding source,
+with ImGui's own `WindowPadding` style forced to 0 so the two never stack.
+
+This is NOT yet the system `app.py`/`sysinfo.py` actually use (that's the
+older, flat `ui/panel.py` from the `ui_module_consolidation` work) --
+migrating the real app to this recursive system is a distinct, not yet
+started piece of work. Everything above was built and validated entirely
+in an isolated, disposable driver script run via agentcom (screenshots
++ live interaction), never against the real app.
+
+## 2026-09-18 — ✨ ryzom_forgery/ui/ package, self-sufficient Panel widget (NON COMMITÉ -- chantier `ui_module_consolidation.md` en pause, voir `project-todos/forgery/`)
+
+**Correction (2026-09-18) : cette entrée décrivait ce travail comme fait/livré, mais il n'a jamais été commité dans `forgery`** (Nuno a interrompu le chantier : "on a pas du tout fini ce chantier", Atyscape jamais réellement testé). Le "Forgery 4.22.0" annoncé n'a jamais existé comme version réelle -- le prochain commit réel a directement bumpé à 4.23.0 (voir l'entrée `box_panel_layout_system` plus haut). Le code décrit ci-dessous existe dans l'arborescence de travail mais reste non commité tant que ce chantier n'est pas repris et terminé.
+
+Consolidated `apps/object_editor_mixins/ui_helpers.py`, `popup_utils.py` and
+`icon_colors.py` into a new `ryzom_forgery/ui/` package (`widgets.py`,
+`popups.py`, `colors.py`) importable by any app or shared dialog, not just
+Patina's own mixins -- ~24 files updated to import from the new location, the
+three old files deleted. Added `ui/layout.py` (`center_x()`/`center_v()`,
+two targeted centering primitives, not a general layout engine) and
+`ui/panel.py`'s `Panel`: a self-sufficient docked-window widget (`side`,
+fixed or `resizable=True` extent with min/max bounds) that owns its own
+position, size, resize constraints, ImGui flags, and begin/end pair --
+callers only draw content inside `with panel.draw(available, title):`.
+`app.py`'s three pinned windows (Explorer, tool panel, sysinfo bar), shared
+by both Patina and Atyscape via `ForgeryApp`, now use `Panel` instead of
+hand-rolled `imgui.set_next_window_pos/size` calls repeated separately for
+each.
+
+`sysinfo.py`'s status bar (`SysInfoBar`) switched to `center_x()`/`center_v()`
+for the vertical-centering bug this whole chantier started from -- fixed
+`sysinfo_height` (36, up from 28) rather than auto-fitting to content:
+`imgui.WindowFlags_.always_auto_resize` on that panel reliably crashed
+Panda3D's `renderFrame()` with a NaN bounding-sphere assertion (confirmed by
+bisection, mechanism not understood, reverted). Also fixed the version
+label's right-alignment math, which omitted `window_padding.x` and let it
+overflow the window's real content area, triggering a visible horizontal
+scrollbar.
+
+## 2026-09-18 — ✨ Automatic live_data fallback in find_file() (Patina, Forgery 4.21.0)
+
+`SearchPathsDialog.find_file()` now falls back to `live_data_path` as a last
+resort when a file isn't found in the workspace or the user's configured
+search paths -- automatic, never added to `settings.search_paths` itself.
+Reuses the existing `priority_paths`/`_priority_entries_for()` mechanism (a
+one-shot, non-persisted in-memory index, `search_paths.build_texture_index()`)
+instead of a new eager full scan: `live_data_path` is only ever walked the
+first time a lookup actually misses everywhere else, not at startup or on
+every Reload. `draw_settings_content()` shows a read-only line at the bottom
+of the search paths list when `live_data_path` is configured and valid.
+
+## 2026-09-18 — ✨ Log uncaught exceptions to crash.log (Forgery 4.20.0)
+
+Added `ryzom_forgery/crash_log.py`: `install()` sets `sys.excepthook` and
+`threading.excepthook` so any uncaught exception -- main thread or
+background thread -- gets appended, with a timestamp and its full
+traceback, to `config_dir()/"crash.log"` before propagating normally
+(unchanged console behavior). A frozen Windows build runs with no console
+attached, so an unhandled exception previously just killed the process
+with nothing left to report. Writing the log is best-effort: an `OSError`
+while writing never masks the real exception. `install()` is called first
+thing in both `object_editor.py::main()` (Patina) and
+`landscape_editor.py::main()` (Atyscape), before the app itself is
+instantiated. Triggered by a user report of Patina crashing on a specific
+click with no traceback recoverable at all -- this doesn't fix that crash
+itself, only gives the next occurrence (of this or any other crash) a real
+trace to diagnose from. Deployed ahead of the TEST step being run, at
+Nuno's explicit request, so the reporting user gets it as soon as possible.
+
+## 2026-09-18 — 🐛 Fix pivot gizmo following the mesh instead of staying anchored in Bind preview (Patina), Forgery 4.19.0
+
+Fixed the Bind preview's pivot gizmo (`_pivot_axes_np`) visually moving along
+with a locked-pivot edit on a non-skinned shape bound to an attach point,
+even though the real anchor (the attach-point bone, or the slot node for a
+skinned override) never actually moves in that case -- a pivot-locked edit
+is baked into the shape's own vertices at save time, never into
+`CMeshBase.DefaultPos/RotQuat/Scale`, so the in-game anchor point stays put.
+
+Root cause (`creature_bind.py`): the gizmo was reparented onto `content_root`
+whenever a shape was bound, and `_update_bound_shape_rotation()` overwrote
+`content_root`'s local transform every frame with `model_root.get_mat(render)`
+-- the full composed transform, including whichever prop currently carries a
+pivot-locked edit. The gizmo therefore tracked that edit exactly like an
+unlocked one, even though only an unlocked edit truly moves the object's own
+`default_pos`/`default_rot_quat`/`default_scale` (and so its real in-game
+anchor).
+
+Fix: the gizmo is now reparented onto `node_path` (the actual fixed anchor --
+the attach-point bone node or the slot-override node) instead of
+`content_root`, and gets its own per-frame transform in
+`_update_bound_shape_rotation()`, driven by `_object_pivot.get_mat(render)`
+alone (never `model_root`'s). Since `_object_pivot` only ever carries
+whichever props/axes are currently unlocked, the gizmo now stays fixed for a
+locked edit and keeps following an unlocked one, matching what the real
+client would actually do. `object_editor.md`'s Bind preview section updated
+to match; the skinned-slot-override exception (gizmo/content both left alone
+entirely, no Default{Pos,Rot,Scale} effect in the real game) is unaffected.
+
 ## 2026-09-17 — ✨ Bind preview: Bip01 Head attach point + readable labels, Forgery 4.18.0
 
 `creature_ref.WEAPON_ATTACH_POINTS` gains a 4th entry, `"Bip01 Head"` (a real skeleton bone
@@ -86,6 +212,235 @@ already handles "no creature shown" itself by re-showing `model_root`.
 Documentation: `docs/apps/object_editor.md`'s Position/Rotation/Scale panel and Bind preview
 sections updated.
 
+## 2026-09-17 — Abandon of landscape_editor__bnp_packaging.md (judged unnecessary by Nuno)
+
+Abandoned the plan to add a final `.bnp` packaging stage (`bnp_make`, producing
+`<continent>_zones.bnp`/`<continent>_ig.bnp`/`<continent>_pacs.bnp`) to
+`run_full_build()`. No code had been written for it (all steps still
+unchecked). `landscape_editor.md` step 16 (`REQUIRE bnp_packaging`) removed
+accordingly.
+
+## 2026-09-17 — ✨ Lissage de normales par matériau dans l'éditeur d'objets (Smoothing), Forgery 4.15.0
+
+Added per-material normal smoothing to Patina (Ryzom Forgery's object editor): a
+"Smoothing" section in the Materials tab lets each material have its own
+smoothing angle (0-180°, matching 3ds Max's own smoothing-group angle
+convention), reusing the `_draw_material_section()` pattern already used by the
+lighting/texture-filtering/texture-transform sections. The angle is persisted
+directly in `Material.smoothing_angle` (new native `.shape` field, sentinel
+`-1.0` = never set) via the pynel/ryzom-core work landed alongside this
+(`project-todos/pynel/material_smoothing_angle_field.md`,
+`project-todos/ryzom-core/material_smoothing_angle_field.md`) -- purely tool
+metadata, ignored by rendering, which still relies solely on the already-baked
+normals.
+
+`shape_geometry.py` gained `face_normal()`/`face_area()` and
+`smooth_normals_per_material(vertex_buffer, material_id, indices,
+angle_degrees)`: per material, adjacent faces whose face-normal angle is under
+the threshold are welded into one smooth group (vertex normal = area-weighted
+average of its group's face normals), any vertex straddling multiple ungrouped
+faces is duplicated, and a material boundary is always a hard edge. Baking is
+destructive and always restarts from a pristine snapshot of the geometry
+captured at load time (`_pristine_mesh_vertex_buffer`/
+`_pristine_rdr_pass_indices`), so repeatedly raising/lowering the angle before
+saving stays fully reversible in either direction -- without the snapshot,
+vertices already split apart by a previous bake at a lower threshold could
+never be re-merged. The bake runs on Apply, on save, and automatically when
+re-opening a `.shape` whose material has `smoothing_angle != -1.0`
+(transparent to the user, angle field pre-filled). Current scope is `CMesh`
+only; `CMeshMRM`/`CMeshMultiLod`/`CMeshMRMSkinned` (multiple LODs/geomorphs
+sharing one `VertexBuffer`) aren't supported yet.
+
+Three bugs fixed during validation: (1) the smoothing algorithm never actually
+smoothed anything on a real faceted mesh, because it grouped edges by shared
+vertex INDEX, which flat-shaded meshes (the normal case for any 3ds
+Max/Blender export or Forgery import) never have between adjacent faces --
+fixed by welding on rounded vertex POSITION instead, verified against a new
+60-face test asset (`examples/test_sphere_faceted.shape`); (2) clicking Apply
+re-centered/re-zoomed the camera every time (`_rebuild_geometry()` always
+calls `_frame_camera()`) -- fixed with a new
+`_rebuild_geometry_preserving_camera()` used by Apply and by the post-save
+viewport refresh, while `_display_shape()` (actual file load) keeps the
+original re-framing behavior; (3) an `AttributeError: 'tuple' object has no
+attribute 'x'` on Apply for imported meshes, which store Position/Normal as
+plain tuples rather than `Vector3` -- fixed via a shared `_xyz()` helper and by
+having `smooth_normals_per_material()` always write the Normal channel back in
+the same representation it found it in.
+
+Validated end-to-end by Nuno on a real cubic test mesh.
+
+## 2026-09-16 — ✨ Ajout de `ai_wmap_export` (régénération de la carte de collision IA), Forgery 4.14.0
+
+Closes `ai_wmap_flora_collision.md`. New module `ryzom_forgery/ai_wmap_export.py`
+(library) + `ryzom_forgery/apps/ai_wmap_export.py` (thin CLI, `python -m
+ryzom_forgery.apps.ai_wmap_export <continent>`) drives the native `ai_build_wmap`
+binary to regenerate a continent's AI pathfinding walkability maps
+(`<continent>_0/1/2.tga`), fixing root cause #2 of the investigation (see
+below): `ai_build_wmap`'s `loadPacsPrims()` reads its `.ig` list from a
+`<continent>_ig.txt` manifest that must live next to `zone_lighted_ig_land/`'s
+real `.ig` files, and nothing in the pipeline ever generated it -- this module
+now writes it itself before every run, together with the `ai_build_wmap.cfg`
+`Paths=` entry the tool also needs, both cleaned up afterward. The `pacs_prim`
+directory used is resolved per the continent's own ecosystem
+(`continent_ecosystem.get_ecosystem_for_continent()`), not hardcoded, unlike
+the throwaway agentcom debug scripts used during the investigation.
+
+Follows the same library/CLI split as `dds_export.py`/`apps/dds_export.py` --
+first written as a standalone script under `~/.cache/agentcom/` (a mistake,
+caught by Nuno: that directory is neither shared with the team nor durable by
+Linux convention), corrected to live in the Forgery repo like every other app.
+`docs/apps/ai_wmap_export.md` also documents this library/CLI split as the
+general convention for any future standalone Forgery script.
+
+Validated for real (agentcom, `bagne`, the sandbox can't run `ai_build_wmap`
+directly): `Loaded 53 IGs` / `Added 2646 primitive blocs`, same as the earlier
+debug scripts, with a 0.024-0.033% residual pixel diff against `bagne_ref/
+ai_wmap` (root cause #3 below).
+
+Full investigation, from root cause #1 (missing flora in 7 `.ig` files) through
+root cause #3 (a ~1cm terrain-vertex residual on every zone, traced through
+`land_export`/`zone_welder`/`zone_elevation`/`zone_lighter` down to `CZone`'s
+patch quantization, `nel/src/3d/zone.cpp`/`patch.h`): the residual converges to
+the same small, homogeneous magnitude across all 53 zones of `bagne` regardless
+of how large the raw `land_export` output's own discrepancy was for that zone
+(up to 3m before welding/elevation), consistent with floating-point precision
+noise between platforms (Windows 32-bit reference build vs our Linux 64-bit
+build) rather than a real geometry or data bug. Accepted as-is (Nuno,
+2026-09-16): not practically fixable (reproducing a historical Windows 32-bit
+compiler's rounding behavior on our toolchain isn't realistic), and the visual
+confirmation (the reference's dense cloud of missing collision points is gone)
+is enough.
+
+A related tangent, since closed separately (`future_land_export_zonenh_version.md`,
+abandoned, see above): the `.zonenh`/`.zone` format version our `land_export`
+writes (5) differs from the reference's (4), traced to a "Ryzom Core release
+check" version bump `ryzom-core` commit `17f23ea437`/`64c94af6e0` (Nuno,
+2024-08-28/2024-09-06) added with no actual format change -- initially
+suspected, then disproven, as the cause of the vertex residual above (`CZone`'s
+version has no logic gated on it, and vertex positions are serialized by
+`CPatch`, which has its own separate, untouched version number). Left as `5`,
+not worth reverting for a purely cosmetic marker.
+
+## 2026-09-16 — Abandon of future_land_export_zonenh_version.md (`.zonenh` version 5 vs 4 not worth fixing)
+
+Investigated why our `land_export` writes `.zonenh` files with format
+version 5 instead of the reference build's version 4 (idea detached from
+`future_ai_wmap_flora_collision.md`'s root cause #3, a 0.7% residual
+diff on the `ai_wmap` comparison for `bagne`). Traced from
+`ryzom-core/ryzom/tools/leveldesign/world_editor/land_export/main.cpp`
+through `land_export_lib/export.cpp` (`UnitZoneNoHeightmap.serial()`) to
+`CZone::serial()` (`nel/src/3d/zone.cpp:458`): the bump from
+`serialVersion(4)` to `serialVersion(5)` is commented in the source
+itself as "Ryzom Core release check" and adds no new field or branch
+(no `if (ver>=5)` anywhere) -- a pure version marker, not a format
+change. Git history (`ryzom-core`) showed it is Nuno's own commit
+(`17f23ea437`, 2024-08-28), reverted (`f8ed2b5e64`, 2024-08-30), then
+reapplied via the `fixes` branch and merged into `main/gingo-test`
+(`64c94af6e0`, merged 2024-09-06) -- that reapplication is what is still
+in effect today. The same marker exists on `CMeshBase::serialMeshBase()`
+(`mesh_base.cpp`, version 9 to 10, same commit), so it is an intentional,
+repeated pattern on NeL 3D serialization formats, not an isolated
+accident.
+
+Initially suspected of also being the cause of the 1-4 unit vertex
+position drift seen in `future_ai_wmap_flora_collision.md`'s root
+cause #3, but that link was never proven and turned out to be false:
+verified that `CZone::serial()`'s version has no gated logic at all,
+and that vertex positions are actually carried by `CPatch::serial()`,
+which has its own independent version number (`_Version`, currently 7,
+untouched by this bump) -- so forcing `CZone`'s version back to 4 would
+only change the header byte, not a single vertex value. Corrected
+`future_ai_wmap_flora_collision.md` to remove the false causal claim
+between the two.
+
+With the two issues confirmed unrelated, Nuno decided the version-5
+marker itself has no practical impact worth fixing (cosmetic only) --
+closing this as abandoned rather than opening a real chantier. The
+vertex-drift root cause from `future_ai_wmap_flora_collision.md` stays
+open, unrelated to this.
+
+## 2026-09-15 — Abandon of landscape_editor__ig_other_export.md (absorbed into ig_editing.md)
+
+Abandoned the plan to produce the "other" `.ig` (village/decor/sky/water)
+from raw sources (locate `IgOtherSourceDirectories`, then run `ig_elevation`
+and `ig_lighter` globally on the result) -- for the same underlying reason
+as `landscape_editor__ig_land_export.md` (see entry below): `live_data`'s
+`.ig` is already elevated and lit, so there is no raw content left to run
+either tool on. Verified `ig_elevation` (`nel/tools/3d/ig_elevation/main.cpp`)
+applies an ADDITIVE heightmap offset (`Pos.z += ...`), unlike the lighter's
+absolute recompute -- re-running it on already-elevated `live_data` content
+would double the offset and corrupt positions, so it must never be called
+on our own working copies. `ig_lighter` (the global counterpart of
+`zone_ig_lighter`, same underlying `instance_lighter.cpp` engine, same
+idempotence already verified) is NOT dead, though: any edit made on an
+"other" working copy (`landscape_editor__ig_editing.md`'s `ig_other/`
+directory) leaves its baked-in lighting stale (a moved building's shadow
+no longer matches), so `ig_editing.md` now relights that working copy
+before every use (step 3), regardless of `land_export`'s own
+`ExportAdditionnalIGs` step (never anything but a rigid position/rotation
+transform, no lighting call at all). `landscape_editor.md` step 14 marked
+done with this decision instead of a CLOSE from a finished sub-chantier,
+same convention as step 13/20.
+
+## 2026-09-15 — Abandon of landscape_editor__ig_land_export.md (direct .ig editing instead)
+
+Abandoned the plan to reconstruct the "land" `.ig` from scratch (merging
+Prim + Ligo sources via `prim_export`/`ig_add`, then `ig_elevation`, ahead
+of the already-implemented `zone_ig_lighter` lighting pass). The whole
+point of the Prim source was to bring World Editor flora placements
+(`.primitive` files) into the `.ig` — but `landscape_editor__flora_ig_import.md`
+(see entry below) had already shown the `.primitive` data is stale on
+nexus (real hand-edits made directly on the `.ig`, never committed back)
+and would need to be kept in sync forever across every continent to stay
+trustworthy as a reconstruction source. Verified in `instance_lighter.cpp`
+(ryzom-core) that `zone_ig_lighter` is safe to re-run directly on an
+already-lit `.ig` — it unconditionally recomputes `StaticLightEnabled`/
+`SunContribution` from the current geometry and terrain rather than
+depending on any prior lighting state, so there is no need to keep a
+separate "raw, never-lit" `.ig` around at all. Decision (Nuno, 2026-09-15):
+edit `live_data`'s already-lit `.ig` directly instead (new plan,
+`landscape_editor__ig_editing.md`) — `live_data` is the one reliable
+source, and this sidesteps the `.primitive` staleness/maintenance problem
+entirely. `land_build.py`'s Stage 4bis (smallbank/farbank resolution +
+`prim_ig_dir`, added solely for this now-dead plan) was removed as dead
+code that could raise on a build for no remaining purpose.
+`landscape_editor__ig_land_export__farbank_smallbank.md` is not itself
+abandoned — smallbank/farbank/`prim_export` are unrelated to `.ig` editing
+and kept for later as `future_prim_export.md`, detached from this dead
+parent.
+
+## 2026-09-15 — Abandon of landscape_editor__flora_ig_import.md (no flora import needed)
+
+Investigated whether the flora placed via World Editor primitives
+(`ryzom-private-data/primitives/**/*.primitive`, split by real continent in
+`project-todos/pynel/flora_primitives_split_by_continent.md`) needed
+importing into the real per-zone `.ig` files. After several rounds of
+measurement against the real, already-exported data (first
+`pipeline/export/continents/<c>/ig_elev_land_prim/`, then the actual
+shipped `live_data/<c>_ig.bnp`), narrowing down false positives (a
+zone-name/brick-name collision bug in the geographic split itself; stale
+`.land`-orphaned zones; a too-tight 2-unit position-matching threshold
+instead of a proper nearest-neighbor search; source primitive points with
+no `form` property at all; auto-generated `"ark_generated N"` placeholder
+points; and `.ig` instances that were never flora to begin with --
+`.pacs_prim` collision markers, `bat_zc_*`/`flag_zc_*` outpost corner
+markers, water/waterfall meshes), the real picture turned out to be: 15 of
+16 continents already have their flora fully and correctly exported,
+nothing to do. Only `nexus` had a genuine discrepancy (14 "missing" points
+present only in the source `.primitive`, 144 "extra" instances present
+only in the real `.ig`) -- confirmed by Nuno (own verification) to be
+expected: real hand-adjustments were made directly on nexus's zones at
+some point, and the source `.primitive` was simply never committed back to
+reflect them. Decision (Nuno, 2026-09-15): import nothing -- the real,
+already-exported `.ig` files (`live_data/*_ig.bnp`) are the reference,
+the stale `.primitive` is not authoritative and should not drive any
+change. `landscape_editor__flora_ig_import.md` is abandoned as a result
+(never had a real reason to exist once the data was actually measured
+correctly) -- `landscape_editor.md` step 20 marked done with this
+decision instead of a CLOSE from a finished sub-chantier. Its own step 19
+(`landscape_editor__primitives_view.md`, the diff visualisation tool that
+made this whole investigation possible) is unaffected and stays open.
+
 ## 2026-09-14 — ✨ Textured region/rest .ig loading + IG Zones/Others checkbox tree, Forgery 4.11.0
 
 `landscape_editor__ig_full_load.md`, `landscape_editor__ig_inspector_tree.md`
@@ -136,6 +491,268 @@ transparent and rendered in Panda3D's lowest-priority `"background"` bin
 with depth-write off, so real geometry loaded afterwards at the same spot
 is never hidden behind a stale placeholder; and the right panel now shows
 the selected zone's name and world-space bounds.
+
+## 2026-09-14 — ✨ Suppression modes de rendu + nettoyage interface + perf régions + mode Low Poly, Forgery 4.12.0
+
+Removed the three zone render mode buttons ([POLY/LAND]/[WELD]/[LIGHT]) from
+Atyscape entirely -- zone resolution is now always the fixed
+`.zonel > .zonew > .zone` priority, identical in Visualisation and Édition,
+matching the behaviour Visualisation already had. The gray fallback
+mechanism (`_resolve_zone_for_mode()`, the `gray` parameter of
+`_set_loaded_zones()`) and the on-demand "Generate missing .zonew" button
+were removed along with it (the "Build" button already covers full
+regeneration). Per-zone build-stage coloring (`zone_build_stage()`) was
+already independent of render mode and stayed untouched.
+
+Restructured the Atyscape UI: continent selection and the region checkbox
+list moved from the right panel to the left panel (previously just the IG
+inspector tree), each with a "center camera" and a "reload cache" icon
+button; the region filter in `region_hierarchy.py` switched from a
+blocklist (`pvp_zone_*`) to an allowlist (`region_*`), fixing non-region
+entries that showed up on some continents. The right panel was reorganized
+into three sections: a collapsible, disableable "Selected Zone" (name in
+orange, bounds in green, the `.land` composition editor merged in, a trash
+icon per built stage to delete that file and fall back to the next one
+down), an always-visible "Continent status" (raw/welded/lighted counts in
+green, with the [Build] button only shown when something is actually
+missing), and a collapsible "Stats" section rendered as a real ImGui table
+(borders, striped rows) after initial plain-text feedback proved unreadable.
+The old "Instances (.ig)" manual-load block was removed (loading was
+already automatic on continent selection). A hand-drawn compass (ImGui has
+no native glyph rotation) was added bottom-right of the viewport, computing
+its heading live from the real camera transform; its "reset to north"
+button uses `OrbitCamera.animate_to_orientation()` since a plain
+`self.orbit_camera.heading = 0.0` assignment never actually moves the
+camera (found by tracing `camera.py` after a user report that the reset
+button did nothing).
+
+A significant perf investigation (traced with precise `(IA_AGENT_DEBUG)`
+timing instrumentation rather than guesswork, across several rounds) found
+and fixed three real, independent bottlenecks in the per-region loading
+path: `_toggle_region()` was reprocessing every previously-checked region's
+zones again on each new region check (an O(n^2) cost across a sequence of
+checks) -- replaced with a genuinely incremental `_load_region_incremental()`/
+`_unload_region_incremental()` pair that only ever touches the newly
+toggled region's own zones; the whole `.land` file (up to 1000+ cells) was
+being re-parsed on every single region toggle with no caching at all --
+fixed with a small mtime-checked in-memory cache; and the per-zone position
+cache (`zone_cache.py`, ~3ms/zone measured, mostly `pickle` decode overhead
+of thousands of individual Python floats) was always loaded before even
+checking whether the final `.bam` geometry cache (`zone_geom_cache.py`)
+would hit anyway (which it does almost every time) -- `ZoneGeomManifest`
+now also carries `bb_center`/`bb_half_size` (cache format bumped to
+version 2) so a cheap manifest-only read can confirm a `.bam` hit and skip
+the expensive position load entirely. The "reload cache" buttons (region
+and whole-continent) were updated to genuinely invalidate both caches via a
+`force` flag threaded through `load_zone_cache_data()` and
+`_rebuild_zone_node()`, reusing the exact same cache modules throughout --
+no second cache was introduced anywhere.
+
+Added a "Low Poly" terrain toggle (icon button, viewport toolbar) for weak
+GPUs: divides each patch's tessellation grid (`order_s`/`order_t`) by 4
+before the existing minimum-segment floor (~16x fewer faces per patch),
+computed from the same `.zone` file data, never an independently chosen
+fixed value. Reuses the exact same cache mechanism as normal quality --
+`zone_cache.py` gained a `variant` suffix (empty for normal quality, so
+every cache file already on disk stays valid) and `zone_geom_cache.py`'s
+already-stable `mode` key gained a second value (`"zone_low"`) -- never a
+separate cache. Persisted like the existing Visualisation/Édition toggle;
+switching forces a full reload of everything currently displayed. Shape/`.ig`
+LOD (buildings/props) is explicitly out of scope, a separate future chantier.
+
+## 2026-09-13 — ✨ Chargement paresseux par région + affichage .ig dans Atyscape, Forgery 4.10.0
+
+Closes `landscape_editor.md` step 11 (`landscape_editor__region_management.md`
+and its own sub-chantier `landscape_editor__region_management__zone_bam_cache.md`).
+
+**Lazy-by-region zone loading**: selecting a continent no longer loads every
+zone's real geometry immediately -- each zone/cell renders as a flat purple
+placeholder square (`zone_geometry.build_zone_placeholders_geom()`) until its
+own region is checked in a new checkbox panel, driven by the `continent ->
+region -> place` hierarchy in `world.lua` (Visualisation, embedded in
+`gamedev.bnp`, `pynel.ryzom_bnp.BnpReader`+`pynel.region_export.parse_world_lua`)
+or `world.json` (Édition, `ryzom-data/leveldesign/world/`, read directly) --
+new module `ryzom_forgery/region_hierarchy.py`. Zone -> region assignment is a
+ray-casting point-in-polygon test on each zone's footprint center
+(`assign_zones_to_regions()`); a zone outside every region polygon stays a
+permanent placeholder. `pvp_zone_*` entries (same hierarchy level as a real
+region in `world.lua`/`world.json`, e.g. `pvp_zone_ichor`) are filtered out --
+confirmed against every continent that a real region is always `region_*`,
+without exception. A continent with no `world.lua`/`world.json` region entries
+falls back to the pre-chantier behaviour (load everything immediately). In
+Édition, the existing `.land`+brick fallback is now ALSO gated by region
+(`self._land_cell_region_map`, same point-in-polygon test on each `.land`
+cell's own center) -- without this, the fallback loaded a real brick (same
+cost as a real zone) for every missing cell regardless of which region was
+checked, defeating the whole point (found testing `bagne`, 0 real exports:
+all 53 cells reloaded on every toggle).
+
+**Camera framing fix**: the camera only frames the WHOLE continent once, at
+`_select_continent()`, never again on a region toggle (`_set_loaded_zones()`'s
+new `frame_camera=False` for continent (re)loads, `True` still the default for
+a single-zone Explorer pick). New `OrbitCamera.frame_bounds()` (`camera.py`)
+computes the needed distance from the lens's real FOV
+(`distance * tan(fov/2)`, same relation `_pan()` already used) instead of a
+flat `distance = max(width, height) * 0.75` guess that under-framed a whole
+continent, projecting the bbox onto the camera's ACTUAL screen right/up axes
+(`getQuat(render).getRight()/.getUp()`, never assumed aligned to world X/Y --
+`up_hint` is deliberately never reset to a fixed axis, see `step_to_face()`),
+and accounting for `self.app.explorer_width`/`.panel_width`: the docked side
+panels sit ON TOP of the 3D view without shrinking its own lens/`DisplayRegion`
+(which stays sized to the whole window), so they visually cover the edges
+without the FOV calculation knowing -- the actual cause of the clipping seen
+on `nexus`/`tryker` (the wider of the two panels is the binding constraint,
+since the frustum is centred on the whole window). One zone-cell of margin
+added on every side.
+
+**Per-zone `.bam` geometry cache** (new `zone_geom_cache.py`, replaces
+`continent_geom_cache.py`, retired): the old cache kept ONE bundle per
+`(continent, render mode)`, containing every currently-loaded zone fused into
+one `NodePath` -- with lazy-by-region loading, that single bundle got
+overwritten on every region toggle, so it never paid off across toggles
+anymore. A bundle per ZONE stays valid no matter which other zones are loaded
+alongside it; each zone/`.land` piece invalidates independently on its own
+manifest (`ZoneManifestEntry`: resolved extension, source mtime/size, plus
+`rot`/`flip` -- found needed while designing this: a brick re-rotated/flipped
+IN PLACE, same file/mtime/size, would otherwise read as an identical cache
+key). The elevation-color gradient's `min_z`/`max_z` (previously recomputed
+from whichever subset was loaded, which would invalidate every zone's cache
+entry on every single region toggle) is now computed ONCE per continent load,
+across every real zone (`region_loader.get_continent_z_range()`), regardless
+of which regions end up checked. Side effect accepted by Nuno: an isolated
+small region gets the same color scale as if the whole continent were loaded,
+rather than being renormalized on itself alone. As a result, the old
+Édition-only cache disable (found 2026-09-12: a stale whole-continent `.bam`
+hit after deleting a built `.zonew`) no longer applies -- each zone's own
+freshness stamp is now what protects against exactly that.
+
+**Real perf bug found and fixed cross-repo**: `get_continent_z_range()`
+initially read each zone's bounding box via a FULL `pynel.ryzom_zone.
+parse_zone()` -- and `region_loader.py` always prefers the most-built
+extension available (`.zonel`, fully lit, the heaviest of the three stages).
+Measured on a real 423 KB `.zonel`: 268ms parse + 14.3 MB retained PER ZONE,
+forever, in `region_loader.py`'s own in-process `_zone_cache` -- for a small
+53-zone continent (`bagne`), that meant a ~14s freeze and ~750 MB of RAM on
+every continent load, before the purple placeholders could even show. Fixed
+by adding `pynel.ryzom_zone.parse_zone_header()` (pynel 0.15.0, see
+`logs/pynel.md`) -- a true header-only read (`zone_id`/`zone_bb`/
+`patch_bias`/`patch_scale`, nothing else), measured at 0.02-0.05ms regardless
+of file size/extension (~5000x faster), verified byte-identical `zone_bb`
+across `.zone`/`.zonew`/`.zonel` of the same zone.
+
+**`.ig` (instance group) visualisation**, from an earlier uncommitted pass
+(new `ig_geometry.py`): resolves and renders `.ig` instances (mesh/water
+polygon/water point) for the currently-loaded zone set. Loading is manual
+only -- the viewport toolbar's existing tree icon (`_toggle_ig_visibility()`)
+now also triggers a load when turned on (for `self._loaded_refs`'s current
+zone set, i.e. by checked region, not the whole continent), replacing
+whatever was shown before; turning it off only hides (no unload). Made
+manual because the per-zone `.ig`/`.shape` parsing cost (pure Python,
+GIL-bound even off the main thread) stuttered the whole app when it used to
+auto-trigger on every single region toggle. Water meshes (`water_polygon`/
+`water_point`) are now `set_two_sided(True)`, like the terrain -- a flat
+single-sided water plane was invisible from below/behind depending on camera
+angle and winding.
+
+**Data bug found while testing, fixed in `ryzom-data`, not a Forgery bug**:
+`continent_pipeline_reference.csv`'s `out_ig_dir` pointed at `ligo_ig_land`
+(the raw, work-in-progress LIGO draft) for all 25 continents instead of
+`zone_lighted_ig_land` (the real final output of `zone_ig_lighter`, matching
+the naming convention already used for the terrain's own `zone_lighted`) --
+confirmed on `nexus`/`46_BZ`: `ligo_ig_land` had only 1 instance (Nuno's
+in-progress edit) vs. 56 in `zone_lighted_ig_land`/`ig_land` (identical to
+each other, real production data). Fixed directly in the CSV.
+
+Documentation: new "Chargement paresseux par région" section and rewritten
+"Cache disque du `NodePath`" section in `docs/apps/landscape_editor.md`.
+
+## 2026-09-12 — ✨ Composition `.land` en 3D + build complet du pipeline paysage, Forgery 4.9.0
+
+Closes `landscape_editor.md` step 10 (`landscape_editor__land_composition.md`).
+Replaces the legacy 2D Ligo composition tool with a real 3D `.land` editor
+in Atyscape, plus a "Build" button running the whole native pipeline.
+Validated by Nuno on a real composition (`bagne`).
+
+**Build-stage color gradient** (replaces the old binary real/fallback
+coloring): `zone_geometry.zone_build_stage(ext_map)` returns 0-3 for the
+furthest real pipeline extension a zone actually has on disk (`.zonel`=3
+down to no file at all=0, a raw `.land` brick fallback). Each stage gets its
+own dark->light color band (`_STAGE_COLORS`), editable live from a new
+"Colors" section in Atyscape's own Settings tab and persisted
+(`Settings.landscape_zone_stage_colors`). Only stage 3 (fully built)
+normalizes over the whole loaded continent's Z range like the old elevation
+gradient did; stages 0-2 stay normalized over their own per-zone range
+(otherwise their tiny slice of relief would read as near-uniform against a
+whole-continent span).
+
+**`[POLY]` renamed `[LAND]` in Edition only**: the internal `render_mode`
+identifier is unchanged, only the displayed label switches to "LAND" in Dev
+(Release never has `.land` access). Release/Visualisation no longer shows
+the render-mode picker at all -- a real shipped `*_zones.bnp` only ever
+contains `.zonel` (confirmed 155/155 entries on a real `nexus_zones.bnp`),
+so the three buttons would always resolve identically there; replaced by a
+plain "Render mode: LIGHT" label.
+
+**Land-driven zone enumeration in Edition** (anti-staleness): Edition mode
+no longer scans disk by region for its zone list -- it enumerates exactly
+the cells the `.land` *currently* references (`land_geometry.
+used_land_cells()`), so a `.zone`/`.zonew`/`.zonel` left on disk at a
+position the `.land` no longer references (composition edited since that
+export) is silently ignored in all 3 render modes rather than shown as
+still current. Found and fixed a real off-by-one-row bug in the position ->
+zone-name resolution while building this: `world_pos_to_zone_name()` must
+always be called on a cell's exact corner, never an interior point (verified
+against `world_pos_to_zone_name(880, -9840)`, `62_AF.zone`'s own bb_center,
+wrongly returning `"61_AF"`) -- the same bug also affected the zone name
+shown under the cursor, fixed the same way (`land_geometry.
+expected_zone_name()`).
+
+**Grid editor**: a new panel lets Nuno select a `.land` grid cell, see a
+✅/❌ checklist of its real `.zone`/`.zonew`/`.zonel` presence, pick a brick
+by name from the ecosystem's brick folder, rotate/flip it, or clear the
+cell. Each edit rewrites the whole `.land` (small XML, cheap) and refreshes
+only the edited cell's own display (`_apply_lightweight_cell_update()`),
+never a full continent reload. Editing a cell also invalidates already-built
+files: the edited cell loses its own stale `.zone`/`.zonew`/`.zonel`/`.ig`/
+`.depend`, and its 8 neighbors lose everything except `.zone` (a neighbor's
+raw elevation never depends on this cell's composition, but its own
+weld/lighting can).
+
+**"Build" button** (`land_build.py`, new module): orchestrates the full
+native chain (`land_export` -> `zone_welder` -> `zone_elevation` ->
+`zone_welder` -> `zone_dependencies` -> `zone_lighter` -> `zone_ig_lighter`)
+for the whole selected continent, reading its config from
+`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (new module
+`continent_pipeline_reference.py`, the one Forgery-side pipeline reference
+going forward -- never the legacy `leveldesign/workspace/`). Rebuilds are
+incremental per real stage (not just "has `.zonel`"): a zone already welded
+is never re-welded just because it lacks lighting yet, and a zone with a
+real `.zonel` but no `.zonew` next to it (found on real pre-existing data)
+still gets correctly re-welded. Worked around two real native
+`zone_dependencies` bugs (broken min/max axis swap, one `.depend` file per
+zone rather than a single file) already documented for pynel's own land
+pipeline work. `zone_lighter` runs are parallelized across zones (one
+process per zone, thread pool sized to `os.cpu_count()`) since each zone's
+own lighting pass dominates the whole build's time; `zone_lighter`'s
+internal thread count is deliberately kept at 1 to avoid oversubscribing
+both process- and thread-level concurrency at once. Newly-lit zones appear
+in the live 3D view immediately as they finish, with one full reload at the
+end of a Build to drop any leftover stale fallback pieces.
+
+`PropertiesConfig.cpu_num` is never read from the CSV despite a leftover
+column for it: baking one machine's own core count into a config file every
+Forgery user's `ryzom-data` shares would ship Nuno's own CPU count to
+everyone else -- `os.cpu_count()` is read fresh on whichever machine
+actually runs the Build instead.
+
+**Other fixes along the way**: zone/piece selection under the cursor now
+matches a loaded zone's real bounding box instead of a fixed 160-unit
+name-based cell, so a multi-cell `.land` piece selects its whole real
+footprint instead of just the clicked 160x160 slice; the camera no longer
+retargets on zone selection while in the locked 2D top-down view (no pivot
+to manage there); and `zone_cache.py`/`continent_geom_cache.py` moved from
+the OS config directory to a proper OS cache directory (new
+`config_dir.cache_dir()`).
 
 ## 2026-09-11 — ✨ Add clickable zone selection with orange border as rotation pivot, Forgery 4.8.0
 
@@ -631,63 +1248,6 @@ Also bumped `OrbitCamera.max_distance`'s multiplier from 3x to 6x (12000.0,
 still under the 20000.0 far clip) -- 3x still weren't enough to zoom out
 comfortably on a whole continent.
 
-## 2026-09-07 — ✨ Add landscape_editor app scaffolding, Forgery 3.5.0
-
-New Forgery tool app, `ryzom_forgery/apps/landscape_editor.py`
-(`project-todos/forgery/landscape_editor.md` step 1): scaffolding only,
-no terrain rendering yet -- window, explorer filtered on `*.land`, free
-`OrbitCamera` reused as-is from `camera.py`. Auto-discovered by ryztart via
-the existing `APP_INFO`/`list_apps()` mechanism, no separate menu file to
-edit.
-
-`OrbitCamera` (and the `ObjectManipulator` it coexists with) reads
-`app.forced_drag_mode`/`app.target_mode` every frame -- both undocumented
-requirements on any `ForgeryApp` subclass wanting to reuse it (only
-discovered by testing: `object_editor.py` happens to set both for its own
-navcube-driven drag-mode overrides, but nothing enforces or documents that a
-camera-only consumer must too). Set to `None` (no override) in
-`LandscapeEditorApp.__init__`.
-
-Also reordered `project-todos/forgery/landscape_editor.md`'s own steps 1-2:
-the plan originally had "finish continent-selector sub-chantier" before
-"create the app", but continent-selector's own step 3 needs the app's panel
-to already exist to add its dropdown to -- a circular dependency, fixed by
-swapping the two steps.
-
-## 2026-09-07 — ✨ Add continent selector + real region bounds, Forgery 3.6.0
-
-`project-todos/forgery/landscape_editor__continent-selector.md` closed.
-Added `ryzom_forgery/continent_selector.py`
-(`load_continent_locations()`/`resolve_continent_bounds()`) and wired a
-continent-picker dropdown + resolved bounds display into
-`landscape_editor.py`'s panel, reading `world.packed_sheets`/
-`continent.packed_sheets`/`sheet_id.bin` from the same `live_data_path`
-global setting Patina (`object_editor.py`) already exposes.
-
-`resolve_continent_bounds()` reproduces `CContinent::getCorners()`:
-`ContinentParameters.zone_min`/`zone_max` are zone names (not raw
-coordinates), decoded via `pynel.ryzom_packed_sheets.zone_name_to_world_pos()`,
-each axis reordered min/max (a zone name's letter/digit order isn't
-guaranteed ascending), and +160 added to the max corner (a zone name gives
-its origin corner, not its extent).
-
-Two real-data surprises found only by testing against a real install (both
-corrected in the sub-chantier's own notes, the initial plan had guessed
-wrong on both):
-- `ContLoc.continent_name` is the bare sheet stem with **no extension**
-  (e.g. `"bagne"`), not `"bagne.continent"` as the original investigation
-  assumed -- the `.continent` suffix has to be appended before looking the
-  name up in `sheet_id.bin`.
-- `sheet_id.bin` is **not** a loose file in the Ryzom Live data folder,
-  unlike `creature.packed_sheets`/`world.packed_sheets`/
-  `continent.packed_sheets` -- it only exists packed inside
-  `leveldesign.bnp`. `continent_selector.py` tries the loose file first,
-  then falls back to reading it out of `leveldesign.bnp` via
-  `pynel.ryzom_bnp.BnpReader`.
-
-Validated against a real Ryzom Live install: all 28 real continents resolve
-bounds without error.
-
 ## 2026-09-08 — ✨ Add disk cache of tessellated zones, whole-continent loading, Forgery 3.8.2
 
 `project-todos/forgery/landscape_editor__zone_disk_cache.md` closed
@@ -791,196 +1351,59 @@ be occluded.
 
 Validated by Nuno on a real continent.
 
-## 2026-09-12 — ✨ Composition `.land` en 3D + build complet du pipeline paysage, Forgery 4.9.0
+## 2026-09-07 — ✨ Add landscape_editor app scaffolding, Forgery 3.5.0
 
-Closes `landscape_editor.md` step 10 (`landscape_editor__land_composition.md`).
-Replaces the legacy 2D Ligo composition tool with a real 3D `.land` editor
-in Atyscape, plus a "Build" button running the whole native pipeline.
-Validated by Nuno on a real composition (`bagne`).
+New Forgery tool app, `ryzom_forgery/apps/landscape_editor.py`
+(`project-todos/forgery/landscape_editor.md` step 1): scaffolding only,
+no terrain rendering yet -- window, explorer filtered on `*.land`, free
+`OrbitCamera` reused as-is from `camera.py`. Auto-discovered by ryztart via
+the existing `APP_INFO`/`list_apps()` mechanism, no separate menu file to
+edit.
 
-**Build-stage color gradient** (replaces the old binary real/fallback
-coloring): `zone_geometry.zone_build_stage(ext_map)` returns 0-3 for the
-furthest real pipeline extension a zone actually has on disk (`.zonel`=3
-down to no file at all=0, a raw `.land` brick fallback). Each stage gets its
-own dark->light color band (`_STAGE_COLORS`), editable live from a new
-"Colors" section in Atyscape's own Settings tab and persisted
-(`Settings.landscape_zone_stage_colors`). Only stage 3 (fully built)
-normalizes over the whole loaded continent's Z range like the old elevation
-gradient did; stages 0-2 stay normalized over their own per-zone range
-(otherwise their tiny slice of relief would read as near-uniform against a
-whole-continent span).
+`OrbitCamera` (and the `ObjectManipulator` it coexists with) reads
+`app.forced_drag_mode`/`app.target_mode` every frame -- both undocumented
+requirements on any `ForgeryApp` subclass wanting to reuse it (only
+discovered by testing: `object_editor.py` happens to set both for its own
+navcube-driven drag-mode overrides, but nothing enforces or documents that a
+camera-only consumer must too). Set to `None` (no override) in
+`LandscapeEditorApp.__init__`.
 
-**`[POLY]` renamed `[LAND]` in Edition only**: the internal `render_mode`
-identifier is unchanged, only the displayed label switches to "LAND" in Dev
-(Release never has `.land` access). Release/Visualisation no longer shows
-the render-mode picker at all -- a real shipped `*_zones.bnp` only ever
-contains `.zonel` (confirmed 155/155 entries on a real `nexus_zones.bnp`),
-so the three buttons would always resolve identically there; replaced by a
-plain "Render mode: LIGHT" label.
+Also reordered `project-todos/forgery/landscape_editor.md`'s own steps 1-2:
+the plan originally had "finish continent-selector sub-chantier" before
+"create the app", but continent-selector's own step 3 needs the app's panel
+to already exist to add its dropdown to -- a circular dependency, fixed by
+swapping the two steps.
 
-**Land-driven zone enumeration in Edition** (anti-staleness): Edition mode
-no longer scans disk by region for its zone list -- it enumerates exactly
-the cells the `.land` *currently* references (`land_geometry.
-used_land_cells()`), so a `.zone`/`.zonew`/`.zonel` left on disk at a
-position the `.land` no longer references (composition edited since that
-export) is silently ignored in all 3 render modes rather than shown as
-still current. Found and fixed a real off-by-one-row bug in the position ->
-zone-name resolution while building this: `world_pos_to_zone_name()` must
-always be called on a cell's exact corner, never an interior point (verified
-against `world_pos_to_zone_name(880, -9840)`, `62_AF.zone`'s own bb_center,
-wrongly returning `"61_AF"`) -- the same bug also affected the zone name
-shown under the cursor, fixed the same way (`land_geometry.
-expected_zone_name()`).
+## 2026-09-07 — ✨ Add continent selector + real region bounds, Forgery 3.6.0
 
-**Grid editor**: a new panel lets Nuno select a `.land` grid cell, see a
-✅/❌ checklist of its real `.zone`/`.zonew`/`.zonel` presence, pick a brick
-by name from the ecosystem's brick folder, rotate/flip it, or clear the
-cell. Each edit rewrites the whole `.land` (small XML, cheap) and refreshes
-only the edited cell's own display (`_apply_lightweight_cell_update()`),
-never a full continent reload. Editing a cell also invalidates already-built
-files: the edited cell loses its own stale `.zone`/`.zonew`/`.zonel`/`.ig`/
-`.depend`, and its 8 neighbors lose everything except `.zone` (a neighbor's
-raw elevation never depends on this cell's composition, but its own
-weld/lighting can).
+`project-todos/forgery/landscape_editor__continent-selector.md` closed.
+Added `ryzom_forgery/continent_selector.py`
+(`load_continent_locations()`/`resolve_continent_bounds()`) and wired a
+continent-picker dropdown + resolved bounds display into
+`landscape_editor.py`'s panel, reading `world.packed_sheets`/
+`continent.packed_sheets`/`sheet_id.bin` from the same `live_data_path`
+global setting Patina (`object_editor.py`) already exposes.
 
-**"Build" button** (`land_build.py`, new module): orchestrates the full
-native chain (`land_export` -> `zone_welder` -> `zone_elevation` ->
-`zone_welder` -> `zone_dependencies` -> `zone_lighter` -> `zone_ig_lighter`)
-for the whole selected continent, reading its config from
-`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (new module
-`continent_pipeline_reference.py`, the one Forgery-side pipeline reference
-going forward -- never the legacy `leveldesign/workspace/`). Rebuilds are
-incremental per real stage (not just "has `.zonel`"): a zone already welded
-is never re-welded just because it lacks lighting yet, and a zone with a
-real `.zonel` but no `.zonew` next to it (found on real pre-existing data)
-still gets correctly re-welded. Worked around two real native
-`zone_dependencies` bugs (broken min/max axis swap, one `.depend` file per
-zone rather than a single file) already documented for pynel's own land
-pipeline work. `zone_lighter` runs are parallelized across zones (one
-process per zone, thread pool sized to `os.cpu_count()`) since each zone's
-own lighting pass dominates the whole build's time; `zone_lighter`'s
-internal thread count is deliberately kept at 1 to avoid oversubscribing
-both process- and thread-level concurrency at once. Newly-lit zones appear
-in the live 3D view immediately as they finish, with one full reload at the
-end of a Build to drop any leftover stale fallback pieces.
+`resolve_continent_bounds()` reproduces `CContinent::getCorners()`:
+`ContinentParameters.zone_min`/`zone_max` are zone names (not raw
+coordinates), decoded via `pynel.ryzom_packed_sheets.zone_name_to_world_pos()`,
+each axis reordered min/max (a zone name's letter/digit order isn't
+guaranteed ascending), and +160 added to the max corner (a zone name gives
+its origin corner, not its extent).
 
-`PropertiesConfig.cpu_num` is never read from the CSV despite a leftover
-column for it: baking one machine's own core count into a config file every
-Forgery user's `ryzom-data` shares would ship Nuno's own CPU count to
-everyone else -- `os.cpu_count()` is read fresh on whichever machine
-actually runs the Build instead.
+Two real-data surprises found only by testing against a real install (both
+corrected in the sub-chantier's own notes, the initial plan had guessed
+wrong on both):
+- `ContLoc.continent_name` is the bare sheet stem with **no extension**
+  (e.g. `"bagne"`), not `"bagne.continent"` as the original investigation
+  assumed -- the `.continent` suffix has to be appended before looking the
+  name up in `sheet_id.bin`.
+- `sheet_id.bin` is **not** a loose file in the Ryzom Live data folder,
+  unlike `creature.packed_sheets`/`world.packed_sheets`/
+  `continent.packed_sheets` -- it only exists packed inside
+  `leveldesign.bnp`. `continent_selector.py` tries the loose file first,
+  then falls back to reading it out of `leveldesign.bnp` via
+  `pynel.ryzom_bnp.BnpReader`.
 
-**Other fixes along the way**: zone/piece selection under the cursor now
-matches a loaded zone's real bounding box instead of a fixed 160-unit
-name-based cell, so a multi-cell `.land` piece selects its whole real
-footprint instead of just the clicked 160x160 slice; the camera no longer
-retargets on zone selection while in the locked 2D top-down view (no pivot
-to manage there); and `zone_cache.py`/`continent_geom_cache.py` moved from
-the OS config directory to a proper OS cache directory (new
-`config_dir.cache_dir()`).
-
-## 2026-09-13 — ✨ Chargement paresseux par région + affichage .ig dans Atyscape, Forgery 4.10.0
-
-Closes `landscape_editor.md` step 11 (`landscape_editor__region_management.md`
-and its own sub-chantier `landscape_editor__region_management__zone_bam_cache.md`).
-
-**Lazy-by-region zone loading**: selecting a continent no longer loads every
-zone's real geometry immediately -- each zone/cell renders as a flat purple
-placeholder square (`zone_geometry.build_zone_placeholders_geom()`) until its
-own region is checked in a new checkbox panel, driven by the `continent ->
-region -> place` hierarchy in `world.lua` (Visualisation, embedded in
-`gamedev.bnp`, `pynel.ryzom_bnp.BnpReader`+`pynel.region_export.parse_world_lua`)
-or `world.json` (Édition, `ryzom-data/leveldesign/world/`, read directly) --
-new module `ryzom_forgery/region_hierarchy.py`. Zone -> region assignment is a
-ray-casting point-in-polygon test on each zone's footprint center
-(`assign_zones_to_regions()`); a zone outside every region polygon stays a
-permanent placeholder. `pvp_zone_*` entries (same hierarchy level as a real
-region in `world.lua`/`world.json`, e.g. `pvp_zone_ichor`) are filtered out --
-confirmed against every continent that a real region is always `region_*`,
-without exception. A continent with no `world.lua`/`world.json` region entries
-falls back to the pre-chantier behaviour (load everything immediately). In
-Édition, the existing `.land`+brick fallback is now ALSO gated by region
-(`self._land_cell_region_map`, same point-in-polygon test on each `.land`
-cell's own center) -- without this, the fallback loaded a real brick (same
-cost as a real zone) for every missing cell regardless of which region was
-checked, defeating the whole point (found testing `bagne`, 0 real exports:
-all 53 cells reloaded on every toggle).
-
-**Camera framing fix**: the camera only frames the WHOLE continent once, at
-`_select_continent()`, never again on a region toggle (`_set_loaded_zones()`'s
-new `frame_camera=False` for continent (re)loads, `True` still the default for
-a single-zone Explorer pick). New `OrbitCamera.frame_bounds()` (`camera.py`)
-computes the needed distance from the lens's real FOV
-(`distance * tan(fov/2)`, same relation `_pan()` already used) instead of a
-flat `distance = max(width, height) * 0.75` guess that under-framed a whole
-continent, projecting the bbox onto the camera's ACTUAL screen right/up axes
-(`getQuat(render).getRight()/.getUp()`, never assumed aligned to world X/Y --
-`up_hint` is deliberately never reset to a fixed axis, see `step_to_face()`),
-and accounting for `self.app.explorer_width`/`.panel_width`: the docked side
-panels sit ON TOP of the 3D view without shrinking its own lens/`DisplayRegion`
-(which stays sized to the whole window), so they visually cover the edges
-without the FOV calculation knowing -- the actual cause of the clipping seen
-on `nexus`/`tryker` (the wider of the two panels is the binding constraint,
-since the frustum is centred on the whole window). One zone-cell of margin
-added on every side.
-
-**Per-zone `.bam` geometry cache** (new `zone_geom_cache.py`, replaces
-`continent_geom_cache.py`, retired): the old cache kept ONE bundle per
-`(continent, render mode)`, containing every currently-loaded zone fused into
-one `NodePath` -- with lazy-by-region loading, that single bundle got
-overwritten on every region toggle, so it never paid off across toggles
-anymore. A bundle per ZONE stays valid no matter which other zones are loaded
-alongside it; each zone/`.land` piece invalidates independently on its own
-manifest (`ZoneManifestEntry`: resolved extension, source mtime/size, plus
-`rot`/`flip` -- found needed while designing this: a brick re-rotated/flipped
-IN PLACE, same file/mtime/size, would otherwise read as an identical cache
-key). The elevation-color gradient's `min_z`/`max_z` (previously recomputed
-from whichever subset was loaded, which would invalidate every zone's cache
-entry on every single region toggle) is now computed ONCE per continent load,
-across every real zone (`region_loader.get_continent_z_range()`), regardless
-of which regions end up checked. Side effect accepted by Nuno: an isolated
-small region gets the same color scale as if the whole continent were loaded,
-rather than being renormalized on itself alone. As a result, the old
-Édition-only cache disable (found 2026-09-12: a stale whole-continent `.bam`
-hit after deleting a built `.zonew`) no longer applies -- each zone's own
-freshness stamp is now what protects against exactly that.
-
-**Real perf bug found and fixed cross-repo**: `get_continent_z_range()`
-initially read each zone's bounding box via a FULL `pynel.ryzom_zone.
-parse_zone()` -- and `region_loader.py` always prefers the most-built
-extension available (`.zonel`, fully lit, the heaviest of the three stages).
-Measured on a real 423 KB `.zonel`: 268ms parse + 14.3 MB retained PER ZONE,
-forever, in `region_loader.py`'s own in-process `_zone_cache` -- for a small
-53-zone continent (`bagne`), that meant a ~14s freeze and ~750 MB of RAM on
-every continent load, before the purple placeholders could even show. Fixed
-by adding `pynel.ryzom_zone.parse_zone_header()` (pynel 0.15.0, see
-`logs/pynel.md`) -- a true header-only read (`zone_id`/`zone_bb`/
-`patch_bias`/`patch_scale`, nothing else), measured at 0.02-0.05ms regardless
-of file size/extension (~5000x faster), verified byte-identical `zone_bb`
-across `.zone`/`.zonew`/`.zonel` of the same zone.
-
-**`.ig` (instance group) visualisation**, from an earlier uncommitted pass
-(new `ig_geometry.py`): resolves and renders `.ig` instances (mesh/water
-polygon/water point) for the currently-loaded zone set. Loading is manual
-only -- the viewport toolbar's existing tree icon (`_toggle_ig_visibility()`)
-now also triggers a load when turned on (for `self._loaded_refs`'s current
-zone set, i.e. by checked region, not the whole continent), replacing
-whatever was shown before; turning it off only hides (no unload). Made
-manual because the per-zone `.ig`/`.shape` parsing cost (pure Python,
-GIL-bound even off the main thread) stuttered the whole app when it used to
-auto-trigger on every single region toggle. Water meshes (`water_polygon`/
-`water_point`) are now `set_two_sided(True)`, like the terrain -- a flat
-single-sided water plane was invisible from below/behind depending on camera
-angle and winding.
-
-**Data bug found while testing, fixed in `ryzom-data`, not a Forgery bug**:
-`continent_pipeline_reference.csv`'s `out_ig_dir` pointed at `ligo_ig_land`
-(the raw, work-in-progress LIGO draft) for all 25 continents instead of
-`zone_lighted_ig_land` (the real final output of `zone_ig_lighter`, matching
-the naming convention already used for the terrain's own `zone_lighted`) --
-confirmed on `nexus`/`46_BZ`: `ligo_ig_land` had only 1 instance (Nuno's
-in-progress edit) vs. 56 in `zone_lighted_ig_land`/`ig_land` (identical to
-each other, real production data). Fixed directly in the CSV.
-
-Documentation: new "Chargement paresseux par région" section and rewritten
-"Cache disque du `NodePath`" section in `docs/apps/landscape_editor.md`.
+Validated against a real Ryzom Live install: all 28 real continents resolve
+bounds without error.
