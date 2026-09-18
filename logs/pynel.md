@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-17 — ✨ Add Material.smoothing_angle mirror (pynel 0.16.0)
+
+Mirrors `CMaterial::_SmoothingAngle` (engine field added at `.shape` version
+10, `project-todos/ryzom-core/material_smoothing_angle_field.md`) in
+`ryzom_shape.py`'s `Material` dataclass: `smoothing_angle` (float, sentinel
+`-1.0` = never set), read via the existing `if ver >= N` branching pattern
+already used for every versioned `CMaterial` field, written unconditionally
+by bumping `_write_material()`'s fixed output version from 9 to 10.
+
+Validated with a manual round-trip: `la_sky_dome.shape` (version < 10, from
+`ryzom-data/graphics/sky_v2/exported/`) loads with `smoothing_angle == -1.0`;
+setting it to `42.5` and writing/re-reading it recovers the exact value.
+Purely tool metadata, consumed by Ryzom Forgery's per-material Smoothing UI
+(`project-todos/forgery/smooth_normals.md`, closed the same day this was
+validated end-to-end via Patina).
+
 ## 2026-09-14 — 🐛 Fix world_pos_to_zone_name() row formula, pynel 0.15.1
 
 `ryzom_packed_sheets.world_pos_to_zone_name()` computed
@@ -17,6 +33,115 @@ Also added `LandExportConfig.ig_other_lighted_dir` (Forgery-only lookup
 path for the legacy build_gamedata pipeline's already-lit "other" `.ig`s --
 villages/water/sky -- sibling of `out_ig_dir`; never read/written by
 `land_export`/`zone_ig_lighter`'s own `.cfg`).
+
+## 2026-09-13 — ✨ Add region_export: continent/region/place export to world.json/world.lua
+
+New module `pynel/region_export.py` (project-todos/pynel/region_places_export.md,
+now closed): reads Ryzom's named lore regions and places (e.g. Tryker mainland's
+`lagoonsofloria`, `windsofmuse`...) from `region_<continent>.primitive` files (LIGO
+primitive tree, `pynel.ryzom_primitive`) in the private `ryzom-private-data`
+leveldesign repository -- the only real source, since neither `live_data_path`'s
+`packed_sheets` nor `ryzom.world` carry these (both were investigated and ruled out
+first).
+
+- `primzone_to_json(prim)`/`build_world_regions(path)`: converts the `.primitive`
+  tree to `{name: [visible, points, children_or_type]}`, matching the exact
+  structure the real Ryzom Live client itself ships as `gamedev/world.lua`. A
+  single `.primitive` file can hold several sibling top-level continents (e.g.
+  `region_fyros.primitive` has `continent_fyros`/`continent_fyros_newbie`/
+  `continent_fyros_islands` side by side) -- all of them are collected, not just
+  the first. Coordinates are truncated toward zero (`int()`, a C++-style cast),
+  not rounded to the nearest integer. The leaf/branch distinction is the node's
+  own `class` property ("place" = leaf) -- a childless continent/region still
+  produces an empty list `[]`, never mistaken for a leaf.
+- `to_lua(regions)`/`parse_world_lua(text)`: a dedicated tokenizer + recursive-
+  descent parser (not a general Lua engine) for the real `world.lua`'s exact
+  grammar, including its `["name"] = {...}` bracketed-key form for names that
+  aren't valid bare Lua identifiers (real examples: `"Karavan Embassy"`,
+  `"endroit_résidu_oeuf"`). Round-trip exact
+  (`parse_world_lua(to_lua(regions)) == regions`). The real file's trailing
+  `FILE_WORLD_VERSION` client-build-version footer is deliberately never
+  written or read (a regeneration has no way to know that number).
+- CLI: `python -m pynel.region_export [--format {json,lua}] [--output-dir <folder>]`,
+  one format per run, writing `world.<format>` into the destination folder
+  (`ryzom-data` by default). Source is always
+  `pynel.repository_paths.get("ryzom-private-data")`, already exposed as a
+  folder-picker setting in both Patina and Atyscape.
+- Validated against real data throughout: exact byte-for-byte match against
+  Nuno's own `world.json`/the real client's `world.lua` wherever the underlying
+  leveldesign data hasn't changed since; real content drift found and confirmed
+  expected elsewhere (polygons nudged, some `place_type`s changed, some places
+  added/removed) since `ryzom-private-data` HEAD is the intended up-to-date
+  source, not a frozen reproduction of the old reference files.
+- Documentation: new `nel/tools/pynel/docs/region_export.md`.
+
+## 2026-09-13 — ✨ parse_zone_header() (lecture d'en-tête légère .zone), pynel 0.15.0
+
+Closes `project-todos/pynel/zone_header_reader.md`, a dependency of Forgery's
+`landscape_editor__region_management__zone_bam_cache.md` (see `logs/forgery.md`).
+
+**`parse_zone_header()`** (new, `ryzom_zone.py`): reads only `zone_id`/
+`zone_bb`/`patch_bias`/`patch_scale` -- the exact leading bytes `parse_zone()`
+itself reads first -- then stops, never touching `num_vertices`/
+`border_vertices`/`patchs`/`patch_connects`/`point_lights` (the bulk of a real
+file). Motivated by a real perf bug found in Forgery: computing a whole
+continent's elevation range via a full `parse_zone()` cost 268ms + 14.3 MB
+retained per zone for a real 423 KB `.zonel` (the heaviest of the 3 build
+stages, and the one `region_loader.py` always prefers when available) -- for
+just 53 zones, ~14s and ~750 MB of RAM. The new header-only read measured at
+0.02-0.05ms regardless of file size/extension (~5000x faster), and verified
+byte-identical `zone_bb` across real `.zone`/`.zonew`/`.zonel` files of the
+same zone (elevation/geometry never changes across build stages, only
+lighting data is added) -- confirming it's always a safe substitute for
+`parse_zone().zone_bb`.
+
+Also bundled two small pre-existing fixes: `LandExportConfig.color_map_file`
+(`ryzom_land_tools.py`) -- `ColorMapFile` was wrongly documented as a dead
+field never read by `loadFromCfg`, contradicted by `main.cpp:174`'s real use
+tinting patch vertices from an optional per-continent color layer; and an
+`env` parameter on `run_zone_welder()` (`ryzom_zone_tools.py`) to let a
+caller override the subprocess environment entirely (e.g. a bundled binary
+needing its own `LD_LIBRARY_PATH`).
+
+Documentation: `docs/zone_format.md` (new "Header-only reading" section),
+`docs/pipeline_directories.md`.
+
+## 2026-09-12 — ✨ Orchestre zone_elevation/zone_dependencies/zone_ig_lighter, pynel 0.14.0
+
+Completed pynel's support for the `.land` format (`CZoneRegion`, Ligo brick-grid
+composition -- each brick a regular `.zone` already supported by `ryzom_zone.py`)
+and orchestration of the remaining native landscape pipeline tools, in `ryzom_land.py`
+and `ryzom_land_tools.py`.
+
+- `ryzom_land.py`: dataclasses `ZoneRegion`/`ZoneUnit`, XML parser/writer
+  (`xml.etree.ElementTree`) handling both v0 (legacy, no dates) and v1 (current)
+  `.land` encodings; empty cells detected via the `< UNUSED >` sentinel string, not
+  an empty string. Binary-encoded `.land` files exist but are unused test/dev-only
+  data on real continents, so left unsupported.
+- `ryzom_land_tools.py`: subprocess wrappers for `land_export`, `zone_elevation`,
+  `zone_dependencies`, and `zone_ig_lighter`, plus config-file generators (`.cfg`
+  text for `land_export`, `properties.cfg` for the other three and for the
+  already-orchestrated `zone_lighter`) so callers build config from Python
+  dataclasses instead of hand-writing the `CConfigFile` text format.
+- Validated end-to-end against real production data (continent nexus, jungle
+  ecosystem): full pipeline order `land_export -> zone_welder -> zone_elevation ->
+  zone_welder -> zone_dependencies -> zone_lighter -> zone_ig_lighter` executed for
+  real (via `agentcom` on Nuno's machine) and every output re-parsed successfully
+  with pynel.
+- Found and fixed two native Linux-portability bugs in `ryzom-core`
+  (`ryzom/ark-features` branch, not yet committed): `world_editor`'s CMake target
+  (holding `land_export`) was locked behind `IF(WIN32)` even though it has no
+  Windows/MFC dependency; and `land_export_lib/export.cpp`'s `treatPattern` built
+  paths with a hardcoded `\` separator, breaking zone lookup on Linux.
+- Found and fixed a third native bug during full end-to-end validation:
+  `zone_elevation.cpp` crashed at static-initialization time (before `main()`) due
+  to a global `CZoneRegion` object -- fixed with lazy pointer allocation, same
+  pattern already used in `land_export`.
+- Documentation: new `nel/tools/pynel/docs/land_format.md`; `docs/zone_tools.md`
+  completed with `zone_elevation`/`zone_dependencies`/`zone_ig_lighter` and all
+  three native bugs found; new `docs/pipeline_directories.md` (per-tool `pipeline/`
+  directory usage, for Atyscape's archive cleanup); the `workspace/`/`graphics/`
+  forbidden-data-root rule documented in `docs/zone_tools.md` §9.
 
 ## 2026-09-11 — ✨ Orchestrate zone_elevation/zone_dependencies/zone_ig_lighter, pynel 0.14.0
 
@@ -142,6 +267,26 @@ needed for `.continent`/`ryzom.world`), does not derive field write-order
 from a `.dfn` file (round-trips the order read instead -- correct for
 editing existing fields, not for inserting brand new ones), and does not
 handle newline-containing ATOM values (not encountered in these two formats).
+
+## 2026-09-07 — ✨ Add clone_repo() for repository checkout
+
+Added `clone_repo(repo_name, target_path)` to `pynel.repository_paths` to allow
+cloning Ryzom repositories (ryzom-core, ryzom-data, ryzom-private-data, ryzom-docker)
+directly from code. Returns a status string ("success" or "error: <reason>") and
+auto-configures the path in `repository_paths.json` on success.
+
+New functions:
+- `get_repo_url(repo_name)`: returns the official GitLab HTTPS URL for a repo
+- `is_git_available()`: checks if git is installed and in PATH
+- `clone_repo(repo_name, target_path)`: clones the repo, returns status string
+
+Uses hardcoded GitLab HTTPS URLs:
+- ryzom-core: https://gitlab.com/ryzom/ryzom-core.git
+- ryzom-data: https://gitlab.com/ryzom/ryzom-data.git
+- ryzom-private-data: https://gitlab.com/ryzom/ryzom-private-data.git
+- ryzom-docker: https://gitlab.com/ryzom/ryzom-docker.git
+
+Used by Forgery's Settings > Paths tab (see `forgery-object-editor.md` 2026-09-07).
 
 ## 2026-09-06 — ✨ Add .zone/.zonew/.zonel + .land read/write and native tool orchestration, pynel 0.13.0
 
@@ -437,6 +582,47 @@ edits, compare against the captured raw geometry bytes -- same method
 investigation that found this needed doing at all (empty `CShadowSkin` on
 Nuno's own hand-made cross-race hairstyle variants, confirmed against
 `~/.local/share/Ryzom/ryzom_live/data/`).
+
+## 2026-08-31 — ✨ Add CMeshMRMSkinned geometry writer to pynel, pynel 0.8.0
+
+`dumps()`/`save_shape()` previously only reconstructed `CMeshBase` (materials) for
+`CMeshMRMSkinned` -- the geometry was always copied back byte-for-byte from the raw
+bytes captured at parse time, so editing `geom.packed_vertices` (or anything else in
+the parsed geometry) had no effect on the written file. This is the format every
+character customization piece in `characters_shapes.bnp` uses
+(hairstyles/clothing/accessories), so it blocked any tool wanting to actually edit one.
+
+Added `_write_packed_vertex()`, `_write_mrm_skinned_rdr_pass()`,
+`_write_mesh_mrm_skinned_lod()`, `_write_mesh_mrm_skinned_geom()`,
+`_write_mesh_mrm_skinned()`, wired into `dumps()` as `CMeshMRMSkinned`'s own branch
+(`CMeshMRM`/`CMeshMultiLod` keep the old raw-copy fallback, untouched). Two
+sub-structures that were previously read and silently discarded --
+`CShadowSkin` (`_skip_shadow_skin()`, a simplified single-bone-rigid-skinned
+shadow-casting proxy mesh, not the real geometry -- see
+`nel/include/nel/3d/shadow_skin.h`) and each lod's trailing
+`MatrixInfluences`/`InfluencedVertices[4]` -- are now captured as opaque raw byte
+spans (`MeshMRMSkinnedGeom._raw_shadow_skin`, `MeshMRMSkinnedLod._raw_matrix_influences`)
+and re-emitted verbatim, rather than modeled field-by-field (nothing needs to edit
+them). Every version byte in this whole geometry subtree turned out to be `0` on real
+data (probed via temporary debug prints, removed again), so no per-version branching
+was needed in the new writer.
+
+Also added `PackedVertex.with_pos(pos, decompact_scale)`, the inverse of
+`decompact_pos()` -- compacts a float position back to the format's `int16`
+representation, raising `ShapeWriteError` if a component doesn't fit.
+
+Validated: geometry-only round-trip (parse a real `.shape`, re-dump with zero edits,
+compare against the captured raw bytes) is byte-exact on two real files
+(`fy_hof_cheveux_shave01.shape`, `tr_hof_cheveux_shave01.shape`). Editing positions and
+writing them back necessarily loses a little precision from the `int16` compaction --
+observed gaps after a real edit-then-reparse round-trip were within the format's own
+worst-case quantization bound (`sqrt(3) * decompact_scale/2`), not a bug.
+
+Also added `nel/tools/pynel/docs/shape_format.md` -- the `.shape` format had no
+dedicated doc despite being the most complex parser in the project (every other
+format module has one, e.g. `pacs_format.md`, `packed_sheets.md`); this covers the
+container structure, per-class read/write coverage, the `CMeshMRMSkinned` compacted
+vertex format, and the `CShadowSkin` explanation above in one place.
 
 ## 2026-08-30 — ✨ Add item/sitem.packed_sheets support to ryzom_packed_sheets, pynel 0.7.0
 
@@ -804,173 +990,3 @@ length-prefixed sections (lines, triangles, quads), each a `(count, capacity)` h
 followed by its index vector. Only the triangle section carries renderable indices
 (`_NbIndexes = triangle_count * 3`); the line and quad sections are read and discarded
 to stay positioned correctly in the stream.
-
-## 2026-08-31 — ✨ Add CMeshMRMSkinned geometry writer to pynel, pynel 0.8.0
-
-`dumps()`/`save_shape()` previously only reconstructed `CMeshBase` (materials) for
-`CMeshMRMSkinned` -- the geometry was always copied back byte-for-byte from the raw
-bytes captured at parse time, so editing `geom.packed_vertices` (or anything else in
-the parsed geometry) had no effect on the written file. This is the format every
-character customization piece in `characters_shapes.bnp` uses
-(hairstyles/clothing/accessories), so it blocked any tool wanting to actually edit one.
-
-Added `_write_packed_vertex()`, `_write_mrm_skinned_rdr_pass()`,
-`_write_mesh_mrm_skinned_lod()`, `_write_mesh_mrm_skinned_geom()`,
-`_write_mesh_mrm_skinned()`, wired into `dumps()` as `CMeshMRMSkinned`'s own branch
-(`CMeshMRM`/`CMeshMultiLod` keep the old raw-copy fallback, untouched). Two
-sub-structures that were previously read and silently discarded --
-`CShadowSkin` (`_skip_shadow_skin()`, a simplified single-bone-rigid-skinned
-shadow-casting proxy mesh, not the real geometry -- see
-`nel/include/nel/3d/shadow_skin.h`) and each lod's trailing
-`MatrixInfluences`/`InfluencedVertices[4]` -- are now captured as opaque raw byte
-spans (`MeshMRMSkinnedGeom._raw_shadow_skin`, `MeshMRMSkinnedLod._raw_matrix_influences`)
-and re-emitted verbatim, rather than modeled field-by-field (nothing needs to edit
-them). Every version byte in this whole geometry subtree turned out to be `0` on real
-data (probed via temporary debug prints, removed again), so no per-version branching
-was needed in the new writer.
-
-Also added `PackedVertex.with_pos(pos, decompact_scale)`, the inverse of
-`decompact_pos()` -- compacts a float position back to the format's `int16`
-representation, raising `ShapeWriteError` if a component doesn't fit.
-
-Validated: geometry-only round-trip (parse a real `.shape`, re-dump with zero edits,
-compare against the captured raw bytes) is byte-exact on two real files
-(`fy_hof_cheveux_shave01.shape`, `tr_hof_cheveux_shave01.shape`). Editing positions and
-writing them back necessarily loses a little precision from the `int16` compaction --
-observed gaps after a real edit-then-reparse round-trip were within the format's own
-worst-case quantization bound (`sqrt(3) * decompact_scale/2`), not a bug.
-
-Also added `nel/tools/pynel/docs/shape_format.md` -- the `.shape` format had no
-dedicated doc despite being the most complex parser in the project (every other
-format module has one, e.g. `pacs_format.md`, `packed_sheets.md`); this covers the
-container structure, per-class read/write coverage, the `CMeshMRMSkinned` compacted
-vertex format, and the `CShadowSkin` explanation above in one place.
-
-## 2026-09-07 — ✨ Add clone_repo() for repository checkout
-
-Added `clone_repo(repo_name, target_path)` to `pynel.repository_paths` to allow
-cloning Ryzom repositories (ryzom-core, ryzom-data, ryzom-private-data, ryzom-docker)
-directly from code. Returns a status string ("success" or "error: <reason>") and
-auto-configures the path in `repository_paths.json` on success.
-
-New functions:
-- `get_repo_url(repo_name)`: returns the official GitLab HTTPS URL for a repo
-- `is_git_available()`: checks if git is installed and in PATH
-- `clone_repo(repo_name, target_path)`: clones the repo, returns status string
-
-Uses hardcoded GitLab HTTPS URLs:
-- ryzom-core: https://gitlab.com/ryzom/ryzom-core.git
-- ryzom-data: https://gitlab.com/ryzom/ryzom-data.git
-- ryzom-private-data: https://gitlab.com/ryzom/ryzom-private-data.git
-- ryzom-docker: https://gitlab.com/ryzom/ryzom-docker.git
-
-Used by Forgery's Settings > Paths tab (see `forgery-object-editor.md` 2026-09-07).
-
-## 2026-09-12 — ✨ Orchestre zone_elevation/zone_dependencies/zone_ig_lighter, pynel 0.14.0
-
-Completed pynel's support for the `.land` format (`CZoneRegion`, Ligo brick-grid
-composition -- each brick a regular `.zone` already supported by `ryzom_zone.py`)
-and orchestration of the remaining native landscape pipeline tools, in `ryzom_land.py`
-and `ryzom_land_tools.py`.
-
-- `ryzom_land.py`: dataclasses `ZoneRegion`/`ZoneUnit`, XML parser/writer
-  (`xml.etree.ElementTree`) handling both v0 (legacy, no dates) and v1 (current)
-  `.land` encodings; empty cells detected via the `< UNUSED >` sentinel string, not
-  an empty string. Binary-encoded `.land` files exist but are unused test/dev-only
-  data on real continents, so left unsupported.
-- `ryzom_land_tools.py`: subprocess wrappers for `land_export`, `zone_elevation`,
-  `zone_dependencies`, and `zone_ig_lighter`, plus config-file generators (`.cfg`
-  text for `land_export`, `properties.cfg` for the other three and for the
-  already-orchestrated `zone_lighter`) so callers build config from Python
-  dataclasses instead of hand-writing the `CConfigFile` text format.
-- Validated end-to-end against real production data (continent nexus, jungle
-  ecosystem): full pipeline order `land_export -> zone_welder -> zone_elevation ->
-  zone_welder -> zone_dependencies -> zone_lighter -> zone_ig_lighter` executed for
-  real (via `agentcom` on Nuno's machine) and every output re-parsed successfully
-  with pynel.
-- Found and fixed two native Linux-portability bugs in `ryzom-core`
-  (`ryzom/ark-features` branch, not yet committed): `world_editor`'s CMake target
-  (holding `land_export`) was locked behind `IF(WIN32)` even though it has no
-  Windows/MFC dependency; and `land_export_lib/export.cpp`'s `treatPattern` built
-  paths with a hardcoded `\` separator, breaking zone lookup on Linux.
-- Found and fixed a third native bug during full end-to-end validation:
-  `zone_elevation.cpp` crashed at static-initialization time (before `main()`) due
-  to a global `CZoneRegion` object -- fixed with lazy pointer allocation, same
-  pattern already used in `land_export`.
-- Documentation: new `nel/tools/pynel/docs/land_format.md`; `docs/zone_tools.md`
-  completed with `zone_elevation`/`zone_dependencies`/`zone_ig_lighter` and all
-  three native bugs found; new `docs/pipeline_directories.md` (per-tool `pipeline/`
-  directory usage, for Atyscape's archive cleanup); the `workspace/`/`graphics/`
-  forbidden-data-root rule documented in `docs/zone_tools.md` §9.
-
-## 2026-09-13 — ✨ Add region_export: continent/region/place export to world.json/world.lua
-
-New module `pynel/region_export.py` (project-todos/pynel/region_places_export.md,
-now closed): reads Ryzom's named lore regions and places (e.g. Tryker mainland's
-`lagoonsofloria`, `windsofmuse`...) from `region_<continent>.primitive` files (LIGO
-primitive tree, `pynel.ryzom_primitive`) in the private `ryzom-private-data`
-leveldesign repository -- the only real source, since neither `live_data_path`'s
-`packed_sheets` nor `ryzom.world` carry these (both were investigated and ruled out
-first).
-
-- `primzone_to_json(prim)`/`build_world_regions(path)`: converts the `.primitive`
-  tree to `{name: [visible, points, children_or_type]}`, matching the exact
-  structure the real Ryzom Live client itself ships as `gamedev/world.lua`. A
-  single `.primitive` file can hold several sibling top-level continents (e.g.
-  `region_fyros.primitive` has `continent_fyros`/`continent_fyros_newbie`/
-  `continent_fyros_islands` side by side) -- all of them are collected, not just
-  the first. Coordinates are truncated toward zero (`int()`, a C++-style cast),
-  not rounded to the nearest integer. The leaf/branch distinction is the node's
-  own `class` property ("place" = leaf) -- a childless continent/region still
-  produces an empty list `[]`, never mistaken for a leaf.
-- `to_lua(regions)`/`parse_world_lua(text)`: a dedicated tokenizer + recursive-
-  descent parser (not a general Lua engine) for the real `world.lua`'s exact
-  grammar, including its `["name"] = {...}` bracketed-key form for names that
-  aren't valid bare Lua identifiers (real examples: `"Karavan Embassy"`,
-  `"endroit_résidu_oeuf"`). Round-trip exact
-  (`parse_world_lua(to_lua(regions)) == regions`). The real file's trailing
-  `FILE_WORLD_VERSION` client-build-version footer is deliberately never
-  written or read (a regeneration has no way to know that number).
-- CLI: `python -m pynel.region_export [--format {json,lua}] [--output-dir <folder>]`,
-  one format per run, writing `world.<format>` into the destination folder
-  (`ryzom-data` by default). Source is always
-  `pynel.repository_paths.get("ryzom-private-data")`, already exposed as a
-  folder-picker setting in both Patina and Atyscape.
-- Validated against real data throughout: exact byte-for-byte match against
-  Nuno's own `world.json`/the real client's `world.lua` wherever the underlying
-  leveldesign data hasn't changed since; real content drift found and confirmed
-  expected elsewhere (polygons nudged, some `place_type`s changed, some places
-  added/removed) since `ryzom-private-data` HEAD is the intended up-to-date
-  source, not a frozen reproduction of the old reference files.
-- Documentation: new `nel/tools/pynel/docs/region_export.md`.
-
-## 2026-09-13 — ✨ parse_zone_header() (lecture d'en-tête légère .zone), pynel 0.15.0
-
-Closes `project-todos/pynel/zone_header_reader.md`, a dependency of Forgery's
-`landscape_editor__region_management__zone_bam_cache.md` (see `logs/forgery.md`).
-
-**`parse_zone_header()`** (new, `ryzom_zone.py`): reads only `zone_id`/
-`zone_bb`/`patch_bias`/`patch_scale` -- the exact leading bytes `parse_zone()`
-itself reads first -- then stops, never touching `num_vertices`/
-`border_vertices`/`patchs`/`patch_connects`/`point_lights` (the bulk of a real
-file). Motivated by a real perf bug found in Forgery: computing a whole
-continent's elevation range via a full `parse_zone()` cost 268ms + 14.3 MB
-retained per zone for a real 423 KB `.zonel` (the heaviest of the 3 build
-stages, and the one `region_loader.py` always prefers when available) -- for
-just 53 zones, ~14s and ~750 MB of RAM. The new header-only read measured at
-0.02-0.05ms regardless of file size/extension (~5000x faster), and verified
-byte-identical `zone_bb` across real `.zone`/`.zonew`/`.zonel` files of the
-same zone (elevation/geometry never changes across build stages, only
-lighting data is added) -- confirming it's always a safe substitute for
-`parse_zone().zone_bb`.
-
-Also bundled two small pre-existing fixes: `LandExportConfig.color_map_file`
-(`ryzom_land_tools.py`) -- `ColorMapFile` was wrongly documented as a dead
-field never read by `loadFromCfg`, contradicted by `main.cpp:174`'s real use
-tinting patch vertices from an optional per-continent color layer; and an
-`env` parameter on `run_zone_welder()` (`ryzom_zone_tools.py`) to let a
-caller override the subprocess environment entirely (e.g. a bundled binary
-needing its own `LD_LIBRARY_PATH`).
-
-Documentation: `docs/zone_format.md` (new "Header-only reading" section),
-`docs/pipeline_directories.md`.
