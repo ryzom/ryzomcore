@@ -261,8 +261,13 @@ skinné), soit collé à un point d'attache d'arme (objet rigide).
 - **Visualisation** : un 3e jeu d'axes (palette distincte des axes du pivot) dessiné
   exactement sur l'os cible quand un point d'attache est choisi, pour aligner
   visuellement l'origine locale de l'arme (ce qui se colle réellement sur l'os) contre
-  la cible. Les axes du pivot eux-mêmes sont reparentés sous la copie posée sur le PNJ
-  tant qu'un binding est actif.
+  la cible. Les axes du pivot eux-mêmes sont reparentés sous l'ancrage fixe (l'os du
+  point d'attache, ou le nœud du slot) tant qu'un binding est actif, et suivent chaque
+  frame `_object_pivot` seul (jamais `model_root`) — une édition à pivot verrouillé
+  (bakée dans les sommets à la sauvegarde, jamais dans `default_pos`/`default_rot_quat`/
+  `default_scale`, voir plus haut) ne déplace donc jamais ce gizmo, seule la copie du
+  mesh bouge ; une édition à pivot déverrouillé (qui, elle, modifie réellement
+  `default_pos`/etc.) continue de le déplacer.
 - **Panoply** : choisir un PNJ force la sélection "skin" (race) du shape principal sur
   la race du PNJ (`panoply.RACES[record.race]`), les autres boutons de race grisés tant
   que c'est forcé.

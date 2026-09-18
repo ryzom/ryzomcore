@@ -287,26 +287,45 @@ class CreatureBindMixin:
 		set_quat(base.default_rot_quat) did for rotation alone -- this
 		fully supersedes that one-time snapshot every frame from here on.
 
+		The pivot gizmo (self._pivot_axes_np) gets its OWN, separate update
+		here: _object_pivot.get_mat(self.render) alone (never model_root's),
+		applied as its local transform under self._assembled_creature_loaded_shape_node
+		(the real, fixed anchor -- the attach-point bone or slot node, see
+		_apply_loaded_shape_to_creature()). _object_pivot only ever carries
+		whichever props/axes are currently UNLOCKED (_transform_node()
+		routes a locked prop's edits to model_root instead) -- a pivot-
+		locked edit is meant to get baked into the shape's own vertices at
+		save time, never into CMeshBase.DefaultPos/Rot/Scale (see
+		shape_io.py's _bake_locked_edit_into_vertices()), so the real
+		in-game anchor point never actually moves for it. Using
+		content_root's full (model_root-based) matrix for the gizmo too
+		made it visually track a locked edit as if the anchor itself had
+		moved, when only the mesh content did (bug found 2026-09-18, Nuno:
+		"quand on lock le pivot ... le pivot se déplace aussi. Alors qu'il
+		ne se déplace en réalité pas").
+
 		EXCEPTION: the skinned slot-override case
 		(self._assembled_creature_loaded_shape_is_skinned_override) is left
-		alone entirely -- position, rotation, AND scale. Verified 2026-08-31
-		(transform.cpp:946 CTransform::updateWorldMatrixFromFather()): a
-		skinned instance's own Default{Pos,RotQuat,Scale} has ZERO effect in
-		the real game, not just position/scale -- the skin binding to the
-		creature's own skeleton alone fully determines every vertex's final
-		position (see _build_assembled_shape_geometry()'s own matching
-		is_skinned check). Layering ANY of the main shape's own edits on top
-		here would just double-offset/rotate already-correctly-placed
-		vertices away from a result the real client could ever produce (bug
-		found 2026-08-31, Nuno: "t'as fais du caca sur les shape skinnés..
-		ils sont pas du tout au bon endroit", then "t'es sur que la rotation
-		dois s'appliquer aussi?" -- no, confirmed).
+		alone entirely -- position, rotation, AND scale, gizmo included.
+		Verified 2026-08-31 (transform.cpp:946
+		CTransform::updateWorldMatrixFromFather()): a skinned instance's own
+		Default{Pos,RotQuat,Scale} has ZERO effect in the real game, not
+		just position/scale -- the skin binding to the creature's own
+		skeleton alone fully determines every vertex's final position (see
+		_build_assembled_shape_geometry()'s own matching is_skinned check).
+		Layering ANY of the main shape's own edits on top here would just
+		double-offset/rotate already-correctly-placed vertices away from a
+		result the real client could ever produce (bug found 2026-08-31,
+		Nuno: "t'as fais du caca sur les shape skinnés.. ils sont pas du
+		tout au bon endroit", then "t'es sur que la rotation dois
+		s'appliquer aussi?" -- no, confirmed).
 
 		No-op whenever nothing is currently bound."""
 		content_root = self._assembled_creature_loaded_shape_content_root
 		if (content_root is not None and not content_root.is_empty()
 				and not self._assembled_creature_loaded_shape_is_skinned_override):
 			content_root.set_mat(self.model_root.get_mat(self.render))
+			self._pivot_axes_np.set_mat(self._object_pivot.get_mat(self.render))
 		return task.cont
 
 	def _update_bind_anim_time(self, task):
@@ -1087,17 +1106,19 @@ class CreatureBindMixin:
 		# value (matches _object_pivot's own at load time), not a live link.
 		self._assembled_creature_loaded_shape_content_root = content_root
 		# Pivot gizmo moves here too, off _object_pivot (its standalone-view
-		# home, still at the pre-bind world position) -- content_root IS
-		# "the object's own local origin", already correctly positioned
-		# wherever the bound copy actually sits (skinned slot, attach-point
-		# bone, or undefined-at-creature-root) and kept live in sync by
-		# _update_bound_shape_rotation(). Without this the gizmo still
-		# rotated with edits (it inherited _object_pivot's rotation) but
-		# stayed frozen at the pre-bind position, completely disconnected
-		# from the actually-rendered mesh (bug found 2026-08-31, Nuno: "mon
-		# objet tourne autour d'un axe qui n'est pas le pivot [...] il est
-		# resté à sa position avant le bind").
-		self._pivot_axes_np.reparent_to(content_root)
+		# home, still at the pre-bind world position) -- node_path is the
+		# real, fixed anchor wherever the bound copy actually sits (skinned
+		# slot, attach-point bone, or undefined-at-creature-root). Without
+		# this the gizmo still rotated with edits (it inherited
+		# _object_pivot's rotation) but stayed frozen at the pre-bind
+		# position, completely disconnected from the actually-rendered mesh
+		# (bug found 2026-08-31, Nuno: "mon objet tourne autour d'un axe qui
+		# n'est pas le pivot [...] il est resté à sa position avant le
+		# bind"). Parented to node_path, NOT content_root -- content_root
+		# also carries model_root's own pivot-locked edits, which the gizmo
+		# must NOT follow (see _update_bound_shape_rotation(), which sets
+		# this node's live transform every frame from _object_pivot alone).
+		self._pivot_axes_np.reparent_to(node_path)
 		self._pivot_axes_np.clear_transform()
 		self._frame_camera()
 
