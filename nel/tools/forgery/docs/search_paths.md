@@ -125,8 +125,16 @@ dossiers configurés par l'utilisateur, sans jamais être persisté dans
  (`search_paths_dialog.py,715-725`) : parsing complet à la demande
  d'un seul `.skel`/`.anim` — seuls les noms d'os sont gardés en mémoire pour
  tous les fichiers scannés, pas les données complètes.
-- `find_texture(name)` (`search_paths_dialog.py`) : résout un nom de
- texture contre l'index scanné.
+- `find_file(name, priority_paths=None)` (`search_paths_dialog.py`) : résout
+ un nom de fichier contre l'index scanné (workspace + search paths). Si rien
+ n'est trouvé, retombe automatiquement sur `_find_in_live_data(name)` --
+ dernier recours, `live_data_path` n'est jamais ajouté à `settings.search_paths`.
+- `_find_in_live_data(name)` (`search_paths_dialog.py`) : index "one-shot"
+ non persistant de `live_data_path` (même mécanisme que `priority_paths` --
+ `_priority_entries_for`/`search_paths.build_texture_index`), construit
+ paresseusement seulement au premier échec réel de résolution, jamais au
+ démarrage ni à chaque `reload`. `None` si `live_data_path` n'est pas
+ configuré/valide.
 - `panoply_variants_for(base_texture_name)` (`search_paths_dialog.py`) :
  variantes panoply pour une texture de base donnée.
 - `_load_ryzom_data_panoply_variants` (`search_paths_dialog.py`) : lit

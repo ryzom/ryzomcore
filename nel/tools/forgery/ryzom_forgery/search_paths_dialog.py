@@ -28,7 +28,7 @@ from pynel import repository_paths
 from pynel.ryzom_animation import AnimationParseError, parse_animation
 from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
 
-from ryzom_forgery import panoply, search_paths, virtual_categories
+from ryzom_forgery import live_data, panoply, search_paths, virtual_categories
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.icon_colors import pastel_color_for
 from ryzom_forgery.settings import SearchPathDir
@@ -839,7 +839,28 @@ class SearchPathsDialog:
 			found = search_paths.find_file(self._priority_entries_for(tuple(priority_paths)), name)
 			if found is not None:
 				return found
-		return search_paths.find_file(self._file_entries, name)
+		found = search_paths.find_file(self._file_entries, name)
+		if found is not None:
+			return found
+		return self._find_in_live_data(name)
+
+	def _find_in_live_data(self, name):
+		"""Last-resort fallback once neither the workspace nor the
+		user-configured search paths have `name` -- tried automatically,
+		never added to settings.search_paths itself (same "injected, not
+		persisted" idea as _workspace_dir, but lowest priority instead of
+		highest). Reuses _priority_entries_for()'s own one-shot, uncached,
+		in-memory-only index (search_paths.build_texture_index(), see its
+		own docstring) -- lazy: live_data_path is only ever walked the first
+		time this actually misses everywhere else, not at startup or on
+		every reload() (added 2026-09-18, Nuno: "la question c'est pas de
+		rescanner tout ça... quel intérêt ? juste que si un fichier n'est
+		pas trouvé dans les search paths, on le cherche dans le live_data")."""
+		settings = app_settings.load()
+		if not live_data.is_valid_live_data_path(settings.live_data_path):
+			return None
+		entries = self._priority_entries_for((settings.live_data_path,))
+		return search_paths.find_file(entries, name)
 
 	def _priority_entries_for(self, priority_paths):
 		cached = self._priority_entries_cache.get(priority_paths)
@@ -917,6 +938,14 @@ class SearchPathsDialog:
 		if remove_index is not None:
 			del self._dirs[remove_index]
 			self._save()
+
+		live_data_path = app_settings.load().live_data_path
+		if live_data.is_valid_live_data_path(live_data_path):
+			suffix = " (Ryzom Live data, last-resort fallback)"
+			available = imgui.get_content_region_avail().x - imgui.calc_text_size(suffix).x
+			imgui.text_disabled(_truncate_path_to_width(live_data_path, max(available, 20)) + suffix)
+			if imgui.is_item_hovered():
+				imgui.set_tooltip(live_data_path)
 
 		if _icon_button(f"{fa_icons.ICON_FA_PLUS}##add-search-folder", "Add folder..."):
 			self._add_dir_dialog = pfd.select_folder("Choose a search folder")
