@@ -17,6 +17,7 @@ from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
 
 from ryzom_forgery.app import _AVAILABLE_FONTS, _dpi_scale, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
+from ryzom_forgery import crash_log
 from ryzom_forgery import creature_ref
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
@@ -840,6 +841,7 @@ class ObjectEditorApp(
 
 
 def main(argv=None):
+	crash_log.install()
 	ObjectEditorApp().run()
 
 

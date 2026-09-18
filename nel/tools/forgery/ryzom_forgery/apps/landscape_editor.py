@@ -21,9 +21,11 @@ from panda3d.core import NodePath, Point3, Quat, TransparencyAttrib, Vec3
 from pynel import repository_paths
 from pynel.ryzom_bnp import BnpError
 from pynel.ryzom_ig import parse_ig, IgParseError
+from pynel.ryzom_primitive import get_property, PrimitiveParseError
 from pynel.ryzom_zone import parse_zone, ZoneParseError
 
 from ryzom_forgery.app import ForgeryApp
+from ryzom_forgery import crash_log
 from ryzom_forgery.apps.landscape_editor_edit_mode import EditModeMixin
 from ryzom_forgery.apps.landscape_editor_modes import (
 	_detect_app_mode, _MODE_BADGE_COLOR, _MODE_BADGE_LABEL, _MODE_EDITION, _MODE_VISUALISATION, _OTHER_MODE,
@@ -53,6 +55,7 @@ from ryzom_forgery import ig_full_geom_cache
 from ryzom_forgery.icon_colors import pastel_color_for
 from ryzom_forgery import ig_full_load
 from ryzom_forgery import ig_geometry
+from ryzom_forgery import primitive_geometry
 from ryzom_forgery.ryzom_paths_section import RyzomPathsSection
 from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
@@ -334,6 +337,19 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._ig_rest_root.hide()
 		self._ig_error = None
 
+		# Primitives view (project-todos/forgery/landscape_editor__primitives_view.md)
+		# -- Édition mode only, one entry per `.primitive` found for the
+		# selected continent (currently just `flora_<continent>.primitive`/
+		# `flora_unused.primitive`, project-todos/pynel/
+		# flora_primitives_split_by_continent.md). {file_stem: {"checked":
+		# bool, "path": Path}}; unchecked by default, same as every other
+		# bundle -- geometry is only built the first time a box is checked
+		# (see _set_primitive_checked()), not eagerly for every entry found.
+		self._primitives_root = self.render.attach_new_node("primitives-root")
+		self._primitives_tree_state = {}
+		self._primitives_nodes = {}  # file_stem -> NodePath, only for CHECKED entries
+		self._primitives_error = None
+
 		# Loaded zone set state. _loaded_refs (name -> default ZoneRef, the
 		# region_loader.py .zonel > .zonew > .zone priority) and
 		# _loaded_extensions (name -> {ext: ZoneRef}) describe the currently
@@ -402,6 +418,16 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# "Continent status" section) -- None outside Édition/before a
 		# continent has loaded.
 		self._continent_total_used_cells = None
+		# Every used `.land` cell's expected zone name (Édition only,
+		# project-todos/forgery/landscape_editor__pacs_export.md step 7h fix,
+		# Nuno 2026-09-18) -- unlike self._loaded_extensions (which only ever
+		# tracks a cell once it has at least one real exported file, by
+		# design of _build_land_driven_refs()), this is the FULL predictable
+		# set of zone names the composition uses, real export or not. Feeds
+		# "Pipeline steps"'s totals so a freshly-authored continent with zero
+		# exports shows "0/53", not a vacuous "0/0" that a plain `count ==
+		# total` comparison would wrongly read as "up to date".
+		self._continent_all_zone_names = None
 		self._region_placeholder_np = self.render.attach_new_node("zone-region-placeholder")
 		# (pos_x, pos_y) -> ZoneUnit.zone_name (the brick the .land itself
 		# assigns to that cell), for the cursor status line -- always the
@@ -443,6 +469,29 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# landscape_editor_edit_mode.py) is writing into, polled the same way
 		# as self._mode_reload_progress.
 		self._land_build_progress = None
+		# "Pipeline steps" section (project-todos/forgery/landscape_editor__
+		# pacs_export.md step 7f) -- set by _draw_pipeline_steps_section()'s
+		# own [force] button on an OSError deleting a step's cache file(s),
+		# cleared on the next successful force.
+		self._pipeline_force_error = None
+		# Isolated per-step [rebuild] button (project-todos/forgery/
+		# landscape_editor__pacs_export.md steps 7i/7n) -- None while idle,
+		# else the dict a background thread (_run_pipeline_step_rebuild(),
+		# landscape_editor_edit_mode.py) is writing into: {"step_index",
+		# "step_name", "done", "fraction", "error"} -- shown in the SAME
+		# modal popup as a full Build (_draw_land_build_progress_popup()),
+		# never inline in "Pipeline steps" itself. Mutually exclusive with
+		# self._land_build_progress (a full Build) -- only one of the two
+		# may run at a time.
+		self._pipeline_step_progress = None
+		# One-shot flag consumed by _draw_land_build_progress_popup() itself
+		# (project-todos/forgery/landscape_editor__pacs_export.md step 7n
+		# bugfix) -- set True by whichever _start_*() just kicked off a
+		# Build/rebuild, regardless of how deeply nested that button click
+		# was in the ID stack (imgui.open_popup() must run at the SAME
+		# stack depth as the begin_popup_modal() call checking for it, so
+		# it can never be called directly from inside a table's push_id()).
+		self._pending_popup_open = False
 
 		# Zone-boundary grid overlay (project-todos/forgery/
 		# landscape_editor.md step 7) -- rebuilt in _set_loaded_zones()
@@ -636,6 +685,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._land_cell_region_map = {}
 		self._continent_z_range = None
 		self._continent_total_used_cells = None
+		self._continent_all_zone_names = None
 		self._continent_loaded_grid_bounds = None
 		self._rebuild_region_placeholders()
 		self._set_loaded_zones({name: zone_to_cache_data(zone)})
@@ -747,6 +797,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			      f"ryzom_data_path={ryzom_data_path!r} uses_pipeline_export={uses_pipeline_export} bounds={bounds}")
 			land_cell_region_map = {}
 			total_used_cells = None
+			all_zone_names = None
 			if self._app_mode == _MODE_EDITION:
 				# Land-driven enumeration (project-todos/forgery/
 				# landscape_editor__land_composition.md step 3) -- a
@@ -774,6 +825,17 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				# EVERY used cell regardless of region, correct even for a
 				# continent with no region_hierarchy entries at all.
 				total_used_cells = len(all_used_cells)
+				# Every used cell's OWN expected zone name (project-todos/
+				# forgery/landscape_editor__pacs_export.md step 7h fix, Nuno
+				# 2026-09-18) -- for "Pipeline steps"'s real total, unlike
+				# `extensions` above (which only ever keeps a cell once it
+				# has a real exported file). A cell whose position doesn't
+				# resolve to a valid zone name is simply skipped, same as
+				# `_build_land_driven_refs()`'s own `if name is None: continue`.
+				all_zone_names = {
+					name for name in (expected_zone_name(pos_x, pos_y) for pos_x, pos_y in all_used_cells)
+					if name is not None
+				}
 			else:
 				refs = find_zones_in_region(
 					live_data_path, min_x, min_y, max_x, max_y, pipeline_continent_name, ryzom_data_path,
@@ -817,6 +879,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			progress["extensions"] = extensions
 			progress["land_cell_region_map"] = land_cell_region_map
 			progress["total_used_cells"] = total_used_cells
+			progress["all_zone_names"] = all_zone_names
 			# Whole-continent elevation-color reference (project-todos/
 			# forgery/landscape_editor__region_management__zone_bam_cache.md
 			# step 1) -- computed once here from every real zone of the
@@ -1643,6 +1706,130 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._ig_rest_progress = None
 		self._ig_tree_state_others = {}
 
+	def _refresh_primitives_tree(self):
+		"""Detects the `.primitive` files available for the currently
+		selected continent (project-todos/forgery/landscape_editor__primitives_view.md
+		step 2) -- Édition mode only (`.primitive`s live in
+		`leveldesign/landscape/`, never in `live_data_path`). Currently just
+		`flora_<continent>.primitive`/`flora_unused.primitive` (project-todos/
+		pynel/flora_primitives_split_by_continent.md); `flora_unused` is
+		offered for every continent (it isn't continent-specific). Only sets
+		up the tree entries (unchecked) -- doesn't load/build any geometry,
+		see _set_primitive_checked() for that."""
+		self._primitives_tree_state = {}
+		self._primitives_error = None
+		if self._app_mode != _MODE_EDITION or not self._selected_continent_pipeline_name:
+			return
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		if not ryzom_data_path:
+			return
+		landscape_dir = Path(ryzom_data_path) / "leveldesign" / "landscape"
+		candidates = [
+			landscape_dir / f"flora_{self._selected_continent_pipeline_name}.primitive",
+			landscape_dir / "flora_unused.primitive",
+		]
+		for path in candidates:
+			if path.is_file():
+				self._primitives_tree_state[path.stem] = {"checked": False, "path": path}
+
+	def _set_primitive_checked(self, file_stem, checked):
+		"""Toggles one `.primitive` FILE's checkbox -- loads its points and
+		builds the per-point list (project-todos/forgery/
+		landscape_editor__primitives_view.md step 4) the first time it's
+		checked, cascades `checked` down to every one of its own points
+		(mirrors `_set_ig_checked()`), detaches the geometry when unchecked.
+		Synchronous (no background thread, unlike the `.ig` bundles): even
+		the largest full-split file (~55000 points, zorai, verified
+		2026-09-15) is one batched GeomPoints build, not per-zone work --
+		the per-point list itself is only practical for the small `diff`
+		files (16-338 points, project-todos/forgery/
+		landscape_editor__flora_ig_import.md) though, see this chantier's
+		own step 4 note."""
+		entry = self._primitives_tree_state.get(file_stem)
+		if entry is None:
+			return
+		entry["checked"] = checked
+		if "points" not in entry:
+			try:
+				nodes = primitive_geometry.flora_points_from_primitive(entry["path"])
+			except (OSError, PrimitiveParseError) as exc:
+				self._primitives_error = f"Failed to load {entry['path'].name}: {exc}"
+				report_error(self._primitives_error)
+				entry["checked"] = False
+				return
+			entry["points"] = [
+				{
+					"checked": True,
+					"node": node,
+					"diff": get_property(node, "diff"),
+					"label": get_property(node, "form") or f"point-{i}",
+				}
+				for i, node in enumerate(nodes)
+			]
+		for point_entry in entry["points"]:
+			point_entry["checked"] = checked
+		self._rebuild_primitive_marker_node(file_stem)
+
+	def _set_primitive_point_checked(self, file_stem, point_index, checked):
+		"""Toggles a single point's own checkbox (project-todos/forgery/
+		landscape_editor__primitives_view.md step 4) -- unlike the `.ig`
+		shape checkboxes (which just show/hide an already-built NodePath),
+		a single `GeomPoints` marker set has no per-vertex visibility, so
+		this rebuilds the whole file's geometry from its currently-checked
+		points instead. Cheap at the scale this is actually used at (the
+		small `diff` files, see _set_primitive_checked()'s own docstring).
+		Unchecking the last remaining checked point reads the file checkbox
+		itself back to unchecked, for visual consistency (mirrors
+		_set_shape_checked())."""
+		entry = self._primitives_tree_state.get(file_stem)
+		if entry is None or "points" not in entry:
+			return
+		entry["points"][point_index]["checked"] = checked
+		if checked:
+			entry["checked"] = True
+		elif not any(p["checked"] for p in entry["points"]):
+			entry["checked"] = False
+		self._rebuild_primitive_marker_node(file_stem)
+
+	def _rebuild_primitive_marker_node(self, file_stem):
+		"""(Re)builds `file_stem`'s marker NodePath from its currently-checked
+		points only, replacing whatever was attached before -- detaches
+		entirely if none are checked (same convention as _hide_ig_region()
+		for an empty set)."""
+		entry = self._primitives_tree_state.get(file_stem)
+		old_node = self._primitives_nodes.pop(file_stem, None)
+		if old_node is not None:
+			old_node.remove_node()
+		if entry is None or "points" not in entry:
+			return
+		checked_nodes = [p["node"] for p in entry["points"] if p["checked"]]
+		if not checked_nodes:
+			return
+		geom_node = primitive_geometry.build_flora_markers_geom(checked_nodes)
+		node_path = self._primitives_root.attach_new_node(geom_node)
+		node_path.set_render_mode_thickness(primitive_geometry.MARKER_THICKNESS)
+		# Markers sit at their raw .primitive Z (not yet ground-snapped like
+		# prim_export's own real pass), so they routinely land almost exactly
+		# on the terrain surface -- z-fighting against it otherwise (Nuno
+		# 2026-09-15). Same fix already proven for the zone grid overlay
+		# (_grid_np, landscape_editor.md step 7): no depth test/write, always
+		# drawn on top via the "fixed" bin -- bin 102, above the grid (100)
+		# and the zone-selection highlight (101).
+		node_path.set_depth_test(False)
+		node_path.set_depth_write(False)
+		node_path.set_bin("fixed", 102)
+		self._primitives_nodes[file_stem] = node_path
+
+	def _hide_all_primitives(self):
+		"""Detaches every `.primitive` marker bundle currently shown -- called
+		whenever the selected continent or mode changes (_select_continent()),
+		mirrors _hide_all_ig()."""
+		for node in self._primitives_nodes.values():
+			node.remove_node()
+		self._primitives_nodes = {}
+		self._primitives_tree_state = {}
+		self._primitives_error = None
+
 	def _toggle_ig_visibility(self):
 		"""Viewport toolbar's tree icon -- toggles visibility of
 		self._ig_region_root ONLY (project-todos/forgery/
@@ -1960,6 +2147,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		self._land_available_bricks_dir = None
 		self._land_edit_error = None
 		self._land_build_progress = None
+		self._pipeline_step_progress = None
+		self._pipeline_force_error = None
 		# A previous continent/mode's `.ig` bundle (project-todos/forgery/
 		# landscape_editor__ig_full_load.md step 6) must never linger once
 		# the selection changes -- also covers a mode switch, which
@@ -1967,6 +2156,8 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# draw_panel()'s own _pending_continent_reload comment).
 		self._hide_all_ig()
 		self._ig_error = None
+		self._hide_all_primitives()
+		self._refresh_primitives_tree()
 		if self._app_mode == _MODE_EDITION:
 			# Edition mode never reads live_data_path/sheet_id.bin (see
 			# _load_edition_continent_locations()) -- continent_name here is
@@ -2337,6 +2528,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 					self._land_cell_region_map = progress.get("land_cell_region_map", {})
 					self._continent_z_range = progress.get("continent_z_range")
 					self._continent_total_used_cells = progress.get("total_used_cells")
+					self._continent_all_zone_names = progress.get("all_zone_names")
 					regions = progress.get("regions", [])
 					self._continent_loaded_grid_bounds = self.continent_bounds
 					if regions:
@@ -2590,6 +2782,37 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		if imgui.tree_node_ex("##ig-others-root", imgui.TreeNodeFlags_.default_open.value, "IG Others"):
 			self._draw_ig_tree_entries(self._ig_tree_state_others)
 			imgui.tree_pop()
+		if self._primitives_tree_state:
+			if imgui.tree_node_ex("##primitives-root", imgui.TreeNodeFlags_.default_open.value, "Primitives"):
+				for file_stem in sorted(self._primitives_tree_state.keys()):
+					self._draw_primitive_file_entry(file_stem)
+				imgui.tree_pop()
+			if self._primitives_error:
+				imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._primitives_error)
+
+	def _draw_primitive_file_entry(self, file_stem):
+		"""One `.primitive` file's checkbox + expandable list of its own
+		points (project-todos/forgery/landscape_editor__primitives_view.md
+		step 4), each point colored by `primitive_geometry.marker_color_for_point()`
+		(step 5: green = `diff="missing"`, pink = `diff="extra"`/no diff)."""
+		entry = self._primitives_tree_state[file_stem]
+		imgui.push_id(file_stem)
+		changed, new_value = imgui.checkbox(f"##primitive-checked", entry["checked"])
+		if changed:
+			self._set_primitive_checked(file_stem, new_value)
+		imgui.same_line()
+		if imgui.tree_node_ex("##primitive-root", imgui.TreeNodeFlags_.open_on_arrow.value, f"{file_stem}.primitive"):
+			for i, point_entry in enumerate(entry.get("points", [])):
+				imgui.push_id(i)
+				point_changed, point_value = imgui.checkbox("##point-checked", point_entry["checked"])
+				if point_changed:
+					self._set_primitive_point_checked(file_stem, i, point_value)
+				imgui.same_line()
+				color = primitive_geometry.marker_color_for_point(point_entry["node"])
+				imgui.text_colored(color, f"{point_entry['label']} #{i}")
+				imgui.pop_id()
+			imgui.tree_pop()
+		imgui.pop_id()
 
 	def _draw_ig_tree_entries(self, entries):
 		"""Draws one checkbox + expandable folder per `.ig` in `entries`
@@ -2827,6 +3050,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				self._land_cell_region_map = {}
 				self._continent_z_range = None
 				self._continent_total_used_cells = None
+				self._continent_all_zone_names = None
 				self._continent_loaded_grid_bounds = None
 				self._rebuild_region_placeholders()
 				self._set_loaded_zones({})
@@ -2900,9 +3124,12 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			imgui.text(label)
 			imgui.same_line()
 			imgui.text_colored(_VALUE_COLOR, str(value))
-		building = self._land_build_progress is not None and not self._land_build_progress["done"]
-		if lighted < total or building:
-			self._draw_land_build_button()
+		# Always visible in Édition (Nuno, 2026-09-17: "si on veut rebuild on
+		# rebuild") -- no longer gated on `lighted < total`/build-in-progress:
+		# that hid the button as soon as a continent's zones were already
+		# fully `.zonel`-lit, even though the later PACS stages (8-14) had
+		# never run yet, with no way to trigger a rebuild from the UI.
+		self._draw_land_build_button()
 
 	def _draw_continent_stats_section(self):
 		"""Repliable "Stats" section (project-todos/forgery/landscape_editor__
@@ -2969,6 +3196,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 
 
 def main(argv=None):
+	crash_log.install()
 	LandscapeEditorApp().run()
 
 

@@ -22,6 +22,7 @@
 - `commands.md` — registre de commandes du menu contextuel de l'explorateur.
 - `duplicate_name_guard.md` — détection de collision de nom entre les watchers du workspace.
 - `error_log.md` — relais des erreurs affichées en UI vers stderr, pour qu'elles atteignent aussi le terminal.
+- `crash_log.md` — journalisation des exceptions non catchées dans un fichier `crash.log`.
 
 ## Explorateur et recherche de fichiers
 
