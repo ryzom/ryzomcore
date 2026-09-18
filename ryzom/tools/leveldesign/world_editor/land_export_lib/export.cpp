@@ -512,10 +512,10 @@ void CExport::treatPattern (sint32 x, sint32 y,
 	if (sMask.Tab[i+j*sMask.w])
 	{
 		// If date of the piece is newer than date of the final zones
-		string finalZoneName = _Options->OutZoneDir + string("\\") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".zonel");
+		string finalZoneName = _Options->OutZoneDir + string("/") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".zonel");
 		if (!CTools::fileExist(finalZoneName))
 		{
-			finalZoneName = _Options->OutZoneDir + string("\\") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".zone");
+			finalZoneName = _Options->OutZoneDir + string("/") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".zone");
 			if (!CTools::fileExist(finalZoneName))
 			{
 				bHaveToExportZone = true; // A file do not exist -> export it
@@ -527,7 +527,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				continue;
 			}
 		}
-		string refZoneName = _Options->RefZoneDir + string("\\") + rSZone + string(".zone");
+		string refZoneName = _Options->RefZoneDir + string("/") + rSZone + string(".zone");
 
 		if (!CTools::fileExist(refZoneName))
 		{
@@ -567,10 +567,10 @@ void CExport::treatPattern (sint32 x, sint32 y,
 	if (sMask.Tab[i+j*sMask.w])
 	{
 		// If date of the piece is newer than date of the final zones
-		string finalIGName = _Options->OutIGDir + string("\\") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".ig");
+		string finalIGName = _Options->OutIGDir + string("/") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".ig");
 		if (!CTools::fileExist(finalIGName))
 		{
-			finalIGName = _Options->OutIGDir + string("\\") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".ig");
+			finalIGName = _Options->OutIGDir + string("/") + getZoneNameFromXY(x+deltaX+i, y+deltaY+j) + string(".ig");
 			if (!CTools::fileExist(finalIGName))
 			{
 				bHaveToExportIG = true; // A file do not exist -> export it
@@ -582,7 +582,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 				continue;
 			}
 		}
-		string refIGName = _Options->RefIGDir + string("\\") + rSZone + string(".ig");
+		string refIGName = _Options->RefIGDir + string("/") + rSZone + string(".ig");
 
 		if (!CTools::fileExist(refIGName))
 		{
@@ -630,7 +630,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 	{
 		try
 		{
-			BigZoneFileName = _Options->RefZoneDir + string("\\") + rSZone + string(".zone");
+			BigZoneFileName = _Options->RefZoneDir + string("/") + rSZone + string(".zone");
 			CIFile inFile ;
 			if (inFile.open(BigZoneFileName))
 			{
@@ -660,7 +660,7 @@ void CExport::treatPattern (sint32 x, sint32 y,
 	{
 		try
 		{
-			bigIGFileName = _Options->RefIGDir + string("\\") + rSZone + string(".ig");
+			bigIGFileName = _Options->RefIGDir + string("/") + rSZone + string(".ig");
 			CIFile inFile;
 			if (inFile.open(bigIGFileName))
 			{
