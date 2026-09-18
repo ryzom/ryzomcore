@@ -30,7 +30,7 @@ from pynel.ryzom_shape import ShapeParseError, SkeletonShape, parse_shape
 
 from ryzom_forgery import live_data, panoply, search_paths, virtual_categories
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.icon_colors import pastel_color_for
+from ryzom_forgery.ui.colors import pastel_color_for
 from ryzom_forgery.settings import SearchPathDir
 
 _PANOPLY_FILE_NAME = "panoply_files.txt"
@@ -104,7 +104,7 @@ def _icon_button(icon, tooltip, disabled=False, color=None):
 	_icon_button() -- each module keeps its own tiny copy rather than
 	sharing one, matching how this codebase already does it (see also
 	object_editor.py's own, more featureful version). Tinted a deterministic
-	pastel color (see icon_colors.py) unless `color` is given -- needed by
+	pastel color (see ui/colors.py) unless `color` is given -- needed by
 	the Recursive toggle's own on/off color, which a pastel tint would
 	otherwise silently override."""
 	imgui.push_style_color(imgui.Col_.text.value, color if color is not None else pastel_color_for(icon))

@@ -12,7 +12,7 @@ from typing import List
 
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.settings import TEXTURE_MODE_COPY_PNG, TEXTURE_MODE_REFERENCE_ONLY
 from ryzom_forgery.shape_export import export_assembled_creature, export_mesh_with_skin, export_shape
 from ryzom_forgery.workspace_sync import pack_workspace_bnp

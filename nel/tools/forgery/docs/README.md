@@ -15,6 +15,7 @@
 ## App framework et infrastructure partagée
 
 - `app.md` — `ForgeryApp`, la classe de base Panda3D+ImGui commune à toutes les apps.
+- `ui.md` — `ryzom_forgery/ui/` : helpers ImGui génériques et widgets réutilisables (boutons, popups, couleurs, centrage, panneaux dockés).
 - `cache_and_config_dir.md` — dossiers standards par utilisateur pour le cache et la configuration.
 - `settings.md` — préférences persistantes unifiées dans un seul fichier TOML.
 - `sysinfo.md` — barre de statut système (FPS, message de statut, version).

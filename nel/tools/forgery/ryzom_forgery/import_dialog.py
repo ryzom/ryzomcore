@@ -8,7 +8,7 @@ from pathlib import Path
 
 from imgui_bundle import imgui, portable_file_dialogs as pfd
 
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.shape_import import ShapeImportError, find_importer
 
 _MODE_POPUP_ID = "Import mesh"

@@ -9,8 +9,8 @@ project-todos/ryzom-core/forgery-object-editor.md for the split's rationale
 and ordering.
 
 Imports _icon_button/_colored_button/button-color constants from
-object_editor_mixins.ui_helpers, NOT from object_editor.py itself -- see
-ui_helpers.py's module docstring for why a mixin must never import back from
+ui.widgets, NOT from object_editor.py itself -- see
+ui/widgets.py's module docstring for why a mixin must never import back from
 object_editor.py (circular-import trap specific to how this app is
 launched).
 """
@@ -23,7 +23,7 @@ from ryzom_forgery.app import _AVAILABLE_FONTS, _dpi_scale
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.workspace_setup_dialog import _truncate_path_to_width
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_colored_button, _icon_button, _QUICK_EXPORT_BUTTON_COLOR, _QUIT_BUTTON_COLOR, _SAVE_BUTTON_COLOR,
 	_SYNC_NOW_COLOR, _EXPORT_AS_BUTTON_COLOR, _WRITABLE_SHAPE_TYPES,
 )

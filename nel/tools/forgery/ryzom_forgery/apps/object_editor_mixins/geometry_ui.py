@@ -17,8 +17,8 @@ class itself is always skinned, with per-LOD skin data (MeshMRMSkinnedLod) --
 "disabling" it would mean converting to a different Python type entirely, not
 toggling a field or clearing some channels.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 import dataclasses
@@ -28,13 +28,13 @@ from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_d
 
 from pynel.ryzom_shape import Mesh, MeshMRM, MeshMRMSkinned, MatrixBlock
 
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.shape_geometry import shape_geom
 from ryzom_forgery.shape_import import (
 	ShapeImportError, _build_skinned_matrix_blocks, _normalize_skin_weights, import_rig_bone_weights,
 )
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import _is_shape_skinned
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _colored_button, _icon_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR
+from ryzom_forgery.ui.widgets import _colored_button, _icon_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR
 
 _CLEAR_SKINNING_POPUP_ID = "Clear Skinning"
 

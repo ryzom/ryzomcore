@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-09-19 — ✨ Migrate sysinfo to the recursive Box/Panel system (Forgery 4.24.0)
+
+First real migration of `project-todos/forgery/box_ui_migration.md`: the
+`sysinfo` status bar (`app.py`, shared by Patina and Atyscape) now uses
+`ryzom_forgery/ui/box.py`/`box_panel.py` instead of the flat `ui/panel.py`.
+`ForgeryApp` gained a screen-sized root `Box` (`self._ui_root`) with a
+`box_panel.Panel(dock="bottom")` for sysinfo as its child; Explorer and the
+right panel are untouched for now, still `ui/panel.py`.
+
+`SysInfoBar.draw()` was replaced by `build_content_box()`, rebuilt fresh
+every frame (the bar's content changes frame to frame) and returning a real
+`Box` tree -- a `LabelWidget` for FPS/ms, optional cursor/status labels with
+spacer `Box`es between segments, a `dock="center"` group for the active
+background task (label + `ProgressBarWidget`), and a right-docked, grayed-out
+version label. No plain `imgui.text`/manual centering left in this file.
+
+Required extending the shared `Box`/`Widget` primitives, now reusable by the
+rest of the migration: `Box` gained an `align` parameter (`"start"`/
+`"center"`/`"end"`, default `"start"`) for cross-axis positioning of a
+top/bottom/left/right-docked child (a `dock="center"` child was already
+centered on both axes and ignores it) -- replaces manual `center_v()` calls.
+`ui/box_panel.py`'s `LabelWidget` gained `color`/`disabled`, and a new
+`ProgressBarWidget` was added. `Panel` gained `extra_flags` (for
+`no_scrollbar`/`no_scroll_with_mouse`, previously passed to `ui.panel.Panel.draw()`).
+
+An initial version of this migration wrapped `SysInfoBar.draw()` behind a
+single opaque callback widget instead of real composition -- reverted after
+Nuno flagged that this only migrates window positioning, not content, and
+defeats the point of `Box`'s automatic centering for anything drawn that way.
+Every future `box_ui_migration__*` sub-chantier decomposes real content into
+`Box`/`Widget` children, documented in `docs/ui.md`'s Historique/pièges so
+the decision doesn't get lost again (it already had been once, in the
+disposable test script that originally validated `box.py`/`box_panel.py`).
+
+Validated by Nuno on a real launch via agentcom: a background task's
+progress bar, previously requiring about an hour of manual trial and error
+to align correctly, rendered centered and aligned on the first try with the
+new system.
+
+Known, accepted behavior change: the task segment now centers against the
+space remaining after FPS/cursor/status/version are placed, never against
+the full window width like the old `center_x()` did -- it can no longer
+overlap those segments, at the cost of a possible small pixel offset from
+the old exact-center behavior on a narrow window.
+
 ## 2026-09-18 — ✨ Recursive Box/Panel layout system (Forgery 4.23.0)
 
 Added `ryzom_forgery/ui/box.py`: `Box(dock, h, v, margin, padding)`, a

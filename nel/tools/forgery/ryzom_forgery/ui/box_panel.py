@@ -39,7 +39,7 @@ class Panel(Box):
 	vire WindowPadding")."""
 
 	def __init__(self, dock, h=STRETCH, v=STRETCH, resizable=False, min_size=None, max_size=None,
-	             title="##panel", padding=4.0):
+	             title="##panel", padding=4.0, extra_flags=0):
 		super().__init__(dock=dock, h=h, v=v, padding=padding)
 		self.resizable = resizable
 		if resizable and (min_size is None or max_size is None):
@@ -47,6 +47,7 @@ class Panel(Box):
 		self.min_size = min_size
 		self.max_size = max_size
 		self.title = title
+		self.extra_flags = extra_flags
 
 	def _size_constraints(self, rect):
 		_x, _y, w, h = rect
@@ -67,7 +68,7 @@ class Panel(Box):
 		itself (imgui.get_window_size(), same lag every resizable window
 		here already accepts)."""
 		x, y, w, h = allocated
-		flags = imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
+		flags = imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value | self.extra_flags
 		if self.title.startswith("##") and "###" not in self.title:
 			flags |= imgui.WindowFlags_.no_title_bar.value
 		imgui.set_next_window_pos((x, y))
@@ -124,12 +125,28 @@ class ButtonWidget(Widget):
 
 
 class LabelWidget(Widget):
-	def __init__(self, text, **kwargs):
+	def __init__(self, text, color=None, disabled=False, **kwargs):
 		super().__init__(**kwargs)
 		self.text = text
+		self.color = color
+		self.disabled = disabled
 
 	def draw_content(self, w, h):
-		imgui.text(self.text)
+		if self.disabled:
+			imgui.text_disabled(self.text)
+		elif self.color is not None:
+			imgui.text_colored(self.color, self.text)
+		else:
+			imgui.text(self.text)
+
+
+class ProgressBarWidget(Widget):
+	def __init__(self, fraction, **kwargs):
+		super().__init__(**kwargs)
+		self.fraction = fraction
+
+	def draw_content(self, w, h):
+		imgui.progress_bar(self.fraction, (w, h))
 
 
 class TextInputWidget(Widget):

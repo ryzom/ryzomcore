@@ -12,7 +12,7 @@ from pynel.ryzom_bnp import BnpReader, BnpError
 
 from . import settings as app_settings
 from .commands import CommandRegistry
-from .icon_colors import pastel_color_for
+from .ui.colors import pastel_color_for
 
 BNP_EXTENSIONS = (".bnp", ".bnpe")
 DEFAULT_FILTER = "*"
@@ -46,7 +46,7 @@ _NON_FAVORITE_STAR_COLOR = (0.5, 0.5, 0.5, 1.0)
 def _icon_button(icon, tooltip, color=None):
 	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
 	_load_icon_font) with a hover tooltip, since an icon alone isn't always
-	self-explanatory. Tinted a deterministic pastel color (see icon_colors.py)
+	self-explanatory. Tinted a deterministic pastel color (see ui/colors.py)
 	unless `color` is given -- needed by _draw_favorites()'s star, whose
 	gold/gray already means something (favorited or not), which a pastel
 	tint would otherwise silently override."""

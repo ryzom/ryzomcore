@@ -11,8 +11,8 @@ from pathlib import Path
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.icon_colors import pastel_color_for
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.colors import pastel_color_for
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.workspaces import (
 	active_workspace_path, create_project, create_workspace, ensure_structure, external_workspace_path,
 	is_root_configured, list_external_workspaces, list_projects, list_workspaces, migrate_legacy_workspaces,

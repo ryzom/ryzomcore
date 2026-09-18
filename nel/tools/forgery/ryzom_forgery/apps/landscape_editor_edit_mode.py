@@ -21,7 +21,7 @@ from pynel.ryzom_zone import load_zone, ZoneParseError
 from ryzom_forgery import continent_ecosystem
 from ryzom_forgery import continent_selector
 from ryzom_forgery import continent_pipeline_reference as cpr
-from ryzom_forgery.icon_colors import pastel_color_for
+from ryzom_forgery.ui.colors import pastel_color_for
 from ryzom_forgery.zone_geom_cache import ZoneManifestEntry
 from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_build
@@ -31,7 +31,7 @@ from ryzom_forgery.land_geometry import (
 	land_cell_index, piece_origin, transform_zone_cache_data, used_land_cells,
 )
 from ryzom_forgery.apps.landscape_editor_modes import _MODE_EDITION
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button
+from ryzom_forgery.ui.widgets import _icon_button
 from ryzom_forgery.region_loader import (
 	best_ref_for_extensions, continent_zone_dirs, get_zone_extensions_index, load_zone_cache_data,
 	RegionLoadError, ZoneRef,

@@ -1,6 +1,6 @@
 # app.py — la classe de base des apps Forgery
 
-**Fichier :** `nel/tools/forgery/ryzom_forgery/app.py` (369 lignes)
+**Fichier :** `nel/tools/forgery/ryzom_forgery/app.py` (570 lignes)
 
 ## Rôle
 
@@ -20,7 +20,7 @@ pour ajouter leur logique métier.
 
 - `_slugify(title)` (`app.py`) : normalise un titre de fenêtre en nom de
  fichier (utilisé pour la persistance de géométrie de fenêtre par app).
-- `ForgeryApp.__init__(self, explorer_root, title=..., explorer_width=300, panel_width=320, sysinfo_height=28, explorer_default_filter=DEFAULT_FILTER)`
+- `ForgeryApp.__init__(self, explorer_root, title=..., explorer_width=300, panel_width=320, sysinfo_height=36, explorer_default_filter=DEFAULT_FILTER)`
  (`app.py`) : construit toute la fenêtre/l'UI. Dans l'ordre : charge la
  géométrie de fenêtre sauvegardée (`_load_window_geometry`), affiche le
  splash (`Splash`, voir `docs/splash.md`) *avant* `ShowBase.__init__`,
@@ -112,9 +112,14 @@ pour ajouter leur logique métier.
  courante -- système de police dynamique d'ImGui 1.92+, aucune
  reconstruction d'atlas nécessaire, texte net même pendant l'aperçu DPI
  en direct). Ferme le splash au tout premier appel, dessine le dialogue
- de setup de workspace, puis positionne/dessine les trois fenêtres
- pinnées (sysinfo, Explorer, panel) selon `display_size` et les largeurs
- courantes.
+ de setup de workspace, puis dessine les trois fenêtres pinnées (sysinfo,
+ Explorer, panel), chaînées à partir de `display_size` (sysinfo d'abord, son
+ rect connu réduit l'espace disponible pour Explorer/panel) : sysinfo est un
+ `box_panel.Panel` (enfant de `self._ui_root`, une `Box` racine écran, voir
+ `docs/ui.md`), son contenu reconstruit chaque frame via
+ `self.sysinfo.build_content_box()` ; Explorer et le panel droit restent sur
+ `ui/panel.py`'s `Panel.draw()` (migration en cours, `project-todos/forgery/
+ box_ui_migration.md`).
 
 ## Utilisation
 
@@ -163,12 +168,16 @@ pour ajouter leur logique métier.
 - `_ICON_FONT_PATH`/`_FONTS_DIR` pointent dans les assets internes
  d'`imgui_bundle` (`app.py`) — aucune police n'est bundlée séparément
  dans le wheel Forgery, tout vient de la dépendance `imgui_bundle` elle-même.
-- Le layout des trois fenêtres pinnées utilise `imgui.Cond_.first_use_ever`
- pour la taille initiale (`app.py`), mais la contrainte
- `set_next_window_size_constraints` (`app.py`, `360-361`) est elle
- appliquée à chaque frame — l'explorateur et le panneau sont donc
- redimensionnables en largeur (150 à 900px, `_SIDE_PANEL_MIN_WIDTH`/`_MAX_WIDTH`)
- mais leur hauteur reste verrouillée à `body_height`.
+- Le layout des trois fenêtres pinnées connaît sa propre taille/contraintes
+ et se redimensionne lui-même : Explorer/panel droit via `ui/panel.py`'s
+ `Panel` (voir `docs/ui.md`), sysinfo via `ui/box_panel.py`'s `Panel`
+ (migré, `project-todos/forgery/box_ui_migration.md`). L'explorateur et le
+ panneau sont redimensionnables en largeur (150 à 900px,
+ `_SIDE_PANEL_MIN_WIDTH`/`_MAX_WIDTH`, `resizable=True`) ; sysinfo est de
+ taille fixe (`resizable=False`) -- un auto-ajustement à son contenu a été
+ tenté puis abandonné, `imgui.WindowFlags_.always_auto_resize` faisant
+ planter Panda3D (assertion sur une sphère englobante NaN, cause non
+ comprise).
 - Le titre du panneau utilise l'astuce ImGui `f"{self.panel_title}###panel"`
  (`app.py`) pour garder une identité ImGui stable (`###panel`) malgré
  un titre affiché qui change dynamiquement.

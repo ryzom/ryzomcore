@@ -12,7 +12,7 @@ image_editor_path/text_editor_path.
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.icon_colors import pastel_color_for
+from ryzom_forgery.ui.colors import pastel_color_for
 from ryzom_forgery.workspace_setup_dialog import _truncate_path_to_width
 
 

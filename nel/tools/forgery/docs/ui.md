@@ -39,39 +39,51 @@ quel module, sans dépendance vers un dossier spécifique à une app.
  sauf si `resizable`/`no_title_bar` si `title` commence par `##`) et la
  paire begin/end — l'appelant ne dessine que son contenu à l'intérieur du
  `with`. Un panneau `resizable=True` capture sa nouvelle taille tout seul à
- la fin de chaque `draw()`. C'est le système RÉELLEMENT utilisé par `app.py`
- aujourd'hui (docking plat sur 4 bords, pas de composition récursive).
-- `box.py` : `Box(dock="top", h=STRETCH, v=STRETCH, margin=0, padding=0)` —
- rectangle imbriqué, récursif (hbox/vbox), voir `project-todos/forgery/
- box_panel_layout_system.md`. `STRETCH` (sentinelle) et `Percent(value)`
- (pourcentage de l'extension du parent) sont les 3 types de valeur possibles
- pour `h`/`v`. `add(box)` ajoute un enfant ; `layout(allocated)` calcule
- `external_rect`/`internal_rect` (margin/padding) puis place ses enfants un
- par un selon leur `dock` (`top`/`bottom`/`left`/`right`/`center`), en
- partageant l'espace à parts égales entre enfants étirés sur le même axe de
- flux. Délibérément sans aucune dépendance `imgui_bundle`, pour rester
- testable en pur Python (aucun affichage nécessaire).
+ la fin de chaque `draw()`. Encore utilisé par `app.py` aujourd'hui pour
+ Explorer/panel droit uniquement (sysinfo migré, voir `box_panel.py`
+ ci-dessous) -- migré élément par élément par `project-todos/forgery/
+ box_ui_migration.md`.
+- `box.py` : `Box(dock="top", h=STRETCH, v=STRETCH, margin=0, padding=0,
+ align="start")` — rectangle imbriqué, récursif (hbox/vbox), voir
+ `project-todos/forgery/box_ui_migration.md`. `STRETCH` (sentinelle) et
+ `Percent(value)` (pourcentage de l'extension du parent) sont les 3 types de
+ valeur possibles pour `h`/`v`. `add(box)` ajoute un enfant ; `layout(allocated)`
+ calcule `external_rect`/`internal_rect` (margin/padding) puis place ses
+ enfants un par un selon leur `dock` (`top`/`bottom`/`left`/`right`/`center`),
+ en partageant l'espace à parts égales entre enfants étirés sur le même axe
+ de flux. `align` (`"start"`/`"center"`/`"end"`, défaut `"start"`) positionne
+ un enfant `top`/`bottom`/`left`/`right` de taille fixe/Percent sur son AXE
+ SECONDAIRE (ex. centrer verticalement un `LabelWidget` docké `"left"` dans
+ une rangée plus haute que lui) -- sans effet sur un enfant `dock="center"`
+ (déjà centré sur les deux axes). Délibérément sans aucune dépendance
+ `imgui_bundle`, pour rester testable en pur Python (aucun affichage
+ nécessaire).
 - `box_panel.py` : le pendant ImGui de `box.py`, séparé pour la même raison
  (`box.py` reste importable sans `imgui_bundle`). `Panel(Box)` : une `Box`
  qui en plus ouvre une vraie fenêtre ImGui pour elle-même (position/taille/
- contraintes de redimensionnement/flags/begin-end), typiquement ajoutée
- comme enfant direct d'une `Box` racine de la taille de l'écran. `Widget(Box)` :
- une `Box` qui dessine du vrai contenu ImGui dans son `internal_rect` au
- lieu de placer des enfants — `draw_content(w, h)` à surcharger, reçoit la
- taille RÉSOLUE (jamais `self.h`/`self.v` bruts, qui peuvent être `STRETCH`
- ou `Percent`). `ButtonWidget`, `LabelWidget`, `TextInputWidget` : 3
- implémentations concrètes de `Widget`. **N'est PAS le système utilisé par
- `app.py` aujourd'hui** (`panel.py`, docking plat) — migrer l'app réelle
- vers `box.py`/`box_panel.py` est un chantier distinct, pas encore fait.
+ contraintes de redimensionnement/flags/begin-end, plus `extra_flags` pour
+ des `imgui.WindowFlags_` additionnels comme `no_scrollbar`), typiquement
+ ajoutée comme enfant direct d'une `Box` racine de la taille de l'écran.
+ `Widget(Box)` : une `Box` qui dessine du vrai contenu ImGui dans son
+ `internal_rect` au lieu de placer des enfants — `draw_content(w, h)` à
+ surcharger, reçoit la taille RÉSOLUE (jamais `self.h`/`self.v` bruts, qui
+ peuvent être `STRETCH` ou `Percent`). `ButtonWidget`, `LabelWidget` (avec
+ `color`/`disabled`), `TextInputWidget`, `ProgressBarWidget` : implémentations
+ concrètes de `Widget`. Utilisé RÉELLEMENT par `app.py` pour sysinfo depuis
+ `box_ui_migration__sysinfo.md` -- migrer le reste de l'app (Explorer, panel
+ droit, dialogues, popups...) continue élément par élément.
 
 ## Utilisation
 
-- `app.py` (`ForgeryApp`, partagée par Patina et Atyscape) : les 3 fenêtres
- pinnées (Explorer, panel droit, sysinfo) sont chacune un `Panel`, chaînées
- dans `draw_ui()` (voir `docs/app.md`).
-- `sysinfo.py` : utilise `center_x()`/`center_v()` pour centrer la tâche de
- fond active (voir `docs/unified_background_task_status_bar.md` si présent,
- sinon `project-todos/forgery/unified_background_task_status_bar.md`).
+- `app.py` (`ForgeryApp`, partagée par Patina et Atyscape) : Explorer et le
+ panel droit restent des `Panel` (`ui/panel.py`) ; sysinfo est maintenant un
+ `box_panel.Panel`, enfant d'une `Box` racine de la taille de l'écran
+ (`self._ui_root`) -- chaînés dans `draw_ui()` (voir `docs/app.md`).
+- `sysinfo.py` : `SysInfoBar.build_content_box()` reconstruit un vrai arbre
+ `Box`/`LabelWidget`/`ProgressBarWidget` à chaque frame (le contenu change
+ frame à frame) au lieu de dessiner directement -- `align="center"`
+ remplace `center_x()`/`center_v()` (`ui/layout.py`, toujours utilisées
+ ailleurs tant que leur propre app n'est pas migrée).
 
 ## Historique / pièges
 
@@ -111,3 +123,19 @@ quel module, sans dépendance vers un dossier spécifique à une app.
  ne doivent jamais coexister (double marge) — `Panel.layout()` force
  `imgui.StyleVar_.window_padding` à `(0, 0)`, le `padding` de la `Box`
  devient l'unique source.
+- **Toute migration d'une app/fenêtre existante vers ce système doit
+ décomposer son contenu réel en `Box`/`Widget`, jamais l'envelopper derrière
+ un seul callback opaque qui appelle l'ancienne méthode `draw()` telle
+ quelle.** Un tel wrapper (ex. un hypothétique `CallbackWidget`) ne migre
+ que le *fenêtrage* (position/taille de la fenêtre) -- tout ce qui est
+ dessiné à l'intérieur reste du imgui direct avec centrage manuel
+ (`ui/layout.py`'s `center_x`/`center_v`), donc aucun gain : le but même de
+ `Box`/`Widget` est d'éliminer ce calcul à la main (un enfant docké
+ `dock="center"` est centré automatiquement sur les deux axes par
+ `Box._place_child()`). Un wrapper de ce genre n'est acceptable que comme
+ scaffolding strictement temporaire pour poser le fenêtrage d'un premier
+ jet, jamais comme livrable final d'une migration (Nuno, 2026-09-19 : "TOUT
+ est a faire en Box, absolument TOUT" -- décision déjà prise une session
+ plus tôt en construisant `box.py`/`box_panel.py` mais jamais notée ici,
+ perdue avec le script de test jetable de l'époque -- voir aussi
+ `project-todos/forgery/box_ui_migration.md`).

@@ -12,8 +12,8 @@ from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_d
 
 from ryzom_forgery import live_data
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.icon_colors import pastel_color_for
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.colors import pastel_color_for
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.workspace_setup_dialog import _truncate_path_to_width
 
 _POPUP_ID = "Ryzom Live game data"

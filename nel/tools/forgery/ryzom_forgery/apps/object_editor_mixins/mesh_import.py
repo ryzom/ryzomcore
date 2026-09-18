@@ -4,8 +4,8 @@ one (including the material-count-mismatch match-up popup). Split out of
 object_editor.py, see the "Split object_editor.py into theme files" chantier
 in project-todos/ryzom-core/forgery-object-editor.md.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
@@ -13,10 +13,10 @@ from panda3d.core import Quat
 
 from pynel.ryzom_shape import ShapeFile
 
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT
 from ryzom_forgery.shape_import import texture_search_dirs_for
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_colored_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR, _icon_button,
 )
 

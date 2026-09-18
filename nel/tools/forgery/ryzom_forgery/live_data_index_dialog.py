@@ -11,7 +11,7 @@ import threading
 from imgui_bundle import imgui
 
 from ryzom_forgery import creature_full_index
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 
 _POPUP_ID = "Building creature/animation index"
 

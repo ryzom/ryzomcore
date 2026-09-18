@@ -22,9 +22,9 @@ from pynel import repository_paths
 from ryzom_forgery import dds_export, panoply, panoply_bake, panoply_colorize, panoply_config, panoply_live
 from ryzom_forgery import panoply_texture
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.shape_geometry import load_panda_texture, resolve_texture_ref
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button
+from ryzom_forgery.ui.widgets import _icon_button
 
 _BAKE_PROGRESS_POPUP_ID = "Baking Panoply variants"
 

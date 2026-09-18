@@ -49,7 +49,7 @@ from ryzom_forgery.apps.object_editor_mixins.reference_shapes import ReferenceSh
 from ryzom_forgery.apps.object_editor_mixins.settings_dialogs import SettingsDialogsMixin
 from ryzom_forgery.apps.object_editor_mixins.shape_io import ShapeIOMixin
 from ryzom_forgery.apps.object_editor_mixins.texture_widgets import TextureWidgetsMixin
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _begin_tab_item_with_icon, _push_tab_color, _pop_tab_color
+from ryzom_forgery.ui.widgets import _begin_tab_item_with_icon, _push_tab_color, _pop_tab_color
 from ryzom_forgery.apps.object_editor_mixins.viewport_transform import ViewportTransformMixin
 
 # See _scan_active_workspace_virtual_categories().
@@ -376,7 +376,7 @@ class ObjectEditorApp(
 		self._panoply_cfg_changed = False  # set from WorkspaceWatcher's background thread, see _on_panoply_cfg_settled()/_update_texture_freshness()
 		self._virtual_categories_cache = None  # {category: [Path, ...]} or None -- see _scan_active_workspace_virtual_categories()
 		self._virtual_categories_cache_time = 0.0
-		self._bake_progress = None  # dict or None -- see _start_panoply_bake()/_draw_bake_progress_popup()
+		self._bake_progress = None  # dict or None -- see _start_panoply_bake()/_update_bake_progress_bar()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
 		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
@@ -771,7 +771,7 @@ class ObjectEditorApp(
 		self._draw_reopen_shape_popup()
 		self._draw_load_shape_unsaved_popup()
 		self._draw_restore_scan_popup()
-		self._draw_bake_progress_popup()
+		self._update_bake_progress_bar()
 		self._draw_import_conflict_popup()
 		self._draw_name_conflict_popup()
 		self._flush_pending_import_status()

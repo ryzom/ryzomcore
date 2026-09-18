@@ -7,8 +7,8 @@ until their own chantier steps). Split out of object_editor.py, see the
 "Split object_editor.py into theme files" chantier in
 project-todos/ryzom-core/forgery-object-editor.md.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 import subprocess
@@ -25,7 +25,7 @@ from ryzom_forgery.shape_geometry import (
 	load_panda_texture, resolve_texture_ref, rgba_to_color, solid_color_texture, texture_to_pnm_image,
 )
 from ryzom_forgery.workspaces import reveal_in_system_file_manager
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_icon_button, _IDRV_MAT_SHADER_SPECULAR, _MULTI_BITMAP_SLOT_LABELS, _STATUS_HINT_COLOR,
 	_TEXTURE_IN_WORKSPACE_COLOR, _TEXTURE_NORMAL_COLOR,
 )

@@ -31,7 +31,7 @@ from ryzom_forgery.apps.landscape_editor_modes import (
 	_detect_app_mode, _MODE_BADGE_COLOR, _MODE_BADGE_LABEL, _MODE_EDITION, _MODE_VISUALISATION, _OTHER_MODE,
 )
 from ryzom_forgery.apps.landscape_editor_view_mode import ViewModeMixin
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_begin_tab_item_with_icon, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _pop_tab_color, _push_tab_color,
 	_VIEWPORT_TOGGLE_MARGIN_PX,
 )
@@ -52,7 +52,7 @@ from ryzom_forgery.region_loader import (
 )
 from ryzom_forgery import continent_pipeline_reference as cpr
 from ryzom_forgery import ig_full_geom_cache
-from ryzom_forgery.icon_colors import pastel_color_for
+from ryzom_forgery.ui.colors import pastel_color_for
 from ryzom_forgery import ig_full_load
 from ryzom_forgery import ig_geometry
 from ryzom_forgery import primitive_geometry
@@ -3073,7 +3073,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		nothing is selected. Colored icon header, zone name in orange,
 		bounds in green (Nuno 2026-09-14: "comme Patina" -- same
 		pastel_color_for(icon) tinting Patina/Explorer already use for
-		icon-buttons app-wide, icon_colors.py)."""
+		icon-buttons app-wide, ui/colors.py)."""
 		has_selection = self._selected_zone_name is not None and self._selected_zone_bounds is not None
 		imgui.begin_disabled(not has_selection)
 		imgui.push_style_color(imgui.Col_.text.value, pastel_color_for(fa_icons.ICON_FA_LOCATION_CROSSHAIRS))

@@ -4,8 +4,8 @@ Single/Multi/specular conversion helpers. Split out of object_editor.py, see
 the "Split object_editor.py into theme files" chantier in
 project-todos/ryzom-core/forgery-object-editor.md.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
@@ -20,7 +20,7 @@ from ryzom_forgery.shape_geometry import (
 	compose_uv_matrix, decompose_uv_matrix, load_panda_cube_texture, load_panda_texture, resolve_texture_ref,
 	rgba_to_color, uv_matrix_to_panda_mat4,
 )
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_icon_button, _IDRV_MAT_SHADER_SPECULAR, _STATUS_HINT_COLOR, _TEXTURE_IN_WORKSPACE_COLOR, _TEXTURE_NORMAL_COLOR,
 )
 
@@ -33,7 +33,7 @@ _IDRV_MAT_ALPHA_TEST = 0x00000200
 _IDRV_MAT_TEX_ADDR = 0x00000400
 # CMaterial::TShader (material.h) -- Material.shader_type's value, not a flag
 # bit. _IDRV_MAT_SHADER_SPECULAR itself lives in
-# object_editor_mixins.ui_helpers (shared with texture_widgets.py).
+# ui.widgets (shared with texture_widgets.py).
 _IDRV_MAT_SHADER_NORMAL = 0
 _IDRV_MAT_SHADER_LIGHTMAP = 3
 

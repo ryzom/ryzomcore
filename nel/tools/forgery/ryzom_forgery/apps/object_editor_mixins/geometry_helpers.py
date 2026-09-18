@@ -2,7 +2,7 @@
 object_editor_mixins/ mixins (main shape rendering, creature-bind assembly,
 reference shapes...).
 
-Like ui_helpers.py, has ZERO dependency on object_editor.py -- see that
+Like ui/widgets.py, has ZERO dependency on object_editor.py -- see that
 module's docstring for why a mixin must never import back from
 object_editor.py.
 """

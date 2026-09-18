@@ -5,8 +5,8 @@ and its per-frame live re-skin/animation, and the floating control panels
 for both). Split out of object_editor.py, see the "Split object_editor.py
 into theme files" chantier in project-todos/ryzom-core/forgery-object-editor.md.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 import io
@@ -38,7 +38,7 @@ from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_build_mesh_skin_state, _build_mrm_skin_state, _build_skin_state, _MeshSkinState, _MrmSkinState,
 	_reskin_mesh_state, _reskin_mrm_state, _reskin_shadow_skin_state, _reskin_state,
 )
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_capture_panel_pos, _icon_button, _set_panel_pos, _VIEWPORT_TOGGLE_MARGIN_PX,
 )
 

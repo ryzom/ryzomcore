@@ -4,8 +4,8 @@ popups, the unsaved-changes guard, transform baking, and shape writing.
 Split out of object_editor.py, see the "Split object_editor.py into theme
 files" chantier in project-todos/ryzom-core/forgery-object-editor.md.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 from datetime import datetime
@@ -22,10 +22,10 @@ from ryzom_forgery import settings as app_settings
 from ryzom_forgery.settings import PanelState
 from ryzom_forgery import virtual_categories
 from ryzom_forgery.explorer import ExplorerItem
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.shape_geometry import IDENTITY_QUAT, smooth_normals_per_material
 from ryzom_forgery.workspaces import reveal_in_system_file_manager
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_colored_button, _icon_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR, _MULTI_BITMAP_SLOT_LABELS,
 )
 

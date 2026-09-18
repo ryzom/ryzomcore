@@ -7,7 +7,7 @@ object_editor.py into theme files" chantier in
 project-todos/ryzom-core/forgery-object-editor.md.
 
 Imports from object_editor_mixins.{ui_helpers,geometry_helpers}, NOT from
-object_editor.py itself -- see ui_helpers.py's module docstring for why.
+object_editor.py itself -- see ui/widgets.py's module docstring for why.
 """
 
 from pathlib import Path
@@ -19,7 +19,7 @@ from pynel.ryzom_shape import ShapeParseError, parse_shape
 
 from ryzom_forgery.shape_geometry import iter_render_passes, shape_bbox
 from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import _build_geom, _build_vertex_data
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_icon_button, _OBJECT_TRANSPARENCY_ALPHA, _VIEWPORT_TOGGLE_MARGIN_PX,
 )
 

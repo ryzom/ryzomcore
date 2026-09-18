@@ -4,8 +4,8 @@ object_editor_mixins/ mixins -- the main shape's own live wind/skin preview
 creature (_update_assembled_creature_skin(), creature_bind.py) both build and
 blend these same per-vertex tables every frame.
 
-Like ui_helpers.py/geometry_helpers.py, has ZERO dependency on
-object_editor.py -- see ui_helpers.py's module docstring for why.
+Like ui/widgets.py/geometry_helpers.py, has ZERO dependency on
+object_editor.py -- see ui/widgets.py's module docstring for why.
 """
 
 import numpy

@@ -17,7 +17,7 @@ from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_d
 
 from pynel import repository_paths
 
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import _icon_button
+from ryzom_forgery.ui.widgets import _icon_button
 from ryzom_forgery.workspace_setup_dialog import _truncate_path_to_width
 
 

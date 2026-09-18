@@ -1,22 +1,23 @@
-"""Generic ImGui button helpers and shared constants used across
-ObjectEditorApp and its object_editor_mixins/ mixins.
+"""Generic ImGui button/panel/tab helpers and shared constants, used across
+every Forgery app (Patina, Atyscape) and their own mixins/dialogs.
 
-Deliberately has ZERO dependency on object_editor.py itself: object_editor.py
-can be loaded under two different sys.modules identities depending on launch
-method (`python -m ryzom_forgery.apps.object_editor` registers it as
-`__main__`, while the app-discovery code in ryzom_forgery/__init__.py imports
-it as `ryzom_forgery.apps.object_editor` -- two separate module objects for
-the same file). A mixin importing something back from object_editor.py hits
-a circular-import ImportError when this happens, because the second,
-package-qualified import re-executes object_editor.py from scratch, re-enters
-its own mixin import before the mixin class is fully defined. Keeping these
-helpers here, with mixins and object_editor.py both importing FROM this
-module (never from each other), avoids the cycle entirely.
+Deliberately has ZERO dependency on any app module (object_editor.py,
+landscape_editor.py, or their mixins): object_editor.py can be loaded under
+two different sys.modules identities depending on launch method (`python -m
+ryzom_forgery.apps.object_editor` registers it as `__main__`, while the
+app-discovery code in ryzom_forgery/__init__.py imports it as
+`ryzom_forgery.apps.object_editor` -- two separate module objects for the
+same file). A mixin importing something back from object_editor.py hits a
+circular-import ImportError when this happens, because the second,
+package-qualified import re-executes object_editor.py from scratch,
+re-enters its own mixin import before the mixin class is fully defined.
+Keeping these helpers here, with every app/mixin importing FROM this module
+(never from each other), avoids the cycle entirely.
 """
 
 from imgui_bundle import imgui
 
-from ryzom_forgery.icon_colors import darken, pastel_color_for
+from ryzom_forgery.ui.colors import darken, pastel_color_for
 
 _ACTIVE_COLOR = (0.7, 0.7, 0.7, 1.0)  # light gray -- default "on" highlight, matches the button family's own gray scale (app.py) instead of clashing with it as ImGui's stock blue used to
 
@@ -83,7 +84,7 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 	the button glyph itself -- NOT the tooltip below, which needs the normal
 	text font: that font is icon-glyphs-only, so a tooltip drawn under it
 	renders as blank/invisible text instead of readable words. The glyph
-	itself is tinted a deterministic pastel color (see icon_colors.py) --
+	itself is tinted a deterministic pastel color (see ui/colors.py) --
 	independent of `active`'s own button-background highlight, both can be
 	on at once (confirmed with Nuno, 2026-09-03: no conflict between the
 	two signals). While `active`, that pastel is darkened first -- the

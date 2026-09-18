@@ -1,10 +1,10 @@
 """Deterministic pastel color per icon glyph -- shared by every _icon_button()
-copy in this codebase (see e.g. apps/object_editor_mixins/ui_helpers.py's own:
-each module keeps its own tiny _icon_button rather than sharing one -- see
-that pattern's own docstring note -- but they all pick their icon's color
-through this one shared, pure lookup so the same icon glyph always gets the
-same color everywhere, not a fresh random pick per launch (confirmed with
-Nuno, 2026-09-03: seeded by the icon itself, not truly random).
+copy in this codebase (see ui/widgets.py's own: each module still keeps its
+own tiny _icon_button rather than sharing one -- see that pattern's own
+docstring note -- but they all pick their icon's color through this one
+shared, pure lookup so the same icon glyph always gets the same color
+everywhere, not a fresh random pick per launch (confirmed with Nuno,
+2026-09-03: seeded by the icon itself, not truly random).
 
 Deliberately NOT applied to navcube.py's own gizmo buttons (status/mode
 icons, direction pad, roll) -- those already use color meaningfully (orange
@@ -40,11 +40,18 @@ _PASTEL_PALETTE = (
 	(0.808, 0.553, 0.596, 1.0),  # coral    #ce8d98
 )
 
+# Shared "error" red -- recopied as a raw (1.0, 0.4, 0.4, 1.0) literal across
+# 9 call sites before this constant existed (found in the 2026-09-18 ui/
+# audit, project-todos/forgery/ui_module_consolidation.md); migrating those
+# sites to import this instead is a separate follow-up chantier, not done
+# here.
+ERROR_COLOR = (1.0, 0.4, 0.4, 1.0)
+
 
 def darken(color, factor=0.5):
 	"""`color` scaled toward black by `factor` (alpha untouched) -- for an
 	icon glyph drawn over a light "active" button background (see
-	ui_helpers.py's _icon_button()), where the normal pastel tint (picked
+	ui/widgets.py's _icon_button()), where the normal pastel tint (picked
 	for contrast against dark backgrounds) would otherwise wash out."""
 	r, g, b, a = color
 	return (r * factor, g * factor, b * factor, a)

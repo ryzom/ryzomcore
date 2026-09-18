@@ -6,7 +6,7 @@ Split out of object_editor.py, see the "Split object_editor.py into theme
 files" chantier in project-todos/ryzom-core/forgery-object-editor.md.
 
 Imports from object_editor_mixins.{ui_helpers,geometry_helpers,
-skin_state_helpers}, NOT from object_editor.py itself -- see ui_helpers.py's
+skin_state_helpers}, NOT from object_editor.py itself -- see ui/widgets.py's
 module docstring for why.
 """
 
@@ -29,7 +29,7 @@ from ryzom_forgery.apps.object_editor_mixins.geometry_helpers import (
 from ryzom_forgery.apps.object_editor_mixins.skin_state_helpers import (
 	_build_mesh_skin_state, _build_shadow_skin_preview_state, _build_skin_state, _build_wind_state,
 )
-from ryzom_forgery.apps.object_editor_mixins.ui_helpers import (
+from ryzom_forgery.ui.widgets import (
 	_ACTIVE_COLOR, _capture_panel_pos, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _set_panel_pos,
 	_VIEWPORT_TOGGLE_MARGIN_PX,
 )

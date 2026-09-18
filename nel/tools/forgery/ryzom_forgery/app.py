@@ -12,13 +12,16 @@ from panda3d.core import AmbientLight, DirectionalLight, Texture, WindowProperti
 
 import p3dimgui
 import imgui_bundle
-from imgui_bundle import imgui, imgui_ctx
+from imgui_bundle import imgui
 
 from . import settings as app_settings
 from .commands import CommandRegistry
 from .explorer import DEFAULT_FILTER, Explorer
 from .splash import Splash
 from .sysinfo import SysInfoBar
+from .ui.box import Box, STRETCH
+from .ui.box_panel import Panel as BoxPanel
+from .ui.panel import Panel
 from .workspace_setup_dialog import WorkspaceSetupDialog
 
 # Font Awesome 6 Solid -- imgui_bundle bundles this .otf too (not just the
@@ -77,11 +80,12 @@ def _effective_ui_scale(settings) -> float:
 	_dpi_scale() directly for sizing now reads this instead."""
 	return _dpi_scale() * settings.dpi_scale
 
-# Sysinfo is a fixed thin strip; explorer/panel are pinned in place (no_move)
-# but resizable in width via SetNextWindowSizeConstraints (height is locked
-# to the constraint range instead, so only the width can actually change).
-_PINNED_FLAGS = imgui.WindowFlags_.no_move.value | imgui.WindowFlags_.no_collapse.value
-_SYSINFO_FLAGS = _PINNED_FLAGS | imgui.WindowFlags_.no_resize.value | imgui.WindowFlags_.no_title_bar.value
+# no_move/no_collapse/no_resize(-unless-resizable)/no_title_bar(-if-##-title)
+# are all handled by ui/panel.py's Panel.draw() itself now -- these are only
+# the EXTRA flags a specific panel needs on top of that. sysinfo never wants
+# a scrollbar (a status bar overflowing was always a sizing bug to fix, never
+# something to scroll -- found 2026-09-18, Nuno: "ya un scrollbar").
+_SYSINFO_EXTRA_FLAGS = imgui.WindowFlags_.no_scrollbar.value | imgui.WindowFlags_.no_scroll_with_mouse.value
 _SIDE_PANEL_MIN_WIDTH = 150
 _SIDE_PANEL_MAX_WIDTH = 900
 
@@ -112,7 +116,7 @@ class ForgeryApp(ShowBase):
 	"""
 
 	def __init__(self, explorer_root, title="Ryzom Forgery",
-	             explorer_width=300, panel_width=320, sysinfo_height=28,
+	             explorer_width=300, panel_width=320, sysinfo_height=36,
 	             explorer_default_filter=DEFAULT_FILTER):
 		self._window_geometry_path = _WINDOW_GEOMETRY_DIR / f"{_slugify(title)}.json"
 		geometry = self._load_window_geometry()
@@ -171,12 +175,12 @@ class ForgeryApp(ShowBase):
 		style.set_color_(imgui.Col_.window_bg.value, (0.06, 0.06, 0.06, 1.0))
 		style.set_color_(imgui.Col_.popup_bg.value, (0.08, 0.08, 0.08, 1.0))
 		# Dear ImGui's stock dark theme's default Button color is itself a
-		# blue (~#4296fa) -- fought for contrast against icon_colors.py's own
+		# blue (~#4296fa) -- fought for contrast against ui/colors.py's own
 		# blue/sky/indigo pastel tints (an icon glyph in that hue family all
 		# but disappeared into its own button's idle background). Neutral
 		# gray instead, distinct from window_bg/popup_bg above, so every
 		# icon color (and the existing blue _ACTIVE_COLOR toggle-highlight,
-		# see ui_helpers.py) reads clearly against it (Nuno, 2026-09-03).
+		# see ui/widgets.py) reads clearly against it (Nuno, 2026-09-03).
 		style.set_color_(imgui.Col_.button.value, (0.2, 0.2, 0.2, 1.0))
 		style.set_color_(imgui.Col_.button_hovered.value, (0.28, 0.28, 0.28, 1.0))
 		style.set_color_(imgui.Col_.button_active.value, (0.35, 0.35, 0.35, 1.0))
@@ -236,9 +240,34 @@ class ForgeryApp(ShowBase):
 		self.explorer_width = explorer_width
 		self.panel_width = panel_width
 		self.sysinfo_height = sysinfo_height
+		# See ui/panel.py -- one Panel per docked window, replacing the
+		# hand-rolled position/size math draw_ui() used to repeat separately
+		# for Explorer/right panel (sysinfo migrated to ui/box_panel.py, see
+		# below). sysinfo stays a FIXED size (not size=None/auto-fit) --
+		# imgui.WindowFlags_.always_auto_resize on it reliably crashed
+		# Panda3D's own renderFrame() with a NaN bounding-sphere assertion
+		# (bisected 2026-09-18: reproducible with the flag, gone without it,
+		# mechanism not understood). sysinfo_height bumped from the old 28 to
+		# 36 instead, comfortably covering the ~35px a status row with a
+		# progress bar actually needs once DPI scaling applies
+		# (project-todos/forgery/ui_module_consolidation.md).
+		self._explorer_panel = Panel(
+			side="left", size=explorer_width, resizable=True, min_size=_SIDE_PANEL_MIN_WIDTH, max_size=_SIDE_PANEL_MAX_WIDTH)
+		self._right_panel = Panel(
+			side="right", size=panel_width, resizable=True, min_size=_SIDE_PANEL_MIN_WIDTH, max_size=_SIDE_PANEL_MAX_WIDTH)
 
 		self.commands = CommandRegistry()
 		self.sysinfo = SysInfoBar()
+		# box_ui_migration__sysinfo.md: sysinfo is the first element migrated
+		# from ui/panel.py's flat Panel to the recursive ui/box.py +
+		# ui/box_panel.py system -- a screen-sized root Box with the sysinfo
+		# BoxPanel docked "bottom" as its sole child so far. Explorer/right
+		# panel stay on the old ui/panel.py Panel until their own
+		# box_ui_migration__* sub-chantiers.
+		self._ui_root = Box(h=STRETCH, v=STRETCH)
+		self._sysinfo_box_panel = BoxPanel(
+			dock="bottom", h=STRETCH, v=sysinfo_height, title="##sysinfo", extra_flags=_SYSINFO_EXTRA_FLAGS)
+		self._ui_root.add(self._sysinfo_box_panel)
 		self.workspace_setup_dialog = WorkspaceSetupDialog()
 		self.workspace_setup_dialog.on_dpi_preview_changed = self.set_live_ui_scale_preview
 		self.workspace_setup_dialog.on_setup_finished = self.relaunch
@@ -523,34 +552,36 @@ class ForgeryApp(ShowBase):
 
 		display_size = imgui.get_io().display_size
 		width, height = display_size.x, display_size.y
-		body_height = height - self.sysinfo_height
+		available = (0.0, 0.0, width, height)
 
-		imgui.set_next_window_pos((0, body_height))
-		imgui.set_next_window_size((width, self.sysinfo_height))
-		with imgui_ctx.begin("##sysinfo", flags=_SYSINFO_FLAGS):
-			self.sysinfo.draw()
+		# sysinfo first (now ui/box_panel.py, box_ui_migration__sysinfo.md),
+		# its fixed size feeding the "body" left/right panels (still
+		# ui/panel.py until their own box_ui_migration__* sub-chantiers)
+		# which then stretch to fill -- same draw order as before this
+		# existed. sysinfo's content changes every frame (FPS, optional
+		# cursor/status, active task), so its Box subtree is rebuilt fresh
+		# each frame (build_content_box(), sysinfo.py) rather than built once
+		# in __init__ -- real Box/Widget children throughout, no opaque
+		# draw() callback (docs/ui.md's Historique/pièges). self._ui_root.
+		# layout() then opens sysinfo's real ImGui window and draws that
+		# content; `available` for what's left is computed directly since
+		# sysinfo's fixed height is already known, same result dock_rect()
+		# would give.
+		self._sysinfo_box_panel.children = [self.sysinfo.build_content_box()]
+		self._ui_root.layout((0.0, 0.0, width, height))
+		available = (0.0, 0.0, width, height - self.sysinfo_height)
 
-		once = imgui.Cond_.first_use_ever.value
-
-		imgui.set_next_window_pos((0, 0))
-		imgui.set_next_window_size((self.explorer_width, body_height), cond=once)
-		imgui.set_next_window_size_constraints(
-			(_SIDE_PANEL_MIN_WIDTH, body_height), (_SIDE_PANEL_MAX_WIDTH, body_height))
-		with imgui_ctx.begin("Explorer", flags=_PINNED_FLAGS):
-			self.explorer_width = imgui.get_window_size().x
+		with self._explorer_panel.draw(available, "Explorer") as available:
 			self.draw_left_panel_content()
+		self.explorer_width = self._explorer_panel.size
 
-		imgui.set_next_window_pos((width - self.panel_width, 0))
-		imgui.set_next_window_size((self.panel_width, body_height), cond=once)
-		imgui.set_next_window_size_constraints(
-			(_SIDE_PANEL_MIN_WIDTH, body_height), (_SIDE_PANEL_MAX_WIDTH, body_height))
 		# "###panel" keeps the window's ImGui identity (position/size
 		# persistence) stable even though the displayed title itself
 		# (panel_title()) changes with whatever's currently loaded.
-		with imgui_ctx.begin(f"{self.panel_title()}###panel", flags=_PINNED_FLAGS):
-			self.panel_width = imgui.get_window_size().x
+		with self._right_panel.draw(available, f"{self.panel_title()}###panel") as available:
 			if self._panel_watermark_tex_ref is not None:
 				self._draw_panel_watermark()
 			self.draw_panel()
+		self.panel_width = self._right_panel.size
 
 		imgui.pop_font()

@@ -23,7 +23,7 @@ from typing import List, Optional, Tuple
 from imgui_bundle import imgui
 
 from ryzom_forgery import pipeline_data_installer as pdi
-from ryzom_forgery.popup_utils import center_next_popup
+from ryzom_forgery.ui.popups import center_next_popup
 
 _POPUP_ID = "Pipeline data missing"
 

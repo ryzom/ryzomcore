@@ -74,15 +74,31 @@ def _resolve_fixed(size, total):
 	return size
 
 
+_ALIGN_VALUES = ("start", "center", "end")
+
+
 class Box:
-	def __init__(self, dock="top", h=STRETCH, v=STRETCH, margin=0.0, padding=0.0):
+	def __init__(self, dock="top", h=STRETCH, v=STRETCH, margin=0.0, padding=0.0, align="start"):
 		if dock not in _DOCK_SIDES:
 			raise ValueError(f"unknown dock {dock!r}, expected one of {_DOCK_SIDES}")
+		if align not in _ALIGN_VALUES:
+			raise ValueError(f"unknown align {align!r}, expected one of {_ALIGN_VALUES}")
 		self.dock = dock
 		self.h = h
 		self.v = v
 		self.margin = margin
 		self.padding = padding
+		# Cross-axis alignment for THIS box within whatever its parent grants
+		# it when docked top/bottom/left/right and the box's own size on the
+		# cross axis is smaller than what's available (e.g. a fixed-height
+		# label docked "left" in a taller row) -- "start" (default, matches
+		# every Box created before this existed) leaves it flush to the
+		# top/left edge of the remaining rect, same as always; "center"/"end"
+		# only matter when the cross-axis size is fixed/Percent, never for a
+		# STRETCH cross-axis (which already fills the whole thing, nothing
+		# to align). Center-docked children ignore this entirely -- they are
+		# already centered on BOTH axes by _place_child() below.
+		self.align = align
 		self.children = []
 		# Set by layout() -- (x, y, w, h) each, in the same coordinate space
 		# as whatever rect was passed in (screen space for a Panel's root
@@ -159,9 +175,13 @@ class Box:
 			resolved_h = _resolve_fixed(child.h, internal_w)
 			child_w = w if resolved_h is None else min(resolved_h, w)
 			# Cross-axis (horizontal) alignment for a fixed-width child on a
-			# vertical-flow side: left-started by default -- no cross-axis
-			# centering in this first version, see the chantier's own note.
-			child_x = x
+			# vertical-flow side -- see child.align (box_ui_migration.md).
+			if child.align == "center":
+				child_x = x + (w - child_w) / 2.0
+			elif child.align == "end":
+				child_x = x + (w - child_w)
+			else:
+				child_x = x
 			if child.dock == "top":
 				child.layout((child_x, y, child_w, child_h))
 				return (x, y + child_h, w, h - child_h)
@@ -174,7 +194,14 @@ class Box:
 			child_w = min(child_w, w)
 			resolved_v = _resolve_fixed(child.v, internal_h)
 			child_h = h if resolved_v is None else min(resolved_v, h)
-			child_y = y
+			# Cross-axis (vertical) alignment for a fixed-height child on a
+			# horizontal-flow side -- see child.align (box_ui_migration.md).
+			if child.align == "center":
+				child_y = y + (h - child_h) / 2.0
+			elif child.align == "end":
+				child_y = y + (h - child_h)
+			else:
+				child_y = y
 			if child.dock == "left":
 				child.layout((x, child_y, child_w, child_h))
 				return (x + child_w, y, w - child_w, h)

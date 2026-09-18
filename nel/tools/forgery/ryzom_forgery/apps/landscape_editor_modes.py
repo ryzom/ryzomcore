@@ -4,7 +4,7 @@ and its two mode mixins (`landscape_editor_edit_mode.py`/
 landscape_editor__land_preview.md step 5) -- factored out here so both
 mixins can use them without importing back from `landscape_editor.py`
 itself (circular import), same reasoning as object_editor_mixins/
-ui_helpers.py's own module docstring.
+ui/widgets.py's own module docstring.
 """
 
 from pynel import repository_paths
