@@ -15,32 +15,26 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""Direct `.ig` editing (project-todos/forgery/landscape_editor__ig_editing.md):
-brings the real, hand-added content of `live_data` into our own editable
-working files, without ever depending on the stale/relocated World Editor
-`.primitive` flora sources (`landscape_editor__ig_land_export.md`, abandoned).
+"""Direct `.ig` editing (project-todos/forgery/landscape_editor__ig_editing.md,
+project-todos/forgery/pipeline_export_dirs_rename.md): brings the real,
+hand-added content of `live_data` into our own editable working files,
+without ever depending on the stale/relocated World Editor `.primitive`
+flora sources (`landscape_editor__ig_land_export.md`, abandoned).
 
-Two kinds of working file, computed/copied ONCE then left untouched forever
-(never recomputed automatically -- see each function's own docstring):
+Two kinds of override file under `assets_src/landscape/`, edited by Nuno
+directly (`land_ig_work_dir()`/`other_ig_work_dir()`) -- always take
+priority over the extracted base when merging (`merge_land_ig()`/
+`merge_other_ig()` below).
 
-- "Land" flora diff (`land_ig_work_dir()`): `land_export` (unchanged, still
-  called every Build) already regenerates, from the Ligo bank, everything
-  that depends on the current `.land` composition for a zone (water,
-  `.pacs_prim`, outpost markers -- confirmed 2026-09-15 against
-  `foret-15_zc.ig`'s real content). The only thing missing from its output
-  is whatever was added by hand on top in `live_data` -- identified by
-  DIFF (shape+position), not by name/extension: real flora in `live_data`
-  isn't consistently suffixed (`fy_s2_palmtree_*`/`fy_s2_coconuts_*` have
-  no extension at all, mixed with genuinely non-flora content in the same
-  "no dot" group), so a name-based classifier would misclassify real
-  flora as non-flora.
-- "Other" `.ig` copy (`other_ig_work_dir()`): nothing regenerates a
-  village/decor/sky/water `.ig`'s own internal content (`land_export`'s
-  `ExportAdditionnalIGs` only repositions the whole file as a rigid block,
-  per the `.continent` sheet's `Villages[]` array) -- `live_data` is
-  copied wholesale, once.
+The extracted base itself (`extract_land_flora()`/`extract_other_ig()`) is
+a COMPLETE copy of `live_data`'s own `.ig` content, redone every Build (no
+diff, decision Nuno 2026-09-19: the previous diff-based approach only ever
+served to validate the export process, not a real requirement) -- safe to
+always overwrite since hand edits live in the separate override files
+above, never in the extracted base itself.
 """
 
+import shutil
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -84,15 +78,6 @@ def _instance_key(inst: Instance) -> Tuple[str, int, int, int]:
 	)
 
 
-def compute_land_flora_diff(live_data_ig: InstanceGroup, land_export_ig: InstanceGroup) -> List[Instance]:
-	"""Every instance of `live_data_ig` with no shape+position match in
-	`land_export_ig` -- the real, hand-added content beyond land_export's
-	own Ligo template, whatever its actual nature (flora or not, cf. this
-	module's own docstring)."""
-	land_export_keys = {_instance_key(inst) for inst in land_export_ig.instances}
-	return [inst for inst in live_data_ig.instances if _instance_key(inst) not in land_export_keys]
-
-
 def _new_instance_group(instances: List[Instance]) -> InstanceGroup:
 	return InstanceGroup(
 		real_time_sun_contribution=False,
@@ -114,90 +99,83 @@ def _find_live_ref(live_data_path, continent: str, name: str):
 	return None
 
 
-def ensure_land_flora_diff(
-	ryzom_data_path, live_data_path, continent: str, zone_name: str, land_export_ig_path: Path,
-) -> Path:
-	"""Path to `zone_name`'s land flora diff working file under
-	`land_ig_work_dir(ryzom_data_path, continent)`, computing it (from
-	`live_data` vs `land_export_ig_path`, land_export's own freshly-produced
-	`.ig` for this zone) if it doesn't exist yet -- created EMPTY (valid,
-	instance-less `.ig`) only if there is nothing to diff against at all (a
-	zone never shipped in `live_data`). A zone land_export produced no `.ig`
-	for (confirmed 2026-09-16 on real bagne data: land_export silently skips
-	a zone whose Ligo tile has no matching ref `.ig`) is diffed against an
-	empty base instead of being treated the same as "nothing to diff" --
-	`live_data`'s entire content for that zone is real, hand-placed flora
-	(and `.pacs_prim` collision markers Stage 8 needs), not noise. Once
-	created, this file is NEVER recomputed automatically: recomputing it
-	later would silently discard any edit already made on it (neither
-	`live_data` nor land_export's own output know about our own edits)."""
-	work_path = land_ig_work_dir(ryzom_data_path, continent) / f"{zone_name}.ig"
-	if work_path.is_file():
-		return work_path
-
-	diff_instances: List[Instance] = []
+def extract_land_flora(ryzom_data_path, live_data_path, continent: str, zone_name: str, out_dir: Path) -> Optional[Path]:
+	"""Writes `zone_name`'s COMPLETE `live_data` `.ig` content (not a diff,
+	decision Nuno 2026-09-19) to `out_dir/<zone_name>.ig` (the "flora"
+	extraction, `igs/flora/` -- project-todos/forgery/
+	pipeline_export_dirs_rename.md), unconditionally overwriting any
+	previous content there -- safe every Build, since hand edits live
+	separately in `land_ig_work_dir()`'s override files, never here.
+	Returns `None` (nothing written) if `zone_name` isn't found in
+	`live_data` for `continent` at all."""
 	live_ref = _find_live_ref(live_data_path, continent, zone_name)
-	land_export_ig_path = Path(land_export_ig_path)
-	if live_ref is not None:
-		live_data_ig = ryzom_ig.parse_ig(ig_full_load.read_ig_ref_bytes(live_ref))
-		land_export_ig = (
-			load_ig(land_export_ig_path) if land_export_ig_path.is_file() else _new_instance_group([])
-		)
-		diff_instances = compute_land_flora_diff(live_data_ig, land_export_ig)
-
-	work_path.parent.mkdir(parents=True, exist_ok=True)
-	save_ig(work_path, _new_instance_group(diff_instances))
-	return work_path
+	if live_ref is None:
+		return None
+	live_data_ig = ryzom_ig.parse_ig(ig_full_load.read_ig_ref_bytes(live_ref))
+	out_path = out_dir / f"{zone_name}.ig"
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+	save_ig(out_path, live_data_ig)
+	return out_path
 
 
-def ensure_other_ig_copy(ryzom_data_path, live_data_path, continent: str, ig_name: str) -> Optional[Path]:
-	"""Path to `ig_name`'s "other" working copy under
-	`other_ig_work_dir(ryzom_data_path)`, copying it verbatim from
-	`live_data` if it doesn't exist yet. Returns `None` (no working file
-	created) if `ig_name` isn't found in `live_data` for `continent` at all.
-	Once copied, this file is NEVER recopied automatically -- same reason
-	as `ensure_land_flora_diff()`."""
-	work_path = other_ig_work_dir(ryzom_data_path) / f"{ig_name}.ig"
-	if work_path.is_file():
-		return work_path
-
+def extract_other_ig(ryzom_data_path, live_data_path, continent: str, ig_name: str, out_dir: Path) -> Optional[Path]:
+	"""Writes `ig_name`'s COMPLETE `live_data` `.ig` content to
+	`out_dir/<ig_name>.ig` (the "other" extraction, `igs/other/` --
+	written into the SAME directory `land_export`'s own `ExportAdditionnalIGs`
+	repositioning writes to, this function running first: project-todos/
+	forgery/pipeline_export_dirs_rename.md). Unconditionally overwritten
+	every Build, same reasoning as `extract_land_flora()`. Returns `None`
+	if `ig_name` isn't found in `live_data` for `continent` at all."""
 	live_ref = _find_live_ref(live_data_path, continent, ig_name)
 	if live_ref is None:
 		return None
+	out_path = out_dir / f"{ig_name}.ig"
+	out_path.parent.mkdir(parents=True, exist_ok=True)
+	out_path.write_bytes(ig_full_load.read_ig_ref_bytes(live_ref))
+	return out_path
 
-	work_path.parent.mkdir(parents=True, exist_ok=True)
-	work_path.write_bytes(ig_full_load.read_ig_ref_bytes(live_ref))
-	return work_path
+
+def merge_land_ig(land_dir: Path, flora_dir: Path, override_dir: Path, out_dir: Path, zone_names) -> None:
+	"""Builds `out_dir/<zone>.ig` (`igs/land_merged/`) for every name in
+	`zone_names`, from `land_dir` (`land_export`'s own regenerated Ligo
+	content, e.g. water/`.pacs_prim`/outpost markers) as the base, plus
+	whichever of `override_dir` (Nuno's hand edits, `land_ig_work_dir()`,
+	always wins) or `flora_dir` (the complete `live_data` extraction) has a
+	file for that zone -- instances already present in the base (shape+
+	position match) are never duplicated (same dedup as the previous diff-
+	based approach; the complete `live_data` extraction otherwise
+	reintroduces content `land_export` already regenerated on its own,
+	project-todos/forgery/pipeline_export_dirs_rename.md). A zone with
+	neither a base nor any flora/override content produces no output file
+	at all (nothing to write)."""
+	out_dir.mkdir(parents=True, exist_ok=True)
+	for zone_name in zone_names:
+		land_path = land_dir / f"{zone_name}.ig"
+		flora_path = override_dir / f"{zone_name}.ig"
+		if not flora_path.is_file():
+			flora_path = flora_dir / f"{zone_name}.ig"
+		base_instances: List[Instance] = list(load_ig(land_path).instances) if land_path.is_file() else []
+		flora_instances: List[Instance] = list(load_ig(flora_path).instances) if flora_path.is_file() else []
+		if not base_instances and not flora_instances:
+			continue
+		existing_keys = {_instance_key(inst) for inst in base_instances}
+		new_instances = [inst for inst in flora_instances if _instance_key(inst) not in existing_keys]
+		merged = _new_instance_group(base_instances + new_instances)
+		save_ig(out_dir / f"{zone_name}.ig", merged)
 
 
-def merge_land_flora_diff(land_export_ig_path: Path, flora_diff_path: Path) -> None:
-	"""Appends `flora_diff_path`'s instances onto `land_export_ig_path`
-	in place (land_export's own freshly-produced `.ig` for a zone) --
-	called after land_export (Stage 1) and before zone_ig_lighter
-	(Stage 7), so the lighter sees the flora too. A no-op if
-	`flora_diff_path` has no instances (nothing to add). Idempotent
-	(shape+position key, same as `compute_land_flora_diff`): skips any
-	diff instance already present in `land_export_ig_path` -- land_export
-	is incremental and may leave an already-merged `.ig` untouched on a
-	later build, so re-running this merge must not duplicate instances
-	(confirmed 2026-09-16: an unconditional append doubled every flora
-	instance on a second build, bagne_ref vs bagne comparison). Creates
-	`land_export_ig_path` from `flora_diff_path` alone (a fresh, empty-base
-	instance group) when land_export produced no `.ig` for this zone at
-	all -- same 2026-09-16 finding as `ensure_land_flora_diff()`'s own
-	docstring: `live_data`'s content for such a zone is real, not noise,
-	and Stage 8's collision build needs the resulting `.ig` to exist."""
-	flora_diff = load_ig(flora_diff_path)
-	if not flora_diff.instances:
-		return
-	land_export_ig_path = Path(land_export_ig_path)
-	if land_export_ig_path.is_file():
-		land_export_ig = load_ig(land_export_ig_path)
-		existing_keys = {_instance_key(inst) for inst in land_export_ig.instances}
-		new_instances = [inst for inst in flora_diff.instances if _instance_key(inst) not in existing_keys]
-		if not new_instances:
-			return
-		land_export_ig.instances = list(land_export_ig.instances) + new_instances
-	else:
-		land_export_ig = _new_instance_group(list(flora_diff.instances))
-	save_ig(land_export_ig_path, land_export_ig)
+def merge_other_ig(other_dir: Path, override_dir: Path, out_dir: Path) -> None:
+	"""Builds `out_dir` (`igs/other_merged/`) from every `.ig` in
+	`other_dir` (`igs/other/`, itself `live_data` extraction + `land_export`'s
+	repositioning), then overwrites by name with `override_dir`'s content
+	(Nuno's hand edits, `other_ig_work_dir()`, always wins) -- whole-file
+	replacement, no instance-level dedup needed (unlike `merge_land_ig()`):
+	`land_export` never regenerates an "other" `.ig`'s own internal content,
+	only repositions the whole file as a rigid block."""
+	out_dir.mkdir(parents=True, exist_ok=True)
+	if other_dir.is_dir():
+		for ig_path in other_dir.glob("*.ig"):
+			shutil.copyfile(ig_path, out_dir / ig_path.name)
+	if override_dir.is_dir():
+		for ig_path in override_dir.glob("*.ig"):
+			shutil.copyfile(ig_path, out_dir / ig_path.name)

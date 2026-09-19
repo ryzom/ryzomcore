@@ -56,11 +56,11 @@ _ZONE_EXTENSIONS_BY_PRIORITY = (".zonel", ".zonew", ".zone")
 # used/edited for testing (e.g. deleting a .zonew to exercise a WELD
 # fallback) without ever touching the real live_data install.
 _PIPELINE_EXPORT_CONTINENTS_SUBPATH = Path("pipeline") / "export" / "continents"
-# Only these three actually hold .zone/.zonew/.zonel among the many
-# subdirectories build_gamedata produces per continent (docs/
-# atyscape_workspace.md's own full list) -- the others (rbank_*, ig_*, map_*,
-# shape_*...) are unrelated to zone geometry.
-_PIPELINE_EXPORT_ZONE_SUBDIRS = ("zone", "zone_weld", "zone_lighted")
+# `.zone`/`.zonew`/`.depend`, all intermediate/preparatory (project-todos/
+# forgery/pipeline_export_dirs_rename.md) -- under `pipeline/continents/<c>/
+# zones/`, NOT the final export tree.
+_PIPELINE_ZONES_SUBPATH = Path("pipeline") / "continents"
+_PIPELINE_ZONE_SUBDIRS = ("raw", "welded", "depends")
 
 # str(live_data_path) -> full index (every real zone found, unfiltered) --
 # process-wide, never invalidated (the real game data doesn't change under a
@@ -88,15 +88,29 @@ _zone_cache: Dict["ZoneRef", Zone] = {}
 # read it once.
 _bnp_reader_cache: Dict[str, BnpReader] = {}
 
-def continent_zone_dirs(ryzom_data_path, continent_name: str) -> Tuple[Path, Path, Path]:
-	"""`(zone_dir, zone_weld_dir, zone_lighted_dir)` for `continent_name` --
-	the same 3 real subdirectories `_pipeline_export_zone_dirs()` scans,
-	exposed for callers that need to WRITE there directly (project-todos/
-	forgery/landscape_editor__land_composition.md step 7's Build button,
-	and its own edit-time invalidation of stale built files) rather than
-	just read the disk index."""
-	continent_dir = Path(ryzom_data_path) / _PIPELINE_EXPORT_CONTINENTS_SUBPATH / continent_name
-	return tuple(continent_dir / name for name in _PIPELINE_EXPORT_ZONE_SUBDIRS)
+def continent_final_export_dir(ryzom_data_path, continent_name: str) -> Path:
+	"""The real, game-ready final export directory for `continent_name`
+	(project-todos/forgery/pipeline_export_dirs_rename.md) -- e.g.
+	`<continent_name>_zones/`/`<continent_name>_ig/`/`<continent_name>_pacs/`
+	live directly under it, named exactly like their `live_data` `.bnp`
+	counterpart."""
+	return Path(ryzom_data_path) / _PIPELINE_EXPORT_CONTINENTS_SUBPATH / continent_name
+
+
+def continent_zone_dirs(ryzom_data_path, continent_name: str) -> Tuple[Path, Path, Path, Path]:
+	"""`(zone_dir, zone_weld_dir, zone_depends_dir, zone_lighted_dir)` for
+	`continent_name` -- the first 3 are intermediate/preparatory
+	(`pipeline/continents/<continent_name>/zones/`), the last is the real,
+	final `.zonel` (`continent_final_export_dir()`'s own `<continent_name>_
+	zones/`, project-todos/forgery/pipeline_export_dirs_rename.md). Exposed
+	for callers that need to WRITE there directly (project-todos/forgery/
+	landscape_editor__land_composition.md step 7's Build button, and its own
+	edit-time invalidation of stale built files) rather than just read the
+	disk index."""
+	zones_dir = Path(ryzom_data_path) / _PIPELINE_ZONES_SUBPATH / continent_name / "zones"
+	zone_dir, zone_weld_dir, zone_depends_dir = (zones_dir / name for name in _PIPELINE_ZONE_SUBDIRS)
+	zone_lighted_dir = continent_final_export_dir(ryzom_data_path, continent_name) / f"{continent_name}_zones"
+	return zone_dir, zone_weld_dir, zone_depends_dir, zone_lighted_dir
 
 
 def _get_bnp_reader(bnp_path: Path) -> BnpReader:
@@ -177,17 +191,18 @@ def _build_zone_index(live_data_path: Path) -> tuple:
 
 
 def _pipeline_export_zone_dirs(ryzom_data_path, continent_name: str) -> Optional[List[Path]]:
-	"""The real zone/zone_weld/zone_lighted subdirectories of a build_gamedata
-	pipeline export for `continent_name`, if `ryzom_data_path` is set and that
-	continent has one under it -- None otherwise (caller falls back to
-	live_data_path)."""
+	"""The real zone/zone_weld/zone_lighted directories (project-todos/
+	forgery/pipeline_export_dirs_rename.md: the first 2 intermediate, the
+	last one the real final export) actually present on disk for
+	`continent_name`, if `ryzom_data_path` is set and at least one of them
+	exists -- `None` otherwise (caller falls back to `live_data_path`).
+	`.depend` (zone_depends_dir) deliberately excluded: not a zone geometry
+	extension `_ZONE_EXTENSIONS_BY_PRIORITY` tracks."""
 	if not ryzom_data_path:
 		return None
-	continent_dir = Path(ryzom_data_path) / _PIPELINE_EXPORT_CONTINENTS_SUBPATH / continent_name
-	if not continent_dir.is_dir():
-		return None
-	dirs = [continent_dir / name for name in _PIPELINE_EXPORT_ZONE_SUBDIRS]
-	return [d for d in dirs if d.is_dir()]
+	zone_dir, zone_weld_dir, _zone_depends_dir, zone_lighted_dir = continent_zone_dirs(ryzom_data_path, continent_name)
+	dirs = [d for d in (zone_dir, zone_weld_dir, zone_lighted_dir) if d.is_dir()]
+	return dirs or None
 
 
 def has_pipeline_export(ryzom_data_path, continent_name: str) -> bool:

@@ -32,9 +32,10 @@ from ryzom_forgery.apps.landscape_editor_modes import (
 )
 from ryzom_forgery.apps.landscape_editor_view_mode import ViewModeMixin
 from ryzom_forgery.ui.widgets import (
-	_begin_tab_item_with_icon, _icon_button, _OBJECT_TRANSPARENCY_ALPHA, _pop_tab_color, _push_tab_color,
-	_VIEWPORT_TOGGLE_MARGIN_PX,
+	_begin_tab_item_with_icon, _colored_button, _CONFIRM_NO_COLOR, _CONFIRM_YES_COLOR, _icon_button,
+	_OBJECT_TRANSPARENCY_ALPHA, _pop_tab_color, _push_tab_color, _VIEWPORT_TOGGLE_MARGIN_PX,
 )
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.camera import AXIS_VIEWS, OrbitCamera
 from ryzom_forgery.land_geometry import expected_zone_name
 from ryzom_forgery import continent_selector
@@ -107,6 +108,11 @@ _WIREFRAME_MODE_LABELS = {
 _TAB_COLOR_LANDSCAPE = (0.729, 0.867, 0.635, 1.0)  # light olive green -- terrain
 _TAB_COLOR_SETTINGS = (0.8, 0.75, 0.15, 1.0)  # yellow, same as object_editor.py's own Settings tab
 
+# Startup "reload last continent?" popup (project-todos/forgery/
+# landscape_editor__startup_prefs.md step 2) -- same naming convention as
+# object_editor_mixins/shape_io.py's own _REOPEN_SHAPE_POPUP_ID.
+_RELOAD_CONTINENT_POPUP_ID = "Reload last continent?"
+
 # "Stats" section (project-todos/forgery/landscape_editor__render_modes_
 # removal.md, Nuno 2026-09-14: "illisible... il faut de la couleur") --
 # header/total lines in a warm amber, table values in a cool cyan, so both
@@ -167,6 +173,22 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# low_poly_mode.md, Nuno 2026-09-14, for weak GPUs) -- halves each
 		# patch's tessellation grid; persisted like landscape_editor_mode.
 		self._low_poly = settings.landscape_low_poly
+		# Startup "reload last continent?" popup (project-todos/forgery/
+		# landscape_editor__startup_prefs.md step 2) -- queued here from
+		# settings, same _restore_session_state()-then-Yes/No-popup pattern
+		# as object_editor_mixins/shape_io.py's own
+		# _pending_reopen_shape_item/_draw_reopen_shape_popup(). Both saved
+		# names are needed to call _select_continent() directly (see its own
+		# docstring for why continent_name and selection_name can differ);
+		# an older settings.toml written before this field existed leaves
+		# both None, so nothing is queued.
+		self._pending_reload_continent = None
+		self._reload_continent_prompt_open = False
+		if settings.last_landscape_continent_name and settings.last_landscape_selection_name:
+			self._pending_reload_continent = (
+				settings.last_landscape_continent_name, settings.last_landscape_selection_name,
+			)
+			self._reload_continent_prompt_open = True
 
 		# OrbitCamera._update() (camera.py) reads both of these every frame --
 		# there's no ObjectManipulator/target object here (unlike
@@ -733,38 +755,34 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		ryzom_data_path = repository_paths.get("ryzom-data") if self._app_mode == _MODE_EDITION else None
 		pipeline_continent_name = self._selected_continent_pipeline_name
 
-		# Propose downloading whatever pipeline data is missing for this
-		# continent (never blocking -- the load below proceeds regardless,
-		# project-todos/forgery/landscape_editor__zone_render_modes__
-		# pipeline_data_installer.md step 5). Always the continent, its
-		# ecosystem's export AND its ecosystem's raw landscape zones
-		# together when missing: `landscape/<eco>/zones/` (raw .zone bricks
-		# + .zoneligo) is the only starting material to compose a continent
-		# from its .land when no continent-specific .zone has been
-		# generated yet (land_export, not wired here -- land_composition
-		# chantier) -- one is as useless as the others without it in
-		# practice (Nuno 2026-09-09).
-		if pipeline_continent_name:
-			missing = []
-			if not pipeline_data_installer.is_installed("pipeline_continents", pipeline_continent_name):
-				missing.append(("pipeline_continents", pipeline_continent_name))
-			ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(pipeline_continent_name)
-			if ecosystem_name:
-				if not pipeline_data_installer.is_installed("pipeline_ecosystems", ecosystem_name):
-					missing.append(("pipeline_ecosystems", ecosystem_name))
-				if not pipeline_data_installer.is_installed("landscape", ecosystem_name):
-					missing.append(("landscape", ecosystem_name))
-			if missing:
-				# Deferred to the next draw_panel() (outside any
-				# begin_combo()/end_combo() block) rather than opened here --
-				# _load_continent() runs from inside the continent combo's
-				# own popup (see _select_continent()'s call site), and
-				# calling imgui.open_popup() for a different popup while
-				# still inside another popup's Begin/End is a classic ImGui
-				# trap: the new popup's open request is silently lost when
-				# the combo closes (found 2026-09-09, Nuno: no popup ever
-				# appeared despite `missing` being correctly non-empty).
-				self._pipeline_data_install_pending = missing
+		# Disabled entirely (project-todos/forgery/landscape_editor__
+		# startup_prefs.md, Nuno 2026-09-19: "j'ai jamais demander un
+		# setting.... je veux que du me desactive les demandes (tu les met
+		# en commentaire)" -- a hard code-level disable, not a Settings
+		# toggle). Left commented out rather than deleted so the missing-
+		# pipeline-data detection logic (pipeline_data_installer.is_installed()
+		# calls) isn't lost if this is ever wanted back.
+		# if pipeline_continent_name:
+		# 	missing = []
+		# 	if not pipeline_data_installer.is_installed("pipeline_continents", pipeline_continent_name):
+		# 		missing.append(("pipeline_continents", pipeline_continent_name))
+		# 	ecosystem_name = continent_ecosystem.get_ecosystem_for_continent(pipeline_continent_name)
+		# 	if ecosystem_name:
+		# 		if not pipeline_data_installer.is_installed("pipeline_ecosystems", ecosystem_name):
+		# 			missing.append(("pipeline_ecosystems", ecosystem_name))
+		# 		if not pipeline_data_installer.is_installed("landscape", ecosystem_name):
+		# 			missing.append(("landscape", ecosystem_name))
+		# 	if missing:
+		# 		# Deferred to the next draw_panel() (outside any
+		# 		# begin_combo()/end_combo() block) rather than opened here --
+		# 		# _load_continent() runs from inside the continent combo's
+		# 		# own popup (see _select_continent()'s call site), and
+		# 		# calling imgui.open_popup() for a different popup while
+		# 		# still inside another popup's Begin/End is a classic ImGui
+		# 		# trap: the new popup's open request is silently lost when
+		# 		# the combo closes (found 2026-09-09, Nuno: no popup ever
+		# 		# appeared despite `missing` being correctly non-empty).
+		# 		self._pipeline_data_install_pending = missing
 
 		# A continent with a real pipeline export (region_loader.py's
 		# has_pipeline_export()) never reads live_data_path at all, so it's
@@ -2204,6 +2222,14 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# n'est créer[e]" -- they were, just unseen).
 		min_x, min_y, max_x, max_y = self.continent_bounds
 		self.orbit_camera.frame_bounds(min_x, min_y, max_x, max_y, margin=ZONE_CELL_SIZE)
+		# Bounds resolved without hitting either early return above --
+		# remembered for the startup reload popup (project-todos/forgery/
+		# landscape_editor__startup_prefs.md step 2), same restore-on-launch
+		# idea as object_editor.py's last_folder/last_shape_path.
+		settings = app_settings.load()
+		settings.last_landscape_continent_name = continent_name
+		settings.last_landscape_selection_name = selection_name
+		app_settings.save(settings)
 		self._load_continent()
 
 	def _toggle_grid(self):
@@ -2966,6 +2992,7 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 			self._pipeline_data_install_dialog.open(self._pipeline_data_install_pending)
 			self._pipeline_data_install_pending = None
 		self._pipeline_data_install_dialog.draw()
+		self._draw_reload_continent_popup()
 
 		if imgui.begin_tab_bar("##panel-tabs"):
 			_push_tab_color(_TAB_COLOR_LANDSCAPE)
@@ -3015,6 +3042,47 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 				self._rebuild_all_zone_nodes()
 				settings.landscape_zone_stage_colors[str(stage)] = [rgb_to_hex(final_low), rgb_to_hex(final_high)]
 				app_settings.save(settings)
+
+	def _draw_reload_continent_popup(self):
+		"""Drawn every frame from draw_panel() while a previous session's
+		continent is queued for a reload decision (see __init__'s own
+		_pending_reload_continent set-up) -- same Yes/No popup pattern as
+		object_editor_mixins/shape_io.py's own _draw_reopen_shape_popup().
+		Only offered once, before any continent has been picked this
+		session: closes for good the moment either button is pressed, or
+		silently if the user selects a continent some other way first
+		(self.selected_continent_name no longer None) -- the saved setting
+		itself is left untouched either way, so it's offered again next
+		launch same as this one."""
+		if not self._reload_continent_prompt_open:
+			return
+		if self.selected_continent_name is not None:
+			self._reload_continent_prompt_open = False
+			self._pending_reload_continent = None
+			return
+		if not imgui.is_popup_open(_RELOAD_CONTINENT_POPUP_ID):
+			imgui.open_popup(_RELOAD_CONTINENT_POPUP_ID)
+		# always=True: this can open on the very first ImGui frame, before
+		# Panda3D's requested window geometry has actually settled -- see
+		# center_next_popup()'s own docstring.
+		center_next_popup(always=True)
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_RELOAD_CONTINENT_POPUP_ID, None, flags)
+		if opened:
+			_, selection_name = self._pending_reload_continent
+			imgui.text(f"Reload \"{selection_name}\" from last session?")
+			if _colored_button("Yes", _CONFIRM_YES_COLOR):
+				continent_name, selection_name = self._pending_reload_continent
+				self._reload_continent_prompt_open = False
+				self._pending_reload_continent = None
+				self._select_continent(continent_name, selection_name)
+				imgui.close_current_popup()
+			imgui.same_line()
+			if _colored_button("No", _CONFIRM_NO_COLOR):
+				self._reload_continent_prompt_open = False
+				self._pending_reload_continent = None
+				imgui.close_current_popup()
+			imgui.end_popup()
 
 	def _draw_landscape_tab(self):
 		if self._pending_continent_reload:

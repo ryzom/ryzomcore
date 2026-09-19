@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-09-19 — ✨ Rename pipeline/export dirs, 18 independent Build steps, startup prefs (Forgery 4.27.0)
+
+`land_build.py`'s Build pipeline goes from 15 grouped steps to 18 fully
+independent ones (`project-todos/forgery/pipeline_export_dirs_rename.md`):
+every step now has its own button/status/destination folder, with no
+shared cache indicator between steps (the previous grouping -- weld pass
+1/elevation/weld pass 2, and `zone_lighter`/`zone_ig_lighter` -- dated from
+when several steps rewrote the SAME file in place; none do anymore).
+
+Two directory trees now exist under `ryzom-data/pipeline/`:
+`pipeline/continents/<c>/` and `pipeline/ecosystems/<e>/` hold all
+intermediate work, `pipeline/export/continents/<c>/` holds ONLY the final,
+game-ready result, matching `live_data`'s own `<c>_zones/`/`<c>_ig/`/
+`<c>_pacs/` layout. The old diff-based flora merge
+(`ig_editing.ensure_land_flora_diff()`, which only ever served to validate
+the export process) is replaced by a real Build step: a complete
+extraction of `live_data`'s `.ig` content into `igs/flora/`/`igs/other/`,
+then merged (with shape+position dedup for flora) with `land_export`'s own
+output and any hand-placed override in `assets_src/landscape/ig(_other)/`.
+Lighting the "other" (village/decor) instance groups via `ig_lighter` is
+now a mandatory Build step too (editing one makes its baked lighting
+stale) -- previously skipped entirely.
+
+Two real native-tool traps found and fixed along the way:
+- A case-sensitivity bug meant NO `live_data` flora was ever actually
+  merged since this chantier began: `live_data`'s `.bnp` entries are named
+  lowercase (`65_bz.ig`), but the rest of the pipeline uses uppercase zone
+  names -- fixed in both the extraction and its own status check (the same
+  bug independently in two places).
+- `ig_lighter` returned exit code 0 while silently producing nothing,
+  same failure class already known from `zone_ig_lighter` -- both now
+  verify real file output instead of trusting the exit code alone. The
+  real root cause turned out to be `properties.cfg` missing 7 fields
+  `ig_lighter` itself reads (`grbank`/`rbank`/`col_identifier_prefix`/
+  `col_identifier_suffix`/`cell_surface_light_size`/`cell_raytrace_delta_z`/
+  `build_debug_surface_shape`, confirmed against the tool's own C++
+  source and all 25 continents' real `.cfg` files) -- fixed in pynel's
+  `PropertiesConfig`/`build_properties_cfg()` (pynel 0.17.0).
+
+`ai_wmap_export.py` no longer runs any `ai_build_wmap` subprocess with its
+working directory set to the final export folder: the native binary
+writes `ai_build_wmap.cfg`/`continents.packed_sheets`/`log.log` into its
+CWD with no way to redirect them via config, so 3 stray files were
+leaking into the real `<c>_pacs/` on every run -- it now runs everything
+from the working `wmap/` directory instead.
+
+Also two small session/startup preferences for Atyscape: the "missing
+pipeline data, download?" popup can now be disabled outright (hard-coded
+off, not a user setting), and the last continent opened is offered for
+reload (Yes/No popup) at the next launch.
+
 ## 2026-09-19 — ✨ Document the "Primitives" visualisation tree (Forgery 4.25.0)
 
 Atyscape's left panel gains a "Primitives" virtual folder (Édition mode

@@ -63,6 +63,32 @@ Message d'erreur explicite dans le panel si ce chemin n'est pas configuré ou
 invalide. L'Explorer démarre directement dans ce dossier si configuré
 (sinon un `search_path` classique, sinon le home).
 
+### Popup de rechargement du dernier continent (`landscape_editor__startup_prefs.md`)
+
+`Settings.last_landscape_continent_name`/`last_landscape_selection_name`
+sont écrits chaque fois que `_select_continent()` réussit (juste avant
+`_load_continent()`, donc jamais sur un échec de résolution des bornes).
+Au tout premier `draw_panel()` sans continent encore sélectionné, si les
+deux champs sont renseignés, `_draw_reload_continent_popup()` propose
+"Reload "<selection_name>" from last session?" -- Oui rappelle
+`_select_continent()` avec les deux valeurs sauvegardées, Non ferme la
+popup sans effacer le réglage (reproposé à la prochaine ouverture). Même
+schéma que `object_editor_mixins/shape_io.py`'s `_pending_reopen_shape_item`/
+`_draw_reopen_shape_popup()`. Deux champs plutôt qu'un seul :
+`_select_continent(continent_name, selection_name)` a besoin des deux pour
+se rappeler correctement (voir sa propre docstring : les deux peuvent
+différer entre Édition et Visualisation).
+
+La popup "Éléments manquants... Télécharger et installer ?"
+(`pipeline_data_install_dialog.py`, déclenchée depuis `_run_load_continent()`
+quand un continent/écosystème pipeline n'est pas installé localement) est
+désactivée en dur -- Nuno 2026-09-19 : pas un réglage utilisateur, le bloc
+qui calcule les éléments manquants et renseigne
+`self._pipeline_data_install_pending` est directement commenté dans le
+code (conservé en commentaire plutôt que supprimé, pour ne pas perdre la
+logique de détection `pipeline_data_installer.is_installed()` si elle est
+un jour redemandée).
+
 ## Onglets (Landscape / Settings)
 
 `draw_panel()` (project-todos/forgery/
@@ -889,52 +915,89 @@ composition locale.
 
 ### Bouton "Build" (`land_build.py`, `continent_pipeline_reference.py`)
 
-`ryzom_forgery/land_build.py` (nouveau module) orchestre la chaîne complète
-en 15 étapes fixes (`land_build._STEP_NAMES`), sur TOUT le continent
+`ryzom_forgery/land_build.py` orchestre la chaîne complète en 18 étapes
+fixes et indépendantes (`land_build._STEP_NAMES`), sur TOUT le continent
 courant, à partir de
-`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (nouveau
-module `continent_pipeline_reference.py` -- seule source de vérité
-pipeline Forgery, voir `project_forgery_pipeline_vs_legacy_workspace`,
-jamais `leveldesign/workspace/`) :
+`ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (module
+`continent_pipeline_reference.py` -- seule source de vérité pipeline
+Forgery, voir `project_forgery_pipeline_vs_legacy_workspace`, jamais
+`leveldesign/workspace/`). Chaque étape a son propre bouton/statut/dossier
+de destination -- aucun regroupement (`project-todos/forgery/
+pipeline_export_dirs_rename.md`, Nuno 2026-09-19 : l'ancien regroupement
+de boutons datait d'une époque où plusieurs étapes réécrivaient le MÊME
+fichier en place ; ce n'est plus le cas d'aucune paire d'étapes
+aujourd'hui, ni les mêmes fichiers ni la même commande native).
 
-| # | Étape | Outil natif | Fichiers produits | Emplacement | Parallélisable |
-|---|-------|-------------|--------------------|-------------|----------------|
-| 1 | `land_export` | `land_export` -- 1 seul appel, tout le continent | `.zonenh` (un par cellule utilisée de la composition `.land`) | `out_zone_dir` (dossier de transit "ligo_zones") | Non -- un seul appel natif traite tout le continent d'un coup |
-| 2 | Fusion flore ajoutée à la main | Aucun -- Python pur (`ig_editing.ensure_land_flora_diff`/`merge_land_flora_diff`) | Modifie en place le `.ig` déjà écrit par `land_export`, aucune nouvelle extension | `out_ig_dir` | Chaque zone est indépendante, mais boucle séquentielle actuellement (Python pur, pas un outil natif) |
-| 3 | Weld passe 1 | `zone_welder`, un appel par zone | `.zonenhw` | À côté du `.zonenh` (`out_zone_dir`) | Non par conception -- volontairement séquentiel (ordre trié) pour que chaque zone voie déjà sur disque le résultat de ses voisines déjà weldées |
-| 4 | `zone_elevation` | `zone_elevation`, un appel par zone | `.zone` | `zone_dir` (sous-dossier d'export "zone") | Chaque zone applique les mêmes heightmaps globales indépendamment -- aucune dépendance croisée identifiée, mais pas parallélisé actuellement |
-| 5 | Weld passe 2 | `zone_welder`, un appel par zone | `.zonew` | `zone_weld_dir` (sous-dossier d'export "zone_weld") | Même famille que la passe 1 (recolle les bords avec les voisines) -- traité en séquentiel par la même prudence, pas revérifié spécifiquement pour cette passe |
-| 6 | `zone_dependencies` | `zone_dependencies` -- 1 seul appel, tout le continent (bornes = coin min/max synthétiques) | Un `.depend` par zone (toujours en minuscules -- bug natif connu, contourné) | `zone_weld_dir` | Non -- un seul appel natif calcule tout le continent en une passe |
-| 7 | `zone_lighter` | `zone_lighter`, un appel par zone | `.zonel` | `zone_lighted_dir` | **Déjà parallélisé** -- `ThreadPoolExecutor(os.cpu_count())`, un process natif par worker ; le multi-threading interne de l'outil (`cpu_num`) reste fixé à 1 |
-| 8 | `zone_ig_lighter` | `zone_ig_lighter`, un appel par zone | `.ig` (réécrit, éclairé) | `out_ig_dir` (= `zone_lighted_ig_land`) | Même indépendance apparente que `zone_lighter`, mais pas parallélisé actuellement (boucle séquentielle simple) |
-| 9 | `build_ig_boxes` | `build_ig_boxes` -- 1 seul appel (tous les `.ig` land + other d'un coup) | `ig_boxes.bbox` (un seul fichier pour tout le continent) | `rbank_bbox_dir` | Non -- l'appel prend déjà la liste complète des IG en argument |
-| 10 | `build_rbank` (check prims) | `build_rbank`, 1 appel | Aucun fichier -- validation seule des primitives de collision | -- | Non -- un seul appel de validation sur tout le continent |
-| 11 | `build_rbank` (par zone) | `build_rbank` -- 1 seul appel côté Python, qui reçoit la LISTE des zones à retraiter (pas un appel par zone) | `.lr` (un par zone retraitée) | `rbank_smooth_dir` | Pas au niveau Python actuellement ; parallélisme interne éventuel du binaire non vérifiable dans ce sandbox |
-| 12 | `build_rbank` (globale) | `build_rbank`, 1 appel de fusion | `temp.rbank` + `temp.gr` | `rbank_smooth_dir` | Non -- doit s'exécuter après toutes les passes par zone |
-| 13 | `build_indoor_rbank` | `build_indoor_rbank`, 1 appel | `tempMerged.rbank` + `tempMerged.gr` + `tempMerged_*.lr` (fusion des `.cmb` déjà exportés) | `rbank_retrievers_dir` | Non -- un seul appel qui fusionne tout d'un coup, doit suivre la passe globale |
-| 14 | Renommage final PACS | Aucun -- Python pur (`shutil.copyfile`) | `<continent>.rbank`, `<continent>.gr`, `<continent>_*.lr` (copies renommées des `tempMerged.*`) | `rbank_output_dir` | Sans objet -- copie de quelques fichiers |
-| 15 | `ai_wmap_export` | `ai_build_wmap` -- sous-commandes `checkPackedSheets` -> `pacsCrunch` -> `pacsBuildGabarit` -> (`pacsBuildWmap`+`pacsBuildBitmap`) x3 (`_WMAP_INDICES = (0, 1, 2)`) | `<continent>_0/1/2.tga` (3 cartes de walkabilité) + un `.log` par sous-commande | `ai_wmap_dir` (`pipeline/export/continents/<continent>/ai_wmap/`) | La boucle sur les 3 indices n'est pas parallélisée ; indépendance réelle entre indices (état intermédiaire `pacsCrunch`/`pacsBuildGabarit` partagé ou non) non vérifiée -- pas de test réel possible dans ce sandbox |
+**Deux troncs de répertoires distincts sous `ryzom-data/pipeline/`**
+(décision structurelle, Nuno 2026-09-19) : `pipeline/continents/<c>/` et
+`pipeline/ecosystems/<e>/` pour tout le travail intermédiaire (la quasi-
+totalité des dossiers ci-dessous), et `pipeline/export/continents/<c>/`
+réservé au résultat FINAL prêt-jeu, avec exactement la même structure que
+`live_data` -- 3 dossiers nommés comme les `.bnp` correspondants :
+`<c>_zones/`, `<c>_ig/`, `<c>_pacs/` (`region_loader.continent_final_export_dir()`).
+Aucun fichier de travail (`.cfg`, manifeste, log natif) ne doit jamais
+atterrir dans ce dernier dossier -- voir la note `ai_wmap_export.py`
+ci-dessous pour un bug réel de cette classe, trouvé et corrigé.
 
-Sur les 15 étapes, seule l'étape 7 (`zone_lighter`) est réellement
-parallélisée aujourd'hui. Les étapes 4 et 8 (`zone_elevation`,
-`zone_ig_lighter`) sont candidates plausibles (indépendance par zone,
-aucune contrainte d'ordre identifiée dans le code) mais restent
-séquentielles dans l'implémentation actuelle.
+| # | Étape | Outil natif | Fichiers produits | Emplacement (`_BuildContext`) |
+|---|-------|-------------|--------------------|--------------------------------|
+| 1 | Extraction live_data (flore + other) | Aucun -- Python pur (`ig_editing.extract_land_flora`/`extract_other_ig`) | Copie COMPLÈTE (pas un diff) du contenu `.ig` de `live_data`, un fichier par zone/other | `igs_flora_dir` (`pipeline/continents/<c>/igs/flora/`) + `additionnal_ig_out_dir` (CSV, `.../igs/other/`) |
+| 2 | `land_export` | `land_export` -- 1 seul appel, tout le continent | `.zonenh` (un par cellule utilisée de la composition `.land`) | `out_zone_dir` (CSV, ex. `pipeline/continents/newbieland/zones/nh/`) |
+| 3 | Fusion flore ajoutée à la main | Aucun -- Python pur (`ig_editing.merge_land_ig`), dédoublonnage shape+position | `.ig` fusionné (base = sortie `land_export`, ajoute le non-dupliqué de l'override manuel puis de l'extraction) | `igs_land_merged_dir` (`.../igs/land_merged/`) |
+| 4 | Fusion other (village/décor) | Aucun -- Python pur (`ig_editing.merge_other_ig`), copie de fichier entier (override toujours gagnant) | `.ig` fusionné | `igs_other_merged_dir` (`.../igs/other_merged/`) |
+| 5 | Weld passe 1 (sans hauteur) | `zone_welder`, un appel par zone | `.zonenhw` | `zone_nhw_dir` (`.../zones/nhw/`) |
+| 6 | `zone_elevation` | `zone_elevation`, un appel par zone | `.zone` | `zone_dir` (`.../zones/raw/`) |
+| 7 | Weld passe 2 (avec hauteur) | `zone_welder`, un appel par zone | `.zonew` | `zone_weld_dir` (`.../zones/welded/`) |
+| 8 | `zone_dependencies` | `zone_dependencies` -- 1 seul appel, tout le continent (bornes = coin min/max synthétiques) | Un `.depend` par zone (toujours en minuscules -- bug natif connu, contourné) | `zone_depends_dir` (`.../zones/depends/`) |
+| 9 | `zone_lighter` | `zone_lighter`, un appel par zone | `.zonel` (le `.zonel` byproduct de `land_export`, sans rapport, est supprimé juste après l'étape 2) | `final_zones_dir` (`pipeline/export/continents/<c>/<c>_zones/`, FINAL) |
+| 10 | `zone_ig_lighter` | `zone_ig_lighter`, un appel par zone JUSTE relightée | `.ig` land éclairé | `final_ig_dir` (`.../<c>_ig/`, FINAL) |
+| 11 | `ig_lighter` (other) | `ig_lighter` -- 1 seul appel global, obligatoire (Nuno 2026-09-19 : éditer un `.ig` "other" périme son lighting) | `.ig` other éclairé | `final_ig_dir` (même dossier que l'étape 10, noms jamais en collision) |
+| 12 | `build_ig_boxes` | `build_ig_boxes` -- 1 seul appel (tous les `.ig` land + other de `final_ig_dir`) | `ig_boxes.bbox` | `rbank_bbox_dir` (`pipeline/continents/<c>/rbank/bbox/`) |
+| 13 | `build_rbank` (vérif primitives) | `build_rbank`, 1 appel de validation | Aucun fichier | `rbank_preproc_dir` (`.../rbank/preproc/`) |
+| 14 | `build_rbank` (par zone) | `build_rbank`, reçoit la liste des zones à retraiter | `.lr` (un par zone) | `rbank_lrs_dir` (`.../rbank/lrs/`) |
+| 15 | `build_rbank` (globale) | `build_rbank`, 1 appel de fusion | `temp.rbank` + `temp.gr` | `rbank_dir` (`.../rbank/`) |
+| 16 | `build_indoor_rbank` | `build_indoor_rbank`, 1 appel | `tempMerged.rbank`/`.gr`/`_*.lr` (fusion des `.cmb`) | `rbank_retrievers_dir` (`.../rbank/merged/`) |
+| 17 | Renommage final PACS | Aucun -- Python pur (`shutil.copyfile`) | `<c>.rbank`, `<c>.gr`, `<c>_*.lr` | `final_pacs_dir` (`pipeline/export/continents/<c>/<c>_pacs/`, FINAL) |
+| 18 | `ai_wmap_export` | `ai_build_wmap` -- sous-commandes `checkPackedSheets` -> `pacsCrunch` -> `pacsBuildGabarit` -> (`pacsBuildWmap`+`pacsBuildBitmap`) x3 | `<c>_0/1/2.tga` (3 cartes de walkabilité) | `ai_wmap_dir` (`pipeline/continents/<c>/wmap/`, dossier de TRAVAIL malgré la présence du résultat final -- voir ci-dessous) |
 
-Chaque étage écrit directement dans les vrais sous-dossiers d'export
-(`zone`/`zone_weld`/`zone_lighted` via `region_loader.continent_zone_dirs()`,
-plus les dossiers PACS résolus par `land_build.resolve_build_dirs()`) plutôt
-que dans un dossier de transit séparé, pour que le résultat soit
-immédiatement visible par le scan disque d'Atyscape sans étape
-d'installation séparée.
+Seule l'étape 9 (`zone_lighter`) est réellement parallélisée aujourd'hui
+(`ThreadPoolExecutor(os.cpu_count())`, un process natif par worker ; le
+multi-threading interne de l'outil, `PropertiesConfig.cpu_num`, reste fixé
+à 1 pour ne pas concurrencer l'ordonnanceur OS pour rien). Les étapes
+extraction/fusions (1, 3, 4) et les étapes de lighting/weld par zone (5-7,
+10) sont candidates plausibles (indépendance par zone, aucune contrainte
+d'ordre identifiée) mais restent séquentielles.
 
-**Reconstruction incrémentale, par étage réel indépendant** (pas juste "a un
-`.zonel`" -- deux bugs trouvés sur de vraies données `bagne`) :
-une zone déjà weldée (`.zonew` présent) n'est jamais re-weldée/re-élevée
-juste parce qu'elle n'a pas encore de `.zonel` ; et une zone peut avoir un
-`.zonel` réel sur disque sans `.zonew` à côté (données préexistantes) --
-avoir besoin d'un weld/élévation et avoir besoin d'un lighting sont deux
-vérifications séparées.
+**`properties.cfg` régénéré librement par chaque étape qui en a besoin**
+(8, 9, 10, 11 -- `_ensure_properties_cfg()`) plutôt que produit une seule
+fois par une étape puis consommé par les suivantes -- décision explicite
+de Nuno (2026-09-19) : Forgery teste étape par étape, jamais uniquement le
+build complet, donc un fichier de config pur Python/déterministe (par
+opposition à un vrai artefact natif comme un `.zonew`/`.ig`) ne doit
+JAMAIS geler une étape en attendant qu'une AUTRE étape l'ait produit.
+`PropertiesConfig` (pynel) couvre maintenant les champs des 4 outils qui
+le lisent (`zone_lighter`/`zone_dependencies`/`zone_ig_lighter`/
+`ig_lighter`, `docs/zone_tools.md` de pynel) -- les 7 champs propres à
+`ig_lighter` (`grbank`/`rbank`/`col_identifier_prefix`/
+`col_identifier_suffix`/`cell_surface_light_size`/`cell_raytrace_delta_z`/
+`build_debug_surface_shape`) manquaient jusqu'au 2026-09-19
+(`EUnknownVar "grbank"` réel) ; `grbank`/`rbank` restent volontairement
+vides (le rbank n'existe pas encore à l'étape 11, construit seulement aux
+étapes 14-16) et les 5 autres sont des constantes fixes, identiques sur
+les 25 continents réels de `ryzom-data`, pas des colonnes CSV.
+
+**`ai_wmap_export.py` ne doit jamais tourner avec `cwd` = un dossier
+FINAL** (bug trouvé par Nuno le 2026-09-19, 3 fichiers parasites --
+`ai_build_wmap.cfg`, `continents.packed_sheets`, `log.log` -- dans le vrai
+`<c>_pacs/`) : le binaire natif `ai_build_wmap` écrit ces 3 fichiers en dur
+dans son répertoire courant, sans aucun moyen de les rediriger par config
+(`main.cpp`'s `cf.load("ai_build_wmap.cfg")`, un nom relatif en dur ;
+`createDebug()`'s `log.log` par défaut ; `pacs_scan.cpp`'s
+`initPackedSheets()`, `"./"` en dur dans le source C++). `generate_ai_wmap()`
+lance donc tous ses appels avec `cwd=ai_wmap_dir` (dossier de travail, vidé
+et recréé à chaque appel) et non plus `cwd=rbank_output_dir` (le dossier
+FINAL) -- les chemins `Paths`/`PacsPrimPaths`/`OutputPath` du `.cfg`
+restent absolus, donc rien d'autre n'en dépendait.
 
 **Deux bugs natifs de `zone_dependencies`**, contournés dans `land_build.py`
 (mêmes bugs déjà documentés dans `nel/tools/pynel/docs/zone_tools.md` §4) :
@@ -945,16 +1008,18 @@ juste décodés) garantissent un ordre croissant sur les deux axes à la fois ;
 et l'outil écrit un `.depend` par zone (toujours en minuscules), jamais un
 fichier unique nommé d'après `argv[4]`.
 
-**Parallélisation** (`zone_lighter`) : chaque zone est
-lancée dans son propre process natif via un `ThreadPoolExecutor`
-(`os.cpu_count()` workers) -- le vrai coût dominant du build (~2s/zone). Le
-multi-threading INTERNE de `zone_lighter` (`PropertiesConfig.cpu_num`) reste
-fixé à 1 : cumuler concurrence process ET thread ferait juste concurrencer
-l'ordonnanceur OS pour rien.
+**Bug de casse trouvé le 2026-09-19** (aucune flore `live_data` n'était
+jamais fusionnée avant ce fix) : les entrées `.bnp` de `live_data` sont
+nommées en minuscules (`65_bz.ig`), mais tout le reste du pipeline utilise
+des noms de zone en majuscules -- `_run_extraction()` normalise désormais
+`ref.name.upper()` avant d'appeler `extract_land_flora()`, et
+`_extraction_status()` applique la même normalisation pour son propre
+calcul de statut (les deux endroits avaient le bug séparément).
 
 **`continent_pipeline_reference.csv`, transposé** (une ligne par champ, une
 colonne par continent) : tous les chemins qu'il contient sont relatifs à
-`ryzom_data_path`. Une poignée de champs de `LandExportConfig`
+`ryzom_data_path`, propre à Forgery (aucune contrainte externe -- Nuno
+2026-09-19). Une poignée de champs de `LandExportConfig`
 (`z_factor_1`/`z_factor_2`/`zone_light`/`export_collisions`/
 `export_additionnal_igs`/`cell_size`/`threshold`) sont identiques sur les 24
 `land_exporter.cfg` réels et donc codés en dur plutôt que lus du CSV.
@@ -985,38 +1050,38 @@ rot/flip), jamais sur celle d'une autre -- donc actif dans les deux modes.
 
 ### Étapes PACS + `ai_wmap_export` (`landscape_editor__pacs_export.md`)
 
-Les étapes 9-14 (`build_ig_boxes`/`build_rbank`/`build_indoor_rbank` +
+Les étapes 12-17 (`build_ig_boxes`/`build_rbank`/`build_indoor_rbank` +
 renommage final) produisent la region bank de collision (`.rbank`/`.gr`/
-`.lr`) attendue par le jeu -- absente du pipeline Forgery jusque-là, qui
-s'arrêtait au `.ig`. Réglages `RBank*`/`RbankRbankName` (une quinzaine,
-identiques sur les 25 continents) codés en dur dans `land_build.py`/
-`ryzom_pacs_tools.py`, jamais lus d'une colonne CSV -- `RbankZoneUl`/
-`RbankZoneDr` réutilisent `_zone_name_from_row_col()`. `IgLandPath`/
-`IgVillagePath` de `build_rbank` pointent directement sur `out_ig_dir`/
-`ig_other_lighted_dir` (la collision ne dépend pas du lighting, seul le
-contenu géométrique compte). L'outil natif `get_neighbors` (binaire absent
-de ce pipeline) est remplacé par un calcul direct des 8 zones voisines via
-l'arithmétique row/col déjà utilisée par `_zone_sort_key()`, même principe
-d'invalidation incrémentale (un voisin plus récent que le `.lr` force la
-reconstruction). L'étape 13 (`build_indoor_rbank`) consomme les `.cmb` déjà
-lus/écrits par pynel (`collision_mesh_build.py`) sans transformation
-supplémentaire ; l'étape 14 est un simple renommage de préfixe
-(`tempMerged.*` -> `<continent>.*`).
+`.lr`) attendue par le jeu. Réglages `RBank*`/`RbankRbankName` (une
+quinzaine, identiques sur les 25 continents) codés en dur dans
+`land_build.py`/`ryzom_pacs_tools.py`, jamais lus d'une colonne CSV --
+`RbankZoneUl`/`RbankZoneDr` réutilisent `_zone_name_from_row_col()`.
+`IgLandPath`/`IgVillagePath` de `build_rbank` pointent directement sur
+`final_ig_dir` (la collision ne dépend pas du lighting, seul le contenu
+géométrique compte -- mais `final_ig_dir` n'est peuplé qu'APRÈS les étapes
+10-11, donc `build_ig_boxes`/`build_rbank` doivent bien suivre le lighting
+dans l'ordre malgré l'absence de dépendance fonctionnelle réelle).
+L'outil natif `get_neighbors` (binaire absent de ce pipeline) est remplacé
+par un calcul direct des 8 zones voisines via l'arithmétique row/col déjà
+utilisée par `_zone_sort_key()`, même principe d'invalidation incrémentale
+(un voisin plus récent que le `.lr` force la reconstruction). L'étape 16
+(`build_indoor_rbank`) consomme les `.cmb` déjà lus/écrits par pynel
+(`collision_mesh_build.py`) sans transformation supplémentaire ; l'étape
+17 est un simple renommage de préfixe (`tempMerged.*` -> `<continent>.*`).
 
 ### Progression structurée du Build
 
 `run_full_build(..., on_progress)` appelle `on_progress(step_index,
 step_count, step_name, fraction)` à chaque changement d'étage
-(`step_index` 1-based, `step_count == 15`, `step_name` tiré de
+(`step_index` 1-based, `step_count == 18`, `step_name` tiré de
 `land_build._STEP_NAMES`) : `fraction` vaut la proportion réelle
-(`zones_faites / zones_total`) pour les étapes qui bouclent par zone (weld
-×2, élévation, `zone_lighter`, `zone_ig_lighter`, `build_rbank` par zone),
-`None` pour un appel natif unique sans sous-progression (les 8 autres
-étapes -- voir `land_build._UNCACHED_STEP_INDICES`).
+(`zones_faites / zones_total`) pour les étapes qui bouclent par zone,
+`None` pour un appel natif unique sans sous-progression (voir
+`land_build._UNCACHED_STEP_INDICES`).
 
 Une popup modale ImGui (`_draw_land_build_progress_popup()`, aucune
 interaction possible avec le reste d'Atyscape tant qu'elle est ouverte)
-s'ouvre dès `_start_land_build()` et affiche "Step X/15 : <nom>" avec la
+s'ouvre dès `_start_land_build()` et affiche "Step X/18 : <nom>" avec la
 barre de progression de l'étape courante -- une barre indéterminée animée
 (`(sin(time.monotonic()*3.0)+1.0)/2.0`) quand `fraction` est `None`. Elle se
 ferme automatiquement à la fin en cas de succès ; en cas d'erreur, elle
@@ -1026,20 +1091,31 @@ manuellement).
 ### Section "Pipeline steps"
 
 Section repliable sous le bouton Build et son statut ("Continent status"),
-visible en Édition seulement (`_draw_pipeline_steps_section()`) : un tableau
-de 15 lignes, une par étage de `run_full_build()`, avec son statut
-(`✅`/`❌ X/Y` zones à jour, ou `(always rebuilt)` pour les 8 étapes sans
-cache sur disque -- `land_build.compute_step_statuses()`) et, uniquement
-pour une étape `forceable`, un bouton icône (`ICON_FA_ROTATE`) qui efface le
-fichier de cache de cette étape (`land_build.force_step()`) pour forcer sa
-reconstruction au prochain Build, sans rien exécuter elle-même. Deux
-groupes d'étapes partagent un seul indicateur sur disque et donc un seul
-bouton, porté par la première étape du groupe (`land_build._STEP_GROUPS`) :
-{weld passe 1, élévation, weld passe 2} (indicateur `.zonew`) et
-{`zone_lighter`, `zone_ig_lighter`} (indicateur `.zonel`). `build_rbank`
-(par zone) et `build_rbank` (globale) ont chacun leur propre indicateur
-indépendant (`.lr` / `temp.rbank`) et sont donc chacun forçables seuls. Une
-erreur d'E/S sur un `force_step()` s'affiche en rouge sous le tableau.
+visible en Édition seulement (`_draw_pipeline_steps_section()`) : un
+tableau de 18 lignes, une par étage de `run_full_build()`, chacune avec
+son propre bouton (plus aucun regroupement, voir plus haut) et 4
+colonnes :
+- **Statut** : coche verte ou `❌`, suivie de "X/Y" (fichiers réellement
+  présents sur disque / attendus -- `land_build.compute_step_statuses()`),
+  ou `(always rebuilt)` pour une étape sans cache sur disque
+  (`_UNCACHED_STEP_INDICES`) ; `ICON_FA_LOCK` si `can_build` est faux.
+- **Bouton "rebuild"** : lance `run_single_step()` pour cette seule étape
+  -- désactivé (`imgui.begin_disabled()`) et son tooltip affiche
+  `blocked_reason` si l'étape ne peut pas encore tourner (fichier(s)
+  prérequis manquant(s), vérifié par étape dans `can_build_reasons`).
+- **Bouton dossier** (`ICON_FA_FOLDER_OPEN`) : ouvre `destination_dir`
+  dans le gestionnaire de fichiers du système
+  (`workspaces.open_in_system_file_manager()`), désactivé si le dossier
+  n'existe pas encore.
+- **Bouton "forcer"** (`ICON_FA_ROTATE`) : efface le fichier de cache de
+  cette étape (`land_build.force_step()`) pour forcer sa reconstruction au
+  prochain Build, sans rien exécuter elle-même.
+
+Chaque étape vérifie ses PROPRES prérequis réels (et non plus seulement
+ceux de l'étape précédente dans l'ordre d'affichage) : par exemple,
+`build_ig_boxes`/les 3 étapes `build_rbank` exigent à la fois `zonew_count
+> 0` ET du contenu réel dans `final_ig_dir`, pas l'un ou l'autre seul.
+Une erreur d'E/S sur un `force_step()` s'affiche en rouge sous le tableau.
 
 ### `cache_dir()` séparé de `config_dir()`
 
@@ -1163,11 +1239,16 @@ vue initiale.
 `continent_pipeline_reference.csv` pointait `out_ig_dir` vers
 `ligo_ig_land` (le brouillon LIGO brut, édition en cours, potentiellement
 très incomplet -- un seul instance pour `46_BZ`/nexus contre 56 dans la
-vraie donnée) au lieu de `zone_lighted_ig_land` (le vrai résultat final de
-`zone_ig_lighter`, cohérent avec la convention déjà en place pour le
-terrain `zone_lighted`). Corrigé dans le CSV (`ryzom-data`) pour les 25
-continents -- ce n'est pas un bug de code Forgery, juste une mauvaise valeur
-dans le fichier de référence.
+vraie donnée) au lieu de `zone_lighted_ig_land` (à l'époque le vrai
+résultat final de `zone_ig_lighter`). Corrigé dans le CSV (`ryzom-data`)
+pour les 25 continents -- ce n'est pas un bug de code Forgery, juste une
+mauvaise valeur dans le fichier de référence. **Historique, dépassé
+depuis `pipeline_export_dirs_rename.md`** (2026-09-19) : le résultat final
+du lighting land+other vit désormais dans `final_ig_dir`
+(`pipeline/export/continents/<c>/<c>_ig/`, voir "Bouton Build" plus haut),
+plus dans `out_ig_dir`/`zone_lighted_ig_land` -- `out_ig_dir` (toujours lu
+du CSV) ne désigne plus que la destination INTERMÉDIAIRE de `zone_ig_lighter`
+et de la fusion land (étape 3).
 
 **⚠️ Important -- tenir `world.json` synchronisé avec les `.primitive`** :
 Atyscape ne charge/n'édite aucun `region_***.primitive` à ce stade (portée
@@ -1214,11 +1295,16 @@ mêmes helpers déjà éprouvés que `shape_geometry.py`/
 
 `ig_full_load.py` énumère les refs réelles d'un continent : Visualisation
 depuis `<continent>_ig.bnp`/`.bnpe` à la racine de `live_data_path` ;
-Édition depuis `out_ig_dir` (par zone) + `ig_other_lighted_dir` (village/
-eau/ciel/autres) de `continent_pipeline_reference.build_land_export_config()`
-réunis. Classification zone/ciel/reste : zone si le nom correspond au motif
-de grille (`^\d+_[A-Za-z]{2}$`), ciel si dans la liste des atomes ci-dessus,
-reste sinon. Deux icônes séparées dans la barre flottante du viewport
+Édition depuis `region_loader.continent_final_export_dir(ryzom_data_path,
+continent) / f"{continent}_ig"` (le dossier FINAL du lighting, land ET
+other réunis dans le même dossier depuis `pipeline_export_dirs_rename.md`
+-- plus `out_ig_dir`/`ig_other_lighted_dir` séparés comme avant ce
+chantier). Classification zone/ciel/reste : zone si le nom correspond au
+motif de grille (`^\d+_[A-Za-z]{2}$`), ciel si dans la liste des atomes
+ci-dessus, reste sinon. Les overrides manuels (`_ig_overrides()`, renommé
+depuis `_other_ig_overrides()`) sont maintenant cherchés dans LES DEUX
+`assets_src/landscape/ig/<continent>/` et `assets_src/landscape/ig_other/`,
+pas un seul des deux. Deux icônes séparées dans la barre flottante du viewport
 pilotent l'affichage sans jamais déclencher elles-mêmes de chargement : sapin
 (`self._ig_region_root`, `.ig` de zone par région) et maison
 (`self._ig_rest_root`, bundle "reste") -- changer de continent/mode détache

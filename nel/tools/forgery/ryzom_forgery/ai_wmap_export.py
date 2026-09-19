@@ -22,7 +22,7 @@ project-todos/forgery/ai_wmap_flora_collision.md.
 `ai_build_wmap`'s `loadPacsPrims()` (continent_container.cpp:322) reads its
 `.ig` list from `sheet.LandscapeIG`, a plain manifest ("<continent>_ig.txt",
 one `.ig` filename per line) that must live NEXT TO the real `.ig` files
-(`zone_lighted_ig_land/`), per
+(`ig_land_dir`, `land_build.py`'s `final_ig_dir`), per
 `nel/tools/build_gamedata/processes/ig/2_build.py:251-259`. Without it (and
 without that directory in `ai_build_wmap.cfg`'s `Paths=`), `pacsCrunch`
 silently loads 0 IGs / adds 0 primitive blocs, no error -- the whole reason
@@ -112,16 +112,28 @@ class AiWmapResult:
 	pacscrunch_log: str
 
 
-def generate_ai_wmap(ryzom_data_path, continent: str) -> AiWmapResult:
+def generate_ai_wmap(
+	ryzom_data_path, continent: str, ig_land_dir=None, rbank_output_dir=None, ai_wmap_dir=None,
+) -> AiWmapResult:
 	"""Regenerates `continent`'s `ai_wmap` directory from scratch (previous
 	content is wiped first, same as the native pipeline's own unconditional
 	regeneration): writes the `<continent>_ig.txt` manifest and a fresh
 	`ai_build_wmap.cfg`, then runs `checkPackedSheets` -> `pacsCrunch` ->
 	`pacsBuildGabarit` -> `pacsBuildWmap`/`pacsBuildBitmap` (one pair per map
 	index in `_WMAP_INDICES`). Requires the continent to already have real
-	`zone_lighted_ig_land/` (`land_build.py`'s Stage 7) and `rbank_output/`
-	(Stage 8) content -- raises `AiWmapExportError` otherwise, and on any
-	tool exit code other than 0."""
+	final land `.ig` and PACS content -- raises `AiWmapExportError`
+	otherwise, and on any tool exit code other than 0.
+
+	`ig_land_dir`/`rbank_output_dir`/`ai_wmap_dir`, if given (`land_build.py`
+	always passes them: `ctx.final_ig_dir`/`ctx.final_pacs_dir`/
+	`ctx.ai_wmap_dir`), are used as-is instead of this module recomputing
+	its own independent guess -- project-todos/forgery/
+	pipeline_export_dirs_rename.md: the previous hardcoded guess
+	(`zone_lighted_ig_land`) silently diverged from `land_build.py`'s own
+	`out_ig_dir` for any continent whose CSV row used a different literal
+	name (confirmed real for bagne/nexus: `ligo_ig_land`). Any caller
+	without a `land_build.py` context (none currently) falls back to the
+	historical `pipeline/export/continents/<continent>/` guesses."""
 	ryzom_data_path = Path(ryzom_data_path)
 	binary_path = _resolve_binary()
 
@@ -137,9 +149,9 @@ def generate_ai_wmap(ryzom_data_path, continent: str) -> AiWmapResult:
 	continents_dir = ryzom_data_path / "leveldesign" / "world" / "continents"
 	dfn_dir = ryzom_data_path / "leveldesign" / "DFN"
 	continent_dir = ryzom_data_path / "pipeline" / "export" / "continents" / continent
-	rbank_output_dir = continent_dir / "rbank_output"
-	ig_land_dir = continent_dir / "zone_lighted_ig_land"
-	ai_wmap_dir = continent_dir / "ai_wmap"
+	rbank_output_dir = Path(rbank_output_dir) if rbank_output_dir is not None else continent_dir / "rbank_output"
+	ig_land_dir = Path(ig_land_dir) if ig_land_dir is not None else continent_dir / "zone_lighted_ig_land"
+	ai_wmap_dir = Path(ai_wmap_dir) if ai_wmap_dir is not None else continent_dir / "ai_wmap"
 
 	if not ig_land_dir.is_dir():
 		raise AiWmapExportError(f"{ig_land_dir} does not exist -- build the continent first (zone_ig_lighter output).")
@@ -157,7 +169,22 @@ def generate_ai_wmap(ryzom_data_path, continent: str) -> AiWmapResult:
 	ig_names = sorted(p.name for p in ig_land_dir.glob("*.ig"))
 	ig_manifest.write_text("\n".join(ig_names), encoding="utf-8")
 
-	cfg_path = rbank_output_dir / "ai_build_wmap.cfg"
+	# `cwd` for every `_run()` below is `ai_wmap_dir` (a working directory
+	# under `pipeline/continents/<c>/`), NEVER `rbank_output_dir` (Nuno
+	# 2026-09-19: found 3 stray files in the real, final
+	# `pipeline/export/continents/<c>/<c>_pacs/` after a build --
+	# `ai_build_wmap.cfg`, `continents.packed_sheets`, `log.log`). All 3 are
+	# hardcoded by the native tool itself to land in its CWD with no way to
+	# redirect them via config -- `main.cpp`'s own `cf.load("ai_build_wmap.cfg")`
+	# (a bare relative name), `createDebug()`'s default log file, and
+	# `pacs_scan.cpp`'s `initPackedSheets()` (`_Continents.init(..., "./", ...)`,
+	# genuinely hardcoded "./" in the C++ source, not something a `.cfg` var
+	# can override). `Paths`/`PacsPrimPaths`/`OutputPath` inside the `.cfg`
+	# are already absolute, so moving the CWD elsewhere changes nothing
+	# else -- `ai_wmap_dir` is wiped and recreated at the top of every
+	# `generate_ai_wmap()` call anyway, so these byproducts are freely
+	# regenerated/discarded there instead of polluting the final export dir.
+	cfg_path = ai_wmap_dir / "ai_build_wmap.cfg"
 	paths = [rbank_output_dir, sheet_id_dir, continents_dir, dfn_dir, ig_land_dir]
 	cfg_path.write_text(
 		"Paths = { " + ", ".join(f'"{p}/"' for p in paths) + " };\n"
@@ -169,7 +196,7 @@ def generate_ai_wmap(ryzom_data_path, continent: str) -> AiWmapResult:
 
 	start_point = _pick_start_point(ryzom_data_path, continent)
 
-	_run(binary_path, "checkPackedSheets", cwd=rbank_output_dir, log_path=ai_wmap_dir / "checkpackedsheets.log")
+	_run(binary_path, "checkPackedSheets", cwd=ai_wmap_dir, log_path=ai_wmap_dir / "checkpackedsheets.log")
 	if start_point is not None:
 		# setStartPoint + pacsCrunch MUST run in the same process: StartPoints
 		# is an in-memory global (pacs_scan.cpp), and each `_run()` call spawns
@@ -182,17 +209,17 @@ def generate_ai_wmap(ryzom_data_path, continent: str) -> AiWmapResult:
 			"setStartPoint", continent, f"{start_x:.1f}", f"{start_y:.1f}",
 			"-",
 			"pacsCrunch", continent,
-			cwd=rbank_output_dir, log_path=ai_wmap_dir / "pacscrunch.log",
+			cwd=ai_wmap_dir, log_path=ai_wmap_dir / "pacscrunch.log",
 		)
 	else:
-		pacscrunch_result = _run(binary_path, "pacsCrunch", continent, cwd=rbank_output_dir, log_path=ai_wmap_dir / "pacscrunch.log")
-	_run(binary_path, "pacsBuildGabarit", continent, cwd=rbank_output_dir, log_path=ai_wmap_dir / "gabarit.log")
+		pacscrunch_result = _run(binary_path, "pacsCrunch", continent, cwd=ai_wmap_dir, log_path=ai_wmap_dir / "pacscrunch.log")
+	_run(binary_path, "pacsBuildGabarit", continent, cwd=ai_wmap_dir, log_path=ai_wmap_dir / "gabarit.log")
 
 	wmap_paths = []
 	for i in _WMAP_INDICES:
 		map_name = f"{continent}_{i}"
-		_run(binary_path, "pacsBuildWmap", map_name, cwd=rbank_output_dir, log_path=ai_wmap_dir / f"wmap_{i}.log")
-		_run(binary_path, "pacsBuildBitmap", map_name, cwd=rbank_output_dir, log_path=ai_wmap_dir / f"bitmap_{i}.log")
+		_run(binary_path, "pacsBuildWmap", map_name, cwd=ai_wmap_dir, log_path=ai_wmap_dir / f"wmap_{i}.log")
+		_run(binary_path, "pacsBuildBitmap", map_name, cwd=ai_wmap_dir, log_path=ai_wmap_dir / f"bitmap_{i}.log")
 		tga_path = ai_wmap_dir / f"{map_name}.tga"
 		if not tga_path.is_file():
 			raise AiWmapExportError(f"pacsBuildBitmap did not produce {tga_path}")

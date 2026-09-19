@@ -29,6 +29,7 @@ from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_build
 from ryzom_forgery import land_loader
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery import workspaces
 from ryzom_forgery.land_geometry import (
 	brick_size_in_cells_from_half_size, expected_zone_name, find_missing_land_cells, land_cell_for_zone_name,
 	land_cell_index, piece_origin, transform_zone_cache_data, used_land_cells,
@@ -547,7 +548,7 @@ class EditModeMixin:
 		except cpr.ContinentPipelineReferenceError as exc:
 			report_error(f"Failed to invalidate built zone files: {exc}")
 			return
-		zone_dir, zone_weld_dir, zone_lighted_dir = continent_zone_dirs(ryzom_data_path, continent)
+		zone_dir, zone_weld_dir, zone_depends_dir, zone_lighted_dir = continent_zone_dirs(ryzom_data_path, continent)
 		for dx in (-1, 0, 1):
 			for dy in (-1, 0, 1):
 				name = expected_zone_name(pos_x + dx, pos_y + dy)
@@ -555,7 +556,7 @@ class EditModeMixin:
 					continue
 				paths = [
 					zone_weld_dir / f"{name}.zonew",
-					zone_lighted_dir / f"{name}.zonel", zone_weld_dir / f"{name.lower()}.depend",
+					zone_lighted_dir / f"{name}.zonel", zone_depends_dir / f"{name.lower()}.depend",
 					out_ig_dir / f"{name}.ig",
 				]
 				if dx == 0 and dy == 0:
@@ -962,13 +963,22 @@ class EditModeMixin:
 		progress in the SAME modal popup (_draw_land_build_progress_popup()),
 		nothing inline here. A [rebuild] button clears that
 		step's cache and reruns it
-		immediately (`land_build.run_single_step()`) -- 2 groups of steps
-		sharing a single indicator (weld pass 1/elevation/weld pass 2, and
-		the two lighters) share ONE table row (step 7l) and ONE button,
-		vertically centered against their multiple lines (step 7o, Nuno
+		immediately (`land_build.run_single_step()`) -- one group of steps
+		sharing a single indicator (weld pass 1/elevation/weld pass 2) shares
+		ONE table row (step 7l) and ONE button, vertically centered against
+		their multiple lines (step 7o, Nuno
 		2026-09-18: "si tu peux centrer les boutons"); `land_build.
 		compute_step_statuses()` decides which step has its own button, this
-		just draws whatever it's told. Édition mode only, same gating as the
+		just draws whatever it's told. A separate open-folder button (project-
+		todos/forgery/pipeline_export_dirs_rename.md step 15b, Nuno
+		2026-09-19) opens each step's own real destination directory
+		(`status.destination_dir`) in the OS file manager -- always one per
+		MEMBER line, even inside a group, unlike the shared [rebuild] button.
+		The tick also carries a "built/total" count (step 15c, Nuno
+		2026-09-19: "5/35 veut dire qu'il y a en sortie 5 fichier sur 35
+		requis"), and turns into a lock icon -- [rebuild] frozen too -- when
+		`can_build` is `False` (this step's own real input isn't there yet).
+		Édition mode only, same gating as the
 		[Build] button itself."""
 		if self._app_mode != _MODE_EDITION or not self.selected_continent_name:
 			return
@@ -1024,10 +1034,11 @@ class EditModeMixin:
 			imgui.TableFlags_.borders.value | imgui.TableFlags_.row_bg.value
 			| imgui.TableFlags_.sizing_stretch_prop.value
 		)
-		if not imgui.begin_table("##pipeline-steps", 3, table_flags):
+		if not imgui.begin_table("##pipeline-steps", 4, table_flags):
 			return
 		imgui.table_setup_column("Step")
 		imgui.table_setup_column("Status")
+		imgui.table_setup_column("", flags=imgui.TableColumnFlags_.width_fixed.value)
 		imgui.table_setup_column("", flags=imgui.TableColumnFlags_.width_fixed.value)
 		imgui.table_headers_row()
 		# One table ROW per [rebuild] button (project-todos/forgery/
@@ -1055,16 +1066,40 @@ class EditModeMixin:
 					imgui.set_tooltip(f"Tool: {member.tool}")
 			imgui.table_next_column()
 			for member in group_members:
-				if member.warning is not None:
-					imgui.text_colored(_TICK_WARNING_COLOR, fa_icons.ICON_FA_EXCLAMATION_CIRCLE)
+				# "built/total" text (project-todos/forgery/
+				# pipeline_export_dirs_rename.md step 15c, Nuno 2026-09-19:
+				# "5/35 veut dire qu'il y a en sortie 5 fichier sur 35
+				# requis") next to the tick -- same line, same color.
+				count_suffix = f" {member.built_count}/{member.total_count}" if member.total_count is not None else ""
+				if not member.can_build:
+					imgui.text_colored(_TICK_NEUTRAL_COLOR, f"{fa_icons.ICON_FA_LOCK}{count_suffix}")
+					if imgui.is_item_hovered():
+						imgui.set_tooltip(member.blocked_reason or "Missing input")
+				elif member.warning is not None:
+					imgui.text_colored(_TICK_WARNING_COLOR, f"{fa_icons.ICON_FA_EXCLAMATION_CIRCLE}{count_suffix}")
 					if imgui.is_item_hovered():
 						imgui.set_tooltip(member.warning)
 				elif member.up_to_date is None:
-					imgui.text_colored(_TICK_NEUTRAL_COLOR, fa_icons.ICON_FA_CIRCLE)
+					imgui.text_colored(_TICK_NEUTRAL_COLOR, f"{fa_icons.ICON_FA_CIRCLE}{count_suffix}")
 				elif member.up_to_date:
-					imgui.text_colored(_TICK_OK_COLOR, fa_icons.ICON_FA_CIRCLE_CHECK)
+					imgui.text_colored(_TICK_OK_COLOR, f"{fa_icons.ICON_FA_CIRCLE_CHECK}{count_suffix}")
 				else:
-					imgui.text_colored(_TICK_STALE_COLOR, fa_icons.ICON_FA_CIRCLE_XMARK)
+					imgui.text_colored(_TICK_STALE_COLOR, f"{fa_icons.ICON_FA_CIRCLE_XMARK}{count_suffix}")
+			imgui.table_next_column()
+			# Open-folder button (project-todos/forgery/pipeline_export_dirs_
+			# rename.md step 15b, Nuno 2026-09-19) -- one per MEMBER line,
+			# unlike the shared [rebuild] button below: each grouped step
+			# still has its own real destination directory. Disabled (not
+			# hidden) when that directory doesn't exist yet, e.g. the step
+			# was never run.
+			for member in group_members:
+				imgui.push_id(f"folder-{member.index}")
+				exists = member.destination_dir is not None and member.destination_dir.is_dir()
+				imgui.begin_disabled(not exists)
+				if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, f"Open folder: {member.destination_dir}", square=True):
+					workspaces.open_in_system_file_manager(member.destination_dir)
+				imgui.end_disabled()
+				imgui.pop_id()
 			imgui.table_next_column()
 			if status.group_size > 1:
 				# Vertically centers the group's single button against its
@@ -1076,9 +1111,22 @@ class EditModeMixin:
 				if offset > 0:
 					imgui.dummy((0, offset))
 			imgui.push_id(str(status.index))
-			imgui.begin_disabled(rebuild_running or build_running)
+			# Frozen (project-todos/forgery/pipeline_export_dirs_rename.md
+			# step 15c, Nuno 2026-09-19) when ANY member of this row can't
+			# build yet (its own real input is missing) -- same condition
+			# `run_single_step()` itself would raise `LandBuildError` on, so
+			# the button never lets the user hit that error after the fact.
+			group_can_build = all(m.can_build for m in group_members)
+			imgui.begin_disabled(rebuild_running or build_running or not group_can_build)
 			if _icon_button(fa_icons.ICON_FA_ROTATE, f"Rebuild now: {status.name}", square=True):
 				self._start_pipeline_step_rebuild(status.index, status.name)
+			# Tooltip checked INSIDE the disabled block (Dear ImGui's own
+			# documented pattern for explaining why a disabled control is
+			# disabled) -- IsItemHovered() still reports the disabled button
+			# here, not after end_disabled().
+			if not group_can_build and imgui.is_item_hovered():
+				blocked_reasons = " / ".join(sorted({m.blocked_reason for m in group_members if m.blocked_reason}))
+				imgui.set_tooltip(blocked_reasons or "Missing input")
 			imgui.end_disabled()
 			imgui.pop_id()
 		imgui.end_table()

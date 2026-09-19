@@ -193,6 +193,16 @@ class Settings:
 	# halves each patch's tessellation grid; False (normal quality) by
 	# default.
 	landscape_low_poly: bool = False
+	# Last continent successfully opened in Atyscape's landscape editor
+	# (project-todos/forgery/landscape_editor__startup_prefs.md, Nuno
+	# 2026-09-19), offered for reload at the next launch -- same
+	# restore-on-launch idea as last_folder/last_shape_path above, applied
+	# to landscape_editor.py instead of object_editor.py. None until a
+	# continent has ever been opened. Both names are needed to actually
+	# reselect it later (landscape_editor.py's own _select_continent()
+	# docstring: continent_name and selection_name can genuinely differ).
+	last_landscape_continent_name: Optional[str] = None
+	last_landscape_selection_name: Optional[str] = None
 
 
 _load_cache: Optional[Settings] = None
@@ -252,6 +262,8 @@ def load() -> Settings:
 	settings.live_data_path = data.get("live_data_path") or None
 	settings.landscape_editor_mode = data.get("landscape_editor_mode") or None
 	settings.landscape_low_poly = bool(data.get("landscape_low_poly", False))
+	settings.last_landscape_continent_name = data.get("last_landscape_continent_name") or None
+	settings.last_landscape_selection_name = data.get("last_landscape_selection_name") or None
 	settings.panel_states = {
 		str(name): PanelState(open=bool(entry.get("open", False)), x=float(entry.get("x", 0.0)), y=float(entry.get("y", 0.0)))
 		for name, entry in data.get("panel_states", {}).items() if isinstance(entry, dict)
@@ -326,6 +338,10 @@ def save(settings: Settings) -> None:
 	doc["panel_states"] = {name: asdict(state) for name, state in settings.panel_states.items()}
 	doc["landscape_zone_stage_colors"] = dict(settings.landscape_zone_stage_colors)
 	doc["landscape_low_poly"] = settings.landscape_low_poly
+	if settings.last_landscape_continent_name is not None:
+		doc["last_landscape_continent_name"] = settings.last_landscape_continent_name
+	if settings.last_landscape_selection_name is not None:
+		doc["last_landscape_selection_name"] = settings.last_landscape_selection_name
 
 	doc["search_paths"] = [asdict(entry) for entry in settings.search_paths]
 	doc["exclusion_rules"] = [asdict(entry) for entry in settings.exclusion_rules]

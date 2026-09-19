@@ -71,7 +71,7 @@ import csv
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
 
-from pynel.ryzom_land_tools import LandExportConfig, PropertiesConfig
+from pynel.ryzom_land_tools import LandExportConfig, PrimExportConfig, PropertiesConfig
 
 _CSV_RELATIVE_PATH = Path("leveldesign") / "world" / "continent_pipeline_reference.csv"
 
@@ -84,6 +84,13 @@ EXPORT_COLLISIONS = True
 EXPORT_ADDITIONNAL_IGS = True
 CELL_SIZE = 160.0
 THRESHOLD = 1.0
+
+# `prim_export` only needs the tile bank's FIRST seasonal postfix (decision,
+# project-todos/forgery/landscape_editor__ig_land_export__farbank_smallbank.md
+# step 2) -- real `MultipleTilesPostfix` order confirmed 2026-09-15 against
+# nexus/bagne's own `process.py` (`["_sp", "_su", "_au", "_wi"]`, spring
+# first), not a CSV column since the 3 other seasons are never built here.
+TILE_POSTFIX = "_sp"
 
 
 class ContinentPipelineReferenceError(Exception):
@@ -247,4 +254,86 @@ def build_properties_config(
 		level_design_directory=level_design_directory,
 		level_design_world_directory=level_design_world_directory,
 		level_design_dfn_directory=level_design_dfn_directory,
+	)
+
+
+def resolve_smallbank_paths(
+	ryzom_data_path: Union[str, Path], continent: str, table: Optional[Dict[str, Dict[str, str]]] = None,
+) -> Tuple[str, str]:
+	"""(smallbank_path, farbank_path) for `continent` -- these are NOT built
+	by Forgery (decision, Nuno 2026-09-15: generating them from raw tiles is
+	deferred to project-todos/forgery/future_tile_bank_generation.md, every
+	continent in the CSV already has both on disk), this function only
+	locates them. Resolved from the CSV's EXISTING `bank_name`/`bankfar_name`
+	columns -- not new fields: `bank_name` is already read by
+	`build_properties_config()` (it's `PropertiesConfig.bank_name`, what
+	`zone_lighter`/`zone_ig_lighter` expect to already exist).
+
+	`farbank_path` is NOT `bankfar_name` taken literally: that column holds
+	an un-postfixed name (`.../farbank/jungle.farbank`) that never exists on
+	disk -- verified 2026-09-15 both `bank_name` (`jungle.smallbank`) AND
+	the real, POSTFIXED farbank files (`jungle_sp.farbank`, `_su`, `_au`,
+	`_wi`, one per `MultipleTilesPostfix` entry) already exist for all 25
+	continents in the CSV. So `farbank_path` reuses `bankfar_name`'s
+	directory but rebuilds its filename as `<ecosystem><TILE_POSTFIX>.farbank`,
+	matching the real on-disk convention."""
+	row = _row_for(table or load_reference_table(ryzom_data_path), continent)
+	smallbank_path = _resolve(ryzom_data_path, row["bank_name"])
+	farbank_dir = Path(_resolve(ryzom_data_path, row["bankfar_name"])).parent
+	farbank_path = str(farbank_dir / f"{row['ecosystem']}{TILE_POSTFIX}.farbank")
+	return smallbank_path, farbank_path
+
+
+def resolve_displace_dir(
+	ryzom_data_path: Union[str, Path], continent: str, table: Optional[Dict[str, Dict[str, str]]] = None,
+) -> str:
+	"""`prim_export`'s `DisplaceDir` for `continent`. NOT a new CSV column --
+	derived from the existing `ecosystem` column: verified 2026-09-15 this
+	is always the LAST entry of the CSV's own `search_pathes` column for
+	both nexus and bagne (`pipeline/export/ecosystems/<ecosystem>/displace`),
+	and that directory exists with real noise textures (e.g.
+	`j_crevasse1.png`) on disk for both."""
+	row = _row_for(table or load_reference_table(ryzom_data_path), continent)
+	return _resolve(ryzom_data_path, f"pipeline/export/ecosystems/{row['ecosystem']}/displace")
+
+
+def build_prim_export_config(
+	ryzom_data_path: Union[str, Path], continent: str,
+	small_bank_path: str, far_bank_path: str, out_ig_dir: str, zone_w_dir: str, prim_dirs: List[str],
+	table: Optional[Dict[str, Dict[str, str]]] = None,
+) -> PrimExportConfig:
+	"""`PrimExportConfig` for `continent`. `small_bank_path`/`far_bank_path`
+	(from `resolve_smallbank_paths()`), `out_ig_dir`/`zone_w_dir`
+	(earlier-stage outputs: the "Prim" ig output dir, and `land_build.py`'s
+	existing `zone_weld_dir`), and `prim_dirs` (already-resolved absolute
+	paths) are all passed in by the caller. `displace_dir` reuses
+	`resolve_displace_dir()`, `form_dir` reuses the CSV's existing
+	`level_design_dfn_directory` column (same value as `LandExportConfig.
+	dfn_dir`), and `world_editor_files` reuses `level_design_world_directory`
+	(verified 2026-09-15: `world_editor_classes.xml`, the file `prim_export`
+	looks up inside this directory, sits directly under `leveldesign/world/`
+	on Nuno's real data) -- none of these 3 are new CSV columns.
+
+	`prim_dirs` is deliberately NOT resolved in here (unlike every other
+	field): the real World Editor flora/tree primitives (e.g.
+	`flora_nexus_minor.primitive`) currently live in `ryzom-private-data`
+	(`primitives/primeroots/`), a SEPARATE repo from `ryzom_data_path` --
+	`graphics/primitive/<continent>` (this function's first guess,
+	2026-09-15) was wrong, Nuno confirmed `graphics/` isn't a usable source
+	at all. Decision (2026-09-15, Nuno): the primitives get moved INTO
+	`ryzom-data` (so a plain `ryzom_data_path`-relative path will work
+	again), but the CSV stays untouched until that move happens and the
+	exact target layout is decided -- so this function takes `prim_dirs`
+	as an opaque, caller-supplied value instead of guessing further."""
+	row = _row_for(table or load_reference_table(ryzom_data_path), continent)
+	return PrimExportConfig(
+		out_ig_dir=out_ig_dir,
+		zone_w_dir=zone_w_dir,
+		small_bank=small_bank_path,
+		far_bank=far_bank_path,
+		displace_dir=resolve_displace_dir(ryzom_data_path, continent, table),
+		prim_dirs=prim_dirs,
+		form_dir=_resolve(ryzom_data_path, row["level_design_dfn_directory"]),
+		world_editor_files=_resolve(ryzom_data_path, row["level_design_world_directory"]),
+		cell_size=CELL_SIZE,
 	)

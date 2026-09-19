@@ -22,6 +22,7 @@ from pynel.ryzom_georges_form import GeorgesFormParseError
 
 from . import continent_pipeline_reference as cpr
 from . import continent_selector
+from . import region_loader
 
 _bnp_reader_cache: Dict[str, BnpReader] = {}
 
@@ -101,21 +102,55 @@ def list_continent_ig_refs_visualisation(live_data_path, continent: str) -> List
 	return []
 
 
+def _ig_overrides(ryzom_data_path, continent: str) -> Dict[str, Path]:
+	"""Bare name -> path for every working `.ig` copy under `assets_src/
+	landscape/ig/<continent>/` (land) and `assets_src/landscape/ig_other/`
+	(other) -- project-todos/forgery/landscape_editor__ig_editing.md,
+	project-todos/forgery/pipeline_export_dirs_rename.md. Takes priority
+	over the last real Build's own final output wherever a name matches, so
+	Atyscape shows a hand edit immediately, before the next full Build
+	re-bakes it in -- and surfaces a brand new name (added directly via the
+	`.continent` sheet, Nuno 2026-09-15) the native pipeline doesn't produce
+	at all. Path construction duplicated from `ig_editing.py` rather than
+	imported: that module imports THIS one (`_find_live_ref()`), importing
+	it back here would be circular."""
+	overrides: Dict[str, Path] = {}
+	for override_dir in (
+		Path(ryzom_data_path) / "assets_src" / "landscape" / "ig" / continent,
+		Path(ryzom_data_path) / "assets_src" / "landscape" / "ig_other",
+	):
+		if not override_dir.is_dir():
+			continue
+		overrides.update({p.stem: p for p in override_dir.iterdir() if p.is_file() and p.suffix.lower() == ".ig"})
+	return overrides
+
+
 def list_continent_ig_refs_edition(ryzom_data_path, continent: str) -> List[FullIgRef]:
-	"""Every `.ig` file directly under `out_ig_dir` (per-zone, zone_ig_lighter's
-	real output) AND `ig_other_lighted_dir` (village/water/sky/other,
-	legacy build_gamedata pipeline's own already-lit output) of
-	`continent`'s continent_pipeline_reference row -- both real directories'
-	contents combined, no attempt at deduplication (distinct naming
-	conventions in practice: zone names like "208_EC" vs. content names
-	like "tr_villagea")."""
+	"""Every `.ig` file directly under the last real Build's `final_ig_dir`
+	(`land_build.py`'s own final, game-ready output -- land AND other
+	together, project-todos/forgery/pipeline_export_dirs_rename.md, this
+	conversation's own starting point: files sitting only in the OLD
+	`additionnal_ig_out_dir`/`ligo_ig_other` were never read here at all).
+	Any name with a working copy under `_ig_overrides()` is served from
+	there instead (existing name) or added on top (brand new name, not yet
+	produced by any Build)."""
 	if not ryzom_data_path:
 		return []
-	try:
-		config = cpr.build_land_export_config(ryzom_data_path, continent)
-	except cpr.ContinentPipelineReferenceError:
-		return []
-	return _ig_refs_from_dir(Path(config.out_ig_dir)) + _ig_refs_from_dir(Path(config.ig_other_lighted_dir))
+	final_ig_dir = region_loader.continent_final_export_dir(ryzom_data_path, continent) / f"{continent}_ig"
+	refs = _ig_refs_from_dir(final_ig_dir)
+	overrides = _ig_overrides(ryzom_data_path, continent)
+	if not overrides:
+		return refs
+	refs = [
+		FullIgRef(name=ref.name, source_path=overrides[ref.name], bnp_entry=None) if ref.name in overrides else ref
+		for ref in refs
+	]
+	known_names = {ref.name for ref in refs}
+	refs += [
+		FullIgRef(name=name, source_path=path, bnp_entry=None)
+		for name, path in overrides.items() if name not in known_names
+	]
+	return refs
 
 
 def list_continent_ig_refs(live_data_path, ryzom_data_path, is_edition: bool, continent: Optional[str]) -> List[FullIgRef]:
