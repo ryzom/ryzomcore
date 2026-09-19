@@ -1,6 +1,78 @@
 # Changelog
 
-## 2026-09-19 — ✨ Migrate sysinfo to the recursive Box/Panel system (Forgery 4.24.0)
+## 2026-09-19 — ✨ Document the "Primitives" visualisation tree (Forgery 4.25.0)
+
+Atyscape's left panel gains a "Primitives" virtual folder (Édition mode
+only, same checkbox-tree pattern as "IG Zones"/"IG Others"): on continent
+load, `flora_<continent>.primitive` and `flora_unused.primitive` are
+auto-detected under `leveldesign/landscape/` if present, and their
+`class="prim"` points are rendered as simple markers (`primitive_geometry.py`,
+a batched `GeomPoints` per checked file) at their real position -- not the
+real `.shape` resolved via `.plant`, deliberately out of scope for this
+validation step. Each point is individually listed and checkable under its
+file, cascading the same way as the IG tree. Marker color comes from the
+point's own `diff` property: green for `"missing"` (in the `.primitive` but
+with no nearby `.ig` instance), pink for `"extra"`/no diff (an `.ig`
+instance with no matching primitive) -- lets a continent's real, already-
+loaded `.ig` vegetation be visually cross-checked against
+`flora_primitives_split_by_continent.md`'s per-continent flora split
+without any separate comparison tooling.
+
+## 2026-09-19 — ✨ PACS collision export + ai_wmap regeneration, 15-step Build pipeline (Forgery 4.25.0)
+
+`land_build.py`'s Build pipeline grows from 8 stages (stopping at the lit
+`.ig`) to 15: `build_ig_boxes` -> `build_rbank` (check prims -> per-zone ->
+global) -> `build_indoor_rbank` -> final PACS rename produce the collision
+region bank (`.rbank`/`.gr`/`.lr`) the game expects, and a new
+`ai_wmap_export` module regenerates the AI pathfinding walkability maps
+(`<continent>_0/1/2.tga`) as the last stage. RBank settings (a dozen flags +
+`RbankRbankName`, identical across all 25 continents) are hardcoded rather
+than read from a CSV column; `RbankZoneUl`/`RbankZoneDr` reuse the existing
+`_zone_name_from_row_col()`; the native `get_neighbors` tool (absent from
+this pipeline checkout) is replaced by direct row/col arithmetic for the 8
+neighbor zones, same incremental-invalidation principle as the rest of the
+pipeline.
+
+`run_full_build()` reports structured per-stage progress
+(`on_progress(step_index, step_count, step_name, fraction)`, a real
+`zones_done/zones_total` ratio for per-zone stages, `None` for the 8 single
+native-tool calls) shown in a modal popup. A new, always-visible "Pipeline
+steps" table (`_draw_pipeline_steps_section()`) lists all 15 stages with a
+real up-to-date/stale tick per stage (`land_build.compute_step_statuses()`,
+sharing its own mtime-staleness logic with `run_full_build()`'s real
+incremental decisions so the two can never disagree) and a per-stage
+[rebuild] button (`land_build.run_single_step()`) that clears just that
+stage's cache and reruns it immediately, without a full Build.
+
+`ai_wmap_export.py`'s `pacsCrunch` call now sets a real, terrain-aware
+collision-scan start point (`setStartPoint`, chained with `pacsCrunch` in
+the same native process invocation -- required since `StartPoints` is an
+in-memory global that doesn't survive across the separate processes each
+`ai_build_wmap` invocation otherwise spawns) instead of relying on the
+native tool's own fallback (the geometric center of the whole retriever's
+bounding box at z=0), which can land in a void/unused region with no
+collision geometry at all. The module also no longer deletes the
+supporting manifest/`.cfg` files it generates to drive the native tool
+after a run -- every file that serves the pipeline stays on disk.
+
+Several real bugs found and fixed testing a full continent (`newbieland`)
+end to end: `land_geometry.used_land_cells()` miscounted cells whose
+`.land` piece name is empty (neither a real piece nor the `STRING_UNUSED`
+marker) as "used", making the `land_export` pipeline step's tick
+structurally impossible to ever show up to date; `_run_land_export()`
+checked the native `land_export` tool's exit code against the wrong
+convention (it returns 1 on a normal completed run, -1 only on a hard
+failure); several `compute_step_statuses()` helpers crashed with an
+unhandled `FileNotFoundError` when polled concurrently with a background
+rebuild thread deleting/rewriting the same files; a flora-merge working
+diff file computed once and never recomputed automatically could go stale
+when the underlying `land_export` output later changed for reasons outside
+the diff's own tracking (here, an unrelated continent `PARENT` reference
+fix), silently dropping over a hundred real hand-placed flora instances per
+affected zone; and `_draw_pipeline_steps_section()` recomputing
+`compute_step_statuses()` on every single rendered frame, with no
+throttling, made the UI unusable (into the low tens of FPS) on a large
+continent, now cached and refreshed at most once a second.
 
 First real migration of `project-todos/forgery/box_ui_migration.md`: the
 `sysinfo` status bar (`app.py`, shared by Patina and Atyscape) now uses

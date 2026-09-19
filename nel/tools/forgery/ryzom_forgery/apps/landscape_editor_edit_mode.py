@@ -8,7 +8,9 @@ Imports from `landscape_editor_modes.py`, NOT from `landscape_editor.py`
 itself -- see that module's own docstring for why (circular import).
 """
 
+import math
 import threading
+import time
 from pathlib import Path
 
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui
@@ -26,12 +28,14 @@ from ryzom_forgery.zone_geom_cache import ZoneManifestEntry
 from ryzom_forgery.error_log import report_error
 from ryzom_forgery import land_build
 from ryzom_forgery import land_loader
+from ryzom_forgery import settings as app_settings
 from ryzom_forgery.land_geometry import (
 	brick_size_in_cells_from_half_size, expected_zone_name, find_missing_land_cells, land_cell_for_zone_name,
 	land_cell_index, piece_origin, transform_zone_cache_data, used_land_cells,
 )
 from ryzom_forgery.apps.landscape_editor_modes import _MODE_EDITION
-from ryzom_forgery.ui.widgets import _icon_button
+from ryzom_forgery.ui.widgets import _colored_button, _icon_button
+from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.region_loader import (
 	best_ref_for_extensions, continent_zone_dirs, get_zone_extensions_index, load_zone_cache_data,
 	RegionLoadError, ZoneRef,
@@ -39,12 +43,56 @@ from ryzom_forgery.region_loader import (
 from ryzom_forgery.zone_cache import read_zone_cache, write_zone_cache
 from ryzom_forgery.zone_geometry import ZONE_CELL_SIZE, zone_to_cache_data
 
-# "Comme Patina" (Nuno 2026-09-14) -- names/values called out in a section
+# "Comme Patina" (Nuno 2026-09-14) -- an identifier called out in a section
 # otherwise plain white, same idea as landscape_editor.py's own
-# _STATS_HEADER_COLOR/_STATS_VALUE_COLOR (orange for an identifier, green
-# for a coordinate/measured value).
+# _STATS_HEADER_COLOR (orange for an identifier).
 _NAME_COLOR = (1.0, 0.75, 0.3, 1.0)
-_VALUE_COLOR = (0.6, 0.9, 0.5, 1.0)
+
+_BUILD_PROGRESS_POPUP_ID = "Build progress"
+
+# Minimum time between two real land_build.compute_step_statuses() calls
+# (project-todos/forgery/landscape_editor__pacs_export.md step 8, Nuno
+# 2026-09-19: "ça me fais ramer atyscape de fou, je tombe a 14fps") --
+# _draw_pipeline_steps_section() runs every frame, but compute_step_statuses()
+# itself does several hundred/thousand stat()/glob() calls on a large
+# continent (up to ~10 stat() per zone just for _zone_needs_rbank_zone_
+# rebuild()'s 3x3 neighbor scan, times 236 zones on newbieland) -- cheap
+# enough once a second, ruinous every frame. Self._pipeline_step_statuses_cache
+# holds (continent, monotonic timestamp, statuses) from the last real
+# computation; a stale-by-up-to-this-much read is fine, the same tolerance
+# _zone_needs_rbank_zone_rebuild()/_rbank_global_needs_rebuild() already
+# accept for their own background-rebuild race (a frame or a second late
+# either way, never wrong forever).
+_PIPELINE_STATUS_REFRESH_INTERVAL = 1.0
+
+# "Pipeline steps" tick colors (project-todos/forgery/landscape_editor__
+# pacs_export.md step 7h, Nuno 2026-09-18) -- green/pink for a real
+# up-to-date/stale check, gray/neutral for the 2 steps with no output file
+# of their own to check (land_build._NO_CHECK_STEP_INDICES).
+_TICK_OK_COLOR = (0.4, 1.0, 0.4, 1.0)
+_TICK_STALE_COLOR = (1.0, 0.4, 0.7, 1.0)
+_TICK_NEUTRAL_COLOR = (0.6, 0.6, 0.6, 1.0)
+# A step with a `warning` (project-todos/forgery/landscape_editor__
+# pacs_export.md step 7k, Nuno 2026-09-18: "s'il manque quoi que ce soit,
+# c'est warning obligatoire") draws this instead of the plain tick -- e.g.
+# flora merge with no live_data_path configured, where the .ig produced
+# will silently be missing content rather than merely "not yet built".
+_TICK_WARNING_COLOR = (1.0, 0.75, 0.0, 1.0)
+
+# "Build" button (project-todos/forgery/landscape_editor__pacs_export.md
+# step 7m, Nuno 2026-09-18: "en couleur") -- same green convention as
+# object_editor_mixins/texture_widgets.py's own primary-action button.
+_BUILD_BUTTON_COLOR = (0.2, 0.65, 0.2, 1.0)
+
+
+def _indeterminate_progress_fraction() -> float:
+	"""Animated back-and-forth fraction for a stage with no real
+	sub-progress (a single native-tool call with no per-item feedback) --
+	shared by the Build progress popup and each "Pipeline steps" row's own
+	inline progress bar (project-todos/forgery/landscape_editor__
+	pacs_export.md step 7n), so both animate identically rather than
+	duplicating the same formula twice."""
+	return (math.sin(time.monotonic() * 3.0) + 1.0) / 2.0
 
 
 class EditModeMixin:
@@ -705,22 +753,46 @@ class EditModeMixin:
 		if not self.selected_continent_name or not self._selected_continent_pipeline_name:
 			return
 		ryzom_data_path = repository_paths.get("ryzom-data")
+		live_data_path = app_settings.load().live_data_path
 		continent = self._selected_continent_pipeline_name
-		progress = {"done": False, "error": None, "message": "Starting...", "zonel_files": [], "ready": [], "reloaded": False}
+		progress = {
+			"done": False, "error": None,
+			"step_index": 0, "step_count": 1, "step_name": "Starting...", "fraction": None,
+			"zonel_files": [], "ready": [], "reloaded": False,
+		}
 		self._land_build_progress = progress
-		thread = threading.Thread(target=self._run_land_build, args=(ryzom_data_path, continent, progress), daemon=True)
+		# Deferred to _draw_land_build_progress_popup() itself (project-todos/
+		# forgery/landscape_editor__pacs_export.md step 7n bugfix, Nuno
+		# 2026-09-18: "aucune popup de visible") -- imgui.open_popup(str_id)
+		# hashes str_id together with whatever ID stack is active AT THE
+		# CALL SITE (same mechanism as GetID() for any widget), so it must
+		# run at the exact same ID-stack depth as the begin_popup_modal()
+		# call that checks for it, never from inside a push_id()'d button
+		# click (the isolated [rebuild] button's own bug, fixed the same
+		# way here for consistency even though this particular call site
+		# was never nested).
+		self._pending_popup_open = True
+		thread = threading.Thread(
+			target=self._run_land_build, args=(ryzom_data_path, live_data_path, continent, progress), daemon=True,
+		)
 		thread.start()
 
-	def _run_land_build(self, ryzom_data_path, continent, progress):
+	def _run_land_build(self, ryzom_data_path, live_data_path, continent, progress):
 		"""Background-thread body for _start_land_build() -- writes only to
 		`progress` (dict field writes/list.append(), safe under the GIL, same
 		reasoning as _run_load_continent()'s own docstring). `progress["ready"]`
 		is drained by _draw_land_build_button() for the live 3D viewport
 		update."""
+		def on_progress(step_index, step_count, step_name, fraction):
+			progress["step_index"] = step_index
+			progress["step_count"] = step_count
+			progress["step_name"] = step_name
+			progress["fraction"] = fraction
+
 		try:
 			zonel_files = land_build.run_full_build(
-				ryzom_data_path, continent,
-				on_progress=lambda message: progress.__setitem__("message", message),
+				ryzom_data_path, continent, live_data_path=live_data_path,
+				on_progress=on_progress,
 				on_zone_ready=lambda name, cache_data: progress["ready"].append((name, cache_data)),
 			)
 			progress["zonel_files"] = zonel_files
@@ -730,71 +802,357 @@ class EditModeMixin:
 		finally:
 			progress["done"] = True
 
+	def _process_land_build_progress(self, progress):
+		"""Live-viewport/reload side effects of a running or just-finished
+		Build (project-todos/forgery/landscape_editor__pacs_export.md step
+		7m) -- pure state update, no drawing, extracted out of
+		_draw_land_build_button() so it keeps running every frame regardless
+		of where that button is drawn on screen."""
+		if progress is None:
+			return
+		# Live viewport update (Nuno 2026-09-12): each zone lit by
+		# land_build.run_full_build() during this Build run appears in the
+		# 3D view immediately, one zone at a time -- a brand new zone (never
+		# loaded before, e.g. a newly-added cell) is added to
+		# self.zones/self._loaded_refs/self._loaded_extensions here too, not
+		# just refreshed, since _rebuild_zone_node() alone only replaces an
+		# EXISTING entry.
+		ready = progress["ready"]
+		while ready:
+			name, cache_data = ready.pop(0)
+			is_new = name not in self.zones
+			# _loaded_extensions must gain its new ".zonel" entry BEFORE
+			# _rebuild_zone_node() runs -- that call computes the zone's
+			# build-stage color from _loaded_extensions right away
+			# (zone_geometry.zone_build_stage()), so doing this after would
+			# color the zone one stage behind on this very update (found
+			# 2026-09-12 reviewing this code).
+			if is_new:
+				pos = zone_name_to_world_pos(name)
+				new_ref = ZoneRef(name=name, x=pos.x, y=pos.y, source_path=Path(), bnp_entry=None)
+				self._loaded_refs[name] = new_ref
+				self._loaded_extensions.setdefault(name, {})[".zonel"] = new_ref
+			else:
+				self._loaded_extensions.setdefault(name, {})[".zonel"] = self._loaded_refs.get(name)
+			self.zones[name] = cache_data
+			self._rebuild_zone_node(name, cache_data)
+		if progress["done"] and not progress["reloaded"]:
+			# One-time full reload once the Build finishes (Nuno 2026-09-12:
+			# "tu ajoutes des zones sans retirer les existantes") -- the live
+			# per-zone drain above only ever touches
+			# self._zone_nodes[<real name>], never the OLD `.land`-fallback
+			# node a just-lit cell used to be shown as (keyed
+			# "land:<origin_x>:<origin_y>", a different dict key -- see
+			# _load_land_fallback_pieces() -- and, for a multi-cell piece,
+			# not even the same origin as this cell's own position).
+			# _load_continent() does a full disk rescan +
+			# _set_loaded_zones() rebuild, which tears down every old node
+			# unconditionally and only recreates what the `.land`+disk state
+			# actually calls for now -- the only reliable way to drop a
+			# stale fallback node here, cheap enough to always do once per
+			# Build (not per zone).
+			progress["reloaded"] = True
+			self._load_continent()
+
 	def _draw_land_build_button(self):
-		""""Build" button (step 7) -- runs the whole `land_export` ->
-		`zone_welder` -> `zone_elevation` -> `zone_welder` ->
-		`zone_dependencies` -> `zone_lighter` -> `zone_ig_lighter` chain for
-		the current composition, producing final installable `.zonel`/`.ig`
-		files. Only meaningful in Edition mode with a continent selected --
-		Visualisation never has a `.land` to build from."""
+		""""Build" button -- runs the whole `land_export` -> `zone_welder` ->
+		`zone_elevation` -> `zone_welder` -> `zone_dependencies` ->
+		`zone_lighter` -> `zone_ig_lighter` -> PACS (`build_ig_boxes`/
+		`build_rbank`/`build_indoor_rbank`) -> `ai_wmap_export` chain for the
+		current composition, producing final installable `.zonel`/`.ig`/
+		`.rbank`/`.gr`/`.lr`/`ai_wmap` files. Only meaningful in Edition mode
+		with a continent selected -- Visualisation never has a `.land` to
+		build from. Progress is shown in a blocking modal popup
+		(_draw_land_build_progress_popup()) AND inline per step in
+		"Pipeline steps" (_draw_pipeline_steps_section()). Drawn at the very
+		bottom, colored (project-todos/forgery/landscape_editor__
+		pacs_export.md step 7m, Nuno 2026-09-18: "encore mieux d'avoir ces
+		étapes visibles et validées une à une avec le build complet... le
+		bouton build tout en bas, en couleur") -- "Pipeline steps" is drawn
+		first and is no longer foldable, so it's always the thing right
+		above this button."""
 		if self._app_mode != _MODE_EDITION or not self.selected_continent_name:
 			return
 		imgui.separator()
 		progress = self._land_build_progress
+		self._process_land_build_progress(progress)
+		self._draw_pipeline_steps_section()
 		building = progress is not None and not progress["done"]
 		imgui.begin_disabled(building)
-		if imgui.button("Build"):
+		if _colored_button("Build", _BUILD_BUTTON_COLOR):
 			self._start_land_build()
 		imgui.end_disabled()
-		if progress is not None:
-			# Live viewport update (Nuno 2026-09-12): each zone lit by
-			# land_build.run_full_build() during this Build run appears in
-			# the 3D view immediately, one zone at a time -- a brand new zone (never
-			# loaded before, e.g. a newly-added cell) is added to
-			# self.zones/self._loaded_refs/self._loaded_extensions here too,
-			# not just refreshed, since _rebuild_zone_node() alone only
-			# replaces an EXISTING entry.
-			ready = progress["ready"]
-			while ready:
-				name, cache_data = ready.pop(0)
-				is_new = name not in self.zones
-				# _loaded_extensions must gain its new ".zonel" entry BEFORE
-				# _rebuild_zone_node() runs -- that call computes the zone's
-				# build-stage color from _loaded_extensions right away
-				# (zone_geometry.zone_build_stage()), so doing this after
-				# would color the zone one stage behind on this very update
-				# (found 2026-09-12 reviewing this code).
-				if is_new:
-					pos = zone_name_to_world_pos(name)
-					new_ref = ZoneRef(name=name, x=pos.x, y=pos.y, source_path=Path(), bnp_entry=None)
-					self._loaded_refs[name] = new_ref
-					self._loaded_extensions.setdefault(name, {})[".zonel"] = new_ref
+		if progress is not None and progress["done"]:
+			if progress["error"] is not None:
+				imgui.same_line()
+				imgui.text_colored((1.0, 0.4, 0.4, 1.0), progress["error"])
+			elif progress["zonel_files"]:
+				imgui.same_line()
+				imgui.text_colored((0.4, 1.0, 0.4, 1.0), f"{len(progress['zonel_files'])} zone(s) built.")
+		self._draw_land_build_progress_popup()
+
+	def _start_pipeline_step_rebuild(self, step_index: int, step_name: str):
+		"""[rebuild] button click (project-todos/forgery/landscape_editor__
+		pacs_export.md step 7i, Nuno 2026-09-18) -- clears step_index's own
+		cache and reruns it (or its whole shared-indicator group) RIGHT NOW,
+		on a background thread since it makes real native subprocess calls,
+		never waiting for a subsequent full Build. Ignored while a full
+		Build or another isolated rebuild is already running (same
+		mutual-exclusion convention as _start_land_build()). Progress shown
+		in the SAME modal popup as a full Build (step 7n, corrected per Nuno
+		2026-09-18: "je veux les 2 builds en modal, rien du tout dans le
+		tableau") -- never anything in the "Pipeline steps" table itself."""
+		building = self._land_build_progress is not None and not self._land_build_progress["done"]
+		rebuilding = self._pipeline_step_progress is not None and not self._pipeline_step_progress["done"]
+		if building or rebuilding:
+			return
+		if not self.selected_continent_name or not self._selected_continent_pipeline_name:
+			return
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		live_data_path = app_settings.load().live_data_path
+		continent = self._selected_continent_pipeline_name
+		progress = {
+			"step_index": step_index, "step_name": step_name, "done": False, "fraction": None, "error": None,
+			"reloaded": False,
+		}
+		self._pipeline_step_progress = progress
+		# Deferred to _draw_land_build_progress_popup() -- see
+		# _start_land_build()'s own comment on why open_popup() can't run
+		# from here directly (this exact call site is the one that
+		# surfaced the bug: it fires from inside the table's push_id()'d
+		# button click).
+		self._pending_popup_open = True
+		thread = threading.Thread(
+			target=self._run_pipeline_step_rebuild,
+			args=(ryzom_data_path, live_data_path, continent, step_index, step_name, progress),
+			daemon=True,
+		)
+		thread.start()
+
+	def _run_pipeline_step_rebuild(self, ryzom_data_path, live_data_path, continent, step_index, step_name, progress):
+		"""Background-thread body for _start_pipeline_step_rebuild()."""
+		def on_progress(reported_index, step_count, reported_name, fraction):
+			progress["fraction"] = fraction
+
+		try:
+			land_build.run_single_step(
+				ryzom_data_path, continent, step_index, live_data_path=live_data_path, on_progress=on_progress,
+			)
+			self._pipeline_force_error = None
+		except land_build.LandBuildError as exc:
+			progress["error"] = f"Failed to rebuild {step_name}: {exc}"
+			self._pipeline_force_error = progress["error"]
+			report_error(progress["error"])
+		finally:
+			progress["done"] = True
+
+	def _draw_pipeline_steps_section(self):
+		"""Always-visible "Pipeline steps" section, drawn ABOVE the [Build]
+		button (project-todos/forgery/landscape_editor__pacs_export.md steps
+		7f-7o, Nuno 2026-09-18: "encore mieux d'avoir ces étapes visibles et
+		validées une à une avec le build complet" -- no longer foldable,
+		unlike its original design): one line per run_full_build() stage,
+		its short 2-word label (tooltip on hover gives the native tool
+		actually invoked, or "None (Python)" for the 2 stages with none),
+		and a colored tick (green = up to date, pink = stale, orange =
+		warning, e.g. flora merge with no live_data_path configured) --
+		never a progress bar in this table (step 7n, corrected per Nuno
+		2026-09-18: "je veux les 2 builds en modal, rien du tout dans le
+		tableau"): both a full Build and an isolated [rebuild] show their
+		progress in the SAME modal popup (_draw_land_build_progress_popup()),
+		nothing inline here. A [rebuild] button clears that
+		step's cache and reruns it
+		immediately (`land_build.run_single_step()`) -- 2 groups of steps
+		sharing a single indicator (weld pass 1/elevation/weld pass 2, and
+		the two lighters) share ONE table row (step 7l) and ONE button,
+		vertically centered against their multiple lines (step 7o, Nuno
+		2026-09-18: "si tu peux centrer les boutons"); `land_build.
+		compute_step_statuses()` decides which step has its own button, this
+		just draws whatever it's told. Édition mode only, same gating as the
+		[Build] button itself."""
+		if self._app_mode != _MODE_EDITION or not self.selected_continent_name:
+			return
+		imgui.text(f"{fa_icons.ICON_FA_CIRCLE_INFO} Pipeline steps")
+		ryzom_data_path = repository_paths.get("ryzom-data")
+		continent = self._selected_continent_pipeline_name
+		if not ryzom_data_path or not continent:
+			return
+		# self._continent_all_zone_names (every used .land cell's expected
+		# zone name, real export or not) rather than self._loaded_extensions
+		# (which only ever tracks a cell once it has a real exported file)
+		# -- project-todos/forgery/landscape_editor__pacs_export.md step 7h
+		# fix, Nuno 2026-09-18: a freshly-authored continent with zero
+		# exports needs a real "0/53", not a vacuous "0/0" read as up to
+		# date. Falls back to self._loaded_extensions if the continent
+		# hasn't finished its own background load yet (all_zone_names still
+		# None at that point).
+		zone_names = self._continent_all_zone_names
+		if zone_names is None:
+			zone_names = self._loaded_extensions.keys()
+		live_data_path = app_settings.load().live_data_path
+		cache = self._pipeline_step_statuses_cache
+		now = time.monotonic()
+		if cache is not None and cache[0] == continent and now - cache[1] < _PIPELINE_STATUS_REFRESH_INTERVAL:
+			statuses = cache[2]
+		else:
+			statuses = land_build.compute_step_statuses(ryzom_data_path, continent, zone_names, live_data_path)
+			self._pipeline_step_statuses_cache = (continent, now, statuses)
+		rebuild_progress = self._pipeline_step_progress
+		rebuild_running = rebuild_progress is not None and not rebuild_progress["done"]
+		build_running = self._land_build_progress is not None and not self._land_build_progress["done"]
+		if rebuild_progress is not None and rebuild_progress["done"] and not rebuild_progress["reloaded"]:
+			# Whatever step (or group) was just rebuilt in isolation, once
+			# EVERY step now reads fully up to date (project-todos/forgery/
+			# landscape_editor__pacs_export.md step 7p, Nuno 2026-09-18:
+			# "quelque soit le build d'étapes, si toutes les étapes sont
+			# validées [il faut] relancer le chargement des zones comme
+			# avec le build complet") -- same one-time reload
+			# _process_land_build_progress() already does at the end of a
+			# full Build, so newly-produced content (a relit zone, a
+			# rebuilt .rbank, a fresh ai_wmap...) actually shows up in the
+			# 3D view instead of silently sitting on disk unseen. Evaluated
+			# exactly once per rebuild (`reloaded` flips to True here
+			# whether or not the continent turns out fully validated) --
+			# most isolated rebuilds leave OTHER steps still stale, which
+			# is expected and shouldn't reload on every single frame
+			# forever until the continent happens to become fully built by
+			# some later, unrelated rebuild.
+			rebuild_progress["reloaded"] = True
+			if all(status.up_to_date and status.warning is None for status in statuses):
+				self._load_continent()
+		table_flags = (
+			imgui.TableFlags_.borders.value | imgui.TableFlags_.row_bg.value
+			| imgui.TableFlags_.sizing_stretch_prop.value
+		)
+		if not imgui.begin_table("##pipeline-steps", 3, table_flags):
+			return
+		imgui.table_setup_column("Step")
+		imgui.table_setup_column("Status")
+		imgui.table_setup_column("", flags=imgui.TableColumnFlags_.width_fixed.value)
+		imgui.table_headers_row()
+		# One table ROW per [rebuild] button (project-todos/forgery/
+		# landscape_editor__pacs_export.md step 7l, Nuno 2026-09-18: "garde
+		# la cellule mais fais 3 lignes") -- a grouped step's `group_size`
+		# (>1 only on the group's first/representative entry, the one with
+		# `has_own_button`) pulls in that many consecutive statuses and
+		# draws one line per member in the Step/Status cells, instead of a
+		# separate table row each; the [rebuild] button column still shows
+		# only the group's single button. A standalone step (group_size ==
+		# 1) draws exactly like before, just going through the same path.
+		i = 0
+		while i < len(statuses):
+			status = statuses[i]
+			if not status.has_own_button:
+				i += 1
+				continue
+			group_members = statuses[i:i + status.group_size]
+			i += status.group_size
+			imgui.table_next_row()
+			imgui.table_next_column()
+			for member in group_members:
+				imgui.text(f"{member.index + 1}. {member.short_name}")
+				if imgui.is_item_hovered():
+					imgui.set_tooltip(f"Tool: {member.tool}")
+			imgui.table_next_column()
+			for member in group_members:
+				if member.warning is not None:
+					imgui.text_colored(_TICK_WARNING_COLOR, fa_icons.ICON_FA_EXCLAMATION_CIRCLE)
+					if imgui.is_item_hovered():
+						imgui.set_tooltip(member.warning)
+				elif member.up_to_date is None:
+					imgui.text_colored(_TICK_NEUTRAL_COLOR, fa_icons.ICON_FA_CIRCLE)
+				elif member.up_to_date:
+					imgui.text_colored(_TICK_OK_COLOR, fa_icons.ICON_FA_CIRCLE_CHECK)
 				else:
-					self._loaded_extensions.setdefault(name, {})[".zonel"] = self._loaded_refs.get(name)
-				self.zones[name] = cache_data
-				self._rebuild_zone_node(name, cache_data)
-			imgui.same_line()
-			imgui.text(progress["message"])
-			if progress["done"]:
-				if progress["error"] is not None:
-					imgui.text_colored((1.0, 0.4, 0.4, 1.0), progress["error"])
-				elif progress["zonel_files"]:
-					imgui.text_colored((0.4, 1.0, 0.4, 1.0), f"{len(progress['zonel_files'])} zone(s) built.")
-				if not progress["reloaded"]:
-					# One-time full reload once the Build finishes (Nuno
-					# 2026-09-12: "tu ajoutes des zones sans retirer les
-					# existantes") -- the live per-zone drain above only
-					# ever touches self._zone_nodes[<real name>], never the
-					# OLD `.land`-fallback piece a just-lit cell used to be
-					# shown as (keyed "land:<origin_x>:<origin_y>", a
-					# different dict key -- see _load_land_fallback_pieces()
-					# -- and, for a multi-cell piece, not even the same
-					# origin as this cell's own position). _load_continent()
-					# does a full disk rescan + _set_loaded_zones() rebuild,
-					# which tears down every old node unconditionally and
-					# only recreates what the `.land`+disk state actually
-					# calls for now -- the only reliable way to drop a stale
-					# fallback node here, cheap enough to always do once per
-					# Build (not per zone).
-					progress["reloaded"] = True
-					self._load_continent()
+					imgui.text_colored(_TICK_STALE_COLOR, fa_icons.ICON_FA_CIRCLE_XMARK)
+			imgui.table_next_column()
+			if status.group_size > 1:
+				# Vertically centers the group's single button against its
+				# `group_size` stacked lines (Nuno 2026-09-18: "centrer les
+				# boutons") -- a plain vertical offset before drawing it,
+				# same trick as everywhere else in Forgery that centers a
+				# fixed-size widget against a taller block of text.
+				offset = (status.group_size * imgui.get_text_line_height_with_spacing() - imgui.get_frame_height()) / 2.0
+				if offset > 0:
+					imgui.dummy((0, offset))
+			imgui.push_id(str(status.index))
+			imgui.begin_disabled(rebuild_running or build_running)
+			if _icon_button(fa_icons.ICON_FA_ROTATE, f"Rebuild now: {status.name}", square=True):
+				self._start_pipeline_step_rebuild(status.index, status.name)
+			imgui.end_disabled()
+			imgui.pop_id()
+		imgui.end_table()
+		if self._pipeline_force_error is not None:
+			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self._pipeline_force_error)
+
+	def _draw_land_build_progress_popup(self):
+		"""Modal popup for the structured progress of EITHER a full Build OR
+		an isolated [rebuild] (project-todos/forgery/landscape_editor__
+		pacs_export.md steps 7b-7d, 7n corrected per Nuno 2026-09-18: "je
+		veux les 2 builds en modal, rien du tout dans le tableau") -- the two
+		are mutually exclusive by construction (each _start_*() refuses to
+		start while the other is running), so at most one ever needs
+		showing here; blocks the rest of Atyscape while either is running
+		(Nuno, 2026-09-17 -- no interaction possible with anything else
+		until it's done). Opened by _start_land_build()/
+		_start_pipeline_step_rebuild(); closes itself automatically on
+		success, but stays open with a "Fermer" button on error so the
+		message remains readable instead of vanishing the instant the
+		thread finishes. The actual imgui.open_popup() call is deferred
+		here (project-todos/forgery/landscape_editor__pacs_export.md step
+		7n bugfix, Nuno 2026-09-18: "aucune popup de visible") -- this is
+		the only place guaranteed to run at the same top-level ID-stack
+		depth as begin_popup_modal() below it, whichever button (Build,
+		nested deep inside "Pipeline steps"'s table, or the top-level
+		[rebuild]) actually requested it via self._pending_popup_open."""
+		if self._pending_popup_open:
+			imgui.open_popup(_BUILD_PROGRESS_POPUP_ID)
+			self._pending_popup_open = False
+		if imgui.is_popup_open(_BUILD_PROGRESS_POPUP_ID):
+			center_next_popup()
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_BUILD_PROGRESS_POPUP_ID, None, flags)
+		if not opened:
+			return
+		build_progress = self._land_build_progress
+		rebuild_progress = self._pipeline_step_progress
+		# Priority: whichever is ACTIVELY RUNNING wins first, regardless of
+		# the other's past state -- only once NEITHER is running do we fall
+		# back to showing a lingering error. Checking "done and error is
+		# None" as the single condition (as a lone Build-only popup could)
+		# is NOT enough with two sources: a past Build's own stale error
+		# (done=True, error set, popup already dismissed once) would
+		# otherwise outrank a brand new isolated rebuild actively running
+		# right now, showing the wrong, outdated message (found by
+		# simulating every state combination before shipping this, not
+		# guessed).
+		if build_progress is not None and not build_progress["done"]:
+			source, label = build_progress, f"Step {build_progress['step_index']}/{build_progress['step_count']}: {build_progress['step_name']}"
+		elif rebuild_progress is not None and not rebuild_progress["done"]:
+			source, label = rebuild_progress, f"Rebuilding: {rebuild_progress['step_name']}"
+		elif build_progress is not None and build_progress["error"] is not None:
+			source, label = build_progress, f"Step {build_progress['step_index']}/{build_progress['step_count']}: {build_progress['step_name']}"
+		elif rebuild_progress is not None and rebuild_progress["error"] is not None:
+			source, label = rebuild_progress, f"Rebuilding: {rebuild_progress['step_name']}"
+		else:
+			imgui.close_current_popup()
+			imgui.end_popup()
+			return
+		step_label = label
+		fraction = source["fraction"]
+		error = source["error"]
+		imgui.text(step_label)
+		if fraction is None:
+			# No real sub-progress available for this stage (a single
+			# native-tool call with no per-item feedback, e.g. land_export
+			# or zone_dependencies) -- animated back-and-forth bar instead
+			# of a frozen one, so it's visually clear the Build hasn't
+			# hung (Nuno, 2026-09-17).
+			imgui.progress_bar(_indeterminate_progress_fraction(), overlay="...")
+		else:
+			imgui.progress_bar(fraction, overlay=f"{fraction * 100:.0f}%")
+		if error is not None:
+			imgui.text_colored((1.0, 0.4, 0.4, 1.0), error)
+			if imgui.button("Fermer"):
+				imgui.close_current_popup()
+		imgui.end_popup()

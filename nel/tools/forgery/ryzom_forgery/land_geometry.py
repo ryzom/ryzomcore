@@ -242,21 +242,33 @@ def land_cell_index(land: ZoneRegion, pos_x: int, pos_y: int) -> Optional[int]:
 
 def used_land_cells(land: ZoneRegion) -> Dict[Tuple[int, int], ZoneUnit]:
 	"""{(pos_x, pos_y) -> ZoneUnit} for EVERY used cell of `land`
-	(`zone_name != STRING_UNUSED`), regardless of whether a real exported
-	`.zone` already exists for it -- the full grid as the `.land` currently
-	describes it (project-todos/forgery/landscape_editor__land_composition.md
-	step 2, generalized out of the missing-cells-only find_missing_land_cells()
-	below so both the land-driven zone enumeration -- step 3 -- and the
-	brick fallback -- unchanged -- share the same grid decoding). Multiple
-	entries here can belong to the same multi-cell piece (same
-	`ZoneUnit.zone_name`, different `pos_x`/`pos_y` "position in the piece")
-	-- deduplicating those into a single render is the caller's job
-	(`piece_origin()`/`build_land_piece_cache_data()` above), not this
-	function's, since it doesn't load any brick file itself."""
+	(`zone_name != STRING_UNUSED` and non-empty), regardless of whether a
+	real exported `.zone` already exists for it -- the full grid as the
+	`.land` currently describes it (project-todos/forgery/
+	landscape_editor__land_composition.md step 2, generalized out of the
+	missing-cells-only find_missing_land_cells() below so both the
+	land-driven zone enumeration -- step 3 -- and the brick fallback --
+	unchanged -- share the same grid decoding). Multiple entries here can
+	belong to the same multi-cell piece (same `ZoneUnit.zone_name`,
+	different `pos_x`/`pos_y` "position in the piece") -- deduplicating
+	those into a single render is the caller's job (`piece_origin()`/
+	`build_land_piece_cache_data()` above), not this function's, since it
+	doesn't load any brick file itself.
+
+	A cell can also have a genuinely EMPTY `zone_name` (`""`, distinct from
+	the formal `STRING_UNUSED` marker `"< UNUSED >"`) -- never actually
+	composed in the world editor, confirmed 2026-09-19 against `land_export`
+	itself (`export.cpp::treatPattern()`'s own zone-bank lookup returns NULL
+	for it, so it's silently never exported) on `newbieland`'s real `.land`
+	(7 such cells found: a genuine, unfixable gap in that composition, not a
+	missing asset). Treated identically to `STRING_UNUSED` here -- a caller
+	that counted an empty-name cell as "used" would expect a `.zonenh` for
+	it that `land_export` can never produce, making the Pipeline steps tick
+	for step 0 permanently red for the affected continent."""
 	width = land.max_x - land.min_x + 1
 	cells = {}
 	for index, unit in enumerate(land.zones):
-		if unit.zone_name == STRING_UNUSED:
+		if unit.zone_name == STRING_UNUSED or not unit.zone_name:
 			continue
 		pos_x = land.min_x + (index % width)
 		pos_y = land.min_y + (index // width)

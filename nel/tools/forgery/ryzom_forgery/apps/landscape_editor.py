@@ -474,6 +474,14 @@ class LandscapeEditorApp(EditModeMixin, ViewModeMixin, ForgeryApp):
 		# own [force] button on an OSError deleting a step's cache file(s),
 		# cleared on the next successful force.
 		self._pipeline_force_error = None
+		# Throttles compute_step_statuses() (project-todos/forgery/
+		# landscape_editor__pacs_export.md step 8, Nuno 2026-09-19: "ça me
+		# fais ramer atyscape de fou, je tombe a 14fps") -- see
+		# landscape_editor_edit_mode.py's _PIPELINE_STATUS_REFRESH_INTERVAL.
+		# None until the first _draw_pipeline_steps_section() call; else
+		# (continent, monotonic timestamp, statuses) from the last real
+		# computation.
+		self._pipeline_step_statuses_cache = None
 		# Isolated per-step [rebuild] button (project-todos/forgery/
 		# landscape_editor__pacs_export.md steps 7i/7n) -- None while idle,
 		# else the dict a background thread (_run_pipeline_step_rebuild(),

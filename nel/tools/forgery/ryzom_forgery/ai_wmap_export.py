@@ -39,18 +39,51 @@ with its own local subprocess calls.
 import platform
 import shutil
 import subprocess
+import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Tuple
+
+from pynel.ryzom_land import LandParseError, load_land
 
 from . import continent_ecosystem
+from . import land_loader
 from . import settings as app_settings
+from .land_geometry import ZONE_CELL_SIZE, used_land_cells
 
 _WMAP_INDICES = (0, 1, 2)
 
 
 class AiWmapExportError(Exception):
 	pass
+
+
+def _pick_start_point(ryzom_data_path: Path, continent: str) -> Optional[Tuple[float, float]]:
+	"""A real, terrain-aware `(x, y)` inside one of `continent`'s actually
+	used `.land` cells (project-todos/forgery/landscape_editor__pacs_export.md,
+	step 14: `pacsCrunch`'s own fallback start point -- the geometric center
+	of the retriever's whole bounding box, at z=0 -- can land in a void/unused
+	region of that box, e.g. `newbieland`, where `evalCollision()` resolves no
+	instance at all and the crunch silently produces an empty world map).
+	`None` if the `.land` can't be found/parsed or has no used cells --
+	callers fall back to plain `pacsCrunch` (its own bbox-center behavior).
+	`ET.ParseError` (not just `LandParseError`) is caught too: a few
+	`.land` files (e.g. `testroom`, `sans_crevasse_matis`) are malformed/
+	empty XML, which `load_land()` doesn't wrap itself -- not this
+	function's concern, just another case to fall back gracefully on."""
+	land_path = land_loader.find_land_files(ryzom_data_path).get(continent)
+	if land_path is None:
+		return None
+	try:
+		land = load_land(land_path)
+	except (OSError, LandParseError, ET.ParseError):
+		return None
+	cells = used_land_cells(land)
+	if not cells:
+		return None
+	pos_x, pos_y = sorted(cells)[0]
+	half = ZONE_CELL_SIZE / 2.0
+	return pos_x * ZONE_CELL_SIZE + half, pos_y * ZONE_CELL_SIZE + half
 
 
 def _resolve_binary() -> Path:
@@ -134,23 +167,35 @@ def generate_ai_wmap(ryzom_data_path, continent: str) -> AiWmapResult:
 		encoding="utf-8",
 	)
 
-	try:
-		_run(binary_path, "checkPackedSheets", cwd=rbank_output_dir, log_path=ai_wmap_dir / "checkpackedsheets.log")
-		pacscrunch_result = _run(binary_path, "pacsCrunch", continent, cwd=rbank_output_dir, log_path=ai_wmap_dir / "pacscrunch.log")
-		_run(binary_path, "pacsBuildGabarit", continent, cwd=rbank_output_dir, log_path=ai_wmap_dir / "gabarit.log")
+	start_point = _pick_start_point(ryzom_data_path, continent)
 
-		wmap_paths = []
-		for i in _WMAP_INDICES:
-			map_name = f"{continent}_{i}"
-			_run(binary_path, "pacsBuildWmap", map_name, cwd=rbank_output_dir, log_path=ai_wmap_dir / f"wmap_{i}.log")
-			_run(binary_path, "pacsBuildBitmap", map_name, cwd=rbank_output_dir, log_path=ai_wmap_dir / f"bitmap_{i}.log")
-			tga_path = ai_wmap_dir / f"{map_name}.tga"
-			if not tga_path.is_file():
-				raise AiWmapExportError(f"pacsBuildBitmap did not produce {tga_path}")
-			wmap_paths.append(tga_path)
-	finally:
-		cfg_path.unlink(missing_ok=True)
-		ig_manifest.unlink(missing_ok=True)
-		pacs_prim_manifest.unlink(missing_ok=True)
+	_run(binary_path, "checkPackedSheets", cwd=rbank_output_dir, log_path=ai_wmap_dir / "checkpackedsheets.log")
+	if start_point is not None:
+		# setStartPoint + pacsCrunch MUST run in the same process: StartPoints
+		# is an in-memory global (pacs_scan.cpp), and each `_run()` call spawns
+		# a fresh `ai_build_wmap` process -- "-" chains both commands into one
+		# invocation (main.cpp:76-104), the only way for the first to affect
+		# the second.
+		start_x, start_y = start_point
+		pacscrunch_result = _run(
+			binary_path,
+			"setStartPoint", continent, f"{start_x:.1f}", f"{start_y:.1f}",
+			"-",
+			"pacsCrunch", continent,
+			cwd=rbank_output_dir, log_path=ai_wmap_dir / "pacscrunch.log",
+		)
+	else:
+		pacscrunch_result = _run(binary_path, "pacsCrunch", continent, cwd=rbank_output_dir, log_path=ai_wmap_dir / "pacscrunch.log")
+	_run(binary_path, "pacsBuildGabarit", continent, cwd=rbank_output_dir, log_path=ai_wmap_dir / "gabarit.log")
+
+	wmap_paths = []
+	for i in _WMAP_INDICES:
+		map_name = f"{continent}_{i}"
+		_run(binary_path, "pacsBuildWmap", map_name, cwd=rbank_output_dir, log_path=ai_wmap_dir / f"wmap_{i}.log")
+		_run(binary_path, "pacsBuildBitmap", map_name, cwd=rbank_output_dir, log_path=ai_wmap_dir / f"bitmap_{i}.log")
+		tga_path = ai_wmap_dir / f"{map_name}.tga"
+		if not tga_path.is_file():
+			raise AiWmapExportError(f"pacsBuildBitmap did not produce {tga_path}")
+		wmap_paths.append(tga_path)
 
 	return AiWmapResult(wmap_paths=wmap_paths, pacscrunch_log=pacscrunch_result.stdout)
