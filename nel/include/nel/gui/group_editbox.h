@@ -157,7 +157,8 @@ namespace NLGUI
 		void		paste();
 		void		paste(uint32 maxTextTags);
 		// Write the string into buffer
-		void		writeString(const std::string &str, bool replace = true, bool atEnd = true);
+		// With allowPartial=false, reject filtered or truncated input without changing the buffer.
+		bool		writeString(const std::string &str, bool replace = true, bool atEnd = true, bool allowPartial = true);
 
 		// Expand the expression (true if there was a '/' at the start of the line)
 		bool		expand();

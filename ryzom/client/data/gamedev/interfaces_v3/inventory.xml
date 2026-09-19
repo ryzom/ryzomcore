@@ -1655,10 +1655,10 @@
               name="uiMainChat"
               handler="link_phrase_in_chat"
               params="destination=main" />
-      <action id="last"
-              name="uiChatLinkLastChat"
+      <action id="tell"
+              name="uimTell"
               handler="link_phrase_in_chat"
-              params="destination=last" />
+              params="destination=tell" />
       <action id="clipboard"
               name="uiChatLinkClipboard"
               handler="link_phrase_in_chat"
