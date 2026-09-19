@@ -2,8 +2,7 @@
 
 Source of truth: `nel/src/3d/zone.cpp` (`CZone::serial`), `nel/src/3d/patch.cpp`
 (`CPatch::serial`), and the `serial()` methods of every sub-structure listed
-below. Investigated 2026-09-06 for `project-todos/pynel/zone_read_write.md`
-(pynel read/write support), step 1.
+below.
 
 All three extensions are the **same binary format** (`CZone::serial()`), at
 different landscape-build pipeline stages: `.zone` = raw exported geometry,
@@ -197,7 +196,7 @@ _AttenuationEnd     f32
 `CRGBA` -- confirmed R,G,B,A byte order (u8 each), same convention as
 pynel's existing `Rgba` dataclass (`packed_sheets.md`'s `rgba()` primitive).
 
-## Status: implemented and validated (2026-09-06)
+## Status: implemented and validated
 
 `pynel.ryzom_zone.parse_zone()`/`load_zone()` (read-only) implement
 everything above. Validated against all 5093 real `.zonel` files found in
@@ -215,7 +214,7 @@ treats it as an opaque blob (see policy note above), read back and
 rewritten byte-for-byte. Only relevant if Forgery ever needs to visualize/
 edit lumels directly, out of scope for this chantier.
 
-## Header-only reading: `parse_zone_header()` (2026-09-13)
+## Header-only reading: `parse_zone_header()`
 
 For a caller that only needs `zone_bb` (e.g. Forgery computing a whole
 continent's elevation-color range across every zone, project-todos/forgery/
@@ -227,7 +226,7 @@ this measured at 268 ms + 14.3 MB retained for a single 423 KB file.
 `pynel.ryzom_zone.parse_zone_header()` reads only `zone_id`/`zone_bb`/
 `patch_bias`/`patch_scale` (the same leading bytes `parse_zone()` itself
 reads first) and stops, never touching `border_vertices`/`patchs`/
-`patch_connects`/`point_lights`. Verified 2026-09-13 against real `.zone`/
+`patch_connects`/`point_lights`. Verified against real `.zone`/
 `.zonew`/`.zonel` files of the same zone: `zone_bb` is byte-identical
 across all three build stages (elevation/geometry never changes, only
 lighting data is added) -- confirming a header-only read is always a

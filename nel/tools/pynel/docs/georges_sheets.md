@@ -1,10 +1,10 @@
 # Georges sheets (`.creature`, `.item`, `.sitem`, `.sbrick`, ...) — investigation notes
 
-Status: **not implemented**. This is a scoping/investigation doc, written
-ahead of a dedicated session to add `ryzom_georges.py` to pynel — read this
-first before starting that work, don't re-derive it from scratch.
+Status: **not implemented**. Scoping/investigation notes for
+`ryzom_georges.py` — read before starting that work, don't re-derive it
+from scratch.
 
-**Update 2026-09-09**: the generic FORM/STRUCT/ARRAY/ATOM tree parser this
+The generic FORM/STRUCT/ARRAY/ATOM tree parser this
 doc describes (see "Format overview" below) has since been implemented as
 `ryzom_georges_form.py` (read + write, see `docs/georges_form.md`), driven
 by a different need (`.continent`/`ryzom.world`, no `PARENT`-chain
@@ -14,7 +14,7 @@ for the raw per-file tree, rather than re-deriving that parsing layer --
 only the parent-chain merge/provenance logic (this doc's actual scope,
 `form_elm.cpp`'s resolution algorithm) is still net-new work.
 
-## Why this doc exists
+## Purpose
 
 Sheets in `ryzom-private-data/game_element/` (creature, items, brick,
 missions, etc.) use NeL's "Georges" form format, which has an **inheritance
@@ -27,13 +27,12 @@ merging. Two problems fall out of that for anyone editing sheets by hand:
 2. When a property has an unexpected value, it's not obvious *which* file
    in the chain set it, or whether the current file overrides it locally.
 
-**Goal for the eventual tool** (stated by the project owner, 2026-08-06):
-a sheet editor that shows, per property, exactly where its effective value
-comes from in the parent chain — the same idea as a browser's CSS
-DevTools "computed" panel, which shows which rule (and which stylesheet)
-last set a given property, with overridden values struck through. This is
-the actual design target for `ryzom_georges.py` — not just read/write, but
-provenance tracking per field.
+The design target for `ryzom_georges.py` is a sheet editor that shows, per
+property, exactly where its effective value comes from in the parent
+chain — the same idea as a browser's CSS DevTools "computed" panel, which
+shows which rule (and which stylesheet) last set a given property, with
+overridden values struck through. Not just read/write, but provenance
+tracking per field.
 
 ## Format overview (confirmed by reading real files)
 
@@ -84,7 +83,7 @@ Leading-underscore filenames (`_tryker_female.creature`,
 `_formuli.creature`) are the convention for parent/base sheets not meant
 to be used as leaf/instance sheets directly.
 
-## Why this is a bigger job than `.primitive` (already done)
+## Complexity compared to `.primitive` (already implemented)
 
 `.primitive` (see `ryzom_primitive.py`) is a flat XML tree with no
 inheritance — read it, you have the whole picture. Georges forms are not:

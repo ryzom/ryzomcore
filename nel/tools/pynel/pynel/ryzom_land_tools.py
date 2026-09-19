@@ -258,14 +258,20 @@ def run_zone_elevation(
 @dataclass
 class PropertiesConfig:
 	"""`properties.cfg` fields actually read by zone_lighter/zone_dependencies/
-	zone_ig_lighter (docs/zone_tools.md §2, §4, §5 -- confirmed exhaustive
-	against all 3 tools' real C++ source, 2026-09-11, after two corrections:
-	see project-todos/pynel/land_pipeline.md step 4 for the full history,
-	notably the 7 fields wrongly pulled in from the unrelated `ig_lighter`
-	tool on the first pass). Field grouping below matches which tool(s)
-	actually require it -- there is no meaningful "PropertiesConfig for just
-	zone_lighter" vs "for zone_ig_lighter", every real continent's .cfg is
-	one shared file read by whichever of the 3 tools runs against it."""
+	zone_ig_lighter/ig_lighter (docs/zone_tools.md §2, §4, §5 -- confirmed
+	exhaustive against all 4 tools' real C++ source, 2026-09-11, after two
+	corrections: see project-todos/pynel/land_pipeline.md step 4 for the
+	full history, notably the 7 fields wrongly pulled in from the unrelated
+	`ig_lighter` tool on the first pass -- since re-added below once
+	`ig_lighter` itself turned out to need them (project-todos/forgery/
+	pipeline_export_dirs_rename.md, Nuno 2026-09-19: real EUnknownVar
+	"grbank" error confirmed from `ig_lighter.cpp`'s own `getVar()` calls).
+	Field grouping below matches which tool(s) actually require it -- there
+	is no meaningful "PropertiesConfig for just zone_lighter" vs "for
+	zone_ig_lighter" vs "for ig_lighter", every real continent's .cfg is
+	one shared file read by whichever of the 4 tools runs against it (same
+	file the legacy build_gamedata pipeline passes to both its zone_light
+	and ig_light processes, `processes/ig_light/2_build.py`)."""
 	# Base -- required by all 3 tools.
 	bank_name: str
 	search_pathes: List[str]
@@ -299,6 +305,23 @@ class PropertiesConfig:
 	ig_oversampling: int = 16
 	# Specific to zone_dependencies.
 	compute_dependencies_with_igs: bool = True
+	# Specific to ig_lighter (project-todos/forgery/
+	# pipeline_export_dirs_rename.md, Nuno 2026-09-19). grbank/rbank are the
+	# GlobalRetriever/LocalRetriever bank files ig_lighter's own
+	# SurfaceLighting feature would use -- always left "" here (which
+	# ig_lighter.cpp's own comment confirms disables SurfaceLighting
+	# rather than erroring): Forgery's build_rbank stages run AFTER
+	# ig_lighter in the pipeline, so no real .gr/.rbank exists yet at the
+	# point this is generated. The other 3 verified identical across all
+	# 25 continents' real properties_base.cfg/properties_draft.cfg
+	# (2026-09-19) -- fixed defaults, not CSV columns.
+	grbank: str = ""
+	rbank: str = ""
+	col_identifier_prefix: str = ""
+	col_identifier_suffix: str = ""
+	cell_surface_light_size: float = 1.5
+	cell_raytrace_delta_z: float = 0.2
+	build_debug_surface_shape: bool = False
 	# Optional -- wrapped in try/catch(EUnknownVar) on the C++ side, used by
 	# zone_dependencies' computeIGBBoxFromContinent() only when
 	# compute_dependencies_with_igs is true. Silently omitted from the
@@ -358,6 +381,13 @@ def build_properties_cfg(config: PropertiesConfig) -> str:
 		f"vegetable_height = {config.vegetable_height};",
 		f"ig_oversampling = {config.ig_oversampling};",
 		f"compute_dependencies_with_igs = {_cfg_bool(config.compute_dependencies_with_igs)};",
+		f"grbank = {_cfg_string(config.grbank)};",
+		f"rbank = {_cfg_string(config.rbank)};",
+		f"col_identifier_prefix = {_cfg_string(config.col_identifier_prefix)};",
+		f"col_identifier_suffix = {_cfg_string(config.col_identifier_suffix)};",
+		f"cell_surface_light_size = {config.cell_surface_light_size};",
+		f"cell_raytrace_delta_z = {config.cell_raytrace_delta_z};",
+		f"build_debug_surface_shape = {_cfg_bool(config.build_debug_surface_shape)};",
 	]
 	if config.continent_name is not None:
 		lines.append(f"continent_name = {_cfg_string(config.continent_name)};")
@@ -391,6 +421,76 @@ def run_zone_dependencies(
 		capture_output=True,
 		text=True,
 	)
+
+
+class PrimExportError(Exception):
+	pass
+
+
+@dataclass
+class PrimExportConfig:
+	"""prim_export's .cfg fields (CExportOptions::loadcf(), ryzom/tools/
+	leveldesign/prim_export/main.cpp:347-383), confirmed exhaustive against
+	the tool's own usage text (main.cpp:749-759) and real usage in
+	nel/tools/build_gamedata/processes/ig/2_build.py. Every field is
+	required -- loadcf() calls CConfigFile::getVar() unguarded for each one,
+	which throws (EUnknownVar) if missing; that exception is caught by
+	main()'s own outer try/catch and only logged, so a missing field still
+	exits 1 (see run_prim_export()'s docstring) rather than fail loudly."""
+	out_ig_dir: str
+	zone_w_dir: str
+	small_bank: str
+	far_bank: str
+	displace_dir: str
+	prim_dirs: List[str]
+	form_dir: str
+	world_editor_files: str
+	cell_size: float = 160.0
+
+
+def build_prim_export_cfg(config: PrimExportConfig) -> str:
+	"""Generates prim_export's .cfg text (CConfigFile syntax) from a
+	PrimExportConfig. Field order follows CExportOptions::loadcf()."""
+	lines = [
+		f"OutIGDir = {_cfg_string(config.out_ig_dir)};",
+		f"ZoneWDir = {_cfg_string(config.zone_w_dir)};",
+		f"SmallBank = {_cfg_string(config.small_bank)};",
+		f"FarBank = {_cfg_string(config.far_bank)};",
+		f"DisplaceDir = {_cfg_string(config.displace_dir)};",
+		f"CellSize = {config.cell_size};",
+		f"PrimDirs = {_cfg_string_array(config.prim_dirs)};",
+		f"FormDir = {_cfg_string(config.form_dir)};",
+		f"WorldEditorFiles = {_cfg_string(config.world_editor_files)};",
+	]
+	# Same trailing-blank-line quirk as build_land_export_cfg().
+	return "\n".join(lines) + "\n\n"
+
+
+def run_prim_export(
+	binary_path: Union[str, Path],
+	config: PrimExportConfig,
+	cfg_path: Union[str, Path],
+) -> subprocess.CompletedProcess:
+	"""Writes config's .cfg to cfg_path, then runs `prim_export <cfg_path>`.
+	Raises PrimExportError on anything but exit code 1 -- same convention as
+	run_land_export() (main.cpp:747: argc!=2 or a config load failure
+	returns -1 directly; main.cpp:1139: every other path, INCLUDING a caught
+	runtime exception logged via outString(), falls through to return 1).
+	So, unlike run_land_export(), a 1 here is an even weaker success signal
+	-- the caller must check the resulting .ig files were actually
+	produced, not just that this call didn't raise."""
+	Path(cfg_path).write_text(build_prim_export_cfg(config), encoding="utf-8")
+
+	result = subprocess.run(
+		[str(binary_path), str(cfg_path)],
+		capture_output=True,
+		text=True,
+	)
+	if result.returncode != 1:
+		raise PrimExportError(
+			f"prim_export failed (exit code {result.returncode}):\n{result.stdout}"
+		)
+	return result
 
 
 def run_zone_ig_lighter(

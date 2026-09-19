@@ -5,7 +5,7 @@ Status: **implemented** (`pynel.hls_texture_bank`, `pynel.hls_bank_texture_info`
 `nel/include/nel/3d/hls_color_texture.h/.cpp` (`.hlsbank`), and
 `nel/tools/3d/panoply_maker/hls_bank_texture_info.h/.cpp` (`.hlsinfo`).
 
-## Why this exists
+## Purpose
 
 `characters.hlsbank` (loaded via `Driver->loadHLSBank()`, see
 `init_main_loop.cpp:914`) is what lets `CAsyncTextureManager` recolor LOD

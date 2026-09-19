@@ -4,12 +4,10 @@ Source of truth: `nel/tools/3d/zone_welder/zone_welder.cpp`,
 `nel/tools/3d/zone_lighter/zone_lighter.cpp`,
 `nel/tools/3d/zone_lib/zone_utility.cpp`/`.h`, and
 `nel/include/nel/misc/config_file.h` (the `.cfg` format both tools read).
-Investigated 2026-09-06 for `project-todos/pynel/zone_read_write.md` step 4
-(orchestration: pynel/Forgery drive these binaries as subprocesses to
-produce a real `.zonew`/`.zonel`, not a rename). Binaries are built via
+pynel/Forgery drive these binaries as subprocesses to produce a real
+`.zonew`/`.zonel`, not a rename. Binaries are built via
 `ryzom-docker/tools` (see `nel/tools/3d/CMakeLists.txt`, no `WIN32` guard on
-either target -- confirmed buildable and runnable on Linux, step 3 of the
-same chantier).
+either target -- confirmed buildable and runnable on Linux).
 
 These tools were **not written for pynel** -- they're the real production
 build tools, unchanged. This doc describes their existing behavior so pynel
@@ -158,8 +156,7 @@ The zone's own `.ig` (`<input zone name>.ig`) is looked up automatically
 via `CPath::lookup` (must be reachable via `search_pathes` or the working
 directory) -- absent is only a warning, not fatal. Same for `bank_name`.
 
-**Tile-noise (displacement bump-map) lookup is broken on Linux, found
-2026-09-11**: loading the tile bank (`bank_name`'s `.smallbank`, or more
+**Tile-noise (displacement bump-map) lookup is broken on Linux**: loading the tile bank (`bank_name`'s `.smallbank`, or more
 precisely the underlying `.bank` referenced by `tile_bank_file`) can trigger
 `CTileBank::getTileNoiseMap()` (`nel/src/3d/tile_bank.cpp:475`), which
 builds its file path as `getAbsPath() + tileNoise._FileName` -- **both of
@@ -175,8 +172,8 @@ relative name uses `\` (not `/`), that backslash stays glued to
 real registered file on Linux even when it exists on disk. Not yet fixed
 (would need a code change in `tile_bank.cpp` to fall back to a `/`-and-`\`
 -aware basename lookup via `search_pathes` when the literal legacy path
-fails) -- and per Nuno's own rule (2026-09-11), any such fallback must
-route through `pipeline/`, never `graphics/` (`docs/pipeline_directories.md`),
+fails) -- and any such fallback must route through `pipeline/`, never
+`graphics/` (`docs/pipeline_directories.md`),
 so `search_pathes` now includes `pipeline/export/ecosystems/<eco>/displace`
 (§9) ready for whenever this fix lands.
 
@@ -199,7 +196,6 @@ analysis is needed.
 
 ## 3. `zone_elevation`
 
-Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
 Source: `nel/tools/3d/zone_elevation/zone_elevation.cpp`. Applies a heightmap
 to a zone freshly produced by `land_export` (a `.zonenhw` -- "no height,
 welded" -- becomes a `.zonew` with real Z positions).
@@ -230,7 +226,7 @@ in this doc.
   matching flag is omitted): `--zfactor`/`--zfactor2` = `1.0`, `--cellsize`
   = `160.0`, `--extendcoords` = off.
 
-**Real bug found and fixed in `ryzom-core`, 2026-09-11** (`fixes` branch):
+**Real bug, found and fixed in `ryzom-core`** (`fixes` branch):
 the tool crashed with a SIGSEGV on every invocation, even with zero CLI args
 -- confirmed via `gdb` backtrace, the crash happened inside
 `std::string::assign()` called from `NLLIGO::CZoneRegion::CZoneRegion()`,
@@ -243,7 +239,6 @@ same pattern this file already used for `s_HeightMap`/`s_HeightMap2`.
 
 ## 4. `zone_dependencies`
 
-Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
 Source: `nel/tools/3d/zone_dependencies/zone_dependencies.cpp`. Computes
 cross-zone shadow/lighting dependencies by bounding-box analysis, writing
 the `.depend` file `zone_lighter` (§2) and `zone_ig_lighter` (§5) both
@@ -265,7 +260,7 @@ zone_dependencies <properties.cfg> <firstZone.zone> <lastZone.zone> <output.depe
   <ext>`) -- a coordinate with no corresponding file is silently skipped
   (a normal, expected case: not every grid cell has a zone).
 - **`compute_dependencies_with_igs=1`** (true for every real continent
-  checked, 2026-09-11) additionally tries, per loaded zone:
+  checked) additionally tries, per loaded zone:
   - `<zone>.ig` via `CPath::lookup` -- **the `nlwarning` for this case is
     commented out in the source** (`zone_dependencies.cpp`, in
     `computeZoneIGBBox`): a missing `.ig` produces **zero trace anywhere**,
@@ -287,7 +282,7 @@ zone_dependencies <properties.cfg> <firstZone.zone> <lastZone.zone> <output.depe
     `continent_name` matches the real file's own basename**.
 
 **Two real bugs found running this tool over a whole continent (nexus, 151
-zones), 2026-09-11**:
+zones)**:
 
 - **The coordinate decoder is NOT the same as `zone_elevation`'s own.**
   `zone_dependencies` decodes `firstZone`/`lastZone` names via the SHARED
@@ -311,7 +306,6 @@ zones), 2026-09-11**:
 
 ## 5. `zone_ig_lighter`
 
-Investigated 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4.
 Source: `nel/tools/3d/zone_ig_lighter/zone_ig_lighter.cpp`. Lights the
 instances (`.ig`) placed in an already-lit zone (`.zonel`), using the same
 `properties.cfg`/`.depend` convention as `zone_lighter` (§2) plus its own
@@ -343,7 +337,7 @@ zone_ig_lighter <input.zonel> <output.ig> <properties.cfg> <dependency.depend>
   failure, same pattern as §4.
 - **Exception**: if `additionnal_ig` (properties.cfg) is non-empty and ANY
   listed file fails to open, `continu=false` is set and the actual lighting
-  is skipped -- but every real continent checked 2026-09-11 has this list
+  is skipped -- but every real continent checked has this list
   empty, so this path is not currently exercised in practice.
 - Always returns `0`, whether it produced real output or not -- same
   non-standard convention as `zone_lighter` (§2): the caller must check the
@@ -396,7 +390,7 @@ dynamically by the script). `.depend` files are generated by
 
 Thin subprocess wrappers only -- no automatic binary discovery (the caller
 passes an explicit path to each binary; pynel stays decoupled from where
-Nuno keeps the `ryzom-docker/tools` build output) and no automatic
+the `ryzom-docker/tools` build output lives) and no automatic
 parameter-file generation (scene/continent-specific, the caller supplies a
 real `.cfg`, following the `zone_lighter.cfg`/`properties_*.cfg` examples
 above). Since `zone_lighter`'s exit code is always 0 even on failure (see
@@ -407,8 +401,7 @@ See `ryzom_zone_tools.py` docstrings for the exact function signatures.
 
 ## 9. `continent_pipeline_reference.csv` -- per-continent path/properties reference
 
-Built 2026-09-11 for `project-todos/pynel/land_pipeline.md` step 4, at
-Nuno's explicit request for **one single** reference table (not split by
+One single reference table (not split by
 source file) of every path and `properties.cfg` field the three tools in
 §3-5 need, for **all 25 continents**. Lives at
 `ryzom-data/leveldesign/world/continent_pipeline_reference.csv` (25 rows,
@@ -428,10 +421,9 @@ regenerated since:
 - the obsolete `.land` location `graphics/landscape/ligo/<eco>/<name>.land`,
   superseded by `leveldesign/landscape/<eco>/<name>.land`.
 
-Nuno's explicit correction after this was caught: the CSV must be a
-reference of what **currently, actually exists**, "comme si les anciens
-dossiers n'avaient jamais existe" -- never a faithful copy of a stale
-config just because that's what the old file says. So the CSV is rebuilt
+The CSV must be a reference of what **currently, actually exists** --
+never a faithful copy of a stale config just because that's what the old
+file says. So the CSV is rebuilt
 entirely from `leveldesign/workspace/continents/<continent>/directories.py`
 -- present for all 25 continents, plain declarative Python (string
 concatenation only), already the trusted source `ryzom_forgery.continent_ecosystem`
@@ -460,7 +452,7 @@ tuning values with **no equivalent in `directories.py`** (which only knows
 about paths, not scene-lighting parameters) -- these are still read from
 each continent's real `generated/properties.cfg`, the only current source
 for them: `sun_direction`, `sun_center`, `sky_intensity`, `quad_grid_size`,
-`quad_grid_cell_size`, `additionnal_ig`. Verified 2026-09-11 across 6 real
+`quad_grid_cell_size`, `additionnal_ig`. Verified across 6 real
 continents (nexus, bagne, fyros, matis, tryker, terre) that every other
 `properties.cfg` field is identical across all continents (see §3-5's field
 lists) -- those are stored once in the CSV-builder's `GLOBAL_PROPERTIES`
@@ -475,13 +467,10 @@ genuinely `MISSING` for every desert/lacustre-ecosystem continent (real,
 confirmed-not-downloaded assets, not a path-construction bug -- do not
 "fix" these by changing the path formula).
 
-### `workspace/` and `graphics/` are now permanently off-limits (Nuno, 2026-09-11)
+### `workspace/` and `graphics/` are permanently off-limits
 
 The `directories.py`-based build described above was a **one-time**
-extraction, not a standing dependency. Nuno drew a hard line right after:
-"on ne touche a aucun fichier de workspace/ on modife notre .csv. Legacy
-pipeline = workspace. Forgery pipeline = csv. Workspace ne dois surtout pas
-etre utilisé non plus. On utilise que pipeline/ et world/" -- `leveldesign/
+extraction, not a standing dependency. `leveldesign/
 workspace/` (where `directories.py` lives) belongs entirely to the
 **legacy** build_gamedata pipeline; Forgery/pynel must never read OR modify
 anything under it again. `graphics/` is off-limits too, separately -- no
@@ -496,13 +485,13 @@ by **editing the CSV directly**, using its own already-present columns
 (e.g. `ecosystem`) to derive new values, never by going back to
 `workspace/`.
 
-**First real case of this, 2026-09-11**: `zone_lighter`'s tile-noise
+**First real case of this**: `zone_lighter`'s tile-noise
 (displacement bump-map) texture lookup needs
 `pipeline/export/ecosystems/<eco>/displace` in `search_pathes` -- a path the
 legacy `directories.py`/`PropertiesExportBuildSearchPaths` never included
 (that legacy convention pointed at a `graphics/`-rooted location instead,
-now permanently out of scope). Nuno added the real `displace/` folders
-under `pipeline/export/ecosystems/<eco>/` himself (all 4 ecosystems:
+now permanently out of scope). The real `displace/` folders were added
+under `pipeline/export/ecosystems/<eco>/` (all 4 ecosystems:
 jungle, desert, lacustre, primes_racines); the CSV's `search_pathes` /
 `search_pathes_status` columns were updated directly (all 25 rows, `OK`)
 to include it, with no `directories.py` involved.

@@ -2,7 +2,7 @@
 
 Status: **implemented** (`pynel.region_export`, CLI + library).
 
-## Why this exists
+## Purpose
 
 Ryzom's named lore regions per continent (e.g. Tryker mainland: `lagoonsofloria`,
 `windsofmuse`, `bountybeaches`, `thefount`, `enchantedisle`, `libertylake`,
@@ -24,7 +24,7 @@ those files and can also produce/consume the same data as a `.lua`/`.json`
 table -- the format the real Ryzom Live client itself ships as
 `gamedev/world.lua` (used by the client's own world-map UI).
 
-## `.primitive` structure (verified 2026-09-13)
+## `.primitive` structure (verified)
 
 A `region_<continent>.primitive` file's `CPrimNode` root holds one or more
 sibling `PrimZone class="continent"` nodes side by side (not always just
@@ -63,7 +63,7 @@ Relevant properties (`pynel.ryzom_primitive.get_property()`):
 
 This is exactly the structure the real client's `world.lua` encodes
 (`game.World = { continent_x = { true, {points}, { region_y = {...}, ... } } }`)
-and the JSON form Nuno used before this module existed. Both are supported
+and a JSON form used before this module existed. Both are supported
 as output/input formats:
 
 - JSON: plain `json.dumps`/`json.loads` of the structure above -- no custom

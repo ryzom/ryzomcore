@@ -2,7 +2,7 @@
 
 Status: **implemented** (`pynel.repository_paths`, library only, no CLI).
 
-## Why this exists
+## Purpose
 
 A working Ryzom Core contributor typically has 4 git repositories checked
 out side by side: `ryzom-core`, `ryzom-data`, `ryzom-private-data`,

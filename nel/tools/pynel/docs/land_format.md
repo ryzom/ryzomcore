@@ -2,8 +2,7 @@
 
 Source of truth: `nel/include/nel/ligo/zone_region.h`,
 `nel/src/ligo/zone_region.cpp` (`CZoneRegion::serial`, `SZoneUnit::serial`,
-`SZoneUnit2::serial`). Investigated 2026-09-06 for
-`project-todos/pynel/land_pipeline.md` step 1.
+`SZoneUnit2::serial`).
 
 A `.land` is the top-level landscape composition file: a flat row-major grid
 of "bricks", each brick being one ordinary `.zone` file (see
@@ -87,8 +86,8 @@ convention as `ryzom_zone.py`'s version handling. `STRING_UNUSED` is
 exported as `pynel.ryzom_land.STRING_UNUSED` for callers checking whether a
 cell is populated.
 
-Confirmed exhaustive against the real `.land` corpus in `ryzom-data`
-(2026-09-06): 27 files found, all XML except two test/dev files never used
+Confirmed exhaustive against the real `.land` corpus in `ryzom-data`:
+27 files found, all XML except two test/dev files never used
 in-game (`jungle/testroom.land`, `jungle/sans_crevasse_matis.land`), which
 are binary and explicitly out of scope.
 

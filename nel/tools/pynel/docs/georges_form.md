@@ -69,7 +69,7 @@ The one reliable field is the `PacsRBank` ATOM (e.g. `Value="nexus.rbank"`),
 whose value with the `.rbank` suffix stripped is the identifier used
 everywhere else in Ryzom tooling (`pipeline/export/continents/<name>/`,
 `live_data_path`'s per-continent sheets, etc.) -- see
-`ryzom_continent.ContinentFile.pacs_rbank`. Cross-checked 2026-09-09 against
+`ryzom_continent.ContinentFile.pacs_rbank`. Cross-checked against
 `ryzom-data/leveldesign/workspace/continents/<name>/directories.py`'s
 `ContinentName`/`EcosystemName` (an independent, non-XML source used by the
 legacy `build_gamedata` pipeline) -- values match, confirming the mapping.

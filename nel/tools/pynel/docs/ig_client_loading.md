@@ -1,6 +1,6 @@
 # `.ig` client loading and generation
 
-How the real Ryzom client loads `.ig` (instance group) files at runtime, and where each kind is generated from. Read this before touching anything `.ig`-related in Forgery's `landscape_editor` app -- researched 2026-09-15 by reading `ryzom-core` directly (client source + `build_gamedata` pipeline scripts), not guessed.
+How the real Ryzom client loads `.ig` (instance group) files at runtime, and where each kind is generated from. Read this before touching anything `.ig`-related in Forgery's `landscape_editor` app -- based on reading `ryzom-core` directly (client source + `build_gamedata` pipeline scripts), not guessed.
 
 ## Two kinds of `.ig`, two loading mechanisms
 
@@ -27,4 +27,4 @@ Consequence: an "other" `.ig`'s filename is an external identity (referenced by 
 - **Land**: Ligo (procedural ecosystem placement, `ligo` process) optionally merged with World Editor `.primitive` flora placements via `prim_export`/`ig_add`, then `ig_elevation`, then lit per-zone by `zone_ig_lighter`.
 - **Other**: hand-built **3ds Max scenes** (`.max` files under `IgOtherSourceDirectories`, e.g. `stuff/<continent>/decors/constructions`), exported to static `.ig` via a MAXScript (`processes/ig/1_export.py` calling `ig_export.ms`) -- requires 3ds Max itself (`MaxAvailable`, Windows/Autodesk), impossible to run from this Linux pipeline. Then elevated+lit globally (not per-zone, no `.depend`) via `ig_elevation`/`ig_lighter` (`processes/ig_light/`).
 
-**Decision (Nuno, 2026-09-15)**: Forgery never reconstructs either kind from these raw sources (World Editor `.primitive` found stale on nexus; 3ds Max simply unavailable on Linux). `live_data` is the one reliable, already-generated-and-shipped reference for both kinds -- Forgery copies it as a base and edits directly on top (`project-todos/forgery/landscape_editor__ig_editing.md`), relying only on the already-proven-idempotent lighting tools (`zone_ig_lighter`/`ig_lighter`) to relight after edits, never on regenerating from source.
+Forgery never reconstructs either kind from these raw sources (World Editor `.primitive` found stale on nexus; 3ds Max simply unavailable on Linux). `live_data` is the one reliable, already-generated-and-shipped reference for both kinds -- Forgery copies it as a base and edits directly on top (`project-todos/forgery/landscape_editor__ig_editing.md`), relying only on the already-proven-idempotent lighting tools (`zone_ig_lighter`/`ig_lighter`) to relight after edits, never on regenerating from source.

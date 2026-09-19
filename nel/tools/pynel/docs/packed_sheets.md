@@ -18,8 +18,8 @@ Bind preview Mode picker ("pick an NPC's animation by its real game meaning
 instead of a flat file list") -- see `nel/tools/forgery/docs/apps/object_editor.md`'s
 own "Mode/animation" section.
 
-`world.packed_sheets`/`continent.packed_sheets`: **implemented** (2026-09-06,
-see their dedicated sections below) for Forgery's Landscape Editor project
+`world.packed_sheets`/`continent.packed_sheets`: **implemented** (see their
+dedicated sections below) for Forgery's Landscape Editor project
 (`project-todos/forgery/landscape_editor.md`'s continent selector) --
 `parse_world_packed_sheets()`/`parse_continent_packed_sheets()` in
 `ryzom_packed_sheets.py`, plus `zone_name_to_world_pos()` for decoding
@@ -32,7 +32,7 @@ zone fields are legitimately empty (`zone_name_to_world_pos()` correctly
 raises on that, by design -- callers must guard for it).
 
 `building.packed_sheets` (`CBuildingSheet`) was also investigated
-(2026-09-05) but deliberately **not implemented**: its one real field,
+but deliberately **not implemented**: its one real field,
 `BuildedIg`, is dead code -- its only caller (`CVillage::updateBuilding()`,
 `village.cpp:229`) is only ever invoked from `CVillage::initOutpost()` with
 a hardcoded `"ruins.building"` (`village.cpp:207`), never with any other
@@ -43,8 +43,7 @@ parser.
 
 ## Where the actual `.shape` comes from (NOT in `.creature`)
 
-Investigated while dumping real entries (2026-08-30) — worth recording since
-it's a natural next question and easy to get wrong:
+Worth recording since it's a natural next question and easy to get wrong:
 
 - `CAutomatonListSheet` (`automaton_list.packed_sheets`) is **not** a shape
   table — it's an animation state machine (`CAutomatonStateSheet`: per-state
@@ -127,9 +126,8 @@ This id is **not self-describing** — turning it into a readable sheet name
 (`"ge_bear_c1.creature"`) requires `sheet_id.bin`, a separate file (see
 below). Without it, entries are only identifiable by raw `(type, id)` pair.
 
-Confirmed (per user decision, 2026-08-30): **`sheet_id.bin` is in scope for
-the first version** — the module should resolve `CSheetId` to real sheet
-names, not leave raw ids.
+**`sheet_id.bin` is in scope for the first version** — the module resolves
+`CSheetId` to real sheet names, not raw ids.
 
 ## `sheet_id.bin` format (`CSheetId::loadSheetId()` in `sheet_id.cpp`)
 
@@ -137,7 +135,7 @@ No header, no magic — it's a single `serialCont` on
 `std::map<uint32, std::string>` (sheet id → full filename with extension,
 e.g. `"ge_bear_c1.creature"`), read as `sint32` count then repeated
 `(u32 key, string value)` pairs, same as any other `serialCont` map.
-Location: **not a loose file** — confirmed (2026-08-30) it ships inside
+Location: **not a loose file** — confirmed it ships inside
 `leveldesign.bnp` (e.g.
 `~/.local/share/Ryzom/ryzom_live/data/leveldesign.bnp`), read via
 `ryzom_bnp.BnpReader(path).read_file("sheet_id.bin")` (pynel already has
@@ -421,9 +419,9 @@ StaticFXs           cont<CStaticFX>   (item_fx_sheet.cpp:122):
 Extension `animset_list` -> `TypeVersion[]` entry **25** (`sheet_manager.cpp`),
 `CEntitySheet::TType` value `ANIMATION_SET_LIST` (=25 in the enum list above --
 same header/`CSheetManagerEntry` wrapper as `.creature`/`.item`, only the
-payload class differs). Investigated and implemented 2026-08-31 for "let
+payload class differs). Implemented to let
 Patina pick an NPC's animation by its real game meaning (Mode/Behaviour)
-instead of a flat file list" (Bind preview's Mode picker, see
+instead of a flat file list (Bind preview's Mode picker, see
 `nel/tools/forgery/docs/apps/object_editor.md`) -- `parse_animation_set_list_packed_sheets()`/
 `load_animation_set_list_packed_sheets()` in `ryzom_packed_sheets.py`,
 validated against real data (665 `CAnimationSetSheet` entries, no trailing
@@ -752,7 +750,7 @@ folded into `zone_name_to_world_pos()` itself -- callers (e.g. Forgery's
 continent bounding-box computation) must apply it explicitly, since it only
 makes sense for a max corner, not for every zone-name lookup.
 
-### `world_pos_to_zone_name()` -- the inverse (2026-09-10, formula corrected 2026-09-14)
+### `world_pos_to_zone_name()` -- the inverse
 
 Given a raw world position `(x, y)`, finds which 160×160 zone tile contains
 it. `getZoneNameFromXY()` itself (`ryzom-core/ryzom/tools/leveldesign/
@@ -771,8 +769,7 @@ if col not in [0, 255] or row not in [0, 255]: return None   # C++ returns "NOT 
 zone_name = f"{row}_{chr(65 + col // 26)}{chr(65 + col % 26)}"
 ```
 
-**Bug found and fixed 2026-09-14** (Nuno, chasing a Forgery `.ig` positioning
-mystery that turned out to be this): the code here originally computed
+This formula was previously wrong: the code here originally computed
 `row = floor(-y / 160.0)` instead -- NOT equivalent to `-floor(y / 160.0)`
 unless `y` is an exact multiple of 160 (`floor(-a) = -floor(a) - 1`
 whenever `a` isn't already an integer), so almost every real position (only
@@ -782,7 +779,7 @@ below turned out not to have caught this -- reverified after the fix, this
 time checked against a real zone's own true bounding box (not just
 `zone_name_to_world_pos()`'s own origin corner).
 
-Round-trip-verified against `zone_name_to_world_pos()` (2026-09-14: 888
+Round-trip-verified against `zone_name_to_world_pos()` (888
 positions spread across the whole valid grid, each 80 units in from a
 cell's own origin corner -- i.e. a real interior point, not the corner
 itself).

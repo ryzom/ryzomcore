@@ -24,7 +24,7 @@ a full Studio reimplementation (Studio's C++/Qt stack is slow to iterate on).
 (round-trip tested against synthetic data, and validated against all 8 real
 `.cmb` files found in `ryzom-data` — parses cleanly, no errors). CLI:
 `ryzom-cmb dump <file>`. This is step 1 of the intended 3-step separation for
-this whole area of work (per Nuno: keeps things flexible/incremental):
+this whole area of work (keeps things flexible/incremental):
 
 1. **pynel reads/writes the raw Ryzom file formats** (done for `.cmb`).
 2. pynel exports to another format, if/when needed.
@@ -144,8 +144,7 @@ the real `CCollisionMeshBuild::link()` edge-consistency check before writing.
   exterior mesh, at positionally-snapped vertices — that's what the engine's
   build actually keys its stitching on.
 
-**Still open, to validate when this chantier starts** (never decide
-unilaterally — confirm with Nuno first):
+**Still open, to validate when this chantier starts** (not yet decided):
 - How to derive per-room `Surface` grouping. The original Max pipeline
   overloads material-id for two unrelated things at once: "which room" and
   "the real floor material / footstep sound". For a Blender-first workflow,

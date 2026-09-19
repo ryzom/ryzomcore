@@ -5,17 +5,16 @@ truth: `nel/src/misc/config_file/cf_lexical.lpp`/`cf_gramatical.ypp` (the
 real flex/bison grammar) and `config_file.cpp` (`CConfigFile::load()`/
 `reparse()`).
 
-## Why this exists
+## Purpose
 
 `CConfigFile` is NeL's generic `.cfg` format, used across the whole engine
 -- `client.cfg` (`ryzom/client/src/network_connection.cpp`'s
 `NCConfigFile.load("client.cfg")`) and `panoply_maker.cpp`'s
-`panoply_*.cfg` both load through the exact same class. Confirmed with Nuno
-(2026-08-29) this is meant to replace ryztart's own hand-rolled `.cfg`
-parser, which doesn't cover the full format -- so unlike most of this
-port's other pieces, this module isn't panoply-specific and lives in pynel
-(no Forgery/Panda3D/numpy dependency) rather than in
-`ryzom_forgery/panoply_maker.py`.
+`panoply_*.cfg` both load through the exact same class. It replaces
+ryztart's own hand-rolled `.cfg` parser, which doesn't cover the full
+format -- so unlike most of this port's other pieces, this module isn't
+panoply-specific and lives in pynel (no Forgery/Panda3D/numpy dependency)
+rather than in `ryzom_forgery/panoply_maker.py`.
 
 ## Format
 

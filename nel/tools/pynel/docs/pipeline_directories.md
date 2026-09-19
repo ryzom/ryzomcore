@@ -1,27 +1,24 @@
 # `pipeline/` directories actually used by the Forgery-side land pipeline
 
-Nuno, 2026-09-11: "je veux aussi savoir quels sont les dossiers utiliser
-dans pipeline/ pour chaque outil, a mettre dans un doc/ a part. L'idée
-c'est de savoir s'il y a des dossier inutilisé pour cleaner les archives
-.zip. Donc tout ce qui est utile on le note" -- this lists every
-`pipeline/`-rooted directory the 6 tools we actually orchestrate
-(`land_export`, `zone_welder`, `zone_elevation`, `zone_dependencies`,
-`zone_lighter`, `zone_ig_lighter`, see `docs/zone_tools.md`) read or write,
-confirmed against each tool's real config fields (`LandExportConfig`/
-`PropertiesConfig`, `pynel.ryzom_land_tools`) and
-`continent_pipeline_reference.csv`'s own columns.
+Lists every `pipeline/`-rooted directory the 6 tools this project
+orchestrates (`land_export`, `zone_welder`, `zone_elevation`,
+`zone_dependencies`, `zone_lighter`, `zone_ig_lighter`, see
+`docs/zone_tools.md`) read or write, confirmed against each tool's real
+config fields (`LandExportConfig`/`PropertiesConfig`,
+`pynel.ryzom_land_tools`) and `continent_pipeline_reference.csv`'s own
+columns.
 
-**Scope note**: this covers only OUR 6-tool subset. A real `pipeline/
-export/<continent>/` directory has many more subfolders than listed here
-(e.g. `ai_wmap`, `rbank_*`, `shape_lightmap*`, `ig_elev_*`, `ig_static_*`,
-`ig_temp_*`, `shape_clodtex_build`, `map_tag`, `zone_lwsl_temp` --
-confirmed present under `pipeline/export/continents/nexus/` 2026-09-11) --
-those belong to OTHER steps of the full legacy build_gamedata pipeline
-(far-LOD banks, AI navigation, lightmap variants, etc.), never touched by
-this project's 6 tools. Anything not in the tables below is a candidate
-for trimming from a `pipeline/` `.zip` this project downloads, but
-confirm first whether some other part of Forgery (or a future chantier)
-needs it before deleting anything real.
+**Scope note**: this covers only this project's 6-tool subset. A real
+`pipeline/export/<continent>/` directory has many more subfolders than
+listed here (e.g. `ai_wmap`, `rbank_*`, `shape_lightmap*`, `ig_elev_*`,
+`ig_static_*`, `ig_temp_*`, `shape_clodtex_build`, `map_tag`,
+`zone_lwsl_temp` -- confirmed present under
+`pipeline/export/continents/nexus/`) -- those belong to OTHER steps of the
+full legacy build_gamedata pipeline (far-LOD banks, AI navigation, lightmap
+variants, etc.), never touched by these 6 tools. Anything not in the tables
+below is a candidate for trimming from a `pipeline/` `.zip` this project
+downloads, but confirm first whether some other part of Forgery needs it
+before deleting anything real.
 
 Per the rules in `docs/zone_tools.md` §9: `pipeline/export/` holds NeL-
 tool-generated output -- `graphics/` and `leveldesign/workspace/` are
@@ -30,9 +27,8 @@ own methodology notes). Raw/authored source data that isn't tool-generated
 output (heightmaps, tile banks, `.land`/`.continent` files) lives under
 `leveldesign/<subfolder>/<eco or continent>/` instead -- `pipeline/landscape/`
 briefly held the tile bank file and, even more briefly, the heightmaps (see
-the "Outside `pipeline/` entirely" table below) but Nuno moved both for real
-2026-09-12, so `pipeline/landscape/` is unused by this project's tools as of
-that date.
+the "Outside `pipeline/` entirely" table below), both since moved for real,
+so `pipeline/landscape/` is unused by this project's tools.
 
 ## Per-ecosystem (`pipeline/export/ecosystems/<eco>/`)
 
@@ -43,7 +39,7 @@ that date.
 | `map_export` | `search_pathes` (`MapLookupDirectories`) | same 3 | read |
 | `map_uncompressed` | `search_pathes` | same 3 | read |
 | `pacs_prim` | `search_pathes` (`PacsPrimLookupDirectories`) | same 3 | read |
-| `displace` | `search_pathes` -- added 2026-09-11 | same 3, once the `tile_bank.cpp` backslash-lookup fix lands (`docs/zone_tools.md` §2) | read |
+| `displace` | `search_pathes` | same 3, once the `tile_bank.cpp` backslash-lookup fix lands (`docs/zone_tools.md` §2) | read |
 | `smallbank/<eco>.smallbank` | `bank_name` | `zone_lighter`, `zone_ig_lighter` | read |
 | `ligo_es/zones` | `ref_zone_dir` | `land_export` | read |
 | `ligo_es/igs` | `ref_ig_dir` + `additionnal_ig_in_dir` | `land_export` | read |
@@ -81,7 +77,7 @@ that date.
 | `leveldesign/landscape/<eco>/<name>.land` | `zone_region_file` | `land_export`, `zone_elevation` (`--land`) |
 | `leveldesign/landscape/<eco>/big_<continent>.tga` | `heightmap_file1` | `land_export` (main heightmap) |
 | `leveldesign/landscape/<eco>/noise_<continent>.tga` | `heightmap_file2` | `land_export` (detail/noise heightmap) |
-| `leveldesign/landscape/<eco>/colormap_<continent>.tga` | `colormap_file` | `land_export` (optional per-vertex tile color tint, `CExport::addColorMap()`, `export.cpp:1170` -- missed in the original field survey, found 2026-09-12; `land_export` runs fine without it) |
-| `leveldesign/ecosystems/<eco>/<eco>.bank` (moved here from `pipeline/landscape/` by Nuno 2026-09-12 -- note the one folder-name exception: `primes_racines`'s `.bank` lives under a folder literally named `primes_roots`, every other ecosystem's folder matches its own identifier) | `tile_bank_file` | `land_export`, `zone_lighter` (tile-noise displacement lookup, `docs/zone_tools.md` §2) |
+| `leveldesign/landscape/<eco>/colormap_<continent>.tga` | `colormap_file` | `land_export` (optional per-vertex tile color tint, `CExport::addColorMap()`, `export.cpp:1170` -- missed in the original field survey; `land_export` runs fine without it) |
+| `leveldesign/ecosystems/<eco>/<eco>.bank` (moved here from `pipeline/landscape/` -- note the one folder-name exception: `primes_racines`'s `.bank` lives under a folder literally named `primes_roots`, every other ecosystem's folder matches its own identifier) | `tile_bank_file` | `land_export`, `zone_lighter` (tile-noise displacement lookup, `docs/zone_tools.md` §2) |
 | `leveldesign/DFN` | `level_design_dfn_directory` / `dfn_dir` | `land_export`; optionally `zone_dependencies` |
 | `leveldesign/world` | `level_design_world_directory` / `continents_dir` | `land_export`; optionally `zone_dependencies` |
