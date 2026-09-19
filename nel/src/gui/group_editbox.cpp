@@ -986,7 +986,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::writeString(const std::string &str16, bool replace, bool atEnd)
+	bool CGroupEditBox::writeString(const std::string &str16, bool replace, bool atEnd, bool allowPartial)
 	{
 		// For now, just trim unsupported codepoints to make emoji fallback to text form
 		::u32string str = trimUnsupported(CUtfStringView(str16).toUtf32());
@@ -1157,6 +1157,9 @@ namespace NLGUI
 			}
 		}
 
+		if (!allowPartial && toAdd != CUtfStringView(str16).toUtf32())
+			return false;
+
 		if (replace)
 		{
 			updateTextTags(minPos, maxPos - minPos, (uint32)toAdd.length());
@@ -1181,6 +1184,7 @@ namespace NLGUI
 				_SelectCursorPos = maxPos+(sint32)toAdd.length();
 			}
 		}
+		return true;
 	}
 
 	// ----------------------------------------------------------------------------

@@ -393,7 +393,7 @@
         <action id="equip" name="uimEquip" handler="inv_auto_equip" icon="filter_armor.tga"/>
         <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
             <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
-            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
             <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" icon="brick_default.tga"/>
@@ -409,7 +409,7 @@
     <group type="menu" id="item_menu_in_trade" extends="base_menu">
         <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
             <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
-            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
             <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_help_auto" icon="brick_default.tga"/>
@@ -424,7 +424,7 @@
         <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
         <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
             <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
-            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
             <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
@@ -444,7 +444,7 @@
         <separator />
         <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
             <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
-            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
             <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
@@ -459,7 +459,7 @@
         </action>
         <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
             <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
-            <action id="last" name="uiChatLinkLastChat" handler="link_item_in_chat" params="destination=last"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
             <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
@@ -1201,6 +1201,14 @@
     <!-- **************** -->
     <!-- *  MESSAGE BOX * -->
     <!-- **************** -->
+    <group type="modal" id="chat_link_tell" active="false" exit_click_out="true" posref="MM MR" w="260" child_resize_h="true" child_resize_hmargin="14" options="skin_modal"
+        on_active="set_keyboard_focus" on_active_params="target=ui:interface:chat_link_tell:receiver:eb|select_all=false"
+        on_deactive="chat_link_tell" on_deactive_params="cancel">
+        <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiTellCmdDest" />
+        <instance template="edit_box_widget" id="receiver" posref="TL TL" x="6" y="-24" child_resize_h="true" w="248"
+            onenter="chat_link_tell" onchange="" max_num_chars="255" entry_type="playername" max_historic="0" enter_loose_focus="false" enter_recover_focus="false" />
+        <instance template="button_ok_cancel" posparent="receiver" posref="BR TR" onclick_ok="chat_link_tell" onclick_cancel="leave_modal" />
+    </group>
     <!-- Simple Message Box with just a OK button -->
     <group type="modal" id="message_box" exit_click_out="true" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="46" on_enter="leave_modal" options="skin_modal">
         <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up" />
