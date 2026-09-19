@@ -25,6 +25,7 @@
 #include "inventory_manager.h"
 #include "people_interraction.h"
 #include "sphrase_manager.h"
+#include "../client_chat_manager.h"
 #include "../sheet_manager.h"
 #include "../string_manager_client.h"
 
@@ -39,6 +40,8 @@
 
 using namespace NLGUI;
 using namespace NLMISC;
+
+extern CClientChatManager ChatMngr;
 
 namespace CHAT_SHARE
 {
@@ -60,6 +63,7 @@ namespace CHAT_SHARE
 		CDBCtrlSheet *LinkedPhraseSheet = NULL;
 		CSmartPtr<CSPhraseComAdpater> LinkedPhraseTooltip;
 		const CChatMessageRequest *CurrentRequest = NULL;
+		CChatMessageRequest PendingTell;
 
 		enum TParseResult
 		{
@@ -73,28 +77,30 @@ namespace CHAT_SHARE
 			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiChatLinkDoesNotFit"));
 		}
 
-		CGroupEditBox *chatInputFromControl(CCtrlBase *control)
+		class CHandlerChatLinkTell : public IActionHandler
 		{
-			CGroupEditBox *editBox = dynamic_cast<CGroupEditBox*>(control);
-			return isChatInput(editBox) ? editBox : NULL;
-		}
-
-		CGroupEditBox *targetChatInput(const std::string &destination)
-		{
-			if (destination == "main")
-				return PeopleInterraction.ChatGroup.Window ?
-					PeopleInterraction.ChatGroup.Window->getEditBox() : NULL;
-			if (destination != "last")
-				return NULL;
-
-			CWidgetManager *widgets = CWidgetManager::getInstance();
-			CGroupEditBox *editBox = chatInputFromControl(widgets->getCaptureKeyboard());
-			if (!editBox)
-				editBox = chatInputFromControl(widgets->getOldCaptureKeyboard());
-			if (!editBox && PeopleInterraction.ChatGroup.Window)
-				editBox = PeopleInterraction.ChatGroup.Window->getEditBox();
-			return editBox;
-		}
+		public:
+			virtual void execute(CCtrlBase * /* caller */, const std::string &params)
+			{
+				if (params == "cancel")
+				{
+					PendingTell.Text.clear();
+					PendingTell.References.clear();
+					return;
+				}
+				CWidgetManager *widgets = CWidgetManager::getInstance();
+				CInterfaceGroup *dialog = dynamic_cast<CInterfaceGroup*>(
+					widgets->getElementFromId("ui:interface:chat_link_tell"));
+				if (!dialog || widgets->getModalWindow() != dialog || !PendingTell.isValid())
+					return;
+				CGroupEditBox *receiver = dynamic_cast<CGroupEditBox*>(dialog->getGroup("receiver:eb"));
+				if (!receiver || receiver->getInputString().empty())
+					return;
+				ChatMngr.tell(receiver->getInputString(), PendingTell);
+				widgets->disableModalWindow();
+			}
+		};
+		REGISTER_ACTION_HANDLER(CHandlerChatLinkTell, "chat_link_tell");
 
 		bool buildRawRequest(const CGroupEditBox *editBox, CChatMessageRequest &request)
 		{
@@ -497,7 +503,34 @@ namespace CHAT_SHARE
 			return CGroupEditBox::copyToClipboard(title, textTags) ? ShareOk : ShareUnavailable;
 		}
 
-		CGroupEditBox *editBox = targetChatInput(destination);
+		if (destination == "tell")
+		{
+			CChatMessageRequest request;
+			request.Text = CUtfStringView(title).toUtf16();
+			if (request.Text.size() > CHAT_MESSAGE::MaxTextLength)
+				return ShareInputFull;
+			CChatMessageReference reference;
+			reference.Length = (uint16)request.Text.size();
+			reference.Type = type;
+			reference.Value = value;
+			request.References.push_back(reference);
+
+			CWidgetManager *widgets = CWidgetManager::getInstance();
+			CInterfaceGroup *dialog = dynamic_cast<CInterfaceGroup*>(
+				widgets->getElementFromId("ui:interface:chat_link_tell"));
+			CGroupEditBox *receiver = dialog ? dynamic_cast<CGroupEditBox*>(dialog->getGroup("receiver:eb")) : NULL;
+			if (!receiver)
+				return ShareUnavailable;
+			receiver->setInputString(std::string());
+			widgets->enableModalWindow(NULL, dialog);
+			PendingTell = request;
+			return ShareOk;
+		}
+
+		if (destination != "main")
+			return ShareUnavailable;
+		CGroupEditBox *editBox = PeopleInterraction.ChatGroup.Window ?
+			PeopleInterraction.ChatGroup.Window->getEditBox() : NULL;
 		if (!editBox)
 			return ShareUnavailable;
 		if (editBox->getTextTags().size() >= CHAT_MESSAGE::MaxReferences)
@@ -523,7 +556,8 @@ namespace CHAT_SHARE
 		editBox->setFocusOnText();
 		editBox->setCursorPos(cursor);
 		CGroupEditBox::setSelectCursorPos(cursor);
-		editBox->writeString(CUtfStringView(insertion).toUtf8(), true, false);
+		if (!editBox->writeString(CUtfStringView(insertion).toUtf8(), true, false, false))
+			return ShareInputFull;
 		editBox->addTextTag(titleStart, (uint32)title.size(), (uint32)type, value, color);
 		const sint32 newCursor = cursor + (sint32)insertion.size();
 		editBox->setCursorPos(newCursor);
@@ -622,6 +656,8 @@ namespace CHAT_SHARE
 
 	void releasePreviewSheets()
 	{
+		PendingTell.Text.clear();
+		PendingTell.References.clear();
 		for (std::map<uint, CDBCtrlSheet*>::iterator it = LinkedItemSheets.begin(); it != LinkedItemSheets.end(); ++it)
 		{
 			getInventory().removeItemLinkInfo(getInventory().getItemSlotId(it->second));
