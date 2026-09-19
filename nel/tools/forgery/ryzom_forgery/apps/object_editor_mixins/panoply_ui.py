@@ -1,12 +1,13 @@
 """ObjectEditorApp mixin: the Panoply integration -- global axis-picker
 section (skin/user/hair/eyes), live-preview texture resolution/freshness
 tracking, mask creation, and the real offline bake (single texture / whole
-shape) with its progress popup. Split out of object_editor.py, see the
+shape), which reports its progress through the shared status bar task queue
+(sysinfo.py). Split out of object_editor.py, see the
 "Split object_editor.py into theme files" chantier in
 project-todos/ryzom-core/forgery-object-editor.md.
 
-Imports from object_editor_mixins.ui_helpers, NOT from object_editor.py
-itself -- see ui_helpers.py's module docstring for why.
+Imports from ui.widgets, NOT from object_editor.py
+itself -- see ui/widgets.py's module docstring for why.
 """
 
 import shutil
@@ -22,11 +23,10 @@ from pynel import repository_paths
 from ryzom_forgery import dds_export, panoply, panoply_bake, panoply_colorize, panoply_config, panoply_live
 from ryzom_forgery import panoply_texture
 from ryzom_forgery import settings as app_settings
-from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.shape_geometry import load_panda_texture, resolve_texture_ref
 from ryzom_forgery.ui.widgets import _icon_button
 
-_BAKE_PROGRESS_POPUP_ID = "Baking Panoply variants"
+_BAKE_TASK_ID = "panoply_bake"
 
 
 class PanoplyUIMixin:
@@ -600,47 +600,31 @@ class PanoplyUIMixin:
 		self._save_status = f"Baked {total_written} variant(s) across {len(texture_names)} texture(s) to tex/ + build/"
 		print(f"[object_editor] {self._save_status}")
 
-	def _draw_bake_progress_popup(self):
-		"""Modal, opened/kept open for the whole lifetime of a background
-		bake (see _start_panoply_bake()) -- shows the current texture/
-		variant being baked and an overall progress bar, closes itself once
-		done (or on error, after the user acknowledges it). Read-only view
-		of self._bake_progress, which the background thread updates -- no
-		imgui calls happen on that thread, only here on the main one."""
+	def _update_bake_progress_bar(self):
+		"""Call every frame (see object_editor.py's draw_panel()) -- reports
+		the current bake (see _start_panoply_bake()) to the shared status
+		bar task queue (sysinfo.py, project-todos/forgery/
+		unified_background_task_status_bar.md) instead of a dedicated modal
+		popup: nothing this bake writes (workspace tex/build/) is ever also
+		currently displayed elsewhere, so there was never a real reason to
+		block the rest of the app while it runs. Read-only view of
+		self._bake_progress, which the background thread updates -- no
+		imgui/sysinfo calls happen on that thread, only here on the main
+		one. Errors already surface through self._save_status (set directly
+		by _run_panoply_bake()/_bake_panoply_real(), not this method)."""
 		progress = self._bake_progress
 		if progress is None:
 			return
-		if not imgui.is_popup_open(_BAKE_PROGRESS_POPUP_ID):
-			imgui.open_popup(_BAKE_PROGRESS_POPUP_ID)
-		center_next_popup()
-		flags = imgui.WindowFlags_.always_auto_resize.value
-		opened, _ = imgui.begin_popup_modal(_BAKE_PROGRESS_POPUP_ID, None, flags)
-		if not opened:
+		if progress["done"]:
+			self.sysinfo.clear_task(_BAKE_TASK_ID)
+			self._bake_progress = None
 			return
-
-		if progress["error"] is not None:
-			imgui.text_colored((1.0, 0.4, 0.4, 1.0), f"Bake failed: {progress['error']}")
-			if imgui.button("OK"):
-				self._bake_progress = None
-				imgui.close_current_popup()
-			imgui.end_popup()
-			return
-
-		imgui.text(f"Texture {progress['texture_index'] + 1}/{progress['texture_total']}: {progress['texture_name']}")
-		if progress["variant_total"]:
-			imgui.text(f"Variant {progress['variant_index'] + 1}/{progress['variant_total']}: {progress['variant_suffix']}")
-		else:
-			imgui.text("Variant: (starting...)")
 		texture_total = max(progress["texture_total"], 1)
 		texture_fraction = progress["texture_index"] / texture_total
 		variant_fraction = ((progress["variant_index"] + 1) / progress["variant_total"] / texture_total
 		                     if progress["variant_total"] else 0.0)
-		imgui.progress_bar(min(1.0, texture_fraction + variant_fraction), (300, 0))
-		if progress["done"]:
-			if imgui.button("OK"):
-				self._bake_progress = None
-				imgui.close_current_popup()
-		imgui.end_popup()
+		label = f"Baking Panoply: {progress['texture_name']} ({progress['texture_index'] + 1}/{progress['texture_total']})"
+		self.sysinfo.report_task(_BAKE_TASK_ID, label, min(1.0, texture_fraction + variant_fraction))
 
 	def _draw_panoply_masks_for(self, base_texture_name):
 		"""Below a material's own texture row: thumbnails of whichever
