@@ -109,7 +109,7 @@ build_cmake_dep()
 		-DZLIB_INCLUDE_DIR="${EXTERNAL_PATH}/include" \
 		-DZLIB_LIBRARY="${EXTERNAL_PATH}/lib/libz.a" \
 		-DCMAKE_C_FLAGS="-I${EXTERNAL_PATH}/include" \
-		-DCMAKE_CXX_FLAGS="-I${EXTERNAL_PATH}/include" \
+		-DCMAKE_CXX_FLAGS="-I${EXTERNAL_PATH}/include -stdlib=libc++" \
 		-DBUILD_SHARED_LIBS=OFF \
 		"$@"
 	cmake --build "$build_dir" -j"${JOBS}"
@@ -270,6 +270,7 @@ if ! is_built luabind; then
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 		-DCMAKE_OSX_ARCHITECTURES="${OSX_ARCHITECTURES}" \
+		-DCMAKE_CXX_FLAGS="-stdlib=libc++" \
 		-DBoost_INCLUDE_DIR="${EXTERNAL_PATH}/include" \
 		-DLUA_INCLUDE_DIR="${EXTERNAL_PATH}/include" \
 		-DLUA_LIBRARIES="${EXTERNAL_PATH}/lib/liblua.a"
@@ -407,7 +408,7 @@ if ! is_built breakpad; then
 		fi
 		(
 			cd "${BUILD_TMP}/breakpad-${arch}"
-			CFLAGS="-arch ${arch}" CXXFLAGS="-arch ${arch}" LDFLAGS="-arch ${arch}" \
+			CFLAGS="-arch ${arch}" CXXFLAGS="-arch ${arch} -stdlib=libc++" LDFLAGS="-arch ${arch} -stdlib=libc++" \
 				./configure --prefix="${BUILD_TMP}/breakpad-install-${arch}" "${configure_host_flags[@]}"
 			make -j"${JOBS}"
 			make install
