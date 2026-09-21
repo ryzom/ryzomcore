@@ -1114,14 +1114,22 @@ function SearchCommand:search(uiId)
 				return 0
 			end
 			
-			self.command_self=self.command_parameter_list[1]
-			
 			--the token being completed is the one under the caret, which is not
 			--necessarily the last one: the player may have gone back to edit an
 			--earlier word
 			local cursor_pos = SearchCommand:get_input_cursor(uiId)
 			local cursor_token, on_empty_slot = SearchCommand:get_cursor_token(self.command_token_list, cursor_pos)
 			self.cursor_on_empty_slot = on_empty_slot
+			
+			--With the caret on an empty command slot there is no command on this
+			--line yet: the first token is whatever stands behind the gap. Reading it
+			--as the command searched for a command by the name of an argument, found
+			--none and left the player with no list at all.
+			if(on_empty_slot and cursor_token == 1)then
+				self.command_self=""
+			else
+				self.command_self=self.command_parameter_list[1]
+			end
 			
 			--update process_status
 			SearchCommand:update_process_list(uiId,cursor_token)
@@ -1190,7 +1198,10 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
 		local command_display = 0
 		
 		if(caret_slot <= 1)then
-			if(command_input == "a" or command_input == "b" or command_input == "c")then
+			--"" is the still empty command slot, where everything that may stand in
+			--slot 1 is a candidate -- the a/b/c prefixes included. Without them the
+			--player could not put back a prefix they had just deleted.
+			if(command_input == "" or command_input == "a" or command_input == "b" or command_input == "c")then
 				if(self.commands_list[c][1] == "client" or self.commands_list[c][1] == "emotes" or self.commands_list[c][4] == "a" or self.commands_list[c][4] == "b" or self.commands_list[c][4] == "c")then
 					command_display = 1
 				else
@@ -1442,6 +1453,18 @@ function SearchCommand:search_build_command_list(uiId,command,show_argument_help
 	end
 end
 
+--The a/b/c prefixes carry the real command of the line in the next token. Which
+--token that is does not depend on where the caret sits, so read it by position --
+--except when the caret sits on the still empty slot that sub-command belongs in.
+--An empty slot owns no entry in the token list, so at that index stands the token
+--behind the gap, which is not the sub-command.
+function SearchCommand:read_sub_command(slot,uiId)
+	if(self.cursor_on_empty_slot and SearchCommand:read_process_status(uiId) <= slot)then
+		return nil
+	end
+	return self.command_parameter_list[slot]
+end
+
 function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 	--debug("search_build_argument_list")
 	local argument_help=""
@@ -1453,28 +1476,33 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 	
 	command_to_show_argument_new = command_to_show_argument
 	
-	--Same caret rule as find_argument: only look past the prefix once the caret
-	--has actually moved past the sub-command slot.
+	--This help describes the command the whole line runs, so it must not follow
+	--the caret: going back into "/a" or into "Position" of "/a Position Riasgin"
+	--used to fall back on "a", counted the words behind the caret as arguments of
+	--"/a" and hung a wrong-argument warning on a line that was perfectly fine.
 	local caret_slot = SearchCommand:read_process_status(uiId)
+	local sub_command_slot = 0
+	local sub_command_found = false
+	local sub_command_unknown = false
 	
-	if(command_to_show_argument == "a")then
-		if(caret_slot > 2)then
-			command_to_show_argument_new=self.command_parameter_list[2]
-			special_offset=1
-		end
+	if(command_to_show_argument == "a" or command_to_show_argument == "b")then
+		sub_command_slot = 2
+	elseif(command_to_show_argument == "c")then
+		sub_command_slot = 3
 	end
 	
-	if(command_to_show_argument == "b")then
-		if(caret_slot > 2)then
-			command_to_show_argument_new=self.command_parameter_list[2]
-			special_offset=1
-		end
-	end
-	
-	if(command_to_show_argument == "c")then
-		if(caret_slot > 3)then
-			command_to_show_argument_new=self.command_parameter_list[3]
-			special_offset=2
+	if(sub_command_slot ~= 0)then
+		local sub_command = SearchCommand:read_sub_command(sub_command_slot,uiId)
+		if(sub_command ~= nil)then
+			if(SearchCommand:get_command_type(sub_command) == "")then
+				--half typed or simply not a command, so the words after it cannot be
+				--read as its arguments either
+				sub_command_unknown = true
+			else
+				command_to_show_argument_new=sub_command
+				special_offset=sub_command_slot - 1
+				sub_command_found = true
+			end
 		end
 	end
 	
@@ -1547,6 +1575,13 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 			end
 		end
 		
+		--Nothing known stands behind the prefix yet, so describe the prefix itself:
+		--leave its placeholder standing instead of echoing the half typed word back
+		--as an argument or counting it as one too many.
+		if(sub_command_unknown)then
+			current_args = 0
+		end
+		
 		for ac = 1, max_arguments do
 			if(ac > current_args)then
 				for pc = 1, #self.commands_list[command_index][5+ac] do
@@ -1583,14 +1618,13 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 			argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
 		end
 		
-		--Echo only the prefix the caret has actually moved past. Keyed on the
-		--caret slot, not the token count, so an empty slot does not echo the token
-		--that follows it.
-		if(self.command_self == "a" and caret_slot > 2)then
+		--Echo the prefix and its sub-command, under the same rule that picked the
+		--command above: without a sub-command there is none to echo yet.
+		if(self.command_self == "a" and sub_command_found)then
 			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
-		elseif(self.command_self == "b" and caret_slot > 2)then
+		elseif(self.command_self == "b" and sub_command_found)then
 			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2]..""..argument_help)
-		elseif(self.command_self == "c" and caret_slot > 3)then
+		elseif(self.command_self == "c" and sub_command_found)then
 			SearchCommand:write_command_help(uiId,"/"..self.command_parameter_list[1].." "..self.command_parameter_list[2].." "..self.command_parameter_list[3]..""..argument_help)
 		else
 			SearchCommand:write_command_help(uiId,"/"..self.commands_list[command_index][4]..""..argument_help)
@@ -1721,6 +1755,11 @@ function SearchCommand:build_command_helper(uiId)
 	
 	if(process_status == 1)then
 		--initlial command
+		--an empty command slot is the same situation as a line holding nothing but
+		--the "/", so say what belongs there instead of leaving the help blank
+		if(self.cursor_on_empty_slot)then
+			SearchCommand:write_command_help(uiId,i18n.get("uiSearchCommandInitDialog"):toUtf8())
+		end
 		SearchCommand:search_build_command_list(uiId,self.command_self,true)
 		self.player_list_already_filled=0
 	else
@@ -2063,6 +2102,10 @@ function SearchCommand:finish_commands(command_name,uiId)
 	end
 	
 	local completed = head..insert_text..trailing
+	--Picking the entry the slot already holds leaves the line as it is, so the
+	--search() below would build the very same list and the popup would come right
+	--back: the entry looked dead, as if it could not be clicked at all.
+	local line_unchanged = (completed..tail == input_text)
 	input_search_string.input_string = completed..tail
 	--setFocusOnText() drops the caret at the end of the line, so put it back
 	--behind what we inserted afterwards, never before
@@ -2070,6 +2113,11 @@ function SearchCommand:finish_commands(command_name,uiId)
 	input_search_string.cursor_pos = string.len(completed)
 	SearchCommand:close_modal(uiId)
 	SearchCommand:search(uiId)
+	
+	--the help text search() just wrote stays, only the list goes
+	if(line_unchanged)then
+		SearchCommand:close_modal(uiId)
+	end
 end
 
 --##############Pars now all Emotes and add it to command table
@@ -2077,4 +2125,4 @@ SearchCommand:pars_all_emotes()
 --##############END Pars now all Emotes and add it to command table
 
 -- VERSION --
-FILE_SEARCH_COMMAND_VERSION = 125
+FILE_SEARCH_COMMAND_VERSION = 126
