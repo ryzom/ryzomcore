@@ -2108,20 +2108,30 @@ function SearchCommand:finish_commands(command_name,uiId)
 	end
 	
 	local completed = head..insert_text..trailing
-	--Picking the entry the slot already holds leaves the line as it is, so the
-	--search() below would build the very same list and the popup would come right
-	--back: the entry looked dead, as if it could not be clicked at all.
 	local line_unchanged = (completed..tail == input_text)
+	
+	--Where the caret ends up. Behind what was just inserted -- but when the line
+	--goes on with a space, step into the slot behind it, the way the trailing
+	--space above opens the next slot at the end of a line. Accepting an entry
+	--that a slot already held would otherwise move nothing at all: the same list
+	--came straight back and the entry looked dead, whether it was clicked, tabbed
+	--or picked by its number.
+	local caret_after = string.len(completed)
+	if(trailing == "" and string.sub(tail, 1, 1) == " ")then
+		caret_after = caret_after + 1
+	end
+	
 	input_search_string.input_string = completed..tail
 	--setFocusOnText() drops the caret at the end of the line, so put it back
 	--behind what we inserted afterwards, never before
 	input_search_string:setFocusOnText()
-	input_search_string.cursor_pos = string.len(completed)
+	input_search_string.cursor_pos = caret_after
 	SearchCommand:close_modal(uiId)
 	SearchCommand:search(uiId)
 	
-	--the help text search() just wrote stays, only the list goes
-	if(line_unchanged)then
+	--Neither the line nor the caret moved, so search() has just rebuilt the very
+	--same list. The player has chosen; leave it closed and keep the help text.
+	if(line_unchanged and caret_after == caret_pos)then
 		SearchCommand:close_modal(uiId)
 	end
 end
@@ -2131,4 +2141,4 @@ SearchCommand:pars_all_emotes()
 --##############END Pars now all Emotes and add it to command table
 
 -- VERSION --
-FILE_SEARCH_COMMAND_VERSION = 127
+FILE_SEARCH_COMMAND_VERSION = 128
