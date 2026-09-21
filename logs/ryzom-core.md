@@ -1,5 +1,31 @@
 # ryzom-core
 
+## 2026-09-16 — ✨ Add smoothing angle property to material
+
+Added `CMaterial::_SmoothingAngle` (float, sentinel `-1.0` = never set) on
+branch `feature/shape-smoothing-property`, purely as tool metadata for Ryzom
+Forgery ("Patina") to store and retrieve the per-material normal-smoothing
+angle the user set, directly inside the `.shape` itself, without an external
+sidecar. Never read by rendering, which still relies solely on the
+already-baked normals (`VertexBuffer.channels["Normal"]`).
+
+`CMaterial::serial()` bumped from `serialVersion(9)` to `serialVersion(10)`,
+serializing `_SmoothingAngle` only for `ver >= 10` (defaulting to `-1.0`
+otherwise), following the same per-version branching pattern already used for
+every other field added since version 2. A client older than version 10
+refuses to load a `.shape` written with this new field (`ENewerStream`,
+`_ThrowOnNewer` defaults to `true`) rather than silently corrupting it --
+client/server rollout is handled entirely by Nuno.
+
+Validated with a standalone round-trip test (`test_smoothing_angle.cpp`,
+`CMemStream`, built via `ryzom-docker/build.sh tools`): default material ->
+`getSmoothingAngle() == -1.0f`; round-trip of `42.5f` -> exact value
+recovered. Test file and its temporary CMake target were removed after
+validation, never committed. Required by
+`project-todos/pynel/material_smoothing_angle_field.md` (Python mirror) and,
+through it, `project-todos/forgery/smooth_normals.md` (Patina's per-material
+Smoothing UI), both closed the same day this was validated end-to-end.
+
 ## 2026-09-09 — 🐛 Fix ryzom_export dragging in MFC on Windows
 
 Building the NeL/Ryzom tools for Windows (`ryzom-docker`'s new `tools_win64` target) failed on `ryzom_export` with `fatal error C1083: Cannot open include file: 'afxwin.h'`. Its `master/easy_cfg.cpp`/`ContinentCfg.cpp` sources (added to the target by the previous `land_export` port above) are genuinely platform-independent, but on Windows they still `#include "stdafx.h"`, which resolves to `master/StdAfx.h` — the 3ds Max plugin's own precompiled header, which unconditionally pulls in `afxwin.h`/`afxext.h`/etc. unless `_CONSOLE` is defined (the standard MFC escape hatch for non-MFC targets sharing that file). `ryzom_export` never defined it.
