@@ -12,7 +12,9 @@ from pynel.ryzom_bnp import BnpReader, BnpError
 
 from . import settings as app_settings
 from .commands import CommandRegistry
-from .ui.colors import pastel_color_for
+from .ui.box import Box, STRETCH
+from .ui.box_panel import (
+	DEFAULT_WIDGET_MARGIN, ComboWidget, IconButtonWidget, SeparatorWidget, TextInputWidget, TreeListWidget, Widget)
 
 BNP_EXTENSIONS = (".bnp", ".bnpe")
 DEFAULT_FILTER = "*"
@@ -41,21 +43,6 @@ _MAX_CONCURRENT_THUMBNAIL_DECODES = 4
 _MAX_VISIBLE_PATH_SUGGESTIONS = 8  # box scrolls instead of growing past this many rows
 _FAVORITE_STAR_COLOR = (1.0, 0.8, 0.0, 1.0)
 _NON_FAVORITE_STAR_COLOR = (0.5, 0.5, 0.5, 1.0)
-
-
-def _icon_button(icon, tooltip, color=None):
-	"""An icon-only button (Font Awesome glyph, see ryzom_forgery.app's
-	_load_icon_font) with a hover tooltip, since an icon alone isn't always
-	self-explanatory. Tinted a deterministic pastel color (see ui/colors.py)
-	unless `color` is given -- needed by _draw_favorites()'s star, whose
-	gold/gray already means something (favorited or not), which a pastel
-	tint would otherwise silently override."""
-	imgui.push_style_color(imgui.Col_.text.value, color if color is not None else pastel_color_for(icon))
-	clicked = imgui.button(icon)
-	imgui.pop_style_color()
-	if imgui.is_item_hovered():
-		imgui.set_tooltip(tooltip)
-	return clicked
 
 
 @dataclass
@@ -106,6 +93,7 @@ class Explorer:
 		self._path_suggestions: list[Path] = []  # this frame's folder-name autocomplete candidates
 		self._path_suggestion_index = -1  # keyboard-highlighted suggestion, -1 = none
 		self._focus_path_input = False  # consumed once, right before the next input_text("##path", ...) call
+		self._path_input_active = False  # set by _PathInputWidget, read by _draw_path_suggestions_rows (same frame, drawn right after)
 
 		self._current_bnp: Optional[Path] = None  # set while browsing a .bnp's flat entry list; None = browsing self.root
 		self._show_hidden = False  # dotfiles/dotfolders, toggled via the list's right-click context menu
@@ -165,6 +153,47 @@ class Explorer:
 		# builds them in a stable, deliberate category order).
 		self.virtual_categories_source = None
 
+		# Persistent AutoHeightWidget instances (build_content_box()) --
+		# unlike every other node in that tree (rebuilt fresh each frame,
+		# same as sysinfo.py's own build_content_box()), these specifically
+		# must survive across frames: an AutoHeightWidget's `v` is measured
+		# THIS frame but only consumed by the layout computation of the
+		# NEXT one (same one-frame lag Panel.resizable already accepts) --
+		# a fresh instance every frame would reset `v` to 0 every time,
+		# collapsing its reserved slot and overlapping whatever's drawn
+		# below it. Kept as separate instances (not one Separator reused at
+		# every position) purely for readability -- reusing the same object
+		# at several tree positions in one frame would work too (Box.layout()
+		# fully completes, side effects included, before it's touched
+		# again), but reads as a stamp rather than a Box.
+		# TreeListWidget (auto_height=True, no_scrollbar): reserved space
+		# grows to fit the whole pinned-folders/virtual-categories tree
+		# rather than scrolling -- matches the old draw()'s behavior (no
+		# internal scroll, the rest of the panel just shifts down), and
+		# confines every row's right edge to this widget's own allotted
+		# width, unlike a bare flow-drawn tree (Nuno 2026-09-20: found via
+		# .test_tree_list_widget.py -- the free-flow version didn't respect
+		# the panel's own right padding, a properly `begin_child`-confined
+		# one does, same as _ExplorerListWidget already did).
+		self._wexplorer_widget = TreeListWidget(
+			self._draw_wexplorer_rows, "##wexplorer",
+			extra_window_flags=imgui.WindowFlags_.no_scrollbar.value, auto_height=True, dock="top")
+		# Suggestions dropdown below the path input -- capped at
+		# _MAX_VISIBLE_PATH_SUGGESTIONS rows (max_height, recomputed each
+		# frame in build_content_box() since it depends on the current
+		# font/DPI scale), scrolling (extra_window_flags has NO
+		# no_scrollbar, unlike Wexplorer above) past that instead of
+		# growing forever. Only added to build_content_box()'s tree while
+		# self._path_suggestions is non-empty.
+		self._path_suggestions_widget = TreeListWidget(
+			self._draw_path_suggestions_rows, "##path-suggestions",
+			child_flags=imgui.ChildFlags_.borders.value, child_bg_color=(0.15, 0.15, 0.15, 1.0),
+			auto_height=True, dock="top")
+		self._header_separator = SeparatorWidget(dock="top")
+		self._toolbar_separator = SeparatorWidget(dock="top")
+		self._filter_separator = SeparatorWidget(dock="top")
+		self._list_separator = SeparatorWidget(dock="top")
+
 	def selected_items(self) -> list:
 		return list(self._selection.values())
 
@@ -187,7 +216,12 @@ class Explorer:
 		self._current_bnp = None
 		self._selection.clear()
 
-	def _draw_path_bar(self):
+	def _draw_path_input(self, w):
+		"""Content of the path input row (_PathInputWidget, fixed-height,
+		build_content_box()) -- explicit `imgui.set_next_item_width(w)`
+		instead of the old `-1` (fill the enclosing window) fixes the same
+		class of right-edge padding bug TreeListWidget fixes for Wexplorer
+		(Nuno 2026-09-20)."""
 		# _path_input is the text being edited; resynced from self.root
 		# whenever something else changed it (favorites, "..", autocomplete
 		# pick) rather than every frame, so mid-edit keystrokes aren't clobbered.
@@ -200,18 +234,18 @@ class Explorer:
 			imgui.set_keyboard_focus_here()
 			self._focus_path_input = False
 
-		imgui.set_next_item_width(-1)
+		imgui.set_next_item_width(w)
 		flags = imgui.InputTextFlags_.enter_returns_true.value
 		submitted, new_text = imgui.input_text("##path", self._path_input, flags)
 		if new_text != self._path_input:
 			self._path_suggestion_index = -1
 		self._path_input = new_text
 
-		input_active = imgui.is_item_active()
-		if input_active:
+		self._path_input_active = imgui.is_item_active()
+		if self._path_input_active:
 			self._path_suggestions = self._compute_path_suggestions()
 
-		if input_active and self._path_suggestions:
+		if self._path_input_active and self._path_suggestions:
 			if imgui.is_key_pressed(imgui.Key.down_arrow):
 				self._path_suggestion_index = min(self._path_suggestion_index + 1, len(self._path_suggestions) - 1)
 			elif imgui.is_key_pressed(imgui.Key.up_arrow):
@@ -223,18 +257,11 @@ class Explorer:
 			else:
 				self._try_navigate_to(self._path_input)
 
-		# Whether to keep showing the box this frame can't just be
-		# `input_active`: clicking a suggestion below moves focus off the
-		# input on that very click, before the click itself is delivered to
-		# the Selectable, which closed the box out from under the click and
-		# ate it. Keeping the box open as long as it's hovered/focused too
-		# (a plain geometric/z-order check, unaffected by that focus race)
-		# lets the click land normally, like any other Selectable elsewhere.
-		box_interacted = False
-		if self._path_suggestions:
-			box_interacted = self._draw_path_suggestions_popup()
-		if not input_active and not box_interacted:
-			self._path_suggestions = []
+		# If no suggestions are left this frame, _draw_path_suggestions_rows()
+		# won't run at all (build_content_box() only adds that widget while
+		# self._path_suggestions is non-empty) -- so it can't do its own
+		# "clear if neither side is interacted" check in that case, but
+		# there's nothing left to clear either.
 
 	def _try_navigate_to(self, text: str):
 		candidate = Path(text).expanduser()
@@ -281,31 +308,32 @@ class Explorer:
 			return []
 		return candidates
 
-	def _draw_path_suggestions_popup(self) -> bool:
-		"""Bordered box right under the path bar, in the normal layout flow
-		(a freestanding overlay window was tried first, but clicking inside
-		it never registered -- moving focus off the path input mid-click
-		seemingly broke selectable hit-testing for that same click). Returns
-		whether the box is currently hovered/focused, so the caller can keep
-		it open across that same click despite the input having lost focus."""
-		style = imgui.get_style()
-		visible_rows = min(len(self._path_suggestions), _MAX_VISIBLE_PATH_SUGGESTIONS)
-		# A little extra beyond the exact line-height sum -- without it, the
-		# child's own content region came out a couple pixels short of what
-		# it actually needed, permanently showing a scrollbar even when all
-		# rows already fit.
-		height = imgui.get_text_line_height_with_spacing() * visible_rows + style.window_padding.y * 2 + 4
-		imgui.push_style_color(imgui.Col_.child_bg.value, (0.15, 0.15, 0.15, 1.0))
-		with imgui_ctx.begin_child(
-				"##path-suggestions", size=(0, height),
-				child_flags=imgui.ChildFlags_.borders.value):
-			interacted = imgui.is_window_hovered() or imgui.is_window_focused()
-			for i, candidate in enumerate(self._path_suggestions):
-				clicked, _ = imgui.selectable(candidate.name, i == self._path_suggestion_index)
-				if clicked:
-					self._select_suggestion(candidate)
-		imgui.pop_style_color()
-		return interacted
+	def _draw_path_suggestions_rows(self, w):
+		"""Content of self._path_suggestions_widget (TreeListWidget,
+		build_content_box(), only added to the tree while
+		self._path_suggestions is non-empty) -- a freestanding overlay
+		window (a real ImGui popup) was tried first for this box, but
+		clicking inside it never registered (moving focus off the path
+		input mid-click seemingly broke selectable hit-testing for that
+		same click), hence a confined child window in the normal layout
+		flow instead. Does its own "keep showing while hovered/focused,
+		even though the input itself lost focus on this same click" check
+		here, since it's the only place with access to both `_path_input_
+		active` (set moments earlier this same frame by _draw_path_input())
+		and this box's own interaction state."""
+		interacted = imgui.is_window_hovered() or imgui.is_window_focused()
+		for i, candidate in enumerate(self._path_suggestions):
+			clicked, _ = imgui.selectable(candidate.name, i == self._path_suggestion_index)
+			if clicked:
+				self._select_suggestion(candidate)
+		if not self._path_input_active and not interacted:
+			self._path_suggestions = []
+
+	def _draw_wexplorer_rows(self, w):
+		"""`draw_rows` callback for `self._wexplorer_widget` (TreeListWidget,
+		build_content_box())."""
+		self._draw_pinned_folders()
+		self._draw_pinned_virtual_categories()
 
 	def _draw_pinned_folders(self):
 		for label, path in self.pinned_folders:
@@ -378,27 +406,21 @@ class Explorer:
 			else:
 				self._draw_leaf(ExplorerItem(path=entry, name=entry.name), show_thumbnail=True)
 
-	def _draw_favorites(self):
-		is_favorite = str(self.root) in self._favorites
-		tooltip = "Remove current folder from favorites" if is_favorite else "Add current folder to favorites"
-		star_color = _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR
-		if _icon_button(fa_icons.ICON_FA_STAR, tooltip, color=star_color):
-			self._toggle_favorite(str(self.root))
-
-		imgui.same_line()
-		if imgui.begin_combo("##favorites", "Favorites"):
-			if not self._favorites:
-				imgui.text_disabled("(none yet -- click the star to add the current folder)")
-			for favorite in list(self._favorites):
-				imgui.push_id(favorite)
-				clicked, _ = imgui.selectable(Path(favorite).name or favorite, False)
-				if imgui.is_item_hovered():
-					imgui.set_tooltip(favorite)
-				if clicked:
-					self._navigate_to(Path(favorite))
-					imgui.close_current_popup()
-				imgui.pop_id()
-			imgui.end_combo()
+	def _draw_favorites_popup(self):
+		"""Dropdown content of the Favorites combo (build_content_box()) --
+		popup content isn't managed by Box (ImGui already positions its own
+		floating overlay window for it), so this stays plain, direct ImGui."""
+		if not self._favorites:
+			imgui.text_disabled("(none yet -- click the star to add the current folder)")
+		for favorite in list(self._favorites):
+			imgui.push_id(favorite)
+			clicked, _ = imgui.selectable(Path(favorite).name or favorite, False)
+			if imgui.is_item_hovered():
+				imgui.set_tooltip(favorite)
+			if clicked:
+				self._navigate_to(Path(favorite))
+				imgui.close_current_popup()
+			imgui.pop_id()
 
 	def _toggle_favorite(self, path: str):
 		if path in self._favorites:
@@ -412,64 +434,111 @@ class Explorer:
 		fresh.explorer_favorites = self._favorites
 		app_settings.save(fresh)
 
-	def draw(self):
-		# Top-to-bottom order: host app's own header (e.g. object_editor.py's
-		# active-workspace row), the Wexplorer (pinned folders, always fully
-		# reachable), the Refresh/Import toolbar, then everything that
-		# filters/navigates the main flat arborescence below (search+filter,
-		# path bar, Favorites).
-		if self.extra_header is not None:
-			self.extra_header()
-			imgui.separator()
-
-		self._draw_pinned_folders()
-		self._draw_pinned_virtual_categories()
-		imgui.separator()
-
-		if _icon_button(fa_icons.ICON_FA_ARROWS_ROTATE, "Refresh"):
-			self.refresh()
-		if self.extra_toolbar is not None:
-			imgui.same_line()
-			self.extra_toolbar()
-		imgui.separator()
-
-		previous_search = self.search
-		previous_filter = self.extension_filter
-
-		imgui.set_next_item_width(150)
-		_, self.search = imgui.input_text_with_hint("##search", "Search...", self.search)
-		imgui.same_line()
-
-		# A single combo-like widget: its preview shows the current filter
-		# (whether typed or picked), and the dropdown holds both a text box
-		# for custom values and the preset list.
-		imgui.set_next_item_width(150)
-		if imgui.begin_combo("##filter", self.extension_filter):
-			_, typed = imgui.input_text("##custom-filter", self.extension_filter)
-			if typed != self.extension_filter:
-				self.extension_filter = typed
-			imgui.separator()
-			for preset in self.extension_presets:
-				clicked, _ = imgui.selectable(preset, preset == self.extension_filter)
-				if clicked:
-					self.extension_filter = preset
-					imgui.close_current_popup()
-			imgui.end_combo()
-
-		if self.search != previous_search or self.extension_filter != previous_filter:
+	def _on_search_changed(self, new_value: str):
+		if new_value != self.search:
 			self._bnp_visible_cache.clear()
+		self.search = new_value
 
-		self._draw_path_bar()
-		self._draw_favorites()
+	def _draw_filter_popup(self):
+		"""Dropdown content of the filter combo (build_content_box()): a
+		text box for a custom glob plus the preset list -- popup content
+		isn't managed by Box, stays plain, direct ImGui."""
+		_, typed = imgui.input_text("##custom-filter", self.extension_filter)
+		if typed != self.extension_filter:
+			self._bnp_visible_cache.clear()
+			self.extension_filter = typed
 		imgui.separator()
+		for preset in self.extension_presets:
+			clicked, _ = imgui.selectable(preset, preset == self.extension_filter)
+			if clicked:
+				if preset != self.extension_filter:
+					self._bnp_visible_cache.clear()
+				self.extension_filter = preset
+				imgui.close_current_popup()
 
-		child_flags = imgui.WindowFlags_.horizontal_scrollbar.value
-		with imgui_ctx.begin_child("explorer-list", window_flags=child_flags):
-			if self._current_bnp is not None:
-				self._draw_bnp_contents(self._current_bnp)
-			else:
-				self._draw_dir_contents(self.root)
-			self._draw_list_context_menu()
+	def build_content_box(self):
+		"""Rebuilt fresh every frame (box_ui_migration__explorer_panel.md),
+		same principle as sysinfo.py's own build_content_box() -- every
+		visible row of the Explorer panel is a real Box/Widget child, never
+		a single opaque callback wrapping this class's own drawing logic
+		(docs/ui.md's Historique/pièges). Returns a Box (never draws
+		anything itself -- that happens when the caller lays this tree out).
+		Top-to-bottom order matches the old draw(): host app's own header
+		(e.g. object_editor.py's active-workspace row), the Wexplorer
+		(pinned folders, always fully reachable), the Refresh/Import
+		toolbar, then everything that filters/navigates the main flat
+		arborescence below (search+filter, path bar, Favorites), then the
+		list itself filling whatever's left."""
+		root = Box(h=STRETCH, v=STRETCH)
+		# A row (or a dock="left"/"right" icon button's own h) holding
+		# exactly one default-margin Widget must reserve
+		# frame_height + 2*DEFAULT_WIDGET_MARGIN, not frame_height alone --
+		# see Widget's own docstring (ui/box_panel.py) for why (Nuno
+		# 2026-09-20: "4 pixel en top, mais 7 en bottom" / "y a plus de
+		# margin la", found via .test_widget_margin.py).
+		row_height = imgui.get_frame_height() + 2 * DEFAULT_WIDGET_MARGIN
+
+		if self.extra_header is not None:
+			for row in self.extra_header():
+				root.add(row)
+			root.add(self._header_separator)
+
+		root.add(self._wexplorer_widget)
+		root.add(self._toolbar_separator)
+
+		# Both icon buttons dock="right" (Nuno 2026-09-20: "les 2 buttons a
+		# droite avec un espace de 5px entre les 2") -- added in this order
+		# since a dock="right" child lands flush against the CURRENT right
+		# edge, then shrinks it for the next one: extra_toolbar first (ends
+		# up rightmost), then a 5px spacer, then Refresh (ends up to its
+		# left) -- reads left-to-right as [Refresh][gap][Import], same
+		# relative order as before, just anchored to the row's right edge.
+		toolbar_row = root.add(Box(dock="top", v=row_height))
+		toolbar_row.add(_ExtraToolbarWidget(self, dock="right", h=row_height))
+		toolbar_row.add(Box(dock="right", h=5.0))
+		toolbar_row.add(IconButtonWidget(
+			fa_icons.ICON_FA_ARROWS_ROTATE, "Refresh", on_click=self.refresh,
+			dock="right", h=row_height))
+		root.add(self._filter_separator)
+
+		# Search input and filter combo both h=STRETCH -- Box's own equal-
+		# share-among-stretch-siblings rule splits the row 50/50 (Nuno
+		# 2026-09-20: "Search <combo> étirés"), instead of each pinned to a
+		# fixed 150px that left the rest of a widened panel empty.
+		filter_row = root.add(Box(dock="top", v=row_height))
+		filter_row.add(TextInputWidget(
+			hint="Search...", value=self.search, on_change=self._on_search_changed,
+			dock="left", h=STRETCH))
+		filter_row.add(ComboWidget(
+			"##filter", self.extension_filter, self._draw_filter_popup,
+			dock="left", h=STRETCH))
+
+		root.add(_PathInputWidget(self, dock="top", v=row_height))
+		if self._path_suggestions:
+			style = imgui.get_style()
+			# A little extra beyond the exact line-height sum -- without it,
+			# the child's own content region came out a couple pixels short
+			# of what it actually needed, permanently showing a scrollbar
+			# even when all rows already fit.
+			self._path_suggestions_widget.max_height = (
+				imgui.get_text_line_height_with_spacing() * _MAX_VISIBLE_PATH_SUGGESTIONS + style.window_padding.y * 2 + 4)
+			root.add(self._path_suggestions_widget)
+
+		favorites_row = root.add(Box(dock="top", v=row_height))
+		is_favorite = str(self.root) in self._favorites
+		star_tooltip = "Remove current folder from favorites" if is_favorite else "Add current folder to favorites"
+		star_color = _FAVORITE_STAR_COLOR if is_favorite else _NON_FAVORITE_STAR_COLOR
+		favorites_row.add(IconButtonWidget(
+			fa_icons.ICON_FA_STAR, star_tooltip, color=star_color,
+			on_click=lambda: self._toggle_favorite(str(self.root)),
+			dock="left", h=row_height))
+		favorites_row.add(ComboWidget(
+			"##favorites", "Favorites", self._draw_favorites_popup,
+			dock="left", h=STRETCH))
+		root.add(self._list_separator)
+
+		root.add(_ExplorerListWidget(self, dock="top", h=STRETCH, v=STRETCH))
+		return root
 
 	def _draw_list_context_menu(self):
 		"""Right-click on empty space in the list (not on an item, so it
@@ -704,3 +773,64 @@ class Explorer:
 			clicked, _ = imgui.menu_item(command.label, "", False, True)
 			if clicked:
 				command.callback(items)
+
+
+class _ExtraToolbarWidget(Widget):
+	"""Wraps Explorer.extra_toolbar -- content owned by another, not yet
+	migrated module (e.g. object_editor.py's import button); draws at its
+	natural size within its allotted rect (a single icon button, same
+	dimensions as Refresh's own IconButtonWidget).
+
+	KNOWN RESIDUAL (Nuno 2026-09-21, confirmed via debug rects -- Box's own
+	layout is correct here, this widget's own external_rect already ends
+	exactly where the other right-docked icon buttons do): the callback
+	(`object_editor_mixins/mesh_import.py`'s `_draw_import_toolbar_button`)
+	draws through ITS OWN local `_icon_button` copy, which calls
+	`imgui.button(icon)` with no explicit size -- unlike `IconButtonWidget`
+	(`ui/box_panel.py`), which always passes `(w, h)` to force-fit its
+	allotted rect. That natural-size button can render wider than this
+	widget's own allotted rect, overflowing past the panel's right padding
+	toward its true edge. This is one of the 7 other `_icon_button` copies
+	`docs/ui.md` already notes as a separate follow-up chantier (migrating
+	them all to `IconButtonWidget`) -- left as-is here, not fixed in
+	box_ui_migration__explorer_panel.md's own scope."""
+
+	def __init__(self, explorer: Explorer, **kwargs):
+		super().__init__(**kwargs)
+		self._explorer = explorer
+
+	def draw_content(self, w, h):
+		if self._explorer.extra_toolbar is not None:
+			self._explorer.extra_toolbar()
+
+
+class _PathInputWidget(Widget):
+	"""The path input row -- fixed height (a single line, like any other
+	simple row), no confinement needed: _draw_path_input() already passes
+	an explicit width to imgui.set_next_item_width() rather than -1."""
+
+	def __init__(self, explorer: Explorer, **kwargs):
+		super().__init__(**kwargs)
+		self._explorer = explorer
+
+	def draw_content(self, w, h):
+		self._explorer._draw_path_input(w)
+
+
+class _ExplorerListWidget(Widget):
+	"""The main scrollable listing (directory or open .bnp contents) plus
+	its right-click context menu -- fills whatever's left after every fixed-
+	height row above it (h=STRETCH, v=STRETCH in build_content_box())."""
+
+	def __init__(self, explorer: Explorer, **kwargs):
+		super().__init__(**kwargs)
+		self._explorer = explorer
+
+	def draw_content(self, w, h):
+		child_flags = imgui.WindowFlags_.horizontal_scrollbar.value
+		with imgui_ctx.begin_child("explorer-list", size=(w, h), window_flags=child_flags):
+			if self._explorer._current_bnp is not None:
+				self._explorer._draw_bnp_contents(self._explorer._current_bnp)
+			else:
+				self._explorer._draw_dir_contents(self._explorer.root)
+			self._explorer._draw_list_context_menu()

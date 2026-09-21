@@ -63,27 +63,68 @@ quel module, sans dépendance vers un dossier spécifique à une app.
  qui en plus ouvre une vraie fenêtre ImGui pour elle-même (position/taille/
  contraintes de redimensionnement/flags/begin-end, plus `extra_flags` pour
  des `imgui.WindowFlags_` additionnels comme `no_scrollbar`), typiquement
- ajoutée comme enfant direct d'une `Box` racine de la taille de l'écran.
- `Widget(Box)` : une `Box` qui dessine du vrai contenu ImGui dans son
- `internal_rect` au lieu de placer des enfants — `draw_content(w, h)` à
- surcharger, reçoit la taille RÉSOLUE (jamais `self.h`/`self.v` bruts, qui
- peuvent être `STRETCH` ou `Percent`). `ButtonWidget`, `LabelWidget` (avec
- `color`/`disabled`), `TextInputWidget`, `ProgressBarWidget` : implémentations
- concrètes de `Widget`. Utilisé RÉELLEMENT par `app.py` pour sysinfo depuis
- `box_ui_migration__sysinfo.md` -- migrer le reste de l'app (Explorer, panel
+ ajoutée comme enfant direct d'une `Box` racine de la taille de l'écran, ou
+ utilisée seule (fenêtre autonome, voir `LeftPanel` ci-dessous). `Widget(Box)` :
+ une `Box` qui dessine du vrai contenu ImGui dans son `internal_rect` au lieu
+ de placer des enfants — `draw_content(w, h)` à surcharger, reçoit la taille
+ RÉSOLUE (jamais `self.h`/`self.v` bruts, qui peuvent être `STRETCH` ou
+ `Percent`). `margin` vaut `DEFAULT_WIDGET_MARGIN` (1.0) par défaut ici
+ (`Box` lui-même défaut à 0) — chaque widget visible respire un peu sans
+ que chaque site d'appel n'ait à y penser (`margin=0` pour s'en exclure,
+ voir `sysinfo.py`). **Une ligne/bouton icône qui réserve exactement
+ `imgui.get_frame_height()` pour UN widget à margin par défaut doit
+ réserver `frame_height + 2*DEFAULT_WIDGET_MARGIN`, pas `frame_height`
+ seul** — voir Historique/pièges. `ButtonWidget`, `LabelWidget` (avec
+ `color`/`disabled`),
+ `TextInputWidget` (état externe `value`/`on_change`, ne possède pas son
+ propre texte), `ProgressBarWidget`, `IconButtonWidget` (bouton icône teinté
+ pastel, `disabled`), `ComboWidget` (trigger + callback `draw_popup` pour le
+ contenu du dropdown, `disabled`/`disabled_tooltip`) : implémentations
+ concrètes de `Widget`. `AutoHeightWidget(Widget)` : pour un contenu dont la
+ hauteur réelle n'est connue qu'après dessin (arbre expansible, suggestions
+ conditionnelles) — mesure le delta de curseur ImGui et réutilise le résultat
+ comme `v` la frame suivante (même principe de décalage d'une frame que
+ `Panel.resizable`) ; `SeparatorWidget` en est la seule sous-classe générique
+ (`imgui.separator()`). `TreeListWidget(Widget)` : confine son contenu dans
+ un vrai `imgui.begin_child(size=(w, h))` (contrairement à un contenu en flux
+ libre, dont les lignes `imgui.tree_node_ex`/`imgui.selectable` s'étirent
+ jusqu'au bord de la fenêtre ENGLOBANTE, pas jusqu'à son propre rect alloué —
+ voir Historique/pièges) ; deux modes via `auto_height` : `False` (défaut,
+ `v` normal/STRETCH, scrolle en cas de dépassement) ou `True` (mesure sa
+ vraie hauteur de contenu via `imgui.get_scroll_max_y()` DANS le child,
+ `max_height` optionnel pour plafonner). `LeftPanel(Panel)` : panel docké à
+ gauche avec les bornes de redimensionnement partagées
+ (`_SIDE_PANEL_MIN_WIDTH`/`_SIDE_PANEL_MAX_WIDTH`, aussi importées par
+ `app.py` pour son `_right_panel` pas encore migré) — chaque app Forgery crée
+ la sienne, indépendante (pas un mécanisme partagé avec un hook de contenu,
+ voir `box_ui_migration__explorer_panel.md`). Utilisé RÉELLEMENT par `app.py`
+ pour sysinfo (`box_ui_migration__sysinfo.md`) et par `explorer.py`/
+ `object_editor.py` pour tout le panneau Explorer de Patina
+ (`box_ui_migration__explorer_panel.md`) -- migrer le reste de l'app (panel
  droit, dialogues, popups...) continue élément par élément.
 
 ## Utilisation
 
-- `app.py` (`ForgeryApp`, partagée par Patina et Atyscape) : Explorer et le
- panel droit restent des `Panel` (`ui/panel.py`) ; sysinfo est maintenant un
- `box_panel.Panel`, enfant d'une `Box` racine de la taille de l'écran
- (`self._ui_root`) -- chaînés dans `draw_ui()` (voir `docs/app.md`).
+- `app.py` (`ForgeryApp`, partagée par Patina et Atyscape) : le panel droit
+ reste un `Panel` (`ui/panel.py`) ; sysinfo est un `box_panel.Panel`, enfant
+ d'une `Box` racine de la taille de l'écran (`self._ui_root`) -- chaînés
+ dans `draw_ui()` (voir `docs/app.md`). `_draw_left_panel(available)` est
+ overridable : le défaut (utilisé par Atyscape, inchangé) dessine l'ancien
+ `ui/panel.py Panel` + hook `draw_left_panel_content()` ; `object_editor.py`
+ (Patina) le surcharge avec sa propre `LeftPanel` autonome (pas enfant de
+ `_ui_root` -- chaque app a la sienne, voir
+ `box_ui_migration__explorer_panel.md`).
 - `sysinfo.py` : `SysInfoBar.build_content_box()` reconstruit un vrai arbre
  `Box`/`LabelWidget`/`ProgressBarWidget` à chaque frame (le contenu change
  frame à frame) au lieu de dessiner directement -- `align="center"`
  remplace `center_x()`/`center_v()` (`ui/layout.py`, toujours utilisées
  ailleurs tant que leur propre app n'est pas migrée).
+- `explorer.py` : `Explorer.build_content_box()` reconstruit tout le
+ panneau Explorer (Wexplorer, toolbar, recherche/filtre, barre de chemin,
+ favoris, liste) à chaque frame, même principe -- voir `docs/explorer.md`.
+ `Explorer.extra_header` est maintenant un callable `() -> list[Box]`
+ (au lieu de dessiner directement) ; `workspace_setup_dialog.py`'s
+ `build_active_workspace_rows()` est le seul fournisseur actuel.
 
 ## Historique / pièges
 
@@ -92,7 +133,17 @@ quel module, sans dépendance vers un dossier spécifique à une app.
  dans le code — migration prévue comme chantier de suivi séparé, pas encore
  fait.
 - `_icon_button` a encore 7 copies locales indépendantes ailleurs dans le
- code (non migrées vers `ui/widgets.py`) — même chantier de suivi.
+ code (non migrées vers `ui/widgets.py`) — même chantier de suivi. L'une
+ d'elles (`object_editor_mixins/mesh_import.py`'s
+ `_draw_import_toolbar_button`, câblée en `Explorer.extra_toolbar`) dessine
+ son bouton à sa taille naturelle (`imgui.button(icon)` sans `(w, h)`
+ explicite) à l'intérieur d'`explorer.py`'s `_ExtraToolbarWidget` — dont le
+ rect alloué, lui, est correctement calculé (confirmé par rects de debug,
+ Nuno 2026-09-21) mais peut être plus étroit que ce bouton à taille
+ naturelle, qui déborde alors vers le bord droit du panel Explorer. Se
+ résoudra de lui-même une fois cette copie migrée vers `IconButtonWidget`
+ (qui force toujours `(w, h)`), pas corrigé dans
+ `box_ui_migration__explorer_panel.md`.
 - Une taille de `Panel` qui s'ajuste automatiquement à son propre contenu
  (`imgui.WindowFlags_.always_auto_resize`) a été tentée pour `sysinfo` puis
  abandonnée : plantage reproductible de Panda3D (`AssertionError:
@@ -114,6 +165,35 @@ quel module, sans dépendance vers un dossier spécifique à une app.
  après `imgui.begin()`), pas le rectangle extérieur de la fenêtre demandé —
  une barre de titre visible mange de la hauteur en haut, sinon la première
  rangée d'enfants empiète dessous.
+- Toujours dans `Panel.layout()`, la taille `cond=first_use_ever` d'un
+ `Panel` `resizable` doit venir de `self.h`/`self.v` (sa propre taille
+ demandée, ex. `LeftPanel(size=200)`) sur son axe de resize, JAMAIS du
+ rectangle `allocated` passé par l'appelant — pour un `Panel` autonome (pas
+ enfant d'une autre `Box`, ex. `LeftPanel` utilisé directement par
+ `object_editor.py`), `allocated` est tout l'espace disponible, pas la
+ taille du panel lui-même ; l'utiliser fait qu'un panel jamais vu avant
+ (aucune entrée `imgui.ini`) prend toute la largeur/hauteur disponible au
+ lieu de `size=`. Resté invisible longtemps sur le vrai Explorer de Patina
+ (masqué par un vieux `imgui.ini` avec une taille déjà correcte), révélé
+ par `.test_tree_list_widget.py` (fenêtre jamais vue avant) --
+ `box_ui_migration__explorer_panel.md`, Nuno 2026-09-20.
+- Un `imgui.begin_child(size=(w, 0))` (ou toute hauteur `<= 0`) ne veut PAS
+ dire "s'ajuster au contenu" en ImGui, mais "remplir l'espace restant du
+ PARENT" -- casse toute mesure de hauteur basée sur
+ `imgui.get_scroll_max_y()` (un enfant qui se remplit toujours tout seul ne
+ déborde jamais, donc `scroll_max_y` reste à 0 pour toujours). Voir
+ `TreeListWidget._MIN_CHILD_HEIGHT` (`box_panel.py`) : un plancher positif
+ minuscule garde `begin_child` en mode taille-fixe-avec-vrai-scroll.
+- Un contenu en flux libre (des `imgui.tree_node_ex`/`imgui.selectable`
+ sans `begin_child`) ne respecte PAS la largeur/le padding de son propre
+ rect alloué -- ses lignes s'étirent jusqu'au bord de la fenêtre ImGui
+ ENGLOBANTE (la vraie fenêtre du `Panel`), pas jusqu'à son propre rect. Un
+ `imgui.set_cursor_screen_pos()` correct ne positionne que le COIN
+ SUPÉRIEUR GAUCHE, jamais la largeur -- seul un `imgui.begin_child(size=
+ (w, h))` (ou un appel qui prend `w` explicitement, ex.
+ `imgui.set_next_item_width(w)` plutôt que `-1`) confine réellement. Trouvé
+ en comparant `_WexplorerWidget` (cassé) à `_ExplorerListWidget` (déjà
+ confiné, donc déjà correct) -- `TreeListWidget` généralise ce confinement.
 - Toujours dans `box_panel.py`, un conteneur (`Box`/sous-classe) qui dessine
  son propre remplissage doit le faire AVANT d'appeler `super().layout()`
  (qui dessine ses enfants, y compris le contenu réel d'un `Widget`) — dans

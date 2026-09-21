@@ -32,20 +32,38 @@ en plus ou à la place.
  `_bnp_cache`, `_bnp_visible_cache`), état des vignettes de textures,
  callbacks (`on_selection_changed`, `extra_header`, `extra_toolbar`),
  `pinned_folders`, et `virtual_categories_source` (voir plus bas).
-- `draw` (`explorer.py`) : point d'entrée appelé chaque frame ImGui
- — dessine dans l'ordre l'en-tête optionnel de l'app hôte, le Wexplorer, la
- barre d'outils (Refresh + extra), recherche/filtre, barre de chemin,
- favoris, puis la liste principale (dossier ou contenu de `.bnp`).
+- `build_content_box` (`explorer.py`) : point d'entrée appelé chaque frame
+ par Patina (`object_editor.py`'s `_draw_left_panel()`) — reconstruit un
+ vrai arbre `Box`/`Widget` (`box_ui_migration__explorer_panel.md`), jamais
+ un callback opaque autour de l'ancien `draw()` (supprimé, plus
+ d'appelant réel). Ordre : en-tête optionnel de l'app hôte
+ (`extra_header()`, une liste de `Box`), Wexplorer (`TreeListWidget`,
+ `auto_height=True`), toolbar (Refresh + `extra_toolbar`, `dock="right"`),
+ recherche/filtre (`h=STRETCH` chacun, 50/50), barre de chemin
+ (`_PathInputWidget` + `_path_suggestions_widget` conditionnel), favoris,
+ puis la liste principale (`dock="top", h=STRETCH, v=STRETCH`, remplit le
+ reste). Chaque ligne fixe utilise `imgui.get_frame_height()`, chaque
+ contenu à hauteur inconnue (Wexplorer, suggestions) utilise
+ `TreeListWidget`/`auto_height=True` (voir `docs/ui.md`).
 - `refresh` (`explorer.py`) : vide les caches de listing pour
- forcer une relecture disque au prochain `draw`.
-- `_draw_path_bar` / `_compute_path_suggestions` /
- `_draw_path_suggestions_popup` (`explorer.py`) : barre de saisie
+ forcer une relecture disque au prochain `build_content_box`.
+- `_draw_path_input` / `_compute_path_suggestions` /
+ `_draw_path_suggestions_rows` (`explorer.py`) : barre de saisie
  de chemin avec autocomplétion de sous-dossiers, navigable au clavier
- (flèches haut/bas), sélection par clic ou Entrée.
-- `_draw_pinned_folders` / `_draw_tree_children` (`explorer.py`) :
- le "Wexplorer" — dossiers épinglés par l'app hôte (`pinned_folders`),
- affichés en arbre extensible sur place, non affecté par le filtre/la
- recherche de la vue principale, avec vignettes de texture.
+ (flèches haut/bas), sélection par clic ou Entrée. `_draw_path_input`
+ (contenu de `_PathInputWidget`, une ligne fixe) pose
+ `self._path_input_active` ; `_draw_path_suggestions_rows` (contenu de
+ `self._path_suggestions_widget`, un `TreeListWidget` plafonné à
+ `_MAX_VISIBLE_PATH_SUGGESTIONS` lignes puis scroll, ajouté à l'arbre
+ seulement si des suggestions existent) le relit pour savoir si la box
+ doit rester ouverte malgré la perte de focus du champ (clic dessus).
+- `_draw_wexplorer_rows` / `_draw_pinned_folders` / `_draw_tree_children`
+ (`explorer.py`) : le "Wexplorer" — dossiers épinglés par l'app hôte
+ (`pinned_folders`), affichés en arbre extensible sur place, non affecté
+ par le filtre/la recherche de la vue principale, avec vignettes de
+ texture. `_draw_wexplorer_rows` (`draw_rows` de `self._wexplorer_widget`,
+ un `TreeListWidget` `auto_height=True`) appelle `_draw_pinned_folders`
+ puis `_draw_pinned_virtual_categories`, inchangées.
 - `_draw_pinned_virtual_categories` (`explorer.py`) : même emplacement/
  principe que `_draw_pinned_folders`, mais pour `virtual_categories_source`
  (`callable() -> {catégorie: [Path, ...]}`, optionnel) au lieu de vrais

@@ -31,6 +31,7 @@ from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher, TEX_EXTENSIONS
+from ryzom_forgery.ui.box_panel import LeftPanel
 from ryzom_forgery import virtual_categories
 from ryzom_forgery.live_data_index_dialog import LiveDataIndexDialog
 from ryzom_forgery.live_data_setup_dialog import LiveDataSetupDialog
@@ -144,6 +145,12 @@ class ObjectEditorApp(
 		explorer_root = Path(configured_dirs[0].path) if configured_dirs else Path.home()
 		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Patina",
 		                     explorer_default_filter="*.shape")
+
+		# Own, independent left-panel window (box_ui_migration__explorer_panel.md,
+		# Nuno 2026-09-19: "chaque App va la remplir") -- Atyscape keeps the
+		# inherited ui/panel.py Panel (ForgeryApp's own _draw_left_panel()
+		# default) unchanged, unrelated to this one.
+		self._explorer_left_panel = LeftPanel(size=self.explorer_width, title="Explorer")
 
 		self.material_docs = load_material_docs()
 
@@ -610,7 +617,7 @@ class ObjectEditorApp(
 
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
-		self.explorer.extra_header = self.workspace_setup_dialog.draw_active_workspace_row
+		self.explorer.extra_header = self.workspace_setup_dialog.build_active_workspace_rows
 
 		# Last, once every piece of state _load_shape()/_reset_shape_state()
 		# touches actually exists -- reopens wherever the Explorer/loaded
@@ -727,6 +734,22 @@ class ObjectEditorApp(
 
 	def panel_title(self):
 		return self._shape_source_name or "Panel"
+
+	def _draw_left_panel(self, available):
+		"""Overrides ForgeryApp._draw_left_panel() -- own, independent
+		LeftPanel (box_ui_migration__explorer_panel.md), filled every frame
+		with a fresh Box tree (Explorer.build_content_box(), same rebuild-
+		every-frame principle as sysinfo.py's own build_content_box()).
+		Computes the rect left over for the right panel by hand, the same
+		math a `dock="left"` Box child's own parent would (LeftPanel isn't
+		itself a child of any parent Box here -- it's Patina's own,
+		self-contained window)."""
+		x, y, w, h = available
+		self._explorer_left_panel.children = [self.explorer.build_content_box()]
+		self._explorer_left_panel.layout(available)
+		consumed = self._explorer_left_panel.h
+		self.explorer_width = consumed
+		return (x + consumed, y, w - consumed, h)
 
 	def draw_ui(self):
 		"""Adds live_data_dialog's own mandatory-popup draw on top of

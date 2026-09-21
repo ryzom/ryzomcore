@@ -117,9 +117,13 @@ pour ajouter leur logique métier.
  rect connu réduit l'espace disponible pour Explorer/panel) : sysinfo est un
  `box_panel.Panel` (enfant de `self._ui_root`, une `Box` racine écran, voir
  `docs/ui.md`), son contenu reconstruit chaque frame via
- `self.sysinfo.build_content_box()` ; Explorer et le panel droit restent sur
- `ui/panel.py`'s `Panel.draw()` (migration en cours, `project-todos/forgery/
- box_ui_migration.md`).
+ `self.sysinfo.build_content_box()`. Explorer passe par
+ `self._draw_left_panel(available)`, overridable -- le défaut (utilisé par
+ Atyscape, inchangé) reste sur `ui/panel.py`'s `Panel.draw()` +
+ `draw_left_panel_content()` ; Patina (`object_editor.py`) le surcharge avec
+ sa propre `LeftPanel` autonome (`box_ui_migration__explorer_panel.md`). Le
+ panel droit reste sur `ui/panel.py`'s `Panel.draw()` (migration en cours,
+ `project-todos/forgery/box_ui_migration.md`).
 
 ## Utilisation
 

@@ -93,17 +93,22 @@ class SysInfoBar:
 		framerate = imgui.get_io().framerate
 		frame_ms = (1000.0 / framerate) if framerate > 0 else 0.0
 		fps_text = f"{framerate:.1f} FPS ({frame_ms:.2f} ms)"
-		row.add(LabelWidget(fps_text, dock="left", align="center",
+		# margin=0 on every LabelWidget/ProgressBarWidget here: each is
+		# already sized to an EXACT pixel width via imgui.calc_text_size()
+		# (no allowance for margin) -- Widget's own default margin=2 would
+		# shrink their content area past that exact size (ui/box_panel.py,
+		# box_ui_migration__explorer_panel.md, Nuno 2026-09-20).
+		row.add(LabelWidget(fps_text, dock="left", align="center", margin=0.0,
 		                     h=imgui.calc_text_size(fps_text).x, v=line_height))
 
 		if self.cursor_info:
 			row.add(Box(dock="left", h=20))
-			row.add(LabelWidget(self.cursor_info, dock="left", align="center",
+			row.add(LabelWidget(self.cursor_info, dock="left", align="center", margin=0.0,
 			                     h=imgui.calc_text_size(self.cursor_info).x, v=line_height))
 
 		if self.status:
 			row.add(Box(dock="left", h=20))
-			row.add(LabelWidget(self.status, dock="left", align="center", color=self.status_color,
+			row.add(LabelWidget(self.status, dock="left", align="center", color=self.status_color, margin=0.0,
 			                     h=imgui.calc_text_size(self.status).x, v=line_height))
 
 		if self._tasks:
@@ -111,10 +116,10 @@ class SysInfoBar:
 			label_width = imgui.calc_text_size(label).x
 			segment_width = label_width if fraction is None else label_width + item_spacing + _TASK_BAR_WIDTH
 			segment = Box(dock="center", h=segment_width, v=STRETCH)
-			segment.add(LabelWidget(label, dock="left", align="center", h=label_width, v=line_height))
+			segment.add(LabelWidget(label, dock="left", align="center", margin=0.0, h=label_width, v=line_height))
 			if fraction is not None:
 				segment.add(Box(dock="left", h=item_spacing))
-				segment.add(ProgressBarWidget(fraction, dock="left", align="center",
+				segment.add(ProgressBarWidget(fraction, dock="left", align="center", margin=0.0,
 				                               h=_TASK_BAR_WIDTH, v=line_height))
 			row.add(segment)
 
@@ -122,6 +127,6 @@ class SysInfoBar:
 		# the same way the old code did (imgui.calc_text_size) -- the box
 		# system has no built-in "size to my own text" mechanism, ImGui does.
 		label_width = imgui.calc_text_size(self._version_label).x
-		row.add(LabelWidget(self._version_label, dock="right", align="center", disabled=True,
+		row.add(LabelWidget(self._version_label, dock="right", align="center", disabled=True, margin=0.0,
 		                     h=label_width, v=line_height))
 		return row

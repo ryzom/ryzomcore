@@ -64,15 +64,26 @@ changer le dossier racine plus tard.
  workspace du projet actif), ouvre la popup obligatoire (setup ou
  migration selon le cas) au premier frame où c'est nécessaire, **appelle
  aussi `imgui.open_popup()`** pour les popups "New project"/"New workspace"
- si `_draw_project_row`/`_draw_workspace_row` en ont fait la demande (voir
- Pièges pour pourquoi c'est fait ici et pas là-bas), puis dessine les
+ si `_draw_project_popup`/`_draw_workspace_popup` en ont fait la demande
+ (voir Pièges pour pourquoi c'est fait ici et pas là-bas), puis dessine les
  trois popups.
-  - `draw_active_workspace_row(width=160)` — deux lignes empilées :
- `_draw_project_row` (combo Projet + `<new>`) puis `_draw_workspace_row`
- (combo Workspace + `<New>` + `<Import Folder>`, désactivé tant qu'aucun
- projet n'est actif, + icône ouvrir dans le gestionnaire de fichiers).
- Ni l'un ni l'autre combo n'offre plus d'option `(none)` -- auto-guérison
- vers le premier disponible à la place.
+  - `build_active_workspace_rows()` (`box_ui_migration__explorer_panel.md`,
+ Nuno 2026-09-20 -- remplace l'ancien `draw_active_workspace_row(width=160)`
+ qui dessinait directement) -- retourne une liste de deux `Box`
+ (`ryzom_forgery.ui.box`) : `_build_project_row()` (label "Project:" +
+ `ComboWidget` du projet, 50/50 via `h=STRETCH` sur les deux) puis
+ `_build_workspace_row()` (label "Workspace:" + `ComboWidget` groupés dans
+ une sous-`Box` qui s'étire APRÈS le bouton fixe "ouvrir dans le
+ gestionnaire de fichiers", `dock="right"`). `ComboWidget`/`IconButtonWidget`
+ utilisent leur paramètre `disabled`/`disabled_tooltip` pour le
+ `imgui.begin_disabled(...)` + tooltip de l'ancien code (Workspaces root
+ pas configuré, pas de projet actif). Le contenu du dropdown lui-même
+ (`_draw_project_popup`/`_draw_workspace_popup`, popup ImGui flottant, pas
+ géré par Box) reprend telle quelle la logique de l'ancien
+ `_draw_project_row`/`_draw_workspace_row`. Ni l'un ni l'autre combo
+ n'offre plus d'option `(none)` -- auto-guérison vers le premier
+ disponible à la place. Appelé depuis `Explorer.build_content_box()` via
+ `Explorer.extra_header` (câblé dans `object_editor.py`).
   - `_register_external_workspace(folder)` — appelée après le sélecteur de
  dossier natif d'`<Import Folder>` : enregistre `folder` dans le manifeste
  du projet actif (`workspaces.add_external_workspace`), nommé d'après le
@@ -132,7 +143,7 @@ changer le dossier racine plus tard.
 
 - **`OpenPopup()`/`BeginPopupModal()` résolvent l'ID réel du popup à partir
  du contexte/fenêtre ImGui courant au moment de l'appel** -- pas juste de
- la chaîne passée en argument. `_draw_project_row`/`_draw_workspace_row`
+ la chaîne passée en argument. `_draw_project_popup`/`_draw_workspace_popup`
  s'exécutent imbriquées dans la fenêtre "Explorer" (voir
  `object_editor.py`'s `Explorer.extra_header`), alors que
  `_draw_new_project_popup`/`_draw_new_workspace_popup`'s `begin_popup_modal`
@@ -153,7 +164,7 @@ changer le dossier racine plus tard.
 - Le message du popup complet affirme explicitement : "shapes are only
  ever saved into a workspace, never elsewhere" — contrainte de conception
  du système de workspace globalement, pas spécifique à ce fichier.
-- `draw`, `_draw_project_row` et `_draw_workspace_row` répètent chacun une
+- `draw`, `_build_project_row` et `_build_workspace_row` répètent chacun une
  variante de la même logique d'auto-guérison (activer le premier trouvé
  quand rien n'est actif) plutôt qu'une fonction commune -- à garder en
  tête si on retouche l'un des trois.

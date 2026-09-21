@@ -1,5 +1,101 @@
 # Changelog
 
+## 2026-09-21 — ✨ Explorer panel migrated to Box (LeftPanel, TreeListWidget), Panel resize-size fix (Forgery 4.28.0)
+
+Patina's Explorer panel (`explorer.py`) is migrated from `ui/panel.py`'s
+flat Panel to the recursive `ui/box.py`/`ui/box_panel.py` system
+(`project-todos/forgery/box_ui_migration__explorer_panel.md`, step 2 of
+`box_ui_migration.md`). `Explorer.build_content_box()` replaces `draw()`
+(removed): a real `Box`/`Widget` tree rebuilt every frame, same principle
+as `sysinfo.py`'s own `build_content_box()`, decomposed row by row
+(Wexplorer, toolbar, search/filter, path bar, favorites, file list) instead
+of one opaque callback wrapping the old drawing methods. Patina and
+Atyscape now each own an independent left-panel window instead of sharing
+one mechanism with a content-drawing hook: `ForgeryApp._draw_left_panel()`
+is overridable, its default (unchanged `ui/panel.py` Panel +
+`draw_left_panel_content()`) still used by Atyscape as-is, while
+`object_editor.py` overrides it with its own `LeftPanel`.
+
+New generic widgets in `ui/box_panel.py`: `LeftPanel` (a `Panel` docked
+left with the shared resize bounds), `IconButtonWidget`/`ComboWidget`
+(with `disabled`/`disabled_tooltip`), `SeparatorWidget`, `AutoHeightWidget`
+(self-measures its real content height across frames for content whose
+height isn't known ahead of drawing), and `TreeListWidget` (confines its
+content to a real `imgui.begin_child`, fixing a real bug: content drawn in
+free flow -- e.g. a bare `imgui.tree_node_ex` sequence -- ignores its own
+parent Box's padding/width on its right edge, stretching to the enclosing
+window's content region instead; `_ExplorerListWidget`, already
+`begin_child`-confined, never had this bug). `TreeListWidget` supports two
+modes (`auto_height` on/off) so the same class covers both an
+expand-in-place tree that grows to fit its content (Wexplorer, path-bar
+suggestions capped at 8 rows then scrolling) and a fill-and-scroll list
+(the file list itself). Validated standalone first, with fake data, via
+`.test_tree_list_widget.py` (a disposable driver script kept in the repo,
+same convention as `.test_box_panel.py`), before being wired into the real
+Explorer.
+
+Also fixed: `Panel.layout()`'s `cond=first_use_ever` initial size for a
+resizable Panel used its own `allocated` rect's width/height (the space
+its caller handed it) instead of the Panel's own requested size
+(`self.h`/`self.v`, e.g. `LeftPanel(size=200)`) -- harmless for a Panel
+nested inside a parent Box (whose own `_layout_children()` already
+resolves that rect to the Panel's real size), but wrong for a standalone
+resizable Panel (not nested in a parent Box, e.g. `LeftPanel` used
+directly): a window ImGui has never seen before (no `imgui.ini` entry)
+defaulted to the entire available space instead of its own requested size.
+
+`workspace_setup_dialog.py`'s Project/Workspace rows (Explorer's
+`extra_header`) are also real Box content now:
+`draw_active_workspace_row()` (drew directly) is replaced by
+`build_active_workspace_rows()` (returns two `Box` rows). `Explorer.extra_
+header`'s own contract changes accordingly, from a plain draw callback to
+`() -> list[Box]`.
+
+`Wexplorer` (`_WexplorerWidget`, an `AutoHeightWidget` drawing in free ImGui
+flow) is replaced by a `TreeListWidget` instance (`auto_height=True`) once
+the free-flow padding bug above was found on it specifically -- along with
+the path-bar suggestions box (split out of the old `_PathBarWidget` into a
+fixed-height `_PathInputWidget` for the input itself, plus a
+`TreeListWidget` instance, `max_height`-capped at 8 rows then scrolling,
+for the suggestions).
+
+`Widget` (`ui/box_panel.py`) now defaults `margin=DEFAULT_WIDGET_MARGIN`
+(1.0) -- every visible widget (button, list, label, entry...) gets a
+little breathing room by default instead of every call site passing its
+own `margin=`; a plain container `Box` is unaffected (still defaults to
+0). `sysinfo.py`'s `LabelWidget`/`ProgressBarWidget` (sized to an exact
+pixel width via `imgui.calc_text_size()`) explicitly opt out
+(`margin=0.0`) to keep their own already-validated appearance unchanged.
+Any row/icon-button reserving exactly `imgui.get_frame_height()` for a
+single default-margin child must now reserve
+`frame_height + 2*DEFAULT_WIDGET_MARGIN` instead: `get_frame_height()` is
+already ImGui's own no-slack natural size for that control, so carving
+margin OUT of an already-tight reservation shrinks `internal_rect` below
+the control's natural size -- most ImGui controls don't shrink to fit,
+they render at natural size regardless, either overflowing (erasing the
+margin visually) or, for an icon button given too little room, rendering
+the glyph truncated. Found and fixed via a second disposable driver script,
+`.test_widget_margin.py` (stacked Entries with a flat background per row,
+same `ColoredBox` trick as `.test_box_panel.py`).
+
+The Project row also gained an "open in system file manager" icon button
+(next to Workspace's own, symmetric layout) -- both now use an explicit
+`##project`/`##workspace` ID suffix on the shared `ICON_FA_EYE` glyph
+(`IconButtonWidget`'s label IS its ImGui ID, same convention already
+documented in `ui/colors.py`'s `pastel_color_for()` -- two buttons sharing
+one glyph with no suffix collide).
+
+Known residual, documented not fixed (out of this chantier's scope): the
+Import toolbar button (`object_editor_mixins/mesh_import.py`'s
+`_draw_import_toolbar_button`) still draws through its own un-migrated
+local `_icon_button` copy at natural ImGui size (no explicit `(w, h)`),
+which can overflow past its own correctly-computed allotted rect toward
+the panel's right edge -- resolves once that copy joins the other 6
+already-noted-in-`docs/ui.md` migrations to `IconButtonWidget`.
+
+Documentation: `docs/ui.md`, `docs/explorer.md`, `docs/app.md`,
+`docs/workspace_setup_dialog.md` updated for all of the above.
+
 ## 2026-09-19 — ✨ Rename pipeline/export dirs, 18 independent Build steps, startup prefs (Forgery 4.27.0)
 
 `land_build.py`'s Build pipeline goes from 15 grouped steps to 18 fully

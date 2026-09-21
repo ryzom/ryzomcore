@@ -11,6 +11,8 @@ from pathlib import Path
 from imgui_bundle import icons_fontawesome_6 as fa_icons, imgui, portable_file_dialogs as pfd
 
 from ryzom_forgery import settings as app_settings
+from ryzom_forgery.ui.box import Box, STRETCH
+from ryzom_forgery.ui.box_panel import DEFAULT_WIDGET_MARGIN, ComboWidget, IconButtonWidget, LabelWidget
 from ryzom_forgery.ui.colors import pastel_color_for
 from ryzom_forgery.ui.popups import center_next_popup
 from ryzom_forgery.workspaces import (
@@ -232,9 +234,11 @@ class WorkspaceSetupDialog:
 
 		# OpenPopup()/BeginPopupModal() both resolve their popup's actual ID
 		# using the current window/ID-stack context at the time they're
-		# called -- draw_active_workspace_row() (called from inside the
-		# Explorer window, see object_editor.py's Explorer.extra_header)
-		# only *requests* these two (self._new_project_pending/
+		# called -- the Project/Workspace combo popups (drawn from inside
+		# the Explorer window, see object_editor.py's Explorer.extra_header
+		# and build_active_workspace_rows()/_draw_project_popup()/
+		# _draw_workspace_popup() above) only *request* these two
+		# (self._new_project_pending/
 		# self._new_workspace_pending) rather than calling open_popup()
 		# itself, so the real calls happen here instead, at the same
 		# top-level context _draw_new_project_popup()/
@@ -254,43 +258,65 @@ class WorkspaceSetupDialog:
 		self._draw_new_project_popup()
 		self._draw_new_workspace_popup()
 
-	def draw_active_workspace_row(self, width=160):
-		"""Two stacked rows -- "Project: [combo]" then "Workspace: [combo]
-		[open in system file manager]" -- called from the host app's panel
-		(see object_editor.py's draw_panel()), above the Save/Export/Quit
-		bar. Both combos are disabled with an explanatory tooltip until a
-		Workspaces root is configured (Workspace's also until a project is
-		active), since there's nothing to list otherwise."""
-		self._draw_project_row(width)
-		self._draw_workspace_row(width)
+	def build_active_workspace_rows(self):
+		"""Two Box rows -- "Project: [combo]" then "Workspace: [combo]
+		[open in system file manager]" -- returned to the host app's
+		Explorer panel (object_editor.py's Explorer.extra_header,
+		box_ui_migration__explorer_panel.md). Both combos are disabled with
+		an explanatory tooltip until a Workspaces root is configured
+		(Workspace's also until a project is active), since there's nothing
+		to list otherwise. Label+combo each `h=STRETCH` split the row 50/50
+		(Box's own equal-share-among-stretch-siblings rule, Nuno 2026-09-20:
+		"chacun doit s'étirer donc prendre 50%")."""
+		return [self._build_project_row(), self._build_workspace_row()]
 
-	def _draw_project_row(self, width):
+	def _build_project_row(self):
 		names = self.project_names()
 		current = self._settings.active_project if self._settings.active_project in names else None
 		preview = current or "(none)"
+		active_path = project_path(self._settings.workspaces_root, current) if current is not None else None
+		# frame_height + 2*DEFAULT_WIDGET_MARGIN, not frame_height alone --
+		# see Widget's own docstring (ui/box_panel.py, Nuno 2026-09-20).
+		row_height = imgui.get_frame_height() + 2 * DEFAULT_WIDGET_MARGIN
 
-		imgui.text("Project:")
-		imgui.same_line()
-		imgui.begin_disabled(not self.is_configured())
-		imgui.set_next_item_width(width)
-		if imgui.begin_combo("##project-selector", preview):
-			for name in names:
-				clicked, _ = imgui.selectable(name, name == current)
-				if clicked:
-					self.set_active_project(name)
-			if names:
-				imgui.separator()
-			clicked, _ = imgui.selectable(_NEW_LABEL, False)
+		row = Box(dock="top", v=row_height)
+		# Same layout as _build_workspace_row() below: label+combo grouped
+		# so the eye button (fixed size, dock="right") reserves its own
+		# width first, the group then stretches into whatever's left,
+		# splitting THAT 50/50 between label and combo (Nuno 2026-09-20:
+		# "chacun dois prendre s'étirer donc prendre 50%").
+		group = row.add(Box(dock="left", h=STRETCH))
+		group.add(LabelWidget("Project:", dock="left", h=STRETCH, align="center"))
+		group.add(ComboWidget(
+			"##project-selector", preview, self._draw_project_popup,
+			dock="left", h=STRETCH,
+			disabled=not self.is_configured(),
+			disabled_tooltip="Set up a Workspaces folder first (Settings tab)"))
+		row.add(IconButtonWidget(
+			fa_icons.ICON_FA_EYE + "##project", "Open project folder in system file manager",
+			on_click=lambda: open_in_system_file_manager(active_path),
+			disabled=active_path is None,
+			dock="right", h=row_height))
+		return row
+
+	def _draw_project_popup(self):
+		"""Dropdown content of the Project combo (_build_project_row()) --
+		popup content isn't managed by Box, stays plain, direct ImGui."""
+		names = self.project_names()
+		current = self._settings.active_project if self._settings.active_project in names else None
+		for name in names:
+			clicked, _ = imgui.selectable(name, name == current)
 			if clicked:
-				self._new_project_name = ""
-				self._new_project_error = ""
-				self._new_project_pending = True
-			imgui.end_combo()
-		imgui.end_disabled()
-		if not self.is_configured() and imgui.is_item_hovered():
-			imgui.set_tooltip("Set up a Workspaces folder first (Settings tab)")
+				self.set_active_project(name)
+		if names:
+			imgui.separator()
+		clicked, _ = imgui.selectable(_NEW_LABEL, False)
+		if clicked:
+			self._new_project_name = ""
+			self._new_project_error = ""
+			self._new_project_pending = True
 
-	def _draw_workspace_row(self, width):
+	def _build_workspace_row(self):
 		names = self.workspace_names()
 		current = self._settings.active_workspace if self._settings.active_workspace in names else None
 		# Self-heal: the active workspace named in settings no longer
@@ -302,37 +328,50 @@ class WorkspaceSetupDialog:
 			current = names[0]
 		preview = current or "(none)"
 		has_project = bool(self._settings.active_project)
-
-		imgui.text("Workspace:")
-		imgui.same_line()
-		imgui.begin_disabled(not has_project)
-		imgui.set_next_item_width(width)
-		if imgui.begin_combo("##workspace-selector", preview):
-			for name in names:
-				clicked, _ = imgui.selectable(name, name == current)
-				if clicked:
-					self.set_active_workspace(name)
-			if names:
-				imgui.separator()
-			clicked, _ = imgui.selectable(_NEW_WORKSPACE_LABEL, False)
-			if clicked:
-				self._new_workspace_name = ""
-				self._new_workspace_error = ""
-				self._new_workspace_pending = True
-			clicked, _ = imgui.selectable(_IMPORT_FOLDER_LABEL, False)
-			if clicked:
-				self._import_folder_dialog = pfd.select_folder("Import workspace folder", "")
-			imgui.end_combo()
-		imgui.end_disabled()
-		if not has_project and imgui.is_item_hovered():
-			imgui.set_tooltip("Pick or create a project first")
-
-		imgui.same_line()
 		active_path = self.active_workspace_dir
-		imgui.begin_disabled(active_path is None)
-		if _icon_button(fa_icons.ICON_FA_EYE, "Open workspace folder in system file manager"):
-			open_in_system_file_manager(active_path)
-		imgui.end_disabled()
+		# frame_height + 2*DEFAULT_WIDGET_MARGIN, not frame_height alone --
+		# see Widget's own docstring (ui/box_panel.py, Nuno 2026-09-20).
+		row_height = imgui.get_frame_height() + 2 * DEFAULT_WIDGET_MARGIN
+
+		row = Box(dock="top", v=row_height)
+		# Label+combo grouped so the eye button (fixed size, dock="right")
+		# reserves its own width first -- the group then stretches into
+		# whatever's left, splitting THAT 50/50 between label and combo
+		# (Nuno 2026-09-20: "Workspace + <liste> ça s'étire, <button> reste
+		# à la bonne dimension").
+		group = row.add(Box(dock="left", h=STRETCH))
+		group.add(LabelWidget("Workspace:", dock="left", h=STRETCH, align="center"))
+		group.add(ComboWidget(
+			"##workspace-selector", preview, self._draw_workspace_popup,
+			dock="left", h=STRETCH,
+			disabled=not has_project,
+			disabled_tooltip="Pick or create a project first"))
+		row.add(IconButtonWidget(
+			fa_icons.ICON_FA_EYE + "##workspace", "Open workspace folder in system file manager",
+			on_click=lambda: open_in_system_file_manager(active_path),
+			disabled=active_path is None,
+			dock="right", h=row_height))
+		return row
+
+	def _draw_workspace_popup(self):
+		"""Dropdown content of the Workspace combo (_build_workspace_row())
+		-- popup content isn't managed by Box, stays plain, direct ImGui."""
+		names = self.workspace_names()
+		current = self._settings.active_workspace if self._settings.active_workspace in names else None
+		for name in names:
+			clicked, _ = imgui.selectable(name, name == current)
+			if clicked:
+				self.set_active_workspace(name)
+		if names:
+			imgui.separator()
+		clicked, _ = imgui.selectable(_NEW_WORKSPACE_LABEL, False)
+		if clicked:
+			self._new_workspace_name = ""
+			self._new_workspace_error = ""
+			self._new_workspace_pending = True
+		clicked, _ = imgui.selectable(_IMPORT_FOLDER_LABEL, False)
+		if clicked:
+			self._import_folder_dialog = pfd.select_folder("Import workspace folder", "")
 
 	def _draw_new_project_popup(self):
 		center_next_popup()

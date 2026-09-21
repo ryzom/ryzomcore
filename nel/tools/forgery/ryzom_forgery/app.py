@@ -20,7 +20,7 @@ from .explorer import DEFAULT_FILTER, Explorer
 from .splash import Splash
 from .sysinfo import SysInfoBar
 from .ui.box import Box, STRETCH
-from .ui.box_panel import Panel as BoxPanel
+from .ui.box_panel import Panel as BoxPanel, _SIDE_PANEL_MAX_WIDTH, _SIDE_PANEL_MIN_WIDTH
 from .ui.panel import Panel
 from .workspace_setup_dialog import WorkspaceSetupDialog
 
@@ -86,8 +86,6 @@ def _effective_ui_scale(settings) -> float:
 # a scrollbar (a status bar overflowing was always a sizing bug to fix, never
 # something to scroll -- found 2026-09-18, Nuno: "ya un scrollbar").
 _SYSINFO_EXTRA_FLAGS = imgui.WindowFlags_.no_scrollbar.value | imgui.WindowFlags_.no_scroll_with_mouse.value
-_SIDE_PANEL_MIN_WIDTH = 150
-_SIDE_PANEL_MAX_WIDTH = 900
 
 # Panda3D's own default window size (~800x600 depending on config.prc) is
 # cramped for these tools -- used as the starting size the very first time an
@@ -423,14 +421,30 @@ class ForgeryApp(ShowBase):
 		pass
 
 	def draw_left_panel_content(self):
-		"""Draws whatever goes inside the left "Explorer" window each frame --
-		override in a subclass to replace the real-file Explorer with
-		something else entirely (project-todos/forgery/
-		landscape_editor__ig_inspector_tree.md: Atyscape's own `.ig`/`.shape`
-		checkbox tree, Nuno 2026-09-14 -- "vire l'explorer de gauche qui ne
-		sert strictement à rien"). Default: the real-file Explorer every
-		other app still uses, unchanged."""
-		self.explorer.draw()
+		"""Draws whatever goes inside the left "Explorer" window each frame,
+		via the default `_draw_left_panel()` below -- override in a subclass
+		to replace the real-file Explorer with something else entirely
+		(project-todos/forgery/landscape_editor__ig_inspector_tree.md:
+		Atyscape's own `.ig`/`.shape` checkbox tree, Nuno 2026-09-14 -- "vire
+		l'explorer de gauche qui ne sert strictement à rien"). No-op by
+		default -- Patina overrides `_draw_left_panel()` itself instead (its
+		own `LeftPanel` + `Explorer.build_content_box()`, see
+		box_ui_migration__explorer_panel.md), so this hook currently only has
+		one real caller (Atyscape)."""
+		pass
+
+	def _draw_left_panel(self, available):
+		"""Draws the left "Explorer" window into `available` and returns
+		whatever rect is left for the right panel -- override in a subclass
+		for a self-contained left-panel window unrelated to this default
+		(Patina's own `LeftPanel`/`Explorer.build_content_box()`, see
+		box_ui_migration__explorer_panel.md). Default: the old flat
+		`ui/panel.py` Panel + `draw_left_panel_content()` hook, unchanged --
+		still what Atyscape uses today."""
+		with self._explorer_panel.draw(available, "Explorer") as available:
+			self.draw_left_panel_content()
+		self.explorer_width = self._explorer_panel.size
+		return available
 
 	def panel_title(self):
 		"""Override in subclasses for a more useful right-panel window title
@@ -571,9 +585,7 @@ class ForgeryApp(ShowBase):
 		self._ui_root.layout((0.0, 0.0, width, height))
 		available = (0.0, 0.0, width, height - self.sysinfo_height)
 
-		with self._explorer_panel.draw(available, "Explorer") as available:
-			self.draw_left_panel_content()
-		self.explorer_width = self._explorer_panel.size
+		available = self._draw_left_panel(available)
 
 		# "###panel" keeps the window's ImGui identity (position/size
 		# persistence) stable even though the displayed title itself
