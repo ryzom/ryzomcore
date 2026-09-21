@@ -1495,8 +1495,9 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 		local sub_command = SearchCommand:read_sub_command(sub_command_slot,uiId)
 		if(sub_command ~= nil)then
 			if(SearchCommand:get_command_type(sub_command) == "")then
-				--half typed or simply not a command, so the words after it cannot be
-				--read as its arguments either
+				--Half typed, or simply not a command. The help is drawn as a shadow
+				--right behind the input, so it has to keep echoing what the player
+				--typed; only the bookkeeping below leaves those words unaccounted.
 				sub_command_unknown = true
 			else
 				command_to_show_argument_new=sub_command
@@ -1575,13 +1576,6 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 			end
 		end
 		
-		--Nothing known stands behind the prefix yet, so describe the prefix itself:
-		--leave its placeholder standing instead of echoing the half typed word back
-		--as an argument or counting it as one too many.
-		if(sub_command_unknown)then
-			current_args = 0
-		end
-		
 		for ac = 1, max_arguments do
 			if(ac > current_args)then
 				for pc = 1, #self.commands_list[command_index][5+ac] do
@@ -1615,7 +1609,13 @@ function SearchCommand:search_build_argument_list(uiId,command_to_show_argument)
 					argument_help=argument_help.." "..surplus
 				end
 			end
-			argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
+			--Words behind a sub-command we do not know are not surplus arguments of
+			--the prefix: they may well belong to the command being typed. They are
+			--echoed above so the help still lines up with the input, but they are
+			--not scolded for.
+			if(not sub_command_unknown)then
+				argument_help=argument_help.." "..i18n.get("uiSearchCommandWarningParameter"):toUtf8()
+			end
 		end
 		
 		--Echo the prefix and its sub-command, under the same rule that picked the
@@ -1755,11 +1755,6 @@ function SearchCommand:build_command_helper(uiId)
 	
 	if(process_status == 1)then
 		--initlial command
-		--an empty command slot is the same situation as a line holding nothing but
-		--the "/", so say what belongs there instead of leaving the help blank
-		if(self.cursor_on_empty_slot)then
-			SearchCommand:write_command_help(uiId,i18n.get("uiSearchCommandInitDialog"):toUtf8())
-		end
 		SearchCommand:search_build_command_list(uiId,self.command_self,true)
 		self.player_list_already_filled=0
 	else
@@ -1820,6 +1815,17 @@ function SearchCommand:write_command_help(uiId,text)
 	local read_prompt = main_chat_input.prompt
 	--debug("write_command_help: "..text)
 	local behind_help_text = getUI(uiId.."h")
+	
+	--The help is a second edit box drawn right behind the input, both starting at
+	--the same place. It only reads as a shadow of the line while it repeats what
+	--the player typed and adds to the end of it; a placeholder in the middle, or
+	--spacing of its own, puts two texts on top of each other and smears them.
+	--Then the suggestion list is the better guidance and the shadow stays empty.
+	local input_text = main_chat_input.input_string
+	if(string.sub(text, 1, string.len(input_text)) ~= input_text)then
+		SearchCommand:write_command_help_clear(uiId)
+		do return end
+	end
 	
 	behind_help_text.prompt=read_prompt
 	behind_help_text.input_string = text
@@ -2125,4 +2131,4 @@ SearchCommand:pars_all_emotes()
 --##############END Pars now all Emotes and add it to command table
 
 -- VERSION --
-FILE_SEARCH_COMMAND_VERSION = 126
+FILE_SEARCH_COMMAND_VERSION = 127
