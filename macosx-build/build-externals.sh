@@ -32,7 +32,7 @@ JOBS="${JOBS:-$(sysctl -n hw.ncpu)}"
 # CMAKE_OSX_DEPLOYMENT_TARGET) — without it, object files get built against
 # the host's own macOS version (e.g. 15.7) instead of the 11.0 floor this
 # whole universal2 build targets.
-export MACOSX_DEPLOYMENT_TARGET="11.0"
+export MACOSX_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET:-11.0}"
 
 # Force our own CMake (installed by setup-environment.sh) ahead of any
 # system one (e.g. MacPorts' /opt/local/bin/cmake) — relying on the user's
@@ -42,7 +42,7 @@ OWN_CMAKE_BIN="${SCRIPT_DIR}/cmake/CMake.app/Contents/bin"
 if [ -x "${OWN_CMAKE_BIN}/cmake" ]; then
 	export PATH="${OWN_CMAKE_BIN}:${PATH}"
 fi
-OSX_ARCHITECTURES="x86_64;arm64"
+OSX_ARCHITECTURES="${MACOS_ARCHITECTURES:-x86_64;arm64}"
 
 ZLIB_VERSION=v1.3.1
 LIBXML2_VERSION=v2.12.6
@@ -173,33 +173,27 @@ fi
 # No CMake / no multi-arch Configure target — built once per arch, then
 # merged into a single fat .a with lipo.
 if ! is_built openssl; then
-	fetch_src https://github.com/openssl/openssl.git "${OPENSSL_VERSION}" "${BUILD_TMP}/openssl-x86_64"
-	cp -r "${BUILD_TMP}/openssl-x86_64" "${BUILD_TMP}/openssl-arm64"
+	fetch_src https://github.com/openssl/openssl.git "${OPENSSL_VERSION}" "${BUILD_TMP}/openssl-src"
 
-	(
-		cd "${BUILD_TMP}/openssl-x86_64"
-		./Configure darwin64-x86_64-cc no-shared no-tests no-apps \
-			--prefix="${BUILD_TMP}/openssl-install-x86_64"
-		make -j"${JOBS}"
-		make install_sw
-	)
-	(
-		cd "${BUILD_TMP}/openssl-arm64"
-		./Configure darwin64-arm64-cc no-shared no-tests no-apps \
-			--prefix="${BUILD_TMP}/openssl-install-arm64"
-		make -j"${JOBS}"
-		make install_sw
-	)
+	SSL_LIPO_INPUTS=()
+	CRYPTO_LIPO_INPUTS=()
+	for arch in ${OSX_ARCHITECTURES//;/ }; do
+		rm -rf "${BUILD_TMP}/openssl-${arch}"
+		cp -r "${BUILD_TMP}/openssl-src" "${BUILD_TMP}/openssl-${arch}"
+		(
+			cd "${BUILD_TMP}/openssl-${arch}"
+			./Configure "darwin64-${arch}-cc" no-shared no-tests no-apps \
+				--prefix="${BUILD_TMP}/openssl-install-${arch}"
+			make -j"${JOBS}"
+			make install_sw
+		)
+		SSL_LIPO_INPUTS+=("${BUILD_TMP}/openssl-install-${arch}/lib/libssl.a")
+		CRYPTO_LIPO_INPUTS+=("${BUILD_TMP}/openssl-install-${arch}/lib/libcrypto.a")
+	done
 
-	lipo -create \
-		"${BUILD_TMP}/openssl-install-x86_64/lib/libssl.a" \
-		"${BUILD_TMP}/openssl-install-arm64/lib/libssl.a" \
-		-output "${EXTERNAL_PATH}/lib/libssl.a"
-	lipo -create \
-		"${BUILD_TMP}/openssl-install-x86_64/lib/libcrypto.a" \
-		"${BUILD_TMP}/openssl-install-arm64/lib/libcrypto.a" \
-		-output "${EXTERNAL_PATH}/lib/libcrypto.a"
-	cp -r "${BUILD_TMP}/openssl-install-x86_64/include/." "${EXTERNAL_PATH}/include/"
+	lipo -create "${SSL_LIPO_INPUTS[@]}" -output "${EXTERNAL_PATH}/lib/libssl.a"
+	lipo -create "${CRYPTO_LIPO_INPUTS[@]}" -output "${EXTERNAL_PATH}/lib/libcrypto.a"
+	cp -r "${BUILD_TMP}/openssl-install-${OSX_ARCHITECTURES%%;*}/include/." "${EXTERNAL_PATH}/include/"
 	mark_built openssl
 fi
 
@@ -244,7 +238,9 @@ if ! is_built lua; then
 	tar xzf "${BUILD_TMP}/lua.tar.gz" -C "${BUILD_TMP}/lua" --strip-components=1
 	(
 		cd "${BUILD_TMP}/lua/src"
-		clang -O2 -arch x86_64 -arch arm64 -DLUA_USE_MACOSX -c ./*.c
+		LUA_ARCH_FLAGS=()
+		for arch in ${OSX_ARCHITECTURES//;/ }; do LUA_ARCH_FLAGS+=(-arch "${arch}"); done
+		clang -O2 "${LUA_ARCH_FLAGS[@]}" -DLUA_USE_MACOSX -c ./*.c
 		rm -f lua.o luac.o
 		libtool -static -o liblua.a ./*.o
 	)
@@ -307,7 +303,7 @@ fi
 # same as OpenSSL/Breakpad.
 if ! is_built jpeg; then
 	fetch_src https://github.com/libjpeg-turbo/libjpeg-turbo.git "${JPEG_VERSION}" "${BUILD_TMP}/jpeg"
-	for arch in x86_64 arm64; do
+	for arch in ${OSX_ARCHITECTURES//;/ }; do
 		cmake -S "${BUILD_TMP}/jpeg" -B "${BUILD_TMP}/jpeg/build-${arch}" \
 			-DCMAKE_BUILD_TYPE=Release \
 			-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
@@ -322,11 +318,12 @@ if ! is_built jpeg; then
 		cmake --build "${BUILD_TMP}/jpeg/build-${arch}" -j"${JOBS}"
 		cmake --install "${BUILD_TMP}/jpeg/build-${arch}"
 	done
-	lipo -create \
-		"${BUILD_TMP}/jpeg/install-x86_64/lib/libjpeg.a" \
-		"${BUILD_TMP}/jpeg/install-arm64/lib/libjpeg.a" \
-		-output "${EXTERNAL_PATH}/lib/libjpeg.a"
-	cp -r "${BUILD_TMP}/jpeg/install-x86_64/include/." "${EXTERNAL_PATH}/include/"
+	JPEG_LIPO_INPUTS=()
+	for arch in ${OSX_ARCHITECTURES//;/ }; do
+		JPEG_LIPO_INPUTS+=("${BUILD_TMP}/jpeg/install-${arch}/lib/libjpeg.a")
+	done
+	lipo -create "${JPEG_LIPO_INPUTS[@]}" -output "${EXTERNAL_PATH}/lib/libjpeg.a"
+	cp -r "${BUILD_TMP}/jpeg/install-${OSX_ARCHITECTURES%%;*}/include/." "${EXTERNAL_PATH}/include/"
 	mark_built jpeg
 fi
 
@@ -338,7 +335,9 @@ if ! is_built giflib; then
 	fetch_src https://git.code.sf.net/p/giflib/code "${GIFLIB_VERSION}" "${BUILD_TMP}/giflib"
 	(
 		cd "${BUILD_TMP}/giflib"
-		clang -O2 -arch x86_64 -arch arm64 -c dgif_lib.c egif_lib.c gifalloc.c gif_err.c gif_font.c gif_hash.c openbsd-reallocarray.c quantize.c
+		GIFLIB_ARCH_FLAGS=()
+		for arch in ${OSX_ARCHITECTURES//;/ }; do GIFLIB_ARCH_FLAGS+=(-arch "${arch}"); done
+		clang -O2 "${GIFLIB_ARCH_FLAGS[@]}" -c dgif_lib.c egif_lib.c gifalloc.c gif_err.c gif_font.c gif_hash.c openbsd-reallocarray.c quantize.c
 		libtool -static -o libgif.a ./*.o
 	)
 	cp "${BUILD_TMP}/giflib/libgif.a" "${EXTERNAL_PATH}/lib/"
@@ -397,7 +396,7 @@ if ! is_built breakpad; then
 	HOST_GNU_ARCH="${HOST_ARCH}"
 	[ "${HOST_ARCH}" = "arm64" ] && HOST_GNU_ARCH="aarch64"
 
-	for arch in x86_64 arm64; do
+	for arch in ${OSX_ARCHITECTURES//;/ }; do
 		rm -rf "${BUILD_TMP}/breakpad-${arch}"
 		cp -r "${BUILD_TMP}/breakpad" "${BUILD_TMP}/breakpad-${arch}"
 		gnu_arch="${arch}"
@@ -416,11 +415,12 @@ if ! is_built breakpad; then
 	done
 
 	mkdir -p "${EXTERNAL_PATH}/include/breakpad"
-	lipo -create \
-		"${BUILD_TMP}/breakpad-install-x86_64/lib/libbreakpad.a" \
-		"${BUILD_TMP}/breakpad-install-arm64/lib/libbreakpad.a" \
-		-output "${EXTERNAL_PATH}/lib/libbreakpad.a"
-	cp -r "${BUILD_TMP}/breakpad-install-x86_64/include/." "${EXTERNAL_PATH}/include/"
+	BREAKPAD_LIPO_INPUTS=()
+	for arch in ${OSX_ARCHITECTURES//;/ }; do
+		BREAKPAD_LIPO_INPUTS+=("${BUILD_TMP}/breakpad-install-${arch}/lib/libbreakpad.a")
+	done
+	lipo -create "${BREAKPAD_LIPO_INPUTS[@]}" -output "${EXTERNAL_PATH}/lib/libbreakpad.a"
+	cp -r "${BUILD_TMP}/breakpad-install-${OSX_ARCHITECTURES%%;*}/include/." "${EXTERNAL_PATH}/include/"
 	mark_built breakpad
 fi
 
