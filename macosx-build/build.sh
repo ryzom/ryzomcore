@@ -1,10 +1,13 @@
 #!/bin/bash
-# Configures and compiles the Ryzom client as a universal2 (x86_64 + arm64)
-# macOS binary, targeting macOS 11.0. Entry point for the whole macOS build
-# pipeline: makes sure the environment and third-party libs are ready, then
-# builds ryzom_client itself.
+# Configures and compiles the Ryzom client for macOS. Entry point for the
+# whole macOS build pipeline: makes sure the environment and third-party
+# libs are ready, then builds ryzom_client itself.
 #
 # Usage: ./build.sh [fv|steam]   (defaults to fv)
+#
+# MACOS_ARCHITECTURES/MACOS_DEPLOYMENT_TARGET let the caller build for a
+# single old-arch machine (e.g. x86_64 on a pre-Big Sur clang that can't
+# parse a "11.0" deployment target) instead of the default universal2 build.
 
 set -e
 set -o pipefail
@@ -13,6 +16,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 export EXTERNAL_PATH="${EXTERNAL_PATH:-${SCRIPT_DIR}/external}"
 JOBS="${JOBS:-$(sysctl -n hw.ncpu)}"
+
+MACOS_ARCHITECTURES="${MACOS_ARCHITECTURES:-x86_64;arm64}"
+MACOS_DEPLOYMENT_TARGET="${MACOS_DEPLOYMENT_TARGET:-11.0}"
 
 # Modern macOS SDKs don't ship system libs as real .dylib files on disk
 # (they only live in the dyld shared cache) — linking against them needs
@@ -117,12 +123,19 @@ fi
 
 mkdir -p "${BUILD_DIR}"
 
+# CMakeModules/nel.cmake force-overwrites CMAKE_CXX_FLAGS from its own
+# PLATFORM_CXXFLAGS (nel.cmake:1064), discarding whatever is passed via
+# -DCMAKE_CXX_FLAGS on the command line — but PLATFORM_CXXFLAGS itself
+# folds in $ENV{CXXFLAGS} (nel.cmake:527), so this is the only way to
+# actually get a flag through to the compiler.
+export CXXFLAGS="-stdlib=libc++"
+
 echo ">>> Configuring with CMake..."
 cmake -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
 	-GXcode \
 	-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
-	-DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
-	-DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
+	-DCMAKE_OSX_ARCHITECTURES="${MACOS_ARCHITECTURES}" \
+	-DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET} \
 	-DCMAKE_SYSTEM_IGNORE_PATH="${CMAKE_SYSTEM_IGNORE_PATH}" \
 	-DCMAKE_PREFIX_PATH="${EXTERNAL_PATH}" \
 	-DWITH_RYZOM_CLIENT=ON \
