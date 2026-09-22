@@ -305,6 +305,16 @@ namespace NLGUI
 		CFile::deleteFile(dest);
 	}
 
+	// A cache file that has not been downloaded yet is not a texture. The
+	// download callback sets the real one once it lands, and addImageDownload
+	// has already put a placeholder in place meanwhile. Handing the name to the
+	// renderer now only logs a lookup miss for every image on the page.
+	static void clearPendingCacheTexture(std::string &name)
+	{
+		if (!name.empty() && startsWith(name, "cache/") && !CFile::fileExists(name))
+			name.clear();
+	}
+
 	void CGroupHTML::StylesheetDownloadCB::finish()
 	{
 		if (CFile::fileExists(tmpdest))
@@ -3063,6 +3073,10 @@ namespace NLGUI
 				}
 			}
 		}
+
+		clearPendingCacheTexture(normal);
+		clearPendingCacheTexture(pushed);
+		clearPendingCacheTexture(over);
 
 		ctrlButton->setType (type);
 		if (!normal.empty())
