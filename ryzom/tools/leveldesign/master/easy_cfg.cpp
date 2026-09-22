@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "stdafx.h"
 #include "easy_cfg.h"
+#ifdef NL_OS_WINDOWS
+#include "stdafx.h"
+#endif
 
 #include "nel/misc/config_file.h"
 

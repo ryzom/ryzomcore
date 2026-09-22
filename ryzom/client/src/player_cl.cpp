@@ -492,8 +492,12 @@ void CPlayerCL::equip(SLOTTYPE::EVisualSlot slot, const std::string &shapeName, 
 					stickPoint = "box_arme_gauche";
 			break;
 
+			case SLOTTYPE::HAT_SLOT:
+				stickPoint = "Bip01 Head";
+				break;
+
 			default:
-			break;
+				break;
 		}
 	}
 
@@ -1004,14 +1008,18 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 
 			equip(SLOTTYPE::HEAD_SLOT, visualA.PropertySubData.HatModel, visualA.PropertySubData.HatColor);
 
-			SLOTTYPE::EVisualSlot slot = SLOTTYPE::HEAD_SLOT;
+			SLOTTYPE::EVisualSlot slot;
 			string hatTag = getTag(7);
 			if (!hatTag.empty() && hatTag != "_")
 			{
-				sint idx = SheetMngr.getVSIndex("eroukan_h.sitem", slot);
-				const CItemSheet *itemSheet = SheetMngr.getItem(slot, (uint)idx);
 				vector<string> tagInfos;
 				splitString(hatTag, string("|"), tagInfos);
+
+				if (tagInfos.size() >= 3 && tagInfos[2] == "H")
+					slot = SLOTTYPE::HAT_SLOT;
+				else
+					slot = SLOTTYPE::HEAD_SLOT;
+
 				UInstance instance;
 
 				// Manage cache of items
@@ -1026,13 +1034,13 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				{
 					sint instTexture;
 					fromString(tagInfos[1], instTexture);
-					equip(slot, tagInfos[0], itemSheet);
+					equip(slot, tagInfos[0]);
 					_Instances[slot].selectTextureSet(instTexture);
 					_Instances[slot].TextureSet = instTexture;
 				}
 				else
 				{
-					equip(slot, tagInfos[0], itemSheet);
+					equip(slot, tagInfos[0]);
 				}
 			}
 		}
