@@ -1306,7 +1306,11 @@ function SearchCommand:build_valid_command_list(command_input,uiId)
 						end
 					else
 						--input is longer as 1 char, go to full search mode, add every result where the input string are anywhere in the command name
-						if string.find(string.lower(self.commands_list[c][4]), string.lower(command_input))then
+						--Plain text, not a pattern. What the player typed goes in here
+						--unescaped, so a "(" in the line aborted the whole search with
+						--"unfinished capture" -- and an eScript call is nothing but
+						--brackets. Nothing here ever wanted pattern matching.
+						if string.find(string.lower(self.commands_list[c][4]), string.lower(command_input), 1, true)then
 							table.insert(self.valid_commands_list,self.commands_list[c][4])
 							count_found=count_found+1
 						end
@@ -1381,7 +1385,8 @@ function SearchCommand:build_valid_player_list(playername_input,uiId,add_targetn
 					found_playername=c
 					count_found=1
 				else
-					if string.find(string.lower(self.player_list[c]), string.lower(playername_input))then
+					--plain text for the same reason as above: a player may type anything
+					if string.find(string.lower(self.player_list[c]), string.lower(playername_input), 1, true)then
 						if(add_targetname_prefix == 1)then
 							local server_name=SearchCommand:get_server_name()
 							table.insert(self.valid_commands_list,self.player_list[c].."("..server_name..")")
