@@ -15,13 +15,31 @@ if not SearchCommand then
 		player_gender_local = 9,
 		ryzom_emotes_text_list = {},
 		command_token_list = {},
-		cursor_on_empty_slot = false
+		cursor_on_empty_slot = false,
+		continent_suffix = "",
+		list_is_numbered = true
 	}
 end
 
 --setup data
 --commands_list[x] = {"type(client/shard)","priv(player/privs)","uitranslation for description","command", "parameter1(playername/text/number)", "parameter2(playername/text/number)" ..}
 SearchCommand.commands_list = {}
+
+--Continents a <ContinentName> argument accepts. Fixed on the shard, so unlike
+--the player list there is nothing to fetch -- it is simply here.
+--Kept in reading order rather than sorted: grouped by homeland, which is how
+--you look for one when the slot is still empty and the whole list is shown.
+SearchCommand.continent_list = {
+	"newbieland",
+	"matis", "matis_newbie", "matis_island",
+	"indoors",
+	"zorai", "zorai_newbie", "zorai_island",
+	"fyros", "fyros_newbie", "fyros_islands",
+	"tryker", "tryker_newbie", "tryker_island",
+	"terre", "sources", "route_gouffre", "nexus", "bagne", "kitiniere",
+	"r2_roots", "r2_desert", "r2_lakes", "r2_forest", "r2_jungle",
+	"corrupted_moor"
+}
 
 local player_priv = isPlayerPrivilege()
 if(player_priv)then
@@ -941,6 +959,16 @@ function SearchCommand:check_autocomplet_number(uiId)
 	end
 	
 	local get_last_char_from_input = tonumber(string.sub(input_text, cursor_pos, cursor_pos))
+
+	--Not inside an eScript slot. Picking an entry by its number cannot work
+	--there: the values are digits themselves, so "2" would mean the value 2 and
+	--the second entry at the same time. In a slot you type the value and click
+	--or tab for the list -- no third reading of the same keystroke.
+	local in_slot_index, in_slot = SearchCommand:escript_at_caret(input_text, cursor_pos)
+	if(in_slot_index ~= nil and in_slot ~= nil)then
+		do return end
+	end
+
 	if(type(get_last_char_from_input) == "number")then
 		--debug("last_input_is_a_Number: "..get_last_char_from_input)
 		
@@ -1373,6 +1401,366 @@ function SearchCommand:get_server_name()
 	return server_name
 end
 
+--Same shape as build_valid_player_list, over a list that is known up front.
+--Two differences on purpose:
+--  * an empty slot offers the whole list. There are 26 of them and the player
+--    is standing on the slot precisely to see what may go in it, while a
+--    player name could be anything and listing "everyone" would say nothing.
+--  * the match is plain text (string.find with plain = true). A continent name
+--    carries no pattern characters, but what the player typed might, and a
+--    stray "(" or "%" would otherwise raise an error instead of matching
+--    nothing.
+--Returns the index of an exact hit, 0 otherwise -- the caller closes the popup
+--on an exact hit, the name is complete then.
+--####################################################################
+--## eScript argument slots
+--##
+--## An eScript command is inserted as a whole template with its parameter
+--## placeholders already filled in, e.g.
+--##
+--##     ()despawn(<0/1>)
+--##     ()npcSay("<Text>", "<say/shout>")
+--##
+--## and the player then overwrites the placeholders. Everything else in this
+--## file completes one whitespace token at a time, which does not fit here
+--## twice over: the placeholder sits inside a token, and a template may even
+--## be split across two of them (npcSay and setUrl carry a space). So these
+--## work on the line text and on the template the text was built from, not on
+--## the token list.
+--##
+--## The template carries its holes as arg1, arg2, ...; splitting on those
+--## gives the literal chunks around them. Finding those chunks back in the
+--## line locates the holes, whatever the player has typed into them so far.
+--####################################################################
+
+--"despawn(arg1)" -> chunks {"despawn(", ")"}, numbers {1}
+function SearchCommand:template_chunks(template)
+	local chunks = {}
+	local numbers = {}
+	local pos = 1
+
+	while true do
+		local first, last, n = string.find(template, "arg(%d)", pos)
+		if(first == nil)then
+			break
+		end
+		table.insert(chunks, string.sub(template, pos, first - 1))
+		table.insert(numbers, tonumber(n))
+		pos = last + 1
+	end
+	table.insert(chunks, string.sub(template, pos))
+
+	return chunks, numbers
+end
+
+--Walk the literal chunks through the line and hand back the byte range of
+--every hole. start_pos is where the template begins in the line. Returns nil
+--when the line no longer follows the template -- the player is free to edit,
+--and a half-deleted call simply has no slots.
+--Ranges are inclusive and 1-based, like string.sub; an empty hole comes back
+--as first > last, which still says where it is.
+function SearchCommand:template_slots(input_text, start_pos, template)
+	local chunks, numbers = SearchCommand:template_chunks(template)
+	local slots = {}
+	local pos = start_pos
+
+	--the text must open with the first literal chunk
+	if(chunks[1] ~= "")then
+		if(string.sub(input_text, pos, pos + string.len(chunks[1]) - 1) ~= chunks[1])then
+			return nil
+		end
+		pos = pos + string.len(chunks[1])
+	end
+
+	for i = 1, #numbers do
+		local following = chunks[i + 1]
+		local hole_first = pos
+		local hole_last
+
+		if(following == "")then
+			--last hole, nothing behind it: it runs to the end of the line
+			hole_last = string.len(input_text)
+			pos = hole_last + 1
+		else
+			local found = string.find(input_text, following, pos, true)
+			if(found == nil)then
+				--The line stops in the middle of the call -- the player has just
+				--typed "()despawn(" and is waiting for the list. Everything from
+				--here is the hole, and what the template still owes is handed
+				--back so picking a value can close the call in one go.
+				if(pos > string.len(input_text) + 1)then
+					return nil
+				end
+				local missing = following
+				for k = i + 1, #numbers do
+					missing = missing..chunks[k + 1]
+				end
+				table.insert(slots, {number = numbers[i], first = hole_first, last = string.len(input_text)})
+				return slots, string.len(input_text), missing
+			end
+			hole_last = found - 1
+			pos = found + string.len(following)
+		end
+
+		table.insert(slots, {number = numbers[i], first = hole_first, last = hole_last})
+	end
+
+	return slots, pos - 1, nil
+end
+
+--Is this alternative a value a player can pick, or a hole to fill in?
+--A hole is written "Text:<Name>" / "Number:<Range>", or carries angle
+--brackets of its own; "*" stands for anything. None of those is selectable.
+function SearchCommand:is_literal_value(alt)
+	if(alt == nil or alt == "" or alt == "*")then
+		return false
+	end
+	if(string.find(alt, "^Text:") or string.find(alt, "^Number:"))then
+		return false
+	end
+	if(string.find(alt, "<", 1, true) or string.find(alt, ">", 1, true))then
+		return false
+	end
+	return true
+end
+
+--A span, not a choice: "<0.0/1.0>" means anything between 0.0 and 1.0, and
+--"<0.0/..0.5../1.0>" says so out loud. Offering the two ends as if they were
+--the only options would be worse than offering nothing, so these get the
+--caret but no list. Whole numbers are exempt -- "<0/1>" really is a choice of
+--two, and it is by far the most common parameter there is.
+function SearchCommand:looks_like_a_span(inner, parts)
+	if(string.find(inner, "..", 1, true))then
+		return true
+	end
+	local decimals = 0
+	for i = 1, #parts do
+		if(string.find(parts[i], "^%-?%d+%.%d+$"))then
+			decimals = decimals + 1
+		elseif(not string.find(parts[i], "^%-?%d+$"))then
+			return false
+		end
+	end
+	return decimals > 0
+end
+
+--The values offered for one parameter slot, or nil when there is nothing to
+--offer. Two shapes carry a choice, and they look different in the table but
+--identical in the finished line, because replace_escript_param joins them
+--with slashes either way:
+--    {{"event_group_killed",""},{"running",""}}   several alternatives
+--    {{"<0/1>",""}}                               one, slashes inside
+function SearchCommand:slot_choices(alts)
+	local parts = {}
+	local inner = ""
+
+	if(alts == nil)then
+		return nil
+	end
+
+	if(#alts > 1)then
+		for i = 1, #alts do
+			parts[i] = alts[i][1]
+		end
+		inner = table.concat(parts, "/")
+	elseif(#alts == 1 and string.find(alts[1][1], "/", 1, true))then
+		inner = alts[1][1]
+		inner = string.match(inner, "^<(.*)>$") or inner
+		for part in string.gmatch(inner, "[^/]+") do
+			table.insert(parts, part)
+		end
+	else
+		return nil
+	end
+
+	if(SearchCommand:looks_like_a_span(inner, parts))then
+		return nil
+	end
+
+	local values = {}
+	for i = 1, #parts do
+		if(SearchCommand:is_literal_value(parts[i]))then
+			table.insert(values, parts[i])
+		end
+	end
+
+	if(#values == 0)then
+		return nil
+	end
+	return values
+end
+
+--Which eScript call the caret is in, and which of its slots. Scans from every
+--"()" in the line, since that is what an inserted call opens with, and tries
+--the templates against it. Returns the command index, the slot under the
+--caret (nil when the caret is in the fixed text between slots) and all slots.
+function SearchCommand:escript_at_caret(input_text, caret_pos)
+	local pos = 1
+
+	while true do
+		local open_at = string.find(input_text, "()", pos, true)
+		if(open_at == nil)then
+			break
+		end
+		local start_pos = open_at + 2
+
+		for c = 1, #self.commands_list do
+			if(self.commands_list[c][1] == "eScript")then
+				local slots, stop, missing = SearchCommand:template_slots(input_text, start_pos, self.commands_list[c][4])
+				if(slots ~= nil and caret_pos >= start_pos - 1 and caret_pos <= stop)then
+					for i = 1, #slots do
+						--same reach as a token: from just before the first byte
+						--to just past the last one, so an empty slot is hit too
+						if(caret_pos >= slots[i].first - 1 and caret_pos <= slots[i].last)then
+							--the tail is only owed by the hole it broke off in
+							if(i == #slots)then
+								return c, slots[i], slots, missing
+							end
+							return c, slots[i], slots
+						end
+					end
+					return c, nil, slots
+				end
+			end
+		end
+
+		pos = open_at + 1
+	end
+
+	return nil
+end
+
+--The alternatives declared for one slot of a command.
+function SearchCommand:slot_alternatives(command_index, slot_number)
+	local entry = self.commands_list[command_index]
+	if(entry == nil)then
+		return nil
+	end
+	return entry[5 + slot_number]
+end
+
+--What the player has already put in the slot. An untouched placeholder still
+--reads as "<0/1>" or "<say/shout>"; that is not a filter, it is the hole
+--itself, so it counts as empty and the whole list is offered.
+function SearchCommand:slot_typed_text(input_text, slot)
+	if(slot.first > slot.last)then
+		return ""
+	end
+	local typed = string.sub(input_text, slot.first, slot.last)
+	if(string.find(typed, "<", 1, true) or string.find(typed, "/", 1, true))then
+		return ""
+	end
+	return typed
+end
+
+--Same filter the continent list uses: everything on an empty slot, plain-text
+--substring matching otherwise, exact hit reported so the popup can close.
+function SearchCommand:build_valid_slot_list(choices,typed,uiId)
+	self.valid_commands_list = {}
+	local count_found = 0
+	local found_exact = 0
+
+	for c = 1, #choices do
+		if(typed == "")then
+			table.insert(self.valid_commands_list, choices[c])
+			count_found = count_found + 1
+		elseif(string.lower(choices[c]) == string.lower(typed))then
+			found_exact = c
+			count_found = 1
+		elseif(string.find(string.lower(choices[c]), string.lower(typed), 1, true))then
+			table.insert(self.valid_commands_list, choices[c])
+			count_found = count_found + 1
+		end
+	end
+
+	if(count_found == 0)then
+		SearchCommand:close_modal(uiId)
+	end
+
+	return found_exact
+end
+
+function SearchCommand:search_build_slot_list(uiId,command_index,slot,input_text)
+	local choices = SearchCommand:slot_choices(SearchCommand:slot_alternatives(command_index, slot.number))
+
+	--No list for this slot -- a span or a free text. The caret is welcome to
+	--sit here, there is simply nothing to choose from.
+	if(choices == nil)then
+		SearchCommand:close_modal(uiId)
+		return
+	end
+
+	self.list_is_numbered = false
+	local found_exact = SearchCommand:build_valid_slot_list(choices, SearchCommand:slot_typed_text(input_text, slot), uiId)
+
+	if(found_exact ~= 0)then
+		SearchCommand:close_modal(uiId)
+	else
+		if next(self.valid_commands_list) ~= nil then
+			SearchCommand:show_more_options(uiId)
+		end
+	end
+end
+
+--A continent slot is not written "<ContinentName>" but "<ContinentName>@": the
+--group id follows the name, separated by an @. That separator belongs to the
+--argument, so read it off the spec instead of hardcoding it here -- a slot
+--written without one then simply completes to the bare name.
+--
+--Mind where it ends. find_argument hands back every alternative a slot accepts,
+--joined with commas and no spaces in between:
+--    ,Text:<ContinentName>@,Text:<EventNpcGroup>
+--so the separator runs up to the next comma, not up to the next blank. Reading
+--to the blank swallowed the rest of the line and completed "matis_newbie" to
+--"matis_newbie@,Text:<EventNpcGroup>".
+function SearchCommand:read_continent_suffix(argu_name)
+	local _, stop = string.find(string.lower(argu_name), string.lower("<ContinentName>"), 1, true)
+	if(stop == nil)then
+		return ""
+	end
+	return string.match(string.sub(argu_name, stop + 1), "^[^,%s]*") or ""
+end
+
+function SearchCommand:build_valid_continent_list(continent_input,uiId)
+	self.valid_commands_list = {}
+	local count_found=0
+	local found_continent=0
+
+	for c = 1, #self.continent_list do
+		if(continent_input == "")then
+			table.insert(self.valid_commands_list,self.continent_list[c])
+			count_found=count_found+1
+		elseif(string.lower(self.continent_list[c]) == string.lower(continent_input))then
+			found_continent=c
+			count_found=1
+		elseif(string.find(string.lower(self.continent_list[c]), string.lower(continent_input), 1, true))then
+			table.insert(self.valid_commands_list,self.continent_list[c])
+			count_found=count_found+1
+		end
+	end
+
+	if(count_found == 0)then
+		SearchCommand:close_modal(uiId)
+	end
+
+	return found_continent
+end
+
+function SearchCommand:search_build_continent_list(uiId,continent)
+	local found_continent=0
+	found_continent=SearchCommand:build_valid_continent_list(continent,uiId)
+
+	SearchCommand:search_build_argument_list(uiId,self.command_self)
+
+	if(found_continent ~= 0)then
+		SearchCommand:close_modal(uiId)
+	else
+		if next(self.valid_commands_list) ~= nil then
+			SearchCommand:show_more_options(uiId)
+		end
+	end
+end
+
 function SearchCommand:build_valid_player_list(playername_input,uiId,add_targetname_prefix)
 	self.valid_commands_list = {}
 	local count_found=0
@@ -1758,6 +2146,19 @@ function SearchCommand:build_command_helper(uiId)
 	--process_status == 1 try for command
 	--process_status > 1 try for parameter
 	
+	--Inside an eScript call the question is not which token to complete but
+	--which slot of the template the caret is in -- the slot sits inside a
+	--token, and npcSay/setUrl even straddle two of them. Checked before the
+	--token path, and only that path knows about slots.
+	self.list_is_numbered = true
+	local caret_now = SearchCommand:get_input_cursor(uiId)
+	local line_now = getUI(uiId).input_string
+	local escript_index, escript_slot = SearchCommand:escript_at_caret(line_now, caret_now)
+	if(escript_index ~= nil and escript_slot ~= nil)then
+		SearchCommand:search_build_slot_list(uiId, escript_index, escript_slot, line_now)
+		return
+	end
+
 	if(process_status == 1)then
 		--initlial command
 		SearchCommand:search_build_command_list(uiId,self.command_self,true)
@@ -1807,6 +2208,11 @@ function SearchCommand:build_command_helper(uiId)
 				end
 				
 				SearchCommand:search_build_player_list(uiId,cursor_text,add_targetname_prefix)
+		elseif(string.find(string.lower(argu_name), string.lower("<ContinentName>")))then
+			--taken here, where the argument spec is at hand; finish_commands only
+			--has the chosen string to go on
+			self.continent_suffix = SearchCommand:read_continent_suffix(argu_name)
+			SearchCommand:search_build_continent_list(uiId,cursor_text)
 		elseif(string.find(string.lower(argu_name), string.lower("<ScriptCommand>")))then
 			SearchCommand:search_build_command_list(uiId,cursor_text,false)
 		else
@@ -1961,11 +2367,23 @@ function SearchCommand:show_more_options(uiId)
 	
 	--fill menu window
 	
+	--The numbers in front of the entries are an offer: type the number, get the
+	--entry. In an eScript slot that offer is a lie -- the values there are
+	--digits themselves, so "1" cannot mean the value 1 and the first entry at
+	--once. The keystroke stays the value, and the numbering goes away so
+	--nothing suggests otherwise.
+	local function entry_label(c)
+		if(self.list_is_numbered)then
+			return c..". "..self.valid_commands_list[c]
+		end
+		return self.valid_commands_list[c]
+	end
+
 	if(found_commands == 1)then
 		menu:addLine(ucstring(i18n.get("uiSearchCommandFound"):toUtf8()..": "..#self.valid_commands_list), "lua", "SearchCommand:close_modal(\""..uiId.."\")", "")
 		for c = 1, display_max_found do
 			if(SearchCommand:get_command_type(self.valid_commands_list[c]) ~= "emotes")then
-				menu:addLine(getUCtf8(c..". "..self.valid_commands_list[c]), "lua", "SearchCommand:check_autocomplet_click(\""..uiId.."\","..c..")", "")
+				menu:addLine(getUCtf8(entry_label(c)), "lua", "SearchCommand:check_autocomplet_click(\""..uiId.."\","..c..")", "")
 			end
 		end
 	end
@@ -1979,7 +2397,7 @@ function SearchCommand:show_more_options(uiId)
 		
 		for c = 1, display_max_found do
 			if(SearchCommand:get_command_type(self.valid_commands_list[c]) == "emotes")then
-				menu:addLine(getUCtf8(c..". "..self.valid_commands_list[c]), "lua", "SearchCommand:check_autocomplet_click(\""..uiId.."\","..c..")", "")
+				menu:addLine(getUCtf8(entry_label(c)), "lua", "SearchCommand:check_autocomplet_click(\""..uiId.."\","..c..")", "")
 			end
 		end
 	end
@@ -2010,6 +2428,18 @@ function SearchCommand:replace_escript_param(command_name)
 		
 		for ac = 1, max_arguments do
 			
+			--A slot you can pick from is inserted empty. The placeholder used to
+			--go in as real text, so picking a value put it next to the
+			--placeholder and left "despawn(0<0/1>)" to clean up by hand. The
+			--list that opens on the slot says what goes there, so the text does
+			--not have to.
+			--A slot with no list keeps its placeholder: it is the only hint
+			--there is, and nothing is ever auto-inserted over it.
+			if(SearchCommand:slot_choices(self.commands_list[command_index][5+ac]) ~= nil)then
+				temp_command = temp_command:gsub("arg"..ac,"")
+				goto next_argument
+			end
+			
 			local load_all_param = ""
 			for pc = 1, #self.commands_list[command_index][5+ac] do
 				local translation_parm = SearchCommand:pars_command_parameter(self.commands_list[command_index][5+ac][pc][1])
@@ -2020,6 +2450,7 @@ function SearchCommand:replace_escript_param(command_name)
 				end
 			end
 			temp_command = temp_command:gsub("arg"..ac,load_all_param)
+			::next_argument::
 		end
 	end
 	
@@ -2064,7 +2495,65 @@ function SearchCommand:finish_commands(command_name,uiId)
 	if(SearchCommand:get_command_type(command_name) == "eScript")then
 		insert_text = "()"..SearchCommand:replace_escript_param(command_name)
 	end
+
+	--A continent is only half of its slot: "<ContinentName>@" wants the group id
+	--behind the @. So the completion brings the separator with it and the caret
+	--stops right after it, in the middle of the token, with no trailing space --
+	--the player carries straight on typing the group.
+	--The membership test is the guard: continent_suffix is set when the list was
+	--built, and only something actually on that list may take it.
+	local stop_inside_token = false
+	if(self.continent_suffix ~= nil and self.continent_suffix ~= ""
+	   and SearchCommand:find(self.continent_list, command_name) ~= nil)then
+		insert_text = insert_text..self.continent_suffix
+		stop_inside_token = true
+	end
 	
+	--A value picked for an eScript slot replaces exactly that slot -- not the
+	--token around it, which is the whole call. The membership test guards
+	--against a stale note: only something that was actually offered may take
+	--this path.
+	--Read the slot off the text as it is right now, the same reason the tokens
+	--above are re-read: a keystroke may have landed since the list was built,
+	--and a range remembered from before it does not cover what was typed. That
+	--is how picking entry 2 wrote "12" -- the value went in front of the digit
+	--instead of over it.
+	local slot_command, slot, _, slot_missing = SearchCommand:escript_at_caret(input_text, caret_pos)
+	local slot_choices = nil
+	if(slot_command ~= nil and slot ~= nil)then
+		slot_choices = SearchCommand:slot_choices(SearchCommand:slot_alternatives(slot_command, slot.number))
+	end
+
+	if(slot_choices ~= nil and SearchCommand:find(slot_choices, command_name) ~= nil)then
+		local before = string.sub(input_text, 1, slot.first - 1)
+		local after = string.sub(input_text, slot.last + 1)
+		local filled = before..command_name
+
+		--"()despawn(" gets its ")" here, so one pick finishes the call
+		input_search_string.input_string = filled..(slot_missing or "")..after
+		input_search_string:setFocusOnText()
+
+		--On to the next hole, or just behind the value when this was the last
+		--one. The slots have to be read off the new text: the value that was
+		--just written is rarely the same length as the placeholder it replaced.
+		--behind the value, in front of whatever closes the call
+		local caret_next = string.len(filled)
+		local _, _, new_slots = SearchCommand:escript_at_caret(input_search_string.input_string, caret_next)
+		if(new_slots ~= nil)then
+			for i = 1, #new_slots do
+				if(new_slots[i].first > caret_next)then
+					caret_next = new_slots[i].first - 1
+					break
+				end
+			end
+		end
+
+		input_search_string.cursor_pos = caret_next
+		SearchCommand:close_modal(uiId)
+		SearchCommand:search(uiId)
+		return
+	end
+
 	--Splice the completion over the token under the caret and leave everything
 	--around it untouched. Rebuilding the whole line from the token list, as this
 	--used to do, threw away the player's own spacing and always dumped the caret
@@ -2108,7 +2597,7 @@ function SearchCommand:finish_commands(command_name,uiId)
 	--the command still takes another argument, otherwise it would be inserted in
 	--the middle of text the player already typed
 	local trailing = ""
-	if(argument_count < max_aruments and tail == "")then
+	if(argument_count < max_aruments and tail == "" and not stop_inside_token)then
 		trailing = " "
 	end
 	
@@ -2122,8 +2611,18 @@ function SearchCommand:finish_commands(command_name,uiId)
 	--came straight back and the entry looked dead, whether it was clicked, tabbed
 	--or picked by its number.
 	local caret_after = string.len(completed)
-	if(trailing == "" and string.sub(tail, 1, 1) == " ")then
+	if(not stop_inside_token and trailing == "" and string.sub(tail, 1, 1) == " ")then
 		caret_after = caret_after + 1
+	end
+
+	--An eScript command arrives as a template with its holes still in it, so
+	--the caret goes into the first one instead of to the end of the line: that
+	--is the next thing to fill, and the list for it opens straight away.
+	if(SearchCommand:get_command_type(command_name) == "eScript")then
+		local slots = select(3, SearchCommand:escript_at_caret(completed..tail, string.len(head) + 3))
+		if(slots ~= nil and slots[1] ~= nil)then
+			caret_after = slots[1].first - 1
+		end
 	end
 	
 	input_search_string.input_string = completed..tail
