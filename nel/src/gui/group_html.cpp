@@ -317,7 +317,7 @@ namespace NLGUI
 		vec.swap(Images);
 
 		// tmpdest file does not exist if download skipped (ie cache was used)
-		if (CFile::fileExists(tmpdest) || CFile::getFileSize(tmpdest) == 0)
+		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
 		{
 			try {
 				// verify that image is not corrupted
