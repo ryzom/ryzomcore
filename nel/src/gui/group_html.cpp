@@ -267,6 +267,29 @@ namespace NLGUI
 		data = NULL;
 	}
 
+	// A server answers a missing image with an error page, and curl writes that
+	// body into the temp file just like it would a real image. Check the file
+	// before it is allowed to become the cache entry.
+	static bool isValidImage(const std::string &filename, const std::string &url)
+	{
+		try
+		{
+			uint32 w = 0, h = 0;
+			CBitmap::loadSize(filename, w, h);
+			if (w != 0 && h != 0)
+				return true;
+
+			nlwarning("Invalid image (%s) from url (%s): zero size", filename.c_str(), url.c_str());
+		}
+		catch(const NLMISC::Exception &e)
+		{
+			// exception message has .tmp file name, so keep it for further analysis
+			nlwarning("Invalid image (%s) from url (%s): %s", filename.c_str(), url.c_str(), e.what());
+		}
+
+		return false;
+	}
+
 	void CGroupHTML::StylesheetDownloadCB::finish()
 	{
 		if (CFile::fileExists(tmpdest))
@@ -307,34 +330,29 @@ namespace NLGUI
 		// tmpdest file does not exist if download skipped (ie cache was used)
 		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
 		{
-			try {
-				// verify that image is not corrupted
-				uint32 w, h;
-				CBitmap::loadSize(tmpdest, w, h);
-				if (w != 0 && h != 0)
+			if (isValidImage(tmpdest, url))
+			{
+				if (CFile::fileExists(dest))
+					CFile::deleteFile(dest);
+
+				// to reload image on page, the easiest seems to be changing texture
+				// to temp file temporarily. that forces driver to reload texture from disk
+				// ITexture::touch() seem not to do this.
+				// cache was updated, first set texture as temp file
+				for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 				{
-					if (CFile::fileExists(dest))
-						CFile::deleteFile(dest);
+					SImageInfo &img = *it;
+					Parent->setImage(img.Image, tmpdest, img.Type);
+					Parent->setImageSize(img.Image, img.Style);
 				}
-			}
-			catch(const NLMISC::Exception &e)
-			{
-				// exception message has .tmp file name, so keep it for further analysis
-				nlwarning("Invalid image (%s) from url (%s): %s", tmpdest.c_str(), url.c_str(), e.what());
-			}
 
-			// to reload image on page, the easiest seems to be changing texture
-			// to temp file temporarily. that forces driver to reload texture from disk
-			// ITexture::touch() seem not to do this.
-			// cache was updated, first set texture as temp file
-			for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
-			{
-				SImageInfo &img = *it;
-				Parent->setImage(img.Image, tmpdest, img.Type);
-				Parent->setImageSize(img.Image, img.Style);
+				CFile::moveFile(dest, tmpdest);
 			}
-
-			CFile::moveFile(dest, tmpdest);
+			else
+			{
+				// keep whatever is in the cache, a broken download is not an update
+				CFile::deleteFile(tmpdest);
+			}
 		}
 
 		if (!CFile::fileExists(dest) || CFile::getFileSize(dest) == 0)
@@ -357,16 +375,31 @@ namespace NLGUI
 		// tmpdest file does not exist if download skipped (ie cache was used)
 		if (CFile::fileExists(tmpdest) && CFile::getFileSize(tmpdest) > 0)
 		{
-			if (CFile::fileExists(dest))
-				CFile::deleteFile(dest);
+			if (isValidImage(tmpdest, url))
+			{
+				if (CFile::fileExists(dest))
+					CFile::deleteFile(dest);
 
-			CFile::moveFile(dest, tmpdest);
+				CFile::moveFile(dest, tmpdest);
+			}
+			else
+			{
+				// keep whatever is in the cache, a broken download is not an update
+				CFile::deleteFile(tmpdest);
+			}
+		}
+
+		std::string texture = dest;
+		if (!CFile::fileExists(texture) || CFile::getFileSize(texture) == 0)
+		{
+			// placeholder if cached texture failed
+			texture = "web_del.tga";
 		}
 
 		CViewRenderer &rVR = *CViewRenderer::getInstance();
 		for(uint i = 0; i < TextureIds.size(); i++)
 		{
-			rVR.reloadTexture(TextureIds[i].first, dest, false);
+			rVR.reloadTexture(TextureIds[i].first, texture, false);
 			TextureIds[i].second->invalidateCoords();
 		}
 	}
@@ -3932,6 +3965,12 @@ namespace NLGUI
 				if (CFile::fileExists(data->dest))
 				{
 					CFile::deleteFile(data->dest);
+				}
+				// the error page body was written to the temp file, drop it so
+				// finish() does not move it into the cache as if it were an image
+				if (CFile::fileExists(data->tmpdest))
+				{
+					CFile::deleteFile(data->tmpdest);
 				}
 			}
 		}
