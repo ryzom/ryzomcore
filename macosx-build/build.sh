@@ -128,7 +128,6 @@ mkdir -p "${BUILD_DIR}"
 # -DCMAKE_CXX_FLAGS on the command line — but PLATFORM_CXXFLAGS itself
 # folds in $ENV{CXXFLAGS} (nel.cmake:527), so this is the only way to
 # actually get a flag through to the compiler.
-export CXXFLAGS="-stdlib=libc++"
 
 echo ">>> Configuring with CMake..."
 cmake -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
@@ -186,7 +185,7 @@ cmake -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
 	-DWITH_STATIC_DRIVERS=ON \
 	-DDESCRIBE="${DESCRIBE}" \
 	-DCMAKE_C_FLAGS="-Wno-everything" \
-	-DCMAKE_CXX_FLAGS="-Wno-everything" \
+	-DCMAKE_CXX_FLAGS="-stdlib=libc++ -Wno-everything" \
 	-DCMAKE_XCODE_ATTRIBUTE_GCC_WARN_INHIBIT_ALL_WARNINGS=YES \
 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_USER_SCRIPT_SANDBOXING=NO
 
