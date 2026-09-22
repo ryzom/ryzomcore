@@ -290,6 +290,21 @@ namespace NLGUI
 		return false;
 	}
 
+	// A cache entry that cannot be decoded is worse than no entry at all: it is
+	// handed to the renderer on every page load, and it is not refreshed while
+	// the entry still counts as fresh. Drop it and let the normal download path
+	// fetch it again.
+	static void dropBrokenCacheFile(const std::string &dest, const std::string &url)
+	{
+		if (!CFile::fileExists(dest))
+			return;
+
+		if (CFile::getFileSize(dest) > 0 && isValidImage(dest, url))
+			return;
+
+		CFile::deleteFile(dest);
+	}
+
 	void CGroupHTML::StylesheetDownloadCB::finish()
 	{
 		if (CFile::fileExists(tmpdest))
@@ -818,6 +833,8 @@ namespace NLGUI
 		string dest = localImageName(url);
 		LOG_DL("add to download '%s' dest '%s'", finalUrl.c_str(), dest.c_str());
 
+		dropBrokenCacheFile(dest, finalUrl);
+
 		if (CFile::fileExists(dest) && CFile::getFileSize(dest) > 0)
 			texId = rVR.createTexture(dest, 0, 0, -1, -1, false);
 		else
@@ -877,6 +894,8 @@ namespace NLGUI
 		// use requested url for local name (cache)
 		string dest = localImageName(url);
 		LOG_DL("add to download '%s' dest '%s' img %p", finalUrl.c_str(), dest.c_str(), img);
+
+		dropBrokenCacheFile(dest, finalUrl);
 
 		// Display cached image while downloading new
 		if (type != OverImage)
