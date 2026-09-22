@@ -150,6 +150,13 @@ public:
 	/// get the bone names of the meshMRM.
 	const std::vector<std::string>			&getBonesName() const {return _BonesName;}
 
+	/** get the geomorph (start->end wedge) table of a given LOD. Wedge index i, for
+	 *	i < geomorphs.size(), is a blend placeholder in getVertexBuffer()'s raw output --
+	 *	for a static (non-blending) render of that LOD, resolve it to the wedge at
+	 *	geomorphs[i].End instead.
+	 */
+	const std::vector<CMRMWedgeGeom> &getLodGeomorphs(uint lodId) const { return _Lods[lodId].Geomorphs; }
+
 	/** get the number of LOD.
 	 */
 	uint getNbLod() const { return (uint)_Lods.size() ; }
