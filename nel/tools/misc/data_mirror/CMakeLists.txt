@@ -9,6 +9,6 @@ TARGET_LINK_LIBRARIES(data_mirror PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(data_mirror "NeL, Tools, Misc: data_mirror")
 NL_ADD_RUNTIME_FLAGS(data_mirror)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
+target_compile_definitions(data_mirror PRIVATE ${MFC_DEFINITIONS})
 
 INSTALL(TARGETS data_mirror RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT toolsmisc)

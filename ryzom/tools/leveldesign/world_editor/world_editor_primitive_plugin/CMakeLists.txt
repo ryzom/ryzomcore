@@ -15,7 +15,7 @@ NL_ADD_RUNTIME_FLAGS(world_editor_primitive_plugin)
 NL_ADD_LIB_SUFFIX(world_editor_primitive_plugin)
 NL_MFC_DLL_WORKAROUND(world_editor_primitive_plugin)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS} -DWIN32_DLL_EXPORTS)
+target_compile_definitions(world_editor_primitive_plugin PRIVATE ${MFC_DEFINITIONS} WIN32_DLL_EXPORTS)
 
 #IF(WITH_PCH)
 #  target_precompile_headers(world_editor_primitive_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)
