@@ -1,5 +1,9 @@
 # ryzom-core
 
+## 2026-09-22 — 🐛 Fix PACS removePrimitive use-after-free crash on FarTP
+
+PACS removePrimitive crash chantier (`fix_pacs_remove_primitive_crash.md`): the Windows client crashed with EXCEPTION_ACCESS_VIOLATION_READ in `NLPACS::CMoveContainer::removePrimitive` (`freePrimitive`/`delete`, move_container.cpp:1499) during a FarTP character reselect (stack: removePrimitive <- releaseMainLoopReselect release.cpp:257 <- CFarTP::disconnectFromPreviousShard far_tp.cpp:1169). `removePrimitive` never checked that the primitive belonged to the container before dereferencing and deleting it, so a dangling `UMovePrimitive` handle (primitive already freed by a previous container, released by `releasePACS()` on every continent switch) hit the unconditional walk + delete. `removePrimitive` now returns early when the primitive is not in `_PrimitiveSet` (pointer comparison only, no dereference), making removal idempotent and safe across container recreations; a `nlwarning` traces the ignored dangling handles (client entity/continent lifecycle cleanup stays a separate topic). Valid removal paths are unchanged.
+
 ## 2026-09-16 — ✨ Add smoothing angle property to material
 
 Added `CMaterial::_SmoothingAngle` (float, sentinel `-1.0` = never set) on
