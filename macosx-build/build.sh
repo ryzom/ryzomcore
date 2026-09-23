@@ -80,34 +80,11 @@ esac
 # fv/steam reconfigures, silently keeping a wrong SDK path.
 BUILD_DIR="${BUILD_DIR:-${SCRIPT_DIR}/build-${RYZOM_CLIENT_TYPE}}"
 
-# DESCRIBE (branch/revision/commit build identifier), used by the client
-# to display its version string. Mirrors ryzom-docker's client_linux/
-# client_windows build scripts so the version string is consistent across
-# platforms.
-YEAR=$(date +%y)
-MONTH=$(date +%m)
-REVISION=$(cd "${REPO_ROOT}/ryzom/client/src" && git rev-list HEAD --count .)
-COMMIT=$(cd "${REPO_ROOT}" && git rev-list --abbrev-commit HEAD -n 1)
-BRANCH=$(cd "${REPO_ROOT}" && git rev-parse --abbrev-ref HEAD)
-case "${BRANCH}" in
-	main/yubo-dev)
-		DOMAIN="Alpha /"
-		;;
-	main/gingo-test)
-		DOMAIN="Beta /"
-		;;
-	*)
-		DOMAIN="Omega /"
-		;;
-esac
-DESCRIBE="${DOMAIN} v${YEAR}.${MONTH}.${REVISION} #${COMMIT}"
-
 echo "=============================================="
 echo " Ryzom macOS client build"
 echo "=============================================="
 echo " Type     : ${RYZOM_CLIENT_TYPE}"
 echo " Jobs     : ${JOBS}"
-echo " Describe : ${DESCRIBE}"
 echo "=============================================="
 
 if ! command -v cmake >/dev/null 2>&1; then
@@ -123,15 +100,27 @@ fi
 
 mkdir -p "${BUILD_DIR}"
 
+# Regenerating the Xcode project assigns new object IDs, which makes Xcode
+# rebuild everything: only configure when needed. DESCRIBE/BUILD_DATE are
+# generated at build time (CMakeModules/BuildInfo.cmake), not by configure.
+# A cached DESCRIBE would override the build-time value, so it forces one
+# configure that drops it.
+NEED_CONFIGURE=0
+if [ "${FORCE_CONFIGURE:-0}" = "1" ] || [ ! -f "${BUILD_DIR}/CMakeCache.txt" ] || grep -q '^DESCRIBE:' "${BUILD_DIR}/CMakeCache.txt"; then
+	NEED_CONFIGURE=1
+fi
+
 # CMakeModules/nel.cmake force-overwrites CMAKE_CXX_FLAGS from its own
 # PLATFORM_CXXFLAGS (nel.cmake:1064), discarding whatever is passed via
 # -DCMAKE_CXX_FLAGS on the command line — but PLATFORM_CXXFLAGS itself
 # folds in $ENV{CXXFLAGS} (nel.cmake:527), so this is the only way to
 # actually get a flag through to the compiler.
 
+if [ "${NEED_CONFIGURE}" = "1" ]; then
 echo ">>> Configuring with CMake..."
 cmake -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
 	-GXcode \
+	-Wno-deprecated \
 	-DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 	-DCMAKE_OSX_ARCHITECTURES="${MACOS_ARCHITECTURES}" \
 	-DCMAKE_OSX_DEPLOYMENT_TARGET=${MACOS_DEPLOYMENT_TARGET} \
@@ -183,11 +172,14 @@ cmake -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
 	-DWITH_SSE3=OFF \
 	-DWITH_STATIC=ON \
 	-DWITH_STATIC_DRIVERS=ON \
-	-DDESCRIBE="${DESCRIBE}" \
+	-UDESCRIBE \
 	-DCMAKE_C_FLAGS="-Wno-everything" \
 	-DCMAKE_CXX_FLAGS="-stdlib=libc++ -Wno-everything" \
 	-DCMAKE_XCODE_ATTRIBUTE_GCC_WARN_INHIBIT_ALL_WARNINGS=YES \
 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_USER_SCRIPT_SANDBOXING=NO
+else
+	echo ">>> Existing CMake configuration found, skipping reconfigure (FORCE_CONFIGURE=1 to force one)."
+fi
 
 echo ">>> Building (this will take a while)..."
 # xcbeautify only reformats output lines it recognizes; anything it doesn't

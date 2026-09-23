@@ -24,6 +24,8 @@
 #include "config.h"
 #endif
 
+#include "ryzom_build_info.h"
+
 #if defined(HAVE_X86_64)
 #define RYZOM_ARCH "x64"
 #elif defined(HAVE_X86)
