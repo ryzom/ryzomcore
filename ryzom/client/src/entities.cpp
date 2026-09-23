@@ -828,6 +828,19 @@ bool CEntityManager::removeInstances()
 	return true;
 }
 
+void CEntityManager::removeShapePrimitives()
+{
+	for(uint i=0; i<_ShapeInstances.size(); ++i)
+	{
+		if (_ShapeInstances[i].Primitive)
+		{
+			if (PACS)
+				PACS->removePrimitive(_ShapeInstances[i].Primitive);
+			_ShapeInstances[i].Primitive = NULL;
+		}
+	}
+}
+
 bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const vector<string> &values)
 {
 	if (!Scene || idx >= _ShapeInstances.size() || _ShapeInstances[idx].Deleted)
