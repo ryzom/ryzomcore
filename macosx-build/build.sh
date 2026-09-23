@@ -100,21 +100,30 @@ fi
 
 mkdir -p "${BUILD_DIR}"
 
-# Regenerating the Xcode project assigns new object IDs, which makes Xcode
-# rebuild everything: only configure when needed. DESCRIBE/BUILD_DATE are
-# generated at build time (CMakeModules/BuildInfo.cmake), not by configure.
-# A cached DESCRIBE would override the build-time value, so it forces one
-# configure that drops it.
-NEED_CONFIGURE=0
-if [ "${FORCE_CONFIGURE:-0}" = "1" ] || [ ! -f "${BUILD_DIR}/CMakeCache.txt" ] || grep -q '^DESCRIBE:' "${BUILD_DIR}/CMakeCache.txt"; then
-	NEED_CONFIGURE=1
-fi
-
 # CMakeModules/nel.cmake force-overwrites CMAKE_CXX_FLAGS from its own
 # PLATFORM_CXXFLAGS (nel.cmake:1064), discarding whatever is passed via
 # -DCMAKE_CXX_FLAGS on the command line — but PLATFORM_CXXFLAGS itself
 # folds in $ENV{CXXFLAGS} (nel.cmake:527), so this is the only way to
-# actually get a flag through to the compiler.
+# actually get a flag through to the compiler. libc++ must be explicit:
+# below a 10.9 deployment target clang defaults to libstdc++, which recent
+# SDKs no longer ship (nel.cmake only adds it for non-Xcode generators).
+export CXXFLAGS="-stdlib=libc++"
+
+# A configure rewrites config.h (BUILD_DATE), recompiling the files that
+# include it, so it only runs when needed. DESCRIBE/BUILD_DATE for the client
+# are generated at build time (CMakeModules/BuildInfo.cmake). The signature
+# covers everything that feeds the cmake command below, including this
+# script itself, so changing any of it reconfigures. A cached DESCRIBE would
+# override the build-time value, so it also forces a configure that drops it.
+CONFIGURE_SIGNATURE_FILE="${BUILD_DIR}/.configure_signature"
+CONFIGURE_SIGNATURE="${RYZOM_CLIENT_TYPE}|${MACOS_ARCHITECTURES}|${MACOS_DEPLOYMENT_TARGET}|${CXXFLAGS}|${EXTERNAL_PATH}|${STEAM_DIR:-}|$(shasum -a 256 "${BASH_SOURCE[0]}" | cut -d' ' -f1)"
+NEED_CONFIGURE=0
+if [ "${FORCE_CONFIGURE:-0}" = "1" ] \
+	|| [ ! -f "${BUILD_DIR}/CMakeCache.txt" ] \
+	|| grep -q '^DESCRIBE:' "${BUILD_DIR}/CMakeCache.txt" \
+	|| [ "${CONFIGURE_SIGNATURE}" != "$(cat "${CONFIGURE_SIGNATURE_FILE}" 2>/dev/null)" ]; then
+	NEED_CONFIGURE=1
+fi
 
 if [ "${NEED_CONFIGURE}" = "1" ]; then
 echo ">>> Configuring with CMake..."
@@ -174,9 +183,10 @@ cmake -S "${REPO_ROOT}" -B "${BUILD_DIR}" \
 	-DWITH_STATIC_DRIVERS=ON \
 	-UDESCRIBE \
 	-DCMAKE_C_FLAGS="-Wno-everything" \
-	-DCMAKE_CXX_FLAGS="-stdlib=libc++ -Wno-everything" \
+	-DCMAKE_CXX_FLAGS="-Wno-everything" \
 	-DCMAKE_XCODE_ATTRIBUTE_GCC_WARN_INHIBIT_ALL_WARNINGS=YES \
 	-DCMAKE_XCODE_ATTRIBUTE_ENABLE_USER_SCRIPT_SANDBOXING=NO
+echo "${CONFIGURE_SIGNATURE}" >"${CONFIGURE_SIGNATURE_FILE}"
 else
 	echo ">>> Existing CMake configuration found, skipping reconfigure (FORCE_CONFIGURE=1 to force one)."
 fi
