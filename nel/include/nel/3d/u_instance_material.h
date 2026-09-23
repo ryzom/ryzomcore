@@ -62,6 +62,8 @@ public:
 										CRGBA specular=CRGBA(0,0,0),
 										float shininess= 10);
 	bool				isUserColor() const;
+	void				setDoubleSided(bool active);
+	bool				getDoubleSided() const;
 	// @}
 
 	/// \name Blending.

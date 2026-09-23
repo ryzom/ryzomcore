@@ -2493,14 +2493,14 @@ int CLuaIHMRyzom::getIslandId(CLuaState &ls)
 
 // ***************************************************************************
 //
-// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton", "inIgZone?")
+// addShape("shape", .x, .y, .z, "angle", .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton", "inIgZone?", doubleSided?)
 //
 //********
 int CLuaIHMRyzom::addShape(CLuaState &ls)
 {
 	const char* funcName = "addShape";
 	CLuaIHM::checkArgMin(ls, funcName, 1);
-	CLuaIHM::checkArgMax(ls, funcName, 14);
+	CLuaIHM::checkArgMax(ls, funcName, 15);
 	CLuaIHM::checkArgType(ls, funcName, 1, LUA_TSTRING);
 
 	sint32 idx = -1;
@@ -2521,6 +2521,7 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 	bool transparency = false;
 	bool collision = true;
 	bool inIgZone = false;
+	bool doubleSided = false;
 
 	if (ls.getTop() >= 2)
 	{
@@ -2617,6 +2618,12 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 		inIgZone = ls.toBoolean(14);
 	}
 
+	if (ls.getTop() >= 15)
+	{
+		CLuaIHM::checkArgType(ls, funcName, 15, LUA_TBOOLEAN);
+		doubleSided = ls.toBoolean(15);
+	}
+
 	CShapeInstanceReference instref = EntitiesMngr.createInstance(shape, CVector(x, y, z), context, url, collision, inIgZone, idx);
 	UInstance instance = instref.Instance;
 
@@ -2648,6 +2655,11 @@ int CLuaIHMRyzom::addShape(CLuaState &ls)
 				instance.getMaterial(j).setAmbient(CRGBA(0,0,0,255));
 				instance.getMaterial(j).setEmissive(CRGBA(255,0,0,255));
 				instance.getMaterial(j).setShininess(1000.0f);
+			}
+
+			if (doubleSided)
+			{
+				instance.getMaterial(j).setDoubleSided(true);
 			}
 
 			if (!texture.empty())
