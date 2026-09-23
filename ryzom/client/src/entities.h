@@ -248,6 +248,8 @@ public:
 	bool deleteInstance(uint32 idx, bool force = false);
 	bool removeInstances();
 	void removeInstancesInIgZone(uint16 igZone);
+	/// Remove the PACS primitive of every shape instance (IG zone ones included).
+	void removeShapePrimitives();
 	CVector getInstancePos(uint32 idx);
 	bool setInstancePos(uint32 idx, CVector pos);
 	CVector getInstanceRot(uint32 idx);
