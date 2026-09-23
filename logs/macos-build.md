@@ -1,3 +1,8 @@
+## 2026-09-23 — 🐛 Restore libc++ for Xcode builds and reconfigure when build parameters change
+
+- `-stdlib=libc++` was only passed through `-DCMAKE_CXX_FLAGS`, which `nel.cmake:1064` overwrites; `nel.cmake:926` adds it only for non-Xcode generators. Builds targeting below macOS 10.9 (e.g. `MACOS_ARCHITECTURES=x86_64 MACOS_DEPLOYMENT_TARGET=10.8` with the 10.14 SDK) therefore fell back to libstdc++, absent from the SDK, and failed with `'algorithm' file not found`. `build.sh` exports `CXXFLAGS="-stdlib=libc++"` again (read unconditionally by `nel.cmake:527`) and no longer puts it in `-DCMAKE_CXX_FLAGS`.
+- `build.sh` stores a configure signature in `build-<type>/.configure_signature` (build type, `MACOS_ARCHITECTURES`, `MACOS_DEPLOYMENT_TARGET`, `CXXFLAGS`, `EXTERNAL_PATH`, `STEAM_DIR`, SHA-256 of `build.sh`) and reconfigures when it differs, so changing these parameters is no longer silently ignored when a `CMakeCache.txt` already exists. The signature is written only after a successful configure.
+
 ## 2026-09-23 — 🔧 Generate client version info at build time and silence CMake warnings
 
 - `CMakeModules/BuildInfo.cmake` (new, `cmake -P` script) writes `ryzom_build_info.h` with `RYZOM_VERSION` (DESCRIBE) and `BUILD_DATE` on every build, through the `ryzom_build_info` custom target (`ryzom/CMakeLists.txt`) that `ryzom_client` and `ryzom_client_patcher` depend on. `user_agent.cpp` includes it after `config.h`. DESCRIBE is taken from `-DDESCRIBE` when given (Linux/Windows scripts), otherwise computed from git with the same format the macOS script used.

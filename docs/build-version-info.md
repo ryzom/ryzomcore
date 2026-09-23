@@ -21,6 +21,9 @@ The client's version string (`RYZOM_VERSION`) and build date (`BUILD_DATE`) are 
 
 - `build-<type>/CMakeCache.txt` does not exist,
 - `FORCE_CONFIGURE=1` is set,
+- the configure signature stored in `build-<type>/.configure_signature` differs: build type, `MACOS_ARCHITECTURES`, `MACOS_DEPLOYMENT_TARGET`, `CXXFLAGS`, `EXTERNAL_PATH`, `STEAM_DIR` and a hash of `build.sh` itself,
 - or the cache holds a `DESCRIBE` entry (it would override the build-time value); that configure drops it with `-UDESCRIBE`.
+
+`-stdlib=libc++` is passed through the `CXXFLAGS` environment variable, the only way a flag reaches the Xcode project (`nel.cmake` overwrites `CMAKE_CXX_FLAGS`, and only adds libc++ itself for non-Xcode generators). Below a 10.9 deployment target clang otherwise defaults to libstdc++, absent from recent SDKs.
 
 A configure rewrites `config.h` (its `BUILD_DATE` changes), which recompiles the handful of files including it. The configure is run with `-Wno-deprecated` to hide the `CMAKE_MINIMUM_REQUIRED(VERSION 2.6)` deprecation warnings.
