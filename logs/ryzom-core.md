@@ -29,6 +29,39 @@ tagged log lines during testing (kept out of the final commit) to confirm
 `KeepHiddenWhenLoaded` — already-existing engine plumbing — was being respected correctly
 for hiding the normal (shared) hairstyle instance while a clipped one is active.
 
+## 2026-09-23 — 🐛 Clear client PACS primitive handles before releasing the container
+
+`releasePACS()` (`ryzom/client/src/pacs_client.cpp`), the only place where the
+client destroys its PACS move container, now first calls
+`EntitiesMngr.removeCollision()` (entity `_Primitive` and user entity
+`_CheckPrimitive`) and the new `CEntityManager::removeShapePrimitives()`
+(the `Primitive` of every Lua shape instance, IG zone shapes included). No
+client entity or shape can keep a handle on a primitive freed with its
+container, whatever path leads to the release (`CContinent::select()` or
+`CContinent::unselect()`).
+
+Before this, IG zone shapes were skipped by `CEntityManager::removeInstances()`
+in `CContinent::unselect()` and kept dangling primitive handles, later passed to
+`removePrimitive()` of the next container (notably from
+`CEntityManager::release()` on FarTP reselect). The ownership guard in
+`CMoveContainer::removePrimitive()` only compares addresses, and primitives are
+plain `new`/`delete` objects, so a freed address reused by a live primitive of
+the new container would have let a stale handle remove it.
+
+Entity primitives are recreated as before by `CEntityManager::changeContinent()`.
+Shape primitives are not recreated: a shape surviving its container keeps its
+3D instance without collision. Shape primitives of a hibernated container
+(indoor switch) are intentionally left in place and remain covered only by the
+`removePrimitive()` ownership guard.
+
+No debug/test steps: the crash is not reproducible on demand; validation relies
+on the code-level reasoning (single container destruction point). Documented in
+`docs/client-pacs-primitives.md`.
+
+## 2026-09-22 — 🐛 Fix PACS removePrimitive use-after-free crash on FarTP
+
+PACS removePrimitive crash chantier (`fix_pacs_remove_primitive_crash.md`): the Windows client crashed with EXCEPTION_ACCESS_VIOLATION_READ in `NLPACS::CMoveContainer::removePrimitive` (`freePrimitive`/`delete`, move_container.cpp:1499) during a FarTP character reselect (stack: removePrimitive <- releaseMainLoopReselect release.cpp:257 <- CFarTP::disconnectFromPreviousShard far_tp.cpp:1169). `removePrimitive` never checked that the primitive belonged to the container before dereferencing and deleting it, so a dangling `UMovePrimitive` handle (primitive already freed by a previous container, released by `releasePACS()` on every continent switch) hit the unconditional walk + delete. `removePrimitive` now returns early when the primitive is not in `_PrimitiveSet` (pointer comparison only, no dereference), making removal idempotent and safe across container recreations; a `nlwarning` traces the ignored dangling handles (client entity/continent lifecycle cleanup stays a separate topic). Valid removal paths are unchanged.
+
 ## 2026-09-16 — ✨ Add smoothing angle property to material
 
 Added `CMaterial::_SmoothingAngle` (float, sentinel `-1.0` = never set) on
