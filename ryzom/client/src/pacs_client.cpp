@@ -29,6 +29,7 @@
 #include "user_entity.h"
 #include "ig_callback.h"
 #include "ig_client.h"
+#include "entities.h"
 
 #ifdef DEBUG_NEW
 #define new DEBUG_NEW
@@ -118,6 +119,10 @@ void releasePACS ()
 	// Move container presents ?
 	if (PACS)
 	{
+		// Every primitive handle held outside the container must be cleared before it is freed
+		EntitiesMngr.removeCollision();
+		EntitiesMngr.removeShapePrimitives();
+
 		UMoveContainer::deleteMoveContainer (PACS);
 		PACS = NULL;
 	}
