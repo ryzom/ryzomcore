@@ -2,10 +2,10 @@ FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 
 SOURCE_GROUP("" FILES ${SRC})
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 ADD_EXECUTABLE(georges WIN32 ${SRC})
 SET_TARGET_PROPERTIES(georges PROPERTIES NL_MFC_UNICODE_APP ON) # unicode MFC GUI: pre-VS2010 links need the explicit wWinMain entry (see NL_DEFAULT_PROPS)
+target_compile_definitions(georges PRIVATE ${MFC_DEFINITIONS})
 
 TARGET_LINK_LIBRARIES(georges
         PRIVATE

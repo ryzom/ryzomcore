@@ -9,7 +9,7 @@ TARGET_LINK_LIBRARIES(words_dic PRIVATE NeL::misc)
 NL_DEFAULT_PROPS(words_dic "NeL, Tools, Misc: words_dic")
 NL_ADD_RUNTIME_FLAGS(words_dic)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
+target_compile_definitions(words_dic PRIVATE ${MFC_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(words_dic PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)

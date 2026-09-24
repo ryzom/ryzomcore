@@ -14,7 +14,7 @@ TARGET_LINK_LIBRARIES(tile_edit PRIVATE NeL::misc NeL::3d)
 NL_DEFAULT_PROPS(tile_edit "NeL, Tools, 3D: Tile Editor")
 NL_ADD_RUNTIME_FLAGS(tile_edit)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
+target_compile_definitions(tile_edit PRIVATE ${MFC_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(tile_edit PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdafx.h)

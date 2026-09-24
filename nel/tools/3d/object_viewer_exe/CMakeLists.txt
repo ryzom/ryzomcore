@@ -3,10 +3,10 @@ FILE(GLOB SRC *.cpp *.h *.rc *.rc2)
 SOURCE_GROUP("" FILES ${SRC})
 
 ENABLE_LANGUAGE(RC)
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 ADD_EXECUTABLE(object_viewer WIN32 ${SRC})
 SET_TARGET_PROPERTIES(object_viewer PROPERTIES NL_MFC_UNICODE_APP ON) # unicode MFC GUI: pre-VS2010 links need the explicit wWinMain entry (see NL_DEFAULT_PROPS)
+target_compile_definitions(object_viewer PRIVATE ${MFC_DEFINITIONS})
 
 TARGET_LINK_LIBRARIES(object_viewer
 		PRIVATE

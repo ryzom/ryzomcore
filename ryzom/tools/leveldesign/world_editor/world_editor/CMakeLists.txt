@@ -5,11 +5,11 @@ SOURCE_GROUP("" FILES ${SRC})
 LIST(REMOVE_ITEM SRC ${CMAKE_CURRENT_SOURCE_DIR}/export_cb_dlg.cpp ${CMAKE_CURRENT_SOURCE_DIR}/builder_logic.cpp)
 
 ENABLE_LANGUAGE(RC)
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
 SET(CMAKE_MFC_FLAG 2)
 
 ADD_EXECUTABLE(world_editor WIN32 ${SRC})
 SET_TARGET_PROPERTIES(world_editor PROPERTIES NL_MFC_UNICODE_APP ON) # unicode MFC GUI: pre-VS2010 links need the explicit wWinMain entry (see NL_DEFAULT_PROPS)
+target_compile_definitions(world_editor PRIVATE ${MFC_DEFINITIONS})
 
 TARGET_LINK_LIBRARIES(world_editor
         PRIVATE

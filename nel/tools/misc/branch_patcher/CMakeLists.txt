@@ -9,6 +9,6 @@ SET_TARGET_PROPERTIES(branch_patcher PROPERTIES NL_MFC_UNICODE_APP ON) # unicode
 NL_DEFAULT_PROPS(branch_patcher "NeL, Tools, Misc: branch_patcher")
 NL_ADD_RUNTIME_FLAGS(branch_patcher)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
+target_compile_definitions(branch_patcher PRIVATE ${MFC_DEFINITIONS})
 
 INSTALL(TARGETS branch_patcher RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT toolsmisc)
