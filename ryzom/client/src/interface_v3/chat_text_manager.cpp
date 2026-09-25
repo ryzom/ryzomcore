@@ -24,7 +24,9 @@
 #include "stdpch.h"
 // client
 #include "chat_text_manager.h"
+#include "emoji_manager.h"
 #include "nel/gui/view_text.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/group_paragraph.h"
 #include "interface_manager.h"
 
@@ -41,7 +43,9 @@ CChatTextManager::CChatTextManager() :
 	_TextFontSize(NULL),
 	_TextMultilineSpace(NULL),
 	_TextShadowed(NULL),
-	_ShowTimestamps(NULL)
+	_ShowTimestamps(NULL),
+	_EmojiMode(NULL),
+	_EmojiSize(NULL)
 {
 }
 
@@ -56,6 +60,10 @@ CChatTextManager::~CChatTextManager()
 	_TextShadowed = NULL;
 	delete _ShowTimestamps;
 	_ShowTimestamps = NULL;
+	delete _EmojiMode;
+	_EmojiMode = NULL;
+	delete _EmojiSize;
+	_EmojiSize = NULL;
 }
 //=================================================================================
 uint CChatTextManager::getTextFontSize() const
@@ -91,6 +99,47 @@ bool CChatTextManager::isTextShadowed() const
 		if (!_TextShadowed) return false;
 	}
 	return _TextShadowed->getValueBool();
+}
+
+//=================================================================================
+uint CChatTextManager::getEmojiMode() const
+{
+	if (!_EmojiMode)
+	{
+		_EmojiMode = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_MODE", false);
+		if (!_EmojiMode) return EmojiImage;
+	}
+	sint32 v = _EmojiMode->getValue32();
+	if (v < EmojiText || v > EmojiImage) return EmojiImage;
+	return (uint)v;
+}
+
+//=================================================================================
+uint CChatTextManager::getEmojiSize() const
+{
+	if (!_EmojiSize)
+	{
+		_EmojiSize = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_SIZE", false);
+		if (!_EmojiSize) return EmojiSmall;
+	}
+	sint32 v = _EmojiSize->getValue32();
+	if (v < EmojiSmall || v > EmojiLarge) return EmojiSmall;
+	return (uint)v;
+}
+
+//=================================================================================
+sint32 CChatTextManager::getEmojiPixelSize() const
+{
+	// The atlas tiles are 32px, so 'large' is their own size and the smaller
+	// settings follow the chat font instead, which is what makes emoji sit in
+	// the line rather than tower over it.
+	switch (getEmojiSize())
+	{
+		case EmojiLarge:	return 32;
+		case EmojiMedium:	return (sint32)(getTextFontSize() * 3 / 2);
+		case EmojiSmall:
+		default:			return (sint32)getTextFontSize();
+	}
 }
 
 //=================================================================================
@@ -399,8 +448,66 @@ CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGB
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+void CChatTextManager::addTextSegment(CGroupParagraph *para, const string &msg,
+	string::size_type from, string::size_type to, NLMISC::CRGBA col, bool justified,
+	const char *id)
 {
+	if (from >= to)
+		return;
+
+	// Carry the colour/tooltip state across the split. See
+	// CViewText::getFormatTagPrefixAt: for an untagged line this is empty and
+	// the piece keeps taking the plain path with the channel colour.
+	string seg = CViewText::getFormatTagPrefixAt(msg, (uint)from);
+	seg.append(msg, from, to - from);
+
+	CViewBase *vt = createMsgTextSimple(seg, col, justified, NULL);
+	if (id)
+		vt->setId(id);
+	para->addChild(vt);
+}
+
+//=================================================================================
+CViewBase *CChatTextManager::createEmojiView(const string &texture)
+{
+	if (texture.empty())
+		return NULL;
+
+	// A view, not a CCtrlButton: a ctrl would capture the pointer, and the
+	// paragraph's right-click-to-copy and the link clicks would stop working
+	// wherever an emoji happened to sit. The cost is that there is no hover
+	// tooltip showing the name.
+	CViewBitmap *bm = new CViewBitmap(CViewBase::TCtorParam());
+	bm->setId("emoji");
+	bm->setTexture(texture);
+	if (!bm->isTextureValid())
+	{
+		// Atlas missing or the tile is not in it. Caller falls back to text.
+		delete bm;
+		return NULL;
+	}
+	bm->setScale(true);
+	sint32 size = getEmojiPixelSize();
+	bm->setW(size);
+	bm->setH(size);
+	bm->setModulateGlobalColor(false);
+	return bm;
+}
+
+//=================================================================================
+CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+{
+	CEmojiManager &emoji = CEmojiManager::getInstance();
+	const uint emojiMode = getEmojiMode();
+	const bool scanEmoji = emojiMode != EmojiText && emoji.mayContainEmoji(originalMsg);
+
+	// In unicode mode the shortcodes become characters and the line stays a
+	// single view, so nothing is split and there is no format state to carry.
+	// That is why this mode cannot disturb text colour at all.
+	string msg = (scanEmoji && emojiMode == EmojiUnicode)
+		? emoji.substituteShortcodes(originalMsg)
+		: originalMsg;
+
 	string::size_type textSize = msg.size();
 
 	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
@@ -409,8 +516,9 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	para->setResizeFromChildH(true);
 
 	// use right click because left click might be used to activate chat window
+	// Copy yields what was actually said, with ":name:" intact.
 	para->setRightClickHandler("copy_chat_popup");
-	para->setRightClickHandlerParams(msg);
+	para->setRightClickHandlerParams(originalMsg);
 
 	if (plaintext)
 	{
@@ -476,15 +584,48 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		hasUrl = (s.find("http://") || s.find("https://"));
 	}
 
+	const bool useEmojiImages = scanEmoji && emojiMode == EmojiImage;
+
 	for (string::size_type i = pos; i< textSize;)
 	{
-		if (hasUrl && isUrlTag(msg, i, textSize))
+		// Step over format tags instead of scanning inside them. A tooltip tag
+		// holds arbitrary text, so "@{Hsee :smile: here}" contains something
+		// that looks exactly like a shortcode, and matching it would cut the
+		// tag in half. The same goes for a URL written inside one.
+		uint tagLen = CViewText::getFormatTagLength(msg, (uint)i);
+		if (tagLen)
 		{
-			if (pos != i)
+			i += tagLen;
+			continue;
+		}
+
+		string::size_type emojiLen = 0;
+		const CEmojiManager::CEntry *emojiEntry = NULL;
+
+		if (useEmojiImages && emoji.matchAt(msg, i, textSize, emojiLen, emojiEntry))
+		{
+			addTextSegment(para, msg, pos, i, col, justified);
+
+			CViewBase *ev = createEmojiView(emojiEntry->Texture);
+			if (ev)
 			{
-				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, NULL);
-				para->addChild(vt);
+				para->addChild(ev);
 			}
+			else
+			{
+				// No tile for this one, so fall back a step rather than showing
+				// nothing: the unicode form, still carrying the format state.
+				string seg = CViewText::getFormatTagPrefixAt(msg, (uint)i);
+				seg += emojiEntry->Utf8;
+				para->addChild(createMsgTextSimple(seg, col, justified, NULL));
+			}
+
+			pos = i + emojiLen;
+			i = pos;
+		}
+		else if (hasUrl && isUrlTag(msg, i, textSize))
+		{
+			addTextSegment(para, msg, pos, i, col, justified);
 
 			string url;
 			string title;
@@ -544,12 +685,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 		}
 	}
 
-	if (pos < textSize)
-	{
-		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, NULL);
-		vt->setId("text");
-		para->addChild(vt);
-	}
+	addTextSegment(para, msg, pos, textSize, col, justified, "text");
 
 	return para;
 }
