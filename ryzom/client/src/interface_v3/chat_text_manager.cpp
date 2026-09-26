@@ -763,6 +763,8 @@ void CChatTextManager::reset ()
 	_TextMultilineSpace = NULL;
 	_TextShadowed = NULL;
 	_ShowTimestamps = NULL;
+	_EmojiMode = NULL;
+	_EmojiSize = NULL;
 }
 
 // ***************************************************************************
