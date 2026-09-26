@@ -21,6 +21,7 @@
 #include "nel/misc/path.h"
 #include "nel/misc/debug.h"
 #include "nel/misc/common.h"
+#include "nel/misc/i18n.h"
 #include "nel/gui/view_text.h"
 
 #include <algorithm>
@@ -34,6 +35,9 @@ CEmojiManager *CEmojiManager::_Instance = NULL;
 // local corrections win without anyone editing the generated one.
 static const char *EmojiTableFile     = "emoji.txt";
 static const char *EmojiOverrideFile  = "emoji_overrides.txt";
+// The picker's layout: which tabs it has and what sits in them. Generated from
+// Unicode's emoji-test.txt, see tools/emoji/gen_emoji_picker.py.
+static const char *EmojiPickerFile    = "emoji_picker.txt";
 
 //=================================================================================
 CEmojiManager::CEmojiManager() : _Loaded(false)
@@ -121,14 +125,20 @@ static bool codepointsToUtf8(const string &field, string &out)
 void CEmojiManager::addEntry(const string &name, const string &utf8, const string &texture)
 {
 	CEntry &e = _ByName[name];
+	e.Name = name;
 	e.Utf8 = utf8;
 	e.Texture = texture;
 }
 
 //=================================================================================
-bool CEmojiManager::loadTable(const string &filename, bool required)
+// Read one of the emoji data files whole. Returns false, quietly unless the
+// file is required, when there is nothing to read.
+//
+// CIFile, not ifstream: these ship inside gamedev.bnp, and only CPath and
+// CIFile can see inside a bnp.
+static bool readEmojiFile(const string &filename, bool required, string &buffer, string &path)
 {
-	string path = CPath::lookup(filename, false, false, false);
+	path = CPath::lookup(filename, false, false, false);
 	if (path.empty())
 	{
 		if (required)
@@ -136,8 +146,6 @@ bool CEmojiManager::loadTable(const string &filename, bool required)
 		return false;
 	}
 
-	// CIFile, not ifstream: the table ships inside gamedev.bnp, and only CPath
-	// and CIFile can see inside a bnp.
 	CIFile f;
 	if (!f.open(path))
 	{
@@ -145,7 +153,6 @@ bool CEmojiManager::loadTable(const string &filename, bool required)
 		return false;
 	}
 
-	string buffer;
 	try
 	{
 		uint32 size = f.getFileSize();
@@ -159,19 +166,35 @@ bool CEmojiManager::loadTable(const string &filename, bool required)
 		return false;
 	}
 	f.close();
+	return true;
+}
+
+//=================================================================================
+// Hand back the next line of \p buffer, without its newline, and advance \p pos.
+static string nextLine(const string &buffer, string::size_type &pos)
+{
+	string::size_type eol = buffer.find('\n', pos);
+	if (eol == string::npos)
+		eol = buffer.size();
+	string line = buffer.substr(pos, eol - pos);
+	pos = eol + 1;
+	if (!line.empty() && line[line.size() - 1] == '\r')
+		line.erase(line.size() - 1);
+	return line;
+}
+
+//=================================================================================
+bool CEmojiManager::loadTable(const string &filename, bool required)
+{
+	string path, buffer;
+	if (!readEmojiFile(filename, required, buffer, path))
+		return false;
 
 	uint added = 0, bad = 0;
 	string::size_type pos = 0;
 	while (pos < buffer.size())
 	{
-		string::size_type eol = buffer.find('\n', pos);
-		if (eol == string::npos)
-			eol = buffer.size();
-		string line = buffer.substr(pos, eol - pos);
-		pos = eol + 1;
-
-		if (!line.empty() && line[line.size() - 1] == '\r')
-			line.erase(line.size() - 1);
+		string line = nextLine(buffer, pos);
 		if (line.empty() || line[0] == '#')
 			continue;
 
@@ -241,8 +264,100 @@ void CEmojiManager::init()
 	std::reverse(lengths.begin(), lengths.end());
 	_Utf8Lengths = lengths;
 
-	nlinfo("Emoji: %u name(s), %u distinct emoji, %u sequence length(s)",
-		(uint)_ByName.size(), (uint)_ByUtf8.size(), (uint)_Utf8Lengths.size());
+	// Last: it wants the reverse index to exist, and it corrects it.
+	loadPicker(EmojiPickerFile);
+
+	nlinfo("Emoji: %u name(s), %u distinct emoji, %u sequence length(s), %u picker group(s)",
+		(uint)_ByName.size(), (uint)_ByUtf8.size(), (uint)_Utf8Lengths.size(),
+		(uint)_Groups.size());
+}
+
+//=================================================================================
+void CEmojiManager::loadPicker(const string &filename)
+{
+	string path, buffer;
+	// Not required: without it the chat is untouched and only the picker is
+	// empty, which the picker itself reports.
+	if (!readEmojiFile(filename, false, buffer, path))
+		return;
+
+	uint kept = 0, unknown = 0, bad = 0;
+	string::size_type pos = 0;
+	while (pos < buffer.size())
+	{
+		string line = nextLine(buffer, pos);
+		if (line.empty() || line[0] == '#')
+			continue;
+
+		// "g \t i18n-key \t English label"  or  "e \t name \t description"
+		string::size_type t1 = line.find('\t');
+		if (t1 == string::npos) { ++bad; continue; }
+		string::size_type t2 = line.find('\t', t1 + 1);
+		if (t2 == string::npos) { ++bad; continue; }
+
+		const string kind  = line.substr(0, t1);
+		const string field = line.substr(t1 + 1, t2 - t1 - 1);
+		const string rest  = line.substr(t2 + 1);
+
+		if (kind == "g")
+		{
+			CGroup g;
+			// The English label from the file is the fallback, so a group is
+			// still named when the translation has not landed yet.
+			g.Label = (!field.empty() && CI18N::hasTranslation(field)) ? CI18N::get(field) : rest;
+			_Groups.push_back(g);
+			continue;
+		}
+		if (kind != "e")
+		{
+			++bad;
+			continue;
+		}
+		if (_Groups.empty())
+		{
+			// An emoji before any group line: the file is not what we think.
+			++bad;
+			continue;
+		}
+
+		std::map<string, CEntry>::iterator it = _ByName.find(field);
+		if (it == _ByName.end())
+		{
+			// The table and the picker were generated from different tables.
+			++unknown;
+			continue;
+		}
+		CEntry &e = it->second;
+		if (e.Texture.empty())
+			continue;
+
+		e.Desc = rest;
+		_Groups.back().Emoji.push_back(&e);
+		// The picker names an emoji the way Zulip does, so let the whole client
+		// do the same: a pasted emoji now reads ":upside_down:" on hover rather
+		// than the first alias alphabetically, ":oops:".
+		if (!e.Utf8.empty())
+			_ByUtf8[e.Utf8] = &e;
+		++kept;
+	}
+
+	// Drop groups nothing survived in, so the picker has no empty tabs.
+	for (std::vector<CGroup>::iterator it = _Groups.begin(); it != _Groups.end();)
+		it = it->Emoji.empty() ? _Groups.erase(it) : it + 1;
+
+	if (bad)
+		nlwarning("Emoji: %u malformed line(s) in '%s'", bad, path.c_str());
+	if (unknown)
+		nlwarning("Emoji: %u emoji in '%s' are not in the name table; regenerate it",
+			unknown, path.c_str());
+	nlinfo("Emoji: picker has %u emoji in %u group(s)", kept, (uint)_Groups.size());
+}
+
+//=================================================================================
+const CEmojiManager::CEntry *CEmojiManager::find(const string &name) const
+{
+	std::map<string, CEntry>::const_iterator it = _ByName.find(name);
+	return it == _ByName.end() ? NULL : &it->second;
 }
 
 //=================================================================================

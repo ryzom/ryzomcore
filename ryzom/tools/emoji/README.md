@@ -7,6 +7,7 @@ rather than hand-maintained, so "is this file current?" has an answer.
 | script | what it does |
 |---|---|
 | `gen_emoji_table.py` | Zulip's `emoji_names.py` -> `emoji.txt` + a coverage report |
+| `gen_emoji_picker.py` | Unicode's `emoji-test.txt` + `emoji.txt` -> `emoji_picker.txt`, the picker's groups and order |
 | `fetch_noto_missing.py` | downloads and rasterises the flag images noto ships only as SVG |
 | `build_atlas.py` | stages the referenced tiles and packs them with `build_interface` |
 | `extend_font.py` | adds a few missing glyphs to ryzom.ttf from a donor font |
@@ -26,6 +27,25 @@ done
 ./gen_emoji_table.py --zulip-dir . --images <noto-png-dir> \
     --out emoji.txt --report coverage.txt
 ```
+
+## Regenerating the picker
+
+`emoji_picker.txt` is the layout of the in-game emoji picker: which tabs it has,
+which emoji sit in each and in what order, and the description under the hovered
+one. All of that is Unicode's, from the same `emoji-test.txt` every emoji
+keyboard is built from; the names are Zulip's canonical ones, so picking an
+emoji in game spells it the way the web chat spells it.
+
+```bash
+curl -sSO https://unicode.org/Public/emoji/16.0/emoji-test.txt
+./gen_emoji_picker.py --emoji-test emoji-test.txt --zulip-dir . \
+    --table ../../client/data/gamedev/interfaces_v3/emoji.txt \
+    --out ../../client/data/gamedev/interfaces_v3/emoji_picker.txt \
+    --report picker_coverage.txt
+```
+
+Run it again after the table changes: an emoji the table does not name is left
+out of the picker, since the player could not type it either.
 
 Local corrections belong in `emoji_overrides.txt`, which the client loads after
 `emoji.txt` and which wins. That is the escape hatch for anything our Zulip does

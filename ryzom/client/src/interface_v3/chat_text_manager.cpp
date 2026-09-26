@@ -27,7 +27,10 @@
 #include "emoji_manager.h"
 #include "nel/gui/view_text.h"
 #include "nel/gui/view_bitmap.h"
+#include "nel/gui/ctrl_tooltip.h"
 #include "nel/gui/group_paragraph.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/widget_manager.h"
 #include "interface_manager.h"
 
 using namespace std;
@@ -473,29 +476,69 @@ void CChatTextManager::addTextSegment(CGroupParagraph *para, const string &msg,
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createEmojiView(const string &texture)
+/** One emoji image in a chat line, named on hover.
+  *
+  * A tooltip is context help, and context help lives on CCtrlBase, so this
+  * cannot be the CViewBitmap it otherwise would be. The one ctrl that may sit
+  * in a chat line is CCtrlToolTip: it is not capturable, so the paragraph keeps
+  * its right-click-to-copy and a link under the same line still takes clicks.
+  * Anything button-like would swallow the pointer wherever an emoji happened
+  * to sit.
+  *
+  * Drawing is CViewBitmap's scaled path, minus the tiling and rotation that an
+  * emoji never uses.
+  */
+class CCtrlEmoji : public CCtrlToolTip
+{
+public:
+	CCtrlEmoji(const TCtorParam &param) : CCtrlToolTip(param) {}
+
+	/// False if the atlas is missing or has no tile of that name.
+	bool setTexture(const std::string &texture)
+	{
+		_TextureId.setTexture(texture.c_str());
+		return !_TextureId.empty();
+	}
+
+	virtual void draw()
+	{
+		CRGBA col = CRGBA::White;
+		// The tile carries its own colours, so it is not modulated by the
+		// interface colour -- only faded with it, like the rest of the window.
+		col.A = (uint8)(((sint32)col.A *
+			((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A + 1)) >> 8);
+
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		rVR.drawRotFlipBitmap(_RenderLayer, _XReal, _YReal, _WReal, _HReal,
+			0, false, _TextureId, col);
+	}
+
+private:
+	CViewRenderer::CTextureId	_TextureId;
+};
+
+//=================================================================================
+CViewBase *CChatTextManager::createEmojiView(const string &texture, const string &name)
 {
 	if (texture.empty())
 		return NULL;
 
-	// A view, not a CCtrlButton: a ctrl would capture the pointer, and the
-	// paragraph's right-click-to-copy and the link clicks would stop working
-	// wherever an emoji happened to sit. The cost is that there is no hover
-	// tooltip showing the name.
-	CViewBitmap *bm = new CViewBitmap(CViewBase::TCtorParam());
+	CCtrlEmoji *bm = new CCtrlEmoji(CViewBase::TCtorParam());
 	bm->setId("emoji");
-	bm->setTexture(texture);
-	if (!bm->isTextureValid())
+	if (!bm->setTexture(texture))
 	{
 		// Atlas missing or the tile is not in it. Caller falls back to text.
 		delete bm;
 		return NULL;
 	}
-	bm->setScale(true);
 	sint32 size = getEmojiPixelSize();
 	bm->setW(size);
 	bm->setH(size);
 	bm->setModulateGlobalColor(false);
+	// Name it on hover, in the form that can be typed back: ":fire:". Nameless
+	// entries simply get no tooltip.
+	if (!name.empty())
+		bm->setDefaultContextHelp(":" + name + ":");
 	return bm;
 }
 
@@ -611,7 +654,7 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLM
 		{
 			addTextSegment(para, msg, pos, i, col, justified);
 
-			CViewBase *ev = createEmojiView(emojiEntry->Texture);
+			CViewBase *ev = createEmojiView(emojiEntry->Texture, emojiEntry->Name);
 			if (ev)
 			{
 				para->addChild(ev);

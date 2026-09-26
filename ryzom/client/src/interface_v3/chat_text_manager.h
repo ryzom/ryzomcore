@@ -121,8 +121,10 @@ private:
 		std::string::size_type from, std::string::size_type to,
 		NLMISC::CRGBA col, bool justified, const char *id = NULL);
 
-	/// Build the image view for one emoji, or NULL if it has no usable texture.
-	NLGUI::CViewBase *createEmojiView(const std::string &texture);
+	/** Build the image view for one emoji, or NULL if it has no usable texture.
+	  * \p name is what the hover tooltip shows, without the colons.
+	  */
+	NLGUI::CViewBase *createEmojiView(const std::string &texture, const std::string &name);
 };
 
 // shortcut to get text manager instance

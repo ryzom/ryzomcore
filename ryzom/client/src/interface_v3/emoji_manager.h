@@ -39,10 +39,36 @@ public:
 	/// One emoji, reachable by name or by its literal unicode form.
 	struct CEntry
 	{
+		/** The name this entry is filed under, with no colons, e.g. "fire".
+		  *
+		  * Several names share one emoji, and each gets its own entry, so this
+		  * is the name that was matched -- ":flame:" keeps "flame". A literal
+		  * emoji has no name of its own and resolves through the reverse index,
+		  * which keeps the first name in alphabetical order; for the emoji that
+		  * have several that is Zulip's canonical one often enough to be worth
+		  * showing ("fire", not "lit"). Used for the chat's hover tooltip.
+		  */
+		std::string		Name;
 		/// The emoji as UTF-8, e.g. "\xf0\x9f\x98\x84". Never empty.
 		std::string		Utf8;
 		/// Texture name for image mode, e.g. "emoji_u1f604.tga". Empty if none.
 		std::string		Texture;
+		/** Unicode's short name for it, e.g. "face with tears of joy". Only the
+		  * emoji the picker lists have one; it is what the picker shows under
+		  * the cursor. From emoji_picker.txt, not from the name table.
+		  */
+		std::string		Desc;
+	};
+
+	/** One tab of the emoji picker: a Unicode group, with the emoji it holds
+	  * in Unicode's own order. Empty until emoji_picker.txt is loaded.
+	  */
+	struct CGroup
+	{
+		/// Translated if the interface has a string for it, English otherwise.
+		std::string						Label;
+		/// Never empty: a group with nothing we can show is not kept.
+		std::vector<const CEntry *>		Emoji;
 	};
 
 	static CEmojiManager &getInstance();
@@ -82,6 +108,14 @@ public:
 				 std::string::size_type to,
 				 std::string::size_type &len, const CEntry *&entry) const;
 
+	/** The picker's tabs, in Unicode's order. Empty if emoji_picker.txt is
+	  * missing, which costs the picker and nothing else.
+	  */
+	const std::vector<CGroup> &getGroups() const { return _Groups; }
+
+	/// The emoji of that name, or NULL. The name carries no colons.
+	const CEntry *find(const std::string &name) const;
+
 	/// Longest name we will consider between two colons, in bytes.
 	static const uint MaxNameBytes = 64;
 
@@ -93,6 +127,11 @@ private:
 	static CEmojiManager *_Instance;
 
 	bool loadTable(const std::string &filename, bool required);
+	/** Load the picker layout. Runs after the reverse index is built, because
+	  * it also decides which of an emoji's names that index hands out: the
+	  * canonical one the picker inserts, rather than the first alphabetically.
+	  */
+	void loadPicker(const std::string &filename);
 	void addEntry(const std::string &name, const std::string &utf8,
 				  const std::string &texture);
 
@@ -120,6 +159,9 @@ private:
 	  * person and the rest of the sequence would be left behind as loose glyphs.
 	  */
 	std::vector<std::string::size_type>		_Utf8Lengths;
+
+	/// The picker's tabs. Holds pointers into _ByName, whose nodes never move.
+	std::vector<CGroup>						_Groups;
 
 	bool									_Loaded;
 };
