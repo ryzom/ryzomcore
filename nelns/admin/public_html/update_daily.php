@@ -86,7 +86,7 @@
 	$id = connectToDatabase($dbhost, $dbname, $dblogin, $dbpassword);
 
 	$shardid = "61";
-	$query = "UPDATE shard SET Version='$version' WHERE ShardId='$shardid'";
+	$query = "UPDATE shard SET Version='".mysql_real_escape_string($version)."' WHERE ShardId='$shardid'";
 	$result = sqldbquery($query, $id);
 
 	die ($result ? "[OK]" : "[FAILED]");

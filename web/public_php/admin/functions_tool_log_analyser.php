@@ -199,7 +199,7 @@
 
 		if ($db->sql_select_db($dbname))
 		{
-			$sql = "SELECT char_id,char_name FROM characters WHERE char_id IN (". implode(',', array_keys($data)) .")";
+			$sql = "SELECT char_id,char_name FROM characters WHERE char_id IN (". implode(',', array_map('intval', array_keys($data))) .")";
 			if ($result = $db->sql_query($sql))
 			{
 				if ($db->sql_numrows($result))

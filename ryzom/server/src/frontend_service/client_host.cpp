@@ -464,8 +464,12 @@ void				CClientHost::CGenericMultiPartTemp::set (CActionGenericMultiPart *agmp, 
 			BlockReceived[i] = false;
 	}
 	
-	nlassert (NbBlock == agmp->NbBlock);
-	nlassert (NbBlock > agmp->Part);
+	if (NbBlock != agmp->NbBlock || agmp->Part >= NbBlock)
+	{
+		nlwarning("CGenericMultiPartTemp::set: invalid part from client %u (NbBlock=%u, Part=%u, expected NbBlock=%u), dropping",
+			client->Uid, agmp->NbBlock, agmp->Part, NbBlock);
+		return;
+	}
 
 	// check if the block was already received
 	if (BlockReceived[agmp->Part])

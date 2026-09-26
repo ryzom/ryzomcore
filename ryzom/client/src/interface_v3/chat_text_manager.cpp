@@ -23,15 +23,19 @@
 
 #include "stdpch.h"
 // client
+#include "game_share/chat_message.h"
 #include "chat_text_manager.h"
+#include "chat_link_ui.h"
 #include "emoji_manager.h"
+#include "nel/gui/group_menu.h"
+#include "nel/gui/view_link.h"
 #include "nel/gui/view_text.h"
-#include "nel/gui/view_bitmap.h"
 #include "nel/gui/ctrl_tooltip.h"
-#include "nel/gui/group_paragraph.h"
 #include "nel/gui/view_renderer.h"
 #include "nel/gui/widget_manager.h"
+#include "nel/gui/group_paragraph.h"
 #include "interface_manager.h"
+#include "../connection.h"
 
 using namespace std;
 using namespace NLMISC;
@@ -40,15 +44,14 @@ CChatTextManager* CChatTextManager::_Instance = NULL;
 
 // last selected chat from 'copy_chat_popup' action handler
 static std::string LastSelectedChat;
+static CSheetId LastSelectedChatSheetId = CSheetId::Unknown;
 
 //=================================================================================
 CChatTextManager::CChatTextManager() :
 	_TextFontSize(NULL),
 	_TextMultilineSpace(NULL),
 	_TextShadowed(NULL),
-	_ShowTimestamps(NULL),
-	_EmojiMode(NULL),
-	_EmojiSize(NULL)
+	_ShowTimestamps(NULL)
 {
 }
 
@@ -63,10 +66,6 @@ CChatTextManager::~CChatTextManager()
 	_TextShadowed = NULL;
 	delete _ShowTimestamps;
 	_ShowTimestamps = NULL;
-	delete _EmojiMode;
-	_EmojiMode = NULL;
-	delete _EmojiSize;
-	_EmojiSize = NULL;
 }
 //=================================================================================
 uint CChatTextManager::getTextFontSize() const
@@ -149,6 +148,7 @@ sint32 CChatTextManager::getEmojiPixelSize() const
 		default:			return small;
 	}
 }
+
 
 //=================================================================================
 bool CChatTextManager::showTimestamps() const
@@ -419,6 +419,47 @@ CViewBase *CChatTextManager::createMsgText(const string &cstMsg, NLMISC::CRGBA c
 	return createMsgTextComplex(msg, col, justified, plaintext, commandGroup);
 }
 
+CViewBase *CChatTextManager::createMsgText(const string &cstPrefix, const CChatMessage &message,
+	NLMISC::CRGBA col, bool justified)
+{
+	string prefix = cstPrefix;
+	if (showTimestamps())
+		prependTimestamp(prefix);
+
+	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
+	para->setId("line");
+	para->setSizeRef("w");
+	para->setResizeFromChildH(true);
+
+	string copyText = prefix;
+	if (!prefix.empty())
+		addMsgText(para, prefix, col, justified, 0, prefix.size());
+	for (std::vector<CChatMessagePart>::const_iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+	{
+		if (it->Type == CChatMessagePart::Text)
+		{
+			const string text = it->TextValue.toUtf8();
+			// Same substitution a chat line gets, per part: each is passed to
+			// addMsgText whole, so no index outlives it.
+			CEmojiManager &emoji = CEmojiManager::getInstance();
+			const string shown = (getEmojiMode() == EmojiUnicode && emoji.mayContainEmoji(text))
+				? emoji.substituteShortcodes(text)
+				: text;
+			addMsgText(para, shown, col, justified, 0, shown.size());
+			copyText += text;
+		}
+		else
+		{
+			CViewLink *view = CHAT_SHARE::createAttachmentView(*it, justified);
+			para->addChildLink(view);
+			copyText += view->LinkTitle;
+		}
+	}
+	para->setRightClickHandler("copy_chat_popup");
+	para->setRightClickHandlerParams(copyText);
+	return para;
+}
+
 //=================================================================================
 CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGBA col, bool justified, CInterfaceGroup *commandGroup)
 {
@@ -543,87 +584,14 @@ CViewBase *CChatTextManager::createEmojiView(const string &texture, const string
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+void CChatTextManager::addMsgText(CGroupParagraph *para, const string &msg, NLMISC::CRGBA col,
+	bool justified, string::size_type pos, string::size_type textSize)
 {
+	// Image mode cuts the line around each emoji, so this has to know where
+	// they are. Worked out here rather than passed in, so that every caller --
+	// a chat line, a shared item's text -- gets them.
 	CEmojiManager &emoji = CEmojiManager::getInstance();
-	const uint emojiMode = getEmojiMode();
-	const bool scanEmoji = emojiMode != EmojiText && emoji.mayContainEmoji(originalMsg);
-
-	// In unicode mode the shortcodes become characters and the line stays a
-	// single view, so nothing is split and there is no format state to carry.
-	// That is why this mode cannot disturb text colour at all.
-	string msg = (scanEmoji && emojiMode == EmojiUnicode)
-		? emoji.substituteShortcodes(originalMsg)
-		: originalMsg;
-
-	string::size_type textSize = msg.size();
-
-	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
-	para->setId("line");
-	para->setSizeRef("w");
-	para->setResizeFromChildH(true);
-
-	// use right click because left click might be used to activate chat window
-	// Copy yields what was actually said, with ":name:" intact.
-	para->setRightClickHandler("copy_chat_popup");
-	para->setRightClickHandlerParams(originalMsg);
-
-	if (plaintext)
-	{
-		CViewBase *vt = createMsgTextSimple(msg, col, justified, NULL);
-		vt->setId("text");
-		para->addChild(vt);
-
-		return para;
-	}
-
-	string::size_type pos = 0;
-
-	string::size_type startTr = msg.find("{:");
-	string::size_type endOfOriginal = msg.find("}@{");
-
-	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
-	if (startTr != string::npos && endOfOriginal != string::npos)
-	{
-		string lang = toUpperAscii(msg.substr(startTr+2, 2));
-
-		bool inverse = false;
-		bool hideFlag = false;
-		CCDBNodeLeaf *nodeInverse = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
-		if (nodeInverse)
-			inverse = nodeInverse->getValueBool();
-		CCDBNodeLeaf *nodeHideFlag = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":HIDE_FLAG", false);
-		if (nodeHideFlag)
-			hideFlag = nodeHideFlag->getValueBool();
-		
-		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
-		para->addChild(vt);
-
-		string texture = "flag-"+toLowerAscii(msg.substr(startTr+2, 2))+".tga";
-		string original = msg.substr(startTr+5, endOfOriginal-startTr-5);
-		string translation = msg.substr(endOfOriginal+3);
-		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
-		ctrlButton->setTexture(texture);
-		ctrlButton->setTextureOver(texture);
-		ctrlButton->setTexturePushed(texture);
-		if (!inverse)
-		{
-		  ctrlButton->setDefaultContextHelp(original);
-		  pos = endOfOriginal+4;
-		}
-		else
-		{
-		  ctrlButton->setDefaultContextHelp(translation);
-		  pos = startTr+5;
-		  textSize = endOfOriginal;
-		}
-		ctrlButton->setId("tr");
-		if (hideFlag) {
-		  delete ctrlButton;
-		} else {
-		  para->addChild(ctrlButton);
-		}
-	}
+	const bool useEmojiImages = getEmojiMode() == EmojiImage && emoji.mayContainEmoji(msg);
 
 	// quickly check if text has links or not
 	bool hasUrl;
@@ -631,8 +599,6 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLM
 		string s = toLowerAscii(msg);
 		hasUrl = (s.find("http://") || s.find("https://"));
 	}
-
-	const bool useEmojiImages = scanEmoji && emojiMode == EmojiImage;
 
 	for (string::size_type i = pos; i< textSize;)
 	{
@@ -734,6 +700,91 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLM
 	}
 
 	addTextSegment(para, msg, pos, textSize, col, justified, "text");
+}
+
+//=================================================================================
+CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+{
+	// In unicode mode the shortcodes become characters and the line stays a
+	// single view, so nothing is split and there is no format state to carry.
+	// That is why this mode cannot disturb text colour at all. It has to happen
+	// before anything below indexes the line.
+	CEmojiManager &emoji = CEmojiManager::getInstance();
+	const uint emojiMode = getEmojiMode();
+	const string msg = (emojiMode == EmojiUnicode && emoji.mayContainEmoji(originalMsg))
+		? emoji.substituteShortcodes(originalMsg)
+		: originalMsg;
+
+	string::size_type textSize = msg.size();
+
+	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
+	para->setId("line");
+	para->setSizeRef("w");
+	para->setResizeFromChildH(true);
+
+	// use right click because left click might be used to activate chat window
+	// Copy yields what was actually said, with ":name:" intact.
+	para->setRightClickHandler("copy_chat_popup");
+	para->setRightClickHandlerParams(originalMsg);
+
+	if (plaintext)
+	{
+		CViewBase *vt = createMsgTextSimple(msg, col, justified, NULL);
+		vt->setId("text");
+		para->addChild(vt);
+
+		return para;
+	}
+
+	string::size_type pos = 0;
+
+	string::size_type startTr = msg.find("{:");
+	string::size_type endOfOriginal = msg.find("}@{");
+
+	// Original/Translated case, example: {:enHello the world!}@{ Bonjour le monde !
+	if (startTr != string::npos && endOfOriginal != string::npos)
+	{
+		string lang = toUpperAscii(msg.substr(startTr+2, 2));
+
+		bool inverse = false;
+		bool hideFlag = false;
+		CCDBNodeLeaf *nodeInverse = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":INVERSE_DISPLAY", false);
+		if (nodeInverse)
+			inverse = nodeInverse->getValueBool();
+		CCDBNodeLeaf *nodeHideFlag = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:TRANSLATION:" + lang + ":HIDE_FLAG", false);
+		if (nodeHideFlag)
+			hideFlag = nodeHideFlag->getValueBool();
+
+		CViewBase *vt = createMsgTextSimple(msg.substr(0, startTr), col, justified, NULL);
+		para->addChild(vt);
+
+		string texture = "flag-"+toLowerAscii(msg.substr(startTr+2, 2))+".tga";
+		string original = msg.substr(startTr+5, endOfOriginal-startTr-5);
+		string translation = msg.substr(endOfOriginal+3);
+		CCtrlButton *ctrlButton = new CCtrlButton(CViewBase::TCtorParam());
+		ctrlButton->setTexture(texture);
+		ctrlButton->setTextureOver(texture);
+		ctrlButton->setTexturePushed(texture);
+		if (!inverse)
+		{
+		  ctrlButton->setDefaultContextHelp(original);
+		  pos = endOfOriginal+4;
+		}
+		else
+		{
+		  ctrlButton->setDefaultContextHelp(translation);
+		  pos = startTr+5;
+		  textSize = endOfOriginal;
+		}
+		ctrlButton->setId("tr");
+		if (hideFlag) {
+		  delete ctrlButton;
+		} else {
+		  para->addChild(ctrlButton);
+		}
+	}
+
+	addMsgText(para, msg, col, justified, pos, textSize);
 
 	return para;
 }
@@ -773,9 +824,24 @@ public:
 		if (pCaller == NULL) return;
 
 		LastSelectedChat = params;
+		LastSelectedChatSheetId = CSheetId::Unknown;
 
 		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
 		if (pGP) pGP->enableTempOver();
+		if (pGP && !UserPrivileges.empty())
+		{
+			CCtrlBase *ctrl = CWidgetManager::getInstance()->getCapturePointerRight();
+			if (ctrl && ctrl->getParent() == pGP)
+				CHAT_SHARE::getAttachmentSheetId(ctrl, LastSelectedChatSheetId);
+		}
+
+		CGroupMenu *menu = dynamic_cast<CGroupMenu*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:chat_copy_action_menu"));
+		if (menu && menu->getRootMenu())
+		{
+			const sint line = menu->getRootMenu()->getLineFromId("copy_sheet_id");
+			if (line >= 0)
+				menu->getRootMenu()->setHiddenLine(line, LastSelectedChatSheetId == CSheetId::Unknown);
+		}
 
 		CWidgetManager::getInstance()->enableModalWindow (pCaller, "ui:interface:chat_copy_action_menu");
 	}
@@ -799,4 +865,24 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCopyChat, "copy_chat");
+
+// ***************************************************************************
+// Called when we right click on an attachment and choose 'copy sheet id' from context menu
+class CHandlerCopyChatSheetId: public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* params */)
+	{
+		if (pCaller == NULL) return;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->disableTempOver();
+
+		if (!UserPrivileges.empty() && LastSelectedChatSheetId != CSheetId::Unknown)
+			CAHManager::getInstance()->runActionHandler("copy_to_clipboard", NULL, LastSelectedChatSheetId.toString());
+		LastSelectedChatSheetId = CSheetId::Unknown;
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerCopyChatSheetId, "copy_chat_sheet_id");
 

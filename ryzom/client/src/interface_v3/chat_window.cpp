@@ -25,11 +25,13 @@
 // client
 #include "stdpch.h"
 
+#include "game_share/chat_message.h"
 #include "game_share/shard_names.h"
 
 #include "../r2/editor.h"
 
 #include "chat_window.h"
+#include "chat_link_ui.h"
 #include "chat_text_manager.h"
 #include "../user_entity.h"
 #include "people_interraction.h"
@@ -201,7 +203,7 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/, const CChatMessage *sharedMessage /*= NULL*/)
 {
 	if (!_Chat)
 	{
@@ -233,7 +235,7 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 		}
 	}
 
-	CViewBase *child = ctm.createMsgText(msgNoTranslate, col);
+	CViewBase *child = sharedMessage ? ctm.createMsgText(msgNoTranslate, *sharedMessage, col) : ctm.createMsgText(msgNoTranslate, col);
 	if (child)
 	{
 		if (gl)	gl->addChild(child);
@@ -550,7 +552,7 @@ void CChatWindow::clearMessages(CChatGroup::TGroupType /* gt */, uint32 /* dynam
 // CChatGroupWindow //
 //////////////////////
 
-void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
+void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible, const CChatMessage *sharedMessage)
 {
 	if (!_Chat)
 	{
@@ -595,7 +597,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 	CViewBase *child = NULL;
 	if (gl != NULL)
 	{
-		child = ctm.createMsgText(newmsg, col);
+		child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col) : ctm.createMsgText(newmsg, col);
 		if (child)
 		{
 			gl->addChild(child);
@@ -669,7 +671,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 
 		if (gl != NULL)
 		{
-			child = ctm.createMsgText(newmsg, col);
+			child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col) : ctm.createMsgText(newmsg, col);
 			if (child)
 			{
 				gl->addChild(child);
@@ -704,7 +706,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 }
 
 //=================================================================================
-void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender)
+void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender, const CChatMessage *sharedMessage)
 {
 	// If we are here with a tell message this is because the teller doesn't belong to any people list
 	CGroupContainer *gcChat = createFreeTeller(sender);
@@ -725,7 +727,8 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 		nlwarning("<CChatGroupWindow::displayTellMessage> can't get text_list.");
 		return;
 	}
-	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	CViewBase *child = sharedMessage ? getChatTextMngr().createMsgText(msg, *sharedMessage, col) :
+		getChatTextMngr().createMsgText(msg, col);
 	if (child)
 		gl->addChild(child);
 }
@@ -1327,12 +1330,24 @@ public:
 		}
 
 		// Parse any tokens in the text
-		if ( ! CInterfaceManager::parseTokens(text))
+		CChatMessageRequest request;
+		const bool hasAttachments = !pEB->getTextTags().empty();
+		bool tokensParsed = false;
+		if (!hasAttachments)
+			tokensParsed = CInterfaceManager::parseTokens(text);
+		else
+		{
+			tokensParsed = CHAT_SHARE::buildRequest(pEB, request);
+			if (tokensParsed)
+				text = request.Text.toUtf8();
+		}
+		if (!tokensParsed)
 		{
 			pEB->setInputString(std::string());
 			return;
 		}
 
+		CHAT_SHARE::CRequestScope requestScope(hasAttachments ? &request : NULL);
 		// if, it s a command, execute it and don't send the command to the server
 		if(text[0] == '/')
 		{

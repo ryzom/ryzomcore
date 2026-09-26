@@ -86,7 +86,7 @@
 	{
 		$result = sqlquery("SELECT view_row.name AS user_name, variable.name AS var_name, path, warning_bound, error_bound, alarm_order, view_row.filter as varfilter, view_table.filter as viewfilter, display, auto_display, view_row.vid AS vid ".
 								 "FROM variable, view_row, view_table ".
-								 "WHERE variable.command='variable' AND (view_table.uid='$uid' OR view_table.uid='$gid') AND view_table.tid='$tid' AND view_row.tid='$tid' AND variable.vid=view_row.vid ORDER BY view_row.ordering");
+								 "WHERE variable.command='variable' AND (view_table.uid='".intval($uid)."' OR view_table.uid='".intval($gid)."') AND view_table.tid='".intval($tid)."' AND view_row.tid='".intval($tid)."' AND variable.vid=view_row.vid ORDER BY view_row.ordering");
 
 		while ($result && ($arr=sqlfetch($result)))
 		{

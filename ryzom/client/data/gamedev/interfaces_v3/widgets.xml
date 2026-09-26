@@ -391,6 +391,11 @@
         </action>
         <!--<action id="drop"           name="uimDrop"          handler="proc"  params="drop_item_proc" />-->
         <action id="equip" name="uimEquip" handler="inv_auto_equip" icon="filter_armor.tga"/>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <action id="item_text_edition" name="uimItemTextEdit" handler="item_text_edition" params="ui:interface:edit_custom" icon="r2ed_tool_scenario_window.tga" />
@@ -401,6 +406,14 @@
         <!-- Will be activated and populated in code -->
         <group type="menu" id="item_group_menu" extends="base_menu"></group>
     </group>
+    <group type="menu" id="item_menu_in_trade" extends="base_menu">
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
+        <action id="infos" name="uimBoldInfo" handler="open_help_auto" icon="brick_default.tga"/>
+    </group>
     <!-- MAX_INVENTORY_ANIMAL -->
     <link expr="switch(@%pa_beast0:TYPE, 'uimMtPaMount0', 'uimMtPaMount0', 'uimMtPaPacker0', 'uimMtPaDemon0')" target="ui:interface:item_menu_in_bag:move:pa0:hardtext" />
     <link expr="switch(@%pa_beast1:TYPE, 'uimMtPaMount1', 'uimMtPaMount1', 'uimMtPaPacker1', 'uimMtPaDemon1')" target="ui:interface:item_menu_in_bag:move:pa1:hardtext" />
@@ -409,6 +422,11 @@
     <!-- item menu when we are in self -->
     <group type="menu" id="item_menu_in_self" extends="base_menu" on_active="item_menu_base_check">
         <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
         <separator />
@@ -424,6 +442,11 @@
         <action id="xp_catalyser_use" name="uimXpCatalyserUse" handler="xp_catalyser_use" icon="ico_cataliseur_xp.tga"/>
         <action id="item_text_display" name="uiOpen" handler="item_text_display" params="ui:interface:edit_custom" icon="r2ed_tool_scenario_window.tga"/>
         <separator />
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
+        </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <separator />
         <action id="destroy" name="uimDestroy" handler="proc" params="destroy_item_proc" icon="r2_toolbar_kill_small.tga" />
@@ -433,6 +456,11 @@
         <!--<action id="drop"    name="uimDrop"     handler="proc" params="drop_item_proc"/>-->
         <action id="move" name="uimMoveTo" icon="curs_can_pan.tga">
             <!--<action id="bag"    name="uimMtBag"         handler="proc" params="move_to_bag" /> -->
+        </action>
+        <action id="item_chat_link" name="uiChatLinkMenuItem" icon="ico_range.tga">
+            <action id="main" name="uiMainChat" handler="link_item_in_chat" params="destination=main"/>
+            <action id="tell" name="uimTell" handler="link_item_in_chat" params="destination=tell"/>
+            <action id="clipboard" name="uiChatLinkClipboard" handler="link_item_in_chat" params="destination=clipboard"/>
         </action>
         <action id="infos" name="uimBoldInfo" handler="open_item_help" params="" icon="brick_default.tga"/>
         <action id="lockunlock" name="uimLockItem" handler="lock_inv_item" icon="r2ed_toolbar_lock_small.tga"/>
@@ -1173,6 +1201,14 @@
     <!-- **************** -->
     <!-- *  MESSAGE BOX * -->
     <!-- **************** -->
+    <group type="modal" id="chat_link_tell" active="false" exit_click_out="true" posref="MM MR" w="260" child_resize_h="true" child_resize_hmargin="14" options="skin_modal"
+        on_active="set_keyboard_focus" on_active_params="target=ui:interface:chat_link_tell:receiver:eb|select_all=false"
+        on_deactive="chat_link_tell" on_deactive_params="cancel">
+        <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiTellCmdDest" />
+        <instance template="edit_box_widget" id="receiver" posref="TL TL" x="6" y="-24" child_resize_h="true" w="248"
+            onenter="chat_link_tell" onchange="" max_num_chars="255" entry_type="playername" max_historic="0" enter_loose_focus="false" enter_recover_focus="false" />
+        <instance template="button_ok_cancel" posparent="receiver" posref="BR TR" onclick_ok="chat_link_tell" onclick_cancel="leave_modal" />
+    </group>
     <!-- Simple Message Box with just a OK button -->
     <group type="modal" id="message_box" exit_click_out="true" posref="MM MM" w="250" child_resize_h="true" child_resize_hmargin="46" on_enter="leave_modal" options="skin_modal">
         <view type="text" id="text" posref="TL TL" line_maxw="234" x="8" y="-12" w="0" h="0" color="255 255 255 255" fontsize="12" shadow="true" multi_line="true" multi_line_space="0" case_mode="%case_first_sentence_letter_up" />
@@ -1386,7 +1422,7 @@
                         <!-- Item preview 3D window -->
                         <group id="item_preview" posref="TL TL" sizeref="w" w="200" h="300" x="0" y="-60">
                             <scene3d id="scene_item_preview" sizeref="wh" w="-2" h="-2" posref="TL TL" x="1" curcam="cam_item_preview" user_interaction="true" ambient="128 96 64" sun_ambient="70 70 70" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" rotz_factor="0.017" roty_factor="0.005" dist_factor="0.2" camz="10" dist_limit_min="20.0" dist_limit_max="80.0">
-                                <character3d id="char" dblink="UI:TEMP:CHAR3D" pos="0.0 0.0 -1.8" rot="0.0 0.0 -60.0" anim="1" />
+                                <character3d id="char" dblink="UI:TEMP:ITEM_PREVIEW:#index" pos="0.0 0.0 -1.8" rot="0.0 0.0 -60.0" anim="1" />
                                 <camera id="cam_item_preview" fov="5" pos="0.0 -40.0 0.0" target="0.0 0.0 -0.85" roll="0" />
                                 <light id="back" pos="0.0 28.2 1.6" color="96 64 32" near="1.0" far="4.0" />
                                 <light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="1.0" far="4.0" />

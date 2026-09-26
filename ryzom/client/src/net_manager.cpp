@@ -69,6 +69,7 @@
 #include "misc.h"
 #include "interface_v3/inventory_manager.h"
 #include "interface_v3/sphrase_manager.h"
+#include "interface_v3/chat_link_ui.h"
 #include "outpost_manager.h"
 #include "interface_v3/encyclopedia_manager.h"
 #include "user_entity.h"
@@ -602,13 +603,20 @@ void impulsePermanentUnban(NLMISC::CBitMemStream &impulse)
 class CInterfaceChatDisplayer : public CClientChatManager::IChatDisplayer
 {
 public:
+	CInterfaceChatDisplayer() : _SharedMessage(NULL), _SharedTextLength(0), _OwnTell(false) {}
 	virtual void displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0);
+	virtual void displayChatMessage(TDataSetIndex compressedSenderIndex, const std::string &prefix, const CChatMessage &message, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName);
 	virtual void displayTell(/*TDataSetIndex senderIndex, */const std::string &ucstr, const std::string &senderName);
+	virtual void displayTellMessage(const std::string &prefix, const CChatMessage &message, const std::string &senderName, bool ownTell);
 	virtual void clearChannel(CChatGroup::TGroupType mode, uint32 dynChatDbIndex);
 
 private:
 	// Add colorization tag for sender name
 	void colorizeSender(string &text, const string &senderName, CRGBA baseColor);
+	std::string getMessageText(const CChatMessage &message);
+	const CChatMessage *_SharedMessage;
+	size_t _SharedTextLength;
+	bool _OwnTell;
 
 };
 static CInterfaceChatDisplayer	InterfaceChatDisplayer;
@@ -634,6 +642,25 @@ void CInterfaceChatDisplayer::colorizeSender(string &text, const string &senderN
 
 		text = str;
 	}
+}
+
+std::string CInterfaceChatDisplayer::getMessageText(const CChatMessage &message)
+{
+	std::string text;
+	for (std::vector<CChatMessagePart>::const_iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
+		text += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() : CHAT_SHARE::getPartName(*it);
+	return text;
+}
+
+void CInterfaceChatDisplayer::displayChatMessage(TDataSetIndex compressedSenderIndex, const std::string &prefix,
+	const CChatMessage &message, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName)
+{
+	std::string text = getMessageText(message);
+	if (message.NoBubble)
+		text.insert(0, "{no_bubble}");
+	_SharedMessage = &message;
+	displayChat(compressedSenderIndex, prefix + text, text, mode, dynChatId, senderName);
+	_SharedMessage = NULL;
 }
 
 // display a chat from network to interface
@@ -726,6 +753,13 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 		colorizeSender(finalString, senderPart, col);
 	}
+	string displayString = finalString;
+	if (_SharedMessage)
+	{
+		displayString = senderPart;
+		if (mode != CChatGroup::system)
+			colorizeSender(displayString, senderPart, col);
+	}
 
 	// play associated fx if any
 	if( !stringCategory.empty() )
@@ -760,22 +794,30 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 		}
 		else if (mode == CChatGroup::guild)
 		{
-			PeopleInterraction.ChatInput.Guild.displayMessage(finalString, col, 2, &windowVisible);
+			PeopleInterraction.ChatInput.Guild.displayMessage(displayString, col, 2, &windowVisible, _SharedMessage);
 		}
 		else if (mode == CChatGroup::team)
 		{
-			PeopleInterraction.ChatInput.Team.displayMessage(finalString, col, 2, &windowVisible);
+			PeopleInterraction.ChatInput.Team.displayMessage(displayString, col, 2, &windowVisible, _SharedMessage);
 		}
 		else if (mode == CChatGroup::region)
 		{
-			PeopleInterraction.ChatInput.Region.displayMessage(finalString, col, 2, &windowVisible);
+			PeopleInterraction.ChatInput.Region.displayMessage(displayString, col, 2, &windowVisible, _SharedMessage);
 		}
 		else if (mode == CChatGroup::universe)
 		{
-			if (lastUniversMessage != finalString)
+			string universeMessage = finalString;
+			if (_SharedMessage)
 			{
-				PeopleInterraction.ChatInput.Universe.displayMessage(finalString, col, 2, &windowVisible);
-				lastUniversMessage = finalString;
+				CMemStream stream;
+				CChatMessage message = *_SharedMessage;
+				stream.serial(message);
+				universeMessage.append((const char*)stream.buffer(), stream.length());
+			}
+			if (lastUniversMessage != universeMessage)
+			{
+				PeopleInterraction.ChatInput.Universe.displayMessage(displayString, col, 2, &windowVisible, _SharedMessage);
+				lastUniversMessage = universeMessage;
 			}
 		}
 		else if (mode == CChatGroup::dyn_chat)
@@ -785,7 +827,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 			// if found, display, else discarded
 			if(dbIndex >= 0 && dbIndex < CChatGroup::MaxDynChanPerPlayer)
 			{
-				PeopleInterraction.ChatInput.DynamicChat[dbIndex].displayMessage(finalString, col, 2, &windowVisible);
+				PeopleInterraction.ChatInput.DynamicChat[dbIndex].displayMessage(displayString, col, 2, &windowVisible, _SharedMessage);
 
 				// Add dynchannel info before text so that the chat log will show the correct string.
 				CCDBNodeLeaf* node = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB", false);
@@ -866,7 +908,7 @@ void CInterfaceChatDisplayer::displayChat(TDataSetIndex compressedSenderIndex, c
 			}
 			else
 			{
-				PeopleInterraction.ChatInput.AroundMe.displayMessage(finalString, col, 2, &windowVisible);
+				PeopleInterraction.ChatInput.AroundMe.displayMessage(displayString, col, 2, &windowVisible, _SharedMessage);
 			}
 		}
 		// if tell, bkup sendername
@@ -937,13 +979,29 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const s
 	string goodSenderName = CEntityCL::removeTitleAndShardFromName(senderName);
 
 	// The sender part is up to and including the first ":" after the goodSenderName
-	string::size_type pos = finalString.find(goodSenderName);
-	pos = finalString.find(':', pos);
-	pos = finalString.find(' ', pos);
-	string senderPart = finalString.substr(0, pos+1);
- 	colorizeSender(finalString, senderPart, prop.getRGBA());
+	if (!_OwnTell)
+	{
+		string::size_type pos = finalString.find(goodSenderName);
+		pos = finalString.find(':', pos);
+		pos = finalString.find(' ', pos);
+		string senderPart = finalString.substr(0, pos+1);
+		colorizeSender(finalString, senderPart, prop.getRGBA());
+	}
+	string displayString = finalString;
+	if (_SharedMessage)
+	{
+		if (_OwnTell)
+		{
+			string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
+			displayString = csr + CI18N::get("youTell") + ": ";
+			string senderPart = displayString;
+			colorizeSender(displayString, senderPart, prop.getRGBA());
+		}
+		else if (_SharedTextLength <= displayString.size())
+			displayString.resize(displayString.size() - _SharedTextLength);
+	}
 
-	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */finalString, goodSenderName, prop.getRGBA(), 2, &windowVisible);
+	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */displayString, goodSenderName, prop.getRGBA(), 2, &windowVisible, _SharedMessage);
 	CInterfaceManager::getInstance()->log(finalString, CChatGroup::groupTypeToString(CChatGroup::tell));
 
 	// Open the free teller window
@@ -953,6 +1011,19 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const s
 
 	if (windowVisible && !goodSenderName.empty())
 		PeopleInterraction.LastSenderName = goodSenderName;
+}
+
+void CInterfaceChatDisplayer::displayTellMessage(const std::string &prefix, const CChatMessage &message,
+	const std::string &senderName, bool ownTell)
+{
+	const std::string text = getMessageText(message);
+	_SharedMessage = &message;
+	_SharedTextLength = text.size();
+	_OwnTell = ownTell;
+	displayTell(prefix + text, senderName);
+	_OwnTell = false;
+	_SharedTextLength = 0;
+	_SharedMessage = NULL;
 }
 
 // clear a channel
@@ -985,6 +1056,11 @@ void impulseChat(NLMISC::CBitMemStream &impulse)
 void impulseChat2(NLMISC::CBitMemStream &impulse)
 {
 	ChatMngr.processChatString2(impulse, InterfaceChatDisplayer);
+}
+
+void impulseChatShare(NLMISC::CBitMemStream &impulse)
+{
+	ChatMngr.processChatMessage(impulse, InterfaceChatDisplayer);
 }
 
 void impulseTell(NLMISC::CBitMemStream &impulse)
@@ -3632,6 +3708,7 @@ void initializeNetwork()
 	GenericMsgHeaderMngr.setCallback("CONNECTION:UNBAN",		        impulsePermanentUnban);
 
 	GenericMsgHeaderMngr.setCallback("STRING:CHAT",				impulseChat);
+	GenericMsgHeaderMngr.setCallback("STRING:CHAT_SHARE",			impulseChatShare);
 	GenericMsgHeaderMngr.setCallback("STRING:TELL",				impulseTell);
 	GenericMsgHeaderMngr.setCallback("STRING:FAR_TELL",			impulseFarTell);
 	GenericMsgHeaderMngr.setCallback("STRING:CHAT2",			impulseChat2);

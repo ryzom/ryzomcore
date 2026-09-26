@@ -67,13 +67,13 @@ class Sync{
                                 $decode = json_decode($record['query']);
                                 $values = array('Password' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->update("user", $values, "Login = '$decode[0]'");
+                                $db->execute("UPDATE `user` SET `Password` = :Password WHERE Login = :Login", array('Password' => $decode[1], 'Login' => $decode[0]));
                                 break;
                             case 'change_mail':
                                 $decode = json_decode($record['query']);
                                 $values = array('Email' => $decode[1]);
                                 //make connection with and put into shard db & delete from the lib
-                                $db->update("user", $values, "Login = '$decode[0]'");
+                                $db->execute("UPDATE `user` SET `Email` = :Email WHERE Login = :Login", array('Email' => $decode[1], 'Login' => $decode[0]));
                                 break;
                             case 'createUser':
                                 $decode = json_decode($record['query']);

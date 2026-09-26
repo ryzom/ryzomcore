@@ -216,6 +216,8 @@
           sendto="IOS"
           format="uc"
           description="the client sets an afk custom text" />
+    <leaf name="CHAT_SHARE"
+          description="the client sends a chat message containing item or action references" />
   </branch>
   <branch name="STUN">
     <leaf name="STUN" />

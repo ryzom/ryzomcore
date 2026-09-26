@@ -23,7 +23,7 @@
 
 	function reorderViews($uid)
 	{
-		$result = sqlquery("SELECT tid FROM view_table WHERE uid='$uid' ORDER BY ordering");
+		$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' ORDER BY ordering");
 		$i = 0;
 		while ($result && $arr = mysql_fetch_array($result))
 		{
@@ -34,25 +34,25 @@
 	
 	function swapView($uid, $ordering, $offs)
 	{
-		$result1 = sqlquery("SELECT tid FROM view_table WHERE uid='$uid' AND ordering='$ordering'");
+		$result1 = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND ordering='".intval($ordering)."'");
 		if (!$result1 || mysql_num_rows($result1) != 1)
 			return;
 		$result1 = mysql_fetch_array($result1);
 		$tid1 = $result1["tid"];
 
-		$result2 = sqlquery("SELECT tid FROM view_table WHERE uid='$uid' AND ordering='".($ordering+$offs)."'");
+		$result2 = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND ordering='".(intval($ordering)+intval($offs))."'");
 		if (!$result2 || mysql_num_rows($result2) != 1)
 			return;
 		$result2 = mysql_fetch_array($result2);
 		$tid2 = $result2["tid"];
 		
-		sqlquery("UPDATE view_table SET ordering='".($ordering+$offs)."' WHERE uid='$uid' AND tid='$tid1'");
-		sqlquery("UPDATE view_table SET ordering='".($ordering)."' WHERE uid='$uid' AND tid='$tid2'");
+		sqlquery("UPDATE view_table SET ordering='".(intval($ordering)+intval($offs))."' WHERE uid='".intval($uid)."' AND tid='$tid1'");
+		sqlquery("UPDATE view_table SET ordering='".intval($ordering)."' WHERE uid='".intval($uid)."' AND tid='$tid2'");
 	}
 
 	function reorderRows($tid)
 	{
-		$result = sqlquery("SELECT vid, ordering FROM view_row WHERE tid='$tid' ORDER BY ordering");
+		$result = sqlquery("SELECT vid, ordering FROM view_row WHERE tid='".intval($tid)."' ORDER BY ordering");
 		$i = 0;
 		
 		$rows = array();
@@ -65,14 +65,14 @@
 			$i = 0;
 			foreach ($rows as $row)
 			{
-				sqlquery("UPDATE view_row SET ordering='".(-$i-1)."' WHERE tid='$tid' AND ordering='".$row[1]."'");
+				sqlquery("UPDATE view_row SET ordering='".(-$i-1)."' WHERE tid='".intval($tid)."' AND ordering='".$row[1]."'");
 				++$i;
 			}
 
 			$i = 0;
 			for ($i=0; $i<count($rows); ++$i)
 			{
-				sqlquery("UPDATE view_row SET ordering='$i' WHERE tid='$tid' AND ordering='".(-$i-1)."'");
+				sqlquery("UPDATE view_row SET ordering='$i' WHERE tid='".intval($tid)."' AND ordering='".(-$i-1)."'");
 			}
 		}
 	}
@@ -96,9 +96,9 @@
 		sqlquery("UPDATE view_row SET ordering='".($ordering)."' WHERE tid='$tid' AND vid='".($vid2)."'");
 */
 
-		sqlquery("UPDATE view_row SET ordering='-1' WHERE tid='$tid' AND ordering='".($ordering)."'");
-		sqlquery("UPDATE view_row SET ordering='".($ordering)."' WHERE tid='$tid' AND ordering='".($ordering+$offs)."'");
-		sqlquery("UPDATE view_row SET ordering='".($ordering+$offs)."' WHERE tid='$tid' AND ordering='-1'");
+		sqlquery("UPDATE view_row SET ordering='-1' WHERE tid='".intval($tid)."' AND ordering='".intval($ordering)."'");
+		sqlquery("UPDATE view_row SET ordering='".intval($ordering)."' WHERE tid='".intval($tid)."' AND ordering='".(intval($ordering)+intval($offs))."'");
+		sqlquery("UPDATE view_row SET ordering='".(intval($ordering)+intval($offs))."' WHERE tid='".intval($tid)."' AND ordering='-1'");
 
 	}
 
@@ -109,44 +109,44 @@
 	if ($createview)
 	{
 		// create a table in view_table
-		$result = sqlquery("SELECT tid FROM view_table WHERE uid='$uid' AND name='$viewname'");
+		$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($viewname)."'");
 		if ($result && mysql_num_rows($result) != 0)
 		{
 			$error = $error."Couldn't create view '$viewname', name already in use<br>\n";
 		}
 		else
 		{
-			$result = sqlquery("INSERT INTO view_table SET uid='$uid', name='$viewname', ordering='255'");
+			$result = sqlquery("INSERT INTO view_table SET uid='".intval($uid)."', name='".sqlescape($viewname)."', ordering='255'");
 			if (!$result)
 			{
 				$error = $error."Couldn't create view '$viewname', mySQL request failed<br>\n";
 			}
-			$result = sqlquery("SELECT tid FROM view_table WHERE uid='$uid' AND name='$viewname'");
+			$result = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($viewname)."'");
 			$result = mysql_fetch_array($result);
 			$tid = $result["tid"];
 
-			reorderViews($uid);
+			reorderViews(intval($uid));
 		}
 		
 	}
 	// duplicate a view
 	else if (isset($dupView) && isset($tid))
 	{
-		$result = sqlquery("SELECT * FROM view_table WHERE tid='$tid'");
+		$result = sqlquery("SELECT * FROM view_table WHERE tid='".intval($tid)."'");
 		if ($result && ($arr = sqlfetch($result)))
 		{
-			sqlquery("INSERT INTO view_table SET uid='$uid', name='CopyOf_".$arr["name"]."', ordering='127', filter='".$arr["filter"]."'");
-			$res2 = sqlquery("SELECT tid FROM view_table WHERE uid='$uid' AND ordering='127'");
+			sqlquery("INSERT INTO view_table SET uid='".intval($uid)."', name='CopyOf_".$arr["name"]."', ordering='127', filter='".$arr["filter"]."'");
+			$res2 = sqlquery("SELECT tid FROM view_table WHERE uid='".intval($uid)."' AND ordering='127'");
 			$arr=sqlfetch($res2);
 			$ntid = $arr["tid"];
 			
-			$result = sqlquery("SELECT * FROM view_row WHERE tid='$tid'");
+			$result = sqlquery("SELECT * FROM view_row WHERE tid='".intval($tid)."'");
 			while ($result && ($arr=sqlfetch($result)))
 			{
 				sqlquery("INSERT INTO view_row SET tid='$ntid', vid='".$arr["vid"]."', name='".$arr["name"]."', ordering='".$arr["ordering"]."', filter='".$arr["filter"]."'");
 			}
 			
-			reorderViews($uid);
+			reorderViews(intval($uid));
 
 			$tid = $ntid;
 		}
@@ -154,53 +154,53 @@
 	// remove a view
 	else if (isset($removeView))
 	{
-		if (!($result = sqlquery("DELETE FROM view_table WHERE uid='$uid' AND tid='$removeView'"))
+		if (!($result = sqlquery("DELETE FROM view_table WHERE uid='".intval($uid)."' AND tid='".intval($removeView)."'"))
 			 || mysql_affected_rows() < 1)
 		{
 			$error = $error."Couldn't remove view $removeView, missing or user doesn't own it<br>\n";
 		}
 		else
 		{
-			sqlquery("DELETE FROM view_row WHERE tid='$removeView'");
-			reorderViews($uid);
+			sqlquery("DELETE FROM view_row WHERE tid='".intval($removeView)."'");
+			reorderViews(intval($uid));
 		}
 	}
 	// change view name
 	else if (isset($chViewName))
 	{
-		sqlquery("UPDATE view_table SET name='$chViewName' WHERE tid='$tid'");
+		sqlquery("UPDATE view_table SET name='".sqlescape($chViewName)."' WHERE tid='".intval($tid)."'");
 	}
 	// change view state
 	else if (isset($chViewFilter))
 	{
-		sqlquery("UPDATE view_table SET filter='$chViewFilter' WHERE tid='$tid'");
+		sqlquery("UPDATE view_table SET filter='".sqlescape($chViewFilter)."' WHERE tid='".intval($tid)."'");
 	}
 	// change view state
 	else if (isset($chViewDisplay))
 	{
-		sqlquery("UPDATE view_table SET display='$chViewDisplay' WHERE tid='$tid'");
+		sqlquery("UPDATE view_table SET display='".sqlescape($chViewDisplay)."' WHERE tid='".intval($tid)."'");
 	}
 	// change view state
 	else if (isset($chViewAutoDisplay))
 	{
-		sqlquery("UPDATE view_table SET auto_display='$chViewAutoDisplay' WHERE tid='$tid'");
+		sqlquery("UPDATE view_table SET auto_display='".sqlescape($chViewAutoDisplay)."' WHERE tid='".intval($tid)."'");
 	}
 	// change view state
 	else if (isset($chViewRefreshRate))
 	{
-		sqlquery("UPDATE view_table SET refresh_rate='$chViewRefreshRate' WHERE tid='$tid'");
+		sqlquery("UPDATE view_table SET refresh_rate='".sqlescape($chViewRefreshRate)."' WHERE tid='".intval($tid)."'");
 	}
 	// swap a view
 	else if (isset($moveView) && isset($offs))
 	{
-		swapView($uid, $moveView, $offs);
+		swapView(intval($uid), intval($moveView), intval($offs));
 	}
 	// add a variable to a view
 	else if (isset($addToView) && isset($tid))
 	{
 		if (hasAccessToVariable($addToView))
 		{
-			if (!($resultt = sqlquery("SELECT name FROM view_table WHERE uid='$uid' AND tid='$tid'"))
+			if (!($resultt = sqlquery("SELECT name FROM view_table WHERE uid='".intval($uid)."' AND tid='".intval($tid)."'"))
 						|| mysql_num_rows($resultt) != 1)
 			{
 				$error = $error."Couldn't add variable $addToView to view $tid, view is missing or user doesn't own it<br>\n";
@@ -208,95 +208,95 @@
 			else
 			{
 				$resultt = mysql_fetch_array($resultt);
-				$result = sqlquery("INSERT INTO view_row SET tid='$tid', vid='$addToView', name='".$variableData[$addToView]["name"]."', ordering='255'");
+				$result = sqlquery("INSERT INTO view_row SET tid='".intval($tid)."', vid='".intval($addToView)."', name='".$variableData[$addToView]["name"]."', ordering='255'");
 				if (!$result)
 					$error = $error."Couldn't add variable ".$variableData[addToView]["name"]." to view ".$resultt["name"].", query failed";
 				else
-					reorderRows($tid);
+					reorderRows(intval($tid));
 			}
 		}
 	}
 	// remove a row
 	else if (isset($removeRow) && isset($tid))
 	{
-		$result = sqlquery("SELECT uid FROM view_table WHERE tid='$tid' AND uid='$uid'");
+		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
 		if ($result && mysql_num_rows($result)>0)
 		{
-			if (!($result = sqlquery("DELETE FROM view_row WHERE tid='$tid' AND ordering='$removeRow'"))
+			if (!($result = sqlquery("DELETE FROM view_row WHERE tid='".intval($tid)."' AND ordering='".intval($removeRow)."'"))
 				 || mysql_affected_rows() < 1)
 			{
 				$error = $error."Couldn't remove row $removeRow, missing or user doesn't own it<br>\n";
 			}
 			else
 			{
-				reorderRows($tid);
+				reorderRows(intval($tid));
 			}
 		}
 	}
 	// swap a row
 	else if (isset($moveRow) && isset($tid) && isset($offs))
 	{
-		$result = sqlquery("SELECT uid FROM view_table WHERE tid='$tid' AND uid='$uid'");
+		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
 		if ($result && mysql_num_rows($result)>0)
-			swapRows($tid, $moveRow, $offs);
+			swapRows(intval($tid), intval($moveRow), intval($offs));
 	}
 	// change a variable name
 	else if ($changeVarName && isset($vid) && isset($tid))
 	{
-		$result = sqlquery("SELECT uid FROM view_table WHERE tid='$tid' AND uid='$uid'");
+		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
 		if ($result && mysql_num_rows($result)>0)
 		{
-			$result = sqlquery("UPDATE view_row SET name='$changeVarName' WHERE vid='$vid' AND tid='$tid'");
+			$result = sqlquery("UPDATE view_row SET name='".sqlescape($changeVarName)."' WHERE vid='".intval($vid)."' AND tid='".intval($tid)."'");
 		}
 	}
 	// change a variable state
 	else if (isset($changeVarFilter) && isset($vid) && isset($tid))
 	{
-		$result = sqlquery("SELECT uid FROM view_table WHERE tid='$tid' AND uid='$uid'");
+		$result = sqlquery("SELECT uid FROM view_table WHERE tid='".intval($tid)."' AND uid='".intval($uid)."'");
 		if ($result && mysql_num_rows($result)>0)
 		{
-			$result = sqlquery("UPDATE view_row SET filter='$changeVarFilter' WHERE vid='$vid' AND tid='$tid'");
+			$result = sqlquery("UPDATE view_row SET filter='".sqlescape($changeVarFilter)."' WHERE vid='".intval($vid)."' AND tid='".intval($tid)."'");
 		}
 	}
 	// select a new default_view
 	else if (isset($default_view))
 	{
-		sqlquery("UPDATE user SET default_view='$default_view' WHERE uid='$uid'");
+		sqlquery("UPDATE user SET default_view='".intval($default_view)."' WHERE uid='".intval($uid)."'");
 	}
 
 	// change a command name
 	else if (isset($chViewCommandName) && isset($vcmd) && isset($tid))
 	{
-		sqlquery("UPDATE view_command SET name='$chViewCommandName' WHERE tid='$tid' AND name='$vcmd'");
+		sqlquery("UPDATE view_command SET name='".sqlescape($chViewCommandName)."' WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
 	}
 	else if (isset($chViewCommand) && isset($vcmd) && isset($tid))
 	{
-		sqlquery("UPDATE view_command SET command='$chViewCommand' WHERE tid='$tid' AND name='$vcmd'");
+		sqlquery("UPDATE view_command SET command='".sqlescape($chViewCommand)."' WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
 	}
 	else if (isset($rmViewCommand) && isset($vcmd) && isset($tid))
 	{
-		sqlquery("DELETE FROM view_command WHERE tid='$tid' AND name='$vcmd'");
+		sqlquery("DELETE FROM view_command WHERE tid='".intval($tid)."' AND name='".sqlescape($vcmd)."'");
 	}
 	else if (isset($createViewCommand) && isset($nViewCommand) && isset($nViewCommandName) && isset($tid))
 	{
-		sqlquery("INSERT INTO view_command SET tid='$tid', name='$nViewCommandName', command='$nViewCommand'");
+		sqlquery("INSERT INTO view_command SET tid='".intval($tid)."', name='".sqlescape($nViewCommandName)."', command='".sqlescape($nViewCommand)."'");
 	}
 	else if (isset($changeVidGraph) && isset($tid))
 	{
 		if (isset($graphState) && $graphState == "on")
 		{
-			sqlquery("UPDATE view_row SET graph='1' WHERE tid='$tid' AND vid='$changeVidGraph'");
+			sqlquery("UPDATE view_row SET graph='1' WHERE tid='".intval($tid)."' AND vid='".intval($changeVidGraph)."'");
 		}
 		else
 		{
-			sqlquery("UPDATE view_row SET graph='0' WHERE tid='$tid' AND vid='$changeVidGraph'");
+			sqlquery("UPDATE view_row SET graph='0' WHERE tid='".intval($tid)."' AND vid='".intval($changeVidGraph)."'");
 		}
 	}
 
 	// give a view to another user
 	else if (isset($giveTo) && isset($tid))
 	{
-		sqlquery("UPDATE view_table SET uid='$giveTo' WHERE tid='$tid'");
+		sqlquery("UPDATE view_table SET uid='".intval($giveTo)."' WHERE tid='".intval($tid)."'");
 		unset($tid);
 	}
 
@@ -324,20 +324,20 @@
 	// -----------------------------
 	// display customizable views
 
-	$res = sqlquery("SELECT default_view FROM user, view_table WHERE user.uid='$uid' AND (view_table.uid='$uid' OR view_table.uid='$gid') AND view_table.tid=user.default_view");
+	$res = sqlquery("SELECT default_view FROM user, view_table WHERE user.uid='".intval($uid)."' AND (view_table.uid='".intval($uid)."' OR view_table.uid='".intval($gid)."') AND view_table.tid=user.default_view");
 	if ($res && ($arr=sqlfetch($res)))
 		$default_view = $arr["default_view"];
 		
 	unset($availViews);
 	unset($userViews);
 	unset($groupViews);
-	$res = sqlquery("SELECT name, tid, ordering FROM view_table WHERE uid='$uid' ORDER BY ordering");
+	$res = sqlquery("SELECT name, tid, ordering FROM view_table WHERE uid='".intval($uid)."' ORDER BY ordering");
 	while ($res && ($arr=sqlfetch($res)))
 	{
 		$availViews[] = $arr;
 		$userViews[] = $arr;
 	}
-	$res = sqlquery("SELECT name, tid, ordering FROM view_table WHERE uid='$gid' ORDER BY ordering");
+	$res = sqlquery("SELECT name, tid, ordering FROM view_table WHERE uid='".intval($gid)."' ORDER BY ordering");
 	while ($res && ($arr=sqlfetch($res)))
 	{
 		$availViews[] = $arr;
@@ -415,7 +415,7 @@
 
 	if (isset($tid))
 	{
-		$result = sqlquery("SELECT name, uid, filter, display, auto_display, refresh_rate FROM view_table WHERE (uid='$uid' OR uid='$gid') AND tid='$tid'");
+		$result = sqlquery("SELECT name, uid, filter, display, auto_display, refresh_rate FROM view_table WHERE (uid='".intval($uid)."' OR uid='".intval($gid)."') AND tid='".intval($tid)."'");
 		if (!$result || mysql_num_rows($result) == 0)
 		{
 			echo "<br><b>Can't display table $tid</b><br>\n";
@@ -453,7 +453,7 @@
 			
 			$result = sqlquery("SELECT view_row.name AS name, view_row.vid AS vid, view_row.ordering AS ordering, path, view_row.filter AS filter, graph ".
 										 "FROM view_table, view_row, variable ".
-										 "WHERE variable.command='variable' AND view_table.uid='$uid' AND view_table.tid='$tid' AND view_table.tid=view_row.tid AND ".
+										 "WHERE variable.command='variable' AND view_table.uid='".intval($uid)."' AND view_table.tid='".intval($tid)."' AND view_table.tid=view_row.tid AND ".
 										 		"view_row.vid=variable.vid ORDER BY ordering");
 
 			if (!$result)
@@ -503,7 +503,7 @@
 
 			$result = sqlquery("SELECT view_row.name AS name, view_row.vid AS vid, view_row.ordering AS ordering, path, view_row.filter AS filter, graph ".
 										 "FROM view_table, view_row, variable ".
-										 "WHERE variable.command='command' AND view_table.uid='$uid' AND view_table.tid='$tid' AND view_table.tid=view_row.tid AND ".
+										 "WHERE variable.command='command' AND view_table.uid='".intval($uid)."' AND view_table.tid='".intval($tid)."' AND view_table.tid=view_row.tid AND ".
 										 		"view_row.vid=variable.vid ORDER BY ordering");
 
 			if (!$result)
@@ -593,7 +593,7 @@
 	
 				$result = sqlquery("SELECT command, variable.vid AS vid, variable.name AS name, path, state, variable.vgid AS vgid, variable_group.name AS group_name ".
 									"FROM variable, variable_group ".
-									"WHERE variable.vgid = variable_group.vgid".(isset($sel_vgid) && $sel_vgid!="-1" ? " AND variable.vgid='$sel_vgid'" : "")." ORDER BY variable.command, variable.vgid, variable.name");
+									"WHERE variable.vgid = variable_group.vgid".(isset($sel_vgid) && $sel_vgid!="-1" ? " AND variable.vgid='".intval($sel_vgid)."'" : "")." ORDER BY variable.command, variable.vgid, variable.name");
 				if (!$result)
 					die("variable select failed !");
 	

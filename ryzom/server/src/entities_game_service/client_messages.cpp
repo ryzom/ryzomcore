@@ -28,6 +28,7 @@
 #include "nel/misc/common.h"
 //game_share
 #include "game_share/generic_xml_msg_mngr.h"
+#include "game_share/chat_message.h"
 #include "game_share/sphrase_com.h"
 #include "game_share/security_check.h"
 #include "server_share/log_item_gen.h"
@@ -66,7 +67,191 @@ using namespace std;
 
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
+CVariable<bool> ChatLinkDiagnostics("egs", "ChatLinkDiagnostics", "Log shared chat message diagnostics", false, 0, true);
+
 CVariable<bool> BuildSpireActive( "egs", "BuildSpireActive", "Activate build spire", true, 0, true );
+
+namespace
+{
+	bool buildSharedMessage(CCharacter *character, const CChatMessageRequest &request, CChatMessage &message)
+	{
+		if (!character || !request.isValid())
+		{
+			if (ChatLinkDiagnostics)
+				nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=invalid_request");
+			return false;
+		}
+
+		uint32 textPosition = 0;
+		for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
+			it != request.References.end(); ++it)
+		{
+			if (it->Start > textPosition)
+			{
+				CChatMessagePart text;
+				text.TextValue = request.Text.substr(textPosition, it->Start - textPosition);
+				message.Parts.push_back(text);
+			}
+
+			if (ChatLinkDiagnostics)
+				nlinfo("CHATLINK_DIAG EGS REFERENCE type=%u value=%u", (uint)it->Type, it->Value);
+			CChatMessagePart part;
+			if (it->Type == CChatMessageReference::Item)
+			{
+				part.Type = CChatMessagePart::Item;
+				if (!character->buildChatItem(it->Value, part.ItemValue))
+				{
+					if (ChatLinkDiagnostics)
+						nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=item_unavailable");
+					return false;
+				}
+			}
+			else if (it->Type == CChatMessageReference::KnownPhrase)
+			{
+				const std::vector<CKnownPhrase> &knownPhrases = character->getKnownPhrases();
+				if (it->Value >= knownPhrases.size() || knownPhrases[it->Value].empty())
+				{
+					if (ChatLinkDiagnostics)
+						nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=unknown_phrase");
+					return false;
+				}
+				const CKnownPhrase &knownPhrase = knownPhrases[it->Value];
+				part.Type = CChatMessagePart::Phrase;
+				part.PhraseValue.SheetId = knownPhrase.PhraseSheetId;
+				if (part.PhraseValue.SheetId == CSheetId::Unknown)
+				{
+					const std::set<CSheetId> &knownBricks = character->getKnownBricks();
+					for (std::vector<CSheetId>::const_iterator brick = knownPhrase.PhraseDesc.Bricks.begin();
+						brick != knownPhrase.PhraseDesc.Bricks.end(); ++brick)
+					{
+						if (knownBricks.find(*brick) == knownBricks.end())
+						{
+							if (ChatLinkDiagnostics)
+								nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=unknown_brick");
+							return false;
+						}
+					}
+					if (!CPhraseManager::getInstance().checkPhraseValidity(knownPhrase.PhraseDesc.Bricks))
+					{
+						if (ChatLinkDiagnostics)
+							nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=invalid_phrase");
+						return false;
+					}
+					part.PhraseValue.Phrase = knownPhrase.PhraseDesc;
+				}
+			}
+			else if (it->Type == CChatMessageReference::PhraseSheet)
+			{
+				const CSheetId sheetId(it->Value);
+				const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
+				CAllRolemasterPhrases::const_iterator phrase = phrases.find(sheetId);
+				if (phrase == phrases.end() || !phrase->second.IsRolemasterPhrase ||
+					sheetId.toString().find("saiphrase") != std::string::npos)
+				{
+					if (ChatLinkDiagnostics)
+						nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=invalid_phrase_sheet");
+					return false;
+				}
+				part.Type = CChatMessagePart::Phrase;
+				part.PhraseValue.SheetId = sheetId;
+			}
+			else
+			{
+				if (ChatLinkDiagnostics)
+					nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=unknown_reference");
+				return false;
+			}
+
+			message.Parts.push_back(part);
+			textPosition = it->Start + it->Length;
+		}
+
+		if (textPosition < request.Text.size())
+		{
+			CChatMessagePart text;
+			text.TextValue = request.Text.substr(textPosition);
+			message.Parts.push_back(text);
+		}
+		return true;
+	}
+}
+
+void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
+{
+	if (ChatLinkDiagnostics)
+		nlinfo("CHATLINK_DIAG EGS RECEIVE service=%s bytes=%u", serviceName.c_str(), (uint)msgin.length());
+	CEntityId sender;
+	uint8 chatMode;
+	CEntityId dynamicChannelId;
+	std::string receiver;
+	CChatMessageRequest request;
+	try
+	{
+		msgin.serial(sender);
+		msgin.serial(chatMode);
+		msgin.serial(dynamicChannelId);
+		msgin.serial(receiver);
+		msgin.serial(request);
+	}
+	catch (const Exception &e)
+	{
+		nlwarning("<cbClientChatShare> Bad message: %s", e.what());
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG EGS REJECT reason=decode_exception");
+		return;
+	}
+
+	if (ChatLinkDiagnostics)
+		nlinfo("CHATLINK_DIAG EGS DECODE sender=%s group=%u channel=%s refs=%u textLength=%u", sender.toString().c_str(), (uint)chatMode, dynamicChannelId.toString().c_str(), (uint)request.References.size(), (uint)request.Text.size());
+	CCharacter *character = PlayerManager.getChar(sender);
+	if (!character || !character->getEnterFlag())
+	{
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG EGS REJECT reason=character_not_ready");
+		return;
+	}
+	if (chatMode >= CChatGroup::nbChatMode)
+	{
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG EGS REJECT reason=invalid_mode");
+		return;
+	}
+	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
+	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
+	{
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG EGS REJECT reason=invalid_target");
+		return;
+	}
+
+	CChatMessage message;
+	if (!buildSharedMessage(character, request, message))
+	{
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG EGS REJECT reason=build_failed");
+		return;
+	}
+
+	character->setAfkState(false);
+	CMessage msgout("CHAT_SHARE");
+	msgout.serial(sender);
+	msgout.serial(chatMode);
+	msgout.serial(dynamicChannelId);
+	msgout.serial(receiver);
+	msgout.serial(message);
+	if (msgout.length() > CHAT_MESSAGE::MaxSerializedSize)
+	{
+		nlwarning("<cbClientChatShare> Shared message is too large");
+		if (ChatLinkDiagnostics)
+			nlinfo("CHATLINK_DIAG EGS REJECT reason=oversized");
+		return;
+	}
+	if (ChatLinkDiagnostics)
+		nlinfo("CHATLINK_DIAG EGS SEND_IOS sender=%s group=%u parts=%u bytes=%u", sender.toString().c_str(), (uint)chatMode, (uint)message.Parts.size(), (uint)msgout.length());
+	CUnifiedNetwork::getInstance()->send("IOS", msgout);
+	if (ChatLinkDiagnostics)
+		nlinfo("CHATLINK_DIAG EGS SEND_IOS_RETURN sender=%s", sender.toString().c_str());
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3569,6 +3754,7 @@ void cbGetNpcIconDesc( NLNET::CMessage& msgin, const std::string & serviceName, 
 //----------------------------
 TUnifiedCallbackItem CbClientArray[]=
 {
+	{ "CLIENT:STRING:CHAT_SHARE",			cbClientChatShare },
 	{ "CLIENT:CONNECTION:CLIENT_QUIT_REQUEST",	cbClientQuitGameRequest },
 	{ "RET_MAINLAND",							cbClientReturnToMainland },
 

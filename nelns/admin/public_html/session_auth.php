@@ -68,7 +68,7 @@
 
 			if (crypt($chOldPass, "NL") == $admpassword && $chNewPass == $chConfirmNewPass)
 			{
-				sqlquery("UPDATE user SET password='".crypt($chNewPass, "NL")."' WHERE uid='$uid'");
+				sqlquery("UPDATE user SET password='".crypt($chNewPass, "NL")."' WHERE uid='".mysql_real_escape_string($uid)."'");
 				$admpassword = $chNewPass;
 				
 				addToLog("Changed password to '$chNewPass':'".crypt($chNewPass, "NL")."'");
@@ -165,7 +165,7 @@
 		}
 
 		addToLog("Validate login: '$admlogin'/'$admpassword'...");
-		$res = mysql_query("SELECT auth.password AS password, auth.uid AS uid, auth.useCookie AS useCookie, auth.gid AS gid, ugroup.login AS gname, auth.allowed_ip AS allowed_ip FROM user AS auth, user AS ugroup WHERE BINARY auth.login='$admlogin' AND auth.gid=ugroup.uid");
+		$res = mysql_query("SELECT auth.password AS password, auth.uid AS uid, auth.useCookie AS useCookie, auth.gid AS gid, ugroup.login AS gname, auth.allowed_ip AS allowed_ip FROM user AS auth, user AS ugroup WHERE BINARY auth.login='".mysql_real_escape_string($admlogin)."' AND auth.gid=ugroup.uid");
 		if (!$res || !($arr=mysql_fetch_array($res)) || !($arr["uid"]) || $admpassword != $arr["password"])
 		{
 			addToLog("failed !!");
@@ -207,7 +207,7 @@
 	{
 		global	$HTTP_USER_AGENT, $REMOTE_ADDR, $userlogpath;
 
-		$result = sqlquery("SELECT login FROM user WHERE uid='$uid'");
+		$result = sqlquery("SELECT login FROM user WHERE uid='".mysql_real_escape_string($uid)."'");
 		if ($result && ($result=sqlfetch($result)))
 		{
 			$login = $result["login"];

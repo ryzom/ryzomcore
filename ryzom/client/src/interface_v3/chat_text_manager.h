@@ -25,6 +25,8 @@
 
 #include "nel/misc/rgba.h"
 
+class CChatMessage;
+
 namespace NLGUI
 {
 	class CViewBase;
@@ -82,6 +84,7 @@ public:
 	  * \param plaintext Text will not be parsed for uri markup links
 	  */
 	NLGUI::CViewBase *createMsgText(const std::string &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
+	NLGUI::CViewBase *createMsgText(const std::string &prefix, const CChatMessage &message, NLMISC::CRGBA col, bool justified = false);
 	// Singleton access
 	static CChatTextManager &getInstance();
 
@@ -125,6 +128,9 @@ private:
 	  * \p name is what the hover tooltip shows, without the colons.
 	  */
 	NLGUI::CViewBase *createEmojiView(const std::string &texture, const std::string &name);
+
+	void addMsgText(NLGUI::CGroupParagraph *paragraph, const std::string &msg, NLMISC::CRGBA col,
+		bool justified, std::string::size_type pos, std::string::size_type textSize);
 };
 
 // shortcut to get text manager instance

@@ -38,6 +38,15 @@ namespace NLGUI
 	public:
         DECLARE_UI_CLASS( CGroupEditBox )
 
+		struct CTextTag
+		{
+			uint32 Start;
+			uint32 Length;
+			uint32 Type;
+			uint32 Value;
+			NLMISC::CRGBA Color;
+		};
+
 		class IComboKeyHandler
 		{
 		public:
@@ -75,6 +84,8 @@ namespace NLGUI
 		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
 		void		setInputStringRef(const ::u32string &str);
+		void		addTextTag(uint32 start, uint32 length, uint32 type, uint32 value, NLMISC::CRGBA color);
+		const std::vector<CTextTag> &getTextTags() const { return _TextTags; }
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
@@ -110,6 +121,12 @@ namespace NLGUI
 		sint32		getCursorPos () const {return _CursorPos;}
 		void		setCursorPos (sint32 pos) {_CursorPos=pos;}
 
+		// Get / set cursor position as a byte offset into the UTF-8 string
+		// returned by getInputString(). Lua strings are byte arrays, so this is
+		// the form scripts can feed straight into string.sub().
+		sint32		getCursorPosUtf8 () const;
+		void		setCursorPosUtf8 (sint32 pos);
+
 		// Get / set cursor at previous line end
 		bool		isCursorAtPreviousLineEnd () const {return _CursorAtPreviousLineEnd;}
 		void		setCursorAtPreviousLineEnd (bool setCursor) {_CursorAtPreviousLineEnd=setCursor;}
@@ -140,10 +157,14 @@ namespace NLGUI
 
 		// Copy the selection into buffer
 		void		copy();
+		bool		copySelectionToClipboard();
+		static bool	copyToClipboard(const ::u32string &text, const std::vector<CTextTag> &textTags);
 		// Paste the selection into buffer
 		void		paste();
+		void		paste(uint32 maxTextTags);
 		// Write the string into buffer
-		void		writeString(const std::string &str, bool replace = true, bool atEnd = true);
+		// With allowPartial=false, reject filtered or truncated input without changing the buffer.
+		bool		writeString(const std::string &str, bool replace = true, bool atEnd = true, bool allowPartial = true);
 
 		// Expand the expression (true if there was a '/' at the start of the line)
 		bool		expand();
@@ -195,6 +216,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("cancelFocusOnText", luaCancelFocusOnText);
 			REFLECT_STRING("input_string", getInputString, setInputString);
 			REFLECT_STRING("prompt", getPrompt, setPrompt);
+			REFLECT_SINT32("cursor_pos", getCursorPosUtf8, setCursorPosUtf8);
 #ifdef RYZOM_LUA_UCSTRING
 			REFLECT_UCSTRING("uc_input_string", getInputStringAsUtf16, setInputStringAsUtf16); // Compatibility
 #endif
@@ -239,10 +261,13 @@ namespace NLGUI
 		::u32string	_Prompt;
 		::u32string	_InputString;
 		CViewText	*_ViewText;
+		std::vector<CTextTag> _TextTags;
 
 		// undo / redo
 		::u32string	_StartInputString;  // value of the input string when focus was acuired first
 		::u32string	_ModifiedInputString;
+		std::vector<CTextTag> _StartTextTags;
+		std::vector<CTextTag> _ModifiedTextTags;
 
 
 		// Historic info
@@ -301,12 +326,14 @@ namespace NLGUI
 
 	private:
 		void setupDisplayText();
+		void updateTextTags(uint32 start, uint32 oldLength, uint32 newLength);
 		void makeTopWindow();
 		void handleEventChar(const NLGUI::CEventDescriptorKey &event);
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
-		void appendStringFromClipboard(const std::string &str);
+		void appendStringFromClipboard(const std::string &str, const std::vector<CTextTag> *textTags,
+			uint32 maxTextTags);
 
 		std::string	getSelection();
 
