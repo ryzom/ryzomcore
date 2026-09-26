@@ -411,6 +411,53 @@
       </group>
     </group>
   </template>
+  <!-- Emoji display mode. A combo rather than a slider, because the three
+       values are named choices and not a range. It binds straight to the
+       database through the combo_box's own "value" attribute, which is why it
+       needs no param entry; the game_config param system has no combo widget. -->
+  <template name="tgcw_combo_emoji_mode"
+            id="combo_emoji_mode"
+            posparent="parent"
+            posref="TL TL"
+            x="0"
+            y="-18"
+            text=""
+            value="">
+    <!-- 240 rather than the 184 the other rows use: the longest entry,
+         "Font (black and white)", already clipped at 150 in English and the
+         translations are longer still. The tab is about 290 wide, so this
+         still leaves a margin. -->
+    <group id="#id"
+           w="240"
+           h="36"
+           posparent="#posparent"
+           posref="#posref"
+           x="#x"
+           y="#y">
+      <view type="text"
+            id="text"
+            posref="TL TL"
+            x="0"
+            y="0"
+            color="255 255 255 192"
+            fontsize="10"
+            shadow="true"
+            hardtext="#text" />
+      <group type="combo_box"
+             id="combo"
+             posref="BL BL"
+             x="0"
+             y="0"
+             w="240"
+             h="20"
+             value="#value">
+        <instance template="combo_box_def1" />
+        <combo_text name="uiEmojiModeOff" />
+        <combo_text name="uiEmojiModeFont" />
+        <combo_text name="uiEmojiModeImages" />
+      </group>
+    </group>
+  </template>
   <!-- ************** -->
   <!-- Main container -->
   <!-- ************** -->
@@ -444,6 +491,13 @@
   <variable entry="UI:TEMP:SCREEN_RATIO_MODE"
             type="sint32"
             value="0" />
+  <!-- Mirror of UI:SAVE:CHAT:EMOJI_MODE that the dropdown actually edits, so
+       that Cancel can discard the change. game_config_init seeds it from the
+       saved value and game_config_apply writes it back; nothing else touches
+       it. The graphics settings use the same TEMP-then-apply shape. -->
+  <variable entry="UI:TEMP:CHAT:EMOJI_MODE"
+            type="sint32"
+            value="2" />
   <define id="game_config_screen_ratio_eb"
           value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
   <define id="game_config_screen_ratio_cb"
@@ -455,6 +509,8 @@
   <proc id="game_config_init">
     <action handler="set"
             params="dblink=UI:VARIABLES:ISACTIVE:GAME_CONFIG|value=1" />
+    <action handler="set"
+            params="dblink=UI:TEMP:CHAT:EMOJI_MODE|value=@UI:SAVE:CHAT:EMOJI_MODE" />
     <action handler="ddx_init"
             params="ui:interface:game_config:content:all" />
     <action handler="tree_reset"
@@ -480,6 +536,8 @@
             params="target_property=ui:interface:game_config:active|value=0" />
   </proc>
   <proc id="game_config_apply">
+    <action handler="set"
+            params="dblink=UI:SAVE:CHAT:EMOJI_MODE|value=@UI:TEMP:CHAT:EMOJI_MODE" />
     <action handler="game_config_change_screen_ratio_custom"
             params="" />
     <action handler="ddx_update"
@@ -2127,11 +2185,72 @@
                   posparent="show_online_offline_notifications_cb"
                   x="0"
                   y="-8" />
+        <instance template="tgcw_combo_emoji_mode"
+                  id="emoji_mode"
+                  text="uiEmojiMode"
+                  value="UI:TEMP:CHAT:EMOJI_MODE"
+                  posref="BL TL"
+                  posparent="font_size"
+                  x="0"
+                  y="-8" />
+        <instance template="tgcw_scrollbarint"
+                  id="emoji_size"
+                  text="uiEmojiSize"
+                  posref="BL TL"
+                  posparent="emoji_mode"
+                  x="0"
+                  y="-8" />
+        <!-- The slider position alone does not say what it means, so name the
+             current value beside it. Three overlapping texts with only one
+             active is the usual way to do this here: the expression language
+             can switch a view on, but has no way to build a string. -->
+        <view type="text"
+              id="emoji_size_small"
+              posparent="emoji_size"
+              posref="TR TR"
+              x="0"
+              y="0"
+              color="255 255 255 192"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiEmojiSizeSmall" />
+        <view type="text"
+              id="emoji_size_medium"
+              posparent="emoji_size"
+              posref="TR TR"
+              x="0"
+              y="0"
+              color="255 255 255 192"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiEmojiSizeMedium" />
+        <view type="text"
+              id="emoji_size_large"
+              posparent="emoji_size"
+              posref="TR TR"
+              x="0"
+              y="0"
+              color="255 255 255 192"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiEmojiSizeLarge" />
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,0)" target="emoji_size_small:active" />
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,1)" target="emoji_size_medium:active" />
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,2)" target="emoji_size_large:active" />
+        <!-- Size only means anything for image emoji: in the font mode the
+             glyphs follow the chat font size, so the slider would do nothing.
+             Hide the whole row unless images are selected. -->
+        <link expr="eq(@UI:TEMP:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
+        <!-- No ddx param covers the dropdown, so the pending mode has to dirty
+             the Apply button itself; without this it stays frozen and only Ok
+             would commit the change. Same shape as the language combo. -->
+        <link expr="@UI:TEMP:CHAT:EMOJI_MODE"
+              action="game_config_change_emoji_mode" />
         <instance template="tgcw_checkbox"
                   id="enter_dontquit_cb"
                   text="uiEnterDontQuitCB"
                   tooltip="uittChatEnter"
-                  posparent="font_size"
+                  posparent="emoji_size"
                   posref="BL TL"
                   x="0"
                   y="-8" />
@@ -3967,6 +4086,13 @@
                link="UI:SAVE:CHAT:FONT_SIZE"
                min="9"
                max="20"
+               realtime="true" />
+        <param ui="chat_colors:emoji_size:c"
+               type="db"
+               widget="sbint"
+               link="UI:SAVE:CHAT:EMOJI_SIZE"
+               min="0"
+               max="2"
                realtime="true" />
         <param ui="entity_colors:cc_user:c"
                type="db"

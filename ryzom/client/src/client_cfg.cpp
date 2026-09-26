@@ -330,6 +330,13 @@ CClientConfig::CClientConfig()
 
 	TexturesInterface.push_back("texture_interfaces_v3_2x");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
+	// Chat emoji tiles. Not in the DXTC list on purpose: these are small,
+	// saturated, high contrast images, which is exactly where DXT5's 4x4 block
+	// quantisation is most visible. The sheet is 2048x1024, so keeping it RGBA
+	// costs about 8 MB of video memory instead of 2 MB.
+	// Note this list is compile-time; READ_STRINGVECTOR_FV for it is commented
+	// out below, so there is no client.cfg migration to worry about.
+	TexturesInterface.push_back("texture_emojis");
 
 	TexturesOutGameInterface.push_back("texture_interfaces_v3_outgame_ui");
 

@@ -207,6 +207,29 @@ namespace NLGUI
 		/** Setup a Text with Format Tags. Text is store without color/format tags, and special array is allocated for Format association
 		 */
 		void	setTextFormatTaged(const std::string &text);
+
+		/** Length in bytes of the format tag starting at \p index, or 0 if no tag
+		  * starts there. Recognises the same three tag forms, in the same order,
+		  * as buildFormatTagText: @{RGBA}, @{Tn} and @{Htooltip}.
+		  *
+		  * Use it to step over tags when scanning text for something else. A
+		  * tooltip tag can contain arbitrary text, so a scanner that does not skip
+		  * tags will happily match inside one and then cut it in half.
+		  */
+		static uint			getFormatTagLength(const std::string &text, uint index);
+
+		/** Prefix that makes text.substr(pos) render the way that part of \p text
+		  * renders as a whole, preserving colour and tooltip state.
+		  *
+		  * Splitting a tagged string and handing the pieces to separate CViewTexts
+		  * otherwise loses the formatting, because each piece is parsed from
+		  * scratch with default state. Returns "" when \p text contains no tags at
+		  * all, so an untagged string keeps taking the plain setText path.
+		  *
+		  * Tab tags are deliberately not carried: @{Tn} is a horizontal position,
+		  * and re-applying it to a continuation piece would indent it again.
+		  */
+		static std::string	getFormatTagPrefixAt(const std::string &text, uint pos);
 #ifdef RYZOM_LUA_UCSTRING
 		void	setTextFormatTagedAsUtf16(const ucstring &text); // Compatibility
 #endif

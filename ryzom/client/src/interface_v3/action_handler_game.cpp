@@ -3397,6 +3397,32 @@ public:
 REGISTER_ACTION_HANDLER (CHandlerGameConfigTextureMode, "game_config_change_texture_mode");
 
 // ***************************************************************************
+class CHandlerGameConfigEmojiMode : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		// The dropdown edits UI:TEMP:CHAT:EMOJI_MODE, which no ddx param covers,
+		// so nothing else would ever let the Apply button out of its frozen
+		// state and the pending mode could only be committed with Ok.
+		if (CInterfaceLink::isUpdatingAllLinks()) return;
+
+		CCDBNodeLeaf *pending = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:CHAT:EMOJI_MODE", false);
+		CCDBNodeLeaf *saved = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_MODE", false);
+		if (!pending || !saved) return;
+
+		// game_config_init seeds the pending value from the saved one, and that
+		// link firing is not a change the player made.
+		if (pending->getValue32() == saved->getValue32()) return;
+
+		CDDXManager *pDM = CDDXManager::getInstance();
+		CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+		if (pDDX)
+			pDDX->validateApplyButton();
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigEmojiMode, "game_config_change_emoji_mode");
+
+// ***************************************************************************
 class CHandlerGameConfigFullscreen : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)

@@ -928,8 +928,18 @@ class CHandlerChatGroupFilter : public IActionHandler
 		if (!pCGW) return;
 		CCtrlTextButton *pUserBut = dynamic_cast<CCtrlTextButton*>(pCGW->getContainer()->getCtrl("content:but_user"));
 		CCtrlTextButton *pEmoteBut = dynamic_cast<CCtrlTextButton*>(pCGW->getContainer()->getCtrl("content:but_emote"));
+		CCtrlBase *pEmojiBut = pCGW->getContainer()->getCtrl("content:but_emoji");
 		CInterfaceGroup *pEditBox = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:ebw"));
 		CInterfaceGroup *pTextList = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:cb"));
+
+		// The emoji button sits in the same row, between the input and Emotes,
+		// so the width it takes comes off the input like the other buttons'.
+		sint32 emojiRoom = 0;
+		if (pEmojiBut)
+		{
+			pEmojiBut->updateCoords();
+			emojiRoom = pEmojiBut->getWReal() + 4;
+		}
 
 		// Target button choose the right filter
 
@@ -976,7 +986,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 
 				if (pEditBox != NULL)
 				{
-					pEditBox->setW(-pUserBut->getWReal()-pEmoteBut->getWReal()-8);
+					pEditBox->setW(-pUserBut->getWReal()-pEmoteBut->getWReal()-8-emojiRoom);
 					pEditBox->setX(pUserBut->getWReal()+4);
 				}
 
@@ -997,9 +1007,9 @@ class CHandlerChatGroupFilter : public IActionHandler
 			if (pEditBox != NULL)
 			{
 				if(pEmoteBut)
-					pEditBox->setW(-pEmoteBut->getWReal()-4);
+					pEditBox->setW(-pEmoteBut->getWReal()-4-emojiRoom);
 				else
-					pEditBox->setW(0);
+					pEditBox->setW(-emojiRoom);
 				pEditBox->setX(0);
 			}
 			if (pTextList != NULL) pTextList->setX(0);
