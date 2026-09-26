@@ -50,6 +50,11 @@
 
 #include "nel/misc/debug.h"
 
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+// Kept as a pointer so changeLogDirectory() can move the dump directory along with the logs.
+static google_breakpad::ExceptionHandler *DumpHandler = NULL;
+#endif
+
 #ifdef HAVE_NELCONFIG_H
 #  include "nelconfig.h"
 #endif // HAVE_NELCONFIG_H
@@ -935,6 +940,12 @@ void getCallStackAndLog (string &result, sint skipNFirst)
 void changeLogDirectory(const std::string &dir)
 {
 	LogPath = CPath::standardizePath(dir);
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+	if (DumpHandler)
+	{
+		DumpHandler->set_minidump_descriptor(google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath));
+	}
+#endif
 	if (fd == NULL) return;
 	string p = LogPath + "log.log";
 	fd->setParam(p);
@@ -1066,11 +1077,12 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 		initDebug2(logInFile);
 
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-		string path = LogPath.empty() ? "." : LogPath;
-		static google_breakpad::MinidumpDescriptor descriptor(path);
-		static google_breakpad::ExceptionHandler handler(
-			descriptor, NULL, NULL, NULL, true, -1
-		);
+		if (!DumpHandler)
+		{
+			DumpHandler = new google_breakpad::ExceptionHandler(
+				google_breakpad::MinidumpDescriptor(LogPath.empty() ? "." : LogPath), NULL, NULL, NULL, true, -1
+			);
+		}
 #endif
 
 		INelContext::getInstance().setAlreadyCreateSharedAmongThreads(true);
