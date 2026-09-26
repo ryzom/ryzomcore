@@ -441,10 +441,9 @@
             hardtext="#text" />
       <group type="combo_box"
              id="combo"
-             posparent="text"
-             posref="TL BL"
+             posref="BL BL"
              x="0"
-             y="-2"
+             y="0"
              w="150"
              h="20"
              value="#value">
