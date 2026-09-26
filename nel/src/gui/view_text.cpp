@@ -3304,6 +3304,90 @@ namespace NLGUI
 
 
 	// ***************************************************************************
+	uint	CViewText::getFormatTagLength(const std::string &text, uint index)
+	{
+		uint	textSize= (uint)text.size();
+		if(index>=textSize)
+			return 0;
+
+		// The order matters and mirrors buildFormatTagText: a colour tag is
+		// tested first, so "@{T4}" cannot be mistaken for one ('T' is not a
+		// hex digit), while "@{D4ab}" legitimately is a colour.
+		if(isColorTag(text, index, textSize))
+			return 7;	// @{RGBA}
+
+		if(isTabTag(text, index, textSize))
+		{
+			// @{T then up to MaxTabDigit digits then }
+			uint	i= index+3;
+			while(i<textSize && text[i]!='}')
+				i++;
+			return i<textSize ? i-index+1 : 0;
+		}
+
+		if(isTooltipTag(text, index, textSize))
+		{
+			// @{H then arbitrary text then }
+			uint	i= index+3;
+			while(i<textSize && text[i]!='}')
+				i++;
+			return i<textSize ? i-index+1 : 0;
+		}
+
+		return 0;
+	}
+
+	// ***************************************************************************
+	std::string	CViewText::getFormatTagPrefixAt(const std::string &text, uint pos)
+	{
+		uint	textSize= (uint)text.size();
+		if(pos>textSize)
+			pos= textSize;
+
+		std::string	color, tooltip;
+		bool		anyTag= false;
+
+		// One pass over the whole string, not just up to pos: we need the state
+		// at pos, but also whether the string is tagged at all, because that is
+		// what decides which branch the caller renders through.
+		for(uint i=0;i<textSize;)
+		{
+			uint	len= getFormatTagLength(text, i);
+			if(len==0)
+			{
+				i++;
+				continue;
+			}
+			anyTag= true;
+			if(i<pos)
+			{
+				// A tag that starts before pos counts as applied. Callers must
+				// not split inside a tag; getFormatTagLength is there to let
+				// them step over one.
+				if(isColorTag(text, i, textSize))
+					color.assign(text, i, len);
+				else if(isTooltipTag(text, i, textSize))
+					tooltip.assign(text, i, len);
+				// tab tags are positional, see the header
+			}
+			i+= len;
+		}
+
+		if(!anyTag)
+			return std::string();
+
+		// The string is tagged, so the caller renders every piece through
+		// setTextFormatTaged, which starts from white. If no colour tag applies
+		// here yet, say white explicitly rather than returning nothing, so the
+		// piece cannot fall back to the plain setText path and pick up the
+		// caller's own colour instead.
+		if(color.empty())
+			color= "@{FFFF}";
+
+		return color + tooltip;
+	}
+
+	// ***************************************************************************
 	void		CViewText::buildFormatTagText(const std::string &text, std::string &textBuild, std::vector<CViewText::CFormatTag> &formatTags, std::vector<std::string> &tooltips)
 	{
 		formatTags.clear();

@@ -43,14 +43,39 @@ namespace NLMISC{
   * \author Nevrax France
   * \date 2003
   */
+class CEmojiManager;
+
 class CChatTextManager
 {
 public:
+	/// How emoji are shown in chat. Stored in UI:SAVE:CHAT:EMOJI_MODE.
+	enum TEmojiMode
+	{
+		EmojiText    = 0,	// leave ":smile:" as written
+		EmojiUnicode = 1,	// substitute the unicode character, drawn from the font
+		EmojiImage   = 2	// draw the image from the emoji atlas
+	};
+
+	/// How big emoji are drawn. Stored in UI:SAVE:CHAT:EMOJI_SIZE.
+	enum TEmojiSize
+	{
+		EmojiSmall  = 0,	// same height as the chat text
+		EmojiMedium = 1,
+		EmojiLarge  = 2		// the tile's own size
+	};
+
 	//\name Text parameters. They are read from the interface database (the configuration of text is doned in config.xml)
 	//@{
 		uint		 getTextFontSize() const;
 		uint		 getTextMultiLineSpace() const;
 		bool		 isTextShadowed() const;
+		uint		 getEmojiMode() const;
+		uint		 getEmojiSize() const;
+		/// Height in pixels an emoji image is drawn at, for the current settings.
+		sint32		 getEmojiPixelSize() const;
+
+		/// Native size of an atlas tile, and so the height of the largest setting.
+		static const sint32 EmojiTilePixels = 32;
 	//@}
 	/** Build a new text multiline using the current chat text settings
 	  * \param msg the actual text
@@ -76,6 +101,8 @@ private:
 	mutable NLMISC::CCDBNodeLeaf    *_TextMultilineSpace;
 	mutable NLMISC::CCDBNodeLeaf    *_TextShadowed;
 	mutable NLMISC::CCDBNodeLeaf    *_ShowTimestamps;
+	mutable NLMISC::CCDBNodeLeaf    *_EmojiMode;
+	mutable NLMISC::CCDBNodeLeaf    *_EmojiSize;
 
 	// ctor, private because of singleton
 	CChatTextManager();
@@ -85,6 +112,23 @@ private:
 
 	NLGUI::CViewBase *createMsgTextSimple(const std::string &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
 	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
+
+	/** Append msg[from, to) to the paragraph as one text view.
+	  *
+	  * The piece is prefixed with the format tags in effect at \p from, so that
+	  * splitting a line around a link or an emoji does not lose the colour that
+	  * was already set. Without this the remainder of a line reverts to the
+	  * caller's colour and things like /em or an inline @{RGBA} come out wrong.
+	  */
+	void addTextSegment(NLGUI::CGroupParagraph *para, const std::string &msg,
+		std::string::size_type from, std::string::size_type to,
+		NLMISC::CRGBA col, bool justified, const char *id = NULL);
+
+	/** Build the image view for one emoji, or NULL if it has no usable texture.
+	  * \p name is what the hover tooltip shows, without the colons.
+	  */
+	NLGUI::CViewBase *createEmojiView(const std::string &texture, const std::string &name);
+
 	void addMsgText(NLGUI::CGroupParagraph *paragraph, const std::string &msg, NLMISC::CRGBA col,
 		bool justified, std::string::size_type pos, std::string::size_type textSize);
 };

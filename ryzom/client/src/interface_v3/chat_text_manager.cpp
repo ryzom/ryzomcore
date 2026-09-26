@@ -26,9 +26,13 @@
 #include "game_share/chat_message.h"
 #include "chat_text_manager.h"
 #include "chat_link_ui.h"
+#include "emoji_manager.h"
 #include "nel/gui/group_menu.h"
 #include "nel/gui/view_link.h"
 #include "nel/gui/view_text.h"
+#include "nel/gui/ctrl_tooltip.h"
+#include "nel/gui/view_renderer.h"
+#include "nel/gui/widget_manager.h"
 #include "nel/gui/group_paragraph.h"
 #include "interface_manager.h"
 #include "../connection.h"
@@ -98,6 +102,53 @@ bool CChatTextManager::isTextShadowed() const
 	}
 	return _TextShadowed->getValueBool();
 }
+
+//=================================================================================
+uint CChatTextManager::getEmojiMode() const
+{
+	if (!_EmojiMode)
+	{
+		_EmojiMode = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_MODE", false);
+		if (!_EmojiMode) return EmojiImage;
+	}
+	sint32 v = _EmojiMode->getValue32();
+	if (v < EmojiText || v > EmojiImage) return EmojiImage;
+	return (uint)v;
+}
+
+//=================================================================================
+uint CChatTextManager::getEmojiSize() const
+{
+	if (!_EmojiSize)
+	{
+		_EmojiSize = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_SIZE", false);
+		if (!_EmojiSize) return EmojiSmall;
+	}
+	sint32 v = _EmojiSize->getValue32();
+	if (v < EmojiSmall || v > EmojiLarge) return EmojiSmall;
+	return (uint)v;
+}
+
+//=================================================================================
+sint32 CChatTextManager::getEmojiPixelSize() const
+{
+	// Small follows the chat font so emoji sit in the line, and large is the
+	// atlas tile's own 32px. Medium is the midpoint between the two rather
+	// than a fixed multiple of the font: at the default font size of 10 the
+	// old "font * 3/2" gave 10 / 15 / 32, so the first step was barely
+	// visible and the second was enormous. The midpoint makes the three
+	// settings evenly spaced whatever the font size is.
+	const sint32 small = (sint32)getTextFontSize();
+	const sint32 large = EmojiTilePixels;
+	switch (getEmojiSize())
+	{
+		case EmojiLarge:	return large;
+		case EmojiMedium:	return small < large ? (small + large) / 2 : large;
+		case EmojiSmall:
+		default:			return small;
+	}
+}
+
 
 //=================================================================================
 bool CChatTextManager::showTimestamps() const
@@ -388,7 +439,13 @@ CViewBase *CChatTextManager::createMsgText(const string &cstPrefix, const CChatM
 		if (it->Type == CChatMessagePart::Text)
 		{
 			const string text = it->TextValue.toUtf8();
-			addMsgText(para, text, col, justified, 0, text.size());
+			// Same substitution a chat line gets, per part: each is passed to
+			// addMsgText whole, so no index outlives it.
+			CEmojiManager &emoji = CEmojiManager::getInstance();
+			const string shown = (getEmojiMode() == EmojiUnicode && emoji.mayContainEmoji(text))
+				? emoji.substituteShortcodes(text)
+				: text;
+			addMsgText(para, shown, col, justified, 0, shown.size());
 			copyText += text;
 		}
 		else
@@ -440,9 +497,102 @@ CViewBase *CChatTextManager::createMsgTextSimple(const string &msg, NLMISC::CRGB
 }
 
 //=================================================================================
+void CChatTextManager::addTextSegment(CGroupParagraph *para, const string &msg,
+	string::size_type from, string::size_type to, NLMISC::CRGBA col, bool justified,
+	const char *id)
+{
+	if (from >= to)
+		return;
+
+	// Carry the colour/tooltip state across the split. See
+	// CViewText::getFormatTagPrefixAt: for an untagged line this is empty and
+	// the piece keeps taking the plain path with the channel colour.
+	string seg = CViewText::getFormatTagPrefixAt(msg, (uint)from);
+	seg.append(msg, from, to - from);
+
+	CViewBase *vt = createMsgTextSimple(seg, col, justified, NULL);
+	if (id)
+		vt->setId(id);
+	para->addChild(vt);
+}
+
+//=================================================================================
+/** One emoji image in a chat line, named on hover.
+  *
+  * A tooltip is context help, and context help lives on CCtrlBase, so this
+  * cannot be the CViewBitmap it otherwise would be. The one ctrl that may sit
+  * in a chat line is CCtrlToolTip: it is not capturable, so the paragraph keeps
+  * its right-click-to-copy and a link under the same line still takes clicks.
+  * Anything button-like would swallow the pointer wherever an emoji happened
+  * to sit.
+  *
+  * Drawing is CViewBitmap's scaled path, minus the tiling and rotation that an
+  * emoji never uses.
+  */
+class CCtrlEmoji : public CCtrlToolTip
+{
+public:
+	CCtrlEmoji(const TCtorParam &param) : CCtrlToolTip(param) {}
+
+	/// False if the atlas is missing or has no tile of that name.
+	bool setTexture(const std::string &texture)
+	{
+		_TextureId.setTexture(texture.c_str());
+		return !_TextureId.empty();
+	}
+
+	virtual void draw()
+	{
+		CRGBA col = CRGBA::White;
+		// The tile carries its own colours, so it is not modulated by the
+		// interface colour -- only faded with it, like the rest of the window.
+		col.A = (uint8)(((sint32)col.A *
+			((sint32)CWidgetManager::getInstance()->getGlobalColorForContent().A + 1)) >> 8);
+
+		CViewRenderer &rVR = *CViewRenderer::getInstance();
+		rVR.drawRotFlipBitmap(_RenderLayer, _XReal, _YReal, _WReal, _HReal,
+			0, false, _TextureId, col);
+	}
+
+private:
+	CViewRenderer::CTextureId	_TextureId;
+};
+
+//=================================================================================
+CViewBase *CChatTextManager::createEmojiView(const string &texture, const string &name)
+{
+	if (texture.empty())
+		return NULL;
+
+	CCtrlEmoji *bm = new CCtrlEmoji(CViewBase::TCtorParam());
+	bm->setId("emoji");
+	if (!bm->setTexture(texture))
+	{
+		// Atlas missing or the tile is not in it. Caller falls back to text.
+		delete bm;
+		return NULL;
+	}
+	sint32 size = getEmojiPixelSize();
+	bm->setW(size);
+	bm->setH(size);
+	bm->setModulateGlobalColor(false);
+	// Name it on hover, in the form that can be typed back: ":fire:". Nameless
+	// entries simply get no tooltip.
+	if (!name.empty())
+		bm->setDefaultContextHelp(":" + name + ":");
+	return bm;
+}
+
+//=================================================================================
 void CChatTextManager::addMsgText(CGroupParagraph *para, const string &msg, NLMISC::CRGBA col,
 	bool justified, string::size_type pos, string::size_type textSize)
 {
+	// Image mode cuts the line around each emoji, so this has to know where
+	// they are. Worked out here rather than passed in, so that every caller --
+	// a chat line, a shared item's text -- gets them.
+	CEmojiManager &emoji = CEmojiManager::getInstance();
+	const bool useEmojiImages = getEmojiMode() == EmojiImage && emoji.mayContainEmoji(msg);
+
 	// quickly check if text has links or not
 	bool hasUrl;
 	{
@@ -452,13 +602,44 @@ void CChatTextManager::addMsgText(CGroupParagraph *para, const string &msg, NLMI
 
 	for (string::size_type i = pos; i< textSize;)
 	{
-		if (hasUrl && isUrlTag(msg, i, textSize))
+		// Step over format tags instead of scanning inside them. A tooltip tag
+		// holds arbitrary text, so "@{Hsee :smile: here}" contains something
+		// that looks exactly like a shortcode, and matching it would cut the
+		// tag in half. The same goes for a URL written inside one.
+		uint tagLen = CViewText::getFormatTagLength(msg, (uint)i);
+		if (tagLen)
 		{
-			if (pos != i)
+			i += tagLen;
+			continue;
+		}
+
+		string::size_type emojiLen = 0;
+		const CEmojiManager::CEntry *emojiEntry = NULL;
+
+		if (useEmojiImages && emoji.matchAt(msg, i, textSize, emojiLen, emojiEntry))
+		{
+			addTextSegment(para, msg, pos, i, col, justified);
+
+			CViewBase *ev = createEmojiView(emojiEntry->Texture, emojiEntry->Name);
+			if (ev)
 			{
-				CViewBase *vt = createMsgTextSimple(msg.substr(pos, i - pos), col, justified, NULL);
-				para->addChild(vt);
+				para->addChild(ev);
 			}
+			else
+			{
+				// No tile for this one, so fall back a step rather than showing
+				// nothing: the unicode form, still carrying the format state.
+				string seg = CViewText::getFormatTagPrefixAt(msg, (uint)i);
+				seg += emojiEntry->Utf8;
+				para->addChild(createMsgTextSimple(seg, col, justified, NULL));
+			}
+
+			pos = i + emojiLen;
+			i = pos;
+		}
+		else if (hasUrl && isUrlTag(msg, i, textSize))
+		{
+			addTextSegment(para, msg, pos, i, col, justified);
 
 			string url;
 			string title;
@@ -518,17 +699,22 @@ void CChatTextManager::addMsgText(CGroupParagraph *para, const string &msg, NLMI
 		}
 	}
 
-	if (pos < textSize)
-	{
-		CViewBase *vt = createMsgTextSimple(msg.substr(pos, textSize - pos), col, justified, NULL);
-		vt->setId("text");
-		para->addChild(vt);
-	}
+	addTextSegment(para, msg, pos, textSize, col, justified, "text");
 }
 
 //=================================================================================
-CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
+CViewBase *CChatTextManager::createMsgTextComplex(const string &originalMsg, NLMISC::CRGBA col, bool justified, bool plaintext, CInterfaceGroup *commandGroup)
 {
+	// In unicode mode the shortcodes become characters and the line stays a
+	// single view, so nothing is split and there is no format state to carry.
+	// That is why this mode cannot disturb text colour at all. It has to happen
+	// before anything below indexes the line.
+	CEmojiManager &emoji = CEmojiManager::getInstance();
+	const uint emojiMode = getEmojiMode();
+	const string msg = (emojiMode == EmojiUnicode && emoji.mayContainEmoji(originalMsg))
+		? emoji.substituteShortcodes(originalMsg)
+		: originalMsg;
+
 	string::size_type textSize = msg.size();
 
 	CGroupParagraph *para = new CGroupParagraph(CViewBase::TCtorParam());
@@ -537,8 +723,9 @@ CViewBase *CChatTextManager::createMsgTextComplex(const string &msg, NLMISC::CRG
 	para->setResizeFromChildH(true);
 
 	// use right click because left click might be used to activate chat window
+	// Copy yields what was actually said, with ":name:" intact.
 	para->setRightClickHandler("copy_chat_popup");
-	para->setRightClickHandlerParams(msg);
+	para->setRightClickHandlerParams(originalMsg);
 
 	if (plaintext)
 	{
