@@ -423,8 +423,12 @@
             y="-18"
             text=""
             value="">
+    <!-- 240 rather than the 184 the other rows use: the longest entry,
+         "Font (black and white)", already clipped at 150 in English and the
+         translations are longer still. The tab is about 290 wide, so this
+         still leaves a margin. -->
     <group id="#id"
-           w="184"
+           w="240"
            h="36"
            posparent="#posparent"
            posref="#posref"
@@ -444,7 +448,7 @@
              posref="BL BL"
              x="0"
              y="0"
-             w="150"
+             w="240"
              h="20"
              value="#value">
         <instance template="combo_box_def1" />
@@ -1902,6 +1906,11 @@
              glyphs follow the chat font size, so the slider would do nothing.
              Hide the whole row unless images are selected. -->
         <link expr="eq(@UI:TEMP:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
+        <!-- No ddx param covers the dropdown, so the pending mode has to dirty
+             the Apply button itself; without this it stays frozen and only Ok
+             would commit the change. Same shape as the language combo. -->
+        <link expr="@UI:TEMP:CHAT:EMOJI_MODE"
+              action="game_config_change_emoji_mode" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
