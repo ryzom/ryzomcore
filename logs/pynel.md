@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-09-26 — ✨ Add .icfg interface config reader/writer (pynel 0.18.0)
+
+New module `pynel/ryzom_icfg.py` reading and writing the Ryzom client's
+interface config files (`save/interface_<character>.icfg`,
+`save/shared_*.icfg`), format taken from `CInterfaceManager::loadConfig()`/
+`saveConfig()` (`ICFG_STREAM_VERSION` 11) and every sub-serializer it calls:
+user chat filters and free tellers, per-mode desktop images (container
+states `SCont` v10 plus widget config chunks), the `UI:SAVE` database, the
+deprecated task bar, user landmarks, info window positions, macro memory,
+ignored context help and dynamic chat channels.
+
+All file versions 0 to 11 are read; writing always emits version 11 and the
+latest version of every sub-object, like the client. Containers older than
+`SCont` v10 are upgraded with the `CGroupContainer` default min/max width
+(222/320).
+
+Widget config chunks carry no type in the file (the client resolves the id
+to the live widget), so the decoder is chosen by a table of known ids (the
+three `actual_map` maps, `mp3_player`, `compass`), then by strict signature
+(exact chunk size, checks passing, single match) for other ids, with a raw
+bytes fallback. Decoded widgets: `CGroupMap`, `CGroupContainerWindows`,
+`CGroupEditBox`, `CGroupCompas`; a compass `PosTracker` target keeps its
+polymorphic `CPositionState` bytes raw.
+
+API: `load_icfg`/`parse_icfg`/`dumps`/`save_icfg`, plus
+`python -m pynel.ryzom_icfg dump <file>` (JSON output). New
+`validate_icfg.py` round-trip script. Validated on 31 real character files
+(all v11): 31/31 byte-identical after read + write, every widget chunk
+decoded (no raw fallback). Format documented in `docs/icfg_format.md`.
+
 ## 2026-09-17 — ✨ Add Material.smoothing_angle mirror (pynel 0.16.0)
 
 Mirrors `CMaterial::_SmoothingAngle` (engine field added at `.shape` version

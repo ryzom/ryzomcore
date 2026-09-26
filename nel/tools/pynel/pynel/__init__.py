@@ -3,6 +3,7 @@
 Submodules:
 	admin_modules_itf, nel_message, json_serde -- admin service protocol client
 	ryzom_ig        -- read/write .ig (Instance Group) files
+	ryzom_icfg      -- read/write .icfg (client interface config) files
 	ryzom_shape     -- read/write .shape (3D mesh) files
 	ryzom_animation -- read .anim (skeleton animation clip) files
 	ryzom_skin      -- CPU linear-blend skinning for CMeshMRMSkinned

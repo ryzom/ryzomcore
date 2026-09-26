@@ -14,6 +14,7 @@
 - `georges_sheets.md` — Georges sheet inheritance (`PARENT` chains) for gameplay sheets (`.creature`, `.item`, `.sbrick`, ...).
 - `packed_sheets.md` — `.packed_sheets` binary format for creature/item/sitem/animset/world/continent sheet data.
 - `hls_texture_bank.md` — `.hlsbank`/`.hlsinfo` HLS-colorisable character texture bank format.
+- `icfg_format.md` — `.icfg` client interface config format (window layouts per desktop mode, `UI:SAVE` database, chat filters, widget configs).
 
 ## Landscape pipeline tools
 
