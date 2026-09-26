@@ -71,6 +71,9 @@ public:
 		uint		 getEmojiSize() const;
 		/// Height in pixels an emoji image is drawn at, for the current settings.
 		sint32		 getEmojiPixelSize() const;
+
+		/// Native size of an atlas tile, and so the height of the largest setting.
+		static const sint32 EmojiTilePixels = 32;
 	//@}
 	/** Build a new text multiline using the current chat text settings
 	  * \param msg the actual text

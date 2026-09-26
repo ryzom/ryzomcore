@@ -487,6 +487,13 @@
   <variable entry="UI:TEMP:SCREEN_RATIO_MODE"
             type="sint32"
             value="0" />
+  <!-- Mirror of UI:SAVE:CHAT:EMOJI_MODE that the dropdown actually edits, so
+       that Cancel can discard the change. game_config_init seeds it from the
+       saved value and game_config_apply writes it back; nothing else touches
+       it. The graphics settings use the same TEMP-then-apply shape. -->
+  <variable entry="UI:TEMP:CHAT:EMOJI_MODE"
+            type="sint32"
+            value="2" />
   <define id="game_config_screen_ratio_eb"
           value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
   <define id="game_config_screen_ratio_cb"
@@ -494,6 +501,8 @@
   <proc id="game_config_init">
     <action handler="set"
             params="dblink=UI:VARIABLES:ISACTIVE:GAME_CONFIG|value=1" />
+    <action handler="set"
+            params="dblink=UI:TEMP:CHAT:EMOJI_MODE|value=@UI:SAVE:CHAT:EMOJI_MODE" />
     <action handler="ddx_init"
             params="ui:interface:game_config:content:all" />
     <action handler="tree_reset"
@@ -519,6 +528,8 @@
             params="target_property=ui:interface:game_config:active|value=0" />
   </proc>
   <proc id="game_config_apply">
+    <action handler="set"
+            params="dblink=UI:SAVE:CHAT:EMOJI_MODE|value=@UI:TEMP:CHAT:EMOJI_MODE" />
     <action handler="game_config_change_screen_ratio_custom"
             params="" />
     <action handler="ddx_update"
@@ -1838,7 +1849,7 @@
         <instance template="tgcw_combo_emoji_mode"
                   id="emoji_mode"
                   text="uiEmojiMode"
-                  value="UI:SAVE:CHAT:EMOJI_MODE"
+                  value="UI:TEMP:CHAT:EMOJI_MODE"
                   posref="BL TL"
                   posparent="font_size"
                   x="0"
@@ -1890,7 +1901,7 @@
         <!-- Size only means anything for image emoji: in the font mode the
              glyphs follow the chat font size, so the slider would do nothing.
              Hide the whole row unless images are selected. -->
-        <link expr="eq(@UI:SAVE:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
+        <link expr="eq(@UI:TEMP:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"

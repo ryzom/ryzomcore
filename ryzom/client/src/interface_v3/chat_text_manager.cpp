@@ -130,15 +130,20 @@ uint CChatTextManager::getEmojiSize() const
 //=================================================================================
 sint32 CChatTextManager::getEmojiPixelSize() const
 {
-	// The atlas tiles are 32px, so 'large' is their own size and the smaller
-	// settings follow the chat font instead, which is what makes emoji sit in
-	// the line rather than tower over it.
+	// Small follows the chat font so emoji sit in the line, and large is the
+	// atlas tile's own 32px. Medium is the midpoint between the two rather
+	// than a fixed multiple of the font: at the default font size of 10 the
+	// old "font * 3/2" gave 10 / 15 / 32, so the first step was barely
+	// visible and the second was enormous. The midpoint makes the three
+	// settings evenly spaced whatever the font size is.
+	const sint32 small = (sint32)getTextFontSize();
+	const sint32 large = EmojiTilePixels;
 	switch (getEmojiSize())
 	{
-		case EmojiLarge:	return 32;
-		case EmojiMedium:	return (sint32)(getTextFontSize() * 3 / 2);
+		case EmojiLarge:	return large;
+		case EmojiMedium:	return small < large ? (small + large) / 2 : large;
 		case EmojiSmall:
-		default:			return (sint32)getTextFontSize();
+		default:			return small;
 	}
 }
 
