@@ -139,14 +139,16 @@ sint32 CChatTextManager::getEmojiPixelSize() const
 	// old "font * 3/2" gave 10 / 15 / 32, so the first step was barely
 	// visible and the second was enormous. The midpoint makes the three
 	// settings evenly spaced whatever the font size is.
-	const sint32 small = (sint32)getTextFontSize();
-	const sint32 large = EmojiTilePixels;
+	// NB: not named 'small' -- the Windows SDK (rpcndr.h) has #define small char,
+	// which turns the declaration into 'const sint32 char' under MSVC.
+	const sint32 smallPx = (sint32)getTextFontSize();
+	const sint32 largePx = EmojiTilePixels;
 	switch (getEmojiSize())
 	{
-		case EmojiLarge:	return large;
-		case EmojiMedium:	return small < large ? (small + large) / 2 : large;
+		case EmojiLarge:	return largePx;
+		case EmojiMedium:	return smallPx < largePx ? (smallPx + largePx) / 2 : largePx;
 		case EmojiSmall:
-		default:			return small;
+		default:			return smallPx;
 	}
 }
 
