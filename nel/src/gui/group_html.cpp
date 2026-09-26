@@ -302,7 +302,13 @@ namespace NLGUI
 		// clear back-references so CViewBitmap does not keep a dangling pointer to this download once it is deleted
 		for(std::vector<SImageInfo>::iterator it = Images.begin(); it != Images.end(); ++it)
 		{
-			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(it->Image);
+			// CRefPtr is NULL when the view was already destroyed: removeContent() deletes the
+			// child views before clearContext() -> releaseDataDownloads() drops the downloads
+			CViewBase *view = it->Image;
+			if (!view)
+				continue;
+
+			CViewBitmap *bitmap = dynamic_cast<CViewBitmap*>(view);
 			if (bitmap)
 				bitmap->resetHtmlDownload();
 		}
@@ -342,6 +348,9 @@ namespace NLGUI
 			for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 			{
 				SImageInfo &img = *it;
+				// view destroyed while the download was in flight
+				if (!img.Image)
+					continue;
 				Parent->setImage(img.Image, tmpdest, img.Type);
 				Parent->setImageSize(img.Image, img.Style);
 			}
@@ -359,6 +368,9 @@ namespace NLGUI
 		for(std::vector<SImageInfo>::iterator it = vec.begin(); it != vec.end(); ++it)
 		{
 			SImageInfo &img = *it;
+			// view destroyed while the download was in flight
+			if (!img.Image)
+				continue;
 			Parent->setImage(img.Image, dest, img.Type);
 			Parent->setImageSize(img.Image, img.Style);
 		}
@@ -379,7 +391,9 @@ namespace NLGUI
 		for(uint i = 0; i < TextureIds.size(); i++)
 		{
 			rVR.reloadTexture(TextureIds[i].first, dest, false);
-			TextureIds[i].second->invalidateCoords();
+			// view destroyed while the download was in flight
+			if (TextureIds[i].second)
+				TextureIds[i].second->invalidateCoords();
 		}
 	}
 
