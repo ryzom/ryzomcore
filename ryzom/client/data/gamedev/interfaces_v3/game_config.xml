@@ -411,6 +411,49 @@
       </group>
     </group>
   </template>
+  <!-- Emoji display mode. A combo rather than a slider, because the three
+       values are named choices and not a range. It binds straight to the
+       database through the combo_box's own "value" attribute, which is why it
+       needs no param entry; the game_config param system has no combo widget. -->
+  <template name="tgcw_combo_emoji_mode"
+            id="combo_emoji_mode"
+            posparent="parent"
+            posref="TL TL"
+            x="0"
+            y="-18"
+            text=""
+            value="">
+    <group id="#id"
+           w="184"
+           h="20"
+           posparent="#posparent"
+           posref="#posref"
+           x="#x"
+           y="#y">
+      <view type="text"
+            id="text"
+            posref="ML ML"
+            x="0"
+            y="-2"
+            color="255 255 255 192"
+            fontsize="12"
+            shadow="true"
+            hardtext="#text" />
+      <group type="combo_box"
+             id="combo"
+             posref="MR MR"
+             x="0"
+             y="0"
+             w="120"
+             h="20"
+             value="#value">
+        <instance template="combo_box_def1" />
+        <combo_text name="uiEmojiModeOff" />
+        <combo_text name="uiEmojiModeFont" />
+        <combo_text name="uiEmojiModeImages" />
+      </group>
+    </group>
+  </template>
   <!-- ************** -->
   <!-- Main container -->
   <!-- ************** -->
@@ -2127,9 +2170,10 @@
                   posparent="show_online_offline_notifications_cb"
                   x="0"
                   y="-8" />
-        <instance template="tgcw_scrollbarint"
+        <instance template="tgcw_combo_emoji_mode"
                   id="emoji_mode"
                   text="uiEmojiMode"
+                  value="UI:SAVE:CHAT:EMOJI_MODE"
                   posref="BL TL"
                   posparent="font_size"
                   x="0"
@@ -3981,13 +4025,6 @@
                link="UI:SAVE:CHAT:FONT_SIZE"
                min="9"
                max="20"
-               realtime="true" />
-        <param ui="chat_colors:emoji_mode:c"
-               type="db"
-               widget="sbint"
-               link="UI:SAVE:CHAT:EMOJI_MODE"
-               min="0"
-               max="2"
                realtime="true" />
         <param ui="chat_colors:emoji_size:c"
                type="db"
