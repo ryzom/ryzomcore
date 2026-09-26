@@ -2185,6 +2185,47 @@
                   posparent="emoji_mode"
                   x="0"
                   y="-8" />
+        <!-- The slider position alone does not say what it means, so name the
+             current value beside it. Three overlapping texts with only one
+             active is the usual way to do this here: the expression language
+             can switch a view on, but has no way to build a string. -->
+        <view type="text"
+              id="emoji_size_small"
+              posparent="emoji_size"
+              posref="TR TR"
+              x="0"
+              y="0"
+              color="255 255 255 192"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiEmojiSizeSmall" />
+        <view type="text"
+              id="emoji_size_medium"
+              posparent="emoji_size"
+              posref="TR TR"
+              x="0"
+              y="0"
+              color="255 255 255 192"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiEmojiSizeMedium" />
+        <view type="text"
+              id="emoji_size_large"
+              posparent="emoji_size"
+              posref="TR TR"
+              x="0"
+              y="0"
+              color="255 255 255 192"
+              fontsize="10"
+              shadow="true"
+              hardtext="uiEmojiSizeLarge" />
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,0)" target="emoji_size_small:active" />
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,1)" target="emoji_size_medium:active" />
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,2)" target="emoji_size_large:active" />
+        <!-- Size only means anything for image emoji: in the font mode the
+             glyphs follow the chat font size, so the slider would do nothing.
+             Hide the whole row unless images are selected. -->
+        <link expr="eq(@UI:SAVE:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
         <instance template="tgcw_checkbox"
                   id="enter_dontquit_cb"
                   text="uiEnterDontQuitCB"
