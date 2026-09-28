@@ -48,6 +48,7 @@ const uint32	DXT_HEADER = NL_MAKEFOURCC('D', 'X', 'T', '\0');
 const uint32	PNG_HEADER = NL_MAKEFOURCC(0x89, 'P', 'N', 'G');
 const uint32	JPG_HEADER = NL_MAKEFOURCC(0xff, 0xd8, 0xff, 0xe0);
 const uint32	GIF_HEADER = NL_MAKEFOURCC('G', 'I', 'F', '8');
+const uint32	KTX_HEADER = NL_MAKEFOURCC(0xAB, 'K', 'T', 'X');
 
 
 // dwLinearSize is valid
@@ -143,6 +144,16 @@ private :
 	 * \return image depth if succeed, 0 else
 	 */
 	uint8 readGIF( NLMISC::IStream &f );
+
+
+	/**
+	 * Read a KTX1 from an IStream.
+	 * KTX files can contain compressed (DXTC) or uncompressed texture data.
+	 * \param f IStream (must be a reading stream)
+	 * \param mipMapSkip number of mipmaps to skip
+	 * \return image depth if succeed, 0 else
+	 */
+	uint8 readKTX( NLMISC::IStream &f, uint mipMapSkip );
 
 
 	/**
@@ -330,11 +341,12 @@ public:
 	void	swap(CBitmap &other);
 
 	/**
-	 * Read a bitmap(TGA, JPEG, PNG or DDS) from an IStream.
-	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5), PNG, JPEG and
-	 * uncompressed TGA (24 and 32 bits).
+	 * Read a bitmap(TGA, JPEG, PNG, DDS or KTX) from an IStream.
+	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5),
+	 * KTX (DXTC1, DXTC3, DXTC5, RGBA, Luminance, Alpha),
+	 * PNG, JPEG and uncompressed TGA (24 and 32 bits).
 	 * \param IStream The stream must be in reading mode.
-	 * \param mipMapSkip if the file is a DDS with mipMap. N=mipMapSkip mipmaps are skipped.
+	 * \param mipMapSkip if the file is a DDS or KTX with mipMap. N=mipMapSkip mipmaps are skipped.
 	 * \return image depth (24 or 32), or 0 if load failed
 	 * \throw ESeekFailed : seek has failed
 	 */
@@ -342,9 +354,10 @@ public:
 
 
 	/**
-	 * Determinate the bitmap size from a bitmap(TGA or DDS) from an IStream. load just header of the file.
-	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5), PNG, JPEG and
-	 * uncompressed TGA (24 and 32 bits).
+	 * Determinate the bitmap size from a bitmap(TGA, DDS or KTX) from an IStream. load just header of the file.
+	 * Bitmap supported are DDS (DXTC1, DXTC1 with Alpha, DXTC3, DXTC5),
+	 * KTX (DXTC1, DXTC3, DXTC5, RGBA, Luminance, Alpha),
+	 * PNG, JPEG and uncompressed TGA (24 and 32 bits).
 	 * NB: at the end, f is seeked to begin.
 	 * \param IStream The stream must be in reading mode.
 	 * \param width the width of the image. 0 if fails.
