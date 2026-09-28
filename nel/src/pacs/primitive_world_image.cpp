@@ -1353,11 +1353,16 @@ void CPrimitiveWorldImage::reaction (const CCollisionSurfaceDesc&	surfaceDesc, c
 	// Relfexion or slide ?
 	if ((type==UMovePrimitive::Reflexion)||(type==UMovePrimitive::Slide))
 	{
+		const double collisionTimeEpsilon = 1e-6;
+		const double safeRemainingTime = std::max(dt-surfaceDesc.ContactTime, collisionTimeEpsilon);
+
 		// Slide ?
 		if (type==UMovePrimitive::Slide)
 		{
+			double speedProj = surfaceDesc.ContactNormal*_Speed;
+			double distBackVelocity = speedProj < 0.0 ? NELPACS_DIST_BACK/safeRemainingTime : 0.0;
 			// Project last delta on plane of collision.
-			_Speed-= surfaceDesc.ContactNormal*(surfaceDesc.ContactNormal*_Speed-NELPACS_DIST_BACK/(dt-surfaceDesc.ContactTime));
+			_Speed -= surfaceDesc.ContactNormal*(speedProj-distBackVelocity);
 		}
 
 		// Reflexion ?
@@ -1365,7 +1370,7 @@ void CPrimitiveWorldImage::reaction (const CCollisionSurfaceDesc&	surfaceDesc, c
 		{
 			// Project last delta on plane of collision.
 			double speedProj=surfaceDesc.ContactNormal*_Speed;
-			_Speed-=surfaceDesc.ContactNormal*(speedProj+speedProj*primitive.getAttenuation()-NELPACS_DIST_BACK/(dt-surfaceDesc.ContactTime));
+			_Speed -= surfaceDesc.ContactNormal*(speedProj+speedProj*primitive.getAttenuation()-NELPACS_DIST_BACK/safeRemainingTime);
 		}
 	}
 	else
