@@ -226,6 +226,25 @@ void	CMeshBase::serialMeshBase(NLMISC::IStream &f)
 	{
 		TLightInfoMapV7 temp;
 		f.serialCont(temp);
+		// Convert old format to new format when reading
+		if(f.isReading())
+		{
+			_LightInfos.clear();
+			for(TLightInfoMapV7::iterator it = temp.begin(); it != temp.end(); ++it)
+			{
+				CLightMapInfoList lmil;
+				lmil.AnimatedLight = it->first;
+				lmil.LightGroup = 0;
+				for(CLightInfoMapListV7::iterator itStage = it->second.begin(); itStage != it->second.end(); ++itStage)
+				{
+					CLightMapInfoList::CMatStage ms;
+					ms.MatId = itStage->nMatNb;
+					ms.StageId = itStage->nStageNb;
+					lmil.StageList.push_back(ms);
+				}
+				_LightInfos.push_back(lmil);
+			}
+		}
 	}
 
 	if(ver>=3)
