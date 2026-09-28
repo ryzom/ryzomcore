@@ -2112,6 +2112,18 @@ bool CDriverD3D::swapBuffers()
 	nlassert (_DeviceInterface);
 
 	++ _SwapBufferCounter;
+
+	// If the device is already lost, skip rendering and try to recover
+	if (_Lost)
+	{
+		HRESULT hr = _DeviceInterface->TestCooperativeLevel();
+		if (hr == D3DERR_DEVICENOTRESET)
+		{
+			reset (_CurrentMode);
+		}
+		return !_Lost;
+	}
+
 	// Swap & reset volatile buffers
 	_CurrentRenderPass++;
 	_VolatileVertexBufferRAM[_CurrentRenderPass&1]->reset ();
