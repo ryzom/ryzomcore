@@ -218,6 +218,8 @@ void CQuicTransceiver::start(uint16 port)
 {
 	stop();
 
+	m_ListenPort = port;
+
 	if (!QuicConnection.get())
 	{
 		nlinfo("QUIC listener disabled");
@@ -711,6 +713,10 @@ void CQuicTransceiver::datagramReceived(CQuicUserContext *user, const uint8 *buf
 	// Increase reference for FIFO copy
 	user->increaseRef();
 
+	// Successfully received a QUIC datagram — comms are working.
+	CFEReceiveTask::LastUDPPacketReceived = NLMISC::CTime::getSecondsSince1970();
+	CFEReceiveTask::PendingCookieReceived = 0;
+
 	// Locked block
 	{
 		NLMISC::CAtomicLockYield lock(m->BufferMutex);
@@ -820,6 +826,15 @@ void CQuicTransceiver::shutdown(CQuicUserContext *user)
 	MsQuic->ConnectionShutdown((HQUIC)user->Connection, QUIC_CONNECTION_SHUTDOWN_FLAG_NONE, 0);
 }
 
+void CQuicTransceiver::restart()
+{
+	if (m_ListenPort)
+	{
+		nlwarning("Restarting QUIC listener on port %hu to recover from failure", m_ListenPort);
+		start(m_ListenPort);
+	}
+}
+
 #else
 
 #define null nullptr
@@ -854,6 +869,7 @@ bool CQuicTransceiver::isConfigEnabled() const
 
 void CQuicTransceiver::start(uint16 port)
 {
+	m_ListenPort = port;
 	nlwarning("QUIC not supported, no listener started");
 }
 
@@ -904,6 +920,10 @@ bool CQuicTransceiver::sendDatagramSwap(CQuicUserContext *user, NLMISC::CBitMemS
 }
 
 void CQuicTransceiver::shutdown(CQuicUserContext *user)
+{
+}
+
+void CQuicTransceiver::restart()
 {
 }
 

@@ -680,6 +680,7 @@ void	cbFESNbPlayers2(CMessage &msgin, const std::string &serviceName, TServiceId
 		CWelcomeServiceMod::getInstance()->updateConnectedPlayerCount(totalNbOnlineUsers, totalNbPendingUsers);
 }
 
+
 /*
  * Set Shard open state
  */

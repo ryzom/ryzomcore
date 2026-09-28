@@ -120,10 +120,19 @@ public:
 	/// Require exit (thread-safe because atomic assignment)
 	void			requireExit() { _ExitRequired = true; }
 
+	/// Request the receive task to close and rebind its socket to recover from persistent failure
+	void			requireRebind() { _RebindRequired = true; }
+
 	/// Return the number of rejected datagrams since the last call (thread-safe because atomic assignment)
 	uint			nbNewRejectedDatagrams()	{ uint nb=_NbRejectedDatagrams; _NbRejectedDatagrams=0; return nb; }
 
 private:
+
+	/// Close and rebind the UDP socket to recover from persistent failure
+	void			rebindSocket();
+
+	/// Set SO_RCVTIMEO on the UDP socket
+	void			setRecvTimeout();
 
 	/// Datagram length
 	uint										_DatagramLength;
@@ -140,13 +149,26 @@ private:
 	/// Exit required
 	volatile bool								_ExitRequired;
 
+	/// Rebind required (set by main thread when persistent socket failure detected)
+	volatile bool								_RebindRequired;
+
+	/// Port the socket is bound to
+	uint16										_BoundPort;
+
 public:
 	
 	/// External datagram socket
 	NLNET::CUdpSock								*DataSock;
 
-	/// The date of the last UPD packet recevied
+	/// The date of the last UDP/QUIC packet received (uint32 seconds since epoch).
+	/// Updated to current time only on successful packet receive.
 	static volatile	uint32						LastUDPPacketReceived;
+
+	/// Timestamp when the first pending login cookie arrived (uint32 seconds since epoch).
+	/// Set to 'now' on cookie arrival (only if currently 0). Cleared to 0 when a
+	/// UDP/QUIC packet is successfully received (proving comms are working).
+	/// The watchdog triggers recovery when this is non-zero and stale (> delay).
+	static volatile	uint32						PendingCookieReceived;
 
 };
 
