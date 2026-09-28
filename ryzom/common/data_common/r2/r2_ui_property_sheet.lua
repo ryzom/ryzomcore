@@ -1697,13 +1697,15 @@ function r2:buildPropertySheetXml(class, className, id, title, isForm)
 					return
 				  end		
 				-- call the actual event handler with the widget as its first parameter											
-				handlingMethod(widgetEventHandler, propWidget, class.NameToProp[attributeName], getTargetInstance()[attributeName], unpack(args))				
+				handlingMethod(widgetEventHandler, propWidget, class.NameToProp[attributeName], getTargetInstance()[attributeName], table.unpack(args))				
 			end			
 			local handleEventFunction = propertySheet.Env.handleEvent
 			-- syntaxic sugar : 'setter' function for simple set operation
 			function propertySheet.Env.setter(attributeName, value)
 				table.clear(eventArgs)
-				table.insert(eventArgs, value)
+				if value ~= nil then
+					table.insert(eventArgs, value)
+				end
 				handleEventFunction("onSet", attributeName, eventArgs)
 			end
 			local setter = propertySheet.Env.setter

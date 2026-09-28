@@ -844,6 +844,7 @@ local registerFeature = function ()
 				{ Name="FeetColor", Type="Number", Visible=false, DefaultInBase=1 },
 
 				{ Name="LinkColor", Type="Number", Visible=false, DefaultInBase=0 },
+				{ Name="UseAllEquipment", Type="Number", Visible=false, DefaultInBase=0 },
 
 				--{ Name="Notes", Type="String", Visible=false, DefaultInBase=1 },
 				{ Name="Function", Type="String", Visible=false, DefaultInBase=1 },
