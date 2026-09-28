@@ -25,10 +25,6 @@
 #include <nel/misc/i18n.h>
 #include <nel/misc/config_file.h>
 
-// Project includes
-#include "nel_qt_config.h"
-#include "configuration.h"
-
 using namespace std;
 using namespace NLMISC;
 
@@ -63,10 +59,14 @@ public:
 #else
 			"RELEASE_TYPE [DEVELOPER_VERSION]\n"
 #endif
-			"VERSION_NUMBER [" NLQT_VERSION "]\n");
+		);
+		if (!s_Version.empty())
+			text += ucstring("VERSION_NUMBER [" + s_Version + "]\n");
 	}
+	static std::string s_Version;
 };
 
+std::string CI18NLoadProxyBuildInfo::s_Version;
 CI18NLoadProxyBuildInfo a_I18NLoadProxy;
 
 } /* anonymous namespace */
@@ -81,7 +81,7 @@ CInternationalization::~CInternationalization()
 	
 }
 
-void CInternationalization::init(CConfiguration *configuration)
+void CInternationalization::init(CConfiguration *configuration, const std::string &version)
 {
 	//H_AUTO2
 
@@ -90,6 +90,9 @@ void CInternationalization::init(CConfiguration *configuration)
 	
 	// check stuff we need
 	nlassert(m_Configuration);
+
+	// set the version for the load proxy
+	CI18NLoadProxyBuildInfo::s_Version = version;
 
 	// set the load proxy
 	nlassert(!m_Callbacks.size());

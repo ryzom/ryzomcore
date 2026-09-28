@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file alias="root.ico">../res/root.ico</file>
+        <file alias="header.ico">../res/header.ico</file>
+        <file alias="struct.ico">../res/struct.ico</file>
+        <file alias="vstruct.ico">../res/vstruct.ico</file>
+        <file alias="array.ico">../res/array.ico</file>
+        <file alias="hold.ico">../res/hold.ico</file>
+        <file alias="zen.ico">../res/zen.ico</file>
+        <file alias="worldbuilder.ico">../res/worldbuilder.ico</file>
+        <file alias="zfee51.ico">../res/zfee51.ico</file>
+        <file alias="Toolbar.bmp">../res/Toolbar.bmp</file>
+    </qresource>
+</RCC>
