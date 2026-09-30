@@ -69,6 +69,7 @@ protected:
 	virtual void mouseReleaseEvent(QMouseEvent *event);
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 	virtual void resizeEvent(QResizeEvent *event);
+	virtual void scrollContentsBy(int dx, int dy);
 
 	void drawGrid(QPainter *painter, const QRectF &rect);
 	void drawGridPoints(QPainter *painter, const QRectF &rect);

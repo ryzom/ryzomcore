@@ -244,6 +244,9 @@
    <property name="text">
     <string>S/H Grid points</string>
    </property>
+   <property name="toolTip">
+    <string>Show/hide a dot grid for precise placing; the spacing follows the zoom (1 m to 160 m)</string>
+   </property>
   </action>
   <action name="newWorldEditAction">
    <property name="text">

@@ -27,6 +27,8 @@
 // Qt includes
 #include <QApplication>
 
+#include <cmath>
+
 namespace LandscapeEditor
 {
 
@@ -219,10 +221,7 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 	}
 
 	if (m_visibleGridPoints)
-	{
-		painter->setPen(QPen(Qt::white, 3, Qt::SolidLine, Qt::RoundCap));
 		drawGridPoints(painter, rect);
-	}
 
 	if (!m_visibleText)
 		return;
@@ -232,6 +231,14 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
 		drawZoneNames(painter, rect);
 	}
+}
+
+void LandscapeView::scrollContentsBy(int dx, int dy)
+{
+	QGraphicsView::scrollContentsBy(dx, dy);
+	// Scrolling moves the pixels already drawn, the grid label in the corner with them.
+	if (m_visibleGridPoints)
+		viewport()->update();
 }
 
 bool LandscapeView::isVisibleGridPoints() const
@@ -248,20 +255,63 @@ void LandscapeView::setVisibleGridPoints(bool visible)
 
 void LandscapeView::drawGridPoints(QPainter *painter, const QRectF &rect)
 {
-	// A dot on every cell corner, the way the original editor marks out the grid where
-	// there is no landscape. Skipped once the cells are too small on screen to tell the
-	// dots apart - at that point it is a grey wash, not information.
-	if (m_cellSize * transform().m11() < 4.0)
+	// A dot grid for placing things precisely. The spacing follows the zoom: the finest
+	// step that keeps the dots at least MIN_PIXELS apart on screen. Every step divides the
+	// cell size, so the dots always line up with the zone grid.
+	static const qreal STEPS[] = { 1, 2, 5, 10, 20, 40, 80, 160 };
+	static const int STEP_COUNT = sizeof(STEPS) / sizeof(STEPS[0]);
+	static const qreal MIN_PIXELS = 12.0;
+
+	const qreal pixelsPerMetre = transform().m11();
+	if (pixelsPerMetre <= 0)
 		return;
 
-	QVector<QPointF> points;
-	for (qreal x = m_cellSize * floor(rect.left() / m_cellSize); x < rect.right(); x += m_cellSize)
+	int stepIndex = 0;
+	while (stepIndex < STEP_COUNT && STEPS[stepIndex] * pixelsPerMetre < MIN_PIXELS)
+		++stepIndex;
+	// Zoomed out so far that even one dot per cell would be a grey wash.
+	if (stepIndex == STEP_COUNT)
+		return;
+	const qreal step = STEPS[stepIndex];
+	// Every fifth dot, or every cell corner at the coarse steps, is drawn bigger to make
+	// counting easier.
+	const qreal majorStep = qMin(qreal(m_cellSize), step * 5);
+
+	QVector<QPointF> minor, major;
+	const qreal left = step * floor(rect.left() / step);
+	const qreal top = step * floor(rect.top() / step);
+	for (qreal x = left; x < rect.right(); x += step)
 	{
-		for (qreal y = m_cellSize * floor(rect.top() / m_cellSize); y < rect.bottom(); y += m_cellSize)
-			points.push_back(QPointF(x, y));
+		const bool majorColumn = std::fmod(std::fabs(x), majorStep) < 0.001;
+		for (qreal y = top; y < rect.bottom(); y += step)
+		{
+			if (majorColumn && std::fmod(std::fabs(y), majorStep) < 0.001)
+				major.push_back(QPointF(x, y));
+			else
+				minor.push_back(QPointF(x, y));
+		}
 	}
 
-	painter->drawPoints(points.data(), points.size());
+	painter->save();
+	painter->setRenderHint(QPainter::Antialiasing, false);
+	QPen pen(QColor(255, 255, 255, 150), 2, Qt::SolidLine, Qt::SquareCap);
+	pen.setCosmetic(true);
+	painter->setPen(pen);
+	painter->drawPoints(minor.data(), minor.size());
+	pen.setColor(QColor(255, 255, 255, 230));
+	pen.setWidth(3);
+	painter->setPen(pen);
+	painter->drawPoints(major.data(), major.size());
+
+	// Tell the spacing in the bottom left corner of the view.
+	painter->resetTransform();
+	const QString label = tr("Grid: %1 m").arg(step);
+	const QRect box = painter->fontMetrics().boundingRect(label).adjusted(-4, -2, 4, 2);
+	const QRect where(QPoint(6, viewport()->height() - box.height() - 6), box.size());
+	painter->fillRect(where, QColor(0, 0, 0, 140));
+	painter->setPen(Qt::white);
+	painter->drawText(where, Qt::AlignCenter, label);
+	painter->restore();
 }
 
 void LandscapeView::drawGrid(QPainter *painter, const QRectF &rect)
