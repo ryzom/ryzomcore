@@ -121,15 +121,32 @@ install_deps() {
 	local family="${ID} ${ID_LIKE:-}"
 	case "$family" in
 		*debian*|*ubuntu*)
-			echo "Packages: $(echo $APT_PACKAGES)"
-			confirm "Install these with apt?" || { echo "skipped"; return; }
-			as_root apt-get update
-			as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_PACKAGES
+			local missing="" pkg
+			for pkg in $APT_PACKAGES; do
+				dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q "install ok installed" \
+					|| missing="$missing $pkg"
+			done
+			if [ -z "$missing" ]; then
+				echo "all build dependencies are installed"
+			else
+				echo "Missing:$missing"
+				confirm "Install these with apt?" || { echo "skipped"; return; }
+				as_root apt-get update
+				as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y $missing
+			fi
 			;;
 		*arch*)
-			echo "Packages: $(echo $PACMAN_PACKAGES)"
-			confirm "Install these with pacman?" || { echo "skipped"; return; }
-			as_root pacman -S --needed --noconfirm $PACMAN_PACKAGES
+			# pacman -T honours "provides", so e.g. zlib-ng-compat counts as zlib and
+			# pacman is never asked to replace an installed alternative.
+			local missing
+			missing="$(pacman -T $PACMAN_PACKAGES | tr '\n' ' ')"
+			if [ -z "$missing" ]; then
+				echo "all build dependencies are installed"
+			else
+				echo "Missing: $missing"
+				confirm "Install these with pacman?" || { echo "skipped"; return; }
+				as_root pacman -S --needed $missing
+			fi
 			# luabind is not in the Arch repositories.
 			if ! ls /usr/lib/libluabind*.so >/dev/null 2>&1; then
 				echo
@@ -160,6 +177,8 @@ if [ "$DO_BUILD" -eq 1 ]; then
 	mkdir -p "$BUILD"
 	# CMAKE_POLICY_VERSION_MINIMUM: the build scripts predate CMake 4, which refuses
 	# them without it. Older CMake versions ignore the variable.
+	# WITH_BREAKPAD=OFF: distro breakpad is a static archive and may carry LTO bytecode
+	# from an older GCC, which then fails to link; studio does not need minidumps.
 	cmake -S "$CORE" -B "$BUILD" \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX="$PREFIX" \
@@ -168,7 +187,7 @@ if [ "$DO_BUILD" -eq 1 ]; then
 		-DWITH_STUDIO=ON -DWITH_QT5=ON -DWITH_QT=OFF \
 		-DWITH_RYZOM=OFF -DWITH_NELNS=OFF -DWITH_SNOWBALLS=OFF \
 		-DWITH_NEL_TOOLS=OFF -DWITH_NEL_TESTS=OFF -DWITH_NEL_SAMPLES=OFF \
-		-DWITH_STATIC=OFF \
+		-DWITH_STATIC=OFF -DWITH_BREAKPAD=OFF \
 		>"$BUILD/configure.log" 2>&1 || { tail -40 "$BUILD/configure.log"; die "configure failed, see $BUILD/configure.log"; }
 	echo "ok (log: $BUILD/configure.log)"
 
