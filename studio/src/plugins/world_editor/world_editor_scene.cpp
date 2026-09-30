@@ -18,6 +18,9 @@
 #include "world_editor_scene.h"
 #include "world_editor_scene_item.h"
 #include "world_editor_actions.h"
+#include "world_editor_constants.h"
+#include "primitives_model.h"
+#include "primitive_item.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -90,7 +93,7 @@ AbstractWorldItem *WorldEditorScene::addWorldItemZone(const QPolygonF &polygon)
 
 namespace
 {
-/// Apply visible to every item of type T in the list.
+/// Re-apply the visibility of every item of type T in the list.
 ///
 /// dynamic_cast, not qgraphicsitem_cast: the world items all inherit
 /// AbstractWorldItem::Type unchanged, so qgraphicsitem_cast matches any of them for any
@@ -98,12 +101,12 @@ namespace
 /// values is not an option either, that is what qgraphicsitem_cast<AbstractWorldItem *>
 /// relies on everywhere else.
 template <typename T>
-void setVisibleItems(const QList<QGraphicsItem *> &items, bool visible)
+void updateVisibleItems(WorldEditorScene *scene, const QList<QGraphicsItem *> &items)
 {
 	Q_FOREACH (QGraphicsItem *item, items)
 	{
 		if (dynamic_cast<T>(item) != 0)
-			item->setVisible(visible);
+			scene->updateItemVisibility(item);
 	}
 }
 }
@@ -111,19 +114,41 @@ void setVisibleItems(const QList<QGraphicsItem *> &items, bool visible)
 void WorldEditorScene::setVisiblePointPrimitives(bool visible)
 {
 	m_visiblePointPrimitives = visible;
-	setVisibleItems<WorldItemPoint *>(items(), visible);
+	updateVisibleItems<WorldItemPoint *>(this, items());
 }
 
 void WorldEditorScene::setVisiblePathPrimitives(bool visible)
 {
 	m_visiblePathPrimitives = visible;
-	setVisibleItems<WorldItemPath *>(items(), visible);
+	updateVisibleItems<WorldItemPath *>(this, items());
 }
 
 void WorldEditorScene::setVisibleZonePrimitives(bool visible)
 {
 	m_visibleZonePrimitives = visible;
-	setVisibleItems<WorldItemZone *>(items(), visible);
+	updateVisibleItems<WorldItemZone *>(this, items());
+}
+
+void WorldEditorScene::updateItemVisibility(QGraphicsItem *item)
+{
+	// Two things decide: the show/hide switch for the kind of primitive, and whether
+	// this one primitive was hidden from the tree. Switching a kind back on must not
+	// bring back what was hidden one by one.
+	bool visible = true;
+	if (dynamic_cast<WorldItemPoint *>(item) != 0)
+		visible = m_visiblePointPrimitives;
+	else if (dynamic_cast<WorldItemPath *>(item) != 0)
+		visible = m_visiblePathPrimitives;
+	else if (dynamic_cast<WorldItemZone *>(item) != 0)
+		visible = m_visibleZonePrimitives;
+	else
+		return;
+
+	Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
+	if ((node != 0) && PrimitivesTreeModel::isHiddenNode(node))
+		visible = false;
+
+	item->setVisible(visible);
 }
 
 void WorldEditorScene::removeWorldItem(QGraphicsItem *item)
@@ -249,7 +274,9 @@ void WorldEditorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
 	if (m_selectedItems.isEmpty())
 	{
-		LandscapeEditor::LandscapeSceneBase::contextMenuEvent(event);
+		// Nothing under the cursor: offer what makes sense for a spot on the map.
+		Q_EMIT emptyContextMenuRequested(event->scenePos(), event->screenPos());
+		event->accept();
 		return;
 	}
 
@@ -317,6 +344,8 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 void WorldEditorScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+	m_lastMouseScenePos = mouseEvent->scenePos();
+
 	if (QApplication::mouseButtons() == Qt::LeftButton)
 	{
 		m_selectionArea.setBottomRight(mouseEvent->scenePos());

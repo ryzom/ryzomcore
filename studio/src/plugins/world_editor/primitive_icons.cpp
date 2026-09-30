@@ -27,6 +27,9 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmap>
 
 namespace WorldEditor
 {
@@ -195,6 +198,61 @@ QIcon PrimitiveIcons::icon(const NLLIGO::IPrimitive *primitive, bool hidden) con
 	}
 
 	return kindIcon(primitive, hidden);
+}
+
+QPixmap PrimitiveIcons::eyeGlyph(int size, bool struckThrough, const QColor &color)
+{
+	QPixmap pixmap(size, size);
+	pixmap.fill(Qt::transparent);
+
+	QPainter painter(&pixmap);
+	painter.setRenderHint(QPainter::Antialiasing, true);
+	const qreal s = size;
+	const qreal pen = qMax<qreal>(1.5, s / 8.0);
+
+	// Almond outline, wide and flat so it still reads as an eye at 14 pixels.
+	QPainterPath outline;
+	outline.moveTo(s * 0.04, s * 0.5);
+	outline.quadTo(s * 0.5, s * -0.02, s * 0.96, s * 0.5);
+	outline.quadTo(s * 0.5, s * 1.02, s * 0.04, s * 0.5);
+	painter.setPen(QPen(color, pen, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+	painter.setBrush(Qt::NoBrush);
+	painter.drawPath(outline);
+
+	// Pupil.
+	painter.setPen(Qt::NoPen);
+	painter.setBrush(color);
+	painter.drawEllipse(QPointF(s * 0.5, s * 0.5), s * 0.19, s * 0.19);
+
+	if (struckThrough)
+	{
+		// Cut a gap first, so the stroke stands apart from the outline.
+		const QPointF from(s * 0.12, s * 0.88), to(s * 0.88, s * 0.12);
+		painter.setCompositionMode(QPainter::CompositionMode_Clear);
+		painter.setPen(QPen(Qt::transparent, pen * 2.2, Qt::SolidLine, Qt::RoundCap));
+		painter.drawLine(from, to);
+		painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+		painter.setPen(QPen(color, pen * 0.9, Qt::SolidLine, Qt::RoundCap));
+		painter.drawLine(from, to);
+	}
+	painter.end();
+	return pixmap;
+}
+
+QIcon PrimitiveIcons::hiddenIcon(const QIcon &base)
+{
+	// Faded only. A badge does not survive 16 pixels; the eye at the end of the row is
+	// what says "hidden", the faded icon keeps the class recognisable next to it.
+	const int size = 16;
+	QPixmap pixmap(size, size);
+	pixmap.fill(Qt::transparent);
+
+	QPainter painter(&pixmap);
+	painter.setOpacity(0.35);
+	painter.drawPixmap(0, 0, base.pixmap(size, size));
+	painter.end();
+
+	return QIcon(pixmap);
 }
 
 } /* namespace WorldEditor */

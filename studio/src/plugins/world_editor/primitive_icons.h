@@ -59,6 +59,14 @@ public:
 	/// Directory the per-class icons were taken from, empty if none was found.
 	QString iconDirectory() const;
 
+	/// An eye, open or struck through, drawn at run time so it fits any colour scheme.
+	static QPixmap eyeGlyph(int size, bool struckThrough, const QColor &color);
+
+	/// The primitive's normal icon faded out. The hidden variants of the MFC editor
+	/// exist for the six kind icons only - a region or stable zone with an icon of its
+	/// own barely changed when hidden.
+	static QIcon hiddenIcon(const QIcon &base);
+
 private:
 	PrimitiveIcons();
 

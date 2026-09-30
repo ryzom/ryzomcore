@@ -7,6 +7,13 @@ INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 
 FILE(GLOB SRC *.cpp *.h)
 
+# The AI map overlay reads <continent>_0.cwmap2 with the AI service's own code, so what
+# the editor shows is exactly what the AI service loads.
+SET(RYZOM_SERVER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../../../ryzom/server/src)
+SET(RYZOM_COMMON_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../../../ryzom/common/src)
+INCLUDE_DIRECTORIES(${RYZOM_SERVER_SRC}/ai_share ${RYZOM_SERVER_SRC} ${RYZOM_COMMON_SRC})
+LIST(APPEND SRC ${RYZOM_SERVER_SRC}/ai_share/world_map.cpp ${RYZOM_SERVER_SRC}/ai_share/16x16_layer.cpp)
+
 SET(OVQT_EXT_SYS_SRC	${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_manager.h
 			${CMAKE_CURRENT_SOURCE_DIR}/../../extension_system/iplugin_spec.h)
@@ -26,6 +33,7 @@ SET(OVQT_PLUGIN_WORLD_EDITOR_HDR	world_editor_plugin.h
 					script_editor.h
 					property_editor_panel.h
 					primitive_property_form.h
+					navigation_tools.h
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_UIS	world_editor_window.ui

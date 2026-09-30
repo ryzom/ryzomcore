@@ -21,6 +21,7 @@
 #include "primitives_model.h"
 #include "world_editor_actions.h"
 #include "world_editor_scene_item.h"
+#include "world_editor_scene.h"
 #include "world_editor_constants.h"
 
 #include "../core/core_constants.h"
@@ -46,9 +47,93 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QStyledItemDelegate>
+#include <QtGui/QMouseEvent>
+#include <QtGui/QPainter>
 
 namespace WorldEditor
 {
+
+namespace
+{
+
+/// Draws the eye at the right end of each primitive row, as in the layer list of a
+/// paint program: struck through and coloured while the primitive is hidden, a faint
+/// open eye under the mouse otherwise. A click on it toggles, without any menu.
+class PrimitiveRowDelegate : public QStyledItemDelegate
+{
+public:
+	PrimitiveRowDelegate(PrimitivesView *view)
+		: QStyledItemDelegate(view),
+		  m_view(view)
+	{
+	}
+
+	static bool hasEye(const QModelIndex &index)
+	{
+		Node *node = static_cast<Node *>(index.internalPointer());
+		return (node != 0) && ((node->type() == Node::PrimitiveNodeType) ||
+							   (node->type() == Node::RootPrimitiveNodeType));
+	}
+
+	static QRect eyeRect(const QRect &row)
+	{
+		const int size = 14;
+		return QRect(row.right() - size - 4, row.center().y() - size / 2, size, size);
+	}
+
+	virtual void paint(QPainter *painter, const QStyleOptionViewItem &option,
+					   const QModelIndex &index) const
+	{
+		if (!hasEye(index))
+		{
+			QStyledItemDelegate::paint(painter, option, index);
+			return;
+		}
+
+		// Keep the text clear of the eye.
+		QStyleOptionViewItem textOption(option);
+		textOption.rect.setRight(option.rect.right() - 22);
+		QStyledItemDelegate::paint(painter, textOption, index);
+
+		Node *node = static_cast<Node *>(index.internalPointer());
+		const bool hidden = PrimitivesTreeModel::isHiddenNode(node);
+		const bool hovered = (option.state & QStyle::State_MouseOver) != 0;
+		if (!hidden && !hovered)
+			return;
+
+		QColor color = hidden ? QColor(210, 70, 45) : option.palette.color(QPalette::Text);
+		if (!hidden)
+			color.setAlphaF(0.45);
+		painter->drawPixmap(eyeRect(option.rect), PrimitiveIcons::eyeGlyph(14, hidden, color));
+	}
+
+	virtual bool editorEvent(QEvent *event, QAbstractItemModel *model,
+							 const QStyleOptionViewItem &option, const QModelIndex &index)
+	{
+		if (hasEye(index) &&
+			((event->type() == QEvent::MouseButtonPress) || (event->type() == QEvent::MouseButtonRelease) ||
+			 (event->type() == QEvent::MouseButtonDblClick)))
+		{
+			QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+			if ((mouseEvent->button() == Qt::LeftButton) &&
+				eyeRect(option.rect).adjusted(-3, -3, 3, 3).contains(mouseEvent->pos()))
+			{
+				// Act on the press and swallow the rest, so the click neither changes
+				// the selection nor opens anything.
+				if (event->type() == QEvent::MouseButtonPress)
+					m_view->toggleHidden(index, (mouseEvent->modifiers() & Qt::ShiftModifier) != 0);
+				return true;
+			}
+		}
+		return QStyledItemDelegate::editorEvent(event, model, option, index);
+	}
+
+private:
+	PrimitivesView *m_view;
+};
+
+} // anonymous namespace
 
 PrimitivesView::PrimitivesView(QWidget *parent)
 	: QTreeView(parent),
@@ -58,6 +143,11 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	  m_primitivesTreeModel(0)
 {
 	setContextMenuPolicy(Qt::DefaultContextMenu);
+
+	setItemDelegate(new PrimitiveRowDelegate(this));
+	// Hover state for the faint eye on visible rows.
+	setMouseTracking(true);
+	viewport()->setAttribute(Qt::WA_Hover, true);
 
 	m_unloadAction = new QAction("Unload", this);
 
@@ -89,11 +179,39 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_helpAction = new QAction("Help", this);
 	m_helpAction->setEnabled(false);
 
-	m_showAction = new QAction("Show", this);
-	m_showAction->setEnabled(false);
+	// Hide a layer on the map to get at what lies below it - a continent, region or
+	// stable zone covering the smaller zones inside. Editor state only, as in the MFC
+	// editor; the tree keeps the row, greyed out with the hidden icon.
+	m_showAction = new QAction(tr("Show on Map"), this);
+	m_showAction->setShortcut(QKeySequence(tr("Ctrl+Shift+H")));
+	m_showAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	addAction(m_showAction);
 
-	m_hideAction = new QAction("Hide", this);
-	m_hideAction->setEnabled(false);
+	m_positionAction = new QAction(tr("Position..."), this);
+	m_positionAction->setToolTip(tr("Read, copy or set the position of the primitive or group"));
+	connect(m_positionAction, SIGNAL(triggered()), this, SLOT(requestPosition()));
+
+	// The whole branch at once: a continent, a region with everything in it, a file.
+	m_hideWithChildrenAction = new QAction(tr("Hide with Children"), this);
+	m_hideWithChildrenAction->setShortcut(QKeySequence(tr("Ctrl+Alt+H")));
+	m_hideWithChildrenAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	m_hideWithChildrenAction->setToolTip(tr("Hide this and everything below it (Shift+click on the eye)"));
+	connect(m_hideWithChildrenAction, SIGNAL(triggered()), this, SLOT(hidePrimitiveWithChildren()));
+	addAction(m_hideWithChildrenAction);
+
+	m_showWithChildrenAction = new QAction(tr("Show with Children"), this);
+	m_showWithChildrenAction->setShortcut(QKeySequence(tr("Ctrl+Alt+Shift+H")));
+	m_showWithChildrenAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	connect(m_showWithChildrenAction, SIGNAL(triggered()), this, SLOT(showPrimitiveWithChildren()));
+	addAction(m_showWithChildrenAction);
+
+	m_showAllAction = new QAction(tr("Show All Hidden"), this);
+	connect(m_showAllAction, SIGNAL(triggered()), this, SLOT(showAllPrimitives()));
+
+	m_hideAction = new QAction(tr("Hide on Map"), this);
+	m_hideAction->setShortcut(QKeySequence(tr("Ctrl+H")));
+	m_hideAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	addAction(m_hideAction);
 
 	connect(m_loadLandAction, SIGNAL(triggered()), this, SLOT(loadLandscape()));
 	connect(m_loadPrimitiveAction, SIGNAL(triggered()), this, SLOT(loadRootPrimitive()));
@@ -359,12 +477,152 @@ void PrimitivesView::unload()
 	}
 }
 
+QModelIndexList PrimitivesView::hideTargets() const
+{
+	// The selected rows; a right click on the map may land on a primitive outside the
+	// selection, then just that one.
+	QModelIndexList targets = selectionModel()->selectedRows();
+	if (m_contextMenuIndex.isValid())
+	{
+		const QModelIndex clicked = m_contextMenuIndex.operator const QModelIndex &();
+		if (!targets.contains(clicked))
+			targets = QModelIndexList() << clicked;
+	}
+	return targets;
+}
+
+void PrimitivesView::setHidden(const QModelIndex &index, bool hidden, QItemSelection &deselect,
+							   bool withChildren)
+{
+	Node *node = static_cast<Node *>(index.internalPointer());
+	if ((node == 0) || ((node->type() != Node::PrimitiveNodeType) && (node->type() != Node::RootPrimitiveNodeType)))
+		return;
+
+	m_primitivesTreeModel->setPrimitiveHidden(index, hidden);
+	if (hidden)
+		deselect.select(index, index);
+
+	QGraphicsItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+	if (item != 0)
+	{
+		m_worldEditorScene->updateItemVisibility(item);
+		// Plain Hide stops here: the children are the smaller zones one hides a region
+		// to get at. "with Children" takes the whole branch - a continent, a file.
+		if (!withChildren)
+			return;
+	}
+
+	// A folder or group has no shape of its own; hiding it means hiding what is in it.
+	const int count = model()->rowCount(index);
+	for (int i = 0; i < count; ++i)
+		setHidden(model()->index(i, 0, index), hidden, deselect, withChildren);
+}
+
+void PrimitivesView::setHiddenOnTargets(bool hidden, bool withChildren)
+{
+	if (m_worldEditorScene == 0)
+		return;
+
+	QItemSelection deselect;
+	Q_FOREACH (const QModelIndex &index, hideTargets())
+		setHidden(index, hidden, deselect, withChildren);
+
+	// A hidden primitive stays selected otherwise, and a drag on the map would move it
+	// without it being seen.
+	if (!deselect.isEmpty())
+		selectionModel()->select(deselect, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
+	m_contextMenuIndex = QPersistentModelIndex();
+}
+
+void PrimitivesView::requestPosition()
+{
+	Q_EMIT positionRequested(hideTargets());
+}
+
+void PrimitivesView::focusIndex(const QModelIndex &index)
+{
+	if (!index.isValid())
+		return;
+
+	selectionModel()->select(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+	selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+	scrollTo(index, QAbstractItemView::PositionAtCenter);
+
+	const QRectF bounds = sceneRectOfSubtree(index);
+	if (!bounds.isNull())
+		Q_EMIT zoomToRectRequested(bounds);
+}
+
+void PrimitivesView::toggleHidden(const QModelIndex &index, bool withChildren)
+{
+	if (m_worldEditorScene == 0)
+		return;
+
+	Node *node = static_cast<Node *>(index.internalPointer());
+	if (node == 0)
+		return;
+
+	QItemSelection deselect;
+	setHidden(index, !PrimitivesTreeModel::isHiddenNode(node), deselect, withChildren);
+	if (!deselect.isEmpty())
+		selectionModel()->select(deselect, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
+}
+
 void PrimitivesView::showPrimitive()
 {
+	setHiddenOnTargets(false, false);
 }
 
 void PrimitivesView::hidePrimitive()
 {
+	setHiddenOnTargets(true, false);
+}
+
+void PrimitivesView::showPrimitiveWithChildren()
+{
+	setHiddenOnTargets(false, true);
+}
+
+void PrimitivesView::hidePrimitiveWithChildren()
+{
+	setHiddenOnTargets(true, true);
+}
+
+void PrimitivesView::showAllPrimitives(const QModelIndex &parent)
+{
+	const int count = model()->rowCount(parent);
+	for (int i = 0; i < count; ++i)
+	{
+		const QModelIndex index = model()->index(i, 0, parent);
+		Node *node = static_cast<Node *>(index.internalPointer());
+		if ((node != 0) && PrimitivesTreeModel::isHiddenNode(node))
+		{
+			m_primitivesTreeModel->setPrimitiveHidden(index, false);
+			QGraphicsItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+			if (item != 0)
+				m_worldEditorScene->updateItemVisibility(item);
+		}
+		showAllPrimitives(index);
+	}
+}
+
+void PrimitivesView::showAllPrimitives()
+{
+	if (m_worldEditorScene != 0)
+		showAllPrimitives(QModelIndex());
+}
+
+void PrimitivesView::addHideActions(QMenu *menu, const QModelIndex &index)
+{
+	Node *node = static_cast<Node *>(index.internalPointer());
+	const bool hidden = (node != 0) && PrimitivesTreeModel::isHiddenNode(node);
+	menu->addAction(hidden ? m_showAction : m_hideAction);
+	if (model()->rowCount(index) > 0)
+	{
+		menu->addAction(m_hideWithChildrenAction);
+		menu->addAction(m_showWithChildrenAction);
+	}
+	menu->addAction(m_showAllAction);
 }
 
 void PrimitivesView::addNewPrimitiveByClass(int value)
@@ -510,6 +768,10 @@ void PrimitivesView::showContextMenu(const QModelIndex &index, const QPoint &glo
 
 	if (!menu.isEmpty())
 		menu.exec(globalPos);
+
+	// The menu's actions have run by now. Forget the row, or a later Ctrl+H in the tree
+	// would act on it instead of on the selection.
+	m_contextMenuIndex = QPersistentModelIndex();
 }
 
 void PrimitivesView::contextMenuEvent(QContextMenuEvent *event)
@@ -517,9 +779,22 @@ void PrimitivesView::contextMenuEvent(QContextMenuEvent *event)
 	QWidget::contextMenuEvent(event);
 	QModelIndexList indexList = selectionModel()->selectedRows();
 
-	// Several rows selected: no menu, every entry acts on a single primitive.
+	// Several rows selected: only what works on all of them at once.
 	if (indexList.size() == 1)
 		showContextMenu(indexList.first(), event->globalPos());
+	else if (indexList.size() > 1)
+	{
+		m_contextMenuIndex = QPersistentModelIndex();
+		QMenu menu(this);
+		menu.addAction(m_positionAction);
+		menu.addSeparator();
+		menu.addAction(m_hideAction);
+		menu.addAction(m_showAction);
+		menu.addAction(m_hideWithChildrenAction);
+		menu.addAction(m_showWithChildrenAction);
+		menu.addAction(m_showAllAction);
+		menu.exec(event->globalPos());
+	}
 
 	event->accept();
 }
@@ -541,6 +816,9 @@ void PrimitivesView::selectChildren(const QModelIndex &parent, QItemSelection &i
 
 void PrimitivesView::fillMenu_WorldEdit(QMenu *menu)
 {
+	QAction *closeAction = menu->addAction(tr("Close World"));
+	connect(closeAction, SIGNAL(triggered()), this, SIGNAL(closeWorldRequested()));
+	menu->addAction(m_showAllAction);
 	//menu->addAction(m_unloadAction);
 	//menu->addAction(m_saveAction);
 	//menu->addAction(m_saveAsAction);
@@ -565,9 +843,6 @@ void PrimitivesView::fillMenu_Landscape(QMenu *menu, const QModelIndex &index)
 	}
 	menu->addSeparator();
 	menu->addAction(m_unloadAction);
-	menu->addSeparator();
-	menu->addAction(m_showAction);
-	menu->addAction(m_hideAction);
 }
 
 void PrimitivesView::fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &index)
@@ -586,6 +861,7 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 	if (!sceneRectOfSubtree(index).isNull())
 	{
 		menu->addAction(m_zoomToAction);
+		menu->addAction(m_positionAction);
 		menu->addSeparator();
 	}
 
@@ -593,8 +869,7 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 	menu->addAction(m_selectChildrenAction);
 	menu->addAction(m_helpAction);
 	menu->addSeparator();
-	menu->addAction(m_showAction);
-	menu->addAction(m_hideAction);
+	addHideActions(menu, index);
 
 	QSignalMapper *addSignalMapper = new QSignalMapper(menu);
 	QSignalMapper *generateSignalMapper = new QSignalMapper(menu);

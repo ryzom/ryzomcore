@@ -186,7 +186,7 @@ int main(int argc, char **argv)
 	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
 	                                    QLatin1String("RyzomCore"), QLatin1String(appNameC));
 
-	// Aktivierung per Einfach- oder Doppelklick (siehe ActivationStyle oben)
+	// Activation by single or double click (see ActivationStyle above)
 	app.setStyle(new ActivationStyle(settings->value("MainWindow/SingleClickActivation", false).toBool()));
 
 	bool firstRun = settings->value( "FirstRun", true ).toBool();

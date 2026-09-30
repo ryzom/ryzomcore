@@ -12,7 +12,13 @@ IF(WITH_GUI)
   ADD_SUBDIRECTORY(gui_editor)
 ENDIF()
 
-ADD_SUBDIRECTORY(translation_manager)
+# translation_manager uploads translations through QFtp, which Qt 5 dropped from
+# QtNetwork (only the separate qtftp add-on has it, and no distribution ships that).
+IF(WITH_QT5)
+  MESSAGE(STATUS "studio: translation_manager plugin skipped - it needs QFtp, which Qt 5 no longer has")
+ELSE()
+  ADD_SUBDIRECTORY(translation_manager)
+ENDIF()
 ADD_SUBDIRECTORY(tile_editor)
 ADD_SUBDIRECTORY(bnp_manager)
 # Note: Temporarily disabled until development continues.

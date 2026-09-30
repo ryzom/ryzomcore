@@ -21,9 +21,14 @@
 #include "world_editor_window.h"
 
 #include <QtCore/QDir>
+#include <QtCore/QDateTime>
 #include <QtCore/QFileInfo>
 #include <QtWidgets/QDockWidget>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QStyle>
+#include <QtWidgets/QGraphicsPathItem>
+#include <QtGui/QClipboard>
+#include <QtGui/QPainterPath>
 #include <QtWidgets/QToolBar>
 #include "world_editor_constants.h"
 #include "primitives_model.h"
@@ -32,6 +37,8 @@
 #include "world_editor_actions.h"
 #include "world_editor_scene_item.h"
 #include "pacs_overlay.h"
+#include "navigation_tools.h"
+#include "ai_map_overlay.h"
 #include "primitive_item.h"
 #include "project_settings_dialog.h"
 
@@ -70,6 +77,11 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	  m_lastUndoIndex(0),
 	  m_lastUndoCount(0),
 	  m_visiblePacsAction(0),
+	  m_findDialog(0),
+	  m_visibleAiMapAction(0),
+	  m_aiMapLegendAction(0),
+	  m_aiMapOverlay(0),
+	  m_gotoMarker(0),
 	  m_pacsLegendAction(0),
 	  m_pacsOverlay(0)
 {
@@ -88,6 +100,10 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_pacsOverlay = new PacsOverlay(Utils::ligoConfig()->CellSize);
 	m_pacsOverlay->setVisible(false);
 	m_worldEditorScene->addItem(m_pacsOverlay);
+
+	m_aiMapOverlay = new AiMapOverlay(Utils::ligoConfig()->CellSize);
+	m_aiMapOverlay->setVisible(false);
+	m_worldEditorScene->addItem(m_aiMapOverlay);
 	m_ui.graphicsView->setScene(m_worldEditorScene);
 	m_ui.graphicsView->setVisibleText(false);
 
@@ -162,6 +178,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	connect(m_ui.visibleGridPointsAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleGridPoints(bool)));
 
 	connect(m_ui.treePrimitivesView, SIGNAL(landscapeLoaded()), this, SLOT(updatePacs()));
+	connect(m_ui.treePrimitivesView, SIGNAL(landscapeLoaded()), this, SLOT(updateAiMap()));
 
 	connect(m_ui.treePrimitivesView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 			this, SLOT(updateSelection(QItemSelection, QItemSelection)));
@@ -172,6 +189,11 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	connect(m_worldEditorScene, SIGNAL(contextMenuRequested(QGraphicsItem *, QPoint)),
 			this, SLOT(showSceneContextMenu(QGraphicsItem *, QPoint)));
 
+	connect(m_ui.treePrimitivesView, SIGNAL(closeWorldRequested()), this, SLOT(closeWorldEditFile()));
+	connect(m_ui.treePrimitivesView, SIGNAL(positionRequested(QModelIndexList)),
+			this, SLOT(showPositionDialog(QModelIndexList)));
+	connect(m_worldEditorScene, SIGNAL(emptyContextMenuRequested(QPointF, QPoint)),
+			this, SLOT(showMapContextMenu(QPointF, QPoint)));
 	connect(m_ui.treePrimitivesView, SIGNAL(zoomToRectRequested(QRectF)),
 			this, SLOT(zoomToRect(QRectF)));
 
@@ -238,9 +260,9 @@ void WorldEditorWindow::open()
 
 void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 {
-	if (m_primitivesModel->isWorldEditNodeLoaded())
-		return;
-
+	// There used to be an early return here whenever a world was loaded - a new empty
+	// one included - so opening a project silently did nothing. checkCurrentWorld()
+	// below asks the user and closes the current world instead.
 	Utils::WorldEditList worldEditList;
 	if (!Utils::loadWorldEditFile(fileName.toUtf8().constData(), worldEditList))
 	{
@@ -312,6 +334,7 @@ void WorldEditorWindow::loadWorldEditFile(const QString &fileName)
 
 	focusOnLandscape();
 	updatePacs();
+	updateAiMap();
 }
 
 bool WorldEditorWindow::checkCurrentWorld()
@@ -331,6 +354,26 @@ bool WorldEditorWindow::checkCurrentWorld()
 	if (answer != QMessageBox::Yes)
 		return false;
 
+	unloadWorld();
+	return true;
+}
+
+void WorldEditorWindow::unloadWorld()
+{
+	m_worldEditorScene->setEnabledEditPoints(false);
+	m_ui.treePrimitivesView->selectionModel()->clearSelection();
+
+	// Take the primitives off the map first. Deleting the tree alone left them drawn,
+	// still pointing at the deleted nodes.
+	const QModelIndex worldEdit = m_primitivesModel->index(0, 0);
+	for (int row = 0; worldEdit.isValid() && row < m_primitivesModel->rowCount(worldEdit); ++row)
+	{
+		const QModelIndex index = m_primitivesModel->index(row, 0, worldEdit);
+		Node *node = static_cast<Node *>(index.internalPointer());
+		if ((node != 0) && (node->type() == Node::RootPrimitiveNodeType))
+			removeGraphicsItems(index, m_primitivesModel, m_worldEditorScene);
+	}
+
 	// Release the loaded zone regions, otherwise they stay behind in the view. By id:
 	// deleting "region 0" until none are left never ended once id 0 was gone.
 	Q_FOREACH (int id, m_zoneBuilderBase->zoneRegionIds())
@@ -338,10 +381,24 @@ bool WorldEditorWindow::checkCurrentWorld()
 
 	m_undoStack->clear();
 	m_primitivesModel->deleteWorldEditNode();
+	m_history->setProjectFile(QString());
 	m_dataDir.clear();
 	m_context.clear();
 	m_pacsOverlay->clear();
-	return true;
+	m_aiMapOverlay->clear();
+}
+
+void WorldEditorWindow::closeWorldEditFile()
+{
+	if (!m_primitivesModel->isWorldEditNodeLoaded())
+		return;
+
+	const QMessageBox::StandardButton answer = QMessageBox::question(this,
+			tr("Close world"),
+			tr("Close the current world? Unsaved changes are lost."),
+			QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+	if (answer == QMessageBox::Yes)
+		unloadWorld();
 }
 
 void WorldEditorWindow::newWorldEditFile()
@@ -440,7 +497,12 @@ void WorldEditorWindow::setMode(int value)
 
 void WorldEditorWindow::updateStatusBar()
 {
-	m_statusInfo->setText(m_worldEditorScene->zoneNameFromMousePos());
+	// Zone and world position under the mouse, in the coordinates the .primitive files
+	// and the game use. Right click on an empty spot copies them.
+	const QPointF world = Navigation::sceneToWorld(m_worldEditorScene->lastMouseScenePos());
+	const QString zone = m_worldEditorScene->zoneNameFromMousePos().section(' ', 0, 0, QString::SectionSkipEmpty);
+	m_statusInfo->setText(tr("Zone %1    X %2    Y %3  ")
+						  .arg(zone).arg(world.x(), 0, 'f', 2).arg(world.y(), 0, 'f', 2));
 }
 
 void WorldEditorWindow::updateSelection(const QItemSelection &selected, const QItemSelection &deselected)
@@ -631,6 +693,13 @@ void WorldEditorWindow::createToolBars()
 	connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveWorldEditFileAs()));
 	m_ui.fileToolBar->addAction(m_saveAsAction);
 
+	// There was no way to get rid of a world once created or loaded.
+	m_closeWorldAction = new QAction(tr("&Close World"), this);
+	m_closeWorldAction->setIcon(style()->standardIcon(QStyle::SP_DialogCloseButton));
+	m_closeWorldAction->setToolTip(tr("Close the current world"));
+	connect(m_closeWorldAction, SIGNAL(triggered()), this, SLOT(closeWorldEditFile()));
+	m_ui.fileToolBar->addAction(m_closeWorldAction);
+
 	// The collision footprints are useful when placing things and in the way when reading
 	// the map, so they get a switch of their own next to the other show/hide toggles.
 	m_visibleCollisionsAction = new QAction(tr("S/H Collisions"), this);
@@ -648,6 +717,37 @@ void WorldEditorWindow::createToolBars()
 	m_ui.shToolBar->addAction(m_visiblePacsAction);
 	m_pacsLegendAction = m_ui.shToolBar->addWidget(createPacsLegend());
 	m_pacsLegendAction->setVisible(false);
+
+	// The collision map of the MFC editor ("View Collisions"): where the AI has support.
+	m_visibleAiMapAction = new QAction(tr("S/H AI Map"), this);
+	m_visibleAiMapAction->setToolTip(tr("Show or hide where the AI service can move mobs and NPCs\n"
+										"(the collision map, from <continent>_0.cwmap2)"));
+	m_visibleAiMapAction->setCheckable(true);
+	connect(m_visibleAiMapAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleAiMap(bool)));
+	m_ui.shToolBar->addAction(m_visibleAiMapAction);
+	m_aiMapLegendAction = m_ui.shToolBar->addWidget(createAiMapLegend());
+	m_aiMapLegendAction->setVisible(false);
+
+	m_ui.fileToolBar->addSeparator();
+
+	// Find primitives and jump to coordinates. Shortcuts work anywhere in this window.
+	m_findAction = new QAction(tr("Find..."), this);
+	m_findAction->setIcon(style()->standardIcon(QStyle::SP_FileDialogContentsView));
+	m_findAction->setShortcut(QKeySequence::Find);
+	m_findAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	m_findAction->setToolTip(tr("Find primitives by name, class or property value (Ctrl+F)"));
+	connect(m_findAction, SIGNAL(triggered()), this, SLOT(showFindDialog()));
+	addAction(m_findAction);
+	m_ui.fileToolBar->addAction(m_findAction);
+
+	m_gotoAction = new QAction(tr("Go to..."), this);
+	m_gotoAction->setIcon(style()->standardIcon(QStyle::SP_ArrowRight));
+	m_gotoAction->setShortcut(QKeySequence(tr("Ctrl+G")));
+	m_gotoAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	m_gotoAction->setToolTip(tr("Go to a world position X Y (Ctrl+G)"));
+	connect(m_gotoAction, SIGNAL(triggered()), this, SLOT(showGotoDialog()));
+	addAction(m_gotoAction);
+	m_ui.fileToolBar->addAction(m_gotoAction);
 
 	m_ui.fileToolBar->addSeparator();
 
@@ -698,6 +798,7 @@ void WorldEditorWindow::readSettings()
 	restoreSwitch(m_ui.visibleGridAction, Constants::VISIBLE_GRID, true);
 	restoreSwitch(m_ui.visibleGridPointsAction, Constants::VISIBLE_GRID_POINTS, false);
 	restoreSwitch(m_visiblePacsAction, Constants::VISIBLE_PACS, false);
+	restoreSwitch(m_visibleAiMapAction, Constants::VISIBLE_AI_MAP, false);
 
 	// Use OpenGL graphics system instead raster graphics system
 	if (settings->value(Constants::WORLD_EDITOR_USE_OPENGL, true).toBool())
@@ -805,9 +906,9 @@ void WorldEditorWindow::updatePacs()
 								 .arg(m_pacsOverlay->edgeCount()).arg(dir), 5000);
 }
 
-QString WorldEditorWindow::pacsDirectory() const
+QStringList WorldEditorWindow::continentDirectories() const
 {
-	// Continent directories to take the PACS from, in order of preference.
+	// Continent directories of what is open, in order of preference.
 	QStringList continents;
 
 	// The landscape that is on screen comes first. A .land opened on its own leaves the
@@ -828,6 +929,12 @@ QString WorldEditorWindow::pacsDirectory() const
 	const QString dataDir = m_zoneBuilderBase->dataPath();
 	if (!dataDir.isEmpty())
 		continents << dataDir;
+	return continents;
+}
+
+QString WorldEditorWindow::pacsDirectory() const
+{
+	const QStringList continents = continentDirectories();
 
 	// The pacs/ directories next to the landscapes are whatever was copied there once,
 	// and several no longer match what the game ships (continents/nexus/pacs is neither
@@ -853,6 +960,115 @@ QString WorldEditorWindow::pacsDirectory() const
 			return QDir(local).absolutePath();
 	}
 	return QString();
+}
+
+QString WorldEditorWindow::aiMapFile() const
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	const QString root = settings->value(Constants::AI_MAP_ROOT).toString();
+	settings->endGroup();
+	if (root.isEmpty())
+		return QString();
+
+	// Only the _0 map: it is the one the AI service loads (world_container.cpp); _1 and
+	// _2 are for bigger creatures.
+	Q_FOREACH (const QString &continent, continentDirectories())
+	{
+		const QString name = QDir(continent).dirName();
+		const QString file = name + "_0.cwmap2";
+		const QStringList candidates = QStringList()
+				<< QDir(root).filePath(name + "/ai_wmap/" + file)
+				<< QDir(root).filePath(name + "/" + file)
+				<< QDir(root).filePath(file);
+		Q_FOREACH (const QString &candidate, candidates)
+		{
+			if (QFileInfo(candidate).isFile())
+				return QFileInfo(candidate).absoluteFilePath();
+		}
+	}
+	return QString();
+}
+
+void WorldEditorWindow::setVisibleAiMap(bool visible)
+{
+	m_aiMapOverlay->setVisible(visible);
+	m_aiMapLegendAction->setVisible(visible);
+	if (visible)
+		updateAiMap();
+}
+
+void WorldEditorWindow::updateAiMap()
+{
+	const QString file = aiMapFile();
+	if (file == m_aiMapOverlay->fileName())
+		return;
+
+	if (!m_aiMapOverlay->isVisible())
+	{
+		m_aiMapOverlay->clear();
+		return;
+	}
+
+	if (file.isEmpty())
+	{
+		m_aiMapOverlay->clear();
+		const QStringList continents = continentDirectories();
+		statusBar()->showMessage(tr("No AI map (%1_0.cwmap2) below WorldEditorAiMapRoot")
+								 .arg(continents.isEmpty() ? QString("<continent>") : QDir(continents.first()).dirName()), 8000);
+		return;
+	}
+
+	statusBar()->showMessage(tr("Loading AI map %1 ...").arg(file));
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	const bool loaded = m_aiMapOverlay->load(file);
+	QApplication::restoreOverrideCursor();
+
+	if (!loaded)
+		statusBar()->showMessage(tr("Could not read the AI map %1").arg(file), 8000);
+	else
+		statusBar()->showMessage(tr("AI map: %1 km2 with AI support, from %2 (%3)")
+								 .arg(m_aiMapOverlay->accessibleArea() / 1.0e6, 0, 'f', 2)
+								 .arg(file)
+								 .arg(QFileInfo(file).lastModified().toString("yyyy-MM-dd")), 8000);
+}
+
+QWidget *WorldEditorWindow::createAiMapLegend()
+{
+	struct Entry
+	{
+		AiMapOverlay::CellKind kind;
+		const char *label;
+		const char *explanation;
+	};
+	static const Entry entries[] =
+	{
+		{ AiMapOverlay::AiGround, QT_TR_NOOP("AI ground"),
+		  QT_TR_NOOP("The AI service can move mobs and NPCs here.\n"
+					 "Walkable ground without this colour has no AI support.") },
+		{ AiMapOverlay::AiLayered, QT_TR_NOOP("Several layers"),
+		  QT_TR_NOOP("Two or three walkable layers on top of each other - a bridge over\n"
+					 "ground, a cave under it. The AI can use each of them.") },
+		{ AiMapOverlay::AiBorder, QT_TR_NOOP("AI border"),
+		  QT_TR_NOOP("Edge of the AI ground: from here the AI cannot go on in at least\n"
+					 "one direction.") }
+	};
+
+	QWidget *legend = new QWidget(this);
+	QHBoxLayout *layout = new QHBoxLayout(legend);
+	layout->setContentsMargins(6, 0, 6, 0);
+	layout->setSpacing(10);
+	for (size_t i = 0; i < sizeof(entries) / sizeof(entries[0]); ++i)
+	{
+		QColor color = AiMapOverlay::kindColor(entries[i].kind);
+		color.setAlpha(255);
+		QLabel *label = new QLabel(QString("<span style=\"color:%1; font-size:large;\">&#9632;</span> %2")
+								   .arg(color.name(), tr(entries[i].label)), legend);
+		label->setToolTip(tr(entries[i].explanation));
+		layout->addWidget(label);
+	}
+	legend->setToolTip(tr("Where the AI service can move mobs and NPCs, from <continent>_0.cwmap2"));
+	return legend;
 }
 
 void WorldEditorWindow::setVisibleLand(bool visible)
@@ -948,6 +1164,162 @@ void WorldEditorWindow::recordUndoChange(int index)
 
 	m_lastUndoIndex = index;
 	m_lastUndoCount = count;
+}
+
+void WorldEditorWindow::showFindDialog()
+{
+	if (m_findDialog == 0)
+	{
+		m_findDialog = new FindPrimitiveDialog(m_primitivesModel, this);
+		connect(m_findDialog, SIGNAL(primitiveActivated(QModelIndex)), this, SLOT(focusPrimitive(QModelIndex)));
+	}
+	m_findDialog->activate();
+}
+
+void WorldEditorWindow::focusPrimitive(const QModelIndex &index)
+{
+	m_ui.treePrimitivesView->focusIndex(index);
+}
+
+void WorldEditorWindow::showGotoDialog()
+{
+	showGotoDialogAt(Navigation::sceneToWorld(m_ui.graphicsView->mapToScene(
+			m_ui.graphicsView->viewport()->rect().center())));
+}
+
+void WorldEditorWindow::showGotoDialogAt(const QPointF &world)
+{
+	PositionDialog dialog(PositionDialog::GotoMode, world, QString(), this);
+	if (dialog.exec() == QDialog::Accepted)
+		gotoWorldPosition(dialog.position(), dialog.zoomIn());
+}
+
+void WorldEditorWindow::gotoWorldPosition(const QPointF &world, bool zoomIn)
+{
+	const QPointF scenePos = Navigation::worldToScene(world);
+	if (zoomIn)
+		zoomToRect(QRectF(scenePos - QPointF(60, 60), QSizeF(120, 120)));
+	else
+		m_ui.graphicsView->centerOn(scenePos);
+
+	// Mark the spot for a moment, or the eye has to search the centre of the view.
+	if (m_gotoMarker == 0)
+	{
+		QPainterPath cross;
+		cross.addEllipse(QPointF(0, 0), 10, 10);
+		cross.moveTo(-18, 0);
+		cross.lineTo(-4, 0);
+		cross.moveTo(4, 0);
+		cross.lineTo(18, 0);
+		cross.moveTo(0, -18);
+		cross.lineTo(0, -4);
+		cross.moveTo(0, 4);
+		cross.lineTo(0, 18);
+		QGraphicsPathItem *marker = new QGraphicsPathItem(cross);
+		QPen pen(QColor(255, 60, 200), 2);
+		pen.setCosmetic(true);
+		marker->setPen(pen);
+		marker->setFlag(QGraphicsItem::ItemIgnoresTransformations, true);
+		marker->setZValue(1000);
+		marker->setAcceptedMouseButtons(Qt::NoButton);
+		m_worldEditorScene->addItem(marker);
+		m_gotoMarker = marker;
+	}
+	m_gotoMarker->setPos(scenePos);
+	m_gotoMarker->setVisible(true);
+	QTimer::singleShot(4000, this, SLOT(hideGotoMarker()));
+}
+
+void WorldEditorWindow::hideGotoMarker()
+{
+	if (m_gotoMarker != 0)
+		m_gotoMarker->setVisible(false);
+}
+
+namespace
+{
+void collectWorldItems(PrimitivesTreeModel *model, const QModelIndex &index, QList<QGraphicsItem *> &items)
+{
+	Node *node = static_cast<Node *>(index.internalPointer());
+	if (node == 0)
+		return;
+	AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D));
+	if ((item != 0) && !items.contains(item))
+		items << item;
+	for (int i = 0; i < model->rowCount(index); ++i)
+		collectWorldItems(model, model->index(i, 0, index), items);
+}
+}
+
+void WorldEditorWindow::showPositionDialog(const QModelIndexList &indexes)
+{
+	// Everything on the map below the picked rows. A group has no position of its own;
+	// its position is the centre of what it holds, and setting it moves all of that.
+	QList<QGraphicsItem *> items;
+	QStringList names;
+	Q_FOREACH (const QModelIndex &index, indexes)
+	{
+		collectWorldItems(m_primitivesModel, index, items);
+		names << index.data(Qt::DisplayRole).toString();
+	}
+	if (items.isEmpty())
+		return;
+
+	QRectF bounds;
+	Q_FOREACH (QGraphicsItem *item, items)
+	{
+		AbstractWorldItem *worldItem = static_cast<AbstractWorldItem *>(item);
+		const QRectF rect = worldItem->worldRect().translated(item->scenePos());
+		bounds = bounds.isNull() ? rect : bounds.united(rect);
+	}
+	// A single point is exactly where it is; a rectangle of no size has no centre to speak of.
+	const QPointF centre = ((items.size() == 1) && (bounds.width() < 0.01) && (bounds.height() < 0.01))
+						   ? items.first()->scenePos() : bounds.center();
+	const QPointF world = Navigation::sceneToWorld(centre);
+
+	QString subject = names.join(", ");
+	if (subject.length() > 120)
+		subject = subject.left(117) + "...";
+	if (items.size() > 1)
+		subject = tr("%1\nCentre of %n primitive(s) on the map.", "", items.size()).arg(subject);
+
+	PositionDialog dialog(PositionDialog::MoveMode, world, subject, this);
+	if (dialog.exec() != QDialog::Accepted)
+		return;
+
+	const QPointF target = dialog.position();
+	if ((qAbs(target.x() - world.x()) < 0.005) && (qAbs(target.y() - world.y()) < 0.005))
+		return;
+
+	// The move command writes the item positions back into the primitives on its first
+	// run - the way a drag on the map works, where the items are already moved.
+	m_ui.pointsAction->setChecked(false);
+	m_worldEditorScene->setEnabledEditPoints(false);
+	const QPointF offset = Navigation::worldToScene(target) - centre;
+	Q_FOREACH (QGraphicsItem *item, items)
+		item->moveBy(offset.x(), offset.y());
+	m_undoStack->push(new MoveWorldItemsCommand(items, offset, m_worldEditorScene, m_primitivesModel));
+}
+
+void WorldEditorWindow::showMapContextMenu(const QPointF &scenePos, const QPoint &globalPos)
+{
+	const QPointF world = Navigation::sceneToWorld(scenePos);
+
+	QMenu menu(this);
+	QAction *copy = menu.addAction(tr("Copy Position  %1").arg(Navigation::formatWorldPosition(world)));
+	QAction *gotoAction = menu.addAction(tr("Go to Position..."));
+	QAction *find = menu.addAction(tr("Find Primitives..."));
+
+	QAction *picked = menu.exec(globalPos);
+	if (picked == copy)
+	{
+		QApplication::clipboard()->setText(Navigation::formatWorldPosition(world));
+		statusBar()->showMessage(tr("Copied %1").arg(Navigation::formatWorldPosition(world)), 3000);
+	}
+	else if (picked == gotoAction)
+		showGotoDialogAt(world);
+	else if (picked == find)
+		showFindDialog();
 }
 
 void WorldEditorWindow::zoomToRect(const QRectF &sceneRect)
@@ -1100,6 +1472,7 @@ void WorldEditorWindow::writeSettings()
 	settings->setValue(Constants::VISIBLE_GRID, m_ui.visibleGridAction->isChecked());
 	settings->setValue(Constants::VISIBLE_GRID_POINTS, m_ui.visibleGridPointsAction->isChecked());
 	settings->setValue(Constants::VISIBLE_PACS, m_visiblePacsAction->isChecked());
+	settings->setValue(Constants::VISIBLE_AI_MAP, m_visibleAiMapAction->isChecked());
 	settings->endGroup();
 	settings->sync();
 }

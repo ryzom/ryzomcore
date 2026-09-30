@@ -62,7 +62,7 @@ std::string getLastError();
 
 // Load *.worldedit file and return list primitives and landscapes.
 // Translates a path from a .worldedit file that was written on Windows:
-// Backslashes werden zu Schraegstrichen, und Laufwerksbuchstaben werden anhand der
+// backslashes become slashes, and drive letters are mapped according to the
 // setting [WorldEditor] WorldEditorPathMap (entries of the form "H:/foo=/mnt/foo").
 // On Windows, and for paths that already resolve, the input is returned unchanged.
 std::string translateLegacyPath(const std::string &path);

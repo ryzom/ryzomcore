@@ -79,6 +79,9 @@ public:
 	void setVisiblePathPrimitives(bool visible);
 	void setVisibleZonePrimitives(bool visible);
 
+	/// Apply the kind switch and the primitive's own hidden flag to its item.
+	void updateItemVisibility(QGraphicsItem *item);
+
 	/// Set current mode editing(select/move/rotate/scale/turn), above world items.
 	void setModeEdit(WorldEditorScene::ModeEdit mode);
 
@@ -87,6 +90,12 @@ public:
 	/// @return true if edit points mode is enabled, else false.
 	bool isEnabledEditPoints() const;
 
+	/// Where the mouse was last seen over the map, in scene coordinates.
+	QPointF lastMouseScenePos() const
+	{
+		return m_lastMouseScenePos;
+	}
+
 Q_SIGNALS:
 	/// This signal is emitted by WorldEditorScene when the selections changes.
 	/// The @selected value contains a list of all selected items.
@@ -94,6 +103,9 @@ Q_SIGNALS:
 
 	/// A right click landed on a primitive. globalPos is where the menu should open.
 	void contextMenuRequested(QGraphicsItem *item, const QPoint &globalPos);
+
+	/// A right click landed on the map where there is no primitive.
+	void emptyContextMenuRequested(const QPointF &scenePos, const QPoint &globalPos);
 
 public Q_SLOTS:
 	/// Enable/disable edit points mode (user can change shape of WorldItemZone and WorldItemPath)
@@ -136,6 +148,7 @@ private:
 	QBrush m_greenBrush, m_purpleBrush;
 
 	QPointF m_firstPick, m_scaleFactor, m_pivot, m_offset;
+	QPointF m_lastMouseScenePos;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;
 

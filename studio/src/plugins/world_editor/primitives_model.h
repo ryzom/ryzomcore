@@ -83,6 +83,11 @@ public:
 	void deleteWorldEditNode();
 	bool isWorldEditNodeLoaded() const;
 
+	/// Hide a primitive on the map, or show it again. Editor state only, like in the MFC
+	/// editor: it is not written to the file. The tree marks hidden rows.
+	void setPrimitiveHidden(const QModelIndex &index, bool hidden);
+	static bool isHiddenNode(const Node *node);
+
 	/// Add new landscape node in tree model.
 	Path createLandscapeNode(const QString &fileName, int id, int pos = AtTheEnd);
 

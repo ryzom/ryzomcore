@@ -88,6 +88,10 @@ public:
 	}
 
 	virtual void open();
+	virtual void newDocument();
+	virtual void save();
+	virtual void saveAs();
+	virtual void close();
 
 	virtual QUndoStack *undoStack();
 

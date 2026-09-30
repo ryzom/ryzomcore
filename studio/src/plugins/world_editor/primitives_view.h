@@ -58,10 +58,23 @@ Q_SIGNALS:
 	/// Emitted after one or more .land files finished loading, so the view can show them.
 	void landscapeLoaded();
 
+	/// "Close World" was picked on the world row.
+	void closeWorldRequested();
+
+	/// "Position..." was picked for these rows.
+	void positionRequested(const QModelIndexList &indexes);
+
 	/// Move the map view onto this area of the scene, picked through "Zoom in".
 	void zoomToRectRequested(const QRectF &sceneRect);
 
 public:
+	/// Hide this one row on the map, or show it again - the eye in the tree. With
+	/// children (Shift+click on the eye), the whole branch goes the same way.
+	void toggleHidden(const QModelIndex &index, bool withChildren = false);
+
+	/// Select the row, scroll it into view and move the map onto it.
+	void focusIndex(const QModelIndex &index);
+
 	explicit PrimitivesView(QWidget *parent = 0);
 	~PrimitivesView();
 
@@ -95,6 +108,10 @@ private Q_SLOTS:
 	void unload();
 	void showPrimitive();
 	void hidePrimitive();
+	void showAllPrimitives();
+	void showPrimitiveWithChildren();
+	void hidePrimitiveWithChildren();
+	void requestPosition();
 	void addNewPrimitiveByClass(int value);
 	void generatePrimitives(int value);
 	void openItem(int value);
@@ -128,6 +145,17 @@ private:
 	QAction *m_helpAction;
 	QAction *m_showAction;
 	QAction *m_hideAction;
+	QAction *m_showAllAction;
+	QAction *m_hideWithChildrenAction;
+	QAction *m_showWithChildrenAction;
+	QAction *m_positionAction;
+
+	/// Rows Hide/Show act on, see hideTargets() in the source.
+	QModelIndexList hideTargets() const;
+	void setHidden(const QModelIndex &index, bool hidden, QItemSelection &deselect, bool withChildren);
+	void setHiddenOnTargets(bool hidden, bool withChildren);
+	void showAllPrimitives(const QModelIndex &parent);
+	void addHideActions(QMenu *menu, const QModelIndex &index);
 	QAction *m_showInTreeAction;
 	QAction *m_zoomToAction;
 

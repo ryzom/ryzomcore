@@ -134,6 +134,28 @@ void WorldEditorContext::open()
 	m_worldEditorWindow->open();
 }
 
+// File > New/Save/Save As/Close of the main window call these. They were not
+// implemented, so the menu entries did nothing in the world editor.
+void WorldEditorContext::newDocument()
+{
+	m_worldEditorWindow->newWorldEditFile();
+}
+
+void WorldEditorContext::save()
+{
+	m_worldEditorWindow->saveWorldEditFile();
+}
+
+void WorldEditorContext::saveAs()
+{
+	m_worldEditorWindow->saveWorldEditFileAs();
+}
+
+void WorldEditorContext::close()
+{
+	m_worldEditorWindow->closeWorldEditFile();
+}
+
 QWidget *WorldEditorContext::widget()
 {
 	return m_worldEditorWindow;

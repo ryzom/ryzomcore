@@ -83,6 +83,11 @@ const char *const VISIBLE_PACS = "WorldEditorVisiblePacs";
 /// the continent. Empty: always use the one next to the landscape.
 const char *const PACS_ROOT = "WorldEditorPacsRoot";
 
+/// Where the AI world maps (<continent>_0.cwmap2) are looked for: <root>/<continent>/ai_wmap/,
+/// <root>/<continent>/ or <root>/ itself - the pipeline export layout and a flat copy both work.
+const char *const AI_MAP_ROOT = "WorldEditorAiMapRoot";
+const char *const VISIBLE_AI_MAP = "WorldEditorVisibleAiMap";
+
 //resources
 const char *const ICON_WORLD_EDITOR = ":/icons/ic_nel_world_editor.png";
 

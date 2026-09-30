@@ -266,7 +266,8 @@ PrimitiveNode::PrimitiveNode(NLLIGO::IPrimitive *primitive)
 void PrimitiveNode::updateIcon()
 {
 	const bool hidden = !data(Constants::PRIMITIVE_IS_VISIBLE).toBool();
-	setData(Qt::DecorationRole, PrimitiveIcons::instance().icon(m_primitive, hidden));
+	const QIcon icon = PrimitiveIcons::instance().icon(m_primitive);
+	setData(Qt::DecorationRole, hidden ? PrimitiveIcons::hiddenIcon(icon) : icon);
 }
 
 PrimitiveNode::~PrimitiveNode()

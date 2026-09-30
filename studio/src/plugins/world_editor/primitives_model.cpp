@@ -70,10 +70,44 @@ QVariant PrimitivesTreeModel::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 		return item->data(Qt::DecorationRole);
 	case Qt::ToolTipRole:
+		if (isHiddenNode(item))
+			return QString("%1 - %2").arg(item->data(Qt::ToolTipRole).toString(), tr("hidden on the map"));
 		return item->data(Qt::ToolTipRole);
+	// Hidden primitives stay in the tree, greyed out and in italics next to the hidden
+	// icon, so it is plain which layers were put out of the way.
+	case Qt::FontRole:
+		if (isHiddenNode(item))
+		{
+			QFont font;
+			font.setItalic(true);
+			return font;
+		}
+		return QVariant();
+	case Qt::ForegroundRole:
+		if (isHiddenNode(item))
+			return QBrush(QColor(128, 128, 128));
+		return QVariant();
 	default:
 		return QVariant();
 	}
+}
+
+bool PrimitivesTreeModel::isHiddenNode(const Node *node)
+{
+	if ((node->type() != Node::PrimitiveNodeType) && (node->type() != Node::RootPrimitiveNodeType))
+		return false;
+	return !node->data(Constants::PRIMITIVE_IS_VISIBLE).toBool();
+}
+
+void PrimitivesTreeModel::setPrimitiveHidden(const QModelIndex &index, bool hidden)
+{
+	Node *node = static_cast<Node *>(index.internalPointer());
+	if ((node == 0) || ((node->type() != Node::PrimitiveNodeType) && (node->type() != Node::RootPrimitiveNodeType)))
+		return;
+
+	node->setData(Constants::PRIMITIVE_IS_VISIBLE, !hidden);
+	static_cast<PrimitiveNode *>(node)->updateIcon();
+	Q_EMIT dataChanged(index, index);
 }
 
 Qt::ItemFlags PrimitivesTreeModel::flags(const QModelIndex &index) const

@@ -43,6 +43,8 @@ namespace WorldEditor
 class PrimitivesTreeModel;
 class WorldEditorScene;
 class PacsOverlay;
+class FindPrimitiveDialog;
+class AiMapOverlay;
 
 class WorldEditorWindow: public QMainWindow
 {
@@ -60,6 +62,12 @@ Q_SIGNALS:
 public Q_SLOTS:
 	void open();
 
+	/// Close the current world after asking; File > Close and the tool bar end up here.
+	void closeWorldEditFile();
+	void newWorldEditFile();
+	void saveWorldEditFile();
+	void saveWorldEditFileAs();
+
 private Q_SLOTS:
 	/// Move the view onto the loaded landscape, so it is not left on empty grid.
 	void focusOnLandscape();
@@ -72,6 +80,10 @@ private Q_SLOTS:
 
 	/// Load the PACS borders that belong to what is open now, if they are shown.
 	void updatePacs();
+
+	/// Show or hide the AI map; load the one of the open continent if needed.
+	void setVisibleAiMap(bool visible);
+	void updateAiMap();
 
 	/// The show/hide switches in the tool bar. Every one of these was present in the
 	/// user interface but connected to nothing.
@@ -88,6 +100,14 @@ private Q_SLOTS:
 	/// Move the view onto an area of the map, picked in the tree.
 	void zoomToRect(const QRectF &sceneRect);
 
+	/// Find primitives, go to a position, read or set the position of primitives.
+	void showFindDialog();
+	void focusPrimitive(const QModelIndex &index);
+	void showGotoDialog();
+	void showPositionDialog(const QModelIndexList &indexes);
+	void showMapContextMenu(const QPointF &scenePos, const QPoint &globalPos);
+	void hideGotoMarker();
+
 	/// Write what the undo stack just did into the project's journal.
 	void recordUndoChange(int index);
 
@@ -96,9 +116,6 @@ private Q_SLOTS:
 
 	void updatePanelsMenu();
 
-	void newWorldEditFile();
-	void saveWorldEditFile();
-	void saveWorldEditFileAs();
 	void openProjectSettings();
 
 	void setMode(int value);
@@ -160,6 +177,26 @@ private:
 
 	void loadWorldEditFile(const QString &fileName);
 	bool checkCurrentWorld();
+
+	/// Remove everything of the current world: primitives on the map, zone regions,
+	/// tree, undo history. No questions asked.
+	void unloadWorld();
+	QAction *m_closeWorldAction;
+
+	void showGotoDialogAt(const QPointF &world);
+	void gotoWorldPosition(const QPointF &world, bool zoomIn);
+	QAction *m_findAction;
+	QAction *m_gotoAction;
+	FindPrimitiveDialog *m_findDialog;
+
+	/// Continent directories of what is open: the first loaded .land's, then the data directory.
+	QStringList continentDirectories() const;
+	QString aiMapFile() const;
+	QWidget *createAiMapLegend();
+	QAction *m_visibleAiMapAction;
+	QAction *m_aiMapLegendAction;
+	AiMapOverlay *m_aiMapOverlay;
+	QGraphicsItem *m_gotoMarker;
 
 	QString m_context;
 	QString m_dataDir;

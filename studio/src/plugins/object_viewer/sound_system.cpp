@@ -162,7 +162,7 @@ void CSoundSystem::play(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), true);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), true);
 		if (src)
 		{
 			// FIXME: Use relative positioning, and set pos to 0,0,0
@@ -182,7 +182,7 @@ NLSOUND::USource *CSoundSystem::create(const std::string &soundName)
 {
 	if (_AudioMixer)
 	{
-		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CSheetId(soundName, "sound"), false);
+		NLSOUND::USource *src = _AudioMixer->createSource(NLMISC::CStringMapper::map(soundName), false);
 		if (src)
 		{
 			// FIXME: Use relative positioning, and set pos to 0,0,0
