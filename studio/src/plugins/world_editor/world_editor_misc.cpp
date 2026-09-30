@@ -32,6 +32,8 @@
 // Project includes
 #include "world_editor_constants.h"
 #include "../core/icore.h"
+#include "../core/core_constants.h"
+#include "../landscape_editor/landscape_editor_constants.h"
 
 // Qt includes
 #include <QDir>
@@ -778,6 +780,48 @@ bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive)
 	return modified;
 }
 
+/// Where a dialog starts before it was ever used: the configured data path for that kind
+/// of file. Without it the dialog opens in the working directory of the process.
+static QString defaultDirectory(const char *settingsKey)
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	QString directory;
+	if (qstrcmp(settingsKey, Constants::LAST_PRIMITIVE_DIR) == 0)
+	{
+		settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+		directory = settings->value(Core::Constants::PRIMITIVES_PATH).toString();
+		settings->endGroup();
+	}
+	else if (qstrcmp(settingsKey, Constants::LAST_WORLD_EDIT_DIR) == 0)
+	{
+		settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+		const QString levelDesign = settings->value(Core::Constants::LEVELDESIGN_PATH).toString();
+		settings->endGroup();
+		if (!levelDesign.isEmpty())
+		{
+			// The .worldedit projects live in leveldesign/continents.
+			directory = QDir(levelDesign).filePath("continents");
+			if (!QDir(directory).exists())
+				directory = levelDesign;
+		}
+	}
+	else if (qstrcmp(settingsKey, Constants::LAST_LAND_DIR) == 0)
+	{
+		settings->beginGroup(LandscapeEditor::Constants::LANDSCAPE_EDITOR_SECTION);
+		const QString landscapeData =
+			settings->value(LandscapeEditor::Constants::LANDSCAPE_DATA_DIRECTORY).toString();
+		settings->endGroup();
+		// The landscape data directory is one continent; its parent holds all of them.
+		QDir dir(landscapeData);
+		if (!landscapeData.isEmpty() && dir.cdUp())
+			directory = dir.path();
+	}
+
+	if (directory.isEmpty() || !QDir(directory).exists())
+		return QString();
+	return directory;
+}
+
 QString lastDirectory(const char *settingsKey)
 {
 	QSettings *settings = Core::ICore::instance()->settings();
@@ -787,7 +831,7 @@ QString lastDirectory(const char *settingsKey)
 
 	// A directory that has gone away would drop the dialog somewhere unexpected.
 	if (directory.isEmpty() || !QDir(directory).exists())
-		return QString();
+		return defaultDirectory(settingsKey);
 
 	return directory;
 }

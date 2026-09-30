@@ -94,7 +94,8 @@ NLLIGO::CLigoConfig	*ligoConfig();
 QRectF zoneRegionSceneRect(const NLLIGO::CZoneRegion &region);
 
 /// Directory a file dialog should start in, remembered from the last time it was used.
-/// Empty when there is none yet, which makes the dialog pick its own default.
+/// Falls back to the configured data path for that kind of file, and is empty only when
+/// that is not set either, which makes the dialog pick its own default.
 QString lastDirectory(const char *settingsKey);
 
 /// Remember the directory of fileName for the next time that dialog opens.

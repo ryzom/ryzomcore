@@ -34,6 +34,7 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
+#include <QtCore/QDir>
 #include <QtCore/QSettings>
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QFileDialog>
@@ -120,8 +121,18 @@ QUndoStack *LandscapeEditorWindow::undoStack() const
 
 void LandscapeEditorWindow::open()
 {
+	// Before the first file was opened, start next to the configured landscape data
+	// directory - it is one continent, its parent holds all of them.
+	QString startDir = _lastDir;
+	if (startDir.isEmpty() && !m_zoneBuilder->dataPath().isEmpty())
+	{
+		QDir dir(m_zoneBuilder->dataPath());
+		if (dir.cdUp())
+			startDir = dir.path();
+	}
+
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-							tr("Open NeL Ligo land file"), _lastDir,
+							tr("Open NeL Ligo land file"), startDir,
 							tr("All NeL Ligo land files (*.land)"));
 
 	setCursor(Qt::WaitCursor);
