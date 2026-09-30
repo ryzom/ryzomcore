@@ -76,13 +76,8 @@ protected:
 	void showEvent( QShowEvent *evnt );
 	void resizeEvent( QResizeEvent *evnt );
 
-#if defined(NL_OS_WINDOWS)
-	bool winEvent( MSG *message, long *result );
-#elif defined(NL_OS_MAC)
-	bool macEvent( EventHandlerCallRef caller, EventRef event );
-#elif defined(NL_OS_UNIX)
-	bool x11Event( XEvent *event );
-#endif
+	// Qt5 replaced winEvent()/macEvent()/x11Event() with this single hook.
+	bool nativeEvent( const QByteArray &eventType, void *message, long *result );
 
 private:
 	NL3D::UDriver *driver;

@@ -21,7 +21,7 @@
 #include "emitter_page.h"
 
 // Qt includes
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 // NeL includes
 

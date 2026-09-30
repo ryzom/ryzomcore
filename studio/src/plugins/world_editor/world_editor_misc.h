@@ -27,6 +27,11 @@
 #include <nel/misc/vector.h>
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/primitive_class.h>
+#include <nel/ligo/zone_region.h>
+
+// Qt includes
+#include <QString>
+#include <QRectF>
 
 // STL includes
 #include <string>
@@ -56,6 +61,12 @@ uint32 getUniqueId();
 std::string getLastError();
 
 // Load *.worldedit file and return list primitives and landscapes.
+// Translates a path from a .worldedit file that was written on Windows:
+// Backslashes werden zu Schraegstrichen, und Laufwerksbuchstaben werden anhand der
+// setting [WorldEditor] WorldEditorPathMap (entries of the form "H:/foo=/mnt/foo").
+// On Windows, and for paths that already resolve, the input is returned unchanged.
+std::string translateLegacyPath(const std::string &path);
+
 bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList);
 
 // Get root primitive
@@ -77,6 +88,17 @@ bool updateDefaultValues(NLLIGO::IPrimitive *primitive);
 bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive);
 
 NLLIGO::CLigoConfig	*ligoConfig();
+
+/// Area a zone region covers in the scene. Null for a region without a single zone,
+/// such as a freshly created .land that was never filled.
+QRectF zoneRegionSceneRect(const NLLIGO::CZoneRegion &region);
+
+/// Directory a file dialog should start in, remembered from the last time it was used.
+/// Empty when there is none yet, which makes the dialog pick its own default.
+QString lastDirectory(const char *settingsKey);
+
+/// Remember the directory of fileName for the next time that dialog opens.
+void setLastDirectory(const char *settingsKey, const QString &fileName);
 
 } /* namespace Utils */
 } /* namespace WorldEditor */

@@ -22,8 +22,8 @@
 
 // Qt includes
 #include <QtGui/QPainter>
-#include <QtGui/QColorDialog>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QColorDialog>
+#include <QtWidgets/QInputDialog>
 
 // NeL includes
 #include <nel/3d/vegetable.h>

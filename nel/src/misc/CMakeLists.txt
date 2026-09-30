@@ -201,21 +201,26 @@ IF(HUNTER_ENABLED)
   FIND_PACKAGE(breakpad CONFIG REQUIRED)
   TARGET_LINK_LIBRARIES(nelmisc breakpad::libbreakpad_client)
 ELSE()
-  IF(UNIX)
-    IF(APPLE)
+  IF(UNIX AND NOT APPLE)
+    # Breakpad ist optional: ohne die Bibliothek entfaellt nur das Minidump-Schreiben.
+    # Do not pin the search paths to /usr/local; distribution packages live in /usr.
+    FIND_PATH(BREAKPAD_INCLUDE_DIR client/linux/handler/exception_handler.h
+      PATHS /usr/local/include/breakpad /usr/include/breakpad
+    )
+    FIND_LIBRARY(BREAKPAD_CLIENT_LIB breakpad_client
+      PATHS /usr/local/lib /usr/lib
+    )
+    IF(WITH_BREAKPAD AND BREAKPAD_INCLUDE_DIR AND BREAKPAD_CLIENT_LIB)
+      TARGET_COMPILE_DEFINITIONS(nelmisc PRIVATE NL_USE_BREAKPAD)
+      TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
+      TARGET_LINK_LIBRARIES(nelmisc ${BREAKPAD_CLIENT_LIB})
     ELSE()
-      FIND_PATH(BREAKPAD_INCLUDE_DIR client/linux/handler/exception_handler.h
-        PATHS /usr/local/include/breakpad
-        NO_DEFAULT_PATH
-      )
-      FIND_LIBRARY(BREAKPAD_CLIENT_LIB breakpad_client
-        PATHS /usr/local/lib
-        NO_DEFAULT_PATH
-      )
+      MESSAGE(STATUS "Breakpad disabled or not found - crash minidumps unavailable")
     ENDIF()
+  ELSEIF(NOT UNIX)
+    TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
+    TARGET_LINK_LIBRARIES(nelmisc ${BREAKPAD_CLIENT_LIB})
   ENDIF()
-  TARGET_INCLUDE_DIRECTORIES(nelmisc PRIVATE ${BREAKPAD_INCLUDE_DIR})
-  TARGET_LINK_LIBRARIES(nelmisc ${BREAKPAD_CLIENT_LIB})
 ENDIF()
 
 IF(JPEG_FOUND)

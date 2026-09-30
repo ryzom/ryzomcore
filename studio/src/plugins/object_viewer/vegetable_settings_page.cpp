@@ -25,10 +25,10 @@
 #include "modules.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QtCore/QSettings>
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QFileDialog>
 
 namespace NLQT
 {

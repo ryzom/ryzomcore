@@ -20,7 +20,7 @@
 #include "example_settings_page.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 // NeL includes
 

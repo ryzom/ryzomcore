@@ -33,10 +33,10 @@
 #include <nel/3d/ps_edit.h>
 
 // Qt includes
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMenu>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMenu>
 
 // Project includes
 #include "dup_ps.h"

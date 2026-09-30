@@ -40,8 +40,8 @@
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtGui/QPixmap>
-#include <QtGui/QUndoStack>
-#include <QtGui/QGraphicsRectItem>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QGraphicsRectItem>
 
 namespace LandscapeEditor
 {

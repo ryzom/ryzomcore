@@ -19,13 +19,15 @@
 
 // Project includes
 #include "world_editor_global.h"
+#include "sheet_collision.h"
 
 #include "../landscape_editor/landscape_scene_base.h"
 
 // NeL includes
 
 // Qt includes
-#include <QtGui/QUndoStack>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QGraphicsSceneContextMenuEvent>
 
 namespace WorldEditor
 {
@@ -58,7 +60,8 @@ public:
 
 	/// Create WorldItemPoint and add in scene.
 	AbstractWorldItem *addWorldItemPoint(const QPointF &point, const qreal angle,
-										 const qreal radius, bool showArrow);
+										 const qreal radius, bool showArrow,
+										 const CollisionShape &collision = CollisionShape());
 
 	/// Create WorldItemPath and add in scene.
 	AbstractWorldItem *addWorldItemPath(const QPolygonF &polyline, bool showArrow);
@@ -68,6 +71,13 @@ public:
 
 	/// Remove a world item from the scene.
 	void removeWorldItem(QGraphicsItem *item);
+
+	/// Show or hide one kind of primitive. The flags are kept, so primitives loaded
+	/// after a switch was flipped follow it too. A hidden primitive cannot be picked
+	/// either - that is the point of hiding it.
+	void setVisiblePointPrimitives(bool visible);
+	void setVisiblePathPrimitives(bool visible);
+	void setVisibleZonePrimitives(bool visible);
 
 	/// Set current mode editing(select/move/rotate/scale/turn), above world items.
 	void setModeEdit(WorldEditorScene::ModeEdit mode);
@@ -82,6 +92,9 @@ Q_SIGNALS:
 	/// The @selected value contains a list of all selected items.
 	void updateSelectedItems(const QList<QGraphicsItem *> &selected);
 
+	/// A right click landed on a primitive. globalPos is where the menu should open.
+	void contextMenuRequested(QGraphicsItem *item, const QPoint &globalPos);
+
 public Q_SLOTS:
 	/// Enable/disable edit points mode (user can change shape of WorldItemZone and WorldItemPath)
 	///
@@ -93,6 +106,7 @@ public Q_SLOTS:
 protected:
 	virtual void drawForeground(QPainter *painter, const QRectF &rect);
 
+	virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -124,6 +138,10 @@ private:
 	QPointF m_firstPick, m_scaleFactor, m_pivot, m_offset;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;
+
+	bool m_visiblePointPrimitives;
+	bool m_visiblePathPrimitives;
+	bool m_visibleZonePrimitives;
 
 	QList<QGraphicsItem *> m_selectedItems;
 	QList<QGraphicsItem *> m_selectedPoints;

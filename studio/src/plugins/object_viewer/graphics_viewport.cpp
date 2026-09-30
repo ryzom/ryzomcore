@@ -24,10 +24,10 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 #include <QtGui/QResizeEvent>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QColorDialog>
+#include <QtWidgets/QFileDialog>
 
 // NeL includes
 #include <nel/misc/rgba.h>

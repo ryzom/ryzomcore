@@ -16,26 +16,36 @@
 
 // Project includes
 #include "primitives_view.h"
+#include "world_editor_misc.h"
+#include "primitive_icons.h"
 #include "primitives_model.h"
 #include "world_editor_actions.h"
+#include "world_editor_scene_item.h"
 #include "world_editor_constants.h"
 
 #include "../core/core_constants.h"
 #include "../landscape_editor/landscape_editor_constants.h"
 #include "../landscape_editor/builder_zone_base.h"
+#include "../landscape_editor/zone_region_editor.h"
+#include "../core/icore.h"
 
 // NeL includes
 #include <nel/ligo/primitive.h>
 #include <nel/ligo/ligo_config.h>
 #include <nel/ligo/primitive_class.h>
 #include <nel/ligo/primitive_utils.h>
+#include <nel/misc/debug.h>
 
 // Qt includes
 #include <QContextMenuEvent>
 #include <QMessageBox>
 #include <QApplication>
-#include <QtGui/QMenu>
-#include <QtGui/QFileDialog>
+#include <QtCore/QDir>
+#include <QtCore/QFileInfo>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QStatusBar>
 
 namespace WorldEditor
 {
@@ -68,6 +78,13 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_deleteAction = new QAction("Delete", this);
 
 	m_selectChildrenAction = new QAction("Select children", this);
+
+	m_showInTreeAction = new QAction(tr("Show in Tree"), this);
+	connect(m_showInTreeAction, SIGNAL(triggered()), this, SLOT(showInTree()));
+
+	m_zoomToAction = new QAction(tr("Zoom in"), this);
+	m_zoomToAction->setToolTip(tr("Move the map view onto this primitive"));
+	connect(m_zoomToAction, SIGNAL(triggered()), this, SLOT(zoomToPrimitive()));
 
 	m_helpAction = new QAction("Help", this);
 	m_helpAction->setEnabled(false);
@@ -125,7 +142,8 @@ void PrimitivesView::loadRootPrimitive()
 	nlassert(m_primitivesTreeModel);
 
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-							tr("Open NeL Ligo primitive file"), m_lastDir,
+							tr("Open NeL Ligo primitive file"),
+							Utils::lastDirectory(Constants::LAST_PRIMITIVE_DIR),
 							tr("All NeL Ligo primitive files (*.primitive)"));
 
 	setCursor(Qt::WaitCursor);
@@ -136,7 +154,7 @@ void PrimitivesView::loadRootPrimitive()
 
 		Q_FOREACH(QString fileName, fileNames)
 		{
-			m_lastDir = QFileInfo(fileName).absolutePath();
+			Utils::setLastDirectory(Constants::LAST_PRIMITIVE_DIR, fileName);
 			m_undoStack->push(new LoadRootPrimitiveCommand(fileName, m_worldEditorScene, m_primitivesTreeModel, this));
 		}
 
@@ -153,23 +171,77 @@ void PrimitivesView::loadLandscape()
 	nlassert(m_primitivesTreeModel);
 
 	QStringList fileNames = QFileDialog::getOpenFileNames(this,
-							tr("Open NeL Ligo land file"), m_lastDir,
+							tr("Open NeL Ligo land file"),
+							Utils::lastDirectory(Constants::LAST_LAND_DIR),
 							tr("All NeL Ligo land files (*.land)"));
 
 	setCursor(Qt::WaitCursor);
 	if (!fileNames.isEmpty())
 	{
+		// The zone bank has to be the one of the continent being opened. At start-up the
+		// builder holds the configured default (LandscapeDataDirectory), and a .land
+		// opened on its own never changed it - nexus.land drawn against the fyros bank
+		// finds none of its zones and shows nothing but placeholders. By convention the
+		// bank sits next to the .land (zoneligos/ and zonebitmaps/); a .land without one
+		// keeps the bank already loaded.
+		const QDir landDir = QFileInfo(fileNames.first()).absoluteDir();
+		if (landDir.exists("zoneligos") && (landDir.absolutePath() != QDir(m_zoneBuilder->dataPath()).absolutePath()))
+		{
+			if (m_zoneBuilder->init(landDir.absolutePath(), true))
+				nlinfo("World editor: zone bank switched to '%s'", landDir.absolutePath().toUtf8().constData());
+		}
+
 		if (fileNames.count() > 1)
 			m_undoStack->beginMacro(tr("Load land files"));
 
+		// Frame what was loaded now, not every region of the session: with lands of
+		// several continents open, their union is a view in which nothing can be seen.
+		QRectF loadedBounds;
+		QStringList emptyFiles;
+		QStringList failedFiles;
 		Q_FOREACH(QString fileName, fileNames)
 		{
-			m_lastDir = QFileInfo(fileName).absolutePath();
+			Utils::setLastDirectory(Constants::LAST_LAND_DIR, fileName);
+
+			const QList<int> idsBefore = m_zoneBuilder->zoneRegionIds();
 			m_undoStack->push(new LoadLandscapeCommand(fileName, m_primitivesTreeModel, m_zoneBuilder));
+
+			bool loaded = false;
+			Q_FOREACH (int id, m_zoneBuilder->zoneRegionIds())
+			{
+				if (idsBefore.contains(id) || (m_zoneBuilder->zoneRegion(id) == 0))
+					continue;
+				loaded = true;
+				const QRectF rect = Utils::zoneRegionSceneRect(m_zoneBuilder->zoneRegion(id)->ligoZoneRegion());
+				if (rect.isNull())
+					emptyFiles << QFileInfo(fileName).fileName();
+				else
+					loadedBounds = loadedBounds.isNull() ? rect : loadedBounds.united(rect);
+			}
+			if (!loaded)
+				failedFiles << QFileInfo(fileName).fileName();
 		}
 
 		if (fileNames.count() > 1)
 			m_undoStack->endMacro();
+
+		if (!loadedBounds.isNull())
+			Q_EMIT zoomToRectRequested(loadedBounds);
+
+		// An empty .land loads without complaint and simply shows nothing, which reads
+		// like a broken view. Say so.
+		QStringList notes;
+		if (!emptyFiles.isEmpty())
+			notes << tr("%1: empty, contains no zones").arg(emptyFiles.join(", "));
+		if (!failedFiles.isEmpty())
+			notes << tr("%1: could not be loaded").arg(failedFiles.join(", "));
+		if (!notes.isEmpty())
+		{
+			Core::ICore::instance()->mainWindow()->statusBar()->showMessage(notes.join("  -  "), 10000);
+			nlwarning("World editor: %s", notes.join("; ").toUtf8().constData());
+		}
+
+		Q_EMIT landscapeLoaded();
 	}
 	setCursor(Qt::ArrowCursor);
 }
@@ -219,12 +291,14 @@ void PrimitivesView::saveAs()
 	nlassert(m_primitivesTreeModel);
 
 	QString fileName = QFileDialog::getSaveFileName(this,
-					   tr("Save NeL Ligo primitive file"), m_lastDir,
+					   tr("Save NeL Ligo primitive file"),
+					   Utils::lastDirectory(Constants::LAST_PRIMITIVE_DIR),
 					   tr("NeL Ligo primitive file (*.primitive)"));
 
 	setCursor(Qt::WaitCursor);
 	if (!fileName.isEmpty())
 	{
+		Utils::setLastDirectory(Constants::LAST_PRIMITIVE_DIR, fileName);
 		QModelIndexList indexList = selectionModel()->selectedRows();
 		QModelIndex index = indexList.first();
 
@@ -317,37 +391,136 @@ void PrimitivesView::openItem(int value)
 {
 }
 
+void PrimitivesView::revealIndex(const QModelIndex &index)
+{
+	if (!index.isValid())
+		return;
+
+	// scrollTo() does not open collapsed parents, so walk up and expand them first.
+	QModelIndexList parents;
+	for (QModelIndex parent = index.parent(); parent.isValid(); parent = parent.parent())
+		parents.prepend(parent);
+
+	Q_FOREACH (const QModelIndex &parent, parents)
+		expand(parent);
+
+	// NoUpdate: move the cursor without changing what is selected - the caller may just
+	// have built a selection of several items.
+	selectionModel()->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+	scrollTo(index, QAbstractItemView::PositionAtCenter);
+}
+
+void PrimitivesView::showInTree()
+{
+	revealIndex(m_contextMenuIndex);
+}
+
+QRectF PrimitivesView::sceneRectOfSubtree(const QModelIndex &index) const
+{
+	QRectF bounds;
+
+	Node *node = static_cast<Node *>(index.internalPointer());
+	if (node != 0)
+	{
+		AbstractWorldItem *item = qvariant_cast<AbstractWorldItem *>(
+				node->data(Constants::GRAPHICS_DATA_QT4_2D));
+		if (item != 0)
+		{
+			// worldRect() is the real extent in item coordinates, centred on the item's
+			// own position - not boundingRect(), which is padded for painting.
+			const QRectF itemRect = item->worldRect().translated(item->scenePos());
+			bounds = bounds.isNull() ? itemRect : bounds.united(itemRect);
+		}
+	}
+
+	// A group is a node primitive: it has no shape of its own, everything it stands for
+	// hangs below it. Framing the whole subtree is what "zoom in on a group" means.
+	const int count = model()->rowCount(index);
+	for (int i = 0; i < count; ++i)
+	{
+		const QRectF childRect = sceneRectOfSubtree(model()->index(i, 0, index));
+		if (childRect.isNull())
+			continue;
+
+		bounds = bounds.isNull() ? childRect : bounds.united(childRect);
+	}
+
+	return bounds;
+}
+
+QRectF PrimitivesView::landscapeSceneRect(const QModelIndex &index) const
+{
+	Node *node = static_cast<Node *>(index.internalPointer());
+	if ((node == 0) || (node->type() != Node::LandscapeNodeType) || (m_zoneBuilder == 0))
+		return QRectF();
+
+	LandscapeEditor::ZoneRegionObject *region =
+			m_zoneBuilder->zoneRegion(static_cast<LandscapeNode *>(node)->id());
+	if (region == 0)
+		return QRectF();
+	return Utils::zoneRegionSceneRect(region->ligoZoneRegion());
+}
+
+void PrimitivesView::zoomToPrimitive()
+{
+	if (!m_contextMenuIndex.isValid())
+		return;
+
+	const QModelIndex index = m_contextMenuIndex.operator const QModelIndex &();
+	Node *node = static_cast<Node *>(index.internalPointer());
+	const QRectF bounds = ((node != 0) && (node->type() == Node::LandscapeNodeType))
+						  ? landscapeSceneRect(index) : sceneRectOfSubtree(index);
+	if (bounds.isNull())
+		return;
+
+	Q_EMIT zoomToRectRequested(bounds);
+}
+
+void PrimitivesView::showContextMenu(const QModelIndex &index, const QPoint &globalPos,
+									 bool fromScene)
+{
+	if (!index.isValid())
+		return;
+
+	m_contextMenuIndex = index;
+
+	QMenu menu(this);
+	if (fromScene)
+	{
+		menu.addAction(m_showInTreeAction);
+		menu.addSeparator();
+	}
+
+	Node *node = static_cast<Node *>(index.internalPointer());
+	switch (node->type())
+	{
+	case Node::WorldEditNodeType:
+		fillMenu_WorldEdit(&menu);
+		break;
+	case Node::RootPrimitiveNodeType:
+		fillMenu_RootPrimitive(&menu, index);
+		break;
+	case Node::LandscapeNodeType:
+		fillMenu_Landscape(&menu, index);
+		break;
+	case Node::PrimitiveNodeType:
+		fillMenu_Primitive(&menu, index);
+		break;
+	};
+
+	if (!menu.isEmpty())
+		menu.exec(globalPos);
+}
+
 void PrimitivesView::contextMenuEvent(QContextMenuEvent *event)
 {
 	QWidget::contextMenuEvent(event);
 	QModelIndexList indexList = selectionModel()->selectedRows();
-	if (indexList.size() == 0)
-		return;
 
-	QMenu *popurMenu = new QMenu(this);
-
+	// Several rows selected: no menu, every entry acts on a single primitive.
 	if (indexList.size() == 1)
-	{
-		Node *node = static_cast<Node *>(indexList.first().internalPointer());
-		switch (node->type())
-		{
-		case Node::WorldEditNodeType:
-			fillMenu_WorldEdit(popurMenu);
-			break;
-		case Node::RootPrimitiveNodeType:
-			fillMenu_RootPrimitive(popurMenu, indexList.first());
-			break;
-		case Node::LandscapeNodeType:
-			fillMenu_Landscape(popurMenu);
-			break;
-		case Node::PrimitiveNodeType:
-			fillMenu_Primitive(popurMenu, indexList.first());
-			break;
-		};
-	}
+		showContextMenu(indexList.first(), event->globalPos());
 
-	popurMenu->exec(event->globalPos());
-	delete popurMenu;
 	event->accept();
 }
 
@@ -379,8 +552,18 @@ void PrimitivesView::fillMenu_WorldEdit(QMenu *menu)
 	menu->addAction(m_helpAction);
 }
 
-void PrimitivesView::fillMenu_Landscape(QMenu *menu)
+void PrimitivesView::fillMenu_Landscape(QMenu *menu, const QModelIndex &index)
 {
+	// Jump to this land on the map. An empty one gets a note instead, so the missing
+	// entry does not look like a fault.
+	if (!landscapeSceneRect(index).isNull())
+		menu->addAction(m_zoomToAction);
+	else
+	{
+		QAction *emptyNote = menu->addAction(tr("Empty land - contains no zones"));
+		emptyNote->setEnabled(false);
+	}
+	menu->addSeparator();
 	menu->addAction(m_unloadAction);
 	menu->addSeparator();
 	menu->addAction(m_showAction);
@@ -398,6 +581,14 @@ void PrimitivesView::fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &inde
 
 void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 {
+	// Offered whenever anything below this row is on the map, so it works on a group
+	// just as well as on a single NPC.
+	if (!sceneRectOfSubtree(index).isNull())
+	{
+		menu->addAction(m_zoomToAction);
+		menu->addSeparator();
+	}
+
 	menu->addAction(m_deleteAction);
 	menu->addAction(m_selectChildrenAction);
 	menu->addAction(m_helpAction);
@@ -427,7 +618,7 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 			QString className = primClass->DynamicChildren[i].ClassName.c_str();
 
 			// Get icon
-			QIcon icon(QString("%1/%2.ico").arg(Constants::PATH_TO_OLD_ICONS).arg(className));
+			QIcon icon = PrimitiveIcons::instance().iconForClass(className);
 
 			// Create and add action in popur menu
 			QAction *action = menu->addAction(icon, tr("Add %1").arg(className));

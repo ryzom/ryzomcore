@@ -29,7 +29,7 @@
 // NeL includes
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QtCore/QSettings>
 
 namespace ExtensionSystem

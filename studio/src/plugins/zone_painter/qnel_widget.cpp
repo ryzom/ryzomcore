@@ -136,65 +136,43 @@ void QNLWidget::hideEvent(QHideEvent *hideEvent)
 }
 
 #if defined(NL_OS_WINDOWS)
-
 typedef bool (*winProc)(NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
-bool QNLWidget::winEvent(MSG *message, long *result)
-{
-	if (m_driver && m_driver->isActive())
-	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
-		if (driver)
-		{
-			winProc proc = (winProc)driver->getWindowProc();
-			return proc(driver, message->hwnd, message->message, message->wParam, message->lParam);
-		}
-	}
-
-	return false;
-}
-
 #elif defined(NL_OS_MAC)
-
 typedef bool (*cocoaProc)(NL3D::IDriver *, const void *e);
-
-bool QNLWidget::macEvent(EventHandlerCallRef caller, EventRef event)
-{
-	if(caller)
-		nlerror("You are using QtCarbon! Only QtCocoa supported, please upgrade Qt");
-
-	if (m_driver && m_driver->isActive())
-	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
-		if (driver)
-		{
-			cocoaProc proc = (cocoaProc)driver->getWindowProc();
-			return proc(driver, event);
-		}
-	}
-
-	return false;
-}
-
-#elif defined(NL_OS_UNIX)
-
-typedef bool (*x11Proc)(NL3D::IDriver *drv, XEvent *e);
-
-bool QNLWidget::x11Event(XEvent *event)
-{
-	if (m_driver && m_driver->isActive())
-	{
-		NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
-		if (driver)
-		{
-			x11Proc proc = (x11Proc)driver->getWindowProc();
-			return proc(driver, event);
-		}
-	}
-
-	return false;
-}
 #endif
+
+bool QNLWidget::nativeEvent(const QByteArray &eventType, void *message, long *result)
+{
+	if (!m_driver || !m_driver->isActive())
+		return QWidget::nativeEvent(eventType, message, result);
+
+	NL3D::IDriver *driver = dynamic_cast<NL3D::CDriverUser *>(m_driver)->getDriver();
+	if (!driver)
+		return QWidget::nativeEvent(eventType, message, result);
+
+#if defined(NL_OS_WINDOWS)
+	if (eventType == "windows_generic_MSG" || eventType == "windows_dispatcher_MSG")
+	{
+		MSG *msg = static_cast<MSG *>(message);
+		winProc proc = (winProc)driver->getWindowProc();
+		return proc(driver, msg->hwnd, msg->message, msg->wParam, msg->lParam);
+	}
+#elif defined(NL_OS_MAC)
+	if (eventType == "NSEvent")
+	{
+		cocoaProc proc = (cocoaProc)driver->getWindowProc();
+		return proc(driver, message);
+	}
+#elif defined(NL_OS_UNIX)
+	// Through the xcb platform Qt5 delivers an xcb_generic_event_t, while NeL's window
+	// procedure (unix_event_emitter) expects an Xlib XEvent structure. Not convertible
+	// into one another, so nothing is forwarded here on purpose - input goes through the
+	// ordinary Qt events.
+#endif
+
+	return QWidget::nativeEvent(eventType, message, result);
+}
+
 
 } /* namespace NLQT */
 

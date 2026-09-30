@@ -16,6 +16,7 @@
 
 // Project includes
 #include "primitive_item.h"
+#include "primitive_icons.h"
 #include "world_editor_misc.h"
 #include "world_editor_constants.h"
 
@@ -27,6 +28,7 @@
 // Qt includes
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 
 namespace WorldEditor
 {
@@ -163,10 +165,37 @@ Node::NodeType Node::type() const
 	return BasicNodeType;
 }
 
-WorldEditNode::WorldEditNode(const QString &name)
+namespace
 {
-	setData(Qt::DisplayRole, name);
+/// Show the file name in the tree and keep the whole path in the tooltip. The paths run
+/// deep enough that the name at the end of them was off the edge of the panel.
+void setNameAndPath(Node *node, const QString &fileName)
+{
+	const QFileInfo info(fileName);
+	const QString name = info.fileName();
+
+	node->setData(Qt::DisplayRole, name.isEmpty() ? fileName : name);
+	if (name != fileName)
+		node->setData(Qt::ToolTipRole, fileName);
+}
+}
+
+WorldEditNode::WorldEditNode(const QString &name)
+	: m_fileName(name)
+{
+	setNameAndPath(this, name);
 	setData(Qt::DecorationRole, QIcon(Constants::ICON_WORLD_EDITOR));
+}
+
+void WorldEditNode::setFileName(const QString &fileName)
+{
+	m_fileName = fileName;
+	setNameAndPath(this, fileName);
+}
+
+QString WorldEditNode::fileName() const
+{
+	return m_fileName;
 }
 
 WorldEditNode::~WorldEditNode()
@@ -202,7 +231,7 @@ LandscapeNode::LandscapeNode(const QString &name, int id)
 	: m_id(id),
 	  m_fileName(name)
 {
-	setData(Qt::DisplayRole, name);
+	setNameAndPath(this, name);
 	setData(Qt::DecorationRole, QIcon(LandscapeEditor::Constants::ICON_ZONE_ITEM));
 }
 
@@ -231,22 +260,13 @@ PrimitiveNode::PrimitiveNode(NLLIGO::IPrimitive *primitive)
 	setData(Qt::DisplayRole, QString(m_primitive->getName().c_str()));
 	setData(Qt::ToolTipRole, QString(m_primitive->getClassName().c_str()));
 
-	std::string className;
-	m_primitive->getPropertyByName("class", className);
+	updateIcon();
+}
 
-	// Set Icon
-	QString nameIcon = QString("%1/%2.ico").arg(Constants::PATH_TO_OLD_ICONS).arg(className.c_str());
-	QIcon icon(nameIcon);
-	if (!QFile::exists(nameIcon))
-	{
-		if (primitive->getParent() == NULL)
-			icon = QIcon(Constants::ICON_ROOT_PRIMITIVE);
-		else if (primitive->getNumChildren() == 0)
-			icon = QIcon(Constants::ICON_PROPERTY);
-		else
-			icon = QIcon(Constants::ICON_FOLDER);
-	}
-	setData(Qt::DecorationRole, icon);
+void PrimitiveNode::updateIcon()
+{
+	const bool hidden = !data(Constants::PRIMITIVE_IS_VISIBLE).toBool();
+	setData(Qt::DecorationRole, PrimitiveIcons::instance().icon(m_primitive, hidden));
 }
 
 PrimitiveNode::~PrimitiveNode()
@@ -281,7 +301,7 @@ RootPrimitiveNode::RootPrimitiveNode(const QString &name, NLLIGO::CPrimitives *p
 	  m_fileName(name),
 	  m_primitives(primitives)
 {
-	setData(Qt::DisplayRole, name);
+	setNameAndPath(this, name);
 }
 
 RootPrimitiveNode::~RootPrimitiveNode()

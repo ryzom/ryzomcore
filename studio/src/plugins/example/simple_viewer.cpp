@@ -20,9 +20,9 @@
 #include "simple_viewer.h"
 
 // Qt includes
-#include <QtGui/QWidget>
-#include <QtGui/QGridLayout>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QMessageBox>
 
 // NeL includes
 

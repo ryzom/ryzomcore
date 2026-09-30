@@ -21,7 +21,7 @@
 #include "landscape_editor_global.h"
 
 // Qt includes
-#include <QtGui/QGraphicsView>
+#include <QtWidgets/QGraphicsView>
 #include <QtGui/QWheelEvent>
 
 namespace LandscapeEditor
@@ -42,6 +42,9 @@ public:
 
 	//Set the current centerpoint in the
 	void setCenter(const QPointF &centerPoint);
+
+	/// Zoom and centre the view so that rect fills it, with a little air around it.
+	void showRect(const QRectF &rect);
 	QPointF getCenter() const;
 
 	bool isVisibleGrid() const;
@@ -50,6 +53,9 @@ public Q_SLOTS:
 
 	/// Enable/disable displaying grid.
 	void setVisibleGrid(bool visible);
+
+	bool isVisibleGridPoints() const;
+	void setVisibleGridPoints(bool visible);
 
 	/// Enable/disable displaying text(coord.) above each zone bricks.
 	void setVisibleText(bool visible);
@@ -65,10 +71,12 @@ protected:
 	virtual void resizeEvent(QResizeEvent *event);
 
 	void drawGrid(QPainter *painter, const QRectF &rect);
+	void drawGridPoints(QPainter *painter, const QRectF &rect);
 	void drawZoneNames(QPainter *painter, const QRectF &rect);
 private:
 
 	bool m_visibleGrid, m_visibleText;
+	bool m_visibleGridPoints;
 	qreal m_maxView, m_minView, m_maxViewText;
 	int m_cellSize;
 

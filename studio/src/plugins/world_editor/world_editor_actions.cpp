@@ -19,6 +19,7 @@
 
 // Project includes
 #include "world_editor_actions.h"
+#include "sheet_collision.h"
 #include "world_editor_constants.h"
 #include "world_editor_misc.h"
 #include "primitive_item.h"
@@ -101,8 +102,13 @@ void addNewGraphicsItems(const QModelIndex &primIndex, PrimitivesTreeModel *mode
 			if (primitive->getPropertyByName ("radius", strRadius))
 				radius = atof(strRadius.c_str());
 			qreal angle = ((2 * NLMISC::Pi - primPoint->Angle) * 180 / NLMISC::Pi);
+
+			// Show how much room the entity really takes, straight from its sheet.
+			const CollisionShape collision =
+					SheetCollision::instance().shapeOf(primitive, node->primitiveClass());
+
 			item = scene->addWorldItemPoint(QPointF(vec->x, -vec->y + cellSize),
-											angle, radius, showArrow);
+											angle, radius, showArrow, collision);
 			break;
 		}
 		case NLLIGO::CPrimitiveClass::Path:
@@ -333,7 +339,7 @@ bool WorldSaver::saveWorldEditFile()
 		return false;
 	}
 
-	std::string fn = n->data( 0 ).toString().toUtf8().constData();
+	std::string fn = n->fileName().toUtf8().constData();
 	bool ok = writeWorldEditFile( fn );
 
 	return ok;

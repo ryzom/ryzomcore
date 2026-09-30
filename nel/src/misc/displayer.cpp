@@ -34,7 +34,7 @@
 #	include <cerrno>
 #endif // NL_OS_WINDOWS
 
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && defined(NL_USE_BREAKPAD)
 #   include "client/linux/handler/exception_handler.h"
 #endif
 
@@ -684,7 +684,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		if (getenv ("NEL_IGNORE_ASSERT") == NULL)
 		{
 
-			#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+			#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && defined(NL_USE_BREAKPAD)
 				google_breakpad::ExceptionHandler::WriteMinidump(getLogDirectory().empty() ? "." : getLogDirectory(), NULL, NULL);
 			#endif
 

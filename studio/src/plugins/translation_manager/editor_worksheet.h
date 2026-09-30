@@ -33,12 +33,12 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QWidget>
-#include <QtGui/QMdiArea>
-#include <QtGui/QTableWidget>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QUndoCommand>
-#include <QtGui/QUndoStack>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QMdiArea>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QMdiSubWindow>
+#include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
 
 
 namespace TranslationManager

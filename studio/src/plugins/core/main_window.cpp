@@ -33,8 +33,9 @@
 
 // Qt includes
 #include <QtCore/QCoreApplication>
-#include <QtGui/QUndoView>
+#include <QtWidgets/QUndoView>
 #include <QtGui/QtGui>
+#include <QtWidgets/QtWidgets>
 
 namespace Core
 {
@@ -111,6 +112,14 @@ void MainWindow::extensionsInitialized()
 	readSettings();
 	connect(m_contextManager, SIGNAL(currentContextChanged(Core::IContext *)),
 			this, SLOT(updateContext(Core::IContext *)));
+
+	// Come back to the context that was open last. Every plugin is loaded by now, so the
+	// tabs exist; an id that no longer matches any of them simply leaves the first tab.
+	m_settings->beginGroup(Constants::MAIN_WINDOW_SECTION);
+	const QString lastContext = m_settings->value(Constants::CURRENT_CONTEXT).toString();
+	m_settings->endGroup();
+	if (!lastContext.isEmpty())
+		m_contextManager->activateContext(lastContext);
 
     Core::IContext *context = m_contextManager->currentContext();
     if (context != NULL)
@@ -493,6 +502,11 @@ void MainWindow::writeSettings()
 	m_settings->beginGroup(Constants::MAIN_WINDOW_SECTION);
 	m_settings->setValue(Constants::MAIN_WINDOW_STATE, saveState());
 	m_settings->setValue(Constants::MAIN_WINDOW_GEOMETRY, saveGeometry());
+
+	const Core::IContext *currentContext = m_contextManager->currentContext();
+	if (currentContext != 0)
+		m_settings->setValue(Constants::CURRENT_CONTEXT, currentContext->id());
+
 	m_settings->endGroup();
 }
 

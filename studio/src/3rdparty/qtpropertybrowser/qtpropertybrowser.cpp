@@ -2055,4 +2055,4 @@ void QtAbstractPropertyBrowser::setCurrentItem(QtBrowserItem *item)
 QT_END_NAMESPACE
 #endif
 
-#include "moc_qtpropertybrowser.cxx"
+#include "moc_qtpropertybrowser.cpp"

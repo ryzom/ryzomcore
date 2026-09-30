@@ -21,8 +21,8 @@
 #include "vegetable_dialog.h"
 
 // Qt includes
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 // NeL includes
 #include <nel/3d/vegetable.h>

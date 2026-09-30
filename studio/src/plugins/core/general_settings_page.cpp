@@ -29,11 +29,11 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QStyleFactory>
-#include <QtGui/QStyle>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QStyleFactory>
+#include <QtWidgets/QStyle>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -107,6 +107,15 @@ void GeneralSettingsPage::applyGeneralSettings()
 	NLMISC::CPath::display();
 	NLMISC::CPath::addSearchFile(ligoConfigFile.toUtf8().constData());
 	NLMISC::CPath::addSearchPath(leveldesignPath.toUtf8().constData(), true, false);
+
+	// Since the data was split across several repositories, the sheets no longer
+	// necessarily live below the level design path. If the key is empty the old
+	// assumption applies and the path is already covered by the recursively added
+	// leveldesignPath.
+	QString gameElementPath = settings->value(Core::Constants::GAME_ELEMENT_PATH).toString();
+	if (!gameElementPath.isEmpty())
+		NLMISC::CPath::addSearchPath(gameElementPath.toUtf8().constData(), true, false);
+
 	settings->endGroup();
 }
 

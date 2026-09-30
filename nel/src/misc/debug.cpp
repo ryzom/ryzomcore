@@ -41,7 +41,9 @@
 #	define IsDebuggerPresent() false
 #	ifndef NL_OS_MAC
 #		include <execinfo.h>
-# 		include "client/linux/handler/exception_handler.h"
+#		ifdef NL_USE_BREAKPAD
+# 			include "client/linux/handler/exception_handler.h"
+#		endif
 #	else
 #	endif
 //#	include <malloc.h>
@@ -1065,7 +1067,7 @@ void createDebug (const char *logPath, bool logInFile, bool eraseLastLog)
 
 		initDebug2(logInFile);
 
-#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
+#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC) && defined(NL_USE_BREAKPAD)
 		string path = LogPath.empty() ? "." : LogPath;
 		static google_breakpad::MinidumpDescriptor descriptor(path);
 		static google_breakpad::ExceptionHandler handler(

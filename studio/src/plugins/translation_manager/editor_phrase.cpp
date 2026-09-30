@@ -28,8 +28,8 @@
 #include <QtCore/QTextCodec>
 #include <QtCore/QTextStream>
 #include <QtGui/QTextCursor>
-#include <QtGui/QErrorMessage>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QErrorMessage>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QCloseEvent>
 
 using namespace std;

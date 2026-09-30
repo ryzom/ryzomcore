@@ -26,10 +26,10 @@
 // NeL includes
 
 // Qt includes
-#include <QtGui/QUndoCommand>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QTreeView>
-#include <QtGui/QGraphicsItem>
+#include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QTreeView>
+#include <QtWidgets/QGraphicsItem>
 #include <QPersistentModelIndex>
 
 namespace LandscapeEditor

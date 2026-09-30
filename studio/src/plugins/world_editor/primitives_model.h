@@ -76,6 +76,10 @@ public:
 	Node *pathToNode(const Path &path);
 
 	void createWorldEditNode(const QString &fileName);
+
+	/// Rename the root node. The name doubles as the path WorldSaver writes the
+	/// .worldedit file to.
+	void setWorldEditFileName(const QString &fileName);
 	void deleteWorldEditNode();
 	bool isWorldEditNodeLoaded() const;
 

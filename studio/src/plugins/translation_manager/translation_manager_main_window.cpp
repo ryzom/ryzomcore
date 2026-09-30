@@ -35,13 +35,13 @@
 #include <QtCore/QSettings>
 #include <QtCore/QSignalMapper>
 #include <QtCore/QResource>
-#include <QtGui/QMessageBox>
-#include <QtGui/QErrorMessage>
-#include <QtGui/QTableWidget>
-#include <QtGui/QTableWidgetItem>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QFileDialog>
-#include <QtGui/QMenuBar>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QErrorMessage>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QTableWidgetItem>
+#include <QtWidgets/QMdiSubWindow>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMenuBar>
 #include <QtGui/QCloseEvent>
 
 #include "uxt_editor.h"
@@ -400,35 +400,35 @@ void CMainWindow::extractWords(QString typeq)
 		// Primitives extraction
 		CRegionPrimWordListBuilder builderP;
 		bool isSheet = false;
-		if(typeq.toAscii() == Constants::WK_ITEM)
+		if(typeq.toLatin1() == Constants::WK_ITEM)
 		{
 			column_name = "item ID";
 			builderS.SheetExt = "sitem";
 			builderS.SheetPath = level_design_path.append("/game_element/sitem").toUtf8().constData();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_CREATURE)
+		else if(typeq.toLatin1() == Constants::WK_CREATURE)
 		{
 			column_name = "creature ID";
 			builderS.SheetExt = "creature";
 			builderS.SheetPath = level_design_path.append("/Game_elem/Creature/fauna").toUtf8().constData();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_SBRICK)
+		else if(typeq.toLatin1() == Constants::WK_SBRICK)
 		{
 			column_name = "sbrick ID";
 			builderS.SheetExt = "sbrick";
 			builderS.SheetPath = level_design_path.append("/game_element/sbrick").toUtf8().constData();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_SPHRASE)
+		else if(typeq.toLatin1() == Constants::WK_SPHRASE)
 		{
 			column_name = "sphrase ID";
 			builderS.SheetExt = "sphrase";
 			builderS.SheetPath = level_design_path.append("/game_element/sphrase").toUtf8().constData();
 			isSheet = true;
 		}
-		else if(typeq.toAscii() == Constants::WK_PLACE)
+		else if(typeq.toLatin1() == Constants::WK_PLACE)
 		{
 			column_name = "placeId";
 			builderP.PrimPath = primitives_path.toUtf8().constData();

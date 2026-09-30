@@ -27,7 +27,7 @@
 
 // Qt includes
 #include <QtOpenGL/QGLWidget>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 class QAction;
 
@@ -100,13 +100,8 @@ protected:
 	virtual void showEvent(QShowEvent *showEvent);
 	virtual void hideEvent(QHideEvent *hideEvent);
 
-#if defined(NL_OS_WINDOWS)
-	virtual bool winEvent(MSG *message, long *result);
-#elif defined(NL_OS_MAC)
-	virtual bool macEvent(EventHandlerCallRef caller, EventRef event);
-#elif defined(NL_OS_UNIX)
-	virtual bool x11Event(XEvent *event);
-#endif
+	// Qt5 replaced winEvent()/macEvent()/x11Event() with this single hook.
+	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 
 private:
 	void init();

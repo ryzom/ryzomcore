@@ -27,6 +27,7 @@
 
 // Qt includes
 #include <QtGui>
+#include <QtWidgets>
 
 namespace WorldEditor
 {
@@ -68,6 +69,8 @@ QVariant PrimitivesTreeModel::data(const QModelIndex &index, int role) const
 		return item->data(Qt::DisplayRole);
 	case Qt::DecorationRole:
 		return item->data(Qt::DecorationRole);
+	case Qt::ToolTipRole:
+		return item->data(Qt::ToolTipRole);
 	default:
 		return QVariant();
 	}
@@ -193,6 +196,20 @@ void PrimitivesTreeModel::createWorldEditNode(const QString &fileName)
 	endResetModel();
 }
 
+void PrimitivesTreeModel::setWorldEditFileName(const QString &fileName)
+{
+	const QModelIndex rootIndex = index(0, 0);
+	if (!rootIndex.isValid())
+		return;
+
+	Node *node = static_cast<Node *>(rootIndex.internalPointer());
+	if (node == 0 || node->type() != Node::WorldEditNodeType)
+		return;
+
+	static_cast<WorldEditNode *>(node)->setFileName(fileName);
+	Q_EMIT dataChanged(rootIndex, rootIndex);
+}
+
 void PrimitivesTreeModel::deleteWorldEditNode()
 {
 	beginResetModel();
@@ -305,11 +322,25 @@ void PrimitivesTreeModel::createChildNodes(NLLIGO::IPrimitive *primitive, int po
 
 	// Scan childs items and add in the tree model
 	QModelIndex childIndex = index(pos, 0, parent);
+	int insertPos = 0;
 	for (uint i = 0; i < primitive->getNumChildren(); ++i)
 	{
 		NLLIGO::IPrimitive *childPrim;
 		primitive->getChild(childPrim, i);
-		createChildNodes(childPrim, i, childIndex);
+
+		// Classes declared VISIBLE="false" in world_editor_classes.xml do not belong in
+		// the tree. This mainly concerns "alias": every primitive with a unique ID carries
+		// such a child node, and unfiltered the view shows a bare "alias" behind every
+		// single entry.
+		// The tree position keeps its own count - the commands remember the primitive
+		// index separately from the tree position, so the two may drift apart.
+		const NLLIGO::CPrimitiveClass *childClass =
+				Utils::ligoConfig()->getPrimitiveClass(*childPrim);
+		if ((childClass != 0) && !childClass->Visible)
+			continue;
+
+		createChildNodes(childPrim, insertPos, childIndex);
+		++insertPos;
 	}
 }
 

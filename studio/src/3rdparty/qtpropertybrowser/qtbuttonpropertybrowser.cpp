@@ -87,12 +87,12 @@
 
 #include "qtbuttonpropertybrowser.h"
 #include <QtCore/QSet>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
 #include <QtCore/QTimer>
 #include <QtCore/QMap>
-#include <QtGui/QToolButton>
-#include <QtGui/QStyle>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QStyle>
 
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
@@ -673,4 +673,4 @@ bool QtButtonPropertyBrowser::isExpanded(QtBrowserItem *item) const
 QT_END_NAMESPACE
 #endif
 
-#include "moc_qtbuttonpropertybrowser.cxx"
+#include "moc_qtbuttonpropertybrowser.cpp"

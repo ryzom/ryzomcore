@@ -32,9 +32,9 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
-#include <QtGui/QTreeWidgetItem>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QTreeWidgetItem>
 
 namespace MissionCompiler
 {

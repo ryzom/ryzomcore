@@ -27,11 +27,11 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenuBar>
 
 // NeL includes
 #include "nel/misc/debug.h"
@@ -79,4 +79,3 @@ void TileEditorPlugin::addAutoReleasedObject(QObject *obj)
 	m_autoReleaseObjects.prepend(obj);
 }
 
-Q_EXPORT_PLUGIN(TileEditorPlugin)

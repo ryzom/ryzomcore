@@ -21,8 +21,8 @@
 #include "located_page.h"
 
 // Qt includes
-#include <QtGui/QMessageBox>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QInputDialog>
 
 // NeL includes
 #include <nel/3d/particle_system.h>

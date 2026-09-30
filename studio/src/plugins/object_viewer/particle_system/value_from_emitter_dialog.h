@@ -23,10 +23,10 @@
 #include <nel/misc/types_nl.h>
 
 // Qt includes
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QWidget>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QWidget>
 
 // NeL include
 #include "nel/3d/ps_attrib_maker.h"

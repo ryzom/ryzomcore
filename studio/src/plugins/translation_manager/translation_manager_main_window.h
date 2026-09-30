@@ -33,13 +33,13 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QUndoStack>
-#include <QtGui/QMainWindow>
-#include <QtGui/QTableWidget>
-#include <QtGui/QMenu>
-#include <QtGui/QMdiSubWindow>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QTableWidget>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QMdiSubWindow>
 #include <QtCore/QSignalMapper>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 
 // STL includes
 #include <set>

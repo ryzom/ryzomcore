@@ -25,8 +25,8 @@
 #include "../core/icore.h"
 
 // Qt includes
-#include <QtGui/QProgressDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QProgressDialog>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QColor>
 #include <QtGui/QVector3D>
 #include <QtCore/QSettings>

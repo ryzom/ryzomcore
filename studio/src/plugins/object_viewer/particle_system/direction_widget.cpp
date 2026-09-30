@@ -21,7 +21,7 @@
 #include "direction_widget.h"
 
 // Qt includes
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QInputDialog>
 #include <QtGui/QPainter>
 #include <QtGui/QMouseEvent>
 

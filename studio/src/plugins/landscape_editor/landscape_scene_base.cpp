@@ -23,8 +23,8 @@
 
 // Qt includes
 #include <QtGui/QPainter>
-#include <QtGui/QGraphicsPixmapItem>
-#include <QtGui/QGraphicsSimpleTextItem>
+#include <QtWidgets/QGraphicsPixmapItem>
+#include <QtWidgets/QGraphicsSimpleTextItem>
 #include <QApplication>
 
 namespace LandscapeEditor
@@ -42,6 +42,7 @@ const int MAX_SCENE_HEIGHT = 256;
 LandscapeSceneBase::LandscapeSceneBase(int sizeCell, QObject *parent)
 	: QGraphicsScene(parent),
 	  m_cellSize(sizeCell),
+	  m_visibleZones(true),
 	  m_zoneBuilderBase(0)
 {
 	setSceneRect(QRectF(0, m_cellSize, MAX_SCENE_WIDTH * m_cellSize, MAX_SCENE_HEIGHT * m_cellSize));
@@ -59,6 +60,26 @@ int LandscapeSceneBase::cellSize() const
 void LandscapeSceneBase::setZoneBuilder(ZoneBuilderBase *zoneBuilder)
 {
 	m_zoneBuilderBase = zoneBuilder;
+}
+
+void LandscapeSceneBase::setVisibleZones(bool visible)
+{
+	if (m_visibleZones == visible)
+		return;
+
+	m_visibleZones = visible;
+
+	// The tiles are the only pixmap items in the scene.
+	Q_FOREACH (QGraphicsItem *item, items())
+	{
+		if (qgraphicsitem_cast<QGraphicsPixmapItem *>(item) != 0)
+			item->setVisible(visible);
+	}
+}
+
+bool LandscapeSceneBase::isVisibleZones() const
+{
+	return m_visibleZones;
 }
 
 QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const ZonePosition &zonePos)
@@ -97,9 +118,12 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	// Enable bilinear filtering
 	item->setTransformationMode(Qt::SmoothTransformation);
 
-	sint32 sizeX = 1, sizeY = 1;
-	sizeX = float(pixmap->width()) / m_zoneBuilderBase->pixmapDatabase()->textureSize();
-	sizeY = float(pixmap->width()) / m_zoneBuilderBase->pixmapDatabase()->textureSize();
+	// Size of the zone in cells. The height has to come from the pixmap height - taking
+	// it from the width placed every non-square zone (a 4x2 canyon, a 5x4 city) wrong by
+	// sizeX - sizeY rows: a hole where the zone belongs and a copy of it further up.
+	const int textureSize = m_zoneBuilderBase->pixmapDatabase()->textureSize();
+	const sint32 sizeX = pixmap->width() / textureSize;
+	const sint32 sizeY = pixmap->height() / textureSize;
 
 	sint32 deltaX = 0, deltaY = 0;
 
@@ -164,6 +188,7 @@ QGraphicsItem *LandscapeSceneBase::createItemZone(const LigoData &data, const Zo
 	item->setZValue(LAYER_ZONES);
 
 	item->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+	item->setVisible(m_visibleZones);
 
 	return item;
 }
@@ -196,6 +221,7 @@ QGraphicsItem *LandscapeSceneBase::createItemEmptyZone(const ZonePosition &zoneP
 	item->setZValue(LAYER_EMPTY_ZONES);
 
 	item->setShapeMode(QGraphicsPixmapItem::BoundingRectShape);
+	item->setVisible(m_visibleZones);
 
 	return item;
 }

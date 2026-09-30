@@ -26,8 +26,8 @@
 #include <nel/ligo/zone_region.h>
 
 // Qt includes
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QGraphicsSceneMouseEvent>
 
 namespace LandscapeEditor
 {
@@ -52,6 +52,11 @@ public:
 	QGraphicsItem *createItemEmptyZone(const ZonePosition &zonePos);
 	void deleteItemZone(const ZonePosition &zonePos);
 
+	/// Show or hide the landscape tiles. Kept as a flag, not applied once and forgotten,
+	/// so zones loaded after the switch was flipped follow it as well.
+	void setVisibleZones(bool visible);
+	bool isVisibleZones() const;
+
 	void addZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 	void delZoneRegion(const NLLIGO::CZoneRegion &zoneRegion);
 
@@ -69,6 +74,7 @@ private:
 	bool checkUnderZone(const int posX, const int posY);
 
 	int m_cellSize;
+	bool m_visibleZones;
 	qreal m_mouseX, m_mouseY;
 	sint32 m_posX, m_posY;
 	ZoneBuilderBase *m_zoneBuilderBase;

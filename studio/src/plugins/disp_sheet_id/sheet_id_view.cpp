@@ -21,8 +21,8 @@
 
 #include "nel/misc/path.h"
 
-#include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QApplication>
 
 class	CPred
 {

@@ -21,10 +21,10 @@
 //#include "ui_bnp_manager_window.h"
 
 // Qt includes
-#include <QtGui/QMainWindow>
-#include <QtGui/QLabel>
-#include <QtGui/QUndoStack>
-#include <QtGui/QTableWidget>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QTableWidget>
 
 
 namespace BNPManager

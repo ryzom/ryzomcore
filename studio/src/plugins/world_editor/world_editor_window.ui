@@ -139,7 +139,7 @@
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="WorldEditor::PropertyEditorWidget" name="propertyEditWidget"/>
+   <widget class="WorldEditor::PropertyEditorPanel" name="propertyEditWidget"/>
   </widget>
   <action name="loadPrimitiveAction">
    <property name="text">
@@ -365,9 +365,9 @@
    <header>primitives_view.h</header>
   </customwidget>
   <customwidget>
-   <class>WorldEditor::PropertyEditorWidget</class>
+   <class>WorldEditor::PropertyEditorPanel</class>
    <extends>QWidget</extends>
-   <header>property_editor_widget.h</header>
+   <header>property_editor_panel.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

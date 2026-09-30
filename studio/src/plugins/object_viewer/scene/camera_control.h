@@ -24,12 +24,12 @@
 
 // Qt includes
 #include <QtCore/QSignalMapper>
-#include <QtGui/QAction>
-#include <QtGui/QComboBox>
-#include <QtGui/QSpinBox>
-#include <QtGui/QLabel>
-#include <QtGui/QMenu>
-#include <QtGui/QToolBar>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QToolBar>
 
 // NeL includes
 #include <nel/3d/u_camera.h>

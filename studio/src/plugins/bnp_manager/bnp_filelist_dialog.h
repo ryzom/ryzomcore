@@ -18,7 +18,7 @@
 #define BNP_FILELIST_DIALOG_H
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 // STL includes
 #include <vector>

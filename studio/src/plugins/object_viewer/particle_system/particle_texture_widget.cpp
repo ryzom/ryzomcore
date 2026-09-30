@@ -21,8 +21,8 @@
 #include "particle_texture_widget.h"
 
 // Qt include
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
 
 // NeL includes
 #include "nel/3d/texture_file.h"

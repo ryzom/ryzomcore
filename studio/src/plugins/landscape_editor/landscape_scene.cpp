@@ -23,8 +23,9 @@
 
 // Qt includes
 #include <QtGui/QPainter>
-#include <QtGui/QGraphicsPixmapItem>
-#include <QtGui/QGraphicsSimpleTextItem>
+#include <QtGui/QTransform>
+#include <QtWidgets/QGraphicsPixmapItem>
+#include <QtWidgets/QGraphicsSimpleTextItem>
 #include <QApplication>
 
 namespace LandscapeEditor
@@ -218,7 +219,7 @@ QGraphicsRectItem *LandscapeScene::createLayerBlackout(const NLLIGO::CZoneRegion
 
 void LandscapeScene::deleteItemZone(const ZonePosition &zonePos)
 {
-	QGraphicsItem *item = itemAt(zonePos.x * m_cellSize, abs(zonePos.y) * m_cellSize);
+	QGraphicsItem *item = itemAt(zonePos.x * m_cellSize, abs(zonePos.y) * m_cellSize, QTransform());
 	if ((item != 0) && (item->data(ZONE_NAME).toString() != QString(LAYER_BLACKOUT_NAME)))
 	{
 		removeItem(item);
@@ -370,7 +371,7 @@ void LandscapeScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 
 bool LandscapeScene::checkUnderZone(const int posX, const int posY)
 {
-	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize);
+	QGraphicsItem *item = itemAt((posX * m_cellSize), abs(posY) * m_cellSize, QTransform());
 	if (item != 0)
 	{
 		//if (item->data(ZONE_NAME) == QString(LAYER_BLACKOUT_NAME))

@@ -20,9 +20,9 @@
 #include "stdpch.h"
 
 // Qt include
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 // NeL include
 #include <nel/3d/ps_particle.h>

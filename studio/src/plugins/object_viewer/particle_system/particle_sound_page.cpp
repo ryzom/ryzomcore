@@ -21,7 +21,7 @@
 #include "particle_sound_page.h"
 
 // Qt includes
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QInputDialog>
 
 // NeL includes
 #include "nel/3d/ps_located.h"

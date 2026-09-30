@@ -12,9 +12,9 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QUrl>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include <QtCore/QString>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QtCore/QFile>
 #include <QtNetwork>
 

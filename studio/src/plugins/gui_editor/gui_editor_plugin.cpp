@@ -85,4 +85,3 @@ namespace GUIEditor
 
 }
 
-Q_EXPORT_PLUGIN(GUIEditor::GUIEditorPlugin)

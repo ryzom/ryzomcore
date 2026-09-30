@@ -27,8 +27,8 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtGui/QTabWidget>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QGridLayout>
 
 namespace Core
 {

@@ -21,6 +21,7 @@
 // Project includes
 #include "property_editor_widget.h"
 #include "world_editor_misc.h"
+#include "world_editor_constants.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -31,7 +32,11 @@
 
 // Qt includes
 #include <QtCore/QModelIndex>
+#include <QApplication>
+#include <QClipboard>
 #include <QMap>
+#include <QMenu>
+#include <QTreeWidget>
 
 #include "const_string_array_property.h"
 
@@ -40,36 +45,25 @@ namespace WorldEditor
 
 struct PropertyEditorWidgetPrivate
 {
-	QMap< QtProperty*, NLLIGO::IPrimitive* > propToPrim;
+	/// One row can stand for several primitives at once - editing it has to reach every
+	/// one of them, which is why this is a list and not a single pointer.
+	QMap< QtProperty*, QList< NLLIGO::IPrimitive* > > propToPrims;
 
 	void clearPrimitives()
 	{
-		propToPrim.clear();
+		propToPrims.clear();
 	}
 
 	void addPrimitive( QtProperty *p, NLLIGO::IPrimitive *prim )
 	{
-		QMap< QtProperty*, NLLIGO::IPrimitive* >::const_iterator itr 
-			= propToPrim.find( p );
-		if( itr != propToPrim.end() )
-			return;
-
-		propToPrim[ p ] = prim;
+		QList< NLLIGO::IPrimitive* > &prims = propToPrims[ p ];
+		if( !prims.contains( prim ) )
+			prims.append( prim );
 	}
 
-	NLLIGO::IPrimitive* getPrimitive( QtProperty *p )
+	QList< NLLIGO::IPrimitive* > getPrimitives( QtProperty *p )
 	{
-		NLLIGO::IPrimitive *prim = NULL;
-
-		QMap< QtProperty*, NLLIGO::IPrimitive* >::const_iterator itr 
-			= propToPrim.find( p );
-
-		if( itr != propToPrim.end() )
-		{
-			prim = itr.value();
-		}
-
-		return prim;
+		return propToPrims.value( p );
 	}
 };
 
@@ -89,15 +83,48 @@ PropertyEditorWidget::PropertyEditorWidget(QWidget *parent)
 	QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
 	QtCheckBoxFactory *boolFactory = new QtCheckBoxFactory(this);
 	QtEnumEditorFactory *enumFactory = new QtEnumEditorFactory(this);
-	QtTextEditorFactory *textFactory = new QtTextEditorFactory(this);
+	// The default one line editor is no way to work on a block of script; this one shows
+	// a summary and opens a proper window.
+	m_scriptEditorFactory = new ScriptEditorFactory(this);
 
 	m_ui.treePropertyBrowser->setFactoryForManager(m_stringManager, lineEditFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_boolManager, boolFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_enumManager, enumFactory);
-	m_ui.treePropertyBrowser->setFactoryForManager(m_stringArrayManager, textFactory);
+	m_ui.treePropertyBrowser->setFactoryForManager(m_stringArrayManager, m_scriptEditorFactory);
 	m_ui.treePropertyBrowser->setFactoryForManager(m_constStrArrPropMgr, m_constStrArrEditorFactory);
 
 	m_groupManager = new QtGroupPropertyManager(this);
+
+	// The browser is readable enough on its own, it was just never set up: no header, no
+	// room for the values, every row the same colour.
+	m_ui.treePropertyBrowser->setAlternatingRowColors(true);
+	m_ui.treePropertyBrowser->setHeaderVisible(true);
+	m_ui.treePropertyBrowser->setRootIsDecorated(false);
+	m_ui.treePropertyBrowser->setPropertiesWithoutValueMarked(true);
+	m_ui.treePropertyBrowser->setResizeMode(QtTreePropertyBrowser::Interactive);
+	m_ui.treePropertyBrowser->setSplitterPosition(180);
+
+	// Values that cannot be selected cannot be copied either, and a property editor whose
+	// values you have to retype by hand is not much of one. The browser keeps its tree
+	// private, so reach it once and hang a context menu and Ctrl+C on it.
+	m_browserTree = m_ui.treePropertyBrowser->findChild<QTreeWidget *>();
+	if (m_browserTree != 0)
+	{
+		m_browserTree->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(m_browserTree, SIGNAL(customContextMenuRequested(QPoint)),
+				this, SLOT(showContextMenu(QPoint)));
+
+		QAction *copyAction = new QAction(tr("Copy Value"), m_browserTree);
+		copyAction->setShortcut(QKeySequence::Copy);
+		copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+		connect(copyAction, SIGNAL(triggered()), this, SLOT(copyValue()));
+		m_browserTree->addAction(copyAction);
+	}
+	else
+	{
+		nlwarning("World Editor: no tree inside the property browser, "
+				  "copying values will not work.");
+	}
 
 	d_ptr = new PropertyEditorWidgetPrivate();
 
@@ -125,50 +152,72 @@ void PropertyEditorWidget::clearProperties()
 	m_ui.treePropertyBrowser->clear();
 }
 
-void PropertyEditorWidget::updateSelection(Node *node)
+void PropertyEditorWidget::addFileProperties(Node *node)
 {
-	clearProperties();
+	// The tree shows file names only - the paths are far too long for it - so the full
+	// path is offered here, where there is room for it, and as a tooltip in the tree.
+	QString fileName;
+	switch (node->type())
+	{
+	case Node::WorldEditNodeType:
+		fileName = static_cast<WorldEditNode *>(node)->fileName();
+		break;
+	case Node::LandscapeNodeType:
+		fileName = static_cast<LandscapeNode *>(node)->fileName();
+		break;
+	case Node::RootPrimitiveNodeType:
+		fileName = static_cast<RootPrimitiveNode *>(node)->fileName();
+		break;
+	default:
+		return;
+	}
 
-	if ((node == 0) || (node->type() != Node::PrimitiveNodeType))
+	if (fileName.isEmpty())
 		return;
 
-	blockSignalsOfProperties(true);
+	QtProperty *fileGroup = m_groupManager->addProperty(
+			node->data(Qt::DisplayRole).toString());
+	m_ui.treePropertyBrowser->addProperty(fileGroup);
 
-	// The parameter list
+	QtProperty *pathProperty = m_stringManager->addProperty(tr("path"));
+	m_stringManager->setValue(pathProperty, fileName);
+	pathProperty->setEnabled(false);
+	fileGroup->addSubProperty(pathProperty);
+
+	m_ui.treePropertyBrowser->setExpanded(
+			m_ui.treePropertyBrowser->topLevelItem(fileGroup), true);
+}
+
+std::list<NLLIGO::CPrimitiveClass::CParameter> PropertyEditorWidget::commonParameters(
+		const QList<const NLLIGO::IPrimitive *> &primitives,
+		const NLLIGO::CPrimitiveClass *primitiveClass)
+{
 	std::list<NLLIGO::CPrimitiveClass::CParameter> parameterList;
-
-	PrimitiveNode *primNode = static_cast<PrimitiveNode *>(node);
-	const NLLIGO::IPrimitive *primitive = primNode->primitive();
-	const NLLIGO::CPrimitiveClass *primClass = primNode->primitiveClass();
+	const NLLIGO::IPrimitive *primitive = primitives.first();
 
 	// Use the class or not ?
-	if (primClass)
+	if (primitiveClass)
 	{
-		// For each properties of the class
-		for (uint p = 0; p < primClass->Parameters.size(); p++)
+		for (uint p = 0; p < primitiveClass->Parameters.size(); p++)
 		{
-			// Is the parameter visible ?
-			if (primClass->Parameters[p].Visible)
+			if (primitiveClass->Parameters[p].Visible)
 			{
-				if (primClass->Parameters[p].Name == "name")
-					parameterList.push_front(primClass->Parameters[p]);
+				if (primitiveClass->Parameters[p].Name == "name")
+					parameterList.push_front(primitiveClass->Parameters[p]);
 				else
-					parameterList.push_back(primClass->Parameters[p]);
+					parameterList.push_back(primitiveClass->Parameters[p]);
 			}
 		}
 	}
 	else
 	{
-		// For each primitive property
 		uint numProp = primitive->getNumProperty();
 		for (uint p = 0; p < numProp; p++)
 		{
-			// Get the property
 			std::string propertyName;
 			const NLLIGO::IProperty *prop;
 			nlverify(primitive->getProperty(p, propertyName, prop));
 
-			// Add a default property
 			NLLIGO::CPrimitiveClass::CParameter defProp(*prop, propertyName.c_str());
 
 			if (defProp.Name == "name")
@@ -178,24 +227,60 @@ void PropertyEditorWidget::updateSelection(Node *node)
 		}
 	}
 
-	// Remove property class
-	std::list<NLLIGO::CPrimitiveClass::CParameter>::iterator ite = parameterList.begin ();
-	while (ite != parameterList.end ())
+	// "class" is what picked the parameter list in the first place, not a row of its own.
+	std::list<NLLIGO::CPrimitiveClass::CParameter>::iterator ite = parameterList.begin();
+	while (ite != parameterList.end())
 	{
 		std::list<NLLIGO::CPrimitiveClass::CParameter>::iterator next = ite;
-		next++;
+		++next;
+
 		if (ite->Name == "class")
-		{
 			parameterList.erase(ite);
-		}
+
 		ite = next;
 	}
 
-	QtProperty *groupNode;
-	groupNode = m_groupManager->addProperty(QString("%1(%2)").arg(node->data(Qt::DisplayRole).toString()).arg(primClass->Name.c_str()));
+	return parameterList;
+}
+
+void PropertyEditorWidget::updateSelection(Node *node)
+{
+	clearProperties();
+
+	if (node == 0)
+		return;
+
+	addFileProperties(node);
+
+	if (node->type() != Node::PrimitiveNodeType)
+		return;
+
+	blockSignalsOfProperties(true);
+
+	PrimitiveNode *primitiveNode = static_cast<PrimitiveNode *>(node);
+	const NLLIGO::IPrimitive *primitive = primitiveNode->primitive();
+	const NLLIGO::CPrimitiveClass *primClass = primitiveNode->primitiveClass();
+
+	QList<const NLLIGO::IPrimitive *> primitives;
+	primitives.append(primitive);
+
+	std::list<NLLIGO::CPrimitiveClass::CParameter> parameterList =
+			commonParameters(primitives, primClass);
+
+	// primClass may be null here - commonParameters() catches that explicitly and builds
+	// the parameters from the raw properties instead. Without this check, studio crashes
+	// on clicking a primitive whose class is not listed in world_editor_classes.xml.
+	const QString className = (primClass != 0)
+			? QString::fromUtf8(primClass->Name.c_str())
+			: tr("unknown class");
+
+	const QString title =
+			QString("%1(%2)").arg(node->data(Qt::DisplayRole).toString()).arg(className);
+
+	QtProperty *groupNode = m_groupManager->addProperty(title);
 	m_ui.treePropertyBrowser->addProperty(groupNode);
 
-	ite = parameterList.begin();
+	std::list<NLLIGO::CPrimitiveClass::CParameter>::iterator ite = parameterList.begin();
 	while (ite != parameterList.end())
 	{
 		NLLIGO::CPrimitiveClass::CParameter &parameter = (*ite);
@@ -214,7 +299,7 @@ void PropertyEditorWidget::updateSelection(Node *node)
 		else
 			prop = addBoolProperty(ligoProperty, parameter, primitive);
 
-		d_ptr->addPrimitive( prop, const_cast< NLLIGO::IPrimitive* >( primitive ) );
+		d_ptr->addPrimitive(prop, const_cast<NLLIGO::IPrimitive *>(primitive));
 
 		// Default value ?
 		if	((ligoProperty == NULL)	|| (ligoProperty->Default))
@@ -226,19 +311,54 @@ void PropertyEditorWidget::updateSelection(Node *node)
 		if (parameter.ReadOnly || (staticChildSelected && (parameter.Name == "name")))
 			prop->setEnabled(false);
 
-		// File ?
-		if (parameter.Filename && (parameter.FileExtension.empty() || parameter.Type != NLLIGO::CPrimitiveClass::CParameter::StringArray))
-		{
-			// TODO: Create an edit box
-			// CHECK: only for ConstString
-		}
-
 		groupNode->addSubProperty(prop);
 
-		ite++;
+		++ite;
 	}
 
+	m_ui.treePropertyBrowser->setExpanded(
+			m_ui.treePropertyBrowser->topLevelItem(groupNode), true);
+
 	blockSignalsOfProperties(false);
+}
+
+QString PropertyEditorWidget::currentRowText(int column) const
+{
+	if (m_browserTree == 0)
+		return QString();
+
+	const QTreeWidgetItem *item = m_browserTree->currentItem();
+	if (item == 0)
+		return QString();
+
+	return item->text(column);
+}
+
+void PropertyEditorWidget::copyValue()
+{
+	const QString value = currentRowText(1);
+	if (!value.isEmpty())
+		QApplication::clipboard()->setText(value);
+}
+
+void PropertyEditorWidget::copyNameAndValue()
+{
+	const QString name = currentRowText(0);
+	if (name.isEmpty())
+		return;
+
+	QApplication::clipboard()->setText(name + QLatin1String(" = ") + currentRowText(1));
+}
+
+void PropertyEditorWidget::showContextMenu(const QPoint &pos)
+{
+	if ((m_browserTree == 0) || (m_browserTree->itemAt(pos) == 0))
+		return;
+
+	QMenu menu(this);
+	menu.addAction(tr("Copy Value"), this, SLOT(copyValue()), QKeySequence::Copy);
+	menu.addAction(tr("Copy Name and Value"), this, SLOT(copyNameAndValue()));
+	menu.exec(m_browserTree->viewport()->mapToGlobal(pos));
 }
 
 void PropertyEditorWidget::propertyChanged(QtProperty *p)
@@ -253,110 +373,100 @@ void PropertyEditorWidget::resetProperty(QtProperty *property)
 
 NLLIGO::IProperty* PropertyEditorWidget::getLigoProperty( QtProperty *p )
 {
-	NLLIGO::IPrimitive *prim = d_ptr->getPrimitive( p );
-	if( prim == NULL )
-	{
+	const QList< NLLIGO::IPrimitive* > prims = d_ptr->getPrimitives( p );
+	if( prims.isEmpty() )
 		return NULL;
-	}
 
 	NLLIGO::IProperty *prop = NULL;
-	prim->getPropertyByName( p->propertyName().toUtf8().constData(), prop );
-	if( prop == NULL )
-	{
-		return NULL;
-	}
+	prims.first()->getPropertyByName( p->propertyName().toUtf8().constData(), prop );
 
 	return prop;
 }
 
-void PropertyEditorWidget::onBoolValueChanged( QtProperty *p, bool v )
+namespace
 {
-	NLLIGO::IProperty *prop = getLigoProperty( p );
-	if( prop == NULL )
+/// Write a single string into one primitive's property.
+void setStringValue( NLLIGO::IPrimitive *primitive, const QString &name, const QString &value )
+{
+	NLLIGO::IProperty *prop = NULL;
+	if( !primitive->getPropertyByName( name.toUtf8().constData(), prop ) || ( prop == NULL ) )
 		return;
 
 	NLLIGO::CPropertyString *pp = dynamic_cast< NLLIGO::CPropertyString* >( prop );
 	if( pp == NULL )
 		return;
 
-	if( v )
-		pp->String = "true";
-	else
-		pp->String = "false";
+	pp->String = value.toUtf8().constData();
+	pp->Default = false;
+}
+
+/// Write a block of lines into one primitive's string array property.
+void setStringArrayValue( NLLIGO::IPrimitive *primitive, const QString &name, const QString &value )
+{
+	NLLIGO::IProperty *prop = NULL;
+	if( !primitive->getPropertyByName( name.toUtf8().constData(), prop ) || ( prop == NULL ) )
+		return;
+
+	NLLIGO::CPropertyStringArray *pp = dynamic_cast< NLLIGO::CPropertyStringArray* >( prop );
+	if( pp == NULL )
+		return;
+
+	pp->StringArray.clear();
+
+	const QStringList lines = value.split( QLatin1Char( '\n' ) );
+	Q_FOREACH( const QString &line, lines )
+		pp->StringArray.push_back( line.toUtf8().constData() );
 
 	pp->Default = false;
+}
+}
+
+void PropertyEditorWidget::onBoolValueChanged( QtProperty *p, bool v )
+{
+	const QString value = v ? QLatin1String( "true" ) : QLatin1String( "false" );
+	Q_FOREACH( NLLIGO::IPrimitive *primitive, d_ptr->getPrimitives( p ) )
+		setStringValue( primitive, p->propertyName(), value );
 }
 
 void PropertyEditorWidget::onStringValueChanged( QtProperty *p, const QString &v )
 {
-	NLLIGO::IProperty *prop = getLigoProperty( p );
-	if( prop == NULL )
+	// The marker is what the row shows while the selected primitives disagree. Writing it
+	// back would set them all to the literal text "<different values>".
+	if( v == QLatin1String( Constants::DIFFERENT_VALUE_STRING ) )
 		return;
 
-	NLLIGO::CPropertyString *pp = dynamic_cast< NLLIGO::CPropertyString* >( prop );
-	if( pp == NULL )
-		return;
-
-	pp->String = v.toUtf8().constData();
-	pp->Default = false;
+	Q_FOREACH( NLLIGO::IPrimitive *primitive, d_ptr->getPrimitives( p ) )
+		setStringValue( primitive, p->propertyName(), v );
 }
 
 void PropertyEditorWidget::onEnumValueChanged( QtProperty *p, int v )
 {
-	NLLIGO::IProperty *prop = getLigoProperty( p );
-	if( prop == NULL )
+	Q_UNUSED( v );
+
+	const QString value = p->valueText();
+	if( value == QLatin1String( Constants::DIFFERENT_VALUE_STRING ) )
 		return;
 
-	NLLIGO::CPropertyString *pp = dynamic_cast< NLLIGO::CPropertyString* >( prop );
-	if( pp == NULL )
-		return;
-
-	pp->String = p->valueText().toUtf8().constData();
-	pp->Default = false;
+	Q_FOREACH( NLLIGO::IPrimitive *primitive, d_ptr->getPrimitives( p ) )
+		setStringValue( primitive, p->propertyName(), value );
 }
 
 void PropertyEditorWidget::onStrArrValueChanged( QtProperty *p, const QString &v )
 {
-	NLLIGO::IProperty *prop = getLigoProperty( p );
-	if( prop == NULL )
+	if( v == QLatin1String( Constants::DIFFERENT_VALUE_STRING ) )
 		return;
 
-	NLLIGO::CPropertyStringArray *pp = dynamic_cast< NLLIGO::CPropertyStringArray* >( prop );
-	if( pp == NULL )
-		return;
-
-	pp->StringArray.clear();
-
-	QStringList l = v.split( '\n' );
-	QStringListIterator itr( l );
-	while( itr.hasNext() )
-	{
-		pp->StringArray.push_back( itr.next().toUtf8().constData() );
-	}
-
-	pp->Default = false;
+	Q_FOREACH( NLLIGO::IPrimitive *primitive, d_ptr->getPrimitives( p ) )
+		setStringArrayValue( primitive, p->propertyName(), v );
 }
 
 void PropertyEditorWidget::onConstStrArrValueChanged( QtProperty *p, const QString &v )
 {
-	NLLIGO::IProperty *prop = getLigoProperty( p );
-	if( prop == NULL )
+	if( v == QLatin1String( Constants::DIFFERENT_VALUE_STRING ) )
 		return;
 
-	NLLIGO::CPropertyStringArray *pp = dynamic_cast< NLLIGO::CPropertyStringArray* >( prop );
-	if( pp == NULL )
-		return;
-
-	pp->StringArray.clear();
-
-	QStringList l = v.split( '\n' );
-	QStringListIterator itr( l );
-	while( itr.hasNext() )
-	{
-		pp->StringArray.push_back( itr.next().toUtf8().constData() );
-	}
-
-	pp->Default = false;
+	Q_FOREACH( NLLIGO::IPrimitive *primitive, d_ptr->getPrimitives( p ) )
+		setStringArrayValue( primitive, p->propertyName(), v );
 }
 
 

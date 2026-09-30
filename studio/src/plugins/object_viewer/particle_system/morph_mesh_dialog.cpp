@@ -21,7 +21,7 @@
 #include "morph_mesh_dialog.h"
 
 // Qt include
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
 
 // NeL includes
 #include "nel/3d/ps_mesh.h"

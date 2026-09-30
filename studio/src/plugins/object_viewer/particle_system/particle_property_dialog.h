@@ -21,11 +21,11 @@
 #define PARTICLE_PROPERTY_DIALOG_H
 
 // Qt includes
-#include <QtGui/QWidget>
-#include <QtGui/QDockWidget>
-#include <QtGui/QStackedWidget>
-#include <QtGui/QScrollArea>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QDockWidget>
+#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QScrollArea>
+#include <QtWidgets/QGridLayout>
 
 // NeL includes
 #include "nel/misc/smart_ptr.h"

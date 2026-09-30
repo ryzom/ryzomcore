@@ -23,11 +23,11 @@
 #include <nel/misc/types_nl.h>
 
 // Qt includes
-#include <QtGui/QApplication>
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QWidget>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QWidget>
 
 // STL includes
 

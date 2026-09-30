@@ -29,12 +29,103 @@
 #include <nel/ligo/primitive_utils.h>
 #include <nel/ligo/ligo_config.h>
 
+// Project includes
+#include "world_editor_constants.h"
+#include "../core/icore.h"
+
+// Qt includes
+#include <QDir>
+#include <QFileInfo>
+#include <QSettings>
+#include <QString>
+#include <QStringList>
+
 #include <libxml/tree.h>
 
 namespace WorldEditor
 {
 namespace Utils
 {
+
+std::string translateLegacyPath(const std::string &path)
+{
+#ifdef NL_OS_WINDOWS
+	return path;
+#else
+	if (path.empty())
+		return path;
+
+	// Project files written on Windows separate with backslashes. On Unix those are
+	// ordinary characters in a file name, CPath::makePathAbsolute() just concatenates them.
+	std::string result = path;
+	for (std::string::size_type i = 0; i < result.size(); ++i)
+	{
+		if (result[i] == '\\')
+			result[i] = '/';
+	}
+
+	// Apply the mappings from [WorldEditor] WorldEditorPathMap, entries "from=to".
+	// This covers two cases: drive letters from the Windows days ("H:/foo=/mnt/foo") and
+	// renamings inside the data set, such as when the common/data_leveldesign level
+	// disappeared from the repositories. Without a matching entry the path is left alone.
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	const QStringList mappings = settings->value(Constants::PATH_MAP).toStringList();
+	settings->endGroup();
+
+	// Applied in a loop: one path may need two rules in sequence, for instance a renamed
+	// repository first and a renamed subdirectory after that. The number of passes is
+	// capped so that rules feeding each other cannot hang.
+	QString qResult = QString::fromUtf8(result.c_str());
+	for (int pass = 0; pass < 8; ++pass)
+	{
+		bool changed = false;
+		for (int i = 0; i < mappings.size(); ++i)
+		{
+			const int sep = mappings.at(i).indexOf(QLatin1Char('='));
+			if (sep <= 0)
+				continue;
+			const QString from = mappings.at(i).left(sep).trimmed();
+			const QString to = mappings.at(i).mid(sep + 1).trimmed();
+			if (from.isEmpty() || !qResult.startsWith(from, Qt::CaseInsensitive))
+				continue;
+			const QString replaced = to + qResult.mid(from.size());
+			if (replaced == qResult)
+				continue;
+			qResult = replaced;
+			changed = true;
+			break;
+		}
+		if (!changed)
+			break;
+	}
+	result = std::string(qResult.toUtf8().constData());
+
+	// A drive letter left over at this point leads nowhere, so say so.
+	if (qResult.size() > 1 && qResult.at(1) == QLatin1Char(':'))
+		nlwarning("No path mapping for '%s' - set [WorldEditor] WorldEditorPathMap",
+		          result.c_str());
+
+	return result;
+#endif
+}
+
+
+/// Resolve a path that names a file, not a directory.
+/// CPath::makePathAbsolute() ends with standardizePath(path, true), which appends a
+/// separator because the function is meant for directories. On a file name the result is
+/// ".../fyros.land/", and every attempt to open it fails with "Not a directory" - which
+/// is why no .worldedit project loaded its landscape or its primitives.
+static std::string makeFilePathAbsolute(const std::string &fileName, const std::string &directory)
+{
+	std::string result = NLMISC::CPath::makePathAbsolute(fileName, directory, true);
+
+	while (!result.empty() &&
+		   ((result[result.size() - 1] == '/') || (result[result.size() - 1] == '\\')))
+		result.resize(result.size() - 1);
+
+	return result;
+}
 
 std::string lastError;
 
@@ -127,7 +218,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 									std::string dataDir;
 									NLMISC::CIXml::getPropertyString(dataDir, node, "VALUE");
 
-									dataDir = NLMISC::CPath::makePathAbsolute( dataDir, p );
+									dataDir = translateLegacyPath(NLMISC::CPath::makePathAbsolute( translateLegacyPath(dataDir), p, true ));
 									worldEditList.push_back(WorldEditItem(DataDirectoryType, dataDir));
 								}
 
@@ -156,7 +247,7 @@ bool loadWorldEditFile(const std::string &fileName, WorldEditList &worldEditList
 											if ( NLMISC::CIXml::getPropertyString(filenameChild, node, "FILENAME"))
 											{
 
-												filenameChild = NLMISC::CPath::makePathAbsolute( filenameChild, p );
+												filenameChild = translateLegacyPath(makeFilePathAbsolute( translateLegacyPath(filenameChild), p ));
 
 												// Is it a landscape ?
 												if (type == "landscape")
@@ -687,9 +778,55 @@ bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive)
 	return modified;
 }
 
+QString lastDirectory(const char *settingsKey)
+{
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	const QString directory = settings->value(settingsKey).toString();
+	settings->endGroup();
+
+	// A directory that has gone away would drop the dialog somewhere unexpected.
+	if (directory.isEmpty() || !QDir(directory).exists())
+		return QString();
+
+	return directory;
+}
+
+void setLastDirectory(const char *settingsKey, const QString &fileName)
+{
+	if (fileName.isEmpty())
+		return;
+
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+	settings->setValue(settingsKey, QFileInfo(fileName).absolutePath());
+	settings->endGroup();
+}
+
 NLLIGO::CLigoConfig	*ligoConfig()
 {
 	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig;
+}
+
+QRectF zoneRegionSceneRect(const NLLIGO::CZoneRegion &region)
+{
+	// An empty region stores min 0 and max -1.
+	if ((region.getMaxX() < region.getMinX()) || (region.getMaxY() < region.getMinY()))
+		return QRectF();
+
+	// Zone coordinates run with negative y, the scene mirrors them: a zone at y sits at
+	// abs(y) * cellSize and covers one cell downwards from there, see
+	// LandscapeSceneBase::createItemZone().
+	const qreal cellSize = ligoConfig()->CellSize;
+	const qreal firstY = qAbs(qreal(region.getMinY())) * cellSize;
+	const qreal lastY = qAbs(qreal(region.getMaxY())) * cellSize;
+
+	QRectF rect;
+	rect.setLeft(region.getMinX() * cellSize);
+	rect.setRight((region.getMaxX() + 1) * cellSize);
+	rect.setTop(qMin(firstY, lastY));
+	rect.setBottom(qMax(firstY, lastY) + cellSize);
+	return rect;
 }
 
 } /* namespace Utils */

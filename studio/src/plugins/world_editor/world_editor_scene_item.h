@@ -19,16 +19,18 @@
 
 // Project includes
 #include "world_editor_global.h"
+#include "sheet_collision.h"
 
 // NeL includes
 
 // Qt includes
 #include <QtCore/QPair>
-#include <QtGui/QGraphicsObject>
-#include <QtGui/QGraphicsScene>
-#include <QtGui/QGraphicsPolygonItem>
-#include <QtGui/QGraphicsRectItem>
-#include <QtGui/QGraphicsSceneMouseEvent>
+#include <QtGui/QColor>
+#include <QtWidgets/QGraphicsObject>
+#include <QtWidgets/QGraphicsScene>
+#include <QtWidgets/QGraphicsPolygonItem>
+#include <QtWidgets/QGraphicsRectItem>
+#include <QtWidgets/QGraphicsSceneMouseEvent>
 
 namespace WorldEditor
 {
@@ -51,6 +53,22 @@ const int MIDDLE_POINT_LAYER = 201;
 const int EDGE_POINT_LAYER = 201;
 
 const int SIZE_ARROW = 20;
+
+/// Control symbols - point markers, edit handles, the direction arrow - are meant to keep
+/// the same size on screen at every zoom level. Drawing them at world size makes them
+/// cover the map when zoomed in; leaving them unscaled when zoomed out makes them vanish.
+/// So paint() scales them by 1/levelOfDetail, capped by this factor, and boundingRect()
+/// reserves room for the cap - it cannot know the zoom itself.
+const qreal MAX_SYMBOL_SCALE = 8.0;
+
+/// Colour a selected item is drawn in. Shared by every world item and read once from
+/// [WorldEditor] WorldEditorSelectionColor, so it can be changed without a rebuild.
+QColor selectionColor();
+
+/// Whether the collision footprints read from the sheets are drawn. Shared as well, so
+/// items created after the switch was flipped pick up the current setting.
+bool isVisibleCollisions();
+void setVisibleCollisions(bool visible);
 
 /*
 @class AbstractWorldItem
@@ -78,6 +96,14 @@ public:
 
 	/// Change color
 	virtual void setColor(const QColor &color) {}
+
+	/// The extent the primitive really occupies in the world, in item coordinates.
+	/// boundingRect() is padded for painting - it reserves room for the arrow and the
+	/// markers at their largest - so it is useless for deciding how far to zoom in.
+	virtual QRectF worldRect() const
+	{
+		return QRectF();
+	}
 
 	/// Enable/disable the mode edit shape (only for WorldItemPath and WorldItemPath)
 	virtual void setEnabledSubPoints(bool enabled) {}
@@ -119,7 +145,8 @@ class WorldItemPoint: public AbstractWorldItem
 {
 public:
 	WorldItemPoint(const QPointF &point, const qreal angle, const qreal radius,
-				   bool showArrow, QGraphicsItem *parent = 0);
+				   bool showArrow, const CollisionShape &collision = CollisionShape(),
+				   QGraphicsItem *parent = 0);
 	virtual ~WorldItemPoint();
 
 	qreal angle() const;
@@ -137,22 +164,36 @@ public:
 
 	virtual QRectF boundingRect() const;
 	virtual QPainterPath shape() const;
+	virtual QRectF worldRect() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 private:
 	void createCircle();
+	void createCollisionShape();
 	void updateBoundingRect();
 
-	static const int SIZE_POINT = 2;
+	static const int SIZE_POINT = 4;
 
 	QPen m_pen, m_selectedPen;
 	QBrush m_brush, m_selectedBrush;
+
+	/// Factor paint() last drew the control symbols with. boundingRect() has to reserve
+	/// room for the largest possible one, shape() must not - it decides what a click
+	/// hits, and a hit area of that size makes clicks land on the wrong primitive.
+	mutable qreal m_lastSymbolScale;
 
 	QPolygonF m_circle;
 	QVector<QLine> m_arrow;
 	QRectF m_rect, m_boundingRect;
 	qreal m_angle, m_radius;
 	bool m_showArrow;
+
+	/// Footprint the sheet declares, drawn at world size - unlike the control symbols,
+	/// showing its real extent is the whole point.
+	CollisionShape m_collision;
+	QPolygonF m_collisionShape;
+	QPen m_collisionPen;
+	QBrush m_collisionBrush;
 };
 
 /*
@@ -168,6 +209,8 @@ public:
 
 	virtual void rotateOn(const QPointF &pivot, const qreal deltaAngle);
 	virtual void scaleOn(const QPointF &pivot, const QPointF &factor);
+
+	virtual QRectF worldRect() const;
 
 	virtual void setEnabledSubPoints(bool enabled);
 	virtual void moveSubPoint(WorldItemSubPoint *subPoint);
@@ -265,6 +308,7 @@ public:
 	void scaleOn(const QPointF &pivot, const QPointF &factor);
 
 	virtual QRectF boundingRect() const;
+	virtual QPainterPath shape() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 	void setActived(bool actived);
@@ -280,9 +324,12 @@ protected:
 private:
 	void updateBoundingRect();
 
-	static const int SIZE_POINT = 6;
+	static const int SIZE_POINT = 7;
 
 	QBrush m_brush, m_brushMiddle, m_selectedBrush;
+
+	/// See WorldItemPoint::m_lastSymbolScale.
+	mutable qreal m_lastSymbolScale;
 
 	QRectF m_rect, m_boundingRect;
 	SubPointType m_type;

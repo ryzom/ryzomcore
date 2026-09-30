@@ -118,63 +118,42 @@ void Nel3DWidget::resizeEvent( QResizeEvent *evnt )
 }
 
 #if defined ( NL_OS_WINDOWS )
-
 typedef bool ( *winProc )( NL3D::IDriver *driver, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam );
-
-bool Nel3DWidget::winEvent( MSG *message, long *result )
-{
-	if( driver != NULL ) 
-	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( iDriver != NULL )
-		{
-			winProc proc = (winProc)iDriver->getWindowProc();
-			return proc( iDriver, message->hwnd, message->message, message->wParam, message->lParam );
-		}
-	}
-
-	return false;
-}
-
 #elif defined( NL_OS_MAC )
-
 typedef bool ( *cocoaProc )( NL3D::IDriver *, const void *e );
+#endif
 
-bool Nel3DWidget::macEvent( EventHandlerCallRef caller, EventRef event )
+bool Nel3DWidget::nativeEvent( const QByteArray &eventType, void *message, long *result )
 {
-	if( caller )
-		nlerror( "You are using QtCarbon! Only QtCocoa supported, please upgrade Qt" );
+	if( driver == NULL )
+		return QWidget::nativeEvent( eventType, message, result );
 
-	if( driver != NULL )
+	NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
+	if( iDriver == NULL )
+		return QWidget::nativeEvent( eventType, message, result );
+
+#if defined( NL_OS_WINDOWS )
+	if( eventType == "windows_generic_MSG" || eventType == "windows_dispatcher_MSG" )
 	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( iDriver != NULL )
-		{
-			cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
-			return proc( iDriver, event );
-		}
+		MSG *msg = static_cast< MSG* >( message );
+		winProc proc = ( winProc )iDriver->getWindowProc();
+		return proc( iDriver, msg->hwnd, msg->message, msg->wParam, msg->lParam );
 	}
-
-	return false;
-}
-
+#elif defined( NL_OS_MAC )
+	if( eventType == "NSEvent" )
+	{
+		cocoaProc proc = ( cocoaProc )iDriver->getWindowProc();
+		return proc( iDriver, message );
+	}
 #elif defined( NL_OS_UNIX )
+	// Through the xcb platform Qt5 delivers an xcb_generic_event_t, while NeL's window
+	// procedure (unix_event_emitter) expects an Xlib XEvent structure. The two cannot be
+	// converted into one another, so nothing is forwarded here on purpose: input goes
+	// through the ordinary Qt events. A real solution needs an Xlib event path in the
+	// driver, or an xcb variant of unix_event_emitter.
+#endif
 
-typedef bool ( *x11Proc )( NL3D::IDriver *drv, XEvent *e );
-
-bool Nel3DWidget::x11Event( XEvent *event )
-{
-	if( driver != NULL )
-	{
-		NL3D::IDriver *iDriver = dynamic_cast< NL3D::CDriverUser* >( driver )->getDriver();
-		if( driver != NULL )
-		{
-			x11Proc proc = ( x11Proc )iDriver->getWindowProc();
-			return proc( iDriver, event );
-		}
-	}
-
-	return false;
+	return QWidget::nativeEvent( eventType, message, result );
 }
-#endif 
+ 
 

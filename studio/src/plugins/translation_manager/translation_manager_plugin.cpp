@@ -35,12 +35,12 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QErrorMessage>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QErrorMessage>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenuBar>
 
 namespace TranslationManager
 {
@@ -93,4 +93,3 @@ void TranslationManagerPlugin::addAutoReleasedObject(QObject *obj)
 
 }
 
-Q_EXPORT_PLUGIN(TranslationManager::TranslationManagerPlugin)

@@ -28,8 +28,8 @@
 // STL includes
 
 // Qt includes
-#include <QtGui/QMainWindow>
-#include <QtGui/QUndoGroup>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QUndoGroup>
 #include <QtCore/QSettings>
 
 namespace Core

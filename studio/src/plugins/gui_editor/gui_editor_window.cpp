@@ -28,7 +28,7 @@
 #include <nel/misc/debug.h>
 
 #include <QtCore/QSettings>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QDockWidget>
 #include <QMessageBox>
 #include "../../3rdparty/qtpropertybrowser/QtTreePropertyBrowser"

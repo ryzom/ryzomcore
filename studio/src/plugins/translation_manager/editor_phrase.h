@@ -27,14 +27,14 @@
 #include <QtCore/QObject>
 #include <QtCore/QFile>
 #include <QtCore/QTextStream>
-#include <QtGui/QWidget>
-#include <QtGui/QMdiArea>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QUndoCommand>
-#include <QtGui/QUndoStack>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QMdiArea>
+#include <QtWidgets/QMdiSubWindow>
+#include <QtWidgets/QUndoCommand>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QTextEdit>
 #include <QtGui/QSyntaxHighlighter>
-#include <QtGui/QErrorMessage>
+#include <QtWidgets/QErrorMessage>
 #include <QKeyEvent>
 
 namespace TranslationManager

@@ -22,10 +22,10 @@
 #define TRANSLATION_MANAGER_EDITOR_H
 
 #include <QtCore/QObject>
-#include <QtGui/QWidget>
-#include <QtGui/QMdiArea>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QUndoStack>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QMdiArea>
+#include <QtWidgets/QMdiSubWindow>
+#include <QtWidgets/QUndoStack>
 #include <QtCore/QFileInfo>
 
 namespace TranslationManager

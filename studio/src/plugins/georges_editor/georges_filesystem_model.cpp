@@ -17,6 +17,16 @@
 #include "stdpch.h"
 #include "georges_filesystem_model.h"
 
+// Project includes
+#include "../core/icore.h"
+#include "../core/core_constants.h"
+
+// NeL includes
+#include <nel/misc/debug.h>
+
+// Qt includes
+#include <QSettings>
+
 #include <QApplication>
 #include <QStyle>
 
@@ -100,16 +110,30 @@ int CGeorgesFileSystemModel::rowCount(const QModelIndex &parent) const
 
 void CGeorgesFileSystemModel::checkLDPath()
 {
-	QFileInfo check1(QString("%1/game_element").arg(m_ldPath));
-	QFileInfo check2(QString("%1/DFN").arg(m_ldPath));
+	// Traditionally DFN and game_element lived in the same tree. Since the data was split
+	// across several repositories (leveldesign in one, game_element in another) that no
+	// longer holds. The sheet path may therefore be given separately through
+	// [DataPath] GameElementPath; without an entry the old assumption still applies.
+	QSettings *settings = Core::ICore::instance()->settings();
+	settings->beginGroup(Core::Constants::DATA_PATH_SECTION);
+	QString gameElementPath = settings->value(Core::Constants::GAME_ELEMENT_PATH).toString();
+	settings->endGroup();
 
-	if (check1.exists() && check2.exists())
+	if (gameElementPath.isEmpty())
+		gameElementPath = QString("%1/game_element").arg(m_ldPath);
+
+	const QFileInfo sheets(gameElementPath);
+	const QFileInfo dfn(QString("%1/DFN").arg(m_ldPath));
+
+	m_correct = sheets.exists() && dfn.exists();
+
+	if (!m_correct)
 	{
-		m_correct = true;
-	}
-	else
-	{
-		m_correct = false;
+		nlwarning("Georges: leveldesign path '%s' incomplete - DFN %s, game_element ('%s') %s",
+		          m_ldPath.toUtf8().constData(),
+		          dfn.exists() ? "found" : "MISSING",
+		          gameElementPath.toUtf8().constData(),
+		          sheets.exists() ? "found" : "MISSING");
 	}
 }
 //

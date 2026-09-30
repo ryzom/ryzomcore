@@ -25,7 +25,7 @@
 #include "ui_georges_editor_form.h"
 
 // Qt includes
-#include <QtGui/QUndoStack>
+#include <QtWidgets/QUndoStack>
 
 class GeorgesDockWidget;
 

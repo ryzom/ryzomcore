@@ -19,7 +19,7 @@
 
 #include "ftp_selection.h"
 
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtNetwork/QFtp>
 
 namespace TranslationManager

@@ -114,12 +114,18 @@ public:
 
 	void setContext(const QString &name);
 	QString context() const;
+
+	/// Path of the .worldedit file, empty for a world that was never saved. The tree
+	/// shows only the file name, so the path has to be kept separately.
+	void setFileName(const QString &fileName);
+	QString fileName() const;
 	void setDataPath(const QString &path);
 	QString dataPath() const;
 
 	virtual NodeType type() const;
 
 private:
+	QString m_fileName;
 	QString m_context;
 	QString m_dataPath;
 };
@@ -160,6 +166,9 @@ public:
 	NLLIGO::IPrimitive *primitive() const;
 	const NLLIGO::CPrimitiveClass *primitiveClass() const;
 	RootPrimitiveNode *rootPrimitiveNode();
+
+	/// Recompute the tree icon from the primitive class and the visibility flag.
+	void updateIcon();
 
 	virtual NodeType type() const;
 

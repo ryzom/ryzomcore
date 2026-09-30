@@ -20,7 +20,7 @@
 #ifndef TILE_ITEM_DELEGATE_H
 #define TILE_ITEM_DELEGATE_H
 
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QPixmap>
 #include <QStyledItemDelegate>
 

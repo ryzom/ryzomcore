@@ -21,7 +21,7 @@
 #include "slot_manager_dialog.h"
 
 // Qt includes
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QInputDialog>
 
 // NeL includes
 

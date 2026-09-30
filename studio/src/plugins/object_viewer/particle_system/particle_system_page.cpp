@@ -21,10 +21,10 @@
 #include "particle_system_page.h"
 
 // Qt includes
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
-#include <QtGui/QInputDialog>
-#include <QtGui/QErrorMessage>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QErrorMessage>
 
 // NeL includes
 #include <nel/3d/particle_system.h>

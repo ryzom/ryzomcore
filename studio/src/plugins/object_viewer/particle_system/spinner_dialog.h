@@ -21,9 +21,9 @@
 #define SPINNER_DIALOG_H
 
 // Qt includes
-#include <QtGui/QDialog>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QLabel>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QLabel>
 
 // Nel include
 #include "nel/3d/ps_plane_basis_maker.h"

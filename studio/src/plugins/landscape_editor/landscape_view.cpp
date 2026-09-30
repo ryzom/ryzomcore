@@ -33,6 +33,7 @@ namespace LandscapeEditor
 LandscapeView::LandscapeView(QWidget *parent)
 	: QGraphicsView(parent),
 	  m_visibleGrid(true),
+	  m_visibleGridPoints(false),
 	  m_visibleText(true)
 {
 	setTransformationAnchor(AnchorUnderMouse);
@@ -133,6 +134,24 @@ void LandscapeView::resizeEvent(QResizeEvent *event)
 	QGraphicsView::resizeEvent(event);
 }
 
+void LandscapeView::showRect(const QRectF &rect)
+{
+	if (rect.isEmpty())
+		return;
+
+	// A little air around it, proportional to what is shown - a fixed margin would be
+	// invisible on a whole landscape and would swamp a single primitive.
+	const qreal marginX = rect.width() * 0.05;
+	const qreal marginY = rect.height() * 0.05;
+	const QRectF target = rect.adjusted(-marginX, -marginY, marginX, marginY);
+
+	fitInView(target, Qt::KeepAspectRatio);
+
+	// fitInView() moves the scroll bars behind setCenter()'s back; keep the tracked
+	// centre in step, otherwise the next resize jumps back to where the view was.
+	setCenter(target.center());
+}
+
 void LandscapeView::setCenter(const QPointF &centerPoint)
 {
 	//Get the rectangle of the visible area in scene coords
@@ -193,11 +212,17 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 {
 	QGraphicsView::drawForeground(painter, rect);
 
-	if (!m_visibleGrid)
-		return;
+	if (m_visibleGrid)
+	{
+		painter->setPen(QPen(Qt::white, 0, Qt::SolidLine));
+		drawGrid(painter, rect);
+	}
 
-	painter->setPen(QPen(Qt::white, 0, Qt::SolidLine));
-	drawGrid(painter, rect);
+	if (m_visibleGridPoints)
+	{
+		painter->setPen(QPen(Qt::white, 3, Qt::SolidLine, Qt::RoundCap));
+		drawGridPoints(painter, rect);
+	}
 
 	if (!m_visibleText)
 		return;
@@ -207,6 +232,36 @@ void LandscapeView::drawForeground(QPainter *painter, const QRectF &rect)
 		painter->setPen(QPen(Qt::white, 0.5, Qt::SolidLine));
 		drawZoneNames(painter, rect);
 	}
+}
+
+bool LandscapeView::isVisibleGridPoints() const
+{
+	return m_visibleGridPoints;
+}
+
+void LandscapeView::setVisibleGridPoints(bool visible)
+{
+	m_visibleGridPoints = visible;
+	if (scene() != 0)
+		scene()->update();
+}
+
+void LandscapeView::drawGridPoints(QPainter *painter, const QRectF &rect)
+{
+	// A dot on every cell corner, the way the original editor marks out the grid where
+	// there is no landscape. Skipped once the cells are too small on screen to tell the
+	// dots apart - at that point it is a grey wash, not information.
+	if (m_cellSize * transform().m11() < 4.0)
+		return;
+
+	QVector<QPointF> points;
+	for (qreal x = m_cellSize * floor(rect.left() / m_cellSize); x < rect.right(); x += m_cellSize)
+	{
+		for (qreal y = m_cellSize * floor(rect.top() / m_cellSize); y < rect.bottom(); y += m_cellSize)
+			points.push_back(QPointF(x, y));
+	}
+
+	painter->drawPoints(points.data(), points.size());
 }
 
 void LandscapeView::drawGrid(QPainter *painter, const QRectF &rect)

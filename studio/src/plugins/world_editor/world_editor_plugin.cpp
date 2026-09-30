@@ -141,4 +141,3 @@ QWidget *WorldEditorContext::widget()
 
 }
 
-Q_EXPORT_PLUGIN(WorldEditor::WorldEditorPlugin)

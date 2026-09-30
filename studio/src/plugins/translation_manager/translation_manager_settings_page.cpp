@@ -24,9 +24,9 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
-#include <QtGui/QListWidgetItem>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QListWidgetItem>
 
 namespace TranslationManager
 {

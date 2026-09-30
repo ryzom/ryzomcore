@@ -31,12 +31,12 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
-#include <QtGui/QWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QWidget>
 #include <QFile>
 #include <QDateTime>
 #include <QTextStream>
@@ -202,4 +202,3 @@ namespace Plugin
 		}
 	}
 }
-Q_EXPORT_PLUGIN(Plugin::CLogPlugin)

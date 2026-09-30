@@ -31,11 +31,11 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenuBar>
 
 using namespace Core;
 
@@ -104,4 +104,3 @@ void CorePlugin::addAutoReleasedObject(QObject *obj)
 	m_autoReleaseObjects.prepend(obj);
 }
 
-Q_EXPORT_PLUGIN(CorePlugin)

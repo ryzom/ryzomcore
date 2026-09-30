@@ -25,8 +25,8 @@
 #include "modules.h"
 
 // Qt includes
-#include <QtGui/QWidget>
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QColorDialog>
 #include <QtCore/QSettings>
 
 // NeL includes

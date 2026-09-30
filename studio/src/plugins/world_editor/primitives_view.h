@@ -25,18 +25,20 @@
 #include <nel/ligo/primitive.h>
 
 // Qt includes
-#include <QtGui/QAction>
-#include <QtGui/QTreeView>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QTreeView>
 #include <QtCore/QModelIndex>
 #include <QtCore/QVariant>
 #include <QtCore/QSignalMapper>
-#include <QtGui/QUndoStack>
-#include <QtGui/QItemSelection>
+#include <QtWidgets/QUndoStack>
+#include <QtCore/QItemSelection>
 
 namespace LandscapeEditor
 {
 class ZoneBuilderBase;
 }
+
+class QGraphicsItem;
 
 namespace WorldEditor
 {
@@ -52,6 +54,13 @@ class PrimitivesView : public QTreeView
 {
 	Q_OBJECT
 
+Q_SIGNALS:
+	/// Emitted after one or more .land files finished loading, so the view can show them.
+	void landscapeLoaded();
+
+	/// Move the map view onto this area of the scene, picked through "Zoom in".
+	void zoomToRectRequested(const QRectF &sceneRect);
+
 public:
 	explicit PrimitivesView(QWidget *parent = 0);
 	~PrimitivesView();
@@ -61,11 +70,24 @@ public:
 	void setWorldScene(WorldEditorScene *worldEditorScene);
 	virtual void setModel(PrimitivesTreeModel *model);
 
+	/// Open every collapsed parent of index and scroll it into view, without touching
+	/// the selection. Picking a primitive on the map is of little use while its row
+	/// sits somewhere inside a folded tree.
+	void revealIndex(const QModelIndex &index);
+
+	/// Show the context menu that belongs to index, at a global position. Used by the
+	/// tree's own right click and by a right click on the map, so both offer the same
+	/// entries. fromScene adds "Show in Tree" on top, which inside the tree is pointless.
+	void showContextMenu(const QModelIndex &index, const QPoint &globalPos,
+						 bool fromScene = false);
+
 private Q_SLOTS:
 	void loadLandscape();
 	void loadRootPrimitive();
 	void createRootPrimitive();
 	void selectChildren();
+	void showInTree();
+	void zoomToPrimitive();
 
 	void save();
 	void saveAs();
@@ -83,11 +105,17 @@ protected:
 private:
 	void selectChildren(const QModelIndex &parent, QItemSelection &itemSelection);
 	void fillMenu_WorldEdit(QMenu *menu);
-	void fillMenu_Landscape(QMenu *menu);
+	void fillMenu_Landscape(QMenu *menu, const QModelIndex &index);
 	void fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &index);
 	void fillMenu_Primitive(QMenu *menu, const QModelIndex &index);
 
-	QString m_lastDir;
+	/// Union of the map extents of this row and everything below it, in scene
+	/// coordinates. Null when nothing in the subtree is drawn on the map.
+	QRectF sceneRectOfSubtree(const QModelIndex &index) const;
+
+	/// Area of a land on the map, null if the row is no land or the land is empty.
+	QRectF landscapeSceneRect(const QModelIndex &index) const;
+
 
 	QAction *m_unloadAction;
 	QAction *m_saveAction;
@@ -100,6 +128,11 @@ private:
 	QAction *m_helpAction;
 	QAction *m_showAction;
 	QAction *m_hideAction;
+	QAction *m_showInTreeAction;
+	QAction *m_zoomToAction;
+
+	/// Index the context menu was last opened for, for "Show in Tree".
+	QPersistentModelIndex m_contextMenuIndex;
 
 	QUndoStack *m_undoStack;
 	WorldEditorScene *m_worldEditorScene;

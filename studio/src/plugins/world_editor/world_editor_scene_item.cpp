@@ -16,6 +16,9 @@
 
 // Project includes
 #include "world_editor_scene_item.h"
+#include "world_editor_constants.h"
+
+#include "../core/icore.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -27,9 +30,54 @@
 #include <QTransform>
 #include <QStyleOptionGraphicsItem>
 #include <QPropertyAnimation>
+#include <QSettings>
 
 namespace WorldEditor
 {
+
+namespace
+{
+/// Default when the setting is absent: a strong magenta. It has to stand out from the
+/// sandy zone bitmaps as well as from the orange points, the red paths and the green
+/// collision shapes, and white did not.
+const char *const DEFAULT_SELECTION_COLOR = "#ff28c8";
+
+bool g_visibleCollisions = true;
+}
+
+QColor selectionColor()
+{
+	// Read once. Changing it takes a restart, which is fine for a colour.
+	static QColor color;
+	if (!color.isValid())
+	{
+		QSettings *settings = Core::ICore::instance()->settings();
+		settings->beginGroup(Constants::WORLD_EDITOR_SECTION);
+		const QString name = settings->value(Constants::SELECTION_COLOR,
+											 QString(DEFAULT_SELECTION_COLOR)).toString();
+		settings->endGroup();
+
+		color = QColor(name);
+		if (!color.isValid())
+		{
+			nlwarning("World Editor: [%s] %s is not a colour ('%s'), using %s.",
+					  Constants::WORLD_EDITOR_SECTION, Constants::SELECTION_COLOR,
+					  name.toUtf8().constData(), DEFAULT_SELECTION_COLOR);
+			color = QColor(QString(DEFAULT_SELECTION_COLOR));
+		}
+	}
+	return color;
+}
+
+bool isVisibleCollisions()
+{
+	return g_visibleCollisions;
+}
+
+void setVisibleCollisions(bool visible)
+{
+	g_visibleCollisions = visible;
+}
 
 static QPainterPath qt_graphicsItem_shapeFromPath(const QPainterPath &path, const QPen &pen)
 {
@@ -89,11 +137,14 @@ bool AbstractWorldItem::isShapeChanged() const
 }
 
 WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qreal radius,
-							   bool showArrow, QGraphicsItem *parent)
+							   bool showArrow, const CollisionShape &collision,
+							   QGraphicsItem *parent)
 	: AbstractWorldItem(parent),
 	  m_angle(angle),
 	  m_radius(radius),
-	  m_showArrow(showArrow)
+	  m_showArrow(showArrow),
+	  m_collision(collision),
+	  m_lastSymbolScale(1.0)
 {
 	setZValue(WORLD_POINT_LAYER);
 
@@ -104,18 +155,24 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qr
 	m_rect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);
 
 	m_pen.setColor(QColor(255, 100, 10));
-	//m_pen.setWidth(0);
+	m_pen.setWidth(0);
 
-	m_selectedPen.setColor(Qt::white);
-	//m_selectedPen.setWidth(0);
+	m_selectedPen.setColor(selectionColor());
+	m_selectedPen.setWidth(0);
 
 	m_brush.setColor(QColor(255, 100, 10));
 	m_brush.setStyle(Qt::SolidPattern);
 
-	m_selectedBrush.setColor(Qt::white);
+	m_selectedBrush.setColor(selectionColor());
 	m_selectedBrush.setStyle(Qt::SolidPattern);
 
+	m_collisionPen.setColor(QColor(120, 230, 90));
+	m_collisionPen.setWidth(0);
+	m_collisionBrush.setColor(QColor(120, 230, 90, 40));
+	m_collisionBrush.setStyle(Qt::SolidPattern);
+
 	createCircle();
+	createCollisionShape();
 
 	// Create arrow
 	if (showArrow)
@@ -201,6 +258,33 @@ QPolygonF WorldItemPoint::polygon() const
 	return polygon;
 }
 
+void WorldItemPoint::createCollisionShape()
+{
+	// Built as a polygon for the same reason as the radius circle above: drawEllipse()
+	// leaves artefacts with the OpenGL painter.
+	if (m_collision.Kind_ == CollisionShape::Circle)
+	{
+		const int segmentCount = 24;
+		for (int i = 0; i < segmentCount + 1; ++i)
+		{
+			const qreal angle = i * (2 * NLMISC::Pi / segmentCount);
+			m_collisionShape << QPointF(cos(angle) * m_collision.Radius,
+										sin(angle) * m_collision.Radius);
+		}
+	}
+	else if (m_collision.Kind_ == CollisionShape::Box)
+	{
+		// Length runs along the direction the entity faces, width across it.
+		const qreal halfLength = m_collision.Length / 2.0;
+		const qreal halfWidth = m_collision.Width / 2.0;
+		m_collisionShape << QPointF(-halfLength, -halfWidth)
+						 << QPointF(halfLength, -halfWidth)
+						 << QPointF(halfLength, halfWidth)
+						 << QPointF(-halfLength, halfWidth)
+						 << QPointF(-halfLength, -halfWidth);
+	}
+}
+
 void WorldItemPoint::createCircle()
 {
 	if (m_radius != 0)
@@ -221,17 +305,45 @@ void WorldItemPoint::createCircle()
 
 void WorldItemPoint::updateBoundingRect()
 {
-	m_boundingRect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);
+	// The marker and the arrow grow by up to MAX_SYMBOL_SCALE when zoomed out, and the
+	// arrow turns with the item, so reserve its full length in every direction. Leaving
+	// the arrow out of the rectangle - as this did before - smears it across the view.
+	const qreal symbolExtent =
+			(m_showArrow ? qreal(SIZE_ARROW) : qreal(SIZE_POINT)) * MAX_SYMBOL_SCALE;
+	m_boundingRect.setCoords(-symbolExtent, -symbolExtent, symbolExtent, symbolExtent);
+
 	QRectF circleBoundingRect;
 	circleBoundingRect.setCoords(-m_radius, -m_radius, m_radius, m_radius);
 	m_boundingRect = m_boundingRect.united(circleBoundingRect);
+
+	if (!m_collisionShape.isEmpty())
+	{
+		// Rotated with the item, so a square around the longest extent covers every angle.
+		const QRectF shapeRect = m_collisionShape.boundingRect();
+		const qreal reach = qMax(qAbs(shapeRect.left()), qMax(qAbs(shapeRect.right()),
+						   qMax(qAbs(shapeRect.top()), qAbs(shapeRect.bottom()))));
+		QRectF collisionBoundingRect;
+		collisionBoundingRect.setCoords(-reach, -reach, reach, reach);
+		m_boundingRect = m_boundingRect.united(collisionBoundingRect);
+	}
 }
 
 QPainterPath WorldItemPoint::shape() const
 {
+	// Only what the user actually sees: the marker at the size it was last drawn with,
+	// plus the radius circle if the primitive has one. boundingRect() also reserves room
+	// for the direction arrow at its largest, and using that here meant a click anywhere
+	// within eight arrow lengths picked whichever point came first in z order.
 	QPainterPath path;
 
-	path.addRect(m_boundingRect);
+	const qreal markerExtent = qreal(SIZE_POINT) * m_lastSymbolScale;
+	QRectF markerRect;
+	markerRect.setCoords(-markerExtent, -markerExtent, markerExtent, markerExtent);
+	path.addRect(markerRect);
+
+	if (m_radius != 0)
+		path.addEllipse(QPointF(0.0, 0.0), m_radius, m_radius);
+
 	return qt_graphicsItem_shapeFromPath(path, m_pen);
 }
 
@@ -240,16 +352,56 @@ QRectF WorldItemPoint::boundingRect() const
 	return m_boundingRect;
 }
 
+QRectF WorldItemPoint::worldRect() const
+{
+	// What the primitive really covers: its radius, and the footprint from the sheet.
+	// The marker and the arrow are drawn at a fixed size on screen and say nothing about
+	// how much room the thing takes in the world, so they are left out.
+	QRectF rect;
+
+	if (m_radius != 0)
+		rect.setCoords(-m_radius, -m_radius, m_radius, m_radius);
+
+	if (!m_collisionShape.isEmpty())
+		rect = rect.isNull() ? m_collisionShape.boundingRect()
+							 : rect.united(m_collisionShape.boundingRect());
+
+	return rect;
+}
+
 void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
 {
 	painter->setPen(m_pen);
 
-	// Draw circle
+	// The radius is a real world size and therefore scales along.
 	// Draws artefacts with using opengl painter
 	// painter->drawEllipse(-m_radius / 2, -m_radius / 2, m_radius, m_radius);
 	painter->drawPolygon(m_circle);
 
+	// The collision footprint from the sheet is a real world size, so it is drawn
+	// unscaled - seeing how much room the object really takes is the point of it. The
+	// box turns with the entity, the circle does not need to.
+	if (!m_collisionShape.isEmpty() && isVisibleCollisions())
+	{
+		painter->save();
+		if (m_collision.Kind_ == CollisionShape::Box)
+			painter->rotate(m_angle);
+		painter->setPen(m_collisionPen);
+		painter->setBrush(m_collisionBrush);
+		painter->drawPolygon(m_collisionShape);
+		painter->restore();
+	}
+
+	// The marker and the direction arrow, in contrast, are pure control symbols and should
+	// keep the same size on screen at every zoom level. Scaling by 1/lod does that in both
+	// directions; the cap keeps them inside the room boundingRect() reserves.
+	const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
+	const qreal scale = qMin(1.0 / lod, MAX_SYMBOL_SCALE);
+	m_lastSymbolScale = scale;
+
+	painter->save();
 	painter->rotate(m_angle);
+	painter->scale(scale, scale);
 
 	// Draw arrow
 	painter->drawLines(m_arrow);
@@ -262,6 +414,7 @@ void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
 	// Draw point
 	painter->drawRect(m_rect);
+	painter->restore();
 }
 
 BaseWorldItemPolyline::BaseWorldItemPolyline(const QPolygonF &polygon, QGraphicsItem *parent)
@@ -305,6 +458,11 @@ void BaseWorldItemPolyline::scaleOn(const QPointF &pivot, const QPointF &factor)
 	m_polyline = trans.map(scaledPolygon);
 
 	m_polyline.translate(pivot - pos());
+}
+
+QRectF BaseWorldItemPolyline::worldRect() const
+{
+	return m_polyline.boundingRect();
 }
 
 void BaseWorldItemPolyline::setEnabledSubPoints(bool enabled)
@@ -484,11 +642,14 @@ WorldItemPath::WorldItemPath(const QPolygonF &polygon, QGraphicsItem *parent)
 	setZValue(WORLD_PATH_LAYER);
 
 	m_pen.setColor(Qt::black);
-	m_pen.setWidth(3);
+	// Width 0 = cosmetic pen: always one screen line wide, however far the view is
+	// zoomed in. A width of 3 means 3 world metres, and zooming in
+	// turns paths and routes into wide bands.
+	m_pen.setWidth(0);
 	m_pen.setJoinStyle(Qt::MiterJoin);
 
-	m_selectedPen.setColor(Qt::white);
-	m_selectedPen.setWidth(3);
+	m_selectedPen.setColor(selectionColor());
+	m_selectedPen.setWidth(0);
 	m_selectedPen.setJoinStyle(Qt::MiterJoin);
 }
 
@@ -541,11 +702,12 @@ WorldItemZone::WorldItemZone(const QPolygonF &polygon, QGraphicsItem *parent)
 
 	m_pen.setColor(QColor(20, 100, 255));
 	m_pen.setWidth(0);
-	m_selectedPen.setColor(Qt::white);
+	m_selectedPen.setColor(selectionColor());
 	m_selectedPen.setWidth(0);
 	m_brush.setColor(QColor(20, 100, 255, TRANSPARENCY));
 	m_brush.setStyle(Qt::SolidPattern);
-	m_selectedBrush.setColor(QColor(255, 255, 255, 100));
+	m_selectedBrush.setColor(QColor(selectionColor().red(), selectionColor().green(),
+									selectionColor().blue(), 100));
 	m_selectedBrush.setStyle(Qt::SolidPattern);
 }
 
@@ -609,7 +771,8 @@ WorldItemSubPoint::WorldItemSubPoint(SubPointType pointType, AbstractWorldItem *
 	: QGraphicsObject(parent),
 	  m_type(pointType),
 	  m_active(false),
-	  m_parent(parent)
+	  m_parent(parent),
+	  m_lastSymbolScale(1.0)
 {
 	setZValue(WORLD_POINT_LAYER);
 
@@ -619,7 +782,8 @@ WorldItemSubPoint::WorldItemSubPoint(SubPointType pointType, AbstractWorldItem *
 	m_brushMiddle.setColor(QColor(255, 25, 100));
 	m_brushMiddle.setStyle(Qt::SolidPattern);
 
-	m_selectedBrush.setColor(QColor(255, 255, 255, 100));
+	// Opaque here: a half transparent handle on a pale zone bitmap was hard to make out.
+	m_selectedBrush.setColor(selectionColor());
 	m_selectedBrush.setStyle(Qt::SolidPattern);
 
 	m_rect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);
@@ -679,6 +843,19 @@ QRectF WorldItemSubPoint::boundingRect() const
 	return m_boundingRect;
 }
 
+QPainterPath WorldItemSubPoint::shape() const
+{
+	// The handle at its drawn size, not the room boundingRect() reserves - see
+	// WorldItemPoint::shape().
+	const qreal extent = qreal(SIZE_POINT) * m_lastSymbolScale;
+	QRectF rect;
+	rect.setCoords(-extent, -extent, extent, extent);
+
+	QPainterPath path;
+	path.addRect(rect);
+	return path;
+}
+
 void WorldItemSubPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	painter->setPen(Qt::NoPen);
@@ -692,8 +869,17 @@ void WorldItemSubPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem 
 	else
 		painter->setBrush(m_brushMiddle);
 
+	// A control handle, not a world object - constant size on screen (see WorldItemPoint).
+	const qreal lod = option->levelOfDetailFromTransform(painter->worldTransform());
+	const qreal scale = qMin(1.0 / lod, MAX_SYMBOL_SCALE);
+	m_lastSymbolScale = scale;
+
+	painter->save();
+	painter->scale(scale, scale);
+
 	// Draw point
 	painter->drawRect(m_rect);
+	painter->restore();
 }
 
 int WorldItemSubPoint::type() const
@@ -735,7 +921,9 @@ void WorldItemSubPoint::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void WorldItemSubPoint::updateBoundingRect()
 {
-	m_boundingRect.setCoords(-SIZE_POINT, -SIZE_POINT, SIZE_POINT, SIZE_POINT);
+	// Grows by up to MAX_SYMBOL_SCALE when zoomed out, see WorldItemPoint.
+	const qreal extent = qreal(SIZE_POINT) * MAX_SYMBOL_SCALE;
+	m_boundingRect.setCoords(-extent, -extent, extent, extent);
 }
 
 } /* namespace WorldEditor */

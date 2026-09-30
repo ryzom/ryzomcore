@@ -87,28 +87,28 @@
 
 #include "qteditorfactory.h"
 #include "qtpropertybrowserutils_p.h"
-#include <QtGui/QSpinBox>
-#include <QtGui/QScrollBar>
-#include <QtGui/QComboBox>
-#include <QtGui/QAbstractItemView>
-#include <QtGui/QLineEdit>
-#include <QtGui/QDateTimeEdit>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QMenu>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QScrollBar>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QAbstractItemView>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QDateTimeEdit>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QMenu>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QApplication>
-#include <QtGui/QLabel>
-#include <QtGui/QToolButton>
-#include <QtGui/QColorDialog>
-#include <QtGui/QFontDialog>
-#include <QtGui/QDialog>
-#include <QtGui/QPlainTextEdit>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QToolButton>
+#include <QtWidgets/QColorDialog>
+#include <QtWidgets/QFontDialog>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QTextEdit>
 #include <QCompleter>
 #include <QColumnView>
 #include <QStandardItemModel>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QSpacerItem>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QSpacerItem>
 #include <QtCore/QMap>
 
 #if defined(Q_CC_MSVC)
@@ -162,7 +162,7 @@ Editor *EditorFactoryPrivate<Editor>::createEditor(QtProperty *property, QWidget
 template <class Editor>
 void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property, Editor *editor)
 {
-    Q_TYPENAME PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
+    typename PropertyToEditorListMap::iterator it = m_createdEditors.find(property);
     if (it == m_createdEditors.end())
         it = m_createdEditors.insert(property, EditorList());
     it.value().append(editor);
@@ -172,12 +172,12 @@ void EditorFactoryPrivate<Editor>::initializeEditor(QtProperty *property, Editor
 template <class Editor>
 void EditorFactoryPrivate<Editor>::slotEditorDestroyed(QObject *object)
 {
-    const Q_TYPENAME EditorToPropertyMap::iterator ecend = m_editorToProperty.end();
-    for (Q_TYPENAME EditorToPropertyMap::iterator itEditor = m_editorToProperty.begin(); itEditor !=  ecend; ++itEditor) {
+    const typename EditorToPropertyMap::iterator ecend = m_editorToProperty.end();
+    for (typename EditorToPropertyMap::iterator itEditor = m_editorToProperty.begin(); itEditor !=  ecend; ++itEditor) {
         if (itEditor.key() == object) {
             Editor *editor = itEditor.key();
             QtProperty *property = itEditor.value();
-            const Q_TYPENAME PropertyToEditorListMap::iterator pit = m_createdEditors.find(property);
+            const typename PropertyToEditorListMap::iterator pit = m_createdEditors.find(property);
             if (pit != m_createdEditors.end()) {
                 pit.value().removeAll(editor);
                 if (pit.value().empty())
@@ -2989,5 +2989,5 @@ void QtTextEditorFactory::disconnectPropertyManager(QtTextPropertyManager *manag
 QT_END_NAMESPACE
 #endif
 
-#include "moc_qteditorfactory.cxx"
+#include "moc_qteditorfactory.cpp"
 #include "qteditorfactory.moc"

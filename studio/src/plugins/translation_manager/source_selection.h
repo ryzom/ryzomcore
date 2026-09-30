@@ -23,9 +23,9 @@
 #include "ui_source_selection.h"
 
 #include <QtCore/QObject>
-#include <QtGui/QDialog>
+#include <QtWidgets/QDialog>
 #include <QtCore/QString>
-#include <QtGui/QListWidgetItem>
+#include <QtWidgets/QListWidgetItem>
 
 #include <map>
 

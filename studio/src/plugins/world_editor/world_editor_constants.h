@@ -50,13 +50,47 @@ const char *const WORLD_EDITOR_SNAP = "WorldEditorSnap";
 const char *const WORLD_EDITOR_USE_OPENGL = "WorldEditorUseOpenGL";
 const char *const ZONE_SNAPSHOT_RES = "WorldEditorZoneSnapshotRes";
 const char *const PRIMITIVE_CLASS_FILENAME = "WorldEditorPrimitiveClassFilename";
+const char *const PATH_MAP = "WorldEditorPathMap";
+
+/// Directory holding the per-class primitive icons (*.ico) of the original editor.
+/// Left empty, the directory is looked up through NeL's search paths, see
+/// PrimitiveIcons::resolveIconDirectory().
+const char *const ICON_PATH = "WorldEditorIconPath";
+
+/// Directory each file dialog last pointed at. Kept apart per kind of file, because the
+/// landscapes, the primitives and the project files live in different trees.
+const char *const LAST_LAND_DIR = "WorldEditorLastLandDir";
+const char *const LAST_PRIMITIVE_DIR = "WorldEditorLastPrimitiveDir";
+const char *const LAST_WORLD_EDIT_DIR = "WorldEditorLastWorldEditDir";
+
+/// Colour a selected primitive is drawn in, as #rrggbb. White - the old fixed value -
+/// disappears on the pale zone bitmaps, which is what this is here to let you change.
+const char *const SELECTION_COLOR = "WorldEditorSelectionColor";
+
+/// State of the show/hide switches in the tool bar.
+const char *const VISIBLE_COLLISIONS = "WorldEditorVisibleCollisions";
+const char *const VISIBLE_LAND = "WorldEditorVisibleLand";
+const char *const VISIBLE_ZONE_PRIMITIVES = "WorldEditorVisibleZonePrimitives";
+const char *const VISIBLE_PATH_PRIMITIVES = "WorldEditorVisiblePathPrimitives";
+const char *const VISIBLE_POINT_PRIMITIVES = "WorldEditorVisiblePointPrimitives";
+const char *const VISIBLE_DETAILS = "WorldEditorVisibleDetails";
+const char *const VISIBLE_GRID = "WorldEditorVisibleGrid";
+const char *const VISIBLE_GRID_POINTS = "WorldEditorVisibleGridPoints";
+const char *const VISIBLE_PACS = "WorldEditorVisiblePacs";
+
+/// Directory holding one <continent>_pacs directory per continent, as in the unpacked
+/// client data. Preferred over the pacs/ directory next to the landscape when it has
+/// the continent. Empty: always use the one next to the landscape.
+const char *const PACS_ROOT = "WorldEditorPacsRoot";
 
 //resources
 const char *const ICON_WORLD_EDITOR = ":/icons/ic_nel_world_editor.png";
-const char *const ICON_ROOT_PRIMITIVE = "./old_ico/root.ico";
-const char *const ICON_PROPERTY = "./old_ico/property.ico";
-const char *const ICON_FOLDER = "./old_ico/folder_h.ico";
-const char *const PATH_TO_OLD_ICONS = "./old_ico";
+
+/// Prefix of the compiled-in tree icons, converted from the resources of the MFC
+/// editor. The names after the prefix are root/folder/property/point/line/zone plus
+/// _closed, _opened or _hidden, and erro for a broken structure.
+const char *const ICON_TREE_PREFIX = ":/icons/we_";
+const char *const ICON_ROOT_PRIMITIVE = ":/icons/we_root_closed.png";
 
 } // namespace Constants
 } // namespace WorldEditor

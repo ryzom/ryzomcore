@@ -28,8 +28,8 @@
 
 // Qt includes
 #include <QtCore/QDir>
-#include <QtGui/QMessageBox>
-#include <QtGui/QProgressDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QProgressDialog>
 
 namespace LandscapeEditor
 {
@@ -121,6 +121,11 @@ void ZoneBuilderBase::deleteZoneRegion(int id)
 int ZoneBuilderBase::countZoneRegion() const
 {
 	return m_landscapeMap.size();
+}
+
+QList<int> ZoneBuilderBase::zoneRegionIds() const
+{
+	return m_landscapeMap.keys();
 }
 
 ZoneRegionObject *ZoneBuilderBase::zoneRegion(int id) const

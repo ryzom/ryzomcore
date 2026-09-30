@@ -26,7 +26,7 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 // NeL includes
 #include <nel/3d/bloom_effect.h>

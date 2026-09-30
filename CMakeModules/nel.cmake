@@ -237,6 +237,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   IF(WITH_QT)
     OPTION(WITH_STUDIO              "Build Core Studio"                             OFF )
   ENDIF()
+  OPTION(WITH_BREAKPAD            "Link Breakpad for crash minidumps"             ON )
 
   ###
   # Features

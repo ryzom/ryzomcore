@@ -27,8 +27,8 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QFileDialog>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QFileDialog>
 
 namespace WorldEditor
 {

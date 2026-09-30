@@ -517,7 +517,7 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 void BrowserCtrlPvt::onAtomValueChanged( QtProperty *p, const QVariant &value )
 {
 	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( getCurrentNode() );
-	atom->setValue( value.toString().toUtf8() );
+	atom->setValue( value.toString().toUtf8().constData() );
 
 	Q_EMIT modified();
 	Q_EMIT valueChanged( m_currentNode.name, value.toString() );

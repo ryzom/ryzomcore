@@ -84,6 +84,8 @@ const char *const SETTINGS_TR_CATEGORY_GENERAL = QT_TR_NOOP("General");
 
 const char *const MAIN_WINDOW_SECTION = "MainWindow";
 const char *const MAIN_WINDOW_STATE = "WindowState";
+/// Context (bottom tab) that was open last, so studio comes back where it was left.
+const char *const CURRENT_CONTEXT = "CurrentContext";
 const char *const MAIN_WINDOW_GEOMETRY = "WindowGeometry";
 const char *const QT_STYLE = "QtStyle";
 const char *const QT_PALETTE = "QtPalette";
@@ -94,6 +96,10 @@ const char *const DATA_PATH_SECTION = "DataPath";
 const char *const SEARCH_PATHS = "SearchPaths";
 const char *const RECURSIVE_SEARCH_PATHS = "RecursiveSearchPathes";
 const char *const LEVELDESIGN_PATH = "LevelDesignPath";
+// Since the data was split across several repositories, the sheets (game_element) no
+// longer necessarily live below LevelDesignPath. Empty = the old assumption,
+// <LevelDesignPath>/game_element.
+const char *const GAME_ELEMENT_PATH = "GameElementPath";
 const char *const PRIMITIVES_PATH = "PrimitivesPath";
 const char *const ASSETS_PATH = "AssetsPath";
 const char *const LIGOCONFIG_FILE = "LigoConfigFile";

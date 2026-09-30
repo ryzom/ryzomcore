@@ -20,7 +20,7 @@
 #ifndef ACTIONS_H
 #define ACTIONS_H
 
-#include <QtGui/QUndoCommand>
+#include <QtWidgets/QUndoCommand>
 #include <QModelIndex>
 
 namespace GeorgesQt 

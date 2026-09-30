@@ -21,6 +21,7 @@
 
 #include <QtCore/QtCore>
 #include <QtGui/QtGui>
+#include <QtWidgets/QtWidgets>
 
 #include <nel/misc/types_nl.h>
 #include <nel/georges/form.h>

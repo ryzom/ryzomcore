@@ -145,7 +145,7 @@ void readFormId( string &outputFileName )
 				map<string,uint8>::iterator itFT = FileTypeToId.find(fileType);
 				if( itFT == FileTypeToId.end() )
 				{
-					FileTypeToId.insert( make_pair(fileType,fid.FormIDInfos.Type) );
+					FileTypeToId.insert( make_pair(fileType,uint8(fid.FormIDInfos.Type)) );
 				}
 			}
 			else

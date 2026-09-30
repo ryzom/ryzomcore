@@ -87,9 +87,9 @@
 
 #include "qtgroupboxpropertybrowser.h"
 #include <QtCore/QSet>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QGroupBox>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QGroupBox>
 #include <QtCore/QTimer>
 #include <QtCore/QMap>
 
@@ -575,4 +575,4 @@ void QtGroupBoxPropertyBrowser::itemChanged(QtBrowserItem *item)
 QT_END_NAMESPACE
 #endif
 
-#include "moc_qtgroupboxpropertybrowser.cxx"
+#include "moc_qtgroupboxpropertybrowser.cpp"

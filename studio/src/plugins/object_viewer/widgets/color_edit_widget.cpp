@@ -21,7 +21,7 @@
 #include "color_edit_widget.h"
 
 // Qt includes
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QColorDialog>
 #include <QtGui/QColor>
 #include <QtGui/QPainter>
 

@@ -25,6 +25,7 @@
 #include "ui_property_editor_widget.h"
 #include "primitives_model.h"
 #include "primitive_item.h"
+#include "script_editor.h"
 
 
 // 3rdparty
@@ -35,6 +36,7 @@
 // NeL includes
 
 // Qt includes
+#include <QTreeWidget>
 
 class ConstStrArrPropMgr;
 class ConstStrArrEditorFactory;
@@ -60,7 +62,8 @@ public:
 public Q_SLOTS:
 	void clearProperties();
 
-	/// Update of selections
+	/// Show the properties of one primitive. Several primitives get one editor each,
+	/// side by side - see PropertyEditorPanel.
 	void updateSelection(Node *node);
 
 	void propertyChanged(QtProperty *p);
@@ -73,6 +76,11 @@ public Q_SLOTS:
 	void onEnumValueChanged( QtProperty *p, int v );
 	void onStrArrValueChanged( QtProperty *p, const QString &v );
 	void onConstStrArrValueChanged( QtProperty *p, const QString &v );
+
+private Q_SLOTS:
+	void showContextMenu(const QPoint &pos);
+	void copyValue();
+	void copyNameAndValue();
 
 
 private:
@@ -92,7 +100,18 @@ private:
 											const NLLIGO::CPrimitiveClass::CParameter &parameter,
 											const NLLIGO::IPrimitive *primitive);
 
+	/// Show the file path of a land, primitive or project node.
+	void addFileProperties(Node *node);
+
 	QStringList getComboValues(const NLLIGO::CPrimitiveClass::CParameter &parameter);
+
+	/// Parameters of this primitive, "name" first, "class" dropped.
+	static std::list<NLLIGO::CPrimitiveClass::CParameter> commonParameters(
+			const QList<const NLLIGO::IPrimitive *> &primitives,
+			const NLLIGO::CPrimitiveClass *primitiveClass);
+
+	/// The plain text of the row the context menu was opened on.
+	QString currentRowText(int column) const;
 
 	void blockSignalsOfProperties(bool block);
 
@@ -104,6 +123,12 @@ private:
 
 	ConstStrArrPropMgr *m_constStrArrPropMgr;
 	ConstStrArrEditorFactory *m_constStrArrEditorFactory;
+	ScriptEditorFactory *m_scriptEditorFactory;
+
+	/// The tree inside the property browser. The browser keeps it private, but a value
+	/// nobody can select and copy is of little use, so it is fetched once for the
+	/// context menu and the copy shortcut.
+	QTreeWidget *m_browserTree;
 
 	Ui::PropertyEditorWidget m_ui;
 

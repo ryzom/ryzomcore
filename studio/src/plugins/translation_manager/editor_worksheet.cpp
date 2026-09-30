@@ -23,13 +23,13 @@
 #include "translation_manager_constants.h"
 
 // Qt includes
-#include <QtGui/QErrorMessage>
-#include <QtGui/QTableWidgetItem>
+#include <QtWidgets/QErrorMessage>
+#include <QtWidgets/QTableWidgetItem>
 #include <QtCore/qfileinfo.h>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QCloseEvent>
-#include <QtGui/QAction>
-#include <QtGui/QMenu>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QMenu>
 
 using namespace std;
 
@@ -495,23 +495,23 @@ bool CEditorWorksheet::isBotNamesTable()
 bool CEditorWorksheet::isSheetTable(QString type)
 {
 	QString column_name;
-	if(type.toAscii() == Constants::WK_ITEM)
+	if(type.toLatin1() == Constants::WK_ITEM)
 	{
 		column_name = "item ID";
 	}
-	else if(type.toAscii() == Constants::WK_CREATURE)
+	else if(type.toLatin1() == Constants::WK_CREATURE)
 	{
 		column_name = "creature ID";
 	}
-	else if(type.toAscii() == Constants::WK_SBRICK)
+	else if(type.toLatin1() == Constants::WK_SBRICK)
 	{
 		column_name = "sbrick ID";
 	}
-	else if(type.toAscii() == Constants::WK_SPHRASE)
+	else if(type.toLatin1() == Constants::WK_SPHRASE)
 	{
 		column_name = "sphrase ID";
 	}
-	else if(type.toAscii() == Constants::WK_PLACE)
+	else if(type.toLatin1() == Constants::WK_PLACE)
 	{
 		column_name = "placeId";
 	}

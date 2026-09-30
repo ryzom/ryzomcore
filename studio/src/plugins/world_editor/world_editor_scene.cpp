@@ -24,8 +24,8 @@
 
 // Qt includes
 #include <QtGui/QPainter>
-#include <QtGui/QGraphicsPixmapItem>
-#include <QtGui/QGraphicsSimpleTextItem>
+#include <QtWidgets/QGraphicsPixmapItem>
+#include <QtWidgets/QGraphicsSimpleTextItem>
 #include <QApplication>
 
 namespace WorldEditor
@@ -37,6 +37,9 @@ WorldEditorScene::WorldEditorScene(int sizeCell, PrimitivesTreeModel *model, QUn
 	  m_lastPickedPrimitive(0),
 	  m_mode(SelectMode),
 	  m_pointsMode(false),
+	  m_visiblePointPrimitives(true),
+	  m_visiblePathPrimitives(true),
+	  m_visibleZonePrimitives(true),
 	  m_undoStack(undoStack),
 	  m_model(model)
 {
@@ -61,10 +64,11 @@ WorldEditorScene::~WorldEditorScene()
 }
 
 AbstractWorldItem *WorldEditorScene::addWorldItemPoint(const QPointF &point, const qreal angle,
-		const qreal radius, bool showArrow)
+		const qreal radius, bool showArrow, const CollisionShape &collision)
 {
-	WorldItemPoint *item = new WorldItemPoint(point, angle, radius, showArrow);
+	WorldItemPoint *item = new WorldItemPoint(point, angle, radius, showArrow, collision);
 	addItem(item);
+	item->setVisible(m_visiblePointPrimitives);
 	return item;
 }
 
@@ -72,6 +76,7 @@ AbstractWorldItem *WorldEditorScene::addWorldItemPath(const QPolygonF &polyline,
 {
 	WorldItemPath *item = new WorldItemPath(polyline);
 	addItem(item);
+	item->setVisible(m_visiblePathPrimitives);
 	return item;
 }
 
@@ -79,7 +84,46 @@ AbstractWorldItem *WorldEditorScene::addWorldItemZone(const QPolygonF &polygon)
 {
 	WorldItemZone *item = new WorldItemZone(polygon);
 	addItem(item);
+	item->setVisible(m_visibleZonePrimitives);
 	return item;
+}
+
+namespace
+{
+/// Apply visible to every item of type T in the list.
+///
+/// dynamic_cast, not qgraphicsitem_cast: the world items all inherit
+/// AbstractWorldItem::Type unchanged, so qgraphicsitem_cast matches any of them for any
+/// of the three classes - every switch would hide everything. Giving them separate Type
+/// values is not an option either, that is what qgraphicsitem_cast<AbstractWorldItem *>
+/// relies on everywhere else.
+template <typename T>
+void setVisibleItems(const QList<QGraphicsItem *> &items, bool visible)
+{
+	Q_FOREACH (QGraphicsItem *item, items)
+	{
+		if (dynamic_cast<T>(item) != 0)
+			item->setVisible(visible);
+	}
+}
+}
+
+void WorldEditorScene::setVisiblePointPrimitives(bool visible)
+{
+	m_visiblePointPrimitives = visible;
+	setVisibleItems<WorldItemPoint *>(items(), visible);
+}
+
+void WorldEditorScene::setVisiblePathPrimitives(bool visible)
+{
+	m_visiblePathPrimitives = visible;
+	setVisibleItems<WorldItemPath *>(items(), visible);
+}
+
+void WorldEditorScene::setVisibleZonePrimitives(bool visible)
+{
+	m_visibleZonePrimitives = visible;
+	setVisibleItems<WorldItemZone *>(items(), visible);
 }
 
 void WorldEditorScene::removeWorldItem(QGraphicsItem *item)
@@ -175,6 +219,42 @@ void WorldEditorScene::drawForeground(QPainter *painter, const QRectF &rect)
 		}
 		painter->drawRect(m_selectionArea);
 	}
+}
+
+void WorldEditorScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+	// While editing points the right button deletes sub-points, so no menu there.
+	if (isEnabledEditPoints())
+	{
+		LandscapeEditor::LandscapeSceneBase::contextMenuEvent(event);
+		return;
+	}
+
+	// Act on what is under the cursor. Anything already selected is left alone, so a
+	// right click on the current selection does not silently pick a different primitive.
+	bool hitSelected = false;
+	Q_FOREACH (QGraphicsItem *item, items(event->scenePos(), Qt::ContainsItemShape,
+										  Qt::AscendingOrder))
+	{
+		if ((qgraphicsitem_cast<AbstractWorldItem *>(item) != 0) &&
+			m_selectedItems.contains(item))
+		{
+			hitSelected = true;
+			break;
+		}
+	}
+
+	if (!hitSelected)
+		updatePickSelection(event->scenePos());
+
+	if (m_selectedItems.isEmpty())
+	{
+		LandscapeEditor::LandscapeSceneBase::contextMenuEvent(event);
+		return;
+	}
+
+	Q_EMIT contextMenuRequested(m_selectedItems.first(), event->screenPos());
+	event->accept();
 }
 
 void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)

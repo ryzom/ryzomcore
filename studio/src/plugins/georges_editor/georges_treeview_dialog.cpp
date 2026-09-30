@@ -22,7 +22,7 @@
 #include "georges_treeview_dialog.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 #include <QSettings>
 #include <QFileDialog>
 #include <QDebug>
@@ -73,7 +73,7 @@ namespace GeorgesQt
 		m_ui.setupUi(this);
 		m_header = new ExpandableHeaderView(Qt::Horizontal, m_ui.treeView);
 		m_ui.treeView->setHeader(m_header);
-		m_ui.treeView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		m_ui.treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 		m_ui.treeView->header()->setStretchLastSection(true);
 
 		m_form = 0;
@@ -126,26 +126,26 @@ namespace GeorgesQt
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)
 	{
-	    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toAscii().data());
+	    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toLatin1().data());
 		//else
 		//{
 		//	CForm *form = 0;
 		//	// Load the DFN
-		//	std::string extStr = NLMISC::CFile::getExtension( formName.toAscii().data() );
+		//	std::string extStr = NLMISC::CFile::getExtension( formName.toLatin1().data() );
 		//	QString dfnName = QString("%1.dfn").arg(extStr.c_str());
 		//	UFormDfn *formdfn;
-		//	if (NLMISC::CPath::exists(dfnName.toAscii().data()))
+		//	if (NLMISC::CPath::exists(dfnName.toLatin1().data()))
 		//	{
-		//		formdfn = _georges->loadFormDfn (dfnName.toAscii().data());
+		//		formdfn = _georges->loadFormDfn (dfnName.toLatin1().data());
 		//		if (!formdfn)
 		//		{
-		//			nlwarning("Failed to load dfn: %s", dfnName.toAscii().data());
+		//			nlwarning("Failed to load dfn: %s", dfnName.toLatin1().data());
 		//			return 0;
 		//		}
 		//	}
 		//	else
 		//	{
-		//		nlwarning("Cannot find dfn: %s", dfnName.toAscii().data());
+		//		nlwarning("Cannot find dfn: %s", dfnName.toLatin1().data());
 		//		return 0;
 		//	}
 
@@ -171,7 +171,7 @@ namespace GeorgesQt
 		m_form = form;
 
 		// Retrieve a copy of the root definition.
-		NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toAscii().data()));
+		NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toLatin1().data()));
 
 		// Next we'll use the root node to build a new form.
 		NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
@@ -254,7 +254,7 @@ namespace GeorgesQt
 		nlinfo("typ's %d",deps["typ"].count());
 		nlinfo("dfn's %d",deps["dfn"].count());
 
-		//nlwarning(strList.join(";").toAscii().data());
+		//nlwarning(strList.join(";").toLatin1().data());
 		if (root) 
 		{
 			loadedForm = m_form->getFilename().c_str();
@@ -274,7 +274,7 @@ namespace GeorgesQt
 	void CGeorgesTreeViewDialog::addParentForm(QString parentFormNm)
 	{
 		// Try to load the form
-		NLGEORGES::UForm *uParentForm = m_georges->loadForm(parentFormNm.toAscii().data());
+		NLGEORGES::UForm *uParentForm = m_georges->loadForm(parentFormNm.toLatin1().data());
 		NLGEORGES::CForm *parentForm = dynamic_cast<NLGEORGES::CForm*>(uParentForm);
 		NLGEORGES::CForm *mainForm = static_cast<NLGEORGES::CForm*>(m_form);
 
@@ -288,11 +288,11 @@ namespace GeorgesQt
 				if (parentForm->Elements.FormDfn ==  mainForm->Elements.FormDfn)
 				{
 					// This is the parent form selector
-					if(!mainForm->insertParent(mainForm->getParentCount(),parentFormNm.toAscii().data(), parentForm))
-						nlwarning("Failed to add parent form: %s", parentFormNm.toAscii().data());
+					if(!mainForm->insertParent(mainForm->getParentCount(),parentFormNm.toLatin1().data(), parentForm))
+						nlwarning("Failed to add parent form: %s", parentFormNm.toLatin1().data());
 					else
 					{
-						nlinfo("Successfullyadded parent form: %s", parentFormNm.toAscii().data());
+						nlinfo("Successfullyadded parent form: %s", parentFormNm.toLatin1().data());
 						model->addParentForm(parentFormNm);
 					}
 				}
@@ -446,7 +446,7 @@ namespace GeorgesQt
 
 		//if (item->parent() && item->parent()->data(0) == "parents")
 		//{
-		//	Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toAscii().data(),false).c_str());
+		//	Q_EMIT changeFile(CPath::lookup(item->data(0).toString().toLatin1().data(),false).c_str());
 		//}
 
 		//// col containing additional stuff like icons
@@ -456,7 +456,7 @@ namespace GeorgesQt
 		//	CFormItem *item = m->getItem(in2);
 		//	QString value = item->data(1).toString();
 
-		//	QString path = CPath::lookup(value.toAscii().data(),false).c_str();
+		//	QString path = CPath::lookup(value.toLatin1().data(),false).c_str();
 
 		//	if(value.contains(".tga") || value.contains(".png")) 
 		//	{
@@ -484,7 +484,7 @@ namespace GeorgesQt
 		//			{
 		//				Modules::objViewInt()->resetScene();
 		//				//Modules::config().configRemapExtensions();
-		//				Modules::objViewInt()->loadMesh(path.toAscii().data(),"");
+		//				Modules::objViewInt()->loadMesh(path.toLatin1().data(),"");
 		//			}
 		//			return;
 		//		}
@@ -702,7 +702,7 @@ namespace GeorgesQt
 		//			file = file.remove(0,file.indexOf(".")+1);
 		//			QString filePattern = "Parent Sheets (*."+file+")";
 		//			
-		//			nlinfo("parent defn name '%s'", file.toAscii().data());
+		//			nlinfo("parent defn name '%s'", file.toLatin1().data());
 		//			QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Select parent sheets..."), m_lastSheetDir, filePattern);
 		//			if(!fileNames.isEmpty())
 		//			{
@@ -712,7 +712,7 @@ namespace GeorgesQt
 		//					QFileInfo pathInfo( fileToParent );
 		//					QString tmpFileName( pathInfo.fileName() );
 
-		//					nlinfo("requesting to add parent form '%s'", tmpFileName.toAscii().data());
+		//					nlinfo("requesting to add parent form '%s'", tmpFileName.toLatin1().data());
 		//					
 		//					// Call to add the form and load it into the Georges form.
 		//					addParentForm(tmpFileName);

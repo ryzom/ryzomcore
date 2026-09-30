@@ -39,11 +39,12 @@
 #include <QtCore/QLibraryInfo>
 #include <QtCore/QLocale>
 #include <QtCore/QSettings>
-#include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
-//#include <QtGui/QSplashScreen>
-#include <QtGui/QFileDialog>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QProxyStyle>
+//#include <QtWidgets/QSplashScreen>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QInputDialog>
 
 #include "startup_settings_dlg.h"
 #include "splash_screen.h"
@@ -113,6 +114,32 @@ static inline QString msgCoreLoadFailure(const QString &why)
 }
 
 
+namespace
+{
+
+// On Linux the Fusion style activates entries in lists and trees on a single click. In
+// file dialogs that means a click on a folder jumps straight into it. For anyone not used
+// to that, the default here is a double click. To get the single click back, set
+// [MainWindow] SingleClickActivation=true.
+class ActivationStyle : public QProxyStyle
+{
+public:
+	explicit ActivationStyle(bool singleClick) : m_singleClick(singleClick) {}
+
+	int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget,
+	              QStyleHintReturn *returnData) const
+	{
+		if (hint == SH_ItemView_ActivateItemOnSingleClick)
+			return m_singleClick ? 1 : 0;
+		return QProxyStyle::styleHint(hint, option, widget, returnData);
+	}
+
+private:
+	bool m_singleClick;
+};
+
+} // anonymous namespace
+
 #ifdef NL_OS_WINDOWS
 int __stdcall WinMain(void *hInstance, void *hPrevInstance, void *lpCmdLine, int nShowCmd)
 #else // NL_OS_WINDOWS
@@ -142,7 +169,6 @@ int main(int argc, char **argv)
 
 		nlinfo("Welcome to NeL Object Viewer Qt!");
 	}
-	QApplication::setGraphicsSystem("raster");
 #ifdef NL_OS_WINDOWS
 	QApplication app(__argc, __argv);
 #else // NL_OS_WINDOWS
@@ -159,6 +185,9 @@ int main(int argc, char **argv)
 	QSettings::setDefaultFormat(QSettings::IniFormat);
 	QSettings *settings = new QSettings(QSettings::IniFormat, QSettings::UserScope,
 	                                    QLatin1String("RyzomCore"), QLatin1String(appNameC));
+
+	// Aktivierung per Einfach- oder Doppelklick (siehe ActivationStyle oben)
+	app.setStyle(new ActivationStyle(settings->value("MainWindow/SingleClickActivation", false).toBool()));
 
 	bool firstRun = settings->value( "FirstRun", true ).toBool();
 	if( firstRun )

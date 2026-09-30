@@ -24,6 +24,7 @@
 
 // Qt includes
 #include <QtGui/QtGui>
+#include <QtWidgets/QtWidgets>
 
 // NeL includes
 #include <nel/3d/u_driver.h>

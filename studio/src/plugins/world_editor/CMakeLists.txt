@@ -22,6 +22,10 @@ SET(OVQT_PLUGIN_WORLD_EDITOR_HDR	world_editor_plugin.h
 					world_editor_settings_page.h
 					const_string_array_property.h
 					const_string_array_editor.h
+					edit_history.h
+					script_editor.h
+					property_editor_panel.h
+					primitive_property_form.h
 )
 
 SET(OVQT_PLUGIN_WORLD_EDITOR_UIS	world_editor_window.ui
@@ -36,9 +40,9 @@ SET(OVQT_PLUGIN_WORLD_EDITOR_RCS world_editor.qrc)
 SET(QT_USE_QTGUI TRUE)
 SET(QT_USE_QTOPENGL TRUE)
 
-QT4_ADD_RESOURCES(OVQT_PLUGIN_WORLD_EDITOR_RC_SRCS ${OVQT_PLUGIN_WORLD_EDITOR_RCS})
-QT4_WRAP_CPP(OVQT_PLUGIN_WORLD_EDITOR_MOC_SRC ${OVQT_PLUGIN_WORLD_EDITOR_HDR})
-QT4_WRAP_UI(OVQT_PLUGIN_WORLD_EDITOR_UI_HDRS ${OVQT_PLUGIN_WORLD_EDITOR_UIS})
+QT5_ADD_RESOURCES(OVQT_PLUGIN_WORLD_EDITOR_RC_SRCS ${OVQT_PLUGIN_WORLD_EDITOR_RCS})
+QT5_WRAP_CPP(OVQT_PLUGIN_WORLD_EDITOR_MOC_SRC ${OVQT_PLUGIN_WORLD_EDITOR_HDR})
+QT5_WRAP_UI(OVQT_PLUGIN_WORLD_EDITOR_UI_HDRS ${OVQT_PLUGIN_WORLD_EDITOR_UIS})
 
 SOURCE_GROUP(QtResources FILES ${OVQT_PLUGIN_WORLD_EDITOR_UIS})
 SOURCE_GROUP(QtGeneratedUiHdr FILES ${OVQT_PLUGIN_WORLD_EDITOR_UI_HDRS})
@@ -57,6 +61,8 @@ TARGET_LINK_LIBRARIES(	studio_plugin_world_editor
 						studio_plugin_landscape_editor 
 						nelmisc 
 						nel3d
+						nelgeorges
+						nelpacs
 						qt_property_browser
 						${QT_LIBRARIES} 
 						${QT_QTOPENGL_LIBRARY}

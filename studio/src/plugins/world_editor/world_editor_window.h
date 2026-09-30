@@ -22,10 +22,13 @@
 
 // Project includes
 #include "ui_world_editor_window.h"
+#include "edit_history.h"
 
 // Qt includes
-#include <QtGui/QUndoStack>
-#include <QtGui/QLabel>
+#include <QtWidgets/QUndoStack>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QPlainTextEdit>
 #include <QtCore/QTimer>
 #include <QtCore/QSignalMapper>
 #include <QtOpenGL/QGLWidget>
@@ -39,6 +42,7 @@ namespace WorldEditor
 {
 class PrimitivesTreeModel;
 class WorldEditorScene;
+class PacsOverlay;
 
 class WorldEditorWindow: public QMainWindow
 {
@@ -57,8 +61,44 @@ public Q_SLOTS:
 	void open();
 
 private Q_SLOTS:
+	/// Move the view onto the loaded landscape, so it is not left on empty grid.
+	void focusOnLandscape();
+
+	/// Show or hide the collision footprints the sheets declare.
+	void setVisibleCollisions(bool visible);
+
+	/// Show or hide the PACS borders of the continent, loading them on first use.
+	void setVisiblePacs(bool visible);
+
+	/// Load the PACS borders that belong to what is open now, if they are shown.
+	void updatePacs();
+
+	/// The show/hide switches in the tool bar. Every one of these was present in the
+	/// user interface but connected to nothing.
+	void setVisibleLand(bool visible);
+	void setVisibleZonePrimitives(bool visible);
+	void setVisiblePathPrimitives(bool visible);
+	void setVisiblePointPrimitives(bool visible);
+	void setVisibleDetails(bool visible);
+	void setVisibleGridPoints(bool visible);
+
+	/// Right click on the map: offer the same menu the tree offers for that primitive.
+	void showSceneContextMenu(QGraphicsItem *item, const QPoint &globalPos);
+
+	/// Move the view onto an area of the map, picked in the tree.
+	void zoomToRect(const QRectF &sceneRect);
+
+	/// Write what the undo stack just did into the project's journal.
+	void recordUndoChange(int index);
+
+	void showHistory(const QStringList &entries, const QString &projectFile);
+	void appendHistory(const QString &line);
+
+	void updatePanelsMenu();
+
 	void newWorldEditFile();
 	void saveWorldEditFile();
+	void saveWorldEditFileAs();
 	void openProjectSettings();
 
 	void setMode(int value);
@@ -72,24 +112,68 @@ protected:
 	virtual void hideEvent(QHideEvent *hideEvent);
 
 private:
+	QMenu *m_panelsMenu;
+	QAction *m_saveAsAction;
+
 	void createMenus();
 	void createToolBars();
 	void readSettings();
 	void writeSettings();
 
+	/// The dock and tool bar arrangement world_editor_window.ui sets up, kept so an
+	/// unusable stored state can be rolled back to it.
+	typedef QList<QPair<QDockWidget *, Qt::DockWidgetArea> > DockDefaults;
+	typedef QList<QPair<QToolBar *, Qt::ToolBarArea> > ToolBarDefaults;
+
+	/// Undo a stored state that hides every dock and tool bar of this window.
+	void ensurePanelsUsable();
+	void createHistoryPanel();
+
+	/// Restore one show/hide switch and apply it to the scene.
+	void restoreSwitch(QAction *action, const char *settingsKey, bool defaultValue);
+
+	QAction *m_visibleCollisionsAction;
+
+	/// The arrangement as it was when the window last went out of view, see writeSettings().
+	QByteArray m_savedWindowState;
+	QByteArray m_savedWindowGeometry;
+	QAction *m_visiblePacsAction;
+
+	/// Colour key for the PACS borders, shown in the tool bar while they are.
+	QWidget *createPacsLegend();
+	QAction *m_pacsLegendAction;
+
+	/// Where the PACS of the open landscape are: pacs/ next to the first loaded .land,
+	/// else pacs/ in the data directory, as the MFC editor had it. Empty if neither exists.
+	QString pacsDirectory() const;
+	PacsOverlay *m_pacsOverlay;
+
+	/// Journal of what was done to the project, kept across sessions.
+	EditHistory *m_history;
+	QPlainTextEdit *m_historyView;
+	QDockWidget *m_historyDock;
+	int m_lastUndoIndex;
+	int m_lastUndoCount;
+
+	/// Bounding rectangle of every loaded zone region, in scene coordinates.
+	QRectF landscapeBounds() const;
+
 	void loadWorldEditFile(const QString &fileName);
-	void checkCurrentWorld();
+	bool checkCurrentWorld();
 
 	QString m_context;
 	QString m_dataDir;
 
-	QString m_lastDir;
 
 	QLabel *m_statusInfo;
 	QTimer *m_statusBarTimer;
 
 	PrimitivesTreeModel *m_primitivesModel;
 	QUndoStack *m_undoStack;
+	DockDefaults m_dockDefaults;
+	ToolBarDefaults m_toolBarDefaults;
+	bool m_panelsChecked;
+
 	WorldEditorScene *m_worldEditorScene;
 	LandscapeEditor::ZoneBuilderBase *m_zoneBuilderBase;
 	QSignalMapper m_modeMapper;

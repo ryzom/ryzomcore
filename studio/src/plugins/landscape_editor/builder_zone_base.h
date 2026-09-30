@@ -37,7 +37,7 @@
 #include <QtCore/QList>
 #include <QtCore/QString>
 #include <QtGui/QPixmap>
-#include <QtGui/QGraphicsRectItem>
+#include <QtWidgets/QGraphicsRectItem>
 
 namespace LandscapeEditor
 {
@@ -89,6 +89,11 @@ public:
 	void deleteZoneRegion(int id);
 	int countZoneRegion() const;
 	ZoneRegionObject *zoneRegion(int id) const;
+
+	/// Ids of the loaded zone regions. They count up for the whole session and are not
+	/// 0..countZoneRegion()-1 - looping over that range misses regions or asks for ones
+	/// long gone.
+	QList<int> zoneRegionIds() const;
 	/// @}
 
 	// Accessors

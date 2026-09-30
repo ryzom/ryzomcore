@@ -6,5 +6,28 @@
     <file>icons/ic_nel_move.png</file>
     <file>icons/ic_nel_turn.png</file>
     <file>icons/ic_nel_world_editor.png</file>
+    <!-- Tree icons of the original MFC world editor (converted from
+         ryzom/tools/leveldesign/world_editor/world_editor/res/*.ico). -->
+    <file>icons/we_erro.png</file>
+    <file>icons/we_folder_closed.png</file>
+    <file>icons/we_folder_hidden.png</file>
+    <file>icons/we_folder_opened.png</file>
+    <file>icons/we_line_closed.png</file>
+    <file>icons/we_line_hidden.png</file>
+    <file>icons/we_line_opened.png</file>
+    <file>icons/we_point_closed.png</file>
+    <file>icons/we_point_hidden.png</file>
+    <file>icons/we_point_opened.png</file>
+    <file>icons/we_property.png</file>
+    <file>icons/we_property_closed.png</file>
+    <file>icons/we_property_hidden.png</file>
+    <file>icons/we_property_opened.png</file>
+    <file>icons/we_root.png</file>
+    <file>icons/we_root_closed.png</file>
+    <file>icons/we_root_hidden.png</file>
+    <file>icons/we_root_opened.png</file>
+    <file>icons/we_zone_closed.png</file>
+    <file>icons/we_zone_hidden.png</file>
+    <file>icons/we_zone_opened.png</file>
   </qresource>
 </RCC>

@@ -27,7 +27,7 @@
 #include <nel/misc/o_xml.h>
 
 // Qt includes
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 namespace LandscapeEditor
 {
