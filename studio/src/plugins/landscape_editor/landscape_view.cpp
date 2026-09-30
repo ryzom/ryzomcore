@@ -266,26 +266,35 @@ void LandscapeView::setVisibleGridPoints(bool visible)
 		scene()->update();
 }
 
-void LandscapeView::drawGridPoints(QPainter *painter, const QRectF &rect)
+qreal LandscapeView::gridPointsStep() const
 {
-	// A dot grid for placing things precisely. The spacing follows the zoom: the finest
-	// step that keeps the dots at least MIN_PIXELS apart on screen, down to 10 cm. Every
-	// step divides the cell size, so the dots always line up with the zone grid.
+	// The spacing follows the zoom: the finest step that keeps the dots at least
+	// MIN_PIXELS apart on screen, down to 10 cm. Every step divides the cell size, so the
+	// dots always line up with the zone grid.
 	static const qreal STEPS[] = { 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40, 80, 160 };
 	static const int STEP_COUNT = sizeof(STEPS) / sizeof(STEPS[0]);
 	static const qreal MIN_PIXELS = 12.0;
 
 	const qreal pixelsPerMetre = transform().m11();
 	if (pixelsPerMetre <= 0)
+		return 0;
+
+	for (int i = 0; i < STEP_COUNT; ++i)
+	{
+		if (STEPS[i] * pixelsPerMetre >= MIN_PIXELS)
+			return STEPS[i];
+	}
+	// Zoomed out so far that even one dot per cell would be a grey wash.
+	return 0;
+}
+
+void LandscapeView::drawGridPoints(QPainter *painter, const QRectF &rect)
+{
+	// A dot grid for placing things precisely, see gridPointsStep().
+	const qreal step = gridPointsStep();
+	if (step <= 0)
 		return;
 
-	int stepIndex = 0;
-	while (stepIndex < STEP_COUNT && STEPS[stepIndex] * pixelsPerMetre < MIN_PIXELS)
-		++stepIndex;
-	// Zoomed out so far that even one dot per cell would be a grey wash.
-	if (stepIndex == STEP_COUNT)
-		return;
-	const qreal step = STEPS[stepIndex];
 	// Every fifth dot, or every cell corner at the coarse steps, is drawn bigger to make
 	// counting easier.
 	const qreal majorStep = qMin(qreal(m_cellSize), step * 5);

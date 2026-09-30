@@ -847,6 +847,72 @@ void setLastDirectory(const char *settingsKey, const QString &fileName)
 	settings->endGroup();
 }
 
+void resetUniqueIds(NLLIGO::IPrimitive *primitive)
+{
+	const NLLIGO::CPrimitiveClass *primClass = ligoConfig()->getPrimitiveClass(*primitive);
+	if (primClass != 0)
+	{
+		for (size_t i = 0; i < primClass->Parameters.size(); ++i)
+		{
+			const NLLIGO::CPrimitiveClass::CParameter &parameter = primClass->Parameters[i];
+			const char *name = parameter.Name.c_str();
+			if (parameter.Type == NLLIGO::CPrimitiveClass::CParameter::String)
+			{
+				if (parameter.DefaultValue.empty() || !parameter.DefaultValue[0].GenID)
+					continue;
+				primitive->removePropertyByName(name);
+				primitive->addPropertyByName(name, new NLLIGO::CPropertyString(NLMISC::toString(getUniqueId()).c_str()));
+			}
+			else if (parameter.Type == NLLIGO::CPrimitiveClass::CParameter::StringArray)
+			{
+				std::vector<std::string> values;
+				std::vector<std::string> *current = 0;
+				if (primitive->getPropertyByName(name, current) && (current != 0))
+					values = *current;
+				bool changed = false;
+				for (size_t j = 0; j < parameter.DefaultValue.size(); ++j)
+				{
+					if (!parameter.DefaultValue[j].GenID)
+						continue;
+					if (values.size() <= j)
+						values.resize(j + 1);
+					values[j] = NLMISC::toString(getUniqueId());
+					changed = true;
+				}
+				if (changed)
+				{
+					primitive->removePropertyByName(name);
+					primitive->addPropertyByName(name, new NLLIGO::CPropertyStringArray(values));
+				}
+			}
+		}
+	}
+
+	for (uint i = 0; i < primitive->getNumChildren(); ++i)
+	{
+		NLLIGO::IPrimitive *child = 0;
+		if (primitive->getChild(child, i) && (child != 0))
+			resetUniqueIds(child);
+	}
+}
+
+std::string numberize(const std::string &name, uint value)
+{
+	int i = int(name.length()) - 1;
+	while ((i >= 0) && (((name[i] >= '0') && (name[i] <= '9')) || (name[i] == ' ')))
+		--i;
+
+	std::string result;
+	if (i >= 0)
+	{
+		result = name.substr(0, i + 1);
+		if ((result[i] != '_') && (result[i] != ' '))
+			result += " ";
+	}
+	result += NLMISC::toString(value);
+	return result;
+}
+
 NLLIGO::CLigoConfig	*ligoConfig()
 {
 	return NLLIGO::CPrimitiveContext::instance().CurrentLigoConfig;

@@ -25,10 +25,13 @@
 
 class QLabel;
 class QSplitter;
+class QUndoStack;
 
 namespace WorldEditor
 {
 class PrimitivePropertyForm;
+class PrimitivesTreeModel;
+class WorldEditorScene;
 
 /**
 @class PropertyEditorPanel
@@ -52,10 +55,17 @@ public:
 	/// Largest number of editors shown at once.
 	static const int MAX_EDITORS = 6;
 
+	/// Makes property changes undoable, see PrimitivePropertyForm::setContext().
+	void setContext(QUndoStack *undoStack, PrimitivesTreeModel *model, WorldEditorScene *scene);
+
 public Q_SLOTS:
 	void clearProperties();
 	void updateSelection(Node *node);
 	void updateSelection(const NodeList &nodes);
+
+private Q_SLOTS:
+	/// A property changed from outside the form showing it - undo, redo, the map.
+	void refreshNode(Node *node);
 
 private:
 	/// Grow or shrink the row of editors to count, reusing the ones already there.
@@ -64,6 +74,9 @@ private:
 	QSplitter *m_splitter;
 	QLabel *m_note;
 	QList<PrimitivePropertyForm *> m_editors;
+	QUndoStack *m_undoStack;
+	PrimitivesTreeModel *m_model;
+	WorldEditorScene *m_scene;
 };
 
 } /* namespace WorldEditor */

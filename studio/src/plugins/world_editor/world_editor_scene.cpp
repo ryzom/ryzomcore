@@ -21,6 +21,7 @@
 #include "world_editor_constants.h"
 #include "primitives_model.h"
 #include "primitive_item.h"
+#include "../landscape_editor/landscape_view.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -40,6 +41,8 @@ WorldEditorScene::WorldEditorScene(int sizeCell, PrimitivesTreeModel *model, QUn
 	  m_lastPickedPrimitive(0),
 	  m_mode(SelectMode),
 	  m_pointsMode(false),
+	  m_snapToGrid(false),
+	  m_selectionLocked(false),
 	  m_visiblePointPrimitives(true),
 	  m_visiblePathPrimitives(true),
 	  m_visibleZonePrimitives(true),
@@ -298,8 +301,9 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 			// Call method mousePressEvent for sub-point located under mouse
 			LandscapeEditor::LandscapeSceneBase::mousePressEvent(mouseEvent);
 
-			if ((!m_editedSelectedItems && m_selectedPoints.isEmpty()) ||
-					(!calcBoundingRect(m_selectedPoints).contains(mouseEvent->scenePos())))
+			if (!m_selectionLocked &&
+					((!m_editedSelectedItems && m_selectedPoints.isEmpty()) ||
+					 (!calcBoundingRect(m_selectedPoints).contains(mouseEvent->scenePos()))))
 			{
 				updatePickSelectionPoints(mouseEvent->scenePos());
 				m_firstSelection = true;
@@ -323,8 +327,9 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		if (mouseEvent->button() != Qt::LeftButton)
 			return;
 
-		if ((!m_editedSelectedItems && m_selectedItems.isEmpty()) ||
-				(!calcBoundingRect(m_selectedItems).contains(mouseEvent->scenePos())))
+		if (!m_selectionLocked &&
+				((!m_editedSelectedItems && m_selectedItems.isEmpty()) ||
+				 (!calcBoundingRect(m_selectedItems).contains(mouseEvent->scenePos()))))
 		{
 			updatePickSelection(mouseEvent->scenePos());
 			m_firstSelection = true;
@@ -333,12 +338,43 @@ void WorldEditorScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		m_pivot = calcBoundingRect(m_selectedItems).center();
 	}
 
+	// The point that snaps: a point primitive's position, the first vertex of a path or
+	// zone, or the first picked sub-point.
+	const QList<QGraphicsItem *> &picked = isEnabledEditPoints() ? m_selectedPoints : m_selectedItems;
+	m_snapAnchor = mouseEvent->scenePos();
+	if (!picked.isEmpty())
+	{
+		QGraphicsItem *item = picked.first();
+		AbstractWorldItem *worldItem = qgraphicsitem_cast<AbstractWorldItem *>(item);
+		const QPolygonF polygon = worldItem ? worldItem->polygon() : QPolygonF();
+		m_snapAnchor = polygon.isEmpty() ? item->scenePos() : item->mapToScene(polygon.first());
+	}
+
+	// Radius mode works on the points that have a radius to change.
+	m_radiusItems.clear();
+	m_radiusStart.clear();
+	if ((m_mode == WorldEditorScene::RadiusMode) && !isEnabledEditPoints())
+	{
+		Q_FOREACH (QGraphicsItem *item, m_selectedItems)
+		{
+			WorldItemPoint *point = dynamic_cast<WorldItemPoint *>(item);
+			Node *node = qvariant_cast<Node *>(item->data(Constants::WORLD_EDITOR_NODE));
+			if ((point == 0) || (node == 0) || (node->type() != Node::PrimitiveNodeType))
+				continue;
+			std::string radius;
+			if (!static_cast<PrimitiveNode *>(node)->primitive()->getPropertyByName("radius", radius))
+				continue;
+			m_radiusItems.append(point);
+			m_radiusStart.append(point->radius());
+		}
+	}
+
 	m_editedSelectedItems = false;
 	m_offset = QPointF(0, 0);
 	m_angle = 0;
 	m_scaleFactor = QPointF(1.0, 1.0);
 
-	if (m_mode == WorldEditorScene::SelectMode)
+	if ((m_mode == WorldEditorScene::SelectMode) && !m_selectionLocked)
 		m_selectionArea.setTopLeft(mouseEvent->scenePos());
 }
 
@@ -441,7 +477,7 @@ void WorldEditorScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 		}
 		else
 		{
-			if ((!m_editedSelectedItems) && (!m_firstSelection))
+			if ((!m_editedSelectedItems) && (!m_firstSelection) && !m_selectionLocked)
 			{
 				if (isEnabledEditPoints())
 					updatePickSelectionPoints(mouseEvent->scenePos());
@@ -595,7 +631,29 @@ void WorldEditorScene::checkUndo()
 			m_undoStack->push(new TurnWorldItemsCommand(m_selectedItems, m_angle, this, m_model));
 			break;
 		case WorldEditorScene::RadiusMode:
+		{
+			// Each changed radius becomes a property change, so it is undone, saved and
+			// shown in the property form like one typed in there.
+			QList<int> changed;
+			for (int i = 0; i < m_radiusItems.size(); ++i)
+			{
+				if (m_radiusItems[i]->radius() != m_radiusStart[i])
+					changed.append(i);
+			}
+			if (changed.isEmpty())
+				break;
+
+			m_undoStack->beginMacro(tr("Change radius"));
+			Q_FOREACH (int i, changed)
+			{
+				Node *node = qvariant_cast<Node *>(m_radiusItems[i]->data(Constants::WORLD_EDITOR_NODE));
+				m_undoStack->push(new SetPropertyCommand(m_model->pathFromNode(node), QLatin1String("radius"),
+														 QString::number(m_radiusItems[i]->radius(), 'g', 6),
+														 false, m_model, this));
+			}
+			m_undoStack->endMacro();
 			break;
+		}
 		};
 	}
 }
@@ -626,8 +684,16 @@ void WorldEditorScene::checkUndoPointsMode()
 
 void WorldEditorScene::updateWorldItemsMove(QGraphicsSceneMouseEvent *mouseEvent)
 {
-	QPointF offset = mouseEvent->scenePos() - mouseEvent->lastScenePos();
-	m_offset += offset;
+	// Where the selection should be now, relative to where the drag started. Worked out
+	// from the start each time rather than summed up, so snapping can be switched while
+	// dragging and nothing drifts.
+	QPointF target = mouseEvent->scenePos() - m_firstPick;
+	if (m_snapToGrid)
+		target = snapToGrid(m_snapAnchor + target) - m_snapAnchor;
+	const QPointF offset = target - m_offset;
+	if (offset.isNull())
+		return;
+	m_offset = target;
 	if (m_pointsMode)
 		Q_FOREACH(QGraphicsItem *item, m_selectedPoints)
 	{
@@ -708,6 +774,73 @@ void WorldEditorScene::updateWorldItemsTurn(QGraphicsSceneMouseEvent *mouseEvent
 
 void WorldEditorScene::updateWorldItemsRadius(QGraphicsSceneMouseEvent *mouseEvent)
 {
+	if (m_radiusItems.isEmpty())
+		return;
+
+	// The first point leads: its circle grows by as much as the mouse moved away from
+	// its centre since the press, so grabbing the circle anywhere does not make it jump.
+	// The others keep their proportion to it.
+	const QPointF centre = m_radiusItems.first()->scenePos();
+	const qreal startLead = m_radiusStart.first();
+	const qreal moved = QLineF(centre, mouseEvent->scenePos()).length() - QLineF(centre, m_firstPick).length();
+
+	const qreal step = m_snapToGrid ? gridStep() : 0;
+	const qreal minimum = (step > 0) ? step : 0.1;
+	qreal lead = startLead + moved;
+	if (step > 0)
+		lead = qRound64(lead / step) * step;
+	lead = qMax(minimum, lead);
+
+	for (int i = 0; i < m_radiusItems.size(); ++i)
+	{
+		const qreal radius = (startLead > 0) ? m_radiusStart[i] * lead / startLead
+											 : m_radiusStart[i] + (lead - startLead);
+		m_radiusItems[i]->setRadius(qMax(minimum, radius));
+	}
+}
+
+bool WorldEditorScene::isSnapToGrid() const
+{
+	return m_snapToGrid;
+}
+
+void WorldEditorScene::setSnapToGrid(bool enabled)
+{
+	m_snapToGrid = enabled;
+}
+
+bool WorldEditorScene::isSelectionLocked() const
+{
+	return m_selectionLocked;
+}
+
+void WorldEditorScene::setSelectionLocked(bool locked)
+{
+	m_selectionLocked = locked;
+	m_selectionArea = QRectF();
+	update();
+}
+
+qreal WorldEditorScene::gridStep() const
+{
+	if (views().isEmpty())
+		return 0;
+	LandscapeEditor::LandscapeView *view = qobject_cast<LandscapeEditor::LandscapeView *>(views().first());
+	return view ? view->gridPointsStep() : 0;
+}
+
+QPointF WorldEditorScene::snapToGrid(const QPointF &scenePos) const
+{
+	if (!m_snapToGrid)
+		return scenePos;
+
+	// The step of the dots the user sees. The cell size is a multiple of every step, so
+	// rounding in scene coordinates lands on whole steps in world coordinates as well.
+	const qreal step = gridStep();
+	if (step <= 0)
+		return scenePos;
+
+	return QPointF(qRound64(scenePos.x() / step) * step, qRound64(scenePos.y() / step) * step);
 }
 
 } /* namespace WorldEditor */

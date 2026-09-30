@@ -390,4 +390,24 @@ void PrimitivesTreeModel::removeChildNodes(Node *node, const QModelIndex &parent
 	endRemoveRows();
 }
 
+void PrimitivesTreeModel::primitivePropertyChanged(Node *node)
+{
+	if (node == 0)
+		return;
+
+	// A file row shows its file name, not the name of its root primitive.
+	if (node->type() == Node::PrimitiveNodeType)
+	{
+		PrimitiveNode *primitiveNode = static_cast<PrimitiveNode *>(node);
+		primitiveNode->setData(Qt::DisplayRole, QString::fromUtf8(primitiveNode->primitive()->getName().c_str()));
+		primitiveNode->updateIcon();
+	}
+
+	const QModelIndex index = pathToIndex(pathFromNode(node));
+	if (index.isValid())
+		Q_EMIT dataChanged(index, index);
+
+	Q_EMIT propertyChanged(node);
+}
+
 } /* namespace WorldEditor */

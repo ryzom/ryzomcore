@@ -49,6 +49,10 @@ public:
 
 	bool isVisibleGrid() const;
 
+	/// Spacing of the dot grid at the current zoom, in metres; 0 when zoomed out too far
+	/// for it. Also what snapping to the grid rounds to.
+	qreal gridPointsStep() const;
+
 public Q_SLOTS:
 
 	/// Enable/disable displaying grid.

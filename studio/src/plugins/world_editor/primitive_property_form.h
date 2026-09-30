@@ -30,9 +30,12 @@
 
 class QVBoxLayout;
 class QWidget;
+class QUndoStack;
 
 namespace WorldEditor
 {
+class PrimitivesTreeModel;
+class WorldEditorScene;
 
 /**
 @class PrimitivePropertyForm
@@ -61,6 +64,24 @@ public:
 
 	/// Forget everything and show nothing.
 	void clear();
+
+	/// Where changes go. With it they are undoable commands; without it they are
+	/// written straight into the primitive, as before.
+	void setContext(QUndoStack *undoStack, PrimitivesTreeModel *model, WorldEditorScene *scene);
+
+	/// The node shown, 0 if none.
+	Node *node() const
+	{
+		return m_node;
+	}
+
+	/// True while this form itself is pushing a change. The change comes back as
+	/// PrimitivesTreeModel::propertyChanged(), and rebuilding the form then would pull
+	/// the field out from under the user's cursor.
+	bool isPushing() const
+	{
+		return m_pushing;
+	}
 
 private Q_SLOTS:
 	void onLineEditFinished();
@@ -92,8 +113,13 @@ private:
 
 	/// True while the form is being filled, so the widgets' own signals are ignored.
 	bool m_building;
+	bool m_pushing;
 
 	NLLIGO::IPrimitive *m_primitive;
+	Node *m_node;
+	QUndoStack *m_undoStack;
+	PrimitivesTreeModel *m_model;
+	WorldEditorScene *m_scene;
 	QWidget *m_content;
 	QVBoxLayout *m_layout;
 };

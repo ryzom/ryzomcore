@@ -76,6 +76,7 @@ const char *const VISIBLE_POINT_PRIMITIVES = "WorldEditorVisiblePointPrimitives"
 const char *const VISIBLE_DETAILS = "WorldEditorVisibleDetails";
 const char *const VISIBLE_GRID = "WorldEditorVisibleGrid";
 const char *const VISIBLE_GRID_POINTS = "WorldEditorVisibleGridPoints";
+const char *const SNAP_TO_GRID = "WorldEditorSnapToGrid";
 const char *const VISIBLE_PACS = "WorldEditorVisiblePacs";
 
 /// Directory holding one <continent>_pacs directory per continent, as in the unpacked

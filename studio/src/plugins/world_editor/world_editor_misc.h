@@ -83,6 +83,14 @@ NLLIGO::IPrimitive *createPrimitive(const char *className, const char *primName,
 
 void deletePrimitive(NLLIGO::IPrimitive *primitive);
 
+/// Give the primitive and everything below it new values for the parameters declared
+/// as unique IDs (GenID), as the MFC editor does for a pasted copy.
+void resetUniqueIds(NLLIGO::IPrimitive *primitive);
+
+/// Replace a trailing number of name with value, like the MFC editor's numberize():
+/// "npc_group 3" becomes "npc_group 7", "bandit" becomes "bandit 7".
+std::string numberize(const std::string &name, uint value);
+
 bool updateDefaultValues(NLLIGO::IPrimitive *primitive);
 
 bool recursiveUpdateDefaultValues(NLLIGO::IPrimitive *primitive);

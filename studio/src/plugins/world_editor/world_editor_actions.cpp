@@ -44,6 +44,8 @@
 #include <QModelIndex>
 #include <QGraphicsView>
 #include <QPersistentModelIndex>
+#include <QDateTime>
+#include <QStringList>
 
 // libxml
 #include <libxml/xmlstring.h>
@@ -609,6 +611,16 @@ AddPrimitiveByClassCommand::AddPrimitiveByClassCommand(const QString &className,
 	QRectF visibleArea = graphicsView->mapToScene(view->rect()).boundingRect();
 	m_delta = visibleArea.height() / 10.0;
 	m_initPos = visibleArea.center();
+
+	// With snapping on, the new primitive and the vertices spread out from it land on
+	// the dot grid as well.
+	if (m_scene->isSnapToGrid())
+	{
+		m_initPos = m_scene->snapToGrid(m_initPos);
+		const qreal snappedDelta = m_scene->snapToGrid(QPointF(m_delta, 0)).x();
+		if (snappedDelta > 0)
+			m_delta = snappedDelta;
+	}
 }
 
 AddPrimitiveByClassCommand::~AddPrimitiveByClassCommand()
@@ -973,6 +985,248 @@ void ShapeWorldItemsCommand::undoChangeItem(int i, AbstractWorldItem *item)
 void ShapeWorldItemsCommand::redoChangeItem(int i, AbstractWorldItem *item)
 {
 	item->setPolygon(m_undoPolygons.at(i));
+}
+
+PastePrimitivesCommand::PastePrimitivesCommand(const QList<NLLIGO::IPrimitive *> &clipboard,
+		const Path &parentPath, uint primitivePos, int treeRow, PrimitivesTreeModel *model,
+		WorldEditorScene *scene, QTreeView *view, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_parentPath(parentPath),
+	  m_primitivePos(primitivePos),
+	  m_treeRow(treeRow),
+	  m_model(model),
+	  m_scene(scene),
+	  m_view(view)
+{
+	setText(QObject::tr("Paste %n primitive(s)", 0, clipboard.size()));
+
+	PrimitiveNode *parentNode = static_cast<PrimitiveNode *>(m_model->pathToNode(m_parentPath));
+	const uint siblings = parentNode ? parentNode->primitive()->getNumChildren() : 0;
+
+	for (int i = 0; i < clipboard.size(); ++i)
+	{
+		NLLIGO::IPrimitive *copy = clipboard[i]->copy();
+		Utils::resetUniqueIds(copy);
+
+		const NLLIGO::CPrimitiveClass *primClass = Utils::ligoConfig()->getPrimitiveClass(*copy);
+		std::string name;
+		if (((primClass == 0) || primClass->Numberize) && copy->getPropertyByName("name", name))
+		{
+			copy->removePropertyByName("name");
+			copy->addPropertyByName("name", new NLLIGO::CPropertyString(Utils::numberize(name, siblings + i)));
+		}
+		m_prepared.append(copy);
+	}
+}
+
+PastePrimitivesCommand::~PastePrimitivesCommand()
+{
+	Q_FOREACH (NLLIGO::IPrimitive *primitive, m_prepared)
+		delete primitive;
+}
+
+void PastePrimitivesCommand::redo()
+{
+	m_scene->setEnabledEditPoints(false);
+	m_view->selectionModel()->clearSelection();
+
+	PrimitiveNode *parentNode = static_cast<PrimitiveNode *>(m_model->pathToNode(m_parentPath));
+	if (parentNode == 0)
+		return;
+
+	// Aliases are handed out by the file the primitive is linked into.
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = parentNode->rootPrimitiveNode()->primitives();
+
+	m_paths.clear();
+	for (int i = 0; i < m_prepared.size(); ++i)
+	{
+		NLLIGO::IPrimitive *copy = m_prepared[i]->copy();
+		const uint primitivePos = (m_primitivePos == NLLIGO::IPrimitive::AtTheEnd) ? m_primitivePos : m_primitivePos + i;
+		if (!parentNode->primitive()->insertChild(copy, primitivePos))
+		{
+			nlwarning("Paste: cannot insert primitive at %u", primitivePos);
+			delete copy;
+			continue;
+		}
+
+		const int treeRow = (m_treeRow == AtTheEnd) ? AtTheEnd : m_treeRow + i;
+		const Path path = m_model->createPrimitiveNode(copy, m_parentPath, treeRow);
+		addNewGraphicsItems(m_model->pathToIndex(path), m_model, m_scene);
+		m_paths.append(path);
+	}
+
+	NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+}
+
+void PastePrimitivesCommand::undo()
+{
+	m_scene->setEnabledEditPoints(false);
+	m_view->selectionModel()->clearSelection();
+
+	// Last first, so the paths of the others stay valid.
+	for (int i = m_paths.size() - 1; i >= 0; --i)
+	{
+		const QModelIndex index = m_model->pathToIndex(m_paths[i]);
+		PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
+		if (node == 0)
+			continue;
+
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = node->rootPrimitiveNode()->primitives();
+		removeGraphicsItems(index, m_model, m_scene);
+		Utils::deletePrimitive(node->primitive());
+		NLLIGO::CPrimitiveContext::instance().CurrentPrimitive = NULL;
+
+		m_model->deleteNode(m_paths[i]);
+	}
+	m_paths.clear();
+}
+
+namespace
+{
+/// Changes of the same property closer together than this merge into one command.
+const qint64 PROPERTY_MERGE_MS = 1500;
+
+qint64 nowMs()
+{
+	return QDateTime::currentMSecsSinceEpoch();
+}
+}
+
+SetPropertyCommand::SetPropertyCommand(const Path &path, const QString &name, const QString &value,
+		bool asArray, PrimitivesTreeModel *model, WorldEditorScene *scene, QUndoCommand *parent)
+	: QUndoCommand(parent),
+	  m_path(path),
+	  m_name(name),
+	  m_asArray(asArray),
+	  m_newValue(value),
+	  m_oldExists(false),
+	  m_oldDefault(false),
+	  m_lastChange(nowMs()),
+	  m_model(model),
+	  m_scene(scene)
+{
+	setText(QObject::tr("Set %1").arg(name));
+
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(m_model->pathToNode(m_path));
+	if (node != 0)
+		m_oldValue = valueOf(node->primitive(), m_name, &m_oldExists, &m_oldDefault);
+}
+
+SetPropertyCommand::~SetPropertyCommand()
+{
+}
+
+QString SetPropertyCommand::valueOf(const NLLIGO::IPrimitive *primitive, const QString &name,
+									bool *exists, bool *isDefault)
+{
+	if (exists)
+		*exists = false;
+	if (isDefault)
+		*isDefault = false;
+	if (primitive == 0)
+		return QString();
+
+	const NLLIGO::IProperty *property = 0;
+	if (!primitive->getPropertyByName(name.toUtf8().constData(), property) || (property == 0))
+		return QString();
+
+	if (exists)
+		*exists = true;
+	if (isDefault)
+		*isDefault = property->Default;
+
+	const NLLIGO::CPropertyString *asString = dynamic_cast<const NLLIGO::CPropertyString *>(property);
+	if (asString != 0)
+		return QString::fromUtf8(asString->String.c_str());
+
+	const NLLIGO::CPropertyStringArray *asArray = dynamic_cast<const NLLIGO::CPropertyStringArray *>(property);
+	if (asArray != 0)
+	{
+		QStringList lines;
+		for (size_t i = 0; i < asArray->StringArray.size(); ++i)
+			lines.append(QString::fromUtf8(asArray->StringArray[i].c_str()));
+		return lines.join(QLatin1String("\n"));
+	}
+
+	return QString();
+}
+
+void SetPropertyCommand::undo()
+{
+	apply(m_oldValue, m_oldExists, m_oldDefault);
+}
+
+void SetPropertyCommand::redo()
+{
+	apply(m_newValue, true, false);
+}
+
+int SetPropertyCommand::id() const
+{
+	return 0x5e7;
+}
+
+bool SetPropertyCommand::mergeWith(const QUndoCommand *other)
+{
+	const SetPropertyCommand *next = static_cast<const SetPropertyCommand *>(other);
+	if ((next->m_path != m_path) || (next->m_name != m_name) ||
+		(next->m_lastChange - m_lastChange > PROPERTY_MERGE_MS))
+		return false;
+
+	m_newValue = next->m_newValue;
+	m_lastChange = next->m_lastChange;
+	// Typed back to where it started: nothing left to undo.
+	if (m_oldExists && (m_newValue == m_oldValue))
+		setObsolete(true);
+	return true;
+}
+
+void SetPropertyCommand::apply(const QString &value, bool exists, bool isDefault)
+{
+	PrimitiveNode *node = static_cast<PrimitiveNode *>(m_model->pathToNode(m_path));
+	if (node == 0)
+		return;
+	NLLIGO::IPrimitive *primitive = node->primitive();
+	const std::string name = m_name.toUtf8().constData();
+
+	if (!exists)
+	{
+		// It was not there before this command: take it away again.
+		primitive->removePropertyByName(name.c_str());
+	}
+	else
+	{
+		NLLIGO::IProperty *property = 0;
+		if (!primitive->getPropertyByName(name.c_str(), property) || (property == 0))
+		{
+			property = m_asArray ? static_cast<NLLIGO::IProperty *>(new NLLIGO::CPropertyStringArray())
+								 : static_cast<NLLIGO::IProperty *>(new NLLIGO::CPropertyString());
+			primitive->addPropertyByName(name.c_str(), property);
+		}
+
+		NLLIGO::CPropertyStringArray *asArray = dynamic_cast<NLLIGO::CPropertyStringArray *>(property);
+		NLLIGO::CPropertyString *asString = dynamic_cast<NLLIGO::CPropertyString *>(property);
+		if (asArray != 0)
+		{
+			asArray->StringArray.clear();
+			Q_FOREACH (const QString &line, value.split(QLatin1Char('\n')))
+				asArray->StringArray.push_back(line.toUtf8().constData());
+		}
+		else if (asString != 0)
+			asString->String = value.toUtf8().constData();
+		property->Default = isDefault;
+	}
+
+	// Shown on the map as well.
+	if (m_name == QLatin1String("radius"))
+	{
+		WorldItemPoint *item = dynamic_cast<WorldItemPoint *>(
+				qvariant_cast<AbstractWorldItem *>(node->data(Constants::GRAPHICS_DATA_QT4_2D)));
+		if (item != 0)
+			item->setRadius(exists ? value.toDouble() : 0);
+	}
+
+	m_model->primitivePropertyChanged(node);
 }
 
 } /* namespace WorldEditor */

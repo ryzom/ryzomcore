@@ -51,6 +51,8 @@
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
 
+#include <algorithm>
+
 namespace WorldEditor
 {
 
@@ -212,6 +214,43 @@ PrimitivesView::PrimitivesView(QWidget *parent)
 	m_hideAction->setShortcut(QKeySequence(tr("Ctrl+H")));
 	m_hideAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 	addAction(m_hideAction);
+
+	// Edit commands of the MFC editor, with its keys.
+	m_copyAction = new QAction(tr("Copy"), this);
+	m_copyAction->setShortcut(QKeySequence::Copy);
+	connect(m_copyAction, SIGNAL(triggered()), this, SLOT(copyPrimitives()));
+
+	m_cutAction = new QAction(tr("Cut"), this);
+	m_cutAction->setShortcut(QKeySequence::Cut);
+	connect(m_cutAction, SIGNAL(triggered()), this, SLOT(cutPrimitives()));
+
+	m_pasteAction = new QAction(tr("Paste"), this);
+	m_pasteAction->setShortcut(QKeySequence::Paste);
+	m_pasteAction->setToolTip(tr("Paste as children of the selected primitive, or next to it"));
+	connect(m_pasteAction, SIGNAL(triggered()), this, SLOT(pastePrimitives()));
+
+	m_deleteAction->setShortcut(QKeySequence::Delete);
+
+	m_selectAllAction = new QAction(tr("Select All"), this);
+	m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+	m_selectAllAction->setToolTip(tr("Select every primitive that is not hidden"));
+	connect(m_selectAllAction, SIGNAL(triggered()), this, SLOT(selectAllPrimitives()));
+
+	m_expandAction = new QAction(tr("Expand"), this);
+	m_expandAction->setShortcut(QKeySequence(Qt::Key_E));
+	m_expandAction->setToolTip(tr("Open the selected rows and everything below them"));
+	connect(m_expandAction, SIGNAL(triggered()), this, SLOT(expandSelected()));
+
+	m_collapseAction = new QAction(tr("Collapse"), this);
+	m_collapseAction->setShortcut(QKeySequence(Qt::Key_R));
+	m_collapseAction->setToolTip(tr("Close the selected rows and everything below them"));
+	connect(m_collapseAction, SIGNAL(triggered()), this, SLOT(collapseSelected()));
+
+	Q_FOREACH (QAction *action, editActions())
+	{
+		action->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+		addAction(action);
+	}
 
 	connect(m_loadLandAction, SIGNAL(triggered()), this, SLOT(loadLandscape()));
 	connect(m_loadPrimitiveAction, SIGNAL(triggered()), this, SLOT(loadRootPrimitive()));
@@ -439,15 +478,224 @@ void PrimitivesView::deletePrimitives()
 	nlassert(m_undoStack);
 	nlassert(m_primitivesTreeModel);
 
-	QModelIndexList indexList = selectionModel()->selectedRows();
+	// Every selected primitive, not just the first one.
+	deleteRows(topLevelSelectedPrimitives(), tr("Delete primitives"));
+}
 
-	QModelIndex index = indexList.first();
+QList<QAction *> PrimitivesView::editActions() const
+{
+	return QList<QAction *>() << m_copyAction << m_cutAction << m_pasteAction << m_deleteAction
+							  << m_selectAllAction << m_expandAction << m_collapseAction;
+}
 
-	PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
+QModelIndexList PrimitivesView::topLevelSelectedPrimitives() const
+{
+	const QModelIndexList selected = selectionModel()->selectedRows();
+	QModelIndexList result;
+	Q_FOREACH (const QModelIndex &index, selected)
+	{
+		Node *node = static_cast<Node *>(index.internalPointer());
+		if ((node == 0) || (node->type() != Node::PrimitiveNodeType))
+			continue;
 
-	if (node->primitiveClass()->Deletable)
-		m_undoStack->push(new DeletePrimitiveCommand(index, m_primitivesTreeModel, m_worldEditorScene, this));
+		bool parentSelected = false;
+		for (QModelIndex parent = index.parent(); parent.isValid(); parent = parent.parent())
+		{
+			if (selected.contains(parent))
+			{
+				parentSelected = true;
+				break;
+			}
+		}
+		if (!parentSelected)
+			result.append(index);
+	}
+	return result;
+}
 
+void PrimitivesView::deleteRows(const QModelIndexList &indexes, const QString &text)
+{
+	QList<Path> paths;
+	Q_FOREACH (const QModelIndex &index, indexes)
+	{
+		PrimitiveNode *node = static_cast<PrimitiveNode *>(index.internalPointer());
+		if ((node != 0) && node->primitiveClass() && node->primitiveClass()->Deletable)
+			paths.append(m_primitivesTreeModel->pathFromIndex(index));
+	}
+	if (paths.isEmpty())
+		return;
+
+	// Last row first: deleting a row moves up the ones after it, never the ones before.
+	std::sort(paths.begin(), paths.end());
+	std::reverse(paths.begin(), paths.end());
+
+	if (paths.size() > 1)
+		m_undoStack->beginMacro(text);
+	Q_FOREACH (const Path &path, paths)
+		m_undoStack->push(new DeletePrimitiveCommand(m_primitivesTreeModel->pathToIndex(path),
+													 m_primitivesTreeModel, m_worldEditorScene, this));
+	if (paths.size() > 1)
+		m_undoStack->endMacro();
+}
+
+namespace
+{
+/// Copies of what was copied or cut last, owned here - like the MFC editor's clipboard.
+QList<NLLIGO::IPrimitive *> s_clipboard;
+
+void clearClipboard()
+{
+	Q_FOREACH (NLLIGO::IPrimitive *primitive, s_clipboard)
+		delete primitive;
+	s_clipboard.clear();
+}
+}
+
+void PrimitivesView::copyPrimitives()
+{
+	const QModelIndexList indexes = topLevelSelectedPrimitives();
+	if (indexes.isEmpty())
+		return;
+
+	clearClipboard();
+	Q_FOREACH (const QModelIndex &index, indexes)
+		s_clipboard.append(static_cast<PrimitiveNode *>(index.internalPointer())->primitive()->copy());
+
+	Core::ICore::instance()->mainWindow()->statusBar()->showMessage(
+			tr("Copied %n primitive(s)", 0, s_clipboard.size()), 3000);
+}
+
+void PrimitivesView::cutPrimitives()
+{
+	const QModelIndexList indexes = topLevelSelectedPrimitives();
+	if (indexes.isEmpty())
+		return;
+
+	copyPrimitives();
+	deleteRows(indexes, tr("Cut primitives"));
+}
+
+void PrimitivesView::pastePrimitives()
+{
+	nlassert(m_undoStack);
+	if (s_clipboard.isEmpty())
+		return;
+
+	const QModelIndexList selected = selectionModel()->selectedRows();
+	if (selected.isEmpty())
+	{
+		Core::ICore::instance()->mainWindow()->statusBar()->showMessage(
+				tr("Select where to paste first"), 4000);
+		return;
+	}
+
+	const QModelIndex target = selected.first();
+	Node *targetNode = static_cast<Node *>(target.internalPointer());
+	if ((targetNode == 0) || ((targetNode->type() != Node::PrimitiveNodeType) &&
+							  (targetNode->type() != Node::RootPrimitiveNodeType)))
+		return;
+
+	NLLIGO::CLigoConfig *config = Utils::ligoConfig();
+	NLLIGO::IPrimitive *targetPrimitive = static_cast<PrimitiveNode *>(targetNode)->primitive();
+	const bool targetIsRoot = targetNode->type() == Node::RootPrimitiveNodeType;
+
+	// Into the selection if the class allows it, otherwise next to it - the MFC order.
+	bool intoTarget = true, besideTarget = !targetIsRoot;
+	Q_FOREACH (NLLIGO::IPrimitive *primitive, s_clipboard)
+	{
+		intoTarget = intoTarget && (targetIsRoot ? (config->canBeRoot(*primitive) || config->canBeChild(*primitive, *targetPrimitive))
+												 : config->canBeChild(*primitive, *targetPrimitive));
+		if (besideTarget)
+		{
+			Node *parentNode = targetNode->parent();
+			NLLIGO::IPrimitive *parentPrimitive = static_cast<PrimitiveNode *>(parentNode)->primitive();
+			const bool parentIsRoot = parentNode->type() == Node::RootPrimitiveNodeType;
+			besideTarget = parentIsRoot ? (config->canBeRoot(*primitive) || config->canBeChild(*primitive, *parentPrimitive))
+										: config->canBeChild(*primitive, *parentPrimitive);
+		}
+	}
+
+	PastePrimitivesCommand *command = 0;
+	if (intoTarget)
+	{
+		command = new PastePrimitivesCommand(s_clipboard, m_primitivesTreeModel->pathFromIndex(target),
+											 NLLIGO::IPrimitive::AtTheEnd, AtTheEnd,
+											 m_primitivesTreeModel, m_worldEditorScene, this);
+	}
+	else if (besideTarget)
+	{
+		uint childId = 0;
+		targetPrimitive->getParent()->getChildId(childId, targetPrimitive);
+		command = new PastePrimitivesCommand(s_clipboard, m_primitivesTreeModel->pathFromIndex(target.parent()),
+											 childId + 1, target.row() + 1,
+											 m_primitivesTreeModel, m_worldEditorScene, this);
+	}
+	else
+	{
+		Core::ICore::instance()->mainWindow()->statusBar()->showMessage(
+				tr("The copied primitives cannot go here - the class does not allow them as children"), 5000);
+		return;
+	}
+
+	m_undoStack->push(command);
+
+	// Select what was pasted, ready to be moved into place.
+	QItemSelection selection;
+	QModelIndex first;
+	Q_FOREACH (const Path &path, command->pastedPaths())
+	{
+		const QModelIndex index = m_primitivesTreeModel->pathToIndex(path);
+		selection.select(index, index);
+		if (!first.isValid())
+			first = index;
+	}
+	selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+	revealIndex(first);
+}
+
+void PrimitivesView::selectAllPrimitives(const QModelIndex &parent, QItemSelection &selection)
+{
+	const int count = model()->rowCount(parent);
+	for (int i = 0; i < count; ++i)
+	{
+		const QModelIndex index = model()->index(i, 0, parent);
+		Node *node = static_cast<Node *>(index.internalPointer());
+		if (node == 0)
+			continue;
+		// Hidden ones stay out: a drag on the map would move them unseen.
+		if (PrimitivesTreeModel::isHiddenNode(node))
+			continue;
+		if (node->type() == Node::PrimitiveNodeType)
+			selection.select(index, index);
+		selectAllPrimitives(index, selection);
+	}
+}
+
+void PrimitivesView::selectAllPrimitives()
+{
+	QItemSelection selection;
+	selectAllPrimitives(QModelIndex(), selection);
+	selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
+}
+
+void PrimitivesView::expandSelected()
+{
+	Q_FOREACH (const QModelIndex &index, selectionModel()->selectedRows())
+		expandRecursively(index);
+}
+
+void PrimitivesView::collapseRecursively(const QModelIndex &index)
+{
+	const int count = model()->rowCount(index);
+	for (int i = 0; i < count; ++i)
+		collapseRecursively(model()->index(i, 0, index));
+	collapse(index);
+}
+
+void PrimitivesView::collapseSelected()
+{
+	Q_FOREACH (const QModelIndex &index, selectionModel()->selectedRows())
+		collapseRecursively(index);
 }
 
 void PrimitivesView::unload()
@@ -852,6 +1100,8 @@ void PrimitivesView::fillMenu_RootPrimitive(QMenu *menu, const QModelIndex &inde
 	menu->addAction(m_unloadAction);
 	fillMenu_Primitive(menu, index);
 	menu->removeAction(m_deleteAction);
+	menu->removeAction(m_cutAction);
+	menu->removeAction(m_copyAction);
 }
 
 void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
@@ -865,8 +1115,14 @@ void PrimitivesView::fillMenu_Primitive(QMenu *menu, const QModelIndex &index)
 		menu->addSeparator();
 	}
 
+	menu->addAction(m_cutAction);
+	menu->addAction(m_copyAction);
+	menu->addAction(m_pasteAction);
 	menu->addAction(m_deleteAction);
+	menu->addSeparator();
 	menu->addAction(m_selectChildrenAction);
+	menu->addAction(m_expandAction);
+	menu->addAction(m_collapseAction);
 	menu->addAction(m_helpAction);
 	menu->addSeparator();
 	addHideActions(menu, index);

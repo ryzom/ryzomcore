@@ -100,6 +100,16 @@ public:
 	/// Delete node and all child nodes from the tree model
 	void deleteNode(const Path &path);
 
+	/// A property of the primitive behind node was changed: refresh its row (name, icon)
+	/// and tell whoever shows its properties.
+	void primitivePropertyChanged(Node *node);
+
+Q_SIGNALS:
+	/// See primitivePropertyChanged(Node *).
+	void propertyChanged(Node *node);
+
+public:
+
 private:
 	void createChildNodes(NLLIGO::IPrimitive *primitive, int pos, const QModelIndex &parent);
 	void removeChildNodes(Node *node, const QModelIndex &parent);

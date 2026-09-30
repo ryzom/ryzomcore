@@ -104,6 +104,13 @@ private Q_SLOTS:
 	void showFindDialog();
 	void focusPrimitive(const QModelIndex &index);
 	void showGotoDialog();
+
+	/// "Select By Location" (Ctrl+L): pick every primitive within a distance of a world
+	/// position, replacing the selection or adding to it.
+	void showSelectByLocationDialog();
+
+	/// Space: lock or unlock the selection on the map.
+	void setSelectionLocked(bool locked);
 	void showPositionDialog(const QModelIndexList &indexes);
 	void showMapContextMenu(const QPointF &scenePos, const QPoint &globalPos);
 	void hideGotoMarker();
@@ -127,6 +134,11 @@ private Q_SLOTS:
 protected:
 	virtual void showEvent(QShowEvent *showEvent);
 	virtual void hideEvent(QHideEvent *hideEvent);
+
+	/// The studio's own Cut/Copy/Paste/Delete/Select All (and Save All, which sits on
+	/// Ctrl+A too) would make those keys ambiguous while this window is shown - the GUI
+	/// editor switches Delete on for good. Switched off on show, restored on hide.
+	void releaseCoreEditShortcuts(bool release);
 
 private:
 	QMenu *m_panelsMenu;
@@ -155,6 +167,8 @@ private:
 	QByteArray m_savedWindowState;
 	QByteArray m_savedWindowGeometry;
 	QAction *m_visiblePacsAction;
+	QAction *m_snapToGridAction;
+	QList<QPair<QAction *, bool> > m_releasedCoreActions;
 
 	/// Colour key for the PACS borders, shown in the tool bar while they are.
 	QWidget *createPacsLegend();
@@ -187,6 +201,8 @@ private:
 	void gotoWorldPosition(const QPointF &world, bool zoomIn);
 	QAction *m_findAction;
 	QAction *m_gotoAction;
+	QAction *m_selectByLocationAction;
+	QAction *m_lockSelectionAction;
 	FindPrimitiveDialog *m_findDialog;
 
 	/// Continent directories of what is open: the first loaded .land's, then the data directory.

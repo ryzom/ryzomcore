@@ -32,6 +32,8 @@
 #include <QPropertyAnimation>
 #include <QSettings>
 
+#include <cmath>
+
 namespace WorldEditor
 {
 
@@ -174,14 +176,6 @@ WorldItemPoint::WorldItemPoint(const QPointF &point, const qreal angle, const qr
 	createCircle();
 	createCollisionShape();
 
-	// Create arrow
-	if (showArrow)
-	{
-		m_arrow.push_back(QLine(0, 0, SIZE_ARROW, 0));
-		m_arrow.push_back(QLine(SIZE_ARROW - 2, -2, SIZE_ARROW, 0));
-		m_arrow.push_back(QLine(SIZE_ARROW - 2, 2, SIZE_ARROW, 0));
-	}
-
 	updateBoundingRect();
 }
 
@@ -239,6 +233,24 @@ void WorldItemPoint::radiusOn(const qreal radius)
 		return;
 
 	// TODO: implement
+}
+
+qreal WorldItemPoint::radius() const
+{
+	return m_radius;
+}
+
+void WorldItemPoint::setRadius(qreal radius)
+{
+	if (radius == m_radius)
+		return;
+
+	prepareGeometryChange();
+	m_radius = qMax(qreal(0), radius);
+	m_circle.clear();
+	createCircle();
+	updateBoundingRect();
+	update();
 }
 
 void WorldItemPoint::setColor(const QColor &color)
@@ -308,8 +320,9 @@ void WorldItemPoint::updateBoundingRect()
 	// The marker and the arrow grow by up to MAX_SYMBOL_SCALE when zoomed out, and the
 	// arrow turns with the item, so reserve its full length in every direction. Leaving
 	// the arrow out of the rectangle - as this did before - smears it across the view.
-	const qreal symbolExtent =
-			(m_showArrow ? qreal(SIZE_ARROW) : qreal(SIZE_POINT)) * MAX_SYMBOL_SCALE;
+	const qreal symbolExtent = m_showArrow
+			? qMax(qreal(SIZE_ARROW) * MAX_SYMBOL_SCALE, arrowWorldReach())
+			: qreal(SIZE_POINT) * MAX_SYMBOL_SCALE;
 	m_boundingRect.setCoords(-symbolExtent, -symbolExtent, symbolExtent, symbolExtent);
 
 	QRectF circleBoundingRect;
@@ -326,6 +339,16 @@ void WorldItemPoint::updateBoundingRect()
 		collisionBoundingRect.setCoords(-reach, -reach, reach, reach);
 		m_boundingRect = m_boundingRect.united(collisionBoundingRect);
 	}
+}
+
+qreal WorldItemPoint::arrowWorldReach() const
+{
+	if (m_collisionShape.isEmpty())
+		return 0;
+	const QRectF shapeRect = m_collisionShape.boundingRect();
+	const qreal reach = qMax(qAbs(shapeRect.left()), qMax(qAbs(shapeRect.right()),
+					   qMax(qAbs(shapeRect.top()), qAbs(shapeRect.bottom()))));
+	return reach * 1.5;
 }
 
 QPainterPath WorldItemPoint::shape() const
@@ -401,11 +424,29 @@ void WorldItemPoint::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
 	painter->save();
 	painter->rotate(m_angle);
+
+	if (m_showArrow)
+	{
+		// SIZE_ARROW pixels up to 1 pixel per metre; zoomed in further it grows to twice
+		// that, and it always reaches past the collision footprint. The head keeps a
+		// readable size on screen - it used to be 2 pixels and gone next to the marker.
+		const qreal zoomIn = qBound(1.0, 1.0 + std::log(lod) / std::log(2.0) / 4.0, 2.0);
+		const qreal length = qMax(SIZE_ARROW * zoomIn * scale, arrowWorldReach());
+		const qreal head = 7.0 * zoomIn * scale;
+		const QLineF arrow[3] =
+		{
+			QLineF(0, 0, length, 0),
+			QLineF(length - head, -head * 0.6, length, 0),
+			QLineF(length - head, head * 0.6, length, 0)
+		};
+		QPen arrowPen = painter->pen();
+		arrowPen.setCosmetic(true);
+		arrowPen.setWidthF(lod > 1.0 ? 2.0 : 1.0);
+		painter->setPen(arrowPen);
+		painter->drawLines(arrow, 3);
+	}
+
 	painter->scale(scale, scale);
-
-	// Draw arrow
-	painter->drawLines(m_arrow);
-
 	painter->setPen(Qt::NoPen);
 	if (isActived())
 		painter->setBrush(m_selectedBrush);

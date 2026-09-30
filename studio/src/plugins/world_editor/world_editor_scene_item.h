@@ -156,6 +156,10 @@ public:
 	virtual void turnOn(const qreal angle);
 	virtual void radiusOn(const qreal radius);
 
+	/// The "radius" property, drawn as a circle around the point; 0 draws none.
+	qreal radius() const;
+	void setRadius(qreal radius);
+
 	virtual void setColor(const QColor &color);
 	virtual void setEnabledSubPoints(bool enabled) {}
 
@@ -172,6 +176,10 @@ private:
 	void createCollisionShape();
 	void updateBoundingRect();
 
+	/// How far the direction arrow reaches at least, in metres: past the collision
+	/// footprint, so the facing still reads when zoomed in on a large creature.
+	qreal arrowWorldReach() const;
+
 	static const int SIZE_POINT = 4;
 
 	QPen m_pen, m_selectedPen;
@@ -183,7 +191,6 @@ private:
 	mutable qreal m_lastSymbolScale;
 
 	QPolygonF m_circle;
-	QVector<QLine> m_arrow;
 	QRectF m_rect, m_boundingRect;
 	qreal m_angle, m_radius;
 	bool m_showArrow;

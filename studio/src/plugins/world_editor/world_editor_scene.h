@@ -33,6 +33,7 @@ namespace WorldEditor
 {
 class PrimitivesTreeModel;
 class AbstractWorldItem;
+class WorldItemPoint;
 
 /*
 @class WorldEditorScene
@@ -90,6 +91,14 @@ public:
 	/// @return true if edit points mode is enabled, else false.
 	bool isEnabledEditPoints() const;
 
+	bool isSnapToGrid() const;
+
+	bool isSelectionLocked() const;
+
+	/// scenePos rounded to the dot grid step of the view at its current zoom, when
+	/// snapping is on; otherwise scenePos unchanged.
+	QPointF snapToGrid(const QPointF &scenePos) const;
+
 	/// Where the mouse was last seen over the map, in scene coordinates.
 	QPointF lastMouseScenePos() const
 	{
@@ -111,6 +120,14 @@ public Q_SLOTS:
 	/// Enable/disable edit points mode (user can change shape of WorldItemZone and WorldItemPath)
 	///
 	void setEnabledEditPoints(bool enabled);
+
+	/// Enable/disable snapping moved primitives and points to the dot grid.
+	void setSnapToGrid(bool enabled);
+
+	/// Lock the selection, like "Toggle Lock" (Space) in the MFC editor: clicks and
+	/// drags on the map no longer pick anything else, so a drag anywhere moves, turns
+	/// or scales what is selected without catching the primitive under the cursor.
+	void setSelectionLocked(bool locked);
 
 	/// Update of selections
 	void updateSelection(const QList<QGraphicsItem *> &selected, const QList<QGraphicsItem *> &deselected);
@@ -144,11 +161,24 @@ private:
 	void updateWorldItemsTurn(QGraphicsSceneMouseEvent *mouseEvent);
 	void updateWorldItemsRadius(QGraphicsSceneMouseEvent *mouseEvent);
 
+	/// Dot grid step of the view at its current zoom, 0 when there is none.
+	qreal gridStep() const;
+
 	QPen m_greenPen, m_purplePen;
 	QBrush m_greenBrush, m_purpleBrush;
 
 	QPointF m_firstPick, m_scaleFactor, m_pivot, m_offset;
 	QPointF m_lastMouseScenePos;
+	/// Scene position of the first selected item or point when the drag started. While
+	/// snapping, this is the point that lands on the grid; the rest follow it.
+	QPointF m_snapAnchor;
+	bool m_snapToGrid;
+	bool m_selectionLocked;
+
+	/// Radius mode: the selected points that have a "radius" property, and their radius
+	/// when the drag started.
+	QList<WorldItemPoint *> m_radiusItems;
+	QList<qreal> m_radiusStart;
 	QRectF m_selectionArea;
 	qreal m_firstPickX, m_firstPickY, m_angle;
 

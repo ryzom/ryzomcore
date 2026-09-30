@@ -16,6 +16,7 @@
 // Project includes
 #include "property_editor_panel.h"
 #include "primitive_property_form.h"
+#include "primitives_model.h"
 
 // Qt includes
 #include <QLabel>
@@ -28,7 +29,10 @@ namespace WorldEditor
 PropertyEditorPanel::PropertyEditorPanel(QWidget *parent)
 	: QWidget(parent),
 	  m_splitter(0),
-	  m_note(0)
+	  m_note(0),
+	  m_undoStack(0),
+	  m_model(0),
+	  m_scene(0)
 {
 	m_splitter = new QSplitter(Qt::Horizontal, this);
 	m_splitter->setChildrenCollapsible(false);
@@ -52,6 +56,7 @@ void PropertyEditorPanel::setEditorCount(int count)
 	while (m_editors.size() < count)
 	{
 		PrimitivePropertyForm *editor = new PrimitivePropertyForm(m_splitter);
+		editor->setContext(m_undoStack, m_model, m_scene);
 		m_splitter->addWidget(editor);
 		m_editors.append(editor);
 	}
@@ -61,6 +66,31 @@ void PropertyEditorPanel::setEditorCount(int count)
 		PrimitivePropertyForm *editor = m_editors.takeLast();
 		editor->setParent(0);
 		delete editor;
+	}
+}
+
+void PropertyEditorPanel::setContext(QUndoStack *undoStack, PrimitivesTreeModel *model,
+									 WorldEditorScene *scene)
+{
+	if (m_model != 0)
+		disconnect(m_model, SIGNAL(propertyChanged(Node *)), this, SLOT(refreshNode(Node *)));
+
+	m_undoStack = undoStack;
+	m_model = model;
+	m_scene = scene;
+	Q_FOREACH (PrimitivePropertyForm *editor, m_editors)
+		editor->setContext(m_undoStack, m_model, m_scene);
+
+	if (m_model != 0)
+		connect(m_model, SIGNAL(propertyChanged(Node *)), this, SLOT(refreshNode(Node *)));
+}
+
+void PropertyEditorPanel::refreshNode(Node *node)
+{
+	Q_FOREACH (PrimitivePropertyForm *editor, m_editors)
+	{
+		if ((editor->node() == node) && !editor->isPushing())
+			editor->setNode(node);
 	}
 }
 

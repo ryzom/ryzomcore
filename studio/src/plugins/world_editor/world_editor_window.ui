@@ -75,6 +75,7 @@
    <addaction name="rotateAction"/>
    <addaction name="scaleAction"/>
    <addaction name="turnAction"/>
+   <addaction name="radiusAction"/>
    <addaction name="separator"/>
    <addaction name="pointsAction"/>
   </widget>
@@ -304,6 +305,17 @@
    </property>
    <property name="text">
     <string>Scale</string>
+   </property>
+  </action>
+  <action name="radiusAction">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Radius</string>
+   </property>
+   <property name="toolTip">
+    <string>Radius (F10): drag to resize the circle of points that have a radius - spawn, trigger, nogo, safe zones</string>
    </property>
   </action>
   <action name="turnAction">

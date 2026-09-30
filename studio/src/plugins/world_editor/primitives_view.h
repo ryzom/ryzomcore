@@ -94,6 +94,18 @@ public:
 	void showContextMenu(const QModelIndex &index, const QPoint &globalPos,
 						 bool fromScene = false);
 
+	/// Edit actions with their shortcuts (Ctrl+C/X/V, Del, Ctrl+A, E, R). The window
+	/// adds them to itself as well, so they work with the map in focus too.
+	QList<QAction *> editActions() const;
+
+public Q_SLOTS:
+	void copyPrimitives();
+	void cutPrimitives();
+	void pastePrimitives();
+	void selectAllPrimitives();
+	void expandSelected();
+	void collapseSelected();
+
 private Q_SLOTS:
 	void loadLandscape();
 	void loadRootPrimitive();
@@ -120,6 +132,16 @@ protected:
 	void contextMenuEvent(QContextMenuEvent *event);
 
 private:
+	/// Selected primitive rows without those whose parent is selected as well - they
+	/// come along with it anyway.
+	QModelIndexList topLevelSelectedPrimitives() const;
+
+	/// Delete these rows as one undo step. Only rows that may be deleted.
+	void deleteRows(const QModelIndexList &indexes, const QString &text);
+
+	void selectAllPrimitives(const QModelIndex &parent, QItemSelection &selection);
+	void collapseRecursively(const QModelIndex &index);
+
 	void selectChildren(const QModelIndex &parent, QItemSelection &itemSelection);
 	void fillMenu_WorldEdit(QMenu *menu);
 	void fillMenu_Landscape(QMenu *menu, const QModelIndex &index);
@@ -149,6 +171,12 @@ private:
 	QAction *m_hideWithChildrenAction;
 	QAction *m_showWithChildrenAction;
 	QAction *m_positionAction;
+	QAction *m_copyAction;
+	QAction *m_cutAction;
+	QAction *m_pasteAction;
+	QAction *m_selectAllAction;
+	QAction *m_expandAction;
+	QAction *m_collapseAction;
 
 	/// Rows Hide/Show act on, see hideTargets() in the source.
 	QModelIndexList hideTargets() const;

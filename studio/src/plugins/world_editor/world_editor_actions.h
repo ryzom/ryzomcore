@@ -408,6 +408,90 @@ private:
 	const QList<QPolygonF> m_undoPolygons;
 };
 
+/**
+@class PastePrimitivesCommand
+@brief Insert copies of primitives from the clipboard below a parent, as Ctrl+V does.
+@details Like the MFC editor: every copy gets new unique IDs, and a class that numbers its
+	children gets the name numbered after the new position. The copies land at the same
+	coordinates as the originals. The prepared copies are kept, so a redo brings back
+	exactly what the first paste made.
+*/
+class PastePrimitivesCommand: public QUndoCommand
+{
+public:
+	/// primitivePos and treeRow are where the first copy goes among the parent's
+	/// primitive children and tree rows; the two differ where hidden children (alias)
+	/// sit in between. NLLIGO::IPrimitive::AtTheEnd and AtTheEnd append.
+	PastePrimitivesCommand(const QList<NLLIGO::IPrimitive *> &clipboard, const Path &parentPath,
+						   uint primitivePos, int treeRow, PrimitivesTreeModel *model,
+						   WorldEditorScene *scene, QTreeView *view, QUndoCommand *parent = 0);
+	virtual ~PastePrimitivesCommand();
+
+	virtual void undo();
+	virtual void redo();
+
+	/// Tree paths of the copies, valid after redo().
+	QList<Path> pastedPaths() const
+	{
+		return m_paths;
+	}
+
+private:
+	QList<NLLIGO::IPrimitive *> m_prepared;
+	const Path m_parentPath;
+	const uint m_primitivePos;
+	const int m_treeRow;
+	QList<Path> m_paths;
+	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *const m_scene;
+	QTreeView *const m_view;
+};
+
+/**
+@class SetPropertyCommand
+@brief Change one property of a primitive, so it can be undone like everything else.
+@details The property form used to write straight into the LIGO object. Now every change
+	goes through here: into the undo stack, the command list and the journal.
+
+	Typing into a script block changes the property on every key. Those changes merge
+	into one command as long as they follow each other quickly and concern the same
+	property, so Ctrl+Z takes back the edit, not a single letter.
+
+	A few properties are shown elsewhere as well and are refreshed after each change:
+	the name in the tree, the radius as the circle on the map.
+*/
+class SetPropertyCommand: public QUndoCommand
+{
+public:
+	SetPropertyCommand(const Path &path, const QString &name, const QString &value, bool asArray,
+					   PrimitivesTreeModel *model, WorldEditorScene *scene,
+					   QUndoCommand *parent = 0);
+	virtual ~SetPropertyCommand();
+
+	virtual void undo();
+	virtual void redo();
+
+	virtual int id() const;
+	virtual bool mergeWith(const QUndoCommand *other);
+
+	/// Current value of a property, array lines joined with newlines. exists tells
+	/// whether the primitive has the property at all, isDefault its default flag.
+	static QString valueOf(const NLLIGO::IPrimitive *primitive, const QString &name,
+						   bool *exists = 0, bool *isDefault = 0);
+
+private:
+	void apply(const QString &value, bool exists, bool isDefault);
+
+	const Path m_path;
+	const QString m_name;
+	const bool m_asArray;
+	QString m_newValue, m_oldValue;
+	bool m_oldExists, m_oldDefault;
+	qint64 m_lastChange;
+	PrimitivesTreeModel *const m_model;
+	WorldEditorScene *const m_scene;
+};
+
 } /* namespace WorldEditor */
 
 // Enable the use of QVariant with this class.

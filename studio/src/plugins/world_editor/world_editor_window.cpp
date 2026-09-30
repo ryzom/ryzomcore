@@ -29,6 +29,13 @@
 #include <QtWidgets/QGraphicsPathItem>
 #include <QtGui/QClipboard>
 #include <QtGui/QPainterPath>
+#include <QtGui/QPainter>
+#include <QtGui/QPixmap>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QPushButton>
 #include <QtWidgets/QToolBar>
 #include "world_editor_constants.h"
 #include "primitives_model.h"
@@ -77,6 +84,7 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	  m_lastUndoIndex(0),
 	  m_lastUndoCount(0),
 	  m_visiblePacsAction(0),
+	  m_snapToGridAction(0),
 	  m_findDialog(0),
 	  m_visibleAiMapAction(0),
 	  m_aiMapLegendAction(0),
@@ -109,8 +117,11 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 
 	m_ui.treePrimitivesView->setModel(m_primitivesModel);
 	m_ui.treePrimitivesView->setUndoStack(m_undoStack);
+	m_ui.propertyEditWidget->setContext(m_undoStack, m_primitivesModel, m_worldEditorScene);
 	m_ui.treePrimitivesView->setZoneBuilder(m_zoneBuilderBase);
 	m_ui.treePrimitivesView->setWorldScene(m_worldEditorScene);
+	// Copy, paste, delete and the rest work with the map in focus as well.
+	addActions(m_ui.treePrimitivesView->editActions());
 
 	QActionGroup *sceneModeGroup = new QActionGroup(this);
 	sceneModeGroup->addAction(m_ui.selectAction);
@@ -118,7 +129,40 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	sceneModeGroup->addAction(m_ui.rotateAction);
 	sceneModeGroup->addAction(m_ui.scaleAction);
 	sceneModeGroup->addAction(m_ui.turnAction);
+	sceneModeGroup->addAction(m_ui.radiusAction);
 	m_ui.selectAction->setChecked(true);
+
+	// The circle the radius mode changes, with the radius drawn in.
+	{
+		QPixmap pixmap(24, 24);
+		pixmap.fill(Qt::transparent);
+		QPainter painter(&pixmap);
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		painter.setPen(QPen(palette().color(QPalette::WindowText), 1.6));
+		painter.drawEllipse(QPointF(12, 12), 9, 9);
+		painter.drawLine(QPointF(12, 12), QPointF(20.5, 12));
+		painter.setBrush(palette().color(QPalette::WindowText));
+		painter.drawEllipse(QPointF(12, 12), 1.8, 1.8);
+		painter.end();
+		m_ui.radiusAction->setIcon(QIcon(pixmap));
+	}
+
+	// F5 to F10 switch the mode, as in the MFC editor.
+	{
+		QAction *modes[] = { m_ui.selectAction, m_ui.moveAction, m_ui.rotateAction,
+							 m_ui.turnAction, m_ui.scaleAction, m_ui.radiusAction };
+		const int keys[] = { Qt::Key_F5, Qt::Key_F6, Qt::Key_F7, Qt::Key_F8, Qt::Key_F9, Qt::Key_F10 };
+		for (int i = 0; i < 6; ++i)
+		{
+			modes[i]->setShortcut(QKeySequence(keys[i]));
+			modes[i]->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+			modes[i]->setToolTip(QString("%1 (%2)").arg(modes[i]->text(), QKeySequence(keys[i]).toString()));
+			addAction(modes[i]);
+		}
+		// The .ui tool tip says more than the name.
+		m_ui.radiusAction->setToolTip(tr("Radius (F10): drag to resize the circle of points that have a radius -\n"
+										 "spawn, trigger, nogo and safe zones and the like"));
+	}
 
 	m_ui.newWorldEditAction->setIcon(QIcon(Core::Constants::ICON_NEW));
 	m_ui.saveWorldEditAction->setIcon(QIcon(Core::Constants::ICON_SAVE));
@@ -173,6 +217,42 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	m_modeMapper->setMapping(m_ui.scaleAction, 3);
 	connect(m_ui.turnAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
 	m_modeMapper->setMapping(m_ui.turnAction, 4);
+	connect(m_ui.radiusAction, SIGNAL(triggered()), m_modeMapper, SLOT(map()));
+	m_modeMapper->setMapping(m_ui.radiusAction, 5);
+
+	// Toggle Lock of the MFC editor, next to the modes it goes with.
+	m_lockSelectionAction = new QAction(tr("Lock selection"), this);
+	m_lockSelectionAction->setCheckable(true);
+	m_lockSelectionAction->setShortcut(QKeySequence(Qt::Key_Space));
+	m_lockSelectionAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	m_lockSelectionAction->setToolTip(tr("Lock the selection (Space): clicks on the map no longer select\n"
+										 "anything else, a drag anywhere moves, turns or scales the selection"));
+	{
+		QPixmap pixmap(24, 24);
+		pixmap.fill(Qt::transparent);
+		QPainter painter(&pixmap);
+		painter.setRenderHint(QPainter::Antialiasing, true);
+		const QColor colour = palette().color(QPalette::WindowText);
+		painter.setPen(QPen(colour, 2.0));
+		painter.drawArc(QRectF(7, 3, 10, 12), 0, 180 * 16);
+		painter.drawLine(QPointF(7, 9), QPointF(7, 11));
+		painter.drawLine(QPointF(17, 9), QPointF(17, 11));
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(colour);
+		painter.drawRoundedRect(QRectF(4.5, 11, 15, 10), 2, 2);
+		painter.end();
+		m_lockSelectionAction->setIcon(QIcon(pixmap));
+	}
+	connect(m_lockSelectionAction, SIGNAL(toggled(bool)), this, SLOT(setSelectionLocked(bool)));
+	addAction(m_lockSelectionAction);
+	m_ui.worldEditToolBar->insertAction(m_ui.pointsAction, m_lockSelectionAction);
+
+	m_selectByLocationAction = new QAction(tr("Select by location..."), this);
+	m_selectByLocationAction->setShortcut(QKeySequence(tr("Ctrl+L")));
+	m_selectByLocationAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+	m_selectByLocationAction->setToolTip(tr("Select every primitive within a distance of a position (Ctrl+L)"));
+	connect(m_selectByLocationAction, SIGNAL(triggered()), this, SLOT(showSelectByLocationDialog()));
+	addAction(m_selectByLocationAction);
 
 	connect(m_modeMapper, SIGNAL(mapped(int)), this, SLOT(setMode(int)));
 	connect(m_ui.pointsAction, SIGNAL(triggered(bool)), m_worldEditorScene, SLOT(setEnabledEditPoints(bool)));
@@ -618,6 +698,7 @@ void WorldEditorWindow::showEvent(QShowEvent *showEvent)
 		m_oglWidget->makeCurrent();
 	m_statusInfo->show();
 	m_statusBarTimer->start(100);
+	releaseCoreEditShortcuts(true);
 
 	// restoreState() ran in the constructor, while this window was not visible yet, so
 	// Qt only applies the restored arrangement now. A check made before that would have
@@ -642,6 +723,33 @@ void WorldEditorWindow::hideEvent(QHideEvent *hideEvent)
 	QMainWindow::hideEvent(hideEvent);
 	m_statusInfo->hide();
 	m_statusBarTimer->stop();
+	releaseCoreEditShortcuts(false);
+}
+
+void WorldEditorWindow::releaseCoreEditShortcuts(bool release)
+{
+	if (release)
+	{
+		if (!m_releasedCoreActions.isEmpty())
+			return;
+		Core::MenuManager *menuManager = Core::ICore::instance()->menuManager();
+		const char *ids[] = { Core::Constants::CUT, Core::Constants::COPY, Core::Constants::PASTE,
+							  Core::Constants::DEL, Core::Constants::SELECT_ALL, Core::Constants::SAVE_ALL };
+		for (size_t i = 0; i < sizeof(ids) / sizeof(ids[0]); ++i)
+		{
+			QAction *action = menuManager->action(ids[i]);
+			if (action == 0)
+				continue;
+			m_releasedCoreActions.append(qMakePair(action, action->isEnabled()));
+			action->setEnabled(false);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < m_releasedCoreActions.size(); ++i)
+			m_releasedCoreActions[i].first->setEnabled(m_releasedCoreActions[i].second);
+		m_releasedCoreActions.clear();
+	}
 }
 
 void WorldEditorWindow::createMenus()
@@ -710,6 +818,19 @@ void WorldEditorWindow::createToolBars()
 	m_visibleCollisionsAction->setCheckable(true);
 	connect(m_visibleCollisionsAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleCollisions(bool)));
 	m_ui.shToolBar->addAction(m_visibleCollisionsAction);
+
+	// Next to the dot grid it snaps to. Off by default: most edits are free-hand.
+	m_snapToGridAction = new QAction(tr("Snap to grid"), this);
+	m_snapToGridAction->setToolTip(tr("Snap moved primitives, moved points and new primitives\n"
+									  "to the dot grid; the step follows the zoom like the dots do"));
+	m_snapToGridAction->setCheckable(true);
+	connect(m_snapToGridAction, SIGNAL(toggled(bool)), m_worldEditorScene, SLOT(setSnapToGrid(bool)));
+	{
+		const QList<QAction *> actions = m_ui.shToolBar->actions();
+		const int gridPoints = actions.indexOf(m_ui.visibleGridPointsAction);
+		QAction *before = (gridPoints >= 0 && gridPoints + 1 < actions.size()) ? actions[gridPoints + 1] : 0;
+		m_ui.shToolBar->insertAction(before, m_snapToGridAction);
+	}
 
 	// ID_VIEW_PACS of the MFC editor: the borders the server moves entities along.
 	m_visiblePacsAction = new QAction(tr("S/H PACS"), this);
@@ -800,6 +921,7 @@ void WorldEditorWindow::readSettings()
 	restoreSwitch(m_ui.visibleDetailsAction, Constants::VISIBLE_DETAILS, false);
 	restoreSwitch(m_ui.visibleGridAction, Constants::VISIBLE_GRID, true);
 	restoreSwitch(m_ui.visibleGridPointsAction, Constants::VISIBLE_GRID_POINTS, false);
+	restoreSwitch(m_snapToGridAction, Constants::SNAP_TO_GRID, false);
 	restoreSwitch(m_visiblePacsAction, Constants::VISIBLE_PACS, false);
 	restoreSwitch(m_visibleAiMapAction, Constants::VISIBLE_AI_MAP, false);
 
@@ -1190,6 +1312,99 @@ void WorldEditorWindow::showGotoDialog()
 			m_ui.graphicsView->viewport()->rect().center())));
 }
 
+void WorldEditorWindow::setSelectionLocked(bool locked)
+{
+	m_worldEditorScene->setSelectionLocked(locked);
+	// Locked in select mode nothing would happen on the map at all.
+	if (locked && m_ui.selectAction->isChecked())
+		m_ui.moveAction->trigger();
+	statusBar()->showMessage(locked ? tr("Selection locked") : tr("Selection unlocked"), 2000);
+}
+
+void WorldEditorWindow::showSelectByLocationDialog()
+{
+	if (m_worldEditorScene->isSelectionLocked())
+	{
+		statusBar()->showMessage(tr("The selection is locked (Space)"), 3000);
+		return;
+	}
+
+	// The values of the last time, as in the MFC dialog; the first time the spot under
+	// the mouse.
+	static bool initialised = false;
+	static double lastX = 0, lastY = 0, lastThreshold = 10;
+	if (!initialised)
+	{
+		const QPointF world = Navigation::sceneToWorld(m_worldEditorScene->lastMouseScenePos());
+		lastX = world.x();
+		lastY = world.y();
+		initialised = true;
+	}
+
+	QDialog dialog(this);
+	dialog.setWindowTitle(tr("Select by location"));
+	QFormLayout *form = new QFormLayout(&dialog);
+	QDoubleSpinBox *x = new QDoubleSpinBox(&dialog);
+	QDoubleSpinBox *y = new QDoubleSpinBox(&dialog);
+	QDoubleSpinBox *threshold = new QDoubleSpinBox(&dialog);
+	Q_FOREACH (QDoubleSpinBox *box, QList<QDoubleSpinBox *>() << x << y)
+	{
+		box->setRange(-100000, 100000);
+		box->setDecimals(2);
+	}
+	threshold->setRange(0, 100000);
+	threshold->setDecimals(2);
+	threshold->setSuffix(" m");
+	x->setValue(lastX);
+	y->setValue(lastY);
+	threshold->setValue(lastThreshold);
+	form->addRow(tr("X"), x);
+	form->addRow(tr("Y"), y);
+	form->addRow(tr("Within"), threshold);
+
+	QDialogButtonBox *buttons = new QDialogButtonBox(&dialog);
+	QPushButton *selectButton = buttons->addButton(tr("Select"), QDialogButtonBox::AcceptRole);
+	QPushButton *addButton = buttons->addButton(tr("Add to selection"), QDialogButtonBox::AcceptRole);
+	buttons->addButton(QDialogButtonBox::Cancel);
+	selectButton->setDefault(true);
+	form->addRow(buttons);
+	connect(buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
+	connect(buttons, SIGNAL(rejected()), &dialog, SLOT(reject()));
+	QAbstractButton *clicked = 0;
+	connect(buttons, &QDialogButtonBox::clicked, [&clicked](QAbstractButton *button) { clicked = button; });
+
+	if (dialog.exec() != QDialog::Accepted)
+		return;
+
+	lastX = x->value();
+	lastY = y->value();
+	lastThreshold = threshold->value();
+	const bool add = (clicked == addButton);
+
+	// The square around the spot, like the MFC editor's pickRect(), in scene coordinates.
+	const QPointF centre = Navigation::worldToScene(QPointF(lastX, lastY));
+	const QRectF area(centre - QPointF(lastThreshold, lastThreshold),
+					  QSizeF(2 * lastThreshold, 2 * lastThreshold));
+
+	QItemSelection selection;
+	Q_FOREACH (QGraphicsItem *item, m_worldEditorScene->items(area, Qt::IntersectsItemShape))
+	{
+		if ((qgraphicsitem_cast<AbstractWorldItem *>(item) == 0) || !item->isVisible())
+			continue;
+		QPersistentModelIndex *index = qvariant_cast<QPersistentModelIndex *>(item->data(Constants::NODE_PERISTENT_INDEX));
+		if ((index != 0) && index->isValid())
+		{
+			const QModelIndex modelIndex = index->operator const QModelIndex &();
+			selection.select(modelIndex, modelIndex);
+		}
+	}
+
+	QItemSelectionModel *selectionModel = m_ui.treePrimitivesView->selectionModel();
+	selectionModel->select(selection, (add ? QItemSelectionModel::Select : QItemSelectionModel::ClearAndSelect)
+							| QItemSelectionModel::Rows);
+	statusBar()->showMessage(tr("%n primitive(s) found", 0, selection.indexes().size()), 3000);
+}
+
 void WorldEditorWindow::showGotoDialogAt(const QPointF &world)
 {
 	PositionDialog dialog(PositionDialog::GotoMode, world, QString(), this);
@@ -1474,6 +1689,7 @@ void WorldEditorWindow::writeSettings()
 	settings->setValue(Constants::VISIBLE_DETAILS, m_ui.visibleDetailsAction->isChecked());
 	settings->setValue(Constants::VISIBLE_GRID, m_ui.visibleGridAction->isChecked());
 	settings->setValue(Constants::VISIBLE_GRID_POINTS, m_ui.visibleGridPointsAction->isChecked());
+	settings->setValue(Constants::SNAP_TO_GRID, m_snapToGridAction->isChecked());
 	settings->setValue(Constants::VISIBLE_PACS, m_visiblePacsAction->isChecked());
 	settings->setValue(Constants::VISIBLE_AI_MAP, m_visibleAiMapAction->isChecked());
 	settings->endGroup();

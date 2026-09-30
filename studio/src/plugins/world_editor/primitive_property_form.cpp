@@ -17,6 +17,8 @@
 #include "primitive_property_form.h"
 #include "script_editor.h"
 #include "world_editor_misc.h"
+#include "world_editor_actions.h"
+#include "primitives_model.h"
 
 // NeL includes
 #include <nel/misc/debug.h>
@@ -31,6 +33,7 @@
 #include <QLineEdit>
 #include <QPlainTextEdit>
 #include <QPushButton>
+#include <QUndoStack>
 #include <QVBoxLayout>
 
 // STL includes
@@ -57,7 +60,12 @@ const int MAX_BLOCK_HEIGHT = 320;
 PrimitivePropertyForm::PrimitivePropertyForm(QWidget *parent)
 	: QScrollArea(parent),
 	  m_building(false),
+	  m_pushing(false),
 	  m_primitive(0),
+	  m_node(0),
+	  m_undoStack(0),
+	  m_model(0),
+	  m_scene(0),
 	  m_content(0),
 	  m_layout(0)
 {
@@ -66,9 +74,18 @@ PrimitivePropertyForm::PrimitivePropertyForm(QWidget *parent)
 	clear();
 }
 
+void PrimitivePropertyForm::setContext(QUndoStack *undoStack, PrimitivesTreeModel *model,
+									   WorldEditorScene *scene)
+{
+	m_undoStack = undoStack;
+	m_model = model;
+	m_scene = scene;
+}
+
 void PrimitivePropertyForm::clear()
 {
 	m_primitive = 0;
+	m_node = 0;
 
 	m_content = new QWidget(this);
 	m_layout = new QVBoxLayout(m_content);
@@ -110,6 +127,20 @@ void PrimitivePropertyForm::store(const QString &name, const QString &value, boo
 {
 	if ((m_primitive == 0) || m_building)
 		return;
+
+	if ((m_undoStack != 0) && (m_model != 0) && (m_node != 0))
+	{
+		// Leaving a field without changing it still ends the edit; that is no change.
+		bool exists = false;
+		if ((SetPropertyCommand::valueOf(m_primitive, name, &exists) == value) && exists)
+			return;
+
+		m_pushing = true;
+		m_undoStack->push(new SetPropertyCommand(m_model->pathFromNode(m_node), name, value, asArray,
+												 m_model, m_scene));
+		m_pushing = false;
+		return;
+	}
 
 	NLLIGO::IProperty *property = 0;
 	if (!m_primitive->getPropertyByName(name.toUtf8().constData(), property) || (property == 0))
@@ -403,6 +434,7 @@ void PrimitivePropertyForm::setNode(Node *node)
 		return;
 
 	m_building = true;
+	m_node = node;
 
 	if (node->type() == Node::PrimitiveNodeType)
 		buildForPrimitive(node);
