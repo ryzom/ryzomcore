@@ -15,7 +15,8 @@ DATA=""
 SERVER=""
 GAME=""
 PREFIX="$HOME/.local/opt/ryzom-studio"
-BUILD="$CORE/build-studio"
+# Outside the checkout, so git status stays clean.
+BUILD="$HOME/.cache/ryzom-studio/build"
 STATE="$HOME/.local/share/ryzom-studio"
 JOBS="$(nproc 2>/dev/null || echo 2)"
 DO_DEPS=1

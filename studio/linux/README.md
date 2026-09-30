@@ -80,7 +80,7 @@ as a `.bak-*` copy each time.
 --server-data DIR   ryzom-server-data checkout
 --game DIR          Ryzom game installation, for the live PACS
 --prefix DIR        install location (default ~/.local/opt/ryzom-studio)
---build-dir DIR     build directory  (default ryzom-core/build-studio)
+--build-dir DIR     build directory  (default ~/.cache/ryzom-studio/build)
 --jobs N            parallel build jobs
 --skip-deps         do not install packages
 --config-only       only rewrite the configuration
