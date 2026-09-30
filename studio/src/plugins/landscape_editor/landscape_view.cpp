@@ -42,8 +42,9 @@ LandscapeView::LandscapeView(QWidget *parent)
 	setBackgroundBrush(QBrush(Qt::lightGray));
 
 	m_cellSize = 160;
+	// Zoom limits in pixels per metre. Far enough in for the finest dot grid step.
 	m_maxView = 0.06;
-	m_minView = 32.0;
+	m_minView = 256.0;
 	m_maxViewText = 0.6;
 
 	//A modified version of centerOn(), handles special cases
@@ -73,23 +74,34 @@ void LandscapeView::setVisibleText(bool visible)
 
 void LandscapeView::wheelEvent(QWheelEvent *event)
 {
-	//How fast we zoom
-	float numSteps = (( event->delta() / 8 ) / 15) * 1.2; 
+	// 1.2 per notch of 120. Smooth and high-resolution wheels send smaller deltas, which
+	// then zoom by a fraction of a notch.
+	const int delta = event->angleDelta().y();
+	if (delta == 0)
+	{
+		event->ignore();
+		return;
+	}
 
-	QMatrix mat = matrix();
-	QPointF mousePosition = event->pos();
+	const qreal current = transform().m11();
+	qreal target = current * std::pow(1.2, delta / 120.0);
 
-	mat.translate((width() / 2) - mousePosition.x(), (height() / 2) - mousePosition.y());
+	// Zoomed in: m_minView pixels per metre. Zoomed out: no further than the whole scene
+	// fits the view - beyond that there is only background left to see.
+	const QRectF scene = sceneRect();
+	qreal fitScene = m_maxView;
+	if (!scene.isEmpty())
+		fitScene = qMax(fitScene, qMin(viewport()->width() / scene.width(), viewport()->height() / scene.height()));
+	target = qBound(fitScene, target, m_minView);
+	if (qFuzzyCompare(target, current))
+	{
+		event->accept();
+		return;
+	}
 
-	if ( numSteps > 0 )
-		mat.scale(numSteps, numSteps);
-	else
-		mat.scale(-1 / numSteps, -1 / numSteps);
-
-	mat.translate(mousePosition.x() - (width() / 2), mousePosition.y() - (height() / 2));
-	
-	//Adjust to the new center for correct zooming
-	setMatrix(mat);
+	// The transformation anchor (AnchorUnderMouse) keeps the point under the cursor.
+	scale(target / current, target / current);
+	m_currentCenterPoint = getCenter();
 	event->accept();
 }
 
@@ -167,8 +179,9 @@ void LandscapeView::setCenter(const QPointF &centerPoint)
 	double boundWidth = sceneBounds.width() - 2.0 * boundX;
 	double boundHeight = sceneBounds.height() - 2.0 * boundY;
 
-	//The max boundary that the centerPoint can be to
-	QRectF bounds(boundX, boundY, boundWidth, boundHeight);
+	//The max boundary that the centerPoint can be to. The scene does not start at 0 -
+	//the world editor's begins 20 cells to the left and above.
+	QRectF bounds(sceneBounds.left() + boundX, sceneBounds.top() + boundY, boundWidth, boundHeight);
 
 	if(bounds.contains(centerPoint))
 	{
@@ -256,9 +269,9 @@ void LandscapeView::setVisibleGridPoints(bool visible)
 void LandscapeView::drawGridPoints(QPainter *painter, const QRectF &rect)
 {
 	// A dot grid for placing things precisely. The spacing follows the zoom: the finest
-	// step that keeps the dots at least MIN_PIXELS apart on screen. Every step divides the
-	// cell size, so the dots always line up with the zone grid.
-	static const qreal STEPS[] = { 1, 2, 5, 10, 20, 40, 80, 160 };
+	// step that keeps the dots at least MIN_PIXELS apart on screen, down to 10 cm. Every
+	// step divides the cell size, so the dots always line up with the zone grid.
+	static const qreal STEPS[] = { 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 40, 80, 160 };
 	static const int STEP_COUNT = sizeof(STEPS) / sizeof(STEPS[0]);
 	static const qreal MIN_PIXELS = 12.0;
 
@@ -277,34 +290,44 @@ void LandscapeView::drawGridPoints(QPainter *painter, const QRectF &rect)
 	// counting easier.
 	const qreal majorStep = qMin(qreal(m_cellSize), step * 5);
 
-	QVector<QPointF> minor, major;
-	const qreal left = step * floor(rect.left() / step);
-	const qreal top = step * floor(rect.top() / step);
-	for (qreal x = left; x < rect.right(); x += step)
+	// Counted in whole steps, not summed up: adding 0.1 a few hundred times drifts off
+	// the grid.
+	const int majorEvery = qMax(1, qRound(majorStep / step));
+	const int firstColumn = int(floor(rect.left() / step));
+	const int lastColumn = int(ceil(rect.right() / step));
+	const int firstRow = int(floor(rect.top() / step));
+	const int lastRow = int(ceil(rect.bottom() / step));
+
+	// Drawn as small squares in viewport pixels, not as points in scene coordinates: the
+	// OpenGL engine strokes a point as a zero-length line in single precision, and far
+	// from the origin and zoomed in that turns the dots into dashes.
+	const QTransform toViewport = painter->worldTransform();
+	QVector<QRectF> minor, major;
+	for (int column = firstColumn; column <= lastColumn; ++column)
 	{
-		const bool majorColumn = std::fmod(std::fabs(x), majorStep) < 0.001;
-		for (qreal y = top; y < rect.bottom(); y += step)
+		const bool majorColumn = (column % majorEvery) == 0;
+		for (int row = firstRow; row <= lastRow; ++row)
 		{
-			if (majorColumn && std::fmod(std::fabs(y), majorStep) < 0.001)
-				major.push_back(QPointF(x, y));
+			const QPointF point = toViewport.map(QPointF(column * step, row * step));
+			const qreal x = std::floor(point.x());
+			const qreal y = std::floor(point.y());
+			if (majorColumn && (row % majorEvery) == 0)
+				major.push_back(QRectF(x - 1, y - 1, 3, 3));
 			else
-				minor.push_back(QPointF(x, y));
+				minor.push_back(QRectF(x, y, 2, 2));
 		}
 	}
 
 	painter->save();
+	painter->resetTransform();
 	painter->setRenderHint(QPainter::Antialiasing, false);
-	QPen pen(QColor(255, 255, 255, 150), 2, Qt::SolidLine, Qt::SquareCap);
-	pen.setCosmetic(true);
-	painter->setPen(pen);
-	painter->drawPoints(minor.data(), minor.size());
-	pen.setColor(QColor(255, 255, 255, 230));
-	pen.setWidth(3);
-	painter->setPen(pen);
-	painter->drawPoints(major.data(), major.size());
+	painter->setPen(Qt::NoPen);
+	painter->setBrush(QColor(255, 255, 255, 150));
+	painter->drawRects(minor.data(), minor.size());
+	painter->setBrush(QColor(255, 255, 255, 230));
+	painter->drawRects(major.data(), major.size());
 
 	// Tell the spacing in the bottom left corner of the view.
-	painter->resetTransform();
 	const QString label = tr("Grid: %1 m").arg(step);
 	const QRect box = painter->fontMetrics().boundingRect(label).adjusted(-4, -2, 4, 2);
 	const QRect where(QPoint(6, viewport()->height() - box.height() - 6), box.size());
