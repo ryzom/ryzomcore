@@ -126,6 +126,26 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	createMenus();
 	createToolBars();
 	createHistoryPanel();
+
+	// Every one of these switches was in the tool bar but wired to nothing, so they sat
+	// there greyed out. The .ui marks them disabled, so enable them here as well. Wired
+	// before readSettings(), which restores them by emitting toggled() - connected after
+	// it, a switch stored as on showed checked while its layer stayed off.
+	m_ui.visibleLandAction->setEnabled(true);
+	m_ui.visibleZonePrimitivesAction->setEnabled(true);
+	m_ui.visiblePathPrimitivesAction->setEnabled(true);
+	m_ui.vidiblePointPrimitives->setEnabled(true);
+	m_ui.visibleDetailsAction->setEnabled(true);
+	m_ui.visibleGridPointsAction->setEnabled(true);
+
+	connect(m_ui.visibleGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
+	connect(m_ui.visibleLandAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleLand(bool)));
+	connect(m_ui.visibleZonePrimitivesAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleZonePrimitives(bool)));
+	connect(m_ui.visiblePathPrimitivesAction, SIGNAL(toggled(bool)), this, SLOT(setVisiblePathPrimitives(bool)));
+	connect(m_ui.vidiblePointPrimitives, SIGNAL(toggled(bool)), this, SLOT(setVisiblePointPrimitives(bool)));
+	connect(m_ui.visibleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleDetails(bool)));
+	connect(m_ui.visibleGridPointsAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleGridPoints(bool)));
+
 	readSettings();
 
 	// Preset the zone builder with the configured landscape directory. Without it the
@@ -160,23 +180,6 @@ WorldEditorWindow::WorldEditorWindow(QWidget *parent)
 	connect(m_ui.settingsAction, SIGNAL(triggered()), this, SLOT(openProjectSettings()));
 	connect(m_ui.newWorldEditAction, SIGNAL(triggered()), this, SLOT(newWorldEditFile()));
 	connect(m_ui.saveWorldEditAction, SIGNAL(triggered()), this, SLOT(saveWorldEditFile()));
-	// Every one of these switches was in the tool bar but wired to nothing, so they sat
-	// there greyed out. The .ui marks them disabled, so enable them here as well.
-	m_ui.visibleLandAction->setEnabled(true);
-	m_ui.visibleZonePrimitivesAction->setEnabled(true);
-	m_ui.visiblePathPrimitivesAction->setEnabled(true);
-	m_ui.vidiblePointPrimitives->setEnabled(true);
-	m_ui.visibleDetailsAction->setEnabled(true);
-	m_ui.visibleGridPointsAction->setEnabled(true);
-
-	connect(m_ui.visibleGridAction, SIGNAL(toggled(bool)), m_ui.graphicsView, SLOT(setVisibleGrid(bool)));
-	connect(m_ui.visibleLandAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleLand(bool)));
-	connect(m_ui.visibleZonePrimitivesAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleZonePrimitives(bool)));
-	connect(m_ui.visiblePathPrimitivesAction, SIGNAL(toggled(bool)), this, SLOT(setVisiblePathPrimitives(bool)));
-	connect(m_ui.vidiblePointPrimitives, SIGNAL(toggled(bool)), this, SLOT(setVisiblePointPrimitives(bool)));
-	connect(m_ui.visibleDetailsAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleDetails(bool)));
-	connect(m_ui.visibleGridPointsAction, SIGNAL(toggled(bool)), this, SLOT(setVisibleGridPoints(bool)));
-
 	connect(m_ui.treePrimitivesView, SIGNAL(landscapeLoaded()), this, SLOT(updatePacs()));
 	connect(m_ui.treePrimitivesView, SIGNAL(landscapeLoaded()), this, SLOT(updateAiMap()));
 
