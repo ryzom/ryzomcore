@@ -51,6 +51,11 @@ static const qreal LEVEL_FACTOR = 3;
 static const int LEVEL_COUNT = 3;
 static const int MAX_IMAGE_SIDE = 8192;
 
+// Side of the tiles a level is cut into, in pixels. Qt's OpenGL paint engine keeps images
+// in a texture cache of 64 MB and drops one that is bigger on the spot, so a level of a
+// large continent in one piece came out black at the finest level.
+static const int TILE_SIDE = 1024;
+
 // Painting order: the blocking borders last, so they stay on top where kinds overlap.
 static const PacsOverlay::EdgeType PAINT_ORDER[PacsOverlay::EdgeTypeCount] =
 {
@@ -343,27 +348,53 @@ void PacsOverlay::buildLevels()
 
 		Level entry;
 		entry.metresPerPixel = metresPerPixel;
-		entry.image = QImage(width, height, QImage::Format_ARGB32_Premultiplied);
-		entry.image.fill(Qt::transparent);
+		entry.columns = (width + TILE_SIDE - 1) / TILE_SIDE;
+		entry.rows = (height + TILE_SIDE - 1) / TILE_SIDE;
+		const qreal tileMetres = TILE_SIDE * metresPerPixel;
 
-		// Each level is drawn from the lines, not scaled down from the one before, so
-		// the borders stay one clean pixel wide at every level.
-		QPainter painter(&entry.image);
-		painter.scale(1.0 / metresPerPixel, 1.0 / metresPerPixel);
-		painter.translate(-m_bounds.topLeft());
-		for (int i = 0; i < EdgeTypeCount; ++i)
+		for (int row = 0; row < entry.rows; ++row)
 		{
-			const EdgeType type = PAINT_ORDER[i];
-			QPen pen(edgeColor(type), 0);
-			pen.setCosmetic(true);
-			painter.setPen(pen);
-			for (int b = 0; b < m_buckets.size(); ++b)
+			for (int column = 0; column < entry.columns; ++column)
 			{
-				if (!m_buckets[b].lines[type].isEmpty())
-					painter.drawLines(m_buckets[b].lines[type]);
+				QImage tile(qMin(TILE_SIDE, width - column * TILE_SIDE),
+							qMin(TILE_SIDE, height - row * TILE_SIDE),
+							QImage::Format_ARGB32_Premultiplied);
+				tile.fill(Qt::transparent);
+
+				// Only the buckets under the tile, one bucket of margin all round, as in
+				// paint().
+				const QPointF origin = m_bounds.topLeft() + QPointF(column * tileMetres, row * tileMetres);
+				const int firstColumn = qMax(0, int(column * tileMetres / BUCKET_SIZE) - 1);
+				const int lastColumn = qMin(m_bucketColumns - 1, int((column + 1) * tileMetres / BUCKET_SIZE) + 1);
+				const int firstRow = qMax(0, int(row * tileMetres / BUCKET_SIZE) - 1);
+				const int lastRow = qMin(m_bucketRows - 1, int((row + 1) * tileMetres / BUCKET_SIZE) + 1);
+
+				// Each level is drawn from the lines, not scaled down from the one before,
+				// so the borders stay one clean pixel wide at every level.
+				QPainter painter(&tile);
+				painter.scale(1.0 / metresPerPixel, 1.0 / metresPerPixel);
+				painter.translate(-origin);
+				for (int i = 0; i < EdgeTypeCount; ++i)
+				{
+					const EdgeType type = PAINT_ORDER[i];
+					QPen pen(edgeColor(type), 0);
+					pen.setCosmetic(true);
+					painter.setPen(pen);
+					for (int r = firstRow; r <= lastRow; ++r)
+					{
+						for (int c = firstColumn; c <= lastColumn; ++c)
+						{
+							const QVector<QLineF> &lines = m_buckets[r * m_bucketColumns + c].lines[type];
+							if (!lines.isEmpty())
+								painter.drawLines(lines);
+						}
+					}
+				}
+				painter.end();
+
+				entry.tiles.append(tile);
 			}
 		}
-		painter.end();
 
 		m_levels.append(entry);
 	}
@@ -411,14 +442,26 @@ void PacsOverlay::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 			++level;
 
 		const Level &entry = m_levels[level];
-		const QRectF source((exposed.left() - m_bounds.left()) / entry.metresPerPixel,
-							(exposed.top() - m_bounds.top()) / entry.metresPerPixel,
-							exposed.width() / entry.metresPerPixel,
-							exposed.height() / entry.metresPerPixel);
+		const qreal tileMetres = TILE_SIDE * entry.metresPerPixel;
 
 		painter->save();
 		painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
-		painter->drawImage(exposed, entry.image, source);
+		painter->setClipRect(exposed, Qt::IntersectClip);
+		for (int row = 0; row < entry.rows; ++row)
+		{
+			for (int column = 0; column < entry.columns; ++column)
+			{
+				// Whole tiles, clipped to the exposed area: a fractional source rectangle
+				// per tile would leave seams between them.
+				const QImage &tile = entry.tiles[row * entry.columns + column];
+				const QRectF target(m_bounds.left() + column * tileMetres,
+									m_bounds.top() + row * tileMetres,
+									tile.width() * entry.metresPerPixel,
+									tile.height() * entry.metresPerPixel);
+				if (target.intersects(exposed))
+					painter->drawImage(target, tile);
+			}
+		}
 		painter->restore();
 		return;
 	}

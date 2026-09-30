@@ -90,11 +90,14 @@ private:
 		QVector<QLineF> lines[EdgeTypeCount];
 	};
 
-	/// A pre-rendered picture of every border, for when the view is zoomed out.
+	/// A pre-rendered picture of every border, for when the view is zoomed out. Cut into
+	/// tiles: one image for a whole continent can exceed what the OpenGL viewport caches
+	/// as a single texture, and is then drawn as a black rectangle.
 	struct Level
 	{
 		qreal metresPerPixel;
-		QImage image;
+		int columns, rows;
+		QVector<QImage> tiles;
 	};
 
 	bool loadRetriever(const QString &rbankFile, const QString &grFile);
