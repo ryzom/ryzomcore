@@ -161,7 +161,8 @@ LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd libluabind_d libluabindd)
 
 FIND_PACKAGE_HELPER(Luabind luabind/luabind.hpp RELEASE ${LIBRARY_NAME_RELEASE} DEBUG ${LIBRARY_NAME_DEBUG})
 
-FIND_PATH(Boost_INCLUDE_DIR boost/version.hpp HINTS ${BOOST_INCLUDEDIR})
+FIND_PATH(Boost_INCLUDE_DIR boost/version.hpp HINTS ${BOOST_INCLUDEDIR} ${BOOST_ROOT} $ENV{BOOST_ROOT} PATH_SUFFIXES include)
+MESSAGE(STATUS "(IA_AGENT_DEBUG) (boost_lookup) (FindLuabind.cmake:165) BOOST_ROOT=${BOOST_ROOT} ENV_BOOST_ROOT=$ENV{BOOST_ROOT} BOOST_INCLUDEDIR=${BOOST_INCLUDEDIR} Boost_INCLUDE_DIR=${Boost_INCLUDE_DIR}")
 IF(NOT Boost_INCLUDE_DIR)
   MESSAGE(FATAL_ERROR "Boost headers not found (boost/version.hpp), required by Luabind")
 ENDIF()
