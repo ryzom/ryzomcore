@@ -187,7 +187,7 @@ class RyzomService():
 	def addRyzomMessage(self, message):
 		self.last_chat_id = self.client.incr("Ryzom-Chat-LastID", 1)
 		self.client.set("Ryzom-Chat-"+str(self.last_chat_id), message.get(), 24*60*60)
-		log_content = "".join([ s[0] for s in  message.get()[6].split() ])
+		log_content = "".join([ s[0] for s in  (message.text or "").split() ])
 		print(f"💬 {self.last_chat_id} = {log_content}")
 		return self.last_chat_id
 
@@ -195,14 +195,23 @@ class RyzomService():
 		message = self.client.get("Ryzom-Chat-"+str(i))
 		if message:
 			m = RyzomMessage()
-			m.set(message)
+			try:
+				m.set(message)
+			except (TypeError, ValueError):
+				print(f"Invalid Ryzom message {i}: {message!r}")
+				return None
 			return m
 		return None
 
 	def getRyzomCommand(self, i):
 		cmd = self.client.get("Shard-Command-"+str(i))
 		if cmd:
-			return cmd.decode("utf-8", errors="ignore").split(":")
+			if isinstance(cmd, bytes):
+				cmd = cmd.decode("utf-8", errors="ignore")
+			if not isinstance(cmd, str):
+				print(f"Invalid shard command {i}: {cmd!r}")
+				return None
+			return cmd.split(":")
 		return None
 
 	def convert_zulip_upload_links(self, text):
