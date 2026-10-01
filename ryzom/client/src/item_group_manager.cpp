@@ -269,7 +269,7 @@ void CItemGroup::updateSheets()
 	{
 		CItem item = items[i];
 		bool found = false;
-		for (int i = 0; i < INVENTORIES::NUM_ALL_INVENTORY; i++)
+		for (int i = 0; i < (int)INVENTORIES::NUM_ALL_INVENTORY; i++)
 		{
 			INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)i;
 			if (pIM->isInventoryAvailable(inventory))

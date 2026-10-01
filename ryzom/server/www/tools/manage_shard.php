@@ -1,4 +1,16 @@
 <?php
+// ______                           _____ _                   _   _____           _
+// | ___ \                         /  ___| |                 | | |_   _|         | |
+// | |_/ /   _ _______  _ __ ___   \ `--.| |__   __ _ _ __ __| |   | | ___   ___ | |___
+// |    / | | |_  / _ \| '_ ` _ \   `--. \ '_ \ / _` | '__/ _` |   | |/ _ \ / _ \| / __|
+// | |\ \ |_| |/ / (_) | | | | | | /\__/ / | | | (_| | | | (_| |   | | (_) | (_) | \__ \
+// \_| \_\__, /___\___/|_| |_| |_| \____/|_| |_|\__,_|_|  \__,_|   \_/\___/ \___/|_|___/
+//        __/ |
+//       |___/
+//
+// Ryzom - MMORPG Framework <https://ryzom.com/dev/>
+// Copyright (C) 2019  Winch Gate Property Limited
+// This program is free software: read https://ryzom.com/dev/copying.html for more details
 
 include_once(dirname(__DIR__).'/libs/admin_modules_itf.php');
 include_once('utils.php');
@@ -7,11 +19,10 @@ array_shift($argv);
 $command = $argv?array_shift($argv):'';
 $option = $argv?array_shift($argv):'';
 
-$ini = parse_ini_file('/etc/ryzom/shard.ini', true);
-$RocketChatGeneral = $ini['notify']['zulip_general'];
-$RocketChatUniverse = $ini['notify']['zulip_universe'];
-$ShardName = ucfirst($ini['shard']['name']).' Intern';
-$ShardId = $ini['shard']['id'];
+$RocketChatGeneral = NOTIFY_ZULIP_GENERAL;
+$RocketChatUniverse = NOTIFY_ZULIP_UNIVERSE;
+$ShardName = ucfirst(SHARD_NAME).' Intern';
+$ShardId = SHARD_ID;
 
 switch($command) {
 
@@ -37,11 +48,11 @@ switch($command) {
 	case 'open':
 		@queryShard('su', 'rsm.setWSState '. $ShardId .' OPEN ""');
 		if ($option == 'players') {
-			file_put_contents('/home/nevrax/www/login/server_open_status', 'ds_open'."\n");
+			file_put_contents('/home/nevrax/www/login/status/server_open_status', 'ds_open'."\n");
 			sendToChat('The server is open for o/_--[ EVERYBODY ]--_\o', $RocketChatUniverse , $ShardName, ':tada:');
 			sendToChat('The server is now open to ALL players \o/', $RocketChatGeneral, $ShardName, ':tada:');
 		} else {
-			file_put_contents('/home/nevrax/www/login/server_open_status', 'ds_restricted'."\n");
+			file_put_contents('/home/nevrax/www/login/status/server_open_status', 'ds_restricted'."\n");
 			if ($option != 'silent') {
 				sendToChat('The server is open for RYZOM TEAM', $RocketChatUniverse, $ShardName, ':raised_hands:');
 				sendToChat('The server is now in the hands of the Customer Support Team.', $RocketChatGeneral, $ShardName, ':raised_hands:');

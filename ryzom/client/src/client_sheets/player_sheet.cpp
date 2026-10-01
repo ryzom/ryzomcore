@@ -167,7 +167,7 @@ void CPlayerSheet::build(const NLGEORGES::UFormElm &item)
 void CPlayerSheet::buildCharac(const NLGEORGES::UFormElm &item)
 {
 	static const char characsBasePath[] = "Basics.Characteristics.";
-	for(uint k = 0; k < CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
+	for(uint k = 0; k < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
 	{
 		const std::string &characName = CHARACTERISTICS::toString((CHARACTERISTICS::TCharacteristics)k);
 		std::string characPath = characsBasePath + characName;
@@ -226,7 +226,7 @@ void CPlayerSheet::serial(NLMISC::IStream &f)
 	f.serial(AnkleR);
 	f.serial(Ammo);
 
-	for(uint k = 0; k < CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
+	for(uint k = 0; k < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
 	{
 		f.serial(Characteristics[k]);
 	}

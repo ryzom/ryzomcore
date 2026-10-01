@@ -7,7 +7,7 @@
 #          \/                   \/
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # Base class for Ryzom <-> Deepl <-> Zulip system
@@ -100,12 +100,10 @@ class CsrBot():
 			"local_id": "csr-bot",
 			"queue_id": self.zulip.queue_id,
 		}
-		print("Send message to Zulip", request)
 		try:
 			result = self.zulip.send_message(request)
 		except Exception as e:
 			print("Error sending message", e)
-		print("Result:", result)
 		if result["result"] == "success":
 			return result["id"]
 		if result["result"] == "error":
@@ -121,7 +119,6 @@ class CsrBot():
 			result = self.zulip.add_reaction(request)
 		except Exception as e:
 			print("Error sending message", e)
-		print("Result:", result)
 		if result["result"] == "success":
 			return message_id
 		if result["result"] == "error":
@@ -157,7 +154,6 @@ class CsrBot():
 		message = event["message"]
 		channel = message["display_recipient"]
 		topic = message["subject"]
-		print(event)
 		content = message["content"].strip()
 		sender = message["sender_email"].split("@")[0]
 		if len(content) >= 2 and content[0] == "/":
@@ -165,6 +161,7 @@ class CsrBot():
 			command = args[0]
 			args = args[1:]
 			emoji_name = ""
+			print(f"{sender} send command: {command}")
 			if hasattr(self, "call_"+command):
 				func = getattr(self, "call_"+command)
 				emoji_name = func(sender, args)

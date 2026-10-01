@@ -11,6 +11,7 @@ FILE(GLOB SRC main.cpp
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
+ADD_DEPENDENCIES(ryzom_client_patcher ryzom_build_info)
 
 INCLUDE_DIRECTORIES(
 			${LIBXML2_INCLUDE_DIR}

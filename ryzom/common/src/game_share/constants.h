@@ -31,6 +31,9 @@
 // define for sheath
 #define NB_SHEATH			1
 
+// maximum number of friends a character can add
+const uint32 MaxFriendListSize = 2048;
+
 // square of the max talking distance in meters
 const sint32 MaxTalkingDistSquare = 64; // 8 m
 

@@ -36,7 +36,7 @@ void CSkillsTreeSheet::build(const UFormElm &item)
 			uint NbSkills;
 			nlverify( arraySkillElt->getArraySize( NbSkills ) );
 
-			//nlassert( NbSkills == SKILLS::NUM_SKILLS );
+			//nlassert( NbSkills == (int)SKILLS::NUM_SKILLS );
 
 			SkillsTree.resize( std::max(NbSkills, (uint) SKILLS::NUM_SKILLS));
 

@@ -244,7 +244,12 @@ void CStaticItem::init(bool doDelete)
 {
 	Family			= ITEMFAMILY::UNDEFINED;
 	Type			= ITEM_TYPE::UNDEFINED;
-	
+
+	// only set by readGeorges() for Family == ITEMFAMILY::TELEPORT, but always
+	// serialized: default them so non-teleport items don't pack uninitialized memory
+	TpType			= TELEPORT_TYPES::NONE;
+	TpEcosystem		= ECOSYSTEM::unknown;
+
 	clearPtrs(doDelete);
 
 	Skill			= SKILLS::unknown;
@@ -788,7 +793,7 @@ void loadRawMaterial( UFormElm &root, CStaticItem *item, const CSheetId &sheetId
 			item->Mp->Ecosystem = ECOSYSTEM::stringToEcosystem( val );
 		
 		if(mp->getValueByName( val, "HarvestSkill"))
-			item->Skill = SKILLS::toSkill( val );
+			item->Mp->HarvestSkill = SKILLS::toSkill( val );
 		
 		if (mp->getValueByName( val, "Category"))
 			item->Mp->Category = MP_CATEGORY::stringToMPCategory( val );

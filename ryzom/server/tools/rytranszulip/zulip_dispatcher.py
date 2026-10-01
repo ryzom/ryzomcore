@@ -9,7 +9,7 @@
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Zulip Dispatcher ==-
@@ -37,6 +37,13 @@ flags = {
 	"fr": ":flag_france:",
 	"ru": ":flag_russia:",
 }
+emojis = {
+	"en": "🇬🇧",
+	"es": "🇪🇸",
+	"de": "🇩🇪",
+	"fr": "🇫🇷",
+	"ru": "🇷🇺",
+}
 
 class ZulipDispatcher(ZulipService):
 	def __init__(self):
@@ -44,7 +51,6 @@ class ZulipDispatcher(ZulipService):
 		self.name = "ZulipDispatcher"
 		self.version = "1.2"
 		self.scriptfile = __file__
-		#self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
 		self.stats = {"messages": 0}
 
 	def getLang(self, lang):
@@ -81,23 +87,18 @@ class ZulipDispatcher(ZulipService):
 			"queue_id": self.getZulipQueueId(),
 		}
 
-		zipped_request = {
-			"type": message_type,
-			"to": channel,
-			"topic": "",
-			"content": "".join([ s[0] for s in  content.split() ]),
-			"local_id": "ryzom-ig",
-			"queue_id": self.getZulipQueueId(),
-		}
-		print("Send message to Zulip", zipped_request)
 		try:
 			result = self.zulip.send_message(request)
 		except Exception as e:
 			print("Error sending message", e)
-		print("Result:", result)
 		if result["result"] == "success":
+			log_channel =  channel.split(" ")[0]
+			log_content =  "".join([ s[0] for s in  content.split() ])
+			log_queueid = self.getZulipQueueId()
+			print(f"💬 {message_type} to {log_channel} with {log_content} = {result["id"]}")
 			return result["id"]
 		if result["result"] == "error":
+			print("Error sending message")
 			return -1
 		return None
 
@@ -116,7 +117,7 @@ class ZulipDispatcher(ZulipService):
 				return False
 			else:
 				request["content"] = "".join([ s[0] for s in  request["content"].split() ])
-				print("Sent translation to Zulip", request, result)
+				print(f"{emojis[m.translated_lang.lower()]} {message_id}")
 		return True
 
 	def run(self):
@@ -124,10 +125,8 @@ class ZulipDispatcher(ZulipService):
 		messages = {}
 		for lang in ALL_LANGS:
 			last_ids[lang] = self.getLastChatLangID(lang)
-			print(lang, last_ids[lang])
 
 		chat_id = self.getLastChatID()
-		print("chat id", chat_id)
 		while True:
 			chat_id = self.getLastChatID()
 			if last_ids[lang]+1 < chat_id+1:

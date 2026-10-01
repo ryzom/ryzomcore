@@ -8,7 +8,7 @@
 #          \/                   \/
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # Base class for Ryzom <-> Deepl <-> Zulip system
@@ -35,7 +35,6 @@ class ZulipClient(zulip.Client):
 			else:
 				self.queue_id = res["queue_id"]
 				self.last_event_id = res["last_event_id"]
-				print(self.queue_id)
 				return self.queue_id
 
 	def call(self, callback, event_types, narrow, **kwargs):
@@ -104,18 +103,16 @@ class ZulipClient(zulip.Client):
 					# longpolling protocol, not something that clients
 					# need to handle.
 					continue
-				print(self.queue_id)
 				callback(event)
 
 	def registerMessages(self, **kwargs):
-		self.doRegister(["message"], None, **kwargs)
+		self.doRegister(["message", "update_message"], None, **kwargs)
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
-			#print(event)
-			if event["type"] == "message":
+			if event["type"] in ("message", "update_message"):
 				callback(event)
-		self.call(event_callback, ["message"], None, **kwargs)
+		self.call(event_callback, ["message", "update_message"], None, **kwargs)
 
 
 class ZulipService(RyzomService):

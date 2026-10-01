@@ -92,7 +92,7 @@ bool CGroupSkills::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	string sTmp;
 	ICDBNode::CTextId textId;
 
-	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
+	for (uint k = 0; k < (sint)SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";
 		textId = ICDBNode::CTextId( sTmp );
@@ -145,7 +145,7 @@ void CGroupSkills::rebuild()
 
 	// **** Update the Show flag of each node
 	// for each skill
-	for (uint32 i = 0; i < SKILLS::NUM_SKILLS; ++i)
+	for (uint32 i = 0; i < (sint)SKILLS::NUM_SKILLS; ++i)
 	{
 		bool	show= false;
 		if (!pSM->isUnknown((SKILLS::ESkills)i))
@@ -288,7 +288,7 @@ CGroupSkills::~CGroupSkills()
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
 	string sTmp;
 	ICDBNode::CTextId textId;
-	for (uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
+	for (uint k = 0; k < (sint)SKILLS::NUM_SKILLS; ++k)
 	{
 		sTmp = string(DB_SKILLS)+":"+NLMISC::toString((sint32)k)+":BaseSKILL";
 		textId = ICDBNode::CTextId( sTmp );
@@ -304,7 +304,7 @@ CGroupSkills::~CGroupSkills()
 	_Tree= NULL;
 
 	// template nodes not linked to hierarchy will memory leak, we must remove them also
-	for (sint i = 0; i<SKILLS::NUM_SKILLS; i++)
+	for (sint i = 0; i< (sint)SKILLS::NUM_SKILLS; i++)
 	{
 		// is the refptr still allocated?
 		if(_AllNodes[i])
@@ -343,7 +343,7 @@ void CGroupSkills::createAllTreeNodes()
 		nCounter++;
 		bQuit = true;
 		// Try to create a skill
-		for (uint32 i = 0; i < SKILLS::NUM_SKILLS; ++i)
+		for (uint32 i = 0; i < (sint)SKILLS::NUM_SKILLS; ++i)
 		if (_AllNodes[i] == NULL) // not already created
 		{
 			if (pSM->isUnknown((SKILLS::ESkills)i)) continue;
@@ -429,13 +429,13 @@ void CGroupSkills::createAllTreeNodes()
 		sint	skillValue;
 		fromString(_TreeRoot->Children[i]->Id, skillValue);
 		// Special sort:
-		if(skillValue==SKILLS::SF)
+		if(skillValue==(sint)SKILLS::SF)
 			skillValue= -4;
-		if(skillValue==SKILLS::SM)
+		if(skillValue==(sint)SKILLS::SM)
 			skillValue= -3;
-		if(skillValue==SKILLS::SC)
+		if(skillValue==(sint)SKILLS::SC)
 			skillValue= -2;
-		if(skillValue==SKILLS::SH)
+		if(skillValue==(sint)SKILLS::SH)
 			skillValue= -1;
 		// prepare tri
 		sortNodes[i].Value= skillValue;

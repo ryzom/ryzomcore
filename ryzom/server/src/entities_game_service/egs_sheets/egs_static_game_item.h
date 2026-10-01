@@ -238,7 +238,16 @@ struct SItemSpecialEffect
 //	std::string	EffectType;
 	double		EffectArgFloat[MaxEffectPerItem];
 	std::string	EffectArgString[MaxEffectPerItem];
-	SItemSpecialEffect() { }
+	SItemSpecialEffect()
+	{
+		// build() only sets as many of the EffectArgFloat slots as the
+		// EffectType requires (1 or 2 out of 4), but serial() always writes
+		// all 4: default them so the unused slots don't pack uninitialized
+		// memory into the packed_sheets.
+		EffectType = ITEM_SPECIAL_EFFECT::UNDEFINED;
+		for (uint i = 0; i < MaxEffectPerItem; ++i)
+			EffectArgFloat[i] = 0.0;
+	}
 	// return false if the effect cannot be built. + warning inside
 	bool	build(std::string const& str);
 	virtual void serial(class NLMISC::IStream &f);
@@ -460,6 +469,19 @@ public:
 		Category = MP_CATEGORY::Undefined;
 		Family	 = RM_FAMILY::Unknown;
 		//IsForMission = false;
+
+		// readGeorges() has a bug: it reads the sheet's "HarvestSkill" value
+		// into CStaticItem::Skill instead of CMP::HarvestSkill, so this field
+		// is never actually set from the sheet. serial() writes it
+		// unconditionally regardless, so default it here to avoid packing
+		// uninitialized memory (not fixing the readGeorges() assignment
+		// itself, since that could change existing gameplay behavior).
+		Ecosystem    = ECOSYSTEM::unknown;
+		HarvestSkill = SKILLS::unknown;
+		StatEnergy   = 0;
+		MaxQuality   = 0;
+		Rarity       = 0;
+		MpColor      = 0;
 	}
 
 	/// Init the 'group <--> string' mapping

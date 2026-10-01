@@ -2721,7 +2721,7 @@ NLMISC_COMMAND(killPlayer,"Kill a player","<uid>")
 }
 
 //----------------------------------------------------------------------------
-NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot orientation groupname x y z look cell")
+NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot orientation groupname x y z look cell [<target entityid to replace>]")
 {
 
 	if (args.size () < 12)
@@ -2831,8 +2831,13 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 	if (isChar)
 		playerId = c->getId();
 
+	// Replace an existing entity (e.g. a temporary mount) instead of spawning at x,y,z
+	CEntityId targetEntityId;
+	if (args.size() >= 13)
+		targetEntityId = CEntityId(args[12]);
+
 	CMessage msgout("EVENT_CREATE_NPC_GROUP");
-	uint32 messageVersion = 1;
+	uint32 messageVersion = 2;
 	msgout.serial(messageVersion);
 	msgout.serial(instanceNumber);
 	msgout.serial(playerId);
@@ -2847,6 +2852,7 @@ NLMISC_COMMAND(spawn, "spawn entity", "<uid> quantity sheet dispersion spawnbot 
 	msgout.serial(botsName);
 	msgout.serial(look);
 	msgout.serial(cell);
+	msgout.serial(targetEntityId);
 	CWorldInstances::instance().msgToAIInstance2(instanceNumber, msgout);
 
 	return true;
@@ -2880,14 +2886,27 @@ NLMISC_COMMAND(grpScript, "executes a script on an event npc group", "<uid> <gro
 		return false;
 	}
 
-	CMessage msgout("EVENT_NPC_GROUP_SCRIPT");
-	uint32 messageVersion = 1;
-	msgout.serial(messageVersion);
-	msgout.serial(nbString);
+	CMessage msgout;
+	if (botsName[0] == '(')
+	{
+		msgout = CMessage("R2_NPC_BOT_SCRIPT_BY_ID");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		uint32 nbMsgArgs = nbString - 1;
+		msgout.serial(nbMsgArgs);
+		msgout.serial(botsName);
+	}
+	else
+	{
+		msgout = CMessage("EVENT_NPC_GROUP_SCRIPT");
+		uint32 messageVersion = 1;
+		msgout.serial(messageVersion);
+		msgout.serial(nbString);
+		msgout.serial(playerEid);
+		msgout.serial(botsName);
+	}
 
-	msgout.serial(playerEid);
-	msgout.serial(botsName);
-	for (uint32 i=2; i<nbString; ++i)
+	for (uint32 i = 2; i < nbString; ++i)
 	{
 		string arg = args[i]+";";
 
@@ -3019,6 +3038,24 @@ NLMISC_COMMAND(temporaryRename, "rename a player for the event", "<uid> <new nam
 	ucstring newName(args[1]);
 
 	c->registerName(newName);
+
+	return true;
+}
+
+
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(setName, "rename a player", "<uid> <old name> <new name>")
+{
+	if (args.size() != 3) {
+		log.displayNL("ERR: invalid arg count");
+		return false;
+	}
+
+	GET_ACTIVE_CHARACTER
+
+	string arg = args[1]+" "+args[2];
+	if (IClientCommandForwader::getInstance())
+		IClientCommandForwader::getInstance()->sendCommand("su", "renamePlayer", c->getId(), false, CEntityId::Unknown, arg);
 
 	return true;
 }
@@ -3506,19 +3543,20 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 
 	if ( c->getRiderEntity().isNull() )
 	{
-		CEntityId target = c->getTarget();
+		CEntityId e;
 
 		if (args.size() > 1)
 		{
-			CEntityId entityId(args[1]);
-			if (entityId != target)
-				log.displayNL("ERR: Bad target");
+			e = CEntityId(args[1]);
+		}
+		else
+		{
+			e = c->getTarget();
 		}
 
-
-		if( target.getType() == RYZOMID::creature || target.getType() == RYZOMID::npc )
+		if( e.getType() == RYZOMID::creature || e.getType() == RYZOMID::npc )
 		{
-			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( target );
+			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( e );
 			if( mount )
 			{
 				const CStaticCreatures * form = mount->getForm();
@@ -3534,7 +3572,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 						}
 						else
 						{
-							c->mount(c->getTargetDataSetRow(), true);
+							c->mount(mount->getEntityRowId(), true);
 							log.displayNL("OK");
 						}
 					}
@@ -3544,6 +3582,8 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 				else
 					log.displayNL("ERR: Entity without form");
 			}
+			else
+					log.displayNL("ERR: Entity is not a mount");
 		}
 		else
 			log.displayNL("ERR: Entity is not creature or npc");
@@ -3555,7 +3595,7 @@ NLMISC_COMMAND(mount,"mount the target","<uid> [<eid>]")
 
 // spawnMount 2 sagass_mount_00.creature "Mount$#Property of Ulukyn"
 //-----------------------------------------------
-NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet custom name>] [x,-y,z] [cell]")
+NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet custom name>] [x,-y,z] [cell] [<target entityid to replace>]")
 {
 	if (args.size() < 2)
 		return false;
@@ -3607,7 +3647,7 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 	}
 
 
-	if (args.size() >= 5)
+	if (args.size() >= 5 && args[4] != "*")
 	{
 		fromString(args[4], msg.Cell);
 	}
@@ -3617,6 +3657,23 @@ NLMISC_COMMAND(spawnMount,"spawn a RentAMount","<uid> <mount sheet name> [<pet c
 		msg.Cell = mirrorCell;
 	}
 
+	// Replace an existing entity (e.g. a NPC group) instead of spawning near a point
+	if (args.size() >= 6 && args[5] != "*")
+	{
+		CEntityId targetEntityId(args[5]);
+		if (targetEntityId == CEntityId::Unknown)
+		{
+			log.displayNL("ERR: invalid target entity id");
+			return true;
+		}
+
+		msg.SpawnMode = CPetSpawnMsg::REPLACE_ENTITY;
+		msg.TargetMirrorRow = TheDataset.getDataSetRow(targetEntityId);
+		msg.AIInstanceId = (uint16)c->getInstanceNumber();
+		CWorldInstances::instance().msgToAIInstance(msg.AIInstanceId, msg);
+		log.displayNL("OK");
+		return true;
+	}
 
 	CContinent * continent = CZoneManager::getInstance().getContinent(msg.Coordinate_X, msg.Coordinate_Y);
 	if (!continent)

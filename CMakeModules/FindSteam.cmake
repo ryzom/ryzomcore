@@ -31,7 +31,7 @@ ELSEIF(APPLE)
   # universal binary
   SET(STEAM_LIBNAME steam_api)
   SET(STEAM_RUNTIMENAME libsteam_api.dylib)
-  SET(STEAM_PATHNAME redistributable_bin/osx32)
+  SET(STEAM_PATHNAME redistributable_bin/osx)
 ELSE()
   SET(STEAM_LIBNAME steam_api)
   SET(STEAM_RUNTIMENAME libsteam_api.so)

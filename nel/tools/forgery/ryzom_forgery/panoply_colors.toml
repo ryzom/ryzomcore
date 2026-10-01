@@ -1,0 +1,503 @@
+# Ryzom Panoply color-shift parameters, consolidated from the real production
+# configs (ryzom-data/leveldesign/workspace/common/characters_maps_hr/
+# panoply_common.cfg + panoply_<race>.cfg, snapshotted 2026-08-19) into one
+# file bundled with Forgery -- avoids needing the user's search paths to
+# cover leveldesign/ just to read these constants. See
+# .todo/forgery-object-editor.md "génération live des textures Panoply" and
+# ryzom_forgery/panoply_colorize.py. If ryzom-data's real palette ever
+# changes, regenerate this file by hand from the source .cfg files.
+#
+# "skin" and "user" are common to every race (panoply_common.cfg). "hair" and
+# "eyes" are per-race (panoply_<race>.cfg) -- which race's table applies to a
+# given texture is decided by which race's asset folder it was built from,
+# not by anything in this file; zorai has no "eyes" axis at all (no such
+# masks exist for that race), and "generique" (shared/non-race-specific
+# actors) has neither hair nor eyes.
+#
+# Each [[<axis>.color]]/[[<race>.<axis>.color]] entry mirrors one index
+# across a source .cfg's "<axis>_hues"/"_lightness"/"_saturations"/
+# "_luminosities"/"_constrasts"/"_color_id" parallel arrays: hue is an
+# absolute target in degrees [0, 360), lightness/saturation are relative
+# deltas added to the bitmap's own averaged value, luminosity/contrast are
+# in [-100, 100] (Photoshop-like) -- see panoply_colorize.convert_bitmap's
+# matching parameters, which these feed directly.
+
+[[skin.color]]
+id = "FY"
+hue = 23
+lightness = -0.1
+saturation = 0.05
+luminosity = 0.0
+contrast = 0.0
+
+[[skin.color]]
+id = "MA"
+hue = 28
+lightness = 0.1
+saturation = -0.15
+luminosity = 0.0
+contrast = 0.0
+
+[[skin.color]]
+id = "TR"
+hue = 27
+lightness = 0.0
+saturation = 0.0
+luminosity = 0.0
+contrast = 0.0
+
+[[skin.color]]
+id = "ZO"
+hue = 220
+lightness = -0.2
+saturation = -0.3
+luminosity = 0.0
+contrast = 0.0
+
+[[user.color]]
+id = "U1"
+hue = 10
+lightness = 0.0
+saturation = 0.3
+luminosity = -20.0
+contrast = 0.0
+
+[[user.color]]
+id = "U2"
+hue = 30
+lightness = 0.0
+saturation = 0.2
+luminosity = 0.0
+contrast = 0.0
+
+[[user.color]]
+id = "U3"
+hue = 78
+lightness = 0.0
+saturation = 0.1
+luminosity = -10.0
+contrast = 5.0
+
+[[user.color]]
+id = "U4"
+hue = 153
+lightness = -0.05
+saturation = 0.25
+luminosity = -20.0
+contrast = 5.0
+
+[[user.color]]
+id = "U5"
+hue = 212
+lightness = 0.0
+saturation = -0.02
+luminosity = -30.0
+contrast = 7.0
+
+[[user.color]]
+id = "U6"
+hue = 345
+lightness = 0.0
+saturation = 0.0
+luminosity = -35.0
+contrast = 10.0
+
+[[user.color]]
+id = "U7"
+hue = 35
+lightness = 0.1
+saturation = -0.2
+luminosity = 50.0
+contrast = 40.0
+
+[[user.color]]
+id = "U8"
+hue = 235
+lightness = -0.1
+saturation = -0.25
+luminosity = -30.0
+contrast = -10.0
+
+[[fyros.hair.color]]
+id = "H1"
+hue = 18
+lightness = 0.1
+saturation = -0.3
+luminosity = 25.0
+contrast = 40.0
+
+[[fyros.hair.color]]
+id = "H2"
+hue = 42
+lightness = 0.1
+saturation = 0.2
+luminosity = 10.0
+contrast = 65.0
+
+[[fyros.hair.color]]
+id = "H3"
+hue = 25
+lightness = 0.1
+saturation = 0.2
+luminosity = 10.0
+contrast = 40.0
+
+[[fyros.hair.color]]
+id = "H4"
+hue = 10
+lightness = 0.0
+saturation = 0.4
+luminosity = 10.0
+contrast = 20.0
+
+[[fyros.hair.color]]
+id = "H5"
+hue = 20
+lightness = -0.1
+saturation = 0.1
+luminosity = 1.0
+contrast = 20.0
+
+[[fyros.hair.color]]
+id = "H6"
+hue = 240
+lightness = -0.2
+saturation = -0.3
+luminosity = 20.0
+contrast = 50.0
+
+[[fyros.eyes.color]]
+id = "E1"
+hue = 50
+lightness = 0.2
+saturation = -0.4
+luminosity = 10.0
+contrast = 20.0
+
+[[fyros.eyes.color]]
+id = "E2"
+hue = 40
+lightness = 0.0
+saturation = 0.2
+luminosity = 5.0
+contrast = 20.0
+
+[[fyros.eyes.color]]
+id = "E3"
+hue = 10
+lightness = -0.1
+saturation = 0.2
+luminosity = 10.0
+contrast = 20.0
+
+[[fyros.eyes.color]]
+id = "E4"
+hue = 2
+lightness = -0.2
+saturation = 0.1
+luminosity = 0.0
+contrast = 50.0
+
+[[fyros.eyes.color]]
+id = "E5"
+hue = 250
+lightness = -0.1
+saturation = -0.1
+luminosity = 10.0
+contrast = 40.0
+
+[[fyros.eyes.color]]
+id = "E6"
+hue = 180
+lightness = -0.1
+saturation = -0.2
+luminosity = 30.0
+contrast = 50.0
+
+[[fyros.eyes.color]]
+id = "E7"
+hue = 90
+lightness = -0.1
+saturation = -0.1
+luminosity = 10.0
+contrast = 40.0
+
+[[fyros.eyes.color]]
+id = "E8"
+hue = 130
+lightness = -0.2
+saturation = -0.2
+luminosity = 0.0
+contrast = 40.0
+
+[[matis.hair.color]]
+id = "H1"
+hue = 30
+lightness = 0.1
+saturation = -0.2
+luminosity = 25.0
+contrast = 40.0
+
+[[matis.hair.color]]
+id = "H2"
+hue = 35
+lightness = 0.1
+saturation = 0.2
+luminosity = 25.0
+contrast = 60.0
+
+[[matis.hair.color]]
+id = "H3"
+hue = 15
+lightness = 0.1
+saturation = -0.1
+luminosity = 20.0
+contrast = 60.0
+
+[[matis.hair.color]]
+id = "H4"
+hue = 20
+lightness = 0.1
+saturation = 0.1
+luminosity = 0.0
+contrast = 40.0
+
+[[matis.hair.color]]
+id = "H5"
+hue = 140
+lightness = 0.0
+saturation = -0.2
+luminosity = 40.0
+contrast = 25.0
+
+[[matis.hair.color]]
+id = "H6"
+hue = 240
+lightness = -0.1
+saturation = -0.3
+luminosity = 0.0
+contrast = 10.0
+
+[[matis.eyes.color]]
+id = "E1"
+hue = 20
+lightness = 0.1
+saturation = -0.4
+luminosity = 50.0
+contrast = 40.0
+
+[[matis.eyes.color]]
+id = "E2"
+hue = 30
+lightness = 0.0
+saturation = 0.2
+luminosity = 5.0
+contrast = 20.0
+
+[[matis.eyes.color]]
+id = "E3"
+hue = 20
+lightness = -0.1
+saturation = 0.1
+luminosity = 0.0
+contrast = 50.0
+
+[[matis.eyes.color]]
+id = "E4"
+hue = 200
+lightness = 0.0
+saturation = -0.2
+luminosity = 20.0
+contrast = 50.0
+
+[[matis.eyes.color]]
+id = "E5"
+hue = 70
+lightness = 0.0
+saturation = -0.1
+luminosity = 10.0
+contrast = 40.0
+
+[[matis.eyes.color]]
+id = "E6"
+hue = 130
+lightness = -0.1
+saturation = -0.2
+luminosity = 20.0
+contrast = 40.0
+
+[[matis.eyes.color]]
+id = "E7"
+hue = 320
+lightness = -0.2
+saturation = -0.1
+luminosity = 0.0
+contrast = 20.0
+
+[[matis.eyes.color]]
+id = "E8"
+hue = 200
+lightness = -0.2
+saturation = -0.3
+luminosity = 0.0
+contrast = 40.0
+
+[[tryker.hair.color]]
+id = "H1"
+hue = 140
+lightness = 0.1
+saturation = -0.3
+luminosity = 30.0
+contrast = 40.0
+
+[[tryker.hair.color]]
+id = "H2"
+hue = 40
+lightness = 0.1
+saturation = 0.2
+luminosity = 20.0
+contrast = 60.0
+
+[[tryker.hair.color]]
+id = "H3"
+hue = 20
+lightness = -0.1
+saturation = 0.1
+luminosity = 0.0
+contrast = 30.0
+
+[[tryker.hair.color]]
+id = "H4"
+hue = 330
+lightness = 0.0
+saturation = 0.3
+luminosity = 10.0
+contrast = 40.0
+
+[[tryker.hair.color]]
+id = "H5"
+hue = 300
+lightness = -0.1
+saturation = 0.1
+luminosity = 10.0
+contrast = 40.0
+
+[[tryker.hair.color]]
+id = "H6"
+hue = 175
+lightness = -0.2
+saturation = 0.3
+luminosity = 0.0
+contrast = 10.0
+
+[[tryker.eyes.color]]
+id = "E1"
+hue = 60
+lightness = 0.2
+saturation = -0.4
+luminosity = 10.0
+contrast = 20.0
+
+[[tryker.eyes.color]]
+id = "E2"
+hue = 40
+lightness = 0.0
+saturation = 0.1
+luminosity = 5.0
+contrast = 20.0
+
+[[tryker.eyes.color]]
+id = "E3"
+hue = 10
+lightness = -0.1
+saturation = 0.1
+luminosity = 0.0
+contrast = 20.0
+
+[[tryker.eyes.color]]
+id = "E4"
+hue = 250
+lightness = 0.1
+saturation = 0.0
+luminosity = 20.0
+contrast = 40.0
+
+[[tryker.eyes.color]]
+id = "E5"
+hue = 70
+lightness = -0.1
+saturation = -0.1
+luminosity = 10.0
+contrast = 40.0
+
+[[tryker.eyes.color]]
+id = "E6"
+hue = 320
+lightness = -0.1
+saturation = 0.0
+luminosity = 10.0
+contrast = 40.0
+
+[[tryker.eyes.color]]
+id = "E7"
+hue = 10
+lightness = -0.2
+saturation = -0.1
+luminosity = 0.0
+contrast = 20.0
+
+[[tryker.eyes.color]]
+id = "E8"
+hue = 200
+lightness = -0.2
+saturation = -0.3
+luminosity = 0.0
+contrast = 40.0
+
+[[zorai.hair.color]]
+id = "H1"
+hue = 40
+lightness = 0.1
+saturation = 0.3
+luminosity = 0.0
+contrast = 50.0
+
+[[zorai.hair.color]]
+id = "H2"
+hue = 70
+lightness = 0.0
+saturation = 0.3
+luminosity = 0.0
+contrast = 40.0
+
+[[zorai.hair.color]]
+id = "H3"
+hue = 100
+lightness = -0.1
+saturation = 0.3
+luminosity = 20.0
+contrast = 30.0
+
+[[zorai.hair.color]]
+id = "H4"
+hue = 20
+lightness = 0.0
+saturation = 0.5
+luminosity = 0.0
+contrast = 40.0
+
+[[zorai.hair.color]]
+id = "H5"
+hue = 200
+lightness = 0.0
+saturation = 0.3
+luminosity = 20.0
+contrast = 40.0
+
+[[zorai.hair.color]]
+id = "H6"
+hue = 280
+lightness = 0.0
+saturation = 0.3
+luminosity = 20.0
+contrast = 40.0

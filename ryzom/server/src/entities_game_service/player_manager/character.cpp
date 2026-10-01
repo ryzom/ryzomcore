@@ -48,6 +48,7 @@
 #include "game_share/animals_orders.h"
 #include "game_share/character_sync_itf.h"
 #include "game_share/chat_group.h"
+#include "game_share/constants.h"
 #include "game_share/entity_types.h"
 #include "game_share/fame.h"
 #include "game_share/gender.h"
@@ -15757,7 +15758,13 @@ string CCharacter::getTargetInfos()
 			CMirrorPropValueRO<TYPE_CELL> srcCell(TheDataset, dsr, DSPropertyCELL);
 			sint32 cell = srcCell;
 
-			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title;
+			string riderName;
+			CCharacter *rider = PlayerManager.getChar( cTarget->getRiderEntity() );
+			if ( rider )
+				riderName = rider->getName().toString();
+
+
+			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title+"|"+riderName;
 		}
 	}
 
@@ -17855,6 +17862,18 @@ uint32 CCharacter::getMagicResistance(DMGTYPE::EDamageType dmgType)
 }
 
 //--------------------------------------------------------------
+// checkFriendListCapacity
+//--------------------------------------------------------------
+bool CCharacter::checkFriendListCapacity() const
+{
+	if (_FriendsList.size() < MaxFriendListSize)
+		return true;
+
+	PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "FRIEND_LIST_FULL");
+	return false;
+}
+
+//--------------------------------------------------------------
 // addPlayerToFriendList
 //--------------------------------------------------------------
 void CCharacter::addPlayerToFriendList(const ucstring &name)
@@ -18167,6 +18186,9 @@ void CCharacter::addPlayerToFriendList(const NLMISC::CEntityId &id)
 			return;
 		}
 	}
+
+	if (!checkFriendListCapacity())
+		return;
 
 	if (haveAnyPrivilege() == false && PlayerManager.haveAnyPriv(id))
 		return; // a character without privilege can't add one with privilege.

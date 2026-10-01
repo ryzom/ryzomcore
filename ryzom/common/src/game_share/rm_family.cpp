@@ -307,7 +307,7 @@ namespace RM_FABER_STAT_TYPE
 		void	setStatLine(RM_FABER_TYPE::TRMFType ft, const uint8 vals[NumRMStatType])
 		{
 			nlassert(sizeof(uint8)==sizeof(bool));
-			nlassert(ft<RM_FABER_TYPE::NUM_FABER_TYPE);
+			nlassert(ft< (int)RM_FABER_TYPE::NUM_FABER_TYPE);
 			memcpy(StatRelevant + ft*NumRMStatType, vals, NumRMStatType*sizeof(bool));
 		}
 
@@ -318,8 +318,8 @@ namespace RM_FABER_STAT_TYPE
 	bool	isStatRelevant(RM_FABER_TYPE::TRMFType ft, TRMStatType fs)
 	{
 		// must change the setup below
-		nlctassert(NumRMStatType == 34 && RM_FABER_TYPE::NUM_FABER_TYPE == 26);
-		if(ft>=RM_FABER_TYPE::NUM_FABER_TYPE || fs>=NumRMStatType)
+		nlctassert(NumRMStatType == 34 && (int)RM_FABER_TYPE::NUM_FABER_TYPE == 26);
+		if(ft>=(int)RM_FABER_TYPE::NUM_FABER_TYPE || fs>=NumRMStatType)
 			return false;
 
 		// build
