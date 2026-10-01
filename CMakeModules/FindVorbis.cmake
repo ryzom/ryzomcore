@@ -14,6 +14,7 @@ IF(VORBISFILE_FOUND)
   set_target_properties(Vorbis::vorbisfile PROPERTIES
           IMPORTED_LOCATION "${VORBISFILE_LIBRARIES}"
           INTERFACE_INCLUDE_DIRECTORIES "${VORBIS_INCLUDE_DIR}"
+          INTERFACE_LINK_LIBRARIES Vorbis::vorbis
   )
   set(Vorbis_FOUND ON)
 ENDIF()
