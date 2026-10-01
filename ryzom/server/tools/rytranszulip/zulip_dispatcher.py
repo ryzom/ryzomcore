@@ -83,6 +83,9 @@ class ZulipDispatcher(ZulipService):
 			channel = m.channel_id.lower()+"@ig.ryzom.com"
 		elif m.channel == "dyn":
 			channel = self.getRealChannel(m.channel_id)
+			if channel.startswith(u"❇️ League_"):
+				print(f"Bad channel {channel}")
+				return None
 		else:
 			channel = self.getRealChannel(m.channel)
 		if not channel:
@@ -108,7 +111,7 @@ class ZulipDispatcher(ZulipService):
 		if result.get("result") == "success" and "id" in result:
 			log_channel =  channel.split(" ")[0]
 			log_content =  "".join([ s[0] for s in  content.split() ])
-			print(f"💬 {message_type} to {log_channel} with {log_content} = {result['id']}")
+			print(f"💬 {message_type} to {channel} with {log_content} = {result['id']}")
 			return result["id"]
 		if result.get("result") == "error":
 			print("Error sending message", result.get("msg", ""))
