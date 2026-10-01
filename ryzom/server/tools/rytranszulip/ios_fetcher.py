@@ -23,6 +23,7 @@
 import os
 import sys
 import json
+import traceback
 import mysql.connector
 
 from time import sleep, time
@@ -85,7 +86,12 @@ class IosFetcher(RyzomService):
 			else:
 				self.status_color = ""
 				self.status = "Waiting..."
-				size = os.stat(self.logname).st_size
+				try:
+					size = os.stat(self.logname).st_size
+				except OSError:
+					# log file being rotated
+					sleep(0.1)
+					continue
 				if file_size > size:
 					self.stats["filesize"] = file_size
 					self.updateStats()
@@ -105,15 +111,18 @@ class IosFetcher(RyzomService):
 
 	def getGuildName(self, gid):
 		self.ensureDbConnection()
-		cursor = self.db.cursor()
+		if self.db is None:
+			print(f"No database connection, guild {gid} name unknown")
+			return ""
 		try:
-			cursor.execute("SELECT * FROM guilds WHERE guild_id='"+gid+"' AND deleted = 0")
+			cursor = self.db.cursor()
+			cursor.execute("SELECT * FROM guilds WHERE guild_id=%s AND deleted = 0", (gid,))
+			guilds = cursor.fetchall()
 		except mysql.connector.Error as err:
 			print("Error", err)
 		else:
-			guilds = cursor.fetchall()
-			if guilds:
-				return guilds[0][2]
+			if guilds and len(guilds[0]) > 2:
+				return guilds[0][2] or ""
 		return ""
 
 	def updateStats(self):
@@ -126,8 +135,11 @@ class IosFetcher(RyzomService):
 
 	def updateLogs(self, line):
 		sline = line.strip().split(" ", 6)
-		if len(sline) >= 5:
+		if len(sline) >= 7:
 			message = sline[6].split("|", 4)
+			if len(message) != 5:
+				print(f"Invalid chat log line: {line.strip()!r}")
+				return
 			channel, sender, source_lang, langs, message = message
 			schannel = channel.split(":", 1)
 			if len(schannel) == 2:
@@ -140,7 +152,11 @@ class IosFetcher(RyzomService):
 				return
 
 			if channel == "guild":
-				gid = str(int(channel_id[8:-10], 16)+0x6500000)
+				try:
+					gid = str(int(channel_id[8:-10], 16)+0x6500000)
+				except ValueError:
+					print(f"Invalid guild channel id: {channel_id!r}")
+					return
 				guild_name = self.getGuildName(gid)
 				channel = "🔰 "+guild_name+" ("+channel_id[8:-10]+")"
 				channel_id = "guild:"+channel_id
@@ -184,10 +200,14 @@ class IosFetcher(RyzomService):
 		loglines = self.follow(self.logfile)
 		print("Fetching IOS log file")
 		for line in loglines:
-			self.updateLogs(line)
+			try:
+				self.updateLogs(line)
+			except Exception:
+				print(f"Error parsing chat log line {line.strip()!r}:\n{traceback.format_exc()}")
 
 	def close(self):
-		self.db.close()
+		if self.db is not None:
+			self.db.close()
 
 if __name__ == "__main__":
 	iosFetcher = IosFetcher()

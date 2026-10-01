@@ -21,6 +21,7 @@
 import os
 import sys
 import json
+import traceback
 import mysql.connector
 import urllib.parse
 
@@ -36,6 +37,8 @@ CUSTOM_PROFILE_TRANSLATIONS="1"
 CUSTOM_PROFILE_TITLE="2"
 CUSTOM_PROFILE_GUILD="3"
 INGAME_FOLDER_ID=2
+
+ALLOWED_COMMANDS = ("playerConnects", "addFactionChannelToCharacter", "removeFactionChannelForCharacter", "deleteMember")
 
 class ShardCommands(RyzomService):
 
@@ -91,24 +94,43 @@ class ShardCommands(RyzomService):
 			method="GET",
 		)
 
-		if ret["result"] == "success":
-			return ret["user"]
+		if isinstance(ret, dict) and ret.get("result") == "success":
+			return ret.get("user")
 		return None
 
 	def getGuildId(self, name):
 		self.ensureDbConnection()
-		cursor = self.db.cursor()
+		if self.db is None:
+			print(f"No database connection, guild {name} id unknown")
+			return 0
 		try:
+			cursor = self.db.cursor()
 			cursor.execute("SELECT * FROM guilds WHERE name=%s AND deleted = 0", (name,))
 			print("Database created successfully")
+			guilds = cursor.fetchall()
 		except mysql.connector.Error as err:
 			print("Error", err)
 		else:
-			guilds = cursor.fetchall()
 			print(guilds)
-			if guilds:
-				return guilds[0][1]
+			if guilds and len(guilds[0]) > 1:
+				try:
+					return int(guilds[0][1])
+				except (TypeError, ValueError):
+					print(f"Invalid guild id for {name}: {guilds[0][1]!r}")
 		return 0
+
+	def getGuildChannel(self, name):
+		guild_id = self.getGuildId(name)
+		if guild_id < 0x6500000:
+			print(f"Guild {name} not found")
+			return ""
+		return "🔰 "+name+f" ({guild_id-0x6500000:0>5X})"
+
+	def getProfileValue(self, user, field):
+		value = user["profile_data"].get(field)
+		if isinstance(value, dict):
+			return value.get("value") or ""
+		return ""
 
 	def addSubscription(self, user, sub):
 		return self.zulip.add_subscriptions(
@@ -134,11 +156,9 @@ class ShardCommands(RyzomService):
 
 			user = self.getUser(user_email)
 
-			if user and "profile_data" in user:
-				if CUSTOM_PROFILE_GUILD in user["profile_data"]:
-					old_guild = user["profile_data"][CUSTOM_PROFILE_GUILD]["value"]
-				if CUSTOM_PROFILE_TITLE in user["profile_data"]:
-					title = user["profile_data"][CUSTOM_PROFILE_TITLE]["value"]
+			if isinstance(user, dict) and isinstance(user.get("profile_data"), dict):
+				old_guild = self.getProfileValue(user, CUSTOM_PROFILE_GUILD)
+				title = self.getProfileValue(user, CUSTOM_PROFILE_TITLE)
 
 
 			if command[2]:
@@ -154,8 +174,10 @@ class ShardCommands(RyzomService):
 					)
 
 			if len(command) >= 4 and command[3]:
-				gid = int(self.getGuildId(command[3]))-0x6500000
-				new_guild = "🔰 "+command[3]+f" ({gid:0>5X})"
+				new_guild = self.getGuildChannel(command[3])
+				if not new_guild:
+					# unknown guild: keep current subscriptions untouched
+					return
 
 			if new_guild:
 				self.addSubscription(user_email, new_guild)
@@ -193,8 +215,9 @@ class ShardCommands(RyzomService):
 	def deleteMember(self, command):
 		if len(command) >= 3:
 			user_email = command[2].lower()+"@ig.ryzom.com"
-			gid = int(self.getGuildId(command[1]))-0x6500000
-			guild = "🔰 "+command[1]+f" ({gid:0>5X})"
+			guild = self.getGuildChannel(command[1])
+			if not guild:
+				return False
 			self.zulip.remove_subscriptions([guild], principals = [user_email])
 			self.zulip.call_endpoint(
 					url="/users/"+user_email+"?profile_data="+urllib.parse.quote_plus("[{\"id\":"+CUSTOM_PROFILE_GUILD+", \"value\": \"""\"}]"),
@@ -205,11 +228,18 @@ class ShardCommands(RyzomService):
 
 	def manageMessage(self, i):
 		command = self.getRyzomCommand(i)
-		if command != None:
+		if command:
 			self.updateActivity(False)
-			if hasattr(self, command[0]) and callable(getattr(self, command[0])) and getattr(self, command[0])(command):
-				self.stats["commands"] += 1
-				self.updateStats()
+			if command[0] not in ALLOWED_COMMANDS:
+				print(f"Unknown shard command {i} {command!r}, skipped")
+				self.current_id = i
+				return
+			try:
+				if getattr(self, command[0])(command):
+					self.stats["commands"] += 1
+					self.updateStats()
+			except Exception:
+				print(f"Error running shard command {i} {command!r}:\n{traceback.format_exc()}")
 		self.current_id = i
 			
 	def checkMessages(self):

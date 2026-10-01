@@ -290,6 +290,8 @@ setup.ini
 *.tmp
 *.out
 
+setup.ini
+ryzom/server/www/login/server_open_status
 .claude/
 .agentcom/
 
