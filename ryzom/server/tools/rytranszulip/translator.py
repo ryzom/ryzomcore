@@ -105,8 +105,6 @@ class Translator(RyzomService):
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"
-							#print("✅ "+str(i), repr(message.text), "➡️ ", translation)
-							print(f"DEEPL|{message.channel}|{billed_characters}")
 							message.translation = translation
 							message.translated_lang = self.dst_lang.upper()
 							message.source_message_id = i

@@ -35,7 +35,6 @@ class ZulipClient(zulip.Client):
 			else:
 				self.queue_id = res["queue_id"]
 				self.last_event_id = res["last_event_id"]
-				print(self.queue_id)
 				return self.queue_id
 
 	def call(self, callback, event_types, narrow, **kwargs):
@@ -104,7 +103,6 @@ class ZulipClient(zulip.Client):
 					# longpolling protocol, not something that clients
 					# need to handle.
 					continue
-				print(self.queue_id)
 				callback(event)
 
 	def registerMessages(self, **kwargs):
@@ -112,7 +110,6 @@ class ZulipClient(zulip.Client):
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
-			#print(event)
 			if event["type"] in ("message", "update_message"):
 				callback(event)
 		self.call(event_callback, ["message", "update_message"], None, **kwargs)

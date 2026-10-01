@@ -1,3 +1,16 @@
+## 2026-09-06 — Validate PHP 8.2-FPM running alongside 7.4 on the www server
+
+Ops task, unrelated to the `www/libs/` reorg above: ran PHP 8.2-FPM as a second pool alongside the existing 7.4 one, on its own socket, to validate the upgrade path without touching the live 7.4 pool. Copied the 7.4 pool config, pointed it at a separate `php8.2-fpm-xxx.sock`, confirmed `mysqli` is enabled for 8.2, and repointed the relevant Apache vhost's `SetHandler` at the new socket after a config test (`php8.2-fpm -t`) and Apache reload.
+
+Manually tested and validated by Nuno.
+
+## 2026-08-22 — 🐛 Fix duplicate config.php include causing redeclare fatal
+
+Follow-up fixes after deploying the `♻️ Reorganize www/ and harden login security` commit to `main/rendor-staging`.
+
+- Added an optional `www/myconfig.php` include in `config.php` (loaded right after `ryzom_load_ini('/etc/ryzom/shard.ini')`, before the default `define()` fallbacks), each wrapped in `defined()` checks so a value set in `myconfig.php` takes precedence over the built-in default. Renamed `OAUTH_GAME_ACCESS` to `OAUTH_ACCESS_URL` and added `GAME_SUBSCRIPTION_URL`; both external calls in `r2_login_user.php` (OAuth login and subscription check) are now guarded with `defined(...) && CONST` so they can be disabled entirely via `myconfig.php`. Applied the same guard to the Steam auth check (`STEAM_APP_ID`).
+- Fixed a production fatal (`Cannot redeclare ryzom_load_ini()`) caused by `tools/validate_cookie.php` and `ring/plan_edit_session.php` loading `config.php` (and, in the latter's case, `validate_cookie.php`/`ring_session_manager_itf.php` too) via a plain `include()` instead of `include_once()`. Since `login/r2_login.php` already loads `config.php` via `include_once` earlier in the same request, the later plain `include()` re-executed it and redeclared its function — a pre-existing latent bug, not introduced by the reorg, but only reachable through the request chains touched by this session's restructuring.
+
 ## 2026-08-22 — ♻️ Reorganize www/ and harden login security
 
 Restructured `ryzom/server/www/` for clarity and removed several legacy security issues in preparation for the codebase going public.

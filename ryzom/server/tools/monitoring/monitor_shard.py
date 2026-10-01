@@ -24,14 +24,23 @@ import glob
 import json
 import math
 import time
+import socket
 
 from pymemcache.client.base import Client
+from pymemcache.exceptions import MemcacheError
 from pynel.admin_modules_itf import CAdminServiceWeb
 
 class MonitorServices():
 
 	def __init__(self):
-		self.client = Client("localhost")
+		print("Connecting to Memcached server...")
+		try:
+			self.client = Client("localhost", connect_timeout=3, timeout=3)
+			self.client.stats()
+			print("Connected to Memcached server.")
+		except (ConnectionRefusedError, socket.timeout, MemcacheError) as e:
+			print(f"Failed to connect to Memcached server: {e}")
+			sys.exit(1)
 		self.shard = sys.argv[1].lower()
 		self.ryzomAS = CAdminServiceWeb()
 		self.ryzomAsStatus = self.ryzomAS.connect("127.0.0.1", 46700)
@@ -59,7 +68,7 @@ class MonitorServices():
 			if time.time() - last_ras_update > 1:
 				updates += 1
 
-				with open("/home/nevrax/www/login/server_open_status", "r") as f:
+				with open("/home/nevrax/www/login/status/server_open_status", "r") as f:
 					new_open_status = f.read().strip()
 					if server_open_status != new_open_status:
 						print("Server Open Status =", new_open_status)
@@ -158,6 +167,6 @@ class MonitorServices():
 			time.sleep(0.01)
 
 if __name__ == "__main__":
-	print(f"Start Monitoring Ryzom Services for {sys.argv[1]}...")
+	print(f"Start Monitoring Ryzom Services for {sys.argv[1]}")
 	service = MonitorServices()
 	service.run()

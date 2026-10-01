@@ -319,7 +319,7 @@ $message->serialString($serviceAlias);
 
 		reset($data);
 		$data = str_replace('\\\'', '', $data);
-	
+
 		foreach($data as $server_data)
 		{
 			$data_ary = explode("\n",$server_data);

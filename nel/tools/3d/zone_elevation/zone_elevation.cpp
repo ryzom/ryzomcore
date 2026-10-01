@@ -58,7 +58,14 @@ bool s_ExtendCoords;
 std::string s_InputZone; // UTF-8
 std::string s_OutputZone; // UTF-8
 
-CZoneRegion s_Land;
+// A plain global (rather than a local/heap-allocated instance, e.g.
+// land_export's own use of NLLIGO::CZoneRegion) gave it static storage
+// duration, so its constructor ran during static initialization, before
+// main() -- crashing with a SIGSEGV inside std::string::assign() on every
+// invocation, even with zero CLI args (confirmed via gdb backtrace,
+// project-todos/pynel/land_pipeline.md step 5, 2026-09-11). Allocated
+// lazily instead, same pattern as s_HeightMap/s_HeightMap2 below.
+CZoneRegion *s_Land = NULL;
 
 bool loadLand(const string &filename)
 {
@@ -69,7 +76,8 @@ bool loadLand(const string &filename)
 		{
 			CIXml xml(true);
 			nlverify(xml.init(fileIn));
-			s_Land.serial(xml);
+			s_Land = new CZoneRegion();
+			s_Land->serial(xml);
 		}
 		else
 		{
@@ -519,10 +527,10 @@ int main(int argc, char **argv)
 	{
 		if (!loadLand(args.getLongArg("land")[0]))
 			goto Fail;
-		s_ZoneMinX = s_Land.getMinX();
-		s_ZoneMaxX = s_Land.getMaxX();
-		s_ZoneMinY = s_Land.getMinY();
-		s_ZoneMaxY = s_Land.getMaxY();
+		s_ZoneMinX = s_Land->getMinX();
+		s_ZoneMaxX = s_Land->getMaxX();
+		s_ZoneMinY = s_Land->getMinY();
+		s_ZoneMaxY = s_Land->getMaxY();
 	}
 	else
 	{

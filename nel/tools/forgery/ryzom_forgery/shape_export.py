@@ -14,12 +14,16 @@ for the same reason: getting buffer/accessor byte layout exactly right by
 hand is easy to get subtly wrong.
 """
 
+import copy
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, List, Optional
 
 from ryzom_forgery.settings import TEXTURE_MODE_COPY_PNG
-from ryzom_forgery.shape_geometry import iter_render_passes, load_panda_texture, rgba_to_color, texture_to_pnm_image
+from ryzom_forgery.shape_geometry import (
+	IDENTITY_QUAT, iter_render_passes, load_panda_texture, rgba_to_color, rotate_mesh_geom, shape_default_rot_quat,
+	texture_to_pnm_image,
+)
 
 
 @dataclass
@@ -198,12 +202,19 @@ def _export_stl(shape_value, materials, output_path: Path, texture_mode: str, te
 def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, texture_finder) -> List[Path]:
 	import numpy
 	from collada import Collada
+	from collada import asset as col_asset
 	from collada import geometry as col_geometry
 	from collada import material as col_material
 	from collada import scene as col_scene
 	from collada import source as col_source
 
 	doc = Collada()
+	# Vertex data below is written as-is, in Ryzom's own Z-up convention --
+	# pycollada's own default asset tag claims Y_UP regardless. Declaring
+	# the true axis here lets Assimp's own ColladaLoader do its normal
+	# Z_UP->Y_UP conversion correctly on reimport, and any other
+	# COLLADA-compliant tool (Blender etc.) shows the right orientation too.
+	doc.assetInfo.upaxis = col_asset.UP_AXIS.Z_UP
 	written = [output_path]
 	texture_cache: dict = {}
 	created_materials = {}
@@ -285,6 +296,15 @@ def _export_dae(shape_value, materials, output_path: Path, texture_mode: str, te
 	return written
 
 
+def _zup_to_yup(v):
+	"""Ryzom's own Z-up (X=right, Y=forward, Z=up) into glTF's mandatory
+	Y-up (x=right, y=up, z=forward) -- glTF has no up-axis metadata to
+	declare otherwise (unlike COLLADA's <asset><up_axis>, see _export_dae()),
+	so the vertex data itself must actually be Y-up: (X, Y, Z) -> (X, Z, -Y)."""
+	x, y, z = v
+	return (x, z, -y)
+
+
 def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode: str, texture_finder):
 	"""Shared by .gltf and .glb -- pygltflib's `GLTF2.save()` picks the JSON
 	vs. binary container based on the output path's extension, so the
@@ -324,6 +344,7 @@ def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode
 		normals = vertex_buffer.channels.get("Normal")
 		texcoords = vertex_buffer.channels.get("TexCoord0")
 
+		positions = [_zup_to_yup(p) for p in positions]
 		xs, ys, zs = [p[0] for p in positions], [p[1] for p in positions], [p[2] for p in positions]
 		pos_bytes = struct.pack(f"<{len(positions) * 3}f", *(c for p in positions for c in p))
 		attributes = pygltflib.Attributes(POSITION=add_accessor(
@@ -331,6 +352,7 @@ def _build_gltf_document(shape_value, materials, output_path: Path, texture_mode
 			bounds=([min(xs), min(ys), min(zs)], [max(xs), max(ys), max(zs)])))
 
 		if normals:
+			normals = [_zup_to_yup(n) for n in normals]
 			normal_bytes = struct.pack(f"<{len(normals) * 3}f", *(c for n in normals for c in n))
 			attributes.NORMAL = add_accessor(
 				normal_bytes, pygltflib.FLOAT, pygltflib.VEC3, len(normals), pygltflib.ARRAY_BUFFER)
@@ -408,7 +430,18 @@ def export_shape(
 	into `output_dir`. `name` supplies the output file's stem (typically the
 	source .shape's own file name). Returns the list of files written.
 	Raises `ValueError` (unsupported shape type / no renderable geometry) on
-	failure."""
+	failure.
+
+	Bakes the shape's own `default_rot_quat` (the rotation the engine
+	actually applies at instance creation, see shape_geometry.py) into the
+	exported vertices on a *copy* of the geometry -- the live shape open in
+	the editor is never mutated -- so the exported file shows the shape's
+	real in-game orientation, not its raw pre-rotation storage pose. A
+	no-op when default_rot_quat is identity."""
+	quat = shape_default_rot_quat(shape_value)
+	if quat != IDENTITY_QUAT:
+		shape_value = copy.deepcopy(shape_value)
+		rotate_mesh_geom(shape_value.geom, quat)
 	materials = getattr(shape_value, "materials", None)
 	stem = Path(name).stem
 	output_path = Path(output_dir) / f"{stem}.{export_format.extension}"

@@ -187,8 +187,8 @@ class RyzomService():
 	def addRyzomMessage(self, message):
 		self.last_chat_id = self.client.incr("Ryzom-Chat-LastID", 1)
 		self.client.set("Ryzom-Chat-"+str(self.last_chat_id), message.get(), 24*60*60)
-
-		print("Set", "Ryzom-Chat-"+str(self.last_chat_id), "=", message.output_zipped())
+		log_content = "".join([ s[0] for s in  message.get()[6].split() ])
+		print(f"💬 {self.last_chat_id} = {log_content}")
 		return self.last_chat_id
 
 	def getRyzomMessage(self, i):

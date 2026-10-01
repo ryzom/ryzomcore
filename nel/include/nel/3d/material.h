@@ -408,6 +408,10 @@ public:
 	uint8					getOpacity() const { return _Diffuse.A;}
 	CRGBA					getSpecular() const { return _Specular;}
 	float					getShininess() const { return _Shininess;}
+	/// Set the smoothing angle (degrees, 0-180) baked by an external tool (Ryzom Forgery). Not used by rendering.
+	void					setSmoothingAngle( float angle ) { _SmoothingAngle= angle; }
+	/// Get the smoothing angle. -1 means never set by a tool.
+	float					getSmoothingAngle() const { return _SmoothingAngle;}
 	// @}
 
 
@@ -686,6 +690,9 @@ private:
 	CRGBA					_Color;
 	CRGBA					_Emissive, _Ambient, _Diffuse, _Specular;
 	float					_Shininess;
+	// Angle threshold (degrees, 0-180) used by external tools (Ryzom Forgery) to bake
+	// smoothed vertex normals per material. -1 means never set by a tool. Not used by rendering.
+	float					_SmoothingAngle;
 	float					_AlphaTestThreshold;
 	uint32					_Touched;
 	bool					_StainedGlassWindow;

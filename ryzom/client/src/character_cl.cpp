@@ -3093,7 +3093,7 @@ KeyChosen:
 					// look in behaviour if there's a spell to play
 					if (_CurrentAttack)
 					{
-						if (_CurrentAttackInfo.Intensity >= 1 &&  _CurrentAttackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+						if (_CurrentAttackInfo.Intensity >= 1 &&  _CurrentAttackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 						{
 							MAGICFX::TSpellCastStage attackStage;
 							switch(newKey)
@@ -4394,7 +4394,7 @@ void CCharacterCL::computeTargetStickMode(const CAttackSheet &sheet, const CAtta
 	bool hasPhysicalImpact = false;
 	if (attackInfo.Localisation != BODY::UnknownBodyPart &&
 		attackInfo.PhysicalImpactIntensity >= 1 &&
-		attackInfo.PhysicalImpactIntensity <= MAGICFX::NUM_SPELL_POWER &&
+		attackInfo.PhysicalImpactIntensity <= (int)MAGICFX::NUM_SPELL_POWER &&
 		attackInfo.HitType != HITTYPE::Failed &&
 		attackInfo.HitType != HITTYPE::Undefined &&
 		attackInfo.DamageType != DMGTYPE::UNDEFINED)
@@ -4453,7 +4453,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 	destPB.StartDate = spawnDate;
 	destPB.EndDate = hitDate;
 	// choose fx for projectile
-	if (attackInfo.Intensity >= 1 && attackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER)
+	if (attackInfo.Intensity >= 1 && attackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER)
 	{
 		destPB.ProjectileAspect = &currentAttack->ProjectileFX;
 	}
@@ -4468,7 +4468,7 @@ bool CCharacterCL::createCurrentAttackEndPart(CProjectileBuild &destPB,
 	}
 	else
 	{
-		if (attackInfo.Intensity  >= 1 && attackInfo.Intensity <= MAGICFX::NUM_SPELL_POWER) // impact has same intensity than projectile
+		if (attackInfo.Intensity  >= 1 && attackInfo.Intensity <= (int)MAGICFX::NUM_SPELL_POWER) // impact has same intensity than projectile
 		{
 			destPB.ImpactAspect = &currentAttack->ImpactFX;
 		}

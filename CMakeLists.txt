@@ -13,7 +13,6 @@
 #       * NL_SBIN_PREFIX  (default: $CMAKE_INSTALL_PREFIX/sbin)
 #       * NL_LIB_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib)
 #       * NL_DRIVER_PREFIX  (default: $CMAKE_INSTALL_PREFIX/lib (windows) or $CMAKE_INSTALL_PREFIX/lib/nel)
-#   * Enable building of documentation: add -DBUILD_DOCUMENTATION:BOOL=ON - new make target: DoxygenDoc
 #   * Updating version: update header (above) but also update NL_VERSION below.
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
@@ -61,7 +60,6 @@ ENDIF()
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
-INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 MESSAGE("EXTERNAL ${WITH_EXTERNAL}")
 
@@ -414,21 +412,6 @@ ENDIF()
 
 IF(WITH_PERSONAL)
   ADD_SUBDIRECTORY(personal)
-ENDIF()
-
-# To build the documention, you will have to enable it
-# and then do the equivalent of "make DoxygenDoc".
-IF(BUILD_DOCUMENTATION)
-    IF(DOT)
-        SET(HAVE_DOT YES)
-    ELSE()
-        SET(HAVE_DOT NO)
-    ENDIF()
-    # This processes our Doxyfile.in and substitutes paths to generate
-    # a final Doxyfile
-    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/doc/Doxyfile.cmake.in ${CMAKE_BINARY_DIR}/doc/Doxyfile)
-
-    ADD_CUSTOM_TARGET(DoxygenDoc ${DOXYGEN} ${CMAKE_BINARY_DIR}/doc/Doxyfile)
 ENDIF()
 
 IF(WITH_NEL_TESTS)

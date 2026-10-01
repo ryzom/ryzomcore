@@ -24,7 +24,7 @@
 
 void loadCharacteristicsFromSheet(const NLGEORGES::UFormElm &rootNode, std::string prefix, sint8 dest[CHARACTERISTICS::NUM_CHARACTERISTICS])
 {
-	for(uint k = 0; k < CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
+	for(uint k = 0; k < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
 	{
 		const std::string &characName = CHARACTERISTICS::toString((CHARACTERISTICS::TCharacteristics) k);
 		std::string characPath = prefix + characName;

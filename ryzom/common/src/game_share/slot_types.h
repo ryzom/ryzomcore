@@ -66,6 +66,7 @@ namespace SLOTTYPE
 		FEET_SLOT,
 		RIGHT_HAND_SLOT,
 		LEFT_HAND_SLOT,
+		HAT_SLOT,
 
 		NB_SLOT
 	};

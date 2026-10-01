@@ -60,7 +60,7 @@ CGroupPhraseSkillFilter::CGroupPhraseSkillFilter(const TCtorParam &param)
 	_Tree= NULL;
 
 	// By default no bricks are known.
-	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
+	for(uint i=0;i< (sint)SKILLS::NUM_SKILLS;i++)
 		_BrickSkillUsage[i]= false;
 
 	// But for clearness, add by default Skill Fight, Magic, Craft, and Forage
@@ -127,7 +127,7 @@ void CGroupPhraseSkillFilter::bkupSkillOpenedStateRecurs(bool *skillOpened, CGro
 		// get the open state
 		uint	skillId;
 		fromString(node->Id, skillId);
-		if(skillId<SKILLS::NUM_SKILLS)
+		if(skillId< (sint)SKILLS::NUM_SKILLS)
 			skillOpened[skillId]= node->Opened;
 	}
 
@@ -201,7 +201,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 		nCounter++;
 		bQuit = true;
 		// Try to create a skill
-		for (uint32 i = 0; i < SKILLS::NUM_SKILLS; ++i)
+		for (uint32 i = 0; i < (sint)SKILLS::NUM_SKILLS; ++i)
 		if (allNodes[i] == NULL) // not already created
 		{
 			if (pSM->isUnknown((SKILLS::ESkills)i)) continue;
@@ -259,13 +259,13 @@ void	CGroupPhraseSkillFilter::rebuild()
 		sint	skillValue;
 		fromString(pRoot->Children[i]->Id, skillValue);
 		// Special sort:
-		if(skillValue==SKILLS::SF)
+		if(skillValue==(sint)SKILLS::SF)
 			skillValue= -4;
-		if(skillValue==SKILLS::SM)
+		if(skillValue==(sint)SKILLS::SM)
 			skillValue= -3;
-		if(skillValue==SKILLS::SC)
+		if(skillValue==(sint)SKILLS::SC)
 			skillValue= -2;
-		if(skillValue==SKILLS::SH)
+		if(skillValue==(sint)SKILLS::SH)
 			skillValue= -1;
 		// prepare tri
 		sortNodes[i].Value= skillValue;
@@ -364,7 +364,7 @@ void CGroupPhraseSkillFilter::CBrickFamilyObs::update (ICDBNode *node)
 		{
 			CSBrickSheet	*brick= pBM->getBrick(pBM->getBrickSheet(BrickFamily, i));
 			// if a valid brick / valid skill
-			if(brick && brick->getSkill()<SKILLS::NUM_SKILLS)
+			if(brick && brick->getSkill()< (sint)SKILLS::NUM_SKILLS)
 			{
 				SKILLS::ESkills		skill= brick->getSkill();
 				// if the skill was not set before

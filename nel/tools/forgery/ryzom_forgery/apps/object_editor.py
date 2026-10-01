@@ -6,6 +6,9 @@
 render yet.
 """
 
+import io
+import subprocess
+from datetime import datetime
 from math import ceil, cos, pi, radians, sin
 from pathlib import Path
 
@@ -13,16 +16,18 @@ import numpy
 
 from panda3d.core import (
 	AlphaTestAttrib, ClockObject, ColorBlendAttrib, Geom, GeomNode, GeomTriangles, GeomVertexData,
-	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, PNMImage, Point3,
-	Quat, Texture as PandaTexture, TransparencyAttrib, Vec3,
+	GeomVertexFormat, GeomVertexWriter, InternalName, LineSegs, Material as PandaMaterial, NodePath, PNMImage, Point3,
+	Quat, Texture as PandaTexture, TextureStage, TransformState, TransparencyAttrib, Vec3,
 )
 
 from imgui_bundle import icons_fontawesome_4 as fa_icons, imgui, imgui_ctx, portable_file_dialogs as pfd
 
-from ryzom_forgery.app import ForgeryApp
+from ryzom_forgery.app import _AVAILABLE_FONTS, ForgeryApp
 from ryzom_forgery.camera import ObjectManipulator, OrbitCamera
+from ryzom_forgery.explorer import ExplorerItem
 from ryzom_forgery.export_dialog import ExportDialog
 from ryzom_forgery.import_dialog import ImportDialog
+from ryzom_forgery.import_watcher import ImportWatcher
 from ryzom_forgery.material_docs import load_material_docs
 from ryzom_forgery.navcube import NavigationCube
 from ryzom_forgery import panoply
@@ -35,22 +40,28 @@ from ryzom_forgery.search_paths_dialog import SearchPathsDialog
 from ryzom_forgery import settings as app_settings
 from ryzom_forgery.shape_export import EXPORT_FORMATS
 from ryzom_forgery.shape_geometry import (
-	finest_skinned_lod, iter_render_passes, load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox,
-	shape_geom, solid_color_texture,
+	IDENTITY_QUAT, compose_uv_matrix, decompose_uv_matrix, finest_skinned_lod, iter_render_passes,
+	load_panda_texture, resolve_texture_ref, rgba_to_color, shape_bbox, shape_geom, solid_color_texture,
+	texture_to_pnm_image, uv_matrix_to_panda_mat4,
 )
 from ryzom_forgery.shape_import import texture_search_dirs_for
+from ryzom_forgery.tex_dds_sync import TexDdsSyncWatcher
+from ryzom_forgery.workspace_setup_dialog import WorkspaceSetupDialog, _truncate_path_to_width
+from ryzom_forgery.workspace_sync import WorkspaceSyncWatcher, SYNCED_SUBDIRS
+from ryzom_forgery.workspace_watch import WorkspaceWatcher
+from ryzom_forgery.workspaces import SUBDIRS as WORKSPACE_SUBDIRS, ensure_structure, reveal_in_system_file_manager
 
 from pynel.ryzom_animation import (
 	AnimationParseError, animation_duration, evaluate_all_bone_world_matrices, parse_animation,
 )
 from pynel.ryzom_shape import (
-	MeshMRMSkinned, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture, WindTreeParams,
-	parse_shape, save_shape,
+	Matrix, MeshMRMSkinned, Quaternion, Rgba, ShapeFile, ShapeParseError, ShapeWriteError, SkeletonShape, Texture,
+	WindTreeParams, parse_shape, save_shape,
 )
 from pynel.ryzom_skin import bone_skin_matrices_for_mesh
 
 # Shape types pynel's save_shape() can actually write back out -- matches
-# ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save/Save As UI only shows for these.
+# ryzom_shape.py's _SHAPE_CLASS_NAMES, the Save UI only shows for these.
 _WRITABLE_SHAPE_TYPES = {"Mesh", "MeshMRM", "MeshMRMSkinned", "MeshMultiLod"}
 
 # Toggleable scale-reference shapes shown alongside whatever's loaded, for an
@@ -75,8 +86,44 @@ _REFERENCE_ICONS = {"Cube (1x1x1)": fa_icons.ICON_FA_CUBE, "Smallest character":
 
 _OVERWRITE_POPUP_ID = "Overwrite shape?"
 _REPLACE_MATCH_POPUP_ID = "Match materials"
+_IMPORT_CONFLICT_POPUP_ID = "Shape open, about to auto-update"
+_RESTORE_SCAN_POPUP_ID = "Scanning assets"
 
 _STATUS_HINT_COLOR = (1.0, 0.6, 0.15, 1.0)  # orange, for material_options.md hints shown in the status bar
+_TEXTURE_NORMAL_COLOR = (1.0, 1.0, 1.0, 1.0)
+_TEXTURE_IN_WORKSPACE_COLOR = (0.4, 1.0, 0.4, 1.0)  # green -- this texture reference already lives in the active workspace's tex/
+# Same 3 extensions the texture browse dialog offers (_start_texture_browse()).
+_WORKSPACE_TEXTURE_EXTENSIONS = {".tga", ".dds", ".png"}
+
+# draw_panel()'s tab bar (_push_tab_color()).
+_TAB_COLOR_TEXTURES = (0.565, 0.933, 0.565, 1.0)  # lightgreen
+_TAB_COLOR_MATERIALS = (0.878, 1.0, 1.0, 1.0)  # lightcyan
+_TAB_COLOR_ALL_PROPERTIES = (0.5, 0.5, 0.5, 1.0)  # gray
+_TAB_COLOR_SETTINGS = (0.8, 0.75, 0.15, 1.0)  # yellow
+
+_SYNC_NOW_COLOR = (0.85, 0.55, 0.15, 1.0)  # orange -- _draw_workspace_sync_settings()'s catch-up button
+
+# _draw_import_conflict_popup()'s 4 choice buttons, color-coded by how
+# "safe" each one is with the in-memory edits (green: nothing lost, orange:
+# both kept but in 2 files, pink: current edits discarded, yellow: no-op).
+_IMPORT_CONFLICT_SAVE_COLOR = (0.85, 0.55, 0.15, 1.0)  # orange
+_IMPORT_CONFLICT_DISCARD_COLOR = (0.85, 0.35, 0.55, 1.0)  # pink
+_IMPORT_CONFLICT_BACKUP_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
+_IMPORT_CONFLICT_CANCEL_COLOR = (0.8, 0.75, 0.15, 1.0)  # yellow
+
+# ImportWatcher outcome messages on the sysinfo status bar (see
+# _flush_pending_import_status()) -- same red as self.shape_error elsewhere
+# in this file, same green as _IMPORT_CONFLICT_BACKUP_COLOR above.
+_IMPORT_STATUS_ERROR_COLOR = (1.0, 0.4, 0.4, 1.0)  # red
+_IMPORT_STATUS_SUCCESS_COLOR = (0.35, 0.75, 0.35, 1.0)  # green
+
+# _draw_bottom_bar()'s Save/Export/Quit buttons -- blue for the export
+# buttons (not pink, to stay visually distinct from Quit's pink).
+_SAVE_BUTTON_COLOR = (0.6, 0.85, 0.65, 1.0)  # pastel green
+_EXPORT_AS_BUTTON_COLOR = (0.65, 0.8, 0.95, 1.0)  # light blue
+_QUICK_EXPORT_BUTTON_COLOR = (0.4, 0.65, 0.9, 1.0)  # blue -- workspace-only quick export
+_QUIT_BUTTON_COLOR = (0.9, 0.55, 0.7, 1.0)  # pink
+
 _COLOR_POPUP_ID = "material-color-picker"
 _DIFFUSE_COLOR_POPUP_ID = "material-diffuse-picker"
 
@@ -86,6 +133,10 @@ _IDRV_MAT_ZWRITE = 0x00000004
 _IDRV_MAT_BLEND = 0x00000080
 _IDRV_MAT_DOUBLE_SIDED = 0x00000100
 _IDRV_MAT_ALPHA_TEST = 0x00000200
+_IDRV_MAT_TEX_ADDR = 0x00000400
+# Per-stage "this stage's tex_user_mat is enabled" bit -- material.cpp's
+# CMaterial::enableUserTexMat()/getFlags(): stage 0 is bit 0x00100000.
+_IDRV_MAT_USER_TEX_MAT_STAGE0 = 0x00100000
 
 # CMaterial::TBlend (material.h) -> panda3d.core.ColorBlendAttrib.Operand, in
 # TBlend's own declaration order so the enum's int value is the list index.
@@ -109,6 +160,33 @@ _TBLEND_NAMES = [
 	"one", "zero", "srcalpha", "invsrcalpha", "srccolor", "invsrccolor",
 	"blendConstantColor", "blendConstantInvColor", "blendConstantAlpha", "blendConstantInvAlpha",
 ]
+
+# _draw_transform_row()'s per-property drag_float() speed/range -- position
+# in meters (no hard limit needed for a 3D scene), rotation in degrees (a
+# full turn either way), scale as a multiplier (must stay positive).
+_TRANSFORM_DRAG_PARAMS = {
+	"position": (0.005, -10000.0, 10000.0),
+	"rotation": (0.5, -360.0, 360.0),
+	"scale": (0.005, 0.001, 1000.0),
+}
+
+# Texture sampling params (docs/material_options.md's "Filtrage et
+# répétition des textures" section) -- see texture.h's TWrapMode/TMagFilter/
+# TMinFilter for the enum values these index into.
+_TEXTURE_WRAP_NAMES = ["Repeat", "Clamp"]
+_TEXTURE_MAG_FILTER_NAMES = ["Nearest (pixelated)", "Linear (smooth)"]
+_TEXTURE_MIN_FILTER_NAMES = [
+	"Nearest, no mipmap", "Nearest, mipmap nearest", "Nearest, mipmap linear",
+	"Linear, no mipmap", "Linear, mipmap nearest", "Linear, mipmap linear (smoothest)",
+]
+# Engine construction defaults (texture.h) -- shown in the combo for a
+# freshly imported texture's None fields (no real value captured yet) until
+# the user actually picks something, at which point a concrete value is
+# written and the None/heuristic-fallback stops applying (see
+# shape_geometry.py's load_panda_texture()).
+_TEXTURE_WRAP_DEFAULT = 0  # Repeat
+_TEXTURE_MAG_FILTER_DEFAULT = 1  # Linear
+_TEXTURE_MIN_FILTER_DEFAULT = 5  # LinearMipMapLinear
 
 # Src/Dst Blend presets (docs/material_options.md's "Mélange" section
 # promises these two shortcuts, pre-filling the raw src/dst combos with the
@@ -172,6 +250,67 @@ def _icon_button(icon, tooltip, active=False, square=False, large_font=None, act
 	if imgui.is_item_hovered():
 		imgui.set_tooltip(tooltip)
 	return clicked
+
+
+def _center_next_widget(width):
+	"""Shifts the cursor so a `width`-wide widget drawn right after this call
+	lands horizontally centered in the current window's content region --
+	e.g. _draw_import_conflict_popup()'s buttons, each a different width
+	(auto-sized to its own label) but all centered under each other. A no-op
+	if `width` is already at least as wide as the available space."""
+	avail = imgui.get_content_region_avail().x
+	if avail > width:
+		imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + (avail - width) / 2)
+
+
+def _colored_button(label, color):
+	"""A plain text button (unlike _icon_button above) tinted `color`, with
+	lighter/darker hover/active variants derived from it -- see
+	_draw_import_conflict_popup()'s 4 choices, color-coded by how "safe"
+	each one is."""
+	r, g, b, a = color
+	imgui.push_style_color(imgui.Col_.button.value, color)
+	imgui.push_style_color(imgui.Col_.button_hovered.value, (min(r + 0.1, 1.0), min(g + 0.1, 1.0), min(b + 0.1, 1.0), a))
+	imgui.push_style_color(imgui.Col_.button_active.value, (max(r - 0.1, 0.0), max(g - 0.1, 0.0), max(b - 0.1, 0.0), a))
+	imgui.push_style_color(imgui.Col_.text.value, (0.0, 0.0, 0.0, 1.0))
+	clicked = imgui.button(label)
+	imgui.pop_style_color(4)
+	return clicked
+
+
+def _push_tab_color(color):
+	"""Tints one panel tab (Textures/Materials/All Properties/Settings --
+	see draw_panel()) so each is visually distinct at a glance instead of
+	every tab looking alike. Same lighter/darker-variant idea as
+	_colored_button() above, just for Col_.tab* instead of Col_.button*: the
+	unselected tab itself a bit darker than `color`, hover a bit lighter,
+	the selected/active tab exactly `color`."""
+	r, g, b, a = color
+	imgui.push_style_color(imgui.Col_.tab.value, (max(r - 0.15, 0.0), max(g - 0.15, 0.0), max(b - 0.15, 0.0), a))
+	imgui.push_style_color(imgui.Col_.tab_hovered.value, (min(r + 0.1, 1.0), min(g + 0.1, 1.0), min(b + 0.1, 1.0), a))
+	imgui.push_style_color(imgui.Col_.tab_selected.value, color)
+
+
+def _pop_tab_color():
+	imgui.pop_style_color(3)
+
+
+def _begin_tab_item_with_icon(icon, label):
+	"""Same as imgui.begin_tab_item_simple(label), just icon-only (no
+	visible text -- `label` only lives in the hidden ##id part and a hover
+	tooltip) with the icon glyph itself forced black, readable against the
+	light background colors _push_tab_color() gives each tab (see
+	draw_panel()'s tab bar). The black text push/pop is scoped to only the
+	begin_tab_item_simple call itself (the tab header, drawn immediately
+	regardless of whether it's the active tab) -- popped before the
+	tooltip, so that stays whatever color tooltips normally are, and before
+	a tab's own content too, so that isn't forced black along with it."""
+	imgui.push_style_color(imgui.Col_.text.value, (0.0, 0.0, 0.0, 1.0))
+	opened = imgui.begin_tab_item_simple(f"{icon}##{label}")
+	imgui.pop_style_color()
+	if imgui.is_item_hovered():
+		imgui.set_tooltip(label)
+	return opened
 
 
 # Viewport helper toggles (floor grid, world/pivot axes) drawn bottom-left of
@@ -427,6 +566,14 @@ def _build_geom(vdata, indices):
 	return geom
 
 
+APP_INFO = {
+	"id": "object_editor",
+	"name": "Patina",
+	"subtitle": "Object Editor",
+	"description": "Browse, inspect and edit .shape files.",
+}
+
+
 class ObjectEditorApp(ForgeryApp):
 	def __init__(self):
 		# The Explorer starts out wherever the highest-priority configured
@@ -436,12 +583,15 @@ class ObjectEditorApp(ForgeryApp):
 		# there's nothing configured yet.
 		configured_dirs = app_settings.load().search_paths
 		explorer_root = Path(configured_dirs[0].path) if configured_dirs else Path.home()
-		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Object Editor",
+		ForgeryApp.__init__(self, explorer_root=explorer_root, title="Ryzom Forgery - Patina",
 		                     explorer_default_filter="*.shape")
 
 		self.material_docs = load_material_docs()
 
 		self._texture_cache = {}
+		# {name: mtime} for _texture_cache entries NOT tracked by
+		# self._panoply_texture_signatures -- see _update_texture_freshness().
+		self._texture_freshness_mtimes = {}
 		self._preview_texture_refs = {}  # texture name -> imgui.ImTextureRef, for thumbnail/tooltip previews in the UI
 		self._color_texture_refs = {}  # (r,g,b,a) rounded -> imgui.ImTextureRef, for plain-color material swatches
 
@@ -487,28 +637,36 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_hint_shown = False  # same, for the material property editor's own doc hints
 		self._texture_browse_dialogs = {}  # key -> (in-flight portable_file_dialogs.open_file, on_result callback)
 		self._material_override_colors = {}  # material_id -> (r,g,b,a), a manual flat-color override for that material
+		# material_id -> {offset_u, offset_v, scale_u, scale_v, rotation, mirror_u, mirror_v} for
+		# _draw_material_texture_transform_section() -- tracked here instead of re-derived from
+		# Material.tex_user_mat[0] every frame, since decompose_uv_matrix() can't represent an
+		# independent per-axis mirror without it bleeding into rotation (a mirrored-only axis and a
+		# 180-degree-rotated one look identical to its matrix decomposition).
+		self._tex_transform_ui_state = {}
 		self._panoply_selection = {}  # axis (panoply.AXES) -> value, shape-wide, render-only, never touches shape data
 		# Not reset on shape reload (unlike _panoply_selection/_texture_cache
 		# above) -- keyed by source mtimes (see LiveColorizeCache), so a live
 		# recompute stays valid across shapes/reloads as long as the base
 		# texture + masks it read from haven't actually changed on disk.
 		self._live_panoply_cache = panoply_live.LiveColorizeCache()
-		# {resolved variant name: (base_name, dims)} for _update_panoply_freshness()
+		# {resolved variant name: (base_name, dims)} for _update_texture_freshness()
 		# to keep re-checking, and {resolved variant name: signature} for it to
 		# compare against -- both reset on shape reload below, together with
 		# _texture_cache itself (see _reset_shape_state()).
 		self._panoply_texture_sources = {}
 		self._panoply_texture_signatures = {}
-		self._panoply_freshness_last_check = 0.0
+		self._texture_freshness_last_check = 0.0
 
-		self._shape_source_path = None  # Path on disk, or None if loaded from inside a .bnp (Save disabled then)
-		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- for Save As's default filename
+		self._shape_source_path = None  # Path this shape was loaded from on disk, or None if loaded from inside a .bnp -- Save no longer depends on this (always targets the active workspace instead), only _texture_search_dirs/dialog-default-folder purposes still do
+		self._shape_source_bnp_path = None  # set alongside _shape_source_path when the shape lives inside a .bnp -- see _save_session_state()
+		self._shape_source_name = None  # original file name, kept even when _shape_source_path is None -- also Save's destination filename within the workspace's shapes/ folder
 		self._texture_search_dirs = []  # extra folders (see shape_geometry.load_panda_texture's search_dirs) to fall back to for this shape's textures -- an imported mesh's own folder, tex/textures/data subfolders included
 		self._texture_needs_repeat = False  # see _uvs_need_repeat() -- whether the loaded shape's own UVs rely on texture tiling
 		self._save_overwrite_confirmed = False  # session-scoped: asked once, no more Save confirmations after that
 		self._confirm_overwrite_open = False
-		self._save_dialog = None  # in-flight portable_file_dialogs.save_file, for Save As
+		self._pending_save_path = None  # workspace destination shown/used by the overwrite-confirmation popup
 		self._save_status = ""
+		self._restore_scan_popup_open = False  # see _restore_session_state()/_draw_restore_scan_popup()
 
 		self._replace_pending_mesh = None  # imported Mesh awaiting material-count matching (mismatched-count "Replace")
 		self._replace_mapping = []  # per pending-mesh-material index: target existing material index, or None = "add as new"
@@ -554,10 +712,51 @@ class ObjectEditorApp(ForgeryApp):
 		self._wind_animate = True
 		self._wind_panel_size = (10.0, 10.0)
 		self.taskMgr.add(self._update_wind, "object-editor-wind")
-		self.taskMgr.add(self._update_panoply_freshness, "object-editor-panoply-freshness")
+		self.taskMgr.add(self._update_texture_freshness, "object-editor-texture-freshness")
 		self.export_dialog = ExportDialog()
 		self.import_dialog = ImportDialog(on_new_shape=self._on_import_new_shape, on_replace=self._on_import_replace)
 		self.search_paths_dialog = SearchPathsDialog()
+		# Wexplorer (Explorer.pinned_folders, see _on_active_workspace_changed())
+		# covers the whole active workspace already watched by search_paths_dialog
+		# -- piggybacks on that same watch instead of a 3rd Observer, so any
+		# on-disk change (this app's own writes included: Save, auto-export...)
+		# refreshes the Wexplorer's listing without a manual Refresh click.
+		self.search_paths_dialog.on_workspace_changed = self.explorer.refresh
+		self.workspace_setup_dialog = WorkspaceSetupDialog()
+		# import_watcher/workspace_sync/tex_dds_sync each keep their own
+		# conversion/sync logic and state, but share a single filesystem
+		# watch (self.workspace_watch, one Observer/one debounce handler for
+		# the whole active workspace) instead of each owning their own --
+		# see workspace_watch.py's module docstring for why (previously 3
+		# near-identical dedicated Observers, consolidated 2026-08-27).
+		self.import_watcher = ImportWatcher(
+			is_shape_open=self._is_shape_open_at, on_open_shape_conflict=self._on_open_shape_conflict,
+			on_status=self._on_import_status)
+		self.workspace_sync = WorkspaceSyncWatcher()
+		self.tex_dds_sync = TexDdsSyncWatcher(on_status=self._on_import_status)
+		self.workspace_watch = WorkspaceWatcher()
+		self.workspace_watch.register("imports", self.import_watcher.handle_settled)
+		self.workspace_watch.register("tex", self.tex_dds_sync.handle_settled)
+		for _synced_subdir in SYNCED_SUBDIRS:
+			self.workspace_watch.register(_synced_subdir, self.workspace_sync.handle_settled)
+		self._workspace_sync_folder_dialog = None  # active portable_file_dialogs.select_folder, or None
+		# Set from ImportWatcher's own background thread (see
+		# _on_open_shape_conflict()); drawn once per frame from draw_panel()
+		# (_draw_import_conflict_popup()) since it needs imgui -- main-thread-only.
+		self._pending_import_conflict = None  # (source_path, target_path) or None
+		self._import_conflict_popup_opened = False
+		# Same cross-thread-safe queuing as _pending_import_conflict above --
+		# set from ImportWatcher's background thread (_on_import_status()),
+		# drained once per frame in draw_ui() since sysinfo.set_status() needs
+		# imgui state that's main-thread-only.
+		self._pending_import_status = None  # (message, is_error) or None
+		# Active workspace's folder always searched first (see the
+		# Workspaces chantier in `.todo/forgery-object-editor.md`) -- synced
+		# on every change via this callback, and once right away here so a
+		# workspace already active from a previous session is in effect
+		# before the first scan below.
+		self.workspace_setup_dialog.on_active_workspace_changed = self._on_active_workspace_changed
+		self._on_active_workspace_changed(self.workspace_setup_dialog.active_workspace_dir)
 		# Kicked off immediately (background thread, see ensure_scanned()) so
 		# the very first shape loaded already has a populated texture/skel/
 		# anim/panoply index, instead of possibly rendering with missing
@@ -579,6 +778,7 @@ class ObjectEditorApp(ForgeryApp):
 		self._bone_preview_panel_size = (10.0, 10.0)
 		self._skeleton_file_dialog = None  # in-flight portable_file_dialogs.open_file, for the Skinning preview's own "load a .skel" icon button
 		self._animation_file_dialog = None  # same, for its "load a .anim" icon button
+		self._image_editor_dialog = None  # same, for the Settings tab's image editor executable picker
 		self.taskMgr.add(self._update_skin_preview_time, "object-editor-skin-preview-time")
 		# Live re-skinning of a loaded CMeshMRMSkinned (see _build_skin_state()/
 		# _update_skin_preview()) -- reuses the same skeleton/animation state
@@ -595,6 +795,13 @@ class ObjectEditorApp(ForgeryApp):
 
 		self.commands.register_for_extension(".shape", "Load in viewer", self._on_load_command)
 		self.explorer.extra_toolbar = self._draw_import_toolbar_button
+		self.explorer.extra_header = self.workspace_setup_dialog.draw_active_workspace_row
+
+		# Last, once every piece of state _load_shape()/_reset_shape_state()
+		# touches actually exists -- reopens wherever the Explorer/loaded
+		# shape were when the previous session quit (see
+		# _save_session_state()/_restore_session_state()).
+		self._restore_session_state()
 
 	def on_selection_changed(self, items):
 		# Selecting alone no longer auto-loads anything -- .shape used to,
@@ -602,6 +809,192 @@ class ObjectEditorApp(ForgeryApp):
 		# "Load in viewer"/"Load as bone-preview skeleton"/"...animation" is
 		# now the one way to load any of them, matching across all three.
 		print(f"[object_editor] selection changed: {[item.name for item in items]}")
+
+	def _on_active_workspace_changed(self, workspace_dir):
+		"""Fans the active-workspace change out to every folder-scoped watcher
+		this app owns -- called by WorkspaceSetupDialog (see __init__)."""
+		if workspace_dir is not None:
+			# Backfills any SUBDIRS missing on disk (a folder introduced in a
+			# later Forgery version, or removed by hand) -- idempotent.
+			# WorkspaceSetupDialog.set_active_workspace() already does this
+			# too, but only when a workspace is picked/created interactively;
+			# this covers every other path into this method, in particular
+			# __init__ resuming a workspace already active from a previous
+			# session (read straight off active_workspace_dir, bypassing
+			# set_active_workspace() entirely).
+			ensure_structure(workspace_dir)
+		self.search_paths_dialog.set_workspace_dir(workspace_dir)
+		self.import_watcher.set_workspace_dir(workspace_dir)
+		self.workspace_sync.set_workspace_dir(workspace_dir)
+		self.tex_dds_sync.set_workspace_dir(workspace_dir)
+		self.workspace_watch.set_workspace_dir(workspace_dir)
+		workspace_name = self.workspace_setup_dialog.active_workspace_name
+		sync_folders = app_settings.load().workspace_sync_folders
+		self.workspace_sync.set_sync_folder(sync_folders.get(workspace_name) if workspace_name else None)
+		# Explorer.pinned_folders (see explorer.py): each workspace subfolder
+		# (tex/shapes/anims/skels/exports/imports) as its own expandable tree
+		# section above Favorites, so the workspace's own content stays
+		# browsable/loadable-from no matter where the Explorer is currently
+		# navigated to.
+		if workspace_dir is None:
+			self.explorer.pinned_folders = []
+		else:
+			self.explorer.pinned_folders = [(subdir, workspace_dir / subdir) for subdir in WORKSPACE_SUBDIRS]
+
+	def _is_shape_open_at(self, target_path):
+		"""ImportWatcher's `is_shape_open` hook -- runs off its own background
+		thread, but only ever reads a couple of plain attributes (no
+		imgui/Panda3D calls), same as other cross-thread reads in this app."""
+		return self.shape_file is not None and self._workspace_shape_save_path() == target_path
+
+	def _on_open_shape_conflict(self, source_path, target_path):
+		"""ImportWatcher's `on_open_shape_conflict` hook -- runs off its own
+		background thread, so only queues state; _draw_import_conflict_popup()
+		(called once per frame from draw_panel()) does the actual imgui/disk
+		work on the main thread."""
+		self._pending_import_conflict = (source_path, target_path)
+
+	def _on_import_status(self, message, is_error):
+		"""ImportWatcher's `on_status` hook -- runs off its own background
+		thread, so only queues state; _flush_pending_import_status() (called
+		once per frame from draw_panel()) does the actual imgui work on the
+		main thread, same reasoning as _on_open_shape_conflict() above."""
+		self._pending_import_status = (message, is_error)
+
+	def _flush_pending_import_status(self):
+		"""Surfaces the last ImportWatcher outcome (queued by
+		_on_import_status()) on the sysinfo status bar -- red for a failure,
+		green for a successful auto-export/update/backup-and-reexport, same
+		colors as _IMPORT_CONFLICT_DISCARD_COLOR/_IMPORT_CONFLICT_BACKUP_COLOR
+		use elsewhere in this file for the same "bad"/"safe" meaning."""
+		if self._pending_import_status is None:
+			return
+		message, is_error = self._pending_import_status
+		self._pending_import_status = None
+		color = _IMPORT_STATUS_ERROR_COLOR if is_error else _IMPORT_STATUS_SUCCESS_COLOR
+		self.sysinfo.set_status(message, color=color)
+
+	def _reload_shape_value_from_disk(self, target_path):
+		"""Pulls target_path's just-rewritten geometry/materials back into the
+		viewport without resetting editor-only state (material override
+		colors, expanded panels, camera...) or re-seeding the pivot rotation
+		-- same minimal-disruption approach as _replace_geometry(), since
+		conceptually this *is* a replace (this exact shape, new geometry from
+		an import), just triggered by the auto-export watcher instead of the
+		manual Import -> Replace flow. Does strip the shape's own previous
+		default_rot_quat back out of the live pivot, though -- see the
+		comment below, same reasoning as _replace_geometry()."""
+		old_base = getattr(self.shape_file.value, "base", None)
+		old_rot = old_base.default_rot_quat if old_base is not None else IDENTITY_QUAT
+		shape_file = parse_shape(target_path.read_bytes())
+		self.shape_file.value = shape_file.value
+		if old_rot != IDENTITY_QUAT:
+			# Same reasoning as _replace_geometry(): the just-reloaded
+			# geometry already has old_rot baked into its vertices (see
+			# import_watcher.py's update_existing_shape()), so strip it back
+			# out of the live pivot to avoid applying it twice.
+			old_quat = Quat(old_rot.w, old_rot.x, old_rot.y, old_rot.z)
+			self._object_pivot.set_quat(old_quat.conjugate() * self._object_pivot.get_quat())
+		self._rebuild_geometry()
+
+	def _has_unsaved_changes_at(self, target_path):
+		"""True if the in-memory shape currently open differs from what's on
+		disk at `target_path` -- lets _draw_import_conflict_popup() only
+		actually ask something when there's a real conflict, instead of on
+		every single open-shape auto-update. Rather than tracking every
+		individual edit throughout the whole editor (a much bigger, more
+		error-prone undertaking -- easy to miss a spot that mutates
+		self.shape_file without going through it), serializes the in-memory
+		shape to bytes (save_shape() accepts any BinaryIO, so this never
+		touches disk) and compares against a fresh read of the file -- exact
+		and always in sync with reality, at the cost of one extra
+		parse+serialize per conflict check (cheap next to the geometry
+		import itself, and only ever runs when the target is the shape
+		that's actually open)."""
+		buffer = io.BytesIO()
+		save_shape(buffer, self.shape_file)
+		try:
+			on_disk = target_path.read_bytes()
+		except OSError:
+			return True
+		return buffer.getvalue() != on_disk
+
+	def _apply_import_conflict_update(self, source_path, target_path):
+		"""Common tail of every _draw_import_conflict_popup() choice: routes
+		through ImportWatcher._update_existing_target() -- same update /
+		material-count-mismatch-backup-and-reexport / error handling and
+		sysinfo-bar reporting as the automatic (shape-not-open) path, so
+		there's a single outcome-reporting story regardless of whether the
+		target happened to be open in the viewport. Refreshes the viewport
+		from disk only if target_path actually ended up rewritten."""
+		if self.import_watcher._update_existing_target(source_path, target_path):
+			self._reload_shape_value_from_disk(target_path)
+
+	def _draw_import_conflict_popup(self):
+		"""The shape currently open in the viewport is also the auto-export
+		watcher's target for a just-changed import/ source file -- if the
+		in-memory shape has actually diverged from what's on disk (see
+		_has_unsaved_changes_at()), overwriting the file could silently
+		discard that in-progress work, so this asks how to proceed instead of
+		auto-updating (see the chantier discussion). When there's nothing
+		unsaved, this behaves exactly like the "not currently open" case --
+		no popup, straight to the update."""
+		if self._pending_import_conflict is None:
+			self._import_conflict_popup_opened = False
+			return
+
+		if not self._import_conflict_popup_opened:
+			source_path, target_path = self._pending_import_conflict
+			if not self._has_unsaved_changes_at(target_path):
+				self._pending_import_conflict = None
+				self._apply_import_conflict_update(source_path, target_path)
+				return
+			imgui.open_popup(_IMPORT_CONFLICT_POPUP_ID)
+			self._import_conflict_popup_opened = True
+
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_IMPORT_CONFLICT_POPUP_ID, None, flags)
+		if not opened:
+			return
+
+		source_path, target_path = self._pending_import_conflict
+		imgui.text(f"{target_path.name} is open in the viewport and about to be updated\n"
+		           f"from the changed import {source_path.name}.")
+		imgui.text_wrapped("This shape has unsaved changes in Patina -- choose how to proceed.")
+		imgui.separator()
+
+		save_label = f"Save this shape then import {source_path.name}"
+		discard_label = f"Import {source_path.name} without saving"
+		backup_label = "Save a copy of this shape"
+		cancel_label = "Cancel (leave the on-disk file untouched)"
+		frame_padding_x2 = imgui.get_style().frame_padding.x * 2
+
+		_center_next_widget(imgui.calc_text_size(save_label).x + frame_padding_x2)
+		if _colored_button(save_label, _IMPORT_CONFLICT_SAVE_COLOR):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+			self._write_shape(target_path)
+			self._apply_import_conflict_update(source_path, target_path)
+		_center_next_widget(imgui.calc_text_size(discard_label).x + frame_padding_x2)
+		if _colored_button(discard_label, _IMPORT_CONFLICT_DISCARD_COLOR):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+			self._apply_import_conflict_update(source_path, target_path)
+		_center_next_widget(imgui.calc_text_size(backup_label).x + frame_padding_x2)
+		if _colored_button(backup_label, _IMPORT_CONFLICT_BACKUP_COLOR):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+			timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+			backup_path = target_path.with_name(f"{target_path.stem}_backup_{timestamp}{target_path.suffix}")
+			self._write_shape(backup_path)
+			self._apply_import_conflict_update(source_path, target_path)
+		imgui.separator()
+		_center_next_widget(imgui.calc_text_size(cancel_label).x + frame_padding_x2)
+		if _colored_button(cancel_label, _IMPORT_CONFLICT_CANCEL_COLOR):
+			self._pending_import_conflict = None
+			imgui.close_current_popup()
+
+		imgui.end_popup()
 
 	def _on_load_command(self, items):
 		if items:
@@ -848,7 +1241,7 @@ class ObjectEditorApp(ForgeryApp):
 			self._bone_preview_panel_size = (imgui.get_window_size().x, imgui.get_window_size().y)
 
 	def _draw_import_toolbar_button(self):
-		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae/.fbx)..."):
+		if _icon_button(fa_icons.ICON_FA_UPLOAD, "Import mesh (.obj/.dae/.fbx/.gltf/.glb)..."):
 			self.import_dialog.open(self.shape_file is not None)
 
 	def _on_import_new_shape(self, mesh, source_path):
@@ -910,6 +1303,27 @@ class ObjectEditorApp(ForgeryApp):
 					rdr_pass.material_id = index_map[rdr_pass.material_id]
 
 		self.shape_file.value.geom = mesh.geom
+		# See import_watcher.py's update_existing_shape() for why: an
+		# imported mesh's source file already has the shape's own (previous)
+		# default_rot_quat baked into its vertices by shape_export.py's
+		# export_shape(), so the new geometry already represents the final
+		# orientation -- reset to identity to avoid rotating it again.
+		base = getattr(self.shape_file.value, "base", None)
+		if base is not None:
+			old_rot = base.default_rot_quat
+			if old_rot != IDENTITY_QUAT:
+				# _object_pivot was seeded with this same old_rot on the
+				# original _display_shape() (plus, potentially, further
+				# Ctrl+drag deltas right-multiplied onto it since -- see
+				# ObjectManipulator._rotate()). Left-multiplying by its
+				# conjugate strips exactly that seeded rotation back out,
+				# leaving only the user's own manual deltas -- otherwise the
+				# pivot would still apply old_rot on top of geometry that
+				# now already has it baked in, throwing the model out of
+				# sync with the camera framing computed from its new bbox.
+				old_quat = Quat(old_rot.w, old_rot.x, old_rot.y, old_rot.z)
+				self._object_pivot.set_quat(old_quat.conjugate() * self._object_pivot.get_quat())
+			base.default_rot_quat = IDENTITY_QUAT
 		self._rebuild_geometry()
 		self._save_status = "Geometry replaced."
 
@@ -993,6 +1407,7 @@ class ObjectEditorApp(ForgeryApp):
 	def _load_shape(self, item):
 		self._reset_shape_state()
 		self._shape_source_path = item.path if item.bnp_path is None else None
+		self._shape_source_bnp_path = item.bnp_path
 		self._shape_source_name = item.name
 		if self._shape_source_path is not None:
 			self._texture_search_dirs = [self._shape_source_path.parent]
@@ -1006,6 +1421,90 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._display_shape(shape_file)
 
+	def _save_session_state(self):
+		"""Persists where the Explorer is browsing and which shape is
+		loaded (see settings.py's last_folder/last_bnp/last_shape_* fields)
+		so the next launch can pick up right where this one left off --
+		called right before quitting (see _draw_bottom_bar()'s Quit
+		button). Best-effort: this is a nice-to-have, not worth failing
+		Quit over."""
+		try:
+			fresh = app_settings.load()
+			fresh.last_folder = str(self.explorer.root)
+			fresh.last_bnp = str(self.explorer._current_bnp) if self.explorer._current_bnp is not None else None
+			shape_path = self._shape_source_bnp_path if self._shape_source_bnp_path is not None else self._shape_source_path
+			fresh.last_shape_path = str(shape_path) if shape_path is not None else None
+			fresh.last_shape_bnp = str(self._shape_source_bnp_path) if self._shape_source_bnp_path is not None else None
+			fresh.last_shape_name = self._shape_source_name
+			app_settings.save(fresh)
+		except OSError as exc:
+			print(f"[object_editor] could not save session state: {exc}")
+
+	def _restore_session_state(self):
+		"""Reopens whatever the Explorer/loaded shape were at the end of
+		the previous session (see _save_session_state()) -- called once
+		from __init__(), after self.explorer/search_paths_dialog are set
+		up. Best-effort: a folder/shape that's since moved or vanished is
+		silently skipped, same as active_workspace_path()'s own handling
+		of a vanished workspace, not worth an error dialog over."""
+		settings = app_settings.load()
+		if settings.last_folder and Path(settings.last_folder).is_dir():
+			self.explorer._navigate_to(Path(settings.last_folder))
+			if settings.last_bnp and Path(settings.last_bnp).is_file():
+				self.explorer._enter_bnp(Path(settings.last_bnp))
+
+		if not (settings.last_shape_name and settings.last_shape_path):
+			return
+		if settings.last_shape_bnp:
+			bnp_path = Path(settings.last_shape_bnp)
+			if bnp_path.is_file():
+				self._load_shape(ExplorerItem(path=bnp_path, name=settings.last_shape_name, bnp_path=bnp_path))
+		else:
+			shape_path = Path(settings.last_shape_path)
+			if shape_path.is_file():
+				self._load_shape(ExplorerItem(path=shape_path, name=settings.last_shape_name))
+
+		# The shape displays right away, but its textures are resolved via
+		# self.search_paths_dialog.find_texture() -- backed by the index
+		# ensure_scanned() (called just before this in __init__) built.
+		# has_scanned_data (not just scanning) is what actually matters
+		# here: a cache-hit startup already published a real (if possibly
+		# slightly stale) index synchronously, so the still-running
+		# background refresh scan has nothing left for this popup to wait
+		# on. Only a genuinely cold start (no cache yet, index still empty)
+		# needs to show the shape untextured with a popup saying so, and
+		# refresh every material once that first scan completes (see
+		# _draw_restore_scan_popup()).
+		if self.shape_file is not None and self.search_paths_dialog.scanning \
+				and not self.search_paths_dialog.has_scanned_data:
+			self._restore_scan_popup_open = True
+
+	def _draw_restore_scan_popup(self):
+		"""Drawn every frame from draw_panel() while a shape was just
+		restored (see _restore_session_state()) before the search-path scan
+		it needs for textures had finished -- closes itself and refreshes
+		every material the moment the scan completes."""
+		if not self._restore_scan_popup_open:
+			return
+		if not imgui.is_popup_open(_RESTORE_SCAN_POPUP_ID):
+			imgui.open_popup(_RESTORE_SCAN_POPUP_ID)
+		flags = imgui.WindowFlags_.always_auto_resize.value
+		opened, _ = imgui.begin_popup_modal(_RESTORE_SCAN_POPUP_ID, None, flags)
+		if opened:
+			imgui.text("Scanning assets for textures...")
+			if not self.search_paths_dialog.scanning:
+				# load_panda_texture() unconditionally caches its result, a
+				# miss (None) included -- the very first resolution attempt
+				# (right after the shape was restored, well before the scan
+				# populated the index) would otherwise poison every texture
+				# name as "not found" forever, so _reapply_all_materials()
+				# alone would just keep re-serving those same stale misses.
+				self._texture_cache.clear()
+				self._reapply_all_materials()
+				imgui.close_current_popup()
+				self._restore_scan_popup_open = False
+			imgui.end_popup()
+
 	def _reset_shape_state(self):
 		"""Common reset before showing any shape in the viewer -- a `.shape`
 		opened from the Explorer, or a mesh imported as a brand-new shape."""
@@ -1018,8 +1517,10 @@ class ObjectEditorApp(ForgeryApp):
 		self._material_section_expanded = set()
 		self._texture_browse_dialogs = {}
 		self._material_override_colors = {}
+		self._tex_transform_ui_state = {}
 		self._panoply_selection = {}
 		self._shape_source_path = None
+		self._shape_source_bnp_path = None  # set alongside _shape_source_path when the shape lives inside a .bnp -- see _save_session_state()
 		self._shape_source_name = None
 		self._texture_search_dirs = []
 		self._texture_needs_repeat = False
@@ -1033,6 +1534,7 @@ class ObjectEditorApp(ForgeryApp):
 		# over to a newly loaded shape risked reusing another shape's
 		# resolved texture/wrap mode outright.
 		self._texture_cache = {}
+		self._texture_freshness_mtimes = {}
 		self._preview_texture_refs = {}
 		# Same reasoning as _texture_cache just above -- also keyed by
 		# resolved texture name only.
@@ -1111,7 +1613,12 @@ class ObjectEditorApp(ForgeryApp):
 			grid_squares = max(
 				_MIN_GRID_SQUARES,
 				ceil(max(bbox.half_size.x, bbox.half_size.y) * 2 / _GRID_STEP) + _GRID_MARGIN_SQUARES)
-			grid_center_x, grid_center_y = bbox.center.x, bbox.center.y
+			# bbox is in model_root's own local space (pre-pivot-rotation) --
+			# same reasoning as _rebuild_geometry()'s camera framing: must go
+			# through model_root's current transform to land in world space.
+			local_center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
+			world_center = self.render.get_relative_point(self.model_root, local_center)
+			grid_center_x, grid_center_y = world_center.x, world_center.y
 			# Fixed at world Z=0 (not the bbox's own bottom) so it reads as an
 			# actual ground reference -- whether the object floats above it or
 			# sinks below it is exactly the thing this grid is meant to show.
@@ -1327,7 +1834,13 @@ class ObjectEditorApp(ForgeryApp):
 		says currently owns it. Rotation is Euler degrees around each world
 		axis (NodePath.get_hpr()'s heading/pitch/roll are Z/X/Y respectively),
 		not the raw quaternion -- matches the panel's X/Y/Z fields."""
-		node = self._transform_node(prop)
+		return self._node_transform_values(self._transform_node(prop), prop)
+
+	def _node_transform_values(self, node, prop):
+		"""Like _get_transform_values(), but for an explicit `node` instead
+		of whichever one _transform_node() currently owns `prop` -- reset
+		needs both _object_pivot's and model_root's own current values
+		regardless of which one is presently the active pivot."""
 		if prop == "position":
 			v = node.get_pos()
 			return (v.x, v.y, v.z)
@@ -1336,6 +1849,38 @@ class ObjectEditorApp(ForgeryApp):
 			return (p, r, h)
 		v = node.get_scale()
 		return (v.x, v.y, v.z)
+
+	def _set_node_transform(self, node, prop, values):
+		"""Sets `node`'s `prop` to `values` -- same (x, y, z)/(p, r, h)
+		order as _node_transform_values()."""
+		if prop == "position":
+			node.set_pos(*values)
+		elif prop == "rotation":
+			p, r, h = values
+			node.set_hpr(h, p, r)
+		else:
+			node.set_scale(*values)
+
+	def _quat_to_prh(self, quat):
+		"""(pitch, roll, heading) for `quat` -- same order _node_transform_values()
+		uses for rotation. Panda's NodePath.get_hpr() has no quaternion
+		equivalent that's proven safe here, so this goes through a scratch,
+		unattached, never-rendered NodePath instead."""
+		scratch = NodePath("scratch")
+		scratch.set_quat(quat)
+		h, p, r = scratch.get_hpr()
+		return (p, r, h)
+
+	def _reset_node_transform(self, node, prop, target):
+		"""Resets `node`'s `prop` to `target` (same order as
+		_node_transform_values()), except any axis currently locked
+		(self.transform_locks[prop]), which keeps its current value instead
+		-- the same per-axis lock _set_transform_axis() already enforces
+		for manual edits and camera.py's Ctrl-drag."""
+		locks = self.transform_locks[prop]
+		current = self._node_transform_values(node, prop)
+		values = [current[i] if locks["xyz"[i]] else target[i] for i in range(3)]
+		self._set_node_transform(node, prop, values)
 
 	def _set_transform_axis(self, prop, axis_index, value):
 		"""Sets one axis (0=X, 1=Y, 2=Z) of `prop` to `value`, on whichever
@@ -1366,36 +1911,42 @@ class ObjectEditorApp(ForgeryApp):
 		_display_shape()) -- on BOTH _object_pivot and model_root, regardless
 		of which one that row's pivot lock currently targets, so the result
 		always reads as a clean reset rather than only clearing whichever of
-		the two happens to be locked right now. Used by reset_object_transform()
-		(the gizmo's Home button, a deliberately total reset); the panel's own
-		per-row Reset button uses _reset_transform_row() instead, which only
-		touches the currently selected reference frame."""
+		the two happens to be locked right now. Any axis currently locked
+		(see _draw_transform_panel()) keeps its current value instead of
+		being reset, same as a manual edit on that axis would be a no-op.
+		Used by reset_object_transform() (the gizmo's Home button, a
+		deliberately total reset); the panel's own per-row Reset button uses
+		_reset_transform_row() instead, which only touches the currently
+		selected reference frame."""
 		if prop == "position":
-			self._object_pivot.set_pos(0, 0, 0)
-			self.model_root.set_pos(0, 0, 0)
+			pivot_target = model_target = (0, 0, 0)
 		elif prop == "rotation":
-			self._object_pivot.set_quat(self._object_pivot_base_quat)
-			self.model_root.set_quat(Quat())  # Quat()'s default constructor is the identity rotation
+			pivot_target = self._quat_to_prh(self._object_pivot_base_quat)
+			model_target = (0, 0, 0)  # Quat()'s default constructor is the identity rotation
 		else:
-			self._object_pivot.set_scale(1, 1, 1)
-			self.model_root.set_scale(1, 1, 1)
+			pivot_target = model_target = (1, 1, 1)
+		self._reset_node_transform(self._object_pivot, prop, pivot_target)
+		self._reset_node_transform(self.model_root, prop, model_target)
 
 	def _reset_transform_row(self, prop):
 		"""Resets `prop` to its default -- position/scale to identity,
 		rotation to the shape's own baseline (_object_pivot_base_quat) if
 		that's the currently selected node, identity otherwise -- only on
 		whichever node _transform_node() currently owns (pivot-locked or
-		not), leaving the other reference frame untouched. Bound to the
-		panel's own per-row Reset button; see _reset_transform() for the
-		gizmo's Home button, which resets both frames at once instead."""
+		not), leaving the other reference frame untouched. Any axis
+		currently locked keeps its current value instead, same as
+		_reset_transform(). Bound to the panel's own per-row Reset button;
+		see _reset_transform() for the gizmo's Home button, which resets
+		both frames at once instead."""
 		node = self._transform_node(prop)
 		if prop == "position":
-			node.set_pos(0, 0, 0)
+			target = (0, 0, 0)
 		elif prop == "rotation":
 			is_pivot = node is self._object_pivot
-			node.set_quat(self._object_pivot_base_quat if is_pivot else Quat())
+			target = self._quat_to_prh(self._object_pivot_base_quat) if is_pivot else (0, 0, 0)
 		else:
-			node.set_scale(1, 1, 1)
+			target = (1, 1, 1)
+		self._reset_node_transform(node, prop, target)
 
 	def reset_object_transform(self):
 		"""Resets position, rotation, and scale together -- bound to the
@@ -1462,7 +2013,10 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.same_line()
 			imgui.set_next_item_width(70)
 			imgui.begin_disabled(axis_locked)
-			changed, new_value = imgui.input_float(f"##{prop}-{axis_name}", values[axis_index], format=value_format)
+			v_speed, v_min, v_max = _TRANSFORM_DRAG_PARAMS[prop]
+			changed, new_value = imgui.drag_float(
+				f"##{prop}-{axis_name}", values[axis_index], v_speed=v_speed, v_min=v_min, v_max=v_max,
+				format=value_format)
 			imgui.end_disabled()
 			if changed:
 				self._set_transform_axis(prop, axis_index, new_value)
@@ -1541,7 +2095,13 @@ class ObjectEditorApp(ForgeryApp):
 
 		bbox = shape_bbox(self.shape_file.value)
 		if bbox is not None:
-			center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
+			local_center = Point3(bbox.center.x, bbox.center.y, bbox.center.z)
+			# shape_bbox() is in model_root's own local space (pre-pivot-
+			# rotation) -- OrbitCamera.frame() expects a world/render-space
+			# target, so this must go through model_root's current transform
+			# (which includes _object_pivot's rotation, e.g. a seeded
+			# default_rot_quat) rather than being used as-is.
+			center = self.render.get_relative_point(self.model_root, local_center)
 			radius = max(bbox.half_size.x, bbox.half_size.y, bbox.half_size.z, 0.1)
 			self.orbit_camera.frame(center, radius * 5.65)
 		self._rebuild_viewport_helpers(bbox)
@@ -1741,7 +2301,7 @@ class ObjectEditorApp(ForgeryApp):
 		through that cache's own name lookup, no special case of their own
 		needed. Never writes to disk. Also records `base_name`/`dims` under
 		the resolved name in self._panoply_texture_sources, so
-		_update_panoply_freshness() can keep re-checking this combination
+		_update_texture_freshness() can keep re-checking this combination
 		later even though this method itself only runs again when the
 		material actually gets re-applied."""
 		dims = self._panoply_dims_for(base_name)
@@ -1760,7 +2320,7 @@ class ObjectEditorApp(ForgeryApp):
 		are just absent from the dict, not None entries), and whatever's
 		already on disk for the baked variant name itself (None if
 		nothing's there). Shared by _ensure_live_panoply_texture() (decides
-		whether/how to (re)compute) and _update_panoply_freshness() (decides
+		whether/how to (re)compute) and _update_texture_freshness() (decides
 		whether a previously-resolved combination needs re-checking) so
 		both always resolve names exactly the same way."""
 		finder = self.search_paths_dialog.find_texture
@@ -1781,7 +2341,7 @@ class ObjectEditorApp(ForgeryApp):
 		resolved combination's current sources -- not "is this stale"
 		(panoply_live.is_baked_stale() already answers that), but "has
 		anything actually changed since I last looked", which is what
-		_update_panoply_freshness() needs to avoid re-evicting/recomputing
+		_update_texture_freshness() needs to avoid re-evicting/recomputing
 		an unstale-but-not-baked live combination every single tick."""
 		base_mtime = base_ref.cache_stat()[0] if base_ref is not None else None
 		mask_mtimes = tuple(sorted((axis, ref.cache_stat()[0]) for axis, ref in mask_refs.items()))
@@ -1801,7 +2361,7 @@ class ObjectEditorApp(ForgeryApp):
 		for zorai) -- falls through to whatever load_panda_texture() itself
 		finds on disk instead, same as if this method didn't exist. Records
 		the freshness signature seen at this point either way (even when
-		the baked file was fine as-is), so _update_panoply_freshness() has
+		the baked file was fine as-is), so _update_texture_freshness() has
 		a baseline to compare later ticks against."""
 		if resolved_name in self._texture_cache:
 			return
@@ -1837,24 +2397,44 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._texture_cache[resolved_name] = panoply_texture.rgba_array_to_texture(result_rgba)
 
-	_PANOPLY_FRESHNESS_CHECK_INTERVAL = 1.0  # seconds
+	_TEXTURE_FRESHNESS_CHECK_INTERVAL = 1.0  # seconds
 
-	def _update_panoply_freshness(self, task):
-		"""Runs about once a second: re-resolves every Panoply-affected
-		texture name currently in play (self._panoply_texture_sources)
-		against its current on-disk sources and compares that to the
-		signature recorded when it was last resolved
-		(_panoply_freshness_signature()) -- on a mismatch (a base texture,
-		mask, or baked file was added/edited/removed since), evicts it from
-		self._texture_cache and forces every material to re-apply, which
-		re-runs _resolve_panoply_texture_name()/_ensure_live_panoply_texture()
-		for it. This is Forgery's whole answer to "I edited a mask in Gimp,
-		now what" -- picked automatically, with no manual reload action:
-		see .todo/forgery-object-editor.md's Phase A Step 5 for why a
-		manual "Reload" button was decided against once this existed."""
-		if task.time - self._panoply_freshness_last_check < self._PANOPLY_FRESHNESS_CHECK_INTERVAL:
+	def _update_texture_freshness(self, task):
+		"""Runs about once a second, two checks in one pass:
+
+		1. Every Panoply-affected texture name currently in play
+		(self._panoply_texture_sources), re-resolved against its current
+		on-disk sources and compared to the signature recorded when it was
+		last resolved (_panoply_freshness_signature()) -- on a mismatch (a
+		base texture, mask, or baked file was added/edited/removed since),
+		evicts it from self._texture_cache, which forces
+		_resolve_panoply_texture_name()/_ensure_live_panoply_texture() to
+		run again for it on the next material re-apply below.
+
+		2. Every other (non-Panoply) name already in self._texture_cache --
+		a plain material texture, or whichever Multi Bitmap slot is
+		currently selected (see _pad_multi_bitmap_slots()/_apply_material_
+		texture() -- only the selected slot's name is ever actually loaded/
+		cached, so this needs no Multi-Bitmap-specific handling) -- re-
+		resolved and compared by mtime against self._texture_freshness_
+		mtimes (seeded in _apply_material_texture() at load time, not here,
+		so the very first tick after a texture is first cached never sees a
+		spurious "changed"). Deliberately restricted to files inside the
+		active workspace (FoundEntry.fs_path, skipping .bnp entries and
+		anything outside it) -- textures from other search paths (mods, the
+		Ryzom install, etc.) are left alone, so the workspace stays the one
+		place edits get picked up live, same idea as the auto-export
+		imports/ watcher only ever touching the active workspace.
+
+		Either check evicting anything forces every material to re-apply
+		once, at the end. This is Forgery's whole answer to "I edited a
+		texture in Gimp, now what" -- picked automatically, with no manual
+		reload action: see .todo/forgery-object-editor.md's Phase A Step 5
+		for why a manual "Reload" button was decided against once the
+		Panoply half of this existed."""
+		if task.time - self._texture_freshness_last_check < self._TEXTURE_FRESHNESS_CHECK_INTERVAL:
 			return task.cont
-		self._panoply_freshness_last_check = task.time
+		self._texture_freshness_last_check = task.time
 
 		changed = False
 		for resolved_name, (base_name, dims) in list(self._panoply_texture_sources.items()):
@@ -1868,6 +2448,31 @@ class ObjectEditorApp(ForgeryApp):
 				del self._texture_cache[resolved_name]
 				self._panoply_texture_signatures.pop(resolved_name, None)
 				changed = True
+
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is not None:
+			finder = self.search_paths_dialog.find_texture
+			for name in list(self._texture_freshness_mtimes):
+				if name not in self._texture_cache or name in self._panoply_texture_sources:
+					self._texture_freshness_mtimes.pop(name, None)
+					continue
+				ref = resolve_texture_ref(name, self._texture_search_dirs, finder)
+				if ref is None or ref.fs_path is None or not ref.fs_path.is_relative_to(workspace_dir):
+					continue
+				try:
+					mtime = ref.cache_stat()[0]
+				except OSError:
+					# Resolved a moment ago (resolve_texture_ref() above), but
+					# gone by the time we stat it -- deleted/renamed between
+					# the two, e.g. externally or via a workspace file-manager
+					# action. Leave the cached texture as the last-known-good
+					# one instead of crashing the whole render loop over it.
+					continue
+				if mtime != self._texture_freshness_mtimes[name]:
+					del self._texture_cache[name]
+					self._texture_freshness_mtimes.pop(name, None)
+					changed = True
+
 		if changed:
 			self._reapply_all_materials()
 		return task.cont
@@ -1919,7 +2524,12 @@ class ObjectEditorApp(ForgeryApp):
 		for name in texture_names:
 			for axis, values in self.search_paths_dialog.panoply_variants_for(name).items():
 				available[axis].update(values)
+
+		imgui.text("Panoply:")
 		if not any(available.values()):
+			imgui.same_line()
+			imgui.text_disabled("no variants detected for this shape's textures")
+			imgui.separator()
 			return
 
 		axis_values = {}
@@ -1960,38 +2570,85 @@ class ObjectEditorApp(ForgeryApp):
 					self._reapply_all_materials()
 		imgui.separator()
 
+	def _create_panoply_mask(self, base_texture_name, axis):
+		"""Creates a new mask file for `axis` -- solid black (0 weight
+		everywhere, no effect until painted over), at the same pixel
+		dimensions as `base_texture_name`'s own texture -- directly in the
+		active workspace's masks/ folder. Picked from the "+" button in
+		_draw_panoply_masks_for()."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return
+		base_panda_texture = load_panda_texture(
+			base_texture_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
+			finder=self.search_paths_dialog.find_texture)
+		width = base_panda_texture.get_x_size() if base_panda_texture is not None else 256
+		height = base_panda_texture.get_y_size() if base_panda_texture is not None else 256
+		image = PNMImage(width, height)
+		image.fill(0, 0, 0)
+		stem = Path(base_texture_name).stem
+		dest = workspace_dir / "masks" / f"{stem}_{axis}.tga"
+		try:
+			dest.parent.mkdir(parents=True, exist_ok=True)
+			image.write(str(dest))
+		except OSError as exc:
+			self._save_status = f"Could not create mask {dest.name}: {exc}"
+			print(f"[object_editor] {self._save_status}")
+			return
+		self._save_status = f"Created mask {dest.name}"
+		print(f"[object_editor] {self._save_status}")
+
 	def _draw_panoply_masks_for(self, base_texture_name):
-		"""Below a panoplied texture's own row: thumbnails of the grayscale
-		masks (mask weight in the red channel) panoply_maker actually baked
-		this texture's variants from -- e.g. for
-		"tr_hom_armor00_epaule_c1.tga", "tr_hom_armor00_epaule_c1_skin.png"/
-		"..._user.png" sitting in a sibling "mask/" folder next to the base
-		texture, resolved through the same search-paths lookup as any other
-		texture (so wherever the user's search paths actually cover that
-		"mask/" subfolder). Only axes this specific texture has panoply
-		variants for are even checked; if none of their mask files actually
-		resolve (not covered by the current search paths, even though
-		panoply_files.txt lists variants for this texture), nothing is drawn
-		at all -- these are purely an informational aid for understanding
-		how a variant was built, no functional effect either way."""
+		"""Below a material's own texture row: thumbnails of whichever
+		grayscale masks (mask weight in the red channel) already resolve for
+		it -- e.g. for "tr_hom_armor00_epaule_c1.tga",
+		"tr_hom_armor00_epaule_c1_skin.png"/"..._user.png" sitting in a
+		sibling "mask/" folder next to the base texture, resolved through
+		the same search-paths lookup as any other texture (so wherever the
+		user's search paths actually cover that "mask/" subfolder) --
+		regardless of whether panoply_files.txt happens to list this texture
+		at all. A "+" button offers to create any axis (panoply.AXES) that
+		doesn't have a mask yet, directly in the workspace -- the way a
+		plain, not-yet-panoplied texture gets its first mask."""
 		if not base_texture_name:
 			return
-		available = self.search_paths_dialog.panoply_variants_for(base_texture_name)
 		stem = Path(base_texture_name).stem
 		mask_names = []
+		missing_axes = []
 		for axis in panoply.AXES:
-			if not available.get(axis):
-				continue
 			mask_name = f"{stem}_{axis}.tga"
 			if self.search_paths_dialog.find_texture(mask_name) is not None:
 				mask_names.append(mask_name)
-		if not mask_names:
-			return
+			else:
+				missing_axes.append(axis)
 		imgui.text_disabled("Masks:")
 		for mask_name in mask_names:
 			imgui.same_line()
 			imgui.push_id(mask_name)
-			self._draw_texture_preview_static(mask_name)
+			self._draw_texture_preview_static(mask_name, subdir="masks")
+			imgui.same_line()
+			# No material field to rewrite on copy (unlike a real texture
+			# reference) -- a mask is only ever derived from the base
+			# texture's own name + axis, never stored anywhere editable, so
+			# on_copied is a no-op; the copy alone is enough for the next
+			# frame's find_texture() to resolve to it (the active
+			# workspace's own folders are already in the search paths).
+			self._draw_texture_copy_button(mask_name, lambda new_name: None, subdir="masks")
+			imgui.pop_id()
+
+		if missing_axes:
+			imgui.same_line()
+			imgui.push_id(f"add-mask-{stem}")
+			disabled = self.workspace_setup_dialog.active_workspace_dir is None
+			if _icon_button(fa_icons.ICON_FA_PLUS, "Add a mask for a missing axis", disabled=disabled):
+				imgui.open_popup("add-mask-popup")
+			if imgui.begin_popup("add-mask-popup"):
+				for axis in missing_axes:
+					clicked, _ = imgui.selectable(self._PANOPLY_AXIS_LABELS[axis], False)
+					if clicked:
+						self._create_panoply_mask(base_texture_name, axis)
+						imgui.close_current_popup()
+				imgui.end_popup()
 			imgui.pop_id()
 
 	def _apply_material_texture(self, node_path, material, material_id):
@@ -2037,9 +2694,34 @@ class ObjectEditorApp(ForgeryApp):
 			# cached independently.
 			panda_texture = load_panda_texture(
 				resolved_name, cache=self._texture_cache, search_dirs=self._texture_search_dirs,
-				repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture)
+				repeat=self._texture_needs_repeat, finder=self.search_paths_dialog.find_texture,
+				wrap_s=texture.wrap_s, wrap_t=texture.wrap_t,
+				min_filter=texture.min_filter, mag_filter=texture.mag_filter,
+				load_grayscale_as_alpha=texture.load_grayscale_as_alpha)
 			if panda_texture is not None:
 				node_path.set_texture(panda_texture)
+				# Seeds _update_texture_freshness()'s baseline right away, so
+				# its very first tick after this load has something to
+				# compare against instead of treating "no baseline yet" as a
+				# change. Panoply-tracked names get their own signature from
+				# _ensure_live_panoply_texture() instead -- skip those here.
+				if resolved_name not in self._panoply_texture_sources and resolved_name not in self._texture_freshness_mtimes:
+					ref = resolve_texture_ref(resolved_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+					if ref is not None:
+						try:
+							self._texture_freshness_mtimes[resolved_name] = ref.cache_stat()[0]
+						except OSError:
+							pass  # gone by the time we stat it -- see _update_texture_freshness()'s own guard
+
+		tex_user_mat = None
+		if material is not None and material.flags & _IDRV_MAT_TEX_ADDR and material.flags & _IDRV_MAT_USER_TEX_MAT_STAGE0:
+			tex_user_mat = material.tex_user_mat.get(0)
+		if tex_user_mat is not None:
+			node_path.set_tex_transform(
+				TextureStage.get_default(),
+				TransformState.make_mat(uv_matrix_to_panda_mat4(tex_user_mat)))
+		else:
+			node_path.clear_tex_transform()
 
 	def _apply_material(self, node_path, material_id):
 		materials = getattr(self.shape_file.value, "materials", None)
@@ -2180,28 +2862,89 @@ class ObjectEditorApp(ForgeryApp):
 			return imgui.color_button(str_id, (0.5, 0.5, 0.5, 0.4), 0, (size, size))
 		return self._draw_thumbnail_button(str_id, tex_ref, name, size)
 
-	def _draw_texture_preview_static(self, name, size=24):
+	def _draw_texture_preview_static(self, name, size=24, badge=None, subdir="tex"):
 		"""Same thumbnail button (size, frame, hover-zoom tooltip) as
-		_draw_texture_preview_button, but disabled -- for spots where
-		clicking it wouldn't do anything (e.g. the Textures tab once a
-		texture is already set: the text field/browse icon next to it are
-		the actual controls), so it doesn't look clickable when it isn't.
-		A plain imgui.image() looked visibly smaller: image_button adds the
-		usual button frame padding around the image that a bare image()
-		doesn't get, and disabling it (rather than swapping widget types)
-		keeps that same size."""
+		_draw_texture_preview_button, but a plain reveal-in-file-manager
+		action instead of whatever a real texture-picker button would do
+		(the text field/browse icon next to it are the actual editing
+		controls for that) -- disabled only when there's no real file to
+		reveal (unresolvable, or living inside a `.bnp`, which has no
+		files of its own on disk). A plain imgui.image() looked visibly
+		smaller: image_button adds the usual button frame padding around
+		the image that a bare image() doesn't get, and disabling it
+		(rather than swapping widget types) keeps that same size.
+
+		`badge` (e.g. a material index), if given, is overlaid directly on
+		the thumbnail -- see _draw_preview_badge() -- instead of a separate
+		imgui.text() label, which would cost horizontal space this panel
+		doesn't have to spare. `subdir` ("tex" or "masks", see
+		_is_texture_in_workspace()) decides which workspace folder
+		"already in the workspace" is checked against, for the green
+		border (see _draw_preview_workspace_border())."""
 		tex_ref = self._get_preview_texture_ref(name)
 		if tex_ref is None:
 			imgui.dummy((size, size))
-			return
-		imgui.begin_disabled(True)
-		imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR)
-		imgui.end_disabled()
-		if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
-			if imgui.begin_tooltip():
-				self._draw_image_opaque_bg(tex_ref, (192, 192))
-				imgui.text(name)
-				imgui.end_tooltip()
+		else:
+			resolved = self._resolve_texture(name)
+			can_reveal = resolved is not None and resolved.fs_path is not None
+			imgui.begin_disabled(not can_reveal)
+			if imgui.image_button("##preview", tex_ref, (size, size), bg_col=_PREVIEW_BG_COLOR) and can_reveal:
+				reveal_in_system_file_manager(resolved.fs_path)
+			imgui.end_disabled()
+			if self._is_texture_in_workspace(name, subdir):
+				self._draw_preview_workspace_border()
+			if imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+				if imgui.begin_tooltip():
+					self._draw_image_opaque_bg(tex_ref, (192, 192))
+					imgui.text(name)
+					if can_reveal:
+						imgui.text_disabled("Click to reveal in file manager")
+					imgui.end_tooltip()
+		if badge is not None:
+			self._draw_preview_badge(badge)
+
+	@staticmethod
+	def _draw_preview_badge(text, scale=0.7):
+		"""Overlays `text` (e.g. "3") in the bottom-right corner of
+		whichever preview button/thumbnail/color-swatch was just drawn, at
+		`scale`x the normal font size -- takes no extra horizontal layout
+		space, unlike a separate imgui.text() next to it, which is the
+		point: these rows are already tight on width. A 1px black shadow
+		keeps it legible over a bright/busy thumbnail.
+
+		add_text()'s explicit-size overload draws at any size regardless
+		of the currently pushed font scale, but calc_text_size() always
+		measures at the *current* (full) size -- so the small size's own
+		footprint is estimated by scaling that measurement down, rather
+		than actually re-measuring at `scale` (glyph metrics scale
+		linearly with size in ImGui's font atlas, so this is exact, not
+		an approximation)."""
+		font = imgui.get_font()
+		full_size = imgui.get_font_size()
+		small_size = full_size * scale
+		full_text_size = imgui.calc_text_size(text)
+		text_w, text_h = full_text_size.x * scale, full_text_size.y * scale
+
+		item_max = imgui.get_item_rect_max()
+		pos = (item_max.x - text_w - 1, item_max.y - text_h - 1)
+		shadow_pos = (pos[0] + 1, pos[1] + 1)
+		draw_list = imgui.get_window_draw_list()
+		draw_list.add_text(font, small_size, shadow_pos, imgui.get_color_u32((0.0, 0.0, 0.0, 1.0)), text)
+		draw_list.add_text(font, small_size, pos, imgui.get_color_u32((1.0, 1.0, 1.0, 1.0)), text)
+
+	@staticmethod
+	def _draw_preview_workspace_border(thickness=2):
+		"""Outlines whichever preview button/thumbnail was just drawn in
+		_TEXTURE_IN_WORKSPACE_COLOR -- same green already used for a texture
+		reference's own text field (see _draw_simple_material_row()/
+		_draw_multi_bitmap_editor()), now also on the thumbnail itself.
+		Manually drawn (not a pushed Col_.border style color): image_button()
+		only actually shows a border when the current style's frame border
+		size is non-zero, which isn't guaranteed."""
+		item_min = imgui.get_item_rect_min()
+		item_max = imgui.get_item_rect_max()
+		color = imgui.get_color_u32(_TEXTURE_IN_WORKSPACE_COLOR)
+		imgui.get_window_draw_list().add_rect(item_min, item_max, color, thickness=thickness)
 
 	def _get_color_texture_ref(self, color):
 		"""A 1x1 solid-color Texture (see shape_geometry.solid_color_texture)
@@ -2283,14 +3026,16 @@ class ObjectEditorApp(ForgeryApp):
 		button, which is a temporary visualization override, never saved).
 		Once a texture is set, this just previews it: the material is a
 		texture now, not a color, so it's no longer clickable for color."""
+		badge = str(material_id)
 		texture = material.textures[0] if material.textures else None
 		if texture is not None and texture.file_name:
-			self._draw_texture_preview_static(texture.file_name)
+			self._draw_texture_preview_static(texture.file_name, badge=badge)
 			return
 
 		diffuse = rgba_to_color(material.diffuse)
 		if self._draw_color_preview_button(f"##diffuse-{material_id}", diffuse):
 			imgui.open_popup(f"{_DIFFUSE_COLOR_POPUP_ID}-{material_id}")
+		self._draw_preview_badge(badge)
 
 		if imgui.begin_popup(f"{_DIFFUSE_COLOR_POPUP_ID}-{material_id}"):
 			changed, new_color = imgui.color_picker4(f"##diffuse-picker-{material_id}", diffuse)
@@ -2399,41 +3144,49 @@ class ObjectEditorApp(ForgeryApp):
 			imgui.text_disabled(preview or "(empty)")
 
 			if expanded:
-				imgui.indent()
 				for material_id, texture in entries:
 					self._ensure_multi_bitmap_slot(texture, index)
 					imgui.push_id(f"mb-mat-{material_id}")
 
 					slot_name = texture.file_names[index]
+					badge = str(material_id)
 					if slot_name:
-						self._draw_texture_preview_static(slot_name)
+						self._draw_texture_preview_static(slot_name, badge=badge)
 					else:
 						imgui.dummy((24, 24))
-					imgui.same_line()
-					imgui.text(f"#{material_id}")
+						self._draw_preview_badge(badge)
 					imgui.same_line()
 
-					imgui.set_next_item_width(220)
-					current_value = texture.file_names[index]
-					changed, new_value = imgui.input_text(f"##text-{index}", current_value)
-					new_value = new_value.lower()  # texture names aren't case-sensitive
-					if changed and new_value != current_value:
-						texture.file_names[index] = new_value
+					def _set_slot(value, material_id=material_id, texture=texture, index=index):
+						texture.file_names[index] = value
 						if texture.selected_index == index:
-							texture.file_name = new_value
+							texture.file_name = value
 							self._reapply_material(material_id)
+
+					current_value = texture.file_names[index]
+					in_workspace = self._is_texture_in_workspace(current_value)
+					imgui.push_style_color(
+						imgui.Col_.text.value, _TEXTURE_IN_WORKSPACE_COLOR if in_workspace else _TEXTURE_NORMAL_COLOR)
+					changed, new_value = self._draw_texture_name_combo(f"##combo-{index}", current_value)
+					imgui.pop_style_color()
+					if imgui.is_item_hovered() and current_value:
+						source_path = self._texture_source_path_text(current_value)
+						tooltip = source_path or current_value
+						if in_workspace:
+							tooltip += "\n(in the active workspace)"
+						imgui.set_tooltip(tooltip)
+					if changed and new_value != current_value:
+						_set_slot(new_value)
 					imgui.same_line()
 					if _icon_button(fa_icons.ICON_FA_FOLDER_OPEN, "Browse for a texture file"):
-						def _on_result(file_name, material_id=material_id, texture=texture, index=index):
+						def _on_result(file_name, texture=texture, index=index, _set_slot=_set_slot):
 							self._ensure_multi_bitmap_slot(texture, index)
-							texture.file_names[index] = file_name
-							if texture.selected_index == index:
-								texture.file_name = file_name
-								self._reapply_material(material_id)
+							_set_slot(file_name)
 						self._start_texture_browse(("multi-bitmap", material_id, index), _on_result)
+					imgui.same_line()
+					self._draw_texture_copy_button(current_value, _set_slot)
 
 					imgui.pop_id()
-				imgui.unindent()
 
 			imgui.pop_id()
 			imgui.separator()
@@ -2445,25 +3198,223 @@ class ObjectEditorApp(ForgeryApp):
 			self.sysinfo.set_status("")
 			self._multi_bitmap_hint_shown = False
 
+	def _workspace_shape_save_path(self):
+		"""Where Save writes to -- always <active workspace>/shapes/<name>,
+		regardless of where the shape was originally loaded from (even from
+		inside a .bnp, which used to disable Save entirely). None if there's
+		no active workspace configured yet, or no shape name is known."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None or not self._shape_source_name:
+			return None
+		return workspace_dir / "shapes" / self._shape_source_name
+
+	def _texture_source_path_text(self, file_name):
+		"""Human-readable full path of whatever file `file_name` actually
+		resolves to (a plain path, or `<bnp path> (<entry name>)` for a
+		texture living inside a .bnp) -- see the texture combo's tooltip
+		(_draw_texture_name_combo() callers), so hovering it shows exactly
+		which source file it takes rather than just the bare name already
+		visible in the combo itself. None if it doesn't resolve to anything."""
+		ref = self._resolve_texture(file_name)
+		if ref is None:
+			return None
+		if ref.fs_path is not None:
+			return str(ref.fs_path)
+		if ref.bnp_path is not None:
+			return f"{ref.bnp_path} ({ref.name})"
+		return None
+
+	def _resolve_texture(self, file_name):
+		"""resolve_texture_ref(), pre-bound to this shape's own
+		_texture_search_dirs/finder -- the same lookup the viewport itself
+		uses to display a texture."""
+		if not file_name:
+			return None
+		return resolve_texture_ref(file_name, self._texture_search_dirs, self.search_paths_dialog.find_texture)
+
+	def _workspace_texture_names(self, subdir="tex"):
+		"""Sorted list of texture file names sitting in the active
+		workspace's `subdir` folder (default "tex") -- rescanned fresh on
+		every call (a single Path.iterdir(), cheap enough to just always
+		redo rather than cache/invalidate) so _draw_texture_name_combo()
+		always shows what's actually on disk the moment its dropdown opens."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return []
+		try:
+			entries = list((workspace_dir / subdir).iterdir())
+		except OSError:
+			return []
+		return sorted(entry.name for entry in entries if entry.suffix.lower() in _WORKSPACE_TEXTURE_EXTENSIONS)
+
+	def _draw_texture_name_combo(self, imgui_id, current_value):
+		"""Combo box listing the active workspace's tex/ textures (see
+		_workspace_texture_names()) -- returns (changed, new_value), same
+		shape as imgui.input_text()'s return value, so call sites only
+		needed to swap the widget itself. current_value is always shown as
+		the combo's own preview text even when it isn't one of the listed
+		names (not yet copied into the workspace, or set via Browse from
+		somewhere else) -- picking a listed entry is the only way this
+		widget itself changes it; Browse/Copy stay the way to set anything
+		else, same buttons as before, unchanged."""
+		imgui.set_next_item_width(220)
+		changed = False
+		new_value = current_value
+		if imgui.begin_combo(imgui_id, current_value):
+			for name in self._workspace_texture_names():
+				clicked, _ = imgui.selectable(name, name == current_value)
+				if clicked:
+					new_value = name
+					changed = True
+			imgui.end_combo()
+		return changed, new_value
+
+	def _texture_copy_destination(self, ref, subdir="tex"):
+		"""<active workspace>/<subdir>/<ref's own bare name>, or None without
+		an active workspace configured. `subdir` defaults to "tex" (a real
+		material texture); pass "masks" for a Panoply mask file instead (see
+		_draw_panoply_masks_for()). A `.dds` source always lands as `.png`
+		instead (see _copy_texture_to_workspace()) -- `.dds` is a compiled,
+		non-editable format (also auto-(re)generated into dds/ from tex/ by
+		Patina itself, see tex_dds_sync.py), never something the workspace's
+		own editable folders should hold."""
+		workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+		if workspace_dir is None:
+			return None
+		name = ref.name
+		if Path(name).suffix.lower() == ".dds":
+			name = f"{Path(name).stem}.png"
+		return workspace_dir / subdir / name
+
+	def _is_texture_in_workspace(self, file_name, subdir="tex"):
+		"""True if `file_name` currently resolves to a file already sitting
+		in the active workspace's own `subdir` folder -- used to color-code
+		texture references in the UI (see _draw_texture_copy_button())."""
+		ref = self._resolve_texture(file_name)
+		if ref is None or ref.fs_path is None:
+			return False
+		dest = self._texture_copy_destination(ref, subdir)
+		return dest is not None and ref.fs_path.resolve() == dest.resolve()
+
+	def _copy_texture_to_workspace(self, file_name, subdir="tex"):
+		"""Resolves `file_name` (absolute path or bare name alike) and
+		copies it into the active workspace's `subdir` folder, unless it's
+		already sitting there. A `.dds` source is decoded and written out as
+		`.png` instead of a raw byte copy (see _texture_copy_destination()
+		-- `.dds` is never an editable workspace source). Returns the
+		resulting bare (lowercased, matching how a typed/browsed texture
+		name is normalized elsewhere) file name to store back on the
+		material, or None if nothing could be done -- no active workspace,
+		unresolvable/undecodable reference, or a write failure (logged, not
+		raised; the caller just leaves the material's current reference
+		untouched in that case)."""
+		ref = self._resolve_texture(file_name)
+		if ref is None:
+			print(f"[object_editor] could not resolve texture {file_name!r} to copy")
+			return None
+		dest = self._texture_copy_destination(ref, subdir)
+		if dest is None:
+			return None
+		if not (ref.fs_path is not None and ref.fs_path.resolve() == dest.resolve()):
+			try:
+				dest.parent.mkdir(parents=True, exist_ok=True)
+				if Path(ref.name).suffix.lower() == ".dds":
+					panda_texture = load_panda_texture(ref.name, finder=lambda _name, _ref=ref: _ref)
+					if panda_texture is None:
+						print(f"[object_editor] could not decode {ref.name!r} to convert to .png")
+						return None
+					texture_to_pnm_image(panda_texture).write(str(dest))
+				else:
+					dest.write_bytes(ref.read_bytes())
+			except OSError as exc:
+				print(f"[object_editor] could not copy texture {ref.name!r} to workspace: {exc}")
+				return None
+		return dest.name.lower()
+
+	def _draw_texture_copy_button(self, current_value, on_copied, subdir="tex"):
+		"""Small icon button, next to a texture reference field: copies
+		that one texture into the active workspace's `subdir` folder and
+		rewrites the reference to the resulting bare name via
+		`on_copied(new_name)` -- deliberately opt-in per texture rather
+		than an automatic copy-everything-on-save, so the workspace's
+		tex/ (or masks/) only ever holds files the user actually chose to
+		bring in for editing. Once it's already there, this becomes an
+		"Edit" button instead (see _draw_texture_edit_button()) -- copying
+		it again would be a no-op, so there's nothing useful left for this
+		button to do besides launch an editor on it."""
+		if self._is_texture_in_workspace(current_value, subdir):
+			self._draw_texture_edit_button(current_value)
+			return
+		disabled = not current_value or self.workspace_setup_dialog.active_workspace_dir is None
+		imgui.begin_disabled(disabled)
+		if _icon_button(fa_icons.ICON_FA_DOWNLOAD, f"Copy this file into the active workspace's {subdir}/"):
+			new_name = self._copy_texture_to_workspace(current_value, subdir)
+			if new_name is not None:
+				on_copied(new_name)
+		imgui.end_disabled()
+
+	def _draw_texture_edit_button(self, current_value):
+		"""Launches the user's configured external image editor (Settings
+		tab -> Tools) on `current_value`'s resolved file -- shown instead
+		of the copy button once a texture already lives in the active
+		workspace. Disabled, with an explanatory tooltip, until an editor
+		executable is actually configured."""
+		editor_path = app_settings.load().image_editor_path
+		disabled = not editor_path
+		imgui.begin_disabled(disabled)
+		if _icon_button(fa_icons.ICON_FA_EDIT, "Edit this texture in the configured image editor"):
+			resolved = self._resolve_texture(current_value)
+			if resolved is not None and resolved.fs_path is not None:
+				subprocess.Popen([editor_path, str(resolved.fs_path)])
+		imgui.end_disabled()
+		if disabled and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+			imgui.set_tooltip("Set an image editor executable in Settings -> Tools first")
+
 	def _write_shape(self, path):
 		try:
+			# Whatever rotation the object is currently at becomes the
+			# shape's own default_rot_quat on save: this is meant to be an
+			# authoring tool for that value, not just a live-viewer aid, so
+			# it must survive a save/reload round trip rather than silently
+			# reverting. Read model_root's WORLD rotation (not just
+			# _object_pivot's own) -- _transform_node("rotation") lets the
+			# Rotation panel edit either node depending on that row's pivot
+			# lock, and model_root's world quat always reflects the total
+			# either way (it's pivot's rotation composed with model_root's
+			# own local one, identity when unlocked).
+			base = getattr(self.shape_file.value, "base", None)
+			if base is not None:
+				total_quat = self.model_root.get_quat(self.render)
+				# Panda3D's LQuaternion stores (real, i, j, k) internally, and
+				# its inherited get_x/y/z/w() accessors read that raw slot
+				# order rather than remapping to (i, j, k, real) -- confirmed
+				# empirically (an identity quat's get_x() came back 1.0, the
+				# real part, not 0.0) and consistent with how _display_shape()
+				# already builds a Panda Quat via Quat(rot.w, rot.x, rot.y,
+				# rot.z) (real first, positionally) elsewhere in this file.
+				base.default_rot_quat = Quaternion(
+					x=total_quat.get_y(), y=total_quat.get_z(), z=total_quat.get_w(), w=total_quat.get_x())
+			path.parent.mkdir(parents=True, exist_ok=True)
 			save_shape(path, self.shape_file)
 			self._save_status = f"Saved to {path}"
 			print(f"[object_editor] {self._save_status}")
-			# The viewer-only Ctrl+drag rotation is never written into the
-			# shape's own default_rot_quat (see _display_shape()), but a save
-			# is a natural point to treat "where the object is now" as the new
-			# reset baseline -- otherwise Ctrl+Reset would keep snapping back
-			# to the pre-save orientation forever.
+			# The pivot's rotation is now baked into default_rot_quat above,
+			# so it's also the natural new reset baseline -- otherwise
+			# Ctrl+Reset would keep snapping back to the pre-save orientation
+			# forever.
 			self._object_pivot_base_quat = Quat(self._object_pivot.get_quat())
 		except (OSError, ShapeWriteError) as exc:
 			self._save_status = f"Save failed: {exc}"
 			print(f"[object_editor] {self._save_status}")
 
 	def _on_save_clicked(self):
+		save_path = self._workspace_shape_save_path()
+		if save_path is None:
+			return
 		if self._save_overwrite_confirmed:
-			self._write_shape(self._shape_source_path)
+			self._write_shape(save_path)
 		else:
+			self._pending_save_path = save_path
 			self._confirm_overwrite_open = True
 			imgui.open_popup(_OVERWRITE_POPUP_ID)
 
@@ -2476,27 +3427,19 @@ class ObjectEditorApp(ForgeryApp):
 		if not opened:
 			return
 
-		imgui.text(f"Overwrite this file?\n{self._shape_source_path}")
+		imgui.text(f"Overwrite this file?\n{self._pending_save_path}")
 		imgui.text_wrapped("You won't be asked again this session.")
 		imgui.separator()
 		if imgui.button("Overwrite"):
 			self._save_overwrite_confirmed = True
 			self._confirm_overwrite_open = False
 			imgui.close_current_popup()
-			self._write_shape(self._shape_source_path)
+			self._write_shape(self._pending_save_path)
 		imgui.same_line()
 		if imgui.button("Cancel"):
 			self._confirm_overwrite_open = False
 			imgui.close_current_popup()
 		imgui.end_popup()
-
-	def _poll_save_dialog(self):
-		if self._save_dialog is None or not self._save_dialog.ready(0):
-			return
-		result = self._save_dialog.result()
-		self._save_dialog = None
-		if result:
-			self._write_shape(Path(result))
 
 	def _poll_skeleton_file_dialog(self):
 		if self._skeleton_file_dialog is None or not self._skeleton_file_dialog.ready(0):
@@ -2516,42 +3459,173 @@ class ObjectEditorApp(ForgeryApp):
 			path = Path(result[0])
 			self._apply_bone_preview_animation_bytes(path.read_bytes(), path.name)
 
+	def _poll_image_editor_dialog(self):
+		if self._image_editor_dialog is None or not self._image_editor_dialog.ready(0):
+			return
+		result = self._image_editor_dialog.result()
+		self._image_editor_dialog = None
+		if result:
+			fresh = app_settings.load()
+			fresh.image_editor_path = result[0]
+			app_settings.save(fresh)
+
+	def _draw_image_editor_settings(self):
+		"""Settings tab -- lets the user pick an external image editor
+		executable, used by the Textures tab's "Edit" button (see
+		_draw_texture_edit_button()) once a texture already lives in the
+		active workspace."""
+		settings = app_settings.load()
+		label = "Image editor: "
+		path_text = settings.image_editor_path or "(not set)"
+
+		style = imgui.get_style()
+		button_width = imgui.calc_text_size(fa_icons.ICON_FA_FOLDER_OPEN).x + style.frame_padding.x * 2
+		available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
+		             - button_width - style.item_spacing.x)
+
+		imgui.text(label)
+		imgui.same_line()
+		imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
+		if settings.image_editor_path and imgui.is_item_hovered():
+			imgui.set_tooltip(settings.image_editor_path)
+		imgui.same_line()
+		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##image-editor", "Choose an image editor executable..."):
+			self._image_editor_dialog = pfd.open_file("Choose image editor executable")
+
+	def _poll_workspace_sync_folder_dialog(self):
+		if self._workspace_sync_folder_dialog is None or not self._workspace_sync_folder_dialog.ready(0):
+			return
+		result = self._workspace_sync_folder_dialog.result()
+		self._workspace_sync_folder_dialog = None
+		workspace_name = self.workspace_setup_dialog.active_workspace_name
+		if not result or workspace_name is None:
+			return
+		fresh = app_settings.load()
+		fresh.workspace_sync_folders[workspace_name] = result
+		fresh.last_workspace_sync_folder = result
+		app_settings.save(fresh)
+		self.workspace_sync.set_sync_folder(result)
+
+	def _draw_workspace_sync_settings(self):
+		"""Settings tab -- lets the user pick an external folder the active
+		workspace's anims/shapes/skels/tex get auto-mirrored into (see
+		workspace_sync.py). Per-workspace: switching the active workspace
+		shows/edits that workspace's own folder, not a single global one
+		(see _on_active_workspace_changed())."""
+		workspace_name = self.workspace_setup_dialog.active_workspace_name
+		label = "Sync folder: "
+		path_text = "(no active workspace)" if workspace_name is None else (
+			app_settings.load().workspace_sync_folders.get(workspace_name) or "(not set)")
+
+		style = imgui.get_style()
+		button_width = imgui.calc_text_size(fa_icons.ICON_FA_FOLDER_OPEN).x + style.frame_padding.x * 2
+		available = (imgui.get_content_region_avail().x - imgui.calc_text_size(label).x
+		             - button_width - style.item_spacing.x)
+
+		imgui.text(label)
+		imgui.same_line()
+		imgui.begin_disabled(workspace_name is None)
+		imgui.text(_truncate_path_to_width(path_text, max(available, 20)))
+		if workspace_name is not None and imgui.is_item_hovered():
+			imgui.set_tooltip(path_text)
+		imgui.same_line()
+		if _icon_button(f"{fa_icons.ICON_FA_FOLDER_OPEN}##sync-folder", "Choose a folder to mirror this workspace's anims/shapes/skels/tex into..."):
+			current = app_settings.load().workspace_sync_folders.get(workspace_name) if workspace_name else None
+			self._workspace_sync_folder_dialog = pfd.select_folder("Choose sync folder", current or "")
+		imgui.end_disabled()
+
+		# Only relevant once a sync folder is actually configured -- catches
+		# up anything that predates the live watch (see
+		# WorkspaceSyncWatcher.refresh_fully_synced()).
+		sync_folder_set = workspace_name is not None and app_settings.load().workspace_sync_folders.get(workspace_name)
+		if sync_folder_set and not self.workspace_sync.is_fully_synced():
+			imgui.begin_disabled(self.workspace_sync.is_syncing())
+			if _colored_button("Sync now", _SYNC_NOW_COLOR):
+				self.workspace_sync.sync_now()
+			imgui.end_disabled()
+			if self.workspace_sync.is_syncing():
+				imgui.same_line()
+				imgui.text_disabled("Syncing...")
+
+	def _draw_ui_font_settings(self):
+		"""Settings tab -- lets the user pick the UI text font/size (see
+		ForgeryApp._load_ui_font(), Settings.ui_font_name/ui_font_size).
+		Takes effect on the next launch only -- no live font-atlas rebuild."""
+		settings = app_settings.load()
+		font_names = list(_AVAILABLE_FONTS)
+		current_index = font_names.index(settings.ui_font_name) if settings.ui_font_name in font_names else 0
+
+		imgui.text("Font: ")
+		imgui.same_line()
+		imgui.set_next_item_width(200)
+		changed, new_index = imgui.combo("##ui-font-name", current_index, font_names)
+		if changed:
+			settings.ui_font_name = font_names[new_index]
+			app_settings.save(settings)
+
+		imgui.text("Size: ")
+		imgui.same_line()
+		imgui.set_next_item_width(100)
+		changed, new_size = imgui.drag_float("##ui-font-size", settings.ui_font_size, v_speed=0.5, v_min=8.0, v_max=32.0)
+		if changed:
+			settings.ui_font_size = new_size
+			app_settings.save(settings)
+
+		if imgui.button("Restart now"):
+			self.relaunch()
+		imgui.same_line()
+		imgui.text_disabled("Restart Patina for a font/size change to take effect.")
+
 	def _draw_bottom_bar(self):
-		"""Single horizontal bar at the very bottom of the panel: Save/Save
-		As (only for a loaded, writable shape), Export (format picker, then
-		the existing ExportDialog flow -- see ExportDialog.export() --
-		applied to the shape's current in-memory state, edits included, not
-		a re-read from disk/bnp), and Quit flush against the right edge.
-		Always drawn (even with nothing loaded) so Quit stays reachable."""
+		"""Pinned at the very bottom of the panel: Save (only for a loaded,
+		writable shape -- always targets the active workspace, see the
+		Workspaces chantier in `.todo/forgery-object-editor.md`), Export
+		(format picker, then the existing ExportDialog flow -- see
+		ExportDialog.export() -- applied to the shape's current in-memory
+		state, edits included, not a re-read from disk/bnp), and Quit flush
+		against the right edge. Always drawn (even with nothing loaded) so
+		Quit stays reachable. The active-workspace row used to live here too
+		-- moved to the top of the Explorer window instead (see
+		Explorer.extra_header in __init__), always reachable there regardless
+		of what's loaded in this panel."""
 		imgui.separator()
 
 		writable = self.shape_file is not None and self.shape_file.type_name in _WRITABLE_SHAPE_TYPES
 		if writable:
-			imgui.begin_disabled(self._shape_source_path is None)
-			if imgui.button(f"{fa_icons.ICON_FA_SAVE} Save"):
+			save_path = self._workspace_shape_save_path()
+			imgui.begin_disabled(save_path is None)
+			if _colored_button(f"{fa_icons.ICON_FA_SAVE} Save", _SAVE_BUTTON_COLOR):
 				self._on_save_clicked()
 			imgui.end_disabled()
-			if imgui.is_item_hovered() and self._shape_source_path is None:
-				imgui.set_tooltip("Save unavailable -- loaded from inside a .bnp archive")
+			if imgui.is_item_hovered() and save_path is None:
+				imgui.set_tooltip("Save unavailable -- set up a Workspaces folder and pick an active workspace first")
 			imgui.same_line()
 
-			if imgui.button("Save As..."):
-				# Prefer the shape's own source path (e.g. saving an edited
-				# .shape back near where it came from); fall back to
-				# wherever the Explorer is currently browsing, plus the
-				# original file name if known (e.g. a shape loaded from
-				# inside a .bnp, which has no real on-disk path of its own
-				# to reuse) -- this used to open with no default folder or
-				# name at all in that case.
-				if self._shape_source_path is not None:
-					default_path = str(self._shape_source_path)
-				else:
-					name = self._shape_source_name or "untitled.shape"
-					default_path = str(Path(self.explorer.root) / name)
-				self._save_dialog = pfd.save_file("Save shape as", default_path, ["Ryzom shape", "*.shape"])
-			imgui.same_line()
+			workspace_dir = self.workspace_setup_dialog.active_workspace_dir
+			if workspace_dir is not None:
+				if _colored_button("Export", _QUICK_EXPORT_BUTTON_COLOR):
+					imgui.open_popup("##quick-export-format-popup")
+				if imgui.is_item_hovered():
+					imgui.set_tooltip(f"Export straight to {workspace_dir / 'exports'}, no prompts")
+				if imgui.begin_popup("##quick-export-format-popup"):
+					for export_format in EXPORT_FORMATS:
+						clicked, _ = imgui.selectable(f"{export_format.label} (.{export_format.extension})", False)
+						if clicked:
+							exports_dir = workspace_dir / "exports"
+							exports_dir.mkdir(parents=True, exist_ok=True)
+							self.export_dialog.quick_export(
+								self.shape_file.value, self._shape_source_name or "shape", export_format,
+								self.search_paths_dialog.find_texture, exports_dir)
+					imgui.separator()
+					bnp_clicked, _ = imgui.selectable(f"Full workspace ({workspace_dir.name}.bnp)", False)
+					if bnp_clicked:
+						exports_dir = workspace_dir / "exports"
+						exports_dir.mkdir(parents=True, exist_ok=True)
+						self.export_dialog.quick_export_workspace_bnp(workspace_dir, exports_dir)
+					imgui.end_popup()
+				imgui.same_line()
 
-			if imgui.button("Export..."):
+			if _colored_button("Export as...", _EXPORT_AS_BUTTON_COLOR):
 				imgui.open_popup("##export-format-popup")
 			if imgui.begin_popup("##export-format-popup"):
 				for export_format in EXPORT_FORMATS:
@@ -2562,6 +3636,13 @@ class ObjectEditorApp(ForgeryApp):
 						self.export_dialog.export(
 							self.shape_file.value, self._shape_source_name or "shape", export_format,
 							self.search_paths_dialog.find_texture, source_folder=source_folder)
+				if workspace_dir is not None:
+					imgui.separator()
+					bnp_clicked, _ = imgui.selectable(f"Full workspace ({workspace_dir.name}.bnp)", False)
+					if bnp_clicked:
+						source_folder = (
+							self._shape_source_path.parent if self._shape_source_path is not None else None)
+						self.export_dialog.export_workspace_bnp(workspace_dir, source_folder=source_folder)
 				imgui.end_popup()
 			imgui.same_line()
 
@@ -2570,12 +3651,11 @@ class ObjectEditorApp(ForgeryApp):
 		avail = imgui.get_content_region_avail().x
 		if avail > quit_width:
 			imgui.set_cursor_pos_x(imgui.get_cursor_pos_x() + avail - quit_width)
-		if imgui.button(quit_label):
+		if _colored_button(quit_label, _QUIT_BUTTON_COLOR):
 			self.userExit()
 
 		if writable:
 			self._draw_save_confirmation_popup()
-			self._poll_save_dialog()
 			if self._save_status:
 				imgui.text_wrapped(self._save_status)
 
@@ -2671,6 +3751,17 @@ class ObjectEditorApp(ForgeryApp):
 					material_id, "transparency", "Transparency", self._draw_material_transparency_section, material)
 				if section_hint:
 					hovered_hint = section_hint
+				if badge != "Color":
+					section_hint = self._draw_material_section(
+						material_id, "texture-filtering", "Texture filtering",
+						self._draw_material_texture_filtering_section, material)
+					if section_hint:
+						hovered_hint = section_hint
+					section_hint = self._draw_material_section(
+						material_id, "texture-transform", "Texture offset/tiling/rotation",
+						self._draw_material_texture_transform_section, material)
+					if section_hint:
+						hovered_hint = section_hint
 				imgui.unindent()
 
 			self._draw_panoply_masks_for(texture.file_name if texture is not None else None)
@@ -2807,6 +3898,172 @@ class ObjectEditorApp(ForgeryApp):
 
 		return hint
 
+	def _draw_material_texture_filtering_section(self, material_id, material):
+		"""Slot 0's texture sampling params (wrap S/T, mag/min filter) -- see
+		docs/material_options.md's "Filtrage et répétition des textures".
+		Scoped to slot 0 only, same as _draw_simple_material_row(): the
+		simplified editor doesn't expose the other 3 texture stages either."""
+		hint = None
+		texture = material.textures[0] if material.textures else None
+		if texture is None:
+			imgui.text_disabled("No texture on this material.")
+			return hint
+
+		def _changed_texture_setting():
+			# A cache hit in load_panda_texture() skips straight past
+			# wrap/filter (see its own docstring) -- only a fresh decode
+			# picks up the new value, so the cache must be dropped first.
+			self._texture_cache.clear()
+			self._reapply_material(material_id)
+
+		imgui.set_next_item_width(180)
+		wrap_s_index = texture.wrap_s if texture.wrap_s is not None else _TEXTURE_WRAP_DEFAULT
+		changed, new_index = imgui.combo("Wrap S (horizontal)", wrap_s_index, _TEXTURE_WRAP_NAMES)
+		hint = self._doc_hint_if_hovered("texture-filtering") or hint
+		if changed and new_index != texture.wrap_s:
+			texture.wrap_s = new_index
+			_changed_texture_setting()
+
+		imgui.set_next_item_width(180)
+		wrap_t_index = texture.wrap_t if texture.wrap_t is not None else _TEXTURE_WRAP_DEFAULT
+		changed, new_index = imgui.combo("Wrap T (vertical)", wrap_t_index, _TEXTURE_WRAP_NAMES)
+		hint = self._doc_hint_if_hovered("texture-filtering") or hint
+		if changed and new_index != texture.wrap_t:
+			texture.wrap_t = new_index
+			_changed_texture_setting()
+
+		imgui.set_next_item_width(180)
+		mag_index = texture.mag_filter if texture.mag_filter is not None else _TEXTURE_MAG_FILTER_DEFAULT
+		changed, new_index = imgui.combo("Mag Filter (close up)", mag_index, _TEXTURE_MAG_FILTER_NAMES)
+		hint = self._doc_hint_if_hovered("texture-filtering") or hint
+		if changed and new_index != texture.mag_filter:
+			texture.mag_filter = new_index
+			_changed_texture_setting()
+
+		imgui.set_next_item_width(180)
+		min_index = texture.min_filter if texture.min_filter is not None else _TEXTURE_MIN_FILTER_DEFAULT
+		changed, new_index = imgui.combo("Min Filter (far away)", min_index, _TEXTURE_MIN_FILTER_NAMES)
+		hint = self._doc_hint_if_hovered("texture-filtering") or hint
+		if changed and new_index != texture.min_filter:
+			texture.min_filter = new_index
+			_changed_texture_setting()
+
+		grayscale_as_alpha = bool(texture.load_grayscale_as_alpha)
+		changed, grayscale_as_alpha = imgui.checkbox(
+			"Grayscale image = alpha mask (not a visible gray color)", grayscale_as_alpha)
+		hint = self._doc_hint_if_hovered("texture-filtering") or hint
+		if changed:
+			texture.load_grayscale_as_alpha = grayscale_as_alpha
+			_changed_texture_setting()
+
+		return hint
+
+	def _draw_material_texture_transform_section(self, material_id, material):
+		"""Slot 0's UV offset/tiling/rotation (Material.tex_user_mat[0]) --
+		see docs/material_options.md's "Matrice de texture exportée". Scoped
+		to slot 0 only, same as the other simplified per-texture sections.
+
+		NOTE: reflected in the 3D viewport via _apply_material_texture()'s
+		set_tex_transform() call, using shape_geometry.py's
+		uv_matrix_to_panda_mat4() -- Offset U/V and the V-mirror correction
+		in there are confirmed correct against the real client (2026-08-28);
+		Rotation's sign is not yet (still applied as-is, untested against a
+		real rotated shape -- see examples/test_cube_wrap.shape). The value
+		is correctly stored/round-tripped in the .shape either way."""
+		hint = None
+		stage0_flag = _IDRV_MAT_USER_TEX_MAT_STAGE0
+		enabled = bool(material.flags & _IDRV_MAT_TEX_ADDR) and bool(material.flags & stage0_flag)
+		changed, enabled = imgui.checkbox("Offset/tile/rotate this texture", enabled)
+		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
+		if changed:
+			if enabled:
+				material.flags |= _IDRV_MAT_TEX_ADDR | stage0_flag
+				if material.tex_user_mat.get(0) is None:
+					material.tex_user_mat[0] = compose_uv_matrix(0.0, 0.0, 1.0, 1.0, 0.0)
+			else:
+				material.flags &= ~stage0_flag
+				# Other 3 stages' enable bits (0x00200000/0x00400000/0x00800000,
+				# see material.h's enableUserTexMat()) -- IDRV_MAT_TEX_ADDR only
+				# turns off once none of the 4 are set anymore.
+				if not (material.flags & 0x00F00000):
+					material.flags &= ~_IDRV_MAT_TEX_ADDR
+			self._reapply_material(material_id)
+
+		if not enabled:
+			return hint
+
+		# Tracked independently per material_id rather than re-derived from
+		# Material.tex_user_mat[0] every frame, so a slider drag doesn't
+		# fight with decompose_uv_matrix()'s own re-derivation. Seeded once
+		# (best-effort, via decompose) the first time this section is drawn
+		# for a material that already had a matrix from elsewhere (a fresh
+		# import, or a real 3dsMax-authored shape).
+		state = self._tex_transform_ui_state.get(material_id)
+		if state is None:
+			offset_u, offset_v, scale_u, scale_v, rotation = decompose_uv_matrix(material.tex_user_mat.get(0))
+			state = dict(
+				offset_u=offset_u, offset_v=offset_v, scale_u=scale_u, scale_v=scale_v, rotation=rotation)
+			self._tex_transform_ui_state[material_id] = state
+
+		imgui.indent()
+		any_changed = False
+
+		imgui.set_next_item_width(180)
+		changed, state["offset_u"] = imgui.drag_float(
+			"Offset U", state["offset_u"], v_speed=0.005, v_min=-10.0, v_max=10.0, format="%.3f")
+		any_changed = any_changed or changed
+		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
+		imgui.set_next_item_width(180)
+		changed, state["offset_v"] = imgui.drag_float(
+			"Offset V", state["offset_v"], v_speed=0.005, v_min=-10.0, v_max=10.0, format="%.3f")
+		any_changed = any_changed or changed
+		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
+		# Rotation combined with tiling (Scale != 1) produces a GPU wrap
+		# artifact (extra/missing visible tile repeats along the rotated
+		# axis, confirmed 2026-08-28 -- inherent to how texture-matrix
+		# rotation interacts with hardware repeat-wrap, not fixable here)
+		# and isn't used by any real shape in ryzom_live/data (0/2600
+		# scanned). Mutually exclusive in the UI rather than silently
+		# producing that artifact: whichever is already non-neutral blocks
+		# editing the other until it's reset back to neutral (0 degrees /
+		# scale 1) first.
+		rotation_active = abs(state["rotation"]) > 0.01
+		scale_active = abs(state["scale_u"] - 1.0) > 0.001 or abs(state["scale_v"] - 1.0) > 0.001
+
+		imgui.begin_disabled(rotation_active)
+		imgui.set_next_item_width(180)
+		changed, state["scale_u"] = imgui.drag_float(
+			"Scale U (tiling)", state["scale_u"], v_speed=0.01, v_min=0.01, v_max=100.0, format="%.3f")
+		any_changed = any_changed or changed
+		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
+		imgui.set_next_item_width(180)
+		changed, state["scale_v"] = imgui.drag_float(
+			"Scale V (tiling)", state["scale_v"], v_speed=0.01, v_min=0.01, v_max=100.0, format="%.3f")
+		any_changed = any_changed or changed
+		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
+		imgui.end_disabled()
+		if rotation_active and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+			imgui.set_tooltip("Reset Rotation to 0 first -- rotation + tiling together isn't supported (GPU wrap artifact)")
+
+		imgui.begin_disabled(scale_active)
+		imgui.set_next_item_width(180)
+		changed, state["rotation"] = imgui.drag_float(
+			"Rotation (degrees)", state["rotation"], v_speed=0.5, v_min=-360.0, v_max=360.0, format="%.2f")
+		any_changed = any_changed or changed
+		hint = self._doc_hint_if_hovered("export-texture-matrix") or hint
+		imgui.end_disabled()
+		if scale_active and imgui.is_item_hovered(imgui.HoveredFlags_.allow_when_disabled.value):
+			imgui.set_tooltip("Reset Scale U/V to 1 first -- rotation + tiling together isn't supported (GPU wrap artifact)")
+
+		imgui.unindent()
+
+		if any_changed:
+			material.tex_user_mat[0] = compose_uv_matrix(
+				state["offset_u"], state["offset_v"], state["scale_u"], state["scale_v"], state["rotation"])
+			self._reapply_material(material_id)
+
+		return hint
+
 	@staticmethod
 	def _set_simple_material_texture(material, file_name):
 		"""Sets slot 0's texture file name, creating a plain CTextureFile
@@ -2859,14 +4116,20 @@ class ObjectEditorApp(ForgeryApp):
 
 		self._draw_texture_color_button(material_id, material)
 		imgui.same_line()
-		imgui.text(f"#{material_id}")
-		imgui.same_line()
 
 		texture = material.textures[0] if material.textures else None
 		current_value = texture.file_name if (texture and texture.file_name) else ""
-		imgui.set_next_item_width(220)
-		changed, new_value = imgui.input_text("##text", current_value)
-		new_value = new_value.lower()  # texture names aren't case-sensitive
+		in_workspace = self._is_texture_in_workspace(current_value)
+		imgui.push_style_color(
+			imgui.Col_.text.value, _TEXTURE_IN_WORKSPACE_COLOR if in_workspace else _TEXTURE_NORMAL_COLOR)
+		changed, new_value = self._draw_texture_name_combo("##texture-combo", current_value)
+		imgui.pop_style_color()
+		if imgui.is_item_hovered() and current_value:
+			source_path = self._texture_source_path_text(current_value)
+			tooltip = source_path or current_value
+			if in_workspace:
+				tooltip += "\n(in the active workspace)"
+			imgui.set_tooltip(tooltip)
 		if changed and new_value != current_value:
 			self._set_simple_material_texture(material, new_value)
 			self._reapply_material(material_id)
@@ -2877,10 +4140,22 @@ class ObjectEditorApp(ForgeryApp):
 				self._set_simple_material_texture(material, file_name)
 				self._reapply_material(material_id)
 			self._start_texture_browse(("simple", material_id), _on_result)
+		imgui.same_line()
+
+		def _on_copied(new_name, material_id=material_id, material=material):
+			self._set_simple_material_texture(material, new_name)
+			self._reapply_material(material_id)
+		self._draw_texture_copy_button(current_value, _on_copied)
 
 		self._draw_panoply_masks_for(current_value)
 
 		imgui.pop_id()
+
+	def _on_exit(self):
+		"""Runs right before the process actually exits, whether that was
+		requested via the in-app Quit button or the OS's own window-close
+		control -- see app.py's ForgeryApp.__init__()/_on_exit()."""
+		self._save_session_state()
 
 	def panel_title(self):
 		return self._shape_source_name or "Panel"
@@ -2895,9 +4170,15 @@ class ObjectEditorApp(ForgeryApp):
 		self.export_dialog.draw()
 		self.import_dialog.draw()
 		self.search_paths_dialog.draw()
+		self.workspace_setup_dialog.draw()
 		self._poll_skeleton_file_dialog()
 		self._poll_animation_file_dialog()
+		self._poll_image_editor_dialog()
+		self._poll_workspace_sync_folder_dialog()
 		self._draw_replace_match_popup()
+		self._draw_restore_scan_popup()
+		self._draw_import_conflict_popup()
+		self._flush_pending_import_status()
 
 		if self.shape_error:
 			imgui.text_colored((1.0, 0.4, 0.4, 1.0), self.shape_error)
@@ -2914,25 +4195,46 @@ class ObjectEditorApp(ForgeryApp):
 		# three tabs only make sense once there's a shape to describe.
 		if imgui.begin_tab_bar("##panel-tabs"):
 			if self.shape_file is not None:
-				if imgui.begin_tab_item_simple("Textures"):
+				_push_tab_color(_TAB_COLOR_TEXTURES)
+				if _begin_tab_item_with_icon(fa_icons.ICON_FA_IMAGE, "Textures"):
 					self._draw_textures_tab()
 					imgui.end_tab_item()
-				if imgui.begin_tab_item_simple("Materials"):
+				_pop_tab_color()
+				_push_tab_color(_TAB_COLOR_MATERIALS)
+				if _begin_tab_item_with_icon(fa_icons.ICON_FA_PAINT_BRUSH, "Materials"):
 					self._draw_materials_tab()
 					imgui.end_tab_item()
-				if imgui.begin_tab_item_simple("All Properties"):
+				_pop_tab_color()
+				_push_tab_color(_TAB_COLOR_ALL_PROPERTIES)
+				if _begin_tab_item_with_icon(fa_icons.ICON_FA_TABLE, "All Properties"):
 					draw_properties(self.shape_file.value)
 					imgui.end_tab_item()
-			if imgui.begin_tab_item_simple("Settings"):
-				if imgui.collapsing_header("Export"):
-					self.export_dialog.draw_settings_content()
+				_pop_tab_color()
+			_push_tab_color(_TAB_COLOR_SETTINGS)
+			if _begin_tab_item_with_icon(fa_icons.ICON_FA_COG, "Settings"):
+				# Workspaces folder folded in here (not its own header) --
+				# it's a path setting like search_paths, just the one
+				# special-cased root instead of a priority-ordered list.
 				if imgui.collapsing_header("Paths"):
+					self.workspace_setup_dialog.draw_settings_content()
+					imgui.separator()
 					self.search_paths_dialog.draw_settings_content()
+				if imgui.collapsing_header("Tools"):
+					self._draw_image_editor_settings()
+					imgui.separator()
+					self._draw_workspace_sync_settings()
+					imgui.separator()
+					self._draw_ui_font_settings()
 				imgui.end_tab_item()
+			_pop_tab_color()
 			imgui.end_tab_bar()
 
 		self._draw_bottom_bar()
 
 
-if __name__ == "__main__":
+def main(argv=None):
 	ObjectEditorApp().run()
+
+
+if __name__ == "__main__":
+	main()

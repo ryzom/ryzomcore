@@ -521,6 +521,14 @@ void CEntityManager::release()
 	// Clear the list.
 	_Entities.clear();
 
+	// Remove all shape instances (force, including IG-zone-owned ones), so no dangling
+	// UInstance handle survives into the next Scene once this manager is reinit'd/reused.
+	for (uint i = 0; i < _ShapeInstances.size(); ++i)
+		deleteInstance(i, true);
+	_ShapeInstances.clear();
+	_IgZoneShapes.clear();
+	_LastRemovedInstance = -1;
+
 	// Clean the backuped list.
 	_BackupedChanges.clear();
 
@@ -818,6 +826,19 @@ bool CEntityManager::removeInstances()
 			deleteInstance(i);
 	}
 	return true;
+}
+
+void CEntityManager::removeShapePrimitives()
+{
+	for(uint i=0; i<_ShapeInstances.size(); ++i)
+	{
+		if (_ShapeInstances[i].Primitive)
+		{
+			if (PACS)
+				PACS->removePrimitive(_ShapeInstances[i].Primitive);
+			_ShapeInstances[i].Primitive = NULL;
+		}
+	}
 }
 
 bool CEntityManager::setupInstance(uint32 idx, const vector<string> &keys, const vector<string> &values)

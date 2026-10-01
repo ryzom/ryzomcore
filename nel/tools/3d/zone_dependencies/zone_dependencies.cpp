@@ -249,8 +249,19 @@ int main (int argc, char* argv[])
 			uint path;
 			for (path = 0; path < (uint)search_pathes.size(); path++)
 			{
-				// Add to search path
-				CPath::addSearchPath (search_pathes.asString(path));
+				// Add to search path -- alternative=false: the 1-arg
+				// overload defaults to alternative=true, which never
+				// indexes the directory's real file names and instead
+				// does a case-SENSITIVE CFile::fileExists() against an
+				// unconditionally lowercased query string, silently
+				// failing to find any real file whose name isn't already
+				// all-lowercase (zone/ig names are always "<row>_<UPPERCASE
+				// LETTERS>") -- confirmed root cause, project-todos/forgery/
+				// lowercase_pipeline_convention.md. Explains why this
+				// exact tool's own missing-.ig warning (computeZoneIGBBox,
+				// below) was long commented out: the lookup silently
+				// failed for every zone regardless.
+				CPath::addSearchPath (search_pathes.asString(path), false, false);
 			}
 /*
 			CConfigFile::CVar &ig_path = properties.getVar ("ig_path");

@@ -12,7 +12,7 @@
 // Copyright (C) 2019  Winch Gate Property Limited
 // This program is free software: read https://ryzom.com/dev/copying.html for more details
 
-	include('../config.php');
+	include_once('../config.php');
 
 	function convertCookieForActionHandler($cookie)
 	{
