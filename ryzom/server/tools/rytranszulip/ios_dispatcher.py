@@ -23,6 +23,7 @@
 import os
 import sys
 import re
+import traceback
 
 from time import sleep, time
 from pynel.admin_modules_itf import CAdminServiceWeb
@@ -52,29 +53,31 @@ class IosDispatcher(RyzomService):
 		self.infos += f"[bright_green]Shard: [orange1]{self.shard}"
 		self.updateInfos()
 
-	def runIOSCommand(self, command):
-		if self.ryzomAS.connect("127.0.0.1", 46700):
-			out = "".join([ s[0] for s in  command.split(" ")[3].split() ])
-			print("▶️ ", out)
-			self.ryzomAS.service_cmd("ios", command)
-			self.ryzomAS.close()
-			return True
-		else:
-			print("🛑 Connextion failed")
+	def runServiceCommand(self, service, command):
+		try:
+			if self.ryzomAS.connect("127.0.0.1", 46700):
+				parts = command.split(" ")
+				out = "".join([ s[0] for s in  parts[3].split() ]) if len(parts) > 3 else ""
+				print("▶️ ", out)
+				self.ryzomAS.service_cmd(service, command)
+				self.ryzomAS.close()
+				return True
+			else:
+				print("🛑 Connextion failed")
+		except Exception as e:
+			print(f"🛑 Error sending command to {service}", repr(e))
 		return False
+
+	def runIOSCommand(self, command):
+		return self.runServiceCommand("ios", command)
 
 	def runEGSCommand(self, command):
-		if self.ryzomAS.connect("127.0.0.1", 46700):
-			out = "".join([ s[0] for s in  command.split(" ")[3].split() ])
-			print("▶️ ", out)
-			self.ryzomAS.service_cmd("egs", command)
-			self.ryzomAS.close()
-			return True
-		else:
-			print("🛑 Connextion failed")
-		return False
+		return self.runServiceCommand("egs", command)
 
 	def sendToService(self, m):
+		if not m.sender or not m.source_lang or not m.translated_lang or m.channel_id is None:
+			print(f"Incomplete message skipped: {m.pprint()}")
+			return False
 		command = "chat" if m.source == "ios" else "farChat"
 		sender = m.sender + (self.domain if m.source == "ios" else "")
 		prefix = ">" if command == "chat" else ""
@@ -93,11 +96,14 @@ class IosDispatcher(RyzomService):
 			return True
 		if m.translated_lang == "WK":
 			if m.channel == "player":
+				if ":" not in m.channel_id:
+					print(f"Invalid player channel id: {m.channel_id!r}")
+					return False
 				self.runIOSCommand(command+" "+sender.lower()+" "+m.channel_id+self.domain+" \""+text+"\"")
 				self.runIOSCommand(command+" "+m.channel_id.split(":")[1].lower()+" tell:"+sender+self.domain+" \"\n@{FF0F}"+sender+": "+text+"\"")
 			elif command == "farChat": # Messages from zulip
 				self.runIOSCommand(command+" "+m.sender+" "+m.channel_id+" \""+source_lang+text+"\"")
-			elif m.channel_id.split(":")[0] == "faction": # FIXME on IOS
+			elif m.channel_id.split(":")[0] == "faction" and ":" in m.channel_id: # FIXME on IOS
 				self.runIOSCommand(command+" "+sender+" dyn:"+m.channel_id.split(":")[1]+" \""+prefix+source_lang+text+"\"")
 			elif m.channel_id.split(":")[0] == "dyn":
 				self.runIOSCommand(command+" "+sender+" "+m.channel_id+" \">"+source_lang+text+"\"")
@@ -118,7 +124,11 @@ class IosDispatcher(RyzomService):
 			if message != None:
 				self.updateActivity(False)
 				self.stats["messages"] += 1
-				status = self.sendToService(message)
+				try:
+					status = self.sendToService(message)
+				except Exception:
+					print(f"Error dispatching message {i}:\n{traceback.format_exc()}")
+					status = False
 				if status:
 					self.stats["messages_to_ios"] += 1
 				self.updateStats()
