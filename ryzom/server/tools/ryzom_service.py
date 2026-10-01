@@ -98,7 +98,6 @@ class RyzomService():
 				last_check = time()
 				if not self.p.isalive():
 					print("Service not alive...")
-					subprocess.run(["schroot", "-e", "-c", self.schroot_session])
 					sys_exit = 0 if self.quitting else -1
 					print(f"Exit with {sys_exit}")
 					sys.exit(sys_exit)

@@ -854,6 +854,9 @@ namespace NLGUI
 			{}
 			virtual ~CDataDownload();
 
+			/// called when the download is dropped without calling finish(), so back-references can be cleared
+			virtual void abortDownload() {}
+
 		public:
 			CCurlWWWData *data;
 			std::string dest;
@@ -897,6 +900,7 @@ namespace NLGUI
 			}
 
 			virtual void finish() NL_OVERRIDE;
+			virtual void abortDownload() NL_OVERRIDE;
 
 			void addImage(CViewBase *img, const CStyleParams &style, TImageType type);
 			void removeImage(CViewBase *img);

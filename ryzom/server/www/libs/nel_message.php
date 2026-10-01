@@ -6,6 +6,7 @@
 	{
 //		flush();
 //		echo $text;
+//		file_put_contents('log/l', file_get_contents('log/l').$text."\n" );
 	}
 
 	class CMemStream
@@ -86,10 +87,10 @@
 			}
 			else
 			{
-				$valLen = strlen($val);
-				$this->serialUInt32($valLen);
+				$vallen = strlen($val);
+				$this->serialUInt32($vallen);
 				$this->Buffer .= $val;
-				$this->Pos += $valLen;
+				$this->Pos += strlen($val);
 				debug(sprintf ("write string '%s' %d<br>\n", $val, $this->Pos));
 			}
 		}
@@ -104,8 +105,7 @@
 			}
 			else
 			{
-				$intValue = $val->toInt();
-				$this->serialUInt32($intValue);
+				$this->serialUInt32($val->toInt());
 				debug(sprintf ("write enum '%s' %d<br>\n", $val->toString(), $this->Pos));
 			}
 		}
@@ -134,9 +134,11 @@
 
 		function connect($addr, $port, &$res)
 		{
-			global $SockTimeOut;
+//ace: mega hack to point to the newshard
+//if($addr == "shard.ryzom.com") $addr = "newshard.ryzom.com";
 
-			debug(sprintf("Connect<br>"));
+			global $SockTimeOut;
+			debug(sprintf("Connect<br>").$addr.$port);
 			$this->MsgNum = 0;
 
 			$this->ConSock = fsockopen ($addr, $port, $errno, $errstr, $SockTimeOut);
@@ -293,4 +295,232 @@
 		}
 	}
 
+
+//	class CSessionManagerProxy
+//	{
+//		function createSession($userId, $sessionType, $callbackClient)
+//		{
+//			debug(sprintf("Creating session for user %u, type %s<BR>", $userId, $sessionType));
+//			$msg = new CMessage;
+//			$msg->setName("CSS");
+//			$msg->serialUInt32($userId);
+//			$msg->serialString($sessionType);
+//
+//			$callbackClient->sendMessage($msg);
+//		}
+//	}
+
+//	class CSessionManagerClientSkel
+//	{
+//		function waitCallback($callbackClient)
+//		{
+//			$message = $callbackClient->waitMessage();
+//
+//			debug(sprintf("Received message '%s'<BR>", $message->MsgName));
+//
+//			switch($message->MsgName)
+//			{
+//			case "CSSR":
+//				debug(sprintf("Create session result<BR>"));
+//				$this->createSessionResult_skel($message);
+//				break;
+//
+//			case "CSNR":
+//				debug(sprintf("Create scenario result<BR>"));
+//				$this->createScenarioResult_skel($message);
+//				break;
+//			};
+//		}
+//
+//		function createSessionResult_skel($message)
+//		{
+//			$userId = 0;
+//			$sessionId = 0;
+//			$result = false;
+//
+//			$message->serialUInt32($userId);
+//			$message->serialUInt32($sessionId);
+//			$message->serialUInt8($result);
+//
+//			createSessionResult($userId, $sessionId, $result);
+//		}
+//	}
+
+//	printf("creating callback client...<BR>");
+//
+//	$cb = new CCallbackClient;
+//	$ret = "";
+//	$cb->connect("192.168.0.1", "8060", $ret);
+//
+//	$smp = new CSessionManagerProxy;
+//
+//	printf("creating a new sessions...<BR>");
+//	$smp->createSession(10, "st_edit", $cb);
+//
+//	$smcs = new CSessionManagerClientSkel;
+//	$smcs->waitCallback($cb);
+//
+//
+//	function createSessionResult($userId, $sessionId, $result)
+//	{
+//		echo "The session result for user $userId is the session $sessionId with a result of $result\n";
+//	}
+//
+
+	// This function connect to the AS.
+	// If true, $res contains the url to connect.
+	// If false, $res contains the reason why it s not okay.
+
+//	function connectToAS(&$fp, &$res)
+//	{
+//		global	$ASHost, $ASPort;
+///*
+//		$sid = session_id();
+//		$result = sqlquery("SELECT socket_id FROM resident_socket");
+//		if (!$result || sqlnumrows($result) == 0)
+//		{
+//			$fp = pfsockopen ($ASHost, $ASPort, $errno, $errstr, 30);
+//			echo "opened resident socket '$fp'\n";
+//
+//			$result = sqlquery("SELECT socket_id FROM resident_socket WHERE socket_id='$fp'");
+//			if ($result && sqlnumrows($result)>0)
+//				sqlquery("DELETE FROM resident_socket WHERE socket_id='$fp'");
+//
+//			sqlquery("INSERT INTO resident_socket SET socket_id='$fp', session_id='$sid', last_access=NOW()");
+//		}
+//		else
+//		{
+//			$result = sqlfetch($result);
+//			$fp = $result["socket_id"];
+//		}
+//
+//		// remove too old sockets
+//		sqlquery("SELECT socket_id FROM resident_socket WHERE NOW()-last_access > 1800");
+//		while ($result && ($arr=sqlfetch($result)))
+//		{
+//			fclose((int)($arr["socket_id"]));
+//			sqlquery("DELETE FROM resident_socket WHERE socket_id='".$arr["socket_id"]."'");
+//		}
+//
+//		// update current socket last access
+//		sqlquery("UPDATE resident_socket SET last_access=NOW() WHERE socket_id='$fp' AND session_id='$sid'");
+//*/
+//
+//		// connect to the login service that must be $ASHost:$ASPort
+//		$fp = fsockopen ($ASHost, $ASPort, $errno, $errstr, 30);
+//		if (!$fp)
+//		{
+//			$res = "Can't connect to the admin service '$ASHost:$ASPort' ($errno: $errstr)";
+//		}
+//		else
+//		{
+//			$res = "";
+//		}
+//
+//	}
+//
+//	function disconnectFromAS(&$fp)
+//	{
+///*
+//		$result = sqlquery("SELECT socket_id FROM resident_socket WHERE socket_id='$fp'");
+//		if (!$result || sqlnumrows($socket)==0)
+//			fclose($fp);
+//*/
+//		fclose($fp);
+//	}
+//
+//	function sendMessage ($fp, $msgout)
+//	{
+//		$size = $msgout->Pos;
+//		$Buffer = chr(($size>>24)&0xFF);
+//		$Buffer .= chr(($size>>16)&0xFF);
+//		$Buffer .= chr(($size>>8)&0xFF);
+//		$Buffer .= chr($size&0xFF);
+//		$Buffer .= $msgout->Buffer;
+//
+//		fwrite ($fp, $Buffer);
+//
+//		//printf ("sent packet size '%d'<br>", strlen($Buffer));
+//
+//		fflush ($fp);
+//	}
+//
+//	function waitMessage ($fp, &$msgin)
+//	{
+//		//echo "waiting a message";
+//		$size = 0;
+//		$val = fread ($fp, 1);
+//		$size = ord($val) << 24;
+//		$val = fread ($fp, 1);
+//		$size = ord($val) << 16;
+//		$val = fread ($fp, 1);
+//		$size += ord($val) << 8;
+//		$val = fread ($fp, 1);
+//		$size += ord($val);
+//		//printf ("receive packet size '%d'<br>", $size);
+//		$fake = fread ($fp, 4);
+//		$size -= 4; // remove the fake
+//
+//		$Buffer = fread ($fp, $size);
+//		$msgin = new CMemStream;
+//		$msgin->setBuffer ($Buffer);
+//	}
+//
+//	function logNelQuery($query)
+//	{
+//		global	$uid;
+///*
+//		$f = fopen("./nel_queries.log", "a");
+//		fwrite($f, date("Y/m/d H:i:s")." ".sprintf("%-16s", $admlogin)." $query\n");
+//		fclose($f);
+//*/
+//
+//		logUser($uid, "QUERY=".$query);
+//	}
+//
+//	function nel_query($rawvarpath, &$result)
+//	{
+//		global			$nel_queries;
+//
+//		$nel_queries[] = $rawvarpath;
+//		$ok = false;
+//		//echo "rawvarpath=$rawvarpath<br>\n";
+//
+//		//logNelQuery($rawvarpath);
+//
+//		connectToAS($fp, $result);
+//		if(strlen($result) != 0)
+//			return $ok;
+//
+//		// send the message that say that we want to add a user
+//		$msgout = new CMemStream;
+//		$fake = 0;
+//		$msgout->serialuint32 ($fake);			// fake used to number the packet
+//		$messageType = 0;
+//		$msgout->serialuint8 ($messageType);
+//		$msgout->serialstring ($rawvarpath);
+//
+//		sendMessage ($fp, $msgout);
+//
+//		waitMessage ($fp, $msgin);
+//
+//		$msgin->serialstring($result);
+//
+//		if(strlen($result) == 0)
+//		{
+//			// it failed
+//		}
+//		else
+//		{
+//			// it's ok
+//			$ok = true;
+//		}
+//
+//		//printf("receive response '$result'<br>\n");
+//
+//		disconnectFromAS(&$fp);
+//		//echo "sent OK.<br><br>\n";
+//
+//		return $ok;
+//	}
 ?>

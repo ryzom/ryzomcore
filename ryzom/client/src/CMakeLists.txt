@@ -118,6 +118,7 @@ IF(WITH_RYZOM_CLIENT)
   ENDIF()
 
   ADD_EXECUTABLE(ryzom_client WIN32 MACOSX_BUNDLE ${SRC} ${SRC_INTERFACE} ${SRC_MODE} ${SRC_R2})
+  ADD_DEPENDENCIES(ryzom_client ryzom_build_info)
 
   # Patch should never be enabled on Steam
   IF(WITH_RYZOM_STEAM)

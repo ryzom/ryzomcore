@@ -102,7 +102,7 @@
 			$msg = new CMessage;
 			$msg->setName("GS");
 
-echo "ok";
+
 
 			$ret = "";
 			$ret = parent::sendMessage($msg);
@@ -112,7 +112,7 @@ echo "ok";
 				$this->invokeError("getStates", "Error in 'sendMessage'");
 				return false;
 			}
-echo "ok";
+
 			$retMsg = parent::waitMessage();
 			if ($ret == false)
 			{
@@ -120,19 +120,17 @@ echo "ok";
 				$this->invokeError("getStates", "Error in 'waitMessage'");
 				return false;
 			}
-echo "ok";
 			if (!($retMsg->MsgName === "R_GS"))
 			{
 				// error during send
 				$this->invokeError("getStates", "Invalid response, awaited 'R_GS', received '".$retMsg->MsgName."'");
 				return false;
 			}
-echo "ok\n";
+
 			// serial the return value
 						$nbElem = 0;
 			$retMsg->serialUInt32($nbElem);
 			$retValue = array();
-			echo $nbElem."\n";
 			for ($i=0; $i<$nbElem;$i++)
 			{
 				$retMsg->serialString($item);
@@ -321,7 +319,7 @@ $message->serialString($serviceAlias);
 
 		reset($data);
 		$data = str_replace('\\\'', '', $data);
-	
+
 		foreach($data as $server_data)
 		{
 			$data_ary = explode("\n",$server_data);
@@ -455,7 +453,6 @@ $message->serialString($serviceAlias);
 		$p_result	= null;
 
 		$adminService = new MyAdminService;
-		$service_command = '!!!NOT CONNECTED!!!';
 
 		if ($adminService->connect($name, '46700', $res) !== false) {
 			$command_return_data	= '';
@@ -504,4 +501,3 @@ $message->serialString($serviceAlias);
 	{
 		return querySelectedShard('localhost', $service_name, $fullcmd, $cmd, $waitCallback, $is_control);
 	}
-

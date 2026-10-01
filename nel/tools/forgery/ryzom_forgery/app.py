@@ -1,17 +1,24 @@
 import json
+import os
 import re
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 from direct.showbase.ShowBase import ShowBase
-from panda3d.core import AmbientLight, DirectionalLight, WindowProperties
+from panda3d.core import AmbientLight, DirectionalLight, Texture, WindowProperties
 
 import p3dimgui
 import imgui_bundle
 from imgui_bundle import imgui, imgui_ctx
 
+from . import settings as app_settings
 from .commands import CommandRegistry
 from .explorer import DEFAULT_FILTER, Explorer
+from .splash import Splash
 from .sysinfo import SysInfoBar
+from .workspace_setup_dialog import WorkspaceSetupDialog
 
 # Font Awesome 4 (the only icon font imgui_bundle ships a .ttf for), merged
 # into the default font so any tool app can use icons_fontawesome_4's
@@ -19,6 +26,23 @@ from .sysinfo import SysInfoBar
 # label -- the default ImGui font alone has no icon glyphs at all.
 _ICON_FONT_PATH = Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts" / "fontawesome-webfont.ttf"
 _ICON_FONT_SIZE = 14.0
+
+# UI text font choices offered in Settings (see Settings.ui_font_name/
+# ui_font_size in settings.py, and _draw_ui_font_settings() in
+# object_editor.py) -- every regular (non-icon) .ttf imgui_bundle itself
+# ships, so no extra font files need bundling in the wheel. Key is what's
+# stored in settings.toml and shown in the picker; value is the path
+# relative to imgui_bundle's own assets/fonts/ directory.
+_FONTS_DIR = Path(imgui_bundle.__file__).resolve().parent / "assets" / "fonts"
+_AVAILABLE_FONTS = {
+	"Roboto Bold": "Roboto/Roboto-Bold.ttf",
+	"Roboto Regular": "Roboto/Roboto-Regular.ttf",
+	"Roboto Bold Italic": "Roboto/Roboto-BoldItalic.ttf",
+	"Roboto Italic": "Roboto/Roboto-RegularItalic.ttf",
+	"Droid Sans": "DroidSans.ttf",
+	"Inconsolata (monospace)": "Inconsolata-Medium.ttf",
+}
+_DEFAULT_FONT_NAME = "Roboto Bold"
 
 # Sysinfo is a fixed thin strip; explorer/panel are pinned in place (no_move)
 # but resizable in width via SetNextWindowSizeConstraints (height is locked
@@ -35,6 +59,8 @@ _SIDE_PANEL_MAX_WIDTH = 900
 # across launches -- see _load_window_geometry()/_save_window_geometry().
 _DEFAULT_WINDOW_SIZE = (1600, 900)
 _WINDOW_GEOMETRY_DIR = Path.home() / ".ryzom_forgery"
+_ICON_PATH = Path(__file__).resolve().parent / "forgery.png"
+_SPLASH_PATH = Path(__file__).resolve().parent / "splashscreen.png"
 
 
 def _slugify(title):
@@ -55,13 +81,28 @@ class ForgeryApp(ShowBase):
 	def __init__(self, explorer_root, title="Ryzom Forgery",
 	             explorer_width=300, panel_width=320, sysinfo_height=28,
 	             explorer_default_filter=DEFAULT_FILTER):
-		ShowBase.__init__(self)
-
 		self._window_geometry_path = _WINDOW_GEOMETRY_DIR / f"{_slugify(title)}.json"
+		geometry = self._load_window_geometry()
+
+		# winfo_screenwidth()/screenheight() report the whole virtual desktop
+		# on multi-monitor X11 setups, so centering on those would straddle
+		# both screens -- center on the target window's own monitor instead,
+		# using its last known position/size (falling back to the virtual
+		# desktop center only on this app's very first launch).
+		center_on = (geometry["x"], geometry["y"], geometry["width"], geometry["height"]) if geometry else None
+		# Kept open past the end of __init__ -- closed on the first real
+		# draw_ui() call below instead, so it covers the actual gap until
+		# something is on screen, not just Python-side construction (there's
+		# a real gap between __init__ returning and ShowBase's run() loop
+		# firing its first frame).
+		self._splash = Splash(_SPLASH_PATH, center_on=center_on) if _SPLASH_PATH.exists() else None
+
+		ShowBase.__init__(self)
 
 		props = WindowProperties()
 		props.setTitle(title)
-		geometry = self._load_window_geometry()
+		if _ICON_PATH.exists():
+			props.setIconFilename(str(_ICON_PATH))
 		if geometry is not None:
 			props.setOrigin(geometry["x"], geometry["y"])
 			props.setSize(geometry["width"], geometry["height"])
@@ -84,7 +125,38 @@ class ForgeryApp(ShowBase):
 		self.camLens.set_near_far(0.02, 20000.0)
 
 		p3dimgui.init()
+		style = imgui.get_style()
+		# Rounded corners app-wide (buttons, inputs, checkboxes...) instead of
+		# ImGui's sharp-cornered default -- purely cosmetic, applies to every
+		# Forgery tool app since it's set once here in the shared base class.
+		style.frame_rounding = 4.0
+		# Dear ImGui's stock dark theme leaves every popup/window background
+		# noticeably translucent (WindowBg/PopupBg alpha ~0.94 by default) --
+		# never touched before now, so every popup in every Forgery app has
+		# always looked slightly hazy. Fully opaque backgrounds read as
+		# crisp/solid instead.
+		style.set_color_(imgui.Col_.window_bg.value, (0.06, 0.06, 0.06, 1.0))
+		style.set_color_(imgui.Col_.popup_bg.value, (0.08, 0.08, 0.08, 1.0))
+		# ModalWindowDimBg is meant to only dim whatever's *behind* a modal
+		# popup -- in this rendering pipeline it was instead blending over
+		# the modal's own content too (confirmed: a pushed pure-black text
+		# color was rendering as 0x0A instead of 0x00, exactly matching
+		# alpha=0.4 blended with the dim color -- 0.4*0.1 + 0.6*0 = 0.04).
+		# Disabled entirely rather than just toned down, so every popup's own
+		# colors/text render exactly as set -- the trade-off is no dimming of
+		# whatever's behind a modal popup anymore.
+		style.set_color_(imgui.Col_.modal_window_dim_bg.value, (0.0, 0.0, 0.0, 0.0))
+		# Dear ImGui's dark theme default for regular text isn't pure white
+		# either -- force it, for the same "everything looks a bit washed
+		# out" reason as the background colors above.
+		style.set_color_(imgui.Col_.text.value, (1.0, 1.0, 1.0, 1.0))
+		self._load_ui_font()
 		self._load_icon_font()
+		self._panel_watermark_tex_ref = None
+		if _SPLASH_PATH.exists():
+			watermark_texture = Texture()
+			watermark_texture.read(str(_SPLASH_PATH))
+			self._panel_watermark_tex_ref = self.imgui.loadTexture(watermark_texture)
 
 		# Applying a Material (as tool apps do for shape rendering) has no
 		# visible effect without at least one light in the scene -- without
@@ -105,16 +177,58 @@ class ForgeryApp(ShowBase):
 
 		self.commands = CommandRegistry()
 		self.sysinfo = SysInfoBar()
+		self.workspace_setup_dialog = WorkspaceSetupDialog()
 		self.explorer = Explorer(self, Path(explorer_root), self.commands,
 		                          default_filter=explorer_default_filter)
 		self.explorer.on_selection_changed = self._on_explorer_selection_changed
 
 		self.accept("imgui-new-frame", self.draw_ui)
 
+		# ShowBase.windowEvent() (see the override below) already calls
+		# self.userExit() itself the moment the OS's own close button/Alt+F4/
+		# etc sets the window's getOpen() to False -- userExit() -> Panda3D's
+		# own finalizeExit() -> self.exitFunc() (if set) -> sys.exit(). That
+		# SystemExit unwinds straight out of super().windowEvent(win) inside
+		# our own override below, well before it would ever reach any code
+		# placed after that call there -- exitFunc is the one hook Panda3D
+		# actually guarantees to run first, no matter which of the two paths
+		# (this, or the in-app Quit button, which also just calls
+		# self.userExit() -- see object_editor.py) triggered the exit.
+		self.exitFunc = self._on_exit
+
 	def windowEvent(self, win):
 		super().windowEvent(win)
 		if win == self.win:
 			self._save_window_geometry()
+
+	def _on_exit(self):
+		"""Hook for subclasses: called once, right before the process
+		actually exits (self.exitFunc, set in __init__ above), regardless
+		of whether that was requested via the in-app Quit button or the
+		OS's own window-close control. No-op here."""
+		pass
+
+	def relaunch(self):
+		"""Relaunches this app with the exact same command line
+		(sys.executable + sys.argv, so this works the same whether launched
+		via `python -m ryzom_forgery.apps.object_editor`, a direct script
+		path, or however ryztart itself invokes it -- sys.argv reflects the
+		actual invocation regardless). Uses os.execv rather than
+		spawning a subprocess and exiting this one separately -- execv
+		replaces this process in place (same PID), so there is never a
+		moment with two copies alive, and no way for a slow/failed shutdown
+		of the old one to pile up extra processes. Used e.g. by the UI
+		font/size Settings, which only take effect on a fresh font atlas
+		build at startup -- see _load_ui_font().
+
+		Named relaunch() rather than restart() deliberately -- ShowBase
+		(our own base class) already defines its own restart(), called from
+		inside ShowBase.__init__ itself to start the IGLOOP task. A same-named
+		override here would shadow that and fire on every single app launch,
+		mid-__init__, via os.execv -- an infinite same-PID re-exec loop
+		disguised as "the app keeps restarting itself for no reason"."""
+		os.execv(sys.executable, [sys.executable] + sys.argv)
+		os.execv(sys.executable, [sys.executable] + sys.argv)
 
 	def _load_window_geometry(self):
 		try:
@@ -134,6 +248,23 @@ class ForgeryApp(ShowBase):
 			self._window_geometry_path.write_text(json.dumps(data))
 		except OSError:
 			pass
+
+	def _load_ui_font(self):
+		"""Loads the user's chosen UI font (Settings.ui_font_name/
+		ui_font_size, see _AVAILABLE_FONTS above) as ImGui's default font,
+		right before _load_icon_font() merges Font Awesome's glyphs into
+		whichever font was most recently added to the atlas -- so the icons
+		end up merged into this one rather than into ImGui's own built-in
+		default. Falls back to _DEFAULT_FONT_NAME if the stored choice is
+		stale (a font file imgui_bundle no longer ships, e.g. after an
+		imgui_bundle upgrade)."""
+		settings = app_settings.load()
+		relative_path = _AVAILABLE_FONTS.get(settings.ui_font_name) or _AVAILABLE_FONTS[_DEFAULT_FONT_NAME]
+		font_path = _FONTS_DIR / relative_path
+		if not font_path.exists():
+			return
+		font = imgui.get_io().fonts.add_font_from_file_ttf(str(font_path), settings.ui_font_size)
+		imgui.get_io().font_default = font
 
 	def _load_icon_font(self):
 		# self.large_icon_font (1.5x _ICON_FONT_SIZE, standalone -- not merged
@@ -162,6 +293,26 @@ class ForgeryApp(ShowBase):
 		loaded there)."""
 		return "Panel"
 
+	_PANEL_WATERMARK_SIZE = 256
+	_PANEL_WATERMARK_COLOR = (1.0, 1.0, 1.0, 0.30)
+
+	_PANEL_WATERMARK_MARGIN = 12
+
+	def _draw_panel_watermark(self):
+		"""Faint branding image horizontally centered at the bottom of the
+		panel, drawn before draw_panel()'s own widgets so it sits behind them
+		in the same window's draw list -- low enough alpha to stay out of the
+		way of whatever's drawn on top."""
+		window_pos = imgui.get_window_pos()
+		window_size = imgui.get_window_size()
+		size = self._PANEL_WATERMARK_SIZE
+		margin = self._PANEL_WATERMARK_MARGIN
+		p_max = (window_pos.x + window_size.x / 2 + size / 2, window_pos.y + window_size.y - margin)
+		p_min = (p_max[0] - size, p_max[1] - size)
+		imgui.get_window_draw_list().add_image(
+			self._panel_watermark_tex_ref, p_min, p_max, (0, 0), (1, 1),
+			imgui.get_color_u32(self._PANEL_WATERMARK_COLOR))
+
 	def on_selection_changed(self, items):
 		"""Override in subclasses to react to the explorer's selection changing."""
 		pass
@@ -179,6 +330,12 @@ class ForgeryApp(ShowBase):
 		self.on_selection_changed(items)
 
 	def draw_ui(self):
+		if self._splash is not None:
+			self._splash.close()
+			self._splash = None
+
+		self.workspace_setup_dialog.draw()
+
 		display_size = imgui.get_io().display_size
 		width, height = display_size.x, display_size.y
 		body_height = height - self.sysinfo_height
@@ -207,4 +364,6 @@ class ForgeryApp(ShowBase):
 		# (panel_title()) changes with whatever's currently loaded.
 		with imgui_ctx.begin(f"{self.panel_title()}###panel", flags=_PINNED_FLAGS):
 			self.panel_width = imgui.get_window_size().x
+			if self._panel_watermark_tex_ref is not None:
+				self._draw_panel_watermark()
 			self.draw_panel()

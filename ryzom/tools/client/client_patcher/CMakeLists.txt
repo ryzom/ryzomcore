@@ -8,6 +8,7 @@ FILE(GLOB SRC main.cpp
 )
 
 ADD_EXECUTABLE(ryzom_client_patcher ${SRC})
+ADD_DEPENDENCIES(ryzom_client_patcher ryzom_build_info)
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_client_patcher
         PRIVATE

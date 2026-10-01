@@ -166,11 +166,8 @@ nel/build/*
 nelns/build/*
 snowballs/build/*
 ryzom/build/*
-build/*
 build-2010/*
 install/*
-build_*
-install_*
 nel/tools/build_gamedata/configuration/buildsite.py
 cmake-build-*
 
@@ -284,22 +281,19 @@ nel/tools/build_gamedata/processes/cartographer/island_screenshots.cfg
 CMakeUserPresets.json
 
 # Configs
-ryzom/server/www/config.php
-ryzom/server/tools/config.sh
+ryzom/server/www/login/vendor/
+ryzom/server/www/login/server_open_status
 setup.ini
 
-server_open_status
 
 # Temp
 *.tmp
 *.out
 
-setup.ini
-ryzom/server/www/login/server_open_status
-
 .claude/
 .agentcom/
-.todo/
 
 # Dear ImGui runtime layout
 imgui.ini
+
+
