@@ -694,10 +694,24 @@ std::string CFileContainer::getCurrentPath ()
 {
 #ifdef NL_OS_WINDOWS
 	wchar_t buffer[1024];
-	return standardizePath(wideToUtf8(_wgetcwd(buffer, 1024)), false);
+
+	if (_wgetcwd(buffer, 1024) == NULL)
+	{
+		nlwarning("PATH: _wgetcwd() failed: %d (%s) -- current directory deleted or inaccessible?", errno, strerror(errno));
+		return std::string();
+	}
+
+	return standardizePath(wideToUtf8(buffer), false);
 #else
 	char buffer [1024];
-	return standardizePath(getcwd(buffer, 1024), false);
+
+	if (getcwd(buffer, 1024) == NULL)
+	{
+		nlwarning("PATH: getcwd() failed: %d (%s) -- current directory deleted or inaccessible?", errno, strerror(errno));
+		return std::string();
+	}
+
+	return standardizePath(buffer, false);
 #endif
 }
 
