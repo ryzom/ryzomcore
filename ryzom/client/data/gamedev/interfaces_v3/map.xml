@@ -33,6 +33,11 @@
 
 <!-- menu of user landmark -->
 <group type="menu" id="user_land_mark_menu_base" extends="land_mark_menu">
+	<action id="share_landmark" name="uiChatLinkMenuLandMark" icon="lm_user.tga">
+		<action id="main" name="uiMainChat" handler="share_map_position" params="source=landmark|destination=main"/>
+		<action id="tell" name="uimTell" handler="share_map_position" params="source=landmark|destination=tell"/>
+		<action id="clipboard" name="uiChatLinkClipboard" handler="share_map_position" params="source=landmark|destination=clipboard"/>
+	</action>
 	<action id="remove" name="uiRemove" handler="enter_modal" params="group=ui:interface:remove_user_landmark_confirm" icon="ico_aim.tga"/>
 	<action id="rename" name="uiRename" handler="rename_user_landmark" params="" icon="r2ed_edit_dialog.tga"/>
 	<separator/>
@@ -51,6 +56,16 @@
 	<action id="create" name="uiCreateUserLM" handler="create_user_landmark" params="" icon="lm_mission.tga"/>
 	<action id="teleport" name="uiTeleport" handler="map_teleport" params="" icon="mp_batiment_noyau_maduk.tga"/>
 	<action id="create_at_user_pos" name="uiCreateUserLMAtUserPos" handler="create_user_landmark_at_user_pos" params="" icon="r2ed_entry_point_over.tga"/>
+	<action id="share_position" name="uiChatLinkMenuPosition" icon="ico_location.tga">
+		<action id="main" name="uiMainChat" handler="share_map_position" params="source=player|destination=main"/>
+		<action id="tell" name="uimTell" handler="share_map_position" params="source=player|destination=tell"/>
+		<action id="clipboard" name="uiChatLinkClipboard" handler="share_map_position" params="source=player|destination=clipboard"/>
+	</action>
+	<action id="share_map_position" name="uiChatLinkMenuLocation" icon="w_radar_point.tga">
+		<action id="main" name="uiMainChat" handler="share_map_position" params="source=map|destination=main"/>
+		<action id="tell" name="uimTell" handler="share_map_position" params="source=map|destination=tell"/>
+		<action id="clipboard" name="uiChatLinkClipboard" handler="share_map_position" params="source=map|destination=clipboard"/>
+	</action>
 	<separator/>
 	<action id="search" name="uiMapSearch" handler="proc" params="map_search_show" icon="ico_location.tga"/>
 	<separator/>

@@ -17,6 +17,7 @@
 
 #include "emoji_picker.h"
 #include "emoji_manager.h"
+#include "chat_text_manager.h"
 
 #include "nel/gui/action_handler.h"
 #include "nel/gui/ctrl_button.h"
@@ -31,31 +32,21 @@ using namespace std;
 using namespace NLMISC;
 using namespace NLGUI;
 
-// The window lives in interaction.xml; these are the parts this file fills.
 #define EMOJI_PICKER_WIN	"ui:interface:emoji_picker"
 #define EMOJI_PICKER_TABS	EMOJI_PICKER_WIN ":content:tabs"
-// "text_list" and "scroll_bar" are the names scroll_text binds together.
 #define EMOJI_PICKER_GRID	EMOJI_PICKER_WIN ":content:grid_area:text_list"
 #define EMOJI_PICKER_SCROLL	EMOJI_PICKER_WIN ":content:grid_area:scroll_bar"
 #define EMOJI_PICKER_FILTER	EMOJI_PICKER_WIN ":content:filter:eb"
 
 namespace
 {
-	// The atlas tiles are 32px. How many fit on a row is measured from the
-	// grid rather than assumed: the window's borders, its inner margins and the
-	// scrollbar all eat into the width, and guessing that arithmetic is what
-	// clipped the last column. The button is a little smaller than its cell so
-	// the grid has gaps rather than a solid sheet of emoji.
+	// Atlas tiles are 32px.
 	const sint32 CellSize = 32;
 	const sint32 FallbackColumns = 8;
 	const sint32 TabSize  = 28;
-
-	// A filter that matches half the table would build thousands of controls
-	// for a list nobody is going to read to the end.
+	// Bounds the number of buttons built for a broad filter.
 	const uint MaxFilterHits = 400;
 
-	// Dimmed until the pointer is on it, which is the only hover feedback a
-	// button whose face is a picture can give.
 	const CRGBA EmojiIdle(255, 255, 255, 190);
 	const CRGBA EmojiLit(255, 255, 255, 255);
 
@@ -65,10 +56,7 @@ namespace
 			CWidgetManager::getInstance()->getElementFromId(id));
 	}
 
-	/** The chat input the picker should type into, found from the button that
-	  * opened it: every chat window holds its edit box as "ebw:eb" somewhere
-	  * above the button, whether it is the main chat, a tell or a channel.
-	  */
+	// Every chat window, including tells and channels, holds its input as "ebw:eb".
 	CGroupEditBox *findChatEditBox(CCtrlBase *caller)
 	{
 		CInterfaceGroup *g = caller ? caller->getParent() : NULL;
@@ -86,24 +74,6 @@ namespace
 		return NULL;
 	}
 
-	/** Is this edit box a chat input?
-	  *
-	  * Every chat window, from the main one to a tell, holds its input as "ebw"
-	  * beside the chat box itself, "cb". Asking for that shape is what keeps a
-	  * pick out of the friend list's search box or the picker's own filter.
-	  */
-	bool isChatEditBox(CGroupEditBox *eb)
-	{
-		if (!eb)
-			return false;
-		CInterfaceGroup *ebw = eb->getParent();
-		if (!ebw)
-			return false;
-		CInterfaceGroup *content = ebw->getParent();
-		return content != NULL && content->getGroup("cb") != NULL;
-	}
-
-	/// ":fire: fire" -- what the name is to type, then what the emoji is.
 	string tooltipFor(const CEmojiManager::CEntry *e)
 	{
 		string help = ":" + e->Name + ":";
@@ -127,8 +97,6 @@ namespace
 		b->setScale(true);
 		b->setW(size);
 		b->setH(size);
-		// The tiles carry their own colours and must not be tinted by the
-		// interface colour, the same as emoji in a chat line.
 		b->setModulateGlobalColorAll(false);
 		b->setColor(EmojiIdle);
 		b->setColorOver(EmojiLit);
@@ -138,13 +106,7 @@ namespace
 }
 
 //=================================================================================
-/** The grid, as a group of its own so that it can notice being resized.
-  *
-  * How many emoji fit on a row is a property of the window's current width, and
-  * the window can be dragged wider at any time. Laying the grid out once and
-  * hoping is what left a dead strip down one side; this asks each frame whether
-  * the width it was built for is still the width it has.
-  */
+// Rebuilds its rows when the picker window is resized.
 class CGroupEmojiGrid : public CGroupList
 {
 public:
@@ -155,8 +117,7 @@ public:
 	virtual void checkCoords()
 	{
 		CGroupList::checkCoords();
-		// Once a frame, with the window laid out and nothing walking this
-		// group's children any more, so they can be thrown away and rebuilt.
+		// Children may only be replaced here, once the layout pass is over.
 		if (getActive())
 			CEmojiPicker::getInstance().updateGrid(getWReal());
 	}
@@ -191,17 +152,13 @@ void CEmojiPicker::releaseInstance()
 //=================================================================================
 CGroupEditBox *CEmojiPicker::getTargetEb() const
 {
-	// Follow the keyboard, not the button. One window serves every chat, so the
-	// player can open it from a tell and then click into the main chat; what
-	// they are typing in is where the emoji belongs. Clicking a button does not
-	// move the keyboard capture, so it still points at the input they left.
+	// The chat input that has the keyboard wins over the one whose button
+	// opened the picker: one window serves every chat.
 	CGroupEditBox *focused = dynamic_cast<CGroupEditBox *>(
 		CWidgetManager::getInstance()->getCaptureKeyboard());
-	if (isChatEditBox(focused))
+	if (getChatTextMngr().isChatInput(focused))
 		return focused;
 
-	// Nothing has the keyboard, or something that is not a chat: fall back to
-	// the input whose button opened the picker.
 	if (_TargetEb.empty())
 		return NULL;
 	return dynamic_cast<CGroupEditBox *>(
@@ -225,8 +182,6 @@ void CEmojiPicker::toggle(CCtrlBase *caller)
 		return;
 	}
 
-	// The same button again closes it; another chat's button aims it there
-	// instead of closing, which is what makes one window enough for them all.
 	if (win->getActive() && _TargetEb == eb->getId())
 	{
 		hide();
@@ -238,16 +193,11 @@ void CEmojiPicker::toggle(CCtrlBase *caller)
 	win->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(win);
 
-	// Fill here, with setActive finished and the window laid out. The grid
-	// group asks for itself too (and that is what covers a picker the saved
-	// interface brings back at login), but this path does not depend on it.
 	win->updateCoords();
 	buildTabs();
 	_NeedFill = true;
 	CGroupEmojiGrid *grid = dynamic_cast<CGroupEmojiGrid *>(getGroupFromId(EMOJI_PICKER_GRID));
 	updateGrid(grid ? grid->getWReal() : 0);
-	// Keyboard focus stays in the chat input on purpose: the picker is a second
-	// way to type, not a place to type.
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 }
 
@@ -273,9 +223,7 @@ void CEmojiPicker::buildTabs()
 	const std::vector<CEmojiManager::CGroup> &groups = CEmojiManager::getInstance().getGroups();
 	for (uint i = 0; i < groups.size(); ++i)
 	{
-		// The group's first emoji is its icon, which is how it works out that
-		// Smileys is a smiley and Flags is a flag: Unicode's order puts the
-		// obvious one first.
+		// Unicode lists the most typical emoji of a group first; it is the tab icon.
 		const CEmojiManager::CEntry *icon = groups[i].Emoji.front();
 		CCtrlButton *b = createEmojiButton(tabs,
 			tabs->getId() + ":tab" + toString(i), icon->Texture, TabSize - 6);
@@ -316,8 +264,6 @@ void CEmojiPicker::setGroup(uint group)
 		return;
 	_Group = group;
 
-	// A tab and a filter cannot both decide what the grid shows, and the tab
-	// was just clicked.
 	if (!_Filter.empty())
 	{
 		_Filter.clear();
@@ -346,9 +292,7 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 	CGroupEmojiGrid *grid = dynamic_cast<CGroupEmojiGrid *>(getGroupFromId(EMOJI_PICKER_GRID));
 	if (!grid)
 	{
-		// An unknown group type is silently replaced by a plain group by the
-		// parser (interface_parser.cpp:1166), so this is the only place the
-		// mistake can be caught.
+		// The parser replaces an unknown group type by a plain group.
 		CInterfaceElement *e = CWidgetManager::getInstance()->getElementFromId(EMOJI_PICKER_GRID);
 		nlwarning("Emoji picker: the grid is missing or is a %s, not an emoji_grid",
 			e ? e->getClassName().c_str() : "(nothing)");
@@ -356,15 +300,10 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 	}
 
 	grid->deleteAllChildren();
-	// deleteAllChildren does not give the height back: CGroupList adds each
-	// child's height to its own and delChild never subtracts it (the code that
-	// did is commented out in removeHead). Left alone, the list claims to be as
-	// tall as every tab ever shown put together, and the scrollbar lets you
-	// scroll that far into nothing.
+	// CGroupList does not shrink when its children are deleted.
 	grid->setH(0);
 	updateTabs();
 
-	// What to show: one tab, or everything the filter matches.
 	const std::vector<CEmojiManager::CGroup> &groups = CEmojiManager::getInstance().getGroups();
 	std::vector<const CEmojiManager::CEntry *> shown;
 	if (_Filter.empty())
@@ -379,8 +318,6 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 			const std::vector<const CEmojiManager::CEntry *> &in = groups[g].Emoji;
 			for (uint i = 0; i < in.size() && shown.size() < MaxFilterHits; ++i)
 			{
-				// Both halves of what the tooltip shows are searchable: a
-				// player either knows the name or knows the words for it.
 				if (toLowerAscii(in[i]->Name).find(_Filter) != string::npos ||
 					toLowerAscii(in[i]->Desc).find(_Filter) != string::npos)
 					shown.push_back(in[i]);
@@ -388,9 +325,6 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 		}
 	}
 
-	// Measured by the caller, not calculated here: how much of the grid is
-	// actually visible is the container's borders, the inner margins and the
-	// scrollbar together, and adding those up by hand got it wrong twice.
 	sint32 columns = gridWidth / CellSize;
 	if (columns < 1)
 		columns = FallbackColumns;
@@ -424,15 +358,11 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 
 	grid->invalidateCoords();
 
-	// Back to the top, whatever the last list was scrolled to.
 	CCtrlScroll *scroll = dynamic_cast<CCtrlScroll *>(
 		CWidgetManager::getInstance()->getElementFromId(EMOJI_PICKER_SCROLL));
 	if (scroll)
 		scroll->setTrackPos(0);
 
-	// The one number worth keeping: a grid whose holder has collapsed clips
-	// everything away, and the rows are built either way, so this is what
-	// tells the two apart.
 	nldebug("Emoji picker: grid %dx%d, clipped to %d, %u rows",
 		grid->getWReal(), grid->getHReal(), grid->getMaxHReal(),
 		(uint)grid->getNumChildren());
@@ -443,7 +373,6 @@ void CEmojiPicker::updateGrid(sint32 gridWidth)
 {
 	if (_Refilling)
 		return;
-	// Nothing asked for a new grid and the old one still fits its width.
 	if (!_NeedFill && gridWidth == _BuiltForW)
 		return;
 
@@ -457,10 +386,7 @@ void CEmojiPicker::updateGrid(sint32 gridWidth)
 //=================================================================================
 void CEmojiPicker::opened()
 {
-	// Only a click on a chat's emoji button opens this. The saved interface
-	// can also bring a window back at login, and a record written while the
-	// window still saved its open state stays in that file until it is next
-	// written -- so refuse to come back by ourselves rather than trust it.
+	// The saved interface may reopen the window at login; only the chat button does.
 	if (!_OpenedByPlayer)
 	{
 		hide();
@@ -473,9 +399,7 @@ void CEmojiPicker::opened()
 		return;
 	}
 	buildTabs();
-	// Not filled here: this runs inside setActive, with the window still
-	// settling into shape, and what it built there did not survive. The grid
-	// asks for its own contents on the next frame instead.
+	// Filled by the grid on the next frame; the window is still being laid out here.
 	_NeedFill = true;
 }
 
@@ -485,18 +409,14 @@ void CEmojiPicker::pick(const string &name)
 	CGroupEditBox *eb = getTargetEb();
 	if (!eb)
 	{
-		// The chat window was closed while the picker stayed open.
 		hide();
 		return;
 	}
 
 	eb->writeString(":" + name + ":");
-	// Back to typing: the player picked an emoji in the middle of a sentence.
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 }
 
-// ***************************************************************************
-// Action handlers
 // ***************************************************************************
 
 class CHandlerEmojiPickerOpened : public IActionHandler

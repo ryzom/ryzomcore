@@ -18,6 +18,7 @@
 #define CL_CHAT_LINK_UI_H
 
 #include "game_share/chat_message.h"
+#include "nel/misc/smart_ptr.h"
 
 namespace NLGUI
 {
@@ -31,32 +32,30 @@ namespace CHAT_SHARE
 	class CRequestScope
 	{
 	public:
-		CRequestScope(const CChatMessageRequest *request);
+		CRequestScope(const CChatMessageRequest *request, NLGUI::CGroupEditBox *editBox = NULL);
 		~CRequestScope();
-
+		bool wasSent() const;
 	private:
 		CRequestScope(const CRequestScope &);
 		CRequestScope &operator=(const CRequestScope &);
 		const CChatMessageRequest *_Previous;
+		NLMISC::CRefPtr<NLGUI::CGroupEditBox> _PreviousEditBox;
+		bool _PreviousSent;
 	};
 
-	enum TShareResult
-	{
-		ShareOk,
-		ShareUnavailable,
-		ShareInputFull
-	};
-
-	TShareResult share(const std::string &name, CChatMessageReference::TType type,
-		uint32 value, NLMISC::CRGBA color, const std::string &destination);
-	NLMISC::CRGBA itemColor();
-	NLMISC::CRGBA phraseColor();
+	void share(const std::string &name, const CChatMessageReference &reference, const std::string &destination);
 	bool canShareItem(const NLMISC::CSheetId &sheetId);
-	bool isChatInput(NLGUI::CGroupEditBox *editBox);
-	bool hasCurrentRequest();
+	const CChatMessageRequest *getCurrentRequest();
+	void setCurrentRequestSent(bool sent);
+	bool isChatCommand(const CChatMessageRequest &request, std::string &name);
+	bool executeCommand(const CChatMessageRequest &request, NLGUI::CGroupEditBox *editBox);
+	bool sendRequest(CChatGroup::TGroupType group, NLMISC::CEntityId dynamicChannelId,
+		std::string receiver, bool command);
 	bool buildRequest(const NLGUI::CGroupEditBox *editBox, CChatMessageRequest &request);
-	bool buildCommandRequest(const NLGUI::CGroupEditBox *editBox, uint32 argumentsBeforeText,
-		CChatMessageRequest &request);
+	// True when the input holds links or group mentions and must be sent as a request.
+	bool hasReferences(const NLGUI::CGroupEditBox *editBox);
+	void reportInvalidLink();
+	void setMapPosition(const CChatMessagePosition *position);
 	std::string getPartName(const CChatMessagePart &part);
 	NLGUI::CViewLink *createAttachmentView(const CChatMessagePart &part, bool justified);
 	bool getAttachmentSheetId(NLGUI::CCtrlBase *caller, NLMISC::CSheetId &sheetId);

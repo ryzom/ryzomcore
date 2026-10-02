@@ -42,6 +42,8 @@
 
 // std
 #include <map>
+#include <deque>
+#include <set>
 #include <string>
 
 
@@ -159,15 +161,36 @@ public :
 	 * \param langs is string to fill all langs where translated
 	 * \param nbrReceivers is a integer to fill with number of players who will receive the message
 	 */
-	void checkNeedDeeplize(const TDataSetRow& sender, const ucstring& ucstr, const std::string& senderLang, std::string &langs, uint &nbrReceivers, TGroupId grpId = NLMISC::CEntityId::Unknown);
+	void checkNeedDeeplize(const TDataSetRow& sender, const ucstring& ucstr, const std::string& senderLang,
+		std::string &langs, uint &nbrReceivers, bool controlPrefix, TGroupId grpId = NLMISC::CEntityId::Unknown);
 
 	/**
 	 * Transmit a chat message
 	 * \param sender is the id of the talking char
 	 * \param str is the chat content
 	 */
-	void chat( const TDataSetRow& sender, const ucstring& ucstr );
-	void chatShared(const TDataSetRow &sender, const CChatMessage &message);
+	void chat( const TDataSetRow& sender, const ucstring& ucstr, bool sharedControlPrefix = false );
+	bool chatShared(const TDataSetRow &sender, const CChatMessage &message);
+	void sendQuoteResult(const NLMISC::CEntityId &sender, uint32 requestId, bool accepted);
+
+	struct CMessageHistoryEntry
+	{
+		CMessageHistoryEntry() : Exported(false) {}
+		CChatMessage Message;
+		std::string Channel;
+		std::string ExternalId;
+		std::set<NLMISC::CEntityId> Receivers;
+		bool Exported;
+	};
+	CMessageHistoryEntry *findMessage(const std::string &messageId);
+	CMessageHistoryEntry *rememberMessage(const CChatMessage &message);
+	bool resolveQuote(CChatMessage &message, const std::string &channel,
+		const NLMISC::CEntityId &sender, const std::string &receiver = std::string());
+	bool canReceiveQuote(const std::string &messageId, const NLMISC::CEntityId &receiver);
+	bool bridgeChat(const std::string &sender, const std::string &channel,
+		const std::string &externalId, const std::string &messageId, const std::string &quoteId,
+		const std::string &sourceLanguage, const std::string &targetLanguage, const ucstring &text,
+		const std::string &translatedParts);
 
 	/**
 	 * Transmit a chat message to a group
@@ -191,13 +214,14 @@ public :
 	 * \param receiver is the id of the listening char
 	 * \param str is the chat content
 	 */
-	void tell( const TDataSetRow& sender, const std::string& receiver, const ucstring& ucstr );
-	void tellShared(const TDataSetRow &sender, const std::string &receiver, const CChatMessage &message);
+	bool tell( const TDataSetRow& sender, const std::string& receiver, const ucstring& ucstr );
+	bool tellShared(const TDataSetRow &sender, const std::string &receiver, const CChatMessage &message);
 	/**
 	 * Transmit a chat message to the receiver
 	 */
 	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr);
-	void farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &receiver, const CChatMessage &message);
+	void farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName,
+		bool havePrivilege, const ucstring &receiver, const CChatMessage &message);
 	void echoTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &receiver, const CChatMessage &message);
 	/**
 	 * Transmit a chat message to the receiver
@@ -376,7 +400,14 @@ private :
 	std::list<NLMISC::CEntityId>	_DestUsers;
 
 	CDynChat _DynChat;
+	/// Metadata scoped to the current synchronous chat()/tell()/sendChat() delivery.
 	const CChatMessage *_SharedMessage;
+	std::map<std::string, CMessageHistoryEntry> _MessageHistory;
+	std::deque<std::string> _MessageHistoryOrder;
+	std::map<std::string, std::string> _ExternalMessageIds;
+	void logSharedMessage(const CChatMessage &message, const std::string &channel,
+		const std::string &language);
+	void recordSharedReceiver(const NLMISC::CEntityId &receiver, CChatGroup::TGroupType chatMode);
 
 
 protected:

@@ -1116,6 +1116,20 @@ if (game.Animal == nil) then
 end
 
 -------------------------------------------------------------------
+function game:staticMapImage(x_pos, y_pos, zoom, icon, label, imageId)
+    local markers = ""
+    if icon ~= "" then
+        markers = [[&markers=icon:]]..icon..[[|color:0x00ff00|label:]]..label..[[|]]..x_pos..[[,]]..y_pos
+    end
+    local attributes = ""
+    if imageId then
+        attributes = [[ id="]]..imageId..[[" width="200" height="200"]]
+    end
+    return [[<img]]..attributes..[[ src="https://api.bmsite.net/maps/static?center=]]..x_pos..[[,]]..y_pos..
+        [[&zoom=]]..zoom..markers..[[&maptype=atys&mapmode=server&size=200x200" />]]
+end
+
+-------------------------------------------------------------------
 function game:animalMouse_over_map_over(x_pos, y_pos, zoom, index)
     --save_old_mouse_pos
     game.Animal.mouse_old_x, game.Animal.mouse_old_y = getMousePos()
@@ -1129,7 +1143,7 @@ function game:animalMouse_over_map_over(x_pos, y_pos, zoom, index)
     local html_display_map_img = ""
     html_display_map_img = [[<table width="100%">
                 <tr align="left">
-                    <td><img src="https://api.bmsite.net/maps/static?center=]]..x_pos..[[,]]..y_pos..[[&zoom=]]..game.Animal.zoom..[[&markers=icon:mektoub|color:0x00ff00|label:]]..game:animalGetName(index)..[[|]]..x_pos..[[,]]..y_pos..[[&maptype=atys&mapmode=server&size=200x200" /></td>
+                    <td>]]..game:staticMapImage(x_pos, y_pos, game.Animal.zoom, "mektoub", game:animalGetName(index))..[[</td>
                 </tr>
             </table>]]
 

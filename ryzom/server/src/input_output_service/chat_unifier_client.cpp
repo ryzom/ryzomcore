@@ -116,13 +116,14 @@ public:
 		cuc.sendFarTell(this, senderCharId, havePrivilege, destName, text);
 	}
 
-	void sendFarTellShared(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
+	bool sendFarTellShared(const CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
 	{
 		if (_ChatUnifierServer == NULL)
-			return;
+			return false;
 
 		CChatUnifierProxy cuc(_ChatUnifierServer);
 		cuc.sendFarTellShared(this, senderCharId, havePrivilege, destName, message);
+		return true;
 	}
 
 	void sendFarGuildChat(const ucstring &senderName, uint32 guildId, const ucstring &text)
@@ -242,7 +243,8 @@ public:
 		cm.farTell(senderCharId, senderName, havePrivilege, destName, text);
 	}
 
-	void recvFarTellShared(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring &destName, const CChatMessage &message)
+	void recvFarTellShared(NLNET::IModuleProxy *sender, const CEntityId &senderCharId, const ucstring &senderName,
+		bool havePrivilege, const ucstring &destName, const CChatMessage &message)
 	{
 		nldebug("IOSCU: recvFarTellShared : receiving a far tell from %s to '%s'", senderCharId.toString().c_str(), destName.toUtf8().c_str());
 		CChatManager &cm = IOS->getChatManager();
@@ -322,7 +324,8 @@ public:
 		}						
 	}
 
-	virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId, const ucstring &senderName, const CChatMessage &message)
+	virtual void dynChanBroadcastShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &chanId,
+		const ucstring &senderName, const CChatMessage &message)
 	{
 		IOS->getChatManager().farDynChatShared(chanId, senderName, message);
 	}

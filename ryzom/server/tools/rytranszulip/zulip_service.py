@@ -16,6 +16,7 @@
 
 import re
 import time
+import traceback
 import zulip
 import requests
 
@@ -37,7 +38,7 @@ class ZulipClient(zulip.Client):
 				self.last_event_id = res["last_event_id"]
 				return self.queue_id
 
-	def call(self, callback, event_types, narrow, **kwargs):
+	def call(self, callback, event_types, narrow, on_register=None, on_poll=None, **kwargs):
 		if narrow is None:
 			narrow = []
 
@@ -46,7 +47,23 @@ class ZulipClient(zulip.Client):
 		# making a new long-polling request.
 		while True:
 			try:
-				res = self.get_events(queue_id=self.queue_id, last_event_id=self.last_event_id)
+				pending = bool(on_poll()) if on_poll is not None else False
+			except (
+				requests.exceptions.Timeout,
+				requests.exceptions.SSLError,
+				requests.exceptions.ConnectionError,
+			):
+				if self.verbose:
+					print(f"Connection error checking pending quotes:\n{traceback.format_exc()}")
+				time.sleep(1)
+				continue
+			if pending:
+				time.sleep(1)
+			try:
+				request = {"queue_id": self.queue_id, "last_event_id": self.last_event_id}
+				if pending:
+					request["dont_block"] = True
+				res = self.get_events(**request)
 			except (
 				requests.exceptions.Timeout,
 				requests.exceptions.SSLError,
@@ -85,8 +102,9 @@ class ZulipClient(zulip.Client):
 						# we can do about it other than resuming
 						# getting new ones.
 						#
-						# Reset queue_id to register a new event queue.
-						self.queue_id = None
+						self.doRegister(event_types, narrow, **kwargs)
+						if on_register is not None:
+							on_register(self.queue_id)
 				# Add a pause here to cover against potential bugs in this library
 				# causing a DoS attack against a server when getting errors.
 				# TODO: Make this back off exponentially.
@@ -94,16 +112,26 @@ class ZulipClient(zulip.Client):
 				continue
 
 			for event in res["events"]:
-				self.last_event_id = max(self.last_event_id, int(event["id"]))
-
 				if event["type"] == "heartbeat":
 					# Heartbeat events are sent to clients regardless
 					# of the client's requested event types, and are
 					# intended to be an internal part of the Zulip
 					# longpolling protocol, not something that clients
 					# need to handle.
+					self.last_event_id = max(self.last_event_id, int(event["id"]))
 					continue
-				callback(event)
+				try:
+					callback(event)
+				except (
+					requests.exceptions.Timeout,
+					requests.exceptions.SSLError,
+					requests.exceptions.ConnectionError,
+				):
+					if self.verbose:
+						print(f"Connection error processing event:\n{traceback.format_exc()}")
+					time.sleep(1)
+					break
+				self.last_event_id = max(self.last_event_id, int(event["id"]))
 
 	def registerMessages(self, **kwargs):
 		self.doRegister(["message", "update_message"], None, **kwargs)
@@ -121,7 +149,7 @@ class ZulipService(RyzomService):
 		super().__init__()
 		while True:
 			try:
-				self.zulip = ZulipClient(config_file=".zuliprc")#email=self.config["zulip"]["email"], api_key=self.config["zulip"]["key"], site=self.base_url)
+				self.zulip = ZulipClient(config_file=".zuliprc")
 			except Exception as e:
 				print("Error Zulip server", self.config["zulip"]["site"])
 				print(e)
@@ -131,6 +159,16 @@ class ZulipService(RyzomService):
 				break
 		print("Connected! to", self.base_url, "!")
 
+
+	def retryError(self, result):
+		if result.get("retry-after"):
+			time.sleep(float(result["retry-after"]))
+		if result.get("result") == "http-error":
+			status = result.get("status_code", 500)
+			return status in (408, 429) or status >= 500
+		if result.get("result") == "error" and result.get("code") is None:
+			return False
+		return result.get("code") in (None, "RATE_LIMIT_HIT", "BAD_EVENT_QUEUE_ID")
 
 	def setZulipQueueId(self, queue_id):
 		self.client.set("Zulip-Queue-Id", self.zulip.queue_id)

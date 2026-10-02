@@ -20,6 +20,10 @@
 #include "chat_group.h"
 #include "item_infos.h"
 #include "sphrase_com.h"
+#include "nel/misc/rgba.h"
+#include "nel/misc/stream.h"
+#include <string>
+#include <vector>
 
 namespace CHAT_MESSAGE
 {
@@ -29,26 +33,89 @@ namespace CHAT_MESSAGE
 		MaxReceiverLength = 255,
 		MaxReferences = 8, // Bounds attachment fan-out and item-info payload size.
 		MaxParts = MaxReferences * 2 + 1,
+		MaxMentions = MaxTextLength / 2,
+		MaxMacroCommands = 32,
+		MessageIdLength = 36,
 		MaxSerializedSize = 64 * 1024 // Bounds authoritative data before server fan-out.
 	};
 
-	inline bool isValidTarget(CChatGroup::TGroupType group, const NLMISC::CEntityId &dynamicChannelId,
-		const std::string &receiver)
+	inline bool stripNoBubble(ucstring &text)
 	{
-		if (group == CChatGroup::tell)
-			return dynamicChannelId == NLMISC::CEntityId::Unknown &&
-				!receiver.empty() && receiver.size() <= MaxReceiverLength;
-		if (!receiver.empty())
-			return false;
-		if (group == CChatGroup::dyn_chat)
-			return dynamicChannelId.getType() == RYZOMID::dynChatGroup;
-		if (dynamicChannelId != NLMISC::CEntityId::Unknown)
-			return false;
-		return group == CChatGroup::say || group == CChatGroup::shout ||
-			group == CChatGroup::team || group == CChatGroup::guild ||
-			group == CChatGroup::region || group == CChatGroup::universe;
+		const ucstring tag("{no_bubble}");
+		bool removed = false;
+		ucstring::size_type position = text.find(tag);
+		while (position != ucstring::npos)
+		{
+			text.erase(position, tag.size());
+			removed = true;
+			position = text.find(tag, position);
+		}
+		return removed;
 	}
+
+	inline bool isMentionNameChar(uint32 c)
+	{
+		return c > 127 || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') || c == '_' || c == '-' || c == '.' || c == '(' || c == ')';
+	}
+
+	inline bool isMentionBoundary(uint32 c)
+	{
+		return c == ' ' || c == '\t' || c == '\n' || c == '"' || c == '\'' ||
+			c == '[' || c == '(' || c == ',' || c == ':' || c == ';' || c == '!' || c == '?';
+	}
+
+	// Ignore code spans, links, URLs and /$$...$$/ tokens; their @ characters
+	// are not player mentions.
+	bool isMentionProtectedText(const ucstring &text, uint32 start);
+
+	uint32 getMentionEnd(const ucstring &text, uint32 start);
+
+	bool isValidTarget(CChatGroup::TGroupType group, const NLMISC::CEntityId &dynamicChannelId,
+		const std::string &receiver);
 }
+
+class CChatMessagePosition
+{
+public:
+	enum TKind
+	{
+		PlayerPosition,
+		MapPosition,
+		UserLandMark
+	};
+
+	CChatMessagePosition() : Kind(PlayerPosition), X(0), Y(0), FlagColor(NLMISC::CRGBA::White),
+		Timestamp(0) {}
+
+	void serial(NLMISC::IStream &stream)
+	{
+		stream.serialEnum(Kind);
+		stream.serial(X);
+		stream.serial(Y);
+		stream.serial(FlagName);
+		stream.serial(FlagColor);
+		stream.serial(Place);
+		stream.serial(Region);
+		stream.serial(Continent);
+		stream.serial(SenderName);
+		stream.serial(Timestamp);
+	}
+
+	bool isValid() const;
+
+	// Mirror and map coordinates use millimetres.
+	TKind Kind;
+	sint32 X;
+	sint32 Y;
+	ucstring FlagName;
+	NLMISC::CRGBA FlagColor;
+	std::string Place;
+	std::string Region;
+	std::string Continent;
+	ucstring SenderName;
+	uint32 Timestamp;
+};
 
 class CChatMessageItem
 {
@@ -81,6 +148,7 @@ public:
 	uint32 Quantity;
 	uint32 Weight;
 	sint32 UserColor;
+	// Receiver string id; the IOS resolves it per receiver before sending.
 	uint32 NameId;
 	std::string NamePhraseId;
 	ucstring Name;
@@ -100,8 +168,56 @@ public:
 		stream.serial(Phrase);
 	}
 
+	// Known rolemaster phrases only carry their sheet; custom phrases carry the bricks.
 	NLMISC::CSheetId SheetId;
 	CSPhraseCom Phrase;
+};
+
+class CChatMessageMacro
+{
+public:
+	class CCommand
+	{
+	public:
+		void serial(NLMISC::IStream &stream)
+		{
+			stream.serial(Name);
+			stream.serial(Params);
+		}
+
+		std::string Name;
+		std::string Params;
+	};
+
+	CChatMessageMacro() : BitmapBack(0), BitmapIcon(0), BitmapOver(0) {}
+
+	void serial(NLMISC::IStream &stream)
+	{
+		stream.serial(Name);
+		stream.serial(DispText);
+		stream.serial(BitmapBack);
+		stream.serial(BitmapIcon);
+		stream.serial(BitmapOver);
+		nlassert(stream.isReading() || Commands.size() <= CHAT_MESSAGE::MaxMacroCommands);
+		uint8 count = stream.isReading() ? 0 : (uint8)Commands.size();
+		stream.serial(count);
+		if (count > CHAT_MESSAGE::MaxMacroCommands)
+			throw NLMISC::EInvalidDataStream(stream);
+		if (stream.isReading())
+			Commands.resize(count);
+		for (uint i = 0; i < Commands.size(); ++i)
+			stream.serial(Commands[i]);
+	}
+
+	bool isValid() const;
+
+	// Same fields as the client macro; the receiver reviews them in the macro editor.
+	std::string Name;
+	std::string DispText;
+	uint8 BitmapBack;
+	uint8 BitmapIcon;
+	uint8 BitmapOver;
+	std::vector<CCommand> Commands;
 };
 
 class CChatMessagePart
@@ -111,7 +227,9 @@ public:
 	{
 		Text,
 		Item,
-		Phrase
+		Phrase,
+		Position,
+		Macro
 	};
 
 	CChatMessagePart() : Type(Text) {}
@@ -130,65 +248,175 @@ public:
 		case Phrase:
 			stream.serial(PhraseValue);
 			break;
+		case Position:
+			stream.serial(PositionValue);
+			break;
+		case Macro:
+			stream.serial(MacroValue);
+			break;
+		default:
+			throw NLMISC::EInvalidDataStream(stream);
 		}
 	}
+
+	bool isValid() const;
 
 	TType Type;
 	ucstring TextValue;
 	CChatMessageItem ItemValue;
 	CChatMessagePhrase PhraseValue;
+	CChatMessagePosition PositionValue;
+	CChatMessageMacro MacroValue;
+};
+
+class CChatMessageQuote
+{
+public:
+	CChatMessageQuote() : SenderId(NLMISC::CEntityId::Unknown), Timestamp(0) {}
+
+	bool isValid() const;
+
+	void serial(NLMISC::IStream &stream)
+	{
+		stream.serial(MessageId);
+		stream.serial(SenderId);
+		stream.serial(SenderName);
+		stream.serial(Timestamp);
+		nlassert(stream.isReading() || Parts.size() <= CHAT_MESSAGE::MaxParts);
+		uint8 count = stream.isReading() ? 0 : (uint8)Parts.size();
+		stream.serial(count);
+		if (count > CHAT_MESSAGE::MaxParts)
+			throw NLMISC::EInvalidDataStream(stream);
+		if (stream.isReading())
+			Parts.resize(count);
+		for (uint i = 0; i < Parts.size(); ++i)
+			stream.serial(Parts[i]);
+	}
+
+	std::string MessageId;
+	NLMISC::CEntityId SenderId;
+	ucstring SenderName;
+	uint32 Timestamp;
+	std::vector<CChatMessagePart> Parts;
+};
+
+class CChatMessageMention
+{
+public:
+	enum TScope
+	{
+		Player,
+		Team,
+		Guild,
+		All
+	};
+
+	CChatMessageMention() : Scope(Player), Part(0), Start(0), Length(0) {}
+	void serial(NLMISC::IStream &stream)
+	{
+		stream.serialEnum(Scope);
+		stream.serial(PlayerId);
+		stream.serial(Name);
+		stream.serial(Part);
+		stream.serial(Start);
+		stream.serial(Length);
+	}
+	TScope Scope;
+	// Mentioned player, only for the Player scope.
+	NLMISC::CEntityId PlayerId;
+	ucstring Name;
+	uint8 Part;
+	uint16 Start;
+	uint16 Length;
 };
 
 class CChatMessage
 {
 public:
-	CChatMessage() : NoBubble(false) {}
+	CChatMessage() : NoBubble(false), Timestamp(0), AllowTranslation(false),
+		MentionHomeSessionId(0), ResolveMentions(false) {}
 
-	bool isValid() const
-	{
-		if (Parts.empty() || Parts.size() > CHAT_MESSAGE::MaxParts)
-			return false;
-
-		uint32 textLength = 0;
-		uint32 referenceCount = 0;
-		for (std::vector<CChatMessagePart>::const_iterator it = Parts.begin(); it != Parts.end(); ++it)
-		{
-			if (it->Type == CChatMessagePart::Text)
-			{
-				if (it->TextValue.size() > CHAT_MESSAGE::MaxTextLength - textLength)
-					return false;
-				textLength += (uint32)it->TextValue.size();
-			}
-			else
-			{
-				if (it->Type != CChatMessagePart::Item && it->Type != CChatMessagePart::Phrase)
-					return false;
-				if (++referenceCount > CHAT_MESSAGE::MaxReferences)
-					return false;
-			}
-		}
-		return true;
-	}
+	bool isValid() const;
 
 	void serial(NLMISC::IStream &stream)
 	{
+		uint8 version = 1;
+		stream.serial(version);
+		if (version != 1)
+			throw NLMISC::EInvalidDataStream(stream);
 		stream.serial(NoBubble);
+		stream.serial(MessageId);
+		stream.serial(SenderId);
+		stream.serial(SenderName);
+		stream.serial(Timestamp);
 		nlassert(stream.isReading() || Parts.size() <= CHAT_MESSAGE::MaxParts);
 		uint8 count = stream.isReading() ? 0 : (uint8)Parts.size();
 		stream.serial(count);
+		if (count > CHAT_MESSAGE::MaxParts)
+			throw NLMISC::EInvalidDataStream(stream);
 		if (stream.isReading())
-		{
-			if (count > CHAT_MESSAGE::MaxParts)
-				throw NLMISC::EInvalidDataStream(stream);
 			Parts.resize(count);
-		}
 		for (uint i = 0; i < Parts.size(); ++i)
 			stream.serial(Parts[i]);
+		stream.serial(SourceLanguage);
+		stream.serial(TranslationLanguage);
+		stream.serial(AllowTranslation);
+		nlassert(stream.isReading() || TranslatedParts.size() <= CHAT_MESSAGE::MaxParts);
+		count = stream.isReading() ? 0 : (uint8)TranslatedParts.size();
+		stream.serial(count);
+		if (count > CHAT_MESSAGE::MaxParts)
+			throw NLMISC::EInvalidDataStream(stream);
+		if (stream.isReading())
+			TranslatedParts.resize(count);
+		for (uint i = 0; i < TranslatedParts.size(); ++i)
+			stream.serial(TranslatedParts[i]);
+		stream.serial(Quote);
+		stream.serial(MentionHomeSessionId);
+		stream.serial(ResolveMentions);
+		nlassert(stream.isReading() || Mentions.size() <= CHAT_MESSAGE::MaxMentions);
+		count = stream.isReading() ? 0 : (uint8)Mentions.size();
+		stream.serial(count);
+		if (count > CHAT_MESSAGE::MaxMentions)
+			throw NLMISC::EInvalidDataStream(stream);
+		if (stream.isReading())
+			Mentions.resize(count);
+		for (uint i = 0; i < Mentions.size(); ++i)
+			stream.serial(Mentions[i]);
 	}
 
 	bool NoBubble;
+	std::string MessageId;
+	NLMISC::CEntityId SenderId;
+	ucstring SenderName;
+	uint32 Timestamp;
 	std::vector<CChatMessagePart> Parts;
+	std::string SourceLanguage;
+	std::string TranslationLanguage;
+	bool AllowTranslation;
+	std::vector<CChatMessagePart> TranslatedParts;
+	CChatMessageQuote Quote;
+	// Home shard used to resolve unqualified player names.
+	uint32 MentionHomeSessionId;
+	// Allow the receiving IOS to resolve @ names in Parts.
+	bool ResolveMentions;
+	std::vector<CChatMessageMention> Mentions;
 };
+
+namespace CHAT_MESSAGE
+{
+	inline void stripNoBubble(CChatMessage &message)
+	{
+		std::vector<CChatMessagePart> *partLists[] = { &message.Parts, &message.TranslatedParts };
+		for (uint list = 0; list < 2; ++list)
+		{
+			for (std::vector<CChatMessagePart>::iterator part = partLists[list]->begin(); part != partLists[list]->end(); ++part)
+			{
+				if (part->Type == CChatMessagePart::Text && stripNoBubble(part->TextValue))
+					message.NoBubble = true;
+			}
+		}
+	}
+}
 
 class CChatMessageReference
 {
@@ -197,7 +425,11 @@ public:
 	{
 		Item,
 		KnownPhrase,
-		PhraseSheet
+		PhraseSheet,
+		Position,
+		MapPosition,
+		Mention,
+		Macro
 	};
 
 	CChatMessageReference() : Start(0), Length(0), Type(Item), Value(0) {}
@@ -207,57 +439,89 @@ public:
 		stream.serial(Start);
 		stream.serial(Length);
 		stream.serialEnum(Type);
-		stream.serial(Value);
+		switch (Type)
+		{
+		case Item:
+		case KnownPhrase:
+		case PhraseSheet:
+		case Mention:
+			stream.serial(Value);
+			break;
+		case MapPosition:
+			stream.serial(PositionValue);
+			break;
+		case Macro:
+			stream.serial(MacroValue);
+			break;
+		case Position:
+			break;
+		default:
+			throw NLMISC::EInvalidDataStream(stream);
+		}
 	}
 
 	uint16 Start;
 	uint16 Length;
 	TType Type;
+	// Inventory slot, known phrase index, phrase sheet id or group mention scope.
 	uint32 Value;
+	CChatMessagePosition PositionValue;
+	CChatMessageMacro MacroValue;
 };
 
 class CChatMessageRequest
 {
 public:
-	bool isValid() const
-	{
-		if (Text.size() > CHAT_MESSAGE::MaxTextLength || References.empty() ||
-			References.size() > CHAT_MESSAGE::MaxReferences)
-			return false;
+	CChatMessageRequest() : ClientRequestId(0) {}
 
-		uint32 textPosition = 0;
-		for (std::vector<CChatMessageReference>::const_iterator it = References.begin();
-			it != References.end(); ++it)
-		{
-			if (it->Length == 0 || it->Start < textPosition || it->Start > Text.size() ||
-				it->Length > Text.size() - it->Start ||
-				(it->Type != CChatMessageReference::Item &&
-				 it->Type != CChatMessageReference::KnownPhrase &&
-				 it->Type != CChatMessageReference::PhraseSheet))
-				return false;
-			textPosition = it->Start + it->Length;
-		}
-		return true;
-	}
+	bool isValid() const;
 
 	void serial(NLMISC::IStream &stream)
 	{
+		uint8 version = 1;
+		stream.serial(version);
+		if (version != 1)
+			throw NLMISC::EInvalidDataStream(stream);
 		stream.serial(Text);
+		stream.serial(QuoteMessageId);
+		stream.serial(ClientRequestId);
 		nlassert(stream.isReading() || References.size() <= CHAT_MESSAGE::MaxReferences);
 		uint8 count = stream.isReading() ? 0 : (uint8)References.size();
 		stream.serial(count);
+		if (count > CHAT_MESSAGE::MaxReferences)
+			throw NLMISC::EInvalidDataStream(stream);
 		if (stream.isReading())
-		{
-			if (count > CHAT_MESSAGE::MaxReferences)
-				throw NLMISC::EInvalidDataStream(stream);
 			References.resize(count);
-		}
 		for (uint i = 0; i < References.size(); ++i)
 			stream.serial(References[i]);
 	}
 
 	ucstring Text;
+	std::string QuoteMessageId;
+	uint32 ClientRequestId;
 	std::vector<CChatMessageReference> References;
+};
+
+// Appended to the existing chat impulse; older clients ignore the remaining bits.
+class CChatMessageTrailer
+{
+public:
+	CChatMessageTrailer() : OwnTell(false) {}
+
+	void serial(NLMISC::IStream &stream)
+	{
+		uint8 version = 1;
+		stream.serial(version);
+		if (version != 1)
+			throw NLMISC::EInvalidDataStream(stream);
+		stream.serial(OwnTell);
+		stream.serial(TellTarget);
+		stream.serial(Message);
+	}
+
+	bool OwnTell;
+	ucstring TellTarget;
+	CChatMessage Message;
 };
 
 #endif

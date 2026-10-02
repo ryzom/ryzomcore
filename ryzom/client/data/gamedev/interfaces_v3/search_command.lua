@@ -944,29 +944,45 @@ function SearchCommand:check_autocomplet_click(uiId, valid_command_number)
 	end
 end
 
-function SearchCommand:check_autocomplet_number(uiId)
+function SearchCommand:check_autocomplet_number(uiId, mention_number, mention_key, friends)
 	local modal_open_list = SearchCommand:read_modal_open_list(uiId)
 	local menu = getUI("ui:interface:search_command_add_menu")
 	local text_from_input = getUI(uiId)
 	local input_text = text_from_input.input_string
 	
-	--The digit just typed sits directly left of the caret. Reading the end of the
-	--line instead only agrees with that while the player types at the end, so
-	--picking an entry by number did nothing once they went back into the line.
-	local cursor_pos = SearchCommand:get_input_cursor(uiId)
-	if(cursor_pos < 1)then
-		do return end
-	end
-	
-	local get_last_char_from_input = tonumber(string.sub(input_text, cursor_pos, cursor_pos))
+	local get_last_char_from_input = mention_number
+	if mention_number then
+		if self.mention_key ~= mention_key or not menu.active or modal_open_list ~= 1 then return end
+		local candidates = self.valid_commands_list
+		self.valid_commands_list = {}
+		for _, name in ipairs(candidates) do
+			runAH(text_from_input, "chat_mention", "candidate="..name)
+		end
+		for _, name in ipairs(friends) do
+			runAH(text_from_input, "chat_mention", "candidate="..name)
+		end
+		local number_in_name = #self.valid_commands_list > 0
+		self.valid_commands_list = candidates
+		if number_in_name then return end
+	else
+		--The digit just typed sits directly left of the caret. Reading the end of the
+		--line instead only agrees with that while the player types at the end, so
+		--picking an entry by number did nothing once they went back into the line.
+		local cursor_pos = SearchCommand:get_input_cursor(uiId)
+		if(cursor_pos < 1)then
+			do return end
+		end
+		
+		get_last_char_from_input = tonumber(string.sub(input_text, cursor_pos, cursor_pos))
 
-	--Not inside an eScript slot. Picking an entry by its number cannot work
-	--there: the values are digits themselves, so "2" would mean the value 2 and
-	--the second entry at the same time. In a slot you type the value and click
-	--or tab for the list -- no third reading of the same keystroke.
-	local in_slot_index, in_slot = SearchCommand:escript_at_caret(input_text, cursor_pos)
-	if(in_slot_index ~= nil and in_slot ~= nil)then
-		do return end
+		--Not inside an eScript slot. Picking an entry by its number cannot work
+		--there: the values are digits themselves, so "2" would mean the value 2 and
+		--the second entry at the same time. In a slot you type the value and click
+		--or tab for the list -- no third reading of the same keystroke.
+		local in_slot_index, in_slot = SearchCommand:escript_at_caret(input_text, cursor_pos)
+		if(in_slot_index ~= nil and in_slot ~= nil)then
+			do return end
+		end
 	end
 
 	if(type(get_last_char_from_input) == "number")then
@@ -979,7 +995,7 @@ function SearchCommand:check_autocomplet_number(uiId)
 				if(modal_open_list == 1)then
 					if next(self.valid_commands_list)then
 						--debug("check_autocomplet"..self.valid_commands_list[get_last_char_from_input])
-						SearchCommand:finish_commands(self.valid_commands_list[get_last_char_from_input],uiId)
+						SearchCommand:finish_commands(self.valid_commands_list[get_last_char_from_input],uiId,mention_number)
 					end
 				end
 			end
@@ -988,6 +1004,15 @@ function SearchCommand:check_autocomplet_number(uiId)
 end
 
 function SearchCommand:key_trigger(uiId)
+	if self.mention_input == uiId then
+		local edit = getUI(uiId)
+		if edit then
+			runAH(edit, "chat_mention", "refresh")
+		else
+			SearchCommand:clear_mention(uiId)
+		end
+		return
+	end
 	base_window_id = string.sub(uiId,0,string.len(uiId)-15);
 	local check_window = getUI(base_window_id)
 	
@@ -1031,7 +1056,7 @@ end
 
 function SearchCommand:read_modal_open_list(uiId)
 	local found_modal_open = 0
-	if next(self.process_list)then
+	if next(self.modal_open_list)then
 		for mc = 1, #self.modal_open_list do
 			if(self.modal_open_list[mc][1] == uiId)then
 				found_modal_open=self.modal_open_list[mc][2]
@@ -1078,11 +1103,65 @@ function SearchCommand:read_process_status(uiId)
 	return process_status
 end
 
+function SearchCommand:clear_mention(uiId)
+	if self.mention_input == uiId then
+		self.mention_input = nil
+		self.mention_key = nil
+		self.mention_friends = nil
+		SearchCommand:close_modal(uiId)
+		local identifier = SearchCommand:find(self.identifier_found, uiId)
+		if identifier then
+			table.remove(self.identifier_found, identifier)
+			local edit = getUI(uiId)
+			if edit then removeOnDbChange(edit, "@UI:VARIABLES:CURRENT_SERVER_TICK") end
+		end
+	end
+end
+
+function SearchCommand:search_mention(uiId, prefix, start, friends, complete)
+	local key = uiId..":"..start..":"..prefix
+	local friend_names = table.concat(friends, "\n")
+	if self.mention_input and self.mention_input ~= uiId then
+		SearchCommand:clear_mention(self.mention_input)
+	end
+	self.mention_input = uiId
+	if self.mention_key == key and self.mention_friends == friend_names and not complete then return end
+	self.mention_key = key
+	self.mention_friends = friend_names
+	SearchCommand:search_build_local_player_list()
+	self.valid_commands_list = {}
+	local edit = getUI(uiId)
+	for _, name in ipairs(friends) do
+		runAH(edit, "chat_mention", "candidate="..name)
+	end
+	for _, name in ipairs(self.player_list) do
+		runAH(edit, "chat_mention", "candidate="..name)
+	end
+	table.sort(self.valid_commands_list)
+	SearchCommand:write_command_help_clear(uiId)
+	--Mentions are always picked by number, unlike an eScript slot list.
+	self.list_is_numbered = true
+	if #self.valid_commands_list > 0 then
+		SearchCommand:show_more_options(uiId)
+	else
+		SearchCommand:close_modal(uiId)
+	end
+	if SearchCommand:find(self.identifier_found, uiId) == nil then
+		table.insert(self.identifier_found, uiId)
+		addOnDbChange(edit, "@UI:VARIABLES:CURRENT_SERVER_TICK", "SearchCommand:key_trigger('"..uiId.."')")
+	end
+end
+
 function SearchCommand:search(uiId)
+	if self.mention_completing then return end
+	if self.mention_input and self.mention_input ~= uiId then
+		SearchCommand:clear_mention(self.mention_input)
+	end
 	--##########################################################
 	--##check if player turn off using auto complate by settings
 	local used_searchcommand_by_config = getDbProp("UI:SAVE:CHAT:CHAT_AUTOCOMPLETE")
 	if(used_searchcommand_by_config == 0)then
+		SearchCommand:clear_mention(uiId)
 		SearchCommand:write_command_help_clear(uiId)
 		do return end
 	end
@@ -1090,6 +1169,14 @@ function SearchCommand:search(uiId)
 	--##########################################################
 	
 	--debug("now_onchange "..uiId)
+	if self.mention_input == uiId then
+		local edit = getUI(uiId)
+		local input_text = edit.input_string
+		runAH(edit, "chat_mention", "number")
+		if edit.input_string ~= input_text then return end
+	end
+	runAH(getUI(uiId), "chat_mention", "")
+	if self.mention_input == uiId then return end
 	is_tab_down = isTabDown()
 	if(is_tab_down)then
 		--debug("key_tab_down")
@@ -2238,14 +2325,18 @@ function SearchCommand:write_command_help(uiId,text)
 		do return end
 	end
 	
-	behind_help_text.prompt=read_prompt
-	behind_help_text.input_string = text
+	if behind_help_text then
+		behind_help_text.prompt=read_prompt
+		behind_help_text.input_string = text
+	end
 end
 
 function SearchCommand:write_command_help_clear(uiId)
 	local behind_help_text = getUI(uiId.."h")
-	behind_help_text.input_string = ""
-	behind_help_text.prompt = ""
+	if behind_help_text then
+		behind_help_text.input_string = ""
+		behind_help_text.prompt = ""
+	end
 end
 
 function SearchCommand:close_modal(uiId)
@@ -2458,7 +2549,15 @@ function SearchCommand:replace_escript_param(command_name)
 	return temp_command
 end
 
-function SearchCommand:finish_commands(command_name,uiId)
+function SearchCommand:finish_commands(command_name,uiId,mention_number)
+	if self.mention_input == uiId then
+		self.mention_completing = true
+		local parameter = mention_number and "number_name=" or "name="
+		runAH(getUI(uiId), "chat_mention", parameter..command_name)
+		self.mention_completing = false
+		SearchCommand:clear_mention(uiId)
+		return
+	end
 	local process_status = SearchCommand:read_process_status(uiId)
 	local input_search_string = getUI(uiId)
 	local input_text = input_search_string.input_string

@@ -30,6 +30,7 @@
 #include "action_handler_misc.h"
 #include "chat_link_ui.h"
 #include "chat_window.h"
+#include "chat_text_manager.h"
 #include "../entity_animation_manager.h"
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/group_menu.h"
@@ -95,16 +96,11 @@ static const sint PARTY_CHAT_SPAWN_DELTA = 20; // to avoid that all party chat a
  */
 static void displayVisibleSystemMsg(const std::string &msg, const string &cat = "CHK");
 
-static void sendChatEntry(const string &msg, CChatWindow *chatWindow, bool isChatTeam = false)
+static void sendChatEntry(const string &msg, bool isChatTeam = false)
 {
-	CChatMessageRequest request;
-	const bool hasAttachments = !chatWindow->getEditBox()->getTextTags().empty();
-	if (hasAttachments)
-	{
-		if (!CHAT_SHARE::buildRequest(chatWindow->getEditBox(), request))
-			return;
-		ChatMngr.chat(request, isChatTeam);
-	}
+	const CChatMessageRequest *request = CHAT_SHARE::getCurrentRequest();
+	if (request)
+		CHAT_SHARE::setCurrentRequestSent(ChatMngr.chat(*request, isChatTeam));
 	else
 		ChatMngr.chat(msg, isChatTeam);
 }
@@ -145,8 +141,8 @@ struct CAroundMeEntryHandler : public IChatWindowListener
 		else
 		{
 			// process msg as usual
-			ChatMngr.setChatMode(CChatGroup::say);
-			sendChatEntry(msg, chatWindow);
+			ChatMngr.setChatMode(CChatGroup::arround);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -164,7 +160,7 @@ struct CRegionEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::region);
-			sendChatEntry(msg, chatWindow);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -182,7 +178,7 @@ struct CUniverseEntryHandler : public IChatWindowListener
 		{
 			// process msg as usual
 			ChatMngr.setChatMode(CChatGroup::universe);
-			sendChatEntry(msg, chatWindow);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -199,7 +195,7 @@ struct CGuildChatEntryHandler : public IChatWindowListener
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::guild);
-			sendChatEntry(msg, chatWindow);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -216,7 +212,7 @@ struct CTeamChatEntryHandler : public IChatWindowListener
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::team);
-			sendChatEntry(msg, chatWindow, true);
+			sendChatEntry(msg, true);
 		}
 	}
 };
@@ -266,7 +262,7 @@ public:
 		else
 		{
 			ChatMngr.setChatMode(CChatGroup::dyn_chat, ChatMngr.getDynamicChannelIdFromDbIndex(DbIndex));
-			sendChatEntry(msg, chatWindow);
+			sendChatEntry(msg);
 		}
 	}
 };
@@ -932,8 +928,6 @@ class CHandlerChatGroupFilter : public IActionHandler
 		CInterfaceGroup *pEditBox = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:ebw"));
 		CInterfaceGroup *pTextList = dynamic_cast<CInterfaceGroup*>(pCGW->getContainer()->getGroup("content:cb"));
 
-		// The emoji button sits in the same row, between the input and Emotes,
-		// so the width it takes comes off the input like the other buttons'.
 		sint32 emojiRoom = 0;
 		if (pEmojiBut)
 		{
@@ -967,7 +961,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 					if (title.empty())
 					{
 						// Dyn channel not available yet, so set to around
-						PeopleInterraction.TheUserChat.Filter.setTargetGroup(CChatGroup::say);
+						PeopleInterraction.TheUserChat.Filter.setTargetGroup(CChatGroup::arround);
 						pUserBut->setHardText("uiFilterAround");
 					}
 					else
@@ -1017,7 +1011,7 @@ class CHandlerChatGroupFilter : public IActionHandler
 
 		// if called from a tab button => force the tab ctrl button to have standard color
 		CCtrlTabButton	*pTabButton= dynamic_cast<CCtrlTabButton*>(pCaller);
-		if(pTabButton)
+		if(pTabButton && !getChatTextMngr().hasUnreadMention(pTabButton))
 		{
 			CRGBA	stdColor= CRGBA::stringToRGBA(CWidgetManager::getInstance()->getParser()->getDefine("chat_group_tab_color_normal").c_str());
 			pTabButton->setTextColorNormal(stdColor);

@@ -43,7 +43,6 @@ using namespace NLMISC;
 using namespace NLNET;
 
 
-extern CVariable<bool> ChatLinkDiagnostics;
 extern CGenericXmlMsgHeaderManager GenericXmlMsgHeaderMngr;
 
 extern CVariable<bool>	VerboseChatManagement;
@@ -200,21 +199,20 @@ void cbImpulsionChatTeam( CMessage& msgin, const string &serviceName, TServiceId
 	}
 } // impulsionChatTeam //
 
+//-----------------------------------------------
+//	cbChatShare
+//
+//-----------------------------------------------
 void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceId)
 {
-	if (ChatLinkDiagnostics)
-		nlinfo("CHATLINK_DIAG IOS RECEIVE service=%s bytes=%u", serviceName.c_str(), (uint)msgin.length());
 	if (msgin.length() > CHAT_MESSAGE::MaxSerializedSize)
-	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS REJECT reason=oversized");
 		return;
-	}
 
 	CEntityId sender;
 	uint8 chatMode;
 	CEntityId dynamicChannelId;
 	string receiver;
+	uint32 requestId;
 	CChatMessage message;
 	try
 	{
@@ -222,30 +220,24 @@ void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceI
 		msgin.serial(chatMode);
 		msgin.serial(dynamicChannelId);
 		msgin.serial(receiver);
+		msgin.serial(requestId);
 		msgin.serial(message);
 	}
 	catch (const Exception &e)
 	{
 		nlwarning("<cbChatShare> %s", e.what());
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS EXCEPTION %s", e.what());
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS REJECT reason=decode_exception");
 		return;
 	}
-	if (ChatLinkDiagnostics)
-		nlinfo("CHATLINK_DIAG IOS DECODE sender=%s group=%u channel=%s parts=%u", sender.toString().c_str(), (uint)chatMode, dynamicChannelId.toString().c_str(), (uint)message.Parts.size());
+	CChatManager &cm = IOS->getChatManager();
 	if (chatMode >= CChatGroup::nbChatMode)
 	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS REJECT reason=invalid_mode");
+		cm.sendQuoteResult(sender, requestId, false);
 		return;
 	}
 	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
 	if (!message.isValid() || !CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
 	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS REJECT reason=invalid_message_or_target");
+		cm.sendQuoteResult(sender, requestId, false);
 		return;
 	}
 
@@ -257,30 +249,29 @@ void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceI
 	}
 	if (!message.isValid())
 	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS REJECT reason=invalid_after_filter");
+		cm.sendQuoteResult(sender, requestId, false);
 		return;
 	}
 
+	bool accepted = false;
 	try
 	{
 		TDataSetRow senderRow = TheDataset.getDataSetRow(sender);
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS DISPATCH sender=%s row=%u group=%u", sender.toString().c_str(), senderRow.getIndex(), (uint)group);
 		if (group == CChatGroup::tell)
 		{
-			IOS->getChatManager().tellShared(senderRow, receiver, message);
+			accepted = cm.tellShared(senderRow, receiver, message);
 		}
 		else
 		{
-			CChatClient &client = IOS->getChatManager().getClient(senderRow);
+			// Use the requested source channel for this send, then restore the active chat mode.
+			CChatClient &client = cm.getClient(senderRow);
 			const CChatGroup::TGroupType previousMode = client.getChatMode();
 			const TChanID previousChannelId = client.getDynChatChan();
 			try
 			{
 				client.setChatMode(group, dynamicChannelId);
 				client.updateAudience();
-				IOS->getChatManager().chatShared(senderRow, message);
+				accepted = cm.chatShared(senderRow, message);
 			}
 			catch (...)
 			{
@@ -291,15 +282,12 @@ void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceI
 			client.setChatMode(previousMode, previousChannelId);
 			client.updateAudience();
 		}
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS DISPATCH_RETURN sender=%s group=%u", sender.toString().c_str(), (uint)group);
 	}
 	catch (const Exception &e)
 	{
 		nlwarning("<cbChatShare> %s", e.what());
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG IOS EXCEPTION %s", e.what());
 	}
+	cm.sendQuoteResult(sender, requestId, accepted);
 }
 
 

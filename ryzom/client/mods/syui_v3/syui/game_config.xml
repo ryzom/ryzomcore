@@ -411,10 +411,6 @@
       </group>
     </group>
   </template>
-  <!-- Emoji display mode. A combo rather than a slider, because the three
-       values are named choices and not a range. It binds straight to the
-       database through the combo_box's own "value" attribute, which is why it
-       needs no param entry; the game_config param system has no combo widget. -->
   <template name="tgcw_combo_emoji_mode"
             id="combo_emoji_mode"
             posparent="parent"
@@ -423,10 +419,7 @@
             y="-18"
             text=""
             value="">
-    <!-- 240 rather than the 184 the other rows use: the longest entry,
-         "Font (black and white)", already clipped at 150 in English and the
-         translations are longer still. The tab is about 290 wide, so this
-         still leaves a margin. -->
+    <!-- wider than other rows for the longest translated entry -->
     <group id="#id"
            w="240"
            h="36"
@@ -491,10 +484,7 @@
   <variable entry="UI:TEMP:SCREEN_RATIO_MODE"
             type="sint32"
             value="0" />
-  <!-- Mirror of UI:SAVE:CHAT:EMOJI_MODE that the dropdown actually edits, so
-       that Cancel can discard the change. game_config_init seeds it from the
-       saved value and game_config_apply writes it back; nothing else touches
-       it. The graphics settings use the same TEMP-then-apply shape. -->
+  <!-- edited by the dropdown, applied to UI:SAVE:CHAT:EMOJI_MODE -->
   <variable entry="UI:TEMP:CHAT:EMOJI_MODE"
             type="sint32"
             value="2" />
@@ -502,6 +492,10 @@
           value="ui:interface:game_config:content:general:screen_ratio:edit:eb" />
   <define id="game_config_screen_ratio_cb"
           value="ui:interface:game_config:content:general:screen_ratio:combo" />
+  <define id="game_config_save_channel_cb"
+          value="ui:interface:game_config:content:chat_colors:save_channel_cb:c" />
+  <define id="game_config_auto_channel_cb"
+          value="ui:interface:game_config:content:chat_colors:auto_channel_cb:c" />
   <proc id="game_config_init">
     <action handler="set"
             params="dblink=UI:VARIABLES:ISACTIVE:GAME_CONFIG|value=1" />
@@ -1747,7 +1741,7 @@
                   posref="BL TL"
                   posparent="cc_shout"
                   x="0"
-                  y="-4" />
+                  y="-16" />
         <instance template="tgcw_color"
                   id="cc_dyn1"
                   text="uiDynColor1"
@@ -1812,10 +1806,18 @@
                   x="0"
                   y="-4" />
         <instance template="tgcw_checkbox"
-                  id="enter_dontquit_cb"
-                  text="uiEnterDontQuitCB"
-                  tooltip="uittChatEnter"
+                  id="save_channel_cb"
+                  text="uiChanSaveCB"
+                  tooltip="uittChanSave"
                   posparent="cc_dyn7"
+                  posref="BL TL"
+                  x="0"
+                  y="-16" />
+        <instance template="tgcw_checkbox"
+                  id="auto_channel_cb"
+                  text="uiChanAutoCB"
+                  tooltip="uittChanAuto"
+                  posparent="save_channel_cb"
                   posref="BL TL"
                   x="0"
                   y="-8" />
@@ -1823,7 +1825,7 @@
                   id="show_times_in_chat_cb"
                   text="uiShowTimesInChatCB"
                   tooltip="uittShowTimesInChat"
-                  posparent="enter_dontquit_cb"
+                  posparent="auto_channel_cb"
                   posref="BL TL"
                   x="0"
                   y="-8" />
@@ -1865,10 +1867,6 @@
                   posparent="emoji_mode"
                   x="0"
                   y="-8" />
-        <!-- The slider position alone does not say what it means, so name the
-             current value beside it. Three overlapping texts with only one
-             active is the usual way to do this here: the expression language
-             can switch a view on, but has no way to build a string. -->
         <view type="text"
               id="emoji_size_small"
               posparent="emoji_size"
@@ -1902,17 +1900,33 @@
         <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,0)" target="emoji_size_small:active" />
         <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,1)" target="emoji_size_medium:active" />
         <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,2)" target="emoji_size_large:active" />
-        <!-- Size only means anything for image emoji: in the font mode the
-             glyphs follow the chat font size, so the slider would do nothing.
-             Hide the whole row unless images are selected. -->
         <link expr="eq(@UI:TEMP:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
-        <!-- No ddx param covers the dropdown, so the pending mode has to dirty
-             the Apply button itself; without this it stays frozen and only Ok
-             would commit the change. Same shape as the language combo. -->
         <link expr="@UI:TEMP:CHAT:EMOJI_MODE"
               action="game_config_change_emoji_mode" />
+        <instance template="tgcw_checkbox"
+                  id="enter_dontquit_cb"
+                  text="uiEnterDontQuitCB"
+                  tooltip="uittChatEnter"
+                  posparent="emoji_size"
+                  posref="BL TL"
+                  x="0"
+                  y="-8" />
+        <instance template="tgcw_checkbox"
+                  id="chat_autocomplete_cb"
+                  text="uiChatAutocompleteCB"
+                  tooltip="uittDisableChatAutocomplete"
+                  posparent="enter_dontquit_cb"
+                  posref="BL TL"
+                  x="0"
+                  y="-8" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />
+        <link expr="@UI:SAVE:CHAT:CHAT_AUTOCOMPLETE"
+              target="chat_autocomplete_cb:c:pushed" />
+        <link expr="@UI:SAVE:CHAT:SAVE_CHANNEL"
+              target="save_channel_cb:c:pushed" />
+        <link expr="@UI:SAVE:CHAT:AUTO_CHANNEL"
+              target="auto_channel_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:SHOW_TIMES_IN_CHAT_CB"
               target="show_times_in_chat_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:SHOW_DYN_CHANNEL_NAME_IN_CHAT_CB"
@@ -3540,6 +3554,21 @@
                type="db"
                widget="boolbut"
                link="UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
+               realtime="true" />
+        <param ui="chat_colors:chat_autocomplete_cb:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:CHAT:CHAT_AUTOCOMPLETE"
+               realtime="true" />
+        <param ui="chat_colors:save_channel_cb:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:CHAT:SAVE_CHANNEL"
+               realtime="true" />
+        <param ui="chat_colors:auto_channel_cb:c"
+               type="db"
+               widget="boolbut"
+               link="UI:SAVE:CHAT:AUTO_CHANNEL"
                realtime="true" />
         <param ui="chat_colors:show_times_in_chat_cb:c"
                type="db"

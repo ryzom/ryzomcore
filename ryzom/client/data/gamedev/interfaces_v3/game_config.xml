@@ -411,10 +411,6 @@
       </group>
     </group>
   </template>
-  <!-- Emoji display mode. A combo rather than a slider, because the three
-       values are named choices and not a range. It binds straight to the
-       database through the combo_box's own "value" attribute, which is why it
-       needs no param entry; the game_config param system has no combo widget. -->
   <template name="tgcw_combo_emoji_mode"
             id="combo_emoji_mode"
             posparent="parent"
@@ -423,10 +419,7 @@
             y="-18"
             text=""
             value="">
-    <!-- 240 rather than the 184 the other rows use: the longest entry,
-         "Font (black and white)", already clipped at 150 in English and the
-         translations are longer still. The tab is about 290 wide, so this
-         still leaves a margin. -->
+    <!-- wider than other rows for the longest translated entry -->
     <group id="#id"
            w="240"
            h="36"
@@ -491,10 +484,7 @@
   <variable entry="UI:TEMP:SCREEN_RATIO_MODE"
             type="sint32"
             value="0" />
-  <!-- Mirror of UI:SAVE:CHAT:EMOJI_MODE that the dropdown actually edits, so
-       that Cancel can discard the change. game_config_init seeds it from the
-       saved value and game_config_apply writes it back; nothing else touches
-       it. The graphics settings use the same TEMP-then-apply shape. -->
+  <!-- edited by the dropdown, applied to UI:SAVE:CHAT:EMOJI_MODE -->
   <variable entry="UI:TEMP:CHAT:EMOJI_MODE"
             type="sint32"
             value="2" />
@@ -2200,10 +2190,6 @@
                   posparent="emoji_mode"
                   x="0"
                   y="-8" />
-        <!-- The slider position alone does not say what it means, so name the
-             current value beside it. Three overlapping texts with only one
-             active is the usual way to do this here: the expression language
-             can switch a view on, but has no way to build a string. -->
         <view type="text"
               id="emoji_size_small"
               posparent="emoji_size"
@@ -2237,13 +2223,7 @@
         <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,0)" target="emoji_size_small:active" />
         <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,1)" target="emoji_size_medium:active" />
         <link expr="eq(@UI:SAVE:CHAT:EMOJI_SIZE,2)" target="emoji_size_large:active" />
-        <!-- Size only means anything for image emoji: in the font mode the
-             glyphs follow the chat font size, so the slider would do nothing.
-             Hide the whole row unless images are selected. -->
         <link expr="eq(@UI:TEMP:CHAT:EMOJI_MODE,2)" target="emoji_size:active" />
-        <!-- No ddx param covers the dropdown, so the pending mode has to dirty
-             the Apply button itself; without this it stays frozen and only Ok
-             would commit the change. Same shape as the language combo. -->
         <link expr="@UI:TEMP:CHAT:EMOJI_MODE"
               action="game_config_change_emoji_mode" />
         <instance template="tgcw_checkbox"
@@ -2262,7 +2242,7 @@
                   posref="BL TL"
                   x="0"
                   y="-8" />
-        <link expr="@UI:SAVE:CHAT_AUTOCOMPLETE"
+        <link expr="@UI:SAVE:CHAT:CHAT_AUTOCOMPLETE"
               target="chat_autocomplete_cb:c:pushed" />
         <link expr="@UI:SAVE:CHAT:ENTER_DONT_QUIT_CB"
               target="enter_dontquit_cb:c:pushed" />

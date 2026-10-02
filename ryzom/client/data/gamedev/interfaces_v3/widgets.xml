@@ -726,6 +726,8 @@
             <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
             <group type="list" id="text_list" chat="#chat" fontsize="10" posref="BL BL" posparent="black" x="2" y="2" space="0" sizeref="hw" w="-4" h="-4" maxelements="#maxelements" />
             <ctrl style="skin_scroll" id="scroll_bar" />
+            <ctrl type="button" id="button_newest" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="4" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpNewest" active="false" />
+            <ctrl type="button" id="button_unread" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="20" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpUnread" active="false" />
         </group>
     </template>
     <template name="chat_box_mainchat" posparent="parent" posref="TL TL" x="0" y="0" w="0" h="0" sizeref="" maxelements="200" keep="true" chat="false">
@@ -738,6 +740,8 @@
             <instance template="inner_thin_border" posparent="black" inherit_gc_alpha="true" />
             <group type="list" id="text_list" chat="#chat" fontsize="10" posref="BL BL" posparent="black" x="2" y="2" space="0" sizeref="hw" w="-4" h="-4" maxelements="#maxelements" />
             <ctrl style="skin_scroll" id="scroll_bar" />
+            <ctrl type="button" id="button_newest" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="4" tx_normal="W_arrow_down_1.tga" tx_pushed="W_arrow_down_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpNewest" active="false" />
+            <ctrl type="button" id="button_unread" button_type="push_button" posparent="black" posref="BR BR" x="-4" y="20" tx_normal="W_arrow_up_1.tga" tx_pushed="W_arrow_up_1.tga" tx_over="W_button_12_over.tga" tooltip="uittChatJumpUnread" active="false" />
         </group>
     </template>
     <!-- ********************* -->
@@ -1201,12 +1205,15 @@
     <!-- **************** -->
     <!-- *  MESSAGE BOX * -->
     <!-- **************** -->
-    <group type="modal" id="chat_link_tell" active="false" exit_click_out="true" posref="MM MR" w="260" child_resize_h="true" child_resize_hmargin="14" options="skin_modal"
+    <group type="modal" id="chat_link_tell" active="false" exit_click_out="true" posref="MM MR" w="260" child_resize_h="true"
+        child_resize_hmargin="14" options="skin_modal"
         on_active="set_keyboard_focus" on_active_params="target=ui:interface:chat_link_tell:receiver:eb|select_all=false"
         on_deactive="chat_link_tell" on_deactive_params="cancel">
-        <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true" hardtext="uiTellCmdDest" />
+        <view type="text" id="text" posref="TL TL" x="8" y="-8" color="255 255 255 255" global_color="false" fontsize="12" shadow="true"
+            hardtext="uiTellCmdDest" />
         <instance template="edit_box_widget" id="receiver" posref="TL TL" x="6" y="-24" child_resize_h="true" w="248"
-            onenter="chat_link_tell" onchange="" max_num_chars="255" entry_type="playername" max_historic="0" enter_loose_focus="false" enter_recover_focus="false" />
+            onenter="chat_link_tell" onchange="" max_num_chars="255" entry_type="playername" max_historic="0" enter_loose_focus="false"
+            enter_recover_focus="false" />
         <instance template="button_ok_cancel" posparent="receiver" posref="BR TR" onclick_ok="chat_link_tell" onclick_cancel="leave_modal" />
     </group>
     <!-- Simple Message Box with just a OK button -->

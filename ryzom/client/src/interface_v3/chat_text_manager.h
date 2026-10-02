@@ -24,6 +24,11 @@
 #define CHAT_TEXT_MANAGER_H
 
 #include "nel/misc/rgba.h"
+#include "game_share/chat_group.h"
+#include <cstddef>
+#include <string>
+#include <vector>
+#include <utility>
 
 class CChatMessage;
 
@@ -31,10 +36,13 @@ namespace NLGUI
 {
 	class CViewBase;
 	class CInterfaceGroup;
+	class CGroupEditBox;
 	class CGroupParagraph;
+	class CCtrlTabButton;
 }
 
 namespace NLMISC{
+	class CEntityId;
 	class CCDBNodeLeaf;
 }
 
@@ -43,25 +51,23 @@ namespace NLMISC{
   * \author Nevrax France
   * \date 2003
   */
-class CEmojiManager;
-
 class CChatTextManager
 {
 public:
-	/// How emoji are shown in chat. Stored in UI:SAVE:CHAT:EMOJI_MODE.
+	// UI:SAVE:CHAT:EMOJI_MODE
 	enum TEmojiMode
 	{
-		EmojiText    = 0,	// leave ":smile:" as written
-		EmojiUnicode = 1,	// substitute the unicode character, drawn from the font
-		EmojiImage   = 2	// draw the image from the emoji atlas
+		EmojiText    = 0,
+		EmojiUnicode = 1,
+		EmojiImage   = 2
 	};
 
-	/// How big emoji are drawn. Stored in UI:SAVE:CHAT:EMOJI_SIZE.
+	// UI:SAVE:CHAT:EMOJI_SIZE
 	enum TEmojiSize
 	{
-		EmojiSmall  = 0,	// same height as the chat text
+		EmojiSmall  = 0,
 		EmojiMedium = 1,
-		EmojiLarge  = 2		// the tile's own size
+		EmojiLarge  = 2
 	};
 
 	//\name Text parameters. They are read from the interface database (the configuration of text is doned in config.xml)
@@ -71,10 +77,8 @@ public:
 		bool		 isTextShadowed() const;
 		uint		 getEmojiMode() const;
 		uint		 getEmojiSize() const;
-		/// Height in pixels an emoji image is drawn at, for the current settings.
 		sint32		 getEmojiPixelSize() const;
 
-		/// Native size of an atlas tile, and so the height of the largest setting.
 		static const sint32 EmojiTilePixels = 32;
 	//@}
 	/** Build a new text multiline using the current chat text settings
@@ -84,7 +88,29 @@ public:
 	  * \param plaintext Text will not be parsed for uri markup links
 	  */
 	NLGUI::CViewBase *createMsgText(const std::string &msg, NLMISC::CRGBA col, bool justified = false, bool plaintext = false);
-	NLGUI::CViewBase *createMsgText(const std::string &prefix, const CChatMessage &message, NLMISC::CRGBA col, bool justified = false);
+	NLGUI::CViewBase *createMsgText(const std::string &prefix, const CChatMessage &message, NLMISC::CRGBA col,
+		bool justified = false, CChatGroup::TGroupType group = CChatGroup::nbChatMode);
+	std::string getMessageText(const CChatMessage &message, CChatGroup::TGroupType group) const;
+	bool isChatInput(NLGUI::CGroupEditBox *editBox) const;
+	void setMessageTarget(NLGUI::CViewBase *view, CChatGroup::TGroupType group,
+		const NLMISC::CEntityId &dynamicChannelId, const std::string &receiver = std::string());
+	void setMessageSender(NLGUI::CViewBase *view, const std::string &sender);
+	const CChatMessage *getSelectedMessage() const;
+	bool getSelectedMessageTarget(CChatGroup::TGroupType &group,
+		NLMISC::CEntityId &dynamicChannelId, std::string &receiver) const;
+	std::string getQuoteMessageId(const NLGUI::CGroupEditBox *editBox) const;
+	bool getQuoteTarget(const NLGUI::CGroupEditBox *editBox, CChatGroup::TGroupType &group,
+		NLMISC::CEntityId &dynamicChannelId, std::string &receiver) const;
+	uint32 beginQuoteSend(NLGUI::CGroupEditBox *editBox);
+	void finishQuoteSend(uint32 requestId, bool accepted);
+	void checkQuoteSendTimeout();
+	void failPendingQuoteSends();
+	void quoteSelectedMessage(NLGUI::CGroupEditBox *editBox);
+	void clearQuote(NLGUI::CGroupEditBox *editBox);
+	std::string getSelectedPlayerName() const;
+	bool isMentionInput(NLGUI::CGroupEditBox *editBox) const;
+	void setMentionTab(NLGUI::CViewBase *message, NLGUI::CCtrlTabButton *tab);
+	bool hasUnreadMention(const NLGUI::CCtrlTabButton *tab) const;
 	// Singleton access
 	static CChatTextManager &getInstance();
 
@@ -111,26 +137,17 @@ private:
 	bool showTimestamps() const;
 
 	NLGUI::CViewBase *createMsgTextSimple(const std::string &msg, NLMISC::CRGBA col, bool justified, NLGUI::CInterfaceGroup *commandGroup);
-	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext, NLGUI::CInterfaceGroup *commandGroup);
-
-	/** Append msg[from, to) to the paragraph as one text view.
-	  *
-	  * The piece is prefixed with the format tags in effect at \p from, so that
-	  * splitting a line around a link or an emoji does not lose the colour that
-	  * was already set. Without this the remainder of a line reverts to the
-	  * caller's colour and things like /em or an inline @{RGBA} come out wrong.
-	  */
+	// Append msg[from, to) with the format tags in effect at from.
 	void addTextSegment(NLGUI::CGroupParagraph *para, const std::string &msg,
 		std::string::size_type from, std::string::size_type to,
 		NLMISC::CRGBA col, bool justified, const char *id = NULL);
 
-	/** Build the image view for one emoji, or NULL if it has no usable texture.
-	  * \p name is what the hover tooltip shows, without the colons.
-	  */
+	// NULL when the atlas has no tile for it.
 	NLGUI::CViewBase *createEmojiView(const std::string &texture, const std::string &name);
-
-	void addMsgText(NLGUI::CGroupParagraph *paragraph, const std::string &msg, NLMISC::CRGBA col,
-		bool justified, std::string::size_type pos, std::string::size_type textSize);
+	void addMsgText(NLGUI::CGroupParagraph *paragraph, const std::string &msg, NLMISC::CRGBA col, bool justified,
+		const std::vector<std::pair<size_t, size_t> > *mentions = NULL);
+	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext,
+		NLGUI::CInterfaceGroup *commandGroup, const std::vector<std::pair<size_t, size_t> > *mentions = NULL);
 };
 
 // shortcut to get text manager instance

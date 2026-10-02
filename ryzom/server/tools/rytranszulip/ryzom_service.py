@@ -20,6 +20,7 @@ import sys
 import logging
 import builtins
 import configparser
+import base64
 
 from time import time
 from datetime import datetime
@@ -93,7 +94,8 @@ builtins.print = printer.print
 
 class RyzomMessage():
 
-	def __init__(self, source="", sender="", channel="", channel_id="", source_lang="", langs="", text="", translated_lang="WK", translation="", source_message_id=0):
+	def __init__(self, source="", sender="", channel="", channel_id="", source_lang="",
+		langs="", text="", translated_lang="WK", translation="", source_message_id=0, chat=None):
 		self.source = source
 		self.sender = sender
 		self.channel = channel
@@ -102,14 +104,18 @@ class RyzomMessage():
 		self.langs = langs
 		self.text = text
 		self.translated_lang = translated_lang
-		self.translation = ""
+		self.translation = translation
 		self.source_message_id = source_message_id
+		self.chat = {} if chat is None else chat
 
 	def set(self, message):
-		self.source, self.sender, self.channel, self.channel_id, self.source_lang, self.langs, self.text, self.translated_lang, self.translation, self.source_message_id = message
+		(self.source, self.sender, self.channel, self.channel_id, self.source_lang, self.langs,
+			self.text, self.translated_lang, self.translation, self.source_message_id) = message[:10]
+		self.chat = message[10] if len(message) > 10 else {}
 
 	def get(self):
-		return (self.source, self.sender, self.channel, self.channel_id, self.source_lang, self.langs, self.text, self.translated_lang, self.translation, self.source_message_id)
+		return (self.source, self.sender, self.channel, self.channel_id, self.source_lang, self.langs,
+			self.text, self.translated_lang, self.translation, self.source_message_id, self.chat)
 
 	def pprint(self):
 		out = []
@@ -163,8 +169,8 @@ class RyzomService():
 	def getLastChatID(self):
 		self.last_chat_id = self.client.get("Ryzom-Chat-LastID")
 		if self.last_chat_id == None:
-			self.client.set("Ryzom-Chat-LastID", 1)
-			self.last_chat_id = 1
+			self.client.add("Ryzom-Chat-LastID", 1, noreply=False)
+			self.last_chat_id = self.client.get("Ryzom-Chat-LastID")
 		return int(self.last_chat_id)
 
 	def getLastCommandID(self):
@@ -185,11 +191,26 @@ class RyzomService():
 		self.client.set("Shard-Command-LastManaged", last_id)
 
 	def addRyzomMessage(self, message):
+		self.getLastChatID()
 		self.last_chat_id = self.client.incr("Ryzom-Chat-LastID", 1)
 		self.client.set("Ryzom-Chat-"+str(self.last_chat_id), message.get(), 24*60*60)
 		log_content = "".join([ s[0] for s in  message.get()[6].split() ])
 		print(f"💬 {self.last_chat_id} = {log_content}")
 		return self.last_chat_id
+
+	def addChatMessageId(self, message_id, zulip_id):
+		self.client.set("Chat-Zulip-"+str(zulip_id), message_id, 24*60*60)
+		self.client.set("Chat-Ryzom-"+message_id, zulip_id, 24*60*60)
+
+	def getChatMessageId(self, zulip_id):
+		return self.client.get("Chat-Zulip-"+str(zulip_id))
+
+	def getChatZulipId(self, message_id):
+		return self.client.get("Chat-Ryzom-"+message_id)
+
+	@staticmethod
+	def encodeChatText(text):
+		return base64.b64encode(text.encode("utf-8")).decode("ascii") or "-"
 
 	def getRyzomMessage(self, i):
 		message = self.client.get("Ryzom-Chat-"+str(i))

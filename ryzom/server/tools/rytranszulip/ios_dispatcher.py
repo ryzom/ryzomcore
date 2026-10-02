@@ -28,6 +28,8 @@ from time import sleep, time
 from pynel.admin_modules_itf import CAdminServiceWeb
 from ryzom_service import RyzomService, RyzomMessage
 
+CHAT_ACK_WAIT_SECONDS = 60
+
 class IosDispatcher(RyzomService):
 
 	def __init__(self):
@@ -53,15 +55,28 @@ class IosDispatcher(RyzomService):
 		self.updateInfos()
 
 	def runIOSCommand(self, command):
-		if self.ryzomAS.connect("127.0.0.1", 46700):
-			out = "".join([ s[0] for s in  command.split(" ")[3].split() ])
-			print("▶️ ", out)
-			self.ryzomAS.service_cmd("ios", command)
-			self.ryzomAS.close()
+		if not self.ryzomAS.connect("127.0.0.1", 46700):
+			print("🛑 Connection failed")
+			return False
+		try:
+			if not self.ryzomAS.service_cmd("ios", command) or not self.ryzomAS.wait_callback():
+				return False
+			result = self.ryzomAS.command_return_data.lstrip()
+			if "chat_bridge_reject|1|" in result:
+				return None
+			if "not found, try 'help'" in result or "Bad command usage" in result:
+				print("AS/IOS could not execute", command.split(" ", 1)[0])
+				return None
+			if result.startswith("ERROR"):
+				print("AS/IOS could not execute", command.split(" ", 1)[0])
+				return False
+			print("▶️ ", command.split(" ", 1)[0])
 			return True
-		else:
-			print("🛑 Connextion failed")
-		return False
+		except OSError as e:
+			print("AS/IOS connection failed", e)
+			return False
+		finally:
+			self.ryzomAS.close()
 
 	def runEGSCommand(self, command):
 		if self.ryzomAS.connect("127.0.0.1", 46700):
@@ -74,7 +89,60 @@ class IosDispatcher(RyzomService):
 			print("🛑 Connextion failed")
 		return False
 
+	def sendStructured(self, message):
+		if message.source == "ios" and message.translated_lang == "WK":
+			return True
+		chat = message.chat
+		message_id = chat.get("message_id", "")
+		if message.translated_lang != "WK" and not message_id:
+			external_id = chat.get("external_id", "")
+			message_id = self.client.get("Chat-External-"+external_id) if external_id else ""
+			wait_key = "Chat-External-Wait-"+external_id
+			if not message_id:
+				original = self.getRyzomMessage(message.source_message_id) if message.source == "zulip" else None
+				if (not external_id or not original or original.source != "zulip" or
+					original.translated_lang != "WK" or original.chat.get("external_id") != external_id or
+					original.channel_id != message.channel_id or original.source_lang != message.source_lang):
+					self.client.delete(wait_key)
+					return None
+				if self.client.add("Chat-External-Retry-"+external_id, 1, expire=2, noreply=False):
+					status = self.sendStructured(original)
+					if status is not True:
+						self.client.delete(wait_key)
+						return status
+					self.client.add(wait_key, time()+CHAT_ACK_WAIT_SECONDS, expire=24*60*60, noreply=False)
+				deadline = self.client.get(wait_key)
+				if deadline is not None and time() >= deadline:
+					print("No IOS acknowledgement for translation", message.source_message_id)
+					self.client.delete(wait_key)
+					return None
+				return False
+			self.client.delete(wait_key)
+		text = message.text if message.translated_lang == "WK" else message.translation
+		if not text:
+			return None
+		part_payload = "-"
+		if message.translated_lang != "WK" and chat.get("translation_parts"):
+			parts = chat["translation_parts"]
+			part_payload = str(len(parts))+":"+"".join(
+				str(len(part.encode("utf-8")))+":"+part for part in parts)
+			part_payload = self.encodeChatText(part_payload)
+		arguments = [
+			self.encodeChatText(message.sender),
+			self.encodeChatText(chat.get("channel", message.channel_id)),
+			self.encodeChatText(chat["external_id"]) if chat.get("external_id") else "-",
+			message_id or "-", chat.get("quote_id") or "-",
+			message.source_lang or "wk",
+			"-" if message.translated_lang == "WK" else message.translated_lang.lower(),
+			self.encodeChatText(text)]
+		if part_payload != "-":
+			arguments.append(part_payload)
+		command = "bridgeChat "+" ".join(arguments)
+		return self.runIOSCommand(command)
+
 	def sendToService(self, m):
+		if m.chat:
+			return self.sendStructured(m)
 		command = "chat" if m.source == "ios" else "farChat"
 		sender = m.sender + (self.domain if m.source == "ios" else "")
 		prefix = ">" if command == "chat" else ""
@@ -114,16 +182,22 @@ class IosDispatcher(RyzomService):
 	def checkMessages(self):
 		last_id = self.getLastChatID()
 		for i in range(self.current_id+1, last_id+1, 1):
-			message = self.getRyzomMessage(i)
-			if message != None:
-				self.updateActivity(False)
-				self.stats["messages"] += 1
-				status = self.sendToService(message)
-				if status:
-					self.stats["messages_to_ios"] += 1
-				self.updateStats()
-				status = "✅" if status else "🛑"
-				self.next_id = i
+			try:
+				message = self.getRyzomMessage(i)
+				if message != None:
+					self.updateActivity(False)
+					self.stats["messages"] += 1
+					status = self.sendToService(message)
+					if status is False:
+						break
+					if status:
+						self.stats["messages_to_ios"] += 1
+					else:
+						print("Skipping IOS message", i)
+					self.updateStats()
+			except (ValueError, TypeError, KeyError, IndexError, AttributeError) as e:
+				print("Invalid queued IOS message", i, e)
+			self.next_id = i
 		self.current_id = self.next_id
 
 	def run(self):
