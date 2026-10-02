@@ -125,6 +125,15 @@ protected:
 	const CRaceStatsSheet	*_PlayerSheet;
 	/// Player Face
 	SInstanceCL				_Face;
+	/// Private (non-shape-bank-shared) hairstyle instance, clipped against the equipped hat's
+	/// volume; only ever created/shown when both HEAD_SLOT and HAT_SLOT are occupied, hiding
+	/// the normal shared _Instances[HEAD_SLOT] instance meanwhile.
+	NL3D::UInstance			_ClippedHairInstance;
+	std::string				_ClippedHairKey;
+	/// Builds/releases _ClippedHairInstance as needed. Called from updateVisible(), not
+	/// updateVisualPropertyVpa(): needs a skeleton already fully configured for the frame
+	/// (scale applied) to skin correctly, which updateVisualPropertyVpa runs too early for.
+	void					updateClippedHairInstance();
 	/// Default Look
 	std::string				_DefaultChest;
 	std::string				_DefaultLegs;
@@ -171,6 +180,10 @@ protected:
 	virtual void updateVisualPropertyVpc(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
 	/// Update the Visual Property PVP Mode (need special imp for player because of PVP consider)
 	virtual void updateVisualPropertyPvpMode(const NLMISC::TGameCycle &gameCycle, const sint64 &prop);
+
+	/// Per-frame update (unlike updateVisualPropertyVp*, runs after the skeleton is fully
+	/// configured for the frame -- scale applied, ready for forceComputeBone()).
+	virtual void updateVisible(const NLMISC::TTime &time, CEntityCL *target);
 
 	// Get The Entity Skin
 	virtual sint skin() const;

@@ -885,7 +885,8 @@ namespace NLGUI
 				: Image(img), Style(style), Type(type)
 				{}
 
-				CViewBase *Image;
+				// weak reference: the view can be destroyed (page re-render) while the download is still pending
+				NLMISC::CRefPtr<CViewBase> Image;
 				CStyleParams Style;
 				TImageType Type;
 			};
@@ -925,7 +926,8 @@ namespace NLGUI
 			}
 
 		private:
-			std::vector<std::pair<sint32, CViewBase *> > TextureIds;
+			// weak references: views can be destroyed while the download is still pending
+			std::vector<std::pair<sint32, NLMISC::CRefPtr<CViewBase> > > TextureIds;
 		};
 
 		class BnpDownloadCB : public CDataDownload

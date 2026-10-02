@@ -72,7 +72,7 @@
         action="proc"
         params="proc_target_changed_nameid" />
   <!-- will be called if either UI:VARIABLES:TARGET:SLOT (local) or P6 (server) changes -->
-  <link expr="depends(@%target_uid)"
+  <link expr="depends(@UI:VARIABLES:TARGET:SLOT,@%target_uid)"
         action="proc"
         params="proc_target_changed" />
   <!-- detects when the target has changed -->

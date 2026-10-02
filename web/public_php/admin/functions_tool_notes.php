@@ -18,9 +18,9 @@
 		$data = array();
 
 		if ($active === null)	// edit note list
-			$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_user_id=". $user_id ." ORDER BY note_active DESC, note_date DESC";
+			$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_user_id=". intval($user_id) ." ORDER BY note_active DESC, note_date DESC";
 		else					// view note list
-			$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE (note_user_id=". $user_id ." OR note_global=1) AND note_active='". $active ."' ORDER BY note_global DESC, note_title ASC";
+			$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE (note_user_id=". intval($user_id) ." OR note_global=1) AND note_active='". intval($active) ."' ORDER BY note_global DESC, note_title ASC";
 
 		if ($result = $db->sql_query($sql))
 		{
@@ -56,7 +56,7 @@
 		else						$note_mode = 1;
 
 		$sql  = "INSERT INTO ". NELDB_NOTE_TABLE ." (`note_user_id`,`note_title`,`note_data`,`note_date`,`note_active`,`note_global`,`note_mode`,`note_popup_uri`,`note_popup_restriction`) VALUES ";
-		$sql .= " ('". $user_id ."','". htmlentities($note_title, ENT_QUOTES) ."','". htmlentities($note_data, ENT_QUOTES) ."','". time() ."',". $note_active .",". $note_global .",". $note_mode .",'". $note_uri ."','". $note_restriction ."')";
+		$sql .= " ('". intval($user_id) ."','". htmlentities($note_title, ENT_QUOTES) ."','". htmlentities($note_data, ENT_QUOTES) ."','". time() ."',". intval($note_active) .",". intval($note_global) .",". intval($note_mode) .",'". $db->sql_escape_string($note_uri) ."','". $db->sql_escape_string($note_restriction) ."')";
 
 		$db->sql_query($sql);
 
@@ -69,7 +69,7 @@
 
 		$data = array();
 
-		$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". $note_id ." AND note_user_id=". $user_id;
+		$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". intval($note_id) ." AND note_user_id=". intval($user_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -87,7 +87,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". $note_id ." AND note_user_id=". $user_id;
+		$sql = "DELETE FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". intval($note_id) ." AND note_user_id=". intval($user_id);
 		$db->sql_query($sql);
 	}
 
@@ -98,13 +98,13 @@
 		if ($note_mode == 'text')	$note_mode = 0;
 		else						$note_mode = 1;
 
-		$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". $note_id ." AND note_user_id=". $user_id;
+		$sql = "SELECT * FROM ". NELDB_NOTE_TABLE ." WHERE note_id=". intval($note_id) ." AND note_user_id=". intval($user_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
 			{
 //				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". htmlentities($note_title, ENT_QUOTES) ."',note_data='". htmlentities($note_data, ENT_QUOTES) ."',note_date='". time() ."',note_active='". $note_active ."',note_global='". $note_global ."',note_mode=". $note_mode .",note_popup_uri='". $note_uri ."',note_popup_restriction='". $note_restriction ."'  WHERE note_id=". $note_id;
-				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". htmlentities($note_title, ENT_QUOTES) ."',note_data='". htmlentities($note_data, ENT_QUOTES) ."',note_date='". time() ."',note_active='". $note_active ."',note_global='". $note_global ."'  WHERE note_id=". $note_id;
+				$sql = "UPDATE ". NELDB_NOTE_TABLE ." SET note_title='". htmlentities($note_title, ENT_QUOTES) ."',note_data='". htmlentities($note_data, ENT_QUOTES) ."',note_date='". time() ."',note_active='". intval($note_active) ."',note_global='". intval($note_global) ."'  WHERE note_id=". intval($note_id);
 				$db->sql_query($sql);
 			}
 			else

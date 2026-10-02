@@ -89,6 +89,7 @@ private:
 void sqlInit();
 std::string sqlQuery(const std::string &query);
 std::string sqlQuery(const std::string &query, sint32 &nbRow, MYSQL_ROW &firstRow, CMysqlResult &result);
+std::string sqlEscape(const std::string &str);
 
 #endif // NL_MYSQL_HELPER_H
 
