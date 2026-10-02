@@ -300,6 +300,10 @@ public:
 		uint32				getItemSlotId(CDBCtrlSheet *ctrl);
 		uint32				getItemSlotId(const std::string &itemDb, uint slotIndex);
 		const	CClientItemInfo	&getItemInfo(uint slotId) const;
+		// Item info used by linked help windows.
+		uint32			createItemLinkInfo(const CItemInfos &itemInfo);
+		void			removeItemLinkInfo(uint32 slotId);
+		bool			isItemLinkSlot(uint32 slotId) const;
 		// get item info from cache
 		const	CClientItemInfo *getItemInfoCache(uint32 serial, uint32 createTime) const;
 		uint				getItemSheetForSlotId(uint slotId) const;

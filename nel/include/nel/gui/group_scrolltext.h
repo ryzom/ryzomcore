@@ -72,6 +72,12 @@ namespace NLGUI
 		// setup vertical scrolling event
 		void	smoothScrollY (sint32 dy);
 
+		// Show the last line, or the first line added while the list was hidden or scrolled up.
+		void	scrollToNewest();
+		void	scrollToUnread();
+		// Mark a line added while the list is hidden.
+		void	markUnread(CViewBase *line);
+
 		REFLECT_EXPORT_START(CGroupScrollText, CInterfaceGroup)
 		REFLECT_EXPORT_END
 
@@ -80,6 +86,13 @@ namespace NLGUI
 		CCtrlScroll	      *_ScrollBar;
 		CCtrlBaseButton		  *_ButtonAdd;
 		CCtrlBaseButton		  *_ButtonSub;
+		CCtrlBaseButton		  *_ButtonNewest;
+		CCtrlBaseButton		  *_ButtonUnread;
+		NLMISC::CRefPtr<CViewBase> _LastLine;
+		NLMISC::CRefPtr<CViewBase> _FirstUnread;
+		// _FirstUnread was displayed.
+		bool			_UnreadSeen;
+		sint64			_LastCheckMs;
 		bool            _Settuped;
 		bool			_InvertScrollBar;
 		sint32          _ListHeight;
@@ -89,6 +102,9 @@ namespace NLGUI
 	protected:
 		void    setup();
 		void    updateScrollBar();
+		void    updateUnread();
+		bool    isAtNewest() const;
+		bool    isLineVisible(const CViewBase *line) const;
 	public:
 		// private use for action handlers
 		sint32			_StartHeight;

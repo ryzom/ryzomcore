@@ -1,0 +1,3344 @@
+# Ryzom chat emoji table -- GENERATED, do not edit by hand.
+# Regenerate with tools/emoji/gen_emoji_table.py
+# Put local corrections in emoji_overrides.txt instead; it is
+# loaded afterwards and wins.
+# name\tcodepoints(hex)\timage-stem (client appends .tga)
++1	1f44d	emoji_u1f44d
+-1	1f44e	emoji_u1f44e
+100	1f4af	emoji_u1f4af
+1234	1f522	emoji_u1f522
+3	1f970	emoji_u1f970
+8_ball	1f3b1	emoji_u1f3b1
+a	1f170	emoji_u1f170
+ab	1f18e	emoji_u1f18e
+abacus	1f9ee	emoji_u1f9ee
+abc	1f524	emoji_u1f524
+abcd	1f521	emoji_u1f521
+absentminded	1f636 200d 1f32b	emoji_u1f636_200d_1f32b
+absorbing	1f9fd	emoji_u1f9fd
+accept	1f251	emoji_u1f251
+accessible	267f	emoji_u267f
+accident	1fad7	emoji_u1fad7
+accommodations	1f6cc	emoji_u1f6cc
+accordion	1fa97	emoji_u1fa97
+accounting	1f9fe	emoji_u1f9fe
+acidity	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+acrobatics	1f938	emoji_u1f938
+action	1f3ac	emoji_u1f3ac
+add	2795	emoji_u2795
+adhesive	1fa79	emoji_u1fa79
+adhesive_bandage	1fa79	emoji_u1fa79
+admiration	1f979	emoji_u1f979
+adorable	1fa77	emoji_u1fa77
+adore	1f970	emoji_u1f970
+aerial_tramway	1f6a1	emoji_u1f6a1
+aesculapius	2695	emoji_u2695
+afro	1faae	emoji_u1faae
+agent	1f575	emoji_u1f575
+agony	1f616	emoji_u1f616
+air	1fa9f	emoji_u1fa9f
+airplane	2708	emoji_u2708
+airplane_arrival	1f6ec	emoji_u1f6ec
+airplane_departure	1f6eb	emoji_u1f6eb
+alarm	1f413	emoji_u1f413
+alarm_clock	23f0	emoji_u23f0
+alces	1face	emoji_u1face
+alchemy	2697	emoji_u2697
+alembic	2697	emoji_u2697
+alert	1f6a8	emoji_u1f6a8
+alien	1f47d	emoji_u1f47d
+aliens	1f6f8	emoji_u1f6f8
+all_good	2705	emoji_u2705
+alpaca	1f999	emoji_u1f999
+alphabet	1f521	emoji_u1f521
+amazement	1fae2	emoji_u1fae2
+ambulance	1f691	emoji_u1f691
+american_football	1f3c8	emoji_u1f3c8
+amoeba	1f9a0	emoji_u1f9a0
+amount	1f90f	emoji_u1f90f
+amphora	1f3fa	emoji_u1f3fa
+amusement	1f6dd	emoji_u1f6dd
+anatomical	1fac0	emoji_u1fac0
+anatomical_heart	1fac0	emoji_u1fac0
+anchor	2693	emoji_u2693
+android	1f4f1	emoji_u1f4f1
+angel	1f47c	emoji_u1f47c
+angelic	1fabd	emoji_u1fabd
+anger	1f4a2	emoji_u1f4a2
+anger_bubble	1f5ef	emoji_u1f5ef
+angry	1f620	emoji_u1f620
+angry_cat	1f63e	emoji_u1f63e
+angry_devil	1f47f	emoji_u1f47f
+anguish	1f62b	emoji_u1f62b
+anguished	1f627	emoji_u1f627
+ankle	1f9b6	emoji_u1f9b6
+annelid	1fab1	emoji_u1fab1
+answer	1f7f0	emoji_u1f7f0
+ant	1f41c	emoji_u1f41c
+antlers	1face	emoji_u1face
+anxious	1f62c	emoji_u1f62c
+ape	1f9a7	emoji_u1f9a7
+applause	1f44f	emoji_u1f44f
+apple	1f34e	emoji_u1f34e
+approved	2705	emoji_u2705
+aquarium	1fabc	emoji_u1fabc
+aquarius	2652	emoji_u2652
+arabian_camel	1f42a	emoji_u1f42a
+arcade	1f579	emoji_u1f579
+archery	1f3f9	emoji_u1f3f9
+archive	1f5c3	emoji_u1f5c3
+arctic	1f43b 200d 2744	emoji_u1f43b_200d_2744
+arepa	1fad3	emoji_u1fad3
+aries	2648	emoji_u2648
+arm	1f9be	emoji_u1f9be
+arms_open	1f917	emoji_u1f917
+army	1fa96	emoji_u1fa96
+arrival	1f6ec	emoji_u1f6ec
+art	1f3a8	emoji_u1f3a8
+artist	1f9d1 200d 1f3a8	emoji_u1f9d1_200d_1f3a8
+ascension	1f426 200d 1f525	emoji_u1f426_200d_1f525
+asking_a_question	261d	emoji_u261d
+ass	1facf	emoji_u1facf
+assassin	1f977	emoji_u1f977
+assistance	1f415 200d 1f9ba	emoji_u1f415_200d_1f9ba
+asterisk	002a 20e3	emoji_u002a_20e3
+astonished	1f632	emoji_u1f632
+astronaut	1f9d1 200d 1f680	emoji_u1f9d1_200d_1f680
+at	1faf5	emoji_u1faf5
+at_work	2692	emoji_u2692
+athletic_shoe	1f45f	emoji_u1f45f
+atm	1f3e7	emoji_u1f3e7
+atom	269b	emoji_u269b
+attachment	1f4ce	emoji_u1f4ce
+attraction	1f9f2	emoji_u1f9f2
+auto	1f6fa	emoji_u1f6fa
+auto_rickshaw	1f6fa	emoji_u1f6fa
+automobile	1f6fb	emoji_u1f6fb
+autumn	1f96e	emoji_u1f96e
+aviation	1fabd	emoji_u1fabd
+avocado	1f951	emoji_u1f951
+awe	1fae2	emoji_u1fae2
+aww	1f979	emoji_u1f979
+ax	1fa93	emoji_u1fa93
+axe	1fa93	emoji_u1fa93
+b	1f171	emoji_u1f171
+baa	1f411	emoji_u1f411
+babooshka	1fa86	emoji_u1fa86
+baboushka	1fa86	emoji_u1fa86
+babushka	1fa86	emoji_u1fa86
+baby	1f476	emoji_u1f476
+baby_bottle	1f37c	emoji_u1f37c
+baby_change_station	1f6bc	emoji_u1f6bc
+baby_chick	1f424	emoji_u1f424
+back	1f519	emoji_u1f519
+backpack	1f392	emoji_u1f392
+backpacking	1f97e	emoji_u1f97e
+bacon	1f953	emoji_u1f953
+badger	1f9a1	emoji_u1f9a1
+badminton	1f3f8	emoji_u1f3f8
+bag	1f9f3	emoji_u1f9f3
+bagel	1f96f	emoji_u1f96f
+baggage_claim	1f6c4	emoji_u1f6c4
+bags	1fae9	emoji_u1fae9
+baguette	1f956	emoji_u1f956
+bait	1faa4	emoji_u1faa4
+balance	2696	emoji_u2696
+ball	26f9	emoji_u26f9
+ballet_shoes	1fa70	emoji_u1fa70
+balloon	1f388	emoji_u1f388
+ballot_box	1f5f3	emoji_u1f5f3
+ballpoint_pen	1f58a	emoji_u1f58a
+bam	1f4a2	emoji_u1f4a2
+bamboo	1f38d	emoji_u1f38d
+banana	1f34c	emoji_u1f34c
+band	1fa88	emoji_u1fa88
+bandage	1fa79	emoji_u1fa79
+bandana	1f9d5	emoji_u1f9d5
+bangbang	203c	emoji_u203c
+banjo	1fa95	emoji_u1fa95
+bank	1f3e6	emoji_u1f3e6
+bar	1f9fc	emoji_u1f9fc
+bar_chart	1f4ca	emoji_u1f4ca
+barber	1f488	emoji_u1f488
+bare	1fabe	emoji_u1fabe
+barf	1f92e	emoji_u1f92e
+barren	1fabe	emoji_u1fabe
+baseball	26be	emoji_u26be
+basket	1f9fa	emoji_u1f9fa
+basketball	1f3c0	emoji_u1f3c0
+bat	1f987	emoji_u1f987
+bath	1f6c0	emoji_u1f6c0
+bathroom	1faa5	emoji_u1faa5
+bathtub	1f6c1	emoji_u1f6c1
+battery	1f50b	emoji_u1f50b
+bday	1f973	emoji_u1f973
+beach	1f3d6	emoji_u1f3d6
+beach_umbrella	26f1	emoji_u26f1
+bead	1f9ff	emoji_u1f9ff
+beak	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+beans	1fad8	emoji_u1fad8
+beanstalk	1fadb	emoji_u1fadb
+bear	1f43b	emoji_u1f43b
+beaver	1f9ab	emoji_u1f9ab
+beckon	1faf4	emoji_u1faf4
+bed	1f6cf	emoji_u1f6cf
+bedroom	1f6cf	emoji_u1f6cf
+bedtime	1f971	emoji_u1f971
+bee	1f41d	emoji_u1f41d
+beer	1f37a	emoji_u1f37a
+beers	1f37b	emoji_u1f37b
+beet	1fadc	emoji_u1fadc
+beetle	1fab2	emoji_u1fab2
+begging	1f97a	emoji_u1f97a
+beginner	1f530	emoji_u1f530
+bell	1f514	emoji_u1f514
+bell_pepper	1fad1	emoji_u1fad1
+bellhop_bell	1f6ce	emoji_u1f6ce
+bento	1f371	emoji_u1f371
+berries	1fad0	emoji_u1fad0
+berry	1fad0	emoji_u1fad0
+betrayed	1f52a	emoji_u1f52a
+beverage	1f9c3	emoji_u1f9c3
+beverage_box	1f9c3	emoji_u1f9c3
+bicycle	1f6b2	emoji_u1f6b2
+big	1f97a	emoji_u1f97a
+big_frown	2639	emoji_u2639
+big_rig	1f69b	emoji_u1f69b
+bike	1f6b2	emoji_u1f6b2
+bikini	1f459	emoji_u1f459
+bilberry	1fad0	emoji_u1fad0
+billed	1f9e2	emoji_u1f9e2
+billed_cap	1f9e2	emoji_u1f9e2
+billiards	1f3b1	emoji_u1f3b1
+biohazard	2623	emoji_u2623
+biology	1f9eb	emoji_u1f9eb
+bird	1f426	emoji_u1f426
+birthday	1f382	emoji_u1f382
+bisexual	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+bison	1f9ac	emoji_u1f9ac
+bisque	1f99e	emoji_u1f99e
+bit	1f90f	emoji_u1f90f
+biting	1fae6	emoji_u1fae6
+biting_lip	1fae6	emoji_u1fae6
+black_and_white_square	1f533	emoji_u1f533
+black_belt	1f94b	emoji_u1f94b
+black_bird	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+black_cat	1f408 200d 2b1b	emoji_u1f408_200d_2b1b
+black_circle	26ab	emoji_u26ab
+black_flag	1f3f4	emoji_u1f3f4
+black_heart	1f5a4	emoji_u1f5a4
+black_large_square	2b1b	emoji_u2b1b
+black_medium_small_square	25fe	emoji_u25fe
+black_medium_square	25fc	emoji_u25fc
+black_nib	2712	emoji_u2712
+black_small_square	25aa	emoji_u25aa
+blades	1f6fc	emoji_u1f6fc
+blank	1f636	emoji_u1f636
+bleed	1fa78	emoji_u1fa78
+blonde	1f471 200d 2640	emoji_u1f471_200d_2640
+bloom	1fabb	emoji_u1fabb
+blossom	1f33c	emoji_u1f33c
+blow	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+blow_a_kiss	1f618	emoji_u1f618
+blowfish	1f421	emoji_u1f421
+blowing	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+blown	1f92f	emoji_u1f92f
+blue_book	1f4d8	emoji_u1f4d8
+blue_circle	1f535	emoji_u1f535
+blue_faced	1f976	emoji_u1f976
+blue_heart	1f499	emoji_u1f499
+blue_square	1f7e6	emoji_u1f7e6
+blueberries	1fad0	emoji_u1fad0
+blueberry	1fad0	emoji_u1fad0
+bluebonnet	1fabb	emoji_u1fabb
+blush	1f60a	emoji_u1f60a
+blushing	1f633	emoji_u1f633
+boar	1f417	emoji_u1f417
+board	1f6f9	emoji_u1f6f9
+boat	26f5	emoji_u26f5
+boba	1f9cb	emoji_u1f9cb
+bok	1f96c	emoji_u1f96c
+bomb	1f4a3	emoji_u1f4a3
+bone	1f9b4	emoji_u1f9b4
+boo	1f47b	emoji_u1f47b
+book	1f4d6	emoji_u1f4d6
+bookkeeping	1f9fe	emoji_u1f9fe
+bookmark	1f516	emoji_u1f516
+books	1f4da	emoji_u1f4da
+boom	1f4a5	emoji_u1f4a5
+boomerang	1fa83	emoji_u1fa83
+boot	1f462	emoji_u1f462
+bottle	1f9f4	emoji_u1f9f4
+boulder	1faa8	emoji_u1faa8
+bouquet	1f490	emoji_u1f490
+bow	1f647	emoji_u1f647
+bow_and_arrow	1f3f9	emoji_u1f3f9
+bowl	1f963	emoji_u1f963
+bowl_with_spoon	1f963	emoji_u1f963
+bowling	1f3b3	emoji_u1f3b3
+boxing_glove	1f94a	emoji_u1f94a
+boy	1f466	emoji_u1f466
+brachiosaurus	1f995	emoji_u1f995
+brain	1f9e0	emoji_u1f9e0
+branches	1fabe	emoji_u1fabe
+bravery	1f49c	emoji_u1f49c
+bread	1f35e	emoji_u1f35e
+break	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+breakfast	1f95e	emoji_u1f95e
+breaking	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+breast	1f931	emoji_u1f931
+breast_feeding	1f931	emoji_u1f931
+breath	1fac1	emoji_u1fac1
+breathe	1fac1	emoji_u1fac1
+brew	1fad6	emoji_u1fad6
+brick	1f9f1	emoji_u1f9f1
+bricks	1f9f1	emoji_u1f9f1
+bride	1f470	emoji_u1f470
+bridge	1f309	emoji_u1f309
+briefcase	1f4bc	emoji_u1f4bc
+briefs	1fa72	emoji_u1fa72
+bright_eyed	1f9d2	emoji_u1f9d2
+brightness	1f506	emoji_u1f506
+broadband	1f6dc	emoji_u1f6dc
+broccoli	1f966	emoji_u1f966
+broken	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+broken_chain	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+broken_heart	1f494	emoji_u1f494
+brontosaurus	1f995	emoji_u1f995
+bronze	1f949	emoji_u1f949
+broom	1f9f9	emoji_u1f9f9
+brown_circle	1f7e4	emoji_u1f7e4
+brown_heart	1f90e	emoji_u1f90e
+brown_mushroom	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+brown_square	1f7eb	emoji_u1f7eb
+brr	1f9e5	emoji_u1f9e5
+brush	1faa5	emoji_u1faa5
+bubble_tea	1f9cb	emoji_u1f9cb
+bubbles	1fae7	emoji_u1fae7
+bucket	1faa3	emoji_u1faa3
+buddhism	2638	emoji_u2638
+buffalo	1f9ac	emoji_u1f9ac
+bug	1f41b	emoji_u1f41b
+bulb	1f4a1	emoji_u1f4a1
+bull	1f402	emoji_u1f402
+bullet_train	1f685	emoji_u1f685
+bullhorn	1f4e2	emoji_u1f4e2
+bulls_eye	1f3af	emoji_u1f3af
+bunny	1f430	emoji_u1f430
+buoy	1f6df	emoji_u1f6df
+burgers	1f96c	emoji_u1f96c
+burial	26b0	emoji_u26b0
+burp	1fae7	emoji_u1fae7
+burrito	1f32f	emoji_u1f32f
+burro	1facf	emoji_u1facf
+bury	1fa8f	emoji_u1fa8f
+bus	1f68c	emoji_u1f68c
+bus_stop	1f68f	emoji_u1f68f
+butter	1f9c8	emoji_u1f9c8
+butterfly	1f98b	emoji_u1f98b
+buzz	1f41d	emoji_u1f41d
+c	00a9	emoji_u00a9
+cactus	1f335	emoji_u1f335
+cake	1f370	emoji_u1f370
+calculation	1f9ee	emoji_u1f9ee
+calculator	1f9ee	emoji_u1f9ee
+calendar	1f4c5	emoji_u1f4c5
+calf	1f42e	emoji_u1f42e
+call_me	1f919	emoji_u1f919
+calling	1f4f2	emoji_u1f4f2
+calm	1fab7	emoji_u1fab7
+camel	1f42b	emoji_u1f42b
+camera	1f4f7	emoji_u1f4f7
+camping	26fa	emoji_u26fa
+campsite	1f3d5	emoji_u1f3d5
+can	1f96b	emoji_u1f96b
+cancer	264b	emoji_u264b
+candle	1f56f	emoji_u1f56f
+candy	1f36c	emoji_u1f36c
+canned	1f96b	emoji_u1f96b
+canned_food	1f96b	emoji_u1f96b
+canoe	1f6f6	emoji_u1f6f6
+cap	1f9e2	emoji_u1f9e2
+capital_abcd	1f520	emoji_u1f520
+capital_letters	1f520	emoji_u1f520
+capricorn	2651	emoji_u2651
+capsicum	1fad1	emoji_u1fad1
+captivated	1fae3	emoji_u1fae3
+car	1f697	emoji_u1f697
+card_index	1f4c7	emoji_u1f4c7
+cardiology	1fac0	emoji_u1fac0
+carousel	1f3a0	emoji_u1f3a0
+carp_streamer	1f38f	emoji_u1f38f
+carpenter	1fa9a	emoji_u1fa9a
+carpenter_square	1f4d0	emoji_u1f4d0
+carpentry	1fa9a	emoji_u1fa9a
+carpentry_saw	1fa9a	emoji_u1fa9a
+carrot	1f955	emoji_u1f955
+cartwheel	1f938	emoji_u1f938
+cask	1faa3	emoji_u1faa3
+castle	1f3f0	emoji_u1f3f0
+cat	1f408	emoji_u1f408
+caterpillar	1f41b	emoji_u1f41b
+caution	26a0	emoji_u26a0
+caw	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+cd	1f4bf	emoji_u1f4bf
+celebration	1f388	emoji_u1f388
+cell_reception	1f4f6	emoji_u1f4f6
+cemetery	1faa6	emoji_u1faa6
+censor	1f92c	emoji_u1f92c
+cereal	1f963	emoji_u1f963
+cha	1fa87	emoji_u1fa87
+chain	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+chains	26d3	emoji_u26d3
+chair	1fa91	emoji_u1fa91
+champagne	1f37e	emoji_u1f37e
+change	1fab8	emoji_u1fab8
+charge	1f202	emoji_u1f202
+charm	1f9ff	emoji_u1f9ff
+chart	1f4c8	emoji_u1f4c8
+check	2705	emoji_u2705
+check_mark	2714	emoji_u2714
+checkbox	2611	emoji_u2611
+checkered_flag	1f3c1	emoji_u1f3c1
+cheese	1f9c0	emoji_u1f9c0
+chemistry	1f9ea	emoji_u1f9ea
+cherries	1f352	emoji_u1f352
+cherry_blossom	1f338	emoji_u1f338
+chess	265f	emoji_u265f
+chess_pawn	265f	emoji_u265f
+chest	1f9f0	emoji_u1f9f0
+chestnut	1f330	emoji_u1f330
+chick	1f424	emoji_u1f424
+chicken	1f414	emoji_u1f414
+chickpea	1f9c6	emoji_u1f9c6
+child	1f9d2	emoji_u1f9d2
+children_crossing	1f6b8	emoji_u1f6b8
+chili_pepper	1f336	emoji_u1f336
+chipmunk	1f43f	emoji_u1f43f
+chocolate	1f36b	emoji_u1f36b
+chopsticks	1f962	emoji_u1f962
+choy	1f96c	emoji_u1f96c
+christianity	271d	emoji_u271d
+christmas	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+church	26ea	emoji_u26ea
+cinco	1fa85	emoji_u1fa85
+cinema	1f3a6	emoji_u1f3a6
+circle	2b55	emoji_u2b55
+circus	1f3aa	emoji_u1f3aa
+citrus	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+city	1f3d9	emoji_u1f3d9
+city_sunrise	1f307	emoji_u1f307
+cl	1f191	emoji_u1f191
+clack	1faad	emoji_u1faad
+clap	1f44f	emoji_u1f44f
+classical_building	1f3db	emoji_u1f3db
+classy	1f9d0	emoji_u1f9d0
+claus	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+claws	1f99e	emoji_u1f99e
+clay	1f9f1	emoji_u1f9f1
+climate	1fab8	emoji_u1fab8
+clink	1f942	emoji_u1f942
+clipboard	1f4cb	emoji_u1f4cb
+clock	1f557	emoji_u1f557
+clockwise	1f503	emoji_u1f503
+closed_book	1f4d5	emoji_u1f4d5
+closed_mailbox	1f4ea	emoji_u1f4ea
+closed_umbrella	1f302	emoji_u1f302
+clothes	1f97c	emoji_u1f97c
+clothing	1f45a	emoji_u1f45a
+cloud	2601	emoji_u2601
+clouds	1f636 200d 1f32b	emoji_u1f636_200d_1f32b
+cloudy	1f325	emoji_u1f325
+clover	2618	emoji_u2618
+clown	1f921	emoji_u1f921
+clubs	2663	emoji_u2663
+cluck	1f414	emoji_u1f414
+clue	1f5dd	emoji_u1f5dd
+coat	1f9e5	emoji_u1f9e5
+cock-a-doodle-doo	1f413	emoji_u1f413
+cockroach	1fab3	emoji_u1fab3
+cocktail	1f378	emoji_u1f378
+coconut	1f965	emoji_u1f965
+coffee	2615	emoji_u2615
+coffin	26b0	emoji_u26b0
+coin	1fa99	emoji_u1fa99
+colada	1f965	emoji_u1f965
+cold_face	1f976	emoji_u1f976
+cold_sweat	1f630	emoji_u1f630
+collision	1f4a5	emoji_u1f4a5
+colorful	1f99a	emoji_u1f99a
+comb	1faae	emoji_u1faae
+come	1faf4	emoji_u1faf4
+comet	2604	emoji_u2604
+comfort	1fac2	emoji_u1fac2
+comfy	1f97f	emoji_u1f97f
+commitment	1f510	emoji_u1f510
+commodities	1f6e2	emoji_u1f6e2
+compass	1f9ed	emoji_u1f9ed
+composition_book	1f4d3	emoji_u1f4d3
+compression	1f5dc	emoji_u1f5dc
+computer	1f4bb	emoji_u1f4bb
+computer_mouse	1f5b1	emoji_u1f5b1
+concerned	1f615	emoji_u1f615
+concertina	1fa97	emoji_u1fa97
+conch	1f41a	emoji_u1f41a
+condemned	1f3da	emoji_u1f3da
+confetti	1f38a	emoji_u1f38a
+confounded	1f616	emoji_u1f616
+confused	1f615	emoji_u1f615
+confusion	1fae4	emoji_u1fae4
+conga	1fa98	emoji_u1fa98
+congee	1f963	emoji_u1f963
+congratulations	3297	emoji_u3297
+connectivity	1f6dc	emoji_u1f6dc
+construction	1f3d7	emoji_u1f3d7
+construction_worker	1f477	emoji_u1f477
+construction_zone	1f6a7	emoji_u1f6a7
+contact	1f50e	emoji_u1f50e
+container	1fad9	emoji_u1fad9
+control_knobs	1f39b	emoji_u1f39b
+convenience_store	1f3ea	emoji_u1f3ea
+convoluted	1f968	emoji_u1f968
+cook	1f9d1 200d 1f373	emoji_u1f9d1_200d_1f373
+cookie	1f36a	emoji_u1f36a
+cooking	1f373	emoji_u1f373
+cool	1f192	emoji_u1f192
+cooling	1faad	emoji_u1faad
+cop	1f46e	emoji_u1f46e
+copyright	00a9	emoji_u00a9
+coral	1fab8	emoji_u1fab8
+cord	1faa2	emoji_u1faa2
+corn	1f33d	emoji_u1f33d
+corvid	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+couch_and_lamp	1f6cb	emoji_u1f6cb
+counterclockwise	1f504	emoji_u1f504
+couple_with_heart	1f491	emoji_u1f491
+couple_with_heart_man_man	1f468 200d 2764 200d 1f468	emoji_u1f468_200d_2764_200d_1f468
+couple_with_heart_woman_man	1f469 200d 2764 200d 1f468	emoji_u1f469_200d_2764_200d_1f468
+couple_with_heart_woman_woman	1f469 200d 2764 200d 1f469	emoji_u1f469_200d_2764_200d_1f469
+cow	1f404	emoji_u1f404
+cowboy	1f920	emoji_u1f920
+crab	1f980	emoji_u1f980
+crash	1f4a5	emoji_u1f4a5
+crayon	1f58d	emoji_u1f58d
+crazy	1f61c	emoji_u1f61c
+credentials	1faaa	emoji_u1faaa
+credit_card	1f4b3	emoji_u1f4b3
+cremation	26b1	emoji_u26b1
+crew	1f6a3	emoji_u1f6a3
+cricket	1f997	emoji_u1f997
+cricket_game	1f3cf	emoji_u1f3cf
+crime	1fac6	emoji_u1fac6
+crochet	1f9f6	emoji_u1f9f6
+crocodile	1f40a	emoji_u1f40a
+croissant	1f950	emoji_u1f950
+crook	1fa9d	emoji_u1fa9d
+cross	271d	emoji_u271d
+cross_mark	274c	emoji_u274c
+crossed	1faf0	emoji_u1faf0
+crossed_flags	1f38c	emoji_u1f38c
+crow	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+crown	1f451	emoji_u1f451
+cruise	1f6f3	emoji_u1f6f3
+crush	1f970	emoji_u1f970
+crushed	1f940	emoji_u1f940
+crutch	1fa7c	emoji_u1fa7c
+cry	1f622	emoji_u1f622
+crying_cat	1f63f	emoji_u1f63f
+crystal	1f48e	emoji_u1f48e
+crystal_ball	1f52e	emoji_u1f52e
+cube	1f9ca	emoji_u1f9ca
+cucumber	1f952	emoji_u1f952
+cuffs	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+culture	1f9eb	emoji_u1f9eb
+cup_with_straw	1f964	emoji_u1f964
+cupcake	1f9c1	emoji_u1f9c1
+cupid	1f498	emoji_u1f498
+cupped	1f932	emoji_u1f932
+curious	1f99d	emoji_u1f99d
+curl	1f4c3	emoji_u1f4c3
+curling	1f94c	emoji_u1f94c
+curling_stone	1f94c	emoji_u1f94c
+curry	1f35b	emoji_u1f35b
+cursing	1f92c	emoji_u1f92c
+curve	1fa9d	emoji_u1fa9d
+cussing	1f92c	emoji_u1f92c
+custard	1f36e	emoji_u1f36e
+customs	1f6c3	emoji_u1f6c3
+cut_of_meat	1f969	emoji_u1f969
+cute	1f4a0	emoji_u1f4a0
+cyan	1fa75	emoji_u1fa75
+cyclist	1f6b4	emoji_u1f6b4
+cyclone	1f300	emoji_u1f300
+cygnet	1f9a2	emoji_u1f9a2
+dagger	1f5e1	emoji_u1f5e1
+dairy	1f9c8	emoji_u1f9c8
+dam	1f9ab	emoji_u1f9ab
+dancer	1f483	emoji_u1f483
+dancers	1f46f	emoji_u1f46f
+dancing	1f57a	emoji_u1f57a
+danger	26a0	emoji_u26a0
+dango	1f361	emoji_u1f361
+dark_sunglasses	1f576	emoji_u1f576
+darts	1f3af	emoji_u1f3af
+dash	1f4a8	emoji_u1f4a8
+date	1f4c6	emoji_u1f4c6
+daze	1fae8	emoji_u1fae8
+de	1fa85	emoji_u1fa85
+deaf_man	1f9cf 200d 2642	emoji_u1f9cf_200d_2642
+deaf_person	1f9cf	emoji_u1f9cf
+deaf_woman	1f9cf 200d 2640	emoji_u1f9cf_200d_2640
+death	2620	emoji_u2620
+debit_card	1f4b3	emoji_u1f4b3
+deciduous_tree	1f333	emoji_u1f333
+decor	1fab4	emoji_u1fab4
+decoration	1f380	emoji_u1f380
+decorative_notebook	1f4d4	emoji_u1f4d4
+decrease	1f53d	emoji_u1f53d
+decreasing	1f4c9	emoji_u1f4c9
+deer	1f98c	emoji_u1f98c
+deg	1faaf	emoji_u1faaf
+delivery	1f961	emoji_u1f961
+demonstration	1faa7	emoji_u1faa7
+denim	1f456	emoji_u1f456
+dental	1faa5	emoji_u1faa5
+dentist	1f9b7	emoji_u1f9b7
+department_store	1f3ec	emoji_u1f3ec
+departure	1f6eb	emoji_u1f6eb
+depressed	1fae5	emoji_u1fae5
+derelict_house	1f3da	emoji_u1f3da
+desert	1f3dc	emoji_u1f3dc
+desktop_computer	1f5a5	emoji_u1f5a5
+dessert	1f9c1	emoji_u1f9c1
+detective	1f575	emoji_u1f575
+devil	1f47f	emoji_u1f47f
+diagonal	1fae4	emoji_u1fae4
+diamond_with_a_dot	1f4a0	emoji_u1f4a0
+diamonds	2666	emoji_u2666
+diaper	1f9f7	emoji_u1f9f7
+dice	1f3b2	emoji_u1f3b2
+die	1f3b2	emoji_u1f3b2
+dig	1fa8f	emoji_u1fa8f
+digital_security	1f50f	emoji_u1f50f
+dim	1f505	emoji_u1f505
+ding	1f6ce	emoji_u1f6ce
+diplodocus	1f995	emoji_u1f995
+direct_hit	1f3af	emoji_u1f3af
+direction	1f9ed	emoji_u1f9ed
+disability	1fa7c	emoji_u1fa7c
+disabled	267f	emoji_u267f
+disappointed	1f61e	emoji_u1f61e
+disappointed_relieved	1f625	emoji_u1f625
+disapproval	1f928	emoji_u1f928
+disc	1f94f	emoji_u1f94f
+disco	1f57a	emoji_u1f57a
+disguise	1f978	emoji_u1f978
+disguised_face	1f978	emoji_u1f978
+dish	1f9eb	emoji_u1f9eb
+dismiss	1faf3	emoji_u1faf3
+dissolve	1fae0	emoji_u1fae0
+distraught	1f629	emoji_u1f629
+distrust	1f928	emoji_u1f928
+dive	1f97d	emoji_u1f97d
+divide	2797	emoji_u2797
+diving_mask	1f93f	emoji_u1f93f
+division	2797	emoji_u2797
+diya	1fa94	emoji_u1fa94
+diya_lamp	1fa94	emoji_u1fa94
+dizzy	1f635	emoji_u1f635
+dna	1f9ec	emoji_u1f9ec
+do_not_litter	1f6af	emoji_u1f6af
+document	1f4c4	emoji_u1f4c4
+dodo	1f9a4	emoji_u1f9a4
+dog	1f415	emoji_u1f415
+dogi	1f94b	emoji_u1f94b
+doll	1fa86	emoji_u1fa86
+dollar	1fa99	emoji_u1fa99
+dollar_bills	1f4b5	emoji_u1f4b5
+dollars	1f4b2	emoji_u1f4b2
+dolls	1f38e	emoji_u1f38e
+dolphin	1f42c	emoji_u1f42c
+donation	1fa78	emoji_u1fa78
+done_deal	1f91d	emoji_u1f91d
+doner_kebab	1f959	emoji_u1f959
+donkey	1facf	emoji_u1facf
+donut	1f369	emoji_u1f369
+door	1f6aa	emoji_u1f6aa
+dormouse	1f42d	emoji_u1f42d
+dotted	1fae5	emoji_u1fae5
+dotted_line_face	1fae5	emoji_u1fae5
+dotted_six_pointed_star	1f52f	emoji_u1f52f
+double_down	23ec	emoji_u23ec
+double_exclamation	203c	emoji_u203c
+double_loop	27bf	emoji_u27bf
+double_up	23eb	emoji_u23eb
+doubtful	1fae4	emoji_u1fae4
+doughnut	1f369	emoji_u1f369
+dove	1f54a	emoji_u1f54a
+dove_of_peace	1f54a	emoji_u1f54a
+down	2b07	emoji_u2b07
+down_button	1f53d	emoji_u1f53d
+downvote	1f53d	emoji_u1f53d
+downwards_trend	1f4c9	emoji_u1f4c9
+dr	1f97c	emoji_u1f97c
+dracula	1f9db	emoji_u1f9db
+dragon	1f409	emoji_u1f409
+dragon_face	1f432	emoji_u1f432
+drained	1faab	emoji_u1faab
+drama	1f3ad	emoji_u1f3ad
+dream	1f4ad	emoji_u1f4ad
+drenched	1f327	emoji_u1f327
+dress	1f457	emoji_u1f457
+drinking_water	1f6b0	emoji_u1f6b0
+drip	1fadf	emoji_u1fadf
+drive_with_care	1f6b8	emoji_u1f6b8
+drooling	1f924	emoji_u1f924
+drop	1f4a7	emoji_u1f4a7
+drop_of_blood	1fa78	emoji_u1fa78
+dropped	1faf3	emoji_u1faf3
+drought	1fabe	emoji_u1fabe
+drum	1f941	emoji_u1f941
+drumstick	1f357	emoji_u1f357
+drunk	1f974	emoji_u1f974
+dua	1f932	emoji_u1f932
+duck	1f986	emoji_u1f986
+duckling	1f9a2	emoji_u1f9a2
+duel	2694	emoji_u2694
+dumpling	1f95f	emoji_u1f95f
+dungeon	1f5dd	emoji_u1f5dd
+dupe	265f	emoji_u265f
+dvd	1f4c0	emoji_u1f4c0
+dying	1f975	emoji_u1f975
+dynamite	1f9e8	emoji_u1f9e8
+e-mail	1f4e7	emoji_u1f4e7
+eagle	1f985	emoji_u1f985
+ear	1f442	emoji_u1f442
+ear_of_rice	1f33e	emoji_u1f33e
+ear_with_hearing_aid	1f9bb	emoji_u1f9bb
+earth_africa	1f30d	emoji_u1f30d
+earth_americas	1f30e	emoji_u1f30e
+earth_asia	1f30f	emoji_u1f30f
+earthquake	1fae8	emoji_u1fae8
+earthworm	1fab1	emoji_u1fab1
+east	27a1	emoji_u27a1
+easy_come_easy_go	1f4b8	emoji_u1f4b8
+eating_utensils	1f374	emoji_u1f374
+edamame	1fadb	emoji_u1fadb
+egg	1f95a	emoji_u1f95a
+eggplant	1f346	emoji_u1f346
+eggs	1faba	emoji_u1faba
+eight	0038 20e3	emoji_u0038_20e3
+eight_pointed_star	2734	emoji_u2734
+eight_spoked_asterisk	2733	emoji_u2733
+eject	23cf	emoji_u23cf
+eject_button	23cf	emoji_u23cf
+elderly	1f9d3	emoji_u1f9d3
+elderly_man	1f474	emoji_u1f474
+elderly_woman	1f475	emoji_u1f475
+electric_plug	1f50c	emoji_u1f50c
+electronic	1faab	emoji_u1faab
+elephant	1f418	emoji_u1f418
+elevated_train	1f69d	emoji_u1f69d
+elevator	1f6d7	emoji_u1f6d7
+elf	1f9dd	emoji_u1f9dd
+elk	1face	emoji_u1face
+email	2709	emoji_u2709
+embarrassed	1f633	emoji_u1f633
+embrace	1fac2	emoji_u1fac2
+embroidery	1faa1	emoji_u1faa1
+emerge	1f426 200d 1f525	emoji_u1f426_200d_1f525
+emergency	1f9ba	emoji_u1f9ba
+emoji	1f928	emoji_u1f928
+empanada	1f95f	emoji_u1f95f
+empty_mailbox	1f4ed	emoji_u1f4ed
+empty_nest	1fab9	emoji_u1fab9
+encrypted	1f5dd	emoji_u1f5dd
+end	1f51a	emoji_u1f51a
+energy	1faab	emoji_u1faab
+engineer	2699	emoji_u2699
+ensnare	1fa9d	emoji_u1fa9d
+envelope	2709	emoji_u2709
+envy	1f49a	emoji_u1f49a
+equal	1f7f0	emoji_u1f7f0
+equality	1f7f0	emoji_u1f7f0
+equals	1f7f0	emoji_u1f7f0
+euro	1fa99	emoji_u1fa99
+euro_banknotes	1f4b6	emoji_u1f4b6
+evergreen_tree	1f332	emoji_u1f332
+evidence	1f9fe	emoji_u1f9fe
+evil_eye	1f9ff	emoji_u1f9ff
+evolution	1f9ec	emoji_u1f9ec
+ew	1f92e	emoji_u1f92e
+exchange	1f4b1	emoji_u1f4b1
+exclamation	2757	emoji_u2757
+exhalation	1fac1	emoji_u1fac1
+exhale	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+exhaling	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+exhausted	1f625	emoji_u1f625
+expecting	1f930	emoji_u1f930
+expendable	265f	emoji_u265f
+expensive	1faf0	emoji_u1faf0
+explode	1f92f	emoji_u1f92f
+exploding	1f92f	emoji_u1f92f
+exploding_head	1f92f	emoji_u1f92f
+explosion	1f4a5	emoji_u1f4a5
+explosive	1f9e8	emoji_u1f9e8
+expressionless	1f611	emoji_u1f611
+extinguish	1f9ef	emoji_u1f9ef
+extinguisher	1f9ef	emoji_u1f9ef
+extra	1f6f8	emoji_u1f6f8
+eye	1f441	emoji_u1f441
+eye_in_speech_bubble	1f441 200d 1f5e8	emoji_u1f441_200d_1f5e8
+eyes	1f440	emoji_u1f440
+face_exhaling	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+face_holding_back_tears	1f979	emoji_u1f979
+face_in_clouds	1f636 200d 1f32b	emoji_u1f636_200d_1f32b
+face_palm	1f926	emoji_u1f926
+face_vomiting	1f92e	emoji_u1f92e
+face_with_bags_under_eyes	1fae9	emoji_u1fae9
+face_with_diagonal_mouth	1fae4	emoji_u1fae4
+face_with_hand_over_mouth	1f92d	emoji_u1f92d
+face_with_monocle	1f9d0	emoji_u1f9d0
+face_with_open_eyes_and_hand_over_mouth	1fae2	emoji_u1fae2
+face_with_peeking_eye	1fae3	emoji_u1fae3
+face_with_raised_eyebrow	1f928	emoji_u1f928
+face_with_spiral_eyes	1f635 200d 1f4ab	emoji_u1f635_200d_1f4ab
+face_with_symbols_on_mouth	1f92c	emoji_u1f92c
+face_with_thermometer	1f912	emoji_u1f912
+factory	1f3ed	emoji_u1f3ed
+factory_worker	1f9d1 200d 1f3ed	emoji_u1f9d1_200d_1f3ed
+fairy	1f9da	emoji_u1f9da
+falafel	1f9c6	emoji_u1f9c6
+fall	1f343	emoji_u1f343
+fallen_leaf	1f342	emoji_u1f342
+family	1f46a	emoji_u1f46a
+family_adult_adult_child	1f9d1 200d 1f9d1 200d 1f9d2	emoji_u1f9d1_200d_1f9d1_200d_1f9d2
+family_adult_adult_child_child	1f9d1 200d 1f9d1 200d 1f9d2 200d 1f9d2	emoji_u1f9d1_200d_1f9d1_200d_1f9d2_200d_1f9d2
+family_adult_child	1f9d1 200d 1f9d2	emoji_u1f9d1_200d_1f9d2
+family_adult_child_child	1f9d1 200d 1f9d2 200d 1f9d2	emoji_u1f9d1_200d_1f9d2_200d_1f9d2
+family_man_boy	1f468 200d 1f466	emoji_u1f468_200d_1f466
+family_man_boy_boy	1f468 200d 1f466 200d 1f466	emoji_u1f468_200d_1f466_200d_1f466
+family_man_girl	1f468 200d 1f467	emoji_u1f468_200d_1f467
+family_man_girl_boy	1f468 200d 1f467 200d 1f466	emoji_u1f468_200d_1f467_200d_1f466
+family_man_girl_girl	1f468 200d 1f467 200d 1f467	emoji_u1f468_200d_1f467_200d_1f467
+family_man_man_boy	1f468 200d 1f468 200d 1f466	emoji_u1f468_200d_1f468_200d_1f466
+family_man_man_boy_boy	1f468 200d 1f468 200d 1f466 200d 1f466	emoji_u1f468_200d_1f468_200d_1f466_200d_1f466
+family_man_man_girl	1f468 200d 1f468 200d 1f467	emoji_u1f468_200d_1f468_200d_1f467
+family_man_man_girl_boy	1f468 200d 1f468 200d 1f467 200d 1f466	emoji_u1f468_200d_1f468_200d_1f467_200d_1f466
+family_man_man_girl_girl	1f468 200d 1f468 200d 1f467 200d 1f467	emoji_u1f468_200d_1f468_200d_1f467_200d_1f467
+family_man_woman_boy	1f468 200d 1f469 200d 1f466	emoji_u1f468_200d_1f469_200d_1f466
+family_man_woman_boy_boy	1f468 200d 1f469 200d 1f466 200d 1f466	emoji_u1f468_200d_1f469_200d_1f466_200d_1f466
+family_man_woman_girl	1f468 200d 1f469 200d 1f467	emoji_u1f468_200d_1f469_200d_1f467
+family_man_woman_girl_boy	1f468 200d 1f469 200d 1f467 200d 1f466	emoji_u1f468_200d_1f469_200d_1f467_200d_1f466
+family_man_woman_girl_girl	1f468 200d 1f469 200d 1f467 200d 1f467	emoji_u1f468_200d_1f469_200d_1f467_200d_1f467
+family_woman_boy	1f469 200d 1f466	emoji_u1f469_200d_1f466
+family_woman_boy_boy	1f469 200d 1f466 200d 1f466	emoji_u1f469_200d_1f466_200d_1f466
+family_woman_girl	1f469 200d 1f467	emoji_u1f469_200d_1f467
+family_woman_girl_boy	1f469 200d 1f467 200d 1f466	emoji_u1f469_200d_1f467_200d_1f466
+family_woman_girl_girl	1f469 200d 1f467 200d 1f467	emoji_u1f469_200d_1f467_200d_1f467
+family_woman_woman_boy	1f469 200d 1f469 200d 1f466	emoji_u1f469_200d_1f469_200d_1f466
+family_woman_woman_boy_boy	1f469 200d 1f469 200d 1f466 200d 1f466	emoji_u1f469_200d_1f469_200d_1f466_200d_1f466
+family_woman_woman_girl	1f469 200d 1f469 200d 1f467	emoji_u1f469_200d_1f469_200d_1f467
+family_woman_woman_girl_boy	1f469 200d 1f469 200d 1f467 200d 1f466	emoji_u1f469_200d_1f469_200d_1f467_200d_1f466
+family_woman_woman_girl_girl	1f469 200d 1f469 200d 1f467 200d 1f467	emoji_u1f469_200d_1f469_200d_1f467_200d_1f467
+fan	1faad	emoji_u1faad
+fancy	1f9d0	emoji_u1f9d0
+farewell	1fac2	emoji_u1fac2
+farmer	1f9d1 200d 1f33e	emoji_u1f9d1_200d_1f33e
+farming	1f9fa	emoji_u1f9fa
+fast_down	23ec	emoji_u23ec
+fast_forward	23e9	emoji_u23e9
+fast_reverse	23ea	emoji_u23ea
+fast_up	23eb	emoji_u23eb
+fateh	1faaf	emoji_u1faaf
+father	1f468 200d 1f37c	emoji_u1f468_200d_1f37c
+fatigued	1fae9	emoji_u1fae9
+fatima	1faac	emoji_u1faac
+fax	1f4e0	emoji_u1f4e0
+fear	1f628	emoji_u1f628
+feather	1fab6	emoji_u1fab6
+feelings	1f979	emoji_u1f979
+feet	1f463	emoji_u1f463
+feline	1f408 200d 2b1b	emoji_u1f408_200d_2b1b
+female	2640	emoji_u2640
+female_sign	2640	emoji_u2640
+fencing	1f93a	emoji_u1f93a
+ferris_wheel	1f3a1	emoji_u1f3a1
+ferry	26f4	emoji_u26f4
+festival	1f96e	emoji_u1f96e
+festive	1fa85	emoji_u1fa85
+fever	1f912	emoji_u1f912
+feverish	1f975	emoji_u1f975
+field_hockey	1f3d1	emoji_u1f3d1
+fife	1fa88	emoji_u1fa88
+fight	1f977	emoji_u1f977
+fighter	1f977	emoji_u1f977
+file	1f4c4	emoji_u1f4c4
+file_cabinet	1f5c4	emoji_u1f5c4
+file_folder	1f4c1	emoji_u1f4c1
+filling	1f967	emoji_u1f967
+film	1f39e	emoji_u1f39e
+find	1f50d	emoji_u1f50d
+fingerprint	1fac6	emoji_u1fac6
+fingers_crossed	1f91e	emoji_u1f91e
+fire	1f525	emoji_u1f525
+fire_engine	1f692	emoji_u1f692
+fire_extinguisher	1f9ef	emoji_u1f9ef
+fire_truck	1f692	emoji_u1f692
+firebird	1f426 200d 1f525	emoji_u1f426_200d_1f525
+firecracker	1f9e8	emoji_u1f9e8
+firefighter	1f9d1 200d 1f692	emoji_u1f9d1_200d_1f692
+fireworks	1f386	emoji_u1f386
+first	1f313	emoji_u1f313
+first_place	1f947	emoji_u1f947
+first_quarter_moon	1f313	emoji_u1f313
+fish	1f41f	emoji_u1f41f
+fishing	1f3a3	emoji_u1f3a3
+fist	270a	emoji_u270a
+fist_bump	1f44a	emoji_u1f44a
+five	0035 20e3	emoji_u0035_20e3
+fixing	1f527	emoji_u1f527
+flag_afghanistan	1f1e6 1f1eb	emoji_u1f1e6_1f1eb
+flag_aland_islands	1f1e6 1f1fd	emoji_u1f1e6_1f1fd
+flag_albania	1f1e6 1f1f1	emoji_u1f1e6_1f1f1
+flag_algeria	1f1e9 1f1ff	emoji_u1f1e9_1f1ff
+flag_american_samoa	1f1e6 1f1f8	emoji_u1f1e6_1f1f8
+flag_andorra	1f1e6 1f1e9	emoji_u1f1e6_1f1e9
+flag_angola	1f1e6 1f1f4	emoji_u1f1e6_1f1f4
+flag_anguilla	1f1e6 1f1ee	emoji_u1f1e6_1f1ee
+flag_antarctica	1f1e6 1f1f6	emoji_u1f1e6_1f1f6
+flag_antigua_and_barbuda	1f1e6 1f1ec	emoji_u1f1e6_1f1ec
+flag_argentina	1f1e6 1f1f7	emoji_u1f1e6_1f1f7
+flag_armenia	1f1e6 1f1f2	emoji_u1f1e6_1f1f2
+flag_aruba	1f1e6 1f1fc	emoji_u1f1e6_1f1fc
+flag_ascension_island	1f1e6 1f1e8	emoji_u1f1e6_1f1e8
+flag_australia	1f1e6 1f1fa	emoji_u1f1e6_1f1fa
+flag_austria	1f1e6 1f1f9	emoji_u1f1e6_1f1f9
+flag_azerbaijan	1f1e6 1f1ff	emoji_u1f1e6_1f1ff
+flag_bahamas	1f1e7 1f1f8	emoji_u1f1e7_1f1f8
+flag_bahrain	1f1e7 1f1ed	emoji_u1f1e7_1f1ed
+flag_bangladesh	1f1e7 1f1e9	emoji_u1f1e7_1f1e9
+flag_barbados	1f1e7 1f1e7	emoji_u1f1e7_1f1e7
+flag_belarus	1f1e7 1f1fe	emoji_u1f1e7_1f1fe
+flag_belgium	1f1e7 1f1ea	emoji_u1f1e7_1f1ea
+flag_belize	1f1e7 1f1ff	emoji_u1f1e7_1f1ff
+flag_benin	1f1e7 1f1ef	emoji_u1f1e7_1f1ef
+flag_bermuda	1f1e7 1f1f2	emoji_u1f1e7_1f1f2
+flag_bhutan	1f1e7 1f1f9	emoji_u1f1e7_1f1f9
+flag_bolivia	1f1e7 1f1f4	emoji_u1f1e7_1f1f4
+flag_bosnia_and_herzegovina	1f1e7 1f1e6	emoji_u1f1e7_1f1e6
+flag_botswana	1f1e7 1f1fc	emoji_u1f1e7_1f1fc
+flag_bouvet_island	1f1e7 1f1fb	emoji_u1f1e7_1f1fb
+flag_brazil	1f1e7 1f1f7	emoji_u1f1e7_1f1f7
+flag_british_indian_ocean_territory	1f1ee 1f1f4	emoji_u1f1ee_1f1f4
+flag_british_virgin_islands	1f1fb 1f1ec	emoji_u1f1fb_1f1ec
+flag_brunei	1f1e7 1f1f3	emoji_u1f1e7_1f1f3
+flag_bulgaria	1f1e7 1f1ec	emoji_u1f1e7_1f1ec
+flag_burkina_faso	1f1e7 1f1eb	emoji_u1f1e7_1f1eb
+flag_burundi	1f1e7 1f1ee	emoji_u1f1e7_1f1ee
+flag_cambodia	1f1f0 1f1ed	emoji_u1f1f0_1f1ed
+flag_cameroon	1f1e8 1f1f2	emoji_u1f1e8_1f1f2
+flag_canada	1f1e8 1f1e6	emoji_u1f1e8_1f1e6
+flag_canary_islands	1f1ee 1f1e8	emoji_u1f1ee_1f1e8
+flag_cape_verde	1f1e8 1f1fb	emoji_u1f1e8_1f1fb
+flag_caribbean_netherlands	1f1e7 1f1f6	emoji_u1f1e7_1f1f6
+flag_cayman_islands	1f1f0 1f1fe	emoji_u1f1f0_1f1fe
+flag_central_african_republic	1f1e8 1f1eb	emoji_u1f1e8_1f1eb
+flag_ceuta_and_melilla	1f1ea 1f1e6	emoji_u1f1ea_1f1e6
+flag_chad	1f1f9 1f1e9	emoji_u1f1f9_1f1e9
+flag_chile	1f1e8 1f1f1	emoji_u1f1e8_1f1f1
+flag_china	1f1e8 1f1f3	emoji_u1f1e8_1f1f3
+flag_christmas_island	1f1e8 1f1fd	emoji_u1f1e8_1f1fd
+flag_clipperton_island	1f1e8 1f1f5	emoji_u1f1e8_1f1f5
+flag_cocos_keeling_islands	1f1e8 1f1e8	emoji_u1f1e8_1f1e8
+flag_colombia	1f1e8 1f1f4	emoji_u1f1e8_1f1f4
+flag_comoros	1f1f0 1f1f2	emoji_u1f1f0_1f1f2
+flag_congo_brazzaville	1f1e8 1f1ec	emoji_u1f1e8_1f1ec
+flag_congo_kinshasa	1f1e8 1f1e9	emoji_u1f1e8_1f1e9
+flag_cook_islands	1f1e8 1f1f0	emoji_u1f1e8_1f1f0
+flag_costa_rica	1f1e8 1f1f7	emoji_u1f1e8_1f1f7
+flag_cote_divoire	1f1e8 1f1ee	emoji_u1f1e8_1f1ee
+flag_croatia	1f1ed 1f1f7	emoji_u1f1ed_1f1f7
+flag_cuba	1f1e8 1f1fa	emoji_u1f1e8_1f1fa
+flag_curacao	1f1e8 1f1fc	emoji_u1f1e8_1f1fc
+flag_curaçao	1f1e8 1f1fc	emoji_u1f1e8_1f1fc
+flag_cyprus	1f1e8 1f1fe	emoji_u1f1e8_1f1fe
+flag_czechia	1f1e8 1f1ff	emoji_u1f1e8_1f1ff
+flag_côte_divoire	1f1e8 1f1ee	emoji_u1f1e8_1f1ee
+flag_denmark	1f1e9 1f1f0	emoji_u1f1e9_1f1f0
+flag_diego_garcia	1f1e9 1f1ec	emoji_u1f1e9_1f1ec
+flag_djibouti	1f1e9 1f1ef	emoji_u1f1e9_1f1ef
+flag_dominica	1f1e9 1f1f2	emoji_u1f1e9_1f1f2
+flag_dominican_republic	1f1e9 1f1f4	emoji_u1f1e9_1f1f4
+flag_ecuador	1f1ea 1f1e8	emoji_u1f1ea_1f1e8
+flag_egypt	1f1ea 1f1ec	emoji_u1f1ea_1f1ec
+flag_el_salvador	1f1f8 1f1fb	emoji_u1f1f8_1f1fb
+flag_england	1f3f4 e0067 e0062 e0065 e006e e0067 e007f	emoji_u1f3f4_e0067_e0062_e0065_e006e_e0067_e007f
+flag_equatorial_guinea	1f1ec 1f1f6	emoji_u1f1ec_1f1f6
+flag_eritrea	1f1ea 1f1f7	emoji_u1f1ea_1f1f7
+flag_estonia	1f1ea 1f1ea	emoji_u1f1ea_1f1ea
+flag_eswatini	1f1f8 1f1ff	emoji_u1f1f8_1f1ff
+flag_ethiopia	1f1ea 1f1f9	emoji_u1f1ea_1f1f9
+flag_european_union	1f1ea 1f1fa	emoji_u1f1ea_1f1fa
+flag_falkland_islands	1f1eb 1f1f0	emoji_u1f1eb_1f1f0
+flag_faroe_islands	1f1eb 1f1f4	emoji_u1f1eb_1f1f4
+flag_fiji	1f1eb 1f1ef	emoji_u1f1eb_1f1ef
+flag_finland	1f1eb 1f1ee	emoji_u1f1eb_1f1ee
+flag_france	1f1eb 1f1f7	emoji_u1f1eb_1f1f7
+flag_french_guiana	1f1ec 1f1eb	emoji_u1f1ec_1f1eb
+flag_french_polynesia	1f1f5 1f1eb	emoji_u1f1f5_1f1eb
+flag_french_southern_territories	1f1f9 1f1eb	emoji_u1f1f9_1f1eb
+flag_gabon	1f1ec 1f1e6	emoji_u1f1ec_1f1e6
+flag_gambia	1f1ec 1f1f2	emoji_u1f1ec_1f1f2
+flag_georgia	1f1ec 1f1ea	emoji_u1f1ec_1f1ea
+flag_germany	1f1e9 1f1ea	emoji_u1f1e9_1f1ea
+flag_ghana	1f1ec 1f1ed	emoji_u1f1ec_1f1ed
+flag_gibraltar	1f1ec 1f1ee	emoji_u1f1ec_1f1ee
+flag_greece	1f1ec 1f1f7	emoji_u1f1ec_1f1f7
+flag_greenland	1f1ec 1f1f1	emoji_u1f1ec_1f1f1
+flag_grenada	1f1ec 1f1e9	emoji_u1f1ec_1f1e9
+flag_guadeloupe	1f1ec 1f1f5	emoji_u1f1ec_1f1f5
+flag_guam	1f1ec 1f1fa	emoji_u1f1ec_1f1fa
+flag_guatemala	1f1ec 1f1f9	emoji_u1f1ec_1f1f9
+flag_guernsey	1f1ec 1f1ec	emoji_u1f1ec_1f1ec
+flag_guinea	1f1ec 1f1f3	emoji_u1f1ec_1f1f3
+flag_guinea_bissau	1f1ec 1f1fc	emoji_u1f1ec_1f1fc
+flag_guyana	1f1ec 1f1fe	emoji_u1f1ec_1f1fe
+flag_haiti	1f1ed 1f1f9	emoji_u1f1ed_1f1f9
+flag_heard_and_mcdonald_islands	1f1ed 1f1f2	emoji_u1f1ed_1f1f2
+flag_honduras	1f1ed 1f1f3	emoji_u1f1ed_1f1f3
+flag_hong_kong_sar_china	1f1ed 1f1f0	emoji_u1f1ed_1f1f0
+flag_hungary	1f1ed 1f1fa	emoji_u1f1ed_1f1fa
+flag_iceland	1f1ee 1f1f8	emoji_u1f1ee_1f1f8
+flag_india	1f1ee 1f1f3	emoji_u1f1ee_1f1f3
+flag_indonesia	1f1ee 1f1e9	emoji_u1f1ee_1f1e9
+flag_iran	1f1ee 1f1f7	emoji_u1f1ee_1f1f7
+flag_iraq	1f1ee 1f1f6	emoji_u1f1ee_1f1f6
+flag_ireland	1f1ee 1f1ea	emoji_u1f1ee_1f1ea
+flag_isle_of_man	1f1ee 1f1f2	emoji_u1f1ee_1f1f2
+flag_israel	1f1ee 1f1f1	emoji_u1f1ee_1f1f1
+flag_italy	1f1ee 1f1f9	emoji_u1f1ee_1f1f9
+flag_jamaica	1f1ef 1f1f2	emoji_u1f1ef_1f1f2
+flag_japan	1f1ef 1f1f5	emoji_u1f1ef_1f1f5
+flag_jersey	1f1ef 1f1ea	emoji_u1f1ef_1f1ea
+flag_jordan	1f1ef 1f1f4	emoji_u1f1ef_1f1f4
+flag_kazakhstan	1f1f0 1f1ff	emoji_u1f1f0_1f1ff
+flag_kenya	1f1f0 1f1ea	emoji_u1f1f0_1f1ea
+flag_kiribati	1f1f0 1f1ee	emoji_u1f1f0_1f1ee
+flag_kosovo	1f1fd 1f1f0	emoji_u1f1fd_1f1f0
+flag_kuwait	1f1f0 1f1fc	emoji_u1f1f0_1f1fc
+flag_kyrgyzstan	1f1f0 1f1ec	emoji_u1f1f0_1f1ec
+flag_laos	1f1f1 1f1e6	emoji_u1f1f1_1f1e6
+flag_latvia	1f1f1 1f1fb	emoji_u1f1f1_1f1fb
+flag_lebanon	1f1f1 1f1e7	emoji_u1f1f1_1f1e7
+flag_lesotho	1f1f1 1f1f8	emoji_u1f1f1_1f1f8
+flag_liberia	1f1f1 1f1f7	emoji_u1f1f1_1f1f7
+flag_libya	1f1f1 1f1fe	emoji_u1f1f1_1f1fe
+flag_liechtenstein	1f1f1 1f1ee	emoji_u1f1f1_1f1ee
+flag_lithuania	1f1f1 1f1f9	emoji_u1f1f1_1f1f9
+flag_luxembourg	1f1f1 1f1fa	emoji_u1f1f1_1f1fa
+flag_macao_sar_china	1f1f2 1f1f4	emoji_u1f1f2_1f1f4
+flag_madagascar	1f1f2 1f1ec	emoji_u1f1f2_1f1ec
+flag_malawi	1f1f2 1f1fc	emoji_u1f1f2_1f1fc
+flag_malaysia	1f1f2 1f1fe	emoji_u1f1f2_1f1fe
+flag_maldives	1f1f2 1f1fb	emoji_u1f1f2_1f1fb
+flag_mali	1f1f2 1f1f1	emoji_u1f1f2_1f1f1
+flag_malta	1f1f2 1f1f9	emoji_u1f1f2_1f1f9
+flag_marshall_islands	1f1f2 1f1ed	emoji_u1f1f2_1f1ed
+flag_martinique	1f1f2 1f1f6	emoji_u1f1f2_1f1f6
+flag_mauritania	1f1f2 1f1f7	emoji_u1f1f2_1f1f7
+flag_mauritius	1f1f2 1f1fa	emoji_u1f1f2_1f1fa
+flag_mayotte	1f1fe 1f1f9	emoji_u1f1fe_1f1f9
+flag_mexico	1f1f2 1f1fd	emoji_u1f1f2_1f1fd
+flag_micronesia	1f1eb 1f1f2	emoji_u1f1eb_1f1f2
+flag_moldova	1f1f2 1f1e9	emoji_u1f1f2_1f1e9
+flag_monaco	1f1f2 1f1e8	emoji_u1f1f2_1f1e8
+flag_mongolia	1f1f2 1f1f3	emoji_u1f1f2_1f1f3
+flag_montenegro	1f1f2 1f1ea	emoji_u1f1f2_1f1ea
+flag_montserrat	1f1f2 1f1f8	emoji_u1f1f2_1f1f8
+flag_morocco	1f1f2 1f1e6	emoji_u1f1f2_1f1e6
+flag_mozambique	1f1f2 1f1ff	emoji_u1f1f2_1f1ff
+flag_myanmar_burma	1f1f2 1f1f2	emoji_u1f1f2_1f1f2
+flag_namibia	1f1f3 1f1e6	emoji_u1f1f3_1f1e6
+flag_nauru	1f1f3 1f1f7	emoji_u1f1f3_1f1f7
+flag_nepal	1f1f3 1f1f5	emoji_u1f1f3_1f1f5
+flag_netherlands	1f1f3 1f1f1	emoji_u1f1f3_1f1f1
+flag_new_caledonia	1f1f3 1f1e8	emoji_u1f1f3_1f1e8
+flag_new_zealand	1f1f3 1f1ff	emoji_u1f1f3_1f1ff
+flag_nicaragua	1f1f3 1f1ee	emoji_u1f1f3_1f1ee
+flag_niger	1f1f3 1f1ea	emoji_u1f1f3_1f1ea
+flag_nigeria	1f1f3 1f1ec	emoji_u1f1f3_1f1ec
+flag_niue	1f1f3 1f1fa	emoji_u1f1f3_1f1fa
+flag_norfolk_island	1f1f3 1f1eb	emoji_u1f1f3_1f1eb
+flag_north_korea	1f1f0 1f1f5	emoji_u1f1f0_1f1f5
+flag_north_macedonia	1f1f2 1f1f0	emoji_u1f1f2_1f1f0
+flag_northern_mariana_islands	1f1f2 1f1f5	emoji_u1f1f2_1f1f5
+flag_norway	1f1f3 1f1f4	emoji_u1f1f3_1f1f4
+flag_oman	1f1f4 1f1f2	emoji_u1f1f4_1f1f2
+flag_pakistan	1f1f5 1f1f0	emoji_u1f1f5_1f1f0
+flag_palau	1f1f5 1f1fc	emoji_u1f1f5_1f1fc
+flag_palestinian_territories	1f1f5 1f1f8	emoji_u1f1f5_1f1f8
+flag_panama	1f1f5 1f1e6	emoji_u1f1f5_1f1e6
+flag_papua_new_guinea	1f1f5 1f1ec	emoji_u1f1f5_1f1ec
+flag_paraguay	1f1f5 1f1fe	emoji_u1f1f5_1f1fe
+flag_peru	1f1f5 1f1ea	emoji_u1f1f5_1f1ea
+flag_philippines	1f1f5 1f1ed	emoji_u1f1f5_1f1ed
+flag_pitcairn_islands	1f1f5 1f1f3	emoji_u1f1f5_1f1f3
+flag_poland	1f1f5 1f1f1	emoji_u1f1f5_1f1f1
+flag_portugal	1f1f5 1f1f9	emoji_u1f1f5_1f1f9
+flag_puerto_rico	1f1f5 1f1f7	emoji_u1f1f5_1f1f7
+flag_qatar	1f1f6 1f1e6	emoji_u1f1f6_1f1e6
+flag_reunion	1f1f7 1f1ea	emoji_u1f1f7_1f1ea
+flag_romania	1f1f7 1f1f4	emoji_u1f1f7_1f1f4
+flag_russia	1f1f7 1f1fa	emoji_u1f1f7_1f1fa
+flag_rwanda	1f1f7 1f1fc	emoji_u1f1f7_1f1fc
+flag_réunion	1f1f7 1f1ea	emoji_u1f1f7_1f1ea
+flag_samoa	1f1fc 1f1f8	emoji_u1f1fc_1f1f8
+flag_san_marino	1f1f8 1f1f2	emoji_u1f1f8_1f1f2
+flag_sao_tome_and_principe	1f1f8 1f1f9	emoji_u1f1f8_1f1f9
+flag_sark	1f1e8 1f1f6	emoji_u1f1e8_1f1f6
+flag_saudi_arabia	1f1f8 1f1e6	emoji_u1f1f8_1f1e6
+flag_scotland	1f3f4 e0067 e0062 e0073 e0063 e0074 e007f	emoji_u1f3f4_e0067_e0062_e0073_e0063_e0074_e007f
+flag_senegal	1f1f8 1f1f3	emoji_u1f1f8_1f1f3
+flag_serbia	1f1f7 1f1f8	emoji_u1f1f7_1f1f8
+flag_seychelles	1f1f8 1f1e8	emoji_u1f1f8_1f1e8
+flag_sierra_leone	1f1f8 1f1f1	emoji_u1f1f8_1f1f1
+flag_singapore	1f1f8 1f1ec	emoji_u1f1f8_1f1ec
+flag_sint_maarten	1f1f8 1f1fd	emoji_u1f1f8_1f1fd
+flag_slovakia	1f1f8 1f1f0	emoji_u1f1f8_1f1f0
+flag_slovenia	1f1f8 1f1ee	emoji_u1f1f8_1f1ee
+flag_solomon_islands	1f1f8 1f1e7	emoji_u1f1f8_1f1e7
+flag_somalia	1f1f8 1f1f4	emoji_u1f1f8_1f1f4
+flag_south_africa	1f1ff 1f1e6	emoji_u1f1ff_1f1e6
+flag_south_georgia_and_south_sandwich_islands	1f1ec 1f1f8	emoji_u1f1ec_1f1f8
+flag_south_korea	1f1f0 1f1f7	emoji_u1f1f0_1f1f7
+flag_south_sudan	1f1f8 1f1f8	emoji_u1f1f8_1f1f8
+flag_spain	1f1ea 1f1f8	emoji_u1f1ea_1f1f8
+flag_sri_lanka	1f1f1 1f1f0	emoji_u1f1f1_1f1f0
+flag_st_barthelemy	1f1e7 1f1f1	emoji_u1f1e7_1f1f1
+flag_st_barthélemy	1f1e7 1f1f1	emoji_u1f1e7_1f1f1
+flag_st_helena	1f1f8 1f1ed	emoji_u1f1f8_1f1ed
+flag_st_kitts_and_nevis	1f1f0 1f1f3	emoji_u1f1f0_1f1f3
+flag_st_lucia	1f1f1 1f1e8	emoji_u1f1f1_1f1e8
+flag_st_martin	1f1f2 1f1eb	emoji_u1f1f2_1f1eb
+flag_st_pierre_and_miquelon	1f1f5 1f1f2	emoji_u1f1f5_1f1f2
+flag_st_vincent_and_grenadines	1f1fb 1f1e8	emoji_u1f1fb_1f1e8
+flag_sudan	1f1f8 1f1e9	emoji_u1f1f8_1f1e9
+flag_suriname	1f1f8 1f1f7	emoji_u1f1f8_1f1f7
+flag_svalbard_and_jan_mayen	1f1f8 1f1ef	emoji_u1f1f8_1f1ef
+flag_sweden	1f1f8 1f1ea	emoji_u1f1f8_1f1ea
+flag_switzerland	1f1e8 1f1ed	emoji_u1f1e8_1f1ed
+flag_syria	1f1f8 1f1fe	emoji_u1f1f8_1f1fe
+flag_são_tomé_and_príncipe	1f1f8 1f1f9	emoji_u1f1f8_1f1f9
+flag_taiwan	1f1f9 1f1fc	emoji_u1f1f9_1f1fc
+flag_tajikistan	1f1f9 1f1ef	emoji_u1f1f9_1f1ef
+flag_tanzania	1f1f9 1f1ff	emoji_u1f1f9_1f1ff
+flag_thailand	1f1f9 1f1ed	emoji_u1f1f9_1f1ed
+flag_timor_leste	1f1f9 1f1f1	emoji_u1f1f9_1f1f1
+flag_togo	1f1f9 1f1ec	emoji_u1f1f9_1f1ec
+flag_tokelau	1f1f9 1f1f0	emoji_u1f1f9_1f1f0
+flag_tonga	1f1f9 1f1f4	emoji_u1f1f9_1f1f4
+flag_trinidad_and_tobago	1f1f9 1f1f9	emoji_u1f1f9_1f1f9
+flag_tristan_da_cunha	1f1f9 1f1e6	emoji_u1f1f9_1f1e6
+flag_tunisia	1f1f9 1f1f3	emoji_u1f1f9_1f1f3
+flag_turkiye	1f1f9 1f1f7	emoji_u1f1f9_1f1f7
+flag_turkmenistan	1f1f9 1f1f2	emoji_u1f1f9_1f1f2
+flag_turks_and_caicos_islands	1f1f9 1f1e8	emoji_u1f1f9_1f1e8
+flag_tuvalu	1f1f9 1f1fb	emoji_u1f1f9_1f1fb
+flag_türkiye	1f1f9 1f1f7	emoji_u1f1f9_1f1f7
+flag_uganda	1f1fa 1f1ec	emoji_u1f1fa_1f1ec
+flag_ukraine	1f1fa 1f1e6	emoji_u1f1fa_1f1e6
+flag_united_arab_emirates	1f1e6 1f1ea	emoji_u1f1e6_1f1ea
+flag_united_kingdom	1f1ec 1f1e7	emoji_u1f1ec_1f1e7
+flag_united_nations	1f1fa 1f1f3	emoji_u1f1fa_1f1f3
+flag_united_states	1f1fa 1f1f8	emoji_u1f1fa_1f1f8
+flag_uruguay	1f1fa 1f1fe	emoji_u1f1fa_1f1fe
+flag_us_outlying_islands	1f1fa 1f1f2	emoji_u1f1fa_1f1f2
+flag_us_virgin_islands	1f1fb 1f1ee	emoji_u1f1fb_1f1ee
+flag_uzbekistan	1f1fa 1f1ff	emoji_u1f1fa_1f1ff
+flag_vanuatu	1f1fb 1f1fa	emoji_u1f1fb_1f1fa
+flag_vatican_city	1f1fb 1f1e6	emoji_u1f1fb_1f1e6
+flag_venezuela	1f1fb 1f1ea	emoji_u1f1fb_1f1ea
+flag_vietnam	1f1fb 1f1f3	emoji_u1f1fb_1f1f3
+flag_wales	1f3f4 e0067 e0062 e0077 e006c e0073 e007f	emoji_u1f3f4_e0067_e0062_e0077_e006c_e0073_e007f
+flag_wallis_and_futuna	1f1fc 1f1eb	emoji_u1f1fc_1f1eb
+flag_western_sahara	1f1ea 1f1ed	emoji_u1f1ea_1f1ed
+flag_yemen	1f1fe 1f1ea	emoji_u1f1fe_1f1ea
+flag_zambia	1f1ff 1f1f2	emoji_u1f1ff_1f1f2
+flag_zimbabwe	1f1ff 1f1fc	emoji_u1f1ff_1f1fc
+flag_åland_islands	1f1e6 1f1fd	emoji_u1f1e6_1f1fd
+flags	1f38f	emoji_u1f38f
+flamboyant	1f9a9	emoji_u1f9a9
+flame	1f525	emoji_u1f525
+flamingo	1f9a9	emoji_u1f9a9
+flan	1f36e	emoji_u1f36e
+flashlight	1f526	emoji_u1f526
+flat	1f97f	emoji_u1f97f
+flat_shoe	1f97f	emoji_u1f97f
+flatbed	1f6fb	emoji_u1f6fb
+flatbread	1fad3	emoji_u1fad3
+flathead	1fa9b	emoji_u1fa9b
+flats	1f97f	emoji_u1f97f
+flautist	1fa88	emoji_u1fa88
+flavor	1f9c2	emoji_u1f9c2
+fleur_de_lis	269c	emoji_u269c
+flight	1fab6	emoji_u1fab6
+flip_flops	1f461	emoji_u1f461
+flipper	1f42c	emoji_u1f42c
+flirting	1fae6	emoji_u1fae6
+float	1f6df	emoji_u1f6df
+floating	1fae7	emoji_u1fae7
+flock	1fabf	emoji_u1fabf
+flop	1fa74	emoji_u1fa74
+floppy_disk	1f4be	emoji_u1f4be
+flower	1f337	emoji_u1f337
+flu	1f912	emoji_u1f912
+fluctuate	1fa80	emoji_u1fa80
+flushed	1f633	emoji_u1f633
+flute	1fa88	emoji_u1fa88
+flutter	1faad	emoji_u1faad
+fly	1fab0	emoji_u1fab0
+flying_disc	1f94f	emoji_u1f94f
+flying_saucer	1f6f8	emoji_u1f6f8
+fog	1f32b	emoji_u1f32b
+foggy	1f301	emoji_u1f301
+folded_hands	1f64f	emoji_u1f64f
+folder	1f4c2	emoji_u1f4c2
+folding	1faad	emoji_u1faad
+folding_hand_fan	1faad	emoji_u1faad
+fondue	1fad5	emoji_u1fad5
+food	1f372	emoji_u1f372
+foot	1f9b6	emoji_u1f9b6
+football	26bd	emoji_u26bd
+footprints	1f463	emoji_u1f463
+force	1faa0	emoji_u1faa0
+forensics	1fac6	emoji_u1fac6
+forever	267e	emoji_u267e
+fork_and_knife	1f374	emoji_u1f374
+fork_and_knife_with_plate	1f37d	emoji_u1f37d
+fortune_cookie	1f960	emoji_u1f960
+fortune_telling	1f52e	emoji_u1f52e
+forward	21aa	emoji_u21aa
+fountain	26f2	emoji_u26f2
+fountain_pen	1f58b	emoji_u1f58b
+four	0034 20e3	emoji_u0034_20e3
+four_leaf_clover	1f340	emoji_u1f340
+fowl	1fabf	emoji_u1fabf
+fox	1f98a	emoji_u1f98a
+frame	1fa9f	emoji_u1fa9f
+framed_picture	1f5bc	emoji_u1f5bc
+free	1f193	emoji_u1f193
+freedom	26d3 200d 1f4a5	emoji_u26d3_200d_1f4a5
+freezing	1f976	emoji_u1f976
+fresh	1fa9f	emoji_u1fa9f
+friends	1f9d1 200d 1f91d 200d 1f9d1	emoji_u1f9d1_200d_1f91d_200d_1f9d1
+friendship	1fac2	emoji_u1fac2
+fries	1f35f	emoji_u1f35f
+frog	1f438	emoji_u1f438
+frostbite	1f976	emoji_u1f976
+frosty	26c4	emoji_u26c4
+frown	1f641	emoji_u1f641
+frowning	1f626	emoji_u1f626
+frustration	1fae4	emoji_u1fae4
+fuel_pump	26fd	emoji_u26fd
+full_battery	1f50b	emoji_u1f50b
+full_moon	1f315	emoji_u1f315
+funeral_urn	26b1	emoji_u26b1
+fungi	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+fungus	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+furniture	1f6cb	emoji_u1f6cb
+future	1f52e	emoji_u1f52e
+gaggle	1fabf	emoji_u1fabf
+gander	1fabf	emoji_u1fabf
+garlic	1f9c4	emoji_u1f9c4
+garnish	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+gas_pump	26fd	emoji_u26fd
+gay	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+gear	2699	emoji_u2699
+gecko	1f98e	emoji_u1f98e
+geek	1f913	emoji_u1f913
+geese	1fabf	emoji_u1fabf
+gelato	1f368	emoji_u1f368
+gem	1f48e	emoji_u1f48e
+gemini	264a	emoji_u264a
+genderqueer	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+gene	1f9ec	emoji_u1f9ec
+genetics	1f9ec	emoji_u1f9ec
+genie	1f9de	emoji_u1f9de
+ghost	1f47b	emoji_u1f47b
+gibbous	1f316	emoji_u1f316
+gift	1f381	emoji_u1f381
+gift_heart	1f49d	emoji_u1f49d
+giggle	1f92d	emoji_u1f92d
+giggling	1f92d	emoji_u1f92d
+ginger	1fada	emoji_u1fada
+ginger_root	1fada	emoji_u1fada
+giraffe	1f992	emoji_u1f992
+girl	1f467	emoji_u1f467
+glad	1f972	emoji_u1f972
+glamour	2728	emoji_u2728
+glass_of_milk	1f95b	emoji_u1f95b
+glasses	1f453	emoji_u1f453
+glbt	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+glbtq	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+glitter	1faa9	emoji_u1faa9
+globe	1f310	emoji_u1f310
+glory	1f426 200d 1f525	emoji_u1f426_200d_1f525
+glove	1f94e	emoji_u1f94e
+gloves	1f9e4	emoji_u1f9e4
+glowing_star	1f31f	emoji_u1f31f
+go	1f3c1	emoji_u1f3c1
+goal	1f945	emoji_u1f945
+goat	1f410	emoji_u1f410
+goblin	1f47a	emoji_u1f47a
+goggles	1f97d	emoji_u1f97d
+gold	1f947	emoji_u1f947
+gold_record	1f4bd	emoji_u1f4bd
+golf	1f3cc	emoji_u1f3cc
+gondola	1f6a0	emoji_u1f6a0
+goodbye	1fac2	emoji_u1fac2
+goodnight	1f31b	emoji_u1f31b
+goofy	1f92a	emoji_u1f92a
+gooooooooal	1f945	emoji_u1f945
+goose	1fabf	emoji_u1fabf
+gordita	1fad3	emoji_u1fad3
+gorilla	1f98d	emoji_u1f98d
+got_it	1f44c	emoji_u1f44c
+graduate	1f393	emoji_u1f393
+grandchild	1f9d2	emoji_u1f9d2
+grandparent	1f9d3	emoji_u1f9d3
+grapes	1f347	emoji_u1f347
+grasshopper	1f997	emoji_u1f997
+gratitude	1f979	emoji_u1f979
+grave	26b0	emoji_u26b0
+graveyard	1faa6	emoji_u1faa6
+gray	1fa76	emoji_u1fa76
+green_apple	1f34f	emoji_u1f34f
+green_book	1f4d7	emoji_u1f4d7
+green_circle	1f7e2	emoji_u1f7e2
+green_heart	1f49a	emoji_u1f49a
+green_large_square	1f7e9	emoji_u1f7e9
+grey	1fa76	emoji_u1fa76
+grey_exclamation	2755	emoji_u2755
+grey_heart	1fa76	emoji_u1fa76
+grey_question	2754	emoji_u2754
+grimacing	1f62c	emoji_u1f62c
+grinning	1f600	emoji_u1f600
+grinning_face_with_smiling_eyes	1f601	emoji_u1f601
+groan	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+gross	1f92e	emoji_u1f92e
+grow	1fab4	emoji_u1fab4
+growing	1f4c8	emoji_u1f4c8
+growing_heart	1f497	emoji_u1f497
+grumpy	1f621	emoji_u1f621
+gua_pi_mao	1f472	emoji_u1f472
+guanaco	1f999	emoji_u1f999
+guard	1f482	emoji_u1f482
+guestrooms	1f6cc	emoji_u1f6cc
+guide_dog	1f9ae	emoji_u1f9ae
+guitar	1f3b8	emoji_u1f3b8
+gun	1f52b	emoji_u1f52b
+gym	1f3cb	emoji_u1f3cb
+gymnastics	1f938	emoji_u1f938
+gyoza	1f95f	emoji_u1f95f
+gyōza	1f95f	emoji_u1f95f
+haha	1fae0	emoji_u1fae0
+hair_pick	1faae	emoji_u1faae
+haircut	1f487	emoji_u1f487
+half_frown	1f615	emoji_u1f615
+halo	1f607	emoji_u1f607
+hamburger	1f354	emoji_u1f354
+hammer	1f528	emoji_u1f528
+hammer_and_pick	2692	emoji_u2692
+hammer_and_wrench	1f6e0	emoji_u1f6e0
+hamsa	1faac	emoji_u1faac
+hamster	1f439	emoji_u1f439
+hand	270b	emoji_u270b
+hand_with_index_finger_and_thumb_crossed	1faf0	emoji_u1faf0
+handbag	1f45c	emoji_u1f45c
+handball	1f93e	emoji_u1f93e
+handshake	1f91d	emoji_u1f91d
+handy	1fa9b	emoji_u1fa9b
+handyman	1f528	emoji_u1f528
+handywoman	1f528	emoji_u1f528
+hang_glide	1fa82	emoji_u1fa82
+happy	1f600	emoji_u1f600
+hard	1f9bb	emoji_u1f9bb
+hard_hat	26d1	emoji_u26d1
+harp	1fa89	emoji_u1fa89
+harvest	1f33e	emoji_u1f33e
+hash	0023 20e3	emoji_u0023_20e3
+hashi	1f962	emoji_u1f962
+hat	1f452	emoji_u1f452
+hatchet	1fa93	emoji_u1fa93
+hatching	1f423	emoji_u1f423
+hatching_chick	1f423	emoji_u1f423
+haunted	1f47b	emoji_u1f47b
+hazard	2620	emoji_u2620
+hazy	1f32b	emoji_u1f32b
+head_bandage	1f915	emoji_u1f915
+head_shaking_horizontally	1f642 200d 2194	emoji_u1f642_200d_2194
+head_shaking_vertically	1f642 200d 2195	emoji_u1f642_200d_2195
+heading_down	2935	emoji_u2935
+heading_up	2934	emoji_u2934
+headlines	1f4f0	emoji_u1f4f0
+headphones	1f3a7	emoji_u1f3a7
+headscarf	1f9d5	emoji_u1f9d5
+headstone	1faa6	emoji_u1faa6
+health_worker	1f9d1 200d 2695	emoji_u1f9d1_200d_2695
+healthier	2764 200d 1fa79	emoji_u2764_200d_1fa79
+hear_no_evil	1f649	emoji_u1f649
+hearing	1f9bb	emoji_u1f9bb
+heart	2764	emoji_u2764
+heart_arrow	1f498	emoji_u1f498
+heart_box	1f49f	emoji_u1f49f
+heart_exclamation	2763	emoji_u2763
+heart_eyes	1f60d	emoji_u1f60d
+heart_eyes_cat	1f63b	emoji_u1f63b
+heart_hands	1faf6	emoji_u1faf6
+heart_kiss	1f618	emoji_u1f618
+heart_of_gold	1f49b	emoji_u1f49b
+heart_on_fire	2764 200d 1f525	emoji_u2764_200d_1f525
+heart_pulse	1f497	emoji_u1f497
+heartache	1f494	emoji_u1f494
+heartbeat	1f493	emoji_u1f493
+hearts	2665	emoji_u2665
+heavenly	1fabd	emoji_u1fabd
+heavy_equals_sign	1f7f0	emoji_u1f7f0
+hedgehog	1f994	emoji_u1f994
+helicopter	1f681	emoji_u1f681
+hello	1f44b	emoji_u1f44b
+helmet	26d1	emoji_u26d1
+help	1fa7c	emoji_u1fa7c
+helpless	1f623	emoji_u1f623
+herb	1f33f	emoji_u1f33f
+herd	1f9ac	emoji_u1f9ac
+heroine	1f9b8 200d 2640	emoji_u1f9b8_200d_2640
+hi	1f44b	emoji_u1f44b
+hibiscus	1f33a	emoji_u1f33a
+hiding	1fae3	emoji_u1fae3
+high_brightness	1f506	emoji_u1f506
+high_five	1f590	emoji_u1f590
+high_heels	1f460	emoji_u1f460
+high_speed_train	1f684	emoji_u1f684
+high_voltage	26a1	emoji_u26a1
+hijab	1f9d5	emoji_u1f9d5
+hiking	1f97e	emoji_u1f97e
+hiking_boot	1f97e	emoji_u1f97e
+hindu	1f6d5	emoji_u1f6d5
+hindu_temple	1f6d5	emoji_u1f6d5
+hinduism	1f549	emoji_u1f549
+hinny	1facf	emoji_u1facf
+hint	1f5dd	emoji_u1f5dd
+hippo	1f99b	emoji_u1f99b
+hippopotamus	1f99b	emoji_u1f99b
+hiss	1f40d	emoji_u1f40d
+hmm	1f928	emoji_u1f928
+hocho	1f52a	emoji_u1f52a
+hoist	1f6d7	emoji_u1f6d7
+holding	1f979	emoji_u1f979
+hole	1f573	emoji_u1f573
+hole_in_one	26f3	emoji_u26f3
+holi	1fadf	emoji_u1fadf
+holiday	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+holiday_tree	1f384	emoji_u1f384
+home_phone	1f4de	emoji_u1f4de
+honey	1f36f	emoji_u1f36f
+honeybee	1f41d	emoji_u1f41d
+hongbao	1f9e7	emoji_u1f9e7
+honk	1fabf	emoji_u1fabf
+hook	1fa9d	emoji_u1fa9d
+hooray	1f973	emoji_u1f973
+horizontal_traffic_light	1f6a5	emoji_u1f6a5
+horizontally	1f642 200d 2194	emoji_u1f642_200d_2194
+horn	1f4ef	emoji_u1f4ef
+horse	1f40e	emoji_u1f40e
+horse_racing	1f3c7	emoji_u1f3c7
+horse_riding	1f3c7	emoji_u1f3c7
+horseshoe	1f9f2	emoji_u1f9f2
+hospital	1f3e5	emoji_u1f3e5
+hot	1f525	emoji_u1f525
+hot_face	1f975	emoji_u1f975
+hot_pepper	1f336	emoji_u1f336
+hot_springs	2668	emoji_u2668
+hotdog	1f32d	emoji_u1f32d
+hotel	1f3e8	emoji_u1f3e8
+hotspot	1f6dc	emoji_u1f6dc
+hourglass	23f3	emoji_u23f3
+hourglass_done	231b	emoji_u231b
+house	1f3e0	emoji_u1f3e0
+houses	1f3d8	emoji_u1f3d8
+hover	1f574	emoji_u1f574
+hug	1f917	emoji_u1f917
+hugging	1fac2	emoji_u1fac2
+huh	1f90c	emoji_u1f90c
+human	1f471	emoji_u1f471
+humpback_whale	1f40b	emoji_u1f40b
+hundred	1f4af	emoji_u1f4af
+hungry	1f37d	emoji_u1f37d
+hurricane	1f300	emoji_u1f300
+hurt	1f915	emoji_u1f915
+hush	1f910	emoji_u1f910
+hushed	1f62f	emoji_u1f62f
+hut	1f6d6	emoji_u1f6d6
+hyacinth	1fabb	emoji_u1fabb
+hygiene	1faa5	emoji_u1faa5
+hypnotized	1f635 200d 1f4ab	emoji_u1f635_200d_1f4ab
+hóngbāo	1f9e7	emoji_u1f9e7
+ice	1f9ca	emoji_u1f9ca
+ice_cream	1f368	emoji_u1f368
+ice_hockey	1f3d2	emoji_u1f3d2
+ice_skate	26f8	emoji_u26f8
+iceberg	1f9ca	emoji_u1f9ca
+icicles	1f976	emoji_u1f976
+id	1f194	emoji_u1f194
+idea	1f4a1	emoji_u1f4a1
+identification	1faaa	emoji_u1faaa
+identification_card	1faaa	emoji_u1faaa
+identity	1fac6	emoji_u1fac6
+ideograph_advantage	1f250	emoji_u1f250
+ill	1f912	emoji_u1f912
+immigration	1f6c2	emoji_u1f6c2
+immortal	1f426 200d 1f525	emoji_u1f426_200d_1f525
+imp	1f47f	emoji_u1f47f
+improving	2764 200d 1fa79	emoji_u2764_200d_1fa79
+in_bed	1f6cc	emoji_u1f6cc
+in_love	1f60d	emoji_u1f60d
+inbox	1f4e5	emoji_u1f4e5
+inbox_zero	1f4ed	emoji_u1f4ed
+incognito	1f978	emoji_u1f978
+incorrect	274c	emoji_u274c
+increase	1f53c	emoji_u1f53c
+increasing	1f4c8	emoji_u1f4c8
+indecisive	1f9c7	emoji_u1f9c7
+index_pointing_at_the_viewer	1faf5	emoji_u1faf5
+indigo	1fabb	emoji_u1fabb
+infinity	267e	emoji_u267e
+info	2139	emoji_u2139
+information_desk_person	1f481	emoji_u1f481
+inhalation	1fac1	emoji_u1fac1
+injection	1f489	emoji_u1f489
+injured	1f915	emoji_u1f915
+injury	1fa78	emoji_u1fa78
+ink	1fadf	emoji_u1fadf
+innocent	1f607	emoji_u1f607
+intelligent	1f9e0	emoji_u1f9e0
+interlocking	1f9e9	emoji_u1f9e9
+internet	1f6dc	emoji_u1f6dc
+interrobang	2049	emoji_u2049
+interrogation	1f90c	emoji_u1f90c
+intoxicated	1f974	emoji_u1f974
+introvert	1fae5	emoji_u1fae5
+invertebrate	1fabc	emoji_u1fabc
+invincible	26d1	emoji_u26d1
+invisible	1fae5	emoji_u1fae5
+invoice	1f9fe	emoji_u1f9fe
+iphone	1f4f1	emoji_u1f4f1
+iron	1f9c7	emoji_u1f9c7
+islam	262a	emoji_u262a
+island	1f3dd	emoji_u1f3dd
+izakaya_lantern	1f3ee	emoji_u1f3ee
+jack-o-lantern	1f383	emoji_u1f383
+japan	1f5fe	emoji_u1f5fe
+japan_post	1f3e3	emoji_u1f3e3
+japanese_acceptable_button	1f251	emoji_u1f251
+japanese_application_button	1f238	emoji_u1f238
+japanese_bargain_button	1f250	emoji_u1f250
+japanese_congratulations_button	3297	emoji_u3297
+japanese_discount_button	1f239	emoji_u1f239
+japanese_free_of_charge_button	1f21a	emoji_u1f21a
+japanese_here_button	1f201	emoji_u1f201
+japanese_monthly_amount_button	1f237	emoji_u1f237
+japanese_no_vacancy_button	1f235	emoji_u1f235
+japanese_not_free_of_charge_button	1f236	emoji_u1f236
+japanese_open_for_business_button	1f23a	emoji_u1f23a
+japanese_passing_grade_button	1f234	emoji_u1f234
+japanese_prohibited_button	1f232	emoji_u1f232
+japanese_reserved_button	1f22f	emoji_u1f22f
+japanese_secret_button	3299	emoji_u3299
+japanese_service_charge_button	1f202	emoji_u1f202
+japanese_vacancy_button	1f233	emoji_u1f233
+jar	1fad9	emoji_u1fad9
+jeans	1f456	emoji_u1f456
+jeep	1f699	emoji_u1f699
+jelly	1fabc	emoji_u1fabc
+jellyfish	1fabc	emoji_u1fabc
+jeotgarak	1f962	emoji_u1f962
+jewish	2721	emoji_u2721
+jiaozi	1f95f	emoji_u1f95f
+jigsaw	1f9e9	emoji_u1f9e9
+joey	1f998	emoji_u1f998
+joker	1f0cf	emoji_u1f0cf
+joking	1f61c	emoji_u1f61c
+jolly	1f3f4 200d 2620	emoji_u1f3f4_200d_2620
+joy	1f602	emoji_u1f602
+joy_cat	1f639	emoji_u1f639
+joystick	1f579	emoji_u1f579
+judaism	2721	emoji_u2721
+judge	1f9d1 200d 2696	emoji_u1f9d1_200d_2696
+juggling	1f939	emoji_u1f939
+jump	1f998	emoji_u1f998
+justice	2696	emoji_u2696
+kaaba	1f54b	emoji_u1f54b
+kaching	1f911	emoji_u1f911
+kale	1f96c	emoji_u1f96c
+kangaroo	1f998	emoji_u1f998
+kawaii	1f4a0	emoji_u1f4a0
+keikogi	1f94b	emoji_u1f94b
+kerchief	1f9d5	emoji_u1f9d5
+key	1f511	emoji_u1f511
+key_signing	1f50f	emoji_u1f50f
+keyboard	2328	emoji_u2328
+khalsa	1faaf	emoji_u1faaf
+khanda	1faaf	emoji_u1faaf
+kick_scooter	1f6f4	emoji_u1f6f4
+kid	1f9d2	emoji_u1f9d2
+kidney	1fad8	emoji_u1fad8
+kimono	1f458	emoji_u1f458
+king	1f451	emoji_u1f451
+kiss	1f48f	emoji_u1f48f
+kiss_man_man	1f468 200d 2764 200d 1f48b 200d 1f468	emoji_u1f468_200d_2764_200d_1f48b_200d_1f468
+kiss_smiling_eyes	1f619	emoji_u1f619
+kiss_with_blush	1f61a	emoji_u1f61a
+kiss_woman_man	1f469 200d 2764 200d 1f48b 200d 1f468	emoji_u1f469_200d_2764_200d_1f48b_200d_1f468
+kiss_woman_woman	1f469 200d 2764 200d 1f48b 200d 1f469	emoji_u1f469_200d_2764_200d_1f48b_200d_1f469
+kissing_cat	1f63d	emoji_u1f63d
+kissing_face	1f617	emoji_u1f617
+kite	1fa81	emoji_u1fa81
+kitten	1f431	emoji_u1f431
+kiwi	1f95d	emoji_u1f95d
+knee	1f9b5	emoji_u1f9b5
+knife	1f52a	emoji_u1f52a
+knit	1f9f6	emoji_u1f9f6
+knot	1faa2	emoji_u1faa2
+koala	1f428	emoji_u1f428
+kuaizi	1f962	emoji_u1f962
+lab_coat	1f97c	emoji_u1f97c
+label	1f3f7	emoji_u1f3f7
+lacrosse	1f94d	emoji_u1f94d
+ladder	1fa9c	emoji_u1fa9c
+lady_beetle	1f41e	emoji_u1f41e
+ladybird	1f41e	emoji_u1f41e
+ladybug	1f41e	emoji_u1f41e
+lai	1f9e7	emoji_u1f9e7
+lambchop	1f969	emoji_u1f969
+landing	1f6ec	emoji_u1f6ec
+landline	1f4de	emoji_u1f4de
+lantern	1f3ee	emoji_u1f3ee
+laptop	1f4bb	emoji_u1f4bb
+large_blue_diamond	1f537	emoji_u1f537
+large_orange_diamond	1f536	emoji_u1f536
+last_quarter_moon	1f317	emoji_u1f317
+last_quarter_moon_face	1f31c	emoji_u1f31c
+late	1fae9	emoji_u1fae9
+lather	1f9fc	emoji_u1f9fc
+laughing	1f606	emoji_u1f606
+laughter_tears	1f602	emoji_u1f602
+laundry	1f9fa	emoji_u1f9fa
+lavash	1fad3	emoji_u1fad3
+lavender	1fabb	emoji_u1fabb
+lazy	1f9a5	emoji_u1f9a5
+leafless	1fabe	emoji_u1fabe
+leafless_tree	1fabe	emoji_u1fabe
+leafy	1f96c	emoji_u1f96c
+leafy_green	1f96c	emoji_u1f96c
+leaves	1f343	emoji_u1f343
+ledger	1f4d2	emoji_u1f4d2
+left	2b05	emoji_u2b05
+left_fist	1f91b	emoji_u1f91b
+left_hook	21a9	emoji_u21a9
+left_right	2194	emoji_u2194
+leftwards_hand	1faf2	emoji_u1faf2
+leftwards_pushing_hand	1faf7	emoji_u1faf7
+leg	1f9b5	emoji_u1f9b5
+lemon	1f34b	emoji_u1f34b
+leo	264c	emoji_u264c
+leopard	1f406	emoji_u1f406
+lesbian	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+lets_eat	1f37d	emoji_u1f37d
+lettuce	1f96c	emoji_u1f96c
+level_slider	1f39a	emoji_u1f39a
+levitating	1f574	emoji_u1f574
+lgbt	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+lgbtq	1f308	emoji_u1f308
+lgbtqia	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+libra	264e	emoji_u264e
+license	1faaa	emoji_u1faaa
+lifesaver	1f6df	emoji_u1f6df
+lifestyles	1f6cb	emoji_u1f6cb
+lift	1f3cb	emoji_u1f3cb
+light_blue_heart	1fa75	emoji_u1fa75
+light_bulb	1f4a1	emoji_u1f4a1
+light_rail	1f688	emoji_u1f688
+lightning	1f329	emoji_u1f329
+lightning_storm	1f329	emoji_u1f329
+like	1f44d	emoji_u1f44d
+lilac	1fabb	emoji_u1fabb
+limb	1f9b5	emoji_u1f9b5
+lime	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+line	1fae5	emoji_u1fae5
+link	1f517	emoji_u1f517
+linked	1f587	emoji_u1f587
+lion	1f981	emoji_u1f981
+lip	1fae6	emoji_u1fae6
+lips	1f444	emoji_u1f444
+lips_are_sealed	1f910	emoji_u1f910
+lipstick	1f484	emoji_u1f484
+lipstick_kiss	1f48b	emoji_u1f48b
+lit	1f525	emoji_u1f525
+little	1f90f	emoji_u1f90f
+live_long_and_prosper	1f596	emoji_u1f596
+living_room	1f6cb	emoji_u1f6cb
+lizard	1f98e	emoji_u1f98e
+llama	1f999	emoji_u1f999
+lobster	1f99e	emoji_u1f99e
+lock_with_key	1f510	emoji_u1f510
+locked	1f512	emoji_u1f512
+locked_bag	1f6c5	emoji_u1f6c5
+locker	1f6c5	emoji_u1f6c5
+log	1fab5	emoji_u1fab5
+lol	1f606	emoji_u1f606
+lollipop	1f36d	emoji_u1f36d
+long	1fa98	emoji_u1fa98
+long_drum	1fa98	emoji_u1fa98
+looking	1f440	emoji_u1f440
+loop	27b0	emoji_u27b0
+losing_money	1f4b8	emoji_u1f4b8
+lotion	1f9f4	emoji_u1f9f4
+lotion_bottle	1f9f4	emoji_u1f9f4
+lotus	1fab7	emoji_u1fab7
+louder	1f50a	emoji_u1f50a
+loudspeaker	1f4e2	emoji_u1f4e2
+love	2764	emoji_u2764
+love_hotel	1f3e9	emoji_u1f3e9
+love_letter	1f48c	emoji_u1f48c
+love_you	2764	emoji_u2764
+love_you_gesture	1f91f	emoji_u1f91f
+low	1faab	emoji_u1faab
+low_battery	1faab	emoji_u1faab
+low_brightness	1f505	emoji_u1f505
+lower_left	2199	emoji_u2199
+lower_right	2198	emoji_u2198
+loyalty	1f510	emoji_u1f510
+lucky	1f340	emoji_u1f340
+luge	1f6f7	emoji_u1f6f7
+luggage	1f9f3	emoji_u1f9f3
+lung	1fac1	emoji_u1fac1
+lungs	1fac1	emoji_u1fac1
+lupine	1fabb	emoji_u1fabb
+lure	1faa4	emoji_u1faa4
+lust	2764 200d 1f525	emoji_u2764_200d_1f525
+lying	1f925	emoji_u1f925
+m	24c2	emoji_u24c2
+maam	1fae1	emoji_u1fae1
+mad	1f621	emoji_u1f621
+mage	1f9d9	emoji_u1f9d9
+maggot	1fab0	emoji_u1fab0
+magic_wand	1fa84	emoji_u1fa84
+magician	1fa84	emoji_u1fa84
+magnet	1f9f2	emoji_u1f9f2
+magnifying	1f50e	emoji_u1f50e
+magnifying_glass	1f50d	emoji_u1f50d
+magnifying_glass_tilted_right	1f50e	emoji_u1f50e
+mahjong	1f004	emoji_u1f004
+mail	2709	emoji_u2709
+mail_dropoff	1f4ee	emoji_u1f4ee
+mail_received	1f4e8	emoji_u1f4e8
+mail_sent	1f4e9	emoji_u1f4e9
+mailbox	1f4eb	emoji_u1f4eb
+maintenance	1f528	emoji_u1f528
+maize	1f33d	emoji_u1f33d
+makeup	1fa9e	emoji_u1fa9e
+malaria	1f99f	emoji_u1f99f
+male	2642	emoji_u2642
+male_sign	2642	emoji_u2642
+malt	1f964	emoji_u1f964
+mammoth	1f9a3	emoji_u1f9a3
+man	1f468	emoji_u1f468
+man_and_woman_couple	1f46b	emoji_u1f46b
+man_and_woman_holding_hands	1f46b	emoji_u1f46b
+man_artist	1f468 200d 1f3a8	emoji_u1f468_200d_1f3a8
+man_astronaut	1f468 200d 1f680	emoji_u1f468_200d_1f680
+man_bald	1f468 200d 1f9b2	emoji_u1f468_200d_1f9b2
+man_beard	1f9d4 200d 2642	emoji_u1f9d4_200d_2642
+man_biking	1f6b4 200d 2642	emoji_u1f6b4_200d_2642
+man_blond_hair	1f471 200d 2642	emoji_u1f471_200d_2642
+man_bouncing_ball	26f9 200d 2642	emoji_u26f9_200d_2642
+man_bowing	1f647 200d 2642	emoji_u1f647_200d_2642
+man_cartwheeling	1f938 200d 2642	emoji_u1f938_200d_2642
+man_climbing	1f9d7 200d 2642	emoji_u1f9d7_200d_2642
+man_construction_worker	1f477 200d 2642	emoji_u1f477_200d_2642
+man_cook	1f468 200d 1f373	emoji_u1f468_200d_1f373
+man_curly_hair	1f468 200d 1f9b1	emoji_u1f468_200d_1f9b1
+man_detective	1f575 200d 2642	emoji_u1f575_200d_2642
+man_elf	1f9dd 200d 2642	emoji_u1f9dd_200d_2642
+man_facepalming	1f926 200d 2642	emoji_u1f926_200d_2642
+man_factory_worker	1f468 200d 1f3ed	emoji_u1f468_200d_1f3ed
+man_fairy	1f9da 200d 2642	emoji_u1f9da_200d_2642
+man_farmer	1f468 200d 1f33e	emoji_u1f468_200d_1f33e
+man_feeding_baby	1f468 200d 1f37c	emoji_u1f468_200d_1f37c
+man_firefighter	1f468 200d 1f692	emoji_u1f468_200d_1f692
+man_frowning	1f64d 200d 2642	emoji_u1f64d_200d_2642
+man_genie	1f9de 200d 2642	emoji_u1f9de_200d_2642
+man_gesturing_no	1f645 200d 2642	emoji_u1f645_200d_2642
+man_gesturing_ok	1f646 200d 2642	emoji_u1f646_200d_2642
+man_getting_haircut	1f487 200d 2642	emoji_u1f487_200d_2642
+man_getting_massage	1f486 200d 2642	emoji_u1f486_200d_2642
+man_golfing	1f3cc 200d 2642	emoji_u1f3cc_200d_2642
+man_guard	1f482 200d 2642	emoji_u1f482_200d_2642
+man_health_worker	1f468 200d 2695	emoji_u1f468_200d_2695
+man_in_lotus_position	1f9d8 200d 2642	emoji_u1f9d8_200d_2642
+man_in_manual_wheelchair	1f468 200d 1f9bd	emoji_u1f468_200d_1f9bd
+man_in_manual_wheelchair_facing_right	1f468 200d 1f9bd 200d 27a1	emoji_u1f468_200d_1f9bd_200d_27a1
+man_in_motorized_wheelchair	1f468 200d 1f9bc	emoji_u1f468_200d_1f9bc
+man_in_motorized_wheelchair_facing_right	1f468 200d 1f9bc 200d 27a1	emoji_u1f468_200d_1f9bc_200d_27a1
+man_in_steamy_room	1f9d6 200d 2642	emoji_u1f9d6_200d_2642
+man_in_tuxedo	1f935 200d 2642	emoji_u1f935_200d_2642
+man_judge	1f468 200d 2696	emoji_u1f468_200d_2696
+man_juggling	1f939 200d 2642	emoji_u1f939_200d_2642
+man_kneeling	1f9ce 200d 2642	emoji_u1f9ce_200d_2642
+man_kneeling_facing_right	1f9ce 200d 2642 200d 27a1	emoji_u1f9ce_200d_2642_200d_27a1
+man_lifting_weights	1f3cb 200d 2642	emoji_u1f3cb_200d_2642
+man_mage	1f9d9 200d 2642	emoji_u1f9d9_200d_2642
+man_mechanic	1f468 200d 1f527	emoji_u1f468_200d_1f527
+man_mountain_biking	1f6b5 200d 2642	emoji_u1f6b5_200d_2642
+man_office_worker	1f468 200d 1f4bc	emoji_u1f468_200d_1f4bc
+man_pilot	1f468 200d 2708	emoji_u1f468_200d_2708
+man_playing_handball	1f93e 200d 2642	emoji_u1f93e_200d_2642
+man_playing_water_polo	1f93d 200d 2642	emoji_u1f93d_200d_2642
+man_police_officer	1f46e 200d 2642	emoji_u1f46e_200d_2642
+man_pouting	1f64e 200d 2642	emoji_u1f64e_200d_2642
+man_raising_hand	1f64b 200d 2642	emoji_u1f64b_200d_2642
+man_red_hair	1f468 200d 1f9b0	emoji_u1f468_200d_1f9b0
+man_rowing_boat	1f6a3 200d 2642	emoji_u1f6a3_200d_2642
+man_running	1f3c3 200d 2642	emoji_u1f3c3_200d_2642
+man_running_facing_right	1f3c3 200d 2642 200d 27a1	emoji_u1f3c3_200d_2642_200d_27a1
+man_scientist	1f468 200d 1f52c	emoji_u1f468_200d_1f52c
+man_shrugging	1f937 200d 2642	emoji_u1f937_200d_2642
+man_singer	1f468 200d 1f3a4	emoji_u1f468_200d_1f3a4
+man_standing	1f9cd 200d 2642	emoji_u1f9cd_200d_2642
+man_student	1f468 200d 1f393	emoji_u1f468_200d_1f393
+man_superhero	1f9b8 200d 2642	emoji_u1f9b8_200d_2642
+man_supervillain	1f9b9 200d 2642	emoji_u1f9b9_200d_2642
+man_surfing	1f3c4 200d 2642	emoji_u1f3c4_200d_2642
+man_swimming	1f3ca 200d 2642	emoji_u1f3ca_200d_2642
+man_teacher	1f468 200d 1f3eb	emoji_u1f468_200d_1f3eb
+man_technologist	1f468 200d 1f4bb	emoji_u1f468_200d_1f4bb
+man_tipping_hand	1f481 200d 2642	emoji_u1f481_200d_2642
+man_vampire	1f9db 200d 2642	emoji_u1f9db_200d_2642
+man_walking	1f6b6 200d 2642	emoji_u1f6b6_200d_2642
+man_walking_facing_right	1f6b6 200d 2642 200d 27a1	emoji_u1f6b6_200d_2642_200d_27a1
+man_wearing_turban	1f473 200d 2642	emoji_u1f473_200d_2642
+man_white_hair	1f468 200d 1f9b3	emoji_u1f468_200d_1f9b3
+man_with_veil	1f470 200d 2642	emoji_u1f470_200d_2642
+man_with_white_cane	1f468 200d 1f9af	emoji_u1f468_200d_1f9af
+man_with_white_cane_facing_right	1f468 200d 1f9af 200d 27a1	emoji_u1f468_200d_1f9af_200d_27a1
+man_zombie	1f9df 200d 2642	emoji_u1f9df_200d_2642
+mandarin	1f34a	emoji_u1f34a
+mango	1f96d	emoji_u1f96d
+mantelpiece_clock	1f570	emoji_u1f570
+mantilla	1f9d5	emoji_u1f9d5
+manual_wheelchair	1f9bd	emoji_u1f9bd
+map	1f5fa	emoji_u1f5fa
+maple_leaf	1f341	emoji_u1f341
+maracas	1fa87	emoji_u1fa87
+marching	1fa88	emoji_u1fa88
+margarita	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+marine	1fabc	emoji_u1fabc
+marsupial	1f998	emoji_u1f998
+martial_arts	1f94b	emoji_u1f94b
+mary	1faac	emoji_u1faac
+mask	1f637	emoji_u1f637
+massage	1f486	emoji_u1f486
+mate	1f9c9	emoji_u1f9c9
+math	1f7f0	emoji_u1f7f0
+matryoshka	1fa86	emoji_u1fa86
+mayo	1fa85	emoji_u1fa85
+meal	1f37d	emoji_u1f37d
+meat	1f356	emoji_u1f356
+meatball	1f9c6	emoji_u1f9c6
+mechanic	1f9d1 200d 1f527	emoji_u1f9d1_200d_1f527
+mechanical	2699	emoji_u2699
+mechanical_arm	1f9be	emoji_u1f9be
+mechanical_leg	1f9bf	emoji_u1f9bf
+medal	1f3c5	emoji_u1f3c5
+medical_symbol	2695	emoji_u2695
+medicine	1f48a	emoji_u1f48a
+megaphone	1f4e3	emoji_u1f4e3
+melon	1f348	emoji_u1f348
+melt	1fae0	emoji_u1fae0
+melted	1fad5	emoji_u1fad5
+melting	1fae0	emoji_u1fae0
+melting_face	1fae0	emoji_u1fae0
+memo	1f4dd	emoji_u1f4dd
+memorial	1faa6	emoji_u1faa6
+men_couple	1f46c	emoji_u1f46c
+men_with_bunny_ears	1f46f 200d 2642	emoji_u1f46f_200d_2642
+men_wrestling	1f93c 200d 2642	emoji_u1f93c_200d_2642
+mending	2764 200d 1fa79	emoji_u2764_200d_1fa79
+mending_heart	2764 200d 1fa79	emoji_u2764_200d_1fa79
+menorah	1f54e	emoji_u1f54e
+mens	1f6b9	emoji_u1f6b9
+menstruation	1fa78	emoji_u1fa78
+meow	1f408	emoji_u1f408
+mercy	1f97a	emoji_u1f97a
+mermaid	1f9dc 200d 2640	emoji_u1f9dc_200d_2640
+merman	1f9dc 200d 2642	emoji_u1f9dc_200d_2642
+merperson	1f9dc	emoji_u1f9dc
+merry	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+merry_go_round	1f3a0	emoji_u1f3a0
+merwoman	1f9dc 200d 2640	emoji_u1f9dc_200d_2640
+mess	1fadf	emoji_u1fadf
+metal	1fa99	emoji_u1fa99
+meteor	2604	emoji_u2604
+metro	24c2	emoji_u24c2
+mexican	1fad4	emoji_u1fad4
+mic	1f3a4	emoji_u1f3a4
+microbe	1f9a0	emoji_u1f9a0
+microphone	1f3a4	emoji_u1f3a4
+microscope	1f52c	emoji_u1f52c
+middle_finger	1f595	emoji_u1f595
+mike	1f3a4	emoji_u1f3a4
+mild	1f928	emoji_u1f928
+military	1fa96	emoji_u1fa96
+military_helmet	1fa96	emoji_u1fa96
+military_medal	1f396	emoji_u1f396
+milk	1f95b	emoji_u1f95b
+milky_way	1f30c	emoji_u1f30c
+mind	1f92f	emoji_u1f92f
+mindblown	1f92f	emoji_u1f92f
+mine	26cf	emoji_u26cf
+minibus	1f690	emoji_u1f690
+minidisc	1f4bd	emoji_u1f4bd
+minus	2796	emoji_u2796
+miriam	1faac	emoji_u1faac
+mirror	1fa9e	emoji_u1fa9e
+mirror_ball	1faa9	emoji_u1faa9
+mischievous	1f61b	emoji_u1f61b
+mobile_phone	1f4f1	emoji_u1f4f1
+mobility	1fa7c	emoji_u1fa7c
+moisturizer	1f9f4	emoji_u1f9f4
+mojito	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+monarch	1fac5	emoji_u1fac5
+money	1f4b0	emoji_u1f4b0
+money_face	1f911	emoji_u1f911
+money_with_wings	1f4b8	emoji_u1f4b8
+monkey	1f412	emoji_u1f412
+monkey_face	1f435	emoji_u1f435
+monocle	1f9d0	emoji_u1f9d0
+monorail	1f69d	emoji_u1f69d
+monster	1f9cc	emoji_u1f9cc
+moon	1f319	emoji_u1f319
+moon_cake	1f96e	emoji_u1f96e
+moon_ceremony	1f391	emoji_u1f391
+moon_face	1f31d	emoji_u1f31d
+moose	1face	emoji_u1face
+mortar	1f9f1	emoji_u1f9f1
+mortar_board	1f393	emoji_u1f393
+mosque	1f54c	emoji_u1f54c
+mosquito	1f99f	emoji_u1f99f
+mostly_sunny	1f324	emoji_u1f324
+mother_christmas	1f936	emoji_u1f936
+mother_nature	1f32c	emoji_u1f32c
+motor_bike	1f6f5	emoji_u1f6f5
+motor_boat	1f6e5	emoji_u1f6e5
+motorcycle	1f3cd	emoji_u1f3cd
+motorized_wheelchair	1f9bc	emoji_u1f9bc
+motorway	1f6e3	emoji_u1f6e3
+mount_fuji	1f5fb	emoji_u1f5fb
+mountain	26f0	emoji_u26f0
+mountain_biker	1f6b5	emoji_u1f6b5
+mountain_cableway	1f6a0	emoji_u1f6a0
+mountain_railway	1f69e	emoji_u1f69e
+mountain_sunrise	1f304	emoji_u1f304
+mouse	1f401	emoji_u1f401
+mouse_trap	1faa4	emoji_u1faa4
+mousetrap	1faa4	emoji_u1faa4
+moustache	1f978	emoji_u1f978
+mouth	1f444	emoji_u1f444
+movie	1f4fd	emoji_u1f4fd
+movie_camera	1f3a5	emoji_u1f3a5
+movie_theater	1f3a6	emoji_u1f3a6
+moving_truck	1f69a	emoji_u1f69a
+moyai	1f5ff	emoji_u1f5ff
+mrs_claus	1f936	emoji_u1f936
+mule	1facf	emoji_u1facf
+multiplication	2716	emoji_u2716
+multiply	2716	emoji_u2716
+muscle	1f4aa	emoji_u1f4aa
+mushroom	1f344	emoji_u1f344
+music	1f3b5	emoji_u1f3b5
+musical_keyboard	1f3b9	emoji_u1f3b9
+musical_notes	1f3b6	emoji_u1f3b6
+musical_score	1f3bc	emoji_u1f3bc
+mustache	1f978	emoji_u1f978
+mute	1f507	emoji_u1f507
+mute_notifications	1f515	emoji_u1f515
+mx	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+mx_claus	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+mystery	1fac6	emoji_u1fac6
+mythology	1fabd	emoji_u1fabd
+naan	1fad3	emoji_u1fad3
+nail_care	1f485	emoji_u1f485
+nail_polish	1f485	emoji_u1f485
+namaste	1f64f	emoji_u1f64f
+name_badge	1f4db	emoji_u1f4db
+nap	1f971	emoji_u1f971
+naruto	1f365	emoji_u1f365
+national_park	1f3de	emoji_u1f3de
+natural	1fada	emoji_u1fada
+nauseated	1f922	emoji_u1f922
+navigation	1f9ed	emoji_u1f9ed
+nazar	1f9ff	emoji_u1f9ff
+nazar_amulet	1f9ff	emoji_u1f9ff
+nc17	1f51e	emoji_u1f51e
+neck	1f9e3	emoji_u1f9e3
+negative	1f9f2	emoji_u1f9f2
+neptune	1f9dc 200d 2642	emoji_u1f9dc_200d_2642
+nerd	1f913	emoji_u1f913
+nervous	1f62c	emoji_u1f62c
+nest_with_eggs	1faba	emoji_u1faba
+nesting_dolls	1fa86	emoji_u1fa86
+network	1f6dc	emoji_u1f6dc
+neutral	1f610	emoji_u1f610
+new	1f195	emoji_u1f195
+new_baby	1f425	emoji_u1f425
+new_moon	1f311	emoji_u1f311
+new_moon_face	1f31a	emoji_u1f31a
+new_york	1f5fd	emoji_u1f5fd
+newspaper	1f5de	emoji_u1f5de
+next_track	23ed	emoji_u23ed
+ng	1f196	emoji_u1f196
+nib	2712	emoji_u2712
+night	1f303	emoji_u1f303
+night_sky	1f30c	emoji_u1f30c
+nine	0039 20e3	emoji_u0039_20e3
+ninja	1f977	emoji_u1f977
+no_bicycles	1f6b3	emoji_u1f6b3
+no_entry	26d4	emoji_u26d4
+no_mail	1f4ed	emoji_u1f4ed
+no_mouth	1f636	emoji_u1f636
+no_pedestrians	1f6b7	emoji_u1f6b7
+no_phones	1f4f5	emoji_u1f4f5
+no_signal	1f645	emoji_u1f645
+no_smoking	1f6ad	emoji_u1f6ad
+no_sound	1f507	emoji_u1f507
+noble	1fac5	emoji_u1fac5
+nod	1f642 200d 2195	emoji_u1f642_200d_2195
+non-potable_water	1f6b1	emoji_u1f6b1
+noodles	1f35c	emoji_u1f35c
+nope	1f645	emoji_u1f645
+north	2b06	emoji_u2b06
+north_east	2197	emoji_u2197
+north_west	2196	emoji_u2196
+nose	1f443	emoji_u1f443
+not_allowed	1f6ab	emoji_u1f6ab
+note	1f4dd	emoji_u1f4dd
+notebook	1f4d3	emoji_u1f4d3
+nothing	1fad9	emoji_u1fad9
+notice	1faa7	emoji_u1faa7
+notifications	1f514	emoji_u1f514
+nuclear	2622	emoji_u2622
+number_one	1f947	emoji_u1f947
+numbers	1f522	emoji_u1f522
+nursery	1f6bc	emoji_u1f6bc
+nurturing	1fab4	emoji_u1fab4
+nut_and_bolt	1f529	emoji_u1f529
+o	1f17e	emoji_u1f17e
+oatmeal	1f963	emoji_u1f963
+oberon	1f9da 200d 2642	emoji_u1f9da_200d_2642
+ocean	1f30a	emoji_u1f30a
+ocean_sunrise	1f305	emoji_u1f305
+octagonal_sign	1f6d1	emoji_u1f6d1
+octopus	1f419	emoji_u1f419
+oden	1f362	emoji_u1f362
+offer	1faf4	emoji_u1faf4
+office	1f3e2	emoji_u1f3e2
+office_supplies	1f587	emoji_u1f587
+office_worker	1f9d1 200d 1f4bc	emoji_u1f9d1_200d_1f4bc
+ogre	1f479	emoji_u1f479
+oh_no	1f615	emoji_u1f615
+oil	1fa94	emoji_u1fa94
+oil_drum	1f6e2	emoji_u1f6e2
+oink	1f416	emoji_u1f416
+ok	1f44c	emoji_u1f44c
+ok_signal	1f646	emoji_u1f646
+old	1f9d3	emoji_u1f9d3
+old_key	1f5dd	emoji_u1f5dd
+older_man	1f474	emoji_u1f474
+older_person	1f9d3	emoji_u1f9d3
+older_woman	1f475	emoji_u1f475
+olive	1fad2	emoji_u1fad2
+om	1f549	emoji_u1f549
+on	1f51b	emoji_u1f51b
+oncoming_automobile	1f698	emoji_u1f698
+oncoming_bus	1f68d	emoji_u1f68d
+oncoming_car	1f698	emoji_u1f698
+oncoming_police_car	1f694	emoji_u1f694
+oncoming_streetcar	1f68a	emoji_u1f68a
+oncoming_taxi	1f696	emoji_u1f696
+oncoming_train	1f686	emoji_u1f686
+oncoming_tram	1f68a	emoji_u1f68a
+oncoming_trolley	1f68a	emoji_u1f68a
+one	0031 20e3	emoji_u0031_20e3
+one_piece_swimsuit	1fa71	emoji_u1fa71
+onigiri	1f359	emoji_u1f359
+onion	1f9c5	emoji_u1f9c5
+oops	1f643	emoji_u1f643
+open	1fae2	emoji_u1fae2
+open_book	1f4d6	emoji_u1f4d6
+open_hands	1f450	emoji_u1f450
+open_mouth	1f62e	emoji_u1f62e
+opening	1fa9f	emoji_u1fa9f
+ophiuchus	26ce	emoji_u26ce
+oracle	1f52e	emoji_u1f52e
+orange	1f34a	emoji_u1f34a
+orange_book	1f4d9	emoji_u1f4d9
+orange_circle	1f7e0	emoji_u1f7e0
+orange_heart	1f9e1	emoji_u1f9e1
+orange_square	1f7e7	emoji_u1f7e7
+orangutan	1f9a7	emoji_u1f9a7
+organize	1f4c1	emoji_u1f4c1
+orienteering	1f9ed	emoji_u1f9ed
+orthodox_cross	2626	emoji_u2626
+orthoptera	1f997	emoji_u1f997
+ostentatious	1f99a	emoji_u1f99a
+otter	1f9a6	emoji_u1f9a6
+ouch	1fabc	emoji_u1fabc
+outbox	1f4e4	emoji_u1f4e4
+outdoors	1f97e	emoji_u1f97e
+overcast	2601	emoji_u2601
+owl	1f989	emoji_u1f989
+ox	1f402	emoji_u1f402
+oyster	1f9aa	emoji_u1f9aa
+p	1f17f	emoji_u1f17f
+package	1f4e6	emoji_u1f4e6
+packing	1f9f3	emoji_u1f9f3
+pad	1f5d3	emoji_u1f5d3
+paella	1f958	emoji_u1f958
+page	1f4c4	emoji_u1f4c4
+page_with_curl	1f4c3	emoji_u1f4c3
+pager	1f4df	emoji_u1f4df
+pain	1f972	emoji_u1f972
+pained	1f627	emoji_u1f627
+paint	1fadf	emoji_u1fadf
+paintbrush	1f58c	emoji_u1f58c
+painting	1f3a8	emoji_u1f3a8
+palette	1f3a8	emoji_u1f3a8
+palm	1f590	emoji_u1f590
+palm_down_hand	1faf3	emoji_u1faf3
+palm_tree	1f334	emoji_u1f334
+palm_up_hand	1faf4	emoji_u1faf4
+palms	1f932	emoji_u1f932
+palms_up_together	1f932	emoji_u1f932
+pamonha	1fad4	emoji_u1fad4
+pancakes	1f95e	emoji_u1f95e
+panda	1f43c	emoji_u1f43c
+panic	1fae8	emoji_u1fae8
+panting	1f975	emoji_u1f975
+pants	1fa73	emoji_u1fa73
+paper	1f4c4	emoji_u1f4c4
+paperclip	1f4ce	emoji_u1f4ce
+paperclip_chain	1f587	emoji_u1f587
+parachute	1fa82	emoji_u1fa82
+parasail	1fa82	emoji_u1fa82
+parasite	1fab1	emoji_u1fab1
+parent	1f9d1 200d 1f37c	emoji_u1f9d1_200d_1f37c
+park	1f6dd	emoji_u1f6dd
+parking	1f17f	emoji_u1f17f
+parrot	1f99c	emoji_u1f99c
+part_alternation	303d	emoji_u303d
+partly_cloudy	26c5	emoji_u26c5
+partly_sunny	26c5	emoji_u26c5
+partly_sunny_with_rain	1f326	emoji_u1f326
+party_ball	1f38a	emoji_u1f38a
+partying_face	1f973	emoji_u1f973
+pass	1f3ab	emoji_u1f3ab
+passenger_ship	1f6f3	emoji_u1f6f3
+passport_control	1f6c2	emoji_u1f6c2
+pastry	1f967	emoji_u1f967
+patience	1f90c	emoji_u1f90c
+pause	23f8	emoji_u23f8
+paw_prints	1f43e	emoji_u1f43e
+pawn	265f	emoji_u265f
+paws	1f43e	emoji_u1f43e
+pea	1fadb	emoji_u1fadb
+pea_pod	1fadb	emoji_u1fadb
+peace	262e	emoji_u262e
+peace_sign	270c	emoji_u270c
+peach	1f351	emoji_u1f351
+peacock	1f99a	emoji_u1f99a
+peahen	1f99a	emoji_u1f99a
+peanuts	1f95c	emoji_u1f95c
+pear	1f350	emoji_u1f350
+pearly	1f9b7	emoji_u1f9b7
+pedestrian	1f6b6	emoji_u1f6b6
+peek	1fae3	emoji_u1fae3
+peeking	1fae3	emoji_u1fae3
+peep	1fae3	emoji_u1fae3
+pen	1f58a	emoji_u1f58a
+penalty	1f7e5	emoji_u1f7e5
+pencil	270f	emoji_u270f
+penguin	1f427	emoji_u1f427
+pensive	1f614	emoji_u1f614
+people_holding_hands	1f9d1 200d 1f91d 200d 1f9d1	emoji_u1f9d1_200d_1f91d_200d_1f9d1
+people_hugging	1fac2	emoji_u1fac2
+pepper	1fad1	emoji_u1fad1
+percussion	1fa87	emoji_u1fa87
+performing_arts	1f3ad	emoji_u1f3ad
+persevere	1f623	emoji_u1f623
+person	1f9d1	emoji_u1f9d1
+person_bald	1f9d1 200d 1f9b2	emoji_u1f9d1_200d_1f9b2
+person_beard	1f9d4	emoji_u1f9d4
+person_blond_hair	1f471	emoji_u1f471
+person_climbing	1f9d7	emoji_u1f9d7
+person_curly_hair	1f9d1 200d 1f9b1	emoji_u1f9d1_200d_1f9b1
+person_feeding_baby	1f9d1 200d 1f37c	emoji_u1f9d1_200d_1f37c
+person_frowning	1f64d	emoji_u1f64d
+person_in_lotus_position	1f9d8	emoji_u1f9d8
+person_in_manual_wheelchair	1f9d1 200d 1f9bd	emoji_u1f9d1_200d_1f9bd
+person_in_manual_wheelchair_facing_right	1f9d1 200d 1f9bd 200d 27a1	emoji_u1f9d1_200d_1f9bd_200d_27a1
+person_in_motorized_wheelchair	1f9d1 200d 1f9bc	emoji_u1f9d1_200d_1f9bc
+person_in_motorized_wheelchair_facing_right	1f9d1 200d 1f9bc 200d 27a1	emoji_u1f9d1_200d_1f9bc_200d_27a1
+person_in_steamy_room	1f9d6	emoji_u1f9d6
+person_kneeling	1f9ce	emoji_u1f9ce
+person_kneeling_facing_right	1f9ce 200d 27a1	emoji_u1f9ce_200d_27a1
+person_pouting	1f64e	emoji_u1f64e
+person_red_hair	1f9d1 200d 1f9b0	emoji_u1f9d1_200d_1f9b0
+person_running_facing_right	1f3c3 200d 27a1	emoji_u1f3c3_200d_27a1
+person_standing	1f9cd	emoji_u1f9cd
+person_tipping_hand	1f481	emoji_u1f481
+person_walking_facing_right	1f6b6 200d 27a1	emoji_u1f6b6_200d_27a1
+person_white_hair	1f9d1 200d 1f9b3	emoji_u1f9d1_200d_1f9b3
+person_with_crown	1fac5	emoji_u1fac5
+person_with_white_cane	1f9d1 200d 1f9af	emoji_u1f9d1_200d_1f9af
+person_with_white_cane_facing_right	1f9d1 200d 1f9af 200d 27a1	emoji_u1f9d1_200d_1f9af_200d_27a1
+pester	1f9a1	emoji_u1f9a1
+petri	1f9eb	emoji_u1f9eb
+petri_dish	1f9eb	emoji_u1f9eb
+petrol_pump	26fd	emoji_u26fd
+phoenix	1f426 200d 1f525	emoji_u1f426_200d_1f525
+phone	260e	emoji_u260e
+phone_off	1f4f4	emoji_u1f4f4
+physics	269b	emoji_u269b
+piano	1f3b9	emoji_u1f3b9
+piccolo	1fa88	emoji_u1fa88
+pick	26cf	emoji_u26cf
+pick_me	1f64b	emoji_u1f64b
+pick_up	1f6fb	emoji_u1f6fb
+picket	1faa7	emoji_u1faa7
+pickup	1f6fb	emoji_u1f6fb
+pickup_truck	1f6fb	emoji_u1f6fb
+picnic	1f9fa	emoji_u1f9fa
+picture	1f5bc	emoji_u1f5bc
+pie	1f967	emoji_u1f967
+piece	1f9e9	emoji_u1f9e9
+pierogi	1f95f	emoji_u1f95f
+pig	1f416	emoji_u1f416
+pig_nose	1f43d	emoji_u1f43d
+piglet	1f437	emoji_u1f437
+pile_of_poo	1f4a9	emoji_u1f4a9
+pill	1f48a	emoji_u1f48a
+pilot	1f9d1 200d 2708	emoji_u1f9d1_200d_2708
+pin	1f4cd	emoji_u1f4cd
+pina	1f965	emoji_u1f965
+pinada	1fa85	emoji_u1fa85
+pinata	1fa85	emoji_u1fa85
+pinched	1f90c	emoji_u1f90c
+pinched_fingers	1f90c	emoji_u1f90c
+pinching	1f90f	emoji_u1f90f
+pinching_hand	1f90f	emoji_u1f90f
+pineapple	1f34d	emoji_u1f34d
+ping_pong	1f3d3	emoji_u1f3d3
+pink_heart	1fa77	emoji_u1fa77
+pipe	1fa88	emoji_u1fa88
+pirate	2620	emoji_u2620
+pirate_flag	1f3f4 200d 2620	emoji_u1f3f4_200d_2620
+pisces	2653	emoji_u2653
+pissed	1f92c	emoji_u1f92c
+pita	1fad3	emoji_u1fad3
+pizza	1f355	emoji_u1f355
+piña	1f965	emoji_u1f965
+piñata	1fa85	emoji_u1fa85
+placard	1faa7	emoji_u1faa7
+place_holder	1f4d1	emoji_u1f4d1
+place_of_worship	1f6d0	emoji_u1f6d0
+planet	1fa90	emoji_u1fa90
+plankton	1fabc	emoji_u1fabc
+plant	1f33f	emoji_u1f33f
+plaque	1faa7	emoji_u1faa7
+play	25b6	emoji_u25b6
+play_pause	23ef	emoji_u23ef
+play_reverse	25c0	emoji_u25c0
+playful	1f9a6	emoji_u1f9a6
+playground	1f6dd	emoji_u1f6dd
+playground_slide	1f6dd	emoji_u1f6dd
+playing_cards	1f3b4	emoji_u1f3b4
+plaything	1f9f8	emoji_u1f9f8
+pleading	1f97a	emoji_u1f97a
+pleading_face	1f97a	emoji_u1f97a
+plumage	1fab6	emoji_u1fab6
+plunder	1f3f4 200d 2620	emoji_u1f3f4_200d_2620
+plunger	1faa0	emoji_u1faa0
+plus	2795	emoji_u2795
+plush	1f9f8	emoji_u1f9f8
+pod	1fadb	emoji_u1fadb
+point	1fa9d	emoji_u1fa9d
+point_down	1f447	emoji_u1f447
+point_left	1f448	emoji_u1f448
+point_of_information	261d	emoji_u261d
+point_right	1f449	emoji_u1f449
+point_up	1f446	emoji_u1f446
+pointing	1faf5	emoji_u1faf5
+poison	2620	emoji_u2620
+poke	1faf5	emoji_u1faf5
+poker_face	1f636	emoji_u1f636
+polar	1f43b 200d 2744	emoji_u1f43b_200d_2744
+polar_bear	1f43b 200d 2744	emoji_u1f43b_200d_2744
+police	1f46e	emoji_u1f46e
+police_car	1f693	emoji_u1f693
+pony	1f434	emoji_u1f434
+poodle	1f429	emoji_u1f429
+pool	1f3b1	emoji_u1f3b1
+poop	1f4a9	emoji_u1f4a9
+pop	1f9e8	emoji_u1f9e8
+popcorn	1f37f	emoji_u1f37f
+popping	1f9e8	emoji_u1f9e8
+porkchop	1f969	emoji_u1f969
+porous	1f9fd	emoji_u1f9fd
+porridge	1f963	emoji_u1f963
+portobello	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+poseidon	1f9dc 200d 2642	emoji_u1f9dc_200d_2642
+positive	1f9f2	emoji_u1f9f2
+post_office	1f3e4	emoji_u1f3e4
+potable_water	1f6b0	emoji_u1f6b0
+potato	1f954	emoji_u1f954
+potsticker	1f95f	emoji_u1f95f
+potted	1fab4	emoji_u1fab4
+potted_plant	1fab4	emoji_u1fab4
+pouch	1f45d	emoji_u1f45d
+poultry	1f357	emoji_u1f357
+pound_notes	1f4b7	emoji_u1f4b7
+pour	1fad7	emoji_u1fad7
+pouring	1fad7	emoji_u1fad7
+pouring_liquid	1fad7	emoji_u1fad7
+pouting_cat	1f63e	emoji_u1f63e
+pow	1f4a2	emoji_u1f4a2
+power	270a	emoji_u270a
+praise	1f64c	emoji_u1f64c
+pray	1f64f	emoji_u1f64f
+prayer	1f932	emoji_u1f932
+prayer_beads	1f4ff	emoji_u1f4ff
+pregnant	1f930	emoji_u1f930
+pregnant_man	1fac3	emoji_u1fac3
+pregnant_person	1fac4	emoji_u1fac4
+present	1f381	emoji_u1f381
+preserver	1f6df	emoji_u1f6df
+pretzel	1f968	emoji_u1f968
+previous_track	23ee	emoji_u23ee
+price_tag	1f3f7	emoji_u1f3f7
+pride	1f308	emoji_u1f308
+prince	1f934	emoji_u1f934
+princess	1f478	emoji_u1f478
+print	1fac6	emoji_u1fac6
+printer	1f5a8	emoji_u1f5a8
+privacy	1f50f	emoji_u1f50f
+prohibited	1f6ab	emoji_u1f6ab
+projector	1f4fd	emoji_u1f4fd
+proof	1f9fe	emoji_u1f9fe
+prophecy	1f960	emoji_u1f960
+protect	1faac	emoji_u1faac
+protected	1f50f	emoji_u1f50f
+protest	1faa7	emoji_u1faa7
+puck	1f9da 200d 2642	emoji_u1f9da_200d_2642
+puke	1f92e	emoji_u1f92e
+pulse	1fac0	emoji_u1fac0
+pumpkin	1f383	emoji_u1f383
+punch	1f44a	emoji_u1f44a
+punk	1f9f7	emoji_u1f9f7
+puppy	1f436	emoji_u1f436
+purity	1fab7	emoji_u1fab7
+purple_circle	1f7e3	emoji_u1f7e3
+purple_heart	1f49c	emoji_u1f49c
+purple_square	1f7ea	emoji_u1f7ea
+purse	1f45b	emoji_u1f45b
+push_pin	1f4cc	emoji_u1f4cc
+put_litter_in_its_place	1f6ae	emoji_u1f6ae
+puzzle	1f9e9	emoji_u1f9e9
+puzzle_piece	1f9e9	emoji_u1f9e9
+queasy	1f922	emoji_u1f922
+queen	1f451	emoji_u1f451
+queer	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+quench	1f9ef	emoji_u1f9ef
+question	2753	emoji_u2753
+quiet	1f910	emoji_u1f910
+r	00ae	emoji_u00ae
+rabbit	1f407	emoji_u1f407
+raccoon	1f99d	emoji_u1f99d
+race	1f3c1	emoji_u1f3c1
+racecar	1f3ce	emoji_u1f3ce
+radio	1f4fb	emoji_u1f4fb
+radio_button	1f518	emoji_u1f518
+radioactive	2622	emoji_u2622
+radish	1fadc	emoji_u1fadc
+rage	1f621	emoji_u1f621
+railway_car	1f683	emoji_u1f683
+railway_track	1f6e4	emoji_u1f6e4
+rainbow	1f308	emoji_u1f308
+rainbow_flag	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+rainy	1f327	emoji_u1f327
+raised	1f928	emoji_u1f928
+raised_hand	270b	emoji_u270b
+raised_hands	1f64c	emoji_u1f64c
+raising_hand	1f64b	emoji_u1f64b
+ram	1f40f	emoji_u1f40f
+ramen	1f35c	emoji_u1f35c
+rat	1f400	emoji_u1f400
+rated_for_violence	1f5e1	emoji_u1f5e1
+rattle	1fa87	emoji_u1fa87
+raven	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+razor	1fa92	emoji_u1fa92
+real	1fac0	emoji_u1fac0
+realization	1f92d	emoji_u1f92d
+rebirth	1f426 200d 1f525	emoji_u1f426_200d_1f525
+rebound	1fa83	emoji_u1fa83
+receipt	1f9fe	emoji_u1f9fe
+reception	1f6ce	emoji_u1f6ce
+record	23fa	emoji_u23fa
+recorder	1fa88	emoji_u1fa88
+recovering	2764 200d 1fa79	emoji_u2764_200d_1fa79
+recreational_vehicle	1f699	emoji_u1f699
+recuperating	2764 200d 1fa79	emoji_u2764_200d_1fa79
+recycle	267b	emoji_u267b
+red_book	1f4d5	emoji_u1f4d5
+red_circle	1f534	emoji_u1f534
+red_envelope	1f9e7	emoji_u1f9e7
+red_faced	1f975	emoji_u1f975
+red_square	1f7e5	emoji_u1f7e5
+red_triangle_down	1f53b	emoji_u1f53b
+red_triangle_up	1f53a	emoji_u1f53a
+reef	1fab8	emoji_u1fab8
+reflection	1fa9e	emoji_u1fa9e
+reflector	1fa9e	emoji_u1fa9e
+refreshing	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+regal	1fac5	emoji_u1fac5
+registered	00ae	emoji_u00ae
+reincarnation	1f426 200d 1f525	emoji_u1f426_200d_1f525
+reinvent	1f426 200d 1f525	emoji_u1f426_200d_1f525
+relaxed	263a	emoji_u263a
+relief	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+relieved	1f60c	emoji_u1f60c
+religion	1faaf	emoji_u1faaf
+reminder_ribbon	1f397	emoji_u1f397
+renewal	1f426 200d 1f525	emoji_u1f426_200d_1f525
+repeat	1f501	emoji_u1f501
+repeat_one	1f502	emoji_u1f502
+repercussion	1fa83	emoji_u1fa83
+reply	21a9	emoji_u21a9
+rescue	1f6df	emoji_u1f6df
+rescue_worker	26d1	emoji_u26d1
+reserved	1f22f	emoji_u1f22f
+resist	1f979	emoji_u1f979
+respect	1fae1	emoji_u1fae1
+respiration	1fac1	emoji_u1fac1
+restroom	1f6bb	emoji_u1f6bb
+return	1f504	emoji_u1f504
+revival	1f426 200d 1f525	emoji_u1f426_200d_1f525
+revive	1f426 200d 1f525	emoji_u1f426_200d_1f525
+revolving_hearts	1f49e	emoji_u1f49e
+rewind	23ea	emoji_u23ea
+rex	1f996	emoji_u1f996
+rhinoceros	1f98f	emoji_u1f98f
+rhythm	1fa98	emoji_u1fa98
+ribbon	1f380	emoji_u1f380
+rice	1f35a	emoji_u1f35a
+rice_cracker	1f358	emoji_u1f358
+rickshaw	1f6fa	emoji_u1f6fa
+rideshare	1f695	emoji_u1f695
+right	27a1	emoji_u27a1
+right_fist	1f91c	emoji_u1f91c
+right_hook	21aa	emoji_u21aa
+right_pointing	1f50e	emoji_u1f50e
+rightwards_hand	1faf1	emoji_u1faf1
+rightwards_pushing_hand	1faf8	emoji_u1faf8
+ring	1f48d	emoji_u1f48d
+ring_buoy	1f6df	emoji_u1f6df
+ringed	1fa90	emoji_u1fa90
+ringed_planet	1fa90	emoji_u1fa90
+rip	1faa6	emoji_u1faa6
+rise	1f426 200d 1f525	emoji_u1f426_200d_1f525
+roach	1fab3	emoji_u1fab3
+road	1f6e3	emoji_u1f6e3
+road_trip	1f5fa	emoji_u1f5fa
+robot	1f916	emoji_u1f916
+rock	1faa8	emoji_u1faa8
+rock_carving	1f5ff	emoji_u1f5ff
+rock_on	1f918	emoji_u1f918
+rocket	1f680	emoji_u1f680
+rofl	1f923	emoji_u1f923
+roger	1f3f4 200d 2620	emoji_u1f3f4_200d_2620
+roll	1f9fb	emoji_u1f9fb
+roll_of_paper	1f9fb	emoji_u1f9fb
+roller_coaster	1f3a2	emoji_u1f3a2
+roller_skate	1f6fc	emoji_u1f6fc
+rolling_eyes	1f644	emoji_u1f644
+rolling_on_the_floor_laughing	1f923	emoji_u1f923
+rolodex	1f4c7	emoji_u1f4c7
+rook	1f426 200d 2b1b	emoji_u1f426_200d_2b1b
+rooster	1f413	emoji_u1f413
+root_vegetable	1fadc	emoji_u1fadc
+rope	1faa2	emoji_u1faa2
+rose	1f339	emoji_u1f339
+rosette	1f3f5	emoji_u1f3f5
+rotating_light	1f6a8	emoji_u1f6a8
+rotting	1fab0	emoji_u1fab0
+roundhouse	1f6d6	emoji_u1f6d6
+router	1f6dc	emoji_u1f6dc
+rowboat	1f6a3	emoji_u1f6a3
+rowing	1f6a3	emoji_u1f6a3
+royal	1fac5	emoji_u1fac5
+royalty	1fac5	emoji_u1fac5
+rugby	1f3c9	emoji_u1f3c9
+ruler	1f4cf	emoji_u1f4cf
+rung	1fa9c	emoji_u1fa9c
+runner	1f3c3	emoji_u1f3c3
+running	1f3c3	emoji_u1f3c3
+running_shirt	1f3bd	emoji_u1f3bd
+running_shoe	1f45f	emoji_u1f45f
+russia	1fa86	emoji_u1fa86
+sacred	2764 200d 1f525	emoji_u2764_200d_1f525
+sad	2639	emoji_u2639
+safe	1f510	emoji_u1f510
+safety_first	26d1	emoji_u26d1
+safety_pin	1f9f7	emoji_u1f9f7
+safety_vest	1f9ba	emoji_u1f9ba
+sagittarius	2650	emoji_u2650
+sailboat	26f5	emoji_u26f5
+sake	1f376	emoji_u1f376
+salad	1f957	emoji_u1f957
+salsa	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+salt	1f9c2	emoji_u1f9c2
+salty	1f9c2	emoji_u1f9c2
+salute	1fae1	emoji_u1fae1
+saluting	1fae1	emoji_u1fae1
+saluting_face	1fae1	emoji_u1fae1
+sandal	1f461	emoji_u1f461
+sandals	1fa74	emoji_u1fa74
+sandwich	1f96a	emoji_u1f96a
+santa	1f385	emoji_u1f385
+sari	1f97b	emoji_u1f97b
+satchel	1f392	emoji_u1f392
+satellite	1f6f0	emoji_u1f6f0
+satellite_antenna	1f4e1	emoji_u1f4e1
+saturn	1fa90	emoji_u1fa90
+saturnine	1fa90	emoji_u1fa90
+sauce	1fad9	emoji_u1fad9
+saucer	1f6f8	emoji_u1f6f8
+sauropod	1f995	emoji_u1f995
+save	1f6df	emoji_u1f6df
+saver	1f6df	emoji_u1f6df
+saw	1fa9a	emoji_u1fa9a
+saxophone	1f3b7	emoji_u1f3b7
+say_cheese	1f4f8	emoji_u1f4f8
+scales	2696	emoji_u2696
+scared	1f628	emoji_u1f628
+scarf	1f9e3	emoji_u1f9e3
+schmear	1f96f	emoji_u1f96f
+school	1f3eb	emoji_u1f3eb
+school_bus	1f68c	emoji_u1f68c
+school_crossing	1f6b8	emoji_u1f6b8
+science	1f52c	emoji_u1f52c
+scientist	1f9d1 200d 1f52c	emoji_u1f9d1_200d_1f52c
+scissors	2702	emoji_u2702
+scoop	1fa8f	emoji_u1fa8f
+scooter	1f6f5	emoji_u1f6f5
+scorpion	1f982	emoji_u1f982
+scorpius	264f	emoji_u264f
+scream	1f631	emoji_u1f631
+scream_cat	1f640	emoji_u1f640
+screw	1f529	emoji_u1f529
+screwdriver	1fa9b	emoji_u1fa9b
+scroll	1f4dc	emoji_u1f4dc
+sculling	1f6a3	emoji_u1f6a3
+seafood	1f99e	emoji_u1f99e
+seal	1f9ad	emoji_u1f9ad
+sealed	1f4e9	emoji_u1f4e9
+search	1f50d	emoji_u1f50d
+seashell	1f41a	emoji_u1f41a
+seat	1f4ba	emoji_u1f4ba
+second_place	1f948	emoji_u1f948
+secret	1f5dd	emoji_u1f5dd
+secure	1f510	emoji_u1f510
+security	1faaa	emoji_u1faaa
+see	1f9e7	emoji_u1f9e7
+see_no_evil	1f648	emoji_u1f648
+seedling	1f331	emoji_u1f331
+seeing_stars	1f4ab	emoji_u1f4ab
+selfie	1f933	emoji_u1f933
+selling	1fa9d	emoji_u1fa9d
+semi_truck	1f69b	emoji_u1f69b
+senbei	1f358	emoji_u1f358
+service_dog	1f415 200d 1f9ba	emoji_u1f415_200d_1f9ba
+services	1f6ce	emoji_u1f6ce
+settings	2699	emoji_u2699
+seven	0037 20e3	emoji_u0037_20e3
+sew	1faa1	emoji_u1faa1
+sewing_needle	1faa1	emoji_u1faa1
+sewing_pin	1f4cd	emoji_u1f4cd
+sexy	1fae6	emoji_u1fae6
+shadow	1f464	emoji_u1f464
+shadows	1f465	emoji_u1f465
+shaking_face	1fae8	emoji_u1fae8
+shampoo	1f9f4	emoji_u1f9f4
+shamrock	2618	emoji_u2618
+shape	1f9f2	emoji_u1f9f2
+shark	1f988	emoji_u1f988
+sharp	1fa92	emoji_u1fa92
+shave	1fa92	emoji_u1fa92
+shaved_ice	1f367	emoji_u1f367
+shawarma	1f959	emoji_u1f959
+sheep	1f411	emoji_u1f411
+shell	1f41a	emoji_u1f41a
+shelter	1f6d6	emoji_u1f6d6
+shh	1f92b	emoji_u1f92b
+shield	1f6e1	emoji_u1f6e1
+shiitake	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+shinto_shrine	26e9	emoji_u26e9
+ship	1f6a2	emoji_u1f6a2
+shiro	1f3ef	emoji_u1f3ef
+shirt	1f455	emoji_u1f455
+shock	1f628	emoji_u1f628
+shocked	1f92f	emoji_u1f92f
+shoe	1f45e	emoji_u1f45e
+shoes	1fa70	emoji_u1fa70
+shoo	1faf3	emoji_u1faf3
+shooting_star	1f320	emoji_u1f320
+shopping_bags	1f6cd	emoji_u1f6cd
+shopping_cart	1f6d2	emoji_u1f6d2
+shopping_trolley	1f6d2	emoji_u1f6d2
+shorts	1fa73	emoji_u1fa73
+shout	1f4e3	emoji_u1f4e3
+shovel	1fa8f	emoji_u1fa8f
+shower	1f6bf	emoji_u1f6bf
+shrimp	1f990	emoji_u1f990
+shrinking	1f4c9	emoji_u1f4c9
+shroom	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+shrub	1fabb	emoji_u1fabb
+shrug	1f937	emoji_u1f937
+shuffle	1f500	emoji_u1f500
+shush	1f92b	emoji_u1f92b
+shushing	1f92b	emoji_u1f92b
+shushing_face	1f92b	emoji_u1f92b
+sick	1f912	emoji_u1f912
+sigh	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+sign_of_the_horns	1f918	emoji_u1f918
+signal_bars	1f4f6	emoji_u1f4f6
+signal_strength	1f4f6	emoji_u1f4f6
+sikh	1faaf	emoji_u1faaf
+sikhism	1faaf	emoji_u1faaf
+silence	1f910	emoji_u1f910
+silhouette	1f464	emoji_u1f464
+silhouettes	1f465	emoji_u1f465
+silly	1fabf	emoji_u1fabf
+silver	1f948	emoji_u1f948
+singer	1f9d1 200d 1f3a4	emoji_u1f9d1_200d_1f3a4
+sir	1fae1	emoji_u1fae1
+siren	1f6a8	emoji_u1f6a8
+sit	1fa91	emoji_u1fa91
+six	0036 20e3	emoji_u0036_20e3
+six_pointed	1f52f	emoji_u1f52f
+skateboard	1f6f9	emoji_u1f6f9
+skater	1f6f9	emoji_u1f6f9
+skates	1f6fc	emoji_u1f6fc
+skeptic	1f928	emoji_u1f928
+skepticism	1f928	emoji_u1f928
+ski	1f3bf	emoji_u1f3bf
+ski_lift	1f6a1	emoji_u1f6a1
+skier	26f7	emoji_u26f7
+skills	1f977	emoji_u1f977
+skip_back	23ee	emoji_u23ee
+skip_forward	23ed	emoji_u23ed
+skull	1f480	emoji_u1f480
+skull_and_crossbones	2620	emoji_u2620
+skunk	1f9a8	emoji_u1f9a8
+sky	1fa75	emoji_u1fa75
+skydive	1fa82	emoji_u1fa82
+skyline	1f3d9	emoji_u1f3d9
+slate	1fa76	emoji_u1fa76
+sled	1f6f7	emoji_u1f6f7
+sledge	1f6f7	emoji_u1f6f7
+sleep	1f971	emoji_u1f971
+sleeping	1f634	emoji_u1f634
+sleepy	1f62a	emoji_u1f62a
+sleigh	1f6f7	emoji_u1f6f7
+sleuth	1f575	emoji_u1f575
+slice	1f967	emoji_u1f967
+slide	1f6dd	emoji_u1f6dd
+sliding	1f6dd	emoji_u1f6dd
+slight_frown	1f641	emoji_u1f641
+slight_smile	1f642	emoji_u1f642
+slip_on	1f97f	emoji_u1f97f
+slipper	1f97f	emoji_u1f97f
+slot_machine	1f3b0	emoji_u1f3b0
+sloth	1f9a5	emoji_u1f9a5
+slow	1f9a5	emoji_u1f9a5
+small_airplane	1f6e9	emoji_u1f6e9
+small_blue_diamond	1f539	emoji_u1f539
+small_glass	1f943	emoji_u1f943
+small_orange_diamond	1f538	emoji_u1f538
+smart	1f9e0	emoji_u1f9e0
+smartphone	1f4f1	emoji_u1f4f1
+smile	1f604	emoji_u1f604
+smile_cat	1f638	emoji_u1f638
+smiley	1f603	emoji_u1f603
+smiley_cat	1f63a	emoji_u1f63a
+smiling_devil	1f608	emoji_u1f608
+smiling_face	263a	emoji_u263a
+smiling_face_with_hearts	1f970	emoji_u1f970
+smiling_face_with_horns	1f608	emoji_u1f608
+smiling_face_with_tear	1f972	emoji_u1f972
+smiling_imp	1f608	emoji_u1f608
+smirk	1f60f	emoji_u1f60f
+smirk_cat	1f63c	emoji_u1f63c
+smitten	1f498	emoji_u1f498
+smoke	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+smoking	1f6ac	emoji_u1f6ac
+smooch	1f617	emoji_u1f617
+smooches	1f617	emoji_u1f617
+smug	1f60f	emoji_u1f60f
+smug_cat	1f63c	emoji_u1f63c
+snail	1f40c	emoji_u1f40c
+snake	1f40d	emoji_u1f40d
+snap	1faf0	emoji_u1faf0
+snapdragon	1fabb	emoji_u1fabb
+snare	1faa4	emoji_u1faa4
+sneaker	1f45f	emoji_u1f45f
+sneaky	1f575	emoji_u1f575
+sneezing	1f927	emoji_u1f927
+snorkeling	1f93f	emoji_u1f93f
+snowboarder	1f3c2	emoji_u1f3c2
+snowflake	2744	emoji_u2744
+snowman	2603	emoji_u2603
+snowstorm	1f328	emoji_u1f328
+snowy	1f328	emoji_u1f328
+snowy_mountain	1f3d4	emoji_u1f3d4
+soak	1f9fd	emoji_u1f9fd
+soaked	1f327	emoji_u1f327
+soap	1f9fc	emoji_u1f9fc
+soapdish	1f9fc	emoji_u1f9fc
+sob	1f62d	emoji_u1f62d
+soccer	26bd	emoji_u26bd
+socks	1f9e6	emoji_u1f9e6
+soda	1f964	emoji_u1f964
+soft	1f964	emoji_u1f964
+soft_ice_cream	1f366	emoji_u1f366
+soft_serve	1f366	emoji_u1f366
+softball	1f94e	emoji_u1f94e
+softer	1f509	emoji_u1f509
+solid	1faa8	emoji_u1faa8
+solidarity	1f38c	emoji_u1f38c
+soon	1f51c	emoji_u1f51c
+sort	1f5c2	emoji_u1f5c2
+sos	1f198	emoji_u1f198
+sound	1f50a	emoji_u1f50a
+soup	1f372	emoji_u1f372
+sour	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+south	2b07	emoji_u2b07
+south_east	2198	emoji_u2198
+south_west	2199	emoji_u2199
+souvlaki	1f959	emoji_u1f959
+soybean	1fadb	emoji_u1fadb
+space_invader	1f47e	emoji_u1f47e
+spade	1fa8f	emoji_u1fa8f
+spades	2660	emoji_u2660
+spaghetti	1f35d	emoji_u1f35d
+spark	1f9e8	emoji_u1f9e8
+sparkle	2747	emoji_u2747
+sparkler	1f387	emoji_u1f387
+sparkles	2728	emoji_u2728
+sparkling_heart	1f496	emoji_u1f496
+speak_no_evil	1f64a	emoji_u1f64a
+speaker	1f508	emoji_u1f508
+speaking_head	1f5e3	emoji_u1f5e3
+spectacles	1f453	emoji_u1f453
+speculum	1fa9e	emoji_u1fa9e
+speech	1f441 200d 1f5e8	emoji_u1f441_200d_1f5e8
+speech_balloon	1f4ac	emoji_u1f4ac
+speech_bubble	1f5e8	emoji_u1f5e8
+speechless	1f636	emoji_u1f636
+speedboat	1f6a4	emoji_u1f6a4
+spew	1f92e	emoji_u1f92e
+spice	1fada	emoji_u1fada
+spider	1f577	emoji_u1f577
+spider_web	1f578	emoji_u1f578
+spiny	1f994	emoji_u1f994
+spiral_calendar	1f5d3	emoji_u1f5d3
+spiral_notebook	1f4d2	emoji_u1f4d2
+spiral_notepad	1f5d2	emoji_u1f5d2
+spiral_shell	1f41a	emoji_u1f41a
+splatter	1fadf	emoji_u1fadf
+split	1fa93	emoji_u1fa93
+spock	1f596	emoji_u1f596
+sponge	1f9fd	emoji_u1f9fd
+spooky	1f47b	emoji_u1f47b
+spool	1f9f5	emoji_u1f9f5
+spoon	1f944	emoji_u1f944
+spore	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+sports	26f9	emoji_u26f9
+spots	1f992	emoji_u1f992
+spring	1fabb	emoji_u1fabb
+sprinkles	1f9c1	emoji_u1f9c1
+sprout	1f331	emoji_u1f331
+spy	1f575	emoji_u1f575
+squared_ok	1f197	emoji_u1f197
+squared_up	1f199	emoji_u1f199
+squeeze	1fa97	emoji_u1fa97
+squeezebox	1fa97	emoji_u1fa97
+squid	1f991	emoji_u1f991
+stadium	1f3df	emoji_u1f3df
+staff	2695	emoji_u2695
+stain	1fadf	emoji_u1fadf
+star	2b50	emoji_u2b50
+star_and_crescent	262a	emoji_u262a
+star_of_david	2721	emoji_u2721
+star_struck	1f929	emoji_u1f929
+stare	1fae3	emoji_u1fae3
+starry_eyed	1f929	emoji_u1f929
+start	1f3c1	emoji_u1f3c1
+station	1f689	emoji_u1f689
+statue	1f5fd	emoji_u1f5fd
+statue_of_liberty	1f5fd	emoji_u1f5fd
+steak	1f969	emoji_u1f969
+stealth	1f977	emoji_u1f977
+steam_locomotive	1f682	emoji_u1f682
+step	1fa9c	emoji_u1fa9c
+stethoscope	1fa7a	emoji_u1fa7a
+stew	1f372	emoji_u1f372
+sting	1fabc	emoji_u1fabc
+stinger	1fabc	emoji_u1fabc
+stink	1f9a8	emoji_u1f9a8
+stitches	1faa1	emoji_u1faa1
+stock_market	1f4b9	emoji_u1f4b9
+stocking	1f9e6	emoji_u1f9e6
+stomp	1f9b6	emoji_u1f9b6
+stop	1f91a	emoji_u1f91a
+stop_button	23f9	emoji_u23f9
+stop_sign	1f6d1	emoji_u1f6d1
+stopwatch	23f1	emoji_u23f1
+store	1fad9	emoji_u1fad9
+straightedge	1f4cf	emoji_u1f4cf
+strawberry	1f353	emoji_u1f353
+streetcar	1f68b	emoji_u1f68b
+stressed	1f625	emoji_u1f625
+strike	1f3b3	emoji_u1f3b3
+string	1f9f5	emoji_u1f9f5
+stringed	1fa95	emoji_u1fa95
+stripe	1f993	emoji_u1f993
+striped_pole	1f488	emoji_u1f488
+stroke	1f975	emoji_u1f975
+stubborn	1facf	emoji_u1facf
+stuck_out_tongue	1f61b	emoji_u1f61b
+stuck_out_tongue_closed_eyes	1f61d	emoji_u1f61d
+stuck_out_tongue_wink	1f61c	emoji_u1f61c
+student	1f9d1 200d 1f393	emoji_u1f9d1_200d_1f393
+studio_microphone	1f399	emoji_u1f399
+stuffed_flatbread	1f959	emoji_u1f959
+stuffy	1f9d0	emoji_u1f9d0
+subtract	2796	emoji_u2796
+suburb	1f3e1	emoji_u1f3e1
+subway	1f687	emoji_u1f687
+subzero	1f976	emoji_u1f976
+suction	1faa0	emoji_u1faa0
+sudden	1f92d	emoji_u1f92d
+sugar	1f9c1	emoji_u1f9c1
+suitcase	1f9f3	emoji_u1f9f3
+sun_and_rain	1f326	emoji_u1f326
+sun_face	1f31e	emoji_u1f31e
+sunflower	1f33b	emoji_u1f33b
+sunglasses	1f60e	emoji_u1f60e
+sunny	2600	emoji_u2600
+sunrise	1f305	emoji_u1f305
+sunscreen	1f9f4	emoji_u1f9f4
+sunset	1f306	emoji_u1f306
+sunshowers	1f326	emoji_u1f326
+superhero	1f9b8	emoji_u1f9b8
+supervillain	1f9b9	emoji_u1f9b9
+surf	1f3c4	emoji_u1f3c4
+surprise	1f62e	emoji_u1f62e
+surrender	1f3f3	emoji_u1f3f3
+sushi	1f363	emoji_u1f363
+suspension_railway	1f69f	emoji_u1f69f
+sutures	1faa1	emoji_u1faa1
+swan	1f9a2	emoji_u1f9a2
+swap	2194	emoji_u2194
+swat	1f5de	emoji_u1f5de
+swearing	1f92c	emoji_u1f92c
+sweat	1f613	emoji_u1f613
+sweat_drops	1f4a6	emoji_u1f4a6
+sweat_smile	1f605	emoji_u1f605
+sweating	1f975	emoji_u1f975
+sweeping	1f9f9	emoji_u1f9f9
+sweet_potato	1f360	emoji_u1f360
+swim	1f3ca	emoji_u1f3ca
+swords	2694	emoji_u2694
+symbols	1f523	emoji_u1f523
+synagogue	1f54d	emoji_u1f54d
+syringe	1f489	emoji_u1f489
+t	1f996	emoji_u1f996
+t_rex	1f996	emoji_u1f996
+table_setting	1f37d	emoji_u1f37d
+table_tennis	1f3d3	emoji_u1f3d3
+tache	1f978	emoji_u1f978
+taco	1f32e	emoji_u1f32e
+tada	1f389	emoji_u1f389
+tag	1f3f7	emoji_u1f3f7
+tailoring	1faa1	emoji_u1faa1
+take_off	1f6eb	emoji_u1f6eb
+takeout	1f961	emoji_u1f961
+takeout_box	1f961	emoji_u1f961
+taking_a_picture	1f4f8	emoji_u1f4f8
+talisman	1f9ff	emoji_u1f9ff
+talk	1f99c	emoji_u1f99c
+tamale	1fad4	emoji_u1fad4
+tanabata_tree	1f38b	emoji_u1f38b
+tangerine	1f34a	emoji_u1f34a
+tangled	1faa2	emoji_u1faa2
+tangy	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+tap_water	1f6b0	emoji_u1f6b0
+tash	1f978	emoji_u1f978
+taste	1f9c2	emoji_u1f9c2
+taurus	2649	emoji_u2649
+taxi	1f695	emoji_u1f695
+tea	1f375	emoji_u1f375
+teacher	1f9d1 200d 1f3eb	emoji_u1f9d1_200d_1f3eb
+teal	1fa75	emoji_u1fa75
+teapot	1fad6	emoji_u1fad6
+tear	1f972	emoji_u1f972
+tears	1f602	emoji_u1f602
+technologist	1f9d1 200d 1f4bb	emoji_u1f9d1_200d_1f4bb
+teddy	1f9f8	emoji_u1f9f8
+teddy_bear	1f9f8	emoji_u1f9f8
+tegh	1faaf	emoji_u1faaf
+telephone	260e	emoji_u260e
+telescope	1f52d	emoji_u1f52d
+television	1f4fa	emoji_u1f4fa
+tell	1faf4	emoji_u1faf4
+temperature	1f321	emoji_u1f321
+temple	1f6d5	emoji_u1f6d5
+tempura	1f364	emoji_u1f364
+ten	1f51f	emoji_u1f51f
+tennis	1f3be	emoji_u1f3be
+tent	26fa	emoji_u26fa
+tentacles	1fabc	emoji_u1fabc
+tequila	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+terrestrial	1f6f8	emoji_u1f6f8
+test	1f9ea	emoji_u1f9ea
+test_tube	1f9ea	emoji_u1f9ea
+thank_you	1f64f	emoji_u1f64f
+thanks	1fac2	emoji_u1fac2
+theater	1f3ad	emoji_u1f3ad
+theme	1f6dd	emoji_u1f6dd
+thermometer	1f321	emoji_u1f321
+thinking	1f914	emoji_u1f914
+third_place	1f949	emoji_u1f949
+this	1f446	emoji_u1f446
+thong	1fa74	emoji_u1fa74
+thong_sandal	1fa74	emoji_u1fa74
+thongs	1fa74	emoji_u1fa74
+thought	1f4ad	emoji_u1f4ad
+thread	1f9f5	emoji_u1f9f5
+three	0033 20e3	emoji_u0033_20e3
+thumb	1faf0	emoji_u1faf0
+thumb_tack	1f4cc	emoji_u1f4cc
+thumbs_down	1f44e	emoji_u1f44e
+thumbs_up	1f44d	emoji_u1f44d
+thunder_and_rain	26c8	emoji_u26c8
+thunderstorm	26c8	emoji_u26c8
+tichel	1f9d5	emoji_u1f9d5
+ticket	1f39f	emoji_u1f39f
+tie	1f454	emoji_u1f454
+tiger	1f405	emoji_u1f405
+tiger_cub	1f42f	emoji_u1f42f
+tilted	1f50e	emoji_u1f50e
+timber	1fab5	emoji_u1fab5
+time	1f557	emoji_u1f557
+time_ticking	23f3	emoji_u23f3
+timer	23f2	emoji_u23f2
+times_up	231b	emoji_u231b
+tipsy	1f974	emoji_u1f974
+tire	1f6de	emoji_u1f6de
+tired	1f614	emoji_u1f614
+titania	1f9da 200d 2640	emoji_u1f9da_200d_2640
+tm	2122	emoji_u2122
+toast	1f942	emoji_u1f942
+toboggan	1f6f7	emoji_u1f6f7
+toilet	1f6bd	emoji_u1f6bd
+toiletry	1faa5	emoji_u1faa5
+tokyo_tower	1f5fc	emoji_u1f5fc
+tomato	1f345	emoji_u1f345
+tomb	1faa6	emoji_u1faa6
+tombstone	1faa6	emoji_u1faa6
+tongue	1f445	emoji_u1f445
+toolbox	1f9f0	emoji_u1f9f0
+tools	1f6e0	emoji_u1f6e0
+tooth	1f9b7	emoji_u1f9b7
+toothbrush	1faa5	emoji_u1faa5
+top	1f51d	emoji_u1f51d
+top_hat	1f3a9	emoji_u1f3a9
+toppings	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+tornado	1f32a	emoji_u1f32a
+tortoise	1f422	emoji_u1f422
+touched	1f972	emoji_u1f972
+tough	1faa8	emoji_u1faa8
+towels	1f9fb	emoji_u1f9fb
+tower	1f5fc	emoji_u1f5fc
+toxic	2620	emoji_u2620
+trace	1fac6	emoji_u1fac6
+trackball	1f5b2	emoji_u1f5b2
+tractor	1f69c	emoji_u1f69c
+tractor-trailer	1f69b	emoji_u1f69b
+trademark	2122	emoji_u2122
+traffic_light	1f6a6	emoji_u1f6a6
+train	1f682	emoji_u1f682
+train_car	1f683	emoji_u1f683
+train_tracks	1f6e4	emoji_u1f6e4
+tram	1f68b	emoji_u1f68b
+trans	1f3f3 200d 1f308	emoji_u1f3f3_200d_1f308
+transform	1f426 200d 1f525	emoji_u1f426_200d_1f525
+transgender_flag	1f3f3 200d 26a7	emoji_u1f3f3_200d_26a7
+transgender_symbol	26a7	emoji_u26a7
+transparent	1fa9f	emoji_u1fa9f
+transport_truck	1f69b	emoji_u1f69b
+transportation	1f6fb	emoji_u1f6fb
+trap	1faa4	emoji_u1faa4
+trash_can	1f5d1	emoji_u1f5d1
+travel	1f9f3	emoji_u1f9f3
+treat	1f9c1	emoji_u1f9c1
+tree	1f333	emoji_u1f333
+triangular_flag	1f6a9	emoji_u1f6a9
+triangular_ruler	1f4d0	emoji_u1f4d0
+trident	1f531	emoji_u1f531
+trim	1fa9a	emoji_u1fa9a
+triton	1f9dc 200d 2642	emoji_u1f9dc_200d_2642
+triumph	1f624	emoji_u1f624
+troll	1f9cc	emoji_u1f9cc
+trolley	1f68e	emoji_u1f68e
+trolling	1f9cc	emoji_u1f9cc
+troops	1fae1	emoji_u1fae1
+trophy	1f3c6	emoji_u1f3c6
+tropical_drink	1f379	emoji_u1f379
+tropical_fish	1f420	emoji_u1f420
+trouble	1f635 200d 1f4ab	emoji_u1f635_200d_1f4ab
+truck	1f69b	emoji_u1f69b
+truffle	1f344 200d 1f7eb	emoji_u1f344_200d_1f7eb
+trumpet	1f3ba	emoji_u1f3ba
+trunk	1fabe	emoji_u1fabe
+tshirt	1f455	emoji_u1f455
+tube	1f9ea	emoji_u1f9ea
+tuk	1f6fa	emoji_u1f6fa
+tulip	1f337	emoji_u1f337
+tumbling	1f938	emoji_u1f938
+turban	1f473	emoji_u1f473
+turkey	1f983	emoji_u1f983
+turn	1f6de	emoji_u1f6de
+turnip	1fadc	emoji_u1fadc
+turtle	1f422	emoji_u1f422
+tusk	1f9a3	emoji_u1f9a3
+tuxedo	1f935	emoji_u1f935
+tv	1f4fa	emoji_u1f4fa
+twine	1faa2	emoji_u1faa2
+twins	1f9d1 200d 1f91d 200d 1f9d1	emoji_u1f9d1_200d_1f91d_200d_1f9d1
+twist	1faa2	emoji_u1faa2
+twisted	1f968	emoji_u1f968
+two	0032 20e3	emoji_u0032_20e3
+two_hearts	1f495	emoji_u1f495
+two_men_holding_hands	1f46c	emoji_u1f46c
+two_women_holding_hands	1f46d	emoji_u1f46d
+typhoon	1f300	emoji_u1f300
+tyrannosaurus	1f996	emoji_u1f996
+u	1f9f2	emoji_u1f9f2
+u5272	1f239	emoji_u1f239
+u5408	1f234	emoji_u1f234
+u55b6	1f23a	emoji_u1f23a
+u6708	1f237	emoji_u1f237
+u6709	1f236	emoji_u1f236
+u6e80	1f235	emoji_u1f235
+u7121	1f21a	emoji_u1f21a
+u7533	1f238	emoji_u1f238
+u7981	1f232	emoji_u1f232
+ufo	1f47d	emoji_u1f47d
+ugh	1f90c	emoji_u1f90c
+ugly	1f9a2	emoji_u1f9a2
+ultimate	1f94f	emoji_u1f94f
+umbrella	2602	emoji_u2602
+umbrella_with_rain	2614	emoji_u2614
+umm	1f4ac	emoji_u1f4ac
+unamused	1f612	emoji_u1f612
+unbounded	267e	emoji_u267e
+uncomfortable	1fae6	emoji_u1fae6
+underage	1f51e	emoji_u1f51e
+underarm	1f94e	emoji_u1f94e
+underwater	1fae7	emoji_u1fae7
+uneven	1f974	emoji_u1f974
+unicorn	1f984	emoji_u1f984
+universal	267e	emoji_u267e
+unlocked	1f513	emoji_u1f513
+unlucky	1f408 200d 2b1b	emoji_u1f408_200d_2b1b
+unread_mail	1f4ec	emoji_u1f4ec
+unsure	1fae4	emoji_u1fae4
+up	2b06	emoji_u2b06
+up_button	1f53c	emoji_u1f53c
+up_down	2195	emoji_u2195
+upper_left	2196	emoji_u2196
+upper_right	2197	emoji_u2197
+upside_down	1f643	emoji_u1f643
+upvote	1f53c	emoji_u1f53c
+upwards_trend	1f4c8	emoji_u1f4c8
+vacancy	1f233	emoji_u1f233
+vampire	1f9db	emoji_u1f9db
+vase	1f3fa	emoji_u1f3fa
+vat	1faa3	emoji_u1faa3
+vehicle	1f6de	emoji_u1f6de
+vertical_traffic_light	1f6a6	emoji_u1f6a6
+vertically	1f642 200d 2195	emoji_u1f642_200d_2195
+very_angry	1f621	emoji_u1f621
+vest	1f9ba	emoji_u1f9ba
+vhs	1f4fc	emoji_u1f4fc
+vibrate	1fae8	emoji_u1fae8
+vibration_mode	1f4f3	emoji_u1f4f3
+victory	270c	emoji_u270c
+vicuna	1f999	emoji_u1f999
+vicuña	1f999	emoji_u1f999
+video_camera	1f4f9	emoji_u1f4f9
+video_game	1f3ae	emoji_u1f3ae
+video_recorder	1f4f9	emoji_u1f4f9
+videocassette	1f4fc	emoji_u1f4fc
+view	1fa9f	emoji_u1fa9f
+viewer	1faf5	emoji_u1faf5
+violet	1fabb	emoji_u1fabb
+violin	1f3bb	emoji_u1f3bb
+virgo	264d	emoji_u264d
+vise	1f5dc	emoji_u1f5dc
+voicemail	27bf	emoji_u27bf
+volcano	1f30b	emoji_u1f30b
+volleyball	1f3d0	emoji_u1f3d0
+volume	1f39a	emoji_u1f39a
+vomit	1f92e	emoji_u1f92e
+vomiting	1f92e	emoji_u1f92e
+vs	1f19a	emoji_u1f19a
+waffle	1f9c7	emoji_u1f9c7
+wait_one_second	261d	emoji_u261d
+walking	1f6b6	emoji_u1f6b6
+wall	1f9f1	emoji_u1f9f1
+wand	1fa84	emoji_u1fa84
+waning_crescent_moon	1f318	emoji_u1f318
+waning_gibbous_moon	1f316	emoji_u1f316
+warm	1f321	emoji_u1f321
+warning	26a0	emoji_u26a0
+warrior	1fa96	emoji_u1fa96
+wastebasket	1f5d1	emoji_u1f5d1
+watch	231a	emoji_u231a
+water_buffalo	1f403	emoji_u1f403
+water_closet	1f6be	emoji_u1f6be
+water_drop	1f4a7	emoji_u1f4a7
+water_polo	1f93d	emoji_u1f93d
+watermelon	1f349	emoji_u1f349
+wave	1f44b	emoji_u1f44b
+wavy	1f974	emoji_u1f974
+wavy_dash	3030	emoji_u3030
+waxing	1f312	emoji_u1f312
+waxing_crescent_moon	1f312	emoji_u1f312
+waxing_moon	1f314	emoji_u1f314
+way	1f92f	emoji_u1f92f
+wc	1f6be	emoji_u1f6be
+wealthy	1f9d0	emoji_u1f9d0
+weapon	1fa83	emoji_u1fa83
+weary	1f629	emoji_u1f629
+weary_cat	1f640	emoji_u1f640
+web	1f578	emoji_u1f578
+wedding	1f492	emoji_u1f492
+weight_lift	1f3cb	emoji_u1f3cb
+welcome	1f64f	emoji_u1f64f
+welding	1f97d	emoji_u1f97d
+well	2764 200d 1fa79	emoji_u2764_200d_1fa79
+west	2b05	emoji_u2b05
+whale	1f433	emoji_u1f433
+wheel	1f6de	emoji_u1f6de
+wheel_of_dharma	2638	emoji_u2638
+wheelchair	267f	emoji_u267f
+wheels	1f6f9	emoji_u1f6f9
+whisper	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+whistle	1f62e 200d 1f4a8	emoji_u1f62e_200d_1f4a8
+white_and_black_square	1f532	emoji_u1f532
+white_cane	1f9af	emoji_u1f9af
+white_circle	26aa	emoji_u26aa
+white_flag	1f3f3	emoji_u1f3f3
+white_flower	1f4ae	emoji_u1f4ae
+white_heart	1f90d	emoji_u1f90d
+white_large_square	2b1c	emoji_u2b1c
+white_medium_small_square	25fd	emoji_u25fd
+white_medium_square	25fb	emoji_u25fb
+white_small_square	25ab	emoji_u25ab
+whoops	1f92d	emoji_u1f92d
+why	1f97a	emoji_u1f97a
+wi_fi	1f6dc	emoji_u1f6dc
+wifi	1f6dc	emoji_u1f6dc
+wild	1f966	emoji_u1f966
+wilted_flower	1f940	emoji_u1f940
+wind	1f343	emoji_u1f343
+wind_chime	1f390	emoji_u1f390
+window	1fa9f	emoji_u1fa9f
+windy	1f32c	emoji_u1f32c
+wine	1f377	emoji_u1f377
+wing	1fabd	emoji_u1fabd
+wink	1f609	emoji_u1f609
+winner	1f3c6	emoji_u1f3c6
+winter	1fabe	emoji_u1fabe
+wireless	1f6dc	emoji_u1f6dc
+wise	1f9d3	emoji_u1f9d3
+wisent	1f9ac	emoji_u1f9ac
+wish	1f320	emoji_u1f320
+wish_tree	1f38b	emoji_u1f38b
+wishbone	1f9b4	emoji_u1f9b4
+witness	1f441 200d 1f5e8	emoji_u1f441_200d_1f5e8
+wlan	1f6dc	emoji_u1f6dc
+woah	1f635 200d 1f4ab	emoji_u1f635_200d_1f4ab
+wolf	1f43a	emoji_u1f43a
+woman	1f469	emoji_u1f469
+woman_artist	1f469 200d 1f3a8	emoji_u1f469_200d_1f3a8
+woman_astronaut	1f469 200d 1f680	emoji_u1f469_200d_1f680
+woman_bald	1f469 200d 1f9b2	emoji_u1f469_200d_1f9b2
+woman_beard	1f9d4 200d 2640	emoji_u1f9d4_200d_2640
+woman_biking	1f6b4 200d 2640	emoji_u1f6b4_200d_2640
+woman_blond_hair	1f471 200d 2640	emoji_u1f471_200d_2640
+woman_bouncing_ball	26f9 200d 2640	emoji_u26f9_200d_2640
+woman_bowing	1f647 200d 2640	emoji_u1f647_200d_2640
+woman_cartwheeling	1f938 200d 2640	emoji_u1f938_200d_2640
+woman_climbing	1f9d7 200d 2640	emoji_u1f9d7_200d_2640
+woman_construction_worker	1f477 200d 2640	emoji_u1f477_200d_2640
+woman_cook	1f469 200d 1f373	emoji_u1f469_200d_1f373
+woman_curly_hair	1f469 200d 1f9b1	emoji_u1f469_200d_1f9b1
+woman_detective	1f575 200d 2640	emoji_u1f575_200d_2640
+woman_elf	1f9dd 200d 2640	emoji_u1f9dd_200d_2640
+woman_facepalming	1f926 200d 2640	emoji_u1f926_200d_2640
+woman_factory_worker	1f469 200d 1f3ed	emoji_u1f469_200d_1f3ed
+woman_fairy	1f9da 200d 2640	emoji_u1f9da_200d_2640
+woman_farmer	1f469 200d 1f33e	emoji_u1f469_200d_1f33e
+woman_feeding_baby	1f469 200d 1f37c	emoji_u1f469_200d_1f37c
+woman_firefighter	1f469 200d 1f692	emoji_u1f469_200d_1f692
+woman_frowning	1f64d 200d 2640	emoji_u1f64d_200d_2640
+woman_genie	1f9de 200d 2640	emoji_u1f9de_200d_2640
+woman_gesturing_no	1f645 200d 2640	emoji_u1f645_200d_2640
+woman_gesturing_ok	1f646 200d 2640	emoji_u1f646_200d_2640
+woman_getting_haircut	1f487 200d 2640	emoji_u1f487_200d_2640
+woman_getting_massage	1f486 200d 2640	emoji_u1f486_200d_2640
+woman_golfing	1f3cc 200d 2640	emoji_u1f3cc_200d_2640
+woman_guard	1f482 200d 2640	emoji_u1f482_200d_2640
+woman_health_worker	1f469 200d 2695	emoji_u1f469_200d_2695
+woman_in_lotus_position	1f9d8 200d 2640	emoji_u1f9d8_200d_2640
+woman_in_manual_wheelchair	1f469 200d 1f9bd	emoji_u1f469_200d_1f9bd
+woman_in_manual_wheelchair_facing_right	1f469 200d 1f9bd 200d 27a1	emoji_u1f469_200d_1f9bd_200d_27a1
+woman_in_motorized_wheelchair	1f469 200d 1f9bc	emoji_u1f469_200d_1f9bc
+woman_in_motorized_wheelchair_facing_right	1f469 200d 1f9bc 200d 27a1	emoji_u1f469_200d_1f9bc_200d_27a1
+woman_in_steamy_room	1f9d6 200d 2640	emoji_u1f9d6_200d_2640
+woman_in_tuxedo	1f935 200d 2640	emoji_u1f935_200d_2640
+woman_judge	1f469 200d 2696	emoji_u1f469_200d_2696
+woman_juggling	1f939 200d 2640	emoji_u1f939_200d_2640
+woman_kneeling	1f9ce 200d 2640	emoji_u1f9ce_200d_2640
+woman_kneeling_facing_right	1f9ce 200d 2640 200d 27a1	emoji_u1f9ce_200d_2640_200d_27a1
+woman_lifting_weights	1f3cb 200d 2640	emoji_u1f3cb_200d_2640
+woman_mage	1f9d9 200d 2640	emoji_u1f9d9_200d_2640
+woman_mechanic	1f469 200d 1f527	emoji_u1f469_200d_1f527
+woman_mountain_biking	1f6b5 200d 2640	emoji_u1f6b5_200d_2640
+woman_office_worker	1f469 200d 1f4bc	emoji_u1f469_200d_1f4bc
+woman_pilot	1f469 200d 2708	emoji_u1f469_200d_2708
+woman_playing_handball	1f93e 200d 2640	emoji_u1f93e_200d_2640
+woman_playing_water_polo	1f93d 200d 2640	emoji_u1f93d_200d_2640
+woman_police_officer	1f46e 200d 2640	emoji_u1f46e_200d_2640
+woman_pouting	1f64e 200d 2640	emoji_u1f64e_200d_2640
+woman_raising_hand	1f64b 200d 2640	emoji_u1f64b_200d_2640
+woman_red_hair	1f469 200d 1f9b0	emoji_u1f469_200d_1f9b0
+woman_rowing_boat	1f6a3 200d 2640	emoji_u1f6a3_200d_2640
+woman_running	1f3c3 200d 2640	emoji_u1f3c3_200d_2640
+woman_running_facing_right	1f3c3 200d 2640 200d 27a1	emoji_u1f3c3_200d_2640_200d_27a1
+woman_scientist	1f469 200d 1f52c	emoji_u1f469_200d_1f52c
+woman_shrugging	1f937 200d 2640	emoji_u1f937_200d_2640
+woman_singer	1f469 200d 1f3a4	emoji_u1f469_200d_1f3a4
+woman_standing	1f9cd 200d 2640	emoji_u1f9cd_200d_2640
+woman_student	1f469 200d 1f393	emoji_u1f469_200d_1f393
+woman_superhero	1f9b8 200d 2640	emoji_u1f9b8_200d_2640
+woman_supervillain	1f9b9 200d 2640	emoji_u1f9b9_200d_2640
+woman_surfing	1f3c4 200d 2640	emoji_u1f3c4_200d_2640
+woman_swimming	1f3ca 200d 2640	emoji_u1f3ca_200d_2640
+woman_teacher	1f469 200d 1f3eb	emoji_u1f469_200d_1f3eb
+woman_technologist	1f469 200d 1f4bb	emoji_u1f469_200d_1f4bb
+woman_tipping_hand	1f481 200d 2640	emoji_u1f481_200d_2640
+woman_vampire	1f9db 200d 2640	emoji_u1f9db_200d_2640
+woman_walking	1f6b6 200d 2640	emoji_u1f6b6_200d_2640
+woman_walking_facing_right	1f6b6 200d 2640 200d 27a1	emoji_u1f6b6_200d_2640_200d_27a1
+woman_wearing_turban	1f473 200d 2640	emoji_u1f473_200d_2640
+woman_white_hair	1f469 200d 1f9b3	emoji_u1f469_200d_1f9b3
+woman_with_headscarf	1f9d5	emoji_u1f9d5
+woman_with_veil	1f470 200d 2640	emoji_u1f470_200d_2640
+woman_with_white_cane	1f469 200d 1f9af	emoji_u1f469_200d_1f9af
+woman_with_white_cane_facing_right	1f469 200d 1f9af 200d 27a1	emoji_u1f469_200d_1f9af_200d_27a1
+woman_zombie	1f9df 200d 2640	emoji_u1f9df_200d_2640
+women_couple	1f46d	emoji_u1f46d
+women_with_bunny_ears	1f46f 200d 2640	emoji_u1f46f_200d_2640
+women_wrestling	1f93c 200d 2640	emoji_u1f93c_200d_2640
+womens	1f6ba	emoji_u1f6ba
+wood	1fab5	emoji_u1fab5
+woodwind	1fa88	emoji_u1fa88
+woof	1f415	emoji_u1f415
+wool	1f999	emoji_u1f999
+wooly	1f9a3	emoji_u1f9a3
+woozy_face	1f974	emoji_u1f974
+work_in_progress	1f6a7	emoji_u1f6a7
+work_out	1f3cb	emoji_u1f3cb
+working_on_it	1f6e0	emoji_u1f6e0
+world_map	1f5fa	emoji_u1f5fa
+worm	1fab1	emoji_u1fab1
+worried	1f61f	emoji_u1f61f
+worry	1fae6	emoji_u1fae6
+wrapped	1fad4	emoji_u1fad4
+wrench	1f527	emoji_u1f527
+wrestling	1f93c	emoji_u1f93c
+writing	270d	emoji_u270d
+wrong	274c	emoji_u274c
+wrong_way	26d4	emoji_u26d4
+www	1f310	emoji_u1f310
+x	274e	emoji_u274e
+x_ray	1fa7b	emoji_u1fa7b
+xmas	1f9d1 200d 1f384	emoji_u1f9d1_200d_1f384
+xray	1fa7b	emoji_u1fa7b
+yacht	1f6f3	emoji_u1f6f3
+yam	1f360	emoji_u1f360
+yarn	1f9f6	emoji_u1f9f6
+yawn	1f971	emoji_u1f971
+yawning	1f971	emoji_u1f971
+yawning_face	1f971	emoji_u1f971
+yellow	1f7e1	emoji_u1f7e1
+yellow_circle	1f7e1	emoji_u1f7e1
+yellow_heart	1f49b	emoji_u1f49b
+yellow_large_square	1f7e8	emoji_u1f7e8
+yen_banknotes	1f4b4	emoji_u1f4b4
+yin_yang	262f	emoji_u262f
+yo_yo	1fa80	emoji_u1fa80
+young	1f9d2	emoji_u1f9d2
+younger	1f9d2	emoji_u1f9d2
+yuebing	1f96e	emoji_u1f96e
+yum	1f60b	emoji_u1f60b
+yurt	1f6d6	emoji_u1f6d6
+yuèbǐng	1f96e	emoji_u1f96e
+zany	1f92a	emoji_u1f92a
+zany_face	1f92a	emoji_u1f92a
+zap	26a1	emoji_u26a1
+zebra	1f993	emoji_u1f993
+zero	0030 20e3	emoji_u0030_20e3
+zest	1f34b 200d 1f7e9	emoji_u1f34b_200d_1f7e9
+zip	1f90c	emoji_u1f90c
+zip_it	1f910	emoji_u1f910
+zombie	1f9df	emoji_u1f9df
+zori	1fa74	emoji_u1fa74
+zzz	1f4a4	emoji_u1f4a4
+zōri	1fa74	emoji_u1fa74

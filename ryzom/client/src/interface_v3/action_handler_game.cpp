@@ -3397,6 +3397,28 @@ public:
 REGISTER_ACTION_HANDLER (CHandlerGameConfigTextureMode, "game_config_change_texture_mode");
 
 // ***************************************************************************
+class CHandlerGameConfigEmojiMode : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		// No ddx param covers the emoji mode, so it enables the Apply button itself.
+		if (CInterfaceLink::isUpdatingAllLinks()) return;
+
+		CCDBNodeLeaf *pending = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:CHAT:EMOJI_MODE", false);
+		CCDBNodeLeaf *saved = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_MODE", false);
+		if (!pending || !saved) return;
+
+		if (pending->getValue32() == saved->getValue32()) return;
+
+		CDDXManager *pDM = CDDXManager::getInstance();
+		CInterfaceDDX *pDDX = pDM->get(GAME_CONFIG_DDX);
+		if (pDDX)
+			pDDX->validateApplyButton();
+	}
+};
+REGISTER_ACTION_HANDLER (CHandlerGameConfigEmojiMode, "game_config_change_emoji_mode");
+
+// ***************************************************************************
 class CHandlerGameConfigFullscreen : public IActionHandler
 {
 	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)

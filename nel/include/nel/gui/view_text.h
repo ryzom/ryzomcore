@@ -207,6 +207,11 @@ namespace NLGUI
 		/** Setup a Text with Format Tags. Text is store without color/format tags, and special array is allocated for Format association
 		 */
 		void	setTextFormatTaged(const std::string &text);
+
+		/// Length of the format tag at index, 0 if none starts there.
+		static uint			getFormatTagLength(const std::string &text, uint index);
+		/// Color and tooltip tags in effect at pos, to render text.substr(pos) alone. Empty for untagged text.
+		static std::string	getFormatTagPrefixAt(const std::string &text, uint pos);
 #ifdef RYZOM_LUA_UCSTRING
 		void	setTextFormatTagedAsUtf16(const ucstring &text); // Compatibility
 #endif

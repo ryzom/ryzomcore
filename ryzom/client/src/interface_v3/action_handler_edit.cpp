@@ -30,6 +30,9 @@ using namespace NLMISC;
 #include "nel/gui/group_editbox.h"
 #include "nel/misc/utf_string_view.h"
 #include "interface_manager.h"
+#include "chat_link_ui.h"
+#include "chat_text_manager.h"
+#include "game_share/chat_message.h"
 #include "../client_chat_manager.h"
 #include "people_interraction.h"
 #include "../r2/editor.h"
@@ -371,7 +374,7 @@ class CAHEditPreviousLine : public CAHEdit
 			{
 				if( _GroupEdit->getHistoric(i).compare(0, _GroupEdit->getCursorPos(), startStr)==0 )
 				{
-					_GroupEdit->setInputStringRef (_GroupEdit->getHistoric(i));
+					_GroupEdit->setInputString(CUtfStringView(_GroupEdit->getHistoric(i)).toUtf8());
 					_GroupEdit->setCurrentHistoricIndex(i);
 					break;
 				}
@@ -443,7 +446,7 @@ class CAHEditNextLine : public CAHEdit
 			{
 				if( _GroupEdit->getHistoric(i).compare(0, _GroupEdit->getCursorPos(), startStr)==0 )
 				{
-					_GroupEdit->setInputStringRef (_GroupEdit->getHistoric(i));
+					_GroupEdit->setInputString(CUtfStringView(_GroupEdit->getHistoric(i)).toUtf8());
 					_GroupEdit->setCurrentHistoricIndex(i);
 					break;
 				}
@@ -522,15 +525,9 @@ protected:
 		// else cut forwards
 		else if(_GroupEdit->getCursorPos() < (sint32) _GroupEdit->getInputStringRef().length())
 		{
-			::u32string inputString = _GroupEdit->getInputStringRef();
-			::u32string::iterator it = inputString.begin() + _GroupEdit->getCursorPos();
-			inputString.erase(it);
-			_GroupEdit->setInputStringRef (inputString);
-			if (!_GroupEdit->getAHOnChange().empty())
-			{
-				CInterfaceManager *pIM = CInterfaceManager::getInstance();
-				CAHManager::getInstance()->runActionHandler(_GroupEdit->getAHOnChange(), _GroupEdit, _GroupEdit->getParamsOnChange());
-			}
+			CGroupEditBox::setCurrSelection(_GroupEdit);
+			CGroupEditBox::setSelectCursorPos(_GroupEdit->getCursorPos() + 1);
+			_GroupEdit->cutSelection();
 		}
 		// must stop selection in all case
 		CGroupEditBox::setCurrSelection(NULL);
@@ -583,7 +580,9 @@ class CAHEditPaste : public CAHEdit
 	}
 	void actionPart ()
 	{
-		_GroupEdit->paste();
+		bool chatInput = getChatTextMngr().isChatInput(_GroupEdit);
+		if (!_GroupEdit->paste(chatInput ? CHAT_MESSAGE::MaxReferences : 0) && chatInput)
+			CHAT_SHARE::reportInvalidLink();
 	}
 	void forwardToEditor()
 	{
@@ -606,10 +605,11 @@ class CAHEditCut : public CAHEditDeleteChar
 		if(CGroupEditBox::getCurrSelection() != NULL && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
 		{
 			// Copy selection
-			_GroupEdit->copy();
-
-			// Cut selection
-			CAHEditDeleteChar::actionPart();
+			if (_GroupEdit->copySelectionToClipboard())
+			{
+				// Cut selection
+				CAHEditDeleteChar::actionPart();
+			}
 		}
 	}
 };
@@ -639,6 +639,11 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 	}
 	void actionPart ()
 	{
+		if (getChatTextMngr().isMentionInput(_GroupEdit))
+		{
+			CAHManager::getInstance()->runActionHandler("chat_mention", _GroupEdit, "complete");
+			return;
+		}
 		// If the line starts with '/', try to expand
 		if (NLMISC::startsWith(_GroupEdit->getInputString(), "/"))
 		{

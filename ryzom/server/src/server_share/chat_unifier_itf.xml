@@ -1,6 +1,7 @@
 <generator header_tag="CHAT_UNIFIER_ITF">
 
 	<include file="nel/misc/entity_id.h"/>
+	<include file="game_share/chat_message.h"/>
 	<cpp-include file="stdpch.h"/>
 
 	<namespace name="CHATUNI">
@@ -42,6 +43,16 @@
 				<param type="bool"			name="havePrivilege" />
 				<param type="ucstring"		name="destName"		byref="true"/>
 				<param type="ucstring"		name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="sendFarTellShared" msg="CUSFTS">
+				<doc line="IOS forward a shared tell message to the unifier"/>
+
+				<param type="NLMISC::CEntityId" name="senderCharId" byref="true"/>
+				<param type="bool" name="havePrivilege"/>
+				<param type="ucstring" name="destName" byref="true"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
 			</method>
 
 			<!-- ========================================================== -->
@@ -103,12 +114,32 @@
 			</method>
 
 			<!-- ========================================================== -->
+			<method name="recvFarTellShared" msg="CURFTS">
+				<doc line="SU sends a shared far tell to the IOS hosting the addressee character"/>
+
+				<param type="NLMISC::CEntityId" name="senderCharId" byref="true"/>
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="bool" name="havePrivilege"/>
+				<param type="ucstring" name="destName" byref="true"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
 			<method name="farGuildChat" msg="CURFGC" broadcast="true">
 				<doc line="IOS forward a guild chat message to the IOS"/>
 
 				<param type="ucstring"			name="senderName"	byref="true"/>
 				<param type="uint32"			name="guildId"/>
 				<param type="ucstring"			name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="farGuildChatShared" msg="CURFGCS" broadcast="true">
+				<doc line="IOS forwards a shared guild chat message to the IOS"/>
+
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="uint32" name="guildId"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
 			</method>
 
 			<!-- ========================================================== -->
@@ -139,12 +170,30 @@
 			</method>
 
 			<!-- ========================================================== -->
+			<method name="universeBroadcastShared" msg="CURUBS" broadcast="true">
+				<doc line="IOS forwards a shared universe chat message to the IOSs"/>
+
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="uint32" name="senderHomeSession"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
 			<method name="dynChanBroadcast" msg="CUDCB" broadcast="true">
 				<doc line="IOS forward a dyn chat chat message to the IOSs"/>
 
 				<param type="NLMISC::CEntityId"	name="chanId"		byref="true"/>
 				<param type="ucstring"			name="senderName"	byref="true"/>
 				<param type="ucstring"			name="text"			byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="dynChanBroadcastShared" msg="CUDCBS" broadcast="true">
+				<doc line="IOS forwards a shared dynamic chat message to the IOSs"/>
+
+				<param type="NLMISC::CEntityId" name="chanId" byref="true"/>
+				<param type="ucstring" name="senderName" byref="true"/>
+				<param type="CChatMessage" name="chatMessage" byref="true"/>
 			</method>
 
 			<!-- ========================================================== -->

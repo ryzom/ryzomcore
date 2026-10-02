@@ -25,22 +25,26 @@
 // client
 #include "stdpch.h"
 
+#include "game_share/chat_message.h"
 #include "game_share/shard_names.h"
 
 #include "../r2/editor.h"
 
 #include "chat_window.h"
+#include "chat_link_ui.h"
 #include "chat_text_manager.h"
 #include "../user_entity.h"
 #include "people_interraction.h"
 #include "../connection.h"
 //
 #include "nel/gui/group_container.h"
+#include "nel/gui/group_scrolltext.h"
 #include "nel/gui/group_editbox.h"
 #include "nel/gui/group_tab.h"
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "../client_chat_manager.h"
+#include "../client_cfg.h"
 //
 #include "../session_browser_impl.h"
 
@@ -201,7 +205,9 @@ bool CChatWindow::isVisible() const
 }
 
 //=================================================================================
-void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/)
+void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt,
+	uint32 dynamicChatDbIndex, uint numBlinks /* = 0*/, bool *windowVisible /*= NULL*/,
+	const CChatMessage *sharedMessage, const string &senderName)
 {
 	if (!_Chat)
 	{
@@ -233,10 +239,17 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 		}
 	}
 
-	CViewBase *child = ctm.createMsgText(msgNoTranslate, col);
+	CViewBase *child = sharedMessage ? ctm.createMsgText(msgNoTranslate, *sharedMessage, col, false, gt) : ctm.createMsgText(msgNoTranslate, col);
 	if (child)
 	{
-		if (gl)	gl->addChild(child);
+		ctm.setMessageTarget(child, gt == CChatGroup::arround ? CChatGroup::say : gt,
+			gt == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown);
+		ctm.setMessageSender(child, senderName);
+		if (gl)
+		{
+			gl->addChild(child);
+			ctm.setMentionTab(child, NULL);
+		}
 
 		// if the group is closed, make it blink
 		if (!_Chat->isOpen())
@@ -550,7 +563,9 @@ void CChatWindow::clearMessages(CChatGroup::TGroupType /* gt */, uint32 /* dynam
 // CChatGroupWindow //
 //////////////////////
 
-void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible)
+void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt,
+	uint32 dynamicChatDbIndex, uint numBlinks, bool *windowVisible,
+	const CChatMessage *sharedMessage, const string &senderName)
 {
 	if (!_Chat)
 	{
@@ -595,13 +610,23 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 	CViewBase *child = NULL;
 	if (gl != NULL)
 	{
-		child = ctm.createMsgText(newmsg, col);
+		child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col, false, gt) : ctm.createMsgText(newmsg, col);
 		if (child)
 		{
+			ctm.setMessageTarget(child, gt == CChatGroup::arround ? CChatGroup::say : gt,
+				gt == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown);
+			ctm.setMessageSender(child, senderName);
 			gl->addChild(child);
+			ctm.setMentionTab(child, tab);
 			if (!gl->getParent()->getActive())
+			{
+				CGroupScrollText *scroll = dynamic_cast<CGroupScrollText *>(gl->getParent());
+				if (scroll)
+					scroll->markUnread(child);
 				if (tab != NULL)
-					tab->setTextColorNormal(newMsgColor);
+					if (!ctm.hasUnreadMention(tab))
+						tab->setTextColorNormal(newMsgColor);
+			}
 		}
 	}
 
@@ -669,13 +694,23 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 
 		if (gl != NULL)
 		{
-			child = ctm.createMsgText(newmsg, col);
+			child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col, false, gt) : ctm.createMsgText(newmsg, col);
 			if (child)
 			{
+				ctm.setMessageTarget(child, gt == CChatGroup::arround ? CChatGroup::say : gt,
+					gt == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown);
+				ctm.setMessageSender(child, senderName);
 				gl->addChild(child);
+				ctm.setMentionTab(child, tab);
 				if (!gl->getParent()->getActive())
+				{
+					CGroupScrollText *scroll = dynamic_cast<CGroupScrollText *>(gl->getParent());
+					if (scroll)
+						scroll->markUnread(child);
 					if (tab != NULL)
-						tab->setTextColorNormal(newMsgColor);
+						if (!ctm.hasUnreadMention(tab))
+							tab->setTextColorNormal(newMsgColor);
+				}
 			}
 		}
 	}
@@ -704,7 +739,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 }
 
 //=================================================================================
-void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender)
+void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, const string &sender, const CChatMessage *sharedMessage)
 {
 	// If we are here with a tell message this is because the teller doesn't belong to any people list
 	CGroupContainer *gcChat = createFreeTeller(sender);
@@ -725,9 +760,15 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 		nlwarning("<CChatGroupWindow::displayTellMessage> can't get text_list.");
 		return;
 	}
-	CViewBase *child = getChatTextMngr().createMsgText(msg, col);
+	CViewBase *child = sharedMessage ? getChatTextMngr().createMsgText(msg, *sharedMessage, col, false, CChatGroup::tell) :
+		getChatTextMngr().createMsgText(msg, col);
 	if (child)
+	{
+		getChatTextMngr().setMessageTarget(child, CChatGroup::tell, CEntityId::Unknown, sender);
+		getChatTextMngr().setMessageSender(child, sender);
 		gl->addChild(child);
+		getChatTextMngr().setMentionTab(child, NULL);
+	}
 }
 
 //=================================================================================
@@ -1325,12 +1366,68 @@ public:
 			nlwarning("No chat box associated with %s", pEB->getId().c_str());
 			return;
 		}
+		CChatMessageRequest linkRequest;
+		bool hasLinks = CHAT_SHARE::hasReferences(pEB);
+		bool keepQuote = false;
+		CRefPtr<CGroupEditBox> quoteEditBox;
+		if (hasLinks)
+		{
+			if (!CHAT_SHARE::buildRequest(pEB, linkRequest))
+			{
+				CHAT_SHARE::reportInvalidLink();
+				return;
+			}
+			text = linkRequest.Text.toUtf8();
+			if (text[0] == '/')
+			{
+				if (linkRequest.References[0].Start != 0)
+				{
+					CChatWindow::_ChatWindowLaunchingCommand = chat;
+					CHAT_SHARE::executeCommand(linkRequest, pEB);
+					return;
+				}
+				if (!getChatTextMngr().getQuoteMessageId(pEB).empty())
+				{
+					CHAT_SHARE::CRequestScope requestScope(&linkRequest, pEB);
+					CHAT_SHARE::sendRequest(CChatGroup::nbChatMode, CEntityId::Unknown, string(), false);
+					return;
+				}
+				if (chat->getListener() && !ClientCfg.Local)
+				{
+					linkRequest.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
+					if (linkRequest.ClientRequestId == 0)
+						return;
+					CHAT_SHARE::CRequestScope requestScope(&linkRequest);
+					chat->getListener()->msgEntered(text, chat);
+					if (!requestScope.wasSent())
+						getChatTextMngr().finishQuoteSend(linkRequest.ClientRequestId, false);
+					return;
+				}
+				CHAT_SHARE::reportInvalidLink();
+				return;
+			}
+		}
 
 		// Parse any tokens in the text
-		if ( ! CInterfaceManager::parseTokens(text))
+		if (!hasLinks && !CInterfaceManager::parseTokens(text))
 		{
-			pEB->setInputString(std::string());
+			if (getChatTextMngr().getQuoteMessageId(pEB).empty())
+				pEB->setInputString(std::string());
 			return;
+		}
+
+		if (!hasLinks && text[0] == '/' && !getChatTextMngr().getQuoteMessageId(pEB).empty())
+		{
+			linkRequest.Text = CUtfStringView(text).toUtf16();
+			string commandName;
+			if (CHAT_SHARE::isChatCommand(linkRequest, commandName))
+			{
+				CChatWindow::_ChatWindowLaunchingCommand = chat;
+				CHAT_SHARE::executeCommand(linkRequest, pEB);
+				return;
+			}
+			keepQuote = true;
+			quoteEditBox = pEB;
 		}
 
 		// if, it s a command, execute it and don't send the command to the server
@@ -1363,13 +1460,64 @@ public:
 		}
 		else
 		{
-			if (chat->getListener())
+			string quoteId = getChatTextMngr().getQuoteMessageId(pEB);
+			if (!quoteId.empty())
 			{
+				CChatGroup::TGroupType group;
+				CEntityId dynamicChannelId;
+				string receiver;
+				if (!getChatTextMngr().getQuoteTarget(pEB, group, dynamicChannelId, receiver))
+					return;
+				CChatMessageRequest request = hasLinks ? linkRequest : CChatMessageRequest();
+				if (!hasLinks)
+					request.Text = CUtfStringView(text).toUtf16();
+				request.QuoteMessageId = quoteId;
+				request.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
+				if (request.ClientRequestId == 0)
+					return;
+				if (!request.isValid())
+				{
+					getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
+					return;
+				}
+				bool queued;
+				if (group == CChatGroup::tell)
+					queued = ChatMngr.tell(receiver, request);
+				else
+					queued = ChatMngr.chat(request, group, dynamicChannelId);
+				if (!queued)
+					getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
+				return;
+			}
+			else if (chat->getListener())
+			{
+				if (hasLinks && !ClientCfg.Local)
+				{
+					linkRequest.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
+					if (linkRequest.ClientRequestId == 0)
+						return;
+				}
+				CHAT_SHARE::CRequestScope requestScope(hasLinks ? &linkRequest : NULL);
 				chat->getListener()->msgEntered(text, chat);
+				if (hasLinks && !ClientCfg.Local)
+				{
+					if (!requestScope.wasSent())
+						getChatTextMngr().finishQuoteSend(linkRequest.ClientRequestId, false);
+					return;
+				}
+			}
+			else if (hasLinks)
+			{
+				CHAT_SHARE::reportInvalidLink();
+				return;
 			}
 		}
+		if (keepQuote && quoteEditBox == NULL)
+			return;
 		// Clear input string
 		pEB->setInputString (std::string());
+		if (!keepQuote)
+			getChatTextMngr().clearQuote(pEB);
 		CGroupContainer *gc = static_cast< CGroupContainer* >( pEB->getEnclosingContainer() );
 
 		if (gc)

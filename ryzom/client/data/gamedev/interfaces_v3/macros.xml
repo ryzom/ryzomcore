@@ -238,6 +238,11 @@
 	<action name="uimMacroExec" handler="macros_exec" icon="r2ed_tool_start.tga" />
 	<action name="uimMacroEdit" handler="macros_edit" icon="r2ed_edit_dialog_small.tga" />
 	<action name="uimMacroCopy" handler="macros_copy" icon="r2ed_tool_copy.tga" />
+	<action id="macro_chat_link" name="uiChatLinkMenuMacro" icon="ico_range.tga">
+		<action id="main" name="uiMainChat" handler="macros_chat_link" params="destination=main" />
+		<action id="tell" name="uimTell" handler="macros_chat_link" params="destination=tell" />
+		<action id="clipboard" name="uiChatLinkClipboard" handler="macros_chat_link" params="destination=clipboard" />
+	</action>
 	<action name="uimMacroUnassign"	handler="macros_unassign" icon="" />
 	<separator/>
 	<action name="uimMacroDel"	handler="macros_del" icon="patch_off.tga" />

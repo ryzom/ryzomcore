@@ -126,6 +126,7 @@ const uint CInventoryManager::InventoryIndexes[]=
 };
 
 const	uint	CInventoryManager::NumInventories= sizeof(CInventoryManager::InventoryDBs)/sizeof(CInventoryManager::InventoryDBs[0]);
+static const uint32 ItemLinkInventoryIndex = INVENTORIES::NUM_ALL_INVENTORY;
 
 
 // *************************************************************************************************
@@ -3488,6 +3489,9 @@ uint32				CInventoryManager::getItemSlotId(CDBCtrlSheet *ctrl)
 // ***************************************************************************
 uint32				CInventoryManager::getItemSlotId(const std::string &itemDb, uint slotIndex)
 {
+	if (itemDb.find("UI:ITEM_LINK:") == 0)
+		return (ItemLinkInventoryIndex << CItemInfos::SlotIdIndexBitSize) + (slotIndex & CItemInfos::SlotIdIndexBitMask);
+
 	// then compare to all possible inventories (ugly)
 	uint	inventoryIndex= 0;
 	for(uint i=0;i<NumInventories;i++)
@@ -3567,6 +3571,41 @@ const	CClientItemInfo	&CInventoryManager::getItemInfo(uint slotId) const
 	}
 
 	return it->second;
+}
+
+// ***************************************************************************
+uint32 CInventoryManager::createItemLinkInfo(const CItemInfos &itemInfo)
+{
+	const uint32 inventory = ItemLinkInventoryIndex << CItemInfos::SlotIdIndexBitSize;
+	uint32 slotId = 0;
+	for (uint32 index = 0; index <= CItemInfos::SlotIdIndexBitMask; ++index)
+	{
+		slotId = inventory + index;
+		if (_ItemInfoMap.find(slotId) == _ItemInfoMap.end())
+			break;
+		if (index == CItemInfos::SlotIdIndexBitMask)
+			return 0;
+	}
+
+	CClientItemInfo &linkedInfo = _ItemInfoMap[slotId];
+	linkedInfo.readFromImpulse(itemInfo);
+	linkedInfo.slotId = slotId;
+	linkedInfo.InfoVersionFromSlot = itemInfo.versionInfo;
+	linkedInfo.InfoVersionSlotServerWaiting = itemInfo.versionInfo;
+	return slotId;
+}
+
+// ***************************************************************************
+void CInventoryManager::removeItemLinkInfo(uint32 slotId)
+{
+	if (isItemLinkSlot(slotId))
+		_ItemInfoMap.erase(slotId);
+}
+
+// ***************************************************************************
+bool CInventoryManager::isItemLinkSlot(uint32 slotId) const
+{
+	return (slotId >> CItemInfos::SlotIdIndexBitSize) == ItemLinkInventoryIndex;
 }
 
 // ***************************************************************************

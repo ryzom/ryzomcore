@@ -37,10 +37,13 @@
 #include "game_share/base_types.h"
 #include "game_share/string_manager_sender.h"
 #include "game_share/dyn_chat.h"
+#include "game_share/chat_message.h"
 
 
 // std
 #include <map>
+#include <deque>
+#include <set>
 #include <string>
 
 
@@ -158,14 +161,36 @@ public :
 	 * \param langs is string to fill all langs where translated
 	 * \param nbrReceivers is a integer to fill with number of players who will receive the message
 	 */
-	void checkNeedDeeplize(const TDataSetRow& sender, const ucstring& ucstr, const std::string& senderLang, std::string &langs, uint &nbrReceivers, TGroupId grpId = NLMISC::CEntityId::Unknown);
+	void checkNeedDeeplize(const TDataSetRow& sender, const ucstring& ucstr, const std::string& senderLang,
+		std::string &langs, uint &nbrReceivers, bool controlPrefix, TGroupId grpId = NLMISC::CEntityId::Unknown);
 
 	/**
 	 * Transmit a chat message
 	 * \param sender is the id of the talking char
 	 * \param str is the chat content
 	 */
-	void chat( const TDataSetRow& sender, const ucstring& ucstr );
+	void chat( const TDataSetRow& sender, const ucstring& ucstr, bool sharedControlPrefix = false );
+	bool chatShared(const TDataSetRow &sender, const CChatMessage &message);
+	void sendQuoteResult(const NLMISC::CEntityId &sender, uint32 requestId, bool accepted);
+
+	struct CMessageHistoryEntry
+	{
+		CMessageHistoryEntry() : Exported(false) {}
+		CChatMessage Message;
+		std::string Channel;
+		std::string ExternalId;
+		std::set<NLMISC::CEntityId> Receivers;
+		bool Exported;
+	};
+	CMessageHistoryEntry *findMessage(const std::string &messageId);
+	CMessageHistoryEntry *rememberMessage(const CChatMessage &message);
+	bool resolveQuote(CChatMessage &message, const std::string &channel,
+		const NLMISC::CEntityId &sender, const std::string &receiver = std::string());
+	bool canReceiveQuote(const std::string &messageId, const NLMISC::CEntityId &receiver);
+	bool bridgeChat(const std::string &sender, const std::string &channel,
+		const std::string &externalId, const std::string &messageId, const std::string &quoteId,
+		const std::string &sourceLanguage, const std::string &targetLanguage, const ucstring &text,
+		const std::string &translatedParts);
 
 	/**
 	 * Transmit a chat message to a group
@@ -180,6 +205,8 @@ public :
 	 * Transmit a far chat message to a group
 	 */
 	void farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName, uint32 senderCid = 0);
+	void farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, const CChatMessage &message, const ucstring &senderName, uint32 senderCid = 0);
+	void farDynChatShared(TChanID chanId, const ucstring &senderName, const CChatMessage &message);
 
 	/**
 	 * Transmit a chat message to the receiver
@@ -187,11 +214,15 @@ public :
 	 * \param receiver is the id of the listening char
 	 * \param str is the chat content
 	 */
-	void tell( const TDataSetRow& sender, const std::string& receiver, const ucstring& ucstr );
+	bool tell( const TDataSetRow& sender, const std::string& receiver, const ucstring& ucstr );
+	bool tellShared(const TDataSetRow &sender, const std::string &receiver, const CChatMessage &message);
 	/**
 	 * Transmit a chat message to the receiver
 	 */
 	void farTell(  const NLMISC::CEntityId &senderCharId, const ucstring &senderName, bool havePrivilege, const ucstring& receiver, const ucstring& ucstr);
+	void farTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &senderName,
+		bool havePrivilege, const ucstring &receiver, const CChatMessage &message);
+	void echoTellShared(const NLMISC::CEntityId &senderCharId, const ucstring &receiver, const CChatMessage &message);
 	/**
 	 * Transmit a chat message to the receiver
 	 * \param sender is the id of the speaking char
@@ -326,7 +357,7 @@ public :
 	ucstring filterClientInputColorCode(ucstring &text);
 
 	/// Filter text send from client for removing any forbiden or harming content
-	ucstring filterClientInput(ucstring &text);
+	ucstring filterClientInput(ucstring &text, bool trimBeginning = true, bool trimEnd = true);
 
 	/// Subscribe special ring users in the ring universe chat
 	void subscribeCharacterInRingUniverse(const NLMISC::CEntityId &charEId);
@@ -369,6 +400,14 @@ private :
 	std::list<NLMISC::CEntityId>	_DestUsers;
 
 	CDynChat _DynChat;
+	/// Metadata scoped to the current synchronous chat()/tell()/sendChat() delivery.
+	const CChatMessage *_SharedMessage;
+	std::map<std::string, CMessageHistoryEntry> _MessageHistory;
+	std::deque<std::string> _MessageHistoryOrder;
+	std::map<std::string, std::string> _ExternalMessageIds;
+	void logSharedMessage(const CChatMessage &message, const std::string &channel,
+		const std::string &language);
+	void recordSharedReceiver(const NLMISC::CEntityId &receiver, CChatGroup::TGroupType chatMode);
 
 
 protected:

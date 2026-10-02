@@ -1,4 +1,5 @@
 # ryzom-core docs
 
 - [build-version-info.md](build-version-info.md): build-time generation of the client version string and build date, and when `macosx-build/build.sh` reconfigures.
+- [chat.md](chat.md): chat sharing of items, actions, positions and macros, quotes, mentions, emoji and the chat window, from client request to IOS delivery.
 - [client-pacs-primitives.md](client-pacs-primitives.md): lifecycle of the client PACS move container and of every `UMovePrimitive` handle held by client objects.

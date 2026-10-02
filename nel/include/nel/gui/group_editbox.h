@@ -38,6 +38,16 @@ namespace NLGUI
 	public:
         DECLARE_UI_CLASS( CGroupEditBox )
 
+		// Colored references attached to UTF-32 input ranges.
+		struct CTextTag
+		{
+			uint32 Start;
+			uint32 Length;
+			uint32 Type;
+			std::string Reference;
+			NLMISC::CRGBA Color;
+		};
+
 		class IComboKeyHandler
 		{
 		public:
@@ -75,6 +85,10 @@ namespace NLGUI
 		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
 		void		setInputStringRef(const ::u32string &str);
+		void		addTextTag(uint32 start, uint32 length, uint32 type, NLMISC::CRGBA color,
+			const std::string &reference = std::string());
+		const std::vector<CTextTag> &getTextTags() const { return _TextTags; }
+		uint64		getInputRevision() const { return _InputRevision; }
 		void		setInputStringAsInt(sint32 val);
 		sint32		getInputStringAsInt() const;
 		void		setInputStringAsInt64(sint64 val);
@@ -140,10 +154,15 @@ namespace NLGUI
 
 		// Copy the selection into buffer
 		void		copy();
+		bool		copySelectionToClipboard();
+		static bool	copyToClipboard(const ::u32string &text, const std::vector<CTextTag> &textTags);
 		// Paste the selection into buffer
 		void		paste();
+		// Reject a tagged paste that cannot preserve all its tags.
+		bool		paste(uint32 maxTextTags);
 		// Write the string into buffer
-		void		writeString(const std::string &str, bool replace = true, bool atEnd = true);
+		// With allowPartial=false, reject filtered or truncated input without changing the buffer.
+		bool		writeString(const std::string &str, bool replace = true, bool atEnd = true, bool allowPartial = true);
 
 		// Expand the expression (true if there was a '/' at the start of the line)
 		bool		expand();
@@ -239,10 +258,15 @@ namespace NLGUI
 		::u32string	_Prompt;
 		::u32string	_InputString;
 		CViewText	*_ViewText;
+		std::vector<CTextTag> _TextTags;
+		bool _HadTextTags;
+		uint64 _InputRevision;
 
 		// undo / redo
 		::u32string	_StartInputString;  // value of the input string when focus was acuired first
 		::u32string	_ModifiedInputString;
+		std::vector<CTextTag> _StartTextTags;
+		std::vector<CTextTag> _ModifiedTextTags;
 
 
 		// Historic info
@@ -301,12 +325,14 @@ namespace NLGUI
 
 	private:
 		void setupDisplayText();
+		void updateTextTags(uint32 start, uint32 oldLength, uint32 newLength);
 		void makeTopWindow();
 		void handleEventChar(const NLGUI::CEventDescriptorKey &event);
 		void handleEventString(const NLGUI::CEventDescriptorKey &event);
 		void setup();
 		void triggerOnChangeAH();
-		void appendStringFromClipboard(const std::string &str);
+		bool appendStringFromClipboard(const std::string &str, const std::vector<CTextTag> *textTags,
+			uint32 maxTextTags);
 
 		std::string	getSelection();
 
