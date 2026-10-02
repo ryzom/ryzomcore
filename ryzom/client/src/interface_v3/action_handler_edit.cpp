@@ -31,6 +31,8 @@ using namespace NLMISC;
 #include "nel/misc/utf_string_view.h"
 #include "interface_manager.h"
 #include "chat_link_ui.h"
+#include "chat_text_manager.h"
+#include "game_share/chat_message.h"
 #include "../client_chat_manager.h"
 #include "people_interraction.h"
 #include "../r2/editor.h"
@@ -578,7 +580,9 @@ class CAHEditPaste : public CAHEdit
 	}
 	void actionPart ()
 	{
-		_GroupEdit->paste(CHAT_SHARE::isChatInput(_GroupEdit) ? CHAT_MESSAGE::MaxReferences : 0);
+		bool chatInput = getChatTextMngr().isChatInput(_GroupEdit);
+		if (!_GroupEdit->paste(chatInput ? CHAT_MESSAGE::MaxReferences : 0) && chatInput)
+			CHAT_SHARE::reportInvalidLink();
 	}
 	void forwardToEditor()
 	{
@@ -635,6 +639,11 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 	}
 	void actionPart ()
 	{
+		if (getChatTextMngr().isMentionInput(_GroupEdit))
+		{
+			CAHManager::getInstance()->runActionHandler("chat_mention", _GroupEdit, "complete");
+			return;
+		}
 		// If the line starts with '/', try to expand
 		if (NLMISC::startsWith(_GroupEdit->getInputString(), "/"))
 		{

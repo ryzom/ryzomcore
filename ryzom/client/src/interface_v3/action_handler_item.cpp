@@ -1814,10 +1814,10 @@ class CHandlerLinkItemInChat : public IActionHandler
 		if (!resolveItemForChatLink(item, slotId))
 			return;
 
-		CHAT_SHARE::TShareResult result = CHAT_SHARE::share(item->getItemActualName(),
-			CChatMessageReference::Item, slotId, CHAT_SHARE::itemColor(), getParam(params, "destination"));
-		if (result == CHAT_SHARE::ShareInputFull)
-			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiChatLinkDoesNotFit"));
+		CChatMessageReference reference;
+		reference.Type = CChatMessageReference::Item;
+		reference.Value = slotId;
+		CHAT_SHARE::share(item->getItemActualName(), reference, getParam(params, "destination"));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerLinkItemInChat, "link_item_in_chat" );

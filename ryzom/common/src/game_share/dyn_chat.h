@@ -124,7 +124,6 @@ public:
 	struct CHistoricEntry
 	{
 		CHistoricEntry() : Shared(false) {}
-
 		ucstring	String;
 //		TDataSetRow Sender;
 		ucstring	SenderString;

@@ -3310,15 +3310,12 @@ namespace NLGUI
 		if(index>=textSize)
 			return 0;
 
-		// The order matters and mirrors buildFormatTagText: a colour tag is
-		// tested first, so "@{T4}" cannot be mistaken for one ('T' is not a
-		// hex digit), while "@{D4ab}" legitimately is a colour.
+		// Same order as buildFormatTagText
 		if(isColorTag(text, index, textSize))
 			return 7;	// @{RGBA}
 
 		if(isTabTag(text, index, textSize))
 		{
-			// @{T then up to MaxTabDigit digits then }
 			uint	i= index+3;
 			while(i<textSize && text[i]!='}')
 				i++;
@@ -3327,7 +3324,6 @@ namespace NLGUI
 
 		if(isTooltipTag(text, index, textSize))
 		{
-			// @{H then arbitrary text then }
 			uint	i= index+3;
 			while(i<textSize && text[i]!='}')
 				i++;
@@ -3347,9 +3343,7 @@ namespace NLGUI
 		std::string	color, tooltip;
 		bool		anyTag= false;
 
-		// One pass over the whole string, not just up to pos: we need the state
-		// at pos, but also whether the string is tagged at all, because that is
-		// what decides which branch the caller renders through.
+		// The whole string is scanned: a tagged string renders through setTextFormatTaged.
 		for(uint i=0;i<textSize;)
 		{
 			uint	len= getFormatTagLength(text, i);
@@ -3361,14 +3355,11 @@ namespace NLGUI
 			anyTag= true;
 			if(i<pos)
 			{
-				// A tag that starts before pos counts as applied. Callers must
-				// not split inside a tag; getFormatTagLength is there to let
-				// them step over one.
 				if(isColorTag(text, i, textSize))
 					color.assign(text, i, len);
 				else if(isTooltipTag(text, i, textSize))
 					tooltip.assign(text, i, len);
-				// tab tags are positional, see the header
+				// tab tags are positions, not state
 			}
 			i+= len;
 		}
@@ -3376,11 +3367,7 @@ namespace NLGUI
 		if(!anyTag)
 			return std::string();
 
-		// The string is tagged, so the caller renders every piece through
-		// setTextFormatTaged, which starts from white. If no colour tag applies
-		// here yet, say white explicitly rather than returning nothing, so the
-		// piece cannot fall back to the plain setText path and pick up the
-		// caller's own colour instead.
+		// Keep the piece on the tagged path, which starts from white.
 		if(color.empty())
 			color= "@{FFFF}";
 

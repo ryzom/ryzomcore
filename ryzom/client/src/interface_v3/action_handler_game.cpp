@@ -3401,17 +3401,13 @@ class CHandlerGameConfigEmojiMode : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		// The dropdown edits UI:TEMP:CHAT:EMOJI_MODE, which no ddx param covers,
-		// so nothing else would ever let the Apply button out of its frozen
-		// state and the pending mode could only be committed with Ok.
+		// No ddx param covers the emoji mode, so it enables the Apply button itself.
 		if (CInterfaceLink::isUpdatingAllLinks()) return;
 
 		CCDBNodeLeaf *pending = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:CHAT:EMOJI_MODE", false);
 		CCDBNodeLeaf *saved = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:EMOJI_MODE", false);
 		if (!pending || !saved) return;
 
-		// game_config_init seeds the pending value from the saved one, and that
-		// link firing is not a change the player made.
 		if (pending->getValue32() == saved->getValue32()) return;
 
 		CDDXManager *pDM = CDDXManager::getInstance();

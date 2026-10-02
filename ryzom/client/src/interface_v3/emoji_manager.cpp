@@ -19,9 +19,9 @@
 
 #include "nel/misc/file.h"
 #include "nel/misc/path.h"
-#include "nel/misc/debug.h"
 #include "nel/misc/common.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/utf_string_view.h"
 #include "nel/gui/view_text.h"
 
 #include <algorithm>
@@ -31,24 +31,11 @@ using namespace NLMISC;
 
 CEmojiManager *CEmojiManager::_Instance = NULL;
 
-// The generated table, plus an optional hand-maintained file loaded after it so
-// local corrections win without anyone editing the generated one.
-static const char *EmojiTableFile     = "emoji.txt";
-static const char *EmojiOverrideFile  = "emoji_overrides.txt";
-// The picker's layout: which tabs it has and what sits in them. Generated from
-// Unicode's emoji-test.txt, see tools/emoji/gen_emoji_picker.py.
-static const char *EmojiPickerFile    = "emoji_picker.txt";
-
 //=================================================================================
 CEmojiManager::CEmojiManager() : _Loaded(false)
 {
 	for (uint i = 0; i < 256; ++i)
 		_CanStartUtf8[i] = false;
-}
-
-//=================================================================================
-CEmojiManager::~CEmojiManager()
-{
 }
 
 //=================================================================================
@@ -62,171 +49,82 @@ CEmojiManager &CEmojiManager::getInstance()
 //=================================================================================
 void CEmojiManager::releaseInstance()
 {
-	if (_Instance)
-	{
-		delete _Instance;
-		_Instance = NULL;
-	}
+	delete _Instance;
+	_Instance = NULL;
 }
 
 //=================================================================================
-// Turn "1f468 200d 1f469" into the UTF-8 bytes for that codepoint sequence.
-static bool codepointsToUtf8(const string &field, string &out)
+// Read the tab separated lines of an emoji data file, skipping comments.
+static bool readEmojiFile(const string &filename, bool required, vector<vector<string> > &lines)
 {
-	out.clear();
-	string::size_type i = 0;
-	while (i < field.size())
-	{
-		while (i < field.size() && field[i] == ' ')
-			++i;
-		string::size_type start = i;
-		while (i < field.size() && field[i] != ' ')
-			++i;
-		if (start == i)
-			break;
-
-		uint32 cp = 0;
-		if (sscanf(field.c_str() + start, "%x", &cp) != 1)
-			return false;
-
-		// UTF-8 encode. Done by hand rather than via CUtfStringView so a single
-		// malformed line cannot take the whole table down with it.
-		if (cp < 0x80)
-		{
-			out += (char)cp;
-		}
-		else if (cp < 0x800)
-		{
-			out += (char)(0xC0 | (cp >> 6));
-			out += (char)(0x80 | (cp & 0x3F));
-		}
-		else if (cp < 0x10000)
-		{
-			out += (char)(0xE0 | (cp >> 12));
-			out += (char)(0x80 | ((cp >> 6) & 0x3F));
-			out += (char)(0x80 | (cp & 0x3F));
-		}
-		else if (cp <= 0x10FFFF)
-		{
-			out += (char)(0xF0 | (cp >> 18));
-			out += (char)(0x80 | ((cp >> 12) & 0x3F));
-			out += (char)(0x80 | ((cp >> 6) & 0x3F));
-			out += (char)(0x80 | (cp & 0x3F));
-		}
-		else
-		{
-			return false;
-		}
-	}
-	return !out.empty();
-}
-
-//=================================================================================
-void CEmojiManager::addEntry(const string &name, const string &utf8, const string &texture)
-{
-	CEntry &e = _ByName[name];
-	e.Name = name;
-	e.Utf8 = utf8;
-	e.Texture = texture;
-}
-
-//=================================================================================
-// Read one of the emoji data files whole. Returns false, quietly unless the
-// file is required, when there is nothing to read.
-//
-// CIFile, not ifstream: these ship inside gamedev.bnp, and only CPath and
-// CIFile can see inside a bnp.
-static bool readEmojiFile(const string &filename, bool required, string &buffer, string &path)
-{
-	path = CPath::lookup(filename, false, false, false);
-	if (path.empty())
+	const string path = CPath::lookup(filename, false, false, false);
+	CIFile f;
+	string buffer;
+	if (path.empty() || !f.open(path) || !f.readAll(buffer))
 	{
 		if (required)
-			nlwarning("Emoji: '%s' not found, chat emoji will stay as plain text", filename.c_str());
+			nlwarning("Emoji: cannot read '%s'", filename.c_str());
 		return false;
 	}
-
-	CIFile f;
-	if (!f.open(path))
+	vector<string> rows;
+	explode(buffer, string("\n"), rows, true);
+	for (uint i = 0; i < rows.size(); ++i)
 	{
-		nlwarning("Emoji: cannot open '%s'", path.c_str());
-		return false;
+		string row = rows[i];
+		if (row[row.size() - 1] == '\r')
+			row.resize(row.size() - 1);
+		if (row.empty() || row[0] == '#')
+			continue;
+		lines.push_back(vector<string>());
+		explode(row, string("\t"), lines.back());
 	}
-
-	try
-	{
-		uint32 size = f.getFileSize();
-		buffer.resize(size);
-		if (size)
-			f.serialBuffer((uint8 *)&buffer[0], size);
-	}
-	catch (const Exception &e)
-	{
-		nlwarning("Emoji: error reading '%s': %s", path.c_str(), e.what());
-		return false;
-	}
-	f.close();
 	return true;
 }
 
 //=================================================================================
-// Hand back the next line of \p buffer, without its newline, and advance \p pos.
-static string nextLine(const string &buffer, string::size_type &pos)
+void CEmojiManager::loadTable(const string &filename, bool required)
 {
-	string::size_type eol = buffer.find('\n', pos);
-	if (eol == string::npos)
-		eol = buffer.size();
-	string line = buffer.substr(pos, eol - pos);
-	pos = eol + 1;
-	if (!line.empty() && line[line.size() - 1] == '\r')
-		line.erase(line.size() - 1);
-	return line;
-}
+	// name, hex codepoints, image stem
+	vector<vector<string> > lines;
+	if (!readEmojiFile(filename, required, lines))
+		return;
 
-//=================================================================================
-bool CEmojiManager::loadTable(const string &filename, bool required)
-{
-	string path, buffer;
-	if (!readEmojiFile(filename, required, buffer, path))
-		return false;
-
-	uint added = 0, bad = 0;
-	string::size_type pos = 0;
-	while (pos < buffer.size())
+	uint bad = 0;
+	for (uint i = 0; i < lines.size(); ++i)
 	{
-		string line = nextLine(buffer, pos);
-		if (line.empty() || line[0] == '#')
-			continue;
-
-		// name \t codepoints \t image-stem
-		string::size_type t1 = line.find('\t');
-		if (t1 == string::npos) { ++bad; continue; }
-		string::size_type t2 = line.find('\t', t1 + 1);
-		if (t2 == string::npos) { ++bad; continue; }
-
-		string name  = line.substr(0, t1);
-		string codes = line.substr(t1 + 1, t2 - t1 - 1);
-		string stem  = line.substr(t2 + 1);
-
+		const vector<string> &fields = lines[i];
 		string utf8;
-		if (name.empty() || name.size() > MaxNameBytes || !codepointsToUtf8(codes, utf8))
+		if (fields.size() == 3 && !fields[0].empty() && fields[0].size() <= MaxNameBytes)
+		{
+			vector<string> codepoints;
+			explode(fields[1], string(" "), codepoints, true);
+			for (uint j = 0; j < codepoints.size(); ++j)
+			{
+				uint32 codepoint = 0;
+				if (sscanf(codepoints[j].c_str(), "%x", &codepoint) != 1 || codepoint > 0x10FFFF)
+				{
+					utf8.clear();
+					break;
+				}
+				CUtfStringView::append(utf8, codepoint);
+			}
+		}
+		if (utf8.empty())
 		{
 			++bad;
 			continue;
 		}
 
-		// The table stores the image stem without an extension on purpose. The
-		// build tools deal in .png, but loadTextures rewrites .png to .tga while
-		// reading an atlas UV list, so what the renderer knows the tile by is
-		// .tga. Whichever extension the file carried, one side would be wrong.
-		addEntry(name, utf8, stem.empty() ? string() : stem + ".tga");
-		++added;
+		CEntry &entry = _ByName[fields[0]];
+		entry.Name = fields[0];
+		entry.Utf8 = utf8;
+		// Atlas UV lists name their tiles .tga, whatever the source images were.
+		entry.Texture = fields[2].empty() ? string() : fields[2] + ".tga";
 	}
 
 	if (bad)
-		nlwarning("Emoji: %u malformed line(s) in '%s'", bad, path.c_str());
-	nlinfo("Emoji: loaded %u entries from '%s'", added, path.c_str());
-	return added > 0;
+		nlwarning("Emoji: %u malformed line(s) in '%s'", bad, filename.c_str());
+	nlinfo("Emoji: loaded %u entries from '%s'", (uint)_ByName.size(), filename.c_str());
 }
 
 //=================================================================================
@@ -236,128 +134,73 @@ void CEmojiManager::init()
 		return;
 	_Loaded = true;
 
-	loadTable(EmojiTableFile, true);
-	// Optional, and loaded second so it overrides the generated table.
-	loadTable(EmojiOverrideFile, false);
+	loadTable("emoji.txt", true);
+	// Optional local corrections, loaded second so they win.
+	loadTable("emoji_overrides.txt", false);
 
-	// Build the reverse index used to spot emoji that were typed or pasted
-	// directly rather than written as ":name:".
-	std::vector<std::string::size_type> lengths;
+	// Reverse index for emoji typed or pasted as unicode.
 	for (std::map<string, CEntry>::const_iterator it = _ByName.begin(); it != _ByName.end(); ++it)
 	{
-		const CEntry &e = it->second;
-		if (e.Utf8.empty())
+		const CEntry &entry = it->second;
+		if (_ByUtf8.find(entry.Utf8) != _ByUtf8.end())
 			continue;
-		// Several names share one emoji; first one wins, which is fine because
-		// only the entry's data is needed here, not which name it came from.
-		if (_ByUtf8.find(e.Utf8) == _ByUtf8.end())
-		{
-			_ByUtf8[e.Utf8] = &e;
-			_CanStartUtf8[(unsigned char)e.Utf8[0]] = true;
-			if (std::find(lengths.begin(), lengths.end(), e.Utf8.size()) == lengths.end())
-				lengths.push_back(e.Utf8.size());
-		}
+		_ByUtf8[entry.Utf8] = &entry;
+		_CanStartUtf8[(unsigned char)entry.Utf8[0]] = true;
+		if (std::find(_Utf8Lengths.begin(), _Utf8Lengths.end(), entry.Utf8.size()) == _Utf8Lengths.end())
+			_Utf8Lengths.push_back(entry.Utf8.size());
 	}
-	// Longest first: a family emoji has to win over the single person its
-	// sequence starts with, or the rest of the sequence is left behind.
-	std::sort(lengths.begin(), lengths.end());
-	std::reverse(lengths.begin(), lengths.end());
-	_Utf8Lengths = lengths;
+	// Longest first, or a family emoji would match as its first person.
+	std::sort(_Utf8Lengths.begin(), _Utf8Lengths.end());
+	std::reverse(_Utf8Lengths.begin(), _Utf8Lengths.end());
 
-	// Last: it wants the reverse index to exist, and it corrects it.
-	loadPicker(EmojiPickerFile);
-
-	nlinfo("Emoji: %u name(s), %u distinct emoji, %u sequence length(s), %u picker group(s)",
-		(uint)_ByName.size(), (uint)_ByUtf8.size(), (uint)_Utf8Lengths.size(),
-		(uint)_Groups.size());
+	loadPicker("emoji_picker.txt");
 }
 
 //=================================================================================
 void CEmojiManager::loadPicker(const string &filename)
 {
-	string path, buffer;
-	// Not required: without it the chat is untouched and only the picker is
-	// empty, which the picker itself reports.
-	if (!readEmojiFile(filename, false, buffer, path))
+	// "g, i18n key, English label" starts a group, "e, name, description" adds an emoji.
+	vector<vector<string> > lines;
+	if (!readEmojiFile(filename, true, lines))
 		return;
 
-	uint kept = 0, unknown = 0, bad = 0;
-	string::size_type pos = 0;
-	while (pos < buffer.size())
+	uint bad = 0;
+	for (uint i = 0; i < lines.size(); ++i)
 	{
-		string line = nextLine(buffer, pos);
-		if (line.empty() || line[0] == '#')
-			continue;
-
-		// "g \t i18n-key \t English label"  or  "e \t name \t description"
-		string::size_type t1 = line.find('\t');
-		if (t1 == string::npos) { ++bad; continue; }
-		string::size_type t2 = line.find('\t', t1 + 1);
-		if (t2 == string::npos) { ++bad; continue; }
-
-		const string kind  = line.substr(0, t1);
-		const string field = line.substr(t1 + 1, t2 - t1 - 1);
-		const string rest  = line.substr(t2 + 1);
-
-		if (kind == "g")
-		{
-			CGroup g;
-			// The English label from the file is the fallback, so a group is
-			// still named when the translation has not landed yet.
-			g.Label = (!field.empty() && CI18N::hasTranslation(field)) ? CI18N::get(field) : rest;
-			_Groups.push_back(g);
-			continue;
-		}
-		if (kind != "e")
+		const vector<string> &fields = lines[i];
+		if (fields.size() != 3 || (fields[0] != "g" && (fields[0] != "e" || _Groups.empty())))
 		{
 			++bad;
 			continue;
 		}
-		if (_Groups.empty())
+		if (fields[0] == "g")
 		{
-			// An emoji before any group line: the file is not what we think.
-			++bad;
+			CGroup group;
+			group.Label = CI18N::hasTranslation(fields[1]) ? CI18N::get(fields[1]) : fields[2];
+			_Groups.push_back(group);
 			continue;
 		}
 
-		std::map<string, CEntry>::iterator it = _ByName.find(field);
+		std::map<string, CEntry>::iterator it = _ByName.find(fields[1]);
 		if (it == _ByName.end())
 		{
-			// The table and the picker were generated from different tables.
-			++unknown;
+			++bad;
 			continue;
 		}
-		CEntry &e = it->second;
-		if (e.Texture.empty())
+		CEntry &entry = it->second;
+		if (entry.Texture.empty())
 			continue;
-
-		e.Desc = rest;
-		_Groups.back().Emoji.push_back(&e);
-		// The picker names an emoji the way Zulip does, so let the whole client
-		// do the same: a pasted emoji now reads ":upside_down:" on hover rather
-		// than the first alias alphabetically, ":oops:".
-		if (!e.Utf8.empty())
-			_ByUtf8[e.Utf8] = &e;
-		++kept;
+		entry.Desc = fields[2];
+		_Groups.back().Emoji.push_back(&entry);
+		// Pasted emoji show the name the picker inserts, like Zulip does.
+		_ByUtf8[entry.Utf8] = &entry;
 	}
 
-	// Drop groups nothing survived in, so the picker has no empty tabs.
 	for (std::vector<CGroup>::iterator it = _Groups.begin(); it != _Groups.end();)
 		it = it->Emoji.empty() ? _Groups.erase(it) : it + 1;
 
 	if (bad)
-		nlwarning("Emoji: %u malformed line(s) in '%s'", bad, path.c_str());
-	if (unknown)
-		nlwarning("Emoji: %u emoji in '%s' are not in the name table; regenerate it",
-			unknown, path.c_str());
-	nlinfo("Emoji: picker has %u emoji in %u group(s)", kept, (uint)_Groups.size());
-}
-
-//=================================================================================
-const CEmojiManager::CEntry *CEmojiManager::find(const string &name) const
-{
-	std::map<string, CEntry>::const_iterator it = _ByName.find(name);
-	return it == _ByName.end() ? NULL : &it->second;
+		nlwarning("Emoji: %u unusable line(s) in '%s'", bad, filename.c_str());
 }
 
 //=================================================================================
@@ -367,40 +210,34 @@ bool CEmojiManager::mayContainEmoji(const string &text) const
 		return false;
 	for (string::size_type i = 0; i < text.size(); ++i)
 	{
-		if (text[i] == ':')
-			return true;
-		if (_CanStartUtf8[(unsigned char)text[i]])
+		if (text[i] == ':' || _CanStartUtf8[(unsigned char)text[i]])
 			return true;
 	}
 	return false;
 }
 
 //=================================================================================
-// Is there a ":name:" at index? Returns its total length including both colons.
-// Names are matched as raw bytes: no character class, see the header.
-static inline std::string::size_type shortcodeAt(const string &text,
+// Length of the ":name:" at index including both colons, or 0.
+static std::string::size_type shortcodeAt(const string &text,
 	std::string::size_type index, std::string::size_type to, string &name)
 {
 	if (index >= to || text[index] != ':')
 		return 0;
 
-	std::string::size_type end = index + 1;
-	std::string::size_type limit = std::min(to, index + 1 + CEmojiManager::MaxNameBytes + 1);
-	while (end < limit)
+	const std::string::size_type limit = std::min(to, index + CEmojiManager::MaxNameBytes + 2);
+	for (std::string::size_type end = index + 1; end < limit; ++end)
 	{
-		unsigned char c = (unsigned char)text[end];
+		const unsigned char c = (unsigned char)text[end];
 		if (c == ':')
 		{
 			if (end == index + 1)
-				return 0;			// "::" is not a name
+				return 0;
 			name.assign(text, index + 1, end - index - 1);
 			return end - index + 1;
 		}
-		// A name never contains whitespace or control bytes. Stopping on them
-		// keeps a stray colon in ordinary prose from starting a long scan.
+		// Names never hold whitespace, so a colon in prose stops at the next word.
 		if (c <= 0x20 || c == 0x7F)
 			return 0;
-		++end;
 	}
 	return 0;
 }
@@ -412,37 +249,29 @@ bool CEmojiManager::matchAt(const string &text, std::string::size_type index,
 	if (index >= to)
 		return false;
 
-	// ":name:"
 	if (text[index] == ':')
 	{
 		string name;
-		std::string::size_type l = shortcodeAt(text, index, to, name);
-		if (l)
-		{
-			std::map<string, CEntry>::const_iterator it = _ByName.find(name);
-			if (it != _ByName.end())
-			{
-				len = l;
-				entry = &it->second;
-				return true;
-			}
-		}
-		return false;
+		const std::string::size_type length = shortcodeAt(text, index, to, name);
+		std::map<string, CEntry>::const_iterator it = length ? _ByName.find(name) : _ByName.end();
+		if (it == _ByName.end())
+			return false;
+		len = length;
+		entry = &it->second;
+		return true;
 	}
 
-	// a literal emoji, longest sequence first
 	if (!_CanStartUtf8[(unsigned char)text[index]])
 		return false;
 	for (uint i = 0; i < _Utf8Lengths.size(); ++i)
 	{
-		std::string::size_type l = _Utf8Lengths[i];
-		if (index + l > to)
+		const std::string::size_type length = _Utf8Lengths[i];
+		if (index + length > to)
 			continue;
-		std::map<string, const CEntry *>::const_iterator it =
-			_ByUtf8.find(text.substr(index, l));
+		std::map<string, const CEntry *>::const_iterator it = _ByUtf8.find(text.substr(index, length));
 		if (it != _ByUtf8.end())
 		{
-			len = l;
+			len = length;
 			entry = it->second;
 			return true;
 		}
@@ -458,38 +287,27 @@ std::string CEmojiManager::substituteShortcodes(const string &text) const
 
 	string out;
 	out.reserve(text.size());
-
 	std::string::size_type i = 0;
 	while (i < text.size())
 	{
-		// Step over format tags rather than scanning inside them. A tooltip tag
-		// carries arbitrary text, so "@{Hsee :smile: here}" holds something that
-		// looks exactly like a shortcode; substituting it would cut the tag in
-		// half and the rest of the line would render as the tag's leftovers.
-		uint tagLen = NLGUI::CViewText::getFormatTagLength(text, (uint)i);
-		if (tagLen)
+		// A tooltip tag holds free text, which must not be cut by a substitution.
+		const uint tagLength = NLGUI::CViewText::getFormatTagLength(text, (uint)i);
+		if (tagLength)
 		{
-			out.append(text, i, tagLen);
-			i += tagLen;
+			out.append(text, i, tagLength);
+			i += tagLength;
 			continue;
 		}
 
-		if (text[i] == ':')
+		string name;
+		const std::string::size_type length = shortcodeAt(text, i, text.size(), name);
+		std::map<string, CEntry>::const_iterator it = length ? _ByName.find(name) : _ByName.end();
+		if (it != _ByName.end())
 		{
-			string name;
-			std::string::size_type l = shortcodeAt(text, i, text.size(), name);
-			if (l)
-			{
-				std::map<string, CEntry>::const_iterator it = _ByName.find(name);
-				if (it != _ByName.end())
-				{
-					out += it->second.Utf8;
-					i += l;
-					continue;
-				}
-			}
+			out += it->second.Utf8;
+			i += length;
+			continue;
 		}
-
 		out += text[i];
 		++i;
 	}

@@ -140,7 +140,9 @@ public:
 		 *	\param dynChatId is valid only if mode==dyn_chat. This the Id of channel (not the index in DB!)
 		 */
 		virtual void	displayChat(TDataSetIndex compressedSenderIndex, const std::string &ucstr, const std::string &rawMessage, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName, uint bubbleTimer=0) =0;
-		virtual void	displayChatMessage(TDataSetIndex compressedSenderIndex, const std::string &prefix, const CChatMessage &message, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId, std::string &senderName) =0;
+		virtual void	displayChatMessage(TDataSetIndex compressedSenderIndex, const std::string &prefix,
+			const CChatMessage &message, CChatGroup::TGroupType mode, NLMISC::CEntityId dynChatId,
+			std::string &senderName) =0;
 		/**
 		 *	display a player tell message
 		 */
@@ -182,7 +184,8 @@ public :
 	 * \param isChatTeam special case for Chat TEAM
 	 */
 	void chat( const std::string& str, bool isChatTeam = false );
-	void chat(const CChatMessageRequest &request, bool isChatTeam = false);
+	bool chat(const CChatMessageRequest &request, bool isChatTeam = false);
+	bool chat(const CChatMessageRequest &request, CChatGroup::TGroupType group, TChanID dynamicChannelId);
 
 	/**
 	 * Transmit a chat message to the receiver
@@ -190,7 +193,7 @@ public :
 	 * \param str is the chat content (truncated to 255 char max)
 	 */
 	void tell( const std::string& receiver, const std::string& str );
-	void tell(const std::string &receiver, const CChatMessageRequest &request);
+	bool tell(const std::string &receiver, const CChatMessageRequest &request);
 
 	/** Get the last name of the people with which a 'tell' has been done, then move that name at the start of the list
 	  */
@@ -237,7 +240,6 @@ public :
 	 * Extract and decode the chat string from the stream. display now if ready or delay in flushBuffer()
 	 */
 	void processChatString( NLMISC::CBitMemStream& bms, IChatDisplayer &chatDisplayer);
-	void processChatMessage(NLMISC::CBitMemStream &bms, IChatDisplayer &chatDisplayer);
 
 	/**
 	 * Extract and decode the chat string from the stream. display now if ready or delay in flushBuffer()

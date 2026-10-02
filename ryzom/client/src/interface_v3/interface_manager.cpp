@@ -115,6 +115,7 @@
 
 #include "chat_text_manager.h"
 #include "emoji_manager.h"
+#include "emoji_picker.h"
 #include "../npc_icon.h"
 
 #include "nel/gui/lua_helper.h"
@@ -902,9 +903,6 @@ void CInterfaceManager::initInGame()
 	// Init LUA Scripting
 	initLUA();
 
-	// Load the chat emoji table. Done here rather than lazily on the first chat
-	// line so that a missing or broken table shows up in the log at startup,
-	// and so the cost is not paid while a message is being rendered.
 	CEmojiManager::getInstance().init();
 
 	// Clear the action manager
@@ -1377,6 +1375,9 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Release interface help before inventory manager
 	CInterfaceHelp::release();
+
+	CEmojiPicker::releaseInstance();
+	CEmojiManager::releaseInstance();
 
 	// Release inventory manager
 	CInventoryManager::releaseInstance();

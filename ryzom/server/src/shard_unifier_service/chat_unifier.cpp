@@ -186,7 +186,8 @@ namespace CHATUNI
 		//// CChatUnifierSkel interface impl
 		/////////////////////////////////////////////////////////////
 
-		bool resolveFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &destName, ucstring &senderName, TModuleProxyPtr &destProxy)
+		bool resolveFarTell(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, const ucstring &destName,
+			ucstring &senderName, TModuleProxyPtr &destProxy)
 		{
 			CChatUnifierClientProxy cucSender(sender);
 			// ask the entity locator to find the addressee charId from it's name
@@ -271,7 +272,8 @@ namespace CHATUNI
 			cucDest.recvFarTell(this, senderCharId, senderName, havePrivilege, destName, text);
 		}
 
-		void sendFarTellShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege, const ucstring &destName, const CChatMessage &chatMessage)
+		void sendFarTellShared(NLNET::IModuleProxy *sender, const NLMISC::CEntityId &senderCharId, bool havePrivilege,
+			const ucstring &destName, const CChatMessage &chatMessage)
 		{
 			ucstring senderName;
 			TModuleProxyPtr destProxy;

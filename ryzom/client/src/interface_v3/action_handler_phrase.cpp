@@ -1581,16 +1581,6 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseUpdateAllMemoryRegenTickRange, "phrase_upd
 
 
 // ***************************************************************************
-static void sharePhrase(const CSPhraseCom &phrase, CChatMessageReference::TType type, uint32 value,
-	const std::string &destination)
-{
-	CHAT_SHARE::TShareResult result = CHAT_SHARE::share(phrase.Name.toUtf8(), type, value,
-		CHAT_SHARE::phraseColor(), destination);
-	if (result == CHAT_SHARE::ShareInputFull)
-		CInterfaceManager::getInstance()->displaySystemInfo(
-			CI18N::get("uiChatLinkDoesNotFit"));
-}
-
 class CHandlerLinkPhraseInChat : public IActionHandler
 {
 public:
@@ -1601,24 +1591,23 @@ public:
 			return;
 
 		CSPhraseCom phrase;
-		CChatMessageReference::TType type;
-		uint32 value;
+		CChatMessageReference reference;
 		if (ctrl->isSPhraseId())
 		{
 			phrase = CSPhraseManager::getInstance()->getPhrase(ctrl->getSPhraseId());
-			type = CChatMessageReference::KnownPhrase;
-			value = ctrl->getSPhraseId();
+			reference.Type = CChatMessageReference::KnownPhrase;
+			reference.Value = ctrl->getSPhraseId();
 		}
 		else if (ctrl->isSPhrase())
 		{
 			CSPhraseManager::getInstance()->buildPhraseFromSheet(phrase, ctrl->getSheetId());
-			type = CChatMessageReference::PhraseSheet;
-			value = ctrl->getSheetId();
+			reference.Type = CChatMessageReference::PhraseSheet;
+			reference.Value = ctrl->getSheetId();
 		}
 		else
 			return;
 		if (!phrase.empty())
-			sharePhrase(phrase, type, value, getParam(params, "destination"));
+			CHAT_SHARE::share(phrase.Name.toUtf8(), reference, getParam(params, "destination"));
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerLinkPhraseInChat, "link_phrase_in_chat");

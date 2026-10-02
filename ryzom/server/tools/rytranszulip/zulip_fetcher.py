@@ -24,9 +24,13 @@ import os
 import sys
 import json
 import re
+import requests
 from time import time
 
 from zulip_service import ZulipService, RyzomMessage
+from quote_bridge import QuoteNotForwarded, extract_quote
+
+QUOTE_ACK_WAIT_SECONDS = 60
 
 class ZulipFetcher(ZulipService):
 
@@ -43,13 +47,34 @@ class ZulipFetcher(ZulipService):
 		self.guilds_prefixes = {"atys": "0x00165", "gingo": "0x002f5"}
 
 	def ingestZulipMessage(self, msg, source_lang=None):
-		raw_msg = msg["content"]
+		def get_original(message_id):
+			result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET",
+				request={"apply_markdown": False})
+			if result.get("result") != "success" and self.retryError(result):
+				raise requests.exceptions.ConnectionError("Cannot fetch quoted message "+str(message_id))
+			return result.get("message") if result.get("result") == "success" else None
+
+		try:
+			raw_msg, quoted_zulip_id = extract_quote(msg, self.base_url, get_original,
+				lambda message_id: bool(self.getChatMessageId(message_id)))
+		except QuoteNotForwarded:
+			raise
+		except ValueError as error:
+			print(f"Cannot forward quoted message {msg['id']}: {error}")
+			return
 		message = self.convert_zulip_upload_links(raw_msg)
 		# Drop the "!" from image markdown: Zulip auto-embeds a plain [alt](url)
 		# link to an image just as well, and this sidesteps every issue caused
 		# by the "!" downstream (DeepL typographic spacing, link conversion, etc.)
 		message = re.sub(r"!(\[[^\]]*]\([^)]+\))", r"\1", message)
 		sender = msg["sender_full_name"]
+		chat = {"zulip_id": msg["id"]}
+		if quoted_zulip_id is not None:
+			quote_id = self.getChatMessageId(quoted_zulip_id)
+			chat["quote_id"] = quote_id.decode("ascii") if isinstance(quote_id, bytes) else quote_id
+		chat["external_id"] = "zulip:"+self.base_url.rstrip("/")+":"+str(msg["id"])
+		if msg.get("last_edit_timestamp"):
+			chat["external_id"] += ":edit:"+str(msg["last_edit_timestamp"])
 		dest = msg["display_recipient"]
 		if msg["type"] == "private":
 			if len(dest) == 2:
@@ -59,8 +84,9 @@ class ZulipFetcher(ZulipService):
 				else:
 					channel_id = dest[0]["full_name"].lower()
 
-				message = RyzomMessage("zulip", sender, channel, "tell:"+channel_id, "wk", "*", message)
-				self.addRyzomMessage(message)
+				chat["channel"] = "tell:"+channel_id
+				message = RyzomMessage("zulip", sender, channel, chat["channel"], "wk", "*", message, source_message_id=msg["id"], chat=chat)
+				return self.addRyzomMessage(message)
 		else:
 			stream_id = msg["stream_id"]
 			stream = self.zulip.call_endpoint(url=f"streams/{stream_id}", method="GET")
@@ -78,11 +104,11 @@ class ZulipFetcher(ZulipService):
 					gid = ""
 				channel_id = "guild:("+self.guilds_prefixes[self.shard]+gid+":09:00:00)"
 			elif channel[0] == u"💠":
-				channel_id = "FACTION_RF"
+				channel_id = "dyn:FACTION_RF"
 			elif channel[0] == "⚜":
-				channel_id = "FACTION_"+channel[2:].strip().upper()
+				channel_id = "dyn:FACTION_"+channel[2:].strip().upper()
 			elif channel[0] == "❇":
-				channel_id = channel[2:].strip()
+				channel_id = "dyn:"+channel[2:].strip()
 			else:
 				channel_id = channel[1:].strip().lower()
 
@@ -91,46 +117,106 @@ class ZulipFetcher(ZulipService):
 				source_lang = msg["translation_lang"] if "translation_lang" in msg else "en"
 			self.client.set(f"Zulip-Msg-Lang-{msg['id']}", source_lang, 24*60*60)
 
-			ryzom_message = RyzomMessage("zulip", sender.lower(), channel, channel_id, source_lang, "*", message, source_message_id=msg["id"])
+			chat["channel"] = channel_id
+			ryzom_message = RyzomMessage("zulip", sender, channel, channel_id, source_lang, "*", message, source_message_id=msg["id"], chat=chat)
 			self.addRyzomMessage(ryzom_message)
+
+	def pendingQuoteKey(self):
+		return "Chat-Zulip-Quote-Pending-"+self.name
+
+	def deferQuotedMessage(self, message_id, quoted_id, event_type):
+		key = self.pendingQuoteKey()
+		pending = self.client.get(key) or {}
+		deadline = pending[message_id][1] if message_id in pending else time()+QUOTE_ACK_WAIT_SECONDS
+		if deadline > time():
+			pending[message_id] = (quoted_id, deadline, event_type)
+			self.client.set(key, pending, expire=QUOTE_ACK_WAIT_SECONDS)
+
+	def clearPendingQuote(self, message_id):
+		key = self.pendingQuoteKey()
+		pending = self.client.get(key) or {}
+		if message_id in pending:
+			del pending[message_id]
+			if pending:
+				self.client.set(key, pending, expire=QUOTE_ACK_WAIT_SECONDS)
+			else:
+				self.client.delete(key)
+
+	def retryPendingQuotes(self):
+		key = self.pendingQuoteKey()
+		for message_id, (quoted_id, deadline, event_type) in (self.client.get(key) or {}).items():
+			if time() >= deadline:
+				print(f"Cannot forward quoted message {message_id}: acknowledgement not received")
+				self.clearPendingQuote(message_id)
+				continue
+			if not self.getChatMessageId(quoted_id):
+				continue
+			result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET",
+				request={"apply_markdown": False})
+			if result.get("result") != "success":
+				continue
+			message = result["message"]
+			if event_type == "update_message":
+				event = {"type": event_type, "message_id": message_id, "message": message,
+					"content": True, "user_id": message["sender_id"]}
+			else:
+				event = {"type": "message", "message": message}
+			if self.dispatchEvent(event) is not False:
+				self.clearPendingQuote(message_id)
+		return bool(self.client.get(key))
 
 	def checkMessages(self, event):
 		msg = event["message"]
 		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
-			return
-		self.ingestZulipMessage(msg)
+			return False
+		return self.ingestZulipMessage(msg)
 
 	def checkUpdatedMessage(self, event):
 		# Only react to actual content edits by a real user; ignore rendering-only
 		# fixups (e.g. link preview refresh) and edits with no content change.
 		if event.get("rendering_only") or "content" not in event:
-			return
+			return False
 		# Edits made by the Ryzom bot itself are how translations get added to a
 		# message; reacting to them here would create a translation loop.
 		if event.get("user_id") == self.admin_id:
-			return
+			return False
 
 		message_id = event["message_id"]
-		result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET", request={"apply_markdown": False})
+		if "message" in event:
+			result = {"result": "success", "message": event["message"]}
+		else:
+			result = self.zulip.call_endpoint(url=f"messages/{message_id}", method="GET",
+				request={"apply_markdown": False})
 		if result["result"] == "error":
 			print(f"Error fetching edited message {message_id}", result["msg"])
-			return
+			return False
 
 		# Reuse the original message's language, so a re-translation isn't
 		# mistakenly sourced from the requesting bot's own language.
 		source_lang = self.client.get(f"Zulip-Msg-Lang-{message_id}")
-		self.ingestZulipMessage(result["message"], source_lang=source_lang)
+		return self.ingestZulipMessage(result["message"], source_lang=source_lang)
 
 	def dispatchEvent(self, event):
-		if event["type"] == "message":
-			self.checkMessages(event)
-		elif event["type"] == "update_message":
-			self.checkUpdatedMessage(event)
+		event_type = event["type"]
+		if event_type == "message":
+			message_id = event["message"]["id"]
+		elif event_type == "update_message":
+			message_id = event["message_id"]
+		else:
+			return
+		try:
+			processed = self.checkMessages(event) if event_type == "message" else self.checkUpdatedMessage(event)
+		except QuoteNotForwarded as error:
+			self.deferQuotedMessage(message_id, error.original_id, event_type)
+			return False
+		if processed is not False:
+			self.clearPendingQuote(message_id)
 
 	def run(self):
 		print("Fetching Zulip messages")
-		self.setZulipQueueId(self.zulip.registerMessages())
-		self.zulip.manageMessages(self.dispatchEvent)
+		self.setZulipQueueId(self.zulip.registerMessages(apply_markdown=False))
+		self.zulip.manageMessages(self.dispatchEvent, on_register=self.setZulipQueueId,
+			on_poll=self.retryPendingQuotes, apply_markdown=False)
 
 if __name__ == "__main__":
 	fetcher = ZulipFetcher()

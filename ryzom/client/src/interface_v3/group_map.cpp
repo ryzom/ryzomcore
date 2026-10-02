@@ -23,6 +23,7 @@
 #include "stdpch.h"
 //
 #include "group_map.h"
+#include "chat_link_ui.h"
 #include "interface_manager.h"
 #include "../continent_manager.h"
 #include "../continent.h"
@@ -49,6 +50,7 @@
 #include "game_share/mission_desc.h"
 #include "game_share/inventories.h"
 #include "game_share/animal_type.h"
+#include "game_share/chat_message.h"
 //
 #include "nel/3d/u_material.h"
 #include "nel/3d/u_texture.h"
@@ -102,6 +104,8 @@ NLMISC::CRGBA	CUserLandMark::_LandMarksColor[CUserLandMark::UserLandMarkTypeCoun
 
 
 const uint32 ISLAND_PIXEL_PER_METER = 2;
+// time a position shown from the chat stays on the map (ms)
+const sint64 CHAT_POSITION_SHOW_TIME = 30000;
 
 static void setupFromZoom(CViewBase *pVB, CContLandMark::TContLMType t, float fMeterPerPixel);
 
@@ -113,7 +117,7 @@ static float distsqr(const CVector2f a, const CVector2f b)
 
 // popup the landmark name dialog
 
-static void popupLandMarkNameDialog()
+static void popupLandMarkNameDialog(const string &title = string())
 {
 	// pop the rename dialog
 	CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -146,7 +150,7 @@ static void popupLandMarkNameDialog()
 	else
 	{
 		NLGUI::CDBManager::getInstance()->getDbProp( "UI:TEMP:LANDMARKTYPE" )->setValue8(cb->getTextPos(CUserLandMark::Misc));
-		eb->setInputString(string());
+		eb->setInputString(title);
 	}
 
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
@@ -431,6 +435,7 @@ CGroupMap::CGroupMap(const TCtorParam &param)
 	_Panning = false;
 	_HasMoved = false;
 	_RightClickLastPos.set(0.f, 0.f);
+	_ChatPositionEnd = 0;
 	// make room for mission targets
 	_MissionLM.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, 0);
 	_MissionTargetTextIDs.resize(2 * MAX_NUM_MISSIONS * MAX_NUM_MISSION_TARGETS, 0);
@@ -944,6 +949,7 @@ void CGroupMap::updateCoords()
 		updateLandMarkList(_ContinentLM);
 		updateLandMarkTextList(_ContinentText);
 		updateLandMarkList(_UserLM);
+		updateLandMarkList(_ChatPositionLM);
 		updateLandMarkList(_MissionLM);
 		// target
 		if (_TargetLM && _TargetLM->getActive()) updateButtonPos(*_TargetLM);
@@ -1130,6 +1136,8 @@ void CGroupMap::checkCoords()
 		invalidateCoords();
 	}
 	updateContinentInfo();
+	if (!_ChatPositionLM.empty() && T1 >= _ChatPositionEnd)
+		removeLandMarks(_ChatPositionLM);
 
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -2609,6 +2617,7 @@ void CGroupMap::createContinentLandMarks()
 
 	// Remove all
 	removeLandMarks(_ContinentLM);
+	removeLandMarks(_ChatPositionLM);
 	for (k = 0; k < _ContinentText.size(); ++k)
 		delView(_ContinentText[k]);
 	_ContinentText.clear();
@@ -2975,6 +2984,92 @@ CUserLandMark CGroupMap::getUserLandMark(CCtrlButton *button) const
 }
 
 //============================================================================================================
+void CGroupMap::captureChatPosition(CCtrlButton *button) const
+{
+	CHAT_SHARE::setMapPosition(NULL);
+	if (_MapMode != MapMode_Normal || _IsIsland || !_CurMap || !_MapTexW || !_MapTexH)
+		return;
+
+	CChatMessagePosition position;
+	position.Kind = CChatMessagePosition::MapPosition;
+	position.Continent = getContinentName();
+	CVector2f point;
+	TLandMarkButtonVect::const_iterator landmark = std::find(_UserLM.begin(), _UserLM.end(), button);
+	if (button && landmark != _UserLM.end() && _CurContinent)
+	{
+		const CUserLandMark &flag = _CurContinent->UserLandMarks[landmark - _UserLM.begin()];
+		if (flag.Type >= CUserLandMark::UserLandMarkTypeCount)
+			return;
+		point = flag.Pos;
+		position.Kind = CChatMessagePosition::UserLandMark;
+		position.FlagName = flag.Title;
+		position.FlagColor = flag.getColor();
+	}
+	else
+	{
+		if (button)
+			return;
+		mapToWorld(point, _RightClickLastPos);
+	}
+	const double x = double(point.x) * 1000, y = double(point.y) * 1000;
+	if (!isValidDouble(x) || !isValidDouble(y) ||
+		x < std::numeric_limits<sint32>::min() || x > std::numeric_limits<sint32>::max() ||
+		y < std::numeric_limits<sint32>::min() || y > std::numeric_limits<sint32>::max())
+		return;
+	position.X = (sint32)x;
+	position.Y = (sint32)y;
+	CHAT_SHARE::setMapPosition(&position);
+}
+
+//============================================================================================================
+bool CGroupMap::showChatPosition(const CVector2f &worldPos, const std::string &continent,
+	const ucstring &title, CRGBA color)
+{
+	const SMap *best = NULL;
+	float bestArea = 0.f;
+	for (uint i = 0; i < _WorldSheet->Maps.size(); ++i)
+	{
+		const SMap &map = _WorldSheet->Maps[i];
+		if (map.ContinentName != continent ||
+			worldPos.x < std::min(map.MinX, map.MaxX) || worldPos.x > std::max(map.MinX, map.MaxX) ||
+			worldPos.y < std::min(map.MinY, map.MaxY) || worldPos.y > std::max(map.MinY, map.MaxY))
+			continue;
+		const float area = fabs((map.MaxX - map.MinX) * (map.MaxY - map.MinY));
+		if (!best || area < bestArea)
+		{
+			best = &map;
+			bestArea = area;
+		}
+	}
+	if (!best || _MapMode != MapMode_Normal)
+		return false;
+
+	setMap(best->Name);
+	removeLandMarks(_ChatPositionLM);
+	CLandMarkOptions options(_UserLMOptions);
+	options.LandMarkMenu.clear();
+	options.ColorNormal = options.ColorOver = options.ColorPushed = color;
+	CVector2f mapPos;
+	worldToMap(mapPos, worldPos);
+	addLandMark(_ChatPositionLM, mapPos, title, options);
+	_ChatPositionEnd = T1 + CHAT_POSITION_SHOW_TIME;
+	centerOnWorldPos(worldPos);
+	return true;
+}
+
+//============================================================================================================
+void CGroupMap::createUserLandMarkAt(const CVector2f &worldPos, const ucstring &title)
+{
+	if (isInDeathMode())
+		return;
+	worldToMap(_RightClickLastPos, worldPos);
+	LastClickedMap = this;
+	LastSelectedLandMark = NULL;
+	UseUserPositionForLandMark = false;
+	popupLandMarkNameDialog(title.toUtf8());
+}
+
+//============================================================================================================
 uint CGroupMap::getNumUserLandMarks() const
 {
 	if (_CurContinent == NULL) return 0;
@@ -3236,6 +3331,18 @@ void CGroupMap::targetLandmark(CCtrlButton *lm)
 				mapToWorld(ct.Pos, (*it)->Pos);
 				found = true;
 			}
+		}
+	}
+	if (!found)
+	{
+		// position shown from the chat
+		it = std::find(_ChatPositionLM.begin(), _ChatPositionLM.end(),lm);
+		if (it != _ChatPositionLM.end())
+		{
+			ct.setType(CCompassTarget::ContinentLandMark);
+			(*it)->getContextHelp(ct.Name);
+			mapToWorld(ct.Pos, (*it)->Pos);
+			found = true;
 		}
 	}
 	if (!found)
@@ -3889,7 +3996,10 @@ class CAHMapLandmarkByIndex : public IActionHandler
 		if (menuId.empty())
 			map->targetLandmark(pButton);
 		else
+		{
+			map->captureChatPosition(pButton);
 			CAHManager::getInstance()->runActionHandler("active_menu", pButton, toString("pushmodal=true|popmodal=false|menu=%s", menuId.c_str()));
+		}
 	}
 };
 REGISTER_ACTION_HANDLER(CAHMapLandmarkByIndex, "map_landmark_by_index");
@@ -4207,6 +4317,7 @@ class CAHWorldMapRightClick : public IActionHandler
 		CGroupMap *gm = dynamic_cast<CGroupMap *>(CWidgetManager::getInstance()->getElementFromId(map));
 		if (!gm) return;
 
+		gm->captureChatPosition(dynamic_cast<CCtrlButton*>(pCaller));
 		if (gm->isIsland())
 		{
 			if (gm->getArkPowoMode() == "editor")

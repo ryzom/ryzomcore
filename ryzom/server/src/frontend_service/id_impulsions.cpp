@@ -166,6 +166,8 @@ void impulsionCmd( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, 
 //-----------------------------------------------
 void impulsionChatShare( CEntityId& sender, CBitMemStream &bms, TGameCycle gamecycle, uint16 serviceId )
 {
+	if (bms.length() > CHAT_MESSAGE::MaxSerializedSize)
+		return;
 	uint8 chatMode;
 	CEntityId dynamicChannelId;
 	string receiver;

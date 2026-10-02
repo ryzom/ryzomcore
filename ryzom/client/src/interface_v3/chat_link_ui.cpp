@@ -21,27 +21,46 @@
 #include "chat_text_manager.h"
 #include "chat_window.h"
 #include "dbctrl_sheet.h"
+#include "group_map.h"
 #include "interface_manager.h"
 #include "inventory_manager.h"
+#include "macrocmd_manager.h"
 #include "people_interraction.h"
 #include "sphrase_manager.h"
 #include "../client_chat_manager.h"
+#include "../commands.h"
+#include "../connection.h"
+#include "../continent.h"
+#include "../continent_manager.h"
+#include "../entity_cl.h"
 #include "../sheet_manager.h"
 #include "../string_manager_client.h"
+#include "../user_entity.h"
+#include "game_share/shard_names.h"
 
 #include "nel/gui/db_manager.h"
+#include "nel/gui/group_container.h"
 #include "nel/gui/group_editbox.h"
+#include "nel/gui/group_html.h"
 #include "nel/gui/group_paragraph.h"
+#include "nel/gui/lua_manager.h"
+#include "nel/gui/view_bitmap.h"
 #include "nel/gui/view_link.h"
+#include "nel/gui/view_text.h"
 #include "nel/gui/widget_manager.h"
-#include "nel/misc/algo.h"
 #include "nel/misc/i18n.h"
+#include "nel/misc/mem_stream.h"
+#include "nel/misc/sstring.h"
 #include "nel/misc/utf_string_view.h"
+
+#include <ctime>
 
 using namespace NLGUI;
 using namespace NLMISC;
 
+extern CContinentManager ContinentMngr;
 extern CClientChatManager ChatMngr;
+extern CLog g_log;
 
 namespace CHAT_SHARE
 {
@@ -57,228 +76,78 @@ namespace CHAT_SHARE
 			CChatMessagePart Part;
 		};
 
+		enum TShareResult
+		{
+			ShareOk,
+			ShareUnavailable,
+			ShareInputFull
+		};
+
+		const CRGBA ItemLinkColor(255, 205, 80, 255);
+		const CRGBA LinkColor(110, 205, 255, 255);
+
 		const char *PhraseLinkDb = "UI:PHRASE_LINK:0";
 		// Help windows store raw sheet pointers, keep previews alive until interface release.
 		std::map<uint, CDBCtrlSheet*> LinkedItemSheets;
 		CDBCtrlSheet *LinkedPhraseSheet = NULL;
 		CSmartPtr<CSPhraseComAdpater> LinkedPhraseTooltip;
+		CChatMessagePosition SelectedMapPosition;
+		bool HasSelectedMapPosition = false;
+		// Position of the open chat_position_map window.
+		CChatMessagePosition ShownPosition;
 		const CChatMessageRequest *CurrentRequest = NULL;
+		CRefPtr<CGroupEditBox> CurrentEditBox;
+		bool CurrentRequestSent = false;
 		CChatMessageRequest PendingTell;
 
-		enum TParseResult
+		// @team and @guild follow the client language; @all is a command word like the chat commands.
+		CChatMessageMention::TScope getMentionScope(const ucstring &name)
 		{
-			ParseOk,
-			ParseInvalidToken,
-			ParseTooLong
-		};
-
-		void displayRequestError()
-		{
-			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiChatLinkDoesNotFit"));
+			const std::string lower = toLower(name.toUtf8());
+			if (lower == toLower(CI18N::get("uiTeam")))
+				return CChatMessageMention::Team;
+			if (lower == toLower(CI18N::get("uiGuild")))
+				return CChatMessageMention::Guild;
+			if (lower == "all")
+				return CChatMessageMention::All;
+			return CChatMessageMention::Player;
 		}
 
-		class CHandlerChatLinkTell : public IActionHandler
+		// Append input text with its tokens parsed, and a reference for each group mention in it.
+		bool appendRequestText(CChatMessageRequest &request, const ::u32string &input)
 		{
-		public:
-			virtual void execute(CCtrlBase * /* caller */, const std::string &params)
-			{
-				if (params == "cancel")
-				{
-					PendingTell.Text.clear();
-					PendingTell.References.clear();
-					return;
-				}
-				CWidgetManager *widgets = CWidgetManager::getInstance();
-				CInterfaceGroup *dialog = dynamic_cast<CInterfaceGroup*>(
-					widgets->getElementFromId("ui:interface:chat_link_tell"));
-				if (!dialog || widgets->getModalWindow() != dialog || !PendingTell.isValid())
-					return;
-				CGroupEditBox *receiver = dynamic_cast<CGroupEditBox*>(dialog->getGroup("receiver:eb"));
-				if (!receiver || receiver->getInputString().empty())
-					return;
-				ChatMngr.tell(receiver->getInputString(), PendingTell);
-				widgets->disableModalWindow();
-			}
-		};
-		REGISTER_ACTION_HANDLER(CHandlerChatLinkTell, "chat_link_tell");
-
-		bool buildRawRequest(const CGroupEditBox *editBox, CChatMessageRequest &request)
-		{
-			request.Text.clear();
-			request.References.clear();
-			if (!editBox || editBox->getTextTags().empty())
-				return false;
-
-			const ::u32string &input = editBox->getInputStringRef();
-			request.Text = CUtfStringView(input).toUtf16();
-			if (request.Text.size() > CHAT_MESSAGE::MaxTextLength ||
-				editBox->getTextTags().size() > CHAT_MESSAGE::MaxReferences)
-				return false;
-
-			const std::vector<CGroupEditBox::CTextTag> &tags = editBox->getTextTags();
-			for (std::vector<CGroupEditBox::CTextTag>::const_iterator it = tags.begin(); it != tags.end(); ++it)
-			{
-				if (it->Start > input.size() || it->Length > input.size() - it->Start)
-					return false;
-				const ucstring prefix = CUtfStringView(input.substr(0, it->Start)).toUtf16();
-				const ucstring title = CUtfStringView(input.substr(it->Start, it->Length)).toUtf16();
-				if (title.empty())
-					return false;
-				CChatMessageReference reference;
-				reference.Start = (uint16)prefix.size();
-				reference.Length = (uint16)title.size();
-				reference.Type = (CChatMessageReference::TType)it->Type;
-				reference.Value = it->Value;
-				request.References.push_back(reference);
-			}
-			return request.isValid();
-		}
-
-		TParseResult appendParsedText(const ucstring &text, ucstring &result)
-		{
-			std::string parsed = text.toUtf8();
+			std::string parsed = CUtfStringView(input).toUtf8();
 			if (!CInterfaceManager::parseTokens(parsed))
-				return ParseInvalidToken;
-			const ucstring parsedText = CUtfStringView(parsed).toUtf16();
-			if (parsedText.size() > CHAT_MESSAGE::MaxTextLength - result.size())
-				return ParseTooLong;
-			result += parsedText;
-			return ParseOk;
-		}
-
-		TParseResult parseRequestTokens(CChatMessageRequest &request)
-		{
-			if (!request.isValid())
-				return ParseTooLong;
-
-			const ucstring source = request.Text;
-			ucstring parsed;
-			uint32 sourcePosition = 0;
-			for (std::vector<CChatMessageReference>::iterator it = request.References.begin();
-				it != request.References.end(); ++it)
-			{
-				const uint32 referenceStart = it->Start;
-				const TParseResult result = appendParsedText(
-					source.substr(sourcePosition, referenceStart - sourcePosition), parsed);
-				if (result != ParseOk)
-					return result;
-				it->Start = (uint16)parsed.size();
-				if (it->Length > CHAT_MESSAGE::MaxTextLength - parsed.size())
-					return ParseTooLong;
-				parsed += source.substr(referenceStart, it->Length);
-				sourcePosition = referenceStart + it->Length;
-			}
-			const TParseResult result = appendParsedText(source.substr(sourcePosition), parsed);
-			if (result != ParseOk)
-				return result;
-			request.Text.swap(parsed);
-			return request.isValid() ? ParseOk : ParseTooLong;
-		}
-
-		bool isCommandSpace(ucchar character)
-		{
-			return character == (ucchar)' ' || character == (ucchar)'\t' ||
-				character == (ucchar)'\n' || character == (ucchar)'\r';
-		}
-
-		void normalizeCommandText(const CChatMessageRequest &source, ucstring::size_type start,
-			ucstring &text, std::vector<uint16> &positions)
-		{
-			const uint16 invalidPosition = CHAT_MESSAGE::MaxTextLength + 1;
-			positions.assign(source.Text.size() + 1, invalidPosition);
-			text.clear();
-			positions[start] = 0;
-			std::vector<CChatMessageReference>::const_iterator reference = source.References.begin();
-			ucstring::size_type position = start;
-			while (position < source.Text.size())
-			{
-				if (reference != source.References.end() && position == reference->Start)
-				{
-					const ucstring::size_type referenceEnd = reference->Start + reference->Length;
-					while (position < referenceEnd)
-					{
-						text += source.Text[position++];
-						positions[position] = (uint16)text.size();
-					}
-					++reference;
-					continue;
-				}
-				if (!isCommandSpace(source.Text[position]))
-				{
-					text += source.Text[position++];
-					positions[position] = (uint16)text.size();
-					continue;
-				}
-
-				const ucstring::size_type spaceStart = position;
-				const ucstring::size_type nextReference = reference == source.References.end() ?
-					source.Text.size() : reference->Start;
-				while (position < nextReference && isCommandSpace(source.Text[position]))
-					++position;
-				if (!text.empty() && position < source.Text.size())
-					text += (ucchar)' ';
-				for (ucstring::size_type i = spaceStart + 1; i <= position; ++i)
-					positions[i] = (uint16)text.size();
-			}
-		}
-
-		bool selectCommandText(const CChatMessageRequest &source, uint32 argumentsBeforeText,
-			CChatMessageRequest &request)
-		{
-			if (!source.isValid() || source.Text.empty() || source.Text[0] != (ucchar)'/')
 				return false;
-
-			ucstring::size_type position = 1;
-			for (uint32 i = 0; i < argumentsBeforeText; ++i)
+			const ucstring segment = CUtfStringView(parsed).toUtf16();
+			if (segment.size() > CHAT_MESSAGE::MaxTextLength - request.Text.size())
+				return false;
+			const uint32 start = (uint32)request.Text.size();
+			request.Text += segment;
+			for (uint32 i = start; i < request.Text.size(); ++i)
 			{
-				while (position < source.Text.size() && isCommandSpace(source.Text[position]))
-					++position;
-				if (position == source.Text.size())
-					return false;
-				while (position < source.Text.size() && !isCommandSpace(source.Text[position]))
-					++position;
-			}
-
-			const ucstring::size_type separatorStart = position;
-			while (position < source.Text.size() && isCommandSpace(source.Text[position]))
-				++position;
-			ucstring::size_type textStart = position;
-			for (std::vector<CChatMessageReference>::const_iterator it = source.References.begin();
-				it != source.References.end(); ++it)
-			{
-				const uint32 referenceEnd = it->Start + it->Length;
-				if (it->Start >= separatorStart && it->Start < textStart && referenceEnd > textStart)
+				const uint32 end = CHAT_MESSAGE::getMentionEnd(request.Text, i);
+				if (end == i)
+					continue;
+				const CChatMessageMention::TScope scope = getMentionScope(request.Text.substr(i + 1, end - i - 1));
+				if (scope != CChatMessageMention::Player)
 				{
-					textStart = it->Start;
-					break;
+					CChatMessageReference reference;
+					reference.Start = (uint16)i;
+					reference.Length = (uint16)(end - i);
+					reference.Type = CChatMessageReference::Mention;
+					reference.Value = scope;
+					request.References.push_back(reference);
 				}
+				i = end - 1;
 			}
-			for (std::vector<CChatMessageReference>::const_iterator it = source.References.begin();
-				it != source.References.end(); ++it)
-			{
-				if (it->Start < textStart)
-					return false;
-			}
+			return true;
+		}
 
-			ucstring normalized;
-			std::vector<uint16> positions;
-			normalizeCommandText(source, textStart, normalized, positions);
-			request.Text.swap(normalized);
-			request.References.clear();
-			for (std::vector<CChatMessageReference>::const_iterator it = source.References.begin();
-				it != source.References.end(); ++it)
-			{
-				const uint32 referenceEnd = it->Start + it->Length;
-				if (it->Start < textStart || referenceEnd >= positions.size() ||
-					positions[it->Start] > CHAT_MESSAGE::MaxTextLength ||
-					positions[referenceEnd] <= positions[it->Start])
-					return false;
-				CChatMessageReference reference = *it;
-				reference.Start = positions[it->Start];
-				reference.Length = positions[referenceEnd] - reference.Start;
-				request.References.push_back(reference);
-			}
-			return request.isValid();
+		CAttachmentView *attachmentFromCaller(CCtrlBase *caller)
+		{
+			CCtrlLink *link = dynamic_cast<CCtrlLink*>(caller);
+			return link ? dynamic_cast<CAttachmentView*>(link->getLinkView()) : NULL;
 		}
 
 		void setItemLinkDbValue(const std::string &dbPath, const std::string &leaf, sint64 value)
@@ -348,18 +217,218 @@ namespace CHAT_SHARE
 			return LinkedPhraseSheet;
 		}
 
-		CAttachmentView *attachmentFromCaller(CCtrlBase *caller)
-		{
-			CCtrlLink *link = dynamic_cast<CCtrlLink*>(caller);
-			return link ? dynamic_cast<CAttachmentView*>(link->getLinkView()) : NULL;
-		}
-
 		void updateLinkTooltip(CCtrlBase *caller, const std::string &windowName, const std::string &text)
 		{
 			CCtrlLink *link = dynamic_cast<CCtrlLink*>(caller);
 			if (link)
 				link->setContextHelpWindowName(windowName);
 			CWidgetManager::getInstance()->getContextHelpText() = text;
+		}
+
+		std::string getPositionName(const CChatMessagePosition &position)
+		{
+			return position.Kind == CChatMessagePosition::UserLandMark ? position.FlagName.toUtf8() :
+				STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(position.Place);
+		}
+
+		std::string getPositionContext(const CChatMessagePosition &position)
+		{
+			std::string context = CI18N::get("uiChatLocation") + ": ";
+			context += STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(position.Place);
+			context += "\n" + CI18N::get("uiREGION") + ": ";
+			context += STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(position.Region);
+			context += "\n" + CI18N::get("uiSearchCommandContinentName") + ": ";
+			context += STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(position.Continent);
+			return context;
+		}
+
+		// Client continent containing the point; shared positions only carry its place name.
+		CContinent *getContinentAt(const CVector &point, std::string &name)
+		{
+			CWorldSheet *world = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
+			if (!world)
+				return NULL;
+			for (uint i = 0; i < world->ContLocs.size(); ++i)
+			{
+				CContinent *continent = ContinentMngr.get(world->ContLocs[i].SelectionName);
+				if (continent && continent->Zone.contains(point))
+				{
+					name = world->ContLocs[i].SelectionName;
+					return continent;
+				}
+			}
+			return NULL;
+		}
+
+		std::string getLocalPlaceName(const CChatMessagePosition &position, bool ownPosition)
+		{
+			CVector point;
+			CContinent *continent = NULL;
+			std::string continentName;
+			if (ownPosition)
+			{
+				if (!UserEntity)
+					return std::string();
+				point = UserEntity->pos();
+				continent = ContinentMngr.cur();
+				continentName = ContinentMngr.getCurrentContinentSelectName();
+			}
+			else
+				point = CVector(position.X * 0.001f, position.Y * 0.001f, 0.0f);
+			if (!continent || !continent->Zone.contains(point))
+				continent = getContinentAt(point, continentName);
+			if (!continent)
+				return std::string();
+
+			const CContLandMark *place = NULL, *region = NULL;
+			double selectedArea = 0;
+			for (uint i = 0; i < continent->ContLandMarks.size(); ++i)
+			{
+				const CContLandMark &landmark = continent->ContLandMarks[i];
+				if (landmark.TitleTextID.empty() || !landmark.Zone.contains(point))
+					continue;
+				if (landmark.Type == CContLandMark::Region)
+				{
+					if (!region)
+						region = &landmark;
+					continue;
+				}
+				if (landmark.Type != CContLandMark::Capital && landmark.Type != CContLandMark::Village &&
+					landmark.Type != CContLandMark::Outpost && landmark.Type != CContLandMark::Place &&
+					landmark.Type != CContLandMark::Street)
+					continue;
+				double area = 0;
+				for (uint j = 0; j < landmark.Zone.VPoints.size(); ++j)
+				{
+					const CVector &a = landmark.Zone.VPoints[j];
+					const CVector &b = landmark.Zone.VPoints[(j + 1) % landmark.Zone.VPoints.size()];
+					area += double(a.x) * b.y - double(b.x) * a.y;
+				}
+				area = fabs(area);
+				if (!place || area < selectedArea ||
+					(area == selectedArea && landmark.TitleTextID < place->TitleTextID))
+				{
+					place = &landmark;
+					selectedArea = area;
+				}
+			}
+			if (place)
+				return STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(place->TitleTextID);
+			if (region)
+				return STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(region->TitleTextID);
+			CWorldSheet *world = dynamic_cast<CWorldSheet*>(SheetMngr.get(CSheetId("ryzom.world")));
+			if (world)
+				for (uint i = 0; i < world->Maps.size(); ++i)
+					if (world->Maps[i].ContinentName == continentName &&
+						world->Maps[i].Name == "continent_" + continentName)
+						return STRING_MANAGER::CStringManagerClient::getPlaceLocalizedName(world->Maps[i].Name);
+			return std::string();
+		}
+
+		void showPositionMap(const CChatMessagePosition &position)
+		{
+			CWidgetManager *widgets = CWidgetManager::getInstance();
+			CGroupContainer *dialog = dynamic_cast<CGroupContainer*>(widgets->getElementFromId("ui:interface:chat_position_map"));
+			CGroupHTML *html = dialog ? dynamic_cast<CGroupHTML*>(dialog->getGroup("html")) : NULL;
+			CViewText *title = dialog ? dynamic_cast<CViewText*>(dialog->getView("title")) : NULL;
+			CViewText *footer = dialog ? dynamic_cast<CViewText*>(dialog->getView("footer")) : NULL;
+			CViewText *context = dialog ? dynamic_cast<CViewText*>(dialog->getView("context")) : NULL;
+			CViewBitmap *marker = dialog ? dynamic_cast<CViewBitmap*>(dialog->getView("marker")) : NULL;
+			if (!html || !title || !footer || !context || !marker || position.Place.empty() ||
+				position.Continent.empty())
+				return;
+
+			marker->setActive(false);
+			marker->setParentPos(NULL);
+			CLuaState *lua = CLuaManager::getInstance().getLuaState();
+			CLuaStackRestorer restorer(lua, lua->getTop());
+			lua->pushGlobalTable();
+			CLuaObject game(*lua);
+			game = game["game"];
+			lua->push(position.X * 0.001);
+			lua->push(position.Y * 0.001);
+			lua->push(8);
+			lua->push("");
+			lua->push("");
+			lua->push("chat_position_map_image");
+			if (!game.callMethodByNameNoThrow("staticMapImage", 6, 1) || !lua->isString(-1))
+				return;
+			html->setHTML(lua->toString(-1));
+
+			CViewBitmap *image = dynamic_cast<CViewBitmap*>(html->getView("chat_position_map_image"));
+			if (image)
+			{
+				const bool flag = position.Kind == CChatMessagePosition::UserLandMark;
+				marker->setScale(false);
+				if (flag)
+					marker->setTexture("lm_user.tga");
+				else if (position.Kind == CChatMessagePosition::PlayerPosition)
+					marker->setTexture("teammate_map.tga");
+				else
+				{
+					marker->setTexture("w_radar_point.tga");
+					marker->setScale(true);
+					marker->setW(14);
+					marker->setH(14);
+				}
+				marker->setColor(flag ? position.FlagColor : CRGBA::White);
+				marker->setParentPos(image);
+				marker->setRenderLayer(image->getRenderLayer() + 1);
+				marker->setActive(true);
+			}
+
+			ShownPosition = position;
+			title->setText(getPositionName(position));
+			const std::string sender = CEntityCL::removeTitleAndShardFromName(position.SenderName.toUtf8());
+			std::string caption = CI18N::get("uiMFAuthor") + ": " + sender;
+			const time_t timestamp = position.Timestamp;
+			const tm *posted = localtime(&timestamp);
+			char time[32] = "";
+			if (posted)
+				strftime(time, sizeof(time), "%H:%M", posted);
+			caption += " \xC2\xB7 " + CI18N::get("uiOutpostTitleTime") + ": " + time;
+			footer->setText(caption);
+			context->setText(getPositionContext(position));
+
+			dialog->setActive(true);
+			dialog->updateCoords();
+			CCtrlMover *mover = dialog->getCtrlMover();
+			if (mover)
+			{
+				mover->setParentPos(dialog);
+				mover->setParentPosRef(Hotspot_TL);
+				mover->setPosRef(Hotspot_TL);
+				mover->setX(0);
+				mover->setY(0);
+				mover->setH(dialog->getYReal() + dialog->getHReal() - html->getYReal() - html->getHReal());
+				mover->updateCoords();
+			}
+			widgets->setTopWindow(dialog);
+		}
+
+		// Open the macro editor with the commands this client knows, the player saves it from there.
+		void editSharedMacro(const CChatMessageMacro &shared)
+		{
+			CMacroCmdManager *manager = CMacroCmdManager::getInstance();
+			CMacroCmd macro;
+			macro.Name = shared.Name;
+			macro.DispText = shared.DispText;
+			macro.BitmapBack = shared.BitmapBack;
+			macro.BitmapIcon = shared.BitmapIcon;
+			macro.BitmapOver = shared.BitmapOver;
+			for (uint i = 0; i < shared.Commands.size(); ++i)
+			{
+				const CAction::CName name(shared.Commands[i].Name.c_str(), shared.Commands[i].Params.c_str());
+				uint j = 0;
+				while (j < manager->ActionManagers.size() && !manager->ActionManagers[j]->getBaseAction(name))
+					++j;
+				if (j < manager->ActionManagers.size())
+					macro.addCommand(shared.Commands[i].Name, shared.Commands[i].Params);
+			}
+			if (macro.Commands.empty())
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
+			else
+				manager->editNewMacro(macro);
 		}
 
 		class CHandlerOpenChatAttachment : public IActionHandler
@@ -390,6 +459,10 @@ namespace CHAT_SHARE
 					if (sheet && sheet->asSBrickSheet())
 						openSabrinaPhraseHelp(sheet, phrase);
 				}
+				else if (view->Part.Type == CChatMessagePart::Position)
+					showPositionMap(view->Part.PositionValue);
+				else if (view->Part.Type == CChatMessagePart::Macro)
+					editSharedMacro(view->Part.MacroValue);
 			}
 		};
 		REGISTER_ACTION_HANDLER(CHandlerOpenChatAttachment, "open_chat_attachment");
@@ -437,39 +510,236 @@ namespace CHAT_SHARE
 			}
 		};
 		REGISTER_ACTION_HANDLER(CHandlerChatAttachmentTooltip, "chat_attachment_tooltip");
+
+		class CHandlerChatPositionOnMap : public IActionHandler
+		{
+		public:
+			virtual void execute(CCtrlBase * /* caller */, const std::string &params)
+			{
+				CWidgetManager *widgets = CWidgetManager::getInstance();
+				CInterfaceGroup *window = dynamic_cast<CInterfaceGroup*>(widgets->getElementFromId("ui:interface:map"));
+				CGroupMap *map = dynamic_cast<CGroupMap*>(widgets->getElementFromId("ui:interface:map:content:map_content:actual_map"));
+				if (!window || !map)
+					return;
+				window->setActive(true);
+				widgets->setTopWindow(window);
+				window->updateCoords();
+
+				const bool flag = ShownPosition.Kind == CChatMessagePosition::UserLandMark;
+				const ucstring title = flag ? ShownPosition.FlagName : ucstring::makeFromUtf8(getPositionName(ShownPosition));
+				const CVector2f position(ShownPosition.X * 0.001f, ShownPosition.Y * 0.001f);
+				std::string continent;
+				if (!getContinentAt(CVector(position.x, position.y, 0.f), continent) ||
+					!map->showChatPosition(position, continent, title, flag ? ShownPosition.FlagColor : CRGBA::White))
+				{
+					CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
+					return;
+				}
+				if (params == "landmark")
+					map->createUserLandMarkAt(position, title);
+			}
+		};
+		REGISTER_ACTION_HANDLER(CHandlerChatPositionOnMap, "chat_position_on_map");
+
+		class CHandlerCloseChatPosition : public IActionHandler
+		{
+		public:
+			virtual void execute(CCtrlBase * /* caller */, const std::string &params)
+			{
+				CWidgetManager *widgets = CWidgetManager::getInstance();
+				CGroupContainer *dialog = dynamic_cast<CGroupContainer*>(widgets->getElementFromId("ui:interface:chat_position_map"));
+				CViewBitmap *marker = dialog ? dynamic_cast<CViewBitmap*>(dialog->getView("marker")) : NULL;
+				if (params != "deactive")
+				{
+					if (dialog)
+						dialog->setActive(false);
+					return;
+				}
+				if (marker)
+				{
+					marker->setActive(false);
+					marker->setParentPos(NULL);
+				}
+			}
+		};
+		REGISTER_ACTION_HANDLER(CHandlerCloseChatPosition, "close_chat_position");
+
+		class CHandlerChatLinkTell : public IActionHandler
+		{
+		public:
+			virtual void execute(CCtrlBase *caller, const std::string &params)
+			{
+				CWidgetManager *widgets = CWidgetManager::getInstance();
+				CInterfaceGroup *dialog = dynamic_cast<CInterfaceGroup*>(
+					widgets->getElementFromId("ui:interface:chat_link_tell"));
+				CGroupEditBox *receiver = dialog ? dynamic_cast<CGroupEditBox*>(dialog->getGroup("receiver:eb")) : NULL;
+				if (params == "cancel")
+				{
+					getChatTextMngr().clearQuote(receiver);
+					PendingTell = CChatMessageRequest();
+					return;
+				}
+				if (!dialog || widgets->getModalWindow() != dialog)
+					return;
+				if (params == "accepted")
+				{
+					if (caller == receiver && PendingTell.ClientRequestId != 0)
+						widgets->disableModalWindow();
+					return;
+				}
+				if (!PendingTell.isValid())
+				{
+					reportInvalidLink();
+					return;
+				}
+				if (!receiver || receiver->getInputString().empty())
+					return;
+				const uint32 requestId = getChatTextMngr().beginQuoteSend(receiver);
+				if (requestId == 0)
+					return;
+				PendingTell.ClientRequestId = requestId;
+				if (!ChatMngr.tell(receiver->getInputString(), PendingTell))
+					getChatTextMngr().finishQuoteSend(requestId, false);
+			}
+		};
+		REGISTER_ACTION_HANDLER(CHandlerChatLinkTell, "chat_link_tell");
+
+		TShareResult shareTo(const std::string &name, const CChatMessageReference &reference,
+			const std::string &destination)
+		{
+			const ::u32string title = CUtfStringView(name).toUtf32();
+			if (title.empty())
+				return ShareUnavailable;
+			if (CUtfStringView(title).toUtf16().size() > CHAT_MESSAGE::MaxTextLength)
+				return ShareInputFull;
+			// Input tags keep the reference until the message is sent; the editbox
+			// only knows the text range and color.
+			CMemStream stream;
+			CChatMessageReference tagReference = reference;
+			stream.serial(tagReference);
+			const std::string tagData((const char*)stream.buffer(), stream.length());
+			const CRGBA color = reference.Type == CChatMessageReference::Item ? ItemLinkColor : LinkColor;
+			if (destination == "clipboard")
+			{
+				CGroupEditBox::CTextTag tag;
+				tag.Start = 0;
+				tag.Length = (uint32)title.size();
+				tag.Type = (uint32)reference.Type;
+				tag.Reference = tagData;
+				tag.Color = color;
+				std::vector<CGroupEditBox::CTextTag> tags(1, tag);
+				return CGroupEditBox::copyToClipboard(title, tags) ? ShareOk : ShareUnavailable;
+			}
+			if (destination == "tell")
+			{
+				CChatMessageRequest request;
+				request.Text = CUtfStringView(title).toUtf16();
+				request.References.push_back(reference);
+				request.References[0].Start = 0;
+				request.References[0].Length = (uint16)request.Text.size();
+				CWidgetManager *widgets = CWidgetManager::getInstance();
+				CInterfaceGroup *dialog = dynamic_cast<CInterfaceGroup*>(
+					widgets->getElementFromId("ui:interface:chat_link_tell"));
+				CGroupEditBox *receiver = dialog ? dynamic_cast<CGroupEditBox*>(dialog->getGroup("receiver:eb")) : NULL;
+				if (!receiver || !request.isValid())
+					return ShareUnavailable;
+				getChatTextMngr().clearQuote(receiver);
+				receiver->setInputString(std::string());
+				PendingTell = request;
+				widgets->enableModalWindow(NULL, dialog);
+				return ShareOk;
+			}
+			if (destination != "main")
+				return ShareUnavailable;
+			CGroupEditBox *editBox = PeopleInterraction.ChatGroup.Window ?
+				PeopleInterraction.ChatGroup.Window->getEditBox() : NULL;
+			if (!editBox)
+				return ShareUnavailable;
+			if (editBox->getTextTags().size() >= CHAT_MESSAGE::MaxReferences)
+				return ShareInputFull;
+
+			const ::u32string &input = editBox->getInputStringRef();
+			::u32string insertion = title;
+			sint32 cursor = editBox->getCursorPos();
+			NLMISC::clamp(cursor, sint32(0), sint32(input.size()));
+			uint32 titleStart = (uint32)cursor;
+			if (cursor > 0 && input[cursor - 1] != (u32char)' ')
+			{
+				insertion.insert(insertion.begin(), (u32char)' ');
+				++titleStart;
+			}
+			if (cursor < (sint32)input.size() && input[cursor] != (u32char)' ')
+				insertion.push_back((u32char)' ');
+			if (CUtfStringView(input).toUtf16().size() + CUtfStringView(insertion).toUtf16().size() >
+				CHAT_MESSAGE::MaxTextLength)
+				return ShareInputFull;
+
+			editBox->stopParentBlink();
+			editBox->setFocusOnText();
+			editBox->setCursorPos(cursor);
+			CGroupEditBox::setSelectCursorPos(cursor);
+			if (!editBox->writeString(CUtfStringView(insertion).toUtf8(), true, false, false))
+				return ShareInputFull;
+			editBox->addTextTag(titleStart, (uint32)title.size(), (uint32)reference.Type, color, tagData);
+			const sint32 newCursor = cursor + (sint32)insertion.size();
+			editBox->setCursorPos(newCursor);
+			CGroupEditBox::setSelectCursorPos(newCursor);
+			editBox->bypassNextKey();
+			return ShareOk;
+		}
+
+		class CHandlerShareMapPosition : public IActionHandler
+		{
+		public:
+			virtual void execute(CCtrlBase * /* caller */, const std::string &params)
+			{
+				const std::string source = getParam(params, "source");
+				const bool ownPosition = source == "player";
+				if ((!ownPosition && source != "map" && source != "landmark") ||
+					(!ownPosition && (!HasSelectedMapPosition ||
+					 (source == "landmark") != (SelectedMapPosition.Kind == CChatMessagePosition::UserLandMark))))
+					return;
+				const CChatMessagePosition selected = SelectedMapPosition;
+				CWidgetManager::getInstance()->disableModalWindow();
+				CChatMessageReference reference;
+				reference.Type = ownPosition ? CChatMessageReference::Position : CChatMessageReference::MapPosition;
+				if (!ownPosition)
+					reference.PositionValue = selected;
+				const std::string name = !ownPosition && selected.Kind == CChatMessagePosition::UserLandMark ?
+					selected.FlagName.toUtf8() : getLocalPlaceName(selected, ownPosition);
+				share(name, reference, getParam(params, "destination"));
+			}
+		};
+		REGISTER_ACTION_HANDLER(CHandlerShareMapPosition, "share_map_position");
 	}
 
-	CRequestScope::CRequestScope(const CChatMessageRequest *request)
-	: _Previous(CurrentRequest)
+	CRequestScope::CRequestScope(const CChatMessageRequest *request, CGroupEditBox *editBox) :
+		_Previous(CurrentRequest), _PreviousEditBox(CurrentEditBox), _PreviousSent(CurrentRequestSent)
 	{
 		CurrentRequest = request;
+		CurrentEditBox = editBox;
+		CurrentRequestSent = false;
 	}
 
 	CRequestScope::~CRequestScope()
 	{
 		CurrentRequest = _Previous;
+		CurrentEditBox = _PreviousEditBox;
+		CurrentRequestSent = _PreviousSent;
 	}
 
-	NLMISC::CRGBA itemColor()
+	bool CRequestScope::wasSent() const
 	{
-		return CRGBA(255, 205, 80, 255);
+		return CurrentRequestSent;
 	}
 
-	NLMISC::CRGBA phraseColor()
+	void share(const std::string &name, const CChatMessageReference &reference, const std::string &destination)
 	{
-		return CRGBA(110, 205, 255, 255);
-	}
-
-	bool isChatInput(CGroupEditBox *editBox)
-	{
-		if (!editBox)
-			return false;
-		const std::string &handler = editBox->getAHOnEnter();
-		if (handler == "contact_entry")
-			return true;
-		CChatWindow *chatWindow = handler == "chat_box_entry" ?
-			getChatWndMgr().getChatWindowFromCaller(editBox) : NULL;
-		return chatWindow && chatWindow->getEditBox() == editBox;
+		const TShareResult result = shareTo(name, reference, destination);
+		if (result == ShareInputFull)
+			reportInvalidLink();
+		else if (result == ShareUnavailable)
+			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
 	}
 
 	bool canShareItem(const CSheetId &sheetId)
@@ -478,142 +748,242 @@ namespace CHAT_SHARE
 		return item != NULL;
 	}
 
-	bool hasCurrentRequest()
+	const CChatMessageRequest *getCurrentRequest()
 	{
-		return CurrentRequest != NULL;
+		return CurrentRequest;
 	}
 
-	TShareResult share(const std::string &name, CChatMessageReference::TType type,
-		uint32 value, NLMISC::CRGBA color, const std::string &destination)
+	void setCurrentRequestSent(bool sent)
 	{
-		if (name.empty())
-			return ShareUnavailable;
+		CurrentRequestSent = sent;
+	}
 
-		const ::u32string title = CUtfStringView(name).toUtf32();
-		if (destination == "clipboard")
+	bool isChatCommand(const CChatMessageRequest &request, std::string &name)
+	{
+		const uint32 prefixLength = request.References.empty() ?
+			(uint32)request.Text.size() : request.References[0].Start;
+		CSString prefix = CUtfStringView(request.Text.substr(0, prefixLength)).toUtf8();
+		const bool prefixEndsWithSeparator = CSString::isWhiteSpace(prefix[prefix.size() - 1]) ||
+			(prefixLength < request.Text.size() && request.Text[prefixLength] <= 127 &&
+				CSString::isWhiteSpace((char)request.Text[prefixLength]));
+		prefix = prefix.leftCrop(1).leftStrip();
+		CSString commandName = prefix.strtok(" \t\r\n", !prefix.empty() && prefix[0] == '"', false, true, false);
+		if (!commandName.empty() && commandName[0] == '"')
+			commandName = commandName.unquote(true, false);
+		name = commandName;
+		if (!request.References.empty() && prefix.empty() && !prefixEndsWithSeparator)
+			return false;
+		CUserCommand *userCommand = dynamic_cast<CUserCommand*>(ICommand::getCommand(name));
+		CUserCommand::CMode *mode = NULL;
+		if (userCommand)
 		{
-			CGroupEditBox::CTextTag tag;
-			tag.Start = 0;
-			tag.Length = (uint32)title.size();
-			tag.Type = (uint32)type;
-			tag.Value = value;
-			tag.Color = color;
-			std::vector<CGroupEditBox::CTextTag> textTags;
-			textTags.push_back(tag);
-			return CGroupEditBox::copyToClipboard(title, textTags) ? ShareOk : ShareUnavailable;
+			const uint32 offset = prefixLength - (uint32)CUtfStringView(prefix).toUtf16().size();
+			CSString arguments = CUtfStringView(request.Text.substr(offset)).toUtf8();
+			uint numArgs = 0;
+			while (!arguments.strtok(" \t\r\n").empty())
+				++numArgs;
+			std::map<uint, CUserCommand::CMode>::iterator fixedMode = userCommand->FixedArgModes.find(numArgs);
+			if (fixedMode != userCommand->FixedArgModes.end())
+				mode = &fixedMode->second;
+			else if (!userCommand->InfiniteMode.Keywords.empty() && numArgs >= userCommand->InfiniteMode.KeywordsCount)
+				mode = &userCommand->InfiniteMode;
 		}
+		return mode && (mode->Action == "talk" || mode->Action == "tell");
+	}
 
-		if (destination == "tell")
+	bool executeCommand(const CChatMessageRequest &request, CGroupEditBox *editBox)
+	{
+		if (!request.References.empty())
 		{
-			CChatMessageRequest request;
-			request.Text = CUtfStringView(title).toUtf16();
-			if (request.Text.size() > CHAT_MESSAGE::MaxTextLength)
-				return ShareInputFull;
-			CChatMessageReference reference;
-			reference.Length = (uint16)request.Text.size();
-			reference.Type = type;
-			reference.Value = value;
-			request.References.push_back(reference);
-
-			CWidgetManager *widgets = CWidgetManager::getInstance();
-			CInterfaceGroup *dialog = dynamic_cast<CInterfaceGroup*>(
-				widgets->getElementFromId("ui:interface:chat_link_tell"));
-			CGroupEditBox *receiver = dialog ? dynamic_cast<CGroupEditBox*>(dialog->getGroup("receiver:eb")) : NULL;
-			if (!receiver)
-				return ShareUnavailable;
-			receiver->setInputString(std::string());
-			widgets->enableModalWindow(NULL, dialog);
-			PendingTell = request;
-			return ShareOk;
+			std::string name;
+			if (!isChatCommand(request, name))
+			{
+				if (!ICommand::exists(name))
+					CInterfaceManager::getInstance()->displaySystemInfo(name + ": " + CI18N::get("uiCommandNotExists"));
+				else
+					reportInvalidLink();
+				return false;
+			}
 		}
+		CRequestScope scope(&request, editBox);
+		ICommand::execute(request.Text.toUtf8().substr(1), g_log);
+		return scope.wasSent();
+	}
 
-		if (destination != "main")
-			return ShareUnavailable;
-		CGroupEditBox *editBox = PeopleInterraction.ChatGroup.Window ?
-			PeopleInterraction.ChatGroup.Window->getEditBox() : NULL;
-		if (!editBox)
-			return ShareUnavailable;
-		if (editBox->getTextTags().size() >= CHAT_MESSAGE::MaxReferences)
-			return ShareInputFull;
-
-		const ::u32string &input = editBox->getInputStringRef();
-		::u32string insertion = title;
-		sint32 cursor = editBox->getCursorPos();
-		NLMISC::clamp(cursor, sint32(0), sint32(input.size()));
-		uint32 titleStart = (uint32)cursor;
-		if (cursor > 0 && input[cursor - 1] != (u32char)' ')
+	bool sendRequest(CChatGroup::TGroupType group, CEntityId dynamicChannelId,
+		std::string receiver, bool command)
+	{
+		if (!CurrentRequest)
+			return false;
+		if (CurrentEditBox == NULL)
+			return true;
+		CChatMessageRequest request = *CurrentRequest;
+		request.QuoteMessageId = getChatTextMngr().getQuoteMessageId(CurrentEditBox);
+		if (!request.QuoteMessageId.empty())
 		{
-			insertion.insert(insertion.begin(), (u32char)' ');
-			++titleStart;
+			CChatGroup::TGroupType sourceGroup;
+			CEntityId sourceDynamicChannelId;
+			std::string sourceReceiver;
+			if (!getChatTextMngr().getQuoteTarget(CurrentEditBox, sourceGroup, sourceDynamicChannelId, sourceReceiver))
+				return true;
+			if (command &&
+				((group == CChatGroup::arround ? CChatGroup::say : group) !=
+				 (sourceGroup == CChatGroup::arround ? CChatGroup::say : sourceGroup) ||
+				 (group == CChatGroup::dyn_chat && dynamicChannelId != sourceDynamicChannelId) ||
+				 (group == CChatGroup::tell && compareCaseInsensitive(
+					 CShardNames::getInstance().makeFullNameFromRelative(PlayerSelectedMainland, receiver),
+					 CShardNames::getInstance().makeFullNameFromRelative(PlayerSelectedMainland, sourceReceiver)) != 0)))
+			{
+				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiChatQuoteSourceChannelOnly"));
+				return true;
+			}
+			group = sourceGroup;
+			dynamicChannelId = sourceDynamicChannelId;
+			receiver = sourceReceiver;
 		}
-		if (cursor < (sint32)input.size() && input[cursor] != (u32char)' ')
-			insertion.push_back((u32char)' ');
-		if (CUtfStringView(input).toUtf16().size() + CUtfStringView(insertion).toUtf16().size() >
-			CHAT_MESSAGE::MaxTextLength)
-			return ShareInputFull;
+		if (command)
+		{
+			const uint32 prefixLength = request.References.empty() ?
+				(uint32)request.Text.size() : request.References[0].Start;
+			CSString text = CUtfStringView(request.Text.substr(0, prefixLength)).toUtf8();
+			if (text.empty() || text[0] != '/')
+				return true;
+			const bool prefixEndsWithSeparator = CSString::isWhiteSpace(text[text.size() - 1]) ||
+				(prefixLength < request.Text.size() && request.Text[prefixLength] <= 127 &&
+					CSString::isWhiteSpace((char)request.Text[prefixLength]));
+			text = text.substr(1);
+			text.strtok(" \t\r\n", true, false, true, false);
+			if (group == CChatGroup::tell)
+			{
+				if (text.strtok(" \t\r\n").empty() ||
+					(!request.References.empty() && text.empty() && !prefixEndsWithSeparator))
+				{
+					reportInvalidLink();
+					return true;
+				}
+			}
+			text = text.leftStrip();
+			const uint32 offset = prefixLength - (uint32)CUtfStringView(text).toUtf16().size();
+			const ucstring body = request.Text.substr(offset);
+			for (std::vector<CChatMessageReference>::iterator it = request.References.begin();
+				it != request.References.end(); ++it)
+			{
+				it->Start -= offset;
+			}
+			request.Text = body;
+			if (!body.empty() && body[0] == '/' &&
+				(request.References.empty() || request.References[0].Start != 0))
+			{
+				setCurrentRequestSent(executeCommand(request, CurrentEditBox));
+				return true;
+			}
+		}
+		request.ClientRequestId = getChatTextMngr().beginQuoteSend(CurrentEditBox);
+		if (request.ClientRequestId == 0)
+			return true;
+		const bool queued = request.isValid() && (group == CChatGroup::tell ?
+			ChatMngr.tell(receiver, request) : ChatMngr.chat(request, group, dynamicChannelId));
+		setCurrentRequestSent(queued);
+		if (!queued)
+			getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
+		return true;
+	}
 
-		editBox->stopParentBlink();
-		editBox->setFocusOnText();
-		editBox->setCursorPos(cursor);
-		CGroupEditBox::setSelectCursorPos(cursor);
-		if (!editBox->writeString(CUtfStringView(insertion).toUtf8(), true, false, false))
-			return ShareInputFull;
-		editBox->addTextTag(titleStart, (uint32)title.size(), (uint32)type, value, color);
-		const sint32 newCursor = cursor + (sint32)insertion.size();
-		editBox->setCursorPos(newCursor);
-		CGroupEditBox::setSelectCursorPos(newCursor);
-		editBox->bypassNextKey();
-		return ShareOk;
+	void reportInvalidLink()
+	{
+		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiChatLinkDoesNotFit"));
 	}
 
 	bool buildRequest(const CGroupEditBox *editBox, CChatMessageRequest &request)
 	{
-		if (CurrentRequest)
-		{
-			request = *CurrentRequest;
-			return true;
-		}
-		if (!buildRawRequest(editBox, request))
-		{
-			displayRequestError();
+		request = CChatMessageRequest();
+		if (!editBox)
 			return false;
+		const ::u32string &input = editBox->getInputStringRef();
+		const std::vector<CGroupEditBox::CTextTag> &tags = editBox->getTextTags();
+		if (tags.size() > CHAT_MESSAGE::MaxReferences ||
+			CUtfStringView(input).toUtf16().size() > CHAT_MESSAGE::MaxTextLength)
+			return false;
+
+		uint32 inputPosition = 0;
+		for (std::vector<CGroupEditBox::CTextTag>::const_iterator it = tags.begin();
+			it != tags.end(); ++it)
+		{
+			if (!it->Length || it->Start < inputPosition || it->Start > input.size() ||
+				it->Length > input.size() - it->Start || it->Reference.empty() ||
+				it->Reference.size() > CHAT_MESSAGE::MaxSerializedSize ||
+				!appendRequestText(request, input.substr(inputPosition, it->Start - inputPosition)))
+				return false;
+
+			CChatMessageReference reference;
+			try
+			{
+				CMemStream stream(true);
+				stream.fill((const uint8*)it->Reference.data(), (uint32)it->Reference.size());
+				stream.serial(reference);
+				if ((uint32)stream.getPos() != stream.length())
+					return false;
+			}
+			catch (const Exception &)
+			{
+				return false;
+			}
+			const ucstring title = CUtfStringView(input.substr(it->Start, it->Length)).toUtf16();
+			if (title.empty() || title.size() > CHAT_MESSAGE::MaxTextLength - request.Text.size())
+				return false;
+			reference.Start = (uint16)request.Text.size();
+			reference.Length = (uint16)title.size();
+			request.Text += title;
+			request.References.push_back(reference);
+			inputPosition = it->Start + it->Length;
 		}
-		const TParseResult result = parseRequestTokens(request);
-		if (result == ParseTooLong)
-			displayRequestError();
-		return result == ParseOk;
+		return appendRequestText(request, input.substr(inputPosition)) &&
+			!request.References.empty() && request.isValid();
 	}
 
-	bool buildCommandRequest(const CGroupEditBox *editBox, uint32 argumentsBeforeText,
-		CChatMessageRequest &request)
+	bool hasReferences(const CGroupEditBox *editBox)
 	{
-		CChatMessageRequest fullRequest;
-		if (!buildRequest(editBox, fullRequest))
+		if (!editBox)
 			return false;
-		if (fullRequest.Text.empty() || fullRequest.Text[0] != (ucchar)'/')
+		if (!editBox->getTextTags().empty())
+			return true;
+		const ucstring text = CUtfStringView(editBox->getInputStringRef()).toUtf16();
+		for (uint32 i = 0; i < text.size(); ++i)
 		{
-			request = fullRequest;
-			return true;
+			const uint32 end = CHAT_MESSAGE::getMentionEnd(text, i);
+			if (end != i && getMentionScope(text.substr(i + 1, end - i - 1)) != CChatMessageMention::Player)
+				return true;
 		}
-		if (selectCommandText(fullRequest, argumentsBeforeText, request))
-			return true;
-		displayRequestError();
 		return false;
+	}
+
+	void setMapPosition(const CChatMessagePosition *position)
+	{
+		HasSelectedMapPosition = position && position->isValid();
+		SelectedMapPosition = HasSelectedMapPosition ? *position : CChatMessagePosition();
 	}
 
 	std::string getPartName(const CChatMessagePart &part)
 	{
-		if (part.Type == CChatMessagePart::Item)
+		switch (part.Type)
 		{
-			CDBCtrlSheet *sheet = prepareItem(part.ItemValue);
-			const std::string name = sheet ? sheet->getItemActualName() : std::string();
-			if (sheet)
-				getInventory().removeItemLinkInfo(getInventory().getItemSlotId(sheet));
-			return name;
-		}
-		if (part.Type == CChatMessagePart::Phrase)
+		case CChatMessagePart::Item:
+			{
+				CDBCtrlSheet *sheet = prepareItem(part.ItemValue);
+				const std::string name = sheet ? sheet->getItemActualName() : std::string();
+				if (sheet)
+					getInventory().removeItemLinkInfo(getInventory().getItemSlotId(sheet));
+				return name;
+			}
+		case CChatMessagePart::Phrase:
 			return localizedPhrase(part.PhraseValue).Name.toUtf8();
-		return part.TextValue.toUtf8();
+		case CChatMessagePart::Position:
+			return getPositionName(part.PositionValue);
+		case CChatMessagePart::Macro:
+			return part.MacroValue.Name;
+		default:
+			return part.TextValue.toUtf8();
+		}
 	}
 
 	CViewLink *createAttachmentView(const CChatMessagePart &part, bool justified)
@@ -621,7 +991,11 @@ namespace CHAT_SHARE
 		CAttachmentView *view = new CAttachmentView(CViewBase::TCtorParam());
 		view->Part = part;
 		view->setId("attachment");
-		const bool canOpen = part.Type != CChatMessagePart::Item || canShareItem(part.ItemValue.SheetId);
+		bool canOpen = true;
+		if (part.Type == CChatMessagePart::Item)
+			canOpen = canShareItem(part.ItemValue.SheetId);
+		else if (part.Type == CChatMessagePart::Position)
+			canOpen = !part.PositionValue.Place.empty() && !part.PositionValue.Continent.empty();
 		view->setUnderlined(canOpen);
 		view->setShadow(getChatTextMngr().isTextShadowed());
 		view->setShadowOutline(false);
@@ -630,12 +1004,13 @@ namespace CHAT_SHARE
 		view->setTextMode(justified ? CViewText::Justified : CViewText::DontClipWord);
 		view->setMultiLineSpace(getChatTextMngr().getTextMultiLineSpace());
 		view->setModulateGlobalColor(false);
-		view->setColor(part.Type == CChatMessagePart::Item ? itemColor() : phraseColor());
+		view->setColor(part.Type == CChatMessagePart::Item ? ItemLinkColor : LinkColor);
 		view->LinkTitle = getPartName(part);
 		view->setText(view->LinkTitle);
 		if (canOpen)
 			view->setActionOnLeftClick("open_chat_attachment");
-		view->setActionOnContextHelp("chat_attachment_tooltip");
+		if (part.Type == CChatMessagePart::Item || part.Type == CChatMessagePart::Phrase)
+			view->setActionOnContextHelp("chat_attachment_tooltip");
 		return view;
 	}
 
@@ -656,8 +1031,7 @@ namespace CHAT_SHARE
 
 	void releasePreviewSheets()
 	{
-		PendingTell.Text.clear();
-		PendingTell.References.clear();
+		PendingTell = CChatMessageRequest();
 		for (std::map<uint, CDBCtrlSheet*>::iterator it = LinkedItemSheets.begin(); it != LinkedItemSheets.end(); ++it)
 		{
 			getInventory().removeItemLinkInfo(getInventory().getItemSlotId(it->second));

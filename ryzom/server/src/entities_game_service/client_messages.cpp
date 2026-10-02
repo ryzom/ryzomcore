@@ -32,11 +32,13 @@
 #include "game_share/sphrase_com.h"
 #include "game_share/security_check.h"
 #include "server_share/log_item_gen.h"
+#include "server_share/used_continent.h"
 //egs
 #include "client_messages.h"
 #include "player_manager/player_manager.h"
 #include "player_manager/player.h"
 #include "player_manager/character.h"
+#include "world_instances.h"
 #include "entity_manager/entity_callbacks.h"
 #include "phrase_manager/phrase_manager_callbacks.h"
 #include "zone_manager.h"
@@ -67,119 +69,233 @@ using namespace std;
 
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
-CVariable<bool> ChatLinkDiagnostics("egs", "ChatLinkDiagnostics", "Log shared chat message diagnostics", false, 0, true);
-
 CVariable<bool> BuildSpireActive( "egs", "BuildSpireActive", "Activate build spire", true, 0, true );
 
-namespace
+//----------------------------
+//	buildChatPosition
+//
+//----------------------------
+static bool buildChatPosition(CCharacter *character, CChatMessagePosition &position,
+	const CChatMessagePosition *requested = NULL)
 {
-	bool buildSharedMessage(CCharacter *character, const CChatMessageRequest &request, CChatMessage &message)
+	position.X = requested ? requested->X : character->getState().X();
+	position.Y = requested ? requested->Y : character->getState().Y();
+	CMirrorPropValueRO<TYPE_CELL> cell(TheDataset, character->getEntityRowId(), DSPropertyCELL);
+	if ((!requested && cell() <= -2) || IsRingShard)
+		return false;
+
+	float gooDistance;
+	const CPlace *stable = NULL;
+	const CRegion *region = NULL;
+	const CContinent *continent = NULL;
+	std::vector<const CPlace *> places;
+	CZoneManager::getInstance().getPlace(position.X, position.Y, gooDistance,
+		&stable, places, &region, &continent);
+	if (region)
+		position.Region = region->getName();
+	if (continent)
+		position.Continent = continent->getName();
+	if (requested)
 	{
-		if (!character || !request.isValid())
-		{
-			if (ChatLinkDiagnostics)
-				nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=invalid_request");
+		// Requests name the continent like the client maps ("fyros"), Continent holds its place name.
+		if (!continent || (!requested->Continent.empty() &&
+			toLowerAscii(CUsedContinent::instance().getPhysicalContinentName(requested->Continent)) !=
+			toLowerAscii(CUsedContinent::instance().getPhysicalContinentName(
+				toLowerAscii(CONTINENT::toString((CONTINENT::TContinent)continent->getId()))))))
 			return false;
-		}
+		const uint32 instanceId = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
+		if (instanceId == INVALID_AI_INSTANCE || CWorldInstances::instance().getAISId(instanceId) == TServiceId(0))
+			return false;
+		position.Kind = requested->Kind;
+		position.FlagName = requested->FlagName;
+		position.FlagColor = requested->FlagColor;
+	}
 
-		uint32 textPosition = 0;
-		for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
-			it != request.References.end(); ++it)
+	const CPlace *selected = NULL;
+	double selectedArea = 0;
+	for (uint i = 0; i < places.size(); ++i)
+	{
+		const CPlace *place = places[i];
+		std::string displayed;
+		if (place->getName().empty() || place->isGooPath() ||
+			(place->getPropertyByName("displayed", displayed) && displayed != "true"))
+			continue;
+		double area = 0;
+		for (uint j = 0; j < place->VPoints.size(); ++j)
 		{
-			if (it->Start > textPosition)
-			{
-				CChatMessagePart text;
-				text.TextValue = request.Text.substr(textPosition, it->Start - textPosition);
-				message.Parts.push_back(text);
-			}
-
-			if (ChatLinkDiagnostics)
-				nlinfo("CHATLINK_DIAG EGS REFERENCE type=%u value=%u", (uint)it->Type, it->Value);
-			CChatMessagePart part;
-			if (it->Type == CChatMessageReference::Item)
-			{
-				part.Type = CChatMessagePart::Item;
-				if (!character->buildChatItem(it->Value, part.ItemValue))
-				{
-					if (ChatLinkDiagnostics)
-						nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=item_unavailable");
-					return false;
-				}
-			}
-			else if (it->Type == CChatMessageReference::KnownPhrase)
-			{
-				const std::vector<CKnownPhrase> &knownPhrases = character->getKnownPhrases();
-				if (it->Value >= knownPhrases.size() || knownPhrases[it->Value].empty())
-				{
-					if (ChatLinkDiagnostics)
-						nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=unknown_phrase");
-					return false;
-				}
-				const CKnownPhrase &knownPhrase = knownPhrases[it->Value];
-				part.Type = CChatMessagePart::Phrase;
-				part.PhraseValue.SheetId = knownPhrase.PhraseSheetId;
-				if (part.PhraseValue.SheetId == CSheetId::Unknown)
-				{
-					const std::set<CSheetId> &knownBricks = character->getKnownBricks();
-					for (std::vector<CSheetId>::const_iterator brick = knownPhrase.PhraseDesc.Bricks.begin();
-						brick != knownPhrase.PhraseDesc.Bricks.end(); ++brick)
-					{
-						if (knownBricks.find(*brick) == knownBricks.end())
-						{
-							if (ChatLinkDiagnostics)
-								nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=unknown_brick");
-							return false;
-						}
-					}
-					if (!CPhraseManager::getInstance().checkPhraseValidity(knownPhrase.PhraseDesc.Bricks))
-					{
-						if (ChatLinkDiagnostics)
-							nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=invalid_phrase");
-						return false;
-					}
-					part.PhraseValue.Phrase = knownPhrase.PhraseDesc;
-				}
-			}
-			else if (it->Type == CChatMessageReference::PhraseSheet)
-			{
-				const CSheetId sheetId(it->Value);
-				const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
-				CAllRolemasterPhrases::const_iterator phrase = phrases.find(sheetId);
-				if (phrase == phrases.end() || !phrase->second.IsRolemasterPhrase ||
-					sheetId.toString().find("saiphrase") != std::string::npos)
-				{
-					if (ChatLinkDiagnostics)
-						nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=invalid_phrase_sheet");
-					return false;
-				}
-				part.Type = CChatMessagePart::Phrase;
-				part.PhraseValue.SheetId = sheetId;
-			}
-			else
-			{
-				if (ChatLinkDiagnostics)
-					nlinfo("CHATLINK_DIAG EGS BUILD_REJECT reason=unknown_reference");
-				return false;
-			}
-
-			message.Parts.push_back(part);
-			textPosition = it->Start + it->Length;
+			const CVector &a = place->VPoints[j];
+			const CVector &b = place->VPoints[(j + 1) % place->VPoints.size()];
+			area += double(a.x) * b.y - double(b.x) * a.y;
 		}
-
-		if (textPosition < request.Text.size())
+		area = fabs(area);
+		if (!selected || area < selectedArea ||
+			(area == selectedArea && place->getName() < selected->getName()))
 		{
-			CChatMessagePart text;
-			text.TextValue = request.Text.substr(textPosition);
-			message.Parts.push_back(text);
+			selected = place;
+			selectedArea = area;
 		}
+	}
+	position.Place = selected ? selected->getName() : position.Region;
+	if (position.Place.empty())
+		position.Place = position.Continent;
+	return !position.Place.empty();
+}
+
+//----------------------------
+//	buildChatPhrase
+//
+//----------------------------
+static bool buildChatPhrase(CCharacter *character, const CChatMessageReference &reference,
+	CChatMessagePhrase &phrase)
+{
+	if (reference.Type == CChatMessageReference::PhraseSheet)
+	{
+		phrase.SheetId = CSheetId(reference.Value);
+		const CAllRolemasterPhrases &phrases = CSheets::getSRolemasterPhrasesMap();
+		CAllRolemasterPhrases::const_iterator it = phrases.find(phrase.SheetId);
+		return it != phrases.end() && it->second.IsRolemasterPhrase &&
+			phrase.SheetId.toString().find("saiphrase") == std::string::npos;
+	}
+
+	const std::vector<CKnownPhrase> &knownPhrases = character->getKnownPhrases();
+	if (reference.Value >= knownPhrases.size() || knownPhrases[reference.Value].empty())
+		return false;
+	const CKnownPhrase &knownPhrase = knownPhrases[reference.Value];
+	phrase.SheetId = knownPhrase.PhraseSheetId;
+	if (phrase.SheetId != CSheetId::Unknown)
 		return true;
+
+	// Custom phrases carry their bricks; only share bricks the character knows.
+	const std::set<CSheetId> &knownBricks = character->getKnownBricks();
+	for (std::vector<CSheetId>::const_iterator brick = knownPhrase.PhraseDesc.Bricks.begin();
+		brick != knownPhrase.PhraseDesc.Bricks.end(); ++brick)
+	{
+		if (knownBricks.find(*brick) == knownBricks.end())
+			return false;
+	}
+	if (!CPhraseManager::getInstance().checkPhraseValidity(knownPhrase.PhraseDesc.Bricks))
+		return false;
+	phrase.Phrase = knownPhrase.PhraseDesc;
+	return true;
+}
+
+//----------------------------
+//	buildChatPart
+//
+//----------------------------
+static bool buildChatPart(CCharacter *character, const CChatMessageReference &reference,
+	CChatMessagePart &part)
+{
+	switch (reference.Type)
+	{
+	case CChatMessageReference::Item:
+		part.Type = CChatMessagePart::Item;
+		return character->buildChatItem(reference.Value, part.ItemValue);
+	case CChatMessageReference::KnownPhrase:
+	case CChatMessageReference::PhraseSheet:
+		part.Type = CChatMessagePart::Phrase;
+		return buildChatPhrase(character, reference, part.PhraseValue);
+	case CChatMessageReference::Position:
+		part.Type = CChatMessagePart::Position;
+		return buildChatPosition(character, part.PositionValue);
+	case CChatMessageReference::MapPosition:
+		part.Type = CChatMessagePart::Position;
+		return buildChatPosition(character, part.PositionValue, &reference.PositionValue);
+	case CChatMessageReference::Macro:
+		// Macros are client data; the receiver reviews them before saving.
+		part.Type = CChatMessagePart::Macro;
+		part.MacroValue = reference.MacroValue;
+		return true;
+	default:
+		return false;
 	}
 }
 
+//----------------------------
+//	buildSharedMessage
+//
+//----------------------------
+static bool buildSharedMessage(CCharacter *character, const CChatMessageRequest &request,
+	CChatMessage &message)
+{
+	if (!request.isValid())
+		return false;
+	// Group mentions stay in the text; the other references become parts.
+	std::vector<uint32> partStarts;
+	uint32 textPosition = 0;
+	for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
+		it != request.References.end(); ++it)
+	{
+		if (it->Type == CChatMessageReference::Mention)
+			continue;
+		if (it->Start > textPosition)
+		{
+			CChatMessagePart text;
+			text.TextValue = request.Text.substr(textPosition, it->Start - textPosition);
+			message.Parts.push_back(text);
+			partStarts.push_back(textPosition);
+		}
+		CChatMessagePart part;
+		if (!buildChatPart(character, *it, part))
+			return false;
+		message.Parts.push_back(part);
+		partStarts.push_back(it->Start);
+		textPosition = it->Start + it->Length;
+	}
+	if (textPosition < request.Text.size())
+	{
+		CChatMessagePart text;
+		text.TextValue = request.Text.substr(textPosition);
+		message.Parts.push_back(text);
+		partStarts.push_back(textPosition);
+	}
+	for (std::vector<CChatMessageReference>::const_iterator it = request.References.begin();
+		it != request.References.end(); ++it)
+	{
+		if (it->Type != CChatMessageReference::Mention)
+			continue;
+		// @all needs account privileges, like the other privileged chat features.
+		if (it->Value == CChatMessageMention::All)
+		{
+			CPlayer *player = PlayerManager.getPlayer(PlayerManager.getPlayerId(character->getId()));
+			if (!player || player->getUserPriv().empty())
+				continue;
+		}
+		uint part = 0;
+		while (part < message.Parts.size() && (message.Parts[part].Type != CChatMessagePart::Text ||
+			it->Start < partStarts[part] ||
+			it->Start + it->Length > partStarts[part] + message.Parts[part].TextValue.size()))
+			++part;
+		if (part == message.Parts.size())
+			return false;
+		CChatMessageMention mention;
+		mention.Scope = (CChatMessageMention::TScope)it->Value;
+		mention.Part = (uint8)part;
+		mention.Start = (uint16)(it->Start - partStarts[part]);
+		mention.Length = it->Length;
+		message.Mentions.push_back(mention);
+	}
+	return message.isValid();
+}
+
+//----------------------------
+//	rejectClientChatShare
+//
+//----------------------------
+static void rejectClientChatShare(const CEntityId &sender, const CChatMessageRequest &request)
+{
+	if (request.ClientRequestId != 0)
+		PlayerManager.sendImpulseToClient(sender, "STRING:CHAT_SHARE_RESULT", request.ClientRequestId, false);
+}
+
+//----------------------------
+//	cbClientChatShare
+//
+//----------------------------
 void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::TServiceId serviceId)
 {
-	if (ChatLinkDiagnostics)
-		nlinfo("CHATLINK_DIAG EGS RECEIVE service=%s bytes=%u", serviceName.c_str(), (uint)msgin.length());
+	if (msgin.length() > CHAT_MESSAGE::MaxSerializedSize)
+		return;
 	CEntityId sender;
 	uint8 chatMode;
 	CEntityId dynamicChannelId;
@@ -196,41 +312,31 @@ void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::T
 	catch (const Exception &e)
 	{
 		nlwarning("<cbClientChatShare> Bad message: %s", e.what());
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG EGS REJECT reason=decode_exception");
 		return;
 	}
 
-	if (ChatLinkDiagnostics)
-		nlinfo("CHATLINK_DIAG EGS DECODE sender=%s group=%u channel=%s refs=%u textLength=%u", sender.toString().c_str(), (uint)chatMode, dynamicChannelId.toString().c_str(), (uint)request.References.size(), (uint)request.Text.size());
 	CCharacter *character = PlayerManager.getChar(sender);
 	if (!character || !character->getEnterFlag())
-	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG EGS REJECT reason=character_not_ready");
 		return;
-	}
 	if (chatMode >= CChatGroup::nbChatMode)
 	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG EGS REJECT reason=invalid_mode");
+		rejectClientChatShare(sender, request);
 		return;
 	}
 	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
 	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
 	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG EGS REJECT reason=invalid_target");
+		rejectClientChatShare(sender, request);
 		return;
 	}
 
 	CChatMessage message;
 	if (!buildSharedMessage(character, request, message))
 	{
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG EGS REJECT reason=build_failed");
+		rejectClientChatShare(sender, request);
 		return;
 	}
+	message.Quote.MessageId = request.QuoteMessageId;
 
 	character->setAfkState(false);
 	CMessage msgout("CHAT_SHARE");
@@ -238,19 +344,15 @@ void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::T
 	msgout.serial(chatMode);
 	msgout.serial(dynamicChannelId);
 	msgout.serial(receiver);
+	msgout.serial(request.ClientRequestId);
 	msgout.serial(message);
 	if (msgout.length() > CHAT_MESSAGE::MaxSerializedSize)
 	{
 		nlwarning("<cbClientChatShare> Shared message is too large");
-		if (ChatLinkDiagnostics)
-			nlinfo("CHATLINK_DIAG EGS REJECT reason=oversized");
+		rejectClientChatShare(sender, request);
 		return;
 	}
-	if (ChatLinkDiagnostics)
-		nlinfo("CHATLINK_DIAG EGS SEND_IOS sender=%s group=%u parts=%u bytes=%u", sender.toString().c_str(), (uint)chatMode, (uint)message.Parts.size(), (uint)msgout.length());
 	CUnifiedNetwork::getInstance()->send("IOS", msgout);
-	if (ChatLinkDiagnostics)
-		nlinfo("CHATLINK_DIAG EGS SEND_IOS_RETURN sender=%s", sender.toString().c_str());
 }
 
 

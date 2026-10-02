@@ -663,9 +663,6 @@
   <!-- ***************** -->
   <!-- * CHAT TEMPLATE * -->
   <!-- ***************** -->
-  <!-- The button that opens the emoji picker. One sits beside every chat
-       input; which input a pick lands in is worked out from the button, so
-       every instance of this is the same and none of them needs parameters. -->
   <template name="chat_emoji_button"
             keep="true"
             id="but_emoji"
@@ -980,6 +977,10 @@
           value="255 255 255 128" />
   <define id="chat_group_tab_color_newmsg"
           value="255 100 100 220" />
+  <define id="chat_group_tab_color_mention"
+          value="45 80 158 255" />
+  <define id="chat_message_color_mention"
+          value="45 80 158 255" />
   <group type="menu"
          id="user_chat_target_menu"
          extends="base_menu"
@@ -1396,9 +1397,6 @@
               onclick_l="select_chat_target"
               params_l="menu=ui:interface:user_chat_target_menu|party_chats=false"
               case_mode="%case_normal" />
-        <!-- Between the input and Emotes, at the end of the row. The input's
-             width is set in code (people_interraction.cpp), which is also
-             where the room for this is taken from. -->
         <instance template="chat_emoji_button"
                   id="but_emoji"
                   posparent="but_emote"
@@ -1440,10 +1438,7 @@
   <!-- ***************** -->
   <!-- *  EMOJI PICKER  * -->
   <!-- ***************** -->
-  <!-- The frame only. The tabs and the grid are filled by CEmojiPicker: one
-       control per emoji, 1883 of them, in the order and the groups Unicode
-       itself defines. One window serves every chat; the button that opened it
-       decides where a pick lands. -->
+  <!-- tabs and grid are filled by CEmojiPicker -->
   <group type="container"
          id="emoji_picker"
          w="380"
@@ -1473,13 +1468,6 @@
            w="120"
            h="12"
            posref="TL TL"></group>
-    <!-- The container takes its height FROM the content here, rather than
-         handing one down: that is the branch a container with no resizer goes
-         through (group_container.cpp:2423). So the content measures itself
-         from its children, and the window follows. With a resizer it is meant
-         to be the other way round, but this window did not end up in that
-         branch and its content came out 26 high, which clipped the grid to a
-         negative height and left the window empty. -->
     <group id="content"
            x="0"
            y="0"
@@ -1488,8 +1476,6 @@
            child_resize_h="true"
            child_resize_hmargin="6"
            posref="TL TL">
-      <!-- Matches on the name and on Unicode's description, so ":fire:" is
-           found by either "fire" or what it is a picture of. -->
       <instance template="edit_box_widget"
                 id="filter"
                 posref="TL TL"
@@ -1512,8 +1498,6 @@
              sizeref="w"
              w="-8"
              h="26"></group>
-      <!-- scroll_text is the chat's own scrolling area: it binds "text_list"
-           to "scroll_bar" by itself, so the grid needs no wiring here. -->
       <group type="scroll_text"
              id="grid_area"
              posparent="tabs"
@@ -3525,7 +3509,109 @@
         name="uiCopySheetId"
         handler="copy_chat_sheet_id"
         params="from_modal" />
+    <action id="quote"
+        name="uiWebReply"
+        handler="quote_chat"
+        params="from_modal" />
+    <action id="tell"
+        name="uimTell"
+        handler="enter_tell"
+        params="from_chat_message" />
+    <action id="add_friend"
+        name="uimGcmAddToFriendList"
+        handler="chat_add_friend"
+        params="from_modal" />
   </group>
+
+  <template name="chat_quote_preview" keep="true" edit_box="">
+    <group id="#id" posref="BL BL" sizeref="w" w="0" h="44" active="false">
+      <instance template="inner_thin_border" posparent="#id" inherit_gc_alpha="true" />
+      <view type="text" id="author" posref="TL TL" x="6" y="-4" fontsize="10" sizeref="w" w="-28" hardtext="" global_color="false" />
+      <view type="text"
+            id="text"
+            posref="BL TL"
+            posparent="author"
+            x="0"
+            y="-3"
+            fontsize="10"
+            multi_line="true"
+            multi_max_line="2"
+            sizeref="w"
+            w="-12"
+            hardtext=""
+            global_color="false" />
+      <ctrl style="button_close" id="close" x="-3" y="-3" onclick_l="quote_chat" params_l="#edit_box" />
+    </group>
+  </template>
+  <group type="container" id="chat_position_map" w="240" h="294" posref="TL TL" active="false"
+      options="skin_modal" escapable="true" global_color="false" savable="false"
+      openable="false" opened="true" movable="true" resizer="false" right_button="false"
+      on_deactive="close_chat_position" on_deactive_params="deactive">
+    <group id="header_opened" h="0" />
+    <group id="content" posref="TL TL" h="294" child_resize_h="true" child_resize_hmargin="12">
+      <view type="text"
+            id="title"
+            posref="TL TL"
+            x="12"
+            y="-12"
+            sizeref="w"
+            w="-40"
+            fontsize="12"
+            hardtext=""
+            multi_line="true"
+            multi_max_line="2"
+            global_color="false" />
+      <ctrl style="button_close" id="close" x="-3" y="-3" onclick_l="close_chat_position" />
+      <group id="html" type="html" posref="BL TL" posparent="title" x="0" y="-8" w="216" h="212"
+          url="" title_prefix="" text_font_size="10" background_color="0 0 0 0" browse_next_time="false" timeout="0">
+        <group id="black" posref="BR BR" sizeref="wh" w="0" h="0" />
+        <group type="list" id="text_list" posref="TL TL" posparent="black" space="0" sizeref="wh" w="0" h="0" />
+        <ctrl style="skin_scroll" id="scroll_bar" />
+      </group>
+      <view type="bitmap" id="marker" posref="MM MM" active="false" texture="w_radar_point.tga" global_color="false" />
+      <view type="text"
+            id="footer"
+            posref="BL TL"
+            posparent="html"
+            y="-4"
+            sizeref="w"
+            w="-24"
+            fontsize="10"
+            hardtext=""
+            multi_line="true"
+            global_color="false" />
+      <view type="text"
+            id="context"
+            posref="BL TL"
+            posparent="footer"
+            y="-4"
+            sizeref="w"
+            w="-24"
+            fontsize="10"
+            hardtext=""
+            multi_line="true"
+            color="170 170 170 255"
+            global_color="false" />
+      <ctrl style="text_button_16"
+            id="on_map"
+            posref="BL TL"
+            posparent="context"
+            y="-6"
+            button_type="push_button"
+            onclick_l="chat_position_on_map"
+            hardtext="uiChatPositionShowOnMap" />
+      <ctrl style="text_button_16"
+            id="save_landmark"
+            posref="BL TL"
+            posparent="on_map"
+            y="-4"
+            button_type="push_button"
+            onclick_l="chat_position_on_map"
+            params_l="landmark"
+            hardtext="uiChatPositionSaveLandmark" />
+    </group>
+  </group>
+  <tree node="chat_position_map" />
 
 
 <proc id="ark_shop_animate_preview_body">
