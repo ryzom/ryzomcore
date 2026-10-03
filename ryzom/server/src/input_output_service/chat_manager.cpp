@@ -683,6 +683,18 @@ void CChatManager::recordSharedReceiver(const CEntityId &receiver, CChatGroup::T
 void CChatManager::logSharedMessage(const CChatMessage &message, const std::string &channel,
 	const std::string &language)
 {
+	if (CHAT_MESSAGE::isReaction(message))
+	{
+		// Reactions from the bridge have no character and are not sent back to it.
+		if (message.SenderId == CEntityId::Unknown || _ExportedReaction == message.MessageId)
+			return;
+		_ExportedReaction = message.MessageId;
+		const CChatMessageReaction &reaction = message.Parts[0].ReactionValue;
+		_Log.displayNL("chat_reaction|1|%s|%s|%s|%s|%s", base64::encode(channel).c_str(),
+			base64::encode(IOS->getRocketName(message.SenderName)).c_str(), reaction.MessageId.c_str(),
+			base64::encode(reaction.Emoji).c_str(), reaction.Remove ? "remove" : "add");
+		return;
+	}
 	CMessageHistoryEntry *entry = rememberMessage(message);
 	if (!entry || entry->Exported)
 		return;
@@ -2966,6 +2978,36 @@ void CChatManager::sendFarChat(const string &name, const ucstring& ucstr, const 
 			dcc = dcc->getNextChannelSession();
 		}
 	}
+}
+
+//-----------------------------------------------
+//	bridgeReaction
+//
+//-----------------------------------------------
+bool CChatManager::bridgeReaction(const std::string &sender, const std::string &messageId,
+	const std::string &emoji, bool remove)
+{
+	CMessageHistoryEntry *entry = findMessage(messageId);
+	if (!entry || sender.empty() || sender.size() > CHAT_MESSAGE::MaxReceiverLength)
+		return false;
+	CChatMessage message;
+	message.MessageId = newMessageId();
+	message.SenderName.fromUtf8(sender);
+	message.Timestamp = CTime::getSecondsSince1970();
+	CChatMessagePart part;
+	part.Type = CChatMessagePart::Reaction;
+	part.ReactionValue.MessageId = messageId;
+	part.ReactionValue.Emoji = emoji;
+	part.ReactionValue.Remove = remove;
+	message.Parts.push_back(part);
+	if (!message.isValid())
+		return false;
+	// Same audience as the reacted message; bridged messages only use these channels.
+	const std::string &channel = entry->Channel;
+	CSharedMessageScope scope(_SharedMessage, message);
+	sendFarChat(sender, sharedMessageLogText(message),
+		channel.compare(0, 4, "dyn:") == 0 ? channel.substr(4) : channel);
+	return true;
 }
 
 //-----------------------------------------------

@@ -109,6 +109,23 @@ class ZulipDispatcher(ZulipService):
 		}
 
 		try:
+			on_behalf = self.onBehalfOf(user)
+			if on_behalf:
+				# The player's account writes it, so no "Name:" in front.
+				content = self.quotePrefix(m)+(clean_text if clean_text is not None else "")
+				self.client.set(self.ownMessageKey(on_behalf, content), 1, 60)
+				result = self.zulip.send_message(dict(request, content=content, on_behalf_of=on_behalf))
+				if result["result"] == "success" and self.onBehalfIgnored(result):
+					# Posted by the bot itself: put the name in front like the bot always does.
+					self.zulip.update_message({"message_id": result["id"],
+						"content": self.quotePrefix(m)+user[0].upper()+user[1:]+":"+(clean_text if clean_text is not None else "")})
+					return result["id"]
+				if result["result"] == "success":
+					print(f"💬 {message_type} to {channel.split(' ')[0]} for {on_behalf} = {result['id']}")
+					return result["id"]
+				print("Error sending message for", on_behalf, result.get("code", ""), result.get("msg", ""))
+				if self.retryError(result):
+					return -1
 			content = self.quotePrefix(m)+user[0].upper()+user[1:]+":"+(clean_text if clean_text is not None else "")
 			request["content"] = content
 			result = self.zulip.send_message(request)
@@ -126,6 +143,57 @@ class ZulipDispatcher(ZulipService):
 			return result["id"]
 		print("Error sending message", result.get("code", ""), result.get("msg", ""))
 		return -1 if self.retryError(result) else None
+
+	def sendReaction(self, m):
+		reaction = m.chat["reaction"]
+		zulip_id = self.getChatZulipId(reaction["message_id"])
+		if not zulip_id:
+			return None
+		if isinstance(zulip_id, bytes):
+			zulip_id = zulip_id.decode("ascii")
+		request = {"message_id": int(zulip_id), "emoji_name": reaction["emoji"]}
+		on_behalf = self.onBehalfOf(m.sender)
+		if on_behalf:
+			self.client.set("Chat-Reaction-Own-"+zulip_id+"-"+reaction["emoji"]+"-"+on_behalf.split("@")[0], 1, 60)
+			try:
+				result = self.zulip.call_endpoint(url=f"messages/{zulip_id}/reactions",
+					method="DELETE" if reaction["remove"] else "POST",
+					request={"emoji_name": reaction["emoji"], "on_behalf_of": on_behalf})
+			except Exception as e:
+				print("Error sending reaction", e)
+				return False
+			if result.get("result") == "success" and not self.onBehalfIgnored(result):
+				print(f"{'➖' if reaction['remove'] else '➕'} {reaction['emoji']} on {zulip_id} for {on_behalf}")
+				return True
+			if result.get("result") != "success":
+				print("Error sending reaction for", on_behalf, result.get("code", ""), result.get("msg", ""))
+				if self.retryError(result):
+					return False
+			else:
+				# The bot reaction itself was just added or removed.
+				shown = not reaction["remove"]
+		# Otherwise the bot reacts once for all players who chose the same emoji.
+		key = "Chat-Reaction-"+reaction["message_id"]+"-"+reaction["emoji"]
+		players = set(self.client.get(key) or ())
+		if not on_behalf or result.get("result") != "success":
+			shown = bool(players)
+		if reaction["remove"]:
+			players.discard(m.sender)
+		else:
+			players.add(m.sender)
+		self.client.set(key, list(players), 24*60*60)
+		if shown == bool(players):
+			return True
+		try:
+			result = self.zulip.add_reaction(request) if players else self.zulip.remove_reaction(request)
+		except Exception as e:
+			print("Error sending reaction", e)
+			return False
+		if result.get("result") != "success":
+			print("Error sending reaction", result.get("code", ""), result.get("msg", ""))
+			return False if self.retryError(result) else None
+		print(f"{'➕' if players else '➖'} {reaction['emoji']} on {zulip_id}")
+		return True
 
 	def sendTranslation(self, message_id, m):
 		if message_id > 0 and m.translation and m.source_lang:
@@ -163,7 +231,10 @@ class ZulipDispatcher(ZulipService):
 					result = True
 					try:
 						message = self.getRyzomMessage(i)
-						if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
+						if message and message.chat.get("reaction"):
+							if lang == "wk" and message.source != "zulip":
+								result = self.sendReaction(message)
+						elif message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
 							if lang == "wk":
 								if message.source != "zulip":
 									message_id = self.sendMessage(message)

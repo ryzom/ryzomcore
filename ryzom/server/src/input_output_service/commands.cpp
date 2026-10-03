@@ -842,6 +842,24 @@ NLMISC_COMMAND(bridgeChat, "send a structured bridge chat message",
 	return true;
 }
 
+//-----------------------------------------------
+//	'bridgeReaction'
+//
+//-----------------------------------------------
+NLMISC_COMMAND(bridgeReaction, "send a reaction from the chat bridge",
+	"<sender64> <message_id> <emoji64> <add|remove>")
+{
+	if (args.size() != 4 || (args[3] != "add" && args[3] != "remove") ||
+		args[0].size() > 4 * ((CHAT_MESSAGE::MaxReceiverLength + 2) / 3) ||
+		args[2].size() > 4 * ((CHAT_MESSAGE::MaxEmojiNameLength + 2) / 3))
+		return false;
+	const std::string sender = base64::decode(args[0]);
+	const std::string emoji = base64::decode(args[2]);
+	if (base64::encode(sender) != args[0] || base64::encode(emoji) != args[2])
+		return false;
+	return IOS->getChatManager().bridgeReaction(sender, args[1], emoji, args[3] == "remove");
+}
+
 NLMISC_COMMAND(getRealName, "getRealName", "<char_name>")
 {
 	if (args.size() != 1)

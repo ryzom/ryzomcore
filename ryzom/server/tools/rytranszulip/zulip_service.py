@@ -16,6 +16,7 @@
 
 import re
 import time
+import hashlib
 import traceback
 import zulip
 import requests
@@ -134,13 +135,13 @@ class ZulipClient(zulip.Client):
 				self.last_event_id = max(self.last_event_id, int(event["id"]))
 
 	def registerMessages(self, **kwargs):
-		self.doRegister(["message", "update_message"], None, **kwargs)
+		self.doRegister(["message", "update_message", "reaction"], None, **kwargs)
 
 	def manageMessages(self, callback, **kwargs):
 		def event_callback(event):
-			if event["type"] in ("message", "update_message"):
+			if event["type"] in ("message", "update_message", "reaction"):
 				callback(event)
-		self.call(event_callback, ["message", "update_message"], None, **kwargs)
+		self.call(event_callback, ["message", "update_message", "reaction"], None, **kwargs)
 
 
 class ZulipService(RyzomService):
@@ -169,6 +170,23 @@ class ZulipService(RyzomService):
 		if result.get("result") == "error" and result.get("code") is None:
 			return False
 		return result.get("code") in (None, "RATE_LIMIT_HIT", "BAD_EVENT_QUEUE_ID")
+
+	def onBehalfOf(self, name):
+		"""Zulip account of a player, unless the server recently ignored on_behalf_of."""
+		if self.client.get("Zulip-On-Behalf-Unsupported"):
+			return None
+		return name.split("@")[-1].lower()+"@ig.ryzom.com"
+
+	def onBehalfIgnored(self, result):
+		"""A plain Zulip server ignores on_behalf_of; ask again in an hour."""
+		if "on_behalf_of" not in result.get("ignored_parameters_unsupported", []):
+			return False
+		self.client.set("Zulip-On-Behalf-Unsupported", 1, 60*60)
+		return True
+
+	def ownMessageKey(self, email, content):
+		"""Marks a message the bot sent for a player, so the fetcher does not send it back."""
+		return "Chat-Zulip-Own-"+email+"-"+hashlib.sha1(content.strip().encode("utf-8")).hexdigest()
 
 	def setZulipQueueId(self, queue_id):
 		self.client.set("Zulip-Queue-Id", self.zulip.queue_id)
