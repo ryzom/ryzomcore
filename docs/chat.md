@@ -21,6 +21,7 @@ Far tells to another shard go through the shard unifier as `sendFarTellShared` /
 | `Phrase` | `KnownPhrase`: known phrase index, `PhraseSheet`: rolemaster phrase sheet |
 | `Position` | `Position`: own position, `MapPosition`: map location or user landmark |
 | `Macro` | `Macro`: name, icon, display text and commands |
+| `Reaction` | `Reaction`: reacted message id, emoji name, add or remove |
 
 `Mention` references do not become parts: `@team`, `@guild` and `@all` stay in the text and are mapped to a `CChatMessageMention` with their scope.
 
@@ -42,8 +43,13 @@ Limits are in `CHAT_MESSAGE` (`chat_message.h`): 255 characters of text, 8 refer
 
 A shared macro opens prefilled in the macro editor as a new macro. Commands the receiving client does not know are left out; the key shortcut is never shared. The macro is only saved when the player confirms the editor.
 
+## Reactions
+
+A reaction is a message of its own with a single `Reaction` part, sent to the channel of the reacted message ("React" in the chat line menu, or a click on an emoji of the reaction row). The IOS accepts it where a quote of the same message would be accepted, does not keep it in its message history and does not export it to Zulip. Clients do not display it as a chat line: they add or remove the sender in the reaction row below the reacted message, whose emoji tooltip lists the players. Reactions to messages no longer shown, and reactions sent before the client received the message, are not kept.
+
 ## Chat window
 
+- Messages with links, quotes or group mentions leave the input when they are sent and come back if the server refuses them.
 - Jump buttons to the newest message and to the first unread one (`button_newest`, `button_unread` of `CGroupScrollText`), with a line above the first message that arrived in an inactive tab.
 - Emoji with a picker beside each chat input; the emoji data and its tooling are described in `ryzom/tools/emoji/README.md`.
 
@@ -53,7 +59,7 @@ The IOS logs shared messages with their parts (`chat_meta` lines), so `ryzom/ser
 
 ## Translation keys
 
-The UI keys used by these features are maintained in the online translations, among them `uiChatLinkMenu*`, `uiChatLinkClipboard`, `uiChatLinkDoesNotFit`, `uiChatQuoteSourceChannelOnly`, `uiChatLocation`, `uiChatPositionShowOnMap`, `uiChatPositionSaveLandmark`, `uittChatJumpNewest`, `uittChatJumpUnread` and `uiCopySheetId`.
+The UI keys used by these features are maintained in the online translations, among them `uiChatLinkMenu*`, `uiChatLinkClipboard`, `uiChatLinkDoesNotFit`, `uiChatQuoteSourceChannelOnly`, `uiChatLocation`, `uiChatPositionShowOnMap`, `uiChatPositionSaveLandmark`, `uittChatJumpNewest`, `uittChatJumpUnread`, `uiChatReact` and `uiCopySheetId`.
 
 ## Credits
 

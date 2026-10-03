@@ -208,6 +208,9 @@ namespace NLGUI
 	//========================================================================
 	void CGroupScrollText::markUnread(CViewBase *line)
 	{
+		// Only scroll texts with jump buttons track unread lines.
+		if (!_ButtonNewest && !_ButtonUnread)
+			return;
 		// Lines read before stay above the new marker.
 		if (_FirstUnread == NULL || _UnreadSeen)
 		{

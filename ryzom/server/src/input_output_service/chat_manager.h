@@ -186,6 +186,8 @@ public :
 	CMessageHistoryEntry *rememberMessage(const CChatMessage &message);
 	bool resolveQuote(CChatMessage &message, const std::string &channel,
 		const NLMISC::CEntityId &sender, const std::string &receiver = std::string());
+	bool resolveReaction(const CChatMessage &message, const std::string &channel,
+		const NLMISC::CEntityId &sender, const std::string &receiver = std::string());
 	bool canReceiveQuote(const std::string &messageId, const NLMISC::CEntityId &receiver);
 	bool bridgeChat(const std::string &sender, const std::string &channel,
 		const std::string &externalId, const std::string &messageId, const std::string &quoteId,

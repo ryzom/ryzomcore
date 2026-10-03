@@ -3499,6 +3499,10 @@
             name="uiWebReply"
             handler="quote_chat"
             params="from_modal" />
+    <action id="react"
+            name="uiChatReact"
+            handler="chat_react"
+            params="from_modal" />
     <action id="tell"
             name="uimTell"
             handler="enter_tell"
