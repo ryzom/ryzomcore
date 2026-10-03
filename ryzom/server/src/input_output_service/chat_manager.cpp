@@ -234,6 +234,8 @@ static ucstring sharedMessageLogText(const std::vector<CChatMessagePart> &parts,
 		}
 		else if (it->Type == CChatMessagePart::Macro)
 			text += ucstring::makeFromUtf8(it->MacroValue.Name);
+		else if (it->Type == CChatMessagePart::Reaction)
+			text += ucstring::makeFromUtf8(":" + it->ReactionValue.Emoji + ":");
 	}
 	return text;
 }
@@ -452,7 +454,7 @@ static bool prepareSharedMessage(const TDataSetRow &sender, CChatMessage &messag
 			it->PositionValue.Timestamp = message.Timestamp;
 		}
 	}
-	message.AllowTranslation = EnableDeepL && !bypassTranslation &&
+	message.AllowTranslation = EnableDeepL && !bypassTranslation && !CHAT_MESSAGE::isReaction(message) &&
 		!IOS->getChatManager().getClient(sender).dontSendTranslation(message.SourceLanguage);
 	message.TranslatedParts.clear();
 	message.MentionHomeSessionId = infos->HomeSessionId.asInt();
@@ -529,7 +531,8 @@ CChatManager::CMessageHistoryEntry *CChatManager::findMessage(const std::string 
 //-----------------------------------------------
 CChatManager::CMessageHistoryEntry *CChatManager::rememberMessage(const CChatMessage &message)
 {
-	if (message.MessageId.empty())
+	// Reactions are neither quoted nor exported.
+	if (message.MessageId.empty() || CHAT_MESSAGE::isReaction(message))
 		return NULL;
 	CMessageHistoryEntry *existing = findMessage(message.MessageId);
 	if (existing)
@@ -622,6 +625,22 @@ bool CChatManager::resolveQuote(CChatMessage &message, const std::string &channe
 	message.Quote.Timestamp = original->Message.Timestamp;
 	message.Quote.Parts = original->Message.Parts;
 	return message.Quote.isValid();
+}
+
+//-----------------------------------------------
+//	resolveReaction
+//
+//-----------------------------------------------
+bool CChatManager::resolveReaction(const CChatMessage &message, const std::string &channel,
+	const CEntityId &sender, const std::string &receiver)
+{
+	if (!CHAT_MESSAGE::isReaction(message))
+		return true;
+	// A reaction is allowed where a quote of the same message would be.
+	CChatMessage quote;
+	quote.SenderName = message.SenderName;
+	quote.Quote.MessageId = message.Parts[0].ReactionValue.MessageId;
+	return resolveQuote(quote, channel, sender, receiver);
 }
 
 //-----------------------------------------------
@@ -1915,7 +1934,8 @@ bool CChatManager::chatShared(const TDataSetRow &sender, const CChatMessage &mes
 			group->second.Type != (client.getChatMode() == CChatGroup::arround ? CChatGroup::say : client.getChatMode()))
 			return false;
 	}
-	if (channel.empty() || !resolveQuote(prepared, channel, prepared.SenderId) || !prepared.isValid())
+	if (channel.empty() || !resolveQuote(prepared, channel, prepared.SenderId) ||
+		!resolveReaction(prepared, channel, prepared.SenderId) || !prepared.isValid())
 		return false;
 	const bool sharedControlPrefix = !prepared.Parts.empty() &&
 		prepared.Parts[0].Type == CChatMessagePart::Text &&
@@ -3727,7 +3747,8 @@ bool CChatManager::tellShared(const TDataSetRow &sender, const std::string &rece
 	if (!senderInfos)
 		return false;
 	const std::string target = CShardNames::getInstance().makeFullNameFromRelative(senderInfos->HomeSessionId, receiver);
-	if (!resolveQuote(prepared, "tell:" + target, prepared.SenderId, target) || !prepared.isValid())
+	if (!resolveQuote(prepared, "tell:" + target, prepared.SenderId, target) ||
+		!resolveReaction(prepared, "tell:" + target, prepared.SenderId, target) || !prepared.isValid())
 		return false;
 	CSharedMessageScope scope(_SharedMessage, prepared);
 	return tell(sender, receiver, sharedMessageLogText(prepared));

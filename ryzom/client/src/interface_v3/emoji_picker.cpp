@@ -130,7 +130,7 @@ CEmojiPicker *CEmojiPicker::_Instance = NULL;
 
 //=================================================================================
 CEmojiPicker::CEmojiPicker() : _Group(0), _TabsBuilt(false), _Refilling(false),
-	_NeedFill(false), _BuiltForW(-1), _OpenedByPlayer(false)
+	_NeedFill(false), _BuiltForW(-1), _OpenedByPlayer(false), _Reacting(false)
 {
 }
 
@@ -182,13 +182,33 @@ void CEmojiPicker::toggle(CCtrlBase *caller)
 		return;
 	}
 
-	if (win->getActive() && _TargetEb == eb->getId())
+	if (win->getActive() && !_Reacting && _TargetEb == eb->getId())
 	{
 		hide();
 		return;
 	}
 	_TargetEb = eb->getId();
+	_Reacting = false;
+	show(win);
+	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
+}
 
+//=================================================================================
+void CEmojiPicker::openForReaction()
+{
+	CInterfaceGroup *win = getGroupFromId(EMOJI_PICKER_WIN);
+	if (!win)
+	{
+		nlwarning("Emoji: the picker window is missing from the interface");
+		return;
+	}
+	_Reacting = true;
+	show(win);
+}
+
+//=================================================================================
+void CEmojiPicker::show(CInterfaceGroup *win)
+{
 	_OpenedByPlayer = true;
 	win->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(win);
@@ -198,13 +218,13 @@ void CEmojiPicker::toggle(CCtrlBase *caller)
 	_NeedFill = true;
 	CGroupEmojiGrid *grid = dynamic_cast<CGroupEmojiGrid *>(getGroupFromId(EMOJI_PICKER_GRID));
 	updateGrid(grid ? grid->getWReal() : 0);
-	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 }
 
 //=================================================================================
 void CEmojiPicker::hide()
 {
 	_OpenedByPlayer = false;
+	_Reacting = false;
 	CInterfaceGroup *win = getGroupFromId(EMOJI_PICKER_WIN);
 	if (win)
 		win->setActive(false);
@@ -406,6 +426,12 @@ void CEmojiPicker::opened()
 //=================================================================================
 void CEmojiPicker::pick(const string &name)
 {
+	if (_Reacting)
+	{
+		hide();
+		getChatTextMngr().react(name);
+		return;
+	}
 	CGroupEditBox *eb = getTargetEb();
 	if (!eb)
 	{

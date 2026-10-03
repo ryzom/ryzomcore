@@ -35,6 +35,7 @@ namespace CHAT_MESSAGE
 		MaxParts = MaxReferences * 2 + 1,
 		MaxMentions = MaxTextLength / 2,
 		MaxMacroCommands = 32,
+		MaxEmojiNameLength = 64, // Longest name the client emoji table accepts.
 		MessageIdLength = 36,
 		MaxSerializedSize = 64 * 1024 // Bounds authoritative data before server fan-out.
 	};
@@ -220,6 +221,26 @@ public:
 	std::vector<CCommand> Commands;
 };
 
+class CChatMessageReaction
+{
+public:
+	CChatMessageReaction() : Remove(false) {}
+
+	void serial(NLMISC::IStream &stream)
+	{
+		stream.serial(MessageId);
+		stream.serial(Emoji);
+		stream.serial(Remove);
+	}
+
+	bool isValid() const;
+
+	// Reacted message and the emoji name written between colons.
+	std::string MessageId;
+	std::string Emoji;
+	bool Remove;
+};
+
 class CChatMessagePart
 {
 public:
@@ -229,7 +250,8 @@ public:
 		Item,
 		Phrase,
 		Position,
-		Macro
+		Macro,
+		Reaction
 	};
 
 	CChatMessagePart() : Type(Text) {}
@@ -254,6 +276,9 @@ public:
 		case Macro:
 			stream.serial(MacroValue);
 			break;
+		case Reaction:
+			stream.serial(ReactionValue);
+			break;
 		default:
 			throw NLMISC::EInvalidDataStream(stream);
 		}
@@ -267,6 +292,7 @@ public:
 	CChatMessagePhrase PhraseValue;
 	CChatMessagePosition PositionValue;
 	CChatMessageMacro MacroValue;
+	CChatMessageReaction ReactionValue;
 };
 
 class CChatMessageQuote
@@ -404,6 +430,12 @@ public:
 
 namespace CHAT_MESSAGE
 {
+	// A reaction is a message of its own, made of a single reaction part.
+	inline bool isReaction(const CChatMessage &message)
+	{
+		return message.Parts.size() == 1 && message.Parts[0].Type == CChatMessagePart::Reaction;
+	}
+
 	inline void stripNoBubble(CChatMessage &message)
 	{
 		std::vector<CChatMessagePart> *partLists[] = { &message.Parts, &message.TranslatedParts };
@@ -429,7 +461,8 @@ public:
 		Position,
 		MapPosition,
 		Mention,
-		Macro
+		Macro,
+		Reaction
 	};
 
 	CChatMessageReference() : Start(0), Length(0), Type(Item), Value(0) {}
@@ -453,6 +486,9 @@ public:
 		case Macro:
 			stream.serial(MacroValue);
 			break;
+		case Reaction:
+			stream.serial(ReactionValue);
+			break;
 		case Position:
 			break;
 		default:
@@ -467,6 +503,7 @@ public:
 	uint32 Value;
 	CChatMessagePosition PositionValue;
 	CChatMessageMacro MacroValue;
+	CChatMessageReaction ReactionValue;
 };
 
 class CChatMessageRequest

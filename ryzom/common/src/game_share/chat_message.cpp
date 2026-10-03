@@ -212,6 +212,20 @@ bool CChatMessageMacro::isValid() const
 	return true;
 }
 
+bool CChatMessageReaction::isValid() const
+{
+	if (MessageId.size() != CHAT_MESSAGE::MessageIdLength ||
+		Emoji.empty() || Emoji.size() > CHAT_MESSAGE::MaxEmojiNameLength)
+		return false;
+	for (uint i = 0; i < Emoji.size(); ++i)
+	{
+		const uint8 c = (uint8)Emoji[i];
+		if (c < 32 || c == 127 || c == ':')
+			return false;
+	}
+	return true;
+}
+
 bool CChatMessagePart::isValid() const
 {
 	switch (Type)
@@ -229,6 +243,8 @@ bool CChatMessagePart::isValid() const
 		return PositionValue.isValid();
 	case Macro:
 		return MacroValue.isValid();
+	case Reaction:
+		return ReactionValue.isValid();
 	}
 	return false;
 }
@@ -279,6 +295,13 @@ bool CChatMessage::isValid() const
 	}
 	if (!visible)
 		return false;
+	for (uint i = 0; i < Parts.size(); ++i)
+	{
+		// Reactions carry nothing else.
+		if (Parts[i].Type == CChatMessagePart::Reaction &&
+			(Parts.size() != 1 || !TranslatedParts.empty() || !Mentions.empty() || !Quote.MessageId.empty()))
+			return false;
+	}
 	for (uint i = 0; i < TranslatedParts.size(); ++i)
 	{
 		if (TranslatedParts[i].Type != Parts[i].Type || !TranslatedParts[i].isValid())
@@ -327,12 +350,14 @@ bool CChatMessageRequest::isValid() const
 		it != References.end(); ++it)
 	{
 		if (it->Length == 0 || it->Start < textPosition || it->Start > Text.size() ||
-			it->Length > Text.size() - it->Start || it->Type > CChatMessageReference::Macro ||
+			it->Length > Text.size() - it->Start || it->Type > CChatMessageReference::Reaction ||
 			(it->Type == CChatMessageReference::Mention &&
 				(it->Value == CChatMessageMention::Player || it->Value > CChatMessageMention::All)) ||
 			(it->Type == CChatMessageReference::MapPosition &&
 				(!it->PositionValue.isValid() || it->PositionValue.Kind == CChatMessagePosition::PlayerPosition)) ||
-			(it->Type == CChatMessageReference::Macro && !it->MacroValue.isValid()))
+			(it->Type == CChatMessageReference::Macro && !it->MacroValue.isValid()) ||
+			(it->Type == CChatMessageReference::Reaction && (!it->ReactionValue.isValid() ||
+				References.size() != 1 || it->Start != 0 || it->Length != Text.size() || !QuoteMessageId.empty())))
 			return false;
 		textPosition = it->Start + it->Length;
 	}

@@ -31,6 +31,7 @@
 #include <utility>
 
 class CChatMessage;
+class CChatMessageParagraph;
 
 namespace NLGUI
 {
@@ -101,7 +102,13 @@ public:
 	std::string getQuoteMessageId(const NLGUI::CGroupEditBox *editBox) const;
 	bool getQuoteTarget(const NLGUI::CGroupEditBox *editBox, CChatGroup::TGroupType &group,
 		NLMISC::CEntityId &dynamicChannelId, std::string &receiver) const;
+	// Update the reaction rows of the reacted message.
+	void applyReaction(const CChatMessage &message);
+	// React to the message chosen in the chat menu or in its reaction row.
+	void react(const std::string &emoji);
 	uint32 beginQuoteSend(NLGUI::CGroupEditBox *editBox);
+	// Empty the input once the request is queued; it comes back if the server refuses it.
+	void clearSentInput(uint32 requestId);
 	void finishQuoteSend(uint32 requestId, bool accepted);
 	void checkQuoteSendTimeout();
 	void failPendingQuoteSends();
@@ -144,6 +151,8 @@ private:
 
 	// NULL when the atlas has no tile for it.
 	NLGUI::CViewBase *createEmojiView(const std::string &texture, const std::string &name);
+	// Rebuild the reaction row below a chat line.
+	void updateReactionViews(CChatMessageParagraph *paragraph);
 	void addMsgText(NLGUI::CGroupParagraph *paragraph, const std::string &msg, NLMISC::CRGBA col, bool justified,
 		const std::vector<std::pair<size_t, size_t> > *mentions = NULL);
 	NLGUI::CViewBase *createMsgTextComplex(const std::string &msg, NLMISC::CRGBA col, bool justified, bool plaintext,

@@ -24,9 +24,12 @@
 #include "stdpch.h"
 // client
 #include "game_share/chat_message.h"
+#include "game_share/character_title.h"
 #include "chat_text_manager.h"
 #include "chat_link_ui.h"
 #include "emoji_manager.h"
+#include "emoji_picker.h"
+#include "../client_chat_manager.h"
 #include "nel/gui/group_container.h"
 #include "chat_window.h"
 #include "nel/gui/group_editbox.h"
@@ -56,6 +59,8 @@
 using namespace std;
 using namespace NLMISC;
 
+extern CClientChatManager ChatMngr;
+
 CChatTextManager* CChatTextManager::_Instance = NULL;
 
 // last selected chat from 'copy_chat_popup' action handler
@@ -72,7 +77,7 @@ static CRefPtr<CGroupEditBox> LastSelectedChatInput;
 struct CChatQuoteDraft
 {
 	CChatQuoteDraft() : Group(CChatGroup::nbChatMode), DynamicChannelId(CEntityId::Unknown),
-		HistoryOffset(0), MinHeightOffset(0), RequestId(0), SentAt(0), SentRevision(0) {}
+		HistoryOffset(0), MinHeightOffset(0), RequestId(0), SentAt(0), SentRevision(0), InputCleared(false) {}
 	CRefPtr<CGroupEditBox> EditBox;
 	CChatMessage Message;
 	CChatGroup::TGroupType Group;
@@ -85,8 +90,10 @@ struct CChatQuoteDraft
 	string SentText;
 	vector<CGroupEditBox::CTextTag> SentTags;
 	uint64 SentRevision;
+	bool InputCleared;
 };
 static list<CChatQuoteDraft> ChatQuoteDrafts;
+static bool setQuotePreviewActive(CGroupEditBox *editBox, bool active, sint32 &historyOffset, sint32 &minHeightOffset);
 static uint32 NextQuoteRequestId = 0;
 static const TTime QuoteSendTimeout = 60 * 1000;
 
@@ -109,6 +116,19 @@ public:
 	std::string Sender;
 	std::vector<CRefPtr<CViewBase> > MentionViews;
 	CRefPtr<CCtrlTabButton> MentionTab;
+	std::vector<CRefPtr<CViewBase> > ReactionViews;
+
+	// False when there was no reaction row.
+	bool clearReactionViews()
+	{
+		if (ReactionViews.empty())
+			return false;
+		for (uint i = 0; i < ReactionViews.size(); ++i)
+			if (ReactionViews[i])
+				delChild(ReactionViews[i]);
+		ReactionViews.clear();
+		return true;
+	}
 };
 
 //=================================================================================
@@ -256,6 +276,46 @@ REGISTER_ACTION_HANDLER(CHandlerChatMention, "chat_mention");
 static std::list<CChatMessageParagraph *> ChatMentionViews;
 static std::map<std::string, bool> ChatMentionUnread;
 
+// Players who reacted to a message with one emoji, in reaction order.
+struct CChatReaction
+{
+	std::string Emoji;
+	std::vector<CEntityId> Reactors;
+	std::vector<std::string> Names;
+};
+// Keeps a reaction row of a chat line short.
+static const uint ChatReactionEmojiLimit = 20;
+static std::multimap<std::string, CChatMessageParagraph *> ChatMessageParagraphs;
+static std::map<std::string, std::vector<CChatReaction> > ChatReactions;
+// Message and channel the next reaction goes to.
+static std::string ReactionMessageId;
+static CChatGroup::TGroupType ReactionGroup = CChatGroup::nbChatMode;
+static CEntityId ReactionDynamicChannelId;
+static std::string ReactionReceiver;
+
+//=================================================================================
+static uint32 getLocalCharacterId()
+{
+	return NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
+}
+
+//=================================================================================
+static void registerMessageParagraph(CChatMessageParagraph *paragraph)
+{
+	if (!paragraph->Message.MessageId.empty())
+		ChatMessageParagraphs.insert(make_pair(paragraph->Message.MessageId, paragraph));
+}
+
+//=================================================================================
+static void setReactionTarget(const string &messageId, CChatGroup::TGroupType group,
+	const CEntityId &dynamicChannelId, const string &receiver)
+{
+	ReactionMessageId = messageId;
+	ReactionGroup = group;
+	ReactionDynamicChannelId = dynamicChannelId;
+	ReactionReceiver = receiver;
+}
+
 struct CChatMentionTab : public IOnReceiveTextId
 {
 	CChatMentionTab() : TextModifier(NULL) {}
@@ -332,6 +392,16 @@ static void updateMentionTabs()
 //=================================================================================
 CChatMessageParagraph::~CChatMessageParagraph()
 {
+	typedef std::multimap<std::string, CChatMessageParagraph *>::iterator TParagraphIt;
+	const std::pair<TParagraphIt, TParagraphIt> paragraphs = ChatMessageParagraphs.equal_range(Message.MessageId);
+	for (TParagraphIt it = paragraphs.first; it != paragraphs.second; ++it)
+		if (it->second == this)
+		{
+			ChatMessageParagraphs.erase(it);
+			break;
+		}
+	if (ChatMessageParagraphs.find(Message.MessageId) == ChatMessageParagraphs.end())
+		ChatReactions.erase(Message.MessageId);
 	ChatMentionViews.remove(this);
 	bool retained = false;
 	for (std::list<CChatMessageParagraph *>::const_iterator it = ChatMentionViews.begin(); it != ChatMentionViews.end(); ++it)
@@ -481,6 +551,8 @@ CChatTextManager::CChatTextManager() :
 //=================================================================================
 CChatTextManager::~CChatTextManager()
 {
+	ChatMessageParagraphs.clear();
+	ChatReactions.clear();
 	ChatMentionUnread.clear();
 	updateMentionTabs();
 	ChatMentionViews.clear();
@@ -900,7 +972,7 @@ static std::vector<std::pair<size_t, size_t> > getDisplayedMentions(const CChatM
 	std::vector<std::pair<size_t, size_t> > ranges;
 	if (message.Mentions.empty() || message.Parts.empty())
 		return ranges;
-	const uint32 localCharacter = NetMngr.getLoginCookie().getUserId() * 16 + PlayerSelectedSlot;
+	const uint32 localCharacter = getLocalCharacterId();
 	const ucstring text = ucstring::makeFromUtf8(displayed);
 	for (uint i = 0; i < message.Mentions.size(); ++i)
 	{
@@ -1085,6 +1157,8 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 			paragraph->setRightClickHandler("copy_chat_popup");
 			paragraph->setRightClickHandlerParams((quoteLine.empty() ? lead : copyText) + visibleParts);
 			registerMentionParagraph(paragraph, message);
+			registerMessageParagraph(paragraph);
+			updateReactionViews(paragraph);
 			return paragraph;
 		}
 	}
@@ -1115,6 +1189,8 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 		paragraph->Message = message;
 		paragraph->setRightClickHandlerParams(prefix + body);
 		registerMentionParagraph(paragraph, message);
+		registerMessageParagraph(paragraph);
+		updateReactionViews(paragraph);
 	}
 	return view;
 }
@@ -1206,7 +1282,184 @@ uint32 CChatTextManager::beginQuoteSend(CGroupEditBox *editBox)
 	it->SentText = editBox->getInputString();
 	it->SentTags = editBox->getTextTags();
 	it->SentRevision = editBox->getInputRevision();
+	it->InputCleared = false;
 	return it->RequestId;
+}
+
+//=================================================================================
+void CChatTextManager::applyReaction(const CChatMessage &message)
+{
+	const CChatMessageReaction &reaction = message.Parts[0].ReactionValue;
+	typedef std::multimap<std::string, CChatMessageParagraph *>::iterator TParagraphIt;
+	const std::pair<TParagraphIt, TParagraphIt> paragraphs = ChatMessageParagraphs.equal_range(reaction.MessageId);
+	if (paragraphs.first == paragraphs.second)
+		return;
+	std::vector<CChatReaction> &reactions = ChatReactions[reaction.MessageId];
+	uint index = 0;
+	while (index < reactions.size() && reactions[index].Emoji != reaction.Emoji)
+		++index;
+	if (index == reactions.size())
+	{
+		if (reaction.Remove || reactions.size() >= ChatReactionEmojiLimit)
+			return;
+		reactions.push_back(CChatReaction());
+		reactions.back().Emoji = reaction.Emoji;
+	}
+	CChatReaction &entry = reactions[index];
+	const std::vector<CEntityId>::iterator reactor = std::find(entry.Reactors.begin(), entry.Reactors.end(), message.SenderId);
+	if (reaction.Remove)
+	{
+		if (reactor == entry.Reactors.end())
+			return;
+		entry.Names.erase(entry.Names.begin() + (reactor - entry.Reactors.begin()));
+		entry.Reactors.erase(reactor);
+		if (entry.Reactors.empty())
+			reactions.erase(reactions.begin() + index);
+	}
+	else
+	{
+		if (reactor != entry.Reactors.end())
+			return;
+		entry.Reactors.push_back(message.SenderId);
+		entry.Names.push_back(CEntityCL::removeTitleAndShardFromName(message.SenderName.toUtf8()));
+	}
+	for (TParagraphIt it = paragraphs.first; it != paragraphs.second; ++it)
+		updateReactionViews(it->second);
+}
+
+//=================================================================================
+void CChatTextManager::updateReactionViews(CChatMessageParagraph *paragraph)
+{
+	const bool hadRow = paragraph->clearReactionViews();
+	std::map<std::string, std::vector<CChatReaction> >::const_iterator reactions =
+		ChatReactions.find(paragraph->Message.MessageId);
+	if (reactions == ChatReactions.end() || reactions->second.empty())
+	{
+		if (hadRow)
+			paragraph->invalidateCoords();
+		return;
+	}
+	CViewText *first = paragraph->getNumChildren() ? dynamic_cast<CViewText *>(paragraph->getChild(0)) : NULL;
+	const CRGBA color = first ? first->getColor() : CRGBA::White;
+	const CRGBA ownColor = CRGBA::stringToRGBA(
+		CWidgetManager::getInstance()->getParser()->getDefine("chat_message_color_mention").c_str());
+	const uint32 localCharacter = getLocalCharacterId();
+	// The row starts on its own line below the message.
+	CViewBase *lineBreak = createMsgTextSimple("\n", color, false, NULL);
+	paragraph->addChild(lineBreak);
+	paragraph->ReactionViews.push_back(lineBreak);
+	for (std::vector<CChatReaction>::const_iterator it = reactions->second.begin(); it != reactions->second.end(); ++it)
+	{
+		bool own = false;
+		string names;
+		for (uint i = 0; i < it->Reactors.size(); ++i)
+		{
+			own |= it->Reactors[i].getShortId() == localCharacter;
+			names += (i ? ", " : "") + it->Names[i];
+		}
+		const string code = ":" + it->Emoji + ":";
+		string::size_type length = 0;
+		const CEmojiManager::CEntry *entry = NULL;
+		string label = code;
+		if (CEmojiManager::getInstance().matchAt(code, 0, code.size(), length, entry) && length == code.size() &&
+			!entry->Texture.empty())
+		{
+			// Clicking the emoji adds or takes back the own reaction.
+			CCtrlButton *button = new CCtrlButton(CViewBase::TCtorParam());
+			button->setId("reaction");
+			button->setTexture(entry->Texture);
+			button->setTextureOver(entry->Texture);
+			button->setTexturePushed(entry->Texture);
+			button->setScale(true);
+			button->setW(getEmojiPixelSize());
+			button->setH(getEmojiPixelSize());
+			button->setModulateGlobalColorAll(false);
+			button->setDefaultContextHelp(names);
+			button->setActionOnLeftClick("chat_reaction");
+			button->setParamsOnLeftClick(it->Emoji);
+			paragraph->addChild(button);
+			paragraph->ReactionViews.push_back(button);
+			label.clear();
+		}
+		CViewBase *count = createMsgTextSimple(label + " " + toString(it->Reactors.size()) + "   ",
+			own ? ownColor : color, false, NULL);
+		paragraph->addChild(count);
+		paragraph->ReactionViews.push_back(count);
+	}
+	paragraph->invalidateCoords();
+}
+
+//=================================================================================
+void CChatTextManager::react(const string &emoji)
+{
+	if (ReactionMessageId.empty())
+		return;
+	// Picking an emoji the player already used takes the reaction back.
+	bool remove = false;
+	std::map<std::string, std::vector<CChatReaction> >::const_iterator reactions = ChatReactions.find(ReactionMessageId);
+	if (reactions != ChatReactions.end())
+	{
+		const uint32 localCharacter = getLocalCharacterId();
+		for (std::vector<CChatReaction>::const_iterator it = reactions->second.begin(); it != reactions->second.end(); ++it)
+			if (it->Emoji == emoji)
+				for (uint i = 0; !remove && i < it->Reactors.size(); ++i)
+					remove = it->Reactors[i].getShortId() == localCharacter;
+	}
+	CChatMessageRequest request;
+	request.Text = ucstring::makeFromUtf8(":" + emoji + ":");
+	CChatMessageReference reference;
+	reference.Type = CChatMessageReference::Reaction;
+	reference.Length = (uint16)request.Text.size();
+	reference.ReactionValue.MessageId = ReactionMessageId;
+	reference.ReactionValue.Emoji = emoji;
+	reference.ReactionValue.Remove = remove;
+	request.References.push_back(reference);
+	const bool queued = request.isValid() && (ReactionGroup == CChatGroup::tell ?
+		ChatMngr.tell(ReactionReceiver, request) : ChatMngr.chat(request, ReactionGroup, ReactionDynamicChannelId));
+	if (!queued)
+		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
+}
+
+//=================================================================================
+void CChatTextManager::clearSentInput(uint32 requestId)
+{
+	for (list<CChatQuoteDraft>::iterator it = ChatQuoteDrafts.begin(); it != ChatQuoteDrafts.end(); ++it)
+		if (requestId != 0 && it->RequestId == requestId)
+		{
+			if (it->EditBox && !it->InputCleared)
+			{
+				it->EditBox->setInputString(string());
+				if (!it->Message.MessageId.empty())
+					setQuotePreviewActive(it->EditBox, false, it->HistoryOffset, it->MinHeightOffset);
+				it->InputCleared = true;
+			}
+			return;
+		}
+}
+
+//=================================================================================
+// Give a refused request back to its input, unless the player already typed a new one.
+static void restoreSentInput(CChatQuoteDraft &draft)
+{
+	CGroupEditBox *editBox = draft.EditBox;
+	if (!draft.InputCleared || !editBox)
+		return;
+	draft.InputCleared = false;
+	if (!editBox->getInputStringRef().empty())
+	{
+		draft.Message = CChatMessage();
+		return;
+	}
+	editBox->setInputString(draft.SentText);
+	for (uint i = 0; i < draft.SentTags.size(); ++i)
+	{
+		const CGroupEditBox::CTextTag &tag = draft.SentTags[i];
+		editBox->addTextTag(tag.Start, tag.Length, tag.Type, tag.Color, tag.Reference);
+	}
+	editBox->setCursorPos((sint32)editBox->getInputStringRef().size());
+	if (!draft.Message.MessageId.empty() &&
+		!setQuotePreviewActive(editBox, true, draft.HistoryOffset, draft.MinHeightOffset))
+		draft.Message = CChatMessage();
 }
 
 //=================================================================================
@@ -1221,6 +1474,14 @@ void CChatTextManager::finishQuoteSend(uint32 requestId, bool accepted)
 				return;
 			}
 			it->RequestId = 0;
+			if (accepted && it->InputCleared)
+			{
+				CGroupEditBox *editBox = it->EditBox;
+				ChatQuoteDrafts.erase(it);
+				if (editBox->getAHOnEnter() == "chat_link_tell")
+					CAHManager::getInstance()->runActionHandler("chat_link_tell", editBox, "accepted");
+				return;
+			}
 			if (accepted)
 			{
 				CGroupEditBox *editBox = it->EditBox;
@@ -1246,7 +1507,10 @@ void CChatTextManager::finishQuoteSend(uint32 requestId, bool accepted)
 				}
 			}
 			else
+			{
+				restoreSentInput(*it);
 				CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
+			}
 			if (it->Message.MessageId.empty())
 				ChatQuoteDrafts.erase(it);
 			return;
@@ -1268,6 +1532,7 @@ void CChatTextManager::checkQuoteSendTimeout()
 		if (it->RequestId != 0 && now - it->SentAt >= QuoteSendTimeout)
 		{
 			it->RequestId = 0;
+			restoreSentInput(*it);
 			timedOut = true;
 			if (it->Message.MessageId.empty())
 			{
@@ -1290,6 +1555,7 @@ void CChatTextManager::failPendingQuoteSends()
 		if (it->RequestId != 0)
 		{
 			it->RequestId = 0;
+			restoreSentInput(*it);
 			pending = true;
 			if (it->Message.MessageId.empty())
 			{
@@ -1415,7 +1681,8 @@ void CChatTextManager::clearQuote(CGroupEditBox *editBox)
 	{
 		if (it->EditBox == NULL || it->EditBox == editBox)
 		{
-			if (it->EditBox == editBox && !it->Message.MessageId.empty())
+			// A cleared input already hid its quote preview.
+			if (it->EditBox == editBox && !it->Message.MessageId.empty() && !it->InputCleared)
 			{
 				historyOffset = it->HistoryOffset;
 				minHeightOffset = it->MinHeightOffset;
@@ -1778,6 +2045,8 @@ void CChatTextManager::reset ()
 	while (!ChatQuoteDrafts.empty())
 		clearQuote(ChatQuoteDrafts.front().EditBox);
 	LastSelectedChatInput = NULL;
+	ChatMessageParagraphs.clear();
+	ChatReactions.clear();
 	ChatMentionUnread.clear();
 	updateMentionTabs();
 	ChatMentionViews.clear();
@@ -1840,17 +2109,24 @@ public:
 			const sint sheetIdLine = menu->getRootMenu()->getLineFromId("copy_sheet_id");
 			if (sheetIdLine >= 0)
 				menu->getRootMenu()->setHiddenLine(sheetIdLine, LastSelectedChatSheetId == CSheetId::Unknown);
+			CChatGroup::TGroupType group;
+			CEntityId dynamicChannelId;
+			string receiver;
+			// Quotes and reactions go to the channel of the selected message.
+			const bool hasTarget = LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() &&
+				getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver);
 			const sint line = menu->getRootMenu()->getLineFromId("quote");
 			if (line >= 0)
 			{
-				CChatGroup::TGroupType group;
-				CEntityId dynamicChannelId;
-				string receiver;
-				const bool selectable = LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() &&
-					getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver) &&
-					LastSelectedChatInput != NULL;
+				const bool selectable = hasTarget && LastSelectedChatInput != NULL;
 				menu->getRootMenu()->setSelectable(line, selectable);
 				menu->getRootMenu()->setGrayedLine(line, !selectable);
+			}
+			const sint reactLine = menu->getRootMenu()->getLineFromId("react");
+			if (reactLine >= 0)
+			{
+				menu->getRootMenu()->setSelectable(reactLine, hasTarget);
+				menu->getRootMenu()->setGrayedLine(reactLine, !hasTarget);
 			}
 			const sint tellLine = menu->getRootMenu()->getLineFromId("tell");
 			if (tellLine >= 0)
@@ -1858,6 +2134,19 @@ public:
 				const bool selectable = !getChatTextMngr().getSelectedPlayerName().empty();
 				menu->getRootMenu()->setSelectable(tellLine, selectable);
 				menu->getRootMenu()->setGrayedLine(tellLine, !selectable);
+			}
+			const sint friendLine = menu->getRootMenu()->getLineFromId("add_friend");
+			if (friendLine >= 0)
+			{
+				// Privileged accounts and players already in the friend list cannot be added.
+				const string playerName = getChatTextMngr().getSelectedPlayerName();
+				const CHARACTER_TITLE::ECharacterTitle title =
+					CHARACTER_TITLE::toCharacterTitle(CEntityCL::getTitleFromName(LastSelectedSender));
+				const bool selectable = !playerName.empty() &&
+					(title < CHARACTER_TITLE::BeginGmTitle || title > CHARACTER_TITLE::EndGmTitle) &&
+					PeopleInterraction.FriendList.getIndexFromName(playerName) == -1;
+				menu->getRootMenu()->setSelectable(friendLine, selectable);
+				menu->getRootMenu()->setGrayedLine(friendLine, !selectable);
 			}
 		}
 
@@ -1925,6 +2214,49 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerCopyChatSheetId, "copy_chat_sheet_id");
+
+// ***************************************************************************
+// Called when we right click on a chat line and choose 'react' from context menu
+class CHandlerChatReact : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &/* params */)
+	{
+		if (pCaller == NULL) return;
+
+		CGroupParagraph *pGP = dynamic_cast<CGroupParagraph *>(pCaller);
+		if (pGP) pGP->disableTempOver();
+
+		CWidgetManager::getInstance()->disableModalWindow();
+		CChatGroup::TGroupType group;
+		CEntityId dynamicChannelId;
+		string receiver;
+		if (LastSelectedHasMessage && !LastSelectedMessage.MessageId.empty() &&
+			getChatTextMngr().getSelectedMessageTarget(group, dynamicChannelId, receiver))
+		{
+			setReactionTarget(LastSelectedMessage.MessageId, group, dynamicChannelId, receiver);
+			CEmojiPicker::getInstance().openForReaction();
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerChatReact, "chat_react");
+
+// ***************************************************************************
+// Called when we click on an emoji of the reaction row
+class CHandlerChatReaction : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const string &params)
+	{
+		CChatMessageParagraph *paragraph = pCaller ? dynamic_cast<CChatMessageParagraph *>(pCaller->getParent()) : NULL;
+		if (!paragraph || params.empty() ||
+			!CHAT_MESSAGE::isValidTarget(paragraph->Group, paragraph->DynamicChannelId, paragraph->Receiver))
+			return;
+		setReactionTarget(paragraph->Message.MessageId, paragraph->Group, paragraph->DynamicChannelId, paragraph->Receiver);
+		getChatTextMngr().react(params);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerChatReaction, "chat_reaction");
 
 // ***************************************************************************
 class CHandlerChatAddFriend: public IActionHandler
