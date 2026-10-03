@@ -206,6 +206,11 @@ static bool buildChatPart(CCharacter *character, const CChatMessageReference &re
 		part.Type = CChatMessagePart::Macro;
 		part.MacroValue = reference.MacroValue;
 		return true;
+	case CChatMessageReference::Reaction:
+		// The IOS checks the reacted message against its history.
+		part.Type = CChatMessagePart::Reaction;
+		part.ReactionValue = reference.ReactionValue;
+		return true;
 	default:
 		return false;
 	}

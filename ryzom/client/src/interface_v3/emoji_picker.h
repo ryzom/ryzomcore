@@ -24,6 +24,7 @@ namespace NLGUI
 {
 	class CCtrlBase;
 	class CGroupEditBox;
+	class CInterfaceGroup;
 }
 
 /** Emoji picker window shared by all chat inputs; its frame is in interaction.xml.
@@ -37,13 +38,15 @@ public:
 
 	// Show the picker for the chat input of the caller's window, or hide it.
 	void toggle(NLGUI::CCtrlBase *caller);
+	// Show the picker to react to a chat message instead of writing.
+	void openForReaction();
 	void hide();
 	void opened();
 	// Called by the grid every frame with its current width.
 	void updateGrid(sint32 gridWidth);
 	void setGroup(uint group);
 	void setFilter(const std::string &filter);
-	// Insert ":name:" into the chat input.
+	// Insert ":name:" into the chat input, or send it as reaction.
 	void pick(const std::string &name);
 
 private:
@@ -52,6 +55,7 @@ private:
 
 	static CEmojiPicker *_Instance;
 
+	void show(NLGUI::CInterfaceGroup *win);
 	void buildTabs();
 	void fillGrid(sint32 gridWidth);
 	void updateTabs();
@@ -67,6 +71,7 @@ private:
 	bool			_NeedFill;
 	sint32			_BuiltForW;
 	bool			_OpenedByPlayer;
+	bool			_Reacting;
 };
 
 #endif // CL_EMOJI_PICKER_H

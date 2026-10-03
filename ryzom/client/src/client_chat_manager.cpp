@@ -384,6 +384,7 @@ bool CClientChatManager::chat(const CChatMessageRequest &request,
 		return false;
 	}
 
+	getChatTextMngr().clearSentInput(request.ClientRequestId);
 	if (UserEntity != NULL) UserEntity->setAFK(false);
 	return true;
 }
@@ -452,6 +453,7 @@ bool CClientChatManager::tell(const string &receiverIn, const CChatMessageReques
 		return false;
 	}
 
+	getChatTextMngr().clearSentInput(request.ClientRequestId);
 	updateTellList(receiver);
 	if (UserEntity != NULL) UserEntity->setAFK(false);
 	return true;
@@ -720,6 +722,11 @@ bool CClientChatManager::isChatMessageReady(const CChatMsgNode &chatMessage)
 // ***************************************************************************
 void CClientChatManager::displayChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer)
 {
+	if (CHAT_MESSAGE::isReaction(chatMessage.SharedMessage))
+	{
+		getChatTextMngr().applyReaction(chatMessage.SharedMessage);
+		return;
+	}
 	const CChatGroup::TGroupType chatMode = (CChatGroup::TGroupType)chatMessage.ChatMode;
 	std::string prefix;
 	if (chatMode == CChatGroup::tell)
