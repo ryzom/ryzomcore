@@ -140,7 +140,16 @@ class IosDispatcher(RyzomService):
 		command = "bridgeChat "+" ".join(arguments)
 		return self.runIOSCommand(command)
 
+	def sendReaction(self, m):
+		reaction = m.chat["reaction"]
+		return self.runIOSCommand("bridgeReaction "+" ".join([self.encodeChatText(m.sender),
+			reaction["message_id"], self.encodeChatText(reaction["emoji"]),
+			"remove" if reaction["remove"] else "add"]))
+
 	def sendToService(self, m):
+		if m.chat.get("reaction"):
+			# Game reactions were already delivered in game.
+			return self.sendReaction(m) if m.source == "zulip" else True
 		if m.chat:
 			return self.sendStructured(m)
 		command = "chat" if m.source == "ios" else "farChat"
