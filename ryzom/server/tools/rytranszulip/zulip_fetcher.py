@@ -169,6 +169,9 @@ class ZulipFetcher(ZulipService):
 		msg = event["message"]
 		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
 			return False
+		# Sent by the bot for a player; the game already shows it.
+		if self.client.get(self.ownMessageKey(msg.get("sender_email", ""), msg["content"])):
+			return False
 		return self.ingestZulipMessage(msg)
 
 	def checkUpdatedMessage(self, event):
@@ -196,8 +199,34 @@ class ZulipFetcher(ZulipService):
 		source_lang = self.client.get(f"Zulip-Msg-Lang-{message_id}")
 		return self.ingestZulipMessage(result["message"], source_lang=source_lang)
 
+	def checkReaction(self, event):
+		# The bot's own reactions are the ones forwarded from the game.
+		if event.get("user_id") == self.admin_id or event.get("reaction_type") != "unicode_emoji":
+			return
+		message_id = self.getChatMessageId(event["message_id"])
+		if not message_id:
+			return
+		user = event.get("user")
+		if not user or "email" not in user:
+			result = self.zulip.get_user_by_id(event["user_id"])
+			if result.get("result") != "success":
+				print(f"Error fetching reacting user {event['user_id']}", result.get("msg", ""))
+				return
+			user = result["user"]
+		# A reaction the dispatcher just set for a player is already shown in game.
+		if self.client.get("Chat-Reaction-Own-"+str(event["message_id"])+"-"+event["emoji_name"]+"-"+
+				user["email"].split("@")[0].lower()):
+			return
+		sender = user["full_name"]
+		reaction = {"message_id": message_id.decode("ascii") if isinstance(message_id, bytes) else message_id,
+			"emoji": event["emoji_name"], "remove": event["op"] == "remove"}
+		self.addRyzomMessage(RyzomMessage("zulip", sender, "", "", "wk", "", ":"+event["emoji_name"]+":",
+			source_message_id=event["message_id"], chat={"reaction": reaction}))
+
 	def dispatchEvent(self, event):
 		event_type = event["type"]
+		if event_type == "reaction":
+			return self.checkReaction(event)
 		if event_type == "message":
 			message_id = event["message"]["id"]
 		elif event_type == "update_message":

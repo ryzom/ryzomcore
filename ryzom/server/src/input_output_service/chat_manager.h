@@ -189,6 +189,8 @@ public :
 	bool resolveReaction(const CChatMessage &message, const std::string &channel,
 		const NLMISC::CEntityId &sender, const std::string &receiver = std::string());
 	bool canReceiveQuote(const std::string &messageId, const NLMISC::CEntityId &receiver);
+	bool bridgeReaction(const std::string &sender, const std::string &messageId,
+		const std::string &emoji, bool remove);
 	bool bridgeChat(const std::string &sender, const std::string &channel,
 		const std::string &externalId, const std::string &messageId, const std::string &quoteId,
 		const std::string &sourceLanguage, const std::string &targetLanguage, const ucstring &text,
@@ -407,6 +409,8 @@ private :
 	std::map<std::string, CMessageHistoryEntry> _MessageHistory;
 	std::deque<std::string> _MessageHistoryOrder;
 	std::map<std::string, std::string> _ExternalMessageIds;
+	// A reaction reaches logSharedMessage once per audience; the bridge gets it once.
+	std::string _ExportedReaction;
 	void logSharedMessage(const CChatMessage &message, const std::string &channel,
 		const std::string &language);
 	void recordSharedReceiver(const NLMISC::CEntityId &receiver, CChatGroup::TGroupType chatMode);

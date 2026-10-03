@@ -1306,22 +1306,27 @@ void CChatTextManager::applyReaction(const CChatMessage &message)
 		reactions.back().Emoji = reaction.Emoji;
 	}
 	CChatReaction &entry = reactions[index];
-	const std::vector<CEntityId>::iterator reactor = std::find(entry.Reactors.begin(), entry.Reactors.end(), message.SenderId);
+	// Zulip users have no character id, their name tells them apart.
+	const string name = CEntityCL::removeTitleAndShardFromName(message.SenderName.toUtf8());
+	uint reactor = 0;
+	while (reactor < entry.Reactors.size() && (entry.Reactors[reactor] != message.SenderId ||
+		(message.SenderId == CEntityId::Unknown && entry.Names[reactor] != name)))
+		++reactor;
 	if (reaction.Remove)
 	{
-		if (reactor == entry.Reactors.end())
+		if (reactor == entry.Reactors.size())
 			return;
-		entry.Names.erase(entry.Names.begin() + (reactor - entry.Reactors.begin()));
-		entry.Reactors.erase(reactor);
+		entry.Names.erase(entry.Names.begin() + reactor);
+		entry.Reactors.erase(entry.Reactors.begin() + reactor);
 		if (entry.Reactors.empty())
 			reactions.erase(reactions.begin() + index);
 	}
 	else
 	{
-		if (reactor != entry.Reactors.end())
+		if (reactor != entry.Reactors.size())
 			return;
 		entry.Reactors.push_back(message.SenderId);
-		entry.Names.push_back(CEntityCL::removeTitleAndShardFromName(message.SenderName.toUtf8()));
+		entry.Names.push_back(name);
 	}
 	for (TParagraphIt it = paragraphs.first; it != paragraphs.second; ++it)
 		updateReactionViews(it->second);

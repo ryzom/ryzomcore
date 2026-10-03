@@ -145,6 +145,24 @@ class IosFetcher(RyzomService):
 					print("Invalid bridge chat acknowledgement")
 			return
 
+		if payload.startswith("chat_reaction|"):
+			fields = payload.split("|")
+			if len(fields) != 7 or fields[1] != "1" or fields[6] not in ("add", "remove"):
+				print("Unsupported chat reaction log entry")
+				return
+			try:
+				channel = base64.b64decode(fields[2], validate=True).decode("utf-8")
+				sender = base64.b64decode(fields[3], validate=True).decode("utf-8")
+				emoji = base64.b64decode(fields[5], validate=True).decode("utf-8")
+			except (ValueError, UnicodeError, binascii.Error):
+				print("Invalid chat reaction log entry")
+				return
+			reaction = {"message_id": fields[4], "emoji": emoji, "remove": fields[6] == "remove"}
+			sender = sender.split("@")[-1]
+			self.addRyzomMessage(RyzomMessage("ios", sender, channel.split(":", 1)[0], channel, "wk", "",
+				":"+emoji+":", chat={"reaction": reaction}))
+			return
+
 		if payload.startswith("chat_meta|"):
 			fields = payload.split("|")
 			if len(fields) != 14 or fields[1] != "1":
