@@ -3187,6 +3187,11 @@ void cbClientPvPSetNeutralAllegianceGuild( NLNET::CMessage& msgin, const std::st
 		if( guild )
 		{
 			CGuildMember * gm = guild->getMemberFromEId(charId);
+			if( gm == NULL )
+			{
+				nlwarning("<cbClientPvPSetNeutralAllegianceGuild> Player Character %s is not a member of his guild", charId.toString().c_str());
+				return;
+			}
 			if( gm->getGrade() == EGSPD::CGuildGrade::Leader )
 			{
 				guild->setAllegianceFromIndeterminedStatus(allegiance);
@@ -3314,6 +3319,10 @@ sint32 clientEventSetItemCustomText(CCharacter* character, INVENTORIES::TInvento
 		return -1;
 	}
 	CInventoryPtr invent = character->getInventory(inventory);
+	if (invent == NULL)
+	{
+		return -1;
+	}
 	if (slot >= invent->getSlotCount())
 	{
 		return -2;
@@ -3352,6 +3361,7 @@ void cbClientEventSetItemCustomText( NLNET::CMessage& msgin, const std::string &
 		// it should be the crafter of the item, check
 		if (inventory==INVENTORIES::UNDEFINED) return;
 		CInventoryPtr invent = character->getInventory(inventory);
+		if (invent == NULL) return;
 		if (slot >= invent->getSlotCount()) return;
 		if (invent->getItem(slot) == NULL) return;
 		CGameItemPtr item = invent->getItem(slot);

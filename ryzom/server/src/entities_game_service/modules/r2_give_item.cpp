@@ -235,7 +235,11 @@ uint32 CR2GiveItem::_regiserLiteralString( TDataSetRow userRowId, const ucstring
 			if( vec[i].ActionId == actionId )
 			{
 				CCharacter *c = PlayerManager.getChar( vec[i].CharacterRowId );
-				nlassert(c);
+				if (c == NULL)
+				{
+					nlwarning("R2GiveItem: character of the request %u is no more online", actionId);
+					return;
+				}
 				CCreature *e = CreatureManager.getCreature(creatureRowId);
 				CMirrorPropValueRO<TYPE_SHEET> sheetInMirror( TheDataset, creatureRowId, DSPropertySHEET );
 				NLMISC::CSheetId sheetId(sheetInMirror());
