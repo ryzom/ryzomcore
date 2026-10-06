@@ -346,12 +346,14 @@ void cbClientMissionWake( NLNET::CMessage& msgin, const std::string & serviceNam
 	CMissionTemplate * templ = NULL;
 	for ( map<TAIAlias, CMission*>::iterator it =  user->getMissionsBegin(); it != user->getMissionsEnd(); ++it )
 	{
-		mission = (*it).second;
-		if ( mission && mission->getClientIndex() == missionIndex )
+		CMission * candidate = (*it).second;
+		if ( candidate && candidate->getClientIndex() == missionIndex )
 		{
-			templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
-			if ( templ->Tags.NoList ) // skip invisible missions
+			CMissionTemplate * candidateTempl = CMissionManager::getInstance()->getTemplate( candidate->getTemplateId() );
+			if ( candidateTempl == NULL || candidateTempl->Tags.NoList ) // skip invalid or invisible missions
 				continue;
+			mission = candidate;
+			templ = candidateTempl;
 			break;
 		}
 	}

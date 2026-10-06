@@ -184,9 +184,9 @@ void CTeamManager::joinLeagueDecline( const NLMISC::CEntityId &charId)
 	//inform both players
 	SM_STATIC_PARAMS_1(params, STRING_MANAGER::player);
 	params[0].setEIdAIAlias( charId, CAIAliasTranslator::getInstance()->getAIAlias( charId) );
-	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(invited->getTeamInvitor()), "LEAGUE_DECLINE", params);
+	PHRASE_UTILITIES::sendDynamicSystemMessage(TheDataset.getDataSetRow(invited->getLeagueInvitor()), "LEAGUE_DECLINE", params);
 
-	params[0].setEIdAIAlias( invited->getTeamInvitor(), CAIAliasTranslator::getInstance()->getAIAlias( invited->getTeamInvitor() ) );
+	params[0].setEIdAIAlias( invited->getLeagueInvitor(), CAIAliasTranslator::getInstance()->getAIAlias( invited->getLeagueInvitor() ) );
 	PHRASE_UTILITIES::sendDynamicSystemMessage(invited->getEntityRowId(), "LEAGUE_YOU_DECLINE", params);
 
 	//cancel the proposal

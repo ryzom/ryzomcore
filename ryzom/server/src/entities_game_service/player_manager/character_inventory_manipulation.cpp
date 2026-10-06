@@ -1725,6 +1725,10 @@ void CCharacter::itemInvToExchange(uint32 invSrc, uint32 invSlot, uint32 exchang
 // ****************************************************************************
 void CCharacter::itemExchangeToBag(uint32 exchangeSlot)
 {
+	// check exchange slot sent by the client
+	if (exchangeSlot >= CExchangeView::NbExchangeSlots)
+		return;
+
 	// check exchange integrity
 	bool exchangeWithBot;
 
@@ -2583,11 +2587,20 @@ void CCharacter::sendItemInfos(uint32 slotId)
 			}
 
 			item = guild->getItem(slot);
+
+			if (item == NULL)
+				return;
+
 			infos.versionInfo = guild->getAndSyncItemInfoVersion(slot, getId());
 		}
 		else if (inventory == INVENTORIES::player_room)
 		{
-			item = _PlayerRoom->getInventory()->getItem(slot);
+			CInventoryPtr roomInv = _PlayerRoom->getInventory();
+
+			if (roomInv == NULL || slot >= roomInv->getSlotCount())
+				return;
+
+			item = roomInv->getItem(slot);
 
 			if (item == NULL)
 				return;
