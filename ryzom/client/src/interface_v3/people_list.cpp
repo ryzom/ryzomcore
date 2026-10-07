@@ -791,8 +791,7 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 	if (child)
 	{
 		const std::string &sender = _Peoples[index].getName();
-		getChatTextMngr().setMessageTarget(child, CChatGroup::tell, CEntityId::Unknown, sender);
-		getChatTextMngr().setMessageSender(child, sender);
+		getChatTextMngr().setMessageTarget(child, CChatGroup::tell, 0, sender, sender);
 		gl->addChild(child);
 	}
 }
@@ -1205,35 +1204,8 @@ class CHandlerContactEntry : public IActionHandler
 				getChatTextMngr().clearQuote(pEB);
 			return;
 		}
-		string quoteId = getChatTextMngr().getQuoteMessageId(pEB);
-		if (!quoteId.empty())
-		{
-			CChatGroup::TGroupType group;
-			CEntityId dynamicChannelId;
-			string receiver;
-			if (!getChatTextMngr().getQuoteTarget(pEB, group, dynamicChannelId, receiver))
-				return;
-			CChatMessageRequest request = hasLinks ? linkRequest : CChatMessageRequest();
-			if (!hasLinks)
-				request.Text = CUtfStringView(text).toUtf16();
-			request.QuoteMessageId = quoteId;
-			request.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
-			if (request.ClientRequestId == 0)
-				return;
-			if (!request.isValid())
-			{
-				getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
-				return;
-			}
-			bool queued;
-			if (group == CChatGroup::tell)
-				queued = ChatMngr.tell(receiver, request);
-			else
-				queued = ChatMngr.chat(request, group, dynamicChannelId);
-			if (!queued)
-				getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
+		if (getChatTextMngr().sendQuote(pEB, text, hasLinks ? &linkRequest : NULL))
 			return;
-		}
 		// Well, we could have used CChatWindow class to handle this, but CPeopleList was written earlier, so for now
 		// it is simpler to keep it as it and to just use this action handler to manage user input.
 		if (!pCaller || !pCaller->getParent()) return;

@@ -123,11 +123,9 @@ class CDynChatChan
 public:
 	struct CHistoricEntry
 	{
-		CHistoricEntry() : Shared(false) {}
 		ucstring	String;
 //		TDataSetRow Sender;
 		ucstring	SenderString;
-		bool		Shared;
 		CChatMessage Message;
 	};
 	NLMISC::CHistoric<CHistoricEntry>		Historic;		// historic of messages for IOS

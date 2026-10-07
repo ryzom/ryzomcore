@@ -242,9 +242,7 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 	CViewBase *child = sharedMessage ? ctm.createMsgText(msgNoTranslate, *sharedMessage, col, false, gt) : ctm.createMsgText(msgNoTranslate, col);
 	if (child)
 	{
-		ctm.setMessageTarget(child, gt == CChatGroup::arround ? CChatGroup::say : gt,
-			gt == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown);
-		ctm.setMessageSender(child, senderName);
+		ctm.setMessageTarget(child, gt, dynamicChatDbIndex, string(), senderName);
 		if (gl)
 		{
 			gl->addChild(child);
@@ -613,9 +611,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 		child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col, false, gt) : ctm.createMsgText(newmsg, col);
 		if (child)
 		{
-			ctm.setMessageTarget(child, gt == CChatGroup::arround ? CChatGroup::say : gt,
-				gt == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown);
-			ctm.setMessageSender(child, senderName);
+			ctm.setMessageTarget(child, gt, dynamicChatDbIndex, string(), senderName);
 			gl->addChild(child);
 			ctm.setMentionTab(child, tab);
 			if (!gl->getParent()->getActive())
@@ -697,9 +693,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 			child = sharedMessage ? ctm.createMsgText(newmsg, *sharedMessage, col, false, gt) : ctm.createMsgText(newmsg, col);
 			if (child)
 			{
-				ctm.setMessageTarget(child, gt == CChatGroup::arround ? CChatGroup::say : gt,
-					gt == CChatGroup::dyn_chat ? ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown);
-				ctm.setMessageSender(child, senderName);
+				ctm.setMessageTarget(child, gt, dynamicChatDbIndex, string(), senderName);
 				gl->addChild(child);
 				ctm.setMentionTab(child, tab);
 				if (!gl->getParent()->getActive())
@@ -764,8 +758,7 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 		getChatTextMngr().createMsgText(msg, col);
 	if (child)
 	{
-		getChatTextMngr().setMessageTarget(child, CChatGroup::tell, CEntityId::Unknown, sender);
-		getChatTextMngr().setMessageSender(child, sender);
+		getChatTextMngr().setMessageTarget(child, CChatGroup::tell, 0, sender, sender);
 		gl->addChild(child);
 		getChatTextMngr().setMentionTab(child, NULL);
 	}
@@ -1460,36 +1453,9 @@ public:
 		}
 		else
 		{
-			string quoteId = getChatTextMngr().getQuoteMessageId(pEB);
-			if (!quoteId.empty())
-			{
-				CChatGroup::TGroupType group;
-				CEntityId dynamicChannelId;
-				string receiver;
-				if (!getChatTextMngr().getQuoteTarget(pEB, group, dynamicChannelId, receiver))
-					return;
-				CChatMessageRequest request = hasLinks ? linkRequest : CChatMessageRequest();
-				if (!hasLinks)
-					request.Text = CUtfStringView(text).toUtf16();
-				request.QuoteMessageId = quoteId;
-				request.ClientRequestId = getChatTextMngr().beginQuoteSend(pEB);
-				if (request.ClientRequestId == 0)
-					return;
-				if (!request.isValid())
-				{
-					getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
-					return;
-				}
-				bool queued;
-				if (group == CChatGroup::tell)
-					queued = ChatMngr.tell(receiver, request);
-				else
-					queued = ChatMngr.chat(request, group, dynamicChannelId);
-				if (!queued)
-					getChatTextMngr().finishQuoteSend(request.ClientRequestId, false);
+			if (getChatTextMngr().sendQuote(pEB, text, hasLinks ? &linkRequest : NULL))
 				return;
-			}
-			else if (chat->getListener())
+			if (chat->getListener())
 			{
 				if (hasLinks && !ClientCfg.Local)
 				{

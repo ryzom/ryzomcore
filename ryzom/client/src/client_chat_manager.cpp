@@ -366,26 +366,35 @@ bool CClientChatManager::chat(const CChatMessageRequest &request,
 	std::string receiver;
 	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
 		return false;
+	if (!sendChatShare(group, dynamicChannelId, receiver, request))
+		return false;
 
+	if (UserEntity != NULL) UserEntity->setAFK(false);
+	return true;
+}
+
+//-----------------------------------------------
+//	sendChatShare
+//
+//-----------------------------------------------
+bool CClientChatManager::sendChatShare(CChatGroup::TGroupType group, TChanID dynamicChannelId,
+	string receiver, const CChatMessageRequest &request)
+{
 	CBitMemStream bms;
-	if (GenericMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", bms))
+	if (!GenericMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", bms))
 	{
-		uint8 targetGroup = (uint8)group;
-		bms.serial(targetGroup);
-		bms.serial(dynamicChannelId);
-		bms.serial(receiver);
-		CChatMessageRequest message = request;
-		bms.serial(message);
-		NetMngr.push(bms);
-	}
-	else
-	{
-		nlwarning("<CClientChatManager::chat> unknown message name: STRING:CHAT_SHARE");
+		nlwarning("<CClientChatManager::sendChatShare> unknown message name: STRING:CHAT_SHARE");
 		return false;
 	}
+	uint8 targetGroup = (uint8)group;
+	bms.serial(targetGroup);
+	bms.serial(dynamicChannelId);
+	bms.serial(receiver);
+	CChatMessageRequest message = request;
+	bms.serial(message);
+	NetMngr.push(bms);
 
 	getChatTextMngr().clearSentInput(request.ClientRequestId);
-	if (UserEntity != NULL) UserEntity->setAFK(false);
 	return true;
 }
 
@@ -436,24 +445,9 @@ bool CClientChatManager::tell(const string &receiverIn, const CChatMessageReques
 	TChanID dynamicChannelId = NLMISC::CEntityId::Unknown;
 	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
 		return false;
-	CBitMemStream bms;
-	if (GenericMsgHeaderMngr.pushNameToStream("STRING:CHAT_SHARE", bms))
-	{
-		uint8 targetGroup = (uint8)group;
-		bms.serial(targetGroup);
-		bms.serial(dynamicChannelId);
-		bms.serial(receiver);
-		CChatMessageRequest message = request;
-		bms.serial(message);
-		NetMngr.push(bms);
-	}
-	else
-	{
-		nlwarning("<CClientChatManager::tell> unknown message name: STRING:CHAT_SHARE");
+	if (!sendChatShare(group, dynamicChannelId, receiver, request))
 		return false;
-	}
 
-	getChatTextMngr().clearSentInput(request.ClientRequestId);
 	updateTellList(receiver);
 	if (UserEntity != NULL) UserEntity->setAFK(false);
 	return true;
@@ -580,12 +574,8 @@ void CClientChatManager::processTellString(NLMISC::CBitMemStream& bms, IChatDisp
 		(trailer.OwnTell ? !trailer.TellTarget.empty() : trailer.TellTarget.empty()))
 	{
 		const string sender = trailer.OwnTell ? trailer.TellTarget.toUtf8() : trailer.Message.SenderName.toUtf8();
-		CChatMsgNode message(chatMsg.CompressedIndex, sender, CChatGroup::tell,
-			CEntityId::Unknown, trailer.OwnTell, trailer.TellTarget.toUtf8(), trailer.Message);
-		if (isChatMessageReady(message))
-			displayChatMessage(message, chatDisplayer);
-		else
-			_ChatBuffer.push_back(message);
+		displayOrBufferChatMessage(CChatMsgNode(chatMsg.CompressedIndex, sender, CChatGroup::tell,
+			CEntityId::Unknown, trailer.OwnTell, trailer.Message), chatDisplayer);
 		return;
 	}
 
@@ -619,12 +609,8 @@ void CClientChatManager::processFarTellString(NLMISC::CBitMemStream& bms, IChatD
 	CChatMessageTrailer trailer;
 	if (readChatMessageTrailer(bms, trailer) && !trailer.OwnTell && trailer.TellTarget.empty())
 	{
-		CChatMsgNode message(0xFFFFF, farTellMsg.SenderName.toUtf8(), CChatGroup::tell,
-			CEntityId::Unknown, false, string(), trailer.Message);
-		if (isChatMessageReady(message))
-			displayChatMessage(message, chatDisplayer);
-		else
-			_ChatBuffer.push_back(message);
+		displayOrBufferChatMessage(CChatMsgNode(0xFFFFF, farTellMsg.SenderName.toUtf8(), CChatGroup::tell,
+			CEntityId::Unknown, false, trailer.Message), chatDisplayer);
 		return;
 	}
 
@@ -653,12 +639,8 @@ void	CClientChatManager::processChatString( NLMISC::CBitMemStream& bms, IChatDis
 			CHAT_MESSAGE::isValidTarget(trailerMode, chatMsg.DynChatChanID, string()))
 		{
 			if (PermanentlyBanned) return;
-			CChatMsgNode message(chatMsg.CompressedIndex, trailer.Message.SenderName.toUtf8(),
-				trailerMode, chatMsg.DynChatChanID, false, string(), trailer.Message);
-			if (isChatMessageReady(message))
-				displayChatMessage(message, chatDisplayer);
-			else
-				_ChatBuffer.push_back(message);
+			displayOrBufferChatMessage(CChatMsgNode(chatMsg.CompressedIndex, trailer.Message.SenderName.toUtf8(),
+				trailerMode, chatMsg.DynChatChanID, false, trailer.Message), chatDisplayer);
 			return;
 		}
 	}
@@ -720,6 +702,15 @@ bool CClientChatManager::isChatMessageReady(const CChatMsgNode &chatMessage)
 }
 
 // ***************************************************************************
+void CClientChatManager::displayOrBufferChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer)
+{
+	if (isChatMessageReady(chatMessage))
+		displayChatMessage(chatMessage, chatDisplayer);
+	else
+		_ChatBuffer.push_back(chatMessage);
+}
+
+// ***************************************************************************
 void CClientChatManager::displayChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer)
 {
 	if (CHAT_MESSAGE::isReaction(chatMessage.SharedMessage))
@@ -734,7 +725,7 @@ void CClientChatManager::displayChatMessage(const CChatMsgNode &chatMessage, ICh
 		if (chatMessage.OwnTell)
 		{
 			prefix = CI18N::get("youTellPlayer");
-			strFindReplace(prefix, "%name", CEntityCL::removeTitleAndShardFromName(chatMessage.TellTarget));
+			strFindReplace(prefix, "%name", CEntityCL::removeTitleAndShardFromName(chatMessage.Sender));
 			prefix += ": ";
 		}
 		else

@@ -212,6 +212,10 @@ class RyzomService():
 	def encodeChatText(text):
 		return base64.b64encode(text.encode("utf-8")).decode("ascii") or "-"
 
+	@staticmethod
+	def decodeChatText(text):
+		return base64.b64decode(text, validate=True).decode("utf-8")
+
 	def getRyzomMessage(self, i):
 		message = self.client.get("Ryzom-Chat-"+str(i))
 		if message:

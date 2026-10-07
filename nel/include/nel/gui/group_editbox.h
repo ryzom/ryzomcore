@@ -43,7 +43,6 @@ namespace NLGUI
 		{
 			uint32 Start;
 			uint32 Length;
-			uint32 Type;
 			std::string Reference;
 			NLMISC::CRGBA Color;
 		};
@@ -85,7 +84,7 @@ namespace NLGUI
 		void		setPrompt(const std::string &s);
 		void		setInputString(const std::string &str);
 		void		setInputStringRef(const ::u32string &str);
-		void		addTextTag(uint32 start, uint32 length, uint32 type, NLMISC::CRGBA color,
+		void		addTextTag(uint32 start, uint32 length, NLMISC::CRGBA color,
 			const std::string &reference = std::string());
 		const std::vector<CTextTag> &getTextTags() const { return _TextTags; }
 		uint64		getInputRevision() const { return _InputRevision; }
@@ -159,13 +158,10 @@ namespace NLGUI
 		sint32	getMinUsedW() const;
 
 		// Copy the selection into buffer
-		void		copy();
-		bool		copySelectionToClipboard();
+		bool		copy();
 		static bool	copyToClipboard(const ::u32string &text, const std::vector<CTextTag> &textTags);
-		// Paste the selection into buffer
-		void		paste();
-		// Reject a tagged paste that cannot preserve all its tags.
-		bool		paste(uint32 maxTextTags);
+		// Paste the clipboard; with maxTextTags != 0 keep its text tags or reject the paste when they do not fit.
+		bool		paste(uint32 maxTextTags = 0);
 		// Write the string into buffer
 		// With allowPartial=false, reject filtered or truncated input without changing the buffer.
 		bool		writeString(const std::string &str, bool replace = true, bool atEnd = true, bool allowPartial = true);

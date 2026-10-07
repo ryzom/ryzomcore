@@ -1002,18 +1002,11 @@ void CInterfaceChatDisplayer::displayTell(/*TDataSetIndex senderIndex, */const s
 	if (_SharedMessage)
 	{
 		if (_OwnTell)
-		{
-			string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
-			displayString = csr + CI18N::get("youTell") + ": ";
-			string senderPart = displayString;
-			colorizeSender(displayString, senderPart, prop.getRGBA());
-		}
+			displayString = string(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "") + CI18N::get("youTell") + ": ";
 		else
-		{
 			displayString = _SharedPrefix;
-			string senderPart = displayString;
-			colorizeSender(displayString, senderPart, prop.getRGBA());
-		}
+		string senderPart = displayString;
+		colorizeSender(displayString, senderPart, prop.getRGBA());
 	}
 
 	PeopleInterraction.ChatInput.Tell.displayTellMessage(/*senderIndex, */displayString, goodSenderName,

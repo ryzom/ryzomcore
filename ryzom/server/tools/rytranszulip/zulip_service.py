@@ -16,12 +16,14 @@
 
 import re
 import time
-import hashlib
 import traceback
 import zulip
 import requests
 
 from ryzom_service import RyzomService, RyzomMessage
+
+NETWORK_ERRORS = (requests.exceptions.Timeout, requests.exceptions.SSLError, requests.exceptions.ConnectionError)
+EVENT_TYPES = ["message", "update_message", "reaction"]
 
 class ZulipClient(zulip.Client):
 	def doRegister(self, event_types, narrow, **kwargs):
@@ -49,11 +51,7 @@ class ZulipClient(zulip.Client):
 		while True:
 			try:
 				pending = bool(on_poll()) if on_poll is not None else False
-			except (
-				requests.exceptions.Timeout,
-				requests.exceptions.SSLError,
-				requests.exceptions.ConnectionError,
-			):
+			except NETWORK_ERRORS:
 				if self.verbose:
 					print(f"Connection error checking pending quotes:\n{traceback.format_exc()}")
 				time.sleep(1)
@@ -65,11 +63,7 @@ class ZulipClient(zulip.Client):
 				if pending:
 					request["dont_block"] = True
 				res = self.get_events(**request)
-			except (
-				requests.exceptions.Timeout,
-				requests.exceptions.SSLError,
-				requests.exceptions.ConnectionError,
-			):
+			except NETWORK_ERRORS:
 				if self.verbose:
 					print(f"Connection error fetching events:\n{traceback.format_exc()}")
 				# TODO: Make this use our backoff library
@@ -123,11 +117,7 @@ class ZulipClient(zulip.Client):
 					continue
 				try:
 					callback(event)
-				except (
-					requests.exceptions.Timeout,
-					requests.exceptions.SSLError,
-					requests.exceptions.ConnectionError,
-				):
+				except NETWORK_ERRORS:
 					if self.verbose:
 						print(f"Connection error processing event:\n{traceback.format_exc()}")
 					time.sleep(1)
@@ -135,13 +125,10 @@ class ZulipClient(zulip.Client):
 				self.last_event_id = max(self.last_event_id, int(event["id"]))
 
 	def registerMessages(self, **kwargs):
-		self.doRegister(["message", "update_message", "reaction"], None, **kwargs)
+		self.doRegister(EVENT_TYPES, None, **kwargs)
 
 	def manageMessages(self, callback, **kwargs):
-		def event_callback(event):
-			if event["type"] in ("message", "update_message", "reaction"):
-				callback(event)
-		self.call(event_callback, ["message", "update_message", "reaction"], None, **kwargs)
+		self.call(callback, EVENT_TYPES, None, **kwargs)
 
 
 class ZulipService(RyzomService):
@@ -170,23 +157,6 @@ class ZulipService(RyzomService):
 		if result.get("result") == "error" and result.get("code") is None:
 			return False
 		return result.get("code") in (None, "RATE_LIMIT_HIT", "BAD_EVENT_QUEUE_ID")
-
-	def onBehalfOf(self, name):
-		"""Zulip account of a player, unless the server recently ignored on_behalf_of."""
-		if self.client.get("Zulip-On-Behalf-Unsupported"):
-			return None
-		return name.split("@")[-1].lower()+"@ig.ryzom.com"
-
-	def onBehalfIgnored(self, result):
-		"""A plain Zulip server ignores on_behalf_of; ask again in an hour."""
-		if "on_behalf_of" not in result.get("ignored_parameters_unsupported", []):
-			return False
-		self.client.set("Zulip-On-Behalf-Unsupported", 1, 60*60)
-		return True
-
-	def ownMessageKey(self, email, content):
-		"""Marks a message the bot sent for a player, so the fetcher does not send it back."""
-		return "Chat-Zulip-Own-"+email+"-"+hashlib.sha1(content.strip().encode("utf-8")).hexdigest()
 
 	def setZulipQueueId(self, queue_id):
 		self.client.set("Zulip-Queue-Id", self.zulip.queue_id)

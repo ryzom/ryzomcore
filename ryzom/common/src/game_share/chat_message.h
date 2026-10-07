@@ -74,6 +74,20 @@ namespace CHAT_MESSAGE
 
 	bool isValidTarget(CChatGroup::TGroupType group, const NLMISC::CEntityId &dynamicChannelId,
 		const std::string &receiver);
+
+	template <class T>
+	void serialBounded(NLMISC::IStream &stream, std::vector<T> &values, uint max)
+	{
+		nlassert(stream.isReading() || values.size() <= max);
+		uint8 count = stream.isReading() ? 0 : (uint8)values.size();
+		stream.serial(count);
+		if (count > max)
+			throw NLMISC::EInvalidDataStream(stream);
+		if (stream.isReading())
+			values.resize(count);
+		for (uint i = 0; i < values.size(); ++i)
+			stream.serial(values[i]);
+	}
 }
 
 class CChatMessagePosition
@@ -199,15 +213,7 @@ public:
 		stream.serial(BitmapBack);
 		stream.serial(BitmapIcon);
 		stream.serial(BitmapOver);
-		nlassert(stream.isReading() || Commands.size() <= CHAT_MESSAGE::MaxMacroCommands);
-		uint8 count = stream.isReading() ? 0 : (uint8)Commands.size();
-		stream.serial(count);
-		if (count > CHAT_MESSAGE::MaxMacroCommands)
-			throw NLMISC::EInvalidDataStream(stream);
-		if (stream.isReading())
-			Commands.resize(count);
-		for (uint i = 0; i < Commands.size(); ++i)
-			stream.serial(Commands[i]);
+		CHAT_MESSAGE::serialBounded(stream, Commands, CHAT_MESSAGE::MaxMacroCommands);
 	}
 
 	bool isValid() const;
@@ -308,15 +314,7 @@ public:
 		stream.serial(SenderId);
 		stream.serial(SenderName);
 		stream.serial(Timestamp);
-		nlassert(stream.isReading() || Parts.size() <= CHAT_MESSAGE::MaxParts);
-		uint8 count = stream.isReading() ? 0 : (uint8)Parts.size();
-		stream.serial(count);
-		if (count > CHAT_MESSAGE::MaxParts)
-			throw NLMISC::EInvalidDataStream(stream);
-		if (stream.isReading())
-			Parts.resize(count);
-		for (uint i = 0; i < Parts.size(); ++i)
-			stream.serial(Parts[i]);
+		CHAT_MESSAGE::serialBounded(stream, Parts, CHAT_MESSAGE::MaxParts);
 	}
 
 	std::string MessageId;
@@ -375,39 +373,15 @@ public:
 		stream.serial(SenderId);
 		stream.serial(SenderName);
 		stream.serial(Timestamp);
-		nlassert(stream.isReading() || Parts.size() <= CHAT_MESSAGE::MaxParts);
-		uint8 count = stream.isReading() ? 0 : (uint8)Parts.size();
-		stream.serial(count);
-		if (count > CHAT_MESSAGE::MaxParts)
-			throw NLMISC::EInvalidDataStream(stream);
-		if (stream.isReading())
-			Parts.resize(count);
-		for (uint i = 0; i < Parts.size(); ++i)
-			stream.serial(Parts[i]);
+		CHAT_MESSAGE::serialBounded(stream, Parts, CHAT_MESSAGE::MaxParts);
 		stream.serial(SourceLanguage);
 		stream.serial(TranslationLanguage);
 		stream.serial(AllowTranslation);
-		nlassert(stream.isReading() || TranslatedParts.size() <= CHAT_MESSAGE::MaxParts);
-		count = stream.isReading() ? 0 : (uint8)TranslatedParts.size();
-		stream.serial(count);
-		if (count > CHAT_MESSAGE::MaxParts)
-			throw NLMISC::EInvalidDataStream(stream);
-		if (stream.isReading())
-			TranslatedParts.resize(count);
-		for (uint i = 0; i < TranslatedParts.size(); ++i)
-			stream.serial(TranslatedParts[i]);
+		CHAT_MESSAGE::serialBounded(stream, TranslatedParts, CHAT_MESSAGE::MaxParts);
 		stream.serial(Quote);
 		stream.serial(MentionHomeSessionId);
 		stream.serial(ResolveMentions);
-		nlassert(stream.isReading() || Mentions.size() <= CHAT_MESSAGE::MaxMentions);
-		count = stream.isReading() ? 0 : (uint8)Mentions.size();
-		stream.serial(count);
-		if (count > CHAT_MESSAGE::MaxMentions)
-			throw NLMISC::EInvalidDataStream(stream);
-		if (stream.isReading())
-			Mentions.resize(count);
-		for (uint i = 0; i < Mentions.size(); ++i)
-			stream.serial(Mentions[i]);
+		CHAT_MESSAGE::serialBounded(stream, Mentions, CHAT_MESSAGE::MaxMentions);
 	}
 
 	bool NoBubble;
@@ -522,15 +496,7 @@ public:
 		stream.serial(Text);
 		stream.serial(QuoteMessageId);
 		stream.serial(ClientRequestId);
-		nlassert(stream.isReading() || References.size() <= CHAT_MESSAGE::MaxReferences);
-		uint8 count = stream.isReading() ? 0 : (uint8)References.size();
-		stream.serial(count);
-		if (count > CHAT_MESSAGE::MaxReferences)
-			throw NLMISC::EInvalidDataStream(stream);
-		if (stream.isReading())
-			References.resize(count);
-		for (uint i = 0; i < References.size(); ++i)
-			stream.serial(References[i]);
+		CHAT_MESSAGE::serialBounded(stream, References, CHAT_MESSAGE::MaxReferences);
 	}
 
 	ucstring Text;

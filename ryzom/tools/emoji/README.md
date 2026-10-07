@@ -10,7 +10,6 @@ rather than hand-maintained, so "is this file current?" has an answer.
 | `gen_emoji_picker.py` | Unicode's `emoji-test.txt` + `emoji.txt` -> `emoji_picker.txt`, the picker's groups and order |
 | `fetch_noto_missing.py` | downloads and rasterises the flag images noto ships only as SVG |
 | `build_atlas.py` | stages the referenced tiles and packs them with `build_interface` |
-| `extend_font.py` | adds a few missing glyphs to ryzom.ttf from a donor font |
 | `add_emoji_to_font.py` | gives **any** TTF the full emoji set |
 
 ## Regenerating the table
@@ -60,7 +59,7 @@ through `add_emoji_to_font.py` and the support comes along:
 ```bash
 ./add_emoji_to_font.py --target MyFont.ttf --codepoints-from emoji.txt --report-only
 ./add_emoji_to_font.py --target MyFont.ttf --donor <ryzom.ttf> \
-    --codepoints-from emoji.txt --out MyFont-emoji.ttf --sheet proof.png
+    --codepoints-from emoji.txt --out MyFont-emoji.ttf
 ```
 
 Using the shipped `ryzom.ttf` as the donor gives full coverage in one pass; the

@@ -190,7 +190,7 @@ static bool buildChatPart(CCharacter *character, const CChatMessageReference &re
 	{
 	case CChatMessageReference::Item:
 		part.Type = CChatMessagePart::Item;
-		return character->buildChatItem(reference.Value, part.ItemValue);
+		return character->buildItemInfos(reference.Value, part.ItemValue, false);
 	case CChatMessageReference::KnownPhrase:
 	case CChatMessageReference::PhraseSheet:
 		part.Type = CChatMessagePart::Phrase;
@@ -323,20 +323,10 @@ void cbClientChatShare(CMessage &msgin, const std::string &serviceName, NLNET::T
 	CCharacter *character = PlayerManager.getChar(sender);
 	if (!character || !character->getEnterFlag())
 		return;
-	if (chatMode >= CChatGroup::nbChatMode)
-	{
-		rejectClientChatShare(sender, request);
-		return;
-	}
-	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
-	if (!CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
-	{
-		rejectClientChatShare(sender, request);
-		return;
-	}
-
 	CChatMessage message;
-	if (!buildSharedMessage(character, request, message))
+	if (chatMode >= CChatGroup::nbChatMode ||
+		!CHAT_MESSAGE::isValidTarget((CChatGroup::TGroupType)chatMode, dynamicChannelId, receiver) ||
+		!buildSharedMessage(character, request, message))
 	{
 		rejectClientChatShare(sender, request);
 		return;

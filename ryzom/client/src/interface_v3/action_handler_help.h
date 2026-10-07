@@ -93,7 +93,7 @@ class	CInterfaceHelp
 public:
 	// Open and set the group next to the element
 	static CInterfaceGroup	*activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow=-1,
-		bool reuseSameAspect=true, bool preferNewWindow=false, uint64 chatLinkId=0);
+		bool preferNewWindow=false, uint64 chatLinkId=0);
 
 	// Bring an existing item help window for this chat link to the front.
 	static bool				activateChatItemWindow(uint64 chatLinkId);
@@ -101,8 +101,9 @@ public:
 	// Close all the Help Windows
 	static	void			closeAll();
 
-	// Remove data associated with a help window.
-	static	void			removeLinkedPhrase(uint i);
+	// Release the linked phrase and the pending info requests of an info window.
+	static	void			clearInfoWindow(uint i);
+	// Remove the pending item or mission info request of an info window.
 	static	void			removeWaiterItemInfo(uint i);
 	static	void			removeWaiterMissionInfo(uint i);
 

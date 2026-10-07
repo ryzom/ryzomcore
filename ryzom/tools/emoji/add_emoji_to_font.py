@@ -50,7 +50,7 @@ Usage
 
     # do it
     ./add_emoji_to_font.py --target MyFont.ttf --donor build/NotoEmoji-donor.ttf \
-        --codepoints-from build/emoji.txt --out MyFont-emoji.ttf --sheet proof.png
+        --codepoints-from build/emoji.txt --out MyFont-emoji.ttf
 
     # a specific few
     ./add_emoji_to_font.py --target MyFont.ttf --donor d.ttf \
@@ -58,8 +58,6 @@ Usage
 """
 
 import argparse
-import copy
-import os
 import sys
 
 from fontTools.pens.ttGlyphPen import TTGlyphPen
@@ -67,6 +65,8 @@ from fontTools.pens.transformPen import TransformPen
 from fontTools.pens.recordingPen import DecomposingRecordingPen, RecordingPen
 from fontTools.ttLib import TTFont
 from fontTools.ttLib.tables._c_m_a_p import CmapSubtable
+
+from gen_emoji_table import read_table
 
 # Codepoints that are part of emoji sequences but must render as nothing.
 def is_invisible(cp):
@@ -78,17 +78,8 @@ def is_invisible(cp):
 
 def codepoints_from_table(path):
     """Union of every codepoint appearing in any sequence in emoji.txt."""
-    cps = set()
-    with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            if line.startswith("#") or not line.strip():
-                continue
-            parts = line.rstrip("\n").split("\t")
-            if len(parts) != 3:
-                continue
-            for p in parts[1].split():
-                cps.add(int(p, 16))
-    return sorted(cps)
+    return sorted({int(p, 16) for _name, codes, _stem in read_table(path)
+                   for p in codes.split()})
 
 
 def parse_cps(text):
@@ -146,7 +137,6 @@ def main():
                     help="scale copied glyphs (1.0 = donor size at target upem)")
     ap.add_argument("--y-offset", type=float, default=0.0,
                     help="shift copied glyphs vertically, in target units")
-    ap.add_argument("--sheet", help="write a PNG contact sheet to eyeball the result")
     args = ap.parse_args()
 
     if not args.codepoints_from and not args.codepoints:
@@ -289,37 +279,8 @@ def main():
     for b in bad[:10]:
         print("  !!", b)
 
-    if args.sheet:
-        write_sheet(args.out, [cp for cp, _d, _n in added], args.sheet)
-
     if bad:
         sys.exit(1)
-
-
-def write_sheet(font_path, cps, out_png, cols=24, cell=40, sample=240):
-    """Render a grid of the added emoji so a human can sanity-check the result."""
-    try:
-        from PIL import Image, ImageDraw, ImageFont
-    except ImportError:
-        print("sheet: Pillow not installed, skipping")
-        return
-    picks = cps[:: max(1, len(cps) // sample)][:sample]
-    rows = (len(picks) + cols - 1) // cols
-    img = Image.new("RGB", (cols * cell, rows * cell), "white")
-    d = ImageDraw.Draw(img)
-    f = ImageFont.truetype(font_path, int(cell * 0.72))
-    blankish = 0
-    for i, cp in enumerate(picks):
-        x, y = (i % cols) * cell, (i // cols) * cell
-        probe = Image.new("L", (cell, cell), 0)
-        ImageDraw.Draw(probe).text((cell * 0.12, cell * 0.08), chr(cp), font=f, fill=255)
-        if probe.getbbox() is None:
-            blankish += 1
-            d.rectangle([x, y, x + cell - 1, y + cell - 1], outline="red")
-        img.paste(probe.convert("RGB").point(lambda v: 255 - v), (x, y))
-    img.save(out_png)
-    print(f"sheet: {out_png} ({len(picks)} of {len(cps)} sampled, "
-          f"{blankish} rendered blank)")
 
 
 if __name__ == "__main__":

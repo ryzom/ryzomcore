@@ -18,7 +18,9 @@
 
 #include "nel/misc/types_nl.h"
 
+#include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -79,11 +81,12 @@ private:
 	std::map<std::string, const CEntry *>	_ByUtf8;
 	// Bytes that can start a literal emoji, checked for every chat line.
 	bool									_CanStartUtf8[256];
-	// Distinct byte lengths of literal emoji, longest first.
-	std::vector<std::string::size_type>		_Utf8Lengths;
+	// Distinct byte lengths of literal emoji, longest first, or a family emoji
+	// would match as its first person.
+	typedef std::set<std::string::size_type, std::greater<std::string::size_type> > TUtf8Lengths;
+	TUtf8Lengths							_Utf8Lengths;
 	// Points into _ByName.
 	std::vector<CGroup>						_Groups;
-	bool									_Loaded;
 };
 
 #endif // CL_EMOJI_MANAGER_H

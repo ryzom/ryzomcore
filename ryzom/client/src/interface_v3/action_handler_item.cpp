@@ -1774,13 +1774,14 @@ class CHandlerItemCristalReload : public IActionHandler
 REGISTER_ACTION_HANDLER( CHandlerItemCristalReload, "item_cristal_reload" );
 
 // **********************************************************************************************************
-static bool resolveItemForChatLink(CDBCtrlSheet *item, uint32 &slotId)
+static bool resolveItemForChatLink(CDBCtrlSheet *item, uint32 *slotId = NULL)
 {
 	if (!item || item->getType() != CCtrlSheetInfo::SheetType_Item || item->getSheetId() == 0 || item->getQuantity() == 0)
 		return false;
 	if (!CHAT_SHARE::canShareItem(CSheetId(item->getSheetId())))
 		return false;
 
+	uint32 itemSlotId;
 	INVENTORIES::TInventory inventory = (INVENTORIES::TInventory)item->getInventoryIndex();
 	if (inventory == INVENTORIES::handling || inventory == INVENTORIES::equipment)
 	{
@@ -1789,19 +1790,14 @@ static bool resolveItemForChatLink(CDBCtrlSheet *item, uint32 &slotId)
 			NLGUI::CDBManager::getInstance()->getDbProp(equipmentPath + ":INDEX_IN_BAG", false);
 		if (!indexInBag || indexInBag->getValue16() <= 0)
 			return false;
-		slotId = getInventory().getItemSlotId("INVENTORY:BAG", uint(indexInBag->getValue16() - 1));
+		itemSlotId = getInventory().getItemSlotId("INVENTORY:BAG", uint(indexInBag->getValue16() - 1));
 	}
 	else
-		slotId = getInventory().getItemSlotId(item);
+		itemSlotId = getInventory().getItemSlotId(item);
 
-	return slotId != 0;
-}
-
-// **********************************************************************************************************
-static bool isItemForChatLink(CDBCtrlSheet *item)
-{
-	uint32 ignoredSlotId = 0;
-	return resolveItemForChatLink(item, ignoredSlotId);
+	if (slotId)
+		*slotId = itemSlotId;
+	return itemSlotId != 0;
 }
 
 // **********************************************************************************************************
@@ -1811,7 +1807,7 @@ class CHandlerLinkItemInChat : public IActionHandler
 	{
 		CDBCtrlSheet *item = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		uint32 slotId = 0;
-		if (!resolveItemForChatLink(item, slotId))
+		if (!resolveItemForChatLink(item, &slotId))
 			return;
 
 		CChatMessageReference reference;
@@ -1935,7 +1931,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 		if(pLockUnlock) pLockUnlock->setActive(true);
 
 		const CItemSheet *pIS = pCS->asItemSheet();
-		if (pItemChatLink) pItemChatLink->setActive(pIS != NULL && isItemForChatLink(pCS));
+		if (pItemChatLink) pItemChatLink->setActive(resolveItemForChatLink(pCS));
 		if (pIS != NULL && invId != INVENTORIES::guild)
 		{
 			if (pCrisEnchant && pIS->Family == ITEMFAMILY::CRYSTALLIZED_SPELL && !bIsLockedByOwner)
@@ -2343,7 +2339,7 @@ class CHandlerItemMenuBaseCheck : public IActionHandler
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
 		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
 		CViewTextMenu	*pItemChatLink = dynamic_cast<CViewTextMenu*>(pMenu->getView("item_chat_link"));
-		if (pItemChatLink) pItemChatLink->setActive(isItemForChatLink(pCS));
+		if (pItemChatLink) pItemChatLink->setActive(resolveItemForChatLink(pCS));
 
 		if (pCS->getLockedByOwner())
 		{

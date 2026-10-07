@@ -448,7 +448,7 @@ namespace CHAT_SHARE
 					CDBCtrlSheet *sheet = prepareItem(view->Part.ItemValue);
 					if (sheet && sheet->asItemSheet())
 						CAHManager::getInstance()->runActionHandler("open_item_help", sheet,
-							"force_keep=0|reuse_same_aspect=0|prefer_new=1|chat_link_id=" + toString(view->AttachmentId));
+							"force_keep=0|prefer_new=1|chat_link_id=" + toString(view->AttachmentId));
 					else if (sheet)
 						getInventory().removeItemLinkInfo(getInventory().getItemSlotId(sheet));
 				}
@@ -624,7 +624,6 @@ namespace CHAT_SHARE
 				CGroupEditBox::CTextTag tag;
 				tag.Start = 0;
 				tag.Length = (uint32)title.size();
-				tag.Type = (uint32)reference.Type;
 				tag.Reference = tagData;
 				tag.Color = color;
 				std::vector<CGroupEditBox::CTextTag> tags(1, tag);
@@ -680,7 +679,7 @@ namespace CHAT_SHARE
 			CGroupEditBox::setSelectCursorPos(cursor);
 			if (!editBox->writeString(CUtfStringView(insertion).toUtf8(), true, false, false))
 				return ShareInputFull;
-			editBox->addTextTag(titleStart, (uint32)title.size(), (uint32)reference.Type, color, tagData);
+			editBox->addTextTag(titleStart, (uint32)title.size(), color, tagData);
 			const sint32 newCursor = cursor + (sint32)insertion.size();
 			editBox->setCursorPos(newCursor);
 			CGroupEditBox::setSelectCursorPos(newCursor);
@@ -711,6 +710,17 @@ namespace CHAT_SHARE
 			}
 		};
 		REGISTER_ACTION_HANDLER(CHandlerShareMapPosition, "share_map_position");
+
+		uint32 getTextBeforeFirstLink(const CChatMessageRequest &request, CSString &prefix, bool &endsWithSeparator)
+		{
+			const uint32 prefixLength = request.References.empty() ?
+				(uint32)request.Text.size() : request.References[0].Start;
+			prefix = CUtfStringView(request.Text.substr(0, prefixLength)).toUtf8();
+			endsWithSeparator = (!prefix.empty() && CSString::isWhiteSpace(prefix[prefix.size() - 1])) ||
+				(prefixLength < request.Text.size() && request.Text[prefixLength] <= 127 &&
+					CSString::isWhiteSpace((char)request.Text[prefixLength]));
+			return prefixLength;
+		}
 	}
 
 	CRequestScope::CRequestScope(const CChatMessageRequest *request, CGroupEditBox *editBox) :
@@ -760,12 +770,9 @@ namespace CHAT_SHARE
 
 	bool isChatCommand(const CChatMessageRequest &request, std::string &name)
 	{
-		const uint32 prefixLength = request.References.empty() ?
-			(uint32)request.Text.size() : request.References[0].Start;
-		CSString prefix = CUtfStringView(request.Text.substr(0, prefixLength)).toUtf8();
-		const bool prefixEndsWithSeparator = CSString::isWhiteSpace(prefix[prefix.size() - 1]) ||
-			(prefixLength < request.Text.size() && request.Text[prefixLength] <= 127 &&
-				CSString::isWhiteSpace((char)request.Text[prefixLength]));
+		CSString prefix;
+		bool prefixEndsWithSeparator;
+		const uint32 prefixLength = getTextBeforeFirstLink(request, prefix, prefixEndsWithSeparator);
 		prefix = prefix.leftCrop(1).leftStrip();
 		CSString commandName = prefix.strtok(" \t\r\n", !prefix.empty() && prefix[0] == '"', false, true, false);
 		if (!commandName.empty() && commandName[0] == '"')
@@ -843,14 +850,11 @@ namespace CHAT_SHARE
 		}
 		if (command)
 		{
-			const uint32 prefixLength = request.References.empty() ?
-				(uint32)request.Text.size() : request.References[0].Start;
-			CSString text = CUtfStringView(request.Text.substr(0, prefixLength)).toUtf8();
+			CSString text;
+			bool prefixEndsWithSeparator;
+			const uint32 prefixLength = getTextBeforeFirstLink(request, text, prefixEndsWithSeparator);
 			if (text.empty() || text[0] != '/')
 				return true;
-			const bool prefixEndsWithSeparator = CSString::isWhiteSpace(text[text.size() - 1]) ||
-				(prefixLength < request.Text.size() && request.Text[prefixLength] <= 127 &&
-					CSString::isWhiteSpace((char)request.Text[prefixLength]));
 			text = text.substr(1);
 			text.strtok(" \t\r\n", true, false, true, false);
 			if (group == CChatGroup::tell)

@@ -235,7 +235,7 @@ void CInterfaceHelp::CFittedWeaponWeightObserver::update(ICDBNode* node)
 
 // ***************************************************************************
 CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forceKeepWindow,
-	bool reuseSameAspect, bool preferNewWindow, uint64 chatLinkId)
+	bool preferNewWindow, uint64 chatLinkId)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 
@@ -252,9 +252,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 		// if the window has been closed, remove it from list
 		if(!group->getActive())
 		{
-			removeLinkedPhrase(_ActiveWindows[i]);
-			removeWaiterItemInfo(_ActiveWindows[i]);
-			removeWaiterMissionInfo(_ActiveWindows[i]);
+			clearInfoWindow(_ActiveWindows[i]);
 			_ActiveWindows.erase(_ActiveWindows.begin()+i);
 		}
 		else
@@ -263,7 +261,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 
 	bool showSlotAndCreator = false;
 	// If an active window get the same object, abort, but make it top.
-	for(i=0; reuseSameAspect && i<_ActiveWindows.size();i++)
+	for(i=0; !preferNewWindow && i<_ActiveWindows.size();i++)
 	{
 		CInterfaceGroup	*group= _InfoWindows[_ActiveWindows[i]].Window;
 		CDBCtrlSheet		*ctrlSrc= elt;
@@ -375,9 +373,7 @@ CInterfaceGroup	*CInterfaceHelp::activateNextWindow(CDBCtrlSheet *elt, sint forc
 	}
 
 	// get the next window
-	removeLinkedPhrase(newIndexWindow);
-	removeWaiterItemInfo(newIndexWindow);
-	removeWaiterMissionInfo(newIndexWindow);
+	clearInfoWindow(newIndexWindow);
 	CInterfaceGroup	*group= _InfoWindows[newIndexWindow].Window;
 	nlassert(group);
 
@@ -466,17 +462,22 @@ void			CInterfaceHelp::removeWaiterItemInfo(uint i)
 }
 
 // ***************************************************************************
-void			CInterfaceHelp::removeLinkedPhrase(uint i)
+void			CInterfaceHelp::clearInfoWindow(uint i)
 {
-	if (i >= _InfoWindows.size() || !_InfoWindows[i].Window)
+	if (i >= _InfoWindows.size())
 		return;
-	CDBCtrlSheet *helpCtrlSheet = dynamic_cast<CDBCtrlSheet*>(
-		_InfoWindows[i].Window->getElement(_InfoWindows[i].Window->getId()+":content:ctrl_slot"));
-	if (helpCtrlSheet)
+	if (_InfoWindows[i].Window)
 	{
-		helpCtrlSheet->setListMenuRight("");
-		LinkedPhraseByHelpControl.erase(helpCtrlSheet);
+		CDBCtrlSheet *helpCtrlSheet = dynamic_cast<CDBCtrlSheet*>(
+			_InfoWindows[i].Window->getElement(_InfoWindows[i].Window->getId()+":content:ctrl_slot"));
+		if (helpCtrlSheet)
+		{
+			helpCtrlSheet->setListMenuRight("");
+			LinkedPhraseByHelpControl.erase(helpCtrlSheet);
+		}
 	}
+	removeWaiterItemInfo(i);
+	removeWaiterMissionInfo(i);
 }
 
 // ***************************************************************************
@@ -521,9 +522,7 @@ void			CInterfaceHelp::closeAll()
 	// For all windows
 	for(uint i=0;i<(uint)maxHelpWindow;i++)
 	{
-		removeLinkedPhrase(i);
-		removeWaiterItemInfo(i);
-		removeWaiterMissionInfo(i);
+		clearInfoWindow(i);
 		_InfoWindows[i].Window->setActive(false);
 	}
 }
@@ -666,10 +665,6 @@ class CHandlerOpenItemHelp : public IActionHandler
 			string	forceKeepWindowStr= getParam(sParams, "force_keep");
 			if(!forceKeepWindowStr.empty())
 				fromString(forceKeepWindowStr, forceKeepWindow);
-			bool reuseSameAspect = true;
-			string reuseSameAspectStr = getParam(sParams, "reuse_same_aspect");
-			if (!reuseSameAspectStr.empty())
-				fromString(reuseSameAspectStr, reuseSameAspect);
 			bool preferNewWindow = false;
 			string preferNewWindowStr = getParam(sParams, "prefer_new");
 			if (!preferNewWindowStr.empty())
@@ -681,7 +676,7 @@ class CHandlerOpenItemHelp : public IActionHandler
 
 			// open the next window
 			CInterfaceGroup	*group = CInterfaceHelp::activateNextWindow(cs, forceKeepWindow,
-				reuseSameAspect, preferNewWindow, chatLinkId);
+				preferNewWindow, chatLinkId);
 			if (!group)
 			{
 				uint32 slotId = getInventory().getItemSlotId(cs);
@@ -3357,7 +3352,7 @@ void openSabrinaPhraseHelp(CDBCtrlSheet *sourceSheet, const CSPhraseCom &phrase)
 		return;
 
 	// Linked phrases with the same root brick may have different stanzas.
-	CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(sourceSheet, -1, false, true);
+	CInterfaceGroup *group = CInterfaceHelp::activateNextWindow(sourceSheet, -1, true);
 	if (!group)
 		return;
 
@@ -3584,9 +3579,7 @@ public:
 		// Remove the waiter for special ItemInfo
 		uint index;
 		fromString(Params, index);
-		CInterfaceHelp::removeLinkedPhrase(index);
-		CInterfaceHelp::removeWaiterItemInfo(index);
-		CInterfaceHelp::removeWaiterMissionInfo(index);
+		CInterfaceHelp::clearInfoWindow(index);
 
 		// unpuhsed the "Keep" button.
 		CInterfaceHelp::setKeepMode(index, false);

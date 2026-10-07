@@ -97,9 +97,15 @@ def image_stem(code):
     return "emoji_u" + code.replace("-", "_")
 
 
-def codepoints_hex(code):
-    """'0023-20e3' -> '0023 20e3' (space separated, for the client)."""
-    return " ".join(code.split("-"))
+def read_table(path):
+    """Yield (name, codepoints, stem) for every row of an emoji.txt."""
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            if line.startswith("#") or not line.strip():
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) == 3:
+                yield tuple(parts)
 
 
 def main():
@@ -127,7 +133,8 @@ def main():
         img = stem + ".png"
         if img not in have:
             missing_img.setdefault(code, []).append(name)
-        rows.append((name, codepoints_hex(code), stem))
+        # space separated, for the client
+        rows.append((name, code.replace("-", " "), stem))
 
     with open(args.out, "w", encoding="utf-8") as fh:
         fh.write("# Ryzom chat emoji table -- GENERATED, do not edit by hand.\n")

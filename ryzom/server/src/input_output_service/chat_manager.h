@@ -209,7 +209,7 @@ public :
 	 * Transmit a far chat message to a group
 	 */
 	void farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const ucstring &text, const ucstring &senderName, uint32 senderCid = 0);
-	void farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, const CChatMessage &message, const ucstring &senderName, uint32 senderCid = 0);
+	void farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, const CChatMessage &message, const ucstring &senderName);
 	void farDynChatShared(TChanID chanId, const ucstring &senderName, const CChatMessage &message);
 
 	/**
