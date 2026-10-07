@@ -24,6 +24,7 @@ import time
 import html
 import re
 import json
+import traceback
 import urllib.parse
 import urllib.request
 
@@ -68,16 +69,28 @@ class ZulipDispatcher(ZulipService):
 	def sendMessage(self, m):
 		message_type = "stream"
 		user = m.sender
+		if not user:
+			print("Message without sender, skipped")
+			return -1
 		# Normalize potential Zulip-style upload markdown to plain URLs before sending
 		clean_text = self.convert_zulip_upload_links(m.text)
 		content = user[0].upper()+user[1:]+":"+(clean_text if clean_text is not None else "")
 		if m.channel == "player":
 			message_type = "private"
+			if not m.channel_id:
+				print(f"Private message from {user} without recipient, skipped")
+				return -1
 			channel = m.channel_id.lower()+"@ig.ryzom.com"
 		elif m.channel == "dyn":
 			channel = self.getRealChannel(m.channel_id)
+			if channel.startswith(u"❇️ League_"):
+				print(f"Bad channel {channel}")
+				return None
 		else:
 			channel = self.getRealChannel(m.channel)
+		if not channel:
+			print(f"Message from {user} without channel, skipped")
+			return -1
 		request = {
 			"type": message_type,
 			"to": channel,
@@ -91,33 +104,37 @@ class ZulipDispatcher(ZulipService):
 			result = self.zulip.send_message(request)
 		except Exception as e:
 			print("Error sending message", e)
-		if result["result"] == "success":
+			return None
+		if not isinstance(result, dict):
+			print("Error sending message, invalid response", result)
+			return None
+		if result.get("result") == "success" and "id" in result:
 			log_channel =  channel.split(" ")[0]
 			log_content =  "".join([ s[0] for s in  content.split() ])
-			log_queueid = self.getZulipQueueId()
-			print(f"💬 {message_type} to {log_channel} with {log_content} = {result["id"]}")
+			print(f"💬 {message_type} to {channel} with {log_content} = {result['id']}")
 			return result["id"]
-		if result["result"] == "error":
-			print("Error sending message")
+		if result.get("result") == "error":
+			print("Error sending message", result.get("msg", ""))
 			return -1
 		return None
 
 	def sendTranslation(self, message_id, m):
-		if message_id > 0 and m.translation and m.source_lang:
+		if message_id > 0 and m.translation and m.source_lang and m.translated_lang:
 			# Normalize Zulip-style upload markdown in translation as well
 			clean_translation = self.convert_zulip_upload_links(m.translation)
 			request = {
 				"message_id": message_id,
-				"content": "<["+m.translated_lang+"]>"+flags[m.source_lang]+" "+(clean_translation if clean_translation is not None else ""),
+				"content": "<["+m.translated_lang+"]>"+flags.get(m.source_lang.lower(), "")+" "+(clean_translation if clean_translation is not None else ""),
 			}
 			try:
 				result = self.zulip.update_message(request)
 			except Exception as e:
 				print("Error update message", e)
 				return False
+			if not isinstance(result, dict) or result.get("result") != "success":
+				print(f"Error update message {message_id}", result.get("msg", "") if isinstance(result, dict) else result)
 			else:
-				request["content"] = "".join([ s[0] for s in  request["content"].split() ])
-				print(f"{emojis[m.translated_lang.lower()]} {message_id}")
+				print(f"{emojis.get(m.translated_lang.lower(), m.translated_lang)} {message_id}")
 		return True
 
 	def run(self):
@@ -138,31 +155,39 @@ class ZulipDispatcher(ZulipService):
 						message = messages[i]
 
 						result = False
-						if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and message.translated_lang.lower() == lang:
-							if lang == "wk":
-								if message.source != "zulip":
-									result = self.sendMessage(message)
-									if result != None:
-										self.addZulipMessageId(i, result)
-							else:
-								message_id = None
-								tries = 50
-								while not message_id:
-									if message.source == "zulip":
-										source_message = self.getRyzomMessage(message.source_message_id)
-										message_id = source_message.source_message_id
-									else:
-										message_id = self.getZulipMessageId(message.source_message_id)
-									time.sleep(0.1)
-									tries -= 1
-									if tries <= 0:
-										break
-
-								if message_id:
-									result = self.sendTranslation(int(message_id), message)
+						try:
+							if message and message.channel not in ("say", "shout", "arround", "region", "dyn", "team") and (message.translated_lang or "").lower() == lang:
+								if lang == "wk":
+									if message.source != "zulip":
+										result = self.sendMessage(message)
+										if result != None:
+											self.addZulipMessageId(i, result)
 								else:
-									result = True
-						else:
+									message_id = None
+									tries = 50
+									while not message_id:
+										if message.source == "zulip":
+											source_message = self.getRyzomMessage(message.source_message_id)
+											if source_message is None:
+												print(f"Source message {message.source_message_id} of {i} not found")
+												break
+											message_id = source_message.source_message_id
+										else:
+											message_id = self.getZulipMessageId(message.source_message_id)
+										time.sleep(0.1)
+										tries -= 1
+										if tries <= 0:
+											break
+
+									if message_id:
+										result = self.sendTranslation(int(message_id), message)
+									else:
+										result = True
+							else:
+								result = True
+						except Exception:
+							# Skip the message instead of crashing or retrying it forever
+							print(f"Error dispatching message {i} ({lang}):\n{traceback.format_exc()}")
 							result = True
 
 						if result:

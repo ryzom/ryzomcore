@@ -1791,6 +1791,12 @@ void cbHarvestDeposit( NLNET::CMessage& msgin, const std::string &serviceName, N
 	}
 	character->setAfkState(false);
 
+	// DEAD CODE: deposit harvesting is no longer implemented (the official client does not send this message anymore).
+	// Everything below this return is unreachable on purpose: it ends in nlerror(), which aborts the whole service,
+	// so a modified client must never be able to reach it.
+	nlwarning("<cbHarvestDeposit> player Id %s asked a deposit harvest, which is not implemented", charId.toString().c_str() );
+	return;
+
 	// check this harvester can use the given skill
 /*	if ( skill >= SKILLS::NUM_SKILLS || character->getSkills()._Skills[skill].Base <= 0 )
 	{

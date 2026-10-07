@@ -35,6 +35,9 @@ class Translator(RyzomService):
 		self.version = "1.2"
 		self.scriptfile = __file__
 		self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
+		if len(sys.argv) < 2:
+			print("Usage: translator.py <lang>")
+			sys.exit(1)
 		self.dst_lang = sys.argv[1]
 		self.stats = {"messages": 0, "translated_messages": 0}
 		self.last_deep_error = ""
@@ -71,11 +74,13 @@ class Translator(RyzomService):
 		return final_text
 
 	def translateWithDeepl(self, m):
-		client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
+		if not m.text:
+			return None
 		text = self.escapeImages(m.text)
 		text = self.escapeQuotes(text, 8)
 		dst_lang = self.dst_lang.upper()
 		try:
+			client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
 			result = client.translate_text(
 				text,
 				source_lang =  m.source_lang,
@@ -84,12 +89,14 @@ class Translator(RyzomService):
 				tag_handling = "xml",
 				ignore_tags = "x",
 				)
-		except deepl.DeepLException as e:
+		except Exception as e:
 			self.last_deep_error = repr(e)
 			print("DeepL Error..."+repr(e))
 			return None
+		if not result or not getattr(result, "text", None):
+			return None
 		final_text = result.text.replace("<x>", "").replace("</x>", "")
-		return (final_text,  result.billed_characters)
+		return (final_text,  getattr(result, "billed_characters", 0))
 
 
 	def checkMessages(self):
@@ -100,8 +107,9 @@ class Translator(RyzomService):
 				self.stats["messages"] += 1
 				if message.translated_lang == "WK" and message.channel != "player":
 					if message.source_lang != self.dst_lang:
-						if message.langs == "*" or self.dst_lang in message.langs.split("-"):
-							translation, billed_characters = self.translateWithDeepl(message)
+						if message.langs == "*" or self.dst_lang in (message.langs or "").split("-"):
+							translated = self.translateWithDeepl(message)
+							translation = translated[0] if translated else None
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"
