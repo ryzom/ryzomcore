@@ -2476,12 +2476,6 @@ void CCharacter::sendItemInfos(uint32 slotId)
 }
 
 // ****************************************************************************
-bool CCharacter::buildChatItem(uint32 slotId, CChatMessageItem &chatItem)
-{
-	return buildItemInfos(slotId, chatItem, false);
-}
-
-// ****************************************************************************
 bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool sendToClient)
 {
 	TLogNoContext_Item noContext;
@@ -2736,10 +2730,7 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 		if (sendToClient)
 			infos.CreatorName = CEntityIdTranslator::getInstance()->getEntityNameStringId(item->getCreator());
 		else
-		{
-			infos.CreatorName = 0;
 			chatItem.CreatorName = CEntityIdTranslator::getInstance()->getByEntity(item->getCreator());
-		}
 		/*
 		CEntityBase* creator = CEntityBaseManager::getEntityBasePtr(item->getCreator());
 		infos.CreatorName = 0;
@@ -2866,7 +2857,6 @@ bool CCharacter::buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool 
 			chatItem.Quantity = item->getStackSize();
 			chatItem.Weight = item->weight() / 10;
 			chatItem.UserColor = item->color();
-			chatItem.NameId = 0;
 			chatItem.NamePhraseId = form->Family == ITEMFAMILY::SCROLL_R2 ? std::string() : item->getPhraseId();
 			chatItem.Enchant = item->getClientEnchantValue();
 			chatItem.RMClassType = item->getItemClass();

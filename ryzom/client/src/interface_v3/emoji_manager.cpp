@@ -32,7 +32,7 @@ using namespace NLMISC;
 CEmojiManager *CEmojiManager::_Instance = NULL;
 
 //=================================================================================
-CEmojiManager::CEmojiManager() : _Loaded(false)
+CEmojiManager::CEmojiManager()
 {
 	for (uint i = 0; i < 256; ++i)
 		_CanStartUtf8[i] = false;
@@ -130,10 +130,6 @@ void CEmojiManager::loadTable(const string &filename, bool required)
 //=================================================================================
 void CEmojiManager::init()
 {
-	if (_Loaded)
-		return;
-	_Loaded = true;
-
 	loadTable("emoji.txt", true);
 	// Optional local corrections, loaded second so they win.
 	loadTable("emoji_overrides.txt", false);
@@ -146,12 +142,8 @@ void CEmojiManager::init()
 			continue;
 		_ByUtf8[entry.Utf8] = &entry;
 		_CanStartUtf8[(unsigned char)entry.Utf8[0]] = true;
-		if (std::find(_Utf8Lengths.begin(), _Utf8Lengths.end(), entry.Utf8.size()) == _Utf8Lengths.end())
-			_Utf8Lengths.push_back(entry.Utf8.size());
+		_Utf8Lengths.insert(entry.Utf8.size());
 	}
-	// Longest first, or a family emoji would match as its first person.
-	std::sort(_Utf8Lengths.begin(), _Utf8Lengths.end());
-	std::reverse(_Utf8Lengths.begin(), _Utf8Lengths.end());
 
 	loadPicker("emoji_picker.txt");
 }
@@ -263,9 +255,9 @@ bool CEmojiManager::matchAt(const string &text, std::string::size_type index,
 
 	if (!_CanStartUtf8[(unsigned char)text[index]])
 		return false;
-	for (uint i = 0; i < _Utf8Lengths.size(); ++i)
+	for (TUtf8Lengths::const_iterator itLength = _Utf8Lengths.begin(); itLength != _Utf8Lengths.end(); ++itLength)
 	{
-		const std::string::size_type length = _Utf8Lengths[i];
+		const std::string::size_type length = *itLength;
 		if (index + length > to)
 			continue;
 		std::map<string, const CEntry *>::const_iterator it = _ByUtf8.find(text.substr(index, length));

@@ -64,12 +64,10 @@ class IosDispatcher(RyzomService):
 			result = self.ryzomAS.command_return_data.lstrip()
 			if "chat_bridge_reject|1|" in result:
 				return None
-			if "not found, try 'help'" in result or "Bad command usage" in result:
+			rejected = "not found, try 'help'" in result or "Bad command usage" in result
+			if rejected or result.startswith("ERROR"):
 				print("AS/IOS could not execute", command.split(" ", 1)[0])
-				return None
-			if result.startswith("ERROR"):
-				print("AS/IOS could not execute", command.split(" ", 1)[0])
-				return False
+				return None if rejected else False
 			print("▶️ ", command.split(" ", 1)[0])
 			return True
 		except OSError as e:
@@ -121,22 +119,18 @@ class IosDispatcher(RyzomService):
 		text = message.text if message.translated_lang == "WK" else message.translation
 		if not text:
 			return None
-		part_payload = "-"
-		if message.translated_lang != "WK" and chat.get("translation_parts"):
-			parts = chat["translation_parts"]
-			part_payload = str(len(parts))+":"+"".join(
-				str(len(part.encode("utf-8")))+":"+part for part in parts)
-			part_payload = self.encodeChatText(part_payload)
 		arguments = [
 			self.encodeChatText(message.sender),
 			self.encodeChatText(chat.get("channel", message.channel_id)),
-			self.encodeChatText(chat["external_id"]) if chat.get("external_id") else "-",
+			self.encodeChatText(chat.get("external_id", "")),
 			message_id or "-", chat.get("quote_id") or "-",
 			message.source_lang or "wk",
 			"-" if message.translated_lang == "WK" else message.translated_lang.lower(),
 			self.encodeChatText(text)]
-		if part_payload != "-":
-			arguments.append(part_payload)
+		if message.translated_lang != "WK" and chat.get("translation_parts"):
+			parts = chat["translation_parts"]
+			arguments.append(self.encodeChatText(str(len(parts))+":"+"".join(
+				str(len(part.encode("utf-8")))+":"+part for part in parts)))
 		command = "bridgeChat "+" ".join(arguments)
 		return self.runIOSCommand(command)
 

@@ -11,7 +11,7 @@ _QUOTE = re.compile(
 )
 
 
-class QuoteNotForwarded(ValueError):
+class QuoteNotForwarded(Exception):
 	def __init__(self, original_id):
 		super().__init__("Quoted message has not been forwarded or has expired")
 		self.original_id = original_id

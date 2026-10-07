@@ -45,7 +45,7 @@ A shared macro opens prefilled in the macro editor as a new macro. Commands the 
 
 ## Reactions
 
-A reaction is a message of its own with a single `Reaction` part, sent to the channel of the reacted message ("React" in the chat line menu, or a click on an emoji of the reaction row). The IOS accepts it where a quote of the same message would be accepted and does not keep it in its message history. Player reactions are logged as `chat_reaction` lines; the bridge adds or removes the matching Zulip reaction, once per emoji with the bot account, or for the player's account when the Zulip server supports `on_behalf_of` (see below), and Zulip reactions come back through the IOS command `bridgeReaction`. Clients do not display it as a chat line: they add or remove the sender in the reaction row below the reacted message, whose emoji tooltip lists the players. Reactions to messages no longer shown, and reactions sent before the client received the message, are not kept.
+A reaction is a message of its own with a single `Reaction` part, sent to the channel of the reacted message ("React" in the chat line menu, or a click on an emoji of the reaction row). The IOS accepts it where a quote of the same message would be accepted and does not keep it in its message history. Player reactions are logged as `chat_reaction` lines; the bridge adds or removes the matching Zulip reaction, once per emoji with the bot account, and Zulip reactions come back through the IOS command `bridgeReaction`. Clients do not display it as a chat line: they add or remove the sender in the reaction row below the reacted message, whose emoji tooltip lists the players. Reactions to messages no longer shown, and reactions sent before the client received the message, are not kept.
 
 ## Chat window
 
@@ -56,17 +56,6 @@ A reaction is a message of its own with a single `Reaction` part, sent to the ch
 ## Zulip bridge
 
 The IOS logs shared messages with their parts (`chat_meta` lines), so `ryzom/server/tools/rytranszulip` can forward links and quotes to Zulip. `quote_bridge.py` validates quotes written in Zulip and renders game quotes there.
-
-### Acting for players in Zulip
-
-The bridge bot sends game messages, quotes and reactions for the player's Zulip account `<name>@ig.ryzom.com` instead of writing them itself with a "Name:" prefix. Plain Zulip does not support this; the server needs to accept one extra parameter from the bridge bot:
-
-- `POST /api/v1/messages` with `on_behalf_of=<email>`: the message is stored with that user as sender.
-- `POST` and `DELETE /api/v1/messages/{message_id}/reactions` with `on_behalf_of=<email>`: the reaction is added or removed for that user.
-- Only the bridge bot may use it, and only for `@ig.ryzom.com` accounts.
-- The bot must still be able to edit these messages, because translations are added by editing.
-
-When a request with `on_behalf_of` fails, the bridge falls back to the bot. A server that does not know the parameter reports it in `ignored_parameters_unsupported`; the bridge then uses the bot for an hour before trying again, and adds the "Name:" prefix to the message the bot just posted. Messages and reactions it sent for a player are marked in memcached for 60 seconds, so the fetcher does not send them back to the game.
 
 ## Translation keys
 

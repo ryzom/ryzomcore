@@ -229,17 +229,13 @@ void cbChatShare(CMessage &msgin, const string &serviceName, TServiceId serviceI
 		return;
 	}
 	CChatManager &cm = IOS->getChatManager();
-	if (chatMode >= CChatGroup::nbChatMode)
+	if (chatMode >= CChatGroup::nbChatMode || !message.isValid() ||
+		!CHAT_MESSAGE::isValidTarget((CChatGroup::TGroupType)chatMode, dynamicChannelId, receiver))
 	{
 		cm.sendQuoteResult(sender, requestId, false);
 		return;
 	}
 	const CChatGroup::TGroupType group = (CChatGroup::TGroupType)chatMode;
-	if (!message.isValid() || !CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver))
-	{
-		cm.sendQuoteResult(sender, requestId, false);
-		return;
-	}
 
 	for (std::vector<CChatMessagePart>::iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
 	{

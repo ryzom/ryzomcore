@@ -31,6 +31,7 @@
 #include <utility>
 
 class CChatMessage;
+class CChatMessageRequest;
 class CChatMessageParagraph;
 
 namespace NLGUI
@@ -94,9 +95,7 @@ public:
 	std::string getMessageText(const CChatMessage &message, CChatGroup::TGroupType group) const;
 	bool isChatInput(NLGUI::CGroupEditBox *editBox) const;
 	void setMessageTarget(NLGUI::CViewBase *view, CChatGroup::TGroupType group,
-		const NLMISC::CEntityId &dynamicChannelId, const std::string &receiver = std::string());
-	void setMessageSender(NLGUI::CViewBase *view, const std::string &sender);
-	const CChatMessage *getSelectedMessage() const;
+		uint32 dynamicChatDbIndex, const std::string &receiver, const std::string &sender);
 	bool getSelectedMessageTarget(CChatGroup::TGroupType &group,
 		NLMISC::CEntityId &dynamicChannelId, std::string &receiver) const;
 	std::string getQuoteMessageId(const NLGUI::CGroupEditBox *editBox) const;
@@ -106,6 +105,9 @@ public:
 	void applyReaction(const CChatMessage &message);
 	// React to the message chosen in the chat menu or in its reaction row.
 	void react(const std::string &emoji);
+	// Send the input as a reply to its quote; false when the input has no quote.
+	bool sendQuote(NLGUI::CGroupEditBox *editBox, const std::string &text,
+		const CChatMessageRequest *linkRequest);
 	uint32 beginQuoteSend(NLGUI::CGroupEditBox *editBox);
 	// Empty the input once the request is queued; it comes back if the server refuses it.
 	void clearSentInput(uint32 requestId);
