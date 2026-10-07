@@ -109,6 +109,22 @@ namespace NLGUI
 		}
 	}
 
+	static ::u32string toColorTag(NLMISC::CRGBA color)
+	{
+		static const char ConvTable[] = "0123456789ABCDEF";
+		return CUtfStringView(NLMISC::toString("@{%c%c%c%c}",
+			ConvTable[color.R >> 4], ConvTable[color.G >> 4],
+			ConvTable[color.B >> 4], ConvTable[color.A >> 4])).toUtf32();
+	}
+
+	static bool isTextTagReplaced(const CGroupEditBox::CTextTag &tag, uint32 start, uint32 length)
+	{
+		const uint32 tagEnd = tag.Start + tag.Length;
+		if (length == 0)
+			return start > tag.Start && start < tagEnd;
+		return start < tagEnd && start + length > tag.Start;
+	}
+
 	// ----------------------------------------------------------------------------
 	NLMISC_REGISTER_OBJECT(CViewBase, CGroupEditBox, std::string, "edit_box");
 
@@ -874,13 +890,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::copy()
-	{
-		copySelectionToClipboard();
-	}
-
-	// ----------------------------------------------------------------------------
-	bool CGroupEditBox::copySelectionToClipboard()
+	bool CGroupEditBox::copy()
 	{
 		if (_CurrSelection != this)
 		{
@@ -907,12 +917,6 @@ namespace NLGUI
 			return true;
 		}
 		return false;
-	}
-
-	// ----------------------------------------------------------------------------
-	void CGroupEditBox::paste()
-	{
-		paste(0);
 	}
 
 	// ----------------------------------------------------------------------------
@@ -956,12 +960,7 @@ namespace NLGUI
 			size_t tagCount = textTags->size();
 			for (std::vector<CTextTag>::const_iterator it = _TextTags.begin(); it != _TextTags.end(); ++it)
 			{
-				const uint32 tagEnd = it->Start + it->Length;
-				const bool insertionInside = insertionStart == insertionEnd &&
-					insertionStart > (sint32)it->Start && insertionStart < (sint32)tagEnd;
-				const bool intersects = insertionStart != insertionEnd &&
-					insertionStart < (sint32)tagEnd && insertionEnd > (sint32)it->Start;
-				if (!insertionInside && !intersects)
+				if (!isTextTagReplaced(*it, (uint32)insertionStart, (uint32)(insertionEnd - insertionStart)))
 					++tagCount;
 			}
 			if (tagCount > maxTextTags)
@@ -1656,22 +1655,14 @@ namespace NLGUI
 				}
 				else
 				{
-					static const char ConvTable[] = "0123456789ABCDEF";
-					const NLMISC::CRGBA baseColor = _ViewText->getColor();
-					const std::string baseColorTag = NLMISC::toString("@{%c%c%c%c}",
-						ConvTable[baseColor.R >> 4], ConvTable[baseColor.G >> 4],
-						ConvTable[baseColor.B >> 4], ConvTable[baseColor.A >> 4]);
-					const ::u32string baseColorTag32 = CUtfStringView(baseColorTag).toUtf32();
+					const ::u32string baseColorTag32 = toColorTag(_ViewText->getColor());
 					::u32string text = baseColorTag32;
 					appendEscapedTaggedText(text, _Prompt, baseColorTag32);
 					uint32 pos = 0;
 					for (std::vector<CTextTag>::const_iterator it = _TextTags.begin(); it != _TextTags.end(); ++it)
 					{
 						appendEscapedTaggedText(text, _InputString.substr(pos, it->Start - pos), baseColorTag32);
-						const std::string colorTag = NLMISC::toString("@{%c%c%c%c}",
-							ConvTable[it->Color.R >> 4], ConvTable[it->Color.G >> 4],
-							ConvTable[it->Color.B >> 4], ConvTable[it->Color.A >> 4]);
-						const ::u32string colorTag32 = CUtfStringView(colorTag).toUtf32();
+						const ::u32string colorTag32 = toColorTag(it->Color);
 						text += colorTag32;
 						appendEscapedTaggedText(text, _InputString.substr(it->Start, it->Length), colorTag32);
 						text += baseColorTag32;
@@ -1901,7 +1892,7 @@ namespace NLGUI
 	}
 
 	// ----------------------------------------------------------------------------
-	void CGroupEditBox::addTextTag(uint32 start, uint32 length, uint32 type, NLMISC::CRGBA color,
+	void CGroupEditBox::addTextTag(uint32 start, uint32 length, NLMISC::CRGBA color,
 		const std::string &reference)
 	{
 		if (length == 0 || start > _InputString.size() || length > _InputString.size() - start)
@@ -1909,7 +1900,6 @@ namespace NLGUI
 		CTextTag tag;
 		tag.Start = start;
 		tag.Length = length;
-		tag.Type = type;
 		tag.Reference = reference;
 		tag.Color = color;
 		std::vector<CTextTag>::iterator it = _TextTags.begin();
@@ -1933,10 +1923,7 @@ namespace NLGUI
 		const sint32 delta = (sint32)newLength - (sint32)oldLength;
 		for (std::vector<CTextTag>::iterator it = _TextTags.begin(); it != _TextTags.end();)
 		{
-			const uint32 tagEnd = it->Start + it->Length;
-			const bool insertionInside = oldLength == 0 && start > it->Start && start < tagEnd;
-			const bool intersects = oldLength != 0 && start < tagEnd && oldEnd > it->Start;
-			if (insertionInside || intersects)
+			if (isTextTagReplaced(*it, start, oldLength))
 			{
 				it = _TextTags.erase(it);
 				continue;

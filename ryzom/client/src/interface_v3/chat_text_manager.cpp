@@ -134,12 +134,7 @@ public:
 //=================================================================================
 static bool getMentionInputRange(CGroupEditBox *editBox, uint32 &start, uint32 &end)
 {
-	if (!editBox)
-		return false;
-	const std::string &handler = editBox->getAHOnEnter();
-	CChatWindow *chatWindow = handler == "chat_box_entry" ?
-		getChatWndMgr().getChatWindowFromCaller(editBox) : NULL;
-	if (handler != "contact_entry" && (!chatWindow || chatWindow->getEditBox() != editBox))
+	if (!getChatTextMngr().isChatInput(editBox))
 		return false;
 	const ::u32string &text = editBox->getInputStringRef();
 	const sint32 cursor = editBox->getCursorPos();
@@ -245,14 +240,11 @@ public:
 			CGroupEditBoxBase::setCurrSelection(NULL);
 			return;
 		}
-		std::vector<std::string> names;
-		for (uint i = 0; i < PeopleInterraction.FriendList.getNumPeople(); ++i)
-			names.push_back(PeopleInterraction.FriendList.getName(i));
 		std::string players;
-		for (uint i = 0; i < names.size(); ++i)
+		for (uint i = 0; i < PeopleInterraction.FriendList.getNumPeople(); ++i)
 		{
 			if (i) players += ',';
-			players += CSString(names[i]).quote(true, false);
+			players += CSString(PeopleInterraction.FriendList.getName(i)).quote(true, false);
 		}
 		if (params == "number")
 		{
@@ -917,47 +909,47 @@ CViewBase *CChatTextManager::createMsgText(const string &cstMsg, NLMISC::CRGBA c
 }
 
 //=================================================================================
+static string getPartsText(const std::vector<CChatMessagePart> &parts)
+{
+	string text;
+	for (std::vector<CChatMessagePart>::const_iterator it = parts.begin(); it != parts.end(); ++it)
+		text += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
+			CHAT_SHARE::getPartName(*it);
+	return text;
+}
+
+//=================================================================================
+static bool isTranslationDisabled(CChatGroup::TGroupType group)
+{
+	if (group >= CChatGroup::nbChatMode)
+		return false;
+	CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(
+		"UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(group)) + ":DISABLE", false);
+	return node && node->getValueBool();
+}
+
+//=================================================================================
+// Keep only the original of a legacy "{:xxoriginal}@{ translated" text.
+static string removeLegacyTranslation(const string &text)
+{
+	string::size_type start = text.find("{:");
+	string::size_type end = text.find("}@{", start);
+	if (start != string::npos && end != string::npos && end >= start + 5)
+		return text.substr(0, start) + text.substr(start + 5, end - start - 5);
+	return text;
+}
+
+//=================================================================================
 string CChatTextManager::getMessageText(const CChatMessage &message, CChatGroup::TGroupType group) const
 {
-	string original;
-	for (std::vector<CChatMessagePart>::const_iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
-		original += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
-			CHAT_SHARE::getPartName(*it);
-	bool disableTranslation = false;
-	if (group < CChatGroup::nbChatMode)
-	{
-		CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(
-			"UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(group)) + ":DISABLE", false);
-		disableTranslation = node && node->getValueBool();
-	}
+	const string original = getPartsText(message.Parts);
+	const bool disableTranslation = isTranslationDisabled(group);
 	if (message.TranslatedParts.empty())
-	{
-		// Legacy translations can arrive inside the original text field.
-		if (disableTranslation)
-		{
-			string::size_type start = original.find("{:");
-			string::size_type end = original.find("}@{", start);
-			if (start != string::npos && end != string::npos && end >= start + 5)
-				return original.substr(0, start) + original.substr(start + 5, end - start - 5);
-		}
-		return original;
-	}
+		return disableTranslation ? removeLegacyTranslation(original) : original;
 
-	string translated;
-	for (std::vector<CChatMessagePart>::const_iterator it = message.TranslatedParts.begin(); it != message.TranslatedParts.end(); ++it)
-		translated += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
-			CHAT_SHARE::getPartName(*it);
+	const string translated = getPartsText(message.TranslatedParts);
 	if (message.TranslationLanguage.empty())
-	{
-		if (disableTranslation)
-		{
-			string::size_type start = translated.find("{:");
-			string::size_type end = translated.find("}@{", start);
-			if (start != string::npos && end != string::npos && end >= start + 5)
-				return translated.substr(0, start) + translated.substr(start + 5, end - start - 5);
-		}
-		return translated;
-	}
+		return disableTranslation ? removeLegacyTranslation(translated) : translated;
 	if (disableTranslation)
 		return original;
 	if (message.SourceLanguage.size() != 2)
@@ -1026,28 +1018,17 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 		if (author.empty())
 			author = message.Quote.SenderName.toUtf8();
 		quoteHeader = author + ": \xC2\xBB";
-		quoteLine = quoteHeader;
+		quoteLine = quoteHeader + getPartsText(message.Quote.Parts) + "\xC2\xAB\n\xE2\x86\xB3 ";
 		for (std::vector<CChatMessagePart>::const_iterator it = message.Quote.Parts.begin();
 			it != message.Quote.Parts.end(); ++it)
-		{
-			quoteLine += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
-				CHAT_SHARE::getPartName(*it);
 			quotedReference |= it->Type != CChatMessagePart::Text;
-		}
-		quoteLine += "\xC2\xAB\n\xE2\x86\xB3 ";
 	}
 	bool hasReference = false;
 	for (std::vector<CChatMessagePart>::const_iterator it = message.Parts.begin(); it != message.Parts.end(); ++it)
 		hasReference |= it->Type != CChatMessagePart::Text;
 	if (hasReference || quotedReference)
 	{
-		bool disableTranslation = false;
-		if (group < CChatGroup::nbChatMode)
-		{
-			CCDBNodeLeaf *node = NLGUI::CDBManager::getInstance()->getDbProp(
-				"UI:SAVE:TRANSLATION:" + toUpper(CChatGroup::groupTypeToString(group)) + ":DISABLE", false);
-			disableTranslation = node && node->getValueBool();
-		}
+		const bool disableTranslation = isTranslationDisabled(group);
 		const bool hasTranslation = !message.TranslatedParts.empty() && !message.TranslationLanguage.empty() &&
 			!disableTranslation && message.SourceLanguage.size() == 2;
 		bool inverse = false, hideFlag = false;
@@ -1130,11 +1111,7 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 			}
 			if (hasTranslation && !hideFlag)
 			{
-				const std::vector<CChatMessagePart> &tooltipParts = inverse ? message.TranslatedParts : message.Parts;
-				string tooltip;
-				for (std::vector<CChatMessagePart>::const_iterator it = tooltipParts.begin(); it != tooltipParts.end(); ++it)
-					tooltip += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
-						CHAT_SHARE::getPartName(*it);
+				const string tooltip = getPartsText(inverse ? message.TranslatedParts : message.Parts);
 				CCtrlButton *flag = new CCtrlButton(CViewBase::TCtorParam());
 				const string texture = "flag-" + toLowerAscii(message.SourceLanguage) + ".tga";
 				flag->setTexture(texture);
@@ -1197,28 +1174,16 @@ CViewBase *CChatTextManager::createMsgText(const string &prefix, const CChatMess
 
 //=================================================================================
 void CChatTextManager::setMessageTarget(CViewBase *view, CChatGroup::TGroupType group,
-	const CEntityId &dynamicChannelId, const string &receiver)
+	uint32 dynamicChatDbIndex, const string &receiver, const string &sender)
 {
 	CChatMessageParagraph *paragraph = dynamic_cast<CChatMessageParagraph *>(view);
 	if (!paragraph)
 		return;
-	paragraph->Group = group;
-	paragraph->DynamicChannelId = dynamicChannelId;
+	paragraph->Group = group == CChatGroup::arround ? CChatGroup::say : group;
+	paragraph->DynamicChannelId = group == CChatGroup::dyn_chat ?
+		ChatMngr.getDynamicChannelIdFromDbIndex(dynamicChatDbIndex) : CEntityId::Unknown;
 	paragraph->Receiver = receiver;
-}
-
-//=================================================================================
-void CChatTextManager::setMessageSender(CViewBase *view, const string &sender)
-{
-	CChatMessageParagraph *paragraph = dynamic_cast<CChatMessageParagraph *>(view);
-	if (paragraph)
-		paragraph->Sender = sender;
-}
-
-//=================================================================================
-const CChatMessage *CChatTextManager::getSelectedMessage() const
-{
-	return LastSelectedHasMessage ? &LastSelectedMessage : NULL;
+	paragraph->Sender = sender;
 }
 
 //=================================================================================
@@ -1253,6 +1218,37 @@ bool CChatTextManager::getQuoteTarget(const CGroupEditBox *editBox,
 			return CHAT_MESSAGE::isValidTarget(group, dynamicChannelId, receiver);
 		}
 	return false;
+}
+
+//=================================================================================
+bool CChatTextManager::sendQuote(CGroupEditBox *editBox, const string &text,
+	const CChatMessageRequest *linkRequest)
+{
+	const string quoteId = getQuoteMessageId(editBox);
+	if (quoteId.empty())
+		return false;
+	CChatGroup::TGroupType group;
+	CEntityId dynamicChannelId;
+	string receiver;
+	if (!getQuoteTarget(editBox, group, dynamicChannelId, receiver))
+		return true;
+	CChatMessageRequest request = linkRequest ? *linkRequest : CChatMessageRequest();
+	if (!linkRequest)
+		request.Text = CUtfStringView(text).toUtf16();
+	request.QuoteMessageId = quoteId;
+	request.ClientRequestId = beginQuoteSend(editBox);
+	if (request.ClientRequestId == 0)
+		return true;
+	if (!request.isValid())
+	{
+		finishQuoteSend(request.ClientRequestId, false);
+		return true;
+	}
+	const bool queued = group == CChatGroup::tell ? ChatMngr.tell(receiver, request) :
+		ChatMngr.chat(request, group, dynamicChannelId);
+	if (!queued)
+		finishQuoteSend(request.ClientRequestId, false);
+	return true;
 }
 
 //=================================================================================
@@ -1459,7 +1455,7 @@ static void restoreSentInput(CChatQuoteDraft &draft)
 	for (uint i = 0; i < draft.SentTags.size(); ++i)
 	{
 		const CGroupEditBox::CTextTag &tag = draft.SentTags[i];
-		editBox->addTextTag(tag.Start, tag.Length, tag.Type, tag.Color, tag.Reference);
+		editBox->addTextTag(tag.Start, tag.Length, tag.Color, tag.Reference);
 	}
 	editBox->setCursorPos((sint32)editBox->getInputStringRef().size());
 	if (!draft.Message.MessageId.empty() &&
@@ -1497,7 +1493,6 @@ void CChatTextManager::finishQuoteSend(uint32 requestId, bool accepted)
 				{
 					if (it->SentTags[i].Start != tags[i].Start ||
 						it->SentTags[i].Length != tags[i].Length ||
-						it->SentTags[i].Type != tags[i].Type ||
 						it->SentTags[i].Reference != tags[i].Reference ||
 						it->SentTags[i].Color != tags[i].Color)
 						unchanged = false;
@@ -1523,22 +1518,23 @@ void CChatTextManager::finishQuoteSend(uint32 requestId, bool accepted)
 }
 
 //=================================================================================
-void CChatTextManager::checkQuoteSendTimeout()
+// Give back the inputs of unanswered requests: all of them, or only those past the timeout.
+static void restorePendingQuoteSends(bool timedOutOnly)
 {
 	const TTime now = CTime::getLocalTime();
-	bool timedOut = false;
+	bool failed = false;
 	for (list<CChatQuoteDraft>::iterator it = ChatQuoteDrafts.begin(); it != ChatQuoteDrafts.end();)
 	{
-		if (!it->EditBox)
+		if (timedOutOnly && !it->EditBox)
 		{
 			it = ChatQuoteDrafts.erase(it);
 			continue;
 		}
-		if (it->RequestId != 0 && now - it->SentAt >= QuoteSendTimeout)
+		if (it->RequestId != 0 && (!timedOutOnly || now - it->SentAt >= QuoteSendTimeout))
 		{
 			it->RequestId = 0;
 			restoreSentInput(*it);
-			timedOut = true;
+			failed = true;
 			if (it->Message.MessageId.empty())
 			{
 				it = ChatQuoteDrafts.erase(it);
@@ -1547,31 +1543,20 @@ void CChatTextManager::checkQuoteSendTimeout()
 		}
 		++it;
 	}
-	if (timedOut)
+	if (failed)
 		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
+}
+
+//=================================================================================
+void CChatTextManager::checkQuoteSendTimeout()
+{
+	restorePendingQuoteSends(true);
 }
 
 //=================================================================================
 void CChatTextManager::failPendingQuoteSends()
 {
-	bool pending = false;
-	for (list<CChatQuoteDraft>::iterator it = ChatQuoteDrafts.begin(); it != ChatQuoteDrafts.end();)
-	{
-		if (it->RequestId != 0)
-		{
-			it->RequestId = 0;
-			restoreSentInput(*it);
-			pending = true;
-			if (it->Message.MessageId.empty())
-			{
-				it = ChatQuoteDrafts.erase(it);
-				continue;
-			}
-		}
-		++it;
-	}
-	if (pending)
-		CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiBCNotAvailable"));
+	restorePendingQuoteSends(false);
 }
 
 //=================================================================================
@@ -1621,11 +1606,10 @@ static bool setQuotePreviewActive(CGroupEditBox *editBox, bool active, sint32 &h
 //=================================================================================
 void CChatTextManager::quoteSelectedMessage(CGroupEditBox *editBox)
 {
-	const CChatMessage *message = getSelectedMessage();
 	CChatGroup::TGroupType group;
 	CEntityId dynamicChannelId;
 	string receiver;
-	if (!message || message->MessageId.empty() || !editBox ||
+	if (!LastSelectedHasMessage || LastSelectedMessage.MessageId.empty() || !editBox ||
 		!getSelectedMessageTarget(group, dynamicChannelId, receiver))
 		return;
 	CInterfaceGroup *widget = editBox->getParent();
@@ -1653,20 +1637,15 @@ void CChatTextManager::quoteSelectedMessage(CGroupEditBox *editBox)
 	CViewText *text = dynamic_cast<CViewText*>(preview->getView("text"));
 	if (!author || !text)
 		return;
-	string authorName = CEntityCL::removeTitleAndShardFromName(message->SenderName.toUtf8());
+	string authorName = CEntityCL::removeTitleAndShardFromName(LastSelectedMessage.SenderName.toUtf8());
 	if (authorName.empty())
-		authorName = message->SenderName.toUtf8();
+		authorName = LastSelectedMessage.SenderName.toUtf8();
 	author->setText(authorName);
-	string previewText;
-	for (std::vector<CChatMessagePart>::const_iterator it = message->Parts.begin();
-		it != message->Parts.end(); ++it)
-		previewText += it->Type == CChatMessagePart::Text ? it->TextValue.toUtf8() :
-			CHAT_SHARE::getPartName(*it);
-	text->setText(previewText);
+	text->setText(getPartsText(LastSelectedMessage.Parts));
 	clearQuote(editBox);
 	CChatQuoteDraft draft;
 	draft.EditBox = editBox;
-	draft.Message = *message;
+	draft.Message = LastSelectedMessage;
 	draft.Group = group;
 	draft.DynamicChannelId = dynamicChannelId;
 	draft.Receiver = receiver;

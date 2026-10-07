@@ -45,6 +45,7 @@ class ZulipFetcher(ZulipService):
 		self.last_update_guilds = 0
 		self.shard = host = self.config["shard"]["name"]
 		self.guilds_prefixes = {"atys": "0x00165", "gingo": "0x002f5"}
+		self.pending_quote_key = "Chat-Zulip-Quote-Pending-"+self.name
 
 	def ingestZulipMessage(self, msg, source_lang=None):
 		def get_original(message_id):
@@ -57,8 +58,6 @@ class ZulipFetcher(ZulipService):
 		try:
 			raw_msg, quoted_zulip_id = extract_quote(msg, self.base_url, get_original,
 				lambda message_id: bool(self.getChatMessageId(message_id)))
-		except QuoteNotForwarded:
-			raise
 		except ValueError as error:
 			print(f"Cannot forward quoted message {msg['id']}: {error}")
 			return
@@ -70,8 +69,7 @@ class ZulipFetcher(ZulipService):
 		sender = msg["sender_full_name"]
 		chat = {"zulip_id": msg["id"]}
 		if quoted_zulip_id is not None:
-			quote_id = self.getChatMessageId(quoted_zulip_id)
-			chat["quote_id"] = quote_id.decode("ascii") if isinstance(quote_id, bytes) else quote_id
+			chat["quote_id"] = self.getChatMessageId(quoted_zulip_id)
 		chat["external_id"] = "zulip:"+self.base_url.rstrip("/")+":"+str(msg["id"])
 		if msg.get("last_edit_timestamp"):
 			chat["external_id"] += ":edit:"+str(msg["last_edit_timestamp"])
@@ -84,8 +82,7 @@ class ZulipFetcher(ZulipService):
 				else:
 					channel_id = dest[0]["full_name"].lower()
 
-				chat["channel"] = "tell:"+channel_id
-				message = RyzomMessage("zulip", sender, channel, chat["channel"], "wk", "*", message, source_message_id=msg["id"], chat=chat)
+				message = RyzomMessage("zulip", sender, channel, "tell:"+channel_id, "wk", "*", message, source_message_id=msg["id"], chat=chat)
 				return self.addRyzomMessage(message)
 		else:
 			stream_id = msg["stream_id"]
@@ -117,15 +114,11 @@ class ZulipFetcher(ZulipService):
 				source_lang = msg["translation_lang"] if "translation_lang" in msg else "en"
 			self.client.set(f"Zulip-Msg-Lang-{msg['id']}", source_lang, 24*60*60)
 
-			chat["channel"] = channel_id
 			ryzom_message = RyzomMessage("zulip", sender, channel, channel_id, source_lang, "*", message, source_message_id=msg["id"], chat=chat)
 			self.addRyzomMessage(ryzom_message)
 
-	def pendingQuoteKey(self):
-		return "Chat-Zulip-Quote-Pending-"+self.name
-
 	def deferQuotedMessage(self, message_id, quoted_id, event_type):
-		key = self.pendingQuoteKey()
+		key = self.pending_quote_key
 		pending = self.client.get(key) or {}
 		deadline = pending[message_id][1] if message_id in pending else time()+QUOTE_ACK_WAIT_SECONDS
 		if deadline > time():
@@ -133,7 +126,7 @@ class ZulipFetcher(ZulipService):
 			self.client.set(key, pending, expire=QUOTE_ACK_WAIT_SECONDS)
 
 	def clearPendingQuote(self, message_id):
-		key = self.pendingQuoteKey()
+		key = self.pending_quote_key
 		pending = self.client.get(key) or {}
 		if message_id in pending:
 			del pending[message_id]
@@ -143,7 +136,7 @@ class ZulipFetcher(ZulipService):
 				self.client.delete(key)
 
 	def retryPendingQuotes(self):
-		key = self.pendingQuoteKey()
+		key = self.pending_quote_key
 		for message_id, (quoted_id, deadline, event_type) in (self.client.get(key) or {}).items():
 			if time() >= deadline:
 				print(f"Cannot forward quoted message {message_id}: acknowledgement not received")
@@ -168,9 +161,6 @@ class ZulipFetcher(ZulipService):
 	def checkMessages(self, event):
 		msg = event["message"]
 		if "local_message_id" in event and event["local_message_id"] == "ryzom-ig":
-			return False
-		# Sent by the bot for a player; the game already shows it.
-		if self.client.get(self.ownMessageKey(msg.get("sender_email", ""), msg["content"])):
 			return False
 		return self.ingestZulipMessage(msg)
 
@@ -206,19 +196,14 @@ class ZulipFetcher(ZulipService):
 		message_id = self.getChatMessageId(event["message_id"])
 		if not message_id:
 			return
-		user = event.get("user")
-		if not user or "email" not in user:
+		sender = event.get("user", {}).get("full_name")
+		if not sender:
 			result = self.zulip.get_user_by_id(event["user_id"])
 			if result.get("result") != "success":
 				print(f"Error fetching reacting user {event['user_id']}", result.get("msg", ""))
 				return
-			user = result["user"]
-		# A reaction the dispatcher just set for a player is already shown in game.
-		if self.client.get("Chat-Reaction-Own-"+str(event["message_id"])+"-"+event["emoji_name"]+"-"+
-				user["email"].split("@")[0].lower()):
-			return
-		sender = user["full_name"]
-		reaction = {"message_id": message_id.decode("ascii") if isinstance(message_id, bytes) else message_id,
+			sender = result["user"]["full_name"]
+		reaction = {"message_id": message_id,
 			"emoji": event["emoji_name"], "remove": event["op"] == "remove"}
 		self.addRyzomMessage(RyzomMessage("zulip", sender, "", "", "wk", "", ":"+event["emoji_name"]+":",
 			source_message_id=event["message_id"], chat={"reaction": reaction}))

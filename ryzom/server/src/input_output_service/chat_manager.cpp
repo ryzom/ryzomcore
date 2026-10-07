@@ -1672,7 +1672,6 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, bool 
 					{
 						if (senderClient.dontSendTranslation(senderLang) || controlPrefix) // Sent directly when prefixed by '>', it's the anti-translation code
 						{
-							startPos = controlPrefix ? 1 : 0;
 							rtzText = rtzText.substr(startPos);
 							string::size_type endOfOriginal = rtzText.find("}@{");
 							if (rtzText.size() > 4 && rtzText[0] == ':' && rtzText[3] == ':')
@@ -1761,10 +1760,7 @@ void CChatManager::chat( const TDataSetRow& sender, const ucstring& ucstr, bool 
 							CDynChatChan::CHistoricEntry entry;
 							entry.String = ucstr;
 							if (_SharedMessage)
-							{
-								entry.Shared = true;
 								entry.Message = *_SharedMessage;
-							}
 							if (ci != NULL)
 								entry.SenderString = ci->Name;
 							else
@@ -2193,7 +2189,7 @@ void CChatManager::farChatInGroup(TGroupId &grpId, uint32 homeSessionId, const u
 //
 //-----------------------------------------------
 void CChatManager::farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, const CChatMessage &message,
-	const ucstring &senderName, uint32 senderCid)
+	const ucstring &senderName)
 {
 	std::map<TGroupId, CChatGroup>::const_iterator group = _Groups.find(grpId);
 	CMessageHistoryEntry *entry = group == _Groups.end() ? NULL : rememberMessage(message);
@@ -2214,7 +2210,7 @@ void CChatManager::farChatInGroupShared(TGroupId &grpId, uint32 homeSessionId, c
 	ucstring text = sharedMessageDeliveryText(resolved);
 	if (EnableDeepL && !message.TranslationLanguage.empty())
 		text = ucstring(":" + message.TranslationLanguage + ":") + text;
-	farChatInGroup(grpId, homeSessionId, text, senderName, senderCid);
+	farChatInGroup(grpId, homeSessionId, text, senderName);
 }
 
 //-----------------------------------------------
@@ -4078,13 +4074,9 @@ void CChatManager::sendHistoric(const TDataSetRow &receiver, TChanID chanID)
 	for(uint k = 0; k < chan->Historic.getSize(); ++k)
 	{
 //		sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, chan->Historic[k].Sender, chanID);
-		if (chan->Historic[k].Shared)
-		{
-			CSharedMessageScope scope(_SharedMessage, chan->Historic[k].Message);
-			sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, TDataSetRow(), chanID, chan->Historic[k].SenderString);
-		}
-		else
-			sendChat(CChatGroup::dyn_chat, receiver, chan->Historic[k].String, TDataSetRow(), chanID, chan->Historic[k].SenderString);
+		const CDynChatChan::CHistoricEntry &entry = chan->Historic[k];
+		CSharedMessageScope scope(_SharedMessage, entry.Message.Parts.empty() ? NULL : &entry.Message);
+		sendChat(CChatGroup::dyn_chat, receiver, entry.String, TDataSetRow(), chanID, entry.SenderString);
 	}
 }
 

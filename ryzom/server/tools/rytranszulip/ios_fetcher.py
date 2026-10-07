@@ -23,7 +23,6 @@
 import os
 import sys
 import json
-import base64
 import binascii
 import mysql.connector
 
@@ -135,7 +134,7 @@ class IosFetcher(RyzomService):
 			fields = payload.split("|")
 			if len(fields) == 4 and fields[1] == "1":
 				try:
-					external_id = base64.b64decode(fields[2], validate=True).decode("utf-8")
+					external_id = self.decodeChatText(fields[2])
 					prefix = "zulip:"+self.base_url.rstrip("/")+":"
 					if external_id.startswith(prefix):
 						zulip_id = int(external_id[len(prefix):].split(":", 1)[0])
@@ -151,9 +150,9 @@ class IosFetcher(RyzomService):
 				print("Unsupported chat reaction log entry")
 				return
 			try:
-				channel = base64.b64decode(fields[2], validate=True).decode("utf-8")
-				sender = base64.b64decode(fields[3], validate=True).decode("utf-8")
-				emoji = base64.b64decode(fields[5], validate=True).decode("utf-8")
+				channel = self.decodeChatText(fields[2])
+				sender = self.decodeChatText(fields[3])
+				emoji = self.decodeChatText(fields[5])
 			except (ValueError, UnicodeError, binascii.Error):
 				print("Invalid chat reaction log entry")
 				return
@@ -169,24 +168,21 @@ class IosFetcher(RyzomService):
 				print("Unsupported structured chat log entry")
 				return
 			try:
-				def decode(index):
-					return base64.b64decode(fields[index], validate=True).decode("utf-8")
-				channel, sender = decode(2), decode(3)
+				channel, sender = self.decodeChatText(fields[2]), self.decodeChatText(fields[3])
 				source_lang, langs = fields[4:6]
 				chat = {"message_id": fields[6],
 					"quote_id": fields[9], "channel": channel,
-					"quote_author": decode(10), "quote_text": decode(11)}
-				message = decode(12)
-				for label in decode(13).splitlines():
+					"quote_author": self.decodeChatText(fields[10]), "quote_text": self.decodeChatText(fields[11])}
+				message = self.decodeChatText(fields[12])
+				for label in self.decodeChatText(fields[13]).splitlines():
 					fields = label.split("|", 3)
 					if (len(fields) != 4 or fields[0] != "part" or
 						int(fields[1]) != len(chat.setdefault("parts", [])) or
 						fields[2] not in ("text", "reference")):
 						raise ValueError("Invalid chat part")
-					part_text = base64.b64decode(fields[3], validate=True).decode("utf-8")
+					part_text = self.decodeChatText(fields[3])
 					chat["parts"].append((fields[2], part_text))
-				if "parts" in chat and (not chat["parts"] or
-					"".join(part[1] for part in chat["parts"]) != message):
+				if "parts" in chat and "".join(part[1] for part in chat["parts"]) != message:
 					raise ValueError("Invalid chat parts")
 			except (ValueError, UnicodeError, binascii.Error, KeyError, TypeError):
 				print("Invalid structured chat log entry")

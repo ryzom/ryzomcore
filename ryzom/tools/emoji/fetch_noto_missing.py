@@ -31,6 +31,8 @@ import subprocess
 import sys
 import urllib.request
 
+from gen_emoji_table import read_table
+
 RAW = ("https://raw.githubusercontent.com/googlefonts/noto-emoji/main/"
        "third_party/region-flags/waved-svg/{name}.svg")
 
@@ -38,19 +40,7 @@ RAW = ("https://raw.githubusercontent.com/googlefonts/noto-emoji/main/"
 def read_needed(table_path, have_dir):
     """Images the table asks for that we do not already have."""
     have = set(os.listdir(have_dir)) if os.path.isdir(have_dir) else set()
-    needed = {}
-    with open(table_path, encoding="utf-8") as fh:
-        for line in fh:
-            if line.startswith("#") or not line.strip():
-                continue
-            parts = line.rstrip("\n").split("\t")
-            if len(parts) != 3:
-                continue
-            name, codes, stem = parts
-            img = stem + ".png"
-            if img not in have:
-                needed.setdefault(img, []).append(name)
-    return needed
+    return {stem + ".png" for _name, _codes, stem in read_table(table_path)} - have
 
 
 def _get(url):
@@ -71,7 +61,7 @@ def fetch_one(img, size, out_dir):
     Over raw.githubusercontent a symlink serves its target *path* as plain text
     rather than the file, so those have to be followed by hand.
     """
-    stem = img[:-4] if img.endswith(".png") else img
+    stem = img[:-4]
     svg_path = os.path.join(out_dir, stem + ".svg")
     png_path = os.path.join(out_dir, img)
     try:

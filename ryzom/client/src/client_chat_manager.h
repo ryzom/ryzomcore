@@ -295,6 +295,8 @@ public :
 
 private :
 	void updateTellList(const std::string &receiver);
+	bool sendChatShare(CChatGroup::TGroupType group, TChanID dynamicChannelId,
+		std::string receiver, const CChatMessageRequest &request);
 
 	uint8				_ChatMode;
 
@@ -324,7 +326,6 @@ private :
 		bool			UseSharedMessage;
 		std::string		Sender;
 		bool			OwnTell;
-		std::string		TellTarget;
 		CChatMessage		SharedMessage;
 
 		CChatMsgNode(const CChatMsg &chatMsg, bool displayAsTell)
@@ -356,7 +357,7 @@ private :
 
 		CChatMsgNode(TDataSetIndex compressedIndex, const std::string &sender,
 			CChatGroup::TGroupType chatMode, const NLMISC::CEntityId &dynChatChanId,
-			bool ownTell, const std::string &tellTarget, const CChatMessage &message)
+			bool ownTell, const CChatMessage &message)
 		{
 			CompressedIndex= compressedIndex;
 			SenderNameId= 0;
@@ -368,13 +369,13 @@ private :
 			UseSharedMessage= true;
 			Sender= sender;
 			OwnTell= ownTell;
-			TellTarget= tellTarget;
 			SharedMessage= message;
 		}
 	};
 	std::list<CChatMsgNode>		_ChatBuffer;
 	bool isChatMessageReady(const CChatMsgNode &chatMessage);
 	void displayChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer);
+	void displayOrBufferChatMessage(const CChatMsgNode &chatMessage, IChatDisplayer &chatDisplayer);
 
 	// peoples
 	std::list<std::string> _TellPeople; // the last people on which tells ha been done

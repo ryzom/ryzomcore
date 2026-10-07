@@ -55,10 +55,10 @@ Usage
 """
 
 import argparse
-import os
 import re
 import sys
-from collections import OrderedDict
+
+from gen_emoji_table import load_zulip_name_maps, read_table
 
 # "1F600 ; fully-qualified # 😀 E1.0 grinning face"
 TEST_LINE_RE = re.compile(
@@ -90,15 +90,7 @@ def load_canonical_names(zulip_dir):
     """exec emoji_names.py -> {codepoints: canonical_name}. {} if not given."""
     if not zulip_dir:
         return {}
-    path = os.path.join(zulip_dir, "emoji_names.py")
-    if not os.path.isfile(path):
-        sys.exit(f"ERROR: {path} not found. Download it from the Zulip tag first.")
-    ns = {}
-    with open(path, encoding="utf-8") as fh:
-        exec(compile(fh.read(), path, "exec"), ns)  # noqa: S102 - trusted, pinned input
-    maps = ns.get("EMOJI_NAME_MAPS")
-    if not maps:
-        sys.exit(f"ERROR: EMOJI_NAME_MAPS missing or empty in {path}")
+    maps = load_zulip_name_maps(zulip_dir)
     return {code: info["canonical_name"] for code, info in maps.items()}
 
 
@@ -111,30 +103,22 @@ def load_table(path):
     """emoji.txt -> ({codepoints: first name alphabetically}, {name: codepoints})."""
     by_code = {}
     by_name = {}
-    with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            line = line.rstrip("\n")
-            if not line or line.startswith("#"):
-                continue
-            parts = line.split("\t")
-            if len(parts) < 3:
-                continue
-            name, codes, stem = parts[0], parts[1], parts[2]
-            if not stem:
-                continue
-            key = "-".join(codes.split())
-            # The file is sorted by name, so the first one seen is the first
-            # alphabetically -- the same one the client's reverse index keeps.
-            by_code.setdefault(key, name)
-            by_name[name] = key
+    for name, codes, stem in read_table(path):
+        if not stem:
+            continue
+        key = "-".join(codes.split())
+        # The file is sorted by name, so the first one seen is the first
+        # alphabetically -- the same one the client's reverse index keeps.
+        by_code.setdefault(key, name)
+        by_name[name] = key
     if not by_code:
         sys.exit(f"ERROR: no usable rows in {path}")
     return by_code, by_name
 
 
 def load_emoji_test(path):
-    """emoji-test.txt -> OrderedDict {group: [(codepoints, description)]}."""
-    groups = OrderedDict()
+    """emoji-test.txt -> {group: [(codepoints, description)]}, in file order."""
+    groups = {}
     group = None
     with open(path, encoding="utf-8") as fh:
         for line in fh:
@@ -174,7 +158,7 @@ def main():
     canonical = load_canonical_names(args.zulip_dir)
     groups = load_emoji_test(args.emoji_test)
 
-    rows = OrderedDict()
+    rows = {}
     used = set()
     missing = []
     uncanonical = []

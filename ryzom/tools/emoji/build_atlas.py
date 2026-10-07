@@ -25,17 +25,7 @@ import struct
 import subprocess
 import sys
 
-
-def read_table(path):
-    stems = []
-    with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            if line.startswith("#") or not line.strip():
-                continue
-            parts = line.rstrip("\n").split("\t")
-            if len(parts) == 3:
-                stems.append(parts[2])
-    return stems
+from gen_emoji_table import read_table
 
 
 def tga_size(path):
@@ -67,7 +57,7 @@ def main():
             if f.endswith(".png"):
                 index.setdefault(f, os.path.join(d, f))
 
-    wanted = sorted(set(read_table(args.table)))
+    wanted = sorted({stem for _name, _codes, stem in read_table(args.table)})
     stage = os.path.join(args.out_dir, "tiles")
     if os.path.isdir(stage):
         shutil.rmtree(stage)

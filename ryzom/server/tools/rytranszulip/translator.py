@@ -112,21 +112,12 @@ class Translator(RyzomService):
 				visible_parts = []
 				billed = 0
 				for kind, value in parts:
-					if kind == "text" and value:
-						translated, characters = translatePart(value)
-						if translated is None:
-							return (None, 0)
-						translated_parts.append(translated)
-						visible_parts.append(translated)
-						billed += characters
-					elif kind == "text":
-						translated_parts.append("")
-						visible_parts.append("")
-					elif kind == "reference":
-						translated_parts.append("")
-						visible_parts.append(value)
-					else:
+					translated, characters = translatePart(value) if kind == "text" and value else ("", 0)
+					if translated is None:
 						return (None, 0)
+					translated_parts.append(translated)
+					visible_parts.append(value if kind == "reference" else translated)
+					billed += characters
 				m.chat["translation_parts"] = translated_parts
 				return ("".join(visible_parts), billed)
 			return translatePart(m.text)

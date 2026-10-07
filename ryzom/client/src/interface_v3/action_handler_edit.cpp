@@ -605,7 +605,7 @@ class CAHEditCut : public CAHEditDeleteChar
 		if(CGroupEditBox::getCurrSelection() != NULL && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
 		{
 			// Copy selection
-			if (_GroupEdit->copySelectionToClipboard())
+			if (_GroupEdit->copy())
 			{
 				// Cut selection
 				CAHEditDeleteChar::actionPart();

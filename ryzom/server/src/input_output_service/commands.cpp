@@ -806,11 +806,11 @@ NLMISC_COMMAND(bridgeChat, "send a structured bridge chat message",
 	if (args.size() < 8 || args.size() > 9)
 		return rejectBridgeChat(log, externalArg, messageArg);
 	std::vector<std::string> decoded = args;
-	const uint base64Arguments[] = { 0, 1, 2, 7 };
-	for (uint i = 0; i < sizeof(base64Arguments) / sizeof(base64Arguments[0]); ++i)
+	const uint base64Arguments[] = { 0, 1, 2, 7, 8 };
+	for (uint i = 0; i < sizeof(base64Arguments) / sizeof(base64Arguments[0]) && base64Arguments[i] < args.size(); ++i)
 	{
 		const uint index = base64Arguments[i];
-		if (index == 2 && args[index] == "-")
+		if ((index == 2 || index == 8) && args[index] == "-")
 		{
 			decoded[index].clear();
 			continue;
@@ -822,22 +822,12 @@ NLMISC_COMMAND(bridgeChat, "send a structured bridge chat message",
 		if (base64::encode(decoded[index]) != args[index])
 			return rejectBridgeChat(log, externalArg, messageArg);
 	}
-	std::string translatedParts;
-	if (args.size() > 8 && args[8] != "-")
-	{
-		if (args[8].size() > 4 * ((CHAT_MESSAGE::MaxSerializedSize + 2) / 3) ||
-			args[8].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=") != std::string::npos)
-			return rejectBridgeChat(log, externalArg, messageArg);
-		translatedParts = base64::decode(args[8]);
-		if (base64::encode(translatedParts) != args[8])
-			return rejectBridgeChat(log, externalArg, messageArg);
-	}
 	ucstring content;
 	content.fromUtf8(decoded[7]);
 	if (!IOS->getChatManager().bridgeChat(decoded[0], decoded[1], decoded[2],
 		args[3] == "-" ? std::string() : args[3],
 		args[4] == "-" ? std::string() : args[4], args[5],
-		args[6] == "-" ? std::string() : args[6], content, translatedParts))
+		args[6] == "-" ? std::string() : args[6], content, args.size() > 8 ? decoded[8] : std::string()))
 		return rejectBridgeChat(log, externalArg, messageArg);
 	return true;
 }

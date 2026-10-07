@@ -129,7 +129,7 @@ REGISTER_UI_CLASS(CGroupEmojiGrid)
 CEmojiPicker *CEmojiPicker::_Instance = NULL;
 
 //=================================================================================
-CEmojiPicker::CEmojiPicker() : _Group(0), _TabsBuilt(false), _Refilling(false),
+CEmojiPicker::CEmojiPicker() : _Group(0), _TabsBuilt(false),
 	_NeedFill(false), _BuiltForW(-1), _OpenedByPlayer(false), _Reacting(false)
 {
 }
@@ -168,13 +168,6 @@ CGroupEditBox *CEmojiPicker::getTargetEb() const
 //=================================================================================
 void CEmojiPicker::toggle(CCtrlBase *caller)
 {
-	CInterfaceGroup *win = getGroupFromId(EMOJI_PICKER_WIN);
-	if (!win)
-	{
-		nlwarning("Emoji: the picker window is missing from the interface");
-		return;
-	}
-
 	CGroupEditBox *eb = findChatEditBox(caller);
 	if (!eb)
 	{
@@ -182,33 +175,38 @@ void CEmojiPicker::toggle(CCtrlBase *caller)
 		return;
 	}
 
-	if (win->getActive() && !_Reacting && _TargetEb == eb->getId())
+	CInterfaceGroup *win = getGroupFromId(EMOJI_PICKER_WIN);
+	if (win && win->getActive() && !_Reacting && _TargetEb == eb->getId())
 	{
 		hide();
 		return;
 	}
+	if (!show())
+		return;
 	_TargetEb = eb->getId();
 	_Reacting = false;
-	show(win);
 	CWidgetManager::getInstance()->setCaptureKeyboard(eb);
 }
 
 //=================================================================================
 void CEmojiPicker::openForReaction()
 {
+	_Reacting = true;
+	show();
+}
+
+//=================================================================================
+bool CEmojiPicker::show()
+{
 	CInterfaceGroup *win = getGroupFromId(EMOJI_PICKER_WIN);
 	if (!win)
 	{
 		nlwarning("Emoji: the picker window is missing from the interface");
-		return;
+		return false;
 	}
-	_Reacting = true;
-	show(win);
-}
+	if (CEmojiManager::getInstance().getGroups().empty())
+		nlwarning("Emoji: no picker data loaded, see emoji_picker.txt");
 
-//=================================================================================
-void CEmojiPicker::show(CInterfaceGroup *win)
-{
 	_OpenedByPlayer = true;
 	win->setActive(true);
 	CWidgetManager::getInstance()->setTopWindow(win);
@@ -218,6 +216,7 @@ void CEmojiPicker::show(CInterfaceGroup *win)
 	_NeedFill = true;
 	CGroupEmojiGrid *grid = dynamic_cast<CGroupEmojiGrid *>(getGroupFromId(EMOJI_PICKER_GRID));
 	updateGrid(grid ? grid->getWReal() : 0);
+	return true;
 }
 
 //=================================================================================
@@ -349,9 +348,6 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 	if (columns < 1)
 		columns = FallbackColumns;
 
-	nldebug("Emoji picker: grid %d wide, %d columns of %d, %u emoji",
-		gridWidth, columns, CellSize, (uint)shown.size());
-
 	CInterfaceGroup *row = NULL;
 	for (uint i = 0; i < shown.size(); ++i)
 	{
@@ -382,25 +378,17 @@ void CEmojiPicker::fillGrid(sint32 gridWidth)
 		CWidgetManager::getInstance()->getElementFromId(EMOJI_PICKER_SCROLL));
 	if (scroll)
 		scroll->setTrackPos(0);
-
-	nldebug("Emoji picker: grid %dx%d, clipped to %d, %u rows",
-		grid->getWReal(), grid->getHReal(), grid->getMaxHReal(),
-		(uint)grid->getNumChildren());
 }
 
 //=================================================================================
 void CEmojiPicker::updateGrid(sint32 gridWidth)
 {
-	if (_Refilling)
-		return;
 	if (!_NeedFill && gridWidth == _BuiltForW)
 		return;
 
 	_NeedFill = false;
 	_BuiltForW = gridWidth;
-	_Refilling = true;
 	fillGrid(gridWidth);
-	_Refilling = false;
 }
 
 //=================================================================================
@@ -408,19 +396,7 @@ void CEmojiPicker::opened()
 {
 	// The saved interface may reopen the window at login; only the chat button does.
 	if (!_OpenedByPlayer)
-	{
 		hide();
-		return;
-	}
-
-	if (CEmojiManager::getInstance().getGroups().empty())
-	{
-		nlwarning("Emoji: no picker data loaded, see emoji_picker.txt");
-		return;
-	}
-	buildTabs();
-	// Filled by the grid on the next frame; the window is still being laid out here.
-	_NeedFill = true;
 }
 
 //=================================================================================
