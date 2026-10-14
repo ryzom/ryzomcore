@@ -23,6 +23,7 @@
 #include "nel/misc/system_info.h"
 #include "nel/misc/hierarchical_timer.h"
 #include "nel/misc/fast_mem.h"
+#include "nel/misc/system_info.h"
 #include "nel/3d/mesh_mrm_skinned.h"
 #include "nel/3d/mrm_builder.h"
 #include "nel/3d/mrm_parameters.h"
@@ -2624,7 +2625,7 @@ void CMeshMRMSkinnedGeom::getSkinWeights (std::vector<CMesh::CSkinWeight> &skinW
 // RawSkin Cache constants
 //===============
 // The number of byte to process per block
-const	uint	NL_BlockByteL1= 4096;
+const	uint	NL_BlockByteL1= NLMISC::CSystemInfo::getPageSize();
 
 // Number of vertices per block to process with 1 matrix.
 uint	CMeshMRMSkinnedGeom::NumCacheVertexNormal1= NL_BlockByteL1 / sizeof(CRawVertexNormalSkinned1);

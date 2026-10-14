@@ -21,6 +21,7 @@
 #include "nel/3d/ray_mesh.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/vector_2f.h"
+#include "nel/misc/system_info.h"
 
 using namespace NLMISC;
 using namespace std;
@@ -35,7 +36,7 @@ namespace NL3D
 
 // ***************************************************************************
 // The number of byte to process per block
-const	uint	NL_BlockByteL1= 4096;
+const	uint	NL_BlockByteL1= NLMISC::CSystemInfo::getPageSize();
 
 // Number of vertices per block to process For ShadowMap generation
 uint	CShadowSkin::NumCacheVertexShadow= NL_BlockByteL1 / sizeof(CShadowVertex);
