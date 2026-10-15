@@ -1879,35 +1879,4 @@ uint64 CSystemInfo::virtualMemory ()
 #endif
 }
 
-// ****************************************************************************
-/**   AARCH64 hardware supports multiple page sizes (4KB, 16KB eg Apple Silicon/Android, or 64KB).
- *    Querying the kernel dynamically allows a single compiled binary to run seamlessly across all
- *    kernel page configurations. Using a C++11/C++20 static local variable with an immediately
- *    invoked lambda expression guarantees thread-safe one-time evaluation without race
- *    conditions or repeated syscall overhead. If the OS query fails or returns an invalid size (<= 0),
- *    the function safely falls back to the 4096-byte standard
- */
-uint32 CSystemInfo::getPageSize ()
-{
-	static const uint32 pageSize = []() -> uint32
-	{
-		#ifdef NL_OS_WINDOWS
-		SYSTEM_INFO si;
-		GetSystemInfo(&si);
-		return (si.dwPageSize > 0) ? static_cast<uint32>(si.dwPageSize) : 4096;
-		#else
-		#	ifdef _SC_PAGESIZE
-		long sz = sysconf(_SC_PAGESIZE);
-		#	elif defined(_SC_PAGE_SIZE)
-		long sz = sysconf(_SC_PAGE_SIZE);
-		#	else
-		long sz = getpagesize();
-		#	endif
-		return (sz > 0) ? static_cast<uint32>(sz) : 4096;
-		#endif
-	}();
-
-	return pageSize;
-}
-
 } // NLMISC

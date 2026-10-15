@@ -92,10 +92,6 @@ public:
 	  */
 	static uint64 virtualMemory ();
 
-	/** Returns the system memory page size in bytes (e.g. 4096, 16384, 65536)
-	 */
-	static uint32 getPageSize ();
-
 	/** Returns the main video card name and the video driver version
 	  */
 	static bool getVideoInfo (std::string &deviceName, uint64 &driverVersion);
