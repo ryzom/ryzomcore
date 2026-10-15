@@ -92,19 +92,9 @@ public:
 	  */
 	static uint64 virtualMemory ();
 
-	/** System memory page size in bytes (e.g. 4096, 16384, 65536).
-	 * Initialized dynamically at runtime on first access.
+	/** Returns the system memory page size in bytes (e.g. 4096, 16384, 65536)
 	 */
-	static uint32 PageSize;
-	static uint32 initPageSize ();
-
-	/** Inlined the function to eliminate function call overhead while remaining safe against
-	 * static initialization ordering.
-	 */
-	static inline uint32 getPageSize ()
-	{
-		return PageSize ? PageSize : initPageSize ();
-	}
+	static uint32 getPageSize ();
 
 	/** Returns the main video card name and the video driver version
 	  */
