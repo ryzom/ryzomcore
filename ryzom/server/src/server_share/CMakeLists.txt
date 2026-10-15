@@ -31,7 +31,7 @@ NL_ADD_RUNTIME_FLAGS(ryzom_servershare)
 NL_ADD_LIB_SUFFIX(ryzom_servershare)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_servershare ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(ryzom_servershare PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 IF(WITH_INSTALL_LIBRARIES)

@@ -7,7 +7,7 @@
  */
 
 // NeL - MMORPG Framework <https://wiki.ryzom.dev/>
-// Copyright (C) 2012-2015  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2012-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -37,7 +37,10 @@ namespace NLSOUND {
 
 /// Hasher functor for hashed container with pointer key.
 template <class Pointer>
-struct THashPtr : public std::unary_function<const Pointer &, size_t>
+struct THashPtr 
+#ifndef NL_CPP17
+	: public std::unary_function<const Pointer &, size_t>
+#endif
 {
 	enum { bucket_size = 4, min_buckets = 8, };
 	size_t operator () (const Pointer &ptr) const

@@ -33,7 +33,7 @@ NL_DEFAULT_PROPS(tile_edit_qt "NeL, Tools, 3D: Qt Tile Editor")
 NL_ADD_RUNTIME_FLAGS(tile_edit_qt)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(tile_edit_qt ${CMAKE_CURRENT_SOURCE_DIR}/common.h ${CMAKE_CURRENT_SOURCE_DIR}/common.cpp)
+  target_precompile_headers(tile_edit_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/common.h)
 ENDIF()
 
 INSTALL(TARGETS tile_edit_qt RUNTIME DESTINATION ${NL_BIN_PREFIX} COMPONENT tools3d)

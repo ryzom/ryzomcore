@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2014  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2013-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@
 
 #include "stdpch.h"
 #include <map>
+#include <stack>
 #include "nel/misc/rgba.h"
 #include "nel/gui/interface_parser.h"
 #include "nel/misc/i_xml.h"
@@ -414,6 +415,10 @@ namespace NLGUI
 
 		while (curNode)
 		{
+			// solve all feature flags first
+			nlassert(!m_FlagStack.size());
+			solveFeatureFlags(curNode);
+			
 			// first solve define for the xml node and his sons
 			if(!solveDefine(curNode))
 			{
@@ -2218,6 +2223,266 @@ namespace NLGUI
 
 		return true;
 	}
+
+	// ***************************************************************************
+    bool CInterfaceParser::solveFeatureFlags(xmlNodePtr cur)
+    {
+		xmlNodePtr parent = cur->parent;
+		size_t flagStackBase = m_FlagStack.size();
+		bool featureOn = true;
+		bool skipElse = false;
+
+	    cur = cur->children;
+	    while (cur)
+	    {
+			xmlNodePtr nextCur = cur->next;
+
+			// Check if this node matches is any of the following:
+			// <if />, <elseif />, <else />, or <endif />
+			// <flag />
+			
+			if (xmlStrcmp(cur->name, (const xmlChar *)"if") == 0)
+			{
+				// Get XML attribute `flags`, check against `checkFeatureFlags`
+			    skipElse = !featureOn;
+			    featureOn = !skipElse && checkFeatureFlags((const char *)xmlGetProp(cur, (const xmlChar *)"flags"));
+				m_FlagStack.push(featureOn ? 1 : (skipElse ? 2 : 0));
+				
+				xmlUnlinkNode(cur);
+				xmlFreeNode(cur);
+			}
+		    else if (xmlStrcmp(cur->name, (const xmlChar *)"elseif") == 0)
+		    {
+				if (m_FlagStack.size() <= flagStackBase)
+				{
+					nlwarning("Unexpected <elseif /> in UI XML");
+					featureOn = false;
+					skipElse = true;
+				}
+				else
+				{
+					skipElse = skipElse || featureOn;
+					featureOn = false;
+					if (skipElse)
+						m_FlagStack.top() = 2;
+					if (!skipElse)
+					{
+						featureOn = checkFeatureFlags((const char *)xmlGetProp(cur, (const xmlChar *)"flags"));
+						m_FlagStack.top() = featureOn ? 1 : 0;
+					}
+				}
+				
+				xmlUnlinkNode(cur);
+				xmlFreeNode(cur);
+		    }
+		    else if (xmlStrcmp(cur->name, (const xmlChar *)"else") == 0)
+		    {
+				if (m_FlagStack.size() <= flagStackBase)
+				{
+					nlwarning("Unexpected <elseif /> in UI XML");
+					featureOn = false;
+					skipElse = true;
+				}
+				else
+				{
+					skipElse = skipElse || featureOn;
+					featureOn = !skipElse;
+					m_FlagStack.top() = featureOn ? 1 : 2;
+				}
+				
+				xmlUnlinkNode(cur);
+				xmlFreeNode(cur);
+		    }
+		    else if (xmlStrcmp(cur->name, (const xmlChar *)"endif") == 0)
+		    {
+				if (m_FlagStack.size() <= flagStackBase)
+				{
+					nlwarning("Too many <endif /> in UI XML");
+				}
+				else
+				{
+					m_FlagStack.pop();
+				}
+				featureOn = (m_FlagStack.size() == flagStackBase) || (m_FlagStack.top() == 1);
+				skipElse = !(m_FlagStack.size() == flagStackBase) && (m_FlagStack.top() == 2);
+
+				xmlUnlinkNode(cur);
+				xmlFreeNode(cur);
+		    }
+			else if (xmlStrcmp(cur->name, (const xmlChar *)"flag") == 0)
+			{
+				const char *name = (const char *)xmlGetProp(cur, (const xmlChar *)"name");
+				if (name)
+				{
+					const char *value = (const char *)xmlGetProp(cur, (const xmlChar *)"value");
+					bool flagOn = !value || NLMISC::toBool(value);
+					if (flagOn)
+						m_FeatureFlags.insert(name);
+					else if (m_FeatureFlags.find(name) != m_FeatureFlags.end())
+						m_FeatureFlags.erase(name);
+				}
+
+				xmlUnlinkNode(cur);
+				xmlFreeNode(cur);
+			}
+		    else if (featureOn)
+		    {
+			    // This node is not a feature flag node, so recurse into it
+			    if (!solveFeatureFlags(cur))
+				    return false;
+		    }
+			else
+			{
+				// Remove/delete this node from the xml document
+			    xmlUnlinkNode(cur);
+			    xmlFreeNode(cur);
+			}
+			
+		    cur = nextCur;
+	    }
+
+		while (m_FlagStack.size() > flagStackBase)
+		{
+			m_FlagStack.pop();
+			nlwarning("Missing <endif /> in UI XML");
+		}
+
+		nlassert(m_FlagStack.size() == flagStackBase);
+
+	    return true;
+    }
+
+	// ***************************************************************************
+    bool CInterfaceParser::checkFeatureFlags(const char *str, ptrdiff_t len) const
+    {
+		// Null or empty string means there's no condition, so it passes
+		if (!str || !str[0])
+			return true;
+		
+	    // If length of string not know, calculate now
+	    if (len == 0)
+		    len = strlen(str);
+		
+	    // Flags in the format like "contexticons | (!ryzomcore & ryzomclassic)"
+		// Maximum braces depth of 16
+		// Maximum flag length of 64 UTF-8 bytes
+		// No limit in expression length
+		
+		// Invalid expressions will not fail, but return an undefined result
+
+	    // Parser state
+	    bool stack[16] = {
+		    false, false, false, false,
+		    false, false, false, false,
+		    false, false, false, false,
+		    false, false, false, false
+	    };
+	    bool invStack[16] = {
+		    false, false, false, false,
+		    false, false, false, false,
+		    false, false, false, false,
+		    false, false, false, false
+	    };
+	    char opStack[16] = {
+		    0, 0, 0, 0,
+		    0, 0, 0, 0,
+		    0, 0, 0, 0,
+		    0, 0, 0, 0
+	    };
+	    int stackDepth = 0;
+	    char flagSymbol[64 + 1];
+	    int flagSymbolLen = 0;
+
+	    for (size_t i = 0; i < len; ++i)
+	    {
+		    char c = str[i];
+		    switch (c)
+		    {
+		    case ' ':
+		    case '\t':
+		    case '\r':
+		    case '\n':
+			    // Ignore whitespace
+			    break;
+		    case '!':
+			    invStack[stackDepth] = !invStack[stackDepth];
+			    flagSymbolLen = 0;
+			    break;
+		    case '(':
+			    // Push current state
+			    ++stackDepth;
+			    if (stackDepth >= 16)
+				    return stack[0];
+			    opStack[stackDepth] = 0;
+			    invStack[stackDepth] = false;
+			    flagSymbolLen = 0;
+			    break;
+		    case '|':
+		    case '&':
+		    case ')':
+			    // End of current symbol
+			    if (flagSymbolLen)
+			    {
+				    // Set flag based on previous operator
+				    flagSymbol[flagSymbolLen] = '\0';
+				    bool setFlag = (strcmp(flagSymbol, "true") == 0) ? true : ((strcmp(flagSymbol, "false") == 0) ? false : m_FeatureFlags.find(flagSymbol) != m_FeatureFlags.end());
+				    if (invStack[stackDepth])
+					    setFlag = !setFlag;
+				    invStack[stackDepth] = false;
+				    if (opStack[stackDepth] == '|')
+					    stack[stackDepth] = stack[stackDepth] || setFlag;
+				    else if (opStack[stackDepth] == '&')
+					    stack[stackDepth] = stack[stackDepth] && setFlag;
+				    else
+					    stack[stackDepth] = setFlag;
+			    }
+			    opStack[stackDepth] = c;
+			    flagSymbolLen = 0;
+			    if (c == ')')
+			    {
+				    // Pop current
+				    --stackDepth;
+				    if (stackDepth < 0)
+					    return stack[0];
+				    if (invStack[stackDepth])
+					    stack[stackDepth + 1] = !stack[stackDepth + 1];
+				    invStack[stackDepth] = false;
+				    if (opStack[stackDepth] == '|')
+					    stack[stackDepth] = stack[stackDepth] || stack[stackDepth + 1];
+				    else if (opStack[stackDepth] == '&')
+					    stack[stackDepth] = stack[stackDepth] && stack[stackDepth + 1];
+				    else
+					    stack[stackDepth] = stack[stackDepth + 1];
+				    flagSymbolLen = 0;
+				    break;
+			    }
+			    break;
+		    default:
+			    flagSymbol[flagSymbolLen] = c;
+			    ++flagSymbolLen;
+			    if (flagSymbolLen >= 64)
+				    return stack[0];
+			    break;
+		    }
+	    }
+
+	    if (flagSymbolLen)
+	    {
+		    // Set flag based on previous operator
+		    flagSymbol[flagSymbolLen] = '\0';
+		    bool setFlag = (strcmp(flagSymbol, "true") == 0) ? true : ((strcmp(flagSymbol, "false") == 0) ? false : m_FeatureFlags.find(flagSymbol) != m_FeatureFlags.end());
+		    if (invStack[stackDepth])
+			    setFlag = !setFlag;
+		    if (opStack[stackDepth] == '|')
+			    stack[stackDepth] = stack[stackDepth] || setFlag;
+		    else if (opStack[stackDepth] == '&')
+			    stack[stackDepth] = stack[stackDepth] && setFlag;
+		    else
+			    stack[stackDepth] = setFlag;
+	    }
+
+	    return stack[0];
+    }
 
 	// ***************************************************************************
 	bool CInterfaceParser::parseSheetSelection(xmlNodePtr cur)

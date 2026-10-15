@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
@@ -26,6 +26,7 @@
 void displayDebug();
 void displayDebugFps();
 void displayDebugUIUnderMouse();
+std::string getActionKey(const char* name, const char* param = "");
 // Display an Help.
 void displayHelp();
 

@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -319,16 +319,17 @@ bool CBufSock::update()
 }
 
 
+
 /*
  * Connects to the specified addr; set connectedstate to true if no connection advertising is needed
  * Precond: not connected
  */
-void CBufSock::connect( const CInetAddress& addr, bool nodelay, bool connectedstate )
+void CBufSock::connect( const CInetHost& addrs, bool nodelay, bool connectedstate )
 {
 	nlassert (this != InvalidSockId);	// invalid bufsock
 	nlassert( ! Sock->connected() );
 
-	Sock->connect( addr );
+	Sock->connect( addrs );
 	_ConnectedState = connectedstate;
 	_KnowConnected = connectedstate;
 	if ( nodelay )

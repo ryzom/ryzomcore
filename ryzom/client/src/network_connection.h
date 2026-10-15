@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
-// Copyright (C) 2015-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -40,6 +40,7 @@
 #include <nel/misc/vectord.h>
 #include <nel/misc/md5.h>
 
+#include "quic_connection.h"
 #include "time_client.h"
 #include "game_share/entity_types.h"
 #include "property_decoder.h"
@@ -511,13 +512,13 @@ public:
 	/// Get local IP address
 	const NLNET::CInetAddress&	getAddress()
 	{
-		return _Connection.localAddr();
+		return m_Connection.localAddr(); // FIXME: QUIC
 	}
 
 	/// Get socket
 	NLNET::CUdpSock&			getConnection()
 	{
-		return _Connection.UdpSock;
+		return m_Connection.UdpSock; // FIXME: QUIC
 	}
 
 	/// Get userId
@@ -561,18 +562,27 @@ public:
 protected:
 	/// The current state of the connection
 	TConnectionState			_ConnectionState;
+	bool						m_LoginNextAddress;
 
 	/// Connection Quality check
 	bool						_ConnectionQuality;
 
 	/// The address of the frontend service
 	std::string					_FrontendAddress;
+	NLNET::CInetHost			_FrontendHost;
+	size_t						_FrontendHostIndex;
 
 	/// The cookie for the login service
 	NLNET::CLoginCookie			_LoginCookie;
 
 	/// The UDP connection to the frontend
-	NLNET::CUdpSimSock			_Connection;
+	NLNET::CUdpSimSock			m_Connection;
+
+	/// The QUIC connection to the frontend
+	CQuicConnection				m_QuicConnection;
+	
+	/// Whether to use QUIC or not
+	bool						m_UseQuic;
 
 	/// The receive buffer
 	uint32						_ReceiveBuffer[65536];

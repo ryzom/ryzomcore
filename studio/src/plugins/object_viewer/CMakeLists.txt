@@ -192,7 +192,7 @@ NL_ADD_LIB_SUFFIX(studio_plugin_object_viewer)
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS -DQT_PLUGIN -DQT_SHARED ${QT_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(studio_plugin_object_viewer ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(studio_plugin_object_viewer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 

@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2017  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -424,7 +424,13 @@ void CWeatherManagerClient::setupFXs(const NLMISC::CMatrix &camMat, NLPACS::UGlo
 	// update waiting precipitations
 	updatePrecipitationVect(_WaitingPrecipitations, camMat, gr);
 	// Remove waiting precipitation that are not running anymore (no more particles)
-	TPrecipitationVect::iterator lastValid = std::remove_if(_WaitingPrecipitations.begin(), _WaitingPrecipitations.end(), std::not1(std::mem_fun(&CPrecipitation::isRunning)));
+	TPrecipitationVect::iterator lastValid = std::remove_if(_WaitingPrecipitations.begin(), _WaitingPrecipitations.end(), 
+#ifndef NL_CPP17
+		std::not1(std::mem_fun(&CPrecipitation::isRunning))
+#else
+	    std::not1(std::mem_fn(&CPrecipitation::isRunning))
+#endif
+	);
 	_WaitingPrecipitations.erase(lastValid, _WaitingPrecipitations.end());
 }
 

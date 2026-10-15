@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -539,7 +542,7 @@ union yyalloc
 #   define YYCOPY(To, From, Count)		\
       do					\
 	{					\
-	  register YYSIZE_T yyi;		\
+	  NL_REGISTER YYSIZE_T yyi;		\
 	  for (yyi = 0; yyi < (Count); yyi++)	\
 	    (To)[yyi] = (From)[yyi];		\
 	}					\
@@ -1203,7 +1206,7 @@ yystrlen (yystr)
      const char *yystr;
 #   endif
 {
-  register const char *yys = yystr;
+  NL_REGISTER const char *yys = yystr;
 
   while (*yys++ != '\0')
     continue;
@@ -1228,8 +1231,8 @@ yystpcpy (yydest, yysrc)
      const char *yysrc;
 #   endif
 {
-  register char *yyd = yydest;
-  register const char *yys = yysrc;
+  NL_REGISTER char *yyd = yydest;
+  NL_REGISTER const char *yys = yysrc;
 
   while ((*yyd++ = *yys++) != '\0')
     continue;
@@ -1359,8 +1362,8 @@ yyparse ()
 #endif
 {
   
-  register int yystate;
-  register int yyn;
+  NL_REGISTER int yystate;
+  NL_REGISTER int yyn;
   int yyresult;
   /* Number of tokens to shift before error messages enabled.  */
   int yyerrstatus;
@@ -1378,12 +1381,12 @@ yyparse ()
   /* The state stack.  */
   short	yyssa[YYINITDEPTH];
   short *yyss = yyssa;
-  register short *yyssp;
+  NL_REGISTER short *yyssp;
 
   /* The semantic value stack.  */
   YYSTYPE yyvsa[YYINITDEPTH];
   YYSTYPE *yyvs = yyvsa;
-  register YYSTYPE *yyvsp;
+  NL_REGISTER YYSTYPE *yyvsp;
 
 
 

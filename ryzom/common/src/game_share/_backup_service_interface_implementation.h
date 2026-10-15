@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -123,8 +126,8 @@ private:
 	bool	_BSInReadMode;
 
 //	bool _HaveSeparatePDBS;
-	NLNET::CInetAddress		_BSMasterAddress;
-	NLNET::CInetAddress		_BSSlaveAddress;
+	NLNET::CInetHost _BSMasterAddress;
+	NLNET::CInetHost _BSSlaveAddress;
 
 	// Layer 3 connection to the BS
 	NLNET::CCallbackClient	_L3BSConn;

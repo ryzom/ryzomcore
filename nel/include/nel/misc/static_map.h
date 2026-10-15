@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -54,7 +57,10 @@ public:
 	typedef std::pair<Key, Typ>		value_type;
 	typedef Comp					key_compare;
 
-	class value_compare : public std::binary_function<value_type, value_type, bool>
+	class value_compare 
+#ifndef NL_CPP17
+		: public std::binary_function<value_type, value_type, bool>
+#endif
 	{
 		friend class CStaticMap<Key, Typ, Comp>;
 	public:

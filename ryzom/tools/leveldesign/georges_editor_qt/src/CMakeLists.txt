@@ -67,7 +67,7 @@ NL_DEFAULT_PROPS(georges_editor_qt "Ryzom, Tools, World: Georges Editor Qt")
 NL_ADD_RUNTIME_FLAGS(georges_editor_qt)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(georges_editor_qt ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(georges_editor_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS georges_editor_qt RUNTIME DESTINATION ${RYZOM_BIN_PREFIX} COMPONENT runtime BUNDLE DESTINATION /Applications)

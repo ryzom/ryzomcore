@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -256,13 +256,12 @@ TSockId	CCallbackClient::getSockId (TSockId hostid)
 	return id ();
 }
 
-
 /*
  * Connect to the specified host
  * Recorded : YES
  * Replayed : YES
  */
-void CCallbackClient::connect( const CInetAddress& addr )
+void CCallbackClient::connect( const CInetHost &addrs )
 {
 #ifdef USE_MESSAGE_RECORDER
 	if ( _MR_RecordingState != Replay )
@@ -272,14 +271,14 @@ void CCallbackClient::connect( const CInetAddress& addr )
 #endif
 
 			// Connect
-			CBufClient::connect( addr );
+			CBufClient::connect( addrs );
 
 #ifdef USE_MESSAGE_RECORDER
 			if ( _MR_RecordingState == Record )
 			{
 				// Record connection
 				CMessage addrmsg;
-				addrmsg.serial( const_cast<CInetAddress&>(addr) );
+				addrmsg.serial( const_cast<CInetHost &>(addrs) );
 				_MR_Recorder.recordNext( _MR_UpdateCounter, Connecting, _BufSock, addrmsg );
 			}
 		}
@@ -289,7 +288,7 @@ void CCallbackClient::connect( const CInetAddress& addr )
 			{
 				// Record connection
 				CMessage addrmsg;
-				addrmsg.serial( const_cast<CInetAddress&>(addr) );
+				addrmsg.serial( const_cast<CInetHost &>(addrs) );
 				_MR_Recorder.recordNext( _MR_UpdateCounter, ConnFailing, _BufSock, addrmsg );
 			}
 			throw;
@@ -298,20 +297,20 @@ void CCallbackClient::connect( const CInetAddress& addr )
 	else
 	{
 		// Check the connection : failure or not
-		TNetworkEvent event = _MR_Recorder.replayConnectionAttempt( addr );
+		TNetworkEvent event = _MR_Recorder.replayConnectionAttempt( addrs );
 		switch ( event )
 		{
 		case Connecting :
 			// Set the remote address
 			nlassert( ! _BufSock->Sock->connected() );
-			_BufSock->connect( addr, _NoDelay, true );
+			_BufSock->connect( addrs, _NoDelay, true );
 			_PrevBytesDownloaded = 0;
 			_PrevBytesUploaded = 0;
 			/*_PrevBytesReceived = 0;
 			_PrevBytesSent = 0;*/
 			break;
 		case ConnFailing :
-			throw ESocketConnectionFailed( addr );
+			throw ESocketConnectionFailed( addrs );
 			//break;
 		default :
 			nlwarning( "LNETL3C: No connection event in replay data, at update #%" NL_I64 "u", _MR_UpdateCounter );

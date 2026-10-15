@@ -26,6 +26,7 @@
 #include "nel/misc/config_file.h"
 #include "nel/misc/thread.h"
 #include "nel/misc/progress_callback.h"
+#include "nel/misc/atomic.h"
 
 #include "game_share/bnp_patch.h"
 
@@ -491,9 +492,9 @@ public:
 
 public:
 
-	bool		Ended;					// true if the thread have ended
-	bool		CheckOk;				// true if the check is good
-	bool		StopAsked;
+	NLMISC::CAtomicBool Ended; // true if the thread have ended
+	bool CheckOk; // true if the check is good
+	NLMISC::CAtomicBool StopAsked;
 
 	int TotalFileToCheck;
 	int CurrentFileChecked;
@@ -517,9 +518,9 @@ class CPatchThread : public NLMISC::IRunnable
 
 public:
 
-	bool		Ended;					// true if the thread have ended the patch
-	bool		PatchOk;				// true if the patch was good
-	bool		StopAsked;
+	NLMISC::CAtomicBool Ended; // true if the thread have ended the patch
+	bool PatchOk; // true if the patch was good
+	NLMISC::CAtomicBool StopAsked;
 
 public:
 
@@ -590,10 +591,10 @@ public:
 public:
 
 	// Written by MainThread, read by thread
-	bool		AskForCancel;			// true if the main thread ask to cancel the task
+	NLMISC::CAtomicBool AskForCancel; // true if the main thread ask to cancel the task
 
 	// Written by thread, read by Main Thread
-	bool		Ended;					// true if the thread have ended
+	NLMISC::CAtomicBool Ended; // true if the thread have ended
 	bool		CheckOk;				// true if the check is good
 	int			TotalFileToScan;
 	int			CurrentFileScanned;

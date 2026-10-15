@@ -101,6 +101,7 @@ short_authors["Botanic"] = "botanic"
 short_authors["Matthew Lagoe@MatthewLagoe-PC <Matthew Lagoe@MatthewLagoe-PC>"] = "botanic"
 short_authors["Botanic <admin@tempestintheaether.org>"] = "botanic"
 short_authors["kaetemi <kaetemi@gmail.com>"] = "kaetemi"
+short_authors["kaetemi <jan.boon@kaetemi.be>"] = "kaetemi"
 short_authors["Jan Boon <jan.boon@kaetemi.be>"] = "kaetemi"
 short_authors["Jan Boon <kaetemi@no-break.space>"] = "kaetemi"
 short_authors["Jan Boon <kaetemi@gmail.com>"] = "kaetemi"
@@ -110,6 +111,7 @@ short_authors["kaetemi@users.sourceforge.net <kaetemi@users.sourceforge.net>"] =
 short_authors["kaetemi@kaevm.localdomain <kaetemi@kaevm.localdomain>"] = "kaetemi"
 short_authors["Jan Boon (Kaetemi)"] = "kaetemi"
 short_authors["NO-BREAK SPACE OÜ <support@no-break.space>"] = "-" # bot
+short_authors["Polyverse OÜ <support@polyverse.dev>"] = "-" # bot
 short_authors["Ryzom Pipeline <ryzom-pipeline@kaetemi.be>"] = "-" # bot
 short_authors["Nimetu <nimetu@gmail.com>"] = "nimetu"
 short_authors["nimetu@gmail.com <nimetu@gmail.com>"] = "nimetu"
@@ -212,6 +214,10 @@ override_author["141e7c645966ee3475097a75a65def8c9bd7086a"] = "-" # Sync
 override_author["e6a617b8bcd1630dba5fc3b6ae9815775ba2c19d"] = "-" # Sync
 override_author["41c8499bd4f1e6229a03c954132fcc5ba4f5dc3e"] = "-" # Sync
 override_author["ecf990f8ae8e04d946ce1d5519c065dc6fedf4c4"] = "-" # Sync
+override_author["b4638c79699b6ce84fdeff9e9f413b8c6a56a905"] = "winch_gate" # Sync
+override_author["6a79a5bf0ff4be9deaf0a6d5d0b3815b456891c5"] = "winch_gate" # Sync
+override_author["678d888b5cfbb1d6785ff3a23c32d19a8fd60ccb"] = "winch_gate" # Sync
+override_author["2889e81d63f3f5400cfe87d59ad6d1517ec30323"] = "winch_gate" # Sync
 
 # Exclude some paths
 exclude_paths = { }

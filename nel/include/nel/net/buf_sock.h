@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -225,7 +225,7 @@ protected:
 
 
 	/// Connects to the specified addr; set connectedstate to true if no connection advertising is needed
-	void connect( const CInetAddress& addr, bool nodelay, bool connectedstate );
+	void connect(const CInetHost &addr, bool nodelay, bool connectedstate);
 
 	/// Disconnects; set connectedstate to false if no disconnection advertising is needed
 	void disconnect( bool connectedstate );

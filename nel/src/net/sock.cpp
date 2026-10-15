@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -23,12 +23,14 @@
 #include "nel/net/net_log.h"
 #include "nel/misc/time_nl.h"
 #include "nel/misc/hierarchical_timer.h"
+#include "nel/misc/atomic.h"
 
 #ifdef NL_OS_WINDOWS
 #	ifndef NL_COMP_MINGW
 #		define NOMINMAX
 #	endif
 #	include <winsock2.h>
+#   include <ws2ipdef.h>
 #	include <windows.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()
@@ -70,16 +72,29 @@ using namespace NLMISC;
 #define new DEBUG_NEW
 #endif
 
+#if defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501)
+#define IPPROTO_IPV6 41
+#endif
+
+#ifdef NL_OS_WINDOWS
+// automatically add the win socket library if you use nel network part
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 namespace NLNET {
 
 
-bool CSock::_Initialized = false;
-
+namespace /* anonymous */ {
+NLMISC::CAtomicBool s_Initialized;
+#ifdef NL_OS_WINDOWS
+NLMISC::CAtomicInt s_WsaInitCount;
+#endif
+} /* anonymous namespace */
 
 /*
  * ESocket constructor
  */
-ESocket::ESocket( const char *reason, bool systemerror, CInetAddress *addr )
+ESocket::ESocket( const char *reason, bool systemerror, CInetHost *addr )
 {
 /*it doesnt work on linux, should do something more cool
   	std::stringstream ss;
@@ -100,7 +115,7 @@ ESocket::ESocket( const char *reason, bool systemerror, CInetAddress *addr )
 	if ( addr != NULL )
 	{
 		// Version with address
-		smprintf( str, 256, reason, addr->asString().c_str() ); // reason *must* contain "%s"
+		smprintf( str, 256, reason, addr->toStringLong().c_str() ); // reason *must* contain "%s"
 		_Reason += str;
 	}
 	else
@@ -130,18 +145,26 @@ ESocket::ESocket( const char *reason, bool systemerror, CInetAddress *addr )
  */
 void CSock::initNetwork()
 {
-	if ( ! CSock::_Initialized )
-	{
 #ifdef NL_OS_WINDOWS
-		WORD winsock_version = MAKEWORD( 2, 0 );
+	if (!s_Initialized.load(NLMISC::TMemoryOrderRelaxed))
+	{
+		WORD winsock_version = MAKEWORD( 2, 2 );
 		WSADATA wsaData;
 		if ( WSAStartup( winsock_version, &wsaData ) != 0 )
 		{
 			throw ESocket( "Winsock initialization failed" );
 		}
-#endif
-		CSock::_Initialized = true;
+		s_Initialized = true;
+		// Ok if it gets initialized more than once due to multiple threads reaching here,
+		// just need to release multiple times!
+		++s_WsaInitCount;
 	}
+#else
+	if (!s_Initialized.load(NLMISC::TMemoryOrderRelaxed))
+	{
+		s_Initialized = true;
+	}
+#endif
 }
 
 /*
@@ -150,9 +173,23 @@ void CSock::initNetwork()
 void CSock::releaseNetwork()
 {
 #ifdef NL_OS_WINDOWS
-	WSACleanup();
+	s_Initialized = false;
+	while (int previous = (s_WsaInitCount--))
+	{
+		if (previous > 0)
+		{
+			WSACleanup();
+		}
+		else // Oops, went too far!
+		{
+			++s_WsaInitCount;
+		}
+	}
+	// Twice, in case called concurrently with initNetwork (don't do this, though)
+	s_Initialized = false;
+#else
+	s_Initialized = false;
 #endif
-	CSock::_Initialized = false;
 }
 
 
@@ -203,19 +240,22 @@ std::string CSock::errorString( uint errorcode )
 /*
  * Constructor
  */
-CSock::CSock( bool logging ) :
-	_Sock( INVALID_SOCKET ),
-	_Logging( logging ),
-	_NonBlocking( false ),
-	_BytesReceived( 0 ),
-	_BytesSent( 0 ),
-	_TimeoutS( 0 ),
-	_TimeoutUs( 0 ),
-	_MaxReceiveTime( 0 ),
-	_MaxSendTime( 0 ),
-	_Blocking( false )
-	{
-	nlassert( CSock::_Initialized );
+CSock::CSock(bool logging)
+    : _Sock(INVALID_SOCKET)
+	, _LocalAddr(false)
+	, _RemoteAddr(false)
+    , _Logging(logging)
+    , _NonBlocking(false)
+    , _BytesReceived(0)
+    , _BytesSent(0)
+    , _TimeoutS(0)
+    , _TimeoutUs(0)
+    , _MaxReceiveTime(0)
+    , _MaxSendTime(0)
+    , _Blocking(false)
+    , _AddressFamily(AF_UNSPEC)
+{
+	nlassert(s_Initialized);
 	/*{
 		CSynchronized<bool>::CAccessor sync( &_SyncConnected );
 		sync.value() = false;
@@ -223,21 +263,21 @@ CSock::CSock( bool logging ) :
 	_Connected = false;
 }
 
-
 /*
  * Construct a CSock object using an existing connected socket descriptor and its associated remote address
  */
-CSock::CSock( SOCKET sock, const CInetAddress& remoteaddr ) :
-	_Sock( sock ),
-	_RemoteAddr( remoteaddr ),
-	_Logging( true ),
-	_NonBlocking( false ),
-	_BytesReceived( 0 ),
-	_BytesSent( 0 ),
-	_MaxReceiveTime( 0 ),
-	_MaxSendTime( 0 )
+CSock::CSock(SOCKET sock, const CInetAddress &remoteaddr)
+    : _Sock(sock)
+    , _RemoteAddr(remoteaddr)
+    , _Logging(true)
+    , _NonBlocking(false)
+    , _BytesReceived(0)
+    , _BytesSent(0)
+    , _MaxReceiveTime(0)
+    , _MaxSendTime(0)
+    , _AddressFamily(AF_UNSPEC)
 {
-	nlassert( CSock::_Initialized );
+	nlassert(s_Initialized);
 	/*{
 		CSynchronized<bool>::CAccessor sync( &_SyncConnected );
 		sync.value() = true;
@@ -265,20 +305,66 @@ CSock::CSock( SOCKET sock, const CInetAddress& remoteaddr ) :
 	ioctl(_Sock, FIOCLEX, NULL);
 	// fcntl should be more portable but not tested fcntl(_Sock, F_SETFD, FD_CLOEXEC);
 #endif
-	}
+}
 
+static SOCKET createSocketInternal(int &family, int familyA, int familyB, int type, int protocol)
+{
+	// First try IPv6
+	SOCKET res = (SOCKET)socket(familyA, type, protocol); // or IPPROTO_IP (=0) ?
+	if (res == INVALID_SOCKET)
+	{
+		// Fallback to IPv4
+		nlwarning("Could not create a socket of the preferred socket family %i, create a socket with family %i, the system may lack IPv6 support", familyA , familyB);
+		res = (SOCKET)socket(familyB, type, protocol);
+		if (res == INVALID_SOCKET)
+		{
+			family = AF_UNSPEC;
+			throw ESocket("Could not create socket");
+		}
+		family = familyB;
+	}
+	else
+	{
+		family = familyA;
+	}
+	return res;
+}
+
+inline static int sizeOfSockAddr(const sockaddr_storage &storage)
+{
+	if (storage.ss_family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	if (storage.ss_family == AF_INET)
+		return sizeof(sockaddr_in);
+	return sizeof(storage);
+}
 
 /*
  * Creates the socket and get a valid descriptor
  */
-void CSock::createSocket( int type, int protocol )
+void CSock::createSocket(int type, int protocol)
 {
-	nlassert( _Sock == INVALID_SOCKET );
+	nlassert(_Sock == INVALID_SOCKET);
 
-	_Sock = (SOCKET)socket( AF_INET, type, protocol ); // or IPPROTO_IP (=0) ?
-	if ( _Sock == INVALID_SOCKET )
+	// Create socket, throws in case of failure
+	_Sock = createSocketInternal(_AddressFamily, AF_INET6, AF_INET, type, protocol);
+
+	if (_AddressFamily == AF_INET6)
 	{
-		throw ESocket( "Socket creation failed" );
+		// Ensure this is dual stack IPv6 and IPv4
+		// Disable IPv6 ONLY flag
+		int no = 0;
+		if (setsockopt(_Sock, IPPROTO_IPV6, IPV6_V6ONLY, (char *)&no, sizeof(no)) != 0)
+		{
+			nlwarning("Could not disable IPV6_V6ONLY flag, this means we're running on a legacy OS, and IPv4 is preferred");
+#ifdef NL_OS_WINDOWS
+			closesocket(_Sock);
+#elif defined NL_OS_UNIX
+			::close(_Sock);
+#endif
+			_Sock = INVALID_SOCKET;
+			_Sock = createSocketInternal(_AddressFamily, AF_INET, AF_INET6, type, protocol);
+		}
 	}
 
 	if ( _Logging )
@@ -320,6 +406,7 @@ void CSock::close()
 	::close( sockToClose );
 #endif
 	_Connected = false;
+	_AddressFamily = AF_UNSPEC;
 }
 
 
@@ -349,53 +436,79 @@ CSock::~CSock()
 		::close( _Sock );
 #endif
 		_Sock = INVALID_SOCKET;
+		_AddressFamily = AF_UNSPEC;
 	}
 }
-
 
 /*
  * Connection
  */
-void CSock::connect( const CInetAddress& addr )
+void CSock::connect(const CInetHost &addrs)
 {
-	LNETL0_DEBUG( "LNETL0: Socket %d connecting to %s...", _Sock, addr.asString().c_str() );
-
-	// Check address
-	if ( ! addr.isValid() )
+	if (_Connected)
 	{
-		throw ESocket( "Unable to connect to invalid address", false );
+		throw ESocket("Already connected", false);
 	}
+
+	bool attempted = false;
+	bool connected = false;
+	_LocalAddr.setNull();
+	_RemoteAddr.setNull();
+	for (size_t ai = 0; ai < addrs.size(); ++ai)
+	{
+		const CInetAddress &addr = addrs.addresses()[ai];
+		sockaddr_storage sockAddr;
+
+		LNETL0_DEBUG("LNETL0: Socket %d connecting to %s...", _Sock, addrs.toStringLong(ai).c_str());
+
+		// Check address
+		if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
+		{
+			continue;
+		}
 
 #ifndef NL_OS_WINDOWS
-	// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
-	int value = true;
-	if ( setsockopt( _Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value) ) == SOCKET_ERROR )
-	{
-		throw ESocket( "ReuseAddr failed" );
-	}
-#endif
-
-	// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
-	if ( ::connect( _Sock, (const sockaddr *)(addr.sockAddr()), sizeof(sockaddr_in) ) != 0 )
-	{
-/*		if ( _Logging )
+		// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
+		int value = true;
+		if (setsockopt(_Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value)) == SOCKET_ERROR)
 		{
-#ifdef NL_OS_WINDOWS
-			nldebug( "Impossible to connect socket %d to %s %s (%d)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM );
-#elif defined NL_OS_UNIX
-			nldebug( "Impossible to connect socket %d to %s %s (%d:%s)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM, strerror(ERROR_NUM) );
-#endif
+			throw ESocket("ReuseAddr failed");
 		}
-*/
+#endif
 
-		throw ESocketConnectionFailed( addr );
+		attempted = true;
+		// Connection (when _Sock is a datagram socket, connect establishes a default destination address)
+		if (::connect(_Sock, (const sockaddr *)(&sockAddr), sizeOfSockAddr(sockAddr)) != 0)
+		{
+			/*		if ( _Logging )
+					{
+			#ifdef NL_OS_WINDOWS
+						nldebug( "Impossible to connect socket %d to %s %s (%d)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM );
+			#elif defined NL_OS_UNIX
+						nldebug( "Impossible to connect socket %d to %s %s (%d:%s)", _Sock, addr.hostName().c_str(), addr.asIPString().c_str(), ERROR_NUM, strerror(ERROR_NUM) );
+			#endif
+					}
+			*/
+			LNETL0_DEBUG("LNETL0: Socket %d failed to connect to %s", _Sock, addrs.toStringLong(ai).c_str());
+			continue;
+		}
+		setLocalAddress();
+		if (_Logging)
+		{
+			LNETL0_DEBUG("LNETL0: Socket %d connected to %s (local %s)", _Sock, addrs.toStringLong(ai).c_str(), _LocalAddr.asString().c_str());
+		}
+		_RemoteAddr = addr;
+		connected = true;
+		break;
 	}
-	setLocalAddress();
-	if ( _Logging )
+	if (!connected)
 	{
-		LNETL0_DEBUG( "LNETL0: Socket %d connected to %s (local %s)", _Sock, addr.asString().c_str(), _LocalAddr.asString().c_str() );
+		if (!attempted)
+		{
+			throw ESocket("Unable to connect to invalid address", false);
+		}
+		throw ESocketConnectionFailed(addrs);
 	}
-	_RemoteAddr = addr;
 
 	_BytesReceived = 0;
 	_BytesSent = 0;
@@ -411,6 +524,9 @@ void CSock::connect( const CInetAddress& addr )
  */
 bool CSock::dataAvailable()
 {
+	if (_Sock == INVALID_SOCKET)
+		throw ESocket("CSock::dataAvailable(): invalid socket");
+	
 	fd_set fdset;
 	FD_ZERO( &fdset );
 	FD_SET( _Sock, &fdset );
@@ -434,13 +550,24 @@ bool CSock::dataAvailable()
  */
 void CSock::setLocalAddress()
 {
-	sockaddr saddr;
-	socklen_t saddrlen = sizeof(saddr);
-	if ( getsockname( _Sock, &saddr, &saddrlen ) != 0 )
+	sockaddr_storage storage;
+	socklen_t saddrlen = sizeof(storage);
+	if (getsockname(_Sock, (sockaddr *)(&storage), &saddrlen) != 0)
 	{
-		throw ESocket( "Unable to find local address" );
+		throw ESocket("Unable to find local address");
 	}
-	_LocalAddr.setSockAddr( (const sockaddr_in *)&saddr );
+	if (storage.ss_family == AF_INET6)
+	{
+		_LocalAddr.fromSockAddrInet6((sockaddr_in6 *)(&storage));
+	}
+	else if (storage.ss_family == AF_INET)
+	{
+		_LocalAddr.fromSockAddrInet((sockaddr_in *)(&storage));
+	}
+	else
+	{
+		throw ESocket("Unknown socket address family");
+	}
 }
 
 
@@ -653,9 +780,9 @@ void CSock::setSendBufferSize( sint32 size )
 sint32 CSock::getSendBufferSize()
 {
   int size = -1;
-  socklen_t bufsize;
-  getsockopt( _Sock, SOL_SOCKET, SO_SNDBUF, (char*)(&size), &bufsize );
-  return size;
+	socklen_t bufsize = sizeof(size);
+	getsockopt(_Sock, SOL_SOCKET, SO_SNDBUF, (char *)(&size), &bufsize);
+	return size;
 }
 
 } // NLNET

@@ -163,4 +163,11 @@ def FindLuaVersion(prefixPaths):
 	# otherwise, detect which lua version the system luabind depends on!
 	return
 
+def FindMsQuic(prefixPaths):
+	for dir in prefixPaths:
+		msquicHeader = os.path.join(dir, "include/msquic.h")
+		if os.path.isfile(msquicHeader):
+			return True
+	return False
+
 # end of file

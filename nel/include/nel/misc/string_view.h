@@ -41,11 +41,19 @@ using namespace std::string_view_literals;
 #define nlsv(strLit) (strLit##sv)
 /// Obtain an std::string from a string view.
 #define nlsvs(strView) (std::string(strView))
+/// Obtain a parameter to pass to find in a string indexed container from a string view.
+#define nlsvf(strView) (strView)
+/// Comparison function for string indexed containers.
+#define NL_SV_LESS std::less<>
 #else
 /// Obtain a string view from a string literal.
 #define nlsv(strLit) (CStringView(strLit, ::strlen(strLit)))
 /// Obtain an std::string from a string view.
 #define nlsvs(strView) (std::string(strView.data(), strView.size()))
+/// Obtain a parameter to pass to find in a string indexed container from a string view.
+#define nlsvf(strView) nlsvs(strView)
+/// Comparison function for string indexed containers.
+#define NL_SV_LESS std::less<std::string>
 #endif
 
 /// Obtain a temporary C-string from a string view. Use directly in argument, do not store.
@@ -62,7 +70,7 @@ namespace NLMISC {
 /// Use the `nlstr` macro to get an std::string from a string literal.
 /// Use the `nlsvs` macro to get an std::string from a CStringView.
 #ifdef NL_CPP17
-typedef std::string_view CStringView;
+using CStringView = std::string_view;
 #else
 class CStringView
 {

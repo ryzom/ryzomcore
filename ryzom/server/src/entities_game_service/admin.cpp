@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2019-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -47,6 +47,8 @@
 #include "nel/net/admin.h"
 #include "nel/net/service.h"
 
+#include "nel/web/http_post_task.h"
+
 #include "game_share/scores.h"
 #include "game_share/send_chat.h"
 #include "game_share/time_weather_season/time_date_season_manager.h"
@@ -55,7 +57,6 @@
 #include "game_share/outpost.h"
 #include "game_share/visual_slot_manager.h"
 #include "game_share/shard_names.h"
-#include "game_share/http_client.h"
 #include "server_share/log_command_gen.h"
 #include "server_share/r2_vision.h"
 #include "server_share/mongo_wrapper.h"
@@ -137,6 +138,7 @@ extern NLMISC::CVariable<uint32> FixedSessionId;
 
 using namespace NLMISC;
 using namespace NLNET;
+using namespace NLWEB;
 using namespace std;
 
 extern CVariable<string>	BannerPriv;

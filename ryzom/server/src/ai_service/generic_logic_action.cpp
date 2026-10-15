@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2019  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2020-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -2646,7 +2646,11 @@ groupFound:
 			}
 
 		}
+#ifndef NL_CPP17
 		std::random_shuffle(cellZones.begin(), cellZones.end());
+#else
+		std::shuffle(cellZones.begin(), cellZones.end(), CAIS::instance().RandomGenerator);
+#endif
 
 		const	CNpcZone	*spawnZone;
 		FOREACH(itCellZone, vector<CCellZone*>, cellZones)

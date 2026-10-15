@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -94,16 +97,14 @@ private:
 
 	/// @name The stop flags
 	//@{
-	volatile bool								_StopThread;
-	volatile bool								_ThreadStopped;
+	NLMISC::CAtomicBool							_StopThread;
+	NLMISC::CAtomicBool							_ThreadStopped;
 	//@}
 
 private:
-	/// Constructor. WARNING, never create module manager from another manager !!
-	CModuleManager(const CModuleManager &mod) { nlerror("FEMMAN: forbidden constructor used!"); }
-
 	/// WARNING, never initialize module manager from another manager !!
-	CModuleManager	& operator = (const CModuleManager &mod) { nlerror("FEMMAN: forbidden operator = used!");}
+	CModuleManager(const CModuleManager &mod) = delete;
+	CModuleManager &operator=(const CModuleManager &mod) = delete;
 
 public:
 
@@ -193,7 +194,7 @@ private:
 	{
 		//nldebug("FEMMAN: [%s] waiting for all modules to increase cycle", _StackName.c_str());
 		while (!allReady())
-			NLMISC::nlSleep(0);
+			NLMISC::nlSleep(0); // FIXME
 
 		/* Warning (Windows platform): this sleep(0) will make the service show 100% of CPU in the
 		 * Windows task manager. In fact, if there is idle time, the sleep(0) makes the system give
@@ -213,7 +214,7 @@ private:
 	{
 		//nldebug("FEMMAN: [%s] waiting for all modules to restart cycle", _StackName.c_str());
 		while (!allComplete())
-			NLMISC::nlSleep(0);
+			NLMISC::nlSleep(0); // FIXME
 
 		/* Warning (Windows platform) about sleep(0): see waitAllReady().
 		 */

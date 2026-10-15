@@ -7,3 +7,4 @@ python 3_install.py -ipj common/gamedev common/data_common common/exedll %RC_EXE
 title Ryzom Core: b1_client_dev.py
 python b1_client_dev.py
 title Ryzom Core: Ready
+dir *.py

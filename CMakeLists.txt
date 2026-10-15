@@ -56,6 +56,7 @@ IF(HUNTER_ENABLED)
  
  # Workaround for PCH compilation issue, from curl intsizeof depencency
   ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  # TODO: Still applicable after switching to CMake's builtin precompiled header support?
 ENDIF()
 
 
@@ -81,7 +82,7 @@ ENDIF()
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 4)
-SET(NL_VERSION_MINOR 0)
+SET(NL_VERSION_MINOR 1)
 SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
 SET(NL_VERSION_BUILD 0 CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
@@ -134,6 +135,7 @@ SET(RYZOM_CLIENT_APP_NAME               "core4")
 
 SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://core4.ryzom.dev/releasenotes/index.php" CACHE STRING "Ryzom Client Release Notes URL")
 SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://core4.ryzom.dev/releasenotes_ring/index.php" CACHE STRING "Ryzom Client Release Notes URL")
+SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomcore" CACHE STRING "Ryzom Client UI Feature Flag")
 
 #-----------------------------------------------------------------------------
 # urls when compiling ryzom live client
@@ -150,6 +152,8 @@ IF(WITH_RYZOM_LIVE)
 
   SET(RYZOM_CLIENT_RELEASENOTES_URL       "https://app.ryzom.com/releasenotes/index.php")
   SET(RYZOM_CLIENT_RELEASENOTES_RING_URL  "https://app.ryzom.com/releasenotes_ring/index.php")
+
+  SET(RYZOM_CLIENT_UI_FEATURE_FLAG        "ryzomforge")
 ENDIF()
 
 #-----------------------------------------------------------------------------
@@ -256,7 +260,6 @@ IF(WITH_STATIC)
   ENDIF()
 ENDIF()
 
-INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules/PCHSupport.cmake)
 
 IF(FINAL_VERSION)
   ADD_DEFINITIONS(-DFINAL_VERSION=1)
@@ -314,6 +317,10 @@ ENDIF()
 #TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
+ENDIF()
+
+IF(WITH_MSQUIC)
+  FIND_PACKAGE(msquic REQUIRED)
 ENDIF()
 
 IF(WITH_NEL)
@@ -461,7 +468,7 @@ ENDIF()
 # packaging information
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ryzom Core MMORPG Framework")
 SET(CPACK_PACKAGE_VENDOR "Ryzom Core")
-SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README)
+SET(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_SOURCE_DIR}/README.md)
 SET(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/COPYING)
 SET(CPACK_PACKAGE_VERSION_MAJOR "${NL_VERSION_MAJOR}")
 SET(CPACK_PACKAGE_VERSION_MINOR "${NL_VERSION_MINOR}")

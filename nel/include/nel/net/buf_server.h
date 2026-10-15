@@ -18,6 +18,9 @@
 #define NL_BUF_SERVER_H
 
 #include "nel/misc/types_nl.h"
+
+#include "nel/misc/atomic.h"
+
 #include "buf_net_base.h"
 #include "listen_sock.h"
 #include "buf_sock.h"
@@ -70,7 +73,7 @@ protected:
 
 private:
 
-	volatile bool	_ExitRequired;
+	NLMISC::CAtomicBool _ExitRequired;
 };
 
 

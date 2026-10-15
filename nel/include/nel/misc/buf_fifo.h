@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -76,6 +79,7 @@ public:
 
 	/// Concate and push 'buffer1' and buffer2 in the head of the FIFO. The goal is to avoid a copy
 	void	 push (const std::vector<uint8> &buffer1, const std::vector<uint8> &buffer2);
+	void	 push (const uint8 *buffer1, uint32 size1, const uint8 *buffer2, uint32 size2);
 
 	/// Get the buffer in the tail of the FIFO and put it in 'buffer'
 	void	 front (std::vector<uint8> &buffer);

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -34,6 +37,7 @@
 
 const uint32 MsgHeaderSize = 1;
 
+class CQuicUserContext;
 
 /**
  * Placeholder for received messages
@@ -85,6 +89,9 @@ public:
 
 	/// Placeholder vector for address info
 	std::vector<uint8>	VAddrFrom;
+
+	/// QUIC user context, no need to refcount since it's already held in the FIFO readout
+	CQuicUserContext *QuicUser;
 };
 
 
@@ -108,7 +115,7 @@ public:
 	virtual void	run();
 
 	/// Set new write queue (thread-safe because mutexed)
-	void			setWriteQueue( NLMISC::CBufFIFO *writequeue );
+	NLMISC::CBufFIFO *swapWriteQueue(NLMISC::CBufFIFO *writeQueue);
 
 	/// Require exit (thread-safe because atomic assignment)
 	void			requireExit() { _ExitRequired = true; }

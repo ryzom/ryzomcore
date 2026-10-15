@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -196,7 +199,12 @@ bool	CAIS::markTagForDelete(const std::string &filename)
 	{
 		// first: tag the dynamic regions in the continents
 		for_each(it->continents().begin(), it->continents().end(),
-			bind2nd(mem_fun(&CContinent::markTagForDelete), fileId));
+#ifndef NL_CPP17
+			bind2nd(mem_fun(&CContinent::markTagForDelete), fileId)
+#else
+		    std::bind(&CContinent::markTagForDelete, std::placeholders::_1, fileId)
+#endif
+		);
 
 		for_each(it->managers().begin(),it->managers().end(),
 			CAliasTreeRoot::CMarkTagForDelete(fileId));
@@ -211,7 +219,12 @@ void CAIS::deleteTaggedAlias(const std::string &filename)
 	{
 		// first: tag the dynamic regions in the continents
 		for_each(it->continents().begin(), it->continents().end(),
-			bind2nd(mem_fun(&CContinent::deleteTaggedAlias),fileId));
+#ifndef NL_CPP17
+			bind2nd(mem_fun(&CContinent::deleteTaggedAlias),fileId)
+#else
+		    std::bind(&CContinent::deleteTaggedAlias, std::placeholders::_1, fileId)
+#endif
+		);
 
 		for_each(it->managers().begin(),it->managers().end(),
 			CAliasTreeRoot::CDeleteTagged<CManager>(it->managers()));
@@ -233,7 +246,13 @@ uint32	CAIS::getEmotNumber(const std::string &name)
 bool CAIS::advanceUserTimer	(uint32 nbTicks)
 {
 	// for each manager, look for a timer event
-	for_each(AIList().begin(), AIList().end(), bind2nd(mem_fun(&CAIInstance::advanceUserTimer),nbTicks) );
+	for_each(AIList().begin(), AIList().end(), 
+#ifndef NL_CPP17
+		bind2nd(mem_fun(&CAIInstance::advanceUserTimer),nbTicks) 
+#else
+	    std::bind(&CAIInstance::advanceUserTimer, std::placeholders::_1, nbTicks)
+#endif
+	);
 	return	true;
 }
 

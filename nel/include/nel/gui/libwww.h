@@ -1,8 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2019  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2013-2015  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -198,8 +199,7 @@ namespace NLGUI
 	std::string getRGBAString(const NLMISC::CRGBA &color);
 
 	// ***************************************************************************
-
-	const std::string &setCurrentDomain(const std::string &uri);
+	
 	void receiveCookies (CURL *curl, const std::string &domain, bool trusted);
 	void sendCookies(CURL *curl, const std::string &domain, bool trusted);
 

@@ -16,7 +16,7 @@ NL_ADD_LIB_SUFFIX(nelgeorges)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelgeorges ${CMAKE_CURRENT_SOURCE_DIR}/stdgeorges.h ${CMAKE_CURRENT_SOURCE_DIR}/stdgeorges.cpp)
+  target_precompile_headers(nelgeorges PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdgeorges.h)
 ENDIF()
 
 NL_GEN_PC(nel-georges.pc)

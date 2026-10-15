@@ -8,6 +8,7 @@ def DockerBaseCommand(image, arch, workdir, hunter, interactive=False):
 	res += [ "--rm" ]
 	if hunter:
 		res += [ "-v", image + "_hunter:/root/.hunter" ]
+	res += [ "-v", image + "_ccache:/root/.ccache" ]
 	res += [ "--mount", "type=bind,source=" + NeLRootDir + ",target=/mnt/nel" ]
 	if workdir:
 		res += [ "--workdir", "/mnt/nel/" + workdir.replace("\\", "/") ]

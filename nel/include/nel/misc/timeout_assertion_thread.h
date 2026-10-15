@@ -19,6 +19,7 @@
 
 #include "common.h"
 #include "thread.h"
+#include "atomic.h"
 
 /*
 
@@ -83,7 +84,7 @@ public:
 
 				// If this assert occurred, it means that a checked part of the code was
 				// to slow and then I decided to assert to display the problem.
-				nlassert(!(_Control==ACTIVE && _Counter==lastCounter));
+				nlassert(!(_Control==ACTIVE && (uint32)_Counter==lastCounter));
 			}
 		}
 	}
@@ -119,9 +120,9 @@ public:
 	}
 
 private:
-	volatile TControl	_Control;
-	volatile uint32		_Counter;
-	volatile uint32		_Timeout;	// in millisecond
+	NLMISC::CAtomicEnum<TControl> _Control;
+	NLMISC::CAtomicInt _Counter;
+	NLMISC::CAtomicInt _Timeout;	// in millisecond
 };
 
 

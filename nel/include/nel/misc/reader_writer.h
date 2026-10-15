@@ -20,8 +20,42 @@
 #include "types_nl.h"
 #include "mutex.h"
 
+#ifdef NL_CPP17
+#include <shared_mutex>
+#endif
 
 namespace NLMISC {
+
+#ifdef NL_CPP17
+
+class CReaderWriter
+{
+private:
+	std::shared_mutex m_Mutex;
+
+public:
+	void enterReader()
+	{
+		m_Mutex.lock_shared();
+	}
+
+	void leaveReader()
+	{
+		m_Mutex.unlock_shared();
+	}
+
+	void enterWriter()
+	{
+		m_Mutex.lock();
+	}
+
+	void leaveWriter()
+	{
+		m_Mutex.unlock();
+	}
+};
+	
+#else
 
 /**
  * This class allows a reader/writer ressource usage policy.
@@ -33,10 +67,10 @@ class CReaderWriter
 {
 private:
 
-	volatile CMutex	_Fairness;
-	volatile CMutex	_ReadersMutex;
-	volatile CMutex	_RWMutex;
-	volatile sint	_ReadersLevel;
+	CMutex	_Fairness;
+	CMutex	_ReadersMutex;
+	CMutex	_RWMutex;
+	sint	_ReadersLevel;
 
 public:
 
@@ -75,6 +109,8 @@ public:
 		const_cast<CMutex&>(_RWMutex).leave();
 	}
 };
+
+#endif
 
 /**
  * This class uses a CReaderWriter object to implement a synchronized object (see mutex.h for standard CSynchronized.)
@@ -137,9 +173,9 @@ private:
 	friend class CRWSynchronized::CReadAccessor;
 	friend class CRWSynchronized::CWriteAccessor;
 
-	volatile CReaderWriter		_RWSync;
+	CReaderWriter		_RWSync;
 
-	volatile T					_Value;
+	T					_Value;
 
 };
 

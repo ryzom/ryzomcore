@@ -137,7 +137,7 @@ NL_ADD_LIB_SUFFIX(nelsound)
 ADD_DEFINITIONS(${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nelsound ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.cpp)
+  target_precompile_headers(nelsound PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h)
 ENDIF()
 
 NL_GEN_PC(nel-sound.pc)

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2014  Matthew LAGOE (Botanic) <cyberempires@gmail.com>
-// Copyright (C) 2014-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -533,6 +533,8 @@ void CPatchManager::getInfoToDisp(SPatchInfo &piOut)
 	}
 }
 
+void stopSoundMngr();
+
 // ****************************************************************************
 // TODO : use selected categories to patch a list of files
 void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, bool applyPatch)
@@ -623,6 +625,12 @@ void CPatchManager::startPatchThread(const vector<string> &CategoriesSelected, b
 
 						// Close opened big files
 						CBigFile::getInstance().remove(FilesToPatch[k].FileName);
+						
+						if (NLMISC::startsWith(FilesToPatch[k].FileName, "sound"))
+						{
+							// Stop sound playback
+							stopSoundMngr();
+						}
 					}
 				}
 			}
@@ -2159,8 +2167,8 @@ void CPatchManager::getCorruptedFileInfo(const SFileToPatch &ftp, string &sTrans
 // ****************************************************************************
 CCheckThread::CCheckThread(bool includeBackgroundPatch)
 {
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToCheck = 0;
 	CurrentFileChecked = 0;
 	IncludeBackgroundPatch = includeBackgroundPatch;
@@ -2441,8 +2449,8 @@ void CCheckThread::run ()
 // ****************************************************************************
 CPatchThread::CPatchThread(bool commitPatch)
 {
-	Ended = false;
 	PatchOk = false;
+	Ended = false;
 	CurrentFilePatched = 0;
 	PatchSizeProgress = 0;
 	_CommitPatch = commitPatch;
@@ -2605,8 +2613,6 @@ public:
 	}
 };
 
-void stopSoundMngr();
-
 // ****************************************************************************
 void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 {
@@ -2617,12 +2623,6 @@ void CPatchThread::processFile (CPatchManager::SFileToPatch &rFTP)
 
 	// Destination File Name (in writable directory)
 	string DestinationName;
-
-	if (NLMISC::startsWith(rFTP.FileName, "sound"))
-	{
-		// Stop sound playback
-		stopSoundMngr();
-	}
 
 	if (rFTP.ExtractPath.empty())
 	{
@@ -3069,8 +3069,8 @@ bool CPatchThread::xDeltaPatch(const string &patch, const string &src, const str
 CScanDataThread::CScanDataThread()
 {
 	AskForCancel= false;
-	Ended = false;
 	CheckOk = false;
+	Ended = false;
 	TotalFileToScan = 1;
 	CurrentFileScanned = 1;
 }

@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -60,7 +63,7 @@ void		CChangeTrackerBase::recordChange( TDataSetIndex entityIndex )
 
 	// Protect consistency of two parallel calls to recordChange() for the same tracker
 	// and between recordChange() and popFirstChanged()
-	trackerMutex().enter();
+	NLMISC::CAutoMutex<NLMISC::CFastMutex> lock(trackerMutex());
 
 	// Test if the entity is already or not flagged as changed
 	if ( _Array[entityIndex].NextChanged==INVALID_DATASET_INDEX )
@@ -98,7 +101,6 @@ void		CChangeTrackerBase::recordChange( TDataSetIndex entityIndex )
 	//++_Header->NbValuesSet; // should be atomic!
 #endif
 		//nldebug( "Tracker (smid %u): E%d already in list (pointing to %d)", smid(), entityIndex, _Array[entityIndex].NextChanged );
-	trackerMutex().leave();
 
 }
 
@@ -112,7 +114,7 @@ void		CChangeTrackerBase::cancelChange( TDataSetIndex entityIndex )
 	nlassertex( (entityIndex != INVALID_DATASET_INDEX) && (entityIndex != LAST_CHANGED), ("E%d", entityIndex) );
 #endif
 
-	trackerMutex().enter();
+	NLMISC::CAutoMutex<NLMISC::CFastMutex> lock(trackerMutex());
 
 	// Find the change before the specified one, to make the link skip it
 	TDataSetIndex row = _Header->First;
@@ -144,7 +146,6 @@ void		CChangeTrackerBase::cancelChange( TDataSetIndex entityIndex )
 			}
 		}
 	}
-	trackerMutex().leave();
 }
 
 

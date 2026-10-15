@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -412,7 +415,7 @@ namespace LS
 
 			NLNET::CInetAddress addr(ipAddress);
 			//2 generate a cookie and set the player status and cookie in database
-			NLNET::CLoginCookie cookie(addr.internalIPAddress(), userId);
+			NLNET::CLoginCookie cookie(addr.hash32(), userId);
 			ru->setCookie(cookie.setToString());
 			ru->setCurrentStatus(TCurrentStatus::cs_logged);
 			ru->setCurrentActivity(TCurrentActivity::ca_none);

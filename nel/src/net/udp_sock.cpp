@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2014-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -28,6 +28,8 @@
 #		define NOMINMAX
 #	endif
 #	include <windows.h>
+// Windows includes for `sockaddr_in6` and `WSAStringToAddressW`
+#	include <ws2ipdef.h>
 #	define socklen_t int
 #	define ERROR_NUM WSAGetLastError()
 #elif defined NL_OS_UNIX
@@ -51,6 +53,15 @@ typedef int SOCKET;
 using namespace NLMISC;
 
 namespace NLNET {
+
+inline static int sizeOfSockAddr(const sockaddr_storage &storage)
+{
+	if (storage.ss_family == AF_INET6)
+		return sizeof(sockaddr_in6);
+	if (storage.ss_family == AF_INET)
+		return sizeof(sockaddr_in);
+	return sizeof(storage);
+}
 
 
 /*
@@ -82,21 +93,44 @@ void CUdpSock::bind( uint16 port )
  */
 void CUdpSock::bind( const CInetAddress& addr )
 {
+	sockaddr_storage sockAddr;
+	
+	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
+	{
+		throw ESocket("Cannot bind to an invalid address", false);
+	}
+	
 #ifndef NL_OS_WINDOWS
 	// Set Reuse Address On (does not work on Win98 and is useless on Win2000)
 	int value = true;
-	if ( setsockopt( _Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value) ) == SOCKET_ERROR )
+	if ( setsockopt( _Sock, SOL_SOCKET, SO_REUSEADDR, &value, sizeof(value) ) != 0 )
 	{
 		throw ESocket( "ReuseAddr failed" );
 	}
 #endif
 
-	_LocalAddr = addr;
-
 	// Bind the socket
-	if ( ::bind( _Sock, (sockaddr*)(_LocalAddr.sockAddr()), sizeof(sockaddr) ) == SOCKET_ERROR )
+	if (::bind(_Sock, (sockaddr *)(&sockAddr), sizeOfSockAddr(sockAddr)) != 0)
 	{
-		throw ESocket( "Bind failed" );
+		if (_AddressFamily == AF_INET6 && addr.getAddress().isAny() && !addr.getAddress().isIPv4())
+		{
+			// Try to bind to IPv4 Any address if a dual stack listen (default) was attempted and failed
+			CInetAddress anyIPv4 = CInetAddress(CIPv6Address::anyIPv4(), addr.port());
+			anyIPv4.toSockAddrInet6((sockaddr_in6 *)(&sockAddr));
+			if (::bind(_Sock, (sockaddr *)&sockAddr, sizeof(sockaddr_in6)) != 0)
+			{
+				throw ESocket("Unable to bind listen socket to to port");
+			}
+			_LocalAddr = anyIPv4;
+		}
+		else
+		{
+			throw ESocket("Unable to bind listen socket to port");
+		}
+	}
+	else
+	{
+		_LocalAddr = addr;
 	}
 	_Bound = true;
 	if ( _Logging )
@@ -111,11 +145,17 @@ void CUdpSock::bind( const CInetAddress& addr )
  */
 void CUdpSock::sendTo( const uint8 *buffer, uint len, const CInetAddress& addr )
 {
+	sockaddr_storage sockAddr;
+
+	if (!addr.toSockAddrStorage(&sockAddr, _AddressFamily))
+	{
+		throw ESocket("Cannot send datagram to an invalid address");
+	}
 
 	//  Send
-	if ( ::sendto( _Sock, (const char*)buffer, len, 0, (sockaddr*)(addr.sockAddr()), sizeof(sockaddr) ) != (sint32)len )
+	if (::sendto(_Sock, (const char *)buffer, len, 0, (sockaddr *)(&sockAddr), sizeOfSockAddr(sockAddr)) != (sint32)len)
 	{
-		throw ESocket( "Unable to send datagram" );
+		throw ESocket("Unable to send datagram");
 	}
 	_BytesSent += len;
 
@@ -180,14 +220,14 @@ bool CUdpSock::receive( uint8 *buffer, uint32& len, bool throw_exception )
 bool CUdpSock::receivedFrom( uint8 *buffer, uint& len, CInetAddress& addr, bool throw_exception )
 {
 	// Receive incoming message
-	sockaddr_in saddr;
-	socklen_t saddrlen = sizeof(saddr);
+	sockaddr_storage sockAddr;
+	socklen_t saddrlen = sizeof(sockAddr);
 
-	len = ::recvfrom( _Sock, (char*)buffer, len , 0, (sockaddr*)&saddr, &saddrlen );
+	len = ::recvfrom(_Sock, (char *)buffer, len, 0, (sockaddr *)(&sockAddr), &saddrlen);
 
 	// If an error occurs, the saddr is not valid
 	// When the remote socket is closed, get sender's address to know who is quitting
-	addr.setSockAddr( &saddr );
+	addr.fromSockAddrStorage(&sockAddr);
 
 	// Check for errors (after setting the address)
 	if ( ((int)len) == SOCKET_ERROR )

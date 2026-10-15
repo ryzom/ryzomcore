@@ -81,7 +81,7 @@ IF(WIN32)
 ENDIF()
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_installer_qt ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.cpp)
+  target_precompile_headers(ryzom_installer_qt PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/stdpch.hp)
 ENDIF()
 
 INSTALL(TARGETS ryzom_installer_qt RUNTIME DESTINATION ${RYZOM_GAMES_PREFIX} COMPONENT client BUNDLE DESTINATION /Applications)

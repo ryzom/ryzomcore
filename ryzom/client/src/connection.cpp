@@ -1,5 +1,5 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
@@ -176,6 +176,10 @@ bool PatchBegun = false;
 
 // \todo GUIGUI : USE TRANSPORT CLASS.
 //	SVersionAnswer versionAnswer;
+#if !FINAL_VERSION
+static bool DebugOutgameUI = false;
+static bool DebugOutgameReloadUI = false;
+#endif
 
 
 // Finite State Machine : all the states before entering the game
@@ -964,10 +968,10 @@ TInterfaceState globalMenu()
 	while (PlayerWantToGoInGame == false)
 	{
 
-		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG) && 0
-			// tmp for debug
-			if (::GetAsyncKeyState(VK_SPACE))
+#if !FINAL_VERSION
+		if (DebugOutgameReloadUI)
 			{
+			DebugOutgameReloadUI = false;
 				pIM->uninitOutGame();
 				pIM->initOutGame();
 				CWidgetManager::getInstance()->activateMasterGroup ("ui:outgame", true);
@@ -979,7 +983,9 @@ TInterfaceState globalMenu()
 				// Active inputs
 				Actions.enable(true);
 				EditActions.enable(true);
+#ifdef RYZOM_BG_DOWNLOADER
 				LuaBGDSuccessFlag = true;
+#endif
 				CWidgetManager::getInstance()->getParser()->reloadAllLuaFileScripts();
 			}
 		#endif
@@ -1051,8 +1057,8 @@ TInterfaceState globalMenu()
 			nlSleep(ClientCfg.Sleep);
 		}
 
-		#if defined(NL_OS_WINDOWS) && defined(NL_DEBUG) && 0
-			if (::GetAsyncKeyState(VK_CONTROL))
+#if !FINAL_VERSION
+		if (DebugOutgameUI)
 			{
 				pIM->displayUIViewBBoxs("");
 				pIM->displayUICtrlBBoxs("");
@@ -1272,6 +1278,26 @@ TInterfaceState globalMenu()
 	//	return SELECT_CHARACTER;
 	return GOGOGO_IN_THE_GAME;
 }
+#if !FINAL_VERSION
+// ***************************************************************************
+class CAHDebugOutgameDebugUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugOutgameUI = !DebugOutgameUI;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugOutgameDebugUI, "debug_outgame_ui");
+// ***************************************************************************
+class CAHDebugOutgameReloadUI : public IActionHandler
+{
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
+	{
+		DebugOutgameReloadUI = !DebugOutgameReloadUI;
+	}
+};
+REGISTER_ACTION_HANDLER (CAHDebugOutgameReloadUI, "debug_outgame_reload_ui");
+#endif
 
 
 // Init the character selection slot texts from the character summaries

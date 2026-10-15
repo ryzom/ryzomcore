@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -46,7 +49,9 @@ public:
 	
 private:
 	struct TFindParameter
+#ifndef NL_CPP17
 	: public std::unary_function<TProfileParameter, bool>
+#endif
 	{
 		std::string _Value;
 		TFindParameter(std::string const& value)

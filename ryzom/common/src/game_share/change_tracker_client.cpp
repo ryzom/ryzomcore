@@ -1,6 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -56,7 +59,7 @@ void		CChangeTrackerClient::clean()
 	// (do not clear the ones that could have been added (by a parallel recordChange())
 	// since the latest call to notifyNext()
 
-	trackerMutex().enter();
+	NLMISC::CAutoMutex<NLMISC::CFastMutex> lock(trackerMutex());
 
 	TDataSetRow entityIndex = getFirstChanged(), entityIndex2;
 #ifdef NL_DEBUG
@@ -101,8 +104,7 @@ void		CChangeTrackerClient::clean()
 	{
 		_Header->Last = TDataSetRow();
 	}
-
-	trackerMutex().leave();
+	
 }
 #endif
 

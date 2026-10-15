@@ -1,6 +1,12 @@
 ---
 BasedOnStyle: WebKit
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: true
 BraceWrapping:
   AfterClass:      true
   AfterControlStatement: true

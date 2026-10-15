@@ -10,7 +10,7 @@ NL_ADD_RUNTIME_FLAGS(ryzom_adminmodules)
 NL_ADD_LIB_SUFFIX(ryzom_adminmodules)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_adminmodules ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(ryzom_adminmodules PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC) OR NOT WITH_STATIC)

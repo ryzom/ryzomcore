@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2016  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2016-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -21,9 +21,11 @@
 #include "login_progress_post_thread.h"
 #include "game_share/login_registry.h"
 #include "nel/misc/system_info.h"
+#include "nel/web/http_client_curl.h"
 
 
 using namespace NLMISC;
+using namespace NLWEB;
 
 
 
@@ -237,15 +239,15 @@ public:
 	//============================================================================================
 	std::string sendMsg(const std::string &msg)
 	{
-		CHttpClient httpClient;
+		CCurlHttpClient httpClient;
 		std::string ret;
-		if (!httpClient.connect("http://" + StartupHost))
+		if (!httpClient.connect(StartupHost))
 		{
 			throw NLMISC::Exception("Can't connect to http server");
 		}
 		//std::string postString = "http://" + StartupHost + StartupPage +  "?cmd=log&msg=" + msg;
 		//nlwarning("POST STRING = %s", postString.c_str());
-		if (!httpClient.sendPost("http://" + StartupHost + StartupPage, "cmd=log&msg=" + msg))
+		if (!httpClient.sendPost(StartupHost + StartupPage, "cmd=log&msg=" + msg))
 		{
 			throw NLMISC::Exception("Post failed");
 		}

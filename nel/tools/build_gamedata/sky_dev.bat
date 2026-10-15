@@ -9,3 +9,4 @@ python b1_client_dev.py
 title Ryzom Core: b2_shard_data.py (LEVELDESIGN)
 python b2_shard_data.py
 title Ryzom Core: Ready
+dir *.py

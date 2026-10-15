@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -54,7 +57,7 @@ namespace NL3D
 #ifdef NL_OS_MAC
 	    typedef std::multimap<T, U, Pr > M;
 #else
-	    typedef std::multimap<T, U, Pr, std::allocator<T> > M;
+	    typedef std::multimap<T, U, Pr, std::allocator<std::pair<const T, U>> > M;
 #endif
 	};
 
@@ -252,7 +255,7 @@ namespace NL3D
 	// partial specialisation tips for multimap
 	template <class T, class U, class Pr = std::less<T> > struct CPSMultiMap
 	{
-		typedef std::multimap<T, U, Pr, CPSAllocator<T> > M;
+		typedef std::multimap<T, U, Pr, CPSAllocator<std::pair<const T, U>> > M;
 	};
 
 	extern uint NumPSAlloc;

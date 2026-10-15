@@ -37,7 +37,7 @@ NL_ADD_RUNTIME_FLAGS(nel_drv_xaudio2_win)
 NL_ADD_LIB_SUFFIX(nel_drv_xaudio2_win)
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(nel_drv_xaudio2_win ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.h ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.cpp)
+  target_precompile_headers(nel_drv_xaudio2_win PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdxaudio2.h)
 ENDIF()
 
 IF((WITH_INSTALL_LIBRARIES AND WITH_STATIC_DRIVERS) OR NOT WITH_STATIC_DRIVERS)

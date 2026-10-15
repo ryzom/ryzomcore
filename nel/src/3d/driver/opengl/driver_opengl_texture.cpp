@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2014  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -835,6 +835,9 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 		std::string	name;
 		getTextureShareName (tex, name);
 
+		// Destructor of texture infos locks _SyncTexDrvInfos, so any existing pointers must be deleted outside the lock
+		NLMISC::CSmartPtr<ITextureDrvInfos> maybeDeleted;
+
 		// insert or get the texture.
 		{
 			CSynchronized<TTexDrvInfoPtrMap>::CAccessor access(&_SyncTexDrvInfos);
@@ -848,6 +851,8 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			{
 				// insert into driver map. (so it is deleted when driver is deleted).
 				itTex= (rTexDrvInfos.insert(make_pair(name, (ITextureDrvInfos*)NULL))).first;
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
 				// create and set iterator, for future deletion.
 				itTex->second= tex.TextureDrvShare->DrvTexture = new CTextureDrvInfosGL(this, itTex, this, isTextureRectangle(&tex));
 
@@ -856,6 +861,9 @@ bool CDriverGL::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded,
 			}
 			else
 			{
+				// keep old value, so it only gets deleted after we release the lock on _SyncTexDrvInfos
+				maybeDeleted = tex.TextureDrvShare->DrvTexture;
+				// set new value
 				tex.TextureDrvShare->DrvTexture= itTex->second;
 
 				if(bMustRecreateSharedTexture)
@@ -1923,11 +1931,11 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 			glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
 			//
 			// Arg0.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0RGB] );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0RGB]);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, SourceLUT[env.Env.SrcArg0Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, OperandLUT[env.Env.OpArg0Alpha]);
 			// Arg1.
-			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg1RGB] );
-			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg1RGB]);
+			glTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, SourceLUT[env.Env.SrcArg1Alpha] );
+			glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, OperandLUT[env.Env.OpArg1Alpha]);
 		}
 	}
 	else
@@ -1970,7 +1978,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 				//
 				if (_Extensions.ATITextureEnvCombine3)
 				{
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, SourceLUT[env.Env.SrcArg0RGB] );
 					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB_EXT, OperandLUT[env.Env.OpArg0RGB]);
@@ -1984,7 +1992,7 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 				else
 				{
 					// fallback to modulate ..
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE);
 					//
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB_EXT, SourceLUT[env.Env.SrcArg0RGB] );
@@ -2018,9 +2026,19 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 			//=====
 			if (env.Env.OpAlpha == CMaterial::Mad)
 			{
-				if (_Extensions.ATITextureEnvCombine3)
+				if (((SourceLUT[env.Env.SrcArg1Alpha] == GL_ZERO && OperandLUT[env.Env.OpArg1Alpha] == GL_ONE_MINUS_SRC_ALPHA)
+					|| (SourceLUT[env.Env.SrcArg1Alpha] == GL_ONE && OperandLUT[env.Env.OpArg1Alpha] == GL_SRC_ALPHA)) // 1
+					&& ((SourceLUT[env.Env.SrcArg2Alpha] == GL_ONE && OperandLUT[env.Env.OpArg2Alpha] == GL_ONE_MINUS_SRC_ALPHA)
+						|| (SourceLUT[env.Env.SrcArg2Alpha] == GL_ZERO && OperandLUT[env.Env.OpArg2Alpha] == GL_SRC_ALPHA))) // 0
 				{
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_RGB_EXT, GL_MODULATE_ADD_ATI);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_REPLACE);
+					// Arg0.
+					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0Alpha] );
+					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0Alpha]);
+				}
+				else if (_Extensions.ATITextureEnvCombine3)
+				{
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE_ADD_ATI);
 					// Arg0.
 					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0Alpha] );
 					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0Alpha]);
@@ -2034,14 +2052,14 @@ void		CDriverGL::forceActivateTexEnvMode(uint stage, const CMaterial::CTexEnv  &
 				else
 				{
 					// fallback to modulate ..
-					glTexEnvf(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
+					glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA_EXT, GL_MODULATE);
 					//
 					// Arg0.
-					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0RGB] );
-					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0RGB]);
+					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_ALPHA_EXT, SourceLUT[env.Env.SrcArg0Alpha] );
+					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA_EXT, OperandLUT[env.Env.OpArg0Alpha]);
 					// Arg1.
-					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, SourceLUT[env.Env.SrcArg1RGB] );
-					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, OperandLUT[env.Env.OpArg1RGB]);
+					glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_ALPHA_EXT, SourceLUT[env.Env.SrcArg1Alpha] );
+					glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA_EXT, OperandLUT[env.Env.OpArg1Alpha]);
 				}
 			}
 			else

@@ -3,7 +3,7 @@
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
-// Copyright (C) 2015-2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2015-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -97,7 +97,10 @@ struct CContextMatcher
 	uint32	JokersValues[JOKER_ARRAY_SIZE];
 	uint32	RandomValue;
 
-	struct CHash : public std::unary_function<CContextMatcher, size_t>
+	struct CHash 
+#ifndef NL_CPP17
+		: public std::unary_function<CContextMatcher, size_t>
+#endif
 	{
 		enum { bucket_size = 4, min_buckets = 8, };
 		size_t operator () (const CContextMatcher &patternMatcher) const

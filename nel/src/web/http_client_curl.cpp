@@ -2,7 +2,7 @@
 // Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2019  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2019-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -31,10 +31,35 @@ using namespace NLWEB;
 #define new DEBUG_NEW
 #endif
 
-#define _Curl (CURL *)_CurlStruct
+namespace NLWEB {
 
-namespace NLWEB
+namespace /* anonymous */ {
+
+// Mutex protected global curl init counter
+CMutex s_CurlInitMutex;
+uint32 s_CurlInitCount = 0;
+
+void initCurl()
 {
+	CAutoMutex<CMutex> mutex(s_CurlInitMutex);
+	if (s_CurlInitCount == 0)
+	{
+		curl_global_init(CURL_GLOBAL_ALL);
+	}
+	s_CurlInitCount++;
+}
+
+void releaseCurl()
+{
+	CAutoMutex<CMutex> mutex(s_CurlInitMutex);
+	if (s_CurlInitCount == 1)
+	{
+		curl_global_cleanup();
+	}
+	s_CurlInitCount--;
+}
+
+} /* anonymous namespace */
 
 // Ugly CURL callback
 size_t CCurlHttpClient::writeDataFromCurl(void *buffer, size_t size, size_t nmemb, void *pHttpClient)
@@ -52,11 +77,11 @@ bool CCurlHttpClient::connect(const std::string &/* server */)
 	if ((vdata->features & CURL_VERSION_SSL) == 0)
 		nlwarning("SSL not supported");
 
-	curl_global_init(CURL_GLOBAL_ALL);
-	_CurlStruct = curl_easy_init();
+	initCurl();
+	_Curl = curl_easy_init();
 	if(_Curl == NULL)
 	{
-		curl_global_cleanup();
+		releaseCurl();
 		return false;
 	}
 
@@ -197,11 +222,11 @@ bool CCurlHttpClient::receive(string &res, bool verbose)
 // ***************************************************************************
 void CCurlHttpClient::disconnect()
 {
-	if (_CurlStruct)
+	if (_Curl)
 	{
 		curl_easy_cleanup(_Curl);
-		_CurlStruct = NULL;
-		curl_global_cleanup();
+		_Curl= NULL;
+		releaseCurl();
 	}
 }
 

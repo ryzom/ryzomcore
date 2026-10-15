@@ -2,7 +2,7 @@
 // Copyright (C) 2010  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
-// Copyright (C) 2013-2021  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2013-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -382,9 +382,7 @@ public:
 		// setCPUMask (Thread, _Process);
 
 		_ZoneLighter->processCalc (_Process, *_Description);
-		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
-		_ZoneLighter->_ProcessExitedMutex.leave();
 	}
 };
 
@@ -590,7 +588,7 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 				if (alphaTest)
 				{
 					// Enter the mutex
-					mutex.enter ();
+					CAutoMutex<CFastMutex> lock(mutex);
 
 					// Write Z around
 					uint d;
@@ -611,9 +609,6 @@ void RenderTriangle (const CZoneLighter::CTriangle &triangle, const CZoneLighter
 							}
 						}
 					}
-
-					// Leave the mutex
-					mutex.leave ();
 				}
 			}
 		}
@@ -660,9 +655,7 @@ void NL3D::CRenderZBuffer::run()
 	}
 
 	// Exit
-	_ZoneLighter->_ProcessExitedMutex.enter();
 	_ZoneLighter->_ProcessExited++;
-	_ZoneLighter->_ProcessExitedMutex.leave();
 }
 
 // ***************************************************************************
@@ -689,9 +682,7 @@ public:
 	void run()
 	{
 		_ZoneLighter->processLightableShapeCalc(_Process, _ShapesToLit, _FirstShape, _LastShape, *_Description);
-		_ZoneLighter->_ProcessExitedMutex.enter();
 		_ZoneLighter->_ProcessExited++;
-		_ZoneLighter->_ProcessExitedMutex.leave();
 	}
 private:
 	CZoneLighter						*_ZoneLighter;

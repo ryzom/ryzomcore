@@ -1,9 +1,9 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010-2020  Winch Gate Property Limited
+// Copyright (C) 2010-2022  Winch Gate Property Limited
 //
 // This source file has been modified by the following contributors:
 // Copyright (C) 2010  Robert TIMM (rti) <mail@rtti.de>
-// Copyright (C) 2010-2020  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+// Copyright (C) 2010-2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
 // Copyright (C) 2011-2012  Matt RAYKOWSKI (sfb) <matt.raykowski@gmail.com>
 // Copyright (C) 2013  Laszlo KIS-ADAM (dfighter) <dfighter1985@gmail.com>
 //
@@ -327,6 +327,8 @@ CClientConfig::CClientConfig()
 
 	Local				= false;					// Default is Net Mode.
 	FSHost				= "";						// Default Host.
+	QuicConnection		= true;
+	QuicCertValidation	= true;
 
 	TexturesInterface.push_back("texture_interfaces_v3_2x");
 	TexturesInterfaceDXTC.push_back("texture_interfaces_dxtc_2x");
@@ -511,6 +513,8 @@ CClientConfig::CClientConfig()
 	End_BG				= "end_bg.tga";				// Default name for the last background file.
 	IntroNevrax_BG		= "launcher_nevrax.tga";
 	IntroNVidia_BG		= "launcher_nvidia.tga";
+
+	UiFeatureFlags.push_back(RYZOM_CLIENT_UI_FEATURE_FLAG);
 
 	TipsY				= 0.07f;
 	TeleportInfoY		= 0.23f;
@@ -805,6 +809,7 @@ void CClientConfig::setValues()
 
 	// r2ed interfaces
 	READ_STRINGVECTOR_FV(XMLR2EDInterfaceFiles);
+	READ_STRINGVECTOR_FV(UiFeatureFlags)
 
 	// logos
 	READ_STRINGVECTOR_FV(Logos);
@@ -914,6 +919,9 @@ void CClientConfig::setValues()
 #endif // FINAL_VERSION
 	// FSHost
 	READ_STRING_FV(FSHost)
+	// QUIC
+	READ_BOOL_FV(QuicConnection)
+	READ_BOOL_FV(QuicCertValidation)
 
 	READ_BOOL_DEV(DisplayAccountButtons)
 	

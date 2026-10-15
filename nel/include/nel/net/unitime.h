@@ -1,6 +1,9 @@
 // NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
+// This source file has been modified by the following contributors:
+// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -25,7 +28,7 @@
 namespace NLNET
 {
 
-class CInetAddress;
+class CInetHost;
 class CCallbackServer;
 class CCallbackClient;
 
@@ -60,7 +63,7 @@ public:
 	 * This function can be called *ONLY* by services that are inside of the shard.
 	 * Don't use it for a client or a service outside of the shard.
 	 */
-	static void				syncUniTimeFromService (CCallbackNetBase::TRecordingState rec=CCallbackNetBase::Off, const CInetAddress *addr = NULL);
+	static void				syncUniTimeFromService (CCallbackNetBase::TRecordingState rec=CCallbackNetBase::Off, const CInetHost *addr = NULL);
 
 	/** Call this function in the init part of the front end service to enable time syncro between
 	 * shard and clients.

@@ -22,7 +22,7 @@ IF(MSVC)
 ENDIF()
 
 IF(WITH_PCH)
-  ADD_NATIVE_PRECOMPILED_HEADER(ryzom_shard_unifier_service ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.cpp)
+  target_precompile_headers(ryzom_shard_unifier_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpch.h)
 ENDIF()
 
 INSTALL(TARGETS ryzom_shard_unifier_service RUNTIME DESTINATION sbin COMPONENT services)
