@@ -267,7 +267,7 @@ function game:addRequireRpItemsPosition(x, y, id)
 end
 
 function game:addRequireRpItems(left, target, mode, id)
-	game.wantedRpTargets[left..":"..target..":"..mode] = id
+	game.wantedRpTargets[left..":"..target..":"..mode..":"..id] = id
 end
 
 game.usedRpLeftItem  = "_"
@@ -299,16 +299,21 @@ function game:updateRpItems()
 			mode = tostring(getTargetMode())
 		end
 
+		game:checkRpItemsPosition()
 		local html = getUI("ui:interface:rpitems_actions"):find("html")
 		for k, v in pairs(game.wantedRpTargets) do
 			local a = html:find("action"..v)
 			if a then
-				if string.find(left..":"..target..":"..mode, k) or string.find(left..":"..target..":*", k) then
-					a:find("but").frozen = false
+				if a:find("but").onclick_l == "lua" and (string.find(k, left..":"..target..":"..mode)  or string.find(k, left..":"..target..":")) then
+					a:find("img").texture = "grey_0.tga"
+					a:find("but").onclick_l = "lua"
+					a:find("but").alpha = 255
 					a:find("text").alpha = 255
 				else
-					a:find("but").frozen = true
-					a:find("text").alpha = 155
+					a:find("img").texture = "r2ed_toolbar_lock_small.tga"
+					a:find("but").onclick_l = ""
+					a:find("but").alpha = 150
+					a:find("text").alpha = 100
 				end
 			end
 		end
@@ -324,11 +329,13 @@ function game:checkRpItemsPosition()
 		local a = html:find("action"..v)
 		if a then
 			if string.find(sx..":"..sy, k) then
-				a:find("but").frozen = false
+				a:find("but").onclick_l = "lua"
+				a:find("img").texture = "grey_0.tga"
 				a:find("text").alpha = 255
 			else
-				a:find("but").frozen = true
-				a:find("text").alpha = 155
+				a:find("but").onclick_l = "proc"
+				a:find("img").texture = "r2ed_toolbar_lock_small.tga"
+				a:find("text").alpha = 200
 			end
 		end
 	end
@@ -354,11 +361,14 @@ function game:updateTargetConsiderUI()
 	local wgPvPTag      = targetWindow:find("pvp_tags")
 	local wgHeader      = targetWindow:find("header_opened")
 	local wgLock        = targetWindow:find("lock")
+	local wginfos       = targetWindow:find("target_tinfos")
 
 	wgTargetSlotForce.active = true
 	wgTargetSlotForce.texture = "consider_bg.tga"
 	wgImpossible.active = true
 	wgTargetSlotForce.h = 16
+
+	wginfos.active = false
 
 	-- no selection ?
 	if twGetTargetLevel() == -1 then
@@ -388,7 +398,8 @@ function game:updateTargetConsiderUI()
 
 	-- if the selection is a player, then both the local & targeted player must be in PVP mode for the level to be displayed
 	if (twIsTargetPlayer()) then
-		-- don't display anything ...
+		-- don't display anything except infos ...
+		wginfos.active = true
 		wgLock.active = false
 		wgTargetSlotForce.active = false
 		wgTargetLevel.active = false
@@ -1287,3 +1298,6 @@ function arkNpcShop:Buy(id)
 	end
 	arkNpcShop:Close()
 end
+
+-- VERSION --
+RYZOM_INTERACTION_VERSION = 324

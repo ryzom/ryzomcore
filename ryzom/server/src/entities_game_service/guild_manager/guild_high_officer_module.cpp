@@ -86,8 +86,8 @@ void CGuildHighOfficerModule::buyGuildOption( const CStaticItem * form )
 			nlwarning("<BUILDING> char %s bot %s has no building",proxy.getId().toString().c_str(), proxy.getInterlocutor()->getId().toString().c_str() );
 			return;
 		}	
-			
-		sint32 fame = CFameInterface::getInstance().getFameIndexed( guild->getEId(), bot->getForm()->getFaction());
+
+		/*sint32 fame = CFameInterface::getInstance().getFameIndexed( guild->getEId(), bot->getForm()->getFaction());
 		if ( fame < MinFameToBuyGuildBuilding )
 		{
 			SM_STATIC_PARAMS_2(params,STRING_MANAGER::integer,STRING_MANAGER::race);
@@ -95,7 +95,7 @@ void CGuildHighOfficerModule::buyGuildOption( const CStaticItem * form )
 			params[1].Enum = bot->getRace();
 			proxy.sendSystemMessage( "GUILD_BUILDING_BAD_FAME", params);
 			return;
-		}
+		}*/
 
 		guild->setBuilding( bot->getGuildBuilding()->getAlias() );
 	}

@@ -75,3 +75,5 @@ function game:updateEquipOnResize(base, force)
         end
     end
 end
+-- VERSION --
+RYZOM_INVENTORY_VERSION = 324

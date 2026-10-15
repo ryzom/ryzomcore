@@ -78,6 +78,7 @@ public:
 	void delCommand (uint cmdNb);
 	void moveUpCommand (uint cmdNb);
 	void moveDownCommand (uint cmdNb);
+	void unassignCombo();
 
 	void writeTo (xmlNodePtr node) const;
 	bool readFrom (xmlNodePtr node);
@@ -104,6 +105,7 @@ public:
 	const std::vector<CMacroCmd> &getMacros() { return _Macros; }
 	void addMacro (const CMacroCmd &m, sint32 nPos=-1);
 	void delMacro(sint32 nMacNb);
+	void unassignMacro(size_t nMacNb);
 	void removeAllMacros();
 
 	void refreshMacroCombo();

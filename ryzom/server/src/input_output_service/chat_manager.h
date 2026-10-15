@@ -416,8 +416,9 @@ public:
 	 * \param phraseId the string manager string number of the chat phrase
 	 * \param sender is the id of the sender
 	 * \param customTxt is a custom text which can be added immediately after the chat message, on the same line
+	 * \param isEmote if true, change receiver to unknown so that client dont display "toto says : toto bows"
 	 */
-	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring(""));
+	void sendChat2Ex( CChatGroup::TGroupType senderChatMode, const TDataSetRow &receiver, uint32 phraseId, const TDataSetRow &sender = TDataSetRow(), ucstring customTxt = ucstring(""), bool isEmote = false);
 
 	/**
 	 * Send a custom emote chat message

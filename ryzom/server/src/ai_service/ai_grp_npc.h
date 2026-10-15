@@ -46,6 +46,7 @@ public:
 
 	virtual void spawnBots();
 	virtual void spawnBots(const std::string &name);
+	virtual void spawnBots(const std::string &name, const std::string &vpx);
 	virtual void despawnBots(bool immediately);
 
 	void update();

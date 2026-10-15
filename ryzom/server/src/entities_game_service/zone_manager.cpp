@@ -1899,31 +1899,30 @@ void CZoneManager::updateCharacterPosition( CCharacter * user, uint32 elapsedTim
 		}
 
 		// Trigger entities
-		std::map<TAIAlias, uint8>::const_iterator it;
+		std::map<CEntityId, uint8>::const_iterator it;
 		for (it = EntitiesDistanceTriggers.begin(); it != EntitiesDistanceTriggers.end(); it++)
 		{
-			nlinfo("Entity trigger : %s", NLMISC::toString(it->first).c_str());
+			//nlinfo("Entity trigger : %s", NLMISC::toString(it->first).c_str());
 			if (it->second == 0)
 			{
-				std::map<TAIAlias, std::string>::const_iterator it2 = EntitiesUrlTriggers.find(it->first);
+				std::map<CEntityId, std::string>::const_iterator it2 = EntitiesUrlTriggers.find(it->first);
 				if ( it2 != EntitiesUrlTriggers.end() )
 					user->sendRpPoints(it2->second);
 			}
 			else
 			{
-				nlinfo("Distance = %d", it->second);
-				const CEntityId & botId = CAIAliasTranslator::getInstance()->getEntityId(it->first);
-				if ( botId != CEntityId::Unknown )
+				//nlinfo("Distance = %d", it->second);
+				if ( it->first != CEntityId::Unknown )
 				{
-					nlinfo("Botid found");
-					CEntityBase *entityBase = CreatureManager.getCreature (botId);
+					//nlinfo("Botid found");
+					CEntityBase *entityBase = CEntityBaseManager::getEntityBasePtr(it->first);
 					if (entityBase != NULL)
 					{
 						sint32 x = entityBase->getState().X/1000.f;
 						sint32 y = entityBase->getState().Y/1000.f;
 						sint32 px = user->getState().X/1000.f;
 						sint32 py = user->getState().Y/1000.f;
-						nlinfo("entityBase found, check pos %i, %i, %i, %i", x, y, px, py);
+						//nlinfo("entityBase found, check pos %i, %i, %i, %i", x, y, px, py);
 						if ((px-x)*(px-x)+(py-y)*(py-y) < it->second * it->second)
 							user->addRpPoints(elapsedTime);
 					}

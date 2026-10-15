@@ -1,0 +1,8 @@
+<FilesMatch "\.(log)$">
+   Deny from all
+</FilesMatch>
+
+<FilesMatch "config.*$">
+   Deny from all
+</FilesMatch>
+

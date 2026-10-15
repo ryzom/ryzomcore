@@ -46,6 +46,7 @@ public:
 
 	void spawnBots() { }
 	void spawnBots(const std::string &name) { }
+	void spawnBots(const std::string &name, const std::string &vpx) {}
 	void despawnBots (bool immediately) { }
 
 	void update();

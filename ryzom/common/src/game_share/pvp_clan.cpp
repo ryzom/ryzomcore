@@ -87,7 +87,7 @@ namespace PVP_CLAN
 	{
 		// These names are in order of the enum TPVPClan
 		// The first two clans, "None" and "Neutral", don't count.  Subtract 2 from the lookup.
-		std::string FactionNames[] = { "kami","karavan","fyros","matis","tryker","zorai","marauder" };
+		std::string FactionNames[] = { "kami","karavan","fyros","matis","tryker","zorai","black_kami" };
 
 		for (int looper = BeginClans; looper <= EndClans; looper += 1)
 		{

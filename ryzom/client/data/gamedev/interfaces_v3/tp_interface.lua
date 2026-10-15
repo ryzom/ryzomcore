@@ -836,3 +836,6 @@ function artefact:startInterface(cult)
 end
 --
 --
+
+-- VERSION --
+RYZOM_TP_INTERFACE_VERSION = 324

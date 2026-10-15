@@ -389,6 +389,7 @@ void processMirrorUpdates()
 				{
 					user->entersWater();
 				}
+				user->applyRegenAndClipCurrentValue();
 			}
 		}
 		TheDataset.endChangedValuesForProp();

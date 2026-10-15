@@ -60,6 +60,7 @@
 #include "game_item_manager/player_inventory.h"
 #include "guild_manager/guild.h"
 #include "guild_manager/guild_manager.h"
+#include "guild_manager/fame_manager.h"
 #include "mission_manager/mission_guild.h"
 #include "mission_manager/mission_solo.h"
 #include "mission_manager/mission_team.h"
@@ -1216,11 +1217,8 @@ void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bo
 		CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setCurrent(
 			_PropertyDatabase, checkedCast<uint16>(_CurrentParryLevel));
 		CPhraseManager::getInstance().disengage(_EntityRowId, true);
-	}
 
 	// Remove enchant weapon effects as they are linked to equipped item
-	if (invId == INVENTORIES::handling && slot == 0)
-	{
 		CSEffectPtr const effect = lookForActiveEffect(EFFECT_FAMILIES::PowerEnchantWeapon);
 
 		if (effect)

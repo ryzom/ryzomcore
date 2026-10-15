@@ -560,12 +560,12 @@ void CTeam::removeCharacter( CCharacter * player )
 		_RewardSharing->resetCandidates(this);
 
 	// update positions
-	updateMembersPositions();
+	updateMembersPositions(true);
 
 	// remove character from chat group
-	TGroupId idGroupe = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
+	TGroupId idGroup = CHAT_GROUPS_IDS::getTeamChatGroupId(_TeamId);
 	CMessage msgRemoveGroup("REMOVE_FROM_GROUP");
-	msgRemoveGroup.serial( idGroupe );
+	msgRemoveGroup.serial( idGroup );
 	msgRemoveGroup.serial( const_cast<CEntityId&> ( charId ) );
 	sendMessageViaMirror( "IOS", msgRemoveGroup );
 

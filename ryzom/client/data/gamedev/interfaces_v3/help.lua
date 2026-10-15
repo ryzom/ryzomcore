@@ -137,3 +137,5 @@ function help:continueLesson(id, url)
 	getUI("ui:interface:ArkLessonWin"..id).active = true
 	webig:checkUrl(url)
 end
+-- VERSION --
+RYZOM_HELP_VERSION = 324

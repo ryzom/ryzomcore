@@ -244,6 +244,8 @@ else
 	WebQueue:push(url)
 end
 end
+-- VERSION --
+RYZOM_WEBIG_VERSION = 324
 
 
 

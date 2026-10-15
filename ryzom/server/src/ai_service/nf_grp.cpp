@@ -68,7 +68,7 @@ void spawn__(CStateInstance* entity, CScriptStack& stack)
 	if (grp)
 	{
 		if (grp->isSpawned())
-			grp->getSpawnObj()->spawnBots();
+			grp->getSpawnObj()->spawnBots(grp->botName, grp->botVpx);
 	}
 }
 
@@ -113,10 +113,10 @@ void despawn_f_(CStateInstance* entity, CScriptStack& stack)
 //----------------------------------------------------------------------------
 /** @page code
 
-@subsection spawnBot_fsssffff_
+@subsection spawnBot_fsssfffff_
 Spawn new bots in the current group.
 
-Arguments: f(NbrBots), s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion) ->
+Arguments: f(NbrBots), s(Sheet), s(Name), s(Look), f(x), f(y), f(orientation), f(dispersion), f(cell) ->
 
 @code
 
@@ -151,11 +151,9 @@ void spawnBot_fsssffff_(CStateInstance* entity, CScriptStack& stack)
 
 	CGroupNpc* grp = dynamic_cast<CGroupNpc*>(entity->getGroup());
 	if (grp)
-		aiInstance->eventCreateNpcBot(grp, nbBots, true, sheetId, CAIVector(x, y), name, orientation, dispersionRadius, look);
+		aiInstance->eventCreateNpcBot(grp, nbBots, true, sheetId, CAIVector(x, y), name, orientation, dispersionRadius, look, grp->botName, grp->botVpx);
 	return;
 }
-
-
 
 //----------------------------------------------------------------------------
 /** @page code

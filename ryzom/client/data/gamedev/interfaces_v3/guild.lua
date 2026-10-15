@@ -96,3 +96,6 @@ function game:guildDeactive()
 
 	setDbProp('UI:VARIABLES:ISACTIVE:GUILD', 0);
 end
+
+-- VERSION --
+RYZOM_GUILD_VERSION = 324

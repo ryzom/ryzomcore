@@ -675,7 +675,7 @@ static float randomAngle()
 	return val;
 }
 
-CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &botsName, const std::string &look, sint32 cell) {
+CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, double dispersionRadius, bool spawnBots, double orientation, const std::string &grpName, const std::string &look, sint32 cell, const std::string &botsName, const std::string &vpx) {
 	if (!_EventNpcManager)
 		return NULL;
 
@@ -687,7 +687,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	}
 
 	_LastGroupAlias++;
-	string name = botsName.empty() ? NLMISC::toString("event_group_%u", _LastGroupAlias):botsName;
+	string name = grpName.empty() ? NLMISC::toString("event_group_%u", _LastGroupAlias):grpName;
 	// Create a group
 	CGroupNpc* grp = new CGroupNpc(_EventNpcManager, _LastGroupAlias, name, RYAI_MAP_CRUNCH::Nothing);
 	// Register it in the manager
@@ -695,7 +695,8 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	// Set the group parameters
 	grp->setAutoSpawn(false);
 
-
+	grp->botVpx = vpx;
+	grp->botName = botsName;
 	grp->setName(name);
 	grp->clearParameters();
 	grp->setPlayerAttackable(true);
@@ -705,7 +706,8 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 
 	grp->clrBotsAreNamedFlag();
 
-	eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look);
+	if (nbBots > 0)
+		eventCreateNpcBot(grp, nbBots, false, sheetId, pos, "", orientation, dispersionRadius, look, botsName, vpx);
 
 	grp->spawn();
 	CSpawnGroupNpc* spawnGroup = grp->getSpawnObj();
@@ -723,7 +725,7 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	destZone->setPosAndRadius(AITYPES::vp_auto, CAIPos(pos, 0, 0), (uint32)(dispersionRadius*1000.));
 	spawnGroup->movingProfile().setAIProfile(new CGrpProfileWanderNoPrim(spawnGroup, destZone));
 
-	if (!botsName.empty())
+	if (!grpName.empty())
 	{
 		CStateMachine* sm = _EventNpcManager->getStateMachine();
 		uint32 stateAlias = grp->getStateAlias("start");
@@ -743,12 +745,12 @@ CGroupNpc* CAIInstance::eventCreateNpcGroup(uint nbBots, NLMISC::CSheetId const&
 	}
 
 	if (spawnBots)
-		grp->getSpawnObj()->spawnBots();
+		grp->getSpawnObj()->spawnBots(botsName, vpx);
 
 	return grp;
 }
 
-bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look)
+bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots, NLMISC::CSheetId const& sheetId, CAIVector const& pos, const std::string &name, double orientation, double dispersionRadius, const std::string &look, const std::string &botname, const std::string &vpx)
 {
 	uint32 offset = grp->bots().size();
 	for	(uint i=0; i<nbBots; ++i)
@@ -805,7 +807,7 @@ bool CAIInstance::eventCreateNpcBot(CGroupNpc* grp, uint nbBots, bool spawnBots,
 	}
 
 	if (spawnBots)
-		grp->getSpawnObj()->spawnBots(name);
+		grp->getSpawnObj()->spawnBots(botname, vpx);
 
 	return true;
 }

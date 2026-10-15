@@ -435,6 +435,13 @@ static void prepareCharacterPositionForStore ( COfflineEntityState & state, cons
 	_FactionPoint[i],\
 	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _FactionPoint[k-PVP_CLAN::BeginClans]=val)\
 \
+	PROP(bool,_SavedFame)\
+	LPROP_MAP2(SavedFames, string, sint32,\
+	for(uint32 i = PVP_CLAN::BeginClans; i <= PVP_CLAN::EndClans; ++i),\
+	PVP_CLAN::toString((PVP_CLAN::TPVPClan)i),\
+	_SavedFames[i],\
+	PVP_CLAN::TPVPClan k=PVP_CLAN::fromString(key); if ((k>=PVP_CLAN::BeginClans) && (k<=PVP_CLAN::EndClans)) _SavedFames[k]=val)\
+\
 	PROP(uint32,_LastTpTick)\
 	PROP(uint32,_LastOverSpeedTick)\
 	PROP(uint32,_LastMountTick)\

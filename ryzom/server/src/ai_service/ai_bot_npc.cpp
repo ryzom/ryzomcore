@@ -1104,42 +1104,47 @@ void CBotNpc::setVisualProperties(std::string input)	// AJM
 	if(input.empty())
 		return;
 
-	// split 'input' string into keyword and tail
-	std::string keyword, tail;
-	if(!AI_SHARE::stringToKeywordAndTail(input,keyword,tail))
+
+	std::vector< std::string > vpx;
+	NLMISC::splitString(input, ";", vpx);
+	for (uint8 i = 0; i < vpx.size(); i++)
 	{
-		nlwarning("Failed to parse visual property text: '%s' for bot: '%s'",input.c_str(),getAliasNode()->fullName().c_str());
-		return;
+		// split 'input' string into keyword and tail
+		std::string keyword, tail;
+		if(!AI_SHARE::stringToKeywordAndTail(vpx[i],keyword,tail))
+	{
+			nlwarning("Failed to parse visual property text: '%s' for bot: '%s'", vpx[i].c_str(), getAliasNode()->fullName().c_str());
+			return;
 	}
 
-	// load val from tail
-	// accept 64bit hex value
-	uint64 val;
-	sscanf( tail.c_str(), "%" NL_I64 "x", &val );
+		// load val from tail
+		// accept 64bit hex value
+		uint64 val;
+		sscanf( tail.c_str(), "%" NL_I64 "x", &val );
 
-	// can't set into mirror row until bot is spawned, so save away
-	if( NLMISC::nlstricmp( keyword,"VPA")==0 )	// VisualPropertyA
+		// can't set into mirror row until bot is spawned, so save away
+		if( NLMISC::nlstricmp( keyword,"VPA")==0 )	// VisualPropertyA
 	{
-		_VisualPropertyA = val;
-		_useVisualProperties = true;
-	}
-	else if( NLMISC::nlstricmp( keyword,"VPB")==0 )	// VisualPropertyB
-	{
-		_VisualPropertyB = val;
-		_useVisualProperties = true;
-	}
-	else if( NLMISC::nlstricmp( keyword,"VPC")==0 )	// VisualPropertyC
-	{
-		_VisualPropertyC = val;
-		_useVisualProperties = true;
-	}
-
+			_VisualPropertyA = val;
+			_useVisualProperties = true;
+		}
+		else if( NLMISC::nlstricmp( keyword,"VPB")==0 )	// VisualPropertyB
+		{
+			_VisualPropertyB = val;
+			_useVisualProperties = true;
+		}
+		else if( NLMISC::nlstricmp( keyword,"VPC")==0 )	// VisualPropertyC
+		{
+			_VisualPropertyC = val;
+			_useVisualProperties = true;
+		}
 	else
-	{
+		{
 		nlwarning("Bot '%s'%s: failed to parse visual property argument: '%s'",
 			getAliasFullName().c_str(),
 			getAliasString().c_str(),
 			input.c_str());
+		}
 	}
 }
 
