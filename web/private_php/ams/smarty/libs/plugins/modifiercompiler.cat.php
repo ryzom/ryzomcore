@@ -5,18 +5,19 @@
  * @package    Smarty
  * @subpackage PluginsModifierCompiler
  */
+
 /**
  * Smarty cat modifier plugin
- * Type:     modifier
- * Name:     cat
- * Date:     Feb 24, 2003
- * Purpose:  catenate a value to a variable
- * Input:    string to catenate
+ * Type:     modifier<br>
+ * Name:     cat<br>
+ * Date:     Feb 24, 2003<br>
+ * Purpose:  catenate a value to a variable<br>
+ * Input:    string to catenate<br>
  * Example:  {$var|cat:"foo"}
  *
- * @link   http://smarty.php.net/manual/en/language.modifier.cat.php cat
+ * @link     http://smarty.php.net/manual/en/language.modifier.cat.php cat
  *           (Smarty online manual)
- * @author Uwe Tews
+ * @author   Uwe Tews
  *
  * @param array $params parameters
  *

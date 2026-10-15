@@ -27,10 +27,10 @@
  * @author Monte Ohrt <monte at ohrt dot com>
  * @author Andrei Zmievski <andrei@php.net>
  * @package Smarty
- * @version 2.6.31-dev
+ * @version 2.6.28
  */
 
-/* $Id$ */
+/* $Id: Smarty.class.php 4660 2012-09-24 20:05:15Z uwe.tews@googlemail.com $ */
 
 /**
  * DIR_SEP isn't used anymore, but third party apps might
@@ -465,7 +465,7 @@ class Smarty
      *
      * @var string
      */
-    var $_version              = '2.6.31';
+    var $_version              = '2.6.28';
 
     /**
      * current template inclusion depth
@@ -562,17 +562,11 @@ class Smarty
      */
     var $_cache_including = false;
 
-    /**
-     * plugin filepath cache
-     *
-     * @var array
-     */
-    var $_filepaths_cache = array();
     /**#@-*/
     /**
      * The class constructor.
      */
-    public function __construct()
+    function __construct()
     {
       $this->assign('SCRIPT_NAME', isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME']
                     : @$GLOBALS['HTTP_SERVER_VARS']['SCRIPT_NAME']);

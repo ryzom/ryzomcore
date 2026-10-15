@@ -1,0 +1,248 @@
+/* Copyright (C) 2009 Winch Gate Property Limited
+ *
+ * This file is part of ryzom_api.
+ * ryzom_api is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ryzom_api is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+html, body, form, fieldset, p, div, h1, h2, h3, h4, h5, h6 {  
+    margin:0;  
+    padding:0;  
+    -webkit-text-size-adjust: none;  
+}
+
+body {
+    font-size: 14px;  
+	background: black;
+	font-family: Helvetica;
+}  
+
+ul li {
+	padding: 0px 4px 10px 2px;
+	list-style: circle outside;
+}
+ol li {
+	padding: 0px 4px 10px 2px;
+}
+.ryzom-ui p {
+	padding-bottom:8px;
+}
+
+#main {
+	clear: both;
+	padding-top: 0px;
+	overflow:auto;
+	margin-left:auto;
+	margin-right:auto;
+	text-align:left
+}
+.error {
+	padding:.5em;
+	background:#ff5555;
+	color:white;
+	font-weight:bold
+}
+/*-----------------------------
+	ORIENTATION
+-----------------------------*/
+
+.content_wide,
+.content_normal {
+	display:none;
+}
+
+.show_normal {
+	width: 320px;
+}
+
+.show_wide {
+	width: 480px;
+}
+
+.show_wide .content_wide,
+.show_normal .content_normal {
+	display: block;
+}
+
+/* ---------------------- */
+
+
+.ryzom-ui {
+	color: white;
+}
+.ryzom-ui input, .ryzom-ui select {
+	border-top: 1px solid #030403;
+	border-right: 1px solid #6e7f57;
+	border-bottom: 1px solid #889e6c;
+	border-left: 1px solid #272d1f;
+	background-color: #37402b;
+	color: #ddd;
+	font-size: 16px;
+	margin: 2px 0 5px 0;
+}
+.ryzom-ui input[type=text] {
+	width: 96%;
+}
+
+.ryzom-ui textarea {
+	width: 96%;
+	background-color: black;
+	color: white;
+	font-size: 16px;
+	font-family: Helvetica;
+}
+/* input[type=submit] will make IE6 to ignore whole CSS rule, so cant combine this with .ryzom-ui-button below */
+input[type=submit] {
+	border-bottom: 1px solid #030403;
+	border-left: 1px solid #6e7f57;
+	border-top: 1px solid #889e6c;
+	border-right: 1px solid #272d1f;
+	background-color: #435120;
+}
+input.ryzom-ui-button, .ryzom-ui-button {
+	border-bottom: 1px solid #030403;
+	border-left: 1px solid #6e7f57;
+	border-top: 1px solid #889e6c;
+	border-right: 1px solid #272d1f;
+	background-color: #435120;
+}
+
+a, a:visited {color:orange}
+
+a:hover {color:orange}
+
+a.ryzom-ui-button, a.ryzom-ui-button:visited {
+	color: white;
+	padding: 0 .5em;
+	text-decoration: none;
+}
+a.ryzom-ui-button:hover {
+	background: #536130;
+	color: #ddd;
+}
+/* window without title - just borders */
+.ryzom-ui-tl {
+}
+.ryzom-ui-tr {
+}
+.ryzom-ui-t {
+	background-image: url(skin_t.gif);
+	background-repeat: repeat-x;
+	background-position: left top;
+	height: 8px;
+	margin: 0;
+}
+/* window with proper header */
+.ryzom-ui-header .ryzom-ui-tl {
+	margin: 0px 0px;
+	height: 32px;
+}
+.ryzom-ui-header .ryzom-ui-tr {
+	height: 32px;
+}
+.ryzom-ui-header .ryzom-ui-t {
+	background-image: url(skin_header_m.gif);
+	background-repeat: repeat-x;
+	background-position: left top;
+	padding: 7px 0 0 12px;
+	height: 32px;
+	text-transform: uppercase;
+	color: white;
+	border-top: 1px solid #030403;
+}
+/* window body */
+.ryzom-ui-l {
+}
+.ryzom-ui-r {
+}
+.ryzom-ui-m {
+	margin: 0 0px;
+	padding: 0px;
+	background-image: url(skin_blank.png);
+	background-repeat: repeat;
+}
+.ryzom-ui-body {
+	background-image: url(skin_blank_inner.png);
+	background-repeat: repeat;
+	/* leave 5px room after bottom border */
+	margin: 0 8px 5px 2px;
+	padding: 5px 5px 5px 5px;
+	border-top: 1px solid #030403;
+	border-right: 1px solid #6e7f57;
+	border-bottom: 1px solid #889e6c;
+	border-left: 1px solid #272d1f;
+}
+/* window bottom border */
+.ryzom-ui-bl {
+	height: 8px;
+}
+.ryzom-ui-br {
+	height: 8px;
+}
+.ryzom-ui-b {
+	height: 8px;
+	margin: 0 8px;
+}
+.ryzom-ui-notice {
+	margin: 0px;
+	padding: 0px;
+	color: #999;
+	text-align: center;
+}
+a.ryzom-ui-notice, a.ryzom-ui-notice:visited {
+	margin: 0px;
+	padding: 0px;
+	color: #BBB;
+	padding: 0 .5em;
+	text-decoration: underline;
+}
+a.ryzom-ui-notice:hover {
+	color: gray;
+}
+
+.ryzom-ui-t .ryzom-ui-text-button {
+    font-size: 85%;
+}
+a.ryzom-ui-text-button, a:visited.ryzom-ui-text-button {
+    color:#FFFF11;
+    text-decoration:none;
+}
+
+.ryzom-ui-text-button {
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+}
+.ryzom-ui-text-button {
+    padding: 0;margin: 0;
+    border-color: #ff8 #ff3 #ff3 #ff8;
+    border-width: 1px;
+    border-style: solid;
+    padding: 0px 4px;
+    color: white;
+}
+
+.ryzom-ui-wrap-ul {
+	float: left;
+	text-align: center;
+	padding: 0;
+	list-style: none;
+}
+
+.ryzom-ui-wrap-li {
+	float: left;
+	margin: 0 0 10px 5px;
+	width: 6.1em;
+	list-style: none;
+	height: 70px;
+}

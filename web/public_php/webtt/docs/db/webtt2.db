@@ -1,0 +1,239 @@
+-- MySQL dump 10.13  Distrib 5.1.51, for pc-linux-gnu (x86_64)
+--
+-- Host: localhost    Database: webtt2
+-- ------------------------------------------------------
+-- Server version	5.1.51
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `comments`
+--
+
+DROP TABLE IF EXISTS `comments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `comments` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `translation_id` int(10) unsigned DEFAULT NULL,
+  `identifier_id` int(10) unsigned DEFAULT NULL,
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `comment` text,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `identifier_id` (`identifier_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `file_identifiers`
+--
+
+DROP TABLE IF EXISTS `file_identifiers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_identifiers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `imported_translation_file_id` int(10) unsigned DEFAULT NULL,
+  `command` varchar(50) DEFAULT NULL,
+  `translation_index` int(10) unsigned DEFAULT NULL,
+  `identifier_id` int(10) unsigned DEFAULT NULL,
+  `arguments` text,
+  `reference_string` text,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `imported_translation_file_id` (`imported_translation_file_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `identifier_columns`
+--
+
+DROP TABLE IF EXISTS `identifier_columns`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `identifier_columns` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `identifier_id` int(10) unsigned DEFAULT NULL,
+  `column_name` varchar(200) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `reference_string` text,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `identifier_id` (`identifier_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `identifiers`
+--
+
+DROP TABLE IF EXISTS `identifiers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `identifiers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `language_id` int(10) unsigned DEFAULT NULL,
+  `translation_file_id` int(10) unsigned DEFAULT NULL,
+  `translation_index` int(10) unsigned DEFAULT NULL,
+  `identifier` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL,
+  `arguments` text,
+  `reference_string` text,
+  `context_description` text,
+  `translated` tinyint(1) DEFAULT '0',
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `translation_file_id` (`translation_file_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `imported_translation_files`
+--
+
+DROP TABLE IF EXISTS `imported_translation_files`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `imported_translation_files` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `language_id` int(10) unsigned DEFAULT NULL,
+  `translation_file_id` int(10) unsigned DEFAULT NULL,
+  `filename` varchar(255) DEFAULT NULL,
+  `merged` tinyint(1) DEFAULT '0',
+  `file_last_modified_date` int(11) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `translation_file_id` (`translation_file_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `languages`
+--
+
+DROP TABLE IF EXISTS `languages`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `languages` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) DEFAULT NULL,
+  `code` varchar(10) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `translation_files`
+--
+
+DROP TABLE IF EXISTS `translation_files`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `translation_files` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `language_id` int(10) unsigned DEFAULT NULL,
+  `filename_template` varchar(255) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `language_id` (`language_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `translations`
+--
+
+DROP TABLE IF EXISTS `translations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `translations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `parent_id` int(10) unsigned DEFAULT NULL,
+  `identifier_id` int(10) unsigned DEFAULT NULL,
+  `identifier_column_id` int(10) unsigned DEFAULT NULL,
+  `translation_text` text,
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `best` tinyint(1) DEFAULT NULL,
+  `translation_hash` varchar(32) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `best` (`best`),
+  KEY `identifier_column_id` (`identifier_column_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `users` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) DEFAULT NULL,
+  `email` varchar(200) DEFAULT NULL,
+  `activated` tinyint(1) DEFAULT NULL,
+  `username` varchar(40) DEFAULT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `role` varchar(20) DEFAULT NULL,
+  `confirm_hash` varchar(40) DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+
+INSERT INTO `users` VALUES (1,'Admin','',1,'admin','9ff60bfc5939c7863518e202cba4dff81da316be','admin',NULL,NULL,NULL,NULL);
+
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `votes`
+--
+
+DROP TABLE IF EXISTS `votes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `votes` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `translation_id` int(10) unsigned DEFAULT NULL,
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `modified` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;

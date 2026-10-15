@@ -1,0 +1,247 @@
+/* Copyright (C) 2009 Winch Gate Property Limited
+ *
+ * This file is part of ryzom_api.
+ * ryzom_api is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ryzom_api is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ryzom_api.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Check ryzom_api/functions_render.php for easy php function to render ryzom layout or use this following html:
+ *
+	<div class="ryzom-ui">
+		<div class="ryzom-ui-tl"><div class="ryzom-ui-tr">
+			<div class="ryzom-ui-t"><!-- title --></div>
+		</div></div>
+		<div class="ryzom-ui-l"><div class="ryzom-ui-r"><div class="ryzom-ui-m">
+			<div class="ryzom-ui-body"><!-- content --></div>
+		</div></div></div>
+		<div class="ryzom-ui-bl"><div class="ryzom-ui-br"><div class="ryzom-ui-b"></div></div></div>
+	</div><!-- .ryzom-ui -->
+ */
+
+.ryzom-ui {
+	color: white;
+}
+.ryzom-ui input, .ryzom-ui select {
+	border-bottom: 1px solid #7B7E80;
+	border-left: 1px solid #7B7E80;
+	border-top: 1px solid #101010;
+	border-right: 1px solid #101010;
+	background-color: #1D1D1D;
+	border-radius: 3px;
+	color: #BBB;
+	-moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+	font-size: 12px;
+	margin: 2px 0 5px 0;
+	padding: 1px;
+}
+.ryzom-ui input[type=text] {
+	width: 100%;
+}
+
+.ryzom-ui textarea {
+	width: 98%;
+}
+
+/* input[type=submit] will make IE6 to ignore whole CSS rule, so cant combine this with .ryzom-ui-button below */
+input[type=submit] {
+	border-bottom: 1px solid #7B7E80;
+	border-left: 1px solid #7B7E80;
+	border-top: 1px solid #7B7E80;
+	border-right: 1px solid #7B7E80;
+	background-color: #232323;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+	color: #BBB;
+}
+input[type=submit]:hover {
+	border-bottom: 1px solid #FFFFFF;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+	color: #FFF;
+}
+input.ryzom-ui-button, .ryzom-ui-button {
+	border-bottom: 1px solid #7B7E80;
+	border-left: 1px solid #7B7E80;
+	border-top: 1px solid #7B7E80;
+	border-right: 1px solid #7B7E80;
+	background-color: #232323;
+	border-radius: 3px;
+	color: #BBB;
+}
+a.ryzom-ui-button, a.ryzom-ui-button:visited {
+	color: #DDD;
+	padding: .2em .5em;
+	text-decoration: none;
+}
+a.ryzom-ui-button:hover {
+	border-bottom: 1px solid #FFFFFF;
+	border-left: 1px solid #FFFFFF;
+	border-top: 1px solid #FFFFFF;
+	border-right: 1px solid #FFFFFF;
+	color: #FFF;
+}
+/* window without title - just borders */
+.ryzom-ui-tl {
+	background-image: url(skin_tl.gif);
+	background-repeat: no-repeat;
+	background-position: left top;
+	width: 100%; height: 8px;
+}
+.ryzom-ui-tr {
+	background-image: url(skin_tr.gif);
+	background-repeat: no-repeat;
+	background-position: right top;
+	height: 8px;
+}
+.ryzom-ui-t {
+	background-image: url(skin_t.gif);
+	background-repeat: repeat-x;
+	background-position: left top;
+	height: 8px;
+	margin: 0 8px;
+}
+/* window with proper header */
+.ryzom-ui-header .ryzom-ui-tl {
+	margin: 0px 0px;
+	background-image: url(skin_header_l.gif);
+	background-repeat: no-repeat;
+	background-position: left top;
+	height: 32px;
+}
+.ryzom-ui-header .ryzom-ui-tr {
+	background-image: url(skin_header_r.gif);
+	background-repeat: no-repeat;
+	background-position: right top;
+	height: 32px;
+}
+.ryzom-ui-header .ryzom-ui-t {
+	background-image: url(skin_header_m.gif);
+	background-repeat: repeat-x;
+	background-position: left top;
+	margin-left: 12px;
+	margin-right: 26px;
+	padding-top: 9px;
+	height: 32px;
+	text-transform: uppercase;
+	color: white;
+}
+/* window body */
+.ryzom-ui-l {
+	background-image: url(skin_l.gif);
+	background-position: left top;
+	background-repeat: repeat-y;
+	width: 100%;
+}
+.ryzom-ui-r {
+	background-image: url(skin_r.gif);
+	background-position: right top;
+	background-repeat: repeat-y;
+	width: 100%;
+}
+.ryzom-ui-m {
+	margin: 0 8px;
+	padding: 8px;
+	background-image: url(skin_blank.png);
+	background-repeat: repeat;
+}
+.ryzom-ui-body {
+	background-image: url(skin_blank_inner.png);
+	background-repeat: repeat;
+	/* leave 5px room after bottom border */
+	margin: 0px 0 5px 0;
+	padding: 10px 10px 5px 10px;
+	border-top: 1px solid #030403;
+	border-right: 1px solid #6e7f57;
+	border-bottom: 1px solid #889e6c;
+	border-left: 1px solid #272d1f;
+}
+/* window bottom border */
+.ryzom-ui-bl {
+	background-image: url(skin_bl.gif);
+	background-repeat: no-repeat;
+	background-position: left top;
+	height: 8px;
+}
+.ryzom-ui-br {
+	background-image: url(skin_br.gif);
+	background-repeat: no-repeat;
+	background-position: right top;
+	height: 8px;
+}
+.ryzom-ui-b {
+	background-image: url(skin_b.gif);
+	background-repeat: repeat-x;
+	background-position: left top;
+	height: 8px;
+	margin: 0 8px;
+}
+.ryzom-ui-notice {
+	margin: 0px;
+	padding: 0px;
+	color: #333;
+	text-align: center;
+}
+a.ryzom-ui-notice, a.ryzom-ui-notice:visited {
+	margin: 0px;
+	padding: 0px;
+	color: #555;
+	padding: 0 .5em;
+	text-decoration: underline;
+}
+a.ryzom-ui-notice:hover {
+	color: gray;
+}
+
+.ryzom-ui-t .ryzom-ui-text-button {
+    font-size: 85%;
+}
+a.ryzom-ui-text-button, a:visited.ryzom-ui-text-button {
+    color:#FFFF11;
+    text-decoration:none;
+}
+
+.ryzom-ui-text-button {
+    border-radius: 4px;
+    -moz-border-radius: 4px;
+    -webkit-border-radius: 4px;
+}
+.ryzom-ui-text-button {
+    padding: 0;margin: 0;
+    border-color: #ff8 #ff3 #ff3 #ff8;
+    border-width: 1px;
+    border-style: solid;
+    padding: 0px 4px;
+    color: white;
+}
+
+.ryzom-ui-wrap-ul {
+	float: left;
+	text-align: center;
+	padding: 0;
+	list-style: none;
+	margin-top: -5px;
+	margin-bottom: -20px;
+}
+
+.ryzom-ui-wrap-li {
+	float: left;
+	margin: 0 5px 10px 5px;
+	width: 6.1em;
+	padding: 0;
+	list-style: none;
+	height: 70px;
+}
