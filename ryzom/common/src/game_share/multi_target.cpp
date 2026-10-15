@@ -22,18 +22,16 @@
 // ***********************************************************************
 void CMultiTarget::pack(uint64 *destVP, uint numVP)
 {
-	nlassert(numVP * 4 >= Targets.size()); // not enough room to stores visual properties!
+	nlassert(numVP * 2 >= Targets.size()); // not enough room to stores visual properties!
 	CTarget  invalidTarget;
 	uint index = 0;
 	for(uint k = 0; k < numVP; ++k)
 	{
-		uint16 parts[4];
-		for(uint l = 0; l < 4; ++l)
-		{
-			parts[l] = index < Targets.size() ? Targets[index].getPacked() : invalidTarget.getPacked();
-			++ index;
-		}
-		destVP[k] = (uint64) parts[0] |  ((uint64) parts[1] << 16) | ((uint64) parts[2] << 32) | ((uint64) parts[3] << 48);
+		destVP[k] = index < Targets.size() ? Targets[index].getPacked() : invalidTarget.getPacked();
+		++index;
+
+		destVP[k] |= uint64(index < Targets.size() ? Targets[index].getPacked() : invalidTarget.getPacked()) << 32;
+		++index;
 	}
 }
 
@@ -43,18 +41,15 @@ void CMultiTarget::unpack(const uint64 *srcVP, uint numVP)
 	Targets.clear();
 	for(uint k = 0; k < numVP; ++k)
 	{
-		for(uint l = 0; l < 4; ++l)
-		{
-			CTarget t;
-			t.setPacked((uint16) ((srcVP[k] >> (16 * l)) & 0xffff));
-			if (t.TargetSlot != CLFECOMMON::INVALID_SLOT)
-			{
-				Targets.push_back(t);
-			}
-			else
-			{
-				return;
-			}
-		}
+		CTarget t;
+		t.setPacked(uint32(srcVP[k]));
+		if(t.TargetSlot == CLFECOMMON::INVALID_SLOT)
+			return;
+		Targets.push_back(t);
+
+		t.setPacked(uint32(srcVP[k] >> 32));
+		if(t.TargetSlot == CLFECOMMON::INVALID_SLOT)
+			return;
+		Targets.push_back(t);
 	}
 }

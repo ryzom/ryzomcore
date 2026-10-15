@@ -58,7 +58,7 @@ using std::string;
 struct CClientConfig
 {
 	enum TDriver3D { DrvAuto = 0, OpenGL, Direct3D, OpenGLES };
-	enum TDriverSound { SoundDrvAuto = 0, SoundDrvFMod, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
+	enum TDriverSound { SoundDrvAuto = 0, SoundDrvOpenAL, SoundDrvDirectSound, SoundDrvXAudio2 };
 	enum TStageLCTUsage { StageUseNoLCT = 0, StageUseAllLCT, StageUsePosOnlyLCT };
 
 	// the config file must be always be available

@@ -58,6 +58,9 @@ CDBGroupListSheetText::CDBGroupListSheetText(const TCtorParam &param)
 	_OverColorNormal = CRGBA(255,255,255,0);
 	_OverColorOver = CRGBA(255,255,255,64);
 	_OverColorPushed = CRGBA(255,255,255,128);
+	_TextureNormal = "blank.tga";
+	_TextureOver = "blank.tga";
+	_TexturePushed = "blank.tga";
 	_SelectionEnabled = true;
 	_Scrolling = 0;
 	_LastTimeScrolled = 0;
@@ -195,6 +198,12 @@ bool CDBGroupListSheetText::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	if (prop)	_OverColorPushed = convertColor (prop);
 	prop= (char*) xmlGetProp( cur, (xmlChar*)"over_col_over" );
 	if (prop)	_OverColorOver = convertColor (prop);
+	prop= (char*) xmlGetProp( cur, (xmlChar*)"tx_normal" );
+	if (prop)	_TextureNormal = (const char*)prop;
+	prop= (char*) xmlGetProp( cur, (xmlChar*)"tx_over" );
+	if (prop)	_TextureOver = (const char*)prop;
+	prop= (char*) xmlGetProp( cur, (xmlChar*)"tx_pushed" );
+	if (prop)	_TexturePushed = (const char*)prop;
 
 	prop= (char*) xmlGetProp( cur, (xmlChar*)"selection" );
 	if (prop)	_SelectionEnabled = convertBool(prop);
@@ -909,9 +918,9 @@ void CDBGroupListSheetText::setup()
 		button->setPosRef (Hotspot_TL);
 		button->setActive(true);
 		// setup aspect
-		button->setTexture("blank.tga");
-		button->setTexturePushed("blank.tga");
-		button->setTextureOver("blank.tga");
+		button->setTexture(_TextureNormal);
+		button->setTexturePushed(_TexturePushed);
+		button->setTextureOver(_TextureOver);
 		button->setColor(_OverColorNormal);
 		button->setColorPushed(_OverColorPushed);
 		button->setColorOver(_OverColorOver);

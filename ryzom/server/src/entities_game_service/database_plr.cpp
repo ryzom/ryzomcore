@@ -1170,7 +1170,7 @@ void CBankAccessor_PLR::TEXCHANGE::TGIVE::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<8; ++i)
+	for (uint i=0; i<10; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -1257,7 +1257,7 @@ void CBankAccessor_PLR::TEXCHANGE::TRECEIVE::init(ICDBStructNode *parent)
 
 	// branch init
 	
-	for (uint i=0; i<8; ++i)
+	for (uint i=0; i<10; ++i)
 	{
 		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
 		nlassert(node != NULL);
@@ -1360,6 +1360,10 @@ void CBankAccessor_PLR::TINVENTORY::init(ICDBStructNode *parent)
 	nlassert(node != NULL);
 	_EQUIP.init(node);
 	
+	node  = parent->getNode( ICDBStructNode::CTextId("HOTBAR"), false );
+	nlassert(node != NULL);
+	_HOTBAR.init(node);
+	
 	node  = parent->getNode( ICDBStructNode::CTextId("TEMP"), false );
 	nlassert(node != NULL);
 	_TEMP.init(node);
@@ -1436,6 +1440,45 @@ void CBankAccessor_PLR::TINVENTORY::TEQUIP::init(ICDBStructNode *parent)
 
 
 void CBankAccessor_PLR::TINVENTORY::TEQUIP::TArray::init(ICDBStructNode *parent, uint index)
+{
+	ICDBStructNode *node = parent;
+
+	_BranchNode = node;
+
+	// leaf init
+	
+	node  = parent->getNode( ICDBStructNode::CTextId("INDEX_IN_BAG"), false );
+	nlassert(node != NULL);
+	_INDEX_IN_BAG = node;
+	
+
+	// branch init
+	
+}
+
+
+void CBankAccessor_PLR::TINVENTORY::THOTBAR::init(ICDBStructNode *parent)
+{
+	ICDBStructNode *node = parent;
+
+	_BranchNode = node;
+
+	// leaf init
+	
+
+	// branch init
+	
+	for (uint i=0; i<5; ++i)
+	{
+		node  = parent->getNode( ICDBStructNode::CTextId(NLMISC::toString("%u", i)), false );
+		nlassert(node != NULL);
+		_Array[i].init(node, i);
+	}
+	
+}
+
+
+void CBankAccessor_PLR::TINVENTORY::THOTBAR::TArray::init(ICDBStructNode *parent, uint index)
 {
 	ICDBStructNode *node = parent;
 

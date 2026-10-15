@@ -1,0 +1,4 @@
+inputFileRule AddFilesFromFdcCache
+inputFileRule Since 01/01/2007
+inputFileRule LargestFile
+inputFileRule Before 04/05/2007

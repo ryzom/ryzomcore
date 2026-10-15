@@ -835,7 +835,7 @@ void CCharacterShoppingList::buyItem( uint16 itemNumber, uint32 quantity )
 		}
 		else if ( form->Type == ITEM_TYPE::TATOO_MALE || form->Type == ITEM_TYPE::TATOO_FEMALE )
 		{
-			if ( !_Character->setTatoo( form->Cosmetics->VPValue ) )
+			if ( !_Character->setTattoo( form->Cosmetics->VPValue ) )
 				return;
 		}
 		else if ( form->Type == ITEM_TYPE::HAIRCOLOR_MALE || form->Type == ITEM_TYPE::HAIRCOLOR_FEMALE )

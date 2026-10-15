@@ -561,7 +561,7 @@ CInventoryPtr getInventory(CCharacter *c, const string &inv)
 			case INVENTORIES::bag:
 			case INVENTORIES::equipment:
 			case INVENTORIES::handling:
-			case INVENTORIES::pet_animal1:
+			case INVENTORIES::hotbar: case INVENTORIES::pet_animal1:
 			case INVENTORIES::pet_animal2:
 			case INVENTORIES::pet_animal3:
 			case INVENTORIES::pet_animal4:
@@ -695,15 +695,14 @@ NLMISC_COMMAND(spawnItem, "Spawn a new Item", "<uid> <inv> <quantity(0=force)> <
 		CGameItemPtr finalItem = item.createItem(quantity);
 		if (finalItem != NULL)
 		{
-			if (c->addItemToInventory(getTInventory(selected_inv), finalItem))
-			{
-
-				if (quality_params.size() > 1)
+			if (quality_params.size() > 1)
 				{
 					uint16 recommended;
 					NLMISC::fromString(quality_params[1], recommended);
 					finalItem->recommended(recommended);
 				}
+			if (c->addItemToInventory(getTInventory(selected_inv), finalItem))
+			{
 
 				log.displayNL("OK");
 				return true;
@@ -804,6 +803,7 @@ NLMISC_COMMAND(getItemList, "get list of items of character by filter", "<uid> [
 		inventories.push_back(INVENTORIES::temporary);
 		inventories.push_back(INVENTORIES::handling);
 		inventories.push_back(INVENTORIES::equipment);
+		inventories.push_back(INVENTORIES::hotbar);
 		inventories.push_back(INVENTORIES::bag);
 		inventories.push_back(INVENTORIES::pet_animal1);
 		inventories.push_back(INVENTORIES::pet_animal2);
@@ -906,6 +906,7 @@ NLMISC_COMMAND(getNamedItemList, "get list of named items of character by filter
 	} else {
 		inventories.push_back(INVENTORIES::handling);
 		inventories.push_back(INVENTORIES::equipment);
+		inventories.push_back(INVENTORIES::hotbar);
 		inventories.push_back(INVENTORIES::bag);
 		inventories.push_back(INVENTORIES::pet_animal1);
 		inventories.push_back(INVENTORIES::pet_animal2);
@@ -2273,6 +2274,8 @@ NLMISC_COMMAND(setAuraFx, "setAuraFx", "<uid> aura")
 
 	if (args[1] == "marauder")
 		fx.Aura = MAGICFX::TeleportMarauder;
+	if (args[1] == "levelup")
+		fx.Aura = MAGICFX::LevelUp;
 
 	sint64 prop;
 	fx.pack(prop);
@@ -2744,7 +2747,7 @@ NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 
 	TDataSetRow row = c->getEntityRowId();
 	c->setNewTitle(args[1]);
-	string fullname = c->getName().toString()+"$"+args[1]+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"$";
+	string fullname = c->getName().toString()+"$"+args[1]+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"#"+c->getTagRightHand()+"#"+c->getTagLeftHand()+"#"+c->getTagHat()+"$";
 	ucstring name;
 	name.fromUtf8(fullname);
 	nlinfo("Set title : %s", name.toUtf8().c_str());
@@ -2754,6 +2757,7 @@ NLMISC_COMMAND(setTitle, "set player title", "<uid> <title>")
 	sendMessageViaMirror("IOS", msgout);
 	return true;
 }
+//setTag 2 pvpA pvp_ally_6.tga
 
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
@@ -2768,15 +2772,18 @@ NLMISC_COMMAND(setTag, "set player title", "<uid> <tag> <value>")
 	TDataSetRow row = c->getEntityRowId();
 	if (args[1] == "pvpA") c->setTagPvPA(args[2]);
 	if (args[1] == "pvpB") c->setTagPvPB(args[2]);
+	if (args[1] == "defaultA") c->setDefaultTagA(args[2]);
+	if (args[1] == "defaultB") c->setDefaultTagB(args[2]);
 	if (args[1] == "A") c->setTagA(args[2]);
 	if (args[1] == "B") c->setTagB(args[2]);
-	string fullname = c->getName().toString()+"$"+c->getNewTitle()+"#"+c->getTagPvPA()+"#"+c->getTagPvPB()+"#"+c->getTagA()+"#"+c->getTagB()+"$";
-	ucstring name;
-	name.fromUtf8(fullname);
-	NLNET::CMessage	msgout("CHARACTER_NAME");
-	msgout.serial(row);
-	msgout.serial(name);
-	sendMessageViaMirror("IOS", msgout);
+	if (args[1] == "RH") c->setTagRightHand(args[2]);
+	if (args[1] == "LH") c->setTagLeftHand(args[2]);
+	if (args[1] == "HAT") c->setTagHat(args[2]);
+
+	if (args[1] == "RH" || args[1] == "LH" || args[1] == "HAT")
+		c->registerName();
+	else
+		c->updateJewelsTags(false);
 	return true;
 }
 
@@ -3152,6 +3159,107 @@ NLMISC_COMMAND(getLastExchangeMount,"get tick of last exchange mount","<uid>")
 	GET_ACTIVE_CHARACTER;
 
 	log.displayNL("%d", c->getLastExchangeMount());
+
+	return true;
+}
+
+//-----------------------------------------------
+NLMISC_COMMAND(mount,"mount the target","<uid>")
+{
+	if (args.size() != 1)
+		return false;
+
+	GET_ACTIVE_CHARACTER;
+
+	if ( c->getRiderEntity().isNull() )
+	{
+		CEntityId target = c->getTarget();
+		if( target.getType() == RYZOMID::creature || target.getType() == RYZOMID::npc )
+		{
+			CEntityBase * mount = CEntityBaseManager::getEntityBasePtr( target );
+			if( mount )
+			{
+				const CStaticCreatures * form = mount->getForm();
+				if( form )
+				{
+					if( form->getProperties().mountable() )
+					{
+						// test player isn't using a TP
+						if (c->getTpTicketSlot() != -1)
+						{
+							PHRASE_UTILITIES::sendDynamicSystemMessage( c->getEntityRowId(), "MOUNT_CANT_WHILE_TP" );
+							log.displayNL("ERR: Player is using tp");
+						}
+						else
+						{
+							c->mount(c->getTargetDataSetRow());
+							log.displayNL("OK");
+						}
+					}
+					else
+						log.displayNL("ERR: Entity not mountable");
+				}
+				else
+					log.displayNL("ERR: Entity without form");
+			}
+		}
+		else
+			log.displayNL("ERR: Entity is not creature or npc");
+	}
+	else
+		log.displayNL("ERR: Player is rider");
+	return true;
+}
+
+//-----------------------------------------------
+NLMISC_COMMAND(spawnMount,"spawn a mount close to player","<uid> <mount sheet name> [<pet custom name>]")
+{
+	if (args.size() != 2)
+		return false;
+
+	GET_ACTIVE_CHARACTER;
+
+	const float distFromPlayer = 2000.f;
+	CPetSpawnMsg msg;
+
+	SGameCoordinate destination;
+	destination.X = c->getState().X;
+	destination.Y = c->getState().Y;
+	destination.Z = c->getState().Z;
+	TDataSetRow dsr = c->getEntityRowId();
+	CMirrorPropValueRO<TYPE_CELL> mirrorCell(TheDataset, dsr, DSPropertyCELL);
+	destination.Cell = mirrorCell;
+
+	msg.SpawnMode = CPetSpawnMsg::NEAR_POINT;
+	msg.Coordinate_X = destination.X - sint32(cos(c->getHeading()) * distFromPlayer);
+	msg.Coordinate_Y = destination.Y - sint32(sin(c->getHeading()) * distFromPlayer);
+	msg.Coordinate_H = destination.Z;
+	msg.Heading = c->getHeading();
+	msg.CharacterMirrorRow = dsr;
+	msg.PetSheetId = CSheetId(args[1]);
+	msg.PetIdx = 8;
+	msg.Cell = destination.Cell;
+	ucstring customName;
+	if (args.size() >= 3)
+		customName.fromUtf8(args[2]);
+	msg.CustomName = customName;
+
+
+	CContinent * continent = CZoneManager::getInstance().getContinent(destination.X, destination.Y);
+	if (!continent) {
+		log.displayNL("ERR: invalid continent");
+		return false;
+	}
+
+	uint32 aiInstance = CUsedContinent::instance().getInstanceForContinent((CONTINENT::TContinent)continent->getId());
+	if (aiInstance == ~0)
+	{
+		log.displayNL("ERR: invalid continent");
+		return false;
+	}
+	msg.AIInstanceId = (uint16)aiInstance;
+	CWorldInstances::instance().msgToAIInstance(msg.AIInstanceId, msg);
+	log.displayNL("OK");
 
 	return true;
 }
@@ -3563,7 +3671,7 @@ NLMISC_COMMAND(setPlayerPetTitle, "change the name of a player pet", "<uid> <ind
 	return true;
 }
 
-//setPlayerVisual 530162 haircut fy_hof_hair_basic02.sitem
+//setPlayerVisual 2 underwear_legs igfpu.sitem
 //----------------------------------------------------------------------------
 NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[,<visual_prop1>,...] <arg1>[,<arg2>,...]")
 {
@@ -3581,6 +3689,11 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 
 
 	uint32 i=0;
+	if (args.size() == 3 && props.size() != prop_args.size())
+	{
+		log.displayNL("ERR: bad number of args");
+		return true;
+	}
 
 	for (i = 0; i < props.size(); i++)
 	{
@@ -3588,6 +3701,13 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 		{
 			if (args.size() == 3)
 			{
+				if (props[i] == "wig" && prop_args[i] == "-")
+				{
+					c->setUseWig(false);
+					c->setHair(c->getDefaultHair(), false, false);
+					c->setHairColor(c->getDefaultHairColor(), false, false);
+					continue;
+				}
 				CSheetId sheetId(prop_args[i]);
 				if (sheetId == CSheetId::Unknown)
 				{
@@ -3608,6 +3728,8 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 				uint8 haircut = c->getHair();
 				CSheetId *sheet = CVisualSlotManager::getInstance()->index2Sheet(haircut, SLOTTYPE::HEAD_SLOT);
 				bool isWig = c->getUseWig();
+				if (!isWig || props[i] == "haircut")
+					sheet = CVisualSlotManager::getInstance()->index2Sheet(c->getDefaultHair(), SLOTTYPE::HEAD_SLOT);
 				if (sheet)
 				{
 					if (isWig)
@@ -3619,27 +3741,103 @@ NLMISC_COMMAND(setPlayerVisual, "get visual of a player", "<uid> <visual_prop1>[
 					log.displayNL("ERR: no haircut");
 			}
 		}
-		else if (props[i] == "haircolor" || props[i] == "force_haircolor")
+		else if (props[i] == "haircolor" || props[i] == "wigcolor")
 		{
 			if (args.size() == 3)
 			{
 				uint32 color;
 				fromString(prop_args[i], color);
 
-				bool isWig = c->getUseWig();
-				if (props[i] == "force_haircolor") // If force_haircolor the color will be applyed even player use a wig. To do that, remove useWig state and reapply it after
-					c->setUseWig(false);
 
-				if (!c->setHairColor(color, false))
+				if (!c->setHairColor(color, props[i] == "wigcolor", false))
 					log.displayNL("ERR: same color");
-
-				if (props[i] == "wigcolor")
-					c->setUseWig(isWig);
 			}
 			else
 			{
 				uint32 haircolor = c->getHairColor();
-				log.displayNL("%u", haircolor);
+				bool isWig = c->getUseWig();
+				if (!isWig || props[i] == "haircolor")
+					haircolor = c->getDefaultHairColor();
+				if (isWig)
+					log.displayNL("W %u", haircolor);
+				else
+					log.displayNL("H %u", haircolor);
+			}
+		}
+		else if (props[i] == "underwear_chest")
+		{
+			if (args.size() == 3)
+			{
+				if (prop_args[i] == "-")
+					c->setUnderwearChest("");
+				else
+					c->setUnderwearChest(prop_args[i]);
+				if (c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::CHEST) == NULL)
+					c->updateVisualInformation(INVENTORIES::equipment, SLOT_EQUIPMENT::CHEST, INVENTORIES::equipment, SLOT_EQUIPMENT::CHEST, CSheetId::Unknown, NULL);
+			}
+			else
+				log.displayNL("%s", c->getUnderwearChest().c_str());
+		}
+		else if (props[i] == "underwear_legs")
+		{
+			if (args.size() == 3)
+			{
+				if (prop_args[i] == "-")
+					c->setUnderwearLegs("");
+				else
+					c->setUnderwearLegs(prop_args[i]);
+				if (c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::LEGS) == NULL)
+					c->updateVisualInformation(INVENTORIES::equipment, SLOT_EQUIPMENT::LEGS, INVENTORIES::equipment, SLOT_EQUIPMENT::LEGS, CSheetId::Unknown, NULL);
+			}
+			else
+				log.displayNL("%s", c->getUnderwearLegs().c_str());
+		}
+		else if (props[i] == "underwear_chest_color")
+		{
+			if (args.size() == 3)
+			{
+				uint8 color;
+				fromString(prop_args[i], color);
+				c->setUnderwearChestColor(color);
+				if (c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::CHEST) == NULL)
+					c->updateVisualInformation(INVENTORIES::equipment, SLOT_EQUIPMENT::CHEST, INVENTORIES::equipment, SLOT_EQUIPMENT::CHEST, CSheetId::Unknown, NULL);
+			}
+			else
+				log.displayNL("%u", c->getUnderwearChestColor());
+		}
+		else if (props[i] == "underwear_legs_color")
+		{
+			if (args.size() == 3)
+			{
+				uint8 color;
+				fromString(prop_args[i], color);
+				c->setUnderwearLegsColor(color);
+				if (c->getItem(INVENTORIES::equipment, SLOT_EQUIPMENT::LEGS) == NULL)
+					c->updateVisualInformation(INVENTORIES::equipment, SLOT_EQUIPMENT::LEGS, INVENTORIES::equipment, SLOT_EQUIPMENT::LEGS, CSheetId::Unknown, NULL);
+			}
+			else
+				log.displayNL("%u", c->getUnderwearLegsColor());
+		}
+		else if (props[i] == "tatoo" || props[i] == "decalco")
+		{
+			if (args.size() == 3)
+			{
+				if (prop_args[i] == "-")
+				{
+					c->setTattoo(c->getDefaultTattoo());
+					continue;
+				}
+
+				uint32 tattoo;
+				fromString(prop_args[i], tattoo);
+				c->setTattoo(tattoo, true, false);
+			}
+			else
+			{
+				if (props[i] == "tatoo")
+					log.displayNL("%u", c->getDefaultTattoo());
+				else
+					log.displayNL("%u", c->getVisualPropertyC().directAccessForStructMembers().PropertySubData.Tattoo);
 			}
 		}
 	}
@@ -4494,6 +4692,7 @@ NLMISC_COMMAND(stopMoveBot,"stop move of a bot","<uid|*> [<target|eid>]")
 	}
 
 	CharacterBotChatBeginEnd.BotChatStart.push_back(TargetRowId);
+	return true;
 }
 
 

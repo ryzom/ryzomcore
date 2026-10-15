@@ -711,6 +711,9 @@ void finalizeClientReady( uint32 userId, uint32 index )
 	if (c->invulnerableMode())
 		c->setBonusMalusName("invulnerability", c->addEffectInDB(CSheetId("invulnerability.sbrick"), true));
 
+	if (c->haveAnyPrivilege() && c->getAggroableOverride() != 0)
+		c->setBonusMalusName("aggro", c->addEffectInDB(CSheetId("enchant_weapon.sbrick"), true));
+
 	c->setFinalized(true);
 
 } // finalizeClientReady //
@@ -2642,23 +2645,13 @@ void cbItemSwap( NLNET::CMessage& msgin, const std::string &serviceName, NLNET::
 
 		if (inventorySrc == (uint16) INVENTORIES::guild)
 		{
-			if (inventoryDst != (uint16) INVENTORIES::bag)
-			{
-				nlwarning("%s user try to move an item from guild inventory to inventory %d : this is not allowed.", sDebug.c_str(), inventoryDst);
-				return;
-			}
 			// Guild -> Bag
-			pGuild->takeItem(character, slotSrc, quantity, nGuildSessionCounter);
+			pGuild->takeItem(character, (INVENTORIES::TInventory) inventoryDst, slotSrc, quantity, nGuildSessionCounter);
 		}
 		else if (inventoryDst == (uint16) INVENTORIES::guild)
 		{
-			if (inventorySrc != (uint16) INVENTORIES::bag)
-			{
-				nlwarning("%s user try to move an item from inventory %d to guild inventory : this is not allowed.", sDebug.c_str(), inventorySrc);
-				return;
-			}
 			// Bag -> Guild
-			pGuild->putItem(character, slotSrc, quantity, nGuildSessionCounter);
+			pGuild->putItem(character, (INVENTORIES::TInventory) inventorySrc, slotSrc, quantity, nGuildSessionCounter);
 		}
 
 		return;

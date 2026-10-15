@@ -121,7 +121,8 @@ void CMissionSolo::getEntities(std::vector<TDataSetRow>& entities)
 void CMissionSolo::stopChildren()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	for ( uint i = 0; i < templ->ChildrenMissions.size(); i++ )
 	{
 		const CMissionTemplate * child = CMissionManager::getInstance()->getTemplate( templ->ChildrenMissions[i] );
@@ -143,7 +144,8 @@ void CMissionSolo::stopChildren()
 void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	CMission::onFailure(ignoreJumps);
 
 	if ( getProcessingState() == CMissionBaseBehaviour::Normal  )
@@ -177,7 +179,8 @@ void CMissionSolo::onFailure(bool ignoreJumps, bool sendMessage)
 void CMissionSolo::forceSuccess()
 {
 	CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( _Mission->getTemplateId() );
-	nlassert(templ);
+	if (templ == NULL)
+		return;
 	CCharacter * user = PlayerManager.getChar( _Taker );
 	if ( user )
 	{

@@ -6,10 +6,10 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_logger_service
 						ryzom_adminmodules
-						ryzom_gameshare
+						${RYZOM_GAMESHARE_LIBRARIES}
 						ryzom_servershare
-						nelmisc
-						nelnet)
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_logger_service "Ryzom, Services: Logger Service (LGS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_logger_service)

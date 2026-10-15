@@ -209,10 +209,29 @@ public:
 	/// Return output data path
 	const std::string& getOutputDataPath() const { return _OutputDataPath; }
 
+	/// Return the rp item
+	const std::string &getRpItem(uint32 id) const
+	{
+		if (_RPItems.size() > id) {
+			return _RPItems[id];
+		}
+		static const std::string empty;
+		return empty;
+	}
+
+	/// Add rp item
+	void addRpItem(const std::string &item)
+	{
+		_RPItems.push_back(item);
+	}
+
+
 private:
 	typedef std::vector<CItemSheet *>	TItemVector;
 	typedef std::vector<TItemVector>	TSlots;
+	typedef std::vector<std::string>	TRPitems;
 	TSlots								_VisualSlots;
+	TRPitems							_RPItems;
 
 	// directory where to create .packed_sheets
 	std::string							_OutputDataPath;

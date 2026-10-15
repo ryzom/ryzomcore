@@ -53,6 +53,7 @@
 #include "game_item_manager/player_inv_bag.h"
 #include "game_item_manager/player_inv_equip.h"
 #include "game_item_manager/player_inv_hand.h"
+#include "game_item_manager/player_inv_hotbar.h"
 #include "game_item_manager/player_inv_pet.h"
 #include "game_item_manager/player_inv_temp.h"
 #include "game_item_manager/player_inv_xchg.h"
@@ -122,6 +123,13 @@ void CCharacter::initInventories()
 	CEquipInvView* eiv = new CEquipInvView;
 	eiv->setCharacter(this);
 	eiv->bindToInventory(ei);
+	// hotbar inventory
+	CHotbarInventory* hoti = new CHotbarInventory;
+	hoti->setInventoryId(INVENTORIES::hotbar);
+	_Inventory[INVENTORIES::hotbar] = hoti;
+	CHotbarInvView* hotiv = new CHotbarInvView;
+	hotiv->setCharacter(this);
+	hotiv->bindToInventory(hoti);
 	// bag inventory
 	CBagInventory* bi = new CBagInventory;
 	bi->setInventoryId(INVENTORIES::bag);
@@ -160,6 +168,8 @@ void CCharacter::initInventoriesDb()
 	// Force the update of all the inventories database
 	nlassert(_Inventory[INVENTORIES::handling] != NULL);
 	_Inventory[INVENTORIES::handling]->forceViewUpdateOfInventory(true);
+	nlassert(_Inventory[INVENTORIES::hotbar] != NULL);
+	_Inventory[INVENTORIES::hotbar]->forceViewUpdateOfInventory(true);
 	nlassert(_Inventory[INVENTORIES::equipment] != NULL);
 	_Inventory[INVENTORIES::equipment]->forceViewUpdateOfInventory(true);
 	nlassert(_Inventory[INVENTORIES::bag] != NULL);
@@ -975,7 +985,7 @@ bool CCharacter::canPutNonDropableItemInInventory(INVENTORIES::TInventory invId)
 // ****************************************************************************
 void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot, uint32 bagSlot, bool sendChatMessage)
 {
-	if (dstInvId != INVENTORIES::handling && dstInvId != INVENTORIES::equipment)
+	if (dstInvId != INVENTORIES::handling && dstInvId != INVENTORIES::equipment && dstInvId != INVENTORIES::hotbar)
 	{
 		nlwarning("invalid equipment inventory %u", dstInvId);
 		return;
@@ -1045,6 +1055,33 @@ void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot
 	if (item->getItemWornState() == ITEM_WORN_STATE::Worned
 			&& (form->Family != ITEMFAMILY::CRAFTING_TOOL && form->Family != ITEMFAMILY::HARVEST_TOOL))
 		return;
+	if (form->Family != ITEMFAMILY::AMMO && dstInvId != INVENTORIES::hotbar)
+	{
+		// split stack before use, item slot is not changed
+		if (item->getStackSize() > 1)
+		{
+			CInventoryBase::TInventoryOpResult res;
+			CGameItemPtr newStack = bagInv->splitStackItem(item, item->getStackSize() - 1, &res);
+			if (res != CInventoryBase::ior_ok)
+			{
+				switch(res)
+				{
+					case CInventoryBase::ior_no_free_slot: {
+						// TODO: better error message than just "bag full"
+						SM_STATIC_PARAMS_1(params, STRING_MANAGER::integer);
+						params[0].Int = bagInv->getSlotCount();
+						sendDynamicSystemMessage(_Id, "BAG_FULL", params);
+						break;
+					}
+					case CInventoryBase::ior_item_locked: case CInventoryBase::ior_stack_undersize: case CInventoryBase::ior_error: default: nlwarning("Split item stack failed: ior = %d", res);
+						break;
+				}
+				return;
+			}
+		}
+		// disable stacking in future to keep item id for client item groups
+		item->disableStacking();
+	}
 
 	// set the item in ref inventory
 	dstInv->insertItem(item, dstSlot);
@@ -1092,7 +1129,7 @@ void CCharacter::equipCharacter(INVENTORIES::TInventory dstInvId, uint32 dstSlot
 // ****************************************************************************
 void CCharacter::unequipCharacter(INVENTORIES::TInventory invId, uint32 slot, bool sendChatMessage)
 {
-	if (invId != INVENTORIES::handling && invId != INVENTORIES::equipment)
+	if (invId != INVENTORIES::handling && invId != INVENTORIES::equipment  && invId != INVENTORIES::hotbar)
 	{
 		nlwarning("invalid equipment inventory %u", invId);
 		return;
@@ -1211,6 +1248,10 @@ bool CCharacter::checkItemValidityWithSlot(const CSheetId &sheet, INVENTORIES::T
 	BOMB_IF(form == 0,
 			NLMISC::toString("Item %s have no static form, recompute packed sheet.", sheet.toString().c_str()),
 			return false);
+	if (inv == INVENTORIES::hotbar) {
+		return
+			form->Family == ITEMFAMILY::ITEM_SAP_RECHARGE || form->Family == ITEMFAMILY::CRYSTALLIZED_SPELL || form->Family == ITEMFAMILY::CONSUMABLE || form->Family == ITEMFAMILY::XP_CATALYSER;
+	}
 
 	// if hands inventory, check if item match with slot (right hand and left hand)
 	if (inv == INVENTORIES::handling)
@@ -1278,7 +1319,15 @@ bool CCharacter::checkItemValidityWithSlot(const CSheetId &sheet, INVENTORIES::T
 					else
 					{
 						result = checkRightLeftHandCompatibility(form2->Slots, form->Slots);
+						// if the current item we want to drop is a dagger, check if right hand is a sword or a dagger
+						if (form->Type == ITEM_TYPE::DAGGER && result)
+							result = form2->Type == ITEM_TYPE::DAGGER || form2->Type == ITEM_TYPE::SWORD;
 					}
+				}
+				else if (form->Type == ITEM_TYPE::DAGGER)
+				{
+					// If nothing in right hand, cant drop a dagger
+					result = false;
 				}
 			}
 
@@ -1635,7 +1684,7 @@ bool CCharacter::checkExchangeActors(bool* exchangeWithBot) const
 }
 
 // ****************************************************************************
-void CCharacter::itemBagToExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 quantity)
+void CCharacter::itemInvToExchange(uint32 invSrc, uint32 invSlot, uint32 exchangeSlot, uint32 quantity)
 {
 	// check exchange integrity
 	bool exchangeWithBot;
@@ -1650,7 +1699,7 @@ void CCharacter::itemBagToExchange(uint32 bagSlot, uint32 exchangeSlot, uint32 q
 	invalidateExchange();
 	// put item in the exchange view
 	nlassert(_ExchangeView != NULL);
-	_ExchangeView->putItemInExchange(bagSlot, exchangeSlot, quantity);
+	_ExchangeView->putItemInExchange(invSrc, invSlot, exchangeSlot, quantity);
 
 	if (exchangeWithBot)
 	{
@@ -2888,6 +2937,13 @@ void CCharacter::createRechargeItem(uint32 sapRecharge)
 		sendDynamicSystemMessage(_EntityRowId, "WEAPONS_ONLY_CAN_BEEN_RECHARGED", params);
 		return;
 	}
+	if (rightHandItem->sapLoad() == rightHandItem->maxSapLoad()) {
+		SM_STATIC_PARAMS_2(params, STRING_MANAGER::item, STRING_MANAGER::integer);
+		params[0].SheetId = rightHandItem->getSheetId();
+		params[1].Int = rightHandItem->maxSapLoad();
+		sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_FULLY_RECHARGED", params);
+		return;
+	}
 
 	rightHandItem->reloadSapLoad(sapRecharge);
 	SM_STATIC_PARAMS_3(params, STRING_MANAGER::item, STRING_MANAGER::integer, STRING_MANAGER::integer);
@@ -3064,7 +3120,8 @@ void CCharacter::enchantItem(INVENTORIES::TInventory invId, uint32 slot)
 
 		rightHandItem->applyEnchantment(crystalItem->getEnchantment());
 		// consume crystal (destroy it)
-		inv->deleteItem(slot);
+		if (inv->deleteStackItem(slot, 1) == 0)
+			nlwarning("Consuming enchant crystal failed for user %s, slot %d", getId().toString().c_str(), slot);
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::item);
 		params[0].SheetId = rightHandItem->getSheetId();
 		sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_NOW_ENCHANTED", params);
@@ -3089,6 +3146,13 @@ void CCharacter::rechargeItem(INVENTORIES::TInventory invId, uint32 slot)
 		// reload sap in right hand item
 		if (sapRechargeItem->sapLoad() == 0)
 			sapRechargeItem->setSapLoad(sapRechargeItem->quality());
+		if (rightHandItem->sapLoad() == rightHandItem->maxSapLoad()) {
+			SM_STATIC_PARAMS_2(params, STRING_MANAGER::item, STRING_MANAGER::integer);
+			params[0].SheetId = rightHandItem->getSheetId();
+			params[1].Int = rightHandItem->maxSapLoad();
+			sendDynamicSystemMessage(_EntityRowId, "ITEM_IS_FULLY_RECHARGED", params);
+			return;
+		}
 
 		rightHandItem->reloadSapLoad(sapRechargeItem->sapLoad());
 		// consume sap recharge (destroy it)

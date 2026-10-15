@@ -124,6 +124,16 @@ namespace ITEMFAMILY
 	
 	}
 
+	bool	isUsable( EItemFamily fam )
+	{
+		return
+			fam == ITEM_SAP_RECHARGE ||
+			fam == CRYSTALLIZED_SPELL ||
+			fam == CONSUMABLE ||
+			fam == XP_CATALYSER;
+	
+	}
+	
 	/**
 	 * returns true if items of this family are destroyed when they are completely worned out
 	 */

@@ -983,7 +983,7 @@ void	CStringManager::retrieveEntityNames( TServiceId serviceId )
 			CMirrorPropValueRO<TYPE_NAME_STRING_ID> nameIndex( TheDataset, entityIndex, DSPropertyNAME_STRING_ID );
 			if ( nameIndex() != 0 )
 			{
-				names.push_back( make_pair( entityIndex, getString(nameIndex).toString() ) );
+				names.push_back( make_pair( entityIndex, getString(nameIndex).toUtf8() ) );
 			}
 		}
 	}

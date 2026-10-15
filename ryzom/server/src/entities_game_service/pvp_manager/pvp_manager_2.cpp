@@ -561,10 +561,19 @@ void CPVPManager2::removeFactionChannelForCharacter(TChanID channel, CCharacter 
 				if (it != _PassChannels.end())
 					_PassChannels.erase(it);
 
-				for (TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin(); it2 != _UserChannel.end(); ++it2)
+				TMAPExtraFactionChannel::iterator it2 = _UserChannel.begin();
+				while (it2 != _UserChannel.end())
 				{
 					if ((*it2).second == currentChannels[i])
-						_UserChannel.erase(it2);
+					{
+						TMAPExtraFactionChannel::iterator itErase = it2;
+						++it2;
+						_UserChannel.erase(itErase);
+					}
+					else
+					{
+						++it2;
+					}
 				}
 			}
 
@@ -839,6 +848,8 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		}
 		////////////////////////////////////////////////////////
 	}
+	bool is_ennemy = false;
+	bool is_neutral_op = false;
 
 	uint i;
 	for( i=0; i<_PVPInterface.size(); ++i )
@@ -849,9 +860,13 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		if( relationTmp == PVP_RELATION::Unknown )
 			return PVP_RELATION::Unknown;
 
-		// Ennemy has the highest priority
+		// Outpost has the highest priority
+		if( relationTmp == PVP_RELATION::NeutralOutpostPVP )
+			is_neutral_op = true;
+
+		// Ennemy has the highest priority after outpost
 		if( relationTmp == PVP_RELATION::Ennemy )
-			return PVP_RELATION::Ennemy;
+			is_ennemy = true;
 
 		// Neutral pvp
 		if( relationTmp == PVP_RELATION::NeutralPVP )
@@ -861,6 +876,11 @@ PVP_RELATION::TPVPRelation CPVPManager2::getPVPRelation( CCharacter * actor, CEn
 		if (relationTmp == PVP_RELATION::Ally && relation != PVP_RELATION::NeutralPVP)
 			relation = PVP_RELATION::Ally;
 	}
+	if (is_neutral_op)
+		return PVP_RELATION::NeutralPVP;
+	
+	if (is_ennemy)
+		return PVP_RELATION::Ennemy;
 
 	return relation;
 }

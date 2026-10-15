@@ -27,6 +27,7 @@
 #include "inventory_manager.h"
 #include "game_share/crafting_tool_type.h"
 #include "game_share/rm_family.h"
+#include "game_share/ecosystem.h"
 #include "game_share/brick_families.h"
 #include "game_share/item_origin.h"
 #include "skill_change_callback.h"
@@ -98,6 +99,10 @@ private:
 		// This is the original quantity in inventory
 		sint32					OriginalQuantity;
 		bool                    LockedByOwner;
+		// for sorting
+		RM_FAMILY::TRMFamily MpFamily;
+		ECOSYSTEM::EECosystem Ecosystem;
+		uint16 StatEnergy;
 
 		CItem() : Sheet(0)
 		{
@@ -107,6 +112,9 @@ private:
 			Weight= 0;
 			Selected= 0;
 			OriginalQuantity= 0;
+			MpFamily = RM_FAMILY::Unknown;
+			Ecosystem = ECOSYSTEM::common_ecosystem;
+			StatEnergy = 0;
 		}
 
 		void		reset()
@@ -120,6 +128,9 @@ private:
 			Weight= 0;
 			Selected= 0;
 			OriginalQuantity= 0;
+			MpFamily = RM_FAMILY::Unknown;
+			Ecosystem = ECOSYSTEM::common_ecosystem;
+			StatEnergy = 0;
 		}
 	};
 
@@ -163,6 +174,15 @@ private:
 	};
 	CDBAnimalObs			_DBAnimalObs;
 	friend class			CDBAnimalObs;
+
+	// mod_craft_success.sbrick
+	class CDBModCraftObs : public NLMISC::ICDBNode::IPropertyObserver
+	{
+	public:
+		virtual void update(NLMISC::ICDBNode* node);
+	};
+	CDBModCraftObs			_DBModCraftObs;
+	friend class			CDBModCraftObs;
 
 
 	// The Current MP Construction for a Line of Item Requirement
@@ -224,6 +244,8 @@ private:
 	void			fillSelection(const std::vector<uint> &mps);
 	void			filterSelectionItemPart(std::vector<uint> &mps, RM_FABER_TYPE::TRMFType itemPartFilter, ITEM_ORIGIN::EItemOrigin originFilter);
 	void			filterSelectionItemSpecific(std::vector<uint> &mps, NLMISC::CSheetId specificItemWanted);
+
+	void			sortSelection(std::vector<uint> &mps) const;
 
 	uint			getMaxQuantityChange(uint itemReqLine, uint mpSlot) const;
 	uint			getTotalQuantitySetuped(uint itemReqLine) const;

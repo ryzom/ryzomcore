@@ -1118,6 +1118,10 @@ void		fillTARGET_LIST( TOutBox& outbox, TPropIndex )
 
 		// distance to target (in 1/127 of 100m)
 		uint32	dt = *(&((*it)()));
+		++it;
+		if (it == targets.end())
+			break;
+		uint32	damage = (*it)();
 
 		// translate slot
 		TCLEntityId		slot = client->IdTranslator.getCEId(index);
@@ -1125,6 +1129,8 @@ void		fillTARGET_LIST( TOutBox& outbox, TPropIndex )
 		{
 			TargetSlotsList.push_back(slot);
 			TargetSlotsList.push_back((uint8)dt);
+			TargetSlotsList.push_back(uint8(damage));
+			TargetSlotsList.push_back(uint8(damage >> 8));
 		}
 
 		++it;

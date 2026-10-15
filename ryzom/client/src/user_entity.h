@@ -360,6 +360,9 @@ public:
 	/// Return 'true' is an attack animation is currently playing.
 	bool isAttacking() const {return _AnimAttackOn;}
 
+	/// Show the user light.
+	void lightOn();
+
 	/// Show/Hide the user light.
 	void light();
 

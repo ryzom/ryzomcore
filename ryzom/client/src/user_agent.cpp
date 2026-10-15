@@ -85,7 +85,7 @@ std::string getDisplayVersion()
 	if (s_version.empty())
 	{
 #if FINAL_VERSION
-		s_version = "FV ";
+		s_version = "";
 #else
 		s_version = "DEV ";
 #endif

@@ -6,8 +6,8 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_admin_service
 						ryzom_adminmodules
-						nelmisc
-						nelnet)
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_admin_service "Ryzom, Services: Ryzom Admin Service (AS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_admin_service)

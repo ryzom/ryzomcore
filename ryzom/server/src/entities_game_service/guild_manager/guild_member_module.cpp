@@ -112,6 +112,7 @@ void CGuildMemberModule::quitGuild()
 	getProxy(proxy);
 	proxy.cancelAFK();
 	clearOnlineGuildProperties();
+	uint32 enterTime = _GuildMemberCore->getEnterTime();
 	guild->deleteMember( _GuildMemberCore );
 	if ( guild->getMembersBegin() == guild->getMembersEnd() )
 	{
@@ -120,6 +121,16 @@ void CGuildMemberModule::quitGuild()
 	}
 	else
 	{
+		CCharacter *c = PlayerManager.getChar(proxy.getId());
+		if (c) {
+			// if player are in guild since 3 days, save it
+			if (((CTickEventHandler::getGameCycle() - enterTime) / (86400/CTickEventHandler::getGameTimeStep())) > 3)
+			{
+				nlinfo("char in guild since 3 days, set enter time to %u", enterTime);
+				c->setGuildEnterTime(enterTime);
+				c->setLastGuildId(guild->getId());
+			}
+		}
 		guild->sendMessageToGuildMembers("GUILD_QUIT", params);
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::string_id);
 		params[0].StringId = guild->getNameId();

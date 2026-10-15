@@ -72,6 +72,10 @@ protected:
 			return false;
 		if ( user->forageProgress() ) // can't be extracting into temp inventory
 			return false; // for now, gives the message "target missing or invalid"
+		/*
+		 * Ulukyn : Removed Money cost
+		 *
+		 * 
 		uint moneyCost = uint( phrase->getSabrinaCost() * RechargeMoneyFactor );
 		if ( ! moneyCost )
 			moneyCost = 1;
@@ -79,12 +83,12 @@ protected:
 		{
 			errorCode = "EGS_MAGIC_LACK_MONEY";
 			return false;
-		}
+		}*/
 		return true;
 	}
 
 	virtual void launch( CMagicPhrase * phrase, sint deltaLevel, sint skillLevel, float successFactor, MBEHAV::CBehaviour & behav,
-						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, const NLMISC::CBitSet & invulnerabilityOffensive,
+						 const std::vector<float> &powerFactors, NLMISC::CBitSet & affectedTargets, std::vector<sint16> &targetDeltaHp, const NLMISC::CBitSet & invulnerabilityOffensive,
 						 const NLMISC::CBitSet & invulnerabilityAll, bool isMad, NLMISC::CBitSet & resists, const TReportAction & actionReport )
 	{
 	}
@@ -99,13 +103,15 @@ protected:
 		CCharacter * user = PlayerManager.getChar(phrase->getActor());
 		if ( !user )
 			return;
-
-		uint moneyCost = uint( phrase->getSabrinaCost() * RechargeMoneyFactor );
+		/*
+		 * Ulukyn : Removed Money cost
+		 * uint moneyCost = uint( phrase->getSabrinaCost() * RechargeMoneyFactor );
 		if ( ! moneyCost )
 			moneyCost = 1;
 		if ( user->getMoney() < moneyCost )
 			return;
 		user->spendMoney( moneyCost );
+		* */
 		if(successFactor <= 0.0f)
 			return;
 

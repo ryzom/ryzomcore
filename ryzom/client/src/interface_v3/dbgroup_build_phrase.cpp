@@ -43,6 +43,7 @@ using namespace NLMISC;
 const std::string	CDBGroupBuildPhrase::BrickSelectionModal= "ui:interface:build_phrase_select_brick";
 const std::string	CDBGroupBuildPhrase::BrickSelectionDB= "UI:PHRASE:SELECT";
 const std::string	CDBGroupBuildPhrase::BrickBuildDB= "UI:PHRASE:BUILD";
+const std::string	CDBGroupBuildPhrase::BrickIconSelectionModal= "ui:interface:build_phrase_select_icon";
 
 
 // ***************************************************************************
@@ -74,6 +75,8 @@ CDBGroupBuildPhrase::CDBGroupBuildPhrase(const TCtorParam &param)
 	{
 		_RootBrickTypeFilter[i]= BRICK_TYPE::UNKNOWN;
 	}
+
+	m_IconIndex = std::numeric_limits<uint8>::max();
 }
 
 // ***************************************************************************
@@ -306,11 +309,14 @@ void			CDBGroupBuildPhrase::startComposition(const CSPhraseCom &phrase)
 		// Append a dummy number
 		_NewSpellNumber++;
 		name+= " " + toString(_NewSpellNumber);
+
+		m_IconIndex = std::numeric_limits<uint8>::max();
 	}
 	else
 	{
 		// copy name
 		name= phrase.Name.toUtf8();
+		m_IconIndex = phrase.IconIndex;
 
 		// get the root Brick. Must exist.
 		CSBrickSheet	*rootBrick= pBM->getBrick(phrase.Bricks[0]);
@@ -717,6 +723,20 @@ void			CDBGroupBuildPhrase::deleteOpCredit(uint index)
 
 	// update the display
 	updateAllDisplay();
+}
+
+// ***************************************************************************
+void CDBGroupBuildPhrase::setPhraseIcon(uint8 index)
+{
+	CSPhraseCom	phrase;
+	buildCurrentPhrase(phrase);
+
+	if (index < phrase.Bricks.size())
+		m_IconIndex = index;
+	else
+		m_IconIndex = std::numeric_limits<uint8>::max();
+
+	updateSpellView();
 }
 
 
@@ -1247,6 +1267,45 @@ void			CDBGroupBuildPhrase::updateAllDisplay(const CSPhraseCom &phrase)
 		_TextPhraseDesc->setTextFormatTaged(text);
 	}
 
+	// **** icons
+	uint nbBricks = phrase.Bricks.size();
+	uint maxBricks = 0;
+	fromString(CWidgetManager::getInstance()->getParser()->getDefine("phrase_max_brick"), maxBricks);
+
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:ICON:0:SHEET")->setValue32(pBM->getInterfaceRemoveBrick().asInt());
+	NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:BUILD:ICON:0:INDEX")->setValue32(maxBricks);
+
+	std::set< std::pair<uint64, uint64> > dupcheck;
+	for(uint i = 0, j = 1; i < maxBricks; i++)
+	{
+		if (i < nbBricks)
+		{
+			CSBrickSheet *pBR = pBM->getBrick(phrase.Bricks[i]);
+			if (pBR)
+			{
+				// ignore back icon, as its replaced anyway
+				uint64 key1 = ((uint64)pBR->IdIcon << 32) | pBR->IconColor.getPacked();
+				uint64 key2 = ((uint64)pBR->IdIconOver << 32) | pBR->IdIconOver2;
+
+				if (dupcheck.insert(make_pair(key1, key2)).second)
+				{
+					NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:ICON:%d:SHEET", j))->setValue32(phrase.Bricks[i].asInt());
+					NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:ICON:%d:INDEX", j))->setValue32(i);
+					j++;
+				}
+			}
+			else
+			{
+				nlwarning("Invalid CSBrickSheet (%d:%s)", phrase.Bricks[i].asInt(), phrase.Bricks[i].toString().c_str());
+			}
+		}
+		else
+		{
+			NLGUI::CDBManager::getInstance()->getDbProp(toString("UI:PHRASE:BUILD:ICON:%d:SHEET", j))->setValue32(0);
+			j++;
+		}
+
+	}
 
 	// **** Since some bricks may have changed, update the spell view
 	updateSpellView();
@@ -1793,6 +1852,8 @@ void			CDBGroupBuildPhrase::buildCurrentPhrase(CSPhraseCom &newPhrase)
 	{
 		newPhrase.Name= ucstring::makeFromUtf8(_UserSentenceName->getInputString());
 	}
+
+	newPhrase.IconIndex = m_IconIndex;
 }
 
 

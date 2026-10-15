@@ -91,7 +91,7 @@ def queryShard(service_name, fullcmd, waitCallback=True, is_control=False):
 
 	adminService = CAdminServiceWeb()
 
-	if adminService.connect("gingo.ryzom.com", 46700, res):
+	if adminService.connect("127.0.0.1", 46700, res):
 		command_return_data = ""
 
 		if isinstance(fullcmd, str):

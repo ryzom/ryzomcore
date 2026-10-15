@@ -90,9 +90,24 @@ void CGuildInvitationModule::accept()
 
 	// ask the client to open it's guild interface
 	PlayerManager.sendImpulseToClient( proxy.getId(),"GUILD:OPEN_GUILD_WINDOW" );
+	CGuildMember *memberCore = NULL;
+
+	// get last leave guild
+	CCharacter *c =  PlayerManager.getChar(proxy.getId());
+	if (c) {
+		if (c->getLastGuildId() == guild->getId())
+		{
+			NLMISC::TGameCycle enterTime = c->getGuildEnterTime();
+			nlinfo("back to guild and use last enter time: %u", enterTime);
+			memberCore = _Invitation->getGuild()->newMember(proxy.getId(), enterTime);
+		}
+	}
 
 	// create a new member core
-	CGuildMember * memberCore = _Invitation->getGuild()->newMember( proxy.getId() );
+	if (!memberCore) {
+		nlinfo("newMember with current enter time");
+		memberCore = _Invitation->getGuild()->newMember( proxy.getId() );
+	}
 	nlassert( memberCore );
 
 // All the following already done by newMember()

@@ -262,6 +262,11 @@ protected:
 	NLMISC::CRGBA				_OverColorOver;
 	NLMISC::CRGBA				_OverColorPushed;
 
+	// Button textures
+	std::string					_TextureNormal;
+	std::string					_TextureOver;
+	std::string					_TexturePushed;
+
 	// Text template Aspect
 	CViewText					_TextTemplate;
 

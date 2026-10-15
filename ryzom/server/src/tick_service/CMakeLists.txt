@@ -6,10 +6,10 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_tick_service
 						ryzom_adminmodules
-						ryzom_gameshare
-						nelmisc
-						nelnet
-						nelgeorges)
+						${RYZOM_GAMESHARE_LIBRARIES}
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES}
+						${NELGEORGES_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_tick_service "Ryzom, Services: Tick Service (TS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_tick_service)

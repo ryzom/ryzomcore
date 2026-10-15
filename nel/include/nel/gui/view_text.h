@@ -285,8 +285,10 @@ namespace NLGUI
 		bool	_FontSizeCoef;
 		bool	_Embolden;
 		bool	_Oblique;
-		// width of the font in pixel. Just a Hint for tabing format (computed with '_')
+		// width of the font in pixel. 
 		float	_FontWidth;
+		// width of tabs
+		float	_TabWidth;
 		// strings to use when computing font size
 		std::string _FontSizingChars;
 		std::string _FontSizingFallback;
@@ -395,8 +397,8 @@ namespace NLGUI
 				// Clear the line & remove text contexts
 				void clear(NL3D::UTextContext &textContext);
 				// Add a new word (and its context) in the line + a number of spaces to append at the end of the line
-				void	addWord(const std::string &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, NL3D::UTextContext &textContext);
-				void    addWord(const CWord &word, float fontWidth);
+				void	addWord(const std::string &word, uint numSpaces, const CFormatInfo &wordFormat, float fontWidth, float tabWidth, NL3D::UTextContext &textContext);
+				void    addWord(const CWord &word, float fontWidth, float tabWidth);
 				uint	getNumWords() const { return (uint)_Words.size(); }
 				CWord   &getWord(uint index) { return _Words[index]; }
 				float	getSpaceWidth() const { return _SpaceWidth; }

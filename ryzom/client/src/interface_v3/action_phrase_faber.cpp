@@ -50,6 +50,10 @@ using namespace NLMISC;
 
 // ***************************************************************************
 const std::string	FaberPlanDB= "UI:PHRASE:FABER:FABER_PLAN:SHEET";
+const std::string	FaberPlanHpBuffDB= "UI:PHRASE:FABER:FABER_PLAN:HP_BUFF";
+const std::string	FaberPlanSapBuffDB= "UI:PHRASE:FABER:FABER_PLAN:SAP_BUFF";
+const std::string	FaberPlanStaBuffDB= "UI:PHRASE:FABER:FABER_PLAN:STA_BUFF";
+const std::string	FaberPlanFocusBuffDB= "UI:PHRASE:FABER:FABER_PLAN:FOCUS_BUFF";
 const std::string	MPFaberDB= "UI:PHRASE:FABER:MP_BUILD";
 const std::string	MPSelectionDB= "UI:PHRASE:FABER:MP_SELECT";
 const std::string	MPQuantityDb= "UI:PHRASE:FABER:MP_QUANTITY";
@@ -170,6 +174,16 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	if(node)
 		node->setValue32(0);
 
+	// Reset buff values
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanHpBuffDB, false);
+	if (node) node->setValue32(0);
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanSapBuffDB, false);
+	if (node) node->setValue32(0);
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanStaBuffDB, false);
+	if (node) node->setValue32(0);
+	node = NLGUI::CDBManager::getInstance()->getDbProp(FaberPlanFocusBuffDB, false);
+	if (node) node->setValue32(0);
+
 	// Reset the result item
 	node= NLGUI::CDBManager::getInstance()->getDbProp(ItemResultSheetDB, false);
 	if(node)
@@ -222,6 +236,17 @@ void		CActionPhraseFaber::launchFaberCastWindow(sint32 memoryLine, uint memoryIn
 	// Observe skill status change to update success rate
 	CSkillManager       *pSM= CSkillManager::getInstance();
 	pSM->appendSkillChangeCallback(&_SkillObserver);
+
+
+	// add observer to mod_craft_success.sbrick
+	{
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->addObserver(&_DBModCraftObs, textId);
+		}
+	}
 }
 
 
@@ -254,6 +279,17 @@ void			CActionPhraseFaber::onCloseFaberCastWindow()
 	}
 
 	pSM->removeSkillChangeCallback(&_SkillObserver);
+
+
+	// remove mod_craft_success.sbrick observer
+	{
+		CCDBNodeLeaf *node= NLGUI::CDBManager::getInstance()->getDbProp("SERVER:CHARACTER_INFO:SUCCESS_MODIFIER:CRAFT", false);
+		if (node)
+		{
+			ICDBNode::CTextId textId;
+			node->removeObserver(&_DBModCraftObs, textId);
+		}
+	}
 }
 
 
@@ -488,6 +524,10 @@ void		CActionPhraseFaber::validateFaberPlanSelection(CSBrickSheet *itemPlanBrick
 				// Bkup original quantity from inventory
 				_InventoryMirror[i].OriginalQuantity= _InventoryMirror[i].Quantity;
 				_InventoryMirror[i].LockedByOwner= bLockedByOwner;
+				// remember these for sorting
+				_InventoryMirror[i].MpFamily = mpSheet->Mp.Family;
+				_InventoryMirror[i].Ecosystem = mpSheet->Mp.Ecosystem;
+				_InventoryMirror[i].StatEnergy = mpSheet->Mp.StatEnergy;
 			}
 		}
 	}
@@ -682,6 +722,63 @@ void			CActionPhraseFaber::filterSelectionItemSpecific(std::vector<uint> &mps, N
 	mps= res;
 }
 
+// ***************************************************************************
+struct SItemSortData
+{
+	uint Index;
+	RM_FAMILY::TRMFamily MpFamily;
+	ECOSYSTEM::EECosystem Ecosystem;
+	uint16 StatEnergy;
+	uint16 Quality;
+	uint16 Quantity;
+
+	SItemSortData(uint i, RM_FAMILY::TRMFamily mpfam, ECOSYSTEM::EECosystem eco, uint16 stat, uint16 quality, uint16 quantity)
+	: Index(i), MpFamily(mpfam), Ecosystem(eco), StatEnergy(stat), Quality(quality), Quantity(quantity)
+	{}
+
+	bool operator<(const SItemSortData &other) const
+	{
+		// anete, shu
+		if (MpFamily < other.MpFamily) return true;
+		if (MpFamily > other.MpFamily) return false;
+
+		// desert, lake
+		if (Ecosystem < other.Ecosystem) return true;
+		if (Ecosystem > other.Ecosystem) return false;
+
+		// basic, choice
+		if (StatEnergy < other.StatEnergy) return true;
+		if (StatEnergy > other.StatEnergy) return false;
+
+		// q10, q200
+		if (Quality < other.Quality) return true;
+		if (Quality > other.Quality) return false;
+
+		// x10, x200
+		if (Quantity < other.Quantity) return true;
+		if (Quantity > other.Quantity) return false;
+
+		return false;
+	}
+};
+
+// ***************************************************************************
+void CActionPhraseFaber::sortSelection(std::vector<uint> &mps) const
+{
+	std::vector<SItemSortData> items;
+	items.reserve(mps.size());
+	for(uint i = 0; i < mps.size(); i++)
+	{
+		const CItem &item = _InventoryMirror[mps[i]];
+		items.push_back(SItemSortData(mps[i], item.MpFamily, item.Ecosystem, item.StatEnergy, item.Quality, item.Quantity));
+	}
+
+	std::sort(items.begin(), items.end());
+
+	// overwrite previous values
+	for(uint i = 0; i< items.size(); i++)
+		mps[i] = items[i].Index;
+}
 
 // ***************************************************************************
 void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
@@ -770,6 +867,9 @@ void		CActionPhraseFaber::startMpSelection(uint itemReqLine, uint mpSlot)
 		{
 			nlstop;
 		}
+
+		// Sort before displaying
+		sortSelection(selectMps);
 
 		// Reset the DB selection
 		resetSelection();
@@ -1401,6 +1501,10 @@ void		CActionPhraseFaber::onInventoryChange()
 				newInvItem.Weight= itemImage->getWeight();
 				newInvItem.OriginalQuantity= newInvItem.Quantity;
 				newInvItem.LockedByOwner = bLockedByOwner;
+				// remember these for sorting
+				newInvItem.MpFamily = mpSheet->Mp.Family;
+				newInvItem.Ecosystem = mpSheet->Mp.Ecosystem;
+				newInvItem.StatEnergy = mpSheet->Mp.StatEnergy;
 			}
 
 			/* There is 5 cases:
@@ -1565,6 +1669,14 @@ void	CActionPhraseFaber::updateItemResult()
 	uint		phraseSlot= pPM->getMemorizedPhrase(_ExecuteFromMemoryLine, _ExecuteFromMemoryIndex);
 	const CSPhraseCom	&phrase= pPM->getPhrase(phraseSlot);
 	uint32		recommendedPropId= pBM->getBrickPropId("cr_recommended");
+	uint32 crHp = pBM->getBrickPropId("cr_hp");
+	uint32 crSap = pBM->getBrickPropId("cr_sap");
+	uint32 crSta = pBM->getBrickPropId("cr_sta");
+	uint32 crFocus = pBM->getBrickPropId("cr_focus");
+	sint32 hpBuff = 0;
+	sint32 sapBuff = 0;
+	sint32 staBuff = 0;
+	sint32 focusBuff = 0;
 	for(i=0;i<phrase.Bricks.size();i++)
 	{
 		CSBrickSheet	*brick= pBM->getBrick(phrase.Bricks[i]);
@@ -1578,10 +1690,30 @@ void	CActionPhraseFaber::updateItemResult()
 					// minimze the level
 					minLevel= min(minLevel, sint32(brick->Properties[j].Value));
 				}
+
+				if (brick->Properties[j].PropId == crHp)
+					hpBuff = sint32(brick->Properties[j].Value);
+				if (brick->Properties[j].PropId == crSap)
+					sapBuff = sint32(brick->Properties[j].Value);
+				if (brick->Properties[j].PropId == crSta)
+					staBuff = sint32(brick->Properties[j].Value);
+				if (brick->Properties[j].PropId == crFocus)
+					focusBuff = sint32(brick->Properties[j].Value);
 			}
 		}
 	}
 
+	{
+		NLGUI::CDBManager *cdb = NLGUI::CDBManager::getInstance();
+		NLMISC::CCDBNodeLeaf *node = cdb->getDbProp(FaberPlanHpBuffDB, false);
+		if (node) node->setValue32(hpBuff);
+		node = cdb->getDbProp(FaberPlanSapBuffDB, false);
+		if (node) node->setValue32(sapBuff);
+		node = cdb->getDbProp(FaberPlanStaBuffDB, false);
+		if (node) node->setValue32(staBuff);
+		node = cdb->getDbProp(FaberPlanFocusBuffDB, false);
+		if (node) node->setValue32(focusBuff);
+	}
 
 	// **** Parse all MPs setuped, to compute level and stats
 	uint	totalItemPartMPReq= 0;
@@ -1879,6 +2011,14 @@ void CActionPhraseFaber::CSkillObserver::onSkillChange()
 	// Dont update if the plan has not yet been selected
 	if(ActionPhraseFaber->_ExecuteFromItemPlanBrick==NULL)
 		return;
+	ActionPhraseFaber->updateItemResult();
+}
+
+void CActionPhraseFaber::CDBModCraftObs::update(ICDBNode * /* node */)
+{
+	if (ActionPhraseFaber == NULL || ActionPhraseFaber->_ExecuteFromItemPlanBrick == NULL)
+		return;
+
 	ActionPhraseFaber->updateItemResult();
 }
 

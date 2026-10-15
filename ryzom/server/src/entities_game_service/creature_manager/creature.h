@@ -492,6 +492,8 @@ public:
 	void	setFameByKillValid(bool value) { _FameByKillValid = value; }
 	void	setFameByKill(sint32 value) { _FameByKill = value; }
 
+	void setForm(const CStaticCreatures *form) { _Form = form;}
+
 	void reset()
 	{
 		if (_Form)

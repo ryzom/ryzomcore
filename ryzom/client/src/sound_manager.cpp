@@ -468,9 +468,7 @@ void CSoundManager::init(IProgressCallback *progressCallBack)
 			_AudioMixer->setPackedSheetOption("", false);
 
 		UAudioMixer::TDriver	driverType= UAudioMixer::DriverAuto;
-		if(ClientCfg.DriverSound==CClientConfig::SoundDrvFMod)
-			driverType= UAudioMixer::DriverFMod;
-		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
+		if(ClientCfg.DriverSound==CClientConfig::SoundDrvOpenAL)
 			driverType= UAudioMixer::DriverOpenAl;
 		else if(ClientCfg.DriverSound==CClientConfig::SoundDrvDirectSound)
 			driverType= UAudioMixer::DriverDSound;

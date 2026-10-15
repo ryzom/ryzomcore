@@ -6,12 +6,12 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_backup_service
 					ryzom_adminmodules
-					ryzom_gameshare
+					${RYZOM_GAMESHARE_LIBRARIES}
 					ryzom_servershare
-					nelmisc 
-					nelnet
-					nelgeorges
-					nelligo)
+					${NELMISC_LIBRARIES} 
+					${NELNET_LIBRARIES}
+					${NELGEORGES_LIBRARIES}
+					${NELLIGO_LIBRARIES})
 					
 NL_DEFAULT_PROPS(ryzom_backup_service "Ryzom, Services: Backup Service (BS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_backup_service)

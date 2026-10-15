@@ -377,6 +377,9 @@ CCharacterCL::CCharacterCL()
 
 
 	_CustomScale = 1.f;
+	_OldCustomScale = 0.f;
+	_StepCustomScale = 0.f;
+	_StartCustomScale = ryzomGetLocalTime();
 }// CCharacterCL //
 
 //-----------------------------------------------
@@ -1690,13 +1693,38 @@ void CCharacterCL::updateVisualPropertyVpb(const NLMISC::TGameCycle &/* gameCycl
 		nlinfo("(%05d,%03d) CH:updtVPVpb:%d: Scale(%d)", sint32(T1%100000), NetMngr.getCurrentServerTick(), _Slot,
 			(uint)altLookProp.PropertySubData.Scale);
 	}
-	// Save old scale
-	float oldCustomScale = _CustomScale;
+
+	float customScale;
 	// Set new scale
 	if (altLookProp.PropertySubData.Scale==0)
-		_CustomScale = 1.f;
+		customScale = 1.f;
 	else
-		_CustomScale = (float)altLookProp.PropertySubData.Scale/100.f;
+		customScale = ((float)altLookProp.PropertySubData.Scale/100.f);
+	nlinfo("customScale = %f", customScale);
+	_StartCustomScale = ryzomGetLocalTime();
+	if (_OldCustomScale == 0) // first time
+	{
+		_StartCustomScale -= 1001.f;
+		_OldCustomScale = 1.f;
+		_CustomScale = 1.f;
+	}
+
+	_StepCustomScale = customScale - _CustomScale;
+	_OldCustomScale = _CustomScale;
+}
+
+void CCharacterCL::scale(bool calculate)
+{
+	// Save old scale
+	float oldCustomScale = _CustomScale;
+	_CustomScale = _OldCustomScale + (float(ryzomGetLocalTime() - _StartCustomScale) / 1000.f) * _StepCustomScale;
+	if ((_StepCustomScale >= 0 && _CustomScale > _OldCustomScale+_StepCustomScale)
+		|| (_StepCustomScale < 0 && _CustomScale < _OldCustomScale+_StepCustomScale))
+	{
+		_CustomScale = _OldCustomScale+_StepCustomScale;
+		_StepCustomScale = 0;
+	}
+
 	// Apply modification
 	_CustomScalePos /= oldCustomScale;
 	_CustomScalePos *= _CustomScale;
@@ -2121,6 +2149,7 @@ double CCharacterCL::computeSpeed()
 //-----------------------------------------------
 double CCharacterCL::computeSpeedFactor(double speedToDest)
 {
+
 	double speedFactor = 1.0;
 
 	// \todo GUIGUI : optimize emotes, currently it's badly designed.
@@ -4553,13 +4582,20 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 {
 	nlassert(targetHitDates.size()==bc.Targets.Targets.size());
 
-	if(!bc.Targets.Targets.empty())
+	if (behaviour.DeltaHP == 0 || bc.Targets.Targets.empty())
+		return;
+
+	CRGBA deltaHPColor(0, 0, 0);
+	for (size_t i=0; i<bc.Targets.Targets.size(); ++i)
 	{
-		if(behaviour.DeltaHP != 0)
+		if(bc.Targets.Targets[i].DeltaHP == 0)
+			continue;
+
+		CEntityCL *target2 = EntitiesMngr.entity(bc.Targets.Targets[i].TargetSlot);
+		if(target2)
 		{
-			CRGBA deltaHPColor(0, 0, 0);
 			// if it's a hit
-			if( behaviour.DeltaHP < 0 )
+			if(bc.Targets.Targets[i].DeltaHP < 0)
 			{
 				// if the behaviour is casted by the user
 				if( slot() == 0 )
@@ -4590,13 +4626,7 @@ void CCharacterCL::applyBehaviourFlyingHPs(const CBehaviourContext &bc, const MB
 				deltaHPColor = CRGBA(0,220,0);
 			}
 
-			// Set the delta HP
-			for (size_t i=0; i<bc.Targets.Targets.size(); ++i)
-			{
-				CEntityCL *target2 = EntitiesMngr.entity(bc.Targets.Targets[i].TargetSlot);
-				if(target2)
-					target2->addHPOutput(behaviour.DeltaHP, deltaHPColor, float(targetHitDates[i]-TimeInSec));
-			}
+			target2->addHPOutput(bc.Targets.Targets[i].DeltaHP, deltaHPColor, float(targetHitDates[i]-TimeInSec));
 		}
 	}
 }
@@ -6046,6 +6076,9 @@ void CCharacterCL::updateAttachedFX()
 //-----------------------------------------------
 void CCharacterCL::updateVisible (const TTime &currentTimeInMs, CEntityCL *target)
 {
+	if (_StepCustomScale)
+		scale();
+
 	// Changes the skeleton state
 	if(!_Skeleton.empty())
 	{
@@ -6273,6 +6306,11 @@ void CCharacterCL::updateVisiblePostPos(const NLMISC::TTime &currentTimeInMs, CE
 					pos = (box().getMin() + box().getMax())/2;
 					pos.z = box().getMax().z;
 				}
+
+				CRaceStatsSheet *sheet = const_cast<CRaceStatsSheet*>(UserEntity->playerSheet());
+				float namePosZ = sheet->GenderInfos[UserEntity->getGender()].NamePosZNormal;
+				if (pos.z > box().getMin().z + namePosZ)
+					pos.z = box().getMin().z + namePosZ;
 				nlassert(isValidDouble(pos.x) && isValidDouble(pos.y) && isValidDouble(pos.z));
 				_CurrentBubble->Position = pos;
 			}
@@ -6561,6 +6599,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 	_OldAutomaton = _CurrentAutomaton;
 	// Compute the Time Step.
 	double frameTimeRemaining = computeTimeStep(((double)currentTimeInMs)*0.001);
+
 	// Update the LodCharacter Animation.
 	if(_LodCharacterAnimEnabled)
 	{
@@ -6678,7 +6717,7 @@ ADD_METHOD(void CCharacterCL::updatePos(const TTime &currentTimeInMs, CEntityCL 
 			updatePosCombatFloat(frameTimeRemaining, target);
 		}
 		// Compute the average speed to the destination.
-		// double spd = 
+		// double spd =
 		computeSpeed();
 
 
@@ -8232,14 +8271,14 @@ float CCharacterCL::getSheetScale() const	// virtual
 // getColRadius :
 // Return the entity collision radius. (return 0.5 if there is any problem).
 //---------------------------------------------------
-float CCharacterCL::getSheetColRadius() const 
+float CCharacterCL::getSheetColRadius() const
 {
-	if(!_Sheet) 
+	if(!_Sheet)
 		return 0.5f;
 	else
 		return _Sheet->ColRadius;
 }
-	
+
 
 //---------------------------------------------------
 // getScale :
@@ -8358,7 +8397,7 @@ std::string CCharacterCL::shapeFromItem(const CItemSheet &itemSheet) const
 		sheet = itemSheet.getShape();
 
 	return sheet;
-		
+
 }// shapeFromItem //
 
 
@@ -9146,7 +9185,7 @@ void CCharacterCL::setAuraFX(uint index, const CAnimationFX *sheet)
 			bi.DelayBeforeStart = 11.5f;
 			_AttachedFXListToStart.push_front(bi);
 		}
-		else 
+		else
 		{
 			CAttachedFX::TSmartPtr fx = new CAttachedFX;
 			fx->create(*this, bi, CAttachedFX::CTargeterInfo());
@@ -9705,7 +9744,7 @@ NLMISC_COMMAND(projectile, "Cast a projectile on another entity", "<spellID> <st
 		double dist = (target->pos() - ch->pos()).norm();
 		bool resist = false;
 		if (args.size() > 4) fromString(args[4], resist);
-		bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, resist, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+		bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, resist, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), -11));
 	}
 	bc.BehavTime = TimeInSec;
 	ch->applyBehaviour(bc);
@@ -9743,7 +9782,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 			if (mainTarget)
 			{
 				double dist = (mainTarget->pos() - ch->pos()).norm();
-				bc.Targets.Targets.push_back(CMultiTarget::CTarget(mainTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+				bc.Targets.Targets.push_back(CMultiTarget::CTarget(mainTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), 1));
 				for(sint k = 1; k < (sint) (args.size() - 4); ++k)
 				{
 					uint secondaryTargetSlot;
@@ -9753,7 +9792,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 					if (secondaryTarget)
 					{
 						dist = (secondaryTarget->pos() - mainTarget->pos()).norm();
-						bc.Targets.Targets.push_back(CMultiTarget::CTarget(secondaryTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+						bc.Targets.Targets.push_back(CMultiTarget::CTarget(secondaryTargetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), k+1));
 					}
 				}
 			}
@@ -9770,7 +9809,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 				if (target)
 				{
 					double dist = (target->pos() - ch->pos()).norm();
-					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), k+1));
 				}
 			}
 		}
@@ -9787,7 +9826,7 @@ NLMISC_COMMAND(mtProjectile, "Cast a projectile on one or several entities", "<c
 				if (target)
 				{
 					double dist = (target->pos() - startSlot->pos()).norm();
-					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+					bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), k+1));
 					startSlot = target;
 				}
 			}
@@ -10100,6 +10139,7 @@ NLMISC_COMMAND(attack, "simulate an attack", "<slot> <intensity> <hit_type> <loc
 	CMultiTarget::CTarget target;
 	target.TargetSlot = UserEntity->selection();
 	target.Info = dsPower | (dsType << 3);
+	target.DeltaHP = -20;
 	bc.Targets.Targets.push_back(target);
 	bc.BehavTime = TimeInSec;
 	bc.Behav.DeltaHP = -20;
@@ -10154,7 +10194,7 @@ NLMISC_COMMAND(rangeAttack, "simulate a range attack", "<slot> [intensity] [loca
 	CEntityCL *target = EntitiesMngr.entity(targetSlot);
 	if (!target) return false;
 	double dist = (target->pos() - entity->pos()).norm();
-	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), -10));
 	bc.Behav.DeltaHP = -10;
 	entity->applyBehaviour(bc);
 	return true;
@@ -10188,7 +10228,7 @@ NLMISC_COMMAND(creatureAttack, "simulate a creature attack (2 attaques per creat
 	{
 		fromString(args[8], resist);
 	}
-	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT))));
+	bc.Targets.Targets.push_back(CMultiTarget::CTarget(targetSlot, false, (uint8) ceilf((float) (dist /  MULTI_TARGET_DISTANCE_UNIT)), -15));
 	bc.Behav.CreatureAttack.ActionDuration = 0;
 	uint magicImpactIntensity = 1;
 	if (args.size() > 3)

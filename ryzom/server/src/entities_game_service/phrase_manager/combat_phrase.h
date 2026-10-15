@@ -345,12 +345,12 @@ protected:
 	 * \param madnessCaster if isMad == true then this is the caster of the madness spell
 	 * \return true if the attack is successful
 	 */
-	bool launchAttack(CEntityBase * actingEntity, bool rightHand, bool isMad, TDataSetRow madnessCaster);
+	bool launchAttack(CEntityBase * actingEntity, bool rightHand, bool isMad, TDataSetRow madnessCaster, std::vector<sint16> &targetDeltaHp);
 
 	/**
 	 * launch attack on given target
 	 */
-	void launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool isMad, bool needComputeBaseDamage);
+	void launchAttackOnTarget(uint8 targetIndex, bool rightHand, bool isMad, bool needComputeBaseDamage, sint16 &deltaHP);
 
 	/**
 	 * check target validity

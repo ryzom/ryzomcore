@@ -434,6 +434,71 @@ CGameItemPtr CInventoryBase::removeItem(uint32 slot, uint32 quantity, TInventory
 }
 
 // ****************************************************************************
+CGameItemPtr CInventoryBase::splitStackItem(CGameItemPtr &item, uint32 quantity, TInventoryOpResult * res)
+{
+	if (item->getInventory() == NULL)
+	{
+		nlwarning("Trying to split item that is not in inventory");
+		if (res) *res = ior_error;
+		return NULL;
+	}
+	// TODO: spliting referenced item is probably ok (item itself stays in the slot)
+	if (item->getRefInventory() != NULL)
+	{
+		nlwarning("Trying to split referenced item on inv:%d, slot: %d", item->getInventory()->getInventoryId(), item->getInventorySlot());
+		if (res) *res = ior_error;
+		return NULL;
+	}
+	if (quantity == 0)
+	{
+		if (res) *res = ior_error;
+		return NULL;
+	}
+	if (quantity >= item->getStackSize())
+	{
+		if (res) *res = ior_stack_undersize;
+		return NULL;
+	}
+	if (item->getLockCount() != 0)
+	{
+		if (res != NULL) *res = ior_item_locked;
+		return NULL;
+	}
+	if (getFreeSlotCount() == 0)
+	{
+		if (res) *res = ior_no_free_slot;
+		return NULL;
+	}
+
+	uint32 slot = getFirstFreeSlot();
+	if (slot == INVENTORIES::INVALID_INVENTORY_SLOT)
+	{
+		if (res) *res = ior_error;
+		return NULL;
+	}
+
+	// create new stack
+	_Items[slot] = item->getItemCopy();
+	_Items[slot]->setStackSize(quantity);
+	_Items[slot]->setInventory(CInventoryPtr(this), slot);
+	--_FreeSlotCount;
+
+	item->setStackSize(item->getStackSize() - quantity);
+
+	// old slot
+	INVENTORIES::TItemChangeFlags changeFlags(INVENTORIES::itc_bulk);
+	changeFlags.setEnumValue(INVENTORIES::itc_weight);
+	onItemChanged(item->getInventorySlot(), changeFlags);
+
+	// new slot
+	onItemChanged(slot, INVENTORIES::itc_inserted);
+	onInventoryChanged(INVENTORIES::ic_item_list);
+
+	if (res) *res = ior_ok;
+	return _Items[slot];
+}
+
+// ****************************************************************************
 uint32 CInventoryBase::deleteStackItem(uint32 slot, uint32 quantity, TInventoryOpResult * res)
 {
 	nlassert(slot < _Items.size());
@@ -971,6 +1036,12 @@ void CCharacterInvView::setCharacter(CCharacter *character)
 
 // ****************************************************************************
 CCharacter *CCharacterInvView::getCharacter()
+{
+	return _Character;
+}
+
+// ****************************************************************************
+CCharacter *CCharacterInvView::getConstCharacter() const
 {
 	return _Character;
 }

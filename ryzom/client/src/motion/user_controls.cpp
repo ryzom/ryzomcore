@@ -36,6 +36,7 @@
 #include "../cursor_functions.h"
 #include "../time_client.h"
 #include "../interface_v3/interface_manager.h"
+#include "../ingame_database_manager.h"
 #include "../entities.h"
 #include "../view.h"
 #include "../input.h"
@@ -206,6 +207,7 @@ void CUserControls::autowalkState(bool enable)
 {
 	if(enable)
 	{
+		checkSpeedFactor();
 		_DirectionMove |= autowalk;
 		// If not backward, default is forward.
 		if(!(_DirectionMove & backward))
@@ -729,6 +731,7 @@ void CUserControls::commonMove()
 				_DirectionMove &= ~(autowalk|forward|backward);
 			else
 			{
+				checkSpeedFactor();
 				// Start Autowalk
 				_DirectionMove |= autowalk;
 				// If not backward, default is forward.
@@ -800,10 +803,32 @@ void CUserControls::commonMove()
 				// Cursor mode.
 				SetMouseCursor ();
 
+				sint32 x, y = -1;
+				CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
+				if (cursor)
+					cursor->getPointerPos(x, y);
+
+				uint32 w, h;
+				CViewRenderer::getInstance()->getScreenSize(w, h);
+				// Get the pointer position (in float)
+				float cursX, cursY;
+				cursX = (float)x/(float)w;
+				cursY = (float)y/(float)h;
+
+
 				// Short Right Click -> Check Action
-				if((T1-_RightClickStart) <= _TimeLongClick)
+				if ((T1-_RightClickStart) <= _TimeLongClick)
 				{
-					if(ClientCfg.SelectWithRClick || R2::isEditionCurrent())
+					
+					sint32 instance_idx;
+					CShapeInstanceReference instref = EntitiesMngr.getShapeInstanceUnderPos(cursX, cursY, instance_idx);
+					nlinfo("instance_idx = %d", instance_idx);
+					if  (instance_idx != -1 && !instref.Instance.empty() && !instref.ContextURL.empty())
+					{
+						UserEntity->selection(CLFECOMMON::INVALID_SLOT);
+					}
+					
+					if (ClientCfg.SelectWithRClick || R2::isEditionCurrent())
 					{
 						// nb : the ring editor also need that kind of events
 						execActionCursorPos(true,dblClickRight);
@@ -811,9 +836,7 @@ void CUserControls::commonMove()
 
 					// Launch Context Menu
 					if (R2::getEditor().getMode() != R2::CEditor::EditionMode)
-					{
 						IM->launchContextMenuInGame("ui:interface:game_context_menu");
-					}
 				}
 
 
@@ -1332,5 +1355,20 @@ void CUserControls::cancelActionsWhenMoving()
 	if( UserEntity->behaviour() == MBEHAV::RANGE_ATTACK )
 	{
 		//UserEntity->disengage();
+	}
+}
+
+//-----------------------------------------------
+// checkSpeedFactor()
+//-----------------------------------------------
+void CUserControls::checkSpeedFactor()
+{
+	if (!IngameDbMngr.initInProgress())
+	{
+		// check if speed factor is zero, and if yes, notify the player
+		CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
+		if (pNodeLeaf && pNodeLeaf->getValue64() == 0) {
+			CInterfaceManager::getInstance()->displaySystemInfo(CI18N::get("uiSpeedFactorZero"), "CHK");
+		}
 	}
 }

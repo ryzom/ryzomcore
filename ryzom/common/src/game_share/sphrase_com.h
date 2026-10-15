@@ -53,13 +53,15 @@ public:
 	DECLARE_PERSISTENCE_METHODS
 
 	/// Constructor
-	CSPhraseCom(){}
+	CSPhraseCom(): IconIndex(std::numeric_limits<uint8>::max())
+	{}
 
 	// clear out the contents before filling with new data...
 	void clear()
 	{
 		Bricks.clear();
 		Name.clear();
+		IconIndex = std::numeric_limits<uint8>::max();
 	}
 
 	// List Of SBricks composing the phrase.
@@ -67,6 +69,9 @@ public:
 
 	// Name Of the Phrase. Saved on server, read on client.
 	ucstring						Name; // FIXME: UTF-8 (serial)
+
+	// Index into Bricks to use as icon (if out of range, then automatic icon selection)
+	uint8							IconIndex;
 
 	/// The comparison is made only on Bricks
 	bool	operator==(const CSPhraseCom &p) const;

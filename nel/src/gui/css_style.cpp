@@ -1115,67 +1115,56 @@ namespace NLGUI
 							// consume 'center'
 							next++;
 						}
-						else if (val == "left" || val == "right")
+						else if ((bgPositionX.empty() || bgPositionX == "center") && (val == "left" || val == "right"))
 						{
-							val = toLowerAscii(parts[next]);
-							if (val == "center")
+							bgPositionX = val;
+							// consume 'left|right'
+							next++;
+							if (next < parts.size() && getCssLength(fval, unit, parts[next]))
 							{
-								if (bgPositionX.empty()) bgPositionX = "center";
-								if (bgPositionY.empty()) bgPositionY = "center";
-								// consume 'center'
+								bgPositionX += " " + parts[next];
+								// consume css length
 								next++;
 							}
-							else if ((bgPositionX.empty() || bgPositionX == "center") && (val == "left" || val == "right"))
+						}
+						else if ((bgPositionY.empty() || bgPositionY == "center") && (val == "top" || val == "bottom"))
+						{
+							bgPositionY = val;
+							// consume top|bottom
+							next++;
+							if (next < parts.size() && getCssLength(fval, unit, parts[next]))
 							{
-								bgPositionX = val;
-								// consume 'left|right'
+								bgPositionY += " " + parts[next];
+								// consume css length
 								next++;
-								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
-								{
-									bgPositionX += " " + parts[next];
-									// consume css length
-									next++;
-								}
 							}
-							else if ((bgPositionY.empty() || bgPositionY == "center") && (val == "top" || val == "bottom"))
+						}
+						else if (getCssLength(fval, unit, parts[next]))
+						{
+							// override X only on first loop
+							if (next == index)
 							{
-								bgPositionY = val;
-								// consume top|bottom
-								next++;
-								if (next < parts.size() && getCssLength(fval, unit, parts[next]))
-								{
-									bgPositionY += " " + parts[next];
-									// consume css length
-									next++;
-								}
+								bgPositionX = parts[next];
 							}
-							else if (getCssLength(fval, unit, parts[next]))
+							else if (bgPositionY.empty())
 							{
-								// override X only on first loop
-								if (next == index)
-								{
-									bgPositionX = parts[next];
-								}
-								else if (bgPositionY.empty())
-								{
-									bgPositionY = parts[next];
-								}
-								else
-								{
-									// invalid
-									bgPositionX.clear();
-									bgPositionY.clear();
-									break;
-								}
-								next++;
+								bgPositionY = parts[next];
 							}
 							else
 							{
-								// invalid value
+								// invalid
 								bgPositionX.clear();
 								bgPositionY.clear();
 								break;
 							}
+							next++;
+						}
+						else
+						{
+							// invalid value
+							bgPositionX.clear();
+							bgPositionY.clear();
+							break;
 						}
 					} while (loop);
 

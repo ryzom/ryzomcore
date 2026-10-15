@@ -235,9 +235,9 @@ void CQueryEgsImp::callback (const std::string &name, NLNET::TServiceId id)
 			bool bags = false;
 			// verify if an item identified by its sheet id is in the inventory of the player
 			// return 0 if not in inventory
-			// return 1 if in equipment / handling
+			// return 1 if in equipment / handling / hotbar
 			// return 2 if in bags / mektoub
-			// return 3 if in equipement/handling *AND*  bags / mektoub
+			// return 3 if in equipement/handling/hotbar *AND*  bags / mektoub
 		
 			const uint sizeInv = INVENTORIES::NUM_INVENTORY;
 			for ( uint i = 0; i < sizeInv ; ++i )
@@ -250,7 +250,7 @@ void CQueryEgsImp::callback (const std::string &name, NLNET::TServiceId id)
 						CGameItemPtr item = childSrc->getItem(j);
 						if (item != NULL && item->getSheetId() == sheet)
 						{
-							if (i == INVENTORIES::handling  || i == INVENTORIES::equipment)
+							if (i == INVENTORIES::handling  || i == INVENTORIES::equipment || i == INVENTORIES::hotbar)
 							{
 								equipement = true;
 								// go out of loop

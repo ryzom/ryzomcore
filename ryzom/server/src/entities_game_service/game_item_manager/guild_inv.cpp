@@ -93,7 +93,7 @@ void CGuildInventoryView::onInventoryChanged(INVENTORIES::TInventoryChangeFlags 
 //-----------------------------------------------------------------------------
 void CGuildInventoryView::onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags)
 {
-	if ( changeFlags.checkEnumValue( INVENTORIES::itc_inserted ) )
+	if ( changeFlags.checkEnumValue(INVENTORIES::itc_inserted) || changeFlags.checkEnumValue(INVENTORIES::itc_lock_state) )
 	{
 		updateClientSlot( slot );
 		updateInfoVersion( slot );
@@ -136,6 +136,11 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 {
 	CGameItemPtr item = getInventory()->getItem( slot );
 	const INVENTORIES::TItemId &itemId = item->getItemId();
+	BOTCHATTYPE::TBotChatResaleFlag resaleFlag = (item->durability() == item->maxDurability() ? BOTCHATTYPE::ResaleOk : BOTCHATTYPE::ResaleKOBroken);
+	if (item->getLockedByOwner())
+	{
+		resaleFlag = BOTCHATTYPE::ResaleKOLockedByOwner;
+	}
 
 	INVENTORIES::CItemSlot itemSlot( slot );
 	itemSlot.setItemProp( INVENTORIES::Sheet, item->getSheetId().asInt() );
@@ -144,12 +149,12 @@ void CGuildInventoryView::updateClientSlot(uint32 slot)
 	itemSlot.setItemProp( INVENTORIES::UserColor, item->color() );
 	itemSlot.setItemProp( INVENTORIES::CreateTime, itemId.getCreateTime() );
 	itemSlot.setItemProp( INVENTORIES::Serial, itemId.getSerialNumber() );
-	itemSlot.setItemProp( INVENTORIES::Locked, 0 );
+	itemSlot.setItemProp( INVENTORIES::Locked, item->getLockCount()>0?1:0 );
 	itemSlot.setItemProp( INVENTORIES::Weight, item->weight() / 10 );
 	itemSlot.setItemProp( INVENTORIES::NameId, 0 ); // TODO: name of guild (item->sendNameId())
 	itemSlot.setItemProp( INVENTORIES::Enchant, item->getClientEnchantValue() );
 	itemSlot.setItemProp( INVENTORIES::Price, 0 );
-	itemSlot.setItemProp( INVENTORIES::ResaleFlag, 0 );
+	itemSlot.setItemProp( INVENTORIES::ResaleFlag, resaleFlag );
 	itemSlot.setItemProp( INVENTORIES::ItemClass, item->getItemClass() );
 	itemSlot.setItemProp( INVENTORIES::ItemBestStat, item->getCraftParameters() == 0 ? RM_FABER_STAT_TYPE::Unknown : item->getCraftParameters()->getBestItemStat() );
 	itemSlot.setItemProp( INVENTORIES::PrerequisitValid, 1 );

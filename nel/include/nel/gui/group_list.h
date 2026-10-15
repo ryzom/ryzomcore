@@ -99,6 +99,8 @@ namespace NLGUI
 		// Get the number of active children
 		uint getNumActiveChildren() const;
 
+		uint getMaxElements() const { return _MaxElements; }
+
 		/**
 		* set the template that will be used to add text;
 		* \templ : a CViewText object. Only its font size, color and shadow are required.

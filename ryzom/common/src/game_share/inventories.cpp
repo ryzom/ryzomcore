@@ -33,6 +33,7 @@ namespace INVENTORIES
 		NL_STRING_CONVERSION_TABLE_ENTRY(handling)
 		NL_STRING_CONVERSION_TABLE_ENTRY(temporary)
 		NL_STRING_CONVERSION_TABLE_ENTRY(equipment)
+		NL_STRING_CONVERSION_TABLE_ENTRY(hotbar)
 		NL_STRING_CONVERSION_TABLE_ENTRY(bag)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal1)
 		NL_STRING_CONVERSION_TABLE_ENTRY(pet_animal2)
@@ -52,11 +53,23 @@ namespace INVENTORIES
 		NL_END_STRING_CONVERSION_TABLE(TInventory, InventoryToString, UNDEFINED)
 
 
-		const std::string& toString( TInventory inv )
+	const std::string& toString( TInventory inv )
 	{
 		// if this raise, correct the table above
 		nlctassert(MAX_INVENTORY_ANIMAL==7);
 		return InventoryToString.toString(inv);
+	}
+
+	const std::string toLocalDbBranch( TInventory inv )
+	{
+		std::string branch = "";
+		if (inv == handling)
+			branch = "HAND";
+		else if (inv == equipment)
+			branch = "EQUIP";
+		if (inv == hotbar)
+			branch = "HOTBAR";
+		return branch;
 	}
 
 	// convert job name to job enum value
@@ -94,6 +107,7 @@ namespace INVENTORIES
 			"TEMP",			// temporary
 			//	"",				// pick-up
 			"EQUIP",		// equipment
+			"HOTBAR",		// hotbar	
 			"",				// bag
 			"",				// pack_animal1
 			"",				// pack_animal2

@@ -227,6 +227,9 @@ CVariable<uint32> NBLoginStats("egs","NBLoginStats", "Nb logins stats kept (logo
 CVariable<bool> EnableGuildPoints("egs", "EnableGuildPoints", "Enable guild points", false, 0, true);
 CVariable<uint32> NBPointsForGuild("egs", "NbrPointsForGuild", "Nb points need to add one guild point", 100, 0, true);
 CVariable<string> ArkSalt("egs", "ArkSalt", "Salt used to hmac callbacks", string("BAE"), 0, true);
+CVariable<uint32> OutpostDaysForGvX("egs", "OutpostDaysForGvX", "Minimum days in Guild for GvE,PvE and GvG", 21, 0, true);
+
+CVariable<float> RegenerateReposModifierFactor("egs", "RegenerateReposModifierFactor", "Factor who will increase the RegenerateModifier with the time", 0, 0, true);
 
 // Max Bonus/malus/consumable effects displayed by client (database corresponding array must have the same size, and client must process the same size)
 const uint32 MaxBonusMalusDisplayed = 12;
@@ -365,6 +368,8 @@ CCharacter::CCharacter():	CEntityBase(false),
 //	_Bulk = 0;
 //	_CarriedWeight = 0;
 	_GuildId = 0;
+	_LastGuildId = 0;
+	_GuildEnterTime = 0;
 	_UseFactionSymbol = false;
 
 	_SavedVersion = 0;
@@ -450,6 +455,13 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_Organization = 0;
 	_OrganizationStatus = 0;
 	_OrganizationPoints = 0;
+	_DefaultHairType = 0;
+	_DefaultHairColor = 0;
+	_WigHairType = 0;
+	_WigHairColor = 0;
+	_UnderwearChestColor = 6;
+	_UnderwearLegsColor = 6;
+	_MainTattoo = 0;
 	// refill pact automatically
 	_doPact = false;
 
@@ -598,6 +610,7 @@ CCharacter::CCharacter():	CEntityBase(false),
 	_MaxPriceFilter = ~0u;
 
 	_LastAppliedWeightMalus = 0;
+	_CurrentRegenerateReposBonus = 0;
 	_TpTicketSlot = INVENTORIES::INVALID_INVENTORY_SLOT;
 
 	// setup timer for tickUpdate() calling
@@ -727,6 +740,8 @@ void CCharacter::clear()
 {
 	_HairType = 0;
 	_HairColor = 0;
+	_DefaultHairType = 0;
+	_DefaultHairColor = 0;
 	_HatColor = 0;
 	_JacketColor = 0;
 	_ArmsColor = 0;
@@ -735,6 +750,8 @@ void CCharacter::clear()
 	_HandsColor = 0;
 	_Money = 0;
 	_GuildId = 0;
+	_LastGuildId = 0;
+	_GuildEnterTime = 0;
 	_CreationPointsRepartition = 0;
 	_ForbidAuraUseStartDate = 0;
 	_ForbidAuraUseEndDate = 0;
@@ -2191,7 +2208,7 @@ void CCharacter::displayPowerFlags()
 //---------------------------------------------------
 // Entity want mount another
 //---------------------------------------------------
-void CCharacter::mount( TDataSetRow PetRowId )
+void CCharacter::mount(TDataSetRow PetRowId, bool fromArk)
 {
 	if ( !R2_VISION::isEntityVisibleToPlayers(getWhoSeesMe()) )
 	{
@@ -2211,7 +2228,7 @@ void CCharacter::mount( TDataSetRow PetRowId )
 				{
 					setAfkState(false);
 					sint32 petIndex = getPlayerPet( PetRowId );
-					if( (petIndex!=-1) /*&& (staticActionInProgress() != true)*/ )
+					if (fromArk || petIndex != -1 /*&& (staticActionInProgress() != true)*/)
 					{
 						COfflineEntityState state =  e->getState();
 						CVector2d destination( state.X, state.Y );
@@ -2228,6 +2245,7 @@ void CCharacter::mount( TDataSetRow PetRowId )
 							e->setRiderEntity( _EntityRowId );
 
 							// remember the mount state
+							if (petIndex != -1)
 							_PlayerPets[petIndex].IsMounted = true;
 
 //							_PropertyDatabase.setProp( "USER:MOUNT_WALK_SPEED", (sint64)(sint)(e->getPhysScores().CurrentWalkSpeed() * 1000.0f) );
@@ -2554,27 +2572,49 @@ void CCharacter::applyRegenAndClipCurrentValue()
 			_Skills._Skills[ i ].OldCurrent = _Skills._Skills[ i ].Current;
 		}
 	}
+	bool invulnerable = false;
+	CSEffect *effect = lookForActiveEffect( EFFECT_FAMILIES::PowerInvulnerability );
+	if (effect)
+		invulnerable = true;
+	else
+	{
+		effect = lookForActiveEffect( EFFECT_FAMILIES::Invincibility );
+		if (effect)
+			invulnerable = true;
+	}
 
 	sint32 oldCurrent;
+
+	if (!getPvPRecentActionFlag() && !invulnerable && _Mode().Mode == MBEHAV::SIT)
+	{
+		if (_CurrentRegenerateReposBonus == 0)
+			_CurrentRegenerateReposBonus += 0.01f;
+		else
+			_CurrentRegenerateReposBonus += RegenerateReposModifierFactor.get() * (CTickEventHandler::getGameCycle() - _CurrentRegenerateReposBonusTickUpdate);
+		_CurrentRegenerateReposBonusTickUpdate = CTickEventHandler::getGameCycle();
+	}
+	else
+		_CurrentRegenerateReposBonus = 0;
+
+	_CurrentRegenerateReposBonus = min(20.0f, _CurrentRegenerateReposBonus);
 	for( i = 0; i < SCORES::NUM_SCORES; ++i )
 	{
 		oldCurrent = _PhysScores._PhysicalScores[ i ].Current;
 		if( _PhysScores._PhysicalScores[ i ].Current < _PhysScores._PhysicalScores[ i ].Max )
 		{
-			_PhysScores._PhysicalScores[ i ].KeepRegenerateDecimal += _PhysScores._PhysicalScores[ i ].CurrentRegenerate * ( CTickEventHandler::getGameCycle() - _PhysScores._PhysicalScores[ i ].RegenerateTickUpdate ) / 10.0f;
+			currentRegen = _PhysScores._PhysicalScores[i].CurrentRegenerate + _PhysScores._PhysicalScores[i].CurrentRegenerate*_CurrentRegenerateReposBonus;
+
+			_PhysScores._PhysicalScores[i].KeepRegenerateDecimal += currentRegen
+					* (CTickEventHandler::getGameCycle() - _PhysScores._PhysicalScores[i].RegenerateTickUpdate) / 10.0f;
 			const sint32 regenWholePart = sint32(_PhysScores._PhysicalScores[ i ].KeepRegenerateDecimal);
 			_PhysScores._PhysicalScores[ i ].Current = sint32(_PhysScores._PhysicalScores[ i ].Current + regenWholePart);
 			_PhysScores._PhysicalScores[ i ].KeepRegenerateDecimal -= regenWholePart;
 
 			if (i == SCORES::hit_points)
-			{
 				PROGRESSIONPVP::CCharacterProgressionPVP::getInstance()->playerRegenHP(this, regenWholePart);
-			}
 		}
 		if( _PhysScores._PhysicalScores[ i ].Current > _PhysScores._PhysicalScores[ i ].Max )
-		{
 			_PhysScores._PhysicalScores[ i ].Current = _PhysScores._PhysicalScores[ i ].Max;
-		}
 		else if( _PhysScores._PhysicalScores[ i ].Current < 0 ) _PhysScores._PhysicalScores[ i ].Current = 0;
 		_PhysScores._PhysicalScores[ i ].RegenerateTickUpdate = CTickEventHandler::getGameCycle();
 	}
@@ -3569,7 +3609,6 @@ void CCharacter::setTarget( const CEntityId &targetId, bool sendMessage )
 					rangeLevel = 0;
 				else
 				{
-					rangeLevel = (((form->getLevel() - 1) / 5) << 1) + (((form->getLevel() - 1) % 5) >= 2 ? 2 : 1);
 					if (creature->getLockLoot() != CTEAM::InvalidTeamId)
 					{
 						if (creature->getLockLoot() == _TeamId)
@@ -3580,8 +3619,28 @@ void CCharacter::setTarget( const CEntityId &targetId, bool sendMessage )
 					else
 						CBankAccessor_PLR::getTARGET().getBARS().setPLAYER_LEVEL(_PropertyDatabase, 0);
 
-					if (rangeLevel > 11)
+					if (form->getLevel() == 200)
+					{
+						rangeLevel = 12;
+					}
+					else if (form->getLevel() == 300)
+					{
+						rangeLevel = 13;
+					}
+					else if (form->getLevel() == 400)
+					{
+						rangeLevel = 14;
+					}
+					else if (form->getLevel() == 500)
+					{
+						rangeLevel = 15;
+					}
+					else
+					{
+						rangeLevel = (((form->getLevel() - 1) / 5) << 1) + (((form->getLevel() - 1) % 5) >= 2 ? 2 : 1);
+						if (rangeLevel > 11)
 						rangeLevel = 11;
+					}
 				}
 			}
 		}
@@ -3861,7 +3920,10 @@ void CCharacter::setTargetBotchatProgramm( CEntityBase * target, const CEntityId
 				CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSIONS_OPTIONS().getArray(i).setTITLE(_PropertyDatabase, text);
 //				_PropertyDatabase.setProp( toString("TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%u:PLAYER_GIFT_NEEDED",i) , 0 );
 				CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSIONS_OPTIONS().getArray(i).setPLAYER_GIFT_NEEDED(_PropertyDatabase, 0 );
-//				_PropertyDatabase.setProp( toString("TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%u:PRIORITY",i), 0  );
+				//				_PropertyDatabase.setProp(
+				// toString("TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%u:PRIORITY",i),
+				// 0
+				//);
 				CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSIONS_OPTIONS().getArray(i).setPRIORITY(_PropertyDatabase, 2 );
 				i++;
 			}
@@ -4681,7 +4743,8 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 //-----------------------------------------------
 void CCharacter::removeKnownBrickBonus( const CSheetId& brickId )
 {
-//	egs_chinfo("<CCharacter::removeKnownBrickBonus> removing a known brick idSheet (%s)", brickId.toString().c_str() );
+	//	egs_chinfo("<CCharacter::removeKnownBrickBonus> removing a known brick idSheet (%s)", brickId.toString().c_str()
+	//);
 	const CStaticBrick* brickForm = CSheets::getSBrickForm( brickId );
 	if( brickForm )
 	{
@@ -5099,22 +5162,43 @@ void CCharacter::updateVisualInformation( uint16 InventoryEmpty, uint16 SlotEmpt
 	{
 		const CStaticRaceStats * raceForm = CSheets::getRaceStats( CSheetId(_SheetId) );
 		const CStaticItem* srcForm = 0;
+		uint8 color = 6;
 		if( raceForm )
 		{
 			switch( SlotEmpty )
 			{
 			case SLOT_EQUIPMENT::HEAD:
 				// keep a NULL form and update visual information with custom properties
-				SET_STRUCT_MEMBER( _VisualPropertyA, PropertySubData.HatModel, _HairType );
-				SET_STRUCT_MEMBER( _VisualPropertyA, PropertySubData.HatColor, _HairColor );
+				if (getUseWig())
+				{
+					SET_STRUCT_MEMBER(_VisualPropertyA, PropertySubData.HatModel, _WigHairType);
+					SET_STRUCT_MEMBER(_VisualPropertyA, PropertySubData.HatColor, _WigHairColor);
+				}
+				else
+				{
+					SET_STRUCT_MEMBER(_VisualPropertyA, PropertySubData.HatModel, _DefaultHairType);
+					SET_STRUCT_MEMBER(_VisualPropertyA, PropertySubData.HatColor, _DefaultHairColor);
+				}
 				break;
 			case SLOT_EQUIPMENT::CHEST:
 				switch( _Gender )
 				{
 					case GSGENDER::male :
+					if (!_UnderwearChest.empty())
+					{
+						srcForm = CSheets::getForm(CSheetId(_UnderwearChest));
+						color = _UnderwearChestColor;
+					}
+					else
 						srcForm = CSheets::getForm( CSheetId( raceForm->MaleDefaultEquipment.DefaultChest ) );
 						break;
 					case GSGENDER::female :
+					if (!_UnderwearChest.empty())
+					{
+						srcForm = CSheets::getForm(CSheetId(_UnderwearChest));
+						color = _UnderwearChestColor;
+					}
+					else
 						srcForm = CSheets::getForm( CSheetId( raceForm->FemaleDefaultEquipment.DefaultChest ) );
 						break;
 				}
@@ -5145,9 +5229,21 @@ void CCharacter::updateVisualInformation( uint16 InventoryEmpty, uint16 SlotEmpt
 				switch( _Gender )
 				{
 					case GSGENDER::male :
+					if (!_UnderwearLegs.empty())
+					{
+						srcForm = CSheets::getForm(CSheetId(_UnderwearLegs));
+						color = _UnderwearLegsColor;
+					}
+					else
 						srcForm = CSheets::getForm( CSheetId( raceForm->MaleDefaultEquipment.DefaultLegs ) );
 						break;
 					case GSGENDER::female :
+					if (!_UnderwearLegs.empty())
+					{
+						srcForm = CSheets::getForm(CSheetId(_UnderwearLegs));
+						color = _UnderwearLegsColor;
+					}
+					else
 						srcForm = CSheets::getForm( CSheetId( raceForm->FemaleDefaultEquipment.DefaultLegs ) );
 						break;
 				}
@@ -5167,7 +5263,7 @@ void CCharacter::updateVisualInformation( uint16 InventoryEmpty, uint16 SlotEmpt
 			}
 			// update visual property only if srcForm is valid
 			if(srcForm)
-				setVisualPropertyForEquipment(SlotEmpty, srcForm, 0, 254);
+				setVisualPropertyForEquipment(SlotEmpty, srcForm, 0, color);
 		}
 	}
 
@@ -5725,15 +5821,13 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 	if( form->PetSheet == CSheetId::Unknown )
 	{
 		if( sendMessage )
-		{
 			nlwarning("<CCharacter::addCharacterAnimal> Cant found sheet name of creature found in ticket %s", PetTicket.toString().c_str() );
-		}
 		return false;
 	}
 
 	if( form->Type == ITEM_TYPE::MEKTOUB_MOUNT_TICKET )
 	{
-		uint32 nbMektoubMount = 0;
+		sint32 nbMektoubMount = delta;
 		for( vector< CPetAnimal >::const_iterator it = _PlayerPets.begin(); it != _PlayerPets.end(); ++it )
 		{
 			const CStaticItem *ticket_form = CSheets::getForm((*it).TicketPetSheetId);
@@ -5755,18 +5849,16 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 			}
 		}
 		// check we can add delta mount
-		if( (nbMektoubMount + delta) > MAX_MEKTOUB_MOUNT )
+		if (nbMektoubMount > MAX_MEKTOUB_MOUNT)
 		{
 			if( sendMessage )
-			{
 				sendDynamicSystemMessage( _Id, "EGS_ALREADY_HAVE_MOUNT" );
-			}
 			return false;
 		}
 	}
 	else if( form->Type == ITEM_TYPE::MEKTOUB_PACKER_TICKET )
 	{
-		uint32 nbMektoubPacker = 0;
+		sint32 nbMektoubPacker = delta;
 		for( vector< CPetAnimal >::const_iterator it = _PlayerPets.begin(); it != _PlayerPets.end(); ++it )
 		{
 			const CStaticItem *ticket_form = CSheets::getForm((*it).TicketPetSheetId);
@@ -5787,12 +5879,10 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 			}
 		}
 		// check we can add delta packer
-		if( (nbMektoubPacker + delta) > MAX_PACK_ANIMAL )
+		if (nbMektoubPacker > MAX_PACK_ANIMAL)
 		{
 			if( sendMessage )
-			{
 				sendDynamicSystemMessage( _Id, "EGS_CANT_BUY_ANOTHER_PACKER" );
-			}
 			return false;
 		}
 
@@ -5801,15 +5891,13 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 		if ( p->isTrialPlayer() )
 		{
 			if( sendMessage )
-			{
 				sendDynamicSystemMessage( _Id, "EGS_CANT_BUY_PACKER_IS_TRIAL_PLAYER" );
-			}
 			return false;
 		}
 	}
 	else if (form->Type == ITEM_TYPE::ANIMAL_TICKET)
 	{
-		uint32 nbAnimals = 0;
+		sint32 nbAnimals = delta;
 		for (vector<CPetAnimal>::const_iterator it = _PlayerPets.begin(); it != _PlayerPets.end(); ++it)
 		{
 			const CStaticItem *ticket_form = CSheets::getForm((*it).TicketPetSheetId);
@@ -5831,12 +5919,10 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 			}
 		}
 		// check we can add delta animal
-		if ((nbAnimals + delta) > MAX_OTHER_PET)
+		if (nbAnimals > MAX_OTHER_PET)
 		{
 			if (sendMessage)
-			{
 				sendDynamicSystemMessage(_Id, "EGS_CANT_GET_ANOTHER_PET");
-			}
 
 			return false;
 		}
@@ -5847,9 +5933,7 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 		if (p->isTrialPlayer())
 		{
 			if (sendMessage)
-			{
 				sendDynamicSystemMessage(_Id, "EGS_CANT_BUY_PACKER_IS_TRIAL_PLAYER");
-			}
 
 			return false;
 		}
@@ -5857,9 +5941,7 @@ bool CCharacter::checkAnimalCount( const CSheetId& PetTicket, bool sendMessage, 
 	else
 	{
 		if( sendMessage )
-		{
 			nlwarning("<CCharacter::addCharacterAnimal> PetAnimal %s not yet implemented", PetTicket.toString().c_str() );
-		}
 		return false;
 	}
 	return true;
@@ -6144,7 +6226,17 @@ void CCharacter::onAnimalSpawned( CPetSpawnConfirmationMsg::TSpawnError SpawnSta
 	CPetAnimal& animal = _PlayerPets[PetIdx];
 	if( SpawnStatus == CPetSpawnConfirmationMsg::NO_ERROR_SPAWN )
 	{
-		if( PetIdx < MAX_INVENTORY_ANIMAL )
+		if (PetIdx == 8)
+		{
+			CCreature* c = CreatureManager.getCreature(TheDataset.getEntityId(PetMirrorRow));
+			if (c)
+				c->setIsAPet(true);
+
+			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
+			freeSpeedMode = true;
+
+		}
+		else if (PetIdx < MAX_INVENTORY_ANIMAL)
 		{
 			if( !TheDataset.isAccessible(animal.SpawnedPets) )
 			{
@@ -7458,7 +7550,7 @@ bool CCharacter::addCatalyserXpBonus(uint32 &slot, SSkill *skill, double xpGain,
 			{
 				if( form->XpCatalyser )
 				{
-					uint32 stackSizeFromSheet = (uint32)((xpGain*100)/form->XpCatalyser->XpBonus); // 100 because of display scale(see txt progress normal gain)
+					uint32 stackSizeFromSheet = (uint32)xpGain;//(uint32)((xpGain * 100) / form->XpCatalyser->XpBonus); // 100 because of display scale(see txt progress normal gain)
 					uint32 stackSizeFromInventory = item->getStackSize();
 					stackSizeToRemove = min(stackSizeFromSheet,stackSizeFromInventory);
 					CInventoryBase::TInventoryOpResult result;
@@ -7598,7 +7690,7 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 		addGuildPoints(guildpoints);
 
 		if (!silent)
-			nlinfo("%u %u XP in Skill %s : %u / %u", skill->MaxLvlReached, skill->Base, _Name.toUtf8().c_str(), (uint32)(XpGain), skillInitial.c_str());
+			nlinfo("%u %u XP in Skill %s : %u / %u", skill->MaxLvlReached, skill->Base, skillName.c_str(), (uint32)(XpGain*100.f), skillInitial.c_str());
 	}
 	////
 
@@ -7678,6 +7770,7 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 
 		if (!p->isTrialPlayer()) // Ulukyn: premium player have no use of catalyser but all the time x2
 		{
+			if (xpBonus < XpGain)
 			xpBonus = XpGain;
 		}
 	}
@@ -7741,7 +7834,7 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 	// For AddXpToSkillBranch mode
 	double	XpGainTruncated= XpGain;
 	double	XpGainRemainder= 0.0;
-	if( addXpMode==AddXpToSkillBranch && skill->Xp > stage->XpForPointSkill )
+	if (skill->Xp > stage->XpForPointSkill)
 	{
 		XpGainTruncated= stage->XpForPointSkill - (skill->Xp - XpGain);
 		XpGainRemainder= XpGain - XpGainTruncated;
@@ -7925,7 +8018,8 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 				_CurrentDodgeLevel = max(sint32(0), dodgeVal + _DodgeModifier);
 //				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.DodgeBase, _BaseDodgeLevel);
 				CBankAccessor_PLR::getCHARACTER_INFO().getDODGE().setBase(_PropertyDatabase, checkedCast<uint16>(_BaseDodgeLevel));
-//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.DodgeCurrent, _CurrentDodgeLevel);
+				//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.DodgeCurrent,
+				//_CurrentDodgeLevel);
 				CBankAccessor_PLR::getCHARACTER_INFO().getDODGE().setCurrent(_PropertyDatabase, checkedCast<uint16>(_CurrentDodgeLevel));
 			}
 
@@ -7955,7 +8049,9 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 
 //				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryBase, _BaseParryLevel);
 				CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setBase(_PropertyDatabase, checkedCast<uint16>(_BaseParryLevel));
-//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryCurrent, _CurrentParryLevel );
+				//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryCurrent,
+				//_CurrentParryLevel
+				//);
 				CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setCurrent(_PropertyDatabase, checkedCast<uint16>(_CurrentParryLevel) );
 			}
 
@@ -7973,12 +8069,6 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 			//Bsi.append( StatPath, NLMISC::toString("[SKILLP] %s %s %d", _Id.toString().c_str(), skillName.c_str(), skill->Base) );
 			//EgsStat.displayNL("[SKILLP] %s %s %d", _Id.toString().c_str(), skillName.c_str(), skill->Base);
 //			EGSPD::skillProgessed(_Id, skillName, skill->Base);
-			log_Character_LevelUp(_Id, skillName, skill->Base);
-			// resplenish the enrgies as player gets a new level
-			_PhysScores._PhysicalScores[ SCORES::hit_points ].Current = _PhysScores._PhysicalScores[ SCORES::hit_points ].Max;
-			_PhysScores._PhysicalScores[ SCORES::stamina ].Current = _PhysScores._PhysicalScores[ SCORES::stamina ].Max;
-			_PhysScores._PhysicalScores[ SCORES::sap ].Current = _PhysScores._PhysicalScores[ SCORES::sap ].Max;
-			_PhysScores._PhysicalScores[ SCORES::focus ].Current = _PhysScores._PhysicalScores[ SCORES::focus ].Max;
 		}
 		else
 		{
@@ -8046,6 +8136,20 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 				skill->Xp = 0;
 			}
 		}
+		log_Character_LevelUp(_Id, skillName, skill->Base);
+		// replenish player stats on level up
+		_PhysScores._PhysicalScores[SCORES::hit_points].Current = _PhysScores._PhysicalScores[SCORES::hit_points].Max;
+		_PhysScores._PhysicalScores[SCORES::stamina].Current = _PhysScores._PhysicalScores[SCORES::stamina].Max;
+		_PhysScores._PhysicalScores[SCORES::sap].Current = _PhysScores._PhysicalScores[SCORES::sap].Max;
+		_PhysScores._PhysicalScores[SCORES::focus].Current = _PhysScores._PhysicalScores[SCORES::focus].Max;
+
+		CMirrorPropValue<TYPE_VISUAL_FX> visualFx(TheDataset, getEntityRowId(), DSPropertyVISUAL_FX);
+		CVisualFX fx;
+		fx.unpack(visualFx.getValue());
+		fx.Aura = MAGICFX::LevelUp;
+		sint64 prop;
+		fx.pack(prop);
+		visualFx = (sint16)prop;
 	}
 	// Update database for skill and current skill value
 //	_PropertyDatabase.setProp( _DataIndexReminder->CHARACTER_INFO.SKILLS.ProgressBar[skillEnum], (uint8) ( skill->Xp * 255 / stage->XpForPointSkill ) );
@@ -8704,6 +8808,8 @@ void CCharacter::setStartStatistics( const CCreateCharMsg& createCharMsg )
 	_DeclaredCult = PVP_CLAN::Neutral;
 	_DeclaredCiv = PVP_CLAN::Neutral;
 	_UseWig = false;
+	_DefaultHairType = 0;
+	_DefaultHairColor = 0;
 
 	// output stats
 	//Bsi.append( StatPath, NLMISC::toString("[CPJ] %s %s %s %d %d %d %d %s", _Id.toString().c_str(), EGSPD::CPeople::toString(_Race).c_str(), GSGENDER::toString((GSGENDER::EGender)_Gender).c_str(), createCharMsg.NbPointFighter, createCharMsg.NbPointCaster, createCharMsg.NbPointCrafter, createCharMsg.NbPointHarvester, RYZOM_STARTING_POINT::toString(createCharMsg.StartPoint).c_str()) );
@@ -10707,6 +10813,8 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 			// if return false, addItemForSale delete item by IITemTrade destructor!
 			if( sellPrice == 0 || _ItemsInShopStore->addItemForSale( sellPrice, basePrice, item, quantity ) )
 			{
+				// reset equipable items stacking lock
+				item->allowStacking();
 				giveMoney( basePrice * quantity );
 
 				//output stats
@@ -11037,6 +11145,18 @@ void CCharacter::setNewTitle(const string &title) {
 }
 
 //-----------------------------------------------------------------------------
+void CCharacter::setDefaultTagA(const string &tag)
+{
+	_DefaultTagA = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setDefaultTagB(const string &tag)
+{
+	_DefaultTagB = tag;
+}
+
+//-----------------------------------------------------------------------------
 void CCharacter::setTagA(const string &tag)
 {
 	_TagA = tag;
@@ -11057,6 +11177,25 @@ void CCharacter::setTagPvPA(const string &tag)
 //-----------------------------------------------------------------------------
 void CCharacter::setTagPvPB(const string &tag) {
 	_TagPvPB = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagRightHand(const string &tag)
+{
+	_TagRightHand = tag;
+}
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagLeftHand(const string &tag)
+{
+	_TagLeftHand = tag;
+}
+
+
+//-----------------------------------------------------------------------------
+void CCharacter::setTagHat(const string &tag)
+{
+	_TagHat = tag;
 }
 
 //-----------------------------------------------------------------------------
@@ -11227,7 +11366,7 @@ CSBrickParamJewelAttrs CCharacter::getJewelAttrs(const string &attribute, SLOT_E
 }
 
 //-----------------------------------------------------------------------------
-void CCharacter::setOrganization(uint32 org)
+void CCharacter::setOrganization(uint32 org, bool enforceFameCaps)
 {
 	if (org == _Organization)
 		return;
@@ -11248,11 +11387,12 @@ void CCharacter::setOrganization(uint32 org)
 	CPVPManager2::getInstance()->updateFactionChannel(this);
 	updateJewelsTags(false);
 
-	// Make sure fame values are properly capped.
+	if (enforceFameCaps)
+	{
 	CFameManager::getInstance().enforceFameCaps(getId(), org, getAllegiance());
 
-	// set tribe fame threshold and clamp fame if necessary
 	CFameManager::getInstance().setAndEnforceTribeFameCap(getId(), org, getAllegiance());
+	}
 }
 
 //-----------------------------------------------------------------------------
@@ -11308,7 +11448,6 @@ void CCharacter::sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpG
 //-----------------------------------------------------------------------------
 void CCharacter::sendFactionPointGainKillMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain, const NLMISC::CEntityId & victimId)
 {
-	BOMB_IF(clan < PVP_CLAN::BeginClans || clan > PVP_CLAN::EndClans, "invalid pvp clan!", return);
 
 	SM_STATIC_PARAMS_3(fpMsgParams, STRING_MANAGER::faction, STRING_MANAGER::integer, STRING_MANAGER::player);
 	fpMsgParams[0].Enum = PVP_CLAN::getFactionIndex(clan);
@@ -11369,6 +11508,16 @@ void CCharacter::exchangeProposal()
 			params[0].Type = STRING_MANAGER::player;
 			params[0].setEIdAIAlias( c->getId(), CAIAliasTranslator::getInstance()->getAIAlias(c->getId()) );
 			PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "EXCHANGE_TOO_FAR", params);
+			return;
+		}
+
+		// cannot propose a trade to someone involved in a op war and not in same side
+		if ((getOutpostAlias() != 0 || c->getOutpostAlias() != 0) && (getOutpostAlias() != c->getOutpostAlias() || getOutpostSide() != c->getOutpostSide()))
+		{
+			params.resize(1);
+			params[0].Type = STRING_MANAGER::player;
+			params[0].setEIdAIAlias(c->getId(), CAIAliasTranslator::getInstance()->getAIAlias(c->getId()));
+			PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "EXCHANGE_BUSY", params);
 			return;
 		}
 
@@ -12098,39 +12247,36 @@ void CCharacter::acceptExchange(uint8 exchangeId)
 //-----------------------------------------------
 bool CCharacter::validateExchange()
 {
-	CCharacter* c = PlayerManager.getChar(_CurrentInterlocutor);
-	if (!c)
+	CCharacter* interlocutor = PlayerManager.getChar(_CurrentInterlocutor);
+
+	if (!interlocutor)
 	{
 		nlwarning("CCharacter::validateExchange : unknown character %s",_CurrentInterlocutor.toString().c_str());
 		abortExchange();
 		return false;
 	}
 
-	uint32 userGiveBulk = 0;
-	uint32 userGiveWeight = 0;
-	uint32 userGiveSlots = 0;
-	uint32 userReceiveBulk = 0;
-	uint32 userReceiveWeight = 0;
-	uint32 userReceiveSlots = 0;
-	bool   bExchangePacker = false;
-	bool   bExchangeMount = false;
-	CSheetId packerSheet;
-	CSheetId mountSheet;
+	uint32 totalGiveBulk = 0, totalGiveSlots = 0;
+	uint32 invGiveBulk = 0, invGiveSlots = 0;
+	uint32 totalReceiveBulk = 0, totalReceiveSlots = 0;
+	uint32 invReceiveBulk = 0, invReceiveSlots = 0;
+	bool bExchangePacker = false, bExchangeMount = false, bExchangeZig = false;
+	CSheetId packerSheet, mountSheet, zigSheet;
 
 	// in the ring check for exploit attempts
 	if (IsRingShard)
 	{
-		if (_ExchangeMoney > 0 || c->_ExchangeMoney > 0)
+		if (_ExchangeMoney > 0 || interlocutor->_ExchangeMoney > 0)
 		{
 			// see if the players are from the same home mainland
-			if (!IInterShardExchangeValidator::getInstance()->isMoneyExchangeAllowed(getHomeMainlandSessionId(),c->getHomeMainlandSessionId())
+			if (!IInterShardExchangeValidator::getInstance()->isMoneyExchangeAllowed(getHomeMainlandSessionId(),interlocutor->getHomeMainlandSessionId())
 				// && getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
-				// && c->getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
+				// && interlocutor->getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
 				)
 			{
 				// not from the same home mainland
 				sendDynamicSystemMessage( getId(), "INVALID_EXCHANGE_IN_RING" );
-				sendDynamicSystemMessage( c->getId(), "INVALID_EXCHANGE_IN_RING" );
+				sendDynamicSystemMessage(interlocutor->getId(), "INVALID_EXCHANGE_IN_RING");
 
 				invalidateExchange();
 				return false;
@@ -12142,27 +12288,34 @@ bool CCharacter::validateExchange()
 	for (uint i = 0; i < CExchangeView::NbExchangeSlots; i++)
 	{
 		CGameItemPtr item;
+		INVENTORIES::TInventory invSrc;
 		uint32 exchangeQuantity;
 
 		// compute bulk/weight/slots that user will give
 		item = _ExchangeView->getExchangeItem(i, &exchangeQuantity);
+		invSrc = _ExchangeView->getSlotInvSrc(i);
 		if (item != NULL)
 		{
-			userGiveBulk += item->getStackBulk(exchangeQuantity);
-			userGiveWeight += item->getStackWeight(exchangeQuantity);
-			userGiveSlots++;
+			totalGiveBulk += item->getStackBulk(exchangeQuantity);
+			totalGiveSlots++;
+
+			if (invSrc == INVENTORIES::bag)
+			{
+				invGiveBulk += item->getStackBulk(exchangeQuantity);
+				invGiveSlots++;
+			}
 
 			// in the ring check for exploit attempts
 			if ( IsRingShard )
 			{
-				if (!IInterShardExchangeValidator::getInstance()->isExchangeAllowed(item,getHomeMainlandSessionId(), c->getHomeMainlandSessionId())
+				if (!IInterShardExchangeValidator::getInstance()->isExchangeAllowed(item,getHomeMainlandSessionId(), interlocutor->getHomeMainlandSessionId())
 					// && getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
-					// && c->getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
+					// && interlocutor->getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
 					)
 				{
 					// not from the same home mainland
 					sendDynamicSystemMessage( getId(), "INVALID_EXCHANGE_IN_RING" );
-					sendDynamicSystemMessage( c->getId(), "INVALID_EXCHANGE_IN_RING" );
+					sendDynamicSystemMessage(interlocutor->getId(), "INVALID_EXCHANGE_IN_RING");
 
 					invalidateExchange();
 					return false;
@@ -12178,28 +12331,39 @@ bool CCharacter::validateExchange()
 			{
 				bExchangeMount = true;
 				mountSheet = item->getSheetId();
+			}
+			if (item->getStaticForm()->Type == ITEM_TYPE::ANIMAL_TICKET)
+			{
+				bExchangeZig = true;
+				zigSheet = item->getSheetId();
 			}
 		}
 
 		// compute bulk/weight/slots that user will receive
-		item = c->_ExchangeView->getExchangeItem(i, &exchangeQuantity);
+		item = interlocutor->_ExchangeView->getExchangeItem(i, &exchangeQuantity);
+		invSrc = _ExchangeView->getInterlocutorView()->getSlotInvSrc(i);
 		if (item != NULL)
 		{
-			userReceiveBulk += item->getStackBulk(exchangeQuantity);
-			userReceiveWeight += item->getStackWeight(exchangeQuantity);
-			userReceiveSlots++;
+			totalReceiveBulk += item->getStackBulk(exchangeQuantity);
+			totalReceiveSlots++;
+
+			if (invSrc == INVENTORIES::bag)
+			{
+				invReceiveBulk += item->getStackBulk(exchangeQuantity);
+				invReceiveSlots++;
+			}
 
 			// in the ring check for exploit attempts
 			if ( IsRingShard )
 			{
-				if (!IInterShardExchangeValidator::getInstance()->isExchangeAllowed(item,getHomeMainlandSessionId(), c->getHomeMainlandSessionId())
+				if (!IInterShardExchangeValidator::getInstance()->isExchangeAllowed(item,getHomeMainlandSessionId(), interlocutor->getHomeMainlandSessionId())
 						// && getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
-						// && c->getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
+						// && interlocutor->getHomeMainlandSessionId() != CSR_SHARD_ID	// allow CSR players to exchange items with normal players
 						)
 				{
 					// not from the same home mainland
 					sendDynamicSystemMessage( getId(), "INVALID_EXCHANGE_IN_RING" );
-					sendDynamicSystemMessage( c->getId(), "INVALID_EXCHANGE_IN_RING" );
+					sendDynamicSystemMessage(interlocutor->getId(), "INVALID_EXCHANGE_IN_RING");
 
 					invalidateExchange();
 					return false;
@@ -12215,6 +12379,11 @@ bool CCharacter::validateExchange()
 			{
 				bExchangeMount = true;
 				mountSheet = item->getSheetId();
+			}
+			if (item->getStaticForm()->Type == ITEM_TYPE::ANIMAL_TICKET)
+			{
+				bExchangeZig = true;
+				zigSheet = item->getSheetId();
 			}
 		}
 	}
@@ -12222,31 +12391,27 @@ bool CCharacter::validateExchange()
 	// NOTE: to check that players have enough slots in their bag, we test the worse case
 
 	const CInventoryPtr & userBag = _Inventory[INVENTORIES::bag];
-	if (	userBag->getInventoryBulk() - userGiveBulk + userReceiveBulk > userBag->getMaxBulk()
-		||	userBag->getInventoryWeight() - userGiveWeight + userReceiveWeight > userBag->getMaxWeight()
-		||	userBag->getUsedSlotCount() + userReceiveSlots > userBag->getSlotCount())
+	if (userBag->getInventoryBulk() - invGiveBulk + totalReceiveBulk > userBag->getMaxBulk() || userBag->getUsedSlotCount() + totalReceiveSlots > userBag->getSlotCount())
 	{
 		// user is too encumbered
 		sendDynamicSystemMessage( getId(), "TOO_ENCUMBERED_FOR_EXCHANGE" );
 
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
 		params[0].setEIdAIAlias( getId(), CAIAliasTranslator::getInstance()->getAIAlias(getId()) );
-		sendDynamicSystemMessage( c->getId(), "INTERLOCUTOR_TOO_ENCUMBERED_FOR_EXCHANGE", params );
+		sendDynamicSystemMessage(interlocutor->getId(), "INTERLOCUTOR_TOO_ENCUMBERED_FOR_EXCHANGE", params);
 
 		invalidateExchange();
 		return false;
 	}
 
-	const CInventoryPtr & interlocutorBag = c->_Inventory[INVENTORIES::bag];
-	if (	interlocutorBag->getInventoryBulk() - userReceiveBulk + userGiveBulk > interlocutorBag->getMaxBulk()
-		||	interlocutorBag->getInventoryWeight() - userReceiveWeight + userGiveWeight > interlocutorBag->getMaxWeight()
-		||	interlocutorBag->getUsedSlotCount() + userGiveSlots > interlocutorBag->getSlotCount())
+	const CInventoryPtr &interlocutorBag = interlocutor->_Inventory[INVENTORIES::bag];
+	if (interlocutorBag->getInventoryBulk() - invReceiveBulk + totalGiveBulk > interlocutorBag->getMaxBulk() || interlocutorBag->getUsedSlotCount() + totalGiveSlots > interlocutorBag->getSlotCount())
 	{
 		// interlocutor is too encumbered
-		sendDynamicSystemMessage( c->getId(), "TOO_ENCUMBERED_FOR_EXCHANGE" );
+		sendDynamicSystemMessage(interlocutor->getId(), "TOO_ENCUMBERED_FOR_EXCHANGE");
 
 		SM_STATIC_PARAMS_1(params, STRING_MANAGER::entity);
-		params[0].setEIdAIAlias( c->getId(), CAIAliasTranslator::getInstance()->getAIAlias(c->getId()) );
+		params[0].setEIdAIAlias(interlocutor->getId(), CAIAliasTranslator::getInstance()->getAIAlias(interlocutor->getId()));
 		sendDynamicSystemMessage( getId(), "INTERLOCUTOR_TOO_ENCUMBERED_FOR_EXCHANGE", params );
 
 		invalidateExchange();
@@ -12256,18 +12421,18 @@ bool CCharacter::validateExchange()
 	// Validate mektoub count
 	if( bExchangePacker )
 	{
-		sint32 ticketDelta = c->_ExchangeView->getPetTicketExchanged( ITEM_TYPE::MEKTOUB_PACKER_TICKET ) - _ExchangeView->getPetTicketExchanged( ITEM_TYPE::MEKTOUB_PACKER_TICKET );
+		sint32 ticketDelta = interlocutor->_ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_PACKER_TICKET) - _ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_PACKER_TICKET);
 		if( !checkAnimalCount( packerSheet, false, ticketDelta ) )
 		{
 			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
-			c->sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
+			interlocutor->sendDynamicSystemMessage(interlocutor->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
 		}
-		if( !c->checkAnimalCount( packerSheet, false, -ticketDelta ) )
+		if (!interlocutor->checkAnimalCount(packerSheet, false, -ticketDelta))
 		{
-			c->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
-			sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
+			interlocutor->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
+			sendDynamicSystemMessage(interlocutor->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
 		}
@@ -12275,18 +12440,39 @@ bool CCharacter::validateExchange()
 
 	if( bExchangeMount )
 	{
-		sint32 ticketDelta = c->_ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_MOUNT_TICKET) - _ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_MOUNT_TICKET);
+		sint32 ticketDelta = interlocutor->_ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_MOUNT_TICKET) - _ExchangeView->getPetTicketExchanged(ITEM_TYPE::MEKTOUB_MOUNT_TICKET);
 		if( !checkAnimalCount( mountSheet, false, ticketDelta ) )
 		{
 			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
-			c->sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
+			interlocutor->sendDynamicSystemMessage(interlocutor->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
 		}
-		if( !c->checkAnimalCount( mountSheet, false, -ticketDelta ) )
+		if (!interlocutor->checkAnimalCount(mountSheet, false, -ticketDelta))
 		{
-			c->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
-			sendDynamicSystemMessage(c->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
+			interlocutor->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
+			sendDynamicSystemMessage(interlocutor->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
+			invalidateExchange();
+			return false;
+		}
+	}
+
+	if (bExchangeZig)
+	{
+		sint32 ticketDelta = interlocutor->_ExchangeView->getPetTicketExchanged(ITEM_TYPE::ANIMAL_TICKET) - _ExchangeView->getPetTicketExchanged(ITEM_TYPE::ANIMAL_TICKET);
+
+		if (!checkAnimalCount(zigSheet, false, ticketDelta))
+		{
+			sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
+			interlocutor->sendDynamicSystemMessage(interlocutor->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
+			invalidateExchange();
+			return false;
+		}
+
+		if (!interlocutor->checkAnimalCount(zigSheet, false, -ticketDelta))
+		{
+			interlocutor->sendDynamicSystemMessage(getId(), "ANIMAL_PLAYER_HAVE_MAX");
+			sendDynamicSystemMessage(interlocutor->getId(), "ANIMAL_INTERLOCUTOR_HAVE_MAX");
 			invalidateExchange();
 			return false;
 		}
@@ -12363,6 +12549,7 @@ void CCharacter::removeExchangeItems(vector<CGameItemPtr >& itemRemoved, vector<
 					// reset player pet
 					_PlayerPets[p].PetStatus = CPetAnimal::not_present;
 					_PlayerPets[p].ItemPtr = 0;
+					_PlayerPets[p].IsInBag = false;
 					_PlayerPets[p].OwnerId = CEntityId::Unknown;
 					_PlayerPets[p].PetSheetId = CSheetId::Unknown;
 					_PlayerPets[p].TicketPetSheetId = CSheetId::Unknown;
@@ -12405,15 +12592,12 @@ void CCharacter::addExchangeItems(CCharacter *trader, vector<CGameItemPtr> &item
 			_PlayerPets[i] = playerPetsAdded[p];
 			_PlayerPets[i].OwnerId = _Id;
 			initPetInventory(i);
+			_PlayerPets[i].PetSheetId = form->PetSheet;
 
 			if( _PlayerPets[ i ].PetStatus == CPetAnimal::waiting_spawn )
-			{
 				spawnCharacterAnimal( i );
-			}
 			else
-			{
 				setAnimalPeople( i );
-			}
 
 			updatePetDataBase = true;
 			msgAI.OwnerMirrorRow = _EntityRowId;
@@ -12438,6 +12622,9 @@ void CCharacter::addExchangeItems(CCharacter *trader, vector<CGameItemPtr> &item
 
 		if (item == NULL)
 			continue;
+
+		// reset equipable items stacking lock
+		item->allowStacking();
 
 		const CStaticItem *form = CSheets::getForm(item->getSheetId());
 		if (form && form->Type == ITEM_TYPE::MEKTOUB_MOUNT_TICKET)
@@ -12474,13 +12661,14 @@ void CCharacter::exchangeMoney(const uint64 &money)
 
 	if (!exchangeWithBot)
 	{
-		CCharacter * c = PlayerManager.getChar( _CurrentInterlocutor );
-		if (c != NULL)
+		CCharacter* interlocutor = PlayerManager.getChar(_CurrentInterlocutor);
+
+		if (interlocutor != NULL)
 		{
-//			c->_PropertyDatabase.setProp( "EXCHANGE:MONEY", quantity );
-			CBankAccessor_PLR::getEXCHANGE().setMONEY(c->_PropertyDatabase, quantity );
-//			c->_PropertyDatabase.setProp( "EXCHANGE:ID", ++_ExchangeId );
-			CBankAccessor_PLR::getEXCHANGE().setID(c->_PropertyDatabase, ++_ExchangeId );
+			//			interlocutor->_PropertyDatabase.setProp( "EXCHANGE:MONEY", quantity );
+			CBankAccessor_PLR::getEXCHANGE().setMONEY(interlocutor->_PropertyDatabase, quantity);
+			//			interlocutor->_PropertyDatabase.setProp( "EXCHANGE:ID", ++_ExchangeId );
+			CBankAccessor_PLR::getEXCHANGE().setID(interlocutor->_PropertyDatabase, ++_ExchangeId);
 		}
 
 		invalidateExchange();
@@ -12815,7 +13003,10 @@ void CCharacter::removeMission(TAIAlias alias, /*TMissionResult*/ uint32 result,
 
 	CMissionTemplate *tpl = CMissionManager::getInstance()->getTemplate(mission->getTemplateId());
 
-	if (mission->getFinished())
+	if (tpl)
+	{
+
+		if (mission->getFinished())
 	{
 		if (mission->getMissionSuccess())
 		{
@@ -12833,6 +13024,7 @@ void CCharacter::removeMission(TAIAlias alias, /*TMissionResult*/ uint32 result,
 		{
 			validateDynamicMissionStep(params[0] + toString("&result=%s", MissionResultStatLogTag[result]));
 			setCustomMissionParams(toUpper(tpl->getMissionName()) + "_CALLBACK", "");
+			}
 		}
 	}
 
@@ -13591,7 +13783,7 @@ bool CCharacter::autoFillExchangeView()
 						if (invItem->getStackSize() >= validateSteps[stepCounter].Quantity)
 						{
 							// if user has put more that this sub step quantity, just put that many in exchange
-							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot(inventoryIndex, validateSteps[stepCounter].Quantity);
+							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot((uint32) INVENTORIES::bag, inventoryIndex, validateSteps[stepCounter].Quantity);
 							if (exchangeWorked)
 							{
 								validateSteps[stepCounter].Quantity = 0;
@@ -13603,7 +13795,7 @@ bool CCharacter::autoFillExchangeView()
 						else
 						{
 							// place all of the quantity that the player has in the exchange inventory
-							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot(inventoryIndex, invItem->getStackSize());
+							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot((uint32) INVENTORIES::bag, inventoryIndex, invItem->getStackSize());
 							if (exchangeWorked)
 							{
 								validateSteps[stepCounter].Quantity -= invItem->getStackSize();
@@ -13667,7 +13859,7 @@ bool CCharacter::autoFillExchangeView()
 						if (invItem->getStackSize() >= validateSteps[stepCounter].Quantity)
 						{
 							// if user has put more that this sub step quantity, just put that many in exchange
-							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot(candidateIndexes[lowestQualityIndex], validateSteps[stepCounter].Quantity);
+							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot((uint32) INVENTORIES::bag, candidateIndexes[lowestQualityIndex], validateSteps[stepCounter].Quantity);
 							if (exchangeWorked)
 							{
 								validateSteps[stepCounter].Quantity = 0;
@@ -13680,7 +13872,7 @@ bool CCharacter::autoFillExchangeView()
 						{
 							// place all of the quantity that the player has in the exchange inventory
 							// candidateIndexs.erase not necessary due to the stack locking, but probably good form.
-							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot(candidateIndexes[lowestQualityIndex], invItem->getStackSize());
+							exchangeWorked = _ExchangeView->putItemInFirstEmptyExchangeSlot((uint32) INVENTORIES::bag, candidateIndexes[lowestQualityIndex], invItem->getStackSize());
 							if (exchangeWorked)
 							{
 								validateSteps[stepCounter].Quantity -= invItem->getStackSize();
@@ -13741,7 +13933,8 @@ void CCharacter::updateSavedMissions()
 	for ( map<TAIAlias, CMission*>::iterator it = getMissionsBegin(); it != getMissionsEnd(); )
 	{
 		CMissionTemplate * templ = CMissionManager::getInstance()->getTemplate( (*it).second->getTemplateId() );
-		EGS_PD_AST ( templ );
+		if (!templ)
+			continue;
 
 		CMissionSolo* mission = EGS_PD_CAST<CMissionSolo*>( (*it).second );
 		EGS_PD_AST( mission );
@@ -14078,10 +14271,12 @@ void CCharacter::registerName(const ucstring &newName)
 
 	string sTitle = getFullTitle();
 	ucstring RegisteredName;
+	ucstring RegisteredTitle;
+	RegisteredTitle.fromUtf8(sTitle);
 	if (newName.empty())
-		RegisteredName = getName() + string("$") + sTitle + string("$");
+		RegisteredName = getName() + ucstring("$") + RegisteredTitle + ucstring("$");
 	else
-		RegisteredName = newName + string("$") + sTitle + string("$");
+		RegisteredName = newName + ucstring("$") + RegisteredTitle + ucstring("$");
 	msgName.serial( RegisteredName );
 	// added 27/04/2006 : now for domain unification, we transmit home mainland session to IOS
 	nlWrite(msgName, serial, getHomeMainlandSessionId());
@@ -14856,7 +15051,7 @@ void CCharacter::sendPhrasesToClient()
 //-----------------------------------------------
 // learnPhrase
 //-----------------------------------------------
-void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, const ucstring &name)
+void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, const ucstring &name, uint8 iconIndex)
 {
 	if (phraseId >= _KnownPhrases.size())
 		_KnownPhrases.resize(phraseId + 1);
@@ -14870,6 +15065,7 @@ void CCharacter::learnPhrase(const vector<CSheetId> &bricks, uint16 phraseId, co
 			_KnownPhrases[phraseId].PhraseDesc.Bricks.push_back(bricks[i]);
 	}
 	_KnownPhrases[phraseId].PhraseDesc.Name = name;
+	_KnownPhrases[phraseId].PhraseDesc.IconIndex = iconIndex;
 } // learnPhrase //
 
 //-----------------------------------------------
@@ -17731,6 +17927,7 @@ bool CCharacter::changeCurrentHp(sint32 deltaValue, TDataSetRow responsibleEntit
 	// if a reverse damage effect is on this entity, inverse damage
 	if (deltaValue < 0)
 	{
+		_CurrentRegenerateReposBonus = 0;
 		const CSEffect *effect = lookForActiveEffect( EFFECT_FAMILIES::ReverseDamage);
 		if (effect)
 		{
@@ -17816,6 +18013,7 @@ void CCharacter::applyGooDamage(float gooDistance, string zoneDamage)
 				if( damageRatio > 0.0f )
 				{
 					_LastTickSufferGooDamage = CTickEventHandler::getGameCycle();
+					_CurrentRegenerateReposBonus = 0;
 
 					// Apply damage corresponding to distance from goo if not dead
 					if( _PhysScores._PhysicalScores[ SCORES::hit_points ].Current > 0 )
@@ -18933,9 +19131,63 @@ void CCharacter::checkSkillTreeForLockedSkill()
 }
 
 //------------------------------------------------------------------------------
-bool CCharacter::setHairColor(uint32 colorValue, bool sendMessage)
+void CCharacter::setDefaultHairColor(uint32 colorValue)
 {
-	if (getUseWig())
+	_DefaultHairColor = (uint8)colorValue;
+}
+
+//------------------------------------------------------------------------------
+void CCharacter::setDefaultHair(uint32 hairValue)
+{
+	_DefaultHairType = (uint8)hairValue;
+}
+
+//------------------------------------------------------------------------------
+void CCharacter::setWigHairColor(uint32 colorValue)
+{
+	_WigHairColor = (uint8)colorValue;
+}
+
+//------------------------------------------------------------------------------
+void CCharacter::setWigHair(uint32 hairValue)
+{
+	_WigHairType = (uint8)hairValue;
+}
+
+
+//------------------------------------------------------------------------------
+void CCharacter::setUnderwearChest(string item)
+{
+	_UnderwearChest = item;
+}
+
+//------------------------------------------------------------------------------
+void CCharacter::setUnderwearLegs(string item)
+{
+	_UnderwearLegs = item;
+}
+
+//------------------------------------------------------------------------------
+void CCharacter::setUnderwearChestColor(uint8 color)
+{
+	_UnderwearChestColor = color;
+}
+
+//------------------------------------------------------------------------------
+void CCharacter::setUnderwearLegsColor(uint8 color)
+{
+	_UnderwearLegsColor = color;
+}
+
+//------------------------------------------------------------------------------
+bool CCharacter::setHairColor(uint32 colorValue, bool isWig, bool sendMessage)
+{
+	if (isWig)
+		setWigHairColor(colorValue);
+	else
+		setDefaultHairColor(colorValue);
+
+	if (getUseWig() && !isWig)
 	{
 		if (sendMessage)
 			CCharacter::sendDynamicSystemMessage(_Id, "EGS_COSMETIC_USE_WIG");
@@ -18947,7 +19199,7 @@ bool CCharacter::setHairColor(uint32 colorValue, bool sendMessage)
 			CCharacter::sendDynamicSystemMessage(_Id, "EGS_COSMETIC_SAME_HAIR_COLOR");
 		return false;
 	}
-	// if the user has a naked head, update visal property
+	// if the user has a naked head, update visual property
 	if ( _HairColor == _VisualPropertyA.directAccessForStructMembers().PropertySubData.HatColor )
 	{
 		_VisualPropertyA.directAccessForStructMembers().PropertySubData.HatColor = (uint8)colorValue;
@@ -18962,7 +19214,19 @@ bool CCharacter::setHairColor(uint32 colorValue, bool sendMessage)
 //------------------------------------------------------------------------------
 bool CCharacter::setHair(uint32 hairValue, bool isWig, bool sendMessage)
 {
-	setUseWig(isWig);
+	if (isWig)
+		setWigHair(hairValue);
+	else
+		setDefaultHair(hairValue);
+
+	if (isWig)
+		setUseWig(true);
+	else if (getUseWig())
+	{
+		if (sendMessage)
+			CCharacter::sendDynamicSystemMessage(_Id, "EGS_COSMETIC_USE_WIG");
+		return false;
+	}
 	if (hairValue == _HairType)
 	{
 		if (sendMessage)
@@ -18982,15 +19246,18 @@ bool CCharacter::setHair(uint32 hairValue, bool isWig, bool sendMessage)
 }
 
 //------------------------------------------------------------------------------
-bool CCharacter::setTatoo(uint32 tatooValue, bool sendMessage)
+bool CCharacter::setTattoo(uint32 tattooValue, bool isFake, bool sendMessage)
 {
-	if ( tatooValue == _VisualPropertyC.directAccessForStructMembers().PropertySubData.Tattoo )
+	if (!isFake)
+		_MainTattoo = tattooValue;
+
+	if (tattooValue == _VisualPropertyC.directAccessForStructMembers().PropertySubData.Tattoo)
 	{
 		if (sendMessage)
 			CCharacter::sendDynamicSystemMessage(_Id, "EGS_COSMETIC_SAME_TATOO");
 		return false;
 	}
-	_VisualPropertyC.directAccessForStructMembers().PropertySubData.Tattoo = (uint8)tatooValue;
+	_VisualPropertyC.directAccessForStructMembers().PropertySubData.Tattoo = (uint8)tattooValue;
 	_VisualPropertyC.setChanged();
 	return true;
 }
@@ -19824,77 +20091,78 @@ void CCharacter::outpostSideChosen( bool neutral, OUTPOSTENUMS::TPVPSide side )
 	CSmartPtr<COutpost> outpost = COutpostManager::getInstance().getOutpostFromAlias(_OutpostIdBeforeUserValidation);
 	if (!outpost)
 		return;
+	if (neutral)
+		side = OUTPOSTENUMS::UnknownPVPSide;
 
 	OUTPOSTENUMS::TOutpostState state = outpost->getState();
-	bool outpostInFire = state == OUTPOSTENUMS::AttackBefore || state == OUTPOSTENUMS::AttackRound || state == OUTPOSTENUMS::DefenseBefore || state == OUTPOSTENUMS::DefenseRound;
 
 	CGuild *guild = CGuildManager::getInstance()->getGuildFromId(_GuildId);
 
-	// Nexus Outposts in test
-	if (outpost->getName().substr(0, 14) == "outpost_nexus_")
+	OUTPOSTENUMS::TPVPType	type = outpost->getPvpType();
+	// Check GVE, PVE and GVG
+	if (type == OUTPOSTENUMS::GVE || type == OUTPOSTENUMS::PVE || type == OUTPOSTENUMS::GVG)
 	{
-		if (neutral)
+		if (guild)
 		{
-			nlinfo("Player %s choose neutral at Nexus OP", getName().toString().c_str());
-			setOutpostSide(OUTPOSTENUMS::UnknownPVPSide);
+			// Check if player have entertime > 21d (execpt for nexus)
+			if (outpost->getName().substr(0, 14) != "outpost_nexus_")
+			{
+				CGuildMember* member = guild->getMemberFromEId(_Id);
+				if (member != NULL && ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (86400/CTickEventHandler::getGameTimeStep())) < OutpostDaysForGvX.get())
+				{
+					side = OUTPOSTENUMS::UnknownPVPSide;
+					nlinfo("Player %s entertime are < 21d at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+				}
+			}
+
+			// Only GvG OP can have defenders
+			if (side == OUTPOSTENUMS::OutpostOwner && type != OUTPOSTENUMS::GVG)
+				side = OUTPOSTENUMS::UnknownPVPSide;
+
+			// Only owner guild can defend in OP in GvG
+			if (side == OUTPOSTENUMS::OutpostOwner && type == OUTPOSTENUMS::GVG && _GuildId != outpost->getOwnerGuild())
+				side = OUTPOSTENUMS::UnknownPVPSide;
+
+			// Only attacker guild can attack
+			if (side == OUTPOSTENUMS::OutpostAttacker && _GuildId != outpost->getAttackerGuild())
+				side = OUTPOSTENUMS::UnknownPVPSide;
+
 		}
 		else
-		{
-			if (guild != NULL && _GuildId == COutpostManager::getInstance().getOutpostFromAlias(_OutpostIdBeforeUserValidation)->getAttackerGuild())
-			{
-				setOutpostAlias(_OutpostIdBeforeUserValidation);
-				setOutpostSide( OUTPOSTENUMS::OutpostAttacker );
-				nlinfo("Guildmate %s choose side Attacker at Nexus OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
-			}
-		}
+			// Guildless can't participate
+			side = OUTPOSTENUMS::UnknownPVPSide;
 	}
-	else  // CLASSIC OUTPOSTS
+	else
 	{
-		// validate outpost alias
-		setOutpostAlias(_OutpostIdBeforeUserValidation);
-		if (neutral)
-		{
-			if (outpostInFire)
-			{
-				nlinfo("Player %s choose neutral but OP on fire => random", getName().toString().c_str());
-				if (uint32(RandomGenerator.rand(1)) == 0)
-					setOutpostSide(OUTPOSTENUMS::OutpostOwner);
-				else
-					setOutpostSide(OUTPOSTENUMS::OutpostAttacker);
-			}
-			else
-			{
-				nlinfo("Player %s choose neutral", getName().toString().c_str());
-				setOutpostSide(OUTPOSTENUMS::UnknownPVPSide);
-			}
-		}
-		else
-		{
-			if (guild != NULL)
-			{
-				nlinfo("Guildmate %s", getName().toString().c_str());
-				// he his guild owns the outpost he can only help his guild
-				if (_GuildId == outpost->getOwnerGuild())
-					side = OUTPOSTENUMS::OutpostOwner;
+		// Only Guild OP can have defenders
+		if (side == OUTPOSTENUMS::OutpostOwner && !outpost->isBelongingToAGuild())
+			side = OUTPOSTENUMS::UnknownPVPSide;
 
-				// he his guild attacks the outpost he can only help his guild
-				if (_GuildId == COutpostManager::getInstance().getOutpostFromAlias(_OutpostIdBeforeUserValidation)->getAttackerGuild())
-					side = OUTPOSTENUMS::OutpostAttacker;
-			}
-
-			// check : if outpost belongs to a tribe the choice can only be attacker
-			if (outpost->isBelongingToAGuild() == false)
+		if (guild)
+		{
+			// Guild who attack can't be defender
+			if (side == OUTPOSTENUMS::OutpostOwner && _GuildId == outpost->getAttackerGuild())
 				side = OUTPOSTENUMS::OutpostAttacker;
 
-			// his guild doesn't participate in outpost conflict so he can choose the side he wants
-			if (side == OUTPOSTENUMS::OutpostOwner)
-				nlinfo("Player %s choose side Owner at OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
-			if (side == OUTPOSTENUMS::OutpostAttacker)
-				nlinfo("Player %s choose side Attacker at OP %s", getName().toString().c_str(), CPrimitivesParser::aliasToString(_OutpostIdBeforeUserValidation).c_str());
-
-			setOutpostSide(side);
+			// Guild who defend can't be attacker
+			if (side == OUTPOSTENUMS::OutpostAttacker && _GuildId == outpost->getOwnerGuild())
+				side = OUTPOSTENUMS::OutpostOwner;
 		}
+
 	}
+
+	if (side == OUTPOSTENUMS::OutpostOwner)
+		nlinfo("Player %s choose side Owner at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+
+	if (side == OUTPOSTENUMS::OutpostAttacker)
+		nlinfo("Player %s choose side Attacker at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+
+	if (side == OUTPOSTENUMS::UnknownPVPSide)
+		nlinfo("Player %s choose side Neutral at OP %s", getName().toString().c_str(), outpost->getName().c_str());
+
+	if (side != OUTPOSTENUMS::UnknownPVPSide)
+		setOutpostAlias(_OutpostIdBeforeUserValidation);
+	setOutpostSide(side);
 
 	_OutpostIdBeforeUserValidation = 0;
 }
@@ -20098,7 +20366,7 @@ uint32 CPetAnimal::initLinkAnimalToTicket( CCharacter * c, uint8 index )
 		{
 //			Slot = ItemPtr->getLocSlot();
 			ItemPtr->setPetIndex(index);
-			ItemPtr->setCustomName(CustomName);
+			//ItemPtr->setCustomName(CustomName);
 			ItemPtr->quality(Size);
 			Slot = ItemPtr->getInventorySlot();
 			return Slot;
@@ -20113,7 +20381,7 @@ uint32 CPetAnimal::initLinkAnimalToTicket( CCharacter * c, uint8 index )
 //				Slot = ItemPtr->getLocSlot();
 				Slot = ItemPtr->getInventorySlot();
 				ItemPtr->setPetIndex(index);
-				ItemPtr->setCustomName(CustomName);
+				//ItemPtr->setCustomName(CustomName);
 				ItemPtr->quality(Size);
 				return Slot;
 			}
@@ -20226,14 +20494,20 @@ void CCharacter::setAggroableOverride(sint8 aggroableOverride)
 	{
 	case -1:
 		_WhoSeesMe= R2_VISION::buildWhoSeesMe((R2_VISION::TInvisibilityLevel)(uint32)_WhoSeesMe,_Aggroable);
+		if (haveAnyPrivilege())
+			setBonusMalusName("aggro", addEffectInDB(CSheetId("enchant_weapon.sbrick"), true));
 		break;
 
 	case 0:
 		_WhoSeesMe= R2_VISION::buildWhoSeesMe((R2_VISION::TInvisibilityLevel)(uint32)_WhoSeesMe,false);
+		if (haveAnyPrivilege())
+			removeEffectInDB(getBonusMalusName("aggro"), true);
 		break;
 
 	case 1:
-		_WhoSeesMe= R2_VISION::buildWhoSeesMe((R2_VISION::TInvisibilityLevel)(uint32)_WhoSeesMe,true);
+		_WhoSeesMe = R2_VISION::buildWhoSeesMe((R2_VISION::TInvisibilityLevel)(uint32)_WhoSeesMe, true);
+		if (haveAnyPrivilege())
+			setBonusMalusName("aggro", addEffectInDB(CSheetId("enchant_weapon.sbrick"), true));
 		break;
 
 	default:
@@ -20392,8 +20666,8 @@ void CCharacter::updateJewelsTags(bool justRemove, bool update)
 	string tagPvPA = getTagPvPA();
 	string tagPvPB = getTagPvPB();
 
-	setTagA("");
-	setTagB("");
+	setTagA(getDefaultTagA());
+	setTagB(getDefaultTagB());
 	setTagPvPA("");
 	setTagPvPB("");
 
@@ -20421,9 +20695,7 @@ void CCharacter::updateJewelsTags(bool justRemove, bool update)
 		return;
 
 	if (getTagA() != tagA || getTagB() != tagB || getTagPvPA() != tagPvPA || getTagPvPB() != tagPvPB)
-	{
 		registerName();
-	}
 }
 
 //----------------------------------------------------------------------------
@@ -21137,7 +21409,15 @@ void CCharacter::setProspectionLocateDepositEffect( CSEffectPtr effect )
 void CCharacter::addXpToSkill(double XpGain, const std::string &Skill, bool silent)
 {
 	std::map<SKILLS::ESkills, CXpProgressInfos> dummy;
-	addXpToSkillInternal(XpGain, Skill, AddXpToSkillSingle, dummy, silent);
+	XpGain = addXpToSkillInternal(XpGain, Skill, AddXpToSkillSingle, dummy, silent);
+	if (XpGain > 0)
+	{
+		do
+		{
+			XpGain = addXpToSkillInternal(XpGain, Skill, AddXpToSkillBranch, dummy, true);
+		}
+		while (XpGain > 0);
+	}
 }
 
 
@@ -21145,7 +21425,15 @@ void CCharacter::addXpToSkill(double XpGain, const std::string &Skill, bool sile
 
 void CCharacter::addXpToSkillAndBuffer( double XpGain, const std::string& Skill, std::map<SKILLS::ESkills,CXpProgressInfos> &gainBySkill)
 {
-	addXpToSkillInternal(XpGain, Skill, AddXpToSkillBuffer, gainBySkill);
+	XpGain = addXpToSkillInternal(XpGain, Skill, AddXpToSkillBuffer, gainBySkill);
+	if (XpGain > 0)
+	{
+		do
+		{
+			XpGain = addXpToSkillInternal(XpGain, Skill, AddXpToSkillBranch, gainBySkill, true);
+		}
+		while (XpGain > 0);
+	}
 }
 
 

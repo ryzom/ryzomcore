@@ -39,20 +39,21 @@ public:
 			uint8 TargetSlot;	// the slot that is targetted
 			uint8 Info;         // Damage shield for melee  5:3 format (damage shield io : power )
 			                    // Distance for range attacks (that do not have damage shield) format is 7:1
+			sint16 DeltaHP;     //
 		public:
-			CTarget(uint8 slot = CLFECOMMON::INVALID_SLOT, bool resist = false, uint8 dist = 0) : TargetSlot(slot)
+			CTarget(uint8 slot = CLFECOMMON::INVALID_SLOT, bool resist = false, uint8 dist = 0, sint16 deltaHp = 0) : TargetSlot(slot), DeltaHP(deltaHp)
 			{
 				Info = (resist == 0 ? 0 : 0x80) | (dist & 0x7f);
 			}
-			uint16 getPacked() const;
-			void   setPacked(uint16 value);
+			uint32 getPacked() const;
+			void   setPacked(uint32 value);
 	};
 	typedef std::vector<CTarget> TTargetVect;
 	// the list of targets
 	TTargetVect Targets;
 public:
 	/** create packed version of targets (to store in visual properties)
-	  * each VP encodes 4 targets
+	  * each VP encodes 2 targets
 	  * caller must provide enough room to store the result (assertion is raised otherwise)
 	  */
 	void pack(uint64 *destVP, uint numVP);
@@ -65,19 +66,18 @@ public:
 ////////////
 
 // *******************************************************************************************
-inline uint16 CMultiTarget::CTarget::getPacked() const
+inline uint32 CMultiTarget::CTarget::getPacked() const
 {
 	//return (uint16) TargetSlot | ((uint16) (Resist ? 1 : 0) << 15) | ((uint16) Distance << 8);
-	return (uint16) TargetSlot | (uint16(Info) << 8);
+	return	((uint32) TargetSlot) | ((uint32) Info << 8) | ((uint32) DeltaHP << 16);
 }
 
 // *******************************************************************************************
-inline void   CMultiTarget::CTarget::setPacked(uint16 value)
+inline void   CMultiTarget::CTarget::setPacked(uint32 value)
 {
-	TargetSlot = uint8(value & 0xff);
-	/*Distance = (uint8) ((value >> 8) & 0x7f);
-	Resist = (value & 0x8000) != 0;*/
-	Info = value >> 8;
+	TargetSlot = uint8(value);
+	Info       = uint8(value >> 8);
+	DeltaHP    = sint16(value >> 16);
 }
 
 #endif

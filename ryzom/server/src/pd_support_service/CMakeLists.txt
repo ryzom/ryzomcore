@@ -6,10 +6,10 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_pd_support_service
 						ryzom_adminmodules
-						ryzom_gameshare
+						${RYZOM_GAMESHARE_LIBRARIES}
 						ryzom_servershare
-						nelmisc
-						nelnet)
+						${NELMISC_LIBRARIES}
+						${NELNET_LIBRARIES})
 
 NL_DEFAULT_PROPS(ryzom_pd_support_service "Ryzom, Services: PD Support Service (PDSS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_pd_support_service)

@@ -918,6 +918,21 @@ void  CMagicPhrase::execute()
 	{
 		slowingParam += slow->getParamValue();
 	}
+	slow = caster->lookForActiveEffect( EFFECT_FAMILIES::SlowMelee);
+	if ( slow )
+	{
+		slowingParam += slow->getParamValue();
+	}
+	slow = caster->lookForActiveEffect( EFFECT_FAMILIES::CombatAttackSlow);
+	if ( slow )
+	{
+		slowingParam += slow->getParamValue();
+	}
+	slow = caster->lookForActiveEffect( EFFECT_FAMILIES::SlowRange);
+	if ( slow )
+	{
+		slowingParam += slow->getParamValue();
+	}
 	slow = caster->lookForActiveEffect( EFFECT_FAMILIES::CombatCastSlow);
 	if ( slow )
 	{
@@ -1523,10 +1538,12 @@ bool CMagicPhrase::launch()
 	NLMISC::CBitSet resists(nbTargets);
 	resists.setAll();
 	CBitSet affectedTargets(nbTargets);
+	// prefill target info
+	std::vector<sint16> targetDeltaHp(nbTargets, 0);
 	
 	for ( uint i = 0; i < _Actions.size(); i++ )
 	{
-		_Actions[i]->launch(this,deltaLvl,skillValue, successFactor,behav,_ApplyParams.TargetPowerFactor,affectedTargets, invulnerabilityOffensive,invulnerabilityAll,isMad,resists,report);
+		_Actions[i]->launch(this,deltaLvl,skillValue, successFactor,behav,_ApplyParams.TargetPowerFactor,affectedTargets, targetDeltaHp, invulnerabilityOffensive,invulnerabilityAll,isMad,resists,report);
 	}
 
 	// build affected target list (must be done before behaviour)
@@ -1546,7 +1563,7 @@ bool CMagicPhrase::launch()
 			if ( affectedTargets[i] )
 			{
 				if(i < (sint)resists.size())
-					PHRASE_UTILITIES::updateMirrorTargetList( targetList, _Targets[i].getId(), _ApplyParams.DistanceToTarget[i],resists[i]);
+					PHRASE_UTILITIES::updateMirrorTargetList( targetList, _Targets[i].getId(), _ApplyParams.DistanceToTarget[i], resists[i], targetDeltaHp[i]);
 			}
 		}
 		//targetList.testList( size*2 ); // wrong now because of the if
@@ -1558,7 +1575,7 @@ bool CMagicPhrase::launch()
 		nlassertex( size == (sint32)invulnerabilityOffensive.size(), ("%d %d", size, invulnerabilityOffensive.size() ) );
 
 		if(resists.size() > 0)
-			PHRASE_UTILITIES::updateMirrorTargetList( targetList, _Targets[0].getId(), (float)PHRASE_UTILITIES::getDistance( _Targets[0].getId(),_ActorRowId),resists[0]);
+			PHRASE_UTILITIES::updateMirrorTargetList( targetList, _Targets[0].getId(), (float)PHRASE_UTILITIES::getDistance( _Targets[0].getId(),_ActorRowId),resists[0], targetDeltaHp[0]);
 		//targetList.testList( 1*2 ); // wrong now because of the if
 	}
 	

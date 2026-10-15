@@ -1,0 +1,35 @@
+Introduction
+------------
+
+Ryzom Core is a software platform for creating and running massively multi-user
+entertainment in a 3D environment over the Internet.
+
+The Ryzom Core library is further divided into specific modules: network, ai, 3d
+and misc. If you want to use any of these, you also need to use the misc
+part of the library, but ai, 3d and network are totally independant from
+each other so you can use only the parts you really need in your project.
+
+If you want know more about the library content and functionalities, you
+should take a look on the documents present in the doc directory.
+
+Ryzom Core is currently developed and tested under GNU/Linux and Windows
+environments. 
+
+
+License
+-------
+
+Ryzom Core is a Free Software project under the GNU Affero General Public License v3,
+which means all its code is available for everyone to download, examine,
+use, modify, and distribute, subject to the usual restrictions attached
+to any GPL software. If you are not familiar with the AGPL, see the COPYING
+file for for more details on license terms and other legal issues.
+
+
+Installation
+------------
+
+Please visit https://ryzomcore.atlassian.net/wiki/display/RC/Ryzom+Core+Home for more information.
+In particular the Getting Started section on the right side of the webpage includes build
+instructions for Windows, Linux and Mac.
+

@@ -208,7 +208,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 {
 	if(_CurrItemSheet && !WindowName.empty())
 	{
-	
+
 		const CItemSheet *pIS = _CurrItemSheet->asItemSheet();
 		if ((pIS != NULL) && ITEMFAMILY::isTextCustomizable(pIS->Family) )
 		{
@@ -342,7 +342,7 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 // ********************************************************************************************
 void CInterfaceItemEdition::CItemEditionWindow::end()
 {
-	
+
 	CDBCtrlSheet *pCSItem = _CurrItemSheet;
 	std::string windowName = WindowName;
 	if(pCSItem && !windowName.empty())
@@ -371,7 +371,7 @@ void CInterfaceItemEdition::CItemEditionWindow::end()
 			editBoxShort->setActive(false);
 			editShort->setActive(false);
 			editBoxLarge->setActive(false);
-			editLarge->setActive(false);				
+			editLarge->setActive(false);
 			display->setActive(false);
 			editButtons->setActive(false);
 			closeButton->setActive(false);
@@ -413,7 +413,7 @@ void CInterfaceItemEdition::CItemEditionWindow::validate()
 				textValid = editLarge->getActive();
 				text = editBoxLarge->getInputString();
 			}
-			 
+
 			if (textValid)
 			{
 				CBitMemStream out;
@@ -562,7 +562,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 
 
 //=====================================================================================================================
-	static void sendExchangeAddToServer(uint16 srcSlotIndex, uint16 destSlotIndex, uint16 quantitySrc)
+	static void sendExchangeAddToServer(uint16 srcInvIndex, uint16 srcSlotIndex, uint16 destSlotIndex, uint16 quantitySrc)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -571,6 +571,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 		if(GenericMsgHeaderMngr.pushNameToStream(sMsg, out))
 		{
 			// Swap all the Src (quantity= quantitySrc) to dest
+			out.serial(srcInvIndex);
 			out.serial(srcSlotIndex);
 			out.serial(destSlotIndex);
 			out.serial(quantitySrc);
@@ -615,7 +616,7 @@ static void openStackItem(CCtrlBase *pCaller, CDBCtrlSheet *pCSSrc, CDBCtrlSheet
 			NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 			// send msg to server
-			sendExchangeAddToServer((uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
+			sendExchangeAddToServer((uint16) src->getSecondIndexInDB(), (uint16)src->getIndexInDB(), (uint8)dest->getIndexInDB(), (uint16)quantitySrc);
 		}
 		else
 		{
@@ -725,7 +726,7 @@ static void validateStackItem(CDBCtrlSheet *pCSSrc, CDBCtrlSheet *pCSDst, sint32
 				NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:EXCHANGE:ACCEPTED")->setValue32(0);
 
 				// send msg to server
-				sendExchangeAddToServer((uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
+				sendExchangeAddToServer((uint16)pCSSrc->getSecondIndexInDB(), (uint16)pCSSrc->getIndexInDB(), (uint8)pCSDst->getIndexInDB(), (uint16)val);
 			}
 		}
 	}
@@ -746,6 +747,10 @@ public:
 		CInterfaceElement *pElt = CWidgetManager::getInstance()->getElementFromId(src);
 		CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(pElt);
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
+
+		// end drag
+		getInventory().endDrag();
+
 		if ((pCSSrc == NULL) || (pCSDst == NULL)) return;
 
 		if (pCSSrc->getType() == CCtrlSheetInfo::SheetType_Item)
@@ -1049,9 +1054,21 @@ class CCanDropToExchange : public IActionHandler
 		if (!pCSSrc || !pCSDst) return;
 
 		// Exchange can only be done from bag to exchange inventories
-
-		if (pCSSrc->getSecondIndexInDB() == INVENTORIES::bag &&
-			pCSDst->getSecondIndexInDB() == INVENTORIES::exchange)
+		uint32 srcInventory = pCSSrc->getSecondIndexInDB();
+		if (
+			(srcInventory == INVENTORIES::bag ||
+				srcInventory == INVENTORIES::pet_animal1 ||
+				srcInventory == INVENTORIES::pet_animal2 ||
+				srcInventory == INVENTORIES::pet_animal3 ||
+				srcInventory == INVENTORIES::pet_animal4 ||
+				srcInventory == INVENTORIES::pet_animal5 ||
+				srcInventory == INVENTORIES::pet_animal6 ||
+				srcInventory == INVENTORIES::pet_animal7 ||
+				srcInventory == INVENTORIES::guild ||
+				srcInventory == INVENTORIES::player_room)
+			&& getInventory().isInventoryAvailable((INVENTORIES::TInventory) pCSSrc->getSecondIndexInDB())
+			&& pCSDst->getSecondIndexInDB() == INVENTORIES::exchange
+		)
 		{
 			if (checkCanExchangeItem(pCSSrc))
 			{
@@ -1061,7 +1078,6 @@ class CCanDropToExchange : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER (CCanDropToExchange, "can_drop_to_exchange");
-
 
 // **********************************************************************************************************
 
@@ -1722,7 +1738,7 @@ void CItemMenuInBagInfoWaiter::infoReceived()
 void CItemMenuInBagInfoWaiter::infoValidated(CDBCtrlSheet* ctrlSheet)
 {
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
-	
+
 	// get the dialog stack
 	CInterfaceGroup* pMenu = dynamic_cast<CInterfaceGroup*>( CWidgetManager::getInstance()->getElementFromId("ui:interface:item_menu_in_bag") );
 	if(!pMenu)	return;
@@ -1868,7 +1884,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			}
 			if (pItemTextDisplay && pIS->Family == ITEMFAMILY::SCROLL)
 			{
-				if (pCS->getInventoryIndex()==INVENTORIES::bag)
+				if (pCS->getInventoryIndex()==INVENTORIES::bag && pIS->Scroll.Label.empty())
 					pItemTextDisplay->setActive(true);
 				pItemInfos->setActive(false);
 			}
@@ -2036,7 +2052,7 @@ class CHandlerItemMenuCheck : public IActionHandler
 			if (pMoveSubMenu) pMoveSubMenu->setActive(false);
 		}
 
-		if (bIsLockedByOwner) 
+		if (bIsLockedByOwner)
 		{
 			if (pLockUnlock) pLockUnlock->setHardText("uimUnlockItem");
 			// Cannot drop/destroy if locked by owner
@@ -2049,7 +2065,8 @@ class CHandlerItemMenuCheck : public IActionHandler
 		}
 
 		// Only show lock menu item if inventory contains the info
-		if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
+		if (invId!=INVENTORIES::guild)
+			if (pLockUnlock) pLockUnlock->setActive(pCS->canOwnerLock());
 
 
 		// **** Gray Entries
@@ -2206,7 +2223,7 @@ class CHandlerItemMenuBaseCheck : public IActionHandler
 		CViewTextMenu	*pDestroy = dynamic_cast<CViewTextMenu*>(pMenu->getView("destroy"));
 		CViewTextMenu	*pLockUnlock = dynamic_cast<CViewTextMenu*>(pMenu->getView("lockunlock"));
 
-		if (pCS->getLockedByOwner()) 
+		if (pCS->getLockedByOwner())
 		{
 			pLockUnlock->setHardText("uimUnlockItem");
 			// Cannot destroy if locked by owner
@@ -2363,7 +2380,7 @@ class CHandlerItemTextDisplay : public IActionHandler
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCSItem == NULL || windowName.empty()) 
+		if (pCSItem == NULL || windowName.empty())
 			return;
 
 		const CItemSheet *pIS = pCSItem->asItemSheet();
@@ -2384,7 +2401,7 @@ class CHandlerItemTextEdition : public IActionHandler
 		std::string const& windowName = sParams;
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CDBCtrlSheet *pCSItem = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
-		if (pCSItem == NULL || windowName.empty()) 
+		if (pCSItem == NULL || windowName.empty())
 			return;
 
 		CInterfaceItemEdition::getInstance()->setCurrWindow(pCSItem, windowName, true);
@@ -2444,6 +2461,63 @@ class CHandlerRingXpCatalyserStopUse : public IActionHandler
 };
 REGISTER_ACTION_HANDLER( CHandlerRingXpCatalyserStopUse, "ring_xp_catalyser_stop_use" );
 
+// ***************************************************************************
+class CHandlerUseHotbarItem : public IActionHandler
+{
+	void execute(CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		CInterfaceManager *pIM = CInterfaceManager::getInstance();
+
+		sint64 slot;
+		if (!CInterfaceExpr::evalAsInt(getParam(sParams, "slot"), slot))
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve counter.");
+			return;
+		}
+
+		if (slot > INVENTORIES::NbHotbarSlots) {
+			nlwarning("<CHandlerUseHotbarItem::execute> Slot out of range.");
+			return;
+		}
+
+		CDBCtrlSheet *pCS = getInventory().getHotbarSheet(slot);
+		if (!pCS)
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve sheet.");
+			return;
+		}
+
+		if (pCS->getLockedByOwner())
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is locked.");
+			return;
+		}
+
+		const CItemSheet *pIS = pCS->asItemSheet();
+		if (!pIS)
+		{
+			nlwarning("<CHandlerUseHotbarItem::execute> Can't retrieve item.");
+			return;
+		}
+
+		ITEMFAMILY::EItemFamily fam = pIS->Family;
+
+		if (!getInventory().isUsableItem(pCS->getSheetId())) {
+			nlwarning("<CHandlerUseHotbarItem::execute> Item is not usable.");
+			return;
+		}
+
+		if (fam == ITEMFAMILY::ITEM_SAP_RECHARGE || fam == ITEMFAMILY::CRYSTALLIZED_SPELL) 
+		{
+			sendToServerEnchantMessage((uint8)pCS->getInventoryIndex(), (uint16)pCS->getIndexInDB());
+		} 
+		else if (fam == ITEMFAMILY::CONSUMABLE || fam == ITEMFAMILY::XP_CATALYSER) 
+		{
+			sendMsgUseItem(uint16(pCS->getIndexInDB()));
+		}
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerUseHotbarItem, "use_hotbar_item" );
 
 // ***************************************************************************
 // item groups
@@ -2473,7 +2547,7 @@ class CHandlerItemGroupEquip : public IActionHandler
 		std::string name = getParam(sParams, "name");
 		if(name.empty())
 		{
-			nlinfo("Trying to move a group with a caller not part of any group");
+			nlinfo("Trying to equip a group with a caller not part of any group");
 			return;
 		}
 
@@ -2481,3 +2555,72 @@ class CHandlerItemGroupEquip : public IActionHandler
 	}
 };
 REGISTER_ACTION_HANDLER(CHandlerItemGroupEquip, "item_group_equip");
+
+// ***************************************************************************
+class CHandlerItemGroupCreate : public IActionHandler
+{
+	void execute (CCtrlBase *pCaller, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			CGroupEditBox * eb = dynamic_cast<CGroupEditBox*>(pCaller->getParent()->findFromShortId("edit_name:eb"));
+			if (!eb) {
+				nlwarning("<CHandlerItemGroupCreate::execute> Can't retrieve edit box.");
+				return;
+			}
+			name = eb->getInputString();
+			CWidgetManager::getInstance()->resetCaptureKeyboard();
+			if (name.empty()) {
+				nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with a caller not part of any group");
+				return;
+			}
+		}
+
+		if (name.find_first_not_of(' ') == name.npos) {
+			nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with whitespace as name");
+			return;
+		}
+
+		bool removeEmpty = false;
+		if (name.substr(0, 1) == "!") {
+			std::string tmp = name.substr(1);
+			if (tmp.find_first_not_of(' ') == tmp.npos) {
+				nlinfo("<CHandlerItemGroupCreate::execute> Trying to create a group with whitespace as name");
+				return;
+			}
+
+			removeEmpty = true;
+			name = tmp;
+		}
+
+		CItemGroupManager::getInstance()->createGroup(name, removeEmpty);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupCreate, "item_group_create");
+
+// ***************************************************************************
+class CHandlerItemGroupDelete : public IActionHandler
+{
+	void execute (CCtrlBase * /* pCaller */, const std::string & sParams)
+	{
+		std::string name = getParam(sParams, "name");
+		if(name.empty())
+		{
+			CCtrlButton *button = dynamic_cast<CCtrlButton*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+			if (!button) {
+				nlwarning("<CHandlerItemGroupDelete::execute> Can't retrieve button.");
+				return;
+			}
+			CAHManager::getInstance()->runActionHandler("leave_modal", NULL);
+			name = dynamic_cast<CViewText*>(button->getParent()->getView("name"))->getText();
+			if (name.empty()) {
+				nlinfo("Trying to delete a group with a caller not part of any group");
+				return;
+			}
+		}
+
+		CItemGroupManager::getInstance()->deleteGroup(name);
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerItemGroupDelete, "item_group_delete");

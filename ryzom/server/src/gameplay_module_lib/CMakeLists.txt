@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp *.h)
 
 NL_TARGET_LIB(ryzom_gameplaymodule ${SRC})
 
-TARGET_LINK_LIBRARIES(ryzom_gameplaymodule nelmisc)
+TARGET_LINK_LIBRARIES(ryzom_gameplaymodule ${NELMISC_LIBRARIES})
 NL_DEFAULT_PROPS(ryzom_gameplaymodule "Ryzom, Library: Gameplay Module")
 NL_ADD_RUNTIME_FLAGS(ryzom_gameplaymodule)
 NL_ADD_LIB_SUFFIX(ryzom_gameplaymodule)

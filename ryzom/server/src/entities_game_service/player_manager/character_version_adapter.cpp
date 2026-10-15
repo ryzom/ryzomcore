@@ -100,8 +100,9 @@ uint32 CCharacterVersionAdapter::currentVersionNumber() const
 	// 26 : (23/04/2015) fix foragetool HP
 	// 27 : (10/10/2017) fix /learnAllBrick exploit
 	// 28 : (21/07/2018) fix amps HP reset
+	// 29 : (16/06/2022) set setDefaultHair and setDefaultHairColor to current Hair and HairColor
 	////////////////////////////////////
-	return 28;
+	return 29;
 }
 
 
@@ -139,6 +140,7 @@ void CCharacterVersionAdapter::adaptCharacterFromVersion( CCharacter &character,
 	case 25: adaptToVersion26(character);
 	case 26: adaptToVersion27(character);
 	case 27: adaptToVersion28(character);
+	case 28: adaptToVersion29(character);
 	default:;
 	}
 }
@@ -1464,6 +1466,17 @@ void CCharacterVersionAdapter::adaptToVersion28(CCharacter &character) const
 				}
 			}
 		}
+	}
+}
+//---------------------------------------------------
+void CCharacterVersionAdapter::adaptToVersion29(CCharacter &character) const
+{
+	character.setDefaultHair(character.getHair());
+	character.setDefaultHairColor(character.getHairColor());
+	if (character.getUseWig())
+	{
+		character.setUseWig(false);
+		character.giveMoney(35000);
 	}
 }
 

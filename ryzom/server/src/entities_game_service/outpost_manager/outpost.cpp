@@ -75,9 +75,11 @@ static uint32 const minutes = 60*seconds;
 static uint32 const hours = 60*minutes;
 static uint32 const days = 24*hours;
 
-CVariable<uint32> OutpostFightRoundCount("egs","OutpostFightRoundCount","number of rounds in an outpost fight", 24, 0, true);
+CVariable<uint32> OutpostFightRoundCount("egs","OutpostFightRoundCount","number of rounds in an outpost fight", 12, 0, true);
 CVariable<uint32> OutpostInTestFightRoundCount("egs","OutpostInTestFightRoundCount","number of rounds in an outpost (in test) fight", 11, 0, true);
-CVariable<float> OutpostInTestFightSquadCount("egs", "OutpostInTestFightSquadCount", "Coef for squad count per round", 1.2f, 0, true );
+CVariable<float> OutpostFullFightSquadCount("egs", "OutpostFullFightSquadCount", "Coef for squad count per round", 1.3f, 0, true );
+CVariable<float> OutpostGvEFightSquadCount("egs", "OutpostGvEFightSquadCount", "Coef for squad count per round", 1.6f, 0, true );
+CVariable<float> OutpostGvGFightSquadCount("egs", "OutpostGvGFightSquadCount", "Coef for squad count per round", 2.0f, 0, true );
 CVariable<uint32> OutpostFightRoundTime("egs","OutpostFightRoundTime","time of a round in an outpost fight, in seconds", 5*minutes, 0, true);
 CVariable<uint32> OutpostLevelDecrementTime("egs","OutpostLevelDecrementTime","time to decrement an outpost level in seconds (in peace time)", 2*days, 0, true);
 CVariable<uint32> OutpostEditingConcurrencyCheckDelay("egs", "OutpostEditingConcurrencyCheckDelay", "delay in ticks used to check if 2 actions for editing an outpost are concurrent", 50, 0, true );
@@ -174,7 +176,7 @@ void COutpost::fillOutpostDB()
 	H_AUTO(COutpost_fillOutpostDB);
 	CGuild* owner = CGuildManager::getInstance()->getGuildFromId(_OwnerGuildId);
 	CGuild* attacker = CGuildManager::getInstance()->getGuildFromId(_AttackerGuildId);
-	uint32 const SHEET					= _Sheet.asInt();
+//	uint32 const SHEET					= _Sheet.asInt(); // Not used (cppcheck)
 	uint8 const LEVEL					= getStaticForm()?getStaticForm()->Level:0;
 	ucstring const GUILD_NAME			= owner?owner->getName():ucstring();
 	uint64 const GUILD_ICON				= owner?owner->getIcon():0;
@@ -686,7 +688,7 @@ void COutpost::setOwnerGuild( EGSPD::TGuildId ownerGuild )
 	EGSPD::TGuildId oldOwnerGuildId = _OwnerGuildId;
 
 	_OwnerGuildId = ownerGuild;
-	OUTPOST_DBG( "Outpost %s is now owned by 0x%x", _Name.c_str(), _OwnerGuildId );
+	OUTPOST_INF( "Outpost %s is now owned by 0x%x", _Name.c_str(), _OwnerGuildId );
 
 	if (ownerGuild != oldOwnerGuildId)
 	{
@@ -730,7 +732,7 @@ void COutpost::setAttackerGuild( EGSPD::TGuildId attackerGuild )
 	EGSPD::TGuildId oldAttackerGuildId = _AttackerGuildId;
 
 	_AttackerGuildId = attackerGuild;
-	OUTPOST_DBG( "Outpost %s is now attacked by 0x%x", _Name.c_str(), _AttackerGuildId );
+	OUTPOST_INF( "Outpost %s is now attacked by 0x%x", _Name.c_str(), _AttackerGuildId );
 
 	if (attackerGuild != oldAttackerGuildId)
 	{
@@ -790,7 +792,7 @@ void COutpost::setState(OUTPOSTENUMS::TOutpostState state)
 		}
 	}
 
-	OUTPOST_DBG( "Outpost %s: [%s] -> [%s]", _Name.c_str(), OUTPOSTENUMS::toString( _State ).c_str(), OUTPOSTENUMS::toString( state ).c_str() );
+	OUTPOST_INF( "Outpost %s: [%s] -> [%s]", _Name.c_str(), OUTPOSTENUMS::toString( _State ).c_str(), OUTPOSTENUMS::toString( state ).c_str() );
 	_State = state;
 
 	// Send to AIS
@@ -812,7 +814,7 @@ std::string COutpost::getStateName() const
 //----------------------------------------------------------------------------
 COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGuild, bool simulate )
 {
-	OUTPOST_DBG( "Outpost %s: Challenged by %s", _Name.c_str(), attackerGuild->getName().toString().c_str() );
+	OUTPOST_INF( "Outpost %s: Challenged by %s", _Name.c_str(), attackerGuild->getName().toString().c_str() );
 
 	nlassert( attackerGuild->getId() != 0 );
 
@@ -836,10 +838,10 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 		{
 			if(member->getSkillValue(member->getBestSkill()) >= guildMemberLevel)
 			{
-				CGuildMember* member = EGS_PD_CAST<CGuildMember*> ( (*it).second );
-				EGS_PD_AST(member);
+				CGuildMember* guild_member = EGS_PD_CAST<CGuildMember*> ( (*it).second );
+				EGS_PD_AST(guild_member);
 
-				if( outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost < ((CTickEventHandler::getGameCycle() - member->getEnterTime()) / (days/CTickEventHandler::getGameTimeStep())) )
+				if( outpostForm->Level/NumberDayFactorGuildNeedForChallengeOutpost < ((CTickEventHandler::getGameCycle() - guild_member->getEnterTime()) / (days/CTickEventHandler::getGameTimeStep())) )
 				{
 					guildAttackerValid = true;
 					break;
@@ -847,6 +849,8 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 			}
 		}
 	}
+	if (_CurrentOutpostLevel >= computeRoundCount())
+		return COutpost::InvalidOutpost;
 	if(!guildAttackerValid)
 	{
 		return COutpost::BadGuildMemberLevel;
@@ -868,7 +872,7 @@ COutpost::TChallengeOutpostErrors COutpost::challengeOutpost( CGuild *attackerGu
 //----------------------------------------------------------------------------
 void COutpost::ownerGuildVanished()
 {
-	OUTPOST_DBG( "Outpost %s: Owner guild vanished", _Name.c_str() );
+	OUTPOST_INF( "Outpost %s: Owner guild vanished", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::OwnerVanished);
 }
@@ -876,7 +880,7 @@ void COutpost::ownerGuildVanished()
 //----------------------------------------------------------------------------
 void COutpost::attackerGuildVanished()
 {
-	OUTPOST_DBG( "Outpost %s: Attacker guild vanished", _Name.c_str() );
+	OUTPOST_INF( "Outpost %s: Attacker guild vanished", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::AttackerVanished);
 }
@@ -884,7 +888,7 @@ void COutpost::attackerGuildVanished()
 //----------------------------------------------------------------------------
 void COutpost::giveupAttack()
 {
-	OUTPOST_DBG( "Outpost %s: Attacker gave up", _Name.c_str() );
+	OUTPOST_INF( "Outpost %s: Attacker gave up", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::AttackerGiveUp);
 }
@@ -892,7 +896,7 @@ void COutpost::giveupAttack()
 //----------------------------------------------------------------------------
 void COutpost::giveupOwnership()
 {
-	OUTPOST_DBG( "Outpost %s: Owner gave up", _Name.c_str() );
+	OUTPOST_INF( "Outpost %s: Owner gave up", _Name.c_str() );
 
 	eventTriggered(OUTPOSTENUMS::OwnerGiveUp);
 }
@@ -1635,10 +1639,10 @@ void COutpost::banishGuildForAttack( uint32 guildId )
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( guildId );
 	if( guild )
 	{
-		map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it;
-		for (it = guild->getMembersBegin(); it != guild->getMembersEnd(); ++it)
+		map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it2;
+		for (it2 = guild->getMembersBegin(); it2 != guild->getMembersEnd(); ++it2)
 		{
-			CCharacter * c = PlayerManager.getChar( (*it).first );
+			CCharacter * c = PlayerManager.getChar( (*it2).first );
 			if( c && c->getEnterFlag() )
 			{
 				if(c->getOutpostSide() == OUTPOSTENUMS::OutpostAttacker)
@@ -1670,10 +1674,10 @@ void COutpost::banishGuildForDefense( uint32 guildId )
 	CGuild * guild = CGuildManager::getInstance()->getGuildFromId( guildId );
 	if( guild )
 	{
-		map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it;
-		for (it = guild->getMembersBegin(); it != guild->getMembersEnd(); ++it)
+		map<EGSPD::TCharacterId, EGSPD::CGuildMemberPD*>::iterator it2;
+		for (it2 = guild->getMembersBegin(); it2 != guild->getMembersEnd(); ++it2)
 		{
-			CCharacter * c = PlayerManager.getChar( (*it).first );
+			CCharacter * c = PlayerManager.getChar( (*it2).first );
 			if( c && c->getEnterFlag() )
 			{
 				if(c->getOutpostSide() == OUTPOSTENUMS::OutpostOwner)
@@ -1763,8 +1767,8 @@ void COutpost::postLoad()
 	}
 
 	// update the tribe outpost level
-	if (!isBelongingToAGuild())
-		_CurrentOutpostLevel = computeTribeOutpostLevel();
+	//if (!isBelongingToAGuild())
+	//	_CurrentOutpostLevel = computeTribeOutpostLevel();
 
 	// check squad vectors and resize them if necessary
 	{
@@ -1948,7 +1952,7 @@ bool COutpost::getSquadFromSlot(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot, s
 		return false;
 	}
 
-	if (squadSlot < OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS)
+	if (squadSlot < OUTPOSTENUMS::OUTPOST_NB_BUYABLE_SQUAD_SLOTS)
 	{
 		squads = squadsA;
 		squadIndex = squadSlot;
@@ -1956,7 +1960,7 @@ bool COutpost::getSquadFromSlot(OUTPOSTENUMS::TPVPSide side, uint32 squadSlot, s
 	else
 	{
 		squads = squadsB;
-		squadIndex = squadSlot - OUTPOSTENUMS::OUTPOST_NB_SQUAD_SLOTS;
+		squadIndex = squadSlot - OUTPOSTENUMS::OUTPOST_NB_BUYABLE_SQUAD_SLOTS;
 	}
 
 	nlassert(squadIndex < squads->size());
@@ -2035,8 +2039,11 @@ void COutpost::actionSetPVPActive(bool active)
 //----------------------------------------------------------------------------
 void COutpost::actionBuySquadsA(uint32 squadCount, OUTPOSTENUMS::TPVPSide side)
 {
-	nlassert(squadCount <= _CurrentSquadsAQueue.size());
-	nlassert(!_DefaultSquads.empty());
+	if (squadCount > _CurrentSquadsAQueue.size())
+		return;
+
+	if (!_DefaultSquads.empty())
+		return;
 
 	EGSPD::TGuildId guildId;
 	uint32 * expenseLimit;
@@ -2108,8 +2115,11 @@ void COutpost::actionBuySquadsA(uint32 squadCount, OUTPOSTENUMS::TPVPSide side)
 //----------------------------------------------------------------------------
 void COutpost::actionBuySquadsB(uint32 squadIndex, OUTPOSTENUMS::TPVPSide side)
 {
-	nlassert(squadIndex < _CurrentSquadsBQueue.size());
-	nlassert(!_DefaultSquads.empty());
+	if (squadIndex > _CurrentSquadsBQueue.size())
+		return;
+
+	if (!_DefaultSquads.empty())
+		return;
 
 	EGSPD::TGuildId guildId;
 	uint32 * expenseLimit;
@@ -2395,12 +2405,10 @@ void COutpost::actionPayBackMoneySpent()
 //----------------------------------------------------------------------------
 uint32 COutpost::computeRoundCount() const
 {
-	///// Nexus test : only 11 rounds
 	if (getName().substr(0, 14) == "outpost_nexus_")
-		return OutpostInTestFightRoundCount.get();
-	//////
+		return 11;
 
-	return std::min(OutpostFightRoundCount.get(), OUTPOSTENUMS::OUTPOST_MAX_SQUAD_SPAWNED);
+	return std::min(OutpostFightRoundCount.get(), OUTPOSTENUMS::OUTPOST_MAX_SQUAD_SPAWNED); //12
 }
 
 //----------------------------------------------------------------------------
@@ -2431,23 +2439,29 @@ uint32 COutpost::computeSpawnDelay(uint32 roundLevel) const
 uint32 COutpost::computeSquadCountA(uint32 roundLevel) const
 {
 
-	///// Nexus test : Number of squad increase faster
-	if (getName().substr(0, 14) == "outpost_nexus_")
-		return (uint32)ceil((float)(roundLevel+1)/OutpostInTestFightSquadCount.get());
-	//////
+	float coef = OutpostFullFightSquadCount.get();
 
-	return (uint32)ceil((float)(roundLevel+1)/2.0f);
+	if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
+		coef = OutpostGvEFightSquadCount.get();
+
+	if (_PVPType == OUTPOSTENUMS::GVG)
+		coef = OutpostGvGFightSquadCount.get();
+
+	return (uint32)ceil((float)(roundLevel+1)/coef);
 }
 
 //----------------------------------------------------------------------------
 uint32 COutpost::computeSquadCountB(uint32 roundLevel) const
 {
-	///// Nexus test : Number of squad increase faster
-	if (getName().substr(0, 14) == "outpost_nexus_")
-		return (uint32)floor((float)(roundLevel+1)/OutpostInTestFightSquadCount.get());
-	//////
+	float coef = OutpostFullFightSquadCount.get();
 
-	return (uint32)floor((float)(roundLevel+1)/2.0f);
+	if (_PVPType == OUTPOSTENUMS::GVE || _PVPType == OUTPOSTENUMS::PVE)
+		coef = OutpostGvEFightSquadCount.get();
+
+	if (_PVPType == OUTPOSTENUMS::GVG)
+		coef = OutpostGvGFightSquadCount.get();
+
+	return (uint32)floor((float)(roundLevel+1)/coef);
 }
 
 //----------------------------------------------------------------------------
@@ -3133,13 +3147,13 @@ std::string COutpost::toString() const
 	}
 
 	string desc;
-	desc = NLMISC::toString("Alias: %s, Name: '%s', Sheet: '%s', State: '%s', Level: %d, Owner: %s",
+	desc = NLMISC::toString("Alias: %s, Name: '%s', Sheet: '%s', State: '%s', Level: %d, Owner: %s, Type: %s",
 		CPrimitivesParser::aliasToString( _Alias ).c_str(),
 		_Name.c_str(),
 		_Sheet.toString().c_str(),
 		OUTPOSTENUMS::toString( _State ).c_str(),
 		_CurrentOutpostLevel,
-		ownerName.c_str()
+		ownerName.c_str(), OUTPOSTENUMS::toString( _PVPType ).c_str()
 		);
 
 	return desc;

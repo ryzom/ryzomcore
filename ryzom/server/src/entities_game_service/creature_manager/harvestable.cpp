@@ -261,6 +261,8 @@ void CHarvestable::setMps( const vector<CStaticCreatureRawMaterial>& mps )
 			rmIndices[RMUTotalQuantity].pop_back();
 
 			// Calculate the quantity for the selected slot
+			// Ulukyn: Keep 10% from average who are the best
+			limitTo10PctFromAverage = true;
 			uint slotQuantity;
 			if ( limitTo10PctFromAverage )
 			{

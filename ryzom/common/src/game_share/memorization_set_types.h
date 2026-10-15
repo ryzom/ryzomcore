@@ -27,7 +27,7 @@ namespace MEM_SET_TYPES
 	// New System. Only 10 memories are allowed
 	enum
 	{
-		NumMemories= 10,
+		NumMemories= 20,
 	};
 
 	// Deprecated

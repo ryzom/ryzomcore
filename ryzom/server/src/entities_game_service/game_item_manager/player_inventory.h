@@ -142,6 +142,8 @@ public:
 	virtual void deleteItem(uint32 slot);
 	/// Remove the nth item from this inventory
 	virtual CGameItemPtr removeItem(uint32 slot, uint32 quantity = INVENTORIES::REMOVE_MAX_STACK_QUANTITY, TInventoryOpResult * res = NULL);
+	/// Split item stack into two stacks.
+	virtual CGameItemPtr splitStackItem(CGameItemPtr &item, uint32 quantity, TInventoryOpResult * res = NULL);
 	/** Move an item from one slot to another slot
 	 *	If the destination slot already contains an item,
 	 *	the two items are swaped.
@@ -395,6 +397,7 @@ public:
 	void setCharacter(CCharacter *character);
 	/// get the character
 	CCharacter *getCharacter();
+	CCharacter *getConstCharacter() const;
 
 	// info version mechanism
 	virtual void onItemChanged(uint32 slot, INVENTORIES::TItemChangeFlags changeFlags);

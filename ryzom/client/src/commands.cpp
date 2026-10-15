@@ -366,6 +366,7 @@ NLMISC_COMMAND(naked, "get naked !", "")
 {
 	std::string handPath = "LOCAL:INVENTORY:HAND:";
 	std::string equipPath = "LOCAL:INVENTORY:EQUIP:";
+	std::string hotbarPath = "LOCAL:INVENTORY:HOTBAR:";
 	uint32 i;
 	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
 	{
@@ -377,6 +378,23 @@ NLMISC_COMMAND(naked, "get naked !", "")
 	{
 		CInventoryManager::getInstance()->unequip(equipPath + NLMISC::toString(i));
 
+	}
+
+	for (i = 0; i < MAX_HOTBARINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(hotbarPath + NLMISC::toString(i));
+
+	}
+	return true;
+}
+
+NLMISC_COMMAND(freeHands, "free hands !", "")
+{
+	std::string handPath = "LOCAL:INVENTORY:HAND:";
+	uint32 i;
+	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(handPath + NLMISC::toString(i));
 	}
 	return true;
 }
@@ -405,6 +423,18 @@ NLMISC_COMMAND(afk, "Set the player as 'away from keyboard'","[<custom text>]")
 	}
 	NetMngr.push(out);
 */
+	return true;
+}
+
+NLMISC_COMMAND(selfkill, "Kill the player ","")
+{
+	CBitMemStream out;
+	if(!GenericMsgHeaderMngr.pushNameToStream("COMMAND:SELFKILL", out))
+	{
+		nlwarning("Unknown message name COMMAND:SELFKILL");
+		return false;
+	}
+	NetMngr.push(out);
 	return true;
 }
 
@@ -555,7 +585,7 @@ NLMISC_COMMAND(clearShape, "Remove all shapes added with the 'shape' command.", 
 		!hasPrivilegeEG())
 		return true;*/
 	#endif // FINAL_VERSION
-	
+
 	if (ShapeAddedByCommand.empty())
 	{
 		nlwarning("No shape created yet");
@@ -5380,7 +5410,7 @@ bool CUserCommand::execute(const std::string &/* rawCommandString */, const std:
 							{
 								finalArgs += "\"" + args[index++] + "\"";
 							}
-							else 
+							else
 							{
 								finalArgs += args[index++];
 							}

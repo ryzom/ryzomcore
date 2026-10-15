@@ -121,16 +121,21 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 	if ( _NbDeath )
 	{
 		// we multiply gained xp by used skill level
-		const double skillBaseValue = user.getSkillBaseValue(usedSkill);
+		SKILLS::ESkills expSkill;
+		user.getSkills().getMaxXPToGain(expSkill);
+		const double skillBaseValue = user.getSkillBaseValue(expSkill);
 		if (skillBaseValue <= 0)
 		{
-			nlwarning("Skill %s base value for char %s is <= 0 !!",SKILLS::toString(usedSkill).c_str(), user.getId().toString().c_str());
+			nlwarning("Skill %s base value for char %s is <= 0 !!",SKILLS::toString(expSkill).c_str(), user.getId().toString().c_str());
 			xp = 0;
 			return;
 		}
 
 		double xpBeforeDeathPenalty = xp;
 		double xpUsedForDeathPenalty = xp * _DeathPenaltyFactor;
+		SSkill* skill = user.getSkills().getSkillStruct(usedSkill);
+		if (skill->MaxLvlReached < 250)
+			xpUsedForDeathPenalty *= 0.5f;
 		xp -= xpUsedForDeathPenalty;
 
 		double tempXp = xpUsedForDeathPenalty * skillBaseValue;
@@ -158,10 +163,7 @@ void CDeathPenalties::addXP( CCharacter& user, SKILLS::ESkills usedSkill, double
 
 		reset(user);
 		
-		if( _CurrentDeathXP || _DeathXPToGain )
-		{
 			PHRASE_UTILITIES::sendDynamicSystemMessage(user.getEntityRowId(), "PROGRESS_DEATH_PENALTY_COMPLETE");
-		}
 
 		// consume SpeedUpDPLoss services
 		while (1)

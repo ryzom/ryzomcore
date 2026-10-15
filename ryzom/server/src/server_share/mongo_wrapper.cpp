@@ -117,6 +117,14 @@ void CMongo::remove(const string &collection, const string &jsonQuery, bool just
 }
 
 
+string CMongo::id()
+{
+	BSONElement e;
+	BSON(GENOID).getObjectID(e);
+	return e.__oid().toString();
+}
+
+
 string CMongo::quote(const string &s)
 {
 	string ret;

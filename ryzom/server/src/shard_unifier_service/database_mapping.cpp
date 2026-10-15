@@ -1,6 +1,6 @@
 
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
-// Copyright (C) 2010  Winch Gate Property Limited
+// Copyright (C) 2010-2021  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -1640,7 +1640,8 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					nlassert(loadSessionParticipants(connection, __FILE__, __LINE__));
+					if (loadSessionParticipants(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
@@ -1649,11 +1650,13 @@ namespace RSMGR
 						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// cascading deletion for vector child KnownBy
-					nlassert(loadKnownBy(connection, __FILE__, __LINE__));
+					if (loadKnownBy(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CKnownUserPtr > & childs = getKnownBy();
 
@@ -1662,11 +1665,13 @@ namespace RSMGR
 						getKnownByByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// unreference (and update) for vector child PlayerRatings
-					nlassert(loadPlayerRatings(connection, __FILE__, __LINE__));
+					if (loadPlayerRatings(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
@@ -1675,6 +1680,7 @@ namespace RSMGR
 						
 						getPlayerRatingsByIndex(i)->setAuthor(0);
 						getPlayerRatingsByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -2653,7 +2659,8 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child KnownUsers
-					nlassert(loadKnownUsers(connection, __FILE__, __LINE__));
+					if (loadKnownUsers(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CKnownUserPtr > & childs = getKnownUsers();
 
@@ -2662,11 +2669,13 @@ namespace RSMGR
 						getKnownUsersByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// cascading deletion for map child Characters
-					nlassert(loadCharacters(connection, __FILE__, __LINE__));
+					if (loadCharacters(connection, __FILE__, __LINE__))
+					{
 
 					const std::map < uint32, CCharacterPtr > & childs = getCharacters();
 
@@ -2675,18 +2684,22 @@ namespace RSMGR
 						getCharactersById(childs.begin()->first)->remove(connection);
 					}
 				}
+				}
 
 				{
 					// cascading deletion for single child GMStatus
-					nlassert(loadGMStatus(connection, __FILE__, __LINE__));
+					if (loadGMStatus(connection, __FILE__, __LINE__))
+					{
 
 					if (getGMStatus() != NULL)
 						getGMStatus()->remove(connection);
 				}
+				}
 
 				{
 					// unreference (and update) for vector child Folders
-					nlassert(loadFolders(connection, __FILE__, __LINE__));
+					if (loadFolders(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CFolderPtr > & childs = getFolders();
 
@@ -2697,10 +2710,12 @@ namespace RSMGR
 						getFoldersByIndex(i)->update(connection);
 					}
 				}
+				}
 
 				{
 					// unreference (and update) for vector child FolderAccess
-					nlassert(loadFolderAccess(connection, __FILE__, __LINE__));
+					if (loadFolderAccess(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
@@ -2709,6 +2724,7 @@ namespace RSMGR
 						
 						getFolderAccessByIndex(i)->setUserId(0);
 						getFolderAccessByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -3359,9 +3375,7 @@ namespace RSMGR
 		qs += "session_type, title, owner, plan_date, start_date, description, orientation, level, rule_type, access_type, state, host_shard_id, subscription_slots, reserved_slots, estimated_duration, final_duration, folder_id, lang, icone, anim_mode, race_filter, religion_filter, guild_filter, shard_filter, level_filter, subscription_closed, newcomer";
 		qs += ") VALUES (";
 		
-		qs += _SessionType.isValid()
-			? "'"+_SessionType.toString()+"'"
-			: "DEFAULT(session_type)";
+		qs += "'"+_SessionType.toString()+"'";
 		qs += ", ";
 		qs += "'"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3486,9 +3500,7 @@ namespace RSMGR
 		std::string qs;
 		qs = "UPDATE sessions SET ";
 		
-		qs += "session_type = " + (_SessionType.isValid()
-			? "'"+_SessionType.toString()+"'"
-			: "DEFAULT(session_type)");
+		qs += "session_type = '"+_SessionType.toString()+"'";
 		qs += ", ";
 		qs += "title = '"+MSW::escapeString(NLMISC::toString(_Title), connection)+"'";
 		qs += ", ";
@@ -3590,7 +3602,8 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionParticipants
-					nlassert(loadSessionParticipants(connection, __FILE__, __LINE__));
+					if (loadSessionParticipants(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CSessionParticipantPtr > & childs = getSessionParticipants();
 
@@ -3599,11 +3612,13 @@ namespace RSMGR
 						getSessionParticipantsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// cascading deletion for vector child GuildInvites
-					nlassert(loadGuildInvites(connection, __FILE__, __LINE__));
+					if (loadGuildInvites(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CGuildInvitePtr > & childs = getGuildInvites();
 
@@ -3612,17 +3627,20 @@ namespace RSMGR
 						getGuildInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// cascading deletion for vector child JournalEntries
-					nlassert(loadJournalEntries(connection, __FILE__, __LINE__));
+					if (loadJournalEntries(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CJournalEntryPtr > & childs = getJournalEntries();
 
 					while (!childs.empty())
 					{
 						getJournalEntriesByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 
@@ -5196,7 +5214,8 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child Invites
-					nlassert(loadInvites(connection, __FILE__, __LINE__));
+					if (loadInvites(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CGuildInvitePtr > & childs = getInvites();
 
@@ -5205,11 +5224,13 @@ namespace RSMGR
 						getInvitesByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// unreference (and update) for vector child Characters
-					nlassert(loadCharacters(connection, __FILE__, __LINE__));
+					if (loadCharacters(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CCharacterPtr > & childs = getCharacters();
 
@@ -5218,6 +5239,7 @@ namespace RSMGR
 						
 						getCharactersByIndex(i)->setGuildId(0);
 						getCharactersByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -7725,7 +7747,8 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child FolderAccess
-					nlassert(loadFolderAccess(connection, __FILE__, __LINE__));
+					if (loadFolderAccess(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CFolderAccessPtr > & childs = getFolderAccess();
 
@@ -7734,11 +7757,13 @@ namespace RSMGR
 						getFolderAccessByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// unreference (and update) for vector child Sessions
-					nlassert(loadSessions(connection, __FILE__, __LINE__));
+					if (loadSessions(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CSessionPtr > & childs = getSessions();
 
@@ -7747,6 +7772,7 @@ namespace RSMGR
 						
 						getSessionsByIndex(i)->setFolderId(0);
 						getSessionsByIndex(i)->update(connection);
+						}
 					}
 				}
 
@@ -9051,7 +9077,8 @@ namespace RSMGR
 
 				{
 					// cascading deletion for vector child SessionLogs
-					nlassert(loadSessionLogs(connection, __FILE__, __LINE__));
+					if (loadSessionLogs(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CSessionLogPtr > & childs = getSessionLogs();
 
@@ -9060,17 +9087,20 @@ namespace RSMGR
 						getSessionLogsByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
+				}
 
 
 				{
 					// cascading deletion for vector child PlayerRatings
-					nlassert(loadPlayerRatings(connection, __FILE__, __LINE__));
+					if (loadPlayerRatings(connection, __FILE__, __LINE__))
+					{
 
 					const std::vector < CPlayerRatingPtr > & childs = getPlayerRatings();
 
 					while (!childs.empty())
 					{
 						getPlayerRatingsByIndex((uint32)childs.size()-1)->remove(connection);
+						}
 					}
 				}
 

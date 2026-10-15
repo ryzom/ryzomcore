@@ -1123,7 +1123,6 @@ namespace NLGUI
 		if(!pIE)
 		{
 			ls.pushNil();
-			nlerror("getCurrentWindowUnder(): No UICaller found. return Nil");
 		}
 		else
 		{
@@ -1672,7 +1671,7 @@ namespace NLGUI
 		ls.registerFunc("runFct",    runFct);
 		ls.registerFunc("runCommand",    runCommand);
 		ls.registerFunc("getPathContent", getPathContent);
-		
+
 		// Through LUABind API
 		lua_State	*L= ls.getStatePointer();
 

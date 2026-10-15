@@ -1,3 +1,5 @@
+#ifndef INCLUDED_database_GUILD_H
+#define INCLUDED_database_GUILD_H
 
 
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>

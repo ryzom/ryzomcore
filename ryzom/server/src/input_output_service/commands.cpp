@@ -676,7 +676,7 @@ NLMISC_COMMAND(showChat,"show or hide chat messages","")
 } // showChat //
 
 
-NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
+NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message> [<id>]")
 {
 	if (args.size() < 3)
 		return false;
@@ -692,10 +692,10 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 	TGroupId groupId = CEntityId::Unknown;
 
 	CChatGroup::TGroupType mode;
-	if (args[1] == "FACTION_RF") // The current only translated dynamic chat
+	if (args[1].substr(0, 8)  == "FACTION_" || args[1].substr(0, 7)  == "league_") // The current only translated dynamic chat
 	{
-		chanId = IOS->getChatManager().getChanId("FACTION_RF");
 		mode = CChatGroup::dyn_chat;
+		chanId = IOS->getChatManager().getChanId(args[1]);
 	}
 	else if (args[1].substr(0, 7) == "region:")
 	{
@@ -707,6 +707,11 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 		mode = CChatGroup::guild;
 		groupId.fromString(args[1].substr(6).c_str());
 	}
+	else if (args[1].substr(0, 5) == "team:")
+	{
+		mode = CChatGroup::team;
+		groupId.fromString(args[1].substr(5).c_str());
+	}
 	else
 	{
 		mode = CChatGroup::stringToGroupType(args[1]);
@@ -716,6 +721,10 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 	ucstring ucstr;
 	ucstr.fromUtf8(args[2]);
 	TDataSetRow rowId = ci->DataSetIndex;
+
+	string rocketId = "";
+	if (args.size() > 3)
+		rocketId = args[3];
 	try
 	{
 		CChatGroup::TGroupType oldMode = IOS->getChatManager().getClient(rowId).getChatMode();
@@ -730,10 +739,12 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 
 		if (mode == CChatGroup::guild)
 			IOS->getChatManager().getClient(rowId).setGuildChatGroup(groupId);
+		if (mode == CChatGroup::team)
+			IOS->getChatManager().getClient(rowId).setTeamChatGroup(groupId);
 
 
 		IOS->getChatManager().getClient(rowId).updateAudience();
-		IOS->getChatManager().chat(rowId, ucstr);
+		IOS->getChatManager().chat(rowId, ucstr, rocketId);
 
 		if (oldMode != mode)
 		{
@@ -753,7 +764,7 @@ NLMISC_COMMAND(chat, "send message chat", "<char_name> <chat_group> <message>")
 	return true;
 }
 
-NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message>")
+NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message> [<id>]")
 {
 	if (args.size() < 3)
 		return false;
@@ -761,10 +772,15 @@ NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message
 	uint32 id;
 	ucstring ucstr;
 
+	string rocketId = "";
+
 	string name = args[0];
 	ucstr.fromUtf8(args[2]);
+	if (args.size() > 3)
+		rocketId = args[3];
 
-	IOS->getChatManager().sendFarChat(name, ucstr, args[1]);
+	IOS->getChatManager().sendFarChat(name, ucstr, args[1], rocketId);
+	return true;
 }
 
 NLMISC_COMMAND(getRealName, "getRealName", "<char_name>")

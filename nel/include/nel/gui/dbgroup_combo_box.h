@@ -92,6 +92,11 @@ namespace NLGUI
 		void			setSelectionText(const std::string & val);
 		std::string		getSelectionText() const;
 
+		// selection text
+		void			setOnChange(const std::string & val);
+		std::string		getOnChange() const;
+
+
 		// view text
 		void			setViewText(const std::string & text);
 		std::string		getViewText() const;
@@ -132,6 +137,7 @@ namespace NLGUI
 			REFLECT_LUA_METHOD("resetTexts", luaResetTexts)
 			REFLECT_SINT32 ("selectionNb", getSelectionNb, setSelectionNb)
 			REFLECT_STRING ("selection_text", getSelectionText, setSelectionText)
+			REFLECT_STRING ("on_change", getOnChange, setOnChange)
 #ifdef RYZOM_LUA_UCSTRING
 			REFLECT_UCSTRING ("view_text", getViewTextAsUtf16, setViewTextAsUtf16) // Compatibility
 #else

@@ -499,7 +499,7 @@ REGISTER_ACTION_HANDLER(CHandlerContextCreateGuild, "context_create_guild");
 // ***************************************************************************
 // GCM Mission option
 // ***************************************************************************
-class CHandlerContextMissionOption : public IActionHandler
+class CHandlerContextOpenMissionOption : public IActionHandler
 {
 public:
 	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
@@ -526,7 +526,23 @@ public:
 		}
 	}
 };
+REGISTER_ACTION_HANDLER(CHandlerContextOpenMissionOption, "open_mission_option");
+
+
+class CHandlerContextMissionOption : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &sParams)
+	{
+		std::string id = getParam(sParams, "id");
+		sint intId;
+		if (!fromString(id, intId)) return;
+		UserEntity->moveToMission(UserEntity->targetSlot(), 3.0, intId);
+	}
+};
 REGISTER_ACTION_HANDLER(CHandlerContextMissionOption, "mission_option");
+
+
 
 
 // ***************************************************************************
@@ -935,7 +951,7 @@ public:
 			CEntityCL *pSel = EntitiesMngr.entity(UserEntity->selection());
 			if (pSel != NULL)
 				if (pSel->isForageSource())
-					UserEntity->moveToExtractionPhrase(UserEntity->selection(), 2.0f, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
+					UserEntity->moveToExtractionPhrase(UserEntity->selection(), MaxExtractionDistance, std::numeric_limits<uint>::max(), std::numeric_limits<uint>::max(), true);
 		}
 	}
 };
@@ -1095,6 +1111,20 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerContextWebPage, "context_web_page");
+
+
+// ***************************************************************************
+class CHandlerFullMap : public IActionHandler
+{
+public:
+	void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */)
+	{
+		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
+
+		CLuaManager::getInstance().executeLuaScript("game:openFullMap()", true);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerFullMap, "fullmap");
 
 
 
@@ -1960,7 +1990,7 @@ public:
 					bool womanTitle = false;
 					if (pChar != NULL)
 						womanTitle = pChar->getGender() == GSGENDER::female;
-					
+
 					copyInout = STRING_MANAGER::CStringManagerClient::getTitleLocalizedName(CEntityCL::getTitleFromName(copyInout), womanTitle);
 
 					// Sometimes translation contains another title
@@ -2667,9 +2697,9 @@ class CAHAddShape : public IActionHandler
 					instance.setPos(CVector((float)x, (float)y, (float)z));
 					instance.setRotQuat(dir.getRot());
 				}
-				
+
 				instance.setTransformMode(UTransformable::RotEuler);
-				
+
 				// if the shape is a particle system, additionnal parameters are user params
 				UParticleSystemInstance psi;
 				psi.cast (instance);
@@ -3481,7 +3511,7 @@ class CHandlerGameConfigVREnable : public IActionHandler
 		// VR_CONFIG
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
-		if (pBut) 
+		if (pBut)
 		{
 			// hide or show device list depending on enabled or not
 			updateVRDevicesComboUI(pBut->getPushed());
@@ -3646,7 +3676,7 @@ class CHandlerGameConfigApply : public IActionHandler
 			NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:AUTO_CHANNEL")->setValue32(pCS->getPushed());
 
 		CCtrlBaseButton *pBut = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(GAME_CONFIG_VR_ENABLE_BUTTON));
-		if (pBut) 
+		if (pBut)
 		{
 			// store the new config variables
 			ClientCfg.VREnable = pBut->getPushed();

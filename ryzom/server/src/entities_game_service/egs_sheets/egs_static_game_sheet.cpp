@@ -1021,6 +1021,7 @@ CAttributeMapping::CAttributeMapping()
 	_StaticAttributeMap.insert(make_pair(std::string("basics.gender"),				at_gender));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.size"),				at_size));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.level"),				at_level));
+	_StaticAttributeMap.insert(make_pair(std::string("basics.playerskilllevel"),	at_player_skill_level));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.nbplayers"),			at_nb_players));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.playerhplevel"),		at_player_hp_level));
 	_StaticAttributeMap.insert(make_pair(std::string("basics.nbhittokillplayer"),	at_nb_hit_to_kill_player));
@@ -1176,8 +1177,11 @@ bool CStaticCreatures::applyUserModel(CCustomElementId userModelId, const std::v
 				break;
 			}
 			case at_level :
-				//FIXME
+			{
+				NLMISC::fromString(scriptLine[1], _Level);
+				nldebug("<CStaticCreatures::applyUserModel> Applying '%s' : setting Level to %u", modelId.c_str(), _Level);
 				break;
+			}
 
 			case at_player_skill_level :
 				//FIXME
