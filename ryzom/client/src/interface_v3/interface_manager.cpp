@@ -75,6 +75,7 @@
 #include "group_skills.h"
 #include "group_compas.h"
 #include "nel/gui/group_html.h"
+#include <nel/gui/url_parser.h>
 
 // Misc
 #include "../input.h"

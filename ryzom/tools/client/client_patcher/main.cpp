@@ -309,9 +309,6 @@ int main(int argc, char *argv[])
 	int versionNumbers[] = { RYZOM_VERSION_RC, 0, 0 };
 	VersionName = NLMISC::toString(versionNumbers[2]);
 
-	// initialize patch manager and set the ryzom full path, before it's used
-	CPatchManager *pPM = CPatchManager::getInstance();
-
 	// use PatchUrl
 	vector<string> patchURLs;
 	pPM->init(patchURLs, ClientCfg.ConfigFile.getVar("PatchUrl").asString(), VersionName);
