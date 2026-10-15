@@ -20,12 +20,12 @@
 #ifndef FOLLOW_PATH_DIALOG_H
 #define FOLLOW_PATH_DIALOG_H
 
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpacerItem>
+#include <QComboBox>
+#include <QDialog>
+#include <QGridLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QSpacerItem>
 
 namespace NL3D
 {

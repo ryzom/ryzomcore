@@ -583,7 +583,7 @@ void CStateInstance::setNextPunctualState(CAIState* state)
 		nlwarning("CStateInstance::setNextPunctualState(): State should be punctual '%s'%s - setting state to std::numeric_limits<uint32>::max()",
 			state->getAliasNode()->fullName().c_str(),
 			state->getAliasString().c_str());
-		state = NULL;
+		state = NULL; // this does nothing wtf
 		return;
 	}
 

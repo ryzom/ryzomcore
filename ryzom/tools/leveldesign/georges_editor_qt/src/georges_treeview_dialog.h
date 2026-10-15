@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "ui_georges_treeview_form.h"
 
 // Qt includes
-#include <QtGui/QDockWidget>
+#include <QDockWidget>
 
 // STL includes
 

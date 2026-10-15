@@ -85,7 +85,7 @@ void SplashScreen::drawContents( QPainter *painter )
 
 	if( progressBarEnabled )
 	{
-		QStyleOptionProgressBarV2 pbStyle;
+		QStyleOptionProgressBar pbStyle;
 		pbStyle.initFrom( this );
 		pbStyle.state = QStyle::State_Enabled;
 		pbStyle.textVisible = false;

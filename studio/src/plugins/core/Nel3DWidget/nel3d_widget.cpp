@@ -17,6 +17,9 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+// needs to be included before x11 due to some collisions
+#include <QResizeEvent>
+
 #include "nel3d_widget.h"
 #include "nel/3d/u_driver.h"
 #include "nel/3d/text_context.h"
@@ -27,8 +30,6 @@
 #ifdef NL_OS_WINDOWS
 #include <Windows.h>
 #endif
-
-#include <QResizeEvent>
 
 Nel3DWidget::Nel3DWidget( QWidget *parent ) :
 NEL3DWIDGET( parent )

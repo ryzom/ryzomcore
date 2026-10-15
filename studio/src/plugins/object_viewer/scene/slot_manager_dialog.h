@@ -23,8 +23,9 @@
 #include <nel/misc/types_nl.h>
 #include "ui_slot_form.h"
 
-#include <QtGui/QDockWidget>
-#include <QtGui/QScrollArea>
+#include <QDockWidget>
+#include <QScrollArea>
+#include <QTabWidget>
 
 #include "nel/3d/channel_mixer.h"
 

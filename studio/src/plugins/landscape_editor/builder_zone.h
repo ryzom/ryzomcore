@@ -39,9 +39,9 @@
 #include <QtCore/QMap>
 #include <QtCore/QList>
 #include <QtCore/QString>
-#include <QtGui/QPixmap>
-#include <QtGui/QUndoStack>
-#include <QtGui/QGraphicsRectItem>
+#include <QPixmap>
+#include <QUndoStack>
+#include <QGraphicsRectItem>
 
 namespace LandscapeEditor
 {

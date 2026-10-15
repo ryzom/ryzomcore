@@ -24,17 +24,17 @@
 #include "translation_manager_editor.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtCore/QFile>
-#include <QtCore/QTextStream>
-#include <QtGui/QWidget>
-#include <QtGui/QMdiArea>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QUndoCommand>
-#include <QtGui/QUndoStack>
-#include <QtGui/QTextEdit>
-#include <QtGui/QSyntaxHighlighter>
-#include <QtGui/QErrorMessage>
+#include <QObject>
+#include <QFile>
+#include <QTextStream>
+#include <QWidget>
+#include <QMdiArea>
+#include <QMdiSubWindow>
+#include <QUndoCommand>
+#include <QUndoStack>
+#include <QTextEdit>
+#include <QSyntaxHighlighter>
+#include <QErrorMessage>
 #include <QKeyEvent>
 
 namespace TranslationManager

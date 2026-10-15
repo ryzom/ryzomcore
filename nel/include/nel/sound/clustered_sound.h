@@ -40,6 +40,7 @@ namespace NLSOUND
 {
 
 class USource;
+class CFilterMaterial;
 
 /** This class will manage the clipping/positioning/occlusion of sound placed inside the
  *	cluster/portal system.
@@ -67,13 +68,17 @@ public:
 		/// The direction vector for the virtual sound source.
 		NLMISC::CVector	Direction;
 		/// The occlusion att.
-		sint32			Occlusion;
+		float			Occlusion;
 		/// The occlusion LF factor (see EAX spec)
 		float			OcclusionLFFactor;
 		/// The occlusion romm ration
 		float			OcclusionRoomRatio;
 		/// The obsctruction att db
-		sint32			Obstruction;
+		float			Obstruction;
+		/// Occlusion low pass cutoff frequency
+		float			DirectCutoffFrequency;
+		/// Occlusion low pass cutoff frequency
+		float			EffectCutoffFrequency;
 	};
 
 	/// Container for audible cluster status
@@ -84,10 +89,12 @@ public:
 	{
 		/// The current gain.
 		float			Gain;
-		sint32			Occlusion;
+		float			Occlusion;
 		float			OcclusionLFFactor;
 		float			OcclusionRoomRatio;
-		sint32			Obstruction;
+		float			Obstruction;
+		float			DirectCutoffFrequency;
+		float			EffectCutoffFrequency;
 		/// The distance acumulator
 		float			Dist;
 		/// A flag that indicate if we need to filter the unvisible child.
@@ -177,7 +184,7 @@ public:
 	 *	\param maxEarDist The maximum traversal distance to limit graph traversal.
 	 *	\param minGain The minimun gain to stop traversal.
 	 */
-	void		init(NL3D::CScene *scene, float portalInterpolate, float maxEarDistance, float minGain);
+	void		init(NL3D::CScene *scene, float portalInterpolate, float maxEarDistance, float minGain, bool enableOcclusionObstruction, bool enableReverb);
 
 	/** Update the cluster sound system.
 	 */
@@ -259,6 +266,13 @@ private:
 	typedef CHashMap<NLMISC::TStringId, NLMISC::TStringId, NLMISC::CStringIdHashMapTraits> TStringStringMap;
 	/// The sound_group to sound assoc
 	TStringStringMap	_SoundGroupToSound;
+
+	typedef std::map<NLMISC::TStringId, CFilterMaterial> TFilterMaterialsMap;
+	/// Filter material presets
+	TFilterMaterialsMap m_FilterMaterials;
+
+	bool m_EnableOcclusionObstruction;
+	bool m_EnableReverb;
 };
 
 } // NLSOUND

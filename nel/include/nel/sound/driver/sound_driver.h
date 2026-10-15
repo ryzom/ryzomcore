@@ -83,8 +83,6 @@ public:
 	/// Driver creation flags, to configure behaviour, or check feature availability.
 	enum TSoundOptions
 	{
-		/// Enable EAX/I3DL2 environment effects. (not implemented on FMod driver).
-		OptionEnvironmentEffects = 0x01, 
 		/// Allow the user to use the ADPCM encoding. (verify availability with getOption)
 		OptionAllowADPCM = 0x02, 
 		/// Force software buffering (always true for XAudio2).
@@ -103,6 +101,10 @@ public:
 		OptionLocalBufferCopy = 0x10, 
 		/// Use to check availability of buffer streaming. (verify with getOption)
 		OptionHasBufferStreaming = 0x20, 
+		/// Enable reverb
+		OptionReverbEffect = 0x40,
+		/// Enable occlusion & obstruction
+		OptionFilterEffect = 0x80,
 	};
 
 	/** The interface must be implemented and provided to the driver

@@ -1,0 +1,6 @@
+{
+  "Name" : "LogPlugin",
+  "Version" : "1.1",
+  "Vendor": "aquiles",
+  "Description": "DockWidget to display all log messages from NeL."
+}

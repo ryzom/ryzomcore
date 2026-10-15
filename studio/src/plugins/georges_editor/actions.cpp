@@ -98,8 +98,8 @@ namespace GeorgesQt
 				value = m_oldValue;
 
 
-			array->Elements[m_item->structId()].Name = value.toAscii().data();
-			m_item->setName(value.toAscii().data());
+			array->Elements[m_item->structId()].Name = value.toLatin1().data();
+			m_item->setName(value.toLatin1().data());
 
 			m_model->emitDataChanged(m_model->index(m_item->row(), 0, m_item));
 		}

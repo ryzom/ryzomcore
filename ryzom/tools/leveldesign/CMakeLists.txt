@@ -29,7 +29,7 @@ IF(WIN32)
 ENDIF()
 
 
-IF(WITH_QT)
+IF(WITH_QT5)
   IF(WITH_GEORGES)
     ADD_SUBDIRECTORY(georges_editor_qt)
   ENDIF()

@@ -10,12 +10,12 @@
 #include <nel/misc/path.h>
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QObject>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 #include "mission_compiler_settings_page.h"
 
@@ -75,5 +75,3 @@ void MissionCompilerPlugin::addAutoReleasedObject(QObject *obj)
 }
 
 }
-
-Q_EXPORT_PLUGIN(MissionCompiler::MissionCompilerPlugin)

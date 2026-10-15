@@ -18,6 +18,8 @@
 #   * To build binary archive, use the 'package' target.
 #     To build source archive, use the 'package_source' target.
 
+CMAKE_MINIMUM_REQUIRED(VERSION 3.22)
+
 #-----------------------------------------------------------------------------
 # Load some macros.
 SET(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules;${CMAKE_MODULE_PATH}")
@@ -39,10 +41,11 @@ ENDIF()
 # Downloads and install Hunger into HUNTER_ROOT directory.
 OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
 IF(HUNTER_ENABLED)
+  cmake_minimum_required(VERSION 3.24)
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.23.321.tar.gz"
-    SHA1 "5e53cbb0429037ea8e2592bfd92704b8ff3ab492"
+    URL "https://github.com/cpp-pm/hunter/archive/v0.25.3.tar.gz"
+    SHA1 "0dfbc2cb5c4cf7e83533733bdfd2125ff96680cb"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
@@ -65,7 +68,6 @@ ENDIF()
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
-INCLUDE(${CMAKE_ROOT}/Modules/Documentation.cmake OPTIONAL)
 
 # Force out of source builds.
 CHECK_OUT_OF_SOURCE()
@@ -79,7 +81,6 @@ ELSE()
   SET(CURRENT_YEAR "2019")
 ENDIF()
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 4)
 SET(NL_VERSION_MINOR 1)
@@ -190,7 +191,10 @@ IF(HUNTER_ENABLED)
   FIND_PACKAGE(libxml2 CONFIG REQUIRED)
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
 
-  HUNTER_ADD_PACKAGE(OpenSSL)
+  # cross compiling doesn't quite work on the hunter openssl package therefor compile it separately and use it
+  IF(NOT CMAKE_CROSSCOMPILING)
+    HUNTER_ADD_PACKAGE(OpenSSL)
+  ENDIF()
   FIND_PACKAGE(OpenSSL REQUIRED)
   # TODO: is OpenSSL::Crypto only needed for WIN32?
   SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)

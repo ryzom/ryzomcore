@@ -21,10 +21,10 @@
 #include "ui_landscape_editor_window.h"
 
 // Qt includes
-#include <QtGui/QUndoStack>
-#include <QtOpenGL/QGLWidget>
-#include <QtGui/QLabel>
-#include <QtCore/QTimer>
+#include <QUndoStack>
+#include <QGLWidget>
+#include <QLabel>
+#include <QTimer>
 
 namespace LandscapeEditor
 {

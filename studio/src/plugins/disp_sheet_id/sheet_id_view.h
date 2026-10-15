@@ -25,7 +25,7 @@
 #include "nel/misc/types_nl.h"
 #include "nel/misc/sheet_id.h"
 
-#include <QtGui/QDialog>
+#include <QDialog>
 
 class SheetIdView : public QDialog
 {

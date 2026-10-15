@@ -23,7 +23,7 @@
 #include "nel/pipeline/project_config.h"
 
 #ifdef NL_OS_WINDOWS
-#	include <Windows.h>
+#	include <windows.h>
 #else
 #	include <stdlib.h>
 #endif

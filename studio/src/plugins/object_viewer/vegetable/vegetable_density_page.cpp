@@ -21,8 +21,8 @@
 #include "vegetable_density_page.h"
 
 // Qt includes
-#include <QtGui/QFileDialog>
-#include <QtGui/QMessageBox>
+#include <QFileDialog>
+#include <QMessageBox>
 
 // NeL includes
 #include <nel/3d/vegetable.h>

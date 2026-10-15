@@ -938,15 +938,20 @@ void CSourceXAudio2::setupDirectFilter()
 		switch (_DirectFilter.Type)
 		{
 		case LowPassFilter:
-			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterHighFrequency / 10.0f, _Frequency);
+			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterHighFrequency, _Frequency);
 			_DirectFilter.OneOverQ = 1.0f;
 			break;
 		case BandPassFilter:
-			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(((_DirectFilterLowFrequency * 10.0f) + (_DirectFilterHighFrequency / 10.0f)) / 2.0f, _Frequency);
-			_DirectFilter.OneOverQ = 1.5f; // todo: calculate OneOverQ from range between low and high frequency
+		{
+			float centerFrequency = sqrt(_DirectFilterLowFrequency * _DirectFilterHighFrequency); // geometric mean
+			float bandwidth = _DirectFilterHighFrequency - _DirectFilterLowFrequency;
+			float q = centerFrequency / bandwidth;
+			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(centerFrequency, _Frequency);
+			_DirectFilter.OneOverQ = 1.0f / q;
 			break;
+		}
 		case HighPassFilter:
-			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterLowFrequency * 10.0f, _Frequency);
+			_DirectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_DirectFilterLowFrequency, _Frequency);
 			_DirectFilter.OneOverQ = 1.0f;
 			break;
 		default:
@@ -1086,16 +1091,22 @@ void CSourceXAudio2::setupEffectFilter()
 		switch (_EffectFilter.Type)
 		{
 		case LowPassFilter:
-			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterHighFrequency / 10.0f, _Frequency);
+			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterHighFrequency, _Frequency);
 			_EffectFilter.OneOverQ = 1.0f;
 			break;
 		case BandPassFilter:
-			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(((_EffectFilterLowFrequency * 10.0f) + (_EffectFilterHighFrequency / 10.0f)) / 2.0f, _Frequency);
-			_EffectFilter.OneOverQ = 1.5f; // todo: calculate OneOverQ from range between low and high frequency
+		{
+			float centerFrequency = sqrt(_EffectFilterLowFrequency * _EffectFilterHighFrequency); // geometric mean
+			float bandwidth = _EffectFilterHighFrequency - _EffectFilterLowFrequency;
+			float q = centerFrequency / bandwidth;
+			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(centerFrequency, _Frequency);
+			_EffectFilter.OneOverQ = 1.0f / q;
 			break;
+		}
 		case HighPassFilter:
-			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterLowFrequency * 10.0f, _Frequency);
+			_EffectFilter.Frequency = XAudio2CutoffFrequencyToRadians(_EffectFilterLowFrequency, _Frequency);
 			_EffectFilter.OneOverQ = 1.0f;
+			break;
 		default:
 			_EffectFilter.Type = (XAUDIO2_FILTER_TYPE)~0;
 			break;

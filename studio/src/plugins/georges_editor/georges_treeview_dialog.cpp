@@ -22,11 +22,12 @@
 #include "georges_treeview_dialog.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QSettings>
 #include <QFileDialog>
 #include <QDebug>
 #include <QMenu>
+#include <QInputDialog>
 
 // NeL includes
 #include <nel/misc/path.h>
@@ -73,7 +74,7 @@ namespace GeorgesQt
 		m_ui.setupUi(this);
 		m_header = new ExpandableHeaderView(Qt::Horizontal, m_ui.treeView);
 		m_ui.treeView->setHeader(m_header);
-		m_ui.treeView->header()->setResizeMode(QHeaderView::ResizeToContents);
+		m_ui.treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 		m_ui.treeView->header()->setStretchLastSection(true);
 
 		m_form = 0;
@@ -126,7 +127,7 @@ namespace GeorgesQt
 
     NLGEORGES::CForm* CGeorgesTreeViewDialog::getFormByName(const QString formName)
 	{
-	    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toAscii().data());
+	    return (NLGEORGES::CForm *)m_georges->loadForm(formName.toLatin1().data());
 		//else
 		//{
 		//	CForm *form = 0;
@@ -171,7 +172,7 @@ namespace GeorgesQt
 		m_form = form;
 
 		// Retrieve a copy of the root definition.
-		NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toAscii().data()));
+		NLGEORGES::CFormDfn *formDfn = dynamic_cast<NLGEORGES::CFormDfn *>(m_georges->loadFormDfn(dfnName.toLatin1().data()));
 
 		// Next we'll use the root node to build a new form.
 		NLGEORGES::CFormElmStruct *fes = dynamic_cast<NLGEORGES::CFormElmStruct *>(getRootNode(0));
@@ -274,7 +275,7 @@ namespace GeorgesQt
 	void CGeorgesTreeViewDialog::addParentForm(QString parentFormNm)
 	{
 		// Try to load the form
-		NLGEORGES::UForm *uParentForm = m_georges->loadForm(parentFormNm.toAscii().data());
+		NLGEORGES::UForm *uParentForm = m_georges->loadForm(parentFormNm.toLatin1().data());
 		NLGEORGES::CForm *parentForm = dynamic_cast<NLGEORGES::CForm*>(uParentForm);
 		NLGEORGES::CForm *mainForm = static_cast<NLGEORGES::CForm*>(m_form);
 
@@ -288,11 +289,11 @@ namespace GeorgesQt
 				if (parentForm->Elements.FormDfn ==  mainForm->Elements.FormDfn)
 				{
 					// This is the parent form selector
-					if(!mainForm->insertParent(mainForm->getParentCount(),parentFormNm.toAscii().data(), parentForm))
-						nlwarning("Failed to add parent form: %s", parentFormNm.toAscii().data());
+					if(!mainForm->insertParent(mainForm->getParentCount(),parentFormNm.toLatin1().data(), parentForm))
+						nlwarning("Failed to add parent form: %s", parentFormNm.toLatin1().data());
 					else
 					{
-						nlinfo("Successfullyadded parent form: %s", parentFormNm.toAscii().data());
+						nlinfo("Successfullyadded parent form: %s", parentFormNm.toLatin1().data());
 						model->addParentForm(parentFormNm);
 					}
 				}

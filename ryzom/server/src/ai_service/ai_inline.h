@@ -37,7 +37,7 @@ inline float CAIS::frandPlusMinus(double mod)	{ return _random.frandPlusMinus(mo
 
 inline uint32 CAIS::rand32()
 { 
-	return ((uint32(_random.rand()))<<16)+uint32(_random.rand());
+	return ((uint32(_random.rand()))<<16)+uint32(_random.rand()); // FIXME: this is broken. _random.rand() is just 15 bits
 }
 inline uint32 CAIS::rand32(uint32 mod)
 { 
@@ -49,7 +49,7 @@ inline uint32 CAIS::rand16(uint32 mod)
 { 
 	if (mod==0)
 		return	0;
-	return _random.rand()%mod;
+	return _random.rand()%mod; // FIXME: this is broken. _random.rand() is just 15 bits
 }
 
 //-------------------------------------------------------------------

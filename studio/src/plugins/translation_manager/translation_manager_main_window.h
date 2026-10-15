@@ -32,14 +32,14 @@
 #include "../core/icore_listener.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QUndoStack>
-#include <QtGui/QMainWindow>
-#include <QtGui/QTableWidget>
-#include <QtGui/QMenu>
-#include <QtGui/QMdiSubWindow>
-#include <QtCore/QSignalMapper>
-#include <QtGui/QDialog>
+#include <QObject>
+#include <QUndoStack>
+#include <QMainWindow>
+#include <QTableWidget>
+#include <QMenu>
+#include <QMdiSubWindow>
+#include <QSignalMapper>
+#include <QDialog>
 
 // STL includes
 #include <set>

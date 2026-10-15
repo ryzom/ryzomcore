@@ -18,6 +18,7 @@
 #include "georges_dfn_dialog.h"
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QFileInfo>
 
 #include "georges.h"
 #include "dfn_browser_ctrl.h"
@@ -25,6 +26,7 @@
 #include "nel/misc/file.h"
 #include "nel/misc/o_xml.h"
 #include "nel/misc/path.h"
+#include "nel/georges/form_dfn.h"
 
 class GeorgesDFNDialogPvt
 {

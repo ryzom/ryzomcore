@@ -21,9 +21,9 @@
 #include "color_edit_widget.h"
 
 // Qt includes
-#include <QtGui/QColorDialog>
-#include <QtGui/QColor>
-#include <QtGui/QPainter>
+#include <QColorDialog>
+#include <QColor>
+#include <QPainter>
 
 // Nel includes
 #include <nel/misc/rgba.h>

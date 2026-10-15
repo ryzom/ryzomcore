@@ -35,6 +35,7 @@ namespace NLGEORGES {
 	class UForm;
     class CFormElmStruct;
     class CFormDfn;
+    class CFormElm;
     class CFormElmArray;
 }
 

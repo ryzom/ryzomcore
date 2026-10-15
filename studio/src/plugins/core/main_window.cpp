@@ -33,8 +33,11 @@
 
 // Qt includes
 #include <QtCore/QCoreApplication>
-#include <QtGui/QUndoView>
-#include <QtGui/QtGui>
+#include <QCloseEvent>
+#include <QDockWidget>
+#include <QMessageBox>
+#include <QStatusBar>
+#include <QUndoView>
 
 namespace Core
 {

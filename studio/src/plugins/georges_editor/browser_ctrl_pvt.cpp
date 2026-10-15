@@ -19,9 +19,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "browser_ctrl_pvt.h"
-#include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
-#include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
+#include <qtpropertybrowser/qttreepropertybrowser.h>
+#include <qtpropertybrowser/qtvariantproperty.h>
 #include <QVariant>
+#include <QFileInfo>
 #include "formitem.h"
 
 #include "nel/georges/form.h"
@@ -517,7 +518,7 @@ void BrowserCtrlPvt::onArrayValueChanged( QtProperty *p, const QVariant &value )
 void BrowserCtrlPvt::onAtomValueChanged( QtProperty *p, const QVariant &value )
 {
 	NLGEORGES::CFormElmAtom *atom = static_cast< NLGEORGES::CFormElmAtom* >( getCurrentNode() );
-	atom->setValue( value.toString().toUtf8() );
+	atom->setValue( value.toString().toUtf8().constData() );
 
 	Q_EMIT modified();
 	Q_EMIT valueChanged( m_currentNode.name, value.toString() );

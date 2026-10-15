@@ -1,2 +1,1 @@
-SUBDIRS(nel)
-
+add_subdirectory(nel)

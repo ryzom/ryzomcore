@@ -36,8 +36,8 @@
 #include <QtCore/QMap>
 #include <QtCore/QList>
 #include <QtCore/QString>
-#include <QtGui/QPixmap>
-#include <QtGui/QGraphicsRectItem>
+#include <QPixmap>
+#include <QGraphicsRectItem>
 
 namespace LandscapeEditor
 {

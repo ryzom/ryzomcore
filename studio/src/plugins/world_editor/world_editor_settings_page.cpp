@@ -23,7 +23,7 @@
 #include "../core/icore.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QSettings>
 
 // NeL includes

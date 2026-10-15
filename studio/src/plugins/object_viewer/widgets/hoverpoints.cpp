@@ -20,6 +20,8 @@
 #include "stdpch.h"
 #include "hoverpoints.h"
 
+#include <QApplication>
+
 #define printf
 
 HoverPoints::HoverPoints(QWidget *widget, PointShape shape)

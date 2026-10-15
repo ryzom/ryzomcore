@@ -21,7 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // STL includes
 
 // Qt includes
-#include <QtGui/QtGui>
+#include <QtWidgets>
+#include <QFileDialog>
+#include <QMessageBox>
 
 // NeL includes
 #include <nel/misc/path.h>

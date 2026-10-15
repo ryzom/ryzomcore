@@ -1,3 +1,13 @@
+// Qt includes
+#include <QtCore/QObject>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
+#include <QStyleOption>
+#include <QEvent>
+
 // Project includes
 #include "example_plugin.h"
 #include "example_settings_page.h"
@@ -11,14 +21,6 @@
 
 // NeL includes
 #include "nel/misc/debug.h"
-
-// Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
 
 namespace Plugin
 {
@@ -79,5 +81,3 @@ void ExamplePlugin::addAutoReleasedObject(QObject *obj)
 }
 
 }
-
-Q_EXPORT_PLUGIN(Plugin::ExamplePlugin)

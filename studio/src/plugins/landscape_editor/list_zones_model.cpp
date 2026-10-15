@@ -30,7 +30,7 @@
 
 // Qt includes
 #include <QApplication>
-#include <QtGui/QProgressDialog>
+#include <QProgressDialog>
 
 namespace LandscapeEditor
 {

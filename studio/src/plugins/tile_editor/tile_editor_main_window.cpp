@@ -22,9 +22,9 @@
 
 #include "nel/misc/path.h"
 
-#include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
-#include <QtGui/QMenu>
+#include <QMessageBox>
+#include <QApplication>
+#include <QMenu>
 #include <QFileDialog>
 #include <QInputDialog>
 

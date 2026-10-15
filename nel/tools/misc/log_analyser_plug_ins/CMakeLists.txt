@@ -1,1 +1,1 @@
-SUBDIRS(extract_warnings)
+ADD_SUBDIRECTORY(extract_warnings)

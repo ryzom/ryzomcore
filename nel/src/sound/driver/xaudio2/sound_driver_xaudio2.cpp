@@ -308,12 +308,13 @@ void CSoundDriverXAudio2::initDevice(const std::string &device, TSoundOptions op
 
 	// list of supported options in this driver
 	const sint supportedOptions = 
-		OptionEnvironmentEffects
-		| OptionAllowADPCM
+		OptionAllowADPCM
 		| OptionSoftwareBuffer
 		| OptionManualRolloff
 		| OptionLocalBufferCopy
-		| OptionHasBufferStreaming;
+		| OptionHasBufferStreaming
+		| OptionReverbEffect
+		| OptionFilterEffect;
 
 	// list of forced options in this driver
 	// always use software buffer, always have local copy

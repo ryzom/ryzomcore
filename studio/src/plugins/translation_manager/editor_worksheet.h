@@ -32,13 +32,13 @@
 #include "nel/ligo/ligo_config.h"
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QWidget>
-#include <QtGui/QMdiArea>
-#include <QtGui/QTableWidget>
-#include <QtGui/QMdiSubWindow>
-#include <QtGui/QUndoCommand>
-#include <QtGui/QUndoStack>
+#include <QObject>
+#include <QWidget>
+#include <QMdiArea>
+#include <QTableWidget>
+#include <QMdiSubWindow>
+#include <QUndoCommand>
+#include <QUndoStack>
 
 
 namespace TranslationManager

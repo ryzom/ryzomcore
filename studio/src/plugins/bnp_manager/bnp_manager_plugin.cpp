@@ -30,7 +30,7 @@
 
 // Qt includes
 #include <QtCore/QObject>
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 namespace BNPManager
 {
@@ -91,5 +91,3 @@ void BNPManagerPlugin::addAutoReleasedObject(QObject *obj)
     m_BnpManagerWindow->open();
 }*/
 }
-
-Q_EXPORT_PLUGIN(BNPManager::BNPManagerPlugin)

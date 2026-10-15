@@ -27,7 +27,7 @@
 
 // Qt includes
 #include <QtOpenGL/QGLWidget>
-#include <QtGui/QWidget>
+#include <QWidget>
 
 class QAction;
 
@@ -38,6 +38,7 @@ typedef QWidget QNeLWidget;
 typedef QWidget QNeLWidget;
 #elif defined(NL_OS_UNIX)
 typedef QGLWidget QNeLWidget;
+#include <X11/Xlib.h>
 #endif // NL_OS_UNIX
 
 namespace NL3D

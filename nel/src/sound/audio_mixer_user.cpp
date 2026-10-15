@@ -217,7 +217,7 @@ void CAudioMixerUser::initClusteredSound(NL3D::CScene *scene, float minGain, flo
 {
 	if (!_ClusteredSound) _ClusteredSound = new CClusteredSound();
 
-	_ClusteredSound->init(scene, portalInterpolate, maxDistance, minGain);
+	_ClusteredSound->init(scene, portalInterpolate, maxDistance, minGain, m_EnableOcclusionObstruction, m_EnableReverb);
 }
 
 
@@ -393,7 +393,7 @@ void CAudioMixerUser::init(uint maxTrack, bool useEax, bool useADPCM, IProgressC
 	CInitInfo initInfo;
 	initInfo.MaxTrack = maxTrack;
 	initInfo.EnableReverb = useEax; // :)
-	initInfo.EnableOccludeObstruct = useEax; // :)
+	initInfo.EnableOcclusionObstruction = useEax; // :)
 	initInfo.UseADPCM = useADPCM;
 	initInfo.ForceSoftware = forceSoftwareBuffer;
 	initInfo.ManualRolloff = manualRolloff;
@@ -490,7 +490,8 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 
 	_profile(( "AM: ---------------------------------------------------------------" ));
 
-	_UseEax = initInfo.EnableReverb || initInfo.EnableOccludeObstruct; // [TODO KAETEMI: Fixme.]
+	m_EnableReverb = initInfo.EnableReverb;
+	m_EnableOcclusionObstruction = initInfo.EnableOcclusionObstruction;
 	_UseADPCM = initInfo.UseADPCM;
 	_AutoLoadSample = initInfo.AutoLoadSample;
 	bool manualRolloff = initInfo.ManualRolloff;
@@ -504,7 +505,8 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 
 		// the options to init the driver
 		sint driverOptions = ISoundDriver::OptionHasBufferStreaming;
-		if (_UseEax) driverOptions |= ISoundDriver::OptionEnvironmentEffects;
+		if (m_EnableReverb) driverOptions |= ISoundDriver::OptionReverbEffect;
+		if (m_EnableOcclusionObstruction) driverOptions |= ISoundDriver::OptionFilterEffect;
 		if (_UseADPCM) driverOptions |= ISoundDriver::OptionAllowADPCM;
 		if (forceSoftware) driverOptions |= ISoundDriver::OptionSoftwareBuffer;
 		if (manualRolloff) driverOptions |= ISoundDriver::OptionManualRolloff;
@@ -514,10 +516,15 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 		_SoundDriver->initDevice(deviceName, (ISoundDriver::TSoundOptions)driverOptions);
 
 		// verify the options, OptionHasBufferStreaming not checked
-		if (_UseEax && !_SoundDriver->getOption(ISoundDriver::OptionEnvironmentEffects))
+		if (m_EnableReverb && !_SoundDriver->getOption(ISoundDriver::OptionReverbEffect))
 		{
-			nlwarning("AM: OptionEnvironmentEffects not available, _UseEax = false");
-			_UseEax = false;
+			nlwarning("AM: OptionReverbEffect not available, m_EnableReverb = false");
+			m_EnableReverb = false;
+		}
+		if (m_EnableOcclusionObstruction && !_SoundDriver->getOption(ISoundDriver::OptionFilterEffect))
+		{
+			nlwarning("AM: OptionFilterEffect not available, m_EnableOcclusionObstruction = false");
+			m_EnableOcclusionObstruction = false;
 		}
 		if (_UseADPCM && !_SoundDriver->getOption(ISoundDriver::OptionAllowADPCM))
 		{
@@ -565,50 +572,54 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	_Listener.init(_SoundDriver);
 
 	// Init environment reverb effects
-	if (_UseEax)
+	if (m_EnableReverb)
 	{
 		_ReverbEffect = _SoundDriver->createReverbEffect();
 
 		if (!_ReverbEffect)
-			{ _UseEax = false; }
+			{ m_EnableReverb = false; }
 		else // createEffect succeeded, add environments
 		{ 
 			nldebug("AM: Reverb OK");
-			// todo: loading this data from a file or something would be neat
+			// todo: loading this data from a file or something would be neat (check https://wiki.thedarkmod.com/index.php?title=Setting_Reverb_Data_of_Rooms_(EAX) for reference)
 			// also: check if this should go into clustered_sound (background_sound_manager also uses this stuff at one point, though)
-			// effect presets (based on I3DL2 specification/guidelines, see 3dl2help.h)
-			addEnvironment("GENERIC",         IReverbEffect::CEnvironment( -10.00f, -1.00f, 1.49f,0.83f, -26.02f,0.007f,   2.00f,0.011f,100.0f,100.0f));
-			addEnvironment("PADDEDCELL",      IReverbEffect::CEnvironment( -10.00f,-60.00f, 0.17f,0.10f, -12.04f,0.001f,   2.07f,0.002f,100.0f,100.0f));
-			addEnvironment("ROOM",            IReverbEffect::CEnvironment( -10.00f, -4.54f, 0.40f,0.83f, -16.46f,0.002f,   0.53f,0.003f,100.0f,100.0f));
-			addEnvironment("BATHROOM",        IReverbEffect::CEnvironment( -10.00f,-12.00f, 1.49f,0.54f,  -3.70f,0.007f,  10.30f,0.011f,100.0f, 60.0f));
-			addEnvironment("LIVINGROOM",      IReverbEffect::CEnvironment( -10.00f,-60.00f, 0.50f,0.10f, -13.76f,0.003f, -11.04f,0.004f,100.0f,100.0f));
-			addEnvironment("STONEROOM",       IReverbEffect::CEnvironment( -10.00f, -3.00f, 2.31f,0.64f,  -7.11f,0.012f,   0.83f,0.017f,100.0f,100.0f));
-			addEnvironment("AUDITORIUM",      IReverbEffect::CEnvironment( -10.00f, -4.76f, 4.32f,0.59f,  -7.89f,0.020f,  -2.89f,0.030f,100.0f,100.0f));
-			addEnvironment("CONCERTHALL",     IReverbEffect::CEnvironment( -10.00f, -5.00f, 3.92f,0.70f, -12.30f,0.020f,  -0.02f,0.029f,100.0f,100.0f));
-			addEnvironment("CAVE",            IReverbEffect::CEnvironment( -10.00f,  0.00f, 2.91f,1.30f,  -6.02f,0.015f,  -3.02f,0.022f,100.0f,100.0f));
-			addEnvironment("ARENA",           IReverbEffect::CEnvironment( -10.00f, -6.98f, 7.24f,0.33f, -11.66f,0.020f,   0.16f,0.030f,100.0f,100.0f));
-			addEnvironment("HANGAR",          IReverbEffect::CEnvironment( -10.00f,-10.00f,10.05f,0.23f,  -6.02f,0.020f,   1.98f,0.030f,100.0f,100.0f));
-			addEnvironment("CARPETEDHALLWAY", IReverbEffect::CEnvironment( -10.00f,-40.00f, 0.30f,0.10f, -18.31f,0.002f, -16.30f,0.030f,100.0f,100.0f));
-			addEnvironment("HALLWAY",         IReverbEffect::CEnvironment( -10.00f, -3.00f, 1.49f,0.59f, -12.19f,0.007f,   4.41f,0.011f,100.0f,100.0f));
-			addEnvironment("STONECORRIDOR",   IReverbEffect::CEnvironment( -10.00f, -2.37f, 2.70f,0.79f, -12.14f,0.013f,   3.95f,0.020f,100.0f,100.0f));
-			addEnvironment("ALLEY",           IReverbEffect::CEnvironment( -10.00f, -2.70f, 1.49f,0.86f, -12.04f,0.007f,  -0.04f,0.011f,100.0f,100.0f));
-			addEnvironment("FOREST",          IReverbEffect::CEnvironment( -10.00f,-33.00f, 1.49f,0.54f, -25.60f,0.162f,  -6.13f,0.088f, 79.0f,100.0f));
-			addEnvironment("CITY",            IReverbEffect::CEnvironment( -10.00f, -8.00f, 1.49f,0.67f, -22.73f,0.007f, -22.17f,0.011f, 50.0f,100.0f));
-			addEnvironment("MOUNTAINS",       IReverbEffect::CEnvironment( -10.00f,-25.00f, 1.49f,0.21f, -27.80f,0.300f, -20.14f,0.100f, 27.0f,100.0f));
-			addEnvironment("QUARRY",          IReverbEffect::CEnvironment( -10.00f,-10.00f, 1.49f,0.83f,-100.00f,0.061f,   5.00f,0.025f,100.0f,100.0f));
-			addEnvironment("PLAIN",           IReverbEffect::CEnvironment( -10.00f,-20.00f, 1.49f,0.50f, -24.66f,0.179f, -25.14f,0.100f, 21.0f,100.0f));
-			addEnvironment("PARKINGLOT",      IReverbEffect::CEnvironment( -10.00f,  0.00f, 1.65f,1.50f, -13.63f,0.008f, -11.53f,0.012f,100.0f,100.0f));
-			addEnvironment("SEWERPIPE",       IReverbEffect::CEnvironment( -10.00f,-10.00f, 2.81f,0.14f,   4.29f,0.014f,   6.48f,0.021f, 80.0f, 60.0f));
-			addEnvironment("UNDERWATER",      IReverbEffect::CEnvironment( -10.00f,-40.00f, 1.49f,0.10f,  -4.49f,0.007f,  17.00f,0.011f,100.0f,100.0f));
-			addEnvironment("SMALLROOM",       IReverbEffect::CEnvironment( -10.00f, -6.00f, 1.10f,0.83f,  -4.00f,0.005f,   5.00f,0.010f,100.0f,100.0f));
-			addEnvironment("MEDIUMROOM",      IReverbEffect::CEnvironment( -10.00f, -6.00f, 1.30f,0.83f, -10.00f,0.010f,  -2.00f,0.020f,100.0f,100.0f));
-			addEnvironment("LARGEROOM",       IReverbEffect::CEnvironment( -10.00f, -6.00f, 1.50f,0.83f, -16.00f,0.020f, -10.00f,0.040f,100.0f,100.0f));
-			addEnvironment("MEDIUMHALL",      IReverbEffect::CEnvironment( -10.00f, -6.00f, 1.80f,0.70f, -13.00f,0.015f,  -8.00f,0.030f,100.0f,100.0f));
-			addEnvironment("LARGEHALL",       IReverbEffect::CEnvironment( -10.00f, -6.00f, 1.80f,0.70f, -20.00f,0.030f, -14.00f,0.060f,100.0f,100.0f));
-			addEnvironment("PLATE",           IReverbEffect::CEnvironment( -10.00f, -2.00f, 1.30f,0.90f,   0.00f,0.002f,   0.00f,0.010f,100.0f, 75.0f));
+			// effect presets (based on I3DL2 specification/guidelines, see 3dl2help.h and efx-presets.h) // TODO: Consolidate differences in density and diffusion parameter
+			addEnvironment("GENERIC",         IReverbEffect::CEnvironment( 0,   7.5f, -10.00f,  -1.00f,  1.49f, 0.83f,  -26.02f, 0.007f,   2.00f, 0.011f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("PADDEDCELL",      IReverbEffect::CEnvironment( 1,   1.4f, -10.00f, -60.00f,  0.17f, 0.10f,  -12.04f, 0.001f,   2.07f, 0.002f, 100.0f, 100.00f, 0x3f)); // TODO: Density
+			addEnvironment("ROOM",            IReverbEffect::CEnvironment( 2,   1.9f, -10.00f,  -4.54f,  0.40f, 0.83f,  -16.46f, 0.002f,   0.53f, 0.003f, 100.0f, 100.00f, 0x3f)); // TODO: Density
+			addEnvironment("BATHROOM",        IReverbEffect::CEnvironment( 3,   1.4f, -10.00f, -12.00f,  1.49f, 0.54f,   -3.70f, 0.007f,  10.30f, 0.011f, 100.0f,  60.00f, 0x3f)); // TODO: Density
+			addEnvironment("LIVINGROOM",      IReverbEffect::CEnvironment( 4,   2.5f, -10.00f, -60.00f,  0.50f, 0.10f,  -13.76f, 0.003f, -11.04f, 0.004f, 100.0f, 100.00f, 0x3f)); // TODO: Density
+			addEnvironment("STONEROOM",       IReverbEffect::CEnvironment( 5,  11.6f, -10.00f,  -3.00f,  2.31f, 0.64f,   -7.11f, 0.012f,   0.83f, 0.017f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("AUDITORIUM",      IReverbEffect::CEnvironment( 6,  21.6f, -10.00f,  -4.76f,  4.32f, 0.59f,   -7.89f, 0.020f,  -2.89f, 0.030f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("CONCERTHALL",     IReverbEffect::CEnvironment( 7,  19.6f, -10.00f,  -5.00f,  3.92f, 0.70f,  -12.30f, 0.020f,  -0.02f, 0.029f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("CAVE",            IReverbEffect::CEnvironment( 8,  14.6f, -10.00f,   0.00f,  2.91f, 1.30f,   -6.02f, 0.015f,  -3.02f, 0.022f, 100.0f, 100.00f, 0x1f));
+			addEnvironment("ARENA",           IReverbEffect::CEnvironment( 9,  36.2f, -10.00f,  -6.98f,  7.24f, 0.33f,  -11.66f, 0.020f,   0.16f, 0.030f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("HANGAR",          IReverbEffect::CEnvironment(10,  50.3f, -10.00f, -10.00f, 10.05f, 0.23f,   -6.02f, 0.020f,   1.98f, 0.030f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("CARPETEDHALLWAY", IReverbEffect::CEnvironment(11,   1.9f, -10.00f, -40.00f,  0.30f, 0.10f,  -18.31f, 0.002f, -16.30f, 0.030f, 100.0f, 100.00f, 0x3f)); // TODO: Density
+			addEnvironment("HALLWAY",         IReverbEffect::CEnvironment(12,   1.8f, -10.00f,  -3.00f,  1.49f, 0.59f,  -12.19f, 0.007f,   4.41f, 0.011f, 100.0f, 100.00f, 0x3f)); // TODO: Density
+			addEnvironment("STONECORRIDOR",   IReverbEffect::CEnvironment(13,  13.5f, -10.00f,  -2.37f,  2.70f, 0.79f,  -12.14f, 0.013f,   3.95f, 0.020f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("ALLEY",           IReverbEffect::CEnvironment(14,   7.5f, -10.00f,  -2.70f,  1.49f, 0.86f,  -12.04f, 0.007f,  -0.04f, 0.011f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("FOREST",          IReverbEffect::CEnvironment(15,  38.0f, -10.00f, -33.00f,  1.49f, 0.54f,  -25.60f, 0.162f,  -6.13f, 0.088f,  79.0f, 100.00f, 0x3f));
+			addEnvironment("CITY",            IReverbEffect::CEnvironment(16,   7.5f, -10.00f,  -8.00f,  1.49f, 0.67f,  -22.73f, 0.007f, -22.17f, 0.011f,  50.0f, 100.00f, 0x3f));
+			addEnvironment("MOUNTAINS",       IReverbEffect::CEnvironment(17, 100.0f, -10.00f, -25.00f,  1.49f, 0.21f,  -27.80f, 0.300f, -20.14f, 0.100f,  27.0f, 100.00f, 0x1f));
+			addEnvironment("QUARRY",          IReverbEffect::CEnvironment(18,  17.5f, -10.00f, -10.00f,  1.49f, 0.83f, -100.00f, 0.061f,   5.00f, 0.025f, 100.0f, 100.00f, 0x3f));
+			addEnvironment("PLAIN",           IReverbEffect::CEnvironment(19,  42.5f, -10.00f, -20.00f,  1.49f, 0.50f,  -24.66f, 0.179f, -25.14f, 0.100f,  21.0f, 100.00f, 0x3f));
+			addEnvironment("PARKINGLOT",      IReverbEffect::CEnvironment(20,   8.3f, -10.00f,   0.00f,  1.65f, 1.50f,  -13.63f, 0.008f, -11.53f, 0.012f, 100.0f, 100.00f, 0x1f));
+			addEnvironment("SEWERPIPE",       IReverbEffect::CEnvironment(21,   1.7f, -10.00f, -10.00f,  2.81f, 0.14f,    4.29f, 0.014f,   6.48f, 0.021f,  80.0f,  60.00f, 0x3f)); // TODO: Density
+			addEnvironment("UNDERWATER",      IReverbEffect::CEnvironment(22,   1.8f, -10.00f, -40.00f,  1.49f, 0.10f,   -4.49f, 0.007f,  17.00f, 0.011f, 100.0f, 100.00f, 0x3f)); // TODO: Density
+			addEnvironment("DRUGGED",         IReverbEffect::CEnvironment(23,   1.9f, -10.00f,   0.00f,  8.39f, 1.39f,   -1.15f, 0.002f,   9.85f, 0.030f,  50.0f,  42.87f, 0x1f)); // TODO: Density
+			addEnvironment("DIZZY",           IReverbEffect::CEnvironment(24,   1.8f, -10.00f,  -4.00f, 17.23f, 0.56f,  -17.13f, 0.020f,  -6.13f, 0.030f,  60.0f,  36.45f, 0x1f)); // TODO: Density
+			addEnvironment("PSYCHOTIC",       IReverbEffect::CEnvironment(25,   1.0f, -10.00f,  -1.51f,  7.56f, 0.91f,   -6.26f, 0.020f,   7.74f, 0.030f,  50.0f,   6.25f, 0x1f)); // TODO: Density
+			// FIXME: Don't have accurate room size of the following environments, are we using these?
+			addEnvironment("SMALLROOM",       IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -6.00f,  1.10f, 0.83f,   -4.00f, 0.005f,   5.00f, 0.010f, 100.0f, 100.00f, 0x20));
+			addEnvironment("MEDIUMROOM",      IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -6.00f,  1.30f, 0.83f,  -10.00f, 0.010f,  -2.00f, 0.020f, 100.0f, 100.00f, 0x20));
+			addEnvironment("LARGEROOM",       IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -6.00f,  1.50f, 0.83f,  -16.00f, 0.020f, -10.00f, 0.040f, 100.0f, 100.00f, 0x20));
+			addEnvironment("MEDIUMHALL",      IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -6.00f,  1.80f, 0.70f,  -13.00f, 0.015f,  -8.00f, 0.030f, 100.0f, 100.00f, 0x20));
+			addEnvironment("LARGEHALL",       IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -6.00f,  1.80f, 0.70f,  -20.00f, 0.030f, -14.00f, 0.060f, 100.0f, 100.00f, 0x20));
+			addEnvironment("PLATE",           IReverbEffect::CEnvironment(26,   7.5f, -10.00f,  -2.00f,  1.30f, 0.90f,    0.00f, 0.002f,   0.00f, 0.010f, 100.0f,  75.00f, 0x20));
 			// these are the default environment settings in case no environment data is available (you'll hear this one)
 			_DefaultEnvironment = getEnvironment("PLAIN");
-			_DefaultRoomSize = 7.5f;
+			_DefaultRoomSize = _DefaultEnvironment.RoomSize; // changed from 7.5f, since 42.5f is the real default for PLAIN
 			// note: 'no fx' generally does not use the default room size
 			_Environments[CStringMapper::map("no fx")] = _DefaultEnvironment;
 			// set the default environment now
@@ -649,9 +660,10 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	CSoundBank *soundBank = new CSoundBank();
 	_SoundBank = soundBank;
 	soundBank->load(getPackedSheetPath(), getPackedSheetUpdate());
-	nlinfo("AM: Initialized audio mixer with %u voices, %s and %s.",
+	nlinfo("AM: Initialized audio mixer with %u voices, %s, %s, and %s.",
 		(uint32)_Tracks.size(),
-		_UseEax ? "with EAX support" : "WITHOUT EAX",
+		m_EnableReverb ? "with reverb support" : "WITHOUT reverb",
+		m_EnableOcclusionObstruction ? "with occlusion and obstruction support" : "WITHOUT occlusion and obstruction",
 		_UseADPCM ? "with ADPCM sample source" : "with 16 bits PCM sample source");
 
 	// Init the sample bank manager
@@ -1786,6 +1798,7 @@ void				CAudioMixerUser::update()
 				if (_Tracks[i]->getLogicalSource() != 0)
 				{
 					CSourceCommon *source = _Tracks[i]->getLogicalSource();
+					ISource *isource = _Tracks[i]->getPhysicalSource();
 					if (source->getCluster() != 0)
 					{
 						// need to check the cluster status
@@ -1796,26 +1809,57 @@ void				CAudioMixerUser::update()
 							float dist = (css->Position - source->getPos()).norm();
 							CVector vpos(_ListenPosition + css->Direction * (css->Dist + dist));
 //							_Tracks[i]->DrvSource->setPos(source->getPos() * (1-css->PosAlpha) + css->Position*(css->PosAlpha));
-							_Tracks[i]->getPhysicalSource()->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
+							isource->setPos(source->getPos() * (1-css->PosAlpha) + vpos*(css->PosAlpha));
 							// update the relative gain
-							_Tracks[i]->getPhysicalSource()->setGain(source->getFinalGain() * css->Gain);
-#if EAX_AVAILABLE == 1
+							isource->setGain(source->getFinalGain() * css->Gain);
+#if 0
 							if (_UseEax)
 							{
 								H_AUTO(NLSOUND_SetEaxProperties)
-								// update the occlusion parameters
-								_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSION, (void*)&css->Occlusion, sizeof(css->Occlusion));
-								_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONLFRATIO, (void*)&css->OcclusionLFFactor, sizeof(css->OcclusionLFFactor));
-	//							if (lastRatio[i] != css->OcclusionRoomRatio)
-	//							{
-									_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONROOMRATIO, (void*)&css->OcclusionRoomRatio, sizeof(css->OcclusionRoomRatio));
-	//								lastRatio[i] = css->OcclusionRoomRatio;
-	//								nldebug("Setting room ration.");
-	//							}
-								_Tracks[i]->DrvSource->setEAXProperty(DSPROPERTY_EAXBUFFER_OBSTRUCTION, (void*)&css->Obstruction, sizeof(css->Obstruction));
+									// update the occlusion parameters
+									_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSION, (void*)&css->Occlusion, sizeof(css->Occlusion));
+								_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONLFRATIO, (void*)&css->OcclusionLFFactor, sizeof(css->OcclusionLFFactor));
+								_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OCCLUSIONROOMRATIO, (void*)&css->OcclusionRoomRatio, sizeof(css->OcclusionRoomRatio));
+								_Tracks[i]->getPhysicalSource()->setEAXProperty(DSPROPERTY_EAXBUFFER_OBSTRUCTION, (void*)&css->Obstruction, sizeof(css->Obstruction));
 							}
 #endif
+							if (m_EnableOcclusionObstruction)
+							{
+								H_AUTO(NLSOUND_SetEaxProperties)
+
+								CFilterParameters params(css->Occlusion, css->OcclusionLFFactor, css->OcclusionRoomRatio, css->Obstruction);
+
+								isource->setDirectGain(params.DirectGain);
+								isource->setDirectFilter(ISource::TFilter::FilterLowPass, css->DirectCutoffFrequency, css->DirectCutoffFrequency, params.DirectGainPass);
+								isource->enableDirectFilter(true);
+
+								if (m_EnableReverb)
+								{
+									isource->setEffectGain(params.EffectGain);
+									isource->setEffectFilter(ISource::TFilter::FilterLowPass, css->EffectCutoffFrequency, css->EffectCutoffFrequency, params.EffectGainPass);
+									isource->enableEffectFilter(true);
+								}
+								else
+								{
+									isource->enableEffectFilter(false);
+								}
+							}
+							else
+							{
+								isource->enableDirectFilter(false);
+								isource->enableEffectFilter(false);
+							}
 						}
+						else
+						{
+							isource->enableDirectFilter(false);
+							isource->enableEffectFilter(false);
+						}
+					}
+					else
+					{
+						isource->enableDirectFilter(false);
+						isource->enableEffectFilter(false);
 					}
 				}
 			}
@@ -2633,7 +2677,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 
 				_Tracks[i] = new CTrack();
 				_Tracks[i]->init(_SoundDriver);
-				if (_UseEax) _Tracks[i]->getPhysicalSource()->setEffect(_ReverbEffect);
+				if (m_EnableReverb) _Tracks[i]->getPhysicalSource()->setEffect(_ReverbEffect);
 				// insert in front because the last inserted wan be sofware buffer...
 				_FreeTracks.insert(_FreeTracks.begin(), _Tracks[i]);
 			}

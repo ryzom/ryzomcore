@@ -25,9 +25,9 @@
 #include "modules.h"
 
 // Qt includes
-#include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
+#include <QSettings>
+#include <QWidget>
+#include <QFileDialog>
 
 namespace NLQT
 {

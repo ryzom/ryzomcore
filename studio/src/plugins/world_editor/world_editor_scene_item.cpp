@@ -21,7 +21,7 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtGui/QPainter>
+#include <QPainter>
 #include <QtCore/QRectF>
 #include <QPolygonF>
 #include <QTransform>

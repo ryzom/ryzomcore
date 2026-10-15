@@ -54,7 +54,7 @@ void CValidationFile::saveMissionValidationFile(std::string filename)
 		nlwarning("Can't find index file '%s' in search path, no mission will be valid", filename.c_str());
 		return;
 	}
-	FILE* file = nlfopen(pathName, "w");
+	FILE* file = NLMISC::nlfopen(pathName, "w");
 	nlassert(file!=NULL);
 	
 	// AuthorizedStates

@@ -16,10 +16,10 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "dfn_browser_ctrl.h"
-#include "3rdparty/qtpropertybrowser/qttreepropertybrowser.h"
-#include "3rdparty/qtpropertybrowser/qtvariantproperty.h"
-#include "3rdparty/qtpropertybrowser/qteditorfactory.h"
-#include "3rdparty/qtpropertybrowser/qtpropertymanager.h"
+#include <qtpropertybrowser/qttreepropertybrowser.h>
+#include <qtpropertybrowser/qtvariantproperty.h>
+#include <qtpropertybrowser/qteditorfactory.h>
+#include <qtpropertybrowser/qtpropertymanager.h>
 
 #include "filepath_property_manager.h"
 

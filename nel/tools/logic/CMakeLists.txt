@@ -1,3 +1,4 @@
 IF(MFC_FOUND)
-  SUBDIRS(logic_editor_dll logic_editor_exe)
+  ADD_SUBDIRECTORY(logic_editor_dll)
+  ADD_SUBDIRECTORY(logic_editor_exe)
 ENDIF()

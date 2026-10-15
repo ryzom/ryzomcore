@@ -502,6 +502,7 @@ extern void operator delete[](void *p) throw();
 #elif defined(NL_ISO_CPP0X_AVAILABLE) || (defined(NL_COMP_VC) && (NL_COMP_VC_VERSION >= 100))
 #	include <unordered_map>
 #	include <unordered_set>
+#	include <memory>
 #	define CHashMap ::std::unordered_map
 #	define CHashSet ::std::unordered_set
 #	define CHashMultiMap ::std::unordered_multimap

@@ -28,8 +28,8 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QFileDialog>
+#include <QWidget>
+#include <QFileDialog>
 
 #if !defined NL_OS_WINDOWS
 #include "core_config.h"

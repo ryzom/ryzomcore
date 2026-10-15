@@ -20,9 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "georges_splash.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QDebug>
-#include <QFileInfo>
 
 // NeL includes
 

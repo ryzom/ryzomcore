@@ -29,11 +29,11 @@
 
 // Qt includes
 #include <QtCore/QSettings>
-#include <QtGui/QWidget>
-#include <QtGui/QMessageBox>
-#include <QtGui/QFileDialog>
-#include <QtGui/QStyleFactory>
-#include <QtGui/QStyle>
+#include <QWidget>
+#include <QMessageBox>
+#include <QFileDialog>
+#include <QStyleFactory>
+#include <QStyle>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

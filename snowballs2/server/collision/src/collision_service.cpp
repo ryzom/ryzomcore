@@ -18,7 +18,7 @@
 #include <nel/3d/u_instance_group.h>
 
 #ifdef NL_OS_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 using namespace SBSERVICE;

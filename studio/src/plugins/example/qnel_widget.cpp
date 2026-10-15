@@ -17,13 +17,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#include "qnel_widget.h"
-
-// STL includes
-
 // Qt includes
 #include <QtCore/QTimer>
 #include <QtGui/QResizeEvent>
+
+#include "qnel_widget.h"
+
+// STL includes
 
 // NeL includes
 #include <nel/misc/event_server.h>

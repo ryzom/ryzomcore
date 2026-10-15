@@ -27,10 +27,10 @@
 
 // Qt includes
 #include <QtCore/QDir>
-#include <QtGui/QPainter>
-#include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
-#include <QtGui/QProgressDialog>
+#include <QPainter>
+#include <QMessageBox>
+#include <QApplication>
+#include <QProgressDialog>
 
 namespace LandscapeEditor
 {

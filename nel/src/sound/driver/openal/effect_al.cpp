@@ -56,7 +56,6 @@ CStandardReverbEffectAL::CStandardReverbEffectAL(CSoundDriverAL *soundDriver, AL
 	// unused params, set default values
 	alEffectf(_AlEffect, AL_REVERB_AIR_ABSORPTION_GAINHF, 0.994f);
 	alEffectf(_AlEffect, AL_REVERB_ROOM_ROLLOFF_FACTOR, 0.0f);
-	alEffectf(_AlEffect, AL_REVERB_DECAY_HFLIMIT, AL_TRUE);
 
 	// set default environment
 	setEnvironment();
@@ -71,17 +70,22 @@ void CStandardReverbEffectAL::setEnvironment(const CEnvironment &environment, fl
 {
 	nldebug("AL: CStandardReverbEffectAL::setEnvironment, size: %f", roomSize);
 
-	// *** TODO *** environment.RoomSize
-	alEffectf(_AlEffect, AL_REVERB_DENSITY, environment.Density / 100.0f); alTestWarning("AL_REVERB_DENSITY");
-	alEffectf(_AlEffect, AL_REVERB_DIFFUSION, environment.Diffusion / 100.0f); alTestWarning("AL_REVERB_DIFFUSION");
-	alEffectf(_AlEffect, AL_REVERB_GAIN, decibelsToAmplitudeRatio(environment.RoomFilter)); alTestWarning("AL_REVERB_GAIN");
-	alEffectf(_AlEffect, AL_REVERB_GAINHF, decibelsToAmplitudeRatio(environment.RoomFilterHF)); alTestWarning("AL_REVERB_GAINHF");
-	alEffectf(_AlEffect, AL_REVERB_DECAY_TIME, environment.DecayTime); alTestWarning("AL_REVERB_DECAY_TIME");
-	alEffectf(_AlEffect, AL_REVERB_DECAY_HFRATIO, environment.DecayHFRatio); alTestWarning("AL_REVERB_DECAY_HFRATIO");
-	alEffectf(_AlEffect, AL_REVERB_REFLECTIONS_GAIN, decibelsToAmplitudeRatio(environment.Reflections)); alTestWarning("AL_REVERB_REFLECTIONS_GAIN");
-	alEffectf(_AlEffect, AL_REVERB_REFLECTIONS_DELAY, environment.ReflectionsDelay); alTestWarning("AL_REVERB_REFLECTIONS_DELAY");
-	alEffectf(_AlEffect, AL_REVERB_LATE_REVERB_GAIN, decibelsToAmplitudeRatio(environment.LateReverb)); alTestWarning("AL_REVERB_LATE_REVERB_GAIN");
-	alEffectf(_AlEffect, AL_REVERB_LATE_REVERB_DELAY, environment.LateReverbDelay); alTestWarning("AL_REVERB_LATE_REVERB_DELAY");
+	CEnvironment env = environment;
+	env.resize(roomSize);
+
+	alEffectf(_AlEffect, AL_REVERB_DENSITY, env.Density / 100.0f); alTestWarning("AL_REVERB_DENSITY");
+	alEffectf(_AlEffect, AL_REVERB_DIFFUSION, env.Diffusion / 100.0f); alTestWarning("AL_REVERB_DIFFUSION");
+	alEffectf(_AlEffect, AL_REVERB_GAIN, decibelsToAmplitudeRatio(env.RoomFilter)); alTestWarning("AL_REVERB_GAIN");
+	alEffectf(_AlEffect, AL_REVERB_GAINHF, decibelsToAmplitudeRatio(env.RoomFilterHF)); alTestWarning("AL_REVERB_GAINHF");
+	alEffectf(_AlEffect, AL_REVERB_DECAY_TIME, env.DecayTime); alTestWarning("AL_REVERB_DECAY_TIME");
+	alEffectf(_AlEffect, AL_REVERB_DECAY_HFRATIO, env.DecayHFRatio); alTestWarning("AL_REVERB_DECAY_HFRATIO");
+	alEffectf(_AlEffect, AL_REVERB_REFLECTIONS_GAIN, decibelsToAmplitudeRatio(env.Reflections)); alTestWarning("AL_REVERB_REFLECTIONS_GAIN");
+	alEffectf(_AlEffect, AL_REVERB_REFLECTIONS_DELAY, env.ReflectionsDelay); alTestWarning("AL_REVERB_REFLECTIONS_DELAY");
+	alEffectf(_AlEffect, AL_REVERB_LATE_REVERB_GAIN, decibelsToAmplitudeRatio(env.LateReverb)); alTestWarning("AL_REVERB_LATE_REVERB_GAIN");
+	alEffectf(_AlEffect, AL_REVERB_LATE_REVERB_DELAY, env.LateReverbDelay); alTestWarning("AL_REVERB_LATE_REVERB_DELAY");
+	// Not implemented: AL_REVERB_AIR_ABSORPTION_GAINHF
+	// Not implemented: AL_REVERB_ROOM_ROLLOFF_FACTOR
+	alEffecti(_AlEffect, AL_REVERB_DECAY_HFLIMIT, env.Flags & NLSOUND_ENVIRONMENT_DECAY_HF_LIMIT); alTestWarning("AL_REVERB_DECAY_HFLIMIT");
 }
 
 // ******************************************************************
@@ -104,8 +108,8 @@ void CCreativeReverbEffectAL::setEnvironment(const CEnvironment &environment, fl
 	nldebug("AL: CCreativeReverbEffectAL::setEnvironment, size: %f", roomSize);
 
 	EAXREVERBPROPERTIES eaxreverb;
-	eaxreverb.ulEnvironment = 26;
-	eaxreverb.flEnvironmentSize = roomSize;
+	eaxreverb.ulEnvironment = environment.Id;
+	eaxreverb.flEnvironmentSize = environment.RoomSize;
 	eaxreverb.flEnvironmentDiffusion = environment.Diffusion / 100.0f;
 	eaxreverb.lRoom = (long)(environment.RoomFilter * 100.0f);
 	eaxreverb.lRoomHF = (long)(environment.RoomFilterHF * 100.0f);
@@ -131,7 +135,8 @@ void CCreativeReverbEffectAL::setEnvironment(const CEnvironment &environment, fl
 	eaxreverb.flHFReference = 5000.0f;
 	eaxreverb.flLFReference = 250.0f;
 	eaxreverb.flRoomRolloffFactor = 0.0f;
-	eaxreverb.ulFlags = 0x3f;
+	eaxreverb.ulFlags = environment.Flags;
+	AdjustEnvironmentSize(&eaxreverb, roomSize);
 	EFXEAXREVERBPROPERTIES efxcreativereverb;
 	ConvertReverbParameters(&eaxreverb, &efxcreativereverb);
 	efxcreativereverb.flDensity = environment.Density / 100.0f;

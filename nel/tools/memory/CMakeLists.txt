@@ -1,1 +1,1 @@
-SUBDIRS(memlog)
+ADD_SUBDIRECTORY(memlog)

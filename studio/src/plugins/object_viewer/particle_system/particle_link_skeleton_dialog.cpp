@@ -21,7 +21,7 @@
 #include "particle_link_skeleton_dialog.h"
 
 // Qt includes
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 // Project includes
 #include "modules.h"

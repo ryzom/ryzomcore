@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "georges_treeview_dialog.h"
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 #include <QSettings>
 #include <QFileDialog>
 

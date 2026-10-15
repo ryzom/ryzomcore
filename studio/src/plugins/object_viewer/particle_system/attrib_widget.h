@@ -24,7 +24,7 @@
 #include "ui_attrib_form.h"
 
 // Qt includes
-#include <QtGui/QDialog>
+#include <QDialog>
 
 // STL includes
 

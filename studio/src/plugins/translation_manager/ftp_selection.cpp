@@ -19,8 +19,8 @@
 
 #include "ftp_selection.h"
 
-#include <QtGui/QMessageBox>
-#include <QtNetwork/QFtp>
+#include <QMessageBox>
+#include <QNetworkAccessManager>
 
 namespace TranslationManager
 {
@@ -49,7 +49,7 @@ CFtpSelection::CFtpSelection(QWidget *parent): QDialog(parent)
 // Connection with the FTP Server. We retrieve the file list.
 void CFtpSelection::ConnectButtonClicked()
 {
-	conn = new QFtp(this);
+	conn = new QNetworkAccessManager(this);
 	connect(conn, SIGNAL(commandFinished(int,bool)), this, SLOT(FtpCommandFinished(int,bool)));
 	connect(conn, SIGNAL(listInfo(QUrlInfo)), this, SLOT(AddToList(QUrlInfo)));
 

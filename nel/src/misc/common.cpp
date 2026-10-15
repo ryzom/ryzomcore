@@ -23,7 +23,7 @@
 #include "nel/misc/common.h"
 
 #ifdef NL_OS_WINDOWS
-#	include <ShellAPI.h>
+#	include <shellapi.h>
 #	include <io.h>
 #	include <tchar.h>
 

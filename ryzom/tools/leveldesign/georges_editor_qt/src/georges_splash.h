@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define GEORGES_SPLASH_H
 
 // Qt includes
-#include <QtGui/QWidget>
+#include <QWidget>
 
 // STL includes
 

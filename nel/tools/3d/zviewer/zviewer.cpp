@@ -89,6 +89,7 @@ struct CViewerConfig
 	string			ShapePath;
 	string			MapsPath;
 	string			Bank;
+	string			FarBank;
 	string			FontPath;
 	CTextContext	TextContext;
 	CFontManager	FontManager;
@@ -375,7 +376,7 @@ void displayZones()
 		nlerror (tmp.c_str());
 	}
 
-	if ((Landscape->Landscape.TileBank.getAbsPath ().empty())&&(!ViewerCfg.TilesPath.empty()))
+	if (!ViewerCfg.TilesPath.empty())
 		Landscape->Landscape.TileBank.setAbsPath (ViewerCfg.TilesPath + "/");
 
 	if (ViewerCfg.UseDDS)
@@ -389,6 +390,10 @@ void displayZones()
 	string::size_type idx = ViewerCfg.Bank.find(".");
 	string farBank = ViewerCfg.Bank.substr(0,idx);
 	farBank += "_su.farbank";
+	if (!ViewerCfg.FarBank.empty())
+	{
+		farBank = ViewerCfg.FarBank;
+	}
 
 	try
 	{
@@ -405,7 +410,10 @@ void displayZones()
 	{
 		nlwarning( "You need to recompute bank.farbank for the far textures" );
 	}
-	
+	string seasonPostfix = farBank.substr(idx,3);
+	Landscape->Landscape.TileBank.postfixTileFilename (seasonPostfix.c_str());
+	Landscape->Landscape.TileBank.postfixTileVegetableDesc (seasonPostfix.c_str());
+
 	// Init light color
 	CNELU::clearBuffers(CRGBA(0,0,0));
 	ViewerCfg.TextContext.printfAt(0.5f,0.5f,"Initializing Light...");
@@ -445,7 +453,7 @@ void displayZones()
 		CZone zone;
 		try
 		{
-			CIFile file(CPath::lookup(ViewerCfg.Zones[i]));
+			CIFile file(CPath::lookup(ViewerCfg.ZonesPath + "/" + ViewerCfg.Zones[i]));
 			zone.serial(file);
 			file.close();
 
@@ -528,26 +536,22 @@ void displayZones()
 	CNELU::Camera->setFrustum(left, right, bottom, top, znear, zfar);
 	
 	
+	// Time mgt.
+	//==========
+	sint64 ts(0);
 	do
 	{
-		// Time mgt.
-		//==========
-		static sint64 t0 = (sint64)CTime::getLocalTime();
-		static sint64 t1 = (sint64)CTime::getLocalTime();
-		static sint64 ts = 0;
 
-		t0 = t1;
-		t1 = (sint64)CTime::getLocalTime();
-		sint64 dt64 = t1-t0;
+		MoveListener.setLocalTime(CTime::getLocalTime());
+		sint64 dt64 = MoveListener.deltaTimeInMilliseconds();
 		ts += dt64;
-		float	dt= ((float)dt64)*0.001f;
+		float	dt(MoveListener.deltaTimeInSeconds());
 
 	
 		CNELU::EventServer.pump();
 
 		
 		// Manage movement and collision
-		MoveListener.setLocalTime(CTime::getLocalTime());
 		CVector oldpos = MoveListener.getPos();
 		MoveListener.changeViewMatrix();
 		if(MoveListener.getMode()==CMoveListener::WALK)
@@ -698,7 +702,7 @@ void displayZones()
 			ViewerCfg.TextContext.printfAt(0.3f,0.01f,"Zone : %s",zoneName.c_str());
 
 			// Position
-			ViewerCfg.TextContext.printfAt(0.1f,0.01f,"Position : %d %d %d",(sint)pos.x,(sint)pos.y,(sint)pos.z);
+			ViewerCfg.TextContext.printfAt(0.1f,0.01f,"Position : %.2f %.2f %.2f", pos.x, pos.y, pos.z);
 
 			// Eyes height
 			ViewerCfg.TextContext.printfAt(0.7f,0.01f,"Eyes : %.2f m",ViewerCfg.EyesHeight.z);
@@ -881,6 +885,9 @@ void initViewerConfig(const char * configFileName)
 		CConfigFile::CVar &cvBank = cf.getVar("Bank");
 		ViewerCfg.Bank = cvBank.asString();
 		
+		CConfigFile::CVar &cvFarBank = cf.getVar("FarBank");
+		ViewerCfg.FarBank = cvFarBank.asString();
+
 		CConfigFile::CVar &cvZonesPath = cf.getVar("ZonesPath");
 		ViewerCfg.ZonesPath = cvZonesPath.asString();
 		CPath::addSearchPath(cvZonesPath.asString());

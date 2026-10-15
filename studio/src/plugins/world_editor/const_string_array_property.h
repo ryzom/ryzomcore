@@ -23,7 +23,7 @@
 
 #define QT_QTPROPERTYBROWSER_IMPORT
 
-#include "3rdparty/qtpropertybrowser/qtpropertybrowser.h"
+#include <qtpropertybrowser/qtpropertybrowser.h>
 #include <QString>
 #include <QStringList>
 

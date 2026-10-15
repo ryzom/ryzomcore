@@ -25,11 +25,11 @@
 #include "../core/icore.h"
 
 // Qt includes
-#include <QtGui/QProgressDialog>
-#include <QtGui/QMessageBox>
-#include <QtGui/QColor>
-#include <QtGui/QVector3D>
-#include <QtCore/QSettings>
+#include <QProgressDialog>
+#include <QMessageBox>
+#include <QColor>
+#include <QVector3D>
+#include <QSettings>
 
 // NeL includes
 #include <nel/3d/landscape_model.h>

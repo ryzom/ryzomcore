@@ -6,7 +6,7 @@
 // http://www.cppblog.com/biao/archive/2009/10/31/99873.html
 // there was no license attached
 
-#include <QtGui/QLineEdit>
+#include <QLineEdit>
 #include <QStringList>
 
 class QListView;

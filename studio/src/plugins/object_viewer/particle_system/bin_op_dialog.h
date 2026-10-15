@@ -24,12 +24,12 @@
 #include <nel/misc/types_nl.h>
 
 // Qt includes
-#include <QtGui/QComboBox>
-#include <QtGui/QDialog>
-#include <QtGui/QGridLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QWidget>
+#include <QComboBox>
+#include <QDialog>
+#include <QGridLayout>
+#include <QHeaderView>
+#include <QSpacerItem>
+#include <QWidget>
 
 // NeL includes
 #include "nel/3d/ps_attrib_maker_bin_op.h"

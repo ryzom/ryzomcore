@@ -31,7 +31,10 @@
 
 // Qt includes
 #include <QtCore/QModelIndex>
+#include <QLineEdit>
 #include <QMap>
+#include <qtpropertybrowser/QtLineEditFactory>
+#include <libqtpropertybrowser-text/QtTextEditorFactory.h>
 
 #include "const_string_array_property.h"
 

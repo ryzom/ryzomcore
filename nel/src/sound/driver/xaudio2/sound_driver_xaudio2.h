@@ -122,7 +122,7 @@ public:
 	/// (Internal) Returns an X3DAudio listener at 0 position.
 	inline X3DAUDIO_LISTENER *getEmptyListener() { return &_EmptyListener; }
 	/// (Internal) Returns if EAX is enabled.
-	inline bool useEax() { return getOption(OptionEnvironmentEffects); }
+	inline bool useReverb() { return getOption(OptionReverbEffect); }
 	/// (Internal) Returns a unique operation set id.
 	inline uint32 getUniqueOperationSet() { return ++_OperationSetCounter; }
 	

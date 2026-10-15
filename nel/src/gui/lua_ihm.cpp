@@ -32,7 +32,7 @@
 #endif
 
 #ifdef NL_OS_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 // Warning: cannot use namespace std,    when using luabind

@@ -30,12 +30,12 @@
 #include <nel/misc/debug.h>
 
 // Qt includes
-#include <QtCore/QObject>
-#include <QtGui/QMessageBox>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenu>
-#include <QtGui/QAction>
-#include <QtGui/QMenuBar>
+#include <QObject>
+#include <QMessageBox>
+#include <QMainWindow>
+#include <QMenu>
+#include <QAction>
+#include <QMenuBar>
 
 using namespace Plugin;
 
@@ -90,5 +90,3 @@ void SheetBuilderPlugin::setNelContext(NLMISC::INelContext *nelContext)
 #endif // NL_OS_WINDOWS
 	m_LibContext = new NLMISC::CLibraryContext(*nelContext);
 }
-
-Q_EXPORT_PLUGIN(SheetBuilderPlugin)

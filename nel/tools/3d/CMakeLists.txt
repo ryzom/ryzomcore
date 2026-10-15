@@ -2,52 +2,48 @@
 IF(WITH_NEL_TOOLS)
   IF(WITH_3D)
     IF(WITH_ASSIMP)
-      SUBDIRS(
-        mesh_utils
-        mesh_export)
+      ADD_SUBDIRECTORY(mesh_utils)
+      ADD_SUBDIRECTORY(mesh_export)
     ENDIF()
     IF(WITH_LIBGSF)
-      SUBDIRS(
-        pipeline_max
-        pipeline_max_dump
-        pipeline_max_rewrite_assets)
+      ADD_SUBDIRECTORY(pipeline_max)
+      ADD_SUBDIRECTORY(pipeline_max_dump)
+      ADD_SUBDIRECTORY(pipeline_max_rewrite_assets)
     ENDIF()
-    SUBDIRS(
-      anim_builder
-      animation_set_builder
-      build_clod_bank
-      build_clodtex
-      build_coarse_mesh
-      build_far_bank
-      build_shadow_skin
-      build_smallbank
-      cluster_viewer
-      file_info
-      ig_add
-      ig_elevation
-      ig_info
-      ig_lighter
-      lightmap_optimizer
-      zone_dependencies
-      zone_ig_lighter
-      zone_lighter
-      zone_welder
-      unbuild_elevation
-      zone_elevation
-      shapes_exporter
-      shape2obj
-      zone_check_bind
-      zone_dump
-      zviewer)
+      ADD_SUBDIRECTORY(anim_builder)
+      ADD_SUBDIRECTORY(animation_set_builder)
+      ADD_SUBDIRECTORY(build_clod_bank)
+      ADD_SUBDIRECTORY(build_clodtex)
+      ADD_SUBDIRECTORY(build_coarse_mesh)
+      ADD_SUBDIRECTORY(build_far_bank)
+      ADD_SUBDIRECTORY(build_shadow_skin)
+      ADD_SUBDIRECTORY(build_smallbank)
+      ADD_SUBDIRECTORY(cluster_viewer)
+      ADD_SUBDIRECTORY(file_info)
+      ADD_SUBDIRECTORY(ig_add)
+      ADD_SUBDIRECTORY(ig_elevation)
+      ADD_SUBDIRECTORY(ig_info)
+      ADD_SUBDIRECTORY(ig_lighter)
+      ADD_SUBDIRECTORY(lightmap_optimizer)
+      ADD_SUBDIRECTORY(zone_dependencies)
+      ADD_SUBDIRECTORY(zone_ig_lighter)
+      ADD_SUBDIRECTORY(zone_lighter)
+      ADD_SUBDIRECTORY(zone_welder)
+      ADD_SUBDIRECTORY(unbuild_elevation)
+      ADD_SUBDIRECTORY(zone_elevation)
+      ADD_SUBDIRECTORY(shapes_exporter)
+      ADD_SUBDIRECTORY(shape2obj)
+      ADD_SUBDIRECTORY(zone_check_bind)
+      ADD_SUBDIRECTORY(zone_dump)
+      ADD_SUBDIRECTORY(zviewer)
   ENDIF()
-  SUBDIRS(
-    build_interface
-    unbuild_interface
-    get_neighbors
-    textures_optimizer
-    textures_tool
-    tga_cut
-    tga_resize)
+    ADD_SUBDIRECTORY(build_interface)
+    ADD_SUBDIRECTORY(unbuild_interface)
+    ADD_SUBDIRECTORY(get_neighbors)
+    ADD_SUBDIRECTORY(textures_optimizer)
+    ADD_SUBDIRECTORY(textures_tool)
+    ADD_SUBDIRECTORY(tga_cut)
+    ADD_SUBDIRECTORY(tga_resize)
 ENDIF()
 
 # For tools selection of only max plugins
