@@ -23,11 +23,12 @@
 	<value value="bonus_malus"			hardtext="uiBonusMalus" contexts="game"/>
 	<value value="info_player_skills"	hardtext="uiStatus" contexts="game"/>
 	<value value="info_player_journal"	hardtext="uiJournal" contexts="game"/>
-	<value value="encyclopedia"			hardtext="uiEncyclopedia" contexts="game"/>
+	<value value="encyclopedia"			hardtext="uiWisdomChest" contexts="game"/>
 	<value value="fame"					hardtext="uiFameTitle" contexts="game"/>
 
 	<value value="gestionsets"			hardtext="uiHands" contexts="game, r2ed_anim_test"/>
 	<value value="gestionsets2"			hardtext="uiHands2" contexts="game, r2ed_anim_test"/>
+	<value value="inv_hotbar"			hardtext="uiHotbarTitle" contexts="game, r2ed_anim_test"/>
 	<value value="inventory"			hardtext="uiInventory" contexts="game, r2ed_anim_test"/>
 	<value value="phrase_book"			hardtext="uiPhraseBook" contexts="game, r2ed_anim_test"/>
 	<value value="mailbox"				hardtext="uiMailBox" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
@@ -59,6 +60,7 @@
 	<value value="game_config"			hardtext="uiGlobalSettings" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm"/>
 	<value value="connection"			hardtext="uiConnection" contexts="game"/>
 	<value value="mp3_player"			hardtext="uimwMP3Player" contexts="game"/>
+	<value value="bg_downloader"		hardtext="uimwBGDownloader" contexts="game"/>
 	<value value="links"				hardtext="uiLinks" contexts="game"/>
 	<value value="debug_info"			hardtext="uiDebug" contexts="game"/>
 
@@ -244,6 +246,7 @@
 	</action>
 	<action name="toggle_combat"		hardtext="uiToggleCombat" contexts="game, r2ed_anim_test"/>
 	<action name="open_default_context"		hardtext="uiOpenDefaultContext" contexts="game"/>
+	<action name="context_quartering"		hardtext="uimGcmQuartering" contexts="game"/>
 	<action name="front_selection"	hardtext="uiFrontSelection" contexts="game, r2ed_anim_test">
 		<parameter hardtext="uiFrontSelectionType">
 			<value value="friend" hardtext="uiFrontSelectionFriend"/>
@@ -326,6 +329,15 @@
 			<value value="10" hardtext="uiNumber10"/>
 		</parameter>
 	</action>
+	<action name="use_hotbar_item" hardtext="uiUseHotbarItem" contexts="game, r2ed_anim_test">
+		<parameter hardtext="uiSlotNumber" name="slot">
+			<value value="0" hardtext="uiNumber01"/>
+			<value value="1" hardtext="uiNumber02"/>
+			<value value="2" hardtext="uiNumber03"/>
+			<value value="3" hardtext="uiNumber04"/>
+			<value value="4" hardtext="uiNumber05"/>
+		</parameter>
+	</action>
 	<action name="phrase_cancel_cast"		hardtext="uiCancelCast" contexts="game, r2ed_anim_test"/>
 	<action name="item_group_equip"	hardtext="uiMacroItemGroupEquip" contexts="game, r2ed_anim_test">
 		<parameter hardtext="uiMacroItemGroupName" type="%action_param_user_name" name="name" />
@@ -395,30 +407,6 @@
 		<parameter hardtext="uiTalkCmdMsg" type="%action_param_user" name="text"/>
 	</action>
 
-	<action name="talk_message"				hardtext="uiTalkMem">
-		<parameter hardtext="uiTalkMemMsg" type="%action_param_constant" value="0">
-			<value value="00" hardtext="uiTalkMemMsg00"/>
-			<value value="01" hardtext="uiTalkMemMsg01"/>
-			<value value="02" hardtext="uiTalkMemMsg02"/>
-			<value value="03" hardtext="uiTalkMemMsg03"/>
-			<value value="04" hardtext="uiTalkMemMsg04"/>
-			<value value="05" hardtext="uiTalkMemMsg05"/>
-			<value value="06" hardtext="uiTalkMemMsg06"/>
-			<value value="07" hardtext="uiTalkMemMsg07"/>
-			<value value="08" hardtext="uiTalkMemMsg08"/>
-			<value value="09" hardtext="uiTalkMemMsg09"/>
-			<value value="10" hardtext="uiTalkMemMsg10"/>
-			<value value="11" hardtext="uiTalkMemMsg11"/>
-			<value value="12" hardtext="uiTalkMemMsg12"/>
-			<value value="13" hardtext="uiTalkMemMsg13"/>
-			<value value="14" hardtext="uiTalkMemMsg14"/>
-			<value value="15" hardtext="uiTalkMemMsg15"/>
-			<value value="16" hardtext="uiTalkMemMsg16"/>
-			<value value="17" hardtext="uiTalkMemMsg17"/>
-			<value value="18" hardtext="uiTalkMemMsg18"/>
-			<value value="19" hardtext="uiTalkMemMsg19"/>
-		</parameter>
-	</action>
 </action_category>
 
 <action_category name="view" hardtext="uiView" contexts="game, r2ed, r2ed_anim_test, r2ed_anim_dm">
@@ -493,6 +481,8 @@
 			<instance template="container_window_list"/>
 		</parameter>
 	</action>	
+
+	<action name="fullmap" hardtext="uiShowFullMap" contexts="game, r2ed_anim_test, r2ed_anim_dm, r2ed"/>
 	<!-- in r2 virtual desktop are used for the different mode (edition, dm, test) -->
 	<action name="set_desktop"			hardtext="uiSetDesktop" repeat="1" keyup="1" contexts="game">
 		<parameter hardtext="uiDesktopNumber">

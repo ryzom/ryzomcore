@@ -253,8 +253,12 @@
 
   <tree node="appzone" />
 
-  <command name="appzone"
-           action="lua"
-           params="AppZone:handle('$')" />
+<group id="webqueue" active="true" x="0" y="0" w="1" h="1" posref="TL TL">
+    <instance template="webig_html"/>
+</group>
+<tree node="webqueue"/>
+<lua file="web_queue.lua" />
+
+<command name="appzone" action="lua" params="AppZone:handle('$')" />
 
 </interface_config>

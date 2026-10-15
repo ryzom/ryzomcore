@@ -195,4 +195,11 @@
 	>
 </group>
 
+<template name="html_text_button" id="" text="" posparent="parent" posref="TL TL" onclick="" onclick_param="" x="0" y="0" keep="true" frozen="false">
+	<group id="#id" posparent="#posparent" posref="#posref" child_resize_w="true" child_resize_h="true" x="#x" y="#y">
+		<ctrl style="text_button_16" id="b" onclick_l="#onclick" params_l="#onclick_param" hardtext="#text" frozen="#frozen" />
+	</group>
+</template>
+
+
 </interface_config>

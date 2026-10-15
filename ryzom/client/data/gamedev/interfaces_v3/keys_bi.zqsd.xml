@@ -93,28 +93,13 @@
   <key name="Key9" ctrl="1" action="select_shortcut_bar" params="9" /> 
   <key name="Key0" ctrl="1" action="select_shortcut_bar" params="10" /> 
   <key name="KeyS" ctrl="1" action="phrase_cancel_cast" /> 
- <!--  Quick messages
+<!--  Hotbar
   --> 
-  <key name="Key1" menu="1" action="talk_message" params="00" /> 
-  <key name="Key2" menu="1" action="talk_message" params="01" /> 
-  <key name="Key3" menu="1" action="talk_message" params="02" /> 
-  <key name="Key4" menu="1" action="talk_message" params="03" /> 
-  <key name="Key5" menu="1" action="talk_message" params="04" /> 
-  <key name="Key6" menu="1" action="talk_message" params="05" /> 
-  <key name="Key7" menu="1" action="talk_message" params="06" /> 
-  <key name="Key8" menu="1" action="talk_message" params="07" /> 
-  <key name="Key9" menu="1" action="talk_message" params="08" /> 
-  <key name="Key0" menu="1" action="talk_message" params="09" /> 
-  <key name="Key1" menu="1" shift="1" action="talk_message" params="10" /> 
-  <key name="Key2" menu="1" shift="1" action="talk_message" params="11" /> 
-  <key name="Key3" menu="1" shift="1" action="talk_message" params="12" /> 
-  <key name="Key4" menu="1" shift="1" action="talk_message" params="13" /> 
-  <key name="Key5" menu="1" shift="1" action="talk_message" params="14" /> 
-  <key name="Key6" menu="1" shift="1" action="talk_message" params="15" /> 
-  <key name="Key7" menu="1" shift="1" action="talk_message" params="16" /> 
-  <key name="Key8" menu="1" shift="1" action="talk_message" params="17" /> 
-  <key name="Key9" menu="1" shift="1" action="talk_message" params="18" /> 
-  <key name="Key0" menu="1" shift="1" action="talk_message" params="19" /> 
+<key name="Key1" menu="1" action="use_hotbar_item" params="slot=0" />
+<key name="Key2" menu="1" action="use_hotbar_item" params="slot=1" />
+<key name="Key3" menu="1" action="use_hotbar_item" params="slot=2" />
+<key name="Key4" menu="1" action="use_hotbar_item" params="slot=3" />
+<key name="Key5" menu="1" action="use_hotbar_item" params="slot=4" />
  <!--  Misc 
   --> 
   <key name="KeyF7" shift="0" action="mount_unmount" /> 
@@ -248,12 +233,13 @@
   <key name="KeyJ" action="show_hide" params="info_player_journal" /> 
   <key name="KeyG" action="show_hide" params="guild" /> 
   <key name="KeyF" shift="1" action="show_hide" params="fame" />
-  <key name="KeyE" shift="1" action="show_hide" params="encyclopedia" />
+<key name="KeyE" shift="0" action="show_hide" params="encyclopedia" />
   
  <!--  Inventory 
   --> 
   <key name="KeyI" action="show_hide" params="inventory" /> 
   <key name="KeyB" action="show_hide" params="phrase_book" /> 
+<key name="N/A" action="show_hide" params="inv_hotbar" />
   <key name="N/A" action="show_hide" params="gestionsets" /> 
   <key name="KeyP" shift="1" action="show_hide" params="animal_global" /> 
   
@@ -264,13 +250,17 @@
   <key name="KeyR" action="show_hide" params="radar" /> 
   <key name="KeyM" action="show_hide" params="map" /> 
   
+<key name="KeyM" ctrl="1" action="fullmap" params="" />
+
+
  <!--  Communication 
   --> 
 	<key name="N/A" action="show_hide" params="target" />
 	<key name="KeyF" action="show_hide" params="contact_list" />
-	<key name="N/A" action="show_hide" params="team_list" />
-	<key name="N/A" action="show_hide" params="main_chat" />
+	<key name="KeyT" action="show_hide" params="team_list" />
+	<key name="N/A" actionq="show_hide" params="main_chat" />
 	<key name="N/A" action="dock_undock_chat" params="SYSTEM_INFO" />
+	<key name="KeyD" shift="1" ctrl="1" action="show_hide" params="debug_info" />
 	<key name="KeyM" shift="1" action="show_hide" params="mailbox" />
   	<key name="KeyW" shift="1" action="show_hide" params="webig"/>
 	<key name="N/A" action="show_hide" params="appzone"/>

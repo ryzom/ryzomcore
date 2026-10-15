@@ -412,7 +412,8 @@
 			<instance template="tgcw_checkbox" id="aos" text="uiAtkOnSelect" posref="BL TL" posparent="foa" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="aet" text="uiAutoEquipTool" posref="BL TL" posparent="aos" x="0" y="-12" />
 			<instance template="tgcw_checkbox" id="auc" text="uiAutomaticCamera" posref="BL TL" posparent="aet" x="0" y="-12" />
-			<instance template="tgcw_checkbox" id="fade" text="uiCharFade" posref="BL TL" posparent="auc" x="0" y="-12" />
+			<instance template="tgcw_checkbox" id="aul" text="uiAutomaticLight" posref="BL TL" posparent="auc" x="0" y="-12" />
+			<instance template="tgcw_checkbox" id="fade" text="uiCharFade" posref="BL TL" posparent="aul" x="0" y="-12" />
 			<instance template="tgcw_scrollbarint" id="opamin" text="uiCharOpacityMin" posref="BL TL" posparent="fade" x="20" y="-2" />
 			<instance template="tgcw_checkbox" id="cao" text="uiCurrentActionOut" tooltip="uittCurrentActionOut" posref="BL TL" posparent="opamin" x="-20" y="-12" />
 			<instance template="tgcw_checkbox" id="show_icon_buffs" text="uiShowIconBuffs" tooltip="uittShowIconBuffs" posref="BL TL" posparent="cao" x="0" y="-12" />
@@ -497,7 +498,12 @@
 			<instance template="tgcw_scrollbarint" id="moa_win" text="uiAlphaRolloverBG" posref="BL TL" posparent="moopa" x="20" y="-2" />
 			<instance template="tgcw_scrollbarint" id="moa_con" text="uiAlphaRolloverContent" posref="BL TL" posparent="moa_win" x="0" y="-2" />
 			<instance template="tgcw_scrollbarint" id="moa_speed" text="uiRolloverAlphaSpeed" posref="BL TL" posparent="moa_con" x="0" y="-2" />
-			<instance template="tgcw_checkbox" id="show_3d_item_preview" text="uiShow3dItemPreview" tooltip="uittShow3dItemPreview" posref="BL TL" posparent="moa_speed" x="-20" y="-12" />
+			<!-- Tooltip Opacity -->
+			<view style="sgc_title2" type="text" id="chopa" posref="BL TL" x="-20" y="-12" hardtext="uiTooltipOpacity" posparent="moa_speed" />
+			<instance template="tgcw_scrollbarint" id="ch_win" text="uiAlphaBG" posref="BL TL" posparent="chopa" x="20" y="-2" />
+			<instance template="tgcw_scrollbarint" id="ch_con" text="uiAlphaContent" posref="BL TL" posparent="ch_win" x="0" y="-2" />
+			<instance template="tgcw_color2" id="ch_col" text="uiTooltipColor" title="uiDefTooltipColor" tooltip="uiDefTooltipColor" posref="BL TL" posparent="ch_con" x="0" y="-2" />
+			<instance template="tgcw_checkbox" id="show_3d_item_preview" text="uiShow3dItemPreview" tooltip="uittShow3dItemPreview" posref="BL TL" posparent="ch_col" x="-20" y="-12" />
 		</group>
 		<ctrl style="skin_scroll" id="sb_alpha_colors" align="T" target="alpha_colors" posparent="crop" posref="TL TR" x="-8" y="0" />
 
@@ -843,6 +849,7 @@
 			<param ui="hud:aos:c" type="cfg" widget="boolbut" link="AtkOnSelect" realtime="true" />
 			<param ui="hud:aet:c" type="cfg" widget="boolbut" link="AutoEquipTool" realtime="true" />
 			<param ui="hud:auc:c" type="cfg" widget="boolbut" link="AutomaticCamera" realtime="true" />
+			<param ui="hud:aul:c" type="db" widget="boolbut" link="UI:SAVE:AUTO_LIGHT" realtime="true" />
 			<param ui="hud:fade:c" type="db" widget="boolbut" link="UI:SAVE:USER_CHAR_FADE" realtime="true" />
 			<param ui="hud:opamin:c" type="db" widget="sbint" link="UI:SAVE:USER_CHAR_OPA_MIN" min="0" max="255" realtime="true" />
 			<param ui="hud:cao:c" type="db" widget="boolbut" link="UI:SAVE:ACT_BAR_OUT" realtime="true" />
@@ -858,6 +865,9 @@
 			<param ui="alpha_colors:moa_win:c" type="db" widget="sbint" link="UI:SAVE:CONTAINER_ROLLOVER_FACTOR" min="0" max="255" realtime="true" />
 			<param ui="alpha_colors:moa_con:c" type="db" widget="sbint" link="UI:SAVE:CONTENT_ROLLOVER_FACTOR" min="64" max="255" realtime="true" />
 			<param ui="alpha_colors:moa_speed:c" type="db" widget="sbint" link="UI:SAVE:ALPHA_ROLLOVER_SPEED" min="0" max="100" realtime="true" />
+			<param ui="alpha_colors:ch_win:c" type="db" widget="sbint" link="UI:SAVE:CONTEXT_HELP_CONTAINER_ALPHA" min="0" max="255" realtime="true" />
+			<param ui="alpha_colors:ch_con:c" type="db" widget="sbint" link="UI:SAVE:CONTEXT_HELP_CONTENT_ALPHA" min="0" max="255" realtime="true" />
+			<param ui="alpha_colors:ch_col:c" type="db" widget="colbut" link="UI:SAVE:CONTEXT_HELP_CONTAINER_COLOR" realtime="true" />
 			<param ui="alpha_colors:show_3d_item_preview:c" type="db" widget="boolbut" link="UI:SAVE:SHOW_3D_ITEM_PREVIEW" realtime="true" />
 			<param ui="language:translation_english_inverse:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:EN:INVERSE_DISPLAY" realtime="true" />
 			<param ui="language:translation_english_hide_flag:c" type="db" widget="boolbut" link="UI:SAVE:TRANSLATION:EN:HIDE_FLAG" realtime="true" />
@@ -1047,4 +1057,6 @@
 <link expr="depends(@UI:SAVE:CONTAINER_ROLLOVER_FACTOR)" action="set" params="dblink=UI:SAVE:CONTENT_ROLLOVER_FACTOR|value=max(@UI:SAVE:CONTENT_ROLLOVER_FACTOR, @UI:SAVE:CONTAINER_ROLLOVER_FACTOR)" />
 
 
+<link expr="depends(@UI:SAVE:CONTEXT_HELP_CONTENT_ALPHA)" action="set" params="dblink=UI:SAVE:CONTEXT_HELP_CONTAINER_ALPHA|value=min(@UI:SAVE:CONTEXT_HELP_CONTENT_ALPHA, @UI:SAVE:CONTEXT_HELP_CONTAINER_ALPHA)" />
+<link expr="depends(@UI:SAVE:CONTEXT_HELP_CONTAINER_ALPHA)" action="set" params="dblink=UI:SAVE:CONTEXT_HELP_CONTENT_ALPHA|value=max(@UI:SAVE:CONTEXT_HELP_CONTENT_ALPHA, @UI:SAVE:CONTEXT_HELP_CONTAINER_ALPHA)" />
 </interface_config>

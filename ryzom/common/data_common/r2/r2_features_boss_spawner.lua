@@ -466,7 +466,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.user_event")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdBossSpawner"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdBossSpawner")):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -518,7 +518,7 @@ component.create = function()
 		debugInfo("Cancel form for 'BossSpawnerFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'BossSpawnerFeature' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'BossSpawnerFeature' at pos (%d, %d, %d)", x, y, z))
 		if r2.mustDisplayInfo("BossSpawner") == 1 then 
 			r2.displayFeatureHelp("BossSpawner")
 		end
@@ -542,7 +542,7 @@ component.create = function()
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdBossSpawner")
-	logicEntityMenu:addLine(name, "lua", "", "BossSpawner")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "BossSpawner")
 end
 
 

@@ -3,6 +3,36 @@ if Ark == nil then
 	}
 end
 
+function print_r(arr, indentLevel)
+	local str = ""
+	local indentStr = "#"
+
+	if(indentLevel == nil) then
+		debug(print_r(arr, 0))
+		return
+	end
+
+	for i = 0, indentLevel do
+		indentStr = indentStr.."    "
+	end
+
+	for index,value in pairs(arr) do
+		if type(value) == "table" then
+			str = str..indentStr..index..": \n"..print_r(value, (indentLevel + 1))
+		else
+			str = str..indentStr..index..": "..value.."\n"
+		end
+	end
+	return str
+end
+
+
+function openPageInWebIg(url)
+	getUI("ui:interface:webig:content:html"):browse(url)
+	getUI("ui:interface:webig").active = true
+	getUI("ui:interface:webig").opened = true
+end
+
 function broadcast(text, t)
 	if t == nil then
 		t = "AMB"
@@ -12,39 +42,93 @@ function broadcast(text, t)
 	displaySystemInfo(message, t)
 end
 
+function fixUrl(url)
+	return url:gsub("{amp}", "&")
+end
+
+function openArkScript(id, winid, extra)
+	if winid == nil then
+		winid = "ui:interface:web_transactions"
+	end
+	if extra == nil then
+		extra = ""
+	end
+	getUI(winid):find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&command=reset_all&"..extra)
+end
+
+function openMissionArkScript(winid, id)
+	WebBrowser:openWindow(winid, "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&command=reset_all")
+end
+
+function getArkScript(id, selected)
+	if selected ~= nil then
+		url = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&_hideWindow=1&command=reset_all&selected="..tostring(selected)
+	else
+		url = "https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script="..id.."&_hideWindow=1&command=reset_all"
+	end
+	return url
+end
+
 --------------------------------------------------------------------------------
 --- ARK MISSION CATALOG ---
 --------------------------------------------------------------------------------
 if ArkMissionCatalog == nil then
 	ArkMissionCatalog = {
 		window = nil,
-		window_id = "ui:interface:ark_mission_catalog"
+		window_id = "ui:interface:encyclopedia"
 	}
 end
 
-function ArkMissionCatalog:OpenWindow(urlA, urlB)
-	local winframe = WebBrowser:addWindow("ark_mission_catalog", "Mission Catalog", getUI(ArkMissionCatalog.window_id))
+function ArkMissionCatalog:OpenWindow(urlA, urlB, dont_active)
+	local winframe = getUI(ArkMissionCatalog.window_id)
 	winframe.opened=true
+	if dont_active ~= true then
 	winframe.active=true
-	winframe.w = 950
+end
 
 	ArkMissionCatalog.window = winframe
 
-	getUI(ArkMissionCatalog.window_id..":content:htmlA"):browse(urlA)
+	getUI("ui:interface:encyclopedia:content:htmlA"):browse(urlA)
 
-	local htmlb = getUI(ArkMissionCatalog.window_id..":content:htmlB")
-	if htmlb.home == "" then
+	local htmlb = getUI("ui:interface:encyclopedia:content:htmlB")
 		htmlb.home = urlB
-	end
 	htmlb:browse("home")
 
 end
 
 
-function ArkMissionCatalog:OpenCat(url)
-	local htmlb = getUI(ArkMissionCatalog.window_id..":content:htmlB")
-	htmlb.home = url+"&continent="+getContinentSheet()
-	htmlb:browse("home")
+function ArkMissionCatalog:OpenCat(cat, url)
+	local ency = getUI("ui:interface:encyclopedia")
+	setOnDraw(ency, "")
+	ArkMissionCatalog.cat = cat
+	local htmlA = getUI(ArkMissionCatalog.window_id..":content:htmlA")
+	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
+	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
+	if cat == "title" or cat == "academic" or cat == "rykea" or cat == "workshops" then
+		ArkMissionCatalog.posxB = 180
+		ArkMissionCatalog.widthB = 240
+		ArkMissionCatalog.widthC = 530
+		ArkMissionCatalog.posxC = 405
+
+		htmlB.x = ArkMissionCatalog.posxB
+		htmlB.w = ArkMissionCatalog.widthB
+		htmlC.w = ArkMissionCatalog.widthC
+		htmlC.x = ArkMissionCatalog.posxC
+		htmlC.active = true
+	else
+		ArkMissionCatalog.widthB = 740
+		htmlB.w = ArkMissionCatalog.widthB
+		if htmlC then
+			htmlC.active = false
+		end
+	end
+	htmlB.home = url.."&continent="..getContinentSheet()
+	htmlB:browse("home")
+	setOnDraw(ency, "ArkMissionCatalog:autoResize()")
+	if ArkMissionCatalog.continent ~= getContinentSheet() then
+		ArkMissionCatalog.continent = getContinentSheet()
+		htmlA:browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8746&command=reset_all&no_html_header=1&ig=1")
+	end
 end
 
 function ArkMissionCatalog:UpdateMissionTexts(win, id, text1, text2)
@@ -72,15 +156,16 @@ function ArkMissionCatalog:autoResize()
 	local ui = getUI(ArkMissionCatalog.window_id)
 	local htmlA = getUI(ArkMissionCatalog.window_id..":content:htmlA")
 	local htmlB = getUI(ArkMissionCatalog.window_id..":content:htmlB")
+	local htmlC = getUI(ArkMissionCatalog.window_id..":content:htmlC")
+
+	if htmlC == nil or htmlC.active == false then
 
 	if ArkMissionCatalog.cat == "storyline" then
 		if ui.w < 784 then
-			if ArkMissionCatalog.cat == "storyline" then
 				local td30 = htmlB:find("storyline_content")
 				if td30 ~= nil then
 					td30.x = math.max(0, 200-784+ui.w)
 					ArkMissionCatalog.need_restore_td30 = true
-				end
 			end
 		else
 			if ArkMissionCatalog.need_restore_td30 then
@@ -94,15 +179,21 @@ function ArkMissionCatalog:autoResize()
 	end
 
 	if ui.w < 950 then
-		htmlA.w = math.max(60, 220-950+ui.w)
+		htmlA.w = math.max(68, 220-950+ui.w)
 		htmlB.x = math.max(35, 190-950+ui.w)
 		ArkMissionCatalog.need_restore = true
 	else
 		if ArkMissionCatalog.need_restore then
 			htmlA.w = 220
-			htmlB.x = 190
+			htmlB.x = 180
 			ArkMissionCatalog.need_restore = false
 		end
+	end
+else
+	htmlA.w = math.max(68, 220-950+ui.w)
+	htmlB.x = math.max(35, ArkMissionCatalog.posxB-950+ui.w)
+	htmlC.x = math.max(75, ui.w-htmlC.w-16)
+	htmlB.w = math.max(55, htmlC.x-htmlB.x+16)
 	end
 end
 

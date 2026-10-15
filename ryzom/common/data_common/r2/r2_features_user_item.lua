@@ -140,7 +140,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 
 	comp.Base = "palette.entities.botobjects.milestone"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdUserItemFeature"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdUserItemFeature")):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -176,7 +176,7 @@ component.create = function()
 		debugInfo("Cancel form for 'UserItemFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'UserItemFeature' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'UserItemFeature' at pos (%d, %d, %d)", x, y, z))
 		r2:doForm("UserItemFeatureForm", {X=x, Y=y}, paramsOk, paramsCancel)
 	end
 	local function posCancel()
@@ -191,7 +191,7 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdUserItemFeature")
-	logicEntityMenu:addLine(name, "lua", "", "UserItemFeature")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "UserItemFeature")
 end
 
 function component:getLogicEntityAttributes()

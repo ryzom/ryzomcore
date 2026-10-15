@@ -376,24 +376,7 @@
 			hardtext="uiClose"
 			onclick_l="lua"
 			params_l="RyzhomePlace:close()" />
-		<!--	
-		<view type="bitmap" id="black" x="2" y="0" w="200" h="150" posref="ML ML" inherit_gc_alpha="true" scale="true" texture="blank.tga" color="0 0 0 240"/>
-		<scene3d id="scene3d" x="2" y="0" w="200" h="150" posref="ML ML" curcam="cam" curcs="env" render_layer="-2" active="false"
-			user_interaction="true" rotz_factor="0.017"
-			roty_factor="0.005" roty_limit_min="-80" roty_limit_max="90"
-			dist_factor="0.05" dist_limit_min="1" dist_limit_max="20.0"
-			ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
-
-
-			<camera id="cam" fov="80" pos="0.0 20.0 0" target="0.0 26.5 2" roll="0" />
-
-			<light id="back" pos="0.0 28.2 1.6" color="255 255 255" near="2.5" far="4.0" />
-			<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
-
-			<shape id="shape" name="" pos="0.0 26.5 0.0" rot="0.0 0.0 0.0" />
-		</scene3d>
-		-->
-		<group id="movers" x="0" y="-4" w="182" h="140" posref="MM MM">
+			<group id="movers" x="0" y="-4" w="182" h="140" posref="MM MM">
 			<instance template="t_webig_ryzhome_button" id="previous_x2" rot="2" x="2" y="-16" tooltip="ll" texture="mp3_button_next.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.1, 0, 0)"	/>		
 			<instance template="t_webig_ryzhome_button" id="previous_x" rot="2" x="32" y="-16" tooltip="ll" texture="mp3_button_play.tga" tx_normal="mp3_button_play.tga" params_l="RyzhomePlace:move(-0.01, 0, 0)"	/>		
 			<view type="text" id="x" posref="TL TL"	x="76" y="-20" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="Axe X" />

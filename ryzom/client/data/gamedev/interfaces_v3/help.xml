@@ -1,15 +1,16 @@
 <interface_config>
 <root id="interface" x="0" y="0" w="800" h="600" active="true" />
-<lua file="help.lua" />
 <!--********************-->
 <!--*   welcome_info  *-->
 <!--********************-->
-<variable entry="UI:SAVE:WELCOME" type="sint32" value="1" />
+<variable entry="UI:SAVE:SKIP_WELCOME" type="sint32" value="0" />
+
+<variable entry="UI:SAVE:WELCOME" type="sint32" value="0" />
 <proc id="welcome_close">
 	<action handler="set" params="target='ui:interface:welcome_info:active'|value=0" />
 	<action handler="set" params="dblink=UI:SAVE:WELCOME|value=0" />
 </proc>
-<group type="container" id="welcome_info" w="420" pop_min_w="420" pop_max_w="420" h="290" pop_min_h="290" pop_max_h="290" title="TheSagaOfRyzom" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:HELP" title_bar_open="false" open_button="false" force_open_out="true" right_button="false" lockable="true" openable="false" opened="true" movable="true" active="true">
+<group type="container" id="welcome_info" w="420" pop_min_w="420" pop_max_w="420" h="290" pop_min_h="290" pop_max_h="290" title="TheSagaOfRyzom" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:HELP" title_bar_open="false" open_button="false" force_open_out="true" right_button="false" lockable="true" openable="false" opened="true" movable="true" active="false">
 	<group id="header_closed" x="0" y="0" h="12" posref="TL TL" group_onclick_r="" group_params_r=""></group>
 	<group id="header_opened" x="0" y="0" w="0" h="16" posref="TL TL" group_onclick_r="" group_params_r=""></group>
 	<group id="content" x="0" y="0" posref="TL TL" w="0" h="0">
@@ -76,7 +77,6 @@
 				  not(@UI:VARIABLES:UNIVERSE_CHANEL_WARNING_DONE),
 				  not(@UI:SAVE:UNIVERSE_CHANEL_WARNING_AVOID))" target="ui:interface:universe_chanel_warning:active" /> -->
 <tree node="universe_chanel_warning"></tree>
-<tree node="welcome_info"></tree>
 <!--********************-->
 <!--*   death warning  *-->
 <!--********************-->
@@ -126,10 +126,11 @@
 		<ctrl style="button_ok" x="0" y="6" posref="BM BM" text_y="0" onclick_l="proc" params_l="night_warning_close" hardtext="uittOK" />
 	</group>
 </group>
+<proc id="enable_light">
+	<action handler="light_on" params="" />
+</proc>
 <!-- If necessary, not already displayed this session, and not avoided by user, show the warning -->
-<link expr="and(@UI:VARIABLES:NIGHT_WARNING_WANTED,
-				  not(@UI:VARIABLES:NIGHT_WARNING_DONE),
-				  not(@UI:SAVE:NIGHT_WARNING_AVOID))" target="ui:interface:night_warning:active" />
+<link expr="@UI:VARIABLES:NIGHT_WARNING_WANTED" action="proc" params="enable_light" />
 <tree node="night_warning"></tree>
 <!--********************-->
 <!--*   help_browser   *-->
@@ -604,4 +605,5 @@
 	</group>
 </group>
 <tree node="r2ed_web_admin"></tree>
+<lua file="help.lua" />
 </interface_config>

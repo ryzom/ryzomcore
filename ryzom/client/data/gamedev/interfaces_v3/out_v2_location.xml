@@ -611,8 +611,7 @@
 	<!-- Continue or Restart Default Outgame Music
 		MUST PLAY IT NOT ASYNCLY, else it don't works well during loading 
 	-->
-	<!-- Play character selection music -->
-	<!-- <action handler="play_music_outgame"  params="async=0" /> -->
+	<action handler="play_music_outgame"  params="async=0" />
 </proc>
 
 <proc id="proc_location_finish2">

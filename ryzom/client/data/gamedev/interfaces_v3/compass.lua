@@ -25,7 +25,7 @@ function game:updateCompass()
 	local calendar_win = getUI("ui:interface:compass:calendar")
 	local format_date = "%d %m %Y %H:%M"
 	format_date = findReplaceAll(format_date, "%m", i18n.get("uiMonth"..getTimestampHuman("%m")):toUtf8())
-	calendar_win.tooltip = getTimestampHuman(format_date)
+	calendar_win.tooltip = getUCtf8(getTimestampHuman(format_date))
 end
 
 

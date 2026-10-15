@@ -8,6 +8,7 @@
 	<lua file="base64.lua" />
 	<lua file="sceneedit.lua" />
 	<lua file="ark.lua" />
+	<lua file="ark_lessons.lua" />
 
 <!-- //////////// STYLE : webigchat_desc /////////// -->
 	<style style="webigchat_desc" type="text" fontsize="12" justification="dont_clip_word" color="0 0 0 255" global_color="false" multi_line="true" multi_line_space="0" line_maxw="320" multi_line_maxw_only="true" />
@@ -94,8 +95,8 @@
 	</template>
 
  <!-- //////////// TEMPLATE : webig_frame_borderless /////////// -->
-	<template name="webig_frame_borderless" keep="true" w="200" h="200" x="0" y="0" movable="true">
-		<group title="" id="content" type="container" posref="MM MM" movable="#movable" pop_max_h="#h" pop_min_h="#h" pop_min_w="#w" pop_max_w="#w" opened="false" openable="false" options="compass" header_active="true" right_button="false">
+<template name="webig_frame_borderless" keep="true" w="200" h="200" x="0" y="0" movable="true" params_l="" params_r="" header_active="true">
+    <group title="" id="content" type="container" posref="MM MM" movable="#movable" pop_max_h="#h" pop_min_h="#h" pop_min_w="#w" pop_max_w="#w" opened="false" openable="false" options="compass" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r" header_active="#header_active" right_button="false">
 			<group id="html" type="html" posref="TL TL" url="" title_prefix="uiQuickhelpTitle" sizeref="wh" x="0" y="0" w="0" h="0" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="16" h2_font_size="14" h3_font_size="13" h4_font_size="12" h5_font_size="11" h6_font_size="11" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="patch_off.tga" checkbox_bitmap_pushed="patch_on.tga" checkbox_bitmap_over="" background_bitmap_view="" home="" browse_next_time="false" timeout="0" form_text_area_group="edit_box_widget_multiline" >
 				<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true"/>
 				<view type="bitmap" id="black2" posparent="black" posref="MM MM" sizeref="wh" w="-2" h="-2" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false"/>
@@ -203,18 +204,24 @@
 </template>
 
 <!-- //////////// TEMPLATE : webig_inv_item /////////// -->
-	<template name="webig_inv_item" render_layer1="1" render_layer2="2" render_layer3="3" w="45" keep="true" img1="token_basic.tga" img2="" img3="" tooltip="" quality="" quantity="" overlay="" text="" text2="" color="255 255 255 255" gc1="true" gc2="true" color2="255 255 255 255" bg="w_slot_item.tga" params_l="" params_r="" x="0" y="0">
-		<group id="#id" posref="MM MM" w="#w" h="45" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
-			<view type="bitmap" id="back" posref="ML ML" x="0" y="0" render_layer="#render_layer1" texture="#bg" global_color="false" />
-			<view type="bitmap" id="img1" posref="ML ML" x="0" y="0" render_layer="#render_layer2" texture="#img1" global_color="false" />
-			<view type="bitmap" id="img2" posref="ML ML" render_layer="#render_layer2" x="0" y="0" texture="#img2" global_color="false" />
-			<view type="bitmap" id="img3" posref="ML ML"  render_layer="#render_layer2" x="0" y="0" texture="#img3" global_color="false" />
-			<view type="text" id="overlay" posref="TL TL" posparent="img1" render_layer="#render_layer2"  x="0" y="0" hardtext="#overlay" fontsize="8" color="255 255 255 255" shadow="true" global_color="false" />
-			<view type="text" id="quantity" posref="BL BL" posparent="img1" render_layer="#render_layer3" x="0" y="0" hardtext="#quantity" fontsize="8" color="255 255 255 255" shadow="true" global_color="false" />
-			<view type="text" id="quality" posref="BR BR" posparent="img1" render_layer="#render_layer3" x="-1" y="0" hardtext="#quality" fontsize="8" color="255 255 255 255" shadow="true" global_color="true" />
-			<view type="text" id="text1" posref="TR TL" posparent="img1" x="3" y="1" fontsize="8" hardtext="#text" color="#color1" shadow="true" global_color="#gc1" />
-			<view type="text" id="text2" posref="BL TL" posparent="text1" x="0" y="2" fontsize="8" hardtext="#text2" color="#color2" shadow="true" global_color="#gc2" />
-			<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="ML ML" x="1" y="0" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" w="40" h="40" tooltip="#tooltip" color="0 0 0 0" col_over="255 255 255 0" col_pushed="255 255 255 0" render_layer="#render_layer1" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
+<template name="webig_inv_item" line_maxw="40" ql0="" ql1="" ql2=""  q0="" q1="" q2="" q3="" q4="" q5="" q6="" q7="" o0="" o1="" o2="" o3="" o4="" o5="" o6="" o7="" render_layer1="1" render_layer2="2" render_layer3="3" render_layer4="4" w="43" keep="true" img1="token_basic.tga" img2="" img3="" img4="" tooltip="" quality="" quantity="" overlay="" text="" text2="" color="255 255 255 255" gc1="true" gc2="true" color2="255 255 255 255" slotbg="w_slot_item.tga" slotbg_gc="true" bg="blank2.tga" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" ctrl_color="0 0 0 0" col_over="255 255 255 50" col_pushed="255 255 255 0" params_over="" params_l="" params_r="" x="0" y="0">
+	<group id="#id" posref="MM MM" w="#w" h="43" x="#x" y="#y" sizeref="" render_layer="#render_layer1">
+		<view type="bitmap" id="back" posref="ML ML" x="3" y="0" h="42" w="42" scale="true" render_layer="#render_layer1" texture="#slotbg" color="255 255 255 255" global_color="#slotbg_gc" />
+		<view type="bitmap" id="bg" posparent="back" posref="MM MM" x="" y="0" w="40" h="40" render_layer="#render_layer2" scale="false" texture="#bg"  global_color="false" />
+		<view type="bitmap" id="img1" posparent="back" posref="MM MM" x="0" y="0" w="40" h="40" scale="false" render_layer="#render_layer3" texture="#img1" global_color="false" />
+		<view type="bitmap" id="img2" posparent="back" posref="MM MM" render_layer="#render_layer3" x="0" y="0" texture="#img2" global_color="false" />
+		<view type="bitmap" id="img3" posparent="back" posref="MM MM"  render_layer="#render_layer4" x="0" y="0" texture="#img3" global_color="false" />
+		<view type="bitmap" id="img4" posparent="back" posref="MM MM"  render_layer="#render_layer4" x="0" y="0" texture="#img4" global_color="false" />
+		<instance id="over" template="typo_ryzom" posref="TL TL" render_layer="6" x="4" y="-2" t0="#o0" t1="#o1" t2="#o2" t3="#o3" t4="#o4" t5="#o5" t6="#o6" t7="#o7" />
+
+		<instance id="quantity" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="" x="5" y="1" t0="#q0" t1="#q1" t2="#q2" t3="#q3" t4="#q4" t5="#q5" t6="#q6" t7="#q7" />
+		<instance id="quality" template="typo_ryzom" posref="BL BL" typo="numbers" render_layer="5" posparent="back" x="24" y="1" t0="#ql0" t1="#ql1" t2="#ql2" gc="true"/>
+		<view type="bitmap" id="numbers_back" posparent="" posref="BL BL" render_layer="4" x="3" y="0" h="10" w="42" scale="true" texture="blank.tga" color="0 0 0 150" global_color="false" />
+
+		<view type="text" id="text1" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="TR TL" posparent="back" x="3" y="1" fontsize="8" hardtext_format="#text" color="#color1" shadow="true" global_color="#gc1" />
+		<view type="text" id="text2" multi_line="true" line_maxw="#line_maxw" multi_line_maxw_only="true" posref="BL TL" posparent="text1" x="0" y="-2" fontsize="8" hardtext_format="#text2" color="#color2" shadow="true" global_color="#gc2" />
+		<ctrl type="button" id="tooltip" posparent="back" scale="true" posref="MM MM" x="0" y="0" h="40" w="40" tooltip="#tooltip" instant_help="false" tooltip_posref="TR BL" />
+		<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" posref="MM MM"  posparent="" x="2" y="0" tx_normal="#tx_normal" tx_pushed="#tx_pushed" tx_over="#tx_over" scale="true" w="0" sizeref="w" h="45" color="#ctrl_color" col_over="#col_over" col_pushed="#col_pushed" render_layer="#render_layer2" onover="lua" params_over="#params_over" onclick_l="lua" params_l="#params_l" onclick_r="lua" params_r="#params_r"  />
 		</group>
 	</template>
 
@@ -224,18 +231,18 @@
 		</group>
 	</template>
 
-	<template name="lesson_template" bg="storyline_lesson_bg" script="0" parent="0" open_script="false" check_color="255 255 255 200" over="80" pushed="90" waiting="true" started="false" finished="false" event="" lesson="">
+	<template name="lesson_template" bg="storyline_lesson_bg" keep="true" bg_color="255 255 255 255" script="0" parent="0" open_script="false" check_color="255 255 255 200" over="80" pushed="90" waiting="true" started="false" finished="false" event="" lesson="">
 		<group id="#id" posref="MM MM" w="510" h="70">
-			<view type="bitmap" id="back" posref="ML ML" texture="#bg.tga" global_color="false" />
+			<view type="bitmap" id="back" posref="ML ML" texture="#bg.tga" color="#bg_color" global_color="false" />
 			<group id="html" type="webig_html" posref="TL TL" global_color="false"  title_prefix="" sizeref="wh" x="30" y="0" w="510" h="70" background_color="0 0 0 0" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
 				<group id="text_list" type="list" fontsize="9" posref="TL TL" x="0" y="-10" space="0" w="510" h="70" maxelements="2000" />
 				<ctrl id="scroll_bar" style="skin_scroll" />
 			</group>
-			<view type="bitmap" id="check" active="#waiting" x="6" posref="ML ML" texture="w_slot_brick.tga" color="255 255 255 255" global_color="false" />
-			<view type="bitmap" id="started" active="#started" x="6" posref="ML ML" texture="w_slot_on.tga" color="#check_color" global_color="false" h="26" w="26" scale="true"/>
-			<view type="bitmap" id="finished" active="#finished" x="0" posref="ML ML" texture="ico_task_done.tga" color="255 255 255 255" global_color="false" />
+			<view type="bitmap" id="check" active="#waiting" x="9" posref="ML ML" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/8/0/7/assets/new.png" color="255 255 255 255" global_color="false" />
+			<view type="bitmap" id="started" active="#started" x="9" posref="ML ML" texture="https://app.ryzom.com/app_arcc/data/app/Scripts//1/8/0/7/assets/ico_amber_ball_wip.png" color="255 255 255 255" global_color="false" />
+			<view type="bitmap" id="finished" active="#finished" x="9" render_layer="2" posref="ML ML" texture="ico_amber_ball.tga" color="255 255 255 255" global_color="false" />
 			<ctrl type="button" id="lesson" button_type="push_button" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="MM MM" x="0" y="0" w="510" h="60" tx_normal="blank.tga" tx_pushed="storyline_lesson_bg_white.tga" tx_over="storyline_lesson_bg_white.tga" scale="true" color="255 255 255 0" col_over="255 255 255 #over" col_pushed="255 255 255 #pushed" onclick_l="lua" params_l="openLesson(#event, #lesson)"  />
-			<ctrl type="button" id="open_script" active="#open_script"  button_type="push_button" posref="BL BL" x="78" y="9" tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga" onclick_l="lua" params_l="openStorylineStepDetails(#script, #parent)" tooltip="" />
+			<ctrl type="button" id="open_script" active="#open_script"  button_type="push_button" posref="BL BL" x="80" y="11" tx_normal="mp3_button_list.tga" tx_pushed="mp3_button_list.tga" tx_over="mp3_button_over.tga" onclick_l="lua" params_l="openStorylineStepDetails(#script, #parent)" tooltip="" />
 		</group>
 	</template>
 
@@ -245,5 +252,75 @@
 			<view type="text" id="text" color="#color_text" global_color="false" fontsize="#fontsize" shadow="#shadow"  posref="MM MM" hardtext="#text" />
 		</group>
 	</template>
+
+	<template name="title_template" keep="true" color="255 0 0 200" icon="" text="" tooltip="" titleid="" enable="true">
+		<group id="#id" posref="MM MM" w="500" h="25">
+			<view type="bitmap" id="check" overlay="3" active="true" x="9" posref="ML ML" texture="ency_step_slot.tga" color="255 255 255 255" global_color="false" />
+			<view type="bitmap" id="finished" active="true" x="9" posref="ML ML" texture="#icon" color="255 255 255 255" global_color="false" />
+			<ctrl type="button" id="ctrl" button_type="push_button" tooltip="#tooltip" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="MM MM" x="0" y="0" w="510" h="60" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" color="0 0 0 0" col_over="255 120 0 #enable" col_pushed="255 255 255 #enable" onclick_l="lua" params_l="activeTitle([[#titleid]])"  />
+			<view type="text" id="text" x="30" color="#color" global_color="true" fontsize="12" shadow="true" posref="ML ML" hardtext="#text"  />
+		</group>
+	</template>
+
+	<template name="webig_inv_item_shape" keep="true" shape="tr_mo_dag.shape" fx="aura_divinity.ps" text="" text_y="0" fontsize="18" bg_color="0 0 0 0" text_color="255 255 255 255" color_over="255 255 255 50" cam_pos="-2.0 0 0.5" rotz="0.017" dist="0.005" roty="0.005" roty_min="-80" roty_max="10" dist_min="1.2" dist_max="2"  shape_pos="0 0 -0.5" shape_rot="0 0 0.7" fx_pos="0 0 -0.89" fx_rot="0 0 0" tooltip="" w="600" h="400" params_l="">
+		<group id="content" posref="TL TL"  w="#w" h="#h" x="0" y="0">
+			<view type="bitmap" color="#bg_color" id="black" posref="MM MM" w="#w" h="#h" inherit_gc_alpha="true" scale="true" texture="blank.tga" global_color="false" />
+			<ctrl type="tooltip" id="ttselect" tooltip="#tooltip" color="255 255 255 255" tooltip_parent="content" posref="TM TM" x="0" y="0" w="#w" h="#h" />
+			<scene3d id="scene" x="0" y="0" w="#w" h="#h" posref="TR TR" curcam="cam" curcs="env" render_layer="-2" user_interaction="true" rotz_factor="#rotz" roty_factor="#roty" roty_limit_min="#roty_min" roty_limit_max="#roty_max" dist_factor="#dist" dist_limit_min="#dist_min" dist_limit_max="#dist_max" ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="0 -5 0" >
+				<light id="back" pos="-1.0 0.0 -1.0" color="255 128 0" near="2.5" far="4.0" />
+				<light id="lgt" pos="1.0 0.0 1.0" color="255 255 255" near="2.0" far="2.5" />
+				<camera id="cam" fov="80" pos="#cam_pos" target="0 0 0" roll="0" />
+				<shape id="item_shape" name="#shape" pos="#shape_pos" rot="#shape_rot" />
+				<shape id="item_fx" name="#fx" pos="#fx_pos" rot="#fx_rot" />
+			</scene3d>
+			<ctrl type="button" id="ctrl" button_type="push_button" global_color_normal="false" global_color_over="false"  global_color_pushed="false" posref="ML ML" x="0" y="0" w="#w" h="#h" tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga" scale="true" color="0 0 0 0" col_over="#color_over" col_pushed="255 255 255 0" onclick_l="lua" params_l="#params_l"  />
+			<view type="text" id="text" x="0" y="#text_y" color="#text_color" global_color="false" fontsize="#fontsize" shadow="true" posparent="ctrl" posref="MM MM" hardtext="#text"  />
+		</group>
+	</template>
+
+	<template name="ark_empty_slot_view" posparent="parent" posref="TL TL" id="" cam_pos="0 24.5 -0.2" cam_tar="0.0 26.5 0.0" shape_pos="26" keep="true" h="150" w="150" x="0" y="0" shape="empty.shape" tooltip="" params_l="" params_over="">
+		<group id="#id" posref="MM MM" w="#w" h="#h" x="#x" y="#y" sizeref="">
+			<ctrl type="button" id="selection" button_type="push_button" tx_normal="blank.tga" render_layer="-5" tx_pushed="blank.tga" tx_over="blank.tga" color="50 50 50 0" col_over="50 50 50 0" col_pushed="50 50 50 200"  global_color_normal="false" global_color="false" scale="true" posref="MM MM" x="0" y="0" w="#w" h="#h" tooltip="#tooltip" tooltip_posref="BM TM" onclick_l="lua" params_l="#params_l" onover="lua" params_over="#params_over"/>
+			<scene3d id="scene" posparent="#posparent" w="#w" h="#h" x="#x" y="#y" posref="#posref" curcam="cam" curcs="env"  user_interaction="false" ambient="128 96 64" sun_ambient="0 0 0" sun_diffuse="255 255 196" sun_specular="0 0 0" sun_direction="-1.0 1.0 -1.0" >
+				<camera id="cam" fov="80" pos="#cam_pos" target="#cam_tar" roll="0" />
+				<light id="back" pos="0.0 28.2 1.6" color="96 64 32 255" near="2.5" far="4.0" />
+				<light id="lgt" pos="0.0 25.3 2.48" color="255 255 255" near="3.0" far="4.0" />
+				<shape id="shape" name="#shape" pos="0.0 #shape_pos 0.1" rot="0.0 0.0 0.0" />
+			</scene3d>
+		</group>
+	</template>
+
+	<template name="typo_ryzom" typo="typo" posref="TL TL" posparent="" keep="true" x="0" y="0" render_layer="3" t0="" t1="" t2="" t3="" t4="" t5="" t6="" t7="" gc="false" >
+		<group id="#id"  posref="#posref" posparent="#posparent" x="#x" y="#y" render_layer="#render_layer">
+			<view type="bitmap" id="t0" posref="#posref" h="8" w="5" render_layer="#render_layer" texture="#typo_#t0.tga" global_color="#gc"/>
+			<view type="bitmap" id="t1" posref="#posref" x="6" h="8" w="5" render_layer="#render_layer" texture="#typo_#t1.tga" global_color="#gc"/>
+			<view type="bitmap" id="t2" posref="#posref" x="12" h="8" w="5" render_layer="#render_layer" texture="#typo_#t2.tga" global_color="#gc"/>
+			<view type="bitmap" id="t3" posref="#posref" x="18" h="8" w="5" render_layer="#render_layer" texture="#typo_#t3.tga" global_color="#gc"/>
+			<view type="bitmap" id="t4" posref="#posref" x="24" h="8" w="5" render_layer="#render_layer" texture="#typo_#t4.tga" global_color="#gc"/>
+			<view type="bitmap" id="t5" posref="#posref" x="30" h="8" w="5" render_layer="#render_layer" texture="#typo_#t5.tga" global_color="#gc"/>
+			<view type="bitmap" id="t6" posref="#posref" x="36" h="8" w="5" render_layer="#render_layer" texture="#typo_#t6.tga" global_color="#gc"/>
+			<view type="bitmap" id="t7" posref="#posref" x="42" h="8" w="5" render_layer="#render_layer" texture="#typo_#t7.tga" global_color="#gc"/>
+		</group>
+	</template>
+
+
+	<template name="webig_browser_no_header" keep="true" home="" w="480" h="400" pop_max_w="2000" pop_max_h="2000" pop_min_w="64" pop_min_h="32" browse_redo="" browse_undo="" browse_refresh="" resizer="true" global_color="true" global_color_over="true">
+		<group id="browser" options="" type="container" w="#w" h="#h" x="0" y="0" right_button="true" pop_max_w="#pop_max_w" pop_max_h="#pop_max_h" pop_min_w="#pop_min_w" pop_min_h="#pop_min_h" posref="TL TL" title="" global_color="#global_color" global_color_over="#global_color_over" movable="true" lockable="true" active="true" openable="true" opened="true" resizer="#resizer" on_active="lua" on_active_params="WebBrowser:onActive()">
+			<group id="html" type="webig_html" posref="TL TL" home="#home" title_prefix="" sizeref="wh" x="2" y="-2" w="0" h="0" background_color="#bg_color" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="0.25" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline">
+				<group id="black" posref="BR BR" sizeref="hw" inherit_gc_alpha="true" />
+				<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" space="0" sizeref="hw" w="-4" h="-4" maxelements="2000" />
+			</group>
+		</group>
+	</template>
+
+	<template name="ark_stage_edit_html" id="html" keep="true" home="" browse_redo="" browse_undo="" browse_refresh="" bg_color="0 0 0 255" sizeref="w" h_offset="-2" w_offset="-2" h="75" w="" x="0" y="0" space="0.1" scrollbar=".9">
+		<group id="#id" type="html" posref="TL TL" home="#home" title_prefix="" x="#x" y="#y" sizeref="#sizeref" w="#w" h="#h" background_color="#bg_color" form_select_group="ark_form_select_widget" error_color="255 240 48 255" link_color="240 155 100 255" text_color="210 210 210 255" h1_color="255 255 255 255" h2_color="255 255 255 255" h3_color="255 255 255 255" h4_color="255 255 255 255" h5_color="255 255 255 255" h6_color="255 255 255 255" text_font_size="10" h1_font_size="20" h2_font_size="18" h3_font_size="16" h4_font_size="14" h5_font_size="12" h6_font_size="12" paragraph_begin_space="12" multi_line_space_factor="#space" td_begin_space="0" li_begin_space="4" ul_begin_space="12" li_indent="-10" ul_indent="30" checkbox_bitmap_normal="w_slot_on.tga" checkbox_bitmap_pushed="w_opacity_on.tga" checkbox_bitmap_over="" background_bitmap_view="background_bitmap" browse_next_time="false" form_text_area_group="edit_box_widget_multiline" browse_refresh="#browse_refresh" browse_undo="#browse_undo" browse_redo="#browse_redo">
+			<group id="black" posref="BR BR" sizeref="hw" w="#w_offset" h="#h_offset" inherit_gc_alpha="true" />
+			<group id="text_list" type="list" fontsize="9" posref="TL TL" posparent="black" x="2" y="0" space="0" sizeref="hw" w="0" h="0" maxelements="2000" />
+			<ctrl id="scroll_bar" active="#scrollbar" style="skin_scroll" />
+		</group>
+	</template>
+
+
 
 </interface_config>

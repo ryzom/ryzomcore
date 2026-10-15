@@ -494,7 +494,7 @@ function r2.testVianney3()
 end
 
 function r2:lowerTranslate(uiR2EdStr)
-	return string.lower(i18n.get(uiR2EdStr))
+	return string.lower(i18n.get(uiR2EdStr):toUtf8())
 end
 
 

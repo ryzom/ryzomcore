@@ -65,6 +65,7 @@ class CMissionStepTalk : public IMissionStepTemplate
 			_Dynamic = missionData.Name;
 			_PhraseId = _Dynamic+"_ACTION";
 			_IsDynamic = true;
+			_Bot = CAIAliasTranslator::Invalid;
 		}
 		else
 		{
@@ -103,11 +104,11 @@ class CMissionStepTalk : public IMissionStepTemplate
 	{
 		string webAppUrl;
 
-		_User = PlayerManager.getChar(getEntityIdFromRow(userRow));
+		CCharacter * p = PlayerManager.getChar(getEntityIdFromRow(userRow));
 
-		if (_IsDynamic && _User != NULL)
+		if (_IsDynamic && p != NULL)
 		{
-			vector<string> params = _User->getCustomMissionParams(_Dynamic);
+			vector<string> params = p->getCustomMissionParams(_Dynamic);
 			if (params.size() < 2)
 			{
 				LOGMISSIONSTEPERROR("talk_to : invalid npc name");
@@ -122,8 +123,8 @@ class CMissionStepTalk : public IMissionStepTemplate
 		// not check here : they are done befor. If a talk event comes here, the step is complete
 		if( event.Type == CMissionEvent::Talk )		
 		{
-			if (!webAppUrl.empty() && _User != NULL)
-				_User->validateDynamicMissionStep(webAppUrl);
+			if (!webAppUrl.empty() && p != NULL)
+				p->validateDynamicMissionStep(webAppUrl);
 			LOGMISSIONSTEPSUCCESS("talk_to");
 			return 1;
 		}
@@ -137,27 +138,29 @@ class CMissionStepTalk : public IMissionStepTemplate
 		ret[0] = 1;
 	}
 
-	bool getDynamicBot(TAIAlias & aliasRet)
+	bool getDynamicBot(TAIAlias & aliasRet, CCharacter * p)
 	{
-		if (_User != NULL)
+		nlinfo("getDynamicBot '%s'", _Dynamic.c_str());
+		if (p != NULL)
 		{
-			vector<string> params = _User->getCustomMissionParams(_Dynamic);
+			vector<string> params = p->getCustomMissionParams(_Dynamic);
 			if (params.size() < 2)
 			{
-				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid customMissionParams '%s' ", _SourceLine, _Dynamic.c_str());
 				return false;
 			}
 			else
 			{
 				vector<TAIAlias> aliases;
+				nlinfo("want %s", params[1].c_str());
 				CAIAliasTranslator::getInstance()->getNPCAliasesFromName(params[1], aliases);
 				if ( aliases.empty() )
 				{
-					MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+					MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot '%s' in '%s'", _SourceLine, params[1].c_str(), _Dynamic.c_str());
 					return false;
 				}
-
 				aliasRet = aliases[0];
+				nlinfo("found bot : %d", aliasRet);
 				return true;
 			}
 		}
@@ -168,45 +171,44 @@ class CMissionStepTalk : public IMissionStepTemplate
 	{
 
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
-
-		if (_IsDynamic)
+		if ( bot )
 		{
-			if (!getDynamicBot(_Bot) || _User == NULL)
+			if (_IsDynamic)
 			{
-				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
-				return 0;
-			}
+				TAIAlias dynBot;
 
-			_User = PlayerManager.getChar(getEntityIdFromRow(user));
-			uint32 userId = PlayerManager.getPlayerId(_User->getId());
-			string text = _PhraseId;
-			if (_User)
-			{
-				uint32 userId = PlayerManager.getPlayerId(_User->getId());
-				text = _User->getCustomMissionText(_PhraseId);
-				if (text.empty())
+				CCharacter *p = PlayerManager.getChar(getEntityIdFromRow(user));
+				if (!getDynamicBot(dynBot, p))
+				{
+					MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
 					return 0;
-			}
-			if ( bot )
-			{
-				if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
-					 ( _Bot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
+				}
+
+				string text = _PhraseId;
+				if (p)
+				{
+					text = p->getCustomMissionText(_PhraseId);
+					if (text.empty())
+						return 0;
+				}
+
+				if ( ( dynBot != CAIAliasTranslator::Invalid && dynBot == bot->getAlias() ) ||
+					 ( dynBot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
 				{
 					SM_STATIC_PARAMS_1(params, STRING_MANAGER::literal);
 					params[0].Literal.fromUtf8(text);
 					return STRING_MANAGER::sendStringToClient( user, "LITERAL", params );
 				}
 			}
-		}
-
-		if ( bot )
-		{
-			if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
-				 ( _Bot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
+			else
 			{
-				TVectorParamCheck params = _Params;
-				CMissionParser::solveEntitiesNames(params, user, giver);
-				return STRING_MANAGER::sendStringToClient( user, _PhraseId, params );	
+				if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
+					 ( _Bot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
+				{
+					TVectorParamCheck params = _Params;
+					CMissionParser::solveEntitiesNames(params, user, giver);
+					return STRING_MANAGER::sendStringToClient( user, _PhraseId, params );
+				}
 			}
 		}
 		else
@@ -216,20 +218,35 @@ class CMissionStepTalk : public IMissionStepTemplate
 		return 0;
 	}
 	
-	virtual bool hasBotChatOption(const TDataSetRow & interlocutor, CMission * instance, bool & gift)
+	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift)
 	{
-		if (_IsDynamic && !getDynamicBot(_Bot))
-		{
-			MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
-			return 0;	
-		}
-
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( bot )
 		{
+			if (_IsDynamic)
+			{
+				TAIAlias dynBot;
+				CCharacter *p = PlayerManager.getChar(getEntityIdFromRow(user));
+				if (!getDynamicBot(dynBot, p))
+				{
+					MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+					return 0;
+				}
+				
+				nlinfo("have bot");
+				nlinfo("_Bot = %d", dynBot);
+				nlinfo("bot->getAlias() = %d", bot->getAlias());
+				nlinfo("instance->getGiver() = %d", instance->getGiver());
+			
+				if ( ( dynBot != CAIAliasTranslator::Invalid && dynBot == bot->getAlias() ) ||
+					( dynBot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
+					return true;
+				return false;
+			}
+
 			if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
 				( _Bot == CAIAliasTranslator::Invalid && bot->getAlias() == instance->getGiver() ) )
-				return true;	
+				return true;
 		}
 		else
 		{
@@ -240,37 +257,45 @@ class CMissionStepTalk : public IMissionStepTemplate
 
 	virtual void getTextParams( uint & nbSubSteps,const std::string* & textPtr,TVectorParamCheck& retParams, const std::vector<uint32>& subStepStates)
 	{
-		if (_IsDynamic && !getDynamicBot(_Bot))
-		{
-			MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
-			static const std::string stepText = "DEBUG_CRASH_P_SMG_CRASH2";
-			textPtr = &stepText;
-			return;	
-		}
-
-		if (_IsDynamic &&  _User != NULL)
-		{
-
-			vector<string> params = _User->getCustomMissionParams(_Dynamic);
-			if (params.size() < 2)
-			{
-				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
-				return;
-			}
-			_Params.insert(_Params.begin(), STRING_MANAGER::TParam());
-			_Params[0].Identifier = params[1];
-		}
-
 		nbSubSteps = 1;
 		static const std::string stepText = "MIS_TALK_TO";
 		textPtr = &stepText;
 		
 		retParams.resize( 1 );
 		retParams[0].Type = STRING_MANAGER::bot;
-		if ( _Bot != CAIAliasTranslator::Invalid )
-			retParams[0].Int = _Bot;
+		
+		if (_IsDynamic)
+		{
+			TAIAlias dynBot;
+			if (!getDynamicBot(dynBot, _User))
+			{
+				MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+				static const std::string stepText = "DEBUG_CRASH_P_SMG_CRASH2";
+				textPtr = &stepText;
+				return;
+			}
+
+			if (_User != NULL)
+			{
+
+				vector<string> params = _User->getCustomMissionParams(_Dynamic);
+				if (params.size() < 2)
+				{
+					MISLOG("sline:%u ERROR : talk_to (sendContextText) : invalid bot", _SourceLine);
+					return;
+				}
+				_Params.insert(_Params.begin(), STRING_MANAGER::TParam());
+				_Params[0].Identifier = params[1];
+			}
+			retParams[0].Int = dynBot;
+		}
 		else
-			retParams[0].Identifier = "giver";		
+		{
+			if ( _Bot != CAIAliasTranslator::Invalid )
+				retParams[0].Int = _Bot;
+			else
+				retParams[0].Identifier = "giver";
+		}
 	}
 
 	bool solveTextsParams( CMissionSpecificParsingData & missionData,CMissionTemplate * templ  )
@@ -357,7 +382,7 @@ class CMissionGiveMoney : public IMissionStepTemplate
 		return 0;
 	}
 	
-	virtual bool hasBotChatOption(const TDataSetRow & interlocutor, CMission * instance, bool & gift)
+	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift)
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
@@ -575,7 +600,7 @@ class CMissionStepGiveItem : public IMissionStepTemplate
 		return 0;
 	}
 	
-	virtual bool hasBotChatOption(const TDataSetRow & interlocutor, CMission * instance, bool & gift)
+	virtual bool hasBotChatOption( const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift)
 	{
 		CCreature * bot = CreatureManager.getCreature( interlocutor );
 		if ( ( _Bot != CAIAliasTranslator::Invalid && _Bot == bot->getAlias() ) ||
@@ -879,7 +904,7 @@ void CMissionStepDynChat::getTextParams( uint & nbSubSteps,const std::string* & 
 	if ( Bot != CAIAliasTranslator::Invalid )
 		retParams[0].Int = Bot;
 	else
-		retParams[0].Identifier = "giver";		
+		retParams[0].Identifier = "giver";
 }
 
 void CMissionStepDynChat::onActivation(CMission* instance,uint32 stepIndex,std::list< CMissionEvent * > & eventList)

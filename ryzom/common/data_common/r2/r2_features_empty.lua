@@ -172,7 +172,7 @@ component.createComponent = function(x, y)
 	assert(comp)
 
 	comp.Base = "palette.entities.botobjects.milestone"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdEmptyFeature"))	
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdEmptyFeature")):toUtf8()	
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -207,7 +207,7 @@ component.create = function()
 		debugInfo("Cancel form for 'EmptyFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'EmptyFeature' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'EmptyFeature' at pos (%d, %d, %d)", x, y, z))
 		r2:doForm("EmptyFeatureForm", {X=x, Y=y}, paramsOk, paramsCancel)
 	end
 	local function posCancel()
@@ -252,7 +252,7 @@ end
 
 function component:registerMenu(logicEntityMenu)
 	local name = i18n.get("uiR2EdEmptyFeature")
-	logicEntityMenu:addLine(name, "lua", "", "EmptyFeature")
+	logicEntityMenu:addLine(ucstring(name), "lua", "", "EmptyFeature")
 end
 
 function component:getLogicTranslations()

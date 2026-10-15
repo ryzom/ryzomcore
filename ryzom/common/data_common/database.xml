@@ -1,8 +1,4 @@
 <database_description>
-  <!-- 2014-09-12: Now possible to use nullable="1" in leafs. This will
-  add 1 additional bit to the field, which will be the only bit sent
-  when the value of the field is 0. Use only for fields which are 
-  updated less frequently and which are often reset. -KAE -->
   <!-- Define bank superclass -->
   <bank_superclass>
     <bank name="PLR" class="CCDBSynchronised" />
@@ -209,7 +205,7 @@
     </branch>
   </branch>
   <!-- Common Item Data : For correct HELP, all items must have this structure:
-    <leaf name="SHEET"                type="I32" nullable="1" cppType="NLMISC::CSheetId" />
+<leaf name="SHEET"                      type="I32"/>
     <leaf name="QUALITY"              type="I10" />
     <leaf name="QUANTITY"             type="I10" />
     <leaf name="CREATE_TIME"          type="I32" />
@@ -220,12 +216,9 @@
     <leaf name="NAMEID"               type="I32" />
     <leaf name="INFO_VERSION"         type="I8" />
     <leaf name="ENCHANT"              type="I10" />
-    <leaf name="RM_CLASS_TYPE"        type="I3" />
-    <leaf name="RM_FABER_STAT_TYPE"   type="I5" />
-    <leaf name="PREREQUISIT_VALID"    type="I1" />
-    <leaf name="PRICE"                type="I32" />
-    <leaf name="RESALE_FLAG"          type="I2" />
-    <leaf name="WORNED"               type="I1" />
+    <leaf name="RM_CLASS_TYPE"              type="I3"/> RM_CLASS_TYPE enum
+    <leaf name="RM_FABER_STAT_TYPE" type="I5"/> RM_FABER_STAT_TYPE enum
+    <leaf name="PREREQUISIT_VALID"  type="I11"/>
   -->
   <!-- gift from animator (dm) to player -->
   <branch name="DM_GIFT" bank="PLR">
@@ -240,7 +233,7 @@
     <leaf name="ACCEPTED"   type="I1" />
     <leaf name="MONEY"      type="I64" />
     <branch name="GIVE">
-      <branch name="" count="8">
+        <branch name="" count="10"> <!-- Change in local_database.xml, player_trade.lua and NbExchangeSlots on server-->
         <!-- Common Item Data -->
         <leaf name="SHEET"                type="I32" cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"              type="I10" />
@@ -248,22 +241,18 @@
         <leaf name="CREATE_TIME"          type="I32" />
         <leaf name="SERIAL"               type="I32" />
         <leaf name="USER_COLOR"           type="I3" />
-        <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
+        <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32"/> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
-	<leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="ENCHANT" type="I10" />
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <!-- <leaf name="PRICE"                type="I32" /> -->
-        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> (FIXME: Add this) --> <!-- true if item is worned (show a red cross) -->
       </branch>
     </branch>
     <branch name="RECEIVE">
-      <branch name="" count="8">
+        <branch name="" count="10"> <!-- Change in local_database.xml, player_trade.lua and NbExchangeSlots on server-->
         <!-- Common Item Data -->
         <leaf name="SHEET"                type="I32" cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"              type="I10" />
@@ -271,22 +260,18 @@
         <leaf name="CREATE_TIME"          type="I32" />
         <leaf name="SERIAL"               type="I32" />
         <leaf name="USER_COLOR"           type="I3" />
-        <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
+        <!-- <leaf name="LOCKED"                        type="I10"/> No longer needed -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
-        <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="ENCHANT" type="I10" />
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <!-- <leaf name="PRICE"                type="I32" /> -->
-        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> (FIXME: Add this) --> <!-- true if item is worned (show a red cross) -->
       </branch>
     </branch>
     <leaf name="FORCE_REFUSE" type="I4" />
-    <!-- Syncrhonisation COUNTER. Should be at END of an atomic branch!!! but still works fine (of course, because this isn't an atomic branch!) -->
+    <!-- Syncrhonisation COUNTER. Should be at END of an atomic branch!!! but still works fine -->
     <leaf name="COUNTER" type="I4" />
   </branch>
   <branch name="INVENTORY" bank="PLR">
@@ -311,8 +296,8 @@
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
         <leaf name="PRICE"                type="I32" />
         <leaf name="RESALE_FLAG"          type="I2" /> <!-- TBotChatResaleFlag -->
@@ -334,18 +319,23 @@
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
 
         <leaf name="INFO_VERSION"         type="I8" />
-        <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="ENCHANT" type="I10" />
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
         <leaf name="PRICE"                type="I32" />
         <leaf name="RESALE_FLAG"          type="I2" /> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> (FIXME: Add this) --> <!-- true if item is worned (show a red cross) -->
       </branch>
     </branch>
     <branch name="EQUIP">
       <!-- jewelry + armor -->
       <branch name="" count="19">
+        <leaf name="INDEX_IN_BAG" type="I9" />
+        <!-- same as hand -->
+    </branch>
+</branch>
+<branch name="HOTBAR">
+    <branch name="" count="5">
         <leaf name="INDEX_IN_BAG" type="I9" />
         <!-- same as hand -->
       </branch>
@@ -359,22 +349,20 @@
         <!-- Common Item Data -->
         <leaf name="SHEET"                type="I32" cppType="NLMISC::CSheetId" />
         <leaf name="QUALITY"              type="I12" />
+        <!-- for forage progress, max QL409 x10 -->
         <leaf name="QUANTITY"             type="I12" />
         <leaf name="CREATE_TIME"          type="I32" />
         <leaf name="SERIAL"               type="I32" />
+        <!-- for forage progress, max x409 x10 -->
         <leaf name="USER_COLOR"           type="I3" />
-        <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
+        <!-- No LOCKED state -->
         <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
-        <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="ENCHANT" type="I10" />
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <!-- <leaf name="PRICE"                type="I32" /> -->
-        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> (FIXME: Add this) --> <!-- true if item is worned (show a red cross) -->
       </branch>
       <leaf name="ENABLE_TAKE" type="I1" />
       <!-- Used only in forage -->
@@ -392,18 +380,14 @@
         <leaf name="CREATE_TIME"          type="I32" />
         <leaf name="SERIAL"               type="I32" />
         <leaf name="USER_COLOR"           type="I3" />
-        <!-- <leaf name="LOCKED"               type="I10" /> -->
-        <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
-        <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
+        <leaf name="WEIGHT" type="I16" />
+        <!-- weight. see DB_WEIGHT_SCALE-->
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
-        <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="ENCHANT" type="I10" />
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <!-- <leaf name="PRICE"                type="I32" /> -->
-        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> --> <!-- true if item is worned (show a red cross) -->
         <!-- Additionnal info -->
         <leaf name="NB_MEMBER" type="I4" />
         <!-- Number of team member who wants this item or phrase -->
@@ -436,12 +420,10 @@
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <!-- <leaf name="PRICE"                type="I32" /> -->
-        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> (FIXME: Add this) --> <!-- true if item is worned (show a red cross) -->
+        <leaf name="RESALE_FLAG" type="I2" />
       </branch>
     </branch>
     <leaf name="MONEY"      type="I64" />
@@ -561,21 +543,17 @@
       <leaf name="SHEET"                type="I32" cppType="NLMISC::CSheetId" />
       <leaf name="QUALITY"              type="I10" />
       <leaf name="QUANTITY"             type="I10" />
+    <!-- No LOCKED state -->
       <leaf name="CREATE_TIME"          type="I32" />
       <leaf name="SERIAL"               type="I32" />
       <leaf name="USER_COLOR"           type="I3" />
-      <!-- <leaf name="LOCKED"               type="I10" /> -->
-      <!-- <leaf name="ACCESS"               type="I2" /> --> <!-- TGuildGrade access grade -->
       <leaf name="WEIGHT"               type="I16" /> <!-- weight. see DB_WEIGHT_SCALE -->
       <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
       <leaf name="INFO_VERSION"         type="I8" />
-      <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-      <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-      <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+    <leaf name="ENCHANT" type="I10" />
+    <leaf name="RM_CLASS_TYPE" type="I3" />
+    <leaf name="RM_FABER_STAT_TYPE" type="I6" />
       <leaf name="PREREQUISIT_VALID"    type="I1" />
-      <!-- <leaf name="PRICE"                type="I32" /> -->
-      <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-      <!-- <leaf name="WORNED"               type="I1" /> --> <!-- true if item is worned (show a red cross) -->
       <!-- Muti currency info -->
       <leaf name="CURRENCY"             type="I4" />
       <!-- The currency type RYMSG::TTradeCurrency -->
@@ -747,12 +725,10 @@
         <leaf name="NAMEID"               type="I32" /> <!-- 0 or special name of item -->
         <leaf name="INFO_VERSION"         type="I8" />
         <leaf name="ENCHANT"              type="I10" /> <!-- 0=not enchanted, 1=enchanted nbcharge 0, 10=e. nbcharge 9 -->
-        <leaf name="RM_CLASS_TYPE"        type="I3" /> <!-- RM_CLASS_TYPE enum -->
-        <leaf name="RM_FABER_STAT_TYPE"   type="I6" /> <!-- RM_FABER_STAT_TYPE enum -->
+        <leaf name="RM_CLASS_TYPE" type="I3" />
+        <leaf name="RM_FABER_STAT_TYPE" type="I6" />
         <leaf name="PREREQUISIT_VALID"    type="I1" />
-        <!-- <leaf name="PRICE"                type="I32" /> -->
-        <!-- <leaf name="RESALE_FLAG"          type="I2" /> --> <!-- TBotChatResaleFlag -->
-        <!-- <leaf name="WORNED"               type="I1" /> (FIXME: Add this) --> <!-- true if item is worned (show a red cross) -->
+        <leaf name="RESALE_FLAG" type="I2" />
       </branch>
     </branch>
     <branch name="OUTPOST">

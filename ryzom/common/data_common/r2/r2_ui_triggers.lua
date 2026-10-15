@@ -59,10 +59,10 @@ function r2:initActivityEditor(activityEditor)
 	local timeLimitCB = activityEditor:find("time_limit"):find("combo_box")
 	assert(timeLimitCB)
 	timeLimitCB:resetTexts()
-	timeLimitCB:addText(i18n.get("uiR2EdNoTimeLimit"))
-	--timeLimitCB:addText("Until a certain time")
-	timeLimitCB:addText(i18n.get("uiR2EdForCertainTime"))
-	timeLimitCB:addText(i18n.get("uiR2EdWhileChat"))
+	timeLimitCB:addText(ucstring(i18n.get("uiR2EdNoTimeLimit")))
+	--timeLimitCB:addText(ucstring("Until a certain time"))
+	timeLimitCB:addText(ucstring(i18n.get("uiR2EdForCertainTime")))
+	timeLimitCB:addText(ucstring(i18n.get("uiR2EdWhileChat")))
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -424,7 +424,7 @@ function r2:buildActivityTitle(activityUI, erase)
 	-- title
 	local title = activityUI:find("title")
 	assert(title)
-	title.text= part1..part2..part3
+	title.uc_hardtext= part1..part2..part3
 end
 
 function r2:getActivityName(activityInst)
@@ -541,7 +541,7 @@ function r2:updateActivityChatSequence(elementUI, canceledChatStepId)
 								activityText:addColoredTextChild(countInfo, 220, 140, 100, 255)
 								firstLine = false
 							end
-							activityText:addTextChild(facing)
+							activityText:addTextChild(ucstring(facing))
 							emptyText = false
 						end
 						if r2.fromEmoteIdToName[emote] ~= nil then
@@ -550,7 +550,7 @@ function r2:updateActivityChatSequence(elementUI, canceledChatStepId)
 								activityText:addColoredTextChild(countInfo, 220, 140, 100, 255)
 								firstLine = false
 							end
-							activityText:addTextChild(emote)
+							activityText:addTextChild(ucstring(emote))
 							emptyText = false
 						end
 						if r2:getInstanceFromId(says)~=nil and r2:getInstanceFromId(says).Text ~= "" then
@@ -559,7 +559,7 @@ function r2:updateActivityChatSequence(elementUI, canceledChatStepId)
 								activityText:addColoredTextChild(countInfo, 220, 140, 100, 255)
 								firstLine = false
 							end
-							activityText:addTextChild(says)
+							activityText:addTextChild(ucstring(says))
 							emptyText = false
 						end
 					end
@@ -706,21 +706,21 @@ function r2:updateActivityEditor()
 
 		local index = r2:searchElementIndex(instanceActivity)
 		if index~= nil then
-			activityName.text = tostring(i18n.get("uiR2EdActivity")).." "..index.." : "
+			activityName.uc_hardtext = tostring(i18n.get("uiR2EdActivity")).." "..index.." : "
 		else
-			activityName.text = tostring(i18n.get("uiR2EdActivity")).." : "
+			activityName.uc_hardtext = tostring(i18n.get("uiR2EdActivity")).." : "
 		end
 		
 		-- activity type
 		local activityText = r2.activityTypeMenu[instanceActivity.Activity]
 		if activityText then
-			activityButtonText.text = activityText
+			activityButtonText.uc_hardtext = activityText
 		end
 		if instanceActivity.ActivityZoneId ~= "" then
 			local place = r2:getInstanceFromId(instanceActivity.ActivityZoneId)
 			assert(place)
 
-			activityButtonText.text = activityButtonText.hardtext .. " " .. place.Name
+			activityButtonText.uc_hardtext = activityButtonText.hardtext .. " " .. place.Name
 		end
 
 		-- time limit
@@ -745,15 +745,15 @@ function r2:updateActivityEditor()
 				certainTime.active = true
 				local hoursMenu = certainTime:find("hours"):find("text")
 				assert(hoursMenu)
-				hoursMenu.text = tostring(hoursNb)
+				hoursMenu.uc_hardtext = tostring(hoursNb)
 
 				local minutesMenu = certainTime:find("minutes"):find("text")
 				assert(minutesMenu)
-				minutesMenu.text = tostring(minNb)
+				minutesMenu.uc_hardtext = tostring(minNb)
 
 				local secondsMenu = certainTime:find("seconds"):find("text")
 				assert(secondsMenu)
-				secondsMenu.text = tostring(secNb)
+				secondsMenu.uc_hardtext = tostring(secNb)
 
 				comboBox.view_text = timeLimitText
 			end
@@ -772,8 +772,8 @@ function r2:updateActivityEditor()
 		assert(repeatLabelButton)
 
 		if sequenceChat ~= nil then
-			--chatMenuButton.text = sequenceChat.Name
-			chatMenuButton.text = r2:getSequenceName(sequenceChat)
+			--chatMenuButton.uc_hardtext = sequenceChat.Name
+			chatMenuButton.uc_hardtext = r2:getSequenceName(sequenceChat)
 
 			repeatLabelButton.active = true
 			local repeatButton = repeatLabelButton:find("toggle_butt")
@@ -783,7 +783,7 @@ function r2:updateActivityEditor()
 			chatButtonEditor.active = true
 		else
 			repeatLabelButton.active = false
-			chatMenuButton.text = i18n.get("uiR2EdNoElt")
+			chatMenuButton.uc_hardtext = i18n.get("uiR2EdNoElt")
 
 			chatButtonEditor.active = false
 		end
@@ -792,11 +792,11 @@ function r2:updateActivityEditor()
 	else
 
 		local name = tostring(i18n.get("uiR2EdActivity")).." : "
-		activityName.text = name
+		activityName.uc_hardtext = name
 		
-		activityButtonText.text = i18n.get("uiR2EdStandStill")
+		activityButtonText.uc_hardtext = i18n.get("uiR2EdStandStill")
 		comboBox.selection_text = i18n.get("uiR2EdNoTimeLimit")
-		chatMenuButton.text = i18n.get("uiR2EdNoElt")
+		chatMenuButton.uc_hardtext = i18n.get("uiR2EdNoElt")
 
 		chatButtonEditor.active = false
 	end
@@ -837,77 +837,77 @@ function r2:openActivityMenu()
 	activityMenu:reset()
 
 	-- Inactive
---	activityMenu:addLine(i18n.get("uiR2EdInactive"), "lua", "r2:setActivity('Inactive')", "Inactive")
+--	activityMenu:addLine(ucstring(i18n.get("uiR2EdInactive")), "lua", "r2:setActivity('Inactive')", "Inactive")
 
 	-- Stand still
-	activityMenu:addLine(i18n.get("uiR2EdStandStill"), "lua", "r2:setActivity('Stand Still')", "Stand Still")
+	activityMenu:addLine(ucstring(i18n.get("uiR2EdStandStill")), "lua", "r2:setActivity('Stand Still')", "Stand Still")
 
 	-- Follow route
-	activityMenu:addLine(i18n.get("uiR2EdFollowRoad"), "", "", "Follow Route")
+	activityMenu:addLine(ucstring(i18n.get("uiR2EdFollowRoad")), "", "", "Follow Route")
 	local menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2ed_icon_road.tga", size="14" })
 	activityMenu:setUserGroupLeft(1, menuButton)
 	activityMenu:addSubMenu(1)
 	local roadsMenu = activityMenu:getSubMenu(1)
 	local roadsTable = r2.Scenario:getAllInstancesByType("Road")
 	for key, road in pairs(roadsTable) do
-		roadsMenu:addLine(road.Name, "lua", "r2:setActivity('Follow Route', '".. road.InstanceId .."')", road.InstanceId)
+		roadsMenu:addLine(ucstring(road.Name), "lua", "r2:setActivity('Follow Route', '".. road.InstanceId .."')", road.InstanceId)
 	end
 	if table.getn(roadsTable) == 0 then
-		roadsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
+		roadsMenu:addLine(ucstring(i18n.get("uiR2EdNoSelelection")), "lua", "r2:setActivity()", "")
 	end
 
 	-- Patrol
-	activityMenu:addLine(i18n.get("uiR2EdPatrol"), "", "", "Patrol")
+	activityMenu:addLine(ucstring(i18n.get("uiR2EdPatrol")), "", "", "Patrol")
 	menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2ed_icon_road.tga", size="14"})
 	activityMenu:setUserGroupLeft(2, menuButton)
 	activityMenu:addSubMenu(2)
 	roadsMenu = activityMenu:getSubMenu(2)
 	for key, road in pairs(roadsTable) do
-		roadsMenu:addLine(road.Name, "lua", "r2:setActivity('Patrol', '".. road.InstanceId .."')", road.InstanceId)
+		roadsMenu:addLine(ucstring(road.Name), "lua", "r2:setActivity('Patrol', '".. road.InstanceId .."')", road.InstanceId)
 	end
 	if table.getn(roadsTable) == 0 then
-		roadsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
+		roadsMenu:addLine(ucstring(i18n.get("uiR2EdNoSelelection")), "lua", "r2:setActivity()", "")
 	end
 
 	-- Repeat Road
-	activityMenu:addLine(i18n.get("uiR2EdRepeatRoad"), "", "", "Repeat Road")
+	activityMenu:addLine(ucstring(i18n.get("uiR2EdRepeatRoad")), "", "", "Repeat Road")
 	menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2ed_icon_road.tga", size="14"})
 	activityMenu:setUserGroupLeft(3, menuButton)
 	activityMenu:addSubMenu(3)
 	roadsMenu = activityMenu:getSubMenu(3)
 	for key, road in pairs(roadsTable) do
-		roadsMenu:addLine(road.Name, "lua", "r2:setActivity('Repeat Road', '".. road.InstanceId .."')", road.InstanceId)
+		roadsMenu:addLine(ucstring(road.Name), "lua", "r2:setActivity('Repeat Road', '".. road.InstanceId .."')", road.InstanceId)
 	end
 	if table.getn(roadsTable) == 0 then
-		roadsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
+		roadsMenu:addLine(ucstring(i18n.get("uiR2EdNoSelelection")), "lua", "r2:setActivity()", "")
 	end
 
 	-- Wander
-	activityMenu:addLine(i18n.get("uiR2EdWander"), "", "", "Wander")
+	activityMenu:addLine(ucstring(i18n.get("uiR2EdWander")), "", "", "Wander")
 	menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2ed_icon_region.tga", size="14"})
 	activityMenu:setUserGroupLeft(4, menuButton)
 	activityMenu:addSubMenu(4)
 	local regionsMenu = activityMenu:getSubMenu(4)
 	local regionsTable = r2.Scenario:getAllInstancesByType("Region")
 	for key, region in pairs(regionsTable) do
-		regionsMenu:addLine(region.Name, "lua", "r2:setActivity('Wander', '".. region.InstanceId .."')", region.InstanceId)
+		regionsMenu:addLine(ucstring(region.Name), "lua", "r2:setActivity('Wander', '".. region.InstanceId .."')", region.InstanceId)
 	end
 	if table.getn(regionsTable) == 0 then
-		regionsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
+		regionsMenu:addLine(ucstring(i18n.get("uiR2EdNoSelelection")), "lua", "r2:setActivity()", "")
 	end
 
 	-- Deploy
---	activityMenu:addLine(i18n.get("uiR2EdDeploy"), "", "", "Deploy")
+--	activityMenu:addLine(ucstring(i18n.get("uiR2EdDeploy")), "", "", "Deploy")
 --	menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2ed_icon_region.tga", size="14"})
 --	activityMenu:setUserGroupLeft(6, menuButton)
 --	activityMenu:addSubMenu(6)
 --	local regionsMenu = activityMenu:getSubMenu(6)
 --	local regionsTable = r2.Scenario:getAllInstancesByType("Region")
 --	for key, region in pairs(regionsTable) do
---		regionsMenu:addLine(region.Name, "lua", "r2:setActivity('Deploy', '".. region.InstanceId .."')", region.InstanceId)
+--		regionsMenu:addLine(ucstring(region.Name), "lua", "r2:setActivity('Deploy', '".. region.InstanceId .."')", region.InstanceId)
 --	end
 --	if table.getn(regionsTable) == 0 then
---		regionsMenu:addLine(i18n.get("uiR2EdNoSelelection"), "lua", "r2:setActivity()", "")
+--		regionsMenu:addLine(ucstring(i18n.get("uiR2EdNoSelelection")), "lua", "r2:setActivity()", "")
 --	end
 
 	r2:openTriggersMenu(getUICaller())
@@ -1050,10 +1050,10 @@ function r2:openSelectChatMenu()
 	chatMenu:reset()
 
 	-- first line "None"
-	chatMenu:addLine(i18n.get("uiR2EdNoElt"), "lua", "r2:selectChatSequence('None')", "None")
+	chatMenu:addLine(ucstring(i18n.get("uiR2EdNoElt")), "lua", "r2:selectChatSequence('None')", "None")
 
 	-- second line "More"
-	chatMenu:addLine(i18n.get("uiR2EdMore"), "lua", "r2:openChatSequences()", "More")
+	chatMenu:addLine(ucstring(i18n.get("uiR2EdMore")), "lua", "r2:openChatSequences()", "More")
 	
 	local entityInst = r2:getSelectedInstance()
 	assert(entityInst)
@@ -1063,8 +1063,8 @@ function r2:openSelectChatMenu()
 	for i=0, chatSequences.Size-1 do
 		local chatS = chatSequences[i]
 		assert(chatS)
-		--chatMenu:addLine(chatS.Name, "lua", "r2:selectChatSequence('" .. chatS.InstanceId .. "')", chatS.InstanceId)
-		chatMenu:addLine(r2:getSequenceName(chatS), "lua", "r2:selectChatSequence('" .. chatS.InstanceId .. "')", chatS.InstanceId)
+		--chatMenu:addLine(ucstring(chatS.Name), "lua", "r2:selectChatSequence('" .. chatS.InstanceId .. "')", chatS.InstanceId)
+		chatMenu:addLine(ucstring(r2:getSequenceName(chatS)), "lua", "r2:selectChatSequence('" .. chatS.InstanceId .. "')", chatS.InstanceId)
 	end
 
 	r2:openTriggersMenu(getUICaller())
@@ -1273,61 +1273,61 @@ function r2:updateChatEditor()
 
 		local index = r2:searchElementIndex(instanceChat)
 		if index~= nil then
-			chatName.text = tostring(i18n.get("uiR2EdChat")).." "..index.." : "
+			chatName.uc_hardtext = tostring(i18n.get("uiR2EdChat")).." "..index.." : "
 		else
-			chatName.text = tostring(i18n.get("uiR2EdChat")).." : "
+			chatName.uc_hardtext = tostring(i18n.get("uiR2EdChat")).." : "
 		end
 
 		-- after value
 		local time = instanceChat.Time
 		local minNb, secNb = r2:calculMinSec(time)
 
-		minutesText.text = tostring(minNb)
-		secondsText.text = tostring(secNb)
+		minutesText.uc_hardtext = tostring(minNb)
+		secondsText.uc_hardtext = tostring(secNb)
 			
 		-- who
 		local whoInst = r2:getInstanceFromId(tostring(instanceChat.Actions[0].Who))
-		whoMenuText.text = whoInst.Name
+		whoMenuText.uc_hardtext = whoInst.Name
 		
 		-- says what
 		local textID = instanceChat.Actions[0].Says
 		if textID ~= "" then
-			editBox.input_string = r2:getInstanceFromId(textID).Text
+			editBox.uc_input_string = r2:getInstanceFromId(textID).Text
 		else
-			editBox.input_string = ""
+			editBox.uc_input_string = ""
 		end
 
 		-- to who
 		local toWhoInst = r2:getInstanceFromId(tostring(instanceChat.Actions[0].Facing))
 		if toWhoInst then
-			toWhoMenuText.text = toWhoInst.Name
+			toWhoMenuText.uc_hardtext = toWhoInst.Name
 		else
-			toWhoMenuText.text = tostring(i18n.get("uiR2EdNobody"))
+			toWhoMenuText.uc_hardtext = tostring(i18n.get("uiR2EdNobody"))
 		end
 
 		-- emote
 		local emoteName = r2.fromEmoteIdToName[instanceChat.Actions[0].Emote]
 		if emoteName then
-			emoteButtonText.text = emoteName
+			emoteButtonText.uc_hardtext = emoteName
 		else
-			emoteButtonText.text = tostring(i18n.get("uiR2EdNoElt"))
+			emoteButtonText.uc_hardtext = tostring(i18n.get("uiR2EdNoElt"))
 		end
 
 	else
 
 		local name = tostring(i18n.get("uiR2EdChat")).." : "
-		chatName.text = name
+		chatName.uc_hardtext = name
 
-		minutesText.text = tostring(0)
-		secondsText.text = tostring(0)
+		minutesText.uc_hardtext = tostring(0)
+		secondsText.uc_hardtext = tostring(0)
 
-		whoMenuText.text = ""
+		whoMenuText.uc_hardtext = ""
 
-		editBox.input_string = ""
+		editBox.uc_input_string = ""
 
-		toWhoMenuText.text = tostring(i18n.get("uiR2EdNobody"))
+		toWhoMenuText.uc_hardtext = tostring(i18n.get("uiR2EdNobody"))
 
-		emoteButtonText.text = tostring(i18n.get("uiR2EdNoElt"))
+		emoteButtonText.uc_hardtext = tostring(i18n.get("uiR2EdNoElt"))
 	end
 end
 
@@ -1450,7 +1450,7 @@ function r2:buildChatTitle(chatUI, erase)
 	-- title
 	local title = chatUI:find("title")
 	assert(title)
-	title.text= part1..part2..part3
+	title.uc_hardtext= part1..part2..part3
 end
 
 function r2:getChatName(chatInst)
@@ -1530,7 +1530,7 @@ function r2:updateChatText(elementUI)
 		end
 		text = text.."\n"
 
-		chatText:addTextChild(text)
+		chatText:addTextChild(ucstring(text))
 
 		local sep = elementUI:find("sep")
 		assert(sep)
@@ -1595,17 +1595,17 @@ function r2:initTimeMenu(timeFunction, isHours)
 	timeMenu:reset()
 
 	for i=0,9 do
-		timeMenu:addLine(tostring(i), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
+		timeMenu:addLine(ucstring(tostring(i)), "lua", timeFunction .. "(" .. tostring(i) .. ")", tostring(i))
 	end
 
 	if isHours == true then
-		timeMenu:addLine(tostring(10), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
+		timeMenu:addLine(ucstring(tostring(10)), "lua", timeFunction .. "(" .. tostring(10) .. ")", tostring(10))
 	else
 
 		local lineNb = 9
 		for i=10, 50, 10 do
 			local lineStr = tostring(i).."/"..tostring(i+9)
-			timeMenu:addLine(lineStr, "", "", tostring(i))
+			timeMenu:addLine(ucstring(lineStr), "", "", tostring(i))
 			lineNb = lineNb+1
 
 			timeMenu:addSubMenu(lineNb)
@@ -1613,7 +1613,7 @@ function r2:initTimeMenu(timeFunction, isHours)
 
 			for s=0,9 do
 				lineStr = tostring(i+s) 
-				subMenu:addLine(lineStr, "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
+				subMenu:addLine(ucstring(lineStr), "lua", timeFunction .. "(" .. tostring(i+s) .. ")", lineStr)
 			end
 		end
 	end
@@ -1707,7 +1707,7 @@ function r2:openWhoMenu(whoFunction, towho)
 	local npcTable = r2.Scenario:getAllInstancesByType("Npc")
 
 	if towho == true then
-		whoMenu:addLine(i18n.get("uiR2EdNobody"), "lua", whoFunction.."('" ..tostring(i18n.get("uiR2EdNobody")).. "')", "Nobody")
+		whoMenu:addLine(ucstring(i18n.get("uiR2EdNobody")), "lua", whoFunction.."('" ..tostring(i18n.get("uiR2EdNobody")).. "')", "Nobody")
 	end
 
 	for key, npc in npcTable do
@@ -1723,7 +1723,7 @@ function r2:openWhoMenu(whoFunction, towho)
 				end
 			end
 			if addLine then
-				whoMenu:addLine(npc.Name, "lua", whoFunction.."('" ..npc.InstanceId.. "')", npc.InstanceId)	
+				whoMenu:addLine(ucstring(npc.Name), "lua", whoFunction.."('" ..npc.InstanceId.. "')", npc.InstanceId)	
 			end
 		end
 	end
@@ -2334,7 +2334,7 @@ function r2:removeElementsSequenceUI(tabIndex, uiName, elementsTable, sequName)
 		buttonTab.params_l = "r2:selectSequenceTab('"..uiName.."', "..tostring(i-1)..")"
 
 		if buttonTab.hardtext == sequName..(i+1) then
-			buttonTab.text = sequName..i
+			buttonTab.uc_hardtext = sequName..i
 		end
 	end
 
@@ -2642,7 +2642,7 @@ function r2:openSequenceEditor(uiName, editorName)
 	local buttonTab = tab:find("tab"..tab.selection)
 	assert(buttonTab)
 
-	editName.input_string = buttonTab.text
+	editName.uc_input_string = buttonTab.uc_hardtext
 end
 
 ------------------ SET SEQUENCE NAME  -----------------------------------------------------
@@ -2684,7 +2684,7 @@ function r2:updateSequenceName(uiName, instance)
 	local buttonTab = tab:find("tab"..tabId)
 	assert(buttonTab)
 	
-	buttonTab.text = name
+	buttonTab.uc_hardtext = name
 
 	if uiName == "r2ed_triggers" then
 		r2:updateSequencesButtonBar(tabId, name)
@@ -2884,8 +2884,8 @@ function r2:updateActivitiesAndChatsUI(instance)
 			end
 		end
 		
-		triggersUI.title = tostring(i18n.get("uiR2EDActivitySequenceEditor")) .. r2:getSelectedInstance().Name
-		chatSequencesUI.title = tostring(i18n.get("uiR2EDChatSequenceEditor")) .. r2:getSelectedInstance().Name
+		triggersUI.uc_title = tostring(i18n.get("uiR2EDActivitySequenceEditor")) .. r2:getSelectedInstance().Name
+		chatSequencesUI.uc_title = tostring(i18n.get("uiR2EDChatSequenceEditor")) .. r2:getSelectedInstance().Name
 	end
 end
 
@@ -2906,8 +2906,8 @@ function activeLogicEntityPropertySheetDisplayerTable:onAttrModified(instance, a
 		local chatSequencesUI = getUI("ui:interface:r2ed_chat_sequence")
 		assert(chatSequencesUI)
 
-		triggersUI.title = tostring(i18n.get("uiR2EDActivitySequenceEditor")) .. instance[attributeName]
-		chatSequencesUI.title = tostring(i18n.get("uiR2EDChatSequenceEditor")) .. instance[attributeName]	
+		triggersUI.uc_title = tostring(i18n.get("uiR2EDActivitySequenceEditor")) .. instance[attributeName]
+		chatSequencesUI.uc_title = tostring(i18n.get("uiR2EDChatSequenceEditor")) .. instance[attributeName]	
 	end
 end	
 
@@ -3480,12 +3480,12 @@ function r2:updateSequencesButtonBar(index, sequenceName)
 		if sequenceName==nil and (index >=0) and (index < activeLogicEntity:getBehavior().Activities.Size) then
 			local activitySequence = activeLogicEntity:getBehavior().Activities[index]
 			assert(activitySequence)
-			--sequencesButton.text = activitySequence.Name
-			sequencesButton.text = r2:getSequenceName(activitySequence)
+			--sequencesButton.uc_hardtext = activitySequence.Name
+			sequencesButton.uc_hardtext = r2:getSequenceName(activitySequence)
 		elseif sequenceName~= nil then
-			sequencesButton.text = sequenceName
+			sequencesButton.uc_hardtext = sequenceName
 		else
-			sequencesButton.text = i18n.get("uiR2EDSequences")
+			sequencesButton.uc_hardtext = i18n.get("uiR2EDSequences")
 		end
 	end
 end
@@ -3543,7 +3543,7 @@ function r2:updateMiniActivityView(index)
 		--label "No activity"
 		if sequence.Components.Size == 0 then
 			noActivityLabel.active = true
-			noActivityLabel.text = tostring(i18n.get("uiR2EdNoActivity"))
+			noActivityLabel.uc_hardtext = tostring(i18n.get("uiR2EdNoActivity"))
 		else
 			noActivityLabel.active = false
 		end
@@ -3592,13 +3592,13 @@ function r2:updateMiniActivityView(index)
 				-- activity type text
 				local activityText = miniActivity:find("activity_name")
 				assert(activityText)
-				activityText.text = activityInst.Activity
+				activityText.uc_hardtext = activityInst.Activity
 			end
 		end
 		startCount = sequence.Components.Size 
 	else
 		noActivityLabel.active = true
-		noActivityLabel.text = tostring(i18n.get("uiR2EdNoSequence"))
+		noActivityLabel.uc_hardtext = tostring(i18n.get("uiR2EdNoSequence"))
 	end
 
 	-- hide remaining mini activity templates
@@ -3665,27 +3665,27 @@ function r2:chooseOrOpenSelectedChatSequence()
 	if chatSequenceId ~= "" then
 		chatSequence = r2:getInstanceFromId(chatSequenceId)
 		assert(chatSequence)
-		--rootMenu:addLine(i18n.get("uiR2EDChatSequence").." " .. chatSequence.Name .." : ", "lua", "", "Title")
-		rootMenu:addLine(i18n.get("uiR2EDChatSequence").." " .. r2:getSequenceName(chatSequence) .." : ", "lua", "", "Title")
+		--rootMenu:addLine(ucstring(tostring(i18n.get("uiR2EDChatSequence")).." " .. chatSequence.Name .." : "), "lua", "", "Title")
+		rootMenu:addLine(ucstring(tostring(i18n.get("uiR2EDChatSequence")).." " .. r2:getSequenceName(chatSequence) .." : "), "lua", "", "Title")
 	else
-		rootMenu:addLine(i18n.get("uiR2EDChatSequence").." : ", "lua", "", "Title")
+		rootMenu:addLine(ucstring(tostring(i18n.get("uiR2EDChatSequence")).." : "), "lua", "", "Title")
 	end
 
 	rootMenu:addSeparator()
 
 	-- "Open chat sequence"
 	if chatSequenceId ~= "" then
-		--rootMenu:addLine(i18n.get("uiR2EDOpen").." "..chatSequence.Name, "lua", "r2:openMiniActivityChatSequence("..tostring(miniActivityNb)..")", "Open")
-		rootMenu:addLine(i18n.get("uiR2EDOpen").." "..r2:getSequenceName(chatSequence), "lua", "r2:openMiniActivityChatSequence("..tostring(miniActivityNb)..")", "Open")
+		--rootMenu:addLine(ucstring(tostring(i18n.get("uiR2EDOpen")).." "..chatSequence.Name), "lua", "r2:openMiniActivityChatSequence("..tostring(miniActivityNb)..")", "Open")
+		rootMenu:addLine(ucstring(tostring(i18n.get("uiR2EDOpen")).." "..r2:getSequenceName(chatSequence)), "lua", "r2:openMiniActivityChatSequence("..tostring(miniActivityNb)..")", "Open")
 		newLine = newLine + 1
 	end
 
 	-- "Any chat sequence"
-	rootMenu:addLine(i18n.get("uiR2EdNoChat"), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..")", "None")
+	rootMenu:addLine(ucstring(i18n.get("uiR2EdNoChat")), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..")", "None")
 
 
 	-- "new chat sequence"
-	rootMenu:addLine(i18n.get("uiR2EdNewChat").."...", "lua", "r2:newChatsSequenceAndSelect("..tostring(miniActivityNb)..")", "None")
+	rootMenu:addLine(ucstring(tostring(i18n.get("uiR2EdNewChat")).."..."), "lua", "r2:newChatsSequenceAndSelect("..tostring(miniActivityNb)..")", "None")
 	local menuButton = createGroupInstance("r2_menu_button", "", { bitmap = "r2_icon_create.tga", size="14" })
 	rootMenu:setUserGroupLeft(newLine, menuButton)
 
@@ -3698,8 +3698,8 @@ function r2:chooseOrOpenSelectedChatSequence()
 		local sequence = activeLogicEntity:getBehavior().ChatSequences[i]
 		assert(sequence)
 
-		--rootMenu:addLine(sequence.Name, "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..", " .. tostring(i)..")", sequence.InstanceId)
-		rootMenu:addLine(r2:getSequenceName(sequence), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..", " .. tostring(i)..")", sequence.InstanceId)
+		--rootMenu:addLine(ucstring(sequence.Name), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..", " .. tostring(i)..")", sequence.InstanceId)
+		rootMenu:addLine(ucstring(r2:getSequenceName(sequence)), "lua", "r2:setSequenceChatToMiniActivity("..tostring(miniActivityNb)..", " .. tostring(i)..")", sequence.InstanceId)
 	end
 
 	-- display menu

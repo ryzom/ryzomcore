@@ -132,11 +132,6 @@ end
 -- INIT --
 ----------
 
-if debugBreak == nil then
-	-- replace this at runtime with the debugger break functions
-	debugBreak = function()
-	end
-end
 
 -- replace the assert function with a more verbose one
 if oldAssert == nil then
@@ -147,8 +142,7 @@ function assert(cond)
 	if not cond then
 		-- rawDebugInfo(colorTag(255, 0, 255) .. "ASSERTION FAILED !! ")
 		rawDebugInfo("@{FOFF}ASSERTION FAILED !! ")
-		dumpCallStack(2)
-		debugBreak()
+		dumpCallStack(2);
 		error("")
 	end
 end

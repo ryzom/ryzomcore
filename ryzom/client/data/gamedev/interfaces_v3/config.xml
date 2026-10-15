@@ -10,6 +10,9 @@
 -->
 <define id="UI_DB_SAVE_VERSION" value="1" />
 
+<variable entry="UI:TEMP:TRUE" type="bool" value="1" />
+<variable entry="UI:TEMP:FALSE" type="bool" value="0" />
+
 
 <!-- ****************************** -->
 <!-- *	WINDOWS COLORS	* -->
@@ -137,7 +140,7 @@
 <variable entry="UI:SAVE:INSCENE:USER:GUILD_SYMBOL" type="bool" value="false" />
 <variable entry="UI:SAVE:INSCENE:USER:NAME" type="bool" value="false" />
 <variable entry="UI:SAVE:INSCENE:USER:TITLE" type="bool" value="false" />
-<variable entry="UI:SAVE:INSCENE:USER:RPTAGS" type="bool" value="false" />
+<variable entry="UI:SAVE:INSCENE:USER:RPTAGS" type="bool" value="true" />
 <variable entry="UI:SAVE:INSCENE:USER:GUILD_NAME" type="bool" value="false" />
 <variable entry="UI:SAVE:INSCENE:USER:HP" type="bool" value="false" />
 <variable entry="UI:SAVE:INSCENE:USER:STA" type="bool" value="false" />
@@ -1090,6 +1093,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 	<param name="text_over_back_color" value="64 64 64 255" />
 
+	<!--    <param name="font"
+	value="basic.ttf" /> -->
 	<param name="font" value="ryzom.ttf" />
 	<param name="monospace_font" value="ryzom_monospace.ttf" />
 
@@ -1364,6 +1369,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 <define id="set_base" value="LOCAL:INVENTORY" />
 
+<define id="hotbar" value="LOCAL:HOTBAR" />
 <!-- Sheathes -->
 <!-- mgt of active sheath is special: must write in %ui_set_active but must read in %set_active 
  It's because Server Replication will write in %set_active. Since we need to put observers on %ui_set_active
@@ -1415,6 +1421,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <define id="pa_bag5" value="%set_base:PACK_ANIMAL5" />
 <define id="pa_bag6" value="%set_base:PACK_ANIMAL6" />
 <define id="money" value="%set_base:MONEY" />
+<define id="elyps" value="UI:VARIABLES:ELYPS" />
 <define id="skill_points_0" value="LOCAL:USER:SKILL_POINTS_0:VALUE" />
 <define id="skill_points_1" value="LOCAL:USER:SKILL_POINTS_1:VALUE" />
 <define id="skill_points_2" value="LOCAL:USER:SKILL_POINTS_2:VALUE" />
@@ -1701,8 +1708,6 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:VARIABLES:MAIL_WAITING" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:FORUM_UPDATED" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:DYNE_UPDATED" type="bool" value="0" />
-<variable entry="UI:VARIABLES:COMPASS_ICON_USER1" type="bool" value="0" />
-<variable entry="UI:VARIABLES:COMPASS_ICON_USER2" type="bool" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_TIME" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_SERVER_TICK" type="sint64" value="0" />
 <variable entry="UI:VARIABLES:CURRENT_SMOOTH_SERVER_TICK" type="sint64" value="0" />
@@ -1732,10 +1737,13 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:CONTAINER_ALPHA" type="sint32" value="255" />
 <variable entry="UI:SAVE:CONTENT_ROLLOVER_FACTOR" type="sint32" value="255" />
 <variable entry="UI:SAVE:CONTAINER_ROLLOVER_FACTOR" type="sint32" value="255" />
+<variable entry="UI:SAVE:CONTEXT_HELP_CONTENT_ALPHA" type="sint32" value="255" />
+<variable entry="UI:SAVE:CONTEXT_HELP_CONTAINER_ALPHA" type="sint32" value="255" />
 <!-- Speeds from 0 to 100 -->
 <variable entry="UI:SAVE:ALPHA_ROLLOVER_SPEED" type="sint32" value="5" />
 <variable entry="UI:SAVE:DOUBLE_CLICK_SPEED" type="sint32" value="50" />
 <variable entry="UI:SAVE:KEY_REPEAT_SPEED" type="sint32" value="50" />
+<variable entry="UI:SAVE:AUTO_LIGHT" type="bool" value="true" />
 
 <variable entry="UI:SAVE:USER_CHAR_FADE" type="bool" value="false" />
 <variable entry="UI:SAVE:USER_CHAR_OPA_MIN" type="sint32" value="160" />
@@ -1743,8 +1751,18 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:DAY_COLOR" type="rgba" value="255 255 255 255" />
 <variable entry="UI:SAVE:NIGHT_COLOR" type="rgba" value="255 255 255 255" />
 
+<variable entry="UI:SAVE:CONTEXT_HELP_CONTAINER_COLOR" type="rgba" value="255 255 255 255" />
 <variable entry="UI:VARIABLES:FPS" type="sint64" value="30" />
 <variable entry="UI:SAVE:SHOW_3D_ITEM_PREVIEW" type="bool" value="true" />
+<variable entry="UI:SAVE:SKIP_TUTORIAL" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_COMPASS" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_ENCYCLOPEDIA" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_SETS" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_MAIN_CHAT" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_INVENTORY" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_INFO_PLAYER_JOURNAL" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_PLAYER" type="bool" value="false" />
+<variable entry="UI:SAVE:TUTORIAL_ACTIVE_TARGET" type="bool" value="false" />
 <!-- Blend between day and night (lightLevel = 0 day) (lightLevel = 1 night) -->
 <link expr="identity(ilinear(getLightLevel(), getRed(intToColor(@UI:SAVE:DAY_COLOR)), getRed(intToColor(@UI:SAVE:NIGHT_COLOR))), @UI:VARIABLES:CURRENT_TIME)" target="@UI:SAVE:COLOR:R" />
 <link expr="identity(ilinear(getLightLevel(), getGreen(intToColor(@UI:SAVE:DAY_COLOR)), getGreen(intToColor(@UI:SAVE:NIGHT_COLOR))), @UI:VARIABLES:CURRENT_TIME)" target="@UI:SAVE:COLOR:G" />
@@ -1792,6 +1810,9 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:CHAT:FONT_SIZE" type="sint32" value="10" />
 <variable entry="UI:SAVE:CHAT:MULTI_LINE_SPACE" type="sint32" value="0" />
 <variable entry="UI:SAVE:CHAT:SHADOWED_TEXT" type="bool" value="true" />
+<!-- ******************************* -->
+<!-- * CHAT TRANSLATION PARAMETERS * -->
+<!-- ******************************* -->
 
 <variable entry="UI:SAVE:TRANSLATION:EN:INVERSE_DISPLAY" type="bool" value="false" />
 <variable entry="UI:SAVE:TRANSLATION:EN:HIDE_FLAG" type="bool" value="false" />
@@ -1858,6 +1879,8 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 
 <variable entry="UI:VARIABLES:ISACTIVE:INV_EQUIP" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:INV_HOTBAR" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:INV_EQUIP_3D" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:INV_BAG" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:INV_PA0" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:INV_PA1" type="sint32" value="0" />
@@ -1875,7 +1898,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INVENTORY_GUILD_WANT_POPUP" type="sint32" value="1" />
 
 <variable entry="UI:SAVE:INV_BAG:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_BAG:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_BAG:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_TOOL" type="sint32" value="1" />
@@ -1884,7 +1907,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_BAG:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_BAG:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA0:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA0:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_TOOL" type="sint32" value="1" />
@@ -1893,7 +1916,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA0:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA0:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA1:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA1:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_TOOL" type="sint32" value="1" />
@@ -1902,7 +1925,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA1:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA1:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA2:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA2:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_TOOL" type="sint32" value="1" />
@@ -1911,7 +1934,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA2:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA2:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA3:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA3:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_TOOL" type="sint32" value="1" />
@@ -1920,7 +1943,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA3:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA3:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA4:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA4:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA4:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA4:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA4:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA4:FILTER_TOOL" type="sint32" value="1" />
@@ -1929,7 +1952,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA4:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA4:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA5:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA5:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA5:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA5:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA5:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA5:FILTER_TOOL" type="sint32" value="1" />
@@ -1938,7 +1961,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA5:FILTER_MISSMP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA5:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA6:SORT_TYPE" type="sint32" value="0" />
-<variable entry="UI:SAVE:INV_PA6:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_PA6:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA6:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA6:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_PA6:FILTER_TOOL" type="sint32" value="1" />
@@ -1948,7 +1971,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_PA6:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:SORT_TYPE" type="sint32" value="1" />
 <!-- 1 == SortType -->
-<variable entry="UI:SAVE:INV_GUILD:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_GUILD:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_GUILD:FILTER_TOOL" type="sint32" value="1" />
@@ -1958,7 +1981,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:SAVE:INV_GUILD:FILTER_TP" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:SORT_TYPE" type="sint32" value="1" />
 <!-- 1 == SortType -->
-<variable entry="UI:SAVE:INV_ROOM:ICON_LIST" type="sint32" value="0" />
+<variable entry="UI:SAVE:INV_ROOM:ICON_LIST" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_ARMOR" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_WEAPON" type="sint32" value="1" />
 <variable entry="UI:SAVE:INV_ROOM:FILTER_TOOL" type="sint32" value="1" />
@@ -1978,6 +2001,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 
 <!-- List Menu 2 -->
 <variable entry="UI:VARIABLES:ISACTIVE:ANIMAL_GLOBAL" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:CAP" type="sint32" value="1" />
 <!-- List Menu 3 -->
 <variable entry="UI:VARIABLES:ISACTIVE:COMPAS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:MAP" type="sint32" value="0" />
@@ -2026,6 +2050,7 @@ This MUST follow the Enum MISSION_DESC::TIconId
 <variable entry="UI:VARIABLES:ISACTIVE:MACROS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:ENCYCLOPEDIA" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:MP3PLAYER" type="sint32" value="0" />
+<variable entry="UI:VARIABLES:ISACTIVE:BG_DOWNLOADER" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:COSMETICS" type="sint32" value="0" />
 <variable entry="UI:VARIABLES:ISACTIVE:MILKO_PAD" type="sint32" value="0" />
 

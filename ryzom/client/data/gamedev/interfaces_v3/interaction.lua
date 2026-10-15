@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------------------------
 -- create the game namespace without reseting if already created in an other file.
 if (game==nil) then
-	game= {};
+	game={}
 end
 
 if (game.ui_props == nil) then
@@ -34,30 +34,30 @@ end
 -- called when server send an invitaion we receive a text id containing the string to display (invitor name)
 function game:onTeamInvation(textID)
 
-	local ui = getUI('ui:interface:join_team_proposal');
-	ui.content.inside.invitor_name.textid = textID;
-	ui.active = true;
-	setTopWindow(ui);
-	ui:center();
-	ui:blink(2);
+	local ui = getUI('ui:interface:join_team_proposal')
+	ui.content.inside.invitor_name.textid = textID
+	ui.active = true
+	setTopWindow(ui)
+	ui:center()
+	ui:blink(2)
 end
 
 ------------------------------------------------------------------------------------------------------------
 --
 function game:teamInvitationAccept()
 
-	local ui = getUI('ui:interface:join_team_proposal');
-	ui.active = false;
-	sendMsgToServer('TEAM:JOIN');
+	local ui = getUI('ui:interface:join_team_proposal')
+	ui.active = false
+	sendMsgToServer('TEAM:JOIN')
 end
 
 ------------------------------------------------------------------------------------------------------------
 --
 function game:teamInvitationRefuse()
 
-	local ui = getUI('ui:interface:join_team_proposal');
-	ui.active = false;
-	sendMsgToServer('TEAM:JOIN_PROPOSAL_DECLINE');
+	local ui = getUI('ui:interface:join_team_proposal')
+	ui.active = false
+	sendMsgToServer('TEAM:JOIN_PROPOSAL_DECLINE')
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -105,32 +105,13 @@ end
 ------------------------------------------------------------------------------------------------------------
 --
 function game:switchChatTab(dbEntry)
-	local	db= 'UI:SAVE:ISENABLED:' .. dbEntry;
-	local	val= getDbProp(db);
+	local	db= 'UI:SAVE:ISENABLED:' .. dbEntry
+	local	val= getDbProp(db)
 	-- switch value
 	if(val==0)	then
-		setDbProp(db, 1);
+		setDbProp(db, 1)
 	else
-		setDbProp(db, 0);
-	end
-end
-
-------------------------------------------------------------------------------------------------------------
---
-function game:updateEmoteMenu(prop, tooltip, tooltip_pushed, name, param)
-	for i=0,9 do
-		-- Get key shortcut
-		local text = i18n.get('uiTalkMemMsg0' .. i);
-		local key = runExpr( "getKey('talk_message','0" .. i .. "',1)" );
-
-		if (key ~= nil and key  ~= '') then
-			key = ' @{T25}@{2F2F}(' .. key .. ')';
-			text = concatString(text, key);
-		end
-
-		-- if we don't do the full getUI, it doesn't work (don't understand why)
-		local	uiQC= getUI("ui:interface:user_chat_emote_menu:quick_chat:" .. "qc" .. i);
-		uiQC.text_format= text;
+		setDbProp(db, 0)
 	end
 
 end
@@ -282,7 +263,6 @@ end
 -- Is its level known (not too high ...)
 -- Boss/Mini-bosses/Names colored ring
 function game:updateTargetConsiderUI()
-	-- debugInfo("Updating consider widget")
 
 	local targetWindow = getUI("ui:interface:target")
 	--
@@ -296,7 +276,9 @@ function game:updateTargetConsiderUI()
 	local wgLock        = targetWindow:find("lock")
 
 	wgTargetSlotForce.active = true
+	wgTargetSlotForce.texture = "consider_bg.tga"
 	wgImpossible.active = true
+	wgTargetSlotForce.h = 16
 
 	-- no selection ?
 	if twGetTargetLevel() == -1 then
@@ -420,10 +402,24 @@ function game:updateTargetConsiderUI()
 			wgTargetSlotForce.color = "213 212 9 255"
 			wgToolTip.tooltip = i18n.get("uittConsiderBoss")
 		end
+	elseif levelForce == 12 then
+		wgImpossible.color = "255 255 255 255"
+		wgTargetSlotForce.texture = "episode_step.tga"
+		wgTargetSlotForce.color = "255 255 255 255"
+		wgToolTip.tooltip = i18n.get("uittConsiderUnknownLevel")
+		wgTargetLevel.active = false
+		wgImpossible.y = -5
+	elseif levelForce > 12 then
+		wgImpossible.color = "255 255 255 255"
+		wgTargetSlotForce.texture = "episode_step_ok.tga"
+		wgTargetSlotForce.color = "255 255 255 255"
+		wgToolTip.tooltip = i18n.get("uittConsiderSpecialLevel")
+		wgTargetLevel.active = false
+		wgImpossible.y = -5
 	end
 
 	if impossible then
-		wgToolTip.tooltip = concatString(wgToolTip.tooltip, "\n", i18n.get("uittConsiderUnknownLevel"))
+		wgToolTip.tooltip = concatUCString(wgToolTip.tooltip, ucstring("\n"), i18n.get("uittConsiderUnknownLevel"))
 	end
 end
 
@@ -593,16 +589,16 @@ end
 ------------------------------------------------------------------------------------------------------------
 --
 function game:closeWebIGBrowserHeader()
-	local ui = getUI('ui:interface:webig');
+	local ui = getUI('ui:interface:webig')
 
 	-- save size
-	ui_webig_browser_h = ui.h;
-	ui_webig_browser_w = ui.w;
+	ui_webig_browser_h = ui.h
+	ui_webig_browser_w = ui.w
 
 	-- reduce window size
-	ui.pop_min_h = 32;
-	ui.h = 0;
-	ui.w = 150;
+	ui.pop_min_h = 32
+	ui.h = 0
+	ui.w = 150
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -647,6 +643,7 @@ end
 function game:openWindowHeader()
 	local ui = getUICaller().parent;
 	local id = ui.id;
+	if ui ~= nil and game.ui_props[id] ~= nil then
 
 	-- set size from saved values
 	if game.ui_props[id].pop_min_h ~= nil then
@@ -659,6 +656,7 @@ function game:openWindowHeader()
 
 	 if ui_webig_browser_w ~= nil then
 		ui.w = game.ui_props[id].w;
+end
 	end
 end
 
@@ -679,13 +677,16 @@ function game:openGuildIsland(url_island)
 	getUI("ui:interface:guild:content:tab_island:props:html"):browse(url_island.."params="..params);
 	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_island:inv:html")
 end
+function game:openGuildSpecialBag()
+	runAH(nil, "browse_home", "name=ui:interface:guild:content:tab_special_bag:inv:html")
+end
 
 
 ------------------------------------------------------------------------------------------------------------
 local SavedUrl = "";
 function game:chatUrl(url)
 	SavedUrl = url
-	runAH(nil, "active_menu", "menu=ui:interface:chat_uri_action_menu");
+	runAH(nil, "active_menu", "menu=ui:interface:chat_uri_action_menu")
 end
 function game:chatUrlCopy()
 	runAH(nil, "copy_to_clipboard", SavedUrl)
@@ -954,7 +955,6 @@ function arkNpcShop:checkitems(db, items, quality, id)
 			local name = string.lower(getSheetName(sheet))
 			for _, item in pairs(items) do
 				if name == item then
-					debug(item)
 					local qual =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUALITY")
 					local quant =  getDbProp("SERVER:INVENTORY:BAG:"..tostring(i)..":QUANTITY")
 

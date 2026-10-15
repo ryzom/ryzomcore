@@ -76,6 +76,12 @@
 				<!-- same as hand -->
 			</branch>
 		</branch>
+		<branch name="HOTBAR">
+			<branch name="" count="5">
+				<leaf name="INDEX_IN_BAG" type="I9" />
+				<!-- same as hand -->
+			</branch>
+		</branch>
 		<branch name="TEMP">
 			<!-- used for harvest loot and bag full -->
 			<leaf name="TYPE" type="I8" />
@@ -162,6 +168,7 @@
 				<leaf name="RM_CLASS_TYPE" type="I3" />
 				<leaf name="RM_FABER_STAT_TYPE" type="I5" />
 				<leaf name="PREREQUISIT_VALID" type="I1" />
+				<leaf name="RESALE_FLAG" type="I2" />
 			</branch>
 		</branch>
 		<leaf name="MONEY" type="I64" />
@@ -179,7 +186,7 @@
 		<leaf name="ACCEPTED" type="I1" />
 		<leaf name="MONEY" type="I64" />
 		<branch name="GIVE">
-			<branch name="" count="8">
+				<branch name="" count="10"> <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
 				<!-- Common Item Data -->
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />
@@ -200,7 +207,7 @@
 			</branch>
 		</branch>
 		<branch name="RECEIVE">
-			<branch name="" count="8">
+				<branch name="" count="10"> <!-- Change in database.xml, player_trade.lua and NbExchangeSlots on server-->
 				<!-- Common Item Data -->
 				<leaf name="SHEET" type="I32" />
 				<leaf name="QUALITY" type="I10" />

@@ -1501,4 +1501,12 @@
 </anim>
 
 
+<template name="display_text" keep="true" posparent="parent" x="0" y="0" w="128" h="16" posref="TL TL" id="" title="" color="" >
+	<group id="#id" x="#x" y="#y" w="#w" h="#h" posparent="#posparent" posref="#posref" >
+		<view type="text" id="score" posref="ML ML" x="0" y="0" hardtext="#title" shadow="true" fontsize="14" color="#color" />
+	</group>
+</template>
+
+
+
 </interface_config>

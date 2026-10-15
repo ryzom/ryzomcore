@@ -22,6 +22,7 @@
 
 
 <tree node="inv_equip" />
+<tree node="inv_hotbar" />
 <tree node="inv_bag" />
 <tree node="inv_guild" />
 <tree node="inv_room" />
@@ -94,6 +95,8 @@
 <tree node="mailbox"/>
 
 <tree node="webig"/>
+
+<tree node="cap"/>
 
 <tree node="info_player_journal"/>
 

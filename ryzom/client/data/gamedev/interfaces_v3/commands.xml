@@ -120,8 +120,6 @@
 
 	<command name="loot" action="inv_temp_all" params="" />
 
-	<command name="setuiscale" action="set_ui_scale" params="scale=$"/>
-
 	<command name="mapsearch" action="proc" params="map_search_show_set|+" />
 	<command name="mapsearch" action="proc" params="map_search_show" />
 
@@ -129,4 +127,7 @@
 	<command name="go" action="browse" params="name=ui:interface:webig:content:html|url=home"/>
 	<command name="webdev" action="browse" params="name=ui:interface:webig:content:html|url=http://localhost/index.html"/>
 
+	<command name="setuiscale" action="set_ui_scale" params="scale=$"/>
+
+	<command name="skiptutorial" action="lua" params="help:skipTutorial()"/>
 </interface_config>

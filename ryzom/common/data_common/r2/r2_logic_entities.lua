@@ -16,7 +16,7 @@ local logicEntity =
 	DisplayerPropertiesParams = "logicEntityPropertySheetDisplayer",
 	PermanentTreeIcon = "r2ed_icon_permanent_macro_components.tga",
 	TreeIcon = "r2ed_icon_macro_components.tga",
-	SelectBarType = i18n.get("uiR2EDMacroComponents"),
+	SelectBarType = i18n.get("uiR2EDMacroComponents"):toUtf8(),
 
 	Prop = 
 	{
@@ -229,6 +229,7 @@ local logicEntity =
 				assert(r2.getLogicAttribute(this.Class, eventCategory, eventType))
 			end 
 		
+			local uc_eventType = ucstring()
 			local menuTitle = r2.getLogicAttribute(this.Class, eventCategory, eventType)
 
 			local addLine = true
@@ -237,7 +238,8 @@ local logicEntity =
 			end
 
 			if addLine then
-				subMenu:addLine(menuTitle.menu, "lua", 
+				uc_eventType:fromUtf8(menuTitle.menu)
+				subMenu:addLine(uc_eventType, "lua", 
 					"r2.events:setEventType('".. eventType .."','" .. tostring(endRequest) .. "','" .. eventCategory .. "')", eventType)
 			end
 		end
@@ -252,26 +254,26 @@ local logicEntity =
 function logicEntity:getLogicTranslations()
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["activate"]				= { menu=i18n.get( "uiR2AA0Activate"					), 
-											text=i18n.get( "uiR2AA1Activate"					)},
-			["deactivate"]				= { menu=i18n.get( "uiR2AA0Deactivate"					), 
-											text=i18n.get( "uiR2AA1Deactivate"					)},
-			["trigger"]					= { menu=i18n.get( "uiR2AA0Trigger"					), 
-											text=i18n.get( "uiR2AA1Trigger"					)},
+			["activate"]				= { menu=i18n.get( "uiR2AA0Activate"					):toUtf8(), 
+											text=i18n.get( "uiR2AA1Activate"					):toUtf8()},
+			["deactivate"]				= { menu=i18n.get( "uiR2AA0Deactivate"					):toUtf8(), 
+											text=i18n.get( "uiR2AA1Deactivate"					):toUtf8()},
+			["trigger"]					= { menu=i18n.get( "uiR2AA0Trigger"					):toUtf8(), 
+											text=i18n.get( "uiR2AA1Trigger"					):toUtf8()},
 		},
 		["Events"] = {	
-			["activation"]				= { menu=i18n.get( "uiR2Event0Activation"				), 
-											text=i18n.get( "uiR2Event1Activation"				)},
-			["deactivation"]			= { menu=i18n.get( "uiR2Event0Deactivation"				), 
-											text=i18n.get( "uiR2Event1Deactivation"				)},
-			["trigger"]					= { menu=i18n.get( "uiR2Event0Trigger"					), 
-											text=i18n.get( "uiR2Event1Trigger"					)},
+			["activation"]				= { menu=i18n.get( "uiR2Event0Activation"				):toUtf8(), 
+											text=i18n.get( "uiR2Event1Activation"				):toUtf8()},
+			["deactivation"]			= { menu=i18n.get( "uiR2Event0Deactivation"				):toUtf8(), 
+											text=i18n.get( "uiR2Event1Deactivation"				):toUtf8()},
+			["trigger"]					= { menu=i18n.get( "uiR2Event0Trigger"					):toUtf8(), 
+											text=i18n.get( "uiR2Event1Trigger"					):toUtf8()},
 		},	
 		["Conditions"] = {	
-			["is active"]				= { menu=i18n.get( "uiR2Test0Active"				), 
-											text=i18n.get( "uiR2Test1Active"				)},
-			["is inactive"]				= { menu=i18n.get( "uiR2Test0Inactive"				), 
-											text=i18n.get( "uiR2Test1Inactive"				)},
+			["is active"]				= { menu=i18n.get( "uiR2Test0Active"				):toUtf8(), 
+											text=i18n.get( "uiR2Test1Active"				):toUtf8()},
+			["is inactive"]				= { menu=i18n.get( "uiR2Test0Inactive"				):toUtf8(), 
+											text=i18n.get( "uiR2Test1Inactive"				):toUtf8()},
 		}
 	}
 	return logicTranslations
@@ -297,7 +299,9 @@ end
 --
 --	local entitiesTable = r2.Scenario:getAllInstancesByType(this.Name)
 --	for key, entity in pairs(entitiesTable) do
---		subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+--		local uc_name = ucstring()
+--		uc_name:fromUtf8(entity.Name)
+--		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 --	end
 --
 --	if table.getn(entitiesTable)==0 then
@@ -334,7 +338,9 @@ function logicEntity.initLogicEntitiesInstancesMenu(this, subMenu, calledFunctio
 		local entity = enumerator:next()
 		if not entity then break end
 		found= true
-		subMenu:addLine(entity.Name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
+		local uc_name = ucstring()
+		uc_name:fromUtf8(entity.Name)
+		subMenu:addLine(uc_name, "lua", calledFunction.."('".. entity.InstanceId .."')", entity.InstanceId)
 	end
 	if not found then
 		subMenu:addLine(i18n.get("uiR2EdNoSelelection"), "", "", "")

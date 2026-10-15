@@ -71,12 +71,12 @@
 <template name="t_current_action_bar" id="" x="" y="" posref="TL TL" tooltip_parent="" tooltip_special_parent="" active="true">
 	<group id="#id" x="#x" y="#y" posref="#posref" w="166" h="32" active="#active">
 		<!-- Backs -->
-		<view type="bitmap" id="slot_action1" posref="TL TL" y="-3" texture="slot_brick.tga" inherit_gc_alpha="false" />
-		<view type="bitmap" id="slot_action2" posref="TR TR" y="-3" texture="slot_brick.tga" inherit_gc_alpha="false" />
+		<view type="bitmap" id="slot_action1" posref="TL TL" y="-3" w="28" h="28" texture="slot_brick.tga" scale="true" inherit_gc_alpha="false" />
+		<view type="bitmap" id="slot_action2" posref="TR TR" y="-3" w="28" h="28" texture="slot_brick.tga" scale="true" inherit_gc_alpha="false" />
 		<view type="bitmap" id="progression" posref="TM TM" y="-7" texture="slot_jauge_action.tga" inherit_gc_alpha="false" />
 		<instance template="text_tt" tooltip="uittGaugesActionBar" posparent="progression" tooltip_parent="#tooltip_parent" tooltip_special_parent="#tooltip_special_parent" />
 		<!-- Next Action + Cycle bmp -->
-		<ctrl type="sheet" id="execute_phrase_next" nature="sphraseid" value="UI:PHRASE:EXECUTE_NEXT" posparent="slot_action2" posref="TL TL" x="1" y="-1" tooltip="uittNextExecutingPhrase" tooltip_parent="#tooltip_parent" tooltip_special_parent="#tooltip_special_parent" />
+		<ctrl type="sheet" id="execute_phrase_next" nature="sphraseid" value="UI:PHRASE:EXECUTE_NEXT" posparent="slot_action2" posref="TL TL" x="1" y="-1" tooltip="uittNextExecutingPhrase" tooltip_parent="#tooltip_parent" tooltip_special_parent="#tooltip_special_parent" onclick_l="phrase_cancel_cast_next" /> />
 		<view type="bitmap" id="view_cycle_action" texture="action_cycle.tga" global_color="false" active="false" posparent="execute_phrase_next" posref="TL TL" x="0" y="0" render_layer="3" />
 		<link expr="@UI:PHRASE:EXECUTE_NEXT:ISCYCLIC" target="view_cycle_action:active" />
 		<!-- Action in progress -->
@@ -94,7 +94,7 @@
 <group type="container" id="current_action" w="182" h="40" title="" global_color="false" global_color_over="true" resizer="false" header_active="false" right_button="false" movable="false" active="false" opened="true" openable="false" options="compass" locked="false" savable="false">
 	<group id="header_closed" x="0" y="0" h="0" posref="TL TL" />
 	<group id="header_opened" x="0" y="0" w="182" h="40" posref="TL TL">
-		<instance template="t_current_action_bar" id="current_action" x="0" y="0" posref="MM MM" tooltip_parent="special" tooltip_special_parent="ui:interface:milko_pad" />
+		<instance template="t_current_action_bar" id="current_action" x="0" y="0" posref="MM MM" tooltip_parent="win" />
 	</group>
 </group>
 <tree node="current_action" />
@@ -267,10 +267,7 @@
 	<action handler="set" params="dblink=UI:BEAST_SELECTED|value=@0" />
 	<!-- If ALL MENU, display the menu. Only if some animal present -->
 	<!-- MAX_INVENTORY_ANIMAL -->
-	<action cond="and(eq(@0,0), or( isAnimalStatusPresent(@%pa_beast0:STATUS), 
-											isAnimalStatusPresent(@%pa_beast1:STATUS), 
-											isAnimalStatusPresent(@%pa_beast2:STATUS), 
-											isAnimalStatusPresent(@%pa_beast3:STATUS) ) )" handler="active_menu" params="menu=ui:interface:animal_menu_all" />
+	<action cond="and(eq(@0,0), or( isAnimalStatusPresent(@%pa_beast0:STATUS), isAnimalStatusPresent(@%pa_beast1:STATUS), isAnimalStatusPresent(@%pa_beast2:STATUS), isAnimalStatusPresent(@%pa_beast3:STATUS), isAnimalStatusPresent(@%pa_beast4:STATUS), isAnimalStatusPresent(@%pa_beast5:STATUS), isAnimalStatusPresent(@%pa_beast6:STATUS) ) )" handler="active_menu" params="menu=ui:interface:animal_menu_all" />
 	<!-- If SINGLE MENU, display the menu -->
 	<action cond="ne(@0,0)" handler="active_menu" params="menu=ui:interface:animal_menu" />
 </proc>

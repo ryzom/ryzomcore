@@ -387,16 +387,6 @@
 <proc id="proc_choice_career">
 	
 	<action handler="play_sound" params="name=career_but_click" />
-<!--
-	<action handler="proc" cond="and(eq(@0,1),not(isCareerActive(getRoleId('MeleeFighter'))))" params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,2),not(isCareerActive(getRoleId('RangeFighter'))))" params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,3),not(isCareerActive(getRoleId('AttackCaster'))))" params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,4),not(isCareerActive(getRoleId('HealerCaster'))))" params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,5),not(isCareerActive(getRoleId('BufferCaster'))))" params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,6),not(isCareerActive(getRoleId('Harvester'))))"	  params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,7),not(isCareerActive(getRoleId('Faber'))))"		  params="proc_warning_career" />
-	<action handler="proc" cond="and(eq(@0,8),not(isCareerActive(getRoleId('Shopkeeper'))))"   params="proc_warning_career" />
--->
 	<action handler="set" params="target_property=ui:outgame:career:next:active|value=1"/>
 	<action handler="anim_start" cond="eq(@UI:TEMP:CAREERCLICKJOB,-1)" params="anim=display_infos_career" />
 	<action handler="set" params="dblink=UI:TEMP:CAREERCLICKJOB|value=@0" />
@@ -504,29 +494,6 @@
 	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,1)" params="proc_set_add_caracs_ma" />
 	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,2)" params="proc_set_add_caracs_tr" />
 	<action handler="proc" cond="eq(@UI:TEMP:CHAR3D:PEOPLE,3)" params="proc_set_add_caracs_zo" />
-
-	
-	<!--
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:STR|value=sub(@@UI:TEMP:CARACS:BASE:STR,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:CON|value=sub(@@UI:TEMP:CARACS:BASE:CON,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:AGI|value=sub(@@UI:TEMP:CARACS:BASE:AGI,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:WIL|value=sub(@@UI:TEMP:CARACS:BASE:WIL,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:WEL|value=sub(@@UI:TEMP:CARACS:BASE:WEL,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:INT|value=sub(@@UI:TEMP:CARACS:BASE:INT,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:CHA|value=sub(@@UI:TEMP:CARACS:BASE:CHA,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:EMP|value=sub(@@UI:TEMP:CARACS:BASE:EMP,5)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MIN:PER|value=sub(@@UI:TEMP:CARACS:BASE:PER,5)" />
-	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:STR|value=add(@@UI:TEMP:CARACS:BASE:STR,10)" />
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:CON|value=add(@@UI:TEMP:CARACS:BASE:CON,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:AGI|value=add(@@UI:TEMP:CARACS:BASE:AGI,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:WIL|value=add(@@UI:TEMP:CARACS:BASE:WIL,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:WEL|value=add(@@UI:TEMP:CARACS:BASE:WEL,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:INT|value=add(@@UI:TEMP:CARACS:BASE:INT,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:CHA|value=add(@@UI:TEMP:CARACS:BASE:CHA,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:EMP|value=add(@@UI:TEMP:CARACS:BASE:EMP,10)" />	
-	<action handler="set" params="dblink=UI:TEMP:CARACS:MAX:PER|value=add(@@UI:TEMP:CARACS:BASE:PER,10)" />		
-	-->
 </proc>
 
 

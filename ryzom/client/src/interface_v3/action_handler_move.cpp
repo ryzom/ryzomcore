@@ -121,7 +121,7 @@ public:
 		UserEntity->disableFollow();
 
 		// check if speed factor is zero, and if yes, notify the player
-		if (!Actions.valide("turn_left") && !Actions.valide("turn_right") && !IngameDbMngr.initInProgress())
+		if (!Actions.valide("turn_left") && !Actions.valide("turn_right") && !IngameDbMngr.initInProgress() && !UserEntity->isSit())
 		{
 			CCDBNodeLeaf *pNodeLeaf = NLGUI::CDBManager::getInstance()->getDbProp("SERVER:USER:SPEED_FACTOR", false);
 			if (pNodeLeaf && pNodeLeaf->getValue64() == 0)

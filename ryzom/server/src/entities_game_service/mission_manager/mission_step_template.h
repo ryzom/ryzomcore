@@ -82,7 +82,7 @@ public:
 	/// send the step context menu entry if necessary
 	virtual uint32	sendContextText(const TDataSetRow& user, const TDataSetRow & interlocutor, CMission * instance, bool & gift, const NLMISC::CEntityId & giver ){ return 0;}
 	///\return true if a menu entry must be displayed
-	virtual bool	hasBotChatOption(const TDataSetRow & interlocutor, CMission * instance, bool & gift){ return false;}
+	virtual bool	hasBotChatOption(const TDataSetRow & user, const TDataSetRow & interlocutor, CMission * instance, bool & gift){ return false;}
 	///\return the text id of the step roleplay text
 	virtual uint32	sendRpStepText(CCharacter * user,const std::vector<uint32>& stepStates,const NLMISC::CEntityId & giver);
 	///\return the text id of the step text

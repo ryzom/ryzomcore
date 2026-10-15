@@ -260,7 +260,7 @@ component.createComponent = function(x, y)
 	assert(comp.Position)
 
 	comp.Base = r2.Translator.getDebugBase("palette.entities.botobjects.trigger_zone")
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRollout_ZoneTrigger"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EDRollout_ZoneTrigger")):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -273,7 +273,7 @@ component.createComponent = function(x, y)
 	zone.Position.y = 0 --  comp.Position.y
 	zone.Position.z = 0 -- comp.Position.z
 	zone.InheritPos = 1 -- don't inherit position of parents
-	zone.Name = r2:genInstanceName(i18n.get("uiR2EDPlaces"))			
+	zone.Name = r2:genInstanceName(i18n.get("uiR2EDPlaces")):toUtf8()			
 	comp._Zone = zone.InstanceId
 	table.insert(comp.Components, zone)
 
@@ -361,34 +361,34 @@ function component:getLogicTranslations()
 	-- register trad
 	local logicTranslations = {
 		["ApplicableActions"] = {	
-			["activate"]				= { menu=i18n.get( "uiR2AA0Activate"			), 
-											text=i18n.get( "uiR2AA1Activate"			)}, 
-			["deactivate"]				= { menu=i18n.get( "uiR2AA0Deactivate"			), 
-											text=i18n.get( "uiR2AA1Deactivate"			)}, 
-			["simulate on enter"]		= { menu=i18n.get( "uiR2AA0ZoneTriggerSimEnter"	), 
-											text=i18n.get( "uiR2AA1ZoneTriggerSimEnter"	)},
-			["simulate on leave"]		= { menu=i18n.get( "uiR2AA0ZoneTriggerSimExit"	), 
-											text=i18n.get( "uiR2AA1ZoneTriggerSimExit"	)},
+			["activate"]				= { menu=i18n.get( "uiR2AA0Activate"			):toUtf8(), 
+											text=i18n.get( "uiR2AA1Activate"			):toUtf8()}, 
+			["deactivate"]				= { menu=i18n.get( "uiR2AA0Deactivate"			):toUtf8(), 
+											text=i18n.get( "uiR2AA1Deactivate"			):toUtf8()}, 
+			["simulate on enter"]		= { menu=i18n.get( "uiR2AA0ZoneTriggerSimEnter"	):toUtf8(), 
+											text=i18n.get( "uiR2AA1ZoneTriggerSimEnter"	):toUtf8()},
+			["simulate on leave"]		= { menu=i18n.get( "uiR2AA0ZoneTriggerSimExit"	):toUtf8(), 
+											text=i18n.get( "uiR2AA1ZoneTriggerSimExit"	):toUtf8()},
 		},
 		["Events"] = {
-			["activation"]				= { menu=i18n.get( "uiR2Event0Activation"		), 
-											text=i18n.get( "uiR2Event1Activation"		)},
-			["deactivation"]			= { menu=i18n.get( "uiR2Event0Deactivation"		), 
-											text=i18n.get( "uiR2Event1Deactivation"		)},
-			["On Player Arrived"]		= { menu=i18n.get( "uiR2Event0ZoneTriggerEntry"	), 
-											text=i18n.get( "uiR2Event1ZoneTriggerEntry"	)},
-			["On Player Left"]			= { menu=i18n.get( "uiR2Event0ZoneTriggerExit"	), 
-											text=i18n.get( "uiR2Event1ZoneTriggerExit"	)},
+			["activation"]				= { menu=i18n.get( "uiR2Event0Activation"		):toUtf8(), 
+											text=i18n.get( "uiR2Event1Activation"		):toUtf8()},
+			["deactivation"]			= { menu=i18n.get( "uiR2Event0Deactivation"		):toUtf8(), 
+											text=i18n.get( "uiR2Event1Deactivation"		):toUtf8()},
+			["On Player Arrived"]		= { menu=i18n.get( "uiR2Event0ZoneTriggerEntry"	):toUtf8(), 
+											text=i18n.get( "uiR2Event1ZoneTriggerEntry"	):toUtf8()},
+			["On Player Left"]			= { menu=i18n.get( "uiR2Event0ZoneTriggerExit"	):toUtf8(), 
+											text=i18n.get( "uiR2Event1ZoneTriggerExit"	):toUtf8()},
 		},
 		["Conditions"] = {
-			["is active"]				= { menu=i18n.get( "uiR2Test0Active"			), 
-											text=i18n.get( "uiR2Test1Active"			)},
-			["is inactive"]				= { menu=i18n.get( "uiR2Test0Inactive"			), 
-											text=i18n.get( "uiR2Test1Inactive"			)},
-			["is empty"]				= { menu=i18n.get( "uiR2Test0ZoneTriggerEmpty"			), 
-											text=i18n.get( "uiR2Test1ZoneTriggerEmpty"			)},
-			["is full"]				= { menu=i18n.get( "uiR2Test0ZoneTriggerFull"			), 
-											text=i18n.get( "uiR2Test1ZoneTriggerFull"			)},
+			["is active"]				= { menu=i18n.get( "uiR2Test0Active"			):toUtf8(), 
+											text=i18n.get( "uiR2Test1Active"			):toUtf8()},
+			["is inactive"]				= { menu=i18n.get( "uiR2Test0Inactive"			):toUtf8(), 
+											text=i18n.get( "uiR2Test1Inactive"			):toUtf8()},
+			["is empty"]				= { menu=i18n.get( "uiR2Test0ZoneTriggerEmpty"			):toUtf8(), 
+											text=i18n.get( "uiR2Test1ZoneTriggerEmpty"			):toUtf8()},
+			["is full"]				= { menu=i18n.get( "uiR2Test0ZoneTriggerFull"			):toUtf8(), 
+											text=i18n.get( "uiR2Test1ZoneTriggerFull"			):toUtf8()},
 
 
 		}

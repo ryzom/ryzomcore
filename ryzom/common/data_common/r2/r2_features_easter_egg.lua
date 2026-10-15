@@ -363,7 +363,7 @@ function component.createComponent(x, y)
 	assert(comp)
 
 	comp.Base = "palette.entities.botobjects.chest_wisdom_std_sel"
-	comp.Name = r2:genInstanceName(i18n.get("uiR2EdEasterEgg"))			
+	comp.Name = r2:genInstanceName(i18n.get("uiR2EdEasterEgg")):toUtf8()			
 	
 	comp.Position.x = x
 	comp.Position.y = y
@@ -434,7 +434,7 @@ function component.create()
 		debugInfo("Cancel form for 'EasterEggFeature' creation")
 	end
 	local function posOk(x, y, z)
-		debugInfo(string.format("Validate creation of 'EasterEggFeature' at pos (%f, %f, %f)", x, y, z))
+		debugInfo(string.format("Validate creation of 'EasterEggFeature' at pos (%d, %d, %d)", x, y, z))
 		if r2.mustDisplayInfo("EasterEgg") == 1 then 
 			r2.displayFeatureHelp("EasterEgg")
 		end
@@ -459,25 +459,25 @@ function component:getLogicTranslations()
 
 	local logicTranslations = {
 		["ApplicableActions"] = {
-			["activate"]		= { menu=i18n.get( "uiR2AA0Spawn"			),
-									text=i18n.get( "uiR2AA1Spawn"			)},
-			["deactivate"]		= { menu=i18n.get( "uiR2AA0Despawn"			),
-									text=i18n.get( "uiR2AA1Despawn"			)},
+			["activate"]		= { menu=i18n.get( "uiR2AA0Spawn"			):toUtf8(),
+									text=i18n.get( "uiR2AA1Spawn"			):toUtf8()},
+			["deactivate"]		= { menu=i18n.get( "uiR2AA0Despawn"			):toUtf8(),
+									text=i18n.get( "uiR2AA1Despawn"			):toUtf8()},
 		},
 		["Events"] = {	
-			["activation"]		= { menu=i18n.get( "uiR2Event0Spawn"		), 
-									text=i18n.get( "uiR2Event1Spawn"		)},
-			["deactivation"]	= { menu=i18n.get( "uiR2Event0Despawn"		), 
-									text=i18n.get( "uiR2Event1Despawn"		)},			
-			["opened"]			= { menu=i18n.get( "uiR2Event0ChestOpened"	),
-									text=i18n.get( "uiR2Event1ChestOpened"	)},
+			["activation"]		= { menu=i18n.get( "uiR2Event0Spawn"		):toUtf8(), 
+									text=i18n.get( "uiR2Event1Spawn"		):toUtf8()},
+			["deactivation"]	= { menu=i18n.get( "uiR2Event0Despawn"		):toUtf8(), 
+									text=i18n.get( "uiR2Event1Despawn"		):toUtf8()},			
+			["opened"]			= { menu=i18n.get( "uiR2Event0ChestOpened"	):toUtf8(),
+									text=i18n.get( "uiR2Event1ChestOpened"	):toUtf8()},
 			
 		},
 		["Conditions"] = {
-			["is active"]		= { menu=i18n.get( "uiR2Test0Spawned"		),
-									text=i18n.get( "uiR2Test1Spawned"		)},
-			["is inactive"]		= { menu=i18n.get( "uiR2Test0Despawned"		),
-									text=i18n.get( "uiR2Test1Despawned"		)}
+			["is active"]		= { menu=i18n.get( "uiR2Test0Spawned"		):toUtf8(),
+									text=i18n.get( "uiR2Test1Spawned"		):toUtf8()},
+			["is inactive"]		= { menu=i18n.get( "uiR2Test0Despawned"		):toUtf8(),
+									text=i18n.get( "uiR2Test1Despawned"		):toUtf8()}
 		}
 	}
 	return logicTranslations

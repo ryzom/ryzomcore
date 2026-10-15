@@ -298,8 +298,9 @@ r2.registerHighLevel = function()
 	----------------------------------------------------------------------------
 	-- add a line to the event sub menu
 	function classScenario.initLogicEntitiesInstancesMenu(this, subMenu, calledFunction)
-		local name = r2.Scenario:getName()
-		subMenu:addLine(name, "lua", calledFunction.."('".. r2.Scenario.InstanceId .."')", r2.Scenario.InstanceId)
+		local uc_name = ucstring()
+		uc_name:fromUtf8(r2.Scenario:getName())
+		subMenu:addLine(uc_name, "lua", calledFunction.."('".. r2.Scenario.InstanceId .."')", r2.Scenario.InstanceId)
 	end
 
 	----------------------------------------------------------------------------
@@ -307,24 +308,24 @@ r2.registerHighLevel = function()
 	function classScenario:getLogicTranslations()
 		local logicTranslations = {
 			["ApplicableActions"] = {
-					--["Start Scenario Timing"]	= { menu=i18n.get( "uiR2AA0ScenarioStartTiming" ), 
-					--						text=i18n.get( "uiR2AA1ScenarioStartTiming" )},
-					--["Stop Scenario Timing"]	= { menu=i18n.get( "uiR2AA0ScenarioStopTiming" ), 
-					--						text=i18n.get( "uiR2AA1ScenarioStopTiming" )},
-					--["add scenario points"]	= { menu=i18n.get( "uiR2AA0ScenarioAddPoints" ), 
-					--						text=i18n.get( "uiR2AA1ScenarioAddPoints" )},
-					--["succeed scenario"]	= { menu=i18n.get( "uiR2AA0ScenarioSucceed" ), 
-					--						text=i18n.get( "uiR2AA1ScenarioSucceed" )},
-					--["fail scenario"]	= { menu=i18n.get( "uiR2AA0ScenarioFail" ), 
-					--						text=i18n.get( "uiR2AA1ScenarioFail" )},
+					--["Start Scenario Timing"]	= { menu=i18n.get( "uiR2AA0ScenarioStartTiming" ):toUtf8(), 
+					--						text=i18n.get( "uiR2AA1ScenarioStartTiming" ):toUtf8()},
+					--["Stop Scenario Timing"]	= { menu=i18n.get( "uiR2AA0ScenarioStopTiming" ):toUtf8(), 
+					--						text=i18n.get( "uiR2AA1ScenarioStopTiming" ):toUtf8()},
+					--["add scenario points"]	= { menu=i18n.get( "uiR2AA0ScenarioAddPoints" ):toUtf8(), 
+					--						text=i18n.get( "uiR2AA1ScenarioAddPoints" ):toUtf8()},
+					--["succeed scenario"]	= { menu=i18n.get( "uiR2AA0ScenarioSucceed" ):toUtf8(), 
+					--						text=i18n.get( "uiR2AA1ScenarioSucceed" ):toUtf8()},
+					--["fail scenario"]	= { menu=i18n.get( "uiR2AA0ScenarioFail" ):toUtf8(), 
+					--						text=i18n.get( "uiR2AA1ScenarioFail" ):toUtf8()},
 			},
 			["Events"] = {	
-				--["On Scenario Started"]	= { menu=i18n.get( "uiR2Event0ScenarioStart" ), 
-				--							text=i18n.get( "uiR2Event1ScenarioStart" )},
-				--["on scenario succeeded"]	= { menu=i18n.get( "uiR2Event0ScenarioSucceed" ), 
-				--							text=i18n.get( "uiR2Event1ScenarioSucceed" )},
-				--["on scenario failed"]	= { menu=i18n.get( "uiR2Event0ScenarioFailed" ), 
-				--							text=i18n.get( "uiR2Event1ScenarioFailed" )},
+				--["On Scenario Started"]	= { menu=i18n.get( "uiR2Event0ScenarioStart" ):toUtf8(), 
+				--							text=i18n.get( "uiR2Event1ScenarioStart" ):toUtf8()},
+				--["on scenario succeeded"]	= { menu=i18n.get( "uiR2Event0ScenarioSucceed" ):toUtf8(), 
+				--							text=i18n.get( "uiR2Event1ScenarioSucceed" ):toUtf8()},
+				--["on scenario failed"]	= { menu=i18n.get( "uiR2Event0ScenarioFailed" ):toUtf8(), 
+				--							text=i18n.get( "uiR2Event1ScenarioFailed" ):toUtf8()},
 			},
 			["Conditions"] = {	
 			}
@@ -345,14 +346,14 @@ r2.registerHighLevel = function()
 				local lineNb = 0
 				for i=1, 100, 20 do
 					local lineStr = tostring(i).."/"..tostring(i+19)
-					subMenu:addLine(lineStr, "", "", tostring(i))
+					subMenu:addLine(ucstring(lineStr), "", "", tostring(i))
 
 					subMenu:addSubMenu(lineNb)
 					local subMenu2= subMenu:getSubMenu(lineNb)
 					for s=0, 19 do
 						lineStr = tostring(i+s) 
 						local func = "r2.events:setEventValue('','" .. categoryEvent .."','".. lineStr.."')"
-						subMenu2:addLine(lineStr, "lua", func, lineStr)
+						subMenu2:addLine(ucstring(lineStr), "lua", func, lineStr)
 					end
 					lineNb = lineNb+1
 				end
@@ -732,8 +733,8 @@ r2.registerHighLevel = function()
 			local name = this.Name
 			local actNb = r2.logicComponents:searchElementIndex(this)-1
 
-			local firstPart = i18n.get("uiR2EDDefaultActTitle").. actNb 
-			local firstPartSpace = i18n.get("uiR2EDDefaultActTitle").. " " .. actNb 
+			local firstPart = i18n.get("uiR2EDDefaultActTitle"):toUtf8().. actNb 
+			local firstPartSpace = i18n.get("uiR2EDDefaultActTitle"):toUtf8().. " " .. actNb 
 			if name=="" then
 				name = firstPartSpace
 			elseif string.lower(name)==string.lower(firstPart) or string.lower(name)==string.lower(firstPartSpace) then
@@ -753,7 +754,9 @@ r2.registerHighLevel = function()
 			if this:isBaseAct() then
 				return i18n.get("uiR2EDBaseAct")
 			end
-			return this:getName()
+			local result = ucstring()
+			result:fromUtf8(this:getName())
+			return result
 		end,
 		-----------------------------------------------------------------------------
 		-- from baseClass
@@ -816,7 +819,9 @@ r2.registerHighLevel = function()
 		for i=0, r2.Scenario.Acts.Size-1 do
 			local act = r2.Scenario.Acts[i]
 			if not act:isBaseAct() then
-				subMenu:addLine(act.Name, "lua", calledFunction.."('".. act.InstanceId .."')", act.InstanceId)
+				local uc_name = ucstring()
+				uc_name:fromUtf8(act.Name)
+				subMenu:addLine(uc_name, "lua", calledFunction.."('".. act.InstanceId .."')", act.InstanceId)
 				empty = false
 			end
 		end
@@ -831,12 +836,12 @@ r2.registerHighLevel = function()
 	function classAct:getLogicTranslations()
 		local logicTranslations = {
 			["ApplicableActions"] = {
-				["Start Act"]			= { menu=i18n.get( "uiR2AA0ActStart"	), 
-											text=i18n.get( "uiR2AA1ActStart"	)},
+				["Start Act"]			= { menu=i18n.get( "uiR2AA0ActStart"	):toUtf8(), 
+											text=i18n.get( "uiR2AA1ActStart"	):toUtf8()},
 			},
 			["Events"] = {	
-				["On Act Started"]		= { menu=i18n.get( "uiR2Event0ActStart"	), 
-											text=i18n.get( "uiR2Event1ActStart"	)},
+				["On Act Started"]		= { menu=i18n.get( "uiR2Event0ActStart"	):toUtf8(), 
+											text=i18n.get( "uiR2Event1ActStart"	):toUtf8()},
 			},
 			["Conditions"] = {	
 			}
@@ -1083,10 +1088,10 @@ end
 --	-- register trad
 --	local localLogicEntityAttributes = {
 --		["ApplicableActions"] = {	
---			["Start Act"]	= i18n.get("uiR2EdStartAct"), 
+--			["Start Act"]	= i18n.get("uiR2EdStartAct"):toUtf8(), 
 --		},
 --		["Events"] = {	
---			["On Act Started"]		= i18n.get("uiR2EdOnActStarted"),
+--			["On Act Started"]		= i18n.get("uiR2EdOnActStarted"):toUtf8(),
 --		},
 --		["Conditions"] = {	
 --		}

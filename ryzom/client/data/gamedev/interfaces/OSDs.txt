@@ -1,0 +1,2 @@
+[...]	BG_Mode: none	BG_Bitmap: 1 BG_Color: 255 255 255 255 TB_Mode: plain TB_Bitmap: 0 TB_Color: 0 0 0 192 TB_Pen: 1 HL_Size: 1 HL_Color: 255 255 255 255 RS_Size: 4 RS_Color: 255 255 255 255
+/[300]	BG_Mode: plain  BG_Color: 0 0 0 128 TB_Mode: stretch TB_Bitmap: 1 TB_Color: 255 255 255 255 TB_Pen: 1 HL_Size: 1 HL_Color: 255 255 255 255 RS_Size: 4 RS_Color: 255 255 255 255

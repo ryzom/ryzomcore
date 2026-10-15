@@ -48,7 +48,7 @@ function bgdownloader:setProgressText(ucstr, color, progress, ellipsis)
 	local text = self:getProgressGroup():find("text")
 	local ellipsisTxt = self:getProgressGroup():find("ellipsis")
 	text.color = color
-	text.text = ucstr
+	text.uc_hardtext = ucstr
 	if ellipsis then
 		ellipsisTxt.hardtext = ellipsis
 	else
@@ -60,7 +60,7 @@ function bgdownloader:setProgressText(ucstr, color, progress, ellipsis)
 		-- any current download to finish, otherwise connection may be lost)
 		self:setIcon("bgd_pause.tga")
 		ellipsisTxt.hardtext = ""
-		text.text = pausedText
+		text.uc_hardtext = pausedText
 	else				
 		self:setIcon("")
 		local progressCtrl = self:getProgressBar()
@@ -88,7 +88,7 @@ function bgdownloader:setPatchProgress(progress)
 	local progressDate = nltime.getLocalTime() / 500
 	local colValue = math.floor(230 + 24 * math.sin(progressDate))
 	local color = string.format("%d %d 	%d %d", colValue, colValue, colValue, 255)
-	self:setProgressText(concatString(i18n.get("uiBGD_Progress"), progressPercentText), color, progress, progressSymbol[progressPostfix + 1])
+	self:setProgressText(concatUCString(i18n.get("uiBGD_Progress"), ucstring(progressPercentText)), color, progress, progressSymbol[progressPostfix + 1])
 end
 
 ------------------------------------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ function bgdownloader:setPatchError()
 		self:getProgressGroup().active = true		
 	end
 	local errMsg = getPatchLastErrorMessage()
-	if errMsg == "" then
+	if errMsg == ucstring() then		
 		self:setProgressText(i18n.get("uiBGD_PatchError"), "255 0 0 255", 0)
 	else		
 		self:setProgressText(errMsg, "255 0 0 255", 0)
