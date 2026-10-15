@@ -191,7 +191,7 @@ void	CMeshMRMGeom::applySkin(CLod &lod, const CSkeletonModel *skeleton)
 // RawSkin Cache constants
 //===============
 // The number of byte to process per block
-const	uint	NL_BlockByteL1= NLMISC::CSystemInfo::getPageSize();
+const	uint	NL_BlockByteL1= 4096;
 
 // Number of vertices per block to process with 1 matrix.
 uint	CMeshMRMGeom::NumCacheVertexNormal1= NL_BlockByteL1 / sizeof(CRawVertexNormalSkin1);

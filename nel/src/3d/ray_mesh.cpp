@@ -20,7 +20,7 @@
 #include "nel/misc/vector_2f.h"
 #include "nel/misc/fast_mem.h"
 #include "nel/misc/plane.h"
-#include "nel/misc/system_info.h"
+
 #include "nel/3d/matrix_3x4.h"
 
 using namespace NLMISC;
@@ -36,7 +36,7 @@ namespace NL3D
 
 // ***************************************************************************
 // The number of byte to process per block
-const	uint	NL_BlockByteL1= NLMISC::CSystemInfo::getPageSize();
+const	uint	NL_BlockByteL1= 4096;
 
 // Number of vertices per block to process For vertices mul
 uint	CRayMesh::NumCacheVertex= NL_BlockByteL1 / sizeof(CVector);
