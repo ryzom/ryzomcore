@@ -14,12 +14,12 @@ INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_frontend_service
 						ryzom_adminmodules
-						${RYZOM_GAMESHARE_LIBRARIES}
+						ryzom_gameshare
 						${MYSQL_LIBRARIES}
-						${NELMISC_LIBRARIES}
-						${NELNET_LIBRARIES}
-						${NELGEORGES_LIBRARIES}
-						${NELLIGO_LIBRARIES})
+						nelmisc
+						nelnet
+						nelgeorges
+						nelligo)
 
 NL_DEFAULT_PROPS(ryzom_frontend_service "Ryzom, Services: Frontend Service (FS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_frontend_service)

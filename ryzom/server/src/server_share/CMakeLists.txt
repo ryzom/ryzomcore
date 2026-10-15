@@ -13,15 +13,15 @@ NL_TARGET_LIB(ryzom_servershare ${SRC} ${R2})
 INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_servershare
-						${NELMISC_LIBRARIES}
-						${NELPACS_LIBRARIES}
-						${NELGEORGES_LIBRARIES}
-						${NELNET_LIBRARIES}
-						${RYZOM_GAMESHARE_LIBRARIES}
+						nelmisc
+						nelpacs
+						nelgeorges
+						nelnet
+						ryzom_gameshare
 						${MYSQL_LIBRARIES}
 						${ZLIB_LIBRARIES})
 
-IF(MONGO_FOUND)
+IF(WITH_MONGODB)
   TARGET_LINK_LIBRARIES(ryzom_servershare ${MONGO_LIBRARIES})
   ADD_DEFINITIONS(${MONGO_DEFINITIONS})
 ENDIF()

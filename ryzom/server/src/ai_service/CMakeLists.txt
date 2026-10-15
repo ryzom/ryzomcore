@@ -22,13 +22,13 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_ai_service
 					ryzom_adminmodules
-					${RYZOM_GAMESHARE_LIBRARIES}
+					ryzom_gameshare
 					ryzom_servershare
 					ryzom_aishare
-					${NELMISC_LIBRARIES}
-					${NELNET_LIBRARIES}
-					${NELGEORGES_LIBRARIES}
-					${NELLIGO_LIBRARIES})
+					nelmisc
+					nelnet
+					nelgeorges
+					nelligo)
 
 NL_DEFAULT_PROPS(ryzom_ai_service "Ryzom, Services: AI Service (AIS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_ai_service)

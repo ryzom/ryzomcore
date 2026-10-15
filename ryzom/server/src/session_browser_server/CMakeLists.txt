@@ -6,11 +6,11 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_session_browser_service
 						ryzom_adminmodules
-						${RYZOM_GAMESHARE_LIBRARIES}
+						ryzom_gameshare
 						ryzom_servershare
-						${NELMISC_LIBRARIES}
-						${NELNET_LIBRARIES}
-						${NELGEORGES_LIBRARIES})
+						nelmisc
+						nelnet
+						nelgeorges)
 
 NL_DEFAULT_PROPS(ryzom_session_browser_service "Ryzom, Services: Session Browser Service (SBS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_session_browser_service)

@@ -8,14 +8,14 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ai_data_service
 					admin_modules
-					${RYZOM_GAMESHARE_LIBRARIES}
+					ryzom_gameshare
 					server_share
 					ai_share
-					${NELMISC_LIBRARIES}
-					${NELNET_LIBRARIES}
-					${NELGEORGES_LIBRARIES}
-					${NELPACS_LIBRARIES}
-					${NELLIGO_LIBRARIES})
+					nelmisc
+					nelnet
+					nelgeorges
+					nelpacs
+					nelligo)
 
 NL_DEFAULT_PROPS(ai_data_service "Ryzom, Services: AI Data Service (AIDS)")
 NL_ADD_RUNTIME_FLAGS(ai_data_service)

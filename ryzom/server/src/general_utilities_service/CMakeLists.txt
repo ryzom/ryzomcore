@@ -130,13 +130,13 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${NEL_INCLUDE_DIR})
 
 TARGET_LINK_LIBRARIES(ryzom_general_utilities_service
 						ryzom_adminmodules
-						${RYZOM_GAMESHARE_LIBRARIES}
+						ryzom_gameshare
 						ryzom_servershare
 						ryzom_aishare
-						${NELMISC_LIBRARIES}
-						${NELNET_LIBRARIES}
-						${NELGEORGES_LIBRARIES}
-						${NELLIGO_LIBRARIES})
+						nelmisc
+						nelnet
+						nelgeorges
+						nelligo)
 
 NL_DEFAULT_PROPS(ryzom_general_utilities_service "Ryzom, Services: General Utilities Service (GUS)")
 NL_ADD_RUNTIME_FLAGS(ryzom_general_utilities_service)

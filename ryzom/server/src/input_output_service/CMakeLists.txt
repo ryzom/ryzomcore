@@ -17,15 +17,15 @@ INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 TARGET_LINK_LIBRARIES(ryzom_ios_service
 					ryzom_adminmodules
 					ryzom_pd
-					${RYZOM_GAMESHARE_LIBRARIES}
+					ryzom_gameshare
 					ryzom_servershare
-					${NELMISC_LIBRARIES}
-					${NELNET_LIBRARIES}
-					${NELPACS_LIBRARIES}
-					${NELGEORGES_LIBRARIES}
-					${NELLIGO_LIBRARIES})
+					nelmisc
+					nelnet
+					nelpacs
+					nelgeorges
+					nelligo)
 
-IF(MONGO_FOUND)
+IF(WITH_MONGODB)
   TARGET_LINK_LIBRARIES(ryzom_ios_service ${MONGO_LIBRARIES})
   ADD_DEFINITIONS(${MONGO_DEFINITIONS})
 ENDIF()
