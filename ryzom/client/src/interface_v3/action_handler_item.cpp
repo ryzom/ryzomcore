@@ -167,6 +167,9 @@ void CInterfaceItemEdition::CItemEditionWindow::infoReceived()
 					else
 					{
 						string text = itemInfo.CustomText.toUtf8();
+						uint inv, index;
+						CInventoryManager::getInstance()->getSlotInvIndex(ItemSlotId, inv, index);
+						strFindReplace(text, "%slot", toString(index));
 						if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 						{
 							CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));
@@ -311,6 +314,10 @@ void CInterfaceItemEdition::CItemEditionWindow::begin()
 						else
 						{
 							string text = itemInfo.CustomText.toUtf8();
+							uint inv, index;
+							CInventoryManager::getInstance()->getSlotInvIndex(ItemSlotId, inv, index);
+							strFindReplace(text, "%slot", toString(index));
+
 							if (text.size() > 3 && text[0]=='@' && text[1]=='W' && text[2]=='E' && text[3]=='B')
 							{
 								CGroupHTML *pGH = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:web_transactions:content:html"));

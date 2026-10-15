@@ -388,6 +388,27 @@ NLMISC_COMMAND(naked, "get naked !", "")
 	return true;
 }
 
+
+NLMISC_COMMAND(nude, "get nude !", "")
+{
+	std::string handPath = "LOCAL:INVENTORY:HAND:";
+	std::string equipPath = "LOCAL:INVENTORY:EQUIP:";
+	uint32 i;
+	for (i = 0; i < MAX_HANDINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(handPath + NLMISC::toString(i));
+	}
+
+
+	for (i = 0; i < MAX_EQUIPINV_ENTRIES; ++i)
+	{
+		CInventoryManager::getInstance()->unequip(equipPath + NLMISC::toString(i));
+
+	}
+
+	return true;
+}
+
 NLMISC_COMMAND(freeHands, "free hands !", "")
 {
 	std::string handPath = "LOCAL:INVENTORY:HAND:";

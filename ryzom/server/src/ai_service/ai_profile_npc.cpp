@@ -3929,14 +3929,14 @@ void CGrpProfileFaction::checkTargetsAround()
 
 		for (CCont<CBot>::iterator itBot=_Grp->bots().begin(), itEnd=_Grp->bots().end(); itBot!=itEnd; ++itBot)
 		{
-			uint32 cellValue = 0;
+			TYPE_CELL cellValue = 0;
 			CBot* bot = *itBot;
 			if (bot)
 			{
 				CSpawnBot* spawnBot = bot->getSpawnObj();
 				if (spawnBot)
 				{
-					CMirrorPropValueRO<uint32> cell( TheDataset, spawnBot->dataSetRow(), DSPropertyCELL );
+					CMirrorPropValueRO<TYPE_CELL> cell( TheDataset, spawnBot->dataSetRow(), DSPropertyCELL );
 					cellValue = cell();
 					Vision.updateBotsAndPlayers(thisGrpNpc.getAIInstance(), centerPos, playerRadius, botRadius, cellValue);
 					break;

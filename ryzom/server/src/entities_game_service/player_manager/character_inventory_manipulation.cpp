@@ -3172,6 +3172,13 @@ void CCharacter::procEnchantment()
 	if (!EnchantSystemEnabled)
 		return;
 
+	if (getPowoCell() != 0 && !getPowoFlag("enchant"))
+	{
+		sendDynamicSystemMessage(_EntityRowId, "ENCHANT_DISABLED");
+		return;
+	}
+
+
 	CInventoryPtr handlingInv = getInventory(INVENTORIES::handling);
 	nlassert(handlingInv != NULL);
 	CGameItemPtr rightHandItem = handlingInv->getItem(INVENTORIES::right);

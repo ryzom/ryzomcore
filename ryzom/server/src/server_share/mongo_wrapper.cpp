@@ -160,8 +160,7 @@ string CMongo::quote(const string &s)
 			if ( *i >= 0 && *i <= 0x1f )
 			{
 				//TODO: these should be utf16 code-units not bytes
-				char c = *i;
-				ret += "\\u00" + toHexLower(&c, 1);
+				ret += "\\u00" + toHexa((uint8)*i);
 			}
 			else
 			{

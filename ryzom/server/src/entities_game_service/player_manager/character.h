@@ -1085,6 +1085,7 @@ public:
 	void removeAnimal(CGameItemPtr item, CPetCommandMsg::TCommand command);
 
 	// remove pet from player corresponding to index and despawn it
+	void removeRentAMount();
 	void removeAnimalIndex(uint32 beastIndex, CPetCommandMsg::TCommand command, bool keepInventory=false);
 
 	// update coordinate for spawned pets
@@ -1326,6 +1327,15 @@ public:
 	void setOrganizationStatus(uint32 status);
 	void changeOrganizationStatus(sint32 status);
 	void changeOrganizationPoints(sint32 points);
+
+	void addBattlePoints(sint32 points);
+	void setBattlePoints(uint32 points);
+	uint32 getBattlePoints();
+
+	void addRpPoints(sint32 points);
+	uint32 getRpPoints();
+	void setRpPoints(uint32 points);
+	void sendRpPoints(std::string url);
 
 	/// send faction point gain phrase to the client
 	void sendFactionPointGainMessage(PVP_CLAN::TPVPClan clan, uint32 fpGain);
@@ -1627,7 +1637,7 @@ public:
 	std::string getEquipementInfos(INVENTORIES::TInventory invId);
 
 	/// Mount a mount
-	void mount(TDataSetRow PetRowId, bool fromArk = false);
+	void mount(TDataSetRow PetRowId, bool fromArk = false, bool skipDistance = false);
 
 	/**
 	 * Unmount a mount.
@@ -3399,6 +3409,15 @@ private:
 	uint32 _OrganizationStatus;
 	uint32 _OrganizationPoints;
 
+	uint32 _BattlePoints;
+
+	uint32 _TimedUrl;
+	TDataSetRow _RequestMount;
+	uint8 _RequestMountTimer;
+	uint32 _RpPoints;
+	NLMISC::TGameCycle _FirstRpPointsWin;
+	NLMISC::TGameCycle _LastRpPointsWin;
+
 	std::string _LangChannel;
 
 	std::string _NewTitle;
@@ -3583,6 +3602,8 @@ private:
 	/// max number of beasts in the train
 	uint8 _TrainMaxSize;
 
+	TDataSetRow _RentAMount;
+
 	/// counter for the current action of the player (used for macros)
 	uint8 _ActionCounter;
 
@@ -3641,7 +3662,8 @@ private:
 
 	/// Structure for forage sessions (NULL if there is no forage in progress)
 	CForageProgress* _ForageProgress;
-
+	NLMISC::TGameCycle _LastTickForageLoot;
+	NLMISC::TGameCycle _LastTickCreatureLoot;
 	/// Distance to current prospected deposit
 	CSEffectPtr _ProspectionLocateDepositEffect;
 

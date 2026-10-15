@@ -153,6 +153,17 @@ public:
 			return & _Mps[index];
 	}
 
+	inline const CCreatureRawMaterial *getCreatureGenericRawMaterial( uint32 index ) const
+	{
+		if (index >= _GenericMps.size())
+		{
+			nlwarning("<CHarvestable::getRawMaterial> Invalid index %u, max value is %u", index, _GenericMps.size() );
+			return NULL;
+		}
+		else
+			return & _GenericMps[index];
+	}
+
 	/// set the harvester
 	inline void harvesterRowId( const TDataSetRow &row) { _HarvesterRowId = row; }
 
@@ -187,6 +198,7 @@ public:
 protected:
 	/// the harvestable Mps (4 per entity)
 	std::vector< CCreatureRawMaterial>	_Mps;
+	std::vector< CCreatureRawMaterial>	_GenericMps;
 
 	/// pointer on the harvesting character
 	TDataSetRow					_HarvesterRowId;

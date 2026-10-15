@@ -1338,6 +1338,19 @@ bool CPeopleInterraction::isContactInList(const string &nameIn, uint8 nList) con
 }
 
 //=================================================================================================================
+bool CPeopleInterraction::isContactOnline(const string &nameIn) const
+{
+	// select correct people list
+	const CPeopleList	&pl = FriendList;
+	// remove the shard name if possible
+	string	name = CEntityCL::removeShardFromName(nameIn);
+	sint idx =  pl.getIndexFromName(name);
+	if (idx != -1)
+		return pl.getOnline(idx) == ccs_online;
+	return false;
+}
+
+//=================================================================================================================
 void CPeopleInterraction::updateAllFreeTellerHeaders()
 {
 	CChatGroupWindow *gcw = getChatGroupWindow();

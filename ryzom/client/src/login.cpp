@@ -1888,8 +1888,7 @@ class CAHOpenURL : public IActionHandler
 		}
 		else
 		{
-			nlwarning("no URL found");
-			return;
+			url = sParams;
 		}
 		
 		if(sParams != "cfg_ConditionsTermsURL" && sParams != "cfg_NamingPolicyURL")

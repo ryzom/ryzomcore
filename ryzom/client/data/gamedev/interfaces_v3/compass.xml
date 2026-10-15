@@ -367,7 +367,7 @@
 			<view id="envelop" type="bitmap" texture="ico_hatred.tga" global_color="false" />
 		</group>
 		<!-- show/hide dynE -->
-		<group id="dyne" posref="TR TR" group_onclick_l="lua" group_params_l="game:displayDynE()" tooltip="uiR2Events" active="false" w="24" h="24" x="-7" y="-30">
+		<group id="dyne" posref="TR TR" group_onclick_l="lua" group_params_l="game:displayDynE()" tooltip="uiR2Events" active="false" w="24" h="24" x="-7" y="-50">
 			<view id="envelop" type="bitmap" texture="dyn_event_compass.tga" global_color="false" />
 			<view type="text" id="dyne_nb" posref="BR BR" x="-1" y="-2" color="255 255 255 255" shadow="true" global_color="false" fontsize="10" hardtext="" />
 		</group>
@@ -376,7 +376,7 @@
 			<view id="envelop" type="bitmap" texture="whatsup_mini.tga" global_color="false" />
 		</group>
 		<!-- show/hide help -->
-		<group id="help" posref="TR TR" group_onclick_l="show_hide" group_params_l="cs_browser" tooltip="uiMk_window8" w="24" h="24" x="-4" y="-5">
+		<group id="help" posref="TR TR" group_onclick_l="show_hide" group_params_l="cs_browser" tooltip="uiMk_window8" w="24" h="24" x="-4" y="-20">
 			<view id="envelop" type="bitmap" texture="tb_help2.tga" global_color="false" />
 		</group>
 

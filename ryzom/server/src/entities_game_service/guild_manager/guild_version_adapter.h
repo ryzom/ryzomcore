@@ -48,6 +48,8 @@ private:
 	void adaptToVersion2(CGuild &guild) const;
 	void adaptToVersion3(CGuild &guild) const;
 	void adaptToVersion4(CGuild &guild) const;
+	void adaptToVersion5(CGuild &guild) const;
+	void adaptToVersion6(CGuild &guild) const;
 
 private:
 	CGuildVersionAdapter(){}

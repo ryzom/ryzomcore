@@ -877,6 +877,7 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 	CCtrlBaseButton *newFriendBut = dynamic_cast<CCtrlBaseButton *>(ft.getCtrl("new_friend"));
 	CCtrlBaseButton *ignoreBut = dynamic_cast<CCtrlBaseButton *>(ft.getCtrl("ignore"));
 	CCtrlBaseButton *inviteBut = dynamic_cast<CCtrlBaseButton *>(ft.getCtrl("invite"));
+	CCtrlBaseButton *inviteTeamBut = dynamic_cast<CCtrlBaseButton *>(ft.getCtrl("invite_team"));
 	if (newFriendBut)
 	{
 		newFriendBut->setFrozen(PeopleInterraction.isContactInList(name, 0));
@@ -904,6 +905,12 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 										 // PeopleInterraction.updateAllFreeTellerHeaders() when list is updated
 		}
 	}
+
+	if (inviteTeamBut)
+	{
+		inviteTeamBut->setActive(PeopleInterraction.isContactOnline(name));
+	}
+
 }
 
 //=================================================================================

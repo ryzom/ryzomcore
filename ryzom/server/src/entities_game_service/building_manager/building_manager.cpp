@@ -363,6 +363,7 @@ bool CBuildingManager::parseTriggers( const NLLIGO::IPrimitive* prim, CBuildingP
 //----------------------------------------------------------------------------
 void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 triggerId )
 {
+	TDataSetRow realRowId = rowId;
 	//GPMS can send a trigger msg more than one. So check if we already received it
 	TTriggerRequestCont::iterator itReq = _TriggerRequests.find( rowId );
 	if ( itReq != _TriggerRequests.end() )
@@ -385,8 +386,17 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 	CCharacter * user= PlayerManager.getChar( rowId );
 	if ( !user )
 	{
+		CEntityBase * e = CEntityBaseManager::getEntityBasePtr( rowId );
+		if( e )
+		{
+			realRowId = e->getRiderEntity();
+			user = PlayerManager.getChar( realRowId );
+			if ( !user )
+			{
 		nlwarning("<BUILDING> row %u is invalid",rowId.getIndex() );
 		return;
+			}
+		}
 	}
 	
 
@@ -432,9 +442,9 @@ void CBuildingManager::addTriggerRequest( const TDataSetRow & rowId, sint32 trig
 	}
 	
 	request.Timer = new CTimer;
-	request.Timer->setRemaining( TriggerRequestTimout, new CTriggerRequestTimoutEvent(rowId) );
+	request.Timer->setRemaining( TriggerRequestTimout, new CTriggerRequestTimoutEvent(realRowId) );
 	// add the request to our manager
-	_TriggerRequests.insert( make_pair( rowId, request ) );
+	_TriggerRequests.insert( make_pair( realRowId, request ) );
 
 	// Don't teleport when it's a custom trigger, send url instead
 	if (!url.empty())

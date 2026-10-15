@@ -489,6 +489,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getPlayerName", getPlayerName);
 	ls.registerFunc("getPlayerTitleRaw", getPlayerTitleRaw);
 	ls.registerFunc("getPlayerTitle", getPlayerTitle);
+	ls.registerFunc("getPlayerTag", getPlayerTag);
+	ls.registerFunc("getPlayerMode", getPlayerMode);
 	ls.registerFunc("getTargetPos", getTargetPos);
 	ls.registerFunc("getTargetFront", getTargetFront);
 	ls.registerFunc("getTargetDirection", getTargetDirection);
@@ -496,6 +498,8 @@ void CLuaIHMRyzom::RegisterRyzomFunctions(NLGUI::CLuaState &ls)
 	ls.registerFunc("getTargetName", getTargetName);
 	ls.registerFunc("getTargetTitleRaw", getTargetTitleRaw);
 	ls.registerFunc("getTargetTitle", getTargetTitle);
+	ls.registerFunc("getTargetTag", getTargetTag);
+	ls.registerFunc("getTargetMode", getTargetMode);
 	ls.registerFunc("moveToTarget", moveToTarget);
 	ls.registerFunc("addSearchPathUser", addSearchPathUser);
 	ls.registerFunc("displaySystemInfo", displaySystemInfo);
@@ -1524,6 +1528,25 @@ int CLuaIHMRyzom::getPlayerTitle(CLuaState &ls)
 }
 
 // ***************************************************************************
+int CLuaIHMRyzom::getPlayerTag(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getPlayerTag", 1);
+	CLuaIHM::checkArgType(ls, "getPlayerTag", 1, LUA_TNUMBER);
+
+	uint8 tagId = (uint8)ls.toInteger(1);
+	ls.push(UserEntity->getTag(tagId));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getPlayerMode(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getPlayerMode", 0);
+	ls.push(MBEHAV::modeToString(UserEntity->mode()));
+	return 1;
+}
+
+// ***************************************************************************
 int CLuaIHMRyzom::getTargetPos(CLuaState &ls)
 {
 	CLuaIHM::checkArgCount(ls, "getTargetPos", 0);
@@ -1606,6 +1629,32 @@ int CLuaIHMRyzom::getTargetTitle(CLuaState &ls)
 	if (!target) return 0;
 
 	ls.push(target->getTitle());
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getTargetTag(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getTargetTag", 1);
+	CLuaIHM::checkArgType(ls, "getTargetTag", 1, LUA_TNUMBER);
+	CEntityCL *target = getTargetEntity();
+
+	if (!target) return 0;
+
+	uint8 tagId = (uint8)ls.toInteger(1);
+	ls.push(target->getTag(tagId));
+	return 1;
+}
+
+// ***************************************************************************
+int CLuaIHMRyzom::getTargetMode(CLuaState &ls)
+{
+	CLuaIHM::checkArgCount(ls, "getTargetMode", 0);
+	CEntityCL *target = getTargetEntity();
+
+	if (!target) return 0;
+
+	ls.push(MBEHAV::modeToString(target->mode()));
 	return 1;
 }
 

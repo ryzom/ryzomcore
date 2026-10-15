@@ -711,8 +711,9 @@ protected:
 	// for selectBox() computing
 	sint64										_LastSelectBoxComputeTime;
 
+	bool										_ScaleDone;
 	float										_CustomScale;
-	float										_OldCustomScale;
+	float										_BaseCustomScale;
 	float										_StepCustomScale;
 	NLMISC::TTime								_StartCustomScale;
 
@@ -810,7 +811,7 @@ protected:
 	uint32 buildEquipment(const CCharacterSheet::CEquipment &slot, SLOTTYPE::EVisualSlot visualSlot, sint color = -1, uint32 instIdx = CEntityCL::BadIndex);
 
 	/// Compute the animation set to use according to weapons, mode and race.
-	virtual void computeAnimSet();
+	virtual void computeAnimSet(sint32 fakeLeftHand = -1, sint32 fakeRightHand = -1);
 
 	/// Update Entity Position.
 	virtual void updateVisualPropertyPos           (const NLMISC::TGameCycle &gameCycle, const sint64 &prop, const NLMISC::TGameCycle &pI);
@@ -875,7 +876,8 @@ protected:
 	/// Method to Flag the character as alive and do everything needed.
 	virtual void setAlive();
 
-	void scale(bool calculate = true);
+	void scale();
+	void applyScale(float oldCustomScale);
 
 	///
 	double computeTimeStep(const double &currentTime);

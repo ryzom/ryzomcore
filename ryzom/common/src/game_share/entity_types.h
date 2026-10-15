@@ -157,7 +157,7 @@ const TCoord		THRESHOLD_VPB				= MAX_THRESHOLD;
 
 // Visual property C
 const TPropIndex	PROPERTY_VPC				= 11;
-const TCoord		THRESHOLD_VPC				= 10000;
+const TCoord		THRESHOLD_VPC				= MAX_THRESHOLD;
 
 // Entity mounted
 const TPropIndex	PROPERTY_ENTITY_MOUNTED_ID	= 12;
