@@ -1184,7 +1184,7 @@ private:
 	TPresetBehaviour							_PresetBehaviour;
 
 	typedef
-		CPSMultiMap<uint32, CPSLocatedBindable *>::M TLBMap;
+		std::multimap<uint32, CPSLocatedBindable *> TLBMap;
 	TLBMap											_LBMap;
 
 	CPSAttribMaker<NLMISC::CRGBA>				*_ColorAttenuationScheme;
