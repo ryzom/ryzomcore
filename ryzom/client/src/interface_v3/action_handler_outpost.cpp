@@ -321,19 +321,10 @@ public:
 		if (pMap == NULL)
 			return;
 
-		// Get the spawn index (from selected squad)
-		uint8 nSpawnIndex = getOutpostSquadSpawnIndex();
-
 		// Get Spawn index selected by the user
 		uint8 nSpawnSelected = (uint8)pMap->getRespawnSelected();
-
-		if (nSpawnIndex != nSpawnSelected)
-		{
-			// get Squad slot
-			uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
-
-			sendMsgToServer("OUTPOST:SET_SQUAD_SPAWN", getOutpostSheet(), nSquadSlot, nSpawnSelected);
-		}
+		uint8 nSquadSlot = NLGUI::CDBManager::getInstance()->getDbProp("UI:TEMP:OUTPOST:SQUAD_SLOT_SELECTED")->getValue8();
+		sendMsgToServer("OUTPOST:SET_SQUAD_SPAWN", getOutpostSheet(), nSquadSlot, nSpawnSelected);
 	}
 };
 REGISTER_ACTION_HANDLER(COutpostSquadMapSend, "outpost_squad_map_send");

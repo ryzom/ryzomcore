@@ -234,7 +234,7 @@ public:
 
 
 	CShapeInstanceReference createInstance(const string& shape, const CVector &pos, const string &text, const string &url, bool haveCollisions, uint16 inIgZone, sint32 &idx);
-	bool deleteInstance(uint32 idx);
+	bool deleteInstance(uint32 idx, bool force = false);
 	bool removeInstances();
 	void removeInstancesInIgZone(uint16 igZone);
 	CVector getInstancePos(uint32 idx);

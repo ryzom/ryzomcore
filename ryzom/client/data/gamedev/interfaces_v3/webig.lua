@@ -55,6 +55,8 @@ function webig:addSheet(dst, sheet, quality, quantity, worned, user_color, rm_cl
 	addDbProp(dst..":USER_COLOR", user_color)
 	addDbProp(dst..":RM_CLASS_TYPE", rm_class_type)
 	addDbProp(dst..":RM_FABER_STAT_TYPE", rm_faber_stat_type)
+	addDbProp(dst..":CREATE_TIME", 0)
+	addDbProp(dst..":SERIAL", 0)
 end
 
 function webig:cleanSheets(db)
@@ -77,6 +79,8 @@ function webig:copyItems(src, dst)
 	addDbProp(dst..":USER_COLOR", getDbProp(src..":USER_COLOR"))
 	addDbProp(dst..":RM_CLASS_TYPE", getDbProp(src..":RM_CLASS_TYPE"))
 	addDbProp(dst..":RM_FABER_STAT_TYPE", getDbProp(src..":RM_FABER_STAT_TYPE"))
+	addDbProp(dst..":CREATE_TIME", 0)
+	addDbProp(dst..":SERIAL", 0)
 end
 
 function webig:swapItems(src, dst)
@@ -95,6 +99,8 @@ function webig:swapItems(src, dst)
 	addDbProp(dst..":USER_COLOR", getDbProp(src..":USER_COLOR"))
 	addDbProp(dst..":RM_CLASS_TYPE", getDbProp(src..":RM_CLASS_TYPE"))
 	addDbProp(dst..":RM_FABER_STAT_TYPE", getDbProp(src..":RM_FABER_STAT_TYPE"))
+	addDbProp(dst..":CREATE_TIME", 0)
+	addDbProp(dst..":SERIAL", 0)
 
 	addDbProp(src..":SHEET", sheet)
 	addDbProp(src..":WORNED", worned)
@@ -103,6 +109,8 @@ function webig:swapItems(src, dst)
 	addDbProp(src..":USER_COLOR", user_color)
 	addDbProp(src..":RM_CLASS_TYPE", rm_class_type)
 	addDbProp(src..":RM_FABER_STAT_TYPE", rm_faber_stat_type)
+	addDbProp(src..":CREATE_TIME", 0)
+	addDbProp(src..":SERIAL", 0)
 end
 
 function webig:deleteItem(src)
@@ -113,6 +121,8 @@ function webig:deleteItem(src)
 	addDbProp(src..":USER_COLOR", 0)
 	addDbProp(src..":RM_CLASS_TYPE", 0)
 	addDbProp(src..":RM_FABER_STAT_TYPE", 0)
+	addDbProp(src..":CREATE_TIME", 0)
+	addDbProp(src..":SERIAL", 0)
 end
 
 function webig:paramDbSheetSlot(sheet_list, ctrl)
@@ -182,6 +192,9 @@ function webig:AddDbSheet(sheet_list, ctrl)
 	whm.w = 224
 	whm = getUI("ui:interface:webig_html_modal:html")
 	if whm ~= nil then
+		if string.sub(sheet_list, 1, 3) == "ark" then
+			whm:browse(webig.ark_modal_urls[sheet_list])
+		end
 		whm:refresh() -- url need be setted before
 	end
 	webig.sheetLists[sheet_list].selection = ctrl

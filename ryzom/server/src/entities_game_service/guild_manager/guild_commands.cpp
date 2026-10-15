@@ -336,6 +336,35 @@ NLMISC_COMMAND(guildMoney, "get money of guild (if quantity, give/take/set the m
 	return true;
 }
 
+//----------------------------------------------------------------------------
+NLMISC_COMMAND(guildFailedGVE, "get/set failed GVE of guild", "<guildName|<shardId>:<guildId> [<value>]")
+{
+
+	if (args.size() < 1)
+		return false;
+
+	GET_GUILD(true);
+
+	if (guild)
+	{
+		NLMISC::TGameCycle time = guild->getLastFailedGVE();
+
+		if (args.size() == 2)
+		{
+			string quant = args[1];
+			fromString(quant, time);
+
+			guild->setLastFailedGVE(time);
+		}
+
+		log.displayNL("%d", time);
+	} else {
+		log.displayNL("ERR: no guild");
+	}
+
+	return true;
+}
+
 
 
 //----------------------------------------------------------------------------

@@ -17,14 +17,6 @@ if SceneEditor == nil then
 	};
 end
 
-
-function debug(text)
-		local message  = ucstring()
-		message:fromUtf8(tostring(text))
-		displaySystemInfo(message, "SYS")
-end
-
-
 function SceneEditor:init(scene_id, form_url, translations, icons_url)
 	self.sceneId = scene_id
 	self.baseUrl = form_url
