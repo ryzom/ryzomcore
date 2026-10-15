@@ -257,7 +257,12 @@ public:
 #	endif // NL_DEBUG
 #	endif // NL_NO_ASM
 #elif defined(NL_OS_MAC)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+// warning: 'OSAtomicCompareAndSwap32' is deprecated: first deprecated in macOS 10.12 -
+// Use std::atomic_compare_exchange_strong_explicit(std::memory_order_relaxed) from <atomic> instead
 		return OSAtomicCompareAndSwap32(0, 1, reinterpret_cast<volatile sint32 *>(lockPtr));
+#pragma clang diagnostic pop
 #elif defined(NL_OS_UNIX)
 		// GCC implements the same functionality using a builtin function
 		// http://gcc.gnu.org/onlinedocs/gcc/Atomic-Builtins.html

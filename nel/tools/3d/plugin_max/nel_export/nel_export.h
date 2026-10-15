@@ -109,6 +109,9 @@ class CNelExportClassDesc:public ClassDesc2
 	int 			IsPublic() {return 1;}
 	void *			Create(BOOL loading = FALSE);
 	const MCHAR *	ClassName() {return _M("NeL Export");}
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("NeL Export"); }
+#endif
 	SClass_ID		SuperClassID() {return UTILITY_CLASS_ID;}
 	Class_ID		ClassID() {return CNELEXPORT_CLASS_ID;}
 	const MCHAR* 	Category() {return _M("NeL Tools");}

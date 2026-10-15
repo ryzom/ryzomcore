@@ -2,7 +2,9 @@ ADD_EXECUTABLE(nl_sample_ls_client client.cpp)
 
 ADD_EXECUTABLE(nl_sample_ls_fes WIN32 frontend_service.cpp)
 
-ADD_DEFINITIONS(-DNL_LS_CFG="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_login_system/\\"")
+SET(NL_LS_CFG "NL_LS_CFG=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_login_system/\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_ls_client PRIVATE ${NL_LS_CFG})
+TARGET_COMPILE_DEFINITIONS(nl_sample_ls_fes PRIVATE ${NL_LS_CFG})
 
 TARGET_LINK_LIBRARIES(nl_sample_ls_client nelmisc nelnet)
 NL_DEFAULT_PROPS(nl_sample_ls_client "NeL, Samples, Net, Login Service: LS Client")

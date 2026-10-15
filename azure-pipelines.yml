@@ -77,3 +77,93 @@ jobs:
         cd build
         make -j`nproc`
       displayName: 'Make'
+  - job: client
+    strategy:
+      matrix:
+        ubuntu:
+          vmImage: 'ubuntu-18.04'
+          releaseName: 'Ubuntu18'
+          aptPackages: >-
+            libasound2-dev
+            libgl1-mesa-dev
+            libjack-dev
+            libpulse-dev
+            libxrandr-dev
+            libxrender-dev
+            libxxf86vm-dev
+          cmakeExtra: >-
+            -DCMAKE_INSTALL_LIBDIR=lib
+        win2019:
+          vmImage: 'windows-2019'
+          releaseName: 'Win64'
+          cmakeExtra: >-
+            -DWITH_DRIVER_DIRECT3D=ON
+            -DWITH_DRIVER_XAUDIO2=ON
+            -DDXSDK_DIR=C:/DXSDK
+        macOS11:
+          vmImage: 'macOS-11'
+          releaseName: 'macOS'
+          MACOSX_DEPLOYMENT_TARGET: 10.12
+          cmakeExtra: >-
+            -DWITH_LIBXML2_ICONV=OFF
+            -GXcode
+    timeoutInMinutes: 120
+    pool:
+      vmImage: $(vmImage)
+    steps:
+    - checkout: self
+      fetchDepth: 0
+    - script: |
+        sudo apt update
+        sudo apt remove -y man-db
+        sudo apt install -y --no-install-recommends $(aptPackages)
+      displayName: '(ubuntu) Dependencies'
+      condition: eq(variables['Agent.JobName'], 'client ubuntu')
+    - task: CmdLine@2
+      inputs:
+        script: |
+          aria2c https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe
+          7z x DXSDK_Jun10.exe -oC:\ -r -y
+          del DXSDK_Jun10.exe
+      displayName: '(windows) DirectX SDK'
+      condition: contains(variables['cmakeExtra'], 'DIRECT3D=ON')
+    - task: Cache@2
+      inputs:
+        key: 'hunter321b-$(releaseName)'
+        path: '$(Pipeline.Workspace)/.hunter/_Base/Cache'
+    - task: CMake@1
+      displayName: 'Configure'
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: >-
+          $(cmakeExtra)
+          -DCMAKE_CONFIGURATION_TYPES=Release
+          -DFINAL_VERSION=OFF
+          -DHUNTER_CONFIGURATION_TYPES=Release
+          -DHUNTER_ENABLED=ON
+          -DHUNTER_ROOT=$(Pipeline.Workspace)/.hunter
+          -DHUNTER_STATUS_DEBUG=ON
+          -DWITH_DRIVER_OPENAL=ON
+          -DWITH_DRIVER_OPENGL=ON
+          -DWITH_INSTALL_LIBRARIES=OFF
+          -DWITH_NEL_SAMPLES=OFF
+          -DWITH_NEL_TESTS=OFF
+          -DWITH_NEL_TOOLS=OFF
+          -DWITH_RYZOM_CLIENT=ON
+          -DWITH_RYZOM_SERVER=OFF
+          -DWITH_RYZOM_TOOLS=OFF
+          $(Build.SourcesDirectory)
+    - task: CMake@1
+      displayName: 'Build'
+      inputs:
+        workingDirectory: $(Build.BinariesDirectory)
+        cmakeArgs: '--build . --config Release'
+    #- task: CMake@1
+    #  displayName: 'Install'
+    #  inputs:
+    #    workingDirectory: $(Build.BinariesDirectory)
+    #    cmakeArgs: --install . --config Release --prefix $(Build.StagingDirectory)
+    #- task: PublishPipelineArtifact@1
+    #  inputs:
+    #    targetPath: $(Build.StagingDirectory)/bin
+    #    artifactName: RyzomClient$(releaseName)Release

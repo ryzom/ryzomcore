@@ -65,6 +65,7 @@ class IPluginAccess
 public:
 	/// Retrieve the config file.
 	virtual NLMISC::CConfigFile &getConfigFile() = 0;
+	virtual std::string transformProjectPath(const std::string &path) = 0;
 	
 	/// Retrieve the main window handle.
 	virtual CWnd		*getMainWindow() =0;

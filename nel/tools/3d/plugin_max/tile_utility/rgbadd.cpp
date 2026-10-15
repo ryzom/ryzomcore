@@ -69,16 +69,24 @@ class RGBAdd: public Texmap {
 		int NumSubTexmaps() { return NSUBTEX; }
 		Texmap* GetSubTexmap(int i) { return subTex[i]; }
 		void SetSubTexmap(int i, Texmap *m);
+#if (MAX_VERSION_MAJOR < 24)
 		TSTR GetSubTexmapSlotName(int i);
+#else
+		virtual TSTR GetSubTexmapSlotName(int i, bool localized) NL_OVERRIDE;
+#endif
 
 		Class_ID ClassID() {	return RGBAddClassID; }
 		SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
-		void GetClassName(TSTR& s) { s= _T("RGB Additive"); }
+		virtual void GetClassName(NL_GET_CLASS_NAME_PARAMS) NL_GET_CLASS_NAME_CONST NL_OVERRIDE { s= _T("RGB Additive"); }
 		void DeleteThis() { delete this; }
 
 		int NumSubs() { return NSUBTEX+1; }  
 		Animatable* SubAnim(int i);
+#if (MAX_VERSION_MAJOR < 24)
 		TSTR SubAnimName(int i);
+#else
+		virtual TSTR SubAnimName(int i, bool localized) NL_OVERRIDE;
+#endif
 		int SubNumToRefNum(int subNum) { return subNum; }
 
 		// From ref
@@ -107,6 +115,9 @@ class RGBAddClassDesc:public ClassDesc2 {
 	int 			IsPublic() { return 1; }
 	void *			Create(BOOL loading) { 	return new RGBAdd; }
 	const TCHAR *	ClassName() { return GetString(IDS_DS_RGBMULT_CDESC); } // mjm - 2.3.99
+#if (MAX_VERSION_MAJOR >= 24)
+	virtual const TCHAR *NonLocalizedClassName() NL_OVERRIDE { return _M("RGB Additive"); }
+#endif
 	SClass_ID		SuperClassID() { return TEXMAP_CLASS_ID; }
 	Class_ID 		ClassID() { return RGBAddClassID; }
 	const MCHAR* 	Category() { return TEXMAP_CAT_COMP;  }
@@ -345,13 +356,22 @@ void RGBAdd::SetSubTexmap(int i, Texmap *m) {
 
 	}
 
-TSTR RGBAdd::GetSubTexmapSlotName(int i) {
-	switch(i) {
-		case 0:  return TSTR(GetString(IDS_DS_COLOR1)); 
-		case 1:  return TSTR(GetString(IDS_DS_COLOR2)); 
-		default: return TSTR(_T(""));
-		}
+#if (MAX_VERSION_MAJOR < 24)
+TSTR RGBAdd::GetSubTexmapSlotName(int i)
+#else
+TSTR RGBAdd::GetSubTexmapSlotName(int i, bool localized)
+#endif
+{
+#if (MAX_VERSION_MAJOR < 24)
+	const bool localized = false;
+#endif
+	switch(i)
+	{
+	case 0:  if (localized) return TSTR(GetString(IDS_DS_COLOR1)); else return _T("Color 1");
+	case 1:  if (localized) return TSTR(GetString(IDS_DS_COLOR2)); else return _T("Color 2");
+	default: return TSTR(_T(""));
 	}
+}
 	 
 Animatable* RGBAdd::SubAnim(int i) {
 	switch (i) {
@@ -360,12 +380,25 @@ Animatable* RGBAdd::SubAnim(int i) {
 		}
 	}
 
-TSTR RGBAdd::SubAnimName(int i) {
-	switch (i) {
-		case 0: return TSTR(GetString(IDS_DS_PARAMETERS));		
-		default: return GetSubTexmapTVName(i-1);
-		}
+#if (MAX_VERSION_MAJOR < 24)
+TSTR RGBAdd::SubAnimName(int i)
+#else
+TSTR RGBAdd::SubAnimName(int i, bool localized)
+#endif
+{
+#if (MAX_VERSION_MAJOR < 24)
+	const bool localized = false;
+#endif
+	switch (i) 
+	{
+	case 0: if (localized) return TSTR(GetString(IDS_DS_PARAMETERS)); else return _T("Parameters");
+#if (MAX_VERSION_MAJOR < 24)
+	default: return GetSubTexmapTVName(i - 1);
+#else
+	default: return GetSubTexmapTVName(i - 1, localized);
+#endif
 	}
+}
 
 RefResult RGBAdd::NotifyRefChanged(NOTIFY_REF_PARAMS)
 {

@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_clusterview WIN32 ${SRC})
 
-ADD_DEFINITIONS(-DCV_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_clusterview/\\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_clusterview PRIVATE "CV_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_clusterview/\"")
 
 TARGET_LINK_LIBRARIES(nl_sample_clusterview nelmisc nel3d)
 NL_ADD_RUNTIME_FLAGS(nl_sample_clusterview)

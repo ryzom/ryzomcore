@@ -651,7 +651,7 @@ void CPlugin::init(IPluginAccess *pluginAccess)
 		{
 			for(uint k = 0; k < (uint) path->size(); ++k)
 			{
-				NLMISC::CPath::addSearchPath(path->asString(k), false, false);
+				NLMISC::CPath::addSearchPath(_PluginAccess->transformProjectPath(path->asString(k)), false, false);
 			}
 		}
 

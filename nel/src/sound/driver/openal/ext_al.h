@@ -36,8 +36,8 @@
 #	include <eax.h>
 #endif
 #if EFX_CREATIVE_AVAILABLE
-#	include <AL/efx-creative.h>
-#	include <AL/EFX-Util.h>
+#	include <efx-creative.h>
+#	include <EFX-Util.h>
 #endif
 
 extern "C"

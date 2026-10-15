@@ -99,6 +99,7 @@ namespace NLGUI
 		_TextSelection= false;
 		_TextSelectionStart= 0;
 		_TextSelectionEnd= std::numeric_limits<uint>::max();
+		m_DisableShadowInSelection = true;
 
 		_InvalidTextContext= true;
 		_FirstLineX = 0;
@@ -1191,9 +1192,10 @@ namespace NLGUI
 		{
 			if (_Lines.empty()) return;
 
+			bool drawShadow = !(_TextSelection && m_DisableShadowInSelection);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
-			TextContext->setShaded (_Shadow);
-			TextContext->setShadeOutline (_ShadowOutline);
+			TextContext->setShaded (_Shadow && drawShadow);
+			TextContext->setShadeOutline (_ShadowOutline && drawShadow);
 			TextContext->setShadeColor (shcol);
 			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize*_Scale);
@@ -1323,9 +1325,10 @@ namespace NLGUI
 		{
 			nlassert(_Index != 0xFFFFFFFF);
 
+			bool drawShadow = !(_TextSelection && m_DisableShadowInSelection);
 			TextContext->setHotSpot (UTextContext::BottomLeft);
-			TextContext->setShaded (_Shadow);
-			TextContext->setShadeOutline (_ShadowOutline);
+			TextContext->setShaded (_Shadow && drawShadow);
+			TextContext->setShadeOutline (_ShadowOutline && drawShadow);
 			TextContext->setShadeColor (shcol);
 			TextContext->setShadeExtent (_ShadowX*oow, _ShadowY*ooh);
 			TextContext->setFontSize (_FontSize*_Scale);
@@ -1468,7 +1471,7 @@ namespace NLGUI
 			}
 		}
 
-		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(getText(), "ui"))) == (_HardText.empty() == _Text.empty())));
+		nlassert(_Text.empty() || ((_Localized && (NLMISC::startsWith(getHardText(), "ui"))) == (_HardText.empty() == _Text.empty())));
 	}
 
 	// ***************************************************************************

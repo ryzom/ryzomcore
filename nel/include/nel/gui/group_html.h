@@ -972,6 +972,7 @@ namespace NLGUI
 
 		// stop all curl downalods (html and data)
 		void releaseDownloads();
+		void releaseDataDownloads();
 		void checkDownloads();
 
 		// _CurlWWW download finished

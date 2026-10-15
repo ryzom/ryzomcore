@@ -1333,7 +1333,7 @@ uint64 CSystemInfo::getProcessorFrequency(bool quick)
 
 static bool DetectMMX()
 {
-	#ifdef NL_CPU_INTEL
+	#if defined(NL_CPU_INTEL) && (defined(HAVE_X86_64) || !defined(NL_COMP_GCC))
 		if (!CSystemInfo::hasCPUID()) return false; // cpuid not supported ...
 
 		sint32 CPUInfo[4];
@@ -1348,7 +1348,7 @@ static bool DetectMMX()
 
 static bool DetectSSE()
 {
-	#ifdef NL_CPU_INTEL
+	#if defined(NL_CPU_INTEL) && (defined(HAVE_X86_64) || !defined(NL_COMP_GCC))
 		if (!CSystemInfo::hasCPUID()) return false; // cpuid not supported ...
 
 		sint32 CPUInfo[4];

@@ -34,6 +34,33 @@ IF(COMMAND cmake_policy)
   ENDIF()
 ENDIF()
 
+
+#-----------------------------------------------------------------------------
+# Downloads and install Hunger into HUNTER_ROOT directory.
+OPTION(HUNTER_ENABLED "Enable Hunter package manager" OFF)
+IF(HUNTER_ENABLED)
+  INCLUDE("CMakeModules/HunterGate.cmake")
+  HunterGate(
+    URL "https://github.com/cpp-pm/hunter/archive/v0.23.321.tar.gz"
+    SHA1 "5e53cbb0429037ea8e2592bfd92704b8ff3ab492"
+    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
+  )
+
+  # default options for hunterized build
+  SET(WITH_STATIC         ON CACHE BOOL "static" FORCE)
+  SET(WITH_STATIC_DRIVERS ON CACHE BOOL "static drivers" FORCE)
+  SET(WITH_STATIC_CURL    ON CACHE BOOL "static curl" FORCE)
+  SET(WITH_STATIC_LIBXML2 ON CACHE BOOL "static libxml2" FORCE)
+  SET(WITH_STATIC_EXTERNAL ON CACHE BOOL "static external" FORCE)
+  SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
+ 
+ # Workaround for PCH compilation issue, from curl intsizeof depencency
+  ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+ENDIF()
+
+
+#-----------------------------------------------------------------------------
+
 INCLUDE(nel)
 INCLUDE(ConfigureChecks)
 INCLUDE(CheckDepends)
@@ -56,6 +83,7 @@ PROJECT(RyzomCore CXX C)
 SET(NL_VERSION_MAJOR 4)
 SET(NL_VERSION_MINOR 0)
 SET(NL_VERSION_PATCH 0 CACHE STRING "Patch version")
+SET(NL_VERSION_BUILD 0 CACHE STRING "Build number")
 SET(YEAR "2001-${CURRENT_YEAR}")
 SET(AUTHOR "Winch Gate and The Ryzom Core Community")
 
@@ -137,6 +165,36 @@ IF(WIN32)
   ENDIF()
 ENDIF()
 
+IF(HUNTER_ENABLED)
+  # This fix is for compiling OpenSSL in Azure Pipeline linux agent where ENV{SYSTEM} == "build"
+  IF(DEFINED ENV{SYSTEM} AND UNIX AND NOT APPLE)
+    STRING(TOUPPER "$ENV{SYSTEM}" _tmp)
+    IF (_tmp STREQUAL "BUILD")
+      UNSET(ENV{SYSTEM})
+    ENDIF()
+    UNSET(_tmp)
+  ENDIF()
+  ## TODO: hack for freetype hunter package
+  SET(ON 1)
+  ##
+  HUNTER_ADD_PACKAGE(ZLIB)
+
+  FIND_PACKAGE(ZLIB CONFIG REQUIRED)
+  SET(ZLIB_LIBRARY ZLIB::zlib)
+
+  HUNTER_ADD_PACKAGE(libxml2)
+  FIND_PACKAGE(libxml2 CONFIG REQUIRED)
+  SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} libxml2::libxml2)
+
+  HUNTER_ADD_PACKAGE(OpenSSL)
+  FIND_PACKAGE(OpenSSL REQUIRED)
+  # TODO: is OpenSSL::Crypto only needed for WIN32?
+  SET(OPENSSL_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+
+  # for precompiled headers, not needed if using TARGET_PRECOMPILE_HEADERS() from cmake 3.16+
+  SET(ZLIB_INCLUDE_DIR ZLIB_ROOT/include)
+  SET(LIBXML2_INCLUDE_DIR ${LIBXML2_ROOT}/include/libxml2)
+ELSE()
 FIND_PACKAGE(ZLIB REQUIRED)
 FIND_PACKAGE(LibXml2 REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
@@ -147,6 +205,7 @@ FIND_PACKAGE(Jpeg)
 IF(WIN32)
   SET(OPENSSL_LIBRARIES ${OPENSSL_LIBRARIES} Crypt32.lib)
 ENDIF()
+ENDIF() #hunter
 
 IF(WITH_LIBOVR)
   FIND_PACKAGE(LibOVR)
@@ -159,11 +218,11 @@ ENDIF()
 NL_CONFIGURE_CHECKS()
 
 IF(WITH_STATIC_LIBXML2)
-  SET(LIBXML2_DEFINITIONS ${LIBXML2_DEFINITIONS} -DLIBXML_STATIC)
+  ADD_DEFINITIONS(-DLIBXML_STATIC)
 ENDIF()
 
-IF(WITH_LIBXML2_ICONV)
-  FIND_PACKAGE(Iconv REQUIRED)
+FIND_PACKAGE(Iconv QUIET)
+IF(ICONV_FOUND)
   INCLUDE_DIRECTORIES(${ICONV_INCLUDE_DIR})
   SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${ICONV_LIBRARIES})
 ENDIF()
@@ -174,7 +233,7 @@ IF(WITH_STATIC)
     SET(LIBXML2_LIBRARIES ${LIBXML2_LIBRARIES} ${WINSOCK2_LIB})
   ENDIF()
 
-  IF(UNIX)
+  IF(UNIX AND NOT HUNTER_ENABLED)
     # under Linux and OS X, recent libxml2 versions are linked against liblzma
     FIND_PACKAGE(LibLZMA)
     IF(LIBLZMA_LIBRARIES)
@@ -240,6 +299,7 @@ ENDIF()
 
 INCLUDE(FindHelpers)
 
+#TODO: hunter qt package
 IF(WITH_QT5)
   FIND_QT5()
 ENDIF()
@@ -251,6 +311,7 @@ IF(WITH_QT)
   FIND_PACKAGE(Qt4 COMPONENTS QtCore QtGui QtXml QtOpenGL REQUIRED)
 ENDIF()
 
+#TODO: hunter assimp package
 IF(WITH_ASSIMP)
   FIND_PACKAGE(assimp REQUIRED)
 ENDIF()
@@ -260,11 +321,26 @@ IF(WITH_NEL)
     FIND_PACKAGE(CppTest)
   ENDIF()
 
-  IF(WITH_GUI)
-    FIND_PACKAGE(Luabind REQUIRED)
-  ENDIF()
+  IF(HUNTER_ENABLED)
+    IF(WITH_GUI)
+      HUNTER_ADD_PACKAGE(luabind)
+      FIND_PACKAGE(Luabind REQUIRED)
+    ENDIF()
+
+    HUNTER_ADD_PACKAGE(CURL)
+    FIND_PACKAGE(CURL CONFIG REQUIRED)
+    # TODO: for nelgui
+    SET(CURL_LIBRARIES CURL::libcurl libxml2::libxml2)
+  ELSE()
+    IF(WITH_GUI)
+      FIND_PACKAGE(Luabind REQUIRED)
+    ENDIF()
 
     FIND_PACKAGE(CURL REQUIRED)
+    # if cmake finds config-file package, ie FIND_PACKAGE(CURL CONFIG), then CURL_LIBRARIES is not defined
+    IF(TARGET CURL::libcurl)
+      SET(CURL_LIBRARIES CURL::libcurl)
+    ENDIF()
 
     IF((WIN32 OR CURL_LIBRARIES MATCHES "\\.a") AND WITH_STATIC_CURL)
       SET(CURL_STATIC ON)
@@ -313,6 +389,7 @@ IF(WITH_NEL)
         ENDIF()
       ENDIF()
     ENDIF()
+  ENDIF() #hunter
 
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/nel/include)
   ADD_SUBDIRECTORY(nel)

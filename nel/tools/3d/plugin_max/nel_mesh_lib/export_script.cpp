@@ -53,7 +53,11 @@ bool CExportNel::scriptEvaluate (const char *script, void *out, TNelScriptValueT
 #endif
 
 		vl.source->flush_whitespace();
-		vl.code = vl.parser->compile_all(vl.source);
+		vl.code = vl.parser->compile_all(vl.source
+#if MAX_VERSION_MAJOR >= 24
+			, MAXScript::ScriptSource::NotSpecified
+#endif
+		);
 		vl.result = vl.code->eval();
 		
 		vl.source->flush_whitespace();

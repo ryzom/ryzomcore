@@ -315,6 +315,7 @@ CClientConfig::CClientConfig()
 	InterfaceScale_min	= 0.8f;
 	InterfaceScale_max	= 2.0f;
 	InterfaceScale_step	= 0.05;
+	InterfaceScaleAuto  = false;
 	BilinearUI			= true;
 
 	WindowSnapInvert	= false;
@@ -864,11 +865,13 @@ void CClientConfig::setValues()
 	// Gamma
 	READ_FLOAT_FV(Gamma)
 	// UI scaling
+	READ_BOOL_FV(InterfaceScaleAuto);
 	READ_FLOAT_FV(InterfaceScale);
 	READ_FLOAT_FV(InterfaceScale_min);
 	READ_FLOAT_FV(InterfaceScale_max);
 	READ_FLOAT_FV(InterfaceScale_step);
 	clamp(ClientCfg.InterfaceScale, ClientCfg.InterfaceScale_min, ClientCfg.InterfaceScale_max);
+
 	READ_BOOL_FV(BilinearUI);
 	READ_BOOL_FV(WindowSnapInvert);
 	READ_INT_FV(WindowSnapDistance);

@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Install shard data
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -51,6 +51,25 @@ printLog(log, "")
 
 mkPath(log, ShardDevDirectory)
 mkPath(log, ShardDevDirectory + "/local")
+
+printLog(log, ">>> Read development MySQL password from rc_mysql_password.txt <<<")
+password = "shard"
+passwordFile = os.path.join(ShardDevDirectory, "rc_mysql_password.txt")
+if os.path.isfile(passwordFile):
+	fi = open(passwordFile, 'r')
+	password = fi.readline().strip()
+	fi.close()
+
+printLog(log, ">>> Generate shard dev local_db.cfg <<<")
+cfg = open(ShardDevDirectory + "/local_db.cfg", "w")
+cfg.write("DBNelUser = \"shard_dev\";\n")
+cfg.write("DBNelPass = \"" + password + "\";\n")
+cfg.write("DBRingUser = \"shard_dev\";\n")
+cfg.write("DBRingPass = \"" + password + "\";\n")
+cfg.flush()
+cfg.close()
+printLog(log, "")
+
 printLog(log, ">>> Generate shard dev local.cfg <<<")
 cfg = open(ShardDevDirectory + "/local.cfg", "w")
 cfg.write("WindowStyle = \"WIN\";\n")

@@ -105,8 +105,8 @@ void updateFromClientCfg()
 			Driver->forceTextureResize(1);
 	}
 
-	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale)
-		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale);
+	if (ClientCfg.InterfaceScale != LastClientCfg.InterfaceScale || ClientCfg.InterfaceScaleAuto != LastClientCfg.InterfaceScaleAuto)
+		CInterfaceManager::getInstance()->setInterfaceScale(ClientCfg.InterfaceScale, ClientCfg.InterfaceScaleAuto);
 
 	if (ClientCfg.BilinearUI != LastClientCfg.BilinearUI)
 		CViewRenderer::getInstance()->setBilinearFiltering(ClientCfg.BilinearUI);
@@ -324,8 +324,19 @@ void updateFromClientCfg()
 	bool	mustReloadSoundMngrContinent= false;
 
 	// disable/enable sound?
-	if (ClientCfg.SoundOn != LastClientCfg.SoundOn)
+	if (ClientCfg.SoundOn != LastClientCfg.SoundOn || ClientCfg.DriverSound != LastClientCfg.DriverSound)
 	{
+		// changing sound driver
+		if (ClientCfg.DriverSound != LastClientCfg.DriverSound)
+		{
+			if (SoundMngr)
+			{
+				nlwarning("Changing sound driver...");
+				delete SoundMngr;
+				SoundMngr = NULL;
+			}
+		}
+
 		if (SoundMngr && !ClientCfg.SoundOn)
 		{
 			nlwarning("Deleting sound manager...");

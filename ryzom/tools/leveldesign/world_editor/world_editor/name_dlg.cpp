@@ -81,7 +81,7 @@ BOOL CNameDlg::OnInitDialog()
 	NLMISC::CConfigFile::CVar *var = getMainFrame()->getConfigFile().getVarPtr("BotNamePath");
 	if (var)
 	{
-		m_dataDir = NLMISC::CPath::standardizePath(var->asString());
+		m_dataDir = theApp.transformProjectPath(NLMISC::CPath::standardizePath(var->asString()));
 	}
 	else
 	{

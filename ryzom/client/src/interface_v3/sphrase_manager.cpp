@@ -798,7 +798,7 @@ void				CSPhraseManager::buildPhraseFromSheet(CSPhraseCom &phrase, sint32 sheetI
 	if(phraseSheet)
 	{
 		// get localized Name
-		phrase.Name= STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheetId));
+		phrase.Name.fromUtf8(STRING_MANAGER::CStringManagerClient::getSPhraseLocalizedName(CSheetId(sheetId)));
 		// Build bricks
 		phrase.Bricks.clear();
 		for(uint i=0;i<phraseSheet->Bricks.size();i++)

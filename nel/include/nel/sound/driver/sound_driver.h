@@ -127,6 +127,12 @@ public:
 
 	/// Return driver name from type.
 	static const char *getDriverName(TDriver driverType);
+	/// Return driver dll filename, empty if unsupported driver
+	static std::string getDriverFileName(TDriver driverType);
+	/** Return possibly available drivers for current platform.
+	 * If no drivers are available, return empty list.
+	 */
+	static std::vector<ISoundDriver::TDriver> getAvailableDrivers();
 	/** The static method which builds the sound driver instance
 	 * In case of failure, can throw one of these ESoundDriver exception objects:
 	 * ESoundDriverNotFound, ESoundDriverCorrupted, ESoundDriverOldVersion, ESoundDriverUnknownVersion
@@ -204,7 +210,6 @@ public:
 	
 private:
 	std::string _DllName;
-	
 };
 
 

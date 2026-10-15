@@ -2,7 +2,7 @@ FILE(GLOB SRC *.cpp)
 
 ADD_EXECUTABLE(nl_sample_font_perf ${SRC})
 
-ADD_DEFINITIONS(-DFONT_DIR="\\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_font_perf/\\"")
+TARGET_COMPILE_DEFINITIONS(nl_sample_font_perf PRIVATE "FONT_DIR=\"${NL_SHARE_ABSOLUTE_PREFIX}/nl_sample_font_perf/\"")
 
 TARGET_LINK_LIBRARIES(nl_sample_font_perf nelmisc nel3d)
 NL_DEFAULT_PROPS(nl_sample_font_perf "NeL, Samples, 3D: Font Performance Test")

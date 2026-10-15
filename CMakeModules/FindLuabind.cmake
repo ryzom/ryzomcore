@@ -83,7 +83,11 @@ MACRO(FIND_CORRECT_LUA_VERSION)
     ENDIF()
   ELSE()
     # TODO: find a way to detect Lua version
-    IF(WITH_LUA54)
+    IF(HUNTER_ENABLED)
+      HUNTER_ADD_PACKAGE(Lua)
+      FIND_PACKAGE(Lua CONFIG REQUIRED)
+      SET(LUA_LIBRARIES Lua::lua_lib)
+    ELSEIF(WITH_LUA54)
       FIND_PACKAGE(Lua54 REQUIRED)
     ELSEIF(WITH_LUA53)
       FIND_PACKAGE(Lua53 REQUIRED)
@@ -161,8 +165,8 @@ IF(WITH_STLPORT)
 ENDIF()
 
 # generic libraries names
-LIST(APPEND LIBRARY_NAME_RELEASE luabind libluabind)
-LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd libluabind_d libluabindd)
+LIST(APPEND LIBRARY_NAME_RELEASE luabind luabind09 libluabind)
+LIST(APPEND LIBRARY_NAME_DEBUG luabind_d luabindd luabind09-d libluabind_d libluabindd)
 
 FIND_PACKAGE_HELPER(Luabind luabind/luabind.hpp RELEASE ${LIBRARY_NAME_RELEASE} DEBUG ${LIBRARY_NAME_DEBUG})
 

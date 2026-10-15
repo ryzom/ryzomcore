@@ -34,6 +34,16 @@
 #define nl_p_end p_end
 #endif
 
+#if (MAX_VERSION_MAJOR < 24)
+#define NL_GET_CLASS_NAME_PARAMS TSTR &s
+#define NL_GET_OBJECT_NAME_PARAMS
+#define NL_GET_CLASS_NAME_CONST
+#else
+#define NL_GET_CLASS_NAME_PARAMS MSTR &s, bool localized = true
+#define NL_GET_OBJECT_NAME_PARAMS bool localized
+#define NL_GET_CLASS_NAME_CONST const
+#endif
+
 static TSTR MaxTStrFromUtf8(const std::string &src)
 {
 	TSTR dst;

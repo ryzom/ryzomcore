@@ -7,7 +7,7 @@
 # Python port of game data build pipeline.
 # Install to client dev
 # 
-# NeL - MMORPG Framework <http://dev.ryzom.com/projects/nel/>
+# NeL - MMORPG Framework <https://wiki.ryzom.dev/>
 # Copyright (C) 2009-2014  by authors
 #
 # This program is free software: you can redistribute it and/or modify
@@ -93,9 +93,8 @@ for category in InstallClientData:
 			printLog(log, "PACKAGE " + package[0])
 			mkPath(log, InstallDirectory + "/" + package[0])
 			if "exedll" in package[0]:
-				if package[0] == "exedll": # or package[0] == platformExeDll # TODO: 64-bit and Linux separation of exedll, only include one
-					copyFileIfNeeded(log, InstallDirectory + "/" + package[0] + "/client_default.cfg", targetPath)
-					copyFileIfNeeded(log, InstallDirectory + "/" + package[0] + "/client_default.cfg", targetPathLive)
+				copyFileIfNeeded(log, InstallDirectory + "/" + package[0] + "/client_default.cfg", targetPath)
+				copyFileIfNeeded(log, InstallDirectory + "/" + package[0] + "/client_default.cfg", targetPathLive)
 			else:
 				copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPath)
 				copyFilesNoTreeIfNeeded(log, InstallDirectory + "/" + package[0], targetPathLive)

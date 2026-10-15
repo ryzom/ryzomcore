@@ -1408,6 +1408,9 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 	// **** Init Video Modes
 	Driver->getModes(videoModes);
 
+	NL3D::UDriver::CMode currentMode;
+	Driver->getCurrentScreenMode(currentMode);
+
 	// TODO: for resolutions below 1024x768, could use automatic UI scaling like in login/outgame
 	// Remove modes under 1024x768 (outgame ui limitation) and get the unique strings
 	sint i, j;
@@ -1444,6 +1447,7 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 				// add it to the list
 				stringModeList.push_back(res);
 
+				// TODO: This should probably only be used when in fullscreen
 				// process all screen sizes less or equal to desired one
 				if ((videoModes[i].Width <= ClientCfg.Width) && (videoModes[i].Height <= ClientCfg.Height))
 				{
@@ -1463,6 +1467,16 @@ bool getRyzomModes(std::vector<NL3D::UDriver::CMode> &videoModes, std::vector<st
 							nFoundMode = i;
 						}
 					}
+				}
+				else
+				if (videoModes[i].Width == currentMode.Width &&
+					videoModes[i].Height == currentMode.Height &&
+					videoModes[i].Frequency == currentMode.Frequency &&
+					videoModes[i].DisplayDevice == currentMode.DisplayDevice)
+				{
+					// use current (active) monitor resolution
+					nFoundMode = i;
+					nFoundStringMode = j;
 				}
 			}
 		}
