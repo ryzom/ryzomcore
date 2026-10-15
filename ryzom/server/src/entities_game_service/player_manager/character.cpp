@@ -3920,10 +3920,7 @@ void CCharacter::setTargetBotchatProgramm( CEntityBase * target, const CEntityId
 				CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSIONS_OPTIONS().getArray(i).setTITLE(_PropertyDatabase, text);
 //				_PropertyDatabase.setProp( toString("TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%u:PLAYER_GIFT_NEEDED",i) , 0 );
 				CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSIONS_OPTIONS().getArray(i).setPLAYER_GIFT_NEEDED(_PropertyDatabase, 0 );
-				//				_PropertyDatabase.setProp(
-				// toString("TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%u:PRIORITY",i),
-				// 0
-				//);
+//				_PropertyDatabase.setProp( toString("TARGET:CONTEXT_MENU:MISSIONS_OPTIONS:%u:PRIORITY",i), 0  );
 				CBankAccessor_PLR::getTARGET().getCONTEXT_MENU().getMISSIONS_OPTIONS().getArray(i).setPRIORITY(_PropertyDatabase, 2 );
 				i++;
 			}
@@ -4743,8 +4740,7 @@ void CCharacter::removeKnownBrick( const CSheetId& brickId )
 //-----------------------------------------------
 void CCharacter::removeKnownBrickBonus( const CSheetId& brickId )
 {
-	//	egs_chinfo("<CCharacter::removeKnownBrickBonus> removing a known brick idSheet (%s)", brickId.toString().c_str()
-	//);
+//	egs_chinfo("<CCharacter::removeKnownBrickBonus> removing a known brick idSheet (%s)", brickId.toString().c_str() );
 	const CStaticBrick* brickForm = CSheets::getSBrickForm( brickId );
 	if( brickForm )
 	{
@@ -8018,8 +8014,7 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 				_CurrentDodgeLevel = max(sint32(0), dodgeVal + _DodgeModifier);
 //				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.DodgeBase, _BaseDodgeLevel);
 				CBankAccessor_PLR::getCHARACTER_INFO().getDODGE().setBase(_PropertyDatabase, checkedCast<uint16>(_BaseDodgeLevel));
-				//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.DodgeCurrent,
-				//_CurrentDodgeLevel);
+//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.DodgeCurrent, _CurrentDodgeLevel);
 				CBankAccessor_PLR::getCHARACTER_INFO().getDODGE().setCurrent(_PropertyDatabase, checkedCast<uint16>(_CurrentDodgeLevel));
 			}
 
@@ -8049,9 +8044,7 @@ double CCharacter::addXpToSkillInternal(double XpGain, const std::string &ContSk
 
 //				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryBase, _BaseParryLevel);
 				CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setBase(_PropertyDatabase, checkedCast<uint16>(_BaseParryLevel));
-				//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryCurrent,
-				//_CurrentParryLevel
-				//);
+//				_PropertyDatabase.setProp(_DataIndexReminder->CHARACTER_INFO.ParryCurrent, _CurrentParryLevel );
 				CBankAccessor_PLR::getCHARACTER_INFO().getPARRY().setCurrent(_PropertyDatabase, checkedCast<uint16>(_CurrentParryLevel) );
 			}
 

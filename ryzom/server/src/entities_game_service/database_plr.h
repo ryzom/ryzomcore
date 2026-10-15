@@ -1,5 +1,3 @@
-#ifndef INCLUDED_database_PLR_H
-#define INCLUDED_database_PLR_H
 
 
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
