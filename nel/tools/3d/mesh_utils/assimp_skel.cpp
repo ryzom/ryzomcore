@@ -113,9 +113,11 @@ static bool getNelFloatMeta(const aiNode *node, const char *key, float &out)
 		case AI_DOUBLE: out = (float)*(const double *)v.mData; return true;
 		case AI_FLOAT:  out =        *(const float *)v.mData;  return true;
 		case AI_INT32:  out = (float)*(const int32_t *)v.mData; return true;
-		case AI_UINT32: out = (float)*(const uint32_t *)v.mData; return true;
 		case AI_UINT64: out = (float)*(const uint64_t *)v.mData; return true;
+#ifdef NL_ASSIMP_HAS_META_INT64_UINT32
+		case AI_UINT32: out = (float)*(const uint32_t *)v.mData; return true;
 		case AI_INT64:  out = (float)*(const int64_t *)v.mData; return true;
+#endif
 		default: return false;
 		}
 	}
