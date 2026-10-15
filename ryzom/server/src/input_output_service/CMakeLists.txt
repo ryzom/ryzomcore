@@ -14,6 +14,10 @@ ADD_EXECUTABLE(ryzom_ios_service WIN32 ${SRC})
 
 INCLUDE_DIRECTORIES(${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
 
+# chat_manager uses boost::uuid (header only)
+FIND_PACKAGE(Boost REQUIRED)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+
 TARGET_LINK_LIBRARIES(ryzom_ios_service
 					ryzom_adminmodules
 					ryzom_pd

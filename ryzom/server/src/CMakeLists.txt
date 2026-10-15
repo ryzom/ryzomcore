@@ -40,7 +40,9 @@ ADD_SUBDIRECTORY(persistant_data_service)
 ADD_SUBDIRECTORY(session_browser_server)
 ADD_SUBDIRECTORY(shard_unifier_service)
 ADD_SUBDIRECTORY(tick_service)
-ADD_SUBDIRECTORY(patchman_service)
+IF(WITH_PATCHMAN_SERVICE)
+  ADD_SUBDIRECTORY(patchman_service)
+ENDIF()
 
 
 # Deprecated, no longer used.
