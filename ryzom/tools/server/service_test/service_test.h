@@ -1,7 +1,7 @@
 /** \file service_test.h
  * <File description>
  *
- * $Id: service_test.h,v 1.7 2004/03/01 19:22:19 lecroart Exp $
+ * $Id$
  */
 
 

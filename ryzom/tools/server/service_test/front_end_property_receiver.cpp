@@ -1,7 +1,7 @@
 /** \file front_end_property_receiver.cpp
  * Container for manage property receivers for front end
  *
- * $Id: front_end_property_receiver.cpp,v 1.21 2004/03/01 19:22:19 lecroart Exp $
+ * $Id$
  */
 
 

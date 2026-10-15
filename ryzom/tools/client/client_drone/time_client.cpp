@@ -1,7 +1,7 @@
 /** \file time_client.cpp
  * <File description>
  *
- * $Id: time_client.cpp,v 1.1 2005/07/11 15:22:33 cado Exp $
+ * $Id$
  */
 
 

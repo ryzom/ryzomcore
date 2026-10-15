@@ -1,7 +1,7 @@
 /** \file ryzom_recover.cpp
  * App to setup minimal Ryzom context
  *
- * $Id: ryzom_recover.cpp,v 1.15 2007/06/07 13:34:25 boucher Exp $
+ * $Id$
  */
 
 /* ----------------------------------------------------------

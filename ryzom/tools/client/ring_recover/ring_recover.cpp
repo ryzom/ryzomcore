@@ -1,7 +1,7 @@
 /** \file ring_recover.cpp
  * App to setup minimal ryzom ring context
  *
- * $Id: ring_recover.cpp,v 1.3 2007/06/07 13:34:25 boucher Exp $
+ * $Id$
  */
 
 /* ----------------------------------------------------------

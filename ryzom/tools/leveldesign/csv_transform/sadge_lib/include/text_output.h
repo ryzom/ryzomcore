@@ -20,7 +20,7 @@
 //-------------------------------------------------------------------------------------------------
 // project: sadge lib
 // file:	text_output.h
-// version:	$Id: text_output.h,v 1.1 2004/02/10 17:54:46 boucher Exp $	
+// version:	$Id$	
 //
 // This file contains a string class derived from the STL string
 // The string compare functions od the class are case insensitive 

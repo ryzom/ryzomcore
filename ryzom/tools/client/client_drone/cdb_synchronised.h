@@ -1,6 +1,6 @@
 /** \file cdb_synchronised.h
  *
- * $Id: cdb_synchronised.h,v 1.1 2005/09/19 09:50:17 boucher Exp $
+ * $Id$
  */
 
 

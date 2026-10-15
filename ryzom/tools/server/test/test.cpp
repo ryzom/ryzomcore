@@ -1,7 +1,7 @@
 /** \file tick_service.cpp
  * The TICK SERVICE deals with time management in the shard
  *
- * $Id: test.cpp,v 1.4 2005/04/25 23:55:00 miller Exp $
+ * $Id$
  */
 
 

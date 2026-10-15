@@ -1,6 +1,6 @@
 /** \file sabrina_test.h
  *
- * $Id: sabrina_test.h,v 1.2 2004/03/01 19:22:19 lecroart Exp $
+ * $Id$
  */
 
 

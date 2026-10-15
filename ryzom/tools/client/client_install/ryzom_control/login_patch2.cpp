@@ -1,6 +1,6 @@
 /** \file patch.cpp
  *
- * $Id: login_patch2.cpp,v 1.3 2007/06/07 13:34:32 boucher Exp $
+ * $Id$
  */
 
 /* Copyright, 2004 Nevrax Ltd.

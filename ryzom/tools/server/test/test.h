@@ -1,7 +1,7 @@
 /** \file tick_service.h
  * The TICK SERVICE deals with time management in the shard
  *
- * $Id: test.h,v 1.1 2004/06/07 15:26:49 miller Exp $
+ * $Id$
  */
 
 #ifndef TEST_H
