@@ -120,8 +120,10 @@ def check_yaml(root, f):
 
 
 def check_python(root, f):
+    import warnings
     try:
-        with open(os.path.join(root, f), 'rb') as fh:
+        with open(os.path.join(root, f), 'rb') as fh, warnings.catch_warnings():
+            warnings.simplefilter('ignore')  # SyntaxWarning (invalid escape sequences) is not a parse failure
             compile(fh.read(), f, 'exec')
         return None
     except SyntaxError as e:
@@ -177,8 +179,8 @@ def main():
     ap.add_argument('--exclude-file', default=None)
     ap.add_argument('--list', action='store_true', help='only list the files that would be checked')
     a = ap.parse_args()
-    root = os.path.abspath(a.root or subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True)
-                           .stdout.decode().strip() or '.')
+    # default root: the checkout this script lives in (tool/ci/..), so no git is needed to find it
+    root = os.path.abspath(a.root or os.path.dirname(os.path.dirname(HERE)))
     kinds = [k for k in a.kinds.split(',') if k]
     bad = [k for k in kinds if k not in KINDS]
     if bad:
