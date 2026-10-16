@@ -578,8 +578,8 @@ namespace NLNET
 		virtual void	deleteModule(IModule *module);
 
 		/** Virtual destructor.
-		 *	The destructor while unregister the module factory from the
-		 *	factory registry and ALL module factored
+		 *	The destructor will unregister the module factory from the
+		 *	factory registry and ALL modules created by this factory
 		 *	will also be deleted.
 		 */
 		virtual ~IModuleFactory();

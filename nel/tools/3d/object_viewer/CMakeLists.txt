@@ -19,7 +19,7 @@ NL_DEFAULT_PROPS(object_viewer_dll "NeL, Tools, 3D: Object Viewer DLL")
 NL_ADD_RUNTIME_FLAGS(object_viewer_dll)
 NL_ADD_LIB_SUFFIX(object_viewer_dll)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS} -DOBJECT_VIEWER_LIB_EXPORTS)
+TARGET_COMPILE_DEFINITIONS(object_viewer_dll PRIVATE ${MFC_DEFINITIONS} OBJECT_VIEWER_LIB_EXPORTS)
 
 IF(WITH_PCH)
   target_precompile_headers(object_viewer_dll PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/std_afx.h)

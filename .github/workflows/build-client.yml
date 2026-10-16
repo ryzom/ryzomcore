@@ -50,11 +50,25 @@ jobs:
         include:
           - os: windows-2022
             cmake_preset: ci-windows-ryzom-client-hunter
+          # windows-2025/windows-latest images ship Visual Studio 2026 only since
+          # June 2026 (VS2022 removed) — the preset's default VS 17 2022 generator
+          # can't work there. The VS 18 2026 generator needs CMake >= 4.2, and
+          # CMake 4.x needs CMAKE_POLICY_VERSION_MINIMUM for Hunter's older dep
+          # recipes (< 3.5 minimums). CLI -G overrides the preset generator.
+          # hunter + windows-2025: needs the patched Boost pin from
+          # CMakeModules/HunterConfig.cmake (1.86.0 with b2 5.4.2 — stock
+          # 1.86 b2 doesn't know the VS 18 toolset, "Unknown toolset: vcunk").
           - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-hunter
+            cmake_generator: "Visual Studio 18 2026"
+            cmake_version: "4.4.2"
+            cmake_policy_min: "3.5"
           - os: windows-2025
             cmake_preset: ci-windows-ryzom-client-vcpkg
             vcpkg: true
+            cmake_generator: "Visual Studio 18 2026"
+            cmake_version: "4.4.2"
+            cmake_policy_min: "3.5"
           - os: ubuntu-22.04
             ubuntu_version: 22.04
             cmake_preset: ci-linux-ryzom-client-hunter
@@ -81,7 +95,7 @@ jobs:
 
     - uses: lukka/get-cmake@latest
       with:
-        cmakeVersion: 3.31.11
+        cmakeVersion: ${{ matrix.cmake_version || '3.31.11' }}
 
     - uses: lukka/run-vcpkg@v11
       if: matrix.vcpkg == true
@@ -144,8 +158,8 @@ jobs:
     - uses: actions/cache/restore@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
-        key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
-        restore-keys: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-
+        key: ${{ matrix.os }}-hunter-v2-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        restore-keys: ${{ matrix.os }}-hunter-v2-${{ steps.strings.outputs.week }}-
 
     - uses: actions/cache@v6
       if: runner.os == 'Windows'
@@ -175,13 +189,15 @@ jobs:
         choco install nsis --cache-location=${{ env.CHOCOLATEY_CACHE }}
 
     - name: Configure CMake
+      env:
+        CMAKE_POLICY_VERSION_MINIMUM: ${{ matrix.cmake_policy_min || '' }}
       run: |
-        cmake --preset ${{ matrix.cmake_preset }}
+        cmake --preset ${{ matrix.cmake_preset }}${{ matrix.cmake_generator && format(' -G "{0}"', matrix.cmake_generator) || '' }}
 
     - uses: actions/cache/save@v6
       with:
         path: ${{ env.HUNTER_ROOT }}
-        key: ${{ matrix.os }}-hunter-${{ steps.strings.outputs.week }}-${{ github.sha }}
+        key: ${{ matrix.os }}-hunter-v2-${{ steps.strings.outputs.week }}-${{ github.sha }}
 
     - uses: actions/cache/save@v6
       if: (matrix.vcpkg == true)
@@ -192,6 +208,7 @@ jobs:
     - name: Build
       env:
         MACOSX_DEPLOYMENT_TARGET: 10.13
+        CMAKE_POLICY_VERSION_MINIMUM: ${{ matrix.cmake_policy_min || '' }}
       run: cmake --build --preset ci-ryzom-client
 
     - name: ccache stats

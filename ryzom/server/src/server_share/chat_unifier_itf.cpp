@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "chat_unifier_itf.h"
 
 namespace CHATUNI
@@ -28,7 +28,7 @@ namespace CHATUNI
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CChatUnifierSkel::TMessageHandlerMap &CChatUnifierSkel::getMessageHandlers() const
 	{
@@ -38,15 +38,15 @@ namespace CHATUNI
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("CUSFT"), &CChatUnifierSkel::sendFarTell_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CChatUnifierSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -65,7 +65,7 @@ namespace CHATUNI
 		return true;
 	}
 
-	
+
 	void CChatUnifierSkel::sendFarTell_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CChatUnifierSkel_sendFarTell_CUSFT);
@@ -91,9 +91,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_sendFarTell(__message, senderCharId, havePrivilege, destName, text);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -116,7 +116,7 @@ namespace CHATUNI
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CChatUnifierClientSkel::TMessageHandlerMap &CChatUnifierClientSkel::getMessageHandlers() const
 	{
@@ -126,43 +126,43 @@ namespace CHATUNI
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURFTF"), &CChatUnifierClientSkel::recvFarTellFail_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURFT"), &CChatUnifierClientSkel::recvFarTell_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURFGC"), &CChatUnifierClientSkel::farGuildChat_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURFGC2"), &CChatUnifierClientSkel::farGuildChat2_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURFGC2E"), &CChatUnifierClientSkel::farGuildChat2Ex_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURUB"), &CChatUnifierClientSkel::universeBroadcast_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CUDCB"), &CChatUnifierClientSkel::dynChanBroadcast_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CURBM"), &CChatUnifierClientSkel::recvBroadcastMessage_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CChatUnifierClientSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -181,7 +181,7 @@ namespace CHATUNI
 		return true;
 	}
 
-	
+
 	void CChatUnifierClientSkel::recvFarTellFail_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CChatUnifierClientSkel_recvFarTellFail_CURFTF);
@@ -287,9 +287,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_recvFarTellFail(__message, senderCharId, destName, failInfo);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -305,9 +305,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_recvFarTell(__message, senderCharId, senderName, havePrivilege, destName, text);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -323,9 +323,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_farGuildChat(__message, senderName, guildId, text);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -341,9 +341,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_farGuildChat2(__message, senderName, guildId, phraseName);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -359,9 +359,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_farGuildChat2Ex(__message, senderName, guildId, phraseId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -377,9 +377,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_universeBroadcast(__message, senderName, senderHomeSession, text);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -395,9 +395,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_dynChanBroadcast(__message, chanId, senderName, text);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -413,9 +413,9 @@ namespace CHATUNI
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_recvBroadcastMessage(__message, message);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

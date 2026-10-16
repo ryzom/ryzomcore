@@ -12,6 +12,11 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/common)
 
 SET(RZ_SERVER_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/server/src)
 
+if(WITH_RYZOM_XSLT)
+  find_package(LibXslt REQUIRED COMPONENTS xsltproc)
+  include(../cmake/add_module_interface.cmake)
+endif()
+
 ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(client)
@@ -22,6 +27,8 @@ IF(WITH_RYZOM_SERVER OR WITH_RYZOM_TOOLS)
   FIND_PACKAGE(MySQL)
   IF(MYSQL_FOUND)
     ADD_SUBDIRECTORY(server)
+  ELSE ()
+    message(WARNING Server dependencies are not build due to missing MySQL package)
   ENDIF()
 ENDIF()
 

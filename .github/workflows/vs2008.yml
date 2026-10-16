@@ -1,0 +1,136 @@
+name: "Ryzom Core: VS2008 / Wine"
+
+# Builds the codebase with the VS2008 SP1 x86 reference toolchain under Wine,
+# using a prepared wine prefix (VS2008 + Windows SDK v6.0A + DirectX SDK June
+# 2010 + Max 2010 SDK + .NET 2.0, packaged from a WinXP install) and the
+# 2019q4 v90 x86 externals. See tool/wine_vs2008/ for the toolchain layer.
+
+on:
+  push:
+    branches: [ "core4", "feature/*", "bugfix/*" ]
+    paths-ignore:
+      - '.devcontainer/**'
+      - '.github/workflows/**'
+      - '!.github/workflows/vs2008.yml'
+      - 'snowballs2/**'
+      - '!snowballs2/**/CMakeLists.txt'
+  pull_request:
+    branches: [ "core4" ]
+  workflow_dispatch:
+
+env:
+  TOOLCHAIN_PREFIX_URL: https://cdn.ryzom.dev/core/toolchain_v90_prefix.7z
+  EXTERNAL_URL: https://cdn.ryzom.dev/core/2019q4_external_v90_x86.7z
+  NL_WINE_VS2008_PREFIX: /home/runner/toolchain_v90_prefix
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: tools-mfc-maxplugin
+            flags: >-
+              -DWITH_MFC=ON -DWITH_RYZOM=ON -DWITH_RYZOM_TOOLS=ON
+              -DWITH_NEL_TOOLS=ON -DWITH_NEL_MAXPLUGIN=ON
+              -DWITH_PIPELINE_NATIVE_OLE=ON -DWITH_LIBGSF=OFF
+              -DWITH_NEL_SAMPLES=OFF -DWITH_SNOWBALLS=OFF
+              -DWITH_RYZOM_CLIENT=OFF -DWITH_RYZOM_SERVER=OFF
+            maxsdk: true
+            package_plugin: true
+          - name: snowballs
+            flags: >-
+              -DWITH_MFC=OFF -DWITH_RYZOM=OFF
+              -DWITH_NEL_TOOLS=OFF -DWITH_NEL_MAXPLUGIN=OFF
+              -DWITH_NEL_SAMPLES=ON -DWITH_SNOWBALLS=ON
+              -DWITH_RYZOM_CLIENT=OFF -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_TOOLS=OFF
+          - name: ryzom-client
+            flags: >-
+              -DWITH_MFC=OFF -DWITH_RYZOM=ON
+              -DWITH_RYZOM_CLIENT=ON -DWITH_RYZOM_PATCH=ON -DWITH_LOGIC=OFF
+              -DWITH_RYZOM_SERVER=OFF -DWITH_RYZOM_TOOLS=OFF
+              -DWITH_NEL_TOOLS=OFF -DWITH_NEL_MAXPLUGIN=OFF
+              -DWITH_NEL_SAMPLES=OFF -DWITH_SNOWBALLS=OFF
+
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install wine and build tools
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends \
+            wine wine32:i386 p7zip-full ninja-build cmake python3
+
+      - name: Cache toolchain prefix and externals
+        id: cache-toolchain
+        uses: actions/cache@v6
+        with:
+          path: |
+            ~/toolchain_v90_prefix
+            ~/2019q4_external_v90_x86
+          key: vs2008-toolchain-v1
+
+      - name: Download and extract toolchain
+        if: steps.cache-toolchain.outputs.cache-hit != 'true'
+        run: |
+          curl -sSfO "$TOOLCHAIN_PREFIX_URL"
+          7z x -y -o"$HOME" toolchain_v90_prefix.7z > /dev/null
+          rm toolchain_v90_prefix.7z
+          # the externals archive is bare (boost/, curl/, ... at the root) —
+          # extract into a named directory
+          curl -sSfO "$EXTERNAL_URL"
+          mkdir -p "$HOME/2019q4_external_v90_x86"
+          7z x -y -o"$HOME/2019q4_external_v90_x86" 2019q4_external_v90_x86.7z > /dev/null
+          rm 2019q4_external_v90_x86.7z
+
+      - name: Set up toolchain
+        run: |
+          # externals live inside the prefix's drive_c by convention
+          ln -sfn "$HOME/2019q4_external_v90_x86" \
+            "$NL_WINE_VS2008_PREFIX/drive_c/2019q4_external_v90_x86"
+          tool/wine_vs2008/setup.sh
+
+      - name: Configure
+        run: |
+          export PROGRAMFILES="$NL_WINE_VS2008_PREFIX/drive_c/Program Files"
+          export WINSDK_DIR="$PROGRAMFILES/Microsoft SDKs/Windows/v6.0A"
+          export DXSDK_DIR="$PROGRAMFILES/Microsoft DirectX SDK (June 2010)"
+          MAXSDK_FLAG=""
+          if [ "${{ matrix.maxsdk }}" = "true" ]; then
+            MAXSDK_FLAG="-DMAXSDK_DIR=$PROGRAMFILES/Autodesk/3ds Max 2010 SDK/maxsdk"
+          fi
+          mkdir -p build && cd build
+          cmake -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$GITHUB_WORKSPACE/tool/wine_vs2008/toolchain.cmake" \
+            -DWITH_SSE2=OFF -DWITH_SSE3=OFF -DWITH_EXTERNAL=OFF -DWITH_STLPORT=OFF \
+            -DWITH_NEL_TESTS=OFF -DWITH_TESTING=OFF -DWITH_STATIC=ON \
+            -DWITH_FFMPEG=OFF -DWITH_MSQUIC=OFF -DWITH_QT=OFF -DWITH_QT5=OFF -DWITH_QT6=OFF \
+            -DWITH_STATIC_LIBXML2=OFF -DWITH_STATIC_CURL=OFF -DCURL_NO_CURL_CMAKE=ON \
+            -DFINAL_VERSION=ON -DWITH_LUA51=OFF -DWITH_LUA53=ON \
+            -DWITH_DRIVER_DIRECT3D=ON -DWITH_DRIVER_DSOUND=ON -DWITH_DRIVER_XAUDIO2=ON \
+            -DWITH_DRIVER_OPENGL=ON -DWITH_DRIVER_OPENGL3=ON -DWITH_DRIVER_OPENAL=ON \
+            -DWITH_ASSIMP=OFF -DWITH_NELNS=OFF -DWITH_3D=ON \
+            ${{ matrix.flags }} \
+            "$MAXSDK_FLAG" \
+            ..
+
+      - name: Build
+        run: |
+          export WINSDK_DIR="$NL_WINE_VS2008_PREFIX/drive_c/Program Files/Microsoft SDKs/Windows/v6.0A"
+          ninja -C build -k 0
+
+      - name: Package max plugin
+        if: matrix.package_plugin
+        run: |
+          tool/wine_vs2008/package_max_plugin.sh \
+            build/bin "$HOME/2019q4_external_v90_x86" package
+
+      - uses: actions/upload-artifact@v7
+        if: matrix.package_plugin
+        with:
+          name: nel_plugin_max_2010_x86
+          path: package/nel_plugin_max_2010_x86
+          if-no-files-found: error

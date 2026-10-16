@@ -389,14 +389,10 @@ namespace NLNET
 					moduleName = className+toString(i++);
 				} while (_ModuleInstances.getB(moduleName) != nullptr);
 			}
-			else
+			else if (_ModuleInstances.getB(moduleName) != nullptr) 	// check that the module name is unique
 			{
-				// check that the module name is unique
-				if (_ModuleInstances.getB(moduleName) != nullptr)
-				{
-					nlwarning("createModule : the name '%s' is already used by another module, can't instantiate the module", moduleName.c_str());
-					return nullptr;
-				}
+				nlwarning("createModule : the name '%s' is already used by another module, can't instantiate the module", moduleName.c_str());
+				return nullptr;
 			}
 
 			IModuleFactory *mf = it->second;
@@ -449,7 +445,7 @@ namespace NLNET
 
 		void deleteModule(IModule *module) NL_OVERRIDE
 		{
-			nlassert(module != NULL);
+			nlassert(module != nullptr);
 
 			// remove module from trackers
 			nlassert(_ModuleInstances.getA(module) != NULL);

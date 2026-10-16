@@ -15,7 +15,7 @@ NL_DEFAULT_PROPS(world_editor_plugin "Ryzom, Tools, World: World Editor Plugin D
 NL_ADD_RUNTIME_FLAGS(world_editor_plugin)
 NL_ADD_LIB_SUFFIX(world_editor_plugin)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS} -DOBJECT_VIEWER_LIB_EXPORTS)
+target_compile_definitions(world_editor_plugin PRIVATE ${MFC_DEFINITIONS} OBJECT_VIEWER_LIB_EXPORTS)
 
 IF (WITH_PCH)
     target_precompile_headers(world_editor_plugin PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/StdAfx.h)

@@ -1,6 +1,7 @@
 <generator header_tag="ADMIN_MODULES_ITF">
 	
 	<include file="nel/misc/time_nl.h"/>
+	<cpp-include file="stdpch.h"/>
 
 	<namespace name="ADMIN">
 

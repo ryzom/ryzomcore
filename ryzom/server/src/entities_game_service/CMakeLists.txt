@@ -91,6 +91,11 @@ ADD_EXECUTABLE(ryzom_entities_game_service WIN32
 	${SRC_TEAM_MANAGER})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_entities_game_service PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
+if (WITH_RYZOM_XSLT)
+	add_module_interface(XML_SOURCES
+			#guild_manager/guild_unifier_itf.xml
+	)
+endif ()
 
 TARGET_LINK_LIBRARIES(ryzom_entities_game_service
 		                PRIVATE

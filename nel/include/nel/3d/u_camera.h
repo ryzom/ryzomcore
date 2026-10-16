@@ -83,6 +83,10 @@ public:
 
 	/// Constructors
 	UCamera() { _Object = nullptr; }
+#ifdef NL_NO_NULLPTR_TYPE
+	/// Init from the emulated nullptr (the implicit two-step conversion chain needs C++11's real nullptr).
+	UCamera(::CNullPtrT) { _Object = NULL; }
+#endif
 	UCamera(class CCamera *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CCamera *object) { _Object = (ITransformable*)object; }

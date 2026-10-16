@@ -3,7 +3,7 @@ project(NeL VERSION ${RyzomCore_VERSION} LANGUAGES CXX C)
 set(project_export_name "${PROJECT_NAME}-targets")
 
 IF(WITH_STATIC_DRIVERS)
-  ADD_DEFINITIONS(-DNL_STATIC)
+  add_compile_definitions(NL_STATIC)
 ENDIF()
 
 IF(WIN32)

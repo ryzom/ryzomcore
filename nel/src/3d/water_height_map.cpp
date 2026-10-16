@@ -308,11 +308,7 @@ void		CWaterHeightMap::makeCpy(uint buffer, uint dX, uint dY, uint sX, uint sY, 
 	{
 		if (dest < src)
 		{
-#ifdef NL_COMP_VC14
-			std::copy(src, src + width, stdext::make_unchecked_array_iterator(dest));
-#else
 			std::copy(src, src + width, dest);
-#endif
 		}
 		else
 		{

@@ -979,8 +979,7 @@ namespace NLNET
 					}
 					else
 					{
-						if (proxy->_SecurityData != nullptr)
-							delete proxy->_SecurityData;
+						delete proxy->_SecurityData;
 						proxy->_SecurityData = modDesc.SecDesc.SecurityData;
 					}
 				}
@@ -1240,7 +1239,7 @@ namespace NLNET
 				{
 					IModule *module = first->second;
 					if (removedModule->getGatewayRoute() != nullptr
-				        || module->getModuleId() != removedModule->getForeignModuleId())
+						|| module->getModuleId() != removedModule->getForeignModuleId())
 					{
 						module->_onModuleDown(removedModule);
 					}
@@ -1326,7 +1325,7 @@ namespace NLNET
 			if (addresseeProxy->getGatewayRoute() == nullptr)
 			{
 				// the module is local, just forward the call to the dispatcher
-				nlassert(senderProxy != NULL);
+				nlassert(senderProxy != nullptr);
 				nlassert(_ModuleProxies.find(senderProxy->getModuleProxyId()) != _ModuleProxies.end());
 
 				// invert the message for immediate dispatching if needed
@@ -1974,7 +1973,7 @@ namespace NLNET
 
 			CMessage updateMsg("MOD_UPD");
 
-			// compil all update in a single message
+			// compile all updates in a single message
 			while (!route->PendingEvents.empty())
 			{
 				CGatewayRoute::TPendingEvent &pe = route->PendingEvents.front();
@@ -2332,8 +2331,10 @@ namespace NLNET
 
 			log.displayNL("The gateway has %u locally plugged module :", _PluggedModules.getAToBMap().size());
 			{
-				for (const auto& [_, module] : _PluggedModules.getAToBMap())
+				TPluggedModules::TAToBMap::const_iterator first(_PluggedModules.getAToBMap().begin()), last(_PluggedModules.getAToBMap().end());
+				for (; first != last; ++first)
 				{
+					IModule *module = first->second;
 					log.displayNL("    ID:%5u : \tName = '%s' \tclass = '%s'",
 						module->getModuleId(),
 						module->getModuleName().c_str(),
@@ -2344,8 +2345,11 @@ namespace NLNET
 
 			log.displayNL("The gateway as %u transport activated :", _Transports.size());
 			{
-				for (const auto& [name, transport] : _Transports)
+				TTransportList::iterator first(_Transports.begin()), last(_Transports.end());
+				for (; first != last; ++first)
 				{
+					const string &name = first->first;
+					IGatewayTransport *transport = first->second;
 
 					log.displayNL("Transport '%s' (transport class is '%s') :",
 						name.c_str(),

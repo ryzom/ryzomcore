@@ -41,7 +41,11 @@
 // See georges_edit.cpp for the implementation of this class
 //
 
+// Two width-pure variants: the key gets concatenated with both narrow ("...")
+// and TCHAR (_T("...")) literals, and pre-C++11 compilers reject mixed
+// narrow/wide string concatenation (C2308) — pick the matching one per site.
 #define GEORGES_EDIT_BASE_REG_KEY "Software\\Nevrax\\Georges Edit"
+#define GEORGES_EDIT_BASE_REG_KEY_T _T("Software\\Nevrax\\Georges Edit")
 #define GEORGES_EDIT_BROWSE_LABEL "--- Browse..."
 
 extern const TCHAR* TypeFilter;

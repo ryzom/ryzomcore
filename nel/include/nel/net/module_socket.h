@@ -90,6 +90,7 @@ namespace NLNET
 
 		virtual void _onModulePlugged(const TModulePtr &pluggedModule);
 		virtual void _onModuleUnplugged(const TModulePtr &pluggedModule);
+		bool isPlugged(IModule *module) const;
 
 		virtual void _sendModuleMessage(IModule *senderModule, TModuleId destModuleProxyId, const NLNET::CMessage &message) =0;
 

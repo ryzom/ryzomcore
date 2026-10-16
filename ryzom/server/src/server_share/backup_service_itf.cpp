@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "backup_service_itf.h"
 
 namespace BS
@@ -28,7 +28,7 @@ namespace BS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CBackupServiceSkel::TMessageHandlerMap &CBackupServiceSkel::getMessageHandlers() const
 	{
@@ -38,19 +38,19 @@ namespace BS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("BSSF"), &CBackupServiceSkel::saveFile_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("BSLF"), &CBackupServiceSkel::loadFile_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CBackupServiceSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -69,7 +69,7 @@ namespace BS
 		return true;
 	}
 
-	
+
 	void CBackupServiceSkel::saveFile_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CBackupServiceSkel_saveFile_BSSF);
@@ -99,9 +99,9 @@ namespace BS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_saveFile(__message, fileName, data);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -117,9 +117,9 @@ namespace BS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_loadFile(__message, fileName, requestId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -151,7 +151,7 @@ namespace BS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CBackupServiceClientSkel::TMessageHandlerMap &CBackupServiceClientSkel::getMessageHandlers() const
 	{
@@ -161,19 +161,19 @@ namespace BS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("BSLFR"), &CBackupServiceClientSkel::loadFileResult_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("BSFU"), &CBackupServiceClientSkel::fileUpdate_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CBackupServiceClientSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -192,7 +192,7 @@ namespace BS
 		return true;
 	}
 
-	
+
 	void CBackupServiceClientSkel::loadFileResult_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CBackupServiceClientSkel_loadFileResult_BSLFR);
@@ -226,9 +226,9 @@ namespace BS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_loadFileResult(__message, requestId, fileName, fileTimeStamp, data);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -244,9 +244,9 @@ namespace BS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_fileUpdate(__message, fileName, content);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

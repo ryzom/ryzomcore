@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "mail_forum_itf.h"
 
 namespace MFS
@@ -28,7 +28,7 @@ namespace MFS
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CMailForumNotifierSkel::TMessageHandlerMap &CMailForumNotifierSkel::getMessageHandlers() const
 	{
@@ -38,19 +38,19 @@ namespace MFS
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("MFS_NM"), &CMailForumNotifierSkel::notifyMail_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("MFS_NFM"), &CMailForumNotifierSkel::notifyForumMessage_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
-		return handlers;			
+		return handlers;
 	}
 	bool CMailForumNotifierSkel::fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message)
 	{
@@ -69,7 +69,7 @@ namespace MFS
 		return true;
 	}
 
-	
+
 	void CMailForumNotifierSkel::notifyMail_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CMailForumNotifierSkel_notifyMail_MFS_NM);
@@ -99,9 +99,9 @@ namespace MFS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_notifyMail(__message, charId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);
@@ -118,9 +118,9 @@ namespace MFS
 		}
 		else
 		{
-			// send the message for remote dispatching and execution or local queing 
+			// send the message for remote dispatching and execution or local queing
 			NLNET::CMessage __message;
-			
+
 			buildMessageFor_notifyForumMessage(__message, charId, guildId, threadId);
 
 			_ModuleProxy->sendModuleMessage(sender, __message);

@@ -31,10 +31,10 @@
 #include "nel/net/module_gateway.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 namespace CNM
 {
-	
+
 	class TCharNameInfo;
 
 	class TCharMappedInfo;
@@ -45,12 +45,12 @@ namespace CNM
 	class TCharNameInfo
 	{
 	protected:
-		// 
+		//
 		NLMISC::CEntityId	_CharEid;
-		// 
+		//
 		ucstring	_CharName;
 	public:
-		// 
+		//
 		const NLMISC::CEntityId &getCharEid() const
 		{
 			return _CharEid;
@@ -61,16 +61,11 @@ namespace CNM
 			return _CharEid;
 		}
 
-
 		void setCharEid(const NLMISC::CEntityId &value)
 		{
-
-
 				_CharEid = value;
-
-				
 		}
-			// 
+		//
 		const ucstring &getCharName() const
 		{
 			return _CharName;
@@ -81,16 +76,11 @@ namespace CNM
 			return _CharName;
 		}
 
-
 		void setCharName(const ucstring &value)
 		{
-
-
 				_CharName = value;
-
-				
 		}
-	
+
 		bool operator == (const TCharNameInfo &other) const
 		{
 			return _CharEid == other._CharEid
@@ -101,35 +91,33 @@ namespace CNM
 		// constructor
 		TCharNameInfo()
 		{
-
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_CharEid);
 			s.serial(_CharName);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
 
-		/////////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
 	class TCharMappedInfo
 	{
 	protected:
-		// 
+		//
 		NLMISC::CEntityId	_CharEid;
-		// 
+		//
 		uint32	_StringId;
 	public:
-		// 
+		//
 		const NLMISC::CEntityId &getCharEid() const
 		{
 			return _CharEid;
@@ -140,16 +128,11 @@ namespace CNM
 			return _CharEid;
 		}
 
-
 		void setCharEid(const NLMISC::CEntityId &value)
 		{
-
-
 				_CharEid = value;
-
-				
 		}
-			// 
+		//
 		uint32 getStringId() const
 		{
 			return _StringId;
@@ -157,11 +140,9 @@ namespace CNM
 
 		void setStringId(uint32 value)
 		{
-
 				_StringId = value;
-
 		}
-	
+
 		bool operator == (const TCharMappedInfo &other) const
 		{
 			return _CharEid == other._CharEid
@@ -172,24 +153,22 @@ namespace CNM
 		// constructor
 		TCharMappedInfo()
 		{
-
 		}
-		
+
 		void serial(NLMISC::IStream &s)
 		{
 			s.serial(_CharEid);
 			s.serial(_StringId);
-
 		}
-		
+
 
 	private:
-	
+
 
 	};
 
 
-	
+
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
@@ -213,12 +192,12 @@ namespace CNM
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -228,7 +207,7 @@ namespace CNM
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void mapCharNames_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		// declare one interceptor member of the skeleton
@@ -272,7 +251,7 @@ namespace CNM
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CCharNameMapperSkel::TInterceptor *interceptor = NULL;
+				CCharNameMapperSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -280,7 +259,7 @@ namespace CNM
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CCharNameMapperProxy()
@@ -297,7 +276,7 @@ namespace CNM
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_mapCharNames(NLNET::CMessage &__message, const std::vector < TCharNameInfo > &charNameInfos);
-	
+
 
 
 
@@ -326,12 +305,12 @@ namespace CNM
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -341,7 +320,7 @@ namespace CNM
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void charNamesMapped_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		// declare one interceptor member of the skeleton
@@ -385,7 +364,7 @@ namespace CNM
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CCharNameMapperClientSkel::TInterceptor *interceptor = NULL;
+				CCharNameMapperClientSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -393,7 +372,7 @@ namespace CNM
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CCharNameMapperClientProxy()
@@ -410,12 +389,12 @@ namespace CNM
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_charNamesMapped(NLNET::CMessage &__message, const std::vector < TCharMappedInfo > &charMappedInfos);
-	
+
 
 
 
 	};
 
 }
-	
+
 #endif

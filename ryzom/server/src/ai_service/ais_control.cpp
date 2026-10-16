@@ -61,11 +61,11 @@ public:
 	{
 		if (module == _ServerAnimationProxy)
 		{
-			_ServerAnimationProxy = NULL;
+			_ServerAnimationProxy = nullptr;
 		}
 		else if (module == _CharacterControlProxy)
 		{
-			_CharacterControlProxy = NULL;
+			_CharacterControlProxy = nullptr;
 		}
 
 	}

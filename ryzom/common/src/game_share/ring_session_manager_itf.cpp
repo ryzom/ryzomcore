@@ -1,4 +1,3 @@
-
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
@@ -20,7 +19,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "stdpch.h"
-	
+
 #include "ring_session_manager_itf.h"
 
 namespace RSMGR
@@ -29,7 +28,7 @@ namespace RSMGR
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CRingSessionManagerSkel::TMessageHandlerMap &CRingSessionManagerSkel::getMessageHandlers() const
 	{
@@ -39,31 +38,31 @@ namespace RSMGR
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("RDSS"), &CRingSessionManagerSkel::registerDSS_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SSC"), &CRingSessionManagerSkel::sessionCreated_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("RSE"), &CRingSessionManagerSkel::reportSessionEvent_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SCS"), &CRingSessionManagerSkel::scenarioStarted_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("RCK"), &CRingSessionManagerSkel::reportCharacterKicked_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SCE"), &CRingSessionManagerSkel::scenarioEnded_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
@@ -86,7 +85,7 @@ namespace RSMGR
 		return true;
 	}
 
-	
+
 	void CRingSessionManagerSkel::registerDSS_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CRingSessionManagerSkel_registerDSS_RDSS);
@@ -340,7 +339,7 @@ namespace RSMGR
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	
+
 
 	const CRingSessionManagerClientSkel::TMessageHandlerMap &CRingSessionManagerClientSkel::getMessageHandlers() const
 	{
@@ -350,43 +349,43 @@ namespace RSMGR
 		if (!init)
 		{
 			std::pair < TMessageHandlerMap::iterator, bool > res;
-			
+
 			res = handlers.insert(std::make_pair(std::string("CSS"), &CRingSessionManagerClientSkel::createSession_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("AHC"), &CRingSessionManagerClientSkel::addCharacterInSession_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CLSDSS"), &CRingSessionManagerClientSkel::closeSession_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SH"), &CRingSessionManagerClientSkel::stopHibernation_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CK"), &CRingSessionManagerClientSkel::characterKicked_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("CUK"), &CRingSessionManagerClientSkel::characterUnkicked_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("STOCTA"), &CRingSessionManagerClientSkel::teleportOneCharacterToAnother_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SHSA"), &CRingSessionManagerClientSkel::hibernateSession_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			res = handlers.insert(std::make_pair(std::string("SSSP"), &CRingSessionManagerClientSkel::setSessionStartParams_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			
+
 			init = true;
 		}
 
@@ -409,7 +408,7 @@ namespace RSMGR
 		return true;
 	}
 
-	
+
 	void CRingSessionManagerClientSkel::createSession_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message)
 	{
 		H_AUTO(CRingSessionManagerClientSkel_createSession_CSS);

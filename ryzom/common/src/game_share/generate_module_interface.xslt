@@ -1,14 +1,26 @@
 <?xml version="1.0"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:output method="text" indent="no"/>
+	<xsl:output method="text" encoding="UTF-8" indent="no"/>
 
 	<!-- Output : can be 'header', 'cpp' or 'php' -->
 	<xsl:param name="output" select="'header'"/>
 	<xsl:param name="filename"/>
 
 	<!-- A special template applyer that is mode aware -->
-	<xsl:template name="myApplyTemplate"><xsl:choose><xsl:when test="$output = 'header'"><xsl:apply-templates mode="header"/></xsl:when><xsl:when test="$output = 'cpp'"><xsl:apply-templates  mode="cpp"/></xsl:when><xsl:when test="$output = 'php'"><xsl:apply-templates mode="php"/></xsl:when></xsl:choose></xsl:template>
+	<xsl:template name="myApplyTemplate">
+		<xsl:choose>
+			<xsl:when test="$output = 'header'">
+				<xsl:apply-templates mode="header"/>
+			</xsl:when>
+			<xsl:when test="$output = 'cpp'">
+				<xsl:apply-templates mode="cpp"/>
+			</xsl:when>
+			<xsl:when test="$output = 'php'">
+				<xsl:apply-templates mode="php"/>
+			</xsl:when>
+		</xsl:choose>
+	</xsl:template>
 
 	<!-- some stupide template to remove unwanted text from output -->
 	<xsl:template match="text()" mode="php"/>
@@ -19,9 +31,8 @@
 	<!-- #####         Root template matcher               ####### -->
 	<!-- ######################################################### -->
 	<xsl:template match="generator">
-<xsl:if test="$output != 'php'">
-// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
-// Copyright (C) 2010-2021  Winch Gate Property Limited
+<xsl:if test="$output != 'php'">// Ryzom - MMORPG Framework &lt;http://dev.ryzom.com/projects/ryzom/&gt;
+// Copyright (C) 2010  Winch Gate Property Limited
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
@@ -85,7 +96,7 @@
 -->
 namespace <xsl:value-of select="@name"/>
 {
-	<!-- forward declaration of class -->
+<!-- forward declaration of class -->
 <xsl:for-each select="class">
 	class <xsl:value-of select="@name"/>;
 <xsl:if test="database">
@@ -104,10 +115,10 @@ namespace <xsl:value-of select="@name"/>
 </xsl:for-each>
 <xsl:call-template name="myApplyTemplate"/>
 }
-	</xsl:template>
+</xsl:template>
 
 	<!-- _______________________________________ -->
-	<xsl:template match="namespace" mode="cpp">
+<xsl:template match="namespace" mode="cpp">
 #include "<xsl:value-of select="$filename"/>.h"
 
 namespace <xsl:value-of select="@name"/>
@@ -124,14 +135,14 @@ namespace <xsl:value-of select="@name"/>
 	<!-- ######################################################### -->
 	<xsl:template match="include" mode="header">
 #include "<xsl:value-of select="@file"/>"
-	</xsl:template>
+</xsl:template>
 	<xsl:template match="sys-include" mode="header">
 #include &lt;<xsl:value-of select="@file"/>&gt;
 	</xsl:template>
 
 	<xsl:template match="cpp-include" mode="cpp">
 #include "<xsl:value-of select="@file"/>"
-	</xsl:template>
+</xsl:template>
 
 	<xsl:template match="php-include" mode="php">
 <xsl:text>&lt;?php
@@ -184,19 +195,20 @@ namespace <xsl:value-of select="@name"/>
 </xsl:if>
 		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
 
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;message);
 	private:
 
-		typedef void (<xsl:value-of select="@name"/>Skel::*TMessageHandler)(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;message);
+		typedef void (<xsl:value-of select="@name"/><xsl:text>Skel::*TMessageHandler)(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;message);
 		typedef std::map&lt;std::string, TMessageHandler&gt;	TMessageHandlerMap;
 
 		const TMessageHandlerMap &amp;getMessageHandlers() const;
 
+</xsl:text>
 		<xsl:for-each select="method">
 <xsl:choose>
 <xsl:when test="not(return)">
@@ -261,7 +273,7 @@ namespace <xsl:value-of select="@name"/>
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				<xsl:value-of select="@name"/>Skel::TInterceptor *interceptor = NULL;
+				<xsl:value-of select="@name"/>Skel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast &lt; NLNET::CModuleBase* &gt;(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -269,7 +281,7 @@ namespace <xsl:value-of select="@name"/>
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~<xsl:value-of select="@name"/>Proxy()
@@ -307,9 +319,7 @@ namespace <xsl:value-of select="@name"/>
 
 			for (; first != last; ++first)
 			{
-				NLNET::IModuleProxy *proxy = *first;
-
-				proxy->sendModuleMessage(sender, message);
+				(*first)->sendModuleMessage(sender, message);
 			}
 
 		}<xsl:text>
@@ -321,7 +331,7 @@ namespace <xsl:value-of select="@name"/>
 <xsl:text>
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &amp;buildMessageFor_</xsl:text><xsl:value-of select="@name"/>(NLNET::CMessage &amp;__message<xsl:call-template name="makeParamList"/>);
-	</xsl:for-each>
+</xsl:for-each>
 
 
 
@@ -337,8 +347,8 @@ namespace <xsl:value-of select="@name"/>
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
 	/////////////////////////////////////////////////////////////////
-	<xsl:variable name="skelName" select="concat(@name, 'Skel')"/>
-	<xsl:variable name="proxyName" select="concat(@name, 'Proxy')"/>
+<xsl:variable name="skelName" select="concat(@name, 'Skel')"/>
+<xsl:variable name="proxyName" select="concat(@name, 'Proxy')"/>
 
 	const <xsl:value-of select="$skelName"/>::TMessageHandlerMap &amp;<xsl:value-of select="$skelName"/>::getMessageHandlers() const
 	{
@@ -348,11 +358,11 @@ namespace <xsl:value-of select="@name"/>
 		if (!init)
 		{
 			std::pair &lt; TMessageHandlerMap::iterator, bool &gt; res;
-			<xsl:for-each select="method">
+<xsl:for-each select="method">
 			res = handlers.insert(std::make_pair(std::string("<xsl:value-of select="@msg"/>"), &amp;<xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel));
 			// if this assert, you have a doubly message name in your interface definition !
 			nlassert(res.second);
-			</xsl:for-each>
+</xsl:for-each>
 			init = true;
 		}
 
@@ -375,10 +385,11 @@ namespace <xsl:value-of select="@name"/>
 		return true;
 	}
 
-	<xsl:for-each select="method">
+<xsl:for-each select="method">
 <xsl:choose>
 <xsl:when test="not(return)">
-	void <xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;__message)
+	void <xsl:value-of select="$skelName"/>::<xsl:value-of select="@name"/>_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &amp;<xsl:choose>
+	<xsl:when test="not(param)">/* __message */</xsl:when><xsl:otherwise>__message</xsl:otherwise></xsl:choose>)
 	{
 		H_AUTO(<xsl:value-of select="$skelName"/>_<xsl:value-of select="@name"/>_<xsl:value-of select="@msg"/>);
 <xsl:for-each select="param">
@@ -527,7 +538,7 @@ namespace <xsl:value-of select="@name"/>
 	<xsl:text>const std::vector&lt;</xsl:text><xsl:value-of select="@type"/>&gt; &amp;<xsl:value-of select="@name"/><xsl:if test="position() != last()">, </xsl:if>
 					</xsl:when>
 					<xsl:otherwise>
-	<xsl:if test="@byref = 'true' or @enum='smart'">const </xsl:if><xsl:value-of select="@type"/><xsl:text> </xsl:text><xsl:if test="@byref = 'true' or @enum = 'smart'">&amp;</xsl:if><xsl:value-of select="@name"/><xsl:if test="position() != last()">, </xsl:if>
+	<xsl:if test="@byref = 'true' or @enum='smart' or @enum='bitset'">const </xsl:if><xsl:value-of select="@type"/><xsl:text> </xsl:text><xsl:if test="@byref = 'true' or @enum = 'smart' or @enum = 'bitset'">&amp;</xsl:if><xsl:value-of select="@name"/><xsl:if test="position() != last()">, </xsl:if>
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:for-each>
@@ -679,7 +690,7 @@ namespace <xsl:value-of select="@name"/>
 	<xsl:call-template name="enumGen">
 		<xsl:with-param name="enumName" select="concat(@name, 'Enum')"/>
 	</xsl:call-template>
-	typedef NLMISC::CEnumBitset &lt; <xsl:value-of select="@name"/>Enum, uint32, <xsl:value-of select="@name"/>Enum::invalid_val, ',', NLMISC::TContainedEnum &lt; <xsl:value-of select="@name"/>Enum, uint32 &gt;, <xsl:value-of select="@name"/>Enum::TValues &gt; <xsl:value-of select="@name"/>;
+	typedef NLMISC::CEnumBitset &lt; <xsl:value-of select="@name"/>Enum, uint32, <xsl:value-of select="@name"/>Enum::max_val, ',', NLMISC::TContainedEnum &lt; <xsl:value-of select="@name"/>Enum, uint32 &gt;, <xsl:value-of select="@name"/>Enum::TValues &gt; <xsl:value-of select="@name"/>;
 </xsl:if>
 <xsl:if test="not(@bitset='true')">
 	<xsl:call-template name="enumGen">
@@ -715,12 +726,18 @@ namespace <xsl:value-of select="@name"/>
 			end_of_enum,
 </xsl:if>
 			<!-- generate an invalid and undefined value-->
+<xsl:if test="@bitset='true'">
+			empty_val = 0,
+			max_val = ((uint32)<xsl:value-of select="item[last()]/@name"/> &lt;&lt; 1) - 1,
+</xsl:if>
+<xsl:if test="not(@bitset='true')">
 			invalid_val,
+</xsl:if>
 			<!-- generate a count of node -->
 			/// Number of enumerated values
 			nb_enum_items = <xsl:value-of select="count(item)"/>
 		};
-		<!-- generate an index table if the enum is 'linear' -->
+<!-- generate an index table if the enum is 'linear' -->
 		<xsl:if test="count(item/@value) = 0 or (count(item/@value) = 1 and item[1]/@value)">
 		/// Index table to convert enum value to linear index table
 		const std::map&lt;TValues, uint32&gt; &amp;getIndexTable() const
@@ -729,26 +746,27 @@ namespace <xsl:value-of select="@name"/>
 			static bool init = false;
 			if (!init)
 			{
-				// fill the index table
-			<xsl:for-each select="item">
-<xsl:text>	indexTable.insert(std::make_pair(</xsl:text><xsl:value-of select="@name"/>, <xsl:value-of select="position()-1"/>));
-			</xsl:for-each>
+				// fill the index table<xsl:for-each select="item"><xsl:text>
+				indexTable.insert(std::make_pair(</xsl:text><xsl:value-of select="@name"/>, <xsl:value-of select="position()-1"/>));</xsl:for-each>
+
 				init = true;
 			}
 
 			return indexTable;
 		}
-		</xsl:if>
+</xsl:if>
 
 		static const NLMISC::CStringConversion&lt;TValues&gt; &amp;getConversionTable()
 		{
 			NL_BEGIN_STRING_CONVERSION_TABLE(TValues)
 <xsl:for-each select="item">				NL_STRING_CONVERSION_TABLE_ENTRY(<xsl:value-of select="@name"/>)
-</xsl:for-each>				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
-			};
+</xsl:for-each>
+<xsl:if test="not(@bitset='true')">				NL_STRING_CONVERSION_TABLE_ENTRY(invalid_val)
+</xsl:if>			};
 			static NLMISC::CStringConversion&lt;TValues&gt;
 			conversionTable(TValues_nl_string_conversion_table, sizeof(TValues_nl_string_conversion_table)
-			/ sizeof(TValues_nl_string_conversion_table[0]),  invalid_val);
+			/ sizeof(TValues_nl_string_conversion_table[0]),  <xsl:if test="@bitset='true'">empty_val</xsl:if><xsl:if test="not(@bitset='true')">invalid_val</xsl:if>);
+
 			return conversionTable;
 		}
 
@@ -756,8 +774,10 @@ namespace <xsl:value-of select="@name"/>
 
 	public:
 		<xsl:value-of select="$enumName"/>()
-			: _Value(invalid_val)
-		{
+<xsl:if test="@bitset='true'">			: _Value(empty_val)
+</xsl:if>
+<xsl:if test="not(@bitset='true')">			: _Value(invalid_val)
+</xsl:if>		{
 		}
 		<xsl:value-of select="$enumName"/>(TValues value)
 			: _Value(value)
@@ -818,13 +838,14 @@ namespace <xsl:value-of select="@name"/>
 		// return true if the actual value of the enum is valid, otherwise false
 		bool isValid()
 		{
-			if (_Value == invalid_val)
+<xsl:if test="not(@bitset='true')">			if (_Value == invalid_val)
 				return false;
+</xsl:if>
 			// not invalid, check other enum value
 			return getConversionTable().isValid(_Value);
 		}
 
-		<!-- generate an index table if the enum is 'linear' -->
+<!-- generate an index table if the enum is 'linear' -->
 		<xsl:if test="count(item/@value) = 0 or (count(item/@value) = 1 and item[1]/@value)">
 		uint32 asIndex()
 		{
@@ -832,14 +853,14 @@ namespace <xsl:value-of select="@name"/>
 			nlassert(it != getIndexTable().end());
 			return it->second;
 		}
-		</xsl:if>
+</xsl:if>
 
 		<!-- insert user code if any -->
 		<xsl:if test="header_code">
 <xsl:value-of select="header_code"/>
 		</xsl:if>
 	};
-	</xsl:template>
+</xsl:template>
 
 
 
@@ -849,7 +870,7 @@ namespace <xsl:value-of select="@name"/>
 
 	<xsl:template name="makeProperty">
 		<xsl:param name="property"/>
-		<xsl:text>		</xsl:text>// <xsl:value-of select="$property/@doc"/><xsl:text>
+		<xsl:text>		//</xsl:text><xsl:if test="$property/@doc != ''"><xsl:text> </xsl:text></xsl:if><xsl:value-of select="$property/@doc"/><xsl:text>
 </xsl:text>
 		<xsl:text>		</xsl:text><xsl:value-of select="$property/@type"/><xsl:text>	_</xsl:text><xsl:value-of select="$property/@name"/><xsl:text>;
 </xsl:text>
@@ -858,8 +879,7 @@ namespace <xsl:value-of select="@name"/>
 	<!--/////////////////////////////////////////////////////////-->
 	<xsl:template name="makePropertyAccessor">
 		<xsl:param name="property"/>
-		<xsl:text>		</xsl:text>// <xsl:value-of select="$property/@doc"/><xsl:text>
-</xsl:text>
+		<xsl:text>		//</xsl:text><xsl:if test="$property/@doc != ''"><xsl:text> </xsl:text></xsl:if><xsl:value-of select="$property/@doc"/><xsl:text>&#xa;</xsl:text>
 <xsl:choose>
 	<xsl:when test="$property/@byref = 'true'">
 		<xsl:text>		</xsl:text>const <xsl:value-of select="$property/@type"/> &amp;get<xsl:value-of select="$property/@name"/>() const
@@ -871,19 +891,17 @@ namespace <xsl:value-of select="@name"/>
 	<!-- for non database 'by reference' property, generate a non const get accessor -->
 		<xsl:text>		</xsl:text><xsl:value-of select="$property/@type"/> &amp;get<xsl:value-of select="$property/@name"/>()
 		{
-			return _<xsl:value-of select="$property/@name"/>;
-		}
+			return _<xsl:value-of select="$property/@name"/><xsl:text>;
+		}</xsl:text>
 </xsl:if>
 
 		void set<xsl:value-of select="$property/@name"/>(const <xsl:value-of select="$property/@type"/> &amp;value)
-		{
-<xsl:if test="../database">
+		{<xsl:if test="../database">
 			if (_<xsl:value-of select="$property/@name"/> != value)
 			{
 				if (getPersistentState() != NOPE::os_transient)
 					setPersistentState(NOPE::os_dirty);
 </xsl:if>
-
 				<xsl:variable name="relation" select="parent[@db_col = $property/@db_col]"/>
 				<xsl:if test="$relation">
 					<!-- this property is a child/parent relation, update the parent -->
@@ -893,10 +911,8 @@ namespace <xsl:value-of select="@name"/>
 				if (parent &amp;&amp; getPersistentState() != NOPE::os_transient )
 					parent->remove<xsl:value-of select="$relation/@child_name"/>Child(this);
 				</xsl:if>
-
-				_<xsl:value-of select="$property/@name"/> = value;
-
-				<xsl:if test="$relation">
+				_<xsl:value-of select="$property/@name"/><xsl:text> = value;</xsl:text>
+<xsl:if test="$relation">
 					<!-- this property is a child/parent relation, update the parent -->
 
 				<xsl:value-of select="$relation/@class"/>Ptr parent = <xsl:value-of select="$relation/@class"/>::loadFromCache(_<xsl:value-of select="$property/@name"/>);
@@ -907,7 +923,7 @@ namespace <xsl:value-of select="@name"/>
 			}
 </xsl:if>
 		}
-	</xsl:when>
+</xsl:when>
 	<xsl:otherwise>
 		<xsl:text>		</xsl:text><xsl:value-of select="$property/@type"/> get<xsl:value-of select="$property/@name"/>() const
 		{
@@ -915,21 +931,17 @@ namespace <xsl:value-of select="@name"/>
 		}
 
 		void set<xsl:value-of select="$property/@name"/>(<xsl:value-of select="$property/@type"/> value)
-		{
-<xsl:if test="../database">
+		{<xsl:if test="../database">
 			if (_<xsl:value-of select="$property/@name"/> != value)
 			{
 				if (getPersistentState() != NOPE::os_transient)
-					setPersistentState(NOPE::os_dirty);
-</xsl:if>
-				_<xsl:value-of select="$property/@name"/> = value;
-<xsl:if test="../database">
-			}
-</xsl:if>
+					setPersistentState(NOPE::os_dirty);</xsl:if>
+				_<xsl:value-of select="$property/@name"/> = value;<xsl:if test="../database">
+			}</xsl:if>
 		}
-	</xsl:otherwise>
+</xsl:otherwise>
 </xsl:choose>
-	</xsl:template>
+</xsl:template>
 
 
 	<!--/////////////////////////////////////////////////////////-->
@@ -1018,6 +1030,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@name != $uniqueId and @db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += _<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1041,6 +1059,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += _<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1067,7 +1091,14 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
-			qs += "'"+_<xsl:value-of select="@name"/>.toString()+"'";
+			qs += _<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)";
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
+			qs += "'"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
+</xsl:text>
 				</xsl:when>
 				<xsl:when test="@date='true'">
 			qs += "'"+MSW::encodeDate(_<xsl:value-of select="@name"/>)<xsl:text>+"'";
@@ -1092,6 +1123,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@name != $uniqueId and @db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += "<xsl:value-of select="@db_col"/> = " + (_<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)");
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "<xsl:value-of select="@db_col"/> = '"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1115,6 +1152,12 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:for-each select="property[@db_col]">
 			<xsl:choose>
 				<xsl:when test="@enum='true' or @enum='smart'">
+		qs += "<xsl:value-of select="@db_col"/> = " + (_<xsl:value-of select="@name"/><xsl:text>.isValid()
+			? "'"+_</xsl:text><xsl:value-of select="@name"/><xsl:text>.toString()+"'"
+			: "DEFAULT(</xsl:text><xsl:value-of select="@db_col"/><xsl:text>)");
+</xsl:text>
+				</xsl:when>
+				<xsl:when test="@enum='bitset'">
 		qs += "<xsl:value-of select="@db_col"/> = '"+_<xsl:value-of select="@name"/><xsl:text>.toString()+"'";
 </xsl:text>
 				</xsl:when>
@@ -1242,9 +1285,10 @@ namespace <xsl:value-of select="@name"/>
 <xsl:if test="not(database)">
 <xsl:text>
 		// constructor
-		</xsl:text><xsl:value-of select="$className"/>()
-		{
-<xsl:if test="property[@default]">			// Default initialisation
+		</xsl:text><xsl:value-of select="$className"/><xsl:text>()
+		{</xsl:text>
+<xsl:if test="property[@default]">
+			// Default initialisation
 </xsl:if>
 <xsl:for-each select="property[@default]">
 <xsl:text>			</xsl:text>_<xsl:value-of select="@name"/> = <xsl:value-of select="@default"/>;
@@ -1383,17 +1427,16 @@ namespace <xsl:value-of select="@name"/>
 		<xsl:if test="serial or message">
 <xsl:text>
 		void serial(NLMISC::IStream &amp;s)
-		{
-</xsl:text>
+		{</xsl:text>
 	<xsl:for-each select="property">
-<xsl:text>			s.serial</xsl:text><xsl:value-of select="@serial"/>(_<xsl:value-of select="@name"/>)<xsl:text>;
-</xsl:text>
+		<xsl:text>
+			s.serial</xsl:text><xsl:value-of select="@serial"/>(_<xsl:value-of select="@name"/>)<xsl:text>;</xsl:text>
 	</xsl:for-each>
 		}
-		</xsl:if>
+</xsl:if>
 
 	private:
-	<!-- generate private child container modifier -->
+<!-- generate private child container modifier -->
 <xsl:for-each select="child_class[relation = 'one-to-many' and cont='vector']">
 
 		/// add a child in the container
@@ -1497,11 +1540,12 @@ namespace <xsl:value-of select="@name"/>
 		// Set the persistent state of the object and do some house keeping
 		void setPersistentState(NOPE::TObjectState state);
 
-</xsl:if>
+</xsl:if><xsl:text>
 
 	};
 
 
+</xsl:text>
 	</xsl:template>
 
 
@@ -1721,8 +1765,7 @@ namespace <xsl:value-of select="@name"/>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @cont='vector']">
 				{
 					// cascading deletion for vector child <xsl:value-of select="@name"/>
-					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
-					{
+					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
 
 					const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
 
@@ -1731,14 +1774,12 @@ namespace <xsl:value-of select="@name"/>
 						get<xsl:value-of select="@name"/>ByIndex((uint32)childs.size()-1)->remove(connection);
 					}
 				}
-				}
 
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @cont='map']">
 				{
 					// cascading deletion for map child <xsl:value-of select="@name"/>
-					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
-					{
+					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
 
 					const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
 
@@ -1747,24 +1788,20 @@ namespace <xsl:value-of select="@name"/>
 						get<xsl:value-of select="@name"/>ById(childs.begin()->first)->remove(connection);
 					}
 				}
-				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'cascade' and @relation='one-to-one']">
 				{
 					// cascading deletion for single child <xsl:value-of select="@name"/>
-					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
-					{
+					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
 
 					if (get<xsl:value-of select="@name"/>() != NULL)
 						get<xsl:value-of select="@name"/>()->remove(connection);
-					}
 				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @cont='vector']">
 				{
 					// unreference (and update) for vector child <xsl:value-of select="@name"/>
-					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
-					{
+					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
 
 					const std::vector &lt; <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
 
@@ -1777,12 +1814,11 @@ namespace <xsl:value-of select="@name"/>
 						get<xsl:value-of select="@name"/>ByIndex(i)->update(connection);
 					}
 				}
-				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @cont='map']">
 				{
 					// unreference (and update) for map child <xsl:value-of select="@name"/>
-					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__)) {
+					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
 
 					const std::map &lt; uint32, <xsl:value-of select="@type"/>Ptr &gt; &amp; childs = get<xsl:value-of select="@name"/>();
 					std::map&lt; uint32, <xsl:value-of select="@type"/>Ptr &gt;::const_iterator first(childs.begin()), last(childs.end());
@@ -1796,13 +1832,11 @@ namespace <xsl:value-of select="@name"/>
 						get<xsl:value-of select="@name"/>ById(it->first)->update(connection);
 					}
 				}
-				}
 </xsl:for-each>
 <xsl:for-each select="child_class[@on-delete = 'update' and @relation='one-to-one']">
 				{
 					// unreference (and update) for single child <xsl:value-of select="@name"/>
-					if (load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__))
-					{
+					nlassert(load<xsl:value-of select="@name"/>(connection, __FILE__, __LINE__));
 
 					<xsl:variable name="type" select="@type"/>
 					<xsl:variable name="child_name" select="@name"/>
@@ -1811,7 +1845,6 @@ namespace <xsl:value-of select="@name"/>
 					{
 						get<xsl:value-of select="@name"/>()->set<xsl:value-of select="parent_prop"/>(0);
 						get<xsl:value-of select="@name"/>()->update(connection);
-						}
 					}
 				}
 </xsl:for-each>
@@ -2114,7 +2147,7 @@ namespace <xsl:value-of select="@name"/>
 
 </xsl:text>	<xsl:for-each select="property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 <xsl:text>			{
 				std::string s;
 				result->getField(</xsl:text><xsl:value-of select="position()-1"/>, s);
@@ -2173,7 +2206,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			return false;
 		}
 
-		CUniquePtr&lt;MSW::CStoreResult&gt; result(connection.storeResult());
+		CUniquePtr&lt;MSW::CStoreResult&gt; result = connection.storeResult();
 
 		for (uint i=0; i&lt;result->getNumRows(); ++i)
 		{
@@ -2182,7 +2215,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			result->fetchRow();
 			<xsl:for-each select="../property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 			{
 				std::string s;
 				result->getField(<xsl:value-of select="position()-1"/>, s);
@@ -2251,7 +2284,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			return false;
 		}
 
-		CUniquePtr&lt;MSW::CStoreResult&gt; result(connection.storeResult());
+		CUniquePtr&lt;MSW::CStoreResult&gt; result = connection.storeResult();
 
 		// check that the data description is consistent with database content
 		nlassert(result->getNumRows() &lt;= 1);
@@ -2263,7 +2296,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 			result->fetchRow();
 			<xsl:for-each select="../property[@db_col]">
 				<xsl:choose>
-					<xsl:when test="@enum='true' or @enum='smart'">
+					<xsl:when test="@enum='true' or @enum='smart' or @enum='bitset'">
 			{
 				std::string s;
 				result->getField(<xsl:value-of select="position()-1"/>, s);
@@ -2439,7 +2472,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 	protected:
 <xsl:if test="not(@extend)">
 		/// the callback server adaptor
-		std::auto_ptr&lt;ICallbackServerAdaptor&gt;	_CallbackServer;
+		CUniquePtr&lt;ICallbackServerAdaptor&gt;	_CallbackServer;
 </xsl:if>
 		void getCallbakArray(NLNET::TCallbackItem *&amp;arrayPtr, uint32 &amp;arraySize)
 		{
@@ -2476,26 +2509,26 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		 *	interface).
 		 */
 <xsl:if test="@extend">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 			:	<xsl:value-of select="@extend"/>Itf(replacementAdaptor)
 		{}
 </xsl:if>
 <xsl:if test="not(@extend)">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>Itf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 		{
-			if (replacementAdaptor == NULL)
+			if (replacementAdaptor == nullptr)
 			{
 				// use default callback server
-				_CallbackServer = std::auto_ptr&lt;ICallbackServerAdaptor&gt;(new CNelCallbackServerAdaptor(this));
+				_CallbackServer = CUniquePtr&lt;ICallbackServerAdaptor&gt;(new CNelCallbackServerAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackServer = std::auto_ptr&lt;ICallbackServerAdaptor&gt;(replacementAdaptor);
+				_CallbackServer = CUniquePtr&lt;ICallbackServerAdaptor&gt;(replacementAdaptor);
 			}
 		}
 </xsl:if>
-		virtual ~<xsl:value-of select="@name"/>Itf()
+		virtual ~<xsl:value-of select="@name"/>Itf()<xsl:if test="@extend"> NL_OVERRIDE</xsl:if>
 		{
 		}
 
@@ -2564,7 +2597,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 
 			<xsl:value-of select="../@name"/>Itf *callback = (<xsl:value-of select="../@name"/>Itf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 <xsl:for-each select="param">
 <xsl:if test="not(@array)">
@@ -2647,7 +2680,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 	protected:
 <xsl:if test="not(@extend)">
 		/// the callback client adaptor
-		std::auto_ptr &lt; ICallbackClientAdaptor &gt;	_CallbackClient;
+		CUniquePtr&lt;ICallbackClientAdaptor&gt;	_CallbackClient;
 </xsl:if>
 
 		void getCallbakArray(NLNET::TCallbackItem *&amp;arrayPtr, uint32 &amp;arraySize)
@@ -2706,27 +2739,27 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		}
 
 <xsl:if test="@extend">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 			:	<xsl:value-of select="@extend"/>ClientItf(adaptorReplacement)
 		{}
 </xsl:if>
 <xsl:if test="not(@extend)">
-<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+<xsl:text>		</xsl:text><xsl:value-of select="@name"/>ClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 		{
-			if (adaptorReplacement == NULL)
+			if (adaptorReplacement == nullptr)
 			{
 				// use the default Nel adaptor
-				_CallbackClient = std::auto_ptr &lt; ICallbackClientAdaptor &gt;(new CNelCallbackClientAdaptor(this));
+				_CallbackClient = CUniquePtr&lt;ICallbackClientAdaptor&gt;(new CNelCallbackClientAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackClient = std::auto_ptr &lt; ICallbackClientAdaptor &gt;(adaptorReplacement);
+				_CallbackClient = CUniquePtr&lt;ICallbackClientAdaptor&gt;(adaptorReplacement);
 			}
 		}
 </xsl:if>
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(const NLNET::CInetHost &amp;address)
+		virtual void connectItf(const NLNET::CInetHost &amp;address)<xsl:if test="@extend"> NL_OVERRIDE</xsl:if>
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
@@ -2753,7 +2786,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 		/** Must be called evenly, update the network subclass to receive message
 		 *	and dispatch invokation returns.
 		 */
-		virtual void update()
+		virtual void update()<xsl:if test="@extend"> NL_OVERRIDE</xsl:if>
 		{
 			H_AUTO(<xsl:value-of select="@name"/>_update);
 
@@ -2792,7 +2825,7 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 
 			<xsl:value-of select="../@name"/>ClientItf *callback = (<xsl:value-of select="../@name"/>ClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 <xsl:for-each select="param">
 
@@ -2838,7 +2871,8 @@ ERROR : parent/child relation support only 'map' or 'vector' cont specification 
 <xsl:if test=".//param[@type != 'uint32'
 				and @type != 'uint8'
 				and @type != 'std::string'
-				and @enum != 'smart']">
+				and @enum != 'smart'
+				and @enum != 'bitset']">
 	<xsl:message terminate="yes">
 		ERROR : PHP interface only support uint8, uint32, enum and std::string parameter in callback interface '<xsl:value-of select="@name"/>.<xsl:value-of select=".//param[@type != 'uint32' and @type != 'uint8' and @type != 'std::string']/../@name"/>'
 	</xsl:message>

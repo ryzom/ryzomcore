@@ -540,7 +540,7 @@ CTemplatizerParser	CTemplatizerCommentBloc::parseInternal(CTemplatizerParser ptr
 	ptr = skipSpace(ptr);
 
 	if (!popToken(ptr, CommentStart, true))
-		return nullptr;
+		return CTemplatizerParser();
 
 	while (*ptr != '\0' && !isNextToken(ptr, CommentEnd, false))
 		++ptr;

@@ -2,9 +2,9 @@ FILE(GLOB SRC *.cpp *.h res/logic_editor.rc2)
 
 ENABLE_LANGUAGE(RC)
 
-ADD_DEFINITIONS(${MFC_DEFINITIONS})
-SET(CMAKE_MFC_FLAG 2) 
+SET(CMAKE_MFC_FLAG 2)
 ADD_LIBRARY(logic_editor_dll SHARED ${SRC})
+target_compile_definitions(logic_editor_dll PRIVATE ${MFC_DEFINITIONS})
 
 TARGET_LINK_LIBRARIES(logic_editor_dll NeL::misc NeL::logic NeL::net)
 NL_DEFAULT_PROPS(logic_editor_dll "NeL, Tools, Logic: Logic Editor DLL")

@@ -1,9 +1,6 @@
 // Ryzom - MMORPG Framework <http://dev.ryzom.com/projects/ryzom/>
 // Copyright (C) 2010  Winch Gate Property Limited
 //
-// This source file has been modified by the following contributors:
-// Copyright (C) 2023  Jan BOON (Kaetemi) <jan.boon@kaetemi.be>
-//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as
 // published by the Free Software Foundation, either version 3 of the
@@ -36,10 +33,10 @@
 #include "game_share/callback_adaptor.h"
 
 #include "nel/misc/entity_id.h"
-	
+
 namespace MFS
 {
-	
+
 
 	/////////////////////////////////////////////////////////////////
 	// WARNING : this is a generated file, don't change it !
@@ -64,12 +61,12 @@ namespace MFS
 			_Interceptor.init(this, module);
 		}
 
-		// unused interceptors 
+		// unused interceptors
 		std::string			fwdBuildModuleManifest() const	{ return std::string(); }
-		void				fwdOnModuleUp(NLNET::IModuleProxy *moduleProxy)  {}
-		void				fwdOnModuleDown(NLNET::IModuleProxy *moduleProxy) {}
-		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy *moduleProxy) {}
-	
+		void				fwdOnModuleUp(NLNET::IModuleProxy * /* moduleProxy */)  {}
+		void				fwdOnModuleDown(NLNET::IModuleProxy * /* moduleProxy */) {}
+		void				fwdOnModuleSecurityChange(NLNET::IModuleProxy * /* moduleProxy */) {}
+
 		// process module message interceptor
 		bool fwdOnProcessModuleMessage(NLNET::IModuleProxy *sender, const NLNET::CMessage &message);
 	private:
@@ -79,7 +76,7 @@ namespace MFS
 
 		const TMessageHandlerMap &getMessageHandlers() const;
 
-		
+
 		void notifyMail_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
 
 		void notifyForumMessage_skel(NLNET::IModuleProxy *sender, const NLNET::CMessage &__message);
@@ -128,7 +125,7 @@ namespace MFS
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CMailForumNotifierSkel::TInterceptor *interceptor = NULL;
+				CMailForumNotifierSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -136,7 +133,7 @@ namespace MFS
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CMailForumNotifierProxy()
@@ -156,10 +153,10 @@ namespace MFS
 
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_notifyMail(NLNET::CMessage &__message, uint32 charId);
-	
+
 		// Message serializer. Return the message received in reference for easier integration
 		static const NLNET::CMessage &buildMessageFor_notifyForumMessage(NLNET::CMessage &__message, uint32 charId, uint32 guildId, uint32 threadId);
-	
+
 
 
 
@@ -171,7 +168,7 @@ namespace MFS
 	protected:
 
 		/// the callback server adaptor
-		CUniquePtr<ICallbackServerAdaptor>	_CallbackServer;	
+		CUniquePtr<ICallbackServerAdaptor>	_CallbackServer;
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
 		{
@@ -205,12 +202,12 @@ namespace MFS
 
 	public:
 		/** Constructor, if you specify a replacement adaptor, then the object
-		 *	become owner of the adaptor (and it will be released with the 
+		 *	become owner of the adaptor (and it will be released with the
 		 *	interface).
 		 */
-		CMailForumWebItf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+		CMailForumWebItf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 		{
-			if (replacementAdaptor == NULL)
+			if (replacementAdaptor == nullptr)
 			{
 				// use default callback server
 				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
@@ -283,10 +280,10 @@ namespace MFS
 			nldebug("CMailForumWeb::cb_notifyMail received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CMailForumWebItf *callback = (CMailForumWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -308,10 +305,10 @@ namespace MFS
 			nldebug("CMailForumWeb::cb_notifyForumMessage received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackServerAdaptor *adaptor = static_cast< ICallbackServerAdaptor *>(netbase.getUserData());
-			
+
 			CMailForumWebItf *callback = (CMailForumWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	guildId;
 			uint32	forumId;
@@ -342,19 +339,19 @@ namespace MFS
 		virtual void on_notifyForumMessage(NLNET::TSockId from, uint32 guildId, uint32 forumId) =0;
 
 	};
-	
+
 		// Callback interface used by web server during 'outgame' operation
 
-	/** This is the client side of the interface 
+	/** This is the client side of the interface
 	 *	Derive from this class to invoke method on the callback server
-	 */	
+	 */
 
 	class CMailForumWebClientItf 
 	{
 	protected:
 
 		/// the callback client adaptor
-		CUniquePtr < ICallbackClientAdaptor >	_CallbackClient;
+		CUniquePtr<ICallbackClientAdaptor>	_CallbackClient;
 
 
 		void getCallbakArray(NLNET::TCallbackItem *&arrayPtr, uint32 &arraySize)
@@ -391,34 +388,34 @@ namespace MFS
 
 				initialized = true;
 			}
-			
+
 			std::map < std::string, std::string>::const_iterator it(messageNames.find(methodName));
 			if (it != messageNames.end())
 				return it->second;
-			
+
 
 			static std::string emptyString;
-			
+
 			return emptyString;
 
 		}
-		
-		CMailForumWebClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+
+		CMailForumWebClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 		{
-			if (adaptorReplacement == NULL)
+			if (adaptorReplacement == nullptr)
 			{
 				// use the default Nel adaptor
-				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(new CNelCallbackClientAdaptor(this));
+				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(new CNelCallbackClientAdaptor(this));
 			}
 			else
 			{
 				// use the replacement one
-				_CallbackClient = CUniquePtr < ICallbackClientAdaptor >(adaptorReplacement);
+				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(adaptorReplacement);
 			}
 		}
 
 		/// Connect the interface client to the callback server at the specified address and port
-		virtual void connectItf(const NLNET::CInetHost & address)
+		virtual void connectItf(const NLNET::CInetHost &address)
 		{
 			NLNET::TCallbackItem *arrayPtr;
 			uint32 arraySize;
@@ -485,10 +482,10 @@ namespace MFS
 			nldebug("CMailForumWebClient::cb_invokeResult received from class '%s'", typeid(netbase).name());
 #endif
 			ICallbackClientAdaptor *adaptor = static_cast< ICallbackClientAdaptor *>(netbase.getUserData());
-			
+
 			CMailForumWebClientItf *callback = (CMailForumWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	resultCode;
 			std::string	resultString;
@@ -515,5 +512,5 @@ namespace MFS
 	};
 
 }
-	
+
 #endif

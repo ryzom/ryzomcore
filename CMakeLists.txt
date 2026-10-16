@@ -30,8 +30,10 @@ IF(HUNTER_ENABLED)
 
   INCLUDE("CMakeModules/HunterGate.cmake")
   HunterGate(
-    URL "https://github.com/cpp-pm/hunter/archive/v0.26.1.tar.gz"
-    SHA1 "e41ac7a18c49b35ebac99ff2b5244317b2638a65"
+    # v0.26.7+ carries the Visual Studio 2026 MSVC_VERSION mapping
+    # (0.26.1 dies with "Unexpected MSVC_VERSION: '1951'" on VS2026 runners)
+    URL "https://github.com/cpp-pm/hunter/archive/v0.26.10.tar.gz"
+    SHA1 "3d904b93ba684f0e671a2d44969a1a127abe3e66"
     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/CMakeModules/HunterConfig.cmake"
   )
 
@@ -43,7 +45,7 @@ IF(HUNTER_ENABLED)
   SET(WITH_EXTERNAL       OFF CACHE BOOL "external libs" FORCE)
  
  # Workaround for PCH compilation issue, from curl intsizeof depencency
-  ADD_DEFINITIONS(-D__STDC_LIMIT_MACROS)
+  ADD_COMPILE_DEFINITIONS(__STDC_LIMIT_MACROS)
   # TODO: Still applicable after switching to CMake's builtin precompiled header support?
 ENDIF()
 
@@ -311,13 +313,13 @@ ENDIF()
 
 
 IF(FINAL_VERSION)
-  ADD_DEFINITIONS(-DFINAL_VERSION=1)
+  ADD_COMPILE_DEFINITIONS(FINAL_VERSION=1)
 ENDIF()
 
 IF(WITH_SSE2)
-  ADD_DEFINITIONS(-DNL_HAS_SSE2)
+  ADD_COMPILE_DEFINITIONS(NL_HAS_SSE2)
   IF(WITH_SSE3)
-    ADD_DEFINITIONS(-DNL_HAS_SSE3)
+    ADD_COMPILE_DEFINITIONS(NL_HAS_SSE3)
   ENDIF()
 ENDIF()
 

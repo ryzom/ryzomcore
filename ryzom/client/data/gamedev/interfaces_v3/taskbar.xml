@@ -990,10 +990,8 @@
 		<instance template="win_button" id="links" color="UI:SAVE:WIN:COLORS:INV" text="uiLinksTitle" posparent="action_book" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:LINKS" win_name="links" />
 		
-		<!--	
 		<instance template="win_button" id="defense" color="UI:SAVE:WIN:COLORS:INV" text="uiDefenseTitle" posparent="links" posref="BL TL" x="0" y="-4"
 			pushflag="UI:VARIABLES:ISACTIVE:DEFENSE" win_name="defense" />
-		-->
 	</group>
 	<view type="bitmap" id="inv_ico_back" posparent="inventory" posref="TL TL" x="-22" y="22" texture="W_slot_categorie.tga" global_color="false" />
 	<view type="bitmap" id="inv_ico" posparent="inv_ico_back" posref="MM MM" x="1" y="-1" texture="spe_inventory.tga" global_color="false" />

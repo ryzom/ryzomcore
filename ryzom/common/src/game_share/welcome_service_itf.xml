@@ -1,0 +1,93 @@
+<generator header_tag="WELCOME_SERVICE_ITF">
+
+	<include file="nel/net/login_cookie.h"/>
+	<cpp-include file="stdpch.h"/>
+
+	<namespace name="WS">
+
+		<enum name="TUserRole">
+			<item name="ur_player"/>
+			<item name="ur_editor"/>
+			<item name="ur_animator"/>
+		</enum>
+
+		<!-- ############################################################## -->
+		<module_interface name="CWelcomeService" module_class='"WelcomeService"'>
+			<doc line="Used by EGS to send characters info update to the SU"/>
+			<doc line="for synchronising the ring database"/>
+
+			<!-- ========================================================== -->
+			<method name="welcomeUser" msg="WU">
+				<doc line="ask the welcome service to welcome a character"/>
+
+				<param type="uint32" name="charId"/>
+				<param type="std::string" name="userName" byref="true"/>
+				<param type="NLNET::CLoginCookie" name="cookie" byref="true"/>
+				<param type="std::string" name="priviledge" byref="true"/>
+				<param type="std::string" name="exPriviledge" byref="true"/>
+				<param type="WS::TUserRole" name="mode"/>
+				<param type="uint32" name="instanceId"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="disconnectUser" msg="DU">
+				<doc line="ask the welcome service to disconnect a user"/>
+
+				<param type="uint32"	name="userId"/>
+			</method>
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<module_interface name="CLoginService">
+			<doc line="Interface to the name unifier used by EGS, implemented in shard unifier"/>
+
+			<!-- ========================================================== -->
+			<method name="pendingUserLost" msg="PUL">
+				<doc line="An awaited user did not connect before the allowed timeout expire"/>
+
+				<param type="NLNET::CLoginCookie" name="cookie" byref="true"/>
+			</method>
+		</module_interface>
+
+		<!-- ############################################################## -->
+		<module_interface name="CWelcomeServiceClient">
+			<doc line="Reponse interface for name unifier"/>
+
+			<!-- ========================================================== -->
+			<method name="registerWS" msg="RWS">
+				<doc line="Register the welcome service in the ring session manager"/>
+				<doc line="The provided sessionId will be non-zero only for a shard with a fixed sessionId"/>
+
+				<param type="uint32" name="shardId"/>
+				<param type="uint32" name="fixedSessionId"/>
+				<param type="bool" name="isOnline"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="reportWSOpenState" msg="RWSOS">
+				<doc line="WS report it's current open state"/>
+
+				<param type="bool" name="isOnline"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="welcomeUserResult" msg="WUR">
+				<doc line="return for welcome user"/>
+
+				<param type="uint32" name="userId"/>
+				<param type="bool" name="ok"/>
+				<param type="std::string" name="shardAddr" byref="true"/>
+				<param type="std::string" name="errorMsg" byref="true"/>
+			</method>
+
+			<!-- ========================================================== -->
+			<method name="updateConnectedPlayerCount" msg="UCP">
+				<doc line="transmits the current player counts"/>
+
+				<param type="uint32" name="nbOnlinePlayers"/>
+				<param type="uint32" name="nbPendingPlayers"/>
+			</method>
+		</module_interface>
+
+	</namespace>
+</generator>
