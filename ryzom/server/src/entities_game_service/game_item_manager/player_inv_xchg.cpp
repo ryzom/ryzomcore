@@ -36,7 +36,7 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 
 const uint32 CExchangeView::NbExchangeSlots = 10;
-extern NLMISC::CVariable<uint32> GuildChestSlots;
+extern NLMISC::CVariable<sint32> GuildChestSlots;
 
 // ****************************************************************************
 CExchangeView::CExchangeView()

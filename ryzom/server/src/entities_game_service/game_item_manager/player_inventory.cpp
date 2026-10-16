@@ -32,7 +32,7 @@
 using namespace NLMISC;
 using namespace std;
 using namespace NLNET;
-extern NLMISC::CVariable<uint32>	GuildChestSlots;
+extern NLMISC::CVariable<sint32>	GuildChestSlots;
 
 
 #define PERSISTENT_TOKEN_FAMILY RyzomTokenFamily

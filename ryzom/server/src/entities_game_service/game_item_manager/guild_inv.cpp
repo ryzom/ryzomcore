@@ -33,7 +33,7 @@ using namespace NLMISC;
 using namespace NLNET;
 
 extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
-extern NLMISC::CVariable<uint32>	GuildChestSlots;
+extern NLMISC::CVariable<sint32>	GuildChestSlots;
 extern CGenericXmlMsgHeaderManager	GenericMsgManager;
 
 /////////////////////////////////////////////////////////////

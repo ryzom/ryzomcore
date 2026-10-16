@@ -59,7 +59,7 @@ CVariable<uint32> GuildMaxOutpostCount("egs", "GuildMaxOutpostCount", "max numbe
 extern std::string guildIdToString(uint32 guildId);
 // utility to parse a human readable string into a guild id
 extern uint32 parseGuildId(const std::string &str);
-extern NLMISC::CVariable<uint32> GuildChestSlots;
+extern NLMISC::CVariable<sint32> GuildChestSlots;
 
 extern bool IOSIsUp;
 
