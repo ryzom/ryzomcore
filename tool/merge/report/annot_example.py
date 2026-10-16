@@ -36,9 +36,11 @@ FindMySQL, FindLuabind and FindGLIB2 modules), the GitHub Actions workflows with
 container, the docker files and the <code>tool/quick_start</code> scripts. The Mercurial leftovers (.hgtags, .hgignore,
 .hgeol), the Travis file and the nelDashBuild scripts are gone as on core4.</p>
 <p>Not taken from atys: the <code>WITH_RYZOM_GAMESHARE</code> / <code>FindPackage(RyzomGameShare)</code> plumbing of the
-standalone server repository, the <code>BuildInfo.cmake</code> build-time version stamp and its <code>ryzom_build_info</code>
-target, the <code>IA_AGENT_DEBUG</code> Boost lookup in FindLuabind, the <code>WITH_SERVER_TOOLS</code> option and the
-DESCRIBE-less version string. The atys <code>.gitlab-ci.yml</code> stays. The .gitignore keeps the atys entries and
+standalone server repository, the <code>IA_AGENT_DEBUG</code> Boost lookup in FindLuabind and the
+<code>WITH_SERVER_TOOLS</code> option. The <code>BuildInfo.cmake</code> build-time version stamp and its
+<code>ryzom_build_info</code> target are kept: the atys account and ARK services read the
+<code>&lt;domain&gt; v&lt;yy&gt;.&lt;mm&gt;.&lt;revision&gt;</code> string from the client User-Agent and refuse
+clients whose revision is too old. The atys <code>.gitlab-ci.yml</code> stays. The .gitignore keeps the atys entries and
 restores the <code>build/*</code>, <code>build_*</code> and <code>install_*</code> rules that atys dropped in September 2026.
 <code>CMakeModules/nel.cmake</code> gains two options the branch introduced to keep both sides buildable:
 <code>WITH_MEMCACHED</code> and <code>WITH_BREAKPAD</code>, both off by default.</p>
@@ -99,8 +101,8 @@ as atys-live.</p>
 <p>Fixes made on the branch that atys should take note of: the duplicated <code>DrvAuto</code> case in the driver
 switch is gone, <code>interface_manager.cpp</code> includes <code>nel/gui/url_parser.h</code> again (atys had dropped
 it while core4's <code>setGroupHTMLWebServer()</code> needs it), and the client patcher keeps the atys xdelta and
-unpack options next to core4's macro-based help text. <code>user_agent.cpp</code> is core4's: the atys build-info
-line depends on the <code>ryzom_build_info</code> target that was not taken.</p>
+unpack options next to core4's macro-based help text. <code>user_agent.cpp</code> is core4's plus the atys
+<code>ryzom_build_info.h</code> include.</p>
 """,
 'client-data': """
 <p>The UI XML and Lua are atys content in core4 formatting, which is why 92 files differ in formatting only. The

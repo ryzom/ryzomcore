@@ -17,6 +17,14 @@ if(WITH_RYZOM_XSLT)
   include(../cmake/add_module_interface.cmake)
 endif()
 
+IF(WITH_RYZOM_CLIENT)
+  # Always out of date: refreshes ryzom_build_info.h (used by user_agent.cpp) on every build
+  ADD_CUSTOM_TARGET(ryzom_build_info
+    COMMAND ${CMAKE_COMMAND} "-DSOURCE_DIR=${CMAKE_SOURCE_DIR}" "-DOUTPUT=${CMAKE_BINARY_DIR}/ryzom_build_info.h" "-DDESCRIBE=${DESCRIBE}" -P ${CMAKE_SOURCE_DIR}/CMakeModules/BuildInfo.cmake
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/ryzom_build_info.h
+    VERBATIM)
+ENDIF()
+
 ADD_SUBDIRECTORY(common)
 ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(client)
