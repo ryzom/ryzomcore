@@ -217,7 +217,7 @@ void CSimClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleP
 			}
 
 			_AdventureId = bodyConnection.AdventureId;
-			CObject* data = bodyConnection.HighLevel.getData();
+			CObject::TSmartPtr data = bodyConnection.HighLevel.getData();
 			if (!data && bodyConnection.InCache)
 			{
 				data = _Client->getComLuaModule().loadLocal("_tmp_.txt");

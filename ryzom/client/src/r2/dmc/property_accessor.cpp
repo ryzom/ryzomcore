@@ -212,7 +212,6 @@ void CPropertyAccessor::shadowValue(CObject *shadowedValue, CObject *localValue)
 			// just replacing value for an already shadowed value
 			if (localValue != _ShadowedValues[k].LocalValue)
 			{
-				delete _ShadowedValues[k].LocalValue;
 				_ShadowedValues[k].LocalValue = localValue;
 			}
 			return;
@@ -288,7 +287,6 @@ void CPropertyAccessor::purgeShadowedValues()
 	{
 		if (!_ShadowedValues[k].ShadowedValue)
 		{
-			delete _ShadowedValues[k].LocalValue;
 			_ShadowedValues[k].LocalValue = NULL;
 		}
 	}

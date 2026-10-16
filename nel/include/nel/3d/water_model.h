@@ -123,8 +123,8 @@ private:
 	NLMISC::CVector2f		  _ColorMapMatColumn0, _ColorMapMatColumn1, _ColorMapMatPos;
 	uint64					  _MatrixUpdateDate;
 	// vertex buffer for simple rendering
-	static CMaterial		  _WaterMat;
-	static CMaterial		  _SimpleWaterMat;
+	static CMaterial		  _WaterMat; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static CMaterial		  _SimpleWaterMat; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	// grid cells that are exactly inside the poly
 	NLMISC::CPolygon2D::TRasterVect	 _Inside;
 	sint							 _MinYInside;
@@ -182,6 +182,7 @@ protected:
 
 	friend class	CWaveMakerShape;
 	TAnimationTime  _Time;
+	uint64          _LastFrameId; // avoid double-accumulation in stereo
 };
 
 // tmp for debug

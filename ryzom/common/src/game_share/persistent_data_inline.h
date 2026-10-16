@@ -108,7 +108,7 @@ inline void CPersistentDataRecord::push(TToken token,sint64 val)
 	_TokenTable.push_back((token<<3)+CArg::EXTEND_TOKEN);
 	_ArgTable.push_back(valueInBits.u32[0]);
 	_TokenTable.push_back((token<<3)+CArg::SINT_TOKEN);
-	_ArgTable.push_back(valueInBits.u32[0]);
+	_ArgTable.push_back(valueInBits.u32[1]);
 }
 
 inline void CPersistentDataRecord::push(TToken token,uint8 val)

@@ -38,6 +38,8 @@
 #include "nel/3d/shape.h"
 #include "nel/3d/vertex_buffer.h"
 #include "nel/3d/driver.h"
+#include "nel/3d/uniform_buffer.h"
+#include "nel/3d/uniform_buffer_format.h"
 
 #include <memory>
 
@@ -233,6 +235,7 @@ public:
 	CRGBA				computeEnvMapMeanColor();
 private:
 	friend class	CWaterModel;
+	friend class	CVertexProgramWaterVPNoWave;
 	void								computeBBox();
 	void								envMapUpdate();
 	void								updateHeightMapNormalizationFactors();
@@ -282,8 +285,24 @@ private:
 	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBump;
 	static NLMISC::CSmartPtr<CVertexProgram>	_VertexProgramNoBumpDiffuse;*/
 	//
-	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWave;
-	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse;
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWave; // STATIC GPU RESOURCE: Blocks multiple driver instances
+	static NLMISC::CSmartPtr<CVertexProgramWaterVPNoWave>    _VertexProgramNoWaveDiffuse; // STATIC GPU RESOURCE: Blocks multiple driver instances
+
+	// Water VP UBO (bump map params, observer, etc.)
+	struct CWaterVPUBOOffsets
+	{
+		sint BumpMap0Scale;
+		sint BumpMap0Offset;
+		sint BumpMap1Scale;
+		sint BumpMap1Offset;
+		sint ObserverHeight;
+		sint ScaleReflectedRay;
+		sint DiffuseMapVector0;
+		sint DiffuseMapVector1;
+	};
+	static CWaterVPUBOOffsets _WaterVPUBOOffsets;
+	static NLMISC::CSmartPtr<CUniformBufferFormat> _WaterVPUBFormat;
+	static NLMISC::CSmartPtr<CUniformBuffer> _WaterVPUB; // STATIC GPU RESOURCE: Blocks multiple driver instances
 };
 
 

@@ -1195,6 +1195,10 @@ void CFarTP::disconnectFromPreviousShard()
 	*/
 	NetMngr.reinit();
 
+	// Reset weather state so the new shard's weather starts clean
+	ClientCfg.ManualWeatherSetup = false;
+	resetWeatherDBState();
+
 	if (isIngame() && !isReselectingChar())
 	{
 		nlinfo("FarTP: calling EntitiesMngr.reinit()");

@@ -1,0 +1,40 @@
+!!ARBfp1.0
+OPTION ARB_precision_hint_fastest;
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_DIFFUSE
+# source file: Y:/ryzomcore4/code/nel/src/3d/shaders/water_fp.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbfp1
+#program water_fp
+#semantic water_fp.bump0ScaleBias : C0
+#semantic water_fp.bump1ScaleBias : C1
+#semantic water_fp.nlTex0 : TEX0
+#semantic water_fp.nlTex1 : TEX1
+#semantic water_fp.nlTex2 : TEX2
+#semantic water_fp.nlTex3 : TEX3
+#var float2 bump0TexCoord : $vin.TEXCOORD0 : TEX0 : 0 : 1
+#var float2 bump1TexCoord : $vin.TEXCOORD1 : TEX1 : 1 : 1
+#var float2 envMapTexCoord : $vin.TEXCOORD2 : TEX2 : 2 : 1
+#var float2 diffuseTexCoord : $vin.TEXCOORD3 : TEX3 : 3 : 1
+#var float4 bump0ScaleBias : C0 : c[0] : 4 : 1
+#var float4 bump1ScaleBias : C1 : c[1] : 5 : 1
+#var sampler2D nlTex0 : TEX0 : texunit 0 : 6 : 1
+#var sampler2D nlTex1 : TEX1 : texunit 1 : 7 : 1
+#var sampler2D nlTex2 : TEX2 : texunit 2 : 8 : 1
+#var sampler2D nlTex3 : TEX3 : texunit 3 : 9 : 1
+#var float4 oCol : $vout.COLOR : COL : 10 : 1
+PARAM c[2] = { program.local[0..1] };
+TEMP R0;
+TEMP R1;
+TEX R0.xy, fragment.texcoord[0], texture[0], 2D;
+MAD R0.xy, R0, c[0].x, c[0].y;
+ADD R0.xy, R0, fragment.texcoord[1];
+TEX R0.xy, R0, texture[1], 2D;
+MAD R0.xy, R0, c[1].x, c[1].y;
+ADD R0.xy, R0, fragment.texcoord[2];
+TEX R1, fragment.texcoord[3], texture[3], 2D;
+TEX R0, R0, texture[2], 2D;
+MUL result.color, R0, R1;
+END
+# 9 instructions, 2 R-regs

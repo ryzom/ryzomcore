@@ -90,6 +90,10 @@ protected:
 	virtual	sint			renderShadowSkinGeom(uint remainingVertices, uint8 *vbDest);
 	virtual	void			renderShadowSkinPrimitives(CMaterial &castMat, IDriver *drv, uint baseVertex);
 
+	virtual	bool			supportGPUSkinning() const;
+	virtual	void			renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton);
+	virtual	CVertexProgram	*getGPUSkinVP() const;
+
 	virtual	bool			supportIntersectSkin() const;
 	virtual	bool			intersectSkin(const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D);
 

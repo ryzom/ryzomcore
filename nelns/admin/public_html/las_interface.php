@@ -69,7 +69,7 @@
 				next($arr);
 			}
 			
-			$sql_query = "SELECT * FROM server WHERE name='".$l['server']."'";
+			$sql_query = "SELECT * FROM server WHERE name='".sqlescape($l['server'])."'";
 			$sql_res = sqlquery($sql_query);
 			if ($sql_res && ($sql_arr = sqlfetch($sql_res)))
 				$l['address'] = $sql_arr['address'];

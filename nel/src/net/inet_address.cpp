@@ -456,7 +456,7 @@ bool CInetAddress::isLoopbackIPAddress() const
 
 uint32 CInetAddress::hash32() const
 {
-	return NLMISC::wangHash(m_Address.hash32() ^ m_Port);
+	return NLMISC::lowbias32(m_Address.hash32() ^ m_Port);
 }
 
 uint64 CInetAddress::hash64() const

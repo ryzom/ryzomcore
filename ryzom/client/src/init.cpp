@@ -22,6 +22,9 @@
 
 
 #include "stdpch.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 
 //////////////
@@ -48,6 +51,7 @@
 #include "nel/3d/u_text_context.h"
 #include "nel/3d/u_shape_bank.h"
 #include "nel/3d/stereo_hmd.h"
+#include "nel/3d/stereo_passthrough.h"
 // Net.
 #include "nel/net/email.h"
 // Ligo.
@@ -665,6 +669,13 @@ void initStereoDisplayDevice()
 		nldebug("VR [C]: NOT Enabled");
 	}
 	IStereoDisplay::releaseUnusedLibraries();
+	// Always ensure StereoDisplay is non-null
+	if (!StereoDisplay)
+	{
+		StereoDisplay = new NL3D::CStereoPassthrough();
+		if (Driver)
+			StereoDisplay->setDriver(Driver);
+	}
 }
 
 // we want to get executable directory
@@ -1059,17 +1070,28 @@ void prelogInit()
 
 		switch(ClientCfg.Driver3D)
 		{
+			case CClientConfig::DrvAuto:
+#if INTPTR_MAX == INT64_MAX && defined(NL_OPENGL3_AVAILABLE)
+				driver = UDriver::OpenGl3;
+#elif defined(NL_OS_WINDOWS) && defined(NL_DIRECT3D_AVAILABLE)
+				driver = UDriver::Direct3d;
+#else
+				driver = UDriver::OpenGl;
+#endif
+			break;
 #ifdef NL_OS_WINDOWS
 			case CClientConfig::Direct3D:
 				driver = UDriver::Direct3d;
 			break;
 #endif // NL_OS_WINDOWS
-			case CClientConfig::DrvAuto:
 			case CClientConfig::OpenGL:
 				driver = UDriver::OpenGl;
 			break;
 			case CClientConfig::OpenGLES:
 				driver = UDriver::OpenGlEs;
+			break;
+			case CClientConfig::OpenGL3:
+				driver = UDriver::OpenGl3;
 			break;
 			default:
 			break;
@@ -1295,6 +1317,8 @@ void prelogInit()
 		FPU_CHECKER_ONCE
 
 		// Set the monitor color properties
+		if (Driver->supportMonitorColorProperties())
+		{
 		CMonitorColorProperties monitorColor;
 		for (uint i=0; i<3; i++)
 		{
@@ -1305,6 +1329,7 @@ void prelogInit()
 		if (!Driver->setMonitorColorProperties (monitorColor))
 		{
 			nlwarning("init : setMonitorColorProperties fails");
+			}
 		}
 
 		// The client require at least 2 textures.

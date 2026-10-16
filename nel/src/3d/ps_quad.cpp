@@ -156,7 +156,7 @@ void CPSQuad::initVertexBuffers()
 		if (vb) // valid vb ?
 		{
 			vb->setName("CPSQuad");
-			vb->setPreferredMemory(CVertexBuffer::AGPVolatile, true);
+			vb->setBufferUsage(CVertexBuffer::FullStream, true);
 			uint32 vf = CVertexBuffer::PositionFlag;
 			/// setup vertex format
 			if (k & (uint) VBCol) vf |= CVertexBuffer::PrimaryColorFlag;
@@ -184,7 +184,7 @@ void CPSQuad::initVertexBuffers()
 		if (vb) // valid vb ?
 		{
 			vb->setName("CPSQuadRAM");
-			vb->setPreferredMemory(CVertexBuffer::RAMPreferred, false);
+			vb->setBufferUsage(CVertexBuffer::CpuReadWrite, false);
 			uint32 vf = CVertexBuffer::PositionFlag;
 			/// setup vertex format
 			if (k & (uint) VBCol) vf |= CVertexBuffer::PrimaryColorFlag;

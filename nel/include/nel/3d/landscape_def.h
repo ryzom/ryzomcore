@@ -151,7 +151,7 @@ public:
 	// Globals for speed render.
 	static IDriver				*PatchCurrentDriver;
 	// The triangles array for the current pass rendered.
-	static CIndexBuffer			PassTriArray;
+	static CIndexBuffer			PassTriArray; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static CIndexBufferReadWrite	PassTriArrayIBA;
 
 };

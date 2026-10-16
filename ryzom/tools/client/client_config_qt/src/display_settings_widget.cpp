@@ -36,6 +36,7 @@ CDisplaySettingsWidget::CDisplaySettingsWidget( QWidget *parent ) :
 
 	connect( autoRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( openglRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
+	connect( opengl3RadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( direct3dRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( fullscreenRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
 	connect( windowedRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( onSomethingChanged() ) );
@@ -46,6 +47,7 @@ CDisplaySettingsWidget::CDisplaySettingsWidget( QWidget *parent ) :
 	connect( videomodeComboBox, SIGNAL( currentIndexChanged( int ) ), this, SLOT( onSomethingChanged() ) );
 	connect( autoRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( updateVideoModes() ) );
 	connect( openglRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( updateVideoModes() ) );
+	connect( opengl3RadioButton, SIGNAL( clicked( bool ) ), this, SLOT( updateVideoModes() ) );
 	connect( direct3dRadioButton, SIGNAL( clicked( bool ) ), this, SLOT( updateVideoModes() ) );
 }
 
@@ -65,6 +67,9 @@ void CDisplaySettingsWidget::load()
 		break;
 	case DRV_OPENGL:
 		openglRadioButton->setChecked( true );
+		break;
+	case DRV_OPENGL3:
+		opengl3RadioButton->setChecked( true );
 		break;
 	case DRV_DIRECT3D:
 		direct3dRadioButton->setChecked( true );
@@ -103,6 +108,8 @@ void CDisplaySettingsWidget::save()
 
 	if( openglRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "OpenGL" ) );
+	else if( opengl3RadioButton->isChecked() )
+		s.config.setString( "Driver3D", std::string( "OpenGL3" ) );
 #ifdef Q_OS_WIN32
 	else if( direct3dRadioButton->isChecked() )
 		s.config.setString( "Driver3D", std::string( "Direct3D" ) );
@@ -232,6 +239,8 @@ E3DDriver CDisplaySettingsWidget::getDriverFromConfigString(std::string &str) co
 		return DRV_DIRECT3D;
 	if( str.compare( "OpenGL" ) == 0 )
 		return DRV_OPENGL;
+	if( str.compare( "OpenGL3" ) == 0 )
+		return DRV_OPENGL3;
 	if( str.compare( "Direct3D" ) == 0)
 		return DRV_DIRECT3D;
 

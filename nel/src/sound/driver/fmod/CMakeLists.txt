@@ -1,5 +1,25 @@
 FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
+SOURCE_GROUP("" FILES
+		sound_driver_fmod.cpp
+		sound_driver_fmod.h
+		stdfmod.cpp
+		stdfmod.h
+		driver_fmod.def
+		resources.rc)
+
+SOURCE_GROUP(sfx FILES
+		buffer_fmod.cpp
+		buffer_fmod.h
+		listener_fmod.cpp
+		listener_fmod.h
+		source_fmod.cpp
+		source_fmod.h)
+
+SOURCE_GROUP(music FILES
+		music_channel_fmod.cpp
+		music_channel_fmod.h)
+
 NL_TARGET_DRIVER(nel_drv_fmod_win ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_drv_fmod_win PRIVATE ${FMOD_INCLUDE_DIR})

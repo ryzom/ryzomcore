@@ -1,0 +1,6 @@
+cpptest provides CMake targets:
+
+find_package(CppTest REQUIRED)
+
+target_link_libraries(main PRIVATE ${CPPTEST_LIBRARIES})
+target_include_directories(main PRIVATE ${CPPTEST_INCLUDE_DIR})

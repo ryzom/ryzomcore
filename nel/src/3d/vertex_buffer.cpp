@@ -110,10 +110,11 @@ void CVertexBuffer::construct()
 	_VertexColorFormat = TRGBA;
 	_LockCounter = 0;
 	_LockedBuffer = NULL;
-	_PreferredMemory = RAMPreferred;
+	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
 	_KeepLocalMemory = false;
+	_DirtyTracking = false;
 
 	// Default routing
 	uint i;
@@ -150,10 +151,11 @@ CVertexBuffer::CVertexBuffer(const CVertexBuffer &vb) : CRefCount()
 	_VertexSize = 0;
 	_LockCounter = 0;
 	_LockedBuffer = NULL;
-	_PreferredMemory = RAMPreferred;
+	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
 	_KeepLocalMemory = false;
+	_DirtyTracking = false;
 
 	operator=(vb);
 
@@ -194,8 +196,10 @@ CVertexBuffer	&CVertexBuffer::operator=(const CVertexBuffer &vb)
 	_Capacity = vb._Capacity;
 	_NonResidentVertices = vb._NonResidentVertices;
 	_VertexColorFormat = vb._VertexColorFormat;
-	_PreferredMemory = vb._PreferredMemory;
+	_BufferUsage = vb._BufferUsage;
 	_KeepLocalMemory = vb._KeepLocalMemory;
+	_DirtyTracking = false;
+	_DirtyRanges.clear();
 	uint i;
 	_LockCounter = 0;
 	_LockedBuffer = NULL;
@@ -222,8 +226,8 @@ CVertexBuffer	&CVertexBuffer::operator=(const CVertexBuffer &vb)
 // --------------------------------------------------
 void CVertexBuffer::copyVertices(CVertexBuffer &dest) const
 {
-	nlassert(_PreferredMemory != RAMVolatile);
-	nlassert(_PreferredMemory != AGPVolatile);
+	nlassert(_BufferUsage != SmallStream);
+	nlassert(_BufferUsage != FullStream);
 	// copy setup
 	dest = *this;
 	CVertexBufferReadWrite srcDatas;
@@ -781,6 +785,8 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 	 * ***********************************************/
 
 	/*
+	Version 4:
+		- TBufferUsage replaces TPreferredMemory.
 	Version 3:
 		- Preferred memory.
 	Version 2:
@@ -790,7 +796,7 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 	Version 0:
 		- base verison of the header serialisation.
 	*/
-	sint	ver= f.serialVersion(3);	// Hulud
+	sint	ver= f.serialVersion(4);
 
 	// Serial VBuffers format/size.
 	//=============================
@@ -881,17 +887,42 @@ void		CVertexBuffer::serialHeader(NLMISC::IStream &f)
 	if (ver>=2)
 		f.serial (_VertexColorFormat);
 
-	if (ver>=3)
+	if (ver>=4)
 	{
-		f.serialEnum(_PreferredMemory);
+		f.serialEnum(_BufferUsage);
 		f.serial(_Name);
+	}
+	else if (ver>=3)
+	{
+		// Version 3: old TPreferredMemory enum
+		if (f.isReading())
+		{
+			sint32 oldPref;
+			f.serial(oldPref);
+			// Remap old enum values to new TBufferUsage
+			switch (oldPref)
+			{
+			case 0: _BufferUsage = CpuReadWrite; break;  // RAMPreferred
+			case 1: _BufferUsage = FullRewrite; break;    // AGPPreferred
+			case 2: _BufferUsage = Immutable; break;      // StaticPreferred
+			case 3: _BufferUsage = SmallStream; break;    // RAMVolatile
+			case 4: _BufferUsage = FullStream; break;     // AGPVolatile
+			default: _BufferUsage = CpuReadWrite; break;
+			}
+			f.serial(_Name);
+		}
+		else
+		{
+			// Should not write old format
+			nlstop;
+		}
 	}
 	else
 	{
-		// Init preferred memory
+		// Init defaults
 		if(f.isReading())
 		{
-			_PreferredMemory = RAMPreferred;
+			_BufferUsage = CpuReadWrite;
 			_Name.clear();
 		}
 	}
@@ -1043,16 +1074,27 @@ bool CVertexBuffer::setVertexColorFormat (TVertexColorType format)
 
 // --------------------------------------------------
 
-void CVertexBuffer::setPreferredMemory (TPreferredMemory preferredMemory, bool keepLocalMemory)
+void CVertexBuffer::setBufferUsage (TBufferUsage usage, bool keepLocalMemory)
 {
-	if ((_PreferredMemory != preferredMemory) || (_KeepLocalMemory != keepLocalMemory))
+	if ((_BufferUsage != usage) || (_KeepLocalMemory != keepLocalMemory))
 	{
-		_PreferredMemory = preferredMemory;
+		_BufferUsage = usage;
 		_KeepLocalMemory = keepLocalMemory;
 
 		// Force non resident
 		restoreNonResidentMemory();
 	}
+}
+
+// --------------------------------------------------
+
+void CVertexBuffer::invalidateRange(uint first, uint last)
+{
+	if (!_DirtyTracking || first >= last) return;
+	CDirtyRange r;
+	r.Begin = first * _VertexSize;
+	r.End = last * _VertexSize;
+	_DirtyRanges.push_back(r);
 }
 
 // --------------------------------------------------
@@ -1065,7 +1107,7 @@ void CVertexBuffer::setLocation (TLocation newLocation)
 		nlassert (DrvInfos);
 
 		// Current size of the buffer
-		const uint size = ((_PreferredMemory==RAMVolatile)||(_PreferredMemory==AGPVolatile))?_NbVerts*_VertexSize:_Capacity*_VertexSize;
+		const uint size = ((_BufferUsage==SmallStream)||(_BufferUsage==FullStream))?_NbVerts*_VertexSize:_Capacity*_VertexSize;
 
 		// The buffer must not be resident
 		if (_Location != NotResident)
@@ -1077,8 +1119,8 @@ void CVertexBuffer::setLocation (TLocation newLocation)
 		memcpy (dest, &(_NonResidentVertices[0]), size);
 		DrvInfos->unlock(0, 0);
 
-		// Reset the non resident container if not a static preferred memory and not put in RAM
-		if ((_PreferredMemory != StaticPreferred) && (_Location != RAMResident) && !_KeepLocalMemory)
+		// Reset the non resident container if not immutable and not put in RAM
+		if ((_BufferUsage != Immutable) && (_Location != RAMResident) && !_KeepLocalMemory)
 			contReset(_NonResidentVertices);
 
 		// Clear touched flags
@@ -1096,7 +1138,7 @@ void CVertexBuffer::setLocation (TLocation newLocation)
 		_NonResidentVertices.resize (size);
 
 		// If resident in RAM, backup the data in non resident memory
-		if ((_Location == RAMResident) && (_PreferredMemory != RAMVolatile) && (_PreferredMemory != AGPVolatile) && !_KeepLocalMemory)
+		if ((_Location == RAMResident) && (_BufferUsage != SmallStream) && (_BufferUsage != FullStream) && !_KeepLocalMemory)
 		{
 			// The driver must have setuped the driver info
 			nlassert (DrvInfos);
@@ -1120,6 +1162,9 @@ void CVertexBuffer::setLocation (TLocation newLocation)
 void CVertexBuffer::restoreNonResidentMemory()
 {
 	setLocation (NotResident);
+
+	_DirtyRanges.clear();
+	_DirtyTracking = false;
 
 	if (DrvInfos)
 		DrvInfos->VertexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die

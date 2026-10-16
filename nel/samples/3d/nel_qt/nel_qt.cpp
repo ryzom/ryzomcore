@@ -26,7 +26,7 @@
 #endif
 
 // Qt includes
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtCore/QMap>
 #include <QtCore/qdebug.h>
 
@@ -39,6 +39,7 @@
 
 // Project includes
 #include "nel_qt_config.h"
+#include "../../../tools/3d/shared_widgets/common.h"
 #include "main_window.h"
 
 using namespace std;
@@ -178,7 +179,13 @@ sint main(int argc, char **argv)
 	hr = hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	bool coInitOk = (hr == S_OK) || (hr == S_FALSE);
 #endif
+#if NLQT_USE_DARK_THEME
+	NLQT::preApplication();
+#endif
 	QApplication app(argc, const_cast<char **>(argv));
+#if NLQT_USE_DARK_THEME
+	NLQT::postApplication();
+#endif
 	QMap<QString, QSize> customSizeHints = parseCustomSizeHints(argc, argv);
 	NLQT::CMainWindow mainWin(customSizeHints);
 	mainWin.resize(800, 600);

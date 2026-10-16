@@ -1,0 +1,102 @@
+!!ARBvp1.0
+# cgc version 3.1.0013, build date Apr 18 2012
+# command line args: -profile arbvp1 -O3 -DNUM_POINT_LIGHTS=2 -DUSE_NORMALIZE
+# source file: wind_tree_vp.cg
+#vendor NVIDIA Corporation
+#version 3.1.0.13
+#profile arbvp1
+#program wind_tree_vp
+#semantic mvp : C0
+#semantic fog : C6
+#semantic windLevel1 : C15
+#semantic windLevel2 : C16
+#semantic windLevel3 : C20
+#semantic ambient : C24
+#semantic diffuse0 : C25
+#semantic diffuse1 : C26
+#semantic diffuse2 : C27
+#semantic diffuse3 : C28
+#semantic dirOrPos0 : C29
+#semantic dirOrPos1 : C30
+#semantic dirOrPos2 : C31
+#semantic diffuseAlpha : C33
+#var float4 iPos : $vin.POSITION : POSITION : 0 : 1
+#var float4 iNormal : $vin.NORMAL : NORMAL : 1 : 1
+#var float4 iColor : $vin.COLOR0 : COLOR0 : 2 : 1
+#var float4 iTexCoord : $vin.TEXCOORD0 : TEXCOORD0 : 3 : 1
+#var float4 oPos : $vout.POSITION : HPOS : 4 : 1
+#var float4 oCol0 : $vout.COLOR0 : COL0 : 5 : 1
+#var float4 oTex0 : $vout.TEXCOORD0 : TEX0 : 6 : 1
+#var float oFog : $vout.FOG : FOGC : 7 : 1
+#var float4x4 mvp : C0 : c[0], 4 : -1 : 1
+#var float4 fog : C6 : c[6] : -1 : 1
+#var float4 windLevel1 : C15 : c[15] : -1 : 1
+#var float4 windLevel2[0] :  : c[16] : -1 : 1
+#var float4 windLevel2[1] :  : c[17] : -1 : 1
+#var float4 windLevel2[2] :  : c[18] : -1 : 1
+#var float4 windLevel2[3] :  : c[19] : -1 : 1
+#var float4 windLevel3[0] :  : c[20] : -1 : 1
+#var float4 windLevel3[1] :  : c[21] : -1 : 1
+#var float4 windLevel3[2] :  : c[22] : -1 : 1
+#var float4 windLevel3[3] :  : c[23] : -1 : 1
+#var float4 ambient : C24 : c[24] : -1 : 1
+#var float4 diffuse0 : C25 : c[25] : -1 : 1
+#var float4 diffuse1 : C26 : c[26] : -1 : 1
+#var float4 diffuse2 : C27 : c[27] : -1 : 1
+#var float4 diffuse3 : C28 : c[28] : -1 : 0
+#var float4 dirOrPos0 : C29 : c[29] : -1 : 1
+#var float4 dirOrPos1 : C30 : c[30] : -1 : 1
+#var float4 dirOrPos2 : C31 : c[31] : -1 : 1
+#var float4 diffuseAlpha : C33 : c[33] : -1 : 1
+#const c[4] = 3.99 3 1 0
+#const c[5] = 0 -1 -2
+PARAM c[34] = { program.local[0..3],
+		{ 3.99, 3, 1, 0 },
+		{ 0, -1, -2 },
+		program.local[6..33] };
+TEMP R0;
+TEMP R1;
+TEMP R2;
+TEMP R3;
+ADDRESS A0;
+MUL R0.x, vertex.color, c[4].y;
+ADD R0.xyz, R0.x, c[5];
+MIN R0.xyz, R0, c[4].z;
+MAX R1.xyz, R0, c[4].w;
+MUL R0.xy, vertex.color.yzzw, c[4].x;
+ARL A0.x, R0.x;
+MAD R2.xyz, R1.x, c[15], vertex.position;
+MAD R2.xyz, R1.y, c[A0.x + 16], R2;
+ARL A0.x, R0.y;
+MAD R0.xyz, c[A0.x + 20], R1.z, R2;
+ADD R1.xyz, -R0, c[31];
+DP3 R0.w, R1, R1;
+RSQ R1.w, R0.w;
+DP3 R0.w, vertex.normal, vertex.normal;
+RSQ R0.w, R0.w;
+MUL R1.xyz, R1.w, R1;
+MUL R2.xyz, R0.w, vertex.normal;
+DP3 R0.w, R2, R1;
+ADD R3.xyz, -R0, c[30];
+DP3 R1.x, R3, R3;
+DP3 R1.y, R2, c[29];
+RSQ R1.x, R1.x;
+MUL R3.xyz, R1.x, R3;
+MAX R1.y, R1, c[4].w;
+MUL R1, R1.y, c[25];
+DP3 R2.x, R2, R3;
+MAX R0.w, R0, c[4];
+ADD R1, R1, c[24];
+MAX R2.x, R2, c[4].w;
+MAD R1, R2.x, c[26], R1;
+MAD R1, R0.w, c[27], R1;
+MOV R0.w, vertex.position;
+MAD result.color, R1, c[33].zzzx, c[33].xxxw;
+DP4 result.position.w, R0, c[3];
+DP4 result.position.z, R0, c[2];
+DP4 result.position.y, R0, c[1];
+DP4 result.position.x, R0, c[0];
+DP4 result.fogcoord.x, R0, c[6];
+MOV result.texcoord[0], vertex.texcoord[0];
+END
+# 39 instructions, 4 R-regs

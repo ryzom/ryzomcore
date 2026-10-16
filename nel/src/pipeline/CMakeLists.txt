@@ -6,8 +6,6 @@ SOURCE_GROUP("" FILES ${HEADERS} ${SRC})
 NL_TARGET_LIB(nelpipeline ${HEADERS} ${SRC})
 add_project_library_alias(nelpipeline pipeline)
 
-TARGET_INCLUDE_DIRECTORIES(nelpipeline PRIVATE ${LIBXML2_INCLUDE_DIR})
-
 TARGET_LINK_LIBRARIES(nelpipeline nelmisc)
 NL_DEFAULT_PROPS(nelpipeline "NeL, Library: NeL Pipeline")
 NL_ADD_RUNTIME_FLAGS(nelpipeline)

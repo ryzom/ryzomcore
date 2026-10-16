@@ -1064,7 +1064,7 @@ public:
 
 		// request the database to retrieve the invited character Id
 		query="";
-		query << "SELECT char_id FROM characters WHERE char_name = '"<<shortName<<"' AND home_mainland_session_id = "<<invitedCharHome.asInt();
+		query << "SELECT char_id FROM characters WHERE char_name = '"<<MSW::escapeString(shortName, _RingDB)<<"' AND home_mainland_session_id = "<<invitedCharHome.asInt();
 
 		BOMB_IF(!_RingDB.query(query), "invitedCharacterByName : failed request 2 in database", invokeResult(from, charId >> 4, 103, "Database request failed"); return);
 		result = CUniquePtr<CStoreResult>(_RingDB.storeResult());

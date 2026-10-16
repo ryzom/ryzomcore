@@ -532,15 +532,17 @@ bool CDriverGL::setupMaterial(CMaterial& mat)
 		// Fog Part.
 		//=================
 
-		// Disable fog if dest blend is ONE
-		if (blend && (pShader->DstBlend == GL_ONE))
+		_DriverGLStates.enableFog(_FogEnabled);
+
+		// Use black fog color for additive blend to avoid brightening the scene with fog
+		if (blend && (pShader->DstBlend == GL_ONE) && _FogEnabled)
 		{
-			_DriverGLStates.enableFog(false);
+			static GLfloat blackFog[4] = { 0, 0, 0, 0 };
+			glFogfv(GL_FOG_COLOR, blackFog);
 		}
-		else
+		else if (_FogEnabled)
 		{
-			// Restore fog state to its current value
-			_DriverGLStates.enableFog(_FogEnabled);
+			glFogfv(GL_FOG_COLOR, _CurrentFogColor);
 		}
 
 		// Texture shader part.

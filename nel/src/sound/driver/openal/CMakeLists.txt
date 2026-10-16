@@ -6,6 +6,14 @@ ELSE()
   SET(NLDRV_AL_LIB "nel_drv_openal")
 ENDIF()
 
+SOURCE_GROUP("" FILES
+		sound_driver_al.cpp
+		sound_driver_al.h
+		stdopenal.cpp
+		stdopenal.h
+		driver_openal.def
+		resources.rc)
+
 SOURCE_GROUP(efx FILES
         effect_al.cpp
         effect_al.h)
@@ -15,10 +23,12 @@ SOURCE_GROUP(sfx FILES
         buffer_al.h
         listener_al.cpp
         listener_al.h
-        music_channel_al.cpp
-        music_channel_al.h
         source_al.cpp
         source_al.h)
+
+SOURCE_GROUP(music FILES
+        music_channel_al.cpp
+        music_channel_al.h)
 
 SOURCE_GROUP(util FILES
         ext_al.cpp
@@ -26,19 +36,22 @@ SOURCE_GROUP(util FILES
 
 NL_TARGET_DRIVER(${NLDRV_AL_LIB} ${SRC})
 
+add_library(NeL::sound::OpenAL ALIAS ${NLDRV_AL_LIB})
+
 IF(HUNTER_ENABLED)
   HUNTER_ADD_PACKAGE(OpenAL)
   FIND_PACKAGE(OpenAL CONFIG REQUIRED)
-  SET(OPENAL_LIBRARY OpenAL::OpenAL)
-  TARGET_COMPILE_DEFINITIONS(${NLDRV_AL_LIB} PRIVATE AL_LIBTYPE_STATIC)
-ELSE()
-  TARGET_INCLUDE_DIRECTORIES(${NLDRV_AL_LIB}
-          PRIVATE ${OPENAL_INCLUDE_DIR}
-          ${OPENAL_INCLUDE_DIR}/AL
-  )
 ENDIF()# hunter
 
-TARGET_LINK_LIBRARIES(${NLDRV_AL_LIB} nelmisc nelsnd_lowlevel ${OPENAL_LIBRARY})
+TARGET_COMPILE_DEFINITIONS(${NLDRV_AL_LIB} PRIVATE AL_ALEXT_PROTOTYPES)
+
+TARGET_LINK_LIBRARIES(${NLDRV_AL_LIB}
+        PUBLIC
+        NeL::misc
+        nelsnd_lowlevel
+        PRIVATE
+        OpenAL::OpenAL
+)
 NL_DEFAULT_PROPS(${NLDRV_AL_LIB} "NeL, Driver, Sound: OpenAL")
 NL_ADD_RUNTIME_FLAGS(${NLDRV_AL_LIB})
 NL_ADD_LIB_SUFFIX(${NLDRV_AL_LIB})
@@ -58,7 +71,7 @@ IF(WITH_PCH)
 ENDIF()
 
 IF(WITH_INSTALL_LIBRARIES OR NOT WITH_STATIC_DRIVERS)
-  INSTALL(TARGETS ${NLDRV_AL_LIB} RUNTIME DESTINATION ${NL_DRIVER_PREFIX} LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT driverssound)
+  INSTALL(TARGETS ${NLDRV_AL_LIB} EXPORT "${project_export_name}" RUNTIME DESTINATION ${NL_DRIVER_PREFIX} LIBRARY DESTINATION ${NL_DRIVER_PREFIX} ARCHIVE DESTINATION ${NL_LIB_PREFIX} COMPONENT driverssound)
   IF(WITH_MAXPLUGIN)
     INSTALL(TARGETS ${NLDRV_AL_LIB} RUNTIME DESTINATION maxplugin COMPONENT driverssound)
   ENDIF()

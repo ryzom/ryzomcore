@@ -280,6 +280,8 @@ public:
 	virtual	void			setShadowMapBlurSize(uint bs);
 	virtual	void			enableShadowPolySmooth(bool enable);
 	virtual	bool			getEnableShadowPolySmooth() const;
+	virtual	void			enableGPUSkinning(bool enable);
+	virtual	bool			isGPUSkinningEnabled() const;
 	virtual	void			setShadowMapDistFadeStart(float dist);
 	virtual	float			getShadowMapDistFadeStart() const;
 	virtual	void			setShadowMapDistFadeEnd(float dist);
@@ -304,6 +306,8 @@ public:
 	virtual void		  setWaterEnvMap(UWaterEnvMap *waterEnvMap);
 	virtual UWaterEnvMap *getWaterEnvMap() const { return _WaterEnvMap; }
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time);
+	virtual void		  setForceWaterEnvMap(bool force) { _Scene.setForceWaterEnvMap(force); }
+	virtual bool		  getForceWaterEnvMap() const { return _Scene.getForceWaterEnvMap(); }
 	// @}
 
 public:

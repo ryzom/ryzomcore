@@ -23,11 +23,15 @@
 #include "nel/misc/types_nl.h"
 #include "nel/3d/mesh_vertex_program.h"
 #include "nel/3d/vertex_program.h"
+#include "nel/3d/uniform_buffer.h"
+#include "nel/3d/uniform_buffer_format.h"
 
 
 namespace NL3D {
 
 class CVertexProgramWindTree;
+class CVertexProgramWindTreeUBO;
+struct CWindTreeVPIdx;
 
 // ***************************************************************************
 /**
@@ -40,6 +44,7 @@ class CMeshVPWindTree : public IMeshVertexProgram
 {
 public:
 	friend class CVertexProgramWindTree;
+	friend class CVertexProgramWindTreeUBO;
 
 	enum	{HrcDepth= 3};
 
@@ -118,9 +123,18 @@ private:
 	/** The 16 versions: Specular or not (0 or 2), + normalize normal or not (0 or 1).
 	 *	All multiplied by 4, because support from 0 to 3 pointLights activated. (0.., 4.., 8.., 12..)
 	 */
-	static	NLMISC::CSmartPtr<CVertexProgramWindTree> _VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgramWindTree> _VertexProgram[NumVp]; // STATIC GPU RESOURCE: Blocks multiple driver instances
+
+	/// Single UBO-based VP (all light/specular/normalize folded). GL3-only, falls back to 16 variants if not compiled.
+	static	NLMISC::CSmartPtr<CVertexProgramWindTreeUBO> _VertexProgramUBO; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	NLMISC::CRefPtr<CVertexProgramWindTree> _ActiveVertexProgram;
+	NLMISC::CRefPtr<CVertexProgramWindTreeUBO> _ActiveVertexProgramUBO;
+
+	// Returns the active program's wind/material uniform indices
+	const CWindTreeVPIdx &activeIdx() const;
+	// Returns true if the UBO program is active
+	bool isUBOActive() const;
 
 	// WindTree Time for this mesh param setup. Stored in mesh because same for all instances.
 	float		_CurrentTime[HrcDepth];
@@ -132,6 +146,22 @@ private:
 
 	// MBR Cache
 	uint		_LastMBRIdVP;
+
+	// User VP UBO for wind + material (UBO path only).
+	static NLMISC::CSmartPtr<CUniformBuffer> _WindTreeUB; // STATIC GPU RESOURCE: Blocks multiple driver instances
+
+	// Cached std140 offsets (layout is const — safe as static)
+	struct CWindTreeUBOOffsets
+	{
+		sint WindLevel1;
+		sint WindLevel2;     // base offset; [i] = WindLevel2 + i*16
+		sint WindLevel3;     // base offset; [i] = WindLevel3 + i*16
+		sint MaterialDiffuse;
+		sint MaterialSpecular;
+		sint MaterialShininess;
+	};
+	static CWindTreeUBOOffsets _UBOOffsets;
+	static NLMISC::CSmartPtr<CUniformBufferFormat> _WindTreeUBFormat;
 
 	// Compute a cosinus with an angle given in 0-1 <=> 0-2Pi. Actual values goes from 0 to 2.
 	static float	speedCos(float angle);

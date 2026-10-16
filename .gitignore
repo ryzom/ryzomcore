@@ -279,3 +279,4 @@ ryzom/server/tools/config.sh
 
 # machine specific files
 CMakeUserPresets.json
+.claude/settings.local.json

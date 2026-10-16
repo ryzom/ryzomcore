@@ -69,6 +69,9 @@ bool							SetMousePosFirstTime = true;
 // mask for mouse buttons that are known to be down
 uint							DownMouseButtons = 0;
 
+// track whether the mouse is currently captured
+static bool						MouseCaptured = false;
+
 //////////////
 // FUNCTION //
 //////////////
@@ -253,21 +256,30 @@ void	SetMouseAcceleration (uint accel)
 }
 
 // *********************************************************************************
+void ResetMouseCaptureState()
+{
+	DownMouseButtons = 0;
+	if (MouseCaptured)
+	{
+		MouseCaptured = false;
+		Driver->setCapture(false);
+	}
+}
+
+// *********************************************************************************
 void HandleSystemCursorCapture(const CEvent &event)
 {
-	static bool mouseCaptured = false;
-
 	// capture on first move event after button is held down or free look is activated
-	if (event == EventMouseMoveId && !mouseCaptured && (MouseFreeLook || DownMouseButtons != 0))
+	if (event == EventMouseMoveId && !MouseCaptured && (MouseFreeLook || DownMouseButtons != 0))
 	{
-		mouseCaptured = true;
+		MouseCaptured = true;
 		Driver->setCapture(true);
 	}
 
 	// release when button is released and not in free look
-	if (mouseCaptured && !MouseFreeLook && DownMouseButtons == 0)
+	if (MouseCaptured && !MouseFreeLook && DownMouseButtons == 0)
 	{
-		mouseCaptured = false;
+		MouseCaptured = false;
 		Driver->setCapture(false);
 	}
 

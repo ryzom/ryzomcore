@@ -1,5 +1,21 @@
 FILE(GLOB SRC *.cpp *.h *.def *.rc)
 
+SOURCE_GROUP("" FILES
+		sound_driver_dsound.cpp
+		sound_driver_dsound.h
+		stddsound.cpp
+		stddsound.h
+		driver_dsound.def
+		resources.rc)
+
+SOURCE_GROUP(sfx FILES
+		buffer_dsound.cpp
+		buffer_dsound.h
+		listener_dsound.cpp
+		listener_dsound.h
+		source_dsound.cpp
+		source_dsound.h)
+
 NL_TARGET_DRIVER(nel_drv_dsound_win ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(nel_drv_dsound_win BEFORE PRIVATE ${DXSDK_INCLUDE_DIR})

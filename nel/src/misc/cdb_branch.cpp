@@ -20,6 +20,8 @@
 
 #include "stdmisc.h"
 
+#ifndef NL_NO_LIBXML2
+
 //#define TRACE_READ_DELTA
 //#define TRACE_WRITE_DELTA
 //#define TRACE_SET_VALUE
@@ -870,3 +872,5 @@ ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 
 }
 
+
+#endif // NL_NO_LIBXML2

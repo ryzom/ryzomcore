@@ -14,6 +14,7 @@ TARGET_LINK_LIBRARIES(world_editor_graph_plugin
 NL_DEFAULT_PROPS(world_editor_graph_plugin "Ryzom, Tools, World: World Editor Graph Plugin")
 NL_ADD_RUNTIME_FLAGS(world_editor_graph_plugin)
 NL_ADD_LIB_SUFFIX(world_editor_graph_plugin)
+NL_MFC_DLL_WORKAROUND(world_editor_graph_plugin)
 
 ADD_DEFINITIONS(${MFC_DEFINITIONS} -DWIN32_DLL_EXPORTS)
 

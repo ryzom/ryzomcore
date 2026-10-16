@@ -657,12 +657,14 @@ template<class T, class U>	inline T	type_cast(U o)
 	}
 }
 
-/** Compile time assertion
+/** Compile time assertion (works at namespace, class, and function scope)
   */
 #ifdef NL_ISO_CPP0X_AVAILABLE
 #	define nlctassert(cond) static_assert((cond), "Compile time assert in "#cond)
 #else
-#	define nlctassert(cond) (void)sizeof(uint[(cond) ? 1 : 0])
+#	define nlctassert_join2(a, b) a##b
+#	define nlctassert_join(a, b) nlctassert_join2(a, b)
+#	define nlctassert(cond) typedef char nlctassert_join(nlctassert_, __LINE__)[(cond) ? 1 : -1]
 #endif
 
 /**

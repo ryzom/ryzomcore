@@ -390,8 +390,8 @@ public:
 	// is this texture a bumpmap ?
 	virtual bool isBumpMap() const { return false; }
 
-	// is this texture a bloom texture ?
-	virtual bool isBloomTexture() const { return false; }
+	// is this an offscreen render target texture?
+	virtual bool isOffscreenTexture() const { return false; }
 
 	// For Texture profiling. The smartPtr is kept (NULL default)
 	void	setTextureCategory(NLMISC::CSmartPtr<CTextureCategory> &textCat) {_TextureCategory= textCat;}

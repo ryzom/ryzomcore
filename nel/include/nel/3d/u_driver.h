@@ -28,6 +28,7 @@
 #include "frustum.h"
 #include "nel/misc/geom_ext.h"
 #include "nel/misc/matrix.h"
+#include "nel/misc/plane.h"
 #include "nel/misc/rgba.h"
 #include "nel/misc/rect.h"
 #include "nel/misc/bitmap.h"
@@ -145,7 +146,7 @@ public:
 	enum TStencilFunc { never = 0, less, lessequal, equal, notequal, greaterequal, greater, always};
 
 	// Existing drivers
-	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs };
+	enum TDriver { Direct3d = 0, OpenGl, OpenGlEs, OpenGl3, OpenGlEs3 };
 
 public:
 	/// The EventServer of this driver. Init after setDisplay()!!
@@ -248,6 +249,12 @@ public:
 	virtual	void			clearBuffers(CRGBA col= CRGBA(255,255,255,255)) =0;
 	/// This swap the back and front buffer (ALL the buffer :) ).
 	virtual	void			swapBuffers() =0;
+	/** Non-blocking check whether the GPU is ready for the next frame.
+	 *  Returns true if we can render, false if the GPU is still processing
+	 *  previous frames. On platforms like Emscripten/WebGL, callers should
+	 *  skip the frame when this returns false to avoid blocking the browser.
+	 */
+	virtual bool			isFrameReady() =0;
 	// Finish all commands
 	virtual void            finish() = 0;
 	// Flush the command buffer then immediately returns
@@ -268,8 +275,10 @@ public:
 	// @{
 	virtual	bool			fogEnabled()=0;
 	virtual	void			enableFog(bool enable)=0;
-	/// $ fog parameters. fog must enabled to see result. start and end are in [0,1] range.
+	/// setup fog parameters. fog must enabled to see result. start and end are in [0,1] range.
 	virtual	void			setupFog(float start, float end, CRGBA color)=0;
+	/// setup fog mode and density. mode/density are orthogonal to start/end/color.
+	virtual	void			setupFogMode(uint mode = 0, float density = 1.f)=0;
 	// @}
 
 	/// \name Light support.
@@ -292,6 +301,12 @@ public:
 	virtual void			stencilFunc(TStencilFunc stencilFunc, int ref, uint mask) = 0;
 	virtual void			stencilOp(TStencilOp fail, TStencilOp zfail, TStencilOp zpass) = 0;
 	virtual void			stencilMask(uint mask) = 0;
+	// @}
+
+	/// \name Clip planes
+	// @{
+	virtual void			enableClipPlane(uint index, bool enable) = 0;
+	virtual void			setClipPlane(uint index, const NLMISC::CPlane &plane) = 0;
 	// @}
 
 	/// \name Scene gestion.
@@ -674,6 +689,10 @@ public:
 	 */
 	virtual void			forceTextureResize(uint divisor)=0;
 
+	/** Return true if the driver supports monitor color properties (gamma, contrast, luminosity).
+	  */
+	virtual bool			supportMonitorColorProperties () const = 0;
+
 	/** Setup monitor color properties.
 	  *
 	  * Return false if setup failed.
@@ -807,6 +826,12 @@ public:
 
 	// check if bloom effect is supported
 	virtual bool				supportBloomEffect() const = 0;
+
+	// check if GPU skinning is supported (requires glsl3vi profile and large UBO arrays)
+	virtual bool				supportGPUSkinning() const = 0;
+
+	/// Return true if driver supports large UBO arrays (false on ANGLE/D3D11).
+	virtual bool				supportLargeUBOArrays() const = 0;
 
 	/// \name Bench
 	// @{

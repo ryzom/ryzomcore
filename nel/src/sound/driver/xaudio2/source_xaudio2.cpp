@@ -357,12 +357,12 @@ void CSourceXAudio2::setStreaming(bool streaming)
 	{
 		XAUDIO2_VOICE_STATE voice_state;
 		_SourceVoice->GetState(&voice_state);
-		if (!voice_state.BuffersQueued)
+		if (voice_state.BuffersQueued)
 		{
 			if (!_IsLooping)
 				nlwarning(NLSOUND_XAUDIO2_PREFIX "Switched streaming mode while buffer still queued!?! Flush");
 			_SoundDriver->getXAudio2()->CommitChanges(_OperationSet);
-			if (FAILED(_SourceVoice->FlushSourceBuffers())) 
+			if (FAILED(_SourceVoice->FlushSourceBuffers()))
 				nlwarning(NLSOUND_XAUDIO2_PREFIX "FAILED FlushSourceBuffers");
 		}
 	}

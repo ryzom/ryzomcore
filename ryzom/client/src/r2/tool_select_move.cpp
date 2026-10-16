@@ -383,8 +383,8 @@ void CToolSelectMove::commitAction(CInstance &instance)
 						if (_AutoGroup.getGroupingCandidate())
 						{
 							newCopy.push();
-							CUniquePtr<CObject> desc(CComLuaModule::getObjectFromLua(ls.getStatePointer()));
-							_AutoGroup.group(desc.get(), _FinalPos);
+							CObject::TSmartPtr desc = CComLuaModule::getObjectFromLua(ls.getStatePointer());
+							_AutoGroup.group(desc, _FinalPos);
 						}
 						else
 						{
@@ -659,9 +659,8 @@ void CToolSelectMove::setInstancePos(const NLMISC::CVectorD &pos, CInstance &ins
 	//H_AUTO(R2_CToolSelectMove_setInstancePos)
 	std::string posInstanceId = instance.getPosInstanceId();
 	if (posInstanceId.empty()) return;
-	CObject *newPos = buildVector(pos, posInstanceId);
+	CObject::TSmartPtr newPos = buildVector(pos, posInstanceId);
 	getEditor().requestSetLocalNode(_GhostInstance ? _GhostInstance->getId() : instance.getId(), "Position", newPos);
-	delete newPos;
 }
 
 // ***************************************************************

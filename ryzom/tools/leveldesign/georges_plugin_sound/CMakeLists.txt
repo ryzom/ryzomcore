@@ -18,6 +18,7 @@ TARGET_LINK_LIBRARIES(georges_plugin_sound
 NL_DEFAULT_PROPS(georges_plugin_sound "Ryzom, Tools, Georges: Georges Plugin Sound")
 NL_ADD_RUNTIME_FLAGS(georges_plugin_sound)
 NL_ADD_LIB_SUFFIX(georges_plugin_sound)
+NL_MFC_DLL_WORKAROUND(georges_plugin_sound)
 
 TARGET_COMPILE_DEFINITIONS(georges_plugin_sound PRIVATE ${MFC_DEFINITIONS})
 

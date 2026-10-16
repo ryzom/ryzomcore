@@ -8,7 +8,7 @@ ADD_EXECUTABLE(sheets_packer ${SRC}
         ${CMAKE_SOURCE_DIR}/ryzom/client/src/sheet_manager.cpp
         ${CMAKE_SOURCE_DIR}/ryzom/client/src/sheet_manager.h)
 
-TARGET_INCLUDE_DIRECTORIES(sheets_packer PRIVATE ${LIBXML2_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/ryzom/client/src)
+TARGET_INCLUDE_DIRECTORIES(sheets_packer PRIVATE ${CMAKE_SOURCE_DIR}/ryzom/client/src)
 
 TARGET_LINK_LIBRARIES(sheets_packer
         PRIVATE
@@ -19,8 +19,6 @@ TARGET_LINK_LIBRARIES(sheets_packer
         NeL::net
         NeL::ligo
 )
-
-TARGET_COMPILE_DEFINITIONS(sheets_packer PRIVATE ${LIBXML2_DEFINITIONS})
 
 NL_DEFAULT_PROPS(sheets_packer "Ryzom, Tools: Sheets Packer")
 NL_ADD_RUNTIME_FLAGS(sheets_packer)

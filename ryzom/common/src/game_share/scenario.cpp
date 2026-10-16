@@ -60,9 +60,9 @@ void CScenario::serial( NLMISC::IStream &f)
 	if (!f.isReading())
 	{
 
-		CObjectSerializerServer hl(_HighLevel);
+		CObjectSerializerServer hl(_HighLevel.getPtr());
 		f.serial(hl);
-		CObjectSerializerServer bb(_BasicBricks);
+		CObjectSerializerServer bb(_BasicBricks.getPtr());
 		f.serial(bb);
 	}
 	else
@@ -72,7 +72,6 @@ void CScenario::serial( NLMISC::IStream &f)
 		CObjectSerializerServer bb;
 		f.serial(bb);
 		setHighLevel( hl.getData() ) ;	// Set instance Map
-		delete _BasicBricks;
 		_BasicBricks = bb.getData();
 	}
 }
@@ -95,11 +94,7 @@ CScenario::CScenario(CObject* object, TScenarioSessionType sessionType)
 void CScenario::setHighLevel(CObject* highLevel)
 {
 	_Clean = false;
-	if (highLevel != _HighLevel)
-	{
-		delete _HighLevel;
-		_HighLevel = highLevel;
-	}
+	_HighLevel = highLevel;
 
 	_InstanceMap->set(highLevel);
 
@@ -149,10 +144,7 @@ CObject *CScenario::find(const std::string& instanceId, const std::string & attr
 
 CScenario::~CScenario()
 {
-	delete _HighLevel;
-	delete _BasicBricks;
 	delete _InstanceMap;
-	delete _Palette;
 }
 
 
@@ -172,7 +164,7 @@ bool CScenario::setNode( const std::string& instanceId, const std::string& attrN
 }
 
 bool  CScenario::insertNode(const std::string&  instanceId, const std::string & attrName, sint32 position,
-	const std::string& key, CObject* value)
+	const std::string& key, const CObject::TSmartPtr &value)
 {
 	_Clean = false;
 	CObject* found= _InstanceMap->find(instanceId);
@@ -218,7 +210,7 @@ bool CScenario::eraseNode(const std::string&  instanceId, const std::string & at
 		return false;
 	}
 
-	CObject* removed = NULL;
+	CObject::TSmartPtr removed;
 	if (found->isTable())
 	{
 		bool canRemove = found->canTake(position);
@@ -248,8 +240,7 @@ bool CScenario::eraseNode(const std::string&  instanceId, const std::string & at
 		nlwarning("CScenario::eraseNode when removing (%s, %s) : position must be -1, because object is not a table", instanceId.c_str(), attrName.c_str());
 		return true;
 	}
-	_InstanceMap->remove(removed);
-	delete removed;
+	_InstanceMap->remove(removed.getPtr());
 	return true;
 }
 
@@ -301,7 +292,7 @@ bool CScenario::moveNode( const std::string& instanceId1, const std::string& att
 		return false;
 	}
 
-	CObject* removed = from->take(position1);
+	CObject::TSmartPtr removed = from->take(position1);
 
 	if (!removed)
 	{
@@ -338,7 +329,6 @@ CObject* CScenario::getHighLevel() const { return _HighLevel;}
 void CScenario::setRtData(CObject* rtScenario)
 {
 	_Clean = false;
-	if (_BasicBricks) { delete _BasicBricks; }
 	this->_BasicBricks = rtScenario;
 }
 
@@ -407,7 +397,7 @@ void CInstanceMap::remove(CObject* root)
 		if ( root->isString("InstanceId") )
 		{
 			std::string instanceId = root->toString(_IdName);
-			std::map<std::string, CObject*>::iterator found(_Map.find(instanceId));
+			std::map<std::string, CObject::TRefPtr>::iterator found(_Map.find(instanceId));
 			if ( found == _Map.end())
 			{
 				nlwarning("Trying to remove object from instance map but object is not found. Objec t is :");
@@ -436,7 +426,7 @@ void CInstanceMap::set(CObject* root)
 
 CObject* CInstanceMap::find (const std::string& instanceId)
 {
-	std::map< std::string , CObject*>::const_iterator found = _Map.find(instanceId);
+	std::map< std::string , CObject::TRefPtr>::const_iterator found = _Map.find(instanceId);
 	if (found != _Map.end()) { return found->second; }
 
 	return 0;

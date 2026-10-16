@@ -38,6 +38,7 @@
 #include <nel/3d/viewport.h>
 
 #include <nel/3d/stereo_hmd.h>
+#include <nel/3d/stereo_passthrough.h>
 
 #include "snowballs_client.h"
 #include "entities.h"
@@ -136,6 +137,13 @@ void	initCamera()
 		}
 	}
 	IStereoDisplay::releaseUnusedLibraries();
+
+	if (!StereoDisplay)
+	{
+		StereoDisplay = new NL3D::CStereoPassthrough();
+		if (Driver)
+			StereoDisplay->setDriver(Driver);
+	}
 
 	// Set up directly the camera
 	Camera = Scene->getCam();

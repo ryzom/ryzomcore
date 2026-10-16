@@ -271,8 +271,8 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 	else
 	{
 		// other is a standalone entity -> create a new group
-		CUniquePtr<CObject> newGroup(getEditor().getDMC().newComponent("NpcGrpFeature"));
-		if (!newGroup.get())
+		CObject::TSmartPtr newGroup = getEditor().getDMC().newComponent("NpcGrpFeature");
+		if (!newGroup)
 		{
 			nlwarning("Syntax error in r2_features_npc_group.lua.");
 			getEditor().getDMC().getActionHistoric().endAction();
@@ -291,8 +291,8 @@ void CAutoGroup::group(CObject *newEntityDesc, const NLMISC::CVectorD &createPos
 							   "Features",
 							   -1,
 							   "",
-							   newGroup.get());
-		targetGroupId = getString(newGroup.get(), "InstanceId");
+							   newGroup.getPtr());
+		targetGroupId = getString(newGroup.getPtr(), "InstanceId");
 		// move target instance in that group (becomes the leader)
 		getEditor().getDMC().requestMoveNode(destGroup->getId(), "", -1, targetGroupId, "Components", -1);
 	}

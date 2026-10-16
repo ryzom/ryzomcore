@@ -44,24 +44,24 @@
 ** 
 ****************************************************************************/
 
-#include <QtGui/QApplication>
-#include <QtGui/QDesktopWidget>
+#include <QtWidgets/QApplication>
 #include <QtGui/QPainter>
-#include <QtGui/QPushButton>
-#include <QtGui/QColorDialog>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QColorDialog>
 #include <QtCore/QMap>
-#include <QtGui/QLayout>
-#include <QtGui/QStyle>
-#include <QtGui/QLabel>
-#include <QtGui/QToolTip>
+#include <QtWidgets/QLayout>
+#include <QtWidgets/QStyle>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QToolTip>
 #include <QtGui/QPixmap>
 #include <QtGui/QFocusEvent>
 #include <QtGui/QPaintEvent>
-#include <QtGui/QGridLayout>
+#include <QtWidgets/QGridLayout>
 #include <QtGui/QHideEvent>
 #include <QtGui/QKeyEvent>
 #include <QtGui/QShowEvent>
 #include <QtGui/QMouseEvent>
+#include <QtGui/QScreen>
 #include <math.h>
 
 #include "qtcolorpicker.h"
@@ -310,7 +310,10 @@ void QtColorPicker::buttonPressed(bool toggled)
     if (!toggled)
         return;
 
-    const QRect desktop = QApplication::desktop()->geometry();
+    const QScreen *screen = QGuiApplication::primaryScreen();
+    if (!screen)
+        return;
+    const QRect desktop = screen->geometry();
     // Make sure the popup is inside the desktop.
     QPoint pos = mapToGlobal(rect().bottomLeft());
     if (pos.x() < desktop.left())
@@ -862,7 +865,7 @@ void ColorPickerPopup::regenerateGrid()
     // one.
     if (grid) delete grid;
     grid = new QGridLayout(this);
-    grid->setMargin(1);
+    grid->setContentsMargins(1, 1, 1, 1);
     grid->setSpacing(0);
 
     int ccol = 0, crow = 0;
@@ -891,12 +894,10 @@ void ColorPickerPopup::regenerateGrid()
 */
 void ColorPickerPopup::getColorFromDialog()
 {
-    bool ok;
-    QRgb rgb = QColorDialog::getRgba(lastSel.rgba(), &ok, parentWidget());
-    if (!ok)
+    QColor col = QColorDialog::getColor(lastSel, parentWidget(), QString(), QColorDialog::ShowAlphaChannel);
+    if (!col.isValid())
 	return;
 
-    QColor col = QColor::fromRgba(rgb);
     insertColor(col, tr("Custom"), -1);
     lastSel = col;
     emit selected(col);

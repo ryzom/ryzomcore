@@ -1,0 +1,78 @@
+// Water fragment program
+// Compile variants:
+//   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision
+//   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_FOG
+//   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_DIFFUSE
+//   cgc -entry water_fp water_fp.cg -profile arbfp1 -O3 -fastmath -fastprecision -DUSE_FOG -DUSE_DIFFUSE
+//   cgc -entry water_fp water_fp.cg -profile ps_2_0 -O3 -fastmath -fastprecision
+//   cgc -entry water_fp water_fp.cg -profile ps_2_0 -O3 -fastmath -fastprecision -DUSE_DIFFUSE
+// Note: ps_2_0 fog is handled by D3D fixed-function pipeline, USE_FOG is arbfp1 only.
+// Note: In arbfp1 output, replace "program.local" with "program.env" to match driver setup.
+//
+// Driver sets constants:
+//   c[0] = bump0ScaleBias {2*factor, -factor, 0, 0}
+//   c[1] = bump1ScaleBias {2*factor, -factor, 0, 0}
+//   c[2] = fogFactor {scale, offset, 0, 0} [fog only]
+//   c[3] = fogColor [fog only, from GL fog state]
+
+void water_fp(
+	// Per fragment parameters
+	float2 bump0TexCoord : TEXCOORD0,
+	float2 bump1TexCoord : TEXCOORD1,
+	float2 envMapTexCoord : TEXCOORD2,
+#ifdef USE_DIFFUSE
+	float2 diffuseTexCoord : TEXCOORD3,
+#endif
+#ifdef USE_FOG
+	float fogValue : FOG,
+#endif
+
+	// Fragment program constants
+	uniform float4 bump0ScaleBias : register(c0),
+	uniform float4 bump1ScaleBias : register(c1),
+#ifdef USE_FOG
+	uniform float4 fogFactor : register(c2),
+	uniform float4 fogColor : register(c3),
+#endif
+	uniform sampler2D nlTex0 : TEX0,
+	uniform sampler2D nlTex1 : TEX1,
+	uniform sampler2D nlTex2 : TEX2,
+#ifdef USE_DIFFUSE
+	uniform sampler2D nlTex3 : TEX3,
+#endif
+
+	// Output color
+	out float4 oCol : COLOR
+)
+{
+	// Read bump map 0
+	float4 bmValue = tex2D(nlTex0, bump0TexCoord);
+	// Bias result (include scaling) — scale from [0,1] to [-1,1] with factor
+	bmValue = bmValue * bump0ScaleBias.xxxx + bump0ScaleBias.yyzz;
+	// Offset bump map 1 UVs
+	bmValue.xy += bump1TexCoord;
+
+	// Read bump map 1
+	bmValue = tex2D(nlTex1, bmValue.xy);
+	// Bias result (include scaling)
+	bmValue = bmValue * bump1ScaleBias.xxxx + bump1ScaleBias.yyzz;
+	// Offset envmap UVs
+	bmValue.xy += envMapTexCoord;
+
+	// Read envmap
+	float4 envMap = tex2D(nlTex2, bmValue.xy);
+
+#ifdef USE_DIFFUSE
+	// Read diffuse and modulate with envmap
+	float4 diffuse = tex2D(nlTex3, diffuseTexCoord);
+	envMap *= diffuse;
+#endif
+
+#ifdef USE_FOG
+	// Compute fog
+	float fog = saturate(fogValue * fogFactor.x + fogFactor.y);
+	oCol = lerp(fogColor, envMap, fog);
+#else
+	oCol = envMap;
+#endif
+}

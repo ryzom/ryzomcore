@@ -39,13 +39,13 @@ namespace NL3D
 {
 
 // ***************************************************************************
-const uint32 IDriver::InterfaceVersion = 0x70; // total video memory
+const uint32 IDriver::InterfaceVersion = 0x74; // user UBO bind API
 
 // ***************************************************************************
 IDriver::IDriver() : _SyncTexDrvInfos( "IDriver::_SyncTexDrvInfos" )
 {
 	_PolygonMode= Filled;
-	_StaticMemoryToVRAM=false;
+	_StaticMemoryToVRAM=true;
 	_ResetCounter=0;
 }
 
@@ -65,6 +65,7 @@ IDriver::~IDriver()
 	nlassert(_VBDrvInfos.empty());
 	nlassert(_IBDrvInfos.empty());
 	nlassert(_GPUPrgDrvInfos.empty());
+	nlassert(_UBDrvInfos.empty());
 }
 
 
@@ -123,6 +124,14 @@ bool		IDriver::release(void)
 	{
 		// NB: at IVertexProgramDrvInfos deletion, this->_GPUPrgDrvInfos is updated (entry deleted);
 		delete *itGPUPrg;
+	}
+
+	// Release UBs drv.
+	ItUBDrvInfoPtrList		itub;
+	while( (itub = _UBDrvInfos.begin()) != _UBDrvInfos.end() )
+	{
+		// NB: at IUBDrvInfos deletion, this->_UBDrvInfos is updated (entry deleted);
+		delete *itub;
 	}
 
 	return true;
@@ -251,6 +260,11 @@ void			IDriver::removeMatDrvInfoPtr(ItMatDrvInfoPtrList shaderIt)
 void			IDriver::removeGPUPrgDrvInfoPtr(ItGPUPrgDrvInfoPtrList gpuPrgDrvInfoIt)
 {
 	_GPUPrgDrvInfos.erase(gpuPrgDrvInfoIt);
+}
+// ***************************************************************************
+void			IDriver::removeUBDrvInfoPtr(ItUBDrvInfoPtrList ubDrvInfoIt)
+{
+	_UBDrvInfos.erase(ubDrvInfoIt);
 }
 
 // ***************************************************************************

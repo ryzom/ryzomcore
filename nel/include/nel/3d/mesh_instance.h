@@ -78,6 +78,11 @@ protected:
 	/// Implementation of the renderSkin
 	virtual void	renderSkin(float alphaMRM);
 
+	/// GPU Skinning
+	virtual	bool			supportGPUSkinning() const;
+	virtual	void			renderGPUSkin(float alphaMRM, CSkeletonModel *skeleton);
+	virtual	CVertexProgram	*getGPUSkinVP() const;
+
 	/// Skin intersection?
 	virtual	bool			supportIntersectSkin() const;
 	virtual	bool			intersectSkin(const CMatrix &toRaySpace, float &dist2D, float &distZ, bool computeDist2D);

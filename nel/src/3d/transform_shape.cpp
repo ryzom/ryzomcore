@@ -286,8 +286,15 @@ void	CTransformShape::traverseLoadBalancingPass0()
 	}
 
 
-	// Then compute distance from camera.
-	float	modelDist= ( loadTrav.CamPos - *modelPos).norm();
+	// Blend of Euclidean distance and camera-plane distance.
+	// Euclidean alone penalizes characters at screen edges equally to those far ahead.
+	// Plane distance alone over-prioritizes off-screen-adjacent characters.
+	// 50/50 blend is a practical compromise.
+	CVector toModel = *modelPos - loadTrav.CamPos;
+	float euclidean = toModel.norm();
+	float plane = toModel * loadTrav.CamLook; // dot product = signed distance along view axis
+	if (plane < 0.01f) plane = 0.01f;
+	float modelDist = (euclidean + plane) * 0.5f;
 
 
 	// Get the number of triangles this model use now.

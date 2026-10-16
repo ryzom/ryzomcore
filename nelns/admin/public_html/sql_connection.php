@@ -34,6 +34,11 @@
 		return connectToDatabase($dbhost, $dbname, $dblogin, $dbpassword);
 	}
 
+	function sqlescape($value)
+	{
+		return mysql_real_escape_string($value);
+	}
+
 	function sqlquery($query)
 	{
 		// here log queries

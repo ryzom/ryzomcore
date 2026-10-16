@@ -337,7 +337,7 @@ void ConnectionClient::cbWSShardChooseShard(CMessage &msgin, const std::string &
 		CMysqlResult result;
 		MYSQL_ROW row;
 		sint32 nbrow;
-		reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where Cookie='" + cookie.setToString() + "'", nbrow, row, result);
+		reason = sqlQuery("select UId, Cookie, Privilege, ExtendedPrivilege from user where Cookie='" + sqlEscape(cookie.setToString()) + "'", nbrow, row, result);
 		if (!reason.empty()) break;
 		if (nbrow != 1)
 		{

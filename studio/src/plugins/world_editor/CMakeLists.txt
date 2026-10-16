@@ -1,7 +1,6 @@
 INCLUDE_DIRECTORIES(	${CMAKE_CURRENT_BINARY_DIR}
 			${CMAKE_CURRENT_SOURCE_DIR}
 			${QT_INCLUDES}
-			${LIBXML2_INCLUDE_DIR}
 			${QtPropertyBrowser_INCLUDE_DIR}
 			)
 
@@ -53,15 +52,17 @@ ADD_LIBRARY(studio_plugin_world_editor MODULE ${SRC}
 						${OVQT_PLUGIN_WORLD_EDITOR_RC_SRCS})
 
 TARGET_LINK_LIBRARIES(studio_plugin_world_editor
+        PUBLIC
 		studio_plugin_core
 		studio_plugin_landscape_editor
+        PRIVATE
 		NeL::misc
 		NeL::3d
 		${QtPropertyBrowser_LIBRARY}
 		QtPropertyBrowser::Text
 		${QT_LIBRARIES}
 		${QT_QTOPENGL_LIBRARY}
-		${LIBXML2_LIBRARIES}
+		LibXml2::LibXml2
 )
 
 NL_DEFAULT_PROPS(studio_plugin_world_editor "Tools: Studio Plugin: World Editor")

@@ -2221,7 +2221,7 @@ void CPSConstraintMesh::CMeshDisplayShare::buildVB(CVertexBuffer &dest, const CV
 	/// we duplicate the original mesh data's 'ConstraintMeshBufSize' times, eventually adding a color
 	nlassert(destFormat == meshVb.getVertexFormat() || destFormat == (meshVb.getVertexFormat() | (uint32) CVertexBuffer::PrimaryColorFlag) );
 	dest.setVertexFormat(destFormat);
-	dest.setPreferredMemory(CVertexBuffer::AGPVolatile, true);
+	dest.setBufferUsage(CVertexBuffer::FullStream, true);
 	dest.setNumVertices(ConstraintMeshBufSize * meshVb.getNumVertices());
 	for(uint k = 0; k < CVertexBuffer::MaxStage; ++k)
 	{

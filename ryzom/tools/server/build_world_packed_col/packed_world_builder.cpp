@@ -426,7 +426,7 @@ void CPackedWorldBuilder::fly(std::vector<CIslandInfo>  &islands, float camSpeed
 	mouseListener.setSpeed(camSpeed);
 	CVertexBuffer vb;
 	vb.setVertexFormat(CVertexBuffer::PositionFlag);
-	vb.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
+	vb.setBufferUsage(CVertexBuffer::FullStream, false);
 	//
 	CMaterial material;
 	material.initUnlit();

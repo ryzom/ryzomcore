@@ -1,0 +1,2 @@
+EXPORTS NL3D_createIDriverInstance
+EXPORTS NL3D_interfaceVersion

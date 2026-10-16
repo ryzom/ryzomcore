@@ -1645,7 +1645,7 @@ void CServerEditionModule::rtScenarioUpdateRequested(NLNET::IModuleProxy *sender
 		nlwarning("R2Ed: char %u is trying to act on an invalid scenario", charId);
 		return;
 	}
-	CObject* value2 = rtScenario->clone();
+	CObject::TSmartPtr value2 = rtScenario->clone();
 	scenario->setRtData(value2);
 }
 
@@ -2115,7 +2115,7 @@ void CServerEditionModule::onScenarioUploadAsked(NLNET::IModuleProxy *senderModu
 		return;
 	}
 
-	CObject* scenarioHl = hlScenario.getData();
+	CObject::TSmartPtr scenarioHl = hlScenario.getData();
 	if (!scenarioHl)
 	{
 		nlwarning("R2Ed: char %u requested to upload an invalid scenario", charId);
@@ -2176,7 +2176,7 @@ void CServerEditionModule::onNodeInsertAsked(NLNET::IModuleProxy *senderModulePr
 	std::string extendedPriv;
 
 	value2.uncompress();
-	CObject* value = value2.getData();
+	CObject::TSmartPtr value = value2.getData();
 
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
 	if (!ok) { return; }
@@ -2220,8 +2220,7 @@ void CServerEditionModule::onNodeSetAsked(NLNET::IModuleProxy *senderModuleProxy
 	std::string extendedPriv;
 
 	value2.uncompress();
-	CObject* value = value2.getData();
-	CUniquePtr<CObject> autoDelete(value);
+	CObject::TSmartPtr value = value2.getData();
 
 
 	bool ok = checkSecurityInfo(senderModuleProxy, charId, clientEid, userPriv, extendedPriv);
@@ -3736,7 +3735,7 @@ void CServerEditionModule::startingScenario(NLNET::IModuleProxy *senderModulePro
 
 void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy, bool ok, const TScenarioHeaderSerializer& header, const CObjectSerializerServer &data, uint32 startingAct)
 {
-	CObject* rtData = data.getData();
+	CObject::TSmartPtr rtData = data.getData();
 	TCharId charId;
 	CEntityId clientEid;
 	std::string userPriv;
@@ -3755,7 +3754,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 		{
 			nlwarning("R2Ed: char %u has too many elements in scenario!", charId);
 			errorReason = "uiR2EDTooManyElmements";
-			delete rtData;
+			rtData = NULL;
 			ok = false;
 		}
 
@@ -3773,7 +3772,7 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			{
 				nlwarning("R2Ed: '%s'", err->toString().c_str());
 			}
-			delete rtData;
+			rtData = NULL;
 			delete err;
 			ok = false;
 			errorReason = "uiR2EDTooHighContent";
@@ -3790,7 +3789,6 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 		if (!scenario)
 		{
 			nlwarning("R2Ed: char %u is trying to act on an invalid scenario", charId);
-			delete rtData;
 			return;
 		}
 
@@ -3829,7 +3827,6 @@ void CServerEditionModule::startScenario(NLNET::IModuleProxy *senderModuleProxy,
 			if (!rtData)
 			{
 				nlwarning("R2Ed: char %u is connected to scenario %u but wants to do a start Test with no rt Data.", charId, body.SessionId.asInt());
-				delete rtData;
 				return;
 			}
 			scenario->setMode(2);

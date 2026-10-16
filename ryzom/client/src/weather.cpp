@@ -213,6 +213,14 @@ static uint16 getServerWeather()
 }
 
 // ***************************************************************************
+void resetWeatherDBState()
+{
+	LocalServerWeather = 0.f;
+	ServerWeatherBlendFactor = 0.f;
+	ServerDrivenWeather = false;
+}
+
+// ***************************************************************************
 void updateDBDrivenWeatherValue()
 {
 	uint16 dbWeather = getServerWeather();

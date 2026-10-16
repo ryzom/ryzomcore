@@ -36,7 +36,7 @@ ENDIF()
 IF(WITH_NEL_TOOLS)
   ADD_EXECUTABLE(nellzma ${CMAKE_CURRENT_SOURCE_DIR}/LzmaUtil.c)
 
-  TARGET_LINK_LIBRARIES(nellzma NeL::sevenzip)
+  TARGET_LINK_LIBRARIES(nellzma PRIVATE NeL::sevenzip)
   NL_DEFAULT_PROPS(nellzma "NeL, 3rd Party: LZMA")
   NL_ADD_RUNTIME_FLAGS(nellzma)
 

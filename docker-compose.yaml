@@ -22,3 +22,33 @@ services:
     build:
       context: .
       dockerfile: snowballs2/docker/Dockerfile
+
+  web:
+    image: "ryzomcore/web"
+    build: "./web"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./web/docs:/var/www/html/docs
+      - ./web/private_php:/var/www/html/private_php
+      - ./web/public_php:/var/www/html/public # needs to be writable by the web server
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ryzom
+      MARIADB_USER: ryzom
+      MARIADB_PASSWORD: ryzom
+      MARIADB_DATABASE: ryzom
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+

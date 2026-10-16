@@ -20,6 +20,9 @@
 
 #ifndef RZ_LUA_HELPER_H
 #define RZ_LUA_HELPER_H
+#ifdef _WIN32
+		#include <windows.h>
+#endif
 
 
 #include "nel/misc/types_nl.h"
@@ -381,7 +384,7 @@ namespace NLGUI
 
 #ifdef _WIN32
 #ifdef NL_DEBUG
-		HMODULE m_LuaSocket;
+		HINSTANCE m_LuaSocket;
 #endif
 #endif
 

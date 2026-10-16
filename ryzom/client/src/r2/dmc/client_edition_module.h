@@ -409,7 +409,7 @@ XII) Property accessor
 
 	CObject* getPropertyList(CObject* component) const;
 
-	CObject* getPaletteElement(const std::string& key)const;
+	const CObject::TSmartPtr& getPaletteElement(const std::string& key)const;
 
 	CObject* newComponent(const std::string& type) const;
 
@@ -953,7 +953,7 @@ public:
 	\param key The name of the palette element.
 	\return The palette element that is identified by its name
 	*/
-	CObject* getPaletteElement(const std::string& key)const;
+	const CObject::TSmartPtr& getPaletteElement(const std::string& key)const;
 
 	/*!
 	Create a new component by its class. Components are mainly defined in lua in the file r2_components.lua

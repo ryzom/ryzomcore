@@ -253,13 +253,7 @@ function(hunter_gate_download dir)
   file(
           WRITE
           "${cmakelists}"
-          "cmake_minimum_required(VERSION 3.10)\n"
-          "if(POLICY CMP0114)\n"
-          "  cmake_policy(SET CMP0114 NEW)\n"
-          "endif()\n"
-          "if(POLICY CMP0135)\n"
-          "  cmake_policy(SET CMP0135 NEW)\n"
-          "endif()\n"
+          "cmake_minimum_required(VERSION 3.28)\n"
           "project(HunterDownload LANGUAGES NONE)\n"
           "include(ExternalProject)\n"
           "ExternalProject_Add(\n"
@@ -336,6 +330,25 @@ function(hunter_gate_download dir)
           "  ${HUNTER_GATE_URL}"
           "  -> ${dir}"
   )
+
+  # Pre-download using system curl if available (workaround for CMake built without HTTPS)
+  get_filename_component(_hg_filename "${HUNTER_GATE_URL}" NAME)
+  set(_hg_filepath "${dir}/${_hg_filename}")
+  if(NOT EXISTS "${_hg_filepath}")
+    find_program(_hg_curl curl)
+    if(_hg_curl)
+      hunter_gate_status_debug("Pre-downloading with system curl: ${HUNTER_GATE_URL}")
+      execute_process(
+              COMMAND "${_hg_curl}" --fail -L -o "${_hg_filepath}" "${HUNTER_GATE_URL}"
+              RESULT_VARIABLE _hg_curl_result
+              ${logging_params}
+      )
+      if(NOT _hg_curl_result EQUAL 0)
+        file(REMOVE "${_hg_filepath}")
+      endif()
+    endif()
+  endif()
+
   execute_process(
           COMMAND "${CMAKE_COMMAND}" --build "${build_dir}"
           WORKING_DIRECTORY "${dir}"

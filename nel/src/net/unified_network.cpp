@@ -371,7 +371,7 @@ void	uncbMsgProcessing(CMessage &msgin, TSockId from, CCallbackNetBase &/* netba
 			nlwarning ("HNETL5: Received a message from a service %hu that is not ready (bad appid? 0x%" NL_I64 "X)", sid.get(), from->appId ());
 			return;
 		}
-		if((*itcb).second == 0)
+		if(!(*itcb).second)
 		{
 			nlwarning ("HNETL5: Received message %s from a service %hu but the associated callback is NULL", msgin.getName ().c_str(), sid.get());
 			return;
@@ -1470,7 +1470,7 @@ void	CUnifiedNetwork::addCallbackArray (const TUnifiedCallbackItem *callbackarra
 
 void	CUnifiedNetwork::setServiceUpCallback (const string &serviceName, TUnifiedNetCallback cb, void *arg, bool back)
 {
-	nlassert (cb != NULL);
+	nlassert (cb);
 	if (serviceName == "*")
 	{
 		if (back)
@@ -1541,7 +1541,7 @@ void	CUnifiedNetwork::removeServiceUpCallback (const string &serviceName, TUnifi
 
 void	CUnifiedNetwork::setServiceDownCallback (const string &serviceName, TUnifiedNetCallback cb, void *arg, bool back)
 {
-	nlassert (cb != NULL);
+	nlassert (cb);
 	if (serviceName == "*")
 	{
 		if (back)
@@ -1747,7 +1747,7 @@ TUnifiedMsgCallback CUnifiedNetwork::findCallback (const std::string &callbackNa
 {
 	TMsgMappedCallback::iterator	itcb = _Callbacks.find(callbackName);
 	if (itcb == _Callbacks.end())
-		return NULL;
+		return TUnifiedMsgCallback();
 	else
 		return (*itcb).second;
 }
@@ -2349,7 +2349,7 @@ NLMISC_CATEGORISED_COMMAND(nel, msgin, "Simulate an input message from another s
 
 	TUnifiedMsgCallback cb = CUnifiedNetwork::getInstance()->findCallback (messageName);
 
-	if (cb == NULL)
+	if (!cb)
 	{
 		log.displayNL ("Callback for message '%s' is not found", messageName.c_str());
 	}
@@ -2495,7 +2495,7 @@ NLMISC_CATEGORISED_COMMAND(nel, l5Callback, "Displays all callback registered in
 	uint i = 0;
 	for (CUnifiedNetwork::TMsgMappedCallback::iterator it = CUnifiedNetwork::getInstance()->_Callbacks.begin(); it != CUnifiedNetwork::getInstance()->_Callbacks.end(); it++)
 	{
-		log.displayNL (" %d '%s' %s", i++, (*it).first.c_str(), ((*it).second == NULL?"have a NULL address":""));
+		log.displayNL (" %d '%s' %s", i++, (*it).first.c_str(), (!(*it).second?"have a NULL address":""));
 	}
 
 	return true;

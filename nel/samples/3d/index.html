@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeL 3D Samples — WebGL 2.0 (GL ES 3.0)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #e0e0e0; min-height: 100vh; }
+    header { background: #16213e; padding: 2rem; text-align: center; border-bottom: 2px solid #0f3460; }
+    header h1 { font-size: 2rem; color: #e94560; margin-bottom: 0.5rem; }
+    header p { color: #a0a0b0; font-size: 1.1rem; }
+    .samples { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding: 2rem; max-width: 1200px; margin: 0 auto; }
+    .card { background: #16213e; border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #0f3460; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(233, 69, 96, 0.15); }
+    .card a { text-decoration: none; color: inherit; display: block; }
+    .card .preview { background: #0a0a1a; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+    .card .info { padding: 1.25rem; }
+    .card .info h2 { font-size: 1.25rem; color: #e94560; margin-bottom: 0.5rem; }
+    .card .info p { font-size: 0.9rem; color: #a0a0b0; line-height: 1.5; }
+    .tag { display: inline-block; background: #0f3460; color: #e0e0e0; padding: 0.2rem 0.6rem; border-radius: 4px; font-size: 0.75rem; margin-top: 0.5rem; }
+    footer { text-align: center; padding: 2rem; color: #666; font-size: 0.85rem; border-top: 1px solid #0f3460; }
+    footer a { color: #e94560; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>NeL 3D Samples — WebGL 2.0</h1>
+    <p>NL3D rendering engine running in the browser via GL ES 3.0 / Emscripten</p>
+  </header>
+
+  <div class="samples">
+    <div class="card">
+      <a href="nl_sample_clip_plane.html">
+        <div class="preview">✂️</div>
+        <div class="info">
+          <h2>Clip Plane</h2>
+          <p>Demonstrates clip plane discard via the pixel program. A rotating cube is clipped by an animated plane.</p>
+          <span class="tag">PP Clip Planes</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="nl_sample_ppl.html">
+        <div class="preview">💡</div>
+        <div class="info">
+          <h2>Per-Pixel Lighting</h2>
+          <p>Multi-object scene with per-pixel Blinn-Phong lighting, fog, and dynamic camera orbit.</p>
+          <span class="tag">Lighting</span> <span class="tag">Fog</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="nl_sample_nelvp.html">
+        <div class="preview">🌊</div>
+        <div class="info">
+          <h2>NeL Vertex Program</h2>
+          <p>Wobble vertex deformation with two-point Blinn-Phong lighting using NeL's custom VP language compiled to GLSL ES 3.00.</p>
+          <span class="tag">Vertex Program</span> <span class="tag">Nelvp</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="nl_sample_planar_reflection.html">
+        <div class="preview">🪞</div>
+        <div class="info">
+          <h2>Planar Reflection</h2>
+          <p>Render-to-texture planar reflection with a reflective floor plane and rotating geometry.</p>
+          <span class="tag">Render Target</span> <span class="tag">Reflection</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="card">
+      <a href="nl_sample_font.html">
+        <div class="preview">🔤</div>
+        <div class="info">
+          <h2>Font Rendering</h2>
+          <p>FreeType-based font rendering with multiple colors, sizes, 3D rotation, and Unicode text.</p>
+          <span class="tag">FreeType</span> <span class="tag">Text</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p>Built with <a href="https://github.com/ryzom/ryzomcore">RyzomCore / NeL</a> — OpenGL ES 3.0 driver target compiled to WebAssembly via Emscripten</p>
+  </footer>
+</body>
+</html>

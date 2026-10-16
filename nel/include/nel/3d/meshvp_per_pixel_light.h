@@ -90,7 +90,7 @@ private:
 	bool	_IsPointLight;
 	//
 	enum { NumVp = 8};
-	static	NLMISC::CSmartPtr<CVertexProgramPerPixelLight> _VertexProgram[NumVp];
+	static	NLMISC::CSmartPtr<CVertexProgramPerPixelLight> _VertexProgram[NumVp]; // STATIC GPU RESOURCE: Blocks multiple driver instances
 
 	NLMISC::CRefPtr<CVertexProgramPerPixelLight> _ActiveVertexProgram;
 };

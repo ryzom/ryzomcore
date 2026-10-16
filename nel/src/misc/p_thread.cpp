@@ -284,6 +284,10 @@ uint64 CPThread::getCPUMask()
 
 void CPThread::setPriority(TThreadPriority priority)
 {
+#ifdef __EMSCRIPTEN__
+	// Emscripten's single-threaded mode does not support thread scheduling
+	(void)priority;
+#else
 	// TODO: Test this
 	sched_param sp;
 	switch (priority)
@@ -308,6 +312,7 @@ void CPThread::setPriority(TThreadPriority priority)
 		sp.sched_priority = 0;
 		pthread_setschedparam(_ThreadHandle, SCHED_OTHER, &sp);
 	}
+#endif
 }
 
 /*

@@ -19,6 +19,8 @@
 
 #include "stdmisc.h"
 
+#ifdef HAVE_PNG
+
 #include "nel/misc/bitmap.h"
 
 #include "nel/misc/stream.h"
@@ -467,3 +469,5 @@ bool CBitmap::writePNG( NLMISC::IStream &f, uint32 d)
 }
 
 }//namespace
+
+#endif // HAVE_PNG

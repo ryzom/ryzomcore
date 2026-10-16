@@ -7,7 +7,17 @@
     {
       "name": "base",
       "hidden": true,
-      "binaryDir": "${sourceDir}/build"
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceDir}/build/install"
+    },
+    {
+      "name": "hunter",
+      "hidden": true,
+      "cacheVariables": {
+        "HUNTER_ENABLED": true,
+        "HUNTER_CONFIGURATION_TYPES": "Release",
+        "CMAKE_FIND_PACKAGE_PREFER_CONFIG": true
+      }
     },
     {
       "inherits": "base",
@@ -39,55 +49,28 @@
       }
     },
     {
+      "name": "vcpkg",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        "CMAKE_FIND_PACKAGE_PREFER_CONFIG": true
+      }
+    },
+    {
+      "name": "ccache",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
+        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache",
+        "WITH_PCH": "OFF"
+      }
+    },
+    {
       "inherits": [
         "linux",
         "default"
       ],
       "name": "linux-default"
-    },
-    {
-      "inherits": "base",
-      "name": "client",
-      "cacheVariables": {
-        "FINAL_VERSION": false,
-        "WITH_DRIVER_OPENAL": true,
-        "WITH_DRIVER_OPENGL": true,
-        "WITH_INSTALL_LIBRARIES": false,
-        "WITH_NEL_SAMPLES": false,
-        "WITH_NEL_TESTS": false,
-        "WITH_NEL_TOOLS": false,
-        "WITH_RYZOM_CLIENT": true,
-        "WITH_RYZOM_SERVER": false,
-        "WITH_RYZOM_TOOLS": false
-      }
-    },
-    {
-      "inherits": [
-        "linux",
-        "client"
-      ],
-      "name": "linux-client"
-    },
-    {
-      "inherits": [
-        "windows",
-        "client"
-      ],
-      "name": "windows-client",
-      "cacheVariables": {
-        "WITH_DRIVER_DIRECT3D": true,
-        "WITH_DRIVER_XAUDIO2": true
-      }
-    },
-    {
-      "inherits": [
-        "macos",
-        "client"
-      ],
-      "name": "macos-client",
-      "cacheVariables": {
-        "WITH_LIBXML2_ICONV": false
-      }
     }
   ],
   "buildPresets": [
@@ -99,11 +82,6 @@
     {
       "name": "release",
       "configurePreset": "default",
-      "configuration": "Release"
-    },
-    {
-      "name": "client",
-      "configurePreset": "client",
       "configuration": "Release"
     }
   ],
@@ -128,10 +106,6 @@
     {
       "name": "default",
       "configurePreset": "default"
-    },
-    {
-      "name": "client",
-      "configurePreset": "client"
     }
   ]
 }

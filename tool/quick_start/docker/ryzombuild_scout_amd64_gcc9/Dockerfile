@@ -29,14 +29,14 @@ RUN rm /usr/bin/addr2line && ln -s /usr/bin/addr2line-2.30 /usr/bin/addr2line \
   && rm /usr/bin/strings && ln -s /usr/bin/strings-2.30 /usr/bin/strings \
   && rm /usr/bin/strip && ln -s /usr/bin/strip-2.30 /usr/bin/strip
 
-RUN git clone https://github.com/ninja-build/ninja.git && cd ninja && git checkout release \
+RUN git clone https://github.com/ninja-build/ninja.git && cd ninja && git checkout v1.11.1 \
   && ./configure.py --bootstrap && ./ninja \
   && cp ./ninja `which ninja` \
   && cd .. && rm -rf ninja \
   && hash -r && ninja --version
 
-RUN git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout release \
-  && cmake -G "Ninja" . && ninja \
+RUN git clone https://github.com/Kitware/CMake.git && cd CMake && git checkout v3.31.11 \
+  && cmake -G "Ninja" -DCMAKE_USE_OPENSSL=ON . && ninja \
   && ninja install \
   && cd .. && rm -rf CMake \
   && hash -r && cmake --version

@@ -55,7 +55,7 @@ public:
 	virtual	~IVertexArrayRange();
 
 	/// allocate a vertex array space. false if error. client must free before re-allocate.
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType)= 0;
+	virtual	bool					allocate(uint32 size, CVertexBuffer::TBufferUsage vbType)= 0;
 	/// free this space.
 	virtual	void					freeBlock()= 0;
 	/// create a IVertexBufferHardGL
@@ -139,7 +139,7 @@ public:
 	/// \name Implementation
 	// @{
 	/// allocate a vertex array sapce. false if error. must free before re-allocate.
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
+	virtual	bool					allocate(uint32 size, CVertexBuffer::TBufferUsage vbType);
 	/// free this space.
 	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
@@ -256,7 +256,7 @@ public:
 	/// \name Implementation
 	// @{
 	/// allocate a vertex array sapce. false if error. must free before re-allocate.
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
+	virtual	bool					allocate(uint32 size, CVertexBuffer::TBufferUsage vbType);
 	/// free this space.
 	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
@@ -365,7 +365,7 @@ public:
 	/** Allocate a vertex array space. false if error. must free before re-allocate.
 	  * Will always succeed, because vb are not managed in a heap, but are rather kept as separate objects
 	  */
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
+	virtual	bool					allocate(uint32 size, CVertexBuffer::TBufferUsage vbType);
 	/// free this space.
 	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
@@ -385,7 +385,7 @@ public:
 	 */
 	void			disable();
 
-	CVertexBuffer::TPreferredMemory getVBType() const { return _VBType; }
+	CVertexBuffer::TBufferUsage getVBType() const { return _VBType; }
 
 	// check & invalidate lost buffers
 	void updateLostBuffers();
@@ -397,7 +397,7 @@ public:
 
 // *************************
 private:
-	CVertexBuffer::TPreferredMemory _VBType;
+	CVertexBuffer::TBufferUsage _VBType;
 	uint32				 _SizeAllocated;
 public:
 	// for use by CVertexBufferHardGLMapObjectATI
@@ -478,7 +478,7 @@ public:
 	/** Allocate a vertex array space. false if error. must free before re-allocate.
 	  * Will always succeed, because vb are not managed in a heap, but are rather kept as separate objects
 	  */
-	virtual	bool					allocate(uint32 size, CVertexBuffer::TPreferredMemory vbType);
+	virtual	bool					allocate(uint32 size, CVertexBuffer::TBufferUsage vbType);
 	/// free this space.
 	virtual	void					freeBlock();
 	/// create a IVertexBufferHardGL
@@ -505,7 +505,7 @@ public:
 	#endif
 // *************************
 private:
-	CVertexBuffer::TPreferredMemory _VBType;
+	CVertexBuffer::TBufferUsage _VBType;
 	uint32							_SizeAllocated;
 	// for use by CVertexBufferHardARB
 public:
@@ -540,7 +540,7 @@ public:
 
    /**	setup ptrs allocated by createVBHard()
 	 */
-	void					initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TPreferredMemory memType);
+	void					initGL(uint vertexObjectID, CVertexArrayRangeARB *var, CVertexBuffer::TBufferUsage memType);
 
 
 public:
@@ -557,7 +557,7 @@ public:
 // *************************
 private:
 	CVertexArrayRangeARB			*_VertexArrayRange;
-	CVertexBuffer::TPreferredMemory _MemType;
+	CVertexBuffer::TBufferUsage		_MemType;
 	void							*_VertexPtr; // pointer on current datas. Null if not locked
 #ifdef USE_OPENGLES
 	uint8							*_Buffer;

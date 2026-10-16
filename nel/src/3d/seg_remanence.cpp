@@ -87,6 +87,7 @@ CSegRemanence::CSegRemanence() : _NumSlices(0),
 								 _Restarted(false),
 								 _UnrollRatio(0),
 								 _SliceTime(0.05f),
+								 _LastUnrollFrameId(0),
 								 _AniMat(NULL),
 								 _LastSampleFrame(0)
 {
@@ -149,8 +150,9 @@ void CSegRemanence::copyFromOther(CSegRemanence &other)
 	_StartDate       = other._StartDate;
 	_CurrDate        = other._CurrDate;
 	_UnrollRatio     = other._UnrollRatio;
-	_SliceTime       = other._SliceTime;
-	_LastSampleFrame = other._LastSampleFrame;
+	_SliceTime         = other._SliceTime;
+	_LastUnrollFrameId = other._LastUnrollFrameId;
+	_LastSampleFrame   = other._LastSampleFrame;
 }
 
 //===============================================================
@@ -181,7 +183,7 @@ void CSegRemanence::render(IDriver *drv, CMaterial &mat)
 	nlassert(_NumCorners >= 2);
 	CSegRemanenceShape *srs = NLMISC::safe_cast<CSegRemanenceShape *>((IShape *) Shape);
 	// resize before locking because of volatile vb
-	_VB.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
+	_VB.setBufferUsage(CVertexBuffer::FullStream, false);
 	_VB.setVertexFormat(CVertexBuffer::PositionFlag|CVertexBuffer::TexCoord0Flag);
 	_VB.setNumVertices(_NumCorners * (_NumSlices + 1));
 	const uint vertexSize = _VB.getVertexSize();
@@ -234,7 +236,7 @@ void CSegRemanence::render(IDriver *drv, CMaterial &mat)
 	uint numQuads = (_NumCorners - 1) * _NumSlices;
 	// Fill Index Buffer part
 	{
-		_IB.setPreferredMemory(CIndexBuffer::RAMVolatile, false);
+		_IB.setBufferUsage(CIndexBuffer::SmallStream, false);
 		_IB.setFormat(CIndexBuffer::Indices16);
 		_IB.setNumIndexes(numQuads * 6);
 		//
@@ -273,7 +275,7 @@ void CSegRemanence::render(IDriver *drv, CMaterial &mat)
 
 	// draw wire frame version if needed
 	#ifdef DEBUG_SEG_REMANENCE_DISPLAY
-		static CMaterial unlitWF;
+		static CMaterial unlitWF; // STATIC GPU RESOURCE: Blocks multiple driver instances
 		unlitWF.initUnlit();
 		unlitWF.setDoubleSided(true);
 		IDriver::TPolygonMode oldPM = drv->getPolygonMode();
@@ -283,19 +285,23 @@ void CSegRemanence::render(IDriver *drv, CMaterial &mat)
 	#endif
 
 	CScene *scene = getOwnerScene();
-	// change unroll ratio
-	if (!_Stopping)
+	// change unroll ratio. Only accumulate once per real frame (avoid double in stereo).
+	if (scene->getFrameId() != _LastUnrollFrameId)
 	{
-		if (_UnrollRatio != 1.f)
-		_UnrollRatio = std::min(1.f, _UnrollRatio + scene->getEllapsedTime() / (srs->getNumSlices() * _SliceTime));
-	}
-	else
-	{
-		_UnrollRatio = std::max(0.f, _UnrollRatio - srs->getRollupRatio() * scene->getEllapsedTime() / (srs->getNumSlices() * _SliceTime));
-		if (_UnrollRatio == 0.f)
+		_LastUnrollFrameId = scene->getFrameId();
+		if (!_Stopping)
 		{
-			_Stopping = false;
-			_Started = false;
+			if (_UnrollRatio != 1.f)
+			_UnrollRatio = std::min(1.f, _UnrollRatio + scene->getEllapsedTime() / (srs->getNumSlices() * _SliceTime));
+		}
+		else
+		{
+			_UnrollRatio = std::max(0.f, _UnrollRatio - srs->getRollupRatio() * scene->getEllapsedTime() / (srs->getNumSlices() * _SliceTime));
+			if (_UnrollRatio == 0.f)
+			{
+				_Stopping = false;
+				_Started = false;
+			}
 		}
 	}
 }

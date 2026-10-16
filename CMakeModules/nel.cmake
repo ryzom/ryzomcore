@@ -120,6 +120,22 @@ MACRO(NL_ADD_RUNTIME_FLAGS name)
   ENDIF()
 ENDMACRO(NL_ADD_RUNTIME_FLAGS)
 
+###
+# Fix for MFC "regular DLL" targets (LNK2005 DllMain conflict).
+# _USRDLL tells MFC this is a regular DLL (not an extension DLL), which controls
+# DLL entry point setup and library pragma directives in MFC headers.
+# Argument: name - the MFC SHARED library target.
+###
+MACRO(NL_MFC_DLL_WORKAROUND name)
+  IF(MSVC)
+    TARGET_COMPILE_DEFINITIONS(${name} PRIVATE _USRDLL)
+    TARGET_LINK_LIBRARIES(${name} PRIVATE
+      $<$<CONFIG:Debug>:mfcs140ud>
+      $<$<CONFIG:Release>:mfcs140u>
+    )
+  ENDIF()
+ENDMACRO(NL_MFC_DLL_WORKAROUND)
+
 MACRO(NL_ADD_STATIC_VID_DRIVERS name)
 IF(HUNTER_ENABLED)
   IF(WIN32)
@@ -133,8 +149,14 @@ IF(HUNTER_ENABLED)
   IF(WITH_DRIVER_OPENGL)
     TARGET_LINK_LIBRARIES(${name} nel_drv_opengl${drv_suffix})
   ENDIF()
+  IF(WITH_DRIVER_OPENGL3)
+    TARGET_LINK_LIBRARIES(${name} nel_drv_opengl3${drv_suffix})
+  ENDIF()
   IF(WITH_DRIVER_OPENGLES)
     TARGET_LINK_LIBRARIES(${name} nel_drv_opengles${drv_suffix})
+  ENDIF()
+  IF(WITH_DRIVER_OPENGLES3)
+    TARGET_LINK_LIBRARIES(${name} nel_drv_opengles3${drv_suffix})
   ENDIF()
 ELSE()
   IF(WITH_STATIC_DRIVERS)
@@ -151,12 +173,28 @@ ELSE()
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengl)
       ENDIF()
     ENDIF()
+	
+    IF(WITH_DRIVER_OPENGL3)
+      IF(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengl3_win)
+      ELSE(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengl3)
+      ENDIF()
+    ENDIF()
 
     IF(WITH_DRIVER_OPENGLES)
       IF(WIN32)
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengles_win)
       ELSE()
         TARGET_LINK_LIBRARIES(${name} nel_drv_opengles)
+      ENDIF()
+    ENDIF()
+
+    IF(WITH_DRIVER_OPENGLES3)
+      IF(WIN32)
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles3_win)
+      ELSE()
+        TARGET_LINK_LIBRARIES(${name} nel_drv_opengles3)
       ENDIF()
     ENDIF()
   ENDIF()
@@ -258,11 +296,6 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ELSE()
     OPTION(WITH_STATIC_LIBXML2    "With static libxml2"                           OFF)
   ENDIF()
-  IF (WITH_STATIC)
-    OPTION(WITH_STATIC_CURL       "With static curl"                              ON )
-  ELSE()
-    OPTION(WITH_STATIC_CURL       "With static curl"                              OFF)
-  ENDIF()
   OPTION(WITH_STATIC_DRIVERS      "With static drivers."                          OFF)
   IF(WIN32)
     OPTION(WITH_EXTERNAL          "With provided external."                       ON )
@@ -289,6 +322,7 @@ MACRO(NL_SETUP_DEFAULT_OPTIONS)
   ###
   OPTION(WITH_GTK                 "With GTK Support"                              OFF)
   OPTION(WITH_QT5                 "With Qt 5 Support"                             OFF)
+  OPTION(WITH_QT6                 "With Qt 6 Support"                             OFF)
 
   IF(WIN32 AND MFC_FOUND)
     OPTION(WITH_MFC               "With MFC Support"                              ON )
@@ -340,7 +374,9 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   # Drivers Support
   ###
   OPTION(WITH_DRIVER_OPENGL       "Build OpenGL Driver (3D)"                      ON )
+  OPTION(WITH_DRIVER_OPENGL3      "Build OpenGL3 Driver (3D)"                     OFF)
   OPTION(WITH_DRIVER_OPENGLES     "Build OpenGL ES Driver (3D)"                   OFF)
+  OPTION(WITH_DRIVER_OPENGLES3    "Build OpenGL ES 3.0 Driver (3D)"              OFF)
   OPTION(WITH_DRIVER_DIRECT3D     "Build Direct3D Driver (3D)"                    OFF)
   OPTION(WITH_DRIVER_OPENAL       "Build OpenAL Driver (Sound)"                   ON )
   OPTION(WITH_DRIVER_FMOD         "Build FMOD Driver (Sound)"                     OFF)
@@ -361,8 +397,13 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
   OPTION(WITH_LIBVR               "With LibVR support"                            OFF)
   OPTION(WITH_PERFHUD             "With NVIDIA PerfHUD support"                   OFF)
 
-  OPTION(WITH_SSE2                "With SSE2"                                     ON )
-  OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  IF(NOT EMSCRIPTEN)
+    OPTION(WITH_SSE2                "With SSE2"                                     ON )
+    OPTION(WITH_SSE3                "With SSE3"                                     ON )
+  ELSE()
+    SET(WITH_SSE2 OFF)
+    SET(WITH_SSE3 OFF)
+  ENDIF()
 
   OPTION(WITH_XRANDR              "With XRandR extension"                         ON )
 
@@ -491,7 +532,11 @@ MACRO(NL_SETUP_BUILD)
 
   # If not specified, use the same CPU as host
   IF(NOT TARGET_CPU)
-    SET(TARGET_CPU ${HOST_CPU})
+    IF(EMSCRIPTEN)
+      SET(TARGET_CPU "wasm")
+    ELSE()
+      SET(TARGET_CPU ${HOST_CPU})
+    ENDIF()
   ENDIF()
 
   IF(TARGET_CPU MATCHES "(amd|AMD|x86_)64")
@@ -977,7 +1022,9 @@ MACRO(NL_SETUP_BUILD)
     ADD_PLATFORM_FLAGS("-D_REENTRANT")
 
     # hardening
-    ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")
+    IF(NOT EMSCRIPTEN)
+      ADD_PLATFORM_FLAGS("-D_FORTIFY_SOURCE=2")
+    ENDIF()
 
     IF(NOT WITH_LOW_MEMORY)
       ADD_PLATFORM_FLAGS("-pipe")
@@ -1049,11 +1096,13 @@ MACRO(NL_SETUP_BUILD)
     ENDIF()
 
     # hardening
-    ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
+    IF(NOT EMSCRIPTEN)
+      ADD_PLATFORM_FLAGS("-fstack-protector --param=ssp-buffer-size=4")
 
-    # If -fstack-protector or -fstack-protector-all enabled, enable too new warnings and fix possible link problems
-    IF(WITH_WARNINGS)
-      ADD_PLATFORM_FLAGS("-Wstack-protector")
+      # If -fstack-protector or -fstack-protector-all enabled, enable too new warnings and fix possible link problems
+      IF(WITH_WARNINGS)
+        ADD_PLATFORM_FLAGS("-Wstack-protector")
+      ENDIF()
     ENDIF()
 
     # Fix undefined reference to `__stack_chk_fail' error
@@ -1061,7 +1110,7 @@ MACRO(NL_SETUP_BUILD)
       ADD_PLATFORM_LINKFLAGS("-lc")
     ENDIF()
 
-    IF(NOT APPLE)
+    IF(NOT APPLE AND NOT EMSCRIPTEN)
       ADD_PLATFORM_LINKFLAGS("-Wl,--no-undefined -Wl,--as-needed")
 
       IF(WITH_STATIC_RUNTIMES)
@@ -1069,7 +1118,7 @@ MACRO(NL_SETUP_BUILD)
       ENDIF()
     ENDIF()
 
-    IF(NOT APPLE AND NOT MINGW)
+    IF(NOT APPLE AND NOT MINGW AND NOT EMSCRIPTEN)
       # hardening
       ADD_PLATFORM_LINKFLAGS("-Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,now")
     ENDIF()
@@ -1080,7 +1129,9 @@ MACRO(NL_SETUP_BUILD)
       IF(APPLE)
         SET(NL_RELEASE_LINKFLAGS "-Wl,-dead_strip ${NL_RELEASE_LINKFLAGS}")
       ELSE()
-        SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
+        IF(NOT EMSCRIPTEN)
+          SET(NL_RELEASE_LINKFLAGS "-Wl,-s ${NL_RELEASE_LINKFLAGS}")
+        ENDIF()
       ENDIF()
     ENDIF()
 

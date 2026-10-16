@@ -4,15 +4,11 @@ FILE(GLOB HEADERS ../../include/nel/pacs/*.h)
 NL_TARGET_LIB(nelpacs ${HEADERS} ${SRC})
 add_project_library_alias(nelpacs pacs)
 
-TARGET_INCLUDE_DIRECTORIES(nelpacs PRIVATE ${LIBXML2_INCLUDE_DIR})
-
 TARGET_LINK_LIBRARIES(nelpacs nelmisc)
 NL_DEFAULT_PROPS(nelpacs "NeL, Library: NeL PACS")
 NL_ADD_RUNTIME_FLAGS(nelpacs)
 
 NL_ADD_LIB_SUFFIX(nelpacs)
-
-TARGET_COMPILE_DEFINITIONS(nelpacs PRIVATE ${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(nelpacs PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdpacs.h)

@@ -170,7 +170,9 @@ SOURCE_GROUP(Driver FILES
         program.cpp
         ../../include/nel/3d/program.h
         gpu_program_params.cpp
-        ../../include/nel/3d/gpu_program_params.h)
+        ../../include/nel/3d/gpu_program_params.h
+        gpu_skin_vp.cpp
+        ../../include/nel/3d/gpu_skin_vp.h)
 
 SOURCE_GROUP(Font FILES
         computed_string.cpp
@@ -283,8 +285,7 @@ SOURCE_GROUP(Textures FILES
         texture_blank.cpp
         ../../include/nel/3d/texture_blank.h
         texture_blend.cpp
-        ../../include/nel/3d/texture_bloom.h
-        texture_bloom.cpp
+        ../../include/nel/3d/texture_offscreen.h
         ../../include/nel/3d/texture_blend.h
         texture_bump.cpp
         ../../include/nel/3d/texture_bump.h
@@ -711,7 +712,9 @@ SOURCE_GROUP(Stereo FILES
 		stereo_libvr.cpp
         ../../include/nel/3d/stereo_libvr.h
 		stereo_debugger.cpp
-		../../include/nel/3d/stereo_debugger.h)
+		../../include/nel/3d/stereo_debugger.h
+		stereo_passthrough.cpp
+		../../include/nel/3d/stereo_passthrough.h)
 
 NL_TARGET_LIB(nel3d ${HEADERS} ${SRC})
 add_project_library_alias(nel3d 3d)
@@ -721,7 +724,13 @@ TARGET_INCLUDE_DIRECTORIES(nel3d
         ${LIBVR_INCLUDE_DIR}
 )
 
+IF(FREETYPE_FOUND)
 TARGET_LINK_LIBRARIES(nel3d nelmisc Freetype::Freetype ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
+TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE HAVE_FREETYPE)
+ELSE()
+TARGET_LINK_LIBRARIES(nel3d nelmisc ${LIBOVR_LIBRARIES} ${LIBVR_LIBRARY})
+TARGET_COMPILE_DEFINITIONS(nel3d PRIVATE NL_DONT_USE_EXTERNAL_CODE)
+ENDIF()
 NL_DEFAULT_PROPS(nel3d "NeL, Library: NeL 3D")
 NL_ADD_RUNTIME_FLAGS(nel3d)
 NL_ADD_STATIC_VID_DRIVERS(nel3d)

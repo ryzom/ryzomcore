@@ -86,8 +86,15 @@ public:
 
 	/// Allocate free vertices in VB. (RAM and AGP if possible). work with locked or unlocked buffer.
 	uint			allocateVertex();
-	/// Delete free vertices in VB. (AGP or RAM).
+	/// Delete free vertices in VB. (AGP or RAM). Deferred when in unsynchronized mode.
 	void			deleteVertex(uint vid);
+
+	/// Enable/disable unsynchronized write mode (deferred freeing of vertex slots).
+	void			setUnsynchronizedMode(bool enable) { _UnsynchronizedMode = enable; }
+	bool			getUnsynchronizedMode() const { return _UnsynchronizedMode; }
+
+	/// Release deferred-free vertex slots whose GPU work has completed.
+	void			processDeferredFrees(uint64 swapBufferInFlight);
 
 	// @}
 
@@ -132,6 +139,15 @@ private:
 	std::vector<uint>			_VertexFreeMemory;
 	std::vector<CVertexInfo>	_VertexInfos;
 	uint						_NumVerticesAllocated;
+
+	// Unsynchronized write mode: deferred freeing of vertex slots.
+	bool						_UnsynchronizedMode;
+	struct SDeferredFree
+	{
+		uint	VertexId;
+		uint64	FrameCounter;
+	};
+	std::vector<SDeferredFree>	_DeferredFreeVertices;
 
 
 	/// \name VB mgt .

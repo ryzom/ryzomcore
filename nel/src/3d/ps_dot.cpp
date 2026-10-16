@@ -218,11 +218,11 @@ void CPSDot::initVertexBuffers()
 {
 	NL_PS_FUNC(CPSDot_initVertexBuffers)
 	_DotVb.setName("CPSDot::_DotVb");
-	_DotVb.setPreferredMemory(CVertexBuffer::AGPVolatile, false);
+	_DotVb.setBufferUsage(CVertexBuffer::FullStream, false);
 	_DotVb.setVertexFormat(CVertexBuffer::PositionFlag);
 	_DotVb.setNumVertices(dotBufSize);
 	_DotVbColor.setVertexFormat(CVertexBuffer::PositionFlag | CVertexBuffer::PrimaryColorFlag);
-	_DotVbColor.setPreferredMemory(CVertexBuffer::AGPVolatile, true); // keep local mem because of interleaved fill
+	_DotVbColor.setBufferUsage(CVertexBuffer::FullStream, true); // keep local mem because of interleaved fill
 	_DotVbColor.setNumVertices(dotBufSize);
 	_DotVbColor.setName("CPSDot::_DotVbColor");
 

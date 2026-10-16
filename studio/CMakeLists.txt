@@ -4,7 +4,7 @@
 #   Copyright (C) 2010 Dzmitry Kamiahin <dnk-88@tut.by>
 #
 #-----------------------------------------------------------------------------
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.28)
 
 project(Studio VERSION ${RyzomCore_VERSION} LANGUAGES CXX)
 

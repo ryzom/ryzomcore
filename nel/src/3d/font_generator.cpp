@@ -467,8 +467,12 @@ uint32	 CFontGenerator::getCharIndex (u32char c)
 
 #else // NL_DONT_USE_EXTERNAL_CODE
 
+#ifdef NL_OS_WINDOWS
+
 #define NOMINMAX
+#define byte win_byte_override
 #include <windows.h>
+#undef byte
 
 using namespace NLMISC;
 
@@ -511,7 +515,7 @@ CFontGenerator::CFontGenerator (const std::string &fontFileName, const std::stri
 
 	HDC hdc = GetDC (NULL);
 	nlassert (hdc);
-	Dib = CreateDIBSection (hdc, &info, DIB_RGB_COLORS, (void**)&Buffer, NULL, NULL);
+	Dib = CreateDIBSection (hdc, &info, DIB_RGB_COLORS, (void**)&Buffer, NULL, 0);
 
 	hdcDib = CreateCompatibleDC (hdc);
 	nlassert (hdcDib);
@@ -585,18 +589,24 @@ uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool ob
 	SelectObject (hdcDib, hFont);
 	SelectObject (hdcDib, Dib);
 
-	const u32char cc = /*(char)*/ c;
+	u32char cc = /*(char)*/ c;
 
 	// prevent outputing white glyph if char is not available in font
-	DWORD glyphIndex;
-	if (GetGlyphIndicesW(hdcDib, &cc, 1, &glyphIndex, GGI_MARK_NONEXISTING_GLYPHS) == 1);
 	{
-		if (glyphIndex == 0xffff)
+		wchar_t wc = (wchar_t)cc;
+		DWORD gi;
+		if (GetGlyphIndicesW(hdcDib, &wc, 1, (LPWORD)&gi, GGI_MARK_NONEXISTING_GLYPHS) == 1)
 		{
-			// thee char is unsupported, replace with a dot
-			cc = '.';
+			if (gi == 0xffff)
+			{
+				// the char is unsupported, replace with a dot
+				cc = '.';
+			}
+			glyphIndex = (uint32)gi;
 		}
 	}
+
+	wchar_t wcc = (wchar_t)cc;
 
 	RECT rect;
 	rect.bottom = Height;
@@ -604,14 +614,14 @@ uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool ob
 	rect.left = 0;
 	rect.right = Width;
 
-	int res = DrawTextW (hdcDib, &cc, 1, &rect, DT_LEFT | DT_TOP);
+	int res = DrawTextW (hdcDib, &wcc, 1, &rect, DT_LEFT | DT_TOP);
 
 	POINT point;
 	point.y = res;
 
 	int w = res;
 //	BOOL rey = GetCharWidth32 (hdcDib, (uint8) cc,  (uint8) cc, &w);
-	BOOL rey = GetCharWidth32 (hdcDib, cc,  cc, &w);
+	BOOL rey = GetCharWidth32 (hdcDib, (UINT)cc, (UINT)cc, &w);
 	nlassert (rey);
 	point.x = w;
 
@@ -621,7 +631,7 @@ uint8 *CFontGenerator::getBitmap (u32char c, uint32 size, bool embolden, bool ob
 //	point.x = abc.abcA;
 
 	SIZE s;
-	GetTextExtentPoint32W (hdcDib, &cc, 1, &s);
+	GetTextExtentPoint32W (hdcDib, &wcc, 1, &s);
 
 	BOOL ret = LPtoDP (hdcDib, &point, 1);
 	nlassert (ret);
@@ -708,6 +718,48 @@ uint32	 CFontGenerator::getCharIndex (u32char c)
 
 
 } // NL3D
+
+#else // !NL_OS_WINDOWS (non-Windows stub when freetype is not available)
+
+namespace NL3D {
+
+CFontGenerator::CFontGenerator(const std::string &fontFileName, const std::string &fontExFileName)
+{
+	nlerror("Font generation not supported on this platform without FreeType");
+}
+
+CFontGenerator::~CFontGenerator()
+{
+}
+
+void CFontGenerator::getSizes(u32char c, uint32 size, uint32 &width, uint32 &height)
+{
+	width = height = 0;
+}
+
+uint8 *CFontGenerator::getBitmap(u32char c, uint32 size, bool embolden, bool oblique,
+	uint32 &width, uint32 &height, uint32 &pitch, sint32 &left, sint32 &top,
+	sint32 &advx, uint32 &glyphIndex)
+{
+	width = height = pitch = 0;
+	left = top = advx = 0;
+	glyphIndex = 0;
+	return NULL;
+}
+
+void CFontGenerator::getKerning(u32char left, u32char right, sint32 &kernx)
+{
+	kernx = 0;
+}
+
+uint32 CFontGenerator::getCharIndex(u32char c)
+{
+	return 0;
+}
+
+} // NL3D
+
+#endif // NL_OS_WINDOWS
 
 #endif // NL_DONT_USE_EXTERNAL_CODE
 

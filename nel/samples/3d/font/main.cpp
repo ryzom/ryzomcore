@@ -40,6 +40,10 @@
 	#include <windows.h>
 #endif // NL_OS_WINDOWS
 
+#ifdef __EMSCRIPTEN__
+	#include <emscripten.h>
+#endif
+
 #ifndef FONT_DIR
 #	define FONT_DIR "."
 #endif
@@ -47,6 +51,101 @@
 using namespace std;
 using namespace NL3D;
 using namespace NLMISC;
+
+// Font demo state
+static CFontManager *s_FontManager = NULL;
+static CTextContext *s_TextContext = NULL;
+static CComputedString *s_CsRotation = NULL;
+static CComputedString *s_Cs3d = NULL;
+static CComputedString *s_CsUnicode = NULL;
+static CValueSmoother *s_SmoothFPS = NULL;
+static float s_X = 0, s_Y = 0, s_Z = 0;
+static float s_Scale = 1.0f, s_Way = 0.05f;
+static float s_Angle = 0.0f;
+static TTicks s_OldTick = 0;
+
+void renderOneFrame()
+{
+	if (!CNELU::Driver->isFrameReady())
+		return; // GPU busy, skip frame to avoid blocking browser event loop
+
+	// look at 3dinit example
+	CNELU::clearBuffers(CRGBA(120,120,0));
+
+	// now, every frame, we have to render the computer string.
+	s_X+=0.01f; s_Y+=0.1f, s_Z+=0.001f;
+	CMatrix m;
+	m.identity();
+	m.translate(CVector(0.7f*4.0f/3.0f, 0.5, 0.5));
+	m.rotateX(s_X);
+	m.rotateY(s_Y);
+	m.rotateZ(s_Z);
+	s_Cs3d->render3D (*CNELU::Driver, m);
+
+	s_TextContext->setColor (CRGBA (255, 255, 255));
+	s_TextContext->setFontSize (40);
+	s_TextContext->setHotSpot (CComputedString::BottomLeft);
+	s_TextContext->printAt (0.5f, 0.7f, string("printAt"));
+
+	s_TextContext->setColor (CRGBA (0, 0, 255));
+	s_TextContext->setFontSize (40);
+	s_TextContext->setHotSpot (CComputedString::BottomLeft);
+	s_TextContext->printAt (0.0f, 0.0f, string("NeL"));
+
+	s_Scale+=s_Way;
+	if (s_Scale>4 || s_Scale < 1) s_Way = -s_Way;
+
+	s_TextContext->setColor (CRGBA (200, 255, 64));
+	s_TextContext->setFontSize (20);
+	s_TextContext->setHotSpot (CComputedString::BottomLeft);
+	s_TextContext->setScaleX (s_Scale);
+	s_TextContext->setScaleZ (s_Scale);
+	s_TextContext->printAt (0.1f, 0.3f, string("printAt Scale String"));
+
+	s_TextContext->setHotSpot (CComputedString::TopLeft);
+	s_TextContext->setScaleX (1.0f);
+	s_TextContext->setScaleZ (1.0f);
+	s_TextContext->printAt (0.1f, 0.25f, string("printAt NoScale String"));
+
+	s_Angle+=0.01f;
+	s_CsRotation->render2D (*CNELU::Driver, 0.2f, 0.7f, CComputedString::MiddleMiddle, 1, 1, s_Angle);
+
+	s_CsUnicode->render2D (*CNELU::Driver, 1.0f, 0.15f, CComputedString::MiddleRight);
+
+	s_TextContext->setColor (CRGBA (32, 64, 127));
+	s_TextContext->setFontSize (65);
+	s_TextContext->setHotSpot (CComputedString::MiddleRight);
+	s_TextContext->printAt (1.0f, 0.85f, ucstring("printAt Unicode String"));
+
+	s_TextContext->setColor (CRGBA (255, 127, 0));
+	s_TextContext->setFontSize (20);
+	s_TextContext->setHotSpot (CComputedString::BottomRight);
+	s_TextContext->printAt (0.99f, 0.01f, string("Press <ESC> to quit"));
+
+	{
+		TTicks newTick = CTime::getPerformanceTime();
+		double deltaTime = CTime::ticksToSecond (newTick-s_OldTick);
+		s_OldTick = newTick;
+		s_SmoothFPS->addValue((float)deltaTime);
+		deltaTime = s_SmoothFPS->getSmoothValue ();
+		if (deltaTime > 0.0)
+		{
+			s_TextContext->setFontSize(16);
+			s_TextContext->setColor(CRGBA::Yellow);
+			s_TextContext->setHotSpot(CComputedString::TopLeft);
+			s_TextContext->printAt(0.01f, 0.99f, toString("FPS:%.f", 1.0f/deltaTime));
+		}
+	}
+
+	// look 3dinit example
+	CNELU::swapBuffers();
+#ifndef __EMSCRIPTEN__
+	CNELU::screenshot();
+#endif
+
+	// look at event example
+	CNELU::EventServer.pump(true);
+}
 
 #ifdef NL_OS_WINDOWS
 int WINAPI WinMain( HINSTANCE hInstance, 
@@ -63,154 +162,52 @@ int main(int argc, char **argv)
 	NLMISC::CPath::addSearchPath(FONT_DIR);
 
 	// create a font manager
-	CFontManager fontManager;
+	s_FontManager = new CFontManager;
+	s_FontManager->setMaxMemory(2000000);
 
-	// set the font cache to 2 megabytes (default is 1mb)
-	fontManager.setMaxMemory(2000000);
+	s_TextContext = new CTextContext;
+	s_TextContext->init (CNELU::Driver, s_FontManager);
+	s_TextContext->setFontGenerator (NLMISC::CPath::lookup("beteckna.ttf"));
 
-	CTextContext tc;
+	s_CsRotation = new CComputedString;
+	s_FontManager->computeString ("cs Rotation", s_TextContext->getFontGenerator(), CRGBA(255,255,255), 70, false, false, CNELU::Driver, *s_CsRotation);
 
-	tc.init (CNELU::Driver, &fontManager);
+	s_Cs3d = new CComputedString;
+	s_FontManager->computeString ("cs 3d", s_TextContext->getFontGenerator(), CRGBA(255,127,0), 75, false, false, CNELU::Driver, *s_Cs3d);
 
-	// The first param is the font name (could be ttf, pfb, fon, etc...). The
-	// second one is optional, it's the font kerning file
-	tc.setFontGenerator (NLMISC::CPath::lookup("beteckna.ttf"));
-
-	// create the first computed string.
-	// A computed string is a string with a format and it generates the string
-	// into a texture. First param is the string or ucstring (Unicode string).
-	// Second is a pointer to a font generator. 3rd is the color of the font.
-	// 4th is the size of the font. 5th is a pointer to the video driver.
-	// 6th is the resulting computed string.
-	CComputedString csRotation;
-	fontManager.computeString ("cs Rotation", tc.getFontGenerator(), CRGBA(255,255,255), 70, false, false, CNELU::Driver, csRotation);
-
-	CComputedString cs3d;
-	fontManager.computeString ("cs 3d", tc.getFontGenerator(), CRGBA(255,127,0), 75, false, false, CNELU::Driver, cs3d);
-
-	// generate an Unicode string.
 	ucstring ucs("cs Unicode String");
-
-	CComputedString csUnicode;
-	fontManager.computeString (ucs, tc.getFontGenerator(), CRGBA(32,64,127), 75, false, false, CNELU::Driver, csUnicode);
+	s_CsUnicode = new CComputedString;
+	s_FontManager->computeString (ucs, s_TextContext->getFontGenerator(), CRGBA(32,64,127), 75, false, false, CNELU::Driver, *s_CsUnicode);
 
 	// look at event example
 	CNELU::EventServer.addEmitter(CNELU::Driver->getEventEmitter());
 	CNELU::AsyncListener.addToServer(CNELU::EventServer);
 
-	NLMISC::CValueSmoother smoothFPS;
-	NLMISC::CRandom rnd;
+	s_SmoothFPS = new CValueSmoother;
+	s_OldTick = CTime::getPerformanceTime();
+
+#ifdef __EMSCRIPTEN__
+	EM_ASM({ if (window.nlLoadingComplete) window.nlLoadingComplete(); });
+	emscripten_set_main_loop(renderOneFrame, 0, 1);
+#else
 	do
 	{
-		// look at 3dinit example
-		CNELU::clearBuffers(CRGBA(120,120,0));
-
-		// now, every frame, we have to render the computer string.
-
-		static float x=0, y=0, z=0;
-		x+=0.01f; y+=0.1f, z+=0.001f;
-		CMatrix m;
-		m.identity();
-		m.translate(CVector(0.7f*4.0f/3.0f, 0.5, 0.5));
-		m.rotateX(x);
-		m.rotateY(y);
-		m.rotateZ(z);
-		// display a string in 3d
-		// first param is a pointer to the driver. second one is
-		// the matrix transformation for the string
-		cs3d.render3D (*CNELU::Driver, m);
-
-		// the first param is a pointer to a driver. second one is the x position
-		// (between (0.0 (left) and 1.0 (right)). third one is the y position (between
-		// 0.0 (bottom) and 1.0 (top)).
-		tc.setColor (CRGBA (255, 255, 255));
-		tc.setFontSize (40);
-		tc.setHotSpot (CComputedString::BottomLeft);
-		tc.printAt (0.5f, 0.7f, string("printAt"));
-
-		// the fourth param is the position of the hotspot, the text will be displayed at x,y
-		// depending on the hotspot
-		tc.setColor (CRGBA (0, 0, 255));
-		tc.setFontSize (40);
-		tc.setHotSpot (CComputedString::BottomLeft);
-		tc.printAt (0.0f, 0.0f, string("NeL"));
-
-		static float scale=1.0f, way=0.05f;
-		scale+=way;
-		if (scale>4 || scale < 1) way = -way;
-		// the 5th and 6th params are the scale of the texture
-
-		tc.setColor (CRGBA (200, 255, 64));
-		tc.setFontSize (20);
-		tc.setHotSpot (CComputedString::BottomLeft);
-		tc.setScaleX (scale);
-		tc.setScaleZ (scale);
-		tc.printAt (0.1f, 0.3f, string("printAt Scale String"));
-
-		// display the same string with no scale
-		tc.setHotSpot (CComputedString::TopLeft);
-		tc.setScaleX (1.0f);
-		tc.setScaleZ (1.0f);
-		tc.printAt (0.1f, 0.25f, string("printAt NoScale String"));
-
-		// the 7th params is the rotation in radian
-		static float angle=0.0f;
-		angle+=0.01f;
-		csRotation.render2D (*CNELU::Driver, 0.2f, 0.7f, CComputedString::MiddleMiddle, 1, 1, angle);
-
-		csUnicode.render2D (*CNELU::Driver, 1.0f, 0.15f, CComputedString::MiddleRight);
-
-		// display the Unicode string
-		tc.setColor (CRGBA (32, 64, 127));
-		tc.setFontSize (65);
-		tc.setHotSpot (CComputedString::MiddleRight);
-		tc.printAt (1.0f, 0.85f, ucstring("printAt Unicode String"));
-
-		tc.setColor (CRGBA (255, 127, 0));
-		tc.setFontSize (20);
-		tc.setHotSpot (CComputedString::BottomRight);
-		tc.printAt (0.99f, 0.01f, string("Press <ESC> to quit"));
-
-		/*for(uint i = 0; i < 1000; ++i)
-		{
-			uint fontSize = rnd.rand(40) + 10;
-			tc.setColor(CRGBA(rnd.rand(255), rnd.rand(255), rnd.rand(255)));
-			tc.setFontSize(fontSize);
-			tc.setHotSpot(CComputedString::MiddleMiddle);
-			tc.printAt(rnd.frand(1.f), rnd.frand(1.f), toString("%d", fontSize));
-		}*/
-
-		{
-			static TTicks oldTick = CTime::getPerformanceTime();
-			TTicks newTick = CTime::getPerformanceTime();
-			double deltaTime = CTime::ticksToSecond (newTick-oldTick);
-			oldTick = newTick;
-			smoothFPS.addValue((float)deltaTime);
-			deltaTime = smoothFPS.getSmoothValue ();
-			if (deltaTime > 0.0)
-			{
-				//printf("FPS: %.5f\n", 1.f/deltaTime);
-				tc.setFontSize(16);
-				tc.setColor(CRGBA::Yellow);
-				tc.setHotSpot(CComputedString::TopLeft);
-				tc.printAt(0.01f, 0.99f, toString("FPS:%.f", 1.0f/deltaTime));
-			}
-		}
-
-		// look 3dinit example
-		CNELU::swapBuffers();
-		CNELU::screenshot();
-
-		// look at event example
-		CNELU::EventServer.pump(true);
-
+		renderOneFrame();
 	}
 	while(!CNELU::AsyncListener.isKeyPushed(KeyESCAPE));
+#endif
 
-	fontManager.dumpCache ("font_cache_dump.tga");
+	s_FontManager->dumpCache ("font_cache_dump.tga");
 
 	// look at event example
 	CNELU::AsyncListener.removeFromServer(CNELU::EventServer);
+
+	delete s_SmoothFPS;
+	delete s_CsUnicode;
+	delete s_Cs3d;
+	delete s_CsRotation;
+	delete s_TextContext;
+	delete s_FontManager;
 
 	// look at 3dinit example
 	CNELU::release();

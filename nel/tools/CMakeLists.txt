@@ -1,5 +1,7 @@
 # Don't add other subdirectories if only max plugins are selected.
-ADD_SUBDIRECTORY(misc)
+IF(WITH_NEL_TOOLS)
+  ADD_SUBDIRECTORY(misc)
+ENDIF()
 
 IF(WITH_NEL_TOOLS)
   ADD_SUBDIRECTORY(memory)

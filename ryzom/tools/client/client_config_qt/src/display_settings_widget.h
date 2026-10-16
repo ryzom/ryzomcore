@@ -27,7 +27,9 @@ enum E3DDriver
 {
 	DRV_AUTO,
 	DRV_OPENGL,
-	DRV_DIRECT3D
+	DRV_DIRECT3D,
+	DRV_GLES,
+	DRV_OPENGL3
 };
 
 /**

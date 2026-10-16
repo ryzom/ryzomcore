@@ -59,7 +59,7 @@ CObjectRefIdClient::~CObjectRefIdClient()
 }
 
 // ************************************************************************
-CObject* CObjectRefIdClient::clone() const
+CObject::TSmartPtr CObjectRefIdClient::clone() const
 {
 	//H_AUTO(R2_CObjectRefIdClient_clone)
 	return new CObjectRefIdClient(getValue());
@@ -346,10 +346,10 @@ void CObjectTableClient::pushOnLuaStack(CLuaState &state, CLuaObject &metatable)
 }
 
 // ************************************************************************
-CObject* CObjectTableClient::clone() const
+CObject::TSmartPtr CObjectTableClient::clone() const
 {
 	//H_AUTO(R2_CObjectTableClient_clone)
-	CObjectTableClient *ret = new CObjectTableClient();
+	CObject::TSmartPtr ret = new CObjectTableClient();
 	// NB : don't copy the reference because there can be only one CObjectTableClient per instance (other copy are for undo/redo or network)
 	TContainer::const_iterator first(_Value.begin()),  last(_Value.end());
 	for ( ;first != last; ++first )

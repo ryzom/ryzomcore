@@ -1975,8 +1975,31 @@ NL3D::IShape				*CExportNel::buildWaterShape(INode& node, TimeValue time)
 			maxDiffuseMap->GetUVTransform(texMat);
 			
 			NLMISC::CMatrix A, B, C;
-			A.setRot(NLMISC::CVector(v0.x, v0.y, 1), NLMISC::CVector(v1.x, v1.y, 1), NLMISC::CVector(v2.x, v2.y, 1));			
-			Point3 uv[3] = { pMesh->getTVert(i0) * texMat, pMesh->getTVert(i1) * texMat, pMesh->getTVert(i2) * texMat };
+			A.setRot(NLMISC::CVector(v0.x, v0.y, 1), NLMISC::CVector(v1.x, v1.y, 1), NLMISC::CVector(v2.x, v2.y, 1));
+
+			// Look up texture vertex indices through face topology.
+			// Mesh vertex indices and texture vertex indices are separate;
+			// we must find the texture vertex for each mesh vertex via tvFace.
+			uint meshVertIdx[3] = { i0, i1, i2 };
+			Point3 uv[3];
+			int numFaces = pMesh->getNumFaces();
+			for (int vi = 0; vi < 3; ++vi)
+			{
+				uv[vi] = Point3(0, 0, 0);
+				bool found = false;
+				for (int f = 0; f < numFaces && !found; ++f)
+				{
+					for (int c = 0; c < 3; ++c)
+					{
+						if (pMesh->faces[f].v[c] == meshVertIdx[vi])
+						{
+							uv[vi] = pMesh->getTVert(pMesh->tvFace[f].getTVert(c)) * texMat;
+							found = true;
+							break;
+						}
+					}
+				}
+			}
 
 			float cropU = 0.f, cropV = 0.f, cropW = 1.f, cropH = 1.f;
 			// crop result	

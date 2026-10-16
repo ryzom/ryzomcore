@@ -217,6 +217,11 @@ public:
 	/// unlock any AGP vertex buffers
 	void			unlockBuffers();
 
+	/// Enable/disable unsynchronized write mode on hard VB allocators.
+	void			setUnsynchronizedMode(bool enable);
+	/// Release deferred-free vertex slots whose GPU work has completed.
+	void			processDeferredFrees(uint64 swapBufferInFlight);
+
 	/** render the manager into a driver, with current viewMatrix/frustum/fog  setuped
 	 *	Buffers should be unlocked.
 	 *	\param	textureDLM is the dynamic lightmap to use. can be NULL if don't want DLM

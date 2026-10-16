@@ -32,7 +32,7 @@
 				if ($this->Pos+1 > strlen($this->Buffer))
 					return false;
 
-				$val = ord($this->Buffer{$this->Pos++});
+				$val = ord($this->Buffer[$this->Pos++]);
 				//printf ("read uint8 '%d'<br>", $val);
 			}
 			else
@@ -51,10 +51,10 @@
 				if ($this->Pos+4 > strlen($this->Buffer))
 					return false;
 
-				$val = ord($this->Buffer{$this->Pos++});
-				$val += ord($this->Buffer{$this->Pos++})<<8;
-				$val += ord($this->Buffer{$this->Pos++})<<16;
-				$val += ord($this->Buffer{$this->Pos++})<<32;
+				$val = ord($this->Buffer[$this->Pos++]);
+				$val += ord($this->Buffer[$this->Pos++])<<8;
+				$val += ord($this->Buffer[$this->Pos++])<<16;
+				$val += ord($this->Buffer[$this->Pos++])<<32;
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else

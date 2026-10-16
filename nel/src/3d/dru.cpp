@@ -69,12 +69,20 @@ const char *IDRV_VERSION_PROC_NAME = "NL3D_interfaceVersion";
 extern IDriver* createGlDriverInstance ();
 #endif
 
+#ifdef NL_OPENGL3_AVAILABLE
+extern IDriver* createGl3DriverInstance ();
+#endif
+
 #if defined(NL_OS_WINDOWS) && defined(NL_DIRECT3D_AVAILABLE)
 extern IDriver* createD3DDriverInstance ();
 #endif
 
 #ifdef NL_OPENGLES_AVAILABLE
 extern IDriver* createGlEsDriverInstance ();
+#endif
+
+#ifdef NL_OPENGLES3_AVAILABLE
+extern IDriver* createGlEs3DriverInstance ();
 #endif
 
 #endif
@@ -134,6 +142,60 @@ IDriver		*CDRU::createGlDriver()
 }
 
 // ***************************************************************************
+IDriver		*CDRU::createGl3Driver()
+{
+#ifdef NL_STATIC
+
+#ifdef NL_OPENGL3_AVAILABLE
+	return createGl3DriverInstance ();
+#else
+	return NULL;
+#endif // NL_OPENGL3_AVAILABLE
+
+#else
+
+	IDRV_CREATE_PROC	createDriver = NULL;
+	IDRV_VERSION_PROC	versionDriver = NULL;
+
+	CLibrary	driverLib;
+
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
+
+	if (!driverLib.loadLibrary(NL3D_GL3_DLL_NAME, true, true, false))
+	{
+		throw EDruOpengl3DriverNotFound();
+	}
+
+	nlinfo ("Using the library '" NL3D_GL3_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
+
+	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
+	if (createDriver == NULL)
+	{
+		throw EDruOpengl3DriverCorrupted();
+	}
+
+	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
+	if (versionDriver != NULL)
+	{
+		if (versionDriver()<IDriver::InterfaceVersion)
+			throw EDruOpengl3DriverOldVersion();
+		else if (versionDriver()>IDriver::InterfaceVersion)
+			throw EDruOpengl3DriverUnknownVersion();
+	}
+
+	IDriver		*ret= createDriver();
+	if (ret == NULL)
+	{
+		throw EDruOpengl3DriverCantCreateDriver();
+	}
+
+	return ret;
+#endif
+}
+
+// ***************************************************************************
 IDriver		*CDRU::createGlEsDriver()
 {
 #ifdef NL_STATIC
@@ -161,6 +223,60 @@ IDriver		*CDRU::createGlEsDriver()
 	}
 
 	nlinfo ("Using the library '" NL3D_GLES_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
+
+	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
+	if (createDriver == NULL)
+	{
+		throw EDruOpenglDriverCorrupted();
+	}
+
+	versionDriver = (IDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
+	if (versionDriver != NULL)
+	{
+		if (versionDriver()<IDriver::InterfaceVersion)
+			throw EDruOpenglDriverOldVersion();
+		else if (versionDriver()>IDriver::InterfaceVersion)
+			throw EDruOpenglDriverUnknownVersion();
+	}
+
+	IDriver		*ret= createDriver();
+	if (ret == NULL)
+	{
+		throw EDruOpenglEsDriverCantCreateDriver();
+	}
+
+	return ret;
+#endif
+}
+
+// ***************************************************************************
+IDriver		*CDRU::createGlEs3Driver()
+{
+#ifdef NL_STATIC
+
+#ifdef NL_OPENGLES3_AVAILABLE
+	return createGlEs3DriverInstance ();
+#else
+	return NULL;
+#endif // NL_OPENGLES3_AVAILABLE
+
+#else
+
+	IDRV_CREATE_PROC	createDriver = NULL;
+	IDRV_VERSION_PROC	versionDriver = NULL;
+
+	CLibrary	driverLib;
+
+#if defined(NL_OS_UNIX) && defined(NL_DRIVER_PREFIX)
+	driverLib.addLibPath(NL_DRIVER_PREFIX);
+#endif
+
+	if (!driverLib.loadLibrary(NL3D_GLES3_DLL_NAME, true, true, false))
+	{
+		throw EDruOpenglEsDriverNotFound();
+	}
+
+	nlinfo ("Using the library '" NL3D_GLES3_DLL_NAME "' that is in the directory: '%s'", driverLib.getLibFileName().c_str());
 
 	createDriver = (IDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
 	if (createDriver == NULL)
@@ -242,6 +358,8 @@ IDriver		*CDRU::createD3DDriver()
 #endif // NL_OS_WINDOWS
 
 // ***************************************************************************
+// NOTE: CDRU functions below use function-local static VBs, IBs, and CMaterials.
+// These are STATIC GPU RESOURCES that block multiple driver instances.
 
 void	CDRU::drawBitmap (float x, float y, float width, float height, ITexture& texture, IDriver& driver, CViewport viewport, bool blend)
 {
@@ -262,7 +380,7 @@ void	CDRU::drawBitmap (float x, float y, float width, float height, ITexture& te
 	if (vb.getName().empty()) vb.setName("CDRU::drawBitmap");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag|CVertexBuffer::TexCoord0Flag);
 	vb.setNumVertices (4);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
@@ -281,7 +399,7 @@ void	CDRU::drawBitmap (float x, float y, float width, float height, ITexture& te
 	if (pb.getName().empty()) NL_SET_IB_NAME(pb, "CDRU::drawBitmap");
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes (6);
-	pb.setPreferredMemory (CIndexBuffer::RAMVolatile, false);
+	pb.setBufferUsage (CIndexBuffer::SmallStream, false);
 	{
 		CIndexBufferReadWrite iba;
 		pb.lock (iba);
@@ -316,7 +434,7 @@ void	CDRU::drawLine (float x0, float y0, float x1, float y1, IDriver& driver, CR
 	if (vb.getName().empty()) vb.setName("CDRU::drawLine");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag);
 	vb.setNumVertices (2);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
@@ -329,7 +447,7 @@ void	CDRU::drawLine (float x0, float y0, float x1, float y1, IDriver& driver, CR
 	if (pb.getName().empty()) NL_SET_IB_NAME(pb, "CDRU::drawLine");
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes (2);
-	pb.setPreferredMemory (CIndexBuffer::RAMVolatile, false);
+	pb.setBufferUsage (CIndexBuffer::SmallStream, false);
 	{
 		CIndexBufferReadWrite iba;
 		pb.lock (iba);
@@ -363,7 +481,7 @@ void	CDRU::drawTriangle (float x0, float y0, float x1, float y1, float x2, float
 	if (vb.getName().empty()) vb.setName("CDRU::drawTriangle");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag);
 	vb.setNumVertices (3);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
@@ -377,7 +495,7 @@ void	CDRU::drawTriangle (float x0, float y0, float x1, float y1, float x2, float
 	if (pb.getName().empty()) NL_SET_IB_NAME(pb, "CDRU::drawTriangle");
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes (3);
-	pb.setPreferredMemory (CIndexBuffer::RAMVolatile, false);
+	pb.setBufferUsage (CIndexBuffer::SmallStream, false);
 	{
 		CIndexBufferReadWrite iba;
 		pb.lock (iba);
@@ -412,7 +530,7 @@ void	CDRU::drawQuad (float x0, float y0, float x1, float y1, IDriver& driver, CR
 	if (vb.getName().empty()) vb.setName("CDRU::drawQuad");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag);
 	vb.setNumVertices (4);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
@@ -449,7 +567,7 @@ void	CDRU::drawQuad (float xcenter, float ycenter, float radius, IDriver& driver
 	if (vb.getName().empty()) vb.setName("CDRU::drawQuad");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag);
 	vb.setNumVertices (4);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);
@@ -499,12 +617,12 @@ void			CDRU::drawTrianglesUnlit(const NLMISC::CTriangleUV	*trilist, sint ntris, 
 	if (vb.getName().empty()) vb.setName("CDRU::drawTrianglesUnlit");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag | CVertexBuffer::TexCoord0Flag);
 	vb.setNumVertices (ntris*3);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 
 	static	CIndexBuffer pb;
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes(ntris*3);
-	pb.setPreferredMemory (CIndexBuffer::RAMVolatile, false);
+	pb.setBufferUsage (CIndexBuffer::SmallStream, false);
 	if (pb.getFormat() == CIndexBuffer::Indices16)
 	{
 		nlassert(ntris * 3 <= 0xffff);
@@ -549,12 +667,12 @@ void			CDRU::drawLinesUnlit(const NLMISC::CLine	*linelist, sint nlines, CMateria
 	if (vb.getName().empty()) vb.setName("CDRU::drawLinesUnlit");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag);
 	vb.setNumVertices (nlines*2);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 
 	static	CIndexBuffer pb;
 	pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
 	pb.setNumIndexes(nlines*2);
-	pb.setPreferredMemory (CIndexBuffer::RAMVolatile, false);
+	pb.setBufferUsage (CIndexBuffer::SmallStream, false);
 
 
 	{
@@ -622,7 +740,7 @@ void			CDRU::drawQuad (float x0, float y0, float x1, float y1, CRGBA col0, CRGBA
 	if (vb.getName().empty()) vb.setName("CDRU::drawQuad");
 	vb.setVertexFormat (CVertexBuffer::PositionFlag|CVertexBuffer::PrimaryColorFlag);
 	vb.setNumVertices (4);
-	vb.setPreferredMemory (CVertexBuffer::RAMVolatile, false);
+	vb.setBufferUsage (CVertexBuffer::SmallStream, false);
 	{
 		CVertexBufferReadWrite vba;
 		vb.lock (vba);

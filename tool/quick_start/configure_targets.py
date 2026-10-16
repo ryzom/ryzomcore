@@ -83,6 +83,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	opts += [ "-DWITH_EXTERNAL=OFF" ]
 	opts += [ "-DWITH_STLPORT=OFF" ]
 	opts += [ "-DWITH_NEL_TESTS=OFF" ]
+	opts += [ "-DWITH_TESTING=OFF" ]
 	opts += [ "-DWITH_STATIC=ON" ]
 	
 	if len(FilterExternalDirs([ "ffmpeg" ], filteredPrefix)) > 0:
@@ -179,9 +180,11 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	# OpenGL / OpenAL
 	if spec != NeLSpecServer:
 		opts += [ "-DWITH_DRIVER_OPENGL=ON" ]
+		opts += [ "-DWITH_DRIVER_OPENGL3=ON" ]
 		opts += [ "-DWITH_DRIVER_OPENAL=ON" ]
 	else:
 		opts += [ "-DWITH_DRIVER_OPENGL=OFF" ]
+		opts += [ "-DWITH_DRIVER_OPENGL3=OFF" ]
 		opts += [ "-DWITH_DRIVER_OPENAL=OFF" ]
 	
 	# CMake Prefix
@@ -191,6 +194,7 @@ def GenerateCMakeOptions(spec, generator, fv, target, buildDir, filteredPrefix):
 	if spec == NeLSpecClient:
 		opts += [ "-DWITH_RYZOM_CLIENT=ON" ]
 		opts += [ "-DWITH_RYZOM_PATCH=ON" ]
+		opts += [ "-DWITH_LOGIC=OFF" ]
 		opts += [ "%RC_CLIENT_DEFAULTS%" ]
 	else:
 		opts += [ "-DWITH_RYZOM_CLIENT=OFF" ]
@@ -400,11 +404,24 @@ def GenerateDockerEnv(file, relBuildDir, buildDir, tc):
 	fo.write("\n")
 	fo.close()
 
+_pause_goto_counter = 0
+
 def WritePauseGoto(fo, go):
-	fo.write("if %errorlevel% neq 0 (\n")
-	fo.write("pause\n")
-	fo.write("goto " + go + "\n")
-	fo.write(")\n")
+	global _pause_goto_counter
+	_pause_goto_counter += 1
+	tag = "rsa" + str(_pause_goto_counter)
+	fo.write("if %errorlevel% neq 0 goto " + tag + "\n")
+	fo.write("goto " + tag + "_ok\n")
+	fo.write(":" + tag + "\n")
+	fo.write("choice /C RSA /N /M \"[R]etry, [S]kip, or [A]bort? \"\n")
+	fo.write("if %errorlevel% equ 3 exit /B 1\n")
+	fo.write("if %errorlevel% equ 1 goto " + go + "\n")
+	fo.write(":" + tag + "_ok\n")
+
+def WriteCmdCall(fo, script, label):
+	fo.write(":" + label + "\n")
+	fo.write("cmd /C " + EscapeArg("call " + script) + "\n")
+	WritePauseGoto(fo, ":" + label)
 
 def WriteHeader(fo):
 	fo.write("@echo off\n")
@@ -607,14 +624,14 @@ def GenerateBuild(file, envScript, spec, generator, fv, target, buildDir):
 	if gen and gen.startswith("Visual Studio"):
 		if not fv:
 			if tc["Version"] > 16:
-				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL% /p:CL_MPCount=%RC_PARALLEL% /p:Configuration=Debug\n")
+				fo.write("msbuild ALL_BUILD.vcxproj /m:%RC_PARALLEL% /p:CL_MPCount=%RC_PARALLEL% /p:Configuration=Debug\n")
 			else:
-				fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Debug\n")
+				fo.write("msbuild ALL_BUILD.vcxproj /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Debug\n")
 			WritePauseGoto(fo, ":build")
 		if tc["Version"] > 16:
-			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL% /p:CL_MPCount=%RC_PARALLEL% /p:Configuration=Release\n")
+			fo.write("msbuild ALL_BUILD.vcxproj /m:%RC_PARALLEL% /p:CL_MPCount=%RC_PARALLEL% /p:Configuration=Release\n")
 		else:
-			fo.write("msbuild RyzomCore.sln /t:ALL_BUILD /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Release\n")
+			fo.write("msbuild ALL_BUILD.vcxproj /m:%RC_PARALLEL_PROJECTS% /p:CL_MPCount=%RC_PARALLEL_FILES% /p:Configuration=Release\n")
 	elif gen and "Ninja" in gen:
 		fo.write("ninja -j%RC_PARALLEL%\n")
 	elif gen and "JOM" in gen:
@@ -713,16 +730,16 @@ def ConfigureTarget(spec, name, fv, target):
 		else:
 			pass
 	if scriptOk:
-		fo_configure_clean_all.write("cmd /C " + EscapeArg("call " + configureScript) + "\n")
-		fo_configure_rebuild_all.write("cmd /C " + EscapeArg("call " + configureScript) + "\n")
-		fo_configure_rebuild_all.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
-		fo_build_all.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+		WriteCmdCall(fo_configure_clean_all, configureScript, safeName + "_cfg")
+		WriteCmdCall(fo_configure_rebuild_all, configureScript, safeName + "_cfg")
+		WriteCmdCall(fo_configure_rebuild_all, buildScript, safeName + "_bld")
+		WriteCmdCall(fo_build_all, buildScript, safeName + "_bld")
 		if spec == NeLSpecServer or spec == NeLSpecClient:
-			fo_build_game.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+			WriteCmdCall(fo_build_game, buildScript, safeName + "_bld")
 			if not fv:
-				fo_build_game_dev.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+				WriteCmdCall(fo_build_game_dev, buildScript, safeName + "_bld")
 		if spec == NeLSpecTools:
-			fo_build_game_dev.write("cmd /C " + EscapeArg("call " + buildScript) + "\n")
+			WriteCmdCall(fo_build_game_dev, buildScript, safeName + "_bld")
 	return res
 
 Targets["Native"]["client_dev"] = ConfigureTarget(NeLSpecClient, "client_dev", False, NeLTargetClientDev)

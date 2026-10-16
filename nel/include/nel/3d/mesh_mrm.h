@@ -34,6 +34,7 @@
 #include "nel/3d/mesh_geom.h"
 #include "nel/3d/mrm_level_detail.h"
 #include "nel/3d/shadow_skin.h"
+#include "nel/3d/gpu_skin_vp.h"
 #include <set>
 #include <vector>
 
@@ -307,6 +308,12 @@ public:
 
 	// @}
 
+	/// \name GPU Skinning Rendering
+	// @{
+	bool			supportGPUSkinning() const { return _GPUSkinBuilt; }
+	void			renderGPUSkin(CMeshMRMInstance *mi, float alphaMRM, CSkeletonModel *skeleton);
+	// @}
+
 // ************************
 private:
 	friend class	CMRMBuilder;
@@ -535,6 +542,26 @@ private:
 	// @{
 	CShadowSkin						_ShadowSkin;
 	bool							_SupportShadowSkinGrouping;
+	// @}
+
+	/// \name GPU Skinning
+	// @{
+	/// GPU skinning vertex buffer (bind-pose data + morph targets). Immutable once built.
+	CVertexBuffer					_GPUSkinVB;
+	/// GPU skinning combined index buffer for all LODs. Immutable once built.
+	CIndexBuffer					_GPUSkinIB;
+	/// True once _GPUSkinVB and _GPUSkinIB are built.
+	bool							_GPUSkinBuilt;
+	/// Per-LOD per-pass info for the GPU IB.
+	struct GPULodPass
+	{
+		uint32 IBOffset;	///< First index in _GPUSkinIB
+		uint32 IBCount;		///< Number of indices
+	};
+	/// _GPULodPasses[lodId][passId]
+	std::vector<std::vector<GPULodPass>>	_GPULodPasses;
+	/// Build the GPU skinning VB and IB from the standard vertex data.
+	void	buildGPUSkinVB();
 	// @}
 
 private:

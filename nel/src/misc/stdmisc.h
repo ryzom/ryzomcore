@@ -57,7 +57,9 @@
 
 #include "nel/misc/types_nl.h"
 
+#ifndef NL_NO_LIBXML2
 #include <libxml/parser.h>
+#endif
 
 #ifdef NL_OS_WINDOWS
 #	define WIN32_LEAN_AND_MEAN

@@ -19,6 +19,8 @@
 
 #include "stdmisc.h"
 
+#ifndef NL_NO_LIBXML2
+
 #include "nel/misc/o_xml.h"
 #include "nel/misc/i_xml.h"
 
@@ -79,7 +81,7 @@ int xmlOutputCloseCallbackForNeL ( void * /* context */ )
 	// COXml *object = (COXml*) context;
 
 	// Does nothing
-	return 1;
+	return XML_ERR_OK;
 }
 
 // ***************************************************************************
@@ -674,3 +676,5 @@ std::string COXml::getErrorString()
 } // NLMISC
 
 #endif // NL_DONT_USE_EXTERNAL_CODE
+
+#endif // NL_NO_LIBXML2

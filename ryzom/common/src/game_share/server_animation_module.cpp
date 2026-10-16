@@ -365,7 +365,7 @@ public:
 	typedef std::map<uint32, TCharacterInfo> TCharacterInfos;
 
 public:
-	CUniquePtr<CObject> RtData;
+	CObject::TSmartPtr RtData;
 	TScenarioHeaderSerializer ScenarioHeader;
 	TSessionId SessionId;
 	//vector<userId>
@@ -1137,7 +1137,7 @@ bool CServerAnimationModule::queueSession(CAnimationSession* session, bool /* ru
 			// binary
 			COFile output;
 			output.open("outpout.rt.bin");
-			CObjectSerializerServer serializer( session->RtData.get());
+			CObjectSerializerServer serializer( session->RtData.getPtr());
 			serializer.serial(output);
 			output.flush();
 			output.close();
@@ -1883,7 +1883,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 	std::vector<CPrimitives> primDocs;
 
 
-	CObject* rtScenario = animSession->RtData.get();
+	CObject* rtScenario = animSession->RtData.getPtr();
 
 	uint32 aiInstance = animSession->AiInstance;
 
@@ -1895,7 +1895,7 @@ bool CServerAnimationModule::doMakeAnimationSession(CAnimationSession* animSessi
 
 	// build instance map
  	CInstanceMap components("Id");
-	components.set(animSession->RtData.get());//default + act courant
+	components.set(animSession->RtData.getPtr());//default + act courant
 
 	//Create Plot items
 
@@ -3572,7 +3572,7 @@ bool CServerAnimationModule::onProcessModuleMessage(IModuleProxy *senderModulePr
 
 			CAnimationSession* session = new CAnimationSession();
 			session->CurrentAct = 0;
-			session->RtData.reset( obj.getData() );
+			session->RtData = obj.getData();
 			session->SessionId = sessionId;
 			queueSession(session, false);
 
@@ -3622,7 +3622,7 @@ void CServerAnimationModule::scheduleStartSessionImpl(const CAnimationMessageAni
 		session->ConnectedChars.push_back(*first);
 	}
 
-	session->RtData.reset( msg.RtData.getData() );
+	session->RtData = msg.RtData.getData();
 	session->SessionId = msg.SessionId;
 	session->AiInstance = msg.AiInstance;
 	session->InitialAct = msg.StartingAct;

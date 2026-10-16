@@ -69,10 +69,10 @@ uint32 CLoginCookie::generateKey()
 #ifdef NL_CPP14
 		srand(std::random_device()());
 #else
-		srand(wangHash(t));
+		srand(lowbias32(t));
 #endif
-		salt0 = wangHash(rand() | rand() << 8 | rand() << 16 | rand() << 24);
-		salt1 = wangHash(rand() | rand() << 8 | rand() << 16 | rand() << 24);
+		salt0 = lowbias32(rand() | rand() << 8 | rand() << 16 | rand() << 24);
+		salt1 = lowbias32(rand() | rand() << 8 | rand() << 16 | rand() << 24);
 		seeded = true;
 	}
 
@@ -93,7 +93,7 @@ uint32 CLoginCookie::generateKey()
 	// 12bits for the inc number => can generate 1024 keys per second without any problem (if you generate more than this number, time will just go faster)
 	//  8bits for random => 256 case
 	// double salted for obfuscating
-	return wangHash(((n & 0xFFFFFF) << 8 | (r & 0xFF)) ^ salt0) ^ salt1;
+	return lowbias32(((n & 0xFFFFFF) << 8 | (r & 0xFF)) ^ salt0) ^ salt1;
 }
 
 

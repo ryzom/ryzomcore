@@ -594,6 +594,11 @@ public:
 	/// get Enable Polygon Smoothing flag
 	virtual	bool			getEnableShadowPolySmooth() const =0;
 
+	/// Enable/Disable GPU Skinning (requires driver support for glsl3vi profile)
+	virtual	void			enableGPUSkinning(bool enable) =0;
+	/// get GPU Skinning enabled flag
+	virtual	bool			isGPUSkinningEnabled() const =0;
+
 	/// ShadowMap Distance Fade Start (40 default)
 	virtual	void			setShadowMapDistFadeStart(float dist) =0;
 	virtual	float			getShadowMapDistFadeStart() const =0;
@@ -641,6 +646,9 @@ public:
 	  * Should be called at the beginning of the frame before anything is rendered.
 	  */
 	virtual void		  updateWaterEnvMaps(TGlobalAnimationTime time) = 0;
+	/// Force all water surfaces in the scene to use the scene water envmap
+	virtual void		  setForceWaterEnvMap(bool force) = 0;
+	virtual bool		  getForceWaterEnvMap() const = 0;
 	// @}
 };
 

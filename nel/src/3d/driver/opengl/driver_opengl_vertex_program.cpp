@@ -81,8 +81,11 @@ CVertexProgamDrvInfosGL::CVertexProgamDrvInfosGL(CDriverGL *drv, ItGPUPrgDrvInfo
 bool CDriverGL::supportVertexProgram(CVertexProgram::TProfile profile) const
 {
 	H_AUTO_OGL(CVertexProgamDrvInfosGL_supportVertexProgram)
-	return (profile == CVertexProgram::nelvp)
-		&& (_Extensions.NVVertexProgram || _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram);
+	if (profile == CVertexProgram::nelvp)
+		return _Extensions.NVVertexProgram || _Extensions.EXTVertexShader || _Extensions.ARBVertexProgram;
+	if (profile == CVertexProgram::arbvp1)
+		return _Extensions.ARBVertexProgram;
+	return false;
 }
 
 // ***************************************************************************
@@ -104,7 +107,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 	nlassert(!program->m_DrvInfo);
 	glDisable(GL_VERTEX_PROGRAM_NV);
 	_VertexProgramEnabled = false;
-	
+
 	// Find nelvp
 	IProgram::CSource *source = NULL;
 	for (uint i = 0; i < program->getSourceNb(); ++i)
@@ -112,6 +115,7 @@ bool CDriverGL::compileNVVertexProgram(CVertexProgram *program)
 		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 		{
 			source = program->getSource(i);
+			break;
 		}
 	}
 	if (!source)
@@ -1535,18 +1539,78 @@ bool CDriverGL::compileARBVertexProgram(NL3D::CVertexProgram *program)
 	glDisable(GL_VERTEX_PROGRAM_ARB);
 	_VertexProgramEnabled = false;
 
-	// Find nelvp
+	// Try arbvp1 source first (native ARB VP from Cg)
+	IProgram::CSource *arbSource = NULL;
+	for (uint i = 0; i < program->getSourceNb(); ++i)
+	{
+		if (program->getSource(i)->Profile == CVertexProgram::arbvp1)
+		{
+			arbSource = program->getSource(i);
+			break;
+		}
+	}
+	if (arbSource)
+	{
+		// Insert into driver list. (so it is deleted when driver is deleted).
+		ItGPUPrgDrvInfoPtrList it = _GPUPrgDrvInfos.insert(_GPUPrgDrvInfos.end(), (NL3D::IProgramDrvInfos*)NULL);
+
+		// Create a driver info
+		CVertexProgamDrvInfosGL *drvInfo;
+		*it = drvInfo = new CVertexProgamDrvInfosGL(this, it);
+		// Set the pointer
+		program->m_DrvInfo = drvInfo;
+
+		// Load directly with nglProgramStringARB (skip nelvp parse+convert)
+		nglBindProgramARB(GL_VERTEX_PROGRAM_ARB, drvInfo->ID);
+		glGetError();
+		nglProgramStringARB(GL_VERTEX_PROGRAM_ARB, GL_PROGRAM_FORMAT_ASCII_ARB, (GLsizei)arbSource->SourceLen, arbSource->SourcePtr);
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR)
+		{
+			if (err == GL_INVALID_OPERATION)
+			{
+				GLint position;
+				glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &position);
+				const GLubyte *errorMsg = glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+				nlwarning("ARB vertex program parse error at position %d: %s", (int)position, (const char *)errorMsg);
+			}
+			// arbvp1 failed, fall through to nelvp
+			nlwarning("Native arbvp1 load failed, falling back to nelvp");
+			delete drvInfo;
+			program->m_DrvInfo = NULL;
+		}
+		else
+		{
+#ifdef NL_OS_MAC
+			glFinish();
+#endif
+
+			// Determine SpecularWritten by scanning for secondary color output
+			drvInfo->SpecularWritten = (strstr(arbSource->SourcePtr, "result.color.secondary") != NULL);
+
+			// Set parameters for assembly programs
+			drvInfo->ParamIndices = arbSource->ParamIndices;
+
+			// Build the feature info
+			program->buildInfo(arbSource);
+
+			return true;
+		}
+	}
+
+	// Fall back to nelvp
 	IProgram::CSource *source = NULL;
 	for (uint i = 0; i < program->getSourceNb(); ++i)
 	{
 		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 		{
 			source = program->getSource(i);
+			break;
 		}
 	}
 	if (!source)
 	{
-		nlwarning("OpenGL driver only supports 'nelvp' profile, vertex program cannot be used");
+		nlwarning("OpenGL ARB driver: no 'arbvp1' or 'nelvp' profile found, vertex program cannot be used");
 		return false;
 	}
 
@@ -1657,6 +1721,7 @@ bool CDriverGL::compileEXTVertexShader(CVertexProgram *program)
 		if (program->getSource(i)->Profile == CVertexProgram::nelvp)
 		{
 			source = program->getSource(i);
+			break;
 		}
 	}
 	if (!source)
@@ -1760,22 +1825,44 @@ bool CDriverGL::compileVertexProgram(NL3D::CVertexProgram *program)
 {
 	if (program->m_DrvInfo == NULL)
 	{
-		// Extension
+		if (program->m_CompileFailed)
+			return false;
+
+		bool result = false;
+
+		// If an arbvp1 source is available and ARB extension is supported,
+		// prefer the ARB path (compileARBVertexProgram tries arbvp1 first,
+		// then falls back to nelvp internally).
+		if (_Extensions.ARBVertexProgram)
+		{
+			for (uint i = 0; i < program->getSourceNb(); ++i)
+			{
+				if (program->getSource(i)->Profile == CVertexProgram::arbvp1)
+				{
+					result = compileARBVertexProgram(program);
+					if (!result) program->m_CompileFailed = true;
+					return result;
+				}
+			}
+		}
+
+		// Extension-priority dispatch (nelvp only)
 		if (_Extensions.NVVertexProgram)
 		{
-			return compileNVVertexProgram(program);
+			result = compileNVVertexProgram(program);
 		}
 		else if (_Extensions.ARBVertexProgram)
 		{
-			return compileARBVertexProgram(program);
+			result = compileARBVertexProgram(program);
 		}
 		else if (_Extensions.EXTVertexShader)
 		{
-			return compileEXTVertexShader(program);
+			result = compileEXTVertexShader(program);
 		}
 
-		// Can't do anything
-		return false;
+		if (!result)
+			program->m_CompileFailed = true;
+		return result;
 	}
 	return true;
 }
@@ -1789,18 +1876,33 @@ bool CDriverGL::activeVertexProgram(CVertexProgram *program)
 	// Compile if necessary
 	if (program && !CDriverGL::compileVertexProgram(program)) return false;
 
-	// Extension
-	if (_Extensions.NVVertexProgram)
+	if (program)
 	{
-		return activeNVVertexProgram(program);
+		// If the program was compiled with arbvp1, activate through the ARB path
+		// (needed for correct SpecularWritten / GL_COLOR_SUM_ARB handling)
+		if (program->profile() == CVertexProgram::arbvp1)
+			return activeARBVertexProgram(program);
+
+		// Extension-priority dispatch
+		if (_Extensions.NVVertexProgram)
+			return activeNVVertexProgram(program);
+		else if (_Extensions.ARBVertexProgram)
+			return activeARBVertexProgram(program);
+		else if (_Extensions.EXTVertexShader)
+			return activeEXTVertexShader(program);
 	}
-	else if (_Extensions.ARBVertexProgram)
+	else
 	{
-		return activeARBVertexProgram(program);
-	}
-	else if (_Extensions.EXTVertexShader)
-	{
-		return activeEXTVertexShader(program);
+		// Deactivation: prefer ARB if available, since it also cleans up
+		// GL_COLOR_SUM_ARB that may have been enabled by an arbvp1 program.
+		// On NVIDIA, GL_VERTEX_PROGRAM_ARB == GL_VERTEX_PROGRAM_NV, so this
+		// correctly disables the NV path too.
+		if (_Extensions.ARBVertexProgram)
+			return activeARBVertexProgram(NULL);
+		else if (_Extensions.NVVertexProgram)
+			return activeNVVertexProgram(NULL);
+		else if (_Extensions.EXTVertexShader)
+			return activeEXTVertexShader(NULL);
 	}
 
 	// Can't do anything

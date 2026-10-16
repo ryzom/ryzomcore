@@ -23,13 +23,9 @@ using ::testing::StrEq;
 class CUTMiscConfigFileTest : public testing::Test
 {
 protected:
-	NLMISC::CApplicationContext context;
-
 	void SetUp() override
 	{
-		context = NLMISC::CApplicationContext();
-
-		NLMISC::createDebug(NULL);
+		ASSERT_TRUE(NLMISC::INelContext::getInstance().isContextInitialised());
 	}
 
 	void TearDown() override

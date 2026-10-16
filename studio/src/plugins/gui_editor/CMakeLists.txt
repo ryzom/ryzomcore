@@ -1,6 +1,5 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${LIBXML2_INCLUDE_DIR}
   ${QT_INCLUDES}
   ${LUA_INCLUDE_DIR})
 
@@ -82,20 +81,23 @@ ADD_LIBRARY(studio_plugin_gui_editor MODULE ${SRC}
             )
 
 TARGET_LINK_LIBRARIES(studio_plugin_gui_editor
+        PUBLIC
         studio_plugin_core
+        PRIVATE
 		NeL::misc
 		NeL::3d
 		NeL::gui
         ${QT_LIBRARIES}
         ${QT_QTOPENGL_LIBRARY}
         ${QtPropertyBrowser_LIBRARY}
+        LibXml2::LibXml2
 )
 
 NL_DEFAULT_PROPS(studio_plugin_gui_editor "Tools: Studio Plugin: GUI Editor")
 NL_ADD_RUNTIME_FLAGS(studio_plugin_gui_editor)
 NL_ADD_LIB_SUFFIX(studio_plugin_gui_editor)
 
-TARGET_COMPILE_DEFINITIONS(studio_plugin_gui_editor PRIVATE GUI_EDITOR_LIBRARY ${LIBXML2_DEFINITIONS} QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
+TARGET_COMPILE_DEFINITIONS(studio_plugin_gui_editor PRIVATE GUI_EDITOR_LIBRARY QT_PLUGIN QT_SHARED ${QT_DEFINITIONS})
 
 IF(WIN32)
   IF(WITH_INSTALL_LIBRARIES)

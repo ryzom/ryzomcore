@@ -76,7 +76,7 @@ namespace R2
 
 		virtual CObject* getPropertyValue(CObject* component, const std::string& attrName) const;
 
-		virtual CObject* getPaletteElement(const std::string& key)const;
+		virtual const CObject::TSmartPtr& getPaletteElement(const std::string& key)const;
 
 		virtual bool isInPalette(const std::string& key) const;
 
@@ -146,7 +146,7 @@ namespace R2
 		void testConnectionAsCreator();
 
 		void updateScenario(CObject* scenario, bool willTP);
-		CObject *translateScenario(CObject* scenario);
+		CObject::TSmartPtr translateScenario(CObject* scenario);
 
 		void save(const std::string& filename);
 
@@ -163,7 +163,7 @@ namespace R2
 		// find an object in the scenario from its instance ID
 		CObject *find(const std::string& instanceId, const std::string& attrName = "", sint32 position = -1, const std::string &key ="");
 		virtual void disconnect();
-		const CObject *getHighLevel() const;
+		CObject *getHighLevel() const;
 
 		CPropertyAccessor &getPropertyAccessor() const;
 

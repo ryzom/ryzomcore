@@ -178,6 +178,9 @@ private:
 
 	// clip the shadow casters to know if they still need some process
 	void	clipShadowCasters();
+
+	// last frame id when shadow fades were accumulated (avoid double-accumulation in stereo)
+	uint64	_LastShadowFadeFrameId;
 };
 
 

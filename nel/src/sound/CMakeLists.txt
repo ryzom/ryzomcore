@@ -99,8 +99,13 @@ IF(HUNTER_ENABLED)
 
   HUNTER_ADD_PACKAGE(vorbis)
   FIND_PACKAGE(vorbis CONFIG REQUIRED)
-  SET(VORBIS_LIBRARY vorbis::vorbis)
-  SET(VORBISFILE_LIBRARY vorbis::vorbisfile)
+  # add compatibility with vorbis cmake config
+  if(NOT TARGET Vorbis::vorbis)
+	  add_library(Vorbis::vorbis ALIAS vorbis::vorbis)
+  endif()
+  if(NOT TARGET Vorbis::vorbisfile)
+	  add_library(Vorbis::vorbisfile ALIAS vorbis::vorbisfile)
+  endif()
 
   IF(WITH_FFMPEG)
     HUNTER_ADD_PACKAGE(ffmpeg)
@@ -111,34 +116,37 @@ ENDIF()
 
 TARGET_INCLUDE_DIRECTORIES(nelsound
 		PRIVATE
-		${VORBIS_INCLUDE_DIR}
-		${VORBIS_INCLUDE_DIR}/vorbis
 		${OGG_INCLUDE_DIR}
 )
 
-TARGET_LINK_LIBRARIES(nelsound ${VORBISFILE_LIBRARY} ${VORBIS_LIBRARY})
+TARGET_LINK_LIBRARIES(nelsound PRIVATE Vorbis::vorbis Vorbis::vorbisfile)
 
-IF(WITH_STATIC OR ${VORBISFILE_LIBRARY} MATCHES "\\.a")
+IF(WITH_STATIC OR "${VORBISFILE_LIBRARY}" MATCHES "\\.a")
   # Add libogg dependency only if target is static because to libvorbisfile
-  TARGET_LINK_LIBRARIES(nelsound ${OGG_LIBRARY})
+  TARGET_LINK_LIBRARIES(nelsound PUBLIC ${OGG_LIBRARY})
 ENDIF()
 
 IF(FFMPEG_FOUND)
 	TARGET_COMPILE_DEFINITIONS(nelsound PRIVATE FFMPEG_ENABLED)
 	TARGET_INCLUDE_DIRECTORIES(nelsound PRIVATE ${FFMPEG_INCLUDE_DIRS})
-	TARGET_LINK_LIBRARIES(nelsound ${FFMPEG_LIBRARIES})
+	TARGET_LINK_LIBRARIES(nelsound PUBLIC ${FFMPEG_LIBRARIES})
 ENDIF()
 
 
-TARGET_INCLUDE_DIRECTORIES(nelsound PRIVATE ${LIBXML2_INCLUDE_DIR})
-
-TARGET_LINK_LIBRARIES(nelsound nelmisc nelligo nelgeorges nel3d nelsnd_lowlevel)
+TARGET_LINK_LIBRARIES(nelsound
+        PUBLIC
+        nelmisc
+        nelligo
+        nelgeorges
+        nel3d
+        nelsnd_lowlevel
+        PRIVATE
+        LibXml2::LibXml2
+)
 NL_DEFAULT_PROPS(nelsound "NeL, Library: NeL Sound")
 NL_ADD_RUNTIME_FLAGS(nelsound)
 
 NL_ADD_LIB_SUFFIX(nelsound)
-
-TARGET_COMPILE_DEFINITIONS(nelsound PRIVATE ${LIBXML2_DEFINITIONS})
 
 IF(WITH_PCH)
   target_precompile_headers(nelsound PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/stdsound.h)

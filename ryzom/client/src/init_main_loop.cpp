@@ -626,6 +626,7 @@ void initMainLoop()
 		Scene->setGroupLoadMaxPolygon("Skin", ClientCfg.SkinNbMaxPoly);
 		Scene->setGroupLoadMaxPolygon("Fx", ClientCfg.FxNbMaxPoly);
 		Scene->setMaxSkeletonsInNotCLodForm(ClientCfg.NbMaxSkeletonNotCLod);
+		Scene->enableGPUSkinning(ClientCfg.GPUSkinning);
 		// separate group for mouse/target selection reticle
 		Scene->setGroupLoadMaxPolygon("SelectionFx", 10000);
 		// enable Scene Lighting
@@ -635,6 +636,7 @@ void initMainLoop()
 		// Setup the global Wind from cfg.
 		Scene->setGlobalWindPower(ClientCfg.GlobalWindPower);
 		Scene->setGlobalWindDirection(ClientCfg.GlobalWindDirection);
+		Scene->setForceWaterEnvMap(ClientCfg.ForceWaterEnvMap);
 
 		// init the clustered sound system
 		if (SoundMngr != NULL)
@@ -1374,6 +1376,7 @@ void initMainLoop()
 
 	// Re-initialise the mouse (will be now in hardware mode, if required)
 	SetMousePosFirstTime = true;
+	ResetMouseCaptureState();
 	InitMouseWithCursor (ClientCfg.HardwareCursor && !StereoDisplayAttached); // the return value of enableLowLevelMouse() has already been tested at startup
 
 	// Re-initialise the keyboard, now in low-level mode, if required
@@ -1449,6 +1452,9 @@ void initMainLoop()
 
 	// enable/disable bloom config interface
 	initBloomConfigUI();
+
+	// enable/disable GPU skinning config interface
+	initGPUSkinningConfigUI();
 
 	// popup to offer hardware cursor activation
 	initHardwareCursor();
@@ -1717,5 +1723,22 @@ void initBloomConfigUI()
 	{
 		if(group)
 			group->setDefaultContextHelp(std::string());
+	}
+}
+
+// ***************************************************************************
+void initGPUSkinningConfigUI()
+{
+	bool supported = Driver->supportGPUSkinning();
+
+	CCtrlBaseButton *button = dynamic_cast<CCtrlBaseButton *>(
+		CWidgetManager::getInstance()->getElementFromId(
+			"ui:interface:game_config:content:char:gpu_skinning:c"));
+	if (button)
+		button->setFrozen(!supported);
+
+	if (!supported)
+	{
+		ClientCfg.writeBool("GPUSkinning", false);
 	}
 }

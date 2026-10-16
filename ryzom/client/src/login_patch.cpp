@@ -485,6 +485,10 @@ void CPatchManager::getInfoToDisp(SPatchInfo &piOut)
 			for (uint32 j = 0; j < rFTP.PatcheSizes.size(); ++j)
 				nTotalPatchesSize += rFTP.PatcheSizes[j];
 
+			// Use LZMA size if available and smaller than patch chain
+			if (rFTP.SZFileSize != 0 && rFTP.SZFileSize < nTotalPatchesSize)
+				nTotalPatchesSize = rFTP.SZFileSize;
+
 			SPatchInfo::SCat c;
 			c.Name = sCatName;
 			c.Size = nTotalPatchesSize;

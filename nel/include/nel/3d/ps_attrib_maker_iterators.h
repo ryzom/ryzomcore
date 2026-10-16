@@ -19,11 +19,14 @@
 
 #include "nel/3d/ps_attrib.h"
 #include "nel/3d/ps_iterator.h"
+#include "nel/misc/wang_hash.h"
 
 
 
 namespace NL3D
 {
+
+	using NLMISC::lowbias32;
 
 	/** We define a set of iterator object that can advance with a fixed point step in the source container
 	  * We have 2 version for each iterator : iterators that advance with a step of 1, and iterators that advance
@@ -52,15 +55,26 @@ namespace NL3D
 		CVectNormIterator(const TBaseIter &it) : CPSBaseIterator<TBaseIter>(it) {}
 	};
 
-	/** This special iterator return random values every time it is read
+	/** This iterator returns deterministic pseudo-random values based on a seed
+	 *  and counter, using the lowbias32 integer hash. This ensures identical
+	 *  values when rendering the same frame multiple times (e.g. stereo).
 	 *  It is for private use only, and it has not all the functionnalities of an iterator.
 	 */
 
 	struct CRandomIterator
 	{
-		GET_INLINE float get() const { return float(rand() * (1 / double(RAND_MAX))); } // this may be optimized with a table...
-		void  advance() {}
-		void  advance(uint /* quantity */) {}
+		uint32 _Seed;
+		uint32 _Counter;
+
+		CRandomIterator(uint32 seed, uint32 startIndex)
+			: _Seed(seed), _Counter(startIndex) {}
+
+		GET_INLINE float get() const
+		{
+			return float(lowbias32(_Seed ^ _Counter)) * (1.0f / 4294967295.0f);
+		}
+		void  advance() { ++_Counter; }
+		void  advance(uint quantity) { _Counter += quantity; }
 	};
 
 	/// this iterator just return the same value

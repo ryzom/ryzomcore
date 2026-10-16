@@ -612,8 +612,8 @@ struct CEntityIdHashMapTraits
 		}
 		else
 		{
-			uint32 hash32a = NLMISC::wangHash((uint32)(hash64 & 0xFFFFFFFF));
-			uint32 hash32b = NLMISC::wangHash((uint32)(hash64 >> 32));
+			uint32 hash32a = NLMISC::lowbias32((uint32)(hash64 & 0xFFFFFFFF));
+			uint32 hash32b = NLMISC::lowbias32((uint32)(hash64 >> 32));
 			return hash32a ^ hash32b;
 		}
 	}

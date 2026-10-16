@@ -33,6 +33,8 @@
 	}
 	else
 	{
+		$file = mysql_real_escape_string($file);
+		$topic = mysql_real_escape_string($topic);
 		$view = true;
 		if ($edit)
 		{
@@ -60,7 +62,8 @@
 		else if ($update)
 		{
 			mysql_query("DELETE FROM help_topic WHERE file='$file' AND topic='$topic'");
-			mysql_query("INSERT INTO help_topic SET file='$file', topic='$topic', help_body='$help_body'");
+			$help_body_escaped = mysql_real_escape_string($help_body);
+			mysql_query("INSERT INTO help_topic SET file='$file', topic='$topic', help_body='$help_body_escaped'");
 		}
 
 		if ($view)

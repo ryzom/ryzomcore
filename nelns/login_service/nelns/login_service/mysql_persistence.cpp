@@ -36,7 +36,7 @@ pair<optional<LoginUserProjection>, string> CMysqlPersistence::findUserByLogin(c
 	CMysqlResult result;
 	MYSQL_ROW row;
 	sint32 nbrow;
-	string reason = sqlQuery("select uid, password, state from user where Login='" + login + "'", nbrow, row, result);
+	string reason = sqlQuery("select uid, password, state from user where Login='" + sqlEscape(login) + "'", nbrow, row, result);
 
 	if (!reason.empty())
 	{
@@ -54,9 +54,9 @@ pair<optional<LoginUserProjection>, string> CMysqlPersistence::findUserByLogin(c
 	}
 
 	LoginUserProjection user {
-		.uid = -1,
-		.password = row[1],
-		.state = row[2]
+		-1,
+		row[1],
+		row[2]
 	};
 	NLMISC::fromString(row[0], user.uid);
 
@@ -65,7 +65,7 @@ pair<optional<LoginUserProjection>, string> CMysqlPersistence::findUserByLogin(c
 
 string CMysqlPersistence::authorizeUser(sint32 uid, const NLNET::CLoginCookie &cookie)
 {
-	return sqlQuery("update user set state='Authorized', Cookie='" + cookie.setToString() + "' where UId=" + toString(uid));
+	return sqlQuery("update user set state='Authorized', Cookie='" + sqlEscape(cookie.setToString()) + "' where UId=" + toString(uid));
 }
 
 pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsByApplication(const string &application)
@@ -74,7 +74,7 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 	MYSQL_ROW row;
 	sint32 nbrow;
 	std::vector<OnlineShardProjection> shards;
-	string reason = sqlQuery("select shardid, name, nbplayers from shard where Online>0 and ClientApplication='" + application + "'", nbrow, row, result);
+	string reason = sqlQuery("select shardid, name, nbplayers from shard where Online>0 and ClientApplication='" + sqlEscape(application) + "'", nbrow, row, result);
 	if (!reason.empty())
 	{
 		return std::make_pair(shards, reason);
@@ -86,9 +86,9 @@ pair<vector<OnlineShardProjection>, string> CMysqlPersistence::findOnlineShardsB
 		// serial the name of the shard
 
 		shards.push_back({
-		    .sid = (static_cast<uint32>(atoi(row[0]))),
-		    .name = (ucstring::makeFromUtf8(row[1])),
-		    .nbplayers = (static_cast<uint8>(atoi(row[2]))),
+		    static_cast<uint32>(atoi(row[0])),
+		    ucstring::makeFromUtf8(row[1]),
+		    static_cast<uint8>(atoi(row[2])),
 		});
 		row = mysql_fetch_row(result);
 	}
@@ -101,7 +101,7 @@ pair<optional<LoginUserProjection>, string> CMysqlPersistence::createUser(const 
 	CMysqlResult result;
 	MYSQL_ROW row;
 	sint32 nbrow;
-	string reason = sqlQuery("insert into user (Login, Password) values ('" + login + "', '" + cpassword + "')", nbrow, row, result);
+	string reason = sqlQuery("insert into user (Login, Password) values ('" + sqlEscape(login) + "', '" + sqlEscape(cpassword) + "')", nbrow, row, result);
 
 	if (!reason.empty())
 	{
@@ -130,10 +130,10 @@ pair<vector<AuthorizedUserProjection>, string> CMysqlPersistence::findAuthorized
 		cookie.setFromString(row[1]);
 
 		users.push_back({
-		    .uid = row[0],
-		    .cookie = cookie,
-		    .privilege = row[2],
-		    .extendedPrivilege = row[3],
+		    row[0],
+		    cookie,
+		    row[2],
+		    row[3],
 		});
 		row = mysql_fetch_row(result);
 	}
@@ -163,7 +163,7 @@ string CMysqlPersistence::logoutUserById(const string& uid) {
 }
 
 string CMysqlPersistence::logoutUserByCookie(const CLoginCookie& cookie) {
-	return sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where Cookie='" + cookie.setToString() + "'");
+	return sqlQuery("update user set state='Offline', ShardId=-1, Cookie='' where Cookie='" + sqlEscape(cookie.setToString()) + "'");
 }
 
 pair<optional<string>, string> CMysqlPersistence::findUserLoginById(const string& uid) {
@@ -203,9 +203,9 @@ pair<vector<NotOfflineUserProjection>, string> CMysqlPersistence::findNotOffline
 		cookie.setFromString(row[2]);
 
 		users.push_back({
-			.uid = row[0],
-			.state = row[1],
-			.cookie = cookie
+			row[0],
+			row[1],
+			cookie
 		});
 		row = mysql_fetch_row(result);
 	}

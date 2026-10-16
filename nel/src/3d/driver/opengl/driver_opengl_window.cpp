@@ -3269,6 +3269,16 @@ bool CDriverGL::isActive()
 }
 
 // ***************************************************************************
+bool CDriverGL::supportMonitorColorProperties () const
+{
+#ifdef NL_OS_WINDOWS
+	return _NeedToRestoreGammaRamp;
+#else
+	return false;
+#endif
+}
+
+// ***************************************************************************
 bool CDriverGL::setMonitorColorProperties (const CMonitorColorProperties &properties)
 {
 	H_AUTO_OGL(CDriverGL_setMonitorColorProperties )

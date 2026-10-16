@@ -606,7 +606,7 @@ bool		CVisualCollisionEntity::getSurfaceInfo(const CVector &pos, CSurfaceInfo &s
 void		CVisualCollisionEntity::displayDebugGrid(IDriver &drv) const
 {
 	// static to not reallocate each frame
-	static	CMaterial	mat;
+	static	CMaterial	mat; // STATIC GPU RESOURCE: Blocks multiple driver instances
 	static	bool		inited= false;
 	if(!inited)
 	{

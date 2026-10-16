@@ -351,7 +351,7 @@ void CComLuaModule::callTranslateFeatures(CObject* scenario)
 }
 
 
-CObject* CComLuaModule::translateFeatures(CObject* hlScenario, std::string& errorMsg) const
+CObject::TSmartPtr CComLuaModule::translateFeatures(CObject* hlScenario, std::string& errorMsg) const
 {
 	//H_AUTO(R2_CComLuaModule_translateFeatures)
 	if (!hlScenario)
@@ -368,7 +368,7 @@ CObject* CComLuaModule::translateFeatures(CObject* hlScenario, std::string& erro
 		errorMsg = NLMISC::toString( "error running function 'doTranslateFeatures': %s", lua_tostring(_LuaState, -1));
 		return 0;
 	}
-	CObject* ret = getObjectFromLua(_LuaState, -1);
+	CObject::TSmartPtr ret = getObjectFromLua(_LuaState, -1);
 	return ret;
 }
 
@@ -471,7 +471,7 @@ sint CComLuaModule::luaAddPaletteElement(lua_State* state)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	std::string key( lua_tostring(state, 1) );
-	CObject* object = this2->getObjectFromLua(state, 2);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 2);
 	this2->_Client->addPaletteElement(key, object);
 	return  0;
 }
@@ -486,11 +486,10 @@ sint CComLuaModule::luaGetPropertyValue(lua_State* state)
 	luaL_checktype(state, 2, LUA_TSTRING);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	std::string attrName( lua_tostring(state, 2) );
 	CObject* toRet = this2->_Client->getPropertyValue(object, attrName);
 	this2->setObjectToLua(state, toRet);
-	delete object;
 	return  1;
 }
 
@@ -623,7 +622,7 @@ sint CComLuaModule::luaRegisterGenerator(lua_State* state)
 	luaL_checktype(state, 1, LUA_TTABLE);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
  	this2->_Client->registerGenerator(object);
 	return  0;
 }
@@ -644,10 +643,9 @@ sint CComLuaModule::luaRequestUpdateRtScenario(lua_State* state)
 	//H_AUTO(R2_CComLuaModule_luaRequestUpdateRtScenario)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	nlassert(object);
 	this2->_Client->requestUpdateRtScenario(object);
-	delete object;	// AJM
 	return 0;
 }
 
@@ -658,11 +656,10 @@ sint CComLuaModule::luaRequestCreateScenario(lua_State* state)
 	luaL_checktype(state, 1, LUA_TTABLE);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	nlassert(object);
 	this2->_Client->getActionHistoric().clear();
 	this2->_Client->requestCreateScenario(object);
-	delete object;
 	return 0;
 }
 
@@ -686,7 +683,7 @@ sint CComLuaModule::luaPrint(lua_State* state)
 //	luaL_checktype(state, 1, LUA_TSTRING);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	if(!object)
 	{
 		nlinfo("nil");
@@ -707,7 +704,6 @@ sint CComLuaModule::luaPrint(lua_State* state)
 	for (; first != last ; ++first) { nlinfo("%s", lines[first].c_str()); }
 
 	//this2->_Client->requestCreateScenario(object);
-	delete object;
 	return 0;
 }
 
@@ -760,13 +756,12 @@ sint CComLuaModule::requestInsertNode(lua_State* state, bool isGhost)
 	std::string attrName(lua_tostring(state, 2));
 	sint position(static_cast<sint>(lua_tointeger(state, 3)));
 	std::string key(lua_tostring(state, 4));
-	CObject* value = getObjectFromLua(state, 5);
+	CObject::TSmartPtr value = getObjectFromLua(state, 5);
 	value->setGhost(isGhost);
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->requestInsertNode(
 		instanceId, attrName, position, key, value);
-	delete value;
 	return 0;
 }
 
@@ -796,7 +791,7 @@ sint CComLuaModule::requestSetNode(lua_State* state, bool isGhost)
 
 	std::string instanceId(lua_tostring(state, 1));
 	std::string attrName(lua_tostring(state, 2));
-	CObject* value = getObjectFromLua(state, 3);
+	CObject::TSmartPtr value = getObjectFromLua(state, 3);
 
 	if (value == NULL)
 	{
@@ -807,7 +802,6 @@ sint CComLuaModule::requestSetNode(lua_State* state, bool isGhost)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2);
 	this2->_Client->requestSetNode(	instanceId, attrName, value);
-	delete value;
 	return 0;
 }
 
@@ -1175,7 +1169,7 @@ void CComLuaModule::setObjectToLua(lua_State* state, CObject* object)
 }
 
 
-CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
+CObject::TSmartPtr CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 {
 	//H_AUTO(R2_CComLuaModule_getObjectFromLua)
 	lua_pushvalue(state, idx);
@@ -1291,7 +1285,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 				{
 					key = lua_tostring(state, -2);
 				}
-				CObject* object = getObjectFromLua(state, -1);
+				CObject::TSmartPtr object = getObjectFromLua(state, -1);
 				if (object)
 				{
 					table->add(key, object);
@@ -1313,7 +1307,7 @@ CObject* CComLuaModule::getObjectFromLua(lua_State* state, sint idx)
 }
 
 
-CObject* CComLuaModule::loadLocal(const std::string& filename, const CScenarioValidator::TValues& values)
+CObject::TSmartPtr CComLuaModule::loadLocal(const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
 	std::string name;
@@ -1324,7 +1318,7 @@ CObject* CComLuaModule::loadLocal(const std::string& filename, const CScenarioVa
 
 	//H_AUTO(R2_CComLuaModule_loadLocal)
 	if (filename.empty()){ return 0; }
-	CObject* object = NULL;
+	CObject::TSmartPtr object = NULL;
 #if defined(LUA_VERSION_NUM) && LUA_VERSION_NUM >= 501
 	if (luaL_dofile(_LuaState, filename.c_str()) == 0)
 #else
@@ -1375,7 +1369,7 @@ bool CComLuaModule::loadUserComponent(const std::string& filename)
 
 
 
-CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
+CObject::TSmartPtr CComLuaModule::loadFromBuffer(const std::string& data, const std::string& filename, const CScenarioValidator::TValues& values)
 {
 	CScenarioValidator::TValues::const_iterator first(values.begin()), last(values.end());
 	std::string name;
@@ -1391,7 +1385,7 @@ CObject* CComLuaModule::loadFromBuffer(const std::string& data, const std::strin
 		COFile testNico("test_nico.lua");
 		testNico.serialBuffer(const_cast<uint8 * >((const uint8 *) &data[0]), (uint)data.size());
 	}
-	CObject* object = NULL;
+	CObject::TSmartPtr object = NULL;
 	// TMP TMP
 	CLuaState &ls = getEditor().getLua();
 	try
@@ -1440,7 +1434,7 @@ sint CComLuaModule::luaUpdateScenario(lua_State* state)
 	//H_AUTO(R2_CComLuaModule_luaUpdateScenario)
 	luaL_checktype(state, 1, LUA_TTABLE);
 
-	CObject* object = getObjectFromLua(state);
+	CObject::TSmartPtr object = getObjectFromLua(state);
 	lua_pushliteral(state, "tmp1");
 	lua_pushliteral(state, "tmp1");
 	lua_pushliteral(state, "tmp1");
@@ -1453,7 +1447,6 @@ sint CComLuaModule::luaUpdateScenario(lua_State* state)
 	CComLuaModule* this2 = getInstance(state);
 	nlassert(this2->_LuaState == state);
 
-	delete object;	// AJM
 	return 0;
 }
 
@@ -1841,7 +1834,7 @@ sint CComLuaModule::luaGetIslandsLocation(lua_State* state)
 sint CComLuaModule::luaObjectToLua(lua_State* state)
 {
 	//H_AUTO(R2_CComLuaModule_luaObjectToLua)
-	CObject* ret = getObjectFromLua(state, -1);
+	CObject::TSmartPtr ret = getObjectFromLua(state, -1);
 	if(!ret)
 	{
 		nlwarning("objectToLua : not an object");
@@ -2250,7 +2243,7 @@ sint CComLuaModule::luaUpdateScenarioAck(lua_State* state)
 	bool ok(lua_toboolean(state, 1) != 0.0);
 	std::string  errMsg = lua_tostring(state, 3);
 
-	CObject* object = this2->getObjectFromLua(state, 2);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 2);
 	std::string str;
 	if (object)
 	{
@@ -2396,7 +2389,7 @@ sint CComLuaModule::luaVerifyRtScenario(lua_State* state)
 	luaL_checktype(state, 1, LUA_TTABLE);
 
 
-	CObject* object = this2->getObjectFromLua(state, 1);
+	CObject::TSmartPtr object = this2->getObjectFromLua(state, 1);
 	CVerfiyRightRtScenarioError* err;
 
 
