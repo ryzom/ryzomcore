@@ -28,6 +28,8 @@
 #define RYZOM_ARCH "x64"
 #elif defined(HAVE_X86)
 #define RYZOM_ARCH "x86"
+#elif defined(HAVE_AARCH64)
+#define RYZOM_ARCH "aarch64"
 #elif defined(HAVE_ARM)
 #define RYZOM_ARCH "arm"
 #else
