@@ -437,6 +437,11 @@ TTicks CTime::getPerformanceTime ()
 	// RDTSC - Read time-stamp counter into EDX:EAX.
 	__asm__ volatile (".byte 0x0f, 0x31" : "=A" (x));
 	return x;
+#elif defined(HAVE_AARCH64)
+	uint64 x;
+	// reads Counter-timer Virtual Count Register
+	__asm__ volatile ("mrs %0, cntvct_el0" : "=r" (x));
+	return x;
 #elif defined(__EMSCRIPTEN__)
 	struct timespec ts;
 	clock_gettime(CLOCK_MONOTONIC, &ts);
