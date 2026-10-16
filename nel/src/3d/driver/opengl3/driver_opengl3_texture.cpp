@@ -64,6 +64,7 @@ CTextureDrvInfosGL3::CTextureDrvInfosGL3(IDriver *drv, ItTexDrvInfoPtrMap it, CD
 	_Driver= drvGl;
 
 	TextureMode = isRectangleTexture?GL_TEXTURE_RECTANGLE:GL_TEXTURE_2D;
+	SwizzleFormat = ITexture::Auto;
 
 	FBOId = 0;
 
@@ -268,6 +269,24 @@ static inline CTextureDrvInfosGL3* getTextureGl(ITexture& tex)
 	CTextureDrvInfosGL3*	gltex;
 	gltex= (CTextureDrvInfosGL3*)(ITextureDrvInfos*)(tex.TextureDrvShare->DrvTexture);
 	return gltex;
+}
+
+// ***************************************************************************
+// Upload format with Auto resolved from the bitmap pixel format: the part of
+// getGlTextureFormat that picks the one, two or four channel path.
+static ITexture::TUploadFormat getEffectiveUploadFormat(ITexture &tex)
+{
+	ITexture::TUploadFormat texfmt = tex.getUploadFormat();
+	if (texfmt != ITexture::Auto)
+		return texfmt;
+	switch (tex.getPixelFormat())
+	{
+		case CBitmap::Luminance: return ITexture::Luminance;
+		case CBitmap::Alpha: return ITexture::Alpha;
+		case CBitmap::AlphaLuminance: return ITexture::AlphaLuminance;
+		case CBitmap::DsDt: return ITexture::DsDt;
+		default: return ITexture::RGBA8888;
+	}
 }
 
 // ***************************************************************************
@@ -653,7 +672,10 @@ void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 		if (_AnisotropicFilter > 1.f && gltext->MinFilter > ITexture::NearestMipMapLinear)
 			glTexParameteri(gltext->TextureMode, GL_TEXTURE_MAX_ANISOTROPY_EXT, _AnisotropicFilter);
 	}
-	switch (tex.getUploadFormat())
+	// The swizzle gives GL_R8 and GL_RG8 textures their legacy luminance and alpha
+	// semantics. A file texture uploads as Auto, so use the format resolved at upload.
+	if (!tex.isTextureCube())
+	switch (gltext->SwizzleFormat != ITexture::Auto ? gltext->SwizzleFormat : tex.getUploadFormat())
 	{
 		case ITexture::Luminance:
 		case ITexture::Alpha:
@@ -678,6 +700,15 @@ void CDriverGL3::setupTextureBasicParameters(ITexture &tex)
 		{
 #ifndef USE_OPENGLES3
 			static const GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_RED, GL_GREEN };
+			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+#endif
+			break;
+		}
+		default:
+		{
+#ifndef USE_OPENGLES3
+			// Reset in case the texture object was reused with another format
+			static const GLint swizzleMask[] = { GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA };
 			glTexParameteriv(gltext->TextureMode, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
 #endif
 			break;
@@ -868,6 +899,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 						pTInTC->flipV();
 
 					// Get the correct texture format from texture...
+					gltext->SwizzleFormat = getEffectiveUploadFormat(*pTInTC);
 					GLint	glfmt= getGlTextureFormat(*pTInTC, gltext->Compressed);
 					GLint	glSrcFmt= getGlSrcTextureFormat(*pTInTC, glfmt);
 					GLenum  glSrcType= getGlSrcTextureComponentType(*pTInTC,glSrcFmt);
@@ -918,6 +950,7 @@ bool CDriverGL3::setupTextureEx (ITexture& tex, bool bUpload, bool &bAllUploaded
 				if (tex.getSize()>0)
 				{
 					// Get the correct texture format from texture...
+					gltext->SwizzleFormat = getEffectiveUploadFormat(tex);
 					GLint	glfmt= getGlTextureFormat(tex, gltext->Compressed);
 					GLint	glSrcFmt= getGlSrcTextureFormat(tex, glfmt);
 					GLenum  glSrcType= getGlSrcTextureComponentType(tex,glSrcFmt);
