@@ -41,12 +41,12 @@ config_vars["SHARD_WEB"] = "http://"+config_vars["SHARD_HOSTNAME"]+":55555/"
 config_vars["CHAT"] = "- deprecated -"
 config_vars["CHAT_DB"] = "- deprecated -"
 
-        for f in os.listdir(templatepath):
+for f in os.listdir(templatepath):
 	with open(templatepath+f, "r", encoding="iso-8859-1") as content:
-                if content:
-                    content = content.read()
+		if content:
+			content = content.read()
 			for k, v in config_vars.items():
 				content = content.replace("#"+k+"#", v)
 			with open(finalpath+f, "w") as fd:
-                        fd.write(content)
-            print(f)
+						fd.write(content)
+			print(f)

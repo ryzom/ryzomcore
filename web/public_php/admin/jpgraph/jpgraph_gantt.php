@@ -3460,7 +3460,7 @@ class TextPropertyBelow extends TextProperty {
 	parent::TextProperty($aTxt);
     }
 
-    function GetColWidth(&$aImg,$margin) {
+    function GetColWidth(&$aImg,$margin=0) {
 	// Since we are not stroking the title in the columns
 	// but rather under the graph we want this to return 0.
 	return array(0);

@@ -408,9 +408,9 @@ class ryDB {
 			$type = $prop[0];
 			$check = $prop[1];
 			$name = $prop[2];
-			if ($type{0} == '#')
+			if ($type[0] == '#')
 			$type = substr($type, 1);
-			if (($type{0} == '>') or ($type == 'id'))
+			if (($type[0] == '>') or ($type == 'id'))
 			continue;
 			switch ($type) {
 			case 'trad':
