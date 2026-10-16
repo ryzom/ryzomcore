@@ -23,6 +23,7 @@ import re
 import sys
 import json
 import deepl
+import uuid
 
 from time import sleep, time
 from ryzom_service import RyzomService, RyzomMessage, printer
@@ -35,9 +36,6 @@ class Translator(RyzomService):
 		self.version = "1.2"
 		self.scriptfile = __file__
 		self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
-		if len(sys.argv) < 2:
-			print("Usage: translator.py <lang>")
-			sys.exit(1)
 		self.dst_lang = sys.argv[1]
 		self.stats = {"messages": 0, "translated_messages": 0}
 		self.last_deep_error = ""
@@ -74,29 +72,59 @@ class Translator(RyzomService):
 		return final_text
 
 	def translateWithDeepl(self, m):
-		if not m.text:
-			return None
-		text = self.escapeImages(m.text)
-		text = self.escapeQuotes(text, 8)
+		client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
+		marker_prefix = "RTZMENTION"+uuid.uuid4().hex
 		dst_lang = self.dst_lang.upper()
-		try:
-			client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
+		marker_count = 0
+		def translatePart(value):
+			protected_mentions = []
+			def protectMention(match):
+				nonlocal marker_count
+				marker = marker_prefix+str(marker_count)+"END"
+				marker_count += 1
+				protected_mentions.append((marker, match.group(2)))
+				return match.group(1)+"<x>"+marker+"</x>"
+			text = re.sub(r"(^|[ \t\n\"'\[(,:;!?])(@[A-Za-z0-9_.()\-\x80-\U0010ffff]+)",
+				protectMention, value)
+			text = self.escapeQuotes(self.escapeImages(text), 8)
 			result = client.translate_text(
 				text,
-				source_lang =  m.source_lang,
+				source_lang = m.source_lang,
 				target_lang = "EN-GB" if dst_lang == "EN" else dst_lang,
 				model_type = "quality_optimized",
 				tag_handling = "xml",
 				ignore_tags = "x",
 				)
-		except Exception as e:
+			translated = result.text.replace("<x>", "").replace("</x>", "")
+			if any(translated.count(marker) != 1 for marker, token in protected_mentions):
+				self.last_deep_error = "DeepL did not preserve a protected mention"
+				return (None, 0)
+			for marker, token in protected_mentions:
+				translated = translated.replace(marker, token, 1)
+			return (translated, result.billed_characters)
+
+		try:
+			parts = m.chat.get("parts") if m.chat else None
+			if parts:
+				if "".join(part[1] for part in parts) != m.text:
+					return (None, 0)
+				translated_parts = []
+				visible_parts = []
+				billed = 0
+				for kind, value in parts:
+					translated, characters = translatePart(value) if kind == "text" and value else ("", 0)
+					if translated is None:
+						return (None, 0)
+					translated_parts.append(translated)
+					visible_parts.append(value if kind == "reference" else translated)
+					billed += characters
+				m.chat["translation_parts"] = translated_parts
+				return ("".join(visible_parts), billed)
+			return translatePart(m.text)
+		except deepl.DeepLException as e:
 			self.last_deep_error = repr(e)
 			print("DeepL Error..."+repr(e))
-			return None
-		if not result or not getattr(result, "text", None):
-			return None
-		final_text = result.text.replace("<x>", "").replace("</x>", "")
-		return (final_text,  getattr(result, "billed_characters", 0))
+			return (None, 0)
 
 
 	def checkMessages(self):
@@ -107,9 +135,8 @@ class Translator(RyzomService):
 				self.stats["messages"] += 1
 				if message.translated_lang == "WK" and message.channel != "player":
 					if message.source_lang != self.dst_lang:
-						if message.langs == "*" or self.dst_lang in (message.langs or "").split("-"):
-							translated = self.translateWithDeepl(message)
-							translation = translated[0] if translated else None
+						if message.langs == "*" or self.dst_lang in message.langs.split("-"):
+							translation, billed_characters = self.translateWithDeepl(message)
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"

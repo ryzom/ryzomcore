@@ -103,7 +103,7 @@
 
 		$data = array();
 
-		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". $group_id ." ORDER BY user_name ASC";
+		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". intval($group_id) ." ORDER BY user_name ASC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -175,7 +175,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_id=". $user_id;
+		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_id=". intval($user_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -202,7 +202,7 @@
 			$sql  = "INSERT INTO ". NELDB_USER_TABLE;
 			$sql .= " (`user_name`,`user_password`,`user_group_id`,`user_created`,`user_active`)";
 			$sql .= " VALUES ";
-			$sql .= " ('". $user_name ."','". md5($user_password) ."','". $user_group ."','". time() ."','". $user_active ."')";
+			$sql .= " ('". $db->sql_escape_string($user_name) ."','". md5($user_password) ."','". intval($user_group) ."','". time() ."','". intval($user_active) ."')";
 			$db->sql_query($sql);
 			return "";
 		}
@@ -216,7 +216,7 @@
 
 		$exists = false;
 
-		$sql = "SELECT user_id, user_name FROM ". NELDB_USER_TABLE ." WHERE user_name='". $user_name ."'";
+		$sql = "SELECT user_id, user_name FROM ". NELDB_USER_TABLE ." WHERE user_name='". $db->sql_escape_string($user_name) ."'";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -232,7 +232,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_USER_TABLE ." WHERE user_id=". $user_id;
+		$sql = "DELETE FROM ". NELDB_USER_TABLE ." WHERE user_id=". intval($user_id);
 		$db->sql_query($sql);
 	}
 
@@ -246,7 +246,7 @@
 		if ($user_name == "") 						return "/!\ Error: user name is empty!";
 		if (!ereg("^([[:alnum:]]+)$",$user_name))	return "/!\ Error: invalid user name, only alpha numerical characters allowed!";
 
-		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_name='". $user_name ."' AND user_id<>". $user_id;
+		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_name='". $db->sql_escape_string($user_name) ."' AND user_id<>". intval($user_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -258,7 +258,7 @@
 		$sql_ext = "";
 		if ($user_password != '')	$sql_ext = ",user_password='". md5($user_password) ."'";
 
-		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_name='". $user_name ."',user_group_id='". $user_group ."',user_active='". $user_active ."'". $sql_ext ." WHERE user_id=". $user_id;
+		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_name='". $db->sql_escape_string($user_name) ."',user_group_id='". intval($user_group) ."',user_active='". intval($user_active) ."'". $sql_ext ." WHERE user_id=". intval($user_id);
 		$db->sql_query($sql);
 
 		return "";
@@ -270,7 +270,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". $group_id;
+		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -301,7 +301,7 @@
 			$sql  = "INSERT INTO ". NELDB_GROUP_TABLE;
 			$sql .= " (`group_name`,`group_level`,`group_default`,`group_active`) ";
 			$sql .= " VALUES ";
-			$sql .= " ('". $group_name ."',". $group_level .",". $group_default .",". $group_active .")";
+			$sql .= " ('". $db->sql_escape_string($group_name) ."',". intval($group_level) .",". intval($group_default) .",". intval($group_active) .")";
 			$db->sql_query($sql);
 
 			return "";
@@ -316,7 +316,7 @@
 
 		$exists = false;
 
-		$sql = "SELECT group_id, group_name FROM ". NELDB_GROUP_TABLE ." WHERE group_name='". $group_name ."'";
+		$sql = "SELECT group_id, group_name FROM ". NELDB_GROUP_TABLE ." WHERE group_name='". $db->sql_escape_string($group_name) ."'";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -333,7 +333,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". $group_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". intval($group_id);
 		$db->sql_query($sql);
 	}
 
@@ -346,7 +346,7 @@
 		if ($group_name == "")						return "/!\ Error: group name is empty!";
 		if (!ereg("^([[:alnum:]]+)$",$group_name))	return "/!\ Error: invalid group name, only alpha numerical characters allowed!";
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_name='". $group_name ."' AND group_id<>". $group_id;
+		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_name='". $db->sql_escape_string($group_name) ."' AND group_id<>". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -361,7 +361,7 @@
 			$db->sql_query($sql);
 		}
 
-		$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_name='". $group_name ."',group_level='". $group_level ."',group_default='". $group_default ."',group_active='". $group_active ."' WHERE group_id=". $group_id;
+		$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_name='". $db->sql_escape_string($group_name) ."',group_level='". intval($group_level) ."',group_default='". intval($group_default) ."',group_active='". intval($group_active) ."' WHERE group_id=". intval($group_id);
 		$db->sql_query($sql);
 
 		return "";
@@ -371,7 +371,7 @@
 	{
 		global $db;
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". $group_id;
+		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -380,7 +380,7 @@
 
 				if ($row['group_default_domain_id'] != $domain_id)
 				{
-					$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_default_domain_id=". $domain_id .",group_default_shard_id=0 WHERE group_id=". $group_id;
+					$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_default_domain_id=". intval($domain_id) .",group_default_shard_id=0 WHERE group_id=". intval($group_id);
 					$db->sql_query($sql);
 				}
 			}
@@ -397,12 +397,12 @@
 	{
 		global $db;
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". $group_id;
+		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
 			{
-				$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_default_shard_id=". $shard_id ." WHERE group_id=". $group_id;
+				$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_default_shard_id=". intval($shard_id) ." WHERE group_id=". intval($group_id);
 				$db->sql_query($sql);
 			}
 			else
@@ -418,12 +418,12 @@
 	{
 		global $db;
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". $group_id;
+		$sql = "SELECT * FROM ". NELDB_GROUP_TABLE ." WHERE group_id=". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
 			{
-				$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_default_application_id=". $application_id ." WHERE group_id=". $group_id;
+				$sql = "UPDATE ". NELDB_GROUP_TABLE ." SET group_default_application_id=". intval($application_id) ." WHERE group_id=". intval($group_id);
 				$db->sql_query($sql);
 			}
 			else
@@ -460,7 +460,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_APPLICATION_TABLE ." WHERE application_id=". $application_id;
+		$sql = "SELECT * FROM ". NELDB_APPLICATION_TABLE ." WHERE application_id=". intval($application_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -485,7 +485,7 @@
 			$sql  = "INSERT INTO ". NELDB_APPLICATION_TABLE;
 			$sql .= " (`application_name`,`application_uri`,`application_restriction`,`application_order`,`application_visible`,`application_icon`) ";
 			$sql .= " VALUES ";
-			$sql .= " ('". $application_name ."','". $application_uri ."','". $application_restriction ."','". $application_order ."','". $application_visible ."','". $application_icon ."')";
+			$sql .= " ('". $db->sql_escape_string($application_name) ."','". $db->sql_escape_string($application_uri) ."','". $db->sql_escape_string($application_restriction) ."','". intval($application_order) ."','". intval($application_visible) ."','". $db->sql_escape_string($application_icon) ."')";
 			$db->sql_query($sql);
 
 			return "";
@@ -500,7 +500,7 @@
 
 		$exists = false;
 
-		$sql = "SELECT application_id, application_name FROM ". NELDB_APPLICATION_TABLE ." WHERE application_name='". $application_name ."'";
+		$sql = "SELECT application_id, application_name FROM ". NELDB_APPLICATION_TABLE ." WHERE application_name='". $db->sql_escape_string($application_name) ."'";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -516,13 +516,13 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_USER_APPLICATION_TABLE ." WHERE user_application_application_id=". $application_id;
+		$sql = "DELETE FROM ". NELDB_USER_APPLICATION_TABLE ." WHERE user_application_application_id=". intval($application_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_GROUP_APPLICATION_TABLE ." WHERE group_application_application_id=". $application_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_APPLICATION_TABLE ." WHERE group_application_application_id=". intval($application_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_APPLICATION_TABLE ." WHERE application_id=". $application_id;
+		$sql = "DELETE FROM ". NELDB_APPLICATION_TABLE ." WHERE application_id=". intval($application_id);
 		$db->sql_query($sql);
 	}
 
@@ -533,7 +533,7 @@
 		$application_name = trim($application_name);
 		if ($application_name == "")	return "/!\ Error: application name is empty!";
 
-		$sql = "SELECT * FROM ". NELDB_APPLICATION_TABLE ." WHERE application_name='". $application_name ."' AND application_id<>". $application_id;
+		$sql = "SELECT * FROM ". NELDB_APPLICATION_TABLE ." WHERE application_name='". $db->sql_escape_string($application_name) ."' AND application_id<>". intval($application_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -542,7 +542,7 @@
 			}
 		}
 
-		$sql = "UPDATE ". NELDB_APPLICATION_TABLE ." SET application_name='". $application_name ."',application_uri='". $application_uri ."',application_restriction='". $application_restriction ."',application_icon='". $application_icon ."',application_order='". $application_order ."',application_visible='". $application_visible ."' WHERE application_id=". $application_id;
+		$sql = "UPDATE ". NELDB_APPLICATION_TABLE ." SET application_name='". $db->sql_escape_string($application_name) ."',application_uri='". $db->sql_escape_string($application_uri) ."',application_restriction='". $db->sql_escape_string($application_restriction) ."',application_icon='". $db->sql_escape_string($application_icon) ."',application_order='". intval($application_order) ."',application_visible='". intval($application_visible) ."' WHERE application_id=". intval($application_id);
 		$db->sql_query($sql);
 
 		return "";
@@ -579,7 +579,7 @@
 			$sql  = "INSERT INTO ". NELDB_DOMAIN_TABLE;
 			$sql .= " (`domain_name`,`domain_application`,`domain_as_host`,`domain_as_port`,`domain_rrd_path`,`domain_las_admin_path`,`domain_las_local_path`,`domain_sql_string`,`domain_hd_check`,`domain_mfs_web`,`domain_cs_sql_string`) ";
 			$sql .= " VALUES ";
-			$sql .= " ('". $domain_name ."','". $domain_application ."','". $domain_as_host ."','". $domain_as_port ."','". $domain_rrd_path ."','". $domain_las_admin_path ."','". $domain_las_local_path ."','". $domain_sql_string ."',". $domain_hd_check .",'". $domain_mfs_web ."','". $domain_cs_sql_string ."') ";
+			$sql .= " ('". $db->sql_escape_string($domain_name) ."','". $db->sql_escape_string($domain_application) ."','". $db->sql_escape_string($domain_as_host) ."','". $db->sql_escape_string($domain_as_port) ."','". $db->sql_escape_string($domain_rrd_path) ."','". $db->sql_escape_string($domain_las_admin_path) ."','". $db->sql_escape_string($domain_las_local_path) ."','". $db->sql_escape_string($domain_sql_string) ."',". intval($domain_hd_check) .",'". $db->sql_escape_string($domain_mfs_web) ."','". $db->sql_escape_string($domain_cs_sql_string) ."') ";
 			$db->sql_query($sql);
 
 			return "";
@@ -594,7 +594,7 @@
 
 		$exists = false;
 
-		$sql = "SELECT domain_id, domain_name FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_name='". $domain_name ."'";
+		$sql = "SELECT domain_id, domain_name FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_name='". $db->sql_escape_string($domain_name) ."'";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -612,7 +612,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_id=". $domain_id;
+		$sql = "SELECT * FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_id=". intval($domain_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -628,22 +628,22 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE  ." WHERE user_shard_domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE  ." WHERE user_shard_domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_USER_DOMAIN_TABLE ." WHERE user_domain_domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_USER_DOMAIN_TABLE ." WHERE user_domain_domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE  ." WHERE group_shard_domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE  ." WHERE group_shard_domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_GROUP_DOMAIN_TABLE ." WHERE group_domain_domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_DOMAIN_TABLE ." WHERE group_domain_domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_SHARD_TABLE ." WHERE shard_domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_SHARD_TABLE ." WHERE shard_domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
 	}
@@ -656,7 +656,7 @@
 
 		if ($domain_name == "")	return "/!\ Error: domain name is empty!";
 
-		$sql = "SELECT * FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_name='". $domain_name ."' AND domain_id<>". $domain_id;
+		$sql = "SELECT * FROM ". NELDB_DOMAIN_TABLE ." WHERE domain_name='". $db->sql_escape_string($domain_name) ."' AND domain_id<>". intval($domain_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -665,7 +665,7 @@
 			}
 		}
 
-		$sql = "UPDATE ". NELDB_DOMAIN_TABLE ." SET domain_name='". $domain_name."',domain_application='". $domain_application ."',domain_as_host='". $domain_as_host ."',domain_as_port='". $domain_as_port ."',domain_rrd_path='". $domain_rrd_path ."',domain_las_admin_path='". $domain_las_admin_path ."',domain_las_local_path='". $domain_las_local_path ."',domain_sql_string='". $domain_sql_string ."',domain_hd_check=". $domain_hd_check .",domain_mfs_web='". $domain_mfs_web ."',domain_cs_sql_string='". $domain_cs_sql_string ."' WHERE domain_id=". $domain_id;
+		$sql = "UPDATE ". NELDB_DOMAIN_TABLE ." SET domain_name='". $db->sql_escape_string($domain_name)."',domain_application='". $db->sql_escape_string($domain_application) ."',domain_as_host='". $db->sql_escape_string($domain_as_host) ."',domain_as_port='". $db->sql_escape_string($domain_as_port) ."',domain_rrd_path='". $db->sql_escape_string($domain_rrd_path) ."',domain_las_admin_path='". $db->sql_escape_string($domain_las_admin_path) ."',domain_las_local_path='". $db->sql_escape_string($domain_las_local_path) ."',domain_sql_string='". $db->sql_escape_string($domain_sql_string) ."',domain_hd_check=". intval($domain_hd_check) .",domain_mfs_web='". $db->sql_escape_string($domain_mfs_web) ."',domain_cs_sql_string='". $db->sql_escape_string($domain_cs_sql_string) ."' WHERE domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 
 		return "";
@@ -705,7 +705,7 @@
 			$sql  = "INSERT INTO ". NELDB_SHARD_TABLE;
 			$sql .= " (`shard_name`,`shard_as_id`,`shard_domain_id`,`shard_lang`) ";
 			$sql .= " VALUES ";
-			$sql .= " ('". $shard_name ."','". $shard_as_id ."','". $shard_domain_id ."','". $shard_language ."') ";
+			$sql .= " ('". $db->sql_escape_string($shard_name) ."','". $db->sql_escape_string($shard_as_id) ."','". intval($shard_domain_id) ."','". $db->sql_escape_string($shard_language) ."') ";
 			$db->sql_query($sql);
 			return "";
 		//}
@@ -721,8 +721,8 @@
 
 		$exists = false;
 
-		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_as_id='". $shard_as_id ."'";
-		if ($except_id !== false)	$sql .= " AND shard_id<>". $except_id;
+		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_as_id='". $db->sql_escape_string($shard_as_id) ."'";
+		if ($except_id !== false)	$sql .= " AND shard_id<>". intval($except_id);
 
 		if ($result = $db->sql_query($sql))
 		{
@@ -741,7 +741,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_id=". $shard_id;
+		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_id=". intval($shard_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -757,13 +757,13 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_shard_id=". $shard_id;
+		$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_shard_id=". intval($shard_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE ." WHERE group_shard_shard_id=". $shard_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE ." WHERE group_shard_shard_id=". intval($shard_id);
 		$db->sql_query($sql);
 
-		$sql = "DELETE FROM ". NELDB_SHARD_TABLE ." WHERE shard_id=". $shard_id;
+		$sql = "DELETE FROM ". NELDB_SHARD_TABLE ." WHERE shard_id=". intval($shard_id);
 		$db->sql_query($sql);
 	}
 
@@ -780,7 +780,7 @@
 		//$shard_exists = tool_admin_shards_name_exist($shard_as_id, $shard_id);
 		//if (!$shard_exists)
 		//{
-			$sql = "UPDATE ". NELDB_SHARD_TABLE ." SET shard_name='". $shard_name ."',shard_as_id='". $shard_as_id ."',shard_domain_id='". $shard_domain_id ."',shard_lang='". $shard_language ."' WHERE shard_id=". $shard_id;
+			$sql = "UPDATE ". NELDB_SHARD_TABLE ." SET shard_name='". $db->sql_escape_string($shard_name) ."',shard_as_id='". $db->sql_escape_string($shard_as_id) ."',shard_domain_id='". intval($shard_domain_id) ."',shard_lang='". $db->sql_escape_string($shard_language) ."' WHERE shard_id=". intval($shard_id);
 			$db->sql_query($sql);
 
 			return "";
@@ -798,7 +798,7 @@
 		$user_domains	= tool_admin_users_domains_get_list($user_id, true);
 		$group_domains	= tool_admin_groups_domains_get_list($group_id, true);
 
-		$sql = "DELETE FROM ". NELDB_USER_DOMAIN_TABLE ." WHERE user_domain_user_id=". $user_id;
+		$sql = "DELETE FROM ". NELDB_USER_DOMAIN_TABLE ." WHERE user_domain_user_id=". intval($user_id);
 		$db->sql_query($sql);
 
 		if (is_array($domain_ids) and sizeof($domain_ids))
@@ -808,7 +808,7 @@
 			{
 				if (is_numeric($domain_id) && $domain_id > 0)
 				{
-					$sql = "INSERT INTO ". NELDB_USER_DOMAIN_TABLE ." (`user_domain_user_id`,`user_domain_domain_id`) VALUES ('". $user_id ."','". $domain_id ."')";
+					$sql = "INSERT INTO ". NELDB_USER_DOMAIN_TABLE ." (`user_domain_user_id`,`user_domain_domain_id`) VALUES ('". intval($user_id) ."','". intval($domain_id) ."')";
 					$db->sql_query($sql);
 				}
 			}
@@ -816,9 +816,9 @@
 
 		// now we remove all shards except those that belong to the user AND group
 
-		$sql  = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id=". $user_id;
-		if (is_array($domain_ids)    && sizeof($domain_ids)) 	$sql .= " AND user_shard_domain_id NOT IN (". implode(',',array_values($domain_ids)) .")";
-		if (is_array($group_domains) && sizeof($group_domains))	$sql .= " AND user_shard_domain_id NOT IN (". implode(',',array_values($group_domains)) .")";
+		$sql  = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id=". intval($user_id);
+		if (is_array($domain_ids)    && sizeof($domain_ids)) 	$sql .= " AND user_shard_domain_id NOT IN (". implode(',',array_map('intval', array_values($domain_ids))) .")";
+		if (is_array($group_domains) && sizeof($group_domains))	$sql .= " AND user_shard_domain_id NOT IN (". implode(',',array_map('intval', array_values($group_domains))) .")";
 		$db->sql_query($sql);
 	}
 
@@ -829,7 +829,7 @@
 		$data = array();
 		$data1 = array();
 
-		$sql = "SELECT * FROM ". NELDB_USER_DOMAIN_TABLE ." LEFT JOIN ". NELDB_DOMAIN_TABLE ." ON (user_domain_domain_id=domain_id) WHERE user_domain_user_id=". $user_id ." ORDER BY domain_name ASC";
+		$sql = "SELECT * FROM ". NELDB_USER_DOMAIN_TABLE ." LEFT JOIN ". NELDB_DOMAIN_TABLE ." ON (user_domain_domain_id=domain_id) WHERE user_domain_user_id=". intval($user_id) ." ORDER BY domain_name ASC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -863,7 +863,7 @@
 		$data = array();
 		$data1 = array();
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_DOMAIN_TABLE ." LEFT JOIN ". NELDB_DOMAIN_TABLE ." ON (group_domain_domain_id=domain_id) WHERE group_domain_group_id=". $group_id ." ORDER BY domain_name ASC";
+		$sql = "SELECT * FROM ". NELDB_GROUP_DOMAIN_TABLE ." LEFT JOIN ". NELDB_DOMAIN_TABLE ." ON (group_domain_domain_id=domain_id) WHERE group_domain_group_id=". intval($group_id) ." ORDER BY domain_name ASC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -924,7 +924,7 @@
 		$data = array();
 		$data1 = array();
 
-		$sql = "SELECT * FROM ". NELDB_USER_SHARD_TABLE ." LEFT JOIN ". NELDB_SHARD_TABLE ." ON (user_shard_shard_id=shard_id) WHERE user_shard_user_id=". $user_id ." ORDER BY shard_name ASC";
+		$sql = "SELECT * FROM ". NELDB_USER_SHARD_TABLE ." LEFT JOIN ". NELDB_SHARD_TABLE ." ON (user_shard_shard_id=shard_id) WHERE user_shard_user_id=". intval($user_id) ." ORDER BY shard_name ASC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -958,7 +958,7 @@
 		$data = array();
 		$data1 = array();
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_SHARD_TABLE ." LEFT JOIN ". NELDB_SHARD_TABLE ." ON (group_shard_shard_id=shard_id) WHERE group_shard_group_id=". $group_id ." ORDER BY shard_name ASC";
+		$sql = "SELECT * FROM ". NELDB_GROUP_SHARD_TABLE ." LEFT JOIN ". NELDB_SHARD_TABLE ." ON (group_shard_shard_id=shard_id) WHERE group_shard_group_id=". intval($group_id) ." ORDER BY shard_name ASC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1038,7 +1038,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id=". $user_id;
+		$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id=". intval($user_id);
 		$db->sql_query($sql);
 
 		if (is_array($shard_ids) && sizeof($shard_ids))
@@ -1052,7 +1052,7 @@
 
 				if (is_numeric($domain_id) && is_numeric($shard_id) && $domain_id > 0 && $shard_id > 0)
 				{
-					$sql = "INSERT INTO ". NELDB_USER_SHARD_TABLE ." (`user_shard_user_id`,`user_shard_shard_id`,`user_shard_domain_id`) VALUES ('". $user_id ."','". $shard_id ."','". $domain_id ."')";
+					$sql = "INSERT INTO ". NELDB_USER_SHARD_TABLE ." (`user_shard_user_id`,`user_shard_shard_id`,`user_shard_domain_id`) VALUES ('". intval($user_id) ."','". intval($shard_id) ."','". intval($domain_id) ."')";
 					$db->sql_query($sql);
 				}
 			}
@@ -1063,7 +1063,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_GROUP_DOMAIN_TABLE ." WHERE group_domain_group_id=". $group_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_DOMAIN_TABLE ." WHERE group_domain_group_id=". intval($group_id);
 		$db->sql_query($sql);
 
 		if (is_array($domain_ids) and sizeof($domain_ids))
@@ -1073,20 +1073,20 @@
 			{
 				if (is_numeric($domain_id) && $domain_id > 0)
 				{
-					$sql = "INSERT INTO ". NELDB_GROUP_DOMAIN_TABLE ." (`group_domain_group_id`,`group_domain_domain_id`) VALUES ('". $group_id ."','". $domain_id ."')";
+					$sql = "INSERT INTO ". NELDB_GROUP_DOMAIN_TABLE ." (`group_domain_group_id`,`group_domain_domain_id`) VALUES ('". intval($group_id) ."','". intval($domain_id) ."')";
 					$db->sql_query($sql);
 				}
 			}
 		}
 
-		$sql  = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE ." WHERE group_shard_group_id=". $group_id;
-		if (is_array($domain_ids)    && sizeof($domain_ids)) 	$sql .= " AND group_shard_domain_id NOT IN (". implode(',',array_values($domain_ids)) .")";
+		$sql  = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE ." WHERE group_shard_group_id=". intval($group_id);
+		if (is_array($domain_ids)    && sizeof($domain_ids)) 	$sql .= " AND group_shard_domain_id NOT IN (". implode(',',array_map('intval', array_values($domain_ids))) .")";
 		$db->sql_query($sql);
 
 		// we need to check some stuff for each user in this group
 
 		// first we get the list of users that belong to his group
-		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". $group_id;
+		$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1100,14 +1100,14 @@
 					$user_domain_list = tool_admin_users_domains_get_list($user_id, true);
 
 					// then we delete the shard that don't belong to the group nor user
-					$sql  = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id=". $user_id;
-					if (is_array($domain_ids) && sizeof($domain_ids)) 				$sql .= " AND user_shard_domain_id NOT IN (". implode(',', array_values($domain_ids)) .")";
-					if (is_array($user_domain_list) && sizeof($user_domain_list))	$sql .= " AND user_shard_domain_id NOT IN (". implode(',', array_values($user_domain_list)) .")";
+					$sql  = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id=". intval($user_id);
+					if (is_array($domain_ids) && sizeof($domain_ids)) 				$sql .= " AND user_shard_domain_id NOT IN (". implode(',', array_map('intval', array_values($domain_ids))) .")";
+					if (is_array($user_domain_list) && sizeof($user_domain_list))	$sql .= " AND user_shard_domain_id NOT IN (". implode(',', array_map('intval', array_values($user_domain_list))) .")";
 					$db->sql_query($sql);
 
 					// make sure users don't have a domain that already belongs to a group
-					$sql  = "DELETE FROM ". NELDB_USER_DOMAIN_TABLE ." WHERE user_domain_user_id=". $user_id;
-					if (is_array($domain_ids) && sizeof($domain_ids))				$sql .= " AND user_domain_domain_id IN (". implode(',', array_values($domain_ids)) .")";
+					$sql  = "DELETE FROM ". NELDB_USER_DOMAIN_TABLE ." WHERE user_domain_user_id=". intval($user_id);
+					if (is_array($domain_ids) && sizeof($domain_ids))				$sql .= " AND user_domain_domain_id IN (". implode(',', array_map('intval', array_values($domain_ids))) .")";
 					$db->sql_query($sql);
 				}
 			}
@@ -1188,7 +1188,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE ." WHERE group_shard_group_id=". $group_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_SHARD_TABLE ." WHERE group_shard_group_id=". intval($group_id);
 		$db->sql_query($sql);
 
 		if (is_array($shard_ids) && sizeof($shard_ids))
@@ -1206,7 +1206,7 @@
 
 				if (is_numeric($domain_id) && is_numeric($shard_id) && $domain_id > 0 && $shard_id > 0)
 				{
-					$sql = "INSERT INTO ". NELDB_GROUP_SHARD_TABLE ." (`group_shard_group_id`,`group_shard_shard_id`,`group_shard_domain_id`) VALUES ('". $group_id ."','". $shard_id ."','". $domain_id ."')";
+					$sql = "INSERT INTO ". NELDB_GROUP_SHARD_TABLE ." (`group_shard_group_id`,`group_shard_shard_id`,`group_shard_domain_id`) VALUES ('". intval($group_id) ."','". intval($shard_id) ."','". intval($domain_id) ."')";
 					$db->sql_query($sql);
 				}
 			}
@@ -1214,7 +1214,7 @@
 			// we need to check some stuff for each user in this group
 
 			// first we get the list of users that belong to his group
-			$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". $group_id;
+			$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". intval($group_id);
 			if ($result = $db->sql_query($sql))
 			{
 				if ($db->sql_numrows($result))
@@ -1225,7 +1225,7 @@
 						$user_ids[] = $row['user_id'];
 					}
 
-					$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id IN (". implode(',',array_values($user_ids)) .") AND user_shard_shard_id IN (". implode(',', array_values($group_shard_ids)) .")";
+					$sql = "DELETE FROM ". NELDB_USER_SHARD_TABLE ." WHERE user_shard_user_id IN (". implode(',',array_map('intval', array_values($user_ids))) .") AND user_shard_shard_id IN (". implode(',', array_map('intval', array_values($group_shard_ids))) .")";
 					$db->sql_query($sql);
 				}
 			}
@@ -1237,7 +1237,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_GROUP_APPLICATION_TABLE ." WHERE group_application_group_id=". $group_id;
+		$sql = "DELETE FROM ". NELDB_GROUP_APPLICATION_TABLE ." WHERE group_application_group_id=". intval($group_id);
 		$db->sql_query($sql);
 
 		if (is_array($application_ids) && sizeof($application_ids))
@@ -1245,12 +1245,12 @@
 			reset($application_ids);
 			foreach($application_ids as $application_id)
 			{
-				$sql = "INSERT INTO ". NELDB_GROUP_APPLICATION_TABLE ." (`group_application_group_id`,`group_application_application_id`) VALUES ('". $group_id ."','". $application_id ."')";
+				$sql = "INSERT INTO ". NELDB_GROUP_APPLICATION_TABLE ." (`group_application_group_id`,`group_application_application_id`) VALUES ('". intval($group_id) ."','". intval($application_id) ."')";
 				$db->sql_query($sql);
 			}
 
 			// we need to make sure no user in this group has this application
-			$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". $group_id;
+			$sql = "SELECT * FROM ". NELDB_USER_TABLE ." WHERE user_group_id=". intval($group_id);
 			if ($result = $db->sql_query($sql))
 			{
 				if ($db->sql_numrows($result))
@@ -1261,7 +1261,7 @@
 						$user_ids[] = $row['user_id'];
 					}
 
-					$sql = "DELETE FROM ". NELDB_USER_APPLICATION_TABLE ." WHERE user_application_user_id IN (". implode(',',array_values($user_ids)) .") AND user_application_application_id IN (". implode(',', array_values($application_ids)) .")";
+					$sql = "DELETE FROM ". NELDB_USER_APPLICATION_TABLE ." WHERE user_application_user_id IN (". implode(',',array_map('intval', array_values($user_ids))) .") AND user_application_application_id IN (". implode(',', array_map('intval', array_values($application_ids))) .")";
 					$db->sql_query($sql);
 				}
 			}
@@ -1277,7 +1277,7 @@
 		$data = array();
 		$data1 = array();
 
-		$sql = "SELECT * FROM ". NELDB_GROUP_APPLICATION_TABLE ." LEFT JOIN ". NELDB_APPLICATION_TABLE ." ON (group_application_application_id=application_id) WHERE group_application_group_id=". $group_id;
+		$sql = "SELECT * FROM ". NELDB_GROUP_APPLICATION_TABLE ." LEFT JOIN ". NELDB_APPLICATION_TABLE ." ON (group_application_application_id=application_id) WHERE group_application_group_id=". intval($group_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1332,7 +1332,7 @@
 		$data = array();
 		$data1 = array();
 
-		$sql = "SELECT * FROM ". NELDB_USER_APPLICATION_TABLE ." LEFT JOIN ". NELDB_APPLICATION_TABLE ." ON (user_application_application_id=application_id) WHERE user_application_user_id=". $user_id;
+		$sql = "SELECT * FROM ". NELDB_USER_APPLICATION_TABLE ." LEFT JOIN ". NELDB_APPLICATION_TABLE ." ON (user_application_application_id=application_id) WHERE user_application_user_id=". intval($user_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1388,7 +1388,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_USER_APPLICATION_TABLE ." WHERE user_application_user_id=". $user_id;
+		$sql = "DELETE FROM ". NELDB_USER_APPLICATION_TABLE ." WHERE user_application_user_id=". intval($user_id);
 		$db->sql_query($sql);
 
 		if (is_array($application_ids) && sizeof($application_ids))
@@ -1398,7 +1398,7 @@
 			{
 				if (is_numeric($application_id) && $application_id > 0)
 				{
-					$sql = "INSERT INTO ". NELDB_USER_APPLICATION_TABLE ." (`user_application_user_id`,`user_application_application_id`) VALUES ('". $user_id ."','". $application_id ."')";
+					$sql = "INSERT INTO ". NELDB_USER_APPLICATION_TABLE ." (`user_application_user_id`,`user_application_application_id`) VALUES ('". intval($user_id) ."','". intval($application_id) ."')";
 					$db->sql_query($sql);
 				}
 			}
@@ -1636,7 +1636,7 @@
 
 		$data = array();
 
-		$sql = "SELECT * FROM ". NELDB_LOG_TABLE ." ORDER BY logs_id DESC LIMIT ". $start .",". $limit;
+		$sql = "SELECT * FROM ". NELDB_LOG_TABLE ." ORDER BY logs_id DESC LIMIT ". intval($start) .",". intval($limit);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1656,7 +1656,7 @@
 
 		if ($db->sql_select_db('nel'))
 		{
-			$sql = "SELECT * FROM domain WHERE domain_name='". $application ."'";
+			$sql = "SELECT * FROM domain WHERE domain_name='". $db->sql_escape_string($application) ."'";
 			if ($result = $db->sql_query($sql))
 			{
 				if ($db->sql_numrows($result))
@@ -1679,7 +1679,7 @@
 		if ($db->sql_select_db('nel'))
 		{
 			//$sql = "UPDATE domain SET status='". $domain_status ."',patch_version=". $domain_version ." WHERE domain_id=". $domain_id ." AND domain_name='". $domain_name ."'";
-			$sql = "UPDATE domain SET status='". $domain_status ."' WHERE domain_id=". $domain_id ." AND domain_name='". $domain_name ."'";
+			$sql = "UPDATE domain SET status='". $db->sql_escape_string($domain_status) ."' WHERE domain_id=". intval($domain_id) ." AND domain_name='". $db->sql_escape_string($domain_name) ."'";
 			$db->sql_query($sql);
 
 			$db->sql_reselect_db();
@@ -1691,6 +1691,8 @@
 		global $db;
 
 		$data = null;
+
+		$order = (strtoupper($order) === 'DESC') ? 'DESC' : 'ASC';
 
 		$sql = "SELECT * FROM ". NELDB_RESTART_GROUP_TABLE ." ORDER BY restart_group_order ". $order .", restart_group_name ". $order;
 		if ($result = $db->sql_query($sql))
@@ -1720,7 +1722,7 @@
 		$sql  = "INSERT INTO ". NELDB_RESTART_GROUP_TABLE;
 		$sql .= " (`restart_group_id`,`restart_group_name`,`restart_group_list`,`restart_group_order`) ";
 		$sql .= " VALUES ";
-		$sql .= " (0,'". $restart_name ."','". $restart_list ."','". $restart_order ."') ";
+		$sql .= " (0,'". $db->sql_escape_string($restart_name) ."','". $db->sql_escape_string($restart_list) ."','". intval($restart_order) ."') ";
 		$db->sql_query($sql);
 
 		return "";
@@ -1732,7 +1734,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_RESTART_GROUP_TABLE ." WHERE restart_group_id=". $restart_id;
+		$sql = "SELECT * FROM ". NELDB_RESTART_GROUP_TABLE ." WHERE restart_group_id=". intval($restart_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1748,7 +1750,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_RESTART_GROUP_TABLE ." WHERE restart_group_id=". $restart_id;
+		$sql = "DELETE FROM ". NELDB_RESTART_GROUP_TABLE ." WHERE restart_group_id=". intval($restart_id);
 		$db->sql_query($sql);
 	}
 
@@ -1765,7 +1767,7 @@
 		$restart_order = trim($restart_order);
 		if (!is_numeric($restart_order)) return "/!\ Error: restart group order is not numeric!";
 
-		$sql = "UPDATE ". NELDB_RESTART_GROUP_TABLE ." SET restart_group_name='". $restart_name ."',restart_group_list='". $restart_list ."',restart_group_order='". $restart_order ."' WHERE restart_group_id=". $restart_id;
+		$sql = "UPDATE ". NELDB_RESTART_GROUP_TABLE ." SET restart_group_name='". $db->sql_escape_string($restart_name) ."',restart_group_list='". $db->sql_escape_string($restart_list) ."',restart_group_order='". intval($restart_order) ."' WHERE restart_group_id=". intval($restart_id);
 		$db->sql_query($sql);
 
 		return "";
@@ -1784,7 +1786,7 @@
 		$sql  = "INSERT INTO ". NELDB_RESTART_MESSAGE_TABLE;
 		$sql .= " (`restart_message_id`,`restart_message_name`,`restart_message_value`,`restart_message_lang`) ";
 		$sql .= " VALUES ";
-		$sql .= " (0,'". $message_name ."','". $message_value ."','". $message_lang ."') ";
+		$sql .= " (0,'". $db->sql_escape_string($message_name) ."','". $db->sql_escape_string($message_value) ."','". $db->sql_escape_string($message_lang) ."') ";
 		$db->sql_query($sql);
 
 		return "";
@@ -1814,7 +1816,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_RESTART_MESSAGE_TABLE ." WHERE restart_message_id=". $message_id;
+		$sql = "SELECT * FROM ". NELDB_RESTART_MESSAGE_TABLE ." WHERE restart_message_id=". intval($message_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1835,10 +1837,10 @@
 		$sql_ext = '';
 		if ($lang !== null)
 		{
-			$sql_ext = " AND restart_message_lang='". $lang ."'";
+			$sql_ext = " AND restart_message_lang='". $db->sql_escape_string($lang) ."'";
 		}
 
-		$sql = "SELECT * FROM ". NELDB_RESTART_MESSAGE_TABLE ." WHERE restart_message_name='". $message_name ."' ". $sql_ext ." ORDER BY restart_message_lang ASC";
+		$sql = "SELECT * FROM ". NELDB_RESTART_MESSAGE_TABLE ." WHERE restart_message_name='". $db->sql_escape_string($message_name) ."' ". $sql_ext ." ORDER BY restart_message_lang ASC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1854,7 +1856,7 @@
 	{
 		global $db;
 
-		$sql = "DELETE FROM ". NELDB_RESTART_MESSAGE_TABLE ." WHERE restart_message_id=". $message_id;
+		$sql = "DELETE FROM ". NELDB_RESTART_MESSAGE_TABLE ." WHERE restart_message_id=". intval($message_id);
 		$db->sql_query($sql);
 	}
 
@@ -1868,7 +1870,7 @@
 		$message_value = trim($message_value);
 		if ($message_value == '')	return "/!\ Error: restart message value is empty!";
 
-		$sql = "UPDATE ". NELDB_RESTART_MESSAGE_TABLE ." SET restart_message_name='". $message_name ."',restart_message_value='". $message_value ."',restart_message_lang='". $message_lang ."' WHERE restart_message_id=". $message_id;
+		$sql = "UPDATE ". NELDB_RESTART_MESSAGE_TABLE ." SET restart_message_name='". $db->sql_escape_string($message_name) ."',restart_message_value='". $db->sql_escape_string($message_value) ."',restart_message_lang='". $db->sql_escape_string($message_lang) ."' WHERE restart_message_id=". intval($message_id);
 		$db->sql_query($sql);
 
 		return "";

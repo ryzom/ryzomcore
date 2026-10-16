@@ -26,6 +26,7 @@
 #include "nel/misc/smart_ptr.h"
 
 #include "game_share/chat_group.h"
+class CChatMessage;
 
 
 namespace NLGUI
@@ -97,8 +98,9 @@ public:
 	};
 public:
 	// display a message in this chat box with the given color
-	virtual void displayMessage(const std::string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = nullptr);
-	virtual void displayTellMessage(const std::string &/* msg */, NLMISC::CRGBA /* col */, const std::string &/* sender */) {}
+	virtual void displayMessage(const std::string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = nullptr, const CChatMessage *sharedMessage = nullptr, const std::string &senderName = std::string());
+	virtual void displayTellMessage(const std::string &/* msg */, NLMISC::CRGBA /* col */, const std::string &/* sender */,
+		const CChatMessage * /* sharedMessage */ = nullptr) {}
 	virtual void clearMessages(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex);
 	// Test if the window is visible
 	bool isVisible() const;
@@ -186,8 +188,8 @@ class CChatGroupWindow : public CChatWindow
 public:
 	CChatGroupWindow() {}
 	// display a message in this chat box with the given color (callback from chat input filter)
-	virtual void displayMessage(const std::string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = nullptr) NL_OVERRIDE;
-	virtual void displayTellMessage(const std::string &msg, NLMISC::CRGBA col, const std::string &sender) NL_OVERRIDE;
+	virtual void displayMessage(const std::string &msg, NLMISC::CRGBA col, CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, uint numBlinks = 0, bool *windowVisible = nullptr, const CChatMessage *sharedMessage = nullptr, const std::string &senderName = std::string()) NL_OVERRIDE;
+	virtual void displayTellMessage(const std::string &msg, NLMISC::CRGBA col, const std::string &sender, const CChatMessage *sharedMessage = nullptr) NL_OVERRIDE;
 	virtual void clearMessages(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex) NL_OVERRIDE;
 	sint32 getTabIndex();
 	void setTabIndex(sint32 n);

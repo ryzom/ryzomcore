@@ -101,6 +101,8 @@
     <leaf name="DYN_STRING" description="system send a dyn string to the client system chat: $u32" />
     <leaf name="DYN_STRING_GROUP" description="system send a dyn string to the client gived group chat: $u32 $u16" />
     <leaf name="AFK_TXT" sendto="IOS" format="uc" description="the client sets an afk custom text" />
+    <leaf name="CHAT_SHARE" description="the client sends a chat message with structured metadata" />
+    <leaf name="CHAT_SHARE_RESULT" description="the server confirms or rejects a structured chat message" />
   </branch>
   <branch name="STUN">
     <leaf name="STUN" />

@@ -582,7 +582,7 @@
 
 		$timer = 0;
 
-		$sql = "SELECT * FROM ". NELDB_STAT_HD_TIME_TABLE ." WHERE hd_domain_id=". $domain_id;
+		$sql = "SELECT * FROM ". NELDB_STAT_HD_TIME_TABLE ." WHERE hd_domain_id=". intval($domain_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -602,17 +602,17 @@
 		//if ($stat_time == 0)	$sql = "INSERT INTO ". NELDB_STAT_HD_TIME_TABLE ." (`hd_domain_id`,`hd_last_time`) VALUES (". $domain_id .",". $now .")";
 		//else					$sql = "UPDATE ". NELDB_STAT_HD_TIME_TABLE ." SET hd_last_time=". $now ." WHERE hd_domain_id=". $domain_id;
 
-		$sql = "SELECT * FROM ". NELDB_STAT_HD_TIME_TABLE ." WHERE hd_domain_id=". $domain_id;
+		$sql = "SELECT * FROM ". NELDB_STAT_HD_TIME_TABLE ." WHERE hd_domain_id=". intval($domain_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
 			{
-				$sql = "UPDATE ". NELDB_STAT_HD_TIME_TABLE ." SET hd_last_time=". $now ." WHERE hd_domain_id=". $domain_id;
+				$sql = "UPDATE ". NELDB_STAT_HD_TIME_TABLE ." SET hd_last_time=". intval($now) ." WHERE hd_domain_id=". intval($domain_id);
 				$db->sql_query($sql);
 			}
 			else
 			{
-				$sql = "INSERT INTO ". NELDB_STAT_HD_TIME_TABLE ." (`hd_domain_id`,`hd_last_time`) VALUES (". $domain_id .",". $now .")";
+				$sql = "INSERT INTO ". NELDB_STAT_HD_TIME_TABLE ." (`hd_domain_id`,`hd_last_time`) VALUES (". intval($domain_id) .",". intval($now) .")";
 				$db->sql_query($sql);
 			}
 		}
@@ -751,7 +751,7 @@
 				//echo '<pre>'. print_r($aes_status, true) .'</pre>';
 
 
-				$sql = "DELETE FROM ". NELDB_STAT_HD_TABLE ." WHERE hd_domain_id=". $domain_id;
+				$sql = "DELETE FROM ". NELDB_STAT_HD_TABLE ." WHERE hd_domain_id=". intval($domain_id);
 				$db->sql_query($sql);
 
 				reset($aes_status);
@@ -763,8 +763,8 @@
 						if (trim($server_name) != '')
 						{
 							$sql  = "INSERT INTO ". NELDB_STAT_HD_TABLE ." (`hd_domain_id`,`hd_server`,`hd_device`,`hd_size`,`hd_used`,`hd_free`,`hd_percent`,`hd_mount`)";
-							$sql .= " VALUES (". $domain_id .",'". $server_name ."','". $server_hd['device'] ."','". $server_hd['size'] ."',";
-							$sql .= "'". $server_hd['used'] ."','". $server_hd['free'] ."','". $server_hd['usedpercent'] ."','". $server_hd['mount'] ."')";
+							$sql .= " VALUES (". intval($domain_id) .",'". $db->sql_escape_string($server_name) ."','". $db->sql_escape_string($server_hd['device']) ."','". $db->sql_escape_string($server_hd['size']) ."',";
+							$sql .= "'". $db->sql_escape_string($server_hd['used']) ."','". $db->sql_escape_string($server_hd['free']) ."','". $db->sql_escape_string($server_hd['usedpercent']) ."','". $db->sql_escape_string($server_hd['mount']) ."')";
 							$db->sql_query($sql);
 						}
 						if (defined('NELTOOL_CRON_DEBUG')) echo "<br />SQL:$sql";
@@ -784,7 +784,7 @@
 		$data = array();
 
 		//$sql = "SELECT * FROM ". NELDB_STAT_HD_TABLE ." WHERE hd_domain_id=". $domain_id ." AND hd_mount='/' ORDER BY hd_percent DESC";
-		$sql = "SELECT * FROM ". NELDB_STAT_HD_TABLE ." WHERE hd_domain_id=". $domain_id ." ORDER BY hd_percent DESC";
+		$sql = "SELECT * FROM ". NELDB_STAT_HD_TABLE ." WHERE hd_domain_id=". intval($domain_id) ." ORDER BY hd_percent DESC";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -792,10 +792,10 @@
 				while ($row = $db->sql_fetchrow($result))
 				{
 					$outp  = '<b>'. $row['hd_server'] .'</b> : '. $row['hd_device'] .'<br>';
-					$outp .= '• Mount : '. $row['hd_mount'] .'<br>';
-					$outp .= '• Size : '. $row['hd_size'] .'<br>';
-					$outp .= '• Used : '. $row['hd_used'] .'<br>';
-					$outp .= '• Free : '. $row['hd_free'] .'<br>';
+					$outp .= 'ï¿½ Mount : '. $row['hd_mount'] .'<br>';
+					$outp .= 'ï¿½ Size : '. $row['hd_size'] .'<br>';
+					$outp .= 'ï¿½ Used : '. $row['hd_used'] .'<br>';
+					$outp .= 'ï¿½ Free : '. $row['hd_free'] .'<br>';
 
 					$row['summary'] = $outp;
 					$data[] = $row;
@@ -813,8 +813,8 @@
 		$data = null;
 
 		$sql = "SELECT * FROM ". NELDB_ANNOTATION_TABLE ." WHERE 1=0";
-		if ($domain_id > 0)	$sql .= " OR annotation_domain_id=". $domain_id;
-		if ($shard_id  > 0)	$sql .= " OR annotation_shard_id=". $shard_id;
+		if ($domain_id > 0)	$sql .= " OR annotation_domain_id=". intval($domain_id);
+		if ($shard_id  > 0)	$sql .= " OR annotation_shard_id=". intval($shard_id);
 		$sql .= " ORDER BY annotation_date DESC";
 
 		if ($result = $db->sql_query($sql))
@@ -835,8 +835,8 @@
 		$data = null;
 
 		$sql = "SELECT * FROM ". NELDB_LOCK_TABLE ." WHERE 1=0 ";
-		if ($domain_id > 0)	$sql .= " OR lock_domain_id=". $domain_id;
-		if ($shard_id  > 0) $sql .= " OR lock_shard_id=". $shard_id;
+		if ($domain_id > 0)	$sql .= " OR lock_domain_id=". intval($domain_id);
+		if ($shard_id  > 0) $sql .= " OR lock_shard_id=". intval($shard_id);
 		$sql .= " ORDER BY lock_date DESC";
 
 		if ($result = $db->sql_query($sql))
@@ -857,7 +857,7 @@
 		global $AS_Name, $AS_ShardName;
 
 		nt_log("Shard Unlock (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."'");
-		$sql = "DELETE FROM ". NELDB_LOCK_TABLE ." WHERE lock_shard_id=". $shard_id;
+		$sql = "DELETE FROM ". NELDB_LOCK_TABLE ." WHERE lock_shard_id=". intval($shard_id);
 		$db->sql_query($sql);
 	}
 
@@ -868,7 +868,7 @@
 		global $AS_Name, $AS_ShardName;
 
 		nt_log("Domain Unlock (Domain: '". $AS_Name ."') by '". $nel_user['user_name'] ."'");
-		$sql = "DELETE FROM ". NELDB_LOCK_TABLE ." WHERE lock_domain_id=". $domain_id;
+		$sql = "DELETE FROM ". NELDB_LOCK_TABLE ." WHERE lock_domain_id=". intval($domain_id);
 		$db->sql_query($sql);
 	}
 
@@ -882,7 +882,7 @@
 		// we need to check if the shard is *all*
 		// if its the case, we go for a lock domain instead
 
-		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_id=". $shard_id;
+		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_id=". intval($shard_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -902,13 +902,13 @@
 		if (is_array($data) && ($data['lock_shard_id'] > 0))
 		{
 			if ($log) nt_log("Shard Lock (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."'");
-			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $nel_user['user_name'] ."',lock_update=". $now ." WHERE lock_id=". $data['lock_id'];
+			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',lock_update=". intval($now) ." WHERE lock_id=". intval($data['lock_id']);
 			$db->sql_query($sql);
 		}
 		elseif (!$data)
 		{
 			if ($log) nt_log("Shard Lock (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."'");
-			$sql = "INSERT INTO ". NELDB_LOCK_TABLE ." (`lock_shard_id`,`lock_user_name`,`lock_date`,`lock_update`) VALUES (". $shard_id .",'". $nel_user['user_name'] ."',". $now .",". $now .")";
+			$sql = "INSERT INTO ". NELDB_LOCK_TABLE ." (`lock_shard_id`,`lock_user_name`,`lock_date`,`lock_update`) VALUES (". intval($shard_id) .",'". $db->sql_escape_string($nel_user['user_name']) ."',". intval($now) .",". intval($now) .")";
 			$db->sql_query($sql);
 		}
 
@@ -920,7 +920,7 @@
 
 		$data = array();
 
-		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_domain_id=". $domain_id;
+		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_domain_id=". intval($domain_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -949,7 +949,7 @@
 
 		if (is_array($lock_data))
 		{
-			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $nel_user['user_name'] ."',lock_update=". $now ." WHERE lock_id=". $lock_data['lock_id'];
+			$sql = "UPDATE ". NELDB_LOCK_TABLE ." SET lock_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',lock_update=". intval($now) ." WHERE lock_id=". intval($lock_data['lock_id']);
 			$db->sql_query($sql);
 		}
 		else
@@ -957,10 +957,10 @@
 			$shard_list = tool_main_get_domain_shard_list($domain_id);
 			$shard_list = array_values($shard_list);
 
-			$sql = "DELETE FROM ". NELDB_LOCK_TABLE ." WHERE lock_shard_id IN (". implode(',', $shard_list) .")";
+			$sql = "DELETE FROM ". NELDB_LOCK_TABLE ." WHERE lock_shard_id IN (". implode(',', array_map('intval', $shard_list)) .")";
 			$db->sql_query($sql);
 
-			$sql = "INSERT INTO ". NELDB_LOCK_TABLE ." (`lock_domain_id`,`lock_user_name`,`lock_date`,`lock_update`) VALUES (". $domain_id .",'". $nel_user['user_name'] ."',". $now .",". $now .")";
+			$sql = "INSERT INTO ". NELDB_LOCK_TABLE ." (`lock_domain_id`,`lock_user_name`,`lock_date`,`lock_update`) VALUES (". intval($domain_id) .",'". $db->sql_escape_string($nel_user['user_name']) ."',". intval($now) .",". intval($now) .")";
 			$db->sql_query($sql);
 		}
 
@@ -983,21 +983,21 @@
 			$shard_list = tool_main_get_domain_shard_list($domain_id);
 			$shard_list = array_values($shard_list);
 
-			$sql = "DELETE FROM ". NELDB_ANNOTATION_TABLE ." WHERE annotation_shard_id IN (". implode(',', $shard_list) .")";
+			$sql = "DELETE FROM ". NELDB_ANNOTATION_TABLE ." WHERE annotation_shard_id IN (". implode(',', array_map('intval', $shard_list)) .")";
 			$db->sql_query($sql);
 
 			$annotation_data = tool_main_get_annotation($domain_id, 0);
 			if ($annotation_data)
 			{
 				nt_log("Domain Annotation (Domain: '". $AS_Name ."') by '". $nel_user['user_name'] ."' : ". $annotation);
-				$sql = "UPDATE ". NELDB_ANNOTATION_TABLE ." SET annotation_data='". $annotation ."',annotation_user_name='". $nel_user['user_name'] ."',annotation_date=". time() ." WHERE annotation_id=". $annotation_data['annotation_id'];
+				$sql = "UPDATE ". NELDB_ANNOTATION_TABLE ." SET annotation_data='". $db->sql_escape_string($annotation) ."',annotation_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',annotation_date=". time() ." WHERE annotation_id=". intval($annotation_data['annotation_id']);
 				$db->sql_query($sql);
 			}
 			else
 			{
 				nt_log("Domain Annotation (Domain: '". $AS_Name ."') by '". $nel_user['user_name'] ."' : ". $annotation);
 				$sql  = "INSERT INTO ". NELDB_ANNOTATION_TABLE ." (`annotation_domain_id`,`annotation_data`,`annotation_user_name`,`annotation_date`) VALUES ";
-				$sql .= "(". $domain_id .",'". $annotation ."','". $nel_user['user_name'] ."',". time() .")";
+				$sql .= "(". intval($domain_id) .",'". $db->sql_escape_string($annotation) ."','". $db->sql_escape_string($nel_user['user_name']) ."',". time() .")";
 				$db->sql_query($sql);
 			}
 
@@ -1009,14 +1009,14 @@
 			if ($annotation_data)
 			{
 				nt_log("Shard Annotation (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."' : ". $annotation);
-				$sql = "UPDATE ". NELDB_ANNOTATION_TABLE ." SET annotation_data='". $annotation ."',annotation_user_name='". $nel_user['user_name'] ."',annotation_date=". time() ." WHERE annotation_id=". $annotation_data['annotation_id'];
+				$sql = "UPDATE ". NELDB_ANNOTATION_TABLE ." SET annotation_data='". $db->sql_escape_string($annotation) ."',annotation_user_name='". $db->sql_escape_string($nel_user['user_name']) ."',annotation_date=". time() ." WHERE annotation_id=". intval($annotation_data['annotation_id']);
 				$db->sql_query($sql);
 			}
 			else
 			{
 				nt_log("Shard Annotation (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."') by '". $nel_user['user_name'] ."' : ". $annotation);
 				$sql  = "INSERT INTO ". NELDB_ANNOTATION_TABLE ." (`annotation_shard_id`,`annotation_data`,`annotation_user_name`,`annotation_date`) VALUES ";
-				$sql .= "(". $shard_id .",'". $annotation ."','". $nel_user['user_name'] ."',". time() .")";
+				$sql .= "(". intval($shard_id) .",'". $db->sql_escape_string($annotation) ."','". $db->sql_escape_string($nel_user['user_name']) ."',". time() .")";
 				$db->sql_query($sql);
 			}
 		}
@@ -1073,7 +1073,7 @@
 			//$sql = "SELECT * FROM shard WHERE ShardId IN (". implode(',', array_keys($shard_list)) .")";
 			if (is_array($shard_list2) && sizeof($shard_list2))
 			{
-				$sql = "SELECT * FROM shard, domain WHERE shard.domain_id=domain.domain_id AND shard.ShardId IN (". implode(',', array_keys($shard_list2)) .") AND domain.domain_name='". $application ."'";
+				$sql = "SELECT * FROM shard, domain WHERE shard.domain_id=domain.domain_id AND shard.ShardId IN (". implode(',', array_map('intval', array_keys($shard_list2))) .") AND domain.domain_name='". $db->sql_escape_string($application) ."'";
 
 				if ($result = $db->sql_query($sql))
 				{
@@ -1109,7 +1109,7 @@
 					//nt_common_add_debug("tool_main_get_shards_info_from_db()");
 					//nt_common_add_debug($shard_list2);
 
-					$sql = "SELECT * FROM shard WHERE shard_id IN (". implode(',', array_keys($shard_list2)) .")";
+					$sql = "SELECT * FROM shard WHERE shard_id IN (". implode(',', array_map('intval', array_keys($shard_list2))) .")";
 
 					if ($result = $db->sql_query($sql))
 					{
@@ -1181,7 +1181,7 @@
 
 		if ($sequence_info)
 		{
-			$sql = "UPDATE ". NELDB_SHARD_TABLE ." SET shard_restart=". $sequence_info['restart_sequence_id'] ." WHERE shard_id=". $shard_id ." AND shard_domain_id=". $domain_id;
+			$sql = "UPDATE ". NELDB_SHARD_TABLE ." SET shard_restart=". intval($sequence_info['restart_sequence_id']) ." WHERE shard_id=". intval($shard_id) ." AND shard_domain_id=". intval($domain_id);
 			$db->sql_query($sql);
 
 			// update shards information
@@ -1212,8 +1212,8 @@
 		$sql  = "INSERT INTO ". NELDB_RESTART_SEQUENCE_TABLE;
 		$sql .= " (`restart_sequence_domain_id`,`restart_sequence_shard_id`,`restart_sequence_user_name`,";
 		$sql .= "  `restart_sequence_step`,`restart_sequence_date_start`,`restart_sequence_date_end`) VALUES ";
-		$sql .= " (". $domain_id .",". $shard_id .",'". $user_name ."',";
-		$sql .=       $step .",". $now .",". $now .")";
+		$sql .= " (". intval($domain_id) .",". intval($shard_id) .",'". $db->sql_escape_string($user_name) ."',";
+		$sql .=       intval($step) .",". intval($now) .",". intval($now) .")";
 		$db->sql_query($sql);
 
 		$sequence_info = tool_main_get_restart_sequence_by_id($db->sql_nextid());
@@ -1233,7 +1233,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_RESTART_SEQUENCE_TABLE ." WHERE restart_sequence_domain_id=". $domain_id ." AND restart_sequence_shard_id=". $shard_id ." AND restart_sequence_user_name='". $user_name ."' AND restart_sequence_step=0 AND restart_sequence_date_start=restart_sequence_date_end";
+		$sql = "SELECT * FROM ". NELDB_RESTART_SEQUENCE_TABLE ." WHERE restart_sequence_domain_id=". intval($domain_id) ." AND restart_sequence_shard_id=". intval($shard_id) ." AND restart_sequence_user_name='". $db->sql_escape_string($user_name) ."' AND restart_sequence_step=0 AND restart_sequence_date_start=restart_sequence_date_end";
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1251,7 +1251,7 @@
 
 		$data = null;
 
-		$sql = "SELECT * FROM ". NELDB_RESTART_SEQUENCE_TABLE ." WHERE restart_sequence_id=". $sequence_id;
+		$sql = "SELECT * FROM ". NELDB_RESTART_SEQUENCE_TABLE ." WHERE restart_sequence_id=". intval($sequence_id);
 		if ($result = $db->sql_query($sql))
 		{
 			if ($db->sql_numrows($result))
@@ -1278,7 +1278,7 @@
 			$step = $sequence_info['restart_sequence_step'] + 1;
 		}
 
-		$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_step=". $step .",restart_sequence_date_end=". $now ." WHERE restart_sequence_id=". $sequence_id;
+		$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_step=". intval($step) .",restart_sequence_date_end=". intval($now) ." WHERE restart_sequence_id=". intval($sequence_id);
 		$db->sql_query($sql);
 
 		nt_log("Shard Restart (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."' - Sequence: '". $sequence_id ."') - ". $nel_user['user_name'] ." moved to step ". $step);
@@ -1303,7 +1303,7 @@
 		//$sequence_info = tool_main_set_next_restart_sequence_step($sequence_id);
 		$sequence_info = tool_main_get_restart_sequence_by_id($sequence_id);
 
-		$sql = "UPDATE ". NELDB_SHARD_TABLE ." SET shard_restart=0 WHERE shard_domain_id=". $sequence_info['restart_sequence_domain_id'] ." AND shard_id=". $sequence_info['restart_sequence_shard_id'];
+		$sql = "UPDATE ". NELDB_SHARD_TABLE ." SET shard_restart=0 WHERE shard_domain_id=". intval($sequence_info['restart_sequence_domain_id']) ." AND shard_id=". intval($sequence_info['restart_sequence_shard_id']);
 		$db->sql_query($sql);
 
 		nt_log("Shard Restart (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."' - Sequence: '". $sequence_id ."') - ". $nel_user['user_name'] ." ended the sequence !". $step);
@@ -1318,7 +1318,7 @@
 		global $db;
 
 		$num = 0;
-		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_domain_id=". $domain_id ." AND shard_restart>0";
+		$sql = "SELECT * FROM ". NELDB_SHARD_TABLE ." WHERE shard_domain_id=". intval($domain_id) ." AND shard_restart>0";
 		if ($result = $db->sql_query($sql))
 		{
 			$num = $db->sql_numrows($result);
@@ -1439,7 +1439,7 @@
 		$timer 		= $timer;
 		$new_timer	= $now + $timer;
 
-		$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_date_end=". $now .",restart_sequence_timer=". $new_timer ." WHERE restart_sequence_id=". $sequence_id;
+		$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_date_end=". intval($now) .",restart_sequence_timer=". intval($new_timer) ." WHERE restart_sequence_id=". intval($sequence_id);
 		$db->sql_query($sql);
 
 		return array('start' => $now, 'end' => $new_timer);
@@ -1452,7 +1452,7 @@
 			$csdb = new sql_db_string($sql_connection);
 			if (is_object($csdb))
 			{
-				$sql = "UPDATE Sorbot_events SET event_action=". $mode .",event_time=". time() .",event_lap=0 WHERE event_id IN (". implode(',', array_values($event_list)) .")";
+				$sql = "UPDATE Sorbot_events SET event_action=". intval($mode) .",event_time=". time() .",event_lap=0 WHERE event_id IN (". implode(',', array_map('intval', array_values($event_list))) .")";
 				$csdb->sql_query($sql);
 
 				$csdb->sql_close();
@@ -1486,7 +1486,7 @@
 				if ($sequence_info && $shard_info)
 				{
 					// lets find the shard id used by the ticket system
-					$sql = "SELECT * FROM ForumCS_tickets_shards WHERE shard_ca='". $shard_info['domain_application'] ."' AND shard_id='". $shard_id ."'";
+					$sql = "SELECT * FROM ForumCS_tickets_shards WHERE shard_ca='". $csdb->sql_escape_string($shard_info['domain_application']) ."' AND shard_id='". intval($shard_id) ."'";
 					if ($result = $csdb->sql_query($sql))
 					{
 						if ($csdb->sql_numrows($result))
@@ -1497,7 +1497,7 @@
 							$ticketsystem_shard_id = $ticketsystem_shard_info['id'];
 
 							// now we have the shard id, lets see which klients servers wants events for it
-							$sql = "SELECT * FROM Sorbot_botconfig WHERE config_name='shardRestart' AND config_value LIKE '%:". $ticketsystem_shard_id .":%'";
+							$sql = "SELECT * FROM Sorbot_botconfig WHERE config_name='shardRestart' AND config_value LIKE '%:". $csdb->sql_escape_string($ticketsystem_shard_id) .":%'";
 							if ($result2 = $csdb->sql_query($sql))
 							{
 								if ($csdb->sql_numrows($result2))
@@ -1517,7 +1517,7 @@
 										$klients_servers[] = $row['server_name'];
 
 										// lets find if there is any specific opening timer, and keep the lowest one
-										$sql = "SELECT * FROM Sorbot_botconfig WHERE server_name='". $row['server_name'] ."' AND config_name='shardRestartOpenTimer'";
+										$sql = "SELECT * FROM Sorbot_botconfig WHERE server_name='". $csdb->sql_escape_string($row['server_name']) ."' AND config_name='shardRestartOpenTimer'";
 										if ($result3 = $csdb->sql_query($sql))
 										{
 											if ($csdb->sql_numrows($result3))
@@ -1605,7 +1605,7 @@
 									foreach($klients_servers as $klient_server)
 									{
 										$sql  = "INSERT INTO Sorbot_events (`server_name`,`event_action`,`event_time`,`event_lap`,`event_params`) ";
-										$sql .= " VALUES ('". $klient_server ."',". $sorbot_message_type .",". time() .",". $open_timer .",'". $notification_data ."')";
+										$sql .= " VALUES ('". $csdb->sql_escape_string($klient_server) ."',". intval($sorbot_message_type) .",". time() .",". intval($open_timer) .",'". $csdb->sql_escape_string($notification_data) ."')";
 										$csdb->sql_query($sql);
 										$event_insert_ids[] = $csdb->sql_nextid();
 									}
@@ -1617,7 +1617,7 @@
 										$notification_info['eventlist'] = array_values($event_insert_ids);
 										$notification_data = base64_encode(serialize($notification_info));
 
-										$sql = "UPDATE Sorbot_events SET event_params='". $notification_data ."' WHERE event_id IN (". implode(',', array_values($event_insert_ids)) .")";
+										$sql = "UPDATE Sorbot_events SET event_params='". $csdb->sql_escape_string($notification_data) ."' WHERE event_id IN (". implode(',', array_map('intval', array_values($event_insert_ids))) .")";
 										$csdb->sql_query($sql);
 
 										// save the events locally too
@@ -1665,7 +1665,7 @@
 	{
 		global $db;
 
-		$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_events='". $events ."' WHERE restart_sequence_id=". $sequence_id;
+		$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_events='". $db->sql_escape_string($events) ."' WHERE restart_sequence_id=". intval($sequence_id);
 		$db->sql_query($sql);
 	}
 
@@ -1687,7 +1687,7 @@
 		$sql .=            NELDB_SHARD_TABLE .".shard_lang,";
 		$sql .=            NELDB_SHARD_TABLE .".shard_restart";
 		$sql .= " FROM ". NELDB_DOMAIN_TABLE .",". NELDB_SHARD_TABLE;
-		$sql .= " WHERE domain_id=shard_domain_id AND domain_id=". $domain_id ." AND shard_id=". $shard_id;
+		$sql .= " WHERE domain_id=shard_domain_id AND domain_id=". intval($domain_id) ." AND shard_id=". intval($shard_id);
 
 		if ($result = $db->sql_query($sql))
 		{
@@ -1711,7 +1711,7 @@
 
 		if ($sequence_info)
 		{
-			$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_user_name='". $nel_user['user_name'] ."' WHERE restart_sequence_id=". $AS_ShardRestart;
+			$sql = "UPDATE ". NELDB_RESTART_SEQUENCE_TABLE ." SET restart_sequence_user_name='". $db->sql_escape_string($nel_user['user_name']) ."' WHERE restart_sequence_id=". intval($AS_ShardRestart);
 			$db->sql_query($sql);
 
 			nt_log("Shard Restart (Domain: '". $AS_Name ."' - Shard: '". $AS_ShardName ."' - Sequence: '". $AS_ShardRestart ."') owner set to '". $nel_user['user_name'] ."'");

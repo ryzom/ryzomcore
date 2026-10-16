@@ -25,6 +25,7 @@
 #include "nel/gui/ctrl_scroll.h"
 #include "nel/gui/ctrl_button.h"
 #include "nel/gui/action_handler.h"
+#include "nel/gui/view_renderer.h"
 #include "nel/misc/i18n.h"
 #include "nel/gui/widget_manager.h"
 
@@ -40,14 +41,7 @@ namespace NLGUI
 	//========================================================================
 	CGroupScrollText::CGroupScrollText(const TCtorParam &param) :
 											CInterfaceGroup(param),
-											_List(nullptr)
-    ,
-											_ScrollBar(nullptr)
-    ,
-											_ButtonAdd(nullptr)
-    ,
-											_ButtonSub(nullptr)
-    ,
+											_List(nullptr), _ScrollBar(nullptr), _ButtonAdd(nullptr), _ButtonSub(nullptr), _ButtonNewest(nullptr), _ButtonUnread(nullptr), _UnreadSeen(false), _LastCheckMs(0),
 											_Settuped(false),
 											_InvertScrollBar(true),
 											_ListHeight(0),
@@ -90,7 +84,7 @@ namespace NLGUI
 	xmlNodePtr CGroupScrollText::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == nullptr)
+		if( node == nullptr )
 			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "scroll_text" );
@@ -151,14 +145,97 @@ namespace NLGUI
 				invalidateCoords();
 				_ListHeight = _List->getH();
 			}
+			if (_ButtonNewest || _ButtonUnread)
+				updateUnread();
 		}
 		CInterfaceGroup::checkCoords();
+	}
+
+	//========================================================================
+	bool CGroupScrollText::isAtNewest() const
+	{
+		// The list is bottom aligned: a negative offset scrolls back in time.
+		return !_List || _List->getHReal() <= _List->getMaxHReal() || _List->getOfsY() >= 0;
+	}
+
+	//========================================================================
+	bool CGroupScrollText::isLineVisible(const CViewBase *line) const
+	{
+		return line->getYReal() >= _List->getYReal() && line->getYReal() + line->getHReal() <= _List->getYReal() + _List->getMaxHReal();
+	}
+
+	//========================================================================
+	void CGroupScrollText::updateUnread()
+	{
+		// A skipped frame means the list was not displayed in between.
+		const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
+		const bool firstCheck = _LastCheckMs == 0;
+		const bool displayed = _LastCheckMs == times.lastFrameMs;
+		_LastCheckMs = times.thisFrameMs;
+
+		const uint count = _List->getNumChildren();
+		CViewBase *last = count ? _List->getChild(count - 1) : nullptr;
+		if (last != _LastLine)
+		{
+			if (displayed && isAtNewest())
+				_FirstUnread = nullptr;
+			else if (!firstCheck && (_FirstUnread == nullptr || _UnreadSeen))
+			{
+				uint first = count;
+				while (first > 0 && _List->getChild(first - 1) != _LastLine)
+					--first;
+				markUnread(first < count ? _List->getChild(first) : nullptr);
+			}
+			_LastLine = last;
+		}
+		if (displayed && _FirstUnread && isLineVisible(_FirstUnread))
+			_UnreadSeen = true;
+
+		if (_ButtonNewest)
+			_ButtonNewest->setActive(!isAtNewest());
+		if (_ButtonUnread)
+			_ButtonUnread->setActive(_FirstUnread != nullptr && !_UnreadSeen && !isLineVisible(_FirstUnread));
+	}
+
+	//========================================================================
+	void CGroupScrollText::markUnread(CViewBase *line)
+	{
+		// Only scroll texts with jump buttons track unread lines.
+		if (!_ButtonNewest && !_ButtonUnread)
+			return;
+		// Lines read before stay above the new marker.
+		if (_FirstUnread == nullptr || _UnreadSeen)
+		{
+			_FirstUnread = line;
+			_UnreadSeen = false;
+		}
+	}
+
+	//========================================================================
+	void CGroupScrollText::scrollToNewest()
+	{
+		if (_List && _ScrollBar && _List->getNumChildren())
+			_ScrollBar->ensureVisible(_List->getChild(_List->getNumChildren() - 1), Hotspot_Bx, Hotspot_Bx);
+	}
+
+	//========================================================================
+	void CGroupScrollText::scrollToUnread()
+	{
+		if (_ScrollBar && _FirstUnread)
+			_ScrollBar->ensureVisible(_FirstUnread, Hotspot_Tx, Hotspot_Tx);
 	}
 
 	//========================================================================
 	void CGroupScrollText::draw()
 	{
 		CInterfaceGroup::draw();
+		// Line above the first unread message.
+		if (_List && _FirstUnread && isLineVisible(_FirstUnread))
+		{
+			CViewRenderer &rVR = *CViewRenderer::getInstance();
+			NLMISC::CRGBA color(255, 255, 255, CWidgetManager::getInstance()->getGlobalColorForContent().A / 2);
+			rVR.drawRotFlipBitmap(_RenderLayer, _List->getXReal(), _FirstUnread->getYReal() + _FirstUnread->getHReal(), _List->getWReal(), 1, 0, false, rVR.getBlankTextureId(), color);
+		}
 	}
 
 	//========================================================================
@@ -244,6 +321,8 @@ namespace NLGUI
 		_ScrollBar = dynamic_cast<CCtrlScroll *>(CInterfaceGroup::getCtrl("scroll_bar"));
 		_ButtonAdd = dynamic_cast<CCtrlBaseButton *>(CInterfaceGroup::getCtrl("button_add"));
 		_ButtonSub = dynamic_cast<CCtrlBaseButton *>(CInterfaceGroup::getCtrl("button_sub"));
+		_ButtonNewest = dynamic_cast<CCtrlBaseButton *>(CInterfaceGroup::getCtrl("button_newest"));
+		_ButtonUnread = dynamic_cast<CCtrlBaseButton *>(CInterfaceGroup::getCtrl("button_unread"));
 		_List	   = dynamic_cast<CGroupList *>(CInterfaceGroup::getGroup("text_list"));
 
 		if(_ScrollBar == nullptr)
@@ -261,6 +340,8 @@ namespace NLGUI
 		// actions
 		if (_ButtonAdd) _ButtonAdd->setActionOnClockTick("gst_add");
 		if (_ButtonSub) _ButtonSub->setActionOnClockTick("gst_sub");
+		if (_ButtonNewest) _ButtonNewest->setActionOnLeftClick("gst_newest");
+		if (_ButtonUnread) _ButtonUnread->setActionOnLeftClick("gst_unread");
 
 		// bind the scrollbar to the list
 		if (_ScrollBar)
@@ -293,7 +374,7 @@ namespace NLGUI
 	class CSTUp : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 		{
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
@@ -315,7 +396,7 @@ namespace NLGUI
 	class CSTDown : public IActionHandler
 	{
 	public:
-		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */) NL_OVERRIDE
+		virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
 		{
 			const CWidgetManager::SInterfaceTimes &times = CWidgetManager::getInstance()->getInterfaceTimes();
 
@@ -332,6 +413,28 @@ namespace NLGUI
 		}
 	};
 	REGISTER_ACTION_HANDLER (CSTDown, "gst_sub");
+	// ***************************************************************************
+	class CSTNewest : public IActionHandler
+	{
+	public: virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		{
+			CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
+			if (pST) pST->scrollToNewest();
+
+}
+	};
+	REGISTER_ACTION_HANDLER (CSTNewest, "gst_newest");
+
+	// ***************************************************************************
+	class CSTUnread : public IActionHandler
+	{
+	public: virtual void execute (CCtrlBase *pCaller, const std::string &/* Params */)
+		{
+			CGroupScrollText *pST = dynamic_cast<CGroupScrollText*>(pCaller->getParent());
+			if (pST) pST->scrollToUnread();
+		}
+	};
+	REGISTER_ACTION_HANDLER (CSTUnread, "gst_unread");
 
 }
 

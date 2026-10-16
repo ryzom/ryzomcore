@@ -21,6 +21,7 @@
 #include "stdpch.h"
 // Nel Misc
 #include "nel/misc/command.h"
+#include "nel/misc/base64.h"
 #include "nel/misc/file.h"
 #include "nel/misc/i_xml.h"
 #include "nel/misc/path.h"
@@ -778,6 +779,73 @@ NLMISC_COMMAND(farChat, "send far message chat", "<char_name> <chat_id> <message
 	nlinfo("chat:[%s]", ucstr.toUtf8().c_str());
 	IOS->getChatManager().sendFarChat(sname[0], ucstr, args[1], senderCid);
 	return true;
+}
+
+//-----------------------------------------------
+//	rejectBridgeChat
+//
+//-----------------------------------------------
+static bool rejectBridgeChat(CLog &log, const std::string &externalArg, const std::string &messageArg)
+{
+	log.displayNL("chat_bridge_reject|1|%s|%s|invalid_message_or_reference",
+		externalArg.c_str(), messageArg.c_str());
+	return true;
+}
+
+//-----------------------------------------------
+//	'bridgeChat'
+//
+//-----------------------------------------------
+NLMISC_COMMAND(bridgeChat, "send a structured bridge chat message",
+	"<sender64> <channel64> <external_id64|-> <message_id|-> <quote_id|-> <source_lang> <target_lang|-> <text64> [<translated_parts64|->]")
+{
+	const std::string externalArg = args.size() > 2 ? args[2] : "-";
+	const std::string messageArg = args.size() > 3 ? args[3] : "-";
+	if (args.size() < 8 || args.size() > 9)
+		return rejectBridgeChat(log, externalArg, messageArg);
+	std::vector<std::string> decoded = args;
+	const uint base64Arguments[] = { 0, 1, 2, 7, 8 };
+	for (uint i = 0; i < sizeof(base64Arguments) / sizeof(base64Arguments[0]) && base64Arguments[i] < args.size(); ++i)
+	{
+		const uint index = base64Arguments[i];
+		if ((index == 2 || index == 8) && args[index] == "-")
+		{
+			decoded[index].clear();
+			continue;
+		}
+		if (args[index].size() > 4 * ((CHAT_MESSAGE::MaxSerializedSize + 2) / 3) ||
+			args[index].find_first_not_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=") != std::string::npos)
+			return rejectBridgeChat(log, externalArg, messageArg);
+		decoded[index] = base64::decode(args[index]);
+		if (base64::encode(decoded[index]) != args[index])
+			return rejectBridgeChat(log, externalArg, messageArg);
+	}
+	ucstring content;
+	content.fromUtf8(decoded[7]);
+	if (!IOS->getChatManager().bridgeChat(decoded[0], decoded[1], decoded[2],
+		args[3] == "-" ? std::string() : args[3],
+		args[4] == "-" ? std::string() : args[4], args[5],
+		args[6] == "-" ? std::string() : args[6], content, args.size() > 8 ? decoded[8] : std::string()))
+		return rejectBridgeChat(log, externalArg, messageArg);
+	return true;
+}
+
+//-----------------------------------------------
+//	'bridgeReaction'
+//
+//-----------------------------------------------
+NLMISC_COMMAND(bridgeReaction, "send a reaction from the chat bridge",
+	"<sender64> <message_id> <emoji64> <add|remove>")
+{
+	if (args.size() != 4 || (args[3] != "add" && args[3] != "remove") ||
+		args[0].size() > 4 * ((CHAT_MESSAGE::MaxReceiverLength + 2) / 3) ||
+		args[2].size() > 4 * ((CHAT_MESSAGE::MaxEmojiNameLength + 2) / 3))
+		return false;
+	const std::string sender = base64::decode(args[0]);
+	const std::string emoji = base64::decode(args[2]);
+	if (base64::encode(sender) != args[0] || base64::encode(emoji) != args[2])
+		return false;
+	return IOS->getChatManager().bridgeReaction(sender, args[1], emoji, args[3] == "remove");
 }
 
 NLMISC_COMMAND(getRealName, "getRealName", "<char_name>")

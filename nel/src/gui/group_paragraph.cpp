@@ -884,6 +884,8 @@ namespace NLGUI
 								ctrl->setActive(true);
 								ctrl->setActionOnLeftClick(link.Link->getActionOnLeftClick());
 								ctrl->setParamsOnLeftClick(link.Link->getParamsOnLeftClick());
+								ctrl->setOnContextHelp(link.Link->getActionOnContextHelp());
+								ctrl->setLinkView(link.Link);
 								ctrl->setScale(true);
 								addCtrl(ctrl);
 							}

@@ -25,7 +25,7 @@
 
 		$encoded_password = md5(trim($password));
 
-		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_password='". $encoded_password ."' WHERE user_id=". $userinfo['user_id'];
+		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_password='". $encoded_password ."' WHERE user_id=". intval($userinfo['user_id']);
 		$db->sql_query($sql);
 
 		return true;
@@ -35,7 +35,7 @@
 	{
 		global $db;
 
-		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_menu_style=". $menu ." WHERE user_id=". $userinfo['user_id'];
+		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_menu_style=". intval($menu) ." WHERE user_id=". intval($userinfo['user_id']);
 		$db->sql_query($sql);
 	}
 
@@ -43,7 +43,7 @@
 	{
 		global $db;
 
-		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_default_application_id=". $application_id ." WHERE user_id=". $userinfo['user_id'];
+		$sql = "UPDATE ". NELDB_USER_TABLE ." SET user_default_application_id=". intval($application_id) ." WHERE user_id=". intval($userinfo['user_id']);
 		$db->sql_query($sql);
 	}
 

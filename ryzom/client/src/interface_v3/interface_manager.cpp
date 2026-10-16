@@ -115,6 +115,8 @@
 #include "../../common/src/game_share/ryzom_database_banks.h"
 
 #include "chat_text_manager.h"
+#include "emoji_manager.h"
+#include "emoji_picker.h"
 #include "../npc_icon.h"
 
 #include "nel/gui/lua_helper.h"
@@ -912,6 +914,8 @@ void CInterfaceManager::initInGame()
 	// Init LUA Scripting
 	initLUA();
 
+	CEmojiManager::getInstance().init();
+
 	// Clear the action manager
 	Actions.clear();
 	EditActions.clear();
@@ -1380,6 +1384,12 @@ void CInterfaceManager::uninitInGame1 ()
 		ChatDisplayer = nullptr;
 	}
 
+	// Release interface help before inventory manager
+	CInterfaceHelp::release();
+
+	CEmojiPicker::releaseInstance();
+	CEmojiManager::releaseInstance();
+
 	// Release inventory manager
 	CInventoryManager::releaseInstance();
 	// Same for temp inventory manager
@@ -1454,9 +1464,6 @@ void CInterfaceManager::uninitInGame1 ()
 
 	// Uninit macro manager
 	CMacroCmdManager::getInstance()->uninitInGame();
-
-	// Release interface help
-	CInterfaceHelp::release();
 
 	// Release guild manager
 	CGuildManager::release();

@@ -51,11 +51,10 @@ public:
 
 		uint32	size;
 		message.serial(size);
-// The following test removed by Sadge because it appears to be pointless and prevents ^2 testing to continue as required
-//		if ( size > 512 )
-//		{
-//			throw NLMISC::EInvalidDataStream();
-//		}
+		if ( size > 512 )
+		{
+			throw NLMISC::EInvalidDataStream();
+		}
 
 		PartCont.resize(size);
 		if (size > 0)

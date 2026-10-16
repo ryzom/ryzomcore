@@ -142,6 +142,7 @@ class CPVPInterface;
 class CStaticCharacters;
 
 class CExchangeView;
+class CChatMessageItem;
 
 /**
  * struct for trading phrases
@@ -2974,6 +2975,7 @@ public:
 
 	/// send item infos. For slotId (combination of inventory and slot), see explanation in CItemInfos
 	void sendItemInfos(uint32 slotId);
+	bool buildItemInfos(uint32 slotId, CChatMessageItem &chatItem, bool sendToClient);
 
 	/// return true if the player wears an item with the specified sheetId
 	bool doesWear(const NLMISC::CSheetId &sheetId) const;

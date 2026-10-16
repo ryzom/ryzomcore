@@ -1,44 +1,33 @@
 # ryzom-core
 
-## 2026-10-06 — 🐛 Validate client-supplied values in EGS callbacks
+## 2026-09-22 — ✨ Clip hairstyle mesh against equipped hat volume (HAT_SLOT)
 
-Crash found from a dump: a `CLIENT:EXCHANGE:ADD` message with an invalid source
-inventory (65535) made `CExchangeView::putItemInExchange()`
-call `getItem()` on a NULL inventory (`CCharacter::getInventory()` returns NULL
-for an unknown inventory). Hardened it and the other EGS callbacks that use
-values read from client messages without checking them. `nlassert` does
-nothing in release builds on Linux (`NLMISC_BREAKPOINT` is empty), so the code
-went on with the bad value.
+`ajout_hat_slot__hair_clip_alpha.md`: wide hairstyles (`HEAD_SLOT`) visually poking
+through hats (`HAT_SLOT`, added separately in `ajout_hat_slot.md`) are now fixed by
+building, per character and only while both slots are occupied, a private (never
+shape-bank-shared) copy of the hairstyle mesh with the geometry inside the hat's volume
+actually cut away — a real geometric clip, computed once at equip time. New module
+`ryzom/client/src/hairstyle_hat_clip.{h,cpp}`; see `docs/hairstyle_hat_clip.md` for the
+full design (coordinate-space handling, the `<hatShapeName>_mask.shape` clipping-volume
+convention, the clipping algorithm, and known limitations).
 
-Exchange: `putItemInExchange()` and `putItemInFirstEmptyExchangeSlot()` check
-the inventory, slot and exchange slot; `itemExchangeToBag()` checks the
-exchange slot.
+Driven from a new `CPlayerCL::updateVisible()` override (`player_cl.h`/`.cpp`), not from
+`updateVisualPropertyVpa()`: the latter runs before the character's skeleton is fully
+configured for the frame (bone world matrices still default/identity, character scale not
+yet reflected), which produced three distinct "skeleton not ready" symptoms during
+testing (unresolved bone matrices, halved-scale positions, and world-space coordinates
+imprecise enough to swamp the sub-centimeter containment test on a large continent) before
+landing on `updateVisible()` and an explicit recenter-on-the-bone-position step.
 
-NULL pointers and out of range indexes: `sendItemInfos()` (guild and room
-inventories) and `CGuild::getAndSyncItemInfoVersion()`, `buyPhraseByIndex()`,
-`sellItem()`, `clientEventSetItemCustomText()` and its callback,
-`cbClientPvPSetNeutralAllegianceGuild()`, `buildBuildingTradeList()`,
-`CCharacterShoppingList::buyItem()` (faction points), `CRewardSharing`
-(`userItemSelect()` for a user that is not a candidate, `userValidSelect()`
-off by one), `cbClientMissionWake()` and `abandonMission()` (missing or invalid
-template), `sendNpcMissionGiverIconDesc()` (missing creature),
-`CR2GiveItem::giveItemGranted()` (character no more online),
-`cbClientGuildSetGrade()` (grade >= `EndGuildGrade`).
+Two small public accessors added to the engine, both previously missing: `CMeshGeom::
+getBonesName()` (`nel/include/nel/3d/mesh.h`) and `CMeshMRMSkinnedGeom::getLodGeomorphs()`
+(`nel/include/nel/3d/mesh_mrm_skinned.h`, though `getGeomorphs()` already existed there
+doing the same thing under a different name — worth deduplicating later, not done here).
 
-Character creation: `checkCreateParams()` now refuses an unknown `People`
-(`setStartStatistics()` dereferenced a NULL race sheet) and visual values that
-do not fit the visual property bit fields (hair, colors, morph targets, eyes,
-tattoo, gabarits). The official client only sends values inside these ranges.
-
-`cbHarvestDeposit()` (`CLIENT:HARVEST:DEPOSIT`) returns early: the rest of the
-function is dead code ending in `nlerror()`, which calls `abort()` on Linux.
-The official client no longer sends this message, only a modified one could.
-
-Also fixes `CTeamManager::joinLeagueDecline()`, which read the team invitor
-instead of the league invitor when informing the players.
-
-No debug/test steps: not reproducible on demand; validation relies on code-level
-reasoning. Not compiled nor run when written.
+`entity_cl.cpp`'s `SInstanceCL::updateCurrentFromLoading()` gained two `(IA_AGENT_DEBUG)`-
+tagged log lines during testing (kept out of the final commit) to confirm
+`KeepHiddenWhenLoaded` — already-existing engine plumbing — was being respected correctly
+for hiding the normal (shared) hairstyle instance while a clipped one is active.
 
 ## 2026-09-23 — 🐛 Clear client PACS primitive handles before releasing the container
 

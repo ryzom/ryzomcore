@@ -44,6 +44,7 @@
 #include "inventory_manager.h"
 #include "game_share/memorization_set_types.h"
 #include "action_handler_help.h"
+#include "chat_link_ui.h"
 #include "bot_chat_page_all.h"
 #include "bot_chat_page_trade.h"
 #include "../net_manager.h"
@@ -90,7 +91,7 @@ void	debugUpdateActionBar()
 class CHandlerPhraseEdit : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCSDst == nullptr || !pCSDst->isSPhraseId())
@@ -118,7 +119,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseEdit, "phrase_edit" );
 class CHandlerPhraseNew : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		// Get A free slot to edit (not allocated).
 		CSPhraseManager		*pPM= CSPhraseManager::getInstance();
@@ -160,7 +161,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseNew, "phrase_new" );
 class CHandlerPhraseValidate : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		// NB: The user can validate only if the server was OK.
 
@@ -239,7 +240,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseValidate, "phrase_validate" );
 class CHandlerPhraseValidateOnEnter : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		// Test if the OK control is valid.
 		CGroupContainer	*pGC= dynamic_cast<CGroupContainer*>(pCaller);
@@ -340,7 +341,7 @@ void	launchPhraseComposition(bool creation)
 class CHandlerPhraseValidateBrick : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
@@ -350,7 +351,7 @@ public:
 
 		// get the selected brick
 		const CSBrickSheet		*brick= pCSSrc->asSBrickSheet();
-		if(brick == nullptr)
+		if(brick==nullptr)
 			return;
 
 		// and validate the composition
@@ -388,14 +389,14 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseValidateBrick, "phrase_validate_brick" );
 CHandlerPhraseValidateBrick::TType	CHandlerPhraseValidateBrick::BrickType;
 uint						CHandlerPhraseValidateBrick::Index;
 uint						CHandlerPhraseValidateBrick::ParamIndex;
-CDBGroupBuildPhrase			*CHandlerPhraseValidateBrick::BuildPhraseGroup = nullptr;
+CDBGroupBuildPhrase			*CHandlerPhraseValidateBrick::BuildPhraseGroup= nullptr;
 
 
 // ***************************************************************************
 class CHandlerPhraseSelectMainBrick : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -437,7 +438,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseSelectMainBrick, "phrase_select_main_bric
 class CHandlerPhraseSelectParamBrick : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -475,7 +476,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseSelectParamBrick, "phrase_select_param_br
 class CHandlerPhraseSelectNewBrick : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -512,7 +513,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseSelectNewBrick, "phrase_select_new_brick"
 class CHandlerPhraseChangeName : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		// The BuildPhrase should be the grandParent
 		CDBGroupBuildPhrase	*buildPhrase= dynamic_cast<CDBGroupBuildPhrase*>(pCaller->getParent()->getParent());
@@ -572,7 +573,7 @@ REGISTER_ACTION_HANDLER( CHandlerPhraseSetIcon, "phrase_set_icon");
 class CHandlerPhraseFaberSelectPlan : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -583,7 +584,7 @@ public:
 		fillFaberPlanSelection(CDBGroupBuildPhrase::BrickSelectionDB, CDBGroupBuildPhrase::MaxSelection, getRightHandCraftToolType());
 
 		// setup the validation
-		CHandlerPhraseValidateBrick::BuildPhraseGroup = nullptr;
+		CHandlerPhraseValidateBrick::BuildPhraseGroup= nullptr;
 		CHandlerPhraseValidateBrick::BrickType= CHandlerPhraseValidateBrick::FaberPlan;
 
 		// launch the modal
@@ -635,7 +636,7 @@ static void	updateAllSPhraseInfo()
 class CHandlerPhraseUpdateFromHand : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
 
@@ -655,7 +656,7 @@ REGISTER_ACTION_HANDLER (CHandlerPhraseUpdateFromHand, "phrase_update_from_hand"
 class CHandlerPhraseUpdateFromActionMalus : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		// **** Update misc Action Infos related to items weared
 		updateAllSPhraseInfo();
@@ -670,7 +671,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseUpdateFromActionMalus, "phrase_update_from
 class CHandlerCanDragPhrase : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 
@@ -691,7 +692,7 @@ REGISTER_ACTION_HANDLER (CHandlerCanDragPhrase, "phrase_can_drag_castable");
 class CHandlerCanMemorizePhraseOrMacro : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
@@ -753,12 +754,16 @@ public:
 	static bool isMacro;
 	static sint32 sPhraseId;
 	static sint32 macroId;
+	static bool hasLinkedPhrase;
+	static CSPhraseCom linkedPhrase;
 
-	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if(ctrl && ctrl->isSPhraseIdMemory())
 		{
+			hasLinkedPhrase = false;
+			linkedPhrase.clear();
 			haveLastPhraseElement = true;
 			isMacro = ctrl->isMacro();
 			sPhraseId = ctrl->getSPhraseId();
@@ -777,6 +782,58 @@ bool CHandlerPhraseMemoryCopy::haveLastPhraseElement = false;
 bool CHandlerPhraseMemoryCopy::isMacro = false;
 sint32 CHandlerPhraseMemoryCopy::sPhraseId = 0;
 sint32 CHandlerPhraseMemoryCopy::macroId = 0;
+bool CHandlerPhraseMemoryCopy::hasLinkedPhrase = false;
+CSPhraseCom CHandlerPhraseMemoryCopy::linkedPhrase;
+
+static bool getCopyableLinkedPhrase(CSPhraseCom &phrase)
+{
+	CDBCtrlSheet *sheet = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+	if (!getLinkedSabrinaPhrase(sheet, phrase))
+		return false;
+
+	CSBrickManager *brickManager = CSBrickManager::getInstance();
+	if (!brickManager)
+		return false;
+	for (uint i = 0; i < phrase.Bricks.size(); ++i)
+	{
+		if (!brickManager->isBrickKnown(phrase.Bricks[i]))
+			return false;
+	}
+	return true;
+}
+
+// **********************************************************************************************************
+class CHandlerCheckLinkedPhraseCopy : public IActionHandler
+{
+public: virtual void execute(CCtrlBase *pCaller, const string & /* params */)
+	{
+		CGroupMenu *menu = dynamic_cast<CGroupMenu*>(pCaller);
+		CViewTextMenu *copy = menu ? dynamic_cast<CViewTextMenu*>(menu->getView("copy")) : nullptr;
+		if (!copy)
+			return;
+		CSPhraseCom phrase;
+		copy->setGrayed(!getCopyableLinkedPhrase(phrase));
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerCheckLinkedPhraseCopy, "chat_link_phrase_copy_check");
+
+// **********************************************************************************************************
+class CHandlerCopyLinkedPhrase : public IActionHandler
+{
+public: virtual void execute(CCtrlBase * /* pCaller */, const string & /* params */)
+	{
+		CSPhraseCom phrase;
+		if (!getCopyableLinkedPhrase(phrase))
+			return;
+		CHandlerPhraseMemoryCopy::linkedPhrase = phrase;
+		CHandlerPhraseMemoryCopy::hasLinkedPhrase = true;
+		CHandlerPhraseMemoryCopy::haveLastPhraseElement = true;
+		CHandlerPhraseMemoryCopy::isMacro = false;
+		CHandlerPhraseMemoryCopy::sPhraseId = 0;
+		CHandlerPhraseMemoryCopy::macroId = 0;
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerCopyLinkedPhrase, "copy_linked_phrase");
 
 
 // **********************************************************************************************************
@@ -844,8 +901,9 @@ void CHandlerMemorizePhraseOrMacro::execute (CCtrlBase *pCaller, const string &P
 			if(!newPhraseId)
 				return;
 
-			// set it, copy from srcPhraseId
-			pPM->setPhrase(newPhraseId, pPM->getPhrase(srcPhraseId));
+			// A linked phrase has no local phrase id before it is pasted.
+			const CSPhraseCom &srcPhrase = CHandlerPhraseMemoryCopy::hasLinkedPhrase ? CHandlerPhraseMemoryCopy::linkedPhrase : pPM->getPhrase(srcPhraseId);
+			pPM->setPhrase(newPhraseId, srcPhrase);
 
 			// send learn to server
 			pPM->sendLearnToServer(newPhraseId);
@@ -1028,7 +1086,7 @@ void CHandlerMemorizePhraseOrMacro::memorizePhraseSheet(sint32 memoryLine, uint 
 class CHandlerForgetPhraseOrMacro : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
 
@@ -1072,7 +1130,7 @@ REGISTER_ACTION_HANDLER( CHandlerForgetPhraseOrMacro, "forget_phrase_or_macro");
 class CHandlerDeletePhraseOrForgetMacro : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string & Params) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string & Params)
 	{
 		CDBCtrlSheet *pCSDst = dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if (pCSDst == nullptr) return;
@@ -1119,7 +1177,7 @@ REGISTER_ACTION_HANDLER( CHandlerDeletePhraseOrForgetMacro, "delete_phrase_or_fo
 class CHandlerDoDeletePhraseOrForgetMacro : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		// Ok, the user try to forget a phrase slot
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();
@@ -1169,7 +1227,7 @@ public:
 	static	sint						LastIndex;
 
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
@@ -1325,7 +1383,7 @@ sint	CHandlerCastPhrase::LastIndex= -1;
 class CAHRunShortcut : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute (CCtrlBase * /* pCaller */, const string &Params)
 	{
 		sint	shortcut;
 		fromString(Params, shortcut);
@@ -1360,7 +1418,7 @@ REGISTER_ACTION_HANDLER (CAHRunShortcut, "run_shortcut");
 class CHandlerCastPhraseOrCreateNew : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager	*pIM = CInterfaceManager::getInstance();
 
@@ -1381,7 +1439,7 @@ public:
 		{
 			string	menu= pCSDst->getListMenuRightEmptySlot();
 			// opens only if no dragged sheet
-			if( !menu.empty() && CDBCtrlSheet::getDraggedSheet() == nullptr)
+			if( !menu.empty() && CDBCtrlSheet::getDraggedSheet()==nullptr )
 			{
 				// opens the menu
 				CDBCtrlSheet::setCurrSelSheet(pCSDst);
@@ -1399,7 +1457,7 @@ REGISTER_ACTION_HANDLER (CHandlerCastPhraseOrCreateNew, "cast_phrase_or_create_n
 class CHandlerPhraseLinkCtrlRClick : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1425,7 +1483,7 @@ REGISTER_ACTION_HANDLER (CHandlerPhraseLinkCtrlRClick, "phrase_link_ctrl_rclick"
 class CHandlerPhraseLinkStop : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1469,7 +1527,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseLinkStop, "phrase_link_stop");
 class CHandlerPhraseCancelCast: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 
@@ -1509,7 +1567,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseCancelCastNext, "phrase_cancel_cast_next")
 class CHandlerPhraseUpdateAllMemoryRegenTickRange : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *, const string &) NL_OVERRIDE
+	virtual void execute(CCtrlBase *, const string &)
 	{
 		CSPhraseManager	*pPM= CSPhraseManager::getInstance();
 		pPM->updateAllMemoryCtrlState();
@@ -1520,39 +1578,89 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseUpdateAllMemoryRegenTickRange, "phrase_upd
 
 
 // ***************************************************************************
-/// Called when we right click on a brick in the memories
-class CHandlerPhraseCheckCanCristalize: public IActionHandler
+class CHandlerLinkPhraseInChat : public IActionHandler
+{
+public: virtual void execute(CCtrlBase * /* pCaller */, const string &params)
+	{
+		CDBCtrlSheet *ctrl = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
+		if (!ctrl)
+			return;
+
+		CSPhraseCom phrase;
+		CChatMessageReference reference;
+		if (ctrl->isSPhraseId())
+		{
+			phrase = CSPhraseManager::getInstance()->getPhrase(ctrl->getSPhraseId());
+			reference.Type = CChatMessageReference::KnownPhrase;
+			reference.Value = ctrl->getSPhraseId();
+		}
+		else if (ctrl->isSPhrase())
+		{
+			CSPhraseManager::getInstance()->buildPhraseFromSheet(phrase, ctrl->getSheetId());
+			reference.Type = CChatMessageReference::PhraseSheet;
+			reference.Value = ctrl->getSheetId();
+		}
+		else
+			return;
+		if (!phrase.empty())
+			CHAT_SHARE::share(phrase.Name.toUtf8(), reference, getParam(params, "destination"));
+	}
+};
+REGISTER_ACTION_HANDLER(CHandlerLinkPhraseInChat, "link_phrase_in_chat");
+
+// ***************************************************************************
+/// Called when opening the phrase context menu
+class CHandlerPhraseMenuCheck: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		const string sCristalizePath = "ui:interface:cm_memory_phrase:cri";
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CSPhraseManager *pPM = CSPhraseManager::getInstance();
 		CSBrickManager *pBM = CSBrickManager::getInstance();
 		CInterfaceElement *pCristalizeMenuOption = CWidgetManager::getInstance()->getElementFromId(sCristalizePath);
+		CGroupMenu *phraseMenu = dynamic_cast<CGroupMenu*>(pCaller);
+		CViewTextMenu *pPhraseChatLink = phraseMenu ? dynamic_cast<CViewTextMenu*>(phraseMenu->getView("phrase_chat_link")) : nullptr;
 
-		if (pCristalizeMenuOption == nullptr) return;
+		if (pPhraseChatLink) pPhraseChatLink->setActive(false);
 		// The default is to not display the cristalize menu option
-		pCristalizeMenuOption->setActive(false);
+		if (pCristalizeMenuOption) pCristalizeMenuOption->setActive(false);
 		if (pCaller == nullptr) return;
 
 		// Get the interface control sheet
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCtrlLaunchingModal());
 		if (pCS == nullptr) return;
-		if (!pCS->isSPhraseIdMemory()) return;
+		bool memoryPhrase = pCS->isSPhraseIdMemory();
+		if (phraseMenu)
+		{
+			const char *memoryOnlyIds[] = { "for", "edi", "cut", "copy" };
+			for (uint i = 0; i < sizeof(memoryOnlyIds) / sizeof(memoryOnlyIds[0]); ++i)
+			{
+				CInterfaceElement *entry = phraseMenu->getView(memoryOnlyIds[i]);
+				if (entry) entry->setActive(memoryPhrase);
+			}
+		}
+		if (pCS->isSPhrase())
+		{
+			CInterfaceElement *info = phraseMenu ? phraseMenu->getView("inf") : nullptr;
+			if (info) info->setActive(true);
+			if (pPhraseChatLink) pPhraseChatLink->setActive(true);
+			return;
+		}
+		if (!pCS->isSPhraseId()) return;
 
-		// If its a phrase id in memory then get the phrase
-
-		const CSPhraseCom &phrase = pPM->getPhrase(pCS->getSheetId());
+		const CSPhraseCom &phrase = pPM->getPhrase(pCS->getSPhraseId());
 		if (phrase.empty()) return;
+		if (pPhraseChatLink) pPhraseChatLink->setActive(true);
+		if (!memoryPhrase) return;
 
 		// If the phrase is not empty get the root to known if its a magic phrase or not
 		// And if its a magic phrase display the cristalize menu option
 
 		CSBrickSheet *pBrick = pBM->getBrick(phrase.Bricks[0]);
-		if (pBrick != nullptr)
+		if (pBrick != nullptr && pCristalizeMenuOption)
 		{
 			if (pBrick->isMagic())
 			{
@@ -1570,14 +1678,14 @@ public:
 		}
 	}
 };
-REGISTER_ACTION_HANDLER(CHandlerPhraseCheckCanCristalize, "phrase_check_can_cristalize");
+REGISTER_ACTION_HANDLER(CHandlerPhraseMenuCheck, "phrase_check_can_cristalize");
 
 // ***************************************************************************
 /// Called after the cm_memory_phrase menu has been opened on a magic phrase
 class CHandlerPhraseCristalize: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CSPhraseManager		*pPM = CSPhraseManager::getInstance();
 
@@ -1612,7 +1720,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseCristalize, "phrase_cristalize");
 class CHandlerPhraseBookSkillFilter : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CSPhraseManager		*pPM= CSPhraseManager::getInstance();
 
@@ -1644,7 +1752,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseBookSkillFilter, "phrase_book_skill_filter
 class CHandlerPhraseSelectMemory : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string expr = getParam (Params, "value");
 		CInterfaceExprValue value;
@@ -1670,7 +1778,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory, "phrase_select_memory");
 class CHandlerPhraseSelectMemory2 : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		string expr = getParam (Params, "value");
 		CInterfaceExprValue value;
@@ -1699,7 +1807,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseSelectMemory2, "phrase_select_memory_2");
 class CHandlerPhraseSelectShortcutBar : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:SELECT_MEMORY", false);
@@ -1717,7 +1825,7 @@ REGISTER_ACTION_HANDLER(CHandlerPhraseSelectShortcutBar, "select_shortcut_bar");
 class CHandlerPhraseSelectShortcutBar2 : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CCDBNodeLeaf	*node= NLGUI::CDBManager::getInstance()->getDbProp("UI:PHRASE:SELECT_MEMORY_2", false);
@@ -1771,7 +1879,7 @@ REGISTER_INTERFACE_USER_FCT("getSPhraseName", getSPhraseName)
 class CHandlerCombatRestrictTooltip : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 		CDBCtrlSheet	*ctrlSheet= dynamic_cast<CDBCtrlSheet*>(pCaller);
@@ -1969,7 +2077,7 @@ NLMISC_COMMAND(phraseComfirmBuy, "Debug: confirm a phrase BotChat buy", "")
 class CHandlerCastMacro : public IActionHandler
 {
 public:
-	virtual void execute (CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute (CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CMacroCmdManager	*pMM = CMacroCmdManager::getInstance();
 
@@ -2003,7 +2111,7 @@ class CHandlerPhraseMemoryBeforeMenu : public IActionHandler
 public:
 	static	uint32 LastPhraseIdMenu;
 
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CDBCtrlSheet	*ctrl= dynamic_cast<CDBCtrlSheet*>(pCaller);
 		if(ctrl && ctrl->isSPhraseIdMemory())

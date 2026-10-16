@@ -26,6 +26,8 @@
 #include "macrocmd_manager.h"
 #include "macrocmd_key.h"
 
+#include "chat_link_ui.h"
+
 #include "interface_manager.h"
 #include "nel/gui/action_handler.h"
 #include "dbctrl_sheet.h"
@@ -552,7 +554,7 @@ void CMacroCmdManager::refreshAllKeyDisplays()
 class CHandlerMacroExec : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		uint macro;
@@ -566,7 +568,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacroExec, AH_MACRO_EXEC);
 class CHandlerMacroRecActEnd : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
@@ -592,7 +594,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacroRecActEnd, "macro_receive_action_end");
 class	CHandlerSetMacroBack : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sTP = getParam(Params, "target");
@@ -609,7 +611,7 @@ REGISTER_ACTION_HANDLER( CHandlerSetMacroBack, "set_macro_back");
 class	CHandlerSetMacroIcon : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sTP = getParam(Params, "target");
@@ -626,7 +628,7 @@ REGISTER_ACTION_HANDLER( CHandlerSetMacroIcon, "set_macro_icon");
 class	CHandlerSetMacroOver : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		string sTP = getParam(Params, "target");
@@ -643,7 +645,7 @@ REGISTER_ACTION_HANDLER( CHandlerSetMacroOver, "set_macro_over");
 class	CHandlerEBUpdateMacroText: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &Params)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
@@ -661,7 +663,7 @@ REGISTER_ACTION_HANDLER( CHandlerEBUpdateMacroText, "eb_update_macro_text");
 class	CHandlerMacroIconCreation : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
@@ -682,7 +684,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacroIconCreation, "macro_icon_creation_ok");
 class	CHandlerMacroIconCreationOpen : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
@@ -750,7 +752,7 @@ sint32 getCmdNbFromId(string id) // copy the string ! (do not change for a const
 class	CHandlerNewMacroCmdMoveUp: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		sint nCmdNb = getCmdNbFromId(pCaller->getId());
@@ -767,7 +769,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdMoveUp, "new_macro_cmd_move_up");
 class	CHandlerNewMacroCmdMoveDown: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		sint nCmdNb = getCmdNbFromId(pCaller->getId());
@@ -784,7 +786,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdMoveDown, "new_macro_cmd_move_down")
 class	CHandlerNewMacroCmdEdit: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		sint nCmdNb = getCmdNbFromId(pCaller->getId());
@@ -800,7 +802,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdEdit, "new_macro_cmd_edit");
 class	CHandlerNewMacroCmdCopy: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		sint nCmdNb = getCmdNbFromId(pCaller->getId());
@@ -819,7 +821,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdCopy, "new_macro_cmd_copy");
 class	CHandlerNewMacroCmdDelete: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		sint nCmdNb = getCmdNbFromId(pCaller->getId());
@@ -853,7 +855,7 @@ void addCommandLine (CGroupList *pParent, uint cmdNb, const string &cmdName)
 class	CHandlerNewMacroNewCmd: public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CAHManager::getInstance()->runActionHandler("new_macro_enter_name", nullptr);
@@ -868,7 +870,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroNewCmd, "new_macro_new_cmd");
 class	CHandlerNewMacroEnterName : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		if (pCaller == nullptr)
@@ -891,7 +893,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroEnterName, "new_macro_enter_name");
 class	CHandlerNewMacroOpen : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		// Init 'new_macro' container from the global current macro (gCurrentEditMacro)
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -943,7 +945,7 @@ REGISTER_ACTION_HANDLER( CHandlerNewMacroOpen, "new_macro_open");
 class	CHandlerNewMacroOk : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
@@ -1031,7 +1033,7 @@ void addMacroLine (CGroupList *pParent, uint macNb, const CMacroCmd &macro)
 class	CHandlerMacrosOpen : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
 		// Init 'macros' container from the macro manager
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1061,17 +1063,23 @@ REGISTER_ACTION_HANDLER( CHandlerMacrosOpen, "macros_open");
 class	CHandlerMacrosNewMacro : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */)
 	{
-		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		// Reinit the new_macro container and variables
 		CMacroCmd mc;
 		mc.Name = "NewMacro";
 		mc.BitmapBack = 0;
 		mc.BitmapIcon = 0;
 		mc.BitmapOver = 0;
-		pMCM->CurrentEditMacro = mc;
+		CMacroCmdManager::getInstance()->editNewMacro(mc);
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerMacrosNewMacro, "macros_new_macro");
+
+// ***************************************************************************
+void CMacroCmdManager::editNewMacro(const CMacroCmd &macro)
+{
+	CurrentEditMacro = macro;
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
 		if (pGC != nullptr)
@@ -1081,18 +1089,16 @@ public:
 			pGC->setActive (true);
 		}
 
-		pMCM->CurrentEditMacroNb = -1;
-		pMCM->EditCmd->deactivate();
+	CurrentEditMacroNb = -1;
+	EditCmd->deactivate();
 	}
-};
-REGISTER_ACTION_HANDLER( CHandlerMacrosNewMacro, "macros_new_macro");
 
 // ***************************************************************************
 // Called from context menu on a macro
 class	CHandlerMacrosExec : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		sint nMacNb = getMacroFromId(pCaller->getId());
 
@@ -1106,7 +1112,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacrosExec, "macros_exec");
 class	CHandlerMacrosEdit : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		sint nMacNb = getMacroFromId(pCaller->getId());
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1129,7 +1135,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacrosEdit, "macros_edit");
 class	CHandlerMacrosCopy : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		sint nMacNb = getMacroFromId(pCaller->getId());
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
@@ -1146,6 +1152,37 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosCopy, "macros_copy");
+
+// ***************************************************************************
+// Called from context menu on a macro
+class	CHandlerMacrosChatLink : public IActionHandler
+{
+public: virtual void execute(CCtrlBase *pCaller, const string &Params)
+	{
+		sint nMacNb = getMacroFromId(pCaller->getId());
+		const CMacroCmd &macro = CMacroCmdManager::getInstance()->getMacros()[nMacNb];
+
+		CChatMessageReference reference;
+		reference.Type = CChatMessageReference::Macro;
+		CChatMessageMacro &shared = reference.MacroValue;
+		shared.Name = macro.Name;
+		shared.DispText = macro.DispText;
+		shared.BitmapBack = macro.BitmapBack;
+		shared.BitmapIcon = macro.BitmapIcon;
+		shared.BitmapOver = macro.BitmapOver;
+		shared.Commands.resize(macro.Commands.size());
+		for (uint i = 0; i < macro.Commands.size(); ++i)
+		{
+			shared.Commands[i].Name = macro.Commands[i].Name;
+			shared.Commands[i].Params = macro.Commands[i].Params;
+		}
+		if (!shared.isValid())
+			CHAT_SHARE::reportInvalidLink();
+		else
+			CHAT_SHARE::share(macro.Name, reference, getParam(Params, "destination"));
+	}
+};
+REGISTER_ACTION_HANDLER( CHandlerMacrosChatLink, "macros_chat_link");
 
 
 // ***************************************************************************
@@ -1171,7 +1208,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacrosUnassign, "macros_unassign");
 class	CHandlerMacrosDel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
+	virtual void execute(CCtrlBase *pCaller, const string &/* Params */)
 	{
 		// build params string		
 		sint nMacNb = getMacroFromId(pCaller->getId());
@@ -1189,7 +1226,7 @@ REGISTER_ACTION_HANDLER( CHandlerMacrosDel, "macros_del");
 class	CHandlerMacrosDoDel : public IActionHandler
 {
 public:
-	virtual void execute(CCtrlBase * /*pCaller*/, const string & Params) NL_OVERRIDE
+	virtual void execute(CCtrlBase * /*pCaller*/, const string & Params)
 	{
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();		
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
