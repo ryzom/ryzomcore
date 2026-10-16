@@ -380,7 +380,9 @@ namespace NLGUI
 		static const char *			_NELSmallScriptTableName;
 
 #ifdef _WIN32
+#ifdef NL_DEBUG
 		HMODULE m_LuaSocket;
+#endif
 #endif
 
 	private:

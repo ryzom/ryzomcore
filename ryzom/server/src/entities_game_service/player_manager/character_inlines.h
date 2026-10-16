@@ -295,6 +295,19 @@ inline CInventoryPtr CCharacter::getLootContainer()
 	return _LootContainer;
 }
 
+
+inline bool CCharacter::isInitChest(uint8 chest)
+{
+	if (chest < 20)
+		return _initializedChests[chest];
+}
+
+inline void CCharacter::isInitChest(uint8 chest, bool value)
+{
+	if (chest < 20)
+		_initializedChests[chest] = value;
+}
+
 //------------------------------------------------------------------------------
 
 inline bool CCharacter::staticActionInProgress() const

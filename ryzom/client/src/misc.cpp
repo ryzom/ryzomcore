@@ -378,8 +378,8 @@ bool computeAnimSet(const CAnimationSet *&animSet, MBEHAV::EMode mode, const str
 		// Up to 100 missing anim set (security).
 		if(UnknownAnimSet.size() < 100)
 		{
-			if(UnknownAnimSet.insert(result).second)
-				nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
+			UnknownAnimSet.insert(result).second;
+			//	nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
 		}
 		// Try to compute the default one
 		result = animSetBaseName + "_" + "default" + "__";
@@ -391,8 +391,8 @@ bool computeAnimSet(const CAnimationSet *&animSet, MBEHAV::EMode mode, const str
 			// Up to 100 missing anim set (security).
 			if(UnknownAnimSet.size() < 100)
 			{
-				if(UnknownAnimSet.insert(result).second)
-					nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
+				UnknownAnimSet.insert(result).second;
+					//nlwarning("computeAnimSet: unknown Anim Set '%s' ('%u' unkowns).", result.c_str(), UnknownAnimSet.size());
 			}
 		}
 	}

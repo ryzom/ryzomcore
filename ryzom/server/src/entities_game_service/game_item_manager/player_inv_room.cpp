@@ -35,7 +35,7 @@ CPlayerRoomInventory::CPlayerRoomInventory(CCharacter * owner)
 }
 
 // ****************************************************************************
-uint32 CPlayerRoomInventory::getMaxBulk() const
+uint32 CPlayerRoomInventory::getMaxBulk(uint8 index) const
 {
 	return BasePlayerRoomBulk;
 }

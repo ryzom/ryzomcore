@@ -60,8 +60,8 @@ public:
 	enum
 	{
 		// The number of bits of the lower bits part (the index part)
-		// 10 because the trading list can have 1024 entries
-		SlotIdIndexBitSize= 11,
+		// 17 because the trading list can have >10000 entries
+		SlotIdIndexBitSize= 17,
 		SlotIdIndexBitMask= (1<<SlotIdIndexBitSize)-1,
 	};
 
@@ -78,8 +78,8 @@ public:
 	///\serial
 	void serial(NLMISC::IStream & s);
 
-	/// inventoryId(6 higher order bits )/slotId(10 lowers bits)
-	uint16	slotId;
+	/// inventoryId(6 higher order bits )/slotId(16 lowers bits)
+	uint32	slotId;
 	/// version of the inventory slot
 	uint16	versionInfo;
 	///\name item properties

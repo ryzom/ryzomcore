@@ -126,15 +126,16 @@ void CChatInput::operator()(const CEvent& event)
 
 	// TAB
 	case KeyTAB:
-		if(insert())
-		{
-			if(!_Str.empty() && _Str[0] == '/')
-			{
-				string command = _Str.toString().substr(1);
-				ICommand::expand(command);
-				_Str = '/' + command;
-			}
-		}
+		//comment out because no one used it and will be replaces with a lua function search_command()
+		//if(insert())
+		//{
+		//	if(!_Str.empty() && _Str[0] == '/')
+		//	{
+		//		string command = _Str.toString().substr(1);
+		//		ICommand::expand(command);
+		//		_Str = '/' + command;
+		//	}
+		//}
 		break;
 
 	// ESCAPE

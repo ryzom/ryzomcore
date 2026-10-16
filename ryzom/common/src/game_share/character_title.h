@@ -24,6 +24,7 @@
 #define RY_CHARACTER_TITLE_H
 
 #include <string>
+#include "nel/misc/algo.h"
 
 // ***************************************************************************
 /** Enum of character (player) title
@@ -306,7 +307,14 @@ inline ECharacterTitle getGMTitleFromPriv (const std::string& priv)
 //----------------------------------------------------------------------
 inline bool isCsrTitle(const std::string& title)
 {
-	ECharacterTitle titleEnum = toCharacterTitle( title );
+	if (title.empty())
+		return false;
+
+	std::vector<std::string> listInfos;
+	NLMISC::splitString(title, "#", listInfos);
+
+
+	ECharacterTitle titleEnum = toCharacterTitle( listInfos[0] );
 	bool bIsCsrTitle = (titleEnum >= SGM && titleEnum <= CM);
 
 	return bIsCsrTitle;

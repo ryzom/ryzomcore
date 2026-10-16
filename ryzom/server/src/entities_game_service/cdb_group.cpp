@@ -172,7 +172,8 @@ void	CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 			DBOutput.serial( noInitialDelta, 16 );
 		}
 		// Write additional provided data (for guild inventory)
-		dataProvider.provideContents( DBOutput ); // provideUpdate() must have been called before, otherwise would not be empty()
+		nlinfo("provide contents to %s", recipient.toString().c_str());
+		dataProvider.provideContents( DBOutput, const_cast<CEntityId&>(recipient), true); // provideUpdate() must have been called before, otherwise would not be empty()
 		// Send
 		CMessage msgout( "CDB_IMPULSION" );
 		msgout.serial( const_cast<CEntityId&>(recipient) );
@@ -184,4 +185,31 @@ void	CCDBGroup::sendDeltas( uint32 maxBitSize, IDataProvider& dataProvider, uint
 			nlwarning( "Recipient %s added twice into CDBGroup", recipient.toString().c_str() );
 	}
 	_NewRecipients.clear();
+}
+
+void CCDBGroup::sendDeltasToClient(IDataProvider& dataProvider, const CEntityId &id )
+{
+	DBOutput.resetBufPos();
+	GenericMsgManager.pushNameToStream( "DB_GROUP:UPDATE_BANK", DBOutput );
+	// Write the server tick, to ensure old DB update are not applied after newer
+	TGameCycle serverTick = CTickEventHandler::getGameCycle();
+	DBOutput.serial( serverTick );
+	// Encode the bank
+	uint32 bank = (uint32)Database.bank();
+	uint nbits;
+	FILL_nbits_WITH_NB_BITS_FOR_CDBBANK
+	DBOutput.serial( bank, nbits );
+	// Write the shared database delta (from the beginning)
+	if ( ! Database.writePermanentDelta( DBOutput ) )
+	{
+		uint32 noInitialDelta = 1;
+		DBOutput.serial( noInitialDelta, 16 );
+	}
+	// Write additional provided data (for guild inventory)
+	dataProvider.provideContents( DBOutput, id );
+	// Send
+	CMessage msgout( "CDB_IMPULSION" );
+	msgout.serial( const_cast<CEntityId&>(id) );
+	msgout.serialBufferWithSize( (uint8*)DBOutput.buffer(), DBOutput.length() );
+	CUnifiedNetwork::getInstance()->send( NLNET::TServiceId(id.getDynamicId()), msgout );
 }

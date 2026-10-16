@@ -3937,23 +3937,30 @@ class CMissionActionRecvGuildXp : public IMissionAction
 	void launch(CMission* instance, std::list< CMissionEvent * > & eventList)
 	{
 		LOGMISSIONACTION("recv_guild_xp");
-		/// todo charge
-		/*
-		CMissionInstanceGuild * mission = dynamic_cast<CMissionInstanceGuild*>(instance);
-		if (mission)
+
+		// get the player
+		std::vector<TDataSetRow> entities;
+		instance->getEntities( entities );
+		if ( entities.empty() )
+			return;
+
+		// If guild player from the mission is not of the race selected do not jump
+		for (uint i = 0 ; i < entities.size(); ++i)
 		{
-			CGuild * guild = mission->getGuild();
-			if ( guild )
+			CCharacter *pChar = PlayerManager.getChar(entities[i]);
+			if (pChar != NULL)
 			{
-				guild->addXp(Amount);
-				guild->sendMessageToMembers( "GUILD_XP_GAIN" );
+				CGuild * pGuild = CGuildManager::getInstance()->getGuildFromId( pChar->getGuildId() );
+				if ( pGuild )
+				{
+					pGuild->addXP(Amount);
+				}
 			}
 			else
-				nlwarning( "<MISSIONS> : CMissionActionRecvGuildXp mission %u, no guild in mission", instance->getTemplate()->Alias );
+			{
+				LOGMISSIONACTION("recv_guild_xp : invalid player row id " + entities[i].toString());
+			}
 		}
-		else
-			nlwarning( "<MISSIONS> : CMissionActionRecvGuildXp non guild mission %u", instance->getTemplate()->Alias );
-			*/
 	}
 
 	MISSION_ACTION_GETNEWPTR(CMissionActionRecvGuildXp)

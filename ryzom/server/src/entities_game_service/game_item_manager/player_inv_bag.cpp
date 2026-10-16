@@ -30,7 +30,7 @@ extern NLMISC::CVariable<uint32>	MaxPlayerBulk;
 /////////////////////////////////////////////////////////////
 
 // ****************************************************************************
-uint32 CBagInventory::getMaxBulk() const
+uint32 CBagInventory::getMaxBulk(uint8 index) const
 {
 	return MaxPlayerBulk;
 }

@@ -1705,6 +1705,40 @@ void CInventoryManager::getBranchSlotCounts(const std::string &basePath, uint& n
 	}
 }
 
+void CInventoryManager::getBranchSlotCounts(const std::string &basePath, uint16 startItemIndex, uint16 numItems, uint& nbUsedSlots, uint& nbMaxSlots )
+{
+	CInterfaceManager *pIM = CInterfaceManager::getInstance();
+	CCDBNodeBranch *branch = NLGUI::CDBManager::getInstance()->getDbBranch(basePath);
+	if (!branch)
+	{
+		nlwarning("<getBranchSlotCounts> Branch is NULL");
+		return;
+	}
+
+	nbMaxSlots = 0; // different from nbNodes, because there can be non-slots leaves (e.g. guild money...)
+	nbUsedSlots = 0;
+	for ( uint i=startItemIndex; i < startItemIndex+numItems; ++i )
+	{
+		ICDBNode *node = branch->getNode(i);
+		if (node)
+		{
+			CCDBNodeLeaf *sheetNode = dynamic_cast<CCDBNodeLeaf *>(node->getNode(ICDBNode::CTextId("SHEET")));
+			if (sheetNode)
+			{
+				// Get the Sheet
+				CSheetId sheetId = CSheetId(sheetNode->getValue32());
+				if (sheetId != CSheetId::Unknown)
+				{
+					++nbUsedSlots;
+				}
+
+				++nbMaxSlots;
+			}
+		}
+	}
+}
+
+
 
 // ***************************************************************************
 double CInventoryManager::getBagBulk(uint32 inventoryIndex)
@@ -3134,13 +3168,17 @@ class CHandlerInvDropTo : public IActionHandler
 						string sTmp;
 						if (pListDstText != NULL) sTmp = toString("%d",pListDstText->getInvType()-CInventoryManager::InvPA0);
 						if (pListDstIcon != NULL) sTmp = toString("%d",pListDstIcon->getInvType()-CInventoryManager::InvPA0);
-							nlinfo("ici :%s", sTmp.c_str());
 						CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_pa|"+sTmp);
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild)) ||
 							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild)))
 					{
 							CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild");
+					}
+					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvGuild2)) ||
+							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvGuild2)))
+					{
+							CAHManager::getInstance()->runActionHandler("proc", pCSSrc, "move_to_guild2");
 					}
 					else if (((pListDstText != NULL) && (pListDstText->getInvType() == CInventoryManager::InvRoom)) ||
 							 ((pListDstIcon != NULL) && (pListDstIcon->getInvType() == CInventoryManager::InvRoom)))
@@ -3349,11 +3387,11 @@ class CHandlerInvTempAll : public IActionHandler
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal4))
 			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(4), pInv->getMaxBagBulk(4)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal5))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(5), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(5), pInv->getMaxBagBulk(5)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal6))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(6), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(6), pInv->getMaxBagBulk(6)));
 		if (pInv->isInventoryAvailable(INVENTORIES::pet_animal7))
-			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(7), pInv->getMaxBagBulk(4)));
+			BagsBulk.push_back(pair <double, double>(pInv->getBagBulk(7), pInv->getMaxBagBulk(7)));
 
 		bool bPlaceFound = true;
 
@@ -3442,13 +3480,13 @@ void			CClientItemInfo::readFromImpulse(const CItemInfos &itemInfo)
 }
 
 // ***************************************************************************
-uint16				CInventoryManager::getItemSlotId(CDBCtrlSheet *ctrl)
+uint32				CInventoryManager::getItemSlotId(CDBCtrlSheet *ctrl)
 {
 	return getItemSlotId(ctrl->getSheet(), ctrl->getIndexInDB());
 }
 
 // ***************************************************************************
-uint16				CInventoryManager::getItemSlotId(const std::string &itemDb, uint slotIndex)
+uint32				CInventoryManager::getItemSlotId(const std::string &itemDb, uint slotIndex)
 {
 	// then compare to all possible inventories (ugly)
 	uint	inventoryIndex= 0;
@@ -3699,7 +3737,7 @@ void			CInventoryManager::onReceiveItemInfo(const CItemInfos &itemInfo)
 }
 
 // ***************************************************************************
-void			CInventoryManager::onRefreshItemInfoVersion(uint16 slotId, uint8 infoVersion)
+void			CInventoryManager::onRefreshItemInfoVersion(uint32 slotId, uint8 infoVersion)
 {
 	_ItemInfoMap[slotId].refreshInfoVersion(infoVersion);
 }
@@ -3765,7 +3803,7 @@ void			CInventoryManager::updateItemInfoQueue()
 					CBitMemStream out;
 					if (GenericMsgHeaderMngr.pushNameToStream("ITEM_INFO:GET", out))
 					{
-						uint16	slotId= itemSlotId;
+						uint32	slotId= itemSlotId;
 						out.serial( slotId );
 						NetMngr.push(out);
 						//nlinfo("impulseCallBack : ITEM_INFO:GET %d sent", slotId);
@@ -3837,6 +3875,11 @@ void CInventoryManager::sortBag()
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_ICONS));
 	if (pIconList != NULL) pIconList->needToSort();
 	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD_TEXT));
+	if (pList != NULL) pList->needToSort();
+
+	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD2_ICONS));
+	if (pIconList != NULL) pIconList->needToSort();
+	pList = dynamic_cast<CDBGroupListSheetBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_GUILD2_TEXT));
 	if (pList != NULL) pList->needToSort();
 
 	pIconList = dynamic_cast<CDBGroupIconListBag*>(CWidgetManager::getInstance()->getElementFromId(LIST_PA0_ICONS));
@@ -4121,6 +4164,7 @@ CInventoryManager::TInvType CInventoryManager::invTypeFromString(const string &s
 	if (sTmp == "inv_pa5")		return InvPA5;
 	if (sTmp == "inv_pa6")		return InvPA6;
 	if (sTmp == "inv_guild")	return InvGuild;
+	if (sTmp == "inv_guild2")	return InvGuild2;
 	if (sTmp == "inv_room")		return InvRoom;
 	return InvUnknown;
 }

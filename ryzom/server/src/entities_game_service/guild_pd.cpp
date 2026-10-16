@@ -389,7 +389,7 @@ void							CGuildPD::apply(CPersistentDataRecord &__pdr)
 		}
 		else
 		{
-			nlwarning("Skipping unrecognised token: %s", __pdr.peekNextTokenName().c_str());
+			//nlwarning("Skipping unrecognised token: %s", __pdr.peekNextTokenName().c_str());
 			__pdr.skipData();
 		}
 	}

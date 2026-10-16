@@ -444,7 +444,8 @@
 			<ctrl style="tab_button_new" id="tab7" posparent="tab6" group="content:pa5" hardtext="uitabInvPAZig2" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa5" onclick_l="proc" params_l="inventory_focus" />
 			<ctrl style="tab_button_new" id="tab8" posparent="tab7" group="content:pa6" hardtext="uitabInvPAZig3" tooltip="uiTabInfo" onclick_r="show" params_r="inv_pa6" onclick_l="proc" params_l="inventory_focus" />
 			<ctrl style="tab_button_new" id="tab9" posparent="tab8" group="content:guild" hardtext="uitabInvGuild" tooltip="uiTabInfo" onclick_r="set" params_r="dblink=UI:SAVE:INVENTORY_GUILD_WANT_POPUP|value=1" onclick_l="proc" params_l="inventory_focus" />
-			<ctrl style="tab_button_new" id="tab10" posparent="tab9" group="content:room" hardtext="uitabInvRoom" tooltip="uiTabInfo" onclick_r="show" params_r="inv_room" onclick_l="proc" params_l="inventory_focus" />
+			<ctrl style="tab_button_new" id="tab11" posparent="tab9" group="content:guild2" hardtext="uitabInvGuild2" tooltip="uiTabInfo" onclick_r="set" params_r="dblink=UI:SAVE:INVENTORY_GUILD2_WANT_POPUP|value=1" onclick_l="proc" params_l="inventory_focus" />
+			<ctrl style="tab_button_new" id="tab10" posparent="tab11" group="content:room" hardtext="uitabInvRoom" tooltip="uiTabInfo" onclick_r="show" params_r="inv_room" onclick_l="proc" params_l="inventory_focus" />
 
 			<link expr="not(@UI:VARIABLES:ISACTIVE:INV_BAG)" target="tab0:active" />
 			<link expr="not(@UI:VARIABLES:ISACTIVE:INV_EQUIP)" target="tab1:active" />
@@ -464,6 +465,7 @@
 
 			<link expr="and(%is_guild_present, not(@UI:SAVE:INVENTORY_GUILD_WANT_POPUP), @UI:TEMP:INVENTORY_GUILD_OPENED)" target="tab9:active" />
 			<link expr="and(not(@UI:VARIABLES:ISACTIVE:INV_ROOM), @UI:TEMP:INVENTORY_ROOM_OPENED)" target="tab10:active" />
+			<link expr="and(%is_guild_present, not(@UI:SAVE:INVENTORY_GUILD2_WANT_POPUP), @UI:TEMP:INVENTORY_GUILD_OPENED)" target="tab11:active" />
 		</group>
 
 		<view type="bitmap" id="sep" posparent="inv_select" posref="BR BL" sizeparent="parent" sizeref="w" w="0" h="1" scale="true" texture="blank.tga" color="166 166 166 255" />
@@ -523,8 +525,16 @@
 
 		<!-- guild -->
 		<group id="guild" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
-			<instance template="tinv_nbslots_bulk_weight" id="ibw" x="0" inv_branch="%guild_inv_dbentry" inv_bulk_max="%guild_inv_bulk_max" />
-			<instance template="tinv_item_list" id="iil" inv_branch_nb="%max_guild_invslot" y="-18" sizeref="wh" h="-16" inv_branch="%guild_inv_dbentry" inv_type="INV_GUILD" />
+			<instance template="tguildinv_nbslots_bulk_weight" id="ibw" x="0" selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_A" inv_branch="%guild_inv_dbentry" inv_bulk_max="%guild_inv_bulk_max" />
+			<instance template="tinv_item_list" id="iil" y="-18" sizeref="wh" h="-16" inv_branch="%guild_inv_dbentry" inv_branch_nb="%max_guild_invslot" start_item="0" inv_type="INV_GUILD" />
+			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%guild_inv_money" />
+			<ctrl style="new_element_header" id="getmoney_but" posref="MR ML" posparent="money" x="4" wmargin="8" hardtext="uittGetMoney" onclick_l="proc" params_l="guild_get_money" />
+			<ctrl style="new_element_header" id="putmoney_but" posref="MR ML" posparent="getmoney_but" x="4" wmargin="8" hardtext="uittPutMoney" onclick_l="proc" params_l="guild_put_money" />
+		</group>
+
+		<group id="guild2" posref="TL TL" x="0" y="0" sizeref="wh" w="0" h="0">
+			<instance template="tguildinv_nbslots_bulk_weight" id="ibw" x="0" selected_chest="UI:SAVE:GUILD_INVENTORY_CHEST_B" inv_branch="%guild_inv_dbentry" />
+			<instance template="tinv_item_list" id="iil" y="-18" sizeref="wh" h="-16" inv_branch="%guild_inv_dbentry" inv_branch_nb="%max_guild_invslot" start_item="0" inv_type="INV_GUILD2" />
 			<instance template="argent" id="money" posref="BL BL" x="4" y="2" value="%guild_inv_money" />
 			<ctrl style="new_element_header" id="getmoney_but" posref="MR ML" posparent="money" x="4" wmargin="8"
 				hardtext="uittGetMoney" onclick_l="proc" params_l="guild_get_money" />

@@ -65,7 +65,7 @@ static bool isContainerAuthorized(CGroupContainer *pGC)
 	std::string shortId = pGC->getShortId();
 	// special case to prevent opening the guild inventory window if there's
 	// no guild or not in guild hall.
-	if (shortId == "inv_guild")
+	if (shortId == "inv_guild" || shortId == "inv_guild2")
 	{
 		if (NLGUI::CDBManager::getInstance()->getDbProp("SERVER:GUILD:NAME") == 0
 			|| !getInventory().isInventoryPresent(INVENTORIES::guild))

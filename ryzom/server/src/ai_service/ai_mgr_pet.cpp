@@ -214,6 +214,7 @@ void CPetSpawnMsgImp::callback(std::string const& name, NLNET::TServiceId id)
 			
 			if (botPet && botPet->isSpawned())
 			{
+				confirmMsg.PetMirrorRow = botPet->getSpawn()->dataSetRow();
 				confirmMsg.SpawnError = CPetSpawnConfirmationMsg::PET_ALREADY_SPAWNED;
 				confirmMsg.send("EGS");
 				return;

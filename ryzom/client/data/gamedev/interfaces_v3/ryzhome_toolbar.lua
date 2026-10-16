@@ -6,7 +6,9 @@ RyzhomeBar = {
 
 function RyzhomeBar:close()
 	getUI("ui:interface:webig_ryzhome_toolbar").active=false
-	self:saveConfig()
+	setOnDraw(getUI("ui:interface:ryzhomeMain"), "")
+	getUI("ui:interface:ryzhomeMain").active = false
+	getUI("ui:interface:ryzhomeItems").active = false
 
 end
 
@@ -128,7 +130,7 @@ function RyzhomeBar:useItem(id)
 end
 
 function RyzhomeBar:addItem(id)
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_Place&command=add&id="..id
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_Place&command=add&id="..id
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
@@ -137,12 +139,12 @@ function RyzhomeBar:removeItem(id)
 	RyzhomeBar:spawnItems()
 	local v = RyzhomeBar.spawnedItems[id]
 	runAH(nil,"add_shape", "shape=sp_mort.ps|x="..v[2].."|y="..v[3].."|z="..v[4].."|angle="..v[5].."|scale="..tostring(tonumber(v[6])*4)..v[7]..v[8]..v[9])
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_Remove&id="..id
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_Remove&id="..id
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:moveItem(id)
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_Place&command=move&id="..id
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_Place&command=move&id="..id
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
@@ -162,14 +164,23 @@ function RyzhomeBar:highlightItem(id)
 end
 
 function RyzhomeBar:callFriendUrl(action, target)
-	local url = "http://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_"..action.."&amp;target="..target
+	local url = "https://app.ryzom.com/app_arcc/index.php?action=player_ryzhome_"..action.."&amp;target="..target
 	getUI("ui:interface:web_transactions:content:html"):browse(url)
 end
 
 function RyzhomeBar:spawnItems()
 	runAH(nil, "remove_shapes", "")
 	for k,v in pairs(RyzhomeBar.spawnedItems) do
-		runAH(nil, "add_shape", "shape="..v[1].."|x="..v[2].."|y="..v[3].."|z="..v[4].."|angle="..v[5].."|scale="..v[6]..v[7]..v[8]..v[9])
+		-- "shape", .x, .y, .z, .a, .b, .c, .scale, collision?, "context", "url", highlight?, transparency?, "texture", "skeleton"
+		if v[2] ~= "" and v[3] ~= "" and v[4] ~= "" and v[5] ~= "" and tonumber(v[8]) ~= nil then
+			id = addShape(v[1], tonumber(v[2]), tonumber(v[3]), tonumber(v[4]), "user", tonumber(v[8]), false, v[9], v[10], false, false, v[11])
+			rotateShape(id, v[6], v[7], v[5])
+			local setup = {}
+			setup["col size x"] = "0"
+			setup["col size y"] = "0"
+			setup["col size z"] = "0"
+			--setupShape(id, setup)
+		end
 	end
 
 end
@@ -181,6 +192,7 @@ function RyzhomeBar:setupItems()
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=""
 		getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).uc_hardtext=""
 	end
+	if RyzhomeBar.Items[RyzhomeBar.selectedPage] then
 	for k,v in pairs(RyzhomeBar.Items[RyzhomeBar.selectedPage]) do
 		if k ~= nil then
 			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":icon"..tostring(k)).active=true
@@ -190,6 +202,7 @@ function RyzhomeBar:setupItems()
 			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":text"..tostring(k)).uc_hardtext=text
 			text:fromUtf8(v[4])
 			getUI("ui:interface:webig_ryzhome_list_item:header_opened"):find(":info"..tostring(k)).uc_hardtext=text
+		end
 		end
 	end
 end
@@ -233,6 +246,7 @@ end
 function RyzhomePlace:close()
 	--runAH(nil, "remove_shapes", "")
 	getUI("ui:interface:webig_ryzhome_place_item").active=false
+	getUI("ui:interface:ryzhomeItems").active=false
 end
 -- VERSION --
 RYZOM_RYZHOME_TOOLBAR_VERSION = 324

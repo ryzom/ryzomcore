@@ -175,6 +175,8 @@ void	CMeshBase::serialMeshBase(NLMISC::IStream &f)
 	 * ***********************************************/
 
 	/*
+	Version 10:
+		- Ryzom Core release check
 	Version 9:
 		- _CollisionMeshGeneration
 	Version 8:
@@ -197,7 +199,7 @@ void	CMeshBase::serialMeshBase(NLMISC::IStream &f)
 	Version 0:
 		- 1st version.
 	*/
-	sint ver = f.serialVersion(9);
+	sint ver = f.serialVersion(10);
 
 	if (ver >= 2)
 	{

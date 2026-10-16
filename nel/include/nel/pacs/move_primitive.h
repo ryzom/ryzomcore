@@ -251,28 +251,6 @@ public:
 		_Height=height;
 	}
 
-	void setZFinalPosition(float pos)
-	{
-		_ZFinalPosition = pos;
-	}
-
-	float getZFinalPosition()
-	{
-		return _ZFinalPosition;
-	}
-
-
-	bool haveZOffset()
-	{
-		return _HaveZOffset;
-	}
-
-	void enableZOffset(bool enabled)
-	{
-		_HaveZOffset = enabled;
-	}
-
-
 	/**
 	  * Set the cylinder size. Only for cylinder.
 	  *
@@ -488,11 +466,6 @@ private:
 
 	// Iteration count
 	sint32				_IterationCount;
-
-	float 				_ZOffset;
-	float 				_ZFinalPosition;
-	bool				_HaveZOffset;
-
 };
 
 } // NLPACS

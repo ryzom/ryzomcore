@@ -489,6 +489,7 @@ bool		CInventoryUpdater<CInventoryCategoryTemplate>::fillAllUpdates( NLMISC::CBi
 
 		// Number field
 		uint32 nbChanges = (uint32)_ItemUpdates[invId].size();
+
 		if ( nbChanges < INVENTORIES::LowNumberBound )
 		{
 			destStream.serial( nbChanges, INVENTORIES::LowNumberBits );

@@ -160,6 +160,7 @@ NLMISC_COMMAND(dumpGuild, "dump a guild", "<guildName|<shardId>:<guildId>")
 
 	GET_GUILD(false);
 
+	guild->initChests();
 	guild->dumpGuildInfos( log );
 
 	return true;
@@ -357,7 +358,7 @@ NLMISC_COMMAND(guildFailedGVE, "get/set failed GVE of guild", "<guildName|<shard
 			guild->setLastFailedGVE(time);
 		}
 
-		log.displayNL("%d", time);
+		log.displayNL("%u", time);
 	} else {
 		log.displayNL("ERR: no guild");
 	}

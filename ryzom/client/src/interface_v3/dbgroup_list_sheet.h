@@ -85,6 +85,10 @@ public:
 	 */
 	void					forceValidity(uint element, bool forceValid);
 
+	sint getStartDbIndex() const { return _StartDbIdx; }
+	void setStartDbIndex(sint index);
+
+
 public:
 
 	// A child node

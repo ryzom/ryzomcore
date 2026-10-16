@@ -1308,13 +1308,13 @@ namespace NLGUI
 			{
 				makeTopWindow();
 				// for french, deutsch and russian, be aware of unicode
-				std::string command = CUtfStringView(_InputString.substr(1)).toUtf8();
-				ICommand::expand(command);
+				//std::string command = CUtfStringView(_InputString.substr(1)).toUtf8();
+				//ICommand::expand(command);
 				// then back to u32string
-				_InputString = CUtfStringView('/' + command).toUtf32();
-				_InputString = _InputString;
-				_CursorPos = (sint32)_InputString.length();
-				_CursorAtPreviousLineEnd = false;
+				//_InputString = CUtfStringView('/' + command).toUtf32();
+				//_InputString = _InputString;
+				//_CursorPos = (sint32)_InputString.length();
+				//_CursorAtPreviousLineEnd = false;
 				triggerOnChangeAH();
 				return true;
 			}

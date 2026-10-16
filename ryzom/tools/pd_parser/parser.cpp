@@ -1329,7 +1329,7 @@ bool	CEnumNode::generateContent()
 	gen.addAttribute("std::vector<std::string>", "_StrTable", "init", true);
 	gen.addAttribute("std::map<std::string, "+Name+">", "_ValueMap", "init", true, "", false, "std::map<std::string, "+getName()+">");
 
-	cppOutput() << "static const struct { char* Name; " << getName() << " Value; } " << Name << "Convert[] =\n";
+	cppOutput() << "static const struct { const char* Name; " << getName() << " Value; } " << Name << "Convert[] =\n";
 	cppOutput() << "{\n";
 	for (j=0; j<Values.size(); ++j)
 		cppOutput() << "{ \"" << Values[j].first << "\", C"+enumTruncName+"::"+Values[j].first+" },\n";
@@ -2638,7 +2638,6 @@ bool	CClassNode::generateContent()
 
 	ApplyId.add(	"else");
 	ApplyId.add(	"{");
-	ApplyId.add(		"nlwarning(\"Skipping unrecognised token: %s\", __pdr.peekNextTokenName().c_str());");
 	ApplyId.add(		"__pdr.skipData();");
 	ApplyId.add(	"}");
 	ApplyId.add("}");
@@ -4515,11 +4514,11 @@ void	CDeclarationNode::generateSetContent(CCallContext *context)
 	if (useReference)
 	{
 		FetchId.add(Type+"*\t"+objectVariable+" = static_cast<"+Type+"*>("+pdslibFunc("create")+"(tableIndex));");
-		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+objectVariable+"));");
+		FetchId.add(cppName()+".insert(std::pair<"+keyType->StorageType+","+Type+">("+keyVariable+", "+objectVariable+"));");
 	}
 	else
 	{
-		FetchId.add(cppName()+".insert(std::make_pair("+keyVariable+", "+Type+"()));");
+		FetchId.add(cppName()+".insert(std::pair<"+keyType->StorageType+","+Type+">("+keyVariable+", "+Type+"()));");
 		FetchId.add(Type+"*\t"+objectVariable+" = &("+cppName()+"["+keyVariable+"]);");
 	}
 	FetchId.add(pdslibFunc("setRowIndex")+"(rowIndex, "+objectVariable+");");

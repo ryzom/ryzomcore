@@ -132,7 +132,7 @@ namespace INVENTORIES
 	const uint CInventoryCategoryForCharacter::InventoryNbSlots [CInventoryCategoryForCharacter::NbInventoryIds] =
 	{ NbBagSlots,	NbPackerSlots,	NbPackerSlots,	NbPackerSlots,	NbPackerSlots, NbPackerSlots, NbPackerSlots, NbPackerSlots,	NbRoomSlots };
 	// Other values to change according to these InventoryNbSlots:
-	// - game_share.h/inventories.h: CInventoryCategoryForCharacter::SlotBitSize
+	// - game_share/inventories.h: CInventoryCategoryForCharacter::SlotBitSize
 	// - data_common/database.xml: INVENTORY:BAG count
 	// - data/gamedev/interfaces_v3/inventory.xml: inventory:content:bag param inv_branch_nb
 
@@ -141,7 +141,7 @@ namespace INVENTORIES
 	const uint CInventoryCategoryForGuild::InventoryNbSlots [CInventoryCategoryForGuild::NbInventoryIds] =
 	{ NbGuildSlots };
 	// Other values to change according to this InventoryNbSlots:
-	// - game_share.h/inventories.h: CInventoryCategoryForGuild::SlotBitSize
+	// - game_share/inventories.h: CInventoryCategoryForGuild::SlotBitSize
 	// - data_common/database.xml: GUILD:INVENTORY count
 	// - data/gamedev/interfaces_v3/inventory.xml: inventory:content:guild param inv_branch_nb
 

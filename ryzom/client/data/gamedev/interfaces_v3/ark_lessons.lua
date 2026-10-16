@@ -226,8 +226,15 @@ function ArkLessons:ArkRevealLessonInfos(scriptid, i, total)
 	end
 end
 
-function openArkLessonScript(i, script_id, url)
+function openArkLessonScript(i, script_id, url, rp_item, rp_item_url)
 	if i == ArkLessons.RevealStep[script_id] then
+		local right = getPlayerTag(5)
+		if getDbProp("LOCAL:INVENTORY:HAND:0:INDEX_IN_BAG") ~= 0 then
+			right = "_"
+		end
+		if rp_item ~= nil and rp_item_url ~= nil and right ~= rp_item then
+			WebQueue:push(rp_item_url)
+		end
 		getUI("ui:interface:ArkLessonWin"..tostring(script_id)).active = false
 		WebQueue:push(url)
 	end
@@ -417,6 +424,16 @@ function webig:openWin(ui_name)
 	if ui then
 		ui.active = true
 	end
+end
+
+function getVpx(vpx)
+	while string.len(vpx) < 16 do
+		vpx = "0"..vpx
+	end
+	local vpx1 = string.format("%06d", tonumber(vpx:sub(1, string.len(vpx)-2), 16)*256)
+	local vpx2 = string.format("%06d", tonumber(vpx:sub(string.len(vpx)-1, string.len(vpx)), 16)+tonumber(vpx1:sub(string.len(vpx1)-5, string.len(vpx1))))
+	local nvpx = vpx1:sub(1, string.len(vpx1)-6)..vpx2:sub(string.len(vpx2)-5, string.len(vpx2))
+	return nvpx
 end
 
 

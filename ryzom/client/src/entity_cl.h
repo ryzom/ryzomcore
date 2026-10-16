@@ -949,10 +949,6 @@ protected:
 	uint32							_NameId;
 	// Primitive used for the collision in PACS
 	NLPACS::UMovePrimitive			*_Primitive;
-
-	uint64 							_LastSnapToGroup;
-	float							_CurrentZOffset;
-
 	// 3D Logic info for light request.
 	CEntityLogicInfo3D				_LogicInfo3D;
 	// Box around the entity.

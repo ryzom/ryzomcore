@@ -727,8 +727,7 @@ void CPlayerCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 	if (fakeRightHand >= 0)
 		rightHand = SheetMngr.getItem(SLOTTYPE::RIGHT_HAND_SLOT, fakeRightHand);
 
-	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _PlayerSheet->GenderInfos[_Gender].AnimSetBaseName, leftHand, rightHand, !modeWithHiddenItems()))
-		nlwarning("PL:computeAnimSet:%d: pb when computing the animset.", _Slot);
+	::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _PlayerSheet->GenderInfos[_Gender].AnimSetBaseName, leftHand, rightHand, !modeWithHiddenItems());
 
 }// computeAnimSet //
 
@@ -863,7 +862,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				UInstance instance;
 
 				// Manage cache of items
-				if (!tagInfos[0].empty() && tagInfos[0][0] == '#')
+				if (tagInfos.size() >= 1 && !tagInfos[0].empty() && tagInfos[0][0] == '#')
 				{
 					int itemNameId;
 					fromString(tagInfos[0].substr(1), itemNameId);
@@ -883,7 +882,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 					fromString(tagInfos[1], instTexture);
 					equip(slot, tagInfos[0], itemSheet, instTexture);
 				}
-				else
+				else if (tagInfos.size() >= 1)
 				{
 					equip(slot, tagInfos[0], itemSheet);
 				}

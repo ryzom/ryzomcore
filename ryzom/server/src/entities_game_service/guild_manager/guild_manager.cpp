@@ -835,6 +835,8 @@ void CGuildManager::createGuildStep2(uint32 guildId, const ucstring &guildName, 
 	guild->setName(guildName);
 	guild->setDescription(pgc.Description);
 
+	guild->initChests();
+
 //	_GuildsAwaitingString.insert( std::make_pair( guildName, guild->getId() ) );
 //	_GuildsAwaitingString.insert( std::make_pair( pgc.Description, guild->getId() ) );
 //	NLMISC::CEntityId stringEId = guild->getEId();

@@ -304,6 +304,7 @@ void CDisconnectTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEn
 bool CMountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	CBypassCheckFlags bypassCheckFlags;
+	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::InWater, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::Invulnerability, true);
 
 	if (!actor || !phrase || !actor->canEntityUseAction(bypassCheckFlags) )
@@ -418,6 +419,7 @@ void CMountTimedAction::stopBeforeExecution(CTimedActionPhrase *phrase, CEntityB
 bool CUnmountTimedAction::validate(CTimedActionPhrase *phrase, CEntityBase *actor)
 {
 	CBypassCheckFlags bypassCheckFlags;
+	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::InWater, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::OnMount, true);
 	bypassCheckFlags.setFlag(CHECK_FLAG_TYPE::Invulnerability, true);
 

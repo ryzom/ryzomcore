@@ -491,7 +491,6 @@ void CChatWindow::displayLocalPlayerTell(const string &receiver, const string &m
 	CInterfaceProperty prop;
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:SPEAKER"," ");
 	encodeColorTag(prop.getRGBA(), finalMsg, false);
-
 	string csr(CHARACTER_TITLE::isCsrTitle(UserEntity->getTitleRaw()) ? "(CSR) " : "");
 	finalMsg += csr + CI18N::get("youTell") + ": ";
 	prop.readRGBA("UI:SAVE:CHAT:COLORS:TELL"," ");

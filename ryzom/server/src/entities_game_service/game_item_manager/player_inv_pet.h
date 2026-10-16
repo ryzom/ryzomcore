@@ -34,7 +34,7 @@ public:
 	//@name Overloads from inventory base
 	/// Return the max bulk according to player capacity
 	uint32 getMaxWeight() const;
-	uint32 getMaxBulk() const;
+	uint32 getMaxBulk(uint8 index = 0) const;
 	uint32 getMaxSlot() const;
 	
 	/// Update database of item representation

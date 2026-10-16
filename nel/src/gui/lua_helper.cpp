@@ -234,6 +234,7 @@ namespace NLGUI
 #endif
 
 #ifdef _WIN32
+#ifdef NL_DEBUG
 			// Lua socket library for MobDebug, optional
 			if (NLMISC::CFile::fileExists("socket\\core.dll"))
 			{
@@ -270,6 +271,8 @@ namespace NLGUI
 			{
 				m_LuaSocket = NULL;
 			}
+
+#endif
 #endif
 
 			// open are buggy????
@@ -360,11 +363,13 @@ namespace NLGUI
 		_SmallScriptCache.clear();
 
 #ifdef _WIN32
+#ifdef NL_DEBUG
 		if (m_LuaSocket)
 		{
 			FreeLibrary(m_LuaSocket);
 			m_LuaSocket = NULL;
 		}
+#endif
 #endif
 	}
 

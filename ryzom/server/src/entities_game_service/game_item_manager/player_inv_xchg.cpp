@@ -23,6 +23,7 @@
 
 #include "game_share/slot_equipment.h"
 #include "player_manager/character.h"
+#include "guild_manager/guild_manager.h"
 #include "guild_manager/guild_member_module.h"
 
 
@@ -35,6 +36,7 @@ using namespace std;
 /////////////////////////////////////////////////////////////
 
 const uint32 CExchangeView::NbExchangeSlots = 10;
+extern NLMISC::CVariable<uint32> GuildChestSlots;
 
 // ****************************************************************************
 CExchangeView::CExchangeView()
@@ -83,12 +85,25 @@ bool CExchangeView::putItemInExchange(uint32 invSrc, uint32 invSlot, uint32 exch
 	const CStaticItem * form = item->getStaticForm();
 	if (form == NULL)
 		return false;
-	// if item is from guild inventory, check permissions
-	CGuildMemberModule * module;
-	if (INVENTORIES::TInventory(invSrc) == INVENTORIES::guild && (!c->getModuleParent().getModule(module) || !module->canTakeGuildItem()))
+
+
+	if (INVENTORIES::TInventory(invSrc) == INVENTORIES::guild)
+	{
+		CGuild* guild = CGuildManager::getInstance()->getGuildFromId(c->getGuildId());
+		if (!guild)
+			return false;
+
+		CGuildMember* member = guild->getMemberFromEId(c->getId());
+		if (!member)
+			return false;
+
+		uint8 chest = floor((float)invSlot / (float)GuildChestSlots);
+
+		if (!guild->haveChestViewGrade(chest, member->getGrade()) || !guild->haveChestGetGrade(chest, member->getGrade()))
 	{
 		CCharacter::sendDynamicSystemMessage(c->getId(), "GUILD_ITEM_DONT_HAVE_RIGHTS");
 		return false;
+		}
 	}
 
 	// if it is an exchange between 2 players

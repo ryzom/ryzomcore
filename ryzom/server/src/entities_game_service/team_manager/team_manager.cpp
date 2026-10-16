@@ -421,29 +421,46 @@ void CTeamManager::joinAccept( const NLMISC::CEntityId &charId)
 		return;
 	}
 	invitor->setAfkState(false);
+
+	CTeam * team = getTeam(invitor->getTeamId());
+
+	if (team)
+	{
+		CCharacter *leader = PlayerManager.getOnlineChar( team->getLeader() );
+		if (!leader)
+		{
+			nlwarning("<CTeamManager joinAccept>character %s, Invalid team leader id %s",charId.toString().c_str(),team->getLeader().toString().c_str());
+			return;
+		}
+
+		if (team->getLeader() != invitorId) {
+			//cancel the proposal
+			invited->setTeamInvitor( CEntityId::Unknown );
+			return;
+		}
+	}
+
 	//cancel the proposal
 	invited->setTeamInvitor( CEntityId::Unknown );
 
-	CTeam *team;
 	//if the invited player had a fake team, remove it
-	team = getTeam( invited->getTeamId() );
-	
-	if ( team )
+	CTeam *teamInvited = getTeam( invited->getTeamId() );
+
+	if ( teamInvited )
 	{
 		// if the team is not fake, there is a problem...
-		if ( !team->isFake() )
+		if ( !teamInvited->isFake() )
 		{
 			nlwarning("<CTeamManager joinAccept>character %s, invitor id %s, the invited player is in a valid team. ",charId.toString().c_str(),invitor->getId().toString().c_str() );
 			return ;
 		}
 		else
 		{
-			team->release();
+			teamInvited->release();
 			removeTeam( invited->getTeamId() );
 		}
 	}
 
-	team = getTeam(invitor->getTeamId());
 	//  create the team if it does not exist
 	if ( !team )
 	{

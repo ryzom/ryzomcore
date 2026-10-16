@@ -66,6 +66,7 @@ public:
 
 	/// get a one line description string (for debug)
 	std::string toString() const;
+	std::string getProductString() const;
 
 	/// called only by the command : outpostAccelerateConstruction
 	void setConstructionTime(uint32 nNbSeconds, uint32 nCurrentTime);

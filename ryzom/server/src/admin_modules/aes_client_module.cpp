@@ -26,10 +26,13 @@
 #include "nel/net/service.h"
 
 #include "admin_modules_itf.h"
+#include "admin_log.h"
 
 using namespace std;
 using namespace NLMISC;
 using namespace NLNET;
+
+CVariable<string> LogPath("aes","LogPath", "path of logs", "../logs", 0, true);
 
 void aesclient_forceLink() {}
 
@@ -126,7 +129,8 @@ namespace ADMIN
 				_ProcessUsedMemory(0)
 		{
 			CAdminExecutorServiceClientSkel::init(this);
-
+			std::string	logPath = LogPath.get();
+			AdminCommandLog.init(CPath::standardizePath(logPath)+"admin_commands.log");
 		}
 
 		std::string makeServiceAlias()
@@ -454,7 +458,7 @@ namespace ADMIN
 			IService::getInstance()->CommandLog.addDisplayer(&stringDisplayer);
 
 			// retrieve the command from the input message and execute it
-			nlinfo ("ADMIN: Executing command from network : '%s'", command.c_str());
+			ADMINCMDLOG("'%s'", command.c_str());
 			ICommand::execute (command, IService::getInstance()->CommandLog);
 
 			// unhook our displayer as it's work is now done
@@ -473,7 +477,7 @@ namespace ADMIN
 		virtual void serviceCmdNoReturn(NLNET::IModuleProxy *sender, const std::string &command)
 		{
 			// retrieve the command from the input message and execute it
-			nlinfo ("ADMIN: Executing command from network : '%s'", command.c_str());
+			ADMINCMDLOG("'%s'", command.c_str());
 			ICommand::execute (command, IService::getInstance()->CommandLog);
 		}
 	};

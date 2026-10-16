@@ -430,7 +430,7 @@ void CCharacterCL::computePrimitive()
 	// Initialize the primitive.
 	if (_Sheet)
 	{
-		initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, (UMovePrimitive::TTrigger)(UMovePrimitive::OverlapTrigger | UMovePrimitive::EnterTrigger), MaskColNpc, MaskColDoor, _Sheet->ClipRadius, _Sheet->ClipHeight);
+		initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, UMovePrimitive::NotATrigger, MaskColNpc, MaskColNone, _Sheet->ClipRadius, _Sheet->ClipHeight);
 	}
 	else
 	{
@@ -980,7 +980,7 @@ bool CCharacterCL::build(const CEntitySheet *sheet)	// virtual
 	_CustomScalePos *= getScale();
 
 	// Create PACS Primitive.
-	initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, (UMovePrimitive::TTrigger)(UMovePrimitive::OverlapTrigger | UMovePrimitive::EnterTrigger), MaskColNpc, MaskColDoor, _Sheet->ClipRadius, _Sheet->ClipHeight);
+	initPrimitive(_Sheet->ColRadius*getScale(), _Sheet->ColHeight*getScale(), _Sheet->ColLength, _Sheet->ColWidth, UMovePrimitive::DoNothing, UMovePrimitive::NotATrigger, MaskColNpc, MaskColNone, _Sheet->ClipRadius, _Sheet->ClipHeight);
 
 	// Compute the element to be able to snap the entity to the ground.
 	computeCollisionEntity();
@@ -1124,7 +1124,7 @@ void CCharacterCL::computeAnimSet(sint32 fakeLeftHand, sint32 fakeRightHand)
 	// Use the generic method to compute the animation set.
 	if(!::computeAnimSet(_CurrentAnimSet[MOVE], _Mode, _Sheet->getAnimSetBaseName(), _Items[SLOTTYPE::LEFT_HAND_SLOT].Sheet, _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet, !modeWithHiddenItems()))
 	{
-		nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
+		//nlwarning("CH:computeAnimSet:%d: pb when trying to compute the animset. Sheet Id '%u(%s)'.", _Slot, _SheetId.asInt(), _SheetId.toString().c_str());
 	}
 
 }// computeAnimSet //

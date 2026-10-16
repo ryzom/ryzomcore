@@ -202,6 +202,9 @@ public:
 
 	CGroupContainer *getContainer();
 
+	sint getStartDbIndex() const { return _StartDbIdx; }
+	void setStartDbIndex(sint index);
+
 protected:
 	friend struct CSheetChild;
 

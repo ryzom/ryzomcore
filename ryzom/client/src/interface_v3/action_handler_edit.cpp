@@ -639,8 +639,8 @@ class CAHEditExpandOrCycleTell : public CAHEdit
 	}
 	void actionPart ()
 	{
-		// If the line starts with '/tell ', do not try to expand
-		if (!NLMISC::startsWith(_GroupEdit->getInputString(), "/tell "))
+		// If the line starts with '/', try to expand
+		if (NLMISC::startsWith(_GroupEdit->getInputString(), "/"))
 		{
 			if (_GroupEdit->expand()) return;
 		}

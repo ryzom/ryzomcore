@@ -40,16 +40,27 @@ function help:skipTutorial()
 	WebQueue:push("https://app.ryzom.com/app_arcc/outgame_rpbg.php?action=skip")
 	setDbProp("UI:SAVE:SKIP_WELCOME", 1)
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_SETS", 1)
+	getUI("ui:interface:gestionsets").active = true
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_INFO_PLAYER_JOURNAL", 1)
+	getUI("ui:interface:info_player_journal").active = true
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_PLAYER", 1)
+	getUI("ui:interface:player").active = true
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_COMPASS", 1)
+	getUI("ui:interface:compass").active = true
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_TARGET", 1)
+	getUI("ui:interface:target").active = true
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_MAIN_CHAT", 1)
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_INVENTORY", 1)
 	setDbProp("UI:SAVE:TUTORIAL_ACTIVE_ENCYCLOPEDIA", 1)
 	setDbProp("UI:SAVE:ISENABLED:AROUND_ME", 1)
 	setDbProp("UI:SAVE:ISENABLED:REGION_CHAT", 1)
 	setDbProp("UI:SAVE:ISENABLED:DYNAMIC_CHAT0", 1)
+	setDbProp("UI:SAVE:MK_MODE", 4)
+	game:activeMilkoKey(1, true)
+	game:activeMilkoKey(2, true)
+	game:activeMilkoKey(3, true)
+	game:activeMilkoKey(4, true)
+
 	if getDbProp("UI:SAVE:SKIP_TUTORIAL") == 1 then
 		return
 	end
@@ -99,7 +110,7 @@ function help:displayWelcome()
 	game:activeMilkoKey(2, false)
 	game:activeMilkoKey(3, false)
 	game:activeMilkoKey(4, getDbProp("UI:SAVE:TUTORIAL_ACTIVE_INVENTORY") == 1) -- bag
-	game:activeMilkoKey(5, getDbProp("UI:SAVE:TUTORIAL_ACTIVE_ENCYCLOPEDIA") == 1) -- ency
+	game:activeMilkoKey(5, true) -- ency
 	game:activeMilkoKey(6, true) -- mission
 	game:activeMilkoKey(7, true) -- help
 	game:activeMilkoKey(8, true) -- system
@@ -141,7 +152,6 @@ function help:checkSkipTutorial()
 	local skip_tutorial = getDbProp("UI:SAVE:SKIP_TUTORIAL")
 	if skip_tutorial == 0 then
 		debug("Skip Tutorial")
-		setDbProp("UI:SAVE:SKIP_TUTORIAL", 1)
 		help:skipTutorial()
 	end
 end
@@ -160,17 +170,6 @@ function help:checkSkipWelcomeTutorial()
 		debug("Already skiped welcome & tutorial")
 		function help:checkCapActive()
 		end
-	end
-end
-
-function help:updateRpbg(slot)
-	local rpbg_key_file = io.open("save/rpbg_"..slot..".key", "rb")
-	if rpbg_key_file then
-		debug("Setup RP BG save/rpbg_"..slot..".key")
-		rpbg_key = rpbg_key_file:read()
-		rpbg_key_file:close()
-		os.remove("save/rpbg_"..slot..".key")
-		WebQueue:push("https://app.ryzom.com/app_arcc/outgame_rpbg.php?action=save&key="..rpbg_key)
 	end
 end
 
