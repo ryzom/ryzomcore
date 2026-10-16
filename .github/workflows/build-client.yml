@@ -178,6 +178,24 @@ jobs:
         )
 
     - uses: actions/cache@v6
+      if: runner.os == 'Windows' && matrix.vcpkg != true
+      with:
+        path: C:\msquic
+        key: msquic-schannel-2.5.12
+
+    # Hunter has no msquic package; Microsoft publishes the Windows binaries on NuGet
+    # (build/native/{include,lib/x64,bin/x64}). The hunter preset points Findmsquic at C:/msquic.
+    - name: MsQuic
+      if: runner.os == 'Windows' && matrix.vcpkg != true
+      shell: cmd
+      run: |
+        IF NOT EXIST C:\msquic (
+          aria2c -o msquic.nupkg https://api.nuget.org/v3-flatcontainer/microsoft.native.quic.msquic.schannel/2.5.12/microsoft.native.quic.msquic.schannel.2.5.12.nupkg
+          7z x msquic.nupkg -oC:\msquic -y
+          del msquic.nupkg
+        )
+
+    - uses: actions/cache@v6
       if: runner.os == 'Windows'
       with:
         path: ${{ env.CHOCOLATEY_CACHE }}

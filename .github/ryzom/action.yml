@@ -33,6 +33,8 @@ runs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
+        wget --quiet https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb
+        sudo dpkg -i packages-microsoft-prod.deb
         sudo apt update
         sudo apt install --yes \
           build-essential ccache \
@@ -49,7 +51,12 @@ runs:
           libsquish-dev \
           libgsf-1-dev \
           libxslt1-dev xsltproc \
-          qtbase5-dev qttools5-dev qttools5-dev-tools
+          qtbase5-dev qttools5-dev qttools5-dev-tools \
+          libmsquic
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/msquic_posix.h
+        wget https://raw.githubusercontent.com/microsoft/msquic/main/src/inc/quic_sal_stub.h
+        sudo mv msquic.h msquic_posix.h quic_sal_stub.h /usr/include/
 
     - name: Install Dependency
       if: runner.os == 'Linux'
