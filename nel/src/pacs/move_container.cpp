@@ -1466,6 +1466,14 @@ void CMoveContainer::removePrimitive (UMovePrimitive* primitive)
 	// CMovePrimitive pointer
 	CMovePrimitive *prim=(CMovePrimitive*)primitive;
 
+	// Not owned by this container (already removed, or a stale handle
+	// from a previous container): ignore, pointer comparison only
+	if (_PrimitiveSet.find (prim) == _PrimitiveSet.end ())
+	{
+		nlwarning ("PACS: removePrimitive called on a primitive not owned by this container");
+		return;
+	}
+
 	// Get the primitive world image
 	for (uint8 i=0; i<prim->getNumWorldImage (); i++)
 	{

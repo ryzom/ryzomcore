@@ -109,7 +109,15 @@ void	init()
 		for (i=0; i<cvPathes.size(); ++i)
 		{
 			nlinfo("Using search path %s", cvPathes.asString(i).c_str());
-			CPath::addSearchPath(cvPathes.asString(i));
+			// alternative=false: the 1-arg overload defaults to
+			// alternative=true, which never indexes the directory's real
+			// file names and instead does a case-SENSITIVE
+			// CFile::fileExists() against an unconditionally lowercased
+			// query string, silently failing to find any real file whose
+			// name isn't already all-lowercase (zone/ig names are always
+			// "<row>_<UPPERCASE LETTERS>") -- confirmed root cause,
+			// project-todos/forgery/lowercase_pipeline_convention.md.
+			CPath::addSearchPath(cvPathes.asString(i), false, false);
 		}
 	}
 	catch (const EConfigFile &e)

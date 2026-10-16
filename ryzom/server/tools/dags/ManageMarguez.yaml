@@ -1,7 +1,0 @@
-name: Marguez Manager
-description: Manage Marguez Web Apps
-group: Services
-steps:
-  - name: run
-    dir: /home/nevrax/repos/ryzom-core/ryzom/server/tools/marguez
-    command: bash manage_marguez_serves.sh

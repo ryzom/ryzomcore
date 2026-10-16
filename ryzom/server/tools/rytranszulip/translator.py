@@ -9,7 +9,7 @@
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
 # M.A.R.G.U.E.Z (Make Awesome all Ryzom's Gossips with the Unreasonable Empowerment of Zulip... and a touch of Deepl :D)
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom Translator ==-
@@ -19,13 +19,13 @@
 
 
 import os
+import re
 import sys
 import json
 import deepl
 
 from time import sleep, time
-from ryzom_service import RyzomService, RyzomMessage
-from marguez.logger import printer
+from ryzom_service import RyzomService, RyzomMessage, printer
 
 class Translator(RyzomService):
 
@@ -35,6 +35,9 @@ class Translator(RyzomService):
 		self.version = "1.2"
 		self.scriptfile = __file__
 		self.log_sections["messages"] = ("db", "Ryzom-Chat-LastID", "Ryzom-Chat-{}", "")
+		if len(sys.argv) < 2:
+			print("Usage: translator.py <lang>")
+			sys.exit(1)
 		self.dst_lang = sys.argv[1]
 		self.stats = {"messages": 0, "translated_messages": 0}
 		self.last_deep_error = ""
@@ -46,6 +49,10 @@ class Translator(RyzomService):
 		self.infos = f"[bright_green]Messages checked: [bright_yellow]{messages}  \t[bright_green]Translated Messages: [bright_yellow]{translated_messages}\n"
 		self.infos += f"[bright_green]Last Deepl Error: [orange1]{self.last_deep_error}"
 		self.updateInfos()
+
+	def escapeImages(self, text):
+		pattern = re.compile(r"!\[[^\]]*]\([^)]+\)")
+		return pattern.sub(lambda m: "<x>"+m.group(0)+"</x>", text)
 
 	def escapeQuotes(self, text, level):
 		if level <= 2:
@@ -67,10 +74,13 @@ class Translator(RyzomService):
 		return final_text
 
 	def translateWithDeepl(self, m):
-		client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
-		text = self.escapeQuotes(m.text, 8)
+		if not m.text:
+			return None
+		text = self.escapeImages(m.text)
+		text = self.escapeQuotes(text, 8)
 		dst_lang = self.dst_lang.upper()
 		try:
+			client = deepl.DeepLClient(self.config["deepl"]["auth_key"])
 			result = client.translate_text(
 				text,
 				source_lang =  m.source_lang,
@@ -79,12 +89,14 @@ class Translator(RyzomService):
 				tag_handling = "xml",
 				ignore_tags = "x",
 				)
-		except deepl.DeepLException as e:
+		except Exception as e:
 			self.last_deep_error = repr(e)
 			print("DeepL Error..."+repr(e))
 			return None
+		if not result or not getattr(result, "text", None):
+			return None
 		final_text = result.text.replace("<x>", "").replace("</x>", "")
-		return (final_text,  result.billed_characters)
+		return (final_text,  getattr(result, "billed_characters", 0))
 
 
 	def checkMessages(self):
@@ -95,13 +107,12 @@ class Translator(RyzomService):
 				self.stats["messages"] += 1
 				if message.translated_lang == "WK" and message.channel != "player":
 					if message.source_lang != self.dst_lang:
-						if message.langs == "*" or self.dst_lang in message.langs.split("-"):
-							translation, billed_characters = self.translateWithDeepl(message)
+						if message.langs == "*" or self.dst_lang in (message.langs or "").split("-"):
+							translated = self.translateWithDeepl(message)
+							translation = translated[0] if translated else None
 							if translation:
 								self.stats["translated_messages"] += 1
 							status = "✅" if translation else "🛑"
-							#print("✅ "+str(i), repr(message.text), "➡️ ", translation)
-							print(f"DEEPL|{message.channel}|{billed_characters}")
 							message.translation = translation
 							message.translated_lang = self.dst_lang.upper()
 							message.source_message_id = i

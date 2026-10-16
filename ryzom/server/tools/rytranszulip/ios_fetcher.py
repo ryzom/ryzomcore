@@ -8,7 +8,7 @@
 #          \/                   \/
 #
 # RyTransZulip - with delicious M.A.R.G.U.E.Z
-# Copyright (C) 2025 Nuneo (ulukyn@gmail.com)
+# Copyright (C) 2025 Nuneo (nuno@troispetits.net)
 # This program is free software (GPLv3): read https://www.gnu.org/licenses/gpl-3.0.en.html for more details
 #
 # -== Ryzom IOS Fetcher ==-
@@ -23,6 +23,7 @@
 import os
 import sys
 import json
+import traceback
 import mysql.connector
 
 from time import sleep, time
@@ -46,6 +47,9 @@ class IosFetcher(RyzomService):
 		self.guilds = {}
 
 		self.db = None
+		self.connectDb()
+
+	def connectDb(self):
 		try:
 			self.db = mysql.connector.connect(
 				host = self.config["db_webig"]["host"],
@@ -56,6 +60,15 @@ class IosFetcher(RyzomService):
 			print("MySQL Database connection successful")
 		except mysql.connector.Error as err:
 			print(f"Error: '{err}'")
+
+	def ensureDbConnection(self):
+		try:
+			if self.db is None:
+				raise mysql.connector.Error("No database connection")
+			self.db.ping(reconnect=True, attempts=3, delay=5)
+		except mysql.connector.Error as err:
+			print(f"Error: '{err}', reconnecting...")
+			self.connectDb()
 
 	def follow(self, thefile):
 		thefile.seek(0, os.SEEK_END)
@@ -73,7 +86,12 @@ class IosFetcher(RyzomService):
 			else:
 				self.status_color = ""
 				self.status = "Waiting..."
-				size = os.stat(self.logname).st_size
+				try:
+					size = os.stat(self.logname).st_size
+				except OSError:
+					# log file being rotated
+					sleep(0.1)
+					continue
 				if file_size > size:
 					self.stats["filesize"] = file_size
 					self.updateStats()
@@ -92,15 +110,19 @@ class IosFetcher(RyzomService):
 				pass
 
 	def getGuildName(self, gid):
-		cursor = self.db.cursor()
+		self.ensureDbConnection()
+		if self.db is None:
+			print(f"No database connection, guild {gid} name unknown")
+			return ""
 		try:
-			cursor.execute("SELECT * FROM guilds WHERE guild_id='"+gid+"' AND deleted = 0")
+			cursor = self.db.cursor()
+			cursor.execute("SELECT * FROM guilds WHERE guild_id=%s AND deleted = 0", (gid,))
+			guilds = cursor.fetchall()
 		except mysql.connector.Error as err:
 			print("Error", err)
 		else:
-			guilds = cursor.fetchall()
-			if guilds:
-				return guilds[0][2]
+			if guilds and len(guilds[0]) > 2:
+				return guilds[0][2] or ""
 		return ""
 
 	def updateStats(self):
@@ -113,8 +135,11 @@ class IosFetcher(RyzomService):
 
 	def updateLogs(self, line):
 		sline = line.strip().split(" ", 6)
-		if len(sline) >= 5:
+		if len(sline) >= 7:
 			message = sline[6].split("|", 4)
+			if len(message) != 5:
+				print(f"Invalid chat log line: {line.strip()!r}")
+				return
 			channel, sender, source_lang, langs, message = message
 			schannel = channel.split(":", 1)
 			if len(schannel) == 2:
@@ -124,11 +149,14 @@ class IosFetcher(RyzomService):
 				channel_id = ""
 
 			if not channel in ("say", "shout", "arround", "universe", "tell", "region", "guild", "team", "dyn"):
-				print(channel+" 🛑 "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 				return
 
 			if channel == "guild":
-				gid = str(int(channel_id[8:-10], 16)+0x6500000)
+				try:
+					gid = str(int(channel_id[8:-10], 16)+0x6500000)
+				except ValueError:
+					print(f"Invalid guild channel id: {channel_id!r}")
+					return
 				guild_name = self.getGuildName(gid)
 				channel = "🔰 "+guild_name+" ("+channel_id[8:-10]+")"
 				channel_id = "guild:"+channel_id
@@ -144,7 +172,6 @@ class IosFetcher(RyzomService):
 						channel = "⚜️  "+channel_id[8:]
 					channel_id = "dyn:"+channel_id
 				elif channel_id[:7] == "League_":
-					print(channel+" 🛑 "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 					return
 				else:
 					channel = "❇️  "+channel_id
@@ -166,19 +193,21 @@ class IosFetcher(RyzomService):
 				sender = ssender[1]
 
 			sline[6] = "".join([ s[0] for s in  sline[6].split() ])
-			print("ios logs", "✅ "+sline[0]+" "+sline[1]+" ", " ".join(sline[2:5])+" ", sline[6])
 			message = RyzomMessage("ios", sender, channel, channel_id, source_lang, langs, message)
 			last_id = self.addRyzomMessage(message)
-			print("last_id", last_id)
 
 	def run(self):
 		loglines = self.follow(self.logfile)
 		print("Fetching IOS log file")
 		for line in loglines:
-			self.updateLogs(line)
+			try:
+				self.updateLogs(line)
+			except Exception:
+				print(f"Error parsing chat log line {line.strip()!r}:\n{traceback.format_exc()}")
 
 	def close(self):
-		self.db.close()
+		if self.db is not None:
+			self.db.close()
 
 if __name__ == "__main__":
 	iosFetcher = IosFetcher()

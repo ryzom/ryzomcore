@@ -1030,7 +1030,7 @@ void CBuildingManager::buildBuildingTradeList(const NLMISC::CEntityId & userId, 
 	CCharacter * user = PlayerManager.getChar( userId );
 	if ( !user )
 	{
-		nlwarning("<BUILDING> user %s : invalid bot %s ",userId.toString().c_str(), user->getCurrentInterlocutor().toString().c_str());
+		nlwarning("<BUILDING> Invalid char %s",userId.toString().c_str());
 		return;
 	}
 	user->setAfkState(false);

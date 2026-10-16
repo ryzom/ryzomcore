@@ -2461,7 +2461,7 @@ class CAHConfirmChangeBotchatBuyFilterItemType : public IActionHandler
 			if(ctrlSheet->getSheetId())
 			{
 				sint	index= ctrlSheet->getIndexInDB();
-				if(index>=0 && index<ITEM_TYPE::UNDEFINED)
+				if(index>=0 && index<(sint)ITEM_TYPE::UNDEFINED)
 					itemType= (ITEM_TYPE::TItemType)index;
 			}
 		}
@@ -2489,7 +2489,7 @@ class CAHBotChatRefilItemTypeChoiceList : public IActionHandler
 				SERVER:TRADING:ITEM_TYPE_SELLER_BITFILED_64_127 which is a 64 bits
 			(param offset gives which part of enum to use)
 		*/
-		nlctassert(ITEM_TYPE::UNDEFINED<=128);
+		nlctassert((int)ITEM_TYPE::UNDEFINED<=128);
 
 		// get the src bitfield
 		CCDBNodeLeaf	*nodeSrc= NLGUI::CDBManager::getInstance()->getDbProp(srcDB, false);

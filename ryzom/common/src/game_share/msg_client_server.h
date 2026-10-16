@@ -415,7 +415,7 @@ public:
 		f.serial( Sex );
 		f.serial( StartPoint );
 
-		for( int i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
+		for( int i = 0; i < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
 		{
 			f.serial( Characteristics[ i ] );
 		}
@@ -446,7 +446,7 @@ public:
 		f.serial( Sex );
 		f.serial( StartPoint );
 
-		for( int i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
+		for( int i = 0; i < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
 		{
 			f.serial( Characteristics[ i ] );
 		}
@@ -476,7 +476,7 @@ public:
 		Sex = true;
 		StartPoint = true;
 
-		for( int i = 0; i < CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
+		for( int i = 0; i < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++i )
 		{
 			Characteristics[ i ] = true;
 		}

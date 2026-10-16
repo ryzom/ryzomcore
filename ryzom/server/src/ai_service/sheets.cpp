@@ -446,8 +446,8 @@ void AISHEETS::CCreature::readGeorges(NLMISC::CSmartPtr<NLGEORGES::UForm> const&
 		_AggroPropagationRadius = -1.f;
 	
 	item.getValueByName(_AssistDist,"Combat.AssistDist");
-	
-	item.getValueByName(_Scale, "3d data.Scale");
+	if (!item.getValueByName(_Scale, "3d data.Scale"))
+		_Scale = 1.f;
 	{
 		std::string faunaTypeStr;
 		item.getValueByName(faunaTypeStr, "Basics.type");

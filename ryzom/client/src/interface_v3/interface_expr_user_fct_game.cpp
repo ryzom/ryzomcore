@@ -918,7 +918,7 @@ static DECLARE_INTERFACE_USER_FCT(isSkillAtMax)
 	// NB: the 2nd arg is only used as a dependency value (every times any skill change, isSkillAtMax() may change)
 
 	SKILLS::ESkills	skill= (SKILLS::ESkills)args[0].getInteger();
-	if(skill>=SKILLS::NUM_SKILLS)
+	if(skill>=(int)SKILLS::NUM_SKILLS)
 	{
 		result.setBool(false);
 	}

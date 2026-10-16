@@ -58,6 +58,7 @@
 #include "game_share/animals_orders.h"
 #include "game_share/animal_status.h"
 #include "game_share/animal_type.h"
+#include "game_share/constants.h"
 #include "game_share/rolemaster_flags.h"
 #include "game_share/time_weather_season/time_and_season.h"
 #include "game_share/visual_fx.h"
@@ -6347,6 +6348,17 @@ void CCharacter::onAnimalSpawned( CPetSpawnConfirmationMsg::TSpawnError SpawnSta
 			if (c) {
 				c->setIsAPet(true);
 			c->setName("pet_of_"+getName().toString());
+				uint32 program = c->getBotChatProgram();
+				if (!(program & (1<<BOTCHATTYPE::WebPageFlag)))
+				{
+					program |= 1 << BOTCHATTYPE::WebPageFlag;
+					c->setBotChatProgram(program);
+				}
+
+				const string &wpn = c->getWebPageName();
+				(string &)wpn = "MENU_MOUNT_IT";
+				const string &wp = c->getWebPage();
+				(string &)wp = toString("app_arcc action=mScript_Run&script_name=MountARenta&player=%s&sheet=%s", getName().toString().c_str(), c->getType().toString().c_str());
 			}
 
 			CMirrorPropValue<TYPE_FUEL> freeSpeedMode(TheDataset, PetMirrorRow, DSPropertyFUEL);
@@ -8874,6 +8886,109 @@ bool CCharacter::checkCreateParams( const CCreateCharMsg& createCharMsg, CCreate
 		}
 	}
 
+	// the race comes from the client: refuse it if no race sheet matches (setStartStatistics needs a valid one)
+	if (people_sheet == CSheetId::Unknown)
+	{
+		createCharErrorMsg.People = false;
+		returnValue = false;
+		egs_chinfo("<CCharacter::checkCreateParams> People %u is refused because no race sheet matches", (uint)createCharMsg.People);
+	}
+
+	// visual properties come from the client: refuse values that do not fit the visual property bit fields
+	// (see SPropVisualA/B/C). The ranges follow the bit widths, not the gameplay limits.
+	{
+		struct CRange
+		{
+			static bool ok(sint8 value, sint8 maxValue) { return value >= 0 && value <= maxValue; }
+		};
+
+		bool visualOk = true;
+
+		if (!CRange::ok(createCharMsg.HairType, 127))
+		{
+			createCharErrorMsg.HairType = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.HairColor, 7))
+		{
+			createCharErrorMsg.HairColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritHeight, 15))
+		{
+			createCharErrorMsg.GabaritHeight = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritTorsoWidth, 15) || !CRange::ok(createCharMsg.GabaritBreastSize, 15))
+		{
+			createCharErrorMsg.GabaritTorsoWidth = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritArmsWidth, 15))
+		{
+			createCharErrorMsg.GabaritArmsWidth = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.GabaritLegsWidth, 15))
+		{
+			createCharErrorMsg.GabaritLegsWidth = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.JacketColor, 7))
+		{
+			createCharErrorMsg.JacketColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.TrousersColor, 7))
+		{
+			createCharErrorMsg.TrousersColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.HatColor, 7))
+		{
+			createCharErrorMsg.HatColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.ArmsColor, 7))
+		{
+			createCharErrorMsg.ArmsColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.HandsColor, 7))
+		{
+			createCharErrorMsg.HandsColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.FeetColor, 7))
+		{
+			createCharErrorMsg.FeetColor = false;
+			visualOk = false;
+		}
+
+		if (!CRange::ok(createCharMsg.MorphTarget1, 7) || !CRange::ok(createCharMsg.MorphTarget2, 7) || !CRange::ok(createCharMsg.MorphTarget3, 7) || !CRange::ok(createCharMsg.MorphTarget4, 7) || !CRange::ok(createCharMsg.MorphTarget5, 7) || !CRange::ok(createCharMsg.MorphTarget6, 7) || !CRange::ok(createCharMsg.MorphTarget7, 7) || !CRange::ok(createCharMsg.MorphTarget8, 7) || !CRange::ok(createCharMsg.EyesColor, 7) || !CRange::ok(createCharMsg.Tattoo, 127))
+		{
+			createCharErrorMsg.FacialMorphDetail = false;
+			visualOk = false;
+		}
+
+		if (!visualOk)
+		{
+			returnValue = false;
+			egs_chinfo("<CCharacter::checkCreateParams> Visual properties refused because out of range");
+		}
+	}
+
 	// Summ role point distribution
 	uint8 sum = createCharMsg.NbPointFighter + createCharMsg.NbPointCaster + createCharMsg.NbPointCrafter + createCharMsg.NbPointHarvester;
 	if( sum > 5 )
@@ -10563,10 +10678,10 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	if ( _CurrentBotChatType == BOTCHATTYPE::GuildRoleMaster )
 		ok = false;	// todo
 
-	// buy the phrase
-	CTradePhrase &phrase = _CurrentPhrasesTradeList[ botChatIndex ];
+	// buy the phrase (botChatIndex comes from the client: only index the list if it is in range)
+	CTradePhrase *pPhrase = ok ? &_CurrentPhrasesTradeList[botChatIndex] : NULL;
 	if(ok)
-		ok = buyRolemasterPhrase(phrase.SheetId, knownPhraseIndex, false);
+		ok = buyRolemasterPhrase(pPhrase->SheetId, knownPhraseIndex, false);
 
 	// send the result to client if he tries to learn it in the ActionBook
 	if (knownPhraseIndex != 0)
@@ -10591,7 +10706,7 @@ void CCharacter::buyPhraseByIndex( uint8 botChatIndex, uint16 knownPhraseIndex )
 	if (ok)
 	{
 		// mark phrase as deleted (NB: already no more appear in the trade list, since hidden client-side)
-		phrase.SheetId = CSheetId::Unknown;
+		pPhrase->SheetId = CSheetId::Unknown;
 
 		CCreature * bot = CreatureManager.getCreature( _CurrentInterlocutor );
 		if ( bot == NULL )
@@ -10839,7 +10954,13 @@ void CCharacter::sellItem( INVENTORIES::TInventory inv, uint32 slot, uint32 quan
 		fame = 0;
 
 	CInventoryPtr child = _Inventory[ inv ];
-	if( child->getSlotCount() > slot && child->getItem( slot ) != NULL )
+	if (child == NULL)
+	{
+		nlwarning("<CCharacter:-:sellItem> inventory %u is NULL", (uint)inv);
+		return;
+	}
+
+	if (child->getSlotCount() > slot && child->getItem(slot) != NULL)
 	{
 		CSheetId sheet;
 		uint16 quality;
@@ -13275,7 +13396,7 @@ void CCharacter::abandonMission(uint8 indexClient)
 			if ( mission )
 			{
 				templ = CMissionManager::getInstance()->getTemplate( mission->getTemplateId() );
-				if ( templ->Tags.NoList ) // skip invisible missions
+				if (templ == NULL || templ->Tags.NoList) // skip invalid or invisible missions
 					continue;
 			}
 			break;
@@ -13302,6 +13423,9 @@ void CCharacter::abandonMission(uint8 indexClient)
 		mission->onFailure(true, false);
 		CCharacter::sendDynamicSystemMessage( _EntityRowId, "ABANDON_MISSION" );
 	}
+	// the template can be missing for a finished mission
+	if (templ != NULL)
+	{
 
 	vector<string> params = getCustomMissionParams(toUpper(templ->getMissionName()) + "_CALLBACK");
 	if (params.size() >= 1)
@@ -13311,6 +13435,7 @@ void CCharacter::abandonMission(uint8 indexClient)
 		else
 			validateDynamicMissionStep(params[0] + "&result=ABD");
 		setCustomMissionParams(toUpper(templ->getMissionName()) + "_CALLBACK", "");
+		}
 	}
 
 	removeMission(mission->getTemplateId(), mr_abandon);
@@ -14770,8 +14895,12 @@ string CCharacter::getTargetInfos()
 			TDataSetRow dsr = cTarget->getEntityRowId();
 			CMirrorPropValueRO<TYPE_CELL> srcCell(TheDataset, dsr, DSPropertyCELL);
 			sint32 cell = srcCell;
+			string riderName;
+			CCharacter *rider = PlayerManager.getChar( cTarget->getRiderEntity() );
+			if ( rider )
+				riderName = rider->getName().toString();
 
-			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell) + cTarget->getType().toString() + "|" + EGSPD::CPeople::toString(cTarget->getRace()) + "|" + toString("%d", cTarget->getGender()) + "|" + title;
+			msg += toString("%.2f|%.2f|%.2f|%.2f|%.4f|%d|", dist, x, y, z, h, cell)+cTarget->getType().toString()+"|"+EGSPD::CPeople::toString(cTarget->getRace())+"|"+toString("%d", cTarget->getGender())+"|"+title+"|"+riderName;
 		}
 	}
 
@@ -16790,6 +16919,18 @@ uint32 CCharacter::getMagicResistance(DMGTYPE::EDamageType dmgType)
 }
 
 //--------------------------------------------------------------
+// checkFriendListCapacity
+//--------------------------------------------------------------
+bool CCharacter::checkFriendListCapacity() const
+{
+	if (_FriendsList.size() < MaxFriendListSize)
+		return true;
+
+	PHRASE_UTILITIES::sendDynamicSystemMessage(_EntityRowId, "FRIEND_LIST_FULL");
+	return false;
+}
+
+//--------------------------------------------------------------
 // addPlayerToFriendList
 //--------------------------------------------------------------
 void CCharacter::addPlayerToFriendList(const ucstring &name)
@@ -17086,6 +17227,8 @@ void CCharacter::addPlayerToFriendList(const NLMISC::CEntityId &id)
 			return;
 		}
 	}
+	if (!checkFriendListCapacity())
+		return;
 
 	if(haveAnyPrivilege() == false && PlayerManager.haveAnyPriv(id))
 		return; // a character without privilege can't add one with privilege.
@@ -23181,7 +23324,7 @@ void CCharacter::sendNpcMissionGiverIconDesc( const std::vector<uint32>& npcKeys
 
 		// Check if the NPC qualifies for mission availability
 		CCreature *creature = CreatureManager.getCreature( npcEntityId );
-		if ( creature->getMissionVector().empty() /*||(!creature->isMissionGiverIconDisplayable())*/ )
+		if (creature == NULL || creature->getMissionVector().empty() /*||(!creature->isMissionGiverIconDisplayable())*/)
 		{
 			state = NPC_ICON::NotAMissionGiver;
 			bms.serial( state );

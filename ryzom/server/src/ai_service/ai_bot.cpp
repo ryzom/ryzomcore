@@ -711,7 +711,13 @@ void CBot::setClientSheet(const std::string & clientSheetName)
 
 		_ClientCSheet = sheet;
 
-		sheetChanged();
+		// The client sheet only changes the entity's visual appearance; the
+		// server-side entity (id, position, target, aggro, EGS state, ...)
+		// must not be touched. Just update the mirror's visual sheet
+		// property on the existing entity instead of despawning and
+		// respawning it via sheetChanged().
+		if (getSpawnObj())
+			CMirrors::initSheet(getSpawnObj()->dataSetRow(), _ClientSheet);
 	}
 }
 

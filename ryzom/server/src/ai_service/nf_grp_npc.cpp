@@ -33,6 +33,7 @@
 
 #include "ai_script_data_manager.h"
 #include "ais_control.h"
+#include "messages.h"
 
 using std::string;
 using std::vector;
@@ -548,6 +549,161 @@ void startMoving_fff_(CStateInstance* entity, CScriptStack& stack)
 
 	return;
 }
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection teleport_ffff_
+Teleport Group to x,y,z
+
+Arguments: f(x), f(y), f(z), f(cell) ->
+@param[in] Position x
+@param[in] Position y
+@param[in] Position z
+@param[in] Cell
+
+@code
+()teleport(3000,-1900,10,0);
+@endcode
+
+*/
+
+void teleport_ffff_(CStateInstance* entity, CScriptStack& stack)
+{
+	float cell = (float&)stack.top();
+ 	stack.pop();
+	float z = (float&)stack.top();
+ 	stack.pop();
+	float y = (float&)stack.top();
+	stack.pop();
+	float x = (float&)stack.top();
+ 	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	if (!entity) { nlwarning("teleport failed!"); return; }
+
+	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (!group)
+	{	nlwarning("teleport failed: no NPC group");
+		return;
+	}
+
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBot* bot = *itBot;
+			if (bot)
+			{
+				if (bot->isSpawned())
+				{
+					CSpawnBot *spawnBot = bot->getSpawnObj();
+					if (spawnBot!=NULL)
+					{
+						CEntityId id = spawnBot->getEntityId();
+						float t = 0;
+						uint8 cont = 0;
+						uint8 one = 1;
+						NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+						NLNET::CMessage msgout2("ENTITY_TELEPORTATION");
+						msgout2.serial( id   );
+						msgout2.serial( x );
+						msgout2.serial( y );
+						msgout2.serial( z );
+						msgout2.serial( t );
+						msgout2.serial( tick );
+						msgout2.serial( cont );
+						msgout2.serial( cell );
+						msgout2.serial( one  );
+
+						sendMessageViaMirror("GPMS", msgout2);
+					}
+				}
+			}
+		}
+	}
+
+	return;
+}
+
+//----------------------------------------------------------------------------
+/** @page code
+
+@subsection slide_f_
+Sldie Group to cell
+
+Arguments: f(cell) ->
+@param[in] Cell
+
+@code
+()slide(-2);
+@endcode
+
+*/
+
+void slide_f_(CStateInstance* entity, CScriptStack& stack)
+{
+	float cell = (float&)stack.top();
+ 	stack.pop();
+
+	IManagerParent* const managerParent = entity->getGroup()->getOwner()->getOwner();
+	CAIInstance* const aiInstance = dynamic_cast<CAIInstance*>(managerParent);
+	if (!aiInstance)
+		return;
+
+	if (!entity) { nlwarning("teleport failed!"); return; }
+
+	CGroupNpc* group = dynamic_cast<CGroupNpc*>(entity->getGroup());
+	if (!group)
+	{	nlwarning("teleport failed: no NPC group");
+		return;
+	}
+
+	if (group->isSpawned())
+	{
+		FOREACH(itBot, CCont<CBot>, group->bots())
+		{
+			CBot* bot = *itBot;
+			if (bot)
+			{
+				if (bot->isSpawned())
+				{
+					CSpawnBot *spawnBot = bot->getSpawnObj();
+					if (spawnBot!=NULL)
+					{
+						CEntityId id = spawnBot->getEntityId();
+						float x = spawnBot->pos().x().asDouble();
+						float y = spawnBot->pos().y().asDouble();
+						float z = 0;
+						float t = 0;
+						uint8 cont = 0;
+						uint8 one = 1;
+						NLMISC::TGameCycle tick = CTickEventHandler::getGameCycle() + 1;
+						NLNET::CMessage msgout2("ENTITY_TELEPORTATION");
+						msgout2.serial( id   );
+						msgout2.serial( x );
+						msgout2.serial( y );
+						msgout2.serial( z );
+						msgout2.serial( t );
+						msgout2.serial( tick );
+						msgout2.serial( cont );
+						msgout2.serial( cell );
+						msgout2.serial( one  );
+
+						sendMessageViaMirror("GPMS", msgout2);
+					}
+				}
+			}
+		}
+	}
+
+	return;
+}
+
 
 //----------------------------------------------------------------------------
 /** @page code
@@ -3400,6 +3556,8 @@ std::map<std::string, FScrptNativeFunc> nfGetNpcGroupNativeFunctions()
 	REGISTER_NATIVE_FUNC(functions, startMoving_fff_);
 	REGISTER_NATIVE_FUNC(functions, waitInZone_s_);
 	REGISTER_NATIVE_FUNC(functions, stopMoving__);
+	REGISTER_NATIVE_FUNC(functions, teleport_ffff_);
+	REGISTER_NATIVE_FUNC(functions, slide_f_);
 	REGISTER_NATIVE_FUNC(functions, followPlayer_sf_);
 	REGISTER_NATIVE_FUNC(functions, wander__);
 	REGISTER_NATIVE_FUNC(functions, setAttackable_f_);

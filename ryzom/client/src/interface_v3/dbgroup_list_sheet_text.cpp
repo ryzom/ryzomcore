@@ -78,7 +78,7 @@ CDBGroupListSheetText::CDBGroupListSheetText(const TCtorParam &param)
 	_CanDrop= false;
 	_Draggable= false;
 
-	for(uint i=0;i<CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
+	for(uint i=0;i< (int)CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
 		_LastPlayerCharac[i]= 0;
 }
 // ***************************************************************************
@@ -1040,7 +1040,7 @@ bool		CDBGroupListSheetText::needCheckAllItems()
 		// Must test each frame if Player characteristics have changed, because in this case, ItemRequirement
 		// and thus TextColor may change....
 		bool	mustTest= false;
-		for(uint i=0;i<CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
+		for(uint i=0;i< (int)CHARACTERISTICS::NUM_CHARACTERISTICS;i++)
 		{
 			sint32	newVal= pIM->getCurrentPlayerCarac((CHARACTERISTICS::TCharacteristics)i);
 			if(newVal!=_LastPlayerCharac[i])

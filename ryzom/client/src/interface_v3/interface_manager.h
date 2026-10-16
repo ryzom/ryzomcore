@@ -415,7 +415,7 @@ public:
 	bool	isItemCaracRequirementMet(CHARACTERISTICS::TCharacteristics type, sint32 value)
 	{
 		// carac requirement?
-		if( type < CHARACTERISTICS::NUM_CHARACTERISTICS)
+		if( type < (int)CHARACTERISTICS::NUM_CHARACTERISTICS)
 			return value <= _CurrentPlayerCharac[type];
 		// no carac requirement => ok
 		else
@@ -425,7 +425,7 @@ public:
 	// get Player Carac
 	sint32	getCurrentPlayerCarac(CHARACTERISTICS::TCharacteristics type)
 	{
-		if( type < CHARACTERISTICS::NUM_CHARACTERISTICS)
+		if( type < (int)CHARACTERISTICS::NUM_CHARACTERISTICS)
 			return _CurrentPlayerCharac[type];
 		else
 			return 0;

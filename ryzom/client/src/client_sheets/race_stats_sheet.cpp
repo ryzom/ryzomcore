@@ -287,7 +287,7 @@ void CRaceStatsSheet::buildGroundFXs(const NLGEORGES::UFormElm &item, const std:
 //===============================================================
 void CRaceStatsSheet::serial(NLMISC::IStream &f)
 {
-	for(uint k = 0; k < CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
+	for(uint k = 0; k < (int)CHARACTERISTICS::NUM_CHARACTERISTICS; ++k)
 	{
 		f.serial(CharacStartValue[k]);
 	}

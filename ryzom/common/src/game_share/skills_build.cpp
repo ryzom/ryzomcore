@@ -24,7 +24,7 @@
 void loadSkillsSummaryFromSheet(const NLGEORGES::UFormElm &item,const std::string &prefix,std::vector<CSkillSummary> &dest)
 {
 	dest.clear();
-	for(uint k = 0; k < SKILLS::NUM_SKILLS; ++k)
+	for(uint k = 0; k < (sint)SKILLS::NUM_SKILLS; ++k)
 	{
 		uint16 skillValue;
 		std::string skillName = prefix;
