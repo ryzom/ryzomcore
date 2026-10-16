@@ -201,7 +201,7 @@ private:
   * unit_box.shape : a box of 1 x 1 x 1 centered at the origin
   * unit_cylinder.shape : a cylinder of height 1, radius 1
   */
- void createInstancesFromMoveContainer(NL3D::UScene *scene, NLPACS::UMoveContainer *mc, std::vector<NL3D::UInstance> *instances = NULL);
+ void createInstancesFromMoveContainer(NL3D::UScene *scene, NLPACS::UMoveContainer *mc, std::vector<NL3D::UInstance> *instances = nullptr);
 
 
 

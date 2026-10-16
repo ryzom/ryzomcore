@@ -101,8 +101,8 @@ void CBipedSystem::parse(uint16 version, uint filter)
 		m_TrackLifted[i] = true;
 		m_ArchivedChunks.push_back(dRaw);
 		m_ArchivedChunks.push_back(tRaw);
-		m_Tokens[dTok].Raw = NULL; m_Tokens[dTok].TrackIdx = (sint8)i; m_Tokens[dTok].IsTime = false;
-		m_Tokens[tTok].Raw = NULL; m_Tokens[tTok].TrackIdx = (sint8)i; m_Tokens[tTok].IsTime = true;
+		m_Tokens[dTok].Raw = nullptr; m_Tokens[dTok].TrackIdx = (sint8)i; m_Tokens[dTok].IsTime = false;
+		m_Tokens[tTok].Raw = nullptr; m_Tokens[tTok].TrackIdx = (sint8)i; m_Tokens[tTok].IsTime = true;
 	}
 }
 
@@ -180,13 +180,13 @@ void CBipedSystem::toStringLocal(std::ostream &ostream, const std::string &pad, 
 
 const CBipedAnimTrack *CBipedSystem::track(CBipedAnimTrack::ETrack t) const
 {
-	if (t < 0 || t >= CBipedAnimTrack::TrackCount || !m_TrackLifted[t]) return NULL;
+	if (t < 0 || t >= CBipedAnimTrack::TrackCount || !m_TrackLifted[t]) return nullptr;
 	return &m_Tracks[t];
 }
 
 CBipedAnimTrack *CBipedSystem::trackForEdit(CBipedAnimTrack::ETrack t)
 {
-	if (t < 0 || t >= CBipedAnimTrack::TrackCount || !m_TrackLifted[t]) return NULL;
+	if (t < 0 || t >= CBipedAnimTrack::TrackCount || !m_TrackLifted[t]) return nullptr;
 	return &m_Tracks[t];
 }
 

@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+# M34 patch-move byte gates: the Tier A geometry write, proven on BOTH write targets.
+#
+#  0. Legacy null-edit output is the baseline. As in M31 the source .max is NOT the
+#     reference - the OLE container is rewritten on any save - so cross-path identity is
+#     always measured against this file.
+#  1. Entering patch mode, picking a sub-object level and drawing the cage writes NOTHING:
+#     a no-op save is byte-identical to the baseline.
+#  2. Moving one vertex writes the vertex AND the tangent handles it owns - tangents are
+#     stored as absolute points, so a corner written alone would save a pinched surface the
+#     session never showed (the display rides the handles; the stream must too). Vertex 5
+#     owns two handles in every fixture, so the move writes 3 elements; each z was 0 and
+#     moves by 1.5, which alters 2 bytes per float - expected delta 6, and any larger
+#     number means a write escaped its target.
+#  3. ALL THREE write targets are covered, which is the point of using three files:
+#       material-fond          - modifier stack, vertex unmapped -> modifier PatchMesh (0x1140)
+#       material-bassin        - modifier stack, vertex mapped   -> mapper Delta (0x1130)
+#       zonematerial-bassin-1  - NO modifier stack at all        -> base RklPatch PatchMesh
+#     The third is not an exotic shape: 26 of the 72 nodes in the 40-file survey have no edit
+#     patch modifier, so a bug on that path would hit roughly a third of the corpus.
+#     The log line is asserted, so a policy regression that silently routed everything to
+#     one target would fail here rather than pass by luck.
+set -euo pipefail
+
+ZP="${ZONE_PAINTER:-}"
+if [[ -z "$ZP" || ! -x "$ZP" ]]; then ZP="/home/kaetemi/ryzomcore/build/nel-pipeline/bin/zone_painter"; fi
+GFX="${RYZOMCORE_GRAPHICS:-/home/kaetemi/ryzomcore_graphics}"
+OUT=/tmp/zp_ui/m34_out
+XVFB="xvfb-run -a"
+rm -rf "$OUT"; mkdir -p "$OUT"
+
+seed() { # $1 = workspace dir, $2 = basename
+	rm -rf "$1"; mkdir -p "$1/landscape/ligo/lacustre/max"
+	cp "$GFX/landscape/ligo/lacustre/max/$2.max" "$1/landscape/ligo/lacustre/max/"
+	ln -sfn "$GFX/landscape/_texture_tiles" "$1/landscape/_texture_tiles"
+}
+
+cat > "$OUT/none.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+EOF
+cat > "$OUT/undo.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.selectPatchVertex(0, 6, 1)
+painter.movePatchSelection(0, 0, 1.5)
+painter.undo()
+EOF
+cat > "$OUT/move.lua" <<'EOF'
+painter.setMode(4)
+painter.setSubObject(1)
+painter.clearPatchVertexSelection()
+painter.selectPatchVertex(0, 5, 1)
+painter.movePatchSelection(0, 0, 1.5)
+EOF
+
+run_session() { # $1 = ws, $2 = basename, $3 = lua, $4 = log
+	ZONE_PAINTER_BOARD_ACTION="save:$2" $XVFB "$ZP" "$1" --startup-auto "lacustre/$2" \
+		--no-hint-stamp --no-thumbnail --startup-lua "$3" --screenshot /dev/null > "$4" 2>&1
+}
+
+for pair in "material-fond:modPM" "material-bassin:delta" "zonematerial-bassin-1:base"; do
+	B="${pair%%:*}"; WANT="${pair##*:}"
+	SRC="$GFX/landscape/ligo/lacustre/max/$B.max"
+
+	echo "===== M34-0 ($B): null-edit baseline ====="
+	"$ZP" "$SRC" --null-edit --out "$OUT/$B.null.max" > "$OUT/$B.null.log" 2>&1
+	REF=$(md5sum "$OUT/$B.null.max" | cut -d' ' -f1)
+	echo "baseline md5 $REF"
+
+	echo "===== M34-1 ($B): patch mode entered, nothing moved == baseline ====="
+	seed "$OUT/ws_none_$B" "$B"
+	run_session "$OUT/ws_none_$B" "$B" "$OUT/none.lua" "$OUT/$B.none.log"
+	GOT=$(md5sum "$OUT/ws_none_$B/landscape/ligo/lacustre/max/$B.max" | cut -d' ' -f1)
+	[[ "$GOT" == "$REF" ]] || { echo "FAIL: patch-mode no-op save != null-edit ($GOT)"; exit 1; }
+	echo "OK no-op identity"
+
+	echo "===== M34-2/3 ($B): one vertex moved, target $WANT ====="
+	seed "$OUT/ws_move_$B" "$B"
+	run_session "$OUT/ws_move_$B" "$B" "$OUT/move.lua" "$OUT/$B.move.log"
+	grep -aq "movePatchSelection: 3 written" "$OUT/$B.move.log" || {
+		echo "FAIL: move did not write vertex + its 2 handles"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; }
+	case "$WANT" in
+		modPM) grep -aq "modPM 3, delta 0" "$OUT/$B.move.log" || {
+			echo "FAIL: expected the modifier-PatchMesh target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
+		delta) grep -aq "modPM 0, delta 3" "$OUT/$B.move.log" || {
+			echo "FAIL: expected the mapper-delta target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
+		base)  grep -aq "base 3, modPM 0, delta 0" "$OUT/$B.move.log" || {
+			echo "FAIL: expected the base-PatchMesh target"; grep -a "movePatchSelection" "$OUT/$B.move.log"; exit 1; } ;;
+	esac
+	# cmp -l exits 1 when the files differ, which is the expected case here - brace it so
+	# pipefail does not turn a successful comparison into a script abort.
+	N=$( { cmp -l "$OUT/$B.null.max" "$OUT/ws_move_$B/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
+	[[ "$N" -eq 6 ]] || { echo "FAIL: move touched $N bytes, expected 6"; exit 1; }
+	echo "OK move wrote 6 bytes (vertex + 2 handles) via $WANT"
+
+	echo "===== M34-4 ($B): move two vertices, undo, back to the baseline ====="
+	seed "$OUT/ws_undo_$B" "$B"
+	run_session "$OUT/ws_undo_$B" "$B" "$OUT/undo.lua" "$OUT/$B.undo.log"
+	# One undo for a two-vertex move: a selection move is one action to the artist, so the
+	# whole list has to land as a single stroke.
+	grep -aq "movePatchSelection: 7 written" "$OUT/$B.undo.log" || {
+		echo "FAIL: expected 7 elements written (2 corners + 5 ridden handles)"; grep -a "movePatchSelection" "$OUT/$B.undo.log"; exit 1; }
+	U=$( { cmp -l "$OUT/$B.null.max" "$OUT/ws_undo_$B/landscape/ligo/lacustre/max/$B.max" || true; } | wc -l)
+	[[ "$U" -eq 0 ]] || { echo "FAIL: undo left $U bytes changed, expected 0"; exit 1; }
+	echo "OK undo restores the baseline byte for byte"
+done
+
+echo "ALL M34 GATES PASSED"

@@ -73,7 +73,7 @@ public:
 	  * \param numWorldImage is the count of world image where the primitive can be inserted.
 	  * \return a pointer on the new primitive.
 	  */
-	virtual UMovePrimitive		*addCollisionablePrimitive (uint8 firstWorldImage, uint8 numWorldImage, const UMovePrimitive *copyFrom = NULL) =0;
+	virtual UMovePrimitive		*addCollisionablePrimitive (uint8 firstWorldImage, uint8 numWorldImage, const UMovePrimitive *copyFrom = nullptr) =0;
 
 	/**
 	  * Add a noncollisionable primitive in the container. Return the pointer on the primitive.
@@ -84,7 +84,7 @@ public:
 	  * \param copyFrom is an optional primitive to copy attributes from (so the primitive is initialised with same values)
 	  * \return a pointer on the new primitive.
 	  */
-	virtual UMovePrimitive		*addNonCollisionablePrimitive (const UMovePrimitive *copyFrom = NULL) =0;
+	virtual UMovePrimitive		*addNonCollisionablePrimitive (const UMovePrimitive *copyFrom = nullptr) =0;
 
 	/**
 	  * Load a PACS primitive block. (*.pacs_prim)

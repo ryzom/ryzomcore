@@ -47,7 +47,7 @@ namespace NLGUI
 			CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 			if (groupHtml) {
 				groupHtml->removeImageDownload(_HtmlDownload, dynamic_cast<CViewBase*>(this));
-				_HtmlDownload = NULL;
+				_HtmlDownload = nullptr;
 			}
 		}
 	}
@@ -253,8 +253,8 @@ namespace NLGUI
 	xmlNodePtr CViewBitmap::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "bitmap" );
 		xmlSetProp( node, BAD_CAST "color", BAD_CAST toString( _Color ).c_str() );
@@ -486,7 +486,7 @@ namespace NLGUI
 				CGroupHTML *groupHtml = dynamic_cast<CGroupHTML*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:webig:content:html"));
 				if (groupHtml)
 					groupHtml->removeImageDownload(_HtmlDownload, dynamic_cast<CViewBase*>(this));
-				_HtmlDownload = NULL;
+				_HtmlDownload = nullptr;
 			}
 			_TextureId.setTexture (TxName.c_str (), _TxtOffsetX, _TxtOffsetY, _TxtWidth, _TxtHeight, false);
 		}

@@ -155,7 +155,7 @@ public:
 	 */
 	CLogicEvent()
 	{
-		_LogicStateMachine = 0;
+		_LogicStateMachine = nullptr;
 		ConditionName = "no_condition";
 	}
 

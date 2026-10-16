@@ -78,7 +78,7 @@ void CTimerManager::tickUpdate()
 		NLMISC::CSmartPtr<CTimerEvent> eventPtr=vect[i];
 
 		// if the event is no longer valid then just skip it
-		if (eventPtr->getOwner()==NULL)
+		if (eventPtr->getOwner() == nullptr)
 			continue;
 
 		// if the event isn't valid yet then keep it for later

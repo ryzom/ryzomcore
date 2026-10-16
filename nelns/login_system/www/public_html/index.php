@@ -3,6 +3,13 @@
 	include_once('../config.php');
 	include_once('service_connection.php');
 
+	// The answers here are the "1:.." / "0:.." lines the client parses, and
+	// several of them quote the login and the client application back
+	// ("Unknown login %s"). With the default html content type a browser
+	// renders that, so say what this is and stop it guessing otherwise.
+	header('Content-Type: text/plain; charset=utf-8');
+	header('X-Content-Type-Options: nosniff');
+
 // ---------------------------------------------------------------------------------------- 
 // Functions
 // ---------------------------------------------------------------------------------------- 
@@ -10,25 +17,70 @@
 	function createSalt()
 	{
 		$chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-			
-		return substr($chars, rand(0, strlen($chars)-1), 1).substr($chars, rand(0, strlen($chars)-1), 1);
+
+		return substr($chars, random_int(0, strlen($chars)-1), 1).substr($chars, random_int(0, strlen($chars)-1), 1);
+	}
+
+	function connectDb($errPrefix)
+	{
+		global $DBHost, $DBPort, $DBUserName, $DBPassword, $DBName;
+		$port = isset($DBPort) ? (int)$DBPort : 0;
+		$link = mysqli_connect($DBHost, $DBUserName, $DBPassword, NULL, $port) or die ($errPrefix."Database unavailable");
+		mysqli_select_db ($link, $DBName) or die ($errPrefix."Database unavailable");
+		return $link;
+	}
+
+	// The permission and shard tables hang off the domain table now: the
+	// client application names the domain (domain.domain_name), same
+	// convention the ring login uses.
+	function resolveDomainId($link, $clientApplication, $errPrefix)
+	{
+		$app = mysqli_real_escape_string($link, $clientApplication);
+		$result = mysqli_query ($link, "SELECT domain_id FROM domain WHERE domain_name='$app'") or die ($errPrefix."Database error");
+		if (mysqli_num_rows($result) != 1)
+			die ($errPrefix."Unknown client application '".$clientApplication."' (error code 65)");
+		$row = mysqli_fetch_row($result);
+		return (int)$row[0];
+	}
+
+	/*
+	 * Same account name rule the ring login and the account tool enforce
+	 * (web/public_php/tools/account_name.php is the canonical copy; this
+	 * tree is standalone and shares nothing with it). The client sends the
+	 * login unencoded in its request, so a name outside this set would
+	 * create an account that can never be logged into afterwards.
+	 */
+	function isValidAccountName($login)
+	{
+		if (!is_string($login))
+			return false;
+		$len = strlen($login);
+		if ($len < 3 || $len > 64)
+			return false;
+		return (bool)preg_match('/^[a-zA-Z0-9_]+$/', $login);
 	}
 
 	// $reason contains the reason why the check failed or success
 	// return true if the check is ok
 	function checkUserValidity ($login, $password, $clientApplication, $cp, &$id, &$reason, &$priv, &$extended)
 	{
-		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
+		global $AcceptUnknownUser;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($DBName) or die ("Can't access to the table dbname:$DBName");
-		$login = mysql_real_escape_string($login);
+		$link = connectDb("");
+		// keep the unescaped login for the account name rule below
+		$rawLogin = $login;
+		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT * FROM user where Login='$login'";
-		$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+		$result = mysqli_query ($link, $query) or die ("Database error");
 
-		if (mysql_num_rows ($result) == 0)
+		if (mysqli_num_rows ($result) == 0)
 		{
-			if ($AcceptUnknownUser)
+			if ($AcceptUnknownUser && !isValidAccountName($rawLogin))
+			{
+				$reason = "Invalid account name (error code 67)";
+				$res = false;
+			}
+			else if ($AcceptUnknownUser)
 			{
 				if (!$cp)
 				{
@@ -37,25 +89,32 @@
 				}
 
 				// login doesn't exist, create it
-				$password = mysql_real_escape_string($password);
+				// FIXME: same trap as the ring login: nel.user.Email is
+				// `UNIQUE NOT NULL DEFAULT ''`, so only the first account ever
+				// created this way inserts; the next one collides on the empty
+				// email. Write a unique placeholder or relax EmailIndex before
+				// leaning on $AcceptUnknownUser beyond a single dev account.
+				$password = mysqli_real_escape_string($link, $password);
 				$query = "INSERT INTO user (Login, Password) VALUES ('$login', '$password')";
-				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+				$result = mysqli_query ($link, $query) or die ("Database error");
 
 				// get the user to have his UId
 				$query = "SELECT * FROM user WHERE Login='$login'";
-				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+				$result = mysqli_query ($link, $query) or die ("Database error");
 
-				if (mysql_num_rows ($result) == 1)
+				if (mysqli_num_rows ($result) == 1)
 				{
 					$reason = "Login '".$login."' was created because it was not found in database (error code 50)";
-					$row = mysql_fetch_array ($result);
+					$row = mysqli_fetch_array ($result);
 					$id = $row["UId"];
 					$priv = $row["Privilege"];
 					$extended = $row["ExtendedPrivilege"];
 
-					// add the default permission
-					$query = "INSERT INTO permission (UId,ClientApplication) VALUES ('$id', 'snowballs')";
-					$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
+					// add the default permission for the domain the client
+					// asked for (ShardId -1 means any shard of the domain)
+					$domainId = resolveDomainId($link, $clientApplication, "");
+					$query = "INSERT INTO permission (UId,DomainId) VALUES ('$id', '$domainId')";
+					$result = mysqli_query ($link, $query) or die ("Database error");
 
 					$res = true;
 				}
@@ -73,16 +132,30 @@
 		}
 		else
 		{
-			$row = mysql_fetch_array ($result);
-			$salt = substr($row["Password"],0,2);
-			if (($cp && $row["Password"] == $password) || (!$cp && $row["Password"] == crypt($password, $salt)))
+			$row = mysqli_fetch_array ($result);
+			$stored = (string)$row["Password"];
+			$password = (string)$password;
+			$salt = substr($stored, 0, 2);
+			// An account row with no password must never authenticate: with
+			// cp set the client sends the crypted password and the check is
+			// a plain comparison, so an empty column is matched by an empty
+			// password field. nel.user.Password is nullable, so such rows
+			// can exist. Two characters is also the least crypt() needs for
+			// its salt to mean anything.
+			if (strlen($stored) < 2 || $password === '')
+			{
+				$reason = "Bad password (error code 56)";
+				$res = false;
+			}
+			// compare without leaking where the two values stop matching
+			elseif (($cp && hash_equals($stored, $password)) || (!$cp && hash_equals($stored, (string)crypt($password, $salt))))
 			{
 				// check if the user can use this application
 
-			$clientApplication = mysql_real_escape_string($clientApplication);
-				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND ClientApplication='$clientApplication'";
-				$result = mysql_query ($query) or die ("Can't execute the query: ".$query);
-				if (mysql_num_rows ($result) == 0)
+			$domainId = resolveDomainId($link, $clientApplication, "");
+				$query = "SELECT * FROM permission WHERE UId='".$row["UId"]."' AND DomainId='$domainId'";
+				$result = mysqli_query ($link, $query) or die ("Database error");
+				if (mysqli_num_rows ($result) == 0)
 				{
 					// no permission
 					$reason = "You can't use the client application '$clientApplication' (error code 53)";
@@ -101,10 +174,10 @@
 							$reason =  $reason."was just disconnected. Now you can retry the identification (error code 54)";
 
 							$query = "update shard set NbPlayers=NbPlayers-1 where ShardId=".$row["ShardId"];
-							$result = mysql_query ($query) or die ("Can't execute the query: '$query' errno:".mysql_errno().": ".mysql_error());
+							$result = mysqli_query ($link, $query) or die ("Database error");
 
 							$query = "update user set ShardId=-1, State='Offline' where UId=".$row["UId"];
-							$result = mysql_query ($query) or die ("Can't execute the query: '$query' errno:".mysql_errno().": ".mysql_error());
+							$result = mysqli_query ($link, $query) or die ("Database error");
 						}
 						else
 						{
@@ -127,48 +200,44 @@
 				$res = false;
 			}
 		}
-		mysql_close($link);
+		mysqli_close($link);
 		return $res;
 	}
 
     function checkShardAccess($id, $clientApplication, $shardId)
     {
         global $PHP_SELF;
-        global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-        $link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
-        mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
+        $link = connectDb("0:");
 
-        $id = mysql_real_escape_string($id);
-        $clientApplication = mysql_real_escape_string($clientApplication);
-        $shardId = mysql_real_escape_string($shardId);
-        $query = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND (ShardId='".$shardId."' OR ShardId='-1')";;
-        $result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+        $id = mysqli_real_escape_string($link, $id);
+        $domainId = resolveDomainId($link, $clientApplication, "0:");
+        $shardId = mysqli_real_escape_string($link, $shardId);
+        $query = "SELECT * FROM permission WHERE UId='".$id."' AND DomainId='".$domainId."' AND (ShardId='".$shardId."' OR ShardId='-1')";
+        $result = mysqli_query ($link, $query) or die ("0:Database error");
 
-        if (mysql_num_rows ($result) > 0)
+        if (mysqli_num_rows ($result) > 0)
         {
-            mysql_close($link);
+            mysqli_close($link);
             return;
         }
-        mysql_close($link);
+        mysqli_close($link);
         die("0:Invalid shard access");
     }
 
 	function displayAvailableShards($id, $clientApplication, $multiplePatchers)
 	{
 		global $PHP_SELF;
-		global $DBHost, $DBUserName, $DBPassword, $DBName;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
-		
-		$id = mysql_real_escape_string($id);
-		$clientApplication = mysql_real_escape_string($clientApplication);
+		$link = connectDb("0:");
+
+		$id = mysqli_real_escape_string($link, $id);
+		$domainId = resolveDomainId($link, $clientApplication, "0:");
 		$query = "SELECT * FROM user WHERE UId='".$id."'";
-		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+		$result = mysqli_query ($link, $query) or die ("0:Database error");
 
 		if ($result)
-			$uData = mysql_fetch_array($result);
+			$uData = mysqli_fetch_array($result);
 			
 		if (strstr($uData['Privilege'], ':DEV:'))
 			$priv = 'dev';
@@ -177,18 +246,31 @@
 		else
 			$priv = '';
 
-		$query = "SELECT * FROM shard WHERE ClientApplication='".$clientApplication."'";
-		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
-		
+		// the patch url moved from the shard row to the domain row
+		$result = mysqli_query ($link, "SELECT patch_urls, backup_patch_url FROM domain WHERE domain_id='".$domainId."'") or die ("0:Database error");
+		$domainRow = mysqli_fetch_assoc($result);
+		$patchURL = "";
+		if ($domainRow)
+		{
+			$patchURL = trim((string)$domainRow['patch_urls']);
+			if ($patchURL == "")
+				$patchURL = trim((string)$domainRow['backup_patch_url']);
+		}
+
+		$query = "SELECT * FROM shard WHERE domain_id='".$domainId."'";
+		$result = mysqli_query ($link, $query) or die ("0:Database error");
+
 		$nbs = 0;
 		$res = "";
-		if (mysql_num_rows ($result) > 0)
+		if (mysqli_num_rows ($result) > 0)
 		{
 			//echo "<h1>Please, select a shard:</h1>\n";
-			while($row = mysql_fetch_array($result))
+			while($row = mysqli_fetch_array($result))
 			{
-				$query2 = "SELECT * FROM permission WHERE UId='".$id."' AND ClientApplication='".$clientApplication."' AND ShardId='".$row["ShardId"]."'";
-				$result2 = mysql_query ($query2) or die ("Can't execute the query: ".$query2);
+				// same rule as checkShardAccess: a ShardId of -1 in the
+				// permission row grants every shard of the domain
+				$query2 = "SELECT * FROM permission WHERE UId='".$id."' AND DomainId='".$domainId."' AND (ShardId='".$row["ShardId"]."' OR ShardId='-1')";
+				$result2 = mysqli_query ($link, $query2) or die ("Database error");
 				
 				$online = $row["Online"];
 				$uOnline = 1;
@@ -209,8 +291,11 @@
 						break;
 				}
 
-				// only display the shard if the user have the good application name AND access to this shard with the permission table
-				if (mysql_num_rows ($result2) > 0 && $row["ProgramName"] == $programName)
+				// only display the shard if the user has access to it in the
+				// permission table (a ProgramName filter used to sit here, but
+				// it compared against a variable that was never set, and no
+				// schema in this tree carries that column)
+				if (mysqli_num_rows ($result2) > 0)
 				{
 					$nbs++;
 					$res = $res.$row["Version"]."|";
@@ -219,9 +304,7 @@
 					$res = $res.$row["Name"]."|";
 					$res = $res."999999|";
 					$res = $res.$row["WsAddr"]."|";
-					$res = $res.$row["PatchURL"];
-					if (strlen($row["DynPatchURL"]) > 0 && $multiplePatchers)
-						$res = $res."|".$row["DynPatchURL"];
+					$res = $res.$patchURL;
 					$res = $res."\n";
 				}
 			}
@@ -229,23 +312,22 @@
 
 		echo "1:".$nbs."\n";
 		echo $res;
-		mysql_close($link);
+		mysqli_close($link);
 		return $res;
 	}
 
 	function askSalt($login)
 	{
 		global $PHP_SELF;
-		global $DBHost, $DBUserName, $DBPassword, $DBName, $AcceptUnknownUser;
+		global $AcceptUnknownUser;
 
-		$link = mysql_connect($DBHost, $DBUserName, $DBPassword) or die ("0:Can't connect to database host:$DBHost user:$DBUserName");
-		mysql_select_db ($DBName) or die ("0:Can't access to the table dbname:$DBName");
+		$link = connectDb("0:");
 
-		$login = mysql_real_escape_string($login);
+		$login = mysqli_real_escape_string($link, $login);
 		$query = "SELECT Password FROM user WHERE Login='$login'";
-		$result = mysql_query ($query) or die ("0:Can't execute the query: ".$query);
+		$result = mysqli_query ($link, $query) or die ("0:Database error");
 
-		if (mysql_num_rows ($result) != 1)
+		if (mysqli_num_rows ($result) != 1)
 		{
 			if ($AcceptUnknownUser)
 			{
@@ -258,40 +340,52 @@
 		}
 		else
 		{
-			$res_array = mysql_fetch_array($result);
-			$salt = substr($res_array['Password'], 0, 2);
+			$res_array = mysqli_fetch_array($result);
+			$stored = (string)$res_array['Password'];
+			// An empty salt tells the caller which accounts carry no
+			// password; hand out a random one instead, the same answer an
+			// unknown login gets, and let checkUserValidity refuse.
+			$salt = strlen($stored) >= 2 ? substr($stored, 0, 2) : createSalt();
 		}
 
 		echo "1:".$salt;
-		mysql_close($link);
+		mysqli_close($link);
 	}
 
 // --------------------------------------------------------------------------------------
 // main 
 // --------------------------------------------------------------------------------------
 
-	if ($_GET["cmd"] == "ask")
+	// every request parameter is optional as far as PHP is concerned:
+	// default the missing ones instead of tripping undefined-index notices
+	$cmd = isset($_GET["cmd"]) ? $_GET["cmd"] : "";
+	$in_login = isset($_GET["login"]) ? $_GET["login"] : "";
+	$in_password = isset($_GET["password"]) ? $_GET["password"] : "";
+	$in_clientApplication = isset($_GET["clientApplication"]) ? $_GET["clientApplication"] : "";
+	$in_shardid = isset($_GET["shardid"]) ? $_GET["shardid"] : "";
+
+	if ($cmd == "ask")
 	{
-		askSalt($_GET["login"]);
+		askSalt($in_login);
 		die();
 	}
 
 	// check cp is set (force bool)
-	$cp = ($_GET["cp"] == "1");
+	$cp = (isset($_GET["cp"]) && $_GET["cp"] == "1");
 
-	if (!checkUserValidity($_GET["login"], $_GET["password"], $_GET["clientApplication"], $cp, $id, $reason, $priv, $extended))
+	if (!checkUserValidity($in_login, $in_password, $in_clientApplication, $cp, $id, $reason, $priv, $extended))
 	{
 		echo "0:".$reason;
 	}
 	else
 	{
-		if ($_GET["cmd"] == "login")
+		if ($cmd == "login")
 		{
-			checkShardAccess($id, $_GET["clientApplication"], $_GET["shardid"]);
+			checkShardAccess($id, $in_clientApplication, $in_shardid);
 
 			// user selected a shard, try to add the user to the shard
 
-			if (askClientConnection($_GET["shardid"], $id, $_GET["login"], $priv, $extended, $res, $patchURLS))
+			if (askClientConnection($in_shardid, $id, $in_login, $priv, $extended, $res, $patchURLS))
 			{
 				// access granted, send cookie and addr
 				echo "1:".$res;
@@ -324,7 +418,7 @@
 		else
 		{
 			// user logged, display the available shard
-			displayAvailableShards ($id, $_GET["clientApplication"], $cp);
+			displayAvailableShards ($id, $in_clientApplication, $cp);
 		}
 	}
 ?>

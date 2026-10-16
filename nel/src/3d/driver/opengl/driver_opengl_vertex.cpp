@@ -68,8 +68,8 @@ CVBDrvInfosGL::CVBDrvInfosGL(CDriverGL *drv, ItVBDrvInfoPtrList it, CVertexBuffe
 {
 	H_AUTO_OGL(CVBDrvInfosGL_CVBDrvInfosGL)
 	_DriverGL = drv;
-	_VBHard = NULL;
-	_SystemMemory = NULL;
+	_VBHard = nullptr;
+	_SystemMemory = nullptr;
 }
 
 // ***************************************************************************
@@ -81,7 +81,7 @@ CVBDrvInfosGL::~CVBDrvInfosGL()
 	if (VertexBufferPtr)
 	{
 		VertexBufferPtr->setLocation(CVertexBuffer::NotResident);
-		VertexBufferPtr = NULL;
+		VertexBufferPtr = nullptr;
 	}
 
 	if (_VBHard)
@@ -93,8 +93,8 @@ CVBDrvInfosGL::~CVBDrvInfosGL()
 	{
 		delete [] _SystemMemory;
 	}
-	_SystemMemory = NULL;
-	_VBHard = NULL;
+	_SystemMemory = nullptr;
+	_VBHard = nullptr;
 }
 
 // ***************************************************************************
@@ -135,12 +135,12 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 	// 2. If necessary, do modifications.
 	//==================================
 	const bool touched = (VB.getTouchFlags() & (CVertexBuffer::TouchedReserve|CVertexBuffer::TouchedVertexFormat)) != 0;
-	if( touched || (VB.DrvInfos == NULL))
+	if( touched || (VB.DrvInfos == nullptr))
 	{
 		// delete first
 		if(VB.DrvInfos)
 			delete VB.DrvInfos;
-		VB.DrvInfos = NULL;
+		VB.DrvInfos = nullptr;
 
 		// create only if some vertices
 		if(VB.getNumVertices())
@@ -148,7 +148,7 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 			// 1. Retrieve/Create driver shader.
 			//==================================
 			// insert into driver list. (so it is deleted when driver is deleted).
-			ItVBDrvInfoPtrList	it= _VBDrvInfos.insert(_VBDrvInfos.end(), (NL3D::IVBDrvInfos*)NULL);
+			ItVBDrvInfoPtrList	it= _VBDrvInfos.insert(_VBDrvInfos.end(), (NL3D::IVBDrvInfos*)nullptr);
 			// create and set iterator, for future deletion.
 			CVBDrvInfosGL *info = new CVBDrvInfosGL(this, it, &VB);
 			*it= VB.DrvInfos = info;
@@ -174,7 +174,7 @@ bool CDriverGL::setupVertexBuffer(CVertexBuffer& VB)
 			}
 
 			// No memory found ? Use system memory
-			if (info->_VBHard == NULL)
+			if (info->_VBHard == nullptr)
 			{
 				nlassert (info->_SystemMemory == NULL);
 				info->_SystemMemory = new uint8[size];
@@ -238,10 +238,10 @@ bool		CDriverGL::activeVertexBuffer(CVertexBuffer& VB)
 			_DriverGLStates.bindARBVertexBuffer(0); // unbind ARB vertex buffer
 		}
 	}
-	if (info->_VBHard == NULL)
+	if (info->_VBHard == nullptr)
 	{
 		// Fence mgt.
-		fenceOnCurVBHardIfNeeded(NULL);
+		fenceOnCurVBHardIfNeeded(nullptr);
 
 		// Disable the current vertexBufferHard if setuped.
 		if(_CurrentVertexBufferHard)
@@ -282,7 +282,7 @@ bool CDriverGL::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	refreshRenderSetup();
 
 	// setup material
-	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
+	if ( !setupMaterial(mat) || _LastIB._Values == nullptr)
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -338,7 +338,7 @@ bool CDriverGL::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris)
 	refreshRenderSetup();
 
 	// setup material
-	if ( !setupMaterial(mat) || _LastIB._Values == NULL )
+	if ( !setupMaterial(mat) || _LastIB._Values == nullptr)
 		return false;
 
 	if (_CurrentVertexBufferHard && _CurrentVertexBufferHard->isInvalid()) return true;
@@ -789,7 +789,7 @@ IVertexBufferHardGL	*CDriverGL::createVertexBufferHard(uint size, uint numVertic
 {
 	H_AUTO_OGL(CDriverGL_createVertexBufferHard)
 	// choose the VertexArrayRange of good type
-	IVertexArrayRange	*vertexArrayRange= NULL;
+	IVertexArrayRange	*vertexArrayRange = nullptr;
 	switch(vbType)
 	{
 	case CVertexBuffer::FullStream:
@@ -810,21 +810,21 @@ IVertexBufferHardGL	*CDriverGL::createVertexBufferHard(uint size, uint numVertic
 
 	// If this one at least created (an extension support it).
 	if( !vertexArrayRange )
-		return NULL;
+		return nullptr;
 	else
 	{
 		// check max vertex
 		if(numVertices > _MaxVerticesByVBHard)
-			return NULL;
+			return nullptr;
 
 		// Create a CVertexBufferHardGL
-		IVertexBufferHardGL		*vbHard = NULL;
+		IVertexBufferHardGL		*vbHard = nullptr;
 		// let the VAR create the vbhard.
 		vbHard= vertexArrayRange->createVBHardGL(size, vb);
 		// if fails
 		if(!vbHard)
 		{
-			return NULL;
+			return nullptr;
 		}
 		else
 		{
@@ -1112,7 +1112,7 @@ void		CDriverGL::toggleGlArraysForARBVertexProgram()
 			{
 				oldTex[stage] = _CurrentTexture[stage];
 				// activate the texture, or disable texturing if NULL.
-				activateTexture(stage, NULL);
+				activateTexture(stage, nullptr);
 			}
 
 #ifndef USE_OPENGLES
@@ -1833,7 +1833,7 @@ void				CDriverGL::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 
 #ifndef USE_OPENGLES
 	// If old is not a VBHard, or if not a NVidia VBHard, no-op.
-	if( _CurrentVertexBufferHard==NULL || _CurrentVertexBufferHard->VBType != IVertexBufferHardGL::NVidiaVB)
+	if( _CurrentVertexBufferHard == nullptr || _CurrentVertexBufferHard->VBType != IVertexBufferHardGL::NVidiaVB)
 		return;
 
 	// if we do not activate the same (NB: newVBHard==NULL if not a VBHard).
@@ -1868,7 +1868,7 @@ void				CDriverGL::fenceOnCurVBHardIfNeeded(IVertexBufferHardGL *newVBHard)
 CIndexBufferInfo::CIndexBufferInfo()
 {
 	H_AUTO_OGL(CIndexBufferInfo_CIndexBufferInfo)
-	_Values = NULL;
+	_Values = nullptr;
 }
 
 // ***************************************************************************

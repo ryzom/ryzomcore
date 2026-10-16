@@ -41,10 +41,14 @@
 	
 	if (isset($active_player) && $active_player != "")
 	{
+		// uid and slot only: spaces or extra tokens would reframe the AS
+		// command. Anything that is not two plain integers is dropped.
 		$arr = explode(',', $active_player);
 		foreach($arr as $player)
 		{
-			$pl = explode(' ', $player);
+			$pl = preg_split('/\s+/', trim($player));
+			if (count($pl) < 2 || !ctype_digit((string)$pl[0]) || !ctype_digit((string)$pl[1]))
+				continue;
 			nel_query("*.*.EGS.loadPlayer ".$pl[0], $dummyResult);
 			nel_query("*.*.EGS.activePlayer ".$pl[0]." ".$pl[1], $dummyResult);
 		}
@@ -124,7 +128,7 @@
 		$found = false;
 		foreach($tname as $tbname)
 		{
-			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$uid' AND name='$tbname'");
+			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($uid)."' AND name='".sqlescape($tbname)."'");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$tid = $arr["tid"];
@@ -133,7 +137,7 @@
 				break;
 			}
 
-			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$gid' AND name='$tbname'");
+			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($gid)."' AND name='".sqlescape($tbname)."'");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$tid = $arr["tid"];
@@ -151,7 +155,7 @@
 
 	if (!isset($tid))
 	{
-		$result = sqlquery("SELECT default_view FROM user, view_table WHERE user.uid='$uid' AND (view_table.uid='$uid' OR view_table.uid='$gid') AND view_table.tid=user.default_view");
+		$result = sqlquery("SELECT default_view FROM user, view_table WHERE user.uid='".intval($uid)."' AND (view_table.uid='".intval($uid)."' OR view_table.uid='".intval($gid)."') AND view_table.tid=user.default_view");
 		if ($result && ($arr=sqlfetch($result)))
 		{
 			$tid=$arr["default_view"];
@@ -161,7 +165,7 @@
 		
 		if (!isset($tid))
 		{
-			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$uid' ORDER BY ordering LIMIT 1");
+			$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($uid)."' ORDER BY ordering LIMIT 1");
 			if ($result && ($arr=sqlfetch($result)))
 			{
 				$tid = $arr["tid"];
@@ -169,7 +173,7 @@
 			}
 			else
 			{
-				$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='$gid' ORDER BY ordering LIMIT 1");
+				$result = sqlquery("SELECT tid, name FROM view_table WHERE uid='".intval($gid)."' ORDER BY ordering LIMIT 1");
 				if ($result && ($arr=sqlfetch($result)))
 				{
 					$tid = $arr["tid"];
@@ -184,7 +188,7 @@
 	if (isset($tid))
 		$current_tid = $tid;
 		
-	$result = sqlquery("SELECT name, refresh_rate FROM view_table WHERE tid='$tid'");
+	$result = sqlquery("SELECT name, refresh_rate FROM view_table WHERE tid='".intval($tid)."'");
 	if ($result && ($result=sqlfetch($result)))
 	{
 		$tname = $result["name"];
@@ -256,31 +260,82 @@
 
 	if (isset($execServCommand) && isset($factPaths) && isset($execServParams) && isset($variableData[$execServCommand]))
 	{
-		// get command path
-		$cmd = $variableData[$execServCommand];
-		$path = $cmd["path"];
-		
-		$paths = expandQuery($factPaths);
-
-		for ($i=0; $i<count($paths); ++$i)
+		// Command must be one the user may use; factPaths is client-posted
+		// so re-apply shard_access before talking to the admin service.
+		if (!hasAccessToVariable($execServCommand))
 		{
-			$fpath = filterPathUsingAliases($paths[$i], $path);
-			if ($fpath != "")
-				$newPaths[] = $fpath;
+			$error = (isset($error) ? $error : "")."No access to that command<br>\n";
 		}
+		else
+		{
+			// get command path
+			$cmd = $variableData[$execServCommand];
+			$path = $cmd["path"];
 
-		$fullPath = factorizeQuery("[".join($newPaths, ",")."]");
+			$paths = expandQuery($factPaths);
+			$newPaths = array();
 
-		// filter selection with command
-		$fullCmd = $fullPath." ".$execServParams;
-		logUser($uid, "COMMAND=".$fullCmd);
-		$qstate = nel_query($fullPath." ".$execServParams, $cmdResult);
+			// Build the set of shards this account may touch
+			$allowedShards = array();
+			if ($admlogin == "root" || $IsNevrax)
+			{
+				$allowedShards = null; // unrestricted
+			}
+			else
+			{
+				foreach ($shardAccess as $sshard)
+					$allowedShards[$sshard["shard"]] = true;
+			}
+
+			for ($i=0; $i<count($paths); ++$i)
+			{
+				$fpath = filterPathUsingAliases($paths[$i], $path);
+				if ($fpath == "")
+					continue;
+				// path form is shard.server.service.var
+				$pathParts = explode(".", $fpath);
+				$shardName = isset($pathParts[0]) ? $pathParts[0] : "";
+				if ($allowedShards !== null
+					&& $shardName !== "*"
+					&& !isset($allowedShards[$shardName]))
+				{
+					continue;
+				}
+				if ($allowedShards !== null && $shardName === "*" && count($allowedShards) === 0)
+					continue;
+				// Expand * to each allowed shard so a restricted user cannot
+				// broadcast through a wildcard path.
+				if ($allowedShards !== null && $shardName === "*")
+				{
+					foreach (array_keys($allowedShards) as $as)
+					{
+						$pathParts[0] = $as;
+						$newPaths[] = implode(".", $pathParts);
+					}
+				}
+				else
+				{
+					$newPaths[] = $fpath;
+				}
+			}
+
+			if (count($newPaths) > 0)
+			{
+				// join(array, glue) support is gone in php 8: glue first
+				$fullPath = factorizeQuery("[".join(",", $newPaths)."]");
+
+				// filter selection with command
+				$fullCmd = $fullPath." ".$execServParams;
+				logUser($uid, "COMMAND=".$fullCmd);
+				$qstate = nel_query($fullPath." ".$execServParams, $cmdResult);
+			}
+		}
 	}
 
 	unset($ownerTables);
 
 	// display available user and group views
-	$result = sqlquery("SELECT view.name AS name, view.tid AS tid, view.uid AS gid, user.login AS owner FROM view_table AS view, user WHERE view.uid=user.uid AND (view.uid='$uid' OR view.uid='$gid') ORDER BY gid, ordering");
+	$result = sqlquery("SELECT view.name AS name, view.tid AS tid, view.uid AS gid, user.login AS owner FROM view_table AS view, user WHERE view.uid=user.uid AND (view.uid='".intval($uid)."' OR view.uid='".intval($gid)."') ORDER BY gid, ordering");
 	if ($result)
 	{
 		$owner = "";
@@ -288,7 +343,8 @@
 			$ownerTables[$arr["owner"]][] = $arr;
 	}
 
-	htmlProlog($_SERVER['PHP_SELF'], "View Selection '$tname'", true);
+	// the view name is typed by tool users; it goes into <title> unescaped
+	htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "View Selection '".htmlspecialchars($tname, ENT_QUOTES)."'", true);
 
 	if (isset($tname))
 		$current_tname = $tname;
@@ -302,14 +358,16 @@
 		echo "	var pos = sURL.indexOf('.php');\n";
 		echo "	function refresh() { window.location.replace( sURL ); }\n";
 		echo "	if (pos >= 0) {\n";
-		echo "		sURL = sURL.substr(0, pos+4)+'?current_tid=$tid&form_refreshRate=$form_refreshRate';\n";
+		// these two go inside a javascript string literal, where html
+		// escaping would do nothing; both are numbers everywhere else
+		echo "		sURL = sURL.substr(0, pos+4)+'?current_tid=".intval($tid)."&form_refreshRate=".intval($form_refreshRate)."';\n";
 		echo "		setTimeout(\"refresh()\", ".($use_refreshRate*1000).");\n";
 		echo "	}\n";
 		echo "//--></script>\n";
 	}
 
 	echo "<br>\n";
-	echo "<table width=100%><form method=post action='".$_SERVER['PHP_SELF']."' name='viewForm'><tr valign=top>\n";
+	echo "<table width=100%><form method=post action='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."' name='viewForm'><tr valign=top>\n";
 
 	if (count($ownerTables)>0)
 	{
@@ -327,12 +385,12 @@
 					if ($i>0)
 						echo "</table></td><td width=150 bgcolor=$bgcolor><table><tr><th>&nbsp;</th></tr>\n";
 					else
-						echo "<td width=150 bgcolor=$bgcolor><table><tr><th align=left>$owner views</th></tr>\n";
+						echo "<td width=150 bgcolor=$bgcolor><table><tr><th align=left>".htmlspecialchars($owner, ENT_QUOTES)." views</th></tr>\n";
 				}
 				if ($tname == $arr["name"])
-					echo "<tr><td nowrap><input type=submit name='selectTid_".$arr["tid"]."' value='View'> <b>".$arr["name"]."</b></td></tr>";
+					echo "<tr><td nowrap><input type=submit name='selectTid_".intval($arr["tid"])."' value='View'> <b>".htmlspecialchars($arr["name"], ENT_QUOTES)."</b></td></tr>";
 				else
-					echo "<tr><td nowrap><input type=submit name='selectTid_".$arr["tid"]."' value='View'> ".$arr["name"]."</td></tr>";
+					echo "<tr><td nowrap><input type=submit name='selectTid_".intval($arr["tid"])."' value='View'> ".htmlspecialchars($arr["name"], ENT_QUOTES)."</td></tr>";
 				
 				++$i;
 			}
@@ -372,7 +430,9 @@
 		echo "<b>Shard shortcuts</b><table><tr valign=top><td>\n";
 		$i = 1;
 		echo "<table>";
-		echo "<tr><td><a href='".$_SERVER['PHP_SELF']."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='><i>All</i></a></td></tr>";
+		// tid and the refresh rate arrive with the request: keep them numeric
+		// like the auto-refresh block above does
+		echo "<tr><td><a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=".intval($tid)."&form_refreshRate=".intval($form_refreshRate)."&filter_shard=".htmlspecialchars(rawurlencode($link_shard), ENT_QUOTES)."&filter_server=&filter_service='><i>All</i></a></td></tr>";
 		foreach ($shards as $link_shard)
 		{
 			if ($i%5 == 0 && $i>0)
@@ -384,7 +444,7 @@
 				$alias = $link_shard;
 			else
 				$alias .= "($link_shard)";
-			echo "<a href='".$_SERVER['PHP_SELF']."?current_tid=$tid&form_refreshRate=$form_refreshRate&filter_shard=$link_shard&filter_server=&filter_service='>$alias</a>";
+			echo "<a href='".htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES)."?current_tid=".intval($tid)."&form_refreshRate=".intval($form_refreshRate)."&filter_shard=".htmlspecialchars(rawurlencode($link_shard), ENT_QUOTES)."&filter_server=&filter_service='>".htmlspecialchars($alias, ENT_QUOTES)."</a>";
 			if ($selShards[$link_shard])
 				echo "</b>";
 			echo "</td></tr>";
@@ -410,10 +470,10 @@
 	echo "<td align=right><table><tr><th width=300>Selection</th></tr>\n";
 	if (count($sel) > 0)
 		foreach ($sel as $s)
-			echo "<tr><td>$s</td></tr>\n";
+			echo "<tr><td>".htmlspecialchars($s, ENT_QUOTES)."</td></tr>\n";
 	echo "</table></td>\n";
 	
-	echo "</tr></table><br>Content of view <font size=3><b>$tname</b></font><br><br>\n";
+	echo "</tr></table><br>Content of view <font size=3><b>".htmlspecialchars($tname, ENT_QUOTES)."</b></font><br><br>\n";
 
 	echo "<table><tr><td>\n";
 	
@@ -495,22 +555,36 @@
 			$aft = ((float)$sec + (float)$usec);
 			$tm = (int)(($aft-$bef)*1000.0);
 
-			$queryResult = "Executed $executeQuery<br>$tm milliseconds computation time<br>\n";
+			$queryResult = "Executed ".htmlspecialchars($executeQuery, ENT_QUOTES)."<br>$tm milliseconds computation time<br>\n";
 		}
 	}
 	else if (isset($executeQuery))
 	{
-		$bef = microtime();
-		$qstate = nel_query($executeQuery, $updateResult);
-		$aft = microtime();
+		// The free-form "Execute Raw NeL query" field is only rendered for
+		// root, but the handler used to run for any logged-in account that
+		// posted executeQuery. Keep it root-only; the form-built UPDATE path
+		// above is separate and still goes through lock checks.
+		if ($admlogin !== 'root')
+		{
+			$queryResult = "Raw NeL queries are restricted to root.<br>\n";
+			unset($executeQuery);
+			unset($updateResult);
+		}
+		else
+		{
+			$bef = microtime();
+			logUser($uid, "RAW=".$executeQuery);
+			$qstate = nel_query($executeQuery, $updateResult);
+			$aft = microtime();
 
-		list($usec, $sec) = explode(" ", $bef);
-		$bef = ((float)$sec + (float)$usec);
-		list($usec, $sec) = explode(" ", $aft);
-		$aft = ((float)$sec + (float)$usec);
-		$tm = (int)(($aft-$bef)*1000.0);
+			list($usec, $sec) = explode(" ", $bef);
+			$bef = ((float)$sec + (float)$usec);
+			list($usec, $sec) = explode(" ", $aft);
+			$aft = ((float)$sec + (float)$usec);
+			$tm = (int)(($aft-$bef)*1000.0);
 
-		$queryResult = "Executed $executeQuery<br>$tm milliseconds computation time<br>\n";
+			$queryResult = "Executed ".htmlspecialchars($executeQuery, ENT_QUOTES)."<br>$tm milliseconds computation time<br>\n";
+		}
 	}
 
 	if ($updateResult)
@@ -530,15 +604,15 @@
 		$queryResult = displayViewTable($uid, $gid, $tid, $sel);
 	}
 
-	echo "<input type=hidden name='current_tid' value='$tid'>\n";
+	echo "<input type=hidden name='current_tid' value='".htmlspecialchars($tid, ENT_QUOTES)."'>\n";
 	$i=0;
 	if (count($sel) > 0)
 		foreach ($sel as $selec)
-			echo "<input type=hidden name='current_select_".($i++)."' value='$selec'>\n";
+			echo "<input type=hidden name='current_select_".($i++)."' value='".htmlspecialchars($selec, ENT_QUOTES)."'>\n";
 
 	if (isset($tid) && $tid != "")
 	{
-		$result = sqlquery("SELECT view_row.name AS name, variable.vid AS vid FROM view_row, variable WHERE tid='$tid' AND variable.command='command' AND view_row.vid=variable.vid ORDER BY ordering");
+		$result = sqlquery("SELECT view_row.name AS name, variable.vid AS vid FROM view_row, variable WHERE tid='".intval($tid)."' AND variable.command='command' AND view_row.vid=variable.vid ORDER BY ordering");
 		if ($result && sqlnumrows($result) > 0)
 		{
 			echo "<br><br><b>Service commands</b> <font size=1>The commands are sent to all services seen in the view above</font><br>\n";
@@ -557,7 +631,7 @@
 				}
 				if ($arr["name"] != 'SEPARATOR')
 				{
-					echo "<tr><td><input type=submit name=execServCommand_".$arr["vid"]." value='".$arr["name"]."'></td></tr>\n";
+					echo "<tr><td><input type=submit name=execServCommand_".intval($arr["vid"])." value='".htmlspecialchars($arr["name"], ENT_QUOTES)."'></td></tr>\n";
 					++$numInCol;
 				}
 			}
@@ -567,7 +641,7 @@
 				$address = "[".join(",", $listPath)."]";
 				$address = factorizeQuery($address);
 
-				echo "<input type=hidden name=factPaths value='$address'>\n";
+				echo "<input type=hidden name=factPaths value='".htmlspecialchars($address, ENT_QUOTES)."'>\n";
 			}
 
 			echo "</table></td>\n";
@@ -575,9 +649,9 @@
 			
 			if (isset($cmdResult))
 			{
-				echo "<br>Result of command '$fullPath $execServParams':<br>\n";
+				echo "<br>Result of command '".htmlspecialchars($fullPath, ENT_QUOTES)." ".htmlspecialchars($execServParams, ENT_QUOTES)."':<br>\n";
 				echo "<table border=1><tr><td>\n";
-				echo "<pre>$cmdResult</pre>\n";
+				echo "<pre>".htmlspecialchars($cmdResult, ENT_QUOTES)."</pre>\n";
 				echo "</td></tr></table>\n";
 			}
 		}
@@ -587,7 +661,7 @@
 	{
 		echo "<br><font size=3><b>Execution errors:</b></font>\n";
 		foreach ($queryErrors as $error)
-			echo "<br><font size=3 color=#FF0000><b>$error</b></font>\n";
+			echo "<br><font size=3 color=#FF0000><b>".htmlspecialchars($error, ENT_QUOTES)."</b></font>\n";
 	}
 	echo "<br><br><font size=0>$queryResult</font>\n";
 	echo "</td></form></tr></table>\n";
@@ -599,7 +673,7 @@
 
 	if (isset($tid) && $tid != "" && count($listPath) > 0)
 	{
-		$result = sqlquery("SELECT view_row.name AS name, variable.vid, variable.path, warning_bound, error_bound, alarm_order FROM view_row, variable WHERE tid='$tid' AND variable.vid=view_row.vid AND graph!='0' ORDER BY name");
+		$result = sqlquery("SELECT view_row.name AS name, variable.vid, variable.path, warning_bound, error_bound, alarm_order FROM view_row, variable WHERE tid='".intval($tid)."' AND variable.vid=view_row.vid AND graph!='0' ORDER BY name");
 		
 		if ($result && sqlnumrows($result) > 0)
 		{
@@ -671,7 +745,7 @@
 					$rrderr = $var["err"];
 					$rrdord = strtoupper($var["order"]);
 
-					echo "<tr><th>$rrdvar <font size=0>(using path $rrdpath)</font></th></tr>\n";
+					echo "<tr><th>".htmlspecialchars($rrdvar, ENT_QUOTES)." <font size=0>(using path ".htmlspecialchars($rrdpath, ENT_QUOTES).")</font></th></tr>\n";
 
 					// generate a temp filename
 					
@@ -689,34 +763,51 @@
 
 					unset($result);
 
-					$rrdDEF = "DEF:val=$rrdpath:var:AVERAGE";
+					// Path and thresholds come from the variable table and land
+					// on an exec() command line. DEF: takes the path unquoted
+					// (rrdtool syntax), so refuse anything that is not a plain
+					// path character; quote the separate output filename args;
+					// keep order/bounds to known tokens / numbers.
+					if (!is_string($rrdpath) || $rrdpath === '' || preg_match('/[^A-Za-z0-9._\\/+-]/', $rrdpath))
+					{
+						echo "<tr><td>Skipping graph with unsafe rrd path</td></tr>\n";
+						continue;
+					}
+					$temp0_q = escapeshellarg($tempFilenameout_0);
+					$temp1_q = escapeshellarg($tempFilenameout_1);
+					$temp2_q = escapeshellarg($tempFilenameout_2);
+					$rrdord_safe = in_array($rrdord, array('LT','GT','LE','GE'), true) ? $rrdord : 'GT';
+					$rrdwarn_n = is_numeric($rrdwarn) ? $rrdwarn : -1;
+					$rrderr_n = is_numeric($rrderr) ? $rrderr : -1;
+
+					$rrdDEF = "DEF:val=".str_replace(":", "\\:", $rrdpath).":var:AVERAGE";
 					$rrdDraw = "";
 					
-					if ($rrdwarn != -1)
+					if ($rrdwarn_n != -1)
 					{
-						$rrdDEF .= " CDEF:warn=val,$rrdwarn,$rrdord,val,0,IF";
+						$rrdDEF .= " CDEF:warn=val,$rrdwarn_n,$rrdord_safe,val,0,IF";
 						$rrdDraw .= "AREA:warn#FFCC88 ";
 					}
 
-					if ($rrderr != -1)
+					if ($rrderr_n != -1)
 					{
-						$rrdDEF .= " CDEF:err=val,$rrderr,$rrdord,val,0,IF";
+						$rrdDEF .= " CDEF:err=val,$rrderr_n,$rrdord_safe,val,0,IF";
 						$rrdDraw .= "AREA:err#FF4422 ";
 					}
 
 					$rrdDraw .= "LINE2:val#0000FF";
 					
-					$execStr = "rrdtool graph $tempFilenameout_0 --start -1200 $rrdDEF $rrdDraw";
+					$execStr = "rrdtool graph $temp0_q --start -1200 $rrdDEF $rrdDraw";
 					//echo "exec(\"$execStr\")<br>\n";
 					exec($execStr, $result, $retcode1);
 //					echo "<tr><td><img src='$tempFilename_0'></td></tr>";
 
-					$execStr = "rrdtool graph $tempFilenameout_1 --start -10800 $rrdDEF $rrdDraw";
+					$execStr = "rrdtool graph $temp1_q --start -10800 $rrdDEF $rrdDraw";
 					//echo "exec(\"$execStr\")<br>\n";
 					exec($execStr, $result, $retcode2);
 //					echo "<tr><td><img src='$tempFilename_1'></td></tr>";
 
-					$execStr = "rrdtool graph $tempFilenameout_2 --start -86400 $rrdDEF $rrdDraw";
+					$execStr = "rrdtool graph $temp2_q --start -86400 $rrdDEF $rrdDraw";
 					//echo "exec(\"$execStr\")<br>\n";
 					exec($execStr, $result, $retcode3);
 //					echo "<tr><td><img src='$tempFilename_2'></td></tr>";

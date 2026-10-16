@@ -40,9 +40,11 @@ static const uint SoundBufSize = 1024;
 
 // ***************************************************************************************************
 CPSSound::CPSSound() : _Gain(1.f),
-					   _GainScheme(NULL),
+					   _GainScheme(nullptr)
+    ,
 					   _Pitch(1.f),
-					   _PitchScheme(NULL),
+					   _PitchScheme(nullptr)
+    ,
 					   _EmissionPercent(1),
 					   _SpawnSounds(false),
 					   _Mute(false),
@@ -69,7 +71,7 @@ void	CPSSound::stopSound()
 		{
 			(*it)->setLooping(false);
 			(*it)->release();
-			(*it) = NULL;
+			(*it) = nullptr;
 		}
 		++it;
 	}
@@ -226,7 +228,7 @@ void	CPSSound::setGain(float Gain)
 {
 	NL_PS_FUNC(CPSSound_setGain)
 	delete _GainScheme;
-	_GainScheme = NULL;
+	_GainScheme = nullptr;
 	_Gain = Gain;
 }
 
@@ -247,7 +249,7 @@ void	CPSSound::setPitch(float pitch)
 {
 	NL_PS_FUNC(CPSSound_setPitch)
 	delete _PitchScheme;
-	_PitchScheme = NULL;
+	_PitchScheme = nullptr;
 	_Pitch = pitch;
 }
 
@@ -307,12 +309,12 @@ void			CPSSound::serial(NLMISC::IStream &f)
 	if (f.isReading())
 	{
 		delete _GainScheme;
-		_GainScheme = NULL;
+		_GainScheme = nullptr;
 		delete _PitchScheme;
-		_PitchScheme = NULL;
+		_PitchScheme = nullptr;
 	}
 	// save Gain infos
-	hasScheme = _GainScheme != NULL;
+	hasScheme = _GainScheme != nullptr;
 	f.serial(hasScheme);
 	if (hasScheme)
 	{
@@ -331,7 +333,7 @@ void			CPSSound::serial(NLMISC::IStream &f)
 		if (!_UseOriginalPitch)
 		{
 			// serialize pitch infos (no needed otherwise)
-			hasScheme = _PitchScheme != NULL;
+			hasScheme = _PitchScheme != nullptr;
 			f.serial(hasScheme);
 			if (hasScheme)
 			{
@@ -345,7 +347,7 @@ void			CPSSound::serial(NLMISC::IStream &f)
 	}
 	else
 	{
-		hasScheme = _PitchScheme != NULL;
+		hasScheme = _PitchScheme != nullptr;
 		f.serial(hasScheme);
 		if (hasScheme)
 		{
@@ -418,12 +420,12 @@ void			CPSSound::newElement(const CPSEmitterInfo &info)
 		}
 		else
 		{
-			_Sounds.insert(NULL);
+			_Sounds.insert(nullptr);
 		}
 	}
 	else
 	{
-		_Sounds.insert(NULL);
+		_Sounds.insert(nullptr);
 	}
 }
 
@@ -470,7 +472,7 @@ void	CPSSound::setUseOriginalPitchFlag(bool useOriginalPitch)
 	if (_PitchScheme)
 	{
 		delete _PitchScheme;
-		_PitchScheme = NULL;
+		_PitchScheme = nullptr;
 	}
 	_UseOriginalPitch = useOriginalPitch;
 }

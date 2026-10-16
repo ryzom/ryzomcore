@@ -36,7 +36,7 @@ namespace NLSOUND {
 
 void CSoundAnimation::addMarker(CSoundAnimMarker* marker)
 {
-	if (marker == NULL)
+	if (marker == nullptr)
 		return;
 
 	_Dirty = true;
@@ -48,7 +48,7 @@ void CSoundAnimation::addMarker(CSoundAnimMarker* marker)
 
 void CSoundAnimation::removeMarker(CSoundAnimMarker* marker)
 {
-	if (marker == NULL)
+	if (marker == nullptr)
 		return;
 
 	_Dirty = true;
@@ -93,7 +93,7 @@ void CSoundAnimation::save()
 		xmlDocPtr xmlDoc = output.getDocument();
 
 		// Create the first node
-		xmlNodePtr root = xmlNewDocNode (xmlDoc, NULL, (const xmlChar*)"SOUNDANIMATION", NULL);
+		xmlNodePtr root = xmlNewDocNode (xmlDoc, nullptr, (const xmlChar*)"SOUNDANIMATION", nullptr);
 		xmlDocSetRootElement (xmlDoc, root);
 
 		vector<CSoundAnimMarker*>::iterator iter;
@@ -106,7 +106,7 @@ void CSoundAnimation::save()
 			char s[64];
 			smprintf(s, 64, "%f", marker->getTime());
 
-			xmlNodePtr markerNode = xmlNewChild (root, NULL, (const xmlChar*)"MARKER", NULL);
+			xmlNodePtr markerNode = xmlNewChild (root, nullptr, (const xmlChar*)"MARKER", nullptr);
 			xmlSetProp (markerNode, (const xmlChar*) "time", (const xmlChar*) s);
 
 			marker->getSounds(sounds);
@@ -114,7 +114,7 @@ void CSoundAnimation::save()
 			vector<NLMISC::TStringId>::iterator iter2;
 			for (iter2 = sounds.begin(); iter2 != sounds.end(); iter2++)
 			{
-				xmlNodePtr soundNode = xmlNewChild ( markerNode, NULL, (const xmlChar*)"SOUND", NULL );
+				xmlNodePtr soundNode = xmlNewChild ( markerNode, nullptr, (const xmlChar*)"SOUND", nullptr);
 				xmlSetProp (soundNode, (const xmlChar*)"name", (const xmlChar*) CStringMapper::unmap(*iter2).c_str());
 			}
 
@@ -169,12 +169,12 @@ void CSoundAnimation::load()
 		xmlNodePtr animNode = input.getRootNode ();
 		xmlNodePtr markerNode = input.getFirstChildNode(animNode, "MARKER");
 
-		while (markerNode != 0)
+		while (markerNode != nullptr)
 		{
 			CSoundAnimMarker* marker = new CSoundAnimMarker();
 
 			const char *time = (const char*) xmlGetProp(markerNode, (xmlChar*) "time");
-			if (time == 0)
+			if (time == nullptr)
 			{
 				throw NLMISC::Exception("Invalid sound animation marker");
 			}
@@ -188,10 +188,10 @@ void CSoundAnimation::load()
 
 			xmlNodePtr soundNode = input.getFirstChildNode(markerNode, "SOUND");
 
-			while (soundNode != 0)
+			while (soundNode != nullptr)
 			{
 				char *name = (char*) xmlGetProp(soundNode, (xmlChar*) "name");
-				if (name == 0)
+				if (name == nullptr)
 				{
 					throw NLMISC::Exception("Invalid sound animation marker");
 				}

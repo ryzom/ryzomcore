@@ -2345,7 +2345,7 @@ static const char s_StringToTitleF09EA5[64 * 4] = {
 };
 
 static const char *s_StringToTitleMap[32] = {
-	0, 0,
+	nullptr, nullptr,
 	s_StringToTitleC2,
 	s_StringToTitleC3,
 	s_StringToTitleC4,
@@ -2355,7 +2355,7 @@ static const char *s_StringToTitleMap[32] = {
 	s_StringToTitleC8,
 	s_StringToTitleC9,
 	s_StringToTitleCA,
-	0, 0,
+	nullptr, nullptr,
 	s_StringToTitleCD,
 	s_StringToTitleCE,
 	s_StringToTitleCF,
@@ -2366,18 +2366,18 @@ static const char *s_StringToTitleMap[32] = {
 	s_StringToTitleD4,
 	s_StringToTitleD5,
 	s_StringToTitleD6,
-	0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char *s_StringToTitleMapE1[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleE18F,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleE1B2,
-	0, 0,
+	nullptr, nullptr,
 	s_StringToTitleE1B5,
 	s_StringToTitleE1B6,
-	0,
+	nullptr,
 	s_StringToTitleE1B8,
 	s_StringToTitleE1B9,
 	s_StringToTitleE1BA,
@@ -2389,95 +2389,95 @@ static const char *s_StringToTitleMapE1[64] = {
 };
 
 static const char *s_StringToTitleMapE2[64] = {
-	0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleE285,
 	s_StringToTitleE286,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleE293,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleE2B0,
 	s_StringToTitleE2B1,
 	s_StringToTitleE2B2,
 	s_StringToTitleE2B3,
 	s_StringToTitleE2B4,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char *s_StringToTitleMapEA[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleEA99,
 	s_StringToTitleEA9A,
-	0,
+	nullptr,
 	s_StringToTitleEA9C,
 	s_StringToTitleEA9D,
 	s_StringToTitleEA9E,
 	s_StringToTitleEA9F,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleEAAD,
 	s_StringToTitleEAAE,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char *s_StringToTitleMapEF[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleEFBD,
-	0, 0,
+	nullptr, nullptr,
 };
 
 static const char **s_StringToTitleMapMap[16] = {
-	0,
+	nullptr,
 	s_StringToTitleMapE1,
 	s_StringToTitleMapE2,
-	0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleMapEA,
-	0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleMapEF,
 };
 
 static const char *s_StringToTitleMapF090[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleF09090,
 	s_StringToTitleF09091,
-	0,
+	nullptr,
 	s_StringToTitleF09093,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleF090B3,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char *s_StringToTitleMapF091[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleF091A3,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char *s_StringToTitleMapF096[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleF096B9,
-	0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char *s_StringToTitleMapF09E[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleF09EA4,
 	s_StringToTitleF09EA5,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char **s_StringToTitleMapMapF0[64] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleMapF090,
 	s_StringToTitleMapF091,
-	0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleMapF096,
-	0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 	s_StringToTitleMapF09E,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 static const char ***s_StringToTitleMapMapMap[8] = {
 	s_StringToTitleMapMapF0,
-	0, 0, 0, 0, 0, 0, 0,
+	nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
 };
 
 // ***************************************************************************

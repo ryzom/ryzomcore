@@ -30,9 +30,9 @@ namespace NL3D
 // ------------------------------------------------------------------------------------------------
 CNoise3d::CNoise3d (IDriver *pDriver)
 {
-	_Mem = NULL;
-	_Mat = NULL;
-	_OffS = NULL;
+	_Mem = nullptr;
+	_Mat = nullptr;
+	_OffS = nullptr;
 	_Driver = pDriver;
 	_NbVertices = 0;
 	_IsDriverSupportCloudSinglePass = pDriver->supportCloudRenderSinglePass();
@@ -51,7 +51,7 @@ void CNoise3d::init (uint32 w, uint32 h, uint32 d)
 {
 	uint32 i;
 
-	if (_Mem != NULL)
+	if (_Mem != nullptr)
 		return;
 
 	w = raiseToNextPowerOf2 (w);

@@ -55,13 +55,13 @@ extern CActionsManager	EditActions;
 // Hierarchical timer
 H_AUTO_DECL ( RZ_Client_Pump_Events )
 
-CInputHandlerManager* CInputHandlerManager::_Instance = NULL;
+CInputHandlerManager* CInputHandlerManager::_Instance = nullptr;
 
 
 // ***************************************************************************
 CInputHandlerManager::CInputHandlerManager()
 {
-	_EventServer= NULL;
+	_EventServer = nullptr;
 	_MouseButtonsState = noButton;
 	_MouseX = _MouseY = _MouseLastX = _MouseLastY = 0;
 	_Focus = true;
@@ -76,7 +76,7 @@ CInputHandlerManager::CInputHandlerManager()
 // ***************************************************************************
 CInputHandlerManager::~CInputHandlerManager()
 {
-	CGroupEditBox::setComboKeyHandler( NULL );
+	CGroupEditBox::setComboKeyHandler(nullptr);
 }
 
 // ********************************************************************************************
@@ -85,7 +85,7 @@ void CInputHandlerManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -483,7 +483,7 @@ bool CInputHandlerManager::readInputConfigFile(const std::string & fileName)
 	catch (const Exception &e)
 	{
 		// Output error
-		root = NULL;
+		root = nullptr;
 		nlwarning ("CFormLoader: Error while loading the xml input file : %s", e.what());
 	}
 	if (!root)

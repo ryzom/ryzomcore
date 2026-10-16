@@ -213,7 +213,7 @@ public:
 	public:
 		CLumelDescriptor ()
 		{
-			TriangleList=NULL;
+			TriangleList = nullptr;
 		}
 		CTriangleList					*TriangleList;
 		NLMISC::CVector					Position;

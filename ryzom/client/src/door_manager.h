@@ -54,7 +54,7 @@ class CDoorManager : public NL3D::ITransformName
 		SDoor()
 		{
 			ID = ++s_nextId;
-			InstanceGroup = NULL;
+			InstanceGroup = nullptr;
 			Opened = false;
 			OCState = 0;
 			AnimType = Normal;
@@ -81,7 +81,7 @@ public:
 	/// Singleton method : Get the unique interface loader instance
 	static CDoorManager* getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CDoorManager();
 		return _Instance;
 	}

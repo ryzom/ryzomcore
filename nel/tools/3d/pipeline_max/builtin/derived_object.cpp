@@ -205,13 +205,13 @@ void CDerivedObject::decodeDerivedModel()
 
 CSceneClass *CDerivedObject::modifier(uint i) const
 {
-	if (i >= m_ModifierSlots.size()) return NULL;
+	if (i >= m_ModifierSlots.size()) return nullptr;
 	return static_cast<CSceneClass *>(getReference(m_ModifierSlots[i].ReferenceIndex));
 }
 
 CStorageContainer *CDerivedObject::modApp(uint i) const
 {
-	if (i >= m_ModifierSlots.size()) return NULL;
+	if (i >= m_ModifierSlots.size()) return nullptr;
 	return m_ModifierSlots[i].ModApp;
 }
 
@@ -227,7 +227,7 @@ IStorageObject *CDerivedObject::localModData(uint i) const
 
 CSceneClass *CDerivedObject::baseObject() const
 {
-	if (!m_HasBase) return NULL;
+	if (!m_HasBase) return nullptr;
 	return static_cast<CSceneClass *>(getReference(m_BaseReferenceIndex));
 }
 
@@ -251,14 +251,14 @@ bool CDerivedObject::modAppContextTM(const CStorageContainer *modApp, float *tm1
 
 IStorageObject *CDerivedObject::modAppLocalModData(const CStorageContainer *modApp)
 {
-	if (!modApp) return NULL;
+	if (!modApp) return nullptr;
 	const CStorageContainer::TStorageObjectContainer &chunks = modApp->chunks();
 	for (CStorageContainer::TStorageObjectConstIt it = chunks.begin(); it != chunks.end(); ++it)
 	{
 		if (it->first == PMB_MOD_APP_LOCAL_DATA_CHUNK_ID)
 			return it->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool CDerivedObject::selfTest(std::string &err) const

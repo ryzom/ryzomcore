@@ -775,7 +775,7 @@ void CClientConfig::setValuesOnFileChange()
 //---------------------------------------------------
 void CClientConfig::setValues()
 {
-	CConfigFile::CVar *varPtr = 0;
+	CConfigFile::CVar *varPtr = nullptr;
 	static bool	firstTimeSetValues= true;
 
 	//////////////////////
@@ -2100,7 +2100,7 @@ void CClientConfig::init(const string &configFileName)
 		// create the basic .cfg
 		FILE *fp = nlfopen(configFileName, "w");
 
-		if (fp == NULL)
+		if (fp == nullptr)
 			nlerror("CFG::init: Can't create config file '%s'", configFileName.c_str());
 		else
 			nlwarning("CFG::init: creating '%s' with default values", configFileName.c_str ());
@@ -2206,7 +2206,7 @@ void CClientConfig::release ()
 		// Save values
 		try
 		{
-			CConfigFile::CVar *varPtr = NULL;
+			CConfigFile::CVar *varPtr = nullptr;
 
 			// Driver still alive ?
 			if (Driver && Driver->isActive ())

@@ -419,7 +419,7 @@ const CAutomatonStateSheet *CAutomatonSheet::state(const TAnimStateKey &key) con
 	if(itStates != _States.end())
 		return &((*itStates).second);
 	else
-		return 0;
+		return nullptr;
 }// state //
 
 //-----------------------------------------------
@@ -481,11 +481,11 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 {
 	NLGEORGES::UFormLoader *formLoader = UFormLoader::createLoader();
 
-	const UFormElm *list = 0;
+	const UFormElm *list = nullptr;
 	rootList.getNodeByName(&list, "list");
 	if(list)
 	{
-		CSmartPtr<UForm> form = 0;
+		CSmartPtr<UForm> form = nullptr;
 
 		uint size;
 		list->getArraySize(size);
@@ -509,7 +509,7 @@ void CAutomatonListSheet::build(const NLGEORGES::UFormElm &rootList)
 					{
 						// Build the automaton.
 						CAutomatonSheet *pAutomatonSheet = new CAutomatonSheet;
-						if (pAutomatonSheet != NULL)
+						if (pAutomatonSheet != nullptr)
 						{
 							pAutomatonSheet->build(form->getRootNode());
 							Automatons.insert(make_pair(filename, pAutomatonSheet));

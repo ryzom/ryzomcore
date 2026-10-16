@@ -13,28 +13,40 @@
  *
  * This TU owns CLI parsing + global state definitions + main() dispatch. Implementation
  * lives in the topical TUs (see zp_state.h for their declarations):
- *   scene_paint          - zone eligibility, build, weld, instance placement
- *   hints_and_footprint  - neighbor-hint appdata + footprint mask math
- *   save_ops             - whole-file write-back, thumbnails, atomic copy
- *   script_and_ui        - paint-script executor + brush/tile/prop UI actions + script host
- *   board_session        - working-set rebuild + eco scratch board ops
- *   session_ops          - continent per-file open/close/save/toggle
- *   viewer               - runViewer main loop + CPaintMouseListener bodies
+ * scene_paint - zone eligibility, build, weld, instance placement
+ * hints_and_footprint - neighbor-hint appdata + footprint mask math
+ * save_ops - whole-file write-back, thumbnails, atomic copy
+ * script_and_ui - paint-script executor + brush/tile/prop UI actions + script host
+ * board_session - working-set rebuild + eco scratch board ops
+ * session_ops - continent per-file open/close/save/toggle
+ * viewer - runViewer main loop + CPaintMouseListener bodies
  *
  * Scene-assembly rules (paint_core sees this shape): eligible RklPatches -> evalNodePatch +
- * object TM at t=0 -> buildPatchInfo in AUTHORED space. Optional ecosystem self-instances
- * (--place dx,dy[,rot][,m]) clone display zones about the footprint block center; place
- * (dx,dy) is the min-corner cell of the transformed block. Display clones share the source
- * carrier by Node pointer; ids from kInstanceZoneIdBase. Per-zone Rotate/Symmetry feed
- * transformDesc. Cross-zone open-edge weld (WELD_THRESOLD, session-only) -> CZone::build
- * -> CZoneCornerSmoother -> Landscape.addZone. Frozen (0x0976) nodes are display+weld only.
+ * object TM at t=0 -> buildPatchInfo in AUTHORED space. Cross-zone open-edge weld
+ * (WELD_THRESOLD, session-only) -> CZone::build -> CZoneCornerSmoother -> Landscape.addZone.
+ * Frozen (0x0976) nodes are display+weld only.
  *
- * Interior paint through an R-rotated instance is byte-identical to the compensated primary
- * op (tile/256/fill store rot (r+R)&3; color/displace identity on UV).
+ * NODES AND OBJECTS (the tool's node/object model). An SPaintZone is a NODE: an object plus a
+ * transform. Several nodes may carry the same Node pointer, which is the OBJECT - one storage,
+ * one paint carrier, one set of vertices. `--place dx,dy[,rot][,m]` adds nodes on an object
+ * already open (place (dx,dy) is the min-corner cell of the transformed footprint block, about
+ * the block centre); a board placement of an open file does the same thing.
+ *
+ * There is deliberately no "primary" node and no second-class "instance". Every node of an
+ * editable object is editable, an edit through any of them writes the one object, and every
+ * node showing it follows through its own transform. Three per-node facts, none of them an id
+ * comparison: Editable (may the object be written), InFile (does the .max hold this node - if
+ * not it is session-only and never saved), and DisplayTM (object -> where this node is drawn).
+ * Zone ids are landscape ids; session-added nodes take theirs from kInstanceZoneIdBase purely
+ * so they do not collide. Per-node Rotate/Symmetry additionally feed transformDesc for tiles.
+ *
+ * Interior paint through an R-rotated node is byte-identical to the compensated op on any
+ * other node of the object (tile/256/fill store rot (r+R)&3; color/displace identity on UV),
+ * and so is a patch-vertex move (m35).
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -44,11 +56,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -190,6 +202,7 @@ using namespace MAXMATH;
 
 // Cross-TU state, types, and forward decls shared by every implementation TU.
 #include "zp_state.h"
+#include "viewer_listener.h" // CPaintMouseListener::SubCount, for the sub-object digit run
 
 bool g_verbose = false;
 // Result of the viewer script pre-pass (propagated as the viewer exit code for scripted gates)
@@ -236,7 +249,7 @@ std::vector<PMAXLOAD::SLoadedMax *> g_ExtraEditableScenes;
 std::vector<SEditableFileInfo> g_EditableFiles;
 // The first-opened file's scene (heap-owned like every other, registered in
 // g_ExtraEditableScenes); NULLed when that file closes. Legacy fallback reads only.
-PMAXLOAD::SLoadedMax *g_PrimaryLm = NULL;
+PMAXLOAD::SLoadedMax *g_PrimaryLm = nullptr;
 // When true, every non-forceFrozen zone is a paint target (open-everything mode).
 // Default false = exporter-faithful eligibility (one editable zone per normal .max).
 bool g_AllZones = false;
@@ -244,7 +257,7 @@ bool g_AllZones = false;
 float g_SessionCellSize = 160.f;
 float g_SessionSnap = 1.f;
 bool g_SessionLockBorders = false;
-NL3D::CTileBank *g_SessionBank = NULL;
+NL3D::CTileBank *g_SessionBank = nullptr;
 // Ecosystem self-instances: board-driven placements. Primary zones sit at the layout origin
 // (rot 0, no mirror); each --place adds a display-level duplicate sharing the same Node
 // pointers (paint_core carrier keying) with geometry transformed about the FOOTPRINT-block
@@ -278,7 +291,28 @@ int g_MaskCycle = 0;
 // cleared on working-set rebuild (session open/close/place). Hover is transient.
 bool g_HavePropSelection = false;
 uint g_SelectedZoneId = 0;
+std::set<TPatchVertId> g_PatchVertSel;
+bool g_WeldTargetArmed = false;
+bool g_PatchFilterVerts = true;
+bool g_PatchFilterVecs = true;
+bool g_PatchLockHandles = false;
+bool g_ShowArrows = false;
+std::set<TPatchVertId> g_PatchTanSel;
+int g_PivotMode = ZPPIV_Selection;
+int g_XformKind = ZPXF_Move;
+NLMISC::CVector g_UserPivot(0.f, 0.f, 0.f);
+bool g_HaveUserPivot = false;
+std::set<SPatchEdgeId> g_PatchEdgeSel;
+std::set<TPatchFaceId> g_PatchFaceSel;
+std::set<TPatchFaceId> g_PatchHidden;
 std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
+
+// Three parallel tables indexed by TPainterKey; the sizes are left implicit and checked
+// below, so adding an action without extending all three is a compile error rather than a
+// silently zero-filled (and therefore dead, or unnamed) binding.
+typedef char zpCheckKeyNames[(sizeof(kPainterKeysName) / sizeof(kPainterKeysName[0])) == ZPK_KeyCounter ? 1 : -1];
+typedef char zpCheckKeyDefaults[(sizeof(g_PainterKeys) / sizeof(g_PainterKeys[0])) == ZPK_KeyCounter ? 1 : -1];
+typedef char zpCheckKeyModes[(sizeof(kPainterKeyModes) / sizeof(kPainterKeyModes[0])) == ZPK_KeyCounter ? 1 : -1];
 
 // ---------------------------------------------------------------------------------------------
 // keys.cfg / vars.cfg (plugin paint_ui.cpp LoadKeyCfg/LoadVarCfg port). The plugin read BOTH
@@ -291,13 +325,14 @@ std::string g_PropStatusMsg; // click "read-only" / selection name (HUD + panel)
 // Key actions keep the plugin's cfg NAMES (a plugin-era keys.cfg rebinds them unchanged);
 // values are NeL TKey codes (== the Windows VK codes the plugin used). Actions without a
 // standalone-tool equivalent are accepted and ignored (documented in --help): Select, Pick,
-// ToggleColor, BackgroundColor, ToggleArrows, Zouille, AutomaticLighting, GetState,
-// ResetPatch. ZoomIn/ZoomOut are implemented but default UNBOUND (0) because the plugin's
+// ToggleColor, BackgroundColor, Zouille, AutomaticLighting, GetState,
+// ResetPatch. ToggleArrows is implemented (patch-scoped C - the paint scope owns C for
+// ModeColor, the same digit-row trick). ZoomIn/ZoomOut are implemented but default UNBOUND (0) because the plugin's
 // default keys 1/2 select tile sets in this tool.
 
 
 // The plugin's cfg variable names (paint_ui.cpp PainterKeysName, order preserved)
-const char *kPainterKeysName[ZPK_KeyCounter] =
+const char *kPainterKeysName[] =
 {
 	"Select",
 	"Pick",
@@ -334,11 +369,28 @@ const char *kPainterKeysName[ZPK_KeyCounter] =
 	"SeasonNext",
 	"TogglePalette",
 	"ToggleBoard",
+	"ZoomExtentsSelected",
+	"TileSetPrev",
+	"TileSetNext",
+	"TileSetDigits",
+	"DisplacePrev",
+	"DisplaceNext",
+	"Undo",
+	"Redo",
+	"Redo2",
+	"ViewUndo",
+	"ViewRedo",
+	"Screenshot",
+	"ModePatch",
+	"SubObjectDigits",
+	"XformMove",
+	"XformRotate",
+	"XformScale",
 };
 
 // Tool defaults: the pre-cfg hardcoded viewer keys stay on their keys (T/C/D, +/-, B, G, F);
 // new actions land on free keys (documented in --help). 0 = unbound.
-uint g_PainterKeys[ZPK_KeyCounter] =
+uint g_PainterKeys[] =
 {
 	0,                    // Select (in-plugin paint-modifier action; no tool equivalent)
 	0,                    // Pick (the tool picks on right mouse, hardcoded)
@@ -349,7 +401,7 @@ uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyT,         // ModeTile
 	NLMISC::KeyC,         // ModeColor
 	NLMISC::KeyD,         // ModeDisplace
-	NLMISC::KeyR,         // ModeProp (free key; T/C/D modes, O board, P palette, Y season)
+	NLMISC::KeyR,         // ModeProp (paint-scoped, so R is free to mean SCALE in patch mode)
 	0,                    // ToggleColor (single brush color in this tool)
 	NLMISC::KeyADD,       // SizeUp
 	NLMISC::KeySUBTRACT,  // SizeDown
@@ -357,7 +409,7 @@ uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyG,         // GroupUp
 	NLMISC::KeyV,         // GroupDown (plugin default)
 	0,                    // BackgroundColor
-	0,                    // ToggleArrows
+	NLMISC::KeyC,         // ToggleArrows (legacy painter C; patch-scoped - C is ModeColor in paint)
 	NLMISC::KeyHOME,      // HardnessUp (plugin PgUp/PgDn select tile sets here)
 	NLMISC::KeyEND,       // HardnessDown
 	NLMISC::KeyINSERT,    // OpacityUp
@@ -375,6 +427,83 @@ uint g_PainterKeys[ZPK_KeyCounter] =
 	NLMISC::KeyY,         // SeasonNext (free key; cycle season textures)
 	NLMISC::KeyP,         // TogglePalette (free key; tileset thumbnail palette)
 	NLMISC::KeyO,         // ToggleBoard (free key; session board hub)
+	NLMISC::KeyZ,         // ZoomExtentsSelected (Max Z)
+	NLMISC::KeyPRIOR,     // TileSetPrev (PgUp)
+	NLMISC::KeyNEXT,      // TileSetNext (PgDn)
+	NLMISC::Key0,         // TileSetDigits: base of the 0-9 run
+	NLMISC::KeyLBRACKET,  // DisplacePrev
+	NLMISC::KeyRBRACKET,  // DisplaceNext
+	ZPK_BIND(NLMISC::KeyZ, ZPKM_CTRL), // Undo
+	ZPK_BIND(NLMISC::KeyY, ZPKM_CTRL), // Redo
+	ZPK_BIND(NLMISC::KeyE, ZPKM_CTRL), // Redo2 (what the tool shipped before)
+	ZPK_BIND(NLMISC::KeyZ, ZPKM_SHIFT), // ViewUndo
+	ZPK_BIND(NLMISC::KeyY, ZPKM_SHIFT), // ViewRedo
+	NLMISC::KeyF12,       // Screenshot
+	NLMISC::KeyM,         // ModePatch (free; T/C/D/R are the paint modes, M for the mesh)
+	NLMISC::Key1,         // SubObjectDigits: base of the 1-5 run (sub-object keys)
+	NLMISC::KeyW,         // XformMove
+	NLMISC::KeyE,         // XformRotate
+	NLMISC::KeyR,         // XformScale  (free here because ModeProp is ZPKS_PAINT)
+};
+
+// Mode scope per action (see ZPKS_* in zp_state.h). Everything that only makes sense while
+// painting is ZPKS_PAINT so the patch-edit modes can reuse those keys; everything the artist
+// needs from any mode - navigation, undo, view, panels, the mode switches themselves - is
+// ZPKS_ANY. Identical behaviour today: no mode outside 0-3 exists yet.
+const uint8 kPainterKeyModes[] =
+{
+	ZPKS_PAINT, // Select
+	ZPKS_PAINT, // Pick
+	ZPKS_PAINT, // Fill0
+	ZPKS_PAINT, // Fill1
+	ZPKS_PAINT, // Fill2
+	ZPKS_PAINT, // Fill3
+	ZPKS_ANY,   // ModeTile      (mode switches must work FROM any mode)
+	ZPKS_ANY,   // ModeColor
+	ZPKS_ANY,   // ModeDisplace
+	ZPKS_PAINT, // ModeProp      (R is SCALE in patch mode; reach Prop from a paint mode)
+	ZPKS_PAINT, // ToggleColor
+	ZPKS_PAINT, // SizeUp
+	ZPKS_PAINT, // SizeDown
+	ZPKS_PAINT, // ToggleTileSize
+	ZPKS_PAINT, // GroupUp
+	ZPKS_PAINT, // GroupDown
+	ZPKS_PAINT, // BackgroundColor
+	ZPKS_PATCH, // ToggleArrows (paint scope owns C for ModeColor; the panel box covers paint modes)
+	ZPKS_PAINT, // HardnessUp
+	ZPKS_PAINT, // HardnessDown
+	ZPKS_PAINT, // OpacityUp
+	ZPKS_PAINT, // OpacityDown
+	ZPKS_PAINT, // Zouille
+	ZPKS_PAINT, // AutomaticLighting
+	ZPKS_PAINT, // SelectColorBrush
+	ZPKS_PAINT, // ToggleColorBrushMode
+	ZPKS_ANY, // LockBorders (a paint constraint, but harmless and useful to pre-set)
+	ZPKS_ANY, // ZoomIn
+	ZPKS_ANY, // ZoomOut
+	ZPKS_PAINT, // GetState
+	ZPKS_PAINT, // ResetPatch
+	ZPKS_ANY, // ToggleUI
+	ZPKS_ANY, // SeasonNext
+	ZPKS_ANY, // TogglePalette
+	ZPKS_ANY, // ToggleBoard
+	ZPKS_ANY, // ZoomExtentsSelected
+	ZPKS_PAINT, // TileSetPrev <- the digit row / PgUp-PgDn belong to the patch-edit
+	ZPKS_PAINT, // TileSetNext modes' sub-object levels once those exist
+	ZPKS_PAINT, // TileSetDigits
+	ZPKS_PAINT, // DisplacePrev
+	ZPKS_PAINT, // DisplaceNext
+	ZPKS_ANY, // Undo
+	ZPKS_ANY, // Redo
+	ZPKS_ANY, // Redo2
+	ZPKS_ANY, // ViewUndo
+	ZPKS_ANY, // ViewRedo
+	ZPKS_ANY, // Screenshot
+	ZPKS_ANY, // ModePatch (a mode switch, so it must work FROM any mode)
+	ZPKS_PATCH, // SubObjectDigits <- shares the digit row with TileSetDigits above
+	ZPKS_PATCH, // XformMove
+	ZPKS_PATCH, // XformRotate
+	ZPKS_PATCH, // XformScale   <- R, which ModeProp holds in the paint modes
 };
 
 // paint_ui.cpp light/zoom variable defaults (LoadVarCfg overrides; identical to the previous
@@ -384,6 +513,13 @@ NLMISC::CRGBA g_LightDiffuse(255, 255, 255);
 NLMISC::CRGBA g_LightAmbiant(0, 0, 0);
 float g_LightMultiply = 1.f;
 float g_ZoomSpeed = 300.f;
+// Patch-edit live surface update: 1 = push the drag into the landscape every frame, 0 = only
+// on release. Per-frame is the default because the point of a manipulator is watching the
+// thing you are manipulating; release-only exists for working sets where the refresh cost
+// per mouse-move is felt.
+bool g_PatchLiveUpdate = true;
+// Landscape weld state; see zp_state.h. Starts welded because a session opens in a paint mode.
+bool g_WeldedLandscape = true;
 
 // LoadKeyCfg port: per-action lookup, absent/typed-wrong names silently keep the default (the
 // plugin's per-var try/catch). `required` = the path came from the CLI (missing file is fatal);
@@ -503,15 +639,25 @@ static bool loadVarsCfg(const std::string &path, bool required)
 	catch (const NLMISC::EConfigFile &)
 	{
 	}
+	try
+	{
+		NLMISC::CConfigFile::CVar &liveUpd = cf.getVar("PatchLiveUpdate");
+		g_PatchLiveUpdate = liveUpd.asInt() != 0;
+		++loaded;
+	}
+	catch (const NLMISC::EConfigFile &)
+	{
+	}
 	printf("vars cfg %s: %u variable(s) applied (light %u,%u,%u dir %.3f,%.3f,%.3f mul %.2f zoom %.1f)\n",
 	       path.c_str(), loaded, g_LightDiffuse.R, g_LightDiffuse.G, g_LightDiffuse.B,
 	       g_LightDirection.x, g_LightDirection.y, g_LightDirection.z, g_LightMultiply, g_ZoomSpeed);
+printf(" PatchLiveUpdate %s\n", g_PatchLiveUpdate ? "per-frame" : "on release only");
 	return true;
 }
 
 // Bound-key test helpers (0 = unbound). g_ViewerAsync is the viewer's UDriver AsyncListener
 // (set for the duration of runViewer; headless modes never touch it).
-NLMISC::CEventListenerAsync *g_ViewerAsync = NULL;
+NLMISC::CEventListenerAsync *g_ViewerAsync = nullptr;
 // painterscript: --lua-script path; file-static so runViewer's pre-pass sees
 // it without widening the signature (mirrors scriptPath's flow).
 std::string g_LuaScriptPath;
@@ -544,8 +690,8 @@ std::vector<SPlaceContextSpec> g_PlaceContextSpecs;
 std::vector<SOpenEditableSpec> g_OpenEditableSpecs;
 
 // Script host state (installed by runViewer)
-bool (*g_ScriptScreenshotFn)(const std::string &path, std::string &err) = NULL;
-void (*g_ScriptPumpFn)() = NULL;
+bool (*g_ScriptScreenshotFn)(const std::string &path, std::string &err) = nullptr;
+void (*g_ScriptPumpFn)() = nullptr;
 bool g_ScriptCancel = false;
 bool g_SessionOpsAvailable = false;
 ZPSCRIPT::SScriptHost g_ScriptHost;
@@ -559,16 +705,72 @@ const uint kMainHeight = 600;
 SBoardOpScope::SBoardOpScope() { ++g_BoardOpDepth; }
 SBoardOpScope::~SBoardOpScope() { --g_BoardOpDepth; }
 
+/** Modifier bits currently held, in ZPKM_* terms. */
+static uint zpHeldMods()
+{
+	if (!g_ViewerAsync)
+		return 0;
+	uint m = 0;
+	if (g_ViewerAsync->isKeyDown(NLMISC::KeyCONTROL)) m |= ZPKM_CTRL;
+	if (g_ViewerAsync->isKeyDown(NLMISC::KeySHIFT)) m |= ZPKM_SHIFT;
+	if (g_ViewerAsync->isKeyDown(NLMISC::KeyMENU)) m |= ZPKM_ALT;
+	return m;
+}
+
+/** The action is live in the mode the painter is currently in (ZPKS_* scope mask). */
+static bool zpModeAllows(TPainterKey action)
+{
+	const uint8 scope = kPainterKeyModes[action];
+	if (scope == ZPKS_ANY)
+		return true;
+	const int mode = zpCurrentPaintMode();
+	if (mode < 0 || mode > 7)
+		return true; // headless / unknown: nothing is mode-restricted
+	return (scope & (1 << mode)) != 0;
+}
+
+/** Modifiers must match EXACTLY: an action bound to Z must not fire on Shift+Z. */
+static bool zpBindingMatches(TPainterKey action, uint &keyOut)
+{
+	const uint b = g_PainterKeys[action];
+	if (b == 0 || !g_ViewerAsync)
+		return false;
+	if (zpHeldMods() != ZPK_MODS(b))
+		return false;
+	if (!zpModeAllows(action))
+		return false;
+	keyOut = ZPK_KEY(b);
+	return true;
+}
+
 bool zpKeyPushed(TPainterKey action)
 {
-	uint k = g_PainterKeys[action];
-	return k != 0 && g_ViewerAsync && g_ViewerAsync->isKeyPushed((NLMISC::TKey)k);
+	uint k = 0;
+	return zpBindingMatches(action, k) && g_ViewerAsync->isKeyPushed((NLMISC::TKey)k);
 }
 
 bool zpKeyDown(TPainterKey action)
 {
-	uint k = g_PainterKeys[action];
-	return k != 0 && g_ViewerAsync && g_ViewerAsync->isKeyDown((NLMISC::TKey)k);
+	uint k = 0;
+	return zpBindingMatches(action, k) && g_ViewerAsync->isKeyDown((NLMISC::TKey)k);
+}
+
+bool zpKeyDigitPushed(uint digit)
+{
+	uint base = 0;
+	if (digit > 9 || !zpBindingMatches(ZPK_TileSetDigits, base))
+		return false;
+	return g_ViewerAsync->isKeyPushed((NLMISC::TKey)(base + digit));
+}
+
+bool zpKeySubObjPushed(uint level)
+{
+	uint base = 0;
+	if (level >= CPaintMouseListener::SubCount || !zpBindingMatches(ZPK_SubObjDigits, base))
+		return false;
+	// The run is 1-based on the keyboard (1-5) and 0-based in EP_*, so level 0 is the
+	// key the binding names and the rest follow it.
+	return g_ViewerAsync->isKeyPushed((NLMISC::TKey)(base + level));
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -588,7 +790,7 @@ int main(int argc, char **argv)
 	                    "pattern after a final '-' (e.g. zonematerial-converted-193_ec) place on the minesweeper\n"
 	                    "board and resolve 8-ring neighbors; unparseable sets fall back to a flat list.\n"
 	                    "Legacy: zone_painter <input.max> --bank <bank> [...] behaves exactly as before.\n"
-	                    "Top toolbar (3ds-Max vibe): movable bar with left drag grip (client hands-bar idiom),\n"
+	                    "Top toolbar: movable bar with left drag grip (client hands-bar idiom),\n"
 	                    "square text buttons BOARD SAVE | UNDO REDO | TILE COLOR DISP PROP | <season face>. Season opens a\n"
 	                    "context menu of available seasons; mode buttons show pushed state. Keys T/C/D/R, O, Y, undo/redo\n"
 	                    "still work. Slim Painter panel: tile set ± / 256 / brush / group, Color section, Displace,\n"
@@ -599,30 +801,59 @@ int main(int argc, char **argv)
 	                    "through the same absolute handler as digit keys / right-click pick; season change rebuilds\n"
 	                    "previews. Toggle with P (TogglePalette) or the panel Tiles button.\n"
 	                    "Config files (plugin keys.cfg port, NLMISC::CConfigFile syntax; one file may serve both):\n"
-	                    "  keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the plugin-era actions by name,\n"
-	                    "  values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
-	                    "  Honored: ModeTile ModeColor ModeDisplace ModeProp SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
-	                    "  Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
-	                    "  ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
-	                    "  (defaults: T C D R + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P; zoom unbound).\n"
-	                    "  ModeProp (default R): property-edit mode - hover thin zone outline, click selects thick;\n"
-	                    "  only editable (unfrozen primary) zones; RO/instance click reports read-only .\n"
-	                    "  Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor ToggleArrows\n"
-	                    "  Zouille AutomaticLighting GetState ResetPatch.\n"
-	                    "  vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
-	                    "  LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
-	                    "  ToggleUI (default F10: show/hide the in-engine NLGUI panel + toolbar).\n"
-	                    "  SeasonNext (default Y: cycle landscape season textures among variants that exist for\n"
-	                    "  the open bank - spring/summer/autumn/winter; paint indices/colors/displace untouched;\n"
-	                    "  tileset palette previews re-resolve to the new season; toolbar season face updates).\n"
-	                    "  TogglePalette (default P: show/hide the Tiles thumbnail palette).\n"
-	                    "  ToggleBoard (default O: session board hub - continent working set, or ecosystem\n"
-	                    "    scratch board for brick instances: empty cell places an instance; instance cell\n"
-	                    "    popup Rotate CW/CCW / Mirror / Remove; home = open brick. Labels show R90/M.\n"
-	                    "    Continent: L-click closed=open, open=Close/Save/Toggle. BACK TO PAINTING / O\n"
-	                    "    returns. Working-set / place changes rebuild landscape+weld and CLEAR undo).\n"
-	                    "Fixed viewer keys: PgUp/PgDn + 0-9 tile set, [ ] displace index, Ctrl+Z/Ctrl+E undo/redo,\n"
-	                    "F12 screenshot, ESC quit.");
+	                    " keys cfg (--keys-cfg, else ./zone_painter_keys.cfg): rebinds the actions by name,\n"
+	                    " values are NeL TKey codes (the plugin's keys.cfg Key* constant block parses verbatim).\n"
+	                    " A binding may carry modifiers: value = key + 65536*mods, mods = 1 Ctrl | 2 Shift | 4 Alt\n"
+	                    " (so Ctrl+Z is 90+65536). Modifier matching is EXACT - an action on Z does not fire on\n"
+	                    " Shift+Z. Actions are also MODE-SCOPED: the paint bindings (tile set, brush, fill,\n"
+	                    " hardness/opacity, displace) are live in the paint modes only, so the digit row and the\n"
+	                    " transform keys stay free for the patch-edit sub-object levels; navigation, undo, view,\n"
+	                    " panels and the mode switches are live everywhere.\n"
+	                    " Honored: ModeTile ModeColor ModeDisplace ModeProp SizeUp SizeDown ToggleTileSize GroupUp GroupDown\n"
+	                    " Fill0 Fill1 Fill2 Fill3 HardnessUp HardnessDown OpacityUp OpacityDown SelectColorBrush\n"
+	                    " ToggleColorBrushMode LockBorders ZoomIn ZoomOut ToggleUI SeasonNext TogglePalette ToggleBoard\n"
+	                    " ZoomExtentsSelected ToggleArrows (patch mode; the legacy painter's orientation arrows)\n"
+	                    " (defaults: T C D R + - B G V F F6 F7 F8 Home End Insert Delete S Q L, F10, Y, P, Z; zoom unbound).\n"
+	                    " ModeProp (default R): property-edit mode - hover thin zone outline, click selects thick;\n"
+	                    " only editable (unfrozen primary) zones; RO/instance click reports read-only .\n"
+	                    " Accepted+ignored (no tool equivalent): Select Pick ToggleColor BackgroundColor\n"
+	                    " Zouille AutomaticLighting GetState ResetPatch.\n"
+	                    " vars cfg (--vars-cfg, else ./zone_painter_vars.cfg): LightDirection {x,y,z}, LightDiffuse {r,g,b},\n"
+	                    " LightAmbiant {r,g,b}, LightMultiply, ZoomSpeed (the plugin LoadVarCfg set).\n"
+	                    " ToggleUI (default F10: show/hide the in-engine NLGUI panel + toolbar).\n"
+	                    " SeasonNext (default Y: cycle landscape season textures among variants that exist for\n"
+	                    " the open bank - spring/summer/autumn/winter; paint indices/colors/displace untouched;\n"
+	                    " tileset palette previews re-resolve to the new season; toolbar season face updates).\n"
+	                    " TogglePalette (default P: show/hide the Tiles thumbnail palette).\n"
+	                    " ToggleBoard (default O: session board hub - continent working set, or ecosystem\n"
+	                    " scratch board for brick instances: empty cell places an instance; instance cell\n"
+	                    " popup Rotate CW/CCW / Mirror / Remove; home = open brick. Labels show R90/M.\n"
+	                    " Continent: L-click closed=open, open=Close/Save/Toggle. BACK TO PAINTING / O\n"
+	                    " returns. Working-set / place changes rebuild landscape+weld and CLEAR undo).\n"
+	                    "Navigation (middle-button set; the LEFT button is never navigation, it\n"
+	                    "belongs to paint/select): MMB pan, Alt+MMB orbit, Ctrl+Alt+MMB dolly, Ctrl+MMB fast\n"
+	                    "pan, Shift+MMB axis-locked pan, wheel stepped zoom. Orbit/dolly/wheel all pivot on\n"
+	                    "the VIEW TARGET, which pans with the camera and is reset by Z - not on a point\n"
+	                    "frozen at session start.\n"
+	                    " ZoomExtentsSelected (default Z): frames the last edit, else the hovered tile,\n"
+	                    " else the Prop selection, else every editable zone. Shift+Z / Shift+Y step the\n"
+	                    " view history.\n"
+	                    " Also honored (were hardcoded, now rebindable + mode-scoped): TileSetPrev TileSetNext\n"
+	                    " TileSetDigits (base of the 0-9 run) DisplacePrev DisplaceNext Undo Redo Redo2 ViewUndo\n"
+	                    " ViewRedo Screenshot (defaults PgUp PgDn 0 [ ] Ctrl+Z Ctrl+Y Ctrl+E Shift+Z Shift+Y F12).\n"
+	                    "Patch edit (ModePatch, default M): shows the patch control cage for every editable\n"
+                    " zone. SubObjectDigits (base of the 1-5 run, default 1) picks the sub-object level -\n"
+                    " 1 Object, 2 Vertex, 3 Edge, 4 Patch, 5 Tile, the same order and meaning as the\n"
+                    " legacy plugin modifier. The digit row is shared with TileSetDigits: only one of the two is\n"
+                    " live, because each is scoped to the modes it belongs to. Entering the mode lands on\n"
+                    " Object level. At Vertex level: click selects a vertex,\n"
+                    " Ctrl adds, Alt removes, a click on nothing clears; the move gizmo appears on\n"
+                    " the selection and dragging an axis / plane / its centre moves the selected\n"
+                    " vertices. BOUND vertices (drawn black) are never moved - they are recomputed\n"
+                    " from the edge they bind into, so a written position could not survive a\n"
+                    " reload; they follow when that edge moves. Rotated or mirrored zones refuse\n"
+                    " the move for now. Moves are undoable as one step per drag.\n"
+	                    "ESC is the only fixed key: closes the session board, else quits; also cancels a script.");
 	// Optional first positional: .max (legacy) or folder (startup seed). Absent => startup flow.
 	args.addAdditionalArg("input", "Input .max scene (legacy) or graphics/seed folder (startup); omit for discovery", true, false);
 	args.addArg("", "bank", "bank", "Tile bank (.smallbank/.bank); required for the legacy .max path (auto-derived in startup flow)");
@@ -687,9 +918,9 @@ int main(int argc, char **argv)
 	            "Supported keys: neighbors=on|off (continents; default on), "
 	            "place=dx,dy[,rot][,m] (ecosystem self-instances; see --place), "
 	            "instances=NxM (deprecated alias for translation-only places; see --instances). "
-	            "Examples: lacustre/material-fond?place=1,0,1  "
-	            "snowballs/4_AC+4_AD  "
-	            "fyros_newbieland/15_AE?neighbors=off  "
+	            "Examples: lacustre/material-fond?place=1,0,1 "
+	            "snowballs/4_AC+4_AD "
+	            "fyros_newbieland/15_AE?neighbors=off "
 	            "lacustre/material-fond?instances=2x1&neighbors=off");
 	args.addArg("", "startup-screenshot", "out.tga", "Render one frame of the first startup screen and exit");
 	args.addArg("", "startup-screen", "world",
@@ -900,21 +1131,21 @@ args.addArg("", "instances", "NxM",
 		for (size_t i = 0; i < hints.size(); ++i)
 		{
 			if (hints[i].Rot != 0 || hints[i].Mirror)
-				printf("  %d,%d,%u,%d:%s\n", hints[i].Dx, hints[i].Dy,
+				printf(" %d,%d,%u,%d:%s\n", hints[i].Dx, hints[i].Dy,
 				       hints[i].Rot & 3, hints[i].Mirror ? 1 : 0, hints[i].Basename.c_str());
 			else
-				printf("  %d,%d:%s\n", hints[i].Dx, hints[i].Dy, hints[i].Basename.c_str());
+				printf(" %d,%d:%s\n", hints[i].Dx, hints[i].Dy, hints[i].Basename.c_str());
 		}
 		return 0;
 	}
 
-	// Headless: dump zone export props 
+	// Headless: dump zone export props
 	if (args.haveLongArg("dump-zone-props"))
 	{
 		return dumpZoneProps(args.getLongArg("dump-zone-props")[0]);
 	}
 
-	// Season preference  before bank load so the first resolveBankTextures uses it
+	// Season preference before bank load so the first resolveBankTextures uses it
 	if (args.haveLongArg("season"))
 	{
 		std::string s = NLMISC::toLowerAscii(args.getLongArg("season")[0]);
@@ -1030,8 +1261,8 @@ args.addArg("", "instances", "NxM",
 	// Shared UDriver + EditorUI for the startup screens and (optionally) the viewer.
 	// Owned here when the startup path opens a window; runViewer receives them and must
 	// not release them. Legacy .max path still lets runViewer create its own driver.
-	NL3D::UDriver *sharedDriver = NULL;
-	ZPUI::CEditorUI *sharedEditorUI = NULL;
+	NL3D::UDriver *sharedDriver = nullptr;
+	ZPUI::CEditorUI *sharedEditorUI = nullptr;
 	bool ownsSharedHost = false;
 
 	// ---- Startup flow: discover + auto / interactive screens ----
@@ -1049,7 +1280,7 @@ args.addArg("", "instances", "NxM",
 			if (!seedFolder.empty()) printf(" seed='%s'", seedFolder.c_str());
 			printf("\n");
 			for (size_t i = 0; i < worlds.size(); ++i)
-				printf("  %s '%s' root=%s bank=%s%s\n",
+				printf(" %s '%s' root=%s bank=%s%s\n",
 				       worlds[i].Kind == ZPWS::Ecosystem ? "eco" : "continent",
 				       worlds[i].WorldName.c_str(),
 				       worlds[i].GraphicsRoot.c_str(),
@@ -1201,7 +1432,7 @@ args.addArg("", "instances", "NxM",
 				if (NLMISC::CFile::fileExists(sysFont)) fontPathEarly = sysFont;
 			}
 			NL3D::CScene::registerBasics();
-			sharedDriver = NL3D::UDriver::createDriver(0, false, 0);
+			sharedDriver = NL3D::UDriver::createDriver(0, false, nullptr);
 			if (!sharedDriver)
 			{
 				fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
@@ -1296,7 +1527,7 @@ args.addArg("", "instances", "NxM",
 		}
 
 		// Configure exactly what the CLI flags would have: bank, search path, input
-		// Multi-select: primary is first editable; keep full list for assembly 
+		// Multi-select: primary is first editable; keep full list for assembly
 		g_StartupEditableZones = selection.EditableZones;
 		if (g_StartupEditableZones.empty())
 			g_StartupEditableZones.push_back(selection.Zone);
@@ -1630,7 +1861,7 @@ args.addArg("", "instances", "NxM",
 				if (absFilePath(dup->Path) != absFilePath(editables[ei].MaxPath))
 				{
 					fprintf(stderr, "ERROR: two different files share the basename '%s':\n"
-					        "  %s\n  %s\n  (basenames are the session's file-identity key)\n",
+					        " %s\n %s\n (basenames are the session's file-identity key)\n",
 					        editables[ei].Basename.c_str(), dup->Path.c_str(),
 					        editables[ei].MaxPath.c_str());
 					return 1;
@@ -1655,7 +1886,7 @@ args.addArg("", "instances", "NxM",
 			                "(10 files; zone-id space)\n");
 			return 1;
 		}
-		PMAXLOAD::SLoadedMax *sceneLm = NULL;
+		PMAXLOAD::SLoadedMax *sceneLm = nullptr;
 		if (ei == 0)
 		{
 			// Uniform ownership : the first file registers exactly like the others
@@ -1735,7 +1966,7 @@ args.addArg("", "instances", "NxM",
 		for (size_t i = 0; i < g_Places.size(); ++i)
 			if (g_Places[i].SourceBasename.empty())
 				g_Places[i].SourceBasename = g_EditableFiles[0].Basename;
-		// The runtime no-source scratchPlace alias pins the same way  - resolving
+		// The runtime no-source scratchPlace alias pins the same way - resolving
 		// g_EditableFiles[0] at CALL time would silently re-source a replayed script's
 		// places to whichever file is first after a close.
 		g_LegacyPlaceSourceName = g_EditableFiles[0].Basename;
@@ -2071,7 +2302,7 @@ args.addArg("", "instances", "NxM",
 	buildPaintInputs(zones, inputs);
 	{
 		std::string err;
-		if (!core.init(inputs, haveBank ? &bank : NULL, cellSize, snap, g_SessionLockBorders, err))
+		if (!core.init(inputs, haveBank ? &bank : nullptr, cellSize, snap, g_SessionLockBorders, err))
 		{
 			fprintf(stderr, "ERROR: paint core: %s\n", err.c_str());
 			return 1;
@@ -2095,7 +2326,7 @@ args.addArg("", "instances", "NxM",
 	}
 	if (args.haveLongArg("color"))
 	{
-		uint32 rgb = (uint32)strtoul(args.getLongArg("color")[0].c_str(), NULL, 16);
+		uint32 rgb = (uint32)strtoul(args.getLongArg("color")[0].c_str(), nullptr, 16);
 		g_ViewerBrushColor = NLMISC::CRGBA((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
 	}
 	if (args.haveLongArg("radius")) NLMISC::fromString(args.getLongArg("radius")[0], g_ViewerBrushRadius);
@@ -2168,7 +2399,7 @@ args.addArg("", "instances", "NxM",
 			rc = runPaintScript(core, scriptPath);
 		if (rc == 0 && !luaScriptPath.empty())
 		{
-			zpInstallScriptHost(NULL);
+			zpInstallScriptHost(nullptr);
 			rc = ZPSCRIPT::runFile(luaScriptPath);
 		}
 	}
@@ -2180,13 +2411,13 @@ args.addArg("", "instances", "NxM",
 		{
 			sharedEditorUI->shutdown();
 			delete sharedEditorUI;
-			sharedEditorUI = NULL;
+			sharedEditorUI = nullptr;
 		}
 		if (sharedDriver)
 		{
 			sharedDriver->release();
 			delete sharedDriver;
-			sharedDriver = NULL;
+			sharedDriver = nullptr;
 		}
 	}
 
@@ -2335,7 +2566,7 @@ args.addArg("", "instances", "NxM",
 	}
 	if (!savePath.empty())
 	{
-		// Route through zpSaveTo so multi-file dirty policy  is enforced:
+		// Route through zpSaveTo so multi-file dirty policy is enforced:
 		// --save is single-path and errors when more than one editable file is dirty.
 		if (g_EditableFiles.empty() && !g_PrimaryLm)
 		{

@@ -66,7 +66,7 @@ void CFileHeader::write (xmlNodePtr node) const
 	if (!Comments.empty ())
 	{
 		// Create a new node
-		xmlNodePtr child = xmlNewChild ( node, NULL, (const xmlChar*)"COMMENTS", NULL);
+		xmlNodePtr child = xmlNewChild ( node, nullptr, (const xmlChar*)"COMMENTS", nullptr);
 		xmlNodePtr textNode = xmlNewText ((const xmlChar *)Comments.c_str());
 		xmlAddChild (child, textNode);
 	}
@@ -75,7 +75,7 @@ void CFileHeader::write (xmlNodePtr node) const
 	if (!Log.empty ())
 	{
 		// Create a new node
-		xmlNodePtr child = xmlNewChild ( node, NULL, (const xmlChar*)"LOG", NULL);
+		xmlNodePtr child = xmlNewChild ( node, nullptr, (const xmlChar*)"LOG", nullptr);
 		xmlNodePtr textNode = xmlNewText ((const xmlChar *)Log.c_str());
 		xmlAddChild (child, textNode);
 	}

@@ -10,10 +10,11 @@
 		var $InputStream;
 		var $Pos;
 
-		function CMemStream ()
+		function __construct ()
 		{
 			$this->InputStream = false;
 			$this->Pos = 0;
+			$this->Buffer = "";
 		}
 
 		function setBuffer ($buffer)
@@ -54,7 +55,7 @@
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])<<8;
 				$val += ord($this->Buffer[$this->Pos++])<<16;
-				$val += ord($this->Buffer[$this->Pos++])<<32;
+				$val += ord($this->Buffer[$this->Pos++])<<24; // was <<32: dropped the high byte
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else
@@ -144,7 +145,7 @@
 		$size = ord($val) << 24;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
-		$size = ord($val) << 16;
+		$size += ord($val) << 16; // an assignment here dropped the high length byte
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
 		$size += ord($val) << 8;
@@ -153,11 +154,24 @@
 		$size += ord($val);
 		//printf ("receive packet size '%d'<br>", $size);
 		$fake = fread ($fp, 4);
-		if (feof ($fp)) return false;
+		if (strlen($fake) < 4 && feof ($fp)) return false;
 		$size -= 4; // remove the fake
 
-		$buffer = fread ($fp, $size);
-		if (feof ($fp)) return false;
+		// fread on a socket may return short; loop until the body is whole,
+		// and only treat eof as an error while it is still incomplete (an
+		// exact read off a closed peer raises eof on a complete reply)
+		$buffer = '';
+		while (strlen($buffer) < $size)
+		{
+			$chunk = fread ($fp, $size - strlen($buffer));
+			if ($chunk !== false && $chunk !== '')
+				$buffer .= $chunk;
+			if (strlen($buffer) < $size && feof ($fp)) return false;
+			// a stalled peer that never closes: fread returns '' after the
+			// stream timeout without raising eof; don't spin on it
+			$info = stream_get_meta_data($fp);
+			if (!empty($info['timed_out'])) return false;
+		}
 		$msgin = new CMemStream;
 		$msgin->setBuffer ($buffer);
 

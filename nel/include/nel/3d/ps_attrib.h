@@ -40,7 +40,8 @@ public:
 	typedef const T *const_iterator;
 	typedef T value_type;
 
-	CSnappedVector() : _Size(0), _Capacity(0), _Start(NULL), _Tab(NULL) {}
+	CSnappedVector() : _Size(0), _Capacity(0), _Start(nullptr)
+	    , _Tab(nullptr) {}
 	~CSnappedVector()
 	{
 		nlassert(_Size <= _Capacity);
@@ -92,7 +93,7 @@ public:
 	void reserve(uint capacity)
 	{
 		if (capacity < _Capacity) return;
-		uint8 *newStart = NULL;
+		uint8 *newStart = nullptr;
 		try
 		{
 			newStart = new uint8[sizeof(T) * capacity + (1 << snapPower)];

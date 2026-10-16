@@ -66,16 +66,16 @@ CFarVertexBufferInfo	CLandscapeGlobals::CurrentFar0VBInfo;
 CFarVertexBufferInfo	CLandscapeGlobals::CurrentFar1VBInfo;
 CNearVertexBufferInfo	CLandscapeGlobals::CurrentTileVBInfo;
 
-CLandscapeVBAllocator	*CLandscapeGlobals::CurrentFar0VBAllocator= NULL;
-CLandscapeVBAllocator	*CLandscapeGlobals::CurrentFar1VBAllocator= NULL;
-CLandscapeVBAllocator	*CLandscapeGlobals::CurrentTileVBAllocator= NULL;
+CLandscapeVBAllocator	*CLandscapeGlobals::CurrentFar0VBAllocator = nullptr;
+CLandscapeVBAllocator	*CLandscapeGlobals::CurrentFar1VBAllocator = nullptr;
+CLandscapeVBAllocator	*CLandscapeGlobals::CurrentTileVBAllocator = nullptr;
 
 
-IDriver					*CLandscapeGlobals::PatchCurrentDriver= NULL;
+IDriver					*CLandscapeGlobals::PatchCurrentDriver = nullptr;
 CIndexBuffer			CLandscapeGlobals::PassTriArray("CLandscapeGlobals::PassTriArray");
 CIndexBufferReadWrite	CLandscapeGlobals::PassTriArrayIBA;
 uint					NL3D_LandscapeGlobals_PassNTri= 0;
-void					*NL3D_LandscapeGlobals_PassTriCurPtr= NULL;
+void					*NL3D_LandscapeGlobals_PassTriCurPtr = nullptr;
 CIndexBuffer::TFormat	NL3D_LandscapeGlobals_PassTriFormat= CIndexBuffer::IndicesUnknownFormat;
 
 

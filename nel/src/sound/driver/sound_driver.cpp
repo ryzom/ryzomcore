@@ -272,8 +272,8 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	
 #else
 
-	ISDRV_CREATE_PROC createSoundDriver = NULL;
-	ISDRV_VERSION_PROC versionDriver = NULL;
+	ISDRV_CREATE_PROC createSoundDriver = nullptr;
+	ISDRV_VERSION_PROC versionDriver = nullptr;
 
 	// dll selected
 	std::string dllName = getDriverFileName(driverType);
@@ -303,7 +303,7 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 #endif
 
 	createSoundDriver = (ISDRV_CREATE_PROC) driverLib.getSymbolAddress(IDRV_CREATE_PROC_NAME);
-	if (createSoundDriver == NULL)
+	if (createSoundDriver == nullptr)
 	{
 #ifdef NL_OS_WINDOWS
 		nlinfo( "Error: %u", GetLastError() );
@@ -314,7 +314,7 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	}
 
 	versionDriver = (ISDRV_VERSION_PROC) driverLib.getSymbolAddress(IDRV_VERSION_PROC_NAME);
-	if (versionDriver != NULL)
+	if (versionDriver != nullptr)
 	{
 		if (versionDriver()<ISoundDriver::InterfaceVersion)
 			throw ESoundDriverOldVersion(dllName);
@@ -323,7 +323,7 @@ ISoundDriver *ISoundDriver::createDriver(IStringMapperProvider *stringMapper, TD
 	}
 
 	ISoundDriver *ret = createSoundDriver(stringMapper);
-	if ( ret == NULL )
+	if ( ret == nullptr)
 	{
 		throw ESoundDriverCantCreateDriver(dllName);
 	}

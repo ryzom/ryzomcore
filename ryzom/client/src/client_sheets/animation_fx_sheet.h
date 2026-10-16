@@ -54,7 +54,7 @@ public:
 
 public:
 	// Constructor
-	CAnimationFXSheet(const std::string &psName = "", const float *userParams = NULL);
+	CAnimationFXSheet(const std::string &psName = "", const float *userParams = nullptr);
 	/// from CEntitySheet
 	virtual void build(const NLGEORGES::UFormElm &item) NL_OVERRIDE;
 	/// Build the fx from an external script.

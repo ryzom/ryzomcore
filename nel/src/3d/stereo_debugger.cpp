@@ -232,7 +232,10 @@ NLMISC_CATEGORISED_COMMAND(nel, stereoDisplayMode, "Set stereo debugger display 
 }
 #endif
 
-CStereoDebugger::CStereoDebugger() : m_Driver(NULL), m_Stage(0), m_SubStage(0), m_ReflPass(0), m_LeftTexU(NULL), m_RightTexU(NULL), m_PixelProgram(NULL)
+CStereoDebugger::CStereoDebugger() : m_Driver(nullptr)
+    , m_Stage(0), m_SubStage(0), m_ReflPass(0), m_LeftTexU(nullptr)
+    , m_RightTexU(nullptr)
+    , m_PixelProgram(nullptr)
 {
 
 }
@@ -245,9 +248,9 @@ CStereoDebugger::~CStereoDebugger()
 	}
 
 	delete m_PixelProgram;
-	m_PixelProgram = NULL;
+	m_PixelProgram = nullptr;
 
-	m_Driver = NULL;
+	m_Driver = nullptr;
 }
 
 /// Sets driver and generates necessary render targets
@@ -301,7 +304,7 @@ void CStereoDebugger::setDriver(NL3D::UDriver *driver)
 			nlwarning("STEREO: No supported pixel program for stereo debugger");
 
 			delete m_PixelProgram;
-			m_PixelProgram = NULL;
+			m_PixelProgram = nullptr;
 		}
 		else
 		{
@@ -362,12 +365,12 @@ void CStereoDebugger::recycleTextures()
 {
 	nlassert(m_LeftTexU);
 	nlassert(m_RightTexU);
-	m_Mat.getObjectPtr()->setTexture(0, NULL);
-	m_Mat.getObjectPtr()->setTexture(1, NULL);
+	m_Mat.getObjectPtr()->setTexture(0, nullptr);
+	m_Mat.getObjectPtr()->setTexture(1, nullptr);
 	m_Driver->getRenderTargetManager().recycleRenderTarget(m_LeftTexU);
 	m_Driver->getRenderTargetManager().recycleRenderTarget(m_RightTexU);
-	m_LeftTexU = NULL;
-	m_RightTexU = NULL;
+	m_LeftTexU = nullptr;
+	m_RightTexU = nullptr;
 }
 
 /*
@@ -672,15 +675,15 @@ bool CStereoDebugger::endRenderTarget()
 			{
 				// Left only
 				mat->setTexture(0, m_LeftTexU->getITexture());
-				mat->setTexture(1, NULL);
-				drvInternal->activePixelProgram(NULL);
+				mat->setTexture(1, nullptr);
+				drvInternal->activePixelProgram(nullptr);
 			}
 			else if (s_StereoDisplayMode == 2)
 			{
 				// Right only
 				mat->setTexture(0, m_RightTexU->getITexture());
-				mat->setTexture(1, NULL);
-				drvInternal->activePixelProgram(NULL);
+				mat->setTexture(1, nullptr);
+				drvInternal->activePixelProgram(nullptr);
 			}
 			else
 			{
@@ -692,7 +695,7 @@ bool CStereoDebugger::endRenderTarget()
 
 			m_Driver->drawQuad(m_QuadUV, m_Mat);
 
-			drvInternal->activePixelProgram(NULL);
+			drvInternal->activePixelProgram(nullptr);
 			m_Driver->enableFog(fogEnabled);
 			recycleTextures();
 		}

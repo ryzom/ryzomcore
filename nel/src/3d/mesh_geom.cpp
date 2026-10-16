@@ -31,7 +31,7 @@ namespace NL3D
 IMeshGeom::IMeshGeom()
 {
 	_RootInstanceId= -1;
-	_MeshBlockManager= NULL;
+	_MeshBlockManager = nullptr;
 	_MeshVBHeapId= 0;
 	_MeshVBHeapNumVertices= 0;
 }

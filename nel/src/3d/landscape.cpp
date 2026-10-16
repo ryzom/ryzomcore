@@ -183,10 +183,10 @@ CLandscape::CLandscape() :
 	_Far1VB(CLandscapeVBAllocator::Far1, "LandscapeFar1VB"),
 	_TileVB(CLandscapeVBAllocator::Tile, "LandscapeTileVB")
 {
-	OwnerModel = NULL;
+	OwnerModel = nullptr;
 
 	// Init the Tile Infos with Max TileId
-	TileInfos.resize(NL3D::NbTilesMax, NULL);
+	TileInfos.resize(NL3D::NbTilesMax, nullptr);
 
 	// Far texture not initialized till initTileBanks is not called
 	_FarInitialized=false;
@@ -244,11 +244,11 @@ CLandscape::CLandscape() :
 	// Default: no textureFar created.
 	_ULTotalFarPixels= 0;
 	_ULFarPixelsToUpdate= 0;
-	_ULRootTextureFar= NULL;
+	_ULRootTextureFar = nullptr;
 	// Default: no patch created
 	_ULTotalNearPixels= 0;
 	_ULNearPixelsToUpdate= 0;
-	_ULRootNearPatch= NULL;
+	_ULRootNearPatch = nullptr;
 	_ULNearCurrentTessBlockId= 0;
 
 
@@ -280,13 +280,13 @@ CLandscape::~CLandscape()
 
 	// release the VegetableManager.
 	delete _VegetableManager;
-	_VegetableManager= NULL;
+	_VegetableManager = nullptr;
 
 	// Dynamic Lighting.
 	// smartPtr delete
-	_TextureDLM= NULL;
+	_TextureDLM = nullptr;
 	delete _PatchDLMContextList;
-	_PatchDLMContextList= NULL;
+	_PatchDLMContextList = nullptr;
 }
 
 
@@ -567,8 +567,8 @@ void			CLandscape::clear()
 
 
 	// reset driver.
-	_Driver= NULL;
-	_WaterReflectionClip= NULL;
+	_Driver = nullptr;
+	_WaterReflectionClip = nullptr;
 }
 
 // ***************************************************************************
@@ -734,7 +734,7 @@ void			CLandscape::refine(const CVector &refineCenter)
 
 		// For each vegetableBlock, test IG creation
 		CLandscapeVegetableBlock	*vegetBlock= _VegetableBlockList.begin();
-		for(;vegetBlock!=NULL; vegetBlock= (CLandscapeVegetableBlock*)vegetBlock->Next)
+		for(;vegetBlock != nullptr; vegetBlock= (CLandscapeVegetableBlock*)vegetBlock->Next)
 		{
 			vegetBlock->update(refineCenter, _VegetableManager);
 		}
@@ -938,7 +938,7 @@ void			CLandscape::updateTessBlocksFaceVector()
 {
 	// while some tessBlock to update remains.
 	CTessBlock	*tb;
-	while( (tb=_TessBlockModificationRoot.getNextToModify()) !=NULL )
+	while( (tb=_TessBlockModificationRoot.getNextToModify()) != nullptr)
 	{
 		// Get the patch which owns this TessBlock.
 		CPatch	*patch= tb->getPatch();
@@ -1045,7 +1045,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 	// values in Stencil Buffer which match with landscape are replace by 128
 	// rest of Stencil is replace by 0.
-	CScene *scene = NULL;
+	CScene *scene = nullptr;
 	if (OwnerModel)
 	{
 		scene = OwnerModel->getOwnerScene();
@@ -1238,7 +1238,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 		uint nbvp = uprogstate ? CLandscapeVBAllocator::MaxVertexProgram : 1;
 
 		// Helper lambda to set uniforms on all VPs of a given VB allocator
-		CLandscapeVBAllocator *vbAllocs[] = { &_TileVB, NULL, NULL };
+		CLandscapeVBAllocator *vbAllocs[] = { &_TileVB, nullptr, nullptr };
 		// When uniforms are per-program state, Far0/Far1 VPs need their own uniforms
 		// (when driver-state, setting on TileVB is enough for all VPs)
 		if (uprogstate)
@@ -1287,7 +1287,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	// First, update Dynamic Lighting for Near, ie multiply Dynamic Lightmap with UserColor, and upload to texture.
 	// ==================
 	CPatchDLMContext	*dlmCtxPtr= _PatchDLMContextList->begin();
-	while(dlmCtxPtr!=NULL)
+	while(dlmCtxPtr != nullptr)
 	{
 		// do it only if the patch has some Near stuff to render, and if it is visible
 		if(dlmCtxPtr->getPatch()->getFar0() == 0
@@ -1423,9 +1423,9 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 			};
 		}
 		// Reset the textures (so there is none in Addtive pass or in Lightmap).
-		TileMaterial.setTexture(0, NULL);
-		TileMaterial.setTexture(1, NULL);
-		TileMaterial.setTexture(2, NULL);
+		TileMaterial.setTexture(0, nullptr);
+		TileMaterial.setTexture(1, nullptr);
+		TileMaterial.setTexture(2, nullptr);
 
 
 		// Render All material RdrPass.
@@ -1596,7 +1596,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 	// First, update Dynamic Lighting for Far, ie multiply Dynamic Lightmap with TextureFar, and upload to texture.
 	// ==================
 	dlmCtxPtr= _PatchDLMContextList->begin();
-	while(dlmCtxPtr!=NULL)
+	while(dlmCtxPtr != nullptr)
 	{
 		// do it only if the patch has some Far stuff to render, and if it is visible
 		if( (dlmCtxPtr->getPatch()->getFar0()>0 || dlmCtxPtr->getPatch()->getFar1()>0)
@@ -1740,21 +1740,21 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 	// 4. "Release" texture materials.
 	//================================
-	FarMaterial.setTexture(0, NULL);
-	FarMaterial.setTexture(1, NULL);
-	FarMaterial.setTexture(2, NULL);
-	FarMaterial.setTexture(3, NULL);
-	TileMaterial.setTexture(0, NULL);
-	TileMaterial.setTexture(1, NULL);
-	TileMaterial.setTexture(2, NULL);
-	TileMaterial.setTexture(3, NULL);
+	FarMaterial.setTexture(0, nullptr);
+	FarMaterial.setTexture(1, nullptr);
+	FarMaterial.setTexture(2, nullptr);
+	FarMaterial.setTexture(3, nullptr);
+	TileMaterial.setTexture(0, nullptr);
+	TileMaterial.setTexture(1, nullptr);
+	TileMaterial.setTexture(2, nullptr);
+	TileMaterial.setTexture(3, nullptr);
 
 	// To ensure no use but in render()..
-	CLandscapeGlobals::PatchCurrentDriver= NULL;
+	CLandscapeGlobals::PatchCurrentDriver = nullptr;
 
 	// Desactive the vertex program (if anyone)
 	if(_VertexShaderOk)
-		driver->activeVertexProgram (NULL);
+		driver->activeVertexProgram (nullptr);
 
 
 	// 5. Vegetable Management.
@@ -1795,7 +1795,7 @@ void			CLandscape::render(const CVector &refineCenter, const CVector &frontVecto
 
 		// Parse all patch which have some vegetables
 		dlmCtxPtr= _PatchDLMContextList->begin();
-		while(dlmCtxPtr!=NULL)
+		while(dlmCtxPtr != nullptr)
 		{
 			// do it only if the patch has some vegetable stuff to render, and if it is visible
 			// NB: we may have some vegetable stuff to render if the patch has some TileMaterial created.
@@ -1884,7 +1884,7 @@ void			CLandscape::loadTile(uint16 tileId)
 	if(tileId<TileBank.getTileCount())
 		tile= TileBank.getTile(tileId);
 	else
-		tile= NULL;
+		tile = nullptr;
 	// TileInfo must not exist.
 	nlassert(TileInfos[tileId]==NULL);
 	TileInfos[tileId]= tileInfo= new CTileInfo;
@@ -1897,7 +1897,7 @@ void			CLandscape::loadTile(uint16 tileId)
 		textName.clear();
 	// If no additive for this tile, rdrpass is NULL.
 	if(textName.empty())
-		tileInfo->AdditiveRdrPass= NULL;
+		tileInfo->AdditiveRdrPass = nullptr;
 	else
 	{
 		// Fill rdrpass.
@@ -1990,7 +1990,7 @@ void			CLandscape::releaseTile(uint16 tileId)
 		tileInfo->DiffuseRdrPass->RefCount--;
 
 	delete tileInfo;
-	TileInfos[tileId]= NULL;
+	TileInfos[tileId] = nullptr;
 }
 
 
@@ -2001,7 +2001,7 @@ CPatchRdrPass	*CLandscape::getTileRenderPass(uint16 tileId, bool additiveRdrPass
 
 	// If not here, create it.
 	//========================
-	if(tile==NULL)
+	if(tile == nullptr)
 	{
 		// Force loading of tile.
 		loadTile(tileId);
@@ -2057,7 +2057,7 @@ NLMISC::CSmartPtr<ITexture>		CLandscape::getTileTexture(uint16 tileId, CTile::TB
 	else
 		pass= getTileRenderPass(tileId, false);
 	if(!pass)
-		return NULL;
+		return nullptr;
 	uint8	dummy;
 	getTileUvScaleBiasRot(tileId, bitmapType, uvScaleBias, dummy);
 
@@ -2084,7 +2084,7 @@ CTileElement *CLandscape::getTileElement(const CPatchIdent &patchId, const CUV &
 	}
 	else
 		// Return not found
-		return NULL;
+		return nullptr;
 }
 
 
@@ -2098,7 +2098,7 @@ void			CLandscape::flushTiles(IDriver *drv, uint32 tileStart, uint32 nbTiles)
 	for(sint tileId= tileStart; tileId<(sint)(tileStart+nbTiles); tileId++)
 	{
 		CTileInfo	*tile= TileInfos[tileId];
-		if(tile==NULL)
+		if(tile == nullptr)
 		{
 			loadTile(uint16(tileId));
 			CTileInfo	*tile= TileInfos[tileId];
@@ -2138,7 +2138,7 @@ void			CLandscape::releaseTiles(uint32 tileStart, uint32 nbTiles)
 	for(sint tileId= tileStart; tileId<(sint)(tileStart+nbTiles); tileId++)
 	{
 		CTileInfo	*tile= TileInfos[tileId];
-		if(tile!=NULL)
+		if(tile != nullptr)
 		{
 			releaseTile(uint16(tileId));
 		}
@@ -2193,8 +2193,8 @@ uint		CLandscape::getTileLightMap(CRGBA  map[NL_TILE_LIGHTMAP_SIZE*NL_TILE_LIGHT
 
 	// 1. Search the first texture which has a free tile.
 	//==================================================
-	CTextureNear	*nearText= NULL;
-	CPatchRdrPass	*nearRdrPass= NULL;
+	CTextureNear	*nearText = nullptr;
+	CPatchRdrPass	*nearRdrPass = nullptr;
 	for(textNum=0;textNum<(sint)_TextureNears.size();textNum++)
 	{
 		nearRdrPass= _TextureNears[textNum];
@@ -2348,7 +2348,7 @@ CPatchRdrPass*	CLandscape::getFarRenderPass(CPatch* pPatch, uint farIndex, float
 		pTextureFar->setTextureCategory(_TextureFarCategory);
 
 		// Append this textureFar to the list of TextureFar to updateLighting.
-		if(_ULRootTextureFar==NULL)
+		if(_ULRootTextureFar == nullptr)
 			_ULRootTextureFar= pTextureFar;
 		else
 			pTextureFar->linkBeforeUL(_ULRootTextureFar);
@@ -2412,7 +2412,7 @@ void		CLandscape::clearFarRenderPass (CPatchRdrPass* pass)
 		_ULRootTextureFar= pTextureFar->getNextUL();
 		// if still the same, it means that the circular list is now empty
 		if(_ULRootTextureFar==pTextureFar)
-			_ULRootTextureFar= NULL;
+			_ULRootTextureFar = nullptr;
 	}
 
 	// unlink the texture from list
@@ -2435,7 +2435,7 @@ CZone*			CLandscape::getZone (sint zoneId)
 	if (it!=Zones.end())
 		return (*it).second;
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -2448,7 +2448,7 @@ const CZone*	CLandscape::getZone (sint zoneId) const
 	if (it!=Zones.end())
 		return (*it).second;
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -3652,7 +3652,7 @@ void			CLandscape::setUpdateLightingFrequency(float freq)
 void			CLandscape::linkPatchToNearUL(CPatch *patch)
 {
 	// Append this patch to the list of patch to updateLighting.
-	if(_ULRootNearPatch==NULL)
+	if(_ULRootNearPatch == nullptr)
 		_ULRootNearPatch= patch;
 	else
 		patch->linkBeforeNearUL(_ULRootNearPatch);
@@ -3668,7 +3668,7 @@ void			CLandscape::unlinkPatchFromNearUL(CPatch *patch)
 		_ULRootNearPatch= patch->getNextNearUL();
 		// if still the same, it means that the circular list is now empty
 		if(_ULRootNearPatch==patch)
-			_ULRootNearPatch= NULL;
+			_ULRootNearPatch = nullptr;
 		// reset tessBlock counter.
 		_ULNearCurrentTessBlockId= 0;
 	}
@@ -3757,7 +3757,7 @@ void			CLandscape::computeDynamicLighting(const std::vector<CPointLight*>	&pls)
 	// Run all DLM Context create, to init Lighting process.
 	//===============
 	CPatchDLMContext	*ctxPtr= _PatchDLMContextList->begin();
-	while(ctxPtr!=NULL)
+	while(ctxPtr != nullptr)
 	{
 		// init lighting process, do differential from last computeDynamicLighting()
 		ctxPtr->getPatch()->beginDLMLighting();
@@ -3809,7 +3809,7 @@ void			CLandscape::computeDynamicLighting(const std::vector<CPointLight*>	&pls)
 	// Run all DLM Context create, to end Lighting process.
 	//===============
 	ctxPtr= _PatchDLMContextList->begin();
-	while(ctxPtr!=NULL)
+	while(ctxPtr != nullptr)
 	{
 		// get enxt now, because the DLM itself may be deleted in endDLMLighting()
 		CPatchDLMContext	*next= (CPatchDLMContext*)ctxPtr->Next;
@@ -3846,7 +3846,7 @@ uint			CLandscape::getDynamicLightingMemoryLoad() const
 
 	// Then, for each patchContext created
 	CPatchDLMContext	*ctxPtr= _PatchDLMContextList->begin();
-	while(ctxPtr!=NULL)
+	while(ctxPtr != nullptr)
 	{
 		// add its memory load.
 		mem+= ctxPtr->getMemorySize();

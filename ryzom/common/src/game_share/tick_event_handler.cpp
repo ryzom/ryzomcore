@@ -50,8 +50,8 @@ NLMISC::CLog				_QuickLog;
 
 
 // user callbacks
-void (*userCbUpdate)() = NULL;
-void (*userCbSync)() = NULL;
+void (*userCbUpdate)() = nullptr;
+void (*userCbSync)() = nullptr;
 
 
 // TickSpeedLoop variable. We store 1 min to get the average (see "help TickSpeedLoop")
@@ -278,8 +278,8 @@ void CTickEventHandler::init( void (*updateFunc)(), void (*syncFunc)(), bool toc
 
 	CUnifiedNetwork::getInstance()->addCallbackArray(cbArray,sizeof(cbArray)/sizeof(cbArray[0]));
 
-	CUnifiedNetwork::getInstance()->setServiceUpCallback ("MS", cbTicksUp, NULL);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback ("MS", cbTicksDown, NULL);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback ("MS", cbTicksUp, nullptr);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback ("MS", cbTicksDown, nullptr);
 
 	RecentHistory.setParam( 6 );
 	_QuickLog.addDisplayer( &RecentHistory, false );
@@ -306,7 +306,7 @@ TUserSyncCallback CTickEventHandler::setSyncCallback( TUserSyncCallback syncFunc
 	else
 	{
 		userCbSync = syncFunc;
-		return NULL;
+		return nullptr;
 	}
 
 } // setSyncCallback //

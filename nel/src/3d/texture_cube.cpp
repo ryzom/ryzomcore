@@ -36,7 +36,7 @@ namespace NL3D
 	CTextureCube::CTextureCube()
 {
 	for( uint i = 0; i < 6; ++i )
-		_Textures[i] = NULL;
+		_Textures[i] = nullptr;
 }
 
 // ***************************************************************************
@@ -51,7 +51,7 @@ string CTextureCube::getShareName() const
 	string sTemp;
 
 	for( uint i = 0; i < 6; ++i )
-		if( _Textures[i] != NULL )
+		if( _Textures[i] != nullptr)
 			sTemp += _Textures[i]->getShareName();
 	return sTemp;
 }
@@ -60,16 +60,16 @@ string CTextureCube::getShareName() const
 void CTextureCube::doGenerate(bool /* async */)
 {
 	uint i;
-	ITexture *pRefTex = NULL;
+	ITexture *pRefTex = nullptr;
 
 	for( i = 0; i < 6; ++i )
-		if( _Textures[i] != NULL )
+		if( _Textures[i] != nullptr)
 		{
 			pRefTex = _Textures[i];
 			break;
 		}
 
-	if( pRefTex == NULL )
+	if( pRefTex == nullptr)
 		return; // There are NO texture
 
 	pRefTex->generate();
@@ -94,7 +94,7 @@ void CTextureCube::doGenerate(bool /* async */)
 	// All textures must be like the reference texture
 	for( i = 0; i < 6; ++i )
 	{
-		if( _Textures[i] != NULL )
+		if( _Textures[i] != nullptr)
 			_Textures[i]->generate();
 		else
 			_Textures[i] = pRefTex;
@@ -142,7 +142,7 @@ void	CTextureCube::release()
 {
 	uint i;
 	for( i = 0; i < 6; ++i )
-		if( _Textures[i] != NULL )
+		if( _Textures[i] != nullptr)
 			_Textures[i]->release();
 }
 

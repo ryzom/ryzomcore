@@ -86,7 +86,7 @@ namespace NLGUI
 				element_number = htmlElementLookup((const char*)node->name);
 
 				// get pointer to previous sibling
-				CHtmlElement *prevSibling = NULL;
+				CHtmlElement *prevSibling = nullptr;
 				if (!parent.Children.empty())
 				{
 					// skip text nodes
@@ -432,7 +432,7 @@ namespace NLGUI
 	// ***************************************************************************
 	void CHtmlParser::getDOM(std::string htmlString, CHtmlElement &dom, std::vector<std::string> &styles, std::vector<StyleLink> &links) const
 	{
-		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(NULL, NULL, NULL, 0, NULL, XML_CHAR_ENCODING_UTF8);
+		htmlParserCtxtPtr parser = htmlCreatePushParserCtxt(nullptr, nullptr, nullptr, 0, nullptr, XML_CHAR_ENCODING_UTF8);
 		if (!parser)
 		{
 			nlwarning("Creating html parser context failed");

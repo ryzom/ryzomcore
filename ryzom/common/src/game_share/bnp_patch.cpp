@@ -419,13 +419,13 @@ CBNPFile* CBNPFileSet::getFileByName(const std::string& fileName)
 			return &getFile(i);
 
 	// file not found so return NULL
-	return NULL;
+	return nullptr;
 }
 
 void CBNPFileSet::addFile(const std::string& fileName,bool isIncremental)
 {
 	// see if the file already exists in the files container
-	if (getFileByName(fileName)!=NULL)
+	if (getFileByName(fileName) != nullptr)
 	{
 		if (!isIncremental)
 			getFileByName(fileName)->setIncremental(false);
@@ -595,7 +595,7 @@ const CBNPCategory* CBNPCategorySet::getCategoryFromFile(const std::string &file
 			return &(*it);
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -652,7 +652,7 @@ const CBNPCategory* CBNPCategorySet::getCategory(const std::string& categoryName
 	for (uint32 i=0;i<categoryCount();++i)
 		if (getCategory(i).getName()==categoryName)
 			return &(getCategory(i));
-	return NULL;
+	return nullptr;
 }
 
 // check whether a named category exists and add a new one if need be
@@ -665,7 +665,7 @@ CBNPCategory* CBNPCategorySet::getCategory(const std::string& categoryName, bool
 
 	// the category wasn't found so return NULL if need be
 	if (!addIfNotExist)
-		return NULL;
+		return nullptr;
 
 	// create a new category if need be
 	_Category.resize(_Category.size()+1);

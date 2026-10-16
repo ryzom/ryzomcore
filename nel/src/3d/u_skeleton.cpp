@@ -110,7 +110,7 @@ bool		USkeleton::bindSkin(UInstance mi)
 	}
 	CTransform			*trans= dynamic_cast<CTransform*>(mi.getObjectPtr());
 	CMeshBaseInstance	*meshi= dynamic_cast<CMeshBaseInstance*>(trans);
-	if(meshi==NULL)
+	if(meshi == nullptr)
 	{
 		nlerror("USkeleton::bindSkin(): mi is not a MeshInstance or MeshMRMInstance");
 		return false;
@@ -350,7 +350,7 @@ bool		USkeleton::computeCurrentBBox(NLMISC::CAABBox &bbox, UPlayList *playList, 
 	NL3D_HAUTO_UI_SKELETON;
 	CSkeletonModel	*object = getObjectPtr();
 
-	if(playList!=NULL)
+	if(playList != nullptr)
 	{
 		CPlayListUser	*plUser= static_cast<CPlayListUser*>(playList);
 		plUser->evalPlayList(playTime);

@@ -154,7 +154,7 @@ private:
 		{
 			FreeSpace= 0;
 			// No List
-			FreePrec= FreeNext= NULL;
+			FreePrec= FreeNext = nullptr;
 		}
 	};
 

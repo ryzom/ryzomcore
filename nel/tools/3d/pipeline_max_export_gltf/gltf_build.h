@@ -85,8 +85,8 @@ public:
 	// interop form, so the caller knows not to attach a skin. Returns mesh index or -1 with *err.
 	sint addMesh(const std::string &name, const NL3D::CMesh::CMeshBuild &mb,
 	             const std::vector<sint> &materialIdx, std::string *err,
-	             const std::vector<NL3D::CMesh::CMeshBuild *> *bsList = NULL,
-	             bool *skinInterop = NULL);
+	             const std::vector<NL3D::CMesh::CMeshBuild *> *bsList = nullptr,
+	             bool *skinInterop = nullptr);
 
 	// --- skins (viewing tier) ---
 	// glTF skin object: joints are node indices (BonesNames order), ibms is joints.size()*16

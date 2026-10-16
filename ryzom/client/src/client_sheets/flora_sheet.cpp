@@ -33,7 +33,7 @@ CFloraSheet::CFloraSheet()
 // ***************************************************************************************************
 void CFloraSheet::build(const NLGEORGES::UFormElm &item)
 {
-	const UFormElm *plantArray = NULL;
+	const UFormElm *plantArray = nullptr;
 	if (item.getNodeByName(&plantArray, "Plants") && plantArray)
 	{
 		uint numPlants;
@@ -41,7 +41,7 @@ void CFloraSheet::build(const NLGEORGES::UFormElm &item)
 		_Plants.reserve(numPlants);
 		for(uint k = 0; k < numPlants; ++k)
 		{
-			const UFormElm *subNode = NULL;
+			const UFormElm *subNode = nullptr;
 			if (plantArray->getArrayNode(&subNode, k) && subNode)
 			{
 				CPlantInfo pi;
@@ -84,7 +84,7 @@ void CPlantInfo::serial(NLMISC::IStream &f)
 // ***************************************************************************************************
 const CPlantInfo *CFloraSheet::getPlantInfoFromWeightedIndex(uint64 index) const
 {
-	if (_TotalWeight == 0) return NULL;
+	if (_TotalWeight == 0) return nullptr;
 	CPlantInfo comp;
 	comp.CumulatedWeight = index;
 	std::vector<CPlantInfo>::const_iterator it = std::lower_bound(_Plants.begin(), _Plants.end(), comp);

@@ -164,7 +164,7 @@ CDecal::CDecal()
 	}
 
 	// initialized in render() as depends on scene
-	_ShadowMap = NULL;
+	_ShadowMap = nullptr;
 	_Material.initUnlit();
 	_Diffuse = CRGBA::White;
 	_Emissive = CRGBA::Black;
@@ -256,7 +256,7 @@ CDecal::~CDecal()
 	if (_ShadowMap)
 	{
 		delete _ShadowMap;
-		_ShadowMap = NULL;
+		_ShadowMap = nullptr;
 	}
 }
 
@@ -268,13 +268,13 @@ void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clamp
 		CInterfaceManager *im = CInterfaceManager::getInstance();
 		CViewRenderer &vr = *CViewRenderer::getInstance();
 		UTexture *tex = vr.getGlobalTexture(fileName);
-		if (tex != NULL)
+		if (tex != nullptr)
 		{
 			_Material.setTexture(0,  (dynamic_cast<NL3D::CTextureUser *>(tex))->getITexture());
 		}
 		else
 		{
-			_Material.setTexture(0,  fileName.empty() ? NULL : new CTextureFile(fileName));
+			_Material.setTexture(0,  fileName.empty() ? nullptr : new CTextureFile(fileName));
 		}
 		if (_Material.getTexture(0))
 		{
@@ -297,7 +297,7 @@ void CDecal::setTexture(const std::string &fileName,   bool clampU,   bool clamp
 	}
 	else
 	{
-		_Material.setTexture(1, NULL);
+		_Material.setTexture(1, nullptr);
 	}
 }
 
@@ -651,7 +651,7 @@ void CDecalRenderList::renderAllDecals()
 	}
 	else
 	{
-		drvInternal->activeVertexProgram(NULL);
+		drvInternal->activeVertexProgram(nullptr);
 	}
 	for(uint k = 0; k < DECAL_NUM_PRIORITIES; ++k)
 	{
@@ -666,7 +666,7 @@ void CDecalRenderList::renderAllDecals()
 	}
 	if (useVertexProgram)
 	{
-		drvInternal->activeVertexProgram(NULL);
+		drvInternal->activeVertexProgram(nullptr);
 	}
 }
 

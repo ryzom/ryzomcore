@@ -46,9 +46,9 @@ public:
 	virtual void setShapeCacheSize(const std::string &shapeCacheName, sint32 maxSize) NL_OVERRIDE;
 	virtual void linkShapeToShapeCache(const std::string &shapeName, const std::string &shapeCacheName) NL_OVERRIDE;
 	virtual void	preLoadShapesFromDirectory(const std::string &shapeCacheName,
-		const std::string &path, const std::string &wildCard, bool recurs, NLMISC::IProgressCallback *progress = NULL, bool flushTextures = false) NL_OVERRIDE;
+		const std::string &path, const std::string &wildCard, bool recurs, NLMISC::IProgressCallback *progress = nullptr, bool flushTextures = false) NL_OVERRIDE;
 	virtual void	preLoadShapesFromBNP(const std::string &shapeCacheName,
-		const std::string &bnpName, const std::string &wildCard, NLMISC::IProgressCallback *progress = NULL, bool flushTextures = false) NL_OVERRIDE;
+		const std::string &bnpName, const std::string &wildCard, NLMISC::IProgressCallback *progress = nullptr, bool flushTextures = false) NL_OVERRIDE;
 	virtual UShape	getShape(const std::string &shapeName) NL_OVERRIDE;
 	virtual void	buildSystemGeometryForshape(const std::string &shapeName) NL_OVERRIDE;
 

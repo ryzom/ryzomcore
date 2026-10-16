@@ -376,7 +376,7 @@ CPlanarReflectionDemo::CPlanarReflectionDemo()
 	, m_VSync(true)
 	, m_KeyForward(false)
 	, m_KeyBackward(false)
-	, m_TextContext(NULL)
+	, m_TextContext(nullptr)
 	, m_CamAngle(0.f)
 	, m_CubeAngleZ(0.f)
 	, m_CubeAngleX(0.f)
@@ -438,7 +438,7 @@ CPlanarReflectionDemo::CPlanarReflectionDemo()
 
 CPlanarReflectionDemo::~CPlanarReflectionDemo()
 {
-	m_FloorMat.setTexture(0, NULL);
+	m_FloorMat.setTexture(0, nullptr);
 	if (m_TextContext)
 		m_Driver->deleteTextContext(m_TextContext);
 	m_Driver->deleteMaterial(m_FloorMat);
@@ -1000,7 +1000,7 @@ void CPlanarReflectionDemo::renderOneFrame()
 
 		// --- Phase 7: Cleanup and swap ---
 
-		m_FloorMat.setTexture(0, NULL);
+		m_FloorMat.setTexture(0, nullptr);
 		rtm.recycleRenderTarget(reflectRT);
 
 		m_Driver->swapBuffers();

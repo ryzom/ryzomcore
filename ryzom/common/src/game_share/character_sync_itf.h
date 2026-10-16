@@ -875,7 +875,7 @@ namespace CHARSYNC
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CCharacterSyncSkel::TInterceptor *interceptor = NULL;
+				CCharacterSyncSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -883,7 +883,7 @@ namespace CHARSYNC
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CCharacterSyncProxy()
@@ -1362,7 +1362,7 @@ namespace CHARSYNC
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CNameUnifierSkel::TInterceptor *interceptor = NULL;
+				CNameUnifierSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -1370,7 +1370,7 @@ namespace CHARSYNC
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CNameUnifierProxy()
@@ -1844,7 +1844,7 @@ namespace CHARSYNC
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CNameUnifierClientSkel::TInterceptor *interceptor = NULL;
+				CNameUnifierClientSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -1852,7 +1852,7 @@ namespace CHARSYNC
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CNameUnifierClientProxy()

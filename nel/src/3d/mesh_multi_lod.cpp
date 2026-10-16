@@ -105,10 +105,10 @@ void CMeshMultiLod::build(CMeshMultiLodBuild &mbuild)
 		if (_MeshVector[slot].Flags&CMeshSlot::CoarseMesh)
 		{
 			// If it is a coarse mesh, it must be a CMeshGeom.
-			if (dynamic_cast<CMeshGeom*>(mbuild.LodMeshes[slot].MeshGeom)==NULL)
+			if (dynamic_cast<CMeshGeom*>(mbuild.LodMeshes[slot].MeshGeom) == nullptr)
 			{
 				// If it is a coarse mesh, it must be a CMeshGeom.
-				_MeshVector[slot].MeshGeom = NULL;
+				_MeshVector[slot].MeshGeom = nullptr;
 				delete mbuild.LodMeshes[slot].MeshGeom;
 			}
 			else
@@ -131,7 +131,7 @@ void CMeshMultiLod::build(CMeshMultiLodBuild &mbuild)
 			CMeshSlot tmp=_MeshVector[j];
 			_MeshVector[j]=_MeshVector[j+1];
 			_MeshVector[j+1]=tmp;
-			tmp.MeshGeom=NULL;
+			tmp.MeshGeom = nullptr;
 		}
 	}
 
@@ -430,7 +430,7 @@ void CMeshMultiLod::CMeshSlot::serial(NLMISC::IStream &f)
 
 CMeshMultiLod::CMeshSlot::CMeshSlot ()
 {
-	MeshGeom=NULL;
+	MeshGeom = nullptr;
 	CoarseNumTris= 0;
 }
 
@@ -501,7 +501,7 @@ void CMeshMultiLod::renderMeshGeom (uint slot, IDriver *drv, CMeshMultiLodInstan
 void CMeshMultiLod::renderCoarseMesh (uint slot, IDriver *drv, CMeshMultiLodInstance *trans, CCoarseMeshManager *manager)
 {
 	// if the manager is NULL, quit.
-	if(manager==NULL)
+	if(manager == nullptr)
 		return;
 
 	// get the scene
@@ -529,7 +529,7 @@ void CMeshMultiLod::renderCoarseMesh (uint slot, IDriver *drv, CMeshMultiLodInst
 		uint	numTris= slotRef.CoarseNumTris;
 		// If empty meshGeom, erase cache (each frame, ugly but error mgt here...)
 		if( numTris==0 || numVerts==0 )
-			trans->_LastCoarseMesh= NULL;
+			trans->_LastCoarseMesh = nullptr;
 		else
 		{
 			// Cache
@@ -620,12 +620,12 @@ void			CMeshMultiLod::changeMRMDistanceSetup(float distanceFinest, float distanc
 		return;
 
 	// If not NULL
-	if(_MeshVector[0].MeshGeom==NULL)
+	if(_MeshVector[0].MeshGeom == nullptr)
 		return;
 
 	// verify it is a CMeshMRMGeom. else no-op.
 	CMeshMRMGeom	*mgeom= dynamic_cast<CMeshMRMGeom*>(_MeshVector[0].MeshGeom);
-	if(mgeom==NULL)
+	if(mgeom == nullptr)
 		return;
 
 	// ok, setup.
@@ -636,7 +636,7 @@ void			CMeshMultiLod::changeMRMDistanceSetup(float distanceFinest, float distanc
 // ***************************************************************************
 IMeshGeom		*CMeshMultiLod::supportMeshBlockRendering (CTransformShape *trans, float &polygonCount ) const
 {
-	IMeshGeom	*ret= NULL;
+	IMeshGeom	*ret = nullptr;
 
 	// get the instance
 	CMeshMultiLodInstance *instance=safe_cast<CMeshMultiLodInstance*>(trans);
@@ -660,7 +660,7 @@ IMeshGeom		*CMeshMultiLod::supportMeshBlockRendering (CTransformShape *trans, fl
 		return ret;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -872,7 +872,7 @@ void	CMeshMultiLod::compileRunTime()
 	if(_VisualCollisionMesh)
 	{
 		delete _VisualCollisionMesh;
-		_VisualCollisionMesh= NULL;
+		_VisualCollisionMesh = nullptr;
 	}
 	// build only if wanted
 	if( (_CollisionMeshGeneration==AutoCameraCol && !_LightInfos.empty()) ||
@@ -895,7 +895,7 @@ void	CMeshMultiLod::compileRunTime()
 					{
 						// delete
 						delete _VisualCollisionMesh;
-						_VisualCollisionMesh= NULL;
+						_VisualCollisionMesh = nullptr;
 					}
 				}
 			}

@@ -115,7 +115,7 @@ private:
 
 
 // *********************************************************************************************************
-CAccessibilityTexture::CAccessibilityTexture() : _IslandCol(NULL)
+CAccessibilityTexture::CAccessibilityTexture() : _IslandCol(nullptr)
 {
 	nlassert(0);
 }
@@ -139,7 +139,7 @@ CIslandCollision::CIslandCollision()
 	_PackedIslandLoadingFailure = false;
 	_EntryPointsLoadingFailure = false;
 	_WorldToAccessibilityTexMat.scale(0.f);
-	_AccessibilityTexture = NULL;
+	_AccessibilityTexture = nullptr;
 }
 
 // *********************************************************************************************************
@@ -147,16 +147,16 @@ void CIslandCollision::releaseAccessibilityTexture()
 {
 	//H_AUTO(R2_CIslandCollision_releaseAccessibilityTexture)
 	delete _AccessibilityTexture;
-	_AccessibilityTexture = NULL;
+	_AccessibilityTexture = nullptr;
 	CViewRenderer &vr = *CViewRenderer::getInstance();
-	vr.setExternalTexture(_AccessibilityTextureId, NULL, 0, 0, 0, 0);
+	vr.setExternalTexture(_AccessibilityTextureId, nullptr, 0, 0, 0, 0);
 }
 
 // *********************************************************************************************************
 void CIslandCollision::release()
 {
 	//H_AUTO(R2_CIslandCollision_release)
-	_PackedIsland = NULL;
+	_PackedIsland = nullptr;
 	_LastPackedIslandTestPos.set(0.f, 0.f);
 	_PackedIslandLoadingFailure = false;
 }
@@ -173,7 +173,7 @@ CRefCountedPackedWorld *CIslandCollision::getPackedIsland()
 {
 	//H_AUTO(R2_CIslandCollision_getPackedIsland)
 	if (_PackedIsland) return _PackedIsland;
-	if (_PackedIslandLoadingFailure) return NULL;
+	if (_PackedIslandLoadingFailure) return nullptr;
 	// get the island under the player
 	updateCurrPackedIsland();
 	return _PackedIsland;
@@ -190,7 +190,7 @@ inline sint clamped(sint value, sint size)
 R2::CScenarioEntryPoints::CCompleteIsland *CIslandCollision::getCurrIslandDesc()
 {
 	//H_AUTO(R2_CIslandCollision_getCurrIslandDesc)
-	if (!getPackedIsland()) return NULL;
+	if (!getPackedIsland()) return nullptr;
 	// TMP TMP
 	static volatile bool dumpPACSCorrepondance = false;
 	if (dumpPACSCorrepondance)
@@ -399,7 +399,7 @@ void CIslandCollision::updateCurrPackedIsland()
 		if (!island)
 		{
 			_PackedIslandLoadingFailure = true;
-			_PackedIsland = NULL;
+			_PackedIsland = nullptr;
 			return;
 		}
 		if (_PackedIsland && _PackedIslandName == island->Island) return; // same than before, no-op
@@ -411,7 +411,7 @@ void CIslandCollision::updateCurrPackedIsland()
 CPackedWorld *CIslandCollision::reloadPackedIsland(const CScenarioEntryPoints::CCompleteIsland &islandDesc)
 {
 	//H_AUTO(R2_CIslandCollision_reloadPackedIsland)
-	_PackedIsland = NULL;
+	_PackedIsland = nullptr;
 	_PackedIslandLoadingFailure = false;
 	_WorldToAccessibilityTexMat.scale(0.f);
 	_HeightMap.clear();

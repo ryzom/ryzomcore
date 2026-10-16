@@ -949,7 +949,7 @@ void		CPatch::computeNearBlockLightmap(uint uts, uint utt, CRGBA	*lightText)
 		{
 			CPatchUVLocator		uvLocator;
 			CBindInfo			bindInfo;
-			bindInfo.Zone= NULL;
+			bindInfo.Zone = nullptr;
 
 			// if smoothed edge, search the neighbor.
 			if(getSmoothFlag(edge))
@@ -964,7 +964,7 @@ void		CPatch::computeNearBlockLightmap(uint uts, uint utt, CRGBA	*lightText)
 					// if there is not same tile order across the edge, invalidate the smooth.
 					// This is rare, so don't bother.
 					if(!uvLocator.sameEdgeOrder())
-						bindInfo.Zone= NULL;
+						bindInfo.Zone = nullptr;
 				}
 			}
 
@@ -972,7 +972,7 @@ void		CPatch::computeNearBlockLightmap(uint uts, uint utt, CRGBA	*lightText)
 			// Fast reject: if no neighbor, or if not smoothed, or if edge order pb, just copy from my interior.
 			if(!bindInfo.Zone)
 			{
-				CRGBA	*src=0;
+				CRGBA	*src=nullptr;
 				switch(edge)
 				{
 				case 0: src= dest + 1; break;
@@ -1076,7 +1076,7 @@ void		CPatch::computeNearBlockLightmap(uint uts, uint utt, CRGBA	*lightText)
 		else
 		{
 			// By default, fill the corner with our interior corner. Because other methods may fail.
-			CRGBA	*src=0;
+			CRGBA	*src=nullptr;
 			switch(corner)
 			{
 			case 0: src= dest + 1 + NL_TILE_LIGHTMAP_SIZE; break;
@@ -1572,7 +1572,7 @@ void		CPatch::appendTileLightInfluences(const CUV &uv,
 	nlassert(CTileLightInfluence::NumLightPerCorner==2);
 	nlassert(CLightInfluenceInterpolator::NumLightPerCorner==2);
 	// Get ref on array of PointLightNamed.
-	CPointLightNamed	*zonePointLights= NULL;
+	CPointLightNamed	*zonePointLights = nullptr;
 	if( getZone()->_PointLightArray.getPointLights().size() >0 )
 	{
 		// const_cast, because will only change _IdInfluence, and
@@ -1606,7 +1606,7 @@ void		CPatch::appendTileLightInfluences(const CUV &uv,
 			for(; lid<CTileLightInfluence::NumLightPerCorner; lid++)
 			{
 				// set to NULL
-				corner.Lights[lid]= NULL;
+				corner.Lights[lid] = nullptr;
 			}
 		}
 	}
@@ -1992,7 +1992,7 @@ void				CPatch::decRefDLMContext(uint count)
 	if(_DLMContextRefCount==0)
 	{
 		delete _DLMContext;
-		_DLMContext= NULL;
+		_DLMContext = nullptr;
 
 		// If the patch is visible, it may have Far Vertices created,
 		// hence, we must reset their DLM Uvs (to point to black pixel)

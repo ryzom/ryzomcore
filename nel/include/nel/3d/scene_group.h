@@ -204,7 +204,7 @@ public:
 				const std::vector<CCluster>& Clusters,
 				const std::vector<CPortal>& Portals,
 				const std::vector<CPointLightNamed> &pointLightList,
-				const CIGSurfaceLight::TRetrieverGridMap *retrieverGridMap= NULL,
+				const CIGSurfaceLight::TRetrieverGridMap *retrieverGridMap = nullptr,
 				float igSurfaceLightCellSize= 0);
 
 	/** Retreive group information. NB: data may have changed, eg: order of lights.
@@ -239,8 +239,8 @@ public:
 	  * the shapes will be preloaded in this driver. If the pointer is NULL (default), textures
 	  * will ve loaded when the shape will be used.
 	  */
-	bool addToScene (CScene& scene, IDriver *driver=NULL, uint selectedTexture=0);
-	bool addToSceneAsync (CScene& scene, IDriver *driver=NULL, uint selectedTexture=0);
+	bool addToScene (CScene& scene, IDriver *driver = nullptr, uint selectedTexture=0);
+	bool addToSceneAsync (CScene& scene, IDriver *driver = nullptr, uint selectedTexture=0);
 	void stopAddToSceneAsync ();
 	TState getAddToSceneState ();
 

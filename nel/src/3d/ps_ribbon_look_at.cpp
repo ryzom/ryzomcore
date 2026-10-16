@@ -84,7 +84,7 @@ void CPSRibbonLookAt::serial(NLMISC::IStream &f)
 	{
 		f.serial(_SegDuration, _NbSegs, dummy /*_NbDyingRibbons*/);
 	}
-	ITexture *tex = NULL;
+	ITexture *tex = nullptr;
 
 	if (ver > 2)
 	{
@@ -379,7 +379,7 @@ void CPSRibbonLookAt::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 		CPSMaterial::forceModulateConstantColor(true, ps.getGlobalColorLighted());
 	}
 	else
-	if (ps.getColorAttenuationScheme() != NULL || ps.isUserColorUsed())
+	if (ps.getColorAttenuationScheme() != nullptr || ps.isUserColorUsed())
 	{
 		CPSMaterial::forceModulateConstantColor(true, ps.getGlobalColor());
 	}
@@ -423,7 +423,7 @@ void CPSRibbonLookAt::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 
 
 		/// setup colors
-		NLMISC::CRGBA	*ptCurrColor=0;
+		NLMISC::CRGBA	*ptCurrColor=nullptr;
 		if (_ColorScheme)
 		{
 			colors.resize(nbRibbons);

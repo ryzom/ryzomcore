@@ -45,7 +45,7 @@ static const char *WIN_BOT_CHAT_ACCEPT_MISSION = "ui:interface:bot_chat_accept_m
 CBotChatPageMission::CBotChatPageMission()
 {
 	_MissionPagesObs.setListType(CHugeListObs::Missions);
-	_CurrSel = NULL;
+	_CurrSel = nullptr;
 }
 
 // *******************************************************************************************

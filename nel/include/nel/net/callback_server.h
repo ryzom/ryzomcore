@@ -43,7 +43,7 @@ public:
 	void	send (const CMessage &buffer, TSockId hostid, bool log = true) NL_OVERRIDE;
 
 	/// Force to send all data pending in the send queue. See comment in CCallbackNetBase.
-	bool	flush (TSockId destid, uint *nbBytesRemaining=NULL) NL_OVERRIDE { nlassert( destid != InvalidSockId ); return CBufServer::flush(destid, nbBytesRemaining); }
+	bool	flush (TSockId destid, uint *nbBytesRemaining = nullptr) NL_OVERRIDE { nlassert( destid != InvalidSockId ); return CBufServer::flush(destid, nbBytesRemaining); }
 
 	/** Updates the network (call this method evenly).
 	 * More info about timeout and mintime in the code of CCallbackNetBase::baseUpdate().
@@ -76,7 +76,7 @@ public:
 	virtual TSockId	getSockId (TSockId hostid = InvalidSockId) NL_OVERRIDE;
 
 	uint64	getReceiveQueueSize () NL_OVERRIDE { return CBufServer::getReceiveQueueSize(); }
-	uint64	getSendQueueSize () NL_OVERRIDE { return CBufServer::getSendQueueSize(0); }
+	uint64	getSendQueueSize () NL_OVERRIDE { return CBufServer::getSendQueueSize(nullptr); }
 
 	void displayReceiveQueueStat (NLMISC::CLog *log = NLMISC::InfoLog) NL_OVERRIDE { CBufServer::displayReceiveQueueStat(log); }
 	void displaySendQueueStat (NLMISC::CLog *log = NLMISC::InfoLog, TSockId destid = InvalidSockId) NL_OVERRIDE { CBufServer::displaySendQueueStat(log, destid); }

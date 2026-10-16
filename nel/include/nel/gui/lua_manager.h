@@ -38,7 +38,7 @@ namespace NLGUI
 		/// Get or create singleton
 		static CLuaManager& getInstance()
 		{
-			if( instance == NULL )
+			if( instance == nullptr)
 			{
 				instance = new CLuaManager();
 			}

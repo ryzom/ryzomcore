@@ -139,7 +139,7 @@ void			IStream::serialIStreamable(IStreamable* &ptr)
 
 		if(node==0)
 		{
-			ptr=NULL;
+			ptr = nullptr;
 
 			// Close the node header
 			xmlPushEnd ();
@@ -165,7 +165,7 @@ void			IStream::serialIStreamable(IStreamable* &ptr)
 
 				// Construct object.
 				ptr= dynamic_cast<IStreamable*> (CClassRegistry::create(className));
-				if(ptr==NULL)
+				if(ptr == nullptr)
 				#ifdef NL_DEBUG
 					throw EUnregisteredClass(className);
 				#else
@@ -194,7 +194,7 @@ void			IStream::serialIStreamable(IStreamable* &ptr)
 	}
 	else
 	{
-		if(ptr==NULL)
+		if(ptr == nullptr)
 		{
 			node= 0;
 

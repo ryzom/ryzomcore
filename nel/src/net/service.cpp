@@ -87,7 +87,7 @@ static const char* NegFiltersNames[] =
    "NegFiltersWarning",
    "NegFiltersAssert",
    "NegFiltersError",
-   0
+   nullptr
 };
 
 
@@ -95,10 +95,10 @@ static const char* NegFiltersNames[] =
 // Variables
 //
 
-TUnifiedCallbackItem EmptyCallbackArray[1] = { { "", NULL } };
+TUnifiedCallbackItem EmptyCallbackArray[1] = { { "", nullptr } };
 
 // class static member
-IService	*IService::_Instance = NULL;
+IService	*IService::_Instance = nullptr;
 
 static sint ExitSignalAsked = 0;
 
@@ -155,7 +155,7 @@ CVariable<string>				NamesOfOnlyServiceToFlushSending("nel", "NamesOfOnlyService
 
 bool wasExitSignalAsked()
 {
-	if (IService::isServiceInitialized() && IService::getInstance()->WindowDisplayer != NULL)
+	if (IService::isServiceInitialized() && IService::getInstance()->WindowDisplayer != nullptr)
 	{
 		// update the window displayer and quit if asked
 		if (!IService::getInstance()->WindowDisplayer->update())
@@ -342,7 +342,7 @@ TUnifiedCallbackItem builtinServiceCallbacks [] =
 
 // Ctor
 IService::IService() :
-	WindowDisplayer(0),
+	WindowDisplayer(nullptr),
 	WriteFilesDirectory("nel", "WriteFilesDirectory", "directory where to save generic shard information (packed_sheets for example)", ".", 0, true, cbDirectoryChanged),
 	SaveFilesDirectory("nel", "SaveFilesDirectory", "directory where to save specific shard information (shard time for example)", ".", 0, true, cbDirectoryChanged),
 	ConvertSavesFilesDirectoryToFullPath("nel", "ConvertSaveFilesDirectoryToFullPath", "If true (default), the provided SaveFilesDirectory will be converted to a full path (ex: saves -> /home/dir/saves)", true, 0, true ),
@@ -356,15 +356,16 @@ IService::IService() :
 	LogDirectory("nel", "LogDirectory", "directory where the service is logging", ".", 0, true, cbDirectoryChanged),
 	RunningDirectory("nel", "RunningDirectory", "directory where the service is running on", ".", 0, true, cbDirectoryChanged),
 	Version("nel", "Version", "Version of the shard", ""),
-	_CallbackArray (0),
+	_CallbackArray (nullptr),
 	_CallbackArraySize (0),
 	_DontUseNS(false),
 	_DontUseAES(false),
 	_ResetMeasures(false),
 	_ShardId(0),
 	_ClosureClearanceStatus(CCMustRequestClearance),
-	_RequestClosureClearanceCallback(NULL),
-	_DirectoryChangedCBI(NULL)
+	_RequestClosureClearanceCallback(nullptr)
+    ,
+	_DirectoryChangedCBI(nullptr)
 {
 	// Singleton
 	_Instance = this;
@@ -376,7 +377,7 @@ IService::IService() :
 IService::~IService()
 {
 	// Singleton
-	_Instance = NULL;
+	_Instance = nullptr;
 
 	// unregister the singleton
 	INelContext::getInstance().releaseSingletonPointer("IService", this);
@@ -526,7 +527,7 @@ void IService::setArgs(int argc, const wchar_t **argv)
 
 void cbLogFilter (CConfigFile::CVar &var)
 {
-	CLog *log = NULL;
+	CLog *log = nullptr;
 	if (var.Name == "NegFiltersDebug")
 	{
 		log = DebugLog;
@@ -585,9 +586,9 @@ void cbExecuteCommands (CConfigFile::CVar &var)
 sint IService::main (const char *serviceShortName, const char *serviceLongName, uint16 servicePort, const char *configDir, const char *logDir, const char *compilationDate)
 {
 	bool userInitCalled = false;
-	CConfigFile::CVar *var = NULL;
+	CConfigFile::CVar *var = nullptr;
 
-	IThread *timeoutThread = NULL;
+	IThread *timeoutThread = nullptr;
 
 	// a short name service can't be a number
 	uint tmp;
@@ -654,7 +655,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			{
 				// create the basic .cfg that link the default one
 				FILE *fp = nlfopen (cfn, "w");
-				if (fp == NULL)
+				if (fp == nullptr)
 				{
 					nlerror ("SERVICE: Can't create config file '%s'", cfn.c_str());
 				}
@@ -681,7 +682,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Set the shard Id
 		//
 
-		if ((var = ConfigFile.getVarPtr("NoWSShardId")) != NULL)
+		if ((var = ConfigFile.getVarPtr("NoWSShardId")) != nullptr)
 		{
 			_ShardId = var->asInt();
 		}
@@ -764,7 +765,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		//
 		// Set the update timeout if found in the cfg
 		//
-		if ((var = ConfigFile.getVarPtr("UpdateTimeout")) != NULL)
+		if ((var = ConfigFile.getVarPtr("UpdateTimeout")) != nullptr)
 		{
 			_UpdateTimeout = var->asInt();
 		}
@@ -775,7 +776,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		for(const char **name = NegFiltersNames; *name; name++)
 		{
-			if ((var = ConfigFile.getVarPtr (*name)) != NULL)
+			if ((var = ConfigFile.getVarPtr (*name)) != nullptr)
 			{
 				ConfigFile.setCallback (*name, cbLogFilter);
 				cbLogFilter(*var);
@@ -783,7 +784,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		}
 
 		ConfigFile.setCallback ("Commands", cbExecuteCommands);
-		if ((var = ConfigFile.getVarPtr ("Commands")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("Commands")) != nullptr)
 		{
 			cbExecuteCommands(*var);
 		}
@@ -797,7 +798,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Create the window if needed
 		//
 
-		if ((var = ConfigFile.getVarPtr ("WindowStyle")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("WindowStyle")) != nullptr)
 		{
 			string disp = var->asString ();
 #ifdef NL_USE_GTK
@@ -814,7 +815,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			}
 #endif // NL_OS_WINDOWS
 
-			if (WindowDisplayer == NULL && disp != "NONE")
+			if (WindowDisplayer == nullptr && disp != "NONE")
 			{
 				nlinfo ("SERVICE: Unknown value for the WindowStyle (should be GTK, WIN or NONE), use no window displayer");
 			}
@@ -822,7 +823,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		vector <pair<string,uint> > displayedVariables;
 		//uint speedNetLabel, speedUsrLabel, rcvLabel, sndLabel, rcvQLabel, sndQLabel, scrollLabel;
-		if (WindowDisplayer != NULL)
+		if (WindowDisplayer != nullptr)
 		{
 			//
 			// Init window param if necessary
@@ -832,15 +833,15 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			bool iconified = false, ww = false;
 			string fn;
 
-			if ((var = ConfigFile.getVarPtr("XWinParam")) != NULL) x = var->asInt();
-			if ((var = ConfigFile.getVarPtr("YWinParam")) != NULL) y = var->asInt();
-			if ((var = ConfigFile.getVarPtr("WWinParam")) != NULL) w = var->asInt();
-			if ((var = ConfigFile.getVarPtr("HWinParam")) != NULL) h = var->asInt();
-			if ((var = ConfigFile.getVarPtr("HistoryWinParam")) != NULL) history = var->asInt();
-			if ((var = ConfigFile.getVarPtr("IWinParam")) != NULL) iconified = var->asInt() == 1;
-			if ((var = ConfigFile.getVarPtr("FontSize")) != NULL) fs = var->asInt();
-			if ((var = ConfigFile.getVarPtr("FontName")) != NULL) fn = var->asString();
-			if ((var = ConfigFile.getVarPtr("WordWrap")) != NULL) ww = var->asInt() == 1;
+			if ((var = ConfigFile.getVarPtr("XWinParam")) != nullptr) x = var->asInt();
+			if ((var = ConfigFile.getVarPtr("YWinParam")) != nullptr) y = var->asInt();
+			if ((var = ConfigFile.getVarPtr("WWinParam")) != nullptr) w = var->asInt();
+			if ((var = ConfigFile.getVarPtr("HWinParam")) != nullptr) h = var->asInt();
+			if ((var = ConfigFile.getVarPtr("HistoryWinParam")) != nullptr) history = var->asInt();
+			if ((var = ConfigFile.getVarPtr("IWinParam")) != nullptr) iconified = var->asInt() == 1;
+			if ((var = ConfigFile.getVarPtr("FontSize")) != nullptr) fs = var->asInt();
+			if ((var = ConfigFile.getVarPtr("FontName")) != nullptr) fn = var->asString();
+			if ((var = ConfigFile.getVarPtr("WordWrap")) != nullptr) ww = var->asInt() == 1;
 
 			if (haveArg('I')) iconified = true;
 
@@ -859,7 +860,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			displayedVariables.push_back(make_pair(string("|Scroller"), WindowDisplayer->createLabel ("NeL Rulez")));
 
 			CConfigFile::CVar *v = ConfigFile.getVarPtr("DisplayedVariables");
-			if (v != NULL)
+			if (v != nullptr)
 			{
 				for (uint i = 0; i < v->size(); i++)
 				{
@@ -918,7 +919,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			IgnoredPipe = false;
 		}
 
-		if (sigprocmask (SIG_BLOCK, &SigList, NULL) == -1)
+		if (sigprocmask (SIG_BLOCK, &SigList, nullptr) == -1)
 		{
 			perror("sigprocmask()");
 			IgnoredPipe = false;
@@ -961,7 +962,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		// set the aes aliasname if present in cfg file
 		CConfigFile::CVar *varAliasName= ConfigFile.getVarPtr("AESAliasName");
-		if (varAliasName != NULL)
+		if (varAliasName != nullptr)
 		{
 			_AliasName = varAliasName->asString();
 			nlinfo("SERVICE: Setting alias name to: '%s'",_AliasName.c_str());
@@ -975,7 +976,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		}
 
 		// Load the recording state from the config file
-		if ((var = ConfigFile.getVarPtr ("Rec")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("Rec")) != nullptr)
 		{
 			string srecstate = toUpperAscii(var->asString());
 			if ( srecstate == "RECORD" )
@@ -1000,7 +1001,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		}
 
 		// Load the default stream format
-		if ((var = ConfigFile.getVarPtr ("StringMsgFormat")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("StringMsgFormat")) != nullptr)
 		{
 			CMessage::setDefaultStringMode( var->asInt() == 1 );
 		}
@@ -1016,7 +1017,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		///
 
 		// get the sid
-		if ((var = ConfigFile.getVarPtr ("SId")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("SId")) != nullptr)
 		{
 			sint32 sid = var->asInt();
 			if (sid<=0 || sid>255)
@@ -1037,7 +1038,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 
 		// look if we don't want to use NS
-		if ((var = ConfigFile.getVarPtr ("DontUseNS")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("DontUseNS")) != nullptr)
 		{
 			// if we set the value in the config file, get it
 			_DontUseNS = (var->asInt() == 1);
@@ -1057,13 +1058,13 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Register all network associations (must be before the CUnifiedNetwork::getInstance()->init)
 		//
 
-		if ((var = ConfigFile.getVarPtr ("Networks")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("Networks")) != nullptr)
 		{
 			for (uint8 i = 0; i < var->size (); i++)
 				CUnifiedNetwork::getInstance()->addNetworkAssociation (var->asString(i), i);
 		}
 
-		if ((var = ConfigFile.getVarPtr ("DefaultNetworks")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("DefaultNetworks")) != nullptr)
 		{
 			for (uint8 i = 0; i < var->size (); i++)
 				CUnifiedNetwork::getInstance()->addDefaultNetwork(var->asString(i));
@@ -1126,7 +1127,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		}
 		else
 		{
-			CUnifiedNetwork::getInstance()->init(NULL, _RecordingState, _ShortName, ListeningPort, _SId);
+			CUnifiedNetwork::getInstance()->init(nullptr, _RecordingState, _ShortName, ListeningPort, _SId);
 		}
 
 		// get the hostname for later use
@@ -1148,7 +1149,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		//
 
 		// look if we don't want to use NS
-		if ((var = ConfigFile.getVarPtr ("DontUseAES")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("DontUseAES")) != nullptr)
 		{
 			// if we set the value in the config file, get it
 			_DontUseAES = var->asInt() == 1;
@@ -1190,7 +1191,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Add default pathes
 		//
 
-		if ((var = ConfigFile.getVarPtr ("IgnoredFiles")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("IgnoredFiles")) != nullptr)
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
@@ -1198,7 +1199,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			}
 		}
 
-		if ((var = ConfigFile.getVarPtr ("Paths")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("Paths")) != nullptr)
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
@@ -1206,7 +1207,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			}
 		}
 
-		if ((var = ConfigFile.getVarPtr ("PathsNoRecurse")) != NULL)
+		if ((var = ConfigFile.getVarPtr ("PathsNoRecurse")) != nullptr)
 		{
 			for (uint i = 0; i < var->size(); i++)
 			{
@@ -1277,7 +1278,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		for (uint i=0; i<posts.size(); ++i)
 		{
 			string varName = cmdRoot + posts[i];
-			if ((var = IService::getInstance()->ConfigFile.getVarPtr (varName)) != NULL)
+			if ((var = IService::getInstance()->ConfigFile.getVarPtr (varName)) != nullptr)
 			{
 				for (uint i = 0; i < var->size(); i++)
 				{
@@ -1304,7 +1305,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 		nlinfo ("SERVICE: Service ready");
 
-		if (WindowDisplayer != NULL)
+		if (WindowDisplayer != nullptr)
 			WindowDisplayer->setTitleBar (_ShortName + " " + _LongName + " " + Version.c_str());
 
 		//
@@ -1357,7 +1358,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			// count the amount of time to manage internal system
 			TTime before = CTime::getLocalTime ();
 
-			if (WindowDisplayer != NULL)
+			if (WindowDisplayer != nullptr)
 			{
 				// update the window displayer and quit if asked
 				if (!WindowDisplayer->update ())
@@ -1454,7 +1455,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			L5CallbackCount = TotalCallbackCalled - LastTotalCallbackCalled;
 			LastTotalCallbackCalled = TotalCallbackCalled;
 
-			if (WindowDisplayer != NULL)
+			if (WindowDisplayer != nullptr)
 			{
 				static TTime lt = 0;
 				TTime ct = CTime::getLocalTime();
@@ -1577,7 +1578,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 		// Remove the window displayer
 		//
 
-		if (WindowDisplayer != NULL)
+		if (WindowDisplayer != nullptr)
 		{
 			DebugLog->removeDisplayer (WindowDisplayer);
 			InfoLog->removeDisplayer (WindowDisplayer);
@@ -1587,7 +1588,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 			CommandLog.removeDisplayer (WindowDisplayer);
 
 			delete WindowDisplayer;
-			WindowDisplayer = NULL;
+			WindowDisplayer = nullptr;
 		}
 
 		nlinfo ("SERVICE: Service released successfully");
@@ -1610,7 +1611,7 @@ sint IService::main (const char *serviceShortName, const char *serviceLongName, 
 
 	// stop the timeout thread
 	MyTAT.quit();
-	if (timeoutThread != NULL)
+	if (timeoutThread != nullptr)
 	{
 		timeoutThread->wait();
 		delete timeoutThread;
@@ -1940,7 +1941,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(nel, string, State, "Set this value to 0 to shutd
 			nlinfo ("SERVICE: User ask me with a command to quit using the State variable");
 			ExitSignalAsked = 0xFFFE;
 			IService *srv = IService::getInstance();
-			if( srv == NULL )
+			if( srv == nullptr)
 			{
 				return;
 			}
@@ -1954,7 +1955,7 @@ NLMISC_CATEGORISED_DYNVARIABLE(nel, string, State, "Set this value to 0 to shutd
 
 	// whether reading or writing, the internal value of the state variable should end up as the result of getFullStatus()
 	IService *srv = IService::getInstance();
-	if( srv == NULL )
+	if( srv == nullptr)
 	{
 		return;
 	}

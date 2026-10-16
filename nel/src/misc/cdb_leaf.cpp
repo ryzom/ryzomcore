@@ -55,7 +55,7 @@ void CCDBNodeLeaf::init(  xmlNodePtr node, IProgressCallback &/* progressCallBac
 {
 	// Read nullable
 	CXMLAutoPtr nullable((const char*)xmlGetProp (node, (xmlChar*)"nullable"));
-	if ((const char *) nullable != NULL)
+	if ((const char *) nullable != nullptr)
 	{
 		m_Nullable = (nullable.getDatas()[0] == '1');
 	}
@@ -133,7 +133,7 @@ ICDBNode * CCDBNodeLeaf::getNode (const CTextId& id, bool /* bCreate */)
 		if (id.size() == id.getCurrentIndex())
 			return this;
 	}
-	return NULL;
+	return nullptr;
 } // getNode //
 
 //-----------------------------------------------

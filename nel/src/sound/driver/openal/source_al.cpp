@@ -37,12 +37,15 @@ using namespace NLMISC;
 namespace NLSOUND {
 
 CSourceAL::CSourceAL(CSoundDriverAL *soundDriver) :
-_SoundDriver(NULL), _Buffer(NULL), _Source(AL_NONE),
+_SoundDriver(nullptr)
+    , _Buffer(nullptr)
+    , _Source(AL_NONE),
 _DirectFilter(AL_FILTER_NULL), _EffectFilter(AL_FILTER_NULL), 
 _IsPlaying(false), _IsPaused(false), _StartTime(0), _IsStreaming(false), _RelativeMode(false), 
 _Pos(0.0f, 0.0f, 0.0f), _Gain(NLSOUND_DEFAULT_GAIN), _Alpha(1.0), 
 _MinDistance(1.0f), _MaxDistance(sqrt(numeric_limits<float>::max())), 
-_Effect(NULL), _Direct(true), 
+_Effect(nullptr)
+    , _Direct(true), 
 _DirectGain(NLSOUND_DEFAULT_DIRECT_GAIN), _EffectGain(NLSOUND_DEFAULT_EFFECT_GAIN), 
 _DirectFilterType(ISource::FilterLowPass), _EffectFilterType(ISource::FilterLowPass), 
 _DirectFilterEnabled(false), _EffectFilterEnabled(false), 
@@ -95,7 +98,7 @@ void CSourceAL::release()
 	if (_Source != AL_NONE) { alDeleteSources(1, &_Source); _Source = AL_NONE; }
 	if (_DirectFilter != AL_FILTER_NULL) { alDeleteFilters(1, &_DirectFilter); _DirectFilter = AL_FILTER_NULL; }
 	if (_EffectFilter != AL_FILTER_NULL) { alDeleteFilters(1, &_EffectFilter); _EffectFilter = AL_FILTER_NULL; }
-	_SoundDriver = NULL;
+	_SoundDriver = nullptr;
 }
 
 /// (Internal) Update the 3d changes.
@@ -122,7 +125,7 @@ void CSourceAL::setStreaming(bool streaming)
 	// bring the source type to AL_UNDETERMINED
 	alSourcei(_Source, AL_BUFFER, AL_NONE);
 	alTestError();
-	_Buffer = NULL;
+	_Buffer = nullptr;
 	_IsStreaming = streaming;
 	if (_IsStreaming)
 	{
@@ -142,11 +145,11 @@ void CSourceAL::setStaticBuffer( IBuffer *buffer )
 	alTestError();
 
 	// Set buffer
-	if ( buffer == NULL )
+	if ( buffer == nullptr)
 	{
 		alSourcei(_Source, AL_BUFFER, AL_NONE );
 		alTestError();
-		_Buffer = NULL;
+		_Buffer = nullptr;
 	}
 	else
 	{
@@ -306,7 +309,7 @@ void CSourceAL::stop()
 {
 	_StartTime = 0;
 
-	if ( _Buffer != NULL )
+	if ( _Buffer != nullptr)
 	{
 		// Static playing mode
 		_IsPlaying = false;
@@ -338,7 +341,7 @@ void CSourceAL::stop()
 /// Pause. Call play() to resume.
 void CSourceAL::pause()
 {
-	if ( _Buffer != NULL )
+	if ( _Buffer != nullptr)
 	{
 		if (_IsPaused) nlwarning("AL: Called pause() while _IsPaused == true!");
 
@@ -366,7 +369,7 @@ void CSourceAL::pause()
 bool CSourceAL::isPlaying() const
 {
 	//return !isStopped() && !_IsPaused;
-	if (_Buffer != NULL)
+	if (_Buffer != nullptr)
 	{
 		ALint srcstate;
 		alGetSourcei(_Source, AL_SOURCE_STATE, &srcstate);
@@ -383,7 +386,7 @@ bool CSourceAL::isPlaying() const
 /// Return true if playing is finished or stop() has been called.
 bool CSourceAL::isStopped() const
 {
-	if (_Buffer != NULL)
+	if (_Buffer != nullptr)
 	{
 		ALint srcstate;
 		alGetSourcei(_Source, AL_SOURCE_STATE, &srcstate);
@@ -400,7 +403,7 @@ bool CSourceAL::isStopped() const
 /// Return true if the playing source is paused
 bool CSourceAL::isPaused() const
 {
-	if (_Buffer != NULL)
+	if (_Buffer != nullptr)
 	{
 		ALint srcstate;
 		alGetSourcei(_Source, AL_SOURCE_STATE, &srcstate);
@@ -776,14 +779,14 @@ void CSourceAL::setEffect(CEffectAL *effect)
 /// Set the effect send for this source, NULL to disable. [IEffect], default: NULL
 void CSourceAL::setEffect(IReverbEffect *reverbEffect)
 {
-	setEffect(reverbEffect ? dynamic_cast<CEffectAL *>(reverbEffect) : NULL);
+	setEffect(reverbEffect ? dynamic_cast<CEffectAL *>(reverbEffect) : nullptr);
 }
 
 /// Get the effect send for this source
 IEffect *CSourceAL::getEffect() const
 {
 	// return _Effect ? NLMISC::safe_cast<IEffect *>(_Effect) : NULL;
-	return NULL;
+	return nullptr;
 }
 
 /// Set the gain for the effect path

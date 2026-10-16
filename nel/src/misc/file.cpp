@@ -62,8 +62,8 @@ CSynchronized<std::deque<std::string> > CIFile::_OpenedFiles("");
 // ======================================================================================================
 CIFile::CIFile() : IStream(true)
 {
-	_F = NULL;
-	_Cache = NULL;
+	_F = nullptr;
+	_Cache = nullptr;
 	_ReadPos = 0;
 	_FileSize = 0;
 	_BigFileOffset = 0;
@@ -77,8 +77,8 @@ CIFile::CIFile() : IStream(true)
 // ======================================================================================================
 CIFile::CIFile(const std::string &path, bool text) : IStream(true)
 {
-	_F=NULL;
-	_Cache = NULL;
+	_F = nullptr;
+	_Cache = nullptr;
 	_ReadPos = 0;
 	_FileSize = 0;
 	_BigFileOffset = 0;
@@ -166,7 +166,7 @@ bool		CIFile::open(const std::string &path, bool text)
 		// CIFile can be reused to load file from bnp and from regular files.
 		// Last open happened to be inside bnp and close() may not set _F to NULL.
 		// Opening regular file will fail as _F points to bnp file.
-		_F = NULL;
+		_F = nullptr;
 	}
 
 	// can't open empty filename
@@ -227,14 +227,14 @@ bool		CIFile::open(const std::string &path, bool text)
 			if (CStreamedPackageManager::getInstance().getFile (filePath, path.substr(pos+1)))
 			{
 				_F = fopen (filePath.c_str(), mode);
-				if (_F != NULL)
+				if (_F != nullptr)
 				{
 					_FileSize=CFile::getFileSize(_F);
 					if (_FileSize == 0)
 					{
 						nlwarning("FILE: Size of file '%s' is 0", path.c_str());
 						fclose(_F);
-						_F = NULL;
+						_F = nullptr;
 					}
 				}
 				else
@@ -263,7 +263,7 @@ bool		CIFile::open(const std::string &path, bool text)
 				_F = CBigFile::getInstance().getFile (path, _FileSize, _BigFileOffset, dummy, _AlwaysOpened);
 			}
 		}
-		if(_F != NULL)
+		if(_F != nullptr)
 		{
 			// Start to load the bigfile or xml file at the file offset.
 			nlfseek64 (_F, _BigFileOffset, SEEK_SET);
@@ -277,22 +277,22 @@ bool		CIFile::open(const std::string &path, bool text)
 				if (!_AlwaysOpened)
 				{
 					fclose (_F);
-					_F = NULL;
+					_F = nullptr;
 				}
-				return (_Cache != NULL);
+				return (_Cache != nullptr);
 			}
 		}
 	}
 
 	// not in bnp, but may have '@' in the name
-	if (_F == NULL)
+	if (_F == nullptr)
 	{
 		_IsInBigFile = false;
 		_IsInXMLPackFile = false;
 		_BigFileOffset = 0;
 		_AlwaysOpened = false;
 		_F = nlfopen (path, mode);
-		if (_F != NULL)
+		if (_F != nullptr)
 		{
 			/*
 			THIS CODE REPLACED BY SADGE BECAUSE SOMETIMES
@@ -311,7 +311,7 @@ bool		CIFile::open(const std::string &path, bool text)
 			{
 				nlwarning ("FILE: Size of file '%s' is 0", path.c_str());
 				fclose (_F);
-				_F = NULL;
+				_F = nullptr;
 			}
 		}
 		else
@@ -320,18 +320,18 @@ bool		CIFile::open(const std::string &path, bool text)
 			_FileSize = 0;
 		}
 
-		if ((_CacheFileOnOpen) && (_F != NULL))
+		if ((_CacheFileOnOpen) && (_F != nullptr))
 		{
 			// load file in the cache
 			loadIntoCache();
 
 			fclose (_F);
-			_F = NULL;
-			return (_Cache != NULL);
+			_F = nullptr;
+			return (_Cache != nullptr);
 		}
 	}
 
-	return (_F != NULL);
+	return (_F != nullptr);
 }
 
 // ======================================================================================================
@@ -355,7 +355,7 @@ void		CIFile::close()
 		if (_Cache)
 		{
 			delete[] _Cache;
-			_Cache = NULL;
+			_Cache = nullptr;
 		}
 	}
 	else
@@ -367,7 +367,7 @@ void		CIFile::close()
 				if (_F)
 				{
 					fclose (_F);
-					_F = NULL;
+					_F = nullptr;
 				}
 			}
 		}
@@ -376,7 +376,7 @@ void		CIFile::close()
 			if (_F)
 			{
 				fclose (_F);
-				_F = NULL;
+				_F = nullptr;
 			}
 		}
 	}
@@ -487,9 +487,9 @@ void		CIFile::serialBuffer(uint8 *buf, uint len)
 	// Check the read pos
 	if ((_ReadPos < 0) || ((_ReadPos+len) > _FileSize))
 		throw EReadError (_FileName);
-	if ((_CacheFileOnOpen) && (_Cache == NULL))
+	if ((_CacheFileOnOpen) && (_Cache == nullptr))
 		throw EFileNotOpened (_FileName);
-	if ((!_CacheFileOnOpen) && (_F == NULL))
+	if ((!_CacheFileOnOpen) && (_F == nullptr))
 		throw EFileNotOpened (_FileName);
 
 	if (_IsAsyncLoading)
@@ -534,9 +534,9 @@ void		CIFile::serialBit(bool &bit)
 // ======================================================================================================
 bool		CIFile::seek (sint32 offset, IStream::TSeekOrigin origin) const
 {
-	if ((_CacheFileOnOpen) && (_Cache == NULL))
+	if ((_CacheFileOnOpen) && (_Cache == nullptr))
 		return false;
-	if ((!_CacheFileOnOpen) && (_F == NULL))
+	if ((!_CacheFileOnOpen) && (_F == nullptr))
 		return false;
 
 	switch (origin)
@@ -628,13 +628,13 @@ uint	CIFile::getDbgStreamSize() const
 // ======================================================================================================
 COFile::COFile() : IStream(false)
 {
-	_F=NULL;
+	_F = nullptr;
 }
 
 // ======================================================================================================
 COFile::COFile(const std::string &path, bool append, bool text, bool useTempFile) : IStream(false)
 {
-	_F=NULL;
+	_F = nullptr;
 	open(path, append, text, useTempFile);
 }
 
@@ -678,7 +678,7 @@ bool	COFile::open(const std::string &path, bool append, bool text, bool useTempF
 
 	_F = nlfopen(fileToOpen, mode);
 
-	return _F!=NULL;
+	return _F != nullptr;
 }
 // ======================================================================================================
 void	COFile::close()
@@ -716,7 +716,7 @@ void	COFile::internalClose(bool success)
 				CFile::deleteFile (_TempFileName);
 		}
 
-		_F=NULL;
+		_F = nullptr;
 	}
 	resetPtrTable();
 }

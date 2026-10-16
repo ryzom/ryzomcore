@@ -77,7 +77,7 @@ public:
 	 *	\param recurs true if want to recurs in sub directory
 	 */
 	virtual void	preLoadShapesFromDirectory(const std::string &shapeCacheName,
-		const std::string &path, const std::string &wildCard, bool recurs= false, NLMISC::IProgressCallback *progress = NULL, bool flushTextures = false) =0;
+		const std::string &path, const std::string &wildCard, bool recurs= false, NLMISC::IProgressCallback *progress = nullptr, bool flushTextures = false) =0;
 
 	/** PreLoad all shapes (.shape, .ps, .skel...) files from a directory into a shapeCache.
 	 *	same as preLoadShapesFromDirectory() but take a BNP name which must have been added with
@@ -86,7 +86,7 @@ public:
 	 *  \param flushTex : true to flush the texture of each shape when it is loaded
 	 */
 	virtual void	preLoadShapesFromBNP(const std::string &shapeCacheName,
-		const std::string &bnpName, const std::string &wildCard, NLMISC::IProgressCallback *progress = NULL, bool flushTextures = false) =0;
+		const std::string &bnpName, const std::string &wildCard, NLMISC::IProgressCallback *progress = nullptr, bool flushTextures = false) =0;
 
 	/** Return a UShape proxy from this name. NB: if not found the mesh is not loaded, and the proxy
 	 *	returned will be empty

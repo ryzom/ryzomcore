@@ -48,7 +48,7 @@ public:
 	typedef std::map<NLMISC::CSString,int> TNextPoundValue;
 
 	// ctor
-	CPersistentDataTreeNode(const NLMISC::CSString& name=NLMISC::CSString(),CPersistentDataTreeNode* parent=NULL);
+	CPersistentDataTreeNode(const NLMISC::CSString& name=NLMISC::CSString(),CPersistentDataTreeNode* parent = nullptr);
 	CPersistentDataTreeNode(const NLMISC::CSString& name,CPersistentDataTreeNode* parent,uint32 idx);
 
 	// attaching a node to a parent node

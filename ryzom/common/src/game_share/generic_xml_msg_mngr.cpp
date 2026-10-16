@@ -42,14 +42,14 @@ using namespace NLMISC;
  */
 CGenericXmlMsgHeaderManager::CGenericXmlMsgHeaderManager()
 {
-	_Root = NULL;
+	_Root = nullptr;
 }
 
 // Destructor
 CGenericXmlMsgHeaderManager::~CGenericXmlMsgHeaderManager()
 {
 	delete _Root;
-	_Root = NULL;
+	_Root = nullptr;
 }
 
 
@@ -76,7 +76,7 @@ void	CGenericXmlMsgHeaderManager::init(const string &filename)
 bool	CGenericXmlMsgHeaderManager::setCallback(const string &msgName, TMsgHeaderCallback callback)
 {
 	// check root
-	if (_Root == NULL)
+	if (_Root == nullptr)
 	{
 		nlwarning("Can't set callback for message '%s', Root not properly initialized.", msgName.c_str());
 		return false;
@@ -86,7 +86,7 @@ bool	CGenericXmlMsgHeaderManager::setCallback(const string &msgName, TMsgHeaderC
 	CNode	*node = _Root->select(msgName.c_str());
 
 	// check node
-	if (node == NULL)
+	if (node == nullptr)
 	{
 		nlwarning("Can't set callback for message '%s', message not found.", msgName.c_str());
 		return false;
@@ -100,7 +100,7 @@ bool	CGenericXmlMsgHeaderManager::setCallback(const string &msgName, TMsgHeaderC
 bool	CGenericXmlMsgHeaderManager::setUserData(const string &msgName, const uint64 &data, uint index)
 {
 	// check root
-	if (_Root == NULL)
+	if (_Root == nullptr)
 	{
 		nlwarning("Can't set user data for message '%s', Root not properly initialized.", msgName.c_str());
 		return false;
@@ -110,7 +110,7 @@ bool	CGenericXmlMsgHeaderManager::setUserData(const string &msgName, const uint6
 	CNode	*node = _Root->select(msgName.c_str());
 
 	// check node
-	if (node == NULL)
+	if (node == nullptr)
 	{
 		nlwarning("Can't set user data for message '%s', message not found.", msgName.c_str());
 		return false;
@@ -125,7 +125,7 @@ bool	CGenericXmlMsgHeaderManager::setUserData(const string &msgName, const uint6
 void	CGenericXmlMsgHeaderManager::execute(CBitMemStream &strm)
 {
 	// check root
-	if (_Root == NULL)
+	if (_Root == nullptr)
 	{
 		nlwarning("Can't execute message , Root not properly initialized.");
 		return;
@@ -134,12 +134,12 @@ void	CGenericXmlMsgHeaderManager::execute(CBitMemStream &strm)
 	CNode	*node = _Root->select(strm);
 
 	// check node
-	if (node == NULL)
+	if (node == nullptr)
 	{
 		nlwarning("Can't execute stream, no valid sequence found");
 	}
 	// check callback
-	else if (node->Callback == NULL)
+	else if (node->Callback == nullptr)
 	{
 		nlwarning("Can't execute msg '%s', no callback set", node->Name.c_str());
 	}
@@ -153,7 +153,7 @@ void	CGenericXmlMsgHeaderManager::execute(CBitMemStream &strm)
 //
 bool	CGenericXmlMsgHeaderManager::pushNameToStream(const string &msgName, CBitMemStream &strm)
 {
-	bool res = (_Root->select(msgName.c_str(), strm) != NULL);
+	bool res = (_Root->select(msgName.c_str(), strm) != nullptr);
 
 	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName.c_str());
 
@@ -163,7 +163,7 @@ bool	CGenericXmlMsgHeaderManager::pushNameToStream(const string &msgName, CBitMe
 //
 bool	CGenericXmlMsgHeaderManager::pushNameToStream(const char *msgName, CBitMemStream &strm)
 {
-	bool res = (_Root->select(msgName, strm) != NULL);
+	bool res = (_Root->select(msgName, strm) != nullptr);
 
 	if (!res) nlwarning("pushNameToStream failed: Unknown message name '%s'", msgName);
 
@@ -180,7 +180,7 @@ void	CGenericXmlMsgHeaderManager::popNameFromStream(string &resultName, CBitMemS
 void	CGenericXmlMsgHeaderManager::popNameAndDescriptionFromStream(string &resultName, string& description, CBitMemStream &strm)
 {
 	CNode	*node = _Root->select(strm, resultName);
-	if (node != NULL)
+	if (node != nullptr)
 	{
 		description = node->Description;
 	}
@@ -195,7 +195,7 @@ void	CGenericXmlMsgHeaderManager::popNameAndDescriptionFromStream(string &result
 /*
  * Constructor
  */
-CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Value(value), UseCycle(false), NbBits(0), Callback(NULL)
+CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Value(value), UseCycle(false), NbBits(0), Callback(nullptr)
 {
 	UserData[0] = 0;
 	UserData[1] = 0;
@@ -324,7 +324,7 @@ CGenericXmlMsgHeaderManager::CNode::CNode(xmlNodePtr xmlNode, uint32 value) : Va
 		// only parse children if not leaf
 		xmlNodePtr	xmlChild = xmlNode->children;
 
-		while (xmlChild != NULL)
+		while (xmlChild != nullptr)
 		{
 			// check node is leaf or branch
 			if (!strcmp((const char*)xmlChild->name, "branch") || !strcmp((const char*)xmlChild->name, "leaf"))
@@ -362,6 +362,6 @@ CGenericXmlMsgHeaderManager::CNode::~CNode()
 	for (i=0; i<Nodes.size(); ++i)
 	{
 		delete Nodes[i];
-		Nodes[i] = NULL;
+		Nodes[i] = nullptr;
 	}
 }

@@ -137,8 +137,8 @@ public:
 };
 
 CClusteredSound::CClusteredSound()
-:	_Scene(0),
-	_RootCluster(0),
+:	_Scene(nullptr),
+	_RootCluster(nullptr),
 	_LastEnv(CStringMapper::emptyId()),
 	_LastEnvSize(-1.0f), // size goes from 0.0f to 100.0f
 	m_EnableOcclusionObstruction(false),
@@ -194,18 +194,18 @@ void CClusteredSound::init(NL3D::CScene *scene, float portalInterpolate, float m
 	_PortalInterpolate = portalInterpolate;
 	_MaxEarDistance = maxEarDist;
 	_MinGain = minGain;
-	if(scene != 0)
+	if(scene != nullptr)
 	{
 		_RootCluster = _Scene->getClipTrav().RootCluster;
 	}
 	else
-		_RootCluster = 0;
+		_RootCluster = nullptr;
 }
 
 void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view */, const CVector &/* up */)
 {
 	H_AUTO(NLSOUND_ClusteredSoundUpdate)
-	if (_Scene == 0)
+	if (_Scene == nullptr)
 	{
 		// hum... what to do ?
 		static bool bDisplayOnce = false;
@@ -298,8 +298,8 @@ void CClusteredSound::update(const CVector &listenerPos, const CVector &/* view 
 //					nldebug("Found the sound [%s] for sound group [%s]", CStringMapper::unmap(soundName).c_str(), CStringMapper::unmap(soundGroup).c_str());
 
 					cs.Distance = css.Dist;
-					cs.Source = CAudioMixerUser::instance()->createSource(soundName, false, NULL, NULL, cluster);
-					if (cs.Source != 0)
+					cs.Source = CAudioMixerUser::instance()->createSource(soundName, false, nullptr, nullptr, cluster);
+					if (cs.Source != nullptr)
 					{
 						cs.Source->setPos(listenerPos + css.Direction * css.Dist + CVector(0,0,2));
 						if (css.DistFactor < 1.0f)
@@ -375,7 +375,7 @@ const CClusteredSound::CClusterSoundStatus *CClusteredSound::getClusterSoundStat
 
 	if (it == _AudibleClusters.end())
 	{
-		return 0;
+		return nullptr;
 	}
 	else
 		return &(it->second);
@@ -384,8 +384,8 @@ const CClusteredSound::CClusterSoundStatus *CClusteredSound::getClusterSoundStat
 
 NL3D::CCluster	*CClusteredSound::getRootCluster()
 {
-	if (_Scene == 0)
-		return 0;
+	if (_Scene == nullptr)
+		return nullptr;
 
 	return _Scene->getClipTrav().RootCluster;
 }

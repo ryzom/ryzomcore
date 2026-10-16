@@ -76,7 +76,7 @@ CTextureDLM::CTextureDLM(uint width, uint height)
 	// init list to NULL.
 	for(i = 0; i < NL_DLM_LIGHTMAP_TYPE_SIZE; i++)
 	{
-		_FreeBlocks[i] = NULL;
+		_FreeBlocks[i] = nullptr;
 	}
 
 	// Since NL_DLM_BLOCK_SIZE is 10 or 18 (a factor of prime number 5 or 3 respectively), we are sure there is
@@ -134,7 +134,7 @@ void			CTextureDLM::linkFreeBlock(uint lMapType, CBlock *block)
 {
 	// link me to others
 	block->FreeNext= _FreeBlocks[lMapType];
-	block->FreePrec= NULL;
+	block->FreePrec = nullptr;
 	// link other to me
 	if(_FreeBlocks[lMapType])
 		_FreeBlocks[lMapType]->FreePrec= block;
@@ -152,8 +152,8 @@ void			CTextureDLM::unlinkFreeBlock(uint lMapType, CBlock *block)
 	else
 		_FreeBlocks[lMapType]= block->FreeNext;
 	// reset me
-	block->FreePrec= NULL;
-	block->FreeNext= NULL;
+	block->FreePrec = nullptr;
+	block->FreeNext = nullptr;
 }
 
 
@@ -169,7 +169,7 @@ bool			CTextureDLM::createLightMap(uint w, uint h, uint &x, uint &y)
 
 	// First manage case list is empty.
 	//===================
-	if(_FreeBlocks[lMapType]==NULL)
+	if(_FreeBlocks[lMapType] == nullptr)
 	{
 		// list is empty => allocate a block from _EmptyBlocks.
 		nlassert(!_EmptyBlocks.empty());

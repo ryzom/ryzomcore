@@ -105,7 +105,7 @@ public:
 	// TMP For debug : render position covered by a frustum
 	virtual void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]) = 0;
 	// raytracing test
-	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const = 0;
+	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = nullptr, NLMISC::CVector *normal = nullptr) const = 0;
 	// roughly select triangle inside 'poly' (all triangle that are at least partially  inside are guaranteed to be selected)
 	virtual void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const = 0;
 };
@@ -144,7 +144,7 @@ public:
 	// try to build a 16 bit version of this packed zone to save some more place
 	NLMISC::CSmartPtr<CPackedZone16> buildPackedZone16();
 	// raytracing test
-	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const NL_OVERRIDE;
+	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = nullptr, NLMISC::CVector *normal = nullptr) const NL_OVERRIDE;
 	//
 	void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const NL_OVERRIDE;
 private:
@@ -187,7 +187,7 @@ public:
 	// TMP For debug : render position covered by a frustum
 	void render(CVertexBuffer &vb, IDriver &drv, CMaterial &mat, CMaterial &wiredMaterial, const NLMISC::CMatrix &camMat, uint batchSize, const NLMISC::CVector localFrustCorners[8]) NL_OVERRIDE;
 		// raytracing test
-	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = NULL, NLMISC::CVector *normal = NULL) const NL_OVERRIDE;
+	virtual bool raytrace(const NLMISC::CVector &start, const NLMISC::CVector &end, NLMISC::CVector &inter, std::vector<NLMISC::CTriangle> *testedTriangles = nullptr, NLMISC::CVector *normal = nullptr) const NL_OVERRIDE;
 	//
 	void appendSelection(const NLMISC::CPolygon2D &poly, std::vector<NLMISC::CTriangle> &selectedTriangles) const NL_OVERRIDE;
 private:

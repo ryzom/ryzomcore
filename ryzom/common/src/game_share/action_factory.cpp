@@ -35,7 +35,7 @@ namespace CLFECOMMON {
 // Variables
 //
 
-CActionFactory *CActionFactory::Instance = NULL;
+CActionFactory *CActionFactory::Instance = nullptr;
 
 
 //
@@ -46,10 +46,10 @@ CActionFactory::CActionFactory ()
 {
 	CActionSint64::init();
 
-	_VolatilePosition = NULL;
+	_VolatilePosition = nullptr;
 	uint	i;
 	for (i=0; i<NB_VISUAL_PROPERTIES; ++i)
-		_VolatileActions[i] = NULL;
+		_VolatileActions[i] = nullptr;
 }
 
 
@@ -98,7 +98,7 @@ void CActionFactory::registerAction (uint32 code, CAction *(*creator)())
 	RegisteredAction.insert (CRegisteredAction::value_type(code, creator));
 */
 
-	if (RegisteredAction.size() > code && RegisteredAction[code].first != NULL)
+	if (RegisteredAction.size() > code && RegisteredAction[code].first != nullptr)
 	{
 		nlerror ("The code %u already registered in the CActionFactory", code);
 	}
@@ -109,17 +109,17 @@ void CActionFactory::registerAction (uint32 code, CAction *(*creator)())
 	}
 
 	if (RegisteredAction.size() <= code)
-		RegisteredAction.resize(code+1, make_pair((CAction *(*)())NULL, vector<CAction*>()));
+		RegisteredAction.resize(code+1, make_pair((CAction *(*)()) nullptr, vector<CAction*>()));
 
 	RegisteredAction[code].first = creator;
 }
 
 CAction *CActionFactory::create (TCLEntityId slot, TActionCode code)
 {
-	if (RegisteredAction.size() <= code || RegisteredAction[code].first == NULL)
+	if (RegisteredAction.size() <= code || RegisteredAction[code].first == nullptr)
 	{
 		nlwarning ("CActionFactory::create() try to create an unknown action (%u)", code);
-		return NULL;
+		return nullptr;
 	}
 	else if (RegisteredAction[code].second.empty())
 	{
@@ -177,21 +177,21 @@ CAction *CActionFactory::createByPropIndex( TCLEntityId slot, TPropIndex propInd
 
 void CActionFactory::remove (CAction *&action)
 {
-	if (action != NULL)
+	if (action != nullptr)
 	{
 		RegisteredAction[action->Code].second.push_back(action);
 		//nlinfo( "Inserting action in store for code %u (total %u, total for code %u)", action->Code, getNbActionsInStore(), getNbActionsInStore(action->Code) );
-		action = NULL;
+		action = nullptr;
 	}
 }
 
 void CActionFactory::remove (CActionImpulsion *&action)
 {
-	if (action != NULL)
+	if (action != nullptr)
 	{
 		CAction*	ptr = static_cast<CAction*>(action);
 		remove(ptr);
-		action = NULL;
+		action = nullptr;
 	}
 }
 
@@ -267,7 +267,7 @@ void CActionFactory::unpack (NLMISC::CBitMemStream &message, std::vector <CActio
 
 		//nlinfo ("m%d size: p:%d s:%d c:%d (actionsize: %d) slot:%hu", n, message.getPosInBit (), message.length() * 8, code, action->size(), (uint16)action->CLEntityId);
 
-		if (action == NULL)
+		if (action == nullptr)
 		{
 			nlwarning ("Unpacking an action with unknown code, skip it (%u)", code);
 		}
@@ -284,7 +284,7 @@ void CActionFactory::unpack (NLMISC::CBitMemStream &message, std::vector <CActio
  */
 CAction *CActionFactory::unpack (NLMISC::CBitMemStream &message, NLMISC::TGameCycle /* currentCycle */ )
 {
-	CAction	*action = NULL;
+	CAction	*action = nullptr;
 
 	if ((sint32)message.length() * 8 - message.getPosInBit () >= 8)
 	{
@@ -307,7 +307,7 @@ CAction *CActionFactory::unpack (NLMISC::CBitMemStream &message, NLMISC::TGameCy
 
 		action = create (INVALID_SLOT, (TActionCode)code);
 
-		if (action == NULL)
+		if (action == nullptr)
 		{
 			nlwarning ("Unpacking an action with unknown code, skip it (%u)", code);
 		}
@@ -358,12 +358,12 @@ void	CActionFactory::releaseVolatileProperties()
 	{
 		CAction*	action = _VolatileActions[i];
 		remove(action);
-		_VolatileActions[i] = NULL;
+		_VolatileActions[i] = nullptr;
 	}
 
 	CAction*	action = _VolatilePosition;
 	remove(action);
-	_VolatilePosition = NULL;
+	_VolatilePosition = nullptr;
 }
 
 

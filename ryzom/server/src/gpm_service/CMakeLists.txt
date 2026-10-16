@@ -1,5 +1,11 @@
 FILE(GLOB SRC *.cpp *.h)
 
+# Part of the gpm sheets library (Ryzom::gpmsheets), compiled once and shared
+# with sheets_packer_shard.
+LIST(REMOVE_ITEM SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/sheets.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sheets.h)
+
 ADD_EXECUTABLE(ryzom_gpm_service WIN32 ${SRC})
 
 TARGET_INCLUDE_DIRECTORIES(ryzom_gpm_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL_INCLUDE_DIR})
@@ -7,6 +13,7 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_gpm_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQ
 TARGET_LINK_LIBRARIES(ryzom_gpm_service
         PRIVATE
         Ryzom::adminmodules
+        Ryzom::gpmsheets
         Ryzom::gameshare
         Ryzom::servershare
         NeL::misc

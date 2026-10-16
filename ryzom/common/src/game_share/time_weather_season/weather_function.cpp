@@ -88,8 +88,8 @@ void CWeatherFunction::getClosestWeatherSetups(float weatherValue, const CWeathe
 {
 	if (_WeatherSetups.empty())
 	{
-		floorSetup = NULL;
-		ceilSetup = NULL;
+		floorSetup = nullptr;
+		ceilSetup = nullptr;
 		blendValue = 0.f;
 		return;
 	}

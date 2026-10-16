@@ -69,11 +69,11 @@ public:
 	bool isPendingActionInProgress() const { return _NewActionIsPending; }
 	// get number of completed actions (do not include the new action being built)
 	uint getNumActions() const { return _Actions.getSize(); }
-	bool isNewActionBeingRecorded() const { return _NewAction != NULL; }
+	bool isNewActionBeingRecorded() const { return _NewAction != nullptr; }
 	uint getMaxNumActions() const { return _Actions.getMaxSize(); }
 	void setMaxNumActions(uint count);
 	// clear
-	void clear(CObject *newScenario = NULL);
+	void clear(CObject *newScenario = nullptr);
 	// get name of next action that can be redone
 	const ucstring *getNextActionName() const;
 	// get name of previous action that can be undone
@@ -93,7 +93,7 @@ public:
 	void requestMoveNode(const std::string& instanceId, const std::string& attrName, sint32 position, const std::string& destInstanceId, const std::string& destAttrName, sint32 destPosition);
 	//Uundo supported only if 'clear' was called with a scenario pointer
 	//Only 'redo' supported else
-	bool isUndoSupported() const { return _Scenario.getHighLevel() != NULL; }
+	bool isUndoSupported() const { return _Scenario.getHighLevel() != nullptr; }
 private:
 	// base for all requests
 	class CRequestBase : public NLMISC::CRefCount

@@ -148,7 +148,7 @@ void CPSZonePlane::show()
 	_Owner->getOwner()->getCurrentEditedElement(loc, index, lb);
 	for (TPSAttribVector::const_iterator it = _Owner->getPos().begin(); it != _Owner->getPos().end(); ++it, ++k)
 	{
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 		CMatrix mat = buildBasis(k);
 		CPSUtil::displayBasis(getDriver(), getLocalToWorldMatrix(), mat, 1.f, *getFontGenerator(), *getFontManager());
 		setupDriverModelMatrix();
@@ -381,7 +381,7 @@ void CPSZoneSphere::show()
 	setupDriverModelMatrix();
 	for (uint k = 0; posIt != endPosIt; ++posIt, ++radiusIt, ++k)
 	{
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 		CPSUtil::displaySphere(*getDriver(), radiusIt->R, *posIt, 5, col);
 	}
 }
@@ -540,7 +540,7 @@ void CPSZoneDisc::show()
 
 	for (uint k = 0; posIt != endPosIt; ++posIt, ++radiusIt, ++normalIt, ++k)
 	{
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 		CPSUtil::buildSchmidtBasis(*normalIt, mat);
 		CPSUtil::displayDisc(*getDriver(), radiusIt->R, *posIt, mat, 32, col);
 
@@ -1031,7 +1031,7 @@ void CPSZoneCylinder::show()
 		mat.setRot(basisIt->X, basisIt->Y, basisIt->X ^ basisIt->Y);
 		mat.setPos(CVector::Null);
 
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 
 
 		CPSUtil::displayCylinder(*getDriver(), *posIt, mat, *dimIt, 32, col);
@@ -1216,7 +1216,7 @@ void CPSZoneRectangle::show()
 		CPSUtil::displayBasis(getDriver(), getLocalToWorldMatrix(), mat, 1.f, *getFontGenerator(), *getFontManager());
 		setupDriverModelMatrix();
 
-		const CRGBA col = ((lb == NULL || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
+		const CRGBA col = ((lb == nullptr || this == lb) && loc == _Owner && index == k  ? CRGBA::Red : CRGBA(127, 127, 127));
 
 
 

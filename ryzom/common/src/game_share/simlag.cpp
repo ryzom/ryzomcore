@@ -63,14 +63,14 @@ struct CBufferizedPacket
 		Packet = new uint8[packetSize];
 		memcpy (Packet, packet, packetSize);
 
-		if (addr != NULL)
+		if (addr != nullptr)
 		{
 			Addr = new CInetAddress;
 			*Addr = *addr;
 		}
 		else
 		{
-			Addr = NULL;
+			Addr = nullptr;
 		}
 	}
 
@@ -78,11 +78,11 @@ struct CBufferizedPacket
 	{
 		nlassert (Packet != NULL);
 		delete [] Packet;
-		Packet = NULL;
-		Client = NULL;
+		Packet = nullptr;
+		Client = nullptr;
 		PacketSize = 0;
 		Time = 0;
-		if (Addr != NULL)
+		if (Addr != nullptr)
 			delete Addr;
 	}
 
@@ -139,7 +139,7 @@ void setSimlagValues (sint32 lag, sint8 packetLoss, sint8 packetDuplication, sin
 
 void sendUDPNow (CUdpSock *client, const uint8 *packet, uint32 packetSize, const CInetAddress *addr)
 {
-	if (addr == NULL)
+	if (addr == nullptr)
 		client->send (packet, packetSize);
 	else
 		client->sendTo (packet, packetSize, *addr);

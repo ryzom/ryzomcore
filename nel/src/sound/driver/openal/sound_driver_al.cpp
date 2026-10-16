@@ -188,7 +188,9 @@ uint32 NLSOUND_interfaceVersion ()
  * Constructor
  */
 CSoundDriverAL::CSoundDriverAL(ISoundDriver::IStringMapperProvider *stringMapper) 
-: _StringMapper(stringMapper), _AlDevice(NULL), _AlContext(NULL), 
+: _StringMapper(stringMapper), _AlDevice(nullptr)
+    , _AlContext(nullptr)
+    , 
 _NbExpBuffers(0), _NbExpSources(0), _RolloffFactor(1.f)
 {
 	alExtInit();
@@ -222,8 +224,8 @@ CSoundDriverAL::~CSoundDriverAL()
 	}
 
 	// OpenAL exit
-	if (_AlContext) { alcDestroyContext(_AlContext); _AlContext = NULL; }
-	if (_AlDevice) { alcCloseDevice(_AlDevice); _AlDevice = NULL; }
+	if (_AlContext) { alcDestroyContext(_AlContext); _AlContext = nullptr; }
+	if (_AlDevice) { alcCloseDevice(_AlDevice); _AlDevice = nullptr; }
 }
 
 /// Return a list of available devices for the user. The value at index 0 is empty, and is used for automatic device selection.
@@ -233,7 +235,7 @@ void CSoundDriverAL::getDevices(std::vector<std::string> &devices)
 
 	if (AlEnumerateAllExt)
 	{	
-		const ALchar* deviceNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+		const ALchar* deviceNames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
 		// const ALchar* defaultDevice = NULL;
 		if(!strlen(deviceNames))
 		{
@@ -258,10 +260,10 @@ void CSoundDriverAL::getDevices(std::vector<std::string> &devices)
 
 static const ALchar *getDeviceInternal(const std::string &device)
 {
-	if (device.empty()) return NULL;
+	if (device.empty()) return nullptr;
 	if (AlEnumerateAllExt)
 	{	
-		const ALchar* deviceNames = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+		const ALchar* deviceNames = alcGetString(nullptr, ALC_ALL_DEVICES_SPECIFIER);
 		if(!strlen(deviceNames))
 		{
 			nldebug("AL: No audio devices");
@@ -281,7 +283,7 @@ static const ALchar *getDeviceInternal(const std::string &device)
 		nldebug("AL: ALC_ENUMERATE_ALL_EXT not present");
 	}
 	nldebug("AL: Device '%s' not found", device.c_str());
-	return NULL;
+	return nullptr;
 }
 
 /// Initialize the driver with a user selected device. If device.empty(), the default or most appropriate device is used.
@@ -307,8 +309,8 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 
 	// OpenAL initialization
 	const ALchar *dev = getDeviceInternal(device);
-	if (!dev) dev = alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
-	nldebug("AL: Opening device: '%s'", dev == NULL ? "NULL" : dev);
+	if (!dev) dev = alcGetString(nullptr, ALC_DEFAULT_DEVICE_SPECIFIER);
+	nldebug("AL: Opening device: '%s'", dev == nullptr ? "NULL" : dev);
 	_AlDevice = alcOpenDevice(dev);
 	if (!_AlDevice) throw ESoundDriver("AL: Failed to open device");
 	nldebug("AL: ALC_DEVICE_SPECIFIER: '%s'", alcGetString(_AlDevice, ALC_DEVICE_SPECIFIER));
@@ -316,7 +318,7 @@ void CSoundDriverAL::initDevice(const std::string &device, ISoundDriver::TSoundO
 	//                   ALC_MONO_SOURCES, 12, 
 	//                   ALC_STEREO_SOURCES, 4, 
 	//                   ALC_INVALID };
-	_AlContext = alcCreateContext(_AlDevice, NULL); // attrlist);
+	_AlContext = alcCreateContext(_AlDevice, nullptr); // attrlist);
 	if (!_AlContext) { alcCloseDevice(_AlDevice); throw ESoundDriver("AL: Failed to create context"); }
 	alcMakeContextCurrent(_AlContext);
 	alTestError();
@@ -458,15 +460,15 @@ ISource *CSoundDriverAL::createSource()
 /// Create a reverb effect
 IReverbEffect *CSoundDriverAL::createReverbEffect()
 {
-	IReverbEffect *ieffect = NULL;
-	CEffectAL *effectal = NULL;
+	IReverbEffect *ieffect = nullptr;
+	CEffectAL *effectal = nullptr;
 	
 	ALuint slot = AL_NONE;
 	alGenAuxiliaryEffectSlots(1, &slot);
 	if (alGetError() != AL_NO_ERROR)
 	{
 		nlwarning("AL: alGenAuxiliaryEffectSlots failed");
-		return NULL;
+		return nullptr;
 	}
 	
 	ALuint effect = AL_NONE;
@@ -475,7 +477,7 @@ IReverbEffect *CSoundDriverAL::createReverbEffect()
 	{
 		nlwarning("AL: alGenEffects failed");
 		alDeleteAuxiliaryEffectSlots(1, &slot);
-		return NULL; /* createEffect */
+		return nullptr; /* createEffect */
 	}
 
 #if EFX_CREATIVE_AVAILABLE
@@ -503,7 +505,7 @@ IReverbEffect *CSoundDriverAL::createReverbEffect()
 		nlwarning("AL: Reverb Effect not supported");
 		alDeleteAuxiliaryEffectSlots(1, &slot);
 		alDeleteEffects(1, &effect);
-		return NULL; /* createEffect */
+		return nullptr; /* createEffect */
 	}
 	else
 	{

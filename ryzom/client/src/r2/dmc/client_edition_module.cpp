@@ -132,7 +132,8 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgScenarioUploaded( const R2::CObject* value)
-			:_Value( value?value->clone():NULL){}
+			:_Value( value?value->clone() : nullptr)
+	    {}
 
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
@@ -146,7 +147,8 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgSet(const std::string &instanceId, const std::string &attrName, const R2::CObject* value)
-			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone():NULL){}
+			:_InstanceId(instanceId), _AttrName(attrName), _Value( value?value->clone() : nullptr)
+	    {}
 
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
@@ -162,7 +164,8 @@ namespace R2 {
 	{
 	public:
 		CServerAnswerMsgInserted(const std::string &instanceId, const std::string &attrName, sint32 position, const std::string &key, const R2::CObject* value)
-			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone():NULL){}
+			:_InstanceId(instanceId), _AttrName(attrName), _Position(position), _Key(key), _Value( value?value->clone() : nullptr)
+	    {}
 
 		void ok(CClientEditionModule* client, NLNET::IModuleProxy *server) NL_OVERRIDE
 		{
@@ -397,7 +400,7 @@ CClientEditionModule::CClientEditionModule()
 	_ChannelId = TChanID::Unknown;
 	_Mute = false;
 
-	_ServerAnswerForseener = 0;
+	_ServerAnswerForseener = nullptr;
 }
 
 CClientEditionModule::~CClientEditionModule()
@@ -413,7 +416,7 @@ void CClientEditionModule::init(NLNET::IModuleSocket* clientGw, CDynamicMapClien
 //	_ClientGw = clientGw;
 
 	_Eid = "Client0";
-	_TranslationModule = 0;
+	_TranslationModule = nullptr;
 	_SessionId = TSessionId(0);
 
 
@@ -428,7 +431,7 @@ void CClientEditionModule::init()
 		return;
 	_Emotes.reset( new CEmoteBehavior() );
 	_Palette = new CPalette();
-	_Scenario = new CScenario(0);
+	_Scenario = new CScenario(nullptr);
 	_Factory = new CObjectFactoryClient(_Eid);
 	_PropertyAccessor = new CPropertyAccessor(_Client, _Factory);
 //	CObjectSerializer::Factory = _Factory;
@@ -466,11 +469,11 @@ void CClientEditionModule::init()
 void CClientEditionModule::release()
 {
 	//H_AUTO(R2_CClientEditionModule_release)
-	delete _ServerAnswerForseener; _ServerAnswerForseener = 0;
-	delete _Palette; _Palette = 0;
-	delete _Scenario;  _Scenario = 0;
-	delete _Factory; _Factory = 0;
-	delete _PropertyAccessor;	_PropertyAccessor = 0;
+	delete _ServerAnswerForseener; _ServerAnswerForseener = nullptr;
+	delete _Palette; _Palette = nullptr;
+	delete _Scenario;  _Scenario = nullptr;
+	delete _Factory; _Factory = nullptr;
+	delete _PropertyAccessor;	_PropertyAccessor = nullptr;
 	_Initialized = false;
 	_Emotes.reset();
 }
@@ -504,11 +507,11 @@ void CClientEditionModule::onModuleDown(NLNET::IModuleProxy *moduleProxy)
 
 	if (moduleClassName == "ServerEditionModule")
 	{
-		_ServerEditionProxy = NULL;
+		_ServerEditionProxy = nullptr;
 	}
 	else if ( moduleClassName == "ServerAnimationModule")
 	{
-		_ServerAnimationProxy = NULL;
+		_ServerAnimationProxy = nullptr;
 	}
 	else
 		return;
@@ -549,7 +552,7 @@ bool CClientEditionModule::onProcessModuleMessage(IModuleProxy *senderModuleProx
 		CEditor::connectionMsg("");
 		CClientMessageAdventureUserConnection  bodyConnection;
 		nlRead(message,serial,bodyConnection);
-		onRingAccessUpdated(0, bodyConnection.RingAccess);
+		onRingAccessUpdated(nullptr, bodyConnection.RingAccess);
 
 		nlinfo("R2CED: user Connected as Client %d In Mode %d", bodyConnection.EditSlotId, bodyConnection.Mode);
 		_SessionId = bodyConnection.SessionId;
@@ -953,7 +956,7 @@ CObject* CClientEditionModule::getPropertyValue(const std::string& instanceId, c
 {
 	//H_AUTO(R2_CClientEditionModule_getPropertyValue)
 	CObject* component = _Scenario->find(instanceId);
-	if (!component) return 0;
+	if (!component) return nullptr;
 	return _PropertyAccessor->getPropertyValue(component, attrName);
 }
 
@@ -1020,7 +1023,7 @@ bool CClientEditionModule::askUpdateCharMode(R2::TCharMode mode)
 {
 	//H_AUTO(R2_CClientEditionModule_askUpdateCharMode)
 	//	CSerialFactoryBackup fb;
-	if (_ServerEditionProxy == NULL) { return false; };
+	if (_ServerEditionProxy == nullptr) { return false; };
 
 	CShareServerEditionItfProxy proxy(_ServerEditionProxy);
 	proxy.onCharModeUpdateAsked(this, mode);
@@ -1266,7 +1269,7 @@ CUserComponent* CClientEditionModule::getUserComponentByHashMd5( const NLMISC::C
 	if (first == last)
 	{
 		nlwarning("Error: try to upload unknown component '%s'", md5.toString().c_str() );
-		return 0;
+		return nullptr;
 	}
 
 	return  first->second;
@@ -1368,9 +1371,9 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 
 
 	uint32 uncompressedFileLength = 0;
-	uint8* uncompressedFile=0;
+	uint8* uncompressedFile=nullptr;
 	uint32 compressedFileLength = 0;
-	uint8* compressedFile=0;
+	uint8* compressedFile=nullptr;
 	bool compressed = false;
 	bool ok = false;
 
@@ -1566,7 +1569,7 @@ bool CClientEditionModule::loadUserComponent(const std::string& filename, bool m
 
 	}
 
-	delete  [] compressedFile; compressedFile = 0;
+	delete  [] compressedFile; compressedFile = nullptr;
 
 	//size of the destination buffer, which must be at least 0.1% larger than sourceLen plus 12 bytes
 
@@ -1625,7 +1628,7 @@ CUserComponent* CClientEditionModule::getUserComponentByFilename(const std::stri
 	{
 		return found->second;
 	}
-	return 0;
+	return nullptr;
 }
 
 void CClientEditionModule::saveUserComponentFile(const std::string& filename, bool mustCompress)
@@ -1780,7 +1783,7 @@ void CClientEditionModule::onQuotaUpdated(NLNET::IModuleProxy * /* senderModuleP
 uint32 CClientEditionModule::getCurrentMaxId()
 {
 	//H_AUTO(R2_CClientEditionModule_getCurrentMaxId)
-	if (_Scenario == NULL)
+	if (_Scenario == nullptr)
 		return 1000;
 	std::string eid = getEid();
 	sint32 currentId = _Factory->getMaxId(eid);
@@ -2378,7 +2381,7 @@ void CClientEditionModule::loadUserComponentFileAccepted(NLNET::IModuleProxy * /
 	if (!ok)
 	{
 		nlwarning("The server has refuse the client to load the a file"); //should (can) not happen
-		this->systemMsg(0, "ERR", "", "The server has refuse the client to load the a file");
+		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
 		return;
 	}
 
@@ -2470,7 +2473,7 @@ void CClientEditionModule::loadScenarioSucceded(const std::string& filename, con
 		bool ok = hasCharacterSameCharacterIdMd5(modifiedByMD5);
 		if (!ok)
 		{
-			this->systemMsg(0, "ERR", "", "uiR2EDLoadingLockedScenario");
+			this->systemMsg(nullptr, "ERR", "", "uiR2EDLoadingLockedScenario");
 			return;
 		}
 	}
@@ -2525,7 +2528,7 @@ void CClientEditionModule::loadScenarioFileAccepted(NLNET::IModuleProxy * /* sen
 	if (!ok)
 	{
 		nlwarning("The server has refuse the client to load the a file"); //should (can) not append
-		this->systemMsg(0, "ERR", "", "The server has refuse the client to load the a file");
+		this->systemMsg(nullptr, "ERR", "", "The server has refuse the client to load the a file");
 		return;
 	}
 

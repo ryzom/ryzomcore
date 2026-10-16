@@ -82,7 +82,7 @@ void			CShadowMap::resetTexture()
 	if(_Texture)
 	{
 		_ShadowMapManager->releaseTexture(_Texture);
-		_Texture= NULL;
+		_Texture = nullptr;
 	}
 	_TextSize= 0;
 }

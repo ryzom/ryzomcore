@@ -105,7 +105,7 @@ void contextBuildTotem		(bool rightClick, bool dblClick);
 void initContextualCursor()
 {
 	// Create states of the Contextual Cursor.
-	ContextCur.add(false,	"STAND BY",			string("curs_default.tga"),			0.0f,	checkUnderCursor,	0);
+	ContextCur.add(false,	"STAND BY",			string("curs_default.tga"),			0.0f,	checkUnderCursor,	nullptr);
 	ContextCur.add(false,	"SELECTABLE",		string("curs_pick.tga"),			0.0f,	checkUnderCursor,	contextSelect);
 //	ContextCur.add(false,	"ATTACK",			string("hand_attack.TGA"),			0.0f,	checkUnderCursor,	contextAttack);
 //	ContextCur.add(false,	"QUARTER",			string("hand_harvest.TGA"),			0.0f,	checkUnderCursor,	contextQuarter);
@@ -247,12 +247,12 @@ void checkUnderCursor()
 {
 	// Get the interface instance.
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	if(IM == 0)
+	if(IM == nullptr)
 		return;
 
 	// Get the cursor instance
 	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-	if(cursor == 0)
+	if(cursor == nullptr)
 		return;
 
 	// No Op if screen minimized
@@ -264,7 +264,7 @@ void checkUnderCursor()
 	cursor->getPointerPos(x, y);
 
 	// Over the interface ?
-	if (CWidgetManager::getInstance()->getWindowUnder(x, y) == NULL)
+	if (CWidgetManager::getInstance()->getWindowUnder(x, y) == nullptr)
 	{
 		// Is the pointer in the window ?
 		if(x < 0 || y <0)
@@ -287,7 +287,7 @@ void checkUnderCursor()
 		// If the mouse is over the player make the player transparent
 		CCDBNodeLeaf *pNL = s_UserCharFade ? &*s_UserCharFade
 			: &*(s_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
-		if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
+		if ((pNL != nullptr) && (pNL->getValue32() == 1) && UserEntity->selectable())
 		{
 			// If the nearest entity is the player, hide!
 			if (isPlayerUnderCursor)
@@ -304,7 +304,7 @@ void checkUnderCursor()
 			for (uint32 i = 1; i < 255; ++i)
 			{
 				CEntityCL *pE = EntitiesMngr.entity(i);
-				if (pE != NULL)
+				if (pE != nullptr)
 				{
 					if (pE == entity)
 						pE->makeTransparent(true);
@@ -795,7 +795,7 @@ void contextTalk(bool rightClick, bool dblClick)
 		return;
 	// Get the interface instace.
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
-	if(IM == 0)
+	if(IM == nullptr)
 		return;
 	// Get Entity Program
 	uint32 availablePrograms = (uint32)NLGUI::CDBManager::getInstance()->getDbProp("LOCAL:TARGET:CONTEXT_MENU:PROGRAMMES")->getValue32();
@@ -884,7 +884,7 @@ void contextWebIG(bool rightClick, bool dblClick)
 	CInterfaceManager *IM = CInterfaceManager::getInstance();
 	CInterfaceElement *pGC = CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object");
 	CInterface3DShape *el= dynamic_cast<CInterface3DShape*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:bot_chat_object:scene3d:object_1"));
-	if (el != NULL)
+	if (el != nullptr)
 	{
 		//TODO: Fix that
 		//el->setName(selectedInstance.getShapeName());
@@ -892,12 +892,12 @@ void contextWebIG(bool rightClick, bool dblClick)
 	}
 	if (selectedInstanceURL.empty())
 	{
-		if (pGC != NULL)
+		if (pGC != nullptr)
 			pGC->setActive(true);
 	}
 	else
 	{
-		if (pGC != NULL)
+		if (pGC != nullptr)
 			pGC->setActive(false);
 
 		if (selectedInstanceURL.substr(0, 5) == "@LUA ") 

@@ -800,7 +800,7 @@ void CZoneLighter2002::processCalc (uint process, const CLightDesc& description)
 
 					// For each triangle
 					CTriangleList *list=lumels[lumel].TriangleList;
-					while (list!=NULL)
+					while (list != nullptr)
 					{
 						// Raytrace this triangle							
 						rayTraceTriangle (list->Triangle, lumels[lumel].Normal, description.Oversampling, lumels[lumel].S, lumels[lumel].T, factor, tested, patch);
@@ -2432,12 +2432,12 @@ void CZoneLighter2002::addLightableShape(IShape *shape, const NLMISC::CMatrix& M
 bool CZoneLighter2002::isLightableShape(IShape &shape)
 {
 	/// for now, the only shape that we lit are water shapes
-	if (dynamic_cast<CWaterShape *>(&shape) != NULL)
+	if (dynamic_cast<CWaterShape *>(&shape) != nullptr)
 	{
 		// check that this water surface has a diffuse map that is a CTextureFile (we must be able to save it !)
 		CWaterShape *ws = static_cast<CWaterShape *>(&shape);
 		const ITexture *tex = ws->getColorMap();
-		if (dynamic_cast<const CTextureFile *>(tex) != NULL)
+		if (dynamic_cast<const CTextureFile *>(tex) != nullptr)
 		{
 			return ws->isLightMappingEnabled();
 		}
@@ -3108,7 +3108,7 @@ void			CZoneLighter2002::processZonePointLightRT(vector<CPointLightNamed> &listP
 				// Reset any empty slot to NULL.
 				for(; lightInfId<CTileLightInfluence::NumLightPerCorner; lightInfId++)
 				{
-					tli.Light[lightInfId]= NULL;
+					tli.Light[lightInfId] = nullptr;
 				}
 
 
@@ -3163,7 +3163,7 @@ void			CZoneLighter2002::processZonePointLightRT(vector<CPointLightNamed> &listP
 				{
 					CTileLightInfUnpack		&tliSrc= pfpl.TileLightInfluences[tliId];
 					CTileLightInfluence		&tliDst= pInfo.TileLightInfluences[tliId];
-					if(tliSrc.Light[lightId] == NULL)
+					if(tliSrc.Light[lightId] == nullptr)
 					{
 						// Mark as unused.
 						tliDst.Light[lightId]= 0xFF;

@@ -58,7 +58,7 @@
 H_AUTO_DECL(RZ_IGCallback)
 
 ///===================================================================================
-CIGCallback::CIGCallback() : _MoveContainer(NULL)
+CIGCallback::CIGCallback() : _MoveContainer(nullptr)
 {
 	H_AUTO_USE(RZ_IGCallback)
 	//nlinfo("**** YOYO: CREATING IG CALLBACK: %x", this);
@@ -78,7 +78,7 @@ void CIGCallback::resetContainer()
 	H_AUTO_USE(RZ_IGCallback)
 	if (!_MoveContainer) return;
 	deleteIGs();
-	_MoveContainer = NULL;
+	_MoveContainer = nullptr;
 }
 
 ///===================================================================================
@@ -115,7 +115,7 @@ void CIGCallback::addIGWithNumZC(NL3D::UInstanceGroup *ig, sint numZC)
 {
 	H_AUTO_USE(RZ_IGCallback)
 	// Check the ig is valid.
-	if(ig == 0)
+	if(ig == nullptr)
 		return;
 
 	nlassert(_MoveContainer);
@@ -183,9 +183,9 @@ CIGCallback::CIGInstance::~CIGInstance()
 	}
 	if (_IG)
 	{
-		_IG->setAddRemoveInstanceCallback(NULL);
-		_IG->setTransformNameCallback(NULL);
-		_IG->setIGAddBeginCallback(NULL);
+		_IG->setAddRemoveInstanceCallback(nullptr);
+		_IG->setTransformNameCallback(nullptr);
+		_IG->setIGAddBeginCallback(nullptr);
 	}
 }
 
@@ -292,7 +292,7 @@ void CIGCallback::CIGInstance::startAddingIG(uint numInstances)
 	H_AUTO_USE(RZ_IGCallback)
 	// make room for sheets ptr
 	_EntitySheets.resize(numInstances);
-	std::fill(_EntitySheets.begin(), _EntitySheets.end(), (CEntitySheet *) NULL);
+	std::fill(_EntitySheets.begin(), _EntitySheets.end(), (CEntitySheet *)nullptr);
 }
 
 ///===================================================================================
@@ -303,7 +303,7 @@ void CIGCallback::CIGInstance::buildSheetVector()
 	_EntitySheets.resize(numInstances);
 	for(uint k = 0; k < numInstances; ++k)
 	{
-		_EntitySheets[k] = NULL;
+		_EntitySheets[k] = nullptr;
 		const std::string &name = _IG->getInstanceName(k);
 		if (NLMISC::nlstricmp(NLMISC::CFile::getExtension(name), "plant") == 0)
 		{
@@ -342,7 +342,7 @@ std::string CIGCallback::CIGInstance::transformName(uint instanceIndex, const st
 	}
 	// We cache the last id
 	static std::string lastName;
-	static CEntitySheet *lastSheet = NULL;
+	static CEntitySheet *lastSheet = nullptr;
 	CEntitySheet *sh;
 	if (instanceName == lastName)
 	{
@@ -447,7 +447,7 @@ bool CIGCallback::enumIGs(IIGEnum *callback)
 	nlassert(callback);
 	for(TIGInstanceList::iterator it = _IGInstances.begin(); it != _IGInstances.end(); ++it)
 	{
-		if ((*it)->getIG() != NULL && (*it)->getIG() != (NL3D::UInstanceGroup *)-1)
+		if ((*it)->getIG() != nullptr && (*it)->getIG() != (NL3D::UInstanceGroup *)-1)
 		{
 			bool res = callback->enumIG((*it)->getIG());
 			if (!res) return false;
@@ -463,7 +463,7 @@ void CIGCallback::changeSeason()
 	// for now, this only update managed fxs so that they are displayed the same way on both clients
 	for(TIGInstanceList::iterator it = _IGInstances.begin(); it != _IGInstances.end(); ++it)
 	{
-		if ((*it)->getIG() != NULL && (*it)->getIG() != (NL3D::UInstanceGroup *)-1)
+		if ((*it)->getIG() != nullptr && (*it)->getIG() != (NL3D::UInstanceGroup *)-1)
 		{
 			(*it)->buildSheetVector(); // the sheet vector is deleted after use, so need to rebuild it
 			(*it)->shutDownFXs();

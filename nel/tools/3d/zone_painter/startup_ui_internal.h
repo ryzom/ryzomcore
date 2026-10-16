@@ -82,7 +82,8 @@ struct SStartupSession
 	std::string PendingActionBasename;
 	SStartupSession()
 		: Active(false), Quit(false), OpenZone(false), FolderBrowserEnabled(false),
-		  Screen(ScreenNone), Worlds(NULL), SelectedWorld(-1), SelectedZone(-1),
+		  Screen(ScreenNone), Worlds(nullptr)
+	    , SelectedWorld(-1), SelectedZone(-1),
 		  InstanceLayout("1x1"), SessionMode(false)
 	{
 	}
@@ -123,7 +124,7 @@ void setZoneBrowserMode(bool continentBoard);
 void refreshBoardSelectionUI();
 
 bool parseScratchBasename(const std::string &base, char &kind, int &cx, int &cy,
-                          bool *isInstanceOrigin = NULL);
+                          bool *isInstanceOrigin = nullptr);
 std::string scratchEditableName(const std::string &base);
 std::string stripLigoFamilyPrefix(const std::string &name);
 

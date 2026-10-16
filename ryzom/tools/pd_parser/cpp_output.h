@@ -116,7 +116,7 @@ public:
 	class SMethodId
 	{
 	public:
-		SMethodId(sint section=-1, sint method=-1, CClassGenerator *generator=NULL) : Section(section), Method(method), Generator(generator)	{}
+		SMethodId(sint section=-1, sint method=-1, CClassGenerator *generator = nullptr) : Section(section), Method(method), Generator(generator)	{}
 
 		sint					Section;
 		sint					Method;

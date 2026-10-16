@@ -81,7 +81,7 @@ bool CItemCL::build(const CEntitySheet *sheet )	// virtual
 {
 	// Cast the sheet in the right type.
 	const CItemSheet *sh = dynamic_cast<const CItemSheet *>(sheet);
-	if(sh==0)
+	if(sh==nullptr)
 	{
 		nlwarning("Item:build: the sheet is not an item sheet -> entity not initialized.");
 		return false;
@@ -93,7 +93,7 @@ bool CItemCL::build(const CEntitySheet *sheet )	// virtual
 		if(nodeRoot)
 		{
 			_DBEntry = dynamic_cast<CCDBNodeBranch *>(nodeRoot->getNode(_Slot));
-			if(_DBEntry == 0)
+			if(_DBEntry == nullptr)
 				pushDebugStr("Cannot get a pointer on the DB entry.");
 		}
 	}
@@ -134,18 +134,18 @@ void CItemCL::initShape( const string &fileName )
 void CItemCL::updateVisualPropertyPos(const NLMISC::TGameCycle &/* gameCycle */, const sint64 &prop, const NLMISC::TGameCycle &/* pI */)
 {
 	// Check the DB entry (the warning is already done in the build method).
-	if(_DBEntry == 0)
+	if(_DBEntry == nullptr)
 		return;
 	// Get The property 'Y'.
 	CCDBNodeLeaf *nodeY	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSY));
-	if(nodeY == 0)
+	if(nodeY == nullptr)
 	{
 		nlwarning("ITM:updtVPPos:%d: Cannot find the property 'PROPERTY_POSY(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSY);
 		return;
 	}
 	// Get The property 'Z'.
 	CCDBNodeLeaf *nodeZ	= dynamic_cast<CCDBNodeLeaf *>(_DBEntry->getNode(CLFECOMMON::PROPERTY_POSZ));
-	if(nodeZ == 0)
+	if(nodeZ == nullptr)
 	{
 		nlwarning("ITM:updtVPPos:%d: Cannot find the property 'PROPERTY_POSZ(%d)'.", _Slot, CLFECOMMON::PROPERTY_POSZ);
 		return;

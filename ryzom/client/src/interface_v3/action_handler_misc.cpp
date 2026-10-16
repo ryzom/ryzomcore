@@ -120,7 +120,7 @@ void CActionHandlerActive::execute (CCtrlBase * /* pCaller */, const std::string
 	std::string active = getParam(params, "active");
 	std::string target = getParam(params, "target");
 	CInterfaceExprValue activeValue;
-	if (CInterfaceExpr::eval(active, activeValue, NULL))
+	if (CInterfaceExpr::eval(active, activeValue, nullptr))
 	{
 		if (!activeValue.toBool())
 		{
@@ -151,7 +151,7 @@ void CActionHandlerSetOpen::execute (CCtrlBase * /* pCaller */, const std::strin
 	std::string open   = getParam(params, "open");
 	std::string target = getParam(params, "target");
 	CInterfaceExprValue activeValue;
-	if (CInterfaceExpr::eval(open, activeValue, NULL))
+	if (CInterfaceExpr::eval(open, activeValue, nullptr))
 	{
 		if (!activeValue.toBool())
 		{
@@ -835,7 +835,7 @@ class CAHReplyTeller : public IActionHandler
 				w->enableBlink(1);
 				PeopleInterraction.ChatGroup.Filter.setTargetPlayer(CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName));
 				CGroupEditBox *eb = w->getEditBox();
-				if (eb != NULL)
+				if (eb != nullptr)
 				{
 					eb->bypassNextKey();
 				}
@@ -862,7 +862,7 @@ class CAHReplyTellerOnce : public IActionHandler
 				w->enableBlink(1);
 				w->setCommand("tell " + CEntityCL::removeTitleAndShardFromName(PeopleInterraction.LastSenderName) + " ", false);
 				CGroupEditBox *eb = w->getEditBox();
-				if (eb != NULL)
+				if (eb != nullptr)
 				{
 					eb->bypassNextKey();
 				}

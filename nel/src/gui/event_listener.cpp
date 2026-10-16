@@ -73,7 +73,7 @@ namespace NLGUI
 		eventServer->removeListener( NLMISC::EventStringId,		 this );
 		eventServer->removeListener( NLMISC::EventSetFocusId,	 this );
 
-		eventServer = NULL;
+		eventServer = nullptr;
 	}
 
 	void CEventListener::operator ()(const NLMISC::CEvent &evnt)

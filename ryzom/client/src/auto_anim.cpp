@@ -57,7 +57,7 @@ extern UScene	*Scene;
 
 
 // ***************************************************************************
-static NL3D::UAnimationSet	*AutoAnimSet= NULL;
+static NL3D::UAnimationSet	*AutoAnimSet = nullptr;
 
 // ***************************************************************************
 void initAutoAnimation()
@@ -108,7 +108,7 @@ void releaseAutoAnimation()
 	if(AutoAnimSet)
 	{
 		Driver->deleteAnimationSet(AutoAnimSet);
-		AutoAnimSet= NULL;
+		AutoAnimSet = nullptr;
 	}
 }
 

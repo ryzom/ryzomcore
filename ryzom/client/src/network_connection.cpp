@@ -237,8 +237,8 @@ extern NL3D::UDriver		*Driver;
 
 CVariable<bool>	CheckXMLSignature("client", "CheckXMLSignature", "enable client to check msg/database.xml signature", true, 0, true);
 
-CSlotGraph *PosUpdateIntervalGraph = NULL;
-CSlotGraph *PosUpdatePredictionGraph = NULL;
+CSlotGraph *PosUpdateIntervalGraph = nullptr;
+CSlotGraph *PosUpdatePredictionGraph = nullptr;
 
 CGraph MsPerTickGraph  ("mspertick (ms)",  10.0f, 570.0f, 400.0f, 100.0f, CRGBA(0,0,128,128), 1000, 400.0f, 2);
 CGraph PingGraph       ("ping (ms)",       10.0f, 460.0f, 400.0f, 100.0f, CRGBA(128,0,0,128), 100000, 1000.0f, 2);
@@ -315,9 +315,9 @@ CNetworkConnection::CNetworkConnection()
 {
 	_ConnectionState = NotInitialised;
 	m_LoginNextAddress = false;
-	_ImpulseCallback = NULL;
-	_ImpulseArg = NULL;
-	_DataBase = NULL;
+	_ImpulseCallback = nullptr;
+	_ImpulseArg = nullptr;
+	_DataBase = nullptr;
 
 	reset();
 
@@ -339,7 +339,7 @@ CNetworkConnection::~CNetworkConnection()
 	{
 		_VisualPropertyTreeRoot->deleteBranches();
 		delete _VisualPropertyTreeRoot;
-		_VisualPropertyTreeRoot = NULL;
+		_VisualPropertyTreeRoot = nullptr;
 	}
 
 #ifdef ENABLE_INCOMING_MSG_RECORDER
@@ -1762,7 +1762,7 @@ void	CNetworkConnection::decodeVisualProperties( CBitMemStream& msgin )
 				if ( ap->Position[0]==0 || ap->Position[1]==0 )
 					nlwarning( "S%hu: Receiving an invalid position", (uint16)slot );
 
-				if (_DataBase != NULL &&  (!IgnoreEntityDbUpdates || slot==0))
+				if (_DataBase != nullptr &&  (!IgnoreEntityDbUpdates || slot==0))
 				{
 					CCDBNodeBranch	*nodeRoot;
 					nodeRoot = dynamic_cast<CCDBNodeBranch*>(_DataBase->getNode((uint16)0));
@@ -1875,7 +1875,7 @@ void	CNetworkConnection::decodeVisualProperties( CBitMemStream& msgin )
 	#ifdef SHOW_PROPERTIES_RECEIVED
 					++propReceived[PROPERTY_ORIENTATION];
 	#endif
-					if (_DataBase != NULL &&  (!IgnoreEntityDbUpdates || slot==0))
+					if (_DataBase != nullptr &&  (!IgnoreEntityDbUpdates || slot==0))
 					{
 						CCDBNodeBranch	*nodeRoot;
 						nodeRoot = dynamic_cast<CCDBNodeBranch*>(_DataBase->getNode(0));
@@ -1933,7 +1933,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 			msgin.serialBuffer(&(TargetSlotsList[0]), listSize);
 
 		// Set target list value in database
-		if (_DataBase != NULL && (!IgnoreEntityDbUpdates || slot==0))
+		if (_DataBase != nullptr && (!IgnoreEntityDbUpdates || slot==0))
 		{
 			CCDBNodeBranch	*nodeRoot;
 			nodeRoot = dynamic_cast<CCDBNodeBranch*>(_DataBase->getNode(0));
@@ -1955,7 +1955,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 					++listSize;
 				}
 
-				CCDBNodeLeaf *nodeProp = NULL;
+				CCDBNodeLeaf *nodeProp = nullptr;
 
 				uint	i;
 				uint64	value = 0;
@@ -2052,7 +2052,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 			_Changes.push_back( thechangeMode );
 
 			// Set mode value in database
-			if (_DataBase != NULL &&  (!IgnoreEntityDbUpdates || slot==0))
+			if (_DataBase != nullptr &&  (!IgnoreEntityDbUpdates || slot==0))
 			{
 				CCDBNodeBranch	*nodeRoot;
 				nodeRoot = dynamic_cast<CCDBNodeBranch*>(_DataBase->getNode(0));
@@ -2073,7 +2073,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 			if ( modeEnum == MBEHAV::COMBAT_FLOAT )
 			{
 				// Set theta
-				if (_DataBase != NULL &&  (!IgnoreEntityDbUpdates || slot==0))
+				if (_DataBase != nullptr &&  (!IgnoreEntityDbUpdates || slot==0))
 				{
 					CCDBNodeBranch	*nodeRoot;
 					nodeRoot = dynamic_cast<CCDBNodeBranch*>(_DataBase->getNode(0));
@@ -2088,7 +2088,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 			else
 			{
 				// Set 2D position (the position at TVPNodeClient::SlotContext.Timestamp is not sent at the same time as the position for Mode)
-				if ( _DataBase != NULL &&  (!IgnoreEntityDbUpdates || slot==0))
+				if ( _DataBase != nullptr &&  (!IgnoreEntityDbUpdates || slot==0))
 				{
 					uint16 x16 = (uint16)((ac->getValue() >> 12) & 0xFFFF);
 					uint16 y16 = (uint16)((ac->getValue() >> 28) & 0xFFFF);
@@ -2135,7 +2135,7 @@ void	CNetworkConnection::decodeDiscreetProperty( CBitMemStream& msgin, TPropInde
 			// Process property
 			CChange thechange( slot, propIndex, timeStamp );
 			_Changes.push_back( thechange );
-			if (_DataBase != NULL && (!IgnoreEntityDbUpdates || slot==0) )
+			if (_DataBase != nullptr && (!IgnoreEntityDbUpdates || slot==0) )
 			{
 				CCDBNodeBranch	*nodeRoot;
 				nodeRoot = dynamic_cast<CCDBNodeBranch*>(_DataBase->getNode(0));
@@ -2758,7 +2758,7 @@ void	CNetworkConnection::push(CBitMemStream &msg)
 	sint32	maxImpulseBitSize = 230*8;
 
 	CActionGeneric *ag = (CActionGeneric *)CActionFactory::getInstance ()->create (INVALID_SLOT, ACTION_GENERIC_CODE);
-	if( ag == NULL ) //TODO: see that with oliver...
+	if( ag == nullptr) //TODO: see that with oliver...
 		return;
 
 	uint	bytelen = msg.length();
@@ -2774,7 +2774,7 @@ void	CNetworkConnection::push(CBitMemStream &msg)
 	{
 		CAction	*casted = ag;
 		CActionFactory::getInstance()->remove(casted);
-		ag = NULL;
+		ag = nullptr;
 
 		// MultiPart impulsion
 		CActionGenericMultiPart *agmp = (CActionGenericMultiPart *)CActionFactory::getInstance ()->create (INVALID_SLOT, ACTION_GENERIC_MULTI_PART_CODE);
@@ -3230,7 +3230,7 @@ void CNetworkConnection::genericAction (CActionGeneric *ag)
 	//nldebug("CNET: Calling impulsion callback (size %u) :'%s'", this, bms.length(), toHexaString(bms.bufferAsVector()).c_str());
 	//nldebug("CNET[%p]: Calling impulsion callback (size %u)", this, bms.length());
 
-	if (_ImpulseCallback != NULL)
+	if (_ImpulseCallback != nullptr)
 		_ImpulseCallback(bms, _LastReceivedNumber, _ImpulseArg);
 }
 
@@ -3286,7 +3286,7 @@ void CNetworkConnection::CGenericMultiPartTemp::set (CActionGenericMultiPart *ag
 		//nldebug("CLMPNET[%p]: Received a generic action size %d", this, bms.length());
 		// todo interface api, call a user callback
 
-		if (parent->_ImpulseCallback != NULL)
+		if (parent->_ImpulseCallback != nullptr)
 			parent->_ImpulseCallback(bms, parent->_LastReceivedNumber, parent->_ImpulseArg);
 
 	}
@@ -3346,8 +3346,8 @@ NLMISC_COMMAND( displayPosUpdateGraph, "Display position update interval graph",
 	{
 		delete PosUpdateIntervalGraph;
 		delete PosUpdatePredictionGraph;
-		PosUpdateIntervalGraph = NULL;
-		PosUpdatePredictionGraph = NULL;
+		PosUpdateIntervalGraph = nullptr;
+		PosUpdatePredictionGraph = nullptr;
 	}
 
 	// Start graph if argument is not 0

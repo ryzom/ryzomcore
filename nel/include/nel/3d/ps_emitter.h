@@ -123,7 +123,7 @@ public:
 	float							getPeriod(void) const { return _Period; }
 
 	/// Indicate whether a period scheme is used or not
-	bool							usePeriodScheme(void) { return _PeriodScheme != NULL; }
+	bool							usePeriodScheme(void) { return _PeriodScheme != nullptr; }
 
 	/// Set a period scheme
 	void							setPeriodScheme(CPSAttribMaker<float> *scheme);
@@ -159,7 +159,7 @@ public:
 	uint							getGenNb(void) const { return _GenNb; }
 
 	/// Indicate whether a GenNb scheme is used or not
-	bool							useGenNbScheme(void) { return _GenNbScheme != NULL; }
+	bool							useGenNbScheme(void) { return _GenNbScheme != nullptr; }
 
 	/// Set a GenNb scheme
 	void							setGenNbScheme(CPSAttribMaker<uint32> *scheme);
@@ -381,7 +381,7 @@ class CPSModulatedEmitter
 	public:
 
 		/// ctor : the default doesn't alter speed
-		CPSModulatedEmitter() : _EmitteeSpeed(1.f), _EmitteeSpeedScheme(NULL)
+		CPSModulatedEmitter() : _EmitteeSpeed(1.f), _EmitteeSpeedScheme(nullptr)
 		{
 		}
 
@@ -406,7 +406,7 @@ class CPSModulatedEmitter
 		void setEmitteeSpeed(float speed)
 		{
 			delete _EmitteeSpeedScheme;
-			_EmitteeSpeedScheme = NULL;
+			_EmitteeSpeedScheme = nullptr;
 			_EmitteeSpeed = speed;
 
 		}
@@ -421,7 +421,7 @@ class CPSModulatedEmitter
 		const CPSAttribMaker<float> *getEmitteeSpeedScheme(void) const { return _EmitteeSpeedScheme; }
 
 		/// check whether a speed modulation scheme is being used
-		bool useEmitteeSpeedScheme(void) const { return _EmitteeSpeedScheme != NULL; }
+		bool useEmitteeSpeedScheme(void) const { return _EmitteeSpeedScheme != nullptr; }
 
 		/// serialization
 		void serialEmitteeSpeedScheme(NLMISC::IStream &f);

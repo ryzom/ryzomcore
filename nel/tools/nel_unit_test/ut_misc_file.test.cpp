@@ -54,7 +54,7 @@ protected:
 			nlverify(fwrite(&c, 1, 1, fp) == 1);
 		}
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		NLMISC::CFile::copyFile(_DstFile, _SrcFile, false);
 
@@ -82,7 +82,7 @@ protected:
 	{
 		// remove the destination if any
 		FILE *fp = NLMISC::nlfopen(_DstFile, "rb");
-		if (fp != NULL)
+		if (fp != nullptr)
 		{
 			fclose(fp);
 			NLMISC::CFile::deleteFile(_DstFile);
@@ -98,7 +98,7 @@ protected:
 			nlverify(fwrite(&c, 1, 1, fp) == 1);
 		}
 		fclose(fp);
-		fp = NULL;
+		fp = nullptr;
 
 		NLMISC::CFile::moveFile(_DstFile, _SrcFile);
 

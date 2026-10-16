@@ -567,7 +567,7 @@ int pmbExportSkelForGltf(PMAXLOAD::SLoadedMax &lm, std::vector<uint8> &out)
 	// flows (the writer, since the single-parse refactor) or loads its own (the standalone
 	// main, which does the same reset).
 	g_bipedRigs.clear();
-	g_rig = NULL;
+	g_rig = nullptr;
 	g_msBones.clear();
 
 	std::vector<Bone> bones;
@@ -612,10 +612,10 @@ int main(int argc, char **argv)
 	//                            but wrong per-bone InvBindPos); default is to refuse with an error so
 	//                            silent-broken outputs don't slip into the corpus.
 	int argi = 1;
-	const char *gltfOut = NULL;
-	const char *maxscriptOut = NULL;
-	const char *manifestOut = NULL;
-	const char *rigDumpOut = NULL;
+	const char *gltfOut = nullptr;
+	const char *maxscriptOut = nullptr;
+	const char *manifestOut = nullptr;
+	const char *rigDumpOut = nullptr;
 	bool allowBipedDegraded = false;
 	while (argi < argc && argv[argi][0] == '-' && argv[argi][1] == '-')
 	{
@@ -661,7 +661,7 @@ int main(int argc, char **argv)
 	// bone's TM controller references its own Biped (0x9155) system object as getReference(0),
 	// which handles files with multiple bipeds (e.g. tr_mo_kitin_queen's Bip01 + Bip02) correctly.
 	g_bipedRigs.clear();
-	g_rig = NULL;
+	g_rig = nullptr;
 	g_msBones.clear();
 
 	std::vector<Bone> bones;

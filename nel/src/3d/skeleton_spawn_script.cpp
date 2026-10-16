@@ -81,7 +81,7 @@ void	CSkeletonSpawnScript::release(CScene *scene)
 	if(!_Cache.empty())
 	{
 		_Cache.clear();
-		parseCache(scene, NULL);
+		parseCache(scene, nullptr);
 	}
 }
 

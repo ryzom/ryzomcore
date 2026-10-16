@@ -65,7 +65,7 @@ class CCharScanScriptFile
 {
 public:
 	// public interface
-	bool parseFile(const std::string& fileName,	CCharScanScript* container=NULL);
+	bool parseFile(const std::string& fileName,	CCharScanScript* container = nullptr);
 	bool applyToJob(CCharacterScanJob& job);
 
 	const std::string& getFileName() const;

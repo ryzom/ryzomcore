@@ -42,7 +42,7 @@ void CWeatherManager::init(const std::vector<const CWeatherSetupSheetBase *> &sh
 			CWeatherSetup *ws = newWeatherSetup();
 			if (ws)
 			{
-				if (_WeatherSetupMap[id] != 0)
+				if (_WeatherSetupMap[id] != nullptr)
 				{
 					nlwarning("Duplicated weather setup : %s", id.c_str());
 				}
@@ -75,6 +75,6 @@ const CWeatherSetup *CWeatherManager::getSetup(const char *name) const
 {
 	std::string id = NLMISC::toLowerAscii(CFile::getFilenameWithoutExtension(name));
 	TWeatherSetupMap::const_iterator it = _WeatherSetupMap.find(id);
-	if (it == _WeatherSetupMap.end()) return NULL;
+	if (it == _WeatherSetupMap.end()) return nullptr;
 	return it->second;
 }

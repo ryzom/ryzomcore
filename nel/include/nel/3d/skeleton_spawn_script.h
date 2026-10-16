@@ -67,8 +67,8 @@ private:
 		class CParticleSystemModel				*PS;
 		CInstance()
 		{
-			Model= NULL;
-			PS= NULL;
+			Model = nullptr;
+			PS = nullptr;
 		}
 	};
 	std::vector<CInstance>	_Instances;

@@ -27,7 +27,7 @@
 
 namespace NLGUI
 {
-	CDBManager* CDBManager::instance = NULL;
+	CDBManager* CDBManager::instance = nullptr;
 
 	CDBManager::CDBManager() :
 	NLMISC::CCDBManager( "ROOT", 0 )
@@ -40,7 +40,7 @@ namespace NLGUI
 
 	CDBManager* CDBManager::getInstance()
 	{
-		if( instance == NULL )
+		if( instance == nullptr)
 			instance = new CDBManager();
 		return instance;
 	}
@@ -49,7 +49,7 @@ namespace NLGUI
 	{
 		nlassert( instance != NULL );
 		delete instance;
-		instance = NULL;
+		instance = nullptr;
 	}
 
 	NLMISC::CCDBNodeLeaf* CDBManager::getDbProp( const std::string &name, bool create )
@@ -65,7 +65,7 @@ namespace NLGUI
 	sint32 CDBManager::getDbValue32( const std::string &name )
 	{
 		NLMISC::CCDBNodeLeaf *node = getDbProp( name, false );
-		if( node != NULL )
+		if( node != nullptr)
 			return node->getValue32();
 		else
 			return 0;

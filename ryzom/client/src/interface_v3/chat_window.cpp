@@ -54,7 +54,7 @@ using namespace std;
 // STATIC //
 ////////////
 
-CChatWindow *CChatWindow::_ChatWindowLaunchingCommand = NULL;
+CChatWindow *CChatWindow::_ChatWindowLaunchingCommand = nullptr;
 
 
 ////////////
@@ -72,7 +72,7 @@ CChatWindowDesc::CChatWindowDesc() :	InsertPosition(-1),
 										ParentBlink(false),
 										Savable(false),
 										Localize(false),
-										Listener(NULL)
+										Listener(nullptr)
 {
 }
 
@@ -81,7 +81,10 @@ CChatWindowDesc::CChatWindowDesc() :	InsertPosition(-1),
 /////////////////
 
 //=================================================================================
-CChatWindow::CChatWindow() : _Listener(NULL), _Chat(NULL), _EB(NULL), _ParentBlink(false)
+CChatWindow::CChatWindow() : _Listener(nullptr)
+    , _Chat(nullptr)
+    , _EB(nullptr)
+    , _ParentBlink(false)
 {
 }
 
@@ -92,7 +95,7 @@ bool CChatWindow::create(const CChatWindowDesc &desc, const std::string &chatId)
 	CInterfaceManager *im = CInterfaceManager::getInstance();
 
 	// get the father container
-	CGroupContainer *fatherContainer = NULL;
+	CGroupContainer *fatherContainer = nullptr;
 	if (!desc.FatherContainer.empty())
 	{
 		if (desc.FatherContainer != "ui:interface" )
@@ -192,7 +195,7 @@ bool CChatWindow::isVisible() const
 			ig = ig->getParent();
 		}
 		while(ig);
-		return ig == NULL; // all parent windows must be open & visible
+		return ig == nullptr; // all parent windows must be open & visible
 	}
 	else
 	{
@@ -251,7 +254,7 @@ void CChatWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CChatGrou
 				father->enableBlink(numBlinks);
 			}
 		}
-		if (windowVisible != NULL)
+	if (windowVisible != nullptr)
 		{
 			*windowVisible = isVisible();
 		}
@@ -328,7 +331,7 @@ void CChatWindow::deleteContainer()
 	}
 	// Removes from parent group
 
-	_Chat = NULL;
+	_Chat = nullptr;
 }
 
 //=================================================================================
@@ -438,7 +441,7 @@ CChatWindow::~CChatWindow()
 	}
 	if (this == _ChatWindowLaunchingCommand)
 	{
-		_ChatWindowLaunchingCommand = NULL;
+		_ChatWindowLaunchingCommand = nullptr;
 	}
 }
 
@@ -561,7 +564,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 
 	CChatTextManager &ctm = getChatTextMngr();
 
-	if (_Chat->getHeaderOpened()==NULL)
+	if (_Chat->getHeaderOpened() == nullptr)
 		return;
 
 
@@ -600,7 +603,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 		{
 			gl->addChild(child);
 			if (!gl->getParent()->getActive())
-				if (tab != NULL)
+			if (tab != nullptr)
 					tab->setTextColorNormal(newMsgColor);
 		}
 	}
@@ -608,7 +611,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 	// *** Display the message in the UserChat (special case)
 	{
 		tab = dynamic_cast<CCtrlTabButton*>(_Chat->getCtrl("header_opened:channel_select:tab5"));
-		gl = NULL;
+		gl = nullptr;
 		CGroupList *gl2 = dynamic_cast<CGroupList *>(_Chat->getGroup("content:cb:user:text_list"));
 
 		CChatWindow *cw = PeopleInterraction.TheUserChat.Window;
@@ -667,14 +670,14 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 				break;
 		}
 
-		if (gl != NULL)
+		if (gl != nullptr)
 		{
 			child = ctm.createMsgText(newmsg, col);
 			if (child)
 			{
 				gl->addChild(child);
 				if (!gl->getParent()->getActive())
-					if (tab != NULL)
+				if (tab != nullptr)
 						tab->setTextColorNormal(newMsgColor);
 			}
 		}
@@ -696,7 +699,7 @@ void CChatGroupWindow::displayMessage(const string &msg, NLMISC::CRGBA col, CCha
 				father->enableBlink(numBlinks);
 			}
 		}
-		if (windowVisible != NULL)
+	if (windowVisible != nullptr)
 		{
 			*windowVisible = isVisible();
 		}
@@ -708,7 +711,7 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 {
 	// If we are here with a tell message this is because the teller doesn't belong to any people list
 	CGroupContainer *gcChat = createFreeTeller(sender);
-	if (gcChat == NULL)
+	if (gcChat == nullptr)
 	{
 		nlwarning("<CChatGroupWindow::displayTellMessage> cannot open chat.");
 		return;
@@ -720,7 +723,7 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 
 	// add the text to this window
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
-	if (gl == NULL)
+	if (gl == nullptr)
 	{
 		nlwarning("<CChatGroupWindow::displayTellMessage> can't get text_list.");
 		return;
@@ -734,7 +737,7 @@ void CChatGroupWindow::displayTellMessage(const string &msg, NLMISC::CRGBA col, 
 sint32 CChatGroupWindow::getTabIndex()
 {
 	CGroupTab *pTab = dynamic_cast<CGroupTab*>(_Chat->getGroup("header_opened:channel_select"));
-	if (pTab != NULL)
+	if (pTab != nullptr)
 		return pTab->getSelection();
 	else
 		return -1;
@@ -744,7 +747,7 @@ sint32 CChatGroupWindow::getTabIndex()
 void CChatGroupWindow::setTabIndex(sint32 n)
 {
 	CGroupTab *pTab = dynamic_cast<CGroupTab*>(_Chat->getGroup("header_opened:channel_select"));
-	if (pTab != NULL)
+	if (pTab != nullptr)
 	{
 		pTab->select(n);
 		// if the current button is hidden, select default not hid
@@ -805,13 +808,13 @@ CGroupContainer *CChatGroupWindow::createFreeTeller(const string &winNameIn, con
 
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CInterfaceGroup *pIG = CWidgetManager::getInstance()->getParser()->createGroupInstance(templateName, "ui:interface", properties);
-		if (!pIG) return NULL;
+		if (!pIG) return nullptr;
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer *>(pIG);
 		if (!pGC)
 		{
 			delete pIG;
 			nlwarning("<CChatGroupWindow::createFreeTeller> group is not a container.(%s)", winName.c_str());
-			return NULL;
+			return nullptr;
 		}
 		// set title from the name
 		pGC->setTitle(winName);
@@ -916,7 +919,7 @@ void CChatGroupWindow::updateFreeTellerHeader(CGroupContainer &ft)
 void CChatGroupWindow::setActiveFreeTeller(const string &winName, bool bActive)
 {
 	CGroupContainer *pGC = createFreeTeller(winName);
-	if (pGC != NULL)
+	if (pGC != nullptr)
 		pGC->setActive(bActive);
 }
 
@@ -953,7 +956,7 @@ bool CChatGroupWindow::removeFreeTeller(const std::string &containerID)
 	CInterfaceGroup *pRoot = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId("ui:interface"));
 	CWidgetManager::getInstance()->unMakeWindow(_FreeTellers[i]);
 	pRoot->delGroup (_FreeTellers[i]);
-	_FreeTellers[i] = NULL;
+	_FreeTellers[i] = nullptr;
 	_FreeTellers.erase(_FreeTellers.begin()+i);
 	return true;
 }
@@ -1038,7 +1041,7 @@ void CChatGroupWindow::loadFreeTeller(NLMISC::IStream &f)
 		CGroupContainer *pGC = createFreeTeller(title, "");
 
 		// With version 1 all tells are active because windows information have "title based" ids and no "sID based".
-		if ((ver == 1) && (pGC != NULL))
+		if ((ver == 1) && (pGC != nullptr))
 			pGC->setActive(false);
 	}
 }
@@ -1056,7 +1059,7 @@ void CChatGroupWindow::clearMessages(CChatGroup::TGroupType gt, uint32 dynamicCh
 	getAssociatedSubWindow(gt, dynamicChatDbIndex, gl, tab);
 
 	// delete all text lines
-	if(gl!=NULL)
+	if(gl != nullptr)
 	{
 		gl->deleteAllChildren();
 	}
@@ -1066,8 +1069,8 @@ void CChatGroupWindow::clearMessages(CChatGroup::TGroupType gt, uint32 dynamicCh
 void CChatGroupWindow::getAssociatedSubWindow(CChatGroup::TGroupType gt, uint32 dynamicChatDbIndex, CGroupList *&gl, CCtrlTabButton *&tab)
 {
 	nlassert(_Chat);
-	gl= NULL;
-	tab= NULL;
+	gl = nullptr;
+	tab = nullptr;
 
 	switch(gt)
 	{
@@ -1130,7 +1133,7 @@ CChatWindow *CChatWindowManager::createChatWindow(const CChatWindowDesc &desc)
 {
 	if (getChatWindow(desc.Title))
 	{
-		return NULL; // duplicate name encountered
+		return nullptr; // duplicate name encountered
 	}
 	CChatWindow *w;
 	w = new CChatWindow;
@@ -1160,7 +1163,7 @@ CChatWindow *CChatWindowManager::createChatWindow(const CChatWindowDesc &desc)
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -1169,7 +1172,7 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 {
 	if (getChatWindow(desc.Title))
 	{
-		return NULL; // duplicate name encountered
+		return nullptr; // duplicate name encountered
 	}
 	CChatGroupWindow *w;
 	w = new CChatGroupWindow;
@@ -1208,7 +1211,7 @@ CChatWindow *CChatWindowManager::createChatGroupWindow(const CChatWindowDesc &de
 	}
 	else
 	{
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -1217,7 +1220,7 @@ CChatWindow *CChatWindowManager::getChatWindow(const string &title)
 {
 	TChatWindowMap::iterator it = _ChatWindowMap.find(title);
 	if (it == _ChatWindowMap.end())
-		return NULL;
+		return nullptr;
 	else
 	{
 		nlassert(it->second != NULL);
@@ -1251,14 +1254,14 @@ CChatWindow *CChatWindowManager::getChatWindowFromCaller(CCtrlBase *caller)
 {
 	// retrieve pointer on the CChatWindow instance associated with the ui
 	// find first enclosing group container
-	CGroupContainer *father = NULL;
+	CGroupContainer *father = nullptr;
 	while (caller)
 	{
 		father = dynamic_cast<CGroupContainer *>(caller);
 		if (father) break;
 		caller = caller->getParent();
 	}
-	if (!father) return NULL;
+	if (!father) return nullptr;
 
 	return  getChatWindow(father->getTitle());
 }
@@ -1268,7 +1271,7 @@ bool CChatWindowManager::rename(const string &oldName, const string &newName, bo
 {
 	// if (oldName == newName) return true;
 	CChatWindow *newWin = getChatWindow(newName);
-	if (newWin != NULL) return false; // target window exists
+	if (newWin != nullptr) return false; // target window exists
 	TChatWindowMap::iterator it = _ChatWindowMap.find(oldName);
 	if (it == _ChatWindowMap.end()) return false;
 	_ChatWindowMap[newName] = it->second;
@@ -1281,7 +1284,7 @@ bool CChatWindowManager::rename(const string &oldName, const string &newName, bo
 //=================================================================================
 CGroupEditBox *CChatWindow::getEditBox() const
 {
-	if (!_Chat) return NULL;
+	if (!_Chat) return nullptr;
 	return dynamic_cast<CGroupEditBox *>(_Chat->getGroup("eb"));
 }
 
@@ -1312,7 +1315,7 @@ public:
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
-		if (pEB == NULL) return;
+		if (pEB == nullptr) return;
 		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())

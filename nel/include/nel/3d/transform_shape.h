@@ -98,7 +98,7 @@ public:
 	float				getNumTrianglesAfterLoadBalancing() {return _NumTrianglesAfterLoadBalancing;}
 
 	/// If the model support MRM, return the level detail setup. default is return NULL.
-	virtual	const	CMRMLevelDetail		*getMRMLevelDetail() const {return NULL;}
+	virtual	const	CMRMLevelDetail		*getMRMLevelDetail() const { return nullptr; }
 
 	// @}
 

@@ -91,7 +91,7 @@ CMirrorPropValueList<NLMISC::CEntityId,CPropLocationUnpacked>::CMirrorPropValueL
 	//}
 	nlassert( (uint32)_PropLocation.dataSetRow().getIndex() < dataSet.maxNbRows() );
 #endif
-	dataSet.getPropPointerForList( &_PtFront, propIndex, entityIndex, (NLMISC::CEntityId*)NULL );
+	dataSet.getPropPointerForList( &_PtFront, propIndex, entityIndex, (NLMISC::CEntityId*)nullptr);
 	_Container = (TSharedListCell*)(dataSet.getListCellContainer( propIndex ));
 }
 
@@ -105,7 +105,7 @@ CMirrorPropValueList<NLMISC::CEntityId,CPropLocationUnpacked>::CMirrorPropValueL
 #ifdef NL_DEBUG
 	nlassert( dataSet.propIsList( _PropLocation.propIndex() ) );
 #endif
-	dataSet.getPropPointerForList( &_PtFront, _PropLocation.propIndex(), _PropLocation.dataSetRow(), (NLMISC::CEntityId*)NULL );
+	dataSet.getPropPointerForList( &_PtFront, _PropLocation.propIndex(), _PropLocation.dataSetRow(), (NLMISC::CEntityId*)nullptr);
 	_Container = (TSharedListCell*)(dataSet.getListCellContainer( _PropLocation.propIndex() ));
 }
 

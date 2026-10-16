@@ -52,7 +52,7 @@ using NLMISC::toString;
 // *************************************************************************************************
 CBotChatPageDynamicMission::CBotChatPageDynamicMission()
 {
-	std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
+	std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *)nullptr);
 	for(uint k = 0; k < DYNAMIC_MISSION_NUM_CHOICES; ++k)
 	{
 		for(uint l = 0; l < DYNAMIC_MISSION_MAX_NUM_OPTIONS; ++l)
@@ -94,7 +94,7 @@ void CBotChatPageDynamicMission::begin()
 	CInterfaceGroup *ig = dynamic_cast<CInterfaceGroup *>(CWidgetManager::getInstance()->getElementFromId(WIN_BOT_CHAT_PAGE_DYNAMIC_MISSION));
 	if (!ig)
 	{
-		std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *) NULL);
+		std::fill(_ChoiceCB, _ChoiceCB + DYNAMIC_MISSION_NUM_CHOICES, (CDBGroupComboBox *)nullptr);
 	}
 	else
 	{
@@ -331,7 +331,7 @@ class CAHAcceptDM : public IActionHandler
 		{
 			nlwarning(" unknown message name %s", msgName);
 		}
-		CBotChatManager::getInstance()->setCurrPage(NULL);
+		CBotChatManager::getInstance()->setCurrPage(nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER(CAHAcceptDM, "accept_dm");

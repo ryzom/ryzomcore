@@ -67,8 +67,8 @@ using namespace STRING_MANAGER;
 
 NLMISC::CSmartPtr<CSPhraseComAdpater> CDBCtrlSheet::_PhraseAdapter;
 
-CDBCtrlSheet *CDBCtrlSheet::_CurrSelection = NULL;
-CDBCtrlSheet *CDBCtrlSheet::_CurrMenuSheet = NULL;
+CDBCtrlSheet *CDBCtrlSheet::_CurrSelection = nullptr;
+CDBCtrlSheet *CDBCtrlSheet::_CurrMenuSheet = nullptr;
 UMaterial CDBCtrlSheet::_GuildMat;
 
 
@@ -309,6 +309,7 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 	_InterfaceColor= true;
 	_SheetSelectionGroup = -1;
 	_UseQuality = true;
+	_DisplayItemQuality = true;
 	_UseQuantity = true;
 	_DuplicateOnDrag = false;
 	_ItemSlot= SLOTTYPE::UNDEFINED;
@@ -316,13 +317,13 @@ CCtrlSheetInfo::CCtrlSheetInfo()
 	_HasTradeSlotType = false;
 	_BrickOverable= false;
 	_ReadQuantityFromSheet = false;
-	_AHOnLeftClick = NULL;
-	_AHOnRightClick = NULL;
-	_AHOnCanDrag = NULL;
-	_AHOnDrag = NULL;
-	_AHOnCanDrop = NULL;
-	_AHOnDrop = NULL;
-	_AHOnCannotDrop = NULL;
+	_AHOnLeftClick = nullptr;
+	_AHOnRightClick = nullptr;
+	_AHOnCanDrag = nullptr;
+	_AHOnDrag = nullptr;
+	_AHOnCanDrop = nullptr;
+	_AHOnDrop = nullptr;
+	_AHOnCannotDrop = nullptr;
 	_DragCopy= false;
 	_ForceItemBackGroundGeneric= false;
 }
@@ -334,7 +335,7 @@ void CDBCtrlSheet::release ()
 		Driver->deleteMaterial(_GuildMat);
 
 	// release now the phrase or it ll be release too late and crash
-	_PhraseAdapter = 0;
+	_PhraseAdapter = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -528,13 +529,13 @@ CCtrlDraggable(param)
 	_SecondIndexInDB= 0;
 	_ShortCut= false;
 	_SheetColor= CRGBA::White;
-	_OtherHandItemFilter= NULL;
+	_OtherHandItemFilter = nullptr;
 	_ActualType = _Type;
 	_ItemWeared= false;
 	_ItemBeastGrayed= false;
 	_Grayed= false;
 	_Useable= true;
-	_GrayedLink= NULL;
+	_GrayedLink = nullptr;
 	_NeedSetup= true;
 	_ItemInfoChanged = true;
 	_IconW = 0;
@@ -546,7 +547,7 @@ CCtrlDraggable(param)
 	_IconOver2Color= CRGBA::White;
 	_PackedArmourColor= 0;
 	_MacroID = -1;
-	_GuildBack = _GuildSymb = NULL;
+	_GuildBack = _GuildSymb = nullptr;
 	_UseGuildIcon = false;
 	_GuildIcon = NLMISC::CSheetId::Unknown;
 	_DrawSlot= true;
@@ -555,10 +556,10 @@ CCtrlDraggable(param)
 	_ArmourColorFromDB= false;
 	_ArmourColorBmpOk= false;
 	_ArmourColorIndex= 0;
-	_UserColor= NULL;
-	_ItemSheet = NULL;
-	_ItemRMClassType= NULL;
-	_ItemRMFaberStatType= NULL;
+	_UserColor = nullptr;
+	_ItemSheet = nullptr;
+	_ItemRMClassType = nullptr;
+	_ItemRMFaberStatType = nullptr;
 	_NotifyAnimEndTime = 0;
 
 	_HpBuffIcon = "ico_heal.tga";
@@ -593,25 +594,25 @@ CDBCtrlSheet::~CDBCtrlSheet()
 	{
 		if (Driver)
 			Driver->deleteTextureFile(_GuildBack);
-		_GuildBack = NULL;
+		_GuildBack = nullptr;
 	}
 	if (_GuildSymb)
 	{
 		if (Driver)
 			Driver->deleteTextureFile(_GuildSymb);
-		_GuildSymb = NULL;
+		_GuildSymb = nullptr;
 	}
 	if (_RegenText)
 	{
 		delete _RegenText;
-		_RegenText = NULL;
+		_RegenText = nullptr;
 	}
 
 	// ensure erase static
-	if(this==_CurrMenuSheet)		_CurrMenuSheet = NULL;
+	if(this==_CurrMenuSheet)		_CurrMenuSheet = nullptr;
 	if(this == dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) )
-		setDraggedSheet( NULL );
-	if(this==_CurrSelection)		_CurrSelection = NULL;
+		setDraggedSheet(nullptr);
+	if(this==_CurrSelection)		_CurrSelection = nullptr;
 }
 
 // ----------------------------------------------------------------------------
@@ -920,14 +921,14 @@ void CDBCtrlSheet::setupSheetDbLinks ()
 		if(_AutoGrayed)
 			_GrayedLink= dbBranch->getLeaf( _DbBranchName+":LOCKED", false );
 		else
-			_GrayedLink= NULL;
+			_GrayedLink = nullptr;
 	}
 	else
 	{
-		_UserColor= NULL;
-		_ItemRMClassType= NULL;
-		_ItemRMFaberStatType= NULL;
-		_GrayedLink= NULL;
+		_UserColor = nullptr;
+		_ItemRMClassType = nullptr;
+		_ItemRMFaberStatType = nullptr;
+		_GrayedLink = nullptr;
 	}
 
 	// force reset of cache
@@ -1239,7 +1240,7 @@ void CDBCtrlSheet::setupPact()
 		_LastSheetId = sheet;
 		CSheetId sheetId(sheet);
 		CEntitySheet *pES = SheetMngr.get (sheetId);
-		if ((pES != NULL) && (pES->type() == CEntitySheet::PACT))
+		if ((pES != nullptr) && (pES->type() == CEntitySheet::PACT))
 		{
 			CPactSheet *pPS = (CPactSheet*)pES;
 			_DispSheetBmpId = rVR.getTextureIdFromName (pPS->Icon);
@@ -1308,7 +1309,7 @@ void CDBCtrlSheet::setupItem ()
 
 		CSheetId sheetId(sheet);
 		CEntitySheet *pES = SheetMngr.get (sheetId);
-		if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM))
+		if ((pES != nullptr) && (pES->type() == CEntitySheet::ITEM))
 		{
 			_ItemSheet = (CItemSheet*)pES;
 
@@ -1500,7 +1501,7 @@ void		CDBCtrlSheet::updateItemCharacRequirement(sint32 sheet)
 {
 	CSheetId sheetId(sheet);
 	CEntitySheet *pES = SheetMngr.get (sheetId);
-	if ((pES != NULL) && (pES->type() == CEntitySheet::ITEM) && _Quality.getNodePtr())
+	if ((pES != nullptr) && (pES->type() == CEntitySheet::ITEM) && _Quality.getNodePtr())
 	{
 		CItemSheet *pIS = (CItemSheet*)pES;
 		_ItemCaracReqType= CHARACTERISTICS::Unknown;
@@ -1535,7 +1536,7 @@ void CDBCtrlSheet::setupMission()
 		_NeedSetup = false;
 
 		CEntitySheet *pES = SheetMngr.get(CSheetId(currIcon));
-		if (pES == NULL) return;
+		if (pES == nullptr) return;
 		if (pES->Type != CEntitySheet::MISSION_ICON) return;
 		CMissionIconSheet *pMIS = (CMissionIconSheet*)pES;
 
@@ -1636,9 +1637,9 @@ void CDBCtrlSheet::setupGuildFlag ()
 
 		if (nLastGuildBack != nGuildBack)
 		{
-			if (_GuildBack != NULL)
+			if (_GuildBack != nullptr)
 				Driver->deleteTextureFile(_GuildBack);
-			_GuildBack = NULL;
+			_GuildBack = nullptr;
 			if (nGuildBack > 0)
 			{
 				string txName = toString("Guild_Back_S_%02d.tga", nGuildBack-1);
@@ -1648,9 +1649,9 @@ void CDBCtrlSheet::setupGuildFlag ()
 
 		if (nLastGuildSymbol != nGuildSymbol)
 		{
-			if (_GuildSymb != NULL)
+			if (_GuildSymb != nullptr)
 				Driver->deleteTextureFile(_GuildSymb);
-			_GuildSymb = NULL;
+			_GuildSymb = nullptr;
 			if (nGuildSymbol > 0)
 			{
 				string txName = toString("Guild_Symbol_S_%02d.tga", nGuildSymbol-1);
@@ -1674,7 +1675,7 @@ void CDBCtrlSheet::setupDisplayAsSBrick(sint32 sheet, sint32 optSheet, bool forc
 
  	CSBrickSheet *pBR = pBM->getBrick (CSheetId(sheet));
 	CSBrickSheet *pBROpt = pBM->getBrick (CSheetId(optSheet));
-	if (pBR != NULL)
+	if (pBR != nullptr)
 	{
 		// Get Back and Over.
 		_DispBackBmpId = rVR.getTextureIdFromName (pBR->getIconBack());
@@ -1931,7 +1932,7 @@ void CDBCtrlSheet::setupOutpostBuilding()
 		_LastSheetId = sheet;
 		CSheetId sheetId(sheet);
 		CEntitySheet *pES = SheetMngr.get (sheetId);
-		if ((pES != NULL) && (pES->type() == CEntitySheet::OUTPOST_BUILDING))
+		if ((pES != nullptr) && (pES->type() == CEntitySheet::OUTPOST_BUILDING))
 		{
 			COutpostBuildingSheet *pOBSheet = (COutpostBuildingSheet*)pES;
 
@@ -2118,8 +2119,8 @@ void CDBCtrlSheet::draw()
 
 	// Drag'N'Drop : display the selected slot bitmap if this slot accept the currently dragged element
 	_CanDrop = false;
-	if (_AHOnCanDrop != NULL)
-	if ((CWidgetManager::getInstance()->getCapturePointerLeft() != NULL) && (CWidgetManager::getInstance()->getCapturePointerLeft() != this))
+	if (_AHOnCanDrop != nullptr)
+	if ((CWidgetManager::getInstance()->getCapturePointerLeft() != nullptr) && (CWidgetManager::getInstance()->getCapturePointerLeft() != this))
 	{
 		if ((CWidgetManager::getInstance()->getPointer()->getX() >= _XReal) &&
 			(CWidgetManager::getInstance()->getPointer()->getX() < (_XReal + _WReal))&&
@@ -2128,7 +2129,7 @@ void CDBCtrlSheet::draw()
 		if (CWidgetManager::getInstance()->getCurrentWindowUnder() == CWidgetManager::getInstance()->getWindow(this))
 		{
 			CDBCtrlSheet *pCSSrc = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getCapturePointerLeft());
-			if ((pCSSrc != NULL) && pCSSrc->isDragged())
+			if ((pCSSrc != nullptr) && pCSSrc->isDragged())
 			{
 				string params = string("src=") + pCSSrc->getId();
 				if (!_AHCanDropParams.empty())
@@ -2166,7 +2167,7 @@ void CDBCtrlSheet::draw()
 			if (_RegenText)
 			{
 				delete _RegenText;
-				_RegenText = NULL;
+				_RegenText = nullptr;
 				_RegenTextValue = 0;
 			}
 		}
@@ -2712,10 +2713,10 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 			if (_UseGuildIcon)
 			{
 				sint32 guildFlagBmpId = -1;
-				CFactionSheet* guildIconSheet = NULL;
+				CFactionSheet* guildIconSheet = nullptr;
 				if (_GuildIcon!=NLMISC::CSheetId::Unknown)
 					guildIconSheet = dynamic_cast<CFactionSheet*>(SheetMngr.get(_GuildIcon));
-				if (guildIconSheet!=NULL && !guildIconSheet->Icon.empty())
+				if (guildIconSheet != nullptr && !guildIconSheet->Icon.empty())
 					guildFlagBmpId = rVR.getTextureIdFromName(guildIconSheet->Icon);
 			//	else
 			//		guildFlagBmpId = rVR.getTextureIdFromName("asc_unknown.tga");
@@ -2788,7 +2789,7 @@ void CDBCtrlSheet::drawSheet (sint32 x, sint32 y, bool draging, bool showSelecti
 						{
 							double dist2 = (target->pos() - UserEntity->pos()).sqrnorm();
 							CSBrickManager	*pBM= CSBrickManager::getInstance();
-							CSBrickSheet	*rootBrick= NULL;
+							CSBrickSheet	*rootBrick = nullptr;
 							if(phrase.Bricks.size())
 								rootBrick= pBM->getBrick(phrase.Bricks[0]);
 							//
@@ -3082,7 +3083,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			}
 
 			// posssibly check AH to see if really can draging
-			if (validClic && _AHOnCanDrag != NULL)
+			if (validClic && _AHOnCanDrag != nullptr)
 			{
 				_TempCanDrag= true;
 				CAHManager::getInstance()->runActionHandler (_AHOnCanDrag, this, _AHCanDragParams);
@@ -3100,7 +3101,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 					setDragged( true );
 					setDraggedSheet( this );
 
-					if (_AHOnDrag != NULL)
+					if (_AHOnDrag != nullptr)
 					{
 						CAHManager::getInstance()->runActionHandler (_AHOnDrag, this, _AHDragParams);
 					}
@@ -3115,7 +3116,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 					bool handled = false;
 					// get the ctrl under the drop
 					const vector<CCtrlBase*> &rCUP = CWidgetManager::getInstance()->getCtrlsUnderPointer();
-					CDBCtrlSheet *pCSdest = NULL;
+					CDBCtrlSheet *pCSdest = nullptr;
 					for (uint32 i = 0; i < rCUP.size(); ++i)
 					{
 						CCtrlBase *pCB = rCUP[i];
@@ -3123,16 +3124,16 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 						{
 							CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pCB);
 							pCSdest = pCS;
-							if (pCSdest != NULL)
+							if (pCSdest != nullptr)
 								break;
 						}
 					}
 
 					// if ctrl exist
-					if (pCSdest != NULL)
+					if (pCSdest != nullptr)
 					{
 						// dest have a drop action and have a drop request?
-						if(pCSdest->_AHOnDrop != NULL && pCSdest->_AHOnCanDrop != NULL)
+						if(pCSdest->_AHOnDrop != nullptr && pCSdest->_AHOnCanDrop != nullptr)
 						{
 							// test if can drop me on dest
 							pCSdest->_CanDrop= false;
@@ -3180,25 +3181,25 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 					{
 						// get the list under the drop
 						const vector<CInterfaceGroup*> &rGUP = CWidgetManager::getInstance()->getGroupsUnderPointer();
-						CDBGroupListSheet *pList = NULL;
-						CDBGroupListSheetText *pTextList = NULL;
+						CDBGroupListSheet *pList = nullptr;
+						CDBGroupListSheetText *pTextList = nullptr;
 						for (uint32 i = 0; i < rGUP.size(); ++i)
 						{
 							pList = dynamic_cast<CDBGroupListSheet*>(rGUP[i]);
-							if (pList != NULL)
+							if (pList != nullptr)
 								if (pList->getCanDrop())
 									break;
 
 							pTextList = dynamic_cast<CDBGroupListSheetText*>(rGUP[i]);
-							if (pTextList != NULL)
+							if (pTextList != nullptr)
 								if (pTextList->getCanDrop())
 									break;
 						}
 
-						if ((pList != NULL) || (pTextList != NULL))
+						if ((pList != nullptr) || (pTextList != nullptr))
 						{
-							if (pList != NULL)
-							if (pList->getCtrlSheetInfo()._AHOnDrop != NULL && pList->getCtrlSheetInfo()._AHOnCanDrop != NULL)
+							if (pList != nullptr)
+							if (pList->getCtrlSheetInfo()._AHOnDrop != nullptr && pList->getCtrlSheetInfo()._AHOnCanDrop != nullptr)
 							{
 								pList->setCanDrop(false);
 								string params = string("src=") + _Id;
@@ -3241,8 +3242,8 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 								}
 							}
 
-							if (pTextList != NULL)
-							if (pTextList->getCtrlSheetInfo()._AHOnDrop != NULL && pTextList->getCtrlSheetInfo()._AHOnCanDrop != NULL)
+							if (pTextList != nullptr)
+							if (pTextList->getCtrlSheetInfo()._AHOnDrop != nullptr && pTextList->getCtrlSheetInfo()._AHOnCanDrop != nullptr)
 							{
 								pTextList->setCanDrop(false);
 								string params = string("src=") + _Id;
@@ -3272,7 +3273,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 						}
 					}
 
-					if (!handled && _AHOnCannotDrop != NULL )
+					if (!handled && _AHOnCannotDrop != nullptr)
 					{
 						CAHManager::getInstance()->runActionHandler (_AHOnCannotDrop, this, _AHCannotDropParams);
 						handled = true;
@@ -3280,7 +3281,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 
 					// In all case, quit
 					setDragged( false );
-					setDraggedSheet( NULL );
+					setDraggedSheet(nullptr);
 					// In call case, end of drag => consider handled to not call another action
 					return true;
 				}
@@ -3305,10 +3306,10 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				return false;
 
 			// RunAction
-			if(_AHOnLeftClick != NULL)
+			if(_AHOnLeftClick != nullptr)
 				CAHManager::getInstance()->runActionHandler (_AHOnLeftClick, this, _AHLeftClickParams);
 			// Run Menu (if item is not being dragged)
-			if (!_ListMenuLeft.empty() && dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == NULL)
+			if (!_ListMenuLeft.empty() && dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == nullptr)
 			{
 				if (getSheetId() != 0)
 				{
@@ -3333,7 +3334,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 				return false;
 
 			// RunAction
-			if(_AHOnRightClick != NULL)
+			if(_AHOnRightClick != nullptr)
 			{
 				handled= true;
 				CAHManager::getInstance()->runActionHandler (_AHOnRightClick, this, _AHRightClickParams);
@@ -3343,7 +3344,7 @@ bool CDBCtrlSheet::handleEvent (const NLGUI::CEventDescriptor &event)
 			{
 				handled= true;
 				// There must be no dragged sheet
-				if( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == NULL)
+				if( dynamic_cast< CDBCtrlSheet* >( CCtrlDraggable::getDraggedSheet() ) == nullptr)
 				{
 					// if a macro, don't test if Sheet==0
 					if ( isMacro() || getSheetId() != 0)
@@ -3381,7 +3382,7 @@ CCDBNodeBranch *CDBCtrlSheet::getRootBranch() const
 	{
 		return _SheetId.getNodePtr()->getParent();
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -3449,7 +3450,7 @@ sint32 CDBCtrlSheet::getNonLockedQuantity() const
 {
 	sint32 nonLockedQt = getQuantity();
 	CCDBNodeLeaf *lockedPtr = getItemLockedPtr();
-	if (lockedPtr != NULL)
+	if (lockedPtr != nullptr)
 		nonLockedQt -= lockedPtr->getValue32();
 	if (nonLockedQt < 0)
 		nonLockedQt = 0;
@@ -3461,14 +3462,14 @@ const CItemSheet *CDBCtrlSheet::asItemSheet() const
 {
 	updateActualType();
 	if( _ActualType!=SheetType_Item )
-		return NULL;
+		return nullptr;
 
 	CEntitySheet *sheet  = SheetMngr.get(CSheetId(getSheetId()));
 	if (sheet && sheet->type() == CEntitySheet::ITEM)
 	{
 		return (CItemSheet *) sheet;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -3476,14 +3477,14 @@ const CPactSheet *CDBCtrlSheet::asPactSheet() const
 {
 	updateActualType();
 	if( _ActualType!=SheetType_Pact )
-		return NULL;
+		return nullptr;
 
 	CEntitySheet *sheet  = SheetMngr.get(CSheetId(getSheetId()));
 	if (sheet && sheet->type() == CEntitySheet::PACT)
 	{
 		return (CPactSheet *) sheet;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -3491,14 +3492,14 @@ const CSBrickSheet *CDBCtrlSheet::asSBrickSheet() const
 {
 	updateActualType();
 	if( _ActualType!=SheetType_SBrick )
-		return NULL;
+		return nullptr;
 
 	CEntitySheet *sheet  = SheetMngr.get(CSheetId(getSheetId()));
 	if (sheet && sheet->type() == CEntitySheet::SBRICK)
 	{
 		return (CSBrickSheet *) sheet;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -3506,14 +3507,14 @@ const CSPhraseSheet	*CDBCtrlSheet::asSPhraseSheet() const
 {
 	updateActualType();
 	if( _ActualType!=SheetType_SPhrase )
-		return NULL;
+		return nullptr;
 
 	CEntitySheet *sheet  = SheetMngr.get(CSheetId(getSheetId()));
 	if (sheet && sheet->type() == CEntitySheet::SPHRASE)
 	{
 		return (CSPhraseSheet *) sheet;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -3521,14 +3522,14 @@ const COutpostBuildingSheet *CDBCtrlSheet::asOutpostBuildingSheet() const
 {
 	updateActualType();
 	if (_ActualType != SheetType_OutpostBuilding)
-		return NULL;
+		return nullptr;
 
 	CEntitySheet *sheet  = SheetMngr.get(CSheetId(getSheetId()));
 	if (sheet && sheet->type() == CEntitySheet::OUTPOST_BUILDING)
 	{
 		return (COutpostBuildingSheet *) sheet;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -3624,7 +3625,7 @@ void	CDBCtrlSheet::getContextHelp(std::string &help) const
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(macro->Commands[i].Name.c_str(), macro->Commands[i].Params.c_str());
-				if (pMCM->ActionManagers[j]->getBaseAction(c) != NULL)
+				if (pMCM->ActionManagers[j]->getBaseAction(c) != nullptr)
 				{
 					commandName = pMCM->ActionManagers[j]->getBaseAction(c)->getActionLocalizedText(c);
 					// display a few commands
@@ -3852,7 +3853,7 @@ bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 			CSheetId sheetId(_OtherHandItemFilter->getSheetId());
 			CEntitySheet *pRightHandES = SheetMngr.get(sheetId);
 			// if item present: must check if the right has a TWO_HANDS or RIGHT_HAND_EXCLUSIVE
-			if (pRightHandES != NULL && pRightHandES->type() == CEntitySheet::ITEM)
+					if ( pRightHandES != nullptr && pRightHandES->type() == CEntitySheet::ITEM )
 			{
 				CItemSheet *pRightHandIS = (CItemSheet *)pRightHandES;
 				if (pRightHandIS->hasSlot(SLOTTYPE::TWO_HANDS) || pRightHandIS->hasSlot(SLOTTYPE::RIGHT_HAND_EXCLUSIVE))
@@ -3878,7 +3879,7 @@ bool	CDBCtrlSheet::canDropItem(CDBCtrlSheet *src) const
 		{
 			CSheetId sheetId(_OtherHandItemFilter->getSheetId());
 			CEntitySheet *pESWeapon = SheetMngr.get(sheetId);
-			if (pESWeapon == NULL || pESWeapon->type() != CEntitySheet::ITEM)
+				if ( pESWeapon == nullptr || pESWeapon->type() != CEntitySheet::ITEM )
 				return false;
 			CItemSheet *pISWeapon = (CItemSheet *)pESWeapon;
 			if (pISWeapon->Family != ITEMFAMILY::RANGE_WEAPON)
@@ -4019,7 +4020,7 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		if (getUseQuality())
 		{
 			dest->setUseQuality(true);
-			if (_Quality.getNodePtr() != NULL)
+			if (_Quality.getNodePtr() != nullptr)
 				dest->setQuality(getQuality());
 			dest->setReadQuantityFromSheetFlag(getReadQuantityFromSheetFlag());
 		}
@@ -4030,7 +4031,7 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		if (getUseQuantity())
 		{
 			dest->setUseQuantity(true);
-			if (_Quantity.getNodePtr() != NULL)
+			if (_Quantity.getNodePtr() != nullptr)
 				dest->setQuantity(getQuantity());
 		}
 		else
@@ -4040,6 +4041,10 @@ void CDBCtrlSheet::copyAspect(CDBCtrlSheet *dest)
 		// copy color for items
 		sint col = getItemColor();
 		if (col != -1) dest->setItemColor(col);
+		// copy charac buffs
+		dest->setItemCharacBuffs(getItemCharacBuffs());
+		// copy access
+		dest->setItemAccess(getItemAccess());
 		// copy weight
 		dest->setItemWeight(getItemWeight());
 		// copy nameId
@@ -4139,7 +4144,7 @@ bool CDBCtrlSheet::isMission() const
 	CCDBNodeBranch *root = getRootBranch();
 	if (!root) return false;
 	CCDBNodeLeaf *node = dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("ICON"), false));
-	return node != NULL;
+	return node != nullptr;
 }
 
 // ***************************************************************************
@@ -4495,7 +4500,7 @@ uint8 CDBCtrlSheet::getItemInfoVersion() const
 CCDBNodeLeaf *CDBCtrlSheet::getItemInfoVersionPtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("INFO_VERSION"), false));
 }
 
@@ -4510,7 +4515,7 @@ void CDBCtrlSheet::setItemInfoVersion(uint8 infoVersion)
 CCDBNodeLeaf *CDBCtrlSheet::getItemWeightPtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("WEIGHT"), false));
 }
 
@@ -4532,7 +4537,7 @@ void CDBCtrlSheet::setItemWeight(uint16 weight)
 CCDBNodeLeaf *CDBCtrlSheet::getItemLockedPtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("LOCKED"), false));
 }
 
@@ -4564,7 +4569,7 @@ sint32 CDBCtrlSheet::getItemPrice() const
 CCDBNodeLeaf *CDBCtrlSheet::getItemPricePtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("PRICE"), false));
 }
 
@@ -4588,7 +4593,7 @@ sint32 CDBCtrlSheet::getItemResaleFlag() const
 CCDBNodeLeaf *CDBCtrlSheet::getItemResaleFlagPtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("RESALE_FLAG"), false));
 }
 
@@ -4657,7 +4662,7 @@ bool CDBCtrlSheet::getLockedByOwner() const
 // ***************************************************************************
 bool CDBCtrlSheet::canOwnerLock() const
 {
-	return (NULL != getItemResaleFlagPtr());
+	return (nullptr != getItemResaleFlagPtr());
 }
 
 // ***************************************************************************
@@ -4672,7 +4677,7 @@ sint32 CDBCtrlSheet::getItemSellerType() const
 CCDBNodeLeaf *CDBCtrlSheet::getItemSellerTypePtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("SELLER_TYPE"), false));
 }
 
@@ -4725,7 +4730,7 @@ bool CDBCtrlSheet::getItemPrerequisitValid() const
 CCDBNodeLeaf *CDBCtrlSheet::getItemPrerequisitValidPtr() const
 {
 	CCDBNodeBranch *root = getRootBranch();
-	if (!root) return NULL;
+	if (!root) return nullptr;
 	return dynamic_cast<CCDBNodeLeaf *>(root->getNode(ICDBNode::CTextId("PREREQUISIT_VALID"), false));
 }
 

@@ -36,8 +36,8 @@ public:
 
 	CTessNodeList()
 	{
-		Prec= NULL;
-		Next= NULL;
+		Prec = nullptr;
+		Next = nullptr;
 	}
 };
 

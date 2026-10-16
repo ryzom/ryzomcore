@@ -211,7 +211,7 @@ public:
 	CBipedAnimEval(PIPELINE::MAX::CSceneClass *rigSys, PMAX_RIG::SBipedRig &rig,
 	               const std::vector<PMAX_RIG::Bone> &bones,
 	               const std::map<PIPELINE::MAX::BUILTIN::INode *, size_t> &boneOfNode,
-	               const SBipAnimKeys *overrideKeys = NULL);
+	               const SBipAnimKeys *overrideKeys = nullptr);
 
 	// Evaluate every biped node of this rig at the given time (ticks). Results keyed by INode*.
 	// Nodes without animation keys stay at their figure pose.

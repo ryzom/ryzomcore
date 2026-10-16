@@ -38,7 +38,7 @@ namespace NL3D
 CLandscapeFaceVectorManager::CLandscapeFaceVectorManager()
 {
 	// Allow 2^32 triangles at max. each list has at max 2^i triangles.
-	_Blocks.resize(NL3D_FACE_VECTOR_NUMBLOCK, NULL);
+	_Blocks.resize(NL3D_FACE_VECTOR_NUMBLOCK, nullptr);
 }
 
 // ***************************************************************************
@@ -62,7 +62,7 @@ void					CLandscapeFaceVectorManager::purge()
 			ptr= next;
 		}
 		// list is empty.
-		_Blocks[i]= NULL;
+		_Blocks[i] = nullptr;
 	}
 }
 
@@ -79,7 +79,7 @@ TLandscapeIndexType	*CLandscapeFaceVectorManager::createFaceVector(uint numTri)
 	uint	blockId= getBlockIdFromNumTri(numTri);
 
 	// If no more free FaceVector, allocate.
-	if(_Blocks[blockId]==NULL)
+	if(_Blocks[blockId] == nullptr)
 	{
 		// Allocate a block of max tris. +1 is for the NumTris entry at index 0.
 		uint	numTriMax= 1<<blockId;
@@ -87,7 +87,7 @@ TLandscapeIndexType	*CLandscapeFaceVectorManager::createFaceVector(uint numTri)
 		uint	sizeInByteToAllocate= (uint)max(sizeof(TLandscapeIndexType*), (numTriMax*3 + 1)*sizeof(TLandscapeIndexType));
 		_Blocks[blockId]= new TLandscapeIndexType[(sizeInByteToAllocate + (sizeof(TLandscapeIndexType) - 1)) /sizeof(TLandscapeIndexType)];
 		// Init it as a free faceVector, with no Next.
-		*(TLandscapeIndexType**)_Blocks[blockId]= NULL;
+		*(TLandscapeIndexType**)_Blocks[blockId] = nullptr;
 	}
 
 	// Pop a FaceVector from the free list.

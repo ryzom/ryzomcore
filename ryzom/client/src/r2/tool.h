@@ -187,7 +187,7 @@ public:
 	  * \param miniMapHandle if not NULL, pointer will be filled with the minimap ui element that is under the mouse
       * \return NULL if there's no instance under the mouse
 	  */
-	static CInstance *checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle = NULL);
+	static CInstance *checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle = nullptr);
 
 	// helper : handle mouse over instance: highlight them when mouse is over & change mouse cursor accordingly
 	static void handleMouseOverInstance(const char *cursorDefault,

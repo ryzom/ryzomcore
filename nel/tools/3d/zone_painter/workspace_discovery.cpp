@@ -69,7 +69,7 @@ static std::string canonicalizeDir(const std::string &path)
 		return n;
 #if !defined(NL_OS_WINDOWS)
 	char buf[PATH_MAX];
-	if (realpath(n.c_str(), buf) != NULL)
+	if (realpath(n.c_str(), buf) != nullptr)
 		return rstripSlash(std::string(buf));
 #endif
 	// Windows: normalizeDir already absolute+standardized; junction resolve is optional
@@ -401,7 +401,7 @@ const SWorldEntry *findWorld(const std::vector<SWorldEntry> &worlds,
                              bool allowDisabled)
 {
 	if (name.empty())
-		return NULL;
+		return nullptr;
 	// Prefer exact WorldName match
 	for (size_t i = 0; i < worlds.size(); ++i)
 	{
@@ -414,7 +414,7 @@ const SWorldEntry *findWorld(const std::vector<SWorldEntry> &worlds,
 		if (dirBasename(worlds[i].GraphicsRoot) == name && (allowDisabled || worlds[i].BankOk))
 			return &worlds[i];
 	}
-	return NULL;
+	return nullptr;
 }
 
 /** True when path is preferRoot or a descendant (normalized absolute dirs, no trailing slash). */
@@ -521,7 +521,7 @@ bool selectAutoMulti(const std::vector<SWorldEntry> &worlds,
 
 	// Score every full match; do not return the first WorldName hit (seed vs remembered).
 	// Priority (high → low): under preferRoot, exact WorldName, discovery order.
-	const SWorldEntry *bestWorld = NULL;
+	const SWorldEntry *bestWorld = nullptr;
 	std::vector<SZoneEntry> bestZones;
 	int bestScore = -1;
 	for (size_t i = 0; i < candidates.size(); ++i)

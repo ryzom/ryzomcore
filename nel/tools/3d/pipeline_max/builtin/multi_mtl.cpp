@@ -116,7 +116,7 @@ const ISceneClassDesc *CMultiMtl::classDesc() const
 
 CMtlBase *CMultiMtl::subMaterial(uint i) const
 {
-	if (i >= m_NumSubMaterials) return NULL;
+	if (i >= m_NumSubMaterials) return nullptr;
 	// Sub-materials are references 1..N (reference 0 is the material's own ParamBlock2).
 	CReferenceMaker *r = getReference(i + 1);
 	return dynamic_cast<CMtlBase *>(r);

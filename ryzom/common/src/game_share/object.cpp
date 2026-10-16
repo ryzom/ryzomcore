@@ -69,7 +69,7 @@ private:
 #endif
 
 //CObjectFactory *CObjectSerializer::Factory = NULL;
-CObjectFactory *CObjectSerializerClient::_ClientObjecFactory = NULL;
+CObjectFactory *CObjectSerializerClient::_ClientObjecFactory = nullptr;
 
 
 static CObject *newTable(CObjectFactory *factory)
@@ -104,7 +104,7 @@ CObject::~CObject()
 
 CObject::CObject()
 {
-	_Parent = 0;
+	_Parent = nullptr;
 	_Ghost = false;
 	_Validation = 0x01020304;
 }
@@ -337,7 +337,7 @@ CObjectTable* CObject::toTable(const std::string & prop) const
 		CObject* attr = getAttr(prop);
 		if (!attr)
 		{
-			BOMB("Try to use the method toTable() on a NULL Object", return 0);
+			BOMB("Try to use the method toTable() on a NULL Object", return nullptr);
 		}
 		return attr->doToTable();
 	}
@@ -350,7 +350,7 @@ CObject::TSmartPtr CObject::take(sint32 /* position */)
 {
 	//H_AUTO(R2_CObject_take)
 	BOMB("Try to use the take function on an object that is not a table", return NULL);
-	return NULL;
+	return nullptr;
 }
 
 bool CObject::canTake(sint32 /* position */) const
@@ -385,8 +385,8 @@ std::string CObject::doToString() const
 CObjectTable* CObject::doToTable() const
 {
 	//H_AUTO(R2_CObject_doToTable)
-	BOMB("Try to convert an objet to string without being allowed", return 0);
-	return 0;
+	BOMB("Try to convert an objet to string without being allowed", return nullptr);
+	return nullptr;
 }
 
 static const CObject::TSmartPtr s_nullSmartPtr;
@@ -399,7 +399,8 @@ const CObject::TSmartPtr& CObject::getValueAtPos(uint32 /* pos */) const{ BOMB("
 
 uint32 CObject::getSize() const { BOMB("Try to call the function getSize() on an object that is not a table", return 0);  return 0; }
 
-CObject::TSmartPtr CObject::clone() const { BOMB("Try to call the function clone() on an object that is not a table", return NULL); return NULL;}
+CObject::TSmartPtr CObject::clone() const { BOMB("Try to call the function clone() on an object that is not a table", return NULL); return nullptr;
+}
 
 void CObject::add(const std::string & key,  const CObject::TSmartPtr &value)
 {
@@ -1093,7 +1094,7 @@ void CObjectTable::sort()
 			if ( key == _Value[firstValue].first)
 			{
 				data.push_back( _Value[firstValue]);
-				_Value[firstValue].second = NULL;
+				_Value[firstValue].second = nullptr;
 			}
 		}
 	}
@@ -1102,7 +1103,7 @@ void CObjectTable::sort()
 		uint32 lastValue = (uint32)_Value.size();
 		for (; firstValue != lastValue; ++firstValue)
 		{
-			if (  _Value[firstValue].first != "Keys" && _Value[firstValue].second != NULL)
+			if (  _Value[firstValue].first != "Keys" && _Value[firstValue].second != nullptr)
 			{
 				data.push_back( _Value[firstValue]);
 			}
@@ -1123,7 +1124,7 @@ CObject::TSmartPtr CObjectTable::clone() const
 		BOMB_IF(!first->second, "Try to clone a table with an NULL component", return NULL);
 		nlassert(first->second->getGhost() == this->getGhost());
 		CObject::TSmartPtr clone = first->second->clone();
-		if (clone) { clone->setParent(0); }
+		if (clone) { clone->setParent(nullptr); }
 		ret->add(first->first,  clone);
 	}
 	ret->setGhost(getGhost());
@@ -1440,7 +1441,7 @@ CObject::TSmartPtr CObjectTable::take(sint32 position)
 	{
 		CObject::TSmartPtr child = _Value[ static_cast<uint32>(position) ].second;
 		_Value.erase(_Value.begin() + static_cast<uint32>(position));
-		child->setParent(0);
+		child->setParent(nullptr);
 		return child;
 	}
 	else if (position == -1)
@@ -1457,7 +1458,7 @@ CObject::TSmartPtr CObjectTable::take(sint32 position)
 		return child;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -1496,7 +1497,7 @@ bool CObjectTable::insert(const std::string& key,  const CObject::TSmartPtr &val
 
 	BOMB_IF(!( -1 <= position && position <= static_cast<sint32>(count)), "Try to take an element that does not exist", return false);
 	BOMB_IF(!value, "Try to insert a Null value", return false);
-	BOMB_IF(value->getParent() != 0, "Try to insert an element that not at the root of the tree.", return false);
+	BOMB_IF(value->getParent() != nullptr, "Try to insert an element that not at the root of the tree.", return false);
 
 	value->setParent(this);
 	// inherit the 'ghost' flag
@@ -1644,7 +1645,7 @@ CObject* CObjectFactory::newBasic(const std::string & type)
 	{
 		return new CObjectTable();
 	}
-	return 0;
+	return nullptr;
 }
 
 CObject* CObjectFactory::newAvanced(const std::string & type)
@@ -1653,7 +1654,7 @@ CObject* CObjectFactory::newAvanced(const std::string & type)
 
 	CObjectGenerator* ret = getGenerator(type);
 	if (ret) { return ret->instanciate(this); }
-	return 0;
+	return nullptr;
 }
 
 void CObjectFactory::registerGenerator(CObject* objectClass)
@@ -1710,7 +1711,7 @@ sint32 CObjectFactory::getMaxId(const std::string& eid) const
 CObject* CObjectFactory::newComponent(const std::string & type)
 {
 	//H_AUTO(R2_CObjectFactory_newComponent)
-	CObject* ret = 0;
+	CObject* ret = nullptr;
 	ret = newBasic(type);
 	if (ret) return ret;
 	ret = newAvanced(type);
@@ -1772,7 +1773,7 @@ CObjectGenerator * CObjectFactory::getGenerator(const std::string & type)
 		CObjectGenerator* ret = found->second;
 		return ret;
 	}
-	return 0;
+	return nullptr;
 }
 
 void CObjectGenerator::createDefaultValues(CObjectFactory* factory)
@@ -2486,7 +2487,7 @@ public:
 				for ( ; first != last ; ++first)
 				{
 					//*first => Property key ()
-					CObject* value = 0;
+					CObject* value = nullptr;
 					std::string key = *first;
 					onSerial(stream, key, value, serializer);
 					if (!value)
@@ -2551,7 +2552,7 @@ public:
 				{
 					std::string key;
 					stream.serial(key);
-					CObject* value=0;
+					CObject* value=nullptr;
 					onSerial(stream, key, value, serializer);
 					if (!value)
 					{
@@ -3068,7 +3069,7 @@ public:
 		if( Instance )
 		{
 			delete Instance;
-			Instance = NULL;
+			Instance = nullptr;
 		}
 	}
 
@@ -3105,7 +3106,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			serializer->setVersion(version);
 		}
 
-		if (data == 0)
+		if (data == nullptr)
 		{
 			type = ObjectNull;
 			uint initLength = stream.getPos();
@@ -3263,7 +3264,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 			}
 			case ObjectNull:
 			{
-				data = 0;
+				data = nullptr;
 				return;
 			}
 			case ObjectNumber:
@@ -3445,7 +3446,7 @@ void CObjectSerializerImpl::serialImpl(NLMISC::IStream& stream, CObject*& data, 
 				{
 					std::string key;
 					stream.serial(key);
-					CObject* value=0;
+					CObject* value=nullptr;
 					serialImpl(stream,value, serializer);
 					data->add(key, value);
 				}
@@ -3505,7 +3506,7 @@ CObject::TSmartPtr CObjectSerializer::getData() const
 	//H_AUTO(R2_CObjectSerializer_getData)
 	if (_Compressed && _MustUncompress) { uncompress(); };
 	if (_Data) return CObject::TSmartPtr(_Data->clone());
-	return NULL;
+	return nullptr;
 }
 
 
@@ -3516,7 +3517,7 @@ CObjectSerializer::CObjectSerializer(CObjectFactory *factory, CObject* data)
 {
 
 	Log = false;
-	_CompressedBuffer = 0;
+	_CompressedBuffer = nullptr;
 	_CompressedLen = 0;
 	_UncompressedLen = 0;
 	_Compressed = false;
@@ -3528,14 +3529,14 @@ CObjectSerializer::CObjectSerializer(CObjectFactory *factory, CObject* data)
 	}
 	else
 	{
-		_Data = 0;
+		_Data = nullptr;
 	}
 
 }
 
 CObjectSerializer::~CObjectSerializer()
 {
-	if (_CompressedBuffer) { delete [] _CompressedBuffer; _CompressedBuffer = 0;}
+	if (_CompressedBuffer) { delete [] _CompressedBuffer; _CompressedBuffer = nullptr;}
 }
 
 
@@ -3561,7 +3562,7 @@ void CObjectSerializer::setData(CObject* data)
 	}
 	else
 	{
-		_Data = NULL;
+		_Data = nullptr;
 	}
 }
 
@@ -3624,7 +3625,7 @@ void CObjectSerializer::uncompressImpl()
 	if (_Compressed && _MustUncompress)
 	{
 		_MustUncompress = false;
-		_Data = NULL;
+		_Data = nullptr;
 
 		Bytef* data = new Bytef[_UncompressedLen];
 		uLongf dataLen = _UncompressedLen;
@@ -3649,7 +3650,7 @@ void CObjectSerializer::uncompressImpl()
 		buffer.invert();
 		buffer.seek(0, NLMISC::IStream::begin);
 
-		CObject* rawData = NULL;
+		CObject* rawData = nullptr;
 		CObjectSerializerImpl::getInstance().serialImpl(buffer, rawData, this, true);
 		_Data = rawData;
 

@@ -34,7 +34,7 @@ const	float	CEdgeQuad::_QuadElementSize= 4;	// = 4 meters.
 // ***************************************************************************
 CEdgeQuad::CEdgeQuad()
 {
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 }
 // ***************************************************************************
@@ -45,7 +45,7 @@ CEdgeQuad::~CEdgeQuad()
 // ***************************************************************************
 CEdgeQuad::CEdgeQuad(const CEdgeQuad &o)
 {
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 	*this= o;
 }
@@ -62,7 +62,7 @@ CEdgeQuad	&CEdgeQuad::operator=(const CEdgeQuad &o)
 		memcpy(_QuadData, o._QuadData, _QuadDataLen);
 	}
 	else
-		_QuadData= NULL;
+		_QuadData = nullptr;
 
 	// copy infos.
 	_Width= o._Width;
@@ -73,7 +73,7 @@ CEdgeQuad	&CEdgeQuad::operator=(const CEdgeQuad &o)
 
 	// copy good pointers.
 	_Quad.clear();
-	_Quad.resize(o._Quad.size(), NULL);
+	_Quad.resize(o._Quad.size(), nullptr);
 	for(sint i=0; i<(sint)_Quad.size(); i++)
 	{
 		if(o._Quad[i])
@@ -91,7 +91,7 @@ CEdgeQuad	&CEdgeQuad::operator=(const CEdgeQuad &o)
 void	CEdgeQuad::clear()
 {
 	delete [] _QuadData;
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 
 	_Quad.clear();
@@ -131,7 +131,7 @@ void			CEdgeQuad::build(const CExteriorMesh &em,
 	// first, clear any pr-build.
 	contReset(_Quad);
 	delete [] _QuadData;
-	_QuadData= NULL;
+	_QuadData = nullptr;
 	_QuadDataLen= 0;
 
 	// don't care about the origin of the instance
@@ -158,7 +158,7 @@ void			CEdgeQuad::build(const CExteriorMesh &em,
 	_Height= (sint32)ceil(chainquadBBox.getMax().y / _QuadElementSize) - _Y;
 
 	tempQuad.resize(_Width*_Height);
-	_Quad.resize(_Width*_Height, NULL);
+	_Quad.resize(_Width*_Height, nullptr);
 
 
 	// 1. For each edge, add them to the quadgrid.
@@ -214,7 +214,7 @@ void			CEdgeQuad::build(const CExteriorMesh &em,
 
 			const TCollisionSurfaceDescVector	*pcd = global.testCylinderMove(gp0, p1-p0, 0.01f, cst);
 
-			if (pcd == NULL)
+			if (pcd == nullptr)
 			{
 //				nlwarning("in CEdgeQuad::build(): testCylinderMove() returned NULL");
 				continue;
@@ -579,7 +579,7 @@ void		CEdgeQuad::serial(NLMISC::IStream &f)
 		if(_QuadDataLen>0)
 			_QuadData= (uint8*)new uint8[_QuadDataLen];
 		else
-			_QuadData= NULL;
+			_QuadData = nullptr;
 	}
 	// Since we have only uint16 (see CEdgeChainEntry), serial them in a single block.
 	uint16	*ptrQData= (uint16*)_QuadData;
@@ -606,7 +606,7 @@ void		CEdgeQuad::serial(NLMISC::IStream &f)
 		{
 			f.serial(val);
 			if(val== 0xFFFFFFFF)
-				_Quad[i]= NULL;
+				_Quad[i] = nullptr;
 			else
 				_Quad[i]= _QuadData+val;
 		}
@@ -621,7 +621,7 @@ void		CEdgeQuad::serial(NLMISC::IStream &f)
 		for(i=0; i<len; i++)
 		{
 			uint8	*ptr= _Quad[i];
-			if(ptr==NULL)
+			if(ptr == nullptr)
 				val= 0xFFFFFFFF;
 			else
 				val= (uint32)(ptr-_QuadData);

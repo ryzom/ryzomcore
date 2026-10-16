@@ -154,7 +154,8 @@ public:
 	//@{
 	struct CMapChannelView
 	{
-		CMapChannelView() : Channel(-1), SupportFlag(0), HasSupportFlag(false), Verts(NULL), Faces(NULL) { }
+		CMapChannelView() : Channel(-1), SupportFlag(0), HasSupportFlag(false), Verts(nullptr)
+		    , Faces(nullptr) { }
 		/// 0x0959 value; -1 when the group lacks the announce leaf (one Max 3 corpus witness).
 		sint32 Channel;
 		/// 0x2398 value (1 corpus-wide), valid when HasSupportFlag.

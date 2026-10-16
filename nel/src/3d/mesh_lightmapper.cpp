@@ -2028,7 +2028,7 @@ bool CMeshLightmapper::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::
 					for( nPlaneNb = 0; nPlaneNb < (sint)FaceGroupByPlane.size(); ++nPlaneNb )
 					{
 						delete TempPlanes[nPlaneNb];
-						TempPlanes[nPlaneNb] = NULL;
+						TempPlanes[nPlaneNb] = nullptr;
 					}
 				}
 
@@ -2110,7 +2110,7 @@ bool CMeshLightmapper::calculateLM( CMesh::CMeshBuild *pZeMeshBuild, CMeshBase::
 			MoveFaceUV1( AllPlanes[i]->faces.begin(), AllPlanes[i]->faces.size(), 
 						AllPlanes[i]->x, AllPlanes[i]->y );
 			delete AllPlanes[i];
-			AllPlanes[i] = NULL;
+			AllPlanes[i] = nullptr;
 		}
 		
 		// Save the lightmap				

@@ -101,7 +101,8 @@ class CChangeTrackerBase
 public:
 
 	/// Constructor
-	CChangeTrackerBase() : _SMId(-1), _MutId(-1), _Header(NULL), _Array(NULL) {}
+	CChangeTrackerBase() : _SMId(-1), _MutId(-1), _Header(nullptr)
+	    , _Array(nullptr) {}
 
 	/// Assignment operator
 	CChangeTrackerBase&		operator = ( const CChangeTrackerBase& src )
@@ -124,7 +125,7 @@ public:
 
 	/// Return true if the tracker header and item array are already allocated
 	bool					isAllocated() const
-							{ return _Array != NULL; }
+							{ return _Array != nullptr; }
 
 	/// Return the pointer to the header (root of the shared memory segment)
 	TChangeTrackerHeader	*header() { return _Header; }

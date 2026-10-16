@@ -89,13 +89,13 @@ static bool DisplayR2EntityBoxes = false;
 // *********************************************************************************************************
 CDisplayerVisualEntity::CDisplayerVisualEntity()
 {
-	_Entity  = NULL;
+	_Entity  = nullptr;
 	_InvertedMatrixTouched = true;
 	_Angle = 0.f;
 	_SelectionDisplayMode = AutoSelection;
 	_RegisteredInEditor = false;
 	_ClipBlend = -1.f;
-	_PlaceHolder = NULL;
+	_PlaceHolder = nullptr;
 	_CreationTimeSwpBufCount = Driver->getSwapBufferCounter();
 }
 
@@ -118,7 +118,7 @@ void CDisplayerVisualEntity::deletePlaceHolder()
 	if (_PlaceHolder)
 	{
 		delete _PlaceHolder;
-		_PlaceHolder = NULL;
+		_PlaceHolder = nullptr;
 	}
 }
 
@@ -543,8 +543,8 @@ void CDisplayerVisualEntity::createEntity()
 	//
 	updateName();
 	updateEntity();
-	_Entity->updateVisible(T1,  NULL);
-	_Entity->updatePos(T1,  NULL);
+	_Entity->updateVisible(T1, nullptr);
+	_Entity->updatePos(T1, nullptr);
 }
 
 // *********************************************************************************************************
@@ -663,7 +663,7 @@ void CDisplayerVisualEntity::eraseEntity()
 	if (_Entity)
 	{
 		EntitiesMngr.remove(_Entity->slot(), true);
-		_Entity = NULL;
+		_Entity = nullptr;
 	}
 }
 
@@ -958,8 +958,8 @@ void CDisplayerVisualEntity::updateEntityWorldPos()
 	_InvertedMatrixTouched = true;
 	if (!_Entity) return;
 	_Entity->pacsPos(getWorldPos());
-	_Entity->updatePos(T1, NULL);
-	_Entity->updateVisible(T1, NULL);
+	_Entity->updatePos(T1, nullptr);
+	_Entity->updateVisible(T1, nullptr);
 }
 
 // *********************************************************************************************************
@@ -1152,7 +1152,7 @@ bool CDisplayerVisualEntity::getLastClip() const
 	//H_AUTO(R2_CDisplayerVisualEntity_getLastClip)
 	if (!_Entity)
 	{
-		return _PlaceHolder == NULL; // is there's a place holder consider entity to be not clipped
+		return _PlaceHolder == nullptr; // is there's a place holder consider entity to be not clipped
 	}
 	if (getActualSelectionDisplayMode() == BoxSelection) return false;
 	return _Entity->getLastClip();

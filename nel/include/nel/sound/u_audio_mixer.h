@@ -221,14 +221,14 @@ public:
 	 * 
 	 *	\param forceSoftware: to force the driver to load in software buffer, not hardware
 	 */
-	virtual void		init(uint maxTrack = 32, bool useEax = true, bool useADPCM = true, NLMISC::IProgressCallback *progressCallBack = NULL, bool autoLoadSample = false, TDriver driverType = DriverAuto, bool forceSoftware = false, bool manualRolloff = true) = 0;
+	virtual void		init(uint maxTrack = 32, bool useEax = true, bool useADPCM = true, NLMISC::IProgressCallback *progressCallBack = nullptr, bool autoLoadSample = false, TDriver driverType = DriverAuto, bool forceSoftware = false, bool manualRolloff = true) = 0;
 
 	/// Initialize the NeL Sound Driver with given driverName.
 	virtual void		initDriver(const std::string &driverName) = 0;
 	/// Get the available devices on the loaded driver.
 	virtual void		getDevices(std::vector<std::string> &devices) = 0;	
 	/// Initialize the selected device on the currently initialized driver. Leave deviceName empty to select the default device.
-	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = NULL) = 0;
+	virtual void		initDevice(const std::string &deviceName, const CInitInfo &initInfo, NLMISC::IProgressCallback *progressCallback = nullptr) = 0;
 
 	/** Initialisation of the clustered sound system.
 	  */
@@ -283,7 +283,7 @@ public:
 	 *	\param filename Name of the directory that contains the samples to load.
 	 *	\param notfoundfiles An optional pointer to a vector that will be filled with the list of not found files.
 	 */
-	virtual uint32		loadSampleBank(bool async, const std::string &filename, std::vector<std::string> *notfoundfiles=NULL ) = 0;
+	virtual uint32		loadSampleBank(bool async, const std::string &filename, std::vector<std::string> *notfoundfiles = nullptr) = 0;
 	/** Unload buffers. Return false if the bank can't be unloaded because an async loading is running.
 	*/
 	virtual bool		unloadSampleBank( const std::string &filename) = 0;
@@ -314,9 +314,9 @@ public:
 	 * pass a callback function that will be called (if not NULL) just before deleting the spawned
 	 * source.
 	 */
-	virtual USource		*createSource(const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context  = 0, UGroupController *groupController = NULL) = 0;
+	virtual USource		*createSource(const NLMISC::TStringId &name, bool spawn=false, TSpawnEndCallback cb = nullptr, void *callbackUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CSoundContext *context  = nullptr, UGroupController *groupController = nullptr) = 0;
 	/// Add a logical sound source (by sound id). To remove a source, just delete it. See createSource(const char*)
-	virtual USource		*createSource(TSoundId id, bool spawn=false, TSpawnEndCallback cb=NULL, void *callbackUserParam  = NULL, NL3D::CCluster *cluster = 0, CSoundContext *context = 0, UGroupController *groupController = NULL) = 0;
+	virtual USource		*createSource(TSoundId id, bool spawn=false, TSpawnEndCallback cb = nullptr, void *callbackUserParam  = nullptr, NL3D::CCluster *cluster = nullptr, CSoundContext *context = nullptr, UGroupController *groupController = nullptr) = 0;
 
 	/** Use this method to set the listener position instead of using getListener->setPos();
 	 * It's because we have to update the background sounds in this case.

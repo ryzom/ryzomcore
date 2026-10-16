@@ -161,8 +161,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlButton::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBaseButton::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "button" );
 
@@ -368,7 +368,7 @@ namespace NLGUI
 		if ( ( _Over && !editorMode ) )
 		{
 
-			if( !editorMode && (lastOver == false) && (_AHOnOver != NULL))
+			if( !editorMode && (lastOver == false) && (_AHOnOver != nullptr))
 				CAHManager::getInstance()->runActionHandler (_AHOnOver, this, _AHOverParams);
 
 			// the pointer is over the button

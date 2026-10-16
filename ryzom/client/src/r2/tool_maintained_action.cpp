@@ -189,7 +189,7 @@ bool CToolMaintainedAction::onMouseLeftButtonClicked()
 	}
 	if (!_PreviousToolClickEnd)
 	{
-		getEditor().setSelectedInstance(NULL);
+		getEditor().setSelectedInstance(nullptr);
 	}
 	_PreviousToolClickEnd = false;
 	// special case for the minimap :
@@ -255,7 +255,7 @@ void CToolMaintainedAction::updateFocusedInstance()
 	CInstance *instanceUnder = checkInstanceUnderMouse();
 	if (!instanceUnder)
 	{
-		getEditor().setFocusedInstance(NULL);
+		getEditor().setFocusedInstance(nullptr);
 		return;
 	}
 

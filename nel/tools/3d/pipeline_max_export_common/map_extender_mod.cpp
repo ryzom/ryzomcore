@@ -62,7 +62,7 @@ bool isMapExtenderModifier(CSceneClass *mod)
 // CMapExtenderCache decode handles both forms.
 static IStorageObject *find2512(CStorageContainer *modApp)
 {
-	if (!modApp) return NULL;
+	if (!modApp) return nullptr;
 	IStorageObject *lmd = CDerivedObject::modAppLocalModData(modApp);
 	if (lmd) return lmd;
 	for (CStorageContainer::TStorageObjectConstIt it = modApp->chunks().begin();
@@ -74,7 +74,7 @@ static IStorageObject *find2512(CStorageContainer *modApp)
 		lmd = CDerivedObject::modAppLocalModData(nested);
 		if (lmd) return lmd;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // Thin copy from the typed library decode (BUILTIN::STORAGE::CMapExtenderCache, design-doc

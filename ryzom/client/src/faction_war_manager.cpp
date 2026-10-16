@@ -33,7 +33,7 @@ using namespace std;
 ////////////
 // METHOD //
 ////////////
-CFactionWarManager * CFactionWarManager::_Instance = NULL;
+CFactionWarManager * CFactionWarManager::_Instance = nullptr;
 
 
 //----------------------------------------------------------------------------
@@ -81,7 +81,7 @@ bool CFactionWarManager::areFactionsInWar(PVP_CLAN::TPVPClan clan1, PVP_CLAN::TP
 //----------------------------------------------------------------------------
 void CFactionWarManager::init()
 {
-	if( _Instance != 0 )
+	if( _Instance != nullptr )
 		return;
 
 	_Instance = new CFactionWarManager();
@@ -90,7 +90,7 @@ void CFactionWarManager::init()
 //----------------------------------------------------------------------------
 CFactionWarManager * CFactionWarManager::getInstance()
 {
-	if(CFactionWarManager::_Instance == 0)
+	if(CFactionWarManager::_Instance == nullptr)
 	{
 		CFactionWarManager::init();
 	}
@@ -100,10 +100,10 @@ CFactionWarManager * CFactionWarManager::getInstance()
 //----------------------------------------------------------------------------
 void CFactionWarManager::release()
 {
-	if( _Instance != 0 )
+	if( _Instance != nullptr )
 	{
 		delete _Instance;
-		_Instance = 0;
+		_Instance = nullptr;
 	}
 }
 

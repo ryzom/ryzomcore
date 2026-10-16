@@ -114,7 +114,7 @@ namespace NLNET
 		virtual IGatewayTransport *getGatewayTransport(const std::string &/* transportName */) const NL_OVERRIDE
 		{
 			// there are no transport here
-			return NULL;
+			return nullptr;
 		}
 
 		virtual uint32	getTransportCount() const NL_OVERRIDE
@@ -251,7 +251,7 @@ namespace NLNET
 		}
 		virtual IModuleProxy *getPluggedModuleProxy(IModule * /* pluggedModule */) NL_OVERRIDE
 		{
-			return NULL;
+			return nullptr;
 		}
 
 		virtual uint32	getProxyCount() const NL_OVERRIDE
@@ -380,7 +380,7 @@ namespace NLNET
 			// create a proxy for this module
 			IModuleProxy *modProx = IModuleManager::getInstance().createModuleProxy(
 					this,
-					NULL,	// the module is local, so there is no route
+		        nullptr,	// the module is local, so there is no route
 					0,		// the module is local, distance is 0
 					pluggedModule,	// the module is local, so store the module pointer
 					pluggedModule->getModuleClassName(),

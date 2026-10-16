@@ -57,7 +57,7 @@ bool CDriverGL3::renderLines(CMaterial& mat, uint32 firstIndex, uint32 nlines)
 	H_AUTO_OGL(CDriverGL3_renderLines)
 
 	// setup material
-	if (!setupMaterial(mat) || _LastIB._Values == NULL)
+	if (!setupMaterial(mat) || _LastIB._Values == nullptr)
 		return false;
 
 	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;
@@ -115,7 +115,7 @@ bool CDriverGL3::renderTriangles(CMaterial& mat, uint32 firstIndex, uint32 ntris
 	H_AUTO_OGL(CDriverGL3_renderTriangles);
 
 	// setup material
-	if (!setupMaterial(mat) || _LastIB._Values == NULL)
+	if (!setupMaterial(mat) || _LastIB._Values == nullptr)
 		return false;
 
 	if (_CurrentVertexBufferGL && _CurrentVertexBufferGL->isInvalid()) return true;

@@ -132,7 +132,7 @@ void CGroupSkills::rebuild()
 	if(!_Tree)
 	{
 		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),WIN_TREE_LIST));
-		if (_Tree == NULL)
+		if (_Tree == nullptr)
 		{
 			nlwarning("cant find tree");
 			return;
@@ -199,7 +199,7 @@ void CGroupSkills::CSkillsObs::update (ICDBNode *node)
 				uint skillId;
 				if (skillParent->getNodeIndex (skill, skillId))
 				{
-					CAHManager::getInstance()->runActionHandler("skill_popup", NULL, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
+					CAHManager::getInstance()->runActionHandler("skill_popup", nullptr, "skillId="+toString(skillId)+"|delta="+toString(leaf->getValue32()-leaf->getOldValue32()));
 
 					// Context help
 					contextHelp ("skill");
@@ -275,15 +275,15 @@ CGroupSkills::CGroupSkills( const TCtorParam &param ) :
 	CInterfaceGroup(param)
 {
 	_MustRebuild = false;
-	_Tree= NULL;
-	_TreeRoot= NULL;
+	_Tree = nullptr;
+	_TreeRoot = nullptr;
 }
 
 // destructor
 CGroupSkills::~CGroupSkills()
 {
 	// remove observers
-	_SkillsObs.Owner = NULL;
+	_SkillsObs.Owner = nullptr;
 
 	CInterfaceManager *pIM= CInterfaceManager::getInstance();
 	string sTmp;
@@ -299,9 +299,9 @@ CGroupSkills::~CGroupSkills()
 	if( _Tree )
 	{
 		// reset now the node hierarchy. NB: the node hierarchy is also deleted
-		_Tree->setRootNode(NULL);
+		_Tree->setRootNode(nullptr);
 	}
-	_Tree= NULL;
+	_Tree = nullptr;
 
 	// template nodes not linked to hierarchy will memory leak, we must remove them also
 	for (sint i = 0; i<SKILLS::NUM_SKILLS; i++)
@@ -312,7 +312,7 @@ CGroupSkills::~CGroupSkills()
 			// NB: delete call makeOrphan, and delete children that may still be in the array
 			// but it's OK, because tested with refptr
 			delete _AllNodes[i];
-			_AllNodes[i]= NULL;
+			_AllNodes[i] = nullptr;
 		}
 	}
 
@@ -320,7 +320,7 @@ CGroupSkills::~CGroupSkills()
 	if(_TreeRoot)
 	{
 		delete _TreeRoot;
-		_TreeRoot = NULL;
+		_TreeRoot = nullptr;
 	}
 }
 void CGroupSkills::createAllTreeNodes()
@@ -330,7 +330,7 @@ void CGroupSkills::createAllTreeNodes()
 
 	// Construct the snode hierarchy structure
 	_TreeRoot = new CGroupTree::SNode;
-	_AllNodes.resize(SKILLS::NUM_SKILLS, NULL);
+	_AllNodes.resize(SKILLS::NUM_SKILLS, nullptr);
 	bool bQuit = false;
 	uint nCounter = 0;
 
@@ -344,7 +344,7 @@ void CGroupSkills::createAllTreeNodes()
 		bQuit = true;
 		// Try to create a skill
 		for (uint32 i = 0; i < SKILLS::NUM_SKILLS; ++i)
-		if (_AllNodes[i] == NULL) // not already created
+		if (_AllNodes[i] == nullptr) // not already created
 		{
 			if (pSM->isUnknown((SKILLS::ESkills)i)) continue;
 
@@ -354,7 +354,7 @@ void CGroupSkills::createAllTreeNodes()
 			// if parent, the parent node must be created
 			if (parentSkill != SKILLS::unknown)
 			{
-				if (_AllNodes[parentSkill] == NULL)
+				if (_AllNodes[parentSkill] == nullptr)
 				{
 					bQuit = false;
 					continue;
@@ -372,7 +372,7 @@ void CGroupSkills::createAllTreeNodes()
 			if(_TemplateSkill.empty())
 			{
 				pNode->DisplayText = true;
-				pNode->Template = NULL;
+				pNode->Template = nullptr;
 				pNode->Text= sSkillName;
 			}
 			else
@@ -383,15 +383,15 @@ void CGroupSkills::createAllTreeNodes()
 				tempVec[0].first="id"; tempVec[0].second= pNode->Id;
 				tempVec[1].first="skillid"; tempVec[1].second= NLMISC::toString(i);
 				CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getParser()->createGroupInstance(_TemplateSkill, getId() + ":" + WIN_TREE_LIST, tempVec);
-				if (pIG == NULL)
+				if (pIG == nullptr)
 					nlwarning("error");
 				// Set Skill Name
 				CViewText *pViewSkillName = dynamic_cast<CViewText*>(pIG->getView("name"));
-				if (pViewSkillName != NULL)
+				if (pViewSkillName != nullptr)
 					pViewSkillName->setText (sSkillName);
 				// Set Skill Max Value
 				CViewText *pViewSkillMax = dynamic_cast<CViewText*>(pIG->getView("max"));
-				if (pViewSkillMax != NULL)
+				if (pViewSkillMax != nullptr)
 					pViewSkillMax->setText (toString(pSM->getMaxSkillValue((SKILLS::ESkills)i)));
 				pNode->Template = pIG;
 			}

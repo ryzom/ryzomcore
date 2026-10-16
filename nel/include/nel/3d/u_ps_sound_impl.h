@@ -50,7 +50,8 @@ public:
 	/** The system will call this method to set the parameters of the sound
 	  */
 	CPSSoundInstanceImpl()
-		: _Source(NULL), _Spawned(false), _SoundServImpl(NULL)
+		: _Source(nullptr)
+	    , _Spawned(false), _SoundServImpl(nullptr)
 	{
 	}
 
@@ -146,7 +147,7 @@ class CPSSoundServImpl : public UPSSoundServer
 {
 public:
 	/// construct this sound server; You must init it then
-	CPSSoundServImpl() : _AudioMixer(NULL)
+	CPSSoundServImpl() : _AudioMixer(nullptr)
 	{
 	}
 
@@ -168,7 +169,7 @@ public:
 	UPSSoundInstance *createSound(const NLMISC::TStringId &soundName, bool spawned = true) NL_OVERRIDE
 	{
 		if (!_AudioMixer)
-			return NULL;
+			return nullptr;
 		CPSSoundInstanceImpl *sound = new CPSSoundInstanceImpl;
 		NLSOUND::USource *source = _AudioMixer->createSource(soundName, spawned, SpawnedSourceEndedCallback, sound );
 		if (source)
@@ -186,7 +187,7 @@ public:
 		{
 			// should usually not happen
 			delete sound;
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -201,7 +202,7 @@ protected:
 inline void SpawnedSourceEndedCallback(NLSOUND::USource *source, void *userParam)
 {
 	nlassert(((CPSSoundInstanceImpl *) userParam)->_Source == source);
-	((CPSSoundInstanceImpl *) userParam)->_Source = NULL;
+	((CPSSoundInstanceImpl *) userParam)->_Source = nullptr;
 }
 
 

@@ -353,7 +353,7 @@ public:
 	 */
 	bool	setupedIntoDriver() const
 	{
-		return TextureDrvShare!=NULL;
+		return TextureDrvShare != nullptr;
 	}
 
 	/// Release the Driver info for this texture (if any). Call it with care.

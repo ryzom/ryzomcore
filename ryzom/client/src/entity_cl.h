@@ -154,8 +154,8 @@ public:
 		// ------------------------------------------------------------------------
 		SInstanceCL()
 		{
-			Current = Loading = NULL;
-			FXItemSheet = NULL;
+			Current = Loading = nullptr;
+			FXItemSheet = nullptr;
 			TextureSet = -1;
 			ApplyColor = false;
 			KeepHiddenWhenLoaded = false;
@@ -380,7 +380,7 @@ public:
 	 * \return USkeleton * : pointer on the skeleton handle or NULL.
 	 */
 	NL3D::USkeleton *skeleton(const std::string &filename);
-	NL3D::USkeleton *skeleton() {return _Skeleton.empty()?NULL:&_Skeleton;}
+	NL3D::USkeleton *skeleton() {return _Skeleton.empty() ? nullptr : &_Skeleton;}
 
 	void setStateFx(const std::string &name);
 	void removeStateFx();
@@ -460,7 +460,7 @@ public:
 	 */
 	virtual void pacsFinalizeMove();
 	/// Get the entity position and set all visual stuff with it.
-	virtual void updateDisplay(CEntityCL *parent = 0);
+	virtual void updateDisplay(CEntityCL *parent = nullptr);
 	/// Set the cluster system for the current entity and all of its chidren.
 	void setClusterSystem(NL3D::UInstanceGroup *cluster);
 	// Get the current cluster system
@@ -659,7 +659,7 @@ public:
 	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 
 	// return vector of ground fxs sorted by ground type, or NULL is ground fxs are not supported for the entity
-	virtual const std::vector<CGroundFXSheet> *getGroundFX() const { return NULL; }
+	virtual const std::vector<CGroundFXSheet> *getGroundFX() const { return nullptr; }
 
 	// are ground fx supported by entity ?
 	virtual bool supportGroundFX() const { return false; }

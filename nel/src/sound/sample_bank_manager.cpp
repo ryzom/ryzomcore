@@ -52,12 +52,12 @@ CSampleBankManager::~CSampleBankManager()
 
 void CSampleBankManager::init(NLGEORGES::UFormElm *mixerConfig)
 {
-	if (mixerConfig == 0)
+	if (mixerConfig == nullptr)
 		return;
 	
 	NLGEORGES::UFormElm	*virtualBanks;
 	mixerConfig->getNodeByName(&virtualBanks, ".VirtualBanks");
-	if (virtualBanks == 0)
+	if (virtualBanks == nullptr)
 		return;
 	
 	uint size;
@@ -68,14 +68,14 @@ void CSampleBankManager::init(NLGEORGES::UFormElm *mixerConfig)
 		NLGEORGES::UFormElm	*virtualBank;
 		virtualBanks->getArrayNode(&virtualBank, i);
 
-		if (virtualBank != 0)
+		if (virtualBank != nullptr)
 		{
 			std::vector<TFilteredBank> vfb;
 			std::string virtualName;
 			virtualBank->getValueByName(virtualName, ".VirtualName");
 			NLGEORGES::UFormElm	*realBanks;
 			virtualBank->getNodeByName(&realBanks, ".FilteredBank");
-			if (realBanks != 0)
+			if (realBanks != nullptr)
 			{
 				uint size2;
 				realBanks->getArraySize(size2);
@@ -84,9 +84,9 @@ void CSampleBankManager::init(NLGEORGES::UFormElm *mixerConfig)
 				{
 					TFilteredBank fb;
 					std::string	bankName;
-					NLGEORGES::UFormElm	*realBank = NULL;
+					NLGEORGES::UFormElm	*realBank = nullptr;
 					realBanks->getArrayNode(&realBank, j);
-					if (realBank != 0)
+					if (realBank != nullptr)
 					{
 						realBank->getValueByName(bankName, ".SampleBank");
 						fb.BankName = CStringMapper::map(bankName);
@@ -124,7 +124,7 @@ CSampleBank *CSampleBankManager::findSampleBank(const NLMISC::TStringId &filenam
 	if (it != m_Banks.end())
 		return it->second;
 
-	return NULL;
+	return nullptr;
 }
 
 IBuffer *CSampleBankManager::get(const NLMISC::TStringId &name)
@@ -135,14 +135,14 @@ IBuffer *CSampleBankManager::get(const NLMISC::TStringId &name)
 	for (iter = m_Banks.begin(); iter != m_Banks.end(); ++iter)
 	{
 		buffer = iter->second->getSample(name);
-		if (buffer != 0)
+		if (buffer != nullptr)
 		{
 			return buffer;
 		}
 	}
 
 	//nlwarning ("Try to get an unknown sample '%s'", name);
-	return 0;
+	return nullptr;
 }
 
 void CSampleBankManager::reload(bool async)

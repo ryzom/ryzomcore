@@ -61,7 +61,7 @@ public:
 
 	uint16 getZoneId (uint x, uint y) const;
 	void getZonePos (uint16 zoneId, uint &x, uint &y) const;
-	void getListZoneId (uint x, uint y, uint sizeArea, std::vector<uint16> &l, const std::vector<uint16> *validZoneIds = NULL);
+	void getListZoneId (uint x, uint y, uint sizeArea, std::vector<uint16> &l, const std::vector<uint16> *validZoneIds = nullptr);
 	std::string getZoneNameFromId (uint16 zoneid);
 
 private:

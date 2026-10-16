@@ -74,7 +74,8 @@ static inline GLsizei vbgl3BufferForType(CVertexBuffer::TBufferUsage mem)
 
 CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TBufferUsage preferred, CVertexBuffer *vb)
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::GL3),
-	m_VertexPtr(NULL),
+	m_VertexPtr(nullptr)
+    ,
 	m_ShadowDirty(false),
 	m_InitialUploadDone(false),
 	m_CurrentIndex(0),
@@ -106,7 +107,7 @@ CVertexBufferGL3::CVertexBufferGL3(CDriverGL3 *drv, uint size, uint numVertices,
 	for (GLsizei i = 0; i < nbBuff; ++i)
 	{
 		drv->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
-		nglBufferData(GL_ARRAY_BUFFER, size, NULL, drv->vertexBufferUsageGL3(preferred));
+		nglBufferData(GL_ARRAY_BUFFER, size, nullptr, drv->vertexBufferUsageGL3(preferred));
 		drv->_DriverGLStates.forceBindArrayBuffer(0);
 	}
 }
@@ -196,7 +197,7 @@ void *CVertexBufferGL3::lock()
 		for (GLsizei i = 0; i < nbBuff; ++i)
 		{
 			m_Driver->_DriverGLStates.forceBindArrayBuffer(m_VertexObjectId[i]);
-			nglBufferData(GL_ARRAY_BUFFER, size, NULL, m_Driver->vertexBufferUsageGL3(m_MemType));
+			nglBufferData(GL_ARRAY_BUFFER, size, nullptr, m_Driver->vertexBufferUsageGL3(m_MemType));
 			m_Driver->_DriverGLStates.forceBindArrayBuffer(0);
 			if (glGetError() != GL_NO_ERROR)
 			{
@@ -321,7 +322,7 @@ void CVertexBufferGL3::unlock()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_unlock);
 
-	m_VertexPtr = NULL;
+	m_VertexPtr = nullptr;
 	if (m_Invalid) return;
 
 	// Shadow buffer: just mark dirty, no GL interaction
@@ -387,9 +388,9 @@ void CVertexBufferGL3::enable()
 void CVertexBufferGL3::disable()
 {
 	H_AUTO_OGL(CVertexBufferGLARB_disable)
-	if (m_Driver->_CurrentVertexBufferGL != NULL)
+	if (m_Driver->_CurrentVertexBufferGL != nullptr)
 	{
-		m_Driver->_CurrentVertexBufferGL = NULL;
+		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}
 }
 
@@ -498,7 +499,7 @@ void CVertexBufferGL3::flush()
 			nglBindBuffer(GL_COPY_WRITE_BUFFER, m_VertexObjectId[m_CurrentIndex]);
 
 			// Orphan staging once and pack all ranges contiguously
-			nglBufferData(GL_COPY_READ_BUFFER, totalDirty, NULL, GL_STREAM_DRAW);
+			nglBufferData(GL_COPY_READ_BUFFER, totalDirty, nullptr, GL_STREAM_DRAW);
 
 			uint32 packOffset = 0;
 			for (uint i = 0; i < m_MergedRanges.size(); ++i)
@@ -553,7 +554,8 @@ void CVertexBufferGL3::invalidate()
 CVertexBufferAMDPinned::CVertexBufferAMDPinned(CDriverGL3 *drv, uint size, uint numVertices, CVertexBuffer::TBufferUsage preferred, CVertexBuffer *vb) 
 	: IVertexBufferGL3(drv, vb, IVertexBufferGL3::AMDPinned),
 	m_MemType(preferred),
-	m_VertexPtr(NULL),
+	m_VertexPtr(nullptr)
+    ,
 	m_VertexObjectId(0),
 	m_FrameInFlight(NL3D_GL3_BUFFER_NOT_IN_FLIGHT)
 {
@@ -603,8 +605,8 @@ CVertexBufferAMDPinned::~CVertexBufferAMDPinned()
 		nglDeleteBuffers(1, &id);
 	}
 	delete[] static_cast<char *>(m_VertexPtrAllocated);
-	m_VertexPtrAllocated = NULL;
-	m_VertexPtrAligned = NULL;
+	m_VertexPtrAllocated = nullptr;
+	m_VertexPtrAligned = nullptr;
 	nlassert(m_VertexPtr == NULL);
 }
 
@@ -634,7 +636,7 @@ void *CVertexBufferAMDPinned::lock()
 	case CVertexBuffer::FullStream:
 	case CVertexBuffer::SmallStream:
 		nlerror("Volatile currently not supported by pinned memory, this would require a re-allocating RAM, and thus require a fast allocation mechanism");
-		m_VertexPtr = NULL;
+		m_VertexPtr = nullptr;
 		break;
 	case CVertexBuffer::CpuReadWrite:
 #ifdef USE_OPENGLES3
@@ -674,7 +676,7 @@ void CVertexBufferAMDPinned::unlock()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_unlock);
 
-	m_VertexPtr = NULL;
+	m_VertexPtr = nullptr;
 
 	if (!m_VertexObjectId)
 		return;
@@ -734,9 +736,9 @@ void CVertexBufferAMDPinned::enable()
 void CVertexBufferAMDPinned::disable()
 {
 	H_AUTO_OGL(CVertexBufferAMDPinned_disable)
-	if (m_Driver->_CurrentVertexBufferGL != NULL)
+	if (m_Driver->_CurrentVertexBufferGL != nullptr)
 	{
-		m_Driver->_CurrentVertexBufferGL = NULL;
+		m_Driver->_CurrentVertexBufferGL = nullptr;
 	}
 }
 

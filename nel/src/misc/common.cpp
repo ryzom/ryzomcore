@@ -686,7 +686,7 @@ char toLower(const char ch)
 
 void toLower(char *str)
 {
-	if (str == 0)
+	if (str == nullptr)
 		return;
 
 	while(*str != '\0')
@@ -719,7 +719,7 @@ std::string toUpper(const std::string &str)
 
 void toUpper(char *str)
 {
-	if (str == 0)
+	if (str == nullptr)
 		return;
 
 	while(*str != '\0')
@@ -1247,7 +1247,7 @@ bool launchProgram(const std::string &programName, const std::string &arguments,
 	{
 		argv[i+1] = (char *) args[i].c_str();
 	}
-	argv[i+1] = NULL;
+	argv[i+1] = nullptr;
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
@@ -1353,7 +1353,7 @@ bool launchProgramArray (const std::string &programName, const std::vector<std::
 	{
 		argv[i+1] = (char *) arguments[i].c_str();
 	}
-	argv[i+1] = NULL;
+	argv[i+1] = nullptr;
 	
 	int status = vfork ();
 	/////////////////////////////////////////////////////////
@@ -1452,7 +1452,7 @@ std::string getCommandOutput(const std::string &command)
 
 	while (!feof(pipe))
 	{
-		if (fgets(buffer, MAX_LINE_WIDTH, pipe) != NULL) result += buffer;
+		if (fgets(buffer, MAX_LINE_WIDTH, pipe) != nullptr) result += buffer;
 	}
 		
 	pclose(pipe);

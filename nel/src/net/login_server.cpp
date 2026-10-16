@@ -48,7 +48,7 @@ struct CPendingUser
 
 static list<CPendingUser> PendingUsers;
 
-static CCallbackServer *Server = NULL;
+static CCallbackServer *Server = nullptr;
 static string ListenAddr;
 static CInetHost ListenHost;
 
@@ -56,7 +56,7 @@ static bool AcceptInvalidCookie = false;
 
 static string DefaultUserPriv;
 
-static TDisconnectClientCallback DisconnectClientCallback = NULL;
+static TDisconnectClientCallback DisconnectClientCallback = nullptr;
 
 // true=tcp   false=udp
 static bool ModeTcp = 0;
@@ -67,9 +67,9 @@ static uint TimeBeforeEraseCookie = 15*60;
 /// contains the correspondance between userid and the sockid
 map<uint32, TSockId> UserIdSockAssociations;
 
-TNewClientCallback NewClientCallback = NULL;
+TNewClientCallback NewClientCallback = nullptr;
 
-TNewCookieCallback NewCookieCallback = NULL;
+TNewCookieCallback NewCookieCallback = nullptr;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,7 +161,7 @@ void cbWSChooseShard (CMessage &msgin, const std::string &/* serviceName */, TSe
 		reason.clear();
 
 		// callback if needed
-		if (NewCookieCallback != NULL)
+		if (NewCookieCallback != nullptr)
 		{
 			NewCookieCallback(cookie);
 		}
@@ -197,7 +197,7 @@ void cbWSDisconnectClient (CMessage &msgin, const std::string &serviceName, TSer
 		}
 	}
 
-	if (DisconnectClientCallback != NULL)
+	if (DisconnectClientCallback != nullptr)
 	{
 		DisconnectClientCallback (userid, serviceName);
 	}
@@ -257,11 +257,11 @@ void cbShardValidation (CMessage &msgin, TSockId from, CCallbackNetBase &netbase
 			UserIdSockAssociations.insert (make_pair(userid, from));
 
 		// identification OK, let's call the user callback
-		if (NewClientCallback != NULL)
+		if (NewClientCallback != nullptr)
 			NewClientCallback (from, cookie);
 
 		// ok, now, he can call all callback
-		Server->authorizeOnly (NULL, from);
+		Server->authorizeOnly (nullptr, from);
 	}
 }
 
@@ -282,7 +282,7 @@ static const TCallbackItem ClientCallbackArray[] =
 void CLoginServer::setListenAddress(const string &la)
 {
 	// if the var is empty or not found, take it from the listenAddress()
-	if (la.empty() && ModeTcp && Server != NULL)
+	if (la.empty() && ModeTcp && Server != nullptr)
 	{
 		ListenAddr = Server->listenAddress ().asIPString();
 	}
@@ -393,7 +393,7 @@ void CLoginServer::init (CCallbackServer &server, TNewClientCallback ncl)
 
 	// add callback to the server
 	server.addCallbackArray (ClientCallbackArray, sizeof (ClientCallbackArray) / sizeof (ClientCallbackArray[0]));
-	server.setConnectionCallback (ClientConnection, NULL);
+	server.setConnectionCallback (ClientConnection, nullptr);
 
 	NewClientCallback = ncl;
 	Server = &server;

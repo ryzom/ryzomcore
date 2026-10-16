@@ -8,7 +8,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -18,11 +18,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -82,7 +82,7 @@ namespace ZPUI {
 const char *CEditorUI::MASTER_GROUP = "ui:zp";
 
 // Process-wide bridge (runViewer installs; action handlers call through it)
-static SPaintUIBridge *s_Bridge = NULL;
+static SPaintUIBridge *s_Bridge = nullptr;
 
 void setPaintUIBridge(SPaintUIBridge *bridge) { s_Bridge = bridge; }
 SPaintUIBridge *getPaintUIBridge() { return s_Bridge; }
@@ -276,6 +276,364 @@ public:
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpPropUseBBox, "zp_prop_usebbox");
+
+// Patch rollout handlers
+/** Sub-object level button: toggle-off - clicking the pressed level returns to
+ * Object level. The level itself comes from the button's params. */
+class CAHZpSubObject : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectSubObject) return;
+		int level = 0;
+		fromString(params, level);
+		b->selectSubObject(b->SubObj == level ? 0 : level);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSubObject, "zp_sub_object");
+
+class CAHZpPatchBind : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchBind) b->patchBind();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchBind, "zp_patch_bind");
+
+class CAHZpPatchUnbind : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchUnbind) b->patchUnbind();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchUnbind, "zp_patch_unbind");
+
+class CAHZpPatchNoSmooth : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchNoSmooth) b->patchNoSmooth();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchNoSmooth, "zp_patch_nosmooth");
+
+/** Selection-block checkboxes: pick filters and Lock Handles. */
+class CAHZpPatchFilterVerts : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchFilterVertsToggle) b->patchFilterVertsToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchFilterVerts, "zp_patch_filter_verts");
+
+class CAHZpPatchFilterVecs : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchFilterVecsToggle) b->patchFilterVecsToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchFilterVecs, "zp_patch_filter_vecs");
+
+class CAHZpPatchLockHandles : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchLockHandlesToggle) b->patchLockHandlesToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchLockHandles, "zp_patch_lock_handles");
+
+class CAHZpPatchArrows : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->arrowsToggle) b->arrowsToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchArrows, "zp_patch_arrows");
+
+/** Surface Properties: one smoothing-group grid button; params = the bit "0".."31". */
+class CAHZpPatchSmGroup : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		int bit = 0;
+		NLMISC::fromString(params, bit);
+		if (b && b->patchSmGroup) b->patchSmGroup(bit);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSmGroup, "zp_patch_smgroup");
+
+class CAHZpPatchSmGroupClear : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSmGroupClear) b->patchSmGroupClear();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSmGroupClear, "zp_patch_smgroup_clear");
+
+/** Tess steppers; params = "u+", "u-", "v+", "v-". */
+class CAHZpPatchTess : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->patchTessDelta || params.size() < 2) return;
+		const int axis = params[0] == 'v' ? 1 : 0;
+		b->patchTessDelta(axis, params[1] == '-' ? -1 : 1);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchTess, "zp_patch_tess");
+
+class CAHZpPatchBalance : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchBalance) b->patchBalance();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchBalance, "zp_patch_balance");
+
+class CAHZpPatchDelete : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDelete) b->patchDelete();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDelete, "zp_patch_delete");
+
+/** Turn the selected patches; params "ccw" / "cw". */
+class CAHZpPatchTurn : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b) return;
+		if (params == "cw") { if (b->patchTurnCw) b->patchTurnCw(); }
+		else { if (b->patchTurnCcw) b->patchTurnCcw(); }
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchTurn, "zp_patch_turn");
+
+class CAHZpPatchSubdivide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSubdivide) b->patchSubdivide();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSubdivide, "zp_patch_subdivide");
+
+/** Panel Weld button: pop the distance dialog, seeded with the last-used threshold. */
+class CAHZpPatchWeld : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b) return;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:weld_dialog:content:dist_frame:dist")))
+			eb->setInputString(NLMISC::toString("%g", b->WeldThreshold));
+		CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:weld_dialog");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchWeld, "zp_patch_weld");
+
+/** Weld dialog OK: parse the distance and weld the vertex selection at it. */
+class CAHZpWeldOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->patchWeldThreshold) return;
+		float t = 0.f;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:weld_dialog:content:dist_frame:dist")))
+			NLMISC::fromString(eb->getInputString(), t);
+		if (t <= 0.f)
+			return; // an unparsable or zero distance welds nothing; the dialog stays up
+		CWidgetManager::getInstance()->disableModalWindow();
+		b->patchWeldThreshold(t);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpWeldOk, "zp_weld_ok");
+
+class CAHZpWeldCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpWeldCancel, "zp_weld_cancel");
+
+/** The Normal radio pair state (dialog-local; seeded from the bridge on open). */
+static void zpSetExtrudeNormalRadio(bool local)
+{
+	if (CCtrlBaseButton *bz = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:extrude_dialog:content:norm_z")))
+		bz->setPushed(!local);
+	if (CCtrlBaseButton *bl = dynamic_cast<CCtrlBaseButton *>(
+	        CWidgetManager::getInstance()->getElementFromId(
+	            "ui:zp:extrude_dialog:content:norm_local")))
+		bl->setPushed(local);
+}
+
+/** Panel Extrude button: pop the dialog, seeded with the last-used height/outline/mode. */
+class CAHZpPatchExtrude : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b) return;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
+			eb->setInputString(NLMISC::toString("%g", b->ExtrudeHeight));
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:outl_frame:outl")))
+			eb->setInputString(NLMISC::toString("%g", b->ExtrudeOutline));
+		zpSetExtrudeNormalRadio(b->ExtrudeLocal);
+		CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:extrude_dialog");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchExtrude, "zp_patch_extrude");
+
+/** The Normal radio pair: exactly one pushed. */
+class CAHZpExtrudeNormal : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		zpSetExtrudeNormalRadio(atoi(params.c_str()) != 0);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeNormal, "zp_extrude_normal");
+
+/** Extrude dialog OK: parse height + outline + mode and extrude the face selection. */
+class CAHZpExtrudeOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->patchExtrudeEx) return;
+		float h = 0.f, outline = 0.f;
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:dist_frame:dist")))
+			NLMISC::fromString(eb->getInputString(), h);
+		if (CGroupEditBox *eb = dynamic_cast<CGroupEditBox *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:outl_frame:outl")))
+			NLMISC::fromString(eb->getInputString(), outline);
+		bool local = false;
+		if (CCtrlBaseButton *bl = dynamic_cast<CCtrlBaseButton *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:extrude_dialog:content:norm_local")))
+			local = bl->getPushed();
+		if (h == 0.f)
+			return; // an unparsable or zero height extrudes nothing; the dialog stays up
+		CWidgetManager::getInstance()->disableModalWindow();
+		b->patchExtrudeEx(h, outline, local);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeOk, "zp_extrude_ok");
+
+class CAHZpExtrudeCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpExtrudeCancel, "zp_extrude_cancel");
+
+class CAHZpPatchAddQuad : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchAddQuad) b->patchAddQuad();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchAddQuad, "zp_patch_add_quad");
+
+class CAHZpPatchDetach : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDetach) b->patchDetach();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDetach, "zp_patch_detach");
 
 class CAHZpTileSet : public IActionHandler
 {
@@ -556,11 +914,234 @@ public:
 		if (!b || b->SeasonCount < 1)
 			return;
 		if (b->seasonMenuFill)
-			b->seasonMenuFill(NULL); // bridge shows/hides s0..s3 buttons
+			b->seasonMenuFill(nullptr); // bridge shows/hides s0..s3 buttons
 		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:season_menu");
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpSeasonMenu, "zp_season_menu");
+
+/** Open the pivot-point picker (toolbar pivot button, and the scene context menu). */
+class CAHZpPivotMenu : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:pivot_menu");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPivotMenu, "zp_pivot_menu");
+
+/** Choose a pivot mode (params = the TPivotMode ordinal). */
+class CAHZpPivotSelect : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->selectPivotMode)
+			return;
+		b->selectPivotMode(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPivotSelect, "zp_pivot_select");
+
+/** Drop the user pivot at the selection's centre - the only way that mode's point is set. */
+class CAHZpPivotToSelection : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->userPivotToSelection)
+			return;
+		b->userPivotToSelection();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPivotToSelection, "zp_pivot_to_selection");
+
+/** Open the scene context menu (right click on empty space in patch mode). */
+class CAHZpSceneMenu : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase *pCaller, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->enableModalWindow(pCaller, "ui:zp:scene_menu");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpSceneMenu, "zp_scene_menu");
+
+class CAHZpPatchElement : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchElement) b->patchElement();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchElement, "zp_patch_element");
+
+class CAHZpPatchWeldTarget : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->weldTargetToggle) b->weldTargetToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchWeldTarget, "zp_patch_weld_target");
+
+/** Scene-menu compass: move the patch selection to the neighbor zone (params = 0..7). */
+class CAHZpMoveToZone : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->moveToZoneDir)
+			b->moveToZoneDir(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpMoveToZone, "zp_move_to_zone");
+
+
+/** Reset paint (mA8): resolve the target zone, show it in the confirm modal, execute on
+ *  OK. The modal is the danger guard - scripts call the op bare. */
+static uint s_ResetPaintZone = 0;
+class CAHZpResetPaint : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (!b || !b->resetPaintTarget || !b->resetPaint) return;
+		std::string label;
+		uint zone = 0;
+		if (!b->resetPaintTarget(zone, label))
+			return; // ambiguous or nothing editable; the status line explains
+		s_ResetPaintZone = zone;
+		if (CViewText *t = dynamic_cast<CViewText *>(
+		        CWidgetManager::getInstance()->getElementFromId(
+		            "ui:zp:reset_dialog:content:zone")))
+			t->setHardText(label);
+		CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:reset_dialog");
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetPaint, "zp_reset_paint");
+
+class CAHZpResetOk : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->resetPaint)
+			b->resetPaint(s_ResetPaintZone);
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetOk, "zp_reset_ok");
+
+class CAHZpResetCancel : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		CWidgetManager::getInstance()->disableModalWindow();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpResetCancel, "zp_reset_cancel");
+
+class CAHZpPatchDetachCopy : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchDetachCopyToggle) b->patchDetachCopyToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchDetachCopy, "zp_patch_detach_copy");
+
+class CAHZpPatchSubdivProp : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchSubdivPropToggle) b->patchSubdivPropToggle();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchSubdivProp, "zp_patch_subdiv_prop");
+
+class CAHZpPatchHide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchHide) b->patchHide();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchHide, "zp_patch_hide");
+
+class CAHZpPatchUnhide : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string & /* params */) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return; // pumped script: UI locked (CANCEL only)
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchUnhideAll) b->patchUnhideAll();
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpPatchUnhide, "zp_patch_unhide");
+
+/** Scene-menu vertex type pair: set the vertex selection Coplanar (1) or Corner (0). */
+class CAHZpVertexType : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchVertCoplanar)
+			b->patchVertCoplanar(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpVertexType, "zp_vertex_type");
+
+/** Scene-menu interior mode pair: set the face selection Auto (1) or Manual (0). */
+class CAHZpInteriorMode : public IActionHandler
+{
+public:
+	virtual void execute(CCtrlBase * /* pCaller */, const std::string &params) NL_OVERRIDE
+	{
+		if (ZPSCRIPT::isExecuting()) return;
+		CWidgetManager::getInstance()->disableModalWindow();
+		SPaintUIBridge *b = getPaintUIBridge();
+		if (b && b->patchInteriorMode)
+			b->patchInteriorMode(atoi(params.c_str()));
+	}
+};
+REGISTER_ACTION_HANDLER(CAHZpInteriorMode, "zp_interior_mode");
 
 /** Pick a specific season code from the menu (params = sp|su|au|wi). */
 class CAHZpSeasonSelect : public IActionHandler
@@ -848,7 +1429,7 @@ static void openSaveDialogCommon(SPaintUIBridge *b, const std::string &prefillBa
 	if (CInterfaceGroup *row = dynamic_cast<CInterfaceGroup *>(
 	        CWidgetManager::getInstance()->getElementFromId("ui:zp:save_dialog:content:update_thumb")))
 		row->setActive(!b->ThumbnailsDisabled);
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:save_dialog");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:save_dialog");
 }
 
 void openSaveDialog()
@@ -994,17 +1575,17 @@ static CInterfaceGroup *spawnPaletteCell(CInterfaceGroup *parent,
                                          sint32 x, sint32 y)
 {
 	if (!parent || !templateName)
-		return NULL;
+		return nullptr;
 	IParser *parser = CWidgetManager::getInstance()->getParser();
-	CInterfaceGroup *g = NULL;
+	CInterfaceGroup *g = nullptr;
 	if (!params.empty())
 		g = parser->createGroupInstance(templateName, parent->getId(),
 		                                &params[0], (uint)params.size());
 	else
 		g = parser->createGroupInstance(templateName, parent->getId(),
-		                                (const std::pair<std::string, std::string> *)NULL, 0);
+		                                (const std::pair<std::string, std::string> *)nullptr, 0);
 	if (!g)
-		return NULL;
+		return nullptr;
 	g->setParent(parent);
 	g->setParentPos(parent);
 	g->setPosRef(Hotspot_TL);
@@ -1024,7 +1605,7 @@ static CInterfaceGroup *spawnPaletteCell(CInterfaceGroup *parent,
  * Also returns the bank-stored relative name (for fallback labelling) via *storedNameOut.
  */
 static std::string firstResolvableDiffuse(NL3D::CTileBank *bank, int setIndex,
-                                          std::string *storedNameOut = NULL)
+                                          std::string *storedNameOut = nullptr)
 {
 	if (storedNameOut)
 		storedNameOut->clear();
@@ -1093,7 +1674,7 @@ static std::string tilesetDisplayName(NL3D::CTileBank *bank, int setIndex,
  * _DisplacementBitmap → bank.getDisplacementMap. Also returns bank-global map id.
  */
 static std::string resolveDisplaceSource(NL3D::CTileBank *bank, int tileset, int subIdx,
-                                         int *mapIdOut = NULL, std::string *storedNameOut = NULL)
+                                         int *mapIdOut = nullptr, std::string *storedNameOut = nullptr)
 {
 	if (mapIdOut) *mapIdOut = -1;
 	if (storedNameOut) storedNameOut->clear();
@@ -1687,8 +2268,8 @@ REGISTER_ACTION_HANDLER(CAHZpSaveCancel, "zp_save_cancel");
 // ---------------------------------------------------------------------------------------------
 
 CEditorUI::CEditorUI()
-	: _Ready(false), _Visible(true), _Driver(NULL), _TextContext(NULL),
-	  _GuiListener(NULL), _PointerButtons(NULL)
+	: _Ready(false), _Visible(true), _Driver(nullptr), _TextContext(nullptr),
+	  _GuiListener(nullptr), _PointerButtons(nullptr)
 {
 }
 
@@ -1770,7 +2351,7 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 		        assetsDir.c_str());
 		CViewRenderer::release();
 		_Driver->deleteTextContext(_TextContext);
-		_TextContext = NULL;
+		_TextContext = nullptr;
 		return false;
 	}
 
@@ -1788,13 +2369,21 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 		CWidgetManager::getInstance()->getParser()->removeAll();
 		CViewRenderer::release();
 		_Driver->deleteTextContext(_TextContext);
-		_TextContext = NULL;
+		_TextContext = nullptr;
 		return false;
 	}
 
 	CWidgetManager::getInstance()->updateAllLocalisedElements();
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, true);
 	CInterfaceLink::updateAllLinks();
+
+	// Software cursor: CViewPointer draws the shape from the atlas as ordinary GUI
+	// geometry, so the resize / pick shapes look and behave the same on every platform -
+	// including WebGL, where the driver has no native cursor to hand a bitmap to. The
+	// system cursor is hidden so the two do not draw on top of each other; setVisible()
+	// and shutdown() put it back, or hiding the GUI would leave no cursor at all.
+	CViewPointer::setHWMouse(false);
+	_Driver->showCursor(false);
 
 	_GuiListener = new CEventListener();
 	_GuiListener->addToServer(&_Driver->EventServer);
@@ -1809,17 +2398,20 @@ bool CEditorUI::init(UDriver *driver, const std::string &fontPathHint)
 
 void CEditorUI::shutdown()
 {
+	// Hand the pointer back to the system before the GUI stops drawing one.
+	if (_Ready && _Driver)
+		_Driver->showCursor(true);
 	if (_GuiListener)
 	{
 		_GuiListener->removeFromServer();
 		delete _GuiListener;
-		_GuiListener = NULL;
+		_GuiListener = nullptr;
 	}
 	if (_PointerButtons && _Driver)
 	{
 		_PointerButtons->removeFromServer(_Driver->EventServer);
 		delete _PointerButtons;
-		_PointerButtons = NULL;
+		_PointerButtons = nullptr;
 	}
 	if (_Ready)
 	{
@@ -1830,9 +2422,9 @@ void CEditorUI::shutdown()
 	if (_TextContext && _Driver)
 	{
 		_Driver->deleteTextContext(_TextContext);
-		_TextContext = NULL;
+		_TextContext = nullptr;
 	}
-	_Driver = NULL;
+	_Driver = nullptr;
 	_Ready = false;
 	_Visible = false;
 	_HwCursors.clear();
@@ -1877,7 +2469,7 @@ void CEditorUI::syncPanelFromBridge()
 	if (!b || !b->HaveCore)
 		return;
 
-	// Max-style rollout containers under the painter tree list.
+	// rollout containers under the painter tree list.
 	// Paths are top-level ids (ui:zp:roll_*); tree attach keeps short ids under root.
 	// Content widgets live at :content:<id>. Toolbar holds mode/season/undo.
 	static const char *kRollSession = "ui:zp:roll_session";
@@ -1886,6 +2478,8 @@ void CEditorUI::syncPanelFromBridge()
 	static const char *kRollFill = "ui:zp:roll_fill";
 	static const char *kRollDisplace = "ui:zp:roll_displace";
 	static const char *kRollProperties = "ui:zp:roll_properties";
+	static const char *kRollPatch = "ui:zp:roll_patch";
+	static const char *kPatchC = "ui:zp:roll_patch:content";
 	static const char *kSessionC = "ui:zp:roll_session:content";
 	static const char *kTilesC = "ui:zp:roll_tiles:content";
 	static const char *kBrushC = "ui:zp:roll_brush:content";
@@ -1913,18 +2507,22 @@ void CEditorUI::syncPanelFromBridge()
 		btn->setPushed(b->Mode == 2);
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_prop"))
 		btn->setPushed(b->Mode == 3);
+	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:mode_patch"))
+		btn->setPushed(b->Mode == 4);
 
 	// Mode-gated rollout VISIBILITY (not collapse).
 	// Non-applicable rollouts are fully hidden. Open/collapsed is remembered per
 	// rollout across mode switches (setActive does not touch isOpen).
-	//   Tile → Session+Tiles+Brush+Fill
-	//   Color → Session+Brush+Fill
-	//   Displace → Session+Displace+Brush+Fill
-	//   Prop → Session+Properties
+	// Tile → Session+Tiles+Brush+Fill
+	// Color → Session+Brush+Fill
+	// Displace → Session+Displace+Brush+Fill
+	// Prop → Session+Properties
+	// Patch → Session+Patch
 	const bool tileActive = (b->Mode == 0);
 	const bool colorActive = (b->Mode == 1);
 	const bool displaceActive = (b->Mode == 2);
 	const bool propActive = (b->Mode == 3);
+	const bool patchActive = (b->Mode == 4);
 	const bool brushActive = tileActive || colorActive || displaceActive;
 	const bool fillActive = brushActive; // paint-common fill tools
 	if (CInterfaceGroup *g = findGroupEl(kRollSession))
@@ -1939,6 +2537,8 @@ void CEditorUI::syncPanelFromBridge()
 		g->setActive(displaceActive);
 	if (CInterfaceGroup *g = findGroupEl(kRollProperties))
 		g->setActive(propActive);
+	if (CInterfaceGroup *g = findGroupEl(kRollPatch))
+		g->setActive(patchActive);
 
 	// ZONE_PAINTER_ROLLOUTS=all: force-open every rollout once (full-column shot).
 	// ZONE_PAINTER_ROLLOUTS=collapsed: close all except Session (header/arrow crop).
@@ -1950,7 +2550,8 @@ void CEditorUI::syncPanelFromBridge()
 		{
 			s_RolloutsEnvDone = true;
 			static const char *kAllRolls[] = {
-				kRollSession, kRollTiles, kRollBrush, kRollFill, kRollDisplace, kRollProperties
+				kRollSession, kRollTiles, kRollBrush, kRollFill, kRollDisplace, kRollProperties,
+				kRollPatch
 			};
 			const bool forceOpen = (strcmp(ra, "all") == 0 || strcmp(ra, "1") == 0);
 			const bool forceCollapse = (strcmp(ra, "collapsed") == 0 || strcmp(ra, "closed") == 0);
@@ -2085,6 +2686,14 @@ void CEditorUI::syncPanelFromBridge()
 		btn->setHardText(up);
 		btn->setFrozen(b->SeasonCount < 1);
 	}
+	// Pivot face on TOOLBAR: only a transform has a pivot, so the button is shown with patch
+	// mode rather than sitting inert next to the paint tools.
+	if (CCtrlTextButton *btn = dynamic_cast<CCtrlTextButton *>(
+	        CWidgetManager::getInstance()->getElementFromId("ui:zp:toolbar:header_closed:btn_pivot")))
+	{
+		btn->setActive(b->Mode == 4);
+		btn->setHardText(b->PivotLabel[0] ? b->PivotLabel : "SEL");
+	}
 	if (CCtrlBaseButton *btn = findButton("ui:zp:toolbar:header_closed:btn_save"))
 		btn->setFrozen(!b->CanSave);
 
@@ -2164,6 +2773,211 @@ void CEditorUI::syncPanelFromBridge()
 		t->setHardText(buf);
 	}
 
+	if (patchActive)
+	{
+		// Level buttons: pressed = current level (legacy toggle-off handled by the AH).
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lvl_vert").c_str()))
+			btn->setPushed(b->SubObj == 1);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lvl_edge").c_str()))
+			btn->setPushed(b->SubObj == 2);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lvl_patch").c_str()))
+			btn->setPushed(b->SubObj == 3);
+		// Selection readout: the current level's count, singular/plural like the legacy line.
+		if (CViewText *t = findText((std::string(kPatchC) + ":sel_info").c_str()))
+		{
+			char buf[64];
+			if (b->SubObj == 1)
+			{
+				if (b->PatchSelTans)
+					snprintf(buf, sizeof(buf), "%u Handle%s (%u Vert%s) Selected",
+					         b->PatchSelTans, b->PatchSelTans == 1 ? "" : "s",
+					         b->PatchSelVerts, b->PatchSelVerts == 1 ? "ex" : "ices");
+				else if (b->PatchSelVerts)
+					snprintf(buf, sizeof(buf), "%u Vert%s Selected",
+					         b->PatchSelVerts, b->PatchSelVerts == 1 ? "ex" : "ices");
+				else
+					snprintf(buf, sizeof(buf), "No Vertex Selected");
+			}
+			else if (b->SubObj == 2)
+				snprintf(buf, sizeof(buf), b->PatchSelEdges == 1 ? "%u Edge Selected"
+				                                                 : "%u Edges Selected", b->PatchSelEdges);
+			else if (b->SubObj == 3)
+				snprintf(buf, sizeof(buf), b->PatchSelFaces == 1 ? "%u Patch Selected"
+				                                                 : "%u Patches Selected", b->PatchSelFaces);
+			else
+				snprintf(buf, sizeof(buf), "Object Level");
+			// One zone -> its name; several -> the count. A cross-file selection is easy
+			// to make by accident and otherwise invisible in the readout.
+			std::string line = buf;
+			const bool haveSel = (b->SubObj == 1 && (b->PatchSelVerts || b->PatchSelTans))
+				|| (b->SubObj == 2 && b->PatchSelEdges)
+				|| (b->SubObj == 3 && b->PatchSelFaces);
+			if (haveSel && b->PatchSelZones == 1 && b->PatchSelZoneName[0])
+				line += std::string(" - ") + b->PatchSelZoneName;
+			else if (haveSel && b->PatchSelZones > 1)
+			{
+				char zbuf[32];
+				snprintf(zbuf, sizeof(zbuf), " - %u zones", b->PatchSelZones);
+				line += zbuf;
+			}
+			t->setHardText(line);
+		}
+		// Selection block: the pick filters live at vertex level, and the two boxes obey
+		// the you-cannot-filter-both-away rule - unchecking one freezes the other.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":filter_verts:box").c_str()))
+		{
+			btn->setPushed(b->FilterVerts);
+			btn->setFrozen(b->SubObj != 1 || !b->FilterVecs);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":filter_vecs:box").c_str()))
+		{
+			btn->setPushed(b->FilterVecs);
+			btn->setFrozen(b->SubObj != 1 || !b->FilterVerts);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":lock_handles:box").c_str()))
+		{
+			btn->setPushed(b->LockHandles);
+			btn->setFrozen(b->SubObj != 1);
+		}
+		// Orientation arrows: a display toggle, live at every level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":show_arrows:box").c_str()))
+			btn->setPushed(b->ShowArrows);
+		// Bind/Unbind live at vertex level, Delete at patch level, No smooth at edge level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_bind").c_str()))
+			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unbind").c_str()))
+			btn->setFrozen(b->SubObj != 1 || !b->PatchSelVerts);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_weld").c_str()))
+			btn->setFrozen(b->SubObj != 1 || b->PatchSelVerts < 2);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_weld_target").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 1);
+			btn->setPushed(b->WeldTargetArmed);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_delete").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_ccw").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_turn_cw").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Subdiv serves both levels: the patch selection 1->4 and the edge selection 1->2.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_subdivide").c_str()))
+			btn->setFrozen(!((b->SubObj == 3 && b->PatchSelFaces)
+			                 || (b->SubObj == 2 && b->PatchSelEdges)));
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":subdiv_prop:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 2);
+			btn->setPushed(b->SubdivPropagate);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":detach_copy:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 3);
+			btn->setPushed(b->DetachCopy);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_add_quad").c_str()))
+			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_detach").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_extrude").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_element").c_str()))
+			btn->setFrozen(b->SubObj != 3 || !b->PatchSelFaces);
+		// Hide takes the current level's selection (vertex/edge/patch); Unhide All is live
+		// whenever anything is hidden, whatever the level.
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_hide").c_str()))
+		{
+			const bool haveSel = (b->SubObj == 1 && b->PatchSelVerts)
+				|| (b->SubObj == 2 && b->PatchSelEdges)
+				|| (b->SubObj == 3 && b->PatchSelFaces);
+			btn->setFrozen(!haveSel);
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_unhide").c_str()))
+			btn->setFrozen(!b->HiddenCount);
+		// Scene-menu compass: a direction is live when an editable board neighbor sits there
+		// (patch level with a face selection; the mask is empty otherwise).
+		{
+			static const char *kMvIds[8] = { "mv_n", "mv_ne", "mv_e", "mv_se",
+			                                 "mv_s", "mv_sw", "mv_w", "mv_nw" };
+			for (int d = 0; d < 8; ++d)
+				if (CCtrlBaseButton *btn = findButton(
+						(std::string("ui:zp:scene_menu:content:") + kMvIds[d]).c_str()))
+					btn->setFrozen(!(b->MoveDirMask & (1u << d)));
+		}
+		// Scene-menu vertex type pair: checked = the WHOLE selection carries that type
+		// (mixed shows neither); live at vertex level with a vertex selection.
+		{
+			const bool vtOff = b->SubObj != 1 || !b->PatchSelVerts;
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:vt_coplanar"))
+			{
+				btn->setFrozen(vtOff);
+				btn->setPushed(!vtOff && b->VertCoplanar == 1);
+			}
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:vt_corner"))
+			{
+				btn->setFrozen(vtOff);
+				btn->setPushed(!vtOff && b->VertCoplanar == 0);
+			}
+		}
+		// Scene-menu interior mode pair: same shape, patch level.
+		{
+			const bool imOff = b->SubObj != 3 || !b->PatchSelFaces;
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:im_auto"))
+			{
+				btn->setFrozen(imOff);
+				btn->setPushed(!imOff && b->PatchAuto == 1);
+			}
+			if (CCtrlBaseButton *btn = findButton("ui:zp:scene_menu:content:im_manual"))
+			{
+				btn->setFrozen(imOff);
+				btn->setPushed(!imOff && b->PatchAuto == 0);
+			}
+		}
+		if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":no_smooth:box").c_str()))
+		{
+			btn->setFrozen(b->SubObj != 2 || !b->PatchSelEdges);
+			btn->setPushed(b->PatchNoSmooth == 1);
+		}
+		if (CViewText *t = findText((std::string(kPatchC) + ":no_smooth_state").c_str()))
+			t->setHardText(b->SubObj == 2 && b->PatchSelEdges
+			                   ? (b->PatchNoSmooth == 2 ? "(mixed)" : "")
+			                   : "");
+		// Surface Properties: grid pushed = bit on ALL selected patches; frozen outside
+		// patch level or without a face selection. A mixed bit shows unpushed - the click
+		// still resolves the tri-state (off or mixed sets, all clears).
+		{
+			const bool surfOff = b->SubObj != 3 || !b->PatchSelFaces;
+			for (int g = 0; g < 32; ++g)
+			{
+				char nm[160];
+				snprintf(nm, sizeof(nm), "%s:sg_%d", kPatchC, g);
+				if (CCtrlBaseButton *btn = findButton(nm))
+				{
+					btn->setPushed(((b->SmGroupAll >> g) & 1) != 0);
+					btn->setFrozen(surfOff);
+				}
+			}
+			if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":btn_sg_clear").c_str()))
+				btn->setFrozen(surfOff || !b->SmGroupAny);
+			if (CViewText *t = findText((std::string(kPatchC) + ":tess_info").c_str()))
+			{
+				char buf[32];
+				if (b->TessU > 0)
+					snprintf(buf, sizeof(buf), "Tess %dx%d", 1 << b->TessU, 1 << b->TessV);
+				else
+					snprintf(buf, sizeof(buf), "Tess -");
+				t->setHardText(buf);
+			}
+			static const char *kSteppers[5] = { "tess_u_dn", "tess_u_up", "tess_v_dn",
+			                                    "tess_v_up", "btn_balance" };
+			for (int k = 0; k < 5; ++k)
+				if (CCtrlBaseButton *btn = findButton((std::string(kPatchC) + ":" + kSteppers[k]).c_str()))
+					btn->setFrozen(surfOff);
+		}
+		// Same live status line the HUD shows (op results land in g_PropStatusMsg).
+		if (CViewText *t = findText((std::string(kPatchC) + ":patch_status").c_str()))
+			t->setHardText(b->PropStatus);
+	}
+
 	if (propActive)
 	{
 		if (CViewText *t = findText((std::string(kPropC) + ":prop_name").c_str()))
@@ -2182,7 +2996,7 @@ void CEditorUI::syncPanelFromBridge()
 			else
 				snprintf(buf, sizeof(buf), "%s%s",
 				         b->PropEditable ? "editable" : "read-only",
-				         b->PropDirty ? "  dirty" : "");
+				         b->PropDirty ? " dirty" : "");
 			t->setHardText(buf);
 		}
 		if (CViewText *t = findText((std::string(kPropC) + ":prop_rot").c_str()))
@@ -2260,7 +3074,7 @@ void CEditorUI::draw()
 {
 	if (!_Ready || !_Visible)
 		return;
-	CWidgetManager::getInstance()->drawViews(NULL);
+	CWidgetManager::getInstance()->drawViews(nullptr);
 }
 
 bool CEditorUI::wantsMouse() const
@@ -2277,7 +3091,7 @@ bool CEditorUI::wantsMouse() const
 		return false;
 	sint32 x = 0, y = 0;
 	pointer->getPointerPos(x, y);
-	return wm->getWindowUnder(x, y) != NULL;
+	return wm->getWindowUnder(x, y) != nullptr;
 }
 
 void CEditorUI::setVisible(bool visible)
@@ -2286,6 +3100,10 @@ void CEditorUI::setVisible(bool visible)
 		return;
 	_Visible = visible;
 	CWidgetManager::getInstance()->activateMasterGroup(MASTER_GROUP, _Visible);
+	// The software cursor is a GUI view: with the GUI hidden nothing draws it, so the
+	// system cursor has to come back or the viewport is left with no pointer at all.
+	if (_Driver)
+		_Driver->showCursor(!_Visible);
 }
 
 void CEditorUI::toggleVisible()
@@ -2294,5 +3112,20 @@ void CEditorUI::toggleVisible()
 }
 
 } // namespace ZPUI
+
+/**
+ * Open the scene context menu from the 3D view.
+ *
+ * Called by the viewer's right-click path rather than by an action handler: the click lands on
+ * the scene, which is not a widget, so there is no caller control to hang a handler on. The
+ * modal is opened with a NULL caller, which is what puts it at the pointer.
+ */
+void zpOpenSceneMenu()
+{
+	if (ZPSCRIPT::isExecuting())
+		return;
+	NLGUI::CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:scene_menu");
+}
+
 
 /* end of file */

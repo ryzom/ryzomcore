@@ -28,7 +28,7 @@ using namespace NLGEORGES;
 void CPactSheet::build(const NLGEORGES::UFormElm &root)
 {
 	Type = PACT;
-	const UFormElm *arrayDeathImpact = NULL;
+	const UFormElm *arrayDeathImpact = nullptr;
 	if( root.getNodeByName( &arrayDeathImpact, "death_impact" ) )
 	{
 		if( arrayDeathImpact )
@@ -49,7 +49,7 @@ void CPactSheet::build(const NLGEORGES::UFormElm &root)
 
 			for( uint i = 0; i < size; ++i )
 			{
-				node = NULL;
+				node = nullptr;
 				arrayDeathImpact->getArrayNode( &node, i );
 
 				if( node )

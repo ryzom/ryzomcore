@@ -34,16 +34,16 @@ class CFastPtrListBase;
 class CFastPtrListNode
 {
 public:
-	CFastPtrListNode() {_Owner= NULL;}
+	CFastPtrListNode() {_Owner = nullptr; }
 	~CFastPtrListNode() {unlink();}
 	// No-op const copy
-	CFastPtrListNode(const CFastPtrListNode &/* o */) {_Owner= NULL;}
+	CFastPtrListNode(const CFastPtrListNode &/* o */) {_Owner = nullptr; }
 
 	// If linked to a list, remove me from it.
 	void			unlink();
 
 	// linked?
-	bool			isLinked() const {return _Owner!=NULL;}
+	bool			isLinked() const {return _Owner != nullptr; }
 
 	// No-op operator=
 	CFastPtrListNode	&operator=(const CFastPtrListNode &/* o */)
@@ -82,7 +82,7 @@ public:
 	void			erase(CFastPtrListNode *node);
 
 	/// Get the head on the array of elements. NULL if none
-	void			**begin() { if(_Elements.empty()) return NULL; else return &_Elements[0];}
+	void			**begin() { if(_Elements.empty()) return nullptr; else return &_Elements[0];}
 	/// get the number of elements
 	uint			size() const {return (uint)_Elements.size();}
 	bool			empty() const {return _Elements.empty();}

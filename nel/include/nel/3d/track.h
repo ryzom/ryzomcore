@@ -79,7 +79,7 @@ public:
 	 *	supported only by CTrackSampledQuat
 	 */
 	virtual bool	applyTrackQuatHeaderCompressionPass0(CTrackSampleCounter &/* quatCounter */) {return false;}
-	virtual ITrack	*applyTrackQuatHeaderCompressionPass1(uint &/* globalKeyOffset */, CTrackSamplePack &/* quatPacker */) {return NULL;}
+	virtual ITrack	*applyTrackQuatHeaderCompressionPass1(uint &/* globalKeyOffset */, CTrackSamplePack &/* quatPacker */) { return nullptr; }
 
 	/// \name From UTrack
 	// @{

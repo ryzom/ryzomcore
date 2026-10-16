@@ -48,8 +48,8 @@ std::string FameToStringCb(void *value)
 }
 
 
-CStaticFames	*CStaticFames::_Instance = NULL;
-CFameInterface	*CFameInterface::_Instance = NULL;
+CStaticFames	*CStaticFames::_Instance = nullptr;
+CFameInterface	*CFameInterface::_Instance = nullptr;
 
 sint16	CFameInterface::TFameOwner::CivilisationPropIndex = 0;
 sint16	CFameInterface::TFameOwner::GuildPropIndex = 0;
@@ -318,8 +318,8 @@ NLMISC_COMMAND(addFame, "Add some fame value between an entity and a faction.", 
 //----------------------------------------------------------------------------
 CStaticFames::CStaticFames()
 {
-	_FameTable = NULL;
-	_PropagationFactorTable = NULL;
+	_FameTable = nullptr;
+	_PropagationFactorTable = nullptr;
 	loadStaticFame("static_fame.txt");
 	loadTribeThreshold("fame_tribes_threshold.txt");
 }
@@ -328,9 +328,9 @@ CStaticFames::CStaticFames()
 CStaticFames::~CStaticFames()
 {
 	delete[] _FameTable;
-	_FameTable = NULL;
+	_FameTable = nullptr;
 	delete[] _PropagationFactorTable;
-	_PropagationFactorTable = NULL;
+	_PropagationFactorTable = nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -339,7 +339,7 @@ void CStaticFames::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -348,7 +348,7 @@ void CStaticFames::loadStaticFame( const string& filename )
 {
 	_FameTableSize = 0;
 	_FirstTribeFameIndex = 0;
-	_FameTable = NULL;
+	_FameTable = nullptr;
 
 	string path = CPath::lookup(filename, false);
 	if (path.empty())

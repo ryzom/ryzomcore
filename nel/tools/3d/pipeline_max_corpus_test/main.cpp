@@ -236,7 +236,7 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 	// original-vs-rewritten comparison.
 	static const char *kStreams[] = {
 		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 	};
 	std::vector<std::string> present;
 	std::vector<std::vector<uint8> > rawOrig;
@@ -419,7 +419,7 @@ static int modifySaveTest(CStorageOleIn &in, CSceneClassRegistry *reg, const std
 		else if (appDataMode)
 		{
 			BUILTIN::CAnimatable *anim = dynamic_cast<BUILTIN::CAnimatable *>(scene2.container()->getByStorageIndex((uint32)targetIndex));
-			BUILTIN::STORAGE::CAppData *ad = anim ? anim->existingAppData() : NULL;
+			BUILTIN::STORAGE::CAppData *ad = anim ? anim->existingAppData() : nullptr;
 			std::string back;
 			bool good = ad && ad->getScriptString(targetSubId, back) && back == newS;
 			if (!good)
@@ -874,7 +874,7 @@ static int meshDeltaSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 			// hypotheses corpus-wide without typing them).
 			{
 				CStorageContainer *c2512 = dynamic_cast<CStorageContainer *>(lmd);
-				CStorageContainer *c4000 = NULL;
+				CStorageContainer *c4000 = nullptr;
 				if (c2512)
 					for (CStorageContainer::TStorageObjectConstIt jt = c2512->chunks().begin(); jt != c2512->chunks().end() && !c4000; ++jt)
 						if (jt->first == 0x4000) c4000 = dynamic_cast<CStorageContainer *>(jt->second);
@@ -1696,11 +1696,11 @@ static int rpoSelfTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegist
 			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
 			if (!data) continue;
 			// local data wrapper 0x1000 -> RFINALPATCH 0x4001 raw leaf
-			CStorageContainer *wrap = NULL;
+			CStorageContainer *wrap = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
 				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
 			if (!wrap) continue;
-			CStorageRaw *rfp = NULL;
+			CStorageRaw *rfp = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !rfp; ++jt)
 				if (jt->first == 0x4001) rfp = dynamic_cast<CStorageRaw *>(jt->second);
 			if (!rfp) continue;
@@ -1755,7 +1755,7 @@ static int rpoModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 {
 	static const char *kStreams[] = {
 		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-		"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 	};
 	std::vector<std::string> present;
 	std::vector<std::vector<uint8> > rawOrig;
@@ -1809,11 +1809,11 @@ static int rpoModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 		{
 			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
 			if (!data) continue;
-			CStorageContainer *wrap = NULL;
+			CStorageContainer *wrap = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
 				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
 			if (!wrap) continue;
-			CStorageRaw *rfp = NULL;
+			CStorageRaw *rfp = nullptr;
 			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !rfp; ++jt)
 				if (jt->first == 0x4001) rfp = dynamic_cast<CStorageRaw *>(jt->second);
 			if (!rfp) continue;
@@ -1864,6 +1864,290 @@ static int rpoModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClass
 
 	std::cout << (fails ? "FAIL" : "OK") << " rpo-modify-save: " << nRpo << " rpo, " << nSnap
 	          << " snapshots, " << fails << " fail\n";
+	return fails ? 1 : 0;
+}
+
+// The whole-file NULL-EDIT proof for the PatchMesh chunk-stream encoder (Tier B): parse the
+// .max, decode every PatchMesh in the file (the base stream of every RklPatch and the OUTPUT
+// copy under every NeL Edit Patch / NeL Patch Painter modifier's 0x1140), write each straight
+// back through encodePatchMesh IN PLACE (element streams, selection BitArrays, hooks, map
+// channel; every other chunk untouched), rebuild the Scene stream, write the whole .max back
+// and require EVERY stream byte-identical — decode -> encode must be the identity before any
+// topological op is allowed to exist. Max 3 streams (reconstructed edge tables) are counted
+// and skipped: their edge data is derived at decode and must never be written back.
+// Temporary probe (editing-methods plan A1/A2/A3): histogram the element Flags words of
+// every PatchMesh in the file and cross-tab the VERTEX flag value against ring-derived
+// tangent coplanarity, to pin the coplanar/corner bit, the patch auto/manual and hidden
+// bits, empirically before any op writes them.
+static void pmFlagsProbeMesh(const NELPATCH::SPatchMesh &pm)
+{
+	using NELPATCH::SPmVert;
+	using NELPATCH::SPmVec;
+	using NELPATCH::SPmPatch;
+	// Attached tangent vecs per vertex, derived from the patch table (the Vectors list is
+	// absent on Max 3): corner c of patch p owns leaving tangent Vec[2c] and arriving
+	// tangent Vec[2*((c+3)&3)+1]. Interior vecs never attach to a vertex.
+	std::vector<std::vector<sint32> > vertVecs(pm.Verts.size());
+	for (size_t p = 0; p < pm.Patches.size(); ++p)
+	{
+		const SPmPatch &pa = pm.Patches[p];
+		for (int c = 0; c < 4; ++c)
+		{
+			sint32 v = pa.V[c];
+			if (v < 0 || (size_t)v >= pm.Verts.size()) continue;
+			sint32 t[2] = { pa.Vec[2 * c], pa.Vec[2 * ((c + 3) & 3) + 1] };
+			for (int k = 0; k < 2; ++k)
+			{
+				if (t[k] < 0 || (size_t)t[k] >= pm.Vecs.size()) continue;
+				std::vector<sint32> &lst = vertVecs[v];
+				bool dup = false;
+				for (size_t j = 0; j < lst.size(); ++j) if (lst[j] == t[k]) dup = true;
+				if (!dup) lst.push_back(t[k]);
+			}
+		}
+	}
+	for (size_t v = 0; v < pm.Verts.size(); ++v)
+	{
+		const SPmVert &vert = pm.Verts[v];
+		std::cout << "PMFLAGS vert " << vert.Flags << "\n";
+		const std::vector<sint32> &lst = vertVecs[v];
+		if (lst.size() < 3) continue;
+		// Unit directions vertex -> tangent; coplanarity = max deviation from the best
+		// pair-cross plane normal.
+		std::vector<double> dx, dy, dz;
+		for (size_t j = 0; j < lst.size(); ++j)
+		{
+			const SPmVec &vec = pm.Vecs[lst[j]];
+			double d0 = (double)vec.Pos[0] - vert.Pos[0];
+			double d1 = (double)vec.Pos[1] - vert.Pos[1];
+			double d2 = (double)vec.Pos[2] - vert.Pos[2];
+			double len = sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+			if (len < 1e-9) continue;
+			dx.push_back(d0 / len); dy.push_back(d1 / len); dz.push_back(d2 / len);
+		}
+		if (dx.size() < 3) continue;
+		double bn0 = 0, bn1 = 0, bn2 = 0, bmag = -1.0;
+		for (size_t a = 0; a < dx.size(); ++a)
+			for (size_t b = a + 1; b < dx.size(); ++b)
+			{
+				double c0 = dy[a] * dz[b] - dz[a] * dy[b];
+				double c1 = dz[a] * dx[b] - dx[a] * dz[b];
+				double c2 = dx[a] * dy[b] - dy[a] * dx[b];
+				double mag = sqrt(c0 * c0 + c1 * c1 + c2 * c2);
+				if (mag > bmag) { bmag = mag; bn0 = c0; bn1 = c1; bn2 = c2; }
+			}
+		if (bmag < 1e-9) continue; // all dirs parallel: trivially coplanar, skip
+		bn0 /= bmag; bn1 /= bmag; bn2 /= bmag;
+		double dev = 0;
+		for (size_t j = 0; j < dx.size(); ++j)
+		{
+			double d = fabs(dx[j] * bn0 + dy[j] * bn1 + dz[j] * bn2);
+			if (d > dev) dev = d;
+		}
+		// log10 bucket: 9 = dev < 1e-9 (exact), else clamp(-floor(log10(dev)), 0..8)
+		int bucket;
+		if (dev < 1e-9) bucket = 9;
+		else
+		{
+			bucket = (int)(-floor(log10(dev)));
+			if (bucket < 0) bucket = 0;
+			if (bucket > 8) bucket = 8;
+		}
+		std::cout << "PMCOPL " << vert.Flags << " n" << dx.size() << " b" << bucket << "\n";
+	}
+	for (size_t j = 0; j < pm.Vecs.size(); ++j)
+		std::cout << "PMFLAGS vec " << pm.Vecs[j].Flags << "\n";
+	for (size_t p = 0; p < pm.Patches.size(); ++p)
+		std::cout << "PMFLAGS patch " << pm.Patches[p].Flags << "\n";
+}
+
+static int pmFlagsProbe(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg)
+{
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) return 0;
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 1; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) return 0;
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 1; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) return 0;
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 1; }
+	}
+	static const NLMISC::CClassId nelEditPatchClassId(0x4dd14a3c, 0x4ac23c0c);
+	static const NLMISC::CClassId nelPatchPaintClassId(0x0c49560f, 0x3c3d68e7);
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		if (NELPATCH::CRklPatchObject *rpo = dynamic_cast<NELPATCH::CRklPatchObject *>(it->second))
+		{
+			NELPATCH::SPatchMesh pm;
+			std::string err;
+			if (rpo->decodePatch(pm, err)) pmFlagsProbeMesh(pm);
+			continue;
+		}
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			CSceneClass *mod = d->modifier(i);
+			const NLMISC::CClassId modClass = mod ? mod->classDesc()->classId() : NLMISC::CClassId::Null;
+			if (modClass != nelEditPatchClassId && modClass != nelPatchPaintClassId)
+				continue;
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
+			if (!data) continue;
+			CStorageContainer *wrap = NULL;
+			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
+				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!wrap) continue;
+			CStorageContainer *fp = NULL;
+			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !fp; ++jt)
+				if (jt->first == 0x1140) fp = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!fp) continue;
+			NELPATCH::SPatchMesh pm;
+			std::string err;
+			if (NELPATCH::decodePatchMesh(fp->chunks(), pm, err)) pmFlagsProbeMesh(pm);
+		}
+	}
+	return 0;
+}
+
+static int pmModifySaveTest(const char *maxFile, CStorageOleIn &in, CSceneClassRegistry *reg, const std::string &tempMax, bool verbose)
+{
+	static const char *kStreams[] = {
+		"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
+		"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
+	};
+	std::vector<std::string> present;
+	std::vector<std::vector<uint8> > rawOrig;
+	for (const char **n = kStreams; *n; ++n)
+	{
+		std::vector<uint8> b;
+		if (in.readStream(*n, b)) { present.push_back(*n); rawOrig.push_back(b); }
+	}
+	uint8 classId[16];
+	bool haveClassId = in.getClassId(classId);
+
+	CDllDirectory dll;
+	CClassDirectory3 cd(&dll);
+	CScene scene(reg, &dll, &cd);
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("DllDirectory", b)) { std::cout << "SKIP pm-modify-save: no DllDirectory\n"; return 0; }
+		CStorageStream ss(b); try { dll.serial(ss); dll.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "dll: " << e.what() << "\n"; return 1; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("ClassDirectory3", b)) { std::cout << "SKIP pm-modify-save: no ClassDirectory3\n"; return 0; }
+		CStorageStream ss(b); try { cd.serial(ss); cd.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "cd: " << e.what() << "\n"; return 1; }
+	}
+	{
+		std::vector<uint8> b;
+		if (!in.readStream("Scene", b)) { std::cout << "SKIP pm-modify-save: no Scene\n"; return 0; }
+		CStorageStream ss(b); try { scene.serial(ss); scene.parse(VersionUnknown); } catch (std::exception &e) { std::cerr << "scene: " << e.what() << "\n"; return 1; }
+	}
+
+	static const NLMISC::CClassId nelEditPatchClassId(0x4dd14a3c, 0x4ac23c0c);
+	static const NLMISC::CClassId nelPatchPaintClassId(0x0c49560f, 0x3c3d68e7);
+	uint nBase = 0, nMod = 0, nMax3 = 0, fails = 0;
+	CSceneClassContainer *ssc = scene.container();
+	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin(); it != ssc->chunks().end(); ++it)
+	{
+		if (NELPATCH::CRklPatchObject *rpo = dynamic_cast<NELPATCH::CRklPatchObject *>(it->second))
+		{
+			NELPATCH::SPatchMesh pm;
+			std::string err;
+			if (!rpo->decodePatch(pm, err))
+			{ std::cerr << "  pm-modify-save DECODE FAIL base (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			if (pm.EdgesReconstructed) { ++nMax3; continue; }
+			if (!rpo->setPatchMesh(pm, err))
+			{ std::cerr << "  pm-modify-save ENCODE FAIL base (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			++nBase;
+			continue;
+		}
+		BUILTIN::CDerivedObject *d = dynamic_cast<BUILTIN::CDerivedObject *>(it->second);
+		if (!d) continue;
+		for (uint i = 0; i < d->modifierCount(); ++i)
+		{
+			CSceneClass *mod = d->modifier(i);
+			const NLMISC::CClassId modClass = mod ? mod->classDesc()->classId() : NLMISC::CClassId::Null;
+			if (modClass != nelEditPatchClassId && modClass != nelPatchPaintClassId)
+				continue;
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(d->localModData(i));
+			if (!data) continue;
+			CStorageContainer *wrap = nullptr;
+			for (CStorageContainer::TStorageObjectConstIt jt = data->chunks().begin(); jt != data->chunks().end() && !wrap; ++jt)
+				if (jt->first == 0x1000) wrap = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!wrap) continue;
+			CStorageContainer *fp = nullptr;
+			for (CStorageContainer::TStorageObjectConstIt jt = wrap->chunks().begin(); jt != wrap->chunks().end() && !fp; ++jt)
+				if (jt->first == 0x1140) fp = dynamic_cast<CStorageContainer *>(jt->second);
+			if (!fp) continue;
+			NELPATCH::SPatchMesh pm;
+			std::string err;
+			if (!NELPATCH::decodePatchMesh(fp->chunks(), pm, err))
+			{ std::cerr << "  pm-modify-save DECODE FAIL 0x1140 (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			if (pm.EdgesReconstructed) { ++nMax3; continue; }
+			if (!NELPATCH::encodePatchMesh(pm, fp->chunksMut(), err))
+			{ std::cerr << "  pm-modify-save ENCODE FAIL 0x1140 (" << maxFile << "): " << err << "\n"; ++fails; continue; }
+			++nMod;
+			if (verbose)
+				std::cerr << "  pm 0x1140 " << pm.Verts.size() << "v/" << pm.Patches.size()
+				          << "p under " << modClass.toString() << "\n";
+		}
+	}
+	if (!nBase && !nMod && !nMax3 && !fails)
+	{
+		std::cout << "OK pm-modify-save: no-pm\n";
+		return 0;
+	}
+	if (!nBase && !nMod && !fails)
+	{
+		// Max 3 only: nothing encodable in the file; skip rather than prove nothing.
+		std::cout << "OK pm-modify-save: max3-only, " << nMax3 << " skipped\n";
+		return 0;
+	}
+
+	try { scene.clean(); scene.build(VersionUnknown); scene.disown(); }
+	catch (std::exception &e) { std::cerr << "scene build: " << e.what() << "\n"; return 1; }
+	std::vector<uint8> newScene;
+	try { newScene = writeContainerToTemp(scene, g_tempPath); }
+	catch (std::exception &e) { std::cerr << "scene write: " << e.what() << "\n"; return 1; }
+
+	{
+		CStorageOleOut out;
+		for (size_t i = 0; i < present.size(); ++i)
+		{
+			if (present[i] == "Scene") out.addStream("Scene", newScene);
+			else out.addStream(present[i], rawOrig[i]);
+		}
+		if (haveClassId) out.setClassId(classId);
+		if (!out.write(tempMax)) { std::cerr << "cannot create " << tempMax << "\n"; return 1; }
+	}
+
+	CStorageOleIn in2;
+	if (!in2.open(tempMax)) { std::cerr << "cannot reopen rewritten .max\n"; return 1; }
+	for (size_t i = 0; i < present.size(); ++i)
+	{
+		std::vector<uint8> b2;
+		in2.readStream(present[i], b2);
+		if (b2 != rawOrig[i])
+		{
+			std::cerr << "  pm-modify-save stream " << (present[i][0] == '\05' ? present[i].substr(1) : present[i])
+			          << " NOT byte-identical (" << rawOrig[i].size() << " -> " << b2.size() << " bytes, " << maxFile << ")\n";
+			++fails;
+		}
+	}
+
+	std::cout << (fails ? "FAIL" : "OK") << " pm-modify-save: " << nBase << " base, " << nMod
+	          << " mod, " << nMax3 << " max3-skip, " << fails << " fail\n";
 	return fails ? 1 : 0;
 }
 
@@ -1933,12 +2217,14 @@ int main(int argc, char **argv)
 	bool doAppDataSelfTest = false;
 	bool doRpoSelfTest = false;
 	bool doRpoModifySave = false;
+	bool doPmModifySave = false;
+	bool doPmFlagsProbe = false;
 	bool doModifySave = false;
 	bool doAppDataModifySave = false;
 	bool doMtlDump = false;
 	bool doUvgenDump = false;
-	const char *dumpScene = NULL;
-	const char *maxFile = NULL;
+	const char *dumpScene = nullptr;
+	const char *maxFile = nullptr;
 	// Accept flags in ANY position (the corpus drivers historically appended --parse after the
 	// file path — with a leading-flags-only parser that silently turned T2 into a no-op).
 	for (int i = 1; i < argc; ++i)
@@ -1957,6 +2243,8 @@ int main(int argc, char **argv)
 		else if (a == "--appdata-selftest") doAppDataSelfTest = true;
 		else if (a == "--rpo-selftest") doRpoSelfTest = true;
 		else if (a == "--rpo-modify-save-test") doRpoModifySave = true;
+		else if (a == "--pm-modify-save-test") doPmModifySave = true;
+		else if (a == "--pm-flags-probe") doPmFlagsProbe = true;
 		else if (a == "--modify-save-test") doModifySave = true;
 		else if (a == "--appdata-modify-save-test") doAppDataModifySave = true;
 		else if (a == "--mtl-dump") doMtlDump = true;
@@ -1972,7 +2260,7 @@ int main(int argc, char **argv)
 	}
 	if (!maxFile)
 	{
-		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--rpo-selftest] [--rpo-modify-save-test] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
+		std::cerr << "usage: pipeline_max_corpus_test [--parse] [--verbose] [--pb2-selftest] [--oldpb-selftest] [--shape-selftest] [--derived-selftest] [--meshdelta-selftest] [--mapext-selftest] [--mapchannel-selftest] [--prs-selftest] [--appdata-selftest] [--rpo-selftest] [--rpo-modify-save-test] [--pm-modify-save-test] [--modify-save-test] [--appdata-modify-save-test] <input.max>\n";
 		return 2;
 	}
 
@@ -2060,6 +2348,22 @@ int main(int argc, char **argv)
 	{
 		std::string tempMax = "/tmp/pipeline_max_rpo_modify_save." + NLMISC::toString((sint32)PMCT_GETPID()) + ".max";
 		int rc = rpoModifySaveTest(maxFile, in, &reg, tempMax, verbose);
+		remove(tempMax.c_str());
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doPmFlagsProbe)
+	{
+		int rc = pmFlagsProbe(maxFile, in, &reg);
+		remove(g_tempPath.c_str());
+		return rc;
+	}
+
+	if (doPmModifySave)
+	{
+		std::string tempMax = "/tmp/pipeline_max_pm_modify_save." + NLMISC::toString((sint32)PMCT_GETPID()) + ".max";
+		int rc = pmModifySaveTest(maxFile, in, &reg, tempMax, verbose);
 		remove(tempMax.c_str());
 		remove(g_tempPath.c_str());
 		return rc;

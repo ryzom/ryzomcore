@@ -64,14 +64,14 @@ void		CMeshMRMInstance::registerBasic()
 void		CMeshMRMInstance::clearRawSkinCache()
 {
 	delete	_RawSkinCache;
-	_RawSkinCache= NULL;
+	_RawSkinCache = nullptr;
 }
 
 // ***************************************************************************
 void		CMeshMRMInstance::clearShiftedTriangleCache()
 {
 	delete	_ShiftedTriangleCache;
-	_ShiftedTriangleCache= NULL;
+	_ShiftedTriangleCache = nullptr;
 }
 
 // ***************************************************************************
@@ -159,7 +159,7 @@ bool			CMeshMRMInstance::getSkinBoneBBox(NLMISC::CAABBox &bbox, uint boneId)
 // ***************************************************************************
 bool	CMeshMRMInstance::isSkinnable() const
 {
-	if(Shape==NULL)
+	if(Shape == nullptr)
 		return false;
 
 	// Get a pointer on the shape
@@ -196,7 +196,7 @@ const	CMRMLevelDetail		*CMeshMRMInstance::getMRMLevelDetail() const
 		return &meshMrm->getMeshGeom().getLevelDetail();
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************

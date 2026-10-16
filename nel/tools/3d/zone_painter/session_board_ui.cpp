@@ -125,7 +125,7 @@ void openCellActionPopup(const std::string &basename)
 		line->setGrayed(!editable);
 	if (CViewTextMenu *line = findMenuLine("ui:zp:cell_action:toggle"))
 		line->setText(editable ? "Make read-only" : "Make editable");
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:cell_action");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:cell_action");
 }
 
 // close_confirm purpose: false = close, true = demote-to-RO (the modal is reused for
@@ -147,7 +147,7 @@ static void openCloseConfirmModal(const std::string &basename, const std::string
 		t->setHardText(purpose.empty() ? "Close dirty zone?" : purpose);
 	if (CViewText *t = findText("ui:zp:close_confirm:content:status"))
 		t->setHardText(basename + " has unsaved paint changes");
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:close_confirm");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:close_confirm");
 }
 
 void forceShowCloseConfirmForShot(const std::string &basename)
@@ -191,7 +191,7 @@ void openInstanceActionPopup(const std::string &basename)
 		if (mir) st += " · mirror";
 		t->setHardText(st);
 	}
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:instance_action");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:instance_action");
 }
 
 void forceShowInstanceActionForShot(const std::string &basename)
@@ -584,8 +584,7 @@ void sessionBoardDragEnd(bool copyModifier)
 			t->setHardText(err);
 		return;
 	}
-	populateScratchBoard();
-	refreshSessionBoardStates();
+	refreshBoardAfterSessionOp();
 }
 
 void setSessionBoardVisible(bool visible)
@@ -610,7 +609,7 @@ void setSessionBoardVisible(bool visible)
 	if (visible)
 	{
 		s_Sess.Active = true;
-		s_Sess.Worlds = NULL;
+		s_Sess.Worlds = nullptr;
 		s_Sess.SelectedWorld = 0;
 		setLayoutSelectorVisible(false);
 		if (isCont)
@@ -674,12 +673,15 @@ bool isSessionBoardVisible()
 }
 
 // Cell-action popup handlers
-/** Per-file board ops change eco occupancy (blocks appear/disappear); repopulate. */
+/**
+ * Post-board-op refresh: THE single entry every board op uses.
+ *
+ * refreshSessionBoardStates() already repopulates the eco scratch grid (occupancy can
+ * change on any op), so the sites that also called populateScratchBoard() themselves were
+ * spawning and destroying every board cell twice per op.
+ */
 void refreshBoardAfterSessionOp()
 {
-	if (s_SessionBridge && s_SessionBridge->World
-	    && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-		populateScratchBoard();
 	refreshSessionBoardStates();
 }
 
@@ -767,7 +769,7 @@ public:
 				t->setHardText(base + " is dirty - save before making read-only?");
 			// Reuse close_confirm; btn labels still say Save first / Close without saving
 			// "Close without saving" path demotes without save via forceDiscard
-			CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:close_confirm");
+			CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:close_confirm");
 			s_CloseConfirmToggle = true;
 			return;
 		}
@@ -985,7 +987,7 @@ void openEmptyCellPopup(const std::string &basename)
 	if (CInterfaceGroup *menu = findGroup("ui:zp:empty_cell_action"))
 		menu->invalidateCoords();
 	s_PendingHintName = haveHint ? hintName : std::string();
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:empty_cell_action");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:empty_cell_action");
 }
 
 void openContextActionPopup(const std::string &basename)
@@ -1002,7 +1004,7 @@ void openContextActionPopup(const std::string &basename)
 		t->setHardText("Context (RO)");
 	if (CViewText *t = findText("ui:zp:context_action:sub"))
 		t->setHardText(lab);
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_action");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:context_action");
 }
 
 void forceShowContextActionForShot(const std::string &basename)
@@ -1115,7 +1117,7 @@ static void openContextBrickPicker(int cx, int cy, int mode)
 		                                : (s_ContextPickerMode == 1 ? "Open editable @ %d,%d"
 		                                                            : "Place context @ %d,%d"),
 		                                cx, cy));
-	CWidgetManager::getInstance()->enableModalWindow(NULL, "ui:zp:context_picker");
+	CWidgetManager::getInstance()->enableModalWindow(nullptr, "ui:zp:context_picker");
 }
 
 class CAHZpEmptyPlaceInstance : public IActionHandler
@@ -1140,10 +1142,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchPlace(cx, cy, err))
 			fprintf(stderr, "scratch place (%d,%d): %s\n", cx, cy, err.c_str());
-		// Rebuild board cells (instance set changed)
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpEmptyPlaceInstance, "zp_empty_place_instance");
@@ -1202,9 +1201,7 @@ static void zpEmptyOpenHint(bool editable)
 		ok = s_SessionBridge->scratchPlaceContext(cx, cy, name, err);
 	if (!ok)
 		fprintf(stderr, "hint open (%d,%d:%s): %s\n", cx, cy, name.c_str(), err.c_str());
-	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-		populateScratchBoard();
-	refreshSessionBoardStates();
+	refreshBoardAfterSessionOp();
 }
 
 class CAHZpEmptyHintRo : public IActionHandler
@@ -1253,9 +1250,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchRemoveContext(cx, cy, err))
 			fprintf(stderr, "scratch remove-context (%d,%d): %s\n", cx, cy, err.c_str());
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextRemove, "zp_context_remove");
@@ -1285,9 +1280,7 @@ public:
 		std::string err;
 		if (!s_SessionBridge->scratchContextToEditable(cx, cy, err))
 			fprintf(stderr, "scratch context-to-editable (%d,%d): %s\n", cx, cy, err.c_str());
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextMakeEditable, "zp_context_make_editable");
@@ -1318,9 +1311,7 @@ static void zpContextTransformAction(int rotDelta, bool mirror)
 		ok = s_SessionBridge->scratchRotateContext(cx, cy, rotDelta, err);
 	if (!ok)
 		fprintf(stderr, "context transform (%d,%d): %s\n", cx, cy, err.c_str());
-	if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-		populateScratchBoard();
-	refreshSessionBoardStates();
+	refreshBoardAfterSessionOp();
 }
 
 class CAHZpContextRotCW : public IActionHandler
@@ -1394,9 +1385,7 @@ public:
 				        s_ContextPickerCx, s_ContextPickerCy,
 				        s_ContextPickerNames[idx].c_str(), err.c_str());
 		}
-		if (s_SessionBridge->World && s_SessionBridge->World->Kind == ZPWS::Ecosystem)
-			populateScratchBoard();
-		refreshSessionBoardStates();
+		refreshBoardAfterSessionOp();
 	}
 };
 REGISTER_ACTION_HANDLER(CAHZpContextPick, "zp_context_pick");

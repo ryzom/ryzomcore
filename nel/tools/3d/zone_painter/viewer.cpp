@@ -12,7 +12,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -22,11 +22,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -150,13 +150,14 @@ using namespace MAXMATH;
 #include "startup_ui.h"
 #include "script_api.h"
 
+#include <nel/3d/nav_mouse_listener.h>
+
 #include "zp_state.h"
 
 // ---------------------------------------------------------------------------------------------
 // Viewer / screenshot: the painting scene (paint.cpp myThread without the paint tools).
 
 #include "viewer_listener.h"
-
 // The light setup lives in g_Light* above (paint_ui.cpp defaults, vars-cfg overridable).
 
 // kMainWidth / kMainHeight are defined in main.cpp (extern in zp_state.h).
@@ -262,33 +263,14 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 {
 		if (!Core) return;
 		if (g_ScriptUiLock) return; // painterscript pump: input locked (ESC handled by the pump)
-		// Keyboard undo/redo always works; mouse is consumed when over the GUI.
-		if (event == NLMISC::EventKeyDownId)
-		{
-			NLMISC::CEventKeyDown *keyDown = (NLMISC::CEventKeyDown *)&event;
-			if (keyDown->FirstTime && (keyDown->Button & NLMISC::ctrlKeyButton))
-			{
-				if (keyDown->Key == NLMISC::KeyZ || keyDown->Key == NLMISC::KeyE)
-				{
-					// Commit any open mouse stroke first: opUndo/opRedo don't guard
-					// m_CurStroke, and undoing beneath an open stroke corrupts the
-					// undo pairing (paint+undo would no longer restore pristine).
-					if (Pressed)
-					{
-						Pressed = false;
-						Core->endStroke();
-						ZPSCRIPT::record("painter.endStroke()");
-					}
-					// Shared handlers, not Core directly; the toolbar buttons go through
-					// these and they record for the painterscript recorder; the raw-Core
-					// keyboard path silently skipped recording.
-					if (keyDown->Key == NLMISC::KeyZ) zpUndo();
-					else zpRedo();
-				}
-			}
-			return;
-		}
-		if (guiWantsMouse())
+		// A live gizmo drag CAPTURES the pointer. It can only start on the scene, so while it
+		// runs the GUI does not steal the move - a release over a toolbar must still end the
+		// drag, or it stays armed and the next stray move continues it with the button up, and
+		// the cancelling right click must reach the drag wherever the pointer happens to be.
+		const bool gizmoCapture = (zpPatchGizmoDragging() || zpWeldDragActive())
+			&& (event == NLMISC::EventMouseMoveId || event == NLMISC::EventMouseUpId
+			    || event == NLMISC::EventMouseDownId);
+		if (!gizmoCapture && guiWantsMouse())
 		{
 			// Abort an in-progress stroke if the pointer enters a GUI window mid-drag
 			if (Pressed && (event == NLMISC::EventMouseUpId || event == NLMISC::EventMouseMoveId))
@@ -304,6 +286,60 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
 			MouseX = mouse->X;
 			MouseY = mouse->Y;
+			// Patch edit intercepts BEFORE the exact-equality test below: that test is
+			// `Button == leftButton`, so Ctrl+left and Alt+left never reach it - which is
+			// exactly the pair add/remove-from-selection needs. Patch mode also never
+			// paints, so returning here is the whole of its mouse-down behaviour.
+			if (Mode == ModePatch)
+			{
+				// Every level that MOVES something takes the click - the same three levels the
+				// gizmo is drawn for. zpPatchVertexClick dispatches on the level itself, so the
+				// edge and patch picks are its concern, not this test's.
+				if ((mouse->Button & NLMISC::leftButton)
+				    && (SubObj == SubVertex || SubObj == SubEdge || SubObj == SubPatch))
+				{
+					// SHIFT-drag at patch level: EXTRUDE - the Z-constrained drag whose
+					// release builds the walls. Checked ahead of the gizmo so a handle
+					// under the pointer cannot steal the gesture.
+					if (SubObj == SubPatch && (mouse->Button & NLMISC::shiftButton)
+					    && zpPatchGizmoBeginExtrudeDrag(Camera, Viewport, MouseX, MouseY))
+						return;
+					// The armed target-weld mode claims a press that lands ON a vertex;
+					// anywhere else the press falls through to the normal paths, so arming
+					// only changes what a vertex press means.
+					NL3D::IDriver *drv = g_PaintCtx.UDriver
+						? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : nullptr;
+					if (g_WeldTargetArmed && SubObj == SubVertex
+					    && zpWeldDragBegin(Camera, drv, MouseX, MouseY))
+						return;
+					// A hot handle claims the click. Hover was resolved by the last frame's
+					// draw, which is the frame the artist was looking at when they pressed.
+					if (zpPatchGizmoBeginDrag(zpPatchGizmoHover(), Camera, Viewport, MouseX, MouseY))
+						return;
+					zpPatchVertexClick(Camera, drv, MouseX, MouseY, (uint)mouse->Button);
+				}
+				if (mouse->Button & NLMISC::rightButton)
+				{
+					// Cancel: a right click during a transform or weld drag abandons it and
+					// nothing is written; armed-but-idle target weld disarms. Otherwise the
+					// scene context menu - patch mode has no eyedropper to spend the right
+					// button on, and this is where the user pivot gets placed. This must
+					// live INSIDE the mode block: an earlier spelling sat below it, after
+					// the unconditional return, and was dead. Live drags come BEFORE the
+					// disarm: arming only claims presses that land ON a vertex, so a gizmo
+					// drag can be live while armed - the cancel must reach the drag, not
+					// spend itself disarming an idle mode under it.
+					if (zpWeldDragActive())
+						zpWeldDragCancel();
+					else if (zpPatchGizmoDragging())
+						zpPatchGizmoCancelDrag();
+					else if (g_WeldTargetArmed)
+						zpWeldTargetToggleClicked();
+					else
+						zpOpenSceneMenu();
+				}
+				return;
+			}
 			if (mouse->Button == NLMISC::leftButton)
 			{
 				// Prop mode: click selects (or reports read-only); no paint stroke.
@@ -368,6 +404,10 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 			{
 				// Pick under the cursor: tile mode = the base layer's set; color mode = the
 				// vertex color; displace mode = the tile's displace index. Prop: no pick.
+				// TODO (cursors): show curs_pick while the right button is held, and put the
+				// mode's own shape back on release - the eyedropper is the one paint action
+				// whose cursor art we already have. Manifest in script_and_ui.cpp above
+				// zpSelectMode; the matching release is in the EventMouseUpId branch.
 				if (Mode == ModeProp)
 					return;
 				updateHover();
@@ -414,7 +454,22 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		else if (event == NLMISC::EventMouseUpId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
-			if (mouse->Button == NLMISC::leftButton && Pressed)
+			if (zpWeldDragActive() && (mouse->Button & NLMISC::leftButton))
+			{
+				NL3D::IDriver *drv = g_PaintCtx.UDriver
+					? static_cast<NL3D::CDriverUser *>(g_PaintCtx.UDriver)->getDriver() : nullptr;
+				zpWeldDragFinish(Camera, drv, mouse->X, mouse->Y);
+				return;
+			}
+			if (zpPatchGizmoDragging() && (mouse->Button & NLMISC::leftButton))
+			{
+				zpPatchGizmoEndDrag();
+				return;
+			}
+			// Mask test, not equality: NeL folds the modifier keys into Button, so a release
+			// with Ctrl or Shift held would fail an exact compare and leave the stroke open -
+			// the next press would then stack a second stroke onto it.
+			if ((mouse->Button & NLMISC::leftButton) && Pressed)
 			{
 				Pressed = false;
 				Core->endStroke();
@@ -424,6 +479,20 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 		else if (event == NLMISC::EventMouseMoveId)
 		{
 			NLMISC::CEventMouse *mouse = (NLMISC::CEventMouse *)&event;
+			if (zpWeldDragActive())
+			{
+				MouseX = mouse->X;
+				MouseY = mouse->Y;
+				zpWeldDragUpdate(MouseX, MouseY);
+				return;
+			}
+			if (zpPatchGizmoDragging())
+			{
+				MouseX = mouse->X;
+				MouseY = mouse->Y;
+				zpPatchGizmoUpdateDrag(Camera, Viewport, MouseX, MouseY);
+				return;
+			}
 			MouseX = mouse->X;
 			MouseY = mouse->Y;
 			if (Mode == ModeProp)
@@ -461,7 +530,8 @@ void CPaintMouseListener::operator()(const NLMISC::CEvent &event)
 // F12 screenshot convenience (CNELU::screenshot port; uses the unwrapped IDriver).
 void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsync &async)
 {
-	if (!async.isKeyPushed(NLMISC::KeyF12))
+	(void)async; // the binding is read through the key table (g_ViewerAsync)
+	if (!zpKeyPushed(ZPK_Screenshot))
 		return;
 	NLMISC::CBitmap btm;
 	driver->getBuffer(btm);
@@ -471,6 +541,130 @@ void zpViewerScreenshot(NL3D::IDriver *driver, NLMISC::CEventListenerAsync &asyn
 	nlinfo("Screenshot '%s' saved", filename.c_str());
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// Zoom Extents Selected
+
+/** Grow `box` over one zone's patch hull; returns false when the zone has no geometry. */
+static bool zpZoneBox(const SPaintZone &pz, NLMISC::CAABBox &box, bool &init)
+{
+	bool any = false;
+	for (size_t p = 0; p < pz.Patches.size(); ++p)
+	{
+		const NL3D::CBezierPatch &bp = pz.Patches[p].Patch;
+		for (uint v = 0; v < 4; ++v)
+		{
+			if (!init) { box.setCenter(bp.Vertices[v]); box.setHalfSize(NLMISC::CVector::Null); init = true; }
+			else box.extend(bp.Vertices[v]);
+			any = true;
+		}
+		for (uint v = 0; v < 8; ++v) box.extend(bp.Tangents[v]);
+		for (uint v = 0; v < 4; ++v) box.extend(bp.Interiors[v]);
+	}
+	return any;
+}
+
+/**
+ * What Z frames, in priority order:
+ * 1. the last edit (paint modes: "centre on what I just worked on")
+ * 2. the tile under the cursor - useful before anything has been painted
+ * 3. the Prop-mode zone selection
+ * 4. every editable zone (plain Zoom Extents)
+ *
+ * Note for feel-testing: in Prop mode a stale last-edit from before the mode switch still
+ * wins over the zone selection. If that reads wrong in practice, move case 3 to the front
+ * when the mode is ModeProp - it is a one-line reorder.
+ */
+static void zpFrameTarget(NL3D::CNavMouseListener &nav, const CPaintMouseListener &paint,
+                          const std::vector<SPaintZone> &zones, ZPPAINT::CPaintCore *core)
+{
+	NLMISC::CAABBox box;
+
+	// 1. last edit (world point + the extent that edit covered)
+	if (core)
+	{
+		NLMISC::CVector pos;
+		float radius = 0.f;
+		if (core->lastEditPos(pos, radius))
+		{
+			box.setCenter(pos);
+			// A bare tile is a small target; a little margin keeps its neighbours in frame.
+			const float half = radius > 0.f ? radius * 2.f : 4.f;
+			box.setHalfSize(NLMISC::CVector(half, half, half));
+			nav.frameBox(box);
+			printf("view: framed last edit (%.1f, %.1f, %.1f)\n", pos.x, pos.y, pos.z);
+			return;
+		}
+	}
+
+	// 2. hovered tile
+	if (core && paint.HaveHover)
+	{
+		NLMISC::CVector c[4];
+		if (core->tileCorners(paint.HoverZone, paint.HoverTile, c) == 0)
+		{
+			box.setCenter(c[0]);
+			box.setHalfSize(NLMISC::CVector::Null);
+			for (int i = 1; i < 4; ++i) box.extend(c[i]);
+			nav.frameBox(box);
+			printf("view: framed hovered tile (zone %u)\n", paint.HoverZone);
+			return;
+		}
+	}
+
+	// 3. Prop-mode zone selection
+	if (g_HavePropSelection)
+	{
+		if (const SPaintZone *pz = zpFindPaintZone(g_SelectedZoneId))
+		{
+			bool init = false;
+			if (zpZoneBox(*pz, box, init) && init)
+			{
+				nav.frameBox(box);
+				printf("view: framed selected zone %u '%s'\n", pz->ZoneId, pz->Name.c_str());
+				return;
+			}
+		}
+	}
+
+	// 4. every editable zone; frozen context only when nothing is editable (same two-pass
+	// rule the session's initial camera placement uses).
+	bool init = false;
+	for (int pass = 0; pass < 2 && !init; ++pass)
+	{
+		for (size_t i = 0; i < zones.size(); ++i)
+		{
+			if (pass == 0 && zones[i].Frozen) continue;
+			zpZoneBox(zones[i], box, init);
+		}
+	}
+	if (!init)
+		return;
+	nav.frameBox(box);
+	printf("view: framed all editable zones\n");
+}
+
+/**
+ * Drop every global that points at runViewer's frame-local objects (the UI bridges, the
+ * paint context, the script pump/host, the async listener, the session bank).
+ *
+ * Shared by the normal exit and BOTH catch blocks: the catch paths used to clear only the
+ * paint bridge + paint ctx, leaving the session-board bridge, the script pump context and
+ * g_ScriptHost.bridge pointing at destroyed stack objects while main() carried on into the
+ * post-viewer save/teardown path.
+ */
+static void zpDropViewerFrameState()
+{
+	ZPUI::setSessionBoardBridge(nullptr);
+	ZPUI::setSessionBoardVisible(false);
+	ZPUI::setPaintUIBridge(nullptr);
+	g_SessionBank = nullptr;
+	g_PaintCtx = SPaintCtx();
+	g_SessionOpsAvailable = false;
+	g_PumpCtx = SScriptPumpCtx();
+	g_ScriptHost.bridge = nullptr; // pointed at the frame's paintBridge
+	g_ViewerAsync = nullptr;
+}
 
 // Shared viewer host: when externalDriver is non-NULL, runViewer uses it and does not
 // create/release the driver (startup flow owns one UDriver for screens + viewer). When
@@ -508,11 +702,11 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 	NLMISC::CVector center = bbox.getCenter();
 
 	NL3D::UDriver *udriver = externalDriver;
-	const bool ownsDriver = (externalDriver == NULL);
-	NL3D::UScene *uscene = NULL;
+	const bool ownsDriver = (externalDriver == nullptr);
+	NL3D::UScene *uscene = nullptr;
 	ZPUI::CEditorUI localEditorUI;
 	ZPUI::CEditorUI *editorUI = externalEditorUI ? externalEditorUI : &localEditorUI;
-	const bool ownsEditorUI = (externalEditorUI == NULL);
+	const bool ownsEditorUI = (externalEditorUI == nullptr);
 	try
 	{
 		// UDriver/UScene port of the previous CNELU init (needed for NLGUI's CViewRenderer,
@@ -521,7 +715,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		NL3D::CViewport viewport;
 		if (ownsDriver)
 		{
-			udriver = NL3D::UDriver::createDriver(0, false, 0);
+			udriver = NL3D::UDriver::createDriver(0, false, nullptr);
 			if (!udriver)
 			{
 				fprintf(stderr, "ERROR: UDriver::createDriver failed (no 3D driver?)\n");
@@ -595,8 +789,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		}
 		theLand->Landscape.setRefineMode(true);
 
-		// Camera looking at the bbox center from a sensible distance (the plugin inherited the
-		// Max viewport matrix; standalone starts from a canonical three-quarter view).
+		// Camera looking at the bbox center from a sensible distance (standalone starts from
+		// a canonical three-quarter view).
 		printf("view: framing bbox min=(%.1f,%.1f,%.1f) max=(%.1f,%.1f,%.1f) radius=%.1f\n",
 		       bbox.getMin().x, bbox.getMin().y, bbox.getMin().z,
 		       bbox.getMax().x, bbox.getMax().y, bbox.getMax().z, bbox.getRadius());
@@ -635,14 +829,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		ZPUI::startupHideAllScreens();
 		ZPUI::startupShowPainter(true);
 
-		// Mouse listener: edit3d orbiting the landscape center (the plugin's hotspot was the
-		// selection center).
-		NL3D::CEvent3dMouseListener mouseListener;
+		// Navigation: middle-button set on the view-target model (nel/3d/nav_mouse_listener.h).
+		// The left button is deliberately NOT bound here - it belongs to paint / select /
+		// transform, and Ctrl+Left / Alt+Left are reserved for selection add / subtract.
+		NL3D::CNavMouseListener mouseListener;
 		mouseListener.setMatrix(camMat);
 		mouseListener.setFrustrum(camera->getFrustum());
 		mouseListener.setViewport(viewport);
-		mouseListener.setHotSpot(center);
-		mouseListener.setMouseMode(NL3D::CEvent3dMouseListener::edit3d);
+		mouseListener.setTarget(center);
 		mouseListener.addToServer(udriver->EventServer);
 
 		CWindowCloseListener closeListener;
@@ -653,7 +847,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		CPaintMouseListener paintListener;
 		// Shared paint actions (keys + NLGUI); bridge lives for the viewer session.
 		ZPUI::SPaintUIBridge paintBridge;
-		g_PaintCtx.Active = (core != NULL);
+		g_PaintCtx.Active = (core != nullptr);
 		g_PaintCtx.Core = core;
 		g_PaintCtx.Paint = &paintListener;
 		g_PaintCtx.InputPath = g_InputPath;
@@ -670,6 +864,42 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		g_PaintCtx.BankPath = g_BankPath;
 		g_PaintCtx.AvailableSeasons = &g_AvailableSeasons;
 		paintBridge.selectMode = zpSelectMode;
+		paintBridge.selectSubObject = zpSelectSubObject;
+		core->setGeomChangedCb(zpGeomVertChanged);
+		core->setRpStateChangedCb(zpRpStateChanged);
+		core->setTopoRestoreCb(zpTopoRestore);
+		paintBridge.patchBind = zpPatchBindClicked;
+		paintBridge.patchUnbind = zpPatchUnbindClicked;
+		paintBridge.patchNoSmooth = zpPatchNoSmoothClicked;
+		paintBridge.patchDelete = zpPatchDeleteClicked;
+		paintBridge.patchTurnCcw = zpPatchTurnCcwClicked;
+		paintBridge.patchTurnCw = zpPatchTurnCwClicked;
+		paintBridge.patchSubdivide = zpPatchSubdivideClicked;
+		paintBridge.patchWeld = zpPatchWeldClicked;
+		paintBridge.patchAddQuad = zpPatchAddQuadClicked;
+		paintBridge.patchDetach = zpPatchDetachClicked;
+		paintBridge.patchElement = zpPatchElementClicked;
+		paintBridge.moveToZoneDir = zpMoveToZoneDirClicked;
+		paintBridge.weldTargetToggle = zpWeldTargetToggleClicked;
+		paintBridge.patchWeldThreshold = zpPatchWeldThresholdClicked;
+		paintBridge.patchExtrude = zpPatchExtrudeClicked;
+		paintBridge.patchExtrudeEx = zpPatchExtrudeExClicked;
+		paintBridge.patchVertCoplanar = zpPatchCoplanarClicked;
+		paintBridge.patchInteriorMode = zpPatchAutoClicked;
+		paintBridge.patchHide = zpPatchHideClicked;
+		paintBridge.patchUnhideAll = zpPatchUnhideAllClicked;
+		paintBridge.patchSubdivPropToggle = zpSubdivPropToggleClicked;
+		paintBridge.patchDetachCopyToggle = zpDetachCopyToggleClicked;
+		paintBridge.resetPaintTarget = zpResetPaintTarget;
+		paintBridge.resetPaint = zpResetZonePaint;
+		paintBridge.patchFilterVertsToggle = zpPatchFilterVertsClicked;
+		paintBridge.patchFilterVecsToggle = zpPatchFilterVecsClicked;
+		paintBridge.patchLockHandlesToggle = zpPatchLockHandlesClicked;
+		paintBridge.arrowsToggle = zpToggleShowArrows;
+		paintBridge.patchSmGroup = zpPatchSmGroupClicked;
+		paintBridge.patchSmGroupClear = zpPatchSmGroupClearClicked;
+		paintBridge.patchTessDelta = zpPatchTessDeltaClicked;
+		paintBridge.patchBalance = zpPatchBalanceClicked;
 		paintBridge.selectTileSetDelta = zpSelectTileSetDelta;
 		paintBridge.selectTileSetAbs = zpSelectTileSetAbs;
 		paintBridge.toggleTileSize = zpToggleTileSize;
@@ -688,6 +918,8 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		paintBridge.seasonNext = zpSeasonNext;
 		paintBridge.seasonSelect = zpSeasonSelect;
 		paintBridge.seasonMenuFill = zpSeasonMenuFill;
+		paintBridge.selectPivotMode = zpSetPivotMode;
+		paintBridge.userPivotToSelection = zpUserPivotToSelection;
 		paintBridge.colorRadiusDelta = zpColorRadiusDelta;
 		paintBridge.hardnessDelta = zpHardnessDelta;
 		paintBridge.opacityDelta = zpOpacityDelta;
@@ -776,12 +1008,12 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				sessionBridge.isEditable = sessionIsEditable;
 				sessionBridge.FootprintCellsW = scratchFw();
 				sessionBridge.FootprintCellsH = scratchFh();
-				sessionBridge.FootprintMask = g_FootprintMask.empty() ? NULL : &g_FootprintMask;
+				sessionBridge.FootprintMask = g_FootprintMask.empty() ? nullptr : &g_FootprintMask;
 			}
 			ZPUI::setSessionBoardBridge(&sessionBridge);
 		}
 		else
-			ZPUI::setSessionBoardBridge(NULL);
+			ZPUI::setSessionBoardBridge(nullptr);
 		// Session rebuild params
 		g_SessionBank = &bank;
 		// cellSize/snap/lockBorders captured later via globals set before runViewer
@@ -790,7 +1022,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 		{
 			core->attachLandscape(&theLand->Landscape);
 			paintListener.Core = core;
-			paintListener.Nav = &mouseListener;
 			paintListener.Camera = camera;
 			paintListener.EditorUI = editorUI;
 			paintListener.Viewport = viewport;
@@ -802,11 +1033,10 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 			udriver->EventServer.addListener(NLMISC::EventMouseDownId, &paintListener);
 			udriver->EventServer.addListener(NLMISC::EventMouseUpId, &paintListener);
 			udriver->EventServer.addListener(NLMISC::EventMouseMoveId, &paintListener);
-			udriver->EventServer.addListener(NLMISC::EventKeyDownId, &paintListener);
 			// Preload flush (plugin preloadTiles): all tile sets into the driver
 			if (g_PreloadTiles)
 				core->preloadTiles(driver);
-			// Tileset thumbnail palette  - bank textures already resolved
+			// Tileset thumbnail palette - bank textures already resolved
 			zpRebuildTilesetPalette();
 		}
 
@@ -1032,6 +1262,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						ZPUI::openSaveDialogForFile(modalShot);
 				}
 			}
+			// Dev-only: ZONE_PAINTER_SCENE_MENU_SHOT=1 opens the scene context menu for the
+			// frame (the modal is otherwise reachable only from a real right click; clipped
+			// menu entries render invisible and only a screenshot can see them).
+			{
+				const char *smShot = getenv("ZONE_PAINTER_SCENE_MENU_SHOT");
+				if (smShot && smShot[0] && smShot[0] != '0')
+					zpOpenSceneMenu();
+			}
 			// Dev-only: ZONE_PAINTER_PALETTE_SHOT=1 opens the Tiles palette for the frame.
 			// ZONE_PAINTER_PALETTE_SCROLL=disp scrolls the body to the Displace section.
 			{
@@ -1178,6 +1416,14 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						ZPUI::refreshSessionBoardStates();
 				}
 				}
+				// Dev-only: ZONE_PAINTER_ZOOM_EXTENTS=1 runs the Z (Zoom Extents Selected)
+				// fallback chain once before the capture, so the framing is gateable
+				// headlessly (the key itself only exists in the interactive loop).
+				{
+					const char *ze = getenv("ZONE_PAINTER_ZOOM_EXTENTS");
+					if (ze && ze[0] && ze[0] != '0')
+						zpFrameTarget(mouseListener, paintListener, zones, core);
+				}
 				// Dev-only: ZONE_PAINTER_DUMP_RECORDER=1 prints the recorder buffer AFTER the
 				// panel/board env hooks ran (board-op recording E2E extracts this dump
 				// and replays it - dumping before the board hooks missed their lines).
@@ -1234,16 +1480,16 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					NLGUI::CInterfaceElement *btn = NLGUI::CWidgetManager::getInstance()->getElementFromId(
 						"ui:zp:toolbar:header_closed:btn_season");
 					NLGUI::CCtrlBase *caller = dynamic_cast<NLGUI::CCtrlBase *>(btn);
-					zpSeasonMenuFill(NULL);
+					zpSeasonMenuFill(nullptr);
 					NLGUI::CWidgetManager::getInstance()->enableModalWindow(caller, "ui:zp:season_menu");
 				}
 			}
 			// Refresh bridge after season/palette/board env hooks
 			zpFillBridgeState(paintBridge);
 			// Capture sequence (restores refine discipline; keeps scene→UI→HUD draw order):
-			//   clear → scene → setRefineMode(false)+refineAll → clear → scene (refined)
-			//   → NLGUI → outlines → optional HUD (--font only)
-			//   → getBuffer (BACK, before swap) → swap.
+			// clear → scene → setRefineMode(false)+refineAll → clear → scene (refined)
+			// → NLGUI → outlines → optional HUD (--font only)
+			// → getBuffer (BACK, before swap) → swap.
 			// The early seed refine above may leave the backbuffer refined, but a later
 			// clear+re-render without a fresh refineAll produced shredded terrain (fresh
 			// binary verified). Re-run the full refine pair immediately before overlays so the
@@ -1263,6 +1509,11 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				udriver->clearBuffers(NLMISC::CRGBA(90, 90, 90));
 				uscene->render();
 			}
+			// Depth-tested wireframe BEFORE the GUI pass: the driver is still in 3D
+			// setup here, so the cage and frame arrows get real occlusion (with the
+			// x-ray faint pass underneath). The screen-space overlays stay after.
+			if (paintListener.Mode == CPaintMouseListener::ModePatch)
+				zpDrawPatchWire3DAll(driver, camera, paintListener.SubObj);
 			editorUI->update();
 			editorUI->draw();
 			{
@@ -1285,15 +1536,38 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 							zpDrawZoneOutline(driver, camera, viewport, *hov, NLMISC::CRGBA(255, 255, 0), false);
 					}
 				}
+				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
+				{
+					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
+					// Gizmo after the cage so it is never overdrawn by it. Every level that
+					// MOVES something gets one - edge and patch selections are projected onto
+					// the same vertex set, so the gizmo is already correct for them.
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex
+					    || paintListener.SubObj == CPaintMouseListener::SubEdge
+					    || paintListener.SubObj == CPaintMouseListener::SubPatch)
+						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
+						                 mouseListener.isNavigating(), mouseListener.viewSerial());
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+						zpDrawWeldDrag(driver, camera);
+				}
 				if (core && hudText)
 				{
-					static const char *modeNames[4] = { "TILE", "COLOR", "DISPLACE", "PROP" };
 					const int mi = paintListener.Mode;
-					const char *mname = modeNames[(mi >= 0 && mi < 4) ? mi : 0];
+					const char *mname = zpModeName(mi);
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
-					if (paintListener.Mode == CPaintMouseListener::ModeProp)
+					if (paintListener.Mode == CPaintMouseListener::ModePatch)
 					{
-						textContext.printfAt(0.01f, 0.98f, "[%s] click zone to select  undo %u",
+						textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u undo %u",
+						                     zpSubObjName(paintListener.SubObj),
+						                     zpPatchVertSelCount(), core->undoDepth());
+						// Same slot Prop mode uses for its status line. Without this the
+						// "preview only" notice from a released drag would go nowhere.
+						if (!g_PropStatusMsg.empty())
+							textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
+					}
+					else if (paintListener.Mode == CPaintMouseListener::ModeProp)
+					{
+						textContext.printfAt(0.01f, 0.98f, "[%s] click zone to select undo %u",
 						                     mname, core->undoDepth());
 						if (!g_PropStatusMsg.empty())
 							textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
@@ -1304,7 +1578,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					}
 					else
 						textContext.printfAt(0.01f, 0.98f, "[%s]", mname);
-					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode  O board  Y season  P tiles  F10 UI  ESC");
+					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode O board Y season P tiles F10 UI ESC");
 				}
 			}
 			// Read the just-drawn backbuffer BEFORE swap (glReadPixels default = GL_BACK).
@@ -1328,7 +1602,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 			{
 				NLMISC::CBitmap thumb;
 				if (captureTopDownThumbnail(thumb,
-				        g_EditableFiles.empty() ? NULL : &g_EditableFiles[0].ZoneIds))
+				        g_EditableFiles.empty() ? nullptr : &g_EditableFiles[0].ZoneIds))
 				{
 					g_CapturedThumb.swap(thumb);
 					g_HaveCapturedThumb = true;
@@ -1353,10 +1627,21 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// Script-window RUN queues its chunk from inside the pump; execute it here,
 				// outside any event dispatch, so painter.pumpUI() can safely pump again.
 				ZPSCRIPT::processPendingRun();
-				// ESC: close session board first ; else quit viewer
+				// ESC, the universal cancel, innermost first: abandon a live gizmo drag,
+				// else close the session board, else quit the viewer. Without the first
+				// step ESC mid-drag would quit the tool out from under the drag.
 				if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyESCAPE))
 				{
-					if (ZPUI::isSessionBoardVisible())
+					// Live drags before the idle disarm, same order as the right-click chain:
+					// a gizmo drag can be live while target weld is armed, and the cancel must
+					// reach the drag first.
+					if (zpWeldDragActive())
+						zpWeldDragCancel();
+					else if (zpPatchGizmoDragging())
+						zpPatchGizmoCancelDrag();
+					else if (g_WeldTargetArmed)
+						zpWeldTargetToggleClicked();
+					else if (ZPUI::isSessionBoardVisible())
 						ZPUI::setSessionBoardVisible(false);
 					else
 						viewerQuit = true;
@@ -1370,7 +1655,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// F10 / ToggleUI: show/hide the NLGUI shell (keys still work either way)
 				if (zpKeyPushed(ZPK_ToggleUI))
 					editorUI->toggleVisible();
-				// P / TogglePalette: show/hide the tileset thumbnail palette 
+				// P / TogglePalette: show/hide the tileset thumbnail palette
 				if (zpKeyPushed(ZPK_TogglePalette))
 					zpTogglePalette();
 				// O / ToggleBoard: continent working set / ecosystem scratch board
@@ -1378,19 +1663,25 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					zpToggleBoard();
 
 				// Tile set / mode / brush keys → shared named handlers (same as NLGUI buttons).
-				// PgUp/PgDn + 0-9 and [ ] displace stay hardcoded; rebindable actions ride the
-				// key table (see kPainterKeysName / --keys-cfg).
-				if (core)
+				// Everything rides the key table now (see kPainterKeysName / --keys-cfg);
+				// only ESC stays hardcoded, as the universal cancel.
+				//
+				// The table is polled off the driver's async listener, which does not know
+				// about NLGUI focus - without this guard, typing "t" into the script window's
+				// edit box also switched paint mode.
+				const bool guiHasKeyboard =
+					NLGUI::CWidgetManager::getInstance()->isKeyboardCaptured();
+				if (core && !guiHasKeyboard)
 				{
 					uint count = core->tileSetCount();
 					if (count)
 					{
-						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyPRIOR))
+						if (zpKeyPushed(ZPK_TileSetPrev))
 							zpSelectTileSetDelta(-1);
-						if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyNEXT))
+						if (zpKeyPushed(ZPK_TileSetNext))
 							zpSelectTileSetDelta(+1);
 						for (int k = 0; k <= 9; ++k)
-							if (udriver->AsyncListener.isKeyPushed((NLMISC::TKey)(NLMISC::Key0 + k)) && k < (int)count)
+							if (k < (int)count && zpKeyDigitPushed((uint)k))
 								zpSelectTileSetAbs(k);
 					}
 					if (zpKeyPushed(ZPK_ToggleTileSize))
@@ -1403,6 +1694,25 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						zpSelectMode(CPaintMouseListener::ModeDisplace);
 					if (zpKeyPushed(ZPK_MModeProp))
 						zpSelectMode(CPaintMouseListener::ModeProp);
+					if (zpKeyPushed(ZPK_MModePatch))
+						zpSelectMode(CPaintMouseListener::ModePatch);
+					// Same physical digit row as the tile sets above. Only one of the two
+					// reads it, because the scope masks make the other binding dead in this
+					// mode - no ordering trick, no "and not in patch mode" guard.
+					for (uint lv = 0; lv < CPaintMouseListener::SubCount; ++lv)
+						if (zpKeySubObjPushed(lv))
+							zpSelectSubObject((int)lv);
+					// W / E / R. R is ModeProp in the paint modes and SCALE here; the
+					// scope masks keep exactly one of the two live, same as the digit row.
+					if (zpKeyPushed(ZPK_XformMove))
+						zpSetXformKind(ZPXF_Move);
+					if (zpKeyPushed(ZPK_XformRotate))
+						zpSetXformKind(ZPXF_Rotate);
+					if (zpKeyPushed(ZPK_XformScale))
+						zpSetXformKind(ZPXF_Scale);
+					// C in patch scope: the legacy painter's orientation arrows.
+					if (zpKeyPushed(ZPK_ToggleArrows))
+						zpToggleShowArrows();
 					if (zpKeyPushed(ZPK_SizeUp))
 						zpBrushSizeDelta(+1);
 					if (zpKeyPushed(ZPK_SizeDown))
@@ -1412,9 +1722,9 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 					if (zpKeyPushed(ZPK_GroupDown))
 						zpGroupDelta(-1);
 					// Displace / hardness / opacity / mask: shared handlers (keys + panel)
-					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyLBRACKET))
+					if (zpKeyPushed(ZPK_DisplacePrev))
 						zpDisplaceIndexDelta(-1);
-					if (udriver->AsyncListener.isKeyPushed(NLMISC::KeyRBRACKET))
+					if (zpKeyPushed(ZPK_DisplaceNext))
 						zpDisplaceIndexDelta(+1);
 					if (zpKeyPushed(ZPK_HardnessUp))
 						zpHardnessDelta(+51);
@@ -1432,6 +1742,30 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						zpToggleLockBorders();
 					if (zpKeyPushed(ZPK_SeasonNext))
 						zpSeasonNext();
+		// Z = Zoom Extents Selected; Shift+Z / Shift+Y = view history.
+		// Plain Y still cycles the season: modifier matching is exact, so the
+		// Shift bindings and the bare ones cannot fire on each other.
+					if (zpKeyPushed(ZPK_ZoomExtentsSel))
+						zpFrameTarget(mouseListener, paintListener, zones, core);
+					if (zpKeyPushed(ZPK_ViewUndo) && !mouseListener.viewUndo())
+						printf("view: nothing to step back to\n");
+					if (zpKeyPushed(ZPK_ViewRedo) && !mouseListener.viewRedo())
+						printf("view: nothing to step forward to\n");
+					// Undo / redo. Commit an open mouse stroke first: opUndo/opRedo do not
+					// guard m_CurStroke, and undoing beneath an open stroke corrupts the
+					// pairing (paint+undo would no longer restore pristine). Goes through
+					// the shared handlers, not Core, so the recorder sees it.
+					if (zpKeyPushed(ZPK_Undo) || zpKeyPushed(ZPK_Redo) || zpKeyPushed(ZPK_Redo2))
+					{
+						if (paintListener.Pressed)
+						{
+							paintListener.Pressed = false;
+							core->endStroke();
+							ZPSCRIPT::record("painter.endStroke()");
+						}
+						if (zpKeyPushed(ZPK_Undo)) zpUndo();
+						else zpRedo();
+					}
 					if (!paintListener.Pressed && !editorUI->wantsMouse())
 						paintListener.updateHover();
 					else if (editorUI->wantsMouse())
@@ -1499,6 +1833,9 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				}
 
 				// NLGUI after landscape, BEFORE outlines/HUD (solid panel backdrop).
+				// Depth-tested wireframe BEFORE the GUI pass (see the interactive loop).
+				if (paintListener.Mode == CPaintMouseListener::ModePatch)
+					zpDrawPatchWire3DAll(driver, camera, paintListener.SubObj);
 				editorUI->update();
 				editorUI->draw();
 
@@ -1535,6 +1872,20 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 						s_TimedOutline = true;
 					}
 				}
+				else if (paintListener.Mode == CPaintMouseListener::ModePatch)
+				{
+					zpDrawPatchLatticeAll(driver, camera, paintListener.SubObj);
+					// Gizmo after the cage so it is never overdrawn by it. Every level that
+					// MOVES something gets one - edge and patch selections are projected onto
+					// the same vertex set, so the gizmo is already correct for them.
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex
+					    || paintListener.SubObj == CPaintMouseListener::SubEdge
+					    || paintListener.SubObj == CPaintMouseListener::SubPatch)
+						zpDrawPatchGizmo(driver, camera, paintListener.MouseX, paintListener.MouseY,
+						                 mouseListener.isNavigating(), mouseListener.viewSerial());
+					if (paintListener.SubObj == CPaintMouseListener::SubVertex)
+						zpDrawWeldDrag(driver, camera);
+				}
 				else if (core && paintListener.HaveHover)
 				{
 					NLMISC::CVector c[4];
@@ -1551,7 +1902,6 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 				// HUD text
 				if (core && hudText)
 				{
-					static const char *modeNames[4] = { "TILE", "COLOR", "DISPLACE", "PROP" };
 					textContext.setColor(NLMISC::CRGBA(255, 255, 255));
 					// HUD matches the Painter panel: 1-based set index; name from bridge
 					// (includes diffuse-stem fallback when smallbank set names are empty).
@@ -1562,27 +1912,36 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 							? paintBridge.TileSetCount : core->tileSetCount();
 						const int tsOneBased = tsCount ? (paintListener.CurTileSet + 1) : 0;
 						const int mi = paintListener.Mode;
-						const char *mname = modeNames[(mi >= 0 && mi < 4) ? mi : 0];
-						if (paintListener.Mode == CPaintMouseListener::ModeProp)
+						const char *mname = zpModeName(mi);
+						if (paintListener.Mode == CPaintMouseListener::ModePatch)
 						{
-							textContext.printfAt(0.01f, 0.98f, "[%s] click zone to select  undo %u  %s",
+textContext.printfAt(0.01f, 0.98f, "[PATCH:%s] sel %u undo %u %s",
+                     zpSubObjName(paintListener.SubObj),
+                     zpPatchVertSelCount(), core->undoDepth(),
+							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
+							if (!g_PropStatusMsg.empty())
+								textContext.printfAt(0.01f, 0.955f, "%s", g_PropStatusMsg.c_str());
+						}
+						else if (paintListener.Mode == CPaintMouseListener::ModeProp)
+						{
+							textContext.printfAt(0.01f, 0.98f, "[%s] click zone to select undo %u %s",
 							                     mname, core->undoDepth(),
 							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
 						}
 						else
 						{
-							textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s  %s  brush %u  group %u  undo %u%s  %s",
+							textContext.printfAt(0.01f, 0.98f, "[%s] TileSet %d/%u %s %s brush %u group %u undo %u%s %s",
 							                     mname,
 							                     tsOneBased, tsCount, tsName,
 							                     paintListener.Mode256 ? "256" : "128", core->brushSize(),
 							                     core->tileGroup(), core->undoDepth(),
-							                     core->lockBordersOn() ? "  LOCK" : "",
+							                     core->lockBordersOn() ? " LOCK" : "",
 							                     paintBridge.SeasonLabel[0] ? paintBridge.SeasonLabel : "auto");
 						}
 					}
-					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode  O board  Y season  P tiles  F10 UI  ESC");
+					textContext.printfAt(0.01f, 0.01f, "T/C/D/R mode O board Y season P tiles F10 UI ESC");
 					if (paintListener.Mode == CPaintMouseListener::ModeColor)
-						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x  radius %.1fm  hardness %u  opacity %u  mask %s",
+						textContext.printfAt(0.01f, 0.955f, "color %02x%02x%02x radius %.1fm hardness %u opacity %u mask %s",
 						                     paintListener.BrushColor.R, paintListener.BrushColor.G, paintListener.BrushColor.B,
 						                     paintListener.BrushRadius, paintListener.BrushHardness, paintListener.BrushOpacity,
 						                     core->brushMaskMode() ? core->brushMaskName().c_str() : "off");
@@ -1598,7 +1957,7 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 							textContext.printfAt(0.01f, 0.955f, "no selection");
 					}
 					if (g_InstanceCount > 1)
-						textContext.printfAt(0.01f, 0.905f, "INSTANCED x%u  (%ux%u layout; shared paint backing)",
+						textContext.printfAt(0.01f, 0.905f, "INSTANCED x%u (%ux%u layout; shared paint backing)",
 						                     g_InstanceCount, g_InstanceCols, g_InstanceRows);
 					if (paintListener.HaveHover && paintListener.Mode != CPaintMouseListener::ModeProp)
 					{
@@ -1630,56 +1989,40 @@ int runViewer(std::vector<SPaintZone> &zones, NL3D::CTileBank &bank, ZPPAINT::CP
 
 		if (ownsEditorUI)
 			editorUI->shutdown();
-		ZPUI::setSessionBoardBridge(NULL);
-		ZPUI::setSessionBoardVisible(false);
-		ZPUI::setPaintUIBridge(NULL);
-		g_SessionBank = NULL;
-		g_PaintCtx = SPaintCtx();
-		// Script hooks referencing this frame's stack objects (driver, scene, bridge)
-		// must not survive the viewer - a post-viewer script/pump call through them
-		// would be a use-after-free (session ops are already board-session-gated).
-		g_SessionOpsAvailable = false;
-		g_PumpCtx = SScriptPumpCtx();
-		g_ScriptHost.bridge = NULL; // pointed at this frame's paintBridge
+		zpDropViewerFrameState();
 		mouseListener.removeFromServer(udriver->EventServer);
 		udriver->EventServer.removeListener(NLMISC::EventDestroyWindowId, &closeListener);
 		udriver->EventServer.removeListener(NLMISC::EventCloseWindowId, &closeListener);
 		if (core)
 		{
-			core->attachLandscape(NULL);
+			core->attachLandscape(nullptr);
 			udriver->EventServer.removeListener(NLMISC::EventMouseDownId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventMouseUpId, &paintListener);
 			udriver->EventServer.removeListener(NLMISC::EventMouseMoveId, &paintListener);
-			udriver->EventServer.removeListener(NLMISC::EventKeyDownId, &paintListener);
 		}
 		// Drop the painting UScene; the shared driver (startup flow) keeps its display.
 		if (uscene)
 		{
 			udriver->deleteScene(uscene);
-			uscene = NULL;
+			uscene = nullptr;
 		}
-		g_ViewerAsync = NULL;
 		if (ownsDriver)
 		{
 			udriver->release();
 			delete udriver;
-			udriver = NULL;
+			udriver = nullptr;
 		}
 	}
 	catch (const NL3D::EDru &e)
 	{
-		ZPUI::setPaintUIBridge(NULL);
-		g_PaintCtx = SPaintCtx();
-		g_ViewerAsync = NULL;
+		zpDropViewerFrameState();
 		if (ownsDriver && udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: 3D driver: %s\n", e.what());
 		return 1;
 	}
 	catch (const NLMISC::Exception &e)
 	{
-		ZPUI::setPaintUIBridge(NULL);
-		g_PaintCtx = SPaintCtx();
-		g_ViewerAsync = NULL;
+		zpDropViewerFrameState();
 		if (ownsDriver && udriver) { udriver->release(); delete udriver; }
 		fprintf(stderr, "ERROR: %s\n", e.what());
 		return 1;

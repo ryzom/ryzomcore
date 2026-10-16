@@ -82,7 +82,7 @@ namespace NLMISC
 	};
 
 	template <class T>
-	T* CSingleton<T>::Instance = 0;
+	T* CSingleton<T>::Instance = nullptr;
 
 
 
@@ -123,7 +123,7 @@ namespace NLMISC
 	{
 		static T *&_instance()
 		{
-			static T *instance = NULL;
+			static T *instance = nullptr;
 
 			return instance;
 		}
@@ -147,7 +147,7 @@ namespace NLMISC
 
 		static bool isInitialized()
 		{
-			return _instance() != NULL;
+			return _instance() != nullptr;
 		}
 
 		static T* getInstance()

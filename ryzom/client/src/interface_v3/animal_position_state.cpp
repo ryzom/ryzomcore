@@ -73,7 +73,7 @@ void CPositionState::serialNodeLeaf(NLMISC::IStream &f, CCDBNodeLeaf *&dbNode)
 	if (f.isReading())
 	{
 		f.serial(dbPath);
-		dbNode = NULL;
+		dbNode = nullptr;
 		if (!dbPath.empty())
 		{
 			CInterfaceManager *im = CInterfaceManager::getInstance();
@@ -105,7 +105,7 @@ void CUIDEntityPositionState::serial(NLMISC::IStream &f)
 // ***************************************************************************
 CEntityCL *CUIDEntityPositionState::getEntity()
 {
-	if (!dbOk()) return NULL;
+	if (!dbOk()) return nullptr;
 	CLFECOMMON::TClientDataSetIndex	uid= _Uid->getValue32();
 	// If the _EntitySlot is not set, try to acquire the animal in vision.
 	if(_EntitySlot == CLFECOMMON::INVALID_SLOT)
@@ -113,7 +113,7 @@ CEntityCL *CUIDEntityPositionState::getEntity()
 		// O(n=256)
 		CEntityCL	*entity= EntitiesMngr.getEntityByCompressedIndex(uid);
 		// the entity position must be valid, else don't take it.
-		if((entity != NULL) && entity->firstPositionReceived())
+		if((entity != nullptr) && entity->firstPositionReceived())
 			_EntitySlot = entity->slot();
 
 	}
@@ -123,7 +123,7 @@ CEntityCL *CUIDEntityPositionState::getEntity()
 		// O(1)
 		CEntityCL	*entity= EntitiesMngr.entity(_EntitySlot);
 		// Is data slot changed ? animal no more in vision -> try to acquire it at next pass
-		if((entity == NULL) || ((entity != NULL) && (entity->dataSetId() != uid)))
+		if((entity == nullptr) || ((entity != nullptr) && (entity->dataSetId() != uid)))
 			_EntitySlot= CLFECOMMON::INVALID_SLOT;
 	}
 	CEntityCL	*entity= EntitiesMngr.entity(_EntitySlot);
@@ -149,8 +149,8 @@ bool CUIDEntityPositionState::getDbPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 CUIDEntityPositionState::CUIDEntityPositionState()
 {
-	_DBPos= NULL;
-	_Uid= NULL;
+	_DBPos = nullptr;
+	_Uid = nullptr;
 	_EntitySlot= CLFECOMMON::INVALID_SLOT;
 }
 
@@ -172,7 +172,7 @@ void CUIDEntityPositionState::build(const std::string &baseDB)
 // ***************************************************************************
 CTeammatePositionState::CTeammatePositionState() : CUIDEntityPositionState()
 {
-	_Present= NULL;
+	_Present = nullptr;
 }
 
 
@@ -212,7 +212,7 @@ bool CTeammatePositionState::getPos(sint32 &px, sint32 &py)
 // ***************************************************************************
 CAnimalPositionState::CAnimalPositionState() : CUIDEntityPositionState()
 {
-	_Status= NULL;
+	_Status = nullptr;
 }
 
 
@@ -260,7 +260,7 @@ void CAnimalPositionState::serial(NLMISC::IStream &f)
 // ***************************************************************************
 CEntityCL *CNamedEntityPositionState::getEntity()
 {
-	if (!dbOk()) return NULL;
+	if (!dbOk()) return nullptr;
 	return EntitiesMngr.getEntityByName(_Name->getValue32());
 }
 
@@ -286,7 +286,7 @@ void CNamedEntityPositionState::build(CCDBNodeLeaf *name, CCDBNodeLeaf *x, CCDBN
 CEntityCL	*CDialogEntityPositionState::getEntity()
 {
 	if ( CCompassDialogsManager::getInstance().getEntries().size() >= _DialogIndex )
-		return NULL;
+		return nullptr;
 	return EntitiesMngr.getEntityByName(CCompassDialogsManager::getInstance().getEntries()[_DialogIndex].Text);
 }
 

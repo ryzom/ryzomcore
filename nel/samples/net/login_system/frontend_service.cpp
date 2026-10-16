@@ -113,7 +113,7 @@ public:
 		CLoginServer::init (_FServer, onConnectionClient); 
 
 		//
-		_FServer.setDisconnectionCallback(onDisconnectClient, NULL);
+		_FServer.setDisconnectionCallback(onDisconnectClient, nullptr);
 	}
 
 	bool	update()

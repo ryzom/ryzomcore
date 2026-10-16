@@ -161,7 +161,8 @@ static float NormalizeDsDtAsRGBA(uint32 *src, sint width, sint height)
 /*
  * Constructor
  */
-CTextureBump::CTextureBump() : _NormalizationFactor(NULL),
+CTextureBump::CTextureBump() : _NormalizationFactor(nullptr)
+    ,
 							   _DisableSharing(false),
 							   _ForceNormalize(true)
 {
@@ -192,7 +193,7 @@ void CTextureBump::serial(NLMISC::IStream &f)
 	/// version 2 : normalization flag
 	sint ver = f.serialVersion(3);
 	ITexture::serial(f);
-	ITexture *tex = NULL;
+	ITexture *tex = nullptr;
 	if (f.isReading())
 	{
 		f.serialPolyPtr(tex);
@@ -295,7 +296,7 @@ void CTextureBump::doGenerate(bool async)
 void CTextureBump::release()
 {
 	ITexture::release();
-	if (_HeightMap != NULL)
+	if (_HeightMap != nullptr)
 	{
 		if (_HeightMap->getReleasable())
 		{

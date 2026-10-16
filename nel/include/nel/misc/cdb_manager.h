@@ -95,7 +95,7 @@ namespace NLMISC{
 		 @param positiveLeafNameFilterSize The size of the array
 
 		 */
-		void addBranchObserver( const char *branchName, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter = NULL, uint positiveLeafNameFilterSize = 0 );
+		void addBranchObserver( const char *branchName, const char *dbPathFromThisNode, ICDBNode::IPropertyObserver &observer, const char **positiveLeafNameFilter = nullptr, uint positiveLeafNameFilterSize = 0 );
 
 		
 		/**

@@ -66,7 +66,7 @@ public:
 	UCloudScape () {}
 	virtual	~UCloudScape () {}
 
-	virtual void init (SCloudScapeSetup *pCSS = NULL) = 0;
+	virtual void init (SCloudScapeSetup *pCSS = nullptr) = 0;
 
 	virtual void set (SCloudScapeSetup &css) = 0;
 

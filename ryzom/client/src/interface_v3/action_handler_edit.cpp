@@ -113,7 +113,7 @@ protected:
 	void init ()
 	{
 		// Get the current edit box
-		_GroupEdit = NULL;
+		_GroupEdit = nullptr;
 		_LooseSelection = false;
 
 		// Get the interface manager
@@ -135,7 +135,7 @@ protected:
 		if (_GroupEdit)
 		{
 			// If selection not active
-			if (CGroupEditBox::getCurrSelection() == NULL)
+			if (CGroupEditBox::getCurrSelection() == nullptr)
 			{
 				// then start selection at curPos
 				CGroupEditBox::setSelectCursorPos(_GroupEdit->getCursorPos());
@@ -151,7 +151,7 @@ protected:
 		{
 			// If selection active
 			CGroupEditBox *currSelection = dynamic_cast< CGroupEditBox* >( CGroupEditBox::getCurrSelection() );
-			if (currSelection != NULL)
+			if (currSelection != nullptr)
 			{
 				if (currSelection != _GroupEdit)
 				{
@@ -159,7 +159,7 @@ protected:
 				}
 
 				// disable selection
-				CGroupEditBox::setCurrSelection(NULL);
+				CGroupEditBox::setCurrSelection(nullptr);
 				_LooseSelection = true;
 			}
 		}
@@ -505,7 +505,7 @@ protected:
 	void actionPart () NL_OVERRIDE
 	{
 		// if selection is activated and not same cursors pos, then cut the selection
-		if(CGroupEditBox::getCurrSelection() != NULL && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
+		if(CGroupEditBox::getCurrSelection() != nullptr && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
 		{
 			if (CGroupEditBox::getCurrSelection() != _GroupEdit)
 			{
@@ -533,7 +533,7 @@ protected:
 			}
 		}
 		// must stop selection in all case
-		CGroupEditBox::setCurrSelection(NULL);
+		CGroupEditBox::setCurrSelection(nullptr);
 		_GroupEdit->setCursorAtPreviousLineEnd(false);
 	}
 };
@@ -603,7 +603,7 @@ class CAHEditCut : public CAHEditDeleteChar
 	void actionPart () NL_OVERRIDE
 	{
 		// if selection is activated and not same cursors pos, then cut the selection
-		if(CGroupEditBox::getCurrSelection() != NULL && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
+		if(CGroupEditBox::getCurrSelection() != nullptr && _GroupEdit->getCursorPos() != CGroupEditBox::getSelectCursorPos())
 		{
 			// Copy selection
 			_GroupEdit->copy();

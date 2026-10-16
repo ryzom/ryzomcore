@@ -73,9 +73,9 @@ CControlKeyFramerBase::CControlKeyFramerBase(CScene *scene, uint16 defaultChunkI
 	, m_DefaultChunkId(defaultChunkId)
 	, m_KeyChunkId(keyChunkId)
 	, m_KeySize(keySize)
-	, m_KeyTable(NULL)
-	, m_Default(NULL)
-	, m_Range(NULL)
+	, m_KeyTable(nullptr)
+	, m_Default(nullptr)
+	, m_Range(nullptr)
 {
 
 }
@@ -147,9 +147,9 @@ void CControlKeyFramerBase::build(uint16 version, uint filter)
 void CControlKeyFramerBase::disown()
 {
 	m_Claimed.clear();
-	m_KeyTable = NULL;
-	m_Default = NULL;
-	m_Range = NULL;
+	m_KeyTable = nullptr;
+	m_Default = nullptr;
+	m_Range = nullptr;
 	CReferenceTarget::disown();
 }
 
@@ -187,13 +187,13 @@ uint CControlKeyFramerBase::keyCount() const
 
 const void *CControlKeyFramerBase::keyData() const
 {
-	if (!keyCount()) return NULL;
+	if (!keyCount()) return nullptr;
 	return nlVectorData(m_KeyTable->Value);
 }
 
 const uint8 *CControlKeyFramerBase::defaultValue(uint &sizeOut) const
 {
-	if (!m_Default) { sizeOut = 0; return NULL; }
+	if (!m_Default) { sizeOut = 0; return nullptr; }
 	sizeOut = (uint)m_Default->Value.size();
 	return nlVectorData(m_Default->Value);
 }

@@ -6,7 +6,7 @@
  * \author Claude Sonnet 5
  * \author Grok 4.5
  *
- * World list, zone browser (ecosystem list / continent minesweeper board / eco large-tile
+ * World list, zone browser (ecosystem list / continent minesweeper board / eco card-grid
  * grid), folder browser, and the runStartupFlow pump. SStartupSession + NLGUI helpers
  * are shared with session_board_ui.cpp through startup_ui_internal.h.
  *
@@ -81,7 +81,7 @@ namespace ZPUI {
 // Session state (definitions; declarations live in startup_ui_internal.h). Both TUs share this.
 
 SStartupSession s_Sess;
-SSessionBoardBridge *s_SessionBridge = NULL;
+SSessionBoardBridge *s_SessionBridge = nullptr;
 
 CInterfaceGroup *findGroup(const char *id)
 {
@@ -155,19 +155,19 @@ CInterfaceGroup *spawnRow(const char *templateName, const char *parentListId,
 	if (!list)
 	{
 		fprintf(stderr, "WARNING: startup UI: list '%s' not found\n", parentListId);
-		return NULL;
+		return nullptr;
 	}
 	IParser *parser = CWidgetManager::getInstance()->getParser();
-	CInterfaceGroup *row = NULL;
+	CInterfaceGroup *row = nullptr;
 	if (!params.empty())
 		row = parser->createGroupInstance(templateName, list->getId(), &params[0], (uint)params.size());
 	else
-		row = parser->createGroupInstance(templateName, list->getId(), (const std::pair<std::string, std::string> *)NULL, 0);
+		row = parser->createGroupInstance(templateName, list->getId(), (const std::pair<std::string, std::string> *)nullptr, 0);
 	if (!row)
 	{
 		fprintf(stderr, "WARNING: startup UI: createGroupInstance(%s) failed under %s\n",
 		        templateName, parentListId);
-		return NULL;
+		return nullptr;
 	}
 	// createGroupInstance leaves parent NULL; CGroupList owns the child
 	row->setActive(true);
@@ -284,16 +284,16 @@ CInterfaceGroup *spawnUnder(CInterfaceGroup *parent, const char *templateName,
                             sint32 x, sint32 y, sint32 w, sint32 h)
 {
 	if (!parent)
-		return NULL;
+		return nullptr;
 	IParser *parser = CWidgetManager::getInstance()->getParser();
-	CInterfaceGroup *g = NULL;
+	CInterfaceGroup *g = nullptr;
 	if (!params.empty())
 		g = parser->createGroupInstance(templateName, parent->getId(), &params[0], (uint)params.size());
 	else
 		g = parser->createGroupInstance(templateName, parent->getId(),
-		                                (const std::pair<std::string, std::string> *)NULL, 0);
+		                                (const std::pair<std::string, std::string> *)nullptr, 0);
 	if (!g)
-		return NULL;
+		return nullptr;
 	g->setParent(parent);
 	g->setParentPos(parent);
 	g->setPosRef(Hotspot_TL);
@@ -535,7 +535,7 @@ std::string stripLigoFamilyPrefix(const std::string &name)
 		"zonespecial-",
 		"transition-",
 		"material-",
-		NULL
+		nullptr
 	};
 	for (int i = 0; kPrefixes[i]; ++i)
 	{
@@ -997,7 +997,7 @@ void setLayoutSelectorVisible(bool /*visible*/)
 		"ui:zp:zone_browser:content:layout_1x2",
 		"ui:zp:zone_browser:content:layout_2x2",
 		"ui:zp:zone_browser:content:layout_3x3",
-		NULL
+		nullptr
 	};
 	for (int i = 0; ids[i]; ++i)
 	{
@@ -1017,7 +1017,7 @@ static void syncLayoutRadios()
 	// no-op (layout selector unused)
 }
 
-// Zone browser display mode: false = detail-tile list, true = large-thumbnail
+// Zone browser display mode: false = detail-row list, true = large-thumbnail
 // grid (the tileset-palette idiom). Remembered in startup.cfg (ZoneBrowserLarge).
 static bool s_ZoneListLarge = false;
 
@@ -1062,10 +1062,10 @@ static void populateZoneList()
 
 	static const char *kList = "ui:zp:zone_browser:content:list_scroll:text_list";
 	// Large mode: one auto-wrapping zp_flow SECTION per zone group. The flow
-	// group reflows its tiles from its own width inside updateCoords (the Ryzom client
+	// group reflows its items from its own width inside updateCoords (the Ryzom client
 	// inventory mechanism), so resizes re-wrap with no repopulation and no width watch.
-	const int kTileW = 178, kTileH = 106;
-	CInterfaceGroup *flowSec = NULL;
+	const int kCardW = 178, kCardH = 106;
+	CInterfaceGroup *flowSec = nullptr;
 	uint flowSecCount = 0;
 
 	std::string lastGroup;
@@ -1079,7 +1079,7 @@ static void populateZoneList()
 			hp.push_back(std::make_pair(std::string("id"), std::string("zg_") + lastGroup));
 			hp.push_back(std::make_pair(std::string("title"), lastGroup));
 			spawnRow("zp_list_header", kList, hp);
-			flowSec = NULL; // group headers start a new flow section
+			flowSec = nullptr; // group headers start a new flow section
 		}
 
 		std::vector<std::pair<std::string, std::string> > p;
@@ -1095,7 +1095,7 @@ static void populateZoneList()
 
 		if (s_ZoneListLarge)
 		{
-			// Large-icon tile into the current section's flow; the flow assigns
+			// Large-icon card into the current section's flow; the flow assigns
 			// the grid slot, positions here are placeholders.
 			p.push_back(std::make_pair(std::string("title"), stripLigoFamilyPrefix(z.Basename)));
 			if (!flowSec)
@@ -1118,19 +1118,19 @@ static void populateZoneList()
 						flowSec->setParentSize(gl);
 					// Stale-build tripwire: with flow_group.cpp missing from the link
 					// (FILE(GLOB) + skipped reconfigure) the parser silently falls back
-					// to a plain interface_group and every tile stacks at slot 0,0.
+					// to a plain interface_group and every card stacks at slot 0,0.
 					if (flowSec->getClassName() != "CZPGroupFlow")
 						nlwarning("zone browser: zp_flow factory missing; grid will not wrap (stale build?)");
 				}
 			}
 			if (!flowSec)
 				continue;
-			if (CInterfaceGroup *tile = spawnUnder(flowSec, "zp_zone_tile", p,
-			                                       0, 0, kTileW, kTileH))
+			if (CInterfaceGroup *card = spawnUnder(flowSec, "zp_zone_card", p,
+			                                       0, 0, kCardW, kCardH))
 			{
-				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(tile->getView("thumb")))
+				if (CViewBitmap *thumb = dynamic_cast<CViewBitmap *>(card->getView("thumb")))
 					thumb->setActive(hasThumb);
-				if (CInterfaceGroup *fr = tile->getGroup("thumb_frame"))
+				if (CInterfaceGroup *fr = card->getGroup("thumb_frame"))
 					fr->setActive(hasThumb);
 			}
 			continue;
@@ -1901,7 +1901,7 @@ EStartupResult runStartupFlow(UDriver *driver,
 	driver->EventServer.removeListener(EventCloseWindowId, &closeListener);
 	startupHideAllScreens();
 	s_Sess.Active = false;
-	s_Sess.Worlds = NULL;
+	s_Sess.Worlds = nullptr;
 	return result;
 }
 

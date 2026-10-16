@@ -84,7 +84,7 @@ public:
 	{
 		typename TRegisterCont::iterator it (_FactoryRegisters.find(key));
 		if (it == _FactoryRegisters.end())
-			return NULL;
+			return nullptr;
 		else
 			return it->second->createObject(ctorParam);
 	}
@@ -195,7 +195,7 @@ public:
 	{
 		typename TRegisterCont::const_iterator it (_FactoryRegisters.find(key));
 		if (it == _FactoryRegisters.end())
-			return NULL;
+			return nullptr;
 		else
 			return it->second->getFactory();
 	}

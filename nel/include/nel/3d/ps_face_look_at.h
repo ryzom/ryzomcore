@@ -38,7 +38,7 @@ public:
 	/** create the face look at by giving a texture. This can't be a CTextureGrouped (for animation)
      * animation must be set later by using setTextureScheme
 	 */
-	CPSFaceLookAt(CSmartPtr<ITexture> tex = NULL);
+	CPSFaceLookAt(CSmartPtr<ITexture> tex = nullptr);
 
 	void serial(NLMISC::IStream &f) NL_OVERRIDE;
 

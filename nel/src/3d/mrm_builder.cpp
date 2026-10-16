@@ -2240,7 +2240,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMGeo
 
 
 
-	bool useTgSpace = mb.MeshVertexProgram != NULL ? mb.MeshVertexProgram->needTangentSpace() : false;
+	bool useTgSpace = mb.MeshVertexProgram != nullptr ? mb.MeshVertexProgram->needTangentSpace() : false;
 
 	// Construct Blend Shapes
 	//// mbuild <- finalMRM
@@ -2742,7 +2742,7 @@ void			CMRMBuilder::buildMeshBuildMrm(const CMRMMeshFinal &finalMRM, CMeshMRMSki
 
 
 
-	bool useTgSpace = mb.MeshVertexProgram != NULL ? mb.MeshVertexProgram->needTangentSpace() : false;
+	bool useTgSpace = mb.MeshVertexProgram != nullptr ? mb.MeshVertexProgram->needTangentSpace() : false;
 
 	// Construct Blend Shapes
 	//// mbuild <- finalMRM

@@ -42,9 +42,9 @@ extern NL3D::UScene *Scene;
 //-----------------------------------------------
 CAnimationFX::CAnimationFX(const std::string &psName /* = "" */, const float *userParams /*=NULL*/)
 {
-	PosTrack = NULL;
-	Sheet = NULL;
-	if ((!psName.empty()) || (userParams != NULL))
+	PosTrack = nullptr;
+	Sheet = nullptr;
+	if ((!psName.empty()) || (userParams != nullptr))
 	{
 		Sheet = new CAnimationFXSheet(psName, userParams);
 	}
@@ -70,7 +70,7 @@ void CAnimationFX::buildTrack(NL3D::UAnimationSet *as)
 	if (Sheet->TrajectoryAnim.empty()) return;
 	std::string animName = NLMISC::toLowerAscii(Sheet->TrajectoryAnim);
 	uint id = as->getAnimationIdByName(animName);
-	NL3D::UAnimation *anim = NULL;
+	NL3D::UAnimation *anim = nullptr;
 	if (id != NL3D::UAnimationSet::NotFound)
 	{
 		anim = as->getAnimation(id);
@@ -97,7 +97,7 @@ NL3D::UParticleSystemInstance CAnimationFX::createMatchingInstance(const float *
 {
 	NL3D::UParticleSystemInstance fx;
 	nlassert(Sheet != NULL);
-	if (Sheet->PSName.empty()) return NULL;
+	if (Sheet->PSName.empty()) return nullptr;
 	NL3D::UInstance inst = Scene->createInstance(Sheet->PSName);
 	if (!inst.empty())
 	{
@@ -106,11 +106,11 @@ NL3D::UParticleSystemInstance CAnimationFX::createMatchingInstance(const float *
 		{
 			nlwarning("Bad shape type for a fxsheet shape : must be a particle system");
 			Scene->deleteInstance(inst);
-			return NULL;
+			return nullptr;
 		}
 		else
 		{
-			if (customUserParams != NULL)
+			if (customUserParams != nullptr)
 			{
 				for(uint l = 0; l < 4; ++l)
 				{

@@ -200,7 +200,7 @@ namespace NLNET
 			// at least one part in the name
 			// check if sub ojbcct exist
 			TParsedCommandLine *sub = _getParam(parts.begin(), (parts.begin()+1));
-			if (sub == NULL)
+			if (sub == nullptr)
 			{
 				TParsedCommandLine * newElem = new TParsedCommandLine();
 				newElem->ParamName = parts[0];
@@ -245,7 +245,7 @@ namespace NLNET
 		}
 
 		// parameter not found
-		return NULL;
+		return nullptr;
 	}
 
 

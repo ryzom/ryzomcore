@@ -179,7 +179,7 @@ public:
 	void syncLoadFiles(const std::vector<std::string>& fileNames, NLMISC::CSmartPtr<IBackupFileReceiveCallback> cb);
 
 	// send a file to the backup service for saving. Use either the SaveFile or SaveFileCheck msg type.
-	void sendFile(CBackupMsgSaveFile& msg, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb=NULL);
+	void sendFile(CBackupMsgSaveFile& msg, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb = nullptr);
 
 	// request BS sends me files matching the given file classes
 	void requestFileClass(const std::string& directory, const std::vector<CBackupFileClass>& classes, NLMISC::CSmartPtr<IBackupFileClassReceiveCallback> cb);
@@ -189,13 +189,13 @@ public:
 
 
 	// Append a line to a file
-	void append(const std::string& filename, const std::string& line, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb=NULL);
+	void append(const std::string& filename, const std::string& line, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb = nullptr);
 	// Append a data stream to a file. Use either the AppendFile or the AppendFileCheck msg type.
-	void append(CBackupMsgSaveFile& msg, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb=NULL);
+	void append(CBackupMsgSaveFile& msg, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb = nullptr);
 
 
 	// request for a file to be deleted (WARNING: no archiving of the file)
-	void deleteFile(const std::string& fileName, bool keepBackupOfFile = true, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb=NULL);
+	void deleteFile(const std::string& fileName, bool keepBackupOfFile = true, NLMISC::CSmartPtr<IBackupGenericAckCallback> cb = nullptr);
 
 
 	// setup a callback to receive connection and disconnection events from the backup system

@@ -111,7 +111,7 @@ void			CVertexStreamManager::release()
 {
 	// release driver/VBHard
 	if(_Driver)
-		_Driver= NULL;
+		_Driver = nullptr;
 
 	_VB.clear();
 

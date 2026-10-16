@@ -49,12 +49,12 @@ CMovieShooter		MovieShooter;
 // ***************************************************************************
 CMovieShooter::CMovieShooter()
 {
-	_MemoryBlock= NULL;
+	_MemoryBlock = nullptr;
 	_MemorySize= 0;
 	_CurrentIndex= 0;
 	_NumFrames= 0;
-	_FirstFrame= NULL;
-	_LastFrame= NULL;
+	_FirstFrame = nullptr;
+	_LastFrame = nullptr;
 	_FrameSkip = _CurrentFrameSkip = 0;
 }
 
@@ -83,8 +83,8 @@ bool				CMovieShooter::init(uint maxMemory)
 	_MemorySize= maxMemory;
 	_CurrentIndex= 0;
 	_NumFrames= 0;
-	_FirstFrame= NULL;
-	_LastFrame= NULL;
+	_FirstFrame = nullptr;
+	_LastFrame = nullptr;
 
 	return true;
 }
@@ -94,12 +94,12 @@ void				CMovieShooter::clearMemory()
 {
 	if(_MemoryBlock)
 		delete [] (_MemoryBlock);
-	_MemoryBlock= NULL;
+	_MemoryBlock = nullptr;
 	_MemorySize= 0;
 	_CurrentIndex= 0;
 	_NumFrames= 0;
-	_FirstFrame= NULL;
-	_LastFrame= NULL;
+	_FirstFrame = nullptr;
+	_LastFrame = nullptr;
 }
 
 // ***************************************************************************
@@ -145,16 +145,16 @@ bool				CMovieShooter::addFrame(double time, CRGBA	*pImage, uint w, uint h)
 	CFrameHeader	*newFrame= (CFrameHeader*)(_MemoryBlock+_CurrentIndex);
 
 	// while this frame erase first one.
-	while( _FirstFrame!=NULL && (uint8*)newFrame<=(uint8*)_FirstFrame && ((uint8*)newFrame+totalSize)>(uint8*)_FirstFrame )
+	while( _FirstFrame != nullptr && (uint8*)newFrame<=(uint8*)_FirstFrame && ((uint8*)newFrame+totalSize)>(uint8*)_FirstFrame )
 	{
 		// skip to the next frame.
 		_FirstFrame= _FirstFrame->Next;
 		_NumFrames--;
 		// if empty, clean all.
-		if(_FirstFrame==NULL)
+		if(_FirstFrame == nullptr)
 		{
 			nlassert(_NumFrames==0);
-			_LastFrame=NULL;
+			_LastFrame = nullptr;
 			_CurrentIndex= 0;
 			newFrame= (CFrameHeader*)_MemoryBlock;
 		}
@@ -165,7 +165,7 @@ bool				CMovieShooter::addFrame(double time, CRGBA	*pImage, uint w, uint h)
 	newFrame->Width= w;
 	newFrame->Height= h;
 	newFrame->Data= _MemoryBlock+_CurrentIndex+sizeof(CFrameHeader);
-	newFrame->Next= NULL;
+	newFrame->Next = nullptr;
 
 	// Compress and Fill Data. As fast as possible
 	uint16	*dst= (uint16*)newFrame->Data;
@@ -221,7 +221,7 @@ bool				CMovieShooter::addFrame(double time, CRGBA	*pImage, uint w, uint h)
 	_CurrentIndex+= totalSize;
 
 	// Link to the list.
-	if(_FirstFrame==NULL)
+	if(_FirstFrame == nullptr)
 	{
 		_FirstFrame= _LastFrame= newFrame;
 	}
@@ -429,8 +429,8 @@ void				CMovieShooter::resetMovie()
 {
 	_CurrentIndex= 0;
 	_NumFrames= 0;
-	_FirstFrame= NULL;
-	_LastFrame= NULL;
+	_FirstFrame = nullptr;
+	_LastFrame = nullptr;
 }
 
 // ***************************************************************************

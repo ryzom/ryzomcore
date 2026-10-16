@@ -2145,7 +2145,7 @@ namespace RSMGR
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CRingSessionManagerSkel::TInterceptor *interceptor = NULL;
+				CRingSessionManagerSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -2153,7 +2153,7 @@ namespace RSMGR
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CRingSessionManagerProxy()
@@ -2322,7 +2322,7 @@ namespace RSMGR
 			{
 				_LocalModule = proxy->getLocalModule();
 				nlassert(_LocalModule != NULL);
-				CRingSessionManagerClientSkel::TInterceptor *interceptor = NULL;
+				CRingSessionManagerClientSkel::TInterceptor *interceptor = nullptr;
 				interceptor = static_cast < NLNET::CModuleBase* >(_LocalModule.getPtr())->getInterceptor(interceptor);
 				nlassert(interceptor != NULL);
 
@@ -2330,7 +2330,7 @@ namespace RSMGR
 				nlassert(_LocalModuleSkel != NULL);
 			}
 			else
-				_LocalModuleSkel = 0;
+				_LocalModuleSkel = nullptr;
 
 		}
 		virtual ~CRingSessionManagerClientProxy()
@@ -2468,9 +2468,9 @@ namespace RSMGR
 		 *	become owner of the adaptor (and it will be released with the
 		 *	interface).
 		 */
-		CRingSessionManagerWebItf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+		CRingSessionManagerWebItf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 		{
-			if (replacementAdaptor == NULL)
+			if (replacementAdaptor == nullptr)
 			{
 				// use default callback server
 				_CallbackServer = CUniquePtr<ICallbackServerAdaptor>(new CNelCallbackServerAdaptor(this));
@@ -2678,7 +2678,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionType	sessionType;
@@ -2737,7 +2737,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -2770,7 +2770,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -2797,7 +2797,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -2854,7 +2854,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -2881,7 +2881,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -2908,7 +2908,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -2935,7 +2935,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -2960,7 +2960,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	friendCharId;
@@ -2987,7 +2987,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	friendCharId;
@@ -3014,7 +3014,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	bannedCharId;
@@ -3041,7 +3041,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	bannedCharId;
@@ -3068,7 +3068,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	friendDMCharId;
@@ -3095,7 +3095,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	friendDMCharId;
@@ -3122,7 +3122,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	charId;
@@ -3153,7 +3153,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	ownerCharId;
 			TSessionId	sessionId;
@@ -3184,7 +3184,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	ownerCharId;
 			TSessionId	sessionId;
@@ -3213,7 +3213,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3240,7 +3240,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3267,7 +3267,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3296,7 +3296,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			std::string	clientApplication;
@@ -3323,7 +3323,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			std::string	clientApplication;
@@ -3350,7 +3350,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -3375,7 +3375,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -3400,7 +3400,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	ownerCharId;
 			TSessionId	sessionId;
@@ -3429,7 +3429,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	ownerCharId;
 			TSessionId	sessionId;
@@ -3458,7 +3458,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3487,7 +3487,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3516,7 +3516,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3549,7 +3549,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3580,7 +3580,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebItf *callback = (CRingSessionManagerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -3926,9 +3926,9 @@ namespace RSMGR
 
 		}
 
-		CRingSessionManagerWebClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+		CRingSessionManagerWebClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 		{
-			if (adaptorReplacement == NULL)
+			if (adaptorReplacement == nullptr)
 			{
 				// use the default Nel adaptor
 				_CallbackClient = CUniquePtr<ICallbackClientAdaptor>(new CNelCallbackClientAdaptor(this));
@@ -4587,7 +4587,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebClientItf *callback = (CRingSessionManagerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			uint32	resultCode;
@@ -4613,7 +4613,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebClientItf *callback = (CRingSessionManagerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -4641,7 +4641,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebClientItf *callback = (CRingSessionManagerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -4685,7 +4685,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebClientItf *callback = (CRingSessionManagerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			TSessionId	sessionId;
@@ -4715,7 +4715,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebClientItf *callback = (CRingSessionManagerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			TSessionId	sessionId;
@@ -4747,7 +4747,7 @@ namespace RSMGR
 
 			CRingSessionManagerWebClientItf *callback = (CRingSessionManagerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			std::string	result;
@@ -5485,7 +5485,7 @@ namespace RSMGR
 		 *	become owner of the adaptor (and it will be released with the
 		 *	interface).
 		 */
-		CSessionBrowserServerWebItf(ICallbackServerAdaptor *replacementAdaptor = NULL)
+		CSessionBrowserServerWebItf(ICallbackServerAdaptor *replacementAdaptor = nullptr)
 			:	CRingSessionManagerWebItf(replacementAdaptor)
 		{}
 
@@ -5659,7 +5659,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	userId;
 			NLNET::CLoginCookie	cookie;
@@ -5686,7 +5686,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -5711,7 +5711,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -5738,7 +5738,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			std::string	invitedCharName;
@@ -5765,7 +5765,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			uint32	sessionId;
@@ -5792,7 +5792,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	sessionId;
 			nlRead(message, serial, sessionId);
@@ -5817,7 +5817,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			std::string	md5;
 			nlRead(message, serial, md5);
@@ -5842,7 +5842,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -5867,7 +5867,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			nlRead(message, serial, charId);
@@ -5892,7 +5892,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebItf *callback = (CSessionBrowserServerWebItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			NLNET::CMessage	msg;
@@ -6042,7 +6042,7 @@ namespace RSMGR
 
 		}
 
-		CSessionBrowserServerWebClientItf(ICallbackClientAdaptor *adaptorReplacement = NULL)
+		CSessionBrowserServerWebClientItf(ICallbackClientAdaptor *adaptorReplacement = nullptr)
 			:	CRingSessionManagerWebClientItf(adaptorReplacement)
 		{}
 
@@ -6248,7 +6248,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			std::vector < TSessionDesc >	sessions;
@@ -6272,7 +6272,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			TSessionId	sessionId;
@@ -6298,7 +6298,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			bool	scenarioRated;
@@ -6332,7 +6332,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			bool	scenarioRated;
 			uint32	rateFun;
@@ -6366,7 +6366,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			bool	scenarioRated;
 			uint32	rateFun;
@@ -6400,7 +6400,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			uint32	authorRating;
@@ -6428,7 +6428,7 @@ namespace RSMGR
 
 			CSessionBrowserServerWebClientItf *callback = (CSessionBrowserServerWebClientItf *)adaptor->getContainerClass();
 
-			if (callback  == NULL)
+			if (callback  == nullptr)
 				return;
 			uint32	charId;
 			std::string	ringPoints;

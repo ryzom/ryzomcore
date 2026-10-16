@@ -82,7 +82,7 @@ public:
 	 * \param string& samplePath The path to directory containing the .wav sample files
 	 * \param vector& sampleBanks The list of sample banks to load
 	 */
-	CSoundManager(NLMISC::IProgressCallback *progressCallBack = NULL);
+	CSoundManager(NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 
 	/// destructor
@@ -326,7 +326,7 @@ public:
 	 * Initialize the audio mixer, load the sound banks, called by the constructors
 	 * \param string& sound buffer file (.nss)
 	 */
-	void init(NLMISC::IProgressCallback *progressCallBack = NULL);
+	void init(NLMISC::IProgressCallback *progressCallBack = nullptr);
 
 private:
 	// attributes------------------------------

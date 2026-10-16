@@ -28,7 +28,7 @@ using namespace NLGEORGES;
 // ***************************************************************************
 void CSkillsTreeSheet::build(const UFormElm &item)
 {
-	const UFormElm *arraySkillElt = NULL;
+	const UFormElm *arraySkillElt = nullptr;
 	if( item.getNodeByName( &arraySkillElt, "SkillData" ) )
 	{
 		if( arraySkillElt )
@@ -42,7 +42,7 @@ void CSkillsTreeSheet::build(const UFormElm &item)
 
 			for( uint i = 0; i < NbSkills; ++i )
 			{
-				const UFormElm* SkillElt = NULL;
+				const UFormElm* SkillElt = nullptr;
 				if( ! ( arraySkillElt->getArrayNode( &SkillElt, i ) && SkillElt ) )
 				{
 					nlwarning("<CSkillsTreeSheet::build> can't get array node of SkillElt in sheet");
@@ -89,7 +89,7 @@ void CSkillsTreeSheet::build(const UFormElm &item)
 					}
 
 					// ChildSkills
-					const UFormElm *arrayChildSkillElt = NULL;
+					const UFormElm *arrayChildSkillElt = nullptr;
 					if( SkillElt->getNodeByName( &arrayChildSkillElt, "ChildSkills" ) )
 					{
 						if( arrayChildSkillElt )

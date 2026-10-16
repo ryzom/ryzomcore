@@ -223,8 +223,8 @@ int main(int argc, char* argv[])
 			
 
 			// try to open gr and rbank
-			CRetrieverBank		*retrieverBank= NULL;
-			CGlobalRetriever	*globalRetriever= NULL;
+			CRetrieverBank		*retrieverBank = nullptr;
+			CGlobalRetriever	*globalRetriever = nullptr;
 			uint32		grFileDate= 0;
 			uint32		rbankFileDate= 0;
 			if( !grFile.empty() && !rbankFile.empty())

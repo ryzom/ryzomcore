@@ -240,7 +240,9 @@ private:// Classes.
 		CQuadNode	*Prev,*Next;
 		CNode		*Node;
 
-		CQuadNode() : Prev(NULL), Next(NULL), Node(NULL) {}
+		CQuadNode() : Prev(nullptr)
+		    , Next(nullptr)
+		    , Node(nullptr) {}
 
 		// can't call this at ctor since copied in array
 		void	initRoot()
@@ -523,7 +525,7 @@ template<class T>	CQuadGrid<T> &CQuadGrid<T>::operator=(const CQuadGrid<T> &o)
 			nlassert(srcNode);
 
 			// get the dest node created for this src node
-			CNode	*dstNode= NULL;
+			CNode	*dstNode = nullptr;
 			typename std::map<const CNode*, CNode *>::iterator	it= srcNodeToDestNode.find(srcNode);
 			if(it!=srcNodeToDestNode.end())
 			{
@@ -645,7 +647,7 @@ template<class T>	typename CQuadGrid<T>::CIterator	CQuadGrid<T>::erase(typename 
 	// Then delete it..., and update selection linked list.
 	//=====================================================
 	// remove it from _SelectedList or _UnSelectedList
-	CBaseNode	*next= NULL;
+	CBaseNode	*next = nullptr;
 	next= ptr->Next;
 	if(next)
 		next->Prev=ptr->Prev;

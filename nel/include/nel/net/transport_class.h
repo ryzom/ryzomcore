@@ -298,16 +298,16 @@ protected:
 
 		CRegisteredClass () { clear (); }
 
-		void clear () { Instance = NULL; }
+		void clear () { Instance = nullptr; }
 	};
 
 	typedef std::map<std::string, CRegisteredClass> TRegisteredClass;
 
 	template <class T> struct CRegisteredProp : public CRegisteredBaseProp
 	{
-		CRegisteredProp () : Value(NULL) { }
+		CRegisteredProp () : Value(nullptr) { }
 
-		CRegisteredProp (const std::string &name, TProp type, T defaultValue, T *value = NULL) :
+		CRegisteredProp (const std::string &name, TProp type, T defaultValue, T *value = nullptr) :
 			CRegisteredBaseProp (name, type), DefaultValue(defaultValue), Value (value) { }
 
 		T DefaultValue, *Value;
@@ -332,9 +332,9 @@ protected:
 
 	template <class T> struct CRegisteredPropCont : public CRegisteredBaseProp
 	{
-		CRegisteredPropCont () : Value(NULL) { }
+		CRegisteredPropCont () : Value(nullptr) { }
 
-		CRegisteredPropCont (const std::string &name, TProp type, T *value = NULL) :
+		CRegisteredPropCont (const std::string &name, TProp type, T *value = nullptr) :
 			CRegisteredBaseProp (name, type), Value (value) { }
 
 		T *Value;

@@ -60,7 +60,7 @@ void			CMaterial::initUnlit()
 	setLighting(false);
 	setColor(CRGBA(255,255,255,255));
 	for(uint32 i=0;i<IDRV_MAT_MAXTEXTURES;i++)
-		setTexture((uint8)i ,NULL);
+		setTexture((uint8)i , nullptr);
 	setZBias(0);
 	setZFunc(lessequal);
 	setZWrite(true);
@@ -299,7 +299,7 @@ void		CMaterial::setShader(TShader val)
 		nTexts=1;
 	// reset all needed
 	for(uint i=0;i<nTexts;i++)
-		setTexture(i ,NULL);
+		setTexture(i , nullptr);
 
 	// If userColor, use TexEnv caps (we got it, so use it :) ).
 	if(val== CMaterial::UserColor)
@@ -415,7 +415,7 @@ ITexture				*CMaterial::getLightMap(uint lmapId) const
 	if(lmapId<_LightMaps.size())
 		return _LightMaps[lmapId].Texture;
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
@@ -553,7 +553,7 @@ void		CMaterial::selectTextureSet(uint index)
 {
 	for (uint k = 0; k < IDRV_MAT_MAXTEXTURES; ++k)
 	{
-		if (_Textures[k] != NULL) _Textures[k]->selectTexture(index);
+		if (_Textures[k] != nullptr) _Textures[k]->selectTexture(index);
 	}
 }
 

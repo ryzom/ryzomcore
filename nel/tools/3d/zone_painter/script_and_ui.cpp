@@ -11,6 +11,9 @@
  * / zpSelectTileSetAbs / zpColorRadiusAbs / zpFill …); prop-mode edit + zone-outline
  * draw; season toggle + palette rebuild; SScriptHost bridge and zpFillBridgeState so
  * NLGUI panels stay in sync with paint state.
+ *
+ * Patch-edit mode lives in its own pair of TUs: patch_edit_ops.cpp (state and operations)
+ * and patch_edit_ui.cpp (drawing and picking), sharing drag state via patch_edit_internal.h.
  */
 
 /*
@@ -152,6 +155,8 @@ using namespace MAXMATH;
 #include "startup_ui.h"
 #include "script_api.h"
 
+#include <nel/3d/nav_mouse_listener.h>
+
 #include "zp_state.h"
 #include "viewer_listener.h"
 
@@ -230,8 +235,10 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			NLMISC::fromString(tok[4], v);
 			ok = core.opClear(zone, patch, u, v, tok[0] == "clear256", err);
 		}
-		else if (tok[0] == "undo") { ok = core.opUndo(); if (!ok) err = "undo stack empty"; }
-		else if (tok[0] == "redo") { ok = core.opRedo(); if (!ok) err = "redo stack empty"; }
+		// Undo/redo may replay a TOPOLOGY record, which restores storage and needs the
+		// working-set rebuild the core cannot run itself - same handling as the U/I keys.
+		else if (tok[0] == "undo") { ok = core.opUndo(); if (!ok) err = "undo stack empty"; else zpHandleTopoRestorePending(); }
+		else if (tok[0] == "redo") { ok = core.opRedo(); if (!ok) err = "redo stack empty"; else zpHandleTopoRestorePending(); }
 		else if (tok[0] == "prop" && tok.size() >= 4)
 		{
 			// prop <zone> <rotate|symmetry|passable|usebbox> <value>
@@ -258,7 +265,7 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			NLMISC::fromString(tok[2], patch);
 			NLMISC::fromString(tok[3], s);
 			NLMISC::fromString(tok[4], t);
-			uint32 rgb = (uint32)strtoul(tok[5].c_str(), NULL, 16);
+			uint32 rgb = (uint32)strtoul(tok[5].c_str(), nullptr, 16);
 			if (tok.size() >= 7) NLMISC::fromString(tok[6], blend);
 			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
 			ok = core.opColorVertex(zone, patch, s, t, col, blend, err);
@@ -275,7 +282,7 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			NLMISC::fromString(tok[2], x);
 			NLMISC::fromString(tok[3], y);
 			NLMISC::fromString(tok[4], radius);
-			uint32 rgb = (uint32)strtoul(tok[5].c_str(), NULL, 16);
+			uint32 rgb = (uint32)strtoul(tok[5].c_str(), nullptr, 16);
 			NLMISC::fromString(tok[6], hardness);
 			NLMISC::fromString(tok[7], opacity);
 			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
@@ -320,7 +327,7 @@ bool zpExecScriptOp(ZPPAINT::CPaintCore &core, const std::string &rawLine,
 			uint blend = 256;
 			NLMISC::fromString(tok[1], zone);
 			NLMISC::fromString(tok[2], patch);
-			uint32 rgb = (uint32)strtoul(tok[3].c_str(), NULL, 16);
+			uint32 rgb = (uint32)strtoul(tok[3].c_str(), nullptr, 16);
 			if (tok.size() >= 5) NLMISC::fromString(tok[4], blend);
 			NLMISC::CRGBA col((uint8)((rgb >> 16) & 0xff), (uint8)((rgb >> 8) & 0xff), (uint8)(rgb & 0xff), 255);
 			ok = core.opFillColor(zone, patch, col, blend, err);
@@ -517,26 +524,242 @@ void recordBoardOp(const std::string &line)
 		ZPSCRIPT::record(line);
 }
 
+/** Current paint mode for the key table's mode scoping (see ZPKS_* in zp_state.h). */
+int zpCurrentPaintMode()
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint)
+		return -1;
+	return g_PaintCtx.Paint->Mode;
+}
+
+/*
+ * TODO (cursors): THE cursor manifest. Mode-dependent pointer shapes are not wired yet -
+ * every mode currently shows the plain arrow, and mode is signalled only by the toolbar's
+ * pushed button and the --font HUD. That is tolerable while the left button does exactly
+ * one thing per mode; it stops being tolerable once the patch-edit sub-object levels and
+ * the Max transform modes land, because then the same click means select / move / rotate /
+ * scale / bind depending on state the artist cannot otherwise see.
+ *
+ * MECHANISM: custom shapes do NOT ride the pointer's XML tx_* slots (CViewPointer only
+ * defines a fixed set: default / move_window / resize_* / rotate / scale / colpick / pan /
+ * can_pan). They go through CViewPointer::setCursor("name.tga"), which overrides the
+ * DEFAULT shape - so a mode switch sets it and leaving the mode sets it back to
+ * "curs_default.tga". Anything the GUI itself claims (resizers, colour picker) still wins
+ * over it, which is the behaviour we want: chrome beats tool.
+ *
+ * WHERE THE ART GOES: shared shapes belong in ryzomcore_graphics/interfaces/v3 (packed into
+ * every tool's atlas); painter-only shapes go in ZONE_PAINTER_EXTRA_TEXTURES in the tool's
+ * CMakeLists, which stages them into the extras dir build_interface packs. Either way the
+ * name must land in the atlas .txt before setCursor can resolve it.
+ *
+ * HAVE (already packed from interfaces/v3, usable today):
+ *   curs_default   select / no-op            curs_pick     eyedropper pick
+ *   curs_rotate    rotate, and orbit drag    curs_scale    scale
+ *   curs_pan       panning                   curs_can_pan  pan available
+ *   curs_resize_*  container resizers (wired in NLGUI already, not a tool concern)
+ *
+ * NEED BITMAPS - paint modes (this switch):
+ *   curs_zp_tile      Tile mode brush
+ *   curs_zp_color     Colour mode brush
+ *   curs_zp_displace  Displace mode brush
+ *   (Prop mode uses curs_default: it is a selection mode.)
+ *
+ * NEED BITMAPS - patch-edit modes (same switch, once the sub-object levels exist):
+ *   curs_zp_move      4-way move
+ *   curs_zp_region    rubber-band region select
+ *   curs_zp_bind      bind vertex to edge
+ *   curs_zp_weld      weld
+ *   curs_zp_attach    attach
+ *   curs_zp_subdiv    subdivide / add patch
+ *   (Rotate and Scale reuse curs_rotate / curs_scale. Turn-edge can reuse curs_rotate.)
+ *
+ * NEED BITMAPS - navigation (see nel/src/3d/nav_mouse_listener.cpp):
+ *   curs_zp_zoom      dolly / zoom drag
+ *   (Pan and orbit reuse curs_pan / curs_rotate.)
+ *
+ * The full art list with motif descriptions is the wiki's zone_painter_icon_manifest.md.
+ * nel_patch_paint cursor art may be converted; patch-edit cursors are redraw-only from
+ * the manifest's motif descriptions.
+ */
+/**
+ * Orientation arrows - the legacy painter's ToggleArrows (paint.cpp), verbatim recipe:
+ * every bank tile gains an ADDITIVE arrow layer so each painted tile renders its frame
+ * orientation, rotation included; off restores the pristine bank. Every patch of every
+ * zone is then invalidated (changePatchTextureAndColor with NULLs) so the tiles reload.
+ * Patch mode additionally draws a thin per-patch frame arrow on the overlay
+ * (zpDrawPatchArrows) - the display that makes Turn CW/CCW visible at all.
+ */
+void zpSetShowArrows(bool on)
+{
+	if (on == g_ShowArrows)
+		return;
+	g_ShowArrows = on;
+	if (g_PaintCtx.Land && g_PaintCtx.Bank)
+	{
+		NL3D::CLandscape &land = g_PaintCtx.Land->Landscape;
+		if (on)
+		{
+			// The arrow tile lives at the _texture_tiles ROOT, which the bank resolve does
+			// not index - and a missing additive texture whitewashes the whole terrain
+			// (NeL's missing-texture fallback). Register it once, probing up from the bank.
+			static bool s_ArrowRegistered = false;
+			if (!s_ArrowRegistered)
+			{
+				std::string dir = NLMISC::CFile::getPath(g_PaintCtx.BankPath);
+				for (int up = 0; up < 4 && !s_ArrowRegistered; ++up)
+				{
+					const std::string cand = dir + "arrow.png";
+					if (NLMISC::CFile::fileExists(cand))
+					{
+						NLMISC::CPath::addSearchFile(cand);
+						s_ArrowRegistered = true;
+					}
+					dir += "../";
+				}
+				if (!s_ArrowRegistered)
+					fprintf(stderr, "WARNING: arrow.png not found near the bank; "
+					        "tile arrows will render white\n");
+			}
+			for (sint i = 0; i < land.TileBank.getTileCount(); ++i)
+			{
+				land.TileBank.getTile(i)->setFileName(NL3D::CTile::additive, "arrow.png");
+				land.releaseTiles((uint)i, 1);
+			}
+		}
+		else
+		{
+			land.TileBank = *g_PaintCtx.Bank;
+			for (sint i = 0; i < land.TileBank.getTileCount(); ++i)
+				land.releaseTiles((uint)i, 1);
+		}
+		if (g_PaintCtx.Zones)
+		{
+			const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+			for (uint z = 0; z < zones.size(); ++z)
+			{
+				NL3D::CZone *lz = land.getZone((sint)zones[z].ZoneId);
+				for (uint p = 0; lz && p < (uint)lz->getNumPatchs(); ++p)
+					lz->changePatchTextureAndColor((sint)p, nullptr, nullptr);
+			}
+		}
+	}
+	g_PropStatusMsg = on ? "orientation arrows ON" : "orientation arrows off";
+	ZPSCRIPT::record(NLMISC::toString("painter.setShowArrows(%s)", on ? "true" : "false"));
+}
+
+void zpToggleShowArrows() { zpSetShowArrows(!g_ShowArrows); }
+
 void zpSelectMode(int mode)
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
 	if (mode < 0) mode = 0;
-	if (mode > 3) mode = 3; // Tile / Color / Displace / Prop
+	if (mode > CPaintMouseListener::ModePatch) mode = CPaintMouseListener::ModePatch;
+	// A live drag cannot survive its mode: the selection it targets is cleared below, yet the
+	// release would still commit (and record) the transform. The key table stays live during a
+	// drag, so this is reachable from the keyboard mid-drag. Both cancels are no-ops when idle.
+	zpPatchGizmoCancelDrag();
+	zpWeldDragCancel();
 	g_PaintCtx.Paint->Mode = mode;
+	// Welds serve painting and actively hide patch edits (see buildDisplayZone), so the weld
+	// state follows the mode. Only on a CHANGE - the rebuild is cheap but not free, and
+	// re-selecting the mode you are already in should do nothing.
+	{
+		bool want = mode != CPaintMouseListener::ModePatch;
+		// Dev hook, alongside ZONE_PAINTER_GIZMO_DRAG: pin the weld state so a gate can run the
+		// SAME script both ways and assert the difference. Without a negative control "the seam
+		// is visible" is a claim about a screenshot rather than about the build.
+		const char *dev = getenv("ZONE_PAINTER_FORCE_WELD");
+		if (dev && *dev)
+			want = *dev != '0';
+		if (want != g_WeldedLandscape)
+		{
+			g_WeldedLandscape = want;
+			zpSyncLandscapeWeld();
+		}
+	}
+	// Entering patch edit lands on Object level, : the artist picks a sub-object
+	// level deliberately, and arriving already in vertex mode makes the first click surprising.
+	if (mode == CPaintMouseListener::ModePatch)
+		g_PaintCtx.Paint->SubObj = CPaintMouseListener::SubObject;
+	// A sub-object selection belongs to the level it was made at, so leaving patch edit (or
+	// re-entering it, which lands on Object) drops it rather than leaving a stale set to
+	// surprise the next move.
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	// TODO (cursors): set the mode's pointer shape here - one setCursor() per mode, back to
+	// "curs_default.tga" for Prop and for any mode whose art is still missing. See the
+	// manifest above for the names and where the bitmaps come from.
 	ZPSCRIPT::record(NLMISC::toString("painter.setMode(%d)", mode));
 }
 
 
-/** Prop-mode selectable: unfrozen primary (not instance / not RO context). */
+/**
+ * HUD labels. Both tables are indexed by the enum they name and bounds-checked here rather
+ * than at each call site - the previous pair of local `modeNames[4]` tables would have
+ * quietly relabelled patch mode as TILE.
+ */
+const char *zpModeName(int mode)
+{
+	static const char *kNames[CPaintMouseListener::ModePatch + 1] =
+		{ "TILE", "COLOR", "DISPLACE", "PROP", "PATCH" };
+	if (mode < 0 || mode > CPaintMouseListener::ModePatch)
+		return "?";
+	return kNames[mode];
+}
+
+const char *zpSubObjName(int level)
+{
+	static const char *kNames[CPaintMouseListener::SubCount] =
+		{ "OBJECT", "VERTEX", "EDGE", "PATCH", "TILE" };
+	if (level < 0 || level >= CPaintMouseListener::SubCount)
+		return "?";
+	return kNames[level];
+}
+
+/** Sub-object level inside patch-edit mode (EP_* order). No-op outside ModePatch. */
+void zpSelectSubObject(int level)
+{
+	if (!g_PaintCtx.Active || !g_PaintCtx.Paint) return;
+	if (g_PaintCtx.Paint->Mode != CPaintMouseListener::ModePatch) return;
+	if (level < 0) level = 0;
+	if (level >= CPaintMouseListener::SubCount) level = CPaintMouseListener::SubCount - 1;
+	if (level != g_PaintCtx.Paint->SubObj)
+	{
+		// Same rule as the mode switch: a drag in flight targets the outgoing level's
+		// selection, so it cannot survive the switch that clears it.
+		zpPatchGizmoCancelDrag();
+		zpWeldDragCancel();
+		// A selection made at one level means nothing at another, and carrying it over would
+		// leave a gizmo sitting on things the new level cannot address.
+		g_PatchVertSel.clear();
+		g_PatchEdgeSel.clear();
+		g_PatchFaceSel.clear();
+		g_PatchTanSel.clear();
+	}
+	g_PaintCtx.Paint->SubObj = level;
+	ZPSCRIPT::record(NLMISC::toString("painter.setSubObject(%d)", level));
+}
+
+
+/**
+ * Prop-mode selectable: any editable node, read-only context excluded.
+ *
+ * Zone properties are Max appdata on the NODE, and nodes showing one object share that
+ * pointer - so editing them through a second node of the object writes the same storage and
+ * is exactly as correct as editing them through the first. There is no display-copy case to
+ * exclude.
+ */
 bool zpZoneIsPropSelectable(uint zoneId)
 {
-	if (zoneId >= kInstanceZoneIdBase)
-		return false;
+	const SPaintZone *pz = zpFindPaintZone(zoneId);
+	if (pz)
+		return pz->Editable;
+	// Headless before assembly hands over the zone list: the core still knows read-only.
 	if (g_PaintCtx.Core)
 		return !g_PaintCtx.Core->zoneFrozen(zoneId);
-	// Headless: consult assembled zones via g_PaintCtx.Zones when set
-	const SPaintZone *pz = zpFindPaintZone(zoneId);
-	return pz && !pz->Frozen;
+	return false;
 }
 
 void zpClearPropSelection()
@@ -807,6 +1030,7 @@ void zpCollectZoneBoundaryPolylines(const SPaintZone &pz, uint segsPerEdge,
  * No depth test - occluded segments overdraw (acceptable; geometry correctness first).
  * Thin = 1px; thick = multi-pass with small screen-space offsets.
  */
+
 void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
                               const NL3D::CViewport &viewport,
                               const SPaintZone &pz, const NLMISC::CRGBA &col, bool thick)
@@ -915,21 +1139,21 @@ void zpDrawZoneOutline(NL3D::IDriver *driver, NL3D::CCamera *camera,
 const SPaintZone *zpFindPaintZone(uint zoneId)
 {
 	if (!g_PaintCtx.Zones)
-		return NULL;
+		return nullptr;
 	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
 			return &(*g_PaintCtx.Zones)[i];
-	return NULL;
+	return nullptr;
 }
 
 SPaintZone *zpFindPaintZoneMut(uint zoneId)
 {
 	if (!g_PaintCtx.Zones)
-		return NULL;
+		return nullptr;
 	for (size_t i = 0; i < g_PaintCtx.Zones->size(); ++i)
 		if ((*g_PaintCtx.Zones)[i].ZoneId == zoneId)
 			return &(*g_PaintCtx.Zones)[i];
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1423,10 +1647,40 @@ void zpToggleLockBorders()
 	ZPSCRIPT::record(on ? "painter.setLockBorders(true)" : "painter.setLockBorders(false)");
 }
 
+/**
+ * A replayed TOPOLOGY record (Kind 6) restored storage from inside the core, which cannot
+ * rebuild the session that owns it. Rebuild here, once per undo/redo, with the same two
+ * flags the op used: the pristine is stale relative to the restored storage (skip the
+ * write-back that would clobber it) and the stacks must survive the re-init.
+ *
+ * Every undo/redo surface funnels here: the U/I keys via zpUndo/zpRedo, the painterscript
+ * `undo`/`redo` op lines via the executor. Headless paint-script runs never set the flag
+ * (topological ops need a live session), so the guard is cheap there.
+ */
+void zpHandleTopoRestorePending()
+{
+	if (!g_PaintCtx.Core || !g_PaintCtx.Core->topoRestorePending())
+		return;
+	g_PaintCtx.Core->clearTopoRestorePending();
+	// Stale sub-object selections died with the restored topology.
+	g_PatchVertSel.clear();
+	g_PatchEdgeSel.clear();
+	g_PatchFaceSel.clear();
+	g_PatchTanSel.clear();
+	zpPatchGizmoInvalidate();
+	std::string err;
+	uint welds = 0;
+	if (!rebuildWorkingSet(err, welds, /* skipWriteBack= */ true, /* keepUndo= */ true))
+		g_PropStatusMsg = "undo: session rebuild failed: " + err;
+	else
+		g_PropStatusMsg = "topology restored";
+}
+
 void zpUndo()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
 	g_PaintCtx.Core->opUndo();
+	zpHandleTopoRestorePending();
 	ZPSCRIPT::record("painter.undo()");
 }
 
@@ -1434,6 +1688,7 @@ void zpRedo()
 {
 	if (!g_PaintCtx.Active || !g_PaintCtx.Core) return;
 	g_PaintCtx.Core->opRedo();
+	zpHandleTopoRestorePending();
 	ZPSCRIPT::record("painter.redo()");
 }
 
@@ -1464,6 +1719,75 @@ void zpFill(int rot)
 	}
 }
 
+
+/**
+ * Reset one zone's paint wholesale (plan mA8): default tiles, white colors, displace 0,
+ * one undo stroke. Scripts call it bare; the panel button confirms through the reset
+ * modal first (the save-dialog pattern).
+ */
+void zpResetZonePaint(uint zoneId)
+{
+	if (!g_PaintCtx.Core)
+		return;
+	std::string err;
+	if (g_PaintCtx.Core->opResetZone(zoneId, err))
+	{
+		ZPSCRIPT::record(NLMISC::toString("painter.resetZonePaint(%u)", zoneId));
+		g_PropStatusMsg = NLMISC::toString("reset paint: zone %u", zoneId);
+	}
+	else
+		g_PropStatusMsg = "reset paint: " + err;
+	printf("%s\n", g_PropStatusMsg.c_str());
+	fflush(stdout);
+}
+
+/**
+ * The panel button's target: the Prop-selected zone when one is set (and editable),
+ * else the session's ONLY editable object's zone. A multi-file session without a Prop
+ * selection refuses - wiping the wrong brick is not a mistake to design around.
+ */
+bool zpResetPaintTarget(uint &zoneOut, std::string &labelOut)
+{
+	if (!g_PaintCtx.Zones)
+		return false;
+	const std::vector<SPaintZone> &zones = *g_PaintCtx.Zones;
+	if (g_HavePropSelection)
+	{
+		for (uint z = 0; z < zones.size(); ++z)
+			if (zones[z].ZoneId == g_SelectedZoneId && zones[z].Editable)
+			{
+				zoneOut = zones[z].ZoneId;
+				labelOut = zpZoneFileBasename(zoneOut);
+				if (labelOut.empty())
+					labelOut = zones[z].Name;
+				return true;
+			}
+	}
+	const void *node = NULL;
+	sint32 pick = -1;
+	for (uint z = 0; z < zones.size(); ++z)
+	{
+		if (!zones[z].Editable || !zones[z].InFile)
+			continue;
+		if (node && zones[z].Node != node)
+		{
+			g_PropStatusMsg = "reset paint: several editable zones - select one in Prop mode";
+			return false;
+		}
+		if (!node)
+		{
+			node = zones[z].Node;
+			pick = (sint32)z;
+		}
+	}
+	if (pick < 0)
+		return false;
+	zoneOut = zones[pick].ZoneId;
+	labelOut = zpZoneFileBasename(zoneOut);
+	if (labelOut.empty())
+		labelOut = zones[pick].Name;
+	return true;
+}
 
 // ---------------------------------------------------------------------------------------------
 // painterscript host : the Lua binding's window into the op layer. All calls
@@ -1711,7 +2035,7 @@ void zpRebuildTilesetPalette()
 		ts = g_PaintCtx.Paint->CurTileSet;
 	if (!g_PaintCtx.Bank)
 	{
-		ZPUI::rebuildTilesetPalette(NULL, std::string(), zpSeasonCacheKey(), ts);
+		ZPUI::rebuildTilesetPalette(nullptr, std::string(), zpSeasonCacheKey(), ts);
 		return;
 	}
 	ZPUI::rebuildTilesetPalette(g_PaintCtx.Bank, g_PaintCtx.BankPath, zpSeasonCacheKey(), ts);
@@ -1825,6 +2149,63 @@ void zpSeasonMenuFill(void * /*unused*/)
 	}
 }
 
+/**
+ * Prop-panel footprint readout for a NON-primary zone, memoized.
+ *
+ * zpFillBridgeState runs every viewer frame, and deriveZoneFootprintMask is a full
+ * NLLIGO::CZoneTemplate build over the zone's open edges (plus a stderr/stdout line on
+ * the AABB-fallback path). Recomputing it per frame while a zone is merely SELECTED cost
+ * real time and spammed the console once per frame on any zone whose template mask does
+ * not build. The result only depends on the node's authored geometry (fixed for a Node
+ * within a working set; the pointer changes on rebuild) plus the two appdata flags the
+ * derivation reads and the session cell/snap - so key on exactly those.
+ */
+static void zpPropFootprintCached(const SPaintZone &pz, bool useBB, bool symmetry,
+                                  int &cellsW, int &cellsH, bool &fromTemplate, bool &filled)
+{
+	// s_HaveKey: the cached key is populated (suppresses the retry-every-frame the derive
+	// was doing). s_Ok: that derive produced a usable result.
+	static bool s_HaveKey = false;
+	static const PIPELINE::MAX::BUILTIN::CNodeImpl *s_Node = nullptr;
+	static bool s_UseBB = false, s_Symmetry = false;
+	static float s_CellSize = 0.f, s_Snap = 0.f;
+	static bool s_Ok = false;
+	static int s_W = 1, s_H = 1;
+	static bool s_FromT = false, s_Filled = true;
+
+	const float cellSize = g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f;
+	const float snap = g_SessionSnap > 0.f ? g_SessionSnap : 1.f;
+	if (!s_HaveKey || s_Node != pz.Node || s_UseBB != useBB || s_Symmetry != symmetry
+	    || s_CellSize != cellSize || s_Snap != snap)
+	{
+		s_HaveKey = true;
+		s_Node = pz.Node;
+		s_UseBB = useBB;
+		s_Symmetry = symmetry;
+		s_CellSize = cellSize;
+		s_Snap = snap;
+		std::vector<bool> mask;
+		float ox = 0.f, oy = 0.f;
+		std::string e;
+		int w = 1, h = 1;
+		bool ft = false;
+		s_Ok = deriveZoneFootprintMask(pz, cellSize, snap, mask, w, h, ox, oy, ft, e);
+		if (s_Ok)
+		{
+			s_W = w;
+			s_H = h;
+			s_FromT = ft;
+			s_Filled = !maskHasHole(mask);
+		}
+	}
+	if (!s_Ok)
+		return; // leave the caller's primary-footprint defaults
+	cellsW = s_W;
+	cellsH = s_H;
+	fromTemplate = s_FromT;
+	filled = s_Filled;
+}
+
 // Fill the UI bridge state snapshot (labels / button push state).
 void zpScriptRefreshBridge();
 void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
@@ -1833,6 +2214,113 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 	if (!bridge.HaveCore) return;
 	CPaintMouseListener &pl = *g_PaintCtx.Paint;
 	bridge.Mode = pl.Mode;
+	bridge.SubObj = pl.SubObj;
+	// Patch rollout snapshot (cheap counts; the tri-state walks the edge selection only)
+	bridge.PatchSelVerts = zpPatchVertSelCount();
+	bridge.PatchSelEdges = zpPatchEdgeSelCount();
+	bridge.PatchSelFaces = zpPatchFaceSelCount();
+	bridge.PatchSelTans = zpPatchTangentSelCount();
+	bridge.PatchNoSmooth = zpEdgeNoSmoothTriState();
+	// The zones the CURRENT level's selection lives in: one -> show its name in the
+	// readout, several -> show the count (a multi-file selection is easy to make and
+	// invisible without this).
+	{
+		std::set<uint> selZones;
+		if (pl.SubObj == CPaintMouseListener::SubEdge)
+		{
+			for (std::set<SPatchEdgeId>::const_iterator it = g_PatchEdgeSel.begin();
+			     it != g_PatchEdgeSel.end(); ++it)
+				selZones.insert(it->Zone);
+		}
+		else if (pl.SubObj == CPaintMouseListener::SubPatch)
+		{
+			for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+			     it != g_PatchFaceSel.end(); ++it)
+				selZones.insert(it->first);
+		}
+		else
+		{
+			for (std::set<TPatchVertId>::const_iterator it = g_PatchVertSel.begin();
+			     it != g_PatchVertSel.end(); ++it)
+				selZones.insert(it->first);
+			for (std::set<TPatchVertId>::const_iterator it = g_PatchTanSel.begin();
+			     it != g_PatchTanSel.end(); ++it)
+				selZones.insert(it->first);
+		}
+		bridge.PatchSelZones = (uint)selZones.size();
+		bridge.PatchSelZoneName[0] = 0;
+		if (selZones.size() == 1)
+		{
+			// The FILE basename, not the node name: ligo nodes are often generically
+			// named ("metazone") while the brick identity the artist thinks in is the
+			// file. Node name is the fallback for synthetic sessions.
+			std::string label = zpZoneFileBasename(*selZones.begin());
+			if (label.empty())
+			{
+				const SPaintZone *pz = zpFindPaintZone(*selZones.begin());
+				if (pz)
+					label = pz->Name;
+			}
+			strncpy(bridge.PatchSelZoneName, label.c_str(),
+			        sizeof(bridge.PatchSelZoneName) - 1);
+			bridge.PatchSelZoneName[sizeof(bridge.PatchSelZoneName) - 1] = 0;
+		}
+	}
+	bridge.WeldTargetArmed = g_WeldTargetArmed;
+	bridge.WeldThreshold = zpLastWeldThreshold();
+	bridge.ExtrudeHeight = zpLastExtrudeHeight();
+	bridge.ExtrudeOutline = zpLastExtrudeOutline();
+	bridge.ExtrudeLocal = zpLastExtrudeLocal();
+	bridge.VertCoplanar = zpVertCoplanarTriState();
+	bridge.PatchAuto = zpPatchAutoTriState();
+	bridge.HiddenCount = (uint)g_PatchHidden.size();
+	bridge.SubdivPropagate = zpSubdividePropagate();
+	bridge.DetachCopy = zpDetachCopy();
+	bridge.FilterVerts = g_PatchFilterVerts;
+	bridge.FilterVecs = g_PatchFilterVecs;
+	bridge.LockHandles = g_PatchLockHandles;
+	bridge.ShowArrows = g_ShowArrows;
+	// Surface Properties snapshot: tri-state smoothing bits over the face selection and
+	// the steering patch's tile orders.
+	bridge.SmGroupAll = 0;
+	bridge.SmGroupAny = 0;
+	bridge.TessU = 0;
+	bridge.TessV = 0;
+	if (!g_PatchFaceSel.empty())
+	{
+		bool first = true;
+		uint32 allBits = 0, anyBits = 0;
+		for (std::set<TPatchFaceId>::const_iterator it = g_PatchFaceSel.begin();
+		     it != g_PatchFaceSel.end(); ++it)
+		{
+			uint32 mask = 0;
+			if (!zpPatchSmGroupsQuery(it->first, it->second, mask))
+				continue;
+			if (first) { allBits = mask; first = false; }
+			else allBits &= mask;
+			anyBits |= mask;
+		}
+		bridge.SmGroupAll = first ? 0 : allBits;
+		bridge.SmGroupAny = anyBits;
+		int u = 0, v = 0;
+		if (zpPatchTessQuery(g_PatchFaceSel.begin()->first, g_PatchFaceSel.begin()->second, u, v))
+		{
+			bridge.TessU = u;
+			bridge.TessV = v;
+		}
+	}
+	// Scene-menu compass availability (patch level with a face selection only).
+	bridge.MoveDirMask = 0;
+	if (pl.SubObj == CPaintMouseListener::SubPatch && !g_PatchFaceSel.empty())
+		for (int d = 0; d < 8; ++d)
+		{
+			uint dst = 0;
+			if (zpMoveDirTarget(d, dst))
+				bridge.MoveDirMask |= (1u << d);
+		}
+	bridge.PivotMode = g_PivotMode;
+	bridge.PivotLabel[0] = 0;
+	strncpy(bridge.PivotLabel, zpPivotModeName(g_PivotMode), sizeof(bridge.PivotLabel) - 1);
 	bridge.CurTileSet = pl.CurTileSet;
 	bridge.TileSetCount = g_PaintCtx.Core->tileSetCount();
 	std::string name = g_PaintCtx.Core->tileSetName(pl.CurTileSet);
@@ -1942,25 +2430,15 @@ void zpFillBridgeState(ZPUI::SPaintUIBridge &bridge)
 			bridge.PropSymmetry = props.Symmetry;
 			bridge.PropPassable = props.Passable;
 			bridge.PropUseBBox = props.UseBoundingBox;
-			// Footprint: primary uses g_Footprint*; others re-derive on the fly for display
+			// Footprint: primary uses g_Footprint*; others re-derive for display (memoized -
+			// this runs once per frame while a selection is live, and the derive is a full
+			// CZoneTemplate build that also logs on failure).
 			int cw = g_FootprintCellsW, ch = g_FootprintCellsH;
 			bool fromT = g_FootprintFromTemplate;
 			bool filled = !maskHasHole(g_FootprintMask);
 			if (pz->ZoneId != 0 || g_FootprintMask.empty())
-			{
-				std::vector<bool> mask;
-				float ox = 0.f, oy = 0.f;
-				std::string e;
-				bool ft = false;
-				int w = 1, h = 1;
-				if (deriveZoneFootprintMask(*pz, g_SessionCellSize > 0.f ? g_SessionCellSize : 160.f,
-				                            g_SessionSnap > 0.f ? g_SessionSnap : 1.f,
-				                            mask, w, h, ox, oy, ft, e))
-				{
-					cw = w; ch = h; fromT = ft;
-					filled = !maskHasHole(mask);
-				}
-			}
+				zpPropFootprintCached(*pz, props.UseBoundingBox, props.Symmetry,
+				                      cw, ch, fromT, filled);
 			snprintf(bridge.PropFootprint, sizeof(bridge.PropFootprint),
 			         "%dx%d (source=%s)%s", cw, ch, fromT ? "template" : "aabb",
 			         filled ? "" : " hole");

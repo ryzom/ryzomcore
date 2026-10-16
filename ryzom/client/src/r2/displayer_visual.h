@@ -218,7 +218,7 @@ public:
 	virtual void	  getSonsWorldPos2f(std::vector<NLMISC::CVector2f> &result);
 	virtual void	  getSons(std::vector<CDisplayerVisual *> &sons) const;
 	virtual uint	  getNumSons() const { return 0; }
-	virtual CDisplayerVisual *getSon(uint /* index */) const { nlassert(0); return NULL; }
+	virtual CDisplayerVisual *getSon(uint /* index */) const { nlassert(0); return nullptr; }
 	virtual bool	  isCompound() const { return false; }
 	//
 	virtual float	  getAngle() const { nlassert(0); return 0.f; }

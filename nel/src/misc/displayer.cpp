@@ -175,7 +175,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		needSpace = true;
 	}
 
-	if (args.FileName != NULL)
+	if (args.FileName != nullptr)
 	{
 		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
@@ -193,7 +193,7 @@ void CStdDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		needSpace = true;
 	}
 
-	if (args.FuncName != NULL)
+	if (args.FuncName != nullptr)
 	{
 		//if (needSpace) { ss << " "; needSpace = false; }
 		if (needSpace) { str += " "; needSpace = false; }
@@ -372,7 +372,7 @@ CFileDisplayer::~CFileDisplayer ()
 	if (_FilePointer > (FILE*)1)
 	{
 		fclose(_FilePointer);
-		_FilePointer = NULL;
+		_FilePointer = nullptr;
 	}
 }
 
@@ -459,7 +459,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		needSpace = true;
 	}
 
-	if (args.FileName != NULL && !_Raw)
+	if (args.FileName != nullptr && !_Raw)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += CFile::getFilename(args.FileName);
@@ -473,7 +473,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 		needSpace = true;
 	}
 
-	if (args.FuncName != NULL && !_Raw)
+	if (args.FuncName != nullptr && !_Raw)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += args.FuncName;
@@ -510,7 +510,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 	if (_FilePointer == (FILE*)1)
 	{
 		_FilePointer = nlfopen (_FileName, "at");
-		if (_FilePointer == NULL)
+		if (_FilePointer == nullptr)
 #ifndef NL_OS_WINDOWS
 			printf ("Can't open log file '%s': %s\n", _FileName.c_str(), strerror (errno));
 #else
@@ -518,7 +518,7 @@ void CFileDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mes
 #endif
 	}
 
-	if (_FilePointer != 0)
+	if (_FilePointer != nullptr)
 	{
 		if (_NeedHeader)
 		{
@@ -594,7 +594,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		needSpace = true;
 	}
 
-	if (args.FileName != NULL)
+	if (args.FileName != nullptr)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += CFile::getFilename(args.FileName);
@@ -608,7 +608,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		needSpace = true;
 	}
 
-	if (args.FuncName != NULL)
+	if (args.FuncName != nullptr)
 	{
 		if (needSpace) { str += " "; needSpace = false; }
 		str += args.FuncName;
@@ -633,7 +633,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		needSpace = true;
 	}
 
-	if (args.FileName != NULL)
+	if (args.FileName != nullptr)
 	{
 		if (needSpace) { str2 += " "; needSpace = false; }
 		str2 += CFile::getFilename(args.FileName);
@@ -647,7 +647,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		needSpace = true;
 	}
 
-	if (args.FuncName != NULL)
+	if (args.FuncName != nullptr)
 	{
 		if (needSpace) { str2 += " "; needSpace = false; }
 		str2 += args.FuncName;
@@ -676,12 +676,12 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		body += toString(LogTypeToString[2][args.LogType]) + "\n";
 		body += "ProcName: " + args.ProcessName + "\n";
 		body += "Date: " + string(dateToHumanString(args.Date)) + "\n";
-		if(args.FileName == NULL)
+		if(args.FileName == nullptr)
 			body += "File: <Unknown>\n";
 		else
 			body += "File: " + string(args.FileName) + "\n";
 		body += "Line: " + toString(args.Line) + "\n";
-		if (args.FuncName == NULL)
+		if (args.FuncName == nullptr)
 			body += "FuncName: <Unknown>\n";
 		else
 			body += "FuncName: " + string(args.FuncName) + "\n";
@@ -714,7 +714,7 @@ void CMsgBoxDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *m
 		subject += procname + " NeL " + toString(LogTypeToString[0][args.LogType]) + " " + (args.FileName?string(args.FileName):"") + " " + toString(args.Line) + " " + (args.FuncName?string(args.FuncName):"");
 
 		// Check the envvar NEL_IGNORE_ASSERT
-		if (getenv ("NEL_IGNORE_ASSERT") == NULL)
+		if (getenv ("NEL_IGNORE_ASSERT") == nullptr)
 		{
 
 			#if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)

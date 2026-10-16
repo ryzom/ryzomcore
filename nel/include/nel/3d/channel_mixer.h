@@ -89,15 +89,15 @@ private:
 		/// Empty the slot
 		void empty ()
 		{
-			_Animation=NULL;
-			_SkeletonWeight=NULL;
+			_Animation = nullptr;
+			_SkeletonWeight = nullptr;
 			_InvertedSkeletonWeight=false;
 		}
 
 		/// Is the slot empty ?
 		bool isEmpty ()
 		{
-			return _Animation==NULL;
+			return _Animation == nullptr;
 		}
 
 	private:

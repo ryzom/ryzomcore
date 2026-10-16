@@ -383,8 +383,8 @@ namespace NLGUI
 	xmlNodePtr CGroupList::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "list" );
 		xmlSetProp( node, BAD_CAST "maxelements", BAD_CAST toString( _MaxElements ).c_str() );
@@ -637,7 +637,7 @@ namespace NLGUI
 
 		CViewBase* childToDel = _Elements[posChildToDel].Element;
 
-		childToDel->_Parent = NULL;
+		childToDel->_Parent = nullptr;
 
 		bool elementMustBeDeleted = _Elements[posChildToDel].EltDeleteOnRemove && !forceDontDelete;
 		_Elements.erase (_Elements.begin()+posChildToDel);
@@ -652,7 +652,7 @@ namespace NLGUI
 			CViewBase *pVB = _Elements[posChildToDel].Element;
 			if (posChildToDel == 0)
 			{
-				pVB->_ParentPos = NULL;
+				pVB->_ParentPos = nullptr;
 				setHSGroup (pVB,   _AddElt,   _Align);
 				if ((_AddElt == Top) || (_AddElt == Bottom))
 					pVB->setY (0);
@@ -807,7 +807,7 @@ namespace NLGUI
 		{
 			CViewRenderer &rVR = *CViewRenderer::getInstance();
 
-			if (CWidgetManager::getInstance()->getModalWindow() == NULL)
+			if (CWidgetManager::getInstance()->getModalWindow() == nullptr)
 			{
 				sint32 x = CWidgetManager::getInstance()->getPointer()->getX();
 				sint32 y = CWidgetManager::getInstance()->getPointer()->getY();
@@ -815,7 +815,7 @@ namespace NLGUI
 				CInterfaceGroup	*pIG = CWidgetManager::getInstance()->getWindowUnder(x,  y);
 				CInterfaceGroup	*pParent = this;
 				bool bFound = false;
-				while (pParent != NULL)
+				while (pParent != nullptr)
 				{
 					if (pParent == pIG)
 					{
@@ -856,16 +856,16 @@ namespace NLGUI
 				// Find the first container
 				CInterfaceGroup *pIG = _Parent;
 				CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(pIG);
-				while (pIG != NULL)
+				while (pIG != nullptr)
 				{
 					pIG = pIG->_Parent;
-					if (pIG == NULL) break;
-					if (dynamic_cast<CGroupContainerBase*>(pIG) != NULL)
+					if (pIG == nullptr) break;
+					if (dynamic_cast<CGroupContainerBase*>(pIG) != nullptr)
 						pGC = dynamic_cast<CGroupContainerBase*>(pIG);
 				}
 
 				bool bDisplayOverSelection = true;
-				if (pGC != NULL)
+				if (pGC != nullptr)
 				{
 					if (pGC->isGrayed())
 						bDisplayOverSelection = false;
@@ -933,19 +933,19 @@ namespace NLGUI
 	// predicate to remove a view from the list of element
 	struct CRemoveViewPred
 	{
-		bool operator()(const CGroupList::CElementInfo &info) const { return dynamic_cast<CViewBase *>(info.Element) != NULL; }
+		bool operator()(const CGroupList::CElementInfo &info) const { return dynamic_cast<CViewBase *>(info.Element) != nullptr; }
 	};
 
 	// predicate to remove a ctrl from the list of element
 	struct CRemoveCtrlPred
 	{
-		bool operator()(const CGroupList::CElementInfo &info)  const { return dynamic_cast<CCtrlBase *>(info.Element) != NULL; }
+		bool operator()(const CGroupList::CElementInfo &info)  const { return dynamic_cast<CCtrlBase *>(info.Element) != nullptr; }
 	};
 
 	// predicate to remove a group from the list of element
 	struct CRemoveGroupPred
 	{
-		bool operator()(const CGroupList::CElementInfo &info)  const { return dynamic_cast<CInterfaceGroup *>(info.Element) != NULL; }
+		bool operator()(const CGroupList::CElementInfo &info)  const { return dynamic_cast<CInterfaceGroup *>(info.Element) != nullptr; }
 	};
 
 
@@ -1028,7 +1028,7 @@ namespace NLGUI
 			return false;
 		}
 		child->_Parent = this;
-		child->_ParentPos = NULL;
+		child->_ParentPos = nullptr;
 		child->_X = 0;
 		child->_Y = 0;
 		child->_RenderLayer = this->_RenderLayer;
@@ -1112,19 +1112,19 @@ namespace NLGUI
 		{
 			child->setSerializable( false );
 			CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(child);
-			if (pIG != NULL)
+			if (pIG != nullptr)
 			{
 				addGroup (pIG,   (sint) index);
 				return true;
 			}
 			CCtrlBase *pCB = dynamic_cast<CCtrlBase*>(child);
-			if (pCB != NULL)
+			if (pCB != nullptr)
 			{
 				addCtrl (pCB,   (sint) index);
 				return true;
 			}
 			CViewBase *pVB = dynamic_cast<CViewBase*>(child);
-			if (pVB != NULL)
+			if (pVB != nullptr)
 			{
 				addView (pVB,   (sint) index);
 				return true;
@@ -1423,7 +1423,7 @@ namespace NLGUI
 		CElementInfo &e = _Elements[ 0 ];
 		
 		CViewText *t = dynamic_cast< CViewText* >( e.Element );
-		if( t != NULL )
+		if( t != nullptr)
 		{
 			t->setText( _HardText );
 			return;
@@ -1431,7 +1431,7 @@ namespace NLGUI
 		else
 		{
 			CViewTextID *ti = dynamic_cast< CViewTextID* >( e.Element );
-			if( ti != NULL )
+			if( ti != nullptr)
 			{
 				ti->setTextId( _TextId );
 			}

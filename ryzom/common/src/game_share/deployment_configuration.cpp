@@ -585,7 +585,7 @@ namespace DEPCFG
 	void CInfoContainer::clear()
 	{
 		_InfoBlocks.clear();
-		_CurrentInfoBlock= NULL;
+		_CurrentInfoBlock = nullptr;
 		_ExeRecords.clear();
 		_DomainExes.clear();
 	}
@@ -1198,7 +1198,7 @@ namespace DEPCFG
 	CInfoBlock* CInfoContainer::getInfoBlock(const NLMISC::CSString& name)
 	{
 		TInfoBlocks::iterator it= _InfoBlocks.find(name);
-		return (it==_InfoBlocks.end())? NULL: it->second;
+		return (it==_InfoBlocks.end()) ? nullptr : it->second;
 	}
 
 	void CInfoContainer::addExe(const SExeRecord& exeRecord,uint32& errors)

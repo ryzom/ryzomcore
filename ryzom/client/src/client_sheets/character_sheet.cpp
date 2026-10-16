@@ -462,7 +462,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 		debug("Key 'Basics.MovementSpeeds.RunSpeed' not found.");
 	}
 
-	const UFormElm *elm = NULL;
+	const UFormElm *elm = nullptr;
 	// Get all alternative Clothes.
 	static const char alternativeClothesKey[] = "Basics.Alternative Clothes";
 	if(item.getNodeByName(&elm, alternativeClothesKey) && elm)
@@ -555,7 +555,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 					for(uint i=0; i< groundFXArraySize; ++i)
 					{
 						const UFormElm *node;
-						if (elm->getArrayNode(&node, i) && node != NULL)
+						if (elm->getArrayNode(&node, i) && node != nullptr)
 						{
 							CGroundFXSheet gfs;
 							if (!gfs.build(*node))
@@ -634,7 +634,7 @@ void CCharacterSheet::build(const NLGEORGES::UFormElm &item)
 	const UFormElm *pElt;
 	nlverify (item.getNodeByName (&pElt, "3d data.ProjectileCastRay"));
 	uint arraySize;
-	if (pElt != NULL)
+	if (pElt != nullptr)
 	{
 		nlverify (pElt->getArraySize (arraySize));
 		ProjectileCastRay.reserve(arraySize);

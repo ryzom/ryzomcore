@@ -375,7 +375,7 @@ CNelvpDemo::CNelvpDemo()
 	, m_AnimCamera(true)
 	, m_Amplitude(0.15f)
 	, m_Frequency(3.f)
-	, m_VP(NULL)
+	, m_VP(nullptr)
 	, m_CamDist(7.f)
 	, m_CamHeight(3.f)
 	, m_CamAngle(0.f)
@@ -573,7 +573,7 @@ void CNelvpDemo::renderOneFrame()
 	drv->renderTriangles(m_Mat, 0, m_SphereIB.getNumIndexes() / 3);
 
 	// Deactivate vertex program
-	drv->activeVertexProgram(NULL);
+	drv->activeVertexProgram(nullptr);
 
 	m_Driver->swapBuffers();
 }

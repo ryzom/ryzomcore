@@ -570,7 +570,7 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 								 useTangentSpace,
 								 &_OriginalSkinVertices,
 								 &_OriginalSkinNormals,
-								 useTangentSpace ? &_OriginalTGSpace : NULL,
+								 useTangentSpace ? &_OriginalTGSpace : nullptr,
 								 false );
 			_MeshMorpher->updateSkinned (mi->getBlendShapeFactors());
 		}
@@ -604,7 +604,7 @@ void	CMeshGeom::render(IDriver *drv, CTransformShape *trans, float polygonCount,
 	//===========
 
 	// use MeshVertexProgram effect?
-	bool	useMeshVP= _MeshVertexProgram != NULL;
+	bool	useMeshVP= _MeshVertexProgram != nullptr;
 	if( useMeshVP )
 	{
 		nlassert(_VBuffer.getVertexFormat() == (CVertexBuffer::PositionFlag | CVertexBuffer::NormalFlag | CVertexBuffer::TexCoord0Flag | CVertexBuffer::PrimaryColorFlag));
@@ -760,7 +760,7 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 							 useTangentSpace,
 							 &_OriginalSkinVertices,
 							 &_OriginalSkinNormals,
-							 useTangentSpace ? &_OriginalTGSpace : NULL,
+							 useTangentSpace ? &_OriginalTGSpace : nullptr,
 							 true );
 		_MeshMorpher->updateSkinned (mi->getBlendShapeFactors());
 	}
@@ -806,7 +806,7 @@ void	CMeshGeom::renderSkin(CTransformShape *trans, float alphaMRM)
 	//===========
 
 	// use MeshVertexProgram effect?
-	bool	useMeshVP= _MeshVertexProgram != NULL;
+	bool	useMeshVP= _MeshVertexProgram != nullptr;
 	if( useMeshVP )
 	{
 		CMatrix		invertedObjectMatrix;
@@ -959,7 +959,7 @@ void	CMeshGeom::serial(NLMISC::IStream &f)
 	// Version3+: MeshVertexProgram.
 	if (ver >= 3)
 	{
-		IMeshVertexProgram	*mvp= NULL;
+		IMeshVertexProgram	*mvp = nullptr;
 		if(f.isReading())
 		{
 			f.serialPolyPtr(mvp);
@@ -974,7 +974,7 @@ void	CMeshGeom::serial(NLMISC::IStream &f)
 	else if(f.isReading())
 	{
 		// release vp
-		_MeshVertexProgram= NULL;
+		_MeshVertexProgram = nullptr;
 	}
 
 	// TestYoyo
@@ -1059,7 +1059,7 @@ void	CMeshGeom::compileRunTime()
 	//supportMeshBlockRendering= false;
 
 	// support MeshVertexProgram, but no material sorting...
-	bool	supportMBRPerMaterial= supportMeshBlockRendering && _MeshVertexProgram==NULL;
+	bool	supportMBRPerMaterial= supportMeshBlockRendering && _MeshVertexProgram == nullptr;
 
 
 	// setup flags
@@ -1869,7 +1869,7 @@ void	CMeshGeom::applySkin(void *dstVb, CSkeletonModel *skeleton)
 	{
 		// compute matrixes for this block.
 		static	CMatrix3x4	matrixes[IDriver::MaxModelMatrix];
-		computeSkinMatrixes(skeleton, matrixes, mb==0?NULL:&_MatrixBlocks[mb-1], _MatrixBlocks[mb]);
+		computeSkinMatrixes(skeleton, matrixes, mb==0 ? nullptr : &_MatrixBlocks[mb-1], _MatrixBlocks[mb]);
 
 		// check what vertex to skin for this PB.
 		flagSkinVerticesForMatrixBlock(&skinFlags[0], _MatrixBlocks[mb]);
@@ -2282,7 +2282,7 @@ void	CMeshGeom::beginMesh(CMeshGeomRenderContext &rdrCtx)
 	else
 	{
 		// use MeshVertexProgram effect?
-		if( _MeshVertexProgram != NULL && _MeshVertexProgram->isMBRVpOk(rdrCtx.Driver) )
+		if( _MeshVertexProgram != nullptr && _MeshVertexProgram->isMBRVpOk(rdrCtx.Driver) )
 		{
 			// Ok will use it.
 			_SupportMBRFlags|= MBRCurrentUseVP;
@@ -2365,7 +2365,7 @@ bool	CMeshGeom::getVBHeapInfo(uint &vertexFormat, uint &numVertices)
 		NB: still possible with complex code to do it (sort per VP type (with or not)...), but tests in Ryzom
 		shows that VBHeap is not really important (not so much different shapes...)
 	*/
-	if( _MeshVertexProgram==NULL )
+	if( _MeshVertexProgram == nullptr)
 	{
 		vertexFormat= _VBuffer.getVertexFormat();
 		numVertices= _VBuffer.getNumVertices();
@@ -2800,7 +2800,7 @@ IMeshGeom	*CMesh::supportMeshBlockRendering (CTransformShape *trans, float &poly
 		return _MeshGeom;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -2830,7 +2830,7 @@ void	CMesh::compileRunTime()
 	if(_VisualCollisionMesh)
 	{
 		delete _VisualCollisionMesh;
-		_VisualCollisionMesh= NULL;
+		_VisualCollisionMesh = nullptr;
 	}
 	// build only if wanted
 	if( (_CollisionMeshGeneration==AutoCameraCol && !_LightInfos.empty()) ||
@@ -2848,7 +2848,7 @@ void	CMesh::compileRunTime()
 			{
 				// delete
 				delete _VisualCollisionMesh;
-				_VisualCollisionMesh= NULL;
+				_VisualCollisionMesh = nullptr;
 			}
 		}
 	}

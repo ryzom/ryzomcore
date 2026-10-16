@@ -166,7 +166,10 @@ void	CMailForumService::checkFile(const std::string& file)
 	if (fsz == 0)
 		return;
 
-	vector<uint8>	buffer(fsz);
+	// the file is still being written by the web side until the "$$$$" marker
+	// lands; terminate the buffer so the marker scan cannot run off the end of
+	// a half-written file
+	vector<uint8>	buffer(fsz + 1, 0);
 
 	CIFile	fi;
 	if (!fi.open(file))
@@ -190,7 +193,12 @@ void	CMailForumService::checkFile(const std::string& file)
 		char	to_username[256];
 		char	from_username[256];
 
-		int		scanned = sscanf(pb, "shard=%d to=%s from=%s", &shard_id, to_username, from_username);
+		int		scanned = sscanf(pb, "shard=%d to=%255s from=%255s", &shard_id, to_username, from_username);
+		if (scanned != 3)
+		{
+			nlwarning("MAIL: malformed incoming mail file '%s', notification dropped", file.c_str());
+			return;
+		}
 
 		CMessage	msgout("MAIL_NOTIF");
 

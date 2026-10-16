@@ -48,7 +48,7 @@ namespace NLGUI
 	{
 		if( name == "value" )
 		{
-			if( _Number.getNodePtr() != NULL )
+			if( _Number.getNodePtr() != nullptr)
 				return _Number.getNodePtr()->getFullName();
 			else
 				return "";
@@ -56,7 +56,7 @@ namespace NLGUI
 		else
 		if( name == "valuemax" )
 		{
-			if( _NumberMax.getNodePtr() != NULL )
+			if( _NumberMax.getNodePtr() != nullptr)
 				return _NumberMax.getNodePtr()->getFullName();
 			else
 				return "";
@@ -98,17 +98,17 @@ namespace NLGUI
 	xmlNodePtr CDBViewQuantity::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CViewText::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "text_quantity" );
 
-		if( _Number.getNodePtr() != NULL )
+		if( _Number.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST _Number.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "value", BAD_CAST "" );
 
-		if( _NumberMax.getNodePtr() != NULL )
+		if( _NumberMax.getNodePtr() != nullptr)
 			xmlSetProp( node, BAD_CAST "valuemax", BAD_CAST _NumberMax.getNodePtr()->getFullName().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "valuemax", BAD_CAST "" );

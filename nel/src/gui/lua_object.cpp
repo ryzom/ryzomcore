@@ -47,7 +47,7 @@ namespace NLGUI
 	// *************************************************
 	bool CLuaObject::isValid() const
 	{
-		return getLuaState() != NULL;
+		return getLuaState() != nullptr;
 	}
 
 	// *************************************************
@@ -109,7 +109,7 @@ namespace NLGUI
 			_LuaState->pushLightUserData((void *) this);
 			_LuaState->pushNil();
 			_LuaState->setTable(LUA_REGISTRYINDEX);
-			_LuaState = NULL;
+			_LuaState = nullptr;
 		}
 	}
 

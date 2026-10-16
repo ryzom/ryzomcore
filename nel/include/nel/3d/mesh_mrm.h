@@ -285,7 +285,7 @@ public:
 	// @}
 
 	// Is this mesh Geom has a VertexProgram bound?
-	virtual bool	hasMeshVertexProgram() const NL_OVERRIDE {return _MeshVertexProgram!=NULL;}
+	virtual bool	hasMeshVertexProgram() const NL_OVERRIDE {return _MeshVertexProgram != nullptr; }
 
 	/// \name ShadowMap Skin rendering
 	// @{

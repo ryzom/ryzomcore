@@ -33,7 +33,7 @@ CIGSurfaceLight::CIGSurfaceLight()
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
-	_Owner= NULL;
+	_Owner = nullptr;
 	_CellSize= 1;
 	_OOCellSize= 1;
 }

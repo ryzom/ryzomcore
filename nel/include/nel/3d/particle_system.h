@@ -366,8 +366,8 @@ public:
 			const NLMISC::CVector &get() const						 { nlassert(_Value); return *_Value; }
 			void				   set(const NLMISC::CVector &value) { nlassert(_Value); *_Value = value; }
 			const std::string     &getName() const					 { nlassert(_Name); return *_Name; }
-			bool				   isValid() const { return _Name != NULL && _Value != NULL; }
-			void                   reset() { _Name = NULL; _Value = NULL; }
+			bool				   isValid() const { return _Name != nullptr && _Value != nullptr; }
+			void                   reset() { _Name = nullptr; _Value = nullptr; }
 		/////////////////////////////
 		private:
 			friend class CParticleSystem;
@@ -389,7 +389,7 @@ public:
 		 *  \index the index of the element in the located.
 		 *  \lb the located bindable that is selected into a located (NULL = all)
 		 */
-		 void setCurrentEditedElement(CPSLocated *loc = NULL , uint32 index = 0, class CPSLocatedBindable *bd = NULL )
+		 void setCurrentEditedElement(CPSLocated *loc = nullptr, uint32 index = 0, class CPSLocatedBindable *bd = nullptr)
 		 {
 			NL_PS_FUNC_MAIN(setCurrentEditedElement)
 			_CurrEditedElementLocated = loc;
@@ -538,13 +538,13 @@ public:
 		  * \param lastingForeverObj, if not NULL, the pointer will be filled with the first object that last or emit forever, or create a loop.
 		  */
 
-		bool canFinish(CPSLocatedBindable **lastingForeverObj = NULL) const;
+		bool canFinish(CPSLocatedBindable **lastingForeverObj = nullptr) const;
 
 		/** Test if there are loops in the system. E.g A emit B emit A
 		  * NB : we assume that all emitters in the system are accessible, e.g that the located graph is connex
 		  * \param loopingObj, if not NULL, will be filled with the first object that creates a loop.
 		  */
-		bool hasLoop(CPSLocatedBindable **loopingObj = NULL) const;
+		bool hasLoop(CPSLocatedBindable **loopingObj = nullptr) const;
 
 
 	// @}
@@ -1090,7 +1090,7 @@ private:
 	public:
 		CCoordSystemInfo()
 		{
-			Matrix = NULL;
+			Matrix = nullptr;
 		}
 	};
 

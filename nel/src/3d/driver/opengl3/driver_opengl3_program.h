@@ -33,7 +33,8 @@ static sint TexGenEyeLinear = 3; // GL_EYE_LINEAR
 /// Builtin vertex program description
 struct CVPBuiltin
 {
-	CVPBuiltin() : VertexProgram(NULL), VertexColorLighted(false), Normalize(false), WorldSpaceNormal(false), WorldSpacePosition(false), NumPerPixelLights(0), ClipPlaneMask(0), PPClipPlane(false) { UVRouting[0] = 0; UVRouting[1] = 1; UVRouting[2] = 2; UVRouting[3] = 3; }
+	CVPBuiltin() : VertexProgram(nullptr)
+	    , VertexColorLighted(false), Normalize(false), WorldSpaceNormal(false), WorldSpacePosition(false), NumPerPixelLights(0), ClipPlaneMask(0), PPClipPlane(false) { UVRouting[0] = 0; UVRouting[1] = 1; UVRouting[2] = 2; UVRouting[3] = 3; }
 
 	uint16 VertexFormat;
 	bool Lighting;
@@ -138,7 +139,7 @@ extern const char *g_TexelNames[IDRV_PROGRAM_MAXSAMPLERS];
 extern const char *g_ConstantNames[IDRV_PROGRAM_MAXSAMPLERS];
 
 /// Generate a mega VP source string. Called from initMegaVertexPrograms and compileInsertVertexProgram.
-void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked = false, const char *insertSource = NULL);
+void megaVPGenerate(std::string &result, bool fogOrPpl, bool hwClip, bool tableUBO, bool cameraUBO, bool objectUBO, bool materialUBO, bool linked = false, const char *insertSource = nullptr);
 
 namespace /* anonymous */ {
 

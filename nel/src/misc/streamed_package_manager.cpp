@@ -27,7 +27,7 @@ namespace NLMISC
 
 NLMISC_SAFE_SINGLETON_IMPL(CStreamedPackageManager);
 
-CStreamedPackageManager::CStreamedPackageManager() : Provider(NULL)
+CStreamedPackageManager::CStreamedPackageManager() : Provider(nullptr)
 {
 	// init
 }

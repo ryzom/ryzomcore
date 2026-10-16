@@ -50,7 +50,8 @@ extern CClientChatManager   ChatMngr;
 /////////////////////
 
 //==================================================================
-CPeopleList::CPeopleList() : _ChatWindow(NULL),
+CPeopleList::CPeopleList() : _ChatWindow(nullptr)
+    ,
 			     _ContactType(CPeopleListDesc::Unknown),
 			     _CurrPeopleID(0),
 			     _Savable(false)
@@ -65,7 +66,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	reset();
 	// get father group
 	CInterfaceManager *im = CInterfaceManager::getInstance();
-	CGroupContainer *fatherContainer = NULL;
+	CGroupContainer *fatherContainer = nullptr;
 	if (!desc.FatherContainer.empty())
 	{
 		fatherContainer = dynamic_cast<CGroupContainer *>(CWidgetManager::getInstance()->getElementFromId(desc.FatherContainer));
@@ -80,7 +81,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	vector< pair<string, string> > baseContainerParams;
 	baseContainerParams.push_back(pair<string, string>("id", desc.Id));
 	std::string baseId;
-	if (fatherContainer == NULL)
+	if (fatherContainer == nullptr)
 	{
 		baseContainerParams.push_back(pair<string, string>("movable","true"));
 		baseContainerParams.push_back(pair<string, string>("active","false"));
@@ -95,7 +96,7 @@ bool CPeopleList::create(const CPeopleListDesc &desc, const CChatWindowDesc *cha
 	// must attach group to hierarchy before we can use it
 	CGroupContainer *gc = dynamic_cast<CGroupContainer  *>(mainIg);
 	if (!gc) return false;
-	if (fatherContainer != NULL)
+	if (fatherContainer != nullptr)
 	{
 		fatherContainer->attachContainer(gc, desc.InsertPosition);
 		fatherContainer->setup();
@@ -331,7 +332,7 @@ bool CPeopleList::isPeopleChatVisible(uint index) const
 		nlwarning("Bad index");
 		return false;
 	}
-	return (_Peoples[index].Chat != NULL);
+	return (_Peoples[index].Chat != nullptr);
 }
 /*
   bool CPeopleList::isPeopleWindowVisible(uint index) const
@@ -687,7 +688,7 @@ void CPeopleList::displayLocalPlayerTell(const string &receiver, uint index, con
 	}
 	// get the chat box inside the container
 	CGroupContainer *gc = _Peoples[index].Chat;
-	if (gc == NULL)
+	if (gc == nullptr)
 		return;
 	CGroupList *gl = dynamic_cast<CGroupList *>(gc->getGroup("text_list"));
 	if (!gl)
@@ -740,19 +741,19 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 	// get the chat box inside the container
 	CGroupContainer *gcChat = _Peoples[index].Chat;
 	CGroupContainer *gcName = _Peoples[index].Container;
-	if (gcName == NULL)
+	if (gcName == nullptr)
 	{
 		nlwarning("<CPeopleList::displayMessage> can't get group list.");
 		return;
 	}
 
 	// if the group is closed, open it
-	if (gcChat == NULL)
+	if (gcChat == nullptr)
 	{
 		openCloseChat(index, true);
 		gcChat = _Peoples[index].Chat;
 	}
-	if (gcChat == NULL)
+	if (gcChat == nullptr)
 	{
 		nlwarning("<CPeopleList::displayMessage> cannot open chat.");
 		return;
@@ -763,7 +764,7 @@ void CPeopleList::displayMessage(uint index, const string &msg, NLMISC::CRGBA co
 	CWidgetManager::getInstance()->setTopWindow(gcChat);
 
 	CGroupList *gl = dynamic_cast<CGroupList *>(gcChat->getGroup("text_list"));
-	if (gl == NULL)
+	if (gl == nullptr)
 	{
 		nlwarning("<CPeopleList::displayMessage> can't get text_list.");
 		return;
@@ -798,12 +799,12 @@ void CPeopleList::reset()
 	if (_ChatWindow)
 	{
 		getChatWndMgr().removeChatWindow(_ChatWindow);
-		_ChatWindow = NULL;
+		_ChatWindow = nullptr;
 	}
 	if (_BaseContainer)
 	{
 		removeAllPeoples();
-		_BaseContainer->setContent(NULL);
+		_BaseContainer->setContent(nullptr);
 
 		CGroupContainer *father = static_cast<CGroupContainer *>(_BaseContainer->getParent()->getEnclosingContainer());
 		if (father)
@@ -982,10 +983,10 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 	if (!gc) return;
 
 	CInterfaceGroup *hc = gc->getHeaderClosed();
-	if (hc != NULL)
+	if (hc != nullptr)
 	{
 		CViewBitmap *onlineView = dynamic_cast<CViewBitmap*>(hc->getView("online"));
-		if (onlineView != NULL)
+		if (onlineView != nullptr)
 		{
 			CCtrlBase *toolTip = hc->getCtrl("tt_online");
 
@@ -1010,11 +1011,11 @@ void CPeopleList::setOnline(uint index, TCharConnectionState online)
 		}
 
 		CCtrlBase *chatButton = hc->getCtrl("chat_button");
-		if (chatButton != NULL)
+		if (chatButton != nullptr)
 			chatButton->setActive(online != ccs_offline);
 
 		CCtrlBase *inviteButton = hc->getCtrl("invite_button");
-		if (inviteButton != NULL)
+		if (inviteButton != nullptr)
 			inviteButton->setActive(online != ccs_offline);
 	}
 
@@ -1099,7 +1100,7 @@ void CPeopleList::openCloseChat(sint index, bool bOpen)
 	else
 		_Peoples[index].Chat = pCGW->createFreeTeller(_Peoples[index].getName(), "UI:SAVE:WIN:COLORS:COM");
 
-	if (_Peoples[index].Chat == NULL)
+	if (_Peoples[index].Chat == nullptr)
 		return;
 	_Peoples[index].Chat->setActive(bOpen);
 }
@@ -1110,7 +1111,7 @@ class CHandlerContactEntry : public IActionHandler
 	void execute (CCtrlBase *pCaller, const std::string &/* sParams */) NL_OVERRIDE
 	{
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
-		if (pEB == NULL) return;
+		if (pEB == nullptr) return;
 		string text = pEB->getInputString();
 		// If the line is empty, do nothing
 		if(text.empty())
@@ -1126,7 +1127,7 @@ class CHandlerContactEntry : public IActionHandler
 		// is it a command ?
 		if(text[0] == '/')
 		{
-			CChatWindow::_ChatWindowLaunchingCommand = NULL; // no CChatWindow instance there ..
+			CChatWindow::_ChatWindowLaunchingCommand = nullptr; // no CChatWindow instance there ..
 			std::string str = text.substr(1);
 			NLMISC::ICommand::execute( str, g_log );
 			pEB->setInputString (std::string());

@@ -261,7 +261,7 @@ namespace NLGUI
 	{
 		// Percent ?
 		const char *percentChar;
-		if ((percentChar = strchr (str, '%')) != NULL)
+		if ((percentChar = strchr (str, '%')) != nullptr)
 		{
 			std::string toto = str;
 			toto = toto.substr (0, percentChar - str);
@@ -289,10 +289,10 @@ namespace NLGUI
 	// scan a color component, and return pointer to next position
 	static const char *scanColorComponent(const char *src, uint8 &intensity)
 	{
-		if (!src) return NULL;
-		if (!isHexa(*src)) return NULL;
+		if (!src) return nullptr;
+		if (!isHexa(*src)) return nullptr;
 		uint8 value = convertHexa(*src++) << 4;
-		if (!isHexa(*src)) return NULL;
+		if (!isHexa(*src)) return nullptr;
 		value += convertHexa(*src++);
 		intensity = value;
 		return src;
@@ -759,7 +759,7 @@ namespace NLGUI
 	// update HTTPCookies with cookies received from curl
 	void receiveCookies (CURL *curl, const std::string &domain, bool trusted)
 	{
-		struct curl_slist *cookies = NULL;
+		struct curl_slist *cookies = nullptr;
 		if (curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies) == CURLE_OK)
 		{
 			struct curl_slist *nc;

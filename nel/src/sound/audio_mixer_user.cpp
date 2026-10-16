@@ -101,14 +101,20 @@ UAudioMixer	*UAudioMixer::createAudioMixer()
 
 CAudioMixerUser::CAudioMixerUser() : _AutoLoadSample(false),
 									 _UseADPCM(true),
-									 _SoundDriver(NULL),
-									 _SoundBank(NULL),
-									 _SampleBankManager(NULL),
-									 _BackgroundSoundManager(NULL),
-									 _ClusteredSound(0),
-									 _ReverbEffect(NULL),
+									 _SoundDriver(nullptr)
+    ,
+									 _SoundBank(nullptr)
+    ,
+									 _SampleBankManager(nullptr)
+    ,
+									 _BackgroundSoundManager(nullptr)
+    ,
+									 _ClusteredSound(nullptr),
+									 _ReverbEffect(nullptr)
+    ,
 									 _ListenPosition(CVector::Null),
-									 _BackgroundMusicManager(NULL),
+									 _BackgroundMusicManager(nullptr)
+    ,
 									 _PlayingSources(0),
 									 _PlayingSourcesMuted(0),
 									 _Leaving(false)
@@ -171,18 +177,18 @@ CAudioMixerUser::~CAudioMixerUser()
 {
 	//nldebug( "AM: Releasing..." );
 
-	delete _ClusteredSound; _ClusteredSound = NULL;
-	delete _BackgroundSoundManager; _BackgroundSoundManager = NULL;
-	delete _BackgroundMusicManager; _BackgroundMusicManager = NULL;
+	delete _ClusteredSound; _ClusteredSound = nullptr;
+	delete _BackgroundSoundManager; _BackgroundSoundManager = nullptr;
+	delete _BackgroundMusicManager; _BackgroundMusicManager = nullptr;
 
 	reset();
 
 	_Leaving = true;
 
 	// Release all the SampleBanks
-	delete _SampleBankManager; _SampleBankManager = NULL;
+	delete _SampleBankManager; _SampleBankManager = nullptr;
 	// Release the sound bank
-	delete _SoundBank; _SoundBank = NULL;
+	delete _SoundBank; _SoundBank = nullptr;
 
 	// Release music channels
 	for (uint i = 0; i < _NbMusicChannelFaders; ++i)
@@ -192,14 +198,14 @@ CAudioMixerUser::~CAudioMixerUser()
 	for (uint i = 0; i < _Tracks.size(); ++i)
 	{
 		delete _Tracks[i];
-		_Tracks[i] = NULL;
+		_Tracks[i] = nullptr;
 	}
 
 	// Reverb effect
-	delete _ReverbEffect; _ReverbEffect = NULL;
+	delete _ReverbEffect; _ReverbEffect = nullptr;
 
 	// Sound driver
-	delete _SoundDriver; _SoundDriver = NULL;
+	delete _SoundDriver; _SoundDriver = nullptr;
 
 	//nldebug( "AM: Released" );
 }
@@ -207,7 +213,7 @@ CAudioMixerUser::~CAudioMixerUser()
 
 void CAudioMixerUser::initClusteredSound(NL3D::UScene *uscene, float minGain, float maxDistance, float portalInterpolate)
 {
-	NL3D::CScene *scene = 0;
+	NL3D::CScene *scene = nullptr;
 	if (uscene) scene = &(static_cast<NL3D::CSceneUser*>(uscene)->getScene());
 
 	initClusteredSound(scene, minGain, maxDistance, portalInterpolate);
@@ -455,12 +461,12 @@ void CAudioMixerUser::initDriver(const std::string &driverName)
 	catch (const ESoundDriver &e)
 	{
 		nlwarning(e.what());
-		delete _SoundDriver; _SoundDriver = NULL;
+		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
 	catch (...)
 	{
-		delete _SoundDriver; _SoundDriver = NULL;
+		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
 }
@@ -550,12 +556,12 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 	catch (const ESoundDriver &e)
 	{
 		nlwarning(e.what());
-		delete _SoundDriver; _SoundDriver = NULL;
+		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
 	catch (...)
 	{
-		delete _SoundDriver; _SoundDriver = NULL;
+		delete _SoundDriver; _SoundDriver = nullptr;
 		throw;
 	}
 
@@ -672,7 +678,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 
 	// try to load default configuration from george sheet
 
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 
 	try
 	{
@@ -706,7 +712,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			NLGEORGES::UFormElm *sampleBanks;
 			root.getNodeByName(&sampleBanks, ".SampleBanks");
 
-			if (sampleBanks != NULL)
+			if (sampleBanks != nullptr)
 			{
 				uint size;
 				sampleBanks->getArraySize(size);
@@ -718,7 +724,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 					if (!name.empty())
 						loadSampleBank(false, name);
 
-					if (progressCallback != 0)
+					if (progressCallback != nullptr)
 						progressCallback->progress(float(i) / size);
 				}
 			}
@@ -726,7 +732,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 			// configure background flags names, fades and state
 			NLGEORGES::UFormElm *bgFlags;
 			root.getNodeByName(&bgFlags, ".BackgroundFlags");
-			if (bgFlags != NULL)
+			if (bgFlags != nullptr)
 			{
 				TBackgroundFlags		flags;
 				TBackgroundFilterFades	fades;
@@ -766,7 +772,7 @@ void CAudioMixerUser::initDevice(const std::string &deviceName, const CInitInfo 
 				setBackgroundFlags(flags);
 			}
 
-			form = NULL;
+			form = nullptr;
 			NLGEORGES::UFormLoader::releaseLoader(formLoader);
 		}
 	}
@@ -1178,7 +1184,7 @@ void CAudioMixerUser::initUserVar()
 			for (; first2 != last2; ++first2)
 			{
 				CSound *sound = getSoundId(*first2);
-				if (sound != 0)
+				if (sound != nullptr)
 				{
 					// ok, the sound exist !
 					sound->_UserVarControler = first->second.Name;
@@ -1192,7 +1198,7 @@ void CAudioMixerUser::initUserVar()
 /// Build the sound bank packed sheets file from georges sound sheet files with .sound extension in the search path, and return the path to the written file.
 std::string UAudioMixer::buildSoundBank(const std::string &packedSheetDir)
 {
-	CGroupControllerRoot *tempRoot = NULL;
+	CGroupControllerRoot *tempRoot = nullptr;
 	if (!CGroupControllerRoot::isInitialized())
 		tempRoot = new CGroupControllerRoot();
 	std::string dir = CPath::standardizePath(packedSheetDir, true);
@@ -1548,7 +1554,7 @@ CTrack *CAudioMixerUser::getFreeTrack(CSourceCommon *source)
 		}
 	}
 
-	return 0;
+	return nullptr;
 }
 
 // ******************************************************************
@@ -1564,13 +1570,13 @@ CTrack *CAudioMixerUser::getFreeTrack(CSourceCommon *source)
 
 void CAudioMixerUser::freeTrack(CTrack *track)
 {
-	nlassert(track != 0);
-	nlassert(track->getLogicalSource() != 0);
+	nlassert(track != nullptr);
+	nlassert(track->getLogicalSource() != nullptr);
 
 //	nldebug("Track %p free by source %p", track, track->getSource());
 
 	_ReserveUsage[track->getLogicalSource()->getPriority()]--;
-	track->setLogicalSource(0);
+	track->setLogicalSource(nullptr);
 	_FreeTracks.push_back(track);
 }
 
@@ -1594,14 +1600,14 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 			if (source->isPlaying())
 			{
 				if (virtualPos)
-					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
+					pos.push_back(make_pair(source->getTrack() == nullptr, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0,
+					pos.push_back(make_pair(source->getTrack() == nullptr,
 						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
 
-				if (source->getTrack() == 0)
+				if (source->getTrack() == nullptr)
 					nbmute++;
 				else
 				{
@@ -1618,14 +1624,14 @@ void CAudioMixerUser::getPlayingSoundsPos(bool virtualPos, std::vector<std::pair
 			if (source->isPlaying())
 			{
 				if (virtualPos)
-					pos.push_back(make_pair(source->getTrack() == 0, source->getVirtualPos()));
+					pos.push_back(make_pair(source->getTrack() == nullptr, source->getVirtualPos()));
 				else
-					pos.push_back(make_pair(source->getTrack() == 0,
+					pos.push_back(make_pair(source->getTrack() == nullptr,
 						source->getSourceRelativeMode()
 						? source->getPos() + _ListenPosition
 						: source->getPos()));
 				
-				if (source->getTrack() == 0)
+				if (source->getTrack() == nullptr)
 					nbmute++;
 				else
 				{
@@ -1680,7 +1686,7 @@ void				CAudioMixerUser::update()
 			TMixerUpdateContainer::iterator first(_UpdateList.begin()), last(_UpdateList.end());
 			for (; first != last; ++first)
 			{
-				if( *first == 0)
+				if( *first == nullptr)
 				{
 					nlwarning("NULL pointeur in update list !");
 				}
@@ -1739,7 +1745,7 @@ void				CAudioMixerUser::update()
 			currentEvent->onEvent();
 
 #ifdef NL_DEBUG
-			currentEvent = 0;
+			currentEvent = nullptr;
 #endif
 		}
 
@@ -1762,7 +1768,7 @@ void				CAudioMixerUser::update()
 	{
 		if (!_Tracks[i]->isPlaying())
 		{
-			if (_Tracks[i]->getLogicalSource() != 0)
+			if (_Tracks[i]->getLogicalSource() != nullptr)
 			{
 				CSourceCommon *source = _Tracks[i]->getLogicalSource();
 				source->stop();
@@ -1795,15 +1801,15 @@ void				CAudioMixerUser::update()
 		{
 			if (_Tracks[i]->isPlaying())
 			{
-				if (_Tracks[i]->getLogicalSource() != 0)
+				if (_Tracks[i]->getLogicalSource() != nullptr)
 				{
 					CSourceCommon *source = _Tracks[i]->getLogicalSource();
 					ISource *isource = _Tracks[i]->getPhysicalSource();
-					if (source->getCluster() != 0)
+					if (source->getCluster() != nullptr)
 					{
 						// need to check the cluster status
 						const CClusteredSound::CClusterSoundStatus *css = _ClusteredSound->getClusterSoundStatus(source->getCluster());
-						if (css != 0)
+						if (css != nullptr)
 						{
 							// there is some data here, update the virtual position of the sound.
 							float dist = (css->Position - source->getPos()).norm();
@@ -1943,9 +1949,9 @@ static bool checkSound(CSound *sound, const vector<pair<string, CSound*> > &subs
 		if (first->second == sound)
 			return false;
 
-		if (first->second == 0 && !first->first.empty())
+		if (first->second == nullptr && !first->first.empty())
 			missingFiles.push_back(first->first);
-		else if (first->second != 0)
+		else if (first->second != nullptr)
 		{
 			vector<pair<string, CSound*> > v2;
 			first->second->getSubSoundList(v2);
@@ -1996,21 +2002,21 @@ USource				*CAudioMixerUser::createSource( TSoundId id, bool spawn, TSpawnEndCal
 	_profile(( "AM: CREATESOURCE: SOUND=%p, NAME=%s, TIME=%d", id, id->getName().c_str(), curTime() ));
 	_profile(( "AM: SOURCES: %d, PLAYING: %d, TRACKS: %d", getSourcesNumber(), getPlayingSourcesNumber(), getNumberAvailableTracks() ));
 
-	if ( id == NULL )
+	if ( id == nullptr)
 	{
 		_profile(("AM: FAILED CREATESOURCE"));
 //		nldebug( "AM: Sound not created: invalid sound id" );
-		return NULL;
+		return nullptr;
 	}
 
-	USource *ret = NULL;
+	USource *ret = nullptr;
 
 	if (_AutoLoadSample)
 	{
 		if (id->getSoundType() == CSound::SOUND_SIMPLE)
 		{
 			CSimpleSound *ss = (CSimpleSound*)id;
-			if (ss->getBuffer() == NULL)
+			if (ss->getBuffer() == nullptr)
 			{
 				const string sampleName = CStringMapper::unmap(ss->getBuffername()) + ".wav";
 
@@ -2031,7 +2037,7 @@ retrySound:
 			if (invalid)
 			{
 				nlwarning("The sound %s contain an infinite recursion !", CStringMapper::unmap(id->getName()).c_str());
-				return NULL;
+				return nullptr;
 			}
 
 			if (!missingFiles.empty()/* && count <= missingFiles.size()*/)
@@ -2058,7 +2064,7 @@ retrySound:
 		{
 			CSimpleSound *simpleSound = static_cast<CSimpleSound *>(id);
 			// This is a simple sound
-			if (simpleSound->getBuffer() == NULL)
+			if (simpleSound->getBuffer() == nullptr)
 			{
 				static std::set<std::string> warned;
 
@@ -2068,7 +2074,7 @@ retrySound:
 					nlwarning ("Can't create the sound '%s'", name.c_str());
 					warned.insert(name);
 				}
-				return NULL;
+				return nullptr;
 			}
 
 			// Create source
@@ -2131,16 +2137,16 @@ retrySound:
 		{
 			static CSoundContext	defaultContext;
 			// This is a context sound.
-			if (context == 0)
+			if (context == nullptr)
 				context = &defaultContext;
 
 			CContextSound *ctxSound = static_cast<CContextSound *>(id);
 			CSound *sound = ctxSound->getContextSound(*context);
-			if (sound != 0)
+			if (sound != nullptr)
 			{
-				ret = createSource(sound, spawn, cb, userParam, cluster, NULL, static_cast<CGroupController *>(groupController));
+				ret = createSource(sound, spawn, cb, userParam, cluster, nullptr, static_cast<CGroupController *>(groupController));
 				// Set the volume of the source according to the context volume
-				if (ret != 0)
+				if (ret != nullptr)
 				{
 					ret->setGain(ret->getGain() * ctxSound->getGain());
 					float pitch = ret->getPitch() * ctxSound->getPitch();
@@ -2148,7 +2154,7 @@ retrySound:
 				}
 			}
 			else
-				ret = 0;
+				ret = nullptr;
 		}
 		break;
 	default:
@@ -2254,7 +2260,7 @@ uint32			CAudioMixerUser::loadSampleBank(bool async, const std::string &name, st
 	//nldebug( "Loading samples bank %s...", name.c_str() );
 	TStringId nameId = CStringMapper::map(name);
 	CSampleBank* bank = _SampleBankManager->findSampleBank(nameId);
-	if (bank == NULL)
+	if (bank == nullptr)
 	{
 		// create a new sample bank
 		bank = new CSampleBank(nameId, _SampleBankManager);
@@ -2286,7 +2292,7 @@ bool CAudioMixerUser::unloadSampleBank(const std::string &name)
 	//nldebug( "Unloading samples bank %s...", name.c_str() );
 	CSampleBank *pbank = _SampleBankManager->findSampleBank(CStringMapper::map(name));
 
-	if (pbank != NULL)
+	if (pbank != nullptr)
 	{
 		// ok, the bank exist.
 		return pbank->unload();
@@ -2466,7 +2472,7 @@ NLMISC_CATEGORISED_COMMAND(nel, displaySoundInfo, "Display information about the
 
 	if(args.size() != 0) return false;
 
-	if (CAudioMixerUser::instance() == NULL)
+	if (CAudioMixerUser::instance() == nullptr)
 	{
 		log.displayNL ("No audio mixer available");
 		return true;
@@ -2476,14 +2482,14 @@ NLMISC_CATEGORISED_COMMAND(nel, displaySoundInfo, "Display information about the
 
 	for (uint i = 0; i < CAudioMixerUser::instance()->_Tracks.size(); i++)
 	{
-		if (CAudioMixerUser::instance()->_Tracks[i] == NULL)
+		if (CAudioMixerUser::instance()->_Tracks[i] == nullptr)
 		{
 			log.displayNL ("Track %d is NULL", i);
 		}
 		else
 		{
 			log.displayNL ("Track %d %s available and %s playing.", i, (CAudioMixerUser::instance()->_Tracks[i]->isAvailable()?"is":"is not"), (CAudioMixerUser::instance()->_Tracks[i]->isPlaying()?"is":"is not"));
-			if (CAudioMixerUser::instance()->_Tracks[i]->getLogicalSource() == NULL)
+			if (CAudioMixerUser::instance()->_Tracks[i]->getLogicalSource() == nullptr)
 			{
 				log.displayNL ("    CSourceCommon is NULL");
 			}
@@ -2541,21 +2547,21 @@ void CAudioMixerUser::unregisterBufferAssoc(CSound *sound, IBuffer *buffer)
 void CAudioMixerUser::registerUpdate(CAudioMixerUser::IMixerUpdate *pmixerUpdate)
 {
 //	nldebug("Registering update %p", pmixerUpdate);
-	nlassert(pmixerUpdate != 0);
+	nlassert(pmixerUpdate != nullptr);
 	_UpdateEventList.push_back(make_pair(pmixerUpdate, true));
 }
 /// Unregister an object from the update list.
 void CAudioMixerUser::unregisterUpdate(CAudioMixerUser::IMixerUpdate *pmixerUpdate)
 {
 //	nldebug("Unregistering update %p", pmixerUpdate);
-	nlassert(pmixerUpdate != 0);
+	nlassert(pmixerUpdate != nullptr);
 	_UpdateEventList.push_back(make_pair(pmixerUpdate, false));
 }
 
 /// Add an event in the future.
 void CAudioMixerUser::addEvent( CAudioMixerUser::IMixerEvent *pmixerEvent, const NLMISC::TTime &date)
 {
-	nlassert(pmixerEvent != 0);
+	nlassert(pmixerEvent != nullptr);
 	//	nldebug("Adding event %p", pmixerEvent);
 	_EventListUpdate.push_back(make_pair(date, pmixerEvent));
 }
@@ -2563,7 +2569,7 @@ void CAudioMixerUser::addEvent( CAudioMixerUser::IMixerEvent *pmixerEvent, const
 /// Remove any event programmed for this object.
 void CAudioMixerUser::removeEvents( CAudioMixerUser::IMixerEvent *pmixerEvent)
 {
-	nlassert(pmixerEvent != 0);
+	nlassert(pmixerEvent != nullptr);
 	//	nldebug("Removing event %p", pmixerEvent);
 
 	// we have to remove from the _EventListUpdate, in the case a IMixerEvent is
@@ -2668,7 +2674,7 @@ void CAudioMixerUser::changeMaxTrack(uint maxTrack)
 	if (maxTrack > prev_track_nb)
 	{
 		uint i = 0;
-		_Tracks.resize(maxTrack, NULL);
+		_Tracks.resize(maxTrack, nullptr);
 		try
 		{
 			for (i = prev_track_nb; i < maxTrack; ++i)

@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
 	const char *leveldesignPath = getenv("RYZOM_LEVELDESIGN");
 	
-	if (leveldesignPath == NULL)
+	if (leveldesignPath == nullptr)
 	{
 		printf("Error: You need to define RYZOM_LEVELDESIGN environment variable that points to previous R:\\leveldesign\\ equivalent under Windows\n");
 		return -1;
@@ -278,11 +278,11 @@ int main(int argc, char *argv[])
 	}
 	catch (const EParseException &e)
 	{
-		CPrimitiveContext::instance().CurrentLigoConfig = NULL;
+		CPrimitiveContext::instance().CurrentLigoConfig = nullptr;
 		nlerror("Compilation error : '%s'", e.Why.c_str());
 	}
 
-	CPrimitiveContext::instance().CurrentLigoConfig = NULL;
+	CPrimitiveContext::instance().CurrentLigoConfig = nullptr;
 
 	return 0;
 }

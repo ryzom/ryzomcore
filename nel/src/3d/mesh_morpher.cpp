@@ -62,12 +62,12 @@ CMeshMorpher::CMeshMorpher()
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
-	_VBOri = NULL;
-	_VBDst = NULL;
+	_VBOri = nullptr;
+	_VBDst = nullptr;
 
-	_Vertices = NULL;
-	_Normals = NULL;
-	_TgSpace= NULL;
+	_Vertices = nullptr;
+	_Normals = nullptr;
+	_TgSpace = nullptr;
 	_SkinApplied= false;
 }
 
@@ -103,7 +103,7 @@ void CMeshMorpher::update (std::vector<CAnimatedMorph> *pBSFactor)
 {
 	uint32 i, j;
 
-	if (_VBOri == NULL)
+	if (_VBOri == nullptr)
 		return;
 	if (BlendShapes.empty())
 		return;
@@ -222,7 +222,7 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 {
 	uint32 i, j;
 
-	if (_VBOri == NULL)
+	if (_VBOri == nullptr)
 		return;
 	if (BlendShapes.empty())
 		return;
@@ -266,13 +266,13 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 		for(j = 0; j < VBVertexSize; ++j)
 			pDst[j+i*VBVertexSize] = pOri[j+i*VBVertexSize];
 
-		if (_Vertices != NULL)
+		if (_Vertices != nullptr)
 			_Vertices->operator[](i) = ((CVector*)(pOri+i*VBVertexSize))[0];
 
-		if (_Normals != NULL)
+		if (_Normals != nullptr)
 			_Normals->operator[](i) = ((CVector*)(pOri+i*VBVertexSize))[1];
 
-		if (_TgSpace != NULL)
+		if (_TgSpace != nullptr)
 			(*_TgSpace)[i] = * (CVector*)(pOri + i * VBVertexSize + tgSpaceOff);
 
 		_Flags[i] = OriginalVBDst;
@@ -291,21 +291,21 @@ void CMeshMorpher::updateSkinned (std::vector<CAnimatedMorph> *pBSFactor)
 
 			// Modify Pos/Norm/TgSpace.
 			//------------
-			if (_Vertices != NULL)
+			if (_Vertices != nullptr)
 			if (!rBS.deltaPos.empty())
 			{
 				CVector *pV = &(_Vertices->operator[](vp));
 				*pV += rBS.deltaPos[j] * rFactor;
 			}
 
-			if (_Normals != NULL)
+			if (_Normals != nullptr)
 			if (!rBS.deltaNorm.empty())
 			{
 				CVector *pV = &(_Normals->operator[](vp));
 				*pV += rBS.deltaNorm[j] * rFactor;
 			}
 
-			if (_UseTgSpace && _TgSpace != NULL)
+			if (_UseTgSpace && _TgSpace != nullptr)
 			if (!rBS.deltaTgSpace.empty())
 			{
 				CVector *pV = &((*_TgSpace)[vp]);
@@ -369,7 +369,7 @@ void CMeshMorpher::updateRawSkin (CVertexBuffer *vbOri,
 {
 	uint32 i, j;
 
-	if (vbOri == NULL)
+	if (vbOri == nullptr)
 		return;
 	if (BlendShapes.empty())
 		return;

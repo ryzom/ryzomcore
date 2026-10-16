@@ -110,7 +110,7 @@ static uint LoginStep = 0;
 //===========================================================================================
 std::string CLoginRegistry::getProductInstallId()
 {
-	srand((uint32)nl_time(0));
+	srand((uint32)nl_time(nullptr));
 	uint32 r = rand();
 	r <<= 16;
 	r |= rand();

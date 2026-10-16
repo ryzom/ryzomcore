@@ -556,7 +556,7 @@ public:
 	// to force static serializer memory cleanup
 	static void releaseInstance();
 protected:
-	CObjectSerializer(CObjectFactory *factory, CObject* data = 0);
+	CObjectSerializer(CObjectFactory *factory, CObject* data = nullptr);
 
 public:
 	void serial(NLMISC::IStream& stream);
@@ -603,7 +603,7 @@ class CObjectSerializerClient : public CObjectSerializer
 	static CObjectFactory	*_ClientObjecFactory;
 public:
 	// constructor for client side serializer, we use the client side factory
-	CObjectSerializerClient(CObject *data=0)
+	CObjectSerializerClient(CObject *data=nullptr)
 		:	CObjectSerializer(_ClientObjecFactory, data)
 	{
 		nlassert(_ClientObjecFactory != NULL);
@@ -619,8 +619,8 @@ class CObjectSerializerServer: public CObjectSerializer
 {
 public:
 	// constructor for server side serializer, we don't use object factory
-	CObjectSerializerServer(CObject *data=0)
-		:	CObjectSerializer(NULL, data)
+	CObjectSerializerServer(CObject *data=nullptr)
+		:	CObjectSerializer(nullptr, data)
 	{}
 };
 

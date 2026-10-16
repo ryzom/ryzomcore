@@ -246,14 +246,14 @@ class CBSPNode2v
 public:
 	CBSPNode2v ()
 	{
-		Back = NULL;
-		Front = NULL;
+		Back = nullptr;
+		Front = nullptr;
 	}
 	CBSPNode2v ( const CPlane &plane, CVector p0, CVector p1, uint v0, uint v1 ) : Plane (plane), P0 (p0), P1 (p1)
 	{
-		Back = NULL;
-		Front = NULL;
-		Parent = NULL;
+		Back = nullptr;
+		Front = nullptr;
+		Parent = nullptr;
 		V0 = v0;
 		V1 = v1;
 	}

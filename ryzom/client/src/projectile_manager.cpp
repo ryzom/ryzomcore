@@ -68,7 +68,7 @@ CProjectileManager &CProjectileManager::getInstance()
 // *****************************************************************************************
 const float *CProjectileManager::getProjectileFXUserParams(uint power)
 {
-	if (power < 1 || power > MAGICFX::NUM_SPELL_POWER) return NULL;
+	if (power < 1 || power > MAGICFX::NUM_SPELL_POWER) return nullptr;
 	return &ProjectileUserParams[power - 1][0];
 }
 
@@ -179,7 +179,7 @@ void CProjectileManager::update()
 	{
 		if (it->LetProjectileStickedOnTarget)
 		{
-			CCharacterCL  *target = NULL;
+			CCharacterCL  *target = nullptr;
 			if (it->Target.Slot != CLFECOMMON::INVALID_SLOT)
 			{
 				target = dynamic_cast<CCharacterCL *>(EntitiesMngr.entity(it->Target.Slot));
@@ -188,7 +188,7 @@ void CProjectileManager::update()
 		}
 		else
 		{
-			it->shutDown(NULL);
+			it->shutDown(nullptr);
 		}
 	}
 	_ToShutDownProjectiles.clear();
@@ -304,7 +304,7 @@ void CProjectileManager::update()
 								for (uint k = 0; k < proj.ImpactAspect->FX.size(); ++k)
 								{
 									CFXStickMode replaceStickMode = proj.ImpactAspect->FX[k].Sheet->StickMode;
-									bi.StickMode = NULL;
+									bi.StickMode = nullptr;
 									if (proj.LocalizedImpact)
 									{
 										nlassert(proj.ImpactAspect->Sheet);
@@ -415,7 +415,7 @@ void CProjectileManager::update()
 CProjectileManager::CProjectile::CProjectile()
 {
 	H_AUTO_USE(RZ_ProjectileManager)
-	for(uint k = 0; k < MaxNumFX; ++k) FX[k] = NULL;
+	for(uint k = 0; k < MaxNumFX; ++k) FX[k] = nullptr;
 	TargetBoneRelativePosBlendFactor = 0.f;
 	TargetBoneID = -1;
 	ParabolaHeight = 0.f;
@@ -434,7 +434,7 @@ CProjectileManager::CProjectile::~CProjectile()
 			if (!FX[k].empty())
 			{
 				Scene->deleteInstance(FX[k]);
-				FX[k] = NULL;
+				FX[k] = nullptr;
 			}
 		}
 	}
@@ -654,7 +654,7 @@ void CProjectileManager::CProjectile::shutDown(CCharacterCL *target)
 				//nlwarning("Projectile with a particle system that has no 'STOP' emitter");
 				if (target)
 				{
-					convertFreeFXToAttachedFX(FX[k], *target, FX_ERROR_TIMEOUT, ProjectileAspect ? &ProjectileAspect->FX[k] : NULL, ProjectileAimingPoint);
+					convertFreeFXToAttachedFX(FX[k], *target, FX_ERROR_TIMEOUT, ProjectileAspect ? &ProjectileAspect->FX[k] : nullptr, ProjectileAimingPoint);
 				}
 				else
 				{
@@ -665,14 +665,14 @@ void CProjectileManager::CProjectile::shutDown(CCharacterCL *target)
 			{
 				if (target)
 				{
-					convertFreeFXToAttachedFX(FX[k], *target, FX_DEFAULT_TIMEOUT, ProjectileAspect ? &ProjectileAspect->FX[k] : NULL, ProjectileAimingPoint);
+					convertFreeFXToAttachedFX(FX[k], *target, FX_DEFAULT_TIMEOUT, ProjectileAspect ? &ProjectileAspect->FX[k] : nullptr, ProjectileAimingPoint);
 				}
 				else
 				{
 					FXMngr.addFX(FX[k], FX_DEFAULT_TIMEOUT); // gives a time out to avoid remaining particles if the fx main emitter has not been flaged with 'STOP'
 				}
 			}
-			FX[k] = NULL;
+			FX[k] = nullptr;
 		}
 	}
 }
@@ -764,7 +764,7 @@ const CAnimationFX *CProjectileManager::getResistFX(uint level)
 	{
 		for(uint k = 0; k < MAGICFX::NUM_SPELL_POWER; ++k)
 		{
-			impactResistFX[k].init(&impactResistSheet[k], NULL);
+			impactResistFX[k].init(&impactResistSheet[k], nullptr);
 		}
 		init = true;
 	}
@@ -772,7 +772,7 @@ const CAnimationFX *CProjectileManager::getResistFX(uint level)
 	{
 		return &impactResistFX[level - 1];
 	}
-	return NULL;
+	return nullptr;
 }
 
 

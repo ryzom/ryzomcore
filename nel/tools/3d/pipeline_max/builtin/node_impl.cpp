@@ -226,7 +226,7 @@ void CNodeImpl::build(uint16 version, uint filter)
 void CNodeImpl::disown()
 {
 	m_NodeVersion = 0;
-	setParent(NULL);
+	setParent(nullptr);
 	m_ParentFlags = 0;
 	m_UserName = ucstring("Untitled Node");
 

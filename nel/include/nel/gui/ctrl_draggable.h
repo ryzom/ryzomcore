@@ -43,7 +43,7 @@ namespace NLGUI
 		void abortDragging()
 		{
 			dragged = false;
-			_LastDraggedSheet = NULL;
+			_LastDraggedSheet = nullptr;
 		}
 
 		// Necessary because of reflection, no other purpose

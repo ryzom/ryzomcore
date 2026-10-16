@@ -13,6 +13,13 @@ LIST(REMOVE_ITEM SRC
         ${CMAKE_CURRENT_SOURCE_DIR}/ios_interface.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/ios_interface.h)
 
+# Part of the ais sheets library (Ryzom::aissheets), compiled once and shared
+# with sheets_packer_shard.
+LIST(REMOVE_ITEM SRC
+        ${CMAKE_CURRENT_SOURCE_DIR}/sheets.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/sheets.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/commands_mlf.cpp)
+
 ADD_EXECUTABLE(ryzom_ai_service WIN32 ${SRC})
 
 IF (APPLE)
@@ -24,6 +31,7 @@ TARGET_INCLUDE_DIRECTORIES(ryzom_ai_service PRIVATE ${RZ_SERVER_SRC_DIR} ${MYSQL
 TARGET_LINK_LIBRARIES(ryzom_ai_service
         PRIVATE
         Ryzom::adminmodules
+        Ryzom::aissheets
         Ryzom::gameshare
         Ryzom::servershare
         Ryzom::aishare

@@ -57,11 +57,11 @@ CMeshBase::CMeshBase()
 
 	_AutoAnim = false;
 
-	_LodCharacterTexture= NULL;
+	_LodCharacterTexture = nullptr;
 
 	_CollisionMeshGeneration= AutoCameraCol;
 
-	_VisualCollisionMesh= NULL;
+	_VisualCollisionMesh = nullptr;
 
 	_DefaultOpacity= false;
 	_DefaultTransparency= false;
@@ -82,7 +82,7 @@ CMeshBase::~CMeshBase()
 	if(_VisualCollisionMesh)
 	{
 		delete _VisualCollisionMesh;
-		_VisualCollisionMesh= NULL;
+		_VisualCollisionMesh = nullptr;
 	}
 }
 
@@ -115,7 +115,7 @@ CMaterialBase	*CMeshBase::getAnimatedMaterial(uint id)
 	if(it!=_AnimatedMaterials.end())
 		return &it->second;
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -481,7 +481,7 @@ void	CMeshBase::resetLodCharacterTexture()
 	if(_LodCharacterTexture)
 	{
 		delete _LodCharacterTexture;
-		_LodCharacterTexture= NULL;
+		_LodCharacterTexture = nullptr;
 	}
 }
 

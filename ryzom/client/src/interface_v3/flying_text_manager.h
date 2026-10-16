@@ -67,8 +67,8 @@ private:
 		bool					UsedThisFrame;
 		CGroupInfo()
 		{
-			GroupInScene= NULL;
-			ViewText= NULL;
+			GroupInScene = nullptr;
+			ViewText = nullptr;
 			UsedThisFrame= false;
 		}
 	};

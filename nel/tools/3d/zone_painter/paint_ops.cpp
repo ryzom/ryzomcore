@@ -11,7 +11,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -21,16 +21,17 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
 #include <nel/misc/types_nl.h>
 #include "paint_core.h"
+#include "patch_topo_snapshot.h"
 
 #include <nel/misc/file.h>
 #include <nel/misc/path.h>
@@ -92,7 +93,7 @@ bool CPaintCore::clearATile(SPaintTile *tile, bool _256, bool force128)
 			CTileDescP descOrig;
 			getTileIdx((uint)neighbor[n]->Zone, neighbor[n]->TileId, descOrig);
 			desc.setDisplace(descOrig.getDisplace());
-			setTile((uint)neighbor[n]->Zone, neighbor[n]->TileId, desc, NULL, true);
+			setTile((uint)neighbor[n]->Zone, neighbor[n]->TileId, desc, nullptr, true);
 		}
 	}
 	else
@@ -103,7 +104,7 @@ bool CPaintCore::clearATile(SPaintTile *tile, bool _256, bool force128)
 		CTileDescP descOrig;
 		getTileIdx((uint)tile->Zone, tile->TileId, descOrig);
 		desc.setDisplace(descOrig.getDisplace());
-		setTile((uint)tile->Zone, tile->TileId, desc, NULL, true);
+		setTile((uint)tile->Zone, tile->TileId, desc, nullptr, true);
 	}
 	return true;
 }
@@ -415,7 +416,7 @@ bool CPaintCore::putATile(SPaintTile *pTile, int tileSet, int curRotation, bool 
 			case 3: desc.setTile(3, 0, desc.getDisplace(), finalIndex[0], finalIndex[1], finalIndex[2]); break;
 			default: return false;
 			}
-			setTile((uint)pTile->Zone, pTile->TileId, desc, NULL, true);
+			setTile((uint)pTile->Zone, pTile->TileId, desc, nullptr, true);
 			// Residual gate: transition-at-pick must also leave legal seams
 			if (!tileSeamsLegal(pTile))
 			{
@@ -538,6 +539,7 @@ bool CPaintCore::opTile(uint zone, uint patch, uint u, uint v, int tileSet, int 
 	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
 	if (!t) { err = "tile not in grid"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	std::set<SPaintTile *> visited;
 	bool ok = putATile(t, tileSet, rot & 3, true, visited, _256);
 	applyChanges();
@@ -558,6 +560,7 @@ bool CPaintCore::opClear(uint zone, uint patch, uint u, uint v, bool _256, std::
 	SPaintTile *t = metaAt(zi, (sint32)(patch * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u));
 	if (!t) { err = "tile not in grid"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	bool ok = clearATile(t, _256);
 	applyChanges();
 	endStroke();
@@ -603,6 +606,7 @@ bool CPaintCore::opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, 
 	}
 
 	m_StrokeSets = 0;
+	noteEditTile(zi, tileId);
 	std::set<SPaintTile *> alreadyRecursed;
 	// Brush size -> recursion depth, the plugin's PutTile call: brushValue[brushSize] with the
 	// same depth whether 128 or 256 (RecursTile steps -2 per 256 hop).
@@ -615,6 +619,7 @@ bool CPaintCore::opTileStroke(uint zone, sint32 tileId, int tileSet, bool _256, 
 
 void CPaintCore::endStroke()
 {
+	if (m_SuspendStroke) return; // opResetZone's sweep: one reset, one stroke
 	if (m_CurStroke.empty()) return;
 	m_UndoStack.push_back(m_CurStroke);
 	m_CurStroke.clear();
@@ -634,7 +639,7 @@ void CPaintCore::abortStrokeTo(size_t mark)
 	{
 		if (m_CurStroke[i].Kind != 0)
 			continue;
-		setTile(m_CurStroke[i].Zone, m_CurStroke[i].TileId, m_CurStroke[i].Old, NULL, false, true);
+		setTile(m_CurStroke[i].Zone, m_CurStroke[i].TileId, m_CurStroke[i].Old, nullptr, false, true);
 		if (m_CurStroke[i].HaveRaw)
 			restoreRawTile(m_CurStroke[i], true);
 	}
@@ -656,11 +661,26 @@ static void zpApplyPropRaw(CNodeImpl *node, uint32 appDataId, bool has, const st
 
 void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 {
+	// Bind/edge-flag restores fire ONE state-changed callback per zone AFTER the whole list
+	// replays: the callback re-derives BindEdges and rebuilds the landscape zone, and doing
+	// that per record would rebuild once per vertex of a released group.
+	std::set<uint> rpChangedZones;
+	for (size_t i = 0; i < list.size(); ++i)
+		if (list[i].Kind == 4 || list[i].Kind == 5)
+			rpChangedZones.insert(list[i].Zone);
 	if (useOld)
 	{
 		for (int i = (int)list.size() - 1; i >= 0; --i)
 		{
-			if (list[i].Kind == 2)
+			if (list[i].Kind == 6)
+				applyTopoUndo(list[i], true);
+			else if (list[i].Kind == 5)
+				applyEdgeFlagUndo(list[i], true);
+			else if (list[i].Kind == 4)
+				applyBindUndo(list[i], true);
+			else if (list[i].Kind == 3)
+				applyGeomUndo(list[i], true);
+			else if (list[i].Kind == 2)
 			{
 				// Prop: restore old raw presence/value
 				uint zi = (uint)-1;
@@ -677,7 +697,7 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].OldColor, false);
 			else
 			{
-				setTile(list[i].Zone, list[i].TileId, list[i].Old, NULL, false, true);
+				setTile(list[i].Zone, list[i].TileId, list[i].Old, nullptr, false, true);
 				if (list[i].HaveRaw)
 					restoreRawTile(list[i], true);
 			}
@@ -687,7 +707,15 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 	{
 		for (size_t i = 0; i < list.size(); ++i)
 		{
-			if (list[i].Kind == 2)
+			if (list[i].Kind == 6)
+				applyTopoUndo(list[i], false);
+			else if (list[i].Kind == 5)
+				applyEdgeFlagUndo(list[i], false);
+			else if (list[i].Kind == 4)
+				applyBindUndo(list[i], false);
+			else if (list[i].Kind == 3)
+				applyGeomUndo(list[i], false);
+			else if (list[i].Kind == 2)
 			{
 				uint zi = (uint)-1;
 				for (size_t z = 0; z < m_Zones.size(); ++z)
@@ -703,13 +731,17 @@ void CPaintCore::applyUndoList(const std::vector<SUndoTile> &list, bool useOld)
 				setColorRaw(list[i].Zone, (uint)list[i].Patch, list[i].S, list[i].T, list[i].NewColor, false);
 			else
 			{
-				setTile(list[i].Zone, list[i].TileId, list[i].New, NULL, false, true);
+				setTile(list[i].Zone, list[i].TileId, list[i].New, nullptr, false, true);
 				if (list[i].HaveRaw)
 					restoreRawTile(list[i], false);
 			}
 		}
 	}
 	applyChanges();
+	if (m_RpStateChangedCb)
+		for (std::set<uint>::const_iterator it = rpChangedZones.begin();
+		     it != rpChangedZones.end(); ++it)
+			m_RpStateChangedCb(*it);
 }
 
 bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::string &newValue,
@@ -759,6 +791,341 @@ bool CPaintCore::opProp(uint zoneId, uint32 appDataId, bool newHas, const std::s
 	if (m_PropChangedCb)
 		m_PropChangedCb(zoneId, appDataId);
 	return true;
+}
+
+uint CPaintCore::opMovePatchElems(uint zoneId, const std::vector<SGeomElemRef> &elems,
+                                  const std::vector<NLMISC::CVector> &objDeltas, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone"; return 0; }
+	SZone &z = m_Zones[zi];
+	if (z.In.Frozen) { err = "read-only"; return 0; }
+	if (!z.In.Node) { err = "no node"; return 0; }
+
+	if (objDeltas.size() != elems.size()) { err = "delta count mismatch"; return 0; }
+	std::vector<SUndoTile> recs;
+	recs.reserve(elems.size());
+	for (size_t i = 0; i < elems.size(); ++i)
+	{
+		const float objDelta[3] = { objDeltas[i].x, objDeltas[i].y, objDeltas[i].z };
+		SGeomWriteTarget t;
+		std::string e;
+		if (!resolveGeomWriteTarget(z.In.Node, elems[i].Idx, elems[i].Elem, t, e))
+		{
+			if (err.empty()) err = e;
+			continue;
+		}
+		SUndoTile rec;
+		rec.Kind = 3;
+		rec.Zone = zoneId;
+		rec.VertIdx = elems[i].Idx;
+		rec.ElemKind = (uint8)elems[i].Elem;
+		if (!geomTargetGet(t, rec.OldPos)) { if (err.empty()) err = "target read failed"; continue; }
+		for (int k = 0; k < 3; ++k)
+			rec.NewPos[k] = rec.OldPos[k] + objDelta[k];
+		if (!geomTargetSet(t, rec.NewPos)) { if (err.empty()) err = "target write failed"; continue; }
+		recs.push_back(rec);
+		if (m_GeomChangedCb)
+			m_GeomChangedCb(zoneId, rec.VertIdx, (int)elems[i].Elem, objDelta);
+	}
+	if (recs.empty())
+		return 0;
+
+	// One stroke for the whole selection: an artist who dragged twelve vertices expects one
+	// Ctrl+Z, not twelve. Commit any in-flight paint stroke first for the same reason opProp
+	// does - a scripted move between stroke segments must not drop their records.
+	endStroke();
+	for (size_t i = 0; i < recs.size(); ++i)
+		m_CurStroke.push_back(recs[i]);
+	endStroke();
+	markGeomDirty(zoneId);
+	return (uint)recs.size();
+}
+
+/** Undo/redo of a Kind 3 record: re-resolve the target and put back the stored triple. */
+void CPaintCore::applyGeomUndo(const SUndoTile &rec, bool useOld)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == rec.Zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1 || !m_Zones[zi].In.Node)
+		return;
+	SGeomWriteTarget t;
+	std::string e;
+	if (!resolveGeomWriteTarget(m_Zones[zi].In.Node, rec.VertIdx, (EGeomElem)rec.ElemKind, t, e))
+		return;
+	const float *pos = useOld ? rec.OldPos : rec.NewPos;
+	const float *from = useOld ? rec.NewPos : rec.OldPos;
+	if (!geomTargetSet(t, pos))
+		return;
+	markGeomDirty(rec.Zone);
+	if (m_GeomChangedCb)
+	{
+		// The difference of the two stored values, which is the object-space delta whatever
+		// the target holds - undo of a mapper delta and undo of a PatchMesh position are the
+		// same shift to the display.
+		const float d[3] = { pos[0] - from[0], pos[1] - from[1], pos[2] - from[2] };
+		m_GeomChangedCb(rec.Zone, rec.VertIdx, (int)rec.ElemKind, d);
+	}
+}
+
+// SRpoVertexBind <-> the SUndoTile flat form, in field order. The whole record travels
+// through undo so a released bind's caches come back verbatim - that is what makes
+// unbind -> undo -> save byte-identical to the baseline.
+static void zpFlattenBind(const SRpoVertexBind &b, uint32 out[11])
+{
+	out[0] = b.Binded; out[1] = b.Type; out[2] = b.Edge; out[3] = b.Patch;
+	out[4] = b.Before; out[5] = b.Before2; out[6] = b.After; out[7] = b.After2;
+	out[8] = b.T; out[9] = b.Type2; out[10] = b.PrimVert;
+}
+
+static void zpUnflattenBind(const uint32 in[11], SRpoVertexBind &b)
+{
+	b.Binded = (uint8)in[0]; b.Type = in[1]; b.Edge = in[2]; b.Patch = in[3];
+	b.Before = in[4]; b.Before2 = in[5]; b.After = in[6]; b.After2 = in[7];
+	b.T = in[8]; b.Type2 = in[9]; b.PrimVert = in[10];
+}
+
+uint CPaintCore::opEditBinds(uint zoneId, const std::vector<SBindEdit> &binds,
+                             const std::vector<SGeomElemRef> &snapElems,
+                             const std::vector<NLMISC::CVector> &snapDeltas, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone"; return 0; }
+	SZone &z = m_Zones[zi];
+	if (z.In.Frozen) { err = "read-only"; return 0; }
+	if (snapDeltas.size() != snapElems.size()) { err = "snap count mismatch"; return 0; }
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp) { err = "no carrier"; return 0; }
+
+	std::vector<SUndoTile> recs;
+	recs.reserve(binds.size());
+	for (size_t i = 0; i < binds.size(); ++i)
+	{
+		const SBindEdit &e = binds[i];
+		if (e.Vert >= rp->Verts.size())
+		{
+			if (err.empty()) err = "bind vertex out of range";
+			continue;
+		}
+		SRpoVertexBind &b = rp->Verts[e.Vert];
+		SUndoTile rec;
+		rec.Kind = 4;
+		rec.Zone = zoneId;
+		rec.VertIdx = e.Vert;
+		zpFlattenBind(b, rec.OldBind);
+		if (e.Binded)
+		{
+			// Legacy BindingVertex: full target written, caches invalidated for the loader
+			// (and our own eval refresh) to rebuild.
+			b.Binded = 1;
+			b.Type = e.Type;
+			b.Type2 = e.Type;
+			b.Edge = e.Edge;
+			b.Patch = e.Patch;
+			b.PrimVert = e.PrimVert;
+			b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		}
+		else
+		{
+			// Legacy UnBindingVertex: flag and caches only; the dead target fields stay.
+			b.Binded = 0;
+			b.Before = b.Before2 = b.After = b.After2 = b.T = (uint32)-1;
+		}
+		zpFlattenBind(b, rec.NewBind);
+		bool same = true;
+		for (int k = 0; k < 11 && same; ++k)
+			same = rec.OldBind[k] == rec.NewBind[k];
+		if (same)
+			continue;
+		recs.push_back(rec);
+	}
+
+	// Geometry snap (new binds land their vertices on the bindWhere points) - same records
+	// the move op writes, deltas already object-space.
+	std::vector<SUndoTile> geomRecs;
+	geomRecs.reserve(snapElems.size());
+	for (size_t i = 0; i < snapElems.size(); ++i)
+	{
+		SGeomWriteTarget t;
+		std::string e;
+		if (!resolveGeomWriteTarget(z.In.Node, snapElems[i].Idx, snapElems[i].Elem, t, e))
+		{
+			if (err.empty()) err = e;
+			continue;
+		}
+		SUndoTile rec;
+		rec.Kind = 3;
+		rec.Zone = zoneId;
+		rec.VertIdx = snapElems[i].Idx;
+		rec.ElemKind = (uint8)snapElems[i].Elem;
+		if (!geomTargetGet(t, rec.OldPos)) { if (err.empty()) err = "target read failed"; continue; }
+		for (int k = 0; k < 3; ++k)
+			rec.NewPos[k] = rec.OldPos[k] + (k == 0 ? snapDeltas[i].x : (k == 1 ? snapDeltas[i].y : snapDeltas[i].z));
+		if (!geomTargetSet(t, rec.NewPos)) { if (err.empty()) err = "target write failed"; continue; }
+		geomRecs.push_back(rec);
+		const float d[3] = { snapDeltas[i].x, snapDeltas[i].y, snapDeltas[i].z };
+		if (m_GeomChangedCb)
+			m_GeomChangedCb(zoneId, rec.VertIdx, (int)snapElems[i].Elem, d);
+	}
+
+	if (recs.empty() && geomRecs.empty())
+		return 0;
+	// One stroke for the whole edit, bind records and snap together - an unbind or a bind is
+	// one action however many vertices the group held.
+	endStroke();
+	for (size_t i = 0; i < recs.size(); ++i)
+		m_CurStroke.push_back(recs[i]);
+	for (size_t i = 0; i < geomRecs.size(); ++i)
+		m_CurStroke.push_back(geomRecs[i]);
+	endStroke();
+	if (!geomRecs.empty())
+		markGeomDirty(zoneId);
+	if (!recs.empty() && m_RpStateChangedCb)
+		m_RpStateChangedCb(zoneId);
+	return (uint)recs.size();
+}
+
+uint CPaintCore::opSetEdgeFlags(uint zoneId, const std::vector<SEdgeFlagEdit> &writes, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone"; return 0; }
+	if (m_Zones[zi].In.Frozen) { err = "read-only"; return 0; }
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp) { err = "no carrier"; return 0; }
+
+	std::vector<SUndoTile> recs;
+	recs.reserve(writes.size());
+	for (size_t i = 0; i < writes.size(); ++i)
+	{
+		const SEdgeFlagEdit &w = writes[i];
+		if (w.Patch >= rp->Patches.size() || w.EdgeSlot >= 4)
+		{
+			if (err.empty()) err = "edge flag target out of range";
+			continue;
+		}
+		uint32 &flags = rp->Patches[w.Patch].EdgeFlags[w.EdgeSlot];
+		if (flags == w.NewFlags)
+			continue;
+		SUndoTile rec;
+		rec.Kind = 5;
+		rec.Zone = zoneId;
+		rec.Patch = (sint32)w.Patch;
+		rec.S = (sint32)w.EdgeSlot;
+		rec.OldColor = flags;
+		rec.NewColor = w.NewFlags;
+		flags = w.NewFlags;
+		recs.push_back(rec);
+	}
+	if (recs.empty())
+		return 0;
+	endStroke();
+	for (size_t i = 0; i < recs.size(); ++i)
+		m_CurStroke.push_back(recs[i]);
+	endStroke();
+	if (m_RpStateChangedCb)
+		m_RpStateChangedCb(zoneId);
+	return (uint)recs.size();
+}
+
+bool CPaintCore::getVertBind(uint zoneId, uint16 vert, bool &binded, uint32 &type, uint32 &edge,
+                             uint32 &patch, uint32 &primVert) const
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return false;
+	const SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || vert >= rp->Verts.size()) return false;
+	const SRpoVertexBind &b = rp->Verts[vert];
+	binded = b.Binded != 0;
+	type = b.Type;
+	edge = b.Edge;
+	patch = b.Patch;
+	primVert = b.PrimVert;
+	return true;
+}
+
+bool CPaintCore::getPatchEdgeFlags(uint zoneId, uint16 patch, uint32 outFlags[4]) const
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zoneId) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return false;
+	const SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || patch >= rp->Patches.size()) return false;
+	for (int e = 0; e < 4; ++e)
+		outFlags[e] = rp->Patches[patch].EdgeFlags[e];
+	return true;
+}
+
+/** Undo/redo of a Kind 6 record: hand the snapshot to the restore callback (which
+ *  re-encodes the matching side into storage) and flag the pending working-set rebuild -
+ *  replaying inside the core cannot rebuild the session that owns the core. */
+void CPaintCore::applyTopoUndo(const SUndoTile &rec, bool useOld)
+{
+	if (!m_TopoRestoreCb || rec.TileId < 0 || (size_t)rec.TileId >= m_TopoSnaps.size())
+		return;
+	m_TopoRestoreCb(*m_TopoSnaps[rec.TileId], useOld);
+	m_TopoRestorePending = true;
+	markGeomDirty(rec.Zone);
+}
+
+void CPaintCore::clearTopoSnaps()
+{
+	for (size_t i = 0; i < m_TopoSnaps.size(); ++i)
+		delete m_TopoSnaps[i];
+	m_TopoSnaps.clear();
+	m_TopoRestorePending = false;
+}
+
+void CPaintCore::opTopoStroke(const std::vector<STopoSnapshot *> &snaps)
+{
+	if (snaps.empty())
+		return;
+	endStroke();
+	for (size_t i = 0; i < snaps.size(); ++i)
+	{
+		SUndoTile rec;
+		rec.Kind = 6;
+		rec.Zone = snaps[i]->Zone;
+		rec.TileId = (sint32)m_TopoSnaps.size();
+		m_TopoSnaps.push_back(snaps[i]);
+		m_CurStroke.push_back(rec);
+	}
+	endStroke();
+}
+
+/** Undo/redo of a Kind 4 record: put back the stored bind record verbatim. */
+void CPaintCore::applyBindUndo(const SUndoTile &rec, bool useOld)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == rec.Zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return;
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || rec.VertIdx >= rp->Verts.size()) return;
+	zpUnflattenBind(useOld ? rec.OldBind : rec.NewBind, rp->Verts[rec.VertIdx]);
+}
+
+/** Undo/redo of a Kind 5 record: put back the stored flag word. */
+void CPaintCore::applyEdgeFlagUndo(const SUndoTile &rec, bool useOld)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == rec.Zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) return;
+	SRPatchMesh *rp = pristineOf(zi);
+	if (!rp || rec.Patch < 0 || (size_t)rec.Patch >= rp->Patches.size()
+	    || rec.S < 0 || rec.S >= 4)
+		return;
+	rp->Patches[rec.Patch].EdgeFlags[rec.S] = useOld ? rec.OldColor : rec.NewColor;
 }
 
 bool CPaintCore::opUndo()
@@ -938,8 +1305,8 @@ bool CPaintCore::colorVertexBorderLocked(uint zoneIdx, uint patch, sint32 s, sin
 	                                              + tv * ZP_MAX_TILE_IN_PATCH + tu];
 	if (tile.TileId < 0)
 		return true; // dead meta cell: refuse (no side information)
-	const bool aLocked = (tile.Voisins[sideA] == NULL) || tile.Voisins[sideA]->Frozen;
-	const bool bLocked = (tile.Voisins[sideB] == NULL) || tile.Voisins[sideB]->Frozen;
+	const bool aLocked = (tile.Voisins[sideA] == nullptr) || tile.Voisins[sideA]->Frozen;
+	const bool bLocked = (tile.Voisins[sideB] == nullptr) || tile.Voisins[sideB]->Frozen;
 	return aLocked || bLocked;
 }
 
@@ -1010,6 +1377,7 @@ bool CPaintCore::opColorVertex(uint zone, uint patch, sint32 s, sint32 t, NLMISC
 	std::vector<SColorSlot> slots;
 	vertexClosure(zi, tile, vid, slots);
 	m_StrokeSets = 0;
+	noteEditTile(zi, tile->TileId);
 	bool ok = setVertexColorShared(slots, color, blend > 256 ? 256 : blend);
 	applyChanges();
 	endStroke();
@@ -1095,6 +1463,8 @@ bool CPaintCore::opColorBrush(uint zone, sint32 seedTileId, const NLMISC::CVecto
 	if (radius <= 0.f) { err = "bad radius"; return false; }
 	float hard = (float)(hardness > 255 ? 255 : hardness) / 255.f;
 	float opa = (float)(opacity > 255 ? 255 : opacity) / 255.f;
+	// The brush's own hit point and radius describe the edit better than any single tile.
+	noteEditAt(hit, radius);
 
 	// Brush-plane base vectors (CPaintColor::paint port). The plugin's topVector is the hit
 	// tile quad's normal ((p1-p0)^(p2-p0) over corners (u,v),(u,v+1),(u+1,v+1)); the seed tile
@@ -1342,7 +1712,7 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 				CTileDescP descOrig;
 				getTileIdx(zi, t->TileId, descOrig);
 				descFill.setDisplace(descOrig.getDisplace());
-				setTile(zi, t->TileId, descFill, NULL, true);
+				setTile(zi, t->TileId, descFill, nullptr, true);
 			}
 		}
 		else
@@ -1359,6 +1729,62 @@ bool CPaintCore::fillTileImpl(uint zi, uint patch, int tileSet, int rot, bool _2
 	return true;
 }
 
+bool CPaintCore::opResetZone(uint zone, std::string &err)
+{
+	uint zi = (uint)-1;
+	for (size_t i = 0; i < m_Zones.size(); ++i)
+		if (m_Zones[i].In.ZoneId == zone) { zi = (uint)i; break; }
+	if (zi == (uint)-1) { err = "unknown zone id"; return false; }
+	if (m_Zones[zi].In.Frozen) { err = "zone frozen"; return false; }
+	const size_t nP = m_Zones[zi].In.EvalRp->Patches.size();
+	// The whole sweep is ONE stroke: the per-op endStroke is suspended, the single close
+	// below pushes everything as one undo record. A mid-sweep failure still closes what
+	// happened (undoable), with the error reported.
+	m_SuspendStroke = true;
+	bool ok = true;
+	for (uint p = 0; p < (uint)nP && ok; ++p)
+	{
+		ok = ok && opFillTile(zone, p, -1, 0, false, err);
+		ok = ok && opFillColor(zone, p, NLMISC::CRGBA(255, 255, 255, 255), 256, err);
+		ok = ok && opFillDisplace(zone, p, 0, err);
+	}
+	// The fill clear leaves the painter's DEAD BYTES behind (stale layer values under
+	// Num = 0 - the plugin's own convention; the reference exporter leaks stale bytes
+	// the same way). A RESET's whole point is a reproducible never-painted state, so
+	// the raw records normalize fully to the default; the raw pair rides the same
+	// stroke, and undo restores the stale bytes verbatim.
+	if (ok)
+		for (uint p = 0; p < (uint)nP; ++p)
+		{
+			const uint nu = orderS(zi, p), nv = orderT(zi, p);
+			for (uint v = 0; v < nv; ++v)
+				for (uint u = 0; u < nu; ++u)
+				{
+					const sint32 tileId =
+						(sint32)(p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u);
+					PIPELINE::MAX::NELPATCH::SRpoTile *rec = pristineTileRecord(zi, tileId);
+					if (!rec)
+						continue;
+					SUndoTile un;
+					un.Kind = 0;
+					un.Zone = zi;
+					un.TileId = tileId;
+					getTileIdx(zi, tileId, un.Old);
+					un.New = un.Old; // the DESC is unchanged: dead-byte normalize only
+					un.HaveRaw = true;
+					captureRawTile(zi, tileId, un.OldRawNum, un.OldRawFlags, un.OldRawNoise,
+					               un.OldRawTile, un.OldRawRot);
+					*rec = PIPELINE::MAX::NELPATCH::SRpoTile();
+					captureRawTile(zi, tileId, un.NewRawNum, un.NewRawFlags, un.NewRawNoise,
+					               un.NewRawTile, un.NewRawRot);
+					m_CurStroke.push_back(un);
+				}
+		}
+	m_SuspendStroke = false;
+	endStroke();
+	return ok;
+}
+
 bool CPaintCore::opFillTile(uint zone, uint patch, int tileSet, int rot, bool _256, std::string &err)
 {
 	if (!m_Bank) { err = "no tile bank loaded"; return false; }
@@ -1370,6 +1796,7 @@ bool CPaintCore::opFillTile(uint zone, uint patch, int tileSet, int rot, bool _2
 	// -1 is the clear sentinel; anything else negative would index the bank out of bounds
 	if (tileSet < -1 || tileSet >= m_Bank->getTileSetCount()) { err = "tile set out of range"; return false; }
 	m_StrokeSets = 0;
+	noteEditPatch(zi, patch);
 	bool ok = fillTileImpl(zi, patch, tileSet, rot & 3, _256);
 	applyChanges();
 	endStroke();
@@ -1391,6 +1818,7 @@ bool CPaintCore::opFillColor(uint zone, uint patch, NLMISC::CRGBA color, uint bl
 	sint32 numU = (sint32)orderS(zi, patch) + 1;
 	sint32 numV = (sint32)orderT(zi, patch) + 1;
 	m_StrokeSets = 0;
+	noteEditPatch(zi, patch);
 	if (blend > 256) blend = 256;
 	for (sint32 t = 0; t < numV; ++t)
 	for (sint32 s = 0; s < numU; ++s)
@@ -1424,7 +1852,7 @@ void CPaintCore::displaceOne(SPaintTile *tile, uint displace)
 	int t0 = (int)desc.getLayer(0).Tile;
 	if (desc.isEmpty() || t0 < 0 || t0 >= m_Bank->getTileCount()) return; // plugin: valid layer 0 only
 	desc.setDisplace((uint8)(displace & 0xf));
-	setTile((uint)tile->Zone, tile->TileId, desc, NULL, true, true);
+	setTile((uint)tile->Zone, tile->TileId, desc, nullptr, true, true);
 }
 
 // RecursTile displace-mode port (the plugin's PutDisplace path): one PutADisplacetile per tile
@@ -1463,6 +1891,7 @@ bool CPaintCore::opDisplace(uint zone, uint patch, uint u, uint v, uint displace
 	if (!t) { err = "tile not in grid"; return false; }
 	if (t->Frozen) { err = "tile frozen"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	// The plugin's displace put rode the same brush recursion as the tile put (PutDisplace ->
 	// RecursTile depth brushValue[brushSize]); depth 0 == the historical single-tile behavior.
 	std::set<SPaintTile *> alreadyRecursed;
@@ -1485,9 +1914,10 @@ bool CPaintCore::opRawTile(uint zone, uint patch, uint u, uint v, int tile, int 
 	if (!t) { err = "tile not in grid"; return false; }
 	if (t->Frozen) { err = "tile frozen"; return false; }
 	m_StrokeSets = 0;
+	noteEditTile(zi, t->TileId);
 	CTileDescP desc;
 	desc.setTile(1, 0, 0, CTileIdx(tile, rot & 3), CTileIdx(), CTileIdx());
-	setTile(zi, t->TileId, desc, NULL, true);
+	setTile(zi, t->TileId, desc, nullptr, true);
 	applyChanges();
 	endStroke();
 	return true;
@@ -1504,6 +1934,7 @@ bool CPaintCore::opFillDisplace(uint zone, uint patch, uint displace, std::strin
 	if (m_Zones[zi].In.Frozen) { err = "zone frozen"; return false; }
 	if (displace > 15) { err = "displace out of range"; return false; }
 	m_StrokeSets = 0;
+	noteEditPatch(zi, patch);
 	uint numU = orderS(zi, patch), numV = orderT(zi, patch);
 	for (uint v = 0; v < numV; ++v)
 	for (uint u = 0; u < numU; ++u)
@@ -1733,6 +2164,16 @@ bool CPaintCore::writeBack(std::string &err)
 	return true;
 }
 
+void CPaintCore::markGeomDirty(uint zoneId)
+{
+	m_GeomDirty.insert(zoneId);
+}
+
+bool CPaintCore::geomDirty(uint zoneId) const
+{
+	return m_GeomDirty.count(zoneId) != 0;
+}
+
 bool CPaintCore::isZoneDirty(uint zoneId) const
 {
 	for (size_t i = 0; i < m_Zones.size(); ++i)
@@ -1744,6 +2185,8 @@ bool CPaintCore::isZoneDirty(uint zoneId) const
 		if (m_Zones[i].In.Frozen)
 			return false;
 		if (propsDirty((uint)i))
+			return true;
+		if (geomDirty(zoneId))
 			return true;
 		const SCarrier &car = m_Carriers[m_Zones[i].Carrier];
 		if (!car.AnyUnfrozen)
@@ -1798,6 +2241,10 @@ bool CPaintCore::anyZoneDirty(const std::vector<uint> &zoneIds) const
 
 void CPaintCore::markZonesSaved(const std::vector<uint> &zoneIds)
 {
+	// Geometry writes went straight into the chunk tree, so once the file is on disk they are
+	// committed - there is no re-encode baseline to refresh, only the flag to drop.
+	for (size_t z = 0; z < zoneIds.size(); ++z)
+		m_GeomDirty.erase(zoneIds[z]);
 	std::set<uint> carriers;
 	for (size_t z = 0; z < zoneIds.size(); ++z)
 	{
@@ -1902,7 +2349,7 @@ void CPaintCore::dumpRpo(FILE *out) const
 			for (int u = 0; u < os; ++u)
 			{
 				const SRpoTile &t = up.Tiles[u + v * os];
-				fprintf(out, "  tile %d %d: num=%u flags=0x%04x noise=%u l0=(%d,r%d) l1=(%d,r%d) l2=(%d,r%d)\n",
+				fprintf(out, " tile %d %d: num=%u flags=0x%04x noise=%u l0=(%d,r%d) l1=(%d,r%d) l2=(%d,r%d)\n",
 				        u, v, t.Num, t.Flags, t.Noise,
 				        t.Layer[0].Tile, t.Layer[0].Rotate,
 				        t.Layer[1].Tile, t.Layer[1].Rotate,
@@ -1910,7 +2357,7 @@ void CPaintCore::dumpRpo(FILE *out) const
 			}
 			for (int v = 0; v < ot + 1; ++v)
 			for (int u = 0; u < os + 1; ++u)
-				fprintf(out, "  color %d %d: 0x%08x\n", u, v, up.Colors[u + v * (os + 1)]);
+				fprintf(out, " color %d %d: 0x%08x\n", u, v, up.Colors[u + v * (os + 1)]);
 		}
 	}
 }
@@ -1939,6 +2386,48 @@ bool CPaintCore::dumpCarrierBlob(uint zone, std::vector<uint8> &out) const
 		}
 	}
 	return false;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Last-edit marker (see paint_core.h). Set by the op layer at the point the artist AIMED at,
+// not at every tile a transition solve happens to rewrite.
+
+void CPaintCore::noteEditAt(const NLMISC::CVector &pos, float radius)
+{
+	m_HaveLastEdit = true;
+	m_LastEditPos = pos;
+	m_LastEditRadius = radius > 0.f ? radius : 0.f;
+}
+
+void CPaintCore::noteEditTile(uint zoneIdx, sint32 tileId)
+{
+	const SPaintTile *t = metaAt(zoneIdx, tileId);
+	if (!t) return;
+	noteEditAt(t->Center, t->Radius);
+}
+
+void CPaintCore::noteEditPatch(uint zoneIdx, uint patch)
+{
+	if (zoneIdx >= m_Zones.size()) return;
+	const std::vector<NL3D::CPatchInfo> *patches = m_Zones[zoneIdx].In.Patches;
+	if (!patches || patch >= patches->size()) return;
+	const NL3D::CBezierPatch &bp = (*patches)[patch].Patch;
+	const NLMISC::CVector center = bp.eval(0.5f, 0.5f);
+	float radius = 0.f;
+	for (uint v = 0; v < 4; ++v)
+	{
+		const float d = (bp.Vertices[v] - center).norm();
+		if (d > radius) radius = d;
+	}
+	noteEditAt(center, radius);
+}
+
+bool CPaintCore::lastEditPos(NLMISC::CVector &pos, float &radius) const
+{
+	if (!m_HaveLastEdit) return false;
+	pos = m_LastEditPos;
+	radius = m_LastEditRadius;
+	return true;
 }
 
 void CPaintCore::getTile(uint zone, sint32 tileId, CTileDescP &desc) const

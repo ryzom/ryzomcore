@@ -47,7 +47,7 @@ CTaskBarManager::CTaskBarManager()
 
 
 // ***************************************************************************
-CTaskBarManager	*CTaskBarManager::_Instance= NULL;
+CTaskBarManager	*CTaskBarManager::_Instance = nullptr;
 CTaskBarManager *CTaskBarManager::getInstance()
 {
 	if(!_Instance)
@@ -61,7 +61,7 @@ void CTaskBarManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -114,7 +114,7 @@ void CGroupContainerWindows::update(bool updatePos)
 {
 	CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(getCtrl("expand"));
 	CInterfaceGroup *pIG = getGroup("mode_buttons");
-	if ((pCB == NULL) || (pIG == NULL)) return;
+	if ((pCB == nullptr) || (pIG == nullptr)) return;
 
 	pCB->setPushed(_ShowDesktops);
 
@@ -144,7 +144,7 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainerWindows *pGCW = dynamic_cast<CGroupContainerWindows*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:windows"));
-		if (pGCW == NULL) return;
+		if (pGCW == nullptr) return;
 		pGCW->setShowDesktops(!pGCW->getShowDesktops());
 	}
 };
@@ -161,13 +161,13 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:gestion_windows"));
-		if (pGC == NULL) return;
+		if (pGC == nullptr) return;
 		CActionsManager *pAM = &Actions;
 		const CActionsManager::TActionComboMap &acmap = pAM->getActionComboMap();
 
 
 		COptionsList *pOL = dynamic_cast<COptionsList*>(CWidgetManager::getInstance()->getOptions("gestion_windows_key_binding"));
-		if (pOL == NULL) return;
+		if (pOL == nullptr) return;
 
 		for (uint i = 0; i < pOL->getNumParams(); ++i)
 		{
@@ -178,7 +178,7 @@ public:
 			CActionsManager::TActionComboMap::const_iterator it = acmap.find(CAction::CName("show_hide",sWin.c_str()));
 			string sFullTxt = string("ui:interface:gestion_windows:") + sTxt + ":key";
 			CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(sFullTxt));
-			if (pVT != NULL)
+			if (pVT != nullptr)
 			{
 				if (it != acmap.end())
 					pVT->setText(it->second.toString());

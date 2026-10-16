@@ -30,7 +30,7 @@ namespace NL3D
 CVegetableClipBlock::CVegetableClipBlock()
 {
 	_Empty= true;
-	_RenderNext= NULL;
+	_RenderNext = nullptr;
 	_NumIgs= 0;
 }
 

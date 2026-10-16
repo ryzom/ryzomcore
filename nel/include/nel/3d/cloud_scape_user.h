@@ -32,7 +32,7 @@ public:
 	CCloudScapeUser(CScene *scene);
 	virtual	~CCloudScapeUser() NL_OVERRIDE;
 
-	virtual void init (SCloudScapeSetup *pCSS = NULL) NL_OVERRIDE;
+	virtual void init (SCloudScapeSetup *pCSS = nullptr) NL_OVERRIDE;
 
 	virtual void set (SCloudScapeSetup &css) NL_OVERRIDE;
 

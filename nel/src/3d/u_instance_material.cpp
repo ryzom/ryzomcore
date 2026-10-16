@@ -39,7 +39,7 @@ bool				UInstanceMaterial::isTextureFile(uint stage) const
 		nlwarning("UInstanceMaterialUser::isTextureFile : invalid stage");
 		return false;
 	}
-	return dynamic_cast<CTextureFile *>(_Object->getTexture(stage)) != NULL;
+	return dynamic_cast<CTextureFile *>(_Object->getTexture(stage)) != nullptr;
 }
 
 // ***************************************************************************
@@ -110,7 +110,7 @@ void UInstanceMaterial::emptyTexture(uint stage /*=0*/)
 		nlwarning("UInstanceMaterialUser::emptyTexture : invalid stage");
 		return;
 	}
-	_Object->setTexture(stage, NULL);
+	_Object->setTexture(stage, nullptr);
 }
 
 // ***************************************************************************
@@ -303,7 +303,7 @@ sint				UInstanceMaterial::getLastTextureStage() const
 	sint lastStage = -1;
 	for(uint k = 0; k < IDRV_MAT_MAXTEXTURES; ++k)
 	{
-		if (_Object->getTexture(k) != NULL)
+		if (_Object->getTexture(k) != nullptr)
 		{
 			lastStage = k;
 		}
@@ -453,7 +453,7 @@ const NLMISC::CMatrix  &UInstanceMaterial::getUserTexMat(uint stage) const
 
 void				UInstanceMaterial::setWrapS(uint stage, TWrapMode mode)
 {
-	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(stage) == NULL)
+	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(stage) == nullptr)
 	{
 		nlwarning("UInstanceMaterial::setWrapS : stage %d is invalid or there's no texture", stage);
 		return;
@@ -465,7 +465,7 @@ void				UInstanceMaterial::setWrapS(uint stage, TWrapMode mode)
 
 void				UInstanceMaterial::setWrapT(uint stage, TWrapMode mode)
 {
-	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(stage) == NULL)
+	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(stage) == nullptr)
 	{
 		nlwarning("UInstanceMaterial::setWrapT : stage %d is invalid or there's no texture", stage);
 		return;
@@ -477,7 +477,7 @@ void				UInstanceMaterial::setWrapT(uint stage, TWrapMode mode)
 
 UInstanceMaterial::TWrapMode			UInstanceMaterial::getWrapS(uint stage) const
 {
-	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(uint8(stage)) == NULL)
+	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(uint8(stage)) == nullptr)
 	{
 		nlwarning("UInstanceMaterial::getWrapS : stage %d is invalid or there's no texture", stage);
 		return Repeat;
@@ -489,7 +489,7 @@ UInstanceMaterial::TWrapMode			UInstanceMaterial::getWrapS(uint stage) const
 
 UInstanceMaterial::TWrapMode			UInstanceMaterial::getWrapT(uint stage) const
 {
-	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(uint8(stage)) == NULL)
+	if (stage >= IDRV_MAT_MAXTEXTURES || _Object->getTexture(uint8(stage)) == nullptr)
 	{
 		nlwarning("UInstanceMaterial::getWrapT : stage %d is invalid or there's no texture", stage);
 		return Repeat;

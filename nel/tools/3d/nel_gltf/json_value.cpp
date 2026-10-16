@@ -108,11 +108,11 @@ CJsonValue *CJsonValue::push()
 
 const CJsonValue *CJsonValue::get(const char *key) const
 {
-	if (m_Type != Object) return NULL;
+	if (m_Type != Object) return nullptr;
 	for (size_t i = 0; i < m_Object.size(); ++i)
 		if (m_Object[i].first == key)
 			return m_Object[i].second;
-	return NULL;
+	return nullptr;
 }
 
 CJsonValue *CJsonValue::set(const char *key)
@@ -137,11 +137,11 @@ CJsonValue *CJsonValue::set(const char *key)
 
 CJsonValue *CJsonValue::getMutable(const char *key)
 {
-	if (m_Type != Object) return NULL;
+	if (m_Type != Object) return nullptr;
 	for (size_t i = 0; i < m_Object.size(); ++i)
 		if (m_Object[i].first == key)
 			return m_Object[i].second;
-	return NULL;
+	return nullptr;
 }
 
 CJsonValue *CJsonValue::ensureObject(const char *key)
@@ -459,12 +459,12 @@ bool CJsonValue::parseValue(const char *&p, const char *end, std::string *err, i
 		if (isFloat)
 		{
 			m_Type = Double;
-			m_Double = strtod(tok.c_str(), NULL);
+			m_Double = strtod(tok.c_str(), nullptr);
 		}
 		else
 		{
 			m_Type = Int;
-			m_Int = (sint64)strtoll(tok.c_str(), NULL, 10);
+			m_Int = (sint64)strtoll(tok.c_str(), nullptr, 10);
 		}
 		return true;
 	}

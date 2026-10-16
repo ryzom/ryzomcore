@@ -77,10 +77,10 @@ public:
 	virtual	void	loadAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded) NL_OVERRIDE;
 	/// Delete old zones, or load new zones, around a position. new Zones are loaded async.
 	virtual	void	refreshZonesAround(const CVector &pos, float radius) NL_OVERRIDE;
-	virtual	void	refreshZonesAround(const CVector &pos, float radius, std::string &zoneAdded, std::string &zoneRemoved, const std::vector<uint16> *validZoneIds = NULL) NL_OVERRIDE;
+	virtual	void	refreshZonesAround(const CVector &pos, float radius, std::string &zoneAdded, std::string &zoneRemoved, const std::vector<uint16> *validZoneIds = nullptr) NL_OVERRIDE;
 	/// Delete old zones, or load new zones, around a position, until it is finished. This is a blocking call.
 	virtual	void	refreshAllZonesAround(const CVector &pos, float radius, std::vector<std::string> &zonesAdded, std::vector<std::string> &zonesRemoved,
-		NLMISC::IProgressCallback &progress, const std::vector<uint16> *validZoneIds = NULL) NL_OVERRIDE;
+		NLMISC::IProgressCallback &progress, const std::vector<uint16> *validZoneIds = nullptr) NL_OVERRIDE;
 	virtual	void	getAllZoneLoaded(std::vector<std::string>	&zoneLoaded) const NL_OVERRIDE;
 	virtual void    invalidateAllTiles() NL_OVERRIDE;
 	virtual void	removeAllZones() NL_OVERRIDE;

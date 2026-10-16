@@ -57,7 +57,7 @@ CIndexBuffer::CIndexBuffer()
 	_NbIndexes = 0;
 	_InternalFlags = 0;
 	_LockCounter = 0;
-	_LockedBuffer = NULL;
+	_LockedBuffer = nullptr;
 	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
@@ -77,7 +77,7 @@ CIndexBuffer::CIndexBuffer(const CIndexBuffer &vb) : CRefCount()
 	_Capacity = 0;
 	_NbIndexes = 0;
 	_LockCounter = 0;
-	_LockedBuffer = NULL;
+	_LockedBuffer = nullptr;
 	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
@@ -97,7 +97,7 @@ CIndexBuffer::CIndexBuffer(const char *name)
 	_NbIndexes = 0;
 	_InternalFlags = 0;
 	_LockCounter = 0;
-	_LockedBuffer = NULL;
+	_LockedBuffer = nullptr;
 	_BufferUsage = CpuReadWrite;
 	_Location = NotResident;
 	_ResidentSize = 0;
@@ -117,7 +117,7 @@ CIndexBuffer::~CIndexBuffer()
 
 	// Single value
 	if (DrvInfos)
-		DrvInfos->IndexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
+		DrvInfos->IndexBufferPtr = nullptr;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();
@@ -297,7 +297,7 @@ void CIndexBuffer::restoreNonResidentMemory()
 	_DirtyTracking = false;
 
 	if (DrvInfos)
-		DrvInfos->IndexBufferPtr = NULL;	// Tell the driver info to not restore memory when it will die
+		DrvInfos->IndexBufferPtr = nullptr;	// Tell the driver info to not restore memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();

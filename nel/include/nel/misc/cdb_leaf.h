@@ -92,7 +92,7 @@ public:
 	 */
 	CCDBNodeLeaf(const std::string &name) : ICDBNode(name)
 	{
-		_Parent=0;
+		_Parent=nullptr;
 		_Property = 0;
 		_oldProperty = 0;
 		_Type = UNKNOWN;
@@ -105,7 +105,7 @@ public:
 	 *	Build the structure of the database from a file
 	 * \param f is the stream
 	 */
-	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = NULL ) NL_OVERRIDE;
+	void init( xmlNodePtr node, IProgressCallback &progressCallBack, bool mapBanks=false, CCDBBankHandler *bankHandler = nullptr) NL_OVERRIDE;
 
 	/**
 	 * Get a node
@@ -195,7 +195,7 @@ public:
 		else
 		{
 			--count;
-			return NULL;
+			return nullptr;
 		}
 	}
 

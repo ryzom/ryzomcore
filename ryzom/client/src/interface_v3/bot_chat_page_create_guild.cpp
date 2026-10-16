@@ -64,17 +64,17 @@ class CHandlerGuildCreate : public IActionHandler
 		string guildDescWin = getParam(Params, "desc");
 
 		CGroupEditBox *pGEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildNameWin));
-		if (pGEB == NULL) return;
+		if (pGEB == nullptr) return;
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(IconWin));
-		if (pCS == NULL) return;
+		if (pCS == nullptr) return;
 
 		CGroupEditBox *pDesc = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(guildDescWin));
 
 		ucstring guildName = ucstring::makeFromUtf8(pGEB->getInputString()); // FIXME: UTF-8 (serial)
 
 		ucstring guildDesc; // FIXME: UTF-8 (serial)
-		if (pDesc != NULL) guildDesc.fromUtf8(pDesc->getInputString()); // FIXME: UTF-8 (serial)
+		if (pDesc != nullptr) guildDesc.fromUtf8(pDesc->getInputString()); // FIXME: UTF-8 (serial)
 
 		uint64 icon = CGuildManager::iconMake((uint8)pCS->getGuildBack(), (uint8)pCS->getGuildSymbol(),
 								pCS->getInvertGuildSymbol(), pCS->getGuildColor1(), pCS->getGuildColor2());

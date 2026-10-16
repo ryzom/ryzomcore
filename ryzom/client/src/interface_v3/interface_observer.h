@@ -68,7 +68,7 @@ public:
 	typedef std::map< std::string, IInterfaceObserverFactory* > TFactoryMap;
 	static CInterfaceObserverFactoryManager* getInstance()
 	{
-		if (_GlobalInstance == NULL)
+		if (_GlobalInstance == nullptr)
 			_GlobalInstance = new CInterfaceObserverFactoryManager;
 		return _GlobalInstance;
 	}
@@ -106,18 +106,18 @@ public:
 		if (!idObserver)
 		{
 			nlinfo("action not found in a observer node");
-			return NULL;
+			return nullptr;
 		}
 		CXMLAutoPtr ptr((const char*) xmlGetProp (node, (xmlChar*)"data"));
 		if (!ptr)
 		{
 			nlinfo ("no data in a observer tag");
-			return NULL;
+			return nullptr;
 
 		}
 
 
-		IInterfaceObserver* obs =NULL;
+		IInterfaceObserver* obs = nullptr;
 
 		char * end = ptr.getDatas() + strlen( ptr.getDatas() );
 		char * dataTok = strtok( ptr.getDatas()," ,");
@@ -126,24 +126,24 @@ public:
 		while(dataTok)
 		{
 			std::string data (dataTok);
-			if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == NULL) // Full path provided ? No.
+			if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == nullptr) // Full path provided ? No.
 			{
 				CInterfaceGroup *parent = parentGroup;
-				while (parent != NULL)
+				while (parent != nullptr)
 				{
 					std::string sTmp;
 					if (data[0] == ':')
 						sTmp = parent->getId() + data;
 					else
 						sTmp = parent->getId() + ":" + data;
-					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false) != NULL)
+					if (NLGUI::CDBManager::getInstance()->getDbProp(sTmp,false) != nullptr)
 					{
 						data = sTmp;
 						break;
 					}
 					parent = parent->getParent();
 				}
-				if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == NULL)
+				if (NLGUI::CDBManager::getInstance()->getDbProp(data,false) == nullptr)
 				{
 					std::string sTmp = std::string("data (")+std::string(dataTok)+std::string(") in a observer tag do not exist, CREATING!");
 					nlinfo (sTmp.c_str());
@@ -157,18 +157,18 @@ public:
 				if (it== CInterfaceObserverFactoryManager::getInstance()->FactoryMap.end())
 				{
 					nlinfo("undefined observer : %s", (const char*)idObserver);
-					return NULL;
+					return nullptr;
 				}
 				obs = it->second->createObserver(node,parentGroup);
 				if (!obs)
 				{
-					return NULL;
+					return nullptr;
 				}
 			}
 			textId = NLMISC::ICDBNode::CTextId( data );
 			if ( ! NLGUI::CDBManager::getInstance()->getDB()->addObserver(obs,textId ) )
 			{
-				return NULL;
+				return nullptr;
 			}
 			dataTok+= strlen(dataTok ) +1;
 			if (dataTok >= end)

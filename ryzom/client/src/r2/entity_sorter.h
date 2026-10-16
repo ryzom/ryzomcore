@@ -60,7 +60,7 @@ private:
 		double					Dist2;
 		TIndexInVisibleList     IndexInVisibleList;
 	public:
-		CSortedEntity(CDisplayerVisualEntity *displayer = NULL, double dist2 = 0.f, TIndexInVisibleList indexInVisibleList = -1)
+		CSortedEntity(CDisplayerVisualEntity *displayer = nullptr, double dist2 = 0.f, TIndexInVisibleList indexInVisibleList = -1)
 				   :  Displayer(displayer), Dist2(dist2), IndexInVisibleList(indexInVisibleList)
 		{}
 		bool operator<(const CSortedEntity &rhs) const
@@ -82,7 +82,7 @@ private:
 		float BlendValue; // current transparency (0.f hidden -> 1.f visible)
 		CDisplayerVisualEntity *Displayer;
 	public:
-		CVisibleEntity(CDisplayerVisualEntity *displayer = NULL) : State(Appear), BlendValue(0.f), Displayer(displayer) {}
+		CVisibleEntity(CDisplayerVisualEntity *displayer = nullptr) : State(Appear), BlendValue(0.f), Displayer(displayer) {}
 	};
 	//
 	std::vector<CSortedEntity>			_SortTable;			// *Table temporarily used for the sort	(avoid reallocation of a new vector each time)

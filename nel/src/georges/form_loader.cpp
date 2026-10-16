@@ -75,7 +75,7 @@ CType *CFormLoader::loadType (const std::string &filename)
 
 	// Already in the map ?
 	TTypeMap::iterator ite = _MapType.find (lowerStr);
-	if (ite != _MapType.end() && (ite->second != NULL) )
+	if (ite != _MapType.end() && (ite->second != nullptr) )
 	{
 		// Return the pointer
 		return ite->second;
@@ -109,7 +109,7 @@ CType *CFormLoader::loadType (const std::string &filename)
 
 				// Delete the type
 				delete type;
-				type = NULL;
+				type = nullptr;
 			}
 		}
 		catch (const Exception &e)
@@ -119,7 +119,7 @@ CType *CFormLoader::loadType (const std::string &filename)
 
 			// Delete the type
 			delete type;
-			type = NULL;
+			type = nullptr;
 		}
 
 		// Loaded ?
@@ -182,7 +182,7 @@ CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 
 				// Delete the formDfn
 				delete formDfn;
-				formDfn = NULL;
+				formDfn = nullptr;
 				_MapFormDfn.erase (lowerStr);
 			}
 		}
@@ -193,7 +193,7 @@ CFormDfn *CFormLoader::loadFormDfn (const std::string &filename, bool forceLoad)
 
 			// Delete the formDfn
 			delete formDfn;
-			formDfn = NULL;
+			formDfn = nullptr;
 			_MapFormDfn.erase (lowerStr);
 		}
 
@@ -237,7 +237,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 
 				// Delete the form
 				delete form;
-				form = NULL;
+				form = nullptr;
 				_MapForm.erase (lowerStr);
 			}
 			name = name.substr (index+1);
@@ -268,7 +268,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 
 					// Delete the form
 					delete form;
-					form = NULL;
+					form = nullptr;
 					_MapForm.erase (lowerStr);
 				}
 			}
@@ -279,7 +279,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 
 				// Delete the form
 				delete form;
-				form = NULL;
+				form = nullptr;
 				_MapForm.erase (lowerStr);
 			}
 		}
@@ -290,7 +290,7 @@ UForm *CFormLoader::loadForm (const std::string &filename)
 
 			// Delete the form
 			delete form;
-			form = NULL;
+			form = nullptr;
 			_MapForm.erase (lowerStr);
 		}
 

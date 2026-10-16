@@ -141,7 +141,7 @@ const CMapExtenderCache::SView *CMapExtenderCache::findView(uint16 id) const
 {
 	for (std::vector<SView>::const_iterator it = m_Views.begin(); it != m_Views.end(); ++it)
 		if (it->Id == id) return &*it;
-	return NULL;
+	return nullptr;
 }
 
 bool CMapExtenderCache::decodeFunctional()

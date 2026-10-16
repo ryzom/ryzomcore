@@ -88,7 +88,7 @@ void CSkyObject::CColorGradientInfo::init(const CSkyObjectSheet::CColorGradientI
 {
 	TargetTextureStage = cgis.TargetTextureStage;
 	WeatherToGradient.resize(cgis.WeatherToGradient.size());
-	CBitmap *lastSeenBitmap = NULL;
+	CBitmap *lastSeenBitmap = nullptr;
 	for(uint k = 0; k < cgis.WeatherToGradient.size(); ++k)
 	{
 		bool alreadyBuilt;
@@ -98,7 +98,7 @@ void CSkyObject::CColorGradientInfo::init(const CSkyObjectSheet::CColorGradientI
 			if (!WeatherToGradient[k]->convertToType(CBitmap::RGBA))
 			{
 				// can't use bitmap..
-				WeatherToGradient[k] = NULL; // don't do a delete here because it'is 'builtBitmaps' that has ownership
+				WeatherToGradient[k] = nullptr; // don't do a delete here because it'is 'builtBitmaps' that has ownership
 			}
 			else
 			{
@@ -400,7 +400,7 @@ bool CSkyObject::setup(const CClientDate &date, const CClientDate &animationDate
 		for(uint k = 0; k < SKY_MAX_NUM_STAGE; ++k)
 		{
 			if (TexPanner[k].U != 0.f || TexPanner[k].V != 0.f ||
-				OffsetUBitmap[k] != NULL || OffsetVBitmap[k] != NULL )
+				OffsetUBitmap[k] != nullptr || OffsetVBitmap[k] != nullptr)
 			{
 				//nlinfo("global date = %f", animTime);
 				// there's tex panning for that stage

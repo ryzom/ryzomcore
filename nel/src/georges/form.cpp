@@ -89,12 +89,12 @@ const UFormElm& CForm::getRootNode () const
 // CForm
 // ***************************************************************************
 
-CForm::CForm () : Elements (this, NULL, NULL, 0xffffffff)
+CForm::CForm () : Elements (this, nullptr, nullptr, 0xffffffff)
 {
 	uint i;
 	for (i=0; i<HeldElementCount; i++)
 	{
-		HeldElements[i] = new CFormElmStruct (this, NULL, NULL, 0xffffffff);
+		HeldElements[i] = new CFormElmStruct (this, nullptr, nullptr, 0xffffffff);
 	}
 }
 
@@ -118,7 +118,7 @@ void CForm::write (xmlDocPtr doc, const std::string &filename)
 		_Filename = CFile::getFilename (filename);
 
 	// Create the first node
-	xmlNodePtr node = xmlNewDocNode (doc, NULL, (const xmlChar*)"FORM", NULL);
+	xmlNodePtr node = xmlNewDocNode (doc, nullptr, (const xmlChar*)"FORM", nullptr);
 	xmlDocSetRootElement (doc, node);
 
 	// List of parent
@@ -128,7 +128,7 @@ void CForm::write (xmlDocPtr doc, const std::string &filename)
 		if (!(ParentList[parent].ParentFilename.empty()))
 		{
 			// Add a parent node
-			xmlNodePtr parentNode = xmlNewChild ( node, NULL, (const xmlChar*)"PARENT", NULL );
+			xmlNodePtr parentNode = xmlNewChild ( node, nullptr, (const xmlChar*)"PARENT", nullptr);
 			xmlSetProp (parentNode, (const xmlChar*)"Filename", (const xmlChar*)ParentList[parent].ParentFilename.c_str());
 		}
 	}
@@ -153,7 +153,7 @@ void CForm::readParent (const char *parent, CFormLoader &loader)
 {
 	// Load the parent
 	CForm *theParent = (CForm*)loader.loadForm (parent);
-	if (theParent != NULL)
+	if (theParent != nullptr)
 	{
 		// Set the parent
 		if (!insertParent (getParentCount (), parent, theParent))
@@ -195,7 +195,7 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std
 	_Dfn = dfn;
 
 	// Check node name
-	if ( ((const char*)node->name == NULL) || (strcmp ((const char*)node->name, "FORM") != 0) )
+	if ( ((const char*)node->name == nullptr) || (strcmp ((const char*)node->name, "FORM") != 0) )
 	{
 		// Make an error message
 		warning (true, "read", "XML Syntax error in block line %d, node (%s) should be FORM.",
@@ -204,7 +204,7 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std
 
 	// Get first struct node
 	xmlNodePtr child = CIXml::getFirstChildNode (node, "STRUCT");
-	if (child == NULL)
+	if (child == nullptr)
 	{
 		// Throw exception
 		warning (true, "read", "Syntax error in block line %d, node (%s) should have a STRUCT child node.",
@@ -217,7 +217,7 @@ void CForm::read (xmlNodePtr node, CFormLoader &loader, CFormDfn *dfn, const std
 	// Get next struct node
 	child = CIXml::getNextChildNode (node, "STRUCT");
 	uint index = 0;
-	while ( (child != NULL) && (index < HeldElementCount))
+	while ( (child != nullptr) && (index < HeldElementCount))
 	{
 		HeldElements[index]->read (child, loader, dfn, this);
 		index++;

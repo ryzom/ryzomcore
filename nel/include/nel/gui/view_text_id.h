@@ -65,7 +65,7 @@ namespace NLGUI
 
 		CViewTextID(const TCtorParam &param) : CViewText(param)
 		{
-			_StringModifier= NULL;
+			_StringModifier = nullptr;
 			_IsDBLink = false;
 			_TextId = 0xFFFFFFFF;
 			_Initialized = false;
@@ -78,7 +78,7 @@ namespace NLGUI
 				NLMISC::CRGBA Color=NLMISC::CRGBA(255,255,255), bool Shadow=false) :
 					CViewText (id, std::string(""), FontSize, Color, Shadow)
 		{
-			_StringModifier= NULL;
+			_StringModifier = nullptr;
 			_IsDBLink = false;
 			_TextId = nID;
 			_Initialized = false;

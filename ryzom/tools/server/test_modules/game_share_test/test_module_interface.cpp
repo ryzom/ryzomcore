@@ -134,12 +134,12 @@ public:
 	void onModuleDown(IModuleProxy *proxy)
 	{
 		if (proxy == Servant)
-			Servant = NULL;
+			Servant = nullptr;
 	}
 
 	void taskFunc()
 	{
-		while (Servant == NULL)
+		while (Servant == nullptr)
 		{
 			if (getActiveModuleTask()->isTerminationRequested())
 				return;

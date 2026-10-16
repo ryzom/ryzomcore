@@ -71,7 +71,7 @@ void CBackgroundSound::importForm(const std::string& filename, NLGEORGES::UFormE
 
 		formRoot.getNodeByName(&psoundList, ".SoundType.Sounds");
 
-		if (psoundList != 0 && psoundList->isArray())
+		if (psoundList != nullptr && psoundList->isArray())
 		{
 			uint size;
 			psoundList->getArraySize(size);
@@ -83,7 +83,7 @@ void CBackgroundSound::importForm(const std::string& filename, NLGEORGES::UFormE
 
 				psoundList->getArrayNode(&psoundItem, i);
 
-				if (psoundItem != NULL)
+				if (psoundItem != nullptr)
 				{
 					// Read the sound name.
 					std::string soundName;
@@ -119,7 +119,7 @@ uint32 CBackgroundSound::getDuration()
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(first->SoundName);
-		if (sound != NULL)
+		if (sound != nullptr)
 			durations.push_back(sound->getDuration());
 	}
 	if (durations.empty())
@@ -149,7 +149,7 @@ float CBackgroundSound::getMaxDistance() const
 	for (; first != last; ++first)
 	{
 		CSound *sound = mixer->getSoundId(first->SoundName);
-		if (sound != 0)
+		if (sound != nullptr)
 		{
 			ret = max(ret, sound->getMaxDistance());
 		}

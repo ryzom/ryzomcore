@@ -76,12 +76,12 @@ namespace NLGUI
 		if (Border)
 		{
 			delete Border;
-			Border = NULL;
+			Border = nullptr;
 		}
 		if (Background)
 		{
 			delete Background;
-			Background = NULL;
+			Background = nullptr;
 		}
 	}
 
@@ -303,8 +303,8 @@ namespace NLGUI
 	xmlNodePtr CGroupCell::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "cell" );
 		
@@ -516,7 +516,7 @@ namespace NLGUI
 			if (Background)
 			{
 				uint8 CurrentAlpha = 255;
-				CGroupTable *table = NULL;
+				CGroupTable *table = nullptr;
 				if (getParent ())
 				{
 					table = static_cast<CGroupTable*> (getParent ());
@@ -675,13 +675,13 @@ namespace NLGUI
 		if (Border)
 		{
 			delete Border;
-			Border = NULL;
+			Border = nullptr;
 		}
 
 		if (Background)
 		{
 			delete Background;
-			Background = NULL;
+			Background = nullptr;
 		}
 
 	/*	uint i;
@@ -1289,7 +1289,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupTable::checkCoords ()
 	{
-		if (_Parent != NULL)
+		if (_Parent != nullptr)
 		{
 			sint parentWidth = _Parent->getInnerWidth();
 			if (_LastParentW != (sint) parentWidth)
@@ -1303,10 +1303,10 @@ namespace NLGUI
 				{
 
 					CCtrlBase *pCB = CWidgetManager::getInstance()->getCapturePointerLeft();
-					if (pCB != NULL)
+					if (pCB != nullptr)
 					{
 						CCtrlResizer *pCR = dynamic_cast<CCtrlResizer*>(pCB);
-						if (pCR != NULL)
+						if (pCR != nullptr)
 						{
 							// We are resizing !!!!
 						}
@@ -1460,7 +1460,7 @@ namespace NLGUI
 		}
 
 		// Not found ?
-		if (gr == NULL)
+		if (gr == nullptr)
 			CurrentAlpha = 255;
 
 		if (!_Columns.empty() && !_Rows.empty())
@@ -1606,8 +1606,8 @@ namespace NLGUI
 	xmlNodePtr CGroupTable::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "table" );
 		if (Border)
@@ -1691,7 +1691,7 @@ namespace NLGUI
 		// parse cells
 		uint row = 0;
 		xmlNodePtr currRow = cur->children;
-		while (currRow != NULL)
+		while (currRow != nullptr)
 		{
 			// look for 'TR' markup
 			if (strcmp((char*)currRow->name,"TR") == 0)
@@ -1700,7 +1700,7 @@ namespace NLGUI
 				xmlNodePtr currCol = currRow->children;
 				bool newLine = true;
 				uint column = 0;
-				while (currCol != NULL)
+				while (currCol != nullptr)
 				{
 					// look for 'TR' markup
 					if (strcmp((char*)currCol->name,"TD") == 0)

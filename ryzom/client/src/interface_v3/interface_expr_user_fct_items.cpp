@@ -193,14 +193,14 @@ static CDBCtrlSheet *asCtrlSheet(CInterfaceExprValue &arg)
 	if (arg.getType() != CInterfaceExprValue::UserType)
 	{
 		nlwarning("<asCtrlSheet> Arg 0 has wrong type!");
-		return NULL;
+		return nullptr;
 	}
 
 	CDBCtrlSheetPtrUserType *sheetPtr = dynamic_cast<CDBCtrlSheetPtrUserType *>(arg.getUserType());
 	if (!sheetPtr)
 	{
 		nlwarning("<asCtrlSheet> Arg 0 has wrong type!");
-		return NULL;
+		return nullptr;
 	}
 	return sheetPtr->Sheet;
 }
@@ -214,7 +214,7 @@ static CDBCtrlSheet *asCtrlSheet(CInterfaceExpr::TArgList &args)
 	if (args.size() != 1)
 	{
 		nlwarning("<asCtrlSheet> bad number of args");
-		return NULL;
+		return nullptr;
 	}
 	return asCtrlSheet(args[0]);
 }
@@ -226,20 +226,20 @@ static const CItemSheet *getItemSheet(CInterfaceExpr::TArgList &args)
 {
 	if (args.size() != 1)
 	{
-		return NULL;
+		return nullptr;
 	}
 	// Check if first arg is a sheet ID
 	if (args[0].toInteger())
 	{
 		if (args[0].getInteger() == 0)
 		{
-			return NULL;
+			return nullptr;
 		}
 		CSheetId si((uint32) args[0].getInteger());
 		CEntitySheet *entitySheet = SheetMngr.get(si);
 		if (!entitySheet || entitySheet->Type != CEntitySheet::ITEM)
 		{
-			return NULL;
+			return nullptr;
 		}
 		return static_cast<CItemSheet *>(entitySheet);
 	}
@@ -248,7 +248,7 @@ static const CItemSheet *getItemSheet(CInterfaceExpr::TArgList &args)
 		CDBCtrlSheet *ctrlSheet = asCtrlSheet(args);
 		if (!ctrlSheet)
 		{
-			return NULL;
+			return nullptr;
 		}
 		return ctrlSheet->asItemSheet();
 	}
@@ -321,7 +321,7 @@ static DECLARE_INTERFACE_USER_FCT(getSheetName)
 	{
 		const CItemSheet *itemSheet = getItemSheet(args);
 		const char *tmp = "";
-		if (itemSheet != NULL) tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id);
+		if (itemSheet != nullptr) tmp = STRING_MANAGER::CStringManagerClient::getItemLocalizedName(itemSheet->Id);
 		result.setString(tmp);
 		return true;
 	}
@@ -381,7 +381,7 @@ REGISTER_INTERFACE_USER_FCT("getSheetIndex", getSheetIndex)
 static DECLARE_INTERFACE_USER_FCT(userFctIsStackable)
 {
 	const CItemSheet *itemSheet = getItemSheet(args);
-	if (itemSheet != NULL)
+	if (itemSheet != nullptr)
 	{
 		result.setBool(itemSheet->Stackable > 1);
 	}
@@ -459,7 +459,7 @@ static inline bool isBrick(uint32 sheetID)
 	CSBrickManager *pBM = CSBrickManager::getInstance();
 	CSheetId sheetId(sheetID);
 	CSBrickSheet *pBR = pBM->getBrick (sheetId);
-	return pBR != NULL;
+	return pBR != nullptr;
 }
 
 static DECLARE_INTERFACE_USER_FCT(isBrickUserFct)

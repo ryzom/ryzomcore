@@ -40,7 +40,8 @@ using namespace std;
 
 namespace NLSOUND {
 
-CGroupControllerRoot::CGroupControllerRoot() : CGroupController(NULL), NLMISC::CManualSingleton<CGroupControllerRoot>()
+CGroupControllerRoot::CGroupControllerRoot() : CGroupController(nullptr)
+    , NLMISC::CManualSingleton<CGroupControllerRoot>()
 {
 	
 }

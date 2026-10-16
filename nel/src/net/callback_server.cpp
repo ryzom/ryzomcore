@@ -62,7 +62,7 @@ CCallbackServer::CCallbackServer( TRecordingState rec, const string& recfilename
 	CCallbackNetBase( rec, recfilename, recordall ),
 	CBufServer( DEFAULT_STRATEGY, DEFAULT_MAX_THREADS, DEFAULT_MAX_SOCKETS_PER_THREADS, true, rec==Replay, initPipeForDataAvailable ),
 	_ConnectionCallback(),
-	_ConnectionCbArg(NULL)
+	_ConnectionCbArg(nullptr)
 {
 #ifndef USE_MESSAGE_RECORDER
 	nlassertex( rec==Off, ("LNETL3S: The message recorder is disabled at compilation time ; switch the recording state Off") );

@@ -443,9 +443,15 @@ class CEventMouseWheel : public CEventMouse
 {
 public:
 	bool	Direction;
-	CEventMouseWheel (float x, float y, TMouseButton button, bool direction, IEventEmitter* emitter) : CEventMouse (x, y, button, emitter, EventMouseWheelId)
+	/** How much of a step this is. A mouse detent is exactly 1; continuous sources - a
+	  * trackpad, a touchscreen pinch - report the fraction they actually travelled, so a
+	  * handler that respects this zooms smoothly instead of in detent-sized jumps. Handlers
+	  * that ignore it keep the old behaviour, since a mouse always says 1. */
+	float	Steps;
+	CEventMouseWheel (float x, float y, TMouseButton button, bool direction, IEventEmitter* emitter, float steps = 1.f) : CEventMouse (x, y, button, emitter, EventMouseWheelId)
 	{
 		Direction=direction;
+		Steps=steps;
 	}
 
 	virtual	CEvent			*clone() const NL_OVERRIDE {return new CEventMouseWheel(*this);}

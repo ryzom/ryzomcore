@@ -45,7 +45,8 @@ using namespace std;
 namespace NLSOUND {
 
 CStreamFileSource::CStreamFileSource(CStreamFileSound *streamFileSound, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
-: CStreamSource(streamFileSound, spawn, cb, cbUserParam, cluster, groupController), m_AudioDecoder(NULL), m_Paused(false), m_DecodingEnded(false)
+: CStreamSource(streamFileSound, spawn, cb, cbUserParam, cluster, groupController), m_AudioDecoder(nullptr)
+    , m_Paused(false), m_DecodingEnded(false)
 {
 	m_Thread = NLMISC::IThread::create(this);
 }
@@ -55,9 +56,9 @@ CStreamFileSource::~CStreamFileSource()
 	stop();
 	m_Thread->wait(); // thread must have stopped for delete!
 	delete m_Thread;
-	m_Thread = NULL;
+	m_Thread = nullptr;
 	delete m_AudioDecoder;
-	m_AudioDecoder = NULL;
+	m_AudioDecoder = nullptr;
 }
 
 void CStreamFileSource::play()
@@ -187,7 +188,7 @@ void CStreamFileSource::stop()
 
 	if (_Spawn)
 	{
-		if (_SpawnEndCb != NULL)
+		if (_SpawnEndCb != nullptr)
 			_SpawnEndCb(this, _CbUserParam);
 		m_Thread->wait();
 		delete this;
@@ -277,7 +278,7 @@ bool CStreamFileSource::prepareDecoder()
 	{
 		nlwarning("CAudioDecoder already exists, possible thread race bug with pause");			
 		delete m_AudioDecoder;
-		m_AudioDecoder = NULL;
+		m_AudioDecoder = nullptr;
 	}
 	if (!m_AudioDecoder)
 	{
@@ -377,7 +378,7 @@ void CStreamFileSource::run()
 	else
 	{
 		delete m_AudioDecoder;
-		m_AudioDecoder = NULL;
+		m_AudioDecoder = nullptr;
 		// _Playing cannot be used to detect play state because its required in cleanup
 		// Using m_AudioDecoder in isEnded() may result race condition (decoder is only created after thread is started)
 		m_DecodingEnded = !m_WaitingForPlay;

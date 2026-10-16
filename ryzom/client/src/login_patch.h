@@ -140,7 +140,7 @@ public:
 	/// Singleton method : Get the unique patch manager instance
 	static CPatchManager* getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CPatchManager();
 		return _Instance;
 	}

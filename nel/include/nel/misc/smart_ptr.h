@@ -212,7 +212,7 @@ public:
 	/// Selection operator. Doesn't check NULL.
 	T* operator->(void) const { SMART_TRACE("ope->()"); return Ptr; }
 	/// returns if there's no object pointed by this SmartPtr.
-	bool	isNull	() const { return Ptr==NULL; }
+	bool	isNull	() const { return Ptr == nullptr; }
 	/// Return the pointer
 	T *getPtr() const { return Ptr;}
 
@@ -231,7 +231,7 @@ public:
 	// serial using serialPtr
 	void serialPtr(NLMISC::IStream &f)
 	{
-		T*	obj= NULL;
+		T*	obj = nullptr;
 		if(f.isReading())
 		{
 			f.serialPtr(obj);
@@ -247,7 +247,7 @@ public:
 	// serial using serialPloyPtr
 	void serialPolyPtr(NLMISC::IStream &f)
 	{
-		T*	obj= NULL;
+		T*	obj = nullptr;
 		if(f.isReading())
 		{
 			f.serialPolyPtr(obj);
@@ -342,7 +342,7 @@ public:
 	// serial using serialPloyPtr
 	void serialPolyPtr(NLMISC::IStream &f)
 	{
-		T*	obj= NULL;
+		T*	obj = nullptr;
 		if(f.isReading())
 		{
 			f.serialPolyPtr(obj);
@@ -490,31 +490,31 @@ public:
 	, _DbgCCstRefs(0)
 	, _MaxRef(other._MaxRef)
 	, _CheckOn(other._CheckOn)
-	, _FirstReference(NULL)
-	, _FirstCstReference(NULL)
+	, _FirstReference(nullptr)
+	, _FirstCstReference(nullptr)
 	{
 	}
 	CDbgRefCount(sint32 maxRef = (1<<30))
 	: _DbgCRefs(0)
 	, _DbgCCstRefs(0)
 	, _MaxRef(maxRef)
-	, _FirstReference(NULL)
-	, _FirstCstReference(NULL)
+	, _FirstReference(nullptr)
+	, _FirstCstReference(nullptr)
 	{
 	}
 	virtual	~CDbgRefCount()
 	{
 		if (_DbgCRefs!=0 || _DbgCCstRefs!=0)
 		{
-			const CDbgPtr<T>* ref0, *ref1, *ref2, *ref3, *ref4; ref0=ref1=ref2=ref3=ref4=(CDbgPtr<T>*)NULL;
-			IDbgPtrData* dat0, *dat1, *dat2, *dat3, *dat4; dat0=dat1=dat2=dat3=dat4=(IDbgPtrData*)NULL;
+			const CDbgPtr<T>* ref0, *ref1, *ref2, *ref3, *ref4; ref0=ref1=ref2=ref3=ref4=(CDbgPtr<T>*)nullptr;
+			IDbgPtrData* dat0, *dat1, *dat2, *dat3, *dat4; dat0=dat1=dat2=dat3=dat4=(IDbgPtrData*)nullptr;
 			if (_DbgCRefs>0) { ref0 = _FirstReference; dat0 = ref0->getData(); }
 			if (_DbgCRefs>1) { ref1 = ref0->getNextReference(); dat1 = ref1->getData(); }
 			if (_DbgCRefs>2) { ref2 = ref1->getNextReference(); dat2 = ref2->getData(); }
 			if (_DbgCRefs>3) { ref3 = ref2->getNextReference(); dat3 = ref3->getData(); }
 			if (_DbgCRefs>4) { ref4 = ref3->getNextReference(); dat4 = ref4->getData(); }
-			const CstCDbgPtr<T>* cref0, *cref1, *cref2, *cref3, *cref4; cref0=cref1=cref2=cref3=cref4=(CstCDbgPtr<T>*)NULL;
-			IDbgPtrData* cdat0, *cdat1, *cdat2, *cdat3, *cdat4; cdat0=dat1=cdat2=cdat3=cdat4=(IDbgPtrData*)NULL;
+			const CstCDbgPtr<T>* cref0, *cref1, *cref2, *cref3, *cref4; cref0=cref1=cref2=cref3=cref4=(CstCDbgPtr<T>*)nullptr;
+			IDbgPtrData* cdat0, *cdat1, *cdat2, *cdat3, *cdat4; cdat0=dat1=cdat2=cdat3=cdat4=(IDbgPtrData*)nullptr;
 			if (_DbgCCstRefs>0) { cref0 = _FirstCstReference; cdat0 = cref0->getData(); }
 			if (_DbgCCstRefs>1) { cref1 = cref0->getNextReference(); cdat1 = cref1->getData(); }
 			if (_DbgCCstRefs>2) { cref2 = cref1->getNextReference(); cdat2 = cref2->getData(); }
@@ -540,7 +540,7 @@ public:
 		// Linked list management
 		nlassert(_FirstReference!=&ptr);
 		ptr.setNextReference(_FirstReference);
-		ptr.setPrevReference((CDbgPtr<T>*)NULL);
+		ptr.setPrevReference((CDbgPtr<T>*)nullptr);
 		if (_FirstReference)
 			_FirstReference->setPrevReference(&ptr);
 		_FirstReference = &ptr;
@@ -606,11 +606,11 @@ public: // Methods
 
 public:
 	CDbgPtr()
-	: Ptr(NULL)
+	: Ptr(nullptr)
 #ifdef NL_DEBUG_PTR
-	, Data(NULL)
-	, NextReference(NULL)
-	, PrevReference(NULL)
+	, Data(nullptr)
+	, NextReference(nullptr)
+	, PrevReference(nullptr)
 #endif
 	{
 	}
@@ -618,9 +618,9 @@ public:
 	template <class W>
 	CDbgPtr(const W* p)
 #ifdef NL_DEBUG_PTR
-	: Data(NULL)
-	, NextReference(NULL)
-	, PrevReference(NULL)
+	: Data(nullptr)
+	, NextReference(nullptr)
+	, PrevReference(nullptr)
 #endif
 	{
 		Ptr = const_cast<T*>(NLMISC::type_cast<const T*>(p));
@@ -635,9 +635,9 @@ public:
 
 	CDbgPtr(const CDbgPtr& copy)
 #ifdef NL_DEBUG_PTR
-	: Data(NULL)
-	, NextReference(NULL)
-	, PrevReference(NULL)
+	: Data(nullptr)
+	, NextReference(nullptr)
+	, PrevReference(nullptr)
 #endif
 	{
 		Ptr = copy.Ptr;
@@ -653,7 +653,7 @@ public:
 
 	bool isNULL() const
 	{
-		return Ptr==NULL;
+		return Ptr == nullptr;
 	}
 
 	T* ptr() const
@@ -679,7 +679,7 @@ public:
 	CDbgPtr<T>& operator=(const W* p)
 	{
 	#ifdef NL_DEBUG_PTR
-		CDbgRefCount<T>* oldRef = (CDbgRefCount<T>*)NULL, *newRef = (CDbgRefCount<T>*)NULL;
+		CDbgRefCount<T>* oldRef = (CDbgRefCount<T>*)nullptr, *newRef = (CDbgRefCount<T>*)nullptr;
 		if (Ptr)
 			oldRef = static_cast<CDbgRefCount<T>*>(Ptr);
 		if (p)
@@ -739,12 +739,12 @@ public:
 	bool operator ==(int p) const
 	{
 		nlassert(p == 0);
-		return Ptr==0;
+		return Ptr==nullptr;
 	}
 	bool operator !=(int p) const
 	{
 		nlassert(p == 0);
-		return Ptr!=0;
+		return Ptr!=nullptr;
 	}
 };
 
@@ -800,19 +800,19 @@ public: // Methods
 
 public:
 	CstCDbgPtr()
-	: Ptr(NULL)
+	: Ptr(nullptr)
 #ifdef NL_DEBUG_PTR
-	, Data(NULL)
-	, NextReference(NULL)
-	, PrevReference(NULL)
+	, Data(nullptr)
+	, NextReference(nullptr)
+	, PrevReference(nullptr)
 #endif
 	{
 	}
 	CstCDbgPtr(const T* p)
 #ifdef NL_DEBUG_PTR
-	: Data(NULL)
-	, NextReference(NULL)
-	, PrevReference(NULL)
+	: Data(nullptr)
+	, NextReference(nullptr)
+	, PrevReference(nullptr)
 #endif
 	{
 		Ptr = p;
@@ -826,9 +826,9 @@ public:
 	}
 	CstCDbgPtr(const CstCDbgPtr& copy)
 #ifdef NL_DEBUG_PTR
-	: Data(NULL)
-	, NextReference(NULL)
-	, PrevReference(NULL)
+	: Data(nullptr)
+	, NextReference(nullptr)
+	, PrevReference(nullptr)
 #endif
 	{
 		Ptr = copy.Ptr;
@@ -849,7 +849,7 @@ public:
 
 	bool isNULL() const
 	{
-		return Ptr==NULL;
+		return Ptr == nullptr;
 	}
 
 	operator const T*(void) const { return Ptr; }

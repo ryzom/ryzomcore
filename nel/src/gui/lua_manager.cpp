@@ -36,7 +36,7 @@ namespace NLGUI
 
 	bool CLuaManager::debugLua = false;
 	bool CLuaManager::editorMode = false;
-	CLuaManager* CLuaManager::instance = NULL;
+	CLuaManager* CLuaManager::instance = nullptr;
 
 	CLuaManager::CLuaManager()
 	{
@@ -48,7 +48,7 @@ namespace NLGUI
 		if (luaState)
 		{
 			delete luaState;
-			luaState = NULL;
+			luaState = nullptr;
 		}
 	}
 
@@ -57,7 +57,7 @@ namespace NLGUI
 		if (instance)
 		{
 			delete instance;
-			instance = NULL;
+			instance = nullptr;
 		}
 	}
 

@@ -63,7 +63,7 @@ void buildMeshInterface(const MESHEVAL::SEvalMesh &mesh, NL3D::CMesh::CMeshBuild
                         const NL3D::CMeshBase::CMeshBaseBuild &buildBaseMesh,
                         const MATBUILD::SMaxMeshBaseBuild &maxBaseBuild,
                         INode &node, SNodeTMCache &tmCache, bool skinned = false,
-                        const NLMISC::CMatrix *morphFinalSpace = NULL);
+                        const NLMISC::CMatrix *morphFinalSpace = nullptr);
 
 // buildMRMParameters replication (appdata-driven).
 void buildMRMParameters(CSceneClass *node, NL3D::CMRMParameters &params);

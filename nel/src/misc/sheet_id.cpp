@@ -80,11 +80,11 @@ CSheetId::CSheetId(uint32 sheetRef)
 			_DebugSheetName = it->second.Ptr;
 		}
 		else
-			_DebugSheetName = NULL;
+			_DebugSheetName = nullptr;
 	}
 	else
 	{
-		_DebugSheetName = NULL;
+		_DebugSheetName = nullptr;
 	}
 #endif
 }
@@ -108,11 +108,11 @@ CSheetId::CSheetId(int sheetRef)
 			_DebugSheetName = it->second.Ptr;
 		}
 		else
-			_DebugSheetName = NULL;
+			_DebugSheetName = nullptr;
 	}
 	else
 	{
-		_DebugSheetName = NULL;
+		_DebugSheetName = nullptr;
 	}
 #endif
 }
@@ -654,7 +654,7 @@ void CSheetId::serial(NLMISC::IStream &f)
 	if (it != _SheetIdToName.end())
 		_DebugSheetName = it->second.Ptr;
 	else
-		_DebugSheetName = NULL;
+		_DebugSheetName = nullptr;
 #endif
 }
 
@@ -865,7 +865,7 @@ void CSheetId::buildSheetId(uint32 shortId, uint32 type)
 		_DebugSheetName = it->second.Ptr;
 	}
 	else
-		_DebugSheetName = NULL;
+		_DebugSheetName = nullptr;
 #endif
 }
 

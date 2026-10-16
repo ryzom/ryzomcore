@@ -76,7 +76,7 @@ static const char *s_GPUSkinInsertGLSL =
 	"    }\n"
 	"}\n";
 
-static CVertexProgram *s_GPUSkinInsertVP = NULL;
+static CVertexProgram *s_GPUSkinInsertVP = nullptr;
 
 CVertexProgram *getGPUSkinInsertVP()
 {
@@ -138,7 +138,7 @@ static const char *s_GPUSkinSimpleInsertGLSL =
 	"    tangent = vec4(normalize(skinnedTan), tangent.w);\n"
 	"}\n";
 
-static CVertexProgram *s_GPUSkinSimpleInsertVP = NULL;
+static CVertexProgram *s_GPUSkinSimpleInsertVP = nullptr;
 
 CVertexProgram *getGPUSkinSimpleInsertVP()
 {

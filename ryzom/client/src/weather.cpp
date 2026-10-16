@@ -49,7 +49,7 @@ H_AUTO_DECL(RZ_Weather)
 CLightCycle		   WorldLightCycle;
 CLightCycleManager LightCycleManager;
 CWeatherManagerClient    WeatherManager;
-CWeatherFunctionParamsSheet  *WeatherFunctionParams = NULL;
+CWeatherFunctionParamsSheet  *WeatherFunctionParams = nullptr;
 
 float               ManualWeatherValue = 0.f;
 EGSPD::CSeason::TSeason	ManualSeasonValue = EGSPD::CSeason::Spring;
@@ -68,7 +68,7 @@ void releaseWeather()
 {
 	if( WeatherFunctionParams )
 		delete WeatherFunctionParams;
-	WeatherFunctionParams = NULL;
+	WeatherFunctionParams = nullptr;
 }
 
 void buildLightCycleDesc(CLightCycleDesc &dest,EGSPD::CSeason::TSeason season)
@@ -109,7 +109,7 @@ void loadWorldLightCycle()
 
 void loadWeatherFunctionParams()
 {
-	if (WeatherFunctionParams == NULL) WeatherFunctionParams = new CWeatherFunctionParamsSheet;
+	if (WeatherFunctionParams == nullptr) WeatherFunctionParams = new CWeatherFunctionParamsSheet;
 
 	if (ClientCfg.ManualWeatherSetup)
 	{
@@ -146,7 +146,7 @@ void updateWeatherManager(CContinent *continent)
 	H_AUTO_USE(RZ_Weather)
 	// build a weather context
 	CWeatherContext wc;
-	wc.GR   = NULL;
+	wc.GR   = nullptr;
 	wc.LC   = &WorldLightCycle;
 	wc.WF	= continent->WeatherFunction;
 
@@ -173,7 +173,7 @@ void updateWeatherManager(const NLMISC::CMatrix &camMatrix, CContinent *continen
 	if(continent)
 		wc.WF = continent->WeatherFunction;
 	else
-		wc.WF = NULL;
+		wc.WF = nullptr;
 
 	if (continent)
 	{

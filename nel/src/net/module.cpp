@@ -42,13 +42,13 @@ namespace NLNET
 	// Module interceptor implementation
 	//////////////////////////////////////
 	IModuleInterceptable::IModuleInterceptable()
-		: _Registrar(NULL)
+		: _Registrar(nullptr)
 	{
 	}
 
 	IModuleInterceptable::~IModuleInterceptable()
 	{
-		if (_Registrar != NULL)
+		if (_Registrar != nullptr)
 			_Registrar->unregisterInterceptor(this);
 	}
 
@@ -65,7 +65,7 @@ namespace NLNET
 	{
 		nlassert(registrar == _Registrar);
 
-		_Registrar = NULL;
+		_Registrar = nullptr;
 	}
 
 	IInterceptorRegistrar *IModuleInterceptable::getRegistrar()
@@ -177,11 +177,15 @@ namespace NLNET
 	//////////////////////////////////////
 
 	CModuleBase::CModuleBase()
-		: _CurrentSender(NULL),
-		  _CurrentMessage(NULL),
+		: _CurrentSender(nullptr)
+        ,
+		  _CurrentMessage(nullptr)
+        ,
 		  _CurrentMessageFailed(false),
-		  _MessageDispatchTask(NULL),
-		  _ModuleFactory(NULL),
+		  _MessageDispatchTask(nullptr)
+        ,
+		  _ModuleFactory(nullptr)
+        ,
 		  _ModuleId(INVALID_MODULE_ID)
 	{
 		// register module itself in the interceptor list
@@ -303,7 +307,7 @@ namespace NLNET
 		else
 		{
 			// go in user code for processing
-			if (_MessageDispatchTask != NULL)
+			if (_MessageDispatchTask != nullptr)
 			{
 				// process the message in the co task
 				_CurrentSender = senderModuleProxy;
@@ -363,7 +367,7 @@ namespace NLNET
 	CModuleTask *CModuleBase::getActiveModuleTask()
 	{
 		if (_ModuleTasks.empty())
-			return NULL;
+			return nullptr;
 
 		return _ModuleTasks.front();
 	}
@@ -662,7 +666,7 @@ namespace NLNET
 
 		IModuleSocket *socket = IModuleManager::getInstance().getModuleSocket(args[0]);
 
-		if (socket == NULL)
+		if (socket == nullptr)
 		{
 			log.displayNL("Unknown socket named '%s'", args[0].c_str());
 			return true;
@@ -695,7 +699,7 @@ namespace NLNET
 
 		IModuleSocket *socket = IModuleManager::getInstance().getModuleSocket(args[0]);
 
-		if (socket == NULL)
+		if (socket == nullptr)
 		{
 			log.displayNL("Unknown socket named '%s'", args[0].c_str());
 			return true;
@@ -820,7 +824,7 @@ namespace NLNET
 		  _ModuleClassName(CStringMapper::map(moduleClassName)),
 		  _FullyQualifiedModuleName(CStringMapper::map(fullyQualifiedModuleName)),
 		  _Manifest(moduleManifest),
-		  _SecurityData(NULL)
+		  _SecurityData(nullptr)
 	{
 	}
 
@@ -873,14 +877,14 @@ namespace NLNET
 	{
 		H_AUTO(CModuleProxy_sendModuleMessage);
 
-		if (_Gateway == NULL )
+		if (_Gateway == nullptr)
 		{
 			throw EModuleNotReachable();
 		}
 
 		// We need to find the proxy for the sender using the addressee gateway
 		IModuleProxy *senderProx = _Gateway->getPluggedModuleProxy(senderModule);
-		if (senderProx == NULL )
+		if (senderProx == nullptr)
 		{
 			throw EModuleNotReachable();
 		}
@@ -892,7 +896,7 @@ namespace NLNET
 	{
 		const TSecurityData *ms = _SecurityData;
 
-		while (ms != NULL)
+		while (ms != nullptr)
 		{
 			if (ms->DataTag == dataTag)
 			{
@@ -905,7 +909,7 @@ namespace NLNET
 		}
 
 		// not found
-		return NULL;
+		return nullptr;
 	}
 
 

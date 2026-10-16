@@ -41,18 +41,18 @@ H_AUTO_DECL ( RZ_Client_Render_Sky )
 // *************************************************************************************************
 CSky::CSky()
 {
-	_Scene = NULL;
-	_Driver = NULL;
-	_IG = NULL;
-	_AnimationSet = NULL;
+	_Scene = nullptr;
+	_Driver = nullptr;
+	_IG = nullptr;
+	_AnimationSet = nullptr;
 	_NumHourInDay = 24;
-	_PlayListManager = NULL;
-	_PlayList = NULL;
-	_AnimationSet = NULL;
+	_PlayListManager = nullptr;
+	_PlayList = nullptr;
+	_AnimationSet = nullptr;
 	_AnimLengthInSeconds = 3.f;
-	_AmbientSunLight = NULL;
-	_DiffuseSunLight = NULL;
-	_FogColor = NULL;
+	_AmbientSunLight = nullptr;
+	_DiffuseSunLight = nullptr;
+	_FogColor = nullptr;
 	_WaterEnvMapCameraHeight = 0.f;
 	_WaterEnvMapAlpha = 255;
 }
@@ -71,18 +71,18 @@ void CSky::release()
 		if (_PlayList)
 		{
 			_PlayListManager->deletePlayList(_PlayList);
-			_PlayList = NULL;
+			_PlayList = nullptr;
 		}
 		if (_AnimationSet && _Driver)
 		{
 			_Driver->deleteAnimationSet(_AnimationSet);
-			_AnimationSet = NULL;
+			_AnimationSet = nullptr;
 		}
 		if (_Scene)
 		{
 			_Scene->deletePlayListManager(_PlayListManager);
 		}
-		_PlayListManager = NULL;
+		_PlayListManager = nullptr;
 	}
 	for(uint k = 0; k < _Bitmaps.size(); ++k)
 	{
@@ -94,8 +94,8 @@ void CSky::release()
 		if (_IG) _IG->removeFromScene(*_Scene);
 		_Objects.clear();
 		_Driver->deleteScene(_Scene);
-		_Scene = NULL;
-		_Driver = NULL;
+		_Scene = nullptr;
+		_Driver = nullptr;
 	}
 }
 
@@ -133,9 +133,9 @@ void CSky::init(UDriver *drv, const CSkySheet &sheet, bool forceFallbackVersion 
 					_PlayListManager->deletePlayList(_PlayList);
 					_Scene->deletePlayListManager(_PlayListManager);
 					_Driver->deleteAnimationSet(_AnimationSet);
-					_PlayListManager = NULL;
-					_PlayList = NULL;
-					_AnimationSet = NULL;
+					_PlayListManager = nullptr;
+					_PlayList = nullptr;
+					_AnimationSet = nullptr;
 				}
 			}
 		}
@@ -287,7 +287,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 					)
 {
 	alreadyBuilt = false;
-	if (filename.empty()) return NULL;
+	if (filename.empty()) return nullptr;
 	std::string lcBMFilename = toLowerAscii(CFile::getFilenameWithoutExtension(filename));
 	std::map<std::string, CBitmap *>::iterator it = bitmapByName.find(lcBMFilename);
 	if (it != bitmapByName.end())
@@ -300,13 +300,13 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 	{
 		// load the bitmap
 		std::string path = CPath::lookup(filename, false);
-		if (path.empty()) return NULL;
+		if (path.empty()) return nullptr;
 		CUniquePtr<CBitmap> bm(new CBitmap);
 		try
 		{
 			CIFile f;
 			f.open(path);
-			if (bm->load(f, 0) == 0) return NULL;
+			if (bm->load(f, 0) == 0) return nullptr;
 			builtBitmaps.push_back(bm.release());
 			bitmapByName[lcBMFilename] = builtBitmaps.back();
 			// dump bitmap fisrt line
@@ -314,7 +314,7 @@ CBitmap *buildSharedBitmap(const std::string &filename,
 		}
 		catch(const EStream &)
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 }

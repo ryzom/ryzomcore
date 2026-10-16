@@ -61,7 +61,7 @@ uint32 CLoginCookie::generateKey()
 	static uint32 salt1;
 	static bool seeded;
 
-	uint32 t = (uint32)time(NULL);
+	uint32 t = (uint32)time(nullptr);
 
 	if (!seeded)
 	{

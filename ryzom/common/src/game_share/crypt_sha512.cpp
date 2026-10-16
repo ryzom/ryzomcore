@@ -219,12 +219,12 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
   /* reject large keys */
   for (i = 0; i <= KEY_MAX && key[i]; i++);
   if (i > KEY_MAX)
-    return 0;
+    return nullptr;
   klen = i;
 
   /* setting: $6$rounds=n$salt$ (rounds=n$ and closing $ are optional) */
   if (strncmp(setting, "$6$", 3) != 0)
-    return 0;
+    return nullptr;
   salt = setting + 3;
 
   r = ROUNDS_DEFAULT;
@@ -246,10 +246,10 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
      */
     salt += sizeof "rounds=" - 1;
     if (!isdigit(*salt))
-      return 0;
+      return nullptr;
     u = strtoul(salt, &end, 10);
     if (*end != '$')
-      return 0;
+      return nullptr;
     salt = end+1;
     if (u < ROUNDS_MIN)
       r = ROUNDS_MIN;
@@ -264,7 +264,7 @@ static char *sha512crypt(const char *key, const char *setting, char *output)
   for (i = 0; i < SALT_MAX && salt[i] && salt[i] != '$'; i++)
     /* reject characters that interfere with /etc/shadow parsing */
     if (salt[i] == '\n' || salt[i] == ':')
-      return 0;
+      return nullptr;
   slen = i;
 
   /* B = sha(key salt key) */

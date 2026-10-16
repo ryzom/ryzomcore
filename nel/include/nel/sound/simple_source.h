@@ -44,7 +44,7 @@ class CSimpleSource : public CSourceCommon, public CAudioMixerUser::IMixerEvent 
 {
 public:
 	/// Constructor
-	CSimpleSource(CSimpleSound *simpleSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
+	CSimpleSource(CSimpleSound *simpleSound = nullptr, bool spawn = false, TSpawnEndCallback cb = nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
 	/// Destructor
 	virtual ~CSimpleSource() NL_OVERRIDE;
 	
@@ -123,7 +123,7 @@ private:
 	TSOURCE_TYPE					getType() const NL_OVERRIDE								{ return SOURCE_SIMPLE; }
 	
 	/// Returns if this logical source has a physical source attached to it.
-	inline bool						hasPhysicalSource() const					{ return _Track != NULL; }
+	inline bool						hasPhysicalSource() const					{ return _Track != nullptr; }
 
 	/// Get the physical source of the track that is in use by this source.
 	inline ISource					*getPhysicalSource()						{ return _Track->getPhysicalSource(); }

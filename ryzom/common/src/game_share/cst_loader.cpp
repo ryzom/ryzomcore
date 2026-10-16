@@ -40,7 +40,7 @@ void CSTLoader::buildTableFormat(const string &fileName, list<pair<string,TDataT
 	//================
 	char readBuffer[4096];
 	char * token;
-	if (fgets(readBuffer, 4096, _File) == NULL) return;
+	if (fgets(readBuffer, 4096, _File) == nullptr) return;
 
 	// extract first token
 	//====================
@@ -66,10 +66,10 @@ void CSTLoader::buildTableFormat(const string &fileName, list<pair<string,TDataT
 
 	// extract next tokens
 	//====================
-	while( token != NULL )
+	while( token != nullptr)
 	{
-		token = strtok(NULL, _Seps.c_str());
-		if(token != NULL)
+		token = strtok(nullptr, _Seps.c_str());
+		if(token != nullptr)
 		{
 			stoken = string( token );
 
@@ -108,7 +108,7 @@ void CSTLoader::readData( list<list<string> >& data )
 		list<string> lineData;
 
 		// read a line
-		if (fgets(readBuffer, 4096, _File) == NULL)
+		if (fgets(readBuffer, 4096, _File) == nullptr)
 		{
 			// EOF
 			break;
@@ -126,15 +126,15 @@ void CSTLoader::readData( list<list<string> >& data )
 			else
 			{
 				// extract next token
-				token = strtok(NULL, _Seps.c_str());
+				token = strtok(nullptr, _Seps.c_str());
 			}
-			if( token != NULL )
+			if( token != nullptr)
 			{
 				string stoken( token );
 				lineData.push_back( stoken );
 			}
 		}
-		while( token != NULL );
+		while( token != nullptr);
 
 		firstToken = true;
 
@@ -268,17 +268,17 @@ void CSTLoader::init(const string &fileName, const map<string,TDataType>& fileFo
 	char readBuffer[4096];
 	char * token;
 
-	if (fgets(readBuffer, 4096, _File) == NULL) return;
+	if (fgets(readBuffer, 4096, _File) == nullptr) return;
 
 	// extract first token
 	token = strtok(readBuffer, _Seps.c_str());
 	_Columns.push_back( string(token) );
 
 	// extract next tokens
-	while( token != NULL )
+	while( token != nullptr)
 	{
-		token = strtok(NULL, _Seps.c_str());
-		if(token != NULL)
+		token = strtok(nullptr, _Seps.c_str());
+		if(token != nullptr)
 		{
 			_Columns.push_back( string(token) );
 		}
@@ -310,7 +310,7 @@ bool CSTLoader::readLine()
 	_Tokens.clear();
 
 	// read a line
-	if (fgets(readBuffer, 4096, _File) == NULL) return false;
+	if (fgets(readBuffer, 4096, _File) == nullptr) return false;
 
 	// if the line is empty we consider we are at end of file
 	if( strlen(readBuffer) == 0)
@@ -331,9 +331,9 @@ bool CSTLoader::readLine()
 		else
 		{
 			// extract next token
-			token = strtok(NULL, _Seps.c_str());
+			token = strtok(nullptr, _Seps.c_str());
 		}
-		if( token != NULL )
+		if( token != nullptr)
 		{
 			// label of token column
 			nlassert( j < nbColumn);
@@ -399,7 +399,7 @@ bool CSTLoader::readLine()
 		}
 		++j;
 	}
-	while( token != NULL );
+	while( token != nullptr);
 
 	++_LineCount;
 

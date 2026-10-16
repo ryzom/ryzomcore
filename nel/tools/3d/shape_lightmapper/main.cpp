@@ -100,7 +100,7 @@ static bool writeShapeCompat(NL3D::IShape *shape, const std::string &outPath)
 		ifile.close();
 	}
 	CFile::deleteFile(tmpPath);
-	uint8 *buf = memBuf.empty() ? NULL : &memBuf[0];
+	uint8 *buf = memBuf.empty() ? nullptr : &memBuf[0];
 	uint32 len = (uint32)memBuf.size();
 	{
 		std::string className = shape->getClassName();
@@ -281,7 +281,7 @@ int main(int argc, char **argv)
 
 		// Finish the shape build from the recipe (the reference flow continues into the
 		// ordinary build whether or not calculateLM produced lightmaps).
-		NL3D::CMeshBase *meshBase = NULL;
+		NL3D::CMeshBase *meshBase = nullptr;
 		std::vector<sint> materialRemap;
 		try
 		{

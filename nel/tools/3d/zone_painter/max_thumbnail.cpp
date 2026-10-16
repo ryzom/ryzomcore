@@ -955,7 +955,7 @@ bool thumbRoundtripIdentical(const std::string &maxPath, std::string &err)
 		return false;
 	}
 	std::vector<uint8> outStream;
-	if (!rebuildSummaryInformationWithThumbnail(inStream, NULL, outStream, 128, /*keepExisting=*/true))
+	if (!rebuildSummaryInformationWithThumbnail(inStream, nullptr, outStream, 128, /*keepExisting=*/true))
 	{
 		err = "parse/reserialize failed";
 		return false;
@@ -985,7 +985,7 @@ bool buildSummaryInformationWithThumbnail(const std::string &maxPath,
 	if (haveSI && gateRoundtrip)
 	{
 		std::vector<uint8> rt;
-		if (!rebuildSummaryInformationWithThumbnail(inStream, NULL, rt, 128, true) || rt != inStream)
+		if (!rebuildSummaryInformationWithThumbnail(inStream, nullptr, rt, 128, true) || rt != inStream)
 		{
 			if (err) *err = "roundtrip gate failed; refusing to rewrite SummaryInformation";
 			return false;

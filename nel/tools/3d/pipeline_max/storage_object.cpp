@@ -237,7 +237,7 @@ IStorageObject *CStorageContainer::findStorageObject(uint16 id, uint nb) const
 			else ++c;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 IStorageObject *CStorageContainer::findLastStorageObject(uint16 id) const
@@ -247,7 +247,7 @@ IStorageObject *CStorageContainer::findLastStorageObject(uint16 id) const
 		if (it->first == id)
 			return it->second;
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool CStorageContainer::isContainer() const

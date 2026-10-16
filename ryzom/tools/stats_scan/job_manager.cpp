@@ -27,7 +27,7 @@ public:
 
 	CFinishedJob(CJobManager::IJob* theFinishedJob)
 	{
-		if (theFinishedJob==NULL)
+		if (theFinishedJob == nullptr)
 			return;
 		_Status=theFinishedJob->getStatus();
 		_ShortStatus=theFinishedJob->getShortStatus();
@@ -41,8 +41,8 @@ private:
 
 CJobManager* CJobManager::getInstance()
 {
-	static CJobManager* mgr=NULL;
-	if (mgr==NULL)
+	static CJobManager* mgr = nullptr;
+	if (mgr == nullptr)
 	{
 		mgr=new CJobManager;
 	}

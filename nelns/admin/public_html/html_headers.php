@@ -54,10 +54,11 @@
 		echo "</style>\n";
 		echo "<body>\n";
 		
-		global	$admcookielogin, $admcookiepassword;
-		
-		addToLog("admcookielogin=$admcookielogin admcookiepassword=$admcookiepassword");
-		addToLog("admlogin=$admcookielogin admcookiepassword=$admcookiepassword");
+		global	$admcookielogin;
+
+		// the log is printed back into the page by htmlEpilog(), so it must
+		// not carry the password, hashed or otherwise
+		addToLog("admcookielogin=$admcookielogin");
 
 		if ($displayLinks)
 			linkBar($title);
@@ -77,24 +78,25 @@
 				echo "<hr>NeL shard queries\n";
 				echo "<ul>\n";
 				foreach ($nel_queries as $query)
-					echo "<li>$query</li>\n";
+					echo "<li>".htmlspecialchars($query, ENT_QUOTES)."</li>\n";
 				echo "</ul>\n";
 				
 			}
 
 			displayQueries();
 
+			// these are the request values verbatim, and they land in a page
 			echo "<hr><pre>HTTP_POST_VARS\n";
-			print_r($HTTP_POST_VARS);
+			echo htmlspecialchars(print_r($HTTP_POST_VARS, true), ENT_QUOTES);
 			echo "\nHTTP_GET_VAR\n";
-			print_r($HTTP_GET_VARS);
+			echo htmlspecialchars(print_r($HTTP_GET_VARS, true), ENT_QUOTES);
 			echo "</pre>\n";
 
 			if (is_array($adminLog))
 			{
 				echo "<hr>\n";
 				foreach ($adminLog as $log)
-					echo "$log<br>\n";
+					echo htmlspecialchars($log, ENT_QUOTES)."<br>\n";
 			}
 		}
 
@@ -130,7 +132,7 @@
 		echo "<td align=left>";
 		echo "<table cellpadding=0 cellspacing=2 border=0><tr align=left height=100%>";
 		echo "<td>".button($title)."</td>";
-		echo "<td>".button("<b>$admlogin</b>/<b>$group</b> on ".$HTTP_HOST.$_SERVER['PHP_SELF'].helpLink("Main"))."</td>";
+		echo "<td>".button("<b>".htmlspecialchars($admlogin, ENT_QUOTES)."</b>/<b>".htmlspecialchars($group, ENT_QUOTES)."</b> on ".htmlspecialchars($HTTP_HOST.$_SERVER['PHP_SELF'], ENT_QUOTES).helpLink("Main"))."</td>";
 		echo "</tr></table>";
 		echo "</td>\n";
 
@@ -176,7 +178,7 @@
 
 	function helpLink($topic)
 	{
-		return "<a href='javascript:helpPopup(\"".getFileRoot($_SERVER['PHP_SELF'])."\",\"$topic\")'><sup>+</sup></a>";
+		return "<a href='javascript:helpPopup(\"".htmlspecialchars(getFileRoot($_SERVER['PHP_SELF']), ENT_QUOTES)."\",\"$topic\")'><sup>+</sup></a>";
 	}
 
 	function help($topic)

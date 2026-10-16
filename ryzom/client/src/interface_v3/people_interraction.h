@@ -61,7 +61,7 @@ public:
 	CChatWindow *Window;
 	CChatTargetFilter	Filter;
 public:
-	CFilteredChat() : Window(NULL) {}
+	CFilteredChat() : Window(nullptr) {}
 	~CFilteredChat()
 	{
 		if (Window)
@@ -75,7 +75,7 @@ public:
 		{
 			CChatWindowManager &cwm = getChatWndMgr();
 			cwm.removeChatWindow(Window);
-			Window = NULL;
+			Window = nullptr;
 		}
 	}
 };

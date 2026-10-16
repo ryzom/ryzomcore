@@ -49,7 +49,8 @@ class CMusicChannelFader
 private:
 	struct _CMusicFader
 	{
-		_CMusicFader() : MusicChannel(NULL), XFadeVolume(0.f), XFadeDVolume(0.f), Playing(false), Fade(false) { }
+		_CMusicFader() : MusicChannel(nullptr)
+		    , XFadeVolume(0.f), XFadeDVolume(0.f), Playing(false), Fade(false) { }
 		IMusicChannel *MusicChannel;
 		float XFadeVolume; // 0--1
 		float XFadeDVolume; // delta
@@ -93,7 +94,7 @@ public:
 	void reset();
 
 	void update(); // time in seconds
-	inline bool isInitOk() { return _SoundDriver != NULL; }
+	inline bool isInitOk() { return _SoundDriver != nullptr; }
 
 private:
 	void updateVolume();

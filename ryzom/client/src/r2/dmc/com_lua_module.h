@@ -50,7 +50,7 @@ namespace R2
 		  *        If the lua state is provided externally, then it won't be deleted by this object
 		  */
 
-		CComLuaModule(CDynamicMapClient* client, lua_State *luaState = NULL);
+		CComLuaModule(CDynamicMapClient* client, lua_State *luaState = nullptr);
 
 		void doFile(const std::string& filename);
 

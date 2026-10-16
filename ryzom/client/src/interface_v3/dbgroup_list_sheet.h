@@ -115,7 +115,7 @@ public:
 
 		CSheetChild()
 		{
-			Ctrl= NULL;
+			Ctrl = nullptr;
 			SheetId= 0;
 			ForceValid= false;
 		}

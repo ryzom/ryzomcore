@@ -64,7 +64,7 @@ private:
 	std::vector<std::string> _Files;
 
 public:
-	CMusicPlayerWorker(): _Running(false), _Thread(NULL)
+	CMusicPlayerWorker(): _Running(false), _Thread(nullptr)
 	{
 	}
 
@@ -75,7 +75,7 @@ public:
 		{
 			_Thread->terminate();
 			delete _Thread;
-			_Thread = NULL;
+			_Thread = nullptr;
 		}
 	}
 
@@ -128,7 +128,7 @@ public:
 		{
 			_Thread->wait();
 			delete _Thread;
-			_Thread = NULL;
+			_Thread = nullptr;
 		}
 	}
 };

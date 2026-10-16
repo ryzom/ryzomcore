@@ -42,7 +42,7 @@ void CBigFile::releaseInstance()
 	{
 		NLMISC::INelContext::getInstance().releaseSingletonPointer("CBigFile", _Instance);
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 // ***************************************************************************
@@ -69,7 +69,7 @@ CBigFile::CHandleFile		&CBigFile::CThreadFileArray::get(uint32 index)
 {
 	// If the thread struct ptr is NULL, must allocate it.
 	vector<CHandleFile>		*ptr= (vector<CHandleFile>*)_TDS.getPointer();
-	if(ptr==NULL)
+	if(ptr == nullptr)
 	{
 		ptr= new vector<CHandleFile>;
 		_TDS.setPointer(ptr);
@@ -95,17 +95,17 @@ void CBigFile::currentThreadFinished()
 void CBigFile::CThreadFileArray::currentThreadFinished()
 {
 	vector<CHandleFile>		*ptr= (vector<CHandleFile>*)_TDS.getPointer();
-	if (ptr==NULL) return;
+	if (ptr == nullptr) return;
 	for (uint k = 0; k < ptr->size(); ++k)
 	{
 		if ((*ptr)[k].File)
 		{
 			fclose((*ptr)[k].File);
-			(*ptr)[k].File = NULL;
+			(*ptr)[k].File = nullptr;
 		}
 	}
 	delete ptr;
-	_TDS.setPointer(NULL);
+	_TDS.setPointer(nullptr);
 }
 
 
@@ -148,7 +148,7 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 
 	// Open the big file.
 	handle.File = nlfopen (sBigFileName, "rb");
-	if (handle.File == NULL)
+	if (handle.File == nullptr)
 		return false;
 
 	// Used internally by CBigFile, use optimizations and lower case of filenames
@@ -158,7 +158,7 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 	if (!bnp.readHeader(handle.File))
 	{
 		fclose (handle.File);
-		handle.File = NULL;
+		handle.File = nullptr;
 		return false;
 	}
 	if (nOptions&BF_CACHE_FILE_ON_OPEN)
@@ -169,7 +169,7 @@ bool CBigFile::add (const std::string &sBigFileName, uint32 nOptions)
 	if (!(nOptions&BF_ALWAYS_OPENED))
 	{
 		fclose (handle.File);
-		handle.File = NULL;
+		handle.File = nullptr;
 		bnp.AlwaysOpened = false;
 	}
 	else
@@ -192,17 +192,18 @@ void CBigFile::remove (const std::string &sBigFileName)
 		// Get a ThreadSafe handle on the file
 		CHandleFile		&handle= _ThreadFileArray.get(rbnp.ThreadFileId);
 		// close it if needed
-		if (handle.File != NULL)
+		if (handle.File != nullptr)
 		{
 			fclose (handle.File);
-			handle.File= NULL;
+			handle.File = nullptr;
 		}
 
 		_BNPs.erase (it);
 	}
 }
 
-CBigFile::BNP::BNP() : FileNames(NULL), ThreadFileId(0), CacheFileOnOpen(false), AlwaysOpened(false), InternalUse(false), OffsetFromBeginning(0)
+CBigFile::BNP::BNP() : FileNames(nullptr)
+    , ThreadFileId(0), CacheFileOnOpen(false), AlwaysOpened(false), InternalUse(false), OffsetFromBeginning(0)
 {
 }
 
@@ -211,7 +212,7 @@ CBigFile::BNP::~BNP()
 	if (FileNames)
 	{
 		delete[] FileNames;
-		FileNames = NULL;
+		FileNames = nullptr;
 	}
 }
 
@@ -222,7 +223,7 @@ bool CBigFile::BNP::readHeader()
 	if (InternalUse || BigFileName.empty()) return false;
 
 	FILE *f = nlfopen (BigFileName, "rb");
-	if (f == NULL) return false;
+	if (f == nullptr) return false;
 
 	bool res = readHeader(f);
 	fclose (f);
@@ -233,7 +234,7 @@ bool CBigFile::BNP::readHeader()
 //// ***************************************************************************
 bool CBigFile::BNP::readHeader(FILE *file)
 {
-	if (file == NULL) return false;
+	if (file == nullptr) return false;
 
 	uint32 nFileSize=CFile::getFileSize (file);
 
@@ -378,7 +379,7 @@ bool CBigFile::BNP::appendHeader()
 	if (InternalUse || BigFileName.empty()) return false;
 
 	FILE *f = nlfopen (BigFileName, "ab");
-	if (f == NULL) return false;
+	if (f == nullptr) return false;
 
 	uint32 nNbFile = (uint32)SFiles.size();
 
@@ -468,10 +469,10 @@ bool CBigFile::BNP::appendFile(const std::string &filename)
 	OffsetFromBeginning += ftmp.Size;
 
 	FILE *f1 = nlfopen(BigFileName, "ab");
-	if (f1 == NULL) return false;
+	if (f1 == nullptr) return false;
 
 	FILE *f2 = nlfopen(filename, "rb");
-	if (f2 == NULL)
+	if (f2 == nullptr)
 	{
 		fclose(f1);
 		return false;
@@ -503,7 +504,7 @@ bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback 
 	if (InternalUse || BigFileName.empty()) return false;
 
 	FILE *bnp = nlfopen (BigFileName, "rb");
-	if (bnp == NULL)
+	if (bnp == nullptr)
 		return false;
 
 	// only read header is not already read
@@ -522,7 +523,7 @@ bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback 
 		total += SFiles[i].Size;
 	}
 
-	FILE *out = NULL;
+	FILE *out = nullptr;
 
 	for (uint32 i = 0; i < SFiles.size(); ++i)
 	{
@@ -536,7 +537,7 @@ bool CBigFile::BNP::unpack(const std::string &sDestDir, TUnpackProgressCallback 
 		}
 
 		out = nlfopen (filename, "wb");
-		if (out != NULL)
+		if (out != nullptr)
 		{
 			nlfseek64 (bnp, rBNPFile.Pos, SEEK_SET);
 			uint8 *ptr = new uint8[rBNPFile.Size];
@@ -694,12 +695,12 @@ bool CBigFile::getFileInternal (const std::string &sFileName, BNP *&zeBnp, BNPFi
 FILE* CBigFile::getFile (const std::string &sFileName, uint32 &rFileSize,
 						 uint32 &rBigFileOffset, bool &rCacheFileOnOpen, bool &rAlwaysOpened)
 {
-	BNP		*bnp= NULL;
-	BNPFile	*bnpFile= NULL;
+	BNP		*bnp = nullptr;
+	BNPFile	*bnpFile = nullptr;
 	if(!getFileInternal(sFileName, bnp, bnpFile))
 	{
 		nlwarning ("BF: Couldn't load '%s'", sFileName.c_str());
-		return NULL;
+		return nullptr;
 	}
 	nlassert(bnp && bnpFile);
 
@@ -708,13 +709,13 @@ FILE* CBigFile::getFile (const std::string &sFileName, uint32 &rFileSize,
 	/* If not opened, open it now. There is 2 reason for it to be not opened:
 		rbnp.AlwaysOpened==false, or it is a new thread which use it for the first time.
 	*/
-	if(handle.File== NULL)
+	if(handle.File == nullptr)
 	{
 		handle.File = nlfopen (bnp->BigFileName, "rb");
-		if (handle.File == NULL)
+		if (handle.File == nullptr)
 		{
 			nlwarning ("bnp: can't fopen big file '%s' error %d '%s'", bnp->BigFileName.c_str(), errno, strerror(errno));
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -728,8 +729,8 @@ FILE* CBigFile::getFile (const std::string &sFileName, uint32 &rFileSize,
 // ***************************************************************************
 bool CBigFile::getFileInfo (const std::string &sFileName, uint32 &rFileSize, uint32 &rBigFileOffset)
 {
-	BNP		*bnp= NULL;
-	BNPFile	*bnpFile= NULL;
+	BNP		*bnp = nullptr;
+	BNPFile	*bnpFile = nullptr;
 	if(!getFileInternal(sFileName, bnp, bnpFile))
 	{
 		nlwarning ("BF: Couldn't find '%s' for info", sFileName.c_str());
@@ -752,7 +753,7 @@ char *CBigFile::getFileNamePtr(const std::string &sFileName, const std::string &
 		BNP &rbnp = _BNPs.find (bigfilenamealone)->second;
 		vector<BNPFile>::iterator itNBPFile;
 		if (rbnp.Files.empty())
-			return NULL;
+			return nullptr;
 		string lwrFileName = toLowerAscii(sFileName);
 
 		BNPFile temp_bnp_file;
@@ -768,7 +769,7 @@ char *CBigFile::getFileNamePtr(const std::string &sFileName, const std::string &
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************

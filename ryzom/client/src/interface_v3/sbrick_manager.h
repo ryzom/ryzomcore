@@ -70,7 +70,7 @@ public:
 	CSBrickSheet *getBrick(const NLMISC::CSheetId &id) const
 	{
 		uint32 shid = id.getShortId();
-		CSBrickSheet *result = NULL;
+		CSBrickSheet *result = nullptr;
 		if (shid < _BrickVector.size())
 			result = _BrickVector[shid];
 		//if (!result)

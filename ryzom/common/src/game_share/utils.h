@@ -452,7 +452,7 @@ inline void CCallStackSingleton::display(NLMISC::CLog *log)
 
 inline ICallStackEntry*& CCallStackSingleton::topStackEntry()
 {
-	static ICallStackEntry* stackEntry=NULL;
+	static ICallStackEntry* stackEntry = nullptr;
 	return stackEntry;
 }
 

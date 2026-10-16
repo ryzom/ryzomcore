@@ -378,7 +378,10 @@ struct SLoadedMax
 	std::vector<std::vector<uint8> > StreamBytes;
 	uint8 OleClassId[16];
 	bool HaveClassId;
-	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL), HaveClassId(false) { }
+	SLoadedMax() : Dll(nullptr)
+	    , Cd(nullptr)
+	    , Scene(nullptr)
+	    , HaveClassId(false) { }
 };
 
 static bool loadMax(const char *path, CSceneClassRegistry *reg, SLoadedMax &out, bool keepRaw)
@@ -389,7 +392,7 @@ static bool loadMax(const char *path, CSceneClassRegistry *reg, SLoadedMax &out,
 	{
 		static const char *kStreams[] = {
 			"VideoPostQueue", "Config", "ClassData", "DllDirectory", "ClassDirectory3", "Scene",
-			"\05SummaryInformation", "\05DocumentSummaryInformation", NULL
+			"\05SummaryInformation", "\05DocumentSummaryInformation", nullptr
 		};
 		for (const char **n = kStreams; *n; ++n)
 		{
@@ -417,7 +420,7 @@ static CBipedSystem *findBipedSystem(CSceneClassContainer *ssc)
 		CBipedSystem *b = dynamic_cast<CBipedSystem *>(it->second);
 		if (b) return b;
 	}
-	return NULL;
+	return nullptr;
 }
 
 struct SRigCtx
@@ -434,7 +437,7 @@ struct SRigCtx
 	INode *node(uint32 id, uint32 link) const
 	{
 		std::map<std::pair<uint32, uint32>, INode *>::const_iterator it = ByIdLink.find(std::make_pair(id, link));
-		return it == ByIdLink.end() ? NULL : it->second;
+		return it == ByIdLink.end() ? nullptr : it->second;
 	}
 	Vec localPos(INode *n) const
 	{
@@ -451,7 +454,7 @@ static bool buildRigCtx(CScene *scene, SRigCtx &ctx)
 	ctx.Sys = findBipedSystem(ctx.Ssc);
 	if (!ctx.Sys) { std::cerr << "ERROR: no Biped (0x9155) system object\n"; return false; }
 
-	INode *bip01 = NULL;
+	INode *bip01 = nullptr;
 	for (CStorageContainer::TStorageObjectConstIt it = ctx.Ssc->chunks().begin(); it != ctx.Ssc->chunks().end() && !bip01; ++it)
 	{
 		CNodeImpl *n = dynamic_cast<CNodeImpl *>(it->second);
@@ -460,7 +463,7 @@ static bool buildRigCtx(CScene *scene, SRigCtx &ctx)
 	if (!bip01) { std::cerr << "ERROR: no Bip01 node\n"; return false; }
 
 	g_bipedRigs.clear();
-	g_rig = NULL;
+	g_rig = nullptr;
 	g_msBones.clear();
 	std::set<std::string> nameSet;
 	NLMISC::CMatrix rootMat; rootMat.identity();
@@ -472,7 +475,7 @@ static bool buildRigCtx(CScene *scene, SRigCtx &ctx)
 	ctx.Rig = &rit->second;
 	g_rig = ctx.Rig;
 
-	ctx.Com = NULL;
+	ctx.Com = nullptr;
 	for (size_t i = 0; i < ctx.Bones.size(); ++i)
 	{
 		INode *n = ctx.Bones[i].Node;

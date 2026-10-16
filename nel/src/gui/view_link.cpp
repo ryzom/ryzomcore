@@ -39,7 +39,7 @@ namespace NLGUI
 	CViewLink::CViewLink (const TCtorParam &param)
 	: CViewText(param)
 	{
-		HTML = NULL;
+		HTML = nullptr;
 	}
 
 	// ***************************************************************************
@@ -52,7 +52,7 @@ namespace NLGUI
 	// ***************************************************************************
 	bool CViewLink::getMouseOverShape(string &texName, uint8 &rot, CRGBA &col)
 	{
-		if (HTML != NULL)
+		if (HTML != nullptr)
 		{
 			if (!LinkTitle.empty())
 			{

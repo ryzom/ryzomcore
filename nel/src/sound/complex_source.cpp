@@ -31,8 +31,10 @@ namespace NLSOUND
 
 CComplexSource::CComplexSource	(CComplexSound *soundPattern, bool spawn, TSpawnEndCallback cb, void *cbUserParam, NL3D::CCluster *cluster, CGroupController *groupController)
 :	CSourceCommon(soundPattern, spawn, cb, cbUserParam, cluster, groupController),
-	_Source1(NULL),
-	_Source2(NULL),
+	_Source1(nullptr)
+    ,
+	_Source2(nullptr)
+    ,
 	_Muted(false)
 {
 	nlassert(soundPattern->getSoundType() == CSound::SOUND_COMPLEX);
@@ -114,7 +116,7 @@ void CComplexSource::playStuf()
 			{
 				CSound *sound = mixer->getSoundId(_PatternSound->getSound(soundSeq[_SoundSeqIndex++]));
 
-				if (sound == 0)
+				if (sound == nullptr)
 					return;
 
 				if (_PatternSound->doFadeIn())
@@ -122,8 +124,8 @@ void CComplexSource::playStuf()
 				else
 					_FadeLength = 0;
 
-				_Source2 = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
-				if (_Source2 == NULL)
+				_Source2 = mixer->createSource(sound, false, nullptr, nullptr, _Cluster, nullptr, _GroupController);
+				if (_Source2 == nullptr)
 					return;
 				_Source2->setPriority(_Priority);
 				_Source2->setRelativeGain(0);
@@ -160,8 +162,8 @@ void CComplexSource::playStuf()
 				{
 					CSound *sound = mixer->getSoundId(_PatternSound->getSound(soundSeq[_SoundSeqIndex++]));
 
-					_Source1 = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
-					if (_Source1 == NULL)
+					_Source1 = mixer->createSource(sound, false, nullptr, nullptr, _Cluster, nullptr, _GroupController);
+					if (_Source1 == nullptr)
 						return;
 					_Source1->setPriority(_Priority);
 					_Source1->setRelativeGain(_Gain*_Gain*_Gain);
@@ -205,10 +207,10 @@ void CComplexSource::playStuf()
 				for (; first != last; ++first)
 				{
 					CSound *sound = mixer->getSoundId(*first);
-					if (sound != NULL)
+					if (sound != nullptr)
 					{
-						USource *source = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
-						if (source != NULL)
+						USource *source = mixer->createSource(sound, false, nullptr, nullptr, _Cluster, nullptr, _GroupController);
+						if (source != nullptr)
 						{
 							source->setPriority(_Priority);
 							source->setRelativeGain(_Gain*_Gain*_Gain);
@@ -257,7 +259,7 @@ void CComplexSource::stop()
 //		mixer->removeSource(_Source1);
 		delete _Source1;
 
-		_Source1 = NULL;
+		_Source1 = nullptr;
 	}
 	if (_Source2)
 	{
@@ -265,7 +267,7 @@ void CComplexSource::stop()
 //		mixer->removeSource(_Source2);
 		delete _Source2;
 
-		_Source2 = NULL;
+		_Source2 = nullptr;
 	}
 
 	std::vector<USource	*>::iterator first(_AllSources.begin()), last(_AllSources.end());
@@ -303,9 +305,9 @@ void CComplexSource::setPos( const NLMISC::CVector& pos )
 {
 	CSourceCommon::setPos(pos);
 
-	if (_Source1 != NULL)
+	if (_Source1 != nullptr)
 		_Source1->setPos(pos);
-	if (_Source2 != NULL)
+	if (_Source2 != nullptr)
 		_Source2->setPos(pos);
 
 	std::vector<USource	*>::iterator first(_AllSources.begin()), last(_AllSources.end());
@@ -319,9 +321,9 @@ void CComplexSource::setVelocity( const NLMISC::CVector& vel )
 {
 	CSourceCommon::setVelocity(vel);
 
-	if (_Source1 != NULL)
+	if (_Source1 != nullptr)
 		_Source1->setVelocity(vel);
-	if (_Source2 != NULL)
+	if (_Source2 != nullptr)
 		_Source2->setVelocity(vel);
 
 	std::vector<USource	*>::iterator first(_AllSources.begin()), last(_AllSources.end());
@@ -338,9 +340,9 @@ void CComplexSource::setDirection( const NLMISC::CVector& dir )
 {
 	CSourceCommon::setDirection(dir);
 
-	if (_Source1 != NULL)
+	if (_Source1 != nullptr)
 		_Source1->setDirection(dir);
-	if (_Source2 != NULL)
+	if (_Source2 != nullptr)
 		_Source2->setDirection(dir);
 
 	std::vector<USource	*>::iterator first(_AllSources.begin()), last(_AllSources.end());
@@ -362,17 +364,17 @@ void CComplexSource::setGain( float gain )
 	if (_PatternSound->getPatternMode() == CComplexSound::MODE_CHAINED)
 	{
 		// set sub source volume with fade value.
-		if (_Source1 != NULL)
+		if (_Source1 != nullptr)
 			_Source1->setRelativeGain((1.0f - _FadeFactor) * _Gain*_Gain*_Gain);
-		if (_Source2 != NULL)
+		if (_Source2 != nullptr)
 			_Source2->setRelativeGain(_FadeFactor * _Gain*_Gain*_Gain);
 
 	}
 	else
 	{
-		if (_Source1 != NULL)
+		if (_Source1 != nullptr)
 			_Source1->setRelativeGain(_Gain*_Gain*_Gain);
-		if (_Source2 != NULL)
+		if (_Source2 != nullptr)
 			_Source2->setRelativeGain(_Gain*_Gain*_Gain);
 	}
 
@@ -394,17 +396,17 @@ void CComplexSource::setRelativeGain( float gain )
 	if (_PatternSound->getPatternMode() == CComplexSound::MODE_CHAINED)
 	{
 		// set sub source volume with fade value.
-		if (_Source1 != NULL)
+		if (_Source1 != nullptr)
 			_Source1->setRelativeGain((1.0f - _FadeFactor) * _Gain*_Gain*_Gain);
-		if (_Source2 != NULL)
+		if (_Source2 != nullptr)
 			_Source2->setRelativeGain(_FadeFactor * _Gain*_Gain*_Gain);
 
 	}
 	else
 	{
-		if (_Source1 != NULL)
+		if (_Source1 != nullptr)
 			_Source1->setRelativeGain(_Gain*_Gain*_Gain);
-		if (_Source2 != NULL)
+		if (_Source2 != nullptr)
 			_Source2->setRelativeGain(_Gain*_Gain*_Gain);
 	}
 
@@ -483,7 +485,7 @@ void CComplexSource::onUpdate()
 //			_Source1->stop();
 //			mixer->removeSource(_Source1);
 			delete _Source1;
-			_Source1 = NULL;
+			_Source1 = nullptr;
 		}
 		if (_Source2)
 		{
@@ -493,9 +495,9 @@ void CComplexSource::onUpdate()
 			_Source1 = _Source2;
 			_FadeFactor = 0.0f;
 			_StartTime1 = _StartTime2;
-			_Source2 = NULL;
+			_Source2 = nullptr;
 			// if there is a next sound available, program an event for the next xfade.
-			CSound	*sound2 = NULL;
+			CSound	*sound2 = nullptr;
 //			_SoundSeqIndex++;
 			const vector<uint32>	&soundSeq = _PatternSound->getSoundSeq();
 			if (_SoundSeqIndex < soundSeq.size())
@@ -510,14 +512,14 @@ void CComplexSource::onUpdate()
 			}
 
 
-			if (sound2 != NULL)
+			if (sound2 != nullptr)
 			{
 				//nldebug("CS : Chaining to sound %s", CStringMapper::unmap(sound2->getName()).c_str());
 				CAudioMixerUser	*mixer = CAudioMixerUser::instance();
 
 				// determine the XFade length (if next sound is too short.
 				_FadeLength = minof<uint32>(uint32(_PatternSound->getFadeLength()/_TickPerSecond), (sound2->getDuration()) / 2, (_Source1->getSound()->getDuration())/2);
-				_Source2 = mixer->createSource(sound2, false, 0, 0, _Cluster, NULL, _GroupController);
+				_Source2 = mixer->createSource(sound2, false, nullptr, nullptr, _Cluster, nullptr, _GroupController);
 				if (_Source2)
 				{
 					_Source2->setPriority(_Priority);
@@ -583,7 +585,7 @@ void CComplexSource::onEvent()
 	case CComplexSound::MODE_CHAINED:
 		{
 			// either it's time to begin a new xfade, or to end this sound.
-			if (_Source2 != NULL)
+			if (_Source2 != nullptr)
 			{
 				// start new cross fade.?
 				_StartTime2 = now;
@@ -610,7 +612,7 @@ void CComplexSource::onEvent()
 //					_Source1->stop();
 //					mixer->removeSource(_Source1);
 					delete _Source1;
-					_Source1 = NULL;
+					_Source1 = nullptr;
 					_Playing = false;
 				}
 			}
@@ -618,12 +620,12 @@ void CComplexSource::onEvent()
 		break;
 	case CComplexSound::MODE_SPARSE:
 		{
-			if (_Source1 != NULL)
+			if (_Source1 != nullptr)
 			{
 //				_Source1->stop();
 //				mixer->removeSource(_Source1);
 				delete _Source1;
-				_Source1 = NULL;
+				_Source1 = nullptr;
 			}
 
 			const std::vector<uint32> &delaySeq = _PatternSound->getDelaySeq();
@@ -646,8 +648,8 @@ void CComplexSource::onEvent()
 
 				CSound *sound = mixer->getSoundId(_PatternSound->getSound(soundSeq[_SoundSeqIndex++]));
 
-				_Source1 = mixer->createSource(sound, false, 0, 0, _Cluster, NULL, _GroupController);
-				if (_Source1 == NULL)
+				_Source1 = mixer->createSource(sound, false, nullptr, nullptr, _Cluster, nullptr, _GroupController);
+				if (_Source1 == nullptr)
 				{
 					stop();
 					return;
@@ -699,16 +701,16 @@ void CComplexSource::checkup()
 	if (_Muted)
 		return;
 
-	if (_Source1 != NULL && _Source1->getSound()->getLooping() && !_Source1->isPlaying())
+	if (_Source1 != nullptr && _Source1->getSound()->getLooping() && !_Source1->isPlaying())
 		_Source1->play();
-	if (_Source2 != NULL && _Source2->getSound()->getLooping() && !_Source2->isPlaying())
+	if (_Source2 != nullptr && _Source2->getSound()->getLooping() && !_Source2->isPlaying())
 		_Source2->play();
 
 	std::vector<USource	*>::iterator first(_AllSources.begin()), last(_AllSources.end());
 	for (; first != last; ++first)
 	{
 		USource *source = *first;
-		if (source == NULL)
+		if (source == nullptr)
 			continue;
 		if (source->getSound()->getLooping() && !source->isPlaying())
 			source->play();

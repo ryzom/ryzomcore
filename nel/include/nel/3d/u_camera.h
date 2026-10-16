@@ -82,14 +82,14 @@ public:
 	/// Proxy interface
 
 	/// Constructors
-	UCamera() { _Object = NULL; }
+	UCamera() { _Object = nullptr; }
 	UCamera(class CCamera *object) { _Object = (ITransformable*)object; };
 	/// Attach an object to this proxy
 	void			attach(class CCamera *object) { _Object = (ITransformable*)object; }
 	/// Detach the object
-	void			detach() { _Object = NULL; }
+	void			detach() { _Object = nullptr; }
 	/// Return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Object==NULL;}
+	bool			empty() const {return _Object == nullptr; }
 	/// For advanced usage, get the internal object ptr
 	class CCamera	*getObjectPtr() const {return (CCamera*)_Object;}
 };

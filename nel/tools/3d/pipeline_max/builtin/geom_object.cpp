@@ -45,7 +45,8 @@ namespace BUILTIN {
 #define PMB_GEOM_UNKNOWN0900_CHUNK_ID 0x0900
 #define PMB_GEOM_BUFFERS_CHUNK_ID 0x08fe
 
-CGeomObject::CGeomObject(CScene *scene) : CObject(scene), m_Unknown0900(NULL), m_GeomBuffers(NULL)
+CGeomObject::CGeomObject(CScene *scene) : CObject(scene), m_Unknown0900(nullptr)
+    , m_GeomBuffers(nullptr)
 {
 
 }
@@ -54,8 +55,8 @@ CGeomObject::~CGeomObject()
 {
 	if (!m_ChunksOwnsPointers)
 	{
-		m_Unknown0900 = NULL;
-		m_GeomBuffers = NULL;
+		m_Unknown0900 = nullptr;
+		m_GeomBuffers = nullptr;
 	}
 }
 
@@ -103,8 +104,8 @@ void CGeomObject::build(uint16 version, uint filter)
 
 void CGeomObject::disown()
 {
-	m_Unknown0900 = NULL;
-	m_GeomBuffers = NULL;
+	m_Unknown0900 = nullptr;
+	m_GeomBuffers = nullptr;
 	CObject::disown();
 }
 

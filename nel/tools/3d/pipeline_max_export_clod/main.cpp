@@ -103,7 +103,7 @@ static bool isToBeExported(INode &node)
 	if (p && dynamic_cast<CNodeImpl *>(p))
 		return false; // has a non-root parent
 
-	CSceneClass *base = baseObjectOf(node, NULL, NULL);
+	CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
 	if (!base) return false;
 
 	NLMISC::CClassId cid = base->classDesc()->classId();
@@ -351,7 +351,7 @@ int pmbExportClodsForGltf(PMAXLOAD::SLoadedMax &lm, bool exportLighting,
 {
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
-	tmCache.SceneRoot = NULL;
+	tmCache.SceneRoot = nullptr;
 
 	std::vector<INode *> allNodes;
 	for (CStorageContainer::TStorageObjectConstIt it = ssc->chunks().begin();

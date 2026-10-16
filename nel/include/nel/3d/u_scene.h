@@ -244,8 +244,7 @@ public:
 														const NLMISC::CVector &pos,
 														const NLMISC::CQuat &rot,
 														uint selectedTexture,
-														IAsyncLoadCallback *pCB = NULL
-													   ) = 0;
+														IAsyncLoadCallback *pCB = nullptr) = 0;
 
 	/**	If we are adding the ig : stop loading and adding it to the scene
 	  * if the ig is already added to the scene : remove it from scene

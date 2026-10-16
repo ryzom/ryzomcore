@@ -13,7 +13,7 @@
  */
 
 /*
- * Copyright (C) 2026  by authors
+ * Copyright (C) 2026 by authors
  *
  * This file is part of RYZOM CORE PIPELINE.
  * RYZOM CORE PIPELINE is free software: you can redistribute it
@@ -23,11 +23,11 @@
  *
  * RYZOM CORE PIPELINE is distributed in the hope that it will be
  * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
- * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Affero General Public License for more details.
  *
  * You should have received a copy of the GNU Affero General Public
- * License along with RYZOM CORE PIPELINE.  If not, see
+ * License along with RYZOM CORE PIPELINE. If not, see
  * <http://www.gnu.org/licenses/>.
  */
 
@@ -187,13 +187,13 @@ bool writeZoneV4(NL3D::CZone &zone, const std::string &path)
 // board footprint also derives from that single eligible zone.
 //
 // Mirrors pipeline_max_export_zone + ligo/zone maxscript selection:
-//   - collectZoneNodes skips [NELLIGO] debug markers (shared patch_eval rule).
-//   - zonematerial- / zonespecial-: export requires exactly one. If multiple non-frozen,
-//     prefer node name matching the cell token (case-insensitive); otherwise first
-//     non-frozen is eligible, rest RO.
-//   - zonetransition-: exception: all non-frozen (9-slot transition scheme at export).
-//   - otherwise (direct ExportRykolZone / continent .max): first RklPatch that is not
-//     DONOTEXPORT and has a findID-parseable name (exportDirectZone loop); rest RO.
+// - collectZoneNodes skips [NELLIGO] debug markers (shared patch_eval rule).
+// - zonematerial- / zonespecial-: export requires exactly one. If multiple non-frozen,
+// prefer node name matching the cell token (case-insensitive); otherwise first
+// non-frozen is eligible, rest RO.
+// - zonetransition-: exception: all non-frozen (9-slot transition scheme at export).
+// - otherwise (direct ExportRykolZone / continent .max): first RklPatch that is not
+// DONOTEXPORT and has a findID-parseable name (exportDirectZone loop); rest RO.
 //
 // File-frozen (0x0976) always remain frozen. --all-zones is an escape hatch only
 // (open-everything); not the authoring default.
@@ -211,7 +211,7 @@ void computeZoneEligibility(const std::vector<SZoneNode> &nodes,
 	if (g_AllZones)
 	{
 		for (size_t i = 0; i < nodes.size(); ++i)
-			eligible[i] = !nodes[i].Frozen; // still respect 0x0976 under --all-zones? 
+			eligible[i] = !nodes[i].Frozen; // still respect 0x0976 under --all-zones?
 		// Today open-everything = non-0x0976 only. Match that.
 		return;
 	}
@@ -344,7 +344,7 @@ bool boardSkipEmbedded()
  * Append paint zones from one Max scene.
  * zoneIdOffset: first zone id for this file (must not collide with existing zones).
  * forceFrozen: true for neighbor/context files (landscape + weld + metaTile, never paint,
- *   carriers never rewritten because AnyUnfrozen stays false).
+ * carriers never rewritten because AnyUnfrozen stays false).
  * fileBasename: used for exporter-faithful eligibility.
  *
  * Board authority: when boardSkipEmbedded(), non-eligible and 0x0976 nodes are NOT
@@ -407,6 +407,7 @@ bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 		// Neighbor files / non-eligible / 0x0976 → read-only context (when displayed).
 		const bool ineligible = !forceFrozen && !isEligible;
 		pz.Frozen = forceFrozen || fileFrozen || ineligible;
+		pz.Editable = !pz.Frozen;
 		pz.Name = name;
 		pz.ZoneId = zoneIdOffset + (uint)i;
 		if (!buildPatchInfo(ep, objectTM, (int)pz.ZoneId, pz.Patches, err))
@@ -415,6 +416,9 @@ bool buildPaintZones(CScene &scene, std::vector<SPaintZone> &zones,
 			continue;
 		}
 		pz.Ep = ep;
+		pz.ObjectTM = objectTM;
+		// The node starts where the file authored it; placement composes onto this later.
+		pz.DisplayTM = objectTM;
 		zones.push_back(pz);
 		any = true;
 		if (pz.Frozen) ++nRo; else ++nEligible;
@@ -453,8 +457,13 @@ uint nextZoneIdBase(const std::vector<SPaintZone> &zones)
 void translateZonesXY(std::vector<SPaintZone> &zones, size_t begin, size_t end,
                              float dx, float dy)
 {
+	// Row-vector convention: a * b applies a then b, so the translation goes on the right.
+	MAXMATH::Matrix3M t = MAXMATH::Matrix3M::identity();
+	t.m[3][0] = dx;
+	t.m[3][1] = dy;
 	for (size_t i = begin; i < end && i < zones.size(); ++i)
 	{
+		zones[i].DisplayTM = zones[i].DisplayTM * t;
 		for (size_t p = 0; p < zones[i].Patches.size(); ++p)
 		{
 			NL3D::CPatchInfo &pi = zones[i].Patches[p];
@@ -534,6 +543,9 @@ SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx, float
 {
 	SPaintZone pz = src;
 	pz.ZoneId = zoneId;
+	// A node the SESSION added: it shows the source's object, but the file holds no node for
+	// it, so it is never written back.
+	pz.InFile = false;
 	pz.Rotate = place.Rot & 3;
 	pz.Symmetry = place.Mirror;
 	std::string tag = NLMISC::toString(" (inst %d,%d", place.CellX, place.CellY);
@@ -542,6 +554,9 @@ SPaintZone cloneInstanceZone(const SPaintZone &src, uint zoneId, float dx, float
 	tag += ")";
 	pz.Name = src.Name + tag;
 	pz.BorderVertices.clear();
+	// The clone is a second NODE on the source's object, so it keeps ObjectTM and gains the
+	// placement on top of it.
+	pz.DisplayTM = src.DisplayTM * instanceDisplayTM(pivotX, pivotY, dx, dy, pz.Rotate, pz.Symmetry);
 	// Ep (topology) is a value copy (same binds/orders); Patches are world-space display.
 	for (size_t p = 0; p < pz.Patches.size(); ++p)
 	{
@@ -665,8 +680,8 @@ uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
 				bool haveBegin = false;
 				for (size_t z = 0; z < zones.size(); ++z)
 				{
-					if (zones[z].ZoneId >= baseId && zones[z].ZoneId < baseId + 1000
-					    && zones[z].ZoneId < kInstanceZoneIdBase)
+					if (zones[z].InFile && zones[z].ZoneId >= baseId
+					    && zones[z].ZoneId < baseId + 1000)
 					{
 						if (!haveBegin) { srcBegin = z; haveBegin = true; }
 						srcEnd = z + 1;
@@ -704,16 +719,16 @@ uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
 		}
 		const std::string srcTag = pl.SourceBasename.empty()
 			? std::string() : (" '" + pl.SourceBasename + "'");
-		printf("  place[%u]%s origin cell (%d,%d) rot %u%s  occupies %dx%d cells [%d,%d)×[%d,%d)\n",
+		printf(" place[%u]%s origin cell (%d,%d) rot %u%s occupies %dx%d cells [%d,%d)×[%d,%d)\n",
 		       (uint)pi, srcTag.c_str(),
 		       pl.CellX, pl.CellY, pl.Rot, pl.Mirror ? " mirror" : "",
 		       bw, bh, pl.CellX, pl.CellX + bw, pl.CellY, pl.CellY + bh);
 	}
-	printf("instances: %u place(s)  footprint %dx%d cells step (%.1f, %.1f)  origin (%.1f, %.1f)  "
-	       "pivot (%.1f, %.1f)  primary zones %u  display zones +%u (ids from %u)\n",
+	printf("instances: %u place(s) footprint %dx%d cells step (%.1f, %.1f) origin (%.1f, %.1f) "
+	       "pivot (%.1f, %.1f) primary zones %u display zones +%u (ids from %u)\n",
 	       (uint)places.size(), cellsW, cellsH, stepX, stepY, originX, originY,
 	       pivotX, pivotY, (uint)primaryCount, appended, kInstanceZoneIdBase);
-	printf("  note: place dx,dy = min-corner of transformed block in fine cells; "
+	printf(" note: place dx,dy = min-corner of transformed block in fine cells; "
 	       "first-opened file footprint %dx%d (source=%s filled=%s)\n",
 	       cellsW, cellsH,
 	       g_FootprintFromTemplate ? "template" : "aabb-square",
@@ -723,7 +738,7 @@ uint appendInstanceZones(std::vector<SPaintZone> &zones, size_t primaryCount,
 	const bool pivotOnHalf = (std::fabs(std::fmod((double)pivotX, (double)halfCell)) < 1e-3
 	                          || std::fabs(std::fmod((double)pivotX, (double)halfCell) - halfCell) < 1e-3);
 	(void)pivotOnHalf;
-	printf("  pivot grid: pivot (%.3f, %.3f) = origin + half-step (%.3f, %.3f)\n",
+	printf(" pivot grid: pivot (%.3f, %.3f) = origin + half-step (%.3f, %.3f)\n",
 	       pivotX, pivotY, stepX * 0.5f, stepY * 0.5f);
 	return appended;
 }
@@ -901,7 +916,34 @@ uint weldPaintZones(std::vector<SPaintZone> &zones)
 // list, like the plugin did).
 void buildDisplayZone(const SPaintZone &pz, NL3D::CZone &zone)
 {
-	zone.build((uint16)pz.ZoneId, pz.Patches, pz.BorderVertices);
+	// Cross-zone welds are a PAINT relationship, not a fact about the geometry: weldPaintZones
+	// derives them at load by scanning for coincident edges, so tile transitions can propagate
+	// across a border and checkSeams can see one. Patch editing wants the opposite. CZone::
+	// compile does not merely bind welded zones, it ALIASES their corners -
+	// `BaseVertices[cur] = zone->getBaseVertex(vertto)` - so the two sides of a seam become one
+	// CTessVertex and an edit that breaks the seam is structurally invisible: there is only one
+	// vertex there, holding whichever position was written last. A surface that cannot show the
+	// edit being made is worse than a visible gap, so in patch mode the zones are built apart
+	// and the seam is left to show.
+	//
+	// Only CROSS-zone binds go; a zone's own patches stay bound to each other, or its interior
+	// would fall apart too. The paint-zone data is untouched either way - paint_core reads
+	// BindEdges straight from it - so switching modes is a landscape rebuild, not a reload.
+	if (g_WeldedLandscape)
+	{
+		zone.build((uint16)pz.ZoneId, pz.Patches, pz.BorderVertices);
+	}
+	else
+	{
+		std::vector<NL3D::CPatchInfo> patches = pz.Patches;
+		for (size_t p = 0; p < patches.size(); ++p)
+			for (uint e = 0; e < 4; ++e)
+				if (patches[p].BindEdges[e].NPatchs != 0
+				    && patches[p].BindEdges[e].ZoneId != (uint16)pz.ZoneId)
+					patches[p].BindEdges[e].NPatchs = 0;
+		const std::vector<NL3D::CBorderVertex> noBorder;
+		zone.build((uint16)pz.ZoneId, patches, noBorder);
+	}
 	NL3D::CZoneCornerSmoother cornerSmoother;
 	std::vector<NL3D::CZone *> emptyVector;
 	cornerSmoother.computeAllCornerSmoothFlags(&zone, emptyVector);

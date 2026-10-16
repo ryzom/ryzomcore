@@ -76,10 +76,10 @@ public:
 	public:
 		CBuildInfo()
 		{
-			Sheet = NULL;
-			StickMode = NULL;
+			Sheet = nullptr;
+			StickMode = nullptr;
 			StickOffset = NLMISC::CVector::Null;
-			StaticMatrix = NULL;
+			StaticMatrix = nullptr;
 			MaxNumAnimCount = 0;
 			TimeOut = FX_MANAGER_DEFAULT_TIMEOUT;
 			StartTime = 0.0;

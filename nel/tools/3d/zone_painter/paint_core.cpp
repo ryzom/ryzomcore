@@ -93,27 +93,35 @@ static void warnInvalidTileSet()
 
 CPaintCore::CPaintCore()
 {
-	m_Bank = NULL;
-	m_Landscape = NULL;
+	m_Bank = nullptr;
+	m_Landscape = nullptr;
 	m_LockBorders = false;
 	m_TileCycle = 0;
 	m_StrokeRotation = 0;
 	m_StrokeOldTile = -1;
 	m_StrokeOldZone = -1;
 	m_StrokeSets = 0;
+	m_SuspendStroke = false;
 	m_BrushSize = 0;
 	m_TileGroup = 0;
 	m_BrushMaskLoaded = false;
 	m_BrushMaskMode = false;
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
-	m_PropChangedCb = NULL;
+	m_PropChangedCb = nullptr;
+	m_GeomChangedCb = nullptr;
+	m_RpStateChangedCb = nullptr;
+	m_TopoRestoreCb = nullptr;
+	m_TopoRestorePending = false;
+	m_HaveLastEdit = false;
+	m_LastEditRadius = 0.f;
 }
 
 CPaintCore::~CPaintCore()
 {
 	for (size_t i = 0; i < m_Carriers.size(); ++i)
 		delete m_Carriers[i].Pristine;
+	clearTopoSnaps();
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -125,20 +133,165 @@ static CStorageContainer *zpContainerChild(const CStorageContainer *c, uint16 id
 {
 	for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<CStorageContainer *>(it->second);
-	return NULL;
+	return nullptr;
 }
 
 static CStorageRaw *zpRawChild(const CStorageContainer *c, uint16 id)
 {
 	for (CStorageContainer::TStorageObjectConstIt it = c->chunks().begin(); it != c->chunks().end(); ++it)
 		if (it->first == id) return dynamic_cast<CStorageRaw *>(it->second);
-	return NULL;
+	return nullptr;
+}
+
+/** Nth child container with the given id (the PatchMesh vertex list is a run of 0x0BE0). */
+static CStorageContainer *zpContainerChildAt(const CStorageContainer::TStorageObjectContainer &chunks,
+                                             uint16 id, uint index)
+{
+	for (CStorageContainer::TStorageObjectConstIt it = chunks.begin(); it != chunks.end(); ++it)
+	{
+		if (it->first != id) continue;
+		if (index) { --index; continue; }
+		return dynamic_cast<CStorageContainer *>(it->second);
+	}
+	return nullptr;
+}
+
+/**
+ * The 0x03E8 position payload of PatchMesh element `elemIdx` within a chunk list.
+ *
+ * Verts and Vecs are two streams of the same shape - an element container holding a 0x03E8
+ * position - so only the container id differs.
+ */
+static bool zpElemPosRaw(const CStorageContainer::TStorageObjectContainer &chunks, uint elemIdx,
+                         EGeomElem elem, CStorageRaw *&rawOut, CStorageContainer *&contOut)
+{
+	CStorageContainer *vc = zpContainerChildAt(chunks, elem == GeomVec ? 0x0BCC : 0x0BE0, elemIdx);
+	if (!vc) return false;
+	CStorageRaw *pos = zpRawChild(vc, 0x03E8);
+	if (!pos || pos->Value.size() < 12) return false;
+	rawOut = pos;
+	contOut = vc;
+	return true;
+}
+
+bool resolveGeomWriteTarget(CNodeImpl *node, uint elemIdx, EGeomElem elem,
+                            SGeomWriteTarget &out, std::string &err)
+{
+	out = SGeomWriteTarget();
+	CSceneClass *obj = node ? dynamic_cast<CSceneClass *>(node->getReference(1)) : nullptr;
+	if (!obj) { err = "node without object"; return false; }
+
+	// Topmost edit-patch modifier slot: its output is what is displayed, so the whole policy
+	// is local to it and there is no need to walk further down the stack.
+	CStorageContainer *topWrap = nullptr;
+	int guard = 8;
+	CSceneClass *walk = obj;
+	while (walk && guard-- > 0 && !topWrap)
+	{
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(walk);
+		if (!derived) break;
+		for (uint m = 0; m < derived->modifierCount() && !topWrap; ++m)
+		{
+			CSceneClass *mod = derived->modifier(m);
+			if (!mod) continue;
+			NLMISC::CClassId mcid = mod->classDesc()->classId();
+			if (mcid != ZP_CLASSID_NEL_EDIT_PATCH && mcid != ZP_CLASSID_NEL_PATCH_PAINT) continue;
+			CStorageContainer *data = dynamic_cast<CStorageContainer *>(derived->localModData(m));
+			if (!data) continue;
+			CStorageContainer *wrap = zpContainerChild(data, 0x1000);
+			if (wrap && zpContainerChild(wrap, 0x1140)) topWrap = wrap;
+		}
+		walk = derived->baseObject();
+	}
+
+	if (topWrap)
+	{
+		// A mapper record for this OUTPUT vertex makes the stored 0x1140 position dead bytes:
+		// evaluation overwrites it with input + delta. The delta is then the only live value.
+		CStorageContainer *mc = zpContainerChild(topWrap, 0x1130);
+		if (mc)
+		{
+			CStorageRaw *mr = zpRawChild(mc, 0x1000);
+			if (mr && mr->Value.size() >= 8)
+			{
+				PIPELINE::MAX::NELPATCH::SPmVertMapper mv;
+				std::string e2;
+				if (decodeVertMapper(&mr->Value[0], mr->Value.size(), mv, e2))
+				{
+					// Payload layout: [int32 vertCount][vertCount x 32][int32 vecCount]
+					// [vecCount x 32]. So the vec half starts past the vert half AND its own
+					// count word - the second 4 is not padding.
+					const std::vector<PIPELINE::MAX::NELPATCH::SPmMapVert> &map =
+						(elem == GeomVec) ? mv.VecMap : mv.VertMap;
+					const size_t base = (elem == GeomVec) ? (8 + mv.VertMap.size() * 32) : 4;
+					for (size_t i = 0; i < map.size(); ++i)
+					{
+						if (map[i].Vert < 0 || (uint)map[i].Vert != elemIdx)
+							continue;
+						// Flat 32-byte records: OriginalStored, Vert, Original[3], Delta[3].
+						out.Kind = SGeomWriteTarget::MapperDelta;
+						out.Raw = mr;
+						out.Offset = base + i * 32 + 20;
+						if (out.Offset + 12 > mr->Value.size()) { err = "mapper delta out of range"; return false; }
+						return true;
+					}
+				}
+			}
+		}
+		CStorageContainer *pm = zpContainerChild(topWrap, 0x1140);
+		if (pm && zpElemPosRaw(pm->chunks(), elemIdx, elem, out.Raw, out.VertChunk))
+		{
+			out.Kind = SGeomWriteTarget::ModifierPatchMesh;
+			return true;
+		}
+		err = NLMISC::toString("modifier 0x1140 without %s %u",
+		                       elem == GeomVec ? "vec" : "vertex", elemIdx);
+		return false;
+	}
+
+	// No modifier stack: the base RklPatch PatchMesh is authoritative.
+	CRklPatchObject *rpo = nullptr;
+	CSceneClass *base = obj;
+	guard = 8;
+	while (base && guard-- > 0)
+	{
+		rpo = dynamic_cast<CRklPatchObject *>(base);
+		if (rpo) break;
+		CDerivedObject *derived = dynamic_cast<CDerivedObject *>(base);
+		if (!derived) break;
+		base = derived->baseObject();
+	}
+	if (!rpo) { err = "no RklPatch base object"; return false; }
+	if (!zpElemPosRaw(rpo->chunks(), elemIdx, elem, out.Raw, out.VertChunk))
+	{
+		err = NLMISC::toString("base PatchMesh without %s %u",
+		                       elem == GeomVec ? "vec" : "vertex", elemIdx);
+		return false;
+	}
+	out.Kind = SGeomWriteTarget::BasePatchMesh;
+	return true;
+}
+
+bool geomTargetGet(const SGeomWriteTarget &t, float *xyz)
+{
+	if (t.Kind == SGeomWriteTarget::None || !t.Raw || t.Offset + 12 > t.Raw->Value.size())
+		return false;
+	memcpy(xyz, &t.Raw->Value[t.Offset], 12);
+	return true;
+}
+
+bool geomTargetSet(const SGeomWriteTarget &t, const float *xyz)
+{
+	if (t.Kind == SGeomWriteTarget::None || !t.Raw || t.Offset + 12 > t.Raw->Value.size())
+		return false;
+	memcpy(&t.Raw->Value[t.Offset], xyz, 12);
+	return true;
 }
 
 static bool zpResolveCarrier(CNodeImpl *node, CRklPatchObject *&rpo, CStorageRaw *&snapLeaf, std::string &err)
 {
-	rpo = NULL;
-	snapLeaf = NULL;
+	rpo = nullptr;
+	snapLeaf = nullptr;
 	CSceneClass *obj = dynamic_cast<CSceneClass *>(node->getReference(1));
 	if (!obj) { err = "node without object"; return false; }
 	int guard = 8;
@@ -216,20 +369,27 @@ static void zpHarvestPainterFlags(CNodeImpl *node, sint &includeMeshes, sint &pr
 // init
 
 bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank *bank,
-                      float cellSize, float snap, bool lockBorders, std::string &err)
+                      float cellSize, float snap, bool lockBorders, std::string &err,
+                      bool keepUndo)
 {
 	// Re-init safe (working-set rebuild): free prior pristine copies + clear undo.
-	// Undo history is intentionally discarded on any working-set change.
+	// Undo history is intentionally discarded on any working-set change; the TOPOLOGY
+	// rebuild passes keepUndo - same zone set, and its Kind 6 record restores the older
+	// records' index space before they replay (see paint_core.h).
 	for (size_t i = 0; i < m_Carriers.size(); ++i)
 		delete m_Carriers[i].Pristine;
 	m_Carriers.clear();
 	m_Zones.clear();
-	m_CurStroke.clear();
-	m_UndoStack.clear();
-	m_RedoStack.clear();
+	if (!keepUndo)
+	{
+		m_CurStroke.clear();
+		m_UndoStack.clear();
+		m_RedoStack.clear();
+		clearTopoSnaps();
+	}
 	m_Changes.clear();
 	m_ColorChanges.clear();
-	m_Landscape = NULL; // caller re-attaches after landscape reassembly
+	m_Landscape = nullptr; // caller re-attaches after landscape reassembly
 	m_Bank = bank;
 	m_LockBorders = lockBorders;
 	m_StrokeRotation = 0;
@@ -243,6 +403,9 @@ bool CPaintCore::init(const std::vector<SPaintZoneInput> &zones, NL3D::CTileBank
 	// Stored painter flags are harvested first-win per working set, not per process.
 	m_StoredIncludeMeshes = -1;
 	m_StoredPreloadTiles = -1;
+	// The marker names a world point derived from zone ids that are about to be reassigned.
+	m_HaveLastEdit = false;
+	m_LastEditRadius = 0.f;
 
 	std::map<const void *, uint> carrierIndex; // keyed by leaf ptr or rpo ptr (shared objects)
 	for (size_t i = 0; i < zones.size(); ++i)
@@ -472,10 +635,10 @@ uint CPaintCore::orderT(uint zone, uint patch) const
 
 SPaintTile *CPaintCore::metaAt(uint zone, sint32 tileId)
 {
-	if (zone >= m_Zones.size()) return NULL;
-	if (tileId < 0 || (size_t)tileId >= m_Zones[zone].Meta.size()) return NULL;
+	if (zone >= m_Zones.size()) return nullptr;
+	if (tileId < 0 || (size_t)tileId >= m_Zones[zone].Meta.size()) return nullptr;
 	SPaintTile *t = &m_Zones[zone].Meta[tileId];
-	return t->TileId >= 0 ? t : NULL;
+	return t->TileId >= 0 ? t : nullptr;
 }
 
 void CPaintCore::collectDuals(SPaintTile *tile, std::vector<SPaintTile *> &out) const
@@ -660,10 +823,10 @@ void CPaintCore::buildMeta(std::string &err)
 				t->TileId = (sint32)(p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u);
 				t->U = (uint8)u;
 				t->V = (uint8)v;
-				t->Voisins[3] = (v == 0) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + (v - 1) * ZP_MAX_TILE_IN_PATCH + u];
-				t->Voisins[1] = (v == nV - 1) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + (v + 1) * ZP_MAX_TILE_IN_PATCH + u];
-				t->Voisins[0] = (u == 0) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u - 1];
-				t->Voisins[2] = (u == nU - 1) ? NULL : &z.Meta[p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u + 1];
+				t->Voisins[3] = (v == 0) ? nullptr : &z.Meta[p * ZP_NUM_TILE_SEL + (v - 1) * ZP_MAX_TILE_IN_PATCH + u];
+				t->Voisins[1] = (v == nV - 1) ? nullptr : &z.Meta[p * ZP_NUM_TILE_SEL + (v + 1) * ZP_MAX_TILE_IN_PATCH + u];
+				t->Voisins[0] = (u == 0) ? nullptr : &z.Meta[p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u - 1];
+				t->Voisins[2] = (u == nU - 1) ? nullptr : &z.Meta[p * ZP_NUM_TILE_SEL + v * ZP_MAX_TILE_IN_PATCH + u + 1];
 				// World center/radius over the display bezier quad (color brush range tests,
 				// same scheme as the plugin's DoPaint tile map)
 				const NL3D::CBezierPatch &bp = (*z.In.Patches)[p].Patch;
@@ -1079,13 +1242,13 @@ void CPaintCore::setTile(uint zone, sint32 tileId, const CTileDescP &desc,
 
 std::vector<NL3D::CTileElement> *CPaintCore::changeTileArray(uint zone, uint patch)
 {
-	if (!m_Landscape) return NULL;
+	if (!m_Landscape) return nullptr;
 	std::pair<int, int> key((int)m_Zones[zone].In.ZoneId, (int)patch);
 	TChangeMap::iterator it = m_Changes.find(key);
 	if (it == m_Changes.end())
 	{
 		NL3D::CZone *lz = m_Landscape->getZone((sint)m_Zones[zone].In.ZoneId);
-		if (!lz) return NULL;
+		if (!lz) return nullptr;
 		it = m_Changes.insert(std::make_pair(key, lz->getPatchTexture((sint)patch))).first;
 	}
 	return &it->second;
@@ -1093,13 +1256,13 @@ std::vector<NL3D::CTileElement> *CPaintCore::changeTileArray(uint zone, uint pat
 
 std::vector<NL3D::CTileColor> *CPaintCore::changeColorArray(uint zone, uint patch)
 {
-	if (!m_Landscape) return NULL;
+	if (!m_Landscape) return nullptr;
 	std::pair<int, int> key((int)m_Zones[zone].In.ZoneId, (int)patch);
 	TColorChangeMap::iterator it = m_ColorChanges.find(key);
 	if (it == m_ColorChanges.end())
 	{
 		NL3D::CZone *lz = m_Landscape->getZone((sint)m_Zones[zone].In.ZoneId);
-		if (!lz) return NULL;
+		if (!lz) return nullptr;
 		it = m_ColorChanges.insert(std::make_pair(key, lz->getPatchColor((sint)patch))).first;
 	}
 	return &it->second;
@@ -1121,7 +1284,7 @@ void CPaintCore::applyChanges()
 		{
 			NL3D::CZone *zone = m_Landscape->getZone(ic->first.first);
 			if (zone)
-				zone->changePatchTextureAndColor(ic->first.second, NULL, &ic->second);
+				zone->changePatchTextureAndColor(ic->first.second, nullptr, &ic->second);
 		}
 	}
 
@@ -1159,7 +1322,7 @@ void CPaintCore::applyChanges()
 		if (!zone) continue;
 		TColorChangeMap::iterator ic = m_ColorChanges.find(ite->first);
 		zone->changePatchTextureAndColor(ite->first.second, &ite->second,
-		                                 ic != m_ColorChanges.end() ? &ic->second : NULL);
+		                                 ic != m_ColorChanges.end() ? &ic->second : nullptr);
 		zone->refreshTesselationGeometry(ite->first.second);
 	}
 	m_Changes.clear();
@@ -1257,7 +1420,7 @@ const NL3D::CTileSetTransition *CPaintCore::findTransition(int tileSet, int rota
 		conv[i] = NL3D::CTileSet::getOrientedBorder(toBorder[i], border[(i + rotate) & 3]);
 	}
 	NL3D::CTileSet::TTransition t = NL3D::CTileSet::getTransitionTile(conv[3], conv[1], conv[0], conv[2]);
-	if (t == NL3D::CTileSet::notfound) return NULL;
+	if (t == NL3D::CTileSet::notfound) return nullptr;
 	return m_Bank->getTileSet(tileSet)->getTransition(t);
 }
 
@@ -1450,7 +1613,7 @@ bool CPaintCore::propagateBorder(SPaintTile *tile, int curRotation, int curTileS
 	// Same edge flags
 	for (v = 0; v < 4; ++v)
 	{
-		if (tile->Voisins[v] == NULL) bSameEdge[v] = false;
+		if (tile->Voisins[v] == nullptr) bSameEdge[v] = false;
 		else
 		{
 			CTileDescP desc;

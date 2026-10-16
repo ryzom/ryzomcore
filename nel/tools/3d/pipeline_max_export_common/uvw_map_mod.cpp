@@ -277,8 +277,8 @@ bool applyUvwMap(CSceneClass *mod, CStorageContainer *modApp, SMeshView &mesh,
 		return false;
 
 	// ParamBlock: scan refs for superclass 0x8
-	CSceneClass *pblock = NULL;
-	CSceneClass *gizmoCtrl = NULL;
+	CSceneClass *pblock = nullptr;
+	CSceneClass *gizmoCtrl = nullptr;
 	CReferenceMaker *mrm = dynamic_cast<CReferenceMaker *>(mod);
 	for (uint r = 0; mrm && r < mrm->nbReferences(); ++r)
 	{

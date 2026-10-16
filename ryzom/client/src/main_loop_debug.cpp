@@ -579,7 +579,7 @@ void displayDebugUIUnderMouse()
 		}
 		else
 		{
-			HighlightedDebugUI = NULL;
+			HighlightedDebugUI = nullptr;
 		}
 	}
 	//
@@ -675,7 +675,7 @@ class CHandlerDebugUiDumpElementUnderMouse : public IActionHandler
 {
 	virtual void execute (CCtrlBase * /* pCaller */, const std::string &/* sParams */) NL_OVERRIDE
 	{
-		if (HighlightedDebugUI == NULL) return;
+		if (HighlightedDebugUI == nullptr) return;
 		CLuaState *lua = CLuaManager::getInstance().getLuaState();
 		if (!lua) return;
 		CLuaStackRestorer lsr(lua, 0);

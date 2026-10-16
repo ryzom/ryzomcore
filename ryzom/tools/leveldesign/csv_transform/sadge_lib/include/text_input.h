@@ -41,18 +41,18 @@
 class CTextInput
 {
 public:
-	CTextInput(CTextOutput *warnings=NULL)
+	CTextInput(CTextOutput *warnings = nullptr)
 	{
 		// initialise the pointer properties
 		_Warnings=warnings;
-		_SubFile=NULL;
-		_Buffer=NULL;
+		_SubFile = nullptr;
+		_Buffer = nullptr;
 
 		// call the 'reset' method to initalise other properties
 		clear();
 	}
 
-	CTextInput(const char *fileName,CTextOutput *warnings=NULL)
+	CTextInput(const char *fileName,CTextOutput *warnings = nullptr)
 	{
 		// use default ctor to perform common initialisation code
 		*this=CTextInput();
@@ -72,14 +72,14 @@ public:
 	void clear()
 	{
 		// free the input buffer
-		if (_Buffer!=NULL)
+		if (_Buffer != nullptr)
 			free(_Buffer);
-		_Buffer=NULL;
+		_Buffer = nullptr;
 
 		// clear any child input manager objects
-		if (_SubFile!=NULL)
+		if (_SubFile != nullptr)
 			delete _SubFile;
-		_SubFile=NULL;
+		_SubFile = nullptr;
 
 		// clear the 'used file names' list
 		_FileNames.clear();
@@ -102,10 +102,10 @@ public:
 			}
 
 		// if we already have a buffer allocated then we must open a sub-file context
-		if (_Buffer!=NULL)
+		if (_Buffer != nullptr)
 		{
 			// if we have an open sub file then recurse into it else setup new sub file here
-			if (_SubFile!=NULL)
+			if (_SubFile != nullptr)
 				_SubFile->readFile(fileName);
 			else
 			{
@@ -120,16 +120,16 @@ public:
 
 		// open the file
 		FILE* inf=fopen(fileName,"rb");
-		if 	(inf==NULL)
+		if 	(inf == nullptr)
 		{
 			printf("File not found: %s\n",fileName);
 			goto ERROR_LABEL;
 		}
 
 		// allocate a big buffer for input
-		_FileLength= (inf!=NULL)? NLMISC::CFile::getFileSize(inf): 0;
+		_FileLength= (inf != nullptr) ? NLMISC::CFile::getFileSize(inf): 0;
 		_Buffer=(char *)malloc(_FileLength+1);
-		if (_Buffer==NULL)
+		if (_Buffer == nullptr)
 		{
 			printf("Failed to allocate %d bytes of RAM required to read file: %s\n",_FileLength+1,fileName);
 			goto ERROR_LABEL;
@@ -150,7 +150,7 @@ public:
 	ERROR_LABEL:
 		// in case of error we have a few things to clean up properly...
 		clear();
-		if (inf!=NULL)
+		if (inf != nullptr)
 			fclose(inf);
 	}
 
@@ -162,7 +162,7 @@ public:
 	NLMISC::CSString getLine()
 	{
 		// if there's an open sub file then recurse into it
-		if (_SubFile!=NULL)
+		if (_SubFile != nullptr)
 		{
 			// check that we're not at the end of the sub file
 			if (!_SubFile->eof())
@@ -171,7 +171,7 @@ public:
 			// we're at the end of the sub file so close it down and return to business as usual
 			delete _SubFile;
 			_FileNames.pop_back();
-			_SubFile=NULL;
+			_SubFile = nullptr;
 		}
 
 		NLMISC::CSString result;
@@ -197,7 +197,7 @@ public:
 	NLMISC::CSString getLineName()
 	{
 		NLMISC::CSString result;
-		if (_SubFile!=NULL)
+		if (_SubFile != nullptr)
 			result=_SubFile->getLineName()+'<';
 		result+=NLMISC::toString("%s:%d:",_FileNames.back().c_str(),_LineNumber);
 		return result;

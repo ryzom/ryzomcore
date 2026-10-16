@@ -78,8 +78,8 @@ public:
 	  * "position.x"			:	get the element named x in the struct named position
 	  * "entities[2].color"		:	get the node named color in the second element of the entities array
 	  */
-	virtual bool	getNodeByName (const UFormElm **result, const std::string &name, TWhereIsNode *where = NULL, bool reserved=true, uint32 round=0) const = 0;
-	virtual bool	getNodeByName (UFormElm **result, const std::string &name, TWhereIsNode *where = NULL, bool reserved=true, uint32 round=0) = 0;
+	virtual bool	getNodeByName (const UFormElm **result, const std::string &name, TWhereIsNode *where = nullptr, bool reserved=true, uint32 round=0) const = 0;
+	virtual bool	getNodeByName (UFormElm **result, const std::string &name, TWhereIsNode *where = nullptr, bool reserved=true, uint32 round=0) = 0;
 
 
 	/// Where a value has been found
@@ -104,19 +104,19 @@ public:
 	  * \return true if the result has been filled, false if the value has not been found or the cast has failed or the evaluation has failed.
 	  * \see getNodeByName ()
 	  */
-	virtual bool	getValueByName (std::string &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (sint8 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (uint8 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (sint16 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (uint16 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (sint32 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (uint32 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (float &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (double &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
-	virtual bool	getValueByName (bool &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
+	virtual bool	getValueByName (std::string &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (sint8 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (uint8 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (sint16 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (uint16 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (sint32 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (uint32 &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (float &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (double &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
+	virtual bool	getValueByName (bool &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
 
 	/// Warning, only R, G and B members are filled, not A.
-	virtual bool	getValueByName (NLMISC::CRGBA &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = NULL, uint32 round=0) const = 0;
+	virtual bool	getValueByName (NLMISC::CRGBA &result, const std::string &name, TEval evaluate = Eval, TWhereIsValue *where = nullptr, uint32 round=0) const = 0;
 
 	/**
 	  * Set a form value with its name. If the node doesn't exist, it is created.
@@ -129,17 +129,17 @@ public:
 	  * true if the value has been created, false it the value has been filled.
 	  * \return true if the value has been set, false if the value has not been found or hasn't been created.
 	  */
-	virtual bool	setValueByName (const std::string &value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (sint8 value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (uint8 value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (sint16 value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (uint16 value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (sint32 value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (uint32 value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (float value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (double value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (bool value, const std::string &name, bool *created = NULL) = 0;
-	virtual bool	setValueByName (NLMISC::CRGBA value, const std::string &name, bool *created = NULL) = 0;
+	virtual bool	setValueByName (const std::string &value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (sint8 value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (uint8 value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (sint16 value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (uint16 value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (sint32 value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (uint32 value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (float value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (double value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (bool value, const std::string &name, bool *created = nullptr) = 0;
+	virtual bool	setValueByName (NLMISC::CRGBA value, const std::string &name, bool *created = nullptr) = 0;
 
 
 	// ** Array element methods
@@ -176,19 +176,19 @@ public:
 	  * the position where the value has been found.
 	  * \return true if the result has been filled, false if the value has not been found or the cast has failed or the evaluation has failed.
 	  */
-	virtual bool	getArrayValue (std::string &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (sint8 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (uint8 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (sint16 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (uint16 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (sint32 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (uint32 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (float &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (double &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
-	virtual bool	getArrayValue (bool &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
+	virtual bool	getArrayValue (std::string &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (sint8 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (uint8 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (sint16 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (uint16 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (sint32 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (uint32 &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (float &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (double &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
+	virtual bool	getArrayValue (bool &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
 
 	/// Warning, only R, G and B members are filled, not A.
-	virtual bool	getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = NULL) const = 0;
+	virtual bool	getArrayValue (NLMISC::CRGBA &result, uint arrayIndex, TEval evaluate = Eval, TWhereIsValue *where = nullptr) const = 0;
 
 	/// Return the name of a table element.
 	virtual bool	getArrayNodeName (std::string &result, uint arrayIndex) const = 0;

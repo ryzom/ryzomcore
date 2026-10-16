@@ -73,7 +73,7 @@ public:
 	  * \param chat optional chat box in the list
 	  * \return true if the list could be
 	  */
-	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = NULL);
+	bool create(const CPeopleListDesc &desc, const CChatWindowDesc *chat = nullptr);
 	// Get index from the name of a people, or -1 if not found
 	sint getIndexFromName(const std::string &name) const;
 	// Get index from the id of the container that represent the people

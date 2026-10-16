@@ -40,7 +40,7 @@ public:
 	/// Attach a IShape to this proxy
 	void			attach(class CVisualCollisionMesh	*mesh);
 	/// return true if the proxy is empty() (not attached)
-	bool			empty() const {return _Mesh==NULL;}
+	bool			empty() const {return _Mesh == nullptr; }
 	/// For Advanced usage, get the Collision Mesh ptr
 	class CVisualCollisionMesh	*getMeshPtr() const {return _Mesh;}
 	// get vertices of the mesh

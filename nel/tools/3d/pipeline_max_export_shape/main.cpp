@@ -292,7 +292,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	std::vector<CSceneClass *> mods;
 	std::vector<CStorageContainer *> modApps;
 	CSceneClass *base = baseObjectOf(node, &mods, &modApps);
-	if (!base) return NULL;
+	if (!base) return nullptr;
 	NLMISC::CClassId cid = base->classDesc()->classId();
 
 	// FX/special shape classes (not yet implemented; each reports for the harness)
@@ -300,33 +300,33 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	{
 		stats.skip("wavemaker");
 		fprintf(stderr, "SKIP shape '%s': wave maker not implemented\n", name.c_str());
-		return NULL;
+		return nullptr;
 	}
 	if (getScriptAppDataInt(n, NEL3D_APPDATA_USE_REMANENCE, 0))
 	{
-		if (lmOnly) return NULL; // specials never collect as lightmap receivers
+		if (lmOnly) return nullptr; // specials never collect as lightmap receivers
 		NL3D::IShape *rs = REMANENCEBUILD::buildRemanenceShape(node, tmCache, exportLighting);
 		if (!rs)
 		{
 			stats.skip("remanence");
-			return NULL;
+			return nullptr;
 		}
 		return rs;
 	}
 	if (cid.a() == CLASSID_PARTA_NEL_FLARE)
 	{
-		if (lmOnly) return NULL;
+		if (lmOnly) return nullptr;
 		NL3D::IShape *fs = FLAREBUILD::buildFlareShape(node, tmCache);
 		if (!fs)
 		{
 			stats.skip("flare");
-			return NULL;
+			return nullptr;
 		}
 		return fs;
 	}
 	if (hasWaterMaterial(node))
 	{
-		if (lmOnly) return NULL;
+		if (lmOnly) return nullptr;
 		NL3D::IShape *ws = WATERBUILD::buildWaterShape(node, tmCache);
 		if (!ws)
 		{
@@ -334,7 +334,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			// specific (the reference exporter returns NULL in the same cases without further
 			// output — missing required maps, empty geometry).
 			stats.skip("water");
-			return NULL;
+			return nullptr;
 		}
 		return ws;
 	}
@@ -355,7 +355,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		{
 			if (getenv("PMB_SKIN_DUMP"))
 			{
-				CStorageContainer *app = (i < modApps.size()) ? modApps[i] : NULL;
+				CStorageContainer *app = (i < modApps.size()) ? modApps[i] : nullptr;
 				fprintf(stderr, "PMB_SKIN_DUMP node='%s' modifier=%s cid=(0x%x,0x%x) sup=0x%x\n",
 				        name.c_str(), isPhysique ? "Physique" : "Skin",
 				        mcid.a(), mcid.b(), (uint32)mscid);
@@ -385,7 +385,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				fprintf(stderr, "SKIP shape '%s': Skin modifier not implemented (Max 4+ ISkin path;"
 				                " corpus era is Physique-only — see design §10z-quat)\n",
 				        name.c_str());
-				return NULL;
+				return nullptr;
 			}
 			hasPhysique = true;
 			// Physique: continue into the mesh path; skinning is applied after mesh eval.
@@ -459,7 +459,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 	// nodes still take the FULL build path below so the collected pre-build data (and any
 	// build-failure bail-out) is bit-for-bit the direct --lm-scene run's.
 	if (lmOnly && !lmCollect)
-		return NULL;
+		return nullptr;
 	NL3D::CLightmapReceiver lmRecv;
 	if (lmCollect)
 	{
@@ -487,7 +487,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		lmRecv.CoarseOutput = lmc->CurrentCoarse;
 	}
 
-	NL3D::CMeshBase *meshBase = NULL;
+	NL3D::CMeshBase *meshBase = nullptr;
 	std::vector<sint> materialRemap;
 
 	if (lodCount > 0)
@@ -509,7 +509,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 			                     hasPhysique))
 			{
 				if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
-					return NULL;
+					return nullptr;
 				tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 				NL3D::CMeshMultiLod::CMeshMultiLodBuild::CBuildSlot slot;
 				slot.DistMax = getScriptAppDataFloat(n, NEL3D_APPDATA_LOD_DIST_MAX, 1000.f);
@@ -610,7 +610,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		{
 			// No LOD came through — bail rather than serialize an empty multi-lod.
 			stats.skip("mesh-eval");
-			return NULL;
+			return nullptr;
 		}
 
 		NL3D::CMeshMultiLod *ml = new NL3D::CMeshMultiLod;
@@ -629,9 +629,9 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 		NL3D::CMesh::CMeshBuild buildMesh;
 		if (!evalAndBuildMesh(node, tmCache, buildBaseMesh, maxBaseBuild, buildMesh, stats,
 		                      hasPhysique))
-			return NULL;
+			return nullptr;
 		if (hasPhysique && !tryApplyPhysique(node, buildMesh, mods, modApps, ssc, stats))
-			return NULL;
+			return nullptr;
 		tryApplyInterface(node, buildMesh, tmCache, hasPhysique);
 
 		if (lmCollect)
@@ -680,7 +680,7 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 				                "the skin-manager buffer.\n",
 				        name.c_str());
 			stats.skip(skipReason.empty() ? "build" : skipReason);
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -718,8 +718,8 @@ static NL3D::IShape *buildShapeForNode(INode &node, SNodeTMCache &tmCache,
 static int exportFile(const std::string &maxPath, const std::string &outDir, const std::string &outDirCoarse,
                       const std::string &animDir, const std::string &lmSceneDir,
                       bool exportLighting, SExportStats &stats,
-                      std::vector<uint8> *lmSceneBytesOut = NULL,
-                      SLoadedMax *preloaded = NULL)
+                      std::vector<uint8> *lmSceneBytesOut = nullptr,
+                      SLoadedMax *preloaded = nullptr)
 {
 	// preloaded = the caller's already-parsed scene (the glTF writer parses each .max once and
 	// feeds every process flow the same instance); standalone runs load their own.
@@ -730,14 +730,14 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 
 	CSceneClassContainer *ssc = lm.Scene->container();
 	SNodeTMCache tmCache;
-	tmCache.SceneRoot = NULL;
+	tmCache.SceneRoot = nullptr;
 
 	// lmSceneBytesOut = lightmap-scene-only mode (nel_lmscene blob): collect the scene graph
 	// exactly like --lm-scene but serialize to memory, skip every file output, and skip the
 	// build of nodes that can't be receivers.
-	const bool lmOnly = lmSceneBytesOut != NULL;
+	const bool lmOnly = lmSceneBytesOut != nullptr;
 	LMSCENE::SCollector lmCollector;
-	LMSCENE::SCollector *lmc = (lmSceneDir.empty() && !lmOnly) ? NULL : &lmCollector;
+	LMSCENE::SCollector *lmc = (lmSceneDir.empty() && !lmOnly) ? nullptr : &lmCollector;
 
 	// Collect the LOD slave set (case-insensitive) and coarse-mesh info
 	std::set<std::string> lodNames;
@@ -782,7 +782,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 		CNodeImpl *n = dynamic_cast<CNodeImpl *>(&node);
 		std::string name = nodeName(node);
 
-		CSceneClass *base = baseObjectOf(node, NULL, NULL);
+		CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
 		if (!isGeometryOrShape(base))
 			continue;
 
@@ -885,7 +885,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			}
 			std::vector<INode *> stack;
 			INode *sceneRoot = ssc->scene()->rootNode();
-			INode *seeds[2] = { sceneRoot, NULL };
+			INode *seeds[2] = { sceneRoot, nullptr };
 			for (int s = 0; s < 2; ++s)
 			{
 				if (s == 1 && seeds[0] == seeds[1]) continue;
@@ -918,7 +918,7 @@ static int exportFile(const std::string &maxPath, const std::string &outDir, con
 			// Root-level only (the maxscript's `node.parent == undefined` selection)
 			if (dynamic_cast<CNodeImpl *>(n->parent())) continue;
 			std::string name = nodeName(node);
-			CSceneClass *base = baseObjectOf(node, NULL, NULL);
+			CSceneClass *base = baseObjectOf(node, nullptr, nullptr);
 			if (!base || base->classDesc()->superClassId() != SCLASS_GEOMOBJECT) continue;
 			NLMISC::CClassId cid = base->classDesc()->classId();
 			if (cid == CLASSID_RPO) continue; // zones never occlude (RPO::isZone in addNode)
@@ -1040,7 +1040,7 @@ static NL3D::IShape *loadShape(const std::string &path)
 	try
 	{
 		NLMISC::CIFile f;
-		if (!f.open(path)) return NULL;
+		if (!f.open(path)) return nullptr;
 		NL3D::CShapeStream ss;
 		ss.serial(f);
 		return ss.getShapePointer();
@@ -1048,7 +1048,7 @@ static NL3D::IShape *loadShape(const std::string &path)
 	catch (const NLMISC::Exception &e)
 	{
 		fprintf(stderr, "load %s: %s\n", path.c_str(), e.what());
-		return NULL;
+		return nullptr;
 	}
 }
 
@@ -1079,7 +1079,7 @@ static const std::vector<NL3D::CMesh::CSkinWeight> *dumpSkinWeightsOf(NL3D::ISha
 		bonesNames = g.getBonesName();
 		return &sw;
 	}
-	return NULL;
+	return nullptr;
 }
 
 static int dumpSkin(const std::string &path)
@@ -1099,7 +1099,7 @@ static int dumpSkin(const std::string &path)
 	// position-matched weight comparison against a reference shape (PMB_SKIN_DUMP_ALL for the
 	// full listing; default keeps the original 16-vert preview).
 	NL3D::CVertexBuffer vbStore;
-	const NL3D::CVertexBuffer *vbp = NULL;
+	const NL3D::CVertexBuffer *vbp = nullptr;
 	if (NL3D::CMeshMRM *mrm = dynamic_cast<NL3D::CMeshMRM *>(shape))
 		vbp = &mrm->getMeshGeom().getVertexBuffer();
 	else if (NL3D::CMeshMRMSkinned *mrms = dynamic_cast<NL3D::CMeshMRMSkinned *>(shape))
@@ -1109,7 +1109,7 @@ static int dumpSkin(const std::string &path)
 	}
 	uint nShow = getenv("PMB_SKIN_DUMP_ALL") ? (uint)sw->size() : std::min((uint)sw->size(), (uint)16u);
 	NL3D::CVertexBufferRead vbr;
-	const uint8 *posPtr = NULL;
+	const uint8 *posPtr = nullptr;
 	uint stride = 0;
 	if (vbp && vbp->getNumVertices() >= sw->size())
 	{
@@ -1470,7 +1470,7 @@ static void compareMeshBase(NL3D::CMeshBase *ma, NL3D::CMeshBase *mb)
 			// dedup — but the presence + class is what the base material carries).
 			NL3D::ITexture *ta = const_cast<NL3D::CMaterial &>(m_a).getTexture(0);
 			NL3D::ITexture *tb = const_cast<NL3D::CMaterial &>(m_b).getTexture(0);
-			if ((ta != NULL) != (tb != NULL))
+			if ((ta != nullptr) != (tb != nullptr))
 			{
 				printf("  material %u lightmap-masked: slot-0 texture presence differs\n", i);
 				raiseVerdict(2);
@@ -1799,7 +1799,7 @@ static void compareShapesFields(const std::string &a, const std::string &b)
 			std::vector<std::string> bonesA, bonesB;
 			const std::vector<NL3D::CMesh::CSkinWeight> *swa = dumpSkinWeightsOf(sa, bonesA);
 			std::vector<NL3D::CMesh::CSkinWeight> swbStore;
-			const std::vector<NL3D::CMesh::CSkinWeight> *swb = NULL;
+			const std::vector<NL3D::CMesh::CSkinWeight> *swb = nullptr;
 			if (mrmb) { bonesB = mrmb->getMeshGeom().getBonesName(); swbStore = mrmb->getMeshGeom().getSkinWeights(); swb = &swbStore; }
 			else { msb->getMeshGeom().getSkinWeights(swbStore); bonesB = msb->getMeshGeom().getBonesName(); swb = &swbStore; }
 			if (bonesA != bonesB)

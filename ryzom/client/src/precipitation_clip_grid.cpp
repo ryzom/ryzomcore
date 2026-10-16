@@ -609,7 +609,7 @@ const CPrecipitationClipGrid::CGridPoint *CPrecipitationClipGrid::get(sint x, si
 	// pos in the grid
 	sint gx = x - _XPos;
 	sint gy = y - _YPos;
-	if ((uint) gx > (_Size + 1) || (uint) gy > (_Size + 1)) return NULL;
+	if ((uint) gx > (_Size + 1) || (uint) gy > (_Size + 1)) return nullptr;
 	return &(*getGridIt(_Grid, gx, gy, _Size));
 }
 

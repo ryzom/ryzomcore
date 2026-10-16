@@ -67,7 +67,7 @@ public:
 		AnimTime= 0;
 		WrapMode= true;
 		_TextureId= -1;
-		_Owner= NULL;
+		_Owner = nullptr;
 	}
 
 	~CLodCharacterInstance();

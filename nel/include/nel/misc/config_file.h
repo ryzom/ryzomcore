@@ -200,7 +200,7 @@ public:
 		//@}
 	};
 
-	CConfigFile() : _Callback(NULL) {}
+	CConfigFile() : _Callback(nullptr) {}
 
 	virtual ~CConfigFile ();
 

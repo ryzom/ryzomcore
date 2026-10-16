@@ -132,7 +132,7 @@ const uint CPSRibbon::NbVerticesInPentagram = sizeof(CPSRibbon::Pentagram) / siz
 
 struct CDummy2DAngle : CPSRotated2DParticle
 {
-	CPSLocated *getAngle2DOwner(void) NL_OVERRIDE { return NULL; }
+	CPSLocated *getAngle2DOwner(void) NL_OVERRIDE { return nullptr; }
 };
 
 ///==================================================================================================================
@@ -195,10 +195,10 @@ void CPSRibbon::serial(NLMISC::IStream &f)
 
 		f.serial(drEnabled);
 		f.serial(tailNbSegs);
-		ITexture *tex = NULL;
+		ITexture *tex = nullptr;
 		f.serialPolyPtr(tex);
 		_Tex = tex;
-		if (_Tex != NULL)
+		if (_Tex != nullptr)
 		{
 			f.serial(_UFactor, _VFactor) ;
 		}
@@ -238,7 +238,7 @@ void CPSRibbon::serial(NLMISC::IStream &f)
 		ITexture *tex = _Tex;
 		f.serialPolyPtr(tex);
 		_Tex = tex;
-		if (_Tex != NULL)
+		if (_Tex != nullptr)
 		{
 			f.serial(_UFactor, _VFactor) ;
 		}
@@ -296,7 +296,7 @@ inline uint CPSRibbon::getNumVerticesInSlice() const
 	}
 	else
 	{
-		return (uint)_Shape.size() + (_Tex == NULL ? 0 : 1);
+		return (uint)_Shape.size() + (_Tex == nullptr ? 0 : 1);
 	}
 }
 
@@ -701,7 +701,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 	// Material setup //
 	////////////////////
 		CParticleSystem &ps = *(_Owner->getOwner());
-		bool useGlobalColor = ps.getColorAttenuationScheme() != NULL || ps.isUserColorUsed();
+		bool useGlobalColor = ps.getColorAttenuationScheme() != nullptr || ps.isUserColorUsed();
 		if (useGlobalColor != _GlobalColor)
 		{
 			_GlobalColor = useGlobalColor;
@@ -779,7 +779,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 					//////////////////////
 					// INCREMENTAL CASE //
 					//////////////////////
-					if (_Tex != NULL && !_BraceMode) // textured case : must duplicate last vertex, unless in brace mod
+					if (_Tex != nullptr && !_BraceMode) // textured case : must duplicate last vertex, unless in brace mod
 					{
 						do
 						{
@@ -829,7 +829,7 @@ void CPSRibbon::displayRibbons(uint32 nbRibbons, uint32 srcStep)
 					//////////////////////
 					// PARAMETRIC  CASE //
 					//////////////////////
-					if (_Tex != NULL) // textured case
+					if (_Tex != nullptr) // textured case
 					{
 						do
 						{
@@ -941,8 +941,8 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 	// TODO : better vb reuse ?
 	/// choose the right vb by building an index for lookup into 'vbMaps' defined above
 	TVBMap &map = _VBMaps[ (_BraceMode		         ? 8 : 0)  | // set bit 3 if brace mode
-						   (_Tex != NULL			 ? 4 : 0)  | // set bit 2 if textured
-						   (_ColorScheme != NULL     ? 2 : 0)  | // set bit 1 if per ribbon color
+						   (_Tex != nullptr ? 4 : 0)  | // set bit 2 if textured
+						   (_ColorScheme != nullptr ? 2 : 0)  | // set bit 1 if per ribbon color
 						   (_ColorFading			 ? 1 : 0)		    // set bit 0 if color fading
 						 ];
 
@@ -970,8 +970,8 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 		/// If the ribbon has fading, but only a global color, we encode it in the primary color
 		vb.setVertexFormat(CVertexBuffer::PositionFlag	| /* alway need position */
 						   (_ColorScheme || _ColorFading ? CVertexBuffer::PrimaryColorFlag : 0) | /* need a color ? */
-						   ((_ColorScheme && _ColorFading) ||  _Tex != NULL ? CVertexBuffer::TexCoord0Flag : 0) | /* need texture coordinates ? */
-						   (_Tex != NULL && _ColorScheme && _ColorFading ? CVertexBuffer::TexCoord1Flag : 0) /* need 2nd texture coordinates ? */
+						   ((_ColorScheme && _ColorFading) ||  _Tex != nullptr ? CVertexBuffer::TexCoord0Flag : 0) | /* need texture coordinates ? */
+						   (_Tex != nullptr && _ColorScheme && _ColorFading ? CVertexBuffer::TexCoord1Flag : 0) /* need 2nd texture coordinates ? */
 						  );
 		vb.setNumVertices((_UsedNbSegs + 1) * numRibbonInVB * numVerticesInSlice); // 1 seg = 1 line + terminal vertices
 		pb.setFormat(NL_DEFAULT_INDEX_BUFFER_FORMAT);
@@ -1042,7 +1042,7 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 					{
 						nlassert(vbIndex < vb.getNumVertices());
 						/// setup texture (if any)
-						if (_Tex != NULL)
+						if (_Tex != nullptr)
 						{
 							vba.setTexCoord(vbIndex,
 											_ColorScheme && _ColorFading ? 1 : 0,		// must we use the second texture coord ? (when 1st one used by the gradient texture : we can't encode it in the diffuse as it encodes each ribbon color)
@@ -1059,7 +1059,7 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 						if (_ColorFading)
 						{
 							// If not per ribbon color, we can encode it in the diffuse
-							if (_ColorScheme == NULL)
+							if (_ColorScheme == nullptr)
 							{
 								uint8 intensity = (uint8) (255 * (1.f - ((float) k / _UsedNbSegs)));
 								NLMISC::CRGBA col(intensity, intensity, intensity, intensity);
@@ -1081,7 +1081,7 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 					{
 						nlassert(vbIndex < vb.getNumVertices());
 						/// setup texture (if any)
-						if (_Tex != NULL)
+						if (_Tex != nullptr)
 						{
 							vba.setTexCoord(vbIndex,
 										   _ColorScheme && _ColorFading ? 1 : 0,		// must we use the second texture coord ? (when 1st one used by the gradient texture : we can't encode it in the diffuse as it encodes each ribbon color)
@@ -1093,7 +1093,7 @@ CPSRibbon::CVBnPB &CPSRibbon::getVBnPB()
 						if (_ColorFading)
 						{
 							// If not per ribbon color, we can encode it in the diffuse
-							if (_ColorScheme == NULL)
+							if (_ColorScheme == nullptr)
 							{
 								uint8 intensity = (uint8) (255 * (1.f - ((float) k / _UsedNbSegs)));
 								NLMISC::CRGBA col(intensity, intensity, intensity, intensity);
@@ -1142,7 +1142,7 @@ inline void	CPSRibbon::updateUntexturedMaterial()
 			{
 				// the first stage is used to get fading * global color
 				// the second stage multiply the result by the diffuse colot
-				if (ptGradTexture == NULL) // have we got a gradient texture ?
+				if (ptGradTexture == nullptr) // have we got a gradient texture ?
 				{
 					ptGradTexture = CreateGradientTexture();
 				}
@@ -1161,7 +1161,7 @@ inline void	CPSRibbon::updateUntexturedMaterial()
 		{
 			if (_ColorFading) // per ribbon color, no fading
 			{
-				if (ptGradTexture == NULL) // have we got a gradient texture ?
+				if (ptGradTexture == nullptr) // have we got a gradient texture ?
 				{
 					ptGradTexture = CreateGradientTexture();
 				}
@@ -1212,7 +1212,7 @@ inline void	CPSRibbon::updateTexturedMaterial()
 		{
 			if (_ColorFading) // global color + fading + per ribbon color
 			{
-				if (ptGradTexture == NULL) // have we got a gradient texture ?
+				if (ptGradTexture == nullptr) // have we got a gradient texture ?
 				{
 					ptGradTexture = CreateGradientTexture(); // create it
 				}
@@ -1239,7 +1239,7 @@ inline void	CPSRibbon::updateTexturedMaterial()
 		{
 			if (_ColorFading) // per ribbon color, fading : 2 textures needed
 			{
-				if (ptGradTexture == NULL) // have we got a gradient texture ?
+				if (ptGradTexture == nullptr) // have we got a gradient texture ?
 				{
 					ptGradTexture = CreateGradientTexture(); // create it
 				}
@@ -1284,7 +1284,7 @@ void	CPSRibbon::updateMaterial()
 {
 	NL_PS_FUNC(CPSRibbon_updateMaterial)
 	if (!_Touch) return;
-	if (_Tex != NULL)
+	if (_Tex != nullptr)
 	{
 		updateTexturedMaterial();
 		setupTextureMatrix();
@@ -1419,7 +1419,7 @@ inline void	CPSRibbon::setupTexturedGlobalColor()
 void	CPSRibbon::setupGlobalColor()
 {
 	NL_PS_FUNC(CPSRibbon_setupGlobalColor)
-	if (_Tex != NULL) setupTexturedGlobalColor();
+	if (_Tex != nullptr) setupTexturedGlobalColor();
 		else setupUntexturedGlobalColor();
 }
 
@@ -1427,7 +1427,7 @@ void	CPSRibbon::setupGlobalColor()
 void CPSRibbon::setupTextureMatrix()
 {
 	NL_PS_FUNC(CPSRibbon_setupTextureMatrix)
-	uint stage = (_ColorScheme != NULL && _ColorFading == true) ? 1 : 0;
+	uint stage = (_ColorScheme != nullptr && _ColorFading == true) ? 1 : 0;
 	if (_UFactor != 1.f || _VFactor != 1.f)
 	{
 		_Mat.enableUserTexMat(stage);

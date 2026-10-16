@@ -109,7 +109,7 @@ public:
 		CStorageRaw *Chunk;
 
 		SParam() : Index(-1), Kind(KindNone), ValueChunkId(0), HasConstant(false),
-			Animated(false), RefSlot(-1), I(0), Chunk(NULL) { F[0] = F[1] = F[2] = 0.0f; }
+			Animated(false), RefSlot(-1), I(0), Chunk(nullptr) { F[0] = F[1] = F[2] = 0.0f; }
 	};
 
 	CParamBlock(CScene *scene);

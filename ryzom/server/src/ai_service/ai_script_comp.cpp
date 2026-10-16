@@ -17,6 +17,7 @@
 #include "stdpch.h"
 #include "ai_generic_fight.h"
 #include "ai_script_comp.h"
+#include "sheets.h"
 #include "server_share/msg_brick_service.h"
 
 using	namespace	std;
@@ -1094,4 +1095,40 @@ CFightScriptComp	*CFightScriptCompReader::createScriptComp	(const string &str)
 		throw	ReadFightActionException(string("ScriptComp creation failed : ")+string(e.what()));
 	}
 
+}
+
+//////////////////////////////////////////////////////////////////////////
+//	Sheets library seam
+
+//	The ai sheets library (ryzom_aissheets) compiles without the fight
+//	script machinery in this file; creature script components reach the AI
+//	service through readCreatureScriptComp, declared in sheets.h.
+
+void AISHEETS::CCreature::registerScriptComp(CFightScriptComp* scriptComp)
+{
+	_ScriptCompList.push_back(scriptComp);
+	
+	CFightSelectFilter* filter = dynamic_cast<CFightSelectFilter*>(scriptComp);
+	if (!filter)
+		return;
+	
+	std::string const& param = filter->getParam();
+	if (param=="ON_UPDATE")
+		_UpdateScriptList.push_back(scriptComp);
+	if (param=="ON_DEATH")
+		_DeathScriptList.push_back(scriptComp);
+	if (param=="ON_BIRTH")
+		_BirthScriptList.push_back(scriptComp);
+}
+
+void AISHEETS::readCreatureScriptComp(AISHEETS::CCreature &creature, std::string const &scriptCompStr)
+{
+	try
+	{
+		creature.registerScriptComp(CFightScriptCompReader::createScriptComp(scriptCompStr));
+	}
+	catch (const ReadFightActionException& ex)
+	{
+		nlwarning("script read error (ignored): %s", ex.what());
+	}
 }

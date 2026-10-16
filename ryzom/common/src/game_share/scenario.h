@@ -241,7 +241,7 @@ public://public functions
 
 	CUserComponent(const std::string &filename,
 		uint8* uncompressedData,  uint32 uncompressedDataLength,
-		uint8* compressedData = 0,  uint32 compressedDataLength = 0
+		uint8* compressedData = nullptr,  uint32 compressedDataLength = 0
 		);
 
 	~CUserComponent();
@@ -303,7 +303,7 @@ public:
 
 public:
 	TValues _Values;
-	CScenarioValidator(CScenarioValidatorLoadSuccededCallback* loadCb = 0 );
+	CScenarioValidator(CScenarioValidatorLoadSuccededCallback* loadCb = nullptr );
 	~CScenarioValidator();
 	bool setScenarioToSave(const std::string& filename, CObject* scenario, const CScenarioValidator::TValues& value, std::string& md5);
 	bool setScenarioToLoad(const std::string& filename, CScenarioValidator::TValues& values, std::string& md5, std::string& signature, bool checkMD5);
@@ -346,7 +346,7 @@ public:
 
 public:
 	TValues _Values;
-	CUserComponentValidator(CUserComponentValidatorLoadSuccededCallback* loadCb = 0 );
+	CUserComponentValidator(CUserComponentValidatorLoadSuccededCallback* loadCb = nullptr );
 	~CUserComponentValidator();
 	bool setUserComponentToSave(const std::string& filename, const CUserComponentValidator::TValues& value, std::string& md5, const std::string &body);
 	bool setUserComponentToLoad(const std::string& filename, CUserComponentValidator::TValues& values, std::string& md5, std::string& signature, bool checkMD5);

@@ -86,7 +86,7 @@ public:
 	virtual void toStringLocal(std::ostream &ostream, const std::string &pad = "", uint filter = 0) const NL_OVERRIDE;
 
 	/// True when a name chunk (0x4001, bare or under 0x4000) was found.
-	inline bool hasName() const { return m_NameChunk != NULL; }
+	inline bool hasName() const { return m_NameChunk != nullptr; }
 	/// The material/texmap name (UTF-8), empty when absent. Valid between parse and clean/disown.
 	std::string name() const;
 

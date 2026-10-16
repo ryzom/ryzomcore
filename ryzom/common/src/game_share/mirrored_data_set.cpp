@@ -39,7 +39,7 @@ using namespace std;
 #define new DEBUG_NEW
 #endif
 
-NLMISC::CMemDisplayer *TmpDebugDisplayer = NULL;
+NLMISC::CMemDisplayer *TmpDebugDisplayer = nullptr;
 //NLMISC::CLog		  *TmpDebugLogger = NULL;
 
 
@@ -87,7 +87,7 @@ void	CMirroredDataSet::init( const NLMISC::CSheetId& sheetId, const TDataSetShee
 	CDataSetBase::init( sheetId, properties );
 
 	_PropTrackers.resize( properties.NbProperties );
-	_ValueToStringCb.resize( properties.NbProperties, NULL );
+	_ValueToStringCb.resize( properties.NbProperties, nullptr);
 
 	// Fill map of properties
 	_PropAllocator = pac;
@@ -336,7 +336,7 @@ uint	CMirroredDataSet::addEntityToDataSet( bool fillEntityId, NLMISC::CEntityId&
 			uint propIndex;
 			for ( propIndex=0; propIndex!=_PropertyContainer.PropertyValueArrays.size(); ++propIndex )
 			{
-				if (_PropertyContainer.PropertyValueArrays[propIndex].Values == NULL)
+				if (_PropertyContainer.PropertyValueArrays[propIndex].Values == nullptr)
 					continue;
 
 				// Empty list container if it's a list property
@@ -1234,7 +1234,7 @@ CChangeTrackerClientProp *CMirroredDataSet::getSelfPropTracker( TPropertyIndex p
 			break;
 	}
 	if ( i == _SelfPropTrackers.size() )
-		return NULL;
+		return nullptr;
 	else
 		return &(_SelfPropTrackers[i]);
 }
@@ -1288,7 +1288,7 @@ void				CMirroredDataSet::accessNewPropTracker( bool self, TPropertyIndex propIn
 	else
 	{
 		// Search smid in the existing prop trackers for all property names (may already exist if another local service has group notification)
-		const CChangeTrackerClient *groupTracker = NULL;
+		const CChangeTrackerClient *groupTracker = nullptr;
 		TTrackersLists::const_iterator itl;
 		for ( itl=_PropTrackers.begin(); itl!=_PropTrackers.end(); ++itl )
 		{
@@ -1526,62 +1526,62 @@ void				CMirroredDataSet::displayPropValue( const std::string& propName, const T
 	{
 		case TypeUint8:
 			{
-				displayValueLine( propName, "%hu", "U8", (uint8*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%hu", "U8", (uint8*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeSint8:
 			{
-				displayValueLine( propName, "%hd", "S8", (sint8*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%hd", "S8", (sint8*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeUint16:
 			{
-				displayValueLine( propName, "%hu", "U16", (uint16*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%hu", "U16", (uint16*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeSint16:
 			{
-				displayValueLine( propName, "%hd", "S16", (sint16*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%hd", "S16", (sint16*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeUint32:
 			{
-				displayValueLine( propName, "%u", "U32", (uint32*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%u", "U32", (uint32*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeSint32:
 			{
-				displayValueLine( propName, "%d", "S32", (sint32*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%d", "S32", (sint32*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeUint64:
 			{
-				displayValueLine( propName, "%" NL_I64 "u", "U64", (uint64*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%" NL_I64 "u", "U64", (uint64*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeSint64:
 			{
-				displayValueLine( propName, "%" NL_I64 "d", "S64", (sint64*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%" NL_I64 "d", "S64", (sint64*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeFloat:
 			{
-				displayValueLine( propName, "%g", "F", (float*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%g", "F", (float*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeDouble:
 			{
-				displayValueLine( propName, "%g", "D", (double*)NULL, this, entityIndex, propIndex, flagsStr, log );
+				displayValueLine( propName, "%g", "D", (double*)nullptr, this, entityIndex, propIndex, flagsStr, log );
 				break;
 			}
 		case TypeBool:
 			{
-				displayValueLine( propName, "", "B", (bool*)NULL, this, entityIndex, propIndex, flagsStr, log, true );
+				displayValueLine( propName, "", "B", (bool*)nullptr, this, entityIndex, propIndex, flagsStr, log, true );
 				break;
 			}
 		case TypeCEntityId:
 			{
-				displayValueLine( propName, "", "EId", (CEntityId*)NULL, this, entityIndex, propIndex, flagsStr, log, false, true );
+				displayValueLine( propName, "", "EId", (CEntityId*)nullptr, this, entityIndex, propIndex, flagsStr, log, false, true );
 				break;
 			}
 		default:
@@ -1611,52 +1611,52 @@ void				CMirroredDataSet::setValueFromString( const TDataSetRow& entityIndex, TP
 	{
 		case TypeUint8:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hu", (uint8*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hu", (uint8*)nullptr);
 				break;
 			}
 		case TypeSint8:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hd", (sint8*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hd", (sint8*)nullptr);
 				break;
 			}
 		case TypeUint16:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hu", (uint16*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hu", (uint16*)nullptr);
 				break;
 			}
 		case TypeSint16:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hd", (sint16*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hd", (sint16*)nullptr);
 				break;
 			}
 		case TypeUint32:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%u", (uint32*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%u", (uint32*)nullptr);
 				break;
 			}
 		case TypeSint32:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%d", (sint32*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%d", (sint32*)nullptr);
 				break;
 			}
 		case TypeUint64:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%" NL_I64 "u", (uint64*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%" NL_I64 "u", (uint64*)nullptr);
 				break;
 			}
 		case TypeSint64:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%" NL_I64 "d", (sint64*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%" NL_I64 "d", (sint64*)nullptr);
 				break;
 			}
 		case TypeFloat:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%g", (float*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%g", (float*)nullptr);
 				break;
 			}
 		case TypeDouble:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%g", (double*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%g", (double*)nullptr);
 				break;
 			}
 		case TypeCEntityId:
@@ -1669,7 +1669,7 @@ void				CMirroredDataSet::setValueFromString( const TDataSetRow& entityIndex, TP
 			}
 		case TypeBool:
 			{
-				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hu", (bool*)NULL );
+				assignValue( this, entityIndex, propIndex, valueStr.c_str(), "%hu", (bool*)nullptr);
 				break;
 			}
 		default:
@@ -1702,52 +1702,52 @@ void				CMirroredDataSet::getValueToString( const TDataSetRow& entityIndex, TPro
 	{
 		case TypeUint8:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%hu", (uint8*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%hu", (uint8*)nullptr);
 				break;
 			}
 		case TypeSint8:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%hd", (sint8*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%hd", (sint8*)nullptr);
 				break;
 			}
 		case TypeUint16:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%hu", (uint16*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%hu", (uint16*)nullptr);
 				break;
 			}
 		case TypeSint16:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%hd", (sint16*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%hd", (sint16*)nullptr);
 				break;
 			}
 		case TypeUint32:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%u", (uint32*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%u", (uint32*)nullptr);
 				break;
 			}
 		case TypeSint32:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%d", (sint32*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%d", (sint32*)nullptr);
 				break;
 			}
 		case TypeUint64:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%" NL_I64 "u", (uint64*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%" NL_I64 "u", (uint64*)nullptr);
 				break;
 			}
 		case TypeSint64:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%" NL_I64 "d", (sint64*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%" NL_I64 "d", (sint64*)nullptr);
 				break;
 			}
 		case TypeFloat:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%g", (float*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%g", (float*)nullptr);
 				break;
 			}
 		case TypeDouble:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%g", (double*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%g", (double*)nullptr);
 				break;
 			}
 		case TypeCEntityId:
@@ -1758,7 +1758,7 @@ void				CMirroredDataSet::getValueToString( const TDataSetRow& entityIndex, TPro
 			}
 		case TypeBool:
 			{
-				displayValue( this, entityIndex, propIndex, tmpStr, "%hu", (bool*)NULL );
+				displayValue( this, entityIndex, propIndex, tmpStr, "%hu", (bool*)nullptr);
 				break;
 			}
 		default:

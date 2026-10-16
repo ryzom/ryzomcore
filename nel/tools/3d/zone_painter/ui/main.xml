@@ -7,19 +7,38 @@
 <define id="case_lower" value="1" />
 <define id="case_upper" value="2" />
 
-<!-- Mouse pointer (textures from the interface atlas) -->
+<!-- Mouse pointer (textures from the interface atlas). Drawn in SOFTWARE (the app
+     calls setHWMouse(false) and hides the system cursor): the hardware path needs the
+     driver to own a native cursor, which Emscripten has no equivalent for, and drawing
+     from the atlas is identical on every platform. -->
 <group id="pointer_layer" posref="BL BL" x="0" y="0" sizeref="wh" w="0" h="0" active="true">
-	<view type="generic_pointer" id="pointer" posref="BL BL" x="0" y="0" w="32" h="32"
+	<!-- posref MM + the (1,-5) nudge is the client's cursor placement (login_config.xml):
+	     the v3 cursor bitmaps are padded so their hotspot sits at the CENTER of the 44x39
+	     frame (the arrow tip is at texel (20,15)); centering the view on the pointer puts
+	     the tip on the point, and keeps the rotating resize shapes centered too. A BL
+	     anchor draws the bitmap a half-frame up-right of where clicks land (found in the
+	     GUI sample first, same fix). -->
+	<view type="generic_pointer" id="pointer" posref="BL MM" x="1" y="-5" w="44" h="39"
 		color="255 255 255 255"
 		tx_default="curs_default.tga"
 		tx_move_window="curs_default.tga"
+		tx_resize_BR_TL="curs_resize_br_tl.tga"
+		tx_resize_BL_TR="curs_resize_bl_tr.tga"
+		tx_resize_TB="curs_resize_tb.tga"
+		tx_resize_LR="curs_resize_lr.tga"
+		tx_rotate="curs_rotate.tga"
+		tx_scale="curs_scale.tga"
 		tx_colpick="curs_pick.tga"
 		tx_pan="curs_pan.tga"
 		tx_can_pan="curs_can_pan.tga" />
+	<!-- Only the shapes CViewPointer itself defines are declared here. Tool cursors (paint
+	     mode, patch-edit mode, navigation drag) are set at runtime by texture NAME through
+	     CViewPointer::setCursor and are not slots - see the manifest in script_and_ui.cpp
+	     above zpSelectMode for the list and for where the bitmaps come from. -->
 </group>
 
 <!-- ===================================================================== -->
-<!-- Startup row templates (filled at runtime via createGroupInstance)     -->
+<!-- Startup row templates (filled at runtime via createGroupInstance) -->
 <!-- ===================================================================== -->
 
 <!-- World row: flat listbox (not a bordered button); primary hit row + path subtitle.
@@ -140,10 +159,10 @@
 	</group>
 </template>
 
-<!-- Large-icon zone tile (zone browser grid mode). 64px thumb in a sunken well, name wrapped
-     below, transparent full-tile hit button. Spawned into zp_zone_flow_sec sections at 0,0;
+<!-- Large-icon zone card (zone browser grid mode). 64px thumb in a sunken well, name wrapped
+     below, transparent full-card hit button. Spawned into zp_zone_flow_sec sections at 0,0;
      the zp_flow group assigns wrap slots in updateCoords. -->
-<template name="zp_zone_tile" keep="true" id="" title="" idx="0" thumb="">
+<template name="zp_zone_card" keep="true" id="" title="" idx="0" thumb="">
 	<group id="#id" w="178" h="106">
 		<ctrl type="button" id="btn" button_type="push_button" posref="TL TL" x="0" y="0" w="178" h="106" scale="true"
 			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
@@ -161,14 +180,14 @@
 	</group>
 </template>
 
-<!-- One auto-wrapping SECTION of zone tiles: zp_flow reflows children from its own width
+<!-- One auto-wrapping SECTION of zone cards: zp_flow reflows children from its own width
      inside updateCoords (client inventory mechanism), so resizes re-wrap without repopulation. -->
 <!-- sizeparent="parent" is a NO-OP here (template parse runs before parenting, resolves to NULL);
      kept as intent only. Real fix is C++ setParentSize(list) after spawn (startup_ui.cpp
      populateZoneList): CGroupList re-chains each child's pos parent to the PREVIOUS element
      and sizeref follows the pos parent, so without it the flow would size to the header row. -->
 <template name="zp_zone_flow_sec" keep="true" id="">
-	<group type="zp_flow" id="#id" tile_w="178" tile_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
+	<group type="zp_flow" id="#id" item_w="178" item_h="106" sizeparent="parent" sizeref="w" w="-4" h="106" />
 </template>
 
 <!-- Section divider row for scroll_text lists (world/zone browser group headers).
@@ -208,7 +227,7 @@
      sits on top of lbl for the caption. Bridge re-syncs box pushed-state after either hit
      (AH toggles the property; sync writes the result back). Frozen grays box and label hit. -->
 <template name="zp_checkbox_row" keep="true" id="" label="" onclick="" params=""
-	posparent="parent" posref="TL TL" x="0" y="0" pushed="false" w="200">
+	posparent="parent" posref="TL TL" x="0" y="0" pushed="false" w="200" labelw="170">
 	<group id="#id" posparent="#posparent" posref="#posref" x="#x" y="#y" w="#w" h="18">
 		<!-- Unchecked = empty slot; checked = filled (help checkbox_bitmap_* pair). -->
 		<ctrl type="button" id="box" button_type="toggle_button" posref="ML ML" x="0" y="0"
@@ -219,7 +238,7 @@
 			onclick_l="#onclick" params_l="#params" />
 		<!-- Transparent hit target covering the caption width (same AH as box). -->
 		<ctrl type="button" id="lbl" button_type="push_button" posparent="box" posref="MR ML" x="2" y="0"
-			w="170" h="16" scale="true"
+			w="#labelw" h="16" scale="true"
 			tx_normal="blank.tga" tx_pushed="blank.tga" tx_over="blank.tga"
 			color="0 0 0 0" col_pushed="0 0 0 0" col_over="255 255 255 20"
 			global_color_normal="false" global_color_pushed="false" global_color_over="false"
@@ -230,7 +249,7 @@
 </template>
 
 <!-- ===================================================================== -->
-<!-- Screen A: world select                                                -->
+<!-- Screen A: world select -->
 <!-- ===================================================================== -->
 <group type="container" id="world_select" w="560" pop_min_w="480" pop_max_w="700" h="480" pop_min_h="360" pop_max_h="580"
 	title="zone_painter: choose world" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -341,7 +360,7 @@
 <tree node="zone_browser"></tree>
 
 <!-- ===================================================================== -->
-<!-- Screen C: folder browser (inactive until enabled)                     -->
+<!-- Screen C: folder browser (inactive until enabled) -->
 <!-- ===================================================================== -->
 <group type="container" id="folder_browser" w="560" pop_min_w="480" pop_max_w="700" h="450" pop_min_h="310" pop_max_h="580"
 	title="zone_painter: browse for graphics" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -400,7 +419,7 @@
 <tree node="folder_browser"></tree>
 
 <!--
-  Top toolbar: slim horizontal strip (3ds Max vibe).
+  Top toolbar: slim horizontal strip (slim strip).
   Client gestionsets idiom: opened=false, header_active=false, no content stack.
   Height is driven by header_closed only (opened=true stacked HeaderH+content and
   left a tall empty gray band above the buttons). Groups:
@@ -441,8 +460,10 @@
 			onclick_l="zp_mode" params_l="2" hardtext="DISP" />
 		<ctrl style="zp_tb_radio" id="mode_prop" posparent="mode_displace" posref="MR ML" x="2" y="0" w="40" h="26"
 			onclick_l="zp_mode" params_l="3" hardtext="PROP" />
+		<ctrl style="zp_tb_radio" id="mode_patch" posparent="mode_prop" posref="MR ML" x="2" y="0" w="46" h="26"
+			onclick_l="zp_mode" params_l="4" hardtext="PATCH" />
 		<!-- group separator -->
-		<view type="bitmap" id="sep3" posparent="mode_prop" posref="MR ML" x="4" y="0" w="1" h="18"
+		<view type="bitmap" id="sep3" posparent="mode_patch" posref="MR ML" x="4" y="0" w="1" h="18"
 			texture="blank.tga" scale="true" color="120 125 135 220" global_color="false" />
 		<!-- Season face: fixed width so SPRING/SUMMER/AUTUMN/WINTER don't reflow the strip -->
 		<ctrl style="zp_tb_btn" id="btn_season" posparent="sep3" posref="MR ML" x="4" y="0" w="80" h="26"
@@ -451,6 +472,12 @@
 			texture="blank.tga" scale="true" global_color="false" color="120 125 135 220" />
 		<ctrl style="zp_tb_btn" id="btn_script" posparent="sep4" posref="MR ML" x="4" y="0" w="56" h="26"
 			onclick_l="zp_script_toggle" params_l="" hardtext="SCRIPT" />
+		<view type="bitmap" id="sep5" posparent="btn_script" posref="MR ML" x="4" y="0" w="1" h="18"
+			texture="blank.tga" scale="true" global_color="false" color="120 125 135 220" />
+		<!-- Pivot face: fixed width so SEL/WORLD/ALL OBJ/SEL OBJ/USER do not reflow the strip.
+		     Only meaningful in patch mode, so it is shown and hidden with it. -->
+		<ctrl style="zp_tb_btn" id="btn_pivot" posparent="sep5" posref="MR ML" x="4" y="0" w="76" h="26"
+			onclick_l="zp_pivot_menu" params_l="" hardtext="SEL" active="false" />
 	</group>
 	<group id="header_opened" x="0" y="0" w="0" h="0" posref="TL TL" active="false" />
 </group>
@@ -473,8 +500,78 @@
 	</group>
 </group>
 
+<!-- Pivot-point picker modal: what a rotate or scale is anchored on (the pivot-point control).
+     The last entry is an ACTION rather than a mode - it drops the user pivot where the
+     selection is, which is the only way that mode's point ever gets set. -->
+<group type="modal" id="pivot_menu" exit_click_out="true" w="180" h="196" options="skin_modal"
+	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-10" color="255 220 140 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Pivot point" />
+		<ctrl style="text_button_16" id="p0" posparent="title" posref="BM TM" x="0" y="-8" w="150"
+			onclick_l="zp_pivot_select" params_l="0" hardtext="Selection center" />
+		<ctrl style="text_button_16" id="p1" posparent="p0" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="1" hardtext="World center" />
+		<ctrl style="text_button_16" id="p2" posparent="p1" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="2" hardtext="Center of all objects" />
+		<ctrl style="text_button_16" id="p3" posparent="p2" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="3" hardtext="Center of sel. objects" />
+		<ctrl style="text_button_16" id="p4" posparent="p3" posref="BL TL" x="0" y="-4" w="150"
+			onclick_l="zp_pivot_select" params_l="4" hardtext="User pivot point" />
+		<ctrl style="text_button_16" id="pset" posparent="p4" posref="BL TL" x="0" y="-10" w="150"
+			onclick_l="zp_pivot_to_selection" params_l="" hardtext="Place at selection" />
+	</group>
+</group>
+
+<!-- Scene context menu (right click on empty space in patch mode). Kept to entries that
+     have nowhere else to live: the user pivot placement, and the checked pairs the legacy
+     kept in its own viewport right-click menu (vertex type). -->
+<group type="modal" id="scene_menu" exit_click_out="true" w="170" h="232" options="skin_modal"
+	mouse_pos="true" posref="TL TL" x="200" y="500" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<ctrl style="text_button_16" id="s_pivot" posref="TM TM" x="0" y="-10" w="150"
+			onclick_l="zp_pivot_to_selection" params_l="" hardtext="Pivot to selection" />
+		<!-- Vertex type (vertex level): PVERT_COPLANAR bit; pushed = the whole selection
+		     carries that type; the constraint applies on the next handle move -->
+		<view type="text" id="vt_label" posparent="s_pivot" posref="BM TM" x="0" y="-8" fontsize="9"
+			shadow="true" global_color="false" color="255 220 140 255" hardtext="Vertex type" />
+		<ctrl style="text_button_toggle" id="vt_coplanar" posparent="vt_label" posref="BM TM" x="-37" y="-4" w="72"
+			onclick_l="zp_vertex_type" params_l="1" hardtext="Coplanar" />
+		<ctrl style="text_button_toggle" id="vt_corner" posparent="vt_coplanar" posref="MR ML" x="4" y="0" w="72"
+			onclick_l="zp_vertex_type" params_l="0" hardtext="Corner" />
+		<!-- Interior mode (patch level): PATCH_AUTO bit; Manual bakes the derived
+		     interiors into editable points -->
+		<view type="text" id="im_label" posparent="vt_coplanar" posref="BM TM" x="37" y="-6" fontsize="9"
+			shadow="true" global_color="false" color="255 220 140 255" hardtext="Interior" />
+		<ctrl style="text_button_toggle" id="im_auto" posparent="im_label" posref="BM TM" x="-37" y="-4" w="72"
+			onclick_l="zp_interior_mode" params_l="1" hardtext="Auto" />
+		<ctrl style="text_button_toggle" id="im_manual" posparent="im_auto" posref="MR ML" x="4" y="0" w="72"
+			onclick_l="zp_interior_mode" params_l="0" hardtext="Manual" />
+		<!-- Move to zone: compass of editable board neighbors (patch selection; no legacy
+		     equivalent - the session shows several brick files, the old plugin never did) -->
+		<view type="text" id="mv_label" posparent="im_auto" posref="BM TM" x="37" y="-8" fontsize="9"
+			shadow="true" global_color="false" color="255 220 140 255" hardtext="Move to zone" />
+		<ctrl style="text_button_16" id="mv_n" posparent="mv_label" posref="BM TM" x="0" y="-4" w="34"
+			onclick_l="zp_move_to_zone" params_l="0" hardtext="N" />
+		<ctrl style="text_button_16" id="mv_nw" posparent="mv_n" posref="ML MR" x="-6" y="0" w="34"
+			onclick_l="zp_move_to_zone" params_l="7" hardtext="NW" />
+		<ctrl style="text_button_16" id="mv_ne" posparent="mv_n" posref="MR ML" x="6" y="0" w="34"
+			onclick_l="zp_move_to_zone" params_l="1" hardtext="NE" />
+		<ctrl style="text_button_16" id="mv_w" posparent="mv_nw" posref="BL TL" x="0" y="-4" w="34"
+			onclick_l="zp_move_to_zone" params_l="6" hardtext="W" />
+		<ctrl style="text_button_16" id="mv_e" posparent="mv_ne" posref="BL TL" x="0" y="-4" w="34"
+			onclick_l="zp_move_to_zone" params_l="2" hardtext="E" />
+		<ctrl style="text_button_16" id="mv_sw" posparent="mv_w" posref="BL TL" x="0" y="-4" w="34"
+			onclick_l="zp_move_to_zone" params_l="5" hardtext="SW" />
+		<ctrl style="text_button_16" id="mv_s" posparent="mv_sw" posref="MR ML" x="6" y="0" w="34"
+			onclick_l="zp_move_to_zone" params_l="4" hardtext="S" />
+		<ctrl style="text_button_16" id="mv_se" posparent="mv_s" posref="MR ML" x="6" y="0" w="34"
+			onclick_l="zp_move_to_zone" params_l="3" hardtext="SE" />
+	</group>
+</group>
+
 <!--
-  Painter control panel: Max-style rollout column.
+  Painter control panel: rollout column.
   Idiom from samples/gui Contacts (parent container + <tree node> openable children)
   and the client contact list: collapsible layer-1 headers with arrows, parent list
   scrolls when open rollouts exceed pop_max_h; vertical resizer adjusts max height.
@@ -495,7 +592,7 @@
 -->
 <!-- Parent: movable/closable; body is the tree-list of rollouts (resizer = max-H). -->
 <!-- pop_max_h caps list height (scroll when open rollouts exceed it); vertical resizers raise/lower max. -->
-<group type="container" id="painter" w="240" pop_min_w="220" pop_max_w="280" h="300" pop_min_h="180" pop_max_h="300"
+<group type="container" id="painter" w="240" pop_min_w="220" pop_max_w="280" h="470" pop_min_h="180" pop_max_h="580"
 	title="Painter" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
 	title_bar_open="false" open_button="false" right_button="true" lockable="false" openable="false"
 	opened="true" movable="true" active="false" x="552" y="580">
@@ -511,13 +608,16 @@
 	active="true" resizer="false" lockable="false">
 	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
 	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
-	<group id="content" x="0" y="0" h="52" posref="TL TL">
+	<group id="content" x="0" y="0" h="74" posref="TL TL">
 		<view type="text" id="instance_info" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
 			global_color="false" color="120 255 160 255" hardtext="" />
 		<view type="text" id="files_info" posparent="instance_info" posref="BL TL" x="0" y="-2" fontsize="10" shadow="true"
 			global_color="false" color="200 200 210 220" hardtext="1 file" />
 		<view type="text" id="hint" posparent="files_info" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
-			global_color="false" color="255 255 255 140" hardtext="T/C/D/R  O board  Y season  P tiles" />
+			global_color="false" color="255 255 255 140" hardtext="T/C/D/R O board Y season P tiles" />
+		<!-- Reset paint (mA8): whole-zone clear behind the confirm modal. -->
+		<ctrl style="text_button_16" id="btn_reset_paint" posparent="hint" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_reset_paint" params_l="" hardtext="Reset paint" />
 	</group>
 </group>
 
@@ -689,6 +789,177 @@
 	</group>
 </group>
 
+<!-- Rollout: Patch (Patch mode) - sub-object level toolbar + selection readout +
+     bind/unbind (vertex level) + no-smooth (edge level). Spec: wiki
+     zone_painter_legacy_rollout_spec.md "Mapping to the zone painter panel". -->
+<group type="container" id="roll_patch" w="228" title="Patch" global_color="false"
+	header_color="UI:SAVE:WIN:COLORS:SAMPLE" opened="true" openable="true" movable="false"
+	active="true" resizer="false" lockable="false">
+	<group id="header_closed" x="0" y="0" h="14" posref="TL TL"></group>
+	<group id="header_opened" x="0" y="0" h="14" posref="TL TL"></group>
+	<group id="content" x="0" y="0" h="374" posref="TL TL">
+		<!-- Level toolbar (text faces until the icon pass; toggle-off returns to Object) -->
+		<view type="text" id="lbl_level" posref="TL TL" x="6" y="-4" fontsize="10" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Level" />
+		<ctrl style="text_button_toggle" id="lvl_vert" posparent="lbl_level" posref="BL TL" x="0" y="-2"
+			onclick_l="zp_sub_object" params_l="1" hardtext="VERT" />
+		<ctrl style="text_button_toggle" id="lvl_edge" posparent="lvl_vert" posref="MR ML" x="4" y="0"
+			onclick_l="zp_sub_object" params_l="2" hardtext="EDGE" />
+		<ctrl style="text_button_toggle" id="lvl_patch" posparent="lvl_edge" posref="MR ML" x="4" y="0"
+			onclick_l="zp_sub_object" params_l="3" hardtext="PATCH" />
+		<!-- Element: expand the face selection to whole islands (a selection helper, not a
+		     level - the gap and non-toggle face keep it apart from the level toolbar). -->
+		<ctrl style="text_button_16" id="btn_element" posparent="lvl_patch" posref="MR ML" x="12" y="0"
+			onclick_l="zp_patch_element" params_l="" hardtext="Elem" />
+		<!-- Selection readout (legacy right-aligned line; left here to match the column) -->
+		<view type="text" id="sel_info" posparent="lvl_vert" posref="BL TL" x="0" y="-4" fontsize="9" shadow="true"
+			global_color="false" color="200 200 210 220" hardtext="Object Level" />
+		<!-- Selection block: pick filters (vertex level; both cannot be off - unchecking
+		     one freezes the other) and Lock Handles. -->
+		<view type="text" id="lbl_filter" posparent="sel_info" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+			global_color="false" color="255 255 255 180" hardtext="Filter" />
+		<instance template="zp_checkbox_row" id="filter_verts" posparent="lbl_filter" posref="MR ML" x="6" y="0"
+			w="64" labelw="40" label="Verts" onclick="zp_patch_filter_verts" params="" />
+		<instance template="zp_checkbox_row" id="filter_vecs" posparent="filter_verts" posref="MR ML" x="10" y="0"
+			w="64" labelw="40" label="Vecs" onclick="zp_patch_filter_vecs" params="" />
+		<instance template="zp_checkbox_row" id="lock_handles" posparent="lbl_filter" posref="BL TL" x="0" y="-4"
+			w="110" labelw="86" label="Lock Handles" onclick="zp_patch_lock_handles" params="" />
+		<!-- Orientation arrows: the tile additive layer + the per-patch frame arrow (C). -->
+		<instance template="zp_checkbox_row" id="show_arrows" posparent="lock_handles" posref="MR ML" x="10" y="0"
+			w="72" labelw="48" label="Arrows" onclick="zp_patch_arrows" params="" />
+		<!-- Topology block: Bind / Unbind (vertex level), Delete (patch level; clears undo) -->
+		<view type="text" id="lbl_topo" posparent="lock_handles" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+			global_color="false" color="255 220 140 255" hardtext="Topology" />
+		<ctrl style="text_button_16" id="btn_bind" posparent="lbl_topo" posref="BL TL" x="0" y="-2"
+			onclick_l="zp_patch_bind" params_l="" hardtext="Bind" />
+		<ctrl style="text_button_16" id="btn_unbind" posparent="btn_bind" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_unbind" params_l="" hardtext="Unbind" />
+		<ctrl style="text_button_16" id="btn_weld" posparent="btn_unbind" posref="MR ML" x="8" y="0"
+			onclick_l="zp_patch_weld" params_l="" hardtext="Weld" />
+		<ctrl style="text_button_toggle" id="btn_weld_target" posparent="btn_weld" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_weld_target" params_l="" hardtext="Target" />
+		<ctrl style="text_button_16" id="btn_turn_ccw" posparent="btn_bind" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_patch_turn" params_l="ccw" hardtext="Turn CCW" />
+		<ctrl style="text_button_16" id="btn_turn_cw" posparent="btn_turn_ccw" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_turn" params_l="cw" hardtext="Turn CW" />
+		<ctrl style="text_button_16" id="btn_subdivide" posparent="btn_turn_cw" posref="MR ML" x="8" y="0"
+			onclick_l="zp_patch_subdivide" params_l="" hardtext="Subdiv" />
+		<ctrl style="text_button_16" id="btn_add_quad" posparent="btn_turn_ccw" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_patch_add_quad" params_l="" hardtext="Add" />
+		<ctrl style="text_button_16" id="btn_delete" posparent="btn_add_quad" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_delete" params_l="" hardtext="Delete" />
+		<ctrl style="text_button_16" id="btn_detach" posparent="btn_delete" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_detach" params_l="" hardtext="Detach" />
+		<ctrl style="text_button_16" id="btn_extrude" posparent="btn_detach" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_extrude" params_l="" hardtext="Extr" />
+		<!-- Hide / Unhide All (session display state: the cage and the picks skip hidden
+		     patches, the landscape keeps rendering them; cleared by topology rebuilds) -->
+		<ctrl style="text_button_16" id="btn_hide" posparent="btn_add_quad" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_patch_hide" params_l="" hardtext="Hide" />
+		<ctrl style="text_button_16" id="btn_unhide" posparent="btn_hide" posref="MR ML" x="4" y="0"
+			onclick_l="zp_patch_unhide" params_l="" hardtext="Unhide All" />
+		<!-- Propagate: the edge-level subdivide's strip walk (the split follows the strip
+		     until it loops or exits an open border). On the Hide row for space - the
+		     Subdiv row is full (clipped controls render invisible; a screenshot showed it). -->
+		<instance template="zp_checkbox_row" id="subdiv_prop" posparent="btn_unhide" posref="MR ML" x="10" y="0"
+			w="60" labelw="36" label="Prop" onclick="zp_patch_subdiv_prop" params="" />
+		<!-- Detach's Copy checkbox (mA7): checked = Detach clones the selection as a
+		     coincident island, the original stays untouched. -->
+		<instance template="zp_checkbox_row" id="detach_copy" posparent="btn_hide" posref="BL TL" x="0" y="-4"
+			w="110" labelw="86" label="Detach Copy" onclick="zp_patch_detach_copy" params="" />
+		<!-- Edge properties: No smooth (tri-state shown via the (mixed) tag) -->
+		<instance template="zp_checkbox_row" id="no_smooth" posparent="detach_copy" posref="BL TL" x="0" y="-8"
+			label="No smooth" onclick="zp_patch_nosmooth" params="" />
+		<view type="text" id="no_smooth_state" posparent="no_smooth" posref="MR ML" x="6" y="0" fontsize="9" shadow="true"
+			global_color="false" color="255 200 120 220" hardtext="" />
+		<!-- Surface Properties (patch level): the smoothing-group grid (tri-state click:
+		     a bit on ALL selected patches clears, off or mixed sets), Clear All, and the
+		     per-patch tile orders with Balance (max per axis over the selection). -->
+		<view type="text" id="lbl_surf" posparent="no_smooth" posref="BL TL" x="0" y="-6" fontsize="10" shadow="true"
+			global_color="false" color="255 220 140 255" hardtext="Surface" />
+		<ctrl style="text_button_toggle" id="sg_0" posparent="lbl_surf" posref="BL TL" x="0" y="-2"
+			onclick_l="zp_patch_smgroup" params_l="0" hardtext="1" />
+		<ctrl style="text_button_toggle" id="sg_1" posparent="sg_0" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="1" hardtext="2" />
+		<ctrl style="text_button_toggle" id="sg_2" posparent="sg_1" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="2" hardtext="3" />
+		<ctrl style="text_button_toggle" id="sg_3" posparent="sg_2" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="3" hardtext="4" />
+		<ctrl style="text_button_toggle" id="sg_4" posparent="sg_3" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="4" hardtext="5" />
+		<ctrl style="text_button_toggle" id="sg_5" posparent="sg_4" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="5" hardtext="6" />
+		<ctrl style="text_button_toggle" id="sg_6" posparent="sg_5" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="6" hardtext="7" />
+		<ctrl style="text_button_toggle" id="sg_7" posparent="sg_6" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="7" hardtext="8" />
+		<ctrl style="text_button_toggle" id="sg_8" posparent="sg_0" posref="BL TL" x="0" y="-2"
+			onclick_l="zp_patch_smgroup" params_l="8" hardtext="9" />
+		<ctrl style="text_button_toggle" id="sg_9" posparent="sg_8" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="9" hardtext="10" />
+		<ctrl style="text_button_toggle" id="sg_10" posparent="sg_9" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="10" hardtext="11" />
+		<ctrl style="text_button_toggle" id="sg_11" posparent="sg_10" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="11" hardtext="12" />
+		<ctrl style="text_button_toggle" id="sg_12" posparent="sg_11" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="12" hardtext="13" />
+		<ctrl style="text_button_toggle" id="sg_13" posparent="sg_12" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="13" hardtext="14" />
+		<ctrl style="text_button_toggle" id="sg_14" posparent="sg_13" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="14" hardtext="15" />
+		<ctrl style="text_button_toggle" id="sg_15" posparent="sg_14" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="15" hardtext="16" />
+		<ctrl style="text_button_toggle" id="sg_16" posparent="sg_8" posref="BL TL" x="0" y="-2"
+			onclick_l="zp_patch_smgroup" params_l="16" hardtext="17" />
+		<ctrl style="text_button_toggle" id="sg_17" posparent="sg_16" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="17" hardtext="18" />
+		<ctrl style="text_button_toggle" id="sg_18" posparent="sg_17" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="18" hardtext="19" />
+		<ctrl style="text_button_toggle" id="sg_19" posparent="sg_18" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="19" hardtext="20" />
+		<ctrl style="text_button_toggle" id="sg_20" posparent="sg_19" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="20" hardtext="21" />
+		<ctrl style="text_button_toggle" id="sg_21" posparent="sg_20" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="21" hardtext="22" />
+		<ctrl style="text_button_toggle" id="sg_22" posparent="sg_21" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="22" hardtext="23" />
+		<ctrl style="text_button_toggle" id="sg_23" posparent="sg_22" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="23" hardtext="24" />
+		<ctrl style="text_button_toggle" id="sg_24" posparent="sg_16" posref="BL TL" x="0" y="-2"
+			onclick_l="zp_patch_smgroup" params_l="24" hardtext="25" />
+		<ctrl style="text_button_toggle" id="sg_25" posparent="sg_24" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="25" hardtext="26" />
+		<ctrl style="text_button_toggle" id="sg_26" posparent="sg_25" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="26" hardtext="27" />
+		<ctrl style="text_button_toggle" id="sg_27" posparent="sg_26" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="27" hardtext="28" />
+		<ctrl style="text_button_toggle" id="sg_28" posparent="sg_27" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="28" hardtext="29" />
+		<ctrl style="text_button_toggle" id="sg_29" posparent="sg_28" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="29" hardtext="30" />
+		<ctrl style="text_button_toggle" id="sg_30" posparent="sg_29" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="30" hardtext="31" />
+		<ctrl style="text_button_toggle" id="sg_31" posparent="sg_30" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_smgroup" params_l="31" hardtext="32" />
+		<ctrl style="text_button_16" id="btn_sg_clear" posparent="sg_24" posref="BL TL" x="0" y="-4"
+			onclick_l="zp_patch_smgroup_clear" params_l="" hardtext="Clear" />
+		<view type="text" id="tess_info" posparent="btn_sg_clear" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
+			global_color="false" color="200 200 210 220" hardtext="Tess -" />
+		<ctrl style="text_button_16" id="tess_u_dn" posparent="tess_info" posref="MR ML" x="6" y="0"
+			onclick_l="zp_patch_tess" params_l="u-" hardtext="U-" />
+		<ctrl style="text_button_16" id="tess_u_up" posparent="tess_u_dn" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_tess" params_l="u+" hardtext="U+" />
+		<ctrl style="text_button_16" id="tess_v_dn" posparent="tess_u_up" posref="MR ML" x="6" y="0"
+			onclick_l="zp_patch_tess" params_l="v-" hardtext="V-" />
+		<ctrl style="text_button_16" id="tess_v_up" posparent="tess_v_dn" posref="MR ML" x="2" y="0"
+			onclick_l="zp_patch_tess" params_l="v+" hardtext="V+" />
+		<ctrl style="text_button_16" id="btn_balance" posparent="tess_v_up" posref="MR ML" x="6" y="0"
+			onclick_l="zp_patch_balance" params_l="" hardtext="Bal" />
+		<view type="text" id="patch_status" posparent="tess_info" posref="BL TL" x="0" y="-6" fontsize="9" shadow="true"
+			global_color="false" color="255 200 120 220" hardtext="" />
+	</group>
+</group>
+
 <!-- Tree: parent painter list hosts the six rollouts (order = column order). -->
 <tree node="painter">
 	<tree node="roll_session" />
@@ -697,10 +968,11 @@
 	<tree node="roll_fill" />
 	<tree node="roll_displace" />
 	<tree node="roll_properties" />
+	<tree node="roll_patch" />
 </tree>
 
 <!-- ===================================================================== -->
-<!-- Tileset + Displace palette: movable/closable; grids laid out in code  -->
+<!-- Tileset + Displace palette: movable/closable; grids laid out in code -->
 <!-- ===================================================================== -->
 <!-- Scroll body holds Tilesets grid then a "Displace" section (0-15 noise maps). -->
 <group type="container" id="tiles_palette" w="320" pop_min_w="220" pop_max_w="500" h="480" pop_min_h="200" pop_max_h="580"
@@ -785,7 +1057,7 @@
 <tree node="script_win"></tree>
 
 <!-- ===================================================================== -->
-<!-- Brush color picker: CCtrlColPick + sample palette texture             -->
+<!-- Brush color picker: CCtrlColPick + sample palette texture -->
 <!-- ===================================================================== -->
 <group type="container" id="color_picker" w="300" pop_min_w="280" pop_max_w="320" h="160" pop_min_h="150" pop_max_h="200"
 	title="Brush color" resizer="true" global_color="false" header_color="UI:SAVE:WIN:COLORS:SAMPLE"
@@ -823,9 +1095,100 @@
 <link expr="makeRGB(@UI:TEMP:COL:R, @UI:TEMP:COL:G, @UI:TEMP:COL:B, 255)" target="ui:zp:color_picker:content:swatch:color" />
 
 <!-- ===================================================================== -->
-<!-- Save modal (interactive flow only)                                    -->
+<!-- Save modal (interactive flow only) -->
 <!-- ===================================================================== -->
 <!-- Minimal edit-box chrome (same bevel pieces as the GUI sample). -->
+<!-- Weld distance: the panel Weld button pops this, seeded with the last-used
+     threshold; OK welds the vertex selection at the confirmed distance. -->
+<group type="modal" id="weld_dialog" exit_click_out="true" w="240" h="102" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="12"
+			shadow="true" global_color="false" hardtext="Weld vertices" />
+		<view type="text" id="dist_lbl" posref="TL TL" x="16" y="-36" color="180 200 220 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Distance:" />
+		<group type="frame" id="dist_frame" options="w_box_frame" posparent="dist_lbl" posref="MR ML" x="8" y="0"
+			w="120" h="22" color="255 255 255 255" global_color="false" display="true">
+			<group type="edit_box" id="dist" posref="TL TL" x="4" y="-5" w="112" h="13"
+				prompt="" max_num_chars="16" entry_type="float" menu_r="ui:zp:editbox_menu"
+				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+				want_return="false" clear_on_escape="false">
+				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
+					fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+			</group>
+		</group>
+		<ctrl style="text_button_16" id="btn_ok" posref="BL BL" x="16" y="14"
+			onclick_l="zp_weld_ok" params_l="" hardtext="Weld" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_ok" posref="MR ML" x="8" y="0"
+			onclick_l="zp_weld_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
+<!-- Extrude dialog: typed height + bevel outline + normal direction; shift-drag at patch
+     level is the gesture form (Z-constrained, no outline - the drag gesture is vertical
+     by design). The legacy Bevel smoothing radios are deliberately absent: walls are
+     fresh paintable surface, smoothing is the no-smooth flag's job. -->
+<group type="modal" id="extrude_dialog" exit_click_out="true" w="240" h="152" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="12"
+			shadow="true" global_color="false" hardtext="Extrude patches" />
+		<view type="text" id="dist_lbl" posref="TL TL" x="16" y="-36" color="180 200 220 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Height:" />
+		<group type="frame" id="dist_frame" options="w_box_frame" posparent="dist_lbl" posref="MR ML" x="8" y="0"
+			w="120" h="22" color="255 255 255 255" global_color="false" display="true">
+			<group type="edit_box" id="dist" posref="TL TL" x="4" y="-5" w="112" h="13"
+				prompt="" max_num_chars="16" entry_type="float" menu_r="ui:zp:editbox_menu"
+				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+				want_return="false" clear_on_escape="false">
+				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
+					fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+			</group>
+		</group>
+		<view type="text" id="outl_lbl" posparent="dist_lbl" posref="BL TL" x="0" y="-14" color="180 200 220 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Outline:" />
+		<group type="frame" id="outl_frame" options="w_box_frame" posparent="outl_lbl" posref="MR ML" x="4" y="0"
+			w="120" h="22" color="255 255 255 255" global_color="false" display="true">
+			<group type="edit_box" id="outl" posref="TL TL" x="4" y="-5" w="112" h="13"
+				prompt="" max_num_chars="16" entry_type="float" menu_r="ui:zp:editbox_menu"
+				enter_loose_focus="false" enter_recover_focus="true" reset_focus_on_hide="true"
+				want_return="false" clear_on_escape="false">
+				<view id="edit_text" type="text" x="0" y="1" posref="TL TL" multi_line="false"
+					fontsize="12" color="255 255 255 255" shadow="true" hardtext="" global_color="false" />
+			</group>
+		</group>
+		<!-- Normal: world Z, or the selection's own area-weighted eval normal (Local). -->
+		<view type="text" id="norm_lbl" posparent="outl_lbl" posref="BL TL" x="0" y="-14" color="180 200 220 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="Normal:" />
+		<ctrl style="text_button_toggle" id="norm_z" posparent="norm_lbl" posref="MR ML" x="8" y="0" w="40"
+			onclick_l="zp_extrude_normal" params_l="0" hardtext="Z" />
+		<ctrl style="text_button_toggle" id="norm_local" posparent="norm_z" posref="MR ML" x="6" y="0" w="60"
+			onclick_l="zp_extrude_normal" params_l="1" hardtext="Local" />
+		<ctrl style="text_button_16" id="btn_ok" posref="BL BL" x="16" y="14"
+			onclick_l="zp_extrude_ok" params_l="" hardtext="Extrude" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_ok" posref="MR ML" x="8" y="0"
+			onclick_l="zp_extrude_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
+<!-- Reset paint confirm (mA8): one click clears a whole zone's paint - the modal is the
+     danger guard (scripts call painter.resetZonePaint bare). -->
+<group type="modal" id="reset_dialog" exit_click_out="true" w="260" h="110" options="skin_modal"
+	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
+	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
+		<view type="text" id="title" posref="TM TM" x="0" y="-12" color="255 255 255 255" fontsize="12"
+			shadow="true" global_color="false" hardtext="Reset paint" />
+		<view type="text" id="zone" posparent="title" posref="BM TM" x="0" y="-8" color="180 220 255 255" fontsize="11"
+			shadow="true" global_color="false" hardtext="" />
+		<view type="text" id="warn" posparent="zone" posref="BM TM" x="0" y="-4" color="255 200 120 255" fontsize="10"
+			shadow="true" global_color="false" hardtext="Clears every tile, color and displace." />
+		<ctrl style="text_button_16" id="btn_ok" posref="BL BL" x="16" y="14"
+			onclick_l="zp_reset_ok" params_l="" hardtext="Reset" />
+		<ctrl style="text_button_16" id="btn_cancel" posparent="btn_ok" posref="MR ML" x="8" y="0"
+			onclick_l="zp_reset_cancel" params_l="" hardtext="Cancel" />
+	</group>
+</group>
+
 <group type="modal" id="save_dialog" exit_click_out="false" w="360" h="170" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
 	<group id="content" x="0" y="0" posref="TL TL" sizeref="wh" w="0" h="0">
@@ -862,15 +1225,15 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Quick-action context menus (session board: plain L-click on a cell).  -->
-<!-- Real NLGUI context menus (type="menu"/CGroupMenu; see nel_sample_gui  -->
-<!-- widgets_sample.xml base_menu/sample_menu), NOT framed dialogs with    -->
-<!-- stacked push buttons: compact rows, hover highlight, auto-dismiss on  -->
-<!-- selection or click-away/ESC (CGroupMenu hardcodes ExitClickOut+       -->
-<!-- ExitKeyPushed; ../src/gui/group_menu.cpp). No visible Cancel row;     -->
-<!-- nothing depends on Cancel cleanup (PendingActionBasename is           -->
-<!-- overwritten by the next popup open regardless of how the previous    -->
-<!-- one closed).                                                          -->
+<!-- Quick-action context menus (session board: plain L-click on a cell). -->
+<!-- Real NLGUI context menus (type="menu"/CGroupMenu; see nel_sample_gui -->
+<!-- widgets_sample.xml base_menu/sample_menu), NOT framed dialogs with -->
+<!-- stacked push buttons: compact rows, hover highlight, auto-dismiss on -->
+<!-- selection or click-away/ESC (CGroupMenu hardcodes ExitClickOut+ -->
+<!-- ExitKeyPushed; ../src/gui/group_menu.cpp). No visible Cancel row; -->
+<!-- nothing depends on Cancel cleanup (PendingActionBasename is -->
+<!-- overwritten by the next popup open regardless of how the previous -->
+<!-- one closed). -->
 <!-- ===================================================================== -->
 <group type="menu" id="zp_ctx_menu_base" mouse_pos="true" space="1" fontsize="12" shadow="true"
 	color="255 255 255 200" shadow_color="0 0 0 255" color_over="255 255 255 255" shadow_color_over="0 0 0 255"
@@ -911,7 +1274,7 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Close dirty confirm: Save first / Close without saving / Cancel       -->
+<!-- Close dirty confirm: Save first / Close without saving / Cancel -->
 <!-- ===================================================================== -->
 <group type="modal" id="close_confirm" exit_click_out="false" w="360" h="140" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">
@@ -957,7 +1320,7 @@
 </group>
 
 <!-- ===================================================================== -->
-<!-- Context brick picker: Screen B list idiom                             -->
+<!-- Context brick picker: Screen B list idiom -->
 <!-- ===================================================================== -->
 <group type="modal" id="context_picker" exit_click_out="true" w="560" h="360" options="skin_modal"
 	mouse_pos="false" posref="MM MM" x="0" y="0" active="false">

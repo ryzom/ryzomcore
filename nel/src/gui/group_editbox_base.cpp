@@ -28,7 +28,7 @@
 namespace NLGUI
 {
 
-	CGroupEditBoxBase *CGroupEditBoxBase::_CurrSelection = NULL;
+	CGroupEditBoxBase *CGroupEditBoxBase::_CurrSelection = nullptr;
 
 	CGroupEditBoxBase::CGroupEditBoxBase( const TCtorParam &param ) :
 	CInterfaceGroup( param )

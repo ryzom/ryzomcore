@@ -317,6 +317,18 @@ IF (Python3_Interpreter_FOUND)
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 	SET_TESTS_PROPERTIES(pipeline_max_rpo_paint_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 3600)
 
+	# pm_encode_corpus.py: the PatchMesh chunk-stream encoder (Tier B) — the whole-file
+	# NULL-EDIT proof on every file (--pm-modify-save-test: every base stream and every
+	# modifier 0x1140 decoded and written back through encodePatchMesh in place, whole .max
+	# rewritten, every stream must stay byte-identical). Decode->encode is the identity
+	# BEFORE any topological op exists. Floors pin the Tier B survey coverage (6943 base +
+	# 1539 modifier copies over the ligo corpus).
+	ADD_TEST(NAME pipeline_max_pm_encode_corpus
+		COMMAND ${Python3_EXECUTABLE} pm_encode_corpus.py --gate
+			--bin $<TARGET_FILE_DIR:pipeline_max_corpus_test>
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	SET_TESTS_PROPERTIES(pipeline_max_pm_encode_corpus PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 3600)
+
 	IF (TARGET unit_test)
 		ADD_DEPENDENCIES(unit_test pipeline_max_corpus_test pipeline_max_export_skel pipeline_max_export_anim pipeline_max_export_swt pipeline_max_export_ig pipeline_max_export_zone pipeline_max_export_shape pipeline_max_export_pacs_prim pipeline_max_export_cmb pipeline_max_export_veget pipeline_max_export_clod shape_lightmapper)
 	ENDIF (TARGET unit_test)

@@ -285,7 +285,7 @@ void CDriverGL3::flushUserUBOs()
 		// Create driver info on first use
 		if (!ub->DrvInfos)
 		{
-			ItUBDrvInfoPtrList it = _UBDrvInfos.insert(_UBDrvInfos.end(), (IUBDrvInfos *)NULL);
+			ItUBDrvInfoPtrList it = _UBDrvInfos.insert(_UBDrvInfos.end(), (IUBDrvInfos *)nullptr);
 			CUBDrvInfosGL3 *info = new CUBDrvInfosGL3(this, it, ub);
 			*it = info;
 			ub->DrvInfos = info;
@@ -310,7 +310,7 @@ void CDriverGL3::flushUserUBOs()
 			else
 			{
 				// Orphan + rewrite (same size)
-				nglBufferData(GL_UNIFORM_BUFFER, dataSize, NULL, usage);
+				nglBufferData(GL_UNIFORM_BUFFER, dataSize, nullptr, usage);
 				nglBufferSubData(GL_UNIFORM_BUFFER, 0, dataSize, ub->data());
 			}
 

@@ -44,7 +44,7 @@ namespace NLSOUND {
 class CStreamSource : public CSourceCommon
 {
 public:
-	CStreamSource(CStreamSound *streamSound = NULL, bool spawn = false, TSpawnEndCallback cb = 0, void *cbUserParam = 0, NL3D::CCluster *cluster = 0, CGroupController *groupController = NULL);
+	CStreamSource(CStreamSound *streamSound = nullptr, bool spawn = false, TSpawnEndCallback cb = nullptr, void *cbUserParam = nullptr, NL3D::CCluster *cluster = nullptr, CGroupController *groupController = nullptr);
 	virtual ~CStreamSource() NL_OVERRIDE;
 	
 	/// Return the sound binded to the source (or NULL if there is no sound)
@@ -98,11 +98,11 @@ public:
 	/// \name Streaming source controls
 	//@{
 	/// Set the sample format. (channels = 1, 2, ...; bitsPerSample = 8, 16; frequency = samples per second, 44100, ...)
-	virtual void					setFormat(uint8 channels, uint8 bitsPerSample, uint32 frequency) NL_OVERRIDE;	
+	virtual void					setFormat(uint8 channels, uint8 bitsPerSample, uint32 frequency) NL_OVERRIDE;
 	/// Return the sample format information.
-	virtual void					getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const NL_OVERRIDE;	
+	virtual void					getFormat(uint8 &channels, uint8 &bitsPerSample, uint32 &frequency) const NL_OVERRIDE;
 	/// Get a writable pointer to the buffer of specified size. Use capacity to specify the required bytes. Returns NULL when all the buffer space is already filled. Call setFormat() first.
-	virtual uint8					*lock(uint capacity) NL_OVERRIDE;	
+	virtual uint8					*lock(uint capacity) NL_OVERRIDE;
 	/// Notify that you are done writing to the locked buffer, so it can be copied over to hardware if needed. Set size to the number of bytes actually written to the buffer. Returns true if ok.
 	virtual bool					unlock(uint size) NL_OVERRIDE;
 	/// Get the recommended buffer size to use with lock()/unlock()
@@ -128,7 +128,7 @@ protected:
 	TSOURCE_TYPE					getType() const NL_OVERRIDE								{ return SOURCE_STREAM; }
 
 	/// Returns if this logical source has a physical source attached to it.
-	inline bool						hasPhysicalSource() const					{ return m_Track != NULL; }
+	inline bool						hasPhysicalSource() const					{ return m_Track != nullptr; }
 
 	/// Get the physical source of the track that is in use by this source.
 	inline ISource					*getPhysicalSource()						{ return m_Track->getPhysicalSource(); }

@@ -64,7 +64,7 @@ public:
 	/** Called when the picking action has been canceled.
 	  * Default behaviour is to restore the default tool
 	  */
-	virtual void cancelPick() { getEditor().setCurrentTool(NULL); }
+	virtual void cancelPick() { getEditor().setCurrentTool(nullptr); }
 	// Test to see if an instance is 'pickable' (default is yes)
 	virtual bool canPick(const CInstance &/* instance */) const { return true; }
 

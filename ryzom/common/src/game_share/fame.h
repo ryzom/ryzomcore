@@ -77,7 +77,7 @@ public:
 	public:
 		bool getCultThresholdForCiv( PVP_CLAN::TPVPClan civ, sint32& kami, sint32& karavan, sint32& neutral, sint32& marauder) const
 		{
-			const CTribeCultThreshold * tc = 0;
+			const CTribeCultThreshold * tc = nullptr;
 			switch( civ )
 			{
 			case PVP_CLAN::Matis:
@@ -123,7 +123,7 @@ public:
 
 	static CStaticFames &getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CStaticFames();
 
 		return *_Instance;
@@ -250,7 +250,7 @@ public:
 	/// Singleton accessor
 	static CFameInterface &getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 		{
 			_Instance = new CFameInterface;
 		}
@@ -358,8 +358,9 @@ public:
 private:
 
 	CFameInterface()
-		: _FameDataSet(NULL),
-		_FameOverload(NULL)
+		: _FameDataSet(nullptr)
+	    ,
+		_FameOverload(nullptr)
 	{}
 
 	// fame data for civilisation, guild or player entity

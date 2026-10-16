@@ -248,7 +248,7 @@ bool convertLightmapLight(NL3D::CLightmapLight &out, INode &node, SCENELIB::SNod
 	out.Direction = NLMISC::CVector(0, 0, -1);
 	if (kind == kindTargetSpot || kind == kindTargetDir)
 	{
-		INode *target = NULL;
+		INode *target = nullptr;
 		if (CControlLookAt *la = dynamic_cast<CControlLookAt *>(node.getReference(0)))
 			target = dynamic_cast<INode *>(la->targetNode());
 		if (target)

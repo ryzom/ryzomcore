@@ -72,10 +72,10 @@ CRenderTrav::CRenderTrav()
 	_MaxTransparencyPriority = 0;
 	OrderOpaqueList.init(1024);
 	setupTransparencySorting();
-	Driver = NULL;
+	Driver = nullptr;
 	_CurrentPassOpaque = true;
 
-	_CacheLightContribution= NULL;
+	_CacheLightContribution = nullptr;
 
 	// Default light Setup.
 	LightingSystemEnabled= false;
@@ -87,8 +87,8 @@ CRenderTrav::CRenderTrav()
 
 	_StrongestLightTouched = true;
 
-	_MeshSkinManager= NULL;
-	_ShadowMeshSkinManager= NULL;
+	_MeshSkinManager = nullptr;
+	_ShadowMeshSkinManager = nullptr;
 
 	// Light table mode: each unique CPointLight is uploaded to the driver once
 	// per frame via setLightTableEntry(). Per-object rendering then calls
@@ -103,7 +103,7 @@ CRenderTrav::CRenderTrav()
 	_MaxLightTableSize= (uint)~0;
 
 	_LayersRenderingOrder= true;
-	_FirstWaterModel = NULL;
+	_FirstWaterModel = nullptr;
 }
 
 
@@ -173,7 +173,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		}
 
 		// fill the OTs.
-		CTransform			**itRdrModel= NULL;
+		CTransform			**itRdrModel = nullptr;
 		uint32				nNbModels = _CurrentNumVisibleModels;
 		if(nNbModels)
 			itRdrModel= &RenderList[0];
@@ -250,15 +250,15 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		{
 			// Batched traversal: pre-fill the light table, then render.
 			// When the table is full, render the batch, flush, and continue.
-			while(OrderOpaqueList.get() != NULL)
+			while(OrderOpaqueList.get() != nullptr)
 			{
 				// Phase 1: collect lights for this batch
 				COrderingTable<CTransform>::CIterator batchStart = OrderOpaqueList.iterator();
 				uint batchCount = 0;
-				while(OrderOpaqueList.get() != NULL)
+				while(OrderOpaqueList.get() != nullptr)
 				{
 					CTransform *tr = OrderOpaqueList.get();
-					const CLightContribution *lc = NULL;
+					const CLightContribution *lc = nullptr;
 					if(tr->isLightable())
 					{
 						CSkeletonModel *ancestor = tr->getAncestorSkeletonModel();
@@ -295,14 +295,14 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 
 				// If more objects remain, flush for next batch
 				OrderOpaqueList.setIterator(batchEnd);
-				if(OrderOpaqueList.get() != NULL)
+				if(OrderOpaqueList.get() != nullptr)
 					flushLightTable();
 			}
 		}
 		else
 		{
 			// Non-table mode: single-pass render
-			while(OrderOpaqueList.get() != NULL)
+			while(OrderOpaqueList.get() != nullptr)
 			{
 				#ifdef NL_DEBUG_RENDER_TRAV
 					CTransformShape *trShape = dynamic_cast<CTransformShape *>(OrderOpaqueList.get());
@@ -366,7 +366,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		// hidden behind the caster's own reflection) — skip the cost.
 		if (!Scene->getWaterReflectionManager().isRenderingReflection())
 		{
-			if(Scene->getLandscapePolyDrawingCallback() != NULL)
+			if(Scene->getLandscapePolyDrawingCallback() != nullptr)
 			{
 				Scene->getLandscapePolyDrawingCallback()->beginPolyDrawing();
 			}
@@ -381,7 +381,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		if(Scene->isNextRenderProfile())
 		{
 			OrderOpaqueList.begin();
-			while( OrderOpaqueList.get() != NULL )
+			while( OrderOpaqueList.get() != nullptr)
 			{
 				OrderOpaqueList.get()->profileRender();
 				OrderOpaqueList.next();
@@ -444,7 +444,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		for(std::vector<CLayeredOrderingTable<CTransform> >::iterator it = _OrderTransparentListByPriority.begin(); it != _OrderTransparentListByPriority.end(); ++it)
 		{
 			it->begin(_LayersRenderingOrder);
-			while( it->get() != NULL )
+			while( it->get() != nullptr)
 			{
 				#ifdef NL_DEBUG_RENDER_TRAV
 					CTransformShape *trShape = dynamic_cast<CTransformShape *>(it->get());
@@ -468,7 +468,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 			for(std::vector<CLayeredOrderingTable<CTransform> >::iterator it = _OrderTransparentListByPriority.begin(); it != _OrderTransparentListByPriority.end(); ++it)
 			{
 				it->begin();
-				while( it->get() != NULL )
+				while( it->get() != nullptr)
 				{
 					it->get()->profileRender();
 					it->next();
@@ -484,7 +484,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		for(std::vector<CLayeredOrderingTable<CTransform> >::iterator it = _OrderTransparentListByPriority.begin(); it != _OrderTransparentListByPriority.end(); ++it)
 		{
 			it->begin(_LayersRenderingOrder);
-			while( it->get() != NULL )
+			while( it->get() != nullptr)
 			{
 				if (!it->get()->isFlare())
 				{
@@ -511,7 +511,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 			for(std::vector<CLayeredOrderingTable<CTransform> >::iterator it = _OrderTransparentListByPriority.begin(); it != _OrderTransparentListByPriority.end(); ++it)
 			{
 				it->begin();
-				while( it->get() != NULL )
+				while( it->get() != nullptr)
 				{
 					if (!it->get()->isFlare())
 					{
@@ -530,7 +530,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 		for(std::vector<CLayeredOrderingTable<CTransform> >::iterator it = _OrderTransparentListByPriority.begin(); it != _OrderTransparentListByPriority.end(); ++it)
 		{
 			it->begin(_LayersRenderingOrder);
-			while( it->get() != NULL )
+			while( it->get() != nullptr)
 			{
 				if (it->get()->isFlare())
 				{
@@ -557,7 +557,7 @@ void		CRenderTrav::traverse(UScene::TRenderPart renderPart, bool newRender, bool
 			for(std::vector<CLayeredOrderingTable<CTransform> >::iterator it = _OrderTransparentListByPriority.begin(); it != _OrderTransparentListByPriority.end(); ++it)
 			{
 				it->begin();
-				while( it->get() != NULL )
+				while( it->get() != nullptr)
 				{
 					if (it->get()->isFlare())
 					{
@@ -633,7 +633,7 @@ void		CRenderTrav::removeRenderModel(CTransform *m)
 		// if i am really this entry, then set NULL
 		if(RenderList[i]==m)
 		{
-			RenderList[i]= NULL;
+			RenderList[i] = nullptr;
 			break;
 		}
 	}
@@ -718,7 +718,7 @@ void		CRenderTrav::resetLightSetup()
 		// setup NULL point lights (=> cache will fail), so no need to setup other lights in Driver.
 		for(i=0; i<NL3D_MAX_LIGHT_CONTRIBUTION; i++)
 		{
-			_LastPointLight[i]= NULL;
+			_LastPointLight[i] = nullptr;
 		}
 
 
@@ -727,7 +727,7 @@ void		CRenderTrav::resetLightSetup()
 
 
 		// clear the cache.
-		_CacheLightContribution= NULL;
+		_CacheLightContribution = nullptr;
 		_NumLightEnabled= 0;
 
 		_StrongestLightTouched = true;
@@ -752,7 +752,7 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 	uint		i;
 
 	// if same lightContribution, no-op.
-	if (_CacheLightContribution == lightContribution && (lightContribution == NULL || _LastLocalAttenuation == useLocalAttenuation))
+	if (_CacheLightContribution == lightContribution && (lightContribution == nullptr || _LastLocalAttenuation == useLocalAttenuation))
 		return;
 	// else, must setup the lights into driver.
 	else
@@ -801,7 +801,7 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 			//-----------
 			uint	plId=0;
 			// for the list of light.
-			while(lightContribution->PointLight[plId]!=NULL)
+			while(lightContribution->PointLight[plId] != nullptr)
 			{
 				CPointLight		*pl= lightContribution->PointLight[plId];
 				uint			inf;
@@ -875,7 +875,7 @@ void		CRenderTrav::changeLightSetup(CLightContribution	*lightContribution, bool 
 			}
 
 			// cache the setup.
-			_CacheLightContribution = NULL;
+			_CacheLightContribution = nullptr;
 			_NumLightEnabled= 0;
 		}
 
@@ -898,7 +898,7 @@ void		CRenderTrav::flushLightTable()
 	Driver->setLightTableSize(1);
 
 	// Clear light contribution cache so next object gets full setup
-	_CacheLightContribution = NULL;
+	_CacheLightContribution = nullptr;
 }
 
 // ***************************************************************************
@@ -910,7 +910,7 @@ bool		CRenderTrav::collectObjectLights(const CLightContribution *lightContributi
 	// Count how many new table slots this object needs
 	uint newLightsNeeded = 0;
 	uint plId = 0;
-	while(lightContribution->PointLight[plId] != NULL)
+	while(lightContribution->PointLight[plId] != nullptr)
 	{
 		if(lightContribution->PointLight[plId]->getTableIndex() < 0)
 			newLightsNeeded++;
@@ -924,7 +924,7 @@ bool		CRenderTrav::collectObjectLights(const CLightContribution *lightContributi
 
 	// Register new lights in the table
 	plId = 0;
-	while(lightContribution->PointLight[plId] != NULL)
+	while(lightContribution->PointLight[plId] != nullptr)
 	{
 		CPointLight *pl = lightContribution->PointLight[plId];
 		if(pl->getTableIndex() < 0)
@@ -951,7 +951,7 @@ bool		CRenderTrav::collectObjectLights(const CLightContribution *lightContributi
 void		CRenderTrav::changeLightSetupTable(CLightContribution *lightContribution, bool useLocalAttenuation)
 {
 	// Cache check: same CLightContribution* + attenuation mode => skip
-	if (_CacheLightContribution == lightContribution && (lightContribution == NULL || _LastLocalAttenuation == useLocalAttenuation))
+	if (_CacheLightContribution == lightContribution && (lightContribution == nullptr || _LastLocalAttenuation == useLocalAttenuation))
 		return;
 
 	_StrongestLightTouched = true;
@@ -963,7 +963,7 @@ void		CRenderTrav::changeLightSetupTable(CLightContribution *lightContribution, 
 		{
 			uint newLightsNeeded = 0;
 			uint plId = 0;
-			while(lightContribution->PointLight[plId] != NULL)
+			while(lightContribution->PointLight[plId] != nullptr)
 			{
 				if(lightContribution->PointLight[plId]->getTableIndex() < 0)
 					newLightsNeeded++;
@@ -1003,7 +1003,7 @@ void		CRenderTrav::changeLightSetupTable(CLightContribution *lightContribution, 
 
 		// Point lights
 		uint plId = 0;
-		while(lightContribution->PointLight[plId] != NULL)
+		while(lightContribution->PointLight[plId] != nullptr)
 		{
 			CPointLight *pl = lightContribution->PointLight[plId];
 			uint8 inf;
@@ -1061,9 +1061,9 @@ void		CRenderTrav::changeLightSetupTable(CLightContribution *lightContribution, 
 	else
 	{
 		// NULL lightContribution: disable all
-		Driver->setLights(NULL, NULL, 0, 0, CRGBA::Black);
+		Driver->setLights(nullptr, nullptr, 0, 0, CRGBA::Black);
 
-		_CacheLightContribution = NULL;
+		_CacheLightContribution = nullptr;
 		_NumLightEnabled = 0;
 	}
 }

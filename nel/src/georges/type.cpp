@@ -64,7 +64,7 @@ CType::~CType ()
 void CType::write (xmlDocPtr doc) const
 {
 	// Create the first node
-	xmlNodePtr node = xmlNewDocNode (doc, NULL, (const xmlChar*)"TYPE", NULL);
+	xmlNodePtr node = xmlNewDocNode (doc, nullptr, (const xmlChar*)"TYPE", nullptr);
 	xmlDocSetRootElement (doc, node);
 
 	// Type
@@ -99,7 +99,7 @@ void CType::write (xmlDocPtr doc) const
 	uint def = 0;
 	for (def = 0; def<Definitions.size(); def++)
 	{
-		xmlNodePtr defNode = xmlNewChild ( node, NULL, (const xmlChar*)"DEFINITION", NULL);
+		xmlNodePtr defNode = xmlNewChild ( node, nullptr, (const xmlChar*)"DEFINITION", nullptr);
 		xmlSetProp (defNode, (const xmlChar*)"Label", (const xmlChar*)Definitions[def].Label.c_str());
 		xmlSetProp (defNode, (const xmlChar*)"Value", (const xmlChar*)Definitions[def].Value.c_str());
 	}
@@ -113,7 +113,7 @@ void CType::write (xmlDocPtr doc) const
 void CType::read (xmlNodePtr root)
 {
 	// Check node name
-	if ( ((const char*)root->name == NULL) || (strcmp ((const char*)root->name, "TYPE") != 0) )
+	if ( ((const char*)root->name == nullptr) || (strcmp ((const char*)root->name, "TYPE") != 0) )
 	{
 		// Throw exception
 		warning2 (true, "read", "XML Syntax error in block line %d, node (%s) should be TYPE.",
@@ -406,12 +406,12 @@ public:
 					if (type == UFormDfn::EntryType)
 					{
 						// The atom
-						const CFormElmAtom *atom = node ? safe_cast<const CFormElmAtom*> (node) : NULL;
+						const CFormElmAtom *atom = node ? safe_cast<const CFormElmAtom*> (node) : nullptr;
 
 						// Evale
 						nlassert (nodeType);
 						string res;
-						if (nodeType->getValue (res, Form, atom, *parentDfn, parentIndex, UFormElm::Eval, NULL, round+1, value))
+						if (nodeType->getValue (res, Form, atom, *parentDfn, parentIndex, UFormElm::Eval, nullptr, round+1, value))
 						{
 							// Request exist ?
 							if (requestExist)
@@ -735,12 +735,12 @@ bool CType::getValue (string &result, const CForm *form, const CFormElmAtom *nod
 							if (type == UFormDfn::EntryType)
 							{
 								// The atom
-								const CFormElmAtom *atom = node ? safe_cast<const CFormElmAtom*> (node) : NULL;
+								const CFormElmAtom *atom = node ? safe_cast<const CFormElmAtom*> (node) : nullptr;
 
 								// Evale
 								nlassert (nodeType);
 								string result2;
-								if (nodeType->getValue (result2, form, atom, *parentDfn, parentIndex, UFormElm::Eval, NULL, round+1, valueName.c_str ()))
+								if (nodeType->getValue (result2, form, atom, *parentDfn, parentIndex, UFormElm::Eval, nullptr, round+1, valueName.c_str ()))
 								{
 									dest += result2;
 								}

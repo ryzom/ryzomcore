@@ -474,7 +474,7 @@ static int exportLigoFile(const std::string &inputBase, CScene &scene, const NLL
 		// Nine bricks from the transition scheme grid.
 		int rc = 0;
 		// Classify the non-frozen patches on the grid.
-		CNodeImpl *transitionZone[9] = { NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL };
+		CNodeImpl *transitionZone[9] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 		for (size_t i = 0; i < nodes.size(); ++i)
 		{
 			if (nodes[i].Frozen) continue;

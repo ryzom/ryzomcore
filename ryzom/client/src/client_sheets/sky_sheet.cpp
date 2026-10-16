@@ -32,7 +32,7 @@ void CSkySheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix
 	item.getValueByName(InstanceGroupName, (prefix + "InstanceGroupName").c_str());
 	item.getValueByName(AnimationName, (prefix + "AnimationName").c_str());
 	item.getValueByName(AnimLengthInSeconds, (prefix + "AnimLengthInSeconds").c_str());
-	const NLGEORGES::UFormElm *elm = NULL;
+	const NLGEORGES::UFormElm *elm = nullptr;
 	if(item.getNodeByName (&elm, "Objects") && elm)
 	{
 		uint numObjects;

@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 #endif
 
 	// don't create log.log anymore because client.log is used
-	createDebug(NULL, false);
+	createDebug(nullptr, false);
 
 	INelContext::getInstance().setWindowedApplication(true);
 

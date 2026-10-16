@@ -40,7 +40,8 @@ const sint16 LOG_CBINDEX = 0;
  * Constructor
  */
 CNetDisplayer::CNetDisplayer(bool autoConnect) :
-	_Server(NULL), _ServerAllocated (false) // disable logging otherwise an infinite recursion may occur
+	_Server(nullptr)
+    , _ServerAllocated (false) // disable logging otherwise an infinite recursion may occur
 {
 	if (autoConnect) findAndConnect();
 }
@@ -51,7 +52,7 @@ CNetDisplayer::CNetDisplayer(bool autoConnect) :
  */
 void CNetDisplayer::findAndConnect()
 {
-	if (_Server == NULL)
+	if (_Server == nullptr)
 	{
 		_Server = new CCallbackClient();
 		_ServerAllocated = true;
@@ -68,11 +69,11 @@ void CNetDisplayer::findAndConnect()
  */
 void CNetDisplayer::setLogServer (const CInetHost& logServerAddr)
 {
-	if (_Server != NULL && _Server->connected()) return;
+	if (_Server != nullptr && _Server->connected()) return;
 
 	_ServerAddr = logServerAddr;
 
-	if (_Server == NULL)
+	if (_Server == nullptr)
 	{
 		_Server = new CCallbackClient();
 		_ServerAllocated = true;
@@ -90,7 +91,7 @@ void CNetDisplayer::setLogServer (const CInetHost& logServerAddr)
 
 void CNetDisplayer::setLogServer (CCallbackClient *server)
 {
-	if (_Server != NULL && _Server->connected()) return;
+	if (_Server != nullptr && _Server->connected()) return;
 
 	_Server = server;
 }
@@ -118,7 +119,7 @@ void CNetDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 {
 	try
 	{
-		if (_Server == NULL || !_Server->connected())
+		if (_Server == nullptr || !_Server->connected())
 		{
 			return;
 		}
@@ -154,7 +155,7 @@ void CNetDisplayer::doDisplay ( const CLog::TDisplayInfo& args, const char *mess
 		CMessage msg("LOG" );
 		string s = str;
 		msg.serial( s );
-		_Server->send (msg, 0, false);
+		_Server->send (msg, nullptr, false);
 	}
 	catch(const NLMISC::Exception& )
 	{

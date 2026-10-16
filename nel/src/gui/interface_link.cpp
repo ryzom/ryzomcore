@@ -51,10 +51,10 @@ namespace NLGUI
 	CInterfaceLink::TLinkList CInterfaceLink::_LinkList;
 	CInterfaceLink::TLinkVect CInterfaceLink::_LinksWithNoTarget;
 	//
-	CInterfaceLink *CInterfaceLink::_FirstTriggeredLink[2] = { NULL, NULL };
-	CInterfaceLink *CInterfaceLink::_LastTriggeredLink[2] = { NULL, NULL };
-	CInterfaceLink *CInterfaceLink::_CurrUpdatedLink = NULL;
-	CInterfaceLink *CInterfaceLink::_NextUpdatedLink = NULL;
+	CInterfaceLink *CInterfaceLink::_FirstTriggeredLink[2] = { nullptr, nullptr };
+	CInterfaceLink *CInterfaceLink::_LastTriggeredLink[2] = { nullptr, nullptr };
+	CInterfaceLink *CInterfaceLink::_CurrUpdatedLink = nullptr;
+	CInterfaceLink *CInterfaceLink::_NextUpdatedLink = nullptr;
 	uint CInterfaceLink::_CurrentTriggeredLinkList = 0;
 
 	bool CInterfaceLink::_UpdateAllLinks = false;
@@ -172,11 +172,11 @@ namespace NLGUI
 		// add an entry in the links list
 		_LinkList.push_front(this);
 		_ListEntry = _LinkList.begin();
-		_PrevTriggeredLink[0] = _PrevTriggeredLink[1] = NULL;
-		_NextTriggeredLink[0] = _NextTriggeredLink[1] = NULL;
+		_PrevTriggeredLink[0] = _PrevTriggeredLink[1] = nullptr;
+		_NextTriggeredLink[0] = _NextTriggeredLink[1] = nullptr;
 		_Triggered[0] = _Triggered[1] = false;
-		_ParseTree = NULL;
-		_AHCondParsed = NULL;
+		_ParseTree = nullptr;
+		_AHCondParsed = nullptr;
 	}
 
 	//===========================================================
@@ -184,7 +184,7 @@ namespace NLGUI
 	{
 		if (this == _CurrUpdatedLink)
 		{
-			_CurrUpdatedLink = NULL;
+			_CurrUpdatedLink = nullptr;
 		}
 		if (this == _NextUpdatedLink)
 		{
@@ -199,9 +199,9 @@ namespace NLGUI
 		_LinkList.erase(_ListEntry);
 
 		delete _ParseTree;
-		_ParseTree = NULL;
+		_ParseTree = nullptr;
 		delete _AHCondParsed;
-		_AHCondParsed = NULL;
+		_AHCondParsed = nullptr;
 	}
 
 	//===========================================================
@@ -232,14 +232,14 @@ namespace NLGUI
 				if (!elem)
 				{
 					nlwarning("<CInterfaceLink::init> : Element %d is NULL", k);
-					_Targets[k]._InterfaceElement = NULL;
+					_Targets[k]._InterfaceElement = nullptr;
 					continue;
 				}
 				_Targets[k]._Property = elem->getReflectedProperty(targets[k].PropertyName);
 				if (!_Targets[k]._Property)
 				{
 					nlwarning("<CInterfaceLink::init> : Can't retrieve property %s for element %d.", targets[k].PropertyName.c_str(), k);
-					_Targets[k]._InterfaceElement = NULL;
+					_Targets[k]._InterfaceElement = nullptr;
 					continue;
 				}
 				_Targets[k]._InterfaceElement = elem;
@@ -492,7 +492,7 @@ namespace NLGUI
 					link._Targets[k]._InterfaceElement->removeLink(&link);
 				}
 			}
-			linkPtr = NULL; // effectively destroy link
+			linkPtr = nullptr; // effectively destroy link
 			curr = nextIt;
 		}
 		nlassert(_LinkList.empty());
@@ -511,7 +511,7 @@ namespace NLGUI
 		}
 		std::string elmPath;
 		std::string elmProp;
-		CInterfaceElement *elm = NULL;
+		CInterfaceElement *elm = nullptr;
 		if (parentGroup)
 		{
 			if (lastPos == std::string::npos)
@@ -655,7 +655,7 @@ namespace NLGUI
 		uint numValidPtr = 0;
 		for(uint k = 0; k < _Targets.size(); ++k)
 		{
-			if (_Targets[k]._InterfaceElement != NULL) ++numValidPtr;
+			if (_Targets[k]._InterfaceElement != nullptr) ++numValidPtr;
 		}
 		nlassert(numValidPtr == (uint) crefs);
 	}
@@ -669,10 +669,10 @@ namespace NLGUI
 		CInterfaceElement *pIE = CWidgetManager::getInstance()->getElementFromId(elt);
 		CInterfaceGroup *pIG = dynamic_cast<CInterfaceGroup*>(pIE);
 		nlassert(pIE);
-		if (pIG == NULL)
+		if (pIG == nullptr)
 			pIG = pIE->getParent();
 
-		if (pIG != NULL)
+		if (pIG != nullptr)
 		{
 			std::vector<CTargetInfo> vTargets;
 			splitLinkTargets(Target, pIG, vTargets);
@@ -733,8 +733,8 @@ namespace NLGUI
 			// this was the last node
 			_LastTriggeredLink[list] = _PrevTriggeredLink[list];
 		}
-		_PrevTriggeredLink[list] = NULL;
-		_NextTriggeredLink[list] = NULL;
+		_PrevTriggeredLink[list] = nullptr;
+		_NextTriggeredLink[list] = nullptr;
 		_Triggered[list] = false;
 	}
 

@@ -112,7 +112,7 @@ ESocket::ESocket( const char *reason, bool systemerror, CInetHost *addr )
   	_Reason = "Socket error: ";
 	uint errornum = CSock::getLastError();
 	char str[256];
-	if ( addr != NULL )
+	if ( addr != nullptr)
 	{
 		// Version with address
 		smprintf( str, 256, reason, addr->toStringLong().c_str() ); // reason *must* contain "%s"
@@ -536,7 +536,7 @@ bool CSock::dataAvailable()
 	tv.tv_usec = _TimeoutUs;
 
 	// Test for message received.
-	int res = select( _Sock+1, &fdset, NULL, NULL, &tv );
+	int res = select( _Sock+1, &fdset, nullptr, nullptr, &tv );
 	switch ( res  )
 	{
 		case  0 : return false;

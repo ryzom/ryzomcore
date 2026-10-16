@@ -81,7 +81,7 @@ namespace NLGUI
 
 			IParserModule()
 			{
-				parser = NULL;
+				parser = nullptr;
 				parsingStage = None;
 			}
 
@@ -219,7 +219,7 @@ namespace NLGUI
 			if (!templateParams.empty())
 				return createGroupInstance(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
 			else
-				return createGroupInstance(templateName, parentID, NULL, 0, updateLinks);
+				return createGroupInstance(templateName, parentID, nullptr, 0, updateLinks);
 		}
 
 		/** create a template from an instance consisting of a single control or group
@@ -233,7 +233,7 @@ namespace NLGUI
 			if (!templateParams.empty())
 				return createUIElement(templateName, parentID, &templateParams[0], (uint)templateParams.size(), updateLinks);
 			else
-				return createUIElement(templateName, parentID, NULL, 0, updateLinks);
+				return createUIElement(templateName, parentID, nullptr, 0, updateLinks);
 		}
 
 		static void freeXMLNodeAndSibblings(xmlNodePtr node);

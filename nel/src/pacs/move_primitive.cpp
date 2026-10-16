@@ -47,7 +47,7 @@ CMovePrimitive::CMovePrimitive (CMoveContainer* container, uint8 firstWorldImage
 	_Attenuation=1;
 	_Container=container;
 	_StaticFlags=0;
-	_RootOTInfo=NULL;
+	_RootOTInfo = nullptr;
 	_LastTestTime=0xffffffff;
 
 	// Ptr table alloc
@@ -78,7 +78,7 @@ CMovePrimitive::~CMovePrimitive ()
 void CMovePrimitive::removeCollisionOTInfo (CCollisionOTInfo *toRemove)
 {
 	// Should be ok
-	CCollisionOTInfo	*previousElement=NULL;
+	CCollisionOTInfo	*previousElement = nullptr;
 	CCollisionOTInfo	*element=_RootOTInfo;
 	nlassert (element);
 
@@ -131,7 +131,7 @@ void CMovePrimitive::removeCollisionOTInfo ()
 	}
 
 	// Relink element because we keep it
-	_RootOTInfo=NULL;
+	_RootOTInfo = nullptr;
 }
 
 // ***************************************************************************

@@ -162,7 +162,7 @@ bool	BuildTangentSpace(CMesh::CMeshBuild &outMeshBuild, const CMesh::CMeshBuild 
 		{
 			uint vertIndex = outMeshBuild.Faces[l].Corner[m].Vertex;
 			bool found = false;
-			NLMISC::CUVW *tsv=0; // a previously computed tangent space vector
+			NLMISC::CUVW *tsv=nullptr; // a previously computed tangent space vector
 			// Test whether it hasn't been built before, by looking in each corner of each face that share that vertex
 			for (n = 0; n < VertToFace[vertIndex].size() && !found; ++n)
 			{

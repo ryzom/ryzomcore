@@ -38,7 +38,7 @@ namespace NLNET
 		TSecurityData	*SecurityData;
 
 		TSecurityDataDesc()
-			: SecurityData(NULL)
+			: SecurityData(nullptr)
 		{
 		}
 
@@ -51,7 +51,7 @@ namespace NLNET
 
 				uint32 nbSecBlock = 0;
 				sint32 tagCountPos = s.reserve(4);
-				while (sd != NULL)
+				while (sd != nullptr)
 				{
 					if (sd->DataTag == 0xff)
 					{
@@ -85,7 +85,7 @@ namespace NLNET
 				s.serial(nbSecBlock);
 
 				if (nbSecBlock == 0)
-					SecurityData = NULL;
+					SecurityData = nullptr;
 
 				for (uint i=0; i<nbSecBlock; ++i)
 				{
@@ -101,7 +101,7 @@ namespace NLNET
 						TSecurityData::TCtorParam param(dataTag);
 						sd = NLMISC_GET_FACTORY(TSecurityData, uint8).createObject(dataTag, param);
 
-						if (sd == NULL)
+						if (sd == nullptr)
 						{
 							// we don't know this type, create an unknow security block
 							sd = new TUnknownSecurityData(dataTag, blockSize);
@@ -299,7 +299,8 @@ namespace NLNET
 	public:
 
 		CStandardGateway()
-			:	_SecurityPlugin(NULL),
+			:	_SecurityPlugin(nullptr)
+	        ,
 				_PingCounter(0)
 		{
 		}
@@ -319,7 +320,7 @@ namespace NLNET
 			}
 
 			// delete security plug-in
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin != nullptr)
 				removeSecurityPlugin();
 
 			// must be done before the other destructors are called
@@ -331,7 +332,7 @@ namespace NLNET
 		{
 			TModuleProxies::iterator it(_ModuleProxies.find(proxyId));
 			if (it == _ModuleProxies.end())
-				return NULL;
+				return nullptr;
 			return static_cast<CModuleProxy*>(it->second.getPtr());
 		}
 
@@ -360,7 +361,7 @@ namespace NLNET
 			param.Gateway = this;
 			IGatewayTransport *transport = NLMISC_GET_FACTORY(IGatewayTransport, std::string).createObject(transportClass, param);
 
-			if (transport == NULL)
+			if (transport == nullptr)
 			{
 				nlwarning("Failed to create a transport with the class '%s'", transportClass.c_str());
 				return;
@@ -429,8 +430,8 @@ namespace NLNET
 					for (; first != last; ++first)
 					{
 						IModuleProxy *proxy = first->second;
-						if (proxy->getGatewayRoute() != NULL
-							&& proxy->getGatewayRoute() != route
+						if (proxy->getGatewayRoute() != nullptr
+					        && proxy->getGatewayRoute() != route
 							&& proxy->getGatewayRoute()->getTransport() == transport)
 						{
 							// this module is on the same transport, but another route, remove/add it from the
@@ -488,7 +489,7 @@ namespace NLNET
 						for (; first != last; ++first)
 						{
 							IModuleProxy *proxy = first->second;
-							if (proxy->getGatewayRoute() == NULL || (proxy->getGatewayRoute() != route ))
+							if (proxy->getGatewayRoute() == nullptr || (proxy->getGatewayRoute() != route ))
 							{
 								// this module is on another route, disclose it if needed
 								if (route->FirewallDisclosed.find(proxy->getModuleProxyId()) == route->FirewallDisclosed.end())
@@ -535,7 +536,7 @@ namespace NLNET
 			TTransportList::const_iterator it(_Transports.find(transportName));
 
 			if (it == _Transports.end())
-				return NULL;
+				return nullptr;
 			else
 				return it->second;
 		}
@@ -663,7 +664,7 @@ namespace NLNET
 		 */
 		virtual void createSecurityPlugin(const std::string &className) NL_OVERRIDE
 		{
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin != nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::createSecurityPlugin : plug-in already created ");
 				return;
@@ -672,7 +673,7 @@ namespace NLNET
 			CGatewaySecurity::TCtorParam params;
 			params.Gateway = this;
 			CGatewaySecurity *gs = NLMISC_GET_FACTORY(CGatewaySecurity, std::string).createObject(className, params);
-			if (gs == NULL)
+			if (gs == nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::createSecurityPlugin : can't create a security plug-in for class '%s'", className.c_str());
 				return;
@@ -692,7 +693,7 @@ namespace NLNET
 		/** Send a command to the security plug-in */
 		virtual void sendSecurityCommand(const TParsedCommandLine &command) NL_OVERRIDE
 		{
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::sendSecurityCommand : plug-in NOT created ");
 				return;
@@ -705,7 +706,7 @@ namespace NLNET
 		 */
 		virtual void removeSecurityPlugin() NL_OVERRIDE
 		{
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				nlwarning("NLNETL5 : CStandardGateway::removeSecurityPlugin : plug-in not created");
 				return;
@@ -714,7 +715,7 @@ namespace NLNET
 			// delete the plug-in (this can remove some security data)
 			_SecurityPlugin->onDelete();
 			delete _SecurityPlugin;
-			_SecurityPlugin = NULL;
+			_SecurityPlugin = nullptr;
 		}
 
 		/** Set a security data block. If a bloc of the same type
@@ -750,20 +751,20 @@ namespace NLNET
 			nlassert(modProx != NULL);
 
 			bool ret = false;
-			TSecurityData *prevSec = NULL;
+			TSecurityData *prevSec = nullptr;
 			TSecurityData *currentSec = modProx->_SecurityData;
-			while (currentSec != NULL)
+			while (currentSec != nullptr)
 			{
 				if (currentSec->DataTag == dataTag)
 				{
-					if (prevSec != NULL)
+					if (prevSec != nullptr)
 						prevSec->NextItem = currentSec->NextItem;
 					else
 						modProx->_SecurityData = currentSec->NextItem;
 
 					TSecurityData *toDelete = currentSec;
 					currentSec = currentSec->NextItem;
-					toDelete->NextItem = NULL;
+					toDelete->NextItem = nullptr;
 					delete toDelete;
 					ret = true;
 				}
@@ -785,7 +786,7 @@ namespace NLNET
 			nlassert(modProx != NULL);
 			nlassert(modProx->_SecurityData != securityData);
 
-			if (modProx->_SecurityData != NULL)
+			if (modProx->_SecurityData != nullptr)
 				delete modProx->_SecurityData;
 
 			modProx->_SecurityData = securityData;
@@ -867,7 +868,7 @@ namespace NLNET
 
 			// translate sender id
 			const TModuleId *pmoduleId = from->ForeignToLocalIdx.getB(from->NextSenderProxyId);
-			if (pmoduleId  == NULL)
+			if (pmoduleId  == nullptr)
 			{
 				nlwarning("The sender proxy %u is unknown in the translation table, can't dispatch the message !", from->NextSenderProxyId);
 				from->NextMessageType = CModuleMessageHeaderCodec::mt_invalid;
@@ -941,7 +942,7 @@ namespace NLNET
 			// Store module information
 			_KnownModules.insert(make_pair(modNameId, modInfo));
 
-			if (_NameToProxyIdx.getB(modNameId) != NULL)
+			if (_NameToProxyIdx.getB(modNameId) != nullptr)
 			{
 				// a proxy for this module already exist,
 				IModuleProxy *modProx = *(_NameToProxyIdx.getB(modNameId));
@@ -969,16 +970,16 @@ namespace NLNET
 				}
 
 				// update the security if needed
-				if (modDesc.SecDesc.SecurityData != NULL)
+				if (modDesc.SecDesc.SecurityData != nullptr)
 				{
 					CModuleProxy *proxy = static_cast<CModuleProxy *>(modProx);
-					if (_SecurityPlugin != NULL)
+					if (_SecurityPlugin != nullptr)
 					{
 						_SecurityPlugin->onNewSecurityData(from, proxy, modDesc.SecDesc.SecurityData);
 					}
 					else
 					{
-						if (proxy->_SecurityData != NULL)
+						if (proxy->_SecurityData != nullptr)
 							delete proxy->_SecurityData;
 						proxy->_SecurityData = modDesc.SecDesc.SecurityData;
 					}
@@ -992,7 +993,7 @@ namespace NLNET
 					this,
 					from,
 					modDesc.ModuleDistance,
-					NULL,
+			        nullptr,
 					modDesc.ModuleClass,
 					modDesc.ModuleFullName,
 					modDesc.ModuleManifest,
@@ -1002,7 +1003,7 @@ namespace NLNET
 				CModuleProxy *proxy = static_cast<CModuleProxy *>(modProx);
 				proxy->_SecurityData = modDesc.SecDesc.SecurityData;
 				// let the security plug-in add/remove security data
-				if (_SecurityPlugin != NULL)
+				if (_SecurityPlugin != nullptr)
 					_SecurityPlugin->onNewProxy(proxy);
 
 				// store the proxy in the proxy list
@@ -1038,7 +1039,7 @@ namespace NLNET
 
 			// translate the module id
 			const TModuleId *pModuleId = from->ForeignToLocalIdx.getB(moduleId);
-			if (pModuleId == NULL)
+			if (pModuleId == nullptr)
 			{
 				nlwarning("Receive a module distance update for foreign module %u, but no translation available", moduleId);
 				return;
@@ -1140,7 +1141,7 @@ namespace NLNET
 //			msgin.serialPolyPtr(modSec);
 
 			const TModuleId *pModuleId = from->ForeignToLocalIdx.getB(secChg.ModuleId);
-			if (pModuleId == NULL)
+			if (pModuleId == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module foreign proxy %u", secChg.ModuleId);
 				return;
@@ -1149,14 +1150,14 @@ namespace NLNET
 			TModuleId moduleId = *pModuleId;
 
 			CModuleProxy *modProx = getModuleProxy(moduleId);
-			if (modProx == NULL)
+			if (modProx == nullptr)
 			{
 				nlwarning("LNETL6 : receive module security update for unknown module proxy %u, foreign %u", moduleId, secChg.ModuleId);
 				return;
 			}
 
 			// allow the security plug-in to affect the data
-			if( _SecurityPlugin != NULL)
+			if( _SecurityPlugin != nullptr)
 			{
 				// let the plug-in update the security data
 				_SecurityPlugin->onNewSecurityData(from, modProx, secChg.SecDesc.SecurityData);
@@ -1238,8 +1239,8 @@ namespace NLNET
 				for (; first != last; ++first)
 				{
 					IModule *module = first->second;
-					if (removedModule->getGatewayRoute() != NULL
-						|| module->getModuleId() != removedModule->getForeignModuleId())
+					if (removedModule->getGatewayRoute() != nullptr
+				        || module->getModuleId() != removedModule->getForeignModuleId())
 					{
 						module->_onModuleDown(removedModule);
 					}
@@ -1256,8 +1257,8 @@ namespace NLNET
 			for (; first != last; ++first)
 			{
 				IModule *module = first->second;
-				if (moduleProxy->getGatewayRoute() != NULL
-					|| module->getModuleId() != moduleProxy->getForeignModuleId())
+				if (moduleProxy->getGatewayRoute() != nullptr
+			        || module->getModuleId() != moduleProxy->getForeignModuleId())
 				{
 					module->_onModuleUp(moduleProxy);
 				}
@@ -1269,7 +1270,7 @@ namespace NLNET
 			TLocalModuleIndex::iterator it(_LocalModuleIndex.find(pluggedModule->getModuleId()));
 
 			if (it == _LocalModuleIndex.end())
-				return NULL;
+				return nullptr;
 			else
 			{
 				TModuleProxies::iterator it2(_ModuleProxies.find(it->second));
@@ -1322,7 +1323,7 @@ namespace NLNET
 				return;
 			}
 
-			if (addresseeProxy->getGatewayRoute() == NULL)
+			if (addresseeProxy->getGatewayRoute() == nullptr)
 			{
 				// the module is local, just forward the call to the dispatcher
 				nlassert(senderProxy != NULL);
@@ -1336,7 +1337,7 @@ namespace NLNET
 				TModuleId addresseeModId = addresseeProxy->getForeignModuleId();
 
 				const TModulePtr *adrcp = _PluggedModules.getB(addresseeModId);
-				if (adrcp == NULL)
+				if (adrcp == nullptr)
 				{
 					nlwarning("sendModuleMessage : can't find addressee module %u that is not plugged here !", addresseeModId);
 					return;
@@ -1404,7 +1405,7 @@ namespace NLNET
 			TModuleId addresseeModId = addresseeProxy->getForeignModuleId();
 
 			const TModulePtr *adrcp = _PluggedModules.getB(addresseeModId);
-			if (adrcp == NULL)
+			if (adrcp == nullptr)
 			{
 				nlwarning("dispatchModuleMessage : dispatching a message to module %u that is not plugged here !", addresseeModId);
 				return;
@@ -1472,14 +1473,14 @@ namespace NLNET
 				IModuleProxy *senderProx = getModuleProxy(lm.SenderProxyId);
 				IModuleProxy *addresseeProx = getModuleProxy(lm.AddresseProxyId);
 
-				if (senderProx == NULL)
+				if (senderProx == nullptr)
 				{
 					nlwarning("CStandardGateway : local message dispatching : Failed to retrieve proxy for sender module %u while dispatching message '%s' to %u",
 						lm.SenderProxyId,
 						lm.Message.getName().c_str(),
 						lm.AddresseProxyId);
 				}
-				else if (addresseeProx == NULL)
+				else if (addresseeProx == nullptr)
 				{
 					nlwarning("CStandardGateway : local message dispatching : Failed to retrieve proxy for addressee module %u while dispatching message '%s' from %u",
 						lm.AddresseProxyId,
@@ -1613,7 +1614,7 @@ namespace NLNET
 			// create a proxy for this module
 			IModuleProxy *modProx = IModuleManager::getInstance().createModuleProxy(
 					this,
-					NULL,	// the module is local, so there is no route
+		        nullptr,	// the module is local, so there is no route
 					0,		// the module is local, distance is 0
 					pluggedModule,	// the module is local, so store the module pointer
 					pluggedModule->getModuleClassName(),
@@ -1646,7 +1647,7 @@ namespace NLNET
 					// either the gateway is non null (distant module), or the
 					// foreign module id is different of the local module (for local proxy,
 					// the foreign module id store the local module id).
-					if (modProx->getGatewayRoute() != NULL || modProx->getForeignModuleId() != pluggedModule->getModuleId())
+					if (modProx->getGatewayRoute() != nullptr || modProx->getForeignModuleId() != pluggedModule->getModuleId())
 					{
 						pluggedModule->_onModuleUp(modProx);
 					}
@@ -1678,8 +1679,8 @@ namespace NLNET
 				{
 					IModuleProxy *modProx = first->second;
 
-					if (modProx->getGatewayRoute() != NULL
-						|| modProx->getForeignModuleId() != unpluggedModule->getModuleId())
+					if (modProx->getGatewayRoute() != nullptr
+				        || modProx->getForeignModuleId() != unpluggedModule->getModuleId())
 					{
 						unpluggedModule->_onModuleDown(modProx);
 					}
@@ -1739,7 +1740,7 @@ namespace NLNET
 		{
 			// translate the module id
 			const TModuleId *pModuleId = route->ForeignToLocalIdx.getB(foreignModuleId);
-			if (pModuleId == NULL)
+			if (pModuleId == nullptr)
 			{
 				// oups !
 				nlwarning("removeForeignModule : unknown foreign module id %u", foreignModuleId);
@@ -1832,7 +1833,7 @@ namespace NLNET
 			else
 			{
 				// do not remove proxy for local module from her !
-				if (modProx->_Route != NULL)
+				if (modProx->_Route != nullptr)
 				{
 					// this module is no longer reachable, remove the proxy
 
@@ -1882,7 +1883,7 @@ namespace NLNET
 		/// Check if a module can be seen by a route
 		bool isModuleProxyVisible(IModuleProxy *proxy, CGatewayRoute *route)
 		{
-			if (route == NULL)
+			if (route == nullptr)
 			{
 				// no route, we can see the proxy
 				return true;
@@ -1895,7 +1896,7 @@ namespace NLNET
 			}
 
 			// if the module is local, then, it can be seen
-			if (proxy->getGatewayRoute() == NULL)
+			if (proxy->getGatewayRoute() == nullptr)
 				return true;
 
 			// if the module is on the same route, it can't be seen (it is seen by the route outbound)
@@ -1908,7 +1909,7 @@ namespace NLNET
 			{
 				// we also need to check if this module is known in this route
 //				CGatewayRoute::TForeignToLocalIdx::iterator it(route->ForeignToLocalIdx.find(proxy->getForeignModuleId()));
-				if (route->ForeignToLocalIdx.getA(proxy->getModuleProxyId()) != NULL)
+				if (route->ForeignToLocalIdx.getA(proxy->getModuleProxyId()) != nullptr)
 					// this module is known in this route, so not invisible
 					return false;
 
@@ -1982,7 +1983,7 @@ namespace NLNET
 				case CGatewayRoute::pet_disclose_module:
 					{
 						IModuleProxy *proxy = getModuleProxy(pe.ModuleId);
-						if (proxy == NULL)
+						if (proxy == nullptr)
 							break;
 
 						// store the update type
@@ -2008,7 +2009,7 @@ namespace NLNET
 				case CGatewayRoute::pet_update_distance:
 					{
 						IModuleProxy *proxy = getModuleProxy(pe.ModuleId);
-						if (proxy == NULL)
+						if (proxy == nullptr)
 							break;
 
 						// store the update type
@@ -2023,7 +2024,7 @@ namespace NLNET
 				case CGatewayRoute::pet_update_security:
 					{
 						IModuleProxy *proxy = getModuleProxy(pe.ModuleId);
-						if (proxy == NULL)
+						if (proxy == nullptr)
 							break;
 
 						// store the update type
@@ -2119,7 +2120,7 @@ namespace NLNET
 			nlunreferenced(quiet);
 			nlunreferenced(human);
 
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				log.displayNL("No security plug-in !");
 				return true;
@@ -2150,7 +2151,7 @@ namespace NLNET
 				return false;
 			}
 
-			if (_SecurityPlugin == NULL)
+			if (_SecurityPlugin == nullptr)
 			{
 				log.displayNL("No security plug-in !");
 				return true;
@@ -2170,7 +2171,7 @@ namespace NLNET
 			if (args.size() != 1)
 				return false;
 
-			if (_SecurityPlugin != NULL)
+			if (_SecurityPlugin != nullptr)
 			{
 				log.displayNL("The gateway already have a security plug-in ! Remove it first");
 				return true;
@@ -2331,10 +2332,8 @@ namespace NLNET
 
 			log.displayNL("The gateway has %u locally plugged module :", _PluggedModules.getAToBMap().size());
 			{
-				TPluggedModules::TAToBMap::const_iterator first(_PluggedModules.getAToBMap().begin()), last(_PluggedModules.getAToBMap().end());
-				for (; first != last; ++first)
+				for (const auto& [_, module] : _PluggedModules.getAToBMap())
 				{
-					IModule *module = first->second;
 					log.displayNL("    ID:%5u : \tName = '%s' \tclass = '%s'",
 						module->getModuleId(),
 						module->getModuleName().c_str(),
@@ -2345,11 +2344,8 @@ namespace NLNET
 
 			log.displayNL("The gateway as %u transport activated :", _Transports.size());
 			{
-				TTransportList::iterator first(_Transports.begin()), last(_Transports.end());
-				for (; first != last; ++first)
+				for (const auto& [name, transport] : _Transports)
 				{
-					const string &name = first->first;
-					IGatewayTransport *transport = first->second;
 
 					log.displayNL("Transport '%s' (transport class is '%s') :",
 						name.c_str(),

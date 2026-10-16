@@ -145,7 +145,7 @@ void CSampleBank::load(bool async)
 		sint32 seekStart = sampleBank.getPos();
 
 
-		uint8	*data = 0;
+		uint8	*data = nullptr;
 		uint	i;
 		for (i=0; i<sbh.Name.size(); ++i)
 		{
@@ -398,7 +398,7 @@ bool				CSampleBank::unload()
 			audioMixer->getSoundBank()->bufferUnloaded(bufferName);
 			
 			// delete
-			it->second = NULL;
+			it->second = nullptr;
 			delete buffer;
 		}
 	}
@@ -442,7 +442,7 @@ IBuffer*			CSampleBank::getSample(const NLMISC::TStringId &name)
 	TSampleTable::iterator iter = _Samples.find(name);
 	if ( iter == _Samples.end() )
 	{
-		return 0;
+		return nullptr;
 	}
 	else
 	{

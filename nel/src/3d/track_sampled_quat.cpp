@@ -311,15 +311,15 @@ ITrack	*CTrackSampledQuat::applyTrackQuatHeaderCompressionPass1(uint &globalKeyO
 {
 	// if there is more than 1 timeBlock, fails
 	if(_TimeBlocks.size()>1)
-		return NULL;
+		return nullptr;
 
 	// Support only 255 keys and not 256!!! cause _NumKeys is encoded in 8 bits!
 	if(_Keys.size()>=256)
-		return NULL;
+		return nullptr;
 
 	// if the number of keys ovveride the uint16 limit, abort
 	if(_Keys.size()+globalKeyOffset > 65536)
-		return NULL;
+		return nullptr;
 
 	// Search if the Track header is the same as one of the quatPacker.
 	// NB: O(N*N) but quatPacker.TrackHeaders should be very small
@@ -338,7 +338,7 @@ ITrack	*CTrackSampledQuat::applyTrackQuatHeaderCompressionPass1(uint &globalKeyO
 	}
 	if(headerIndex==quatPacker.TrackHeaders.size())
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	// OK! this track can be converted to a CTrackSampledQuatSmallHeader

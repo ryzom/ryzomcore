@@ -34,7 +34,7 @@ CPrimitiveWorldImage::CPrimitiveWorldImage()
 {
 	// Set to NULL
 	for (uint i=0; i<4; i++)
-		_MoveElement[i]=NULL;
+		_MoveElement[i] = nullptr;
 
 	_DynamicFlags=0;
 	_BBXMin=-FLT_MAX;
@@ -64,7 +64,7 @@ void CPrimitiveWorldImage::copy (const CPrimitiveWorldImage& source)
 
 	// Pointer into the 4 possibles sorted lists of movable primitives. Must be NULL
 	for (uint i=0; i<4; i++)
-		_MoveElement[i]=NULL;
+		_MoveElement[i] = nullptr;
 }
 
 // ***************************************************************************
@@ -161,7 +161,7 @@ const TCollisionSurfaceDescVector *CPrimitiveWorldImage::evalCollision (CGlobalR
 
 	// Test time
 	if (!primitive.checkTestTime (testTime, maxTestIteration))
-		return NULL;
+		return nullptr;
 
 	// Switch the good test
 	if (primitive.getPrimitiveTypeInternal()==UMovePrimitive::_2DOrientedBox)
@@ -1054,7 +1054,7 @@ void CPrimitiveWorldImage::addMoveElement (CMoveCell& cell, uint16 x, uint16 y, 
 	for (slot=0; slot<4; slot++)
 	{
 		// Empty ?
-		if (_MoveElement[slot]==NULL)
+		if (_MoveElement[slot] == nullptr)
 		{
 			// Primitive center
 			double cx=(_BBXMin+_BBXMax)/2.f;
@@ -1100,7 +1100,7 @@ void CPrimitiveWorldImage::addMoveElementendOfList (CMoveCell& cell, uint16 x, u
 	for (slot=0; slot<4; slot++)
 	{
 		// Empty ?
-		if (_MoveElement[slot]==NULL)
+		if (_MoveElement[slot] == nullptr)
 		{
 			// Allocate move element
 			_MoveElement[slot]=container.allocateMoveElement ();
@@ -1132,7 +1132,7 @@ void CPrimitiveWorldImage::removeMoveElement (uint i, CMoveContainer &container,
 	container.freeMoveElement (_MoveElement[i]);
 
 	// Set to NULL
-	_MoveElement[i]=NULL;
+	_MoveElement[i] = nullptr;
 }
 
 // ***************************************************************************

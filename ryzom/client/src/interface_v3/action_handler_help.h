@@ -47,9 +47,9 @@ public:
 	// ctor
 	CSheetHelpSetup()
 	{
-		HelpWindow = NULL;
-		SrcSheet = NULL;
-		DestSheet = NULL;
+		HelpWindow = nullptr;
+		SrcSheet = nullptr;
+		DestSheet = nullptr;
 		FromBotChat= false;
 	}
 	// set the default ids for help window
@@ -139,7 +139,7 @@ private:
 		// The button for KeepMode. Button state == KeepMode
 		CCtrlBaseButtonPtr	KeepButton;
 	public:
-		CInfoWindow() : CtrlSheet(NULL) {KeepMode= false;}
+		CInfoWindow() : CtrlSheet(nullptr) {KeepMode= false;}
 		virtual void	infoReceived() NL_OVERRIDE;
 		virtual void	missionInfoReceived(const CPrerequisitInfos &infos) NL_OVERRIDE;
 	};

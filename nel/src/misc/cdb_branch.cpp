@@ -77,7 +77,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 							xmlNodePtr &child, const string& bankName,
 							bool atomBranch, bool clientOnly,
 							IProgressCallback &progressCallBack,
-							bool mapBanks, CCDBBankHandler *bankHandler = NULL )
+							bool mapBanks, CCDBBankHandler *bankHandler = nullptr)
 {
 	nodesSorted.push_back(newNode);
 	nodes.push_back(newNode);
@@ -86,7 +86,7 @@ static /*inline*/ void addNode( ICDBNode *newNode, std::string newName, CCDBNode
 	nodes.back()->init(child, progressCallBack);
 
 	// Setup bank mapping for first-level node
-	if ( mapBanks && (parent->getParent() == NULL) )
+	if ( mapBanks && (parent->getParent() == nullptr) )
 	{
 		if ( ! bankName.empty() )
 		{
@@ -125,7 +125,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 		if ( atom ) sAtom = (const char*)atom;
 		if ( clientonly ) sClientonly = clientonly.getDatas();
 		nlassert((const char *) name != NULL);
-		if ((const char *) count != NULL)
+		if ((const char *) count != nullptr)
 		{
 			// dealing with an array of entries
 			uint countAsInt;
@@ -174,7 +174,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 		string sBank;
 		if ( bank ) sBank = bank.getDatas();
 		nlassert((const char *) name != NULL);
-		if ((const char *) count != NULL)
+		if ((const char *) count != nullptr)
 		{
 			// dealing with an array of entries
 			uint countAsInt;
@@ -207,7 +207,7 @@ void CCDBNodeBranch::init( xmlNodePtr node, IProgressCallback &progressCallBack,
 	}
 
 	// count number of bits required to store the id
-	if ( (mapBanks) && (getParent() == NULL) )
+	if ( (mapBanks) && (getParent() == nullptr) )
 	{		
 		nlassert( bankHandler != NULL );
 		nlassertex( bankHandler->getUnifiedIndexToBankSize() == countNode, ("Mapped: %u Nodes: %u", bankHandler->getUnifiedIndexToBankSize(), countNode) );
@@ -257,7 +257,7 @@ CCDBNodeLeaf *CCDBNodeBranch::getLeaf( const char *id, bool bCreate )
 	// get the last name piece
 	const char *last = strrchr( id, ':' );
 	if( !last )
-		return NULL;
+		return nullptr;
 	ICDBNode *pNode = find( &last[1] );
 	if( !pNode && bCreate )
 	{
@@ -281,7 +281,7 @@ ICDBNode * CCDBNodeBranch::getNode (const CTextId& id, bool bCreate)
 
 	ICDBNode *pNode = find(str);
 	// If the node do not exists
-	if ( pNode == NULL )
+	if ( pNode == nullptr)
 	{
 		if (bCreate)
 		{
@@ -304,7 +304,7 @@ ICDBNode * CCDBNodeBranch::getNode (const CTextId& id, bool bCreate)
 		}
 		else
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -326,7 +326,7 @@ ICDBNode * CCDBNodeBranch::getNode( uint16 idx )
 	if ( idx < _Nodes.size() )
 		return _Nodes[idx];
 	else
-		return NULL;
+		return nullptr;
 
 } // getNode //
 
@@ -381,7 +381,7 @@ bool CCDBNodeBranch::setProp( CTextId& id, sint64 value )
 	ICDBNode *pNode = find( str );
 
 	// Property not found.
-	if(pNode == NULL)
+	if(pNode == nullptr)
 	{
 		nlwarning("Property %s not found in %s", str.c_str(), id.toString().c_str());
 		return false;
@@ -536,7 +536,7 @@ CCDBNodeLeaf *CCDBNodeBranch::findLeafAtCount( uint& count )
 		if ( leaf )
 			return leaf;
 	}
-	return NULL;
+	return nullptr;
 }
 
 /*
@@ -569,13 +569,13 @@ void CCDBNodeBranch::removeNode (const CTextId& id)
 {
 	// Look for the node
 	CCDBNodeBranch *pNode = dynamic_cast<CCDBNodeBranch*>(getNode(id,false));
-	if (pNode == NULL)
+	if (pNode == nullptr)
 	{
 		nlwarning("node %s not found", id.toString().c_str());
 		return;
 	}
 	CCDBNodeBranch *pParent = pNode->_Parent;
-	if (pParent== NULL)
+	if (pParent == nullptr)
 	{
 		nlwarning("parent node not found");
 		return;
@@ -617,7 +617,7 @@ void CCDBNodeBranch::onLeafChanged( NLMISC::TStringId leafName )
 		if( (*itr)->observesLeaf( *leafName ) )
 			(*itr)->addToFlushableList();
 
-	if( _Parent != NULL )
+	if( _Parent != nullptr)
 		_Parent->onLeafChanged( leafName );
 }
 
@@ -643,7 +643,7 @@ bool CCDBNodeBranch::addObserver(IPropertyObserver* observer,CTextId& id)
 	const string &str = id.readNext();
 	ICDBNode *pNode = find( str );
 	// Property not found.
-	if(pNode == NULL)
+	if(pNode == nullptr)
 	{
 		nlwarning(" Property %s not found", id.toString().c_str());
 		return false;
@@ -676,7 +676,7 @@ bool CCDBNodeBranch::removeObserver(IPropertyObserver* observer, CTextId& id)
 	const string &str = id.readNext();
 	ICDBNode *pNode = find( str );
 	// Property not found.
-	if(pNode == NULL)
+	if(pNode == nullptr)
 	{
 		nlwarning(" Property %s not found", id.toString().c_str());
 		return false;
@@ -715,7 +715,8 @@ void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, cons
 	else
 	{
 		branchNode = safe_cast<CCDBNodeBranch*>(getNode(ICDBNode::CTextId(dbPathFromThisNode), false));
-		if( branchNode == NULL ){
+		if( branchNode == nullptr)
+		{
 			std::string msg = *getName();
 			msg += ":";
 			msg += dbPathFromThisNode;
@@ -738,7 +739,8 @@ void CCDBNodeBranch::addBranchObserver( ICDBDBBranchObserverHandle *handle, cons
 void CCDBNodeBranch::removeBranchObserver(const char *dbPathFromThisNode, ICDBNode::IPropertyObserver& observer)
 {
 	CCDBNodeBranch *branchNode = safe_cast<CCDBNodeBranch*>(getNode(ICDBNode::CTextId(dbPathFromThisNode), false));
-	if( branchNode == NULL ){
+	if( branchNode == nullptr)
+	{
 		std::string msg = *getName();
 		msg += ":";
 		msg += dbPathFromThisNode;
@@ -838,7 +840,7 @@ ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 	CCDBNodeLeaf tmp(nodeName);
 	vector<ICDBNode*>::iterator it = lower_bound(_NodesByName.begin(), _NodesByName.end(), &tmp, CCDBNodeBranchComp());
 	if (it == _NodesByName.end())
-		return NULL;
+		return nullptr;
 	else
 	{
 		if (*(*it)->getName() == nodeName)
@@ -852,7 +854,7 @@ ICDBNode *CCDBNodeBranch::find(const std::string &nodeName)
 #endif
 		}
 		else
-			return NULL;
+			return nullptr;
 	}
 }
 

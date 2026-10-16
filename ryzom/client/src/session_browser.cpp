@@ -88,7 +88,7 @@ class CCallbackClientAdaptor : public CNelCallbackClientAdaptor
 	static void cb_preDispatchMessage(CMessage &msgin, TSockId from, CCallbackNetBase &netbase)
 	{
 		CNelCallbackClientAdaptor *adaptor = static_cast<CNelCallbackClientAdaptor*>(netbase.getUserData());
-		if (adaptor != NULL)
+		if (adaptor != nullptr)
 		{
 			CSessionBrowser *sb = static_cast<CSessionBrowser*>(adaptor->getContainerClass());
 

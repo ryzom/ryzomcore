@@ -42,11 +42,11 @@ namespace NLNET {
 // Variables
 //
 
-CCallbackClient *CNamingClient::_Connection = NULL;
+CCallbackClient *CNamingClient::_Connection = nullptr;
 CNamingClient::TRegServices CNamingClient::_RegisteredServices;
 
-static TBroadcastCallback _RegistrationBroadcastCallback = NULL;
-static TBroadcastCallback _UnregistrationBroadcastCallback = NULL;
+static TBroadcastCallback _RegistrationBroadcastCallback = nullptr;
+static TBroadcastCallback _UnregistrationBroadcastCallback = nullptr;
 
 TServiceId CNamingClient::_MySId(0);
 
@@ -73,7 +73,7 @@ void CNamingClient::setUnregistrationBroadcastCallback (TBroadcastCallback cb)
 
 static bool Registered;
 static bool RegisteredSuccess;
-static TServiceId *RegisteredSID = NULL;
+static TServiceId *RegisteredSID = nullptr;
 static string Reason;
 void cbRegisterBroadcast (CMessage &msgin, TSockId from, CCallbackNetBase &netbase);
 
@@ -140,7 +140,7 @@ void cbRegisterBroadcast (CMessage &msgin, TSockId /* from */, CCallbackNetBase 
 
 			nlinfo ("NC: Registration Broadcast of the service %s-%hu '%s'", name.c_str(), sid.get(), vectorCInetAddressToString(addr).c_str());
 
-			if (_RegistrationBroadcastCallback != NULL)
+			if (_RegistrationBroadcastCallback != nullptr)
 				_RegistrationBroadcastCallback (name, sid, addr);
 		}
 		else if (addrs.size() == 1)
@@ -217,7 +217,7 @@ void cbUnregisterBroadcast (CMessage &msgin, TSockId /* from */, CCallbackNetBas
 		return;
 	}
 
-	if (_UnregistrationBroadcastCallback != NULL)
+	if (_UnregistrationBroadcastCallback != nullptr)
 		_UnregistrationBroadcastCallback (name, sid, addrs);
 
 	//CNamingClient::displayRegisteredServices ();
@@ -239,7 +239,7 @@ void CNamingClient::connect( const CInetHost &addr, CCallbackNetBase::TRecording
 {
 	nlassert (_Connection == NULL || (_Connection != NULL && !_Connection->connected ()));
 
-	if (_Connection == NULL)
+	if (_Connection == nullptr)
 	{
 		_Connection = new CCallbackClient( rec, "naming_client.nmr" );
 		_Connection->addCallbackArray (NamingClientCallbackArray, sizeof (NamingClientCallbackArray) / sizeof (NamingClientCallbackArray[0]));
@@ -264,14 +264,14 @@ void CNamingClient::connect( const CInetHost &addr, CCallbackNetBase::TRecording
 
 void CNamingClient::disconnect ()
 {
-	if (_Connection != NULL)
+	if (_Connection != nullptr)
 	{
 		if (_Connection->connected ())
 		{
 			_Connection->disconnect ();
 		}
 		delete _Connection;
-		_Connection = NULL;
+		_Connection = nullptr;
 	}
 
 	// we don't call unregisterAllServices because when the naming service will see the disconnection,
@@ -327,7 +327,7 @@ bool CNamingClient::registerService (const std::string &name, const std::vector<
 		Reason.clear();
 	}
 
-	RegisteredSID = NULL;
+	RegisteredSID = nullptr;
 
 	return RegisteredSuccess;
 }
@@ -524,7 +524,7 @@ bool CNamingClient::lookupAndConnect (const std::string &name, CCallbackClient &
 void CNamingClient::update ()
 {
 	// get message for naming service (new registration for example)
-	if (_Connection != NULL && _Connection->connected ())
+	if (_Connection != nullptr && _Connection->connected ())
 		_Connection->update ();
 }
 

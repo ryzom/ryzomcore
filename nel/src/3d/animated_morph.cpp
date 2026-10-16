@@ -71,7 +71,7 @@ IAnimatedValue* CAnimatedMorph::getValue (uint valueId)
 		case FactorValue: return &_Factor;
 	};
 
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 const char *CAnimatedMorph::getValueName (uint valueId) const
@@ -93,7 +93,7 @@ ITrack*	CAnimatedMorph::getDefaultTrack (uint valueId)
 		case FactorValue: return &_MorphBase->DefaultFactor;
 	};
 
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 void	CAnimatedMorph::registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix)

@@ -114,7 +114,7 @@ CBone::CBone(CBoneBase *boneBase)
 	_PivotChannelId= -1;
 
 	// No animCtrl by default
-	_AnimCtrl= NULL;
+	_AnimCtrl = nullptr;
 
 	// Get default BoneBase SkinScale
 	_SkinScale= _BoneBase->SkinScale;
@@ -139,7 +139,7 @@ ITrack* CBone::getDefaultTrack (uint valueId)
 	nlstop;
 	// Deriver note: else call BaseClass::getDefaultTrack(valueId);
 
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************

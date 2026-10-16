@@ -81,7 +81,7 @@ CHugeListObs::CHugeListObs(ListType category) : _Init(false)
 	_CurrentSessionNb = 0;
 	_MType= MISSION_DESC::Mission;
 	_FirstPageNotUpdated= 0;
-	_PhrasePriceCB= NULL;
+	_PhrasePriceCB = nullptr;
 	_PhrasePriceUpdateAndMaybeClientFill= false;
 
 	// Client-Side phrase filling
@@ -89,8 +89,8 @@ CHugeListObs::CHugeListObs(ListType category) : _Init(false)
 	_PhraseClientFillNumPhrase= 0;
 	_PhraseClientFillFlags= 0;
 	_PhraseClientFillRace= 0;
-	_RoleMasterFlagDB= NULL;
-	_RoleMasterRaceDB= NULL;
+	_RoleMasterFlagDB = nullptr;
+	_RoleMasterRaceDB = nullptr;
 
 	_DownloadComplete = false;
 
@@ -108,7 +108,7 @@ CHugeListObs::~CHugeListObs()
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		pBM->removeBrickLearnedCallback(_PhrasePriceCB);
 		delete _PhrasePriceCB;
-		_PhrasePriceCB= NULL;
+		_PhrasePriceCB = nullptr;
 	}
 }
 
@@ -119,7 +119,7 @@ void CHugeListObs::setListType(ListType listType)
 	_Category = listType;
 
 	// For phrase trading, append the callback that will update phrase prices according to brick knowns
-	if(_Category==Trading && _PhrasePriceCB==NULL)
+	if(_Category==Trading && _PhrasePriceCB == nullptr)
 	{
 		CSBrickManager	*pBM= CSBrickManager::getInstance();
 		_PhrasePriceCB= new CPhrasePriceCB(this);
@@ -205,6 +205,7 @@ bool CHugeListObs::init()
 				_Items[k].Weight = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:WEIGHT").c_str(), (int) k), false);
 				_Items[k].NameId = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:NAMEID").c_str(), (int) k), false);
 				_Items[k].UserColor = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:USER_COLOR").c_str(), (int) k), false);
+				_Items[k].CharacBuffs = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:CHARAC_BUFFS").c_str(), (int) k), false);
 				_Items[k].Enchant = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ENCHANT").c_str(), (int) k), false);
 				_Items[k].RMClassType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_CLASS_TYPE").c_str(), (int) k), false);
 				_Items[k].RMFaberStatType = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:RM_FABER_STAT_TYPE").c_str(), (int) k), false);
@@ -220,7 +221,7 @@ bool CHugeListObs::init()
 			case Ascensor:
 				_Items[k].GuildIcon = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ICON").c_str(), (int) k), false);
 				_Items[k].GuildName = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:NAME").c_str(), (int) k), false);
-				if ((_Items[k].GuildIcon == NULL) || (_Items[k].GuildName == NULL))
+				if ((_Items[k].GuildIcon == nullptr) || (_Items[k].GuildName == nullptr))
 					return false;
 			break;
 			case  Missions:
@@ -228,8 +229,8 @@ bool CHugeListObs::init()
 				_Items[k].MissionText = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:TEXT").c_str(), (int) k), false);
 				_Items[k].MissionIcon = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:ICON").c_str(), (int) k), false);
 				_Items[k].MissionPreReqState = NLGUI::CDBManager::getInstance()->getDbProp(toString((dbPath + ":%d:PREREQ_STATE").c_str(), (int) k), false);
-				if ((_Items[k].MissionText == NULL) || (_Items[k].MissionIcon == NULL) ||
-					(_Items[k].MissionDetailText == NULL) || (_Items[k].MissionPreReqState == NULL))
+				if ((_Items[k].MissionText == nullptr) || (_Items[k].MissionIcon == nullptr) ||
+					(_Items[k].MissionDetailText == nullptr) || (_Items[k].MissionPreReqState == nullptr))
 					return false;
 			break;
 			default:
@@ -515,7 +516,7 @@ void CHugeListObs::updateUIItemPage(uint index)
 	TItemVect					 *items = &_ItemsPages;
 	CDBCtrlSheet::TSheetCategory *itemCategory = &_ItemCategory;
 	CDBGroupListSheetText		 *listSheet;
-	CCDBNodeLeaf				 *itemListCategoryLeaf = NULL;
+	CCDBNodeLeaf				 *itemListCategoryLeaf = nullptr;
 	switch (_Category)
 	{
 		case Trading:

@@ -54,7 +54,7 @@ namespace NLGUI
 
 	CInterfaceGroup::CInterfaceGroup(const TCtorParam &param) : CCtrlBase(param)
 	{
-		_ParentSizeMax = NULL;
+		_ParentSizeMax = nullptr;
 		_MaxW = _MaxH = std::numeric_limits<sint32>::max();
 		_OffsetX = _OffsetY = 0;
 		_Overlappable= true;
@@ -71,12 +71,12 @@ namespace NLGUI
 		_IsGroupScrollText = false;
 		_IsGroupInScene = false;
 		_IsGroupList = false;
-		_AHOnActive = NULL;
-		_AHOnDeactive = NULL;
-		_AHOnLeftClick = NULL;
-		_AHOnRightClick = NULL;
-		_AHOnEnter = NULL;
-		_AHOnEscape = NULL;
+		_AHOnActive = nullptr;
+		_AHOnDeactive = nullptr;
+		_AHOnLeftClick = nullptr;
+		_AHOnRightClick = nullptr;
+		_AHOnEnter = nullptr;
+		_AHOnEscape = nullptr;
 		_NeedFrameUpdatePos= false;
 		_LUAEnvTableCreated= false;
 		_DepthForZSort= 0.f;
@@ -126,11 +126,11 @@ namespace NLGUI
 		if(state != getActive())
 		{
 			CCtrlBase::setActive(state);
-			if (_AHOnActive != NULL && state)
+			if (_AHOnActive != nullptr && state)
 			{
 				CAHManager::getInstance()->runActionHandler (_AHOnActive, this, _AHOnActiveParams);
 			}
-			if (_AHOnDeactive != NULL && !state)
+			if (_AHOnDeactive != nullptr && !state)
 			{
 				CAHManager::getInstance()->runActionHandler (_AHOnDeactive, this, _AHOnDeactiveParams);
 			}
@@ -219,7 +219,7 @@ namespace NLGUI
 		{
 			CCtrlBase *pCB = *itc;
 			CCtrlScrollBase *pSB = dynamic_cast<CCtrlScrollBase*>(pCB);
-			if (pSB != NULL)
+			if (pSB != nullptr)
 			{
 				if (pSB->getTarget() == target)
 				{
@@ -240,7 +240,7 @@ namespace NLGUI
 		{
 			CCtrlBase *pCB = *itc;
 			CCtrlScrollBase *pSB = dynamic_cast<CCtrlScrollBase*>(pCB);
-			if (pSB != NULL)
+			if (pSB != nullptr)
 			{
 				if (pSB->getTarget() == target)
 				{
@@ -624,7 +624,7 @@ namespace NLGUI
 
 			if (value != "parent")
 			{
-				if (_Parent != NULL)
+				if (_Parent != nullptr)
 				{
 					parentId = _Parent->getId() + ":" + value;
 				}
@@ -733,8 +733,8 @@ namespace NLGUI
 	xmlNodePtr CInterfaceGroup::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = serializeGroup( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		serializeSubGroups( node );
 		serializeControls( node );
@@ -747,8 +747,8 @@ namespace NLGUI
 	xmlNodePtr CInterfaceGroup::serializeGroup( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlNewProp( node, BAD_CAST "overlappable", BAD_CAST NLMISC::toString( _Overlappable ).c_str() );
 		xmlNewProp( node, BAD_CAST "escapable", BAD_CAST NLMISC::toString( _Escapable ).c_str() );
@@ -828,12 +828,12 @@ namespace NLGUI
 
 	xmlNodePtr CInterfaceGroup::serializeTreeData( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
-			return NULL;
+		if( parentNode == nullptr)
+			return nullptr;
 
-		xmlNodePtr node = xmlNewNode( NULL, BAD_CAST "tree" );
-		if( node == NULL )
-			return NULL;
+		xmlNodePtr node = xmlNewNode(nullptr, BAD_CAST "tree" );
+		if( node == nullptr)
+			return nullptr;
 
 		xmlAddChild( parentNode, node );
 
@@ -845,13 +845,13 @@ namespace NLGUI
 
 	bool CInterfaceGroup::serializeLinks( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
 		const std::map< uint32, SLinkData > &linkMap =
 			CWidgetManager::getInstance()->getParser()->getLinkMap();
 
-		xmlNodePtr node = NULL;
+		xmlNodePtr node = nullptr;
 
 		std::map< uint32, SLinkData >::const_iterator itr;
 		for( itr = linkMap.begin(); itr != linkMap.end(); ++itr )
@@ -861,8 +861,8 @@ namespace NLGUI
 
 			const SLinkData &data = itr->second;
 
-			node = xmlNewNode( NULL, BAD_CAST "link" );
-			if( node == NULL )
+			node = xmlNewNode(nullptr, BAD_CAST "link" );
+			if( node == nullptr)
 				return false;
 
 			xmlAddChild( parentNode, node );
@@ -1084,7 +1084,7 @@ namespace NLGUI
 			if (view)
 				return view;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1105,7 +1105,7 @@ namespace NLGUI
 			if (pCtrl)
 				return pCtrl;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1125,7 +1125,7 @@ namespace NLGUI
 			if (pCtrl)
 				return pCtrl;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1303,7 +1303,7 @@ namespace NLGUI
 
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouseleftdown)
 			{
-				if (_AHOnLeftClick != NULL)
+				if (_AHOnLeftClick != nullptr)
 				{
 					CAHManager::getInstance()->runActionHandler(_AHOnLeftClick, this, _AHOnLeftClickParams);
 					return true;
@@ -1312,7 +1312,7 @@ namespace NLGUI
 
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mouserightup)
 			{
-				if (_AHOnRightClick != NULL)
+				if (_AHOnRightClick != nullptr)
 				{
 					CAHManager::getInstance()->runActionHandler(_AHOnRightClick, this, _AHOnRightClickParams);
 					return true;
@@ -1459,28 +1459,28 @@ namespace NLGUI
 		_MaxWReal = _MaxW;
 		_MaxHReal = _MaxH;
 
-		CInterfaceElement *el = NULL;
+		CInterfaceElement *el = nullptr;
 
-		if (_ParentSizeMax != NULL)
+		if (_ParentSizeMax != nullptr)
 		{
 			el = _ParentSizeMax;
 		}
 		else
 		{
-			if (_ParentSize != NULL)
+			if (_ParentSize != nullptr)
 			{
 				el = _ParentSize;
 			}
 			else
 			{
-				if (_ParentPos != NULL)
+				if (_ParentPos != nullptr)
 					el = _ParentPos;
 				else
 					el = _Parent;
 			}
 		}
 
-		if (el != NULL)
+		if (el != nullptr)
 		{
 			if (_GroupSizeRef&1)
 				_MaxWReal += _SizeDivW * el->getWReal() / 10;
@@ -1598,7 +1598,7 @@ namespace NLGUI
 			return this;
 
 		if (id.compare(0, _Id.size(), _Id) != 0)
-			return NULL;
+			return nullptr;
 
 		vector<CViewBase*>::const_iterator itv;
 		for (itv = _Views.begin(); itv != _Views.end(); itv++)
@@ -1630,10 +1630,10 @@ namespace NLGUI
 			nlassert(pIG);	// The element must not be NULL
 	#endif
 			CInterfaceElement *pIEL = pIG->getElement(id);
-			if (pIEL != NULL)
+			if (pIEL != nullptr)
 				return pIEL;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1724,7 +1724,7 @@ namespace NLGUI
 		if( ok )
 			return e;
 		else
-			return NULL;
+			return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1745,7 +1745,7 @@ namespace NLGUI
 		{
 			CInterfaceGroup *pChild = *itg;
 			CInterfaceGroup *pChildUnder = pChild->getGroupUnder (x-_XReal, y-_YReal);
-			if (pChildUnder != NULL)
+			if (pChildUnder != nullptr)
 			{
 				if ( (x >= _XReal) &&
 					(x < (_XReal + _WReal))&&
@@ -1761,7 +1761,7 @@ namespace NLGUI
 			 (y > _YReal) &&
 			 (y <= (_YReal+ _HReal)))
 			 return this;
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1791,7 +1791,7 @@ namespace NLGUI
 			if (!(*itc)->isCtrl() && !(*itc)->isGroup()) // must be a view
 			{
 				CViewBase *pVB = *itc;
-				if (pVB != NULL)
+				if (pVB != nullptr)
 				if (pVB->getActive())
 				if ( ((x) > pVB->getXReal()) &&
 					 ((x) < (pVB->getXReal() + pVB->getWReal()))&&
@@ -1846,7 +1846,7 @@ namespace NLGUI
 			if ((*itc)->isCtrl() && !(*itc)->isGroup()) // must be a ctrl but not a group (parsed later)
 			{
 				CCtrlBase *pICL = (CCtrlBase *) *itc;
-				if (pICL != NULL)
+				if (pICL != nullptr)
 				if (pICL->getActive())
 				if ( ((x) >= pICL->getXReal()) &&
 					 ((x) < (pICL->getXReal() + pICL->getWReal()))&&
@@ -1902,7 +1902,7 @@ namespace NLGUI
 			if ((*itc)->isGroup()) // must be a group
 			{
 				CInterfaceGroup *pIGL = (CInterfaceGroup *) *itc;
-				if (pIGL != NULL)
+				if (pIGL != nullptr)
 				if (pIGL->getActive())
 				if ( ((x) >= pIGL->getXReal()) &&
 					 ((x) < (pIGL->getXReal() + pIGL->getWReal()))&&
@@ -1935,7 +1935,7 @@ namespace NLGUI
 	void CInterfaceGroup::absoluteToRelative (sint32 &x, sint32 &y)
 	{
 		CInterfaceGroup *curGrp = _Parent;
-		while (curGrp != NULL)
+		while (curGrp != nullptr)
 		{
 			x = x - curGrp->_XReal;
 			y = y - curGrp->_YReal;
@@ -2067,7 +2067,7 @@ namespace NLGUI
 		if (index > _ChildrenGroups.size())
 		{
 			nlwarning("<CInterfaceGroup::getGroup()> bad index;");
-			return NULL;
+			return nullptr;
 		}
 		return _ChildrenGroups[index];
 	}
@@ -2175,9 +2175,9 @@ namespace NLGUI
 				return ig;
 			ig = ig->getParent();
 		}
-		while( ig != NULL );
+		while( ig != nullptr);
 
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -2350,7 +2350,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CInterfaceGroup::visitGroupAndChildren( CInterfaceElementVisitor *visitor )
 	{
-		nlassert( visitor != 0 );
+		nlassert( visitor != nullptr );
 		for( uint i = 0; i < _ChildrenGroups.size(); i++ )
 		{
 			_ChildrenGroups[ i ]->visitGroupAndChildren( visitor );
@@ -2513,7 +2513,7 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement* CInterfaceGroup::findFromShortId(const std::string &id)
 	{
-		CInterfaceElement* element = NULL;
+		CInterfaceElement* element = nullptr;
 		element = getView(id);
 		if (!element) element = getCtrl(id);
 		if (!element) element = getGroup(id);
@@ -2589,7 +2589,7 @@ namespace NLGUI
 		CInterfaceElement *oldParentSizeMax = _ParentSizeMax;
 		if (_ParentSizeMax == _Parent)
 		{
-			_ParentSizeMax = NULL;
+			_ParentSizeMax = nullptr;
 		}
 		CInterfaceElement *ret = CCtrlBase::clone();
 		_ParentSizeMax	 = oldParentSizeMax;
@@ -2634,7 +2634,7 @@ namespace NLGUI
 	bool CInterfaceGroup::explode()
 	{
 		CInterfaceGroup *p = getParent();
-		if( p == NULL )
+		if( p == nullptr)
 			return false;
 
 		std::string oldId;

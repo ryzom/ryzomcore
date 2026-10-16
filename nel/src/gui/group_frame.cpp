@@ -104,8 +104,8 @@ namespace NLGUI
 	xmlNodePtr CGroupFrame::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "frame" );
 		xmlSetProp( node, BAD_CAST "display", BAD_CAST NLMISC::toString( _DisplayFrame ).c_str() );
@@ -269,10 +269,10 @@ namespace NLGUI
 	{
 		CViewRenderer &rVR = *(CViewRenderer::getInstance());
 
-		CInterfaceOptions *pIO = NULL;
+		CInterfaceOptions *pIO = nullptr;
 		pIO = CWidgetManager::getInstance()->getOptions( _Options );
 
-		if( pIO != NULL )
+		if( pIO != nullptr)
 		{
 			_DispTypeDefined= true;
 

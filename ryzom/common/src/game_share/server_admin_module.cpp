@@ -66,7 +66,7 @@ NLNET_REGISTER_MODULE_FACTORY(CServerAdminModule,"ServerAdminModule");
 
 namespace R2
 {
-CServerAdminModule* CServerAdminModule::_Instance = 0;
+CServerAdminModule* CServerAdminModule::_Instance = nullptr;
 
 //------------------------------------------------------------------------------
 
@@ -147,11 +147,11 @@ void CServerAdminModule::onModuleDown(NLNET::IModuleProxy *moduleProxy)
 {
 	if (moduleProxy->getModuleClassName() == "ServerAnimationModule")
 	{
-		_ServerAnimationProxy = NULL;
+		_ServerAnimationProxy = nullptr;
 	}
 	else if (moduleProxy->getModuleClassName() == "ServerEditionModule")
 	{
-		_ServerEditionProxy = NULL;
+		_ServerEditionProxy = nullptr;
 	}
 }
 
@@ -187,7 +187,7 @@ CServerAdminModule::CServerAdminModule()
 
 CServerAdminModule::~CServerAdminModule()
 {
-	_Instance = 0;
+	_Instance = nullptr;
 }
 
 

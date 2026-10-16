@@ -52,8 +52,8 @@ namespace NLGUI
 	/////////////
 
 	sint32         CGroupEditBox::_SelectCursorPos = 0;
-	CGroupEditBox *CGroupEditBox::_MenuFather = NULL;
-	CGroupEditBox::IComboKeyHandler* CGroupEditBox::comboKeyHandler = NULL;
+	CGroupEditBox *CGroupEditBox::_MenuFather = nullptr;
+	CGroupEditBox::IComboKeyHandler* CGroupEditBox::comboKeyHandler = nullptr;
 
 	// For now, just trim unsupported codepoints to make emoji fallback to text form
 	static u32char supportedCodepoint(u32char c)
@@ -106,7 +106,8 @@ namespace NLGUI
 									_FirstVisibleChar(0),
 									_LastVisibleChar(0),
 									_SelectingText(false),
-									_ViewText(NULL),
+									_ViewText(nullptr)
+        ,
 									_MaxHistoric(0),
 									_CurrentHistoricIndex(-1),
 									_PrevNumLine(1),
@@ -142,7 +143,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	CGroupEditBox::~CGroupEditBox()
 	{
-		if (this == _CurrSelection) _CurrSelection = NULL;
+		if (this == _CurrSelection) _CurrSelection = nullptr;
 		if (CWidgetManager::getInstance()->getCaptureKeyboard() == this || CWidgetManager::getInstance()->getOldCaptureKeyboard() == this)
 		{
 			CWidgetManager::getInstance()->resetCaptureKeyboard();
@@ -513,8 +514,8 @@ namespace NLGUI
 	xmlNodePtr CGroupEditBox::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "edit_box" );
 		xmlSetProp( node, BAD_CAST "onchange", BAD_CAST _AHOnChange.c_str() );
@@ -854,7 +855,7 @@ namespace NLGUI
 	// ----------------------------------------------------------------------------
 	void CGroupEditBox::paste()
 	{
-		if(_CurrSelection != NULL)
+		if(_CurrSelection != nullptr)
 		{
 			if (_CurrSelection != this)
 			{
@@ -1083,14 +1084,14 @@ namespace NLGUI
 			case KeyESCAPE:
 				_CurrentHistoricIndex= -1;
 				// stop selection
-				_CurrSelection = NULL;
+				_CurrSelection = nullptr;
 				_CursorAtPreviousLineEnd = false;
 				if (_ClearOnEscape)
 				{
 					setInputStringRef(::u32string());
 					triggerOnChangeAH();
 				}
-				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+				CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
 			break;
 			case KeyTAB:
 				makeTopWindow();
@@ -1117,10 +1118,10 @@ namespace NLGUI
 					if (NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:CHAT:ENTER_DONT_QUIT_CB")->getValue32() == 0)
 					{
 						if(_LooseFocusOnEnter)
-							CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+							CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
 					}
 					// stop selection
-					_CurrSelection = NULL;
+					_CurrSelection = nullptr;
 					_CursorAtPreviousLineEnd = false;
 					CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 				}
@@ -1140,7 +1141,7 @@ namespace NLGUI
 						}
 
 						// if selection is activated, then cut the selection
-						if(_CurrSelection != NULL)
+						if(_CurrSelection != nullptr)
 						{
 							if (_CurrSelection != this)
 							{
@@ -1359,7 +1360,7 @@ namespace NLGUI
 	{
 		makeTopWindow();
 		// if selection is activated and not same cursors pos, then cut the selection
-		if(_CurrSelection != NULL && _CursorPos != _SelectCursorPos)
+		if(_CurrSelection != nullptr && _CursorPos != _SelectCursorPos)
 		{
 			if (_CurrSelection != this)
 			{
@@ -1384,7 +1385,7 @@ namespace NLGUI
 			{
 				nlwarning("Selection can only be on focus");
 			}
-			_CurrSelection = NULL;
+			_CurrSelection = nullptr;
 		}
 	}
 
@@ -1425,7 +1426,7 @@ namespace NLGUI
 			else
 			{
 				// Look into the input handler Manager if the key combo has to be considered as handled
-				if( ( CGroupEditBox::comboKeyHandler != NULL ) && comboKeyHandler->isComboKeyChat(rEDK) )
+				if( ( CGroupEditBox::comboKeyHandler != nullptr) && comboKeyHandler->isComboKeyChat(rEDK) )
 					return true;
 				else
 					return false;
@@ -1443,10 +1444,10 @@ namespace NLGUI
 			{
 				if (CWidgetManager::getInstance()->getCapturePointerRight() == this)
 				{
-					CWidgetManager::getInstance()->setCapturePointerRight(NULL);
+					CWidgetManager::getInstance()->setCapturePointerRight(nullptr);
 					if (!_ListMenuRight.empty())
 					{
-						if (CCtrlDraggable::getDraggedSheet() == NULL)
+						if (CCtrlDraggable::getDraggedSheet() == nullptr)
 						{
 							_MenuFather = this;
 							CWidgetManager::getInstance()->enableModalWindow (this, _ListMenuRight);
@@ -1466,7 +1467,7 @@ namespace NLGUI
 			{
 				_SelectingText = false;
 				if (_SelectCursorPos == _CursorPos)
-					_CurrSelection = NULL;
+					_CurrSelection = nullptr;
 				
 				return true;
 			}
@@ -1495,7 +1496,7 @@ namespace NLGUI
 				_CursorPos -= (sint32)_Prompt.length();
 				_CursorPos = std::max(_CursorPos, sint32(0));
 				_SelectCursorPos = _CursorPos;
-				_CurrSelection = NULL;
+				_CurrSelection = nullptr;
 
 				return true;
 			}
@@ -1532,7 +1533,7 @@ namespace NLGUI
 				{
 					CWidgetManager::getInstance()->resetCaptureKeyboard();
 					// If a selection was shown, reset it
-					if (_CurrSelection == this) _CurrSelection = NULL;
+					if (_CurrSelection == this) _CurrSelection = nullptr;
 				}
 				CInterfaceGroup::handleEvent(activeEvent);
 			}
@@ -1682,7 +1683,7 @@ namespace NLGUI
 		nlwarning("Interface: CGroupEditBox: text 'edit_text' missing or bad type");
 		nlwarning( "Trying to create a new 'edit_text' for %s", getId().c_str() );
 		_ViewText = dynamic_cast< CViewText* >( CInterfaceFactory::createClass( "text" ) );
-		if( _ViewText == NULL )
+		if( _ViewText == nullptr)
 		{
 			nlwarning( "Failed to create new 'edit_text' for %s", getId().c_str() );
 			return;
@@ -1707,10 +1708,10 @@ namespace NLGUI
 	void CGroupEditBox::setup()
 	{
 		// bind to the controls
-		if( _ViewText == NULL )
+		if( _ViewText == nullptr)
 			_ViewText = dynamic_cast<CViewText *>(CInterfaceGroup::getView("edit_text"));
 
-		if(_ViewText == NULL)
+		if(_ViewText == nullptr)
 			createViewText();
 
 		_ViewText->setEditorSelectable( false );
@@ -1727,7 +1728,7 @@ namespace NLGUI
 
 		// read options
 		CInterfaceOptions *pIO = CWidgetManager::getInstance()->getOptions("text_selection");
-		if (pIO != NULL)
+		if (pIO != nullptr)
 		{
 			_BackSelectColor= pIO->getValColor("back_select_color");
 			_TextSelectColor= pIO->getValColor("text_select_color");
@@ -1822,7 +1823,7 @@ namespace NLGUI
 		{
 			_InputString= _InputString.substr(0, minPos) + _InputString.substr(maxPos);
 		}
-		_CurrSelection = NULL;
+		_CurrSelection = nullptr;
 		_CursorPos= minPos;
 		triggerOnChangeAH();
 	}
@@ -1897,7 +1898,7 @@ namespace NLGUI
 		if (execute)
 		{
 			// stop selection
-			_CurrSelection = NULL;
+			_CurrSelection = nullptr;
 			_CursorAtPreviousLineEnd = false;
 			CAHManager::getInstance()->runActionHandler(_AHOnEnter, this, _AHOnEnterParams);
 		}
@@ -1994,7 +1995,7 @@ namespace NLGUI
 	{
 		// clear the text and restore backup pos before final save
 		setInputStringRef(::u32string());
-		_CurrSelection = NULL;
+		_CurrSelection = nullptr;
 	}
 
 	// ***************************************************************************
@@ -2002,7 +2003,7 @@ namespace NLGUI
 	{
 		// config is not saved when there's an empty string, so restore that default state.
 		setInputStringRef(::u32string());
-		_CurrSelection = NULL;
+		_CurrSelection = nullptr;
 		_PrevNumLine = 1;
 	}
 
@@ -2078,7 +2079,7 @@ namespace NLGUI
 		if (CWidgetManager::getInstance()->getCaptureKeyboard()==this || CWidgetManager::getInstance()->getOldCaptureKeyboard()==this)
 			CWidgetManager::getInstance()->resetCaptureKeyboard();
 
-		_CurrSelection = NULL;
+		_CurrSelection = nullptr;
 		_SelectCursorPos= 0;
 		_CursorPos= 0;
 		_CursorAtPreviousLineEnd = false;
@@ -2111,8 +2112,8 @@ namespace NLGUI
 		if(_Frozen)
 		{
 			// stop capture and selection
-			CWidgetManager::getInstance()->setCaptureKeyboard (NULL);
-			if(_CurrSelection==this)	_CurrSelection = NULL;
+			CWidgetManager::getInstance()->setCaptureKeyboard (nullptr);
+			if(_CurrSelection==this)	_CurrSelection = nullptr;
 			// do not allow to recover focus
 			if (CWidgetManager::getInstance()->getOldCaptureKeyboard() == this)
 			{

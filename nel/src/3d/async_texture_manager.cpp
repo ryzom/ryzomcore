@@ -74,7 +74,7 @@ CAsyncTextureManager::CTextureLod::CTextureLod()
 {
 	IsTextureEntry= false;
 
-	TextureEntry= NULL;
+	TextureEntry = nullptr;
 	Weight= 0;
 	Level= 0;
 	Loaded= false;
@@ -105,13 +105,13 @@ CAsyncTextureManager::CAsyncTextureManager()
 	_MaxLodLevel= 1;
 	_MaxUploadPerFrame= 65536;
 	_MaxHLSColoringPerFrame= 20*1024;
-	_CurrentUploadTexture= NULL;
+	_CurrentUploadTexture = nullptr;
 	_MaxTotalTextureSize= 10*1024*1024;
 	_TotalTextureSizeAsked= 0;
 	_LastTextureSizeGot= 0;
 
 	// Do not share this texture, to force uploading of the lods.
-	_CurrentTextureLodLoaded= NULL;
+	_CurrentTextureLodLoaded = nullptr;
 
 	// For Texture profiling
 	_TextureCategory= new ITexture::CTextureCategory("ASYNC ENTITY MANAGER");
@@ -173,7 +173,7 @@ uint			CAsyncTextureManager::addTextureRef(const string &textNameNotLwr, CMeshBa
 		// resize if needed.
 		if(i>=_TextureEntries.size())
 		{
-			_TextureEntries.push_back(NULL);
+			_TextureEntries.push_back(nullptr);
 			_FreeTextureIds.reserve(_TextureEntries.capacity());
 		}
 
@@ -255,7 +255,7 @@ void			CAsyncTextureManager::deleteTexture(uint id)
 	// If it was the currently uploaded one, abort
 	if(_CurrentUploadTexture==text)
 	{
-		_CurrentUploadTexture= NULL;
+		_CurrentUploadTexture = nullptr;
 	}
 
 	// If not uploaded.
@@ -286,15 +286,15 @@ void			CAsyncTextureManager::deleteTexture(uint id)
 		// stop uploading if was me
 		if(_CurrentUploadTexture==textLod)
 		{
-			_CurrentUploadTexture= NULL;
+			_CurrentUploadTexture = nullptr;
 		}
 		// stop loading me.
-		_CurrentTextureLodLoaded= NULL;
+		_CurrentTextureLodLoaded = nullptr;
 	}
 
 	// At last delete texture entry.
 	delete text;
-	_TextureEntries[id]= NULL;
+	_TextureEntries[id] = nullptr;
 	// add a new free id.
 	_FreeTextureIds.push_back(id);
 }
@@ -345,14 +345,14 @@ bool			CAsyncTextureManager::isTextureUpLoaded(uint id) const
 const NLMISC::CBitmap	*CAsyncTextureManager::getCoarseBitmap(uint id) const
 {
 	if(id>=_TextureEntries.size())
-		return NULL;
+		return nullptr;
 	CTextureEntry	*textEntry= _TextureEntries[id];
 	if(!textEntry)
-		return NULL;
+		return nullptr;
 
 	// if the textEntry not uploaded, return NULL
 	if(!textEntry->UpLoaded)
-		return NULL;
+		return nullptr;
 
 	// ok return the CoarseBitmap
 	return &textEntry->CoarseBitmap;
@@ -366,7 +366,7 @@ void			CAsyncTextureManager::update(IDriver *pDriver)
 	uint	nTotalColored = 0;
 
 	// if no texture to upload, get the next one
-	if(_CurrentUploadTexture==NULL)
+	if(_CurrentUploadTexture == nullptr)
 		getNextTextureToUpLoad(nTotalColored, pDriver);
 
 	// while some texture to upload
@@ -432,14 +432,14 @@ void			CAsyncTextureManager::update(IDriver *pDriver)
 				// Flag the Lod.
 				textLod->UpLoaded= true;
 				// Ok, ended to completly load this textureLod.
-				_CurrentTextureLodLoaded= NULL;
+				_CurrentTextureLodLoaded = nullptr;
 			}
 
 			// finally uploaded in VRAM, can release the RAM texture memory
 			pText->release();
 
 			// if not break because can't upload all parts, get next texture to upload
-			_CurrentUploadTexture= NULL;
+			_CurrentUploadTexture = nullptr;
 			getNextTextureToUpLoad(nTotalColored, pDriver);
 		}
 		else
@@ -555,7 +555,7 @@ bool			CAsyncTextureManager::uploadTexturePart(ITexture *pText, IDriver *pDriver
 void			CAsyncTextureManager::getNextTextureToUpLoad(uint &nTotalColored, IDriver *pDriver)
 {
 	// Reset texture uploading
-	_CurrentUploadTexture= NULL;
+	_CurrentUploadTexture = nullptr;
 	_CurrentUploadTextureMipMap= 0;
 	_CurrentUploadTextureLine= 0;
 
@@ -609,7 +609,7 @@ void			CAsyncTextureManager::getNextTextureToUpLoad(uint &nTotalColored, IDriver
 		}
 
 		// if no Lod texture currently loading, try to load/unload one
-		if(_CurrentTextureLodLoaded == NULL)
+		if(_CurrentTextureLodLoaded == nullptr)
 		{
 			updateTextureLodSystem(pDriver);
 		}
@@ -732,7 +732,7 @@ void			CAsyncTextureManager::updateTextureLodSystem(IDriver *pDriver)
 
 
 	// if the loadedSize is inferior to the wanted size, we can load a new LOD
-	CTextureLodToSort	*textLod= NULL;
+	CTextureLodToSort	*textLod = nullptr;
 	bool			unload;
 	if(currentLoadedSize<currentWantedSize)
 	{
@@ -762,7 +762,7 @@ void			CAsyncTextureManager::updateTextureLodSystem(IDriver *pDriver)
 			}
 		}
 		// it is possible that not found here. It means that All is Ok!!
-		if(textLod==NULL)
+		if(textLod == nullptr)
 			// no-op.
 			return;
 	}
@@ -797,7 +797,7 @@ void			CAsyncTextureManager::updateTextureLodSystem(IDriver *pDriver)
 		textLod->Lod->UpLoaded= false;
 		textLod->Lod->Loaded= false;
 		// Release completly the texture in driver. (SmartPtr delete)
-		textLod->Lod->Texture= NULL;
+		textLod->Lod->Texture = nullptr;
 	}
 
 }

@@ -39,7 +39,7 @@ bool initEmoteList( std::map<std::string, uint32>& 	emoteContainer )
 		CSmartPtr<UForm> emotList = formLoader->loadForm("list.emot");
 		if(emotList)
 		{
-			const UFormElm *list = 0;
+			const UFormElm *list = nullptr;
 			emotList->getRootNode().getNodeByName(&list, "emot_list");
 			if(list)
 			{

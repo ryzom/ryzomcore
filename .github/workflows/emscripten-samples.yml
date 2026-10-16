@@ -186,7 +186,8 @@ jobs:
             nl_sample_ppl \
             nl_sample_water \
             nl_sample_font \
-            nl_sample_gui
+            nl_sample_gui \
+            nl_sample_navigation
 
       - name: ccache stats
         if: always()
@@ -196,7 +197,7 @@ jobs:
         run: |
           mkdir -p pages
           # Copy built sample files
-          for sample in clip_plane nelvp planar_reflection ppl water font gui; do
+          for sample in clip_plane nelvp planar_reflection ppl water font gui navigation; do
             cp build/bin/nl_sample_${sample}.js pages/
             cp build/bin/nl_sample_${sample}.wasm pages/
             # Copy any embedded data files
@@ -205,7 +206,7 @@ jobs:
             fi
           done
           # Generate per-sample HTML host pages
-          for sample in clip_plane nelvp planar_reflection ppl water font gui; do
+          for sample in clip_plane nelvp planar_reflection ppl water font gui navigation; do
             title=$(echo "$sample" | sed 's/_/ /g; s/\b\(.\)/\u\1/g')
             cat > pages/nl_sample_${sample}.html << 'SAMPLEEOF'
           <!DOCTYPE html>
@@ -362,16 +363,29 @@ jobs:
           SAMPLEEOF
             # Append the title and sample-specific script tag (needs shell variable expansion)
             sed -i "s|<title>NeL Sample (WebGL 2.0)</title>|<title>NeL Sample - ${title} (WebGL 2.0)</title>|" pages/nl_sample_${sample}.html
-            # The GUI sample runs fullscreen at native devicePixelRatio; swap
-            # the fixed-size centered layout for a viewport-filling canvas.
-            if [ "$sample" = "gui" ]; then
-              sed -i \
-                -e 's|body {|body { overflow: hidden;|' \
-                -e 's|display: flex; justify-content: center; align-items: center;||' \
-                -e 's|width: 800px; height: 600px;|width: 100vw; height: 100vh;|' \
-                -e 's|<canvas id="canvas" width="800" height="600"|<canvas id="canvas"|' \
-                pages/nl_sample_${sample}.html
-            fi
+            # Samples that run fullscreen at native devicePixelRatio: swap the fixed-size
+            # centered layout for a viewport-filling canvas. The driver's emscripten event
+            # emitter already tracks CSS size x DPR into the canvas backing store and
+            # re-syncs on resize, so the page only has to let the canvas fill.
+            #
+            # The viewport meta is what makes "fill" mean the real screen on a phone -
+            # without it 100vw resolves against a ~980px virtual viewport and the page is
+            # scaled down. It stays off the fixed-size samples on purpose: width=device-width
+            # would leave their 800px canvas overflowing a narrow screen sideways.
+            #
+            # overscroll-behavior stops pull-to-refresh and rubber-banding from stealing a
+            # drag that starts near an edge, which on a phone is most of them.
+            case "$sample" in
+              gui|navigation)
+                sed -i \
+                  -e 's|<meta charset="utf-8">|<meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">|' \
+                  -e 's|body {|html, body { width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none;|' \
+                  -e 's|display: flex; justify-content: center; align-items: center;||' \
+                  -e 's|width: 800px; height: 600px;|width: 100vw; height: 100vh;|' \
+                  -e 's|<canvas id="canvas" width="800" height="600"|<canvas id="canvas"|' \
+                  pages/nl_sample_${sample}.html
+                ;;
+            esac
             echo "  <script src=\"nl_sample_${sample}.js\"></script>" >> pages/nl_sample_${sample}.html
             echo "  </body>" >> pages/nl_sample_${sample}.html
             echo "  </html>" >> pages/nl_sample_${sample}.html

@@ -165,7 +165,7 @@ public:
 	 * \returns False if an error has occurred (e.g. the remote host is disconnected).
 	 * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
 	 */
-	bool	flush( uint *nbBytesRemaining=NULL ) { return _BufSock->flush( nbBytesRemaining ); }
+	bool	flush( uint *nbBytesRemaining = nullptr) { return _BufSock->flush( nbBytesRemaining ); }
 
 
 

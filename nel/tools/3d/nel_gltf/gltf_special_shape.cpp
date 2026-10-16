@@ -145,7 +145,7 @@ static bool texToFiles(const ITexture *t, std::vector<std::string> &files, std::
 // CTextureBlend(day, night).
 static ITexture *texFromFiles(const std::vector<std::string> &files)
 {
-	if (files.empty()) return NULL;
+	if (files.empty()) return nullptr;
 	if (files.size() == 1)
 	{
 		CTextureFile *tf = new CTextureFile;
@@ -278,7 +278,7 @@ static IShape *waterFromExtras(const CJsonValue &e, std::string *err)
 	{
 		if (err) *err = "bad water env map extras";
 		delete ws;
-		return NULL;
+		return nullptr;
 	}
 	{
 		std::vector<std::string> one(1);
@@ -319,7 +319,7 @@ static IShape *waterFromExtras(const CJsonValue &e, std::string *err)
 		{
 			if (err) *err = "bad water polygon extras";
 			delete ws;
-			return NULL;
+			return nullptr;
 		}
 		NLMISC::CPolygon2D poly;
 		poly.Vertices.resize(a->size() / 2);
@@ -392,7 +392,7 @@ static IShape *remanenceFromExtras(const CJsonValue &e, std::string *err)
 		{
 			if (err && err->empty()) *err = "missing remanence material extras";
 			delete srs;
-			return NULL;
+			return nullptr;
 		}
 		srs->setMaterial(mat);
 	}
@@ -402,7 +402,7 @@ static IShape *remanenceFromExtras(const CJsonValue &e, std::string *err)
 		{
 			if (err) *err = "bad remanence corners extras";
 			delete srs;
-			return NULL;
+			return nullptr;
 		}
 		srs->setNumCorners((uint)(a->size() / 3));
 		for (size_t k = 0; k < a->size() / 3; ++k)
@@ -511,7 +511,7 @@ static IShape *flareFromExtras(const CJsonValue &e, std::string *err)
 		{
 			if (err) *err = "bad flare per-slot extras";
 			delete fs;
-			return NULL;
+			return nullptr;
 		}
 		for (uint k = 0; k < MaxFlareNum; ++k)
 		{
@@ -521,7 +521,7 @@ static IShape *flareFromExtras(const CJsonValue &e, std::string *err)
 			if (!tn.empty())
 				fs->setTexture(k, new CTextureFile(tn));
 			else
-				fs->setTexture(k, NULL);
+				fs->setTexture(k, nullptr);
 		}
 	}
 	CVector pos;
@@ -565,7 +565,7 @@ IShape *specialShapeFromExtras(const CJsonValue &extras, const std::string &shap
 	if (shapeClass == "flare")
 		return flareFromExtras(extras, err);
 	if (err) *err = "unknown structural shape class " + shapeClass;
-	return NULL;
+	return nullptr;
 }
 
 } /* namespace NLGLTF */

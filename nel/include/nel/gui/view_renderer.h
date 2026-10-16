@@ -297,7 +297,7 @@ namespace NLGUI
 		  */
 
 		void setExternalTexture(const std::string &sGlobalTextureName,
-								NL3D::UTexture	*externalTexture = NULL,
+								NL3D::UTexture	*externalTexture = nullptr,
 								uint32			 externalTexWidth = 1,
 								uint32			 externalTexHeight = 1,
 								uint32			 defaultTexWidth = 1,

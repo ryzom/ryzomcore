@@ -49,8 +49,8 @@ CCluster::CCluster ()
 
 	FatherVisible = VisibleFromFather = false;
 	FatherAudible = AudibleFromFather = false;
-	Father = NULL;
-	Group = NULL;
+	Father = nullptr;
+	Group = nullptr;
 
 	// map a no fx string
 	_EnvironmentFxId = CStringMapper::map("no fx");
@@ -127,7 +127,7 @@ void CCluster::unlinkFromParent()
 	if (Father)
 	{
 		 Father->Children.erase(remove(Father->Children.begin(), Father->Children.end(), this), Father->Children.end());
-		 Father = NULL;
+		 Father = nullptr;
 	}
 }
 
@@ -144,7 +144,7 @@ void CCluster::unlinkSons()
 	{
 		if (Children[k]->Father == this)
 		{
-			Children[k]->Father = NULL;
+			Children[k]->Father = nullptr;
 		}
 	}
 	NLMISC::contReset(Children);
@@ -433,7 +433,7 @@ bool CCluster::clip ()
 void CCluster::traverseClip ()
 {
 	// This is the root call called by the SceneRoot
-	recursTraverseClip(NULL);
+	recursTraverseClip(nullptr);
 }
 
 
@@ -470,7 +470,7 @@ void CCluster::recursTraverseClip(CTransform *caller)
 		else
 			pOtherSideCluster = pPortal->getCluster (0);
 
-		if (Father != NULL)
+		if (Father != nullptr)
 		if (caller == Father) // If the caller is the father
 		if (VisibleFromFather)
 			// Backface clipping
@@ -493,7 +493,7 @@ void CCluster::recursTraverseClip(CTransform *caller)
 	}
 
 	// Link up in hierarchy
-	if ((FatherVisible)&&(Father != NULL))
+	if ((FatherVisible)&&(Father != nullptr))
 	{
 		Father->recursTraverseClip(this);
 	}
@@ -579,7 +579,7 @@ void CCluster::cameraRayClip(const CVector &start, const CVector &end, std::vect
 	/* Link up in hierarchy. Test the Inverse Flag, cause the path is inverted here!!!
 		ie: if I allow the camera to go out, it MUST can re-enter (ie if I am VisibleFromFather)
 	*/
-	if ((VisibleFromFather)&&(Father != NULL))
+	if ((VisibleFromFather)&&(Father != nullptr))
 	{
 		Father->cameraRayClip(start, end, clusterVisited);
 	}

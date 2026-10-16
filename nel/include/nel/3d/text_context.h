@@ -351,7 +351,7 @@ public:
 		if (index < _CacheStrings.size())
 			return &_CacheStrings[index];
 		else
-			return NULL;
+			return nullptr;
 	}
 
 

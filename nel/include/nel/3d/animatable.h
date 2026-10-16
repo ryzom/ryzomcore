@@ -75,7 +75,7 @@ public:
 	  */
 	IAnimatable ()
 	{
-		_Father= NULL;
+		_Father = nullptr;
 		_BitSet= 0;
 	}
 

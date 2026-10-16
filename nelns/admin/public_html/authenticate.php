@@ -15,9 +15,28 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+        // Without httponly the session id is readable by any script that
+        // makes it onto a page; without a samesite policy the cookie rides
+        // along on cross site form posts. Only ask for the secure flag when
+        // the request itself arrived over tls, or a plain http install could
+        // never log in.
+        ini_set('session.cookie_httponly', '1');
+        ini_set('session.use_only_cookies', '1');
+        ini_set('session.cookie_samesite', 'Lax');
+        if ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== '' && strtolower($_SERVER['HTTPS']) !== 'off')
+                || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443))
+                ini_set('session.cookie_secure', '1');
+
         session_start();
 	include('foo.php');
-        $publicAccess = true;
+        // admin.php, commands.php and las_interface.php set $publicAccess to
+        // false before including this file, and the check further down is what
+        // keeps everyone but root and the nevrax group out of them. Assigning
+        // true here unconditionally threw that away, so those pages -- account
+        // administration and running service commands -- were open to every
+        // account that could log in. Only supply the default.
+        if (!isset($publicAccess))
+                $publicAccess = true;
         // set cookies for filters
         if (isset($admfilter_shard) && !isset($filter_shard))                   $filter_shard = $admfilter_shard;
         else if (isset($filter_shard) && $filter_shard=="")                             setCookie("admfilter_shard");
@@ -56,7 +75,7 @@
 
 	if ((!isset($publicAccess) || $publicAccess == false) && $admlogin != "root" && (!$allowNevrax || !$IsNevrax))
 	{
-		htmlProlog($_SERVER['PHP_SELF'], "Acces not granted");
+		htmlProlog(htmlspecialchars($_SERVER['PHP_SELF'], ENT_QUOTES), "Acces not granted");
 		echo "You are not allowed to go to this page.<br>\n";
 		echo "<a href='index.php'>Index page</a>\n";
 		htmlEpilog();

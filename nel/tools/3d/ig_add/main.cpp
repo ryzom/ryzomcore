@@ -40,13 +40,13 @@ CInstanceGroup* LoadInstanceGroup (const char* sFilename)
 		catch (const Exception &)
 		{
 			delete newIG;
-			return NULL;
+			return nullptr;
 		}
 	}
 	else
 	{
 		delete newIG;
-		return NULL;
+		return nullptr;
 	}
 	return newIG;
 }
@@ -89,13 +89,13 @@ int main(int nNbArg, char**ppArgs)
 	// Load in1 and in2
 	// ****************
 	CInstanceGroup *pIG1 = LoadInstanceGroup (ppArgs[2]);
-	if (pIG1 == NULL)
+	if (pIG1 == nullptr)
 	{
 		cerr << "File " << ppArgs[2] << " not found" << endl;
 		return -1;
 	}
 	CInstanceGroup *pIG2 = LoadInstanceGroup (ppArgs[3]);
-	if (pIG2 == NULL)
+	if (pIG2 == nullptr)
 	{
 		cerr << "File " << ppArgs[3] << " not found" << endl;
 		delete pIG1;

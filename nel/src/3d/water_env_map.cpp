@@ -211,7 +211,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 		driver.setRenderTarget(_Env2D, 0, 0, _Env2DSize, _Env2DSize);
 		doInit();
 		//
-		driver.activeVertexProgram(NULL);
+		driver.activeVertexProgram(nullptr);
 		driver.activeVertexBuffer(_FlattenVB);
 		driver.activeIndexBuffer(_FlattenIB);
 		driver.setFrustum(-1.f, 1.f, -1.f, 1.f, 0.f, 1.f, false);
@@ -224,7 +224,7 @@ void CWaterEnvMap::update(TGlobalAnimationTime time, IDriver &driver)
 		driver.renderTriangles(_MaterialPassThru, 0, FVB_NUM_TRIS);
 		_NumRenderedFaces = 0; // start to render again
 	}
-	driver.setRenderTarget(NULL);
+	driver.setRenderTarget(nullptr);
 }
 
 // *******************************************************************************

@@ -244,7 +244,7 @@ private :
 	{
 	public:
 		char *Ptr;
-		CChar() { Ptr = NULL; }
+		CChar() { Ptr = nullptr; }
 		CChar(const CChar& c) { Ptr = c.Ptr; } // WARNING : Share Pointer
 	};
 

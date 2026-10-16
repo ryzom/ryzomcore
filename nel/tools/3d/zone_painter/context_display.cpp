@@ -433,7 +433,7 @@ void discoverAvailableSeasons(const std::string &bankPath, std::vector<std::stri
 		// Converted sibling tiles/ (scan for *_{season}.dds)
 		if (!found)
 		{
-			const char *dirs[] = { tilesDir.c_str(), exportTiles.c_str(), bankDir.c_str(), NULL };
+			const char *dirs[] = { tilesDir.c_str(), exportTiles.c_str(), bankDir.c_str(), nullptr };
 			for (int d = 0; dirs[d] && !found; ++d)
 			{
 				if (!dirs[d][0] || !NLMISC::CFile::isDirectory(dirs[d]))
@@ -567,7 +567,7 @@ void resolveBankTextures(NL3D::CTileBank &bank, const std::string &bankPath,
 		const char *name = bank.getDisplacementMap(d);
 		if (name && *name) names.insert(NLMISC::CFile::getFilename(name));
 	}
-	resolveNamesWithSeasons(names, NULL, resolvedOut, missingOut);
+	resolveNamesWithSeasons(names, nullptr, resolvedOut, missingOut);
 }
 
 void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShapeBank *shapeBank,
@@ -586,7 +586,7 @@ void addContextMeshes(PMAXLOAD::SLoadedMax &lm, NL3D::CScene *scene, NL3D::CShap
 		// the buildings of village/town bricks are XRefObject nodes referencing construction
 		// .max files, and the XRefObject wrapper's registered superclass is 0x60; a wrapper-
 		// level superclass test drops every one of them silently. Resolve first, then gate.
-		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
+		CSceneClass *obj = SCENELIB::baseObjectOf(*node, nullptr, nullptr);
 		if (!obj) continue;
 		if (obj->classDesc()->classId().a() == 0x92aab38c)
 		{
@@ -751,7 +751,7 @@ static void decodeSceneLights(PMAXLOAD::SLoadedMax &lm, std::vector<SDecodedLigh
 		if (!node) continue;
 		// XRef-RESOLVING walk, same as the mesh path above: an XRefObject wrapper reports
 		// superclass 0x60, so a wrapper-level 0x30 gate silently drops XRef'd lights.
-		CSceneClass *obj = SCENELIB::baseObjectOf(*node, NULL, NULL);
+		CSceneClass *obj = SCENELIB::baseObjectOf(*node, nullptr, nullptr);
 		if (!obj) continue;
 		if (obj->classDesc()->classId().a() == 0x92aab38c)
 			continue; // unresolvable XRef (missing referenced file); resolver already warned

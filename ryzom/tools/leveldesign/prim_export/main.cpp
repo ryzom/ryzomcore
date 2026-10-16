@@ -523,7 +523,7 @@ public:
 	const UForm		*loadForm (const char *formName, uint32 &formDate)
 	{
 		// The form
-		UForm *form = NULL;
+		UForm *form = nullptr;
 		formDate = 0;
 
 		// In the map ?

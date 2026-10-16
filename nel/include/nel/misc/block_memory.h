@@ -66,7 +66,7 @@ public:
 		nlassert(blockSize);
 		_BlockSize= blockSize;
 		_EltSize= std::max((uint)sizeof(T), (uint)sizeof(void*));
-		_NextFreeElt= NULL;
+		_NextFreeElt = nullptr;
 		_NAllocatedElts= 0;
 	}
 	// just copy setup from other blockMemory, don't copy data!
@@ -76,7 +76,7 @@ public:
 		// if other block is rebinded, don't copy its rebinded size.
 		_EltSize= (uint)std::max(sizeof(T), sizeof(void*));
 		// No elts allocated
-		_NextFreeElt= NULL;
+		_NextFreeElt = nullptr;
 		_NAllocatedElts= 0;
 	}
 	/** purge()
@@ -183,7 +183,7 @@ public:
 			_Blocks.erase(_Blocks.begin());
 		}
 
-		_NextFreeElt= NULL;
+		_NextFreeElt = nullptr;
 		_NAllocatedElts= 0;
 	}
 
@@ -273,7 +273,7 @@ private:
 			ptr= next;
 		}
 		// last element points to NULL.
-		*(void**)ptr= NULL;
+		*(void**)ptr = nullptr;
 
 
 		// If debug, must init all check values to CheckDeletedIdent.

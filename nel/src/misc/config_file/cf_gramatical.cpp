@@ -435,7 +435,8 @@ int yydebug;			/*  nonzero means print parse trace	*/
 #ifndef YYMAXDEPTH
 #define YYMAXDEPTH 10000
 #endif
-
+
+
 /* Define __yy_memcpy.  Note that the size argument
    should be passed with type unsigned int, because that is what the non-GCC
    definitions require.  With GCC, __builtin_memcpy takes an arg
@@ -479,7 +480,8 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 
 #endif
 #endif
-
+
+
 #line 217 "cfbison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
@@ -826,7 +828,7 @@ case 5:
 {
 				DEBUG_PRINTF("Forcing current file %s and line %u\n", yyvsp[-1].Val.String, yyvsp[0].Val.Int-1);
 
-				if (cf_CurrentFile != NULL)
+				if (cf_CurrentFile != nullptr)
 					free(cf_CurrentFile);
 				// store the filename
 				cf_CurrentFile = strdup(yyvsp[-1].Val.String);
@@ -857,7 +859,7 @@ case 6:
 				}
 				NLMISC::CConfigFile::CVar Var;
 				Var.Comp = false;
-				Var.Callback = NULL;
+				Var.Callback = nullptr;
 				if (cf_CurrentVar.Comp)
 				{
 					DEBUG_PRINTF ("yacc: new assign complex variable '%s'\n", yyvsp[-3].Val.String);
@@ -880,7 +882,7 @@ case 6:
 					// reaffectation d'une variable
 					Var.Callback = (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].Callback;
 					DEBUG_PRINTF ("yacc: reassign var name '%s' type %d\n", Var.Name.c_str(), Var.Type);
-					if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != NULL)
+					if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != nullptr)
 						(Var.Callback)(Var);
 					(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] = Var;
 				}
@@ -916,7 +918,7 @@ case 7:
 				}
 				NLMISC::CConfigFile::CVar Var;
 				Var.Comp = false;
-				Var.Callback = NULL;
+				Var.Callback = nullptr;
 				if (cf_CurrentVar.Comp) Var = cf_CurrentVar;
 				else cf_setVar (Var, yyvsp[-1].Val);
 				Var.Name = yyvsp[-3].Val.String;
@@ -936,14 +938,14 @@ case 7:
 						// this var was created in the current cfg, append the new value at the end
 						(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i].add(Var);
 
-						if (Var.size() > 0 && Var.Callback != NULL)
+						if (Var.size() > 0 && Var.Callback != nullptr)
 							(Var.Callback)((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i]);
 					}
 					else
 					{
 						// this var has been created in a parent Cfg, append at the beginning of the array
 						Var.add ((*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i]);
-						if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != NULL)
+						if (Var != (*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] && Var.Callback != nullptr)
 							(Var.Callback)(Var);
 						(*((vector<NLMISC::CConfigFile::CVar>*)(YYPARSE_PARAM)))[i] = Var;
 					}
@@ -1069,7 +1071,8 @@ case 27:
 }
    /* the action file gets copied in in place of this dollarsign */
 #line 543 "cfbison.simple"
-
+
+
   yyvsp -= yylen;
   yyssp -= yylen;
 #ifdef YYLSP_NEEDED

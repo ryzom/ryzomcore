@@ -54,7 +54,7 @@ CDisplayerVisual::CDisplayerVisual() : _DisplayFlags(FlagNone)
 	_BlinkStartDate = 0;
 	_Pos.set(0, 0, 0);
 	_WorldPos = _Pos;
-	_IconInScene = NULL;
+	_IconInScene = nullptr;
 	_IconInSceneCreationFailed = false;
 	_DisplayFlags = 0;
 	_RotateInProgress = false;
@@ -64,7 +64,7 @@ CDisplayerVisual::CDisplayerVisual() : _DisplayFlags(FlagNone)
 	_DisplayMode = DisplayModeVisible;
 	_InheritDisplayMode = false; // filled at init by this displayer lua parameter
 	_LastParentOk = false;
-	_LastParent = NULL;
+	_LastParent = nullptr;
 }
 
 // ***************************************************************
@@ -106,7 +106,7 @@ bool CDisplayerVisual::getDisplayFlag(TDisplayFlags flag) const
 CDisplayerVisual *CDisplayerVisual::getParent()
 {
 	if (_LastParentOk) return _LastParent;
-	CDisplayerVisual *result = NULL;
+	CDisplayerVisual *result = nullptr;
 	//H_AUTO(R2_CDisplayerVisual_getParent)
 	CInstance *inst = getDisplayedInstance();
 	nlassert(inst);
@@ -435,7 +435,7 @@ void CDisplayerVisual::onPostRender()
 				CInterfaceManager *pIM = CInterfaceManager::getInstance();
 				const char *iconTemplateName = "r2ed_bad_pos_icon";
 				// if the in scene 'stop' window wasn't created, then create it now
-				CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (iconTemplateName , "ui:interface", NULL, 0);
+				CInterfaceGroup *group = CWidgetManager::getInstance()->getParser()->createGroupInstance (iconTemplateName , "ui:interface", nullptr, 0);
 				if (group)
 				{
 					_IconInScene = dynamic_cast<CGroupInScene *>(group);

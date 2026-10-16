@@ -75,7 +75,7 @@ CMeshBase *buildMeshShape(CMeshBase::CMeshBaseBuild &bbm,
 			{
 				delete meshMRMSkinned;
 				if (skipReason) *skipReason = "skinned-maxverts";
-				return NULL;
+				return nullptr;
 			}
 			meshMRMSkinned->optimizeMaterialUsage(materialRemap);
 			return meshMRMSkinned;

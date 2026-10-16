@@ -50,7 +50,7 @@ UInstanceGroup	*UInstanceGroup::createInstanceGroup (const std::string &instance
 		delete user;
 
 		// Return error code
-		return NULL;
+		return nullptr;
 	}
 
 	// return the good value
@@ -70,7 +70,7 @@ void UInstanceGroup::stopCreateInstanceGroupAsync (UInstanceGroup **ppIG)
 {
 	// Theorically should stop the async file manager but the async file manager can only be stopped
 	// between tasks (a file reading) so that is no sense to do anything here
-	while (*ppIG == NULL)
+	while (*ppIG == nullptr)
 	{
 		nlSleep (2);
 	}
@@ -170,7 +170,7 @@ void CInstanceGroupUser::setIGAddBeginCallback(IIGAddBegin *callback)
 void CInstanceGroupUser::addToScene (class UScene& scene, UDriver *driver, uint selectedTexture)
 {
 	// Get driver pointer
-	IDriver *cDriver= driver ? NLMISC::safe_cast<CDriverUser*>(driver)->getDriver() : NULL;
+	IDriver *cDriver= driver ? NLMISC::safe_cast<CDriverUser*>(driver)->getDriver() : nullptr;
 
 	// Add to the scene
 	addToScene (((CSceneUser*)&scene)->getScene(), cDriver, selectedTexture);
@@ -192,7 +192,7 @@ void CInstanceGroupUser::addToScene (class CScene& scene, IDriver *driver, uint 
 	for( uint32 i = 0; i < _InstanceGroup._Instances.size(); ++i)
 	{
 		string stmp;
-		if (_InstanceGroup._Instances[i] != NULL)
+		if (_InstanceGroup._Instances[i] != nullptr)
 		{
 			// insert in map (may fail if double name)
 			stmp = _InstanceGroup.getInstanceName (i);
@@ -204,7 +204,7 @@ void CInstanceGroupUser::addToScene (class CScene& scene, IDriver *driver, uint 
 // ***************************************************************************
 void CInstanceGroupUser::addToSceneAsync (class UScene& scene, UDriver *driver, uint selectedTexture)
 {
-	IDriver *cDriver= driver ? NLMISC::safe_cast<CDriverUser*>(driver)->getDriver() : NULL;
+	IDriver *cDriver= driver ? NLMISC::safe_cast<CDriverUser*>(driver)->getDriver() : nullptr;
 	// Add to the scene
 	_InstanceGroup.addToSceneAsync (((CSceneUser*)&scene)->getScene(), cDriver, selectedTexture);
 	_AddToSceneState = StateAdding;
@@ -228,7 +228,7 @@ UInstanceGroup::TState CInstanceGroupUser::getAddToSceneState ()
 		for( uint32 i = 0; i < _InstanceGroup._Instances.size(); ++i)
 		{
 			string stmp;
-			if (_InstanceGroup._Instances[i] != NULL)
+			if (_InstanceGroup._Instances[i] != nullptr)
 			{
 				// create but don't want to delete from scene, since added/removed with _InstanceGroup
 				// insert in map (may fail if double name)
@@ -510,7 +510,7 @@ UInstanceGroup *CInstanceGroupUser::getParentCluster() const
 		// NB: return NULL if this is the GlobalInstanceGroup.
 		return parent->getUserInterface();
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
@@ -518,7 +518,7 @@ void			CInstanceGroupUser::displayDebugClusters(UDriver *drv, UTextContext *txtC
 {
 	if(!drv)
 		return;
-	CTextContext	*pTxtCtx= NULL;
+	CTextContext	*pTxtCtx = nullptr;
 	if(txtCtx)
 		pTxtCtx= &((CTextContextUser*)txtCtx)->getTextContext();
 	_InstanceGroup.displayDebugClusters(((CDriverUser*)drv)->getDriver(), pTxtCtx);

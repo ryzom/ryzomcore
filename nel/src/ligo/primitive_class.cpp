@@ -126,7 +126,7 @@ bool ReadChild (CPrimitiveClass::CChild &child, xmlNodePtr childNode, const char
 		// Read the parameters
 		child.Parameters.reserve (CIXml::countChildren (childNode, "PARAMETER"));
 		for (	xmlNodePtr childParamNode = CIXml::getFirstChildNode (childNode, "PARAMETER");
-				childParamNode != NULL;
+				childParamNode != nullptr;
 				childParamNode = CIXml::getNextChildNode (childParamNode, "PARAMETER"))
 		{
 			// Add a static child
@@ -143,7 +143,7 @@ bool ReadChild (CPrimitiveClass::CChild &child, xmlNodePtr childNode, const char
 			uint defaultId = 0;
 			childParam.DefaultValue.resize (CIXml::countChildren (childParamNode, "DEFAULT_VALUE"));
 			for (	xmlNodePtr childParamValueNode = CIXml::getFirstChildNode (childParamNode, "DEFAULT_VALUE");
-					childParamValueNode != NULL;
+					childParamValueNode != nullptr;
 					childParamValueNode = CIXml::getNextChildNode (childParamValueNode, "DEFAULT_VALUE"))
 			{
 				// Gen id flag
@@ -200,7 +200,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 	{
 		const CPrimitiveClass *parent = config.getPrimitiveClass(parentClass.c_str());
 
-		if (parent == NULL)
+		if (parent == nullptr)
 		{
 			config.syntaxError (filename, primitiveNode, "Can't find parent class (%s) for class (%s)", parentClass.c_str (), className);
 			return false;
@@ -269,7 +269,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 
 	// Read the parameters
 	for (	xmlNodePtr paramNode = CIXml::getFirstChildNode (primitiveNode, "PARAMETER");
-			paramNode != NULL;
+			paramNode != nullptr;
 			paramNode = CIXml::getNextChildNode (paramNode, "PARAMETER"))
 	{
 		// Read the property name
@@ -369,7 +369,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 
 		// Read the combo values
 		for (	xmlNodePtr comboValueNode = CIXml::getFirstChildNode (paramNode, "COMBO_VALUES");
-				comboValueNode != NULL;
+				comboValueNode != nullptr;
 				comboValueNode = CIXml::getNextChildNode (comboValueNode, "COMBO_VALUES"))
 		{
 			// Read the context
@@ -388,7 +388,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 
 			// Read the values
 			for (	xmlNodePtr comboValueValueNode = CIXml::getFirstChildNode (comboValueNode, "CONTEXT_VALUE");
-					comboValueValueNode != NULL;
+					comboValueValueNode != nullptr;
 					comboValueValueNode = CIXml::getNextChildNode (comboValueValueNode, "CONTEXT_VALUE"))
 			{
 				// Read the value
@@ -401,7 +401,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 
 		// Read the combo files
 		for (	xmlNodePtr comboValueNode = CIXml::getFirstChildNode (paramNode, "COMBO_FILES");
-				comboValueNode != NULL;
+				comboValueNode != nullptr;
 				comboValueNode = CIXml::getNextChildNode (comboValueNode, "COMBO_FILES"))
 		{
 			// Read the context
@@ -474,7 +474,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 		uint defaultId = 0;
 		parameter.DefaultValue.resize (CIXml::countChildren (paramNode, "DEFAULT_VALUE"));
 		for (	xmlNodePtr defaultValueNode = CIXml::getFirstChildNode (paramNode, "DEFAULT_VALUE");
-				defaultValueNode != NULL;
+				defaultValueNode != nullptr;
 				defaultValueNode = CIXml::getNextChildNode (defaultValueNode, "DEFAULT_VALUE"))
 		{
 			// Gen id flag
@@ -499,7 +499,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 	// Read static children
 	StaticChildren.reserve (StaticChildren.size() + CIXml::countChildren (primitiveNode, "STATIC_CHILD"));
 	for (	xmlNodePtr childrenNode = CIXml::getFirstChildNode (primitiveNode, "STATIC_CHILD");
-			childrenNode != NULL;
+			childrenNode != nullptr;
 			childrenNode = CIXml::getNextChildNode (childrenNode, "STATIC_CHILD"))
 	{
 		// Add a static child
@@ -516,7 +516,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 	// Read dynamic children
 	DynamicChildren.reserve (DynamicChildren.size() + CIXml::countChildren (primitiveNode, "DYNAMIC_CHILD"));
 	for (	xmlNodePtr childrenNode = CIXml::getFirstChildNode (primitiveNode, "DYNAMIC_CHILD");
-			childrenNode != NULL;
+			childrenNode != nullptr;
 			childrenNode = CIXml::getNextChildNode (childrenNode, "DYNAMIC_CHILD"))
 	{
 		// Add a static child
@@ -533,7 +533,7 @@ bool CPrimitiveClass::read (xmlNodePtr primitiveNode,
 	// Read generated children
 	GeneratedChildren.reserve (GeneratedChildren.size() + CIXml::countChildren (primitiveNode, "GENERATED_CHILD"));
 	for (	xmlNodePtr childrenNode = CIXml::getFirstChildNode (primitiveNode, "GENERATED_CHILD");
-			childrenNode != NULL;
+			childrenNode != nullptr;
 			childrenNode = CIXml::getNextChildNode (childrenNode, "GENERATED_CHILD"))
 	{
 		// Add a static child
@@ -619,7 +619,7 @@ void	CPrimitiveClass::CParameter::CConstStringValue::appendPrimPath(std::vector<
 		const	uint	nbChilds=(*it)->getNumChildren();
 		for (uint childIndex=0;childIndex<nbChilds;childIndex++)
 		{
-			const	IPrimitive*child=NULL;
+			const	IPrimitive*child = nullptr;
 			if	(	!(*it)->getChild(child,childIndex)
 				||	!child	)
 				continue;

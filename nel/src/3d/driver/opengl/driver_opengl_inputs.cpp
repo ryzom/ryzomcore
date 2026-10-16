@@ -60,7 +60,7 @@ CDriverGL::CCursor::CCursor() : ColorDepth(CDriverGL::ColorDepth32),
 								Rot(0)
 {
 #if defined(NL_OS_UNIX) && !defined(NL_OS_MAC)
-	Dpy = NULL;
+	Dpy = nullptr;
 #endif
 }
 
@@ -784,7 +784,7 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 		}
 
 		// Create the icon graphic contest
-		GC gc = XCreateGC(_dpy, pixmap, 0, NULL);
+		GC gc = XCreateGC(_dpy, pixmap, 0, nullptr);
 
 		if (!gc)
 		{
@@ -807,7 +807,7 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 		if (image->data)
 		{
 			free(image->data);
-			image->data = NULL;
+			image->data = nullptr;
 		}
 
 		XDestroyImage(image);
@@ -820,7 +820,7 @@ bool CDriverGL::convertBitmapToCursor(const NLMISC::CBitmap &bitmap, nlCursor &c
 			return false;
 		}
 
-		Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, 0);
+		Picture picture = XRenderCreatePicture(_dpy, pixmap, format, 0, nullptr);
 
 		if (!picture)
 		{

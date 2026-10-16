@@ -62,7 +62,7 @@ CEmotListSheet::CEmotListSheet()
 //-----------------------------------------------
 void CEmotListSheet::build(const NLGEORGES::UFormElm &item)
 {
-	const UFormElm *list = 0;
+	const UFormElm *list = nullptr;
 	item.getNodeByName(&list, "emot_list");
 	if(list)
 	{

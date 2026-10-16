@@ -55,7 +55,7 @@ CUniformBuffer::~CUniformBuffer()
 	 * ***********************************************/
 
 	if (DrvInfos)
-		DrvInfos->UniformBufferPtr = NULL; // Tell the driver info to not restaure memory when it will die
+		DrvInfos->UniformBufferPtr = nullptr; // Tell the driver info to not restaure memory when it will die
 
 	// Must kill the drv mirror of this VB.
 	DrvInfos.kill();

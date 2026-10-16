@@ -101,14 +101,14 @@ void CSceneClassRegistry::remove(const TSClassId superClassId)
 CSceneClass *CSceneClassRegistry::create(CScene *scene, const TSClassId superClassId, const NLMISC::CClassId classId) const
 {
 	TKey key(superClassId, classId);
-	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { /* nldebug("Try to create class that does not exist"); */ return NULL; }
+	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { /* nldebug("Try to create class that does not exist"); */ return nullptr; }
 	return m_ClassDescriptions.find(key)->second->create(scene);
 }
 
 /// Create an unknown class by superclass id
 CSceneClass *CSceneClassRegistry::createUnknown(CScene *scene, TSClassId superClassId, const NLMISC::CClassId classId, const ucstring &displayName, const ucstring &dllFilename, const ucstring &dllDescription) const
 {
-	if (m_SuperClassDescriptions.find(superClassId) == m_SuperClassDescriptions.end()) { nlwarning("Creating superclass 0x%x (%s) %s that does not exist", superClassId, displayName.toUtf8().c_str(), classId.toString().c_str()); return NULL; }
+	if (m_SuperClassDescriptions.find(superClassId) == m_SuperClassDescriptions.end()) { nlwarning("Creating superclass 0x%x (%s) %s that does not exist", superClassId, displayName.toUtf8().c_str(), classId.toString().c_str()); return nullptr; }
 	return m_SuperClassDescriptions.find(superClassId)->second->createUnknown(scene, classId, displayName, dllFilename, dllDescription);
 }
 
@@ -122,7 +122,7 @@ void CSceneClassRegistry::destroy(CSceneClass *sceneClass) const
 const ISceneClassDesc *CSceneClassRegistry::describe(const TSClassId superClassId, const NLMISC::CClassId classId) const
 {
 	TKey key(superClassId, classId);
-	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { nldebug("Try to describe class that does not exist"); return NULL; }
+	if (m_ClassDescriptions.find(key) == m_ClassDescriptions.end()) { nldebug("Try to describe class that does not exist"); return nullptr; }
 	return m_ClassDescriptions.find(key)->second;
 }
 

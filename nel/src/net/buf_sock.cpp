@@ -63,7 +63,7 @@ CBufSock::CBufSock( CTcpSock *sock ) :
 {
 	nlnettrace( "CBufSock::CBufSock" ); // don't define a global object
 
-	if ( Sock == NULL )
+	if ( Sock == nullptr)
 	  {
 		Sock = new CTcpSock();
 	  }
@@ -88,7 +88,7 @@ CBufSock::~CBufSock()
 
 	// destroy the structur to be sure that other people will not access to this anymore
 	AuthorizedCallback.clear();
-	Sock = NULL;
+	Sock = nullptr;
 	_KnowConnected = false;
 	_LastFlushTime = 0;
 	_TriggerTime = 0;
@@ -152,7 +152,7 @@ bool CBufSock::flush( uint *nbBytesRemaining )
 	do
 	{
 		// Process each element in the send queue
-		uint8 *tmpbuffer = NULL;
+		uint8 *tmpbuffer = nullptr;
 		uint32 size = 0;
 		if (! SendFifo.empty())
 		{
@@ -369,7 +369,7 @@ string CBufSock::asString() const
 		str += typeStr();
 		str += NLMISC::toStringPtr(this) + " (socket ";
 
-		if (Sock == NULL)
+		if (Sock == nullptr)
 			str += "<null>";
 		else
 			str += NLMISC::toString(Sock->descriptor());
@@ -400,7 +400,7 @@ CNonBlockingBufSock::CNonBlockingBufSock( CTcpSock *sock, uint32 maxExpectedBloc
 CServerBufSock::CServerBufSock( CTcpSock *sock ) :
 	CNonBlockingBufSock( sock ),
 	_Advertised( false ),
-	_OwnerTask( NULL )
+	_OwnerTask(nullptr)
 {
 	nlassert (this != InvalidSockId);	// invalid bufsock
 	nlnettrace( "CServerBufSock::CServerBufSock" );

@@ -269,7 +269,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 
 	bool containerChanged = false;
 
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 
 	std::vector<uint> NeededToRecompute;
 
@@ -323,7 +323,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		}
 
 		// create the georges loader if necessary
-		if (formLoader == NULL)
+		if (formLoader == nullptr)
 		{
 			NLMISC::WarningLog->addNegativeFilter("CFormLoader: Can't open the form file");
 			formLoader = NLGEORGES::UFormLoader::createLoader ();
@@ -389,7 +389,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
-	if (formLoader != NULL)
+	if (formLoader != nullptr)
 	{
 		NLGEORGES::UFormLoader::releaseLoader (formLoader);
 		NLMISC::WarningLog->removeFilter ("CFormLoader: Can't open the form file");
@@ -632,7 +632,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 
 	bool containerChanged = false;
 
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 
 	std::vector<uint> NeededToRecompute;
 
@@ -686,7 +686,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 		}
 
 		// create the georges loader if necessary
-		if (formLoader == NULL)
+		if (formLoader == nullptr)
 		{
 			NLMISC::WarningLog->addNegativeFilter("CFormLoader: Can't open the form file");
 			formLoader = NLGEORGES::UFormLoader::createLoader ();
@@ -752,7 +752,7 @@ void loadForm2(const std::vector<std::string> &sheetFilters, const std::string &
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
-	if (formLoader != NULL)
+	if (formLoader != nullptr)
 	{
 		NLGEORGES::UFormLoader::releaseLoader (formLoader);
 		NLMISC::WarningLog->removeFilter ("CFormLoader: Can't open the form file");
@@ -997,7 +997,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 
 	bool containerChanged = false;
 
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 
 	std::vector<uint> NeededToRecompute;
 
@@ -1053,7 +1053,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 		}
 
 		// create the georges loader if necessary
-		if (formLoader == NULL)
+		if (formLoader == nullptr)
 		{
 			NLMISC::WarningLog->addNegativeFilter("CFormLoader: Can't open the form file");
 			formLoader = NLGEORGES::UFormLoader::createLoader ();
@@ -1116,7 +1116,7 @@ void loadForm (const std::vector<std::string> &sheetFilters, const std::string &
 	nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
-	if (formLoader != NULL)
+	if (formLoader != nullptr)
 	{
 		NLGEORGES::UFormLoader::releaseLoader (formLoader);
 		NLMISC::WarningLog->removeFilter ("CFormLoader: Can't open the form file");
@@ -1266,7 +1266,7 @@ void loadFormNoPackedSheet (const std::vector<std::string> &sheetFilters, std::m
 
 	NLMISC::TTime last = NLMISC::CTime::getLocalTime ();
 	NLMISC::TTime start = NLMISC::CTime::getLocalTime ();
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 	NLMISC::CSmartPtr<NLGEORGES::UForm> form;
 	std::vector<NLMISC::CSmartPtr<NLGEORGES::UForm> >	cacheFormList;
 
@@ -1281,7 +1281,7 @@ void loadFormNoPackedSheet (const std::vector<std::string> &sheetFilters, std::m
 		}
 
 		// create the georges loader if necessary
-		if (formLoader == NULL)
+		if (formLoader == nullptr)
 		{
 			NLMISC::WarningLog->addNegativeFilter("CFormLoader: Can't open the form file");
 			formLoader = NLGEORGES::UFormLoader::createLoader ();
@@ -1308,7 +1308,7 @@ void loadFormNoPackedSheet (const std::vector<std::string> &sheetFilters, std::m
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
-	if (formLoader != NULL)
+	if (formLoader != nullptr)
 	{
 		NLGEORGES::UFormLoader::releaseLoader (formLoader);
 		NLMISC::WarningLog->removeFilter ("CFormLoader: Can't open the form file");
@@ -1355,7 +1355,7 @@ void loadFormNoPackedSheet2 (const std::vector<std::string> &sheetFilters, std::
 
 	NLMISC::TTime last = NLMISC::CTime::getLocalTime ();
 	NLMISC::TTime start = NLMISC::CTime::getLocalTime ();
-	NLGEORGES::UFormLoader *formLoader = NULL;
+	NLGEORGES::UFormLoader *formLoader = nullptr;
 	NLMISC::CSmartPtr<NLGEORGES::UForm> form;
 	std::vector<NLMISC::CSmartPtr<NLGEORGES::UForm> >	cacheFormList;
 
@@ -1370,7 +1370,7 @@ void loadFormNoPackedSheet2 (const std::vector<std::string> &sheetFilters, std::
 		}
 
 		// create the georges loader if necessary
-		if (formLoader == NULL)
+		if (formLoader == nullptr)
 		{
 			NLMISC::WarningLog->addNegativeFilter("CFormLoader: Can't open the form file");
 			formLoader = NLGEORGES::UFormLoader::createLoader ();
@@ -1397,7 +1397,7 @@ void loadFormNoPackedSheet2 (const std::vector<std::string> &sheetFilters, std::
 		nlinfo ("%d seconds to recompute %d sheets", (uint32)(NLMISC::CTime::getLocalTime()-start)/1000, NeededToRecompute.size());
 
 	// free the georges loader if necessary
-	if (formLoader != NULL)
+	if (formLoader != nullptr)
 	{
 		NLGEORGES::UFormLoader::releaseLoader (formLoader);
 		NLMISC::WarningLog->removeFilter ("CFormLoader: Can't open the form file");

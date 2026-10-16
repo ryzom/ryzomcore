@@ -38,7 +38,7 @@ namespace NLSOUND {
 CMusicSound::CMusicSound()
 {
 	// init with NULL in case of unexcepted access
-	_FileName= NULL;
+	_FileName = nullptr;
 	_FadeInLength= 2000;
 	_FadeOutLength= 2000;
 	_MinimumPlayTime= 10000;

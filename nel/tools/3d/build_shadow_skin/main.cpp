@@ -319,7 +319,7 @@ int		main(int argc, char *argv[])
 		NLMISC::fromString(argv[4], maxFace);
 
 	// **** Load the Mesh In.
-	IShape *pResult = NULL;
+	IShape *pResult = nullptr;
 	CMeshMRM	*pMesh;
 	CShapeStream	shapeStreamIn;
 	CIFile		shapeFileIn;

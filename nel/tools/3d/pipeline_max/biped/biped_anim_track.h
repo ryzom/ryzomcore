@@ -101,7 +101,7 @@ public:
 	void encodeTime(std::vector<uint8> &out) const;
 
 	const SDesc *desc() const { return m_Desc; }
-	bool valid() const { return m_Desc != NULL; }
+	bool valid() const { return m_Desc != nullptr; }
 
 	// raw typed content (bit-exact)
 	std::vector<uint32> DataHdrExtra; // data hdr dwords AFTER the count

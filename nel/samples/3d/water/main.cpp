@@ -460,11 +460,11 @@ CWaterDemo::CWaterDemo()
 	, m_KeyBackward(false)
 	, m_QueryCamDist(0)
 	, m_QueryCamHeight(0)
-	, m_StereoPassthrough(NULL)
-	, m_StereoDebugger(NULL)
+	, m_StereoPassthrough(nullptr)
+	, m_StereoDebugger(nullptr)
 	, m_Stereo(false)
-	, m_Scene(NULL)
-	, m_TextContext(NULL)
+	, m_Scene(nullptr)
+	, m_TextContext(nullptr)
 	, m_PoolsMode(false)
 	, m_PoolCount(5)
 	, m_FlareOn(true)
@@ -679,9 +679,9 @@ CWaterDemo::CWaterDemo()
 CWaterDemo::~CWaterDemo()
 {
 	delete m_StereoDebugger;
-	m_StereoDebugger = NULL;
+	m_StereoDebugger = nullptr;
 	delete m_StereoPassthrough;
-	m_StereoPassthrough = NULL;
+	m_StereoPassthrough = nullptr;
 	m_Driver->deleteMaterial(m_MirrorMat);
 	destroyProceduralPools();
 	if (!m_Flare.empty())
@@ -1253,7 +1253,7 @@ void CWaterDemo::renderOneFrame()
 				}
 				m_MirrorMat.setTexture(0, reflInfo.Texture);
 				m_Driver->drawQuads(quads, m_MirrorMat);
-				m_MirrorMat.setTexture(0, NULL);
+				m_MirrorMat.setTexture(0, nullptr);
 				if (m_Fog)
 					m_Driver->enableFog(true);
 			}
@@ -1284,7 +1284,7 @@ void CWaterDemo::renderOneFrame()
 				rtQuad.Color0 = rtQuad.Color1 = rtQuad.Color2 = rtQuad.Color3 = CRGBA::White;
 				m_MirrorMat.setTexture(0, reflInfo.Texture);
 				m_Driver->drawQuad(rtQuad, m_MirrorMat);
-				m_MirrorMat.setTexture(0, NULL);
+				m_MirrorMat.setTexture(0, nullptr);
 
 				// Outline each active reflection's tile within the displayed
 				// texture (tiles of other textures are skipped), to make the

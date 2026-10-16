@@ -151,7 +151,7 @@ public:
 	 *	\param polygonCount the number of polygons to render for the meshGeom returned
 	 *	\return the meshgeom to render per block if OK, else NULL (default)
 	 */
-	virtual IMeshGeom			*supportMeshBlockRendering (CTransformShape * /* trans */, float &/* polygonCount */ ) const {return NULL;}
+	virtual IMeshGeom			*supportMeshBlockRendering (CTransformShape * /* trans */, float &/* polygonCount */ ) const { return nullptr; }
 
 	// @}
 

@@ -375,10 +375,10 @@ public:
 	 *
 	 * \param back if true, put the callback at the end of the callback array, otherwise but on the beginning. You should always use true
 	 */
-	void	setServiceUpCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = 0, bool back=true);
+	void	setServiceUpCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = nullptr, bool back=true);
 
 	/** Remove a service up callback */
-	void	removeServiceUpCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = 0);
+	void	removeServiceUpCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = nullptr);
 
 	/** Sets callback for disconnections.
 	 * On a client, the callback will be call each time the connection to the server is lost.
@@ -392,10 +392,10 @@ public:
 	 *
 	 * \param back if true, put the callback at the end of the callback array, otherwise but on the beginning. You should always use true
 	 */
-	void	setServiceDownCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = 0, bool back=true);
+	void	setServiceDownCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = nullptr, bool back=true);
 
 	/** Remove a service down callback */
-	void	removeServiceDownCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = 0);
+	void	removeServiceDownCallback (const std::string &serviceName, TUnifiedNetCallback cb, void *arg = nullptr);
 
 	/** Associate a string with a network id
 	 * If the send don't set a specific nid, it ll use the 0, so be sure that the nid 0 is set to a network.
@@ -501,7 +501,8 @@ private:
 			/// If it s a server connection, it's the host id, it s InvalidId if it s a client
 			TSockId				 HostId;
 
-			TConnection() : IsServerConnection(false), CbNetBase(NULL), HostId(InvalidSockId) { }
+			TConnection() : IsServerConnection(false), CbNetBase(nullptr)
+			    , HostId(InvalidSockId) { }
 			TConnection(CCallbackClient *cbc) : IsServerConnection(false), CbNetBase(cbc), HostId(InvalidSockId) { }
 			TConnection(CCallbackNetBase *cbnb, TSockId hi) : IsServerConnection(true), CbNetBase(cbnb), HostId(hi) { }
 
@@ -511,14 +512,14 @@ private:
 			bool valid ()
 			{
 				if(IsServerConnection)
-					return CbNetBase != 0 && HostId != InvalidSockId;
+					return CbNetBase != nullptr && HostId != InvalidSockId;
 				else
-					return CbNetBase != 0;
+					return CbNetBase != nullptr;
 			}
 
 			void reset ()
 			{
-				if (CbNetBase != 0)
+				if (CbNetBase != nullptr)
 				{
 					if (IsServerConnection)
 					{
@@ -531,7 +532,7 @@ private:
 						delete CbNetBase;
 					}
 				}
-				CbNetBase = 0;
+				CbNetBase = nullptr;
 				IsServerConnection = false;
 				HostId = InvalidSockId;
 			}
@@ -749,7 +750,7 @@ private:
 	//
 	CUnifiedNetwork() :
 		ICommandsHandler(),
-		_CbServer(0),
+		_CbServer(nullptr),
 		_ExtSId(256),
 		_LastRetry(0),
 		_NextUpdateTime(0),

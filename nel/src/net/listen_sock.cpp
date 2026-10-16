@@ -179,7 +179,7 @@ CTcpSock *CListenSock::accept()
 	{
 		if (_Sock == INVALID_SOCKET)
 			// normal case, the listen sock have been closed, just return NULL.
-			return NULL;
+			return nullptr;
 
 	  /*LNETL0_INFO( "LNETL0: Error accepting a connection");
 	  // See accept() man on Linux

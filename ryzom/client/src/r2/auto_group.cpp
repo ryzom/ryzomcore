@@ -103,11 +103,11 @@ void CAutoGroup::update(const CVector &testPos, const std::string &paletteEntry,
 CInstance *CAutoGroup::getGroupingCandidate()
 {
 	//H_AUTO(R2_CAutoGroup_getGroupingCandidate)
-	if (!_AutoGroupEnabled) return NULL;
+	if (!_AutoGroupEnabled) return nullptr;
 	// if I'm a bot object, don't auto-group
 	CObject *palEntry = getEditor().getDMC().getPaletteElement(_PaletteEntry);
-	if (!palEntry || !palEntry->isTable()) return NULL;
-	if (getNumber(palEntry, "IsBotObject") == 1) return NULL;
+	if (!palEntry || !palEntry->isTable()) return nullptr;
+	if (getNumber(palEntry, "IsBotObject") == 1) return nullptr;
 	// auto-group feature
 	// look in default feature and sort objects by distance
 	CInstance *defaultFeatInst = getEditor().getDefaultFeature(getEditor().getCurrentAct());
@@ -115,17 +115,17 @@ CInstance *CAutoGroup::getGroupingCandidate()
 	if (!defaultFeatInst || !baseDefaultFeatInst)
 	{
 		nlwarning("Can't access to Default Features"); // syntax error in lua was making the client crash
-		return NULL; //In this case there is no default features
+		return nullptr; //In this case there is no default features
 	}
 	CObjectTable *defaultFeat = defaultFeatInst->getObjectTable();
 	CObjectTable *baseDefaultFeat = baseDefaultFeatInst->getObjectTable();
 	CObject *components = defaultFeat->getAttr("Components");
 	CObject *baseComponents = baseDefaultFeat->getAttr("Components");
-	if (!components || !baseComponents || !palEntry->isTable()) return NULL;
+	if (!components || !baseComponents || !palEntry->isTable()) return nullptr;
 	_SortedComponents.clear();
 	for (uint k = 0; k < (components->getSize()+baseComponents->getSize()); ++k)
 	{
-		CObject *obj = NULL;
+		CObject *obj = nullptr;
 		if(k<components->getSize())
 			obj = components->getValueAtPos(k);
 		else
@@ -147,13 +147,13 @@ CInstance *CAutoGroup::getGroupingCandidate()
 	// iterate through other features
 	CObjectTable *act = getEditor().getCurrentAct()->getObjectTable();
 	CObjectTable *baseAct = getEditor().getBaseAct()->getObjectTable();
-	if (!act || !baseAct) return NULL;
+	if (!act || !baseAct) return nullptr;
 	CObject *features = act->getAttr("Features");
 	CObject *baseFeatures = baseAct->getAttr("Features");
-	if (!features || !baseFeatures) return NULL;
+	if (!features || !baseFeatures) return nullptr;
 	for (uint k = 0; k < (features->getSize()+baseFeatures->getSize()); ++k)
 	{
-		CObject *obj = NULL;
+		CObject *obj = nullptr;
 		if(k<features->getSize())
 			obj = features->getValueAtPos(k);
 		else
@@ -179,9 +179,9 @@ CInstance *CAutoGroup::getGroupingCandidate()
 	if (!categoryObj)
 	{
 		nlwarning("No 'Category' field in palEntry '%s'", _PaletteEntry.c_str());
-		return NULL;
+		return nullptr;
 	}
-	if (!categoryObj->isString()) return NULL;
+	if (!categoryObj->isString()) return nullptr;
 	std::string category = categoryObj->toString();
 	//
 	const CObject *subCategoryObj = getObject(palEntry, "SubCategory");
@@ -196,7 +196,7 @@ CInstance *CAutoGroup::getGroupingCandidate()
 	}
 
 	//
-	if (category.empty()) return NULL;
+	if (category.empty()) return nullptr;
 	for(uint k = 0; k < _SortedComponents.size(); ++k)
 	{
 		CLuaStackRestorer lsr(&ls, 0);
@@ -232,7 +232,7 @@ CInstance *CAutoGroup::getGroupingCandidate()
 		// good candidate
 		return _SortedComponents[k].Instance;
 	}
-	return NULL;
+	return nullptr;
 }
 
 

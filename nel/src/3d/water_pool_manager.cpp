@@ -235,7 +235,7 @@ void CWaterPoolManager::serial(NLMISC::IStream &f)
 		f.xmlPush("PoolDesc");
 		if (f.isReading())
 		{
-			CWaterHeightMap *whm = NULL;
+			CWaterHeightMap *whm = nullptr;
 			uint32 id;
 			f.xmlSerial(id, "POOL_ID");
 			f.serialPtr(whm);

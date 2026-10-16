@@ -153,7 +153,7 @@ private:
 		CDynBubble()
 		{
 			DescWaiting = 0;
-			Bubble = NULL;
+			Bubble = nullptr;
 		}
 		void displayOptions(bool bShow);
 		// get string id for an option in the dynchat

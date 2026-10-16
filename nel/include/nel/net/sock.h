@@ -43,7 +43,7 @@ struct ESocket : public NLMISC::Exception
 	 * where the address should be written. Moreover, the length of reason plus
 	 * the length of the address when displayed by asString() should no exceed 256.
 	 */
-	ESocket( const char *reason="", bool systemerror=true, CInetHost *addr=NULL );
+	ESocket( const char *reason="", bool systemerror=true, CInetHost *addr = nullptr);
 };
 
 

@@ -413,7 +413,7 @@ protected:
 	  * \param  numVerts, if not NULL, the dest vector will be filled with the number of vertices of each mesh (or a TError enumerated value if loading failed)
 	  * \return true if the mesh could be found and match the requirement
 	  */
-	bool				update(std::vector<sint> *numVerts = NULL);
+	bool				update(std::vector<sint> *numVerts = nullptr);
 
 	/// make a vb for the prerotated mesh from a source vb
 	CVertexBuffer	    &makePrerotatedVb(const CVertexBuffer &inVB);

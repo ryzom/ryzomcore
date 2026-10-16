@@ -49,7 +49,7 @@ void			CHeapMemory::reset()
 	_EmptySpaces.clear();
 	_EmptySpaceMap.clear();
 	_AllocatedSpaceMap.clear();
-	_HeapPtr= NULL;
+	_HeapPtr = nullptr;
 	_HeapSize= 0;
 	_HeapSizeUsed= 0;
 }
@@ -71,7 +71,7 @@ void			CHeapMemory::initHeap(void *heap, uint size, uint align)
 
 	// clear container.
 	reset();
-	if(heap==0 || size==0)
+	if(heap==nullptr || size==0)
 		return;
 
 	_HeapPtr= (uint8*)heap;
@@ -113,7 +113,7 @@ void		CHeapMemory::addEmptySpace(CEmptySpace &space)
 void			*CHeapMemory::allocate(uint size)
 {
 	if(size==0)
-		return NULL;
+		return nullptr;
 
 	// Manage alignement.
 	size= (size + (_Alignment-1)) & (~(_Alignment-1));
@@ -130,7 +130,7 @@ void			*CHeapMemory::allocate(uint size)
 
 	// if not found, alloc fails.
 	if(it == _EmptySpaceMap.end())
-		return NULL;
+		return nullptr;
 	else
 	{
 		// NB: this space must exist in the "array".
@@ -167,7 +167,7 @@ void			*CHeapMemory::allocate(uint size)
 // ***************************************************************************
 void			CHeapMemory::freeBlock(void *ptr)
 {
-	if(ptr==NULL)
+	if(ptr == nullptr)
 		return;
 
 	// Must find the array in allocated spaces.

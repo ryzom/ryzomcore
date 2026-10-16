@@ -55,7 +55,7 @@ public:
 
 	// Debug
 	void disp ();
-	void dispXYZ (NL3D::CMaterial *pMat = NULL);
+	void dispXYZ (NL3D::CMaterial *pMat = nullptr);
 	// Debug
 
 	// Create the billboard (in the screen at pos (NbW*Width, 0)

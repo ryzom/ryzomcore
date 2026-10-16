@@ -93,7 +93,7 @@ public:
 		uint ReferenceIndex;
 		CStorageContainer *ModApp;
 
-		SModifierSlot() : ReferenceIndex(0), ModApp(NULL) { }
+		SModifierSlot() : ReferenceIndex(0), ModApp(nullptr) { }
 	};
 
 	CDerivedObject(CScene *scene);

@@ -339,7 +339,7 @@ inline void	setThreshold( TCoord *table, TPropIndex propIndex, TCoord dist, uint
 /// Check if there is no unset threshold
 inline void	checkThresholds()
 {
-	setThreshold( NULL, 0, 0, 0, true );
+	setThreshold(nullptr, 0, 0, 0, true );
 }
 
 /// Initialize threshold table
@@ -404,10 +404,13 @@ public:
 	bool							BranchHasPayload;
 
 	/// Constructor
-	TVPNodeBase() : VPParent(NULL), VPA(NULL), VPB(NULL), PropIndex(std::numeric_limits<TPropIndex>::max()), BranchHasPayload(false) {}
+	TVPNodeBase() : VPParent(nullptr)
+	    , VPA(nullptr)
+	    , VPB(nullptr)
+	    , PropIndex(std::numeric_limits<TPropIndex>::max()), BranchHasPayload(false) {}
 	virtual ~TVPNodeBase() {}
 	/// Return true if the node is root of a tree
-	bool		isRoot() const { return VPParent == NULL; }
+	bool		isRoot() const { return VPParent == nullptr; }
 
 	/// Return true if the node is leaf of a tree
 	bool		isLeaf() const { return PropIndex != std::numeric_limits<TPropIndex>::max(); }

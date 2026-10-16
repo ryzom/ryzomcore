@@ -58,7 +58,7 @@ namespace NLGUI
 		_CallingAH = false;
 		_Cancelable = false;
 		_Keyboard = false;
-		_Target = NULL;
+		_Target = nullptr;
 		_Inverted = false;
 		_IsDBLink = false;
 		_LastTargetHReal = 0;
@@ -200,7 +200,7 @@ namespace NLGUI
 		else
 		if( name == "target" )
 		{
-			if( _Target != NULL )
+			if( _Target != nullptr)
 				return _Target->getId();
 			else
 				return "";
@@ -433,8 +433,8 @@ namespace NLGUI
 	xmlNodePtr CCtrlScroll::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CCtrlBase::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "scroll" );
 		xmlSetProp( node, BAD_CAST "tx_bottomleft", BAD_CAST getTextureBottomOrLeft().c_str() );
@@ -479,7 +479,7 @@ namespace NLGUI
 		xmlSetProp( node, BAD_CAST "onscrollcancel", BAD_CAST _AHOnScrollCancel.c_str() );
 		xmlSetProp( node, BAD_CAST "cancel_params", BAD_CAST _AHOnScrollCancelParams.c_str() );
 
-		if( _Target != NULL )
+		if( _Target != nullptr)
 			xmlSetProp( node, BAD_CAST "target", BAD_CAST _Target->getId().c_str() );
 		else
 			xmlSetProp( node, BAD_CAST "target", BAD_CAST "" );
@@ -581,10 +581,10 @@ namespace NLGUI
 		if (prop)
 		{
 			CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(prop.str()));
-			if(group == NULL)
+			if(group == nullptr)
 				group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(this->getId(), prop.str()));
 
-			if(group != NULL)
+			if(group != nullptr)
 				setTarget (group);
 		}
 
@@ -626,7 +626,7 @@ namespace NLGUI
 		std::string targetId = ls.toString(1);
 
 		CInterfaceGroup	*group = dynamic_cast<CInterfaceGroup*>(CWidgetManager::getInstance()->getElementFromId(targetId));
-		if(group != NULL)
+		if(group != nullptr)
 		{
 			setTarget (group);
 		}

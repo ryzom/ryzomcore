@@ -272,7 +272,7 @@ void	CPatch::recreateAllVegetableIgs()
 	for(uint numtb=0; numtb<TessBlocks.size(); numtb++)
 	{
 		// if the vegetableBlock is deleted, and if there is at least one Material in the tessBlock, and if possible
-		if( TessBlocks[numtb].VegetableBlock==NULL && TessBlocks[numtb].TileMaterialRefCount>0
+		if( TessBlocks[numtb].VegetableBlock == nullptr && TessBlocks[numtb].TileMaterialRefCount>0
 			&& getLandscape()->isVegetableActive())
 		{
 			// compute tessBlock coordinate
@@ -341,7 +341,7 @@ void		CPatch::releaseVegetableBlock(uint numTb)
 		TessBlocks[numTb].VegetableBlock->release(getLandscape()->_VegetableManager, getLandscape()->_VegetableBlockList);
 		// delete.
 		delete TessBlocks[numTb].VegetableBlock;
-		TessBlocks[numTb].VegetableBlock= NULL;
+		TessBlocks[numTb].VegetableBlock = nullptr;
 	}
 }
 

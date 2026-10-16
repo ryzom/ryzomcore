@@ -47,7 +47,7 @@ void CSkyObjectSheet::CColorInfoSheet::serial(NLMISC::IStream &f)
 void CSkyObjectSheet::CColorGradientInfoSheet::build(const NLGEORGES::UFormElm &item, const std::string &prefix)
 {
 	item.getValueByName(TargetTextureStage, (prefix + "TargetTextureStage").c_str());
-	const NLGEORGES::UFormElm *elm = NULL;
+	const NLGEORGES::UFormElm *elm = nullptr;
 	if(item.getNodeByName (&elm, prefix + "WeatherToGradient") && elm)
 	{
 		uint numBitmaps;

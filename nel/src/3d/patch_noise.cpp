@@ -145,7 +145,7 @@ float		CPatch::computeDisplaceRawInteger(sint ts, sint tt, sint ms, sint mt) con
 	CTileNoiseMap	*noiseMap;
 	noiseMap = getZone()->getLandscape()->TileBank.getTileNoiseMap (tileNumber, tileSubNoise);
 
-	if (noiseMap == NULL)
+	if (noiseMap == nullptr)
 		return 0.0f;
 
 	// Sample the noiseMap with (s,t).

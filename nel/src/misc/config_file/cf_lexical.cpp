@@ -222,7 +222,7 @@ struct yy_buffer_state
 #define YY_BUFFER_EOF_PENDING 2
 	};
 
-static YY_BUFFER_STATE yy_current_buffer = 0;
+static YY_BUFFER_STATE yy_current_buffer = nullptr;
 
 /* We provide macros for accessing buffer states in case in the
  * future we want to put the buffer states in a more general
@@ -240,7 +240,7 @@ static int yy_n_chars;		/* number of characters read into yy_ch_buf */
 int yyleng;
 
 /* Points to current character in buffer. */
-static char *yy_c_buf_p = (char *) 0;
+static char *yy_c_buf_p = (char *) nullptr;
 static int yy_init = 1;		/* whether we need to initialize */
 static int yy_start = 0;	/* start state number */
 
@@ -286,7 +286,7 @@ static void yy_flex_free YY_PROTO(( void * ));
 #define YY_AT_BOL() (yy_current_buffer->yy_at_bol)
 
 typedef unsigned char YY_CHAR;
-FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
+FILE *yyin = (FILE *) nullptr, *yyout = (FILE *) nullptr;
 typedef int yy_state_type;
 extern char *yytext;
 #define yytext_ptr yytext
@@ -2598,7 +2598,7 @@ static int yy_get_next_buffer()
 				}
 			else
 				/* Can't grow it, we don't own it. */
-				b->yy_ch_buf = 0;
+				b->yy_ch_buf = nullptr;
 
 			if ( ! b->yy_ch_buf )
 				YY_FATAL_ERROR(
@@ -2928,7 +2928,7 @@ YY_BUFFER_STATE b;
 		return;
 
 	if ( b == yy_current_buffer )
-		yy_current_buffer = (YY_BUFFER_STATE) 0;
+		yy_current_buffer = (YY_BUFFER_STATE) nullptr;
 
 	if ( b->yy_is_our_buffer )
 		yy_flex_free( (void *) b->yy_ch_buf );
@@ -3015,7 +3015,7 @@ yy_size_t size;
 	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
 	     base[size-1] != YY_END_OF_BUFFER_CHAR )
 		/* They forgot to leave room for the EOB's. */
-		return 0;
+		return nullptr;
 
 	b = (YY_BUFFER_STATE) yy_flex_alloc( sizeof( struct yy_buffer_state ) );
 	if ( ! b )
@@ -3024,7 +3024,7 @@ yy_size_t size;
 	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
 	b->yy_buf_pos = b->yy_ch_buf = base;
 	b->yy_is_our_buffer = 0;
-	b->yy_input_file = 0;
+	b->yy_input_file = nullptr;
 	b->yy_n_chars = b->yy_buf_size;
 	b->yy_is_interactive = 0;
 	b->yy_at_bol = 1;

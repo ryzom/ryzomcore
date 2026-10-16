@@ -42,7 +42,7 @@ using namespace std;
 using namespace NLMISC;
 
 // ------------------------------------------------------------------------------------------------
-CMacroCmdManager *CMacroCmdManager::_Instance = NULL;
+CMacroCmdManager *CMacroCmdManager::_Instance = nullptr;
 // ------------------------------------------------------------------------------------------------
 // CMacroCmd
 // ------------------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ CMacroCmd::CMacroCmd()
 void CMacroCmd::writeTo (xmlNodePtr node) const
 {
 	// New node
-	xmlNodePtr macroNode = xmlNewChild ( node, NULL, (const xmlChar*)"macro", NULL );
+	xmlNodePtr macroNode = xmlNewChild ( node, nullptr, (const xmlChar*)"macro", nullptr);
 
 	// Props
 	xmlSetProp (macroNode, (const xmlChar*)"name", (const xmlChar*)Name.c_str());
@@ -74,7 +74,7 @@ void CMacroCmd::writeTo (xmlNodePtr node) const
 
 	for (uint i = 0; i < Commands.size(); ++i)
 	{
-		xmlNodePtr cmdNode = xmlNewChild ( macroNode, NULL, (const xmlChar*)"command", NULL );
+		xmlNodePtr cmdNode = xmlNewChild ( macroNode, nullptr, (const xmlChar*)"command", nullptr);
 		xmlSetProp (cmdNode, (const xmlChar*)"name", (const xmlChar*)Commands[i].Name.c_str());
 		xmlSetProp (cmdNode, (const xmlChar*)"params", (const xmlChar*)Commands[i].Params.c_str());
 	}
@@ -185,8 +185,8 @@ CMacroCmdManager::CMacroCmdManager()
 	_CurExecCmd = -1;
 	_CurExecCmdWait = -1;
 	_ActionId = 0;
-	EditCmd = NULL;
-	NewKey = NULL;
+	EditCmd = nullptr;
+	NewKey = nullptr;
 	_MacroIDGenerator = 0;
 }
 
@@ -200,7 +200,7 @@ void CMacroCmdManager::releaseInstance()
 	if( _Instance )
 	{
 		delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 }
 
@@ -211,7 +211,7 @@ void CMacroCmdManager::initInGame()
 	CInterfaceManager *pIM = CInterfaceManager::getInstance();
 	CViewRenderer &rVR = *CViewRenderer::getInstance();
 	CInterfaceOptions *pIO = CWidgetManager::getInstance()->getOptions("macro_custom_icon");
-	if (pIO != NULL)
+	if (pIO != nullptr)
 	{
 		string sTmp;
 		uint i, nOpt;
@@ -263,12 +263,12 @@ void CMacroCmdManager::uninitInGame()
 	if (NewKey)
 	{
 		delete NewKey;
-		NewKey = NULL;
+		NewKey = nullptr;
 	}
 	if (EditCmd)
 	{
 		delete EditCmd;
-		EditCmd = NULL;
+		EditCmd = nullptr;
 	}
 }
 
@@ -448,7 +448,7 @@ const CMacroCmd	*CMacroCmdManager::getMacroFromMacroID(sint32 nMacroID)
 		}
 	}
 	nlwarning("Macro (ID:%d) not found", nMacroID);
-	return NULL;
+	return nullptr;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -493,7 +493,7 @@ void CMacroCmdManager::updateMacroExecution ()
 			{
 				CAction::CName c(rC.Name.c_str(), rC.Params.c_str());
 				const CBaseAction *pBA = ActionManagers[j]->getBaseAction(c);
-				if (pBA != NULL)
+				if (pBA != nullptr)
 				{
 					if (pBA->WaitForServer)
 						bWaitForServer = true;
@@ -502,7 +502,7 @@ void CMacroCmdManager::updateMacroExecution ()
 			}
 
 			// Here we have to execute the current command
-			CAHManager::getInstance()->runActionHandler(rC.Name, NULL, rC.Params);
+			CAHManager::getInstance()->runActionHandler(rC.Name, nullptr, rC.Params);
 
 			// Flush interface links (else bug with Macro "Select ShortCutBar/Run Shortcut"
 			IngameDbMngr.flushObserverCalls();
@@ -543,9 +543,9 @@ void CMacroCmdManager::refreshAllKeyDisplays()
 {
 	CInterfaceManager	*pIM= CInterfaceManager::getInstance();
 	// Refresh Key Window
-	CAHManager::getInstance()->runActionHandler("keys_open", NULL);
+	CAHManager::getInstance()->runActionHandler("keys_open", nullptr);
 	// Refresh gestion_windows container
-	CAHManager::getInstance()->runActionHandler("gestion_windows_update_key_binding", NULL);
+	CAHManager::getInstance()->runActionHandler("gestion_windows_update_key_binding", nullptr);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -600,7 +600,7 @@ public:
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sTP));
 		sint32 nb;
 		fromString(getParam(Params, "value"), nb);
-		if (pCS != NULL) pCS->setMacroBack((uint8)nb);
+		if (pCS != nullptr) pCS->setMacroBack((uint8)nb);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSetMacroBack, "set_macro_back");
@@ -617,7 +617,7 @@ public:
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sTP));
 		sint32 nb;
 		fromString(getParam(Params, "value"), nb);
-		if (pCS != NULL) pCS->setMacroIcon((uint8)nb);
+		if (pCS != nullptr) pCS->setMacroIcon((uint8)nb);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSetMacroIcon, "set_macro_icon");
@@ -634,7 +634,7 @@ public:
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(sTP));
 		sint32 nb;
 		fromString(getParam(Params, "value"), nb);
-		if (pCS != NULL) pCS->setMacroOver((uint8)nb);
+		if (pCS != nullptr) pCS->setMacroOver((uint8)nb);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerSetMacroOver, "set_macro_over");
@@ -647,10 +647,10 @@ public:
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
-		if (pEB == NULL) return;
+		if (pEB == nullptr) return;
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(Params));
-		if (pCS == NULL) return;
+		if (pCS == nullptr) return;
 		pCS->setMacroText(pEB->getInputString());
 	}
 };
@@ -667,10 +667,10 @@ public:
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_MACROICONCREATION_ICON));
-		if (pCS != NULL) pCS->writeToMacro(pMCM->CurrentEditMacro);
+		if (pCS != nullptr) pCS->writeToMacro(pMCM->CurrentEditMacro);
 
 		pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_NEWMACRO_ICON));
-		if (pCS != NULL) pCS->readFromMacro(pMCM->CurrentEditMacro);
+		if (pCS != nullptr) pCS->readFromMacro(pMCM->CurrentEditMacro);
 
 		CWidgetManager::getInstance()->disableModalWindow();
 	}
@@ -687,16 +687,16 @@ public:
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
-		CAHManager::getInstance()->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_BACK);
-		CAHManager::getInstance()->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_ICON);
-		CAHManager::getInstance()->runActionHandler("reset_pushed", NULL, string("dblink=")+GROUP_MACROICONCREATION_OVER);
+		CAHManager::getInstance()->runActionHandler("reset_pushed", nullptr, string("dblink=")+GROUP_MACROICONCREATION_BACK);
+		CAHManager::getInstance()->runActionHandler("reset_pushed", nullptr, string("dblink=")+GROUP_MACROICONCREATION_ICON);
+		CAHManager::getInstance()->runActionHandler("reset_pushed", nullptr, string("dblink=")+GROUP_MACROICONCREATION_OVER);
 
 		uint8 back = pMCM->CurrentEditMacro.BitmapBack;
 		if (back != 0xff)
 		{
 			string sButton = string(GROUP_MACROICONCREATION_BACK) + CTRL_MACROICONCREATION_BUTTON + toString(back+1);
 			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(sButton));
-			if (pCB != NULL) pCB->setPushed(true);
+			if (pCB != nullptr) pCB->setPushed(true);
 		}
 
 		uint8 icon = pMCM->CurrentEditMacro.BitmapIcon;
@@ -704,7 +704,7 @@ public:
 		{
 			string sButton = string(GROUP_MACROICONCREATION_ICON) + CTRL_MACROICONCREATION_BUTTON + toString(icon+1);
 			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(sButton));
-			if (pCB != NULL) pCB->setPushed(true);
+			if (pCB != nullptr) pCB->setPushed(true);
 		}
 
 		uint8 over = pMCM->CurrentEditMacro.BitmapOver;
@@ -712,21 +712,21 @@ public:
 		{
 			string sButton = string(GROUP_MACROICONCREATION_OVER) + CTRL_MACROICONCREATION_BUTTON + toString(over+1);
 			CCtrlBaseButton *pCB = dynamic_cast<CCtrlBaseButton*>(CWidgetManager::getInstance()->getElementFromId(sButton));
-			if (pCB != NULL) pCB->setPushed(true);
+			if (pCB != nullptr) pCB->setPushed(true);
 		}
 
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(CTRL_MACROICONCREATION_EDITTEXT));
-		if (pEB != NULL)
+		if (pEB != nullptr)
 		{
 			pEB->setInputString(pMCM->CurrentEditMacro.DispText);
 			CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_MACROICONCREATION_ICON));
-			if (pCS != NULL)
+			if (pCS != nullptr)
 				pCS->setMacroText(pEB->getInputString());
 		}
 
-		CAHManager::getInstance()->runActionHandler("set_macro_back", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(back));
-		CAHManager::getInstance()->runActionHandler("set_macro_icon", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(icon));
-		CAHManager::getInstance()->runActionHandler("set_macro_over", NULL, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(over));
+		CAHManager::getInstance()->runActionHandler("set_macro_back", nullptr, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(back));
+		CAHManager::getInstance()->runActionHandler("set_macro_icon", nullptr, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(icon));
+		CAHManager::getInstance()->runActionHandler("set_macro_over", nullptr, string("target=")+CTRL_MACROICONCREATION_ICON+"|value="+toString(over));
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacroIconCreationOpen, "macro_icon_creation_open");
@@ -757,7 +757,7 @@ public:
 		pMCM->CurrentEditMacro.moveUpCommand(nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open", nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdMoveUp, "new_macro_cmd_move_up");
@@ -774,7 +774,7 @@ public:
 		pMCM->CurrentEditMacro.moveDownCommand(nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open", nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdMoveDown, "new_macro_cmd_move_down");
@@ -809,7 +809,7 @@ public:
 									nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open", nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdCopy, "new_macro_cmd_copy");
@@ -826,7 +826,7 @@ public:
 		pMCM->CurrentEditMacro.delCommand(nCmdNb);
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
 		CMacroCmdManager::getInstance()->EditCmd->deactivate();
-		CAHManager::getInstance()->runActionHandler("new_macro_open",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_open", nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerNewMacroCmdDelete, "new_macro_cmd_delete");
@@ -839,10 +839,10 @@ void addCommandLine (CGroupList *pParent, uint cmdNb, const string &cmdName)
 	vector< pair<string, string> > vParams;
 	vParams.push_back(pair<string,string>("id", "c"+toString(cmdNb)));
 	CInterfaceGroup *pNewCmd = CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_NEWMACRO_COMMAND, pParent->getId(), vParams);
-	if (pNewCmd == NULL) return;
+	if (pNewCmd == nullptr) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewCmd->getView(TEMPLATE_NEWMACRO_COMMAND_TEXT));
-	if (pVT != NULL) pVT->setText(cmdName);
+	if (pVT != nullptr) pVT->setText(cmdName);
 
 	pNewCmd->setParent (pParent);
 	pParent->addChild (pNewCmd);
@@ -856,7 +856,7 @@ public:
 	virtual void execute(CCtrlBase * /* pCaller */, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		CAHManager::getInstance()->runActionHandler("new_macro_enter_name",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_enter_name", nullptr);
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		pMCM->EditCmd->activate();
 	}
@@ -871,10 +871,10 @@ public:
 	virtual void execute(CCtrlBase *pCaller, const string &/* Params */) NL_OVERRIDE
 	{
 		CInterfaceManager *pIM = CInterfaceManager::getInstance();
-		if (pCaller == NULL)
+		if (pCaller == nullptr)
 			pCaller = dynamic_cast<CCtrlBase*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:new_macro:content:edit_name"));
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(pCaller);
-		if (pEB == NULL) return;
+		if (pEB == nullptr) return;
 
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		pMCM->CurrentEditMacro.Name = pEB->getInputString();
@@ -898,16 +898,16 @@ public:
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 		// Icon
 		CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(CWidgetManager::getInstance()->getElementFromId(CTRL_NEWMACRO_ICON));
-		if (pCS != NULL) pCS->readFromMacro(pMCM->CurrentEditMacro);
+		if (pCS != nullptr) pCS->readFromMacro(pMCM->CurrentEditMacro);
 		// Name
 		CGroupEditBox *pEB = dynamic_cast<CGroupEditBox*>(CWidgetManager::getInstance()->getElementFromId(GROUP_NEWMACRO_EDIT_NAME));
-		if (pEB != NULL) pEB->setInputString(pMCM->CurrentEditMacro.Name);
+		if (pEB != nullptr) pEB->setInputString(pMCM->CurrentEditMacro.Name);
 		// Commands
 		CGroupList *pList = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(GROUP_NEWMACRO_COMMANDS));
-		if (pList == NULL) return;
+		if (pList == nullptr) return;
 		// Key Shortcut
 		CViewText *pVT = dynamic_cast<CViewText*>(CWidgetManager::getInstance()->getElementFromId(VIEW_NEWMACRO_KEY));
-		if (pVT != NULL)
+		if (pVT != nullptr)
 		{
 			if (pMCM->CurrentEditMacro.Combo.Key == KeyCount)
 				pVT->setText(CI18N::get(VIEW_EDITCMD_TEXT_KEY_DEFAULT));
@@ -924,7 +924,7 @@ public:
 			for (uint j = 0; j < pMCM->ActionManagers.size(); ++j)
 			{
 				CAction::CName c(pMCM->CurrentEditMacro.Commands[i].Name.c_str(), pMCM->CurrentEditMacro.Commands[i].Params.c_str());
-				if (pMCM->ActionManagers[j]->getBaseAction(c) != NULL)
+				if (pMCM->ActionManagers[j]->getBaseAction(c) != nullptr)
 				{
 					commandName = pMCM->ActionManagers[j]->getBaseAction(c)->getActionLocalizedText(c);
 					break;
@@ -950,7 +950,7 @@ public:
 		CSPhraseManager	*pPM = CSPhraseManager::getInstance();
 
 		// Validate name
-		CAHManager::getInstance()->runActionHandler("new_macro_enter_name",NULL);
+		CAHManager::getInstance()->runActionHandler("new_macro_enter_name", nullptr);
 
 		// Check if macro has more than one command
 		if (pMCM->CurrentEditMacro.Commands.empty()) return;
@@ -973,9 +973,9 @@ public:
 		}
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
-		if (pGC != NULL) pGC->setActive (false);
+		if (pGC != nullptr) pGC->setActive (false);
 
-		CAHManager::getInstance()->runActionHandler("macros_open",NULL);
+		CAHManager::getInstance()->runActionHandler("macros_open", nullptr);
 
 		// Refresh key containers
 		pMCM->refreshAllKeyDisplays();
@@ -1006,16 +1006,16 @@ void addMacroLine (CGroupList *pParent, uint macNb, const CMacroCmd &macro)
 	vector< pair<string, string> > vParams;
 	vParams.push_back(pair<string,string>("id", "m"+toString(macNb)));
 	CInterfaceGroup *pNewMacro = CWidgetManager::getInstance()->getParser()->createGroupInstance(TEMPLATE_MACRO_ELT, pParent->getId(), vParams);
-	if (pNewMacro == NULL) return;
+	if (pNewMacro == nullptr) return;
 
 	CViewText *pVT = dynamic_cast<CViewText*>(pNewMacro->getView(TEMPLATE_MACRO_ELT_TEXT));
-	if (pVT != NULL) pVT->setText(macro.Name);
+	if (pVT != nullptr) pVT->setText(macro.Name);
 
 	CDBCtrlSheet *pCS = dynamic_cast<CDBCtrlSheet*>(pNewMacro->getCtrl(TEMPLATE_MACRO_ELT_ICON));
-	if (pCS != NULL) pCS->readFromMacro(macro);
+	if (pCS != nullptr) pCS->readFromMacro(macro);
 
 	pVT = dynamic_cast<CViewText*>(pNewMacro->getView(TEMPLATE_MACRO_ELT_KEYTEXT));
-	if (pVT != NULL)
+	if (pVT != nullptr)
 	{
 		if (macro.Combo.Key != KeyCount)
 			pVT->setText(macro.Combo.toString());
@@ -1038,7 +1038,7 @@ public:
 		CMacroCmdManager *pMCM = CMacroCmdManager::getInstance();
 
 		CGroupList *pList = dynamic_cast<CGroupList*>(CWidgetManager::getInstance()->getElementFromId(WIN_MACRO_CONTENT));
-		if (pList == NULL) return;
+		if (pList == nullptr) return;
 
 		pList->clearGroups();
 		pList->setDynamicDisplaySize(true);
@@ -1074,7 +1074,7 @@ public:
 		pMCM->CurrentEditMacro = mc;
 
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
-		if (pGC != NULL)
+		if (pGC != nullptr)
 		{
 			pGC->setTitle(NEWMACRO_TITLE_NEW);
 			pGC->setActive (false);
@@ -1114,7 +1114,7 @@ public:
 		pMCM->CurrentEditMacro = pMCM->getMacros()[nMacNb];
 		pMCM->CurrentEditMacroNb = nMacNb;
 		CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(CWidgetManager::getInstance()->getElementFromId(WIN_NEWMACRO));
-		if (pGC != NULL)
+		if (pGC != nullptr)
 		{
 			pGC->setTitle(NEWMACRO_TITLE_EDIT);
 			pGC->setActive (false);
@@ -1142,7 +1142,7 @@ public:
 		m.Combo.KeyButtons = noKeyButton;
 		pMCM->addMacro(m, nMacNb+1);
 
-		CAHManager::getInstance()->runActionHandler("macros_open",NULL);
+		CAHManager::getInstance()->runActionHandler("macros_open", nullptr);
 	}
 };
 REGISTER_ACTION_HANDLER( CHandlerMacrosCopy, "macros_copy");
@@ -1202,7 +1202,7 @@ public:
 		pPM->deleteMacroShortcuts(pMCM->getMacros()[nMacNb].ID);
 		// then delete
 		pMCM->delMacro(nMacNb);
-		CAHManager::getInstance()->runActionHandler("macros_open",NULL);
+		CAHManager::getInstance()->runActionHandler("macros_open", nullptr);
 
 		// Refresh key containers
 		pMCM->refreshAllKeyDisplays();

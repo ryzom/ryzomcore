@@ -112,7 +112,7 @@ void CGenericRequestIdRegister::processCallbacks(uint32 lastRequestId)
 		CBackupInterfaceSingleton* singleton= CBackupInterfaceSingleton::getInstance();
 		CBackupServiceInterface *itf;
 		NLMISC::CSmartPtr<IBackupGenericAckCallback> cb= singleton->popGenericCallback(theRequestId, itf);
-		if (cb!=NULL)
+		if (cb != nullptr)
 		{
 			// call the calback
 			cb->callback(theFileName);
@@ -375,8 +375,8 @@ void CBSIINonModule::activate()
 
 	_Initialised= true;
 
-	CUnifiedNetwork::getInstance()->setServiceUpCallback ("BS", cbBSConnection, NULL);
-	CUnifiedNetwork::getInstance()->setServiceDownCallback ("BS", cbBSDisconnection, NULL);
+	CUnifiedNetwork::getInstance()->setServiceUpCallback ("BS", cbBSConnection, nullptr);
+	CUnifiedNetwork::getInstance()->setServiceDownCallback ("BS", cbBSDisconnection, nullptr);
 
 //	CUnifiedNetwork::getInstance()->setServiceUpCallback ("PDBS", cbBSConnection, NULL);
 //	CUnifiedNetwork::getInstance()->setServiceDownCallback ("PDBS", cbBSDisconnection, NULL);

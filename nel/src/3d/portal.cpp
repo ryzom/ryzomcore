@@ -47,7 +47,7 @@ CPortal::CPortal()
 	 *	It can be loaded/called through CAsyncFileManager for instance
 	 * ***********************************************/
 
-	_Clusters[0] = _Clusters[1] = NULL;
+	_Clusters[0] = _Clusters[1] = nullptr;
 	_Opened = true;
 	_OcclusionModelId = CStringMapper::map("no occlusion");
 	_OpenOcclusionModelId = CStringMapper::map("no occlusion");
@@ -133,18 +133,18 @@ bool CPortal::isInFront (CVector &v)
 // ***************************************************************************
 void CPortal::resetClusterLinks()
 {
-	_Clusters[0] = _Clusters[1] = NULL;
+	_Clusters[0] = _Clusters[1] = nullptr;
 }
 
 // ***************************************************************************
 bool CPortal::setCluster(CCluster *cluster)
 {
-	if( _Clusters[0] == NULL )
+	if( _Clusters[0] == nullptr)
 	{
 		_Clusters[0] = cluster;
 		return true;
 	}
-	if( _Clusters[1] == NULL )
+	if( _Clusters[1] == nullptr)
 	{
 		_Clusters[1] = cluster;
 		return true;
@@ -156,9 +156,9 @@ bool CPortal::setCluster(CCluster *cluster)
 uint8 CPortal::getNbCluster()
 {
 	uint8 nRet = 0;
-	if( _Clusters[0] != NULL )
+	if( _Clusters[0] != nullptr)
 		nRet++;
-	if( _Clusters[1] != NULL )
+	if( _Clusters[1] != nullptr)
 		nRet++;
 	return nRet;
 }

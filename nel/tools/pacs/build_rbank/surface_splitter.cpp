@@ -189,7 +189,7 @@ void	CSurfaceSplitter::splitChain(TChainMap::iterator it, uint &numInters)
 
 			CChain		*ichain = getChain(iedge.Chain);
 
-			if (ichain == NULL)
+			if (ichain == nullptr)
 			{
 				nlwarning("Couldn't find referenced chain %d", iedge.Chain.Id);
 				continue;

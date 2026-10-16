@@ -39,7 +39,7 @@ namespace NL3D
 // ***************************************************************************
 void	CMaterialBase::CAnimatedTexture::serial(NLMISC::IStream &f)
 {
-	ITexture	*text= NULL;
+	ITexture	*text = nullptr;
 	if(f.isReading())
 	{
 		f.serialPolyPtr(text);
@@ -138,7 +138,7 @@ ITexture*		CMaterialBase::getAnimatedTexture(uint32 id)
 	if( it!=_AnimatedTextures.end() )
 		return it->second.Texture;
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -191,7 +191,7 @@ std::string		CAnimatedMaterial::getMaterialName() const
 // ***************************************************************************
 void	CAnimatedMaterial::update()
 {
-	if(isTouched(OwnerBit) && _Material!=NULL /*&& _Material->isLighted()*/)
+	if(isTouched(OwnerBit) && _Material != nullptr /*&& _Material->isLighted()*/)
 	{
 
 		// well, just update all...  :)
@@ -294,7 +294,7 @@ IAnimatedValue* CAnimatedMaterial::getValue (uint valueId)
 
 	// shoudl not be here!!
 	nlstop;
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 const char *CAnimatedMaterial::getValueName (uint valueId) const
@@ -364,7 +364,7 @@ ITrack*	CAnimatedMaterial::getDefaultTrack (uint valueId)
 
 	// shoudl not be here!!
 	nlstop;
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 void	CAnimatedMaterial::registerToChannelMixer(CChannelMixer *chanMixer, const std::string &prefix)

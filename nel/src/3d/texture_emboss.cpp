@@ -51,7 +51,7 @@ void CTextureEmboss::serial(NLMISC::IStream &f)
 {
 	f.serialVersion(0);
 	ITexture::serial(f);
-	ITexture *tex = NULL;
+	ITexture *tex = nullptr;
 	if (f.isReading())
 	{
 		f.serialPolyPtr(tex);
@@ -86,7 +86,7 @@ std::string CTextureEmboss::getShareName() const
 void CTextureEmboss::release()
 {
 	ITexture::release();
-	if (_HeightMap != NULL)
+	if (_HeightMap != nullptr)
 	{
 		if (_HeightMap->getReleasable())
 		{

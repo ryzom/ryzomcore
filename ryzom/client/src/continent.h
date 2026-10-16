@@ -153,7 +153,7 @@ public:
 
 	CFogOfWar()
 	{
-		Tx = NULL;
+		Tx = nullptr;
 	}
 
 	~CFogOfWar() NL_OVERRIDE;
@@ -299,7 +299,7 @@ public:
 	enum TChannel { ChannelR = 0, ChannelG = 1, ChannelB = 2, ChannelA = 3, ChannelRGBA };
 	// dump fog map, blended with continent map, and with camera pos
 	// If a single channel is used, then channelLookup is used pick up the final color
-	void dumpFogMap(CFogMapBuild::TMapType mapType, const std::string &filename, TChannel channel = ChannelRGBA, const CRGBA channelLookup[256] = NULL);
+	void dumpFogMap(CFogMapBuild::TMapType mapType, const std::string &filename, TChannel channel = ChannelRGBA, const CRGBA channelLookup[256] = nullptr);
 
 	void reloadFogMap();
 

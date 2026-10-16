@@ -158,14 +158,14 @@ static const SUVCoord s_uvCoords[] = {
 
 static CSceneClass *findUVGen(CSceneClass *obj, int depth)
 {
-	if (!obj) return NULL;
+	if (!obj) return nullptr;
 	if (obj->classDesc()->superClassId() == 0x00000c20) return obj;
-	if (depth <= 0) return NULL;
+	if (depth <= 0) return nullptr;
 	CReferenceMaker *rm = dynamic_cast<CReferenceMaker *>(obj);
 	for (uint i = 0; rm && i < rm->nbReferences(); ++i)
 		if (CSceneClass *r = findUVGen(dynamic_cast<CSceneClass *>(rm->getReference(i)), depth - 1))
 			return r;
-	return NULL;
+	return nullptr;
 }
 
 static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
@@ -175,9 +175,9 @@ static CControlKeyFramerBase *uvController(CSceneClass *texmap, int coord)
 	// CParamBlock decodes that mapping (§10k; formerly an inline 0x0002 chunk walk here).
 	CSceneClass *uvgen = findUVGen(texmap, 3);
 	CReferenceMaker *urm = dynamic_cast<CReferenceMaker *>(uvgen);
-	if (!urm || urm->nbReferences() == 0) return NULL;
+	if (!urm || urm->nbReferences() == 0) return nullptr;
 	CParamBlock *pblock = dynamic_cast<CParamBlock *>(urm->getReference(0));
-	if (!pblock) return NULL;
+	if (!pblock) return nullptr;
 	return dynamic_cast<CControlKeyFramerBase *>(pblock->controllerForParam(coord));
 }
 
@@ -200,12 +200,12 @@ static uint addTexTracks(NL3D::CAnimation &animation, CSceneClass *texmap, uint 
 
 static CSceneClass *firstNelMaterial(CSceneClass *mtl)
 {
-	if (!mtl) return NULL;
+	if (!mtl) return nullptr;
 	if (mtl->classDesc()->classId() == CLASSID_NEL_MTL) return mtl;
 	if (CMultiMtl *mm = dynamic_cast<CMultiMtl *>(mtl))
 		for (uint s = 0; s < mm->numSubMaterials(); ++s)
 			if (CSceneClass *r = firstNelMaterial(mm->subMaterial(s))) return r;
-	return NULL;
+	return nullptr;
 }
 
 static uint addMtlTracks(NL3D::CAnimation &animation, CSceneClass *mtl, const std::string &parentName)
@@ -259,8 +259,8 @@ static bool nodeIsLight(INode &node)
 // whole node first).
 static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std::set<CReferenceMaker *> &seen)
 {
-	if (!obj || depth < 0) return NULL;
-	if (!seen.insert(obj).second) return NULL;
+	if (!obj || depth < 0) return nullptr;
+	if (!seen.insert(obj).second) return nullptr;
 
 	if (CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(obj))
 	{
@@ -279,7 +279,7 @@ static CReferenceMaker *findColorController(CReferenceMaker *obj, int depth, std
 		if (CReferenceMaker *found = findColorController(r, depth - 1, seen))
 			return found;
 	}
-	return NULL;
+	return nullptr;
 }
 
 static std::string getAnimatedLightName(INode &node)
@@ -322,7 +322,7 @@ static uint addMorphTracks(NL3D::CAnimation &animation, INode &node)
 {
 	CDerivedObject *obj = dynamic_cast<CDerivedObject *>(node.getReference(1));
 	if (!obj) return 0;
-	CReferenceMaker *morpher = NULL;
+	CReferenceMaker *morpher = nullptr;
 	for (uint i = 0; i < obj->modifierCount() && !morpher; ++i)
 	{
 		CSceneClass *mod = obj->modifier(i);

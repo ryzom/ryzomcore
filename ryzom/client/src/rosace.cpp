@@ -58,9 +58,9 @@ extern UDriver *Driver;
 CRosaceComponent::CRosaceComponent()
 {
 	// No callback function at the beginning.
-	_Callback	= 0;
+	_Callback	= nullptr;
 	// No texture at the beginning.
-	_Texture	= 0;
+	_Texture	= nullptr;
 	_X = 0.5f;
 	_Y = 0.5f;
 	_W = 0.05f;

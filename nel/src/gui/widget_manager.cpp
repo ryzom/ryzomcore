@@ -65,7 +65,7 @@ namespace
 
 namespace NLGUI
 {
-	CWidgetManager* CWidgetManager::instance = NULL;
+	CWidgetManager* CWidgetManager::instance = nullptr;
 	std::string CWidgetManager::_CtrlLaunchingModalId= "ctrl_launch_modal";
 	// ----------------------------------------------------------------------------
 	// SMasterGroup
@@ -125,7 +125,7 @@ namespace NLGUI
 				it++;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -200,7 +200,7 @@ namespace NLGUI
 			while (it != PrioritizedWindows[i].end())
 			{
 				CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(*it);
-				if (pGC != NULL)
+				if (pGC != nullptr)
 					gcs.push_back(pGC);
 				it++;
 			}
@@ -223,7 +223,7 @@ namespace NLGUI
 			while (it != PrioritizedWindows[i].end())
 			{
 				CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(*it);
-				if ((pGC != NULL) && (pGC->getParent() != NULL))
+				if ((pGC != nullptr) && (pGC->getParent() != nullptr))
 				{
 					sint32 wParent = pGC->getParent()->getW(false);
 					sint32 w = pGC->getW(false);
@@ -247,7 +247,7 @@ namespace NLGUI
 			while (it != PrioritizedWindows[i].end())
 			{
 				CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(*it);
-				if (pGC != NULL)
+				if (pGC != nullptr)
 					pGC->setLocked(false);
 
 				it++;
@@ -302,7 +302,7 @@ namespace NLGUI
 
 	CWidgetManager* CWidgetManager::getInstance()
 	{
-		if( instance == NULL )
+		if( instance == nullptr)
 			instance = new CWidgetManager;
 
 		return instance;
@@ -311,7 +311,7 @@ namespace NLGUI
 	void CWidgetManager::release()
 	{
 		delete instance;
-		instance = NULL;
+		instance = nullptr;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -322,7 +322,7 @@ namespace NLGUI
 			if (_MasterGroups[i].Group->getId() == MasterGroupName)
 				return _MasterGroups[i].Group;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ----------------------------------------------------------------------------
@@ -332,17 +332,17 @@ namespace NLGUI
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			CInterfaceGroup *pIG = rMG.getWindowFromId(groupId);
-			if (pIG != NULL)
+			if (pIG != nullptr)
 				return pIG;
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ----------------------------------------------------------------------------
 	void CWidgetManager::addWindowToMasterGroup (const std::string &sMasterGroupName, CInterfaceGroup *pIG)
 	{
 		// Warning this function is not smart : its a o(n) !
-		if (pIG == NULL) return;
+		if (pIG == nullptr) return;
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); ++nMasterGroup)
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -357,7 +357,7 @@ namespace NLGUI
 	void CWidgetManager::removeWindowFromMasterGroup(const std::string &sMasterGroupName,CInterfaceGroup *pIG)
 	{
 		// Warning this function is not smart : its a o(n) !
-		if (pIG == NULL) return;
+		if (pIG == nullptr) return;
 		for (uint32 nMasterGroup = 0; nMasterGroup < _MasterGroups.size(); ++nMasterGroup)
 		{
 			SMasterGroup &rMG = _MasterGroups[nMasterGroup];
@@ -375,7 +375,7 @@ namespace NLGUI
 			unlinkAllContainers (rG[i]);
 
 		CGroupContainerBase *pGC = dynamic_cast<CGroupContainerBase*>(pIG);
-		if (pGC != NULL)
+		if (pGC != nullptr)
 			pGC->removeAllContainers();
 	}
 
@@ -401,7 +401,7 @@ namespace NLGUI
 	void CWidgetManager::activateMasterGroup (const std::string &sMasterGroupName, bool bActive)
 	{
 		CInterfaceGroup *pIG = getMasterGroupFromId (sMasterGroupName);
-		if (pIG != NULL)
+		if (pIG != nullptr)
 		{
 			pIG->setActive(bActive);
 			pIG->invalidateCoords();
@@ -412,9 +412,9 @@ namespace NLGUI
 	CInterfaceGroup* CWidgetManager::getWindow(CInterfaceElement *pIE)
 	{
 		CInterfaceGroup *pIG = pIE->getParent();
-		if (pIG == NULL) return NULL;
-		if (pIG->getParent() == NULL) return NULL;
-		while (pIG->getParent()->getParent() != NULL)
+		if (pIG == nullptr) return nullptr;
+		if (pIG->getParent() == nullptr) return nullptr;
+		while (pIG->getParent()->getParent() != nullptr)
 		{
 			pIG = pIG->getParent();
 		}
@@ -434,7 +434,7 @@ namespace NLGUI
 		{
 			CWidgetManager::SMasterGroup &rMG = _MasterGroups[nMasterGroup];
 			CInterfaceElement *pIEL = rMG.Group->getElement (sEltId);
-			if (pIEL != NULL)
+			if (pIEL != nullptr)
 			{
 #if !FINAL_VERSION
 				if (m_LoggedMissingElement.find(sEltId) != m_LoggedMissingElement.end())
@@ -452,14 +452,14 @@ namespace NLGUI
 			m_LoggedMissingElement.insert(sEltId);
 			nlwarning("Could not find UI element from Id '%s'...", sEltId.c_str());
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
 	CInterfaceElement* CWidgetManager::getElementFromId (const std::string &sStart, const std::string &sEltId)
 	{
 		CInterfaceElement *pIEL = getElementFromId (sEltId);
-		if (pIEL == NULL)
+		if (pIEL == nullptr)
 		{
 			std::string sZeStart = sStart, sTmp;
 			if (sZeStart[sZeStart.size()-1] == ':')
@@ -472,7 +472,7 @@ namespace NLGUI
 				else
 					sTmp = sZeStart	+ ":" + sEltId;
 				pIEL = getElementFromId (sTmp);
-				if (pIEL != NULL)
+				if (pIEL != nullptr)
 					return pIEL;
 				std::string::size_type nextPos = sZeStart.rfind(':');
 				if (nextPos == std::string::npos) break;
@@ -521,12 +521,12 @@ namespace NLGUI
 			{
 				// return the first.
 				if(rMG.PrioritizedWindows[nPriority].empty())
-					return NULL;
+					return nullptr;
 				else
 					return rMG.PrioritizedWindows[nPriority].back();
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -540,12 +540,12 @@ namespace NLGUI
 			{
 				// return the first.
 				if(rMG.PrioritizedWindows[nPriority].empty())
-					return NULL;
+					return nullptr;
 				else
 					return rMG.PrioritizedWindows[nPriority].front();
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -569,7 +569,7 @@ namespace NLGUI
 				}
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ***************************************************************************
@@ -661,7 +661,7 @@ namespace NLGUI
 		}
 
 		// disable any context help
-		setCurContextHelp( NULL );
+		setCurContextHelp(nullptr);
 		_DeltaTimeStopingContextHelp = 0;
 	}
 
@@ -839,7 +839,7 @@ namespace NLGUI
 				}
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -860,14 +860,14 @@ namespace NLGUI
 						if (pIG->getActive() && pIG->getUseCursor())
 						{
 							CInterfaceGroup *pIGunder = pIG->getGroupUnder (x ,y);
-							if (pIGunder != NULL)
+							if (pIGunder != nullptr)
 								return pIGunder;
 						}
 					}
 				}
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -1005,17 +1005,17 @@ namespace NLGUI
 	void CWidgetManager::removeRefOnCtrl(CCtrlBase *ctrlBase)
 	{
 		if ( getCurContextHelp()  == ctrlBase)
-			setCurContextHelp( NULL );
+			setCurContextHelp(nullptr);
 		if (getCapturePointerLeft() == ctrlBase)
-			setCapturePointerLeft(NULL);
+			setCapturePointerLeft(nullptr);
 		if (getCapturePointerRight() == ctrlBase)
-			setCapturePointerRight (NULL);
+			setCapturePointerRight (nullptr);
 		if (getCaptureKeyboard() == ctrlBase)
-			setCaptureKeyboard(NULL);
+			setCaptureKeyboard(nullptr);
 		if (getOldCaptureKeyboard() == ctrlBase)
-			setOldCaptureKeyboard(NULL);
+			setOldCaptureKeyboard(nullptr);
 		if (getDefaultCaptureKeyboard() == ctrlBase)
-			setDefaultCaptureKeyboard(NULL);
+			setDefaultCaptureKeyboard(nullptr);
 		uint i;
 		for (i=0; i<_CtrlsUnderPointer.size(); i++)
 		{
@@ -1048,17 +1048,17 @@ namespace NLGUI
 
 	void CWidgetManager::reset()
 	{
-		setCurContextHelp( NULL );
+		setCurContextHelp(nullptr);
 
 		_ViewsUnderPointer.clear();
 		_CtrlsUnderPointer.clear();
 		_GroupsUnderPointer.clear();
 
-		_CaptureKeyboard = NULL;
-		_OldCaptureKeyboard = NULL;
-		setCapturePointerLeft(NULL);
-		setCapturePointerRight(NULL);
-		_CapturedView = NULL;
+		_CaptureKeyboard = nullptr;
+		_OldCaptureKeyboard = nullptr;
+		setCapturePointerLeft(nullptr);
+		setCapturePointerRight(nullptr);
+		_CapturedView = nullptr;
 
 		resetColorProps();
 		resetAlphaRolloverSpeedProps();
@@ -1154,7 +1154,7 @@ namespace NLGUI
 				}
 			}
 
-			if ( getPointer() != NULL)
+			if ( getPointer() != nullptr)
 				getPointer()->updateCoords();
 		}
 
@@ -1163,7 +1163,7 @@ namespace NLGUI
 		if (bRecomputeCtrlUnderPtr)
 		{
 			H_AUTO ( RZ_Interface_RecomputeCtrlUnderPtr )
-			if ( getPointer() != NULL )
+			if ( getPointer() != nullptr)
 			{
 				sint32 mx = _Pointer->getX();
 				sint32 my = _Pointer->getY();
@@ -1192,7 +1192,7 @@ namespace NLGUI
 			}
 		}
 
-		return NULL;
+		return nullptr;
 	}
 
 
@@ -1207,7 +1207,7 @@ namespace NLGUI
 			if(groupOver)
 			{
 				CViewText *vtDst = dynamic_cast<CViewText*>(groupOver->getView("text"));
-				if (vtDst != NULL)
+				if (vtDst != nullptr)
 				{
 					groupOver->setParentPos(vtSrc);
 
@@ -1270,7 +1270,7 @@ namespace NLGUI
 			}
 
 			// Reset the ptr so at next frame, won't be rendered (but if reset)
-			setOverExtendViewText( NULL, getOverExtendViewTextBackColor() );
+			setOverExtendViewText(nullptr, getOverExtendViewTextBackColor() );
 		}
 	}
 
@@ -1534,7 +1534,7 @@ namespace NLGUI
 		if(groupContextHelp)
 		{
 			CViewText *pTxt = (CViewText*)groupContextHelp->getView("text");
-			if (pTxt != NULL)
+			if (pTxt != nullptr)
 			{
 				pTxt->setTextFormatTaged(_ContextHelpText);
 				// update only to get correct W/H
@@ -1543,7 +1543,7 @@ namespace NLGUI
 
 				// **** Compute parent coordinates
 				CCtrlBase::TToolTipParentType	parentType= newCtrl->getToolTipParent();
-				CInterfaceGroup	*win= NULL;
+				CInterfaceGroup	*win = nullptr;
 				// adjust to the mouse by default
 				sint32		xParent= getPointer()->getX();
 				sint32		yParent= getPointer()->getY();
@@ -1643,14 +1643,14 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::disableContextHelp()
 	{
-		setCurContextHelp( NULL );
+		setCurContextHelp(nullptr);
 		_DeltaTimeStopingContextHelp = 0;
 	}
 
 	// ------------------------------------------------------------------------------------------------
 	void CWidgetManager::disableContextHelpForControl( CCtrlBase *pCtrl )
 	{
-		if( pCtrl == NULL )
+		if( pCtrl == nullptr)
 			return;
 
 		if( getCurContextHelp() == pCtrl )
@@ -1661,7 +1661,7 @@ namespace NLGUI
 	CCtrlBase* CWidgetManager::getNewContextHelpCtrl()
 	{
 		// get the top most ctrl under us
-		CCtrlBase *best = NULL;
+		CCtrlBase *best = nullptr;
 		sint8 bestRenderLayer = -128;
 
 		for (sint i = (sint32)_CtrlsUnderPointer.size()-1; i>=0; i--)
@@ -1739,7 +1739,7 @@ namespace NLGUI
 			}
 
 			// Check if _CurCtrlContextHelp  is visible
-			if (_CurCtrlContextHelp == NULL)
+			if (_CurCtrlContextHelp == nullptr)
 			{
 				disableContextHelp();
 			}
@@ -1749,7 +1749,7 @@ namespace NLGUI
 				if (_CurCtrlContextHelp->getActive() == false)
 					bVisible = false;
 				CInterfaceGroup *pParent = _CurCtrlContextHelp->getParent();
-				while (pParent != NULL)
+				while (pParent != nullptr)
 				{
 					if (pParent->getActive() == false)
 						bVisible = false;
@@ -1792,7 +1792,7 @@ namespace NLGUI
 
 					// If the text is finally empty (Special AH case), abort
 					if( getContextHelpText().empty() )
-						newCtrl= NULL;
+						newCtrl = nullptr;
 				}
 
 				// not present? wait furthermore to move the mouse.
@@ -2044,7 +2044,7 @@ namespace NLGUI
 			for( std::vector< CViewBase* >::const_iterator itr = vs.begin(); itr != vs.end(); ++itr )
 			{
 				CViewText *vt = dynamic_cast< CViewText* >( *itr );
-				if( vt != NULL )
+				if( vt != nullptr)
 				{
 					if( reset )
 						vt->resetTextIndex();
@@ -2137,14 +2137,14 @@ namespace NLGUI
 		NL3D::UDriver *driver = CViewRenderer::getInstance()->getDriver();
 
 		// If an element has captured the keyboard, make sure it is alway visible (all parent windows active)
-		if( getCaptureKeyboard() != NULL)
+		if( getCaptureKeyboard() != nullptr)
 		{
 			CCtrlBase *cb = getCaptureKeyboard();
 			do
 			{
 				if (!cb->getActive())
 				{
-					setCaptureKeyboard(NULL);
+					setCaptureKeyboard(nullptr);
 					break;
 				}
 				cb = cb->getParent();
@@ -2234,7 +2234,7 @@ namespace NLGUI
 						}
 					}
 
-					if( draggedElement != NULL )
+					if( draggedElement != nullptr)
 					{
 						CInterfaceElement *e = draggedElement;
 						static_cast< CViewBase* >( e )->draw();
@@ -2265,7 +2265,7 @@ namespace NLGUI
 		}
 
 		// Draw the pointer and DND Item
-		if (getPointer() != NULL)
+		if (getPointer() != nullptr)
 		{
 			if (getPointer()->getActive())
 				getPointer()->draw ();
@@ -2276,7 +2276,7 @@ namespace NLGUI
 			for(uint i = 0; i < editorSelection.size(); ++i)
 			{
 				CInterfaceElement *e = getElementFromId(editorSelection[i]);
-				if (e != NULL)
+				if (e != nullptr)
 					e->drawHighlight();
 			}
 		}
@@ -2323,22 +2323,22 @@ namespace NLGUI
 		const CEventDescriptorSystem &systemEvent = reinterpret_cast< const CEventDescriptorSystem& >( evnt );
 		if( systemEvent.getEventTypeExtended() == CEventDescriptorSystem::setfocus )
 		{
-			if( getCapturePointerLeft() != NULL )
+			if( getCapturePointerLeft() != nullptr)
 			{
 				getCapturePointerLeft()->handleEvent( evnt );
-				setCapturePointerLeft( NULL );
+				setCapturePointerLeft(nullptr);
 			}
 
-			if( getCapturePointerRight() != NULL )
+			if( getCapturePointerRight() != nullptr)
 			{
 				getCapturePointerRight()->handleEvent( evnt );
-				setCapturePointerRight( NULL );
+				setCapturePointerRight(nullptr);
 			}
 
-			if( _CapturedView != NULL )
+			if( _CapturedView != nullptr)
 			{
 				_CapturedView->handleEvent( evnt );
-				_CapturedView = NULL;
+				_CapturedView = nullptr;
 			}
 		}
 
@@ -2420,7 +2420,7 @@ namespace NLGUI
 
 			// else the 'return' key bring back to the last edit box (if possible)
 			CCtrlBase *oldCapture = getOldCaptureKeyboard() ? getOldCaptureKeyboard() : getDefaultCaptureKeyboard();
-			if ( getCaptureKeyboard() == NULL && oldCapture && !handled)
+			if ( getCaptureKeyboard() == nullptr && oldCapture && !handled)
 			{
 				/* If the editbox does not want to recover focus, then abort. This possibility is normaly avoided
 					through setCaptureKeyboard() which already test getRecoverFocusOnEnter(), but it is still possible
@@ -2434,7 +2434,7 @@ namespace NLGUI
 					notifyElementCaptured(getCaptureKeyboard() );
 					// make sure all parent windows are active
 					CCtrlBase *cb = getCaptureKeyboard();
-					CGroupContainer *lastContainer = NULL;
+					CGroupContainer *lastContainer = nullptr;
 					nlassert(cb);
 					for(;;)
 					{
@@ -2514,14 +2514,14 @@ namespace NLGUI
 		if( isMouseHandlingEnabled() )
 		{
 			// First thing to do : Capture handling
-			if ( getCapturePointerLeft() != NULL)
+			if ( getCapturePointerLeft() != nullptr)
 				handled|= getCapturePointerLeft()->handleEvent(evnt);
 
-			if ( getCapturePointerRight() != NULL &&
+			if ( getCapturePointerRight() != nullptr &&
 				getCapturePointerLeft() != getCapturePointerRight() )
 				handled|= getCapturePointerRight()->handleEvent(evnt);
 
-			if( _CapturedView != NULL &&
+			if( _CapturedView != nullptr &&
 				_CapturedView != getCapturePointerLeft() &&
 				_CapturedView != getCapturePointerRight() )
 				_CapturedView->handleEvent( evnt );
@@ -2537,7 +2537,7 @@ namespace NLGUI
 
 			// get the group under the mouse
 			CInterfaceGroup *pNewCurrentWnd = getCurrentWindowUnder();
-			setMouseOverWindow( pNewCurrentWnd != NULL );
+			setMouseOverWindow( pNewCurrentWnd != nullptr);
 
 
 			NLMISC::CRefPtr<CGroupModal>	clickedOutModalWindow;
@@ -2551,7 +2551,7 @@ namespace NLGUI
 					// If we are not in "click out" mode so we dont handle controls other than those of the modal
 					if (pNewCurrentWnd != mwi.ModalWindow && !mwi.ModalExitClickOut)
 					{
-						pNewCurrentWnd = NULL;
+						pNewCurrentWnd = nullptr;
 					}
 					else
 					{
@@ -2560,7 +2560,7 @@ namespace NLGUI
 							if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown ||
 								(eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown))
 								if (!mwi.ModalHandlerClickOut.empty())
-									CAHManager::getInstance()->runActionHandler(mwi.ModalHandlerClickOut,NULL,mwi.ModalClickOutParams);
+									CAHManager::getInstance()->runActionHandler(mwi.ModalHandlerClickOut, nullptr, mwi.ModalClickOutParams);
 
 						// If the current window is not the modal and if must quit on click out
 						if(pNewCurrentWnd != mwi.ModalWindow && mwi.ModalExitClickOut)
@@ -2578,7 +2578,7 @@ namespace NLGUI
 								{
 									// don't handle event unless it is a previous modal window
 									if( !isPreviousModal( pNewCurrentWnd ) )
-										pNewCurrentWnd = NULL; // can't handle event before we have left all modal windows
+										pNewCurrentWnd = nullptr; // can't handle event before we have left all modal windows
 								}
 								movePointer (0,0); // Reget controls under pointer
 							}
@@ -2590,10 +2590,10 @@ namespace NLGUI
 			// Manage LeftClick.
 			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftdown)
 			{
-				if ((pNewCurrentWnd != NULL) && (!hasModal()) && (pNewCurrentWnd->getOverlappable()))
+				if ((pNewCurrentWnd != nullptr) && (!hasModal()) && (pNewCurrentWnd->getOverlappable()))
 				{
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pNewCurrentWnd);
-					if (pGC != NULL)
+					if (pGC != nullptr)
 					{
 						if (!pGC->isGrayed()) setTopWindow(pNewCurrentWnd);
 					}
@@ -2614,7 +2614,7 @@ namespace NLGUI
 						for( sint32 i = _GroupsUnderPointer.size() - 1; i >= 0; i-- )
 						{
 							CInterfaceGroup *g = _GroupsUnderPointer[ i ];
-							if( ( g != NULL ) && ( g->isInGroup( pNewCurrentWnd ) ) )
+							if( ( g != nullptr) && ( g->isInGroup( pNewCurrentWnd ) ) )
 							{
 								_CapturedView = g;
 								captured = true;
@@ -2652,7 +2652,7 @@ namespace NLGUI
 						for( sint32 i = _ViewsUnderPointer.size()-1; i >= 0; i-- )
 						{
 							CViewBase *v = _ViewsUnderPointer[i];
-							if( ( v != NULL ) && v->isInGroup( pNewCurrentWnd ) )
+							if( ( v != nullptr) && v->isInGroup( pNewCurrentWnd ) )
 							{
 								if( CInterfaceElement::getEditorMode() && !v->isEditorSelectable() )
 									continue;
@@ -2676,7 +2676,7 @@ namespace NLGUI
 					// consider clicking on a control implies handling of the event.
 					handled= true;
 
-					if( getCapturePointerLeft() != NULL )
+					if( getCapturePointerLeft() != nullptr)
 						_CapturedView = getCapturePointerLeft();
 
 					// handle the capture
@@ -2692,10 +2692,10 @@ namespace NLGUI
 			// Manage RightClick
 			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightdown)
 			{
-				if ((pNewCurrentWnd != NULL) && (!hasModal()) && (pNewCurrentWnd->getOverlappable()))
+				if ((pNewCurrentWnd != nullptr) && (!hasModal()) && (pNewCurrentWnd->getOverlappable()))
 				{
 					CGroupContainer *pGC = dynamic_cast<CGroupContainer*>(pNewCurrentWnd);
-					if (pGC != NULL)
+					if (pGC != nullptr)
 					{
 						if (!pGC->isGrayed()) setTopWindow(pNewCurrentWnd);
 					}
@@ -2729,7 +2729,7 @@ namespace NLGUI
 					}
 				}
 				//if found
-				if ( getCapturePointerRight() != NULL)
+				if ( getCapturePointerRight() != nullptr)
 				{
 					// handle the capture
 					handled |= getCapturePointerRight()->handleEvent(evnt);
@@ -2740,11 +2740,11 @@ namespace NLGUI
 			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouserightup)
 			{
 				if (!handled)
-					if (pNewCurrentWnd != NULL)
+					if (pNewCurrentWnd != nullptr)
 						pNewCurrentWnd->handleEvent(evnt);
-				if ( getCapturePointerRight() != NULL)
+				if ( getCapturePointerRight() != nullptr)
 				{
-					setCapturePointerRight(NULL);
+					setCapturePointerRight(nullptr);
 					handled= true;
 				}
 			}
@@ -2752,7 +2752,7 @@ namespace NLGUI
 			// window handling. if not handled by a control
 			if (!handled)
 			{
-				if (((pNewCurrentWnd != NULL) && !hasModal()) ||
+				if (((pNewCurrentWnd != nullptr) && !hasModal()) ||
 					((hasModal() && getModal().ModalWindow == pNewCurrentWnd)))
 				{
 					CEventDescriptorMouse ev2 = eventDesc;
@@ -2773,7 +2773,7 @@ namespace NLGUI
 			// Put here to let a chance to the window to handle if the capture dont
 			if (eventDesc.getEventTypeExtended() == CEventDescriptorMouse::mouseleftup)
 			{
-				if ( getCapturePointerLeft() != NULL)
+				if ( getCapturePointerLeft() != nullptr)
 				{
 					if( !handled )
 					{
@@ -2781,11 +2781,11 @@ namespace NLGUI
 						c->handleEvent( evnt );
 					}
 
-					setCapturePointerLeft(NULL);
+					setCapturePointerLeft(nullptr);
 					handled = true;
 				}
 
-				_CapturedView = NULL;
+				_CapturedView = nullptr;
 
 				if( CInterfaceElement::getEditorMode() )
 					stopDragging();
@@ -2820,8 +2820,8 @@ namespace NLGUI
 			handled|= isMouseOverWindow();
 
 			// If mouse click was not on interface and we have keyboard captured, then release keyboard
-			if (!handled && getCaptureKeyboard() != NULL && eventDesc.getEventTypeExtended() != CEventDescriptorMouse::mousemove)
-				CWidgetManager::getInstance()->setCaptureKeyboard(NULL);
+			if (!handled && getCaptureKeyboard() != nullptr && eventDesc.getEventTypeExtended() != CEventDescriptorMouse::mousemove)
+				CWidgetManager::getInstance()->setCaptureKeyboard(nullptr);
 		}
 
 		return handled;
@@ -2829,7 +2829,7 @@ namespace NLGUI
 
 	bool CWidgetManager::handleMouseMoveEvent( const CEventDescriptor &eventDesc )
 	{
-		if( getPointer() == NULL )
+		if( getPointer() == nullptr)
 			return false;
 
 		if( eventDesc.getType() != CEventDescriptor::mouse )
@@ -2863,12 +2863,12 @@ namespace NLGUI
 
 		if( CInterfaceElement::getEditorMode() )
 		{
-			if( ( _CapturedView != NULL ) && ( draggedElement == NULL ) )
+			if( ( _CapturedView != nullptr) && ( draggedElement == nullptr) )
 			{
 				startDragging();
 			}
 			else
-			if( draggedElement != NULL )
+			if( draggedElement != nullptr)
 			{
 				sint32 dx = newX - oldX;
 				sint32 dy = newY - oldY;
@@ -2883,13 +2883,13 @@ namespace NLGUI
 	// ------------------------------------------------------------------------------------------------
 	bool CWidgetManager::startDragging()
 	{
-		CInterfaceElement *e = NULL;
+		CInterfaceElement *e = nullptr;
 
 		CInterfaceGroup *g = _CapturedView->getParent();
-		if( g != NULL )
+		if( g != nullptr)
 		{
 			e = g->takeElement( _CapturedView );
-			if( e == NULL )
+			if( e == nullptr)
 			{
 				nlinfo( "Something went horribly wrong :(" );
 				return false;
@@ -2898,7 +2898,7 @@ namespace NLGUI
 		else
 			e = _CapturedView;
 
-		e->setParent( NULL );
+		e->setParent(nullptr);
 		draggedElement = e;
 
 		return true;
@@ -2906,13 +2906,13 @@ namespace NLGUI
 
 	void CWidgetManager::stopDragging()
 	{
-		if( draggedElement != NULL )
+		if( draggedElement != nullptr)
 		{
 			CInterfaceGroup *g = getGroupUnder( draggedElement->getXReal(), draggedElement->getYReal() );
 			CInterfaceElement *e = draggedElement;
 			CInterfaceGroup *tw = getTopWindow();
 
-			if( g == NULL )
+			if( g == nullptr)
 				g = tw;
 
 			std::string oldid = e->getId();
@@ -2926,7 +2926,7 @@ namespace NLGUI
 			e->alignTo( g );
 			//e->setName( "==MARKED==" );
 
-			draggedElement = NULL;
+			draggedElement = nullptr;
 
 			onWidgetMoved( oldid, e->getId() );
 		}
@@ -2993,10 +2993,10 @@ namespace NLGUI
 	// ***************************************************************************
 	void CWidgetManager::setCapturePointerLeft(CCtrlBase *c)
 	{
-		_CapturedView = NULL;
+		_CapturedView = nullptr;
 
 		// additionally, abort any dragging
-		if( CCtrlDraggable::getDraggedSheet() != NULL )
+		if( CCtrlDraggable::getDraggedSheet() != nullptr)
 			CCtrlDraggable::getDraggedSheet()->abortDragging();
 
 		_CapturePointerLeft = c;
@@ -3043,8 +3043,8 @@ namespace NLGUI
 	void CWidgetManager::resetCaptureKeyboard()
 	{
 		CCtrlBase *captureKeyboard = _CaptureKeyboard;
-		_OldCaptureKeyboard = NULL;
-		_CaptureKeyboard = NULL;
+		_OldCaptureKeyboard = nullptr;
+		_CaptureKeyboard = nullptr;
 		if (captureKeyboard)
 		{
 			captureKeyboard->onKeyboardCaptureLost();
@@ -3072,7 +3072,7 @@ namespace NLGUI
 		{
 			// instead of deleting, just mark as deleted incase we are inside iterating loop,
 			// it will be removed in sendClockTickEvent
-			(*it) = NULL;
+			(*it) = nullptr;
 		}
 	}
 
@@ -3234,10 +3234,10 @@ namespace NLGUI
 
 	void CWidgetManager::resetColorProps()
 	{
-		_RProp = NULL;
-		_GProp = NULL;
-		_BProp = NULL;
-		_AProp = NULL;
+		_RProp = nullptr;
+		_GProp = nullptr;
+		_BProp = nullptr;
+		_AProp = nullptr;
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -3245,7 +3245,7 @@ namespace NLGUI
 	{
 		std::map< std::string, NLMISC::CSmartPtr< CInterfaceOptions > >::iterator it = _OptionsMap.find( name );
 		if( it == _OptionsMap.end() )
-			return NULL;
+			return nullptr;
 		else
 			return it->second;
 	}
@@ -3268,13 +3268,13 @@ namespace NLGUI
 
 	bool CWidgetManager::serializeOptions( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
 		std::map< std::string, NLMISC::CSmartPtr< CInterfaceOptions > >::const_iterator itr;
 		for( itr = _OptionsMap.begin(); itr != _OptionsMap.end(); ++itr )
 		{
-			if( itr->second->serialize( parentNode, itr->first ) == NULL )
+			if( itr->second->serialize( parentNode, itr->first ) == nullptr)
 				return false;
 		}
 
@@ -3284,7 +3284,7 @@ namespace NLGUI
 
 	bool CWidgetManager::serializeTreeData( xmlNodePtr parentNode ) const
 	{
-		if( parentNode == NULL )
+		if( parentNode == nullptr)
 			return false;
 
 		std::vector< SMasterGroup >::size_type i;
@@ -3298,10 +3298,10 @@ namespace NLGUI
 				CInterfaceGroup *g = mg.Group->getGroup( j );
 				nlassert(g);
 
-				if( dynamic_cast< CGroupModal* >( g ) != NULL )
+				if( dynamic_cast< CGroupModal* >( g ) != nullptr)
 					continue;
 
-				if( g->serializeTreeData( parentNode ) == NULL )
+				if( g->serializeTreeData( parentNode ) == nullptr)
 					return false;
 			}
 		}
@@ -3321,11 +3321,11 @@ namespace NLGUI
 
 			// If Left captured, reset
 			if( getCapturePointerLeft() )
-				setCapturePointerLeft( NULL );
+				setCapturePointerLeft(nullptr);
 
 			// Same for Right
 			if( getCapturePointerRight() )
-				setCapturePointerRight( NULL );
+				setCapturePointerRight(nullptr);
 
 			// Avoid any problem with modals
 			disableModalWindow();
@@ -3337,7 +3337,7 @@ namespace NLGUI
 	{
 		uint nVal = 50;
 		NLMISC::CCDBNodeLeaf *pNL = CDBManager::getInstance()->getDbProp("UI:SAVE:DOUBLE_CLICK_SPEED");
-		if( pNL != NULL )
+		if( pNL != nullptr)
 			nVal = pNL->getValue32();
 
 		uint dbclickDelay = (uint)(DOUBLE_CLICK_MIN + (DOUBLE_CLICK_MAX-DOUBLE_CLICK_MIN) * (float)nVal / 100.0f);
@@ -3349,7 +3349,7 @@ namespace NLGUI
 	{
 		// After parsing options and templates node -> init system options.
 		CInterfaceOptions *opt = getOptions( "system" );
-		if( opt != NULL )
+		if( opt != nullptr)
 		{
 			// List here all Special options
 			_SystemOptions[OptionCtrlSheetGrayColor]= opt->getValue("ctrl_sheet_gray_color");
@@ -3374,7 +3374,7 @@ namespace NLGUI
 	// Get the alpha roll over speed
 	float CWidgetManager::getAlphaRolloverSpeed()
 	{
-		if( _AlphaRolloverSpeedDB == NULL )
+		if( _AlphaRolloverSpeedDB == nullptr)
 			_AlphaRolloverSpeedDB = CDBManager::getInstance()->getDbProp("UI:SAVE:ALPHA_ROLLOVER_SPEED");
 		float fTmp = ROLLOVER_MIN_DELTA_PER_MS + (ROLLOVER_MAX_DELTA_PER_MS - ROLLOVER_MIN_DELTA_PER_MS) * 0.01f * (100 - _AlphaRolloverSpeedDB->getValue32());
 		return fTmp*fTmp*fTmp;
@@ -3382,7 +3382,7 @@ namespace NLGUI
 
 	void CWidgetManager::resetAlphaRolloverSpeedProps()
 	{
-		_AlphaRolloverSpeedDB = NULL;
+		_AlphaRolloverSpeedDB = nullptr;
 	}
 
 	void CWidgetManager::setContainerAlpha(uint8 alpha)
@@ -3415,10 +3415,10 @@ namespace NLGUI
 
 	void CWidgetManager::resetGlobalAlphasProps()
 	{
-		_GlobalContentAlphaDB = NULL;
-		_GlobalContainerAlphaDB = NULL;
-		_GlobalContentRolloverFactorDB = NULL;
-		_GlobalContainerRolloverFactorDB = NULL;
+		_GlobalContentAlphaDB = nullptr;
+		_GlobalContainerAlphaDB = nullptr;
+		_GlobalContentRolloverFactorDB = nullptr;
+		_GlobalContainerRolloverFactorDB = nullptr;
 	}
 
 	void CWidgetManager::registerNewScreenSizeHandler( INewScreenSizeHandler *handler )
@@ -3469,7 +3469,7 @@ namespace NLGUI
 	void CWidgetManager::startAnim( const std::string &animId )
 	{
 		CInterfaceAnim *pIT = _Parser->getAnim( animId );
-		if( pIT == NULL )
+		if( pIT == nullptr)
 			return;
 
 		stopAnim( animId );
@@ -3518,7 +3518,7 @@ namespace NLGUI
 		const std::vector< std::string> &paramList )
 	{
 		CProcedure *procp = _Parser->getProc( procName );
-		if( procp == NULL )
+		if( procp == nullptr)
 			return;
 
 		CProcedure &proc = *procp;
@@ -3534,7 +3534,7 @@ namespace NLGUI
 				result.setBool( false );
 				std::string cond;
 				action.buildCond( paramList, cond );
-				CInterfaceExpr::eval( cond, result, NULL );
+				CInterfaceExpr::eval( cond, result, nullptr);
 
 				if( result.toBool() )
 					if( !result.getBool() )
@@ -3554,7 +3554,7 @@ namespace NLGUI
 		const std::string &ah, const std::string &params )
 	{
 		CProcedure *procp = _Parser->getProc( procName );
-		if( procp == NULL )
+		if( procp == nullptr)
 			return;
 
 		CProcedure &proc = *procp;
@@ -3590,14 +3590,14 @@ namespace NLGUI
 			if( multiSelection )
 			{
 				editorSelection.erase( itr );
-				if( e != NULL )
+				if( e != nullptr)
 					e->setEditorSelected( false );
 			}
 		}
 		else
 		{
 			// Select if not yet selected
-			if( e != NULL )
+			if( e != nullptr)
 			{
 				// If multiselection is off, we can only have 1 widget selected
 				if( !multiSelection )
@@ -3700,20 +3700,20 @@ namespace NLGUI
 	{
 		// Check if this group exists
 		CInterfaceElement *e = getElementFromId( group );
-		if( e == NULL )
-			return NULL;
+		if( e == nullptr)
+			return nullptr;
 		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( e );
-		if( g == NULL )
-			return NULL;
+		if( g == nullptr)
+			return nullptr;
 
 		// Check if an element already exists with that name
-		if( g->getElement( widgetName ) != NULL )
-			return NULL;
+		if( g->getElement( widgetName ) != nullptr)
+			return nullptr;
 
 		// Create and add the new widget
 		CViewBase *v = getParser()->createClass( widgetClass );
-		if( v == NULL )
-			return NULL;
+		if( v == nullptr)
+			return nullptr;
 
 		v->setId( std::string( g->getId() + ":" + widgetName ) );
 		v->setParent( g );
@@ -3739,7 +3739,7 @@ namespace NLGUI
 		for(uint i = 0; i < editorSelection.size(); ++i)
 		{
 			CInterfaceElement *e = getElementFromId(editorSelection[i]);
-			if (e != NULL)
+			if (e != nullptr)
 				elms.push_back(e);
 		}
 
@@ -3764,7 +3764,7 @@ namespace NLGUI
 			CInterfaceElement *e = elms[i];
 			oldId = e->getId();
 			CInterfaceGroup *p = e->getParent();
-			if (p != NULL)
+			if (p != nullptr)
 				p->takeElement(e);
 
 			g->addElement(e);
@@ -3796,17 +3796,17 @@ namespace NLGUI
 
 		// Does the element exist?
 		CInterfaceElement *e = getElementFromId( editorSelection[ 0 ] );
-		if( e == NULL )
+		if( e == nullptr)
 			return false;
 
 		// Is the element a group?
 		CInterfaceGroup *g = dynamic_cast< CInterfaceGroup* >( e );
-		if( g == NULL )
+		if( g == nullptr)
 			return false;
 
 		// Can't blow up a root group :(
 		CInterfaceGroup *p = g->getParent();
-		if( p == NULL )
+		if( p == nullptr)
 			return false;
 
 		// KABOOM!
@@ -3931,8 +3931,8 @@ namespace NLGUI
 
 		_Parser = IParser::createParser();
 
-		_Pointer = NULL;
-		curContextHelp = NULL;
+		_Pointer = nullptr;
+		curContextHelp = nullptr;
 		_ContextHelpActive = true;
 		_DeltaTimeStopingContextHelp = 0;
 		_MaxTimeStopingContextHelp= 0.2f;
@@ -3951,7 +3951,7 @@ namespace NLGUI
 		_GlobalContainerAlpha = 255;
 		_GlobalRolloverFactorContent = 255;
 		_GlobalRolloverFactorContainer = 255;
-		_AlphaRolloverSpeedDB = NULL;
+		_AlphaRolloverSpeedDB = nullptr;
 
 		_MouseHandlingEnabled = true;
 		_MouseOverWindow = false;
@@ -3982,10 +3982,10 @@ namespace NLGUI
 		}
 
 		delete _Parser;
-		_Parser = NULL;
+		_Parser = nullptr;
 
-		_Pointer = NULL;
-		curContextHelp = NULL;
+		_Pointer = nullptr;
+		curContextHelp = nullptr;
 
 		CStringShared::deleteStringMapper();
 

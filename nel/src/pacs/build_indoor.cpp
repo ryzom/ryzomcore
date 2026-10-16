@@ -165,12 +165,12 @@ void	resetEdgeFlags(CCollisionMeshBuild &cmb)
 void	followBorder(CInteriorSurface &surface, uint first, uint edge, uint sens, vector<CVector> &vstore, bool &loop)
 {
 	CCollisionFace	*current = &surface.getFace(first);
-	CCollisionFace	*next = (current->Edge[edge] == -1) ? NULL : &surface.CollisionMeshBuild->Faces[current->Edge[edge]];
+	CCollisionFace	*next = (current->Edge[edge] == -1) ? nullptr : &surface.CollisionMeshBuild->Faces[current->Edge[edge]];
 	current->EdgeFlags[edge] = true;
 	sint32			currentFace = surface.Faces[first];
 
 	const sint32	currentSurfId = current->InternalSurface;
-	const sint32	oppositeSurfId = (next != NULL) ? next->InternalSurface : (current->Visibility[edge] ? -1 : -2);
+	const sint32	oppositeSurfId = (next != nullptr) ? next->InternalSurface : (current->Visibility[edge] ? -1 : -2);
 	sint			oedge;
 
 	sint			pivot = (edge+sens)%3;
@@ -185,7 +185,7 @@ void	followBorder(CInteriorSurface &surface, uint first, uint edge, uint sens, v
 	{
 		loop = false;
 		// -1 means no neighbor at all, -2 means a neighbor that is not available yet
-		sint32	thisOpposite = (next != NULL) ? next->InternalSurface : (current->Visibility[nextEdge] ? -1 : -2);
+		sint32	thisOpposite = (next != nullptr) ? next->InternalSurface : (current->Visibility[nextEdge] ? -1 : -2);
 		if ((thisOpposite != currentSurfId && thisOpposite != oppositeSurfId) ||
 			(loop = (current->EdgeFlags[nextEdge] && !allowThis)))
 		{
@@ -206,7 +206,7 @@ void	followBorder(CInteriorSurface &surface, uint first, uint edge, uint sens, v
 			}
 			pivot = (pivot+sens)%3;
 			nextEdge = (nextEdge+sens)%3;
-			next = (current->Edge[nextEdge] == -1) ? NULL : &surface.CollisionMeshBuild->Faces[current->Edge[nextEdge]];
+			next = (current->Edge[nextEdge] == -1) ? nullptr : &surface.CollisionMeshBuild->Faces[current->Edge[nextEdge]];
 			vstore.push_back(surface.CollisionMeshBuild->Vertices[current->V[pivot]]);
 		}
 		else
@@ -222,7 +222,7 @@ void	followBorder(CInteriorSurface &surface, uint first, uint edge, uint sens, v
 			current = next;
 			pivot = (oedge+3-sens)%3;
 			nextEdge = (oedge+sens)%3;
-			next = (current->Edge[nextEdge] == -1) ? NULL : &surface.CollisionMeshBuild->Faces[current->Edge[nextEdge]];
+			next = (current->Edge[nextEdge] == -1) ? nullptr : &surface.CollisionMeshBuild->Faces[current->Edge[nextEdge]];
 		}
 
 		allowThis = false;

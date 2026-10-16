@@ -85,9 +85,9 @@ bool CDBGroupListSheetTextShare::parse (xmlNodePtr cur, CInterfaceGroup *parentG
 // ***************************************************************************
 CDBGroupListSheetTextShare::CSheetChildShare::CSheetChildShare()
 {
-	NbMember = NULL;
-	Chance = NULL;
-	Wanted = NULL;
+	NbMember = nullptr;
+	Chance = nullptr;
+	Wanted = nullptr;
 
 	CacheNbMember = 0;
 	CacheChance = 0;
@@ -97,9 +97,9 @@ CDBGroupListSheetTextShare::CSheetChildShare::CSheetChildShare()
 // ***************************************************************************
 CDBGroupListSheetTextShare::CSheetChildShare::~CSheetChildShare()
 {
-	NbMember = NULL;
-	Chance = NULL;
-	Wanted = NULL;
+	NbMember = nullptr;
+	Chance = nullptr;
+	Wanted = nullptr;
 }
 
 
@@ -191,7 +191,7 @@ void CDBGroupListSheetTextShare::CSheetChildShare::updateViewText(CDBGroupListSh
 	updateViewTextAsItem();
 
 	// Update the Number of member of the team that wants the item/phrase
-	if(NbMember != NULL)
+	if(NbMember != nullptr)
 	{
 		NbMember->setActive(true);
 		NbMember->setX( compoList->getXNbMember() );
@@ -200,7 +200,7 @@ void CDBGroupListSheetTextShare::CSheetChildShare::updateViewText(CDBGroupListSh
 	}
 
 	// Update the chance percentage to obtain the item
-	if(Chance != NULL)
+	if(Chance != nullptr)
 	{
 		Chance->setActive(true);
 		Chance->setX( compoList->getXChance() );
@@ -208,7 +208,7 @@ void CDBGroupListSheetTextShare::CSheetChildShare::updateViewText(CDBGroupListSh
 		Chance->setText( toString(CacheChance) );
 	}
 
-	if(Wanted != NULL)
+	if(Wanted != nullptr)
 	{
 		if (CacheWanted)
 			Wanted->setTexture(compoList->getWantedIcon());
@@ -227,9 +227,9 @@ void CDBGroupListSheetTextShare::CSheetChildShare::hide(CDBGroupListSheetText *p
 	CSheetChild::hide(pFather);
 
 	// hide additional views
-	if(NbMember != NULL) NbMember->setActive(false);
-	if(Chance != NULL) Chance->setActive(false);
-	if(Wanted != NULL) Wanted->setActive(false);
+	if(NbMember != nullptr) NbMember->setActive(false);
+	if(Chance != nullptr) Chance->setActive(false);
+	if(Wanted != nullptr) Wanted->setActive(false);
 }
 
 // ***************************************************************************
@@ -270,7 +270,7 @@ class CHandlerTeamShareChoose : public IActionHandler
 		CBitMemStream out;
 
 		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
-		if (pTB == NULL) return;
+		if (pTB == nullptr) return;
 		if (pTB->getActive() == false) return;
 
 		uint8 index = 0;
@@ -323,7 +323,7 @@ class CHandlerTeamShareValid : public IActionHandler
 		string strMsgName = "TEAM:SHARE_VALID";
 
 		CCtrlTextButton *pTB = dynamic_cast<CCtrlTextButton*>(CWidgetManager::getInstance()->getElementFromId("ui:interface:team_share:content:ok"));
-		if (pTB != NULL)
+		if (pTB != nullptr)
 			pTB->setActive(false);
 
 		if (!GenericMsgHeaderMngr.pushNameToStream(strMsgName, out))

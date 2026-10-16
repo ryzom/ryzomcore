@@ -241,7 +241,7 @@ public:
 	 * \returns False if an error has occurred (e.g. the remote host is disconnected).
 	 * To retrieve the reason of the error, call CSock::getLastError() and/or CSock::errorString()
 	 */
-	bool	flush( TSockId destid, uint *nbBytesRemaining=NULL );
+	bool	flush( TSockId destid, uint *nbBytesRemaining = nullptr);
 
 
 

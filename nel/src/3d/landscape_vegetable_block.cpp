@@ -64,15 +64,15 @@ float		CLVBSqrDistLUT::Array[NL3D_VEGETABLE_BLOCK_NUMDIST+1];
 // ***************************************************************************
 CLandscapeVegetableBlock::CLandscapeVegetableBlock()
 {
-	_VegetableClipBlock= NULL;
+	_VegetableClipBlock = nullptr;
 	_CurDistType= NL3D_VEGETABLE_BLOCK_NUMDIST;
 
 	for(uint j=0;j<NL3D_TESSBLOCK_TILESIZE;j++)
 	{
-		_VegetableSortBlock[j]= NULL;
+		_VegetableSortBlock[j] = nullptr;
 		for(uint i=0;i<NL3D_VEGETABLE_BLOCK_NUMDIST;i++)
 		{
-			_VegetableIG[j][i]= NULL;
+			_VegetableIG[j][i] = nullptr;
 		}
 	}
 }
@@ -126,7 +126,7 @@ void			CLandscapeVegetableBlock::release(CVegetableManager *vegeManager, CTessLi
 			if(_VegetableIG[j][i])
 			{
 				vegeManager->deleteIg(_VegetableIG[j][i]);
-				_VegetableIG[j][i]= NULL;
+				_VegetableIG[j][i] = nullptr;
 			}
 		}
 
@@ -134,7 +134,7 @@ void			CLandscapeVegetableBlock::release(CVegetableManager *vegeManager, CTessLi
 		if(_VegetableSortBlock[j])
 		{
 			vegeManager->deleteSortBlock(_VegetableSortBlock[j]);
-			_VegetableSortBlock[j]= NULL;
+			_VegetableSortBlock[j] = nullptr;
 		}
 	}
 
@@ -181,7 +181,7 @@ void			CLandscapeVegetableBlock::update(const CVector &viewCenter, CVegetableMan
 					if(_VegetableIG[j][i])
 					{
 						vegeManager->deleteIg(_VegetableIG[j][i]);
-						_VegetableIG[j][i]= NULL;
+						_VegetableIG[j][i] = nullptr;
 					}
 				}
 
@@ -250,7 +250,7 @@ void			CLandscapeVegetableBlock::createVegetableIGForDistType(uint i, CVegetable
 			if(vegetIg->isEmpty())
 			{
 				vegeManager->deleteIg(vegetIg);
-				_VegetableIG[tileId][i]= NULL;
+				_VegetableIG[tileId][i] = nullptr;
 			}
 
 			// NB: vegtable SortBlock is updated in CLandscapeVegetableBlock::update() after
@@ -270,7 +270,7 @@ void			CLandscapeVegetableBlock::createVegetableIGForDistType(uint i, CVegetable
 // ***************************************************************************
 CLandscapeVegetableBlockCreateContext::CLandscapeVegetableBlockCreateContext()
 {
-	_Patch= NULL;
+	_Patch = nullptr;
 }
 
 

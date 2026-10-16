@@ -305,7 +305,7 @@ void CTime::probeTimerInfo(CTime::CTimerInfo &result)
  */
 uint32 CTime::getSecondsSince1970 ()
 {
-	return uint32(time(NULL));
+	return uint32(time(nullptr));
 }
 
 
@@ -412,7 +412,7 @@ TTime CTime::getLocalTime ()
 
 	// This is affected by system time changes.
 	struct timeval tv;
-	if ( gettimeofday( &tv, NULL) != 0 )
+	if ( gettimeofday( &tv, nullptr) != 0 )
 		nlerror ("Can't get time of day");
 	return (TTime)tv.tv_sec * (TTime)1000 + (TTime)tv.tv_usec / (TTime)1000;
 

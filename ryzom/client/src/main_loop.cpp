@@ -590,7 +590,7 @@ void clearBuffers()
 
 void renderScene(bool forceFullDetail, bool bloom)
 {
-	CTextureUser *effectRenderTarget = NULL;
+	CTextureUser *effectRenderTarget = nullptr;
 	if (bloom && Driver->supportBloomEffect())
 	{
 		// set bloom parameters before applying bloom effect
@@ -893,7 +893,7 @@ void	updateGameQuitting()
 			{
 				// disable
 				CWidgetManager::getInstance()->disableModalWindow();
-				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->enableModalWindow(nullptr, group);
 			}
 		}
 
@@ -919,7 +919,7 @@ void	updateGameQuitting()
 			{
 				// disable
 				CWidgetManager::getInstance()->disableModalWindow();
-				CWidgetManager::getInstance()->enableModalWindow(NULL, group);
+				CWidgetManager::getInstance()->enableModalWindow(nullptr, group);
 
 				bool farTPing = FarTP.isFarTPInProgress();
 				// Far TP: skipping not allowed (because we can't duplicate the avatar...), anyway the quit button would quit the game (no far tp)
@@ -1283,7 +1283,7 @@ bool mainLoop()
 			pIMinstance->updateFrameEvents ();
 
 
-			if ((ContinentMngr.cur()) && (UserEntity != NULL))
+			if ((ContinentMngr.cur()) && (UserEntity != nullptr))
 				ContinentMngr.cur()->FoW.explore((float)UserEntity->pos().x, (float)UserEntity->pos().y);
 
 			// Check if the window size has changed.
@@ -1547,7 +1547,7 @@ bool mainLoop()
 					// Load Zone in streaming according to the refine position (not necessarily the User Position);
 					string	zoneAdded, zoneRemoved;
 					const R2::CScenarioEntryPoints::CCompleteIsland *ci = R2::CScenarioEntryPoints::getInstance().getCompleteIslandFromCoords(CVector2f((float) UserEntity->pos().x, (float) UserEntity->pos().y));
-					Landscape->refreshZonesAround(View.refinePos(), ClientCfg.Vision + ExtraZoneLoadingVision, zoneAdded, zoneRemoved, ci ? &(ci->ZoneIDs) : NULL);
+					Landscape->refreshZonesAround(View.refinePos(), ClientCfg.Vision + ExtraZoneLoadingVision, zoneAdded, zoneRemoved, ci ? &(ci->ZoneIDs) : nullptr);
 					LandscapeIGManager.loadZoneIG(zoneAdded);
 					LandscapeIGManager.unloadZoneIG(zoneRemoved);
 					if (!zoneAdded.empty())
@@ -1607,7 +1607,7 @@ bool mainLoop()
 		// Set the right camera cluster.
 		if(GR)
 		{
-			UInstanceGroup *pPlayerClusterSystem = NULL;
+			UInstanceGroup *pPlayerClusterSystem = nullptr;
 
 			// Normal Mode
 			if(UserControls.mode() != CUserControls::ThirdMode)
@@ -1625,7 +1625,7 @@ bool mainLoop()
 				MainCam.setClusterSystem(pPlayerClusterSystem);
 
 				// important to update this each frame, for shadow map consideration against the "matis serre bug"
-				CollisionManager->setPlayerInside(pPlayerClusterSystem!=NULL);
+				CollisionManager->setPlayerInside(pPlayerClusterSystem != nullptr);
 			}
 			// Camera 3rd person complex mode
 			else
@@ -1640,7 +1640,7 @@ bool mainLoop()
 				MainCam.setClusterSystem(View.getThirdPersonClusterSystem());
 
 				// important to update this each frame, for shadow map consideration against the "matis serre bug"
-				CollisionManager->setPlayerInside(pPlayerClusterSystem!=NULL);
+				CollisionManager->setPlayerInside(pPlayerClusterSystem != nullptr);
 
 				// For debug only
 				View.getCamera3rdPersonSetup(LastDebugClusterCameraThirdPersonStart,
@@ -1657,7 +1657,7 @@ bool mainLoop()
 			if (SkipFrame > 0)
 			{
 				// update only the cluster system where the player is!
-				if (pPlayerClusterSystem != NULL)
+				if (pPlayerClusterSystem != nullptr)
 				{
 					static vector<string> PortalsName;
 					PortalsName.clear();
@@ -1689,7 +1689,7 @@ bool mainLoop()
 		}
 
 		uint i = 0;
-		CTextureUser *effectRenderTarget = NULL;
+		CTextureUser *effectRenderTarget = nullptr;
 		bool haveEffects = Render && Driver->getPolygonMode() == UDriver::Filled
 			&& Driver->supportBloomEffect()
 			&& (ClientCfg.Bloom || FXAA);
@@ -2093,7 +2093,7 @@ bool mainLoop()
 						{
 							std::vector<string> res;
 							explode(ClientCfg.Logos[i],std::string(":"), res);
-							if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i]!=NULL)
+							if(res.size()==9 && i<LogoBitmaps.size() && LogoBitmaps[i] != nullptr)
 							{
 								fromString(res[5], x);
 								fromString(res[6], y);
@@ -2194,7 +2194,7 @@ bool mainLoop()
 							if(ContinentMngr.cur())
 								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, ContinentMngr.cur()->WeatherFunction);
 							else
-								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, 0);
+								weatherValue = ::getBlendedWeather(currDay, currHour, *WeatherFunctionParams, nullptr);
 
 							NLMISC::clamp(weatherValue, 0.f, 1.f);
 							CRGBA seasonToColor[EGSPD::CSeason::Invalid] =
@@ -2329,7 +2329,7 @@ bool mainLoop()
 				{
 					H_AUTO_USE ( RZ_Client_Main_Loop_Debug )
 
-					if (SoundMngr != 0)
+					if (SoundMngr != nullptr)
 					{
 						static bool drawSound = false;
 		 				static float camHeigh = 150.0f;
@@ -2572,7 +2572,7 @@ bool mainLoop()
 			if (ClientCfg.SoundOn && ClientCfg.MediaPlayerAutoPlay)
 			{
 				MusicPlayer.stop();
-				CAHManager::getInstance()->runActionHandler("music_player", NULL, "play_songs");
+				CAHManager::getInstance()->runActionHandler("music_player", nullptr, "play_songs");
 				MusicPlayer.play();
 			}
 		}
@@ -2727,7 +2727,7 @@ bool mainLoop()
 		Actions.enable(false);
 		EditActions.enable(false);
 
-		CWidgetManager::getInstance()->setDefaultCaptureKeyboard(NULL);
+		CWidgetManager::getInstance()->setDefaultCaptureKeyboard(nullptr);
 
 		// Interface saving
 		CInterfaceManager::getInstance()->uninitInGame0();
@@ -2758,7 +2758,7 @@ bool mainLoop()
 
 	ryzom_exit = true;
 
-	return ryzom_exit || (Driver == NULL) || (!Driver->isActive ());
+	return ryzom_exit || (Driver == nullptr) || (!Driver->isActive ());
 }// mainLoop //
 
 //---------------------------------------------------
@@ -2968,7 +2968,7 @@ void updateClouds()
 	if(ContinentMngr.cur())
 		wc.WF = ContinentMngr.cur()->WeatherFunction;
 	else
-		wc.WF = NULL;
+		wc.WF = nullptr;
 
 	if (ClientCfg.ManualWeatherSetup && !ForceTrueWeatherValue)
 	{
@@ -3240,7 +3240,7 @@ void displayPACSPrimitive()
 //-----------------------------------------------
 void displaySoundBox()
 {
-	if (SoundMngr != 0)
+	if (SoundMngr != nullptr)
 	{
 		SoundMngr->drawSounds(50.f);
 	}

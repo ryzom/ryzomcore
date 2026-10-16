@@ -47,7 +47,7 @@
 extern NL3D::UCamera MainCam;
 extern CEntityManager EntitiesMngr;
 extern CContinentManager ContinentMngr;
-CCompassDialogsManager * CCompassDialogsManager::_Instance = NULL;
+CCompassDialogsManager * CCompassDialogsManager::_Instance = nullptr;
 
 using namespace std;
 using namespace NLMISC;
@@ -107,7 +107,7 @@ void CCompassTarget::serial(NLMISC::IStream &f)
 	{
 		if (f.isReading())
 		{
-			_PositionState = NULL;
+			_PositionState = nullptr;
 		}
 	}
 	f.serialCheck(NELID("_END"));
@@ -129,18 +129,18 @@ NLMISC_REGISTER_OBJECT(CViewBase, CGroupCompas, std::string, "compas");
 CGroupCompas::CGroupCompas(const TCtorParam &param)
 :	CGroupContainer(param)
 {
-	_ArrowShape = NULL;
+	_ArrowShape = nullptr;
 	std::fill(_TargetTypeColor, _TargetTypeColor + CCompassTarget::NumTypes, CRGBA::White);
 	_Target.setType(CCompassTarget::North);
 	_Target.Name = CI18N::get("uiNorth");
 	_StartBlinkTime = 0;
 	_Blinking = false;
 	_NewTargetSelectedColor = CRGBA(255, 127, 0);
-	_DistView = NULL;
-	_RadarView = NULL;
-	_RadarRangeView = NULL;
+	_DistView = nullptr;
+	_RadarView = nullptr;
+	_RadarRangeView = nullptr;
 	_RadarPos = 1; // 50 m
-	_DynamicTargetPos = NULL;
+	_DynamicTargetPos = nullptr;
 	_LastDynamicTargetPos = 0xFFFFFFFF;
 	_SavedTargetValid = false;
 	_TargetSetOnce = false;
@@ -193,7 +193,7 @@ void CGroupCompas::updateCoords()
 	CGroupContainer::updateCoords();
 
 	// Set the compas
-	if (_ArrowShape == NULL)
+	if (_ArrowShape == nullptr)
 	{
 		CInterfaceElement *element = getElement (_Id+":arrow3d");
 		if (element)
@@ -213,21 +213,21 @@ void CGroupCompas::updateCoords()
 	}
 
 	// Get a pointer on the dist view
-	if (_DistView == NULL)
+	if (_DistView == nullptr)
 	{
 		CInterfaceElement *element = getElement(_Id+":dist");
 		if (element)
 			_DistView = dynamic_cast<CViewText*>(element);
 	}
 
-	if (_RadarView == NULL)
+	if (_RadarView == nullptr)
 	{
 		CInterfaceElement *element = getElement(_Id+":visuel:radar");
 		if (element)
 			_RadarView = dynamic_cast<CViewRadar*>(element);
 	}
 
-	if (_RadarRangeView == NULL)
+	if (_RadarRangeView == nullptr)
 	{
 		CInterfaceElement *element = getElement(_Id+":visuel:range");
 		if (element)
@@ -312,7 +312,7 @@ void CGroupCompas::draw()
 			if (UserEntity->selection() != CLFECOMMON::INVALID_SLOT && UserEntity->selection() != 0)
 			{
 				CEntityCL *sel = EntitiesMngr.entity(UserEntity->selection());
-				if (sel != NULL)
+				if (sel != nullptr)
 				{
 					_Target.Name = sel->removeTitleAndShardFromName(sel->getEntityName());
 					if (_Target.Name.empty())
@@ -455,7 +455,7 @@ bool CGroupCompas::handleEvent (const NLGUI::CEventDescriptor &event)
 	{
 		const NLGUI::CEventDescriptorMouse &eventDesc = (const NLGUI::CEventDescriptorMouse &)event;
 		//
-		if ((_RadarView != NULL) && (_RadarRangeView != NULL))
+		if ((_RadarView != nullptr) && (_RadarRangeView != nullptr))
 		{
 			if (eventDesc.getEventTypeExtended() == NLGUI::CEventDescriptorMouse::mousewheel)
 			{
@@ -512,7 +512,7 @@ bool CGroupCompas::parse (xmlNodePtr cur, CInterfaceGroup *parentGroup)
 	CGroupContainer::parse (cur, parentGroup);
 
 	// Look for the arrow shape
-	_ArrowShape = NULL;
+	_ArrowShape = nullptr;
 	//
 	CXMLAutoPtr ptr;
 	ptr = xmlGetProp (cur, (xmlChar*)"north_color");
@@ -682,11 +682,11 @@ void CGroupCompasMenu::setActive (bool state)
 		Targets.clear();
 
 		// Get the 3 sub menus now (since not so many lines)
-		CGroupSubMenu	*missionSubMenu= NULL;
-		CGroupSubMenu	*landMarkSubMenu= NULL;
-		CGroupSubMenu	*teamSubMenu= NULL;
-		CGroupSubMenu	*animalSubMenu= NULL;
-		CGroupSubMenu	*dialogsSubMenu= NULL;
+		CGroupSubMenu	*missionSubMenu = nullptr;
+		CGroupSubMenu	*landMarkSubMenu = nullptr;
+		CGroupSubMenu	*teamSubMenu = nullptr;
+		CGroupSubMenu	*animalSubMenu = nullptr;
+		CGroupSubMenu	*dialogsSubMenu = nullptr;
 		sint			missionLineIndex= 0;
 		sint			landMarkLineIndex= 0;
 		sint			teamLineIndex= 0;

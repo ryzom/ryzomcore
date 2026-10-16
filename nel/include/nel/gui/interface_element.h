@@ -103,7 +103,7 @@ namespace NLGUI
 		/// Constructor
 		CInterfaceElement()
 		{
-			_Parent = NULL;
+			_Parent = nullptr;
 
 			_XReal = _YReal = _WReal = _HReal = 0;
 			_X = _Y = _W = _H = 0;
@@ -112,14 +112,14 @@ namespace NLGUI
 
 			_PosRef = Hotspot_BL;
 			_ParentPosRef = Hotspot_BL;
-			_ParentPos = NULL;
+			_ParentPos = nullptr;
 
 			_SizeRef = 0;
 			_SizeDivW = 10;
 			_SizeDivH = 10;
-			_ParentSize = NULL;
+			_ParentSize = nullptr;
 
-			_Links = NULL;
+			_Links = nullptr;
 			_Active= true;
 			// default to 3 pass
 			_InvalidCoords= 3;
@@ -162,7 +162,7 @@ namespace NLGUI
 		virtual uint32 getMemory () { return (uint32)(sizeof(*this)+_Id.size()); }
 
 		/// helper: display a parse error with the id of the lement
-		void parseError (CInterfaceGroup *parentGroup, const char *reason = NULL);
+		void parseError (CInterfaceGroup *parentGroup, const char *reason = nullptr);
 
 		/// Accessors : GET
 		const std::string& getId() const { return _Id; }

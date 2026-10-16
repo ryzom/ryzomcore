@@ -402,7 +402,7 @@ public:
 	void releaseCollisionInfo(void);
 
 	/// test whether this located has collision infos
-	bool hasCollisionInfos() const { return _CollisionNextPos != NULL; }
+	bool hasCollisionInfos() const { return _CollisionNextPos != nullptr; }
 
 	// Compute spawns. Should be called only inside the sim loop.
 	void computeSpawns(uint firstInstanceIndex, bool includeEmitOnce);

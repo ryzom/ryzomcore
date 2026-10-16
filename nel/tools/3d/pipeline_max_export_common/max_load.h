@@ -52,7 +52,9 @@ struct SLoadedMax
 	PIPELINE::MAX::CDllDirectory *Dll;
 	PIPELINE::MAX::CClassDirectory3 *Cd;
 	PIPELINE::MAX::CScene *Scene;
-	SLoadedMax() : Dll(NULL), Cd(NULL), Scene(NULL) { }
+	SLoadedMax() : Dll(nullptr)
+	    , Cd(nullptr)
+	    , Scene(nullptr) { }
 };
 
 // One-time registry construction — the FULL class set (builtin + update1 + epoly + biped +

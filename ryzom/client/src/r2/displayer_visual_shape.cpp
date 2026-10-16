@@ -53,7 +53,7 @@ CDisplayerVisualShape::CDisplayerVisualShape(const std::string &shapeName, float
 	_BadShapeName = false;
 	_Active = false;
 	_VisualSnapToGroundDone = false;
-	_VisualCollisionEntity = NULL;
+	_VisualCollisionEntity = nullptr;
 	_WorldMapDisplay = worldMapDisplay;
 }
 
@@ -73,7 +73,7 @@ void CDisplayerVisualShape::deleteVisualCollisionEntity()
 		if (_VisualCollisionEntity)
 		{
 			CollisionManager->deleteEntity(_VisualCollisionEntity);
-			_VisualCollisionEntity = NULL;
+			_VisualCollisionEntity = nullptr;
 		}
 	}
 }

@@ -182,7 +182,7 @@ void CPSMesh::serial(NLMISC::IStream &f)
 		}
 		for(uint k = 0; k < maxSize; ++k)
 		{
-			_Instances.insert(NULL);
+			_Instances.insert(nullptr);
 		}
 	}
 }
@@ -246,7 +246,7 @@ void CPSMesh::removeAllInstancesFromScene()
 		if (_Instances[k])
 		{
 			if (_Owner) _Owner->getScene()->deleteInstance(_Instances[k]);
-			_Instances[k] = NULL;
+			_Instances[k] = nullptr;
 		}
 	}
 }
@@ -1002,7 +1002,8 @@ public:
 };
 
 CPSConstraintMesh::CPSConstraintMesh() : _NumFaces(0),
-										 _ModelBank(NULL),
+										 _ModelBank(nullptr)
+    ,
 										 _ModulatedStages(0),
 										 _Touched(1),
 										 _HasOpaqueFaces(0),
@@ -1012,7 +1013,7 @@ CPSConstraintMesh::CPSConstraintMesh() : _NumFaces(0),
 										 _HasLightableFaces(0),
 										 _ValidBuild(0),
 										 _MorphValue(0),
-										 _MorphScheme(NULL)
+										 _MorphScheme(nullptr)
 {
 	NL_PS_FUNC(CPSConstraintMesh_CPSConstraintMesh)
 	if (CParticleSystem::getSerializeIdentifierFlag()) _Name = std::string("ConstraintMesh");
@@ -1156,7 +1157,7 @@ void	CPSConstraintMesh::setMorphValue(float value)
 {
 	NL_PS_FUNC(CPSConstraintMesh_setMorphValue)
 	delete _MorphScheme;
-	_MorphScheme = NULL;
+	_MorphScheme = nullptr;
 	_MorphValue = value;
 }
 
@@ -1231,7 +1232,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 
 	CScene *scene = _Owner->getScene();
 	_ModelBank = scene->getShapeBank();
-	IShape *is = 0;
+	IShape *is = nullptr;
 
 
 	uint32 vFormat = 0;
@@ -1247,7 +1248,7 @@ bool CPSConstraintMesh::update(std::vector<sint> *numVertsVect /*= NULL*/)
 
 	_Meshes.resize(_MeshShapeFileName.size());
 	_MeshVertexBuffers.resize(_MeshShapeFileName.size());
-	std::fill(_MeshVertexBuffers.begin(), _MeshVertexBuffers.end(), (CVertexBuffer *) NULL);
+	std::fill(_MeshVertexBuffers.begin(), _MeshVertexBuffers.end(), (CVertexBuffer *)nullptr);
 	if (numVertsVect) numVertsVect->resize(_MeshShapeFileName.size());
 	for (uint k = 0; k < _MeshShapeFileName.size(); ++k)
 	{
@@ -1589,7 +1590,7 @@ void CPSConstraintMesh::serial(NLMISC::IStream &f)
 		}
 		else
 		{
-			useScheme = _MorphScheme != NULL;
+			useScheme = _MorphScheme != nullptr;
 		}
 		f.serial(useScheme);
 		if (useScheme)
@@ -1831,7 +1832,7 @@ void CPSConstraintMesh::setupMaterialColor(CMaterial &destMat, CMaterial &srcMat
 			destMat.setTexEnvMode(k, srcMat.getTexEnvMode(k));
 		}
 	}
-	if (_ColorScheme == NULL) // per mesh color ?
+	if (_ColorScheme == nullptr) // per mesh color ?
 	{
 		destMat.setColor(_Color);
 		if (destMat.isLighted())
@@ -1886,7 +1887,7 @@ void	CPSConstraintMesh::setupRenderPasses(float date, TRdrPassSet &rdrPasses, bo
 
 			/// force vertex lighting
 			bool forceVertexcolorLighting;
-			if (_ColorScheme != NULL)
+			if (_ColorScheme != nullptr)
 			{
 				forceVertexcolorLighting = _VertexColorLightingForced != 0 ? true : SourceMat.getLightedVertexColor();
 			}
@@ -1904,7 +1905,7 @@ void	CPSConstraintMesh::setupRenderPasses(float date, TRdrPassSet &rdrPasses, bo
 			{
 				for (uint k = 0; k < IDRV_MAT_MAXTEXTURES; ++k)
 				{
-					if (Mat.getTexture(k) != NULL)
+					if (Mat.getTexture(k) != nullptr)
 					{
 						Mat.enableUserTexMat(k, true);
 						CMatrix mat;

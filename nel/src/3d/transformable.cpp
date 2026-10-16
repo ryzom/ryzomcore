@@ -65,7 +65,7 @@ IAnimatedValue*		ITransformable::getValue (uint valueId)
 	nlstop;
 	// Deriver note: else call BaseClass::getValue(valueId);
 
-	return NULL;
+	return nullptr;
 }
 // ***************************************************************************
 const char 	*ITransformable::getValueName (uint valueId) const

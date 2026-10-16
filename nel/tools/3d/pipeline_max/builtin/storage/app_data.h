@@ -251,17 +251,17 @@ T *CAppDataEntry::value()
 template <typename T>
 T *CAppData::get(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
-	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return nullptr; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
-	if (it == m_Entries.end()) { nldebug("Trying to read non-existant key, this is allowed, returning NULL"); return NULL; }
+	if (it == m_Entries.end()) { nldebug("Trying to read non-existant key, this is allowed, returning NULL"); return nullptr; }
 	return it->second->value<T>();
 }
 
 template <typename T>
 T *CAppData::getOrCreate(NLMISC::CClassId classId, TSClassId superClassId, uint32 subId)
 {
-	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return NULL; }
+	if (m_ChunksOwnsPointers) { nlwarning("Not parsed"); return nullptr; }
 	TKey key(classId, superClassId, subId);
 	TMap::const_iterator it = m_Entries.find(key);
 	CAppDataEntry *appDataEntry;

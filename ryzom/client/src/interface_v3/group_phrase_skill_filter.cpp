@@ -57,7 +57,7 @@ CGroupPhraseSkillFilter::CGroupPhraseSkillFilter(const TCtorParam &param)
 :CInterfaceGroup(param)
 {
 	_MustRebuild= false;
-	_Tree= NULL;
+	_Tree = nullptr;
 
 	// By default no bricks are known.
 	for(uint i=0;i<SKILLS::NUM_SKILLS;i++)
@@ -157,11 +157,11 @@ void	CGroupPhraseSkillFilter::rebuild()
 	CSkillManager *pSM = CSkillManager::getInstance();
 
 	// get the tree
-	if (_Tree == NULL)
+	if (_Tree == nullptr)
 	{
 		_Tree = dynamic_cast<CGroupTree*>(CWidgetManager::getInstance()->getElementFromId(getId(),"sbtree:tree_list"));
 
-		if (_Tree == NULL)
+		if (_Tree == nullptr)
 		{
 			nlwarning("cant find tree");
 			return;
@@ -186,7 +186,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 	// Construct the snode hierarchy structure
 	CGroupTree::SNode *pRoot = new CGroupTree::SNode;
 	vector<CGroupTree::SNode*> allNodes;
-	allNodes.resize(SKILLS::NUM_SKILLS, NULL);
+	allNodes.resize(SKILLS::NUM_SKILLS, nullptr);
 	bool bQuit = false;
 	uint nCounter = 0;
 
@@ -202,7 +202,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 		bQuit = true;
 		// Try to create a skill
 		for (uint32 i = 0; i < SKILLS::NUM_SKILLS; ++i)
-		if (allNodes[i] == NULL) // not already created
+		if (allNodes[i] == nullptr) // not already created
 		{
 			if (pSM->isUnknown((SKILLS::ESkills)i)) continue;
 			// if no bricks use this skill, skip
@@ -211,7 +211,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 			// Can create if we can obtain its parent (if it get a parent)
 			if (pSM->getParent((SKILLS::ESkills)i) != SKILLS::unknown)
 			{
-				if (allNodes[pSM->getParent((SKILLS::ESkills)i)] == NULL)
+				if (allNodes[pSM->getParent((SKILLS::ESkills)i)] == nullptr)
 				{
 					bQuit = false;
 					continue;
@@ -224,7 +224,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 
 			// just text
 			pNode->DisplayText = true;
-			pNode->Template = NULL;
+			pNode->Template = nullptr;
 			pNode->Text = STRING_MANAGER::CStringManagerClient::getSkillLocalizedName((SKILLS::ESkills)i);
 
 			// Action handler?
@@ -285,7 +285,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 
 		// just text
 		pNode->DisplayText = true;
-		pNode->Template = NULL;
+		pNode->Template = nullptr;
 		pNode->Text= CI18N::get("uiPhraseNoFilter");
 
 		// Action handler?
@@ -310,7 +310,7 @@ void	CGroupPhraseSkillFilter::rebuild()
 
 		// just text
 		pNode->DisplayText = true;
-		pNode->Template = NULL;
+		pNode->Template = nullptr;
 		pNode->Text= CI18N::get("uiSpecialPowerFilter");
 
 		// Action handler?

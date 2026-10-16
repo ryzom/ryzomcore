@@ -21,7 +21,9 @@
 		var $InputStream;
 		var $Pos;
 
-		function CMemStream ()
+		// php 8 no longer treats a method named after the class as the
+		// constructor; without this rename Pos/InputStream started null
+		function __construct ()
 		{
 			$this->InputStream = false;
 			$this->Pos = 0;
@@ -59,7 +61,7 @@
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])<<8;
 				$val += ord($this->Buffer[$this->Pos++])<<16;
-				$val += ord($this->Buffer[$this->Pos++])<<32;
+				$val += ord($this->Buffer[$this->Pos++])<<24;
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else
@@ -121,7 +123,7 @@
 				$val = ord($this->Buffer[$this->Pos++]);
 				$val += ord($this->Buffer[$this->Pos++])<<8;
 				$val += ord($this->Buffer[$this->Pos++])<<16;
-				$val += ord($this->Buffer[$this->Pos++])<<32;
+				$val += ord($this->Buffer[$this->Pos++])<<24;
 				//printf ("read uint32 '%d'<br>", $val);
 			}
 			else
@@ -172,7 +174,9 @@
 		$fp = fsockopen ($asHost, $asPort, $errno, $errstr, 30);
 		if (!$fp)
 		{
-			$res = "Can't connect to the admin service '$ASHost:$ASPort' ($errno: $errstr)";
+			// $ASHost/$ASPort were the globals, never imported here: the
+			// message printed an empty address (and warns on php 8)
+			$res = "Can't connect to the admin service '$asHost:$asPort' ($errno: $errstr)";
 		}
 		else
 		{
@@ -248,13 +252,15 @@
 	function waitMessage ($fp, &$msgin)
 	{
 		//echo "waiting a message";
+		// Big-endian length: accumulate each byte (assignment used to drop
+		// the high octet when the second fread overwrote $size).
 		$size = 0;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
 		$size = ord($val) << 24;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
-		$size = ord($val) << 16;
+		$size += ord($val) << 16;
 		$val = fread ($fp, 1);
 		if (feof ($fp)) return false;
 		$size += ord($val) << 8;
@@ -270,7 +276,8 @@
 		while (($stillNotRead = $size-strlen($buffer)) > 0)
 		{
 			$buffer .= fread ($fp, $stillNotRead);
-			if (feof ($fp)) return false;
+			// only while incomplete: an exact read off a closed peer sets eof
+			if (strlen($buffer) < $size && feof ($fp)) return false;
 		}
 
 		$msgin = new CMemStream;
@@ -312,10 +319,12 @@
 
 		sendMessage ($fp, $msgout);
 
-		waitMessage ($fp, $msgin);
+		// a peer that accepts and then closes without answering leaves $msgin
+		// unset; calling into it was a fatal. An empty result already means
+		// "failed" to every caller, so report the same way.
+		if (!waitMessage ($fp, $msgin) || !$msgin->serialstring($result))
+			$result = '';
 
-		$msgin->serialstring($result);
-			
 		if(strlen($result) == 0)
 		{
 			// it failed
@@ -348,8 +357,10 @@
 			{
 				foreach ($as as $asHost)
 				{
+					// bare `pos` was an undefined constant: truthy on old
+					// php (so a portless address got mangled), fatal on 8
 					$pos = strpos($asHost, ':');
-					if (pos != FALSE)
+					if ($pos !== FALSE)
 					{
 						$asPort = substr($asHost, $pos+1);
 						$asHost = substr($asHost, 0, $pos);
@@ -370,7 +381,7 @@
 			{
 				$asPort = $ASPort;
 				$pos = strpos($asHost, ':');
-				if (pos != FALSE)
+				if ($pos !== FALSE)
 				{
 					$asPort = substr($asHost, $pos+1);
 					$asHost = substr($asHost, 0, $pos);
@@ -388,8 +399,8 @@
 			//print_r($resArray);echo '<br>';
 			$result = rebuildResult($resCols, $resArray);
 		}
-		
-		return res;
+
+		return $res;
 	}
 
 
@@ -438,13 +449,13 @@
 	
 	function	selectAllAS()
 	{
-		global	$ASHost, $ASPort;
+		global	$ASHost, $ASPort, $shardLockState;
 
 		$as[] = $ASHost.':'.$ASPort;
-		
+
 		foreach($shardLockState as $shard)
 			if ($shard['ASAddr'] != '')
-				$as[] = $shard[ASAddr];
+				$as[] = $shard['ASAddr'];
 
 		return array_unique($as);
 	}
@@ -456,7 +467,9 @@
 		if (count($shards) == 0)
 			return;
 
-		if (array_search('*', $shards) != FALSE)
+		// '*' is usually the first element, index 0: `!= FALSE` never saw it
+		// and a wildcard query silently went to the default AS only
+		if (array_search('*', $shards) !== FALSE)
 			return selectAllAS();
 
 		foreach($shards as $shard)

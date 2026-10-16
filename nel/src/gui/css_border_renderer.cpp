@@ -45,7 +45,7 @@ namespace NLGUI
 		m_WReal = 0;
 		m_HReal = 0;
 
-		m_Viewport = NULL;
+		m_Viewport = nullptr;
 		m_FontSize = 16.f;
 		m_RootFontSize = 16.f;
 

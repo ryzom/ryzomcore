@@ -165,7 +165,7 @@ void CTool::getMousePos(sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
 	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-	if(cursor == NULL)
+	if(cursor == nullptr)
 	{
 		x = y = -1;
 		return;
@@ -179,7 +179,7 @@ void CTool::getMouseDown(bool &down, sint32 &x, sint32 &y)
 	down = false;
 	//H_AUTO(R2_CTool_getMousePos)
 	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-	if(cursor == NULL)
+	if(cursor == nullptr)
 	{
 		x = y = -1;
 		return;
@@ -192,7 +192,7 @@ void CTool::getMouseMiddleDown(bool &down, sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
 	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-	if(cursor == NULL)
+	if(cursor == nullptr)
 	{
 		x = y = -1;
 		return;
@@ -205,7 +205,7 @@ void CTool::getMouseRightDown(bool &down, sint32 &x, sint32 &y)
 {
 	//H_AUTO(R2_CTool_getMousePos)
 	CViewPointer *cursor = static_cast< CViewPointer* >( CWidgetManager::getInstance()->getPointer() );
-	if(cursor == NULL)
+	if(cursor == nullptr)
 	{
 		x = y = -1;
 		return;
@@ -236,7 +236,7 @@ sint32 CTool::getMouseY()
 bool CTool::isMouseOnUI()
 {
 	//H_AUTO(R2_CTool_isMouseOnUI)
-	return CWidgetManager::getInstance()->getWindowUnder(getMouseX(), getMouseY()) != NULL;
+	return CWidgetManager::getInstance()->getWindowUnder(getMouseX(), getMouseY()) != nullptr;
 }
 
 
@@ -258,13 +258,13 @@ CGroupMap *CTool::isMouseOnWorldMap()
 {
 	//H_AUTO(R2_CTool_isMouseOnWorldMap)
 	const std::vector<CInterfaceGroup *> &groupsUnder = CWidgetManager::getInstance()->getGroupsUnderPointer();
-	if (groupsUnder.empty()) return NULL;
+	if (groupsUnder.empty()) return nullptr;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
 		CGroupMap *gm = dynamic_cast<CGroupMap *>(groupsUnder[k]);
 		if (gm) return gm;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************
@@ -272,14 +272,14 @@ CGroupContainer *CTool::isMouseOnContainer()
 {
 	//H_AUTO(R2_CTool_isMouseOnContainer)
 	const std::vector<CInterfaceGroup *> &groupsUnder = CWidgetManager::getInstance()->getGroupsUnderPointer();
-	if (groupsUnder.empty()) return NULL;
+	if (groupsUnder.empty()) return nullptr;
 	for(uint k = 0; k < groupsUnder.size(); ++k)
 	{
 		CInterfaceGroup* gc = groupsUnder[k]->getParentContainer();
 		if (gc)
 			return static_cast< CGroupContainer* >( gc );
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************
@@ -465,14 +465,14 @@ static bool areaRaytrace(CPackedWorld &pw, const CVector &start, const CVector &
 	//H_AUTO(R2_areaRaytrace)
 	static volatile float distMax = 0.2f;
 	static volatile float distStep = 0.05f;
-	if (pw.raytrace(start, end, inter, NULL, normal)) return true;
+	if (pw.raytrace(start, end, inter, nullptr, normal)) return true;
 	for (float dist = distStep; dist <= distMax; dist += distStep)
 	{
 
 		for (uint k = 0; k < sizeofarray(cardinals); ++k)
 		{
 			CVector delta = dist * cardinals[k];
-			if (pw.raytrace(start + delta, end + delta, inter, NULL, normal))
+			if (pw.raytrace(start + delta, end + delta, inter, nullptr, normal))
 			{
 				inter -= delta; // remove correction
 				return true;
@@ -607,7 +607,7 @@ void CTool::handleMouseOverPlayer(bool over)
 	// If the mouse is over the player make the player transparent
 	CCDBNodeLeaf *pNL = _UserCharFade ? &*_UserCharFade
 		: &*(_UserCharFade = NLGUI::CDBManager::getInstance()->getDbProp("UI:SAVE:USER_CHAR_FADE", false));
-	if ((pNL != NULL) && (pNL->getValue32() == 1) && UserEntity->selectable())
+	if ((pNL != nullptr) && (pNL->getValue32() == 1) && UserEntity->selectable())
 	{
 		// If the nearest entity is the player, hide!
 		if (over)
@@ -626,7 +626,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 	// Get the pointer position (in pixels)
 	if (miniMapHandle)
 	{
-		*miniMapHandle = NULL;
+		*miniMapHandle = nullptr;
 	}
 	sint32 x, y;
 	getMousePos(x, y);
@@ -636,20 +636,20 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 		if (gm)
 		{
 			CInstance *inst = getEditor().getSelectedInstance();
-			CDisplayerVisual *currSelectedDV = inst ? inst->getDisplayerVisual() : NULL;
+			CDisplayerVisual *currSelectedDV = inst ? inst->getDisplayerVisual() : nullptr;
 			sint32 mouseXInWindow;
 			sint32 mouseYInWindow;
 			gm->getCorner(mouseXInWindow, mouseYInWindow, Hotspot_BL);
 			mouseXInWindow = x - mouseXInWindow;
 			mouseYInWindow = y - mouseYInWindow;
-			IDisplayerUIHandle *bestCandidate = NULL;
+			IDisplayerUIHandle *bestCandidate = nullptr;
 			sint8 bestCandidateLayer = -128;
 			// see if the element is under the mouse
 			const std::vector<CCtrlBase *> &ctrlsUnder = CWidgetManager::getInstance()->getCtrlsUnderPointer();
 			for(sint k = (sint)ctrlsUnder.size() - 1; k >= 0; --k)
 			{
 				IDisplayerUIHandle *handle = dynamic_cast<IDisplayerUIHandle *>(ctrlsUnder[k]);
-				if (handle != NULL)
+				if (handle != nullptr)
 				{
 					CDisplayerVisual *dv = handle->getDisplayedInstance().getDisplayerVisual();
 					if (ctrlsUnder[k]->getRenderLayer() > bestCandidateLayer ||
@@ -710,7 +710,7 @@ CInstance *CTool::checkInstanceUnderMouse(IDisplayerUIHandle **miniMapHandle /*=
 			return inst;
 		}
 	}
-	return NULL;
+	return nullptr;
 }
 
 
@@ -722,7 +722,7 @@ void CTool::handleMouseOverInstance(const char *cursorDefault, const char *curso
 	CInstance *instanceUnder = checkInstanceUnderMouse();
 	if (!instanceUnder)
 	{
-		getEditor().setFocusedInstance(NULL);
+		getEditor().setFocusedInstance(nullptr);
 		return;
 	}
 
@@ -744,7 +744,7 @@ bool CTool::onMouseRightButtonClicked()
 	//H_AUTO(R2_CTool_onMouseRightButtonClicked)
 	if (!getEditor().getFocusedInstance())
 	{
-		getEditor().setSelectedInstance(NULL);
+		getEditor().setSelectedInstance(nullptr);
 		return false;
 	}
 	getEditor().setSelectedInstance(getEditor().getFocusedInstance());
@@ -790,7 +790,7 @@ void CTool::captureMouse()
 void CTool::releaseMouse()
 {
 	//H_AUTO(R2_CTool_releaseMouse)
-	CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+	CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
 	UserControls.releaseMouse();
 	CWidgetManager::getInstance()->enableMouseHandling(true);
 	CWidgetManager::getInstance()->setContextHelpActive(true);

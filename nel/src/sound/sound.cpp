@@ -43,7 +43,7 @@ namespace NLSOUND {
 
 CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& formRoot)
 {
-	CSound *ret = NULL;
+	CSound *ret = nullptr;
 	string	soundType;
 
 	NLGEORGES::UFormElm *psoundType;
@@ -51,10 +51,10 @@ CSound *CSound::createSound(const std::string &filename, NLGEORGES::UFormElm& fo
 	if (!formRoot.getNodeByName(&psoundType, ".SoundType"))
 	{
 		nlwarning("No SoundType in : %s", filename.c_str());
-		return 0;
+		return nullptr;
 	}
 
-	if (psoundType != NULL)
+	if (psoundType != nullptr)
 	{
 		std::string dfnName;
 		psoundType->getDfnName(dfnName);
@@ -120,7 +120,7 @@ CSound::CSound() :
 	_MinDist(1.0f),
 	_MaxDist(1000000.0f),
 	_UserVarControler(CStringMapper::emptyId()),
-	_GroupController(NULL)
+	_GroupController(nullptr)
 {
 }
 

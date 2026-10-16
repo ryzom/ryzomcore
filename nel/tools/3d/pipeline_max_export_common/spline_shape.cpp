@@ -43,7 +43,7 @@ const CClassId CLASSID_RECTANGLE(0x00001065, 0x00000000);
 bool isShapeObject(CSceneClass *obj)
 {
 	// Every superclass-0x40 object instantiates through the CShapeObject registration.
-	return dynamic_cast<BUILTIN::CShapeObject *>(obj) != NULL;
+	return dynamic_cast<BUILTIN::CShapeObject *>(obj) != nullptr;
 }
 
 // Thin copy from the typed model: CShapeObject decoded the BezierShape/Spline3D chunk tree at

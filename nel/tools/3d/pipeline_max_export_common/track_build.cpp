@@ -162,7 +162,7 @@ static NL3D::ITrack *buildBezPoint3Track(const CStorageBezPoint3Key *keys, uint 
 		applyRange(track, hasRange, rs, re, firstKey, lastKey, defaultLoopMode(type));
 		return track;
 	}
-	if (type != typePos && type != typeScale) return NULL;
+	if (type != typePos && type != typeScale) return nullptr;
 	NL3D::CTrackKeyFramerBezierVector *track = new NL3D::CTrackKeyFramerBezierVector();
 	for (uint i = 0; i < numKeys; ++i)
 	{
@@ -204,7 +204,7 @@ static NL3D::ITrack *buildLinPoint3Track(const CStorageLinPoint3Key *keys, uint 
 		applyRange(track, hasRange, rs, re, firstKey, lastKey, defaultLoopMode(type));
 		return track;
 	}
-	if (type != typePos && type != typeScale) return NULL;
+	if (type != typePos && type != typeScale) return nullptr;
 	NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 	for (uint i = 0; i < numKeys; ++i)
 	{
@@ -243,7 +243,7 @@ static NL3D::ITrack *buildTCBPoint3Track(const CStorageTCBPoint3Key *keys, uint 
 		applyRange(track, hasRange, rs, re, firstKey, lastKey, defaultLoopMode(type));
 		return track;
 	}
-	if (type != typePos && type != typeScale) return NULL;
+	if (type != typePos && type != typeScale) return nullptr;
 	NL3D::CTrackKeyFramerTCBVector *track = new NL3D::CTrackKeyFramerTCBVector();
 	for (uint i = 0; i < numKeys; ++i)
 	{
@@ -266,9 +266,9 @@ static NL3D::ITrack *buildTCBPoint3Track(const CStorageTCBPoint3Key *keys, uint 
 NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 {
 	CControlKeyFramerBase *kf = dynamic_cast<CControlKeyFramerBase *>(ctrl);
-	if (!kf) return NULL;
+	if (!kf) return nullptr;
 	uint numKeys = kf->keyCount();
-	if (!numKeys) return NULL;
+	if (!numKeys) return nullptr;
 
 	sint32 rangeStart = 0, rangeEnd = 0;
 	bool hasRange = kf->range(rangeStart, rangeEnd);
@@ -281,7 +281,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Rotation
 	if (CControlRotLinear *c = dynamic_cast<CControlRotLinear *>(kf))
 	{
-		if (type != typeRotation) return NULL;
+		if (type != typeRotation) return nullptr;
 		NL3D::CTrackKeyFramerLinearQuat *track = new NL3D::CTrackKeyFramerLinearQuat();
 		const CStorageLinRotKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -300,7 +300,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Scale
 	if (CControlScaleLinear *c = dynamic_cast<CControlScaleLinear *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerLinearVector *track = new NL3D::CTrackKeyFramerLinearVector();
 		const CStorageLinScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -327,7 +327,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Bezier Scale
 	if (CControlScaleBezier *c = dynamic_cast<CControlScaleBezier *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerBezierVector *track = new NL3D::CTrackKeyFramerBezierVector();
 		const CStorageBezScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -349,7 +349,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Bezier Float
 	if (CControlFloatBezier *c = dynamic_cast<CControlFloatBezier *>(kf))
 	{
-		if (type != typeFloat) return NULL;
+		if (type != typeFloat) return nullptr;
 		NL3D::CTrackKeyFramerBezierFloat *track = new NL3D::CTrackKeyFramerBezierFloat();
 		const CStorageBezFloatKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -371,7 +371,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// Linear Float
 	if (CControlFloatLinear *c = dynamic_cast<CControlFloatLinear *>(kf))
 	{
-		if (type != typeFloat) return NULL;
+		if (type != typeFloat) return nullptr;
 		NL3D::CTrackKeyFramerLinearFloat *track = new NL3D::CTrackKeyFramerLinearFloat();
 		const CStorageLinFloatKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -396,7 +396,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Rotation
 	if (CControlRotTCB *c = dynamic_cast<CControlRotTCB *>(kf))
 	{
-		if (type != typeRotation) return NULL;
+		if (type != typeRotation) return nullptr;
 		NL3D::CTrackKeyFramerTCBQuat *track = new NL3D::CTrackKeyFramerTCBQuat();
 		const CStorageTCBRotKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -449,7 +449,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 	// TCB Scale
 	if (CControlScaleTCB *c = dynamic_cast<CControlScaleTCB *>(kf))
 	{
-		if (type != typePos && type != typeScale) return NULL;
+		if (type != typePos && type != typeScale) return nullptr;
 		NL3D::CTrackKeyFramerTCBVector *track = new NL3D::CTrackKeyFramerTCBVector();
 		const CStorageTCBScaleKey *keys = c->keys();
 		for (uint i = 0; i < numKeys; ++i)
@@ -470,7 +470,7 @@ NL3D::ITrack *buildATrack(CReferenceMaker *ctrl, TNelValueType type)
 		return track;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void addTrackChecked(NL3D::CAnimation &animation, const std::string &name, NL3D::ITrack *track)

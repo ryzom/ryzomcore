@@ -88,7 +88,8 @@ CSegRemanence::CSegRemanence() : _NumSlices(0),
 								 _UnrollRatio(0),
 								 _SliceTime(0.05f),
 								 _LastUnrollFrameId(0),
-								 _AniMat(NULL),
+								 _AniMat(nullptr)
+    ,
 								 _LastSampleFrame(0)
 {
 	IAnimatable::resize(AnimValueLast);
@@ -112,7 +113,7 @@ CSegRemanence::~CSegRemanence()
 }
 
 //===============================================================
-CSegRemanence::CSegRemanence(CSegRemanence &other)	: CTransformShape(other), _AniMat(NULL)
+CSegRemanence::CSegRemanence(CSegRemanence &other)	: CTransformShape(other), _AniMat(nullptr)
 {
 	copyFromOther(other);
 }
@@ -133,8 +134,8 @@ void CSegRemanence::copyFromOther(CSegRemanence &other)
 {
 	if (this == &other) return;
 
-	CAnimatedMaterial   *otherMat = other._AniMat != NULL ? new CAnimatedMaterial(*other._AniMat)
-														  : NULL;
+	CAnimatedMaterial   *otherMat = other._AniMat != nullptr ? new CAnimatedMaterial(*other._AniMat)
+														  : nullptr;
 	delete _AniMat;
 	_AniMat = otherMat;
 	std::copy(other._Samples, other._Samples + 4, _Samples);
@@ -265,7 +266,7 @@ void CSegRemanence::render(IDriver *drv, CMaterial &mat)
 	CMatrix texMat;
 	texMat.setPos(NLMISC::CVector(1.f - _UnrollRatio, 0, 0));
 
-	if (mat.getTexture(0) != NULL)
+	if (mat.getTexture(0) != nullptr)
 		mat.setUserTexMat(0, texMat);
 	drv->setupModelMatrix(CMatrix::Identity);
 
@@ -529,7 +530,7 @@ ITrack *CSegRemanence::getDefaultTrack (uint valueId)
 		case ScaleValue:		return srs->getDefaultScale();
 	}
 	return CTransformShape::getDefaultTrack(valueId);
-	return NULL;
+	return nullptr;
 
 }
 

@@ -75,7 +75,7 @@ public:
 
 	~CCloudScape ();
 
-	void init (SCloudScapeSetup *pCSS = NULL, NL3D::CCamera *pCamera = NULL);
+	void init (SCloudScapeSetup *pCSS = nullptr, NL3D::CCamera *pCamera = nullptr);
 
 	void set (SCloudScapeSetup &css);
 

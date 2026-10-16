@@ -75,7 +75,7 @@ CSceneClass *CSceneClassUnknownDesc::create(CScene *scene) const
 	// Unknown classes are only created through createUnknown() on the superclass desc; this
 	// path should be unreachable. Return NULL after the assert so we don't fall off the end.
 	nlassert(false);
-	return NULL;
+	return nullptr;
 }
 
 void CSceneClassUnknownDesc::destroy(CSceneClass *sc) const

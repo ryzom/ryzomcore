@@ -84,7 +84,7 @@ extern CMsgBoxDisplayer *DefaultMsgBoxDisplayer;
 //
 
 // internal use only
-void createDebug (const char *logPath = NULL, bool logInFile = true, bool eraseLastLog = false);
+void createDebug (const char *logPath = nullptr, bool logInFile = true, bool eraseLastLog = false);
 
 /// Do not call this, unless you know what you're trying to do (it kills debug)!
 void destroyDebug();
@@ -176,7 +176,7 @@ private:
 	CLog *m_Log;
 
 public:
-	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName = NULL) : m_Log(log)
+	inline CSetLogPosition(CLog *log, sint line, const char *fileName, const char *funcName = nullptr) : m_Log(log)
 	{
 		log->setPosition(line, fileName, funcName);
 	};
@@ -776,12 +776,12 @@ class CInstanceCounterManager
 	public:
 		static CInstanceCounterManager &getInstance()
 		{
-			if (_Instance == NULL)
+			if (_Instance == nullptr)
 			{
 				/* the nel context MUST be initialised */
 //				nlassert(NLMISC::NelContext != NULL);
 				void *ptr = NLMISC::INelContext::getInstance().getSingletonPointer("CInstanceCounterManager");
-				if (ptr == NULL)
+				if (ptr == nullptr)
 				{
 					/* allocate the singleton and register it */
 					_Instance = new CInstanceCounterManager;
@@ -823,7 +823,7 @@ class CInstanceCounterLocalManager
 public:
 	static CInstanceCounterLocalManager &getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 		{
 			_Instance = new CInstanceCounterLocalManager;
 		}
@@ -832,10 +832,10 @@ public:
 
 	static void releaseInstance()
 	{
-		if (_Instance != NULL)
+		if (_Instance != nullptr)
 		{
 			delete _Instance;
-			_Instance = NULL;
+			_Instance = nullptr;
 		}
 	}
 

@@ -94,7 +94,7 @@ void CShapeBank::release(IShape* pShp)
 	// Do we have the last smartPtr on the shape ?
 	const string* str = getShapeNameFromShapePtr( pShp );
 
-	if (str == NULL)
+	if (str == nullptr)
 	{
 		nlwarning ("Trying to release a mesh that have not be added to the shape bank");
 	}
@@ -145,7 +145,7 @@ void CShapeBank::processWaitingShapes ()
 		switch (rWS.State)
 		{
 			case AsyncLoad_Shape: // Check if we can pass to the AsyncLoad_Texture state
-				if (pShp != NULL)
+				if (pShp != nullptr)
 				{
 					if (pShp == (IShape*)-1)
 						rWS.State = AsyncLoad_Error;
@@ -161,7 +161,7 @@ void CShapeBank::processWaitingShapes ()
 					break;
 
 				CMeshBase *pMesh = dynamic_cast<CMeshBase*>(pShp);
-				if( pMesh != NULL )
+				if( pMesh != nullptr)
 				{
 					uint8 j;
 					uint32 i, CurrentProgress = 0;
@@ -223,7 +223,7 @@ void CShapeBank::processWaitingShapes ()
 						if (rMat.getShader() == CMaterial::LightMap)
 						{
 							uint j = 0; ITexture *pText = rMat.getLightMap (j);
-							while (pText != NULL)
+							while (pText != nullptr)
 							{
 								if (CurrentProgress >= rWS.UpTextProgress)
 								{
@@ -281,7 +281,7 @@ void CShapeBank::processWaitingShapes ()
 					while (ite != rWS.Signal.end())
 					{
 						bool *bSignal = *ite;
-						if (bSignal != NULL)
+						if (bSignal != nullptr)
 						{
 							bool bFound = false;
 							TWaitingShapesMap::iterator wsmmIt2 = WaitingShapes.begin();
@@ -457,7 +457,7 @@ IShape	*CShapeBank::getShape (const std::string &shapeNameNotLwr)
 	if( smIt != ShapeMap.end() )
 		return smIt->second;
 
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -486,7 +486,7 @@ void CShapeBank::load (const string &shapeNameNotLwr)
 			nlwarning ("CShapeBank::load() : Can't open file %s", shapeName.c_str());
 		}
 
-		if (mesh.getShapePointer() != NULL)
+		if (mesh.getShapePointer() != nullptr)
 		{
 			// Add the shape to the map.
 			add( shapeName, mesh.getShapePointer() );
@@ -552,7 +552,7 @@ void CShapeBank::cancelLoadAsync (const std::string &shapeNameNotLwr)
 				   NB: don't forget that the load can still be a fail too....
 				*/
 				IShape	*shape= wsmmIt->second.ShapePtr;
-				if(shape!=NULL && shape!=(IShape*)-1)
+				if(shape != nullptr && shape!=(IShape*)-1)
 				{
 					// this ptr should not be added to the map
 					nlassert(ShapePtrToShapeInfo.find(shape)==ShapePtrToShapeInfo.end());
@@ -578,7 +578,7 @@ void CShapeBank::cancelLoadAsync (const std::string &shapeNameNotLwr)
 
 					// then delete this shape
 					delete shape;
-					wsmmIt->second.ShapePtr= NULL;
+					wsmmIt->second.ShapePtr = nullptr;
 				}
 			}
 
@@ -622,7 +622,7 @@ void CShapeBank::add (const string &shapeNameNotLwr, IShape* pShp)
 		siTemp.sShpName = shapeName;
 		siTemp.pShpCache = getShapeCachePtrFromShapeName( shapeName );
 		// Is the shape has a valid shape cache ?
-		if( siTemp.pShpCache == NULL )
+		if( siTemp.pShpCache == nullptr)
 		{
 			// No -> link to default (which do the UpdateShapeInfo)
 			siTemp.pShpCache = getShapeCachePtrFromShapeCacheName( "default" );
@@ -659,7 +659,7 @@ void CShapeBank::removeShapeCache(const std::string &shapeCacheName)
 
 	// Free the shape cache
 	CShapeCache *pShpCache = getShapeCachePtrFromShapeCacheName( shapeCacheName );
-	if( pShpCache == NULL )
+	if( pShpCache == nullptr)
 		return;
 	pShpCache->MaxSize = 0;
 	checkShapeCache( pShpCache );
@@ -730,12 +730,12 @@ void CShapeBank::linkShapeToShapeCache(const string &shapeNameNotLwr, const stri
 	{
 		// Shape exist?
 		IShape	*shapePtr= getShapePtrFromShapeName(shapeName);
-		if(shapePtr == NULL)
+		if(shapePtr == nullptr)
 			// No, but still link the shape name to the shapeCache name.
 			break;
 		// Is the shape cache exist ?
 		CShapeCache *shapeCachePtr = getShapeCachePtrFromShapeCacheName( shapeCacheName );
-		if( shapeCachePtr == NULL )
+		if( shapeCachePtr == nullptr)
 			// abort, since cannot correctly link to a valid shapeCache
 			return;
 
@@ -770,7 +770,7 @@ CShapeBank::CShapeCache* CShapeBank::getShapeCachePtrFromShapePtr(IShape* pShp)
 	{
 		return scfpmIt->second.pShpCache;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -784,7 +784,7 @@ IShape* CShapeBank::getShapePtrFromShapeName(const std::string &pShpName)
 		IShape *ptr = (IShape*)(smIt->second);
 		return ptr;
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -796,7 +796,7 @@ CShapeBank::CShapeCache* CShapeBank::getShapeCachePtrFromShapeCacheName(const st
 	{
 		return &(scmIt->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -808,7 +808,7 @@ const string* CShapeBank::getShapeNameFromShapePtr(IShape* pShp) const
 	{
 		return &(scfpmIt->second.sShpName);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
@@ -820,14 +820,14 @@ CShapeBank::CShapeCache* CShapeBank::getShapeCachePtrFromShapeName(const std::st
 	{
 		return getShapeCachePtrFromShapeCacheName(scnIt->second);
 	}
-	return NULL;
+	return nullptr;
 }
 
 // ***************************************************************************
 
 void CShapeBank::checkShapeCache(CShapeCache* pShpCache)
 {
-	if( pShpCache != NULL )
+	if( pShpCache != nullptr)
 	while( (sint)pShpCache->Elements.size() > pShpCache->MaxSize )
 	{
 		// Suppress the last shape of the cache

@@ -75,7 +75,7 @@ public:
 
 	// Array access/build. Elements are owned by this value.
 	size_t size() const { return m_Type == Array ? m_Array.size() : (m_Type == Object ? m_Object.size() : 0); }
-	const CJsonValue *at(size_t i) const { return i < m_Array.size() ? m_Array[i] : NULL; }
+	const CJsonValue *at(size_t i) const { return i < m_Array.size() ? m_Array[i] : nullptr; }
 	CJsonValue *push(); // append a new null element, return it
 	void pushInt(sint64 i) { push()->setInt(i); }
 	void pushDouble(double d) { push()->setDouble(d); }
@@ -108,7 +108,7 @@ public:
 
 	// Strict-enough parser for glTF JSON. Returns false on malformed input; *this becomes the
 	// root value on success.
-	bool parse(const std::string &in, std::string *err = NULL);
+	bool parse(const std::string &in, std::string *err = nullptr);
 
 	void clear();
 

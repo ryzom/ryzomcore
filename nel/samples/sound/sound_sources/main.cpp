@@ -42,7 +42,7 @@ using namespace NLSOUND;
 #endif // NL_SOUND_DATA
 
 // Pointer to the audio mixer object
-UAudioMixer	*AudioMixer = NULL;
+UAudioMixer	*AudioMixer = nullptr;
 
 
 /*
@@ -83,7 +83,7 @@ void Init()
 			selectedDriver = drivers[selection].ID;
 
 		// init with 32 tracks, EAX enabled, no ADPCM, and activate automatic sample bank loading
-		AudioMixer->init(32, true, false, NULL, true, selectedDriver);
+		AudioMixer->init(32, true, false, nullptr, true, selectedDriver);
 
 		/*
 		 * 2. Initialize listener's position and orientation (in NeL coordinate system).
@@ -111,7 +111,7 @@ USource *OnAddSource( const char *name, float x, float y, float z )
 	 * Create a source with sound 'name', and set some of its initial properties, if successful
 	 */
 	USource *source = AudioMixer->createSource( CStringMapper::map(name) );
-	if ( source != NULL )
+	if ( source != nullptr)
 	{
 		source->setPos( CVector(x,y,z) );
 

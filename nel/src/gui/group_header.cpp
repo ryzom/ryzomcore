@@ -263,8 +263,8 @@ namespace NLGUI
 	xmlNodePtr CGroupHeader::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CGroupList::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "type", BAD_CAST "header" );
 		xmlSetProp( node, BAD_CAST "header_max_size", BAD_CAST toString( _HeaderMaxSize ).c_str() );
@@ -300,7 +300,7 @@ namespace NLGUI
 			if (CWidgetManager::getInstance()->getCapturePointerLeft() == this)
 			{
 				_Moving = false;
-				CWidgetManager::getInstance()->setCapturePointerLeft(NULL);
+				CWidgetManager::getInstance()->setCapturePointerLeft(nullptr);
 			}
 		}
 		virtual uint		getDeltaDepth() const NL_OVERRIDE { return 100; }
@@ -308,7 +308,7 @@ namespace NLGUI
 		{
 			if (_RightSide) return _Parent;
 
-			if (getParent()->getParent() == _Parent->getParentPos()) return NULL; // leftmost header
+			if (getParent()->getParent() == _Parent->getParentPos()) return nullptr; // leftmost header
 			return dynamic_cast<CInterfaceGroup *>(getParent()->getParentPos());
 		}
 		bool handleEvent (const NLGUI::CEventDescriptor &event) NL_OVERRIDE
@@ -436,8 +436,8 @@ namespace NLGUI
 	xmlNodePtr CGroupHeaderEntry::serialize( xmlNodePtr parentNode, const char *type ) const
 	{
 		xmlNodePtr node = CInterfaceGroup::serialize( parentNode, type );
-		if( node == NULL )
-			return NULL;
+		if( node == nullptr)
+			return nullptr;
 
 		xmlSetProp( node, BAD_CAST "wmin", BAD_CAST toString( _MinSize ).c_str() );
 		xmlSetProp( node, BAD_CAST "resizer_size", BAD_CAST toString( _ResizerSize ).c_str() );

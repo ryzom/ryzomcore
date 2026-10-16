@@ -122,7 +122,7 @@ public:
 	// get entity name using the eid
 	const ucstring		&getByEntity (const NLMISC::CEntityId &eid);
 
-	void				getEntityIdInfo (const CEntityId &eid, ucstring &entityName, sint8 &entitySlot, uint32 &uid, std::string &userName, bool &online, std::string* additional = NULL);
+	void				getEntityIdInfo (const CEntityId &eid, ucstring &entityName, sint8 &entitySlot, uint32 &uid, std::string &userName, bool &online, std::string* additional = nullptr);
 
 	// transform a username ucstring into a string that can be compared with registered string
 	std::string			getRegisterableString( const ucstring & entityName);
@@ -172,7 +172,7 @@ private:
 	TNameIndexCont	NameIndex;
 
 	// Singleton, no ctor access
-	CEntityIdTranslator() { EntityInfoCallback = NULL; }
+	CEntityIdTranslator() { EntityInfoCallback = nullptr; }
 
 	std::string FileName;
 

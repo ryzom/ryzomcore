@@ -84,16 +84,16 @@ public:
 	/// The singleton 's instance
 	static CGuildManager* getInstance()
 	{
-		if (_Instance == NULL)
+		if (_Instance == nullptr)
 			_Instance = new CGuildManager;
 		return _Instance;
 	}
 
 	static void release()
 	{
-		if (_Instance != NULL)
+		if (_Instance != nullptr)
 			delete _Instance;
-		_Instance = NULL;
+		_Instance = nullptr;
 	}
 
 	/// Destructor

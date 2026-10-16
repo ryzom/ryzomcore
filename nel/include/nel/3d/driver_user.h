@@ -134,7 +134,7 @@ public:
 
 	/// \name Object
 	// @{
-	CDriverUser (uintptr_t windowIcon, UDriver::TDriver driver, emptyProc exitFunc = 0);
+	CDriverUser (uintptr_t windowIcon, UDriver::TDriver driver, emptyProc exitFunc = nullptr);
 	virtual	~CDriverUser() NL_OVERRIDE;
 	// @}
 

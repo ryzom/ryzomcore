@@ -56,7 +56,8 @@ struct CSkill
 	string		SecondaryCategory;
 	vector<CSkill*> Children;
 
-	CSkill() : ParentSkillPtr(NULL),MaxValue(0),StageType(0)
+	CSkill() : ParentSkillPtr(nullptr)
+	    ,MaxValue(0),StageType(0)
 	{}
 
 	CSkill(const CSkill &skill)
@@ -114,7 +115,7 @@ struct CSkill
 
 	void buildCode()
 	{
-		if (ParentSkillPtr != NULL)
+		if (ParentSkillPtr != nullptr)
 			Code = ParentSkillPtr->Code + Code;
 
 		Codes.insert( Code );
@@ -148,7 +149,7 @@ struct CSkill
 		out = string("          <ATOM Name=\"Type of Stage\" Value=\"")+ toString(StageType) + string("\"/>\n");
 		fo.serialBuffer( (uint8 *) const_cast< char * >(out.c_str()), (uint)out.size() );
 		
-		if (ParentSkillPtr != NULL)
+		if (ParentSkillPtr != nullptr)
 		{
 			out = string("          <ATOM Name=\"ParentSkill\" Value=\"")+ ParentSkill + string("\"/>\n");			
 		}
@@ -336,7 +337,7 @@ sint main( sint argc, char ** argv )
 			};
 
 			++col;
-			ptr = strtok( 0, separators );			
+			ptr = strtok( nullptr, separators );			
 		}
 
 		if ( !skill.SkillName.empty())

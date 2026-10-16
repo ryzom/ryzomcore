@@ -32,11 +32,11 @@ namespace NLMISC
 {
 
 //INelContext *NelContext = NULL;
-INelContext *INelContext::_NelContext = NULL;
+INelContext *INelContext::_NelContext = nullptr;
 
 INelContext ** INelContext::_getInstance()
 {
-	static INelContext *nelContext = NULL;
+	static INelContext *nelContext = nullptr;
 
 	return &nelContext;
 }
@@ -44,7 +44,7 @@ INelContext ** INelContext::_getInstance()
 
 INelContext &INelContext::getInstance()
 {
-	if (*(_getInstance()) == NULL)
+	if (*(_getInstance()) == nullptr)
 	{
 		_NelContext = new CApplicationContext;
 		*(_getInstance()) = _NelContext;
@@ -55,7 +55,7 @@ INelContext &INelContext::getInstance()
 
 bool INelContext::isContextInitialised()
 {
-	return (*_getInstance()) != NULL;
+	return (*_getInstance()) != nullptr;
 }
 
 
@@ -74,8 +74,8 @@ INelContext::~INelContext()
 
 	CInstanceCounterLocalManager::releaseInstance();
 
-	_NelContext = NULL;
-	*(_getInstance()) = NULL;
+	_NelContext = nullptr;
+	*(_getInstance()) = nullptr;
 }
 
 
@@ -99,7 +99,7 @@ void INelContext::contextReady()
 	CInstanceCounterLocalManager::getInstance().registerLocalManager();
 
 	// register local commands into the global command registry (except it there is no command at all)
-	if (ICommand::LocalCommands != NULL)
+	if (ICommand::LocalCommands != nullptr)
 	{
 		ICommand::TCommand::iterator first(ICommand::LocalCommands->begin()), last(ICommand::LocalCommands->end());
 		for (; first != last; ++first)
@@ -112,13 +112,13 @@ void INelContext::contextReady()
 CApplicationContext::CApplicationContext()
 {
 	// init
-	ErrorLog = NULL;
-	WarningLog = NULL;
-	InfoLog = NULL;
-	DebugLog = NULL;
-	AssertLog = NULL;
-	DefaultMemDisplayer = NULL;
-	DefaultMsgBoxDisplayer = NULL;
+	ErrorLog = nullptr;
+	WarningLog = nullptr;
+	InfoLog = nullptr;
+	DebugLog = nullptr;
+	AssertLog = nullptr;
+	DefaultMemDisplayer = nullptr;
+	DefaultMsgBoxDisplayer = nullptr;
 	DebugNeedAssert = false;
 	NoAssert = false;
 	AlreadyCreateSharedAmongThreads = false;
@@ -155,7 +155,7 @@ void *CApplicationContext::getSingletonPointer(const std::string &singletonName)
 		return it->second;
 
 //	nlwarning("Can't find singleton '%s'", singletonName.c_str());
-	return NULL;
+	return nullptr;
 }
 
 void CApplicationContext::setSingletonPointer(const std::string &singletonName, void *ptr)

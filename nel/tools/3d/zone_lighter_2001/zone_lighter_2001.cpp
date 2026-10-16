@@ -83,7 +83,7 @@ static bool NL2001AnalyticLattice ()
 	static bool value = false;
 	if (!init)
 	{
-		value = getenv ("NL2001_ANALYTIC_LATTICE") != NULL;
+		value = getenv ("NL2001_ANALYTIC_LATTICE") != nullptr;
 		init = true;
 	}
 	return value;
@@ -720,7 +720,7 @@ void CZoneLighter2001::processCalc (uint process, uint firstPatch, uint lastPatc
 
 					// For each triangle
 					CTriangleList *list=lumels[lumel].TriangleList;
-					while (list!=NULL)
+					while (list != nullptr)
 					{
 						// Raytrace this triangle							
 						rayTraceTriangle (list->Triangle, lumels[lumel].Normal, description.Oversampling, lumels[lumel].S, lumels[lumel].T, factor, tested, patch);
@@ -2068,8 +2068,8 @@ void CZoneLighter2001::buildZoneInformation (CLandscape &landscape, const vector
 	// leaf vertex positions with pure CBezierPatch::eval at the leaf's parametric coords
 	// (the 2001-era result at threshold 0 / noise 0, independent of any modern tessellation
 	// position contamination). NL2001_LATTICE_DEBUG=1 reports the position deltas.
-	bool analyticLattice = getenv ("NL2001_ANALYTIC_LATTICE") != NULL;
-	bool latticeDebug = getenv ("NL2001_LATTICE_DEBUG") != NULL;
+	bool analyticLattice = getenv ("NL2001_ANALYTIC_LATTICE") != nullptr;
+	bool latticeDebug = getenv ("NL2001_LATTICE_DEBUG") != nullptr;
 	double latticeMaxDelta = 0.0, latticeSumDelta = 0.0;
 	uint latticeSamples = 0;
 

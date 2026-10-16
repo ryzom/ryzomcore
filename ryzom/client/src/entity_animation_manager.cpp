@@ -70,8 +70,8 @@ H_AUTO_DECL ( RZ_Client_Entity_Animation_Mngr )
 ////////////////////
 // STATIC MEMBERS //
 ////////////////////
-CEntityAnimationManager	*CEntityAnimationManager::_Instance			= 0;
-NL3D::UPlayListManager	*CEntityAnimationManager::_PlayListManager	= 0;
+CEntityAnimationManager	*CEntityAnimationManager::_Instance			= nullptr;
+NL3D::UPlayListManager	*CEntityAnimationManager::_PlayListManager	= nullptr;
 
 
 ////////////////////
@@ -84,7 +84,7 @@ NL3D::UPlayListManager	*CEntityAnimationManager::_PlayListManager	= 0;
 //---------------------------------------------------
 CEntityAnimationManager * CEntityAnimationManager::getInstance()
 {
-	if(_Instance == 0)
+	if(_Instance == nullptr)
 	{
 		_Instance = new CEntityAnimationManager();
 		if(Scene)
@@ -106,7 +106,7 @@ void CEntityAnimationManager::delInstance()
 	if(_Instance)
 	{
 		delete _Instance;
-		_Instance = 0;
+		_Instance = nullptr;
 	}
 }// delInstance //
 
@@ -120,9 +120,9 @@ void CEntityAnimationManager::delInstance()
 //---------------------------------------------------
 CEntityAnimationManager::CEntityAnimationManager()
 {
-	_AnimationSet = NULL;
-	_AutomatonList = NULL;
-	_EmotList = NULL;
+	_AnimationSet = nullptr;
+	_AutomatonList = nullptr;
+	_EmotList = nullptr;
 
 }// CEntityAnimationManager //
 
@@ -137,7 +137,7 @@ CEntityAnimationManager::~CEntityAnimationManager()
 	{
 //		if(Scene)
 //			Scene->deletePlayListManager(_PlayListManager);
-		_PlayListManager = 0;
+		_PlayListManager = nullptr;
 	}
 
 	// Release all things initialized by the load method.
@@ -161,11 +161,11 @@ void CEntityAnimationManager::release()
 	if(_AnimationSet)
 	{
 		Driver->deleteAnimationSet(_AnimationSet);
-		_AnimationSet = 0;
+		_AnimationSet = nullptr;
 	}
 
 	// owned by CSheetManager
-	_AutomatonList = NULL;
+	_AutomatonList = nullptr;
 
 }// release //
 
@@ -187,7 +187,7 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 
 	// Create the animation set for all entities.
 	_AnimationSet = Driver->createAnimationSet();
-	if(_AnimationSet == 0)
+	if(_AnimationSet == nullptr)
 		pushDebugStr("_AnimationSet is Null !.");
 
 	// Loading Emots
@@ -216,8 +216,8 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 	}
 
 	// Build 3d Animation Set (called after all animations added in the animation set).
-	_AnimationSetPosCache.resize (0, NULL);
-	_AnimationSetRotCache.resize (0, NULL);
+	_AnimationSetPosCache.resize (0, nullptr);
+	_AnimationSetRotCache.resize (0, nullptr);
 	if(_AnimationSet)
 	{
 		_AnimationSet->build();
@@ -225,8 +225,8 @@ void CEntityAnimationManager::load(NLMISC::IProgressCallback &/* progress */, bo
 		// Build animation set cache
 		uint i;
 		const uint count = _AnimationSet->getNumAnimation ();
-		_AnimationSetPosCache.resize (count, NULL);
-		_AnimationSetRotCache.resize (count, NULL);
+		_AnimationSetPosCache.resize (count, nullptr);
+		_AnimationSetRotCache.resize (count, nullptr);
 		for (i=0; i<count; i++)
 		{
 			// Get the animation
@@ -327,17 +327,17 @@ const CAutomatonStateSheet *CEntityAnimationManager::mState(const string &automa
 	{
 		// Get the state.
 		const CAutomatonStateSheet *statePtr = ((*it).second)->state(key);
-		if(statePtr == 0)
+		if(statePtr == nullptr)
 		{
 			nlwarning("CEntityAnimationManager::mState: the state '%s' does not exist for the automaton '%s'", CAnimationState::getAnimationStateName(key).c_str(), automaton.c_str());
-			return 0;
+			return nullptr;
 		}
 		else
 			return statePtr;
 	}
 	// Automaton not found
 	else
-		return 0;
+		return nullptr;
 }// mState //
 
 //---------------------------------------------------
@@ -351,7 +351,7 @@ void CEntityAnimationManager::deletePlayList(NL3D::UPlayList * pl)
 	if(pl)
 	{
 		_PlayListManager->deletePlayList(pl);
-		pl = 0;
+		pl = nullptr;
 	}
 }// deletePlayList //
 
@@ -470,7 +470,7 @@ const CAnimationSet *CEntityAnimationManager::getAnimSet(const std::string &anim
 	TAnimSet::const_iterator itAnimSet = _AnimSet.find(animSet);
 	if(itAnimSet == _AnimSet.end())
 		// Set not found.
-		return 0;
+		return nullptr;
 
 	// Return the pointer
 	return &((*itAnimSet).second);
@@ -484,8 +484,8 @@ const CAnimationSet *CEntityAnimationManager::getAnimSet(const std::string &anim
 //---------------------------------------------------
 NL3D::UPlayList *CEntityAnimationManager::createPlayList() const
 {
-	if (_PlayListManager == 0)
-		return 0;
+	if (_PlayListManager == nullptr)
+		return nullptr;
 
 	return _PlayListManager->createPlayList(_AnimationSet);
 }// createPlayList //

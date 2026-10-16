@@ -270,7 +270,7 @@ namespace NLGUI
 		bool				getTableBooleanValue(const char *name, bool        defaultValue= false);
 		double				getTableNumberValue(const char *name,  double      defaultValue= 0.0);
 		sint64				getTableIntegerValue(const char *name,  sint64     defaultValue= 0);
-		const char			*getTableStringValue(const char *name, const char *defaultValue= NULL);
+		const char			*getTableStringValue(const char *name, const char *defaultValue = nullptr);
 		// pushing value onto the stack
 		void				push(bool value);
 		void				push(float value);

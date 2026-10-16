@@ -34,7 +34,8 @@ template <class TDS>
 struct TPropertyInfoBase
 {
 	/// Constructor
-	TPropertyInfoBase( TDS *ds, TPropertyIndex propindex ) : Segment(NULL), DataSet(ds), PropertyIndex(propindex), SMId(-1) {}
+	TPropertyInfoBase( TDS *ds, TPropertyIndex propindex ) : Segment(nullptr)
+	    , DataSet(ds), PropertyIndex(propindex), SMId(-1) {}
 
 	/// Where the property array is allocated
 	void				*Segment;
@@ -49,7 +50,7 @@ struct TPropertyInfoBase
 	sint32				SMId;
 
 	/// Return true if the property is allocated
-	bool				allocated() const { return Segment != NULL; }
+	bool				allocated() const { return Segment != nullptr; }
 
 	/// Serial ids
 	void				serial( NLMISC::IStream& s )
@@ -82,7 +83,7 @@ public:
 		}
 		else
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 };
@@ -97,7 +98,7 @@ enum TPropertyDebugFlag { FlagReadOnly=0, FlagWriteOnly=1, FlagNotifyChanges=3, 
 struct TPropertyInfo : public TPropertyInfoBase< CMirroredDataSet >
 {
 	/// Constructor
-	TPropertyInfo( CMirroredDataSet *ds=NULL, TPropertyIndex propindex=INVALID_PROPERTY_INDEX ) : TPropertyInfoBase<CMirroredDataSet>(ds, propindex), Pending(false), PropTrackersPending(false), _PropertyDebugFlags(0), _PropNotifyingTheGroup(INVALID_PROPERTY_INDEX) {}
+	TPropertyInfo( CMirroredDataSet *ds = nullptr, TPropertyIndex propindex=INVALID_PROPERTY_INDEX ) : TPropertyInfoBase<CMirroredDataSet>(ds, propindex), Pending(false), PropTrackersPending(false), _PropertyDebugFlags(0), _PropNotifyingTheGroup(INVALID_PROPERTY_INDEX) {}
 
 	// True if allocation of the property is being processed (property not allocated yet)
 	bool				Pending;

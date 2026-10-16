@@ -38,7 +38,8 @@ CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCal
 	: CSourceCommon(streamSound, spawn, cb, cbUserParam, cluster, groupController), 
 	m_StreamSound(streamSound), 
 	m_Alpha(0.0f), 
-	m_Track(NULL), 
+	m_Track(nullptr)
+    , 
 	m_FreeBuffers(3),
 	m_NextBuffer(0),
 	m_LastSize(0),
@@ -46,7 +47,7 @@ CStreamSource::CStreamSource(CStreamSound *streamSound, bool spawn, TSpawnEndCal
 	m_WaitingForPlay(false),
 	m_PitchInv(1.0f)
 {
-	nlassert(m_StreamSound != 0);
+	nlassert(m_StreamSound != nullptr);
 
 	// get a local copy of the stream sound parameter
 	m_Alpha = m_StreamSound->getAlpha();//m_Buffers
@@ -68,16 +69,16 @@ CStreamSource::~CStreamSource()
 	if (_Playing)
 		stop();
 
-	if (m_Buffers[0] != NULL) { delete m_Buffers[0]; m_Buffers[0] = NULL; }
-	if (m_Buffers[1] != NULL) { delete m_Buffers[1]; m_Buffers[1] = NULL; }
-	if (m_Buffers[2] != NULL) { delete m_Buffers[2]; m_Buffers[2] = NULL; }
+	if (m_Buffers[0] != nullptr) { delete m_Buffers[0]; m_Buffers[0] = nullptr; }
+	if (m_Buffers[1] != nullptr) { delete m_Buffers[1]; m_Buffers[1] = nullptr; }
+	if (m_Buffers[2] != nullptr) { delete m_Buffers[2]; m_Buffers[2] = nullptr; }
 }
 
 void CStreamSource::initPhysicalSource()
 {
 	CAudioMixerUser *mixer = CAudioMixerUser::instance();
 	CTrack *track = mixer->getFreeTrack(this);
-	if (track != NULL)
+	if (track != nullptr)
 	{
 		nlassert(track->hasPhysicalSource());
 		m_Track = track;
@@ -97,7 +98,7 @@ void CStreamSource::releasePhysicalSource()
 		pSource->stop();
 		pSource->setStreaming(false);
 		if (mixer) mixer->freeTrack(m_Track);
-		m_Track = NULL;
+		m_Track = nullptr;
 	}
 }
 
@@ -130,11 +131,11 @@ void CStreamSource::setLooping(bool l)
 
 CVector CStreamSource::getVirtualPos() const
 {
-	if (getCluster() != 0)
+	if (getCluster() != nullptr)
 	{
 		// need to check the cluster status
 		const CClusteredSound::CClusterSoundStatus *css = CAudioMixerUser::instance()->getClusteredSound()->getClusterSoundStatus(getCluster());
-		if (css != 0)
+		if (css != nullptr)
 		{
 			// there is some data here, update the virtual position of the sound.
 			float dist = (css->Position - getPos()).norm();
@@ -163,7 +164,7 @@ void CStreamSource::play()
 			m_WaitingForPlay = false;
 			if (_Spawn)
 			{
-				if (_SpawnEndCb != NULL)
+				if (_SpawnEndCb != nullptr)
 					_SpawnEndCb(this, _CbUserParam);
 				delete this;
 			}
@@ -228,7 +229,7 @@ void CStreamSource::play()
 				m_WaitingForPlay = false;
 				if (_Spawn)
 				{
-					if (_SpawnEndCb != NULL)
+					if (_SpawnEndCb != nullptr)
 						_SpawnEndCb(this, _CbUserParam);					
 					delete this;
 				}
@@ -317,7 +318,7 @@ void CStreamSource::stop()
 	
 	if (_Spawn)
 	{
-		if (_SpawnEndCb != NULL)
+		if (_SpawnEndCb != nullptr)
 			_SpawnEndCb(this, _CbUserParam);
 		delete this;
 	}
@@ -436,7 +437,7 @@ uint8 *CStreamSource::lock(uint capacity)
 	updateAvailableBuffers();
 	if (m_FreeBuffers > 0)
 		return m_Buffers[m_NextBuffer]->lock(capacity);
-	return NULL;
+	return nullptr;
 }
 
 /// Notify that you are done writing to the locked buffer, so it can be copied over to hardware if needed. Set size to the number of bytes actually written to the buffer. Returns true if ok.

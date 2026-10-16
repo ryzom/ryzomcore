@@ -203,14 +203,14 @@ const CParamBlock::SParam *CParamBlock::findParam(sint32 index) const
 {
 	for (std::vector<SParam>::const_iterator it = m_Params.begin(); it != m_Params.end(); ++it)
 		if (it->Index == index) return &(*it);
-	return NULL;
+	return nullptr;
 }
 
 CParamBlock::SParam *CParamBlock::findParamMutable(sint32 index)
 {
 	for (std::vector<SParam>::iterator it = m_Params.begin(); it != m_Params.end(); ++it)
 		if (it->Index == index) return &(*it);
-	return NULL;
+	return nullptr;
 }
 
 bool CParamBlock::getFloat(sint32 index, float &out) const
@@ -259,7 +259,7 @@ CReferenceMaker *CParamBlock::controllerForParam(sint32 index) const
 	for (std::vector<SParam>::const_iterator it = m_Params.begin(); it != m_Params.end(); ++it)
 		if (it->Animated && it->Index == index && it->RefSlot >= 0)
 			return getReference((uint)it->RefSlot);
-	return NULL;
+	return nullptr;
 }
 
 // ---------------------------------------------------------------------------------------------

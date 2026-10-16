@@ -423,7 +423,7 @@ bool sessionCloseZoneImpl(const std::string &basename, bool saveFirst, bool forc
 		return false;
 	}
 	if (toFree == g_PrimaryLm)
-		g_PrimaryLm = NULL; // fallback pointer must not dangle (legacy Lm-NULL files only)
+		g_PrimaryLm = nullptr; // fallback pointer must not dangle (legacy Lm-NULL files only)
 	freeLoadedMax(toFree);
 	printf("session close: '%s'; welds=%u\n", basename.c_str(), welds);
 	return true;

@@ -351,7 +351,7 @@ void	NLPACS::CGlobalRetriever::getBorders(const CAABBox &sbox, std::vector<std::
 		}
 		// Bind edges for exterior mesh
 		const CExteriorMesh &em = retriever.getExteriorMesh();
-		const CExteriorMesh::CEdge *previousEdge = NULL;
+		const CExteriorMesh::CEdge *previousEdge = nullptr;
 		for(uint k = 0; k < em.getEdges().size(); ++k)
 		{
 			if (previousEdge)
@@ -360,7 +360,7 @@ void	NLPACS::CGlobalRetriever::getBorders(const CAABBox &sbox, std::vector<std::
 				edges.back().first.V0 = previousEdge->Start + origin;
 				edges.back().first.V1 = em.getEdges()[k].Start + origin;
 			}
-			previousEdge = em.getEdges()[k].Link != -2 ? &em.getEdges()[k] : NULL;
+			previousEdge = em.getEdges()[k].Link != -2 ? &em.getEdges()[k] : nullptr;
 		}
 	}
 }
@@ -1169,12 +1169,12 @@ const NLPACS::CRetrievableSurface	*NLPACS::CGlobalRetriever::getSurfaceById(cons
 		sint32	locRetId= this->getInstance(surfId.RetrieverInstanceId).getRetrieverId();
 		const CLocalRetriever		&retr = _RetrieverBank->getRetriever(locRetId);
 		if (!retr.isLoaded() || surfId.SurfaceId >= (sint)retr.getSurfaces().size())
-			return NULL;
+			return nullptr;
 		const CRetrievableSurface	&surf= retr.getSurface(surfId.SurfaceId);
 		return &surf;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 
@@ -1904,7 +1904,7 @@ const	NLPACS::TCollisionSurfaceDescVector
 		//nlassertonce (0);
 
 		// Return NULL when lost
-		return NULL;
+		return nullptr;
 	}
 	// store this request in cst.
 	cst.PrecStartSurface= startSurface;
@@ -1978,7 +1978,7 @@ const	NLPACS::TCollisionSurfaceDescVector
 		//nlassertonce (0);
 
 		// Return NULL when lost
-		return NULL;
+		return nullptr;
 	}
 
 	// store this request in cst.
@@ -2425,7 +2425,7 @@ NLPACS::UGlobalRetriever *NLPACS::UGlobalRetriever::createGlobalRetriever (const
 		return static_cast<UGlobalRetriever *>(retriever);
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 // ***************************************************************************
