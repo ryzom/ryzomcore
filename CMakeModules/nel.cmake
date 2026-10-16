@@ -506,7 +506,6 @@ MACRO(NL_SETUP_NEL_DEFAULT_OPTIONS)
     SET(WITH_SSE3 OFF)
   ENDIF()
 
-  OPTION(WITH_XRANDR              "With XRandR extension"                         ON )
 
   IF(NOT MSVC)
     OPTION(WITH_GCC_FPMATH_BOTH   "With GCC -mfpmath=both"                        OFF)
