@@ -291,8 +291,10 @@
 			<instance template="tgcw_scrollbarint" id="window_snap_distance" text="uiWindowSnapDistance" posref="BL TL" posparent="title_win_snap" x="20" y="-2" />
 			<instance template="tgcw_checkbox" id="window_snap_invert" text="uiWindowSnapInvert" posparent="window_snap_distance" posref="BL TL" x="0" y="-2" />
 			
+			<instance template="tgcw_checkbox" id="occeventbnps" text="uiOccEventBnps" posparent="window_snap_invert" posref="BL TL" x="-20" y="-28" />
+			<instance template="tgcw_checkbox" id="occitems" text="uiOccItems" posref="BR BL" posparent="occeventbnps" x="5" y="0" />
 			<!-- wait vbl -->
-			<instance template="tgcw_checkbox" id="waitvbl" text="uiWaitVBL" posparent="window_snap_invert" posref="BL TL" x="-20" y="-28" />
+			<instance template="tgcw_checkbox" id="waitvbl" text="uiWaitVBL" posparent="occeventbnps" posref="BL TL" x="0" y="-28" />
 
 			<!-- Special case for video modes -->
 			<group id="fullscreen" posref="TR TR" x="-16" y="-30" child_resize_w="true" h="14">
@@ -816,6 +818,8 @@
 			<param ui="general:scale_auto:c" type="cfg" realtime="true" widget="boolbut" link="InterfaceScaleAuto" />
 			<param ui="general:scale:c" type="cfg" realtime="false" ui_view="general:scale:c_res" ui_decimal="2" widget="sbfloat" link="InterfaceScale" />
 			<param ui="general:waitvbl:c" type="cfg" realtime="true" widget="boolbut" link="WaitVBL" />
+			<param ui="general:occeventbnps:c" type="cfg" realtime="false" widget="boolbut" link="EnableEventsBnp" />
+			<param ui="general:occitems:c" type="cfg" realtime="false" widget="boolbut" link="EnableOccsBnp" />
 			<param ui="general:window_snap_distance:c" type="cfg" realtime="true" ui_view="general:window_snap_distance:c_res" ui_decimal="2" widget="sbint" link="WindowSnapDistance" />
 			<param ui="general:window_snap_invert:c" type="cfg" realtime="true" widget="boolbut" link="WindowSnapInvert" />
 			<param ui="landscape:lvi:c" type="cfg" widget="sbfloat_round" realtime="end_scroll" ui_view="landscape:lvi:c_res" ui_unit="uigcUnitMeters" link="Vision" preset="UI:TEMP:PRESET_LAND" />

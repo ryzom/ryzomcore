@@ -489,6 +489,9 @@ CClientConfig::CClientConfig()
 	MediaPlayerDirectory	= "music";
 	MediaPlayerAutoPlay		= false;
 
+	EnableEventsBnp			= true;
+	EnableOccsBnp			= false;
+
 //	PreDataPath.push_back("data/gamedev/language/");	// Default Path for the language data
 
 //	DataPath.push_back("data/");					// Default Path for the Data.
@@ -1185,7 +1188,7 @@ void CClientConfig::setValues()
 	READ_STRING_FV(WebIgMainDomain);
 	if (ClientCfg.WebIgMainDomain.find("http://") == std::string::npos
 		|| ClientCfg.WebIgMainDomain.find("https://") == std::string::npos)
-		ClientCfg.WebIgMainDomain = "http://" + ClientCfg.WebIgMainDomain;
+		ClientCfg.WebIgMainDomain = "https://" + ClientCfg.WebIgMainDomain;
 	READ_STRINGVECTOR_FV(WebIgTrustedDomains);
 	READ_INT_FV(WebIgNotifInterval);
 	READ_INT_FV(CurlMaxConnections);
@@ -1380,6 +1383,9 @@ void CClientConfig::setValues()
 
 	//////////
 	// MISC //
+
+	READ_BOOL_FV(EnableEventsBnp);
+	READ_BOOL_FV(EnableOccsBnp);
 
 	// Pre Data Path.
 	READ_STRINGVECTOR_FV(PreDataPath);

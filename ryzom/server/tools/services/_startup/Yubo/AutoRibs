@@ -1,0 +1,60 @@
+#!/bin/bash
+
+echo "Checking /home/nevrax/www/public_html/ribs_hook.cmd ..."
+tail -n 0 --follow=name /home/nevrax/www/public_html/ribs_hook.cmd | while read LINE0
+do
+	cmd=${LINE0}
+	echo "Getting command: $cmd"
+
+	if [ "$cmd" == "client" ]
+	then
+		cd /home/nevrax/repos/ryzom-core
+		BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
+		REMOTE=$(git ls-remote -q --heads | grep "refs/heads/$BRANCH" | awk '{ print $1 }')
+		LOCAL=$(git rev-parse HEAD)
+
+		echo "$LOCAL vs $REMOTE"
+		FILES=$(git diff --name-only $REMOTE $LOCAL)
+		echo "$FILES" > /home/nevrax/files.txt
+		
+		if [ "$LOCAL" == "$REMOTE" ]
+		then
+			echo "Latest version, no need update..."
+		else
+			git pull
+						
+			if [[ ! $(grep -c '^ryzom/nel' /home/nevrax/files.txt) == 0 || ! $(grep -c '^ryzom/client' /home/nevrax/files.txt) == 0 || ! $(grep -c '^ryzom/common' /home/nevrax/files.txt) == 0 ]]
+			then
+				echo -e -n "build/ryzom_build_client.sh|Run|64 Windows Linux\ndata/generate_client_data.sh|Run|Clients\ndata/patch_client.sh|Run|-" >> /home/nevrax/www/public_html/autoribs_hook.cmd
+			fi
+
+			if [[ ! $(grep -c '^ryzom/nel' /home/nevrax/files.txt) == 0 || ! $(grep -c '^ryzom/server' /home/nevrax/files.txt) == 0 || ! $(grep -c '^ryzom/common' /home/nevrax/files.txt) == 0 ]]
+			then
+				echo -e -n "build/ryzom_build_server.sh|Run|Nel" >> /home/nevrax/www/public_html/autoribs_hook.cmd
+			fi
+		fi
+		
+	elif [ "$cmd" == "client-data" ]
+	then
+		cd /home/nevrax/repos/ryzom-data
+		BRANCH=$(git branch | grep \* | cut -d ' ' -f2)
+		REMOTE=$(git ls-remote -q --heads | grep "refs/heads/$BRANCH" | awk '{ print $1 }')
+		LOCAL=$(git rev-parse HEAD)
+
+		echo "$LOCAL vs $REMOTE"
+		if [ "$LOCAL" == "$REMOTE" ]
+		then
+			echo "Latest version, no need update..."
+		else
+			git pull
+			echo -e -n "data/generate_client_data.sh|Run|Data\ndata/patch_client.sh|Run|-" >> /home/nevrax/www/public_html/autoribs_hook.cmd
+		fi
+	elif [ "$cmd" == "restart-shard" ]
+	then
+		cd /home/nevrax/ribs/server
+		sh run_ribs.sh shard/ryzom_stop_shard.sh Run kickall
+		sh run_ribs.sh shard/ryzom_start_shard.sh Run Silent
+		sh run_ribs.sh shard/ryzom_open_shard.sh Run -
+	fi
+done
+

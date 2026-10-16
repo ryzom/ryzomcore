@@ -1,6 +1,7 @@
 <interface_config>
 
 <root id="outgame" x="0" y="0" w="800" h="600" active="false" />
+
 <variable entry="UI:TEMP:INTROCLICKSTEP"	type="sint64" value="-1"/>
 
 <!-- ***************** -->
@@ -91,8 +92,7 @@
 	<!-- BLACK BACK -->
 	<view type="bitmap" id="bg" posref="MM MM" x="0" y="0" render_layer="0" texture="blank.tga" color="0 0 0 255" scale="true" global_color="false" />
 
-	
-	
+
 	<!--
 	<view type="bitmap" id="nevrax" render_layer="1" txtoffsetx="0" txtoffsety="0" txtwidth="352" txtheight="48"
 	global_color="false" color="255 255 255 255" posref="MM MM" x="0" y="0" texture="logos_intro.tga" />
@@ -241,9 +241,5 @@
 	</track>
 </anim>
 -->
-
-
-
-
 </interface_config>
 

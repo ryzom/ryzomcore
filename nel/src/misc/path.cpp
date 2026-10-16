@@ -1107,9 +1107,6 @@ void CFileContainer::addSearchPath (const string &path, bool recurse, bool alter
 				progressCallBack->pushCropedValues ((float)f/(float)filesToProcess.size(), (float)(f+1)/(float)filesToProcess.size());
 			}
 
-			string filename = CFile::getFilename (filesToProcess[f]);
-			string filepath = CFile::getPath (filesToProcess[f]);
-//			insertFileInMap (filename, filepath, false, CFile::getExtension(filename));
 			addSearchFile (filesToProcess[f], false, "", progressCallBack);
 
 			// Progress bar
@@ -1168,6 +1165,12 @@ void CFileContainer::addSearchFile (const string &file, bool remap, const string
 		return;
 	}
 
+	string filename = CFile::getFilename (newFile);
+	string filepath = CFile::getPath (newFile);
+	map<string, string>::iterator itss = _RemappedFiles.find(filename);
+	if (itss != _RemappedFiles.end())
+		newFile = filepath+"/"+itss->second;
+
 	std::string fileExtension = CFile::getExtension(newFile);
 
 	// check if it s a big file
@@ -1195,7 +1198,7 @@ void CFileContainer::addSearchFile (const string &file, bool remap, const string
 	}
 
 	string filenamewoext = CFile::getFilenameWithoutExtension (newFile);
-	string filename, ext;
+	string ext;
 
 	if (virtual_ext.empty())
 	{

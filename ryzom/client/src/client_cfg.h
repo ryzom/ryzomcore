@@ -395,6 +395,9 @@ struct CClientConfig
 	string			MediaPlayerDirectory;
 	bool			MediaPlayerAutoPlay;
 
+	bool			EnableEventsBnp;
+	bool			EnableOccsBnp;
+
 	/// Pre Data Path.
 	std::vector<string>			PreDataPath;
 	/// Data Path.

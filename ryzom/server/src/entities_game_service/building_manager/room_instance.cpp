@@ -174,14 +174,6 @@ void CRoomInstancePlayer::addUser( CCharacter* user, const NLMISC::CEntityId & o
 	CBuildingPhysicalPlayer * playerBuilding = dynamic_cast<CBuildingPhysicalPlayer *>( _Building );
 	BOMB_IF( !playerBuilding, "<BUILDING> building type does not match with room type", return );
 
-	// open room inventory window if not in powo or in powo and have access
-	if (user->getPowoCell() == 0 || user->getPowoFlag("room_inv"))
-		PlayerManager.sendImpulseToClient(user->getId(), "ITEM:OPEN_ROOM_INVENTORY");
-
-	// open guild inventory window if in powo and have access (in powo all are player rooms)
-	if (user->getPowoCell() != 0 && user->getPowoFlag("guild_inv"))
-		PlayerManager.sendImpulseToClient(user->getId(), "GUILD:OPEN_INVENTORY");
-	
 	if (owner != CEntityId::Unknown)
 	{
 		CCharacter * o = PlayerManager.getChar(owner);

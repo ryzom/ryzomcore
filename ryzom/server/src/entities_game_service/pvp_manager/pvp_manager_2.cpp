@@ -645,8 +645,11 @@ void CPVPManager2::playerConnects(CCharacter * user)
 	string::size_type pos = playerName.find('(');
 	if (pos != string::npos)
 		playerName = playerName.substr(0, pos);
-
-	CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
+	CPlayer* player = PlayerManager.getPlayer(PlayerManager.getPlayerId(user->getId()));
+	if (player == NULL)
+		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'rzlang': 'en', 'online': true} }", user->getId().getShortId(), user->getGuildId()), true);
+	else
+		CMongo::update("ryzom_users", toString("{'name': '%s'}", playerName.c_str()), toString("{$set: {'cid': %" NL_I64 "u, 'guildId': %d, 'rzlang': '%s', 'online': true} }", user->getId().getShortId(), user->getGuildId(), player->getUserLanguage().c_str()), true);
 #endif
 
 	std::vector<TChanID> currentChannels = getCharacterUserChannels(user);

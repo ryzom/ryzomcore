@@ -1,0 +1,8 @@
+#!/bin/sh
+mkdir -p /run/user/1000/chweb/
+
+while true
+do
+	cd $SHARD_PATH/tools/send_characters_to_web
+	bash send_characters_to_web.sh
+done

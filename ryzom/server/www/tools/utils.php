@@ -5,6 +5,7 @@ include_once(dirname(__DIR__).'/config.php');
 
 function sendToChat($message, $channel='', $username='', $icon='') {
 	global $RocketChatHook;
+	global $RocketChatServer;
 	if ($RocketChatHook) {
 		$data = json_encode(array(
 				'channel' => $channel,

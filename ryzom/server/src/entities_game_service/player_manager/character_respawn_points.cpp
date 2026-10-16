@@ -153,6 +153,9 @@ void CCharacterRespawnPoints::addDefaultRespawnPoint(CONTINENT::TContinent conti
 	case CONTINENT::KITINIERE:
 		defaultPlaceName = "kitiniere_entrance";
 		break;
+	case CONTINENT::UNDERNEXUS:
+		defaultPlaceName = "place_respawn_undernexus";
+		break;
 	default:
 		defaultPlaceName = "newbie_start_point";
 	}

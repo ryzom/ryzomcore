@@ -1,0 +1,7 @@
+#!/bin/sh
+
+while true
+do
+	python3 ../../check_outpost_logs.py /home/nevrax/shard/logs/entities_game_service.log
+done
+

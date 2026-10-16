@@ -454,6 +454,12 @@ f1 uiR2_Forest31 uiR2EntryPoint05 23598 -12850 SW
 f1 uiR2_Forest31 uiR2EntryPoint06 23995 -12787 W
 f1 uiR2_Forest31 uiR2EntryPoint07 23879 -12573 W
 
+f1 uiR2_Forest49 uiR2EntryPoint01 22802 -14253 N
+f1 uiR2_Forest50 uiR2EntryPoint01 21222 -14270 N
+f1 uiR2_Forest51 uiR2EntryPoint01 23627 -14197 N
+f1 uiR2_Forest52 uiR2EntryPoint01 21983 -14266 N
+f1 uiR2_Forest53 uiR2EntryPoint01 21244 -14688 N
+
 f2 uiR2_Forest34 uiR2EntryPoint01 26220 -12600 SE
 f2 uiR2_Forest34 uiR2EntryPoint02 26613 -12753 NW
 f2 uiR2_Forest34 uiR2EntryPoint03 26413 -12556 S

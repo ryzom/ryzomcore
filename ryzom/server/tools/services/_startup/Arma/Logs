@@ -1,0 +1,11 @@
+#!/bin/sh
+
+while true
+do
+	DAY=$(date +%d)
+	MONTH=$(date +%m)
+	YEAR=$(date +%Y)
+	python3 ../../rocket_logs_errors.py /home/nevrax/logs/login/$YEAR/$MONTH/error.$DAY.log LOGIN
+	sleep 10
+done
+

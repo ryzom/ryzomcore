@@ -1704,6 +1704,46 @@
     <zone name="89_GT"/>
     <zone name="88_GT"/>
   </complete_island>
+  <complete_island island="uiR2_Forest49" package="f1" continent="r2_forest" xmin="22564" ymin="-14400" xmax="23030" ymax="-14085">
+    <zone name="89_FL"/>
+    <zone name="89_FM"/>
+    <zone name="89_FN"/>
+    <zone name="90_FL"/>
+    <zone name="90_FM"/>
+    <zone name="90_FN"/>
+  </complete_island>
+  <complete_island island="uiR2_Forest50" package="f1" continent="r2_forest" xmin="20965" ymin="-14400" xmax="21430" ymax="-14085">
+    <zone name="89_FB"/>
+    <zone name="89_FC"/>
+    <zone name="89_FD"/>
+    <zone name="90_FB"/>
+    <zone name="90_FC"/>
+    <zone name="90_FD"/>
+  </complete_island>
+  <complete_island island="uiR2_Forest51" package="f1" continent="r2_forest" xmin="23365" ymin="-14400" xmax="23831" ymax="-14085">
+    <zone name="89_FQ"/>
+    <zone name="89_FR"/>
+    <zone name="89_FS"/>
+    <zone name="90_FQ"/>
+    <zone name="90_FR"/>
+    <zone name="90_FS"/>
+  </complete_island>
+  <complete_island island="uiR2_Forest52" package="f1" continent="r2_forest" xmin="21766" ymin="-14400" xmax="22231" ymax="-14085">
+    <zone name="89_FG"/>
+    <zone name="89_FH"/>
+    <zone name="89_FI"/>
+    <zone name="90_FG"/>
+    <zone name="90_FH"/>
+    <zone name="90_FI"/>
+  </complete_island>
+  <complete_island island="uiR2_Forest53" package="f1" continent="r2_forest" xmin="20965" ymin="-14882" xmax="21430" ymax="-14568">
+    <zone name="92_FB"/>
+    <zone name="92_FC"/>
+    <zone name="92_FD"/>
+    <zone name="93_FB"/>
+    <zone name="93_FC"/>
+    <zone name="93_FD"/>
+  </complete_island>
   <complete_island island="uiR2_Jungle01" package="j1" continent="r2_jungle" xmin="31038" ymin="-11361" xmax="31684" ymax="-10879">
     <zone name="70_HN"/>
     <zone name="71_HM"/>

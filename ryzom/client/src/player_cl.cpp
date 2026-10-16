@@ -914,8 +914,11 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 			// No Valid item in the left hand.
 			equip(SLOTTYPE::LEFT_HAND_SLOT, "");
 			SLOTTYPE::EVisualSlot slot = SLOTTYPE::LEFT_HAND_SLOT;
+
+			const CEntitySheet *pRight = _Items[SLOTTYPE::RIGHT_HAND_SLOT].Sheet;
+			CItemSheet *pIsRight = (CItemSheet *)pRight;
 			leftHandTag = getTag(6);
-			if (!leftHandTag.empty() && leftHandTag != "_")
+			if ((!pIsRight || (!pIsRight->hasSlot(SLOTTYPE::TWO_HANDS) && !pIsRight->hasSlot(SLOTTYPE::RIGHT_HAND_EXCLUSIVE))) && !leftHandTag.empty() && leftHandTag != "_")
 			{
 				vector<string> tagInfos;
 				splitString(leftHandTag, string("|"), tagInfos);
@@ -953,6 +956,7 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 				equip(slot, "");
 			}
 		}
+
 		CLuaManager::getInstance().executeLuaScript(toString("game:updateRpItems('%s', '%s')", leftHandTag.c_str(), rightHandTag.c_str()), 0);
 
 		// Create face
@@ -1032,8 +1036,6 @@ void CPlayerCL::updateVisualPropertyVpa(const NLMISC::TGameCycle &/* gameCycle *
 					equip(slot, tagInfos[0], itemSheet);
 				}
 			}
-
-
 		}
 		else
 		{

@@ -368,9 +368,19 @@ function game:onDbChangeAppPage()
 		local npcName = getTargetName()
 		local message  = ucstring()
 
-		local text = game:getOpenAppPageMessage()
-		message:fromUtf8(text)
-		displaySystemInfo(message, "AMB")
+		local text  = ""
+		if game.appNpcMessages[npcName] ~= nil then
+			text = game.appNpcMessages[npcName]
+		else
+			text = game:getOpenAppPageMessage()
+		end
+		if text == "" then
+			text = "w_magic_sep2.tga|"
+		else
+			text = findReplaceAll(text, "%s", npcName)
+		end
+		message:fromUtf8(game:parseLangText(text))
+		displaySystemInfo(message, "ZON")
 		removeOnDbChange(getUI("ui:interface:npc_web_browser"),"@UI:VARIABLES:CURRENT_SERVER_TICK")
 	end
 end
@@ -1610,7 +1620,7 @@ end
 
 
 function game:openMissionsCatalog()
-	-- Setup this function in webig
+	getUI("ui:interface:web_transactions"):find("html"):browse("https://app.ryzom.com/app_arcc/index.php?action=mScript_Run&script=8747&command=reset_all")
 end
 
 --------------------------------------------------------------------------------------------------------------
@@ -2190,4 +2200,4 @@ function game:arkTitlesAddClassics()
 	ui:renderHtml(html)
 end
 -- VERSION --
-RYZOM_INFO_PLAYER_VERSION = 324
+RYZOM_INFO_PLAYER_VERSION = 335
