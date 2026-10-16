@@ -53,25 +53,25 @@
           <td> 
             <table>
               <tr align="right"> 
-                <form method='post' action='confirm_remove_mail.php'>
+                <td width="100%"><form method='post' action='confirm_remove_mail.php'>
 					<input type='hidden' name='select_mail_%%MAIL%%' value='select'>
-					<td width="100%"><input type="image" name="del" value="Submit" src="web_del.gif" alt="uiWebDelMess" ></td>
-                </form>
-                <form method='post' action='new_mail.php'>
+					<input type="image" name="del" value="Submit" src="web_del.gif" alt="uiWebDelMess" >
+                </form></td>
+                <td><form method='post' action='new_mail.php'>
 					<input type='hidden' name='msg' value='%%MAIL%%'>
 					<input type='hidden' name='mail_to' value='%%FROM%%'>
 					<input type='hidden' name='mail_subject' value='Re: %%SUBJECT%%'>
 					<input type='hidden' name='mail_content' value='%%UCFROM%% wrote:
 %%CLEANCONTENT%%'>
-	                <td><input type="image" name="del2" value="Submit" src="web_reply.gif" alt="uiWebReply" ></td>
-                </form>
-                <form method='post' action='new_mail.php'>
+					<input type="image" name="del2" value="Submit" src="web_reply.gif" alt="uiWebReply" >
+                </form></td>
+                <td><form method='post' action='new_mail.php'>
 					<input type='hidden' name='msg' value='%%MAIL%%'>
 					<input type='hidden' name='mail_subject' value='Tr: %%SUBJECT%%'>
 					<input type='hidden' name='mail_content' value='%%UCFROM%% wrote:
 %%CLEANCONTENT%%'>
-					<td><input type="image" name="del3" value="Submit" src="web_forward.gif" alt="uiWebForward" ></td>
-                </form>
+					<input type="image" name="del3" value="Submit" src="web_forward.gif" alt="uiWebForward" >
+                </form></td>
                 <td><a href="new_mail.php"><img src="web_send.gif" alt="uiWebNewMessage" ></a></td>
               </tr>
             </table>

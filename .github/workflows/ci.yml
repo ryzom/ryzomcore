@@ -9,7 +9,7 @@ on:
       - '!.github/workflows/ci.yml'
 
   pull_request:
-    branches: [ "core4" ]
+    branches: [ "core4", "feature/core4-*" ]
     paths-ignore:
       - '.devcontainer/**'
       - '.github/workflows/**'
