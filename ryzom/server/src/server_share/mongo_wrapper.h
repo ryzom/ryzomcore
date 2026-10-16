@@ -23,7 +23,6 @@
 #include <mongo/bson/bsonmisc.h>
 
 using namespace mongo;
-using namespace bson;
 
 class CMongo {
 public:
